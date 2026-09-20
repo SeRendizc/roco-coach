@@ -1,0 +1,766 @@
+{
+  "schema_version": 1,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "importer": "m1-importer/1",
+  "fetched_at": "2026-09-20T16:15:30Z",
+  "source_files": {
+    "catalog": {
+      "path": "data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/Catalog.lua",
+      "sha256": "537fba5e8cb779c1ef3e231342c2a196e85d0ecb2ee072186adb6e9f727a83d7",
+      "bytes": 929115
+    },
+    "skills": {
+      "path": "data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/Skills.lua",
+      "sha256": "ed9132e1a3fd7f0cf287c8acbeb57e830ba0cfe2dc1f11946a72ef6329772f33",
+      "bytes": 187055
+    },
+    "learnsets": {
+      "path": "data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/Learnsets.lua",
+      "sha256": "740e84def6f142fca15b74d58c9851c18eb578ce004fd8a5991243300eef058e",
+      "bytes": 539068
+    },
+    "types": {
+      "path": "data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/Types.lua",
+      "sha256": "22999381d35c64ba50a71e695a9de5c6a45d0fb486fd6541ba6c785d70c2ab57",
+      "bytes": 35441
+    },
+    "terms": {
+      "path": "data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/Terms.lua",
+      "sha256": "f1830685d31732d3634f8857e14eec75b85ea56b923ceef218ede18182056488",
+      "bytes": 6555
+    }
+  },
+  "counts": {
+    "pets_total_in_snapshot": 622,
+    "skills_total_in_snapshot": 824,
+    "learnsets_total_in_snapshot": 312,
+    "targets_resolved": 12,
+    "targets_total": 12
+  },
+  "targets": [
+    {
+      "group": "A",
+      "order": 1,
+      "name": "寂灭骨龙",
+      "resolved": true,
+      "pet_id": "pet_000225",
+      "title": "寂灭骨龙",
+      "game_id": 3269,
+      "types": [
+        "龙系",
+        "幽系"
+      ],
+      "learnset_id": "learnset_e1c7b7e68094",
+      "counts": {
+        "native": 13,
+        "blood": 18,
+        "stones": 13
+      }
+    },
+    {
+      "group": "A",
+      "order": 2,
+      "name": "海豹船长",
+      "resolved": true,
+      "pet_id": "pet_000190",
+      "title": "海豹船长",
+      "game_id": 3216,
+      "types": [
+        "武系",
+        "水系"
+      ],
+      "learnset_id": "learnset_44835ae2b88f",
+      "counts": {
+        "native": 15,
+        "blood": 18,
+        "stones": 16
+      }
+    },
+    {
+      "group": "A",
+      "order": 3,
+      "name": "黑猫巫师",
+      "resolved": true,
+      "pet_id": "pet_000445",
+      "title": "黑猫巫师",
+      "game_id": 3569,
+      "types": [
+        "普通系"
+      ],
+      "learnset_id": "learnset_7d180f57f514",
+      "counts": {
+        "native": 13,
+        "blood": 18,
+        "stones": 14
+      }
+    },
+    {
+      "group": "A",
+      "order": 4,
+      "name": "圆号鱼",
+      "resolved": true,
+      "pet_id": "pet_000417",
+      "title": "圆号鱼",
+      "game_id": 3530,
+      "types": [
+        "水系"
+      ],
+      "learnset_id": "learnset_ca8baabd57b8",
+      "counts": {
+        "native": 13,
+        "blood": 18,
+        "stones": 14
+      }
+    },
+    {
+      "group": "A",
+      "order": 5,
+      "name": "雪影娃娃",
+      "resolved": true,
+      "pet_id": "pet_000112",
+      "title": "雪影娃娃",
+      "game_id": 3123,
+      "types": [
+        "冰系",
+        "萌系"
+      ],
+      "learnset_id": "learnset_ae3e9c322f63",
+      "counts": {
+        "native": 16,
+        "blood": 18,
+        "stones": 16
+      }
+    },
+    {
+      "group": "A",
+      "order": 6,
+      "name": "音速犬",
+      "resolved": true,
+      "pet_id": "pet_000062",
+      "title": "音速犬",
+      "game_id": 3071,
+      "types": [
+        "火系"
+      ],
+      "learnset_id": "learnset_d48a3d9c7167",
+      "counts": {
+        "native": 13,
+        "blood": 18,
+        "stones": 13
+      }
+    },
+    {
+      "group": "B",
+      "order": 7,
+      "name": "画间沉铁兽",
+      "resolved": true,
+      "pet_id": "pet_000474",
+      "title": "画间沉铁兽",
+      "game_id": 3609,
+      "types": [
+        "普通系",
+        "武系"
+      ],
+      "learnset_id": "learnset_87c8775aa30f",
+      "counts": {
+        "native": 16,
+        "blood": 18,
+        "stones": 24
+      }
+    },
+    {
+      "group": "B",
+      "order": 8,
+      "name": "秩序鱿墨",
+      "resolved": true,
+      "pet_id": "pet_000451",
+      "title": "秩序鱿墨",
+      "game_id": 3579,
+      "types": [
+        "幽系",
+        "萌系"
+      ],
+      "learnset_id": "learnset_37d460cb4d20",
+      "counts": {
+        "native": 16,
+        "blood": 18,
+        "stones": 17
+      }
+    },
+    {
+      "group": "B",
+      "order": 9,
+      "name": "化蝶",
+      "title": "化蝶（平常的样子）",
+      "resolved": true,
+      "pet_id": "pet_000124",
+      "game_id": 3138,
+      "types": [
+        "虫系",
+        "萌系"
+      ],
+      "learnset_id": "learnset_ba9df96a104e",
+      "counts": {
+        "native": 15,
+        "blood": 18,
+        "stones": 16
+      }
+    },
+    {
+      "group": "C",
+      "order": 10,
+      "name": "银月狼王",
+      "resolved": true,
+      "pet_id": "pet_000608",
+      "title": "银月狼王",
+      "game_id": 3763,
+      "types": [
+        "幽系",
+        "幻系"
+      ],
+      "learnset_id": "learnset_162b16b43e43",
+      "counts": {
+        "native": 13,
+        "blood": 18,
+        "stones": 15
+      }
+    },
+    {
+      "group": "C",
+      "order": 11,
+      "name": "圣凯布米龙",
+      "resolved": true,
+      "pet_id": "pet_000601",
+      "title": "圣凯布米龙",
+      "game_id": 3576,
+      "types": [
+        "火系",
+        "虫系"
+      ],
+      "learnset_id": "learnset_3d550ce8167a",
+      "counts": {
+        "native": 13,
+        "blood": 18,
+        "stones": 13
+      }
+    },
+    {
+      "group": "C",
+      "order": 12,
+      "name": "月使鹭纳",
+      "resolved": true,
+      "pet_id": "pet_000611",
+      "title": "月使鹭纳",
+      "game_id": 3766,
+      "types": [
+        "翼系",
+        "冰系"
+      ],
+      "learnset_id": "learnset_da630e35c0e9",
+      "counts": {
+        "native": 15,
+        "blood": 18,
+        "stones": 16
+      }
+    }
+  ],
+  "orphan_skill_refs_total": 0,
+  "cross_check": {
+    "attempted": 12,
+    "matched": 0,
+    "explained_by_rebalance": 24,
+    "unresolved": 0,
+    "not_present": 4,
+    "explained_by_classification": {
+      "field_scope_difference": 5,
+      "cross_source_stale": 6,
+      "version_rebalance": 13
+    },
+    "unresolved_by_classification": {},
+    "details": [
+      {
+        "pet_id": "pet_000225",
+        "name": "寂灭骨龙",
+        "status": "cross_checked_with_differences",
+        "cross_checked": true,
+        "explained": 7,
+        "unresolved": 0,
+        "explained_detail": [
+          {
+            "field": "types",
+            "primary": [
+              "龙系",
+              "幽系"
+            ],
+            "cross_source": "龙",
+            "classification": "field_scope_difference",
+            "detail": "NRC_AI 的 pokemon.element 只保存主属性；主快照 types 保存 1—2 个属性。非同一字段。",
+            "verified": true
+          },
+          {
+            "field": "stats.hp",
+            "primary": 120,
+            "cross_source": 92,
+            "classification": "cross_source_stale",
+            "third_source_value": 120,
+            "evidence_versions": null,
+            "verified": true,
+            "detail": "第三来源与主快照一致（两个独立来源互证）；交叉来源快照更早，为旧值。"
+          },
+          {
+            "field": "stats.atk",
+            "primary": 137,
+            "cross_source": 116,
+            "classification": "cross_source_stale",
+            "third_source_value": 137,
+            "evidence_versions": null,
+            "verified": true,
+            "detail": "第三来源与主快照一致（两个独立来源互证）；交叉来源快照更早，为旧值。"
+          },
+          {
+            "field": "stats.def",
+            "primary": 104,
+            "cross_source": 87,
+            "classification": "cross_source_stale",
+            "third_source_value": 104,
+            "evidence_versions": null,
+            "verified": true,
+            "detail": "第三来源与主快照一致（两个独立来源互证）；交叉来源快照更早，为旧值。"
+          },
+          {
+            "field": "stats.spa",
+            "primary": 50,
+            "cross_source": 41,
+            "classification": "cross_source_stale",
+            "third_source_value": 50,
+            "evidence_versions": null,
+            "verified": true,
+            "detail": "第三来源与主快照一致（两个独立来源互证）；交叉来源快照更早，为旧值。"
+          },
+          {
+            "field": "stats.spd",
+            "primary": 81,
+            "cross_source": 65,
+            "classification": "cross_source_stale",
+            "third_source_value": 81,
+            "evidence_versions": null,
+            "verified": true,
+            "detail": "第三来源与主快照一致（两个独立来源互证）；交叉来源快照更早，为旧值。"
+          },
+          {
+            "field": "stats.spe",
+            "primary": 60,
+            "cross_source": 85,
+            "classification": "cross_source_stale",
+            "third_source_value": 60,
+            "evidence_versions": null,
+            "verified": true,
+            "detail": "第三来源与主快照一致（两个独立来源互证）；交叉来源快照更早，为旧值。"
+          }
+        ],
+        "unresolved_detail": []
+      },
+      {
+        "pet_id": "pet_000190",
+        "name": "海豹船长",
+        "status": "cross_checked_with_differences",
+        "cross_checked": true,
+        "explained": 1,
+        "unresolved": 0,
+        "explained_detail": [
+          {
+            "field": "types",
+            "primary": [
+              "武系",
+              "水系"
+            ],
+            "cross_source": "武",
+            "classification": "field_scope_difference",
+            "detail": "NRC_AI 的 pokemon.element 只保存主属性；主快照 types 保存 1—2 个属性。非同一字段。",
+            "verified": true
+          }
+        ],
+        "unresolved_detail": []
+      },
+      {
+        "pet_id": "pet_000445",
+        "name": "黑猫巫师",
+        "status": "cross_checked_with_differences",
+        "cross_checked": true,
+        "explained": 5,
+        "unresolved": 0,
+        "explained_detail": [
+          {
+            "field": "stats.hp",
+            "primary": 149,
+            "cross_source": 152,
+            "classification": "version_rebalance",
+            "third_source_value": 152,
+            "evidence_versions": [
+              {
+                "version_key": "s2-2026-05-21",
+                "before": 152,
+                "after": 149,
+                "delta": -3
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 152，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 152 改为 149；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.atk",
+            "primary": 53,
+            "cross_source": 91,
+            "classification": "version_rebalance",
+            "third_source_value": 91,
+            "evidence_versions": [
+              {
+                "version_key": "s2-2026-05-21",
+                "before": 91,
+                "after": 53,
+                "delta": -38
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 91，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 91 改为 53；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.def",
+            "primary": 90,
+            "cross_source": 67,
+            "classification": "version_rebalance",
+            "third_source_value": 67,
+            "evidence_versions": [
+              {
+                "version_key": "s2-2026-05-21",
+                "before": 67,
+                "after": 90,
+                "delta": 23
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 67，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 67 改为 90；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.spa",
+            "primary": 124,
+            "cross_source": 163,
+            "classification": "version_rebalance",
+            "third_source_value": 163,
+            "evidence_versions": [
+              {
+                "version_key": "s2-2026-05-21",
+                "before": 163,
+                "after": 124,
+                "delta": -39
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 163，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 163 改为 124；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.spd",
+            "primary": 129,
+            "cross_source": 119,
+            "classification": "version_rebalance",
+            "third_source_value": 119,
+            "evidence_versions": [
+              {
+                "version_key": "s2-2026-05-21",
+                "before": 119,
+                "after": 129,
+                "delta": 10
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 119，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 119 改为 129；交叉来源仍是改动前的值。"
+          }
+        ],
+        "unresolved_detail": []
+      },
+      {
+        "pet_id": "pet_000417",
+        "name": "圆号鱼",
+        "status": "cross_checked_with_differences",
+        "cross_checked": true,
+        "explained": 2,
+        "unresolved": 0,
+        "explained_detail": [
+          {
+            "field": "stats.hp",
+            "primary": 113,
+            "cross_source": 136,
+            "classification": "version_rebalance",
+            "third_source_value": 136,
+            "evidence_versions": [
+              {
+                "version_key": "s2-2026-05-21",
+                "before": 136,
+                "after": 113,
+                "delta": -23
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 136，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 136 改为 113；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.atk",
+            "primary": 31,
+            "cross_source": 34,
+            "classification": "version_rebalance",
+            "third_source_value": 34,
+            "evidence_versions": [
+              {
+                "version_key": "s2-2026-05-21",
+                "before": 34,
+                "after": 31,
+                "delta": -3
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 34，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 34 改为 31；交叉来源仍是改动前的值。"
+          }
+        ],
+        "unresolved_detail": []
+      },
+      {
+        "pet_id": "pet_000112",
+        "name": "雪影娃娃",
+        "status": "cross_checked_with_differences",
+        "cross_checked": true,
+        "explained": 1,
+        "unresolved": 0,
+        "explained_detail": [
+          {
+            "field": "types",
+            "primary": [
+              "冰系",
+              "萌系"
+            ],
+            "cross_source": "冰",
+            "classification": "field_scope_difference",
+            "detail": "NRC_AI 的 pokemon.element 只保存主属性；主快照 types 保存 1—2 个属性。非同一字段。",
+            "verified": true
+          }
+        ],
+        "unresolved_detail": []
+      },
+      {
+        "pet_id": "pet_000062",
+        "name": "音速犬",
+        "status": "cross_checked_with_differences",
+        "cross_checked": true,
+        "explained": 2,
+        "unresolved": 0,
+        "explained_detail": [
+          {
+            "field": "stats.atk",
+            "primary": 116,
+            "cross_source": 128,
+            "classification": "version_rebalance",
+            "third_source_value": 128,
+            "evidence_versions": [
+              {
+                "version_key": "s4-2026-09-10",
+                "before": 128,
+                "after": 116,
+                "delta": -12
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 128，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 128 改为 116；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.spa",
+            "primary": 38,
+            "cross_source": 46,
+            "classification": "version_rebalance",
+            "third_source_value": 46,
+            "evidence_versions": [
+              {
+                "version_key": "s4-2026-09-10",
+                "before": 46,
+                "after": 38,
+                "delta": -8
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 46，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 46 改为 38；交叉来源仍是改动前的值。"
+          }
+        ],
+        "unresolved_detail": []
+      },
+      {
+        "pet_id": "pet_000474",
+        "name": "画间沉铁兽",
+        "status": "cross_checked_with_differences",
+        "cross_checked": true,
+        "explained": 5,
+        "unresolved": 0,
+        "explained_detail": [
+          {
+            "field": "types",
+            "primary": [
+              "普通系",
+              "武系"
+            ],
+            "cross_source": "普通",
+            "classification": "field_scope_difference",
+            "detail": "NRC_AI 的 pokemon.element 只保存主属性；主快照 types 保存 1—2 个属性。非同一字段。",
+            "verified": true
+          },
+          {
+            "field": "stats.hp",
+            "primary": 126,
+            "cross_source": 100,
+            "classification": "version_rebalance",
+            "third_source_value": 100,
+            "evidence_versions": [
+              {
+                "version_key": "s3-2026-07-17",
+                "before": 100,
+                "after": 126,
+                "delta": 26
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 100，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 100 改为 126；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.atk",
+            "primary": 147,
+            "cross_source": 160,
+            "classification": "version_rebalance",
+            "third_source_value": 160,
+            "evidence_versions": [
+              {
+                "version_key": "s3-2026-07-17",
+                "before": 160,
+                "after": 147,
+                "delta": -13
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 160，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 160 改为 147；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.spa",
+            "primary": 63,
+            "cross_source": 67,
+            "classification": "version_rebalance",
+            "third_source_value": 67,
+            "evidence_versions": [
+              {
+                "version_key": "s3-2026-07-17",
+                "before": 67,
+                "after": 63,
+                "delta": -4
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 67，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 67 改为 63；交叉来源仍是改动前的值。"
+          },
+          {
+            "field": "stats.spe",
+            "primary": 92,
+            "cross_source": 105,
+            "classification": "version_rebalance",
+            "third_source_value": 105,
+            "evidence_versions": [
+              {
+                "version_key": "s3-2026-07-17",
+                "before": 105,
+                "after": 92,
+                "delta": -13
+              }
+            ],
+            "verified": true,
+            "third_source_note": "第三来源（2026-05）仍停留在改动前的值 105，与交叉来源一致，说明它早于该次改动。",
+            "detail": "主快照自带的版本改动记录显示该字段由 105 改为 92；交叉来源仍是改动前的值。"
+          }
+        ],
+        "unresolved_detail": []
+      },
+      {
+        "pet_id": "pet_000451",
+        "name": "秩序鱿墨",
+        "status": "cross_checked_with_differences",
+        "cross_checked": true,
+        "explained": 1,
+        "unresolved": 0,
+        "explained_detail": [
+          {
+            "field": "types",
+            "primary": [
+              "幽系",
+              "萌系"
+            ],
+            "cross_source": "幽",
+            "classification": "field_scope_difference",
+            "detail": "NRC_AI 的 pokemon.element 只保存主属性；主快照 types 保存 1—2 个属性。非同一字段。",
+            "verified": true
+          }
+        ],
+        "unresolved_detail": []
+      },
+      {
+        "pet_id": "pet_000124",
+        "name": "化蝶",
+        "status": "not_present_in_cross_source",
+        "cross_checked": false,
+        "explained": 0,
+        "unresolved": 0,
+        "reason": "NRC_AI 快照为 2026-04，晚出的 S4 精灵不在其中；该精灵本轮只有单一来源，不能声明交叉核验通过。"
+      },
+      {
+        "pet_id": "pet_000608",
+        "name": "银月狼王",
+        "status": "not_present_in_cross_source",
+        "cross_checked": false,
+        "explained": 0,
+        "unresolved": 0,
+        "reason": "NRC_AI 快照为 2026-04，晚出的 S4 精灵不在其中；该精灵本轮只有单一来源，不能声明交叉核验通过。"
+      },
+      {
+        "pet_id": "pet_000601",
+        "name": "圣凯布米龙",
+        "status": "not_present_in_cross_source",
+        "cross_checked": false,
+        "explained": 0,
+        "unresolved": 0,
+        "reason": "NRC_AI 快照为 2026-04，晚出的 S4 精灵不在其中；该精灵本轮只有单一来源，不能声明交叉核验通过。"
+      },
+      {
+        "pet_id": "pet_000611",
+        "name": "月使鹭纳",
+        "status": "not_present_in_cross_source",
+        "cross_checked": false,
+        "explained": 0,
+        "unresolved": 0,
+        "reason": "NRC_AI 快照为 2026-04，晚出的 S4 精灵不在其中；该精灵本轮只有单一来源，不能声明交叉核验通过。"
+      }
+    ],
+    "third_source": {
+      "source_id": "rocom-data-lineups",
+      "file": "data/roco/raw/extracted/rocom-data/data/sprites.json",
+      "file_sha256": "d501396c898ccb573ab514b5d7aa9583c116d262e1bf4684af3987aa63436b49",
+      "revision": "d2c0533aad9a0480d39e3fbc5c37507a47958251",
+      "license_note": "仓库无 LICENSE → REFERENCE_ONLY，仅用于交叉核验，不进入 normalized 数据。",
+      "records": 465
+    }
+  },
+  "warnings": []
+}

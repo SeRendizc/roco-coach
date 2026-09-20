@@ -23,6 +23,16 @@
     "test:smoke": "node scripts/browser-smoke.mjs",
     "test:opponent-smoke": "node scripts/opponent-smoke.mjs",
     "test:browser": "node --test --test-concurrency=1 browser.test.js replace.test.js",
-    "test:unit": "node --test engine.test.js rules.test.js offline.test.js mechanics.test.js pvp.test.js features.test.js coach.test.js companion.test.js strategist.test.js server.test.js opponent.test.js knowledge.test.js evals/agent.test.js evals/regression.test.js evals/slow-model.test.js wiring.test.js copy.test.js evals/player-copy.test.js evals/tool-arguments.test.js"
+    "test:roco": "node --test evals/roco/data-acceptance.test.js",
+    "roco:parse-check": "node scripts/roco/selftest-lua-parse.mjs",
+    "roco:hash": "node scripts/roco/hash-snapshot.mjs",
+    "roco:cross-check": "python3 scripts/roco/cross-check.py",
+    "roco:import": "node scripts/roco/import-snapshot.mjs",
+    "roco:matrix": "node scripts/roco/build-support-matrix.mjs",
+    "roco:microcases": "node scripts/roco/build-microcases.mjs",
+    "roco:docs": "node scripts/roco/build-support-matrix-doc.mjs && node scripts/roco/build-conflicts-doc.mjs && node scripts/roco/build-microcase-doc.mjs",
+    "roco:pipeline": "npm run roco:parse-check && npm run roco:cross-check && npm run roco:import && npm run roco:matrix && npm run roco:microcases && npm run roco:docs",
+    "roco:acceptance": "node scripts/roco/browser-acceptance.mjs",
+    "test:unit": "node --test engine.test.js rules.test.js offline.test.js mechanics.test.js pvp.test.js features.test.js coach.test.js companion.test.js strategist.test.js server.test.js opponent.test.js knowledge.test.js evals/agent.test.js evals/regression.test.js evals/slow-model.test.js wiring.test.js copy.test.js evals/player-copy.test.js evals/tool-arguments.test.js evals/roco/data-acceptance.test.js"
   }
 }

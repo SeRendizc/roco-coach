@@ -4,3 +4,25 @@ __pycache__/
 *.pyc
 .DS_Store
 tmp/
+
+# ── M1 上游原始快照 ────────────────────────────────────────────────
+# 解压后的第三方快照体积大且属他人版权，不入库。
+# 归档是否入库按**体积**分开处理，避免把 177MB 的 NRC_AI 归档塞进 git：
+#   data/roco/raw/rocom-wiki-data.tar.gz  (844KB)  ← 入库（主数据源，M1 的核心证据）
+#   data/roco/raw/rocom-data.tar.gz       (4.0MB)  ← 入库（第三来源）
+#   data/roco/raw/NRC_AI.tar.gz           (172MB)  ← **不入库**，见下方说明
+#
+# NRC_AI 归档不入库的理由与替代保证：
+#   1. 它在 git 里会被完整保留在历史中，之后无法真正移除，代价远大于收益；
+#   2. 它的角色只是**交叉核验的第二来源**，其数值不进入 normalized/（许可未确认，
+#      标 REFERENCE_ONLY），所以丢失它不会让任何已交付结论失去依据；
+#   3. 可复现性由「固定 revision + 归档 SHA256 + 解压后逐文件 SHA256」保证：
+#        revision          → data/roco/sources.yaml（nrc-ai-sqlite）
+#        归档 SHA256        → reports/roco/m1-data/raw-sha256.txt
+#        逐文件 SHA256      → reports/roco/m1-data/snapshot-file-inventory.json
+#        交叉核验结果       → reports/roco/m1-data/cross-check.json
+#     任何人可用 sources.yaml 里的 archive_url 重新下载并核对上述哈希。
+data/roco/raw/extracted/
+data/roco/raw/NRC_AI.tar.gz
+.dsh-pushplus-token
+reports/roco/notify-log.jsonl

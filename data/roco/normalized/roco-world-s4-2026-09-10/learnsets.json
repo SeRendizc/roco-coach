@@ -1,0 +1,2276 @@
+{
+  "schema_version": 1,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "source_id": "wiki-rocom-snapshot",
+  "source_revision": "aff808eb60003457fe8a260d1ac3c9bd95d53872",
+  "learnset_count": 12,
+  "learnsets": {
+    "pet_000225": {
+      "learnset_id": "learnset_e1c7b7e68094",
+      "pet_id": "pet_000225",
+      "feature_skill_id": "skill_000129",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000576",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000750",
+          "stage": 1
+        },
+        {
+          "level": 4,
+          "skill_id": "skill_000746",
+          "stage": 1
+        },
+        {
+          "level": 8,
+          "skill_id": "skill_000744",
+          "stage": 1
+        },
+        {
+          "level": 11,
+          "skill_id": "skill_000569",
+          "stage": 1
+        },
+        {
+          "level": 26,
+          "skill_id": "skill_000563",
+          "stage": 1
+        },
+        {
+          "level": 32,
+          "skill_id": "skill_000575",
+          "stage": 1
+        },
+        {
+          "level": 34,
+          "skill_id": "skill_000757",
+          "stage": 1
+        },
+        {
+          "level": 38,
+          "skill_id": "skill_000751",
+          "stage": 1
+        },
+        {
+          "level": 39,
+          "skill_id": "skill_000312",
+          "stage": 1
+        },
+        {
+          "level": 46,
+          "skill_id": "skill_000574",
+          "stage": 1
+        },
+        {
+          "level": 49,
+          "skill_id": "skill_000567",
+          "stage": 1
+        },
+        {
+          "level": 50,
+          "skill_id": "skill_000564",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000287"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000354"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000391"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000429"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000461"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000524"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000553"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000572"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000591"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000620"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000644"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000664"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000706"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000727"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000753"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000780"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000468"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000821"
+        }
+      ],
+      "skill_stones": [
+        "skill_000581",
+        "skill_000604",
+        "skill_000263",
+        "skill_000259",
+        "skill_000277",
+        "skill_000290",
+        "skill_000271",
+        "skill_000326",
+        "skill_000327",
+        "skill_000328",
+        "skill_000289",
+        "skill_000747",
+        "skill_000286"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000190": {
+      "learnset_id": "learnset_44835ae2b88f",
+      "pet_id": "pet_000190",
+      "feature_skill_id": "skill_000091",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000673",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000272",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000429",
+          "stage": 1
+        },
+        {
+          "level": 7,
+          "skill_id": "skill_000434",
+          "stage": 1
+        },
+        {
+          "level": 9,
+          "skill_id": "skill_000425",
+          "stage": 1
+        },
+        {
+          "level": 13,
+          "skill_id": "skill_000312",
+          "stage": 1
+        },
+        {
+          "level": 17,
+          "skill_id": "skill_000271",
+          "stage": 1
+        },
+        {
+          "level": 22,
+          "skill_id": "skill_000682",
+          "stage": 1
+        },
+        {
+          "level": 27,
+          "skill_id": "skill_000420",
+          "stage": 1
+        },
+        {
+          "level": 29,
+          "skill_id": "skill_000667",
+          "stage": 1
+        },
+        {
+          "level": 35,
+          "skill_id": "skill_000438",
+          "stage": 1
+        },
+        {
+          "level": 36,
+          "skill_id": "skill_000672",
+          "stage": 1
+        },
+        {
+          "level": 37,
+          "skill_id": "skill_000678",
+          "stage": 1
+        },
+        {
+          "level": 40,
+          "skill_id": "skill_000663",
+          "stage": 1
+        },
+        {
+          "level": 50,
+          "skill_id": "skill_000422",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000287"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000354"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000391"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000419"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000458"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000524"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000542"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000591"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000620"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000644"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000676"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000706"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000726"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000757"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000780"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000477"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000821"
+        }
+      ],
+      "skill_stones": [
+        "skill_000664",
+        "skill_000432",
+        "skill_000428",
+        "skill_000671",
+        "skill_000679",
+        "skill_000430",
+        "skill_000543",
+        "skill_000546",
+        "skill_000540",
+        "skill_000260",
+        "skill_000266",
+        "skill_000294",
+        "skill_000553",
+        "skill_000326",
+        "skill_000324",
+        "skill_000286"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000445": {
+      "learnset_id": "learnset_7d180f57f514",
+      "pet_id": "pet_000445",
+      "feature_skill_id": "skill_000123",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000272",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000303",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 4,
+          "skill_id": "skill_000305",
+          "stage": 1
+        },
+        {
+          "level": 6,
+          "skill_id": "skill_000279",
+          "stage": 1
+        },
+        {
+          "level": 12,
+          "skill_id": "skill_000251",
+          "stage": 1
+        },
+        {
+          "level": 16,
+          "skill_id": "skill_000274",
+          "stage": 1
+        },
+        {
+          "level": 21,
+          "skill_id": "skill_000327",
+          "stage": 1
+        },
+        {
+          "level": 22,
+          "skill_id": "skill_000260",
+          "stage": 1
+        },
+        {
+          "level": 29,
+          "skill_id": "skill_000280",
+          "stage": 1
+        },
+        {
+          "level": 36,
+          "skill_id": "skill_000321",
+          "stage": 1
+        },
+        {
+          "level": 37,
+          "skill_id": "skill_000284",
+          "stage": 1
+        },
+        {
+          "level": 38,
+          "skill_id": "skill_000278",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000306"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000344"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000387"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000425"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000458"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000506"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000535"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000588"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000614"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000640"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000667"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000706"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000723"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000753"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000775"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000483"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000803"
+        }
+      ],
+      "skill_stones": [
+        "skill_000324",
+        "skill_000331",
+        "skill_000290",
+        "skill_000325",
+        "skill_000748",
+        "skill_000752",
+        "skill_000756",
+        "skill_000755",
+        "skill_000705",
+        "skill_000692",
+        "skill_000265",
+        "skill_000281",
+        "skill_000289",
+        "skill_000758"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000417": {
+      "learnset_id": "learnset_ca8baabd57b8",
+      "pet_id": "pet_000417",
+      "feature_skill_id": "skill_000127",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000275",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000418",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 4,
+          "skill_id": "skill_000435",
+          "stage": 1
+        },
+        {
+          "level": 8,
+          "skill_id": "skill_000441",
+          "stage": 1
+        },
+        {
+          "level": 12,
+          "skill_id": "skill_000305",
+          "stage": 1
+        },
+        {
+          "level": 16,
+          "skill_id": "skill_000426",
+          "stage": 1
+        },
+        {
+          "level": 21,
+          "skill_id": "skill_000428",
+          "stage": 1
+        },
+        {
+          "level": 26,
+          "skill_id": "skill_000421",
+          "stage": 1
+        },
+        {
+          "level": 33,
+          "skill_id": "skill_000424",
+          "stage": 1
+        },
+        {
+          "level": 35,
+          "skill_id": "skill_000440",
+          "stage": 1
+        },
+        {
+          "level": 40,
+          "skill_id": "skill_000427",
+          "stage": 1
+        },
+        {
+          "level": 50,
+          "skill_id": "skill_000442",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000273"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000344"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000387"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000419"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000458"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000506"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000535"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000588"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000614"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000640"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000667"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000705"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000723"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000741"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000775"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000483"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000810"
+        }
+      ],
+      "skill_stones": [
+        "skill_000753",
+        "skill_000748",
+        "skill_000756",
+        "skill_000755",
+        "skill_000745",
+        "skill_000482",
+        "skill_000472",
+        "skill_000294",
+        "skill_000281",
+        "skill_000283",
+        "skill_000278",
+        "skill_000272",
+        "skill_000284",
+        "skill_000495"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000112": {
+      "learnset_id": "learnset_ae3e9c322f63",
+      "pet_id": "pet_000112",
+      "feature_skill_id": "skill_000039",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000529",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000535",
+          "stage": 1
+        },
+        {
+          "level": 8,
+          "skill_id": "skill_000316",
+          "stage": 1
+        },
+        {
+          "level": 9,
+          "skill_id": "skill_000723",
+          "stage": 1
+        },
+        {
+          "level": 11,
+          "skill_id": "skill_000717",
+          "stage": 1
+        },
+        {
+          "level": 17,
+          "skill_id": "skill_000537",
+          "stage": 1
+        },
+        {
+          "level": 22,
+          "skill_id": "skill_000540",
+          "stage": 1
+        },
+        {
+          "level": 26,
+          "skill_id": "skill_000530",
+          "stage": 1
+        },
+        {
+          "level": 29,
+          "skill_id": "skill_000719",
+          "stage": 1
+        },
+        {
+          "level": 35,
+          "skill_id": "skill_000728",
+          "stage": 1
+        },
+        {
+          "level": 36,
+          "skill_id": "skill_000555",
+          "stage": 1
+        },
+        {
+          "level": 37,
+          "skill_id": "skill_000531",
+          "stage": 1
+        },
+        {
+          "level": 40,
+          "skill_id": "skill_000557",
+          "stage": 1
+        },
+        {
+          "level": 45,
+          "skill_id": "skill_000724",
+          "stage": 1
+        },
+        {
+          "level": 48,
+          "skill_id": "skill_000549",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000306"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000344"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000387"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000425"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000458"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000506"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000543"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000588"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000614"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000640"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000667"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000705"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000716"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000756"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000775"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000483"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000810"
+        }
+      ],
+      "skill_stones": [
+        "skill_000729",
+        "skill_000536",
+        "skill_000721",
+        "skill_000542",
+        "skill_000818",
+        "skill_000805",
+        "skill_000811",
+        "skill_000815",
+        "skill_000318",
+        "skill_000271",
+        "skill_000290",
+        "skill_000730",
+        "skill_000282",
+        "skill_000538",
+        "skill_000550",
+        "skill_000289"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000062": {
+      "learnset_id": "learnset_d48a3d9c7167",
+      "pet_id": "pet_000062",
+      "feature_skill_id": "skill_000067",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000378",
+          "stage": 1
+        },
+        {
+          "level": 7,
+          "skill_id": "skill_000387",
+          "stage": 1
+        },
+        {
+          "level": 9,
+          "skill_id": "skill_000382",
+          "stage": 1
+        },
+        {
+          "level": 11,
+          "skill_id": "skill_000271",
+          "stage": 1
+        },
+        {
+          "level": 22,
+          "skill_id": "skill_000316",
+          "stage": 1
+        },
+        {
+          "level": 24,
+          "skill_id": "skill_000408",
+          "stage": 1
+        },
+        {
+          "level": 28,
+          "skill_id": "skill_000385",
+          "stage": 1
+        },
+        {
+          "level": 35,
+          "skill_id": "skill_000404",
+          "stage": 1
+        },
+        {
+          "level": 42,
+          "skill_id": "skill_000402",
+          "stage": 1
+        },
+        {
+          "level": 46,
+          "skill_id": "skill_000388",
+          "stage": 1
+        },
+        {
+          "level": 47,
+          "skill_id": "skill_000392",
+          "stage": 1
+        },
+        {
+          "level": 49,
+          "skill_id": "skill_000379",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000303"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000358"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000397"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000434"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000458"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000497"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000542"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000593"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000620"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000647"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000675"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000699"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000726"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000751"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000767"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000477"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000803"
+        }
+      ],
+      "skill_stones": [
+        "skill_000785",
+        "skill_000770",
+        "skill_000787",
+        "skill_000775",
+        "skill_000580",
+        "skill_000588",
+        "skill_000599",
+        "skill_000449",
+        "skill_000269",
+        "skill_000259",
+        "skill_000290",
+        "skill_000325",
+        "skill_000331"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000474": {
+      "learnset_id": "learnset_87c8775aa30f",
+      "pet_id": "pet_000474",
+      "feature_skill_id": "skill_000141",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000249",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000272",
+          "stage": 1
+        },
+        {
+          "level": 5,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 7,
+          "skill_id": "skill_000312",
+          "stage": 1
+        },
+        {
+          "level": 13,
+          "skill_id": "skill_000271",
+          "stage": 1
+        },
+        {
+          "level": 19,
+          "skill_id": "skill_000248",
+          "stage": 1
+        },
+        {
+          "level": 26,
+          "skill_id": "skill_000280",
+          "stage": 1
+        },
+        {
+          "level": 33,
+          "skill_id": "skill_000305",
+          "stage": 1
+        },
+        {
+          "level": 35,
+          "skill_id": "skill_000282",
+          "stage": 1
+        },
+        {
+          "level": 37,
+          "skill_id": "skill_000685",
+          "stage": 1
+        },
+        {
+          "level": 38,
+          "skill_id": "skill_000255",
+          "stage": 1
+        },
+        {
+          "level": 40,
+          "skill_id": "skill_000680",
+          "stage": 1
+        },
+        {
+          "level": 41,
+          "skill_id": "skill_000664",
+          "stage": 1
+        },
+        {
+          "level": 44,
+          "skill_id": "skill_000324",
+          "stage": 1
+        },
+        {
+          "level": 49,
+          "skill_id": "skill_000677",
+          "stage": 1
+        },
+        {
+          "level": 50,
+          "skill_id": "skill_000666",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000306"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000358"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000376"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000434"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000461"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000498"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000543"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000593"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000621"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000647"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000676"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000699"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000727"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000741"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000767"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000468"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000817"
+        }
+      ],
+      "skill_stones": [
+        "skill_000278",
+        "skill_000290",
+        "skill_000319",
+        "skill_000310",
+        "skill_000265",
+        "skill_000267",
+        "skill_000269",
+        "skill_000256",
+        "skill_000308",
+        "skill_000670",
+        "skill_000674",
+        "skill_000307",
+        "skill_000318",
+        "skill_000753",
+        "skill_000751",
+        "skill_000742",
+        "skill_000804",
+        "skill_000811",
+        "skill_000810",
+        "skill_000326",
+        "skill_000748",
+        "skill_000752",
+        "skill_000754",
+        "skill_000755"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000451": {
+      "learnset_id": "learnset_37d460cb4d20",
+      "pet_id": "pet_000451",
+      "feature_skill_id": "skill_000158",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000750",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000756",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000725",
+          "stage": 1
+        },
+        {
+          "level": 2,
+          "skill_id": "skill_000723",
+          "stage": 1
+        },
+        {
+          "level": 7,
+          "skill_id": "skill_000785",
+          "stage": 1
+        },
+        {
+          "level": 12,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 17,
+          "skill_id": "skill_000267",
+          "stage": 1
+        },
+        {
+          "level": 22,
+          "skill_id": "skill_000751",
+          "stage": 1
+        },
+        {
+          "level": 24,
+          "skill_id": "skill_000776",
+          "stage": 1
+        },
+        {
+          "level": 30,
+          "skill_id": "skill_000717",
+          "stage": 1
+        },
+        {
+          "level": 34,
+          "skill_id": "skill_000757",
+          "stage": 1
+        },
+        {
+          "level": 35,
+          "skill_id": "skill_000744",
+          "stage": 1
+        },
+        {
+          "level": 36,
+          "skill_id": "skill_000746",
+          "stage": 1
+        },
+        {
+          "level": 39,
+          "skill_id": "skill_000732",
+          "stage": 1
+        },
+        {
+          "level": 47,
+          "skill_id": "skill_000718",
+          "stage": 1
+        },
+        {
+          "level": 48,
+          "skill_id": "skill_000289",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000287"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000354"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000391"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000429"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000458"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000524"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000553"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000591"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000620"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000644"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000664"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000694"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000716"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000753"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000780"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000468"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000810"
+        }
+      ],
+      "skill_stones": [
+        "skill_000294",
+        "skill_000818",
+        "skill_000755",
+        "skill_000271",
+        "skill_000280",
+        "skill_000816",
+        "skill_000269",
+        "skill_000332",
+        "skill_000268",
+        "skill_000327",
+        "skill_000328",
+        "skill_000821",
+        "skill_000288",
+        "skill_000742",
+        "skill_000259",
+        "skill_000765",
+        "skill_000764"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000124": {
+      "learnset_id": "learnset_ba9df96a104e",
+      "pet_id": "pet_000124",
+      "feature_skill_id": "skill_000104",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000645",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000641",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 2,
+          "skill_id": "skill_000647",
+          "stage": 1
+        },
+        {
+          "level": 7,
+          "skill_id": "skill_000639",
+          "stage": 1
+        },
+        {
+          "level": 11,
+          "skill_id": "skill_000646",
+          "stage": 1
+        },
+        {
+          "level": 17,
+          "skill_id": "skill_000719",
+          "stage": 1
+        },
+        {
+          "level": 21,
+          "skill_id": "skill_000644",
+          "stage": 1
+        },
+        {
+          "level": 27,
+          "skill_id": "skill_000726",
+          "stage": 1
+        },
+        {
+          "level": 34,
+          "skill_id": "skill_000652",
+          "stage": 1
+        },
+        {
+          "level": 35,
+          "skill_id": "skill_000717",
+          "stage": 1
+        },
+        {
+          "level": 37,
+          "skill_id": "skill_000723",
+          "stage": 1
+        },
+        {
+          "level": 40,
+          "skill_id": "skill_000649",
+          "stage": 1
+        },
+        {
+          "level": 49,
+          "skill_id": "skill_000729",
+          "stage": 1
+        },
+        {
+          "level": 50,
+          "skill_id": "skill_000311",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000273"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000344"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000387"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000425"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000458"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000506"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000535"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000588"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000614"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000648"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000667"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000705"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000716"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000756"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000775"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000483"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000810"
+        }
+      ],
+      "skill_stones": [
+        "skill_000724",
+        "skill_000722",
+        "skill_000696",
+        "skill_000702",
+        "skill_000283",
+        "skill_000275",
+        "skill_000276",
+        "skill_000294",
+        "skill_000325",
+        "skill_000285",
+        "skill_000278",
+        "skill_000282",
+        "skill_000331",
+        "skill_000281",
+        "skill_000284",
+        "skill_000327"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000608": {
+      "learnset_id": "learnset_162b16b43e43",
+      "pet_id": "pet_000608",
+      "feature_skill_id": "skill_000196",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000750",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000816",
+          "stage": 1
+        },
+        {
+          "level": 7,
+          "skill_id": "skill_000271",
+          "stage": 1
+        },
+        {
+          "level": 10,
+          "skill_id": "skill_000818",
+          "stage": 1
+        },
+        {
+          "level": 17,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 19,
+          "skill_id": "skill_000759",
+          "stage": 1
+        },
+        {
+          "level": 22,
+          "skill_id": "skill_000824",
+          "stage": 1
+        },
+        {
+          "level": 30,
+          "skill_id": "skill_000765",
+          "stage": 1
+        },
+        {
+          "level": 36,
+          "skill_id": "skill_000825",
+          "stage": 1
+        },
+        {
+          "level": 38,
+          "skill_id": "skill_000764",
+          "stage": 1
+        },
+        {
+          "level": 40,
+          "skill_id": "skill_000744",
+          "stage": 1
+        },
+        {
+          "level": 42,
+          "skill_id": "skill_000827",
+          "stage": 1
+        },
+        {
+          "level": 44,
+          "skill_id": "skill_000742",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000306"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000339"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000397"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000434"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000459"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000498"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000543"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000593"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000621"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000647"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000675"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000699"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000727"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000756"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000767"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000468"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000817"
+        }
+      ],
+      "skill_stones": [
+        "skill_000269",
+        "skill_000831",
+        "skill_000268",
+        "skill_000519",
+        "skill_000499",
+        "skill_000506",
+        "skill_000772",
+        "skill_000797",
+        "skill_000787",
+        "skill_000775",
+        "skill_000316",
+        "skill_000312",
+        "skill_000290",
+        "skill_000259",
+        "skill_000253"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000601": {
+      "learnset_id": "learnset_3d550ce8167a",
+      "pet_id": "pet_000601",
+      "feature_skill_id": "skill_000197",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000378",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000645",
+          "stage": 1
+        },
+        {
+          "level": 6,
+          "skill_id": "skill_000271",
+          "stage": 1
+        },
+        {
+          "level": 10,
+          "skill_id": "skill_000399",
+          "stage": 1
+        },
+        {
+          "level": 18,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 21,
+          "skill_id": "skill_000656",
+          "stage": 1
+        },
+        {
+          "level": 27,
+          "skill_id": "skill_000325",
+          "stage": 1
+        },
+        {
+          "level": 33,
+          "skill_id": "skill_000642",
+          "stage": 1
+        },
+        {
+          "level": 38,
+          "skill_id": "skill_000416",
+          "stage": 1
+        },
+        {
+          "level": 40,
+          "skill_id": "skill_000632",
+          "stage": 1
+        },
+        {
+          "level": 42,
+          "skill_id": "skill_000417",
+          "stage": 1
+        },
+        {
+          "level": 46,
+          "skill_id": "skill_000379",
+          "stage": 1
+        },
+        {
+          "level": 49,
+          "skill_id": "skill_000637",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000287"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000339"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000397"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000434"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000461"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000524"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000543"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000588"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000621"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000648"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000667"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000699"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000727"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000751"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000775"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000483"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000803"
+        }
+      ],
+      "skill_stones": [
+        "skill_000259",
+        "skill_000382",
+        "skill_000650",
+        "skill_000390",
+        "skill_000388",
+        "skill_000633",
+        "skill_000634",
+        "skill_000658",
+        "skill_000514",
+        "skill_000506",
+        "skill_000498",
+        "skill_000818",
+        "skill_000298"
+      ],
+      "orphan_skill_refs": []
+    },
+    "pet_000611": {
+      "learnset_id": "learnset_da630e35c0e9",
+      "pet_id": "pet_000611",
+      "feature_skill_id": "skill_000198",
+      "native_skills": [
+        {
+          "level": 1,
+          "skill_id": "skill_000686",
+          "stage": 1
+        },
+        {
+          "level": 1,
+          "skill_id": "skill_000277",
+          "stage": 1
+        },
+        {
+          "level": 4,
+          "skill_id": "skill_000541",
+          "stage": 1
+        },
+        {
+          "level": 7,
+          "skill_id": "skill_000700",
+          "stage": 1
+        },
+        {
+          "level": 12,
+          "skill_id": "skill_000689",
+          "stage": 1
+        },
+        {
+          "level": 20,
+          "skill_id": "skill_000286",
+          "stage": 1
+        },
+        {
+          "level": 28,
+          "skill_id": "skill_000691",
+          "stage": 1
+        },
+        {
+          "level": 32,
+          "skill_id": "skill_000531",
+          "stage": 1
+        },
+        {
+          "level": 38,
+          "skill_id": "skill_000703",
+          "stage": 1
+        },
+        {
+          "level": 40,
+          "skill_id": "skill_000711",
+          "stage": 1
+        },
+        {
+          "level": 43,
+          "skill_id": "skill_000714",
+          "stage": 1
+        },
+        {
+          "level": 45,
+          "skill_id": "skill_000713",
+          "stage": 1
+        },
+        {
+          "level": 46,
+          "skill_id": "skill_000692",
+          "stage": 1
+        },
+        {
+          "level": 48,
+          "skill_id": "skill_000536",
+          "stage": 1
+        },
+        {
+          "level": 50,
+          "skill_id": "skill_000554",
+          "stage": 1
+        }
+      ],
+      "blood_skills": [
+        {
+          "blood": "普通",
+          "level": 15,
+          "skill_id": "skill_000306"
+        },
+        {
+          "blood": "草",
+          "level": 15,
+          "skill_id": "skill_000358"
+        },
+        {
+          "blood": "火",
+          "level": 15,
+          "skill_id": "skill_000387"
+        },
+        {
+          "blood": "水",
+          "level": 15,
+          "skill_id": "skill_000419"
+        },
+        {
+          "blood": "光",
+          "level": 15,
+          "skill_id": "skill_000461"
+        },
+        {
+          "blood": "地",
+          "level": 15,
+          "skill_id": "skill_000498"
+        },
+        {
+          "blood": "冰",
+          "level": 15,
+          "skill_id": "skill_000535"
+        },
+        {
+          "blood": "龙",
+          "level": 15,
+          "skill_id": "skill_000566"
+        },
+        {
+          "blood": "电",
+          "level": 15,
+          "skill_id": "skill_000594"
+        },
+        {
+          "blood": "毒",
+          "level": 15,
+          "skill_id": "skill_000614"
+        },
+        {
+          "blood": "虫",
+          "level": 15,
+          "skill_id": "skill_000640"
+        },
+        {
+          "blood": "武",
+          "level": 15,
+          "skill_id": "skill_000667"
+        },
+        {
+          "blood": "翼",
+          "level": 15,
+          "skill_id": "skill_000697"
+        },
+        {
+          "blood": "萌",
+          "level": 15,
+          "skill_id": "skill_000726"
+        },
+        {
+          "blood": "幽",
+          "level": 15,
+          "skill_id": "skill_000751"
+        },
+        {
+          "blood": "恶",
+          "level": 15,
+          "skill_id": "skill_000775"
+        },
+        {
+          "blood": "机械",
+          "level": 15,
+          "skill_id": "skill_000477"
+        },
+        {
+          "blood": "幻",
+          "level": 15,
+          "skill_id": "skill_000803"
+        }
+      ],
+      "skill_stones": [
+        "skill_000329",
+        "skill_000324",
+        "skill_000279",
+        "skill_000323",
+        "skill_000278",
+        "skill_000327",
+        "skill_000705",
+        "skill_000706",
+        "skill_000544",
+        "skill_000538",
+        "skill_000550",
+        "skill_000808",
+        "skill_000812",
+        "skill_000818",
+        "skill_000294",
+        "skill_000715"
+      ],
+      "orphan_skill_refs": []
+    }
+  }
+}

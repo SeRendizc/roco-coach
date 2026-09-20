@@ -1,0 +1,195 @@
+# 《洛克王国：世界》手游数据来源清单（M1）
+#
+# 用途：本文件是 `data/roco/` 下所有规范化数据的来源台账。
+# 规则：
+#   1. 只登记《洛克王国：世界》手游（roco_world_mobile）来源。页游资料一律不得进入本文件。
+#   2. 每条来源必须有固定的 revision（commit SHA），不得写「最新」。
+#   3. SHA256 是**下载到的归档文件**的哈希；解压后逐文件哈希见
+#      `reports/roco/m1-data/snapshot-file-inventory.json`。
+#   4. license 与 redistribution 必须分别标注；未确认的标 REFERENCE_ONLY。
+#   5. verification_status 只描述「我们核验到哪一步」，不描述上游权威性。
+#
+# 生成方式：scripts/roco/fetch-sources.mjs（下载）+ scripts/roco/hash-snapshot.mjs（逐文件哈希）
+# 本轮抓取时间：2026-09-20T16:15Z（UTC）
+
+schema_version: 1
+game: roco_world_mobile
+game_name_zh: 洛克王国：世界
+generated_at: "2026-09-20T16:16:00Z"
+
+# 本轮冻结的 ruleset。所有 normalized 数据都归属它。
+ruleset:
+  ruleset_id: roco-world-s4-2026-09-10
+  label: S4「月涌狂想」赛季
+  season: S4
+  epoch_start: "2026-09-10"
+  basis: >
+    以 `rocom-wiki-data` 仓库 HEAD（2026-09-10 推送）为主快照；该仓库内容为
+    洛克王国世界 WIKI（wiki.biligame.com/nrc）的 Lua 数据镜像归档。
+  caveat: >
+    这是**社区归档**，不是官方配置导出。官方端内数值不可得，因此
+    「与官方一致」的任何结论都不在本轮范围内。
+
+sources:
+  # ── 主快照：精灵 / 技能 / 学习表 / 属性 / 改动历史 ──────────────────
+  - source_id: wiki-rocom-snapshot
+    role: primary
+    kind: data_archive_lua
+    repo: JayeGT002/rocom-wiki-data
+    url: https://github.com/JayeGT002/rocom-wiki-data
+    upstream_url: https://wiki.biligame.com/nrc
+    revision: aff808eb60003457fe8a260d1ac3c9bd95d53872
+    revision_date: "2026-09-10T08:46:18Z"
+    revision_message: "优化图鉴表格排版并修正部分数据"
+    default_branch: main
+    archive_url: https://codeload.github.com/JayeGT002/rocom-wiki-data/tar.gz/aff808eb60003457fe8a260d1ac3c9bd95d53872
+    archive_path: data/roco/raw/rocom-wiki-data.tar.gz
+    archive_bytes: 860689
+    archive_sha256: 5cc6822a4bb7a2c7b37f535b9b22f78880d04f12056a8e5ee6e185b92883b0cc
+    file_inventory: reports/roco/m1-data/snapshot-file-inventory.json
+    extracted_to: data/roco/raw/extracted/rocom-wiki-data
+    fetched_at: "2026-09-20T16:15:30Z"
+    license: CC-BY-NC-SA-4.0
+    license_evidence: data/roco/raw/extracted/rocom-wiki-data/LICENSE
+    license_note: >
+      仓库自带 LICENSE 为 CC BY-NC-SA 4.0（署名-非商业性使用-相同方式共享）。
+      上游 WIKI 内容同为 CC BY-NC-SA 4.0。GitHub API 的 license 字段返回
+      NOASSERTION/Other，因为该 LICENSE 是自定义排版的中文全文，不是 SPDX 原文；
+      以仓库内 LICENSE 文件正文为准。
+    redistribution: DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL
+    attribution_required: true
+    commercial_use: prohibited
+    verification_status: cross_checked_2_sources
+    verification_note: >
+      本快照的精灵属性/种族值/技能名已与 `nrc-ai-sqlite` 逐条比对，
+      一致与冲突都写入 provenance.jsonl / conflicts.jsonl。
+    notes: >
+      M1 当轮快照（2026-09-10 推送）。这是本轮的**主数据源**，因为它是
+      唯一同时给出精灵、技能、学习表、属性克制与改动历史的归档。
+      仓库包含 `S4Season.lua`（S4 赛季 23 只新精灵），与官方 2026-09-10 开季一致。
+
+  # ── 交叉核验：结构化精灵/技能数据库 + 效果原语参考 ─────────────────
+  - source_id: nrc-ai-sqlite
+    role: cross_check
+    kind: sqlite_database
+    repo: ColinHong10/NRC_AI
+    url: https://github.com/ColinHong10/NRC_AI
+    revision: 9b5801b08d349c6505a233c513faa5075f427035
+    revision_date: "2026-04-20T16:34:54Z"
+    default_branch: main
+    archive_url: https://codeload.github.com/ColinHong10/NRC_AI/tar.gz/9b5801b08d349c6505a233c513faa5075f427035
+    archive_path: data/roco/raw/NRC_AI.tar.gz
+    archive_bytes: 180349494
+    archive_sha256: 22139197ccc004a39d719d9917f0f1524778e88ea9c862b5fb5d80618336e9e3
+    archive_committed_to_git: false
+    archive_committed_reason: >
+      该归档为 172MB。放进 git 会永久留在历史里、之后无法真正移除，代价远大于收益。
+      它的角色只是**交叉核验的第二来源**，其数值不进入 normalized/（许可未确认，
+      标 REFERENCE_ONLY），因此不随仓库分发不会让任何已交付结论失去依据。
+      需要复现时按 archive_url 重新下载，并用下面的 SHA256 核对。
+    file_inventory: reports/roco/m1-data/snapshot-file-inventory.json
+    extracted_to: data/roco/raw/extracted/NRC_AI
+    fetched_at: "2026-09-20T16:15:40Z"
+    primary_file: data/roco/raw/extracted/NRC_AI/data/nrc.db
+    primary_file_sha256_recorded_in: reports/roco/m1-data/snapshot-file-inventory.json
+    license: MIT
+    license_evidence: data/roco/raw/extracted/NRC_AI/LICENSE
+    license_note: >
+      仓库 LICENSE 为 MIT，覆盖的是**仓库代码**。上游游戏数据的权利未在本仓库
+      单独声明；因此本来源只用于**交叉核验与效果实现参考**，不作为可再分发的
+      数据包输出。
+    redistribution: REFERENCE_ONLY
+    attribution_required: true
+    commercial_use: unclear
+    verification_status: parsed_and_cross_checked
+    tables:
+      pokemon: 461
+      skill: 491
+      pokemon_skill: 20433
+      evolution: 206
+    notes: >
+      快照时间 2026-04（早于 S4）。因此它**不包含** S4 新精灵
+      （银月狼王 / 圣凯布米龙 / 月使鹭纳），这三只只有主快照一个来源。
+      其 `skill.power` 字段是少数提供静态威力的来源之一，用于交叉核验；
+      但它是社区实现，不等于官方数值。
+
+  # ── 社区阵容：候选与频次，不是胜率 ────────────────────────────────
+  - source_id: rocom-data-lineups
+    role: community_lineups
+    kind: json_scrape
+    repo: AofeiLi-code/rocom-data
+    url: https://github.com/AofeiLi-code/rocom-data
+    upstream_url: https://wiki.biligame.com/nrc
+    revision: d2c0533aad9a0480d39e3fbc5c37507a47958251
+    revision_date: "2026-05-09T05:20:09Z"
+    default_branch: main
+    archive_url: https://codeload.github.com/AofeiLi-code/rocom-data/tar.gz/d2c0533aad9a0480d39e3fbc5c37507a47958251
+    archive_path: data/roco/raw/rocom-data.tar.gz
+    archive_bytes: 4196321
+    archive_sha256: 92345dfb99ca03739f6c157fb432e8bec556f27efb450e5f36915b723cf212cc
+    file_inventory: reports/roco/m1-data/snapshot-file-inventory.json
+    extracted_to: data/roco/raw/extracted/rocom-data
+    fetched_at: "2026-09-20T16:15:50Z"
+    primary_file: data/roco/raw/extracted/rocom-data/data/lineups.json
+    secondary_files:
+      - data/roco/raw/extracted/rocom-data/data/skills_all.csv
+      - data/roco/raw/extracted/rocom-data/data/sprites.json
+    license: NONE_DECLARED
+    license_evidence: null
+    license_note: >
+      **仓库根目录没有任何 LICENSE / COPYING 文件**（已用 find 确认）。
+      README 说明数据爬取自洛克王国世界 BWIKI，但仓库本身未声明许可。
+      因此整条来源标 REFERENCE_ONLY：只能用于内部的频次统计与候选生成，
+      不得作为公开数据包分发，也不得进入任何对外发布的训练集。
+    redistribution: REFERENCE_ONLY
+    attribution_required: true
+    commercial_use: prohibited_pending_clarification
+    verification_status: parsed_frequency_only
+    counts:
+      lineups_total: 169
+      lineups_pvp: 148
+      lineups_pve: 21
+    caveats:
+      - "169 套阵容全部写有 6 只成员，但**没有**段位、样本量、胜率或对局数。"
+      - "数据主要来自 2026-04 至 2026-05 的 WIKI 阵容广场，早于 S4（2026-09-10）。"
+      - "因此本来源只能支撑「历史社区阵容出现频次」，不得表述为胜率、T0 或当前 Meta。"
+
+  # ── 赛季标识：S4 名单，用于确认新精灵身份 ────────────────────────
+  - source_id: wiki-rocom-s4-season-file
+    role: season_roster
+    kind: data_archive_lua
+    part_of: wiki-rocom-snapshot
+    archive_path: data/roco/raw/extracted/rocom-wiki-data/S4Season.lua
+    license: CC-BY-NC-SA-4.0
+    redistribution: DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL
+    verification_status: parsed
+    notes: >
+      S4 赛季精灵名单。用于判定「S4 新精灵」这一**身份**，
+      不用于判定「热门」或「强」——新版本登场不等于强度或使用率。
+
+# 明确被排除的来源类型（防止页游数据混入）
+excluded_source_classes:
+  - class: 页游 roco.qq.com / 洛克王国页游 wiki
+    reason: 用户硬性要求：只使用手游数据。页游精灵名可能重名，机制不同。
+  - class: 宝可梦 / Pokémon 数据
+    reason: 与本作机制无来源关系；不得作为伤害或时序的替代证据。
+  - class: 未标版本的二手攻略转载
+    reason: 无法固定 revision，无法计算 hash，不可追溯。
+
+# 许可状态汇总（详细矩阵见 docs/roco/LICENSE-MATRIX.md）
+license_summary:
+  - source_id: wiki-rocom-snapshot
+    license: CC-BY-NC-SA-4.0
+    redistribution: DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL
+    can_ship_in_repo: true
+    can_ship_in_public_dataset: false
+  - source_id: nrc-ai-sqlite
+    license: MIT (code) / unclear (upstream data)
+    redistribution: REFERENCE_ONLY
+    can_ship_in_repo: false
+    can_ship_in_public_dataset: false
+  - source_id: rocom-data-lineups
+    license: NONE_DECLARED
+    redistribution: REFERENCE_ONLY
+    can_ship_in_repo: false
+    can_ship_in_public_dataset: false

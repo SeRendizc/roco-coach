@@ -1,0 +1,5261 @@
+{
+  "schema_version": 1,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "generated_from": {
+    "pets": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
+    "learnsets": "data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json",
+    "skills": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+    "types": "data/roco/normalized/roco-world-s4-2026-09-10/types.json",
+    "history": "data/roco/normalized/roco-world-s4-2026-09-10/history.json"
+  },
+  "caveats": [
+    "支持等级 current 一律为 KNOWLEDGE_ONLY：本轮未实现任何效果原语，未通过任何 microcase。",
+    "候选配招是一组机制覆盖互不重复的真实技能，不是最优解，也不代表社区推荐。",
+    "描述文本里的机制只登记为「描述中出现」，未据此推断结算时序。",
+    "C 组为 S4 新精灵：新版本登场不等于热门或强。"
+  ],
+  "pets": [
+    {
+      "pet_id": "pet_000225",
+      "group": "A",
+      "order": 1,
+      "name": "寂灭骨龙",
+      "title": "寂灭骨龙",
+      "game_id": 3269,
+      "number": "290",
+      "types": [
+        "龙系",
+        "幽系"
+      ],
+      "stats": {
+        "hp": 120,
+        "atk": 137,
+        "def": 104,
+        "spa": 50,
+        "spd": 81,
+        "spe": 60
+      },
+      "stat_total": 552,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "耐久 / 换宠博弈 / 收尾",
+      "trait": {
+        "skill_id": "skill_000129",
+        "name": "不朽",
+        "desc": "力竭4回合后复活。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_e1c7b7e68094",
+        "native": 13,
+        "blood": 18,
+        "stones": 13,
+        "pool_size": 44,
+        "native_pool_size": 13,
+        "by_category": {
+          "防御": 20,
+          "攻击": 18,
+          "状态": 6
+        },
+        "with_static_power": 18,
+        "without_static_power": 26,
+        "dynamic_or_conditional_power": 8,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "龙系|幽系",
+          "resist": [
+            {
+              "type": "普通系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "火系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "水系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "电系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "毒系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "翼系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "光系",
+              "multiplier": 2
+            },
+            {
+              "type": "冰系",
+              "multiplier": 2
+            },
+            {
+              "type": "龙系",
+              "multiplier": 2
+            },
+            {
+              "type": "萌系",
+              "multiplier": 2
+            },
+            {
+              "type": "幽系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "龙系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "火系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "水系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "电系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "翼系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "冰系",
+              "multiplier": 2
+            },
+            {
+              "type": "龙系",
+              "multiplier": 2
+            },
+            {
+              "type": "萌系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "幽系",
+          "resist": [
+            {
+              "type": "普通系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "毒系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "光系",
+              "multiplier": 2
+            },
+            {
+              "type": "幽系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "下一轮为 A 组所选 4 技能实现效果原语并通过 microcase 后升为 SIM_PARTIAL。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000750",
+          "reactive_defense": "skill_000576",
+          "main_attack": "skill_000744",
+          "mechanism_support": "skill_000591"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000757",
+                "name": "虚化",
+                "category": "防御",
+                "element": "幽系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "stat_mod"
+                ]
+              }
+            ]
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 7,
+            "alternatives": [
+              {
+                "skill_id": "skill_000564",
+                "name": "吹炎",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 3,
+                "power": 170,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "charge",
+                  "respond"
+                ]
+              },
+              {
+                "skill_id": "skill_000574",
+                "name": "隼鳞",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 5,
+                "power": 140,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000567",
+                "name": "龙之利爪",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 3,
+                "power": 130,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "charge",
+                  "heal"
+                ]
+              },
+              {
+                "skill_id": "skill_000751",
+                "name": "幻象",
+                "category": "攻击",
+                "element": "幽系",
+                "energy": 1,
+                "power": 60,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000563",
+                "name": "龙吼",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 1,
+                "power": 60,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 41,
+            "new_mechanisms_brought": [
+              "heal",
+              "escape"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000567",
+                "name": "龙之利爪",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 3,
+                "power": 130,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "charge",
+                  "heal"
+                ]
+              },
+              {
+                "skill_id": "skill_000312",
+                "name": "先发制人",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 2,
+                "power": 55,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000569",
+                "name": "架势",
+                "category": "状态",
+                "element": "龙系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "charge",
+                  "heal"
+                ]
+              },
+              {
+                "skill_id": "skill_000746",
+                "name": "降灵",
+                "category": "状态",
+                "element": "幽系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "mark"
+                ]
+              },
+              {
+                "skill_id": "skill_000757",
+                "name": "虚化",
+                "category": "防御",
+                "element": "幽系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "stat_mod"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000750",
+            "name": "诡刺",
+            "category": "攻击",
+            "element": "幽系",
+            "energy": 0,
+            "power": 40,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000576",
+            "name": "龙血",
+            "category": "防御",
+            "element": "龙系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，本技能可以在蓄力状态下使用，应对攻击：下次技能无需蓄力。",
+            "mechanisms": [
+              "charge",
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000744",
+            "name": "坟场搏击",
+            "category": "攻击",
+            "element": "幽系",
+            "energy": 4,
+            "power": 180,
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方每有1能量，本次技能威力-10%。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000591",
+            "name": "集中",
+            "category": "防御",
+            "element": "电系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己回合结束返场。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "heal",
+              "escape"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "8 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s2-2026-05-21",
+            "kind": "changed",
+            "change_count": 4
+          },
+          {
+            "version_key": "s3-2026-07-17",
+            "kind": "changed",
+            "change_count": 1
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000190",
+      "group": "A",
+      "order": 2,
+      "name": "海豹船长",
+      "title": "海豹船长",
+      "game_id": 3216,
+      "number": "182",
+      "types": [
+        "武系",
+        "水系"
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 113,
+        "def": 111,
+        "spa": 109,
+        "spd": 77,
+        "spe": 100
+      },
+      "stat_total": 600,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "承伤与稳定防守",
+      "trait": {
+        "skill_id": "skill_000091",
+        "name": "身经百练",
+        "desc": "己方精灵每应对1次，自己入场时水系和武系技能威力+20%。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_44835ae2b88f",
+        "native": 15,
+        "blood": 18,
+        "stones": 16,
+        "pool_size": 49,
+        "native_pool_size": 15,
+        "by_category": {
+          "攻击": 23,
+          "状态": 6,
+          "防御": 20
+        },
+        "with_static_power": 23,
+        "without_static_power": 26,
+        "dynamic_or_conditional_power": 7,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "武系|水系",
+          "resist": [
+            {
+              "type": "火系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "地系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "恶系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "机械系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "草系",
+              "multiplier": 2
+            },
+            {
+              "type": "电系",
+              "multiplier": 2
+            },
+            {
+              "type": "翼系",
+              "multiplier": 2
+            },
+            {
+              "type": "萌系",
+              "multiplier": 2
+            },
+            {
+              "type": "幻系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "武系",
+          "resist": [
+            {
+              "type": "地系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "恶系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "翼系",
+              "multiplier": 2
+            },
+            {
+              "type": "萌系",
+              "multiplier": 2
+            },
+            {
+              "type": "幻系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "水系",
+          "resist": [
+            {
+              "type": "火系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "机械系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "草系",
+              "multiplier": 2
+            },
+            {
+              "type": "电系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "下一轮为 A 组所选 4 技能实现效果原语并通过 microcase 后升为 SIM_PARTIAL。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000673",
+          "reactive_defense": "skill_000429",
+          "main_attack": "skill_000678",
+          "mechanism_support": "skill_000294"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 3,
+            "alternatives": [
+              {
+                "skill_id": "skill_000682",
+                "name": "防御反击",
+                "category": "防御",
+                "element": "武系",
+                "energy": 3,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond",
+                  "shield"
+                ]
+              },
+              {
+                "skill_id": "skill_000672",
+                "name": "听桥",
+                "category": "防御",
+                "element": "武系",
+                "energy": 4,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield"
+                ]
+              }
+            ]
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 7,
+            "alternatives": [
+              {
+                "skill_id": "skill_000422",
+                "name": "水刃",
+                "category": "攻击",
+                "element": "水系",
+                "energy": 4,
+                "power": 115,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000420",
+                "name": "气泡",
+                "category": "攻击",
+                "element": "水系",
+                "energy": 3,
+                "power": 100,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000438",
+                "name": "水幕冲击",
+                "category": "攻击",
+                "element": "水系",
+                "energy": 3,
+                "power": 100,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000663",
+                "name": "斩断",
+                "category": "攻击",
+                "element": "武系",
+                "energy": 2,
+                "power": 70,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond"
+                ]
+              },
+              {
+                "skill_id": "skill_000434",
+                "name": "泡沫",
+                "category": "攻击",
+                "element": "水系",
+                "energy": 1,
+                "power": 60,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 46,
+            "new_mechanisms_brought": [
+              "energy",
+              "random"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000591",
+                "name": "集中",
+                "category": "防御",
+                "element": "电系",
+                "energy": 2,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "heal",
+                  "escape"
+                ]
+              },
+              {
+                "skill_id": "skill_000422",
+                "name": "水刃",
+                "category": "攻击",
+                "element": "水系",
+                "energy": 4,
+                "power": 115,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000312",
+                "name": "先发制人",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 2,
+                "power": 55,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000425",
+                "name": "蓄水",
+                "category": "状态",
+                "element": "水系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000566",
+                "name": "升龙咆哮",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 3,
+                "power": 200,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "charge"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000673",
+            "name": "气波",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 0,
+            "power": 40,
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000429",
+            "name": "水泡盾",
+            "category": "防御",
+            "element": "水系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己获得魔攻+70%。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "stat_mod"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000678",
+            "name": "一拳",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 5,
+            "power": 140,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000294",
+            "name": "取念",
+            "category": "状态",
+            "element": "普通系",
+            "energy": 0,
+            "power": null,
+            "damage_class": null,
+            "desc": "每回合随机变成敌方任意精灵的技能，且该技能能耗-2。",
+            "mechanisms": [
+              "energy",
+              "random"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "7 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s2-2026-05-21",
+            "kind": "changed",
+            "change_count": 6
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000445",
+      "group": "A",
+      "order": 3,
+      "name": "黑猫巫师",
+      "title": "黑猫巫师",
+      "game_id": 3569,
+      "number": "122",
+      "types": [
+        "普通系"
+      ],
+      "stats": {
+        "hp": 149,
+        "atk": 53,
+        "def": 90,
+        "spa": 124,
+        "spd": 129,
+        "spe": 70
+      },
+      "stat_total": 615,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "节奏与魔法增益",
+      "trait": {
+        "skill_id": "skill_000123",
+        "name": "预警",
+        "desc": "若敌方技能足够击败自己，回合开始时自己获得速度+50。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_7d180f57f514",
+        "native": 13,
+        "blood": 18,
+        "stones": 14,
+        "pool_size": 45,
+        "native_pool_size": 13,
+        "by_category": {
+          "状态": 28,
+          "攻击": 13,
+          "防御": 4
+        },
+        "with_static_power": 13,
+        "without_static_power": 32,
+        "dynamic_or_conditional_power": 3,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "普通系",
+          "resist": [
+            {
+              "type": "幽系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "武系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "普通系",
+          "resist": [
+            {
+              "type": "幽系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "武系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "下一轮为 A 组所选 4 技能实现效果原语并通过 microcase 后升为 SIM_PARTIAL。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000321",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000251",
+          "mechanism_support": "skill_000483"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000327",
+                "name": "嗜痛",
+                "category": "防御",
+                "element": "普通系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "stat_mod"
+                ]
+              }
+            ]
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 4,
+            "alternatives": [
+              {
+                "skill_id": "skill_000305",
+                "name": "许愿星",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 3,
+                "power": 110,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000303",
+                "name": "拍击",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 1,
+                "power": 65,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000260",
+                "name": "乱打",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 4,
+                "power": 25,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 42,
+            "new_mechanisms_brought": [
+              "stat_mod",
+              "position"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000588",
+                "name": "麻痹",
+                "category": "状态",
+                "element": "电系",
+                "energy": 2,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "stat_mod",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000758",
+                "name": "魔镜",
+                "category": "状态",
+                "element": "幽系",
+                "energy": 2,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "energy",
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000289",
+                "name": "无畏之心",
+                "category": "防御",
+                "element": "普通系",
+                "energy": 5,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "heal",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000260",
+                "name": "乱打",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 4,
+                "power": 25,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              },
+              {
+                "skill_id": "skill_000284",
+                "name": "精神扰乱",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 0,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "energy"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000321",
+            "name": "彗星",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 0,
+            "power": 240,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，每失去5%生命，本次技能威力-10，使用后消耗全部生命。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000251",
+            "name": "音爆",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 4,
+            "power": 130,
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000483",
+            "name": "啮合传递",
+            "category": "状态",
+            "element": "机械系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+            "mechanisms": [
+              "stat_mod",
+              "position"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "3 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s2-2026-05-21",
+            "kind": "changed",
+            "change_count": 10
+          },
+          {
+            "version_key": "s3-2026-07-17",
+            "kind": "changed",
+            "change_count": 2
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000417",
+      "group": "A",
+      "order": 4,
+      "name": "圆号鱼",
+      "title": "圆号鱼",
+      "game_id": 3530,
+      "number": "184",
+      "types": [
+        "水系"
+      ],
+      "stats": {
+        "hp": 113,
+        "atk": 31,
+        "def": 95,
+        "spa": 95,
+        "spd": 110,
+        "spe": 105
+      },
+      "stat_total": 549,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "水系输出与资源节奏",
+      "trait": {
+        "skill_id": "skill_000127",
+        "name": "泛音列",
+        "desc": "使用状态技能后，敌方获得「聒噪」技能的效果，持续3回合。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_ca8baabd57b8",
+        "native": 13,
+        "blood": 18,
+        "stones": 14,
+        "pool_size": 45,
+        "native_pool_size": 13,
+        "by_category": {
+          "状态": 30,
+          "攻击": 13,
+          "防御": 2
+        },
+        "with_static_power": 13,
+        "without_static_power": 32,
+        "dynamic_or_conditional_power": 1,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "水系",
+          "resist": [
+            {
+              "type": "火系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "机械系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "草系",
+              "multiplier": 2
+            },
+            {
+              "type": "电系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "水系",
+          "resist": [
+            {
+              "type": "火系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "机械系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "草系",
+              "multiplier": 2
+            },
+            {
+              "type": "电系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "下一轮为 A 组所选 4 技能实现效果原语并通过 microcase 后升为 SIM_PARTIAL。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000418",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000305",
+          "mechanism_support": "skill_000483"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000428",
+                "name": "泡沫幻影",
+                "category": "防御",
+                "element": "水系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "escape"
+                ]
+              }
+            ]
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 4,
+            "alternatives": [
+              {
+                "skill_id": "skill_000421",
+                "name": "水炮",
+                "category": "攻击",
+                "element": "水系",
+                "energy": 5,
+                "power": 110,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000440",
+                "name": "涌泉",
+                "category": "攻击",
+                "element": "水系",
+                "energy": 6,
+                "power": 90,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000435",
+                "name": "肥皂泡",
+                "category": "攻击",
+                "element": "水系",
+                "energy": 1,
+                "power": 60,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 42,
+            "new_mechanisms_brought": [
+              "stat_mod",
+              "position"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000588",
+                "name": "麻痹",
+                "category": "状态",
+                "element": "电系",
+                "energy": 2,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "stat_mod",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000428",
+                "name": "泡沫幻影",
+                "category": "防御",
+                "element": "水系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "escape"
+                ]
+              },
+              {
+                "skill_id": "skill_000426",
+                "name": "打湿",
+                "category": "状态",
+                "element": "水系",
+                "energy": 4,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "mark"
+                ]
+              },
+              {
+                "skill_id": "skill_000424",
+                "name": "润泽",
+                "category": "状态",
+                "element": "水系",
+                "energy": 7,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000566",
+                "name": "升龙咆哮",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 3,
+                "power": 200,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "charge"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000418",
+            "name": "甩水",
+            "category": "攻击",
+            "element": "水系",
+            "energy": 0,
+            "power": 30,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000305",
+            "name": "许愿星",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 3,
+            "power": 110,
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000483",
+            "name": "啮合传递",
+            "category": "状态",
+            "element": "机械系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+            "mechanisms": [
+              "stat_mod",
+              "position"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "1 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s2-2026-05-21",
+            "kind": "changed",
+            "change_count": 5
+          },
+          {
+            "version_key": "s4-2026-09-10",
+            "kind": "changed",
+            "change_count": 1
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000112",
+      "group": "A",
+      "order": 5,
+      "name": "雪影娃娃",
+      "title": "雪影娃娃",
+      "game_id": 3123,
+      "number": "144",
+      "types": [
+        "冰系",
+        "萌系"
+      ],
+      "stats": {
+        "hp": 130,
+        "atk": 103,
+        "def": 66,
+        "spa": 98,
+        "spd": 130,
+        "spe": 90
+      },
+      "stat_total": 617,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "冰系控制",
+      "trait": {
+        "skill_id": "skill_000039",
+        "name": "捉迷藏",
+        "desc": "使敌方获得冻结时，也会使其获得全技能能耗+1。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_ae3e9c322f63",
+        "native": 16,
+        "blood": 18,
+        "stones": 16,
+        "pool_size": 50,
+        "native_pool_size": 16,
+        "by_category": {
+          "防御": 3,
+          "攻击": 17,
+          "状态": 30
+        },
+        "with_static_power": 17,
+        "without_static_power": 33,
+        "dynamic_or_conditional_power": 3,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "冰系|萌系",
+          "resist": [
+            {
+              "type": "水系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "光系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "冰系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "机械系",
+              "multiplier": 3
+            },
+            {
+              "type": "火系",
+              "multiplier": 2
+            },
+            {
+              "type": "地系",
+              "multiplier": 2
+            },
+            {
+              "type": "毒系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "冰系",
+          "resist": [
+            {
+              "type": "水系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "光系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "冰系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "火系",
+              "multiplier": 2
+            },
+            {
+              "type": "地系",
+              "multiplier": 2
+            },
+            {
+              "type": "武系",
+              "multiplier": 2
+            },
+            {
+              "type": "机械系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "萌系",
+          "resist": [
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "毒系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            },
+            {
+              "type": "机械系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "下一轮为 A 组所选 4 技能实现效果原语并通过 microcase 后升为 SIM_PARTIAL。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000529",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000717",
+          "mechanism_support": "skill_000483"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000540",
+                "name": "冰墙",
+                "category": "防御",
+                "element": "冰系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "status_dot"
+                ]
+              }
+            ]
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 7,
+            "alternatives": [
+              {
+                "skill_id": "skill_000531",
+                "name": "冰晶坠",
+                "category": "攻击",
+                "element": "冰系",
+                "energy": 4,
+                "power": 90,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000530",
+                "name": "暴风雪",
+                "category": "攻击",
+                "element": "冰系",
+                "energy": 3,
+                "power": 85,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "status_dot"
+                ]
+              },
+              {
+                "skill_id": "skill_000316",
+                "name": "当头棒喝",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 3,
+                "power": 80,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000724",
+                "name": "破罐破摔",
+                "category": "攻击",
+                "element": "萌系",
+                "energy": 3,
+                "power": 80,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000549",
+                "name": "碎冰冰",
+                "category": "攻击",
+                "element": "冰系",
+                "energy": 3,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "status_dot"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 47,
+            "new_mechanisms_brought": [
+              "stat_mod",
+              "position"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000588",
+                "name": "麻痹",
+                "category": "状态",
+                "element": "电系",
+                "energy": 2,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "stat_mod",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000530",
+                "name": "暴风雪",
+                "category": "攻击",
+                "element": "冰系",
+                "energy": 3,
+                "power": 85,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "status_dot"
+                ]
+              },
+              {
+                "skill_id": "skill_000549",
+                "name": "碎冰冰",
+                "category": "攻击",
+                "element": "冰系",
+                "energy": 3,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "status_dot"
+                ]
+              },
+              {
+                "skill_id": "skill_000728",
+                "name": "撒娇",
+                "category": "攻击",
+                "element": "萌系",
+                "energy": 3,
+                "power": 30,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              },
+              {
+                "skill_id": "skill_000535",
+                "name": "霜降",
+                "category": "状态",
+                "element": "冰系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "status_dot"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000529",
+            "name": "风吹雪",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 0,
+            "power": 30,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000717",
+            "name": "超级糖果",
+            "category": "攻击",
+            "element": "萌系",
+            "energy": 3,
+            "power": 100,
+            "damage_class": "物攻",
+            "desc": "造成物伤，自己获得萌化：本次技能威力+60。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000483",
+            "name": "啮合传递",
+            "category": "状态",
+            "element": "机械系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+            "mechanisms": [
+              "stat_mod",
+              "position"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "3 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s2-2026-05-21",
+            "kind": "changed",
+            "change_count": 2
+          },
+          {
+            "version_key": "s3-2026-08-18",
+            "kind": "changed",
+            "change_count": 1
+          },
+          {
+            "version_key": "s4-2026-09-10",
+            "kind": "changed",
+            "change_count": 2
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000062",
+      "group": "A",
+      "order": 6,
+      "name": "音速犬",
+      "title": "音速犬",
+      "game_id": 3071,
+      "number": "048",
+      "types": [
+        "火系"
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 116,
+        "def": 101,
+        "spa": 38,
+        "spd": 82,
+        "spe": 120
+      },
+      "stat_total": 542,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "火系高速进攻",
+      "trait": {
+        "skill_id": "skill_000067",
+        "name": "专注力",
+        "desc": "入场首回合，获得物攻+100%。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_d48a3d9c7167",
+        "native": 13,
+        "blood": 18,
+        "stones": 13,
+        "pool_size": 44,
+        "native_pool_size": 13,
+        "by_category": {
+          "防御": 1,
+          "攻击": 32,
+          "状态": 11
+        },
+        "with_static_power": 32,
+        "without_static_power": 12,
+        "dynamic_or_conditional_power": 8,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "火系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "冰系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "萌系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "机械系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "水系",
+              "multiplier": 2
+            },
+            {
+              "type": "地系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "火系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "冰系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "萌系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "机械系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "水系",
+              "multiplier": 2
+            },
+            {
+              "type": "地系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "下一轮为 A 组所选 4 技能实现效果原语并通过 microcase 后升为 SIM_PARTIAL。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000378",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000392",
+          "mechanism_support": "skill_000408"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 6,
+            "alternatives": [
+              {
+                "skill_id": "skill_000402",
+                "name": "灼伤",
+                "category": "攻击",
+                "element": "火系",
+                "energy": 4,
+                "power": 120,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000382",
+                "name": "流星火雨",
+                "category": "攻击",
+                "element": "火系",
+                "energy": 3,
+                "power": 85,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000316",
+                "name": "当头棒喝",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 3,
+                "power": 80,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000379",
+                "name": "闪燃",
+                "category": "攻击",
+                "element": "火系",
+                "energy": 1,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond"
+                ]
+              },
+              {
+                "skill_id": "skill_000385",
+                "name": "高温回火",
+                "category": "攻击",
+                "element": "火系",
+                "energy": 2,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "escape"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 41,
+            "new_mechanisms_brought": [
+              "mark",
+              "status_dot"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000599",
+                "name": "过载回路",
+                "category": "状态",
+                "element": "电系",
+                "energy": 1,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "heal",
+                  "escape"
+                ]
+              },
+              {
+                "skill_id": "skill_000588",
+                "name": "麻痹",
+                "category": "状态",
+                "element": "电系",
+                "energy": 2,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "stat_mod",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000385",
+                "name": "高温回火",
+                "category": "攻击",
+                "element": "火系",
+                "energy": 2,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "escape"
+                ]
+              },
+              {
+                "skill_id": "skill_000271",
+                "name": "力量增效",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000404",
+                "name": "怒火",
+                "category": "状态",
+                "element": "火系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "stat_mod"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000378",
+            "name": "火苗",
+            "category": "攻击",
+            "element": "火系",
+            "energy": 0,
+            "power": 30,
+            "damage_class": "物攻",
+            "desc": "造成物伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000392",
+            "name": "火云车",
+            "category": "攻击",
+            "element": "火系",
+            "energy": 5,
+            "power": 140,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000408",
+            "name": "焚烧烙印",
+            "category": "状态",
+            "element": "火系",
+            "energy": 3,
+            "power": null,
+            "damage_class": null,
+            "desc": "驱散双方所有印记，每驱散1层，敌方获得5层灼烧。",
+            "mechanisms": [
+              "mark",
+              "status_dot"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "8 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s4-2026-09-10",
+            "kind": "changed",
+            "change_count": 5
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000474",
+      "group": "B",
+      "order": 7,
+      "name": "画间沉铁兽",
+      "title": "画间沉铁兽",
+      "game_id": 3609,
+      "number": "302",
+      "types": [
+        "普通系",
+        "武系"
+      ],
+      "stats": {
+        "hp": 126,
+        "atk": 147,
+        "def": 100,
+        "spa": 63,
+        "spd": 76,
+        "spe": 92
+      },
+      "stat_total": 604,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "复杂形态 / 承伤机制",
+      "trait": {
+        "skill_id": "skill_000141",
+        "name": "变形活画",
+        "desc": "行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_87c8775aa30f",
+        "native": 16,
+        "blood": 18,
+        "stones": 24,
+        "pool_size": 58,
+        "native_pool_size": 16,
+        "by_category": {
+          "攻击": 42,
+          "状态": 14,
+          "防御": 2
+        },
+        "with_static_power": 42,
+        "without_static_power": 16,
+        "dynamic_or_conditional_power": 13,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "普通系|武系",
+          "resist": [
+            {
+              "type": "地系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "幽系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "恶系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "武系",
+              "multiplier": 2
+            },
+            {
+              "type": "翼系",
+              "multiplier": 2
+            },
+            {
+              "type": "萌系",
+              "multiplier": 2
+            },
+            {
+              "type": "幻系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "普通系",
+          "resist": [
+            {
+              "type": "幽系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "武系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "武系",
+          "resist": [
+            {
+              "type": "地系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "恶系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "翼系",
+              "multiplier": 2
+            },
+            {
+              "type": "萌系",
+              "multiplier": 2
+            },
+            {
+              "type": "幻系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "KNOWLEDGE_ONLY",
+        "target_note": "B 组进入战斗前需先建立其形态/承伤机制；本轮只做知识库。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000741",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000248",
+          "mechanism_support": "skill_000670"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000265",
+                "name": "魔能爆",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 0,
+                "power": 1,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "energy"
+                ]
+              }
+            ]
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 9,
+            "alternatives": [
+              {
+                "skill_id": "skill_000305",
+                "name": "许愿星",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 3,
+                "power": 110,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000677",
+                "name": "影袭",
+                "category": "攻击",
+                "element": "武系",
+                "energy": 3,
+                "power": 100,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000249",
+                "name": "扫尾",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 2,
+                "power": 90,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000666",
+                "name": "截拳",
+                "category": "攻击",
+                "element": "武系",
+                "energy": 3,
+                "power": 85,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000685",
+                "name": "回旋踢",
+                "category": "攻击",
+                "element": "武系",
+                "energy": 3,
+                "power": 80,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 55,
+            "new_mechanisms_brought": [
+              "heal",
+              "stat_mod"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000312",
+                "name": "先发制人",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 2,
+                "power": 55,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000664",
+                "name": "反击拳",
+                "category": "攻击",
+                "element": "武系",
+                "energy": 2,
+                "power": 25,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              },
+              {
+                "skill_id": "skill_000272",
+                "name": "魔法增效",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 0,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000271",
+                "name": "力量增效",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000282",
+                "name": "应激反应",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "heal"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000741",
+            "name": "鬼火",
+            "category": "攻击",
+            "element": "幽系",
+            "energy": 0,
+            "power": 30,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000248",
+            "name": "飞踢",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 3,
+            "power": 110,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000670",
+            "name": "气沉丹田",
+            "category": "状态",
+            "element": "武系",
+            "energy": 10,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己回复60%生命，获得物攻+130%，每次应对后本技能能耗-3，使用后能耗重置。",
+            "mechanisms": [
+              "heal",
+              "energy",
+              "stat_mod"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "13 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s2-2026-05-21",
+            "kind": "changed",
+            "change_count": 5
+          },
+          {
+            "version_key": "s3-2026-07-17",
+            "kind": "changed",
+            "change_count": 5
+          },
+          {
+            "version_key": "s4-2026-09-10",
+            "kind": "changed",
+            "change_count": 1
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000451",
+      "group": "B",
+      "order": 8,
+      "name": "秩序鱿墨",
+      "title": "秩序鱿墨",
+      "game_id": 3579,
+      "number": "282",
+      "types": [
+        "幽系",
+        "萌系"
+      ],
+      "stats": {
+        "hp": 78,
+        "atk": 120,
+        "def": 124,
+        "spa": 39,
+        "spd": 113,
+        "spe": 130
+      },
+      "stat_total": 604,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "控制 / 场面约束",
+      "trait": {
+        "skill_id": "skill_000158",
+        "name": "绝对秩序",
+        "desc": "受到非敌方系别的技能攻击时伤害-50%。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_37d460cb4d20",
+        "native": 16,
+        "blood": 18,
+        "stones": 17,
+        "pool_size": 51,
+        "native_pool_size": 16,
+        "by_category": {
+          "攻击": 23,
+          "状态": 10,
+          "防御": 18
+        },
+        "with_static_power": 23,
+        "without_static_power": 28,
+        "dynamic_or_conditional_power": 9,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "幽系|萌系",
+          "resist": [
+            {
+              "type": "虫系",
+              "multiplier": 0.25
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.25
+            },
+            {
+              "type": "普通系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "恶系",
+              "multiplier": 3
+            },
+            {
+              "type": "光系",
+              "multiplier": 2
+            },
+            {
+              "type": "幽系",
+              "multiplier": 2
+            },
+            {
+              "type": "机械系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "幽系",
+          "resist": [
+            {
+              "type": "普通系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "毒系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "光系",
+              "multiplier": 2
+            },
+            {
+              "type": "幽系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "萌系",
+          "resist": [
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "毒系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            },
+            {
+              "type": "机械系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "KNOWLEDGE_ONLY",
+        "target_note": "B 组进入战斗前需先建立其形态/承伤机制；本轮只做知识库。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000750",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000744",
+          "mechanism_support": "skill_000591"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000725",
+                "name": "鞭打",
+                "category": "攻击",
+                "element": "萌系",
+                "energy": 0,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 4,
+            "alternatives": [
+              {
+                "skill_id": "skill_000757",
+                "name": "虚化",
+                "category": "防御",
+                "element": "幽系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000732",
+                "name": "捧杀",
+                "category": "防御",
+                "element": "萌系",
+                "energy": 4,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield"
+                ]
+              },
+              {
+                "skill_id": "skill_000289",
+                "name": "无畏之心",
+                "category": "防御",
+                "element": "普通系",
+                "energy": 5,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "heal",
+                  "energy"
+                ]
+              }
+            ]
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 7,
+            "alternatives": [
+              {
+                "skill_id": "skill_000717",
+                "name": "超级糖果",
+                "category": "攻击",
+                "element": "萌系",
+                "energy": 3,
+                "power": 100,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000785",
+                "name": "诋毁",
+                "category": "攻击",
+                "element": "恶系",
+                "energy": 2,
+                "power": 80,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000267",
+                "name": "能量刃",
+                "category": "攻击",
+                "element": "普通系",
+                "energy": 3,
+                "power": 80,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000751",
+                "name": "幻象",
+                "category": "攻击",
+                "element": "幽系",
+                "energy": 1,
+                "power": 60,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000725",
+                "name": "鞭打",
+                "category": "攻击",
+                "element": "萌系",
+                "energy": 0,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 48,
+            "new_mechanisms_brought": [
+              "heal",
+              "escape"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000746",
+                "name": "降灵",
+                "category": "状态",
+                "element": "幽系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "mark"
+                ]
+              },
+              {
+                "skill_id": "skill_000757",
+                "name": "虚化",
+                "category": "防御",
+                "element": "幽系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000723",
+                "name": "甜心续航",
+                "category": "状态",
+                "element": "萌系",
+                "energy": 3,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "heal"
+                ]
+              },
+              {
+                "skill_id": "skill_000289",
+                "name": "无畏之心",
+                "category": "防御",
+                "element": "普通系",
+                "energy": 5,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "heal",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000566",
+                "name": "升龙咆哮",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 3,
+                "power": 200,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "charge"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000750",
+            "name": "诡刺",
+            "category": "攻击",
+            "element": "幽系",
+            "energy": 0,
+            "power": 40,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000744",
+            "name": "坟场搏击",
+            "category": "攻击",
+            "element": "幽系",
+            "energy": 4,
+            "power": 180,
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方每有1能量，本次技能威力-10%。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000591",
+            "name": "集中",
+            "category": "防御",
+            "element": "电系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己回合结束返场。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "heal",
+              "escape"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "9 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s2-2026-05-21",
+            "kind": "changed",
+            "change_count": 2
+          },
+          {
+            "version_key": "s3-2026-07-17",
+            "kind": "changed",
+            "change_count": 1
+          },
+          {
+            "version_key": "s4-2026-09-10",
+            "kind": "changed",
+            "change_count": 2
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000124",
+      "group": "B",
+      "order": 9,
+      "name": "化蝶",
+      "title": "化蝶（平常的样子）",
+      "game_id": 3138,
+      "number": "034",
+      "types": [
+        "虫系",
+        "萌系"
+      ],
+      "stats": {
+        "hp": 53,
+        "atk": 46,
+        "def": 66,
+        "spa": 46,
+        "spd": 66,
+        "spe": 100
+      },
+      "stat_total": 377,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role_hint": "减速 / 回复 / 辅助",
+      "trait": {
+        "skill_id": "skill_000104",
+        "name": "化茧",
+        "desc": "受到致命伤害时，获得1层萌化，并免疫此次伤害。（最多触发2次）",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_ba9df96a104e",
+        "native": 15,
+        "blood": 18,
+        "stones": 16,
+        "pool_size": 49,
+        "native_pool_size": 15,
+        "by_category": {
+          "攻击": 15,
+          "状态": 31,
+          "防御": 3
+        },
+        "with_static_power": 15,
+        "without_static_power": 34,
+        "dynamic_or_conditional_power": 2,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "虫系|萌系",
+          "resist": [
+            {
+              "type": "武系",
+              "multiplier": 0.25
+            },
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "火系",
+              "multiplier": 2
+            },
+            {
+              "type": "毒系",
+              "multiplier": 2
+            },
+            {
+              "type": "翼系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            },
+            {
+              "type": "机械系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "虫系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "火系",
+              "multiplier": 2
+            },
+            {
+              "type": "翼系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "萌系",
+          "resist": [
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "毒系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            },
+            {
+              "type": "机械系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "KNOWLEDGE_ONLY",
+        "target_note": "B 组进入战斗前需先建立其形态/承伤机制；本轮只做知识库。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000645",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000311",
+          "mechanism_support": "skill_000294"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000644",
+                "name": "掩护",
+                "category": "防御",
+                "element": "虫系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "respond",
+                  "shield",
+                  "escape"
+                ]
+              }
+            ]
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 7,
+            "alternatives": [
+              {
+                "skill_id": "skill_000729",
+                "name": "爆米花爆破",
+                "category": "攻击",
+                "element": "萌系",
+                "energy": 5,
+                "power": 140,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000649",
+                "name": "虫蛊",
+                "category": "攻击",
+                "element": "虫系",
+                "energy": 3,
+                "power": 100,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000717",
+                "name": "超级糖果",
+                "category": "攻击",
+                "element": "萌系",
+                "energy": 3,
+                "power": 100,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000726",
+                "name": "魅惑",
+                "category": "攻击",
+                "element": "萌系",
+                "energy": 1,
+                "power": 60,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000647",
+                "name": "噬心",
+                "category": "攻击",
+                "element": "虫系",
+                "energy": 1,
+                "power": 60,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 46,
+            "new_mechanisms_brought": [
+              "energy",
+              "random"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000483",
+                "name": "啮合传递",
+                "category": "状态",
+                "element": "机械系",
+                "energy": 1,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "stat_mod",
+                  "position"
+                ]
+              },
+              {
+                "skill_id": "skill_000588",
+                "name": "麻痹",
+                "category": "状态",
+                "element": "电系",
+                "energy": 2,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "stat_mod",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000646",
+                "name": "虫刺",
+                "category": "攻击",
+                "element": "虫系",
+                "energy": 1,
+                "power": 15,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              },
+              {
+                "skill_id": "skill_000641",
+                "name": "虫茧",
+                "category": "状态",
+                "element": "虫系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "heal"
+                ]
+              },
+              {
+                "skill_id": "skill_000652",
+                "name": "食腐",
+                "category": "状态",
+                "element": "虫系",
+                "energy": 2,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "mark"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000645",
+            "name": "蛰针",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 0,
+            "power": 40,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000311",
+            "name": "打鼾",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 6,
+            "power": 165,
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000294",
+            "name": "取念",
+            "category": "状态",
+            "element": "普通系",
+            "energy": 0,
+            "power": null,
+            "damage_class": null,
+            "desc": "每回合随机变成敌方任意精灵的技能，且该技能能耗-2。",
+            "mechanisms": [
+              "energy",
+              "random"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "2 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s2-2026-05-21",
+            "kind": "changed",
+            "change_count": 4
+          },
+          {
+            "version_key": "s3-2026-07-17",
+            "kind": "changed",
+            "change_count": 1
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000608",
+      "group": "C",
+      "order": 10,
+      "name": "银月狼王",
+      "title": "银月狼王",
+      "game_id": 3763,
+      "number": "445",
+      "types": [
+        "幽系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 115,
+        "atk": 128,
+        "def": 128,
+        "spa": 51,
+        "spd": 98,
+        "spe": 130
+      },
+      "stat_total": 650,
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "role_hint": "S4 新精灵（机制核验中）",
+      "trait": {
+        "skill_id": "skill_000196",
+        "name": "铭记于月亮",
+        "desc": "获得自己击败的精灵的特性，每次攻击后自己失去5%生命。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_162b16b43e43",
+        "native": 13,
+        "blood": 18,
+        "stones": 15,
+        "pool_size": 46,
+        "native_pool_size": 13,
+        "by_category": {
+          "攻击": 37,
+          "状态": 8,
+          "防御": 1
+        },
+        "with_static_power": 37,
+        "without_static_power": 9,
+        "dynamic_or_conditional_power": 11,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "幽系|幻系",
+          "resist": [
+            {
+              "type": "武系",
+              "multiplier": 0.25
+            },
+            {
+              "type": "普通系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "毒系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "幻系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "幽系",
+              "multiplier": 3
+            },
+            {
+              "type": "光系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "幽系",
+          "resist": [
+            {
+              "type": "普通系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "毒系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "光系",
+              "multiplier": 2
+            },
+            {
+              "type": "幽系",
+              "multiplier": 2
+            },
+            {
+              "type": "恶系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "幻系",
+          "resist": [
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "幻系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "虫系",
+              "multiplier": 2
+            },
+            {
+              "type": "幽系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "CATALOG_ONLY",
+        "target_note": "C 组为 S4 新精灵，先支持图鉴与培养问答；技能/特性/时序未核验前不开放实战。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000750",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000744",
+          "mechanism_support": "skill_000825"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000816",
+                "name": "粒子对撞",
+                "category": "攻击",
+                "element": "幻系",
+                "energy": 0,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 7,
+            "alternatives": [
+              {
+                "skill_id": "skill_000759",
+                "name": "撞鬼",
+                "category": "攻击",
+                "element": "幽系",
+                "energy": 4,
+                "power": 120,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000818",
+                "name": "双星",
+                "category": "攻击",
+                "element": "幻系",
+                "energy": 3,
+                "power": 100,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000742",
+                "name": "惊吓盒子",
+                "category": "攻击",
+                "element": "幽系",
+                "energy": 3,
+                "power": 80,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000764",
+                "name": "掠影",
+                "category": "攻击",
+                "element": "幽系",
+                "energy": 3,
+                "power": 65,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000816",
+                "name": "粒子对撞",
+                "category": "攻击",
+                "element": "幻系",
+                "energy": 0,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 43,
+            "new_mechanisms_brought": [
+              "mark"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000271",
+                "name": "力量增效",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000824",
+                "name": "叠加态",
+                "category": "状态",
+                "element": "幻系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "random"
+                ]
+              },
+              {
+                "skill_id": "skill_000765",
+                "name": "离魂术",
+                "category": "状态",
+                "element": "幽系",
+                "energy": 3,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "energy",
+                  "escape"
+                ]
+              },
+              {
+                "skill_id": "skill_000566",
+                "name": "升龙咆哮",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 3,
+                "power": 200,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "charge"
+                ]
+              },
+              {
+                "skill_id": "skill_000772",
+                "name": "极限撕裂",
+                "category": "攻击",
+                "element": "恶系",
+                "energy": 4,
+                "power": 135,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "stat_mod"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000750",
+            "name": "诡刺",
+            "category": "攻击",
+            "element": "幽系",
+            "energy": 0,
+            "power": 40,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000744",
+            "name": "坟场搏击",
+            "category": "攻击",
+            "element": "幽系",
+            "energy": 4,
+            "power": 180,
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方每有1能量，本次技能威力-10%。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000825",
+            "name": "天体吸积",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 4,
+            "power": 20,
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方每有1层印记，本次攻击威力+20。",
+            "mechanisms": [
+              "damage",
+              "mark"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "11 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s4-2026-09-10",
+            "kind": "introduced",
+            "change_count": 1
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000601",
+      "group": "C",
+      "order": 11,
+      "name": "圣凯布米龙",
+      "title": "圣凯布米龙",
+      "game_id": 3576,
+      "number": "451",
+      "types": [
+        "火系",
+        "虫系"
+      ],
+      "stats": {
+        "hp": 79,
+        "atk": 116,
+        "def": 120,
+        "spa": 29,
+        "spd": 120,
+        "spe": 105
+      },
+      "stat_total": 569,
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "role_hint": "S4 新精灵（机制核验中）",
+      "trait": {
+        "skill_id": "skill_000197",
+        "name": "热成像",
+        "desc": "若上回合双方有精灵使用火系技能，本回合自己携带的虫系技能威力+100%。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_3d550ce8167a",
+        "native": 13,
+        "blood": 18,
+        "stones": 13,
+        "pool_size": 44,
+        "native_pool_size": 13,
+        "by_category": {
+          "攻击": 29,
+          "状态": 12,
+          "防御": 3
+        },
+        "with_static_power": 29,
+        "without_static_power": 15,
+        "dynamic_or_conditional_power": 10,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "priority",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "火系|虫系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.25
+            },
+            {
+              "type": "冰系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "萌系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "机械系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "火系",
+              "multiplier": 2
+            },
+            {
+              "type": "水系",
+              "multiplier": 2
+            },
+            {
+              "type": "地系",
+              "multiplier": 2
+            },
+            {
+              "type": "翼系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "火系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "冰系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "萌系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "机械系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "水系",
+              "multiplier": 2
+            },
+            {
+              "type": "地系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "虫系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "火系",
+              "multiplier": 2
+            },
+            {
+              "type": "翼系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "CATALOG_ONLY",
+        "target_note": "C 组为 S4 新精灵，先支持图鉴与培养问答；技能/特性/时序未核验前不开放实战。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000632",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000399",
+          "mechanism_support": "skill_000483"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 3,
+            "alternatives": [
+              {
+                "skill_id": "skill_000645",
+                "name": "蛰针",
+                "category": "攻击",
+                "element": "虫系",
+                "energy": 0,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000378",
+                "name": "火苗",
+                "category": "攻击",
+                "element": "火系",
+                "energy": 0,
+                "power": 30,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "energy"
+                ]
+              }
+            ]
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 7,
+            "alternatives": [
+              {
+                "skill_id": "skill_000637",
+                "name": "虫击",
+                "category": "攻击",
+                "element": "虫系",
+                "energy": 3,
+                "power": 90,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond"
+                ]
+              },
+              {
+                "skill_id": "skill_000656",
+                "name": "草虫冲击",
+                "category": "攻击",
+                "element": "虫系",
+                "energy": 3,
+                "power": 75,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000416",
+                "name": "暖阳",
+                "category": "攻击",
+                "element": "火系",
+                "energy": 2,
+                "power": 70,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000645",
+                "name": "蛰针",
+                "category": "攻击",
+                "element": "虫系",
+                "energy": 0,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage"
+                ]
+              },
+              {
+                "skill_id": "skill_000379",
+                "name": "闪燃",
+                "category": "攻击",
+                "element": "火系",
+                "energy": 1,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "respond"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 41,
+            "new_mechanisms_brought": [
+              "stat_mod",
+              "position"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000588",
+                "name": "麻痹",
+                "category": "状态",
+                "element": "电系",
+                "energy": 2,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "stat_mod",
+                  "priority"
+                ]
+              },
+              {
+                "skill_id": "skill_000271",
+                "name": "力量增效",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 1,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000642",
+                "name": "虫群智慧",
+                "category": "状态",
+                "element": "虫系",
+                "energy": 3,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "random"
+                ]
+              },
+              {
+                "skill_id": "skill_000417",
+                "name": "星火",
+                "category": "状态",
+                "element": "火系",
+                "energy": 3,
+                "power": null,
+                "from_native": true,
+                "mechanisms": [
+                  "status_dot"
+                ]
+              },
+              {
+                "skill_id": "skill_000566",
+                "name": "升龙咆哮",
+                "category": "攻击",
+                "element": "龙系",
+                "energy": 3,
+                "power": 200,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "charge"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000632",
+            "name": "啃咬",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 0,
+            "power": 40,
+            "damage_class": "物攻",
+            "desc": "造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000399",
+            "name": "火焰切割",
+            "category": "攻击",
+            "element": "火系",
+            "energy": 3,
+            "power": 100,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000483",
+            "name": "啮合传递",
+            "category": "状态",
+            "element": "机械系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+            "mechanisms": [
+              "stat_mod",
+              "position"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "10 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s4-2026-09-10",
+            "kind": "introduced",
+            "change_count": 1
+          }
+        ]
+      }
+    },
+    {
+      "pet_id": "pet_000611",
+      "group": "C",
+      "order": 12,
+      "name": "月使鹭纳",
+      "title": "月使鹭纳",
+      "game_id": 3766,
+      "number": "448",
+      "types": [
+        "翼系",
+        "冰系"
+      ],
+      "stats": {
+        "hp": 83,
+        "atk": 99,
+        "def": 104,
+        "spa": 100,
+        "spd": 113,
+        "spe": 115
+      },
+      "stat_total": 614,
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "role_hint": "S4 新精灵（机制核验中）",
+      "trait": {
+        "skill_id": "skill_000198",
+        "name": "冷光源",
+        "desc": "若上回合双方有精灵使用翼系技能，本回合自己携带的冰系技能威力+100%。",
+        "effect_support": "unsupported"
+      },
+      "learnset": {
+        "learnset_id": "learnset_da630e35c0e9",
+        "native": 15,
+        "blood": 18,
+        "stones": 16,
+        "pool_size": 49,
+        "native_pool_size": 15,
+        "by_category": {
+          "攻击": 24,
+          "状态": 21,
+          "防御": 4
+        },
+        "with_static_power": 24,
+        "without_static_power": 25,
+        "dynamic_or_conditional_power": 9,
+        "distinct_mechanisms": [
+          "charge",
+          "damage",
+          "energy",
+          "escape",
+          "heal",
+          "mark",
+          "multi_hit",
+          "position",
+          "random",
+          "respond",
+          "shield",
+          "stat_mod",
+          "status_dot"
+        ],
+        "orphan_skill_refs": []
+      },
+      "defensive_profile": [
+        {
+          "key": "翼系|冰系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "水系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "光系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "火系",
+              "multiplier": 2
+            },
+            {
+              "type": "地系",
+              "multiplier": 2
+            },
+            {
+              "type": "电系",
+              "multiplier": 2
+            },
+            {
+              "type": "机械系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "翼系",
+          "resist": [
+            {
+              "type": "草系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "虫系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "武系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "冰系",
+              "multiplier": 2
+            },
+            {
+              "type": "电系",
+              "multiplier": 2
+            }
+          ]
+        },
+        {
+          "key": "冰系",
+          "resist": [
+            {
+              "type": "水系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "光系",
+              "multiplier": 0.5
+            },
+            {
+              "type": "冰系",
+              "multiplier": 0.5
+            }
+          ],
+          "weak": [
+            {
+              "type": "火系",
+              "multiplier": 2
+            },
+            {
+              "type": "地系",
+              "multiplier": 2
+            },
+            {
+              "type": "武系",
+              "multiplier": 2
+            },
+            {
+              "type": "机械系",
+              "multiplier": 2
+            }
+          ]
+        }
+      ],
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。",
+        "target_next": "CATALOG_ONLY",
+        "target_note": "C 组为 S4 新精灵，先支持图鉴与培养问答；技能/特性/时序未核验前不开放实战。"
+      },
+      "candidate_moveset": {
+        "note": "在数据中真实存在、且机制覆盖互不重复的一组 4 技能；**不是**最优解、不是社区推荐、不是胜率结果。选择规则见 scripts/roco/build-support-matrix.mjs。",
+        "roles_filled": {
+          "free_attack": "skill_000541",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000700",
+          "mechanism_support": "skill_000808"
+        },
+        "selection_evidence": {
+          "free_attack": {
+            "rule": "predicate + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 2,
+            "alternatives": [
+              {
+                "skill_id": "skill_000686",
+                "name": "啄击",
+                "category": "攻击",
+                "element": "翼系",
+                "energy": 0,
+                "power": 15,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              }
+            ]
+          },
+          "reactive_defense": {
+            "rule": "predicate + sort(power desc, energy asc, name asc)",
+            "source_pool": "native_learnset",
+            "considered": 1,
+            "alternatives": []
+          },
+          "main_attack": {
+            "rule": "predicate(攻击类且有静态威力) + sort(power desc, energy asc)",
+            "source_pool": "native_learnset",
+            "considered": 7,
+            "alternatives": [
+              {
+                "skill_id": "skill_000531",
+                "name": "冰晶坠",
+                "category": "攻击",
+                "element": "冰系",
+                "energy": 4,
+                "power": 90,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000711",
+                "name": "飞箭",
+                "category": "攻击",
+                "element": "翼系",
+                "energy": 3,
+                "power": 40,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              },
+              {
+                "skill_id": "skill_000713",
+                "name": "月影交错",
+                "category": "攻击",
+                "element": "翼系",
+                "energy": 2,
+                "power": 25,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              },
+              {
+                "skill_id": "skill_000689",
+                "name": "疾风刺",
+                "category": "攻击",
+                "element": "翼系",
+                "energy": 2,
+                "power": 25,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              },
+              {
+                "skill_id": "skill_000686",
+                "name": "啄击",
+                "category": "攻击",
+                "element": "翼系",
+                "energy": 0,
+                "power": 15,
+                "from_native": true,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit"
+                ]
+              }
+            ]
+          },
+          "mechanism_support": {
+            "rule": "maximize(new mechanisms not yet covered), tie-break: native first, then power desc, energy asc",
+            "source_pool": "full_pool(native+blood+stones)",
+            "considered": 46,
+            "new_mechanisms_brought": [
+              "multi_hit",
+              "mark"
+            ],
+            "alternatives": [
+              {
+                "skill_id": "skill_000294",
+                "name": "取念",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 0,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "energy",
+                  "random"
+                ]
+              },
+              {
+                "skill_id": "skill_000323",
+                "name": "三连破",
+                "category": "状态",
+                "element": "普通系",
+                "energy": 1,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit",
+                  "stat_mod"
+                ]
+              },
+              {
+                "skill_id": "skill_000550",
+                "name": "冰捆缚",
+                "category": "状态",
+                "element": "冰系",
+                "energy": 3,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit",
+                  "energy"
+                ]
+              },
+              {
+                "skill_id": "skill_000812",
+                "name": "星链",
+                "category": "状态",
+                "element": "幻系",
+                "energy": 3,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "damage",
+                  "multi_hit",
+                  "mark"
+                ]
+              },
+              {
+                "skill_id": "skill_000538",
+                "name": "霜天",
+                "category": "状态",
+                "element": "冰系",
+                "energy": 4,
+                "power": null,
+                "from_native": false,
+                "mechanisms": [
+                  "energy",
+                  "status_dot"
+                ]
+              }
+            ]
+          }
+        },
+        "skills": [
+          {
+            "skill_id": "skill_000541",
+            "name": "冰锥",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 0,
+            "power": 40,
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "free_attack"
+          },
+          {
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "reactive_defense"
+          },
+          {
+            "skill_id": "skill_000700",
+            "name": "回旋风暴",
+            "category": "攻击",
+            "element": "翼系",
+            "energy": 3,
+            "power": 100,
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "main_attack"
+          },
+          {
+            "skill_id": "skill_000808",
+            "name": "多维击打",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 4,
+            "power": 15,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "mark"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "mechanism_support"
+          }
+        ],
+        "missing_roles": []
+      },
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现",
+        "9 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
+        "「防御」类技能是条件护盾（减伤%+应对效果），不是简单减伤，时序未核验",
+        "存在印记机制，叠加/持续/清除规则未核验",
+        "存在蓄力机制，「下次免蓄力」的消耗规则未核验",
+        "等级→面板换算公式未知（性格/天分/血脉影响未知）",
+        "官方伤害公式无来源，属 unknown"
+      ],
+      "history": {
+        "changes": [
+          {
+            "version_key": "s4-2026-09-10",
+            "kind": "introduced",
+            "change_count": 1
+          }
+        ]
+      }
+    }
+  ]
+}

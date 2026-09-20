@@ -1,0 +1,605 @@
+{
+  "schema_version": 1,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "season": "S4",
+  "source_id": "wiki-rocom-snapshot",
+  "source_revision": "aff808eb60003457fe8a260d1ac3c9bd95d53872",
+  "pet_count": 12,
+  "pets": {
+    "pet_000225": {
+      "pet_id": "pet_000225",
+      "name": "寂灭骨龙",
+      "title": "寂灭骨龙",
+      "form": null,
+      "game_id": 3269,
+      "number": "290",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "龙系",
+        "幽系"
+      ],
+      "stats": {
+        "hp": 120,
+        "atk": 137,
+        "def": 104,
+        "spa": 50,
+        "spd": 81,
+        "spe": 60
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000129",
+      "learnset_id": "learnset_e1c7b7e68094",
+      "siblings": {},
+      "image": {
+        "egg": "Item_107104.png",
+        "fruits": {
+          "1": "Item_108104.png"
+        },
+        "has_egg": true,
+        "has_fruit": true,
+        "head": "PetAvatar_3269.png",
+        "illustration": "PetPortrait_jimiegulong.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "A",
+        "order": 1
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000190": {
+      "pet_id": "pet_000190",
+      "name": "海豹船长",
+      "title": "海豹船长",
+      "form": null,
+      "game_id": 3216,
+      "number": "182",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "武系",
+        "水系"
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 113,
+        "def": 111,
+        "spa": 109,
+        "spd": 77,
+        "spe": 100
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000091",
+      "learnset_id": "learnset_44835ae2b88f",
+      "siblings": {},
+      "image": {
+        "egg": "Item_107083.png",
+        "fruits": {
+          "1": "Item_108083.png"
+        },
+        "has_egg": true,
+        "has_fruit": true,
+        "head": "PetAvatar_3216.png",
+        "illustration": "PetPortrait_haibaochuangzhang.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "A",
+        "order": 2
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000445": {
+      "pet_id": "pet_000445",
+      "name": "黑猫巫师",
+      "title": "黑猫巫师",
+      "form": null,
+      "game_id": 3569,
+      "number": "122",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "普通系"
+      ],
+      "stats": {
+        "hp": 149,
+        "atk": 53,
+        "def": 90,
+        "spa": 124,
+        "spd": 129,
+        "spe": 70
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000123",
+      "learnset_id": "learnset_7d180f57f514",
+      "siblings": {
+        "1": "pet_000540"
+      },
+      "image": {
+        "egg": "Item_107196.png",
+        "fruits": {
+          "1": "Item_108179.png"
+        },
+        "has_egg": true,
+        "has_fruit": true,
+        "head": "PetAvatar_3569.png",
+        "illustration": "PetPortrait_heimaowushi.png",
+        "shiny": "PetPortrait_img_Com_HeiMao2_101_Res.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "A",
+        "order": 3
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000417": {
+      "pet_id": "pet_000417",
+      "name": "圆号鱼",
+      "title": "圆号鱼",
+      "form": null,
+      "game_id": 3530,
+      "number": "184",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "水系"
+      ],
+      "stats": {
+        "hp": 113,
+        "atk": 31,
+        "def": 95,
+        "spa": 95,
+        "spd": 110,
+        "spe": 105
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000127",
+      "learnset_id": "learnset_ca8baabd57b8",
+      "siblings": {},
+      "image": {
+        "egg": "Item_107187.png",
+        "fruits": {
+          "1": "Item_108172.png"
+        },
+        "has_egg": true,
+        "has_fruit": true,
+        "head": "PetAvatar_3530.png",
+        "illustration": "PetPortrait_diyinhaoyu.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "A",
+        "order": 4
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000112": {
+      "pet_id": "pet_000112",
+      "name": "雪影娃娃",
+      "title": "雪影娃娃",
+      "form": null,
+      "game_id": 3123,
+      "number": "144",
+      "class": "冰冰凉精灵",
+      "stage": 3,
+      "types": [
+        "冰系",
+        "萌系"
+      ],
+      "stats": {
+        "hp": 130,
+        "atk": 103,
+        "def": 66,
+        "spa": 98,
+        "spd": 130,
+        "spe": 90
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000039",
+      "learnset_id": "learnset_ae3e9c322f63",
+      "siblings": {
+        "1": "pet_000546"
+      },
+      "image": {
+        "egg": "Item_107048.png",
+        "fruits": {
+          "1": "Item_108048.png"
+        },
+        "has_egg": true,
+        "has_fruit": true,
+        "head": "PetAvatar_3123.png",
+        "illustration": "PetPortrait_xueyingwawa.png",
+        "shiny": "PetPortrait_xueyingwawa_yise.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "A",
+        "order": 5
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000062": {
+      "pet_id": "pet_000062",
+      "name": "音速犬",
+      "title": "音速犬",
+      "form": null,
+      "game_id": 3071,
+      "number": "048",
+      "class": "狗狗类精灵",
+      "stage": 2,
+      "types": [
+        "火系"
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 116,
+        "def": 101,
+        "spa": 38,
+        "spd": 82,
+        "spe": 120
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000067",
+      "learnset_id": "learnset_d48a3d9c7167",
+      "siblings": {
+        "1": "pet_000551"
+      },
+      "image": {
+        "egg": "Item_107032.png",
+        "fruits": {
+          "1": "Item_108032.png"
+        },
+        "has_egg": true,
+        "has_fruit": true,
+        "head": "PetAvatar_3071.png",
+        "illustration": "PetPortrait_yinsuquan.png",
+        "shiny": "PetPortrait_yinsuquan_yise.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "A",
+        "order": 6
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000474": {
+      "pet_id": "pet_000474",
+      "name": "画间沉铁兽",
+      "title": "画间沉铁兽",
+      "form": null,
+      "game_id": 3609,
+      "number": "302",
+      "class": "自然类精灵",
+      "stage": 3,
+      "types": [
+        "普通系",
+        "武系"
+      ],
+      "stats": {
+        "hp": 126,
+        "atk": 147,
+        "def": 100,
+        "spa": 63,
+        "spd": 76,
+        "spe": 92
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000141",
+      "learnset_id": "learnset_87c8775aa30f",
+      "siblings": {},
+      "image": {
+        "egg": "Item_107203.png",
+        "has_egg": true,
+        "has_fruit": false,
+        "head": "PetAvatar_3609.png",
+        "illustration": "PetPortrait_huajianchentieshou.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "B",
+        "order": 7
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000451": {
+      "pet_id": "pet_000451",
+      "name": "秩序鱿墨",
+      "title": "秩序鱿墨",
+      "form": null,
+      "game_id": 3579,
+      "number": "282",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "幽系",
+        "萌系"
+      ],
+      "stats": {
+        "hp": 78,
+        "atk": 120,
+        "def": 124,
+        "spa": 39,
+        "spd": 113,
+        "spe": 130
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000158",
+      "learnset_id": "learnset_37d460cb4d20",
+      "siblings": {},
+      "image": {
+        "egg": "Item_107218.png",
+        "has_egg": true,
+        "has_fruit": false,
+        "head": "PetAvatar_3579.png",
+        "illustration": "PetPortrait_zhixumoyu.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "B",
+        "order": 8
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000124": {
+      "pet_id": "pet_000124",
+      "name": "化蝶",
+      "title": "化蝶（平常的样子）",
+      "form": "平常的样子",
+      "game_id": 3138,
+      "number": "034",
+      "class": "昆虫类精灵",
+      "stage": 3,
+      "types": [
+        "虫系",
+        "萌系"
+      ],
+      "stats": {
+        "hp": 53,
+        "atk": 46,
+        "def": 66,
+        "spa": 46,
+        "spd": 66,
+        "spe": 100
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000104",
+      "learnset_id": "learnset_ba9df96a104e",
+      "siblings": {
+        "1": "pet_000371",
+        "2": "pet_000372",
+        "3": "pet_000373"
+      },
+      "image": {
+        "egg": "Item_107053.png",
+        "fruits": {
+          "1": "Item_108053.png"
+        },
+        "has_egg": true,
+        "has_fruit": true,
+        "head": "PetAvatar_3138.png",
+        "illustration": "PetPortrait_huadie.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "B",
+        "order": 9
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000608": {
+      "pet_id": "pet_000608",
+      "name": "银月狼王",
+      "title": "银月狼王",
+      "form": null,
+      "game_id": 3763,
+      "number": "445",
+      "class": "自然类精灵",
+      "stage": 3,
+      "types": [
+        "幽系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 115,
+        "atk": 128,
+        "def": 128,
+        "spa": 51,
+        "spd": 98,
+        "spe": 130
+      },
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "feature_skill_id": "skill_000196",
+      "learnset_id": "learnset_162b16b43e43",
+      "siblings": {},
+      "image": {
+        "has_egg": false,
+        "has_fruit": false,
+        "head": "PetAvatar_3763.png",
+        "illustration": "PetPortrait_img_Wus_LangLing3_001_Res.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "C",
+        "order": 10
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000601": {
+      "pet_id": "pet_000601",
+      "name": "圣凯布米龙",
+      "title": "圣凯布米龙",
+      "form": null,
+      "game_id": 3576,
+      "number": "451",
+      "class": "自然类精灵",
+      "stage": 3,
+      "types": [
+        "火系",
+        "虫系"
+      ],
+      "stats": {
+        "hp": 79,
+        "atk": 116,
+        "def": 120,
+        "spa": 29,
+        "spd": 120,
+        "spe": 105
+      },
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "feature_skill_id": "skill_000197",
+      "learnset_id": "learnset_3d550ce8167a",
+      "siblings": {},
+      "image": {
+        "has_egg": false,
+        "has_fruit": false,
+        "head": "PetAvatar_3576.png",
+        "illustration": "PetPortrait_img_Fir_ReTuanTuan3_001_Res.png",
+        "shiny": "PetPortrait_img_Fir_ReTuanTuan3_101_Res.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "C",
+        "order": 11
+      },
+      "orphan_skill_refs": []
+    },
+    "pet_000611": {
+      "pet_id": "pet_000611",
+      "name": "月使鹭纳",
+      "title": "月使鹭纳",
+      "form": null,
+      "game_id": 3766,
+      "number": "448",
+      "class": "自然类精灵",
+      "stage": 3,
+      "types": [
+        "翼系",
+        "冰系"
+      ],
+      "stats": {
+        "hp": 83,
+        "atk": 99,
+        "def": 104,
+        "spa": 100,
+        "spd": 113,
+        "spe": 115
+      },
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "feature_skill_id": "skill_000198",
+      "learnset_id": "learnset_da630e35c0e9",
+      "siblings": {},
+      "image": {
+        "has_egg": false,
+        "has_fruit": false,
+        "head": "PetAvatar_3766.png",
+        "illustration": "PetPortrait_img_Win_XinYueLu3_001_Res.png",
+        "shiny": "PetPortrait_img_Win_XinYueLu3_101_Res.png"
+      },
+      "unknown_fields": [
+        "nature_effect_on_stats",
+        "talent_effect_on_stats",
+        "level_scaling_formula",
+        "official_damage_formula"
+      ],
+      "target": {
+        "group": "C",
+        "order": 12
+      },
+      "orphan_skill_refs": []
+    }
+  }
+}

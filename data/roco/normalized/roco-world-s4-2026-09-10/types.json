@@ -1,0 +1,4944 @@
+{
+  "schema_version": 1,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "source_id": "wiki-rocom-snapshot",
+  "note": "key 形如「光系」或「光系|地系」，表示单属性或双属性组合的防御相性。",
+  "counts": {
+    "total": 120
+  },
+  "types": {
+    "光系": {
+      "key": "光系",
+      "resist": [
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "光系|地系": {
+      "key": "光系|地系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 3
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "光系|水系": {
+      "key": "光系|水系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 3
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "光系|火系": {
+      "key": "光系|火系",
+      "resist": [
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "光系|草系": {
+      "key": "光系|草系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "光系|虫系": {
+      "key": "光系|虫系",
+      "resist": [
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "冰系": {
+      "key": "冰系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "冰系|地系": {
+      "key": "冰系|地系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "武系",
+          "multiplier": 3
+        },
+        {
+          "type": "机械系",
+          "multiplier": 3
+        },
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "冰系|幻系": {
+      "key": "冰系|幻系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "冰系|电系": {
+      "key": "冰系|电系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "冰系|草系": {
+      "key": "冰系|草系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 3
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "冰系|萌系": {
+      "key": "冰系|萌系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "机械系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "地系": {
+      "key": "地系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "地系|光系": {
+      "key": "地系|光系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 3
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "地系|幻系": {
+      "key": "地系|幻系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "地系|幽系": {
+      "key": "地系|幽系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "地系|恶系": {
+      "key": "地系|恶系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "武系",
+          "multiplier": 3
+        },
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "地系|水系": {
+      "key": "地系|水系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 3
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "地系|翼系": {
+      "key": "地系|翼系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 3
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "地系|草系": {
+      "key": "地系|草系",
+      "resist": [
+        {
+          "type": "电系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 3
+        },
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幻系": {
+      "key": "幻系",
+      "resist": [
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幻系|光系": {
+      "key": "幻系|光系",
+      "resist": [
+        {
+          "type": "幻系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "幽系",
+          "multiplier": 3
+        },
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幻系|幽系": {
+      "key": "幻系|幽系",
+      "resist": [
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "幽系",
+          "multiplier": 3
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幻系|机械系": {
+      "key": "幻系|机械系",
+      "resist": [
+        {
+          "type": "幻系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幻系|翼系": {
+      "key": "幻系|翼系",
+      "resist": [
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幽系": {
+      "key": "幽系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幽系|光系": {
+      "key": "幽系|光系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "幽系",
+          "multiplier": 3
+        },
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幽系|幻系": {
+      "key": "幽系|幻系",
+      "resist": [
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "幽系",
+          "multiplier": 3
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幽系|恶系": {
+      "key": "幽系|恶系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "光系",
+          "multiplier": 3
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幽系|毒系": {
+      "key": "幽系|毒系",
+      "resist": [
+        {
+          "type": "毒系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "恶系",
+          "multiplier": 3
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幽系|草系": {
+      "key": "幽系|草系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幽系|萌系": {
+      "key": "幽系|萌系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "恶系",
+          "multiplier": 3
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "幽系|虫系": {
+      "key": "幽系|虫系",
+      "resist": [
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "恶系": {
+      "key": "恶系",
+      "resist": [
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "恶系|光系": {
+      "key": "恶系|光系",
+      "resist": [
+        {
+          "type": "恶系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "恶系|冰系": {
+      "key": "恶系|冰系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "武系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "恶系|地系": {
+      "key": "恶系|地系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "武系",
+          "multiplier": 3
+        },
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "恶系|水系": {
+      "key": "恶系|水系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "恶系|火系": {
+      "key": "恶系|火系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "恶系|翼系": {
+      "key": "恶系|翼系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "恶系|虫系": {
+      "key": "恶系|虫系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "普通系": {
+      "key": "普通系",
+      "resist": [
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "普通系|幻系": {
+      "key": "普通系|幻系",
+      "resist": [
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "虫系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "普通系|幽系": {
+      "key": "普通系|幽系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "普通系|机械系": {
+      "key": "普通系|机械系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "武系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "普通系|武系": {
+      "key": "普通系|武系",
+      "resist": [
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "普通系|水系": {
+      "key": "普通系|水系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "普通系|萌系": {
+      "key": "普通系|萌系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "普通系|虫系": {
+      "key": "普通系|虫系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "机械系": {
+      "key": "机械系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "机械系|地系": {
+      "key": "机械系|地系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 3
+        },
+        {
+          "type": "武系",
+          "multiplier": 3
+        }
+      ]
+    },
+    "机械系|幻系": {
+      "key": "机械系|幻系",
+      "resist": [
+        {
+          "type": "幻系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "机械系|火系": {
+      "key": "机械系|火系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "机械系|翼系": {
+      "key": "机械系|翼系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "机械系|草系": {
+      "key": "机械系|草系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 3
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "机械系|虫系": {
+      "key": "机械系|虫系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 3
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "武系": {
+      "key": "武系",
+      "resist": [
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "武系|地系": {
+      "key": "武系|地系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "武系|水系": {
+      "key": "武系|水系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "毒系": {
+      "key": "毒系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "毒系|地系": {
+      "key": "毒系|地系",
+      "resist": [
+        {
+          "type": "毒系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "毒系|恶系": {
+      "key": "毒系|恶系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "毒系|普通系": {
+      "key": "毒系|普通系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "毒系|萌系": {
+      "key": "毒系|萌系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "恶系",
+          "multiplier": 3
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系": {
+      "key": "水系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|冰系": {
+      "key": "水系|冰系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|幽系": {
+      "key": "水系|幽系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|武系": {
+      "key": "水系|武系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|毒系": {
+      "key": "水系|毒系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|火系": {
+      "key": "水系|火系",
+      "resist": [
+        {
+          "type": "机械系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|电系": {
+      "key": "水系|电系",
+      "resist": [
+        {
+          "type": "机械系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|翼系": {
+      "key": "水系|翼系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "电系",
+          "multiplier": 3
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|草系": {
+      "key": "水系|草系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|萌系": {
+      "key": "水系|萌系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "水系|龙系": {
+      "key": "水系|龙系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "龙系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系": {
+      "key": "火系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|光系": {
+      "key": "火系|光系",
+      "resist": [
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|冰系": {
+      "key": "火系|冰系",
+      "resist": [
+        {
+          "type": "冰系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|武系": {
+      "key": "火系|武系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|毒系": {
+      "key": "火系|毒系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 3
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|翼系": {
+      "key": "火系|翼系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|草系": {
+      "key": "火系|草系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|萌系": {
+      "key": "火系|萌系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|虫系": {
+      "key": "火系|虫系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "冰系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "火系|龙系": {
+      "key": "火系|龙系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "龙系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "电系": {
+      "key": "电系",
+      "resist": [
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "电系|光系": {
+      "key": "电系|光系",
+      "resist": [
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "电系|幻系": {
+      "key": "电系|幻系",
+      "resist": [
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "电系|水系": {
+      "key": "电系|水系",
+      "resist": [
+        {
+          "type": "机械系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "电系|翼系": {
+      "key": "电系|翼系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "翼系": {
+      "key": "翼系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "翼系|冰系": {
+      "key": "翼系|冰系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "翼系|幻系": {
+      "key": "翼系|幻系",
+      "resist": [
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "翼系|恶系": {
+      "key": "翼系|恶系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "翼系|普通系": {
+      "key": "翼系|普通系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "翼系|机械系": {
+      "key": "翼系|机械系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "龙系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "翼系|水系": {
+      "key": "翼系|水系",
+      "resist": [
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "电系",
+          "multiplier": 3
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "草系": {
+      "key": "草系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "草系|冰系": {
+      "key": "草系|冰系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 3
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "草系|地系": {
+      "key": "草系|地系",
+      "resist": [
+        {
+          "type": "电系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 3
+        },
+        {
+          "type": "草系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "武系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "草系|幻系": {
+      "key": "草系|幻系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幻系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "虫系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "草系|武系": {
+      "key": "草系|武系",
+      "resist": [
+        {
+          "type": "地系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "翼系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "草系|毒系": {
+      "key": "草系|毒系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "草系|火系": {
+      "key": "草系|火系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "机械系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "草系|萌系": {
+      "key": "草系|萌系",
+      "resist": [
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "毒系",
+          "multiplier": 3
+        },
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "萌系": {
+      "key": "萌系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "萌系|武系": {
+      "key": "萌系|武系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "萌系|毒系": {
+      "key": "萌系|毒系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "恶系",
+          "multiplier": 3
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "萌系|翼系": {
+      "key": "萌系|翼系",
+      "resist": [
+        {
+          "type": "虫系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "虫系": {
+      "key": "虫系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "虫系|地系": {
+      "key": "虫系|地系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "水系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "虫系|恶系": {
+      "key": "虫系|恶系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "幽系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "恶系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "虫系|毒系": {
+      "key": "虫系|毒系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "萌系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "地系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "幻系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "虫系|翼系": {
+      "key": "虫系|翼系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "电系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "虫系|草系": {
+      "key": "虫系|草系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "光系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "地系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 3
+        },
+        {
+          "type": "翼系",
+          "multiplier": 3
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "虫系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "虫系|萌系": {
+      "key": "虫系|萌系",
+      "resist": [
+        {
+          "type": "武系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "火系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "翼系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "龙系": {
+      "key": "龙系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "龙系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "龙系|幽系": {
+      "key": "龙系|幽系",
+      "resist": [
+        {
+          "type": "普通系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "毒系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "光系",
+          "multiplier": 2
+        },
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "龙系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "幽系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "龙系|翼系": {
+      "key": "龙系|翼系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.25
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 3
+        },
+        {
+          "type": "龙系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        }
+      ]
+    },
+    "龙系|萌系": {
+      "key": "龙系|萌系",
+      "resist": [
+        {
+          "type": "草系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "火系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "水系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "电系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "虫系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "武系",
+          "multiplier": 0.5
+        },
+        {
+          "type": "翼系",
+          "multiplier": 0.5
+        }
+      ],
+      "weak": [
+        {
+          "type": "冰系",
+          "multiplier": 2
+        },
+        {
+          "type": "龙系",
+          "multiplier": 2
+        },
+        {
+          "type": "毒系",
+          "multiplier": 2
+        },
+        {
+          "type": "萌系",
+          "multiplier": 2
+        },
+        {
+          "type": "恶系",
+          "multiplier": 2
+        },
+        {
+          "type": "机械系",
+          "multiplier": 2
+        }
+      ]
+    }
+  }
+}
