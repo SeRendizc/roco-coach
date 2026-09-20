@@ -26,3 +26,6 @@ data/roco/raw/extracted/
 data/roco/raw/NRC_AI.tar.gz
 .dsh-pushplus-token
 reports/roco/notify-log.jsonl
+
+# v0.1 一键启动产生的检出
+.v0.1-run/
