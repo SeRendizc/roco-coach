@@ -269,19 +269,39 @@ depth=2 在那把尺子上看起来更差。这一轮补上另一半：
 ② 同一批 fixture 同时量 planner 与 greedy 基线（只报前者没有信息量）；
 ③ **必须报 Wilson 95% 区间**（40 局里 ±15 个百分点是常态）。
 
-**结果**（40 局 × 2 个座位，planner 与基线用同一批种子）：
+> ### ⛔ 第 12 轮更正：这一节的结论整段作废（**INVALID / 不可解释**）
+>
+> 监工直接审了脚本，量具本身是错的：
+>
+> 1. `--swapped` 下 planner 打 **80** 局（正向 40 + 换边 40），但基线只有默认座位
+>    **40** 局，而且 `use_planner=False` 那条路**完全忽略** `planner_side`。
+>    于是「44/80 vs 18/40」不是同一批座位暴露 —— 一半样本多暴露了一次先手，
+>    差值里混进了座位效应；`delta_win_rate` 因此不可解释。
+> 2. 「区间几乎不重叠」是错的读法：planner (0.441, 0.654) 与基线 (0.307, 0.602)
+>    的重叠区间是 **0.441~0.602**。而且**两个独立区间的重叠与否本来就不能替代
+>    差异检验** —— 同一批 fixture 是配对试验，应该报配对差。
+>
+> 修正后的协议（写进产物 `comparison_protocol`）：配对键 `(fixture_id, seat)`；
+> `--swapped` 时两侧都打两个座位且样本数相等（`2 × fixtures`）；
+> 主比较 = McNemar 精确二项 + 配对 bootstrap；Wilson 只描述单方胜率；
+> 分层列 `games / wins / fallbacks / timed_out`。
+> 守卫测试：`roco/tests/test_benchmark_matches_pairing.py`（10 项，
+> 含**反证**：把「基线只打一个座位」塞回去必须报错）。
+> 旧产物留档 `reports/roco/invalidated/planner-matches-2026-09-21-invalid.json`。
 
-| 对手 | planner | CI95 | greedy 基线 | CI95 |
+**结果（第 12 轮重跑，40 fixtures × 2 座位 × 3 对手）**：见
+`reports/roco/planner-matches.json`。汇总配对差：
+`greedy_damage` **+0.050**（p=0.48）、`shallow_search` **−0.088**（p=0.14）、
+`status_control` **−0.100**（p=0.057）—— **没有任何一格支持 planner 更好**。
+分层后两半符号相反：`greedy_damage` 的 player 座位 +0.250（p=0.002）、
+enemy 座位 −0.150（p=0.070）。座位效应成因**未查清**，不得读成「先手优势」。
+下表是**作废前**的数字，仅作留痕，**不得引用**：
+
+| 对手 | planner（作废） | CI95 | greedy 基线（作废） | CI95 |
 |---|---|---|---|---|
-| `greedy_damage` | **44/80 = 0.550** | (0.441, 0.654) | 18/40 = 0.450 | (0.307, 0.602) |
-| `shallow_search` | 18/80 = 0.225 | (0.147, 0.328) | 13/40 = 0.325 | (0.201, 0.480) |
-| `status_control` | 21/80 = 0.263 | (0.179, 0.368) | 15/40 = 0.375 | (0.242, 0.530) |
-
-**如实读法**：只有在「对手是 `greedy_damage`」这一格上，区间几乎不重叠
-（planner 下界 0.441 vs 基线上界 0.602 —— 仍有一点点重叠），
-所以「规划比一步贪心好」在这一个对手上是**弱证据**；
-对另外两个对手，**没有任何证据表明规划更好**。样本 40—80 局，
-区间宽度 ±10 个百分点，不足以支撑更强的说法。
+| `greedy_damage` | ~~44/80 = 0.550~~ | (0.441, 0.654) | ~~18/40 = 0.450~~ | (0.307, 0.602) |
+| `shallow_search` | ~~18/80 = 0.225~~ | (0.147, 0.328) | ~~13/40 = 0.325~~ | (0.201, 0.480) |
+| `status_control` | ~~21/80 = 0.263~~ | (0.179, 0.368) | ~~15/40 = 0.375~~ | (0.242, 0.530) |
 
 ### 第 8 轮新增（W4-01 / W4-02，一句话索引）
 
@@ -793,7 +813,10 @@ active goal 已按此重写（revision 2）。
 | 2026-09-21 | **W4-02 轨迹集**：4,536 条 / 12 世界 / 7 arm + 离线回放 + 双向对照 | `docs/roco/AGENT-TRAJECTORIES.md`、`reports/roco/agent-trajectories-verification.json` |
 | 2026-09-21 | 反向对照抓出判定器三个真缺陷（胜率/冲突/过期各一），全部修掉 | 同上；本轮验证日志 |
 | 2026-09-21 | 第 9 轮验证：Python 195（1 skip）/ Node 430 / bridge 11 / toolbox 17 / plan-e2e 10；demo 16/16、浏览器 9/9；轨迹判定 verdict=true | `reports/roco/verification/round9-agent-trajectories.log` |
-| 2026-09-21 | **第 10 轮修一个「测试全绿但生成器已经不能跑」的漏洞**：给 `receiptSummary` 加注释时把 `export` 一起删了，盘上还有旧产物所以测试照样过；新增加载守卫 + 重算 `bytes`（剔除延迟） | commit 见下；`reports/roco/verification/round10-agent-trajectories.log` |
+| 2026-09-21 | **第 12 轮（P0）量具修正**：`--swapped` 下基线也打两个座位；主比较改为配对 McNemar 精确二项 + 配对 bootstrap；分层 (opponent × seat) 报告；新增 10 项校准测试（含反证） | `roco/tests/test_benchmark_matches_pairing.py`、`reports/roco/verification/round12-benchmark-pairing.log` |
+| 2026-09-21 | 旧整局胜负结论标 **INVALID**（80 对 40 + 用区间重叠当差异检验）；旧产物留档 | `reports/roco/invalidated/planner-matches-2026-09-21-invalid.json` |
+| 2026-09-21 | 修正后重跑：**没有任何一格支持 planner 更好**（+0.050 / −0.088 / −0.100）；分层后两半符号相反 | `reports/roco/planner-matches.json`、`docs/roco/BENCHMARKS.md` §2.1–2.2 |
+| 2026-09-21 | 第 10 轮修一个「测试全绿但生成器已经不能跑」的漏洞：给 `receiptSummary` 加注释时把 `export` 一起删了，盘上还有旧产物所以测试照样过；新增加载守卫 + 重算 `bytes`（剔除延迟） | commit 见下；`reports/roco/verification/round10-agent-trajectories.log` |
 
 ---
 
@@ -816,4 +839,15 @@ active goal 已按此重写（revision 2）。
 
 **数据不足时的正确做法**：先建**数据 / 评测 / 接口闭环**，
 不得用合成轨迹声称真人效果，不得把模型分数叫胜率。
+
+### 第 12 轮的决定：先修尺子，不动 planner
+
+按监工指令，量具修正优先于继续调 planner。跑完之后的处置：
+
+| 决定 | 依据 |
+|---|---|
+| **保留** planner 代码，不因这份基准撤回 | 报告没有说 planner 坏了：回落率 0.0、超时 0，说明它确实在决策。它只是**没有比 greedy 基线更好**，这不是撤回理由（greedy 是启发式，planner 是产品要求的可解释规划器） |
+| **不**因为「44/80 看着更好」而继续调参 | 那个数字来自错量具。修正后汇总差为 +0.050（p=0.48），不支持任何调参 |
+| 下一项独立工作：**查清座位效应** | `player` 座位 +0.250（p=0.002）、`enemy` 座位 −0.150。`step_joint` 是同时结算，所以不是「先手优势」，更可能是自驱动循环/补位顺序/state 视角在两侧不对称。查清前不得把座位效应解释成任何产品结论 |
+| 报告口径 | 以后引用这份基准**必须带座位**，且必须带配对检验的 p 与不一致格 b/c |
 

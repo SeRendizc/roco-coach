@@ -70,6 +70,77 @@ def wilson_interval(wins: int, total: int, z: float = 1.96) -> Tuple[float, floa
     return (round(max(0.0, centre - half), 4), round(min(1.0, centre + half), 4))
 
 
+def _binom_two_sided(k: int, n: int) -> float:
+    """精确二项检验（双侧），p0 = 0.5。McNemar 的精确版。
+
+    为什么不直接上卡方：不一致对数常常只有个位数，卡方近似在这个规模上不可信。
+    k=0 或 k=n 时按 1.0 处理（观测到的事件是「全部落一侧」，没有更极端的情形）。
+    """
+    if n <= 0:
+        return 1.0
+    # P(X = i)，X ~ B(n, 0.5)
+    probs = [math.comb(n, i) * (0.5 ** n) for i in range(n + 1)]
+    observed = probs[k]
+    # 双侧 p：所有概率不超过观测值的结局之和（加 1e-12 容忍浮点误差）
+    return round(min(1.0, sum(pr for pr in probs if pr <= observed + 1e-12)), 6)
+
+
+def _paired_bootstrap(diffs: Sequence[float], *, resamples: int = 4000,
+                      seed: int = 20260921) -> Tuple[float, float]:
+    """配对 bootstrap 的 95% 区间：按 **fixture** 重采样，两个策略一起重采。
+
+    配对的意义就在这里：重采样的是「同一局面下两者的差」，不是两个独立样本。
+    独立区间重叠与否**不能**用来判断差异是否显著——那正是这份基准之前犯的错。
+    """
+    n = len(diffs)
+    if n == 0:
+        return (0.0, 0.0)
+    import random as _random
+    rng = _random.Random(seed)
+    means: List[float] = []
+    for _ in range(resamples):
+        total = 0.0
+        for _ in range(n):
+            total += diffs[rng.randrange(n)]
+        means.append(total / n)
+    means.sort()
+    lo = means[max(0, int(0.025 * resamples) - 1)]
+    hi = means[min(resamples - 1, int(0.975 * resamples))]
+    return (round(lo, 4), round(hi, 4))
+
+
+def paired_test(planner_wins: Sequence[bool], baseline_wins: Sequence[bool]) -> Dict[str, Any]:
+    """同一批 fixture 上的配对比较。
+
+    `b` = planner 赢而基线输的对数，`c` = 基线赢而 planner 输的对数。
+    McNemar 只看这两个不一致格：两边都赢/都输的局面不携带「谁更好」的信息。
+    """
+    if len(planner_wins) != len(baseline_wins):
+        raise ValueError(
+            f"配对样本长度不一致：planner={len(planner_wins)} baseline={len(baseline_wins)}"
+            "（换边时基线也必须打两个座位）")
+    n = len(planner_wins)
+    b = sum(1 for p, q in zip(planner_wins, baseline_wins) if p and not q)
+    c = sum(1 for p, q in zip(planner_wins, baseline_wins) if q and not p)
+    both = sum(1 for p, q in zip(planner_wins, baseline_wins) if p and q)
+    neither = n - b - c - both
+    diffs = [float(p) - float(q) for p, q in zip(planner_wins, baseline_wins)]
+    return {
+        "pairs": n,
+        "planner_only_wins": b,
+        "baseline_only_wins": c,
+        "both_win": both,
+        "both_lose": neither,
+        "discordant": b + c,
+        "mean_paired_diff": round(statistics.fmean(diffs), 4) if diffs else 0.0,
+        "paired_diff_ci95": _paired_bootstrap(diffs),
+        "mcnemar_exact_p": _binom_two_sided(b, b + c),
+        "significant_at_95": _binom_two_sided(b, b + c) < 0.05,
+        "note": "配对检验只用了同一 fixture+座位上的差异；"
+                "独立 Wilson 区间重叠与否不能替代它",
+    }
+
+
 DISCLAIMER = (
     "这不是天梯强度。对手是 5 条启发式策略，不是真人；"
     "胜负只在「这套引擎 + 这些对手 + 这串种子」的范围内有意义。"
@@ -136,22 +207,30 @@ def to_engine_result(winner: str) -> str:
 def play_one(rs, team_a: List[str], team_b: List[str], seed: int,
              opponent_strategy: str, *, use_planner: bool,
              depth: int, beam: int, budget_ms: int,
-             planner_side: str = "player") -> Dict[str, Any]:
-    """打一局：我方用 planner（或 `greedy_damage` 作基线），对手用给定策略。"""
-    starter = ropp.get_strategy("greedy_damage")
-    player = None
+             planner_side: str = "player", fixture_id: Optional[int] = None) -> Dict[str, Any]:
+    """打一局：**被测方**用 planner（或 `greedy_damage` 作基线），对手用给定策略。
+
+    `planner_side` 对**两条路都生效**。这是一个基准正确性问题，不是便利参数：
+    换边那一半如果只让 planner 换边、基线还坐在 player 侧，那么
+    「44/80 vs 18/40」比的就不是同一批座位暴露 —— 一半的样本多暴露了一次先手，
+    差值里混进了座位效应，而报告当时把它读成了「规划有用」。
+
+    返回的 `winner` 一律是**被测方视角**（`win` / `loss` / `draw` / `escaped` /
+    `unfinished`），所以两个座位、两条路的行可以直接配对。
+    """
+    side = planner_side if planner_side in ("player", "enemy") else "player"
+    other = "enemy" if side == "player" else "player"
+    tested = None
     if use_planner:
         state = renv.reset(team_a, team_b, seed=seed, rs=rs)
-        player = PlannerPlayer(state, rs, depth=depth, beam=beam, budget_ms=budget_ms,
-                               side=planner_side)
-    enemy = ropp.get_strategy(opponent_strategy)
-    # `planner_side` 支持换边：默认 planner 坐 player（先手侧）。
-    # 换边时把胜负换算回「planner 视角」，否则换边那一半会反向计入。
-    planner_side_actual = planner_side if use_planner else "player"
+        tested = PlannerPlayer(state, rs, depth=depth, beam=beam, budget_ms=budget_ms,
+                               side=side)
+    opponent = ropp.get_strategy(opponent_strategy)
+    planner_side_actual = side
 
     if use_planner:
         # 自己驱动，才能把 state 交给 planner
-        state = player.state
+        state = tested.state
         ropp.bind_ruleset(rs)
         started = time.perf_counter()
         guard = 0
@@ -166,7 +245,7 @@ def play_one(rs, team_a: List[str], team_b: List[str], seed: int,
                     switch = [a for a in legal if a.kind == "switch"]
                     if not switch:
                         continue
-                    strategy = player if side == planner_side_actual else enemy
+                    strategy = tested if side == planner_side_actual else opponent
                     action = strategy.act(renv.observe(state, rs, side), switch, seed, state.turn)
                     renv.step_replace(state, rs, side, int(action.target_index))
                 continue
@@ -174,9 +253,9 @@ def play_one(rs, team_a: List[str], team_b: List[str], seed: int,
             theirs = renv.legal_actions(state, rs, "enemy" if planner_side_actual == "player" else "player")
             if not mine or not theirs:
                 break
-            pa = player.act(renv.observe(state, rs, planner_side_actual), mine, seed, state.turn)
-            ea = enemy.act(renv.observe(state, rs, "enemy" if planner_side_actual == "player" else "player"),
-                           theirs, seed, state.turn)
+            pa = tested.act(renv.observe(state, rs, planner_side_actual), mine, seed, state.turn)
+            ea = opponent.act(renv.observe(state, rs, "enemy" if planner_side_actual == "player" else "player"),
+                              theirs, seed, state.turn)
             if planner_side_actual == "player":
                 renv.step_joint(state, rs, pa, ea)
             else:
@@ -186,18 +265,175 @@ def play_one(rs, team_a: List[str], team_b: List[str], seed: int,
         if planner_side_actual == "enemy":
             winner = {"win": "loss", "loss": "win"}.get(winner, winner)
         return {"winner": winner, "turns": state.turn, "seconds": round(elapsed, 3),
-                "decisions": player.decisions, "timed_out": player.timed_out,
-                "fallbacks": player.fallbacks}
+                "decisions": tested.decisions, "timed_out": tested.timed_out,
+                "fallbacks": tested.fallbacks, "seat": planner_side_actual,
+                "fixture_id": fixture_id, "seed": seed, "teams": [list(team_a), list(team_b)]}
 
-    record = ropp.play_match(rs, team_a, team_b, "greedy_damage", opponent_strategy,
-                             seed, turn_limit=300)
+    # 基线走 `play_match`：strat_a 坐 player 侧、strat_b 坐 enemy 侧。
+    # 换到 enemy 侧时**两支策略一起换**，这样基线面对的局面与 planner 完全相同。
+    if side == "player":
+        strat_a, strat_b = "greedy_damage", opponent_strategy
+    else:
+        strat_a, strat_b = opponent_strategy, "greedy_damage"
+    record = ropp.play_match(rs, team_a, team_b, strat_a, strat_b, seed, turn_limit=300)
     # **口径必须与上面 planner 分支一致。** `play_match` 的 `winner` 用
     # `player` / `enemy` / `draw` / `escaped`（见 `opponents._winner_of`），
     # 而自己驱动那条路拿到的是引擎的 `state.result`（`win` / `loss` / ...）。
     # 第一版没做映射，于是基线在报告里显示「0 胜 0 负」——
     # 一个把「对手赢了」当成未知值的计数，差一点被我读成「基线很弱」。
-    return {"winner": to_engine_result(record.winner), "turns": record.total_turns,
-            "seconds": None, "decisions": None, "timed_out": 0, "fallbacks": 0}
+    winner = to_engine_result(record.winner)
+    if side == "enemy":
+        # 基线坐 enemy 侧：把胜负换算回**被测方视角**，与 planner 分支同一口径。
+        winner = {"win": "loss", "loss": "win"}.get(winner, winner)
+    return {"winner": winner, "turns": record.total_turns,
+            "seconds": None, "decisions": None, "timed_out": 0, "fallbacks": 0,
+            "seat": side, "fixture_id": fixture_id, "seed": seed,
+            "teams": [list(team_a), list(team_b)]}
+
+
+def _summarise_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
+    """一组的胜负汇总。**样本数、阵容、seed、座位必须与配对组一致**，由调用方保证。"""
+    games = len(rows)
+    wins = sum(1 for r in rows if r["winner"] == "win")
+    decisions = sum(r["decisions"] or 0 for r in rows)
+    fallbacks = sum(r["fallbacks"] for r in rows)
+    seconds = [r["seconds"] for r in rows if r["seconds"] is not None]
+    return {
+        "games": games,
+        "wins": wins,
+        "losses": sum(1 for r in rows if r["winner"] == "loss"),
+        "draws": sum(1 for r in rows if r["winner"] == "draw"),
+        "escaped": sum(1 for r in rows if r["winner"] == "escaped"),
+        "unfinished": sum(1 for r in rows if r["winner"] == "unfinished"),
+        "win_rate": round(wins / games, 4) if games else None,
+        # Wilson 只**描述单方胜率**，不参与任何比较。判差异要用 paired_test。
+        "win_rate_ci95": wilson_interval(wins, games) if games else None,
+        "mean_turns": round(statistics.fmean(r["turns"] for r in rows), 1) if rows else None,
+        "mean_seconds": round(statistics.fmean(seconds), 3) if seconds else None,
+        "decisions": decisions,
+        "timed_out_decisions": sum(r["timed_out"] for r in rows),
+        "fallbacks": fallbacks,
+        "fallback_rate": round(fallbacks / decisions, 4) if decisions else 0.0,
+        "seats": sorted({r["seat"] for r in rows}),
+    }
+
+
+def run_benchmark(*, games: int, opponents: Sequence[str], depth: int = 2, beam: int = 3,
+                  budget_ms: int = 800, swapped: bool = False,
+                  skip_baseline: bool = False, seed_base: int = SEED_BASE,
+                  progress=None) -> Dict[str, Any]:
+    """跑完整基准并返回报告对象。**不写文件**——写盘由 `main` 负责。
+
+    抽出来的理由是测试：测试要能用几局、一个对手在几十秒内跑完整条链路，
+    并断言「planner 与基线的 (fixture, 座位) 完全对齐」。如果只能通过 CLI 跑，
+    测的就只是「命令有没有报错」。
+    """
+    rs = rdata.load_ruleset()
+    ids = [rs.pets_by_name(n)[0].pet_id for n in ROSTER]
+    opponents = [x.strip() for x in opponents if x and x.strip()]
+
+    import random
+    rng = random.Random(seed_base)
+    fixtures: List[Tuple[List[str], List[str], int]] = []
+    for _ in range(games):
+        fixtures.append((rng.sample(ids, 3), rng.sample(ids, 3),
+                         rng.randrange(1, 10 ** 6)))
+
+    seats = ["player", "enemy"] if swapped else ["player"]
+    report: Dict[str, Any] = {
+        "generated_by": "scripts/roco/benchmark-planner-matches.py",
+        "ruleset_id": rs.ruleset_id,
+        "settings": {"games_per_opponent": games, "depth": depth,
+                     "beam": beam, "budget_ms": budget_ms,
+                     "seed_base": seed_base, "opponents": opponents,
+                     "seat_swapped": bool(swapped),
+                     "fixtures": len(fixtures),
+                     "seats": seats,
+                     "note": "换边时 planner 与基线都打两个座位，胜负一律按被测方视角记；"
+                             "主比较用同一 (fixture, 座位) 上的配对差，不用 80 对 40 的汇总"},
+        "comparison_protocol": [
+            "pairing_key = (fixture_id, seat)：两策略的样本数、阵容、seed、座位逐一对齐",
+            "主比较 = paired_test：planner_only / baseline_only 的不一致格 + 精确二项（McNemar）",
+            "Wilson 区间只描述单方胜率；**区间重叠与否不能替代差异检验**",
+            "分层 (opponent × seat) 各自给 games/wins/fallback/timeout，再给总计",
+        ],
+        "disclaimer": DISCLAIMER,
+        "results": {},
+    }
+
+    for opponent in opponents:
+        started = time.perf_counter()
+
+        def run(use_planner: bool) -> List[Dict[str, Any]]:
+            """按 (fixture, 座位) 跑一遍，并给每行打上 fixture_id 与座位。
+
+            fixture 是**配对键**：同一 (fixture_id, seat) 上 planner 与基线的
+            两行必须一一对应，配对检验就建立在这个键上。
+            """
+            rows: List[Dict[str, Any]] = []
+            for fixture_id, (a, b, seed) in enumerate(fixtures):
+                for seat in seats:
+                    row = play_one(rs, a, b, seed, opponent, use_planner=use_planner,
+                                   depth=depth, beam=beam,
+                                   budget_ms=budget_ms, planner_side=seat,
+                                   fixture_id=fixture_id)
+                    row["opponent"] = opponent
+                    rows.append(row)
+            return rows
+
+        planner_rows = run(True)
+        entry: Dict[str, Any] = {
+            "planner": _summarise_rows(planner_rows),
+            "by_seat": {seat: _summarise_rows([r for r in planner_rows if r["seat"] == seat])
+                        for seat in seats},
+            "seconds": None,
+        }
+        if not skip_baseline:
+            base_rows = run(False)
+            planner_keys = {(r["fixture_id"], r["seat"]) for r in planner_rows}
+            base_keys = {(r["fixture_id"], r["seat"]) for r in base_rows}
+            if planner_keys != base_keys:
+                missing = sorted(planner_keys - base_keys)[:3]
+                extra = sorted(base_keys - planner_keys)[:3]
+                raise RuntimeError(
+                    "配对样本不对齐：planner 与基线必须打完全相同的 (fixture, 座位)。"
+                    f"planner={len(planner_rows)} 行 / 基线={len(base_rows)} 行；"
+                    f"基线缺少 {missing}，多出 {extra}")
+            entry["greedy_baseline"] = _summarise_rows(base_rows)
+            entry["greedy_baseline_by_seat"] = {
+                seat: _summarise_rows([r for r in base_rows if r["seat"] == seat]) for seat in seats}
+            entry["paired"] = paired_test(
+                [r["winner"] == "win" for r in planner_rows],
+                [r["winner"] == "win" for r in base_rows])
+            entry["paired_by_seat"] = {
+                seat: paired_test(
+                    [r["winner"] == "win" for r in planner_rows if r["seat"] == seat],
+                    [r["winner"] == "win" for r in base_rows if r["seat"] == seat])
+                for seat in seats}
+            entry["delta_win_rate"] = entry["paired"]["mean_paired_diff"]
+            entry["delta_win_rate_basis"] = "paired:同一 (fixture, 座位) 上的平均胜率差"
+        entry["seconds"] = round(time.perf_counter() - started, 1)
+        planner = entry["planner"]
+        rate = planner["fallback_rate"]
+        if rate > 0.25:
+            planner["warning"] = (
+                f"回落率 {rate:.1%} 过高；这些胜负主要来自回落的贪心基线，不是 planner。"
+            )
+            if progress:
+                progress(f"[{opponent}] **警告**：回落率 {rate:.1%}"
+                         f"（{planner['fallbacks']}/{planner['decisions']}）—— "
+                         f"planner 基本没有在决策，这份数据不能当作「planner 的胜负」。")
+        report["results"][opponent] = entry
+        if progress:
+            base = entry.get("greedy_baseline")
+            paired = entry.get("paired")
+            progress(f"[{opponent}] planner {planner['wins']}/{planner['games']}"
+                     + (f"  基线 {base['wins']}/{base['games']}" if base else "")
+                     + (f"  配对差 {paired['mean_paired_diff']:+.3f}"
+                        f" (b={paired['planner_only_wins']}, c={paired['baseline_only_wins']},"
+                        f" p={paired['mcnemar_exact_p']})" if paired else "")
+                     + f"  ({entry['seconds']}s)")
+    return report
 
 
 def main(argv: Optional[List[str]] = None) -> int:
@@ -208,105 +444,24 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--budget-ms", type=int, default=800)
     parser.add_argument("--opponents", default="greedy_damage,shallow_search,status_control")
     parser.add_argument("--skip-baseline", action="store_true",
-                        help="跳过 greedy 基线（省时间；默认**不**跳过）")
+                        help="跳过 greedy 基线（省时间；默认**不**跳过）。"
+                             "注意：跳过之后**没有**可解释的比较，"
+                             "报告里会写明这一点")
     parser.add_argument("--swapped", action="store_true",
-                        help="同一批 fixture 再打一遍，但**双方换边**"
-                             "（planner 坐 enemy 侧）。用来排除「先手优势」"
-                             "被误读成「规划有效」")
+                        help="planner **与基线**都再坐 enemy 侧打一遍，"
+                             "用来排除「先手优势」被误读成「规划有效」")
     args = parser.parse_args(argv)
 
-    rs = rdata.load_ruleset()
-    ids = [rs.pets_by_name(n)[0].pet_id for n in ROSTER]
-    opponents = [x.strip() for x in args.opponents.split(",") if x.strip()]
-
-    import random
-    rng = random.Random(SEED_BASE)
-    fixtures: List[Tuple[List[str], List[str], int]] = []
-    for _ in range(args.games):
-        fixtures.append((rng.sample(ids, 3), rng.sample(ids, 3),
-                         rng.randrange(1, 10 ** 6)))
-    # 同一批 fixture 给所有对手与所有基线用 —— 否则胜负差里混进阵容差
-
-    report: Dict[str, Any] = {
-        "generated_by": "scripts/roco/benchmark-planner-matches.py",
-        "ruleset_id": rs.ruleset_id,
-        "settings": {"games_per_opponent": args.games, "depth": args.depth,
-                     "beam": args.beam, "budget_ms": args.budget_ms,
-                     "seed_base": SEED_BASE, "opponents": opponents,
-                     "seat_swapped": bool(args.swapped),
-                     "note": "换边时两半都按 planner 视角记胜负，所以可以相加"},
-        "disclaimer": DISCLAIMER,
-        "results": {},
-    }
-
-    for opponent in opponents:
-        started = time.perf_counter()
-        planner_rows = [play_one(rs, a, b, seed, opponent, use_planner=True,
-                                 depth=args.depth, beam=args.beam, budget_ms=args.budget_ms)
-                        for a, b, seed in fixtures]
-        if args.swapped:
-            # 换边再打一遍：planner 坐 enemy 侧。**胜率一律按 planner 视角记**，
-            # 所以两半可以直接相加 —— 这样汇总数字里不会混进「谁先手」。
-            planner_rows += [play_one(rs, a, b, seed, opponent, use_planner=True,
-                                      depth=args.depth, beam=args.beam,
-                                      budget_ms=args.budget_ms, planner_side="enemy")
-                             for a, b, seed in fixtures]
-        planner_wins = sum(1 for r in planner_rows if r["winner"] == "win")
-        planner_losses = sum(1 for r in planner_rows if r["winner"] == "loss")
-        entry: Dict[str, Any] = {
-            "planner": {
-                "games": len(planner_rows),
-                "wins": planner_wins,
-                "losses": planner_losses,
-                "draws": sum(1 for r in planner_rows if r["winner"] == "draw"),
-                "escaped": sum(1 for r in planner_rows if r["winner"] == "escaped"),
-                "unfinished": sum(1 for r in planner_rows if r["winner"] == "unfinished"),
-                "win_rate": round(planner_wins / len(planner_rows), 4),
-                # 区间不是装饰：40 局里 ±15 个百分点的波动是常态，
-                # 不报区间就会把噪声读成「规划有用」。
-                "win_rate_ci95": wilson_interval(planner_wins, len(planner_rows)),
-                "mean_turns": round(statistics.fmean(r["turns"] for r in planner_rows), 1),
-                "mean_seconds": round(statistics.fmean(
-                    r["seconds"] for r in planner_rows if r["seconds"] is not None), 3)
-                    if any(r["seconds"] is not None for r in planner_rows) else None,
-                "decisions": sum(r["decisions"] or 0 for r in planner_rows),
-                "timed_out_decisions": sum(r["timed_out"] for r in planner_rows),
-                "fallbacks": sum(r["fallbacks"] for r in planner_rows),
-            },
-            "seconds": round(time.perf_counter() - started, 1),
-        }
-        if not args.skip_baseline:
-            base_rows = [play_one(rs, a, b, seed, opponent, use_planner=False,
-                                  depth=args.depth, beam=args.beam, budget_ms=args.budget_ms)
-                         for a, b, seed in fixtures]
-            base_wins = sum(1 for r in base_rows if r["winner"] == "win")
-            entry["greedy_baseline"] = {
-                "games": len(base_rows),
-                "wins": base_wins,
-                "losses": sum(1 for r in base_rows if r["winner"] == "loss"),
-                "win_rate": round(base_wins / len(base_rows), 4),
-                "win_rate_ci95": wilson_interval(base_wins, len(base_rows)),
-                "mean_turns": round(statistics.fmean(r["turns"] for r in base_rows), 1),
-            }
-            entry["delta_win_rate"] = round(
-                entry["planner"]["win_rate"] - entry["greedy_baseline"]["win_rate"], 4)
-        # 守卫：回落率过高说明「planner 根本没在决策」——
-        # 那种情况下这份数据是假的（第一版换边就是 162/182 = 89%）。
-        decisions = entry["planner"]["decisions"]
-        fallbacks = entry["planner"]["fallbacks"]
-        rate = (fallbacks / decisions) if decisions else 0.0
-        entry["planner"]["fallback_rate"] = round(rate, 4)
-        if rate > 0.25:
-            print(f"[{opponent}] **警告**：回落率 {rate:.1%}"
-                  f"（{fallbacks}/{decisions}）—— planner 基本没有在决策，"
-                  f"这份数据不能当作「planner 的胜负」。", file=sys.stderr)
-            entry["planner"]["warning"] = (
-                f"回落率 {rate:.1%} 过高；这些胜负主要来自回落的贪心基线，不是 planner。"
-            )
-        report["results"][opponent] = entry
-        print(f"[{opponent}] planner {entry['planner']['wins']}/{entry['planner']['games']}"
-              f"  基线 {entry.get('greedy_baseline', {}).get('wins', '—')}"
-              f"  ({entry['seconds']}s)", flush=True)
+    report = run_benchmark(games=args.games,
+                           opponents=[x.strip() for x in args.opponents.split(",")],
+                           depth=args.depth, beam=args.beam, budget_ms=args.budget_ms,
+                           swapped=args.swapped, skip_baseline=args.skip_baseline,
+                           progress=lambda msg: print(msg, flush=True))
+    # `--skip-baseline` 时报告仍要能被解释：明确标出「这次没有基线」。
+    if args.skip_baseline:
+        report["settings"]["comparable"] = False
+        report["settings"]["why_not_comparable"] = (
+            "跳过了 greedy 基线：只有被测方一侧的数据，任何「规划有没有用」的说法都不成立")
 
     os.makedirs(os.path.join(_ROOT, os.path.dirname(OUT_JSON)), exist_ok=True)
     with open(os.path.join(_ROOT, OUT_JSON), "w", encoding="utf-8") as fh:

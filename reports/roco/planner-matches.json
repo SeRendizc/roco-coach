@@ -13,8 +13,19 @@
       "status_control"
     ],
     "seat_swapped": true,
-    "note": "换边时两半都按 planner 视角记胜负，所以可以相加"
+    "fixtures": 40,
+    "seats": [
+      "player",
+      "enemy"
+    ],
+    "note": "换边时 planner 与基线都打两个座位，胜负一律按被测方视角记；主比较用同一 (fixture, 座位) 上的配对差，不用 80 对 40 的汇总"
   },
+  "comparison_protocol": [
+    "pairing_key = (fixture_id, seat)：两策略的样本数、阵容、seed、座位逐一对齐",
+    "主比较 = paired_test：planner_only / baseline_only 的不一致格 + 精确二项（McNemar）",
+    "Wilson 区间只描述单方胜率；**区间重叠与否不能替代差异检验**",
+    "分层 (opponent × seat) 各自给 games/wins/fallback/timeout，再给总计"
+  ],
   "disclaimer": "这不是天梯强度。对手是 5 条启发式策略，不是真人；胜负只在「这套引擎 + 这些对手 + 这串种子」的范围内有意义。它回答的问题是「多回合规划比一步贪心有没有用」，不是「小芽有多强」。",
   "results": {
     "greedy_damage": {
@@ -31,25 +42,184 @@
           0.6542
         ],
         "mean_turns": 24.1,
-        "mean_seconds": 1.256,
+        "mean_seconds": 1.245,
         "decisions": 2030,
         "timed_out_decisions": 0,
         "fallbacks": 0,
-        "fallback_rate": 0.0
+        "fallback_rate": 0.0,
+        "seats": [
+          "enemy",
+          "player"
+        ]
       },
-      "seconds": 100.5,
+      "by_seat": {
+        "player": {
+          "games": 40,
+          "wins": 28,
+          "losses": 12,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.7,
+          "win_rate_ci95": [
+            0.5457,
+            0.8193
+          ],
+          "mean_turns": 20.6,
+          "mean_seconds": 1.202,
+          "decisions": 861,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "player"
+          ]
+        },
+        "enemy": {
+          "games": 40,
+          "wins": 16,
+          "losses": 24,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.4,
+          "win_rate_ci95": [
+            0.2635,
+            0.554
+          ],
+          "mean_turns": 27.5,
+          "mean_seconds": 1.288,
+          "decisions": 1169,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "enemy"
+          ]
+        }
+      },
+      "seconds": 100.7,
       "greedy_baseline": {
-        "games": 40,
-        "wins": 18,
-        "losses": 22,
-        "win_rate": 0.45,
+        "games": 80,
+        "wins": 40,
+        "losses": 40,
+        "draws": 0,
+        "escaped": 0,
+        "unfinished": 0,
+        "win_rate": 0.5,
         "win_rate_ci95": [
-          0.3071,
-          0.6017
+          0.393,
+          0.607
         ],
-        "mean_turns": 24.5
+        "mean_turns": 24.5,
+        "mean_seconds": null,
+        "decisions": 0,
+        "timed_out_decisions": 0,
+        "fallbacks": 0,
+        "fallback_rate": 0.0,
+        "seats": [
+          "enemy",
+          "player"
+        ]
       },
-      "delta_win_rate": 0.1
+      "greedy_baseline_by_seat": {
+        "player": {
+          "games": 40,
+          "wins": 18,
+          "losses": 22,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.45,
+          "win_rate_ci95": [
+            0.3071,
+            0.6017
+          ],
+          "mean_turns": 24.5,
+          "mean_seconds": null,
+          "decisions": 0,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "player"
+          ]
+        },
+        "enemy": {
+          "games": 40,
+          "wins": 22,
+          "losses": 18,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.55,
+          "win_rate_ci95": [
+            0.3983,
+            0.6929
+          ],
+          "mean_turns": 24.5,
+          "mean_seconds": null,
+          "decisions": 0,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "enemy"
+          ]
+        }
+      },
+      "paired": {
+        "pairs": 80,
+        "planner_only_wins": 11,
+        "baseline_only_wins": 7,
+        "both_win": 33,
+        "both_lose": 29,
+        "discordant": 18,
+        "mean_paired_diff": 0.05,
+        "paired_diff_ci95": [
+          -0.05,
+          0.1625
+        ],
+        "mcnemar_exact_p": 0.480682,
+        "significant_at_95": false,
+        "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+      },
+      "paired_by_seat": {
+        "player": {
+          "pairs": 40,
+          "planner_only_wins": 10,
+          "baseline_only_wins": 0,
+          "both_win": 18,
+          "both_lose": 12,
+          "discordant": 10,
+          "mean_paired_diff": 0.25,
+          "paired_diff_ci95": [
+            0.125,
+            0.375
+          ],
+          "mcnemar_exact_p": 0.001953,
+          "significant_at_95": true,
+          "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+        },
+        "enemy": {
+          "pairs": 40,
+          "planner_only_wins": 1,
+          "baseline_only_wins": 7,
+          "both_win": 15,
+          "both_lose": 17,
+          "discordant": 8,
+          "mean_paired_diff": -0.15,
+          "paired_diff_ci95": [
+            -0.3,
+            -0.025
+          ],
+          "mcnemar_exact_p": 0.070312,
+          "significant_at_95": false,
+          "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+        }
+      },
+      "delta_win_rate": 0.05,
+      "delta_win_rate_basis": "paired:同一 (fixture, 座位) 上的平均胜率差"
     },
     "shallow_search": {
       "planner": {
@@ -65,25 +235,184 @@
           0.3279
         ],
         "mean_turns": 18.3,
-        "mean_seconds": 0.811,
+        "mean_seconds": 0.806,
         "decisions": 1603,
         "timed_out_decisions": 0,
         "fallbacks": 0,
-        "fallback_rate": 0.0
+        "fallback_rate": 0.0,
+        "seats": [
+          "enemy",
+          "player"
+        ]
       },
-      "seconds": 64.9,
+      "by_seat": {
+        "player": {
+          "games": 40,
+          "wins": 14,
+          "losses": 26,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.35,
+          "win_rate_ci95": [
+            0.2213,
+            0.5049
+          ],
+          "mean_turns": 18.5,
+          "mean_seconds": 0.979,
+          "decisions": 799,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "player"
+          ]
+        },
+        "enemy": {
+          "games": 40,
+          "wins": 4,
+          "losses": 36,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.1,
+          "win_rate_ci95": [
+            0.0396,
+            0.2305
+          ],
+          "mean_turns": 18.1,
+          "mean_seconds": 0.633,
+          "decisions": 804,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "enemy"
+          ]
+        }
+      },
+      "seconds": 65.9,
       "greedy_baseline": {
-        "games": 40,
-        "wins": 13,
-        "losses": 27,
-        "win_rate": 0.325,
+        "games": 80,
+        "wins": 25,
+        "losses": 55,
+        "draws": 0,
+        "escaped": 0,
+        "unfinished": 0,
+        "win_rate": 0.3125,
         "win_rate_ci95": [
-          0.2008,
-          0.4798
+          0.2215,
+          0.4207
         ],
-        "mean_turns": 18.5
+        "mean_turns": 18.2,
+        "mean_seconds": null,
+        "decisions": 0,
+        "timed_out_decisions": 0,
+        "fallbacks": 0,
+        "fallback_rate": 0.0,
+        "seats": [
+          "enemy",
+          "player"
+        ]
       },
-      "delta_win_rate": -0.1
+      "greedy_baseline_by_seat": {
+        "player": {
+          "games": 40,
+          "wins": 13,
+          "losses": 27,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.325,
+          "win_rate_ci95": [
+            0.2008,
+            0.4798
+          ],
+          "mean_turns": 18.5,
+          "mean_seconds": null,
+          "decisions": 0,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "player"
+          ]
+        },
+        "enemy": {
+          "games": 40,
+          "wins": 12,
+          "losses": 28,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.3,
+          "win_rate_ci95": [
+            0.1807,
+            0.4543
+          ],
+          "mean_turns": 17.9,
+          "mean_seconds": null,
+          "decisions": 0,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "enemy"
+          ]
+        }
+      },
+      "paired": {
+        "pairs": 80,
+        "planner_only_wins": 5,
+        "baseline_only_wins": 12,
+        "both_win": 13,
+        "both_lose": 50,
+        "discordant": 17,
+        "mean_paired_diff": -0.0875,
+        "paired_diff_ci95": [
+          -0.1875,
+          0.0125
+        ],
+        "mcnemar_exact_p": 0.143463,
+        "significant_at_95": false,
+        "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+      },
+      "paired_by_seat": {
+        "player": {
+          "pairs": 40,
+          "planner_only_wins": 4,
+          "baseline_only_wins": 3,
+          "both_win": 10,
+          "both_lose": 23,
+          "discordant": 7,
+          "mean_paired_diff": 0.025,
+          "paired_diff_ci95": [
+            -0.1,
+            0.15
+          ],
+          "mcnemar_exact_p": 1.0,
+          "significant_at_95": false,
+          "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+        },
+        "enemy": {
+          "pairs": 40,
+          "planner_only_wins": 1,
+          "baseline_only_wins": 9,
+          "both_win": 3,
+          "both_lose": 27,
+          "discordant": 10,
+          "mean_paired_diff": -0.2,
+          "paired_diff_ci95": [
+            -0.35,
+            -0.05
+          ],
+          "mcnemar_exact_p": 0.021484,
+          "significant_at_95": true,
+          "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+        }
+      },
+      "delta_win_rate": -0.0875,
+      "delta_win_rate_basis": "paired:同一 (fixture, 座位) 上的平均胜率差"
     },
     "status_control": {
       "planner": {
@@ -99,25 +428,184 @@
           0.3682
         ],
         "mean_turns": 17.8,
-        "mean_seconds": 0.779,
+        "mean_seconds": 0.775,
         "decisions": 1557,
         "timed_out_decisions": 0,
         "fallbacks": 0,
-        "fallback_rate": 0.0
+        "fallback_rate": 0.0,
+        "seats": [
+          "enemy",
+          "player"
+        ]
       },
-      "seconds": 62.4,
+      "by_seat": {
+        "player": {
+          "games": 40,
+          "wins": 15,
+          "losses": 25,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.375,
+          "win_rate_ci95": [
+            0.2422,
+            0.5297
+          ],
+          "mean_turns": 17.4,
+          "mean_seconds": 0.906,
+          "decisions": 752,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "player"
+          ]
+        },
+        "enemy": {
+          "games": 40,
+          "wins": 6,
+          "losses": 34,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.15,
+          "win_rate_ci95": [
+            0.0706,
+            0.2907
+          ],
+          "mean_turns": 18.2,
+          "mean_seconds": 0.644,
+          "decisions": 805,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "enemy"
+          ]
+        }
+      },
+      "seconds": 62.7,
       "greedy_baseline": {
-        "games": 40,
-        "wins": 15,
-        "losses": 25,
-        "win_rate": 0.375,
+        "games": 80,
+        "wins": 29,
+        "losses": 51,
+        "draws": 0,
+        "escaped": 0,
+        "unfinished": 0,
+        "win_rate": 0.3625,
         "win_rate_ci95": [
-          0.2422,
-          0.5297
+          0.2657,
+          0.4719
         ],
-        "mean_turns": 17.7
+        "mean_turns": 17.9,
+        "mean_seconds": null,
+        "decisions": 0,
+        "timed_out_decisions": 0,
+        "fallbacks": 0,
+        "fallback_rate": 0.0,
+        "seats": [
+          "enemy",
+          "player"
+        ]
       },
-      "delta_win_rate": -0.1125
+      "greedy_baseline_by_seat": {
+        "player": {
+          "games": 40,
+          "wins": 15,
+          "losses": 25,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.375,
+          "win_rate_ci95": [
+            0.2422,
+            0.5297
+          ],
+          "mean_turns": 17.7,
+          "mean_seconds": null,
+          "decisions": 0,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "player"
+          ]
+        },
+        "enemy": {
+          "games": 40,
+          "wins": 14,
+          "losses": 26,
+          "draws": 0,
+          "escaped": 0,
+          "unfinished": 0,
+          "win_rate": 0.35,
+          "win_rate_ci95": [
+            0.2213,
+            0.5049
+          ],
+          "mean_turns": 18.2,
+          "mean_seconds": null,
+          "decisions": 0,
+          "timed_out_decisions": 0,
+          "fallbacks": 0,
+          "fallback_rate": 0.0,
+          "seats": [
+            "enemy"
+          ]
+        }
+      },
+      "paired": {
+        "pairs": 80,
+        "planner_only_wins": 3,
+        "baseline_only_wins": 11,
+        "both_win": 18,
+        "both_lose": 48,
+        "discordant": 14,
+        "mean_paired_diff": -0.1,
+        "paired_diff_ci95": [
+          -0.1875,
+          -0.0125
+        ],
+        "mcnemar_exact_p": 0.057373,
+        "significant_at_95": false,
+        "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+      },
+      "paired_by_seat": {
+        "player": {
+          "pairs": 40,
+          "planner_only_wins": 2,
+          "baseline_only_wins": 2,
+          "both_win": 13,
+          "both_lose": 23,
+          "discordant": 4,
+          "mean_paired_diff": 0.0,
+          "paired_diff_ci95": [
+            -0.1,
+            0.1
+          ],
+          "mcnemar_exact_p": 1.0,
+          "significant_at_95": false,
+          "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+        },
+        "enemy": {
+          "pairs": 40,
+          "planner_only_wins": 1,
+          "baseline_only_wins": 9,
+          "both_win": 5,
+          "both_lose": 25,
+          "discordant": 10,
+          "mean_paired_diff": -0.2,
+          "paired_diff_ci95": [
+            -0.35,
+            -0.075
+          ],
+          "mcnemar_exact_p": 0.021484,
+          "significant_at_95": true,
+          "note": "配对检验只用了同一 fixture+座位上的差异；独立 Wilson 区间重叠与否不能替代它"
+        }
+      },
+      "delta_win_rate": -0.1,
+      "delta_win_rate_basis": "paired:同一 (fixture, 座位) 上的平均胜率差"
     }
   }
 }

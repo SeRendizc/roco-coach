@@ -368,10 +368,11 @@ def write_doc(payload: Dict[str, Any]) -> None:
     p("| 命令 | 口径 | 量出来的结论 |")
     p("|---|---|---|")
     p("| `npm run roco:benchmark-planner` | 一步推演值当正确答案 | top1 0.27 → **0.59**（修掉候选裁剪之后）；**不能**比较搜索深度 |")
-    p("| `npm run roco:benchmark-matches` | 整局胜负 | 对 `greedy_damage` **弱证据**（0.550 vs 0.450）；对另外两个对手**无证据** |")
+    p("| `npm run roco:benchmark-matches` | 整局胜负 | ⛔ **量具被判定为错，结论 INVALID / 不可解释**（80 对 40、且用区间重叠当差异检验）。"
+      "修正后协议：两个座位样本数相等 + 配对检验。见 `docs/roco/BENCHMARKS.md` 第 2 节 |")
     p("| `npm run roco:planner-calibration` | `expected` 对整局胜负 | **不显著**（Welch t=0.873）→ `expected` **不能**当信心代理 |")
     p("")
-    p("第三个是**否定结论**，也是最有行动价值的一个：它挡住了")
+    p("最后一条（`planner-calibration`）是**否定结论**，也是最有行动价值的一个：它挡住了")
     p("「把 `expected` 当胜率展示给玩家」这条看起来顺理成章的用法。")
     p("")
     p("## 需要用户的三件事（唯一阻塞）")

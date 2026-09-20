@@ -1,0 +1,26 @@
+=== 第 12 轮：整局胜负基准量具修正 @ 2026-09-20T21:49:35Z ===
+=== test:env (含 10 项量具校准) ===
+----------------------------------------------------------------------
+Ran 205 tests in 23.929s
+
+OK (skipped=1)
+=== test:unit ===
+ℹ tests 431
+ℹ pass 431
+ℹ fail 0
+=== test:bridge ===
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0
+=== test:toolbox-roco ===
+ℹ tests 17
+ℹ pass 17
+ℹ fail 0
+=== test:plan-e2e ===
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+=== 基准重跑（摘要） ===
+greedy_damage 80 80 diff 0.05 p 0.480682 fallback 0.0
+shallow_search 80 80 diff -0.0875 p 0.143463 fallback 0.0
+status_control 80 80 diff -0.1 p 0.057373 fallback 0.0
