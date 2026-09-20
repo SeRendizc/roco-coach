@@ -43,6 +43,10 @@ import sys
 DEFAULT_RULESET = "roco-world-s4-2026-09-10"
 CATEGORIES = ("攻击", "状态", "防御", "特性")
 
+# 借用 roco_env.data 时不要往 roco/src/roco_env/ 里写 __pycache__：
+# 那个目录由另一个 agent 负责，本脚本对它只读不写。
+sys.dont_write_bytecode = True
+
 # ────────────────────────────────────────────────────────────────────────────
 # 1. 原语表
 #
@@ -64,11 +68,13 @@ PRIMITIVES = [
         "id": "direct_damage",
         "label": "直接伤害",
         "family": "damage",
-        "pattern": r"造成(物伤|魔伤|物理伤害|魔法伤害)|对敌方精灵造成(物理|魔法)伤害",
+        "pattern": r"造成[^，。]{0,8}(物伤|魔伤|物理伤害|魔法伤害)|对敌方精灵造成(物理|魔法)伤害",
         "terms": [],
         "related_terms": [],
         "note": "最基础的一条：按面板与相性算一次伤害。伤害公式本身没有官方来源"
-                "（pets.json 的 unknown_fields 里明确列着 official_damage_formula）。",
+                "（pets.json 的 unknown_fields 里明确列着 official_damage_formula）。"
+                "注意 361 条里有 3 条不是攻击类技能（刺肤/硬门/听桥）也在造成伤害，"
+                "所以「分类字段」不能替代「这条描述是否造成伤害」。",
     },
     {
         "id": "multi_hit",
@@ -99,7 +105,9 @@ PRIMITIVES = [
         "related_terms": ["1012"],
         "note": "威力在结算时才定：『敌方每有1能量，本次技能威力-10%』"
                 "『消耗越高，伤害越高』『速度比敌方越高，本次技能威力越高』。"
-                "MICROCASE-PLAN 的 MC-010 就是问它，尚无答案 → fail closed。",
+                "MICROCASE-PLAN 的 MC-010 就是问它，尚无答案 → fail closed。"
+                "注意：`support-matrix.json` 的 `dynamic_or_conditional_power` 用的是"
+                "另一条更宽的判定（`scripts/roco/build-support-matrix.mjs`），两者计数不同，不要混用。",
     },
     {
         "id": "power_modifier",
@@ -269,7 +277,7 @@ PRIMITIVES = [
         "id": "energy_drain",
         "label": "失去/偷取能量",
         "family": "energy",
-        "pattern": r"(失去|偷取|扣除)\d*能量|失去能耗之差",
+        "pattern": r"(失去|偷取|扣除)[^，。]{0,10}能量|失去能耗之差",
         "terms": [],
         "related_terms": [],
         "note": "『偷取敌方3能量』：偷取＝敌方失去＋自己获得，但描述未写清；"
@@ -288,7 +296,7 @@ PRIMITIVES = [
         "id": "energy_cost_modifier",
         "label": "能耗增减",
         "family": "energy",
-        "pattern": r"能耗[+\-]|能耗减半|能耗为\d|全技能能耗|本技能能耗|能耗重置",
+        "pattern": r"能耗[+\-]|能耗减半|能耗为\d|全技能能耗|本技能能耗|能耗重置|能耗增加|能耗降低|能耗变化",
         "terms": [],
         "related_terms": [],
         "note": "A 组取念『该技能能耗-2』、啮合传递『传动1』都落在这里。"
@@ -486,7 +494,9 @@ PRIMITIVES = [
         "terms": ["1016"],
         "related_terms": [],
         "note": "A 组六只的『应对型防御』全部命中这一条；1016 一条同时规定三件事"
-                "（必定先手、触发应对效果、携带的防御技能进入1回合冷却）→ MC-020。",
+                "（必定先手、触发应对效果、携带的防御技能进入1回合冷却）→ MC-020。"
+                "本数据里 54 条防御类技能**全部**含『应对攻击』，两者暂时完全重合，"
+                "所以它不能当独立信号用（要拆开必须靠描述里的『应对攻击：』后半句）。",
     },
     {
         "id": "respond_status",
@@ -573,8 +583,9 @@ PRIMITIVES = [
         "pattern": r"选择",
         "terms": ["3019"],
         "related_terms": [],
-        "note": "1019 说『可以从2个效果中选择1个使用』并明确『分别记为明和暗』。"
-                "选择发生在选招时还是结算时未定义。",
+        "note": "3019 说『可以从2个效果中选择1个使用』并明确『分别记为明和暗』。"
+                "选择发生在选招时还是结算时未定义。命中 27 条，但**这 12 只目标精灵的学习表"
+                "里一条都没有**，所以本轮优先级最低：现有数据无法从任何目标精灵触达它。",
     },
     {
         "id": "devotion",
@@ -673,18 +684,20 @@ PRIMITIVES = [
         "pattern": r"入场后的首次|本场战斗首次|首次入场|首次使用",
         "terms": ["1010"],
         "related_terms": [],
-        "note": "A 组音速犬特性『专注力』= 入场首回合获得物攻+100%，但没写哪一句是那个特性。"
-                "1010 定义了『入场后的首次行动』＝迸发的挂载点。",
+        "note": "『本场战斗首次使用的技能获得迅捷』『首次入场时，失去自己一半的当前生命』。"
+                "1010 定义了『入场后的首次行动』这个挂载点。注意 A 组音速犬特性『专注力』"
+                "写的是『入场首回合』而不是『首次』，因此它只落在 switch_trigger，不被本原语命中。",
     },
     {
         "id": "extra_trigger",
         "label": "额外触发/额外使用",
         "family": "timing",
-        "pattern": r"额外触发|额外使用|使用次数\+1|额外获得|会额外|额外获得三个",
+        "pattern": r"额外触发|额外使用|会额外使用|使用次数\+1|额外获得三个",
         "terms": [],
         "related_terms": ["1010"],
         "note": "『双方回合结束时的效果会额外触发1次』『会额外使用1次相同的「选择」效果』。"
-                "额外触发的结算插入点无术语。",
+                "额外触发的结算插入点无术语。注意：描述里泛用的『额外获得X』不算在这里"
+                "（那是 stat_boost / buff_layer_modifier 的条件分支）。",
     },
     {
         "id": "random_effect",
@@ -735,6 +748,16 @@ PRIMITIVES = [
         "related_terms": [],
         "note": "A 组圆号鱼特性『泛音列』= 使用状态技能后，敌方获得「聒噪」技能的效果，"
                 "持续3回合。『获得某个技能的效果』指向什么、如何结算完全没有定义 → 风险项。",
+    },
+    {
+        "id": "active_passive_split",
+        "label": "主动/被动双段技能",
+        "family": "timing",
+        "pattern": r"主动：|被动：",
+        "terms": [],
+        "related_terms": [],
+        "note": "『主动：本技能被动永久额外-1能耗，被动：两侧技能能耗-1，传动1』。"
+                "一条技能里写了两段（主动段/被动段），需要技能对象支持多段效果。",
     },
 ]
 
@@ -831,6 +854,11 @@ AMBIGUITY_RULES = [
         "pattern": r"过量回复",
         "reason": "『过量回复』的定义（超出上限的部分）无术语条目。",
     },
+    {
+        "id": "AMB-EXTERNAL-DATA",
+        "pattern": r"根据自己的血脉|根据捕捉所用的咕噜球",
+        "reason": "效果取决于本数据集之外的字段（血脉 / 咕噜球），数据里没有这些字段，无法实现。",
+    },
 ]
 
 PROSE_ONLY_NO_TERM_NOTE = (
@@ -840,7 +868,71 @@ PROSE_ONLY_NO_TERM_NOTE = (
 )
 
 # ────────────────────────────────────────────────────────────────────────────
-# 3. 数据加载
+# 3. 与旧口径对账
+#
+# `scripts/roco/build-support-matrix.mjs` 里的 MECHANISM_PATTERNS 是 14 个粗粒度
+# 「机制」。本脚本用它当起点，但**逐条对着 824 条描述核过**：
+# 有 3 个状态词和 2 个条件词在这份数据里一次都没出现，同时它漏掉了真正出现的机制。
+# 对账结果写进 JSON 的 legacy_mechanism_mapping，方便下一个人判断该不该沿用旧口径。
+# ────────────────────────────────────────────────────────────────────────────
+
+LEGACY_MECHANISM_PATTERNS = [
+    ("damage", "直接伤害", r"造成(物理|魔法|物伤|魔伤)|本次技能威力|连击|威力\+|威力翻倍|威力变为"),
+    ("multi_hit", "多段/连击", r"连击|2连击|3连击|连击数"),
+    ("charge", "蓄力", r"蓄力"),
+    ("respond", "应对（条件反击）", r"应对(攻击|状态|变化)"),
+    ("shield", "减伤护盾", r"减伤\d|减伤"),
+    ("heal", "回复生命", r"回复\d*%?生命|回复生命|吸血|回复自己生命|返场"),
+    ("energy", "能量增减", r"能量|能耗"),
+    ("mark", "印记", r"印记"),
+    ("stat_mod", "属性增减", r"物攻|物防|魔攻|魔防|速度|双攻"),
+    ("status_dot", "持续状态", r"灼烧|中毒|冻结|麻痹|睡眠|寄生|束缚"),
+    ("escape", "强制离场/脱离", r"脱离|离场|返场|换宠|入场"),
+    ("priority", "先手", r"先手"),
+    ("position", "技能位/传动", r"号位|传动"),
+    ("random", "随机化", r"随机"),
+]
+
+# key -> (拆成了哪些原语, 为什么要拆)
+LEGACY_SPLIT = {
+    "damage": (
+        ["direct_damage", "dynamic_power", "power_modifier", "multi_hit"],
+        "把「直接伤害 / 动态威力 / 威力加成 / 连击」压成了一条，四者在引擎里是四个不同的实现单位。",
+    ),
+    "multi_hit": (["multi_hit", "multi_hit_modifier"], "『2连击』与『连击数+1』是两件事（后者依赖前者存在）。"),
+    "charge": (["charge"], "口径一致，未改动。"),
+    "respond": (["respond_attack", "respond_status", "respond_defense", "respond_success_trigger"],
+                "拆成三种应对条件 + 一种「应对成功后」的奖励触发。"),
+    "shield": (["damage_reduction"], "只保留减伤；「护盾」在本数据里没有独立字段。"),
+    "heal": (["heal", "lifesteal", "switch_leave"],
+             "旧口径把『吸血』『返场』也当成回复生命：吸血是伤害的一个系数，返场是离场流程。"),
+    "energy": (["energy_gain", "energy_drain", "energy_cost_modifier", "energy_cap_change"],
+               "『能量』与『能耗』是两套状态，方向也不同（获得/失去/改消耗/改上限）。"),
+    "mark": (["marks"], "口径一致；但具名印记各自是独立数值规则，见 named_mark_variants。"),
+    "stat_mod": (["stat_boost", "stat_drop"],
+                 "旧口径不区分加减方向，也漏掉了『双防/攻防/攻防速/种族资质』这些写法。"),
+    "status_dot": (["status_dot", "status_freeze", "status_electric_shock", "status_dizzy",
+                    "status_no_escape", "status_morph"],
+                   "旧口径列了三个在这份数据里根本不存在的状态词，却漏掉了真正出现的机制。"),
+    "escape": (["switch_leave", "switch_trigger"],
+               "『离场/脱离/返场』是一个动作，『入场时/离场后触发』是一个时机，二者要分开。"),
+    "priority": (["priority"], "口径一致，未改动。"),
+    "position": (["transmission"], "口径一致；补上了『两侧技能』『跨精灵』这些写法。"),
+    "random": (["random_effect"], "口径一致，未改动。"),
+}
+
+# 旧口径里在这份数据上一次都没出现的字面量（脚本会现场数一遍确认）
+LEGACY_DEAD_TOKENS = ["麻痹", "睡眠", "束缚", "应对变化", "换宠"]
+
+# 旧口径漏掉、但在这份数据里确实出现的写法（脚本会现场数一遍）
+LEGACY_MISSING_TOKENS = {
+    "stat_mod": ["双防", "攻防速", "攻防", "种族资质"],
+    "respond": ["应对防御"],
+    "status_dot": ["引电", "眩晕", "禁足", "萌化"],
+}
+
+# ────────────────────────────────────────────────────────────────────────────
+# 4. 数据加载
 # ────────────────────────────────────────────────────────────────────────────
 
 
@@ -983,7 +1075,7 @@ def load_inputs(ruleset_id):
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# 4. 分类与聚合
+# 5. 分类与聚合
 # ────────────────────────────────────────────────────────────────────────────
 
 
@@ -1188,6 +1280,31 @@ def build(inp):
             ],
         })
 
+    # 每个 A 组候选技能的原子集：哪些原语是术语表背书的，哪些只能靠描述
+    usage = collections.defaultdict(list)
+    for pid in a_pets:
+        for role, sid in sorted(inp.a_group_movesets.get(pid, {}).items()):
+            usage[sid].append({"pet_id": pid, "role": role})
+    prim_index = dict((r["id"], r) for r in prim_rows)
+    a_coverage = []
+    for sid in sorted(a_moveset_union):
+        s = skill_by_id.get(sid)
+        if s is None:
+            continue
+        need = [r["id"] for r in prim_rows if sid in r["skill_ids"]]
+        prose = [i for i in need if not prim_index[i]["glossary_backed"]]
+        a_coverage.append({
+            "skill_id": sid,
+            "name": s["name"],
+            "category": s["category"],
+            "desc": s["desc"],
+            "used_as": sorted(usage.get(sid, []), key=lambda x: (x["pet_id"], x["role"])),
+            "primitive_count": len(need),
+            "primitives": sorted(need),
+            "prose_only_primitives": prose,
+            "fully_glossary_backed": len(prose) == 0,
+        })
+
     prims_sorted = sorted(
         prim_rows,
         key=lambda r: (-r["a_group_moveset_skill_count"],
@@ -1201,7 +1318,7 @@ def build(inp):
 
     named_marks = []
     for tid in sorted(inp.terms, key=lambda x: int(x)):
-        if "印记" in inp.terms[tid]["note"]:
+        if "印记" in inp.terms[tid]["note"] and tid != "3010":
             named_marks.append({
                 "term_id": tid,
                 "note": inp.terms[tid]["note"],
@@ -1212,6 +1329,47 @@ def build(inp):
 
     empty_desc = [s["skill_id"] for s in inp.skills if not s["desc"].strip()]
     no_terms_annotated = sum(1 for sid in inp.desc_notes if not inp.desc_notes[sid])
+
+    # 与 build-support-matrix.mjs 的 MECHANISM_PATTERNS 对账
+    legacy_entries = []
+    for key, label, pat in LEGACY_MECHANISM_PATTERNS:
+        rx = re.compile(pat)
+        lhits = [s for s in inp.skills if rx.search(s["desc"])]
+        split_into, why = LEGACY_SPLIT.get(key, ([], "未对账"))
+        legacy_entries.append({
+            "legacy_key": key,
+            "legacy_label": label,
+            "legacy_pattern": pat,
+            "legacy_hit_count": len(lhits),
+            "legacy_hits_in_target_learnsets": sum(
+                1 for s in lhits if s["skill_id"] in target_skill_union),
+            "legacy_hits_in_a_group_movesets": sum(
+                1 for s in lhits if s["skill_id"] in a_moveset_union),
+            "split_into": list(split_into),
+            "why_changed": why,
+        })
+    legacy_dead = [{
+        "token": tok,
+        "occurrences_in_desc": sum(1 for s in inp.skills if tok in s["desc"]),
+    } for tok in LEGACY_DEAD_TOKENS]
+    legacy_missing = []
+    for key in sorted(LEGACY_MISSING_TOKENS):
+        for tok in LEGACY_MISSING_TOKENS[key]:
+            legacy_missing.append({
+                "legacy_key": key,
+                "token": tok,
+                "occurrences_in_desc": sum(1 for s in inp.skills if tok in s["desc"]),
+            })
+    legacy = {
+        "source": "scripts/roco/build-support-matrix.mjs :: MECHANISM_PATTERNS",
+        "legacy_mechanism_count": len(LEGACY_MECHANISM_PATTERNS),
+        "entries": legacy_entries,
+        "dead_alternatives": legacy_dead,
+        "missing_alternatives": legacy_missing,
+        "note": "旧口径是 14 个粗粒度机制，本清单是 %d 个实现单位；"
+                "dead_alternatives 里出现 0 次的字面量说明旧正则未对本数据核过。"
+                % len(prim_rows),
+    }
 
     doc = {
         "schema_version": 1,
@@ -1242,6 +1400,8 @@ def build(inp):
             "target_learnset_skill_union": len(target_skill_union),
             "a_group_pets": len(a_pets),
             "a_group_candidate_skill_union": len(a_moveset_union),
+            "a_group_skills_fully_glossary_backed": sum(
+                1 for r in a_coverage if r["fully_glossary_backed"]),
             "primitives_total": len(prim_rows),
             "primitives_glossary_backed": len(glossary_backed),
             "primitives_prose_only": len(prose_only),
@@ -1273,6 +1433,8 @@ def build(inp):
         "glossary_terms_referenced_by_exactly_one_skill": single_ref,
         "named_mark_variants": named_marks,
         "a_group_candidate_movesets": a_movesets_out,
+        "a_group_skill_coverage": a_coverage,
+        "legacy_mechanism_mapping": legacy,
         "ambiguity_rules": ambiguity_rules_out,
         "ambiguous_skills": amb_rows,
         "data_gaps": [
@@ -1290,7 +1452,7 @@ def build(inp):
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# 5. 人读文档
+# 6. 人读文档
 # ────────────────────────────────────────────────────────────────────────────
 
 FAMILY_LABEL = {
@@ -1333,6 +1495,8 @@ def render_markdown(doc):
     add("| 术语表中没有任何技能引用的条目 | %d |" % c["glossary_terms_unreferenced_by_any_skill"])
     add("| 目标精灵（12 只）学习表技能并集 | %d |" % c["target_learnset_skill_union"])
     add("| A 组（6 只）候选配招技能并集 | %d |" % c["a_group_candidate_skill_union"])
+    add("| 其中**完全**由术语表背书、不依赖纯描述原语的 | **%d** |"
+        % c["a_group_skills_fully_glossary_backed"])
     add("| 被标为「文本不确定」的技能 | %d |" % c["ambiguous_skills"])
     add("")
 
@@ -1348,6 +1512,41 @@ def render_markdown(doc):
     add("   垂直切片，`A组技能数` 就是「实现这个原语能让几个已选定技能变得可模拟」。")
     add("")
     add("优先级排序键：`A组技能数` ↓ → `12只学习表技能数` ↓ → `技能总数` ↓ → `id` ↑。")
+    add("")
+
+    legacy = doc["legacy_mechanism_mapping"]
+    add("### 0.1 与旧口径（`MECHANISM_PATTERNS`）的对账")
+    add("")
+    add("起点是 `scripts/roco/build-support-matrix.mjs` 里的 %d 个粗粒度机制。"
+        % legacy["legacy_mechanism_count"])
+    add("逐条对着 824 条描述核过之后，它被拆成了本清单的 %d 个实现单位。" % c["primitives_total"])
+    add("")
+    add("| 旧机制 | 旧正则命中 | A组 | 12只 | 拆成 | 为什么改 |")
+    add("|---|---:|---:|---:|---|---|")
+    for e in legacy["entries"]:
+        add("| `%s` %s | %d | %d | %d | %s | %s |" % (
+            e["legacy_key"], md_escape(e["legacy_label"]), e["legacy_hit_count"],
+            e["legacy_hits_in_a_group_movesets"], e["legacy_hits_in_target_learnsets"],
+            "、".join("`%s`" % i for i in e["split_into"]) or "—",
+            md_escape(e["why_changed"])))
+    add("")
+    add("**旧正则里在这份数据上一次都没出现的字面量**（说明它是从别处抄来的，没有对本数据核过）：")
+    add("")
+    add("| 字面量 | 出现次数 |")
+    add("|---|---:|")
+    for d in legacy["dead_alternatives"]:
+        add("| `%s` | %d |" % (md_escape(d["token"]), d["occurrences_in_desc"]))
+    add("")
+    add("**旧正则漏掉、但这份数据里确实出现的写法**：")
+    add("")
+    add("| 属于旧机制 | 漏掉的字面量 | 出现次数 |")
+    add("|---|---|---:|")
+    for m in legacy["missing_alternatives"]:
+        add("| `%s` | `%s` | %d |" % (m["legacy_key"], md_escape(m["token"]),
+                                      m["occurrences_in_desc"]))
+    add("")
+    add("> 这一步不能省：如果直接沿用旧口径，「麻痹/睡眠/束缚/应对变化/换宠」会永远命中 0 条，"
+        "而真正需要实现的『双防/攻防速/种族资质』『应对防御』『引电/眩晕/禁足/萌化』会被漏掉。")
     add("")
 
     add("## 1. 按实现顺序排列的原语总表")
@@ -1386,6 +1585,26 @@ def render_markdown(doc):
             r["skill_count"], "" if r["glossary_backed"] else "   ← 无术语定义"))
     add("```")
     add("")
+    add("### 2.1 逐技能反查：A 组 19 个技能各自需要什么")
+    add("")
+    add("`术语` 列写「全部」= 该技能需要的每个原语都有术语表条目背书；")
+    add("否则列出**只能靠技能描述**的原语 —— 那些就是它现在还不能进模拟的原因。")
+    add("")
+    add("| 技能 | 类别 | 需要的原语 | 只靠描述的原语 | 术语 |")
+    add("|---|---|---:|---|---|")
+    for row in doc["a_group_skill_coverage"]:
+        need = "、".join("`%s`" % i for i in row["primitives"]) or "—"
+        prose = "、".join("`%s`" % i for i in row["prose_only_primitives"]) or "—"
+        verdict = "全部" if row["fully_glossary_backed"] else "**%d 个缺口**" % len(row["prose_only_primitives"])
+        add("| `%s` %s | %s | %d | %s | %s |" % (
+            row["skill_id"], md_escape(row["name"]), row["category"],
+            row["primitive_count"], prose, verdict))
+    add("")
+    add("结论：19 个 A 组候选技能里，只有 **%d** 个是「所有原语都有术语背书」的，"
+        "其余全部至少被一个纯描述原语卡住。" % c["a_group_skills_fully_glossary_backed"])
+    add("换句话说：**A 组现在一个技能都进不了模拟**，与 `PET-SUPPORT-MATRIX.md` 的")
+    add("`KNOWLEDGE_ONLY` 一致；而且卡住它们的不是复杂机制，是最基础的伤害/减伤/回能。")
+    add("")
 
     add("## 3. 原语明细（按族）")
     add("")
@@ -1406,7 +1625,7 @@ def render_markdown(doc):
                    cats.get("防御", 0), cats.get("特性", 0)))
             add("- 12 只目标精灵学习表：**%d** 条；A 组候选配招：**%d** 条"
                 % (r["target_learnset_skill_count"], r["a_group_moveset_skill_count"]))
-            add("- 判定正则：`%s`" % r["pattern"].replace("|", "\\|"))
+            add("- 判定正则：`%s`" % r["pattern"])
             if r["glossary_terms"]:
                 add("- 术语表证据：" + "；".join(
                     "[`%s`] %s —— %s" % (g["term_id"], g["note"], g["desc"])
@@ -1471,7 +1690,7 @@ def render_markdown(doc):
         for t in doc["glossary_terms_referenced_by_exactly_one_skill"]:
             add("| `%s` | %s | %s | %s |" % (
                 t["term_id"], md_escape(t["note"]),
-                "、".join(t["only_referenced_by"]) if t["only_referenced_by"] else "—",
+                "、".join("`%s`" % x for x in t["only_referenced_by"]) if t["only_referenced_by"] else "—",
                 md_escape(t["desc"])))
     else:
         add("| 术语 | 名称 | 定义 |")
@@ -1547,7 +1766,7 @@ def render_markdown(doc):
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# 6. main
+# 7. main
 # ────────────────────────────────────────────────────────────────────────────
 
 

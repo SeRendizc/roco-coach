@@ -502,5 +502,71 @@ class TestTraits(unittest.TestCase):
         self.assertIn("skill_000274", spec.reason, "理由里要指出数值出处")
 
 
+class TestTeamBaseline(unittest.TestCase):
+    """G2 阵容评分 baseline：输出分项证据，**不输出胜率**。"""
+
+    def test_returns_features_not_a_winrate(self):
+        """不得把胜率当结论。
+
+        注意不能简单地断言「不出现『胜率』二字」——本模块的免责声明里
+        就写着「不是胜率」，那是**正确**的表述。要断言的是：
+        没有任何字段把胜率/强度当**结论**给出。
+        """
+        from roco_env import team as rteam
+        score = rteam.evaluate_team(A_TEAM, rs=RS)
+        d = score.to_dict()
+        # ① 顶层不得有胜率类字段
+        for key in ("winrate", "win_rate", "win_probability", "tier", "grade"):
+            self.assertNotIn(key, d)
+        # ② calibration 必须声明是规则 baseline、没有模拟
+        self.assertEqual(d["calibration"], "rule-baseline-no-simulation")
+        # ③ 免责声明必须在，且明确否认胜率
+        self.assertIn("不是胜率", d["note"])
+        # ④ 每个特征都是 0..1 或计数量，不得是「总战力」这种复合分
+        for f in d["features"]:
+            self.assertNotIn("overall", f)
+            self.assertNotIn("score", f)
+
+    def test_every_feature_carries_evidence(self):
+        from roco_env import team as rteam
+        score = rteam.evaluate_team(A_TEAM, rs=RS)
+        names = {f.name for f in score.features}
+        self.assertEqual(names, {"types", "roles", "speed", "damage", "energy", "gaps"})
+        for f in score.features:
+            self.assertIsInstance(f.detail, dict)
+            if f.name != "gaps":
+                self.assertTrue(f.evidence, f"{f.name} 必须能指向具体精灵/技能")
+
+    def test_speed_uses_panel_values_not_race_values(self):
+        from roco_env import team as rteam
+        score = rteam.evaluate_team(A_TEAM, rs=RS)
+        speed = next(f for f in score.features if f.name == "speed")
+        # 面板速度远大于种族速度（1.67×+61），所以最快的面板速度必然 > 150
+        self.assertGreater(speed.detail["fastest"][1], 150.0,
+                           "速度线必须用面板值；用种族值会得到一个很小的数字")
+
+    def test_gaps_are_words_not_a_deduction(self):
+        from roco_env import team as rteam
+        score = rteam.evaluate_team(A_TEAM, rs=RS)
+        gaps = next(f for f in score.features if f.name == "gaps")
+        self.assertIsInstance(gaps.detail["gaps"], list)
+        for g in gaps.detail["gaps"]:
+            self.assertIsInstance(g, str)
+
+    def test_compare_change_reports_cost_as_well_as_gain(self):
+        from roco_env import team as rteam
+        comp = rteam.compare_team_change(A_TEAM, "pet_000062", rs=RS)
+        self.assertIn("improves", comp)
+        self.assertIn("costs", comp)
+        self.assertIn("note", comp)
+        self.assertIn("不等于", comp["note"],
+                      "换人比较必须写明它不等于「更强」")
+
+    def test_rejects_a_team_that_is_not_three(self):
+        from roco_env import team as rteam
+        with self.assertRaises(ValueError):
+            rteam.evaluate_team(["pet_000225"], rs=RS)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
