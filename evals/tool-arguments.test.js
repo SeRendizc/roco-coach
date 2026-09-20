@@ -351,7 +351,18 @@ test('R06 README 代码块里的每条命令都真实存在',async()=>{
  const pkg=JSON.parse(fs.readFileSync(new URL('package.json',root),'utf8'));
  const lines=[...readme.matchAll(/```sh\n([\s\S]*?)```/g)].flatMap(m=>m[1].split('\n')).map(line=>line.replace(/#.*$/,'').trim()).filter(Boolean);
  assert(lines.length>=10,`README 的命令块应当被解析出来，实际只找到 ${lines.length} 条`);
- for(const line of lines){
+ // 允许 `VAR=value` 形式的环境变量前缀（例如 `PORT=8899 npm start`）：
+ // 前缀本身不需要核对，去掉之后按原规则核对其余部分。
+ // 也接受单独一行的赋值（如 `PORT=8899`），它不含可核对的命令。
+ const stripEnv=line=>{
+  let rest=line;
+  while(/^[A-Za-z_][A-Za-z0-9_]*=\S*\s+/.test(rest))rest=rest.replace(/^[A-Za-z_][A-Za-z0-9_]*=\S*\s+/,'');
+  return rest;
+ };
+ for(const rawLine of lines){
+  if(/^[A-Za-z_][A-Za-z0-9_]*=\S*$/.test(rawLine))continue;  // 纯赋值行
+  const line=stripEnv(rawLine);
+  if(!line)continue;
   const run=/^npm run ([\w:.-]+)/.exec(line);
   if(run){assert(Object.hasOwn(pkg.scripts,run[1]),`README 写了 npm run ${run[1]}，package.json 里没有这个 script`);continue;}
   const direct=/^npm (start|test)\b/.exec(line);
@@ -364,10 +375,13 @@ test('R06 README 代码块里的每条命令都真实存在',async()=>{
   if(python){assert(fs.existsSync(new URL(python[1],root)),`README 写了 ${python[1]}，文件不存在`);continue;}
   const pip=/^\.venv-agent\/bin\/python -m pip install -r ([\w.-]+)/.exec(line);
   if(pip){assert(fs.existsSync(new URL(pip[1],root)),`README 写了依赖文件 ${pip[1]}，文件不存在`);continue;}
-  assert(false,`README 里这条命令无法核对（新增写法时请同步这条测试）：${line}`);
+  assert(false,`README 里这条命令无法核对（新增写法时请同步这条测试）：${rawLine}`);
  }
  // 反例：README 真的会被解析，而不是空转
  assert(!lines.includes('npm run eval:does-not-exist'));
+ // 反例：环境变量前缀不能把「不存在的命令」也放过去
+ assert.equal(stripEnv('PORT=1 npm run eval:does-not-exist'),'npm run eval:does-not-exist');
+ assert.equal(stripEnv('PORT=1'),'PORT=1');
 });
 
 
