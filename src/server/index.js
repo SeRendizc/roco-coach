@@ -7,6 +7,7 @@ import {fileURLToPath} from 'node:url';
 import {dirname,join,relative,resolve} from 'node:path';
 import {generateKeyPairSync,privateDecrypt,constants,randomBytes,timingSafeEqual} from 'node:crypto';
 import {runCoach,fitModelMessages} from '../coach/runtime.js';
+import {localModelMode,LocalModel,wrapWithLocalModel,createLocalPlan} from '../coach/local-model.js';
 import {decideOpponentAction,DIFFICULTY_BRIEFING,OPPONENT_TIMEOUT_MS} from './opponent.js';
 import {createRocoService} from './roco-service.js';
 
@@ -119,6 +120,29 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
  const {publicKey,privateKey}=generateKeyPairSync('rsa',{modulusLength:2048});
  const spki=publicKey.export({type:'spki',format:'der'}).toString('base64');
  const sessions=new Map();let credential='',model='deepseek-flash',verified=false,generation=0,inflight=false;
+  // 本地模型只在**真的要用**时才建（懒加载 + 单例）：它常驻约 3 GB 统一内存，
+  // 默认关闭时一个字节都不该占。见 src/coach/local-model.js 的 feature flag。
+  let localSingleton=null;
+  const localModel=()=>{
+   if(!localSingleton)localSingleton=new LocalModel();
+   return localSingleton;
+  };
+  /**
+   * 把云端 provider 按 feature flag 包一层。
+   *
+   * 三种模式：off 原样返回；shadow 跑一遍本地但不改变给玩家的结果；
+   * on 本地可用时用本地。**无论哪种模式，模型都不能改写规则事实**——
+   * 它只产出一段文字或一次工具选择，事实仍由工具回执与 planner 提供。
+   */
+  const applyLocalModel=(base)=>{
+   const mode=localModelMode();
+   if(mode==='off'||!base)return base;
+   const wrapped=wrapWithLocalModel(base,{model:localModel(),mode});
+   // 工具选择也交给本地模型（失败方向同样是「拿不准就停止查证」）。
+   wrapped.plan=createLocalPlan({model:localModel(),tools:['read_state','search_rules','compare_actions',
+    'simulate_branch','inspect_training','read_match','read_evidence','read_last_turn']});
+   return wrapped;
+  };
  // 本机开发用的可选入口：启动时从环境变量读一次密钥，读进内存后不再引用它。
  // 这不改变「不落盘」的性质——应用从不写密钥，是否用环境变量由使用者自己决定。
  // 不设这个变量时行为与以前完全一致，仍然走 /connect.html 加密录入。
@@ -181,7 +205,7 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
      validateChat(b);const cancelled=new AbortController();res.once('close',()=>{if(!res.writableEnded)cancelled.abort();});if(inflight)throw fail(429,'已有请求进行中，请稍后再试');inflight=true;
      try{
       let usage=null,tokenAudit=null;
-      const provider=credential?{name:'deepseek',retrieve:retriever?(q,o)=>retriever.search(q,o):null,async plan(task){
+      const baseProvider=credential?{name:'deepseek',retrieve:retriever?(q,o)=>retriever.search(q,o):null,async plan(task){
        const result=await complete([{role:'system',content:'你为小芽决定是否要查证。仅输出JSON，不输出思考过程。'
        +'**默认是停止。** 只有当答案需要的某个具体事实不在下面的 receipts、也不在游戏规则常识里时，才调用工具。'
        +'必须调用的情况只有三种：玩家问的是本局的具体数字或当前状态而 receipts 里没有；玩家问到某个具体回合当时发生了什么；引入了一条新的战术规则需要核对条件与反例。'
@@ -194,6 +218,7 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
         ...historyForModel(packet.conversation),{role:'user',content:JSON.stringify({player_message:b.message,role:b.role,preference:b.memory.preference||null,recent_messages:historyForModel(b.conversation),game_evidence:packet})}];
        const result=await complete(messages,320,8000,cancelled.signal);usage=result.usage;tokenAudit=result.tokenAudit;return result.text;
       }}:undefined;
+      const provider=applyLocalModel(baseProvider);
       const answer=await runCoach({message:b.message,role:b.role,context:b.context,memory:b.memory,conversation:historyForModel(b.conversation),provider});
       return json(res,200,{...answer,usage,tokenAudit,stateToken:b.stateToken});
      }finally{inflight=false;}

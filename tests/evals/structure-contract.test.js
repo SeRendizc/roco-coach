@@ -135,7 +135,13 @@ test('结构契约：仓库顶层只允许约定俗成的目录与文件', () =>
     //   ② 实施书要求「Python roco_env 是手游规则唯一来源，Node 不得再实现一套」，
     //      目录边界让这条约束看得见；
     //   ③ 它有自己的 pyproject 与测试，不该混进 src/ 的模块图。
-    'roco']);
+    'roco',
+    // models/ 是**模型登记表**（models/registry.json），不是权重。
+    // 权重在 .models/（被 .gitignore 忽略），两者刻意分开：
+    //   ① 登记表要入库，权重不能入库；
+    //   ② 校验脚本按登记表里的 SHA256 校验本机权重，路径写在登记表里。
+    // 这条测试守住「models/ 里只有登记表」——见下面那条。
+    'models']);
   // 顶层只允许这些文件。注意：文档一律进 docs/，
   // 所以这里**没有** COACH-ACCEPTANCE.md / DEEPSEEK.md / coach-design-notes.md 等文档（它们都在 docs/）。
   // 曾经允许过它们，结果它们就真的留在根目录了——允许清单必须等于实际想要的形态。
@@ -150,6 +156,27 @@ test('结构契约：仓库顶层只允许约定俗成的目录与文件', () =>
   }
   assert.deepEqual(unexpected, [],
     `仓库顶层出现了未登记的条目。要么把它归入 src/tests/tools，要么加进这条测试的允许清单并说明理由：\n${unexpected.join('\n')}`);
+});
+
+test('结构契约：models/ 里只有登记表，没有任何权重文件', () => {
+  // 权重（safetensors/gguf/bin）一旦混进 models/ 就会被提交进仓库。
+  // 这条测试是**唯一的**那道闸：目录在允许清单里，所以必须单独守住内容。
+  const entries = readdirSync(join(ROOT, 'models'), {withFileTypes: true});
+  const names = entries.map((e) => e.name);
+  for (const name of names) {
+    assert.ok(!/\.(safetensors|gguf|bin|pt|pth|onnx|npz|mlmodel|h5|ckpt)$/i.test(name),
+      `models/ 里出现了权重文件：${name}（权重要放 .models/，那里被 gitignore）`);
+  }
+  assert.deepEqual(names.filter((n) => !n.startsWith('.')).sort(), ['registry.json'],
+    'models/ 只允许 registry.json（模型登记表）');
+  // 登记表必须自带来源与许可证字段，否则「这个权重是什么」无法追溯。
+  const registry = JSON.parse(readFileSync(join(ROOT, 'models', 'registry.json'), 'utf8'));
+  assert.ok(Array.isArray(registry.models) && registry.models.length, 'registry 必须有 models 段');
+  for (const model of registry.models) {
+    for (const field of ['model_id', 'revision', 'source', 'license', 'quantization']) {
+      assert.ok(model[field], `${model.model_id || '条目'} 缺少 ${field}`);
+    }
+  }
 });
 
 test('结构契约：URL 空间与磁盘空间同构，页面短路径可用', async () => {

@@ -1,0 +1,19 @@
+=== 第 14 轮：Mac 本地模型部署 @ 2026-09-20T22:03:05Z ===
+--- manifest
+✔ mlx-community/Qwen3.5-4B-4bit — 校验 11/11 个文件
+manifest 校验通过
+--- test:env
+Ran 208 tests in 24.348s
+
+OK (skipped=1)
+--- test:unit (含 21 项本地模型测试)
+ℹ tests 452
+ℹ pass 451
+ℹ fail 1
+--- bridge/toolbox/plan-e2e
+ℹ pass 11
+ℹ fail 0
+ℹ pass 17
+ℹ fail 0
+ℹ pass 10
+ℹ fail 0

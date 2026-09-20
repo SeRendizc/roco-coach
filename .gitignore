@@ -50,3 +50,9 @@ reports/roco/demo-acceptance/*.png
 # 本地推理虚拟环境与下载缓存（第 14 轮）：权重与依赖都不入库
 .venv-mlx/
 tmp/uv-cache/
+
+# 本地模型运行产物（日志、PID、请求记录）：每次跑都变，只留 bench.json 当证据
+reports/roco/local-model/*.log
+reports/roco/local-model/*.pid
+reports/roco/local-model/responses.jsonl
+reports/roco/local-model/requests.fifo

@@ -605,7 +605,10 @@ active goal 已按此重写（revision 2）。
 | 日志 | `reports/roco/verification/round8..round13-*.log` |
 | 本轮**保留**的实验 | 无（本轮交付与实验分离，没有为刷指标改动过搜索或评分） |
 | 本轮**撤回/修正**的 | ① `skill_name` 参数键（工具不接受，任务不可完成）；② 判定器胜率判据整段扫描；③ 判定器冲突判据把「一致」判成「冲突」；④ 过期判据只卡正文；⑤ 换世界不清工具层状态版本导致串号；⑥ 给 `receiptSummary` 加注释时误删 `export`（测试全绿但生成器已不能跑） |
-| **本轮进行中（第 14 轮）** | **Mac 本地模型部署**：M5 Pro 48GB 实测确认；`.venv-mlx`（Python 3.12 + mlx-lm 0.31.3，GPU 后端）已建；`mlx-community/Qwen3.5-4B-4bit`（2.9 GB）已下载到 `.models/mlx/`（gitignore）；首次真实推理成功：**首 token 1.62 s、64 token 总延迟 1.86 s、峰值内存 2.43 GB**（关掉 `enable_thinking`） |
+| **第 14 轮已完成** | **Mac 本地模型部署**：M5 Pro 48GB preflight；`.venv-mlx`（Python 3.12 + mlx-lm 0.31.3，GPU 后端）；`mlx-community/Qwen3.5-4B-4bit`（2.9 GB，revision `0e7ffd5c62`，apache-2.0）已下载到 `.models/mlx/`（gitignore）；manifest 逐文件 SHA256 校验通过；一键 setup/start/healthcheck/stop；OpenAI-compatible 网关；feature flag 真实接入 Agent（默认 off）；21 项失败降级测试 | `docs/roco/LOCAL-MODEL.md`、`models/registry.json`、`reports/roco/verification/round14-mac-local-model.log` |
+| 第 14 轮实测 | 固定提示集 8 次调用：首 token p50/p95 **214.5 / 318.1 ms**，总延迟 p50/p95 **362.9 / 470.5 ms**，29.8 tok/s，峰值内存 **2.51 GB**，结构化输出合法率 **1.0（8/8）** | `reports/roco/local-model/bench.json` |
+| 本轮**待验**（外部依赖） | ① 与 DeepSeek 的质量对照要 key（没有就不声称可替代云端）；② `short`/`refuse` 的「说得好不好」要人工审阅或盲评（程序合法率不等于质量） | `docs/CHECKLIST.md` 的 MP11/MP12 |
+| **Windows 3060（明天）** | 用户指令：本轮只做 Mac。3060 那台负责 LightGBM / 小网络 / 环境 profiling / rollout，不与 Mac 拼显存 | — |
 | 下一步（最高优先，不依赖外部条件） | **查清整局基准里的座位效应**（第 12 轮发现）：`greedy_damage` 的 player 座位配对差 **+0.250（p=0.002）**、enemy 座位 **−0.150（p=0.070）**。`step_joint` 是同时结算，所以不是「先手优势」；嫌疑是自驱动循环在补位顺序 / 合法动作枚举 / `PlannerPlayer` 持有的 state 视角上两侧不对称。**查清之前不得把座位效应写进任何产品结论** |
 | 再下一步（不依赖外部条件） | **W5-04 的标签扩充 + 评测闭环**：`tests/evals/intervention-windows.json` 现在只有 30 条、且 `heldMs/hovers` 是假设值。先做**确定性标签扩充器**（同一条窗口在多个局面上重放，判据可程序化判定，两个方向都要测），再谈分类器。硬门控不变 |
 | 外部依赖（不影响上面继续做） | 一个 DeepSeek key（W4-02 的模型候选 / W4-05 三臂对比 / W5-01 gateway）、M5 Pro 48GB（W4-03/04）、3—5 位真人（W5-05）、一次游戏内实测（E03 已验证那一半）+ 录屏（F03） |

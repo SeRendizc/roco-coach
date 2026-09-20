@@ -1,0 +1,86 @@
+{
+  "schema": "roco-local-model-manifest/1",
+  "generated_by": "scripts/model/verify-manifest.mjs（--write 时重算）",
+  "purpose": "Mac 本地小模型的**可复现部署清单**：名字、revision、来源、许可证、量化与逐文件 SHA256。权重本身不入库，靠这份清单校验本机那一份是不是同一个东西。",
+  "device": {
+    "model": "MacBook Pro Mac17,9",
+    "chip": "Apple M5 Pro",
+    "cpu_cores": 15,
+    "memory_gb": 48,
+    "unified_memory": true,
+    "note": "统一内存：权重、KV cache 与推理进程共享同一 48GB，不存在独立显存。"
+  },
+  "runtime": {
+    "engine": "mlx-lm",
+    "engine_version": "0.31.3",
+    "python": "3.12.14",
+    "venv": ".venv-mlx",
+    "backend": "Metal GPU（mx.default_device() == gpu）",
+    "why_mlx": [
+      "Apple Silicon 原生：权重、KV cache 与计算都在统一内存里，不需要把张量搬到独立显存。",
+      "mlx-lm 官方提供结构化输出/工具调用示例，工程接口能直接对齐 Agent 的工具契约。",
+      "同一套权重可用 `mlx_lm.lora` 做后续 LoRA，不需要第二套后端。"
+    ],
+    "why_not_ollama": "Ollama 会自建模型仓库与常驻调度，把版本、量化与超时口径从本项目手里拿走；本项目要求 manifest 可校验、超时可控、回退路径明确，所以直接用 mlx-lm。"
+  },
+  "models": [
+    {
+      "role": "primary",
+      "role_description": "局内低延迟：意图路由、工具选择、干预措辞、本地降级",
+      "model_id": "mlx-community/Qwen3.5-4B-4bit",
+      "base_model": "Qwen/Qwen3.5-4B",
+      "revision": "0e7ffd5c62",
+      "source": "https://huggingface.co/mlx-community/Qwen3.5-4B-4bit",
+      "upstream": "https://huggingface.co/Qwen/Qwen3.5-4B",
+      "license": "apache-2.0",
+      "license_source": "Hugging Face API cardData.license（2026-09-21 核对）",
+      "quantization": {"kind": "mlx-4bit", "bits": 4, "group_size": 64, "mode": "affine"},
+      "download_bytes": 3130711087,
+      "local_dir": ".models/mlx/Qwen3.5-4B-4bit",
+      "chat_template_thinking": "默认会输出 <think> 推理段；局内调用必须显式 enable_thinking=false（本仓库默认关）",
+      "expected_memory_gb": 3.2,
+      "measured": {
+        "first_token_ms": 1621.2,
+        "total_ms": 1859.4,
+        "completion_tokens": 22,
+        "tokens_per_second": 11.83,
+        "peak_memory_gb": 2.425,
+        "memory_source": "mlx-peak",
+        "measured_on": "Mac17,9 / M5 Pro / 48GB / mlx-lm 0.31.3",
+        "note": "单条短回答（关闭 thinking）。不是分布统计：延迟随输出长度线性增长，评测脚本会给分位数。"
+      },
+      "files": {
+        ".gitattributes": {"sha256": "34448b82c17d60fec9b65b1f093c115ddbaadc04beb1b0140b6bfed2e012a930", "bytes": 1570},
+        "chat_template.jinja": {"sha256": "a4aee8afcf2e0711942cf848899be66016f8d14a889ff9ede07bca099c28f715", "bytes": 7756},
+        "config.json": {"sha256": "f3efc81b2ea8d96a45301037d3ccccbcccdef44a961845c87f286aaddbc6eaaa", "bytes": 3366},
+        "model.safetensors": {"sha256": "5fb9acd0246866381cf8c5c354c6db1019f6498eec4ccb4f5edcc71ffeacb2db", "bytes": 3034300695},
+        "model.safetensors.index.json": {"sha256": "52e534c41f7b97708329c85f762e5882bf48bd5955a422c6ae74eba321e6048a", "bytes": 101944},
+        "preprocessor_config.json": {"sha256": "27225450ac9c6529872ee1924fcb0962ff5634834f817040f444118116f4e516", "bytes": 390},
+        "processor_config.json": {"sha256": "14932921ca485d458a04dafd8069fbb0a4505622a48208d19ed247115801385b", "bytes": 1300},
+        "tokenizer.json": {"sha256": "87a7830d63fcf43bf241c3c5242e96e62dd3fdc29224ca26fed8ea333db72de4", "bytes": 19989343},
+        "tokenizer_config.json": {"sha256": "e98f1901ac6f0adff67b1d540bfa0c36ac1a0cf59eb72ed78146ef89aafa1182", "bytes": 1139},
+        "video_preprocessor_config.json": {"sha256": "7768af27c1fafa9cc9011c1dc20067e03f8915e03b63504550e11d5066986d13", "bytes": 385},
+        "vocab.json": {"sha256": "ce99b4cb2983d118806ce0a8b777a35b093e2000a503ebde25853284c9dfa003", "bytes": 6722759}
+      }
+    }
+  ],
+  "not_downloaded": [
+    {
+      "model_id": "mlx-community/Qwen3.5-9B-4bit",
+      "why": "9B 只在 4B 被证明容量不足时才作为 challenger。先把 4B 的评测闭环跑通，不提前占 5 GB 磁盘与带宽。"
+    },
+    {
+      "model_id": "mlx-community/Qwen3.8-27B-4bit",
+      "why": "27B 4bit 约 15 GB，preflight 判断能装下，但按用户角色分工它**只**做离线 teacher/eval/数据生成或慢速深度复盘，不进入约 3 秒的局内关键路径。等 4B 的评测结果说明需要 teacher 时再下载。"
+    },
+    {
+      "model_id": "Qwen/Qwen3.8-2.4T-A95B-FP8",
+      "why": "2.4T MoE，48GB 装不下，且需要多卡；明确出界，不评估。"
+    }
+  ],
+  "forbidden": [
+    "把权重、密钥、完整私有 prompt 或私有数据提交进仓库（.models/ 与 .venv-mlx/ 都在 .gitignore）",
+    "让模型改写规则事实（面板值、伤害、合法动作、状态版本只能来自规则引擎与 planner）",
+    "把模型分数当胜率或把本地模型的输出当已验证事实"
+  ]
+}
