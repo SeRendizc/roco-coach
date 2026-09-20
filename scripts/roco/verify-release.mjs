@@ -45,6 +45,9 @@ export const SUITES = [
     why: '轨迹集与判定器的两个方向；判定器写坏了只有这里看得见'},
   {id: 'model-manifest', cmd: 'node', args: ['scripts/model/verify-manifest.mjs'],
     why: '本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么'},
+  {id: 'provenance', cmd: 'node', args: ['scripts/roco/verify-provenance.mjs'],
+    why: '数据溯源：每条来源有可核对的锚点（归档哈希 / 逐文件清单）、'
+      + '逐实体的 provenance 台账完整。「所有数据必须记录来源」这条边界从散文变成检查'},
   {id: 'state-doc', cmd: 'node', args: ['scripts/roco/verify-state-doc.mjs'],
     why: '状态文档与现实一致：声明的 HEAD 还在历史里、验证产物在、没有引用不存在的路径。'
       + '第 30 轮的教训是文档能漂，而读它的人会在错的前提上继续做事'},

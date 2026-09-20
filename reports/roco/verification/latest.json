@@ -6,7 +6,7 @@
    "id": "env",
    "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
    "ok": true,
-   "ms": 25106,
+   "ms": 25030,
    "tail": [
     "> test:env",
     "> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
@@ -16,55 +16,55 @@
    "id": "unit",
    "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
    "ok": true,
-   "ms": 14930,
+   "ms": 14606,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 14801.227333"
+    "ℹ duration_ms 14475.535334"
    ]
   },
   {
    "id": "bridge",
    "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
    "ok": true,
-   "ms": 3664,
+   "ms": 3679,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 3533.633709"
+    "ℹ duration_ms 3540.4795"
    ]
   },
   {
    "id": "toolbox-roco",
    "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
    "ok": true,
-   "ms": 177,
+   "ms": 184,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 52.14625"
+    "ℹ duration_ms 53.926125"
    ]
   },
   {
    "id": "plan-e2e",
    "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
    "ok": true,
-   "ms": 1706,
+   "ms": 1707,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 1581.127166"
+    "ℹ duration_ms 1580.324167"
    ]
   },
   {
    "id": "trajectories",
    "why": "轨迹集与判定器的两个方向；判定器写坏了只有这里看得见",
    "ok": true,
-   "ms": 862,
+   "ms": 864,
    "tail": [
     ""
    ]
@@ -73,19 +73,29 @@
    "id": "model-manifest",
    "why": "本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么",
    "ok": true,
-   "ms": 1201,
+   "ms": 1203,
    "tail": [
     "✔ mlx-community/Qwen3.5-4B-4bit — 校验 11/11 个文件",
     "manifest 校验通过"
    ]
   },
   {
+   "id": "provenance",
+   "why": "数据溯源：每条来源有可核对的锚点（归档哈希 / 逐文件清单）、逐实体的 provenance 台账完整。「所有数据必须记录来源」这条边界从散文变成检查",
+   "ok": true,
+   "ms": 280,
+   "tail": [
+    "规范化文件 8 份，来源 4 个，provenance 18 条，快照校验通过 3 个",
+    "溯源完整"
+   ]
+  },
+  {
    "id": "state-doc",
    "why": "状态文档与现实一致：声明的 HEAD 还在历史里、验证产物在、没有引用不存在的路径。第 30 轮的教训是文档能漂，而读它的人会在错的前提上继续做事",
    "ok": true,
-   "ms": 49,
+   "ms": 55,
    "tail": [
-    "状态文档：声明 HEAD bbd5563，当前 bbd5563，最近验证套件 10 个",
+    "状态文档：声明 HEAD bbd5563，当前 85cb9f9，最近验证套件 11 个",
     "一致"
    ]
   },
@@ -93,7 +103,7 @@
    "id": "guard-selftest",
    "why": "注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑",
    "ok": true,
-   "ms": 8048,
+   "ms": 8062,
    "tail": [
     "  ✔ 红 generator-artifact-drift",
     "  ✔ 红 companion-sayable-gone",
@@ -105,7 +115,7 @@
    "id": "browser-acceptance",
    "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
    "ok": true,
-   "ms": 20667,
+   "ms": 19756,
    "tail": [
     "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
     "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
@@ -117,7 +127,7 @@
    "id": "demo-acceptance",
    "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
    "ok": true,
-   "ms": 5741,
+   "ms": 5711,
    "tail": [
     "[demo-acceptance] ✔ 玩家抱怨时陪练先回应情绪（R2/R3） — R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。",
     "[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 ",

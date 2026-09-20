@@ -1,0 +1,15 @@
+=== 第 32 轮收尾 @ 2026-09-20T23:43:53Z ===
+  ✔ env（25s）
+  ✔ unit（15s）
+  ✔ bridge（4s）
+  ✔ toolbox-roco（0s）
+  ✔ plan-e2e（2s）
+  ✔ trajectories（1s）
+  ✔ model-manifest（1s）
+  ✔ provenance（0s）
+  ✔ state-doc（0s）
+  ✔ guard-selftest（8s）
+  ✔ browser-acceptance（20s）
+  ✔ demo-acceptance（6s）
+ "verdict": "pass",
+ "failed": [],
