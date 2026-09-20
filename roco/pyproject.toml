@@ -1,0 +1,18 @@
+# roco_env —— 《洛克王国：世界》手游规则的唯一来源。
+#
+# 为什么是纯标准库：本项目的可移植性是刻意维持的（根 package.json 零依赖）。
+# 规则引擎要能在任何有 Python 3.9+ 的机器上直接跑，不装东西。
+# 需要扩展时优先加自己的模块，而不是加依赖。
+#
+# 跑测试：
+#   cd roco && PYTHONPATH=src python3 -m unittest discover -s tests -v
+[project]
+name = "roco-env"
+version = "0.1.0"
+description = "《洛克王国：世界》手游规则引擎（唯一事实来源）"
+requires-python = ">=3.9"
+dependencies = []
+
+[build-system]
+requires = []
+build-backend = "setuptools.build_meta"
