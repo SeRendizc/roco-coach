@@ -52,6 +52,7 @@
     "roco:measure": "python3 scripts/roco/record-measurements.py",
     "roco:calibrate": "python3 scripts/roco/calibrate-from-measurements.py",
     "roco:dashboard": "python3 scripts/roco/build-progress-dashboard.py",
-    "roco:benchmark-planner": "python3 scripts/roco/benchmark-planner.py"
+    "roco:benchmark-planner": "python3 scripts/roco/benchmark-planner.py",
+    "roco:benchmark-matches": "python3 scripts/roco/benchmark-planner-matches.py"
   }
 }

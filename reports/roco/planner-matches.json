@@ -1,0 +1,50 @@
+{
+  "generated_by": "scripts/roco/benchmark-planner-matches.py",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "settings": {
+    "games_per_opponent": 4,
+    "depth": 2,
+    "beam": 3,
+    "budget_ms": 800,
+    "seed_base": 700000,
+    "opponents": [
+      "greedy_damage"
+    ]
+  },
+  "disclaimer": "这不是天梯强度。对手是 5 条启发式策略，不是真人；胜负只在「这套引擎 + 这些对手 + 这串种子」的范围内有意义。它回答的问题是「多回合规划比一步贪心有没有用」，不是「小芽有多强」。",
+  "results": {
+    "greedy_damage": {
+      "planner": {
+        "games": 4,
+        "wins": 2,
+        "losses": 2,
+        "draws": 0,
+        "escaped": 0,
+        "unfinished": 0,
+        "win_rate": 0.5,
+        "win_rate_ci95": [
+          0.15,
+          0.85
+        ],
+        "mean_turns": 18.5,
+        "mean_seconds": 0.989,
+        "decisions": 78,
+        "timed_out_decisions": 0,
+        "fallbacks": 0
+      },
+      "seconds": 4.0,
+      "greedy_baseline": {
+        "games": 4,
+        "wins": 2,
+        "losses": 2,
+        "win_rate": 0.5,
+        "win_rate_ci95": [
+          0.15,
+          0.85
+        ],
+        "mean_turns": 22.0
+      },
+      "delta_win_rate": 0.0
+    }
+  }
+}
