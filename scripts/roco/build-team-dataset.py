@@ -51,8 +51,13 @@ from roco_env import data as rdata          # noqa: E402
 from roco_env import opponents as ropp      # noqa: E402
 from roco_env import team as rteam          # noqa: E402
 
-#: 只从 A 组六只里取三人阵容：这六只的特性与技能是当前唯一核过一遍的。
-A_GROUP = ["寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃", "音速犬"]
+#: 阵容池。W3-01 之后 12 只全部接入引擎（特性 FULL 6 / PARTIAL 2 / REFUSED 4），
+#: 所以阵容池从 A 组 6 只扩到全部 12 只：
+#:   C(6,3) = 20  →  C(12,3) = 220 套三人阵容，家族空间 ×11。
+#: 这正是 G02 报告里说的「第一步该扩阵容池，而不是换模型」。
+A_GROUP = ["寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃", "音速犬",
+           "画间沉铁兽", "秩序鱿墨", "化蝶", "银月狼王",
+           "圣凯布米龙", "月使鹭纳"]
 
 #: 对手池按「行为强度」分层，而不是随便挑几条：如果对手永远比玩家弱，
 #: 标签会一边倒（第一次抽样 12 局里 11 胜），学到的就只是「对手很弱」。
@@ -217,7 +222,7 @@ def build(rs, families: int, games_per_family: int, budget_s: float, base_seed: 
         "ruleset_id": rs.ruleset_id,
         "snapshot_fingerprint": rs.snapshot_fingerprint(),
         "strategy_version": ropp.STRATEGY_VERSION,
-        "a_group": A_GROUP,
+        "roster": A_GROUP,
         "a_group_ids": a_group_ids,
         "opponent_pools": OPPONENT_POOLS,
         "player_strategies": PLAYER_STRATEGIES,

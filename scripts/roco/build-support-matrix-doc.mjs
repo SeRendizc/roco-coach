@@ -140,7 +140,15 @@ for (const p of byOrder.filter((x) => x.group === 'A')) {
   P(`- **发布**：${p.release?.date}（版本 ${p.release?.version}）`);
   P(`- **设计定位（交接材料给定）**：${p.role_hint ?? '—'}`);
   P(`- **特性**：${p.trait ? `${p.trait.name} —— ${p.trait.desc}` : '—'}`);
-  P(`  - ⚠️ 特性效果 ` + '`effect_support: unsupported`' + '：本轮未实现，描述仅作登记。');
+  // 两个字段说的不是一件事，必须分开写：
+  //   · effect_support 是**上游数据**的说法（824/824 全是 unsupported）；
+  //   · engine_status 是**本仓库引擎**的实现状态（FULL / PARTIAL / REFUSED）。
+  // 只写前者会让人以为「什么都没做」，只写后者会让人以为「数据支持了」。
+  P(`  - 数据侧 ` + '`effect_support`' + `：\`${p.trait?.effect_support ?? '—'}\`（上游快照字段，与引擎实现无关）。`);
+  const st = p.trait?.engine_status;
+  const mark = st === 'FULL' ? '✅' : st === 'PARTIAL' ? '◐' : st === 'REFUSED' ? '⛔' : '—';
+  P(`  - 引擎侧 ${mark} **${st ?? '未登记'}**${p.trait?.engine_hook ? `（钩子 \`${p.trait.engine_hook}\`）` : ''}`
+    + `${p.trait?.engine_reason ? `：${p.trait.engine_reason}` : ''}`);
   P(`- **技能池**：${p.learnset.pool_size}（固有 ${p.learnset.native} / 血统 ${p.learnset.blood} / 技能石 ${p.learnset.stones}）`);
   P(`  - 分类：${Object.entries(p.learnset.by_category).map(([k, v]) => `${k} ${v}`).join(' / ')}`);
   P(`  - 有静态威力 ${p.learnset.with_static_power} / 无静态威力 ${p.learnset.without_static_power} / **条件化威力 ${p.learnset.dynamic_or_conditional_power}**`);

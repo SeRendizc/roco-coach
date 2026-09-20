@@ -171,10 +171,30 @@ function selectCandidate(pet, learnset) {
 //   · 本轮：一个都没有实现 → 任何精灵都不可能超过 KNOWLEDGE_ONLY
 //   · A 组额外具备「有证据的候选配招」，属于下一轮 SIM 的目标群，
 //     但**当前仍不可模拟**，因此标 KNOWLEDGE_ONLY 并写明 target。
+// 引擎侧的特性实现状态（由 scripts/roco/export-trait-status.py 生成）。
+// 与数据侧的 effect_support **是两件事**，必须在同一张表里分开写，否则必误导：
+//   · effect_support=unsupported 是**上游快照**的说法（824/824 都是它）；
+//   · engine status 是**本仓库引擎**的实现状态（FULL/PARTIAL/REFUSED 三档）。
+const engineTraits = (() => {
+  try {
+    return JSON.parse(readFileSync('data/roco/engine-trait-status.json', 'utf8'));
+  } catch {
+    return null;
+  }
+})();
+const engineTraitOf = (petName) =>
+  engineTraits?.pets?.find((p) => p.name === petName) ?? null;
+
 function supportLevel(entry) {
+  const implemented = entry.trait?.engine_status;
   return {
     current: 'KNOWLEDGE_ONLY',
-    reason: '本轮未实现任何效果原语，也未通过任何 microcase；所有技能 effect_support=unsupported。',
+    reason: `本轮没有任何 microcase 通过（游戏内实测为零），因此**任何**精灵都不能进实战：`
+      + `支持等级看的是「机制被实测核验过」，不是「代码写过」。`
+      + `12 只特性里引擎侧已实现 ${engineTraits?.counts?.FULL ?? '?'} 条（FULL）、`
+      + `部分实现 ${engineTraits?.counts?.PARTIAL ?? '?'} 条、明确拒绝 ${engineTraits?.counts?.REFUSED ?? '?'} 条`
+      + `${implemented ? `；本精灵的特性当前是 ${implemented}` : ''}。`
+      + `所有技能 effect_support=unsupported 是**数据侧**字段，与引擎实现状态是两件事。`,
     target_next: entry.group === 'A' ? 'SIM_PARTIAL' : entry.group === 'B' ? 'KNOWLEDGE_ONLY' : 'CATALOG_ONLY',
     target_note: entry.group === 'A'
       ? '下一轮为 A 组所选 4 技能实现效果原语并通过 microcase 后升为 SIM_PARTIAL。'
@@ -223,7 +243,18 @@ for (const [pid, pet] of Object.entries(pets).sort((a, b) => a[1].target.order -
       B: { 画间沉铁兽: '复杂形态 / 承伤机制', 秩序鱿墨: '控制 / 场面约束', 化蝶: '减速 / 回复 / 辅助' },
       C: { 银月狼王: 'S4 新精灵（机制核验中）', 圣凯布米龙: 'S4 新精灵（机制核验中）', 月使鹭纳: 'S4 新精灵（机制核验中）' },
     }[pet.target.group]?.[pet.name] ?? null,
-    trait: trait ? { skill_id: ls.feature_skill_id, name: trait.name, desc: trait.desc, effect_support: trait.effect_support } : null,
+    trait: trait ? {
+      skill_id: ls.feature_skill_id,
+      name: trait.name,
+      desc: trait.desc,
+      // 数据侧：上游快照给的支持字段，恒为 unsupported。
+      effect_support: trait.effect_support,
+      // 引擎侧：本仓库的实现状态（FULL/PARTIAL/REFUSED）+ 理由。
+      // 两个字段说的不是一件事，所以**都留着**，由文档分两行写。
+      engine_status: engineTraitOf(pet.name)?.status ?? null,
+      engine_hook: engineTraitOf(pet.name)?.hook ?? null,
+      engine_reason: engineTraitOf(pet.name)?.reason ?? null,
+    } : null,
     learnset: {
       learnset_id: ls.learnset_id,
       native: ls.native_skills.length,

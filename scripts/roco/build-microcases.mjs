@@ -604,6 +604,146 @@ add({
   verification: { level: 'planned', passed: false, how_to_verify_next_round: '实现跨回合状态机；断言蓄力当回合无伤害、次回合释放、离场免疫、免蓄力消耗四件事。' },
 });
 
+
+// ══════════════════════════════════════════════════════════════════════
+// P4：B/C 组特性（W3-01 扩到 12 只之后新增）
+//
+// 这 6 条与 A 组那 6 条**同一形状**：每条都是一个「特性文本说了什么、
+// 而结算规则没说什么」的清单。其中 4 条在引擎里是 REFUSED —— 那些
+// unresolved_questions 就是「为什么做不到」的可核对版本。
+// ══════════════════════════════════════════════════════════════════════
+
+const BC_TRAITS = [
+  { pet: '画间沉铁兽', expect: '行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5', question: '「1层增益」怎么计数——按 buff 键个数，还是按数值层数？增益被同一属性合并时算几层？威力与速度的加成上限？', case_id: 'MC-022' },
+  { pet: '秩序鱿墨', expect: '受到非敌方系别的技能攻击时伤害-50%', question: '「非敌方系别」指「不属于对手任一属性」，还是「与我方属性不同」？两种读法的减伤覆盖面差一倍。', case_id: 'MC-023' },
+  { pet: '化蝶', expect: '受到致命伤害时，获得1层萌化，并免疫此次伤害（最多触发2次）', question: '「萌化」这个状态的效果是什么（数据里只出现在状态技能描述里，没有定义）？免疫发生在伤害结算的哪一步？「最多2次」是每局还是每次入场？', case_id: 'MC-024' },
+  { pet: '银月狼王', expect: '获得自己击败的精灵的特性，每次攻击后自己失去5%生命', question: '「获得特性」是永久还是当局？被击败精灵的特性若自身也是获取型，是否递归？5% 生命是最大生命还是当前生命？', case_id: 'MC-025' },
+  { pet: '圣凯布米龙', expect: '若上回合双方有精灵使用火系技能，本回合自己携带的虫系技能威力+100%', question: '「上回合」是否包含自己？「使用」是否要求技能真的结算成功（被取消算不算）？+100% 与其他威力加成的先后与叠加方式？', case_id: 'MC-026' },
+  { pet: '月使鹭纳', expect: '若上回合双方有精灵使用翼系技能，本回合自己携带的冰系技能威力+100%', question: '与热成像同形；额外要问的是两条特性同时在场时是否各自独立触发。', case_id: 'MC-027' },
+];
+
+for (const t of BC_TRAITS) {
+  const pet = petByName(t.pet);
+  const trait = traitOf(t.pet);
+  const smPet = sm.find((p) => p.name === t.pet);
+  add({
+    case_id: t.case_id,
+    title: `${pet?.group === 'C' ? 'C' : 'B'} 组特性：${t.pet}「${trait?.name}」`,
+    priority: 'P4',
+    category: 'bc_group_trait',
+    why_it_matters: `W3-01 把阵容池从 A 组 6 只扩到 12 只；该特性改变 ${t.pet} 的数值或触发条件，不核验则该精灵只能停在 KNOWLEDGE_ONLY。`,
+    initial_state: {
+      pet: t.pet,
+      pet_id: pet?.pet_id,
+      types: pet?.types,
+      stats: pet?.stats,
+      trait: trait ? { skill_id: trait.trait_skill_id, name: trait.name, desc: trait.desc } : null,
+      note: pet?.group === 'C'
+        ? 'C 组是 S4 新精灵，**单一来源、无交叉核验**；登场不等于热门或强。'
+        : 'B 组有历史数值改动记录，采用前需核对版本。',
+    },
+    public_observation: ['该精灵的面板与特性文本'],
+    legal_actions: { known: false, note: '取决于特性是否产生额外合法动作（通常不产生）' },
+    joint_actions: [{ side_a: '（构造触发条件）', side_b: '（构造对照）', question: t.question }],
+    expected_event_sequence: null,
+    expected_event_sequence_status: 'unknown',
+    evidence: [
+      { level: 'B_description', ...SRC.primary, locator: `Skills.lua#${trait?.trait_skill_id}`, quote: trait?.desc, settled: `快照给出的特性描述：「${trait?.desc}」。这是**文本**，不是结算规则。` },
+      { level: 'C_inference', ...SRC.primary, locator: 'support-matrix.json', settled: `该精灵技能池 ${smPet?.learnset.pool_size} 个技能、条件化威力 ${smPet?.learnset.dynamic_or_conditional_power} 个。` },
+    ],
+    resolved_from_data: [],
+    unresolved_questions: [t.question, '该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？'],
+    verification: {
+      level: 'planned', passed: false,
+      how_to_verify_next_round: `为「${t.pet}」写参数化 case：触发条件、对照条件、以及「描述与实际不符」的失败分支。引擎侧当前状态见 roco/src/roco_env/traits.py 的 TraitSpec.status。`,
+    },
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// 顺序与状态三条（引擎里已实现，但**真实语义**仍待实测）
+// ══════════════════════════════════════════════════════════════════════
+
+add({
+  case_id: 'MC-028',
+  title: '属性增减的复合：多个来源同一属性时相加还是相乘',
+  priority: 'P1',
+  category: 'stat_stacking',
+  why_it_matters: '引擎里「自己获得物攻+60%」与特性「物攻+100%」会写进同一个键。相加是 +160%，相乘是 ×3.2 —— 差一倍。任何伤害结论都建立在这条上。',
+  initial_state: {
+    side_a: { pet: '寂灭骨龙', note: '配招含「力量增效」（自己获得物攻+100%）' },
+    note: '当前引擎按**相加**处理（`effects.buff_damage_multiplier` 的 docstring 写明这是 COMMUNITY_HYPOTHESIS_V1 的一部分）。',
+  },
+  public_observation: ['自身增减文本', '伤害数值（局内可见）'],
+  legal_actions: { known: true, note: '力量增效 + 一次普通攻击即可构造。' },
+  joint_actions: [{ side_a: '力量增效 → 普攻', side_b: '（对照）普攻', question: '同一属性两个来源是相加还是相乘？' }],
+  expected_event_sequence: null,
+  expected_event_sequence_status: 'unknown',
+  evidence: [
+    { level: 'A_glossary_text', ...SRC.primary, locator: 'Terms.lua#3014', settled: '术语只定义了「获得属性增减」这件事，**没有**定义多来源如何复合。' },
+    { level: 'C_inference', ...SRC.primary, locator: 'roco_env/effects.py', settled: '引擎当前实现为相加（假设），并标注未核验。' },
+  ],
+  resolved_from_data: [],
+  unresolved_questions: [
+    '同一属性的两个来源是相加还是相乘？',
+    '增减是否有上下限（例如速度最低为 1、物防不能低于 0）？',
+    '取整发生在每一步还是最后一步？',
+  ],
+  verification: { level: 'planned', passed: false, how_to_verify_next_round: '游戏内构造两个来源，比较实际伤害与「相加/相乘」两种预言值；这是**投入产出比最高**的一条实测，因为它同时标定伤害公式的两个乘区。' },
+});
+
+add({
+  case_id: 'MC-029',
+  title: '防御减伤的结算时机与是否受属性增减影响',
+  priority: 'P1',
+  category: 'defense_timing',
+  why_it_matters: '引擎把「减伤70%」当作乘法直接作用在最终伤害上，且假设**无条件生效**（只有「应对效果」需要应对成功）。若实际是先算减伤再算属性，或者减伤也吃增减，数值会整体偏移。',
+  initial_state: {
+    side_a: { pet: '寂灭骨龙', note: '「龙血」：减伤70%，应对攻击' },
+    side_b: { pet: '音速犬', note: '带一个高威力攻击技能' },
+  },
+  public_observation: ['双方所选技能', '伤害数值'],
+  legal_actions: { known: true },
+  joint_actions: [
+    { side_a: '龙血（防御）', side_b: '普攻', question: '减伤是否无条件生效，还是必须应对成功？' },
+    { side_a: '龙血（防御）', side_b: '道具/换人（不对应攻击）', question: '没有攻击可应对时，减伤还在不在？' },
+  ],
+  expected_event_sequence: null,
+  expected_event_sequence_status: 'unknown',
+  evidence: [
+    { level: 'A_glossary_text', ...SRC.primary, locator: 'Terms.lua#1016', settled: '术语 1016 定义了「应对」与防御技能进 1 回合冷却，**没有**说减伤是否无条件。' },
+    { level: 'C_inference', ...SRC.primary, locator: 'roco_env/effects.py', settled: '引擎取「减伤无条件生效」为假设（parse_defense_reduction 的 docstring）。' },
+  ],
+  resolved_from_data: [],
+  unresolved_questions: [
+    '减伤是无条件生效，还是必须应对成功？',
+    '减伤是乘在最终伤害上，还是在属性计算之前？',
+    '减伤与属性增减同时存在时的先后顺序？',
+  ],
+  verification: { level: 'planned', passed: false, how_to_verify_next_round: '游戏内对照两组：防御+对手攻击 vs 防御+对手换人。前者给出减伤比例，后者给出「是否无条件」。' },
+});
+
+add({
+  case_id: 'MC-030',
+  title: '伤害取整方向与最小伤害',
+  priority: 'P2',
+  category: 'rounding',
+  why_it_matters: '引擎按社区公式向下取整、最小 1。取整方向会让「刚好够不够收」的判断系统性地偏向一侧。',
+  initial_state: { note: '选取多个不同面板/威力的组合，覆盖小数部分接近 .5 的情况。' },
+  public_observation: ['伤害数值'],
+  legal_actions: { known: true },
+  joint_actions: [{ side_a: '普攻', side_b: '防御（固定减伤）', question: '结算结果是向下取整、四舍五入，还是保留小数显示？' }],
+  expected_event_sequence: null,
+  expected_event_sequence_status: 'unknown',
+  evidence: [
+    { level: 'D_unknown', ...SRC.primary, locator: '—', settled: '快照里没有任何关于取整的文字。' },
+    { level: 'C_inference', ...SRC.primary, locator: 'roco_env/effects.py', settled: '引擎沿用社区实现的「向下取整、最小 1」，标注未核验。' },
+  ],
+  resolved_from_data: [],
+  unresolved_questions: ['取整方向？', '是否存在最小伤害保底（是 1 还是别的值）？', '多段攻击是每段取整还是总和取整？'],
+  verification: { level: 'planned', passed: false, how_to_verify_next_round: '用同一技能打不同物防的目标，收集伤害序列，反推取整规则。这是 MC-010 的一部分，可与 MC-028 同批实测。' },
+});
+
 // ── 写文件 ────────────────────────────────────────────────────────────
 const OUT = 'tests/evals/roco/cases/microcases-v1.jsonl';
 mkdirSync('tests/evals/roco/cases', { recursive: true });
