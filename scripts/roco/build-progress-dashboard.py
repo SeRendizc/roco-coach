@@ -238,18 +238,20 @@ ITEMS: List[Dict[str, Any]] = [
      "note": "规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。"},
     {"id": "W5-04", "title": "主动介入成本敏感分类器", "status": PARTIAL,
      "evidence": ["docs/roco/W5-04-INTERVENTION-GATE.md",
-                  "scripts/roco/build-intervention-windows.mjs",
+                  "docs/roco/W5-04-INTERVENTION-GATE-V2.md",
+                  "scripts/roco/build-roco-intervention-windows.py",
                   "scripts/roco/train-intervention-model.py",
                   "src/coach/intervention-model.js",
                   "tests/evals/intervention-layer.test.js"],
-     "note": "预注册 → 窗口集 30 条扩到 3,740 条（seed family 切分 + family 外 OOD）→ "
-             "成本敏感分类器 → 只抑制的判定层（默认关闭、可回滚）→ 10 项守卫测试，已全部落地。"
-             "两次口径的结果都留痕：**v1（决策后分差当标签）`gate_failed`**"
-             "（G3 校准 ECE 0.1546、G4 阈值稳健未过），这是有效的负结论——问题定义不可测；"
-             "**v2（纯决策前观察量）离线 6/6 通过**（ECE 0.0070、误报 0.0、family 外同样通过），"
-             "消融臂证明通过不是因为多塞了特征。"
-             "但运行期缺 `planner_margin_norm`（规划器回执没有「枚举第二名」），"
-             "所以**判定层尚未在真实链路生效**，规则评分仍是默认。"},
+     "note": "预注册 v2（H1—H8，误报上限改为**绝对值**）→ **手游引擎自己标定**的窗口集 2,544 条"
+             "（seed family 切分 + family 外 OOD；边际量阈值 0.1465 只在训练侧估）→ "
+             "成本敏感分类器 → 只抑制的判定层 → 11 项守卫测试。"
+             "**全部可判定判据通过**：H1 召回 0.900、H2 误报 0.0000、H3 ECE 0.0465、"
+             "H4 在阈值 0.74 处 TPR 0.975/FPR 0.0162、H5 family 外 0.9097/0.0023。"
+             "**判据有牙的证据**：对照臂（去掉边际量特征、与规则同信息）在同一套判据下"
+             "挂掉 H1/H3/H4/H5。因此判定层获准进入 **shadow 可观测**（跑模型、记账、"
+             "不改玩家看到的结果)；`on` 仍需真人审阅，尚未获准。"},
+
     {"id": "W5-05", "title": "陪练盲评", "status": NEEDS_HUMAN, "evidence": [],
      "needs": "NEEDS_HUMAN：3—5 位真人玩家，对陪练回复做盲评打分（同一条回复随机标成不同来源）",
      "note": "这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。"},
