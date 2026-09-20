@@ -1,0 +1,62 @@
+HEAD 32e601de6f46dd935d2b567f0f4172a461d07601
+date 2026-09-20T21:23:55Z
+=== npm run test:env ===
+.....................................................................s............................................................................................................................
+----------------------------------------------------------------------
+Ran 194 tests in 13.004s
+
+OK (skipped=1)
+=== npm run test:unit ===
+✔ every capability the interview asks for has an entry point wired (0.3265ms)
+✔ 异常路径不许让 busy 卡住：busy=true 必须紧贴 try，finally 第一句必须放掉它 (0.556208ms)
+✔ 看门狗不许有任何能永远挡住自己的前置条件 (0.622375ms)
+✔ 教练记账绝不允许把一步棋卡死 (0.1505ms)
+ℹ tests 424
+ℹ suites 0
+ℹ pass 424
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13919.017542
+=== npm run test:roco-all ===
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1583.092125
+=== bridge ===
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0
+=== toolbox-roco ===
+ℹ tests 17
+ℹ pass 17
+ℹ fail 0
+=== plan-e2e ===
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+=== demo-acceptance ===
+[demo-acceptance] ✔ 局末给出一个教学入口 — 第 16 回合那个决策点值得回看（这一局 16 个回合）。
+[demo-acceptance] ✔ 局末教学入口在页面上真的显示了 
+[demo-acceptance] ✔ 玩家抱怨时陪练先回应情绪（R2/R3） — R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。
+[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 
+[demo-acceptance] ✔ 控制台没有报错 — []
+[demo-acceptance] 结果：16 通过 / 0 失败；报告见 reports/roco/demo-acceptance/
+=== browser-acceptance ===
+[acceptance] checks 9/9 pass
+[acceptance]   ✔ 营地页渲染出伙伴卡
+[acceptance]   ✔ 属性筛选真的在过滤
+[acceptance]   ✔ 筛选后截图确实处于「已筛选」状态
+[acceptance]   ✔ M1 新增数据未被页面暴露（不在 publicAssets 白名单）
+[acceptance]   ✔ M1 规范化数据在磁盘上存在且含 12 只目标精灵
+[acceptance]   ✔ 能进入对局且公开面板可读
+[acceptance]   ✔ 对局能打到出现结果面板
+[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）
+[acceptance]   ✔ 控制台零报错 / 零未捕获异常
+[acceptance] screenshots: 01-camp.png, 02-filter.png, 03-battle.png, 04-battle-end.png
+[acceptance] wrote /Users/serendizc/Developer/roco-coach/reports/roco/acceptance/browser-acceptance.json

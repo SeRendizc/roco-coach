@@ -108,7 +108,7 @@
       "name": "对局能打到出现结果面板",
       "pass": true,
       "detail": {
-        "strikes": 14,
+        "strikes": 15,
         "ended": {
           "resultVisible": true,
           "text": "本场失利全队经验 +12 · 训练点 +1 · 返回营地继续培养"
@@ -120,7 +120,7 @@
       "pass": true,
       "detail": {
         "maxStuck": 0,
-        "strikes": 14
+        "strikes": 15
       }
     },
     {
