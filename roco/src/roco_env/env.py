@@ -839,6 +839,205 @@ def replay(record: Dict[str, Any], rs: Optional[Ruleset] = None) -> GameState:
     return state
 
 
+
+# ── 公开 planner state（隐藏信息的第二道边界）────────────────────────────
+#
+# 为什么需要它：`serialize()` 是**引擎的完整内部状态**，里面有真实 seed、
+# 对手本回合已提交的动作、对手后备的血量。把整份递给教练等于把隐藏信息递过去。
+# 教练只能看公开信息（产品红线），所以规划请求走这个 schema。
+#
+# 与 observation 的区别：observation 是「玩家能看到什么」，
+# 公开 planner state 是「规划器需要什么」——它多带 turn / phase / 后备存活情况，
+# 但**没有** seed、没有 pending、没有对手后备的具体血量与配招。
+
+PUBLIC_PLANNER_SCHEMA_VERSION = 1
+
+# 重建搜索状态时对方后备的**未知量**怎么填。这些值不是「猜对手」，而是
+# 「我们不知道，因此按名义值建模，并在 limitations 里写明」。
+# 之所以可以这样：规划只用于给出取舍建议，任何依赖对手后备精确血量的结论
+# 都会因为这次简化而偏乐观——所以必须如实标注，且分析要跨多个 analysis seed 聚合。
+OPPONENT_BENCH_ASSUMPTION = "full_hp_nominal_loadout"
+
+
+def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") -> Dict[str, Any]:
+    """把对局状态裁剪成**可以安全交给教练**的规划输入。
+
+    只保留公开字段：
+      - 回合、阶段、结果、规则集 id、状态版本
+      - 双方**场上**面板（生命、能量、公开状态与印记、防御冷却、蓄力与否、增益）
+      - 己方后备的完整面板与配招（自己的信息）
+      - 对手后备**只有**位次、精灵 id、是否倒下、现在的 active 位（术语 3010 的公开部分）
+    绝不包含：seed、随机源、`_pending_*`、对手后备血量/能量/配招。
+    """
+    me = getattr(state, side)
+    foe = getattr(state, "enemy" if side == "player" else "player")
+
+    def own_pet(p: PetState) -> Dict[str, Any]:
+        return {
+            "slot": p.slot,
+            "pet_id": p.pet_id,
+            "hp": p.hp,
+            "max_hp": p.max_hp,
+            "energy": p.energy,
+            "fainted": p.fainted,
+            "statuses": {k: dict(v) for k, v in p.statuses.items()},
+            "marks": dict(p.marks),
+            "buffs": dict(p.buffs),
+            "defense_cooldown": p.defense_cooldown,
+            "charging": bool(p.charge),
+            "entered_turn": p.entered_turn,
+        }
+
+    def foe_field_pet(p: PetState) -> Dict[str, Any]:
+        # 对手**场上**的面板是公开的：生命条、能量、异常与印记都写在屏幕上
+        return {
+            "slot": p.slot,
+            "pet_id": p.pet_id,
+            "hp": p.hp,
+            "max_hp": p.max_hp,
+            "energy": p.energy,
+            "fainted": p.fainted,
+            "statuses": {k: dict(v) for k, v in p.statuses.items()},
+            "marks": dict(p.marks),
+            "defense_cooldown": p.defense_cooldown,
+            "charging": bool(p.charge),
+        }
+
+    return {
+        "schema_version": PUBLIC_PLANNER_SCHEMA_VERSION,
+        "ruleset_id": state.ruleset_id,
+        "state_version": state.state_version,
+        "side": side,
+        "turn": state.turn,
+        "phase": state.phase,
+        "result": state.result,
+        "self": {
+            "active": me.active,
+            "items": dict(me.items),
+            # 配招是自己的信息，可以给
+            "loadouts": {k: list(v) for k, v in (me.loadouts or {}).items()},
+            "pets": [own_pet(p) for p in me.pets],
+        },
+        "opponent": {
+            "active": foe.active,
+            "living_count": len(foe.living()),
+            "field": foe_field_pet(foe.field_pet),
+            # 后备：只有位次 / id / 是否倒下。**没有血量、没有配招。**
+            "bench": [
+                {"slot": p.slot, "pet_id": p.pet_id, "fainted": p.fainted}
+                for i, p in enumerate(foe.pets) if i != foe.active
+            ],
+        },
+        "assumptions": {
+            "opponent_bench": OPPONENT_BENCH_ASSUMPTION,
+            "note": (
+                "对手后备的血量与配招不在公开信息里，重建搜索状态时按满血 + "
+                "规范配招建模。任何依赖对手后备精确血量的结论都会因此偏乐观。"
+            ),
+        },
+    }
+
+
+def state_from_public_planner(
+    public: Dict[str, Any],
+    rs: Ruleset,
+    *,
+    analysis_seed: int,
+) -> "GameState":
+    """由**公开** planner state 重建一个用于分析的 `GameState`。
+
+    重建规则（每一步都可解释）：
+      - 真实 seed 不参与。`analysis_seed` 由调用方给出（固定值或由公开状态指纹派生），
+        与真实对局 seed 无关。
+      - 对手后备按 `OPPONENT_BENCH_ASSUMPTION` 建模：满血 + 规范配招。
+      - 重建出来的状态**只用于规划与估值**，不是权威对局状态；回执里必须说明这一点。
+    """
+    if public.get("schema_version") != PUBLIC_PLANNER_SCHEMA_VERSION:
+        raise ValueError(f"公开 planner state 版本不支持：{public.get('schema_version')}")
+    if public.get("ruleset_id") != rs.ruleset_id:
+        raise ValueError(f"规则集不匹配：{public.get('ruleset_id')} vs {rs.ruleset_id}")
+
+    side = public.get("side", "player")
+    other = "enemy" if side == "player" else "player"
+
+    def mk_own(d: Dict[str, Any]) -> PetState:
+        p = PetState(
+            pet_id=d["pet_id"], slot=int(d["slot"]),
+            hp=int(d["hp"]), max_hp=int(d["max_hp"]), energy=int(d.get("energy", 0)),
+            statuses=dict(d.get("statuses") or {}), marks=dict(d.get("marks") or {}),
+            buffs=dict(d.get("buffs") or {}),
+            defense_cooldown=int(d.get("defense_cooldown", 0)),
+            charge=d.get("charging") or None,
+            entered_turn=d.get("entered_turn"),
+            fainted=bool(d.get("fainted", False)),
+        )
+        return p
+
+    def mk_foe_field(d: Dict[str, Any]) -> PetState:
+        return PetState(
+            pet_id=d["pet_id"], slot=int(d["slot"]),
+            hp=int(d["hp"]), max_hp=int(d["max_hp"]), energy=int(d.get("energy", 0)),
+            statuses=dict(d.get("statuses") or {}), marks=dict(d.get("marks") or {}),
+            defense_cooldown=int(d.get("defense_cooldown", 0)),
+            charge=d.get("charging") or None,
+            fainted=bool(d.get("fainted", False)),
+        )
+
+    def mk_bench_assumed(pet_id: str, slot: int) -> PetState:
+        """对手后备：满血 + 规范配招（公开信息里没有，按假设建模）。"""
+        p = _make_pet(rs, pet_id, slot, 1)
+        p.entered_turn = None
+        return p
+
+    own = public["self"]
+    foe = public["opponent"]
+
+    own_pets = [mk_own(p) for p in own["pets"]]
+    own_active = int(own["active"])
+
+    # 对手队列：先放场上那只，再把后备按位次补齐
+    foe_slots: Dict[int, PetState] = {}
+    field = mk_foe_field(foe["field"])
+    foe_slots[int(field.slot)] = field
+    for b in foe.get("bench", []):
+        slot = int(b["slot"])
+        assumed = mk_bench_assumed(b["pet_id"], slot)
+        if b.get("fainted"):
+            assumed.hp = 0
+            assumed.fainted = True
+        foe_slots[slot] = assumed
+    n = max(foe_slots) + 1 if foe_slots else 1
+    foe_pets = []
+    for i in range(n):
+        if i in foe_slots:
+            foe_pets.append(foe_slots[i])
+        else:
+            # 公开信息里连位次都没给全时，用规范配招补一个占位（仍会被标注为假设）
+            fallback_id = rs.candidate_movesets and next(iter(rs.candidate_movesets)) or None
+            if fallback_id is None:
+                raise ValueError("无法重建对手队伍：公开信息缺位次且规则集没有规范配招")
+            foe_pets.append(mk_bench_assumed(fallback_id, i))
+
+    state = GameState(
+        ruleset_id=rs.ruleset_id,
+        seed=int(analysis_seed),          # 分析用的种子，与真实对局无关
+        player=SideState(name=side, pets=own_pets, active=own_active,
+                         items=dict(own.get("items") or {})),
+        enemy=SideState(name=other, pets=foe_pets, active=int(foe["active"]),
+                        items=dict(DEFAULT_ITEM_STOCK)),
+        turn=int(public.get("turn", 1)),
+        phase=str(public.get("phase", "battle")),
+        result=public.get("result"),
+        state_version=int(public.get("state_version", 0)),
+    )
+    # 己方配招来自公开信息；对手配招是假设值
+    state.player.loadouts = {k: tuple(v) for k, v in (own.get("loadouts") or {}).items()}
+    if side != "player":
+        # 保证 player/enemy 两个名字都可用（内部一律用 player/enemy 命名）
+        state.player, state.enemy = state.enemy, state.player
+    state.enemy.loadouts = {p.pet_id: rs.candidate_moveset(p.pet_id) for p in state.enemy.pets}
+    return state
+
 def observe(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
     """公开观察。隐藏信息的唯一边界。"""
     return observation_for(state, rs, side)

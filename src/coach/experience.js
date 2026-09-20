@@ -5,6 +5,8 @@ import {strategist} from './strategist.js';
 import {skillLesson} from './teacher.js';
 import {teachingPlan} from './memory.js';
 import {active,multiplier,actionName,legalActions,SKILLS,ITEMS,damage,effectiveSpeed} from '../game/engine.js';
+// P01 的模式硬门控住在 policy.js（那一层就是「谁可以收到战术帮助」），这里只消费它的结论。
+import {interventionPolicyGate} from './policy.js';
 // incident 来自 coach/experience.js 军师触发层的真实枚举结果（分差 + after 快照上的后果）。
 // 只有军师判定为「明显错误且造成后果」时才传进来，所以这里只是把理由写成一句可核对的话。
 export function observe(game,{incident=null}={}){
@@ -91,8 +93,17 @@ export function releaseAttention(state){
  state.since=null;                // 墙钟计时的起点一并作废
  return state;
 }
-export function shouldNudge(state,{now,turn,mode='gentle',active=true,risk=false,holdMs=0}){
- if(!active||mode==='quiet'||state.dismissed||state.count>=2||state.shownTurn===turn||now-state.lastShown<45000)return false;
+export function shouldNudge(state,{now,turn,mode='gentle',active=true,risk=false,holdMs=0,focus=true,stale=false,background=false,animating=false,chatting=false,preview=false,ended=false,battleMode=null,game=null,epoch=null,stateEpoch=null}={}){
+ // P01：原来这里的前五个条件现在归 interventionGate / interventionBudget 统一判定，
+ // 语义逐条对齐（既有调用者一个字都不用改）：
+ //   !active → not-in-match        state.count>=2 → hint-budget
+ //   mode==='quiet' → explicit-quiet  state.shownTurn===turn → decision-answered
+ //   state.dismissed → hint-dismissed now-state.lastShown<45000 → cooldown
+ // 新增的宿主门控（focus/stale/background/animating/chatting/preview/ended）默认放行，
+ // 所以行为与以前完全一致；宿主把事实传进来就立即生效。
+ if(interventionGate({preference:mode,mode,active,focus,stale,background,animating,chatting,preview,ended,battleMode,game,epoch,stateEpoch,
+  dismissed:state?.dismissed===true,decisionKey:turn??null,lastDecisionKey:state?.shownTurn??null}))return false;
+ if(interventionBudget({now,recentHints:state?.count,lastHintAt:state?.lastShown}).blocked)return false;
  if(mode==='critical'&&!risk)return false;
  const seen=(state.hovers||[]).filter(x=>x&&x.action);        // 没有 action 的记录不算一个选项
  const scanning=seen.length>=3&&new Set(seen.map(x=>actionKey(x.action))).size>=2&&now-state.since>=8000;
@@ -109,6 +120,132 @@ export function attentionText(game,action){
  const q=active(game,'enemy');
  if(q.status?.kind==='burn'&&p.skills.includes('pursuit'))return '对面已经灼烧，追猎会增伤；不过如果两招都能收掉，就不必只看谁数字大。';
  return '拿不准时，先看对方留场和换宠两种情况。回合回顾里可以展开比较，由你决定。';
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// P01：干预策略本体的重写（should_intervene）。
+//
+// 旧路径把「要不要开口」拆成三个布尔：shouldNudge 的固定等待（悬停 ≥20 秒，或扫过两个
+// 选项 ≥8 秒）、strategistTrigger 的三类理由、adaptiveGate 的降频。两个真问题：
+//   ① 输出是布尔的，说不清「这次不打扰」是无话可说，还是该留到复盘；
+//   ② 固定等待不知道局面风险、也不知道行动分差，于是「看了很久但选对了」会被打断，
+//      而「很快选错」反而没人说话。
+//
+// 新策略是纯函数、四选一、门控在前：
+//   特征输入：局面风险、best-vs-second-best 行动分差、剩余可行动时间、技能证据、
+//             近期提示数、显式偏好、焦点状态（外加既有记账：本局次数 / 冷却 / 本决策）
+//   动作输出：silent | micro_hint | action_hint | defer_to_review（恰好四个，不是布尔）
+//   硬门控（在任何评分之前，权重不可能换回它们）：
+//             安静偏好 / 线上竞技 / 窗口失焦 / 状态陈旧 / 刚被点掉，
+//             再加后台、动画、聊天、预制体验、对局结束、每决策一次。
+//   预算（每局 2 条、45 秒冷却）不判死，而是把决定性局面转成复盘条目：
+//             「不能再打断」不等于「当作没发生过」。
+//
+// 证据边界：权重与阈值是产品规则的编码，不是从真人数据拟合的；它们只用于在四个动作之间
+// 排序，不声称胜率，也不声称干预真的帮到了玩家。P02 的窗口评测是 fixture，不是人体实验。
+export const INTERVENTION_ACTIONS=['silent','micro_hint','action_hint','defer_to_review'];
+export const INTERVENTION_LIMITS={maxHintsPerMatch:2,cooldownMs:45000,actionableMs:3000,criticalRisk:0.8,valueFloor:1.2,skillWeight:1.4};
+
+// 硬门控：null = 通过；字符串 = 必须沉默的门控标识（也是测试与报告里的可核对理由）。
+// 顺序即优先级，前五个就是 roadmap 要求「reward 永远不能交换掉」的那五个。
+export function interventionGate(f={}){
+ const game=f.game||null,battleMode=f.battleMode??game?.mode??null;
+ // ① 五个不可交换的硬门控。
+ if(f.preference==='quiet'||f.mode==='quiet')return 'explicit-quiet';         // 玩家显式选了安静档
+ const policy=interventionPolicyGate({mode:battleMode,battle:game,ended:f.ended===true});
+ if(policy)return policy;                                                     // 'pvp-live' | 'ended'
+ if(f.focus===false)return 'window-unfocused';                                // 窗口失焦
+ if(f.stale===true)return 'stale-state';                                      // 特征描述的局面已经不存在
+ if(Number.isFinite(f.epoch)&&Number.isFinite(f.stateEpoch)&&f.epoch!==f.stateEpoch)return 'stale-state';
+ if(f.dismissed===true||f.attention?.dismissed===true||f.session?.dismissed===true)return 'hint-dismissed';
+ // ② 宿主状态：不打断是纪律，不是「这次没什么可说」。
+ if(f.active===false)return 'not-in-match';
+ if(f.background===true||f.hidden===true)return 'background';
+ if(f.animating===true||f.busy===true)return 'animating';
+ if(f.chatting===true||f.asking===true)return 'chatting';
+ if(f.preview===true||game?.preview===true)return 'preview';
+ // ③ 每决策至多一次：已经就这一手说过的，不再重复同一手。
+ if(f.decisionKey!=null&&f.lastDecisionKey!=null&&f.decisionKey===f.lastDecisionKey)return 'decision-answered';
+ return null;
+}
+
+// 频率预算：不打断，但不抹掉这一手。命中的局面由 interventionScore 转成 defer_to_review。
+export function interventionBudget(f={}){
+ const cap=f.maxHintsPerMatch??INTERVENTION_LIMITS.maxHintsPerMatch;
+ const cooldown=f.cooldownMs??INTERVENTION_LIMITS.cooldownMs;
+ if(Number.isFinite(f.recentHints)&&f.recentHints>=cap)return {blocked:true,reason:'hint-budget'};
+ if(Number.isFinite(f.lastHintAt)&&Number.isFinite(f.now)&&f.now-f.lastHintAt<cooldown)return {blocked:true,reason:'cooldown'};
+ return {blocked:false,reason:null};
+}
+
+// 局面风险：只用公开且确定的事实（是否必须补位、当前血量比例）。
+// 0.35 这条线沿用 observe() 与 decisiveOpportunity 已经在用的危险血线，不另立一套。
+export function situationRisk(game){
+ if(!playable(game))return 0;
+ const p=active(game,'player');
+ if(!p)return 0;
+ if(game.phase==='replace'||p.hp<=0)return 1;        // 必须补位：不可逆，而补位是免费动作
+ const ratio=p.maxHp>0?p.hp/p.maxHp:0;
+ if(ratio<=.35)return .8;
+ if(ratio<=.6)return .5;
+ return .2;
+}
+
+const clamp01=n=>n<0?0:n>1?1:n;
+// 评分：只在 interventionGate 通过之后运行。
+// value 的构成（全部是公开事实，不含胜率）：
+//   3 × risk                      —— 局面越危险越值得占用注意力
+//   1.2 × min(gap / REASONABLE_GAP, 1) —— 分差阈值复用 assessDecision / strategicIncident 的「>5 才算明显」
+// floor = valueFloor + skillWeight × skill —— 技能证据只抬高门槛、不压低：没有证据 ≠ 熟练
+export function interventionScore(f={}){
+ const risk=clamp01(Number.isFinite(f.risk)?f.risk:0);
+ const gap=Number.isFinite(f.gap)?f.gap:null;
+ const skill=clamp01(Number.isFinite(f.skill)?f.skill:0);
+ const timeLeft=Number.isFinite(f.timeLeft)?f.timeLeft:Infinity;
+ const preference=f.preference??f.mode??'gentle';
+ const value=round1(3*risk+1.2*Math.min(Math.max(gap??0,0)/REASONABLE_GAP,1));
+ const floor=round1(INTERVENTION_LIMITS.valueFloor+INTERVENTION_LIMITS.skillWeight*skill);
+ const decisive=(gap!==null&&gap>REASONABLE_GAP)||risk>=INTERVENTION_LIMITS.criticalRisk;
+ const budget=interventionBudget(f);
+ // 剩余时间不够读完再改这一手：不打断，但值得复盘。
+ if(timeLeft<INTERVENTION_LIMITS.actionableMs)
+  return {action:decisive||value>=floor?'defer_to_review':'silent',reason:'not-actionable-now',value,floor,decisive,budget:null};
+ if(budget.blocked)
+  return {action:decisive||value>=floor?'defer_to_review':'silent',reason:budget.reason,value,floor,decisive,budget:budget.reason};
+ // 「仅关键风险」档：非关键局面连复盘条目都不生成——那是玩家明确划掉的注意力预算。
+ if(preference==='critical'&&!decisive)
+  return {action:'silent',reason:'critical-preference',value,floor,decisive,budget:null};
+ if(decisive)
+  return {action:'action_hint',reason:gap!==null&&gap>REASONABLE_GAP?'decisive-gap':'critical-risk',value,floor,decisive,budget:null};
+ if(value>=floor)
+  return {action:'micro_hint',reason:'moderate-risk',value,floor,decisive,budget:null};
+ return {action:'silent',reason:'below-threshold',value,floor,decisive,budget:null};
+}
+
+// 完整判定（含门控标识），供测试、评测脚本与「为什么现在说」的解释入口使用。
+export function interventionDetail(features={}){
+ const gate=interventionGate(features);
+ if(gate)return {action:'silent',gate,reason:`hard-gate:${gate}`,value:null,floor:null,decisive:false,budget:null};
+ return {gate:null,...interventionScore(features)};
+}
+// 对外只暴露四个动作之一。调用方不应该拿到布尔。
+export function shouldIntervene(features={}){return interventionDetail(features).action;}
+
+// 从真实的局内对象投影出特征向量（纯函数，不碰 DOM）：
+// 把宿主层已经在检查的事实（document.hidden / hasFocus / busy / asking / preview / result）
+// 收进一个可断言的对象。P02 的录制窗口用的就是同一组字段名。
+export function interventionFeatures({game=null,attention=null,session=null,mode='gentle',now=0,host={},risk=null,gap=null,skill=null,timeLeft=Infinity}={}){
+ const tkey=game?turnKey(game):(host.decisionKey??null);
+ const answered=tkey!=null&&session?.said?.has?.(`turn:${tkey}`)?tkey:null;
+ return {game,battleMode:game?.mode??host.battleMode??null,preference:mode,mode,
+  focus:host.focus!==false,stale:host.stale===true,background:host.background===true,animating:host.animating===true,
+  chatting:host.chatting===true,preview:host.preview===true,ended:host.ended===true,active:host.active!==false,
+  dismissed:attention?.dismissed===true||session?.dismissed===true,
+  decisionKey:tkey,lastDecisionKey:answered??attention?.shownTurn??null,
+  recentHints:session?.hints??attention?.count??0,
+  lastHintAt:Number.isFinite(session?.lastAt)?session.lastAt:(Number.isFinite(attention?.lastShown)?attention.lastShown:-Infinity),
+  now,epoch:Number.isFinite(host.epoch)?host.epoch:null,stateEpoch:Number.isFinite(host.stateEpoch)?host.stateEpoch:null,
+  risk:Number.isFinite(risk)?risk:situationRisk(game),gap,skill,timeLeft};
 }
 
 export function decisiveOpportunity(game){

@@ -1,0 +1,136 @@
+{
+  "artifacts": {
+    "failures": "failures.jsonl",
+    "manifest": "manifest.json",
+    "metrics": "metrics.json",
+    "readme": "README.md"
+  },
+  "base_seed": 20260921,
+  "code_commit": "4da4fca4964c18434335e4a50db4976cae4f5ebd",
+  "command": "python3 roco/run_pilot.py --quiet",
+  "disclaimer": "本报告的分组胜负计数是**环境自检，不是胜率、不是强度榜**。社区阵容出现频率不是胜率；模拟出来的胜场数也不是天梯强度。这里没有任何一个策略可以被称为「强」或「T0」——本项目的策略池按**行为**命名而不按名次命名，正是因为「谁强」需要真实天梯样本，而本项目没有。",
+  "games": 1000,
+  "generated_at": "2026-09-21T02:36:37+08:00",
+  "git_dirty": true,
+  "host": "darwin",
+  "loadouts": "M1 规范配招（Ruleset.candidate_moveset），由 env.reset 自动套用",
+  "pilot": "S02-1000-game-pilot",
+  "python": "3.9.6",
+  "reproduce": "cd /Users/serendizc/Developer/roco-coach && python3 roco/run_pilot.py --games 1000 --base-seed 20260921 --out /Users/serendizc/Developer/roco-coach/reports/roco/pilot-1000",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "seed_range": [
+    20260921,
+    20261920
+  ],
+  "snapshot_files": {
+    "learnsets.json": "0a68366b6624f94efec43b6ee036152bbb37f84e396024f3e63fb868220f3052",
+    "pets.json": "8ba09fd7a05e1d023a6add5e79a81408e7890606b3067da4d15662f7f48fcdb0",
+    "skills.json": "9d01a6476a529be750973b4b3e8eb939112773f6a8b685e15e67516092e278e4",
+    "support-matrix.json": "803058f17ed53bc8ef51d3b9b0851114c6e6cacdb58ec07235350bd0e7f4278b",
+    "terms.json": "1b12b19993c05d901218942c0223a638bdd91194343e2817e559c59c5593bc6f",
+    "types.json": "d2b4d0eaebd466905871cd7d55fc9a54e545b3ea676ae6d8c53e3e60d371defc"
+  },
+  "snapshot_fingerprint": "affa4273ae5fb87578d038084e7a30dc6f5e2fd5e59d11049f0aa989c40a1f7a",
+  "strategies": [
+    {
+      "name": "random_legal",
+      "note": "在 legal_actions 上均匀随机；对照组。",
+      "version": 1
+    },
+    {
+      "name": "greedy_damage",
+      "note": "取即时伤害估计最高的一手（能耗折价；残血时才吃药）。",
+      "version": 1
+    },
+    {
+      "name": "conservative_switch",
+      "note": "对位吃亏且后备明显更能扛时换人，否则吃药/防御/省能量出手。",
+      "version": 1
+    },
+    {
+      "name": "status_control",
+      "note": "优先施加状态/减益/印记（解析器说没覆盖的算半套，打对折）。",
+      "version": 1
+    },
+    {
+      "name": "shallow_search",
+      "note": "对每一手做 1 层前瞻：收益 − 对手最疼还手 − 换人整回合成本。",
+      "version": 1
+    }
+  ],
+  "strategy_version": 1,
+  "teams": {
+    "note": "A 组六只组成的 4 套三人队，T<下标> 就是 `team_pool` 的下标；先手侧与后手侧都会轮到每一套，避免座位与队伍绑死。",
+    "pool": [
+      "pet_000225",
+      "pet_000190",
+      "pet_000445",
+      "pet_000417",
+      "pet_000112",
+      "pet_000062"
+    ],
+    "pool_names": [
+      "寂灭骨龙",
+      "海豹船长",
+      "黑猫巫师",
+      "圆号鱼",
+      "雪影娃娃",
+      "音速犬"
+    ],
+    "team_pool": [
+      {
+        "id": "T0",
+        "names": [
+          "寂灭骨龙",
+          "海豹船长",
+          "黑猫巫师"
+        ],
+        "pets": [
+          "pet_000225",
+          "pet_000190",
+          "pet_000445"
+        ]
+      },
+      {
+        "id": "T1",
+        "names": [
+          "圆号鱼",
+          "雪影娃娃",
+          "音速犬"
+        ],
+        "pets": [
+          "pet_000417",
+          "pet_000112",
+          "pet_000062"
+        ]
+      },
+      {
+        "id": "T2",
+        "names": [
+          "寂灭骨龙",
+          "黑猫巫师",
+          "雪影娃娃"
+        ],
+        "pets": [
+          "pet_000225",
+          "pet_000445",
+          "pet_000112"
+        ]
+      },
+      {
+        "id": "T3",
+        "names": [
+          "海豹船长",
+          "圆号鱼",
+          "音速犬"
+        ],
+        "pets": [
+          "pet_000190",
+          "pet_000417",
+          "pet_000062"
+        ]
+      }
+    ]
+  },
+  "turn_limit": 300
+}

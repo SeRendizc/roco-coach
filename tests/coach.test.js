@@ -63,7 +63,7 @@ test('agent planner can adapt to tool receipts and invalid tools never execute',
  let count=0;await gatherAgentEvidence({message:'x',context:{...context,mode:'pvp-live'},plan:async()=>{count++;}});assert.equal(count,0);
 });
 
-import {summarizeMatch,reviewMatch} from '../src/coach/teacher.js';
+import {summarizeMatch,reviewMatch,matchStatsLine} from '../src/coach/teacher.js';
 import {decisiveOpportunity} from '../src/coach/experience.js';
 test('whole-match archive persists all turns, separates matches and preserves previews',async()=>{
  let g=createGame(17);g.player.pets.forEach(p=>{p.hp=1000;p.maxHp=1000;});g.id='battle-a';let archive=null;
@@ -210,4 +210,226 @@ test('the countered hint states both directions, because the chart is symmetric'
  const neutral=Object.keys(TYPE_ADVANTAGES).find(t=>t!==p.type&&!TYPE_ADVANTAGES[t].includes(p.type)&&!TYPE_ADVANTAGES[p.type].includes(t));
  g.enemy.pets[g.enemy.active].type=neutral;g.turn=2;
  assert.doesNotMatch(observe(g).reason,/属性被克/,'中性对位不得提属性');
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// C01 老师闭环：一个关键决策 + 相似练习（参数已改动）+ 独立解出的记账
+// C03 记忆控制：查看 / 纠正 / 逐条删除 / 全部清空，删除要级联掉推断
+// ══════════════════════════════════════════════════════════════════════════════
+import {keyDecisionOf,practiceQuestion,turnDecision,PRACTICE_DELTAS,QUIZ_OFFSETS,makeQuiz as buildQuiz} from '../src/coach/teacher.js';
+import {rememberPreference,rememberDecision,answerPendingQuiz,quizMastery,quizAnswerOf,recordQuizAttempt,moodHypothesis,rememberMood,playerWishes,memoryItems,correctMemoryItem,deleteMemoryItem,clearMemory,purgeDerived,statedTurn,MOOD_TTL_MS,MOOD_CONFIDENCE,REFUSAL_TTL_MS,QUIZ_MASTERY,adaptiveGate,memorySummary} from '../src/coach/memory.js';
+
+// 真实跑一局（有减员、有生命变化），复盘用的每一个数字都来自引擎实跑。
+function playedMatch(seed=17,moves=6){
+ let g={...createGame(seed),id:`c01-${seed}`};
+ for(let i=0;i<moves&&!g.result;i++)g=step(g,rankEnemyActions({...g,player:g.enemy,enemy:g.player})[0]?.action||legalActions(g)[0]);
+ g.result=g.result||'win';return g;
+}
+test('整局复盘默认只给一个关键决策：当时的信息、两个候选动作、后果在展开区各一句',()=>{
+ const m=summarizeMatch(playedMatch());
+ const packet=reviewMatch({lastMatch:m});
+ const d=packet.keyDecision;
+ assert(d,'一局复盘必须选出一个关键决策');
+ assert.equal(typeof d.turn,'number');
+ assert(d.lesson,'关键决策要带课程名（与军师记账同一套词）');
+ assert(Number.isInteger(d.situation.playerHp)&&Number.isInteger(d.situation.enemyHp),'当时的信息要来自回合开始前的快照');
+ assert(d.chosen.name,'要写清当时选了什么');
+ assert(Array.isArray(d.options)&&d.options.length>=1,'要给出当时可比较的候选动作');
+ assert(d.consequence&&'playerHp'in d.consequence,'要有事后结算');
+ // 折叠那句只说一个回合，而且说的是那个决策，不是统计
+ assert.equal(packet.brief.match(/第\d+回合/g).length,1,`折叠句只该点名一个回合：${packet.brief}`);
+ assert.match(packet.brief,/你选了「/);
+ assert(!/\d+胜\d+负/.test(packet.brief)&&!/共\d+回合/.test(packet.brief),'折叠句不是统计播报');
+ // 展开区三段齐全，而且是同一回合
+ const chapter=packet.evidence.find(e=>e.startsWith('关键决策：'));
+ assert(chapter,`展开区要有这个决策的三段依据：${JSON.stringify(packet.evidence.slice(0,3))}`);
+ assert.match(chapter,/开始时/);assert.match(chapter,/候选动作/);assert.match(chapter,/结算后/);
+ // 玩家单独问「总结整局」时那段完整回答里的统计一个字都没丢
+ assert(packet.text.includes(matchStatsLine(m,{lead:false})));
+});
+test('关键决策取的是事前差值最大的那一回合，不是事后结果最惨的那一回合',()=>{
+ const g=playedMatch(11,8);
+ const m=summarizeMatch(g);
+ const expect=m.keyTurns.filter(k=>k.decision).slice().sort((a,b)=>((b.decision.gap||0)-(a.decision.gap||0))||(a.turn-b.turn))[0];
+ assert.equal(keyDecisionOf(m).turn,expect.turn);
+ // 没有可比较的候选（撤退那一局）时不补造两个候选
+ let esc={...step(createGame(17),{kind:'escape'}),id:'esc'};
+ esc.result='escaped';
+ const em=summarizeMatch(esc);
+ const ed=keyDecisionOf(em);
+ assert(ed,'撤退局也要能说出当时的选择');
+ assert.equal(ed.optionsComplete,false,'引擎没给排序时不许编两个候选出来');
+ const packet=reviewMatch({lastMatch:em});
+ assert.match(packet.evidence.find(e=>e.startsWith('关键决策：')),/没有给出可排序的候选/);
+});
+test('相似练习：参数改了、答案由算术算出，而且变式之间不是同一道题',()=>{
+ const m=summarizeMatch(playedMatch());
+ const d=keyDecisionOf(m);
+ const seen=new Set(),questions=new Set();
+ for(let v=0;v<6;v++){
+  const q=practiceQuestion({keyDecision:d,variant:v});
+  assert(q,`第${v}个变式应当出得来`);
+  assert.match(q.question,/假设练习（参数已改动）/);
+  assert.equal(q.variant,v);
+  assert.equal(q.variantOf,q.id,'参数不同的变式要有各自的身份（判重与掌握判断都靠它）');
+  assert.equal(q.sourceId,`${d.matchId}:turn:${d.turn}`,'变式的出处必须是这一局这个决策');
+  assert(q.skillKey===d.lesson);
+  assert(!seen.has(q.id)&&!questions.has(q.question),'变式之间不能是同一道题');
+  seen.add(q.id);questions.add(q.question);
+  assert(q.choices.includes(q.answer)&&q.choices.length===2);
+  // 答案是算出来的：把它代回同一个算式必须自洽
+  if(/够收尾|不够收尾/.test(q.answer)){
+   const assumed=Number(q.question.match(/这里改成\s*(\d+)\s*血/)[1]);
+   const hit=Number(q.question.match(/打出\s*(\d+)\s*伤害/)[1]);
+   assert.equal(q.answer,hit>=assumed?'够收尾':'不够收尾',`答案必须由伤害与假定血量算出来：${q.question}`);
+  }
+  // 参数确实改过：至少有一个变式的假定值不等于真实值，而变式0..5互相不同
+  assert.equal(PRACTICE_DELTAS[v]!==0,true,`变式${v}必须改掉参数，否则就是原题`);
+ }
+ assert.equal(practiceQuestion({keyDecision:null}),null,'没有关键决策时不出题，也不编一道');
+});
+test('小测的变式表每一档都不同：第 4 次出题不再与第 1 次一模一样',()=>{
+ const context=buildContext(null,newProfile(),'fox');
+ const ids=[],enemies=[];
+ for(let v=0;v<QUIZ_OFFSETS.length;v++){
+  const q=buildQuiz(context,{variant:v});
+  assert.equal(q.variant,v);
+  ids.push(q.id);
+  enemies.push(Number(q.question.match(/对手速度\s*(\d+)/)[1]));
+  assert(q.skillKey==='速度比较','练习题要带上知识点，掌握判断才有记账对象');
+ }
+ assert.equal(new Set(ids).size,QUIZ_OFFSETS.length,`${QUIZ_OFFSETS.length} 个变式的 id 必须互不相同`);
+ assert.equal(ids[3]===ids[0],false,'第 4 次出题不能与第 1 次完全一样（原来 [2,4,3] 循环就会）');
+ assert.match(buildQuiz(context,{variant:0}).explanation,/38\+3=41/,'第 1 个变式的数字不能变（既有验收）');
+});
+test('独立解出才算一次：有提示的答对不算，一次答对也不是掌握',()=>{
+ const context=buildContext(null,newProfile(),'fox');
+ // 走 runtime 的现成接线：rememberPreference 在路由前对每条消息调用一次，
+ // 所以要提示与作答这两件事都记在 memory 里（不依赖任何其它文件改动）。
+ let memory=freshMemory();
+ const q0=buildQuiz(context,{variant:0});
+ memory=rememberPreference({...memory,pendingQuiz:q0},'先给我点提示');
+ assert(memory.pendingQuiz.hintShown,'要过提示这件事本身必须被记下来');
+ memory=rememberPreference(memory,'先出手');
+ assert.equal(memory.quizLog.length,1);
+ assert.equal(memory.quizLog[0].correct,true);
+ assert.equal(memory.quizLog[0].independent,false,'看过提示之后答对不算独立解出');
+ // 没有提示的一次答对算独立，但**一次不算掌握**
+ const q1=buildQuiz(context,{variant:1});
+ memory=rememberPreference({...memory,pendingQuiz:q1},q1.answer);
+ const one=quizMastery(memory,{skillKey:'速度比较'});
+ assert.equal(one.independentCorrect,1);
+ assert.equal(one.mastered,false);
+ assert.match(one.status,/一次答对不构成掌握/);
+ assert.equal(one.causalClaim,false);
+ // 第二个变式独立答对：还是"仍需观察"，因为门槛写在 QUIZ_MASTERY 里
+ const q2=buildQuiz(context,{variant:2});
+ memory=rememberPreference({...memory,pendingQuiz:q2},q2.answer);
+ const two=quizMastery(memory,{skillKey:'速度比较'});
+ assert.equal(two.distinctVariants,2);
+ assert.equal(two.mastered,two.independentCorrect>=QUIZ_MASTERY.minIndependent,'门槛由 QUIZ_MASTERY 决定，不写死');
+ // 反复答同一道题不算更多变式
+ const again=recordQuizAttempt(memory,{quiz:q2,answer:q2.answer});
+ assert.equal(again.memory.quizLog.filter(a=>a.quizId===q2.id).length,1,'同一次作答不重复记账');
+ // 练习题答对**不写掌握判断**：「可以减少提示」那一层只认场上的独立行动。
+ assert.equal(Boolean(memory.reflections['速度比较']),false,'练对了几道题不产生掌握判断（那是独立行动的证据）');
+ assert.equal(adaptiveGate(memory,{lesson:'速度比较'}).allow,true,'练习题答对不该把提示静音');
+ // 反向核对：真正会改变那一层的是独立行动，而不是练习作答（两层各管各的）
+ const byDecisions=rememberDecisions(memory);
+ assert.equal(adaptiveGate(byDecisions,{lesson:'能量管理'}).allow,false,'三次独立且合理的行动才轮到减少提示');
+});
+// 造几条独立的决策证据（走 app.js 用的同一个接口 rememberDecision）：
+// 用来分别验证「练习记账」与「独立行动记账」两层互不越权。
+function rememberDecisions(memory,{matchId='q',lesson='能量管理'}={}){
+ let m=memory;
+ for(const turn of [1,2,3])m=rememberDecision(m,{matchId,turn,lesson,reasonable:true,prompted:false,scoreGap:1,caseKey:`c${turn}`,rulesVersion:'0.6'});
+ return m;
+}
+
+test('记忆查看：每一条都带来源与时间；情绪只写成假设，且不从沉默与连败推出来',()=>{
+ let memory=freshMemory();
+ memory=rememberPreference(memory,'以后叫我老王');
+ memory=rememberPreference(memory,'本命是烬尾狐');
+ memory=rememberPreference(memory,'今天有点烦');
+ const rows=memoryItems(memory);
+ assert(rows.length>=3,`至少三条可查看的记忆：${JSON.stringify(rows)}`);
+ for(const row of rows)assert(typeof row.id==='string'&&typeof row.source==='string',`每条都要有 id 与来源：${JSON.stringify(row)}`);
+ const statedRows=rows.filter(r=>r.group==='stated');
+ assert(statedRows.every(r=>r.source==='player-stated'&&Date.parse(r.time)>0),'玩家自己说过的条目必须有来源与时间');
+ // 情绪假设：低置信、短时、可覆盖
+ const mood=moodHypothesis(memory);
+ assert(mood,'玩家自己说过「烦」，才有一条假设');
+ assert(mood.confidence<=0.4,`情绪只能是低置信假设，实际 ${mood.confidence}`);
+ assert(mood.expiresAt-Date.parse(mood.time)<=MOOD_TTL_MS,'假设必须有到期时间');
+ assert.equal(mood.overwritable,true);
+ assert.equal(moodHypothesis(memory,{now:mood.expiresAt+1}),null,'过期即失效，不留成标签');
+ // 覆盖：下一句换个词就换掉，不叠加
+ const next=rememberMood(memory,'今天没睡好');
+ assert.equal(moodHypothesis({...memory,mood:next}).label,'没睡好');
+ // 不从沉默 / 连败 / 慢操作推：这三样在记忆层根本读不到
+ const silent=rememberBattle(rememberBattle(freshMemory(),{...createGame(4),result:'loss'}),{...createGame(5),result:'loss'});
+ assert.equal(moodHypothesis(silent),null,'连败不等于「上头」，没有玩家开口就没有假设');
+ assert.equal(moodHypothesis(freshMemory()),null);
+});
+test('记忆纠正：新的值生效，旧值不再被引用；旧值推出来的假设一起失效',()=>{
+ let memory=freshMemory();
+ memory=rememberPreference(memory,'本命是烬尾狐');
+ memory=rememberPreference(memory,'以后简短说');
+ const fav=memoryItems(memory).find(r=>r.kind==='favorite');
+ const fixed=correctMemoryItem(memory,{id:fav.id,value:'turtle'});
+ assert.equal(fixed.corrected,true);
+ assert.equal(fixed.previous,'fox');
+ assert.equal(playerWishes(fixed.memory).address,null);
+ assert.equal(fixed.memory.favorite,'turtle','本命要换成新的那只');
+ assert(!JSON.stringify(fixed.memory.stated).includes('烬尾狐'),'旧值不该还留在条目里');
+ assert(!memorySummary(fixed.memory).includes('烬尾狐'),'摘要里也不能再引用旧值');
+ const brief=memoryItems(fixed.memory).find(r=>r.kind==='chat-style');
+ assert.equal(correctMemoryItem(memory,{id:'stated:does-not-exist',value:'x'}).corrected,false,'推断出来的东西不能改');
+ assert.match(correctMemoryItem(memory,{id:'stated:does-not-exist',value:'x'}).reason,/只能纠正/);
+ assert.equal(brief.value,'brief');
+});
+test('逐条删除：删掉的记录连同引用它的推断一起消失，摘要里再也读不到',()=>{
+ let memory=freshMemory();
+ memory=rememberDecisions(memory,{matchId:'del-1'});
+ assert(Object.keys(memory.reflections).length>0,'前提：已经形成了一条习惯判断');
+ const label=memorySummary(memory);
+ assert.match(label,/能量管理/);
+ const ids=memory.reflections['能量管理'].evidenceIds;
+ const gone=deleteMemoryItem(memory,{id:ids[0]});
+ assert.equal(gone.deleted,true);
+ assert(!memorySummary(gone.memory).includes('能量管理'),'推断必须随着它的证据一起被删掉，不能只删条目');
+ // 连删两条 → 判断失去全部依据，仍然不该残留
+ const gone2=deleteMemoryItem(gone.memory,{id:ids[1]});
+ assert(!memorySummary(gone2.memory).includes('能量管理'));
+ // 按对局删除：挂在这一局上的行为记录一起走
+ const whole=deleteMemoryItem(gone2.memory,{id:'event:del-1'});
+ assert.equal(whole.deleted,true);
+ assert.equal(whole.memory.journal.filter(e=>e.matchId==='del-1').length,0,'整局删除时挂在它上面的记录一起删');
+ assert.equal(deleteMemoryItem(whole.memory,{id:'event:del-1'}).deleted,false,'已经删过的不再报成功');
+});
+test('全部清空与按组清空：清的是记忆，不是游戏成长',()=>{
+ let memory=freshMemory();
+ memory=rememberPreference(memory,'以后叫我老王');
+ memory=rememberBattle(memory,{...createGame(4),id:'c-1',result:'win'});
+ const all=clearMemory(memory,{});
+ assert.deepEqual(all.memory.stated,[]);
+ assert.equal(all.memory.events.length,0);
+ assert.deepEqual(all.memory.quizLog,[]);
+ assert.equal(all.memory.mood,null);
+ assert.equal(all.memory.version,1,'清空后仍是可读回的存档');
+ const part=clearMemory(memory,{groups:['journal']});
+ assert.equal(part.memory.journal.length,0);
+ assert.equal(playerWishes(part.memory).address,'老王','按组清空不该动别的组');
+ assert.equal(part.memory.events.length,1);
+});
+test('拒绝有时效：删掉拒绝那一条、或者等它过期，复盘就重新允许',()=>{
+ let memory=rememberPreference(freshMemory(),'别复盘了');
+ assert.equal(playerWishes(memory).refusedReview,true);
+ const item=memoryItems(memory).find(r=>r.kind==='refusal');
+ assert(Date.parse(item.time)>0);
+ assert.equal(playerWishes(memory,Date.now()+REFUSAL_TTL_MS+1).refused,false,'拒绝不是永久标签，过期自动失效');
+ const gone=deleteMemoryItem(memory,{id:item.id});
+ assert.equal(playerWishes(gone.memory).refused,false);
+ assert.equal(moodHypothesis(freshMemory()),null);
+ assert.equal(MOOD_CONFIDENCE<=0.4,true,'常量本身也写死了「低置信」');
 });

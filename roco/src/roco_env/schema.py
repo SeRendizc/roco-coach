@@ -275,8 +275,9 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
     me = getattr(state, side)
     foe = getattr(state, other)
 
-    def public_pet(p: PetState, mine: bool) -> Dict[str, Any]:
-        d: Dict[str, Any] = {
+    def own_pet(p: PetState) -> Dict[str, Any]:
+        """己方精灵：自己的信息全给（面板、技能、buff、携带物、冷却）。"""
+        return {
             "slot": p.slot,
             "pet_id": p.pet_id,
             "name": rs.pet(p.pet_id).name,
@@ -286,13 +287,43 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
             "statuses": sorted(p.statuses.keys()),
             "marks": sorted(p.marks.keys()),
             "fainted": p.fainted,
+            "buffs": dict(p.buffs),
+            "defense_cooldown": p.defense_cooldown,
+            "charge": bool(p.charge),
         }
-        if mine:
-            # 己方看得到自己的技能、buff、携带物与冷却
-            d["buffs"] = dict(p.buffs)
-            d["defense_cooldown"] = p.defense_cooldown
-            d["charge"] = bool(p.charge)
-        return d
+
+    def foe_field_pet(p: PetState, is_active: bool = True) -> Dict[str, Any]:
+        """对手**场上**那只：面板是公开的。
+
+        之前这里漏了 hp/max_hp/energy——那是个真 bug，不是安全取舍：
+        对手场上的血条、能量、异常与印记本来就画在屏幕上，教练看不到它们
+        反而更糟（无法判断「这一击够不够收」）。真正的隐藏信息是**后备**的血量
+        与配招、以及对手本回合已提交的动作，那些仍然不给。
+        """
+        return {
+            "slot": p.slot,
+            "pet_id": p.pet_id,
+            "name": rs.pet(p.pet_id).name,
+            "hp": p.hp,
+            "max_hp": p.max_hp,
+            "energy": p.energy,
+            "statuses": sorted(p.statuses.keys()),
+            "marks": sorted(p.marks.keys()),
+            "fainted": p.fainted,
+            "field": True,
+            "active": is_active,
+        }
+
+    def foe_bench_pet(p: PetState, is_active: bool = False) -> Dict[str, Any]:
+        """对手后备：只有位次 / id / 是否倒下。血量、能量、配招都不给。"""
+        return {
+            "slot": p.slot,
+            "pet_id": p.pet_id,
+            "name": rs.pet(p.pet_id).name,
+            "fainted": p.fainted,
+            "field": False,
+            "active": is_active,
+        }
 
     return {
         "side": side,
@@ -304,20 +335,15 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
         "self": {
             "active": me.active,
             "items": dict(me.items),
-            "pets": [public_pet(p, True) for p in me.pets],
+            "pets": [own_pet(p) for p in me.pets],
         },
         "opponent": {
             "active": foe.active,
-            # 对手后备只暴露「还活着几只」与位次，不暴露血量与配招
             "living_count": len(foe.living()),
+            # 场上那只给面板，后备只给存在性——**换人之后也不会消失**
+            "field": foe_field_pet(foe.field_pet),
             "pets": [
-                {
-                    "slot": p.slot,
-                    "pet_id": p.pet_id,
-                    "name": rs.pet(p.pet_id).name,
-                    "active": (i == foe.active),
-                    "fainted": p.fainted,
-                }
+                (foe_field_pet(p, i == foe.active) if i == foe.active else foe_bench_pet(p, False))
                 for i, p in enumerate(foe.pets)
             ],
         },

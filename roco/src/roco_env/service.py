@@ -100,6 +100,11 @@ except ImportError:  # 直接当脚本跑：python3 roco/src/roco_env/service.py
     from roco_env import env as env_mod  # type: ignore
 
 
+# 分析用种子：与真实对局 seed 无关的固定集合。
+# 固定是为了可复现；跨种子聚合是为了让结论不依赖任何单一随机序列
+# （同速裁决在真实对局里可能任一结果，所以给区间而不是单点）。
+DEFAULT_ANALYSIS_SEEDS = (11, 29, 47)
+
 PROTOCOL_VERSION = 1
 SERVICE_NAME = "roco_env"
 SERVICE_VERSION = "0.1.0"
@@ -131,14 +136,6 @@ CAPABILITIES: Dict[str, bool] = {
 
 # 未实现的能力 → 结构化拒绝理由（绝不返回编造的数值）
 NOT_IMPLEMENTED: Dict[str, Dict[str, Any]] = {
-    "/battle/plan": {
-        "code": "battle_planning",
-        "reason": (
-            "回合规划需要行动排序键、应对/蓄力时序与隐藏信息不变量全部落地"
-            "（MC-001/MC-004/MC-013/MC-020/MC-021），当前未核验"
-        ),
-        "missing": ["action_order", "respond_mechanics", "charge_mechanics"],
-    },
 }
 
 # 隐藏信息键（归一化后比较）：对手待执行动作、真实随机种子、私有状态。
@@ -158,6 +155,13 @@ HIDDEN_KEYS = frozenset(
         "rngseed",
         "randomseed",
         "seed",
+        # env/schema 内部字段：对手本回合**已提交**的动作。
+        # 归一化会去掉下划线，所以这里写 pendingenemy / pendingplayer /
+        # replacequeue 等真实会被序列化出来的键名。
+        "pendingenemy",
+        "pendingplayer",
+        "pendingenemyaction",
+        "pendingplayeraction",
     }
 )
 
@@ -190,7 +194,15 @@ def find_hidden_keys(payload: Any, prefix: str = "") -> List[str]:
     """递归找出请求/回执里的隐藏信息键，返回可读路径列表。
 
     这是 MC-013 不变量在桥上的落地位置：宁可拒绝一个请求，也不让对手的
-    未公开选择或真实随机种子穿过去。
+    未公开选择或**真实随机种子**穿过去。
+
+    **没有例外。** 我一开始给 `state.seed` 开了一个「只允许 state 下一层」的口子，
+    那是错的：真实 seed 能预测同速裁决与后续伤害的随机结果，它就是隐藏信息，
+    而且 toolbox 的 `plan_actions` 合同明确禁止真实随机种子——开后门会让
+    客户端与服务端契约互相矛盾。现在任何深度、任何位置的 seed 都会被拒。
+
+    教练侧要规划，走的是**公开 schema**（见 `public_planner_state`），
+    而不是把对局私有状态整份递进来。
     """
     hits: List[str] = []
     if isinstance(payload, dict):
@@ -1071,6 +1083,129 @@ class RocoService:
             extra={"calibration": comp.get("calibration")},
         ), body, started)
 
+    def battle_plan(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        """2—3 回合联合动作搜索。
+
+        **输入是公开 planner state，不是 `env.serialize()` 的私有状态。**
+        用公开 schema 而不是整份内部状态，是因为内部状态带真实 seed、
+        对手本回合已提交的动作与对手后备血量——那些都是隐藏信息。
+
+        随机性：真实对局 seed 不参与。分析用 `DEFAULT_ANALYSIS_SEEDS` 固定集合
+        （也可由请求显式给定，用于复现），并**跨种子聚合**期望与最差尾部，
+        所以结论不依赖任何一个特定随机序列。同速裁决在真实对局里可能任一结果，
+        聚合后给出的是分布区间，而不是「按某个 seed 会怎样」。
+        """
+        started = time.perf_counter()
+        from . import planner as pm
+
+        rs, early = self._ruleset_ok(body)
+        if early is not None:
+            return early
+
+        public = body.get("public") if isinstance(body.get("public"), dict) else None
+        if public is None:
+            return self._answer_envelope(_bad_request(
+                "缺少 public：规划请求必须用 env.public_planner_state() 产出的公开 state，"
+                "而不是 env.serialize() 的私有状态（后者含真实 seed 与对手待执行动作）"
+            ), body, started)
+
+        raw_seeds = body.get("analysis_seeds", list(DEFAULT_ANALYSIS_SEEDS))
+        if not isinstance(raw_seeds, list) or not raw_seeds:
+            return self._answer_envelope(_bad_request("analysis_seeds 必须是非空整数数组"), body, started)
+        if len(raw_seeds) > 8:
+            return self._answer_envelope(_bad_request("analysis_seeds 最多 8 个"), body, started)
+        for sv in raw_seeds:
+            if not isinstance(sv, int) or sv < 0:
+                return self._answer_envelope(_bad_request("analysis_seeds 必须是非负整数"), body, started)
+
+        depth = body.get("depth", pm.DEFAULT_DEPTH)
+        beam = body.get("beam", pm.DEFAULT_BEAM)
+        budget = body.get("budget_ms", pm.DEFAULT_BUDGET_MS)
+        for name, val, lo, hi in (("depth", depth, 1, pm.MAX_DEPTH),
+                                  ("beam", beam, 1, pm.MAX_BEAM),
+                                  ("budget_ms", budget, 10, 10000)):
+            if not isinstance(val, int) or not (lo <= val <= hi):
+                return self._answer_envelope(
+                    _bad_request(f"{name} 必须是 {lo}..{hi} 之间的整数"), body, started)
+
+        # 跨种子聚合：每个 analysis seed 重建一次搜索状态
+        per_seed = []
+        unsupported_total = 0
+        for sv in raw_seeds:
+            try:
+                state = env_mod.state_from_public_planner(public, rs, analysis_seed=sv)
+            except ValueError as exc:
+                return self._answer_envelope(
+                    _unsupported("invalid_public_state", str(exc)), body, started)
+            if state.result:
+                return self._answer_envelope(Answer(
+                    result=None, coverage=1.0,
+                    unsupported=[{"reason": "对局已结束，没有可规划的动作"}],
+                ), body, started)
+            plan = pm.plan_actions(state, rs, depth=depth, beam=beam, budget_ms=budget)
+            unsupported_total += plan.unsupported_seen
+            per_seed.append(plan.to_dict())
+
+        # 推荐必须跨种子一致才敢说「推荐」；不一致就如实说「随随机性变化」
+        labels = {p["recommended_label"] for p in per_seed}
+        expectations = [p["expected"] for p in per_seed]
+        worsts = [p["worst"] for p in per_seed]
+        bests = [p["best"] for p in per_seed]
+        timed_out = any(p["timed_out"] for p in per_seed)
+        coverage = sum(p["coverage"] for p in per_seed) / len(per_seed)
+
+        payload = {
+            "schema_version": public.get("schema_version"),
+            "state_version": public.get("state_version"),
+            "turn": public.get("turn"),
+            "analysis_seeds": raw_seeds,
+            "recommendation_stable": len(labels) == 1,
+            "recommended_label": per_seed[0]["recommended_label"] if len(labels) == 1 else None,
+            "recommended_by_seed": {
+                sv: p["recommended_label"] for sv, p in zip(raw_seeds, per_seed)
+            },
+            "expected": {"min": min(expectations), "max": max(expectations),
+                         "mean": sum(expectations) / len(expectations)},
+            "worst": {"min": min(worsts), "max": max(worsts)},
+            "best": {"min": min(bests), "max": max(bests)},
+            "main_counter": per_seed[0]["main_counter"],
+            "counter_note": per_seed[0]["counter_note"],
+            "branches_evaluated": sum(p["branches_evaluated"] for p in per_seed),
+            "depth_searched": max(p["depth_searched"] for p in per_seed),
+            "beam": beam,
+            "coverage": coverage,
+            "timed_out": timed_out,
+            "unsupported_seen": unsupported_total,
+            "opponent_model": per_seed[0]["opponent_model"],
+            "per_seed": per_seed,
+        }
+
+        unsupported = []
+        if timed_out:
+            unsupported.append({"reason": "至少一个 analysis seed 未在预算内搜完，结果不是完整搜索",
+                                "coverage": coverage})
+        if unsupported_total:
+            unsupported.append({"reason": f"搜索中共遇到 {unsupported_total} 条未核验机制登记（fail closed）"})
+        if len(labels) != 1:
+            unsupported.append({
+                "reason": "推荐动作随 analysis seed 变化，说明它不是一个稳健结论；请把 expected/worst 区间当作结论",
+                "labels": sorted(labels),
+            })
+
+        return self._answer_envelope(Answer(
+            result=payload,
+            coverage=coverage,
+            evidence_ids=[f"ev:{rs.ruleset_id}:public-state@{public.get('state_version')}"],
+            unsupported=unsupported,
+            extra={"limitations": [
+                "估值是启发式局面分，**不是胜率**；expected 不能读成「赢的概率」",
+                "对手后备血量与配招不在公开信息里，按满血+规范配招建模（见 public.assumptions）",
+                "随机性用与真实对局无关的 analysis_seeds，并跨种子聚合；结论不依赖真实 seed",
+                "对手按启发式分布建模，不是真实对手行为模型",
+                "这是**分析**状态，不是权威对局状态；实际结算以游戏内为准",
+            ]},
+        ), body, started)
+
     def not_implemented(self, path: str, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
         started = time.perf_counter()
         rs, early, state_version, fingerprint = self._resolve_or_envelope(body, started)
@@ -1196,6 +1331,8 @@ class RocoRequestHandler(BaseHTTPRequestHandler):
                 status, env = service.team_evaluate(body)
             elif path == "/team/compare":
                 status, env = service.team_compare(body)
+            elif path == "/battle/plan":
+                status, env = service.battle_plan(body)
             elif path in NOT_IMPLEMENTED:
                 status, env = service.not_implemented(path, body)
             else:

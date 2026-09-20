@@ -2,6 +2,11 @@
 export class CoachScheduler {
  constructor({timeoutMs=35000,ttlMs=10000,maxCache=12}={}){this.timeoutMs=timeoutMs;this.ttlMs=ttlMs;this.maxCache=maxCache;this.epoch=0;this.tail=Promise.resolve();this.pending=new Map();this.cache=new Map();this.active=null;}
  invalidate(){this.epoch++;this.active?.abort();this.pending.clear();this.cache.clear();}
+ // P01 的「陈旧状态」硬门控读的就是这里。
+ // 一份特征向量是在某个 epoch 上算出来的；如果期间发生过 invalidate()（玩家提交了动作、
+ // 换了对局、局面被取消），那一份特征描述的局面已经不存在了，不能拿来打断玩家。
+ // 这是只读查询：不增加缓存、不改 epoch，因此不会影响既有的合并/超时语义。
+ isCurrent(epoch){return epoch===this.epoch;}
  run(key,work,{cache=false}={}){
   const epoch=this.epoch,full=epoch+':'+key,cached=this.cache.get(full);
   if(cache&&cached&&cached.expires>Date.now())return Promise.resolve(structuredClone(cached.value));

@@ -179,6 +179,11 @@
 // ══════════════════════════════════════════════════════════════════════════════
 import {SPECIES,SKILLS,TYPES,ITEMS} from '../game/engine.js';
 import {isLiveMatch} from './policy.js';
+// C02：玩家自己说过的偏好与拒绝存在 coach/memory.js 的 stated 层里，陪练只**读**它
+// （写入点是 memory.rememberPreference，runtime 在路由之前对每条消息调用一次）。
+// 两张表的词表（拒绝、本命、称呼）同源于 memory.js，所以「陪练听懂了什么」与
+// 「记住了什么」不会变成两套说法。
+import {playerWishes,moodHypothesis,statedTurn} from './memory.js';
 
 const DAY=86400000;
 
@@ -448,6 +453,10 @@ export function companionFacts(memory={},context={},now=Date.now()){
  const lessons=(memory.lessons||[]).filter(x=>typeof x==='string');
  const favorite=SPECIES.find(p=>p.id===memory.favorite)||null;
  const time=Date.parse(last?.time||'');
+ // 玩家明说的那一层（称呼／本命／聊天风格／输了要不要复盘／里程碑／拒绝）。
+ // 它由 memory.js 的 stated 条目投影而来，这里只读；拒绝有时效，过期自动不再拦。
+ const wishes=playerWishes(memory,now);
+ const mood=moodHypothesis(memory,{now});
  return {history,last,summary,live:liveFacts(context),
   stage:cleanStage(rawStage),turns:rawTurns,result:rawResult,
   source:last?'memory.events':summary?'context.lastMatch':null,
@@ -461,6 +470,13 @@ export function companionFacts(memory={},context={},now=Date.now()){
   lessons,favorite:favorite?favorite.name:null,knowsFavorite:Boolean(favorite),
   goal:['稳健','速攻'].includes(memory.goal)?memory.goal:null,
   preference:['brief','detailed'].includes(memory.preference)?memory.preference:null,
+  // 显式记忆：这几项都是玩家自己说过的，不是从行为推的。
+  address:wishes.address,milestones:wishes.milestones,reviewAfterLoss:wishes.reviewAfterLoss,
+  chatStyle:wishes.chatStyle,refused:wishes.refused,refusedAdvice:wishes.refusedAdvice,
+  refusedReview:wishes.refusedReview,refusedTalk:wishes.refusedTalk,
+  // 情绪是**假设**：低置信、有到期时间、可被下一句覆盖。它永远不进正文当标签，
+  // 只进依据（给模型看的那一行），而且要连置信度与到期时间一起写。
+  mood:mood?{label:mood.label,confidence:mood.confidence,expiresAt:mood.expiresAt,basis:mood.basis}:null,
   dialogue:(memory.dialogue||[]).filter(x=>x&&typeof x.content==='string'),
   daysAgo:Number.isFinite(time)?Math.max(0,Math.floor((now-time)/DAY)):null};
 }
@@ -1001,7 +1017,9 @@ export function companionReadings({cross=null,signals=null,context={},now=Date.n
   else if(h.late>0)sentences.push(SENT(`最近一次是第${h.turns.at(-1)}回合才掉的。`,'derived','memory.events.firstLossTurn'));
   // 最后这一支优先说「一共倒下过几次」（跨局数出来的数字），
   // 而不是「这一局它还在你的队伍里」——队伍就摆在屏幕上，念出来等于没说。
-  else if(h.faints>=1)sentences.push(SENT(`${h.name}在这${h.total}局里一共倒下过${h.faints}次。`,'memory','memory.events.faints'));
+  // **这里不再重复「在这 N 局里」**：同一个数（h.total）第一句刚说过，
+  // 再说一遍就是同一条信息说了两遍（C02 验收③，判据见 repeatedInformation）。
+  else if(h.faints>=1)sentences.push(SENT(`它一共倒下过${h.faints}次。`,'memory','memory.events.faints'));
   else if(l.currentTeam.includes(h.name))sentences.push(SENT(`这一局它还在你的队伍里。`,'derived','context.battle.player'));
   add({id:`hazard:${h.name}`,topic:'first-fallen',klass:'habit',priority:88,tags:[],sentences,evidence:[
    `跨局账本：${h.total} 局有「最先倒下的是谁」的记录，${h.name} 占 ${h.times} 次，掉人回合为 ${h.turns.join('、')||'未记录'}（来源：memory.events.firstFallen / firstLossTurn）。`,
@@ -1310,6 +1328,100 @@ export function fitSentences(sentences=[],limit=80,tail=null){
  if(tail)return {text:text+tail.text,parts:[...fitted,tail]};
  return text?{text,parts:fitted}:null;
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// C02：六个场景里「不是观察、也不是心情」的那几个
+// ══════════════════════════════════════════════════════════════════════════════
+// 题目要求陪练在这些场景里都接得住：只想吐槽 / 拒绝建议 / 分享胜利 / 只聊精灵 /
+// 纠正偏好 / 不想说话。其中三个已经有了出口（见 moodLine、CHAT_THREADS 的 pet 线程、
+// 问候与道谢的 socialLine），这一节补上另外三个，并把它们与**显式记忆**接起来：
+//   · 拒绝（建议／复盘／继续说话）→ 一句「好，不劝了」＋把这件事记下来；
+//     记下来之后，接下来这一段时间里**不再推任何复盘**（见 companion() 的 noReview）。
+//   · 纠正偏好 → 承认新的值、**一个字都不提旧值**（旧值就挂在 memory.stated 上）。
+//   · 分享胜利 → 恭喜落在真实记录上（连胜几局／今天第几局），没有记录可落时只说这一句。
+//   · 里程碑 → 接住玩家自己说的那句话（mimic），并把它存成一条显式记忆。
+// 三条验收在这里由代码保证，不由文案风格保证：
+//   ① 拒绝之后不再推复盘：noReview 挡掉跨局记录的观察与 record 线程（见 companion()）。
+//   ② 不复述屏幕：每条新文案都过 checkCompanionRestraint（含 SCREEN_ECHO）。
+//   ③ 同一屏不把同一条信息说两遍：每条新文案都过 repeatedInformation，重复即作废。
+// 「只想吐槽」不走这里——它是心情出口（moodLine），理由见文件头第二节。
+// 拒绝的三类词、分享胜利的判据、称呼／本命／风格／复盘意愿／里程碑的解析都在 memory.js，
+// 这里不另写一张表：两张表迟早会分叉，而分叉的表现就是「她答的和我记的不是一件事」。
+export const PLAYER_LABEL=/你(?:就是|是个|总是|一向|本来就|天生|果然)(?:急|急躁|容易上头|上头|冲动|菜|不行|差|没耐心|心态差|玻璃心|手残)|你(?:打|玩)得(?:不好|不行|菜|差)|你这人/;
+// 「同一屏不把同一条信息说两遍」：判据两档，写成可失败的东西，而不是靠读文案。
+//   ① 同一句话说了两遍（去掉标点后完全一样，且不短于 4 个字）；
+//   ② 同一个「N局／N场」出现在两句里。**只有局与场这一种量词进这一档**：一局就是一局，
+//     同一个局数在一屏里出现两次，读到的人听到的是同一个数被念了两遍。
+//     次／回合／天不进这一档——它们各自计的是不同的事（「最先倒下过2次」与「一共倒下过2次」
+//     可以是两件不同的记录），按数字判重会造出假阳性，那比漏判更糟（会把合法文案整条丢掉）。
+const REPEAT_UNIT=/(\d+)\s*(局|场)/g;
+export function repeatedInformation(text){
+ const raw=String(text||'');
+ const clauses=raw.split(/[。！？；\n]+/).map(s=>s.replace(/[\s，、,]/g,'')).filter(s=>s.length>=4);
+ const seen=new Set();
+ for(const c of clauses){if(seen.has(c))return {repeated:true,kind:'same-sentence',text:c};seen.add(c);}
+ const tallies=[...raw.matchAll(REPEAT_UNIT)].map(m=>`${m[1]}${m[2]}`);
+ const dup=tallies.find((t,i)=>tallies.indexOf(t)!==i);
+ return dup?{repeated:true,kind:'same-tally',text:dup}:{repeated:false};
+}
+const STATED_LINE={
+ address:v=>`好，叫你${v}。`,
+ favorite:v=>`好，本命是${v}。`,
+ 'chat-style:brief':()=>'好，以后说短一点。',
+ 'chat-style:detailed':()=>'好，以后多说一点。',
+ 'review-after-loss:yes':()=>'好，输了先复盘一下。',
+ 'review-after-loss:no':()=>'好，输了先不复盘。',
+ 'goal:稳健':()=>'好，往稳里打。',
+ 'goal:速攻':()=>'好，打得主动些。',
+ 'refusal:review':()=>'好，不复盘了。',
+ 'refusal:advice':()=>'好，不劝了。',
+ 'refusal:talk':()=>'好，不问了。',
+};
+// 里程碑：把玩家自己那句话接回来（mimic），不去解释「我把它记下来了」——
+// 那是展示记忆功能，不是使用记忆（文件头第六节的反例）。
+function milestoneEcho(value){
+ const t=String(value||'').replace(/^我(?:今天|刚刚|刚|昨天)?/,'').replace(/[。！？!?]+$/,'').slice(0,16);
+ return t?`嗯，${t}。`:'嗯，这个好。';
+}
+// 这一轮玩家说的话里有没有「要记下来的东西」——有就回一句，没有就交回原来的通道。
+// 只用玩家这一轮自己说的话，不引入任何关于过去的陈述，所以空账本下也成立。
+export function statedLine(message){
+ const turn=statedTurn(message,{});
+ const item=turn.latest;
+ if(!item)return turn.clearedAddress?{text:'好，不叫了。',intent:'preference',socialOnly:true,kind:'address',stated:null}:null;
+ if(item.kind==='milestone')return {text:milestoneEcho(item.value),intent:'sharing',socialOnly:true,kind:'milestone',stated:item};
+ const line=item.kind==='favorite'?STATED_LINE.favorite(item.label):STATED_LINE[`${item.kind}:${item.value}`]?STATED_LINE[`${item.kind}:${item.value}`]():STATED_LINE[item.kind]?STATED_LINE[item.kind](item.value):null;
+ if(!line)return null;
+ return {text:line,intent:item.kind==='refusal'?'refusal':'preference',socialOnly:true,kind:item.kind,stated:item};
+}
+// 玩家自己报的胜利：恭喜落在**真实记录**上（连胜几局／今天第几局）。
+// 记录里最后一局不是六小时内赢的，就只说这一句「拿下了啊」，不冒认任何过去。
+export function shareLine(facts={},now=Date.now()){
+ if(facts.sharing!==true)return null;
+ const history=facts.history||[],last=history.at(-1)||null;
+ if(!last||last.result!=='win')return null;
+ const t=Date.parse(last.time||'');
+ const recent=Number.isFinite(t)&&now-t<=6*3600*1000;
+ const streak=trailingStreak(history,'win');
+ const today=history.filter(e=>dayKeyOf(e.time)===dayKey(now)).length;
+ const head=streak>=2?'连着拿下了啊——':'拿下了啊——';
+ if(!recent)return {text:`${head}好。`,parts:[SENT(head,'chat','本轮消息'),SENT('好。','presence',null)],informative:false,intent:'sharing'};
+ if(streak>=2)return {text:`${head}连着${streak}局了。`,parts:[SENT(head,'chat','本轮消息'),SENT(`连着${streak}局了。`,'memory','memory.events.result')],informative:true,intent:'sharing'};
+ if(today>=2)return {text:`${head}今天第${today}局了。`,parts:[SENT(head,'chat','本轮消息'),SENT(`今天第${today}局了。`,'memory','memory.events.result')],informative:true,intent:'sharing'};
+ return {text:`${head}那就好。`,parts:[SENT(head,'chat','本轮消息'),SENT('那就好。','presence',null)],informative:false,intent:'sharing'};
+}
+// 「分享胜利」的判据与 memory.sharingOf 同源，这里只读它的结论，不另写一张词表。
+export function sharingWord(message){return /我(?:刚|今天|这局)?(?:赢|胜|拿下)了|赢啦|赢咯|拿下了|连胜|上了?分|冲上去了|终于(?:赢|过)/.test(String(message||''));}
+// 场景层的总入口：按「拒绝 > 纠正/记下 > 分享胜利」的顺序取第一条能说的。
+// 返回 null 表示这一轮不属于这几个场景，交回原来的心情／闲聊／观察通道。
+export function scenarioOf(message,{facts={},now=Date.now()}={}){
+ const stated=statedLine(message);
+ if(stated)return stated;
+ return shareLine({...facts,sharing:sharingWord(message)},now);
+}
+// 「拒绝」生效期间要挡掉的观察类别：跨局记录的回顾（上一局、最近几局、习惯、趋势、关卡）。
+// 本局正在发生的事（高光、险过、连着倒）不在其中——那是在场，不是复盘。
+export const REVIEW_CLASSES=['rematch','return','habit','trend','stage','last'];
 
 // ── 自检：这条话到底有没有信息 ──────────────────────────────────────────────
 // 复述屏幕的写法（「X连着2回合被草系按着打」「还剩2只」「血线反过来了」）。
@@ -1682,19 +1794,31 @@ function habitLine(f){
  const turns=linesOf(f).filter(e=>name(e.firstFallen)===top[0]).map(e=>num(e.firstLossTurn,1)).filter(Boolean);
  return turns.length>=2?`最先倒下的${top[0]}已经${top[1]}次了，最近一次在第${turns.at(-1)}回合。`:`最先倒下的${top[0]}已经${top[1]}次了。`;
 }
-export function chatThread(text=''){const t=String(text||'');return CHAT_THREADS.find(thread=>thread.match.test(t))||null;}
+// noReview=true（玩家拒绝过）时不去认「账本」这条线程：他刚说过不想听这些。
+export function chatThread(text='',{noReview=false}={}){
+ const t=String(text||'');
+ const threads=noReview?CHAT_THREADS.filter(thread=>thread.id!=='record'):CHAT_THREADS;
+ // 点了名就聊那只：句子里出现精灵名时，pet 线程优先于泛泛的「聊聊」——
+ // 「就聊聊烬尾狐吧」原来落进 self 线程，回的是与烬尾狐无关的「嗯，那就聊」，
+ // 而 C02 的「只聊精灵」要的正是接住他点的这一只。心情与战术问句在 chatReply
+ // 的更前面就已经让开了（MOOD_LINE / TACTICAL_HINT），所以这一条不会把这两类截走。
+ if(t&&new RegExp(PET_NAMES).test(t)&&threads.some(x=>x.id==='pet'))return threads.find(x=>x.id==='pet');
+ return threads.find(thread=>thread.match.test(t))||null;
+}
 // 上一轮聊的是哪个话题：先看玩家自己那句话，再看陪练的回话。
-export function previousChatThread(memory={}){
+export function previousChatThread(memory={},opts={}){
  const dialogue=(memory.dialogue||[]).filter(x=>x&&typeof x.content==='string');
  const lastUser=[...dialogue].reverse().find(x=>x.role==='user');
- const own=lastUser?chatThread(lastUser.content):null;
+ const own=lastUser?chatThread(lastUser.content,opts):null;
  if(own)return own;
  const lastAssistant=[...dialogue].reverse().find(x=>x.role==='assistant');
- return lastAssistant?CHAT_THREADS.find(t=>t.signature.test(lastAssistant.content))||null:null;
+ if(!lastAssistant)return null;
+ const threads=opts.noReview?CHAT_THREADS.filter(thread=>thread.id!=='record'):CHAT_THREADS;
+ return threads.find(t=>t.signature.test(lastAssistant.content))||null;
 }
 // 闲聊回复：接住这句话 + 一件自己记得的事 +（有的话）落在同一件事上的情绪。
 // 返回 null 表示「这句不是闲聊」或「没有可核对的经历」，交给原来的观察通道。
-export function chatReply({message='',memory={},facts=null,intent='other',limit=REGISTERS.R1.limit,now=Date.now()}={}){
+export function chatReply({message='',memory={},facts=null,intent='other',limit=REGISTERS.R1.limit,now=Date.now(),noReview=false}={}){
  const f=facts||companionFacts(memory,{},now);
  const text=String(message||'');
  if(TACTICAL_HINT.test(text))return null;
@@ -1705,8 +1829,8 @@ export function chatReply({message='',memory={},facts=null,intent='other',limit=
  // 闲聊不该把它换成一句家常——而且**说状态的那一轮不该有任何战报**（见 moodLine 的那条例外）。
  // 一条记录都没有时没有可关切的事，接住这句话本身就是回应（走下面的线程文案）。
  if(hasRecord&&MOOD_LINE.test(text)&&intent!=='chat')return null;
- const own=chatThread(text);
- const prev=previousChatThread(memory);
+ const own=chatThread(text,{noReview});
+ const prev=previousChatThread(memory,{noReview});
  // 上一轮已经开了一个话题时，这一轮哪怕是个问句也先接着那个话题说——
  // 「各说各的」正是这样断掉的。真正的战术问句由 TACTICAL_HINT 挡在上面。
  if(!own&&!prev&&intent!=='chat'&&intent!=='other')return null;
@@ -1737,7 +1861,11 @@ export function chatReply({message='',memory={},facts=null,intent='other',limit=
  // 而一句「哈喽」换来回合数与胜负统计正是这句话的实例。
  // 现在问候轮的第二句一律是**在场的陪伴**（emptyLedgerLine 的那两句，和一条记录都没有时
  // 用的是同一对句子）：问候就回应问候，问候轮的效果不再由账本决定。
- const second=greeting
+ // C02 的验收①在这里落地：玩家拒绝过（不想听复盘），这一轮的第二句就**不落跨局记录**，
+  // 换成本局的在场句。第一句仍然是接住他这句话本身（不是记录，也不是统计）。
+ const second=noReview
+  ?{text:emptyLedgerLine(continuing,false),kind:'presence',source:'玩家拒绝过复盘（在场）'}
+  :greeting
   ?{text:emptyLedgerLine(continuing,false),kind:'presence',source:'问候轮（在场）'}
   :built.memory
   ?{text:built.memory,kind:'memory',source:'memory.events'}
@@ -1748,7 +1876,7 @@ export function chatReply({message='',memory={},facts=null,intent='other',limit=
  if(!second)return null;
  const affects=[],last=linesOf(f).at(-1);
  // 记录那一句都没说，就没理由再补一句情绪——问候轮整段只有「接住问候 + 在场」。
- if(!greeting&&thread.id==='record'&&last){
+ if(!greeting&&!noReview&&thread.id==='record'&&last){
   if(last.result==='win')affects.push(AFFECT('praise','最近这一局是拿下的，收得漂亮。','memory.events.result'));
   else if(last.result==='loss')affects.push(AFFECT('pity','最近这一局没拿下来，可惜。','memory.events.result'));
  }
@@ -1776,18 +1904,22 @@ export const ANSWER_REQUIREMENTS='\n回答要求：';
 export function playerWords(message){return String(message??'').split(ANSWER_REQUIREMENTS)[0];}
 // R0 在这里是最短承接句（聊天通道不能真的空消息，runCoach 会拒绝空文本）；
 // 真正的「不发消息」只存在于主动通道（coach.js 返回 null）。
-export function companion(context={},memory={},message='',now=Date.now()){
+ export function companion(context={},memory={},message='',now=Date.now()){
  const words=playerWords(message),intent=intentOf(words);
  const state=companionState(memory,context,{playerInitiated:true,intent,message:words},now);
  const f=state.facts;
+ // C02 的验收①：玩家拒绝过（建议／复盘／不想说话）之后，这一段时间里不再推复盘。
+ // 判据在 memory.playerWishes（带 until），这里只执行：关掉跨局记录的观察与 record 线程。
+ const noReview=f.refused;
  const cross=companionLedger(memory,liveGame(context),now);
  const bundle={cross,signals:emptySignals(),context:{goal:f.goal,turn:f.live?.turn||null},now};
  const readings=companionReadings(bundle);
- const pick=classes=>readings.find(r=>classes.includes(r.klass))||null;
+ // 拒绝生效期间，可供挑选的观察里没有跨局回顾那一类；本局正在发生的事照旧可选。
+ const pick=classes=>readings.find(r=>classes.includes(r.klass)&&!(noReview&&REVIEW_CLASSES.includes(r.klass)))||null;
  const CLASSES=['rematch','return','habit','type','stage','trend','live','last'];
  const limit=REGISTERS[state.register]?.limit||REGISTERS.R1.limit;
  // followupReply 是「接住追问」的修复句，不是一条新观察，所以不参加信息量自检。
- let register=state.register,text=null,reading=null,parts=[],observed=true,chat=null;
+ let register=state.register,text=null,reading=null,parts=[],observed=true,chat=null,scenario=null,scenarioFailed=null;
  // 这两类**不接观察**，只接住人（理由见 moodLine 与 socialLine）：说心情（累／烦／
  // 不想打了）与只道谢／应一声。放在观察通道之前，因为它们要的回应不是事实。
  // socialOnly=true 表示这一句按设计就不含任何事实，跳过「至少一句跨局信息」那一关；
@@ -1805,7 +1937,11 @@ export function companion(context={},memory={},message='',now=Date.now()){
  // 否则模型读到的「档位依据」和「回复约束」互相打架，它照着依据写就又把话拐回战斗了。
  if(greeting)state.registerReason='玩家这一轮只是打了个招呼：问候就回问候——不落跨局记录、不报战绩、不聊对局（意图=chat）';
  const hasRecord=f.history.length>0;
- const continuing=Boolean(previousChatThread(memory));
+ // ── C02：拒绝生效期间不再推复盘 ──────────────────────────────────────────────
+ // 判据是玩家**自己说过**「别复盘／不用你教／不想说」，而且那条记录还没过期
+ // （memory.playerWishes 里带 until）。它只关掉跨局记录的回顾，不关掉在场与心情：
+ // 拒绝的是「复盘」，不是「你这个人」。
+ const continuing=Boolean(previousChatThread(memory,{noReview}));
  // named 只在**真正的第一次见面**（本机一条记录都没有）时为真：有记录时那句问候照说，
  // 但不再自我介绍（「我是小芽」是用户点名的那一处，见文件头第八次修正）。
  const social=SOCIAL_ONLY.test(words.trim())?socialLine(words,{now,named:!hasRecord&&!continuing}):null;
@@ -1816,7 +1952,18 @@ export function companion(context={},memory={},message='',now=Date.now()){
  // R3 是「已经连败、收尾陪坐」，那一档本来就在说「连着N局没赢……到这儿也行」，
  // 那是陪着不是汇报，所以不在这里改它。
  const mood=(register==='R0'||register==='R1'||register==='R2')?moodLine(words,{continuing}):null;
- if(register==='R0'){
+ // 场景层（拒绝／纠正偏好／分享胜利／里程碑）排在心情与闲聊之前：玩家刚说「别复盘了」，
+ // 回他一段记录是最糟的一种接法。文案里每个字都来自这一轮玩家自己说的话或真实记录，
+ // 所以空账本下也成立。三类硬线在这里先过一遍：复述屏幕、说教、战术越界、同一屏说两遍。
+ scenario=scenarioOf(words,{facts:{...f,sharing:sharingWord(words)},now});
+ if(scenario){
+  const past=hasRecord||Boolean(scenario.stated);
+  const safe=checkCompanionRestraint(scenario.text,{register,voice:'companion',facts:{allowPast:past,lessons:f.lessons},previousAssistant:'',playerMessage:words});
+  const repeat=repeatedInformation(scenario.text);
+  if(safe.valid&&!repeat.repeated){text=scenario.text;parts=scenario.parts||[];socialOnly=true;if(scenario.kind==='milestone')moodUsed=false;}
+  else{scenarioFailed=safe.reasons.concat(repeat.repeated?['repeats-information']:[]);scenario=null;}
+ }
+ if(!text&&register==='R0'){
   // 安静档/线上竞技的语义一个字都没改：**不主动开口**（主动侧由 coach.js 的门控
   // 保证 R0 一句都不说）、不给战术指令、不问句。这里只决定「玩家搭话时回哪一句」，
   // 顺序与 R1/R2 一致：心情 → 问候/道谢 →（都说不出时）最短承接句。
@@ -1825,12 +1972,12 @@ export function companion(context={},memory={},message='',now=Date.now()){
   else if(social){text=social;parts=[SENT(social,'chat','本轮消息')];socialOnly=true;}
   else text='我在。';
  }
- else if(register==='R1'||register==='R2'){
+ else if(!text&&(register==='R1'||register==='R2')){
   // 玩家主动搭话（寒暄、家常、问陪练自己）先走闲聊线程：接住这句话，再落一件记得的事。
   // 战术问句与倾诉不走这里——前者是军师的活，后者由 R2/R3 的关切句接。
   // 空账本下说心情／状态会走这条线程（那时没有可关切的事），所以这里也要认出来：
   // 只要这一轮说的是心情／状态，模型那一侧就不许再要跨局记录。
-  chat=chatReply({message:words,memory,facts:f,intent,limit,now});
+  chat=chatReply({message:words,memory,facts:f,intent,limit,now,noReview});
   // 问候轮的接话句本身就是全部内容（第二句是在场，不是记录），所以它按 socialOnly 走：
   // 豁免的只有「至少一句跨局信息」这一条**信息量**判据，其余每一关照旧。
   if(chat){text=chat.text;parts=chat.parts;if(chat.greeting)socialOnly=true;if(MOOD_LINE.test(words))moodUsed=true;}
@@ -1862,8 +2009,14 @@ export function companion(context={},memory={},message='',now=Date.now()){
  else if(!text&&register==='R2'){
   // R2 是玩家真的问了一句话：给两条观察（各带自己的来源），而不是把 R1 那句重说一遍。
   reading=pick(CLASSES);
-  const second=reading?readings.find(r=>r!==reading&&CLASSES.includes(r.klass)):null;
-  const body=reading?[...(f.preference==='brief'?reading.sentences.slice(0,1):reading.sentences.slice(0,2)),...(second?[second.sentences[0]]:[])].slice(0,3):[];
+  const first=reading?(f.preference==='brief'?reading.sentences.slice(0,1):reading.sentences.slice(0,2)):[];
+  // 第二条观察**不能把第一条已经说过的局数再说一遍**：实测输出过
+  // 「最近3局里，最先倒下的有2次是烬尾狐……今天你打了3局，1胜2负。」——
+  // 同一屏把「3局」念了两遍，正是 C02 验收③要挡的那一种（判据见 repeatedInformation）。
+  // 第二条按「加上它以后还不重复」来挑；挑不到就只留第一条，不硬凑两条。
+  const firstText=first.map(s=>s.text).join('');
+  const second=reading?readings.find(r=>r!==reading&&CLASSES.includes(r.klass)&&!(noReview&&REVIEW_CLASSES.includes(r.klass))&&r.sentences?.[0]&&!repeatedInformation(firstText+r.sentences[0].text).repeated):null;
+  const body=reading?[...first,...(second?[second.sentences[0]]:[])].slice(0,3):[];
   const offer=f.live&&!f.live.over&&body.length<2?SENT('这一局哪一步不顺，你说。','presence','context.battle'):null;
   const fit=body.length?fitSentences(body,limit,offer):null;
   if(fit){text=fit.text;parts=fit.parts;}
@@ -1878,9 +2031,12 @@ export function companion(context={},memory={},message='',now=Date.now()){
  // socialOnly 的两类（说心情／只道谢）按设计就不含事实，唯一豁免的是「至少一句跨局信息」
  // 与「至少两句」这两条**信息量**判据；它们的文本来自固定小词表，由测试逐条钉住不许夹带事实。
  if(observed&&!socialOnly&&text&&text!=='我在。'&&!checkCompanionInformation(text,{parts,freshIntro:Boolean(chat?.emptyLedger)}).valid){text=null;reading=null;parts=[];chat=null;moodUsed=false;}
+ // C02 的验收③：同一屏不把同一条信息说两遍。它是**最后一道闸**，对每一类出口都生效——
+ // 包括不含事实的陪伴句（两句一模一样的陪伴句同样是重复）。判据见 repeatedInformation。
+ if(text&&text!=='我在。'&&repeatedInformation(text).repeated){text=null;reading=null;parts=[];chat=null;moodUsed=false;socialOnly=false;}
  // 该档位需要的事实一条都拼不出来时，降到 R0 只说承接句：档位要么真的用上，要么明说降到最低。
  if(!text){register='R0';text='我在。';state.register='R0';state.registerReason='该档位需要的事实在本机记录里一条都找不到，降到最短承接句';reading=null;parts=[];chat=null;moodUsed=false;}
- return publicPacket({text,register,state,intent,reading,chat,mood:moodUsed,greeting});
+ return publicPacket({text,register,state,intent,reading,chat,mood:moodUsed,greeting,scenario,scenarioFailed});
 }
 
 // 被动通道手里只有 buildContext 的快照（history 被裁空），把它当成一个「没有回合记录的对局」读。
@@ -1903,7 +2059,7 @@ function followupReply(memory){
 
 // 每个数字都出现在依据里：这样模型改写后的答案也能通过 checkGroundedAnswer 的数字核对，
 // 不会因为「引用了陪练模板里的真实数字」被误判成编造。
-function publicPacket({text,register,state,intent,reading=null,chat=null,mood=false,greeting=false}){
+function publicPacket({text,register,state,intent,reading=null,chat=null,mood=false,greeting=false,scenario=null,scenarioFailed=null}){
  const f=state.facts,history=f.history;
  const wins=history.filter(e=>e.result==='win').length,losses=history.filter(e=>e.result==='loss').length,draws=history.filter(e=>e.result==='draw').length;
  const evidence=[`本机对战记录：已结束${history.length}场，${wins}胜${losses}负${draws?draws+'平':''}（来源：memory.events，最多保留12场，预制场景不写入）。`];
@@ -1927,17 +2083,24 @@ function publicPacket({text,register,state,intent,reading=null,chat=null,mood=fa
  if(chat?.evidence?.length)evidence.push(...chat.evidence);
  evidence.push(`语气档位 ${register}（${REGISTERS[register].name}）：${state.registerReason}。`);
  evidence.push(`档位依据：${state.reasons.slice(0,-1).join('；')}。`);
- const settings=[`交流偏好${f.preference||'未设置'}`,`玩法目标${f.goal||'未设置'}`,`本命${f.favorite||'未设置'}`].join('、');
+ const settings=[`交流偏好${f.preference||'未设置'}`,`玩法目标${f.goal||'未设置'}`,`本命${f.favorite||'未设置'}`,`怎么称呼你${f.address||'未设置'}`].join('、');
  evidence.push(`你的设置：${settings}（来源：你明确表达过才会记录）。`);
+ // 显式记忆里最该被模型看见的三样：里程碑、输了要不要复盘、拒绝。
+ if(f.milestones.length)evidence.push(`你自己说过的里程碑：${f.milestones.join('；')}（来源：memory.stated 的 milestone 条目，原话保留）。`);
+ if(f.reviewAfterLoss!==null)evidence.push(`输了以后${f.reviewAfterLoss?'你想复盘一下':'你明确说过先不复盘'}（来源：memory.stated 的 review-after-loss 条目）；这一轮${f.reviewAfterLoss?'可以问一句要不要复盘':'不要提复盘'}。`);
+ if(f.refused)evidence.push(`你最近明确拒绝过：${[f.refusedAdvice?'先别给建议':null,f.refusedReview?'先别复盘':null,f.refusedTalk?'先不想说话':null].filter(Boolean).join('、')}（来源：memory.stated 的 refusal 条目，有时效）。这一轮不要推复盘、不要给建议、不要追问。`);
+ // 情绪假设：一定带置信度与到期时间，而且是「假设」不是「你就是这样」。
+ if(f.mood)evidence.push(`情绪假设（不是结论）：你最近一次自己说的是「${f.mood.label}」，置信度 ${f.mood.confidence}，${new Date(f.mood.expiresAt).toISOString().slice(11,16)} 前有效（${f.mood.basis}）。这一轮只接住这个状态，不要据此评价你这个人。`);
  if(f.lessons.length)evidence.push(`课程记录：${f.lessons.join('、')}（${f.lessons.length}条答对过的练习，不等于熟练掌握）。`);
- return {text,evidence,register,companionState:{register,engagement:state.engagement,consideration:state.consideration,momentum:state.momentum,lossStreak:state.lossStreak,winStreak:state.winStreak,reasons:state.reasons},replyConstraints:replyConstraints(register,'companion',{emptyLedger:!history.length&&!f.lessons.length,continuing:Boolean(chat?.continued),chat:Boolean(chat),mood,greeting,metBefore:history.length>0}),intent,chatThread:chat?.thread||null,chatContinued:Boolean(chat?.continued),silent:register==='R0'};
+ if(scenarioFailed?.length)evidence.push(`场景文案自检未通过（${scenarioFailed.join('、')}），本机已退回原通道：这一轮不要换成别的说法去讲同一件事。`);
+ return {text,evidence,register,companionState:{register,engagement:state.engagement,consideration:state.consideration,momentum:state.momentum,lossStreak:state.lossStreak,winStreak:state.winStreak,reasons:state.reasons},replyConstraints:replyConstraints(register,'companion',{emptyLedger:!history.length&&!f.lessons.length,continuing:Boolean(chat?.continued),chat:Boolean(chat),mood,greeting,metBefore:history.length>0,scenario:scenario?.intent||null,noReview:f.refused,address:f.address}),intent,chatThread:chat?.thread||null,chatContinued:Boolean(chat?.continued),silent:register==='R0'};
 }
 
 // 模型路径下的档位约束：随证据包一起送到服务端（server.js 把整个证据包作为 game_evidence 发给模型）。
 // forbid 里的每一条与 checkCompanionRestraint / checkCompanionInformation 的硬线一一对应：
 // 复述屏幕、播报自己的情绪、空泛安慰、评价水平、说教、战术指挥，一条都不留。
 // allow 里写清这一轮**该有**的东西：情绪不是被禁止的，被禁止的是把情绪落在自己身上。
-export function replyConstraints(register,voice='companion',{emptyLedger=false,continuing=false,chat=false,mood=false,greeting=false,metBefore=false}={}){
+export function replyConstraints(register,voice='companion',{emptyLedger=false,continuing=false,chat=false,mood=false,greeting=false,metBefore=false,scenario=null,noReview=false,address=null}={}){
  const r=REGISTERS[register];
  // 没有记录时送模型的那句话要换掉：原来写的是「至少一句要来自跨局记录（memory.events）」，
  // 而 memory.events 是空的——照这句写，模型只能编一局出来；
@@ -1986,12 +2149,26 @@ export function replyConstraints(register,voice='companion',{emptyLedger=false,c
  // 模型把它当成「复述屏幕上看得见的事实」（publicState 里确实有双方速度），
  // 所以「不要复述屏幕」那条约束拦不住它——实测那句正是这样穿过去的。
  const noTactics='速度对比（「速度38比它34快」）、先手判断（「可以先动」「先手在你」）、以及任何告诉玩家这一手该出什么的说法，都属于军师的活：陪练一句都不给。';
+ // ── C02：拒绝与场景轮送给模型的同一句话 ──────────────────────────────────────
+ // 本地模板已经做到了，模型那一侧必须同步：否则模型会把「好，不劝了」扩写成一段复盘，
+ // 而生成后扫描只会把它判为越界再回退——玩家读到的还是模板，模型那次调用白花。
+ // noReview 是**持续生效**的（玩家拒绝过，直到那条记录过期）：这一轮与后面几轮都不许推复盘。
+ const noReviewRule=noReview?'玩家明确拒绝过（先别给建议／先别复盘／先不想说话），而且这条记录还没过期：这一轮不要推复盘、不要提「上一局／最近几局／记录」，不要给建议，也不要追问他的状态。接住他这句话本身，到此为止。':'';
+ // 场景轮：他自己刚说完一句要记下来的话（纠正偏好／里程碑／拒绝）或报了一场胜利。
+ // 这一轮的正文只有一句：承认那个新值（或接住那句话）——**不许提旧值**，也不许把记录念一遍。
+ const scene=scenario==='sharing'
+  ?'玩家这一轮自己报了胜利：恭喜要落在真实记录上（连胜几局、今天第几局），不许复述屏幕上的胜负，也不许顺势讲下一局该怎么打。'
+  :scenario
+  ?'玩家这一轮说了一句关于他自己偏好或意愿的话：只承认这句话本身（新值），一个字都不要提旧值，也不要把记录念一遍——「你自己说过的」这种展示记忆功能的话一句都不许有。'
+  :'';
+ const nameRule=address?`怎么称呼他已经定了（${address}）：按他的要求称呼，但不要每句都点名，也不要拿它当开场白。`:'';
  return {register,voice,maxChars:r.limit,maxQuestions:r.maxQuestions,allowAdvice:r.advice,
-  forbid:['复述屏幕上已经写着的事','播报自己的情绪（「我看得有点急」这类第一人称感受）','空泛安慰','评价玩家水平','说教',r.advice?'':'给建议','战术指挥','速度对比与先手判断（「速度38比它34快」「可以先动」「先手在你」）',emptyLedger?'提任何过去的事（「上次」「之前」「上回」这类说法）':'',emptyLedger?'播报本机有没有记录（「记录还是空的」「一局都还没记上」），或者把玩家推去开一局（「去开一局吧」「打完我就能接上话」）':'',register==='R0'?'提对局、记录、回合数或胜负（安静档只回玩家这一句话）':'',mood?'提对局、记录、回合数或胜负（他这一轮说的是自己的状态，先接住他）':'',greeting?'提对局、记录、回合数、胜负、血线或本局局面（这一轮只是问候，回问候就够）':''].filter(Boolean),
+  forbid:['复述屏幕上已经写着的事','播报自己的情绪（「我看得有点急」这类第一人称感受）','空泛安慰','评价玩家水平','说教',r.advice?'':'给建议','战术指挥','速度对比与先手判断（「速度38比它34快」「可以先动」「先手在你」）',emptyLedger?'提任何过去的事（「上次」「之前」「上回」这类说法）':'',emptyLedger?'播报本机有没有记录（「记录还是空的」「一局都还没记上」），或者把玩家推去开一局（「去开一局吧」「打完我就能接上话」）':'',register==='R0'?'提对局、记录、回合数或胜负（安静档只回玩家这一句话）':'',mood?'提对局、记录、回合数或胜负（他这一轮说的是自己的状态，先接住他）':'',greeting?'提对局、记录、回合数、胜负、血线或本局局面（这一轮只是问候，回问候就够）':'',noReview?'推复盘、提「上一局／最近几局／记录」、给建议或追问他（他明确拒绝过）':'',scenario?'提旧值、念记录，或说「我记着／我都留着底」这类展示记忆功能的话':''].filter(Boolean),
   allow:greeting
    ?['对这句问候本身的回应（用当前时段的问候，或一句同样短的应声）——这一轮不要别的']
+   :scenario?['对他这句话本身的承认（新值／他自己的那句话）——这一轮不要别的']
    :['对真实事件的可惜/漂亮/悬/憋屈/松口气（必须落在具体回合、数字或记录上）','跨局记录与偏好（玩家以前说过、打过的事）'],
-  instruction:`本轮档位 ${register}（${r.name}）：正文不超过${r.limit}字，${r.maxQuestions?'最多一个问句':'不要问句'}，${mood||greeting?'':'只写有本机记录支撑的事实。'}${quiet}${care}${greet}${grounding}${threading}${smallTalk}${noTactics}不要复述屏幕上已经写着的事（谁被克制、还剩几只、第几回合的进度），也不要说自己的感受——情绪要落在这一局真实发生的事上（可惜、漂亮、悬、憋屈、松口气），不是落在你自己身上。`};
+  instruction:`本轮档位 ${register}（${r.name}）：正文不超过${r.limit}字，${r.maxQuestions?'最多一个问句':'不要问句'}，${mood||greeting||scenario?'':'只写有本机记录支撑的事实。'}${quiet}${care}${greet}${noReviewRule}${scene}${nameRule}${grounding}${threading}${smallTalk}${noTactics}不要复述屏幕上已经写着的事（谁被克制、还剩几只、第几回合的进度），也不要说自己的感受——情绪要落在这一局真实发生的事上（可惜、漂亮、悬、憋屈、松口气），不是落在你自己身上。`};
 }
 
 // 两条声线。自我中心的情绪在任何声线下都拦——「我看得有点急」正是这一版要修掉的方向：
@@ -2045,6 +2222,10 @@ export function checkCompanionRestraint(text,{register='R2',facts={},previousAss
  if(emptyLedger&&EMPTY_LEDGER_MENU.test(t))reasons.push('smalltalk-menu');
  if(FILLER.test(t))reasons.push('empty-encouragement');
  if(/菜|太弱|你错了|你不行|水平不够|速度意识差|手残|瞎打|乱打|不会玩|没天赋|水平差/.test(t))reasons.push('skill-insult');
+ // C02：**不许把情绪假设变成性格标签**。玩家说过一句「烦」，那是这一轮的假设（低置信、
+ // 30 分钟过期）；「你就是急躁」「你玩得不好」是给他贴标签，永远不许说——
+ // 也不许从静默、连败或慢操作推出来（那三样在这个模块里根本读不到，见 memory.moodHypothesis）。
+ if(PLAYER_LABEL.test(t))reasons.push('player-label');
  if(PREACH.test(t))reasons.push('preach');
  if(TACTICAL_OVERREACH.test(t))reasons.push('tactical-overreach');
  // 问候轮：上面那些都是「说得对不对」，这一条是「该不该说」——玩家只打了个招呼，

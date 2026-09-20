@@ -16,10 +16,17 @@ export function teacher(context){
  const reason=free<=0?(v.level<5?'再升一级解锁1格，或免费重置。':'已到最高等级，可以免费重置分配。'):context.profile.tokens<1?'完成一场训练就能获得。':chosen==='atk'?`攻击 ${p.atk} → ${p.atk+4}，提高每次出招的伤害。`:chosen==='hp'?`生命 ${p.maxHp} → ${p.maxHp+12}，多留一点承伤空间。`:`速度 ${p.speed} → ${p.speed+3}，超过该关首发的 ${target.speed}。`;
  return {headline,reason:reserve?'训练点不多，这只先不急着投入。':reason,goal:context.goal||null,favorite:context.favorite||null,reserveOption:reserveText,comparisons:[['生命',p.maxHp,p.maxHp+12],['攻击',p.atk,p.atk+4],['速度',p.speed,p.speed+3]],brief:free<=0||context.profile.tokens<1?budget:`${p.name}可先试1点${stat}。速度${p.speed}对${target.speed}，${p.speed>target.speed?'已经更快，不必急着加敏捷':p.speed+3>target.speed?'加敏捷能超过对手':'加一次敏捷仍不能稳拿先手'}。`,text:`${p.name}先考虑${stat}。当前关卡首发${target.name}速度${target.speed}，你的速度${p.speed}，${p.speed>target.speed?'已经更快，暂时不需要靠敏捷抢先手':p.speed===target.speed?'目前平速，不能保证先手':'目前较慢，要看加点后能否超过'}。${budget}`,evidence:[reserveText,`玩家明确目标：${context.goal||'未设置'}；本命：${context.favorite||'未设置'}。`,comparison,`当前生命 ${p.maxHp}，攻击 ${p.atk}，防御 ${p.def}，速度 ${p.speed}。`,'一次培养：生命 +12 / 攻击 +4 / 速度 +3；不会替你执行加点。'],method:'读取当前宠物与资源 → 职责建议 → 训练验证'};
 }
+// 练习题的变式：同一个知识点，参数不同。
+// offet 表每一档都不同（原来是 [2,4,3] 循环，第 4 次出题就与第 1 次完全一样），
+// 而且 id 带上变式号——id 是「这是不是同一道题」的判据（coach/memory.js 的 quizMastery
+// 用 distinctVariants 数它）：参数变了就是另一个变式，答对两次也只算两次不同的题。
+export const QUIZ_OFFSETS=[2,4,3,6,1,5];
 export function makeQuiz(context,{variant=0}={}){
- const p=pet(context),offset=[2,4,3][variant%3],enemy=p.speed+offset;
+ const v=((variant%QUIZ_OFFSETS.length)+QUIZ_OFFSETS.length)%QUIZ_OFFSETS.length;
+ const p=pet(context),offset=QUIZ_OFFSETS[v],enemy=p.speed+offset;
  const answer=offset<3?'先':offset>3?'后':'不确定';
- return {id:`speed:${p.id}:${p.speed}:${enemy}`,variant,question:`假设练习（不是当前敌人的面板）：${p.name}速度 ${p.speed}，对手速度 ${enemy}。培养一次敏捷（+3），双方技能优先级相同，你会先出手、后出手，还是无法确定？`,answer,explanation:`培养后速度 ${p.speed}+3=${p.speed+3}，对手 ${enemy}。${answer==='不确定'?'同速时由随机过程决定，不能保证先手。':answer==='先'?'同优先级下速度更高，先出手。':'同优先级下速度仍更低，后出手。'}`,lesson:'速度比较：同优先级时，速度更高者先行动。',evidenceIds:['tactic:priority','tactic:speed-tie','tactic:training']};
+ const base=`speed:${p.id}:${p.speed}:${enemy}`;
+ return {id:`${base}:v${v}`,sourceId:base,variant:v,variantOf:`${base}:v${v}`,questionKey:'speed',skillKey:'速度比较',variant,question:`假设练习（不是当前敌人的面板）：${p.name}速度 ${p.speed}，对手速度 ${enemy}。培养一次敏捷（+3），双方技能优先级相同，你会先出手、后出手，还是无法确定？`,answer,explanation:`培养后速度 ${p.speed}+3=${p.speed+3}，对手 ${enemy}。${answer==='不确定'?'同速时由随机过程决定，不能保证先手。':answer==='先'?'同优先级下速度更高，先出手。':'同优先级下速度仍更低，后出手。'}`,lesson:'速度比较：同优先级时，速度更高者先行动。',evidenceIds:['tactic:priority','tactic:speed-tie','tactic:training']};
 }
 export function review(context){const h=context.lastTurn;if(!h)return {text:'暂时没有回合记录。完成一个回合后再来，我会按当时的信息解释。',evidence:[]};return {text:`第 ${h.before.turn} 回合的事实记录：${h.events.filter(x=>!x.startsWith('──')).join(' ')} 下一次先检查属性、出手优先级和速度。单次输赢不能直接证明选择对错。`,evidence:['来源：实际回合日志；未把事后结果当作决策正确性的唯一依据。'],method:'读取已完成回合 → 事实复盘'};}
 
@@ -92,8 +99,43 @@ export function summarizeMatch(match){
  const selected=ranked.slice().sort((a,b)=>b.importance-a.importance).slice(0,3).sort((a,b)=>a.i-b.i);
  return {remainingItems:structuredClone(turns.at(-1).after.player.items),id:match.id||'current',rulesVersion:match.version,stage:match.stageName||match.stage||'训练场',result:match.result||'ongoing',rounds:turns.length,counts,
   team:turns[0].before.player.pets.map(p=>p.name),survivors:remaining(turns.at(-1).after.player),
-  keyTurns:selected.map(({h})=>({id:`${match.id||'current'}:turn:${h.before.turn}`,turn:h.before.turn,hpBefore:h.before.player.pets.concat(h.before.enemy.pets).map(p=>({name:p.name,hp:p.hp})),hpAfter:h.after.player.pets.concat(h.after.enemy.pets).map(p=>({name:p.name,hp:p.hp})),playerPet:h.before.player.pets[h.before.player.active].name,playerActionCancelled:h.events.some(e=>e.includes('你的宠物已倒下，原定行动取消')),action:h.action,events:h.events.filter(x=>!x.startsWith('──')),analysis:analyzeTurn(h,{rulesVersion:match.version}),alternatives:compareTurnAlternatives(h,match.version)}))};
+  keyTurns:selected.map(({h},rank)=>{
+   const alternatives=compareTurnAlternatives(h,match.version);
+   // 这个回合的决策素材（C01）：当时的信息、两个候选动作、事后后果。
+   // 全部取自回合开始前的公开快照与引擎自己的结算，不在这里做任何新推断。
+   const decision=turnDecision(h,{alternatives,rank,rulesVersion:match.version});
+   return {id:`${match.id||'current'}:turn:${h.before.turn}`,turn:h.before.turn,hpBefore:h.before.player.pets.concat(h.before.enemy.pets).map(p=>({name:p.name,hp:p.hp})),hpAfter:h.after.player.pets.concat(h.after.enemy.pets).map(p=>({name:p.name,hp:p.hp})),playerPet:h.before.player.pets[h.before.player.active].name,playerActionCancelled:h.events.some(e=>e.includes('你的宠物已倒下，原定行动取消')),action:h.action,events:h.events.filter(x=>!x.startsWith('──')),analysis:analyzeTurn(h,{rulesVersion:match.version}),alternatives,decision};
+  })};
 }
+// 一个回合的「关键决策」素材。lesson 用的是与军师记账、experience.js 的 lessonOf 同一套词，
+// 所以「这一课」在老师、军师、军师记账三处指的是同一件事（见 decisionLesson 的注释）。
+// 两个候选动作来自 compareTurnAlternatives 的排序（top2），事后后果来自 h.after 的结算快照。
+export function turnDecision(h,{alternatives=null,rank=0,rulesVersion='0.6'}={}){
+ if(!h)return null;
+ const a=h.action||{},before=h.before||{},after=h.after||{};
+ const p=before.player?.pets?.[before.player.active]||null,q=before.enemy?.pets?.[before.enemy.active]||null;
+ const pa=after.player?.pets?.[before.player.active]||null,qa=after.enemy?.pets?.[before.enemy.active]||null;
+ const fallen=side=>before[side].pets.filter((x,j)=>x.hp>0&&(after[side].pets[j]?.hp||0)<=0).map(x=>x.name);
+ const options=(alternatives?.rows||[]).map(r=>({action:r.action,name:r.name,expected:r.expected,worst:r.worst,score:r.score}));
+ // 引擎自己算出来的数字：这一手打出多少、换上来的那只这一回合实际掉多少。
+ // 练习题的「参数已改动」版就是把这些数字代回去重算，答案不靠回忆、靠算术。
+ const chosenSkill=a.kind==='skill'?SKILLS[a.id]:null;
+ const incomingIdx=a.kind==='switch'?a.target:null;
+ const beforeIncoming=incomingIdx!==null?before.player.pets[incomingIdx]:null;
+ const afterIncoming=incomingIdx!==null?after.player.pets[incomingIdx]:null;
+ const numbers={
+  chosen:p&&q&&chosenSkill&&chosenSkill.power?{name:chosenSkill.name,power:chosenSkill.power,cost:chosenSkill.cost,energy:p.energy??null,enemyHp:q.hp??null,hit:damage(p,q,chosenSkill,false),guarded:damage(p,q,chosenSkill,true)}:null,
+  incoming:beforeIncoming?{name:beforeIncoming.name,hp:beforeIncoming.hp??null,after:afterIncoming?.hp??null,taken:Math.max(0,(beforeIncoming.hp||0)-(afterIncoming?.hp||0))}:null};
+ return {turn:before.turn??null,lesson:decisionLesson(before,a),chosen:{action:a,name:actionName(before,'player',a)},
+  situation:{playerPet:p?.name||null,playerHp:p?.hp??null,playerEnergy:p?.energy??null,enemyPet:q?.name||null,enemyHp:q?.hp??null,enemyEnergy:q?.energy??null},
+  options,numbers,
+  consequence:{playerHp:pa?.hp??null,enemyHp:qa?.hp??null,playerFallen:fallen('player'),enemyFallen:fallen('enemy'),cancelled:h.events?.some(e=>e.includes('你的宠物已倒下，原定行动取消'))||false,turnEvents:(h.events||[]).filter(x=>!x.startsWith('──'))},
+  gap:alternatives?.gap??null,rank,rulesVersion,
+  // 两个候选动作是不是真的凑得出来：逃跑了、或者规则版本对不上，引擎不给排序，
+  // 那时只是「没有可比较的两个候选」，不拿别的回合补一个上去。
+  optionsComplete:options.length>=2};
+}
+
 export function analyzeTurn(h,{rulesVersion='0.6'}={}){
  if(!h)return '缺少这回合的原始记录。';
  if(rulesVersion!=='0.6')return '这条记录的规则版本与当前计算器不匹配，只展示原始事件，不重新推算伤害。';
@@ -131,15 +173,101 @@ export function reviewMatch(context){
  const m=context.lastMatch;if(!m)return {text:'暂时没有可用的完整对局记录。旧版只存了最后一回合的历史无法还原整局。新版本会保存完整对局；如果当前对局还在页面里，可直接从现有记录复盘。',evidence:[],scope:'match'};
  const outcome={win:'胜利',loss:'失利',draw:'平局',escaped:'撤退',ongoing:'尚未结束'}[m.result]||m.result;
  const key=m.keyTurns.slice().sort((a,b)=>(b.alternatives?.gap||0)-(a.alternatives?.gap||0))[0];
+ // ── C01：默认输出是**一个**关键决策，不是统计罗列 ───────────────────────────
+ // 这一个决策的素材全部来自 summarizeMatch（当时的信息 / 两个候选动作 / 事后后果），
+ // 展开区（evidence）里各给一句，折叠时（brief）只说一句。
+ // text 仍是玩家问「总结整局」时那段完整回答，统计那句一个数字都没动（它是依据，不是装饰）。
+ const decision=keyDecisionOf(m);
+ const practice=decision?practiceQuestion({keyDecision:decision,variant:Number.isInteger(context.practiceVariant)?context.practiceVariant:0}):null;
  const lesson=m.result==='loss'&&m.remainingItems?.potion>0?`下次在伙伴进入危险血线时，先比较吃药、换宠和继续攻击，别等倒下再救；有药不代表那回合吃药一定更好。`:key?.alternatives?.gap>5?`第${key.turn}回合值得回看：当时可比较「${key.alternatives.rows[0].name}」，这是事前一回合评分，不代表改这一手就一定能赢。`:null;
  const theme=lesson|| (m.counts.guards+m.counts.items>m.rounds/2?'这局防御和道具占了一半以上，重点看看哪些回合可以转为进攻。':m.counts.switches>=4?'这局有多次轮换，重点看换入承伤是否换来了后续机会。':'先看造成减员或生命变化较大的回合，比较当时还有哪些选择。');
- return {brief:lesson||`${m.stage}，${outcome}。先回看第${key?.turn||1}回合，比较当时的其他选择。`,textFacts:m,text:`${m.stage}，共${m.rounds}回合，${outcome}。${matchStatsLine(m,{lead:false})}${theme}`,scope:'match',matchId:m.id,
+ // 折叠那句就是那个关键决策本身（没有可比较的两个候选时退回原来那句「先回看第N回合」）。
+ const brief=decision?decisionBrief(decision):lesson||`${m.stage}，${outcome}。先回看第${key?.turn||1}回合，比较当时的其他选择。`;
+ return {brief,textFacts:m,text:`${m.stage}，共${m.rounds}回合，${outcome}。${matchStatsLine(m,{lead:false})}${theme}`,scope:'match',matchId:m.id,
+  keyDecision:decision,practice,
   // 展开区只放依据：整局统计一句人话，加上挑出来的关键回合，最后统一交代一句怎么读这些差值。
   // 回合标识（那份 `对局id:turn:N`）是内部索引，印给玩家没有意义，去掉。
   evidence:[`整局统计：${matchStatsLine(m)}`,
+   ...(decision?[decisionEvidence(decision)]:[]),
    ...m.keyTurns.map(k=>`第${k.turn}回合：${k.events.join(' ')}\n${k.analysis}${k.alternatives?`\n${k.alternatives.line}`:''}`),
    m.keyTurns.find(k=>k.alternatives)?.alternatives.rule].filter(Boolean),choices:m.keyTurns.map(k=>`详看第${k.turn}回合`),method:'完整回合统计 → 减员与生命变化选点 → 事前条件分析（不等于全局最优）'};
 }
+// 一局只留一个「最值得看」的决策：按事前差值（gap）排，取最大的那个。
+// gap 都一样时取回合更早的那个（先发生的更接近「当时的取舍」，不会被后面的连锁结果带偏）。
+export function keyDecisionOf(match){
+ const rows=(match?.keyTurns||[]).filter(k=>k.decision);
+ if(!rows.length)return null;
+ const ranked=rows.slice().sort((a,b)=>((b.decision.gap||0)-(a.decision.gap||0))||(a.turn-b.turn));
+ const k=ranked[0],d=k.decision;
+ return {id:`${match.id||'current'}:decision:${d.turn}`,matchId:match.id||'current',turn:d.turn,lesson:d.lesson,
+  chosen:d.chosen,situation:d.situation,options:d.options,optionsComplete:d.optionsComplete,numbers:d.numbers,
+  consequence:d.consequence,gap:d.gap,ruleVersion:d.rulesVersion,
+  evidenceIds:[`${match.id||'current'}:turn:${d.turn}`]};
+}
+// 折叠时那一句：一个决策，四个要素（哪一回合、当时有什么、你选了什么、还能选什么）。
+// 不带括号、不带回合 ID、不念统计——玩家先读到的是「这一局最值得看的那一下」。
+function decisionBrief(d){
+ const s=d.situation,alts=d.options.filter(o=>JSON.stringify(o.action)!==JSON.stringify(d.chosen.action));
+ const bits=[`第${d.turn}回合最值得看：当时${s.playerPet??'你的伙伴'} ${s.playerHp??'?'} 血`];
+ if(Number.isInteger(s.playerEnergy))bits.push(`、${s.playerEnergy} 豆`);
+ bits.push(`，对面${s.enemyPet??'对手'} ${s.enemyHp??'?'} 血；你选了「${d.chosen.name}」`);
+ if(alts.length)bits.push(`，当时还能选「${alts[0].name}」`);
+ if(d.consequence.enemyFallen.length)bits.push(`，这一下打倒了${d.consequence.enemyFallen.join('、')}`);
+ bits.push('。');
+ return bits.join('');
+}
+// 展开时那三句：当时的信息 / 两个候选动作 / 后果。与上面那句不是同一句（措辞与数据都不同），
+// 所以「折叠说过的不在展开区再说一遍」这条判据照样成立。
+function decisionEvidence(d){
+ const s=d.situation,c=d.consequence;
+ const info=`第${d.turn}回合开始时的信息：${s.playerPet??'我方'} ${s.playerHp??'?'} 血、${s.playerEnergy??'?'} 豆；${s.enemyPet??'对手'} ${s.enemyHp??'?'} 血、${s.enemyEnergy??'?'} 豆（来源：回合开始前的公开快照）。`;
+ const opts=d.optionsComplete?`当时可比较的两个候选动作：${d.options.slice(0,2).map(o=>`「${o.name}」`).join('与')}；你实际选了「${d.chosen.name}」。`:`这一个回合引擎没有给出可排序的候选（撤退或规则版本不匹配），只保留实际选择「${d.chosen.name}」。`;
+ const outcomeText=`结算后的结果：${s.playerPet??'我方'} ${s.playerHp??'?'} → ${c.playerHp??'?'} 血，${s.enemyPet??'对手'} ${s.enemyHp??'?'} → ${c.enemyHp??'?'} 血${c.playerFallen.length?`，${c.playerFallen.join('、')}倒下`:''}${c.enemyFallen.length?`，${c.enemyFallen.join('、')}倒下`:''}${c.cancelled?'（这一手因伙伴倒下被取消）':''}。`;
+ return `关键决策：${info}${opts}${outcomeText}`;
+}
+// ── C01：相似练习（参数已改动）───────────────────────────────────────────────
+// 判据：从这一局那个关键决策出发，把**参数**改掉再问一次同一类判断，答案由算术/引擎字段
+// 算出来，不靠回忆。参数改了但题型没变，所以它是「相似的练习题」，不是「同一道题」：
+//   ① 有伤害数字时 → 改对手当时剩下的血，问这一手还够不够收尾；
+//   ② 换宠时      → 改换上来的那只当时的血，问它扛不扛得住这一回合真实的伤害；
+//   ③ 能量取舍时  → 改当时的豆数，问打完还剩几豆、下一回合还能不能再出同一手；
+//   ④ 防御节奏时  → 参数=上一回合是否已经防御过（规则的硬边界）。
+// 凑不出任何一条时返回 null：宁可这道练习题不出，也不编一道与本局无关的题。
+export const PRACTICE_DELTAS=[8,-6,15,-11,3,-18];
+export function practiceQuestion({keyDecision:d=null,variant=0}={}){
+ if(!d)return null;
+ const v=((variant%6)+6)%6,pick=PRACTICE_DELTAS[v];
+ const base=`${d.matchId}:turn:${d.turn}`,id=`practice:${base}:v${v}`;
+ const wrap=(body)=>({id,sourceId:base,variant:v,variantOf:id,skillKey:d.lesson,question:`假设练习（参数已改动）：${body.question}`,answer:body.answer,choices:body.choices||[body.answer,body.other],explanation:body.explanation,lesson:`${d.lesson}：${body.lesson}`,evidenceIds:d.evidenceIds,source:`${d.matchId} 第${d.turn}回合的关键决策，参数已改动`});
+ const n=d.numbers||{};
+ if(n.chosen&&Number.isInteger(n.chosen.enemyHp)&&Number.isInteger(n.chosen.hit)&&n.chosen.enemyHp>0){
+  const assumed=Math.max(1,n.chosen.enemyHp+pick),enough=n.chosen.hit>=assumed;
+  return wrap({question:`${d.situation.playerPet??'你的伙伴'}用「${n.chosen.name}」打出 ${n.chosen.hit} 伤害（对方防御时 ${n.chosen.guarded}）。当时对手剩 ${n.chosen.enemyHp} 血，这里改成 ${assumed} 血，这一手够不够收尾？`,
+   answer:enough?'够收尾':'不够收尾',other:enough?'不够收尾':'够收尾',
+   explanation:`伤害 ${n.chosen.hit} 比假定的 ${assumed} 血${enough?'多，所以够':'少，所以不够'}（真实那一局对手剩 ${n.chosen.enemyHp} 血）。对手这一回合防御时只有 ${n.chosen.guarded}，所以「够」只在它不防御时成立。`,
+   lesson:'收尾判断只比较「这一手打出的伤害」与「对手当时剩下的血」。'});
+ }
+ if(n.incoming&&Number.isInteger(n.incoming.hp)&&Number.isInteger(n.incoming.taken)&&n.incoming.taken>0){
+  const assumed=Math.max(1,n.incoming.hp-pick),survives=assumed-n.incoming.taken>0;
+  return wrap({question:`换上的${n.incoming.name}这一回合挨了 ${n.incoming.taken} 伤害。当时它剩 ${n.incoming.hp} 血，这里改成 ${assumed} 血，它还站得住吗？`,
+   answer:survives?'站得住':'会倒下',other:survives?'会倒下':'站得住',
+   explanation:`${assumed} 减去 ${n.incoming.taken} 等于 ${assumed-n.incoming.taken}，${survives?'大于 0，所以还剩着':'不大于 0，所以会倒下'}（真实那一局它剩 ${n.incoming.after??'?'} 血）。`,
+   lesson:'换上来的伙伴能不能承伤，要看它当时的血与这一回合实际承受的伤害。'});
+ }
+ if(n.chosen&&Number.isInteger(n.chosen.cost)&&Number.isInteger(n.chosen.energy)){
+  const assumed=Math.max(0,n.chosen.energy+pick),left=assumed-n.chosen.cost,again=left>=n.chosen.cost;
+  return wrap({question:`出「${n.chosen.name}」要 ${n.chosen.cost} 豆。当时你手里 ${n.chosen.energy} 豆，这里改成 ${assumed} 豆，打完以后下一回合还能不能再出它一次？`,
+   answer:again?'还能再出一次':'下一回合出不了',other:again?'下一回合出不了':'还能再出一次',
+   explanation:`${assumed} 减 ${n.chosen.cost} 等于 ${left}，${again?`不少于 ${n.chosen.cost}，所以还能再出一次`:`少于 ${n.chosen.cost}，所以下一回合出不了`}（真实那一局你有 ${n.chosen.energy} 豆）。`,
+   lesson:'能量够不够，是「打完剩下的豆」与「这一手要的豆」比大小。'});
+ }
+ if(d.chosen.action?.id==='guard'||d.lesson==='防御节奏')return wrap({question:`这一局你选了防御（减伤并回能）。假设上一回合也已经防御过，这一回合再想防御一次，成不成立？`,
+  answer:'不成立',other:'成立',
+  explanation:'规则里不能连续防御：防御能减伤与回能，但下一回合必须重新在攻击、换宠、防御或道具之间选，所以连着两回合防御不成立。',
+  lesson:'防御是一次性的节奏：它买到的是这一回合的减伤，不是可以一直按住的按钮。'});
+ return null;
+}
+
 
 // 同一句话有没有被说两遍：给 app.js 的展开区用（顶部条已经说过的结论不再出现在依据里）。
 // 判据是「同一句」而不是「同一个元素」：模型那句解释会被同时写进顶部条与展开区，

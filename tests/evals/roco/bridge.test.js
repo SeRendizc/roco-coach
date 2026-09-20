@@ -249,19 +249,25 @@ test('桥：机制不支持时返回 unsupported，而不是一个数字', { ski
     // 注意这里**不再**用 team/evaluate 与 team/compare 当例子——那两个已经接上
     // 规则 baseline，返回的是真实特征；用已实现的端点当「未实现」的例子，
     // 会在实现落地时变成假失败（这条测试就是这么被发现的）。
-    const plan = await client.planActions({ turn: 3 });
-    assert.equal(plan.ok, false);
-    assert.equal(plan.code, ROCO_ERROR.NOT_IMPLEMENTED);
-    assert.equal(plan.failure_class, ROCO_FAILURE_CLASS.UNSUPPORTED, 'not_implemented 属于「不支持」大类');
-    assert.equal(plan.coverage, 0);
-    assert.equal(plan.result, null);
+    // planActions 现在**已接上 planner**。因此它的正确行为不再是 not_implemented，
+    // 而是：缺少公开 planner state 时给一个明确的 bad_request，并在错误里说清
+    // 需要用 public 而不是私有 serialize()。这不是放宽断言，是断言新契约。
+    const planNoPublic = await client.planActions({ turn: 3 });
+    assert.equal(planNoPublic.ok, false);
+    assert.equal(planNoPublic.code, ROCO_ERROR.BAD_REQUEST);
+    assert.equal(planNoPublic.coverage, 0);
+    assert.equal(planNoPublic.result, null);
+    assert.match(planNoPublic.message, /public/,
+      '缺公开 planner state 时必须明确指向 public，而不是含糊报错');
 
+    // summarize_battle 仍然没有服务端点（实施书只定义了 4 个端点）——它必须是
+    // 结构化的 not_implemented，而不是编一份摘要。
     const summary = await client.summarizeBattle({ match_id: 'm1' });
     assert.equal(summary.code, ROCO_ERROR.NOT_IMPLEMENTED);
     assert.equal(summary.coverage, 0);
-
-    assert.equal(isNotImplemented(plan), true);
-    assert.equal(isUnsupported(plan), true, 'not_implemented 与 unsupported_effect 同属不支持');
+    assert.equal(summary.result, null);
+    assert.equal(isNotImplemented(summary), true);
+    assert.equal(isUnsupported(summary), true, 'not_implemented 与 unsupported_effect 同属不支持');
   });
 });
 

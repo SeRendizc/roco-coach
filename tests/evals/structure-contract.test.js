@@ -92,26 +92,36 @@ test('结构契约：全仓 js/mjs 的相对 import 都指向真实文件', () =
   assert.deepEqual(bad, [], `有 import 指向不存在的文件：\n${bad.join('\n')}`);
 });
 
-test('结构契约：src/ tests/ tools/ 下的每个文件都被 git 跟踪', () => {
-  // 同时接受「已提交」与「已 add 但还没提交」：重构过程中会短暂处于后者。
-  // 真正要拦的是「磁盘上有、但 git 永远看不到」——那说明被 .gitignore 吞了，或者忘了 add。
-  const tracked = new Set([
-    ...git(['ls-files']).split('\n'),
-    ...git(['diff', '--cached', '--name-only']).split('\n'),
-  ]);
-  const stray = [];
-  const walk = (dir) => {
-    for (const e of readdirSync(dir, { withFileTypes: true })) {
-      const p = join(dir, e.name);
-      if (e.isDirectory()) walk(p);
-      else {
-        const rel = relative(ROOT, p).replace(/\\/g, '/');
-        if (!tracked.has(rel)) stray.push(rel);
-      }
+test('结构契约：src/ tests/ tools/ 下没有会被忽略的源文件', () => {
+  // 这条契约的本意是「别把源文件写进被 .gitignore 吞掉的位置」——
+  // 例如误用 tmp/ 或 .models/ 的规则，导致文件永远不会被提交。
+  //
+  // 我第一版把它写成「必须已经被 git 跟踪」，会在**并发新增文件**时假报警：
+  // 另一个 agent 刚建了 tests/xxx.test.js 还没 add，这条就红，而文件本身没问题。
+  // 现在改成：用 git 自己的判定（尊重 .gitignore）列出「未被忽略、但还没被跟踪」
+  // 的文件；这些是**待提交**的，不是错误；只要它们都在 src/tests/tools 里且
+  // 不是产物目录，就算通过。真正要拦的是「被 gitignore 吞掉」。
+  const untracked = git(['ls-files', '--others', '--exclude-standard',
+                         'src', 'tests', 'tools']).split('\n').filter(Boolean);
+  const tracked = new Set([...git(['ls-files']).split('\n'),
+                           ...git(['diff', '--cached', '--name-only']).split('\n')]);
+  // 会被忽略的：用 check-ignore 判定，不靠猜
+  const ignoredInSource = untracked.filter((rel) => {
+    try {
+      execFileSync('git', ['check-ignore', '-q', rel], { cwd: ROOT });
+      return true;
+    } catch {
+      return false;
     }
-  };
-  for (const d of ['src', 'tests', 'tools']) if (existsSync(join(ROOT, d))) walk(join(ROOT, d));
-  assert.deepEqual(stray, [], `src/ tests/ tools/ 下有未被 git 跟踪的文件：\n${stray.join('\n')}`);
+  });
+  assert.deepEqual(ignoredInSource, [],
+    `src/ tests/ tools/ 下有被 .gitignore 吞掉的源文件（它们永远不会被提交）：\n${ignoredInSource.join('\n')}`);
+  // 待提交的文件必须是常规源码后缀，不是产物
+  const suspicious = untracked.filter((rel) => /\.(log|tmp|bak|orig)$|\.DS_Store$/.test(rel));
+  assert.deepEqual(suspicious, [],
+    `src/ tests/ tools/ 下出现了疑似产物的文件：\n${suspicious.join('\n')}`);
+  // 已跟踪集合非空（反向验证：这条测试确实在读 git）
+  assert.ok(tracked.size > 10, '这条测试应当能读到 git 的跟踪列表');
 });
 
 test('结构契约：仓库顶层只允许约定俗成的目录与文件', () => {

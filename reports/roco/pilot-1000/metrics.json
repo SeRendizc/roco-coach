@@ -1,0 +1,612 @@
+{
+  "base_seed": 20260921,
+  "code_commit": "4da4fca4964c18434335e4a50db4976cae4f5ebd",
+  "disclaimer": "本报告的分组胜负计数是**环境自检，不是胜率、不是强度榜**。社区阵容出现频率不是胜率；模拟出来的胜场数也不是天梯强度。这里没有任何一个策略可以被称为「强」或「T0」——本项目的策略池按**行为**命名而不按名次命名，正是因为「谁强」需要真实天梯样本，而本项目没有。",
+  "exception_causes": {},
+  "exceptions": 0,
+  "exposure": {
+    "balanced": true,
+    "balanced_definition": "每个策略对场次相同，且队伍对的多重集合完全相同（逐格场次也相同）",
+    "block_size": 400,
+    "cell_counts": [
+      2,
+      3
+    ],
+    "cell_counts_uniform": false,
+    "complete_blocks": 2,
+    "distinct_exposure_patterns": 1,
+    "games": 1000,
+    "games_per_strategy_pair": [
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40,
+      40
+    ],
+    "note": "balanced=true 表示每个策略对拿到完全相同的队伍组合与场次，此时分组胜负计数是可比的——但它仍然**不是胜率**。",
+    "team_pairs_per_strategy_pair": [
+      16
+    ]
+  },
+  "games": 1000,
+  "games_per_second": 49.31,
+  "games_planned": 1000,
+  "generated_at": "2026-09-21T02:36:37+08:00",
+  "git_dirty": true,
+  "hidden_field_read_paths": [],
+  "hidden_field_reads": {},
+  "illegal_actions": 0,
+  "per_pair_win_counts_are": "environment-sanity-check-not-a-winrate",
+  "per_strategy_pair": {
+    "conservative_switch__vs__conservative_switch": {
+      "draws": 0,
+      "enemy_wins": 20,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 20,
+      "strategy_a": "conservative_switch",
+      "strategy_b": "conservative_switch",
+      "truncated": 0
+    },
+    "conservative_switch__vs__greedy_damage": {
+      "draws": 0,
+      "enemy_wins": 23,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 17,
+      "strategy_a": "conservative_switch",
+      "strategy_b": "greedy_damage",
+      "truncated": 0
+    },
+    "conservative_switch__vs__random_legal": {
+      "draws": 0,
+      "enemy_wins": 14,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 26,
+      "strategy_a": "conservative_switch",
+      "strategy_b": "random_legal",
+      "truncated": 0
+    },
+    "conservative_switch__vs__shallow_search": {
+      "draws": 0,
+      "enemy_wins": 17,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 23,
+      "strategy_a": "conservative_switch",
+      "strategy_b": "shallow_search",
+      "truncated": 0
+    },
+    "conservative_switch__vs__status_control": {
+      "draws": 0,
+      "enemy_wins": 17,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 23,
+      "strategy_a": "conservative_switch",
+      "strategy_b": "status_control",
+      "truncated": 0
+    },
+    "greedy_damage__vs__conservative_switch": {
+      "draws": 0,
+      "enemy_wins": 18,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 22,
+      "strategy_a": "greedy_damage",
+      "strategy_b": "conservative_switch",
+      "truncated": 0
+    },
+    "greedy_damage__vs__greedy_damage": {
+      "draws": 0,
+      "enemy_wins": 20,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 20,
+      "strategy_a": "greedy_damage",
+      "strategy_b": "greedy_damage",
+      "truncated": 0
+    },
+    "greedy_damage__vs__random_legal": {
+      "draws": 0,
+      "enemy_wins": 11,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 29,
+      "strategy_a": "greedy_damage",
+      "strategy_b": "random_legal",
+      "truncated": 0
+    },
+    "greedy_damage__vs__shallow_search": {
+      "draws": 0,
+      "enemy_wins": 14,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 26,
+      "strategy_a": "greedy_damage",
+      "strategy_b": "shallow_search",
+      "truncated": 0
+    },
+    "greedy_damage__vs__status_control": {
+      "draws": 0,
+      "enemy_wins": 10,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 30,
+      "strategy_a": "greedy_damage",
+      "strategy_b": "status_control",
+      "truncated": 0
+    },
+    "random_legal__vs__conservative_switch": {
+      "draws": 0,
+      "enemy_wins": 26,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 14,
+      "strategy_a": "random_legal",
+      "strategy_b": "conservative_switch",
+      "truncated": 0
+    },
+    "random_legal__vs__greedy_damage": {
+      "draws": 0,
+      "enemy_wins": 29,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 11,
+      "strategy_a": "random_legal",
+      "strategy_b": "greedy_damage",
+      "truncated": 0
+    },
+    "random_legal__vs__random_legal": {
+      "draws": 1,
+      "enemy_wins": 16,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 23,
+      "strategy_a": "random_legal",
+      "strategy_b": "random_legal",
+      "truncated": 0
+    },
+    "random_legal__vs__shallow_search": {
+      "draws": 0,
+      "enemy_wins": 29,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 11,
+      "strategy_a": "random_legal",
+      "strategy_b": "shallow_search",
+      "truncated": 0
+    },
+    "random_legal__vs__status_control": {
+      "draws": 0,
+      "enemy_wins": 24,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 16,
+      "strategy_a": "random_legal",
+      "strategy_b": "status_control",
+      "truncated": 0
+    },
+    "shallow_search__vs__conservative_switch": {
+      "draws": 0,
+      "enemy_wins": 23,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 17,
+      "strategy_a": "shallow_search",
+      "strategy_b": "conservative_switch",
+      "truncated": 0
+    },
+    "shallow_search__vs__greedy_damage": {
+      "draws": 0,
+      "enemy_wins": 25,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 15,
+      "strategy_a": "shallow_search",
+      "strategy_b": "greedy_damage",
+      "truncated": 0
+    },
+    "shallow_search__vs__random_legal": {
+      "draws": 1,
+      "enemy_wins": 14,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 25,
+      "strategy_a": "shallow_search",
+      "strategy_b": "random_legal",
+      "truncated": 0
+    },
+    "shallow_search__vs__shallow_search": {
+      "draws": 0,
+      "enemy_wins": 19,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 21,
+      "strategy_a": "shallow_search",
+      "strategy_b": "shallow_search",
+      "truncated": 0
+    },
+    "shallow_search__vs__status_control": {
+      "draws": 0,
+      "enemy_wins": 21,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 19,
+      "strategy_a": "shallow_search",
+      "strategy_b": "status_control",
+      "truncated": 0
+    },
+    "status_control__vs__conservative_switch": {
+      "draws": 0,
+      "enemy_wins": 24,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 16,
+      "strategy_a": "status_control",
+      "strategy_b": "conservative_switch",
+      "truncated": 0
+    },
+    "status_control__vs__greedy_damage": {
+      "draws": 0,
+      "enemy_wins": 28,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 12,
+      "strategy_a": "status_control",
+      "strategy_b": "greedy_damage",
+      "truncated": 0
+    },
+    "status_control__vs__random_legal": {
+      "draws": 0,
+      "enemy_wins": 16,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 24,
+      "strategy_a": "status_control",
+      "strategy_b": "random_legal",
+      "truncated": 0
+    },
+    "status_control__vs__shallow_search": {
+      "draws": 0,
+      "enemy_wins": 21,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 19,
+      "strategy_a": "status_control",
+      "strategy_b": "shallow_search",
+      "truncated": 0
+    },
+    "status_control__vs__status_control": {
+      "draws": 2,
+      "enemy_wins": 18,
+      "exceptions": 0,
+      "games": 40,
+      "player_wins": 20,
+      "strategy_a": "status_control",
+      "strategy_b": "status_control",
+      "truncated": 0
+    }
+  },
+  "per_team_pair": {
+    "T0__vs__T0": {
+      "draws": 0,
+      "enemy_wins": 35,
+      "games": 75,
+      "player_wins": 40,
+      "team_a": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ],
+      "team_b": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ]
+    },
+    "T0__vs__T1": {
+      "draws": 0,
+      "enemy_wins": 1,
+      "games": 75,
+      "player_wins": 74,
+      "team_a": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ],
+      "team_b": [
+        "pet_000417",
+        "pet_000112",
+        "pet_000062"
+      ]
+    },
+    "T0__vs__T2": {
+      "draws": 0,
+      "enemy_wins": 21,
+      "games": 75,
+      "player_wins": 54,
+      "team_a": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ],
+      "team_b": [
+        "pet_000225",
+        "pet_000445",
+        "pet_000112"
+      ]
+    },
+    "T0__vs__T3": {
+      "draws": 0,
+      "enemy_wins": 0,
+      "games": 75,
+      "player_wins": 75,
+      "team_a": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ],
+      "team_b": [
+        "pet_000190",
+        "pet_000417",
+        "pet_000062"
+      ]
+    },
+    "T1__vs__T0": {
+      "draws": 0,
+      "enemy_wins": 74,
+      "games": 75,
+      "player_wins": 1,
+      "team_a": [
+        "pet_000417",
+        "pet_000112",
+        "pet_000062"
+      ],
+      "team_b": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ]
+    },
+    "T1__vs__T1": {
+      "draws": 3,
+      "enemy_wins": 37,
+      "games": 75,
+      "player_wins": 35,
+      "team_a": [
+        "pet_000417",
+        "pet_000112",
+        "pet_000062"
+      ],
+      "team_b": [
+        "pet_000417",
+        "pet_000112",
+        "pet_000062"
+      ]
+    },
+    "T1__vs__T2": {
+      "draws": 0,
+      "enemy_wins": 75,
+      "games": 75,
+      "player_wins": 0,
+      "team_a": [
+        "pet_000417",
+        "pet_000112",
+        "pet_000062"
+      ],
+      "team_b": [
+        "pet_000225",
+        "pet_000445",
+        "pet_000112"
+      ]
+    },
+    "T1__vs__T3": {
+      "draws": 0,
+      "enemy_wins": 62,
+      "games": 75,
+      "player_wins": 13,
+      "team_a": [
+        "pet_000417",
+        "pet_000112",
+        "pet_000062"
+      ],
+      "team_b": [
+        "pet_000190",
+        "pet_000417",
+        "pet_000062"
+      ]
+    },
+    "T2__vs__T0": {
+      "draws": 0,
+      "enemy_wins": 34,
+      "games": 50,
+      "player_wins": 16,
+      "team_a": [
+        "pet_000225",
+        "pet_000445",
+        "pet_000112"
+      ],
+      "team_b": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ]
+    },
+    "T2__vs__T1": {
+      "draws": 0,
+      "enemy_wins": 1,
+      "games": 50,
+      "player_wins": 49,
+      "team_a": [
+        "pet_000225",
+        "pet_000445",
+        "pet_000112"
+      ],
+      "team_b": [
+        "pet_000417",
+        "pet_000112",
+        "pet_000062"
+      ]
+    },
+    "T2__vs__T2": {
+      "draws": 0,
+      "enemy_wins": 25,
+      "games": 50,
+      "player_wins": 25,
+      "team_a": [
+        "pet_000225",
+        "pet_000445",
+        "pet_000112"
+      ],
+      "team_b": [
+        "pet_000225",
+        "pet_000445",
+        "pet_000112"
+      ]
+    },
+    "T2__vs__T3": {
+      "draws": 0,
+      "enemy_wins": 2,
+      "games": 50,
+      "player_wins": 48,
+      "team_a": [
+        "pet_000225",
+        "pet_000445",
+        "pet_000112"
+      ],
+      "team_b": [
+        "pet_000190",
+        "pet_000417",
+        "pet_000062"
+      ]
+    },
+    "T3__vs__T0": {
+      "draws": 0,
+      "enemy_wins": 50,
+      "games": 50,
+      "player_wins": 0,
+      "team_a": [
+        "pet_000190",
+        "pet_000417",
+        "pet_000062"
+      ],
+      "team_b": [
+        "pet_000225",
+        "pet_000190",
+        "pet_000445"
+      ]
+    },
+    "T3__vs__T1": {
+      "draws": 0,
+      "enemy_wins": 8,
+      "games": 50,
+      "player_wins": 42,
+      "team_a": [
+        "pet_000190",
+        "pet_000417",
+        "pet_000062"
+      ],
+      "team_b": [
+        "pet_000417",
+        "pet_000112",
+        "pet_000062"
+      ]
+    },
+    "T3__vs__T2": {
+      "draws": 0,
+      "enemy_wins": 48,
+      "games": 50,
+      "player_wins": 2,
+      "team_a": [
+        "pet_000190",
+        "pet_000417",
+        "pet_000062"
+      ],
+      "team_b": [
+        "pet_000225",
+        "pet_000445",
+        "pet_000112"
+      ]
+    },
+    "T3__vs__T3": {
+      "draws": 1,
+      "enemy_wins": 24,
+      "games": 50,
+      "player_wins": 25,
+      "team_a": [
+        "pet_000190",
+        "pet_000417",
+        "pet_000062"
+      ],
+      "team_b": [
+        "pet_000190",
+        "pet_000417",
+        "pet_000062"
+      ]
+    }
+  },
+  "seconds_per_game": 0.02028,
+  "seed_range": [
+    20260921,
+    20261920
+  ],
+  "truncations": 0,
+  "turn_limit": 300,
+  "turns": {
+    "definition": "turns = 对局走到的回合号（补位不消耗回合）；battle_turns = 结算过的战斗回合数",
+    "histogram": {
+      "0-19": 157,
+      "100-119": 54,
+      "120-139": 37,
+      "140-159": 11,
+      "160-179": 2,
+      "20-39": 318,
+      "200-219": 5,
+      "40-59": 196,
+      "60-79": 143,
+      "80-99": 77
+    },
+    "histogram_bucket": 20,
+    "mean": 51.13,
+    "quantiles": {
+      "max": 214,
+      "min": 9,
+      "p10": 15,
+      "p25": 25,
+      "p50": 42,
+      "p75": 66,
+      "p90": 102
+    },
+    "stdev": 35.29
+  },
+  "unfinished_games": 0,
+  "verdicts": {
+    "draws": 4,
+    "enemy_wins": 497,
+    "note": "player/enemy 指**对局里的座位**，不是「更强的一方」。每个有序策略对都打了同样多的场次，座位在对局内是固定的。",
+    "player_wins": 499
+  },
+  "wall_seconds": 20.28
+}

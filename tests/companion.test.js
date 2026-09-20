@@ -2214,3 +2214,177 @@ test('negative verification: 拆掉问候轮的三道约束，上一条验收必
  assert(!RECORD_TALK.test(companion({mode:'camp'},ledger,'哈喽',now).text),'问候轮不许用这条读数');
 });
 
+
+// ══════════════════════════════════════════════════════════════════════════════
+// C02 陪练闭环：显式记忆、情绪假设、六个场景、三条验收
+// ══════════════════════════════════════════════════════════════════════════════
+import {rememberPreference,moodHypothesis,playerWishes,memoryItems,deleteMemoryItem,MOOD_TTL_MS,REFUSAL_TTL_MS} from '../src/coach/memory.js';
+import {repeatedInformation,scenarioOf,statedLine,shareLine,sharingWord,PLAYER_LABEL,REVIEW_CLASSES} from '../src/coach/companion.js';
+
+// 「复盘味」的词：拒绝生效期间，这一屏里一个都不许出现。
+const REVIEW_TALK=/上一局|上局|最近\d*局|这几局|账本|回合数|最先倒下|胜率|连胜|连败|记录里|这几天的/;
+const withRecord=()=>history([lossGame(),lossGame(),play(7)]);
+
+test('显式记忆：称呼、本命、聊天风格、输了要不要复盘、里程碑都记下来，而且带来源与时间',()=>{
+ let memory=freshMemory();
+ // 走 runtime 的现成接线：rememberPreference 在路由前对每条消息调用一次
+ memory=rememberPreference(memory,'以后叫我老王');
+ memory=rememberPreference(memory,'本命是潮甲龟');
+ memory=rememberPreference(memory,'以后说简短点');
+ memory=rememberPreference(memory,'输了别复盘，我不想听');
+ memory=rememberPreference(memory,'我今天第一次通关冠军高地');
+ const wish=playerWishes(memory);
+ assert.equal(wish.address,'老王');
+ assert.equal(memory.favorite,'turtle','本命要写进既有的 favorite 字段（旧的读取方一个字都不用改）');
+ assert.equal(memory.preference,'brief');
+ assert.equal(wish.reviewAfterLoss,false);
+ assert(wish.milestones.some(x=>x.includes('第一次通关冠军高地')),'里程碑保存的是玩家自己的原话');
+ const rows=memoryItems(memory).filter(r=>r.group==='stated');
+ assert(rows.length>=5,`每样都要单独成条：${JSON.stringify(rows.map(r=>r.kind))}`);
+ for(const row of rows){
+  assert(row.source&&row.time&&Date.parse(row.time)>0,`每条显式记忆都要有来源与时间：${JSON.stringify(row)}`);
+ }
+ // 陪练看到的是同一份（不是另记一份）
+ const f=companionFacts(memory,{mode:'camp'},Date.now());
+ assert.equal(f.address,'老王');assert.equal(f.chatStyle,'brief');assert.equal(f.reviewAfterLoss,false);
+ assert(f.milestones.length>0);
+ const evidence=companion({mode:'camp'},memory,'这局怎么打').evidence.join('\n');
+ assert.match(evidence,/怎么称呼你老王/);
+ assert.match(evidence,/你自己说过的里程碑/);
+ assert.match(evidence,/你明确说过先不复盘/);
+});
+test('纠正偏好：承认新值，一个字都不提旧值',()=>{
+ let memory=withRecord();
+ memory=rememberPreference(memory,'本命是烬尾狐');
+ const before=companion({mode:'camp'},memory,'这局怎么打');
+ const corrected=rememberPreference(memory,'本命不是烬尾狐，是潮甲龟');
+ const answer=companion({mode:'camp'},corrected,'本命不是烬尾狐，是潮甲龟');
+ assert.match(answer.text,/潮甲龟/);
+ assert(!answer.text.includes('烬尾狐'),`纠正之后不许再提旧值：${answer.text}`);
+ assert.equal(corrected.favorite,'turtle');
+ assert(!JSON.stringify(memoryItems(corrected).filter(r=>r.kind==='favorite')).includes('烬尾狐'),'旧的本命条目要一起让位');
+ // 没有纠正的一轮不会凭空说出「记成X了」
+ assert.doesNotMatch(before.text,/好，本命是/);
+ assert.equal(checkCompanionRestraint(answer.text,{register:answer.register,facts:{allowPast:true}}).valid,true);
+});
+test('拒绝建议与不想说话：只应一声，不劝、不给建议、不推复盘',()=>{
+ const memory=withRecord();
+ for(const [message,want] of [['不用你教，我自己会打',/不劝/],['别复盘了，不想听',/不复盘/],['我先不想说话',/不问/]]){
+  const answer=companion({mode:'camp'},rememberPreference(memory,message),message);
+  assert.match(answer.text,want,`「${message}」应当接住这条拒绝：${answer.text}`);
+  assert(!REVIEW_TALK.test(answer.text),`拒绝之后不许推复盘：${answer.text}`);
+  assert(!/你应该|下次别|建议你|不妨|记住/.test(answer.text),`拒绝之后不许再给建议：${answer.text}`);
+  assert.equal(answer.replyConstraints.forbid.some(x=>/推复盘/.test(x)),true,'送给模型的约束里也要有同一条禁令');
+  assert.equal(answer.register==='R0'||answer.register==='R1',true);
+ }
+});
+test('拒绝之后不再推复盘：同一份记录，拒绝前会讲、拒绝后不讲，过期后再讲',()=>{
+ const base=withRecord();
+ const now=Date.now();
+ const before=companion({mode:'camp'},base,'这局怎么打',now);
+ assert(REVIEW_TALK.test(before.text),`前提：没有拒绝时它会落到跨局记录上：${before.text}`);
+ const refused=rememberPreference(base,'别复盘了');
+ const after=companion({mode:'camp'},refused,'这局怎么打',now);
+ assert(!REVIEW_TALK.test(after.text),`拒绝生效期间不许推复盘：${after.text}`);
+ assert.notEqual(after.chatThread,'record','拒绝生效期间不许开「账本」那条线程');
+ // 跟随的几轮同样不许把话拐回记录
+ for(const message of ['最近怎么样','那我现在干嘛','嗯','说点什么']){
+  const more=companion({mode:'camp'},refused,message,now);
+  assert(!REVIEW_TALK.test(more.text),`拒绝之后的「${message}」仍在推复盘：${more.text}`);
+ }
+ // 拒绝有时效：过期之后同一句话又能讲记录（否则上面那条断言是空的）
+ const expired=companion({mode:'camp'},refused,'这局怎么打',now+REFUSAL_TTL_MS+1);
+ assert(REVIEW_TALK.test(expired.text),`拒绝过期后应当重新允许复盘：${expired.text}`);
+ // 删掉那条拒绝记录，效果与过期一致
+ const item=memoryItems(refused).find(r=>r.kind==='refusal');
+ const removed=deleteMemoryItem(refused,{id:item.id}).memory;
+ assert(REVIEW_TALK.test(companion({mode:'camp'},removed,'这局怎么打',now).text));
+ assert.equal(REVIEW_CLASSES.includes('live'),false,'本局在场的观察不在被挡的那一类里');
+});
+test('分享胜利：恭喜落在真实记录上，不复述屏幕，也不空泛打鸡血',()=>{
+ const win=winGame();
+ const memory=history([lossGame(),win]);
+ const recent=rememberBattle(memory,win).events.at(-1).time;
+ const answer=companion({mode:'camp'},memory,'我赢了！',Date.parse(recent));
+ assert.match(answer.text,/拿下了啊/);
+ assert(answer.parts.some(p=>p.kind==='memory'),`要有真实记录支撑的那一句：${answer.text}`);
+ assert(!SCREEN_ECHO.test(answer.text));
+ assert.equal(checkCompanionRestraint(answer.text,{register:answer.register,facts:{allowPast:true}}).valid,true,answer.text);
+ assert.equal(repeatedInformation(answer.text).repeated,false);
+ // 记录里最后一局不是赢的：不许冒认「拿下了」
+ const onlyLoss=history([lossGame()]);
+ const noCheer=companion({mode:'camp'},onlyLoss,'我赢了');
+ assert(!/拿下了啊/.test(noCheer.text),`没有真实记录时不许冒认：${noCheer.text}`);
+ // 空账本下也答得住，且不提任何过去
+ const fresh=companion({mode:'camp'},freshMemory(),'我赢了');
+ assert(fresh.text&&!REVIEW_TALK.test(fresh.text),fresh.text);
+});
+test('只聊精灵：他点名哪只就聊哪只，且用他自己说过的本命',()=>{
+ const said=companion({mode:'camp'},freshMemory(),'就聊聊烬尾狐吧');
+ assert.match(said.text,/烬尾狐/,said.text);
+ let memory=withRecord();
+ memory=rememberPreference(memory,'本命是潮甲龟');
+ const own=companion({mode:'camp'},memory,'就聊聊我的本命吧');
+ assert.match(own.text,/潮甲龟/,own.text);
+ assert(!REVIEW_TALK.test(own.text)||/倒下|这几局/.test(own.text),'聊精灵可以说它的记录，但不换话题');
+});
+test('情绪是假设不是标签：低置信、短时、可覆盖，而且不从沉默与连败推出来',()=>{
+ const now=Date.now();
+ let memory=rememberPreference(freshMemory(),'今天有点烦');
+ const mood=moodHypothesis(memory,{now});
+ assert(mood&&mood.confidence<=0.4&&mood.expiresAt-now<=MOOD_TTL_MS);
+ assert.equal(mood.overwritable,true);
+ assert.equal(moodHypothesis(memory,{now:now+MOOD_TTL_MS+1}),null,'过期就不是记忆了');
+ memory=rememberPreference(memory,'今天没睡好');
+ assert.equal(moodHypothesis(memory,{now}).label,'没睡好','下一句直接覆盖，不叠加成结论');
+ // 没有玩家开口时，连败 + 长回合 + 沉默都不产生任何状态假设
+ const silent=history([lossGame(),lossGame(),lossGame()]);
+ assert.equal(moodHypothesis(silent),null,'连败与沉默推不出「他上头了」');
+ const state=companionState(silent,{mode:'camp'},{playerInitiated:false},now);
+ assert(!/上头|心态|急躁|情绪不稳|玩得不好/.test(state.reasons.join('')),'派生状态里也不许出现性格判断');
+ // 扫一遍文本层：把它说成性格一律拦下
+ assert(PLAYER_LABEL.test('你就是急躁'));
+ assert.equal(checkCompanionRestraint('你就是急躁，玩得也不太好。',{register:'R2',facts:{allowPast:true}}).valid,false);
+ assert.equal(companion({mode:'camp'},silent,'嗯').text.includes('急躁'),false);
+});
+test('三条验收的判据本身不是空的：同一屏说两遍、复述屏幕、拒绝后推复盘都要能被判出来',()=>{
+ // ① 同一屏把同一条信息说两遍
+ assert.equal(repeatedInformation('最近3局里，最先倒下的都是烬尾狐。今天你打了3局，1胜2负。').repeated,true);
+ assert.equal(repeatedInformation('今天打了3局。这一局还剩2只。').repeated,false);
+ assert.equal(repeatedInformation('慢慢来，不急。慢慢来，不急。').repeated,true);
+ // 真实的 R2 回答：两条观察拼起来也不许出现同一个局数
+ const answer=companion({mode:'camp'},withRecord(),'这局怎么打');
+ assert.equal(repeatedInformation(answer.text).repeated,false,answer.text);
+ // ② 复述屏幕
+ assert.equal(SCREEN_ECHO.test('对面还剩2只，你还有机会。'),true);
+ // ③ 拒绝之后推复盘
+ const refused=rememberPreference(withRecord(),'别复盘了');
+ assert.equal(companion({mode:'camp'},refused,'最近怎么样').text.includes('最近'),false);
+});
+test('六个场景一张表：每一条都接得住，而且每条都过得了硬线',()=>{
+ const cases=[
+  ['只想吐槽','今天真是烦死了',/烦/],
+  ['拒绝建议','不用你教，我自己打',/不劝/],
+  ['分享胜利','我赢了！',/拿下了啊/],
+  ['只聊精灵','就聊聊烬尾狐吧',/烬尾狐/],
+  ['纠正偏好','本命不是烬尾狐，是潮甲龟',/潮甲龟/],
+  ['不想说话','我先不想说话',/不问/],
+ ];
+ const win=winGame();
+ for(const [name,message,want] of cases){
+  const memory=rememberBattle(withRecord(),win);
+  const answer=companion({mode:'camp'},memory,message);
+  assert.match(answer.text,want,`${name}：「${message}」→ ${answer.text}`);
+  assert.equal(answer.text.trim().length>0,true,name);
+  assert.equal(checkCompanionRestraint(answer.text,{register:answer.register,facts:{allowPast:true,lessons:[]},playerMessage:message}).valid,true,`${name} 越界：${answer.text}`);
+  assert.equal(repeatedInformation(answer.text).repeated,false,`${name} 同一屏说两遍：${answer.text}`);
+  assert(!REVIEW_TALK.test(answer.text)||name==='只聊精灵',`${name} 不该推复盘：${answer.text}`);
+ }
+ // 场景层的判据可单独调用（不依赖 companion 的其余门控）
+ assert.equal(scenarioOf('别复盘了',{facts:{}}).intent,'refusal');
+ assert.equal(scenarioOf('我赢了',{facts:{sharing:false}}),null,'没有分享意图时不出恭喜句');
+ assert.match(statedLine('以后叫我老王').text,/老王/);
+ assert.equal(statedLine('今天天气不错'),null);
+ assert.equal(sharingWord('我赢了'),true);assert.equal(sharingWord('这局怎么打'),false);
+ assert.equal(shareLine({sharing:true,history:[]}),null,'没有记录就不出恭喜句');
+});

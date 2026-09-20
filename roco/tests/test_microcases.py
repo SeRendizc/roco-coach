@@ -142,11 +142,19 @@ class TestMC003Simultaneous(unittest.TestCase):
         blob = repr(obs)
         self.assertNotIn("pending", blob)
         self.assertNotIn("enemy_action", blob)
-        # 对手后备只暴露「还活着几只」，不暴露血量与技能
+        # 对手**场上**那只的面板是公开的：血条、能量、异常、印记就画在屏幕上。
+        # 隐藏的是**后备**的信息（血量/能量/配招）与对手本回合已提交的动作。
         self.assertIn("living_count", obs["opponent"])
+        field = obs["opponent"]["field"]
+        self.assertIn("hp", field, "对手场上面板是公开信息，教练必须看得到")
+        self.assertIn("energy", field)
         for p in obs["opponent"]["pets"]:
-            self.assertNotIn("hp", p)
-            self.assertNotIn("energy", p)
+            if p.get("field"):
+                self.assertIn("hp", p)
+                self.assertNotIn("loadouts", p, "配招不是公开信息")
+            else:
+                self.assertNotIn("hp", p, "后备血量是隐藏信息")
+                self.assertNotIn("energy", p)
 
     def test_observation_is_json_serializable_and_has_versions(self):
         import json

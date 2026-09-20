@@ -52,6 +52,48 @@ M0/M1 完成后，用户要求「不定格在 M2，目标定高、一直做」�
 能量上限与回能时机、同速裁决、印记叠加替换、传动、天气、连击数、
 属性增减层数语义、12 只精灵的特性效果、状态类技能的具体效果原语。
 
+## 1.6 第 1 轮 goal（30 项 MVP）——隐私边界修正与四条支线
+
+**本轮最重要的一次纠偏（监工指出，我原判断错误）**：我曾给 `state.seed` 开了
+「只允许 state 下一层」的例外，放行真实对局 seed。那是**错的方向**：
+真实 seed 能预测同速裁决与后续伤害的随机结果，它就是隐藏信息；
+toolbox 的 `plan_actions` 合同也明确禁止真实随机种子——开后门会让
+客户端与服务端契约互相矛盾。已修正：
+
+| 项 | 修正 |
+|---|---|
+| seed 例外 | **彻底移除**。任何深度、任何位置的 `seed`/`rng_seed`/`random_seed` 都被拒 |
+| `_pending_enemy` 等内部字段 | 补进 HIDDEN_KEYS（归一化后比较），现已拦截 |
+| `/battle/plan` 输入 | 改为**公开 planner state**（`env.public_planner_state`），不再接受 `env.serialize()` 私有状态 |
+| 随机性 | 用与真实对局无关的 `DEFAULT_ANALYSIS_SEEDS=(11,29,47)`，并**跨种子聚合**给区间而非单点 |
+| 反证测试 | 新增 `roco/tests/test_public_planner.py`（12 项）：同公开观察+不同真实 seed → 请求与推荐必须一致 |
+
+**另一处真 bug（本轮修）**：`observation_for` 之前**连对手场上那只**都不给
+`hp/max_hp/energy`——那不是安全取舍，是真漏：对手场上的血条与能量本来就画在屏幕上，
+看不到反而无法判断「这一击够不够收」。现在场上给面板、**后备仍隐藏**（血量/配能/配招）。
+
+**四条支线（子 agent）已交付**：
+
+| 支线 | 任务 | 交付 |
+|---|---|---|
+| ① 对手池+先导 | S01/S02 | `opponents.py`（五策略，隐藏信息只读代理）+ `run_pilot.py`；**1000 局 49.3 局/秒，非法动作 0、截断 0、异常 0** |
+| ② coach 工具接入 | T02/G03 | `toolbox.js` 五个新工具契约 + 陈旧状态拒绝 + `toolbox-roco.test.js` |
+| ③ 老师陪练记忆 | C01/C02/C03 | `memory.js` 显式偏好层/低置信心情/记忆控制；`teacher.js`；`companion.js` 六场景 |
+| ④ 主动介入 | P01/P02 | 四档动作 `silent/micro_hint/action_hint/defer_to_review` + 硬门控先于评分；30 窗口评测（precision 1.0、stale 0） |
+
+**我这一轮自己做的**：planner（G04）`roco/src/roco_env/planner.py` +
+`/battle/plan` 接上服务；隐藏信息边界收紧；`observation_for` 修复。
+
+### 已知未完成/红项（如实记录）
+
+- `tests/companion.test.js` 有 **3 条红**，都是陪练支线**自己新加的场景测试**
+  （分享胜利 / 只聊精灵 / 六场景一张表）。已把根因与栈交回该支线修复中；
+  **没有放宽任何既有断言**。
+- `summarize_battle` 仍无服务端点（实施书只定义 4 个端点），返回结构化
+  `not_implemented`，**不编摘要**。
+- microcase 的「12/12 通过」仍**做不到**：需要游戏内实测。引擎侧做到
+  「能算的算、算不了的 fail closed」。
+
 ## 2. 当前 HEAD 与工作区
 
 | 项 | 值 |
