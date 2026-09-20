@@ -369,6 +369,16 @@ test('R06 README 代码块里的每条命令都真实存在',async()=>{
   if(direct){assert(Object.hasOwn(pkg.scripts,direct[1]),`README 写了 npm ${direct[1]}`);continue;}
   const script=/^\.\/scripts\/([\w.-]+)/.exec(line);
   if(script){assert(fs.existsSync(new URL('scripts/'+script[1],root)),`README 写了 ${line}，文件不存在`);continue;}
+  // 仓库根目录下的一次性入口脚本（例如 ./run-v0.1.sh）：
+  // 它必须存在，而且必须真的有可执行位——否则 README 教人敲的命令会 Permission denied。
+  const rootScript=/^\.\/([\w.-]+\.sh)\b/.exec(line);
+  if(rootScript){
+   const url=new URL(rootScript[1],root);
+   assert(fs.existsSync(url),`README 写了 ${line}，根目录下没有 ${rootScript[1]}`);
+   const {mode}=fs.statSync(url);
+   assert((mode&0o111)!==0,`README 写了 ${line}，但 ${rootScript[1]} 没有可执行位（chmod +x 一下）`);
+   continue;
+  }
   const node=/^node ([\w./-]+\.(?:js|mjs))/.exec(line);
   if(node){assert(fs.existsSync(new URL(node[1],root)),`README 写了 node ${node[1]}，文件不存在`);continue;}
   const python=/^(?:\S*python) ([\w./-]+\.py)/.exec(line);
