@@ -1,0 +1,50 @@
+<h2>文件结构整理：完成</h2>
+<p><b>仓库顶层从 38 个文件降到 4 个</b>（<code>README.md / package.json / requirements-agent.lock.txt / run-v0.1.sh</code>）。</p>
+
+<h3>新布局</h3>
+<pre>src/game/     engine content progression rules   （游戏内核）
+src/coach/    浏览器侧教练模块（session.js = 原 coach.js）
+src/server/   Node 入口 index.js（原 server.js）+ helpers
+src/client/   页面外壳与资源 index.html app.js *.css
+tests/        16 个测试；tests/evals/ 放评测与 M1 数据域
+tools/        benchmark.js
+docs/         40 份文档（含新的 STRUCTURE.md）
+</pre>
+<p>git 用 <code>git mv</code> 识别成 <b>51 个 rename</b>，历史保留。</p>
+
+<h3>过程中挖出两个真问题</h3>
+<ol>
+<li><b>服务器静态路由以前只对「一层目录」成立</b>——它把 URL 拼到仓库根、白名单从入口的 import 图推导，两者只在所有文件同层时巧合成立。
+现在 <b>URL 空间与磁盘空间同构</b>：<code>/src/coach/runtime.js</code> 就是这个文件。
+<code>/</code>、<code>/index.html</code>、<code>/connect.html</code> 保持原样（对外契约，你的书签和文档都写着）。</li>
+<li><b><code>tests/browser.test.js</code> 原来是正则去抠 <code>server.js</code> 里的白名单数组</b>——那只证明「字符串写对了」，证明不了「服务器真的会给」。
+现在改成<b>起真服务、把模块图里每个 URL 都请求一遍</b>，并断言非白名单文件（含目录穿越）一律 404。</li>
+</ol>
+
+<h3>新增的结构守卫</h3>
+<p><code>tests/evals/structure-contract.test.js</code>（6 项）：顶层只允许约定条目、模块图每个模块磁盘与 HTTP 都在、
+全仓 import 可解析、<code>src/tests/tools</code> 无未跟踪文件、页面短路径可用、白名单是唯一边界。</p>
+<p><b>反向验证过</b>：故意往顶层放一个文件 → 该测试变红。允许清单我同时收紧了（原先它把 4 个文档列为「允许留在顶层」，那正是它们一直没搬走的原因）。</p>
+
+<h3>另外两件</h3>
+<ul>
+<li><b>顶层剩下的 4 份文档已搬进 <code>docs/</code></b>（LEGACY / DEEPSEEK / COACH-ACCEPTANCE / coach-design-notes），8 个文件的引用已跟着改。</li>
+<li><b><code>report/figs/*.tex</code> 4 个图源</b>共 47 处路径已更新；其中 <code>mech-pipeline.tex</code> 的框从 196pt 加宽到 232pt——
+实测第 1 行只剩 61.3pt 而新路径需 68.0pt、第 4 行剩 69.7pt 需 80.0pt，不加宽会压到机制名。</li>
+</ul>
+
+<h3>验证</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr><th>项</th><th>结果</th></tr>
+<tr><td>全量测试（主仓）</td><td><b>378 unit + 18 browser，全部通过，0 跳过</b></td></tr>
+<tr><td>结构契约</td><td>6/6</td></tr>
+<tr><td>浏览器验收</td><td>9/9（4 张截图）</td></tr>
+<tr><td>从 GitHub 全新克隆</td><td>顶层 4 文件；378 unit 中 12 项按设计 skip（上游快照未解压，带明确原因）；18/18 browser 通过</td></tr>
+<tr><td><code>./run-v0.1.sh</code></td><td>仍正常服务 v0.1.0（它跑的是旧 tag 的 worktree，刻意不动）</td></tr>
+</table>
+
+<p><b>已推送</b>（<code>2f6ba6e</code> 重构、<code>2f8398a</code> 文档与结构说明），工作区干净。
+顺手删掉了我自己留的临时 tag <code>refactor-base</code>（名字会误导，<code>v0.1.0</code> 才是发行版坐标）。
+你自己的 8765 服务全程没动。</p>
+
+<p>新文件该放哪、为什么这么分，都写进 <code>docs/STRUCTURE.md</code> 了。</p>
