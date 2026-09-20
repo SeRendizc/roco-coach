@@ -88,14 +88,55 @@ toolbox 的 `plan_actions` 合同也明确禁止真实随机种子——开后�
 
 | 套件 | 结果 |
 |---|---|
-| Node 全量（unit + browser） | **410 + 18，0 失败** |
+| Node 全量（unit + browser） | **410 + 18，0 失败**（browser 里 1 项按设计 skip） |
 | Python（引擎 + 先导 + 隐私） | **111 / 111** |
 | Node↔Python 桥契约 | **11 / 11** |
 | coach 工具层（toolbox-roco） | **17 / 17** |
+| 规划端到端（plan-e2e，真 Python 服务） | **6 / 6**（新增） |
 | 结构契约 | **6 / 6**（含反向验证） |
+
+一条命令跑全部服务侧：`npm run test:roco-all`
+（= `test:env` + `test:bridge` + `test:toolbox-roco` + `test:plan-e2e`）。
 
 陪练支线那 3 条红已由该支线修好（都是它自己新加的场景测试里的 `undefined.some`
 TypeError），**没有放宽任何既有断言**。
+
+### 本轮收尾时补上的两处（监工纠偏的落地）
+
+**① 两层隐藏信息边界曾经漏了一层（真漏洞，已修）。**
+桥的 `HIDDEN_KEYS` 只有 13 个键，缺 `pendingenemy` / `pendingplayer` /
+`pendingenemyaction` / `pendingplayeraction` / `replacequeue`。而
+`env.serialize()` 里对手待执行动作的真实键名就是 `_pending_enemy`
+（归一化 `pendingenemy`）——也就是说**私有状态能从桥本地穿过去**，
+只剩 Python 服务端兜底。MC-013 要求两层都拦，桥是第一层，这个缺口必须补。
+
+现在三份词汇表一一对应：Python `service.HIDDEN_KEYS`、Node 桥
+`roco-client.HIDDEN_KEYS`、浏览器工具层镜像 `toolbox.ROCO_HIDDEN_KEYS`。
+并且新增了**跨文件比对测试**（`plan-e2e.test.js` 最后一条）：直接读三个源文件
+比对集合，任何一侧改单边都会变红——不靠注释约定。
+
+**② 真链路能出计划这件事，此前没有任何测试证明。**
+`bridge.test.js` 只证明了「缺 public 会被拒」；`toolbox-roco.test.js` 用的是假客户端。
+两边都绿而真实链路对不上是完全可能的（T02 阶段就是这样：桥发 state、服务要 public）。
+新增 `tests/evals/roco/plan-e2e.test.js`：
+
+- 公开 planner state 由 **Python 引擎现场生成**
+  （`scripts/roco/gen-plan-state.py`），不是测试里手抄的 fixture ——
+  手抄的 fixture 会随引擎改动悄悄过期；
+- 端到端：`toolbox → roco-client → HTTP → 真 Python 服务` 确实产出了计划
+  （`planAvailable=true`、`search.completed=true`、推荐非空、有最坏尾部区间）；
+- 反证：私有 `serialize()` 两层都被拒（客户端本地 + 绕过守卫的 raw POST）；
+- 反证：`state.seed` / `state.foo.seed` / `state.history[0].seed` /
+  对手待执行动作 / `rng_seed` 别名在客户端就拦下，用**记账 HTTP 端点**证明
+  请求数为 0，并配一条「干净状态确实发得出请求」的对照组
+  （没有对照组的话，「0 个请求」也可能只是端点根本打不通）；
+- 反证：两个不同真实内部 seed（7 / 12345）的公开面逐字节一致、规划结论一致，
+  且桥实际发出的请求体里连真实 seed 的**取值**都不出现；
+  再加一条「真实 seed 恰好等于某个 analysis seed 时结论不变」。
+
+同时把 `toolbox-roco.test.js` 里那条断言「已删除的补发兜底」的过时测试，
+换成断言**直连契约**：一次调用、桥独占 `public` 键、私有传输层
+（`_request` / `_payload`）不可达。
 
 ### 已知未完成（如实记录）
 
@@ -107,10 +148,6 @@ TypeError），**没有放宽任何既有断言**。
 - **G02（逻辑回归/LightGBM 阵容模型）**：未做。现在有 1000 局轨迹作输入，
   但按 GATE 要求，模型必须在**未见阵容家族**上优于规则分才可上线——
   这一步需要先做 family split，属下一轮。
-- `summarize_battle` 仍无服务端点（实施书只定义 4 个端点），返回结构化
-  `not_implemented`，**不编摘要**。
-- microcase 的「12/12 通过」仍**做不到**：需要游戏内实测。引擎侧做到
-  「能算的算、算不了的 fail closed」。
 
 ## 2. 当前 HEAD 与工作区
 
@@ -236,13 +273,14 @@ TypeError），**没有放宽任何既有断言**。
 `00-START-HERE.md`、`01-COLD-START-CONTEXT.md`、`02-DSH-MASTER-PROMPT.md`、`03-IMPLEMENTATION-BRIEF.md`、
 `04-DSH-PLUGIN-DECISION.md`、`05-MODEL-GROUP-AND-TASK-MATRIX.md`、`06-INTEGRATED-BUILD-ROADMAP.md`、
 `07-FINAL-DECISION-AND-EXECUTION-PLAN.md`。
-
 仓库：`README.md`、`docs/IMPLEMENTATION-STATUS.md`、`docs/CHECKLIST.md`、`package.json`。
 （仓库内**不存在** `AGENTS.md`，已用 glob 全仓确认。）
 
 ---
 
 ## 6. 最近一次验证命令与结果
+
+### 6.1 M0/M1 基线（保留原样，不要覆盖——它是「开始时的样子」）
 
 | 项 | 值 |
 |---|---|
@@ -258,6 +296,28 @@ TypeError），**没有放宽任何既有断言**。
 > 注意：`npm test` 的 `test:browser` 部分会真实启动 Chrome 并驱动页面，因此
 > 「浏览器验收」与「单元回归」在本仓库是**两件事**：前者证明页面可交互，
 > 后者证明逻辑不变量。M0/M1 结束时两者都要有本轮日志。
+
+### 6.2 第 1 轮 goal（MVP）收尾时的验证（追加，不覆盖 6.1）
+
+| 项 | 值 |
+|---|---|
+| 命令 | `npm run test:unit` |
+| 结果 | **410 / 410 通过**，0 fail / 0 skipped，13.8 s |
+| 命令 | `npm run test:browser` |
+| 结果 | **17 通过 / 1 按设计 skip**（skip 原因：20 步内对手 0 号位未倒下，场景前置不成立） |
+| 命令 | `npm run test:env` |
+| 结果 | **111 / 111 通过**（引擎 + 先导 + 公开 schema 隐私），1.0 s |
+| 命令 | `npm run test:bridge` |
+| 结果 | **11 / 11 通过**，3.6 s |
+| 命令 | `npm run test:toolbox-roco` |
+| 结果 | **17 / 17 通过**，0.05 s |
+| 命令 | `npm run test:plan-e2e` |
+| 结果 | **6 / 6 通过**，1.5 s（真 Python 服务，包含本文件 1.6 节所述的隐藏信息反证） |
+| 命令 | `npm run test:roco-all` |
+| 结果 | 上述四项服务侧套件一次跑完：**145 / 145 通过** |
+
+运行时间 2026-09-21（本地）。这些是**逻辑与契约**证据；「页面真的能用」仍以
+`npm run roco:acceptance` 的浏览器证据为准，两者不可互相替代。
 
 ---
 
@@ -278,3 +338,6 @@ TypeError），**没有放宽任何既有断言**。
 | 2026-09-20T16:43Z | 全量回归 **390/390 通过**（372 unit + 18 browser），0 跳过 | `reports/roco/m1-data/npm-test-final.log` |
 | 2026-09-20T16:43Z | M0/M1 验收 checklist 完成（A—L，每项带证据） | `docs/roco/M0-M1-ACCEPTANCE.md` |
 | 2026-09-20T16:43Z | **本轮结束，等待人工审阅。未提交 git（保持工作区可见，便于审阅 diff）** | `git status --porcelain` |
+| 2026-09-21 | 第 1 轮 goal（30 项 MVP）启动：隐私边界收紧（移除 `state.seed` 后门、`/battle/plan` 改用公开 schema、对手后备不再暴露血量） | `roco/tests/test_public_planner.py`、`tests/evals/roco/bridge.test.js` |
+| 2026-09-21 | **补上二层隐藏信息边界缺口**：桥的 `HIDDEN_KEYS` 缺 `pendingenemy/pendingplayer/replacequeue`，私有 `serialize()` 能从第一层穿过 | commit `8e79a6f`；新增三条词汇表跨文件比对测试 |
+| 2026-09-21 | **新增规划端到端测试**（真 Python 服务）：证明正确公开状态确实产出计划，并反证真实 seed 不影响结论 | `tests/evals/roco/plan-e2e.test.js`、`scripts/roco/gen-plan-state.py`、`npm run test:plan-e2e` |
