@@ -63,7 +63,14 @@ function stableReceipt(receipt) {
   return stable;
 }
 
-function receiptSummary(receipt) {
+/**
+ * 回执的**有界摘要**：轨迹集不能把每个回执的全文都存下来（单条上限 10KB，
+ * 几千条就是几十 MB），但判定器又必须能核对回执没变。
+ *
+ * 所以存两样：`digest`（规范化全文摘要，回放时比对）+ 人看得懂的关键字段。
+ * 摘要里**剔除延迟**：延迟每次都不同，算进摘要会让回放永远「变了」。
+ */
+export function receiptSummary(receipt) {
   if (receipt === null || receipt === undefined) return {kind: 'null'};
   if (typeof receipt !== 'object') return {kind: typeof receipt, value: String(receipt).slice(0, 80)};
   const stable = stableReceipt(receipt);

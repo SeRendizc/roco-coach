@@ -79,6 +79,18 @@ test('反证 arm 真的被判挂，而不是与基线一模一样', () => {
   assert.ok(rate('stop_now') < rate('baseline'), 'stop_now 与 baseline 持平：判据没抓到「一次都不查」');
 });
 
+test('生成器与判定器都能被加载：模块导出漂了要在这里断，而不是在产物里', () => {
+  // 这条是补上的：曾经给 receiptSummary 加注释时把 `export` 一起删掉了，
+  // 生成器 import 直接失败——但盘上还有上一轮产物，测试照样全绿。
+  // 「产物存在」不能替代「生成器能跑」。
+  const module = join(ROOT, 'scripts', 'roco', 'agent-trajectories.mjs');
+  const builder = join(ROOT, 'scripts', 'roco', 'build-agent-trajectories.mjs');
+  const check = execFileSync(process.execPath, ['--input-type=module', '-e',
+    `await import(${JSON.stringify(module)}); await import(${JSON.stringify(builder)}); process.stdout.write('ok');`],
+  {cwd: ROOT, encoding: 'utf8', timeout: 120000});
+  assert.equal(check.trim(), 'ok', '生成器或格式模块无法加载：导出被改坏了');
+});
+
 test('判定器两个方向都对，且生成时的判定与现在重判一致', () => {
   execFileSync('node', [join(ROOT, 'scripts', 'roco', 'verify-agent-trajectories.mjs'), '--quiet'], {
     cwd: ROOT, stdio: 'pipe', timeout: 600000,

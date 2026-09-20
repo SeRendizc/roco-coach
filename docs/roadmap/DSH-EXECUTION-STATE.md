@@ -778,6 +778,7 @@ active goal 已按此重写（revision 2）。
 | 2026-09-21 | **W4-02 轨迹集**：4,536 条 / 12 世界 / 7 arm + 离线回放 + 双向对照 | `docs/roco/AGENT-TRAJECTORIES.md`、`reports/roco/agent-trajectories-verification.json` |
 | 2026-09-21 | 反向对照抓出判定器三个真缺陷（胜率/冲突/过期各一），全部修掉 | 同上；本轮验证日志 |
 | 2026-09-21 | 第 9 轮验证：Python 195（1 skip）/ Node 430 / bridge 11 / toolbox 17 / plan-e2e 10；demo 16/16、浏览器 9/9；轨迹判定 verdict=true | `reports/roco/verification/round9-agent-trajectories.log` |
+| 2026-09-21 | **第 10 轮修一个「测试全绿但生成器已经不能跑」的漏洞**：给 `receiptSummary` 加注释时把 `export` 一起删了，盘上还有旧产物所以测试照样过；新增加载守卫 + 重算 `bytes`（剔除延迟） | commit 见下；`reports/roco/verification/round10-agent-trajectories.log` |
 
 ---
 

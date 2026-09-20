@@ -1,0 +1,30 @@
+=== HEAD 98516a031dafb2e76afa4571a0ed7c2f49d2d3b0 @ 2026-09-20T21:40:27Z ===
+=== test:env ===
+----------------------------------------------------------------------
+Ran 195 tests in 13.115s
+
+OK (skipped=1)
+=== test:unit ===
+ℹ tests 431
+ℹ pass 431
+ℹ fail 0
+ℹ skipped 0
+=== test:bridge ===
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0
+=== test:toolbox-roco ===
+ℹ tests 17
+ℹ pass 17
+ℹ fail 0
+=== test:plan-e2e ===
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+=== demo-acceptance ===
+[demo-acceptance] ✔ 控制台没有报错 — []
+[demo-acceptance] 结果：16 通过 / 0 失败；报告见 reports/roco/demo-acceptance/
+=== browser-acceptance ===
+[acceptance] checks 9/9 pass
+=== trajectory verdict ===
+verdict True structural 0 replay 0 drift 0 neg {'total': 13656, 'passed': 13656}
