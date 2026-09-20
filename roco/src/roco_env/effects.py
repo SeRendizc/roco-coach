@@ -117,13 +117,79 @@ def active_damage_model() -> DamageModel:
 def ability_level(buffs: Dict[str, int]) -> float:
     """把攻防增减折成一个系数。
 
-    约定 buffs 的键：atk_up / atk_down / def_up / def_down，值为小数（0.4 = +40%）。
+    **键与单位**（这一条以前是错的，必须写清）：
+    引擎里属性增减的真实键是 `atk` / `spa` / `def` / `spd` / `spe`，
+    值是**整数百分点**（`{"atk": 60}` = 物攻 +60%，来自 `parse.STAT_KEYS`
+    与技能描述里的 `+60%`）。`ability_level` 只关心攻防四项，速度由
+    `order_actions` 单独读取。
+
     与社区实现一致： (1 + 攻升 + 敌防降) / (1 + 攻降 + 敌防升)。
-    **未核验**：增减之间是相加还是相乘，没有一手证据。
+    **未核验**：增减之间是相加还是相乘，没有一手证据（MC-010）。
+
+    `atk_up`/`atk_down`/`def_up`/`def_down` 的小数键仍然接受（社区实现的原始口径），
+    只有当对应的引擎键不存在时才回落到它们。
     """
-    up = float(buffs.get("atk_up", 0.0)) + float(buffs.get("def_down", 0.0))
-    down = float(buffs.get("atk_down", 0.0)) + float(buffs.get("def_up", 0.0))
+    def pct(key: str, legacy: str) -> float:
+        if key in buffs:
+            return float(buffs[key]) / 100.0
+        return float(buffs.get(legacy, 0.0))
+
+    # 负值要从「升」挪到「降」：`{"atk": -30}` 是物攻 -30%，不是 +(-30)。
+    # 社区实现的原始键名（atk_up/atk_down/def_up/def_down，小数）由 `pct` 回落读取。
+    atk_self = pct("atk", "atk_up") + float(buffs.get("atk_down", 0.0))
+    atk = pct("def", "def_down")
+    up = (atk_self if atk_self > 0 else 0.0) + (atk if atk > 0 else 0.0)
+    down = (abs(atk_self) if atk_self < 0 else 0.0) + (abs(atk) if atk < 0 else 0.0)
     return (1.0 + up) / max(0.1, 1.0 + down)
+
+
+def attacker_multiplier(buffs: Dict[str, int]) -> float:
+    """攻方对这次结算的全部影响：物攻增减。
+
+    键与单位见 `ability_level`：`{"atk": 60}` = +60%（整数百分点）。
+    """
+    atk = float(buffs.get("atk", 0)) / 100.0 + float(buffs.get("atk_up", 0.0))
+    atk += float(buffs.get("atk_down", 0.0))          # 社区口径的负值键
+    return 1.0 + atk
+
+
+def defender_multiplier(buffs: Dict[str, int]) -> float:
+    """守方对这次结算的全部影响：物防增减。"""
+    dfn = float(buffs.get("def", 0)) / 100.0 + float(buffs.get("def_up", 0.0))
+    dfn += float(buffs.get("def_down", 0.0))
+    return max(0.1, 1.0 + dfn)
+
+
+def combined_ability_level(attacker_buffs: Dict[str, int],
+                           defender_buffs: Dict[str, int]) -> float:
+    """`攻方系数 / 守方系数`，直接喂给伤害模型的 `ability_level`。
+
+    **不要**再把攻方增益乘进 `attacker_atk`：社区公式里 `ability_level` 乘的就是
+    攻击面板，两边同时乘等于把增益约掉（我实测过一次：atk+100% 的伤害与不加完全一样，
+    因为 `panel_value(1+1.0)` 与 `ability_level(1/(1+1.0))` 精确抵消）。
+    面板值一律用**未加成**的原始面板，全部增减走这一个系数。
+    """
+    return attacker_multiplier(attacker_buffs) / defender_multiplier(defender_buffs)
+
+
+#: 属性键 → 该键表示的百分比（整数，+60 = +60%）。
+#: 与 `parse.STAT_KEYS` 是同义词表：解析器写什么键，这里就读什么键。
+PANEL_BUFF_KEYS = {
+    "atk": "atk",   # 物攻
+    "spa": "spa",   # 魔攻
+    "def": "def",   # 物防
+    "spd": "spd",   # 魔防
+    "spe": "spe",   # 速度
+}
+
+
+def panel_value(base: float, pct_delta: int) -> float:
+    """面板值 + 百分比增减 → 实际参与的数值。
+
+    假设（未核验 MC-010）：百分比直接乘在面板值上，`+60%` → ×1.6。
+    `+100%`（专注力）→ ×2.0。
+    """
+    return float(base) * (1.0 + float(pct_delta) / 100.0)
 
 
 # ── 条件化威力 ──────────────────────────────────────────────────────────

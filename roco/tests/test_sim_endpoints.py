@@ -25,6 +25,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from roco_env import data as rdata          # noqa: E402
+from roco_env import env as env_mod         # noqa: E402
 from roco_env.service import (              # noqa: E402
     PRIVATE_TRUST_DOMAIN,
     RocoService,
@@ -328,3 +329,77 @@ class TestPlanCoverageIsHonest(unittest.TestCase):
         payload = plan.to_dict()
         for key in ("branches_evaluated", "no_counter_branches", "coverage", "timed_out"):
             self.assertIn(key, payload)
+
+
+class TestStatChangesReachTheDamage(unittest.TestCase):
+    """状态技能的属性增减必须真的进伤害。
+
+    两个**真实而且是静默的** bug（F02 之后我自己在给 B/C 组接特性时撞出来的）：
+
+      ① 伤害计算里 `ability_level` 与 `power_multiplier` 是**硬编码 1.0**，
+         于是「自己获得物攻+60%」写进 `pet.buffs` 之后没有任何作用 ——
+         事件留着、数值上什么都没发生。不报错、不留痕。
+      ② `_defense_reduction` 写在 PetState 上、跨回合存活，回合开始从不清零：
+         第 1 回合用过防御之后，**之后每一回合**受到的伤害都被再减一次，
+         而且攻方自己行动时读的是它上一回合的减伤。
+
+    这一组用「纯攻击对纯攻击」把防御/状态技能排除掉，只量属性增减的倍率。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.rs = RS
+        cls.team = TEAM
+
+    def _pure(self, st, side):
+        return [a for a in env_mod.legal_actions(st, self.rs, side)
+                if a.kind == "skill" and not self.rs.skills[a.skill_id].is_status
+                and not self.rs.skills[a.skill_id].is_defense]
+
+    def _player_damage(self, *, atk=0, foe_def=0, power=0, foe_atk=0, seed=11):
+        st = env_mod.reset(self.team, self.team, seed=seed, rs=self.rs)
+        if atk:
+            st.player.field_pet.buffs["atk"] = atk
+        if power:
+            st.player.field_pet.buffs["power"] = power
+        if foe_def:
+            st.enemy.field_pet.buffs["def"] = foe_def
+        if foe_atk:
+            st.enemy.field_pet.buffs["atk"] = foe_atk
+        env_mod.step_joint(st, self.rs, self._pure(st, "player")[0], self._pure(st, "enemy")[0])
+        hits = [e.detail["damage"] for e in st.events
+                if e.kind == "damage" and e.detail.get("side") == "player"]
+        self.assertTrue(hits, "纯攻击对纯攻击必须产生一次我方伤害事件")
+        return hits[0]
+
+    def test_attack_buff_multiplies_damage(self):
+        base = self._player_damage()
+        self.assertEqual(self._player_damage(atk=100), base * 2, "物攻+100% 应当把伤害翻倍")
+        self.assertEqual(self._player_damage(atk=60), int(base * 1.6), "物攻+60% 应当 ×1.6")
+
+    def test_foe_defense_buff_divides_damage(self):
+        base = self._player_damage()
+        self.assertEqual(self._player_damage(foe_def=50), int(base / 1.5), "对方物防+50% 应当把伤害压到 2/3")
+
+    def test_power_buff_multiplies_damage(self):
+        base = self._player_damage()
+        self.assertEqual(self._player_damage(power=30), int(base * 1.3), "全技能威力+30% 应当 ×1.3")
+
+    def test_foe_attack_buff_does_not_change_my_damage(self):
+        base = self._player_damage()
+        self.assertEqual(self._player_damage(foe_atk=100), base,
+                         "对手的物攻增益不该影响我打它的伤害（算错方向会在这里红）")
+
+    def test_negative_buff_lowers_damage(self):
+        base = self._player_damage()
+        self.assertLess(self._player_damage(atk=-30), base, "物攻-30% 必须让伤害变低")
+
+    def test_defense_reduction_only_lasts_the_turn_it_was_used(self):
+        """防御减伤不许跨回合残留。"""
+        st = env_mod.reset(self.team, self.team, seed=11, rs=self.rs)
+        me = st.player.field_pet
+        setattr(me, "_defense_reduction", 0.7)
+        # 推进一回合：回合开始时必须被清零
+        env_mod.step_joint(st, self.rs, self._pure(st, "player")[0], self._pure(st, "enemy")[0])
+        self.assertEqual(getattr(st.player.field_pet, "_defense_reduction", 0.0), 0.0,
+                         "上一回合的防御减伤必须在新回合开始时清零，否则后续每一击都被减伤")

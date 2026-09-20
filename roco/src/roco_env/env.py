@@ -380,6 +380,15 @@ def step_joint(
         for p in side.pets:
             if p.defense_cooldown > 0:
                 p.defense_cooldown -= 1
+            # 防御技能的减伤只在**使用它的那个回合**有效（术语 1016 说
+            # 防御技能进入 1 回合冷却，即下回合不能再用，而不是「减伤持续」）。
+            # 这里曾经漏了清零：`_execute` 把 `_defense_reduction` 写在 PetState 上，
+            # 而 PetState 是跨回合存活的，于是第 1 回合用过防御之后，
+            # **之后每一个回合**受到的伤害都被再减一次（实测 -70%），
+            # 而且它还会污染攻方自己的攻击（攻方行动时读的是它上一回合自己的减伤）。
+            # 表现是伤害整体偏低、且与 buff 的预期倍率对不上。
+            if getattr(p, "_defense_reduction", 0.0):
+                setattr(p, "_defense_reduction", 0.0)
 
     for side, action in order:
         _execute(state, rs, side, action)
@@ -530,6 +539,28 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
     atk_value = atk_panel.get("atk", float(attacker_pet.stats.get("atk", 1)))
     def_value = def_panel.get("def", float(defender_pet.stats.get("def", 1)))
 
+    # 属性增减要真的进伤害。
+    #
+    # 这一处曾经是**硬编码 1.0**：引擎把「自己获得物攻+60%」写进 `pet.buffs["atk"]`，
+    # 但伤害计算从不读它，`ability_level=1.0` 与 `power_multiplier=1.0` 把
+    # 全部增益/减益**静默丢掉**。也就是说状态技能打出去只留下一条事件，
+    # 数值上什么都没发生 —— 这种「看起来实现了、其实没接线」的 bug 最难发现，
+    # 因为它不报错、不留痕、测试也只看事件。
+    #
+    # 现在：己方物攻增益放大攻击面板；对手物防增减缩放防御面板；
+    # 双方攻防一起过一遍 `ability_level`（社区口径，未核验 MC-010）。
+    # 面板值保持**未加成**的原始面板：攻防增减全部由 `ability` 承担。
+    # （两边同时乘会把增益约掉——`panel_value(×2)` 与 `ability_level(÷2)` 精确抵消，
+    #  表现是「加了 buff 伤害一点没变」，而且不报错。）
+    ability = fx.combined_ability_level(dict(pet.buffs), dict(defender.buffs))
+
+    # 全技能威力增减（`parse.STAT_KEYS` 的 "全技能威力"）以及特性写的元素系威力。
+    # `power_multiplier` 是**乘区**，所以每一项都折成系数再相乘。
+    power_buff = 1.0 + float(pet.buffs.get("power", 0)) / 100.0
+    for element_key, element in (("power_water", "水系"), ("power_fight", "武系")):
+        if element_key in pet.buffs and skill.element == element:
+            power_buff *= 1.0 + float(pet.buffs[element_key]) / 100.0
+
     reduction = getattr(defender, "_defense_reduction", 0.0)
     raw = model.compute(
         attacker_atk=float(atk_value),
@@ -538,10 +569,11 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         type_multiplier=float(type_mult),
         stab=float(stab),
         hit_count=1,
-        power_multiplier=1.0,
-        ability_level=1.0,
+        power_multiplier=float(power_buff),
+        ability_level=float(ability),
     )
     damage = max(1, int(raw * (1.0 - reduction))) if reduction else raw
+
     actual = min(defender.hp, damage)
     defender.hp -= actual
 
