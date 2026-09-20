@@ -10,15 +10,13 @@
 
 ## 运行
 
-**想直接跑已经完成的 v0.1（自创宠物 Demo + 小芽 Coach）：**
+**想跑已经完成的 v0.1（自创宠物 Demo + 小芽 Coach）：**
 
-```sh
-./run-v0.1.sh
-```
+去 [Releases](https://github.com/SeRendizc/roco-coach/releases/tag/v0.1.0) 下载 `v0.1.0` 的源码包，
+解压后 `npm start` 即可。不需要 Python、不需要下载模型、不需要 API Key。
 
-它自动取出一份 v0.1 检出、挑空闲端口、起服务并打开浏览器。
-不需要 Python、不需要下载模型、不需要 API Key。停止用 `./run-v0.1.sh --stop`。
-详见 [`LEGACY.md`](docs/LEGACY.md)。
+当前 `master` 正在往《洛克王国：世界》手游方向演进（见下方「小芽 2.0：当前进度」），
+游戏部分与 v0.1 暂时一致，但会继续改。
 
 **在当前分支上开发/试跑 `master`：**
 

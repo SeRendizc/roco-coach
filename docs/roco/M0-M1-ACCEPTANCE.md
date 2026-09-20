@@ -5,9 +5,8 @@
 > `KNOWLEDGE_ONLY`（不能进入战斗）。
 >
 > 唯一的发行版是 **v0.1 = 已完成的小芽 Coach Demo**（tag `v0.1.0`，
-> commit `1717cd5`，一个命令启动：`./run-v0.1.sh`）。
+> commit `1717cd5`，直接从 GitHub Releases 下载）。
 > M0/M1 只打了一个内部 tag `milestone-m0m1-data`，**故意没有创建 GitHub Release**。
-> 版本关系见 `docs/LEGACY.md`。
 >
 > 本轮范围：**只做 M0 + M1**。本文件逐项对照验收条件，**只有能指向具体文件、数据、日志或截图的项才打勾**。
 > 基准 commit：`1717cd515e8d900e6f2ccccb8707a0a85a809989`

@@ -118,10 +118,10 @@ test('结构契约：仓库顶层只允许约定俗成的目录与文件', () =>
   const allowedDirs = new Set(['src', 'tests', 'tools', 'scripts', 'docs', 'data', 'knowledge',
     'reports', 'report', 'output', 'checkpoints', 'training']);
   // 顶层只允许这些文件。注意：文档一律进 docs/，
-  // 所以这里**没有** LEGACY.md / COACH-ACCEPTANCE.md / DEEPSEEK.md / coach-design-notes.md。
+  // 所以这里**没有** COACH-ACCEPTANCE.md / DEEPSEEK.md / coach-design-notes.md 等文档（它们都在 docs/）。
   // 曾经允许过它们，结果它们就真的留在根目录了——允许清单必须等于实际想要的形态。
   const allowedFiles = new Set(['.gitignore', 'package.json', 'README.md',
-    'requirements-agent.lock.txt', 'run-v0.1.sh']);
+    'requirements-agent.lock.txt']);
   const entries = readdirSync(join(ROOT), { withFileTypes: true })
     .filter((e) => !e.name.startsWith('.') && e.name !== 'node_modules' && e.name !== 'tmp');
   const unexpected = [];

@@ -14,7 +14,6 @@ roco-coach/
 ├── README.md                    项目入口（唯一留在顶层的说明文档）
 ├── package.json                 唯一依赖清单（无第三方运行依赖）
 ├── requirements-agent.lock.txt  可选 Python 环境（语义检索与离线小实验）
-├── run-v0.1.sh                  一键启动已完成的 v0.1（见 docs/LEGACY.md）
 ├── .gitignore
 │
 ├── src/          ← 所有实现代码
@@ -148,7 +147,7 @@ tests/
 - **`/`、`/index.html`、`/connect.html` 三个短路径保留。** 它们是**对外契约**
   （README、文档、用户书签都写着），所以即使文件搬进 `src/client/` 也不改 URL：
   服务器里有显式别名表，而不是靠文件恰好放在某处。
-- **旧版本不复制一份到 `legacy/`。** `v0.1.0` 是个 tag，取用方式见 `docs/LEGACY.md`。
+- **旧版本不复制一份到 `legacy/`。** `v0.1.0` 是个 tag，直接从 GitHub Releases 下载即可。
   复制目录会让同一份代码有两处，改 bug 要改两遍、测试也要跑两遍。
 
 ## 8. 如果你看到旧文档里的路径
@@ -179,7 +178,6 @@ tests/
 ## 9. 相关文档
 
 - `README.md` — 项目入口与运行方式
-- `docs/LEGACY.md` — 版本、tag 与「旧代码几个 G」的澄清
 - `docs/RELEASE-v0.1.md` — v0.1 发行说明
 - `docs/roco/M0-REPO-AUDIT.md` — 每个模块的 KEEP / ADAPT / RETIRE / MISSING 去向
 - `docs/roadmap/DSH-EXECUTION-STATE.md` — 断点状态，接手时先读这份

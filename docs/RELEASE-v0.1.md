@@ -14,25 +14,25 @@
 
 ## 直接运行
 
+从本 Release 下载源码包，解压后：
+
+```sh
+npm start          # http://127.0.0.1:8765/
+```
+
+不需要 Python，不需要下载模型，不需要 API Key。
+
+也可以用 git 取这个 tag：
+
 ```sh
 git clone https://github.com/SeRendizc/roco-coach.git
 cd roco-coach
-./run-v0.1.sh
+git checkout v0.1.0
+npm start
 ```
 
-脚本会自动取出一份 v0.1 检出、选一个空闲端口、起服务并打开浏览器。
-不需要 Python，不需要下载模型，不需要 API Key。
-
-其他用法：
-
-```sh
-./run-v0.1.sh --port 9000   # 指定端口
-./run-v0.1.sh --no-open     # 不自动打开浏览器
-./run-v0.1.sh --stop        # 停掉 v0.1 服务
-./run-v0.1.sh --clean       # 移除 v0.1 检出
-```
-
-也可以手动跑：
+> 注意：本仓库的 `master` 分支在此之后做过目录整理与手游数据层开发，
+> 而 **`v0.1.0` 这个 tag 保持当时的布局不变**（源码在仓库根，`npm start` 直接可跑）。
 
 ```sh
 git worktree add ../roco-v0.1 v0.1.0

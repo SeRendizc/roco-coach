@@ -147,7 +147,7 @@ cd ../roco-legacy && npm start
 ```
 
 用 tag 而不是复制一份代码，是为了让代码只有一条历史。
-详见 [`LEGACY.md`](https://github.com/SeRendizc/roco-coach/blob/master/docs/LEGACY.md)。
+旧版本见 [Releases](https://github.com/SeRendizc/roco-coach/releases) 里的 `legacy-demo-v0.11` 说明。
 
 ---
 
