@@ -91,22 +91,50 @@ class Learnset:
 
 @dataclass(frozen=True)
 class TypeChart:
-    """防御相性：给定防守方属性组合，返回受到某属性攻击的倍率。"""
+    """防御相性：给定防守方属性组合，返回受到某属性攻击的倍率。
 
-    single: Dict[str, Dict[str, float]]
+    **优先使用快照的显式双属性行。** Types.lua 里既有单属性行，也有
+    102 条 `光系|地系` 这样的显式组合行，且两者**并不等价**：
+    对拍 1836 组后，41 处不一致，全部是「相乘得 4.0 而快照封顶 3.0」
+    （例：`光系|地系` 受草系，显式给 3，相乘给 4）。
+
+    之前的实现丢弃了组合行、改用两条单属性相乘——那等于用我们的推断
+    覆盖数据。现在以快照为准，推断只在没有显式行时作为**标注过的**回退。
+    """
+
+    # 键是排序后的属性组合（单属性时就是长度 1 的元组）
+    rows: Dict[Tuple[str, ...], Dict[str, float]]
 
     DEFAULT: float = 1.0
 
-    def multiplier(self, defender_types: Tuple[str, ...], attack_element: str) -> float:
-        """防守方属性组合 × 攻击属性 → 倍率。
+    @staticmethod
+    def _key(types: Tuple[str, ...]) -> Tuple[str, ...]:
+        return tuple(sorted(types))
 
-        依据：Types.lua 给的是**防御侧**相性表（weak / resist 各带 multiplier）。
-        双属性按两条单属性**相乘**——这是社区实现在此处的通行做法。
-        假设：倍率相乘而非相加。数据没有直接说明，属 microcase 待验项。
+    def multiplier(self, defender_types: Tuple[str, ...], attack_element: str) -> float:
+        """防守方属性组合 × 攻击属性 → 倍率。"""
+        row = self.rows.get(self._key(defender_types))
+        if row is not None:
+            return row.get(attack_element, self.DEFAULT)
+        return self.DEFAULT
+
+    def has_row(self, defender_types: Tuple[str, ...]) -> bool:
+        """快照里有没有这一组合的显式行。
+
+        缺行意味着「这条相性我们没有数据」，调用方应当能把它报成
+        unsupported，而不是当成 1 倍静默通过。
+        """
+        return self._key(defender_types) in self.rows
+
+    def fallback_multiplier(self, defender_types: Tuple[str, ...], attack_element: str) -> float:
+        """没有显式行时的**推断**值（两条单属性相乘）。
+
+        它不是数据，是推断，所以单独一个方法、名字里带 fallback，
+        调用方必须自己决定要不要用、以及要不要标未核验。
         """
         m = self.DEFAULT
         for t in defender_types:
-            row = self.single.get(t)
+            row = self.rows.get((t,))
             if row:
                 m *= row.get(attack_element, self.DEFAULT)
         return m
@@ -308,16 +336,15 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
             f"学习表里有 {len(orphans)} 个孤儿技能引用：" + "; ".join(orphans[:5])
         )
 
-    single: Dict[str, Dict[str, float]] = {}
+    # 单属性行与显式双属性行**都要**收：快照把两者都给了，而它们不等价。
+    rows: Dict[Tuple[str, ...], Dict[str, float]] = {}
     for key, row in raw["types"]["types"].items():
-        if "|" in key:
-            continue                       # 双属性组合由两条单属性相乘得到
         table: Dict[str, float] = {}
         for e in row.get("weak", []):
             table[e["type"]] = float(e["multiplier"])
         for e in row.get("resist", []):
             table.setdefault(e["type"], float(e["multiplier"]))
-        single[key] = table
+        rows[tuple(sorted(key.split("|")))] = table
 
     terms = {
         str(k): Term(term_id=str(k), note=v.get("note") or "", desc=v.get("desc") or "")
@@ -331,7 +358,7 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
         skills=skills,
         pets=pets,
         learnsets=learnsets,
-        type_chart=TypeChart(single=single),
+        type_chart=TypeChart(rows=rows),
         terms=terms,
         files=files,
         by_name=by_name,

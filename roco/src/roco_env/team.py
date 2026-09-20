@@ -105,7 +105,7 @@ def feature_types(rs: Ruleset, team: Sequence[str], skills: Dict[str, List[str]]
     # 弱点：对**全部已知属性**算一遍相性，受 >1 倍即算弱点。
     # 注意：攻击属性集合取自 Types.lua 里出现过的键，而不是只取本规则集 12 只精灵的属性
     # ——否则「被某属性克制」会被队伍构成意外收窄。
-    all_elements = set(rs.type_chart.single.keys())
+    all_elements = {k[0] for k in rs.type_chart.rows if len(k) == 1}
     defence_weak: Dict[str, List[str]] = {}
     for pid in team:
         pet = rs.pet(pid)

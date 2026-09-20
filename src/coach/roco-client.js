@@ -488,7 +488,13 @@ export class RocoClient {
   async _request(method, path, payload, options = {}) {
     const started = process.hrtime.bigint();
     const elapsed = () => Number(process.hrtime.bigint() - started) / 1e6;
-    const stateVersion = payload && typeof payload.state_version === 'number' ? payload.state_version : null;
+    // 契约要求回执里总有 state_version：GET /health 没有状态，按服务端口径记 0。
+    const stateVersion =
+      payload && typeof payload.state_version === 'number'
+        ? payload.state_version
+        : method === 'GET'
+          ? 0
+          : null;
     const rulesetId = (payload && payload.ruleset_id) || this.rulesetId;
 
     if (payload && typeof payload === 'object') {

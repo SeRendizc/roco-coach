@@ -24,6 +24,7 @@
     "test:opponent-smoke": "node scripts/opponent-smoke.mjs",
     "test:browser": "node --test --test-concurrency=1 tests/browser.test.js tests/replace.test.js",
     "test:roco": "node --test tests/evals/roco/data-acceptance.test.js",
+    "test:bridge": "node --test tests/evals/roco/bridge.test.js",
     "roco:parse-check": "node scripts/roco/selftest-lua-parse.mjs",
     "roco:hash": "node scripts/roco/hash-snapshot.mjs",
     "roco:cross-check": "python3 scripts/roco/cross-check.py",

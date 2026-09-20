@@ -471,7 +471,7 @@ class RocoService:
                     "pets": len(rs.pets),
                     "skills": len(rs.skills),
                     "learnsets": len(rs.learnsets),
-                    "type_rows": len(rs.type_chart.single),
+                    "type_rows": len(rs.type_chart.rows),
                     "terms": len(rs.terms),
                 },
                 "capabilities": dict(CAPABILITIES),
@@ -547,7 +547,7 @@ class RocoService:
                     "pets": len(rs.pets),
                     "skills": len(rs.skills),
                     "learnsets": len(rs.learnsets),
-                    "type_rows": len(rs.type_chart.single),
+                    "type_rows": len(rs.type_chart.rows),
                     "terms": len(rs.terms),
                 },
                 "files": rs.files,
@@ -832,7 +832,7 @@ class RocoService:
         if rows is None:
             if len(uniq) == 1:
                 # 单属性仍可从已加载的 TypeChart 取（data.py 保留的那部分）
-                table = rs.type_chart.single.get(uniq[0])
+                table = rs.type_chart.rows.get((uniq[0],))
                 if table is None:
                     return _not_found(f"未知属性：{uniq[0]}")
                 return Answer(
