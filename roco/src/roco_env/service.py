@@ -1332,6 +1332,12 @@ class RocoService:
         # 推荐必须跨种子一致才敢说「推荐」；不一致就如实说「随随机性变化」
         labels = {p["recommended_label"] for p in per_seed}
         expectations = [p["expected"] for p in per_seed]
+        # 枚举第一与第二名的估值差（一手推演尺度）。产品侧用它判断「这一手是不是真的两难」：
+        # 咬得紧才值得提示。⚠️ 它的**量纲与旧演示引擎不同**（旧引擎的 evaluate 分数
+        # 中位数是 3 量级，这里是 0.04 量级），所以任何阈值都必须按这一把尺子重新标定，
+        # 不能照搬旧引擎的「>5」。见 docs/roco/W5-04-INTERVENTION-GATE.md §10.4。
+        margins = [p.get("first_second_margin") for p in per_seed
+                   if p.get("first_second_margin") is not None]
         worsts = [p["worst"] for p in per_seed]
         bests = [p["best"] for p in per_seed]
         timed_out = any(p["timed_out"] for p in per_seed)
@@ -1351,6 +1357,15 @@ class RocoService:
                          "mean": sum(expectations) / len(expectations)},
             "worst": {"min": min(worsts), "max": max(worsts)},
             "best": {"min": min(bests), "max": max(bests)},
+            "first_second_margin": {
+                "min": min(margins) if margins else None,
+                "max": max(margins) if margins else None,
+                "mean": (sum(margins) / len(margins)) if margins else None,
+                "scale": "one-ply-value",
+                "note": ("枚举第一与第二名的估值差（一手推演尺度）。只用于判断「这一手"
+                         "是不是真的两难」，**不是胜率、不是游戏机制的分差**。"
+                         "量纲按本引擎标定，不要与旧演示引擎的分数直接比较。"),
+            },
             "main_counter": per_seed[0]["main_counter"],
             "counter_note": per_seed[0]["counter_note"],
             "branches_evaluated": sum(p["branches_evaluated"] for p in per_seed),

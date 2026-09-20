@@ -1,0 +1,21 @@
+=== 第 18 轮：把 first_second_margin 接进真实链路 @ 2026-09-20T22:22:37Z ===
+--- python（planner/service 改动）
+----------------------------------------------------------------------
+Ran 208 tests in 24.439s
+
+OK (skipped=1)
+--- plan-e2e（真链路）
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+--- toolbox-roco
+ℹ tests 17
+ℹ pass 17
+ℹ fail 0
+--- 第 18 轮全量
+ℹ tests 464
+ℹ pass 463
+ℹ fail 1
+ℹ pass 11
+ℹ fail 0
+traj verdict True

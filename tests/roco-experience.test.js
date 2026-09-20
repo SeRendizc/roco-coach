@@ -69,8 +69,11 @@ test('规划特征：gap 用期望区间宽度，不用 worst 的绝对值', () 
   assert.equal(Number(f.gap.toFixed(6)), 0.6, 'gap = expected.max - expected.min');
   // 推荐随分析种子变化 = 没有稳健结论：技能证据记 0（不压低门槛）
   assert.equal(rocoPlanFeatures({ok: true, expected: {min: 0, max: 0}, recommendation_stable: false}).skill, 0);
-  assert.deepEqual(rocoPlanFeatures(null), {gap: null, skill: null, timedOut: null});
+  assert.deepEqual(rocoPlanFeatures(null), {gap: null, skill: null, timedOut: null, margin: null});
   assert.equal(rocoPlanFeatures({ok: false}).gap, null, '规划失败时不许编一个 gap');
+  // 枚举第一与第二名的估值差：工具回执里有就透传，没有就是 null（不编代理值）
+  assert.equal(rocoPlanFeatures({ok: true, firstSecondMargin: 0.045}).margin, 0.045);
+  assert.equal(rocoPlanFeatures({ok: true}).margin, null, '没有边际量时必须如实为 null');
 });
 
 test('陈旧判定：版本对不上就作废，只有一个入口', () => {

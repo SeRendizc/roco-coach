@@ -171,6 +171,19 @@ test('featureVector 与模型声明的特征顺序严格对应', () => {
   if (index('turn_norm') >= 0) assert.equal(vector[index('turn_norm')], 0.2);
 });
 
+test('planner_margin_norm 只在真的拿到边际量时非零（不编代理值）', () => {
+  const model = loadInterventionModel(MODEL_PATH);
+  assert.ok(model);
+  const withMargin = featureVector({risk: 0.2, phase: 'battle', hpRatio: 0.9, turn: 3, legalCount: 4,
+    plannerMargin: 5}, model);
+  const without = featureVector({risk: 0.2, phase: 'battle', hpRatio: 0.9, turn: 3, legalCount: 4,
+    plannerMargin: null}, model);
+  const index = model.features.indexOf('planner_margin_norm');
+  assert.ok(index >= 0, '模型应当用到 planner_margin_norm');
+  assert.equal(withMargin[index], 1, '边际量 5 归一后应当饱和到 1');
+  assert.equal(without[index], 0, '拿不到边际量时必须是 0（没有分歧证据），不许编');
+});
+
 test('flag 读法保守：未知取值当作 off', () => {
   assert.equal(interventionModelMode({}), 'off');
   assert.equal(interventionModelMode({ROCO_INTERVENTION_MODEL: 'maybe'}), 'off');

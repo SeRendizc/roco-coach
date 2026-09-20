@@ -161,6 +161,20 @@ test('端到端：toolbox → roco-client → 真 Python 服务，公开状态�
     assert.ok(direct.result, '成功时必须有 result');
     assert.ok(Array.isArray(direct.result.analysis_seeds) && direct.result.analysis_seeds.length >= 1);
     assert.equal(direct.result.state_version, version, '回执钉的状态必须就是请求的状态');
+    // 枚举第一与第二名的估值差必须真的从引擎带出来。
+    // 没有它，产品侧就**无法**判断「这一手是不是真的两难」——W5-04 的判定层
+    // 就是卡在这个量上（见 docs/roco/W5-04-INTERVENTION-GATE.md §10.3/§10.4）。
+    assert.ok(direct.result.first_second_margin, '回执必须带 first_second_margin');
+    assert.equal(direct.result.first_second_margin.scale, 'one-ply-value');
+    const marginMean = direct.result.first_second_margin.mean;
+    assert.ok(marginMean === null || typeof marginMean === 'number',
+      `first_second_margin.mean 必须是数字或 null，实际 ${typeof marginMean}`);
+    if (typeof marginMean === 'number') {
+      // 量纲自检：本引擎的一手推演值差是**小量**（实测 0.02—0.08 量级）。
+      // 如果它突然变成 5 量级，说明有人把旧演示引擎的尺子搬过来了。
+      assert.ok(Math.abs(marginMean) < 1,
+        `估值差 ${marginMean} 不在本引擎的量纲内（0.0x 量级）；不要照搬旧引擎的阈值`);
+    }
 
     // 再走工具层：这才是模型真正会调的入口。
     configureRocoTools({ client, stateVersion: version });
@@ -173,6 +187,10 @@ test('端到端：toolbox → roco-client → 真 Python 服务，公开状态�
       assert.equal(receipt.timeout.timedOut, false, `不该超时：${receipt.message || ''}`);
       assert.equal(receipt.search.completed, true);
       assert.ok(receipt.recommendation !== null, '完成搜索后必须给出推荐');
+      // 同一条量必须能穿过工具层到达产品侧（否则「接进真实链路」只是空话）。
+      assert.ok('firstSecondMargin' in receipt, '工具回执必须暴露 firstSecondMargin');
+      assert.ok(receipt.firstSecondMargin === null || typeof receipt.firstSecondMargin === 'number',
+        `firstSecondMargin 必须是数字或 null，实际 ${typeof receipt.firstSecondMargin}`);
       assert.equal(typeof receipt.recommendation, 'string');
       assert.ok(receipt.recommendation.length > 0 && receipt.recommendation.length <= 40);
       assert.ok(receipt.worstCaseTail && typeof receipt.worstCaseTail === 'object', '必须给最坏尾部区间');

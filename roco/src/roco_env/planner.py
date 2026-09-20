@@ -77,6 +77,17 @@ class PlanResult:
     note: str
     #: 对手分布为空、只做了静态估值的候选数（不计入 branches_evaluated 与 coverage）。
     no_counter_branches: int = 0
+    #: **枚举第一与第二名的估值差**（top1 − top2，只在一手推演值上算）。
+    #:
+    #: 为什么要有它：产品侧要判断「这一手是不是真的两难」——
+    #: 第一和第二咬得很紧时才值得提示，差得远时玩家照着最优走就行。
+    #: 以前回执里只有 `expected/worst/best`，**没有第二名**，所以那个判断在运行期
+    #: 根本算不出来（W5-04 的判定层就卡在这里，见 docs/roco/W5-04-INTERVENTION-GATE.md §10.3）。
+    #:
+    #: 口径：与 `one_ply_value` 同一把尺子（`evaluate` 的分数差），
+    #: 只统计**真的推演出来**的候选；只有一个可行动作或全部推不动时为 None。
+    #: 它**不是**胜率，也不是「分差」的游戏机制含义，只是估值差。
+    first_second_margin: Optional[float] = None
     #: 被丢弃的分支数与原因（{异常类名: 次数}）。fail closed 的可见面。
     dropped_branches: Dict[str, int] = field(default_factory=dict)
     #: **风险分支**（W3-04）：推荐动作在对手各种合法选择下的分布。
@@ -102,6 +113,8 @@ class PlanResult:
             "counter_note": self.counter_note,
             "branches_evaluated": self.branches_evaluated,
             "no_counter_branches": self.no_counter_branches,
+            "first_second_margin": (round(self.first_second_margin, 4)
+                                    if self.first_second_margin is not None else None),
             "dropped_branches": dict(self.dropped_branches),
             "risk": dict(self.risk),
             "depth_searched": self.depth_searched,
@@ -324,9 +337,22 @@ def _my_candidates(state: GameState, rs: Ruleset, *, beam: int,
     于是「换宠承伤」「防御等一轮」永远进不了搜索 —— 而多回合规划存在的理由
     恰恰是这两类分支。保底与按值排序**并存**，不是二选一。
     """
+    picked, _scored = _candidates_and_scores(state, rs, beam=beam, side=side)
+    return picked
+
+
+def _candidates_and_scores(state: GameState, rs: Ruleset, *, beam: int,
+                           side: str = "player") -> Tuple[List[Action], List[Tuple[float, Action]]]:
+    """候选与它们的分数一起返回。
+
+    拆出来的理由：一手推演值是**每个合法动作都要算一次**的成本，
+    `_my_candidates` 已经算过一遍；`first_second_margin` 要用同一个分数，
+    再算一遍就是白花一遍预算（`one_ply_value` 会对每个动作枚举对手分布）。
+    两处必须用**同一批**分数，否则「候选是按这个分数挑的」就不成立。
+    """
     actions = [a for a in renv.legal_actions(state, rs, side) if a.kind != "escape"]
     if not actions:
-        return []
+        return [], []
     scored: List[Tuple[float, Action]] = [
         (one_ply_value(state, rs, a, side=side), a) for a in actions]
     scored.sort(key=lambda pair: -pair[0])
@@ -346,7 +372,18 @@ def _my_candidates(state: GameState, rs: Ruleset, *, beam: int,
             picked.append(action)
     # 类别保底可能已经超过 beam（例如 beam=1 但有三个类别）——那也留着：
     # 宁可多看两眼，也不要把「换宠/防御」这两类整类丢掉。
-    return picked
+    return picked, scored
+
+
+def first_second_margin(scored: Sequence[Tuple[float, Action]]) -> Optional[float]:
+    """枚举第一与第二名的估值差。只有一个候选、或算不出来的候选不足两个时为 None。
+
+    算不出来的候选（`-inf`）**不参与**：拿它当第二名会得到一个虚假的「巨大分歧」。
+    """
+    finite = [value for value, _action in scored if value != float("-inf")]
+    if len(finite) < 2:
+        return None
+    return float(finite[0] - finite[1])
 
 
 # ── 搜索 ────────────────────────────────────────────────────────────────
@@ -377,7 +414,9 @@ def plan_actions(
     # 我们不该把它的 seed 换掉（那会污染调用方后续的 replay）。
     original_seed = state.seed
     state.seed = SEARCH_SEED
-    my_candidates = _my_candidates(state, rs, beam=beam, side=side)
+    my_candidates, scored_candidates = _candidates_and_scores(state, rs, beam=beam, side=side)
+    # 产品侧判断「这一手是不是真的两难」要用它；与候选筛选同一批分数，不重复计算。
+    margin = first_second_margin(scored_candidates)
     branches = 0
     #: 被丢弃的分支数（非法或未支持的组合）与原因计数。
     #: 只报 branches 不报丢弃数时，「搜了 3 个分支」与「13 个候选里 10 个算不出来」
@@ -390,9 +429,11 @@ def plan_actions(
     reached_depth = 0
 
     try:
-        return _search(state, rs, side=side, depth=depth, beam=beam, budget_s=budget_s,
-                       clock=clock, start=start, my_candidates=my_candidates,
-                       opponent=opponent, original_seed=original_seed)
+        result = _search(state, rs, side=side, depth=depth, beam=beam, budget_s=budget_s,
+                         clock=clock, start=start, my_candidates=my_candidates,
+                         opponent=opponent, original_seed=original_seed)
+        result.first_second_margin = margin
+        return result
     finally:
         # 无论走哪条出口（含超时、异常）都把 seed 还回去。
         # 这一条不能靠「每个 return 前记得写一行」—— 那种约定迟早漏。

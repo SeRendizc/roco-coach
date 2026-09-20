@@ -735,6 +735,11 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
   mainCounterNote:plan?.counter_note??null,
   worstCaseTail:completed?plan.worstCaseTail??plan.worst??plan.worstCase??null:null,
   expected:plan?.expected??null,
+  // 枚举第一与第二名的估值差（一手推演尺度）。它公开出来是为了让产品侧能判断
+  // 「这一手是不是真的两难」；**它只在一手推演值上有意义，不是胜率、不是机制分差**。
+  // 量纲按本引擎标定（实测 0.02—0.08 量级），不要与旧演示引擎的分数直接比较。
+  firstSecondMargin:Number.isFinite(plan?.first_second_margin?.mean)?plan.first_second_margin.mean
+   :(Number.isFinite(plan?.first_second_margin)?plan.first_second_margin:null),
   search:{completed,coverage:searchCoverage??(completed?receipt.coverage:0),timedOut:searchTimedOut,
    nodes:Number.isInteger(search?.nodes)?search.nodes:(Number.isInteger(plan?.branches_evaluated)?plan.branches_evaluated:null),
    depth:Number.isInteger(search?.depth)?search.depth:(Number.isInteger(plan?.depth_searched)?plan.depth_searched:null),

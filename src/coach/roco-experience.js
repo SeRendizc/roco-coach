@@ -91,14 +91,17 @@ export function rocoGameView(view, {matchId = null} = {}) {
  * 返回的对象可以直接喂给 `interventionFeatures(...)`（它再补 game/risk/timeLeft）。
  */
 export function rocoPlanFeatures(plan) {
-  if (!plan || plan.ok !== true) return {gap: null, skill: null, timedOut: null};
+  if (!plan || plan.ok !== true) return {gap: null, skill: null, timedOut: null, margin: null};
+  // 枚举第一与第二名的估值差。工具回执里叫 `firstSecondMargin`；
+  // 没有它时传 null（判定层按 0 处理 = 没有分歧证据），**不编一个代理值**。
+  const margin = Number.isFinite(plan.firstSecondMargin) ? plan.firstSecondMargin : null;
   const expected = plan.expected;
   const gap = expected && Number.isFinite(expected.min) && Number.isFinite(expected.max)
     ? Math.max(0, expected.max - expected.min)
     : null;
   // 「推荐随分析种子变化」= 这个局面没有稳健结论；技能证据按 0 处理（不压低门槛）。
   const skill = plan.recommendation_stable === false ? 0 : null;
-  return {gap, skill, timedOut: plan.timed_out === true};
+  return {gap, skill, timedOut: plan.timed_out === true, margin};
 }
 
 /**
@@ -214,13 +217,12 @@ export function rocoIntervention({view = null, session = null, plan = null, host
     risk: Number.isFinite(host.risk) ? host.risk : null,
     gap: planFeatures.gap,
     skill: planFeatures.skill,
-    // 判定层的 `planner_margin_norm` 要的是**枚举第一与第二名的估值差**。
-    // ⚠️ 当前规划器回执里**没有**这个量：`PlanResult` 只有 `expected/worst/best`，
-    // 没有「第二名是多少」。所以这里只能传 null（判定层按 0 处理 = 没有分歧证据），
-    // 判定层目前**不会**生效。要让它在真实链路上生效，必须先让规划器把
-    // top1-top2 的边际量带进回执——那是一次独立的、要动的服务改动，
-    // 见 docs/roco/W5-04-INTERVENTION-GATE.md §10.2。不编一个代理值假装接上了。
-    plannerMargin: Number.isFinite(plan?.margin) ? plan.margin : null,
+    // 判定层的 `planner_margin_norm` 用的是**枚举第一与第二名的估值差**。
+    // 规划器现在会把它带进回执（`PlanResult.first_second_margin` →
+    // 工具回执 `firstSecondMargin`），所以这里**真的**有值可传了。
+    // ⚠️ 量纲不同：本引擎实测 0.02—0.08，判定层里的 `GAP_SCALE = 5` 是旧演示引擎的尺子，
+    // 因此判定层尚未按本引擎标定，见 docs/roco/W5-04-INTERVENTION-GATE.md §10.4。
+    plannerMargin: planFeatures.margin,
     timeLeft: Number.isFinite(host.timeLeft) ? host.timeLeft : Infinity,
   });
   return interventionDetail(features);
