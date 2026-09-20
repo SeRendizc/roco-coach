@@ -1,0 +1,3 @@
+[acceptance]   ✔ 控制台零报错 / 零未捕获异常
+[acceptance] screenshots: 01-camp.png, 02-filter.png, 03-battle.png, 04-battle-end.png
+[acceptance] wrote /Users/serendizc/Developer/roco-coach/reports/roco/acceptance/browser-acceptance.json

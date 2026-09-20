@@ -229,7 +229,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     planner_rows = [r for r in (score_position(rs, rec, args.depth, args.beam, args.budget_ms)
                                 for rec in positions_list) if r]
     payload: Dict[str, Any] = {
-        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        # 易变的时间戳**不进稳定产物**（否则每次跑都显示「报告被改了」，
+        # 久了没人看 diff）；它另存 `planner-benchmark-run.json`（已 gitignore）。
         "generated_by": "scripts/roco/benchmark-planner.py",
         "ruleset_id": rs.ruleset_id,
         "position_seed": POSITION_SEED,
@@ -251,6 +252,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     os.makedirs(os.path.join(_ROOT, os.path.dirname(OUT_JSON)), exist_ok=True)
     with open(os.path.join(_ROOT, OUT_JSON), "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=2)
+    run_path = os.path.join(_ROOT, os.path.dirname(OUT_JSON), "planner-benchmark-run.json")
+    with open(run_path, "w", encoding="utf-8") as fh:
+        json.dump({"generated_at": datetime.datetime.now(datetime.timezone.utc)
+                   .isoformat(timespec="seconds")}, fh, ensure_ascii=False, indent=2)
 
     print(json.dumps({k: payload[k] for k in ("planner",) if k in payload}, ensure_ascii=False, indent=2))
     if args.compare:

@@ -40,6 +40,8 @@ reports/roco/acceptance/*.png
 reports/roco/demo-acceptance/*-run.json
 reports/roco/microcases/*-run.json
 reports/roco/dashboard-run.json
+# 通用：所有报告的易变运行信息都叫 *-run.json
+reports/roco/*-run.json
 reports/roco/demo-acceptance/*.png
 
 # v0.1 一键启动产生的检出

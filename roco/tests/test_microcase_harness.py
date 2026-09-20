@@ -178,10 +178,18 @@ class TestReportGeneratorsAreIdempotent(unittest.TestCase):
     这条测试就是那条纪律的执行者。
     """
 
+    #: 这两份是**全量**产物（参数固定），可以放一起「连跑两次比字节」。
+    #: 基准不在这里：它的产物取决于命令行给的 `--positions`，
+    #: 而测试为了跑得快只给 6 —— 拿它跟仓库里那份（120）比字节毫无意义。
+    #: 基准的等价性质由下面 `TestBenchmarksAreReproducible` 单独测。
     GENERATORS = [
         os.path.join("scripts", "roco", "run-microcase-harness.py"),
         os.path.join("scripts", "roco", "build-progress-dashboard.py"),
     ]
+
+    @staticmethod
+    def _cmd(script: str):
+        return [sys.executable, os.path.join(_ROOT, script)]
 
     def test_second_run_produces_no_diff(self):
         env = dict(os.environ, PYTHONPATH=os.path.join(_ROOT, "roco", "src"))
@@ -220,8 +228,8 @@ class TestReportGeneratorsAreIdempotent(unittest.TestCase):
         before = digests()
         # 再跑一遍：产物内容必须**逐字节**一致
         for script in self.GENERATORS:
-            subprocess.run([sys.executable, os.path.join(_ROOT, script)],
-                           cwd=_ROOT, env=env, capture_output=True, timeout=180)
+            subprocess.run(self._cmd(script), cwd=_ROOT, env=env,
+                           capture_output=True, timeout=300)
         after = set(dirty())
         new = sorted(after - baseline)
         self.assertEqual(new, [],
@@ -229,3 +237,39 @@ class TestReportGeneratorsAreIdempotent(unittest.TestCase):
         changed = sorted(k for k in before if before[k] != digests().get(k))
         self.assertEqual(changed, [],
                          f"第二次运行改了产物内容（说明里面有易变字段）：{changed}")
+
+
+class TestBenchmarksAreReproducible(unittest.TestCase):
+    """基准报告在同参数下必须**逐字节**可复现。
+
+    这与上一类的区别：基准的产物取决于命令行参数（`--positions`），
+    所以不能用「仓库里那份 vs 测试的小样本」比 —— 那是两回事。
+    正确的不变量是：**同一份参数跑两次，产物必须完全一致**。
+
+    为什么重要：这些报告要入库当证据。如果一个数字重复跑不出来，
+    它就不该被引用。
+    """
+
+    def _run(self, script, args, out_rel):
+        env = dict(os.environ, PYTHONPATH=os.path.join(_ROOT, "roco", "src"))
+        result = subprocess.run(
+            [sys.executable, os.path.join(_ROOT, script), *args],
+            cwd=_ROOT, env=env, capture_output=True, text=True, timeout=600)
+        self.assertEqual(result.returncode, 0, result.stderr[-500:])
+        with open(os.path.join(_ROOT, out_rel), "rb") as fh:
+            import hashlib
+            return hashlib.sha256(fh.read()).hexdigest()
+
+    def test_one_ply_benchmark_is_reproducible(self):
+        script = os.path.join("scripts", "roco", "benchmark-planner.py")
+        out = os.path.join("reports", "roco", "planner-benchmark.json")
+        first = self._run(script, ["--positions", "6"], out)
+        second = self._run(script, ["--positions", "6"], out)
+        self.assertEqual(first, second, "同参数两次跑出的基准报告不一致")
+
+    def test_planner_calibration_is_reproducible(self):
+        script = os.path.join("scripts", "roco", "check-planner-calibration.py")
+        out = os.path.join("reports", "roco", "planner-calibration.json")
+        first = self._run(script, ["--games", "3"], out)
+        second = self._run(script, ["--games", "3"], out)
+        self.assertEqual(first, second, "同参数两次跑出的标定报告不一致")

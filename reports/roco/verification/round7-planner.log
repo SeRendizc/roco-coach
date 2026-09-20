@@ -1,0 +1,33 @@
+=== 一步指标（基准，含配置）===
+    "top1": 0.5862,
+    "mean_rank": 3.716,
+    "median_rank": 1.0,
+    "mean_regret": 0.1459,
+    "max_regret": 1.4278,
+    "regret_zero": 0.5862
+  }
+}
+{
+  "greedy_baseline": {
+    "positions": 115,
+    "top1": 0.8783,
+    "mean_rank": 1.696,
+    "median_rank": 1,
+    "mean_regret": 0.0168,
+    "max_regret": 0.6572,
+    "regret_zero": 0.8783
+  }
+}
+wrote reports/roco/planner-benchmark.json
+[greedy_damage] planner 44/80  基线 18  (100.5s)
+[shallow_search] planner 18/80  基线 13  (64.9s)
+[status_control] planner 21/80  基线 15  (62.4s)
+wrote reports/roco/planner-matches.json
+
+=== 整局胜负（planner 上场比赛，40 局 × 2 座位，同批种子）===
+配置: depth=2 beam=3 budget_ms=800 games=40×2座位 seed_base=700000
+
+greedy_damage      planner  44/80 = 0.550 CI95 (0.441, 0.654) | greedy 18/40 = 0.45 CI95 (0.307, 0.602) | 回落率 0.0 | 超时 0 | 均回合 24.1
+shallow_search     planner  18/80 = 0.225 CI95 (0.147, 0.328) | greedy 13/40 = 0.325 CI95 (0.201, 0.48) | 回落率 0.0 | 超时 0 | 均回合 18.3
+status_control     planner  21/80 = 0.263 CI95 (0.179, 0.368) | greedy 15/40 = 0.375 CI95 (0.242, 0.53) | 回落率 0.0 | 超时 0 | 均回合 17.8
+plan 端到端延迟 ms: 146, 146, 146, 146, 147, 147, 152 | p50 146

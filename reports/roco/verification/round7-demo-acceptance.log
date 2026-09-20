@@ -1,0 +1,3 @@
+[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 
+[demo-acceptance] ✔ 控制台没有报错 — []
+[demo-acceptance] 结果：16 通过 / 0 失败；报告见 reports/roco/demo-acceptance/
