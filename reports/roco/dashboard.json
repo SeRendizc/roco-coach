@@ -3,13 +3,16 @@
   "important": [
     "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
     "`NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。",
-    "`BLOCKED_BY_BOUNDARY` 表示它落在用户明说的硬边界里（不训练模型、不租 GPU）。",
+    "`NEEDS_HARDWARE` 表示缺的是**特定硬件**（M5 Pro 48GB），不是决策。",
+    "`BLOCKED_BY_BOUNDARY` 只用于仍然有效的硬边界；旧的「不训练模型」在第 7 轮已被用户改写。",
     "这份台账不判「质量好不好」，只判「证据在不在」。"
   ],
   "counts": {
-    "DONE": 33,
-    "PARTIAL": 1,
-    "BLOCKED_BY_BOUNDARY": 3
+    "DONE": 35,
+    "PARTIAL": 3,
+    "NEEDS_HARDWARE": 2,
+    "NOT_STARTED": 7,
+    "NEEDS_HUMAN": 1
   },
   "mvp_total": 30,
   "mvp_done": 29,
@@ -756,29 +759,206 @@
       "evidence_missing": []
     },
     {
-      "id": "W4",
-      "title": "Agent SFT 数据与本地训练",
-      "status": "BLOCKED_BY_BOUNDARY",
+      "id": "W4-01",
+      "title": "固定 Agent 任务集",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/agent-tasks-v1.jsonl",
+        "scripts/roco/build-agent-tasks.py",
+        "scripts/roco/verify-agent-tasks.py",
+        "roco/tests/test_agent_tasks.py"
+      ],
+      "note": "288 条 / 8 类，按**家族、机制、表达模板**三重隔离切分；留出维度不进训练集，每类在 train/val/test 三侧都有样本。判定器自检两个方向都要对。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/agent-tasks-v1.jsonl",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/build-agent-tasks.py",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/verify-agent-tasks.py",
+          "exists": true
+        },
+        {
+          "path": "roco/tests/test_agent_tasks.py",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W4-02",
+      "title": "构造 2,000—5,000 条工具轨迹",
+      "status": "PARTIAL",
+      "evidence": [
+        "tests/evals/agent-trajectories-v1.jsonl",
+        "scripts/roco/agent-trajectories.mjs",
+        "scripts/roco/build-agent-trajectories.mjs",
+        "scripts/roco/verify-agent-trajectories.mjs",
+        "docs/roco/AGENT-TRAJECTORIES.md"
+      ],
+      "note": "4,536 条 / 12 个世界 / 7 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，判定器两个方向都被测过（正向 648/648、反向 13,656 个变体全挂）。缺的一半是**模型候选**：要 DeepSeek key，本机没有。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/agent-trajectories-v1.jsonl",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/agent-trajectories.mjs",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/build-agent-trajectories.mjs",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/verify-agent-trajectories.mjs",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/AGENT-TRAJECTORIES.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W4-03",
+      "title": "Qwen3-4B profiling",
+      "status": "NEEDS_HARDWARE",
       "evidence": [],
-      "note": "用户的硬边界：**不下载模型、不训练模型、不租云 GPU**。SFT 训练与 Qwen3-4B profiling 都落在里面。",
+      "note": "目标机器是 M5 Pro 48GB；本机不是，且用户不租云 GPU。属于硬件阻塞，不是产品决策阻塞。",
       "evidence_checked": [],
       "evidence_missing": []
     },
     {
-      "id": "W5",
-      "title": "Model gateway / shadow replay / 主动介入模型 / 陪练盲评",
-      "status": "BLOCKED_BY_BOUNDARY",
+      "id": "W4-04",
+      "title": "Qwen3-4B SFT",
+      "status": "NEEDS_HARDWARE",
       "evidence": [],
-      "note": "训练类任务同 W4 的边界；**陪练盲评需要真人评分**，不属于边界但同样做不到。",
+      "note": "同 W4-03；另外它依赖 W4-02 的模型候选那一半。",
       "evidence_checked": [],
       "evidence_missing": []
     },
     {
-      "id": "W6",
-      "title": "learned value / Battle PPO / LLM Agentic RL / 最终交付",
-      "status": "BLOCKED_BY_BOUNDARY",
+      "id": "W4-05",
+      "title": "同 Agent 回放门禁",
+      "status": "PARTIAL",
+      "evidence": [
+        "scripts/roco/verify-agent-trajectories.mjs",
+        "tests/evals/roco/agent-trajectories.test.js"
+      ],
+      "note": "门禁本身已经可用且自己被验证过（两个方向 + 漂移检查）。「固定 pipeline / 模型 / SFT」三条 arm 的对比要等有 key 才能真正跑。",
+      "evidence_checked": [
+        {
+          "path": "scripts/roco/verify-agent-trajectories.mjs",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/agent-trajectories.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W5-01",
+      "title": "Model gateway",
+      "status": "NOT_STARTED",
       "evidence": [],
-      "note": "全部依赖训练与真人数据，都落在「**不下载模型、不训练模型、不租云 GPU**」这条边界里；PPO / Agentic RL 属训练，最终交付依赖它们。",
+      "note": "未开工。它要连真实模型，和 W4-02 的模型候选同一前置。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W5-02",
+      "title": "Shadow replay",
+      "status": "NOT_STARTED",
+      "evidence": [],
+      "note": "未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W5-03",
+      "title": "主动介入规则评分",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/policy.js",
+        "src/coach/experience.js",
+        "tests/intervention.test.js"
+      ],
+      "note": "规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/policy.js",
+          "exists": true
+        },
+        {
+          "path": "src/coach/experience.js",
+          "exists": true
+        },
+        {
+          "path": "tests/intervention.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W5-04",
+      "title": "主动介入成本敏感分类器",
+      "status": "NOT_STARTED",
+      "evidence": [],
+      "note": "先建标签扩充 + 评测闭环（`scripts/roco/` 下还缺），再谈训练；硬门控不变。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W5-05",
+      "title": "陪练盲评",
+      "status": "NEEDS_HUMAN",
+      "evidence": [],
+      "note": "需要 3—5 位真人评分。这是外部阻塞，不是代码问题。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W6-01",
+      "title": "learned value",
+      "status": "NOT_STARTED",
+      "evidence": [],
+      "note": "未开工；依赖 W4-02 的候选数据。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W6-02",
+      "title": "Battle PPO",
+      "status": "NOT_STARTED",
+      "evidence": [],
+      "note": "未开工；属训练，且需要 W4-04 的底座。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W6-03",
+      "title": "LLM Agentic RL",
+      "status": "NOT_STARTED",
+      "evidence": [],
+      "note": "未开工；属训练，依赖 W5-01 的 gateway。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W6-04",
+      "title": "最终交付",
+      "status": "NOT_STARTED",
+      "evidence": [],
+      "note": "未开工；依赖 W6-01—03。",
       "evidence_checked": [],
       "evidence_missing": []
     }

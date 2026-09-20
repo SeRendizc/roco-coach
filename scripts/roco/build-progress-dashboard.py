@@ -37,6 +37,10 @@ DONE = "DONE"
 PARTIAL = "PARTIAL"
 NEEDS_HUMAN = "NEEDS_HUMAN"
 NOT_STARTED = "NOT_STARTED"
+NEEDS_HARDWARE = "NEEDS_HARDWARE"
+#: 旧的「不训练模型」边界已经被用户重写（见 docs/roadmap/DSH-EXECUTION-STATE.md §1.7）。
+#: 这个状态只保留给**真的**由边界挡住、且边界仍然有效的条目；目前没有条目再用它，
+#: 但枚举保留，免得历史报告里的取值变成「未知」。
 BLOCKED_BY_BOUNDARY = "BLOCKED_BY_BOUNDARY"
 
 
@@ -196,17 +200,54 @@ ITEMS: List[Dict[str, Any]] = [
      "note": "模型分只在**显式声明对手池**时给，门槛不过不加载、特征顺序不符不加载、"
              "没有模型不编概率；风险分支与伤害范围都上了页面。"
              "两次升级都过了同一个端到端演示。"},
-    # ── 旗舰版 Week 4—6（用户的硬边界内做不了）──────────────────────────
-    {"id": "W4", "title": "Agent SFT 数据与本地训练", "status": BLOCKED_BY_BOUNDARY,
-     "evidence": [], "note": "用户的硬边界：**不下载模型、不训练模型、不租云 GPU**。"
-                             "SFT 训练与 Qwen3-4B profiling 都落在里面。"},
-    {"id": "W5", "title": "Model gateway / shadow replay / 主动介入模型 / 陪练盲评",
-     "status": BLOCKED_BY_BOUNDARY, "evidence": [],
-     "note": "训练类任务同 W4 的边界；**陪练盲评需要真人评分**，不属于边界但同样做不到。"},
-    {"id": "W6", "title": "learned value / Battle PPO / LLM Agentic RL / 最终交付",
-     "status": BLOCKED_BY_BOUNDARY, "evidence": [],
-     "note": "全部依赖训练与真人数据，都落在「**不下载模型、不训练模型、不租云 GPU**」"
-             "这条边界里；PPO / Agentic RL 属训练，最终交付依赖它们。"},
+    # ── 旗舰版 Week 4—6 ──────────────────────────────────────────────────
+    #
+    # 这一段的边界在第 7 轮被用户改写：旧的「不训练模型」是**早期阶段边界**，
+    # 不是长期禁令。改写后的规则是：每个模型类模块都必须真的接进 Agent 并有分工，
+    # 否则不做；硬件不够的条目按 `NEEDS_HARDWARE` 记，不记成「边界挡住」。
+    {"id": "W4-01", "title": "固定 Agent 任务集", "status": DONE,
+     "evidence": ["tests/evals/agent-tasks-v1.jsonl", "scripts/roco/build-agent-tasks.py",
+                  "scripts/roco/verify-agent-tasks.py", "roco/tests/test_agent_tasks.py"],
+     "note": "288 条 / 8 类，按**家族、机制、表达模板**三重隔离切分；留出维度不进训练集，"
+             "每类在 train/val/test 三侧都有样本。判定器自检两个方向都要对。"},
+    {"id": "W4-02", "title": "构造 2,000—5,000 条工具轨迹", "status": PARTIAL,
+     "evidence": ["tests/evals/agent-trajectories-v1.jsonl",
+                  "scripts/roco/agent-trajectories.mjs",
+                  "scripts/roco/build-agent-trajectories.mjs",
+                  "scripts/roco/verify-agent-trajectories.mjs",
+                  "docs/roco/AGENT-TRAJECTORIES.md"],
+     "note": "4,536 条 / 12 个世界 / 7 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，"
+             "判定器两个方向都被测过（正向 648/648、反向 13,656 个变体全挂）。"
+             "缺的一半是**模型候选**：要 DeepSeek key，本机没有。"},
+    {"id": "W4-03", "title": "Qwen3-4B profiling", "status": NEEDS_HARDWARE,
+     "evidence": [], "note": "目标机器是 M5 Pro 48GB；本机不是，且用户不租云 GPU。"
+                             "属于硬件阻塞，不是产品决策阻塞。"},
+    {"id": "W4-04", "title": "Qwen3-4B SFT", "status": NEEDS_HARDWARE,
+     "evidence": [], "note": "同 W4-03；另外它依赖 W4-02 的模型候选那一半。"},
+    {"id": "W4-05", "title": "同 Agent 回放门禁", "status": PARTIAL,
+     "evidence": ["scripts/roco/verify-agent-trajectories.mjs",
+                  "tests/evals/roco/agent-trajectories.test.js"],
+     "note": "门禁本身已经可用且自己被验证过（两个方向 + 漂移检查）。"
+             "「固定 pipeline / 模型 / SFT」三条 arm 的对比要等有 key 才能真正跑。"},
+    {"id": "W5-01", "title": "Model gateway", "status": NOT_STARTED, "evidence": [],
+     "note": "未开工。它要连真实模型，和 W4-02 的模型候选同一前置。"},
+    {"id": "W5-02", "title": "Shadow replay", "status": NOT_STARTED, "evidence": [],
+     "note": "未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。"},
+    {"id": "W5-03", "title": "主动介入规则评分", "status": DONE,
+     "evidence": ["src/coach/policy.js", "src/coach/experience.js", "tests/intervention.test.js"],
+     "note": "规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。"},
+    {"id": "W5-04", "title": "主动介入成本敏感分类器", "status": NOT_STARTED, "evidence": [],
+     "note": "先建标签扩充 + 评测闭环（`scripts/roco/` 下还缺），再谈训练；硬门控不变。"},
+    {"id": "W5-05", "title": "陪练盲评", "status": NEEDS_HUMAN, "evidence": [],
+     "note": "需要 3—5 位真人评分。这是外部阻塞，不是代码问题。"},
+    {"id": "W6-01", "title": "learned value", "status": NOT_STARTED, "evidence": [],
+     "note": "未开工；依赖 W4-02 的候选数据。"},
+    {"id": "W6-02", "title": "Battle PPO", "status": NOT_STARTED, "evidence": [],
+     "note": "未开工；属训练，且需要 W4-04 的底座。"},
+    {"id": "W6-03", "title": "LLM Agentic RL", "status": NOT_STARTED, "evidence": [],
+     "note": "未开工；属训练，依赖 W5-01 的 gateway。"},
+    {"id": "W6-04", "title": "最终交付", "status": NOT_STARTED, "evidence": [],
+     "note": "未开工；依赖 W6-01—03。"},
 ]
 
 
@@ -239,7 +280,8 @@ def main() -> int:
         "important": [
             "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
             "`NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。",
-            "`BLOCKED_BY_BOUNDARY` 表示它落在用户明说的硬边界里（不训练模型、不租 GPU）。",
+            "`NEEDS_HARDWARE` 表示缺的是**特定硬件**（M5 Pro 48GB），不是决策。",
+            "`BLOCKED_BY_BOUNDARY` 只用于仍然有效的硬边界；旧的「不训练模型」在第 7 轮已被用户改写。",
             "这份台账不判「质量好不好」，只判「证据在不在」。",
         ],
         "counts": counts,
@@ -337,7 +379,8 @@ def write_doc(payload: Dict[str, Any]) -> None:
     p("   有它就能把 E03 的「已验证」那一半推进，并标定 MC-008/010/011。")
     p("   录入：`python3 scripts/roco/record-measurements.py --interactive`")
     p("2. **录屏**（F03 的第二项）：脚本 `docs/roco/mvp/DEMO-SCRIPT.md` 已备好。")
-    p("3. **是否解除「不训练模型」的边界**：解除才有 W4/W5/W6；不解除就只能停在这里。")
+    p("3. **一个 DeepSeek key**（或等价模型凭据）：W4-02 的「模型候选」那一半、"
+      "W4-05 的三条 arm 对比、W5-01 的 gateway 都要它。没有 key 时其余独立项继续做。")
     p("")
     os.makedirs(os.path.join(_ROOT, os.path.dirname(OUT_DOC)), exist_ok=True)
     with open(os.path.join(_ROOT, OUT_DOC), "w", encoding="utf-8") as fh:

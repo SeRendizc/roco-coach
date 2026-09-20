@@ -4,7 +4,8 @@
 
 - `DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。
 - `NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。
-- `BLOCKED_BY_BOUNDARY` 表示它落在用户明说的硬边界里（不训练模型、不租 GPU）。
+- `NEEDS_HARDWARE` 表示缺的是**特定硬件**（M5 Pro 48GB），不是决策。
+- `BLOCKED_BY_BOUNDARY` 只用于仍然有效的硬边界；旧的「不训练模型」在第 7 轮已被用户改写。
 - 这份台账不判「质量好不好」，只判「证据在不在」。
 
 ## 汇总
@@ -13,9 +14,11 @@
 
 | 状态 | 条数 |
 |---|---:|
-| `BLOCKED_BY_BOUNDARY` | 3 |
-| `DONE` | 33 |
-| `PARTIAL` | 1 |
+| `DONE` | 35 |
+| `NEEDS_HARDWARE` | 2 |
+| `NEEDS_HUMAN` | 1 |
+| `NOT_STARTED` | 7 |
+| `PARTIAL` | 3 |
 
 ## 逐项
 
@@ -55,9 +58,20 @@
 | W3-02 | 数据增量与阵容合法性 | `DONE` | `data/roco/lineup-legality.jsonl`、`docs/roco/LINEUP-LEGALITY.md` | 169 套逐条台账；结论是 **0 套可原样执行**（名册只 12 只、快照 622 只、140/169 来自 2026-04 早于 S4）。模拟池因此从自己的 12 只组出来。 |
 | W3-03 | 生成 1 万场以上轨迹 | `DONE` | `scripts/roco/build-trajectories.py`、`reports/roco/trajectories/manifest.json` | 12,000 局 / 234,058 transition；家族**先切分后生成**、三侧互不相交。91MB jsonl 不入库，靠 manifest 里的种子复现。 |
 | W3-04 | 升级工具（重训 evaluate_team / plan_actions 风险分支） | `DONE` | `roco/src/roco_env/team_model.py`、`roco/src/roco_env/planner.py`、`tests/roco-experience.test.js` | 模型分只在**显式声明对手池**时给，门槛不过不加载、特征顺序不符不加载、没有模型不编概率；风险分支与伤害范围都上了页面。两次升级都过了同一个端到端演示。 |
-| W4 | Agent SFT 数据与本地训练 | `BLOCKED_BY_BOUNDARY` | — | 用户的硬边界：**不下载模型、不训练模型、不租云 GPU**。SFT 训练与 Qwen3-4B profiling 都落在里面。 |
-| W5 | Model gateway / shadow replay / 主动介入模型 / 陪练盲评 | `BLOCKED_BY_BOUNDARY` | — | 训练类任务同 W4 的边界；**陪练盲评需要真人评分**，不属于边界但同样做不到。 |
-| W6 | learned value / Battle PPO / LLM Agentic RL / 最终交付 | `BLOCKED_BY_BOUNDARY` | — | 全部依赖训练与真人数据，都落在「**不下载模型、不训练模型、不租云 GPU**」这条边界里；PPO / Agentic RL 属训练，最终交付依赖它们。 |
+| W4-01 | 固定 Agent 任务集 | `DONE` | `tests/evals/agent-tasks-v1.jsonl`、`scripts/roco/build-agent-tasks.py`、`scripts/roco/verify-agent-tasks.py`、`roco/tests/test_agent_tasks.py` | 288 条 / 8 类，按**家族、机制、表达模板**三重隔离切分；留出维度不进训练集，每类在 train/val/test 三侧都有样本。判定器自检两个方向都要对。 |
+| W4-02 | 构造 2,000—5,000 条工具轨迹 | `PARTIAL` | `tests/evals/agent-trajectories-v1.jsonl`、`scripts/roco/agent-trajectories.mjs`、`scripts/roco/build-agent-trajectories.mjs`、`scripts/roco/verify-agent-trajectories.mjs`、`docs/roco/AGENT-TRAJECTORIES.md` | 4,536 条 / 12 个世界 / 7 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，判定器两个方向都被测过（正向 648/648、反向 13,656 个变体全挂）。缺的一半是**模型候选**：要 DeepSeek key，本机没有。 |
+| W4-03 | Qwen3-4B profiling | `NEEDS_HARDWARE` | — | 目标机器是 M5 Pro 48GB；本机不是，且用户不租云 GPU。属于硬件阻塞，不是产品决策阻塞。 |
+| W4-04 | Qwen3-4B SFT | `NEEDS_HARDWARE` | — | 同 W4-03；另外它依赖 W4-02 的模型候选那一半。 |
+| W4-05 | 同 Agent 回放门禁 | `PARTIAL` | `scripts/roco/verify-agent-trajectories.mjs`、`tests/evals/roco/agent-trajectories.test.js` | 门禁本身已经可用且自己被验证过（两个方向 + 漂移检查）。「固定 pipeline / 模型 / SFT」三条 arm 的对比要等有 key 才能真正跑。 |
+| W5-01 | Model gateway | `NOT_STARTED` | — | 未开工。它要连真实模型，和 W4-02 的模型候选同一前置。 |
+| W5-02 | Shadow replay | `NOT_STARTED` | — | 未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。 |
+| W5-03 | 主动介入规则评分 | `DONE` | `src/coach/policy.js`、`src/coach/experience.js`、`tests/intervention.test.js` | 规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。 |
+| W5-04 | 主动介入成本敏感分类器 | `NOT_STARTED` | — | 先建标签扩充 + 评测闭环（`scripts/roco/` 下还缺），再谈训练；硬门控不变。 |
+| W5-05 | 陪练盲评 | `NEEDS_HUMAN` | — | 需要 3—5 位真人评分。这是外部阻塞，不是代码问题。 |
+| W6-01 | learned value | `NOT_STARTED` | — | 未开工；依赖 W4-02 的候选数据。 |
+| W6-02 | Battle PPO | `NOT_STARTED` | — | 未开工；属训练，且需要 W4-04 的底座。 |
+| W6-03 | LLM Agentic RL | `NOT_STARTED` | — | 未开工；属训练，依赖 W5-01 的 gateway。 |
+| W6-04 | 最终交付 | `NOT_STARTED` | — | 未开工；依赖 W6-01—03。 |
 
 ## 证据路径检查
 
@@ -68,12 +82,30 @@
 - **E03 实现已验证效果原语**（`PARTIAL`）
   - **这一项只完成了一半，必须说清楚**：引擎侧对每条待验机制都有明确行为并登记成假设（30 条里 26 条），未知机制一律 fail closed；但「已验证」那一半需要游戏内实测，当前 **0 条通过**。实测入口与标定管线已建好，文件是空的。
   - **缺的是谁**：NEEDS_HUMAN：一次游戏内伤害实测（技能名 + 双方面板 + 属性关系 + 是否防御）
-- **W4 Agent SFT 数据与本地训练**（`BLOCKED_BY_BOUNDARY`）
-  - 用户的硬边界：**不下载模型、不训练模型、不租云 GPU**。SFT 训练与 Qwen3-4B profiling 都落在里面。
-- **W5 Model gateway / shadow replay / 主动介入模型 / 陪练盲评**（`BLOCKED_BY_BOUNDARY`）
-  - 训练类任务同 W4 的边界；**陪练盲评需要真人评分**，不属于边界但同样做不到。
-- **W6 learned value / Battle PPO / LLM Agentic RL / 最终交付**（`BLOCKED_BY_BOUNDARY`）
-  - 全部依赖训练与真人数据，都落在「**不下载模型、不训练模型、不租云 GPU**」这条边界里；PPO / Agentic RL 属训练，最终交付依赖它们。
+- **W4-02 构造 2,000—5,000 条工具轨迹**（`PARTIAL`）
+  - 4,536 条 / 12 个世界 / 7 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，判定器两个方向都被测过（正向 648/648、反向 13,656 个变体全挂）。缺的一半是**模型候选**：要 DeepSeek key，本机没有。
+- **W4-03 Qwen3-4B profiling**（`NEEDS_HARDWARE`）
+  - 目标机器是 M5 Pro 48GB；本机不是，且用户不租云 GPU。属于硬件阻塞，不是产品决策阻塞。
+- **W4-04 Qwen3-4B SFT**（`NEEDS_HARDWARE`）
+  - 同 W4-03；另外它依赖 W4-02 的模型候选那一半。
+- **W4-05 同 Agent 回放门禁**（`PARTIAL`）
+  - 门禁本身已经可用且自己被验证过（两个方向 + 漂移检查）。「固定 pipeline / 模型 / SFT」三条 arm 的对比要等有 key 才能真正跑。
+- **W5-01 Model gateway**（`NOT_STARTED`）
+  - 未开工。它要连真实模型，和 W4-02 的模型候选同一前置。
+- **W5-02 Shadow replay**（`NOT_STARTED`）
+  - 未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。
+- **W5-04 主动介入成本敏感分类器**（`NOT_STARTED`）
+  - 先建标签扩充 + 评测闭环（`scripts/roco/` 下还缺），再谈训练；硬门控不变。
+- **W5-05 陪练盲评**（`NEEDS_HUMAN`）
+  - 需要 3—5 位真人评分。这是外部阻塞，不是代码问题。
+- **W6-01 learned value**（`NOT_STARTED`）
+  - 未开工；依赖 W4-02 的候选数据。
+- **W6-02 Battle PPO**（`NOT_STARTED`）
+  - 未开工；属训练，且需要 W4-04 的底座。
+- **W6-03 LLM Agentic RL**（`NOT_STARTED`）
+  - 未开工；属训练，依赖 W5-01 的 gateway。
+- **W6-04 最终交付**（`NOT_STARTED`）
+  - 未开工；依赖 W6-01—03。
 
 ## planner 的三个基准（结论见 `docs/roco/BENCHMARKS.md`）
 
@@ -92,5 +124,5 @@
    有它就能把 E03 的「已验证」那一半推进，并标定 MC-008/010/011。
    录入：`python3 scripts/roco/record-measurements.py --interactive`
 2. **录屏**（F03 的第二项）：脚本 `docs/roco/mvp/DEMO-SCRIPT.md` 已备好。
-3. **是否解除「不训练模型」的边界**：解除才有 W4/W5/W6；不解除就只能停在这里。
+3. **一个 DeepSeek key**（或等价模型凭据）：W4-02 的「模型候选」那一半、W4-05 的三条 arm 对比、W5-01 的 gateway 都要它。没有 key 时其余独立项继续做。
 
