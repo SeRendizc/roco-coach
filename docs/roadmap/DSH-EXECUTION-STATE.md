@@ -599,9 +599,9 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `afca69a`（`feat(coach): redefine W5-04 on pre-decision observables and report both outcomes`）—— 已推送 |
+| HEAD | `349bd51`（`fix(coach): make the W5-04 layer actually engage on the live page path`）—— 已推送 |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
-| 验证 | Python **208**（1 skip）/ Node unit **463** / bridge 11 / toolbox-roco 17 / plan-e2e 10；demo-acceptance 16/16、浏览器 9/9；轨迹判定 `verdict=true`（结构 0 失败、回放 0 失败、漂移 0、反向对照 13,656/13,656）；本地模型 manifest 11/11 通过 |
+| 验证 | Python **208**（1 skip）/ Node unit **472** / bridge 11 / toolbox-roco 17 / plan-e2e 10；demo-acceptance 16/16、浏览器 9/9；轨迹判定 `verdict=true`（结构 0 失败、回放 0 失败、漂移 0、反向对照 13,656/13,656）；本地模型 manifest 11/11 通过 |
 | 日志 | `reports/roco/verification/round8..round13-*.log` |
 | 本轮**保留**的实验 | 无（本轮交付与实验分离，没有为刷指标改动过搜索或评分） |
 | 本轮**撤回/修正**的 | ① `skill_name` 参数键（工具不接受，任务不可完成）；② 判定器胜率判据整段扫描；③ 判定器冲突判据把「一致」判成「冲突」；④ 过期判据只卡正文；⑤ 换世界不清工具层状态版本导致串号；⑥ 给 `receiptSummary` 加注释时误删 `export`（测试全绿但生成器已不能跑） |
@@ -620,6 +620,7 @@ active goal 已按此重写（revision 2）。
 | 第 15 轮**结论：gate_failed** | G1 召回、G2 误报、G5 family 外通过；**G3 校准（ECE 0.1546 > 0.10）与 G4 阈值稳健未通过**。结构性原因：标签依赖**决策后**才有的分差，而特征只能用决策前的量，天花板本就低。**判定层不进入产品路径，保持默认关闭** | `reports/roco/intervention-model-report.json`、预注册文档 §8.1 |
 | 第 15 轮修的两个真缺陷 | ① 第一次训练误用决策后方可得的分差当特征（口径错误，重训并留痕）；② shadow 模式**真的改了行为**——`interventionScore` 只看 `layer.suppress` 没看 `layer.active` | 同上；`tests/evals/intervention-layer.test.js` 的 shadow 用例 |
 | 下一步（最高优先，不依赖外部条件） | **查清整局基准里的座位效应**（第 12 轮发现）：`greedy_damage` 的 player 座位配对差 **+0.250（p=0.002）**、enemy 座位 **−0.150（p=0.070）**。`step_joint` 是同时结算，所以不是「先手优势」；嫌疑是自驱动循环在补位顺序 / 合法动作枚举 / `PlannerPlayer` 持有的 state 视角上两侧不对称。**查清之前不得把座位效应写进任何产品结论** |
+| 下一步（不依赖外部条件） | **W5-04 剩余**：判定层已在真实路径生效（相对刻度），但「抑制 = 规则犯错」**没有被验证**——需要一次用**同义量**（枚举边际 vs 枚举边际）的对照，把「模型抑制的那几次规则是否真错」量出来。当前口径下不能声称这一点 |
 | 再下一步（不依赖外部条件） | **重做 W5-04 的标签口径**：把标签从「玩家随后会怎么选（决策后）」改成**纯决策前的观察量**（例如「风险 ≥ 0.8 或必须补位」＝规则里的 `decisive`）。这是**重新定义问题**，要重写预注册再跑；不能在失败之后回头改口径。改之前判定层保持默认关闭 |
 | 第 14 轮已交付（Mac） | 本地模型：manifest 可校验、一键 setup/start/healthcheck/stop、OpenAI-compatible 网关、feature flag 接入、21 项失败降级测试；实测首 token p50 ~214 ms、总 p50 ~363 ms、合法率 8/8。**待验**：与 DeepSeek 的质量对照（要 key）、人工审阅（要真人） |
 | 外部依赖（不影响上面继续做） | 一个 DeepSeek key（W4-02 的模型候选 / W4-05 三臂对比 / W5-01 gateway）、M5 Pro 48GB（W4-03/04）、3—5 位真人（W5-05）、一次游戏内实测（E03 已验证那一半）+ 录屏（F03） |
