@@ -88,7 +88,7 @@ const report={
  serverVerified:'the runner exited 2 unless /api/bootstrap reported configured=true; every row below is one real POST /api/coach',
  failures,
  completion:`${rows.length}/${CASES} pre-registered cases executed`,
- blocker:rows.length>=CASES?null:'The app server process on 127.0.0.1:8765 that held the DeepSeek API key in memory was terminated when the agent session was interrupted. The key is never written to disk (by design, see DEEPSEEK.md), so no further real calls could be made. The server was restarted (port was free, so no second instance), but it comes up configured=false and needs the user to re-enter the key at /connect.html.',
+ blocker:rows.length>=CASES?null:'The app server process on 127.0.0.1:8765 that held the DeepSeek API key in memory was terminated when the agent session was interrupted. The key is never written to disk (by design, see docs/DEEPSEEK.md), so no further real calls could be made. The server was restarted (port was free, so no second instance), but it comes up configured=false and needs the user to re-enter the key at /connect.html.',
  scope:'Real DeepSeek calls through the running app server. One request per case, no retries, no simulated provider. Ground truth for tool need was written per case before the run.',
  caseSetSize:CASES,executed:rows.length,
  caseSetLocation:'scripts/eval-live-s04.js (all 44 pre-registered cases with expect/why annotations)',

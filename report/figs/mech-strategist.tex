@@ -1,28 +1,28 @@
 % 军师机制图（放进 2.1 军师小节）。图上每一步的出处：
-%   当前局面        app.js 的 matchContext() → buildContext()，拿到的是这一回合的双方快照
-%   枚举双方合法行动 engine.js 的 legalActions(g,side)，rankEnemyActions 里两侧各枚举一次
-%   同一结算器算分   engine.js 的 rankEnemyActions() → resolveTurn(...,{simulation:true})；
-%                   同速时 tieFirst:'player' 与 'enemy' 各跑一遍再取平均（engine.js 第 186 行）
-%   要不要开口       coach/experience.js 的 strategistTrigger()：fall / mistake / hesitation / dwell
-%                   四种情形，门控是 STRATEGIST_LIMITS，线上竞技由 coach/policy.js 的 isLiveMatch 判定
-%   讲成一句话       app.js 的 updateCoach() → requestCoach({role:'strategist'}) → coach/runtime.js 的
+%   当前局面        src/client/app.js 的 matchContext() → buildContext()，拿到的是这一回合的双方快照
+%   枚举双方合法行动 src/game/engine.js 的 legalActions(g,side)，rankEnemyActions 里两侧各枚举一次
+%   同一结算器算分   src/game/engine.js 的 rankEnemyActions() → resolveTurn(...,{simulation:true})；
+%                   同速时 tieFirst:'player' 与 'enemy' 各跑一遍再取平均（src/game/engine.js 第 186 行）
+%   要不要开口       src/coach/experience.js 的 strategistTrigger()：fall / mistake / hesitation / dwell
+%                   四种情形，门控是 STRATEGIST_LIMITS，线上竞技由 src/coach/policy.js 的 isLiveMatch 判定
+%   讲成一句话       src/client/app.js 的 updateCoach() → requestCoach({role:'strategist'}) → src/coach/runtime.js 的
 %                   runCoach() → provider.generate；模型负责理解这一问、决定怎么组织、写这一句，
-%                   但算分与合法行动来自引擎。没连上模型或无合法调用可用时，用 experience.js 的本地模板兜底
-%   展开给依据       app.js 第 771 行的「计算依据」details，条目来自 coach/strategist.js 的 evidence
+%                   但算分与合法行动来自引擎。没连上模型或无合法调用可用时，用 src/coach/experience.js 的本地模板兜底
+%   展开给依据       src/client/app.js 第 771 行的「计算依据」details，条目来自 src/coach/strategist.js 的 evidence
 \begin{figure}[H]\centering
 \begin{tikzpicture}[font=\scriptsize]
-\node[mbox] (a1) {\mbody{当前局面}{app.js}{{\ttfamily matchContext()}}};
+\node[mbox] (a1) {\mbody{当前局面}{src/client/app.js}{{\ttfamily matchContext()}}};
 \node[mbox,right=8pt of a1.north east,anchor=north west] (a2)
-  {\mbody{枚举双方合法行动}{engine.js}{{\ttfamily legalActions()} 两侧各一次}};
+  {\mbody{枚举双方合法行动}{src/game/engine.js}{{\ttfamily legalActions()} 两侧各一次}};
 \node[mbox,right=8pt of a2.north east,anchor=north west] (a3)
-  {\mbody{同一结算器算分}{engine.js}{{\ttfamily resolveTurn()} 两种先手序各跑一遍}};
+  {\mbody{同一结算器算分}{src/game/engine.js}{{\ttfamily resolveTurn()} 两种先手序各跑一遍}};
 \draw[marr] (a1)--(a2); \draw[marr] (a2)--(a3);
 \node[mbox,anchor=north west] (b1) at ([yshift=-26pt]a1.south west)
-  {\mbody{要不要开口}{experience.js}{{\ttfamily strategistTrigger()} 四种情形}};
+  {\mbody{要不要开口}{src/coach/experience.js}{{\ttfamily strategistTrigger()} 四种情形}};
 \node[mbox,right=8pt of b1.north east,anchor=north west] (b2)
-  {\mbody{讲成一句话}{app.js}{{\ttfamily requestCoach()} 模型组织并讲解}};
+  {\mbody{讲成一句话}{src/client/app.js}{{\ttfamily requestCoach()} 模型组织并讲解}};
 \node[mbox,right=8pt of b2.north east,anchor=north west] (b3)
-  {\mbody{展开给依据}{app.js}{{\ttfamily evidence} 全是引擎材料}};
+  {\mbody{展开给依据}{src/client/app.js}{{\ttfamily evidence} 全是引擎材料}};
 \draw[marr] (b1)--(b2); \draw[marr] (b2)--(b3);
 % 上一行算完，才轮到下一行说：折线只画在行间空白里，不穿任何框。
 \draw[marr,dashed] (a3.south) -- ++(0,-10pt) -| (b1.north);
@@ -30,7 +30,7 @@
 \node[font=\tiny,anchor=east] at ([xshift=-4pt]b1.west) {说};
 \node[mnote,text width=394pt,anchor=north west] at ([yshift=-9pt]b1.south west)
  {四种情形：伙伴倒下、必须补位（补位不花回合）· 玩家在两个选项之间来回看 · 这一手真的造成了后果，而它明显偏离当时更划算的做法 · 玩家停在一个选项上不动，而它不是当前最划算的那个。\\[1pt]
-  门控：每局最多 3 次、每种情形各 1 次、两次之间至少 60 秒、同一回合只开口一次；提示档设成安静、点掉任意一条、或线上竞技，以上全部让路（{\ttfamily policy.js} 的 {\ttfamily isLiveMatch}）。};
+  门控：每局最多 3 次、每种情形各 1 次、两次之间至少 60 秒、同一回合只开口一次；提示档设成安静、点掉任意一条、或线上竞技，以上全部让路（{\ttfamily src/coach/policy.js} 的 {\ttfamily isLiveMatch}）。};
 \end{tikzpicture}
 \shotcaption{军师的机制：先把这一回合算完，再决定说不说、怎么说\label{fig:mech-strategist}}
 \end{figure}

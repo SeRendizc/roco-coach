@@ -652,7 +652,7 @@
 
 - **三份版本号互相独立**：页面里的 UI 版本、进程内的 `runtimeVersion`、以及游戏规则 `version`。任何一份落后，表现都是「功能没生效」，但排查方向完全不同。
 - **「没生效」和「没实现」从界面上看是一样的。**用户没法区分「这个功能还没做」和「这个功能做了但服务是旧的」，只能得出「你这改动真改了吗」。
-- **不重启是理性选择。**密钥只在进程内存里（`DEEPSEEK.md`：密钥和私钥只在当前服务进程内存中，不写入磁盘），重启就要重新录入。所以「重启一下」不是一个免费的调试动作，而是有成本的。
+- **不重启是理性选择。**密钥只在进程内存里（`docs/DEEPSEEK.md`：密钥和私钥只在当前服务进程内存中，不写入磁盘），重启就要重新录入。所以「重启一下」不是一个免费的调试动作，而是有成本的。
 - **混合状态让验收结论失效。**在一半新一半旧的进程上跑的验收，既不能代表旧版也不能代表新版。
 
 ### 方案
@@ -751,7 +751,7 @@ v0.10 的五条真实 DeepSeek 调用中，有一条把游戏里的道具名说�
 
 - **名称约束补上之后**当时**尚未复验。`docs/EXPERIMENTS.md:54` 原文：「已补名称约束，仍需复验。」**所以「名称漂移已经修好」这个说法在当时证据下不成立。** **2026-09-17 晚复核：已复验**——`tests/evals/agent.test.js`「item-name drift is rejected even when every number is grounded」断言这条拦截生效；第三轮 44 条真实调用（`reports/live-model-eval.json`）的 `badAnswers` 里**没有任何 `item-name-drift`**。同类的因果语义也补了「an action recorded as cancelled cannot be described as having hit」。
 - **`docs/CHECKLIST.md` 的 A05（输出校验）当时仍未勾**，原因是「数字/引用校验仍漏名称或因果语义错误」。名称问题正是这条未勾的实例之一。**2026-09-17 晚复核：A05 已勾选**——注释写明「本轮补上最后两块——道具名称漂移（`item-name-drift`）与因果语义（`causal-cancelled-action`）」。
-- **校验的自我描述写得很清楚**：`scope: 'Narrow numeric/citation/certainty guard; not a proof of all natural language correctness'`。`DEEPSEEK.md:35` 也写「语言模型输出并未逐句自动验证，事实依据可以展开核对，不能宣称所有生成建议已被程序证明」。
+- **校验的自我描述写得很清楚**：`scope: 'Narrow numeric/citation/certainty guard; not a proof of all natural language correctness'`。`docs/DEEPSEEK.md:35` 也写「语言模型输出并未逐句自动验证，事实依据可以展开核对，不能宣称所有生成建议已被程序证明」。
 - **因果语义错误完全没有校验。**上面这条回答里「还剩 3 瓶回复药」是对的，但它同时暗示了「药没用完是问题」——这个因果判断（该不该吃药、那几回合吃药是否更好）**没有任何自动检查覆盖**。`docs/reviews/2026-09-17-live-acceptance.md:22`：「语义检查仍可能漏掉错误因果和不合理建议。」
 - **同一批调用的另一条也有解释质量问题**：`weather-tools` 一条在 `docs/EXPERIMENTS.md:54` 中被记为「天气回答没有充分解释速度顺序，属于解释质量不足」。**解释质量目前只能人工逐条阅读**，没有自动指标。
 - **样本量：5 条。**`docs/CHECKLIST.md` 的 W08 与 S04 两行都曾写明「独立质量评测 S04 仍未完成」（**2026-09-17 晚复核：S04 已勾选**，三轮共 132 次真实调用）；但**本节这一条依据的具体样本仍然只有 5 条**，本文关于「模型回答准确率」的陈述都**不成立**。

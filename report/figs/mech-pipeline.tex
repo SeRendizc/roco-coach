@@ -36,20 +36,23 @@
 \begin{tikzpicture}[
   font=\scriptsize,
   >={Latex[length=2.2pt,width=2.2pt]},
-  prow/.style={draw=black!55,rounded corners=2.5pt,minimum width=196pt,minimum height=16pt},
+  % 196pt 装不下整理后的完整路径：实测第 1 行剩 61.3pt 而 src/client/app.js 需 68.0pt、
+  % 第 4 行剩 69.7pt 而 src/coach/toolbox.js 需 80.0pt，会压到机制名。
+  % 加宽到 232pt 后 7 行全部放得下（本图在 453pt 文字栏内，几何上安全）。
+  prow/.style={draw=black!55,rounded corners=2.5pt,minimum width=232pt,minimum height=16pt},
   pterm/.style={prow,fill=black!8},
   pnum/.style={circle,draw=black!45,minimum size=11pt,inner sep=0pt,
                font=\scriptsize,text=black!70},
   flow/.style={->,draw=black!70,line width=0.5pt}]
 
   % 头尾两框加浅底纹：第一框是入口（谁触发），第七框是出口（记忆落地）
-  \prow{1}{0}    {pterm}{玩家提问 / 自动触发}{app.js}
-  \prow{2}{-0.8} {prow} {硬策略门控}          {policy.js}
-  \prow{3}{-1.6} {prow} {有界工具循环}        {runtime.js}
-  \prow{4}{-2.4} {prow} {引擎 / RAG 回执}     {toolbox.js}
-  \prow{5}{-3.2} {prow} {一致性校验}          {runtime.js}
-  \prow{6}{-4.0} {prow} {有界输出 / 沉默}     {runtime.js}
-  \prow{7}{-4.8} {pterm}{事件记忆与反思}      {memory.js}
+  \prow{1}{0}    {pterm}{玩家提问 / 自动触发}{src/client/app.js}
+  \prow{2}{-0.8} {prow} {硬策略门控}          {src/coach/policy.js}
+  \prow{3}{-1.6} {prow} {有界工具循环}        {src/coach/runtime.js}
+  \prow{4}{-2.4} {prow} {引擎 / RAG 回执}     {src/coach/toolbox.js}
+  \prow{5}{-3.2} {prow} {一致性校验}          {src/coach/runtime.js}
+  \prow{6}{-4.0} {prow} {有界输出 / 沉默}     {src/coach/runtime.js}
+  \prow{7}{-4.8} {pterm}{事件记忆与反思}      {src/coach/memory.js}
 
   % 主链：七步一路向下，每一步只有一个向下的箭头，六个箭头等长、都落在框的正中
   \foreach \a/\b in {s1/s2,s2/s3,s3/s4,s4/s5,s5/s6,s6/s7} {\draw[flow] (\a) -- (\b);}

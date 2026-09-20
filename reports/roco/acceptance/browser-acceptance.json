@@ -1,6 +1,6 @@
 {
-  "started_at": "2026-09-20T17:44:41.015Z",
-  "base": "http://127.0.0.1:62928/",
+  "started_at": "2026-09-20T17:51:37.902Z",
+  "base": "http://127.0.0.1:64062/",
   "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   "checks": [
     {
@@ -110,7 +110,7 @@
       "name": "对局能打到出现结果面板",
       "pass": true,
       "detail": {
-        "strikes": 15,
+        "strikes": 14,
         "ended": {
           "resultVisible": true,
           "text": "本场失利全队经验 +12 · 训练点 +1 · 返回营地继续培养"
@@ -122,7 +122,7 @@
       "pass": true,
       "detail": {
         "maxStuck": 0,
-        "strikes": 15
+        "strikes": 14
       }
     },
     {
@@ -141,7 +141,7 @@
     "03-battle.png",
     "04-battle-end.png"
   ],
-  "finished_at": "2026-09-20T17:45:01.198Z",
+  "finished_at": "2026-09-20T17:51:57.115Z",
   "summary": {
     "total": 9,
     "pass": 9,

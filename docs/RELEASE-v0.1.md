@@ -155,7 +155,7 @@ Python 环境或模型缺失时**不会报错中断**：语义检索自动退回
 
 项目下一阶段的唯一记录入口是
 [`docs/roadmap/DSH-EXECUTION-STATE.md`](https://github.com/SeRendizc/roco-coach/blob/master/docs/roadmap/DSH-EXECUTION-STATE.md)，
-以及 [`LEGACY.md`](https://github.com/SeRendizc/roco-coach/blob/master/LEGACY.md)。
+以及 [`LEGACY.md`](https://github.com/SeRendizc/roco-coach/blob/master/docs/LEGACY.md)。
 
 本项目正在继续升级为《洛克王国：世界》**手游**内嵌 Coach「小芽 2.0」，
 但**数据层（M0/M1）尚未接管这个可玩 Demo 的 UI 与引擎**——

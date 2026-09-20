@@ -1,36 +1,36 @@
 % 老师机制图（放进 2.3 老师小节）。图上每一步的出处：
-%   四个入口   长停留：coach/experience.js 的 dwellIntervention()（与军师共用一份局内记账，
-%              「停的是不是最优解」决定谁开口）；回合结束：experience.js 的 feedback()；
-%              整局结束：app.js 的 showMatchReview()；玩家提问：coach/runtime.js 的 runCoach() 路由
-%   只取回合开始前 coach/teacher.js 的 compareTurnAlternatives()：用 structuredClone(h.before)
+%   四个入口   长停留：src/coach/experience.js 的 dwellIntervention()（与军师共用一份局内记账，
+%              「停的是不是最优解」决定谁开口）；回合结束：src/coach/experience.js 的 feedback()；
+%              整局结束：src/client/app.js 的 showMatchReview()；玩家提问：src/coach/runtime.js 的 runCoach() 路由
+%   只取回合开始前 src/coach/teacher.js 的 compareTurnAlternatives()：用 structuredClone(h.before)
 %              重建局面，不看对手实际打出的那一招
 %   四个出口   讲解 skillLesson()、复盘 reviewMatch()/summarizeMatch()/analyzeTurn()、
-%              小测 makeQuiz()、培养建议 teacher()，全部在 coach/teacher.js
-%   教学账本   coach/memory.js 的 markTaught() 与 markUnlearned()：memory.lessons 记讲过哪一课、
+%              小测 makeQuiz()、培养建议 teacher()，全部在 src/coach/teacher.js
+%   教学账本   src/coach/memory.js 的 markTaught() 与 markUnlearned()：memory.lessons 记讲过哪一课、
 %              memory.journal 记每次独立行动、memory.reflections 记掌握判断
 %   什么时候重新教 teachingPlan() 的 RELEARN（至少 3 次独立行动、合理率低于一半），
 %              军师在局内看到同类失误时由 observeStruggle() 把这一课标回未掌握
 \begin{figure}[H]\centering
 \begin{tikzpicture}[font=\scriptsize]
-\node[mbox] (a1) {\mbody{四个入口}{experience.js}{{\ttfamily dwellIntervention()} 长停留}};
+\node[mbox] (a1) {\mbody{四个入口}{src/coach/experience.js}{{\ttfamily dwellIntervention()} 长停留}};
 \node[mbox,right=8pt of a1.north east,anchor=north west] (a2)
-  {\mbody{只看回合开始前}{teacher.js}{{\ttfamily compareTurnAlternatives()}}};
+  {\mbody{只看回合开始前}{src/coach/teacher.js}{{\ttfamily compareTurnAlternatives()}}};
 \node[mbox,right=8pt of a2.north east,anchor=north west] (a3)
-  {\mbody{四个出口}{teacher.js}{{\ttfamily skillLesson() · makeQuiz()}}};
+  {\mbody{四个出口}{src/coach/teacher.js}{{\ttfamily skillLesson() · makeQuiz()}}};
 \draw[marr] (a1)--(a2); \draw[marr] (a2)--(a3);
 \node[mbox,anchor=north west] (b1) at ([yshift=-26pt]a1.south west)
-  {\mbody{教学账本}{memory.js}{{\ttfamily markTaught() · markUnlearned()}}};
+  {\mbody{教学账本}{src/coach/memory.js}{{\ttfamily markTaught() · markUnlearned()}}};
 \node[mbox,right=8pt of b1.north east,anchor=north west] (b2)
-  {\mbody{什么时候重新教}{memory.js}{{\ttfamily teachingPlan() · observeStruggle()}}};
+  {\mbody{什么时候重新教}{src/coach/memory.js}{{\ttfamily teachingPlan() · observeStruggle()}}};
 \node[mbox,right=8pt of b2.north east,anchor=north west] (b3)
-  {\mbody{只数独立行动}{memory.js}{{\ttfamily transferAssessment()}}};
+  {\mbody{只数独立行动}{src/coach/memory.js}{{\ttfamily transferAssessment()}}};
 \draw[marr] (b1)--(b2); \draw[marr] (b2)--(b3);
 % 讲完就记账，记完决定下次还讲不讲：折线画在行间空白里。
 \draw[marr,dashed] (a3.south) -- ++(0,-10pt) -| (b1.north);
 \node[font=\tiny,anchor=east] at ([xshift=-4pt]a1.west) {讲什么};
 \node[font=\tiny,anchor=east] at ([xshift=-4pt]b1.west) {怎么记};
 \node[mnote,text width=394pt,anchor=north west] at ([yshift=-9pt]b1.south west)
- {四个入口：长停留（{\ttfamily dwellIntervention}，讲解与军师共用一份局内记账）· 回合结束（{\ttfamily feedback}）· 整局结束（{\ttfamily app.js} 的 {\ttfamily showMatchReview}）· 玩家提问（{\ttfamily runCoach} 的路由）。\\[1pt]
+ {四个入口：长停留（{\ttfamily dwellIntervention}，讲解与军师共用一份局内记账）· 回合结束（{\ttfamily feedback}）· 整局结束（{\ttfamily src/client/app.js} 的 {\ttfamily showMatchReview}）· 玩家提问（{\ttfamily runCoach} 的路由）。\\[1pt]
   四个出口：讲解 {\ttfamily skillLesson()} 只讲玩家停住的那一招，最后一句是「出不出它由你决定」· 复盘 {\ttfamily reviewMatch()} 与 {\ttfamily summarizeMatch()} 挑出最多三个关键回合 · 小测 {\ttfamily makeQuiz()} 按玩家自己的面板出变式题 · 培养建议 {\ttfamily teacher()} 只摊三项数值，不替玩家加点。\\[1pt]
   重新教的条件：这一课教过、之后至少 3 次独立行动里合理的不到一半（{\ttfamily transferAssessment} 只数没被提示的行动）；重讲一次后这个标记就消费掉，再要重讲得等新出现的独立失误。};
 \end{tikzpicture}

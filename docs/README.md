@@ -4,6 +4,8 @@
 
 优先阅读：
 
+- [目录结构与约定](STRUCTURE.md) ← **新文件该放哪看这份**
+
 - [当前状态](IMPLEMENTATION-STATUS.md)
 - [逐项清单](CHECKLIST.md)
 - [演示与验收](DEMO-ACCEPTANCE.md)

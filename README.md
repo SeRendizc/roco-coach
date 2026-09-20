@@ -18,7 +18,7 @@
 
 它自动取出一份 v0.1 检出、挑空闲端口、起服务并打开浏览器。
 不需要 Python、不需要下载模型、不需要 API Key。停止用 `./run-v0.1.sh --stop`。
-详见 [`LEGACY.md`](LEGACY.md)。
+详见 [`LEGACY.md`](docs/LEGACY.md)。
 
 **在当前分支上开发/试跑 `master`：**
 
@@ -122,7 +122,12 @@ npm run roco:acceptance   # 9 项真实浏览器验收（含 4 张截图）
 
 ## 目录
 
+代码按 `src/` 分层，测试在 `tests/`，约定与「新文件该放哪」见 **`docs/STRUCTURE.md`**。
+顶层只有入口与配置，不放实现代码（这条有测试守着）。
+
+- **`docs/STRUCTURE.md`** — 目录结构与约定：新文件该放哪、为什么不那样做
 - **`output/pdf/xiaoya-coach-report.pdf`** — 实施与实验报告（页数以构建产物为准，建议先看这个）
+- `docs/LEGACY.md` — 版本、tag，以及「旧代码几个 G」的澄清
 - `docs/CHECKLIST.md` — 逐项完成状态与验收证据
 - `docs/IMPLEMENTATION-STATUS.md` — 当前能力、运行版本与限制
 - `docs/DEMO-ACCEPTANCE.md` — 普通游玩、静默、条件提醒、异步与公平性演示
