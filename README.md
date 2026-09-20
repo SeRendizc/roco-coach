@@ -26,6 +26,47 @@ npm test           # 全量自动测试，约一分钟；项数以实际输出�
 ./scripts/start.sh              # 以后直接启动，自动读取
 ```
 
+> **`npm start` 现在跑的还是上面这个自创宠物 Demo。**
+> 「小芽 2.0」的手游规则域目前只做到数据层（M0/M1），**没有接管默认 UI**，
+> 所以启动方式、端口、玩法都和以前完全一样。见下方「小芽 2.0：当前进度」。
+
+---
+
+## 小芽 2.0：当前进度
+
+项目正在从自创宠物 Demo 升级为《洛克王国：世界》**手游**内嵌主动 Coach。
+当前只完成了 **M0（基线 + 仓库审计）** 与 **M1（数据快照）**，
+**没有修改任何运行代码**——`engine.js`、`content.js`、`coach/*`、前端与全部既有测试
+与本轮开始前的 commit 逐字节一致。
+
+已完成的是**可信的数据地基**：
+
+| 产物 | 内容 | 入口 |
+|---|---|---|
+| 来源与许可台账 | 3 份上游快照按 revision + SHA256 冻结；许可与再分发等级 | `data/roco/sources.yaml`、`docs/roco/LICENSE-MATRIX.md` |
+| 规范化数据 | 12 只目标精灵、824 条技能、312 张学习表、120 组属性相性 | `data/roco/normalized/roco-world-s4-2026-09-10/` |
+| 仓库审计 | 逐模块 KEEP / ADAPT / RETIRE / MISSING | `docs/roco/M0-REPO-AUDIT.md` |
+| 冲突记录 | 26 处跨来源差异，全部分类，未解决 0 | `docs/roco/DATA-CONFLICTS.md` |
+| 支持矩阵 | 12 只精灵的完整度、候选配招、缺口 | `docs/roco/PET-SUPPORT-MATRIX.md` |
+| microcase 计划 | 21 条，供下一轮规则引擎实现 | `docs/roco/MICROCASE-PLAN.md` |
+| 验收 checklist | 逐项打勾与证据 | `docs/roco/M0-M1-ACCEPTANCE.md` |
+
+**12 只精灵当前支持等级一律是 `KNOWLEDGE_ONLY`**：本轮没有实现任何效果原语，
+824 条技能的 `effect_support` 全是 `unsupported`。字段齐全是数据完整度，
+不等于机制可模拟——这两件事在文档里被强制分开。
+
+复现数据管线（不联网、不执行第三方代码）：
+
+```sh
+npm run roco:pipeline     # 解析校验 → 交叉核验 → 导入 → 矩阵 → microcase → 文档
+npm run test:roco         # 15 项数据域验收（直接与原始 Lua 对拍）
+npm run roco:acceptance   # 9 项真实浏览器验收（含 4 张截图）
+```
+
+> 注：`data/roco/raw/extracted/` 不入库。新克隆的仓库需要先从
+> `data/roco/raw/*.tar.gz` 解压（归档本身已入库且带 SHA256），
+> 否则数据域验收测试会**显式 skip 并说明原因**，不会假装通过。
+
 ---
 
 ## 三种角色
