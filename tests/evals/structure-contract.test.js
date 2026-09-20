@@ -71,6 +71,58 @@ test('结构契约：index.html 引用的每个本地模块都真实存在', () 
     `index.html 的 JS 入口应当是 ${ENTRY}，实际 ${assets.filter((x) => x.endsWith('.js'))}`);
 });
 
+test('结构契约：浏览器模块图里不许出现 node:*（静态 import）', () => {
+  // 这条是第 24 轮那次事故的守卫。那次 `experience.js` 接到一个顶层
+  // `import {readFileSync} from 'node:fs'` 的模块上，浏览器解不出 `node:*`，
+  // 整条 import 链**静默**断掉：标题与按钮都在，但开不了局。
+  // `test:unit` 全绿（Node 里 node:fs 存在），浏览器验收从 9/9 掉到 3/9。
+  //
+  // 这里把「不许在浏览器图里静态 import node:*」变成结构契约：
+  // 未来任何人再引入一次，这里直接红，而不是等浏览器验收才发现。
+  //
+  // 允许**动态** import（`await import('node:fs')`）：它在浏览器里根本不会被执行，
+  // 也不会让模块解析失败。所以只扫静态 import 语句。
+  // 覆盖**每一个页面**的模块图，而不是只有主入口：
+  // `/roco.html` 是另一条入口（第 22 轮那次事故就是它整页白屏）。
+  const entries = [...new Set([ENTRY, ...[...serverBrowserModules()].filter((x) => x.endsWith('.js'))])];
+  const offenders = [];
+  const checked = new Set();
+  for (const entry of entries) {
+    for (const rel of browserModules(entry)) {
+      if (checked.has(rel)) continue;
+      checked.add(rel);
+      let src;
+      try { src = readFileSync(join(ROOT, rel), 'utf8'); } catch { continue; }
+      for (const m of src.matchAll(/(?:^|\n)\s*import\s[^'"]*['"]([^'"]+)['"]/g)) {
+        if (m[1].startsWith('node:') || ['fs', 'path', 'url', 'child_process', 'crypto', 'os'].includes(m[1])) {
+          offenders.push(`${rel} 静态 import 了 ${m[1]}`);
+        }
+      }
+    }
+  }
+  assert.ok(checked.size >= 8, `扫到的模块太少（${checked.size}），守卫可能失效`);
+  assert.deepEqual(offenders, [],
+    `浏览器模块图里出现了 Node 内置模块（会让页面静默开不了局）：\n${offenders.join('\n')}`);
+});
+
+test('反证：扫描逻辑真的能抓到静态 node:*（否则上面的守卫是空的）', () => {
+  // 直接对扫描逻辑做对照：同一段代码，一个含违规、一个不含。
+  const scan = (src) => [...src.matchAll(/(?:^|\n)\s*import\s[^'"]*['"]([^'"]+)['"]/g)]
+    .map((m) => m[1])
+    .filter((spec) => spec.startsWith('node:')
+      || ['fs', 'path', 'url', 'child_process', 'crypto', 'os'].includes(spec));
+  assert.deepEqual(scan("import {readFileSync} from 'node:fs';\n"), ['node:fs'], '静态 node:fs 必须被抓到');
+  assert.deepEqual(scan("import {join} from 'node:path';\n"), ['node:path']);
+  assert.deepEqual(scan("import './x.js';\n"), [], '相对 import 不算违规');
+  // 动态 import 是允许的：浏览器根本不会执行它，也不会解析失败
+  assert.deepEqual(scan("const fs = await import('node:fs');\n"), [], '动态 import 不算违规');
+  // 现在仓库里**已经**有一处动态 import node:fs（intervention-model.js），
+  // 它必须不被抓——否则这次守卫会把正确写法判成违规。
+  const live = readFileSync(join(ROOT, 'src/coach/intervention-model.js'), 'utf8');
+  assert.deepEqual(scan(live), [], 'intervention-model.js 用的是动态 import，不该被判违规');
+  assert.match(live, /await Promise\.all\(\[\s*import\('node:fs'\)/, '它应当仍然是动态 import');
+});
+
 test('结构契约：入口模块图里每个相对 import 都解析到真实文件', () => {
   const mods = browserModules(ENTRY);
   assert.ok(mods.size >= 8, `模块图应当有一定规模，实际 ${mods.size}`);

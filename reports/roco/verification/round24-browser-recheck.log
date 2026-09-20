@@ -18,3 +18,15 @@
 Ran 208 tests in 24.405s
 
 OK (skipped=1)
+=== 第 24 轮收尾全量 @ 2026-09-20T23:09:59Z ===
+ℹ tests 486
+ℹ pass 486
+ℹ fail 0
+ℹ pass 11
+ℹ fail 0
+ℹ pass 17
+ℹ fail 0
+ℹ pass 10
+ℹ fail 0
+traj True
+manifest 校验通过

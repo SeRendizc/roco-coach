@@ -1,0 +1,10 @@
+=== 第 25 轮验证 @ 2026-09-20T23:10:59Z ===
+Ran 208 tests in 24.537s
+
+OK (skipped=1)
+ℹ tests 488
+ℹ pass 488
+ℹ fail 0
+--- 浏览器/演示验收
+[acceptance] checks 9/9 pass
+[demo-acceptance] 结果：16 通过 / 0 失败；报告见 reports/roco/demo-acceptance/
