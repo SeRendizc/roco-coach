@@ -1,6 +1,7 @@
 {
   "generated_by": "scripts/roco/train-intervention-model.py",
   "preregistration": "docs/roco/W5-04-INTERVENTION-GATE-V2.md",
+  "decision_margin_threshold": 0.146532,
   "criteria": [
     "H1_recall_floor",
     "H2_false_positive_ceiling",

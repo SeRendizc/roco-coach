@@ -138,7 +138,28 @@ export function interventionModelDecision(features = {}, {model = null, mode = i
     return {...base, active: false, suppress: false, probability: null, threshold,
       reason: `feature-mismatch:${error.message}`};
   }
-  const suppress = probability < threshold;
+
+  // 判定口径：**优先用可解释的边际量刻度**，sigmoid 只作诊断量。
+  //
+  // 为什么不是直接比 sigmoid 阈值：这个模型在可分数据上系数很大，
+  // 运行时边际量 0.01 就能把概率打到 1.0（第 21 轮实测：40 个运行时形状的输入上
+  // 概率**全部是 1.000**，抑制一次都没触发）。概率饱和属于实现缺陷，
+  // 但把 `C` 调小去治好它会把召回从 0.900 压到 0.675、ECE 从 0.047 抬到 0.120
+  //（三条判据挂掉）——用一个更差的模型换更好看的行为，不划算。
+  //
+  // 所以改成：边际量低于**训练侧分布的 75 分位**时判定「这一手咬得紧」→ 抑制。
+  // 这个刻度随模型文件一起落盘（`decision_margin_threshold`），是可解释的、可复算的；
+  // `planner_margin_norm` 恰好就是按同一个刻度归一化的，所以两种口径同源。
+  const marginScale = Number(model.decision_margin_threshold);
+  // 注意 `Number(null) === 0`：直接把缺失值交给 `Number` 会得到一个**假的 0 边际量**，
+  // 于是「没有边际量」被当成「咬得极紧」→ 永远抑制。
+  // 必须先判 `typeof === 'number'`，缺失才走 sigmoid 兜底。
+  const rawMargin = features.plannerMargin;
+  const margin = typeof rawMargin === 'number' ? rawMargin : NaN;
+  const hasMargin = Number.isFinite(margin) && Number.isFinite(marginScale) && marginScale > 0;
+  const suppress = hasMargin ? margin < marginScale : probability < threshold;
   return {...base, active: mode === 'on', suppress, probability: Number(probability.toFixed(4)),
-    threshold, reason: suppress ? 'model-suppress' : 'model-allow'};
+    threshold, margin: hasMargin ? margin : null, margin_threshold: hasMargin ? marginScale : null,
+    decided_by: hasMargin ? 'margin-quantile' : 'sigmod-threshold',
+    reason: suppress ? 'model-suppress' : 'model-allow'};
 }

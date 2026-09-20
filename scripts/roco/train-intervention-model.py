@@ -239,6 +239,16 @@ def train(train_rows: List[Dict[str, Any]], val_rows: List[Dict[str, Any]],
 
     # 成本敏感：把「漏掉决定性局面」的代价编码成样本权重，不用改标签。
     weights = np.where(y_train == 1, COST_FN, COST_FP)
+    # `C` 是正则强度的倒数。
+    #
+    # 试过把 C 从 1.0 压到 0.05 来治**概率饱和**（可分数据上系数会被推得很大，
+    # 运行时边际量 0.01 就能把 sigmoid 打到 1.0，于是「抑制」永不触发）。
+    # 结果是召回从 0.900 掉到 0.675、ECE 从 0.047 涨到 0.120，三条判据挂掉——
+    # **用一个更差的模型换一个更好看的行为，不划算**，所以 C 保持 1.0。
+    #
+    # 真正的解法不是在 `C` 上折中，而是让这个概率**锚回一个可解释的分位刻度**：
+    # 见下面 `decision_margin_threshold`——它记录训练侧边际量的 75 分位，
+    # 判定层用它做相对判定，而 sigmoid 输出只作诊断量。饱和因此不再影响行为。
     model = LogisticRegression(max_iter=5000, random_state=SEED, C=1.0, solver="lbfgs")
     model.fit(x_train, y_train, sample_weight=weights)
 
@@ -266,7 +276,11 @@ def train(train_rows: List[Dict[str, Any]], val_rows: List[Dict[str, Any]],
                   "metrics": binary_metrics(y_val, (probabilities_val >= 0.5).astype(int)),
                   "note": "验证集上找不到同时满足召回门槛的阈值"}
 
+    # 饱和检查：验证集上有多大比例的概率被压到极端值（<0.01 或 >0.99）。
+    # 比例高说明这个概率不可用——它在运行时会表现为「永远放行」或「永远抑制」。
+    extreme = float(np.mean((probabilities_val < 0.01) | (probabilities_val > 0.99)))
     return {
+        "saturation_rate": round(extreme, 4),
         "coefficients": [round(float(value), 6) for value in model.coef_[0]],
         "intercept": round(float(model.intercept_[0]), 6),
         "standardize": {"mean": [round(float(value), 6) for value in mean],
@@ -503,6 +517,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     report = {
         "generated_by": "scripts/roco/train-intervention-model.py",
+        "decision_margin_threshold": header.get("margin_threshold"),
         "preregistration": "docs/roco/W5-04-INTERVENTION-GATE-V2.md",
         "window_set": header.get("set_id"),
         "window_set_path": args.windows,
@@ -545,6 +560,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         with open(args.out_model, "w", encoding="utf-8") as fh:
             json.dump({"generated_by": "scripts/roco/train-intervention-model.py",
                        "preregistration": report["preregistration"],
+                       # 判定层做**相对**判定用的刻度：边际量低于这个分位 = 「这一手咬得紧」。
+                       # 它来自训练侧分布（窗口集头部），不是拍出来的常数；
+                       # sigmoid 概率只作诊断量，饱和也不影响行为。
+                       "decision_margin_threshold": header.get("margin_threshold"),
                        "criteria": list(gate["gates"].keys()),
                        "features": FEATURE_NAMES,
                        "standardize": model["standardize"],

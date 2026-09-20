@@ -195,6 +195,49 @@ test('planner_margin_norm 只在真的拿到边际量时非零（不编代理值
   assert.equal(without[index], 0, '拿不到边际量时必须是 0（没有分歧证据），不许编');
 });
 
+test('判定层在**真实链路**上真的会触发，而且用的是可解释的边际量刻度', async () => {
+  // 这条修的是一个「接上了但其实不生效」的问题：模型在可分数据上系数很大，
+  // 运行时边际量 0.01 就能把 sigmoid 打到 1.0（实测 40 个运行时形状的输入概率全是 1.000），
+  // 抑制一次都没触发。现在判定口径改成「边际量 < 训练侧 75 分位 ⇒ 咬得紧 ⇒ 抑制」，
+  // sigmoid 只作诊断量。
+  const {rocoIntervention} = await import('../../src/coach/roco-experience.js');
+  const view = (hp) => ({state_version: 1, phase: 'battle', turn: 6, battle_result: null,
+    self: {pets: [{pet_id: 'a', name: 'A', hp, max_hp: 120, energy: 3}]},
+    opponent: {field: {pet_id: 'b', name: 'B', hp: 100, max_hp: 120, energy: 2}, bench: []},
+    legal: [{kind: 'skill', skill_id: 's1'}]});
+  const session = {hints: 0, lastAt: -Infinity, dismissed: false, said: new Set(),
+    readings: new Set(), topics: new Set(), limit: 3};
+  const model = loadInterventionModel(MODEL_PATH);
+  assert.ok(model, '需要手游标定的模型文件');
+  assert.ok(Number.isFinite(model.decision_margin_threshold),
+    '模型文件必须带 decision_margin_threshold（相对判定的刻度）');
+
+  const run = (hp, margin, expected) => rocoIntervention({view: view(hp), session: {...session},
+    plan: {ok: true, expected, recommendation_stable: true, firstSecondMargin: margin},
+    host: {focus: true, preference: 'gentle'}, now: 1000});
+
+  // 先取 off 下的基线：同一输入在 off 时必须给规则的结论
+  const baseline = withFlag('off', () => run(110, 0.001, {min: -1, max: 6, mean: 2.5}));
+  assert.equal(baseline.layer.active, false, 'off 下判定层不参与');
+  assert.notEqual(baseline.action, 'silent', 'off 下规则本来会提示');
+
+  withFlag('on', () => {
+    // 窄间隔 + 极紧的边际量 → 规则本来要提示，判定层抑制
+    const tight = run(110, 0.001, {min: -1, max: 6, mean: 2.5});
+    assert.equal(tight.layer.active, true, 'on 模式下判定层必须激活');
+    assert.equal(tight.layer.suppress, true, '极紧的边际量必须被抑制');
+    assert.equal(tight.layer.decided_by, 'margin-quantile');
+    assert.equal(tight.action, 'silent', '被抑制时动作必须是 silent');
+    // 同一个局面，边际量换成宽的 → 放行
+    const wide = run(110, 0.9, {min: -1, max: 6, mean: 2.5});
+    assert.equal(wide.layer.suppress, false, '宽边际量必须放行');
+    assert.notEqual(wide.action, 'silent');
+    // 没有边际量（例如规划失败）时退回 sigmoid 口径，而不是永远抑制
+    const noMargin = run(110, null, {min: -1, max: 6, mean: 2.5});
+    assert.equal(noMargin.layer.decided_by, 'sigmod-threshold');
+  });
+});
+
 test('flag 读法保守：未知取值当作 off', () => {
   assert.equal(interventionModelMode({}), 'off');
   assert.equal(interventionModelMode({ROCO_INTERVENTION_MODEL: 'maybe'}), 'off');

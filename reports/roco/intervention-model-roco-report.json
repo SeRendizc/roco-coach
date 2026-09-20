@@ -1,5 +1,6 @@
 {
   "generated_by": "scripts/roco/train-intervention-model.py",
+  "decision_margin_threshold": 0.146532,
   "preregistration": "docs/roco/W5-04-INTERVENTION-GATE-V2.md",
   "window_set": "intervention-windows-roco-v1",
   "window_set_path": "/Users/serendizc/Developer/roco-coach/tests/evals/roco/intervention-windows-roco.jsonl",
@@ -14,6 +15,7 @@
     "ood": 588
   },
   "model": {
+    "saturation_rate": 0.643,
     "coefficients": [
       0.0,
       1.414819,

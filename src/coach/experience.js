@@ -240,17 +240,32 @@ function playerHpRatio(game,fallback){
  return pet.hp/pet.maxHp;
 }
 
+// 合法动作数：判定层的 `legal_count_norm` 用它。`legalActions` 会对局面做一次枚举，
+// 所以只在 game 真的可用时才调（拿不到就给 0，与训练时缺值同口径）。
+function legalCountOf(game){
+ if(!game)return 0;
+ try{return legalActions(game).length;}catch{return 0;}
+}
+
 //: 判定层的模型是**懒加载**的：默认关闭时（`off`）一个字节都不读盘。
 let interventionModelCache=undefined;
 function interventionLayer(f={}){
  try{
   if(interventionModelCache===undefined)interventionModelCache=loadInterventionModel();
+  // 特征必须从**真实局面**里取，而不是只取调用方随手传的那几个字段。
+  //
+  // 踩过一次：判定层的 `phase` / `turn` / `legalCount` 只读 `f.*`，而
+  // `rocoIntervention` 只传 risk/gap/skill/timeLeft —— 于是手游链路上
+  // `phase` 恒为 null、`turn` 恒为 0、`legalCount` 恒为 0，
+  // 判定层拿到的是**残缺特征**。它不会报错，只会安静地给出一个基于假特征的概率，
+  // 那比报错更糟。现在优先从 `f.game` 读，`f.*` 只作为兜底。
+  const game=f.game||null;
   return interventionModelDecision({
-   risk:Number.isFinite(f.risk)?f.risk:situationRisk(f.game),
-   phase:f.game?.phase??f.phase??null,
-   hpRatio:playerHpRatio(f.game,f.hpRatio),
-   turn:f.game?.turn??f.turn??0,
-   legalCount:Number.isFinite(f.legalCount)?f.legalCount:0,
+   risk:Number.isFinite(f.risk)?f.risk:situationRisk(game),
+   phase:game?.phase??f.phase??null,
+   hpRatio:playerHpRatio(game,f.hpRatio),
+   turn:game?.turn??f.turn??0,
+   legalCount:Number.isFinite(f.legalCount)?f.legalCount:legalCountOf(game),
    plannerMargin:Number.isFinite(f.plannerMargin)?f.plannerMargin:null,
   },{model:interventionModelCache});
  }catch{
