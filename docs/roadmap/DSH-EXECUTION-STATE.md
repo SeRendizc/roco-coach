@@ -88,12 +88,17 @@ toolbox 的 `plan_actions` 合同也明确禁止真实随机种子——开后�
 
 | 套件 | 结果 |
 |---|---|
-| Node 全量（unit + browser） | **410 + 18，0 失败**（browser 里 1 项按设计 skip） |
-| Python（引擎 + 先导 + 隐私） | **111 / 111** |
+| Node 全量（unit + browser） | **421 + 18，0 失败** |
+| Python（引擎 + 对局域 + 公开 schema） | **127 / 127** |
 | Node↔Python 桥契约 | **11 / 11** |
 | coach 工具层（toolbox-roco） | **17 / 17** |
-| 规划端到端（plan-e2e，真 Python 服务） | **6 / 6**（新增） |
-| 结构契约 | **6 / 6**（含反向验证） |
+| 规划端到端（plan-e2e，真 Python 服务） | **8 / 8** |
+| 结构契约（含多页面白名单） | **8 / 8** |
+| 投影层（roco-experience） | **9 / 9** |
+| **合计** | **610 项，0 失败**（browser 1 项按测试自身的前置守卫跳过） |
+
+另有两项**浏览器真机验收**（起真 Chrome、真 Python 引擎）：
+`npm run roco:acceptance`（营地页 9/9）与 `npm run roco:demo-acceptance`（演示页 16/16）。
 
 一条命令跑全部服务侧：`npm run test:roco-all`
 （= `test:env` + `test:bridge` + `test:toolbox-roco` + `test:plan-e2e`）。
@@ -140,14 +145,29 @@ TypeError），**没有放宽任何既有断言**。
 
 ### 已知未完成（如实记录）
 
-- **F01/F02/F03 端到端演示与全链路回归**：未做。依赖 T02/G05 支线收尾。
-- **T02/G03/G05 的 coach 工具接入**：支线仍在跑（`src/coach/toolbox.js` 已被改动，
-  17 项契约测试通过，但该支线尚未报告完成）。
-- `summarize_battle` 仍无服务端点，返回结构化 `not_implemented`，**不编摘要**。
+- **G02（阵容模型）**：**做了，但没过自己的门槛** → `evaluate_team` 继续用规则评分，
+  模型不接入玩家可见的结论。见 `reports/roco/g02-team/G02-MODEL-2026-09-21.md`：
+  log loss 0.6704 vs 规则分 0.6808 ✓、Brier 0.2392 vs 0.2438 ✓、**ECE 0.1098 ✗**
+  （且 AUC 0.59 接近随机）。根因是家族空间被 A 组 6 只卡在 360，
+  下一步是扩阵容池（6→12 只，家族空间 ×11），不是换模型。
+- `summarize_battle` 仍无服务端点，返回结构化 `not_implemented`（**现在回 501**，
+  不再混进 404），**不编摘要**。
 - microcase 的「12/12 通过」仍**做不到**：需要游戏内实测。
-- **G02（逻辑回归/LightGBM 阵容模型）**：未做。现在有 1000 局轨迹作输入，
-  但按 GATE 要求，模型必须在**未见阵容家族**上优于规则分才可上线——
-  这一步需要先做 family split，属下一轮。
+- **`npm run test:smoke` 不自举**：它要求 8765 上已有服务，否则退出码 2。
+  M0/M1 遗留的冒烟脚本，属于独立工作量（未改）。
+- 录屏（F03 里那一项）**需要人来做**：脚本已备好（`docs/roco/mvp/DEMO-SCRIPT.md`，
+  2 分 30 秒，逐段写清「点什么、屏幕上出现什么、说哪句」）。
+
+### F01 / F02 / F03 交付（本轮完成）
+
+| 任务 | 交付 | 证据 |
+|---|---|---|
+| **F01 无聊天入口演示** | `/roco.html`（无聊天框；主动短提示、阵容变化重判、局末一个教学入口、陪练先接情绪） | `npm run roco:demo-acceptance` → **16/16**，6 张截图；`tests/roco-experience.test.js` 9 项 |
+| **F02 全链路回归** | 人读报告 + JSON + 18 份原始日志 | `reports/roco/regression/F02-REGRESSION-2026-09-21.md`（含协调者补记） |
+| **F03 MVP 材料** | 架构图 / 数据卡 / 规则覆盖表 / 实现状态标签 / 录屏脚本 | `docs/roco/mvp/`（5 份，每节标了证据来源） |
+
+F02 报的四条问题，三条已修（能力表说假话、`NOT_IMPLEMENTED` 空字典导致 501 不可达、
+补位局面的规划实际上从未算过），一条留作已知问题（test:smoke 不自举）。
 
 ## 2. 当前 HEAD 与工作区
 
@@ -341,3 +361,8 @@ TypeError），**没有放宽任何既有断言**。
 | 2026-09-21 | 第 1 轮 goal（30 项 MVP）启动：隐私边界收紧（移除 `state.seed` 后门、`/battle/plan` 改用公开 schema、对手后备不再暴露血量） | `roco/tests/test_public_planner.py`、`tests/evals/roco/bridge.test.js` |
 | 2026-09-21 | **补上二层隐藏信息边界缺口**：桥的 `HIDDEN_KEYS` 缺 `pendingenemy/pendingplayer/replacequeue`，私有 `serialize()` 能从第一层穿过 | commit `8e79a6f`；新增三条词汇表跨文件比对测试 |
 | 2026-09-21 | **新增规划端到端测试**（真 Python 服务）：证明正确公开状态确实产出计划，并反证真实 seed 不影响结论 | `tests/evals/roco/plan-e2e.test.js`、`scripts/roco/gen-plan-state.py`、`npm run test:plan-e2e` |
+| 2026-09-21 | **F01 无聊天入口演示页** `/roco.html` + 浏览器验收 16/16 | `src/client/roco.{html,js,css}`、`src/coach/roco-experience.js`、`scripts/roco/demo-acceptance.mjs` |
+| 2026-09-21 | **F02 全链路回归**：604 项去重合计，0 失败；P50/P95 实测 | `reports/roco/regression/`（含 18 份原始日志） |
+| 2026-09-21 | **F03 MVP 材料**：架构图 / 数据卡 / 规则覆盖表 / 状态标签 / 录屏脚本 | `docs/roco/mvp/` |
+| 2026-09-21 | 按 F02 的四条发现修掉三条（能力表、501 不可达、补位规划从未算过） | commit `44b4e92`；`roco/tests/test_sim_endpoints.py` |
+| 2026-09-21 | **G02 阵容模型：不过门槛**，`evaluate_team` 继续用规则评分 | `reports/roco/g02-team/G02-MODEL-2026-09-21.md` |
