@@ -247,7 +247,25 @@ def main(argv: Optional[List[str]] = None) -> int:
     if args.compare:
         greedy_rows = [r for r in (score_position(rs, rec, args.depth, args.beam, args.budget_ms,
                                                   greedy=True) for rec in positions_list) if r]
+        # 配对对齐检查（第 12 轮补）：两侧必须落在**同一批局面**上。
+        # 之前只是「各自过滤掉算不出来的行」，一旦 planner 侧多挂了几行，
+        # 两个 top1 就是在不同局面集上算的——和整局基准那个 80 对 40 是同一类错误。
+        planner_keys = {r["hash"] for r in planner_rows}
+        greedy_keys = {r["hash"] for r in greedy_rows}
+        if planner_keys != greedy_keys:
+            missing = sorted(planner_keys - greedy_keys)[:3]
+            extra = sorted(greedy_keys - planner_keys)[:3]
+            raise SystemExit(
+                "配对局面不对齐：planner 与 greedy 必须落在同一批局面上。"
+                f"planner={len(planner_rows)} 行 / greedy={len(greedy_rows)} 行；"
+                f"greedy 缺少 {missing}，多出 {extra}")
         payload["greedy_baseline"] = summarise(greedy_rows)
+        payload["paired_positions"] = {
+            "pairs": len(planner_rows),
+            "planner_only_scored": len(planner_keys - greedy_keys),
+            "greedy_only_scored": len(greedy_keys - planner_keys),
+            "note": "两侧局面集合必须相同；top1 是配对比例，不是两个独立样本",
+        }
 
     os.makedirs(os.path.join(_ROOT, os.path.dirname(OUT_JSON)), exist_ok=True)
     with open(os.path.join(_ROOT, OUT_JSON), "w", encoding="utf-8") as fh:
