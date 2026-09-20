@@ -1,0 +1,11 @@
+=== 第 27 轮：守卫自检 + 全量 @ 2026-09-20T23:22:31Z ===
+  ✔ env（25s）
+  ✔ unit（14s）
+  ✔ bridge（4s）
+  ✔ toolbox-roco（0s）
+  ✔ plan-e2e（2s）
+  ✔ trajectories（1s）
+  ✔ model-manifest（1s）
+  ✔ browser-acceptance（21s）
+  ✔ demo-acceptance（6s）
+ "verdict": "pass",

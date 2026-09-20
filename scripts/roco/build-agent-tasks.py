@@ -547,6 +547,11 @@ def build() -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="W4-01 Agent 任务集")
     parser.add_argument("--print", action="store_true", dest="print_only")
+    # `--json`：只把 JSONL 写到 stdout，不带摘要。
+    # 存在的理由：测试要能**确定性地**核对「现在这份生成器的产出 == 仓库里的产物」。
+    # 没有它时只能解析摘要文本或者写临时文件，两种都更脆。
+    parser.add_argument("--json", action="store_true", dest="json_only",
+                        help="只输出 JSONL 到 stdout（供产物一致性检查用）")
     args = parser.parse_args(argv)
 
     rows, header = build()
@@ -554,6 +559,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     for row in rows:
         text += "\n" + json.dumps(row, ensure_ascii=False)
     text += "\n"
+
+    if args.json_only:
+        sys.stdout.write(text)
+        return 0
 
     if not args.print_only:
         path = os.path.join(_ROOT, OUT)

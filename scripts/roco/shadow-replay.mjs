@@ -217,6 +217,27 @@ async function main(argv) {
     await client.stopService().catch(() => {});
   }
 
+  const report = buildShadowReport({arm, gateway, rows, compareWith});
+  if (write) {
+    mkdirSync(dirname(OUT), {recursive: true});
+    const suffix = arm === 'rule' ? '' : `-${arm}`;
+    const path = OUT.replace(/\.json$/, `${suffix}.json`);
+    writeFileSync(path, `${JSON.stringify(report, null, 1)}\n`);
+    report.written_to = path;
+  }
+  process.stdout.write(`${JSON.stringify({arm, summary: report.summary,
+    comparison: report.comparison || null, written_to: report.written_to || null}, null, 1)}\n`);
+  return 0;
+}
+
+/**
+ * 组装报告对象。**抽出来是为了能被测试直接调用**。
+ *
+ * 只写文件的那一版有个盲点：测试只能读**已经落盘的**报告，
+ * 于是「代码里的组装逻辑被改坏」不会被任何测试发现——守卫自检的注入实验
+ * 抓到了这一点（把 prompt_digest 改成恒 null，注入后仍然全绿）。
+ */
+export function buildShadowReport({arm, gateway = null, rows, compareWith = null}) {
   const report = {
     generated_by: 'scripts/roco/shadow-replay.mjs',
     arm,
@@ -236,16 +257,7 @@ async function main(argv) {
     report.comparison = compare(reference, rows);
     report.comparison.against = compareWith;
   }
-  if (write) {
-    mkdirSync(dirname(OUT), {recursive: true});
-    const suffix = arm === 'rule' ? '' : `-${arm}`;
-    const path = OUT.replace(/\.json$/, `${suffix}.json`);
-    writeFileSync(path, `${JSON.stringify(report, null, 1)}\n`);
-    report.written_to = path;
-  }
-  process.stdout.write(`${JSON.stringify({arm, summary: report.summary,
-    comparison: report.comparison || null, written_to: report.written_to || null}, null, 1)}\n`);
-  return 0;
+  return report;
 }
 
 const invoked = process.argv[1] ? fileURLToPath(import.meta.url) === process.argv[1] : false;

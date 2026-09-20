@@ -21,7 +21,8 @@ const ROOT = join(HERE, '..', '..');
 const {localModelPlanner, extractFirstJson, LOCAL_TOOL_SYSTEM} =
   await import('../../scripts/roco/agent-trajectories.mjs');
 const {extractJson} = await import('../../src/coach/local-model.js');
-const {summarise, compare} = await import('../../scripts/roco/shadow-replay.mjs');
+const {summarise, compare, buildShadowReport} =
+  await import('../../scripts/roco/shadow-replay.mjs');
 const {digest: computeDigest} = await import('../../scripts/roco/agent-trajectories.mjs');
 
 const RULE_REPORT = join(ROOT, 'reports', 'roco', 'shadow-replay.json');
@@ -141,6 +142,21 @@ test('报告必须带提示版本：只比通过率分不出两次跑的是不�
   // 同一次跑里，digest 必须真的是那段提示的摘要（不是随手填的常量）
   assert.equal(computeDigest(report.prompt), report.prompt_digest,
     'prompt_digest 与 prompt 全文不一致');
+});
+
+test('报告装配本身必须带提示摘要：这条不看落盘产物，只看代码', () => {
+  // 只核对落盘报告的写法有个盲点：代码里的装配被改坏（例如 prompt_digest 恒 null）
+  // 不会有任何测试变红——守卫自检的注入实验抓到过。
+  // 所以这里**直接调装配函数**，不经过文件。
+  const candidate = buildShadowReport({arm: 'local_4b', gateway: 'http://x', rows: []});
+  assert.match(String(candidate.prompt_digest), /^[0-9a-f]{64}$/,
+    '模型臂的报告必须带提示摘要');
+  assert.equal(candidate.prompt_digest, computeDigest(candidate.prompt),
+    '摘要必须与提示全文一致');
+  assert.equal(candidate.prompt, LOCAL_TOOL_SYSTEM, '提示全文必须是当前代码里的那一份');
+  const rule = buildShadowReport({arm: 'rule', rows: []});
+  assert.equal(rule.prompt_digest, null, '参考臂不该带提示摘要');
+  assert.equal(rule.prompt, null);
 });
 
 test('参考臂不带提示：它没有模型提示，带一个空值会让人以为它也有', () => {

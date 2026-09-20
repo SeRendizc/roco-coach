@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import collections
+import hashlib
 import importlib.util
 import json
 import os
@@ -116,6 +117,41 @@ class TestTaskSetIsUsableAsAGate(unittest.TestCase):
     def test_case_ids_are_unique(self):
         ids = [r["case_id"] for r in self.rows]
         self.assertEqual(len(ids), len(set(ids)))
+
+    def test_committed_task_set_matches_a_fresh_build(self):
+        """产物必须与**现在**的生成器一致。
+
+        没有这条的时候，改生成器（比如把期望参数改成工具不接受的键）不会让任何测试变红：
+        其它用例用的是内存里重新 build 的结果，产物还是旧的，而产物才是下游
+        （轨迹集、门禁）真正读的东西。这个盲点在守卫自检里被注入实验抓到过。
+        """
+        # 在**独立进程**里重新生成，而不是调同一个模块的 build()：
+        # `build()` 会往模块级的累加器里追加，重复调用**不是幂等**的
+        # （第一次 14 条、之后只返回增量）。在进程内调用会把这条测试变成一个
+        # 靠调用顺序才能通过的测试——那种测试比没有更糟。
+        result = subprocess.run(
+            [sys.executable, _BUILD, "--json"], cwd=_ROOT, capture_output=True, text=True, timeout=120)
+        self.assertEqual(result.returncode, 0, f"生成器失败：{result.stderr[-300:]}")
+        fresh = result.stdout
+        fresh_rows = [json.loads(line) for line in fresh.splitlines()
+                      if line.strip() and json.loads(line).get("record_type") == "agent_task"]
+        fresh_digest = hashlib.sha256(
+            ("\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in fresh_rows))
+            .encode("utf-8")).hexdigest()
+        committed = [
+            json.loads(line) for line in open(TASKS, encoding="utf-8")
+            if line.strip() and json.loads(line).get("record_type") == "agent_task"
+        ]
+        committed_digest = hashlib.sha256(
+            ("\n".join(json.dumps(row, ensure_ascii=False, sort_keys=True) for row in committed))
+            .encode("utf-8")).hexdigest()
+        self.assertEqual(
+            len(fresh_rows), len(committed),
+            f"产物条数 {len(committed)} 与现场生成 {len(fresh_rows)} 不一致："
+            "改了生成器却没有重跑 `python3 scripts/roco/build-agent-tasks.py`")
+        self.assertEqual(
+            fresh_digest, committed_digest,
+            "产物的任务内容与现场生成不一致（同样的键、同样的顺序）：请重跑生成器")
 
     def test_backfill_is_accounted_for(self):
         """为保证每类三侧都有样本而补搬的条目必须**记账**，不能偷偷改侧。"""
