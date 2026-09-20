@@ -1,0 +1,20 @@
+=== 第 24 轮：浏览器与演示验收（改动后未跑）@ 2026-09-20T23:06:40Z ===
+--- demo-acceptance
+
+[demo-acceptance] ✔ 页面没有聊天入口（无 #chat-input / #chat-form / textarea） — {"chat":false,"coachApi":false,"textareas":0}
+[demo-acceptance] 失败： 页面求值失败：TypeError: Cannot read properties of undefined (reading 'startBattle')
+    at <anonymous>:1:17
+--- browser-acceptance
+[acceptance] checks 3/9 pass
+[acceptance]   ✖ 营地页渲染出伙伴卡
+[acceptance]   ✖ 属性筛选真的在过滤
+[acceptance]   ✖ 筛选后截图确实处于「已筛选」状态
+[acceptance]   ✖ 能进入对局且公开面板可读
+--- demo-acceptance
+[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 
+[demo-acceptance] ✔ 控制台没有报错 — []
+[demo-acceptance] 结果：16 通过 / 0 失败；报告见 reports/roco/demo-acceptance/
+--- test:env
+Ran 208 tests in 24.405s
+
+OK (skipped=1)

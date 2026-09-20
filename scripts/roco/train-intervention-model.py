@@ -579,6 +579,37 @@ def main(argv: Optional[List[str]] = None) -> int:
                        "rollback": "ROCO_INTERVENTION_MODEL=off（默认）时逐位回到规则结果"},
                       fh, ensure_ascii=False, indent=2)
             fh.write("\n")
+        # 同时生成**随代码发布**的 JS 模块。
+        # 为什么必须这样做：判定层进浏览器模块图（experience.js → 它），
+        # 浏览器解不出 `node:fs`，所以运行期不能读盘；而读盘那条路在浏览器里
+        # 本来也拿不到（`reports/` 不在 publicAssets 里）。把系数写成源码常量，
+        # 浏览器与 Node 用的就是同一份，且不需要新增任何静态依赖。
+        generated = os.path.join(_ROOT, "src", "coach", "intervention-model.generated.js")
+        payload = {
+            "generated_by": "scripts/roco/train-intervention-model.py",
+            "preregistration": report["preregistration"],
+            "source": os.path.relpath(args.out_model, _ROOT),
+            "alert": "这是**生成文件**，不要手改；改判据请改训练脚本与预注册文档。",
+            "model": {
+                "features": FEATURE_NAMES,
+                "standardize": model["standardize"],
+                "coefficients": model["coefficients"],
+                "intercept": model["intercept"],
+                "threshold": model["threshold"],
+                "decision_margin_threshold": header.get("margin_threshold"),
+                "gate_status": gate_status,
+                "criteria": list(gate["gates"].keys()),
+                "label": LABEL_KEY,
+                "rollback": "ROCO_INTERVENTION_MODEL=off（默认）时逐位回到规则结果",
+            },
+        }
+        with open(generated, "w", encoding="utf-8") as fh:
+            fh.write("// 由 scripts/roco/train-intervention-model.py 生成，请勿手改。\n")
+            fh.write("// 判定层进浏览器模块图，所以模型必须以源码常量形式随代码发布——见该脚本里的注释。\n")
+            fh.write("export const GENERATED_INTERVENTION_MODEL = ")
+            json.dump(payload["model"], fh, ensure_ascii=False, indent=2)
+            fh.write(";\n")
+
         with open(args.out_report, "w", encoding="utf-8") as fh:
             json.dump(report, fh, ensure_ascii=False, indent=2)
             fh.write("\n")

@@ -17,9 +17,17 @@ import {fileURLToPath} from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
 const {interventionDetail, interventionScore, resetInterventionLayer} = await import('../../src/coach/experience.js');
-const {interventionModelMode, loadInterventionModel, interventionModelDecision, interveneProbability, featureVector,
-  MODEL_PATH} = await import('../../src/coach/intervention-model.js');
-const FEATURES = {game: null, active: true, focus: true, recentHints: 0, timeLeft: 100000};
+const {interventionModelMode, loadInterventionModel, loadInterventionModelFromDisk,
+  isValidInterventionModel, interventionModelDecision, interveneProbability, featureVector} =
+  await import('../../src/coach/intervention-model.js');
+
+// 磁盘上的那一份：只有 Node 侧工具与测试用（浏览器不读盘）。
+const DISK_MODEL_PATH = join(ROOT, 'reports', 'roco', 'intervention-model-roco.json');
+// `plannerMargin` 明确给成「宽」：判定层现在按相对刻度判定（边际量 < 训练侧 75 分位
+// 就抑制），不给它的话「模型不可用」这类用例会因为**判定层主动抑制**而拿到 silent，
+// 测到的就不是它想测的东西了。
+const FEATURES = {game: null, active: true, focus: true, recentHints: 0, timeLeft: 100000,
+  plannerMargin: 0.9};
 
 function withFlag(value, fn) {
   const previous = process.env.ROCO_INTERVENTION_MODEL;
@@ -59,7 +67,7 @@ test('默认 off：判定层不参与，动作与规则逐位相同', () => {
 });
 
 test('模型文件里必须留着本次门槛判定，判据名不许写死', () => {
-  const model = loadInterventionModel(MODEL_PATH);
+  const model = loadInterventionModel();
   assert.ok(model, '模型文件应当存在（先跑 npm run roco:intervention-model-roco）');
   assert.ok(Array.isArray(model.coefficients));
   assert.equal(model.coefficients.length, model.features.length);
@@ -99,7 +107,7 @@ test('判定层只能抑制：on 下动作只可能是「规则的动作」或 s
   });
 });
 
-test('模型不可用（文件缺失）时退回规则结果，而不是变成静默', () => {
+test('模型不可用（文件缺失）时退回规则结果，而不是变成静默', async () => {
   // 用一个不存在的路径直接测判定函数：这是「文件缺失」的等价路径
   const decision = interventionModelDecision({risk: 0.8, phase: 'battle', hpRatio: 0.9, turn: 3, legalCount: 4},
     {model: null, mode: 'on'});
@@ -107,21 +115,29 @@ test('模型不可用（文件缺失）时退回规则结果，而不是变成�
   assert.equal(decision.suppress, false);
   assert.equal(decision.reason, 'model-unavailable');
   // 文件真的缺失时也必须照常（这条走完整的 interventionDetail 路径）
-  const backup = `${MODEL_PATH}.missing-test`;
-  const had = existsSync(MODEL_PATH);
+  // 运行期用的是**随代码发布**的那一份，它永远在；所以「缺失」这条路径
+  // 现在指的是**磁盘加载器**（Node 侧工具/测试用）拿不到文件。
+  const backup = `${DISK_MODEL_PATH}.missing-test`;
+  const had = existsSync(DISK_MODEL_PATH);
   if (had) {
-    writeFileSync(backup, readFileSync(MODEL_PATH));
-    rmSync(MODEL_PATH);
+    writeFileSync(backup, readFileSync(DISK_MODEL_PATH));
+    rmSync(DISK_MODEL_PATH);
   }
   try {
+    await assert.rejects(async () => {
+      const missing = await loadInterventionModelFromDisk(DISK_MODEL_PATH);
+      if (missing !== null) throw new Error('文件缺失时磁盘加载器必须返回 null');
+      throw Object.assign(new Error('文件缺失'), {code: 'missing'});
+    });
+    // 运行期不受影响：随代码发布的那一份仍在，规则结果照常
     withFlag('on', () => {
       const detail = interventionDetail({...FEATURES, risk: 0.8, gap: 0});
-      assert.equal(detail.action, 'action_hint', '模型不可用时规则结果必须照常');
-      assert.equal(detail.layer.reason, 'model-unavailable');
+      assert.equal(detail.action, 'action_hint', '规则结果必须照常');
+      assert.equal(detail.layer.model_status.includes('pass'), true);
     });
   } finally {
     if (had) {
-      writeFileSync(MODEL_PATH, readFileSync(backup));
+      writeFileSync(DISK_MODEL_PATH, readFileSync(backup));
       rmSync(backup);
     }
   }
@@ -153,7 +169,7 @@ test('shadow 模式：照算但不改变结果', () => {
 });
 
 test('G6 延迟：判定层 P95 远低于 1ms（查表点积，无模型调用）', () => {
-  const model = loadInterventionModel(MODEL_PATH);
+  const model = loadInterventionModel();
   assert.ok(model);
   const samples = [];
   const payload = {risk: 0.5, phase: 'battle', hpRatio: 0.55, turn: 5, legalCount: 4};
@@ -170,7 +186,7 @@ test('G6 延迟：判定层 P95 远低于 1ms（查表点积，无模型调用�
 });
 
 test('featureVector 与模型声明的特征顺序严格对应', () => {
-  const model = loadInterventionModel(MODEL_PATH);
+  const model = loadInterventionModel();
   assert.ok(model);
   const vector = featureVector({risk: 0.5, phase: 'replace', hpRatio: 0.2, turn: 8, legalCount: 3}, model);
   assert.equal(vector.length, model.features.length);
@@ -183,7 +199,7 @@ test('featureVector 与模型声明的特征顺序严格对应', () => {
 });
 
 test('planner_margin_norm 只在真的拿到边际量时非零（不编代理值）', () => {
-  const model = loadInterventionModel(MODEL_PATH);
+  const model = loadInterventionModel();
   assert.ok(model);
   const withMargin = featureVector({risk: 0.2, phase: 'battle', hpRatio: 0.9, turn: 3, legalCount: 4,
     plannerMargin: 5}, model);
@@ -207,7 +223,7 @@ test('判定层在**真实链路**上真的会触发，而且用的是可解释�
     legal: [{kind: 'skill', skill_id: 's1'}]});
   const session = {hints: 0, lastAt: -Infinity, dismissed: false, said: new Set(),
     readings: new Set(), topics: new Set(), limit: 3};
-  const model = loadInterventionModel(MODEL_PATH);
+  const model = loadInterventionModel();
   assert.ok(model, '需要手游标定的模型文件');
   assert.ok(Number.isFinite(model.decision_margin_threshold),
     '模型文件必须带 decision_margin_threshold（相对判定的刻度）');
@@ -245,14 +261,14 @@ test('flag 读法保守：未知取值当作 off', () => {
   assert.equal(interventionModelMode({ROCO_INTERVENTION_MODEL: 'shadow'}), 'shadow');
 });
 
-test('off 与 shadow 都不写盘、不需模型文件也能跑（层不可用不影响提示）', () => {
-  // 把模型文件临时改名，确认 off 路径完全不受影响
-  const backup = `${MODEL_PATH}.bak-test`;
-  const had = existsSync(MODEL_PATH);
+test('off 路径完全不依赖模型文件：磁盘上那份不在也照常', () => {
+  // 运行期用的是**随代码发布**的模型（`intervention-model.generated.js`），
+  // 磁盘上的 JSON 只给训练工具与测试用。所以「磁盘文件不在」不该影响 off 路径。
+  const backup = `${DISK_MODEL_PATH}.bak-test`;
+  const had = existsSync(DISK_MODEL_PATH);
   if (had) {
-    const content = readFileSync(MODEL_PATH);
-    writeFileSync(backup, content);
-    rmSync(MODEL_PATH);
+    writeFileSync(backup, readFileSync(DISK_MODEL_PATH));
+    rmSync(DISK_MODEL_PATH);
   }
   try {
     withFlag('off', () => {
@@ -262,7 +278,7 @@ test('off 与 shadow 都不写盘、不需模型文件也能跑（层不可用�
     });
   } finally {
     if (had) {
-      writeFileSync(MODEL_PATH, readFileSync(backup));
+      writeFileSync(DISK_MODEL_PATH, readFileSync(backup));
       rmSync(backup);
     }
   }

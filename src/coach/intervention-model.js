@@ -20,15 +20,20 @@
 // 它不产文案、不改回执、不碰规则事实。模型文件缺失或 `gate_status !== 'pass'` 时，
 // 默认**退回规则结果**——「层不可用」不等于「静默不提示」。
 
-import {readFileSync, existsSync} from 'node:fs';
-import {dirname, join} from 'node:path';
-import {fileURLToPath} from 'node:url';
+// ⚠️ 这个模块**进浏览器模块图**（`experience.js` → 它，经由 `companion.js` → `app.js`）。
+//
+// 所以它**不能**在顶层 import `node:fs` / `node:path`：浏览器解不出 `node:*`，
+// 一旦引入，`app.js` 的整条 import 链会静默断掉——页面标题还在、按钮还在，
+// 但开不了局。第 24 轮就是这样把两条浏览器验收打成 3/9 的：
+// 单测全绿（Node 里 `node:fs` 存在），浏览器全挂。
+//
+// 正确的做法是**把标定好的系数当成源码的一部分**：`intervention-model-roco.json`
+// 由训练脚本产出，同时生成这份 `intervention-model.generated.js`，
+// 浏览器拿到的就是**随代码一起发布的那一份**，不需要任何文件读取。
+// 读盘只保留给 Node 侧的工具与测试（`loadInterventionModelFromDisk`，动态 import）。
+import {GENERATED_INTERVENTION_MODEL} from './intervention-model.generated.js';
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-export const REPO_ROOT = join(HERE, '..', '..');
-//: 默认用**手游引擎标定**的那一份（第 18 轮）。旧演示引擎的模型留在
-//: `intervention-model.json`，两把尺子不可通约，不能混用（预注册文档 §10.4）。
-export const MODEL_PATH = join(REPO_ROOT, 'reports', 'roco', 'intervention-model-roco.json');
+export const INTERVENTION_MODEL = GENERATED_INTERVENTION_MODEL;
 
 /**
  * feature flag：
@@ -44,20 +49,41 @@ export function interventionModelMode(env = process.env) {
   return 'off';
 }
 
-export function loadInterventionModel(path = MODEL_PATH) {
-  if (!existsSync(path)) return null;
+/** 结构校验：维度对不上就当作不可用，宁可不用也不要按错的系数算。 */
+export function isValidInterventionModel(model) {
+  if (!model || typeof model !== 'object') return false;
+  for (const field of ['coefficients', 'intercept', 'features', 'standardize']) {
+    if (!model[field]) return false;
+  }
+  return model.coefficients.length === model.features.length
+    && model.standardize.mean.length === model.features.length
+    && model.standardize.scale.length === model.features.length;
+}
+
+/**
+ * 默认模型：**随代码发布的那一份**（浏览器与 Node 用同一个）。
+ * 结构不合法时返回 null——层退回规则结果。
+ */
+export function loadInterventionModel() {
+  return isValidInterventionModel(INTERVENTION_MODEL) ? INTERVENTION_MODEL : null;
+}
+
+/**
+ * 从磁盘读一份（只有 Node 侧的工具与测试用）。
+ *
+ * 用**动态** import `node:fs`：静态 import 会进浏览器模块图并把页面打挂，
+ * 动态 import 只在真的调用时解析，浏览器永远不会走到这一条。
+ */
+export async function loadInterventionModelFromDisk(path) {
+  const [{readFileSync, existsSync}, {dirname, join}, {fileURLToPath}] = await Promise.all([
+    import('node:fs'), import('node:path'), import('node:url'),
+  ]);
+  const here = dirname(fileURLToPath(import.meta.url));
+  const target = path || join(here, '..', '..', 'reports', 'roco', 'intervention-model-roco.json');
+  if (!existsSync(target)) return null;
   try {
-    const model = JSON.parse(readFileSync(path, 'utf8'));
-    for (const field of ['coefficients', 'intercept', 'features', 'standardize']) {
-      if (!model[field]) return null;
-    }
-    if (model.coefficients.length !== model.features.length
-      || model.standardize.mean.length !== model.features.length
-      || model.standardize.scale.length !== model.features.length) {
-      // 维度对不上就是文件被换过：宁可不用，也不要按错的系数算。
-      return null;
-    }
-    return model;
+    const model = JSON.parse(readFileSync(target, 'utf8'));
+    return isValidInterventionModel(model) ? model : null;
   } catch {
     return null;
   }

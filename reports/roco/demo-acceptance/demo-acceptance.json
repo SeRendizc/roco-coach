@@ -16,7 +16,7 @@
     {
       "name": "打危险了之后出现主动短提示（无聊天入口）",
       "ok": true,
-      "detail": "hint=micro_hint action=micro_hint 血量比=0.39 自动推进=2 判定={\"gate\":null,\"action\":\"micro_hint\",\"reason\":\"moderate-risk\",\"value\":1.5,\"floor\":1.2,\"decisive\":false,\"budget\":null}"
+      "detail": "hint=micro_hint action=micro_hint 血量比=0.39 自动推进=2 判定={\"gate\":null,\"action\":\"micro_hint\",\"reason\":\"moderate-risk\",\"value\":1.5,\"floor\":1.2,\"decisive\":false,\"budget\":null,\"layer\":{\"active\":false,\"suppress\":false,\"reason\":\"layer-error\",\"mode\":\"off\",\"model_status\":\"error\",\"probability\":null,\"threshold\":null}}"
     },
     {
       "name": "提示给的是可执行建议，并说明依据",
