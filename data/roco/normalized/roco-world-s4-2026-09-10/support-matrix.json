@@ -492,6 +492,73 @@
         ],
         "missing_roles": []
       },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000312",
+            "name": "先发制人",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 2,
+            "power": 55,
+            "damage_class": "物攻",
+            "desc": "造成物理伤害，先手+1。",
+            "mechanisms": [
+              "damage",
+              "priority"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "priority"
+            ]
+          },
+          {
+            "skill_id": "skill_000746",
+            "name": "降灵",
+            "category": "状态",
+            "element": "幽系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "敌方获得1层降灵印记。",
+            "mechanisms": [
+              "mark"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "mark"
+            ]
+          },
+          {
+            "skill_id": "skill_000757",
+            "name": "虚化",
+            "category": "防御",
+            "element": "幽系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己获得魔防+70%。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "stat_mod"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "stat_mod"
+            ]
+          }
+        ],
+        "count": 3
+      },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
         "8 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
@@ -962,6 +1029,76 @@
         ],
         "missing_roles": []
       },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000591",
+            "name": "集中",
+            "category": "防御",
+            "element": "电系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己回合结束返场。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "heal",
+              "escape"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "heal",
+              "escape"
+            ]
+          },
+          {
+            "skill_id": "skill_000312",
+            "name": "先发制人",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 2,
+            "power": 55,
+            "damage_class": "物攻",
+            "desc": "造成物理伤害，先手+1。",
+            "mechanisms": [
+              "damage",
+              "priority"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "priority"
+            ]
+          },
+          {
+            "skill_id": "skill_000566",
+            "name": "升龙咆哮",
+            "category": "攻击",
+            "element": "龙系",
+            "energy": 3,
+            "power": 200,
+            "damage_class": "魔攻",
+            "desc": "蓄力，对敌方造成魔法伤害。",
+            "mechanisms": [
+              "damage",
+              "charge"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "charge"
+            ]
+          }
+        ],
+        "count": 3
+      },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
         "7 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
@@ -1312,6 +1449,73 @@
           }
         ],
         "missing_roles": []
+      },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000289",
+            "name": "无畏之心",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 5,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤100%，应对攻击：减免的伤害变为回复自己生命，且本技能能耗永久+2。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "heal",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "heal",
+              "energy"
+            ]
+          },
+          {
+            "skill_id": "skill_000260",
+            "name": "乱打",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 4,
+            "power": 25,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，5连击。",
+            "mechanisms": [
+              "damage",
+              "multi_hit"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "multi_hit"
+            ]
+          },
+          {
+            "skill_id": "skill_000284",
+            "name": "精神扰乱",
+            "category": "状态",
+            "element": "普通系",
+            "energy": 0,
+            "power": null,
+            "damage_class": null,
+            "desc": "敌方获得全技能能耗+1，应对防御：改为能耗+3。",
+            "mechanisms": [
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": []
+          }
+        ],
+        "count": 3
       },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
@@ -1684,6 +1888,73 @@
           }
         ],
         "missing_roles": []
+      },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000428",
+            "name": "泡沫幻影",
+            "category": "防御",
+            "element": "水系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己脱离。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "escape"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "escape"
+            ]
+          },
+          {
+            "skill_id": "skill_000426",
+            "name": "打湿",
+            "category": "状态",
+            "element": "水系",
+            "energy": 4,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得1层湿润印记。",
+            "mechanisms": [
+              "mark"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "mark"
+            ]
+          },
+          {
+            "skill_id": "skill_000566",
+            "name": "升龙咆哮",
+            "category": "攻击",
+            "element": "龙系",
+            "energy": 3,
+            "power": 200,
+            "damage_class": "魔攻",
+            "desc": "蓄力，对敌方造成魔法伤害。",
+            "mechanisms": [
+              "damage",
+              "charge"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "charge"
+            ]
+          }
+        ],
+        "count": 3
       },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
@@ -2143,6 +2414,71 @@
         ],
         "missing_roles": []
       },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000530",
+            "name": "暴风雪",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 3,
+            "power": 85,
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方获得1层冻结。",
+            "mechanisms": [
+              "damage",
+              "status_dot"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "status_dot"
+            ]
+          },
+          {
+            "skill_id": "skill_000549",
+            "name": "碎冰冰",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 3,
+            "power": 40,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，敌方每有1层冻结，本次技能威力+20。",
+            "mechanisms": [
+              "damage",
+              "status_dot"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": []
+          },
+          {
+            "skill_id": "skill_000728",
+            "name": "撒娇",
+            "category": "攻击",
+            "element": "萌系",
+            "energy": 3,
+            "power": 30,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，3连击。自己获得萌化：全技能威力永久+10。",
+            "mechanisms": [
+              "damage",
+              "multi_hit"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "multi_hit"
+            ]
+          }
+        ],
+        "count": 3
+      },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
         "3 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
@@ -2552,6 +2888,73 @@
           }
         ],
         "missing_roles": []
+      },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000599",
+            "name": "过载回路",
+            "category": "状态",
+            "element": "电系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "回合结束自己返场，下回合所选技能使用次数+1。",
+            "mechanisms": [
+              "heal",
+              "escape"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "heal",
+              "escape"
+            ]
+          },
+          {
+            "skill_id": "skill_000588",
+            "name": "麻痹",
+            "category": "状态",
+            "element": "电系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "敌方先手-1，应对防御：额外使敌方获得双攻-70%。",
+            "mechanisms": [
+              "stat_mod",
+              "priority"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "stat_mod",
+              "priority"
+            ]
+          },
+          {
+            "skill_id": "skill_000385",
+            "name": "高温回火",
+            "category": "攻击",
+            "element": "火系",
+            "energy": 2,
+            "power": 40,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，自己脱离。",
+            "mechanisms": [
+              "damage",
+              "escape"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": []
+          }
+        ],
+        "count": 3
       },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
@@ -2980,6 +3383,71 @@
           }
         ],
         "missing_roles": []
+      },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000312",
+            "name": "先发制人",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 2,
+            "power": 55,
+            "damage_class": "物攻",
+            "desc": "造成物理伤害，先手+1。",
+            "mechanisms": [
+              "damage",
+              "priority"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "priority"
+            ]
+          },
+          {
+            "skill_id": "skill_000664",
+            "name": "反击拳",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 2,
+            "power": 25,
+            "damage_class": "物攻",
+            "desc": "造成物伤，2连击，若后手攻击，改为3连击。",
+            "mechanisms": [
+              "damage",
+              "multi_hit"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "multi_hit"
+            ]
+          },
+          {
+            "skill_id": "skill_000324",
+            "name": "热身运动",
+            "category": "状态",
+            "element": "普通系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得连击数+3。",
+            "mechanisms": [
+              "damage",
+              "multi_hit"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": []
+          }
+        ],
+        "count": 3
       },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
@@ -3477,6 +3945,73 @@
         ],
         "missing_roles": []
       },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000746",
+            "name": "降灵",
+            "category": "状态",
+            "element": "幽系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "敌方获得1层降灵印记。",
+            "mechanisms": [
+              "mark"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "mark"
+            ]
+          },
+          {
+            "skill_id": "skill_000757",
+            "name": "虚化",
+            "category": "防御",
+            "element": "幽系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己获得魔防+70%。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "stat_mod"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "stat_mod"
+            ]
+          },
+          {
+            "skill_id": "skill_000566",
+            "name": "升龙咆哮",
+            "category": "攻击",
+            "element": "龙系",
+            "energy": 3,
+            "power": 200,
+            "damage_class": "魔攻",
+            "desc": "蓄力，对敌方造成魔法伤害。",
+            "mechanisms": [
+              "damage",
+              "charge"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "charge"
+            ]
+          }
+        ],
+        "count": 3
+      },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
         "9 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
@@ -3919,6 +4454,74 @@
         ],
         "missing_roles": []
       },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000483",
+            "name": "啮合传递",
+            "category": "状态",
+            "element": "机械系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+            "mechanisms": [
+              "stat_mod",
+              "position"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "stat_mod",
+              "position"
+            ]
+          },
+          {
+            "skill_id": "skill_000588",
+            "name": "麻痹",
+            "category": "状态",
+            "element": "电系",
+            "energy": 2,
+            "power": null,
+            "damage_class": null,
+            "desc": "敌方先手-1，应对防御：额外使敌方获得双攻-70%。",
+            "mechanisms": [
+              "stat_mod",
+              "priority"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "priority"
+            ]
+          },
+          {
+            "skill_id": "skill_000646",
+            "name": "虫刺",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 1,
+            "power": 15,
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，3连击。",
+            "mechanisms": [
+              "damage",
+              "multi_hit"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "multi_hit"
+            ]
+          }
+        ],
+        "count": 3
+      },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
         "2 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
@@ -4359,6 +4962,71 @@
           }
         ],
         "missing_roles": []
+      },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000271",
+            "name": "力量增效",
+            "category": "状态",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得物攻+100%。",
+            "mechanisms": [
+              "stat_mod"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "stat_mod"
+            ]
+          },
+          {
+            "skill_id": "skill_000824",
+            "name": "叠加态",
+            "category": "状态",
+            "element": "幻系",
+            "energy": 1,
+            "power": null,
+            "damage_class": null,
+            "desc": "自己获得随机16层属性增益，巧变：幻系攻击技能。",
+            "mechanisms": [
+              "random"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "random"
+            ]
+          },
+          {
+            "skill_id": "skill_000765",
+            "name": "离魂术",
+            "category": "状态",
+            "element": "幽系",
+            "energy": 3,
+            "power": null,
+            "damage_class": null,
+            "desc": "偷取敌方2能量，脱离。",
+            "mechanisms": [
+              "energy",
+              "escape"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "escape"
+            ]
+          }
+        ],
+        "count": 3
       },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
@@ -4821,6 +5489,71 @@
         ],
         "missing_roles": []
       },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000642",
+            "name": "虫群智慧",
+            "category": "状态",
+            "element": "虫系",
+            "energy": 3,
+            "power": null,
+            "damage_class": null,
+            "desc": "己方队伍获得2次随机奉献。",
+            "mechanisms": [
+              "random"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "random"
+            ]
+          },
+          {
+            "skill_id": "skill_000417",
+            "name": "星火",
+            "category": "状态",
+            "element": "火系",
+            "energy": 3,
+            "power": null,
+            "damage_class": null,
+            "desc": "敌方获得8层灼烧，若上回合双方有精灵使用光系技能，敌方额外获得12层灼烧。",
+            "mechanisms": [
+              "status_dot"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "status_dot"
+            ]
+          },
+          {
+            "skill_id": "skill_000566",
+            "name": "升龙咆哮",
+            "category": "攻击",
+            "element": "龙系",
+            "energy": 3,
+            "power": 200,
+            "damage_class": "魔攻",
+            "desc": "蓄力，对敌方造成魔法伤害。",
+            "mechanisms": [
+              "damage",
+              "charge"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "charge"
+            ]
+          }
+        ],
+        "count": 3
+      },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",
         "10 个技能是条件化/动态威力，静态 power 不能直接当最终伤害",
@@ -5273,6 +6006,72 @@
           }
         ],
         "missing_roles": []
+      },
+      "candidate_extras": {
+        "note": "扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。",
+        "rule": "maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc",
+        "skills": [
+          {
+            "skill_id": "skill_000294",
+            "name": "取念",
+            "category": "状态",
+            "element": "普通系",
+            "energy": 0,
+            "power": null,
+            "damage_class": null,
+            "desc": "每回合随机变成敌方任意精灵的技能，且该技能能耗-2。",
+            "mechanisms": [
+              "energy",
+              "random"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "energy",
+              "random"
+            ]
+          },
+          {
+            "skill_id": "skill_000538",
+            "name": "霜天",
+            "category": "状态",
+            "element": "冰系",
+            "energy": 4,
+            "power": null,
+            "damage_class": null,
+            "desc": "敌方获得1层冻结，且每有1层冻结获得全技能能耗+1。",
+            "mechanisms": [
+              "energy",
+              "status_dot"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "not_provided_by_source",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": [
+              "status_dot"
+            ]
+          },
+          {
+            "skill_id": "skill_000531",
+            "name": "冰晶坠",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 4,
+            "power": 90,
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方获得全技能能耗+1。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "effect_support": "unsupported",
+            "power_status": "static_value_present",
+            "role": "extra_candidate",
+            "new_mechanisms_brought": []
+          }
+        ],
+        "count": 3
       },
       "blockers_before_simulation": [
         "所有技能 effect_support = unsupported：效果原语未实现",

@@ -162,7 +162,35 @@ function selectCandidate(pet, learnset) {
     chosen.mechanisms.forEach((m) => covered.add(m));
   }
 
-  return { picked, rolesFilled, evidence, poolSize: pool.length, nativePoolSize: native.length };
+  // ── W3-01 扩技能池：在 4 个角色位之外再挑若干「扩展候选」 ──────────────
+  //
+  // 为什么需要它：12 只 × 4 技能 = 48 个位置，但**去重后只有 30 个技能**，
+  // 达不到 W3-01 的「40—60 技能」。扩法有两种，这里选第二种：
+  //   ① 把 `candidate_moveset.skills` 从 4 个改成 6 个 —— 会改变 G02 的家族定义
+  //      （family key 含配招），等于把已经跑过的 23,760 行数据作废；
+  //   ② **另开一栏 `candidate_extras`** —— 规范配招不动，扩展候选单独列，
+  //      谁要用（例如 W3-04 的 plan_actions 风险分支）谁显式取。
+  //
+  // 挑选规则与角色位不同：这里只追求**机制覆盖**与**静态威力可算**，
+  // 不假装它们是「推荐配招」。每条都写清选取规则，便于反驳。
+  const extras = [];
+  const extraPool = pool
+    .filter((s) => !picked.some((p) => p.skill_id === s.skill_id))
+    .map((s) => ({
+      s,
+      newMech: s.mechanisms.filter((m) => !covered.has(m)).length,
+      fromNative: nativeSet.has(s.skill_id) ? 1 : 0,
+    }))
+    .sort((a, b) =>
+      b.newMech - a.newMech || b.fromNative - a.fromNative ||
+      (b.s.power ?? -1) - (a.s.power ?? -1) || a.s.energy - b.s.energy || a.s.name.localeCompare(b.s.name));
+  const EXTRA_LIMIT = 3;
+  for (const row of extraPool.slice(0, EXTRA_LIMIT)) {
+    extras.push({ ...row.s, role: 'extra_candidate', new_mechanisms_brought: row.s.mechanisms.filter((m) => !covered.has(m)) });
+    row.s.mechanisms.forEach((m) => covered.add(m));
+  }
+
+  return { picked, rolesFilled, evidence, extras, poolSize: pool.length, nativePoolSize: native.length };
 }
 
 // ── 支持等级判定 ────────────────────────────────────────────────────────
@@ -208,7 +236,7 @@ const results = [];
 for (const [pid, pet] of Object.entries(pets).sort((a, b) => a[1].target.order - b[1].target.order)) {
   const ls = learnsets[pid];
   if (!ls) { results.push({ pet_id: pid, name: pet.name, error: 'no_learnset' }); continue; }
-  const { picked, rolesFilled, evidence, poolSize, nativePoolSize } = selectCandidate(pet, ls);
+  const { picked, rolesFilled, evidence, extras, poolSize, nativePoolSize } = selectCandidate(pet, ls);
 
   const allIds = [...new Set([...ls.native_skills.map((x) => x.skill_id), ...ls.blood_skills.map((x) => x.skill_id), ...ls.skill_stones])];
   const enrichedPool = allIds.map(enrich).filter(Boolean);
@@ -277,6 +305,14 @@ for (const [pid, pet] of Object.entries(pets).sort((a, b) => a[1].target.order -
       selection_evidence: evidence,
       skills: picked,
       missing_roles: ['free_attack', 'reactive_defense', 'main_attack', 'mechanism_support'].filter((r) => !rolesFilled[r]),
+    },
+    // W3-01 的**扩展候选**：不是推荐配招，只是「本精灵技能池里机制覆盖最广的几个」。
+    // 与 `candidate_moveset.skills` 分开，是为了不动 G02 的家族定义。
+    candidate_extras: {
+      note: '扩展候选：只按「带来的未覆盖机制数 → 固有优先 → 威力 → 能耗 → 名字」排序，**不是**推荐配招、不是最优解、不是胜率结果。用于扩大可核验技能池（W3-01），不用于替换规范配招。',
+      rule: 'maximize(new mechanisms not yet covered) → native first → power desc → energy asc → name asc',
+      skills: extras,
+      count: extras.length,
     },
     // 进入模拟前还缺什么（每条都可核验）
     blockers_before_simulation: [
