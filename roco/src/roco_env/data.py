@@ -203,6 +203,10 @@ class Ruleset:
     terms: Dict[str, Term]
     files: Dict[str, str]
     by_name: Dict[str, List[str]]
+    # M1 为 12 只各选定的一组 4 技能「候选配招」。
+    # 它是**数据**（有选择规则与证据，见 support-matrix.json 的 selection_evidence），
+    # 不是我们的偏好；引擎用它当规范配招，而不是拿整个固有技能池当配招。
+    candidate_movesets: Dict[str, Tuple[str, ...]]
 
     def skill(self, skill_id: str) -> Skill:
         try:
@@ -230,6 +234,10 @@ class Ruleset:
     def is_learnable(self, pet_id: str, skill_id: str) -> bool:
         ls = self.learnsets.get(pet_id)
         return bool(ls) and skill_id in ls.all_skill_ids
+
+    def candidate_moveset(self, pet_id: str) -> Tuple[str, ...]:
+        """该精灵的规范配招（M1 选定的 4 技能）。没有就返回空元组，不编。"""
+        return self.candidate_movesets.get(pet_id, ())
 
     def term(self, term_id: str) -> Optional[Term]:
         return self.terms.get(str(term_id))
@@ -351,6 +359,20 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
         for k, v in raw["terms"]["terms"].items()
     }
 
+    # 候选配招：来自 M1 的 support-matrix（可选文件）。
+    # 缺失时**不编**，只是没有规范配招，调用方需自己给。
+    movesets: Dict[str, Tuple[str, ...]] = {}
+    matrix_path = os.path.join(base, "support-matrix.json")
+    if os.path.exists(matrix_path):
+        with open(matrix_path, "r", encoding="utf-8") as fh:
+            matrix = json.load(fh)
+        for entry in matrix.get("pets", []):
+            cm = entry.get("candidate_moveset") or {}
+            ids = tuple(s["skill_id"] for s in (cm.get("skills") or []) if s.get("skill_id"))
+            if ids:
+                movesets[entry["pet_id"]] = ids
+        files["support-matrix.json"] = _sha256(matrix_path)
+
     return Ruleset(
         ruleset_id=ruleset_id,
         game=raw["pets"].get("game"),
@@ -362,4 +384,5 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
         terms=terms,
         files=files,
         by_name=by_name,
+        candidate_movesets=movesets,
     )

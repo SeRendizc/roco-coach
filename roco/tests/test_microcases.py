@@ -325,14 +325,35 @@ class TestFailClosed(unittest.TestCase):
         """
         from roco_env import parse as rparse
 
-        state = fresh()
+        # 合法动作按**配招**枚举，而 M1 的规范配招不一定含状态技能
+        # （那是数据选择的结果，测试不该假设）。这里显式给一套含状态技能的配招。
+        ls = RS.learnsets[A1]
+        status_ids = [sid for sid in sorted(ls.all_skill_ids)
+                      if RS.skills[sid].is_status and RS.skills[sid].energy <= 3]
+        self.assertTrue(status_ids, f"{RS.pet(A1).name} 应当有低耗状态技能")
+        def attacks_of(pet_id, n=2):
+            """各自的攻击技能——配招要按**每只自己的学习表**给，不能拿别人的。"""
+            pool = RS.learnsets[pet_id].all_skill_ids
+            return [sid for sid in sorted(pool)
+                    if RS.skills[sid].is_attack and RS.skills[sid].power][:n]
+
+        # 双方都要给，且每只都要有攻击技能（否则轮到它时敌方没有可执行动作）。
+        # A1 额外带两个状态技能，这正是本用例要观察的对象。
+        loadout = {}
+        for pid in (A1, A2, A3):
+            combo = attacks_of(pid)
+            if pid == A1:
+                combo = combo + status_ids[:2]
+            self.assertTrue(combo, f"{RS.pet(pid).name} 需要至少一个可用技能")
+            loadout[pid] = tuple(combo)
+        state = renv.reset(A_TEAM, A_TEAM, seed=7, rs=RS, loadouts=loadout)
         status_actions = [a for a in renv.legal_actions(state, RS, "player")
                           if a.kind == ACTION_SKILL and RS.skills[a.skill_id].is_status]
-        self.assertTrue(status_actions, "应当有可用的状态技能")
+        self.assertTrue(status_actions, "显式配招下应当有可用的状态技能")
 
         applied, registered = 0, 0
         for act in status_actions:
-            st = fresh()
+            st = renv.reset(A_TEAM, A_TEAM, seed=7, rs=RS, loadouts=loadout)
             pet = st.player.field_pet
             pet.energy = renv.ENERGY_MAX
             before_unsupported = len(st.unsupported)

@@ -145,6 +145,9 @@ class SideState:
     pets: List[PetState] = field(default_factory=list)
     active: int = 0                       # 场上精灵在 pets 里的下标
     items: Dict[str, int] = field(default_factory=dict)
+    # 每只精灵这场带的 4 个技能（pet_id -> skill_id 元组）。
+    # 合法动作按它枚举：图鉴可学 ≠ 这场带得上。
+    loadouts: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def field_pet(self) -> PetState:
@@ -170,6 +173,7 @@ class SideState:
             name=d["name"],
             active=d["active"],
             items=dict(d.get("items") or {}),
+            loadouts={k: tuple(v) for k, v in (d.get("loadouts") or {}).items()},
             pets=[PetState.from_dict(p) for p in d["pets"]],
         )
 

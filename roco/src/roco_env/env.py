@@ -87,11 +87,17 @@ def reset(
     *,
     seed: int = 1,
     rs: Optional[Ruleset] = None,
+    loadouts: Optional[Dict[str, Sequence[str]]] = None,
 ) -> GameState:
     """开始一局。
 
     `team` 是 3 只精灵的 id（手游完整阵容是 6 只，但训练场用 3v3，见实施书 §4.4）。
     队伍与配招的合法性在 `validate_team` 里统一检查。
+
+    `loadouts` 是每只精灵**实际带上场的配招**。省略时用 M1 选定的规范配招
+    （`Ruleset.candidate_moveset`）。这一点很重要：图鉴说「学得到」不等于
+    「这场带得上」——对局里一只精灵只带 4 个技能，所以合法动作必须按配招算，
+    否则算出来的分支在真实对局里根本不存在。
     """
     rs = rs or load_ruleset()
     if len(team) != 3:
@@ -105,12 +111,23 @@ def reset(
     if len(enemy) != 3:
         raise ValueError("对手也必须是 3 只")
 
+    problems = validate_team(rs, team, loadouts)
+    if problems:
+        raise ValueError("队伍不合法：" + "；".join(problems))
+
     state = GameState(
         ruleset_id=rs.ruleset_id,
         seed=seed,
         player=SideState(name="player", pets=[_make_pet(rs, p, i, 1) for i, p in enumerate(team)]),
         enemy=SideState(name="enemy", pets=[_make_pet(rs, p, i, 1) for i, p in enumerate(enemy)]),
     )
+    # 配招：显式给就用，否则用规范配招
+    for side, ids in ((state.player, team), (state.enemy, enemy)):
+        side.loadouts = {}
+        for pid in ids:
+            chosen = tuple(loadouts[pid]) if (loadouts and pid in loadouts) else rs.candidate_moveset(pid)
+            side.loadouts[pid] = chosen
+
     for side in (state.player, state.enemy):
         side.items = dict(DEFAULT_ITEM_STOCK)
         side.active = 0
@@ -154,7 +171,9 @@ def legal_actions(state: GameState, rs: Ruleset, side: str) -> List[Action]:
             acts.append(Action(kind=ACTION_SWITCH, target_index=i))
         return acts
 
-    for sid in sorted(rs.learnsets.get(pet.pet_id, _EMPTY).all_skill_ids):
+    # 按**配招**枚举，不是整个学习表（图鉴可学 ≠ 这场带得上）
+    chosen = tuple(me.loadouts.get(pet.pet_id) or ()) or tuple(rs.learnsets.get(pet.pet_id, _EMPTY).all_skill_ids)
+    for sid in sorted(chosen):
         skill = rs.skills.get(sid)
         if skill is None or skill.is_trait:
             continue
