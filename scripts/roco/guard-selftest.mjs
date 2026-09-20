@@ -38,8 +38,14 @@ export const INJECTIONS = [
     id: 'browser-node-import',
     guard: 'src/coach/intervention-model.js 不许在浏览器模块图里静态 import node:*',
     file: 'src/coach/intervention-model.js',
-    find: "import {GENERATED_INTERVENTION_MODEL} from './intervention-model.generated.js';",
-    replace: "import {readFileSync} from 'node:fs';\nimport {GENERATED_INTERVENTION_MODEL} from './intervention-model.generated.js';",
+    // 注入点刻意**不写成一行 import 语句**：仓库里有一条「全仓 js/mjs 的相对 import
+    // 都指向真实文件」的结构契约，它会在**登记表自己的字符串里**扫到那行文本，
+    // 然后报「指向不存在的文件」——一次误报，而且是真的会红。
+    // 改成在函数体里插一行静态 import 调用，效果一样（模块顶层出现 node:fs 引用），
+    // 但不再往任何文本里塞一条相对 import。
+    find: 'export function isValidInterventionModel(model) {',
+    replace: "import {readFileSync as __injectedFs} from 'node:fs';\n\n"
+      + 'export function isValidInterventionModel(model) {',
     catches: '页面整条 import 链静默断掉：标题与按钮在，但开不了局（第 24 轮真发生过）',
     run: {cmd: 'node', args: ['--test', 'tests/evals/structure-contract.test.js']},
   },
@@ -115,6 +121,11 @@ export function childEnv(extra = {}) {
   delete env.NODE_TEST_WORKER_ID;
   return env;
 }
+// 注意：`tests/helpers/subprocess.mjs` 有一份同义的 `cleanEnv()`。
+// 脚本与测试各自成域（脚本不进 `tests/` 的模块图），所以这里保留一份本地实现，
+// 而不是让脚本去 import 测试目录——**测试要能独立删掉**，脚本不该依赖它。
+// 两边的一致性由 `tests/evals/subprocess-env.test.js` 的静态检查守着
+// （它要求所有起 `node --test` 的地方都清理，无论用哪一份实现）。
 
 function restore(file, original) {
   writeFileSync(file, original);

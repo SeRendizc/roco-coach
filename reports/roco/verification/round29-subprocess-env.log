@@ -1,0 +1,12 @@
+=== 第 29 轮收尾全量 @ 2026-09-20T23:31:32Z ===
+  ✔ env（25s）
+  ✔ unit（15s）
+  ✔ bridge（4s）
+  ✔ toolbox-roco（0s）
+  ✔ plan-e2e（2s）
+  ✔ trajectories（1s）
+  ✔ model-manifest（1s）
+  ✔ guard-selftest（8s）
+  ✔ browser-acceptance（20s）
+  ✔ demo-acceptance（6s）
+ "verdict": "pass",

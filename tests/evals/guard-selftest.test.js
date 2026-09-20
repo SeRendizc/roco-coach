@@ -14,6 +14,7 @@ import {dirname, join} from 'node:path';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
 const {INJECTIONS, runInjection, childEnv} = await import('../../scripts/roco/guard-selftest.mjs');
+const {cleanEnv} = await import('../helpers/subprocess.mjs');
 
 test('子进程环境必须清掉测试运行器自己的变量（否则自检永远是假绿）', () => {
   // 这条是第 28 轮那个真缺陷的守卫：从 `node --test` 里再起
@@ -24,6 +25,10 @@ test('子进程环境必须清掉测试运行器自己的变量（否则自检�
   assert.equal(env.NODE_TEST_CONTEXT, undefined, '必须清掉 NODE_TEST_CONTEXT');
   assert.equal(env.NODE_TEST_WORKER_ID, undefined, '必须清掉 NODE_TEST_WORKER_ID');
   assert.equal(env.KEEP, 'yes', '别的变量要保留');
+  // 共享 helper 与脚本里的那一份必须同义：两份实现漂了就会有一半调用点被漏掉
+  const shared = cleanEnv({NODE_TEST_CONTEXT: 'child-v8', NODE_TEST_WORKER_ID: '1', KEEP: 'yes'});
+  assert.deepEqual({...shared, PATH: undefined}, {...env, PATH: undefined},
+    'guard-selftest 的 childEnv 与 tests/helpers/subprocess.mjs 的 cleanEnv 必须同义');
 });
 
 test('登记表非空，且每条都写清「抓的是什么」', () => {

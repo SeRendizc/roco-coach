@@ -55,11 +55,19 @@ export const SUITES = [
     why: '无聊天入口的完整演示链路；页面能开但演示链路断了也在这里', quick: true},
 ];
 
+/** 清净的子进程环境：清掉测试运行器自己的变量（见 tests/helpers/subprocess.mjs 的说明）。 */
+function childEnv() {
+  const env = {...process.env};
+  delete env.NODE_TEST_CONTEXT;
+  delete env.NODE_TEST_WORKER_ID;
+  return env;
+}
+
 function run(suite) {
   const started = Date.now();
   try {
     const stdout = execFileSync(suite.cmd, suite.args,
-      {cwd: ROOT, encoding: 'utf8', timeout: 1800000, stdio: ['ignore', 'pipe', 'pipe']});
+      {cwd: ROOT, encoding: 'utf8', timeout: 1800000, stdio: ['ignore', 'pipe', 'pipe'], env: childEnv()});
     return {id: suite.id, why: suite.why, ok: true, ms: Date.now() - started,
       tail: stdout.trim().split('\n').slice(-4).join('\n')};
   } catch (error) {
