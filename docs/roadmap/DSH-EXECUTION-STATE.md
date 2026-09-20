@@ -599,10 +599,12 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `349bd51`（`fix(coach): make the W5-04 layer actually engage on the live page path`）—— 已推送 |
+| HEAD | `bbd5563`（`fix(coach): the intervention layer was never engaging on the real page`）—— 已推送 |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
-| 验证 | Python **208**（1 skip）/ Node unit **472** / bridge 11 / toolbox-roco 17 / plan-e2e 10；demo-acceptance 16/16、浏览器 9/9；轨迹判定 `verdict=true`（结构 0 失败、回放 0 失败、漂移 0、反向对照 13,656/13,656）；本地模型 manifest 11/11 通过 |
-| 日志 | `reports/roco/verification/round8..round13-*.log` |
+| 验证 | **一条命令可复现**：`npm run verify:release` → 10 个套件全绿（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / model-manifest / guard-selftest 7-7 / 浏览器 9/9 / demo 16/16），约 75 秒，产物 `reports/roco/verification/latest.json` |
+| 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
+| 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**（证明登记过的守卫不是空的） |
+| 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**已进 `verify:release` 的清单**（第 31 轮加） |
 | 本轮**保留**的实验 | 无（本轮交付与实验分离，没有为刷指标改动过搜索或评分） |
 | 本轮**撤回/修正**的 | ① `skill_name` 参数键（工具不接受，任务不可完成）；② 判定器胜率判据整段扫描；③ 判定器冲突判据把「一致」判成「冲突」；④ 过期判据只卡正文；⑤ 换世界不清工具层状态版本导致串号；⑥ 给 `receiptSummary` 加注释时误删 `export`（测试全绿但生成器已不能跑） |
 | **第 14 轮已完成** | **Mac 本地模型部署**：M5 Pro 48GB preflight；`.venv-mlx`（Python 3.12 + mlx-lm 0.31.3，GPU 后端）；`mlx-community/Qwen3.5-4B-4bit`（2.9 GB，revision `0e7ffd5c62`，apache-2.0）已下载到 `.models/mlx/`（gitignore）；manifest 逐文件 SHA256 校验通过；一键 setup/start/healthcheck/stop；OpenAI-compatible 网关；feature flag 真实接入 Agent（默认 off）；21 项失败降级测试 | `docs/roco/LOCAL-MODEL.md`、`models/registry.json`、`reports/roco/verification/round14-mac-local-model.log` |
@@ -611,6 +613,7 @@ active goal 已按此重写（revision 2）。
 | **Windows 3060（明天）** | 用户指令：本轮只做 Mac。3060 那台负责 LightGBM / 小网络 / 环境 profiling / rollout，不与 Mac 拼显存 | — |
 | **第 15 轮（W5-04）** | **主动介入判定层**：预注册（`docs/roco/W5-04-INTERVENTION-GATE.md`）先写判据；窗口集从 30 条扩到 **3,740 条**（按 seed family 切分 + family 外 OOD）；成本敏感分类器（`sklearn`，cost FN:FP = 3:1）；判定层只做**抑制**、默认关闭、可逐位回滚 | `scripts/roco/{build-intervention-windows.mjs,train-intervention-model.py}`、`src/coach/intervention-model.js`、`tests/evals/intervention-layer.test.js`（10 项） |
 | **第 17 轮（W5-04 v2）** | 按「纯决策前观察量」**重新定义问题**后重跑：标签 = 必须补位 / 血量≤35% / 枚举 top1−top2 边际 > 5；特征 7 维全部决策前可得。**离线 G1—G5 全过**（召回 1.0、误报 0.0、ECE 0.0070、family 外同样过、三个固定阈值都过）。**消融臂**（去掉 `planner_margin_norm`，特征与规则同信息）误报率塌成 1.0 → 证明通过来自「特征终于覆盖了标签依赖的量」，不是多塞了特征 | `reports/roco/intervention-model-report.json`、预注册文档 §10 |
+| **第 31 轮（状态文档与现实的一致性检查）** | 第 30 轮的教训是「文档说生效、实际没生效」，而文档漂了之后每个读它的人都在错的前提上做事。这轮把**机器可核对**的几项做成检查：声明的 HEAD 必须仍是当前历史的祖先（允许落后，但落后 >12 个提交要报）、`latest.json` 必须是 pass、文档引用的每条 `reports/...` 路径必须真的存在。**第一次跑就抓到一个**：变更记录引用的 `G02-MODEL-2026-09-21.md` 不存在（实际是 `-v1.md` 与 `-v2.md`）。进 `verify:release` 清单；带反证（假 HEAD、缺失产物路径都必须被判出来）。**明确它不核对散文里的技术断言**——那些只能靠代码与量测 | `scripts/roco/verify-state-doc.mjs`、`tests/evals/state-doc.test.js`（5 项） |
 | **第 30 轮（把判定层真正接通：两个真缺陷，都在搬运环节）** | 第 21 轮只让它在**测试路径**上生效。去量**真实页面路径**发现它一直没生效，两个缺陷都不报错：① Node 桥（`src/server/roco-service.js`）组装 plan 响应时**没透传** `first_second_margin`；② 同一个量两侧**命名不同**——工具回执用 camelCase `firstSecondMargin`，页面 plan 用 snake_case `first_second_margin`，而 `rocoPlanFeatures` 只认前者，于是页面上永远返回 null。两处都修；**用真服务的端到端证据**：引擎 0.0293 → `rocoPlanFeatures().margin` 0.0293 → 判定层 `decided_by: margin-quantile`、`suppress: true`（修前是退回 sigmoid 口径、永远放行）。补一条专门守卫：断言最终的 `decided_by`，而不是断言某个中间字段存在 | `tests/evals/roco/intervention-margin-chain.test.js`、预注册文档 §13 |
 | **第 29 轮（把假绿的教训变成约定 + 静态守卫）** | 第 28 轮的成因是「起子进程要清 `NODE_TEST_*`」只活在一次调试记忆里。这轮做成三件可检查的东西：① `tests/helpers/subprocess.mjs` 的 `cleanEnv()` / `runNodeSync()`；② 新增静态守卫 `subprocess-env.test.js`——扫所有测试文件，凡起 `node --test` 必须显式清环境，带反证；③ `verify:release` 也走同一套清理（它本身可能被测试调用）。**顺手修掉两个自伤**：扫描会把**注释里**的示例当调用（先剥注释）、会扫到**自己**的反证样例（跳过本文件）；注入登记表里那行 import 文本被仓库的「相对 import 必须存在」契约扫到 → 改成在函数体里插 import 调用。另：注入点的写法本身也成了约束——登记表不能往文本里塞相对 import | `tests/helpers/subprocess.mjs`、`tests/evals/subprocess-env.test.js`、`reports/roco/verification/round29-*.log` |
 | **第 28 轮（把守卫自检自动化，并在自动化过程中又踩到一个真缺陷）** | 手工抽样变成登记表 `npm run guard:selftest`：**7 条注入**，每条写明抓的是什么，跑完无论成败都恢复；复验 **7/7 全红**。加进 `verify:release`（8 秒），**刻意不放进 `test:unit`**——它逐个改写仓库文件，与并行单测放一起会互相读到注入中的状态（实测把结构契约搞成偶发红）。**自动化过程中又发现一个真缺陷**：从 `node --test` 里再 `execFileSync('node',['--test',…])` 时，子进程继承 `NODE_TEST_CONTEXT=child-v8`，于是**不按参数跑那个文件、永远 exit 0**，自检把 7 条注入**全部报成「仍绿」**——真红被假绿盖住，而它出现在「用来发现假绿」的工具自己身上。修法 `childEnv()` 清掉那两个变量，并有测试钉住 | `scripts/roco/guard-selftest.mjs`、`tests/evals/guard-selftest.test.js`、`docs/roco/GUARD-SELFTEST.md` §3 |
@@ -831,7 +834,7 @@ active goal 已按此重写（revision 2）。
 | 2026-09-21 | **F02 全链路回归**：604 项去重合计，0 失败；P50/P95 实测 | `reports/roco/regression/`（含 18 份原始日志） |
 | 2026-09-21 | **F03 MVP 材料**：架构图 / 数据卡 / 规则覆盖表 / 状态标签 / 录屏脚本 | `docs/roco/mvp/` |
 | 2026-09-21 | 按 F02 的四条发现修掉三条（能力表、501 不可达、补位规划从未算过） | commit `44b4e92`；`roco/tests/test_sim_endpoints.py` |
-| 2026-09-21 | **G02 阵容模型：不过门槛**，`evaluate_team` 继续用规则评分 | `reports/roco/g02-team/G02-MODEL-2026-09-21.md` |
+| 2026-09-21 | **G02 阵容模型：不过门槛**，`evaluate_team` 继续用规则评分 | `reports/roco/g02-team/G02-MODEL-2026-09-21-v1.md`（不过）、`-v2.md`（过）；目录里没有不带后缀的那一份 |
 | 2026-09-21 | **属性增减真的进伤害了**（此前入口硬编码 1.0）、防御减伤不再跨回合残留 | commit `35d7120`；`TestBuffDamageWiring` |
 | 2026-09-21 | **W3-01：12 只精灵全部接入特性**（FULL 6 / PARTIAL 2 / REFUSED 4） | commit `2231191`；`roco/src/roco_env/traits.py` |
 | 2026-09-21 | 监工复核后：折算收敛到唯一函数、语义标注为假设、测试改按不变量写 | commit `9085af2`；`TestReplayCarriesLoadouts` |

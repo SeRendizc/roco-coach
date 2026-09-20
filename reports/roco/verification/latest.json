@@ -6,7 +6,7 @@
    "id": "env",
    "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
    "ok": true,
-   "ms": 24898,
+   "ms": 25106,
    "tail": [
     "> test:env",
     "> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
@@ -16,55 +16,55 @@
    "id": "unit",
    "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
    "ok": true,
-   "ms": 14540,
+   "ms": 14930,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 14410.453416"
+    "ℹ duration_ms 14801.227333"
    ]
   },
   {
    "id": "bridge",
    "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
    "ok": true,
-   "ms": 3691,
+   "ms": 3664,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 3563.663875"
+    "ℹ duration_ms 3533.633709"
    ]
   },
   {
    "id": "toolbox-roco",
    "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
    "ok": true,
-   "ms": 182,
+   "ms": 177,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 54.52125"
+    "ℹ duration_ms 52.14625"
    ]
   },
   {
    "id": "plan-e2e",
    "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
    "ok": true,
-   "ms": 1719,
+   "ms": 1706,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 1591.017458"
+    "ℹ duration_ms 1581.127166"
    ]
   },
   {
    "id": "trajectories",
    "why": "轨迹集与判定器的两个方向；判定器写坏了只有这里看得见",
    "ok": true,
-   "ms": 866,
+   "ms": 862,
    "tail": [
     ""
    ]
@@ -80,10 +80,20 @@
    ]
   },
   {
+   "id": "state-doc",
+   "why": "状态文档与现实一致：声明的 HEAD 还在历史里、验证产物在、没有引用不存在的路径。第 30 轮的教训是文档能漂，而读它的人会在错的前提上继续做事",
+   "ok": true,
+   "ms": 49,
+   "tail": [
+    "状态文档：声明 HEAD bbd5563，当前 bbd5563，最近验证套件 10 个",
+    "一致"
+   ]
+  },
+  {
    "id": "guard-selftest",
    "why": "注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑",
    "ok": true,
-   "ms": 8105,
+   "ms": 8048,
    "tail": [
     "  ✔ 红 generator-artifact-drift",
     "  ✔ 红 companion-sayable-gone",
@@ -95,7 +105,7 @@
    "id": "browser-acceptance",
    "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
    "ok": true,
-   "ms": 20666,
+   "ms": 20667,
    "tail": [
     "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
     "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
@@ -107,7 +117,7 @@
    "id": "demo-acceptance",
    "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
    "ok": true,
-   "ms": 5693,
+   "ms": 5741,
    "tail": [
     "[demo-acceptance] ✔ 玩家抱怨时陪练先回应情绪（R2/R3） — R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。",
     "[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 ",
