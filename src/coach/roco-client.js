@@ -102,6 +102,11 @@ export const CONTRACT_FIELDS = Object.freeze([
 // 只列固定契约字段、把其余丢掉，等于把「我们不知道什么」一起丢了。
 const KNOWN_TOP_LEVEL = new Set(['ok', 'error']);
 
+/** 给「还没来得及发请求就失败」的路径一个耗时读数（0 是可接受的）。 */
+function elapsedSince(options) {
+  return typeof options?.startedAt === 'number' ? Date.now() - options.startedAt : 0;
+}
+
 /** 隐藏信息键（归一化后比较）：对手待执行动作、真实随机种子、私有状态。依据 MC-013。 */
 export const HIDDEN_KEYS = Object.freeze([
   'opponentaction',
@@ -801,8 +806,31 @@ export class RocoClient {
     return this._request('POST', '/team/compare', this._payload({ team_before: teamBefore, team_after: teamAfter }, options));
   }
 
-  async planActions(state, options = {}) {
-    return this._request('POST', '/battle/plan', this._payload({ state }, options));
+  /**
+   * 2—3 回合规划。
+   *
+   * `publicState` 必须是 `env.public_planner_state()` 产出的**公开** state，
+   * 不能是 `env.serialize()` 的私有完整状态：后者带真实 seed、对手本回合已提交的
+   * 动作与对手后备血量，服务端会以 hidden_information 直接拒绝——这是有意的，
+   * 真实 seed 能预测同速与伤害的随机结果，属于隐藏信息（MC-013）。
+   *
+   * `analysisSeeds` 与真实对局 seed 无关；服务端跨种子聚合，回执给的是区间。
+   * 参数名从 `state` 改成 `publicState` 是刻意的：让「传错东西」在调用点就看得出来。
+   */
+  async planActions(publicState, options = {}) {
+    if (publicState == null || typeof publicState !== 'object') {
+      return this._localFailure(
+        ROCO_ERROR.BAD_REQUEST,
+        'planActions 需要公开 planner state（env.public_planner_state() 的产物），不是私有 serialize()',
+        elapsedSince(options), { ruleset_id: this.rulesetId, state_version: options.stateVersion ?? 0 },
+      );
+    }
+    const body = { public: publicState };
+    if (Number.isInteger(options.depth)) body.depth = options.depth;
+    if (Number.isInteger(options.beam)) body.beam = options.beam;
+    if (Number.isInteger(options.budgetMs)) body.budget_ms = options.budgetMs;
+    if (Array.isArray(options.analysisSeeds)) body.analysis_seeds = options.analysisSeeds;
+    return this._request('POST', '/battle/plan', this._payload(body, options), options);
   }
 
   /**

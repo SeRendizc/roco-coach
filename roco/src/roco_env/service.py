@@ -1108,6 +1108,23 @@ class RocoService:
                 "缺少 public：规划请求必须用 env.public_planner_state() 产出的公开 state，"
                 "而不是 env.serialize() 的私有状态（后者含真实 seed 与对手待执行动作）"
             ), body, started)
+        # 形状先校验，再进引擎。不校验的话，字段缺失会在重建时抛异常，
+        # 变成 500 internal_error——那是**调用方的错**，应当明确报 400。
+        # （这条是被 bridge 的一条测试逼出来的：它传 {turn:3} 期望 400 而不是 500。）
+        if public.get("schema_version") != env_mod.PUBLIC_PLANNER_SCHEMA_VERSION:
+            return self._answer_envelope(_bad_request(
+                f"public.schema_version 必须是 {env_mod.PUBLIC_PLANNER_SCHEMA_VERSION}，"
+                f"实际 {public.get('schema_version')!r}；"
+                "这个对象应当来自 env.public_planner_state()"
+            ), body, started)
+        for required in ("self", "opponent"):
+            if not isinstance(public.get(required), dict):
+                return self._answer_envelope(_bad_request(
+                    f"public.{required} 必须是对象（来自 env.public_planner_state()）"), body, started)
+        if not isinstance(public["self"].get("pets"), list) or not public["self"]["pets"]:
+            return self._answer_envelope(_bad_request("public.self.pets 必须是非空数组"), body, started)
+        if not isinstance(public["opponent"].get("field"), dict):
+            return self._answer_envelope(_bad_request("public.opponent.field 必须是对象"), body, started)
 
         raw_seeds = body.get("analysis_seeds", list(DEFAULT_ANALYSIS_SEEDS))
         if not isinstance(raw_seeds, list) or not raw_seeds:
@@ -1134,9 +1151,9 @@ class RocoService:
         for sv in raw_seeds:
             try:
                 state = env_mod.state_from_public_planner(public, rs, analysis_seed=sv)
-            except ValueError as exc:
-                return self._answer_envelope(
-                    _unsupported("invalid_public_state", str(exc)), body, started)
+            except (ValueError, KeyError, TypeError) as exc:
+                return self._answer_envelope(_bad_request(
+                    f"public 无法重建为分析状态：{type(exc).__name__}: {exc}"), body, started)
             if state.result:
                 return self._answer_envelope(Answer(
                     result=None, coverage=1.0,
