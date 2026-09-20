@@ -574,7 +574,11 @@ def write_doc(payload: Dict[str, Any]) -> None:
     p = lines.append
     p("# Microcase 执行台账")
     p("")
-    p(f"> 生成时间：{payload['generated_at']}　生成脚本：`scripts/roco/run-microcase-harness.py`")
+    # 生成时间**刻意不写进这份文档**：它每次跑都会变，写进来会让 git 每次都显示
+    # 「台账被改了」，久了就没人看它的 diff（与浏览器验收报告同一个理由）。
+    # 时间戳留在 `reports/roco/microcases/harness.json` 里。
+    p("> 生成脚本：`scripts/roco/run-microcase-harness.py`"
+      "　（生成时间是易变字段，留在 `reports/roco/microcases/harness.json`）")
     p(f"> 规则集：`{payload['ruleset_id']}`　计划：`{payload['plan_id']}`")
     p("")
     p("## 0. 这份台账**不是**什么")

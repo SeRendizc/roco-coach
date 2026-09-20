@@ -1,6 +1,6 @@
 # 实测 vs 引擎：标定报告
 
-> 生成时间：2026-09-20T20:16:06+00:00　脚本：`scripts/roco/calibrate-from-measurements.py`
+> 脚本：`scripts/roco/calibrate-from-measurements.py`　（生成时间是易变字段，留在 `reports/roco/microcases/calibration.json`）
 > 规则集：`roco-world-s4-2026-09-10`
 
 - **容差由人给。** 脚本不替人拍一个「算通过」的阈值；不给容差就只报告差异。

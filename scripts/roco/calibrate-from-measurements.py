@@ -330,7 +330,10 @@ def write_doc(payload: Dict[str, Any]) -> None:
     p = lines.append
     p("# 实测 vs 引擎：标定报告")
     p("")
-    p(f"> 生成时间：{payload['generated_at']}　脚本：`scripts/roco/calibrate-from-measurements.py`")
+    # 生成时间不写进文档（每次跑都变，会让 git 每次都显示改动）；
+    # 它留在 `reports/roco/microcases/calibration.json` 里。
+    p("> 脚本：`scripts/roco/calibrate-from-measurements.py`"
+      "　（生成时间是易变字段，留在 `reports/roco/microcases/calibration.json`）")
     p(f"> 规则集：`{payload['ruleset_id']}`")
     p("")
     for line in payload["important"]:
