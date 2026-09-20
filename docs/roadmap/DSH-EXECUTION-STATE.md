@@ -283,6 +283,18 @@ depth=2 在那把尺子上看起来更差。这一轮补上另一半：
 对另外两个对手，**没有任何证据表明规划更好**。样本 40—80 局，
 区间宽度 ±10 个百分点，不足以支撑更强的说法。
 
+### 第 6 轮新增（一句话索引）
+
+| 交付 | 一句话 | 证据 |
+|---|---|---|
+| `benchmark-planner-matches.py` | 整局胜负口径：planner 真的上场比赛，带 Wilson 区间与换边 | `npm run roco:benchmark-matches` |
+| **修 `plan_actions` 的 side 参数** | 它以前被完全忽略（候选写死取 player），换边那一半 89% 静默回落成基线 | `TestPlannerIsSideAware`（3 项） |
+| 胜负口径统一 | `play_match` 用 `player`/`enemy`、自己驱动用 `win`/`loss`；第一版没映射，基线显示「0 胜 0 负」 | `to_engine_result()` |
+| 回落率守卫 | 任何对手回落率 > 25% 就在 stderr 警告并在 JSON 标记 —— 静默退化的基准必须自己喊 | 同上 |
+| `check-planner-calibration.py` | 量 `expected` 与胜负的关系：**不显著**（Welch t=0.873）→ 不能当信心代理 | `npm run roco:planner-calibration` |
+| `docs/roco/BENCHMARKS.md` | 三个基准摆在一起，含它们各自偏差与「骗过我三次」的记录 | 该文件 |
+| 幂等测试补盲区 | 原来只比 git status（基线脏就看不出来）；现在比产物 SHA256 | `TestReportGeneratorsAreIdempotent` |
+
 ### `expected` 能不能当信心用？量过了：**不能**（第 6 轮）
 
 `expected` / `worst` 是规划回执里最像「信心」的两个数，很容易被上层
