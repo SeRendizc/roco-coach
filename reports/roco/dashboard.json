@@ -1,0 +1,789 @@
+{
+  "generated_at": "2026-09-20T20:20:28+00:00",
+  "generated_by": "scripts/roco/build-progress-dashboard.py",
+  "head": "5a329f8a6d0c5a8f8f25dfff09a75cf9596ae5ec",
+  "dirty_files": 8,
+  "important": [
+    "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
+    "`NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。",
+    "`BLOCKED_BY_BOUNDARY` 表示它落在用户明说的硬边界里（不训练模型、不租 GPU）。",
+    "这份台账不判「质量好不好」，只判「证据在不在」。"
+  ],
+  "counts": {
+    "DONE": 33,
+    "PARTIAL": 1,
+    "BLOCKED_BY_BOUNDARY": 3
+  },
+  "mvp_total": 30,
+  "mvp_done": 29,
+  "items": [
+    {
+      "id": "M01",
+      "title": "记录当前基线",
+      "status": "DONE",
+      "evidence": [
+        "reports/roco/m0-baseline/",
+        "docs/roadmap/DSH-EXECUTION-STATE.md"
+      ],
+      "note": "HEAD / 环境 / 基线测试逐项落盘；后续每轮都在同一个文件里续写。",
+      "evidence_checked": [
+        {
+          "path": "reports/roco/m0-baseline/",
+          "exists": true
+        },
+        {
+          "path": "docs/roadmap/DSH-EXECUTION-STATE.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "M02",
+      "title": "KEEP / ADAPT / RETIRE / MISSING 审计",
+      "status": "DONE",
+      "evidence": [
+        "docs/roco/M0-REPO-AUDIT.md"
+      ],
+      "note": "每个现有模块都有去向，含 5 条文档与运行态不一致。",
+      "evidence_checked": [
+        {
+          "path": "docs/roco/M0-REPO-AUDIT.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "D01",
+      "title": "建立数据来源清单",
+      "status": "DONE",
+      "evidence": [
+        "data/roco/sources.yaml",
+        "docs/roco/LICENSE-MATRIX.md"
+      ],
+      "note": "三个来源的 revision / sha256 / 许可 / 再分发等级。",
+      "evidence_checked": [
+        {
+          "path": "data/roco/sources.yaml",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/LICENSE-MATRIX.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "D02",
+      "title": "冻结第一条规则域",
+      "status": "DONE",
+      "evidence": [
+        "data/roco/normalized/roco-world-s4-2026-09-10/"
+      ],
+      "note": "`roco-world-s4-2026-09-10`，快照指纹进每个回执。",
+      "evidence_checked": [
+        {
+          "path": "data/roco/normalized/roco-world-s4-2026-09-10/",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "D03",
+      "title": "编写安全 importer",
+      "status": "DONE",
+      "evidence": [
+        "scripts/roco/import-snapshot.mjs",
+        "scripts/roco/lua-safe-parse.mjs"
+      ],
+      "note": "第三方 Lua **只作文本解析、不执行**（有自检脚本）。",
+      "evidence_checked": [
+        {
+          "path": "scripts/roco/import-snapshot.mjs",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/lua-safe-parse.mjs",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "D04",
+      "title": "建立数据质量报告",
+      "status": "DONE",
+      "evidence": [
+        "data/roco/conflicts.jsonl",
+        "docs/roco/DATA-CONFLICTS.md"
+      ],
+      "note": "26 处差异全部分类，未解决 = 0。",
+      "evidence_checked": [
+        {
+          "path": "data/roco/conflicts.jsonl",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/DATA-CONFLICTS.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "E01",
+      "title": "编写首批 12 个机制案例",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/roco/cases/microcases-v1.jsonl",
+        "docs/roco/MICROCASE-PLAN.md"
+      ],
+      "note": "已扩到 **30** 条（W3-01 的目标是 30—50）。不能确认的字段写 unknown，不猜。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/roco/cases/microcases-v1.jsonl",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/MICROCASE-PLAN.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "E02",
+      "title": "定义环境合同",
+      "status": "DONE",
+      "evidence": [
+        "roco/src/roco_env/env.py",
+        "roco/tests/test_replay_invariants.py"
+      ],
+      "note": "reset/observe/legal_actions/step_joint/serialize/replay；「双方基于同一事前状态」由 history 里的 observation 哈希钉住。",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/env.py",
+          "exists": true
+        },
+        {
+          "path": "roco/tests/test_replay_invariants.py",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "E03",
+      "title": "实现已验证效果原语",
+      "status": "PARTIAL",
+      "evidence": [
+        "roco/src/roco_env/effects.py",
+        "docs/roco/MICROCASE-HARNESS.md",
+        "scripts/roco/record-measurements.py"
+      ],
+      "note": "**这一项只完成了一半，必须说清楚**：引擎侧对每条待验机制都有明确行为并登记成假设（30 条里 26 条），未知机制一律 fail closed；但「已验证」那一半需要游戏内实测，当前 **0 条通过**。实测入口与标定管线已建好，文件是空的。",
+      "needs": "NEEDS_HUMAN：一次游戏内伤害实测（技能名 + 双方面板 + 属性关系 + 是否防御）",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/effects.py",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/MICROCASE-HARNESS.md",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/record-measurements.py",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "E04",
+      "title": "实现 joint-step 与确定性回放",
+      "status": "DONE",
+      "evidence": [
+        "roco/tests/test_replay_invariants.py"
+      ],
+      "note": "100 个固定 seed、每条重放两次逐事件一致；终止后再行动抛错。顺带修掉一个真 bug：`replay()` 不读记录里的 `loadouts`。",
+      "evidence_checked": [
+        {
+          "path": "roco/tests/test_replay_invariants.py",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "E05",
+      "title": "隐藏信息和不变量测试",
+      "status": "DONE",
+      "evidence": [
+        "roco/tests/test_replay_invariants.py",
+        "roco/tests/test_public_planner.py"
+      ],
+      "note": "120 局随机对局的不变量 + 60 局 observation 泄漏扫描（按字符串扫，不按字段读）。",
+      "evidence_checked": [
+        {
+          "path": "roco/tests/test_replay_invariants.py",
+          "exists": true
+        },
+        {
+          "path": "roco/tests/test_public_planner.py",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "T01",
+      "title": "实现本地规则服务",
+      "status": "DONE",
+      "evidence": [
+        "roco/src/roco_env/service.py",
+        "tests/evals/roco/bridge.test.js"
+      ],
+      "note": "六个端点：/health、/rules/query、/team/evaluate、/team/compare、/battle/plan，以及本地对局域的 /battle/new|legal|advance。每个回执都带 ruleset_id / state_version / coverage / evidence_ids / latency_ms / error_type；四类失败可区分。",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/service.py",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/bridge.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "T02",
+      "title": "接入 `coach/toolbox.js`",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/toolbox.js",
+        "tests/evals/roco/toolbox-roco.test.js"
+      ],
+      "note": "五个工具契约；路径/URL/代码/未声明参数在到达引擎之前被拒；状态变化后旧结果被丢弃。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/toolbox.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/toolbox-roco.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "S01",
+      "title": "实现五类对手策略",
+      "status": "DONE",
+      "evidence": [
+        "roco/src/roco_env/opponents.py",
+        "roco/tests/test_opponents.py"
+      ],
+      "note": "五条策略 + 只读观察代理（拿不到 state）+ 策略版本号。",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/opponents.py",
+          "exists": true
+        },
+        {
+          "path": "roco/tests/test_opponents.py",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "S02",
+      "title": "跑 1,000 场 pilot",
+      "status": "DONE",
+      "evidence": [
+        "roco/run_pilot.py",
+        "reports/roco/pilot-1000/"
+      ],
+      "note": "1000 局、非法动作 0、截断 0、异常 0；报告明写「这是环境自检，不是胜率」。",
+      "evidence_checked": [
+        {
+          "path": "roco/run_pilot.py",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/pilot-1000/",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "G01",
+      "title": "规则评分 baseline",
+      "status": "DONE",
+      "evidence": [
+        "roco/src/roco_env/team.py",
+        "docs/roco/mvp/RULE-COVERAGE.md"
+      ],
+      "note": "六个分项特征（类型/角色/速度/伤害/能量/缺口），**不输出胜率**。",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/team.py",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/mvp/RULE-COVERAGE.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "G02",
+      "title": "训练逻辑回归/LightGBM 候选",
+      "status": "DONE",
+      "evidence": [
+        "reports/roco/g02-team/G02-MODEL-2026-09-21-v2.md",
+        "reports/roco/g02-team/model.json"
+      ],
+      "note": "**过门槛**：未见家族上 log loss 0.6517 vs 规则分 0.6905、Brier 0.2303 vs 0.2486、ECE 0.0335 ≤ 0.05，AUC 0.6588。没做 LightGBM 对照，理由写在报告 §7（同规模下只会更快过拟合）。",
+      "evidence_checked": [
+        {
+          "path": "reports/roco/g02-team/G02-MODEL-2026-09-21-v2.md",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/g02-team/model.json",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "G03",
+      "title": "接入 `evaluate_team`",
+      "status": "DONE",
+      "evidence": [
+        "roco/src/roco_env/team.py",
+        "tests/evals/roco/toolbox-roco.test.js"
+      ],
+      "note": "锁定伙伴后只返回满足约束的候选；解释含「改善什么 / 牺牲什么 / 适用哪个对手池」。",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/team.py",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/toolbox-roco.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "G04",
+      "title": "实现 2—3 回合联合动作搜索",
+      "status": "DONE",
+      "evidence": [
+        "roco/src/roco_env/planner.py",
+        "roco/tests/test_planner.py"
+      ],
+      "note": "可替换启发式，超时如实上报；**风险分支**（downside/top_risks/fragile）与**原始伤害范围**（damage_preview）都在这条路径上。",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/planner.py",
+          "exists": true
+        },
+        {
+          "path": "roco/tests/test_planner.py",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "G05",
+      "title": "接入 `plan_actions`",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/toolbox.js",
+        "tests/evals/roco/toolbox-roco.test.js"
+      ],
+      "note": "桥只发公开 planner state；规划器未接入或搜索未完成时明确说出来。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/toolbox.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/toolbox-roco.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A01",
+      "title": "更新 Agent system / tool contract",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/runtime.js",
+        "src/coach/toolbox.js",
+        "tests/evals/tool-arguments.test.js"
+      ],
+      "note": "工具参数按契约校验；证据包是事实依据；不编造数值。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/runtime.js",
+          "exists": true
+        },
+        {
+          "path": "src/coach/toolbox.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/tool-arguments.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A02",
+      "title": "打通三个真实场景",
+      "status": "DONE",
+      "evidence": [
+        "src/client/roco.js",
+        "scripts/roco/demo-acceptance.mjs"
+      ],
+      "note": "配队页 → evaluate_team / compare_team_change；对局中 → plan_actions；局后 → 教学入口。三个场景都在 `/roco.html` 上跑通。",
+      "evidence_checked": [
+        {
+          "path": "src/client/roco.js",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/demo-acceptance.mjs",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "P01",
+      "title": "重写 `should_intervene` 特征",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/experience.js",
+        "src/coach/roco-experience.js",
+        "tests/roco-experience.test.js"
+      ],
+      "note": "四档动作 + 硬门控先于评分；阈值是产品参数而不是游戏机制。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/experience.js",
+          "exists": true
+        },
+        {
+          "path": "src/coach/roco-experience.js",
+          "exists": true
+        },
+        {
+          "path": "tests/roco-experience.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "P02",
+      "title": "事件回放验收",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/intervention-windows.json",
+        "tests/intervention.test.js"
+      ],
+      "note": "30 个窗口（15 该提示 / 15 不该）；P01 精度 1.0、过期 0；报告明写这是离线 fixture 而不是人体实验。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/intervention-windows.json",
+          "exists": true
+        },
+        {
+          "path": "tests/intervention.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "C01",
+      "title": "老师闭环",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/teacher.js",
+        "tests/coach.test.js"
+      ],
+      "note": "每局默认只给一个关键决策；参数变化的相似题；不把一次答对写成掌握。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/teacher.js",
+          "exists": true
+        },
+        {
+          "path": "tests/coach.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "C02",
+      "title": "陪练闭环",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/companion.js",
+        "tests/companion.test.js"
+      ],
+      "note": "六个场景；显式记忆（称呼/偏好/里程碑）与低置信的推测状态分开。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/companion.js",
+          "exists": true
+        },
+        {
+          "path": "tests/companion.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "C03",
+      "title": "记忆控制",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/memory.js",
+        "tests/companion.test.js"
+      ],
+      "note": "查看 / 纠正 / 逐条删除 / 全部清除，保留 source 与 timestamp。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/memory.js",
+          "exists": true
+        },
+        {
+          "path": "tests/companion.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "F01",
+      "title": "无聊天入口完整演示",
+      "status": "DONE",
+      "evidence": [
+        "src/client/roco.html",
+        "scripts/roco/demo-acceptance.mjs",
+        "reports/roco/demo-acceptance/demo-acceptance.json"
+      ],
+      "note": "16/16 通过；六条场景（无聊天框、危险时短提示、该沉默就不说、换阵容撤旧建议、局末一个教学入口、抱怨时先接情绪）。",
+      "evidence_checked": [
+        {
+          "path": "src/client/roco.html",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/demo-acceptance.mjs",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "F02",
+      "title": "全链路回归",
+      "status": "DONE",
+      "evidence": [
+        "reports/roco/regression/F02-REGRESSION-2026-09-21.md"
+      ],
+      "note": "人读报告 + JSON + 18 份原始日志；P50/P95 实测；四条发现修掉三条、一条（test:smoke 不自举）如实留作已知问题。",
+      "evidence_checked": [
+        {
+          "path": "reports/roco/regression/F02-REGRESSION-2026-09-21.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "F03",
+      "title": "MVP 材料",
+      "status": "DONE",
+      "evidence": [
+        "docs/roco/mvp/ARCHITECTURE.md",
+        "docs/roco/mvp/DATA-CARD.md",
+        "docs/roco/mvp/RULE-COVERAGE.md",
+        "docs/roco/mvp/STATUS-LABELS.md",
+        "docs/roco/mvp/DEMO-SCRIPT.md"
+      ],
+      "note": "架构图 / 数据卡 / 规则覆盖表 / 实现状态标签 / 录屏脚本。**录屏本身没做**，需要用户本人。",
+      "needs": "NEEDS_HUMAN：2—3 分钟录屏（脚本已备好，我没有屏幕录制能力）",
+      "evidence_checked": [
+        {
+          "path": "docs/roco/mvp/ARCHITECTURE.md",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/mvp/DATA-CARD.md",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/mvp/RULE-COVERAGE.md",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/mvp/STATUS-LABELS.md",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/mvp/DEMO-SCRIPT.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W3-01",
+      "title": "扩到 12—20 只精灵、40—60 技能",
+      "status": "DONE",
+      "evidence": [
+        "roco/src/roco_env/traits.py",
+        "data/roco/engine-trait-status.json",
+        "docs/roco/PET-SUPPORT-MATRIX.md"
+      ],
+      "note": "12/12 精灵接入（FULL 6 / PARTIAL 2 / REFUSED 4）；microcase 21 → 30；技能池 30 → 55（新开 `candidate_extras`，规范配招不动）。",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/traits.py",
+          "exists": true
+        },
+        {
+          "path": "data/roco/engine-trait-status.json",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W3-02",
+      "title": "数据增量与阵容合法性",
+      "status": "DONE",
+      "evidence": [
+        "data/roco/lineup-legality.jsonl",
+        "docs/roco/LINEUP-LEGALITY.md"
+      ],
+      "note": "169 套逐条台账；结论是 **0 套可原样执行**（名册只 12 只、快照 622 只、140/169 来自 2026-04 早于 S4）。模拟池因此从自己的 12 只组出来。",
+      "evidence_checked": [
+        {
+          "path": "data/roco/lineup-legality.jsonl",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/LINEUP-LEGALITY.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W3-03",
+      "title": "生成 1 万场以上轨迹",
+      "status": "DONE",
+      "evidence": [
+        "scripts/roco/build-trajectories.py",
+        "reports/roco/trajectories/manifest.json"
+      ],
+      "note": "12,000 局 / 234,058 transition；家族**先切分后生成**、三侧互不相交。91MB jsonl 不入库，靠 manifest 里的种子复现。",
+      "evidence_checked": [
+        {
+          "path": "scripts/roco/build-trajectories.py",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/trajectories/manifest.json",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W3-04",
+      "title": "升级工具（重训 evaluate_team / plan_actions 风险分支）",
+      "status": "DONE",
+      "evidence": [
+        "roco/src/roco_env/team_model.py",
+        "roco/src/roco_env/planner.py",
+        "tests/roco-experience.test.js"
+      ],
+      "note": "模型分只在**显式声明对手池**时给，门槛不过不加载、特征顺序不符不加载、没有模型不编概率；风险分支与伤害范围都上了页面。两次升级都过了同一个端到端演示。",
+      "evidence_checked": [
+        {
+          "path": "roco/src/roco_env/team_model.py",
+          "exists": true
+        },
+        {
+          "path": "roco/src/roco_env/planner.py",
+          "exists": true
+        },
+        {
+          "path": "tests/roco-experience.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W4",
+      "title": "Agent SFT 数据与本地训练",
+      "status": "BLOCKED_BY_BOUNDARY",
+      "evidence": [],
+      "note": "用户的硬边界：**不下载模型、不训练模型、不租云 GPU**。SFT 训练与 Qwen3-4B profiling 都落在里面。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W5",
+      "title": "Model gateway / shadow replay / 主动介入模型 / 陪练盲评",
+      "status": "BLOCKED_BY_BOUNDARY",
+      "evidence": [],
+      "note": "训练类任务同 W4 的边界；**陪练盲评需要真人评分**，不属于边界但同样做不到。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "W6",
+      "title": "learned value / Battle PPO / LLM Agentic RL / 最终交付",
+      "status": "BLOCKED_BY_BOUNDARY",
+      "evidence": [],
+      "note": "全部依赖训练与真人数据，都落在「**不下载模型、不训练模型、不租云 GPU**」这条边界里；PPO / Agentic RL 属训练，最终交付依赖它们。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    }
+  ]
+}

@@ -205,13 +205,13 @@ B/C 组 3v3 实战跑通；`parse` 覆盖率语义修正；G02 判定为不过�
 |---|---|
 | Node unit | **424 / 424** |
 | Node browser | **18（17 通过 / 1 按测试自身守卫 skip）** |
-| Python（引擎 + 服务 + 模型 + 回放 + 台账守卫） | **165 / 165**（1 skip） |
+| Python（引擎 + 服务 + 模型 + 回放 + 台账/台账守卫） | **169 / 169**（1 skip） |
 | Node↔Python 桥契约 | **11 / 11** |
 | coach 工具层 | **17 / 17** |
 | 规划端到端（plan-e2e） | **10 / 10** |
 | 结构契约 | **8 / 8** |
 | 投影层（roco-experience） | **12 / 12** |
-| **合计** | **664 项，0 失败**（1 项按守卫 skip） |
+| **合计** | **668 项，0 失败**（1 项按守卫 skip） |
 
 浏览器真机验收两项：`npm run roco:acceptance` 9/9、`npm run roco:demo-acceptance` 16/16。
 
@@ -230,6 +230,26 @@ B/C 组 3v3 实战跑通；`parse` 覆盖率语义修正；G02 判定为不过�
    并让 30 条 microcase 里的一部分可以真的判定通过；
 2. **录屏**（F03 那一项）——脚本已备好，我没有屏幕录制能力；
 3. **W4/W5/W6 是否解除「不训练模型」的边界**——不解除就只能停在这里。
+
+### 进度台账：路线图 vs 证据（本轮新增）
+
+`scripts/roco/build-progress-dashboard.py` → `docs/roco/PROGRESS.md` + `reports/roco/dashboard.json`。
+
+它回答的是最容易失真的那个问题：**路线图上被划掉多少项，其中多少项真的拿得出证据。**
+
+| 状态 | 条数 | 含义 |
+|---|---|---|
+| `DONE` | **33** | 有证据，且每个证据路径都被脚本 `os.path.exists` 检查过 |
+| `PARTIAL` | **1** | **E03**：引擎侧对每条待验机制有明确行为并登记为假设，但「已验证」需要实测 |
+| `BLOCKED_BY_BOUNDARY` | **3** | W4 / W5 / W6，落在「不下载模型、不训练模型、不租云 GPU」这条边界里 |
+
+**MVP 30 项：`DONE` 29 / 30。** 唯一没 `DONE` 的是 **E03**，
+因为它的验收是「12/12 microcase 通过」，而那需要游戏内实测 —— 当前 0 条。
+
+台账的守卫（`roco/tests/test_microcase_harness.py` 里的 `TestProgressDashboard`，4 项）：
+每条 `DONE` 的每个证据路径必须存在、非 `DONE` 必须写清原因、
+`NEEDS_HUMAN` 必须点出缺的是谁、`BLOCKED_BY_BOUNDARY` 必须写明是哪条边界。
+**写台账的脚本自己也会被测试**，否则它就成了最不可核对的一份文档。
 
 ### E04/E05 的验收不变量落地（本轮新增）
 

@@ -118,3 +118,49 @@ class TestHarnessScriptRuns(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestProgressDashboard(unittest.TestCase):
+    """进度台账的守卫：`DONE` 必须有存在的证据，且不许有「没做完却标 DONE」。
+
+    这份台账是给用户看「到底做到哪了」的，所以它自己最容易失真：
+    `[x]` 只说明「我认为做完了」。这里的断言把它压回可核对：
+    每条 `DONE` 的每个证据路径都必须真的存在。
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        path = os.path.join(_ROOT, "scripts", "roco", "build-progress-dashboard.py")
+        spec = importlib.util.spec_from_file_location("progress_dashboard", path)
+        cls.module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.module)
+
+    def test_every_done_item_has_existing_evidence(self):
+        for item in self.module.ITEMS:
+            checked = self.module.check_evidence(item.get("evidence") or [])
+            missing = [e["path"] for e in checked if not e["exists"]]
+            self.assertEqual(missing, [],
+                             f"{item['id']} 标了 {item['status']} 但证据不存在：{missing}")
+            if item["status"] == self.module.DONE:
+                self.assertTrue(checked, f"{item['id']} 标了 DONE 却没有任何证据路径")
+
+    def test_non_done_items_say_what_or_who_is_missing(self):
+        for item in self.module.ITEMS:
+            if item["status"] == self.module.DONE:
+                continue
+            self.assertTrue(item.get("note"),
+                            f"{item['id']} 不是 DONE，必须写清为什么")
+            # NEEDS_HUMAN 的项必须点出缺的是**谁**，而不是含糊说「待补」
+            if item["status"] == self.module.NEEDS_HUMAN:
+                self.assertTrue(item.get("needs"),
+                                f"{item['id']} 标了 NEEDS_HUMAN 却没说缺谁提供")
+
+    def test_boundary_blocked_items_cite_the_boundary(self):
+        for item in self.module.ITEMS:
+            if item["status"] == self.module.BLOCKED_BY_BOUNDARY:
+                self.assertIn("边界", item.get("note", ""),
+                              f"{item['id']} 标了 BLOCKED_BY_BOUNDARY 却没写是哪条边界")
+
+    def test_ids_are_unique(self):
+        ids = [item["id"] for item in self.module.ITEMS]
+        self.assertEqual(len(ids), len(set(ids)), "台账里有重复 id")

@@ -508,14 +508,26 @@ def main(argv: Optional[List[str]] = None) -> int:
     for row in rows:
         records = measurements.get(row["case_id"])
         if records:
+            # **演练数据不算实测。** `source` 以 `manual-` 开头但不是 `manual` 的
+            # （例如管线演练用的 `manual-drill`）只并进来当**对照**，
+            # 不许把状态升级成 MEASURED —— 否则一次演练就会让台账看起来像有了实测。
+            real = [r for r in records if str(r.get("source", "")).strip() == "manual"]
             row["measurements"] = records
-            row["harness_status"] = MEASURED
+            row["measurements_rejected_as_drill"] = len(records) - len(real)
+            if real:
+                row["harness_status"] = MEASURED
+            else:
+                row["note_on_measurements"] = (
+                    "这些记录的 source 不是 `manual`（演练/导入数据），"
+                    "因此**不**把状态升级为 MEASURED。"
+                )
 
     summary = {
         "total": len(rows),
         "engine_can_run": sum(1 for r in rows if r["engine_can_run_it"]),
         "not_executable": sum(1 for r in rows if not r["engine_can_run_it"]),
         "with_measurements": sum(1 for r in rows if r.get("measurements")),
+        "measured_status": sum(1 for r in rows if r["harness_status"] == MEASURED),
         "verification_passed": sum(1 for r in rows if r["verification_passed"]),
         "by_category": {},
     }
@@ -580,6 +592,10 @@ def write_doc(payload: Dict[str, Any]) -> None:
     p(f"- 连局面前提都还缺：**{summary['not_executable']}**（状态 `NOT_EXECUTABLE`）")
     p(f"- **已通过实测核验：{summary['verification_passed']}**")
     p(f"- 已有实测记录：{summary['with_measurements']}")
+    p(f"- 其中 source=manual 的（真的把状态升级为 `MEASURED`）：{summary.get('measured_status', 0)}")
+    p("")
+    p("> 演练/导入数据（`source` 不是 `manual`）会被并列显示，但**不升级状态**：")
+    p("> 否则跑一次管线演练，台账看起来就像已经有了实测。")
     p("")
     p("| 分类 | 条数 | 引擎能执行 |")
     p("|---|---:|---:|")

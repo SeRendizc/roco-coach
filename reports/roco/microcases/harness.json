@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-20T20:19:22+00:00",
+  "generated_at": "2026-09-20T20:20:50+00:00",
   "generated_by": "scripts/roco/run-microcase-harness.py",
   "ruleset_id": "roco-world-s4-2026-09-10",
   "plan_id": "microcases-v1",
@@ -18,6 +18,7 @@
     "engine_can_run": 26,
     "not_executable": 4,
     "with_measurements": 0,
+    "measured_status": 0,
     "verification_passed": 0,
     "by_category": {
       "priority": {

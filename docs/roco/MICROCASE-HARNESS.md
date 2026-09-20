@@ -1,6 +1,6 @@
 # Microcase 执行台账
 
-> 生成时间：2026-09-20T20:19:22+00:00　生成脚本：`scripts/roco/run-microcase-harness.py`
+> 生成时间：2026-09-20T20:20:50+00:00　生成脚本：`scripts/roco/run-microcase-harness.py`
 > 规则集：`roco-world-s4-2026-09-10`　计划：`microcases-v1`
 
 ## 0. 这份台账**不是**什么
@@ -19,6 +19,10 @@
 - 连局面前提都还缺：**4**（状态 `NOT_EXECUTABLE`）
 - **已通过实测核验：0**
 - 已有实测记录：0
+- 其中 source=manual 的（真的把状态升级为 `MEASURED`）：0
+
+> 演练/导入数据（`source` 不是 `manual`）会被并列显示，但**不升级状态**：
+> 否则跑一次管线演练，台账看起来就像已经有了实测。
 
 | 分类 | 条数 | 引擎能执行 |
 |---|---:|---:|

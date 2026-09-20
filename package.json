@@ -50,6 +50,7 @@
     "roco:hidden-keys": "python3 scripts/roco/export-hidden-keys.py --write",
     "roco:microcase-harness": "python3 scripts/roco/run-microcase-harness.py",
     "roco:measure": "python3 scripts/roco/record-measurements.py",
-    "roco:calibrate": "python3 scripts/roco/calibrate-from-measurements.py"
+    "roco:calibrate": "python3 scripts/roco/calibrate-from-measurements.py",
+    "roco:dashboard": "python3 scripts/roco/build-progress-dashboard.py"
   }
 }
