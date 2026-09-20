@@ -87,19 +87,28 @@ class PlannerPlayer:
     planner 是**我方**，看得到自己的完整局面，这是设计上允许的。
     """
 
-    def __init__(self, state, rs, *, depth: int, beam: int, budget_ms: int):
+    def __init__(self, state, rs, *, depth: int, beam: int, budget_ms: int,
+                 side: str = "player"):
         self.state = state
         self.rs = rs
         self.depth = depth
         self.beam = beam
         self.budget_ms = budget_ms
+        # **侧别必须传下去。** `plan_actions` 的 `side` 默认是 "player"，
+        # 换边那一半如果不告诉它，它会去规划**对手**的动作，
+        # 返回的推荐几乎必然不在我方的合法动作集里 → 每次都回落到贪心。
+        # 实测症状：换边那一半 182 次决策里有 162 次回落，
+        # 于是「换边后的胜负」实际量的是 greedy 基线，不是 planner。
+        # 这个 bug 会把整份报告变成假数据，所以下面还加了回落率守卫。
+        self.side = side
         self.decisions = 0
         self.timed_out = 0
         self.fallbacks = 0
 
     def act(self, obs, legal: Sequence[Any], seed: int, turn: int):
         self.decisions += 1
-        result = pm.plan_actions(self.state, self.rs, depth=self.depth, beam=self.beam,
+        result = pm.plan_actions(self.state, self.rs, side=self.side,
+                                 depth=self.depth, beam=self.beam,
                                  budget_ms=self.budget_ms)
         if result.timed_out:
             self.timed_out += 1
@@ -107,7 +116,7 @@ class PlannerPlayer:
         if chosen is None or chosen not in legal:
             # 推荐缺失或不可执行 → 回落到一步贪心；**计数**，不静默。
             self.fallbacks += 1
-            chosen = pm.immediate_greedy(self.state, self.rs) or legal[0]
+            chosen = pm.immediate_greedy(self.state, self.rs, side=self.side) or legal[0]
             if chosen not in legal:
                 chosen = legal[0]
         return chosen
@@ -133,7 +142,8 @@ def play_one(rs, team_a: List[str], team_b: List[str], seed: int,
     player = None
     if use_planner:
         state = renv.reset(team_a, team_b, seed=seed, rs=rs)
-        player = PlannerPlayer(state, rs, depth=depth, beam=beam, budget_ms=budget_ms)
+        player = PlannerPlayer(state, rs, depth=depth, beam=beam, budget_ms=budget_ms,
+                               side=planner_side)
     enemy = ropp.get_strategy(opponent_strategy)
     # `planner_side` 支持换边：默认 planner 坐 player（先手侧）。
     # 换边时把胜负换算回「planner 视角」，否则换边那一半会反向计入。
@@ -280,6 +290,19 @@ def main(argv: Optional[List[str]] = None) -> int:
             }
             entry["delta_win_rate"] = round(
                 entry["planner"]["win_rate"] - entry["greedy_baseline"]["win_rate"], 4)
+        # 守卫：回落率过高说明「planner 根本没在决策」——
+        # 那种情况下这份数据是假的（第一版换边就是 162/182 = 89%）。
+        decisions = entry["planner"]["decisions"]
+        fallbacks = entry["planner"]["fallbacks"]
+        rate = (fallbacks / decisions) if decisions else 0.0
+        entry["planner"]["fallback_rate"] = round(rate, 4)
+        if rate > 0.25:
+            print(f"[{opponent}] **警告**：回落率 {rate:.1%}"
+                  f"（{fallbacks}/{decisions}）—— planner 基本没有在决策，"
+                  f"这份数据不能当作「planner 的胜负」。", file=sys.stderr)
+            entry["planner"]["warning"] = (
+                f"回落率 {rate:.1%} 过高；这些胜负主要来自回落的贪心基线，不是 planner。"
+            )
         report["results"][opponent] = entry
         print(f"[{opponent}] planner {entry['planner']['wins']}/{entry['planner']['games']}"
               f"  基线 {entry.get('greedy_baseline', {}).get('wins', '—')}"

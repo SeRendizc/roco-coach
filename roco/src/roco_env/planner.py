@@ -242,13 +242,14 @@ def _quick(a: Action, rs: Ruleset) -> float:
     return 0.9
 
 
-def _quick_candidates(state: GameState, rs: Ruleset, *, beam: int) -> List[Action]:
+def _quick_candidates(state: GameState, rs: Ruleset, *, beam: int,
+                      side: str = "player") -> List[Action]:
     """便宜版候选：按类别保底 + 静态威力排序。**用于 rollout 内部**。
 
     这里保留「便宜」是刻意的：rollout 每一层都要调它，
     而下面那个 `_my_candidates` 会为每个动作跑一遍一步推演 —— 放在深层会爆预算。
     """
-    actions = [a for a in renv.legal_actions(state, rs, "player") if a.kind != "escape"]
+    actions = [a for a in renv.legal_actions(state, rs, side) if a.kind != "escape"]
     if not actions:
         return []
     by_kind: Dict[str, List[Action]] = {}
@@ -286,7 +287,8 @@ def one_ply_value(state: GameState, rs: Ruleset, action: Action, *, side: str = 
     return total
 
 
-def _my_candidates(state: GameState, rs: Ruleset, *, beam: int) -> List[Action]:
+def _my_candidates(state: GameState, rs: Ruleset, *, beam: int,
+                   side: str = "player") -> List[Action]:
     """根节点的我方候选：**按一步推演值**挑，而不是按静态威力挑。
 
     为什么改（这是本仓库里第一次用一个客观基准量出来的修正）：
@@ -304,10 +306,11 @@ def _my_candidates(state: GameState, rs: Ruleset, *, beam: int) -> List[Action]:
     于是「换宠承伤」「防御等一轮」永远进不了搜索 —— 而多回合规划存在的理由
     恰恰是这两类分支。保底与按值排序**并存**，不是二选一。
     """
-    actions = [a for a in renv.legal_actions(state, rs, "player") if a.kind != "escape"]
+    actions = [a for a in renv.legal_actions(state, rs, side) if a.kind != "escape"]
     if not actions:
         return []
-    scored: List[Tuple[float, Action]] = [(one_ply_value(state, rs, a), a) for a in actions]
+    scored: List[Tuple[float, Action]] = [
+        (one_ply_value(state, rs, a, side=side), a) for a in actions]
     scored.sort(key=lambda pair: -pair[0])
 
     picked: List[Action] = []
@@ -356,7 +359,7 @@ def plan_actions(
     # 我们不该把它的 seed 换掉（那会污染调用方后续的 replay）。
     original_seed = state.seed
     state.seed = SEARCH_SEED
-    my_candidates = _my_candidates(state, rs, beam=beam)
+    my_candidates = _my_candidates(state, rs, beam=beam, side=side)
     branches = 0
     #: 被丢弃的分支数（非法或未支持的组合）与原因计数。
     #: 只报 branches 不报丢弃数时，「搜了 3 个分支」与「13 个候选里 10 个算不出来」
@@ -426,11 +429,11 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
                 theirs_first = opp_action if side == "player" else first
                 cur = _clone(root)
                 if mine_first is not None and mine_first.kind == "switch" and mine_first.target_index is not None:
-                    renv.step_replace(cur, rs, "player", int(mine_first.target_index))
+                    renv.step_replace(cur, rs, side, int(mine_first.target_index))
                 if theirs_first is not None and theirs_first.kind == "switch" and theirs_first.target_index is not None:
                     queue = renv.needs_replacement(cur)
-                    if "enemy" in queue:
-                        renv.step_replace(cur, rs, "enemy", int(theirs_first.target_index))
+                    if opponent in queue:
+                        renv.step_replace(cur, rs, opponent, int(theirs_first.target_index))
                 # 补位不消耗战斗回合，`remaining` 不递减：这里的「深度」是换人次数
                 return evaluate(cur, rs, side)
             nxt = renv.step_joint(
@@ -450,7 +453,7 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
         for _ in range(remaining):
             if cur.result or cur.phase == "replace":
                 break
-            mine = _quick_candidates(cur, rs, beam=2)
+            mine = _quick_candidates(cur, rs, beam=2, side=side)
             theirs = opponent_distribution(cur, rs, beam=2)
             if not mine or not theirs:
                 break

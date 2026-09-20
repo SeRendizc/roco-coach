@@ -219,3 +219,58 @@ class TestSearchIsDeterministicAcrossAnalysisSeeds(unittest.TestCase):
             pl.plan_actions(state2, RS, depth=2, beam=4, budget_ms=2000,
                             clock=lambda: (_ for _ in ()).throw(RuntimeError("boom")))
         self.assertEqual(state2.seed, original2, "异常路径没有恢复 seed")
+
+
+class TestPlannerIsSideAware(unittest.TestCase):
+    """`plan_actions(side=...)` 必须真的按那一侧规划。
+
+    **这是一个真实的既有 bug。** `_my_candidates` 把 `legal_actions(..., "player")`
+    写死在函数体里，不看 `side` —— 于是 `side="enemy"` 时：
+    候选来自**玩家**的合法动作，估值也按玩家视角算，返回的推荐
+    几乎必然不在对手的合法动作集合里。
+
+    症状是间接发现的：我在 `benchmark-planner-matches.py` 里加了「换边」
+    （让 planner 坐 enemy 侧）来排除先手优势，结果换边那一半
+    **182 次决策里 162 次回落到贪心**（89%）——也就是说那一半量的其实是基线，
+    不是 planner。一个会静默退化成基线的基准比没有基准更糟：
+    它给出的数字看起来像结论。
+    """
+
+    def _states(self, count=6):
+        ids = [RS.pets_by_name(n)[0].pet_id for n in
+               ("寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃", "音速犬")]
+        import random
+        rng = random.Random(4242)
+        out = []
+        for _ in range(count):
+            a = rng.sample(ids, 3)
+            b = rng.sample(ids, 3)
+            out.append(renv.reset(a, b, seed=rng.randrange(1, 10 ** 5), rs=RS))
+        return out
+
+    def test_recommendation_is_legal_for_the_requested_side(self):
+        for state in self._states():
+            for side in ("player", "enemy"):
+                legal = renv.legal_actions(state, RS, side)
+                if not legal:
+                    continue
+                result = pl.plan_actions(state, RS, side=side, depth=2, beam=3, budget_ms=800)
+                if result.recommended is None:
+                    continue          # 没有推荐是可以的（超时/无候选），给它错的动作不行
+                self.assertIn(result.recommended, legal,
+                              f"side={side} 的推荐不在该侧的合法动作里：{result.recommended_label}")
+
+    def test_enemy_side_candidates_come_from_the_enemy_side(self):
+        for state in self._states(3):
+            enemy_legal = set(renv.legal_actions(state, RS, "enemy"))
+            candidates = pl._my_candidates(state, RS, beam=3, side="enemy")
+            self.assertTrue(candidates, "对手侧应当有候选")
+            for action in candidates:
+                self.assertIn(action, enemy_legal,
+                              "对手侧的候选必须来自对手的合法动作集合")
+
+    def test_both_sides_can_be_planned_without_crashing(self):
+        for state in self._states(4):
+            for side in ("player", "enemy"):
+                result = pl.plan_actions(state, RS, side=side, depth=2, beam=2, budget_ms=500)
+                self.assertIsNotNone(result, f"side={side} 的规划返回了 None")
