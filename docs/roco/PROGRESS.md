@@ -75,6 +75,17 @@
 - **W6 learned value / Battle PPO / LLM Agentic RL / 最终交付**（`BLOCKED_BY_BOUNDARY`）
   - 全部依赖训练与真人数据，都落在「**不下载模型、不训练模型、不租云 GPU**」这条边界里；PPO / Agentic RL 属训练，最终交付依赖它们。
 
+## planner 的三个基准（结论见 `docs/roco/BENCHMARKS.md`）
+
+| 命令 | 口径 | 量出来的结论 |
+|---|---|---|
+| `npm run roco:benchmark-planner` | 一步推演值当正确答案 | top1 0.27 → **0.59**（修掉候选裁剪之后）；**不能**比较搜索深度 |
+| `npm run roco:benchmark-matches` | 整局胜负 | 对 `greedy_damage` **弱证据**（0.550 vs 0.450）；对另外两个对手**无证据** |
+| `npm run roco:planner-calibration` | `expected` 对整局胜负 | **不显著**（Welch t=0.873）→ `expected` **不能**当信心代理 |
+
+第三个是**否定结论**，也是最有行动价值的一个：它挡住了
+「把 `expected` 当胜率展示给玩家」这条看起来顺理成章的用法。
+
 ## 需要用户的三件事（唯一阻塞）
 
 1. **一条游戏内伤害实测**：技能名 + 双方精灵名 + 是否防御 + 实际伤害数字。
