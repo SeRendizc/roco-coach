@@ -91,9 +91,13 @@ from urllib.parse import parse_qs
 
 try:  # 作为包导入：python3 -m roco_env.service
     from .data import DEFAULT_RULESET, Ruleset, RulesetError, load_ruleset
+    from . import team as team_mod
+    from . import env as env_mod
 except ImportError:  # 直接当脚本跑：python3 roco/src/roco_env/service.py
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from roco_env.data import DEFAULT_RULESET, Ruleset, RulesetError, load_ruleset  # type: ignore
+    from roco_env import team as team_mod  # type: ignore
+    from roco_env import env as env_mod  # type: ignore
 
 
 PROTOCOL_VERSION = 1
@@ -127,19 +131,6 @@ CAPABILITIES: Dict[str, bool] = {
 
 # 未实现的能力 → 结构化拒绝理由（绝不返回编造的数值）
 NOT_IMPLEMENTED: Dict[str, Dict[str, Any]] = {
-    "/team/evaluate": {
-        "code": "team_evaluation",
-        "reason": (
-            "队伍强度评估需要官方伤害公式、等级→面板换算与效果原语，"
-            "三者都无一手来源（MC-010/MC-011，见 docs/roco/MICROCASE-PLAN.md §5）"
-        ),
-        "missing": ["official_damage_formula", "level_scaling_formula", "effect_primitives"],
-    },
-    "/team/compare": {
-        "code": "team_comparison",
-        "reason": "换人前后对比依赖与 /team/evaluate 相同的未核验机制，故同样 fail closed",
-        "missing": ["official_damage_formula", "level_scaling_formula", "effect_primitives"],
-    },
     "/battle/plan": {
         "code": "battle_planning",
         "reason": (
@@ -962,6 +953,124 @@ class RocoService:
 
     # ── 尚未实现的引擎端点 ──────────────────────────────────────────────
 
+    def _ruleset_ok(self, body: Dict[str, Any]) -> Tuple[Optional[Ruleset], Optional[Tuple[int, Dict[str, Any]]]]:
+        """复用既有的 ruleset/指纹/隐藏信息校验，只取 rs 与可能的错误响应。"""
+        rs, early, _sv, _fp = self._resolve_or_envelope(body, time.perf_counter())
+        return rs, early
+
+    def _answer_envelope(
+        self, answer: Answer, body: Dict[str, Any], started: float
+    ) -> Tuple[int, Dict[str, Any]]:
+        """把 Answer 包成契约信封。与 rules_query 的收尾保持一致，
+        这样 team 端点也自动带上 ruleset_id / coverage / evidence_ids / latency_ms。"""
+        _rs, _early, state_version, fingerprint = self._resolve_or_envelope(body, started)
+        env = self._envelope(
+            started=started,
+            ruleset_id=self.served_ruleset_id,
+            state_version=state_version,
+            snapshot_fingerprint=fingerprint,
+            coverage=answer.coverage,
+            evidence_ids=answer.evidence_ids,
+            unsupported=answer.unsupported,
+            error_type=answer.error_type,
+            error=answer.error,
+            result=answer.result,
+            **answer.extra,
+        )
+        return ERROR_HTTP_STATUS.get(answer.error_type or "", 200), env
+
+    def team_evaluate(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        """规则 baseline 阵容评估。
+
+        注意它**不输出胜率**：只给分项特征与文字结论。
+        如果请求里带了 loadouts，就用它；否则用固有技能。
+        队伍合法性先按规则集校验，非法直接 400，不猜。
+        """
+        started = time.perf_counter()
+        rs, early = self._ruleset_ok(body)
+        if early is not None:
+            return early
+        squad = body.get("team")
+        if not isinstance(squad, list) or not all(isinstance(x, str) for x in squad):
+            return self._answer_envelope(_bad_request("team 必须是精灵 id 的数组"), body, started)
+        loadouts = body.get("loadouts")
+        if loadouts is not None and not isinstance(loadouts, dict):
+            return self._answer_envelope(_bad_request("loadouts 必须是 {pet_id: [skill_id...]}"), body, started)
+
+        problems = env_mod.validate_team(rs, squad, loadouts)
+        if problems:
+            return self._answer_envelope(_bad_request("队伍不合法：" + "；".join(problems)), body, started)
+
+        try:
+            score = team_mod.evaluate_team(squad, rs=rs, loadouts=loadouts)
+        except ValueError as exc:
+            return self._answer_envelope(_bad_request(str(exc)), body, started)
+
+        payload = score.to_dict()
+        evidence = sorted({e for f in score.features for e in f.evidence})
+        return self._answer_envelope(Answer(
+            result=payload,
+            # coverage 表示「这些特征有多少来自真实数据」：全部来自规则集，故 1.0；
+            # 但它**不代表**评估的准确性——准确性取决于未核验的伤害公式。
+            coverage=1.0,
+            evidence_ids=[f"ev:{rs.ruleset_id}:pets.json#{p}" for p in squad],
+            extra={
+                "evidence_skill_ids": evidence,
+                "calibration": payload.get("calibration"),
+                "limitations": [
+                    "不输出胜率：没有样本量、段位与版本可信的真人数据",
+                    "特征由规则与数据算出，不经过模拟对局",
+                    "面板值换算与伤害公式仍属未核验假设（MC-010/MC-011）",
+                ],
+            },
+        ), body, started)
+
+    def team_compare(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        """换人前后对比：报告**改善什么、牺牲什么**。"""
+        started = time.perf_counter()
+        rs, early = self._ruleset_ok(body)
+        if early is not None:
+            return early
+        # 契约形状：工具声明与 JS 客户端都用 team_before / team_after
+        # （见 src/coach/roco-client.js 的 ROCO_TOOLS）。服务端接受它，
+        # 自己算出换出了谁、换入了谁——调用方说的是「换成什么样」，
+        # 而不是「用谁换谁」，让服务端做这个 diff 可以少一个出错的地方。
+        before = body.get("team_before")
+        after = body.get("team_after")
+        if not isinstance(before, list) or not all(isinstance(x, str) for x in before):
+            return self._answer_envelope(_bad_request("team_before 必须是精灵 id 的数组"), body, started)
+        if not isinstance(after, list) or not all(isinstance(x, str) for x in after):
+            return self._answer_envelope(_bad_request("team_after 必须是精灵 id 的数组"), body, started)
+        if len(before) != len(after):
+            return self._answer_envelope(
+                _bad_request("team_before 与 team_after 长度必须相同（只做等量换人比较）"), body, started)
+
+        dropped = [p for p in before if p not in after]
+        added = [p for p in after if p not in before]
+        if len(dropped) != 1 or len(added) != 1:
+            return self._answer_envelope(
+                _bad_request(f"两支队伍应当只差一只（实际换出 {len(dropped)}、换入 {len(added)}）"),
+                body, started)
+        drop, replacement = dropped[0], added[0]
+        for pid in (drop, replacement):
+            if pid not in rs.pets:
+                return self._answer_envelope(_not_found(f"未知精灵：{pid}"), body, started)
+
+        try:
+            comp = team_mod.compare_team_change(
+                before, replacement, drop=drop, rs=rs,
+                loadouts=body.get("loadouts"),
+            )
+        except ValueError as exc:
+            return self._answer_envelope(_bad_request(str(exc)), body, started)
+
+        return self._answer_envelope(Answer(
+            result=comp,
+            coverage=1.0,
+            evidence_ids=[f"ev:{rs.ruleset_id}:pets.json#{p}" for p in after],
+            extra={"calibration": comp.get("calibration")},
+        ), body, started)
+
     def not_implemented(self, path: str, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
         started = time.perf_counter()
         rs, early, state_version, fingerprint = self._resolve_or_envelope(body, started)
@@ -1083,6 +1192,10 @@ class RocoRequestHandler(BaseHTTPRequestHandler):
         try:
             if path == "/rules/query":
                 status, env = service.rules_query(body)
+            elif path == "/team/evaluate":
+                status, env = service.team_evaluate(body)
+            elif path == "/team/compare":
+                status, env = service.team_compare(body)
             elif path in NOT_IMPLEMENTED:
                 status, env = service.not_implemented(path, body)
             else:

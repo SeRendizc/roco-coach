@@ -245,28 +245,61 @@ test('桥：机制不支持时返回 unsupported，而不是一个数字', { ski
     // 结果里不该出现任何「数字型」的最终数值
     assert.equal(effect.result, null);
 
-    // 三个引擎逻辑还没写的端点：结构化 not_implemented + coverage 0
-    const team = await client.evaluateTeam(['pet_000225', 'pet_000190']);
-    assert.equal(team.ok, false);
-    assert.equal(team.code, ROCO_ERROR.NOT_IMPLEMENTED);
-    assert.equal(team.failure_class, ROCO_FAILURE_CLASS.UNSUPPORTED, 'not_implemented 属于「不支持」大类');
-    assert.equal(team.coverage, 0);
-    assert.equal(team.result, null);
-
-    const compare = await client.compareTeamChange(['pet_000225'], ['pet_000190']);
-    assert.equal(compare.code, ROCO_ERROR.NOT_IMPLEMENTED);
-    assert.equal(compare.coverage, 0);
-
+    // 引擎逻辑还没写的端点：结构化 not_implemented + coverage 0。
+    // 注意这里**不再**用 team/evaluate 与 team/compare 当例子——那两个已经接上
+    // 规则 baseline，返回的是真实特征；用已实现的端点当「未实现」的例子，
+    // 会在实现落地时变成假失败（这条测试就是这么被发现的）。
     const plan = await client.planActions({ turn: 3 });
+    assert.equal(plan.ok, false);
     assert.equal(plan.code, ROCO_ERROR.NOT_IMPLEMENTED);
+    assert.equal(plan.failure_class, ROCO_FAILURE_CLASS.UNSUPPORTED, 'not_implemented 属于「不支持」大类');
     assert.equal(plan.coverage, 0);
+    assert.equal(plan.result, null);
 
     const summary = await client.summarizeBattle({ match_id: 'm1' });
     assert.equal(summary.code, ROCO_ERROR.NOT_IMPLEMENTED);
     assert.equal(summary.coverage, 0);
 
-    assert.equal(isNotImplemented(team), true);
-    assert.equal(isUnsupported(team), true, 'not_implemented 与 unsupported_effect 同属不支持');
+    assert.equal(isNotImplemented(plan), true);
+    assert.equal(isUnsupported(plan), true, 'not_implemented 与 unsupported_effect 同属不支持');
+  });
+});
+
+test('桥：阵容评估已接规则 baseline，且明确不输出胜率', { skip: SKIP }, async () => {
+  await withService(async (client) => {
+    const team = await client.evaluateTeam(['pet_000225', 'pet_000190', 'pet_000445']);
+    assert.equal(team.ok, true, `阵容评估应当可用，实际 ${team.code}: ${team.message}`);
+    assert.equal(team.coverage, 1.0, '特征全部来自规则集，故 coverage = 1');
+    assert.ok(team.evidence_ids.length >= 3, '每条队伍成员都要有证据 id');
+    assert.equal(team.result.calibration, 'rule-baseline-no-simulation');
+    // 六个特征都在
+    const names = team.result.features.map((f) => f.name).sort();
+    assert.deepEqual(names, ['damage', 'energy', 'gaps', 'roles', 'speed', 'types']);
+    // 不得输出胜率类字段
+    const blob = JSON.stringify(team.result);
+    for (const forbidden of ['"winrate"', '"win_rate"', '"overall"', '"tier"']) {
+      assert.ok(!blob.includes(forbidden), `规则 baseline 不得输出 ${forbidden}`);
+    }
+    // limitations / calibration 由信封展开到**顶层**（与 service 的 _envelope 一致），
+    // 不在 result 里。注释写清这点，免得下次又找错位置。
+    assert.ok(team.limitations.length >= 3, '必须带上局限性说明');
+    assert.equal(team.calibration, 'rule-baseline-no-simulation');
+
+    // 非法队伍要 400，而不是猜一个结果
+    const bad = await client.evaluateTeam(['pet_000225']);
+    assert.equal(bad.ok, false);
+    assert.equal(bad.code, ROCO_ERROR.BAD_REQUEST);
+    assert.equal(bad.coverage, 0);
+
+    // 换人比较：客户端契约是 (teamBefore, teamAfter)，服务端自己 diff 出换出/换入。
+    // 要同时给出改善与代价。
+    const comp = await client.compareTeamChange(
+      ['pet_000225', 'pet_000190', 'pet_000445'],
+      ['pet_000225', 'pet_000190', 'pet_000062']);
+    assert.equal(comp.ok, true, `换人比较应当可用，实际 ${comp.code}: ${comp.message}`);
+    assert.ok(Array.isArray(comp.result.improves));
+    assert.ok(Array.isArray(comp.result.costs));
+    assert.ok(comp.result.note.includes('不等于'), '必须写明它不等于「更强」');
   });
 });
 

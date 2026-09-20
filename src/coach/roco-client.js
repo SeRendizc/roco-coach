@@ -94,6 +94,14 @@ export const CONTRACT_FIELDS = Object.freeze([
   'error_type',
 ]);
 
+// 契约字段之外，这些顶层键已被单独取出；**其余顶层键属于端点专有字段**，
+// 会被 _normalize 透传给调用方。
+// 为什么要透传：服务端 `_envelope(**extra)` 把 extra 展开到顶层，里面可能有
+// 关键信息——最典型的是阵容评估的 `limitations` 与 `calibration`，
+// 它们说明这个结果**不声称**什么（例如不声称胜率）。
+// 只列固定契约字段、把其余丢掉，等于把「我们不知道什么」一起丢了。
+const KNOWN_TOP_LEVEL = new Set(['ok', 'error']);
+
 /** 隐藏信息键（归一化后比较）：对手待执行动作、真实随机种子、私有状态。依据 MC-013。 */
 export const HIDDEN_KEYS = Object.freeze([
   'opponentaction',
@@ -639,7 +647,17 @@ export class RocoClient {
     const coverage = typeof envelope.coverage === 'number' ? envelope.coverage : null;
     const code = errorType === null ? (envelope.ok === false ? mapServerErrorType(null, coverage) : null) : mapServerErrorType(errorType, coverage);
     const ok = envelope.ok === true && code === null;
+    // 信封允许带端点专有字段（服务端 `_envelope(**extra)` 会展开到顶层）。
+    // 这些字段必须透传，否则会丢掉关键信息——最典型的是阵容评估的 `limitations`
+    // 与 `calibration`：它们说明这个结果**不声称**什么（例如不声称胜率）。
+    // 只列已知的契约字段、把其余丢掉，等于把「我们不知道什么」一起丢了。
+    const extra = {};
+    for (const key of Object.keys(envelope)) {
+      if (CONTRACT_FIELDS.includes(key) || KNOWN_TOP_LEVEL.has(key)) continue;
+      extra[key] = envelope[key];
+    }
     return {
+      ...extra,
       ok,
       code: ok ? null : code,
       failure_class: ok ? null : FAILURE_CLASS[code] || 'unknown',
