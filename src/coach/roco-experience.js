@@ -130,6 +130,12 @@ export function rocoHintText(plan) {
   const tail = worst && Number.isFinite(worst.min) && Number.isFinite(worst.max)
     ? `（最坏尾部 ${worst.min.toFixed(2)} ~ ${worst.max.toFixed(2)}）`
     : '';
+  // 风险分支（W3-04）：这一手「脆」的时候**降级措辞**，不说「可以优先考虑」。
+  // `fragile` 来自规划器按产品阈值判定的 downside，不是游戏机制。
+  if (plan.risk && plan.risk.fragile === true) {
+    const gap = Number.isFinite(plan.risk.downside_max) ? plan.risk.downside_max.toFixed(2) : '—';
+    return `「${plan.recommendation}」这一手不稳：对手换个选择就要亏约 ${gap}，先看区间再定${tail}`;
+  }
   return `可以优先考虑「${plan.recommendation}」${plan.main_counter ? `，注意对方可能${plan.main_counter}` : ''}${tail}`;
 }
 

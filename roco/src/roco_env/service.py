@@ -95,6 +95,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import signal
 import sys
 import threading
@@ -230,6 +231,26 @@ def _normalize_key(key: str) -> str:
     return "".join(ch for ch in key.lower() if ch.isalnum())
 
 
+#: 允许以**纯标记字段**出现的键名：它们不是在携带隐藏信息，而是在说
+#: 「这一项讲的是对手的某个动作」。风险分支（W3-04）的回执里有
+#: `risk.worst_seed_risks[].opponent_action`，值是「诡刺」这样的动作名字串，
+#: 按名字扫会把它判成违规、整份回执丢掉 —— 这是加风险分支时撞出来的真实误报。
+#:
+#: 纪律：只在这些**分析结果**父路径下放行，且值必须是字符串。
+#: `state.opponent_action` 这种状态字段照样拦。
+VALUE_MARKER_KEYS = frozenset({"opponentaction", "opponentchoice", "opponentselection"})
+VALUE_MARKER_PARENTS = frozenset({"risk", "toprisks", "worstseedrisks", "perseed", "branches"})
+
+
+def _parent_segment(prefix: str) -> str:
+    """取父路径最后一段并归一化：`risk.worst_seed_risks[0]` → `worstseedrisks`。"""
+    if not prefix:
+        return ""
+    last = prefix.split(".")[-1]
+    last = re.sub(r"\[\d+\]$", "", last)
+    return _normalize_key(last)
+
+
 def find_hidden_keys(payload: Any, prefix: str = "") -> List[str]:
     """递归找出请求/回执里的隐藏信息键，返回可读路径列表。
 
@@ -246,9 +267,16 @@ def find_hidden_keys(payload: Any, prefix: str = "") -> List[str]:
     """
     hits: List[str] = []
     if isinstance(payload, dict):
+        under_marker_parent = _parent_segment(prefix) in VALUE_MARKER_PARENTS
         for key, value in payload.items():
             path = f"{prefix}.{key}" if prefix else str(key)
-            if _normalize_key(str(key)) in HIDDEN_KEYS:
+            normalized = _normalize_key(str(key))
+            is_marker = (
+                under_marker_parent
+                and normalized in VALUE_MARKER_KEYS
+                and isinstance(value, str)
+            )
+            if normalized in HIDDEN_KEYS and not is_marker:
                 hits.append(path)
             hits.extend(find_hidden_keys(value, path))
     elif isinstance(payload, list):
@@ -1321,6 +1349,22 @@ class RocoService:
             "timed_out": timed_out,
             "unsupported_seen": unsupported_total,
             "opponent_model": per_seed[0]["opponent_model"],
+            # 风险分支（W3-04）：把每个分析种子的 downside 聚成区间，
+            # 并给出最差的那个种子的 top_risks（它们描述的才是真实的对手动作名）。
+            "risk": {
+                "downside_min": round(min(p["risk"].get("downside", 0.0) for p in per_seed), 4),
+                "downside_max": round(max(p["risk"].get("downside", 0.0) for p in per_seed), 4),
+                "fragile": any(p["risk"].get("fragile") for p in per_seed),
+                "threshold": per_seed[0]["risk"].get("threshold"),
+                "worst_seed_risks": max(
+                    per_seed, key=lambda p: p["risk"].get("downside", 0.0)
+                )["risk"].get("top_risks", []),
+                "note": (
+                    "risk 只描述推荐那一手的落差：`downside` 是期望到最坏的举例，"
+                    "`fragile` 表示落差超过产品阈值（用于措辞分级，不是游戏机制）。"
+                    "对手仍是启发式分布建模，不是真人行为。"
+                ),
+            },
             "per_seed": per_seed,
         }
 

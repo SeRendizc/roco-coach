@@ -266,6 +266,16 @@ export function createRocoService(options={}){
    worst:r.worst??null,
    branches_evaluated:r.branches_evaluated??null,
    depth_searched:r.depth_searched??null,
+   // 风险分支（W3-04）：推荐那一手在对手各种选择下的落差。
+   // `fragile` 为真时页面把措辞降级——它是**产品阈值**，不是游戏机制。
+   risk:r.risk?{
+    downside_min:r.risk.downside_min??null,
+    downside_max:r.risk.downside_max??null,
+    fragile:r.risk.fragile===true,
+    threshold:r.risk.threshold??null,
+    top_risks:Array.isArray(r.risk.worst_seed_risks)?r.risk.worst_seed_risks.slice(0,3):[],
+    note:r.risk.note??null,
+   }:null,
    coverage:typeof envelope.coverage==='number'?envelope.coverage:null,
    timed_out:r.timed_out===true,
    unsupported:Array.isArray(envelope.unsupported)?envelope.unsupported:[],

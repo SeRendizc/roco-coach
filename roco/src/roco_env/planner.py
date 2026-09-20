@@ -33,6 +33,9 @@ MAX_BEAM = 8
 DEFAULT_DEPTH = 2
 MAX_DEPTH = 3
 DEFAULT_BUDGET_MS = 2000
+#: 期望到最坏的落差超过这个值，就认为这一手「脆」（`risk.fragile`）。
+#: 这是**产品阈值**，不是游戏机制；改它只影响措辞分级，不影响任何估值。
+FRAGILE_DOWNSIDE = 1.2
 
 
 @dataclass
@@ -59,6 +62,17 @@ class PlanResult:
     no_counter_branches: int = 0
     #: 被丢弃的分支数与原因（{异常类名: 次数}）。fail closed 的可见面。
     dropped_branches: Dict[str, int] = field(default_factory=dict)
+    #: **风险分支**（W3-04）：推荐动作在对手各种合法选择下的分布。
+    #:
+    #: `expected`/`worst` 只给两个点（均值与最小值），看不出「这个推荐有多脆」。
+    #: 例如两手的期望都是 1.0，但 A 在所有对手选择下都是 1.0、B 在一半情况下是 -2，
+    #: 那是两个完全不同的建议。这里把**最差前三个对手动作**与风险差列出来：
+    #:   `downside`       = expected - worst（期望到最坏的落差）
+    #:   `top_risks`      = 按估值升序的前三个对手动作及该分支的得分
+    #:   `spread`         = best - worst（同一手在不同对手选择下的最大落差）
+    #: `fragile` = 落差超过 `FRAGILE_DOWNSIDE` 时置位：上层可以把措辞从
+    #: 「可以优先考虑」降级成「这一手不稳，看区间」。
+    risk: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -72,6 +86,7 @@ class PlanResult:
             "branches_evaluated": self.branches_evaluated,
             "no_counter_branches": self.no_counter_branches,
             "dropped_branches": dict(self.dropped_branches),
+            "risk": dict(self.risk),
             "depth_searched": self.depth_searched,
             "beam": self.beam,
             "coverage": round(self.coverage, 4),
@@ -395,6 +410,30 @@ def plan_actions(
     top = results[0]
     counter_label, counter_score = counters.get(top["action"], (None, None))
 
+    # ── 风险分支（W3-04）────────────────────────────────────────────────
+    # 只描述**推荐的那一手**：别的候选不该出现在「推荐的风险」里。
+    branch_scores = top.get("branch_scores") or {}
+    downside = top["expected"] - top["worst"]
+    spread = top["best"] - top["worst"]
+    top_risks = sorted(branch_scores.items(), key=lambda kv: kv[1])[:3]
+    risk = {
+        "downside": round(downside, 4),
+        "spread": round(spread, 4),
+        "branch_count": len(branch_scores),
+        "top_risks": [
+            {"opponent_action": label, "score": round(score, 4),
+             "loss_vs_expected": round(top["expected"] - score, 4)}
+            for label, score in top_risks
+        ],
+        "fragile": bool(downside > FRAGILE_DOWNSIDE),
+        "threshold": FRAGILE_DOWNSIDE,
+        "note": (
+            "risk 只描述**推荐的那一手**在对手各种选择下的落差；"
+            "`downside` 是期望到最坏的距离，`top_risks` 是最差的前三个对手动作。"
+            "阈值是产品参数（用于措辞分级），不是游戏机制；对手仍是启发式分布建模。"
+        ),
+    }
+
     total_possible = len(my_candidates)
     # coverage 的含义是「对手反制也被枚举过的比例」。对手分布为空的局面
     # （补位阶段就是）**没有**搜索可言，只能是 0 —— 给 1.0 会让上层读成
@@ -446,6 +485,7 @@ def plan_actions(
         opponent_model="heuristic-distribution",
         unsupported_seen=len(state.unsupported),
         note="；".join(note_parts),
+        risk=risk,
     )
 
 

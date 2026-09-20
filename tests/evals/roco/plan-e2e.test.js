@@ -453,3 +453,52 @@ test('对局域的回执带私有状态：桥按路径收下，公开视图只�
     await service.stop();
   }
 });
+
+test('标记字段的放行是**按路径**的：分析结果里的动作名不算隐藏信息，状态字段照旧拦', () => {
+  // 风险分支（W3-04）的回执里有 `risk.worst_seed_risks[].opponent_action`，
+  // 值是「诡刺」这样的动作名字串。纯按名字扫会把它判成协议违规，
+  // 于是 /battle/plan 的正常回执被整份丢掉——这是加风险分支时撞出来的真实误报。
+  // 修法是**按路径**放行：只在这些分析结果父路径下、且值是字符串时放行。
+  const allowed = [
+    {risk: {worst_seed_risks: [{opponent_action: '诡刺'}]}},
+    {result: {per_seed: [{risk: {top_risks: [{opponent_action: '换上第2位'}]}}]}},
+    {branches: [{opponent_choice: '龙血'}]},
+  ];
+  for (const payload of allowed) {
+    assert.deepEqual(findHiddenKeys(payload), [],
+      `分析结果里的动作名不该被判成隐藏信息：${JSON.stringify(payload)}`);
+  }
+
+  const refused = [
+    // 状态字段：同一个键名，出现在 state 下就必须拦
+    {state: {opponent_action: '诡刺'}},
+    {state: {foo: {opponent_action: '诡刺'}}},
+    // 顶层直接出现也不行（顶层是「这条请求带着这个字段」，不是「在描述一个动作」）
+    {opponent_action: '诡刺'},
+    // 值不是字符串：说明它携带的是**对象**，那就是状态而不是标记
+    {risk: {opponent_action: {skill_id: 'skill_000750'}}},
+    // 真隐藏信息照旧
+    {state: {seed: 7}},
+    {state: {_pending_enemy: {}}},
+    {result: {replace_queue: 'enemy'}},
+  ];
+  for (const payload of refused) {
+    assert.ok(findHiddenKeys(payload).length > 0,
+      `必须继续拦下：${JSON.stringify(payload)}`);
+  }
+});
+
+test('隐藏信息词汇表现在有唯一事实来源（Python 导出，另外两份派生）', () => {
+  // 三份手写迟早会漂——而且漂过一次（桥少了 pendingenemy 等，私有状态能穿过去）。
+  // 现在 Python 侧是唯一事实来源，导出成 data/roco/hidden-keys.json，
+  // Node 桥与结构测试都从它对齐；这条测试钉住「导出的文件与 Python 一致」。
+  const exported = JSON.parse(
+    readFileSync(join(ROOT, 'data', 'roco', 'hidden-keys.json'), 'utf8'),
+  );
+  assert.equal(exported.source, 'roco/src/roco_env/service.py');
+  const clientKeys = new Set(HIDDEN_KEYS.map((k) => k.toLowerCase().replace(/[^a-z0-9]/g, '')));
+  const exportedKeys = new Set(exported.keys);
+  const diff = (a, b) => [...a].filter((k) => !b.has(k)).sort();
+  assert.deepEqual(diff(exportedKeys, clientKeys), [], '导出里有、桥里缺的隐藏信息键');
+  assert.deepEqual(diff(clientKeys, exportedKeys), [], '桥里有、导出里缺的隐藏信息键');
+});

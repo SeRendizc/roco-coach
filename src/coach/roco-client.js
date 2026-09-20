@@ -215,6 +215,22 @@ export {HIDDEN_KEYSET, PRIVATE_PLANE_PATHS};
 const normalizeKey = (key) => String(key).toLowerCase().replace(/[^a-z0-9]/g, '');
 
 /**
+ * 允许以**纯标记字段**出现的键名：它们不是「携带隐藏信息」，而是在说
+ * 「这一项讲的是对手的某个动作」。
+ *
+ * 为什么需要这一条：风险分支（W3-04）的回执里有
+ * `risk.worst_seed_risks[].opponent_action`，值是像「诡刺」这样的**动作名字串**。
+ * 按名字扫会把它判成协议违规，于是 `/battle/plan` 的正常回执被整份丢掉——
+ * 这是我在加风险分支时撞出来的真实误报。
+ *
+ * 纪律：白名单**只按路径的最后一段**匹配，而且这些名字必须出现在
+ * `VALUE_MARKER_PARENTS` 列出的父路径下（`risk` / `top_risks` / `per_seed` 等
+ * **分析结果**字段）。`state.opponent_action` 这种**状态字段**照样会被拦。
+ */
+const VALUE_MARKER_KEYS = new Set(['opponentaction', 'opponentchoice', 'opponentselection']);
+const VALUE_MARKER_PARENTS = new Set(['risk', 'toprisks', 'worstseedrisks', 'perseed', 'branches']);
+
+/**
  * 递归找出隐藏信息键，返回可读路径（如 `state.opponent_action`）。
  * 有深度上限与环保护：调用方传进来一个有环对象也不会把桥挂死。
  */
@@ -227,9 +243,17 @@ export function findHiddenKeys(payload, { prefix = '', depth = 0, seen = new Wea
     payload.forEach((item, i) => hits.push(...findHiddenKeys(item, { prefix: `${prefix}[${i}]`, depth: depth + 1, seen })));
     return hits;
   }
+  // 父路径的最后一段（跳过数组下标），用来判断「这个键名是在说标记还是携带状态」。
+  // 取父路径的最后一段：`risk.worst_seed_risks[0]` → `worstseedrisks`。
+  // 先把数组下标后缀去掉再归一化，否则会得到 `worstseedrisks0` 而匹配不上。
+  const parentSegment = (prefix.split('.').filter(Boolean).pop() ?? '').replace(/\[\d+\]$/g, '');
+  const underMarkerParent = VALUE_MARKER_PARENTS.has(normalizeKey(parentSegment));
   for (const [key, value] of Object.entries(payload)) {
     const path = prefix ? `${prefix}.${key}` : key;
-    if (HIDDEN_KEYSET.has(normalizeKey(key))) hits.push(path);
+    const normalized = normalizeKey(key);
+    // 纯标记字段（值必须是字符串）且在分析结果下 → 放行；其余照旧拦。
+    const isMarker = underMarkerParent && VALUE_MARKER_KEYS.has(normalized) && typeof value === 'string';
+    if (HIDDEN_KEYSET.has(normalized) && !isMarker) hits.push(path);
     hits.push(...findHiddenKeys(value, { prefix: path, depth: depth + 1, seen }));
   }
   return hits;

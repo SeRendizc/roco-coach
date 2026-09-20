@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "source": "roco/src/roco_env/service.py",
+  "generated_by": "scripts/roco/export-hidden-keys.py",
+  "note": "隐藏信息键（归一化后比较）。Python 服务是唯一事实来源；Node 桥与浏览器工具层镜像从这份 JSON 派生，由 tests/evals/roco/plan-e2e.test.js 的三份比对兜底。",
+  "normalize": "lowercase + strip non-alphanumeric",
+  "keys": [
+    "hiddenaction",
+    "hiddenstate",
+    "opponentaction",
+    "opponentchoice",
+    "opponentpendingaction",
+    "opponentprivatestate",
+    "opponentselection",
+    "pendingaction",
+    "pendingenemy",
+    "pendingenemyaction",
+    "pendingplayer",
+    "pendingplayeraction",
+    "privatestate",
+    "randomseed",
+    "replacequeue",
+    "rngseed",
+    "seed",
+    "trueseed"
+  ]
+}

@@ -146,7 +146,14 @@ async function main(){
  check('打危险了之后出现主动短提示（无聊天入口）',data.rocoHint&&data.rocoHint!=='hidden',
   `hint=${data.rocoHint} action=${data.rocoAction} 血量比=${hpRatio} 自动推进=${drove} 判定=${detail}`);
  check('提示给的是可执行建议，并说明依据',['action_hint','micro_hint'].includes(data.rocoHint)&&hintText.length>0&&/依据/.test(hintWhy),`${hintText.slice(0,60)} / ${hintWhy}`);
- check('展开里有可核对的搜索证据（区间、分支、分析种子）',/期望区间|搜索|分析种子/.test(hintBody),hintBody.slice(0,100).replace(/\s+/g,' '));
+ // 只在**规划跑过**时要求证据面板有数字：W3-04 之后「脆」的一手措辞会降级，
+ // 而没跑规划时面板本来就说「不含具体数值结论」——那是如实陈述，不是失败。
+ const hasPlan=await js('Boolean(window.rocoDemo.state.plan&&window.rocoDemo.state.plan.ok)');
+ if(hasPlan){
+  check('展开里有可核对的搜索证据（区间、分支、分析种子）',/期望区间|搜索|分析种子/.test(hintBody),hintBody.slice(0,100).replace(/\s+/g,' '));
+ }else{
+  check('展开里如实说明「不含具体数值结论」',/不含具体数值结论/.test(hintBody),hintBody.slice(0,80));
+ }
  // 「不声称胜率」这句话本身含「胜率」两个字，所以判据是「有没有把胜率当结论」：
  // 出现数字 + 胜率/概率，或出现「最优 / 一定能赢」这类承诺，才算违规。
  const hintAll=hintText+hintBody;

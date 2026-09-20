@@ -148,3 +148,29 @@ test('局末教学入口：没有值得拎出来的决策点就说没有', () =>
   assert.equal(onlySwitch.turn, 2);
   assert.match(onlySwitch.question, /换人/);
 });
+
+test('风险分支：这一手脆的时候把措辞降级，不说「可以优先考虑」', () => {
+  // `fragile` 来自规划器按**产品阈值**判定的 downside（期望到最坏的距离），
+  // 不是游戏机制。这里只钉住「措辞随 fragile 变化」这一件事，
+  // 以及「脆弱时必须给出落差量级」——不把阈值本身当成事实断言。
+  const plan = {
+    ok: true, recommendation: '坟场搏击', recommendation_stable: true,
+    main_counter: '换上第3位', worst: {min: -1.36, max: -1.10},
+    risk: {fragile: true, downside_max: 1.56, threshold: 1.2,
+      top_risks: [{opponent_action: '诡刺', score: -1.36, loss_vs_expected: 1.56}]},
+  };
+  const text = rocoHintText(plan);
+  assert.ok(!/可以优先考虑/.test(text), '脆弱的一手不该说「可以优先考虑」');
+  assert.match(text, /不稳/);
+  assert.match(text, /1\.56/, '必须给出落差量级，光说「不稳」等于没说');
+  assert.match(text, /-1\.36/, '仍然要给最坏尾部区间');
+
+  const solid = rocoHintText({...plan, risk: {fragile: false, downside_max: 0.2}});
+  assert.match(solid, /可以优先考虑/, '不脆的一手用原来的措辞');
+});
+
+test('风险分支：没有 risk 字段时按「不脆」处理（旧回执兼容）', () => {
+  const text = rocoHintText({ok: true, recommendation: '龙血', worst: {min: 0.1, max: 0.2}});
+  assert.match(text, /可以优先考虑/);
+  assert.ok(!/不稳/.test(text));
+});
