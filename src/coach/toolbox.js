@@ -168,7 +168,9 @@ const ROCO_ERROR=Object.freeze({TIMEOUT:'timeout',RULESET_UNSUPPORTED:'ruleset_u
 const ROCO_FAILURE_CLASS=Object.freeze({SERVICE:'service',RULESET:'ruleset',VERSION:'version',UNSUPPORTED:'unsupported',REQUEST:'request',PROTOCOL:'protocol'});
 const CONTRACT_FIELDS=Object.freeze(['ruleset_id','state_version','coverage','evidence_ids','latency_ms','error_type']);
 // MC-013：与 roco-client.js 的 HIDDEN_KEYS 一致（归一化后比较）。
-const ROCO_HIDDEN_KEYS=new Set(['opponentaction','opponentpendingaction','opponentchoice','opponentselection','pendingaction','hiddenaction','hiddenstate','privatestate','opponentprivatestate','trueseed','rngseed','randomseed','seed']);
+// toolbox.js 进浏览器模块图，不能静态 import roco-client.js（后者用 node:child_process），
+// 所以这里是**镜像**；镜像漂了由 tests/evals/roco/toolbox-roco.test.js 的逐键比对抓住。
+const ROCO_HIDDEN_KEYS=new Set(['opponentaction','opponentpendingaction','opponentchoice','opponentselection','pendingaction','hiddenaction','hiddenstate','privatestate','opponentprivatestate','trueseed','rngseed','randomseed','seed','pendingenemy','pendingplayer','pendingenemyaction','pendingplayeraction','replacequeue']);
 const ROCO_QUERY_KINDS=Object.freeze(['ruleset','pet','skill','learnset','term','type_row','type_chart','type_multiplier','effect']);
 const UNSAFE_TEXT=/[/\\]|\.\.|:\/\/|[\u0000-\u001f\u007f]/;
 const UNSAFE_KEYS=new Set(['path','file','filename','filepath','dir','directory','folder','glob','url','uri','href','code','script','source','command','cmd','exec','shell','eval','require','import','module','env','process']);
@@ -558,11 +560,9 @@ async function readyRocoClient(){
  * `timed_out` 为真、或 `search.completed === false` 时，工具**一律不给**推荐、
  * 主要应对与最坏尾部——绝不假装深搜完成。
  *
- * 一处已知的桥/服务键名不一致（记录在此，不去改 roco-client.js）：桥的
- * `planActions()` 把请求体包在 `state` 键下，而 `/battle/plan` 要求 `public`
- * （公开 planner schema）。这里先走桥的公开方法，只有在它明确回
- * `bad_request` + 「缺少 public」时才用**桥自己的传输层**补发一次同名端点——
- * 工具层不另起 HTTP。桥跟上之后第一次调用就会成功，这条补发分支自然失效。
+ * 桥/服务键名曾不一致（桥发 `state`、服务要 `public`），当时这里用桥自己的传输层
+ * 补发了一次。那座桥已修好——`planActions()` 现在直接发 `public` 并透传深度/波束/
+ * 预算/分析种子——所以补发分支已删除。留着它只会掩盖下一次同类不一致。
  */
 export async function planActionsViaPlanner({client,state,state_version,timeoutMs,context}={}){
  if(typeof rocoPlanner==='function')return rocoPlanner({client,state,state_version,timeoutMs,context});
@@ -571,13 +571,8 @@ export async function planActionsViaPlanner({client,state,state_version,timeoutM
    ruleset_id:client?.rulesetId??null,state_version:Number.isInteger(state_version)?state_version:null,coverage:0,evidence_ids:[],latency_ms:0,result:null,
    unsupported:[{code:'battle_planning',reason:'桥没有 planActions 方法，规划器未接入',missing:['action_order','respond_mechanics','charge_mechanics']}]};
  }
- const attempt=await client.planActions(state,{stateVersion:state_version,timeoutMs});
- const mismatch=attempt?.error_type===ROCO_ERROR.BAD_REQUEST&&/public/.test(String(attempt.message??''));
- if(!mismatch||typeof client._request!=='function')return attempt;
- const payload=typeof client._payload==='function'
-  ?client._payload({public:state},{stateVersion:state_version})
-  :{ruleset_id:client.rulesetId,state_version:state_version,public:state};
- return client._request('POST','/battle/plan',payload,{timeoutMs});
+ // 直接调桥。桥负责把公开 state 放进 `public` 键（并拒绝私有 serialize()）。
+ return client.planActions(state,{stateVersion:state_version,timeoutMs});
 }
 
 async function executeRocoTool(name,args,context){

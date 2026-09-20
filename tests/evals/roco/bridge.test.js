@@ -378,6 +378,15 @@ test('桥：拒绝携带隐藏信息，连发都不发', { skip: SKIP }, async (
   assert.deepEqual(findHiddenKeys({ rng_seed: 42 }), ['rng_seed']);
   assert.deepEqual(findHiddenKeys({ state: { my_hp: 100 } }), []);
   assert.deepEqual(findHiddenKeys({ list: [{ pendingAction: 1 }] }), ['list[0].pendingAction']);
+  // seed 在**任何深度**都要被认出：这里曾有一个「只允许 state 下一层」的后门，
+  // 真实 seed 能预测同速与伤害的随机结果，所以后门已移除。
+  assert.deepEqual(findHiddenKeys({ state: { seed: 7 } }), ['state.seed']);
+  assert.deepEqual(findHiddenKeys({ state: { foo: { seed: 7 } } }), ['state.foo.seed']);
+  assert.deepEqual(findHiddenKeys({ state: { history: [{ seed: 7 }] } }), ['state.history[0].seed']);
+  // env/schema 私有 serialize() 真正会出现的键名（归一化后）
+  assert.deepEqual(findHiddenKeys({ state: { _pending_enemy: {} } }), ['state._pending_enemy']);
+  assert.deepEqual(findHiddenKeys({ state: { _pending_player: {} } }), ['state._pending_player']);
+  assert.deepEqual(findHiddenKeys({ state: { replace_queue: 'enemy' } }), ['state.replace_queue']);
 
   await withService(async (client) => {
     const refused = await client.planActions({ turn: 1, opponent_pending_action: { skill: 'skill_000744' } });

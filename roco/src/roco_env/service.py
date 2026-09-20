@@ -155,13 +155,18 @@ HIDDEN_KEYS = frozenset(
         "rngseed",
         "randomseed",
         "seed",
-        # env/schema 内部字段：对手本回合**已提交**的动作。
+        # env/schema 内部字段：对手本回合**已提交**的动作与换人队列。
         # 归一化会去掉下划线，所以这里写 pendingenemy / pendingplayer /
         # replacequeue 等真实会被序列化出来的键名。
+        # 这一组必须与 src/coach/roco-client.js 的 HIDDEN_KEYS 一一对应：
+        # 桥是第一层，少一个键就会让私有 serialize() 从桥本地穿过去、
+        # 只剩服务端兜底，而 MC-013 要求两层都拦。
         "pendingenemy",
         "pendingplayer",
         "pendingenemyaction",
         "pendingplayeraction",
+        # 换人队列说明「谁被迫换人」，是待执行状态，不是公开观察。
+        "replacequeue",
     }
 )
 

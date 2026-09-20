@@ -503,34 +503,37 @@ test('plan_actions 认引擎现状的字段名：recommended_label / main_counte
  }finally{resetRocoTools();}
 });
 
-test('plan_actions 适配桥与服务的键名差异：桥发 state、服务要 public（不改 roco-client）',async()=>{
- // 真实 roco-client 的 planActions 把请求体包在 state 键下，而 /battle/plan 要求 public。
- // 工具层先走桥的公开方法，拿到「缺少 public」的 bad_request 后，用**桥自己的传输层**
- // 补发一次同名端点；工具层不另起 HTTP。
+test('plan_actions 直连桥的公开方法：一次调用、桥独占 public 键，工具层不再手搓传输层',async()=>{
+ // 这里曾有一条测试，断言工具层在桥报「缺少 public」后用 **桥自己的 _request** 补发一次，
+ // 以掩盖「桥发 state、服务要 public」的错配。那个错配已在 roco-client 侧修好
+ // （planActions 自己就用 public 键，并在本地拒绝非对象），所以补发路径已删除。
+ // 现在要钉的是**修好之后**的契约：工具层只调一次桥的公开方法，
+ // 不允许再出现任何备用传输层（_request / _payload 由桥独占）。
  const calls=[];
+ const planResult={coverage:1,result:{recommended_label:'先防御',main_counter:'换上潮甲龟',worst:{min:-0.4,max:-0.2},
+  branches_evaluated:500,depth_searched:2,recommendation_stable:true,timed_out:false}};
  const client={
   baseUrl:'http://127.0.0.1:9',rulesetId:RULESET_ID,
-  _payload(extra,options){return {ruleset_id:this.rulesetId,state_version:Number.isInteger(options?.stateVersion)?options.stateVersion:0,...extra};},
-  async planActions(){calls.push('planActions');return engineFail({code:ROCO_ERROR.BAD_REQUEST,error_type:ROCO_ERROR.BAD_REQUEST,failure_class:ROCO_FAILURE_CLASS.REQUEST,
-   message:'缺少 public：规划请求必须用 env.public_planner_state() 产出的公开 state，而不是 env.serialize() 的私有状态（后者含真实 seed 与对手待执行动作）'});},
-  async _request(method,path,payload,options){calls.push({method,path,payload,options});
-   if(!payload.public)return engineFail({code:ROCO_ERROR.BAD_REQUEST,error_type:ROCO_ERROR.BAD_REQUEST,message:'缺少 public'});
-   return engineOk({coverage:1,result:{recommended_label:'先防御',main_counter:'换上潮甲龟',worst:{min:-0.4,max:-0.2},branches_evaluated:500,depth_searched:2,recommendation_stable:true,timed_out:false}});},
+  async planActions(state,options){calls.push({state,options});return engineOk(planResult);},
+  // 私有传输层必须**不可达**：工具层一碰它就说明回退路径又长回来了
+  _payload(){calls.push({forbidden:'_payload'});throw new Error('工具层不许碰桥的私有传输层 _payload');},
+  _request(){calls.push({forbidden:'_request'});throw new Error('工具层不许碰桥的私有传输层 _request');},
  };
  configureRocoTools({client,stateVersion:STATE});
  try{
   const receipt=await executeTool('plan_actions',{state:PUBLIC_STATE,state_version:STATE},ctx());
-  assert.deepEqual(calls.map(x=>typeof x==='string'?x:x.path),['planActions','/battle/plan']);
-  assert.deepEqual(calls[1].payload.public,PUBLIC_STATE,'补发时用的是 public 键，且内容就是调用方给的公开 state');
-  assert.equal(calls[1].payload.state_version,STATE);
+  assert.equal(calls.length,1,'规划只许调一次桥：补发/回退路径不得复活');
+  assert.equal(calls[0].state,PUBLIC_STATE,'原样把调用方的公开 state 交给桥');
+  assert.equal(calls[0].options.stateVersion,STATE,'state_version 必须原样透传（桥用它填请求体并校验回执）');
+  assert.equal(calls[0].options.timeoutMs,ROCO_PLAN_TIMEOUT_MS,'规划超时用工具层的常量，不由调用方随手给');
   assert.equal(receipt.ok,true);
   assert.equal(receipt.recommendation,'先防御');
   assert.equal(receipt.mainCounter,'换上潮甲龟');
   assert.deepEqual(receipt.worstCaseTail,{min:-0.4,max:-0.2});
   assert.equal(receipt.search.completed,true);
  }finally{resetRocoTools();}
- // 桥没有私有传输层时不许硬撑：原样把 bad_request 交给调用方，不编一个计划
- const {bridge:plain}=makeBridge({planActions:()=>engineFail({code:ROCO_ERROR.BAD_REQUEST,error_type:ROCO_ERROR.BAD_REQUEST,failure_class:ROCO_FAILURE_CLASS.REQUEST,message:'缺少 public：……'})});
+ // 桥明确拒绝（缺 public / 隐藏信息）时不许硬撑：原样把 bad_request 交给调用方，不编一个计划
+ const {bridge:plain,calls:plainCalls}=makeBridge({planActions:()=>engineFail({code:ROCO_ERROR.BAD_REQUEST,error_type:ROCO_ERROR.BAD_REQUEST,failure_class:ROCO_FAILURE_CLASS.REQUEST,message:'缺少 public：……'})});
  configureRocoTools({client:plain,stateVersion:STATE,planner:undefined});
  try{
   const refused=await executeTool('plan_actions',{state:PUBLIC_STATE,state_version:STATE},ctx());
@@ -539,6 +542,7 @@ test('plan_actions 适配桥与服务的键名差异：桥发 state、服务要 
   assert.equal(refused.coverage,0);
   assert.equal(refused.recommendation,null);
   assert.equal(refused.planAvailable,false);
+  assert.equal(plainCalls.filter(c=>c.method==='planActions').length,1,'拒绝之后也不许换条路再试一次');
  }finally{resetRocoTools();}
 });
 

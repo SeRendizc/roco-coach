@@ -122,6 +122,16 @@ export const HIDDEN_KEYS = Object.freeze([
   'rngseed',
   'randomseed',
   'seed',
+  // env/schema 真正会序列化出来的内部字段（归一化后比较，下划线会被去掉）。
+  // 少了这几个，私有 `serialize()` 就能从桥本地穿过去、只靠服务端兜底——
+  // MC-013 要求两层都拦，而桥是第一层。这几个键是与
+  // roco/src/roco_env/service.py 的 HIDDEN_KEYS 一一对应的。
+  'pendingenemy',
+  'pendingplayer',
+  'pendingenemyaction',
+  'pendingplayeraction',
+  // 换人队列：它说明「谁被迫换人」，是待执行状态，不是公开观察。
+  'replacequeue',
 ]);
 
 const DEFAULT_TIMEOUT_MS = 5000;
