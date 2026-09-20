@@ -196,6 +196,22 @@ export function assertOk(result, label = '规则服务调用') {
 
 const HIDDEN_KEYSET = new Set(HIDDEN_KEYS);
 
+/**
+ * **本地对局域**端点：它们按设计就携带私有状态（含真实 seed）。
+ *
+ * 服务端在这条路径上显式声明 `trust_domain: "local_sim"`，并且回执里的私有状态
+ * 只允许留在本机 Node 内存里，绝不返回浏览器。所以桥的本地守卫对这几个路径
+ * 不做隐藏信息扫描 —— 否则对局域连开一局都做不到。
+ *
+ * 这是一份**白名单**，不是「按名字猜」：只有这里逐条列出的路径会被跳过。
+ * 教练域的路径（`/battle/plan`、`/rules/query`、`/team/*`）永远在扫描范围内。
+ * 新增一个会带私有状态的端点，必须同时改这里和 `roco-service.js`，
+ * 并由 `tests/evals/roco/bridge.test.js` 的「两个域互不串门」钉住。
+ */
+const PRIVATE_PLANE_PATHS = new Set(['/battle/new', '/battle/legal', '/battle/advance']);
+
+export {HIDDEN_KEYSET, PRIVATE_PLANE_PATHS};
+
 const normalizeKey = (key) => String(key).toLowerCase().replace(/[^a-z0-9]/g, '');
 
 /**
@@ -520,7 +536,7 @@ export class RocoClient {
           : null;
     const rulesetId = (payload && payload.ruleset_id) || this.rulesetId;
 
-    if (payload && typeof payload === 'object') {
+    if (payload && typeof payload === 'object' && !PRIVATE_PLANE_PATHS.has(path)) {
       const hidden = findHiddenKeys(payload);
       if (hidden.length) {
         // 纪律 4：宁可拒绝，也不把对手的未公开选择发出去（连发都不发）。
@@ -599,7 +615,13 @@ export class RocoClient {
     }
 
     // 纪律 4（回执侧）：发现隐藏信息就判协议违规，并且**不把泄漏内容透传**。
-    const leaked = findHiddenKeys(envelope);
+    //
+    // 例外只有一处，而且是**按路径**给的：本地对局域（/battle/new|legal|advance）
+    // 的回执按设计就带私有状态（含真实 seed），服务端也声明了 trust_domain。
+    // 那些回执**不得**返回浏览器 —— 这个约束由 src/server/roco-service.js 的
+    // publicView() 白名单负责，那一层只吐公开面。
+    const privatePlane = PRIVATE_PLANE_PATHS.has(path);
+    const leaked = privatePlane ? [] : findHiddenKeys(envelope);
     if (leaked.length) {
       return this._localFailure(
         ROCO_ERROR.PROTOCOL_ERROR,
@@ -841,6 +863,45 @@ export class RocoClient {
     if (Number.isInteger(options.budgetMs)) body.budget_ms = options.budgetMs;
     if (Array.isArray(options.analysisSeeds)) body.analysis_seeds = options.analysisSeeds;
     return this._request('POST', '/battle/plan', this._payload(body, options), options);
+  }
+
+  /**
+   * 开一局**本地练习对局**（本地对局域，含私有状态）。
+   *
+   * 与 `planActions` 的区别是刻意的、也是本文件里最重要的一条边界：
+   *   · `planActions` 属于**教练域**：只发公开面，带 seed 一律本地拒绝；
+   *   · 这三个 `battleXxx` 方法属于**本地对局域**：它们按设计就带完整私有状态
+   *     （含真实 seed），由本机 Node 服务调用，回执里的私有状态**不得返回浏览器**。
+   *
+   * 服务端会在这两个域的请求上分别打标记（`trust_domain`），所以这里的私有状态
+   * 不会被误当成教练输入；反过来，教练输入也不允许走这几个方法。
+   */
+  async battleNew({ team, enemyTeam, seed = 1, strategy = 'greedy_damage', loadouts = null, stateVersion = 0 } = {}) {
+    const body = { team, seed, strategy };
+    if (enemyTeam) body.enemy_team = enemyTeam;
+    if (loadouts) body.loadouts = loadouts;
+    return this._request('POST', '/battle/new', this._payload(body, { stateVersion }), { stateVersion });
+  }
+
+  /** 列出某一局当前的合法动作（本地对局域）。 */
+  async battleLegal({ state, strategy = 'greedy_damage', stateVersion = 0 } = {}) {
+    return this._request(
+      'POST', '/battle/legal',
+      this._payload({ state, strategy }, { stateVersion }), { stateVersion },
+    );
+  }
+
+  /**
+   * 推进一个回合或一次补位（本地对局域）。
+   *
+   * `action` 给了就是玩家自己出招；只给 `playerStrategy` 就是让策略代打
+   * （自动演示与批量推演用）。两者都没给会被服务端以 400 拒绝——不猜玩家想干什么。
+   */
+  async battleAdvance({ state, action = null, strategy = 'greedy_damage', playerStrategy = null, stateVersion = 0 } = {}) {
+    const body = { state, strategy };
+    if (action) body.action = action;
+    if (playerStrategy) body.player_strategy = playerStrategy;
+    return this._request('POST', '/battle/advance', this._payload(body, { stateVersion }), { stateVersion });
   }
 
   /**

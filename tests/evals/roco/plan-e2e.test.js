@@ -33,8 +33,9 @@ import { createServer as createHttpServer, request as httpRequest } from 'node:h
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-import { RocoClient, ROCO_ERROR, RULESET_ID, HIDDEN_KEYS, findHiddenKeys } from '../../../src/coach/roco-client.js';
+import { RocoClient, ROCO_ERROR, RULESET_ID, HIDDEN_KEYS, PRIVATE_PLANE_PATHS, findHiddenKeys } from '../../../src/coach/roco-client.js';
 import { executeTool, configureRocoTools, resetRocoTools } from '../../../src/coach/toolbox.js';
+import { createRocoService } from '../../../src/server/roco-service.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..', '..');
@@ -386,4 +387,69 @@ test('三份隐藏信息词汇表必须一一对应（任何一侧改了都会�
   assert.deepEqual(diff(clientKeys, pyKeys), [], 'Node 桥有、Python 缺的隐藏信息键');
   assert.deepEqual(diff(clientKeys, tbKeys), [], 'Node 桥有、工具层镜像缺的隐藏信息键');
   assert.deepEqual(diff(tbKeys, clientKeys), [], '工具层镜像有、Node 桥缺的隐藏信息键');
+});
+
+test('两个信任域互不串门：私有端点按路径白名单，教练端点永远扫描', async () => {
+  // 演示页需要「本地对局域」（带私有状态）。如果桥的守卫不按路径区分，
+  // 开一局都做不到；如果按得太松，教练域就会被顺带放过。这条测试把两侧都钉住。
+  assert.deepEqual([...PRIVATE_PLANE_PATHS].sort(), ['/battle/advance', '/battle/legal', '/battle/new'],
+    '私有域白名单必须逐条列出，不能按名字猜');
+  for (const coachPath of ['/battle/plan', '/rules/query', '/team/evaluate', '/team/compare']) {
+    assert.ok(!PRIVATE_PLANE_PATHS.has(coachPath), `教练域端点 ${coachPath} 不得进入私有域白名单`);
+  }
+
+  // 私有端点：带真实 seed 的请求**必须**发得出去（否则演示页开不了局）
+  await withSpyServer(async ({ baseUrl, seen }) => {
+    const client = new RocoClient({ baseUrl, rulesetId: RULESET_ID });
+    const seeded = { schema_version: 1, seed: 7, self: { pets: [] }, opponent: { field: {} } };
+    const created = await client.battleNew({ team: ['a', 'b', 'c'], seed: 7, stateVersion: 0 });
+    assert.equal(created.ok, true, `对局域应当允许带 seed：${created.code}: ${created.message}`);
+    assert.equal(seen.length, 1);
+    assert.equal(seen[0].url, '/battle/new');
+    assert.ok(seen[0].body.includes('"seed":7'), '对局域请求体里确实带了 seed');
+    // 同一个带 seed 的对象走教练端点，必须在本地就被拦下（连发都不发）
+    const before = seen.length;
+    const planned = await client.planActions(seeded, { stateVersion: 0 });
+    assert.equal(planned.ok, false);
+    assert.equal(planned.code, ROCO_ERROR.HIDDEN_INFORMATION);
+    assert.equal(seen.length, before, '教练端点带 seed 必须一个请求都不发');
+  });
+});
+
+test('对局域的回执带私有状态：桥按路径收下，公开视图只吐白名单字段', async () => {
+  // 回执侧同理：引擎的 /battle/new 回执里就有 state.seed。
+  // 桥按路径放行它（否则本地对局根本跑不起来），而**返回浏览器**的那一份
+  // 由 roco-service.js 的 publicView() 白名单裁剪。这里直接喂一份完整私有回执，
+  // 看白名单漏不漏——这是「浏览器永远看不到 seed」的那道闸门。
+  const client = new RocoClient({ baseUrl: 'http://127.0.0.1:1', rulesetId: RULESET_ID });
+  const service = createRocoService({ client, idleStopMs: 0 });
+  try {
+    const privateResult = {
+      state: { seed: 7, replace_queue: 'enemy', player: { pets: [{ pet_id: 'x', hp: 1 }] } },
+      state_version: 3, turn: 4, phase: 'battle', result: null,
+      public: {
+        schema_version: 1, ruleset_id: RULESET_ID, state_version: 3, turn: 4, phase: 'battle', result: null,
+        self: { active: 0, pets: [{ slot: 0, pet_id: 'pet_000225', hp: 400, max_hp: 425, energy: 2, fainted: false }] },
+        opponent: { active: 1, living_count: 3,
+          field: { slot: 1, pet_id: 'pet_000190', hp: 300, max_hp: 374, energy: 1, fainted: false },
+          bench: [{ slot: 0, pet_id: 'pet_000445', fainted: false }] },
+      },
+      legal: { player: [{ kind: 'skill', label: '龙血', skill_id: 'skill_000750' }], enemy: [{}] },
+      needs_replacement: [], events: [{ turn: 4, kind: 'damage', side: 'enemy', detail: { amount: 25 } }],
+      strategy: { name: 'greedy_damage', version: 1 }, unsupported_seen: [],
+    };
+    const view = service.publicView(privateResult);
+    const blob = JSON.stringify(view);
+    assert.ok(!blob.includes('"seed"'), '公开视图里不得出现 seed');
+    assert.ok(!blob.includes('replace_queue'), '公开视图里不得出现 replace_queue');
+    assert.ok(!('state' in view), '公开视图不得包含私有 state');
+    assert.equal(view.self.pets[0].hp, 400, '场上面板是公开的');
+    assert.equal(view.opponent.field.hp, 300, '对手场上面板是公开的（画在屏幕上）');
+    assert.deepEqual(Object.keys(view.opponent.bench[0]).sort(), ['fainted', 'pet_id', 'slot'],
+      '对手后备只给位次/id/是否倒下');
+    assert.equal(view.cpu_legal_count, 1, '对手有几个合法动作是公开的（不公开是哪些）');
+    assert.equal(view.legal[0].label, '龙血', '自己的合法动作要带标签，页面要渲染按钮');
+  } finally {
+    await service.stop();
+  }
 });

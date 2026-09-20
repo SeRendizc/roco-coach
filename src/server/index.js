@@ -8,6 +8,7 @@ import {dirname,join,relative,resolve} from 'node:path';
 import {generateKeyPairSync,privateDecrypt,constants,randomBytes,timingSafeEqual} from 'node:crypto';
 import {runCoach,fitModelMessages} from '../coach/runtime.js';
 import {decideOpponentAction,DIFFICULTY_BRIEFING,OPPONENT_TIMEOUT_MS} from './opponent.js';
+import {createRocoService} from './roco-service.js';
 
 // 整局复盘里「计为 0 的类别」这条口径的模型侧一半。本地那一半在 coach/teacher.js 的
 // matchStatsLine()：它只推非零类别，为 0 的整类不出现（判据写在同文件 113–121 行的注释里）。
@@ -88,8 +89,10 @@ function validateOpponent(b){
  if(b.goal!==null&&b.goal!==undefined&&!['稳健','速攻'].includes(b.goal))throw fail(400,'目标偏好无效');
  for(const side of ['player','enemy']){const s=c[side];if(!s||!Array.isArray(s.pets)||s.pets.length!==3||!Number.isInteger(s.active)||s.active<0||s.active>2)throw fail(400,'战况无效');for(const p of s.pets){if(!Array.isArray(p.skills)||p.skills.length>6||![p.hp,p.maxHp,p.atk,p.def,p.speed,p.energy].every(Number.isFinite))throw fail(400,'宠物状态无效');}for(const [id,count]of Object.entries(s.items||{}))if(!Number.isInteger(count)||count<0||count>99)throw fail(400,'道具数量无效');}
 }
-export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=false}={}){
+export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=false,roco=null}={}){
  const retriever=semantic?createSemanticRetriever():null;
+ // roco 规则服务网关：按需启动 Python 子进程，空闲自动回收。注入是为了测试能换成假的。
+ const rocoService=roco||createRocoService();
  const {publicKey,privateKey}=generateKeyPairSync('rsa',{modulusLength:2048});
  const spki=publicKey.export({type:'spki',format:'der'}).toString('base64');
  const sessions=new Map();let credential='',model='deepseek-flash',verified=false,generation=0,inflight=false;
@@ -128,6 +131,9 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
     return json(res,200,{...status(),csrf:s.csrf,nonce:s.nonce,publicKey:spki});
    }
    if(path.startsWith('/api/')){
+    // GET /api/roco/status 是唯一的只读接口：演示页打开时先问一次「规则服务在不在」，
+    // 它不改状态、不需要 CSRF，也不碰密钥。其余 /api/ 一律 POST + CSRF。
+    if(path==='/api/roco/status'&&req.method==='GET')return json(res,200,await rocoService.status());
     if(req.method!=='POST')throw fail(405,'仅支持 POST');
     if(req.headers.origin!==origin||!req.headers['content-type']?.startsWith('application/json'))throw fail(403,'请求来源或类型不正确');
     const sid=req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1],s=sessions.get(sid);
@@ -181,6 +187,23 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
       complete:(messages,maxTokens,timeout,signal)=>complete(messages,maxTokens,timeout,signal?AbortSignal.any([signal,cancelled.signal]):cancelled.signal)});
      return json(res,200,result);
     }
+    // ── 手游规则服务（roco）────────────────────────────────────────────────
+    //
+    // 浏览器起不了 Python 子进程，所以由这里托管，并把私有对局状态**留在 Node 内存**。
+    // 三个入口各管一件事：
+    //   battle/new      开一局本地练习对局（返回公开视图 + session id）
+    //   battle/advance  推进一个回合（action = 玩家出的招；auto=true = 让策略代打）
+    //   plan            教练域：只用公开面 + 固定分析种子，出行动建议
+    //
+    // 注意 plan **不接受**调用方传 state：公开面由服务端从自己存的状态现算。
+    // 这样浏览器就没有任何机会把私有状态塞进教练请求（那是 MC-013 的边界）。
+    if(path.startsWith('/api/roco/')){
+     const action=path.slice('/api/roco/'.length);
+     if(action==='battle/new')return json(res,200,await rocoService.startBattle(b));
+     if(action==='battle/advance')return json(res,200,await rocoService.advanceBattle(b));
+     if(action==='plan')return json(res,200,await rocoService.planBattle(b));
+     throw fail(404,'接口不存在');
+    }
     throw fail(404,'接口不存在');
    }
    if(!['GET','HEAD'].includes(req.method))throw fail(405,'方法不支持');
@@ -199,7 +222,10 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
    const data=await readFile(join(root,asset));res.writeHead(200,{'Content-Type':asset.endsWith('.html')?'text/html; charset=utf-8':asset.endsWith('.css')?'text/css; charset=utf-8':'text/javascript; charset=utf-8'});res.end(req.method==='HEAD'?undefined:data);
   }catch(e){if(!res.headersSent)json(res,e.status||500,{error:e.status?e.message:'本地服务无法完成请求'});else res.end();}
  });
- server.on('close',()=>{retriever?.close();credential='';sessions.clear();});
+ server.on('close',()=>{retriever?.close();credential='';sessions.clear();
+  // 关服务时必须显式带走 Python 子进程：它按父 pid 自杀，但 Node 被 SIGKILL
+  // 时那条路走不到，所以这里主动停一次，避免留下孤儿监听进程。
+  void rocoService.stop().catch(()=>{});});
  return server;
 }
 function historyForModel(history){return Array.isArray(history)?history.slice(-6).filter(x=>x&&['user','assistant'].includes(x.role)&&typeof x.content==='string').map(x=>({role:x.role,content:x.content.slice(0,1200)})):[];}
