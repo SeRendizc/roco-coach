@@ -24,6 +24,7 @@ import random
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from . import effects as fx
+from . import parse
 from . import data as _data
 from .data import Ruleset, load_ruleset
 from .schema import (
@@ -453,10 +454,12 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         return
 
     if skill.is_status:
-        # 状态类技能的效果原语尚未核验：登记而不是假装生效
-        _note_unsupported(state, f"状态技能「{skill.name}」", skill.desc or "", skill.skill_id)
-        state.log.append(f"{label}的{rs.pet(pet.pet_id).name}使用{skill.name}（效果未核验）。")
-        _bump(state, "status_unsupported", {"side": side, "skill_id": skill.skill_id})
+        applied = _apply_status_effects(state, rs, side, skill)
+        if not applied:
+            # 解析不出来就 fail closed：登记，不假装生效
+            _note_unsupported(state, f"状态技能「{skill.name}」", skill.desc or "", skill.skill_id)
+            state.log.append(f"{label}的{rs.pet(pet.pet_id).name}使用{skill.name}（效果未核验）。")
+            _bump(state, "status_unsupported", {"side": side, "skill_id": skill.skill_id})
         return
 
     # 攻击
@@ -528,6 +531,100 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         defender.charge = None
         state.log.append(f"{defender_pet.name}倒下了。")
         _bump(state, "faint", {"side": foe_side, "slot": defender.slot}, evidence=("3009",))
+
+
+def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bool:
+    """应用一个状态技能被解析出来的效果。返回是否**至少应用了一条**。
+
+    纪律：只有描述能被 `parse.py` 机械读出时才应用；解析出未覆盖机制时返回 False，
+    由调用方登记为 unsupported。**不做部分应用**——半套效果比不支持更危险，
+    因为它会让上层以为这个技能已经可用。
+    """
+    parsed = parse.parse_skill(skill)
+    if not parsed.effects or parsed.unparsed:
+        return False
+
+    me = getattr(state, side)
+    foe = getattr(state, "enemy" if side == "player" else "player")
+    pet = me.field_pet
+    label = "你" if side == "player" else "对手"
+    applied = 0
+
+    for eff in parsed.effects:
+        v = eff.value
+        if eff.kind == "self_stat":
+            key = str(v["stat"])
+            pet.buffs[key] = pet.buffs.get(key, 0) + int(v["delta_pct"])
+            applied += 1
+            _bump(state, "buff_self", {"side": side, "stat": key, "delta_pct": v["delta_pct"]},
+                  evidence=(eff.term or "",))
+        elif eff.kind == "foe_stat":
+            key = str(v["stat"])
+            tgt = foe.field_pet
+            tgt.buffs[key] = tgt.buffs.get(key, 0) + int(v["delta_pct"])
+            applied += 1
+            _bump(state, "debuff_foe", {"side": side, "stat": key, "delta_pct": v["delta_pct"]},
+                  evidence=(eff.term or "",))
+        elif eff.kind in ("self_mark", "foe_mark"):
+            holder = pet if eff.kind == "self_mark" else foe.field_pet
+            name = str(v["mark"])
+            # 术语 3010：最多同时拥有 1 种正面印记和 1 种负面印记。
+            # 替换规则数据未定义（MC-009），这里采取「累加层数」，并把该假设登记出来。
+            holder.marks[name] = holder.marks.get(name, 0) + int(v["layers"])
+            _note_unsupported(
+                state, f"印记「{name}」的叠加/替换规则",
+                "术语 3010 只给了「最多 1 正 + 1 负」，未定义同类替换（MC-009）；"
+                "本引擎暂按累加层数处理", "3010",
+            )
+            applied += 1
+            _bump(state, "mark_added", {"side": side if eff.kind == "self_mark" else "enemy",
+                                        "mark": name, "layers": v["layers"]}, evidence=("3010",))
+        elif eff.kind == "foe_status":
+            name = str(v["status"])
+            spec = fx.END_OF_TURN_STATUS.get(name)
+            if spec is None:
+                continue
+            tgt = foe.field_pet
+            tgt.statuses[name] = {
+                "layers": tgt.statuses.get(name, {}).get("layers", 0) + int(v["layers"])
+            }
+            applied += 1
+            _bump(state, "status_added", {"side": "enemy", "status": name,
+                                          "layers": v["layers"]},
+                  evidence=(spec.get("term", ""),))
+        elif eff.kind == "cleanse":
+            cleared = sorted(foe.field_pet.buffs)
+            foe.field_pet.buffs.clear()
+            applied += 1
+            _bump(state, "cleanse", {"side": side, "cleared": cleared})
+        elif eff.kind == "heal":
+            pct = int(v["percent"])
+            amount = fx.percent_of_max_hp(pet.max_hp, pct)
+            healed = min(amount, pet.max_hp - pet.hp)
+            pet.hp += healed
+            applied += 1
+            _bump(state, "heal", {"side": side, "healed": healed})
+        elif eff.kind == "drain_energy":
+            amount = int(v["amount"])
+            taken = min(amount, foe.field_pet.energy)
+            foe.field_pet.energy -= taken
+            pet.energy = min(ENERGY_MAX, pet.energy + taken)
+            applied += 1
+            _bump(state, "drain_energy", {"side": side, "taken": taken})
+        elif eff.kind == "escape":
+            # 术语 3003/3024：离场并换人。本引擎需要调用方决定换谁，所以登记为待处理。
+            _note_unsupported(state, f"技能「{skill.name}」的离场效果",
+                              "离场需要选择换上谁，属补位流程；引擎未自动代选", "3009")
+        elif eff.kind == "weather":
+            _note_unsupported(state, f"天气「{v['weather']}」", "引擎尚未实现天气层", "")
+
+    if applied:
+        state.log.append(
+            f"{label}的{rs.pet(pet.pet_id).name}使用{skill.name}，应用 {applied} 条效果。"
+        )
+        _bump(state, "status_applied", {"side": side, "skill_id": skill.skill_id,
+                                        "effects": applied})
+    return applied > 0
 
 
 def _opponent_action_of(state: GameState, side: str) -> Optional[Action]:

@@ -316,17 +316,44 @@ class TestMC010DynamicPower(unittest.TestCase):
 class TestFailClosed(unittest.TestCase):
     """核心纪律：不知道就拒绝，绝不编一个数。"""
 
-    def test_unsupported_skills_are_recorded_not_silently_skipped(self):
+    def test_status_skills_are_either_applied_or_registered(self):
+        """状态技能必须二选一：**要么真的生效，要么被登记为未支持**。
+
+        不能出现的第三种情况是「悄悄什么都没做」——那会让上层以为它可用。
+        支持面会随 parse.py 的覆盖增长而变化，所以这里断言的是**这个二分法**，
+        而不是固定的一串技能名。
+        """
+        from roco_env import parse as rparse
+
         state = fresh()
-        # 找一个状态类技能打出去，应当被登记为 unsupported
-        status = [a for a in renv.legal_actions(state, RS, "player")
-                  if a.kind == ACTION_SKILL and RS.skills[a.skill_id].is_status]
-        if not status:
-            self.skipTest("当前能量下没有可用状态技能")
-        before = len(state.unsupported)
-        renv.step_joint(state, RS, status[0], attack_actions(state, "enemy")[0])
-        self.assertGreater(len(state.unsupported), before,
-                           "未实现的效果必须被登记，而不是静默生效")
+        status_actions = [a for a in renv.legal_actions(state, RS, "player")
+                          if a.kind == ACTION_SKILL and RS.skills[a.skill_id].is_status]
+        self.assertTrue(status_actions, "应当有可用的状态技能")
+
+        applied, registered = 0, 0
+        for act in status_actions:
+            st = fresh()
+            pet = st.player.field_pet
+            pet.energy = renv.ENERGY_MAX
+            before_unsupported = len(st.unsupported)
+            before = (dict(pet.buffs), dict(pet.marks), pet.hp, pet.energy)
+            renv.step_joint(st, RS, act, attack_actions(st, "enemy")[0])
+            now = st.player.field_pet
+            # 效果可以是属性/印记/生命/能量中的任意一种，所以要全看
+            changed = ((dict(now.buffs), dict(now.marks), now.hp, now.energy) != before
+                       or bool(st.events and any(
+                           e.kind in ("status_applied", "cleanse", "drain_energy", "heal")
+                           for e in st.events)))
+            logged = len(st.unsupported) > before_unsupported
+            parsed = rparse.parse_skill(RS.skills[act.skill_id])
+            if parsed.fully_supported:
+                self.assertTrue(changed, f"{RS.skills[act.skill_id].name} 解析为可支持，但状态没变")
+                applied += 1
+            else:
+                self.assertTrue(logged, f"{RS.skills[act.skill_id].name} 未解析出来，但也没登记为 unsupported")
+                registered += 1
+        self.assertGreater(applied, 0, "支持面应当大于零")
+        self.assertGreater(registered, 0, "应当仍有未覆盖的机制被如实登记")
 
     def test_level_other_than_one_is_refused(self):
         with self.assertRaises(fx.UnsupportedEffect):
