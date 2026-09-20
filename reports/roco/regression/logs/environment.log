@@ -1,0 +1,12 @@
+# 环境（延迟与耗时口径）
+uname: Darwin serendizc-mbp 27.0.0 Darwin Kernel Version 27.0.0: Tue Aug 11 21:06:40 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T6050 arm64
+host: serendizc-mbp
+cpus: 15
+mem: 51539607552
+python3: Python 3.9.6
+node: v24.20.0
+npm: 11.19.0
+chrome: /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
+date: 2026-09-20T19:17:19Z
+git HEAD: b5c245363e44526c6d0482863bfe4bb833e0ee70
+git dirty:       11 paths changed

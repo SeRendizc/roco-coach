@@ -1,6 +1,6 @@
 {
-  "started_at": "2026-09-20T19:11:07.703Z",
-  "url": "http://127.0.0.1:52192/roco.html",
+  "started_at": "2026-09-20T19:14:16.846Z",
+  "url": "http://127.0.0.1:53030/roco.html",
   "checks": [
     {
       "name": "页面没有聊天入口（无 #chat-input / #chat-form / textarea）",

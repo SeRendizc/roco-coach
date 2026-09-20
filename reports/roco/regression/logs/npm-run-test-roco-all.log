@@ -1,0 +1,91 @@
+$ npm run test:roco-all
+# started: 2026-09-20T19:14:09Z
+
+> test:roco-all
+> npm run test:env && npm run test:bridge && npm run test:toolbox-roco && npm run test:plan-e2e
+
+
+> test:env
+> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests
+
+..........................................................................................................................
+----------------------------------------------------------------------
+Ran 122 tests in 1.534s
+
+OK
+
+> test:bridge
+> node --test tests/evals/roco/bridge.test.js
+
+✔ 桥：能起停 Python 服务；/health 往返并报告规则集 id 与快照指纹 (415.204125ms)
+✔ 桥：静态事实带 ruleset/state_version/coverage/evidence_ids/延迟 (415.608083ms)
+✔ 桥：未知规则集 id → 可区分的 version_mismatch (376.988417ms)
+✔ 桥：机制不支持时返回 unsupported，而不是一个数字 (376.31475ms)
+✔ 桥：阵容评估已接规则 baseline，且明确不输出胜率 (370.8735ms)
+✔ 桥：本引擎持有的规则集加载不了 → ruleset_unsupported (397.48225ms)
+✔ 桥：服务超时是独立的一类（service） (202.88225ms)
+✔ 桥：拒绝携带隐藏信息，连发都不发 (359.861667ms)
+✔ 桥：双属性相性只用快照显式行（缺行时 unsupported，不相乘） (362.016417ms)
+✔ 桥：工具层声明了 5 个工具且必填项明确（get_visible_state 之外） (0.22725ms)
+✔ 桥：assertOk 能把结构化拒绝变成四类可区分的异常 (354.803458ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3728.354459
+
+> test:toolbox-roco
+> node --test tests/evals/roco/toolbox-roco.test.js
+
+✔ query_rules 参数：只收稳定 id 与名字，额外参数、路径、URL、代码一律拒绝 (0.876208ms)
+✔ 其余四个工具的入参同样有界：额外参数、路径、隐藏信息都拒绝 (0.307125ms)
+✔ query_rules 回执带齐契约字段；机制不支持时 result 为 null 且没有编造数值 (0.70175ms)
+✔ state_version 对不上就拒绝执行（请求根本不发出去） (0.2185ms)
+✔ 没有权威版本时，同一对局内也不许版本倒退；来源如实写进 freshness (0.1455ms)
+✔ 引擎回执钉的状态与请求不符：丢弃结果，不返回旧状态算出的内容 (0.099334ms)
+✔ context 里的 stateVersion 也能作为权威来源；规划超时预算是显式常量 (0.084625ms)
+✔ evaluate_team 锁定伙伴：不满足约束的候选不返回，并说清改善/代价/对手池（G03） (0.8095ms)
+✔ evaluate_team 锁定伙伴：没有任何候选满足约束时如实说没有 (0.124625ms)
+✔ compare_team_change 透传 limitations 与「不等于更强」的原话；锁定伙伴被换掉就拒绝 (0.249458ms)
+✔ plan_actions 未实现：结构化 not_implemented、coverage 0、不编计划（G05） (0.437916ms)
+✔ plan_actions 搜索超时：如实报超时，不假装深搜完成（G05） (0.157ms)
+✔ 规划器接入点：搜索没完成不给结论，完成了才给；签名固定（G05） (0.144125ms)
+✔ plan_actions 认引擎现状的字段名：recommended_label / main_counter / worst / timed_out（G05） (0.164333ms)
+✔ plan_actions 直连桥的公开方法：一次调用、桥独占 public 键，工具层不再手搓传输层 (0.144583ms)
+✔ summarize_battle 没有端点：结构化 not_implemented、coverage 0、不生成摘要 (0.138167ms)
+✔ 五个工具的成功/失败回执都带齐六个契约字段 (0.154875ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 57.7915
+
+> test:plan-e2e
+> node --test tests/evals/roco/plan-e2e.test.js
+
+✔ 公开 planner state 由引擎产出：无 seed/pending，对手后备只有公开事实 (73.918708ms)
+✔ 端到端：toolbox → roco-client → 真 Python 服务，公开状态产出计划 (447.252333ms)
+✔ 反证：把私有 serialize() 递进去必须被拒，客户端与服务端两层都拦 (448.814666ms)
+✔ 反证：任意深度的 seed 与对手待执行动作都在客户端被拦下，HTTP 请求数为 0 (85.3825ms)
+✔ 反证：同一公开观察 + 不同真实内部 seed → 公开面一致、结论一致、请求体无真实 seed (528.394125ms)
+✔ 三份隐藏信息词汇表必须一一对应（任何一侧改了都会在这里红） (0.74725ms)
+✔ 两个信任域互不串门：私有端点按路径白名单，教练端点永远扫描 (1.485958ms)
+✔ 对局域的回执带私有状态：桥按路径收下，公开视图只吐白名单字段 (0.44075ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1653.449791
+real 7.93
+user 4.73
+sys 0.67
+# exit=0 finished: 2026-09-20T19:14:17Z

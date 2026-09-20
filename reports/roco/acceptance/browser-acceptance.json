@@ -1,6 +1,6 @@
 {
-  "started_at": "2026-09-20T17:51:37.902Z",
-  "base": "http://127.0.0.1:64062/",
+  "started_at": "2026-09-20T19:14:10.179Z",
+  "base": "http://127.0.0.1:52977/",
   "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   "checks": [
     {
@@ -141,7 +141,7 @@
     "03-battle.png",
     "04-battle-end.png"
   ],
-  "finished_at": "2026-09-20T17:51:57.115Z",
+  "finished_at": "2026-09-20T19:14:29.361Z",
   "summary": {
     "total": 9,
     "pass": 9,

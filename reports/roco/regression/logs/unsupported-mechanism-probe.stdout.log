@@ -1,0 +1,204 @@
+{"name": "A1 等级换算：env._make_pet(level=2)", "raised": "effects.UnsupportedEffect", "message": "未支持的机制：等级 2（等级→面板换算公式未知，本引擎只支持 level=1（M1 已登记为 unknown））", "what": "等级 2", "detail": "等级→面板换算公式未知，本引擎只支持 level=1（M1 已登记为 unknown）"}
+{"name": "A3 未实现回合末结算的状态：effects.status_tick('眩晕')", "raised": "effects.UnsupportedEffect", "message": "未支持的机制：状态「眩晕」（该状态没有实现回合末结算）", "what": "状态「眩晕」", "detail": "该状态没有实现回合末结算"}
+{"name": "A4 防御技能读不出减伤：effects.parse_defense_reduction", "raised": "effects.UnsupportedEffect", "message": "未支持的机制：防御技能「X」（描述里读不出减伤比例）", "what": "防御技能「X」", "detail": "描述里读不出减伤比例"}
+{"name": "A5 状态技能效果未核验：step_joint → state.unsupported", "outcome": {"used": "聒噪", "apply_returned": null, "unsupported_entries": [{"turn": 1, "what": "状态技能「聒噪」", "detail": "敌方获得全攻击技能能耗+2，持续3回合。", "evidence": "skill_000274"}], "events": ["status_unsupported"]}}
+{"name": "A6 deserialize 规则集不匹配", "raised": "effects.UnsupportedEffect", "message": "未支持的机制：规则集不匹配：记录是 other-ruleset，当前是 roco-world-s4-2026-09-10（不同规则集的状态不可混用）", "what": "规则集不匹配：记录是 other-ruleset，当前是 roco-world-s4-2026-09-10", "detail": "不同规则集的状态不可混用"}
+{"name": "A7 印记叠加/替换规则未定义（MC-009）", "outcome": {"skill": "主场优势", "skill_id": "skill_000280", "desc": "自己获得1层攻击印记。", "apply_returned": true, "marks": {"攻击印记": 1}, "unsupported_entries": [{"turn": 1, "what": "印记「攻击印记」的叠加/替换规则", "detail": "术语 3010 只给了「最多 1 正 + 1 负」，未定义同类替换（MC-009）；本引擎暂按累加层数处理", "evidence": "3010"}]}}
+{"name": "A8 未实现的道具", "outcome": {"unsupported_entries": [{"turn": 1, "what": "道具「神秘道具」", "detail": "未实现", "evidence": "神秘道具"}]}}
+
+=== 汇总 ===
+{
+ "status_skill_stats": {
+  "total": 167,
+  "fully_parsed": 77,
+  "partial": 9,
+  "no_effect_parsed": 81
+ },
+ "status_skill_examples": [
+  {
+   "skill_id": "skill_000274",
+   "name": "聒噪",
+   "desc": "敌方获得全攻击技能能耗+2，持续3回合。",
+   "unparsed": [],
+   "owners_in_A": [
+    "pet_000445"
+   ]
+  },
+  {
+   "skill_id": "skill_000277",
+   "name": "锐利眼神",
+   "desc": "敌方获得物防和魔防-120%。",
+   "unparsed": [],
+   "owners_in_A": [
+    "pet_000225"
+   ]
+  },
+  {
+   "skill_id": "skill_000278",
+   "name": "快速移动",
+   "desc": "自己获得速度+80，应对防御：改为速度+160。",
+   "unparsed": [],
+   "owners_in_A": [
+    "pet_000445"
+   ]
+  },
+  {
+   "skill_id": "skill_000279",
+   "name": "伺机而动",
+   "desc": "下一次攻击时，技能威力+70。",
+   "unparsed": [],
+   "owners_in_A": [
+    "pet_000445"
+   ]
+  },
+  {
+   "skill_id": "skill_000281",
+   "name": "操控",
+   "desc": "敌方本回合使用的技能能耗+7，持续3回合。",
+   "unparsed": [],
+   "owners_in_A": [
+    "pet_000445"
+   ]
+  },
+  {
+   "skill_id": "skill_000284",
+   "name": "精神扰乱",
+   "desc": "敌方获得全技能能耗+1，应对防御：改为能耗+3。",
+   "unparsed": [],
+   "owners_in_A": [
+    "pet_000445"
+   ]
+  }
+ ],
+ "A5_skill": {
+  "skill_id": "skill_000274",
+  "name": "聒噪",
+  "desc": "敌方获得全攻击技能能耗+2，持续3回合。",
+  "owner": "pet_000445",
+  "parsed_effects": [],
+  "effective_support": "unsupported"
+ },
+ "service_constants": {
+  "CAPABILITIES": {
+   "rules.query_catalog": true,
+   "rules.query_type_chart": true,
+   "mechanics.resolve_effect": false,
+   "team.evaluate": false,
+   "team.compare": false,
+   "battle.plan": false
+  },
+  "NOT_IMPLEMENTED": {},
+  "ROUTES": [
+   "/health",
+   "/rules/query",
+   "/team/evaluate",
+   "/team/compare",
+   "/battle/plan",
+   "/battle/new",
+   "/battle/legal",
+   "/battle/advance"
+  ],
+  "EFFECT_KINDS": [
+   "damage",
+   "effect",
+   "mechanic",
+   "power",
+   "resolve"
+  ],
+  "ERROR_HTTP_STATUS": {
+   "bad_request": 400,
+   "hidden_information": 400,
+   "not_found": 404,
+   "ruleset_unsupported": 404,
+   "version_mismatch": 409,
+   "unsupported_effect": 422,
+   "not_implemented": 501,
+   "internal_error": 500
+  }
+ },
+ "not_implemented_paths": [],
+ "route_check": {
+  "/battle/summary": {
+   "in_ROUTES": false,
+   "in_NOT_IMPLEMENTED": false,
+   "dispatch_result": "not_found(404)"
+  },
+  "/battle/plan": {
+   "in_ROUTES": true,
+   "in_NOT_IMPLEMENTED": false,
+   "dispatch_result": "handler"
+  }
+ },
+ "traits": {
+  "不朽": {
+   "pet": "寂灭骨龙",
+   "status": "REFUSED",
+   "hook": null,
+   "reason": "复活需要「力竭后仍占用一个回合计数位」这一状态，而本引擎在精灵力竭时立刻把它移出可行动集合（术语 3009 把力竭下场与主动离场分开）。要实现它必须先确认：4 回合从哪一刻开始计、复活后生命/能量/状态/印记如何初始化、能否被再次触发。四条都没有一手证据（MC-014），所以拒绝而不是近似。"
+  },
+  "身经百练": {
+   "pet": "海豹船长",
+   "status": "FULL",
+   "hook": "on_enter",
+   "reason": "计数源明确（术语 1015/1016/1017 的「应对成功」），加成对象明确（水系与武系技能，入场时生效）。假设：每层 +20% 且可叠加；「入场时」= 换上该精灵的那个回合。"
+  },
+  "预警": {
+   "pet": "黑猫巫师",
+   "status": "PARTIAL",
+   "hook": "on_turn_start",
+   "reason": "「速度+50」已实现为速度属性增益。未实现的是**触发条件**「敌方技能足够击败自己」——它要求对每个合法敌方技能算一遍伤害并比较当前生命，而这依赖尚未核验的官方伤害公式（MC-010/011）；用未核验的公式去决定「会不会死」，会让一条被动特性建立在假设上。因此条件未实现，特性只在测试里被显式驱动。"
+  },
+  "泛音列": {
+   "pet": "圆号鱼",
+   "status": "FULL",
+   "hook": "after_status_skill",
+   "reason": "「聒噪」的效果在数据里查得到（`聒噪` skill_000274：敌方获得全攻击技能能耗+2，持续3回合），所以不需要猜。实现为给对手挂一个能耗修正标记。"
+  },
+  "捉迷藏": {
+   "pet": "雪影娃娃",
+   "status": "PARTIAL",
+   "hook": "after_freeze_applied",
+   "reason": "「给敌方挂全技能能耗+1」已实现为能耗修正标记。未实现的是它与**其他能耗修改**（湿润印记 -1、聒噪 +2）的复合顺序与下限——术语没有定义，属 MC-018 待验项，因此只登记标记、不在此处结算复合。"
+  },
+  "专注力": {
+   "pet": "音速犬",
+   "status": "FULL",
+   "hook": "on_enter",
+   "reason": "触发时机用 `entered_turn` 判定（换入即记录回合号），与术语 1010「迸发」所依据的字段是同一个。「首回合」判定为 entered_turn == 当前回合。"
+  }
+ },
+ "traits_summary": {
+  "FULL": 3,
+  "PARTIAL": 2,
+  "REFUSED": 1
+ },
+ "unparsed_markers": [
+  "随机",
+  "选择",
+  "明",
+  "暗",
+  "传动",
+  "号位",
+  "连击",
+  "天气",
+  "眩晕",
+  "沉默",
+  "封印"
+ ],
+ "unparsed_marker_counts_all_824": {
+  "随机": 18,
+  "选择": 27,
+  "明": 1,
+  "暗": 3,
+  "传动": 18,
+  "号位": 16,
+  "连击": 76,
+  "天气": 13,
+  "眩晕": 4,
+  "沉默": 0,
+  "封印": 0
+ },
+ "type_chart": {
+  "singles": 18,
+  "dual_rows_in_snapshot": 102,
+  "two_single_combinations"

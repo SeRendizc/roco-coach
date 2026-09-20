@@ -1,0 +1,773 @@
+{
+  "report_id": "F02-REGRESSION-2026-09-21",
+  "roadmap_task": "F02 全链路回归",
+  "human_report": "reports/roco/regression/F02-REGRESSION-2026-09-21.md",
+  "generated_at": "2026-09-21T03:25:00+08:00",
+  "identity": {
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "snapshot_fingerprint": "affa4273ae5fb87578d038084e7a30dc6f5e2fd5e59d11049f0aa989c40a1f7a",
+    "git_head": "b5c245363e44526c6d0482863bfe4bb833e0ee70",
+    "git_dirty": true,
+    "python": "3.9.6",
+    "node": "v24.20.0",
+    "npm": "11.19.0",
+    "host": "serendizc-mbp (Darwin arm64, 15 cpus)",
+    "pytest_available": false,
+    "pytest_note": "本机无 pytest（No module named pytest），项目规则禁止安装依赖；Python 测试用标准库 unittest"
+  },
+  "integrity": {
+    "source_dirs_modified": [],
+    "tests_modified": [],
+    "written_paths": [
+      "reports/roco/regression/"
+    ],
+    "git_reset_or_checkout_or_stash": false,
+    "commits_made": 0,
+    "packages_installed": [],
+    "note": "roco/src/、src/、tests/ 零改动；reports/** 的改动是验收脚本与先导自身的产物"
+  },
+  "suites": [
+    {
+      "command": "npm test",
+      "log": "logs/npm-test.log",
+      "exit": 0,
+      "real_s": 158.11,
+      "parts": [
+        {
+          "name": "test:unit",
+          "test_files": 23,
+          "tests": 421,
+          "pass": 421,
+          "fail": 0,
+          "skipped": 0,
+          "duration_ms": 14909.741416
+        },
+        {
+          "name": "test:browser",
+          "test_files": 2,
+          "tests": 18,
+          "pass": 17,
+          "fail": 0,
+          "skipped": 1,
+          "duration_ms": 142846.716875,
+          "skip_detail": "④ 换到 1 号位后再打倒对手首发：对手补位必须落地 —— tests/replace.test.js:577 的既有条件守卫（1 号位 60 回合内没倒下则 skip），非本任务放宽"
+        }
+      ]
+    },
+    {
+      "command": "python -m pytest roco/tests",
+      "log": "logs/pytest-substitution.log",
+      "exit": 1,
+      "executed": false,
+      "error": "/Library/Developer/CommandLineTools/usr/bin/python3: No module named pytest",
+      "substitute": "npm run test:env",
+      "note": "路线图书面命令；本机无 pytest，如实报告替代口径，不声称 pytest 通过"
+    },
+    {
+      "command": "npm run test:env",
+      "log": "logs/npm-run-test-env.log",
+      "exit": 0,
+      "real_s": 1.55,
+      "expands_to": "cd roco && PYTHONPATH=src python3 -m unittest discover -s tests",
+      "tests": 122,
+      "pass": 122,
+      "fail": 0,
+      "skipped": 0,
+      "duration_ms": 1263
+    },
+    {
+      "command": "npm run test:smoke",
+      "log": "logs/test-smoke.log",
+      "exit": 0,
+      "real_s": 20.76,
+      "checks": 7,
+      "pass": 7,
+      "fail": 0,
+      "prerequisite": "需要 http://127.0.0.1:8765 已有服务；scripts/browser-smoke.mjs:27-29 探测不到就 exit 2",
+      "prerequisite_caveat": "本轮 8765 上的服务不是本任务启动的（本任务没有起任何常驻服务）"
+    },
+    {
+      "command": "npm run test:bridge",
+      "log": "logs/test-bridge.log",
+      "exit": 0,
+      "real_s": 4.0,
+      "tests": 11,
+      "pass": 11,
+      "fail": 0,
+      "skipped": 0,
+      "duration_ms": 3865.832667
+    },
+    {
+      "command": "npm run test:toolbox-roco",
+      "log": "logs/test-toolbox-roco.log",
+      "exit": 0,
+      "real_s": 0.23,
+      "tests": 17,
+      "pass": 17,
+      "fail": 0,
+      "skipped": 0,
+      "duration_ms": 68.742167
+    },
+    {
+      "command": "npm run test:plan-e2e",
+      "log": "logs/test-plan-e2e.log",
+      "exit": 0,
+      "real_s": 1.92,
+      "tests": 8,
+      "pass": 8,
+      "fail": 0,
+      "skipped": 0,
+      "duration_ms": 1746.702542
+    },
+    {
+      "command": "npm run test:roco-all",
+      "log": "logs/npm-run-test-roco-all.log",
+      "exit": 0,
+      "real_s": 7.93,
+      "composed_of": [
+        "test:env",
+        "test:bridge",
+        "test:toolbox-roco",
+        "test:plan-e2e"
+      ],
+      "tests": 158,
+      "pass": 158,
+      "fail": 0,
+      "skipped": 0,
+      "counted_in_total": false,
+      "note": "与独立执行的四个套件重复，合计时只算一次"
+    },
+    {
+      "command": "node scripts/roco/browser-acceptance.mjs",
+      "log": "logs/browser-acceptance.log",
+      "exit": 0,
+      "real_s": 19.79,
+      "checks": 9,
+      "pass": 9,
+      "fail": 0,
+      "artifact": "reports/roco/acceptance/browser-acceptance.json"
+    },
+    {
+      "command": "node scripts/roco/demo-acceptance.mjs",
+      "log": "logs/demo-acceptance.log",
+      "exit": 0,
+      "real_s": 5.51,
+      "checks": 16,
+      "pass": 16,
+      "fail": 0,
+      "artifact": "reports/roco/demo-acceptance/demo-acceptance.json"
+    },
+    {
+      "command": "python3 roco/run_pilot.py --games 1000 --quiet",
+      "log": "logs/run_pilot-1000.log",
+      "exit": 0,
+      "real_s": 21.61,
+      "games": 1000,
+      "metrics": {
+        "games": 1000,
+        "base_seed": 20260921,
+        "seed_range": [
+          20260921,
+          20261920
+        ],
+        "turn_limit": 300,
+        "wall_seconds": 21.488,
+        "games_per_second": 46.537,
+        "seconds_per_game": 0.02149,
+        "illegal_actions": 0,
+        "truncations": 0,
+        "exceptions": 0,
+        "unfinished_games": 0
+      },
+      "hidden_field_reads": {},
+      "verdicts": {
+        "player_wins": 500,
+        "enemy_wins": 498,
+        "draws": 2
+      },
+      "turns": {
+        "mean": 51.11,
+        "p50": 42,
+        "max": 214
+      },
+      "exposure_balanced": true,
+      "disclaimer": "分组胜负计数是环境自检，不是胜率、不是强度榜"
+    },
+    {
+      "command": "python3 roco/run_pilot.py --games 200 --quiet",
+      "log": "logs/run_pilot.log",
+      "exit": 0,
+      "real_s": 4.29,
+      "games": 200,
+      "illegal_actions": 0,
+      "truncations": 0,
+      "exceptions": 0,
+      "unfinished_games": 0
+    },
+    {
+      "command": "npm run test:roco-experience",
+      "log": "logs/test-roco-experience.log",
+      "exit": 0,
+      "real_s": 0.17,
+      "tests": 9,
+      "pass": 9,
+      "fail": 0,
+      "skipped": 0,
+      "counted_in_total": false,
+      "note": "tests/roco-experience.test.js 已包含在 npm run test:unit 的 23 个文件内，本行只作交叉确认"
+    }
+  ],
+  "summary": {
+    "total_tests_counted": 604,
+    "pass": 603,
+    "fail": 0,
+    "skipped": 1,
+    "counting_rule": "1a(421) + 1b(18) + test:env(122) + test:smoke(7 检查项) + test:bridge(11) + test:toolbox-roco(17) + test:plan-e2e(8)；test:roco-all 与 browser/demo 验收检验项不计入",
+    "commands_executed": 15,
+    "commands_not_executed": [
+      {
+        "command": "python -m pytest roco/tests",
+        "reason": "本机无 pytest"
+      }
+    ]
+  },
+  "latency": {
+    "method": "一次性脚本 /tmp/f02-latency.mjs（不进仓库）通过 src/coach/roco-client.js 启动真实 Python 服务并计时；同时记录客户端往返 latency_ms 与服务端自测 service_latency_ms",
+    "units": "ms",
+    "is_local_only": true,
+    "caveat": "本机回环（同一台 15 核 arm64 MacBook，Python 3.9.6）数字，不是生产数据，不可用于容量规划",
+    "raw_samples": "logs/latency-samples.json",
+    "measurements": {
+      "plan_battle_planActions_round_trip_ms": {
+        "n": 25,
+        "min": 0.707,
+        "p50": 36.29,
+        "p95": 57.68,
+        "max": 57.794,
+        "mean": 31.945
+      },
+      "plan_battle_planActions_search_path_round_trip_ms": {
+        "n": 19,
+        "min": 25.43,
+        "p50": 38.276,
+        "p95": 57.68,
+        "max": 57.794,
+        "mean": 41.716
+      },
+      "plan_battle_planActions_fast_path_round_trip_ms": {
+        "n": 6,
+        "min": 0.707,
+        "p50": 0.932,
+        "p95": 1.767,
+        "max": 1.767,
+        "mean": 1.003
+      },
+      "plan_battle_planActions_service_ms": {
+        "n": 25,
+        "min": 0.215,
+        "p50": 35.638,
+        "p95": 56.175,
+        "max": 56.644,
+        "mean": 31.288
+      },
+      "battle_advance_round_trip_ms": {
+        "n": 30,
+        "min": 0.775,
+        "p50": 1.89,
+        "p95": 2.58,
+        "max": 2.821,
+        "mean": 1.868
+      },
+      "battle_advance_service_ms": {
+        "n": 30,
+        "min": 0.401,
+        "p50": 1.314,
+        "p95": 2.096,
+        "max": 2.142,
+        "mean": 1.279
+      },
+      "rules_query_round_trip_ms": {
+        "n": 40,
+        "min": 0.174,
+        "p50": 0.199,
+        "p95": 0.262,
+        "max": 0.58,
+        "mean": 0.217
+      },
+      "rules_query_service_ms": {
+        "n": 40,
+        "min": 0.01,
+        "p50": 0.014,
+        "p95": 0.046,
+        "max": 0.395,
+        "mean": 0.027
+      }
+    },
+    "plan_params": {
+      "depth": 2,
+      "beam": 4,
+      "analysis_seeds": [
+        11,
+        29,
+        47
+      ]
+    },
+    "plan_request_bytes": {
+      "public_planner_state_min": 1155,
+      "public_planner_state_max": 1169,
+      "n": 25
+    },
+    "plan_stratification_note": "branches_evaluated>0 走完整搜索；==0 是「这一步只有换人可做」，一个分支都不搜即返回（见 findings F-01）",
+    "advance_games_used": 3,
+    "advance_seed_range": [
+      20260921,
+      20260923
+    ],
+    "rules_query_kinds": [
+      "pet",
+      "skill",
+      "learnset",
+      "term",
+      "type_multiplier",
+      "ruleset"
+    ],
+    "errors": {
+      "plan": 0,
+      "advance": 0,
+      "query": 0
+    }
+  },
+  "coverage": {
+    "pets": {
+      "total": 12,
+      "by_support_level": {
+        "KNOWLEDGE_ONLY": 12
+      },
+      "by_group": {
+        "A": 6,
+        "B": 3,
+        "C": 3
+      },
+      "caveats": [
+        "支持等级 current 一律为 KNOWLEDGE_ONLY：本轮未实现任何效果原语，未通过任何 microcase。",
+        "候选配招是一组机制覆盖互不重复的真实技能，不是最优解，也不代表社区推荐。",
+        "描述文本里的机制只登记为「描述中出现」，未据此推断结算时序。",
+        "C 组为 S4 新精灵：新版本登场不等于热门或强。"
+      ]
+    },
+    "skills": {
+      "total_in_snapshot": 824,
+      "effect_support_unsupported": 824,
+      "a_group_candidate_moveset_pool": {
+        "total": 19,
+        "fully_supported": 3,
+        "partial": 0,
+        "unsupported": 16,
+        "unique_skill_ids": 19
+      },
+      "twelve_pet_learnset_union": {
+        "total": 264,
+        "fully_supported": 62,
+        "partial": 2,
+        "unsupported": 200
+      },
+      "all_skills": {
+        "total": 824,
+        "fully_supported": 164,
+        "partial": 20,
+        "unsupported": 640
+      },
+      "all_status_skills": {
+        "total": 167,
+        "fully_supported": 77,
+        "partial": 9,
+        "unsupported": 81
+      },
+      "a_group_pool_by_resolution_path": {
+        "attack_static_power": 12,
+        "defense_readable_reduction": 4,
+        "status_parse_complete": 1,
+        "status_parse_failed": 2,
+        "note": "parse.coverage_report 的 fully_supported 只对状态技能有意义；攻击/防御走各自路径"
+      }
+    },
+    "microcases": {
+      "total": 21,
+      "passed": 0,
+      "failed": 0,
+      "unverified": 21,
+      "verified_levels": {
+        "documented_text_only": 2,
+        "planned": 19
+      }
+    },
+    "traits_a_group": {
+      "summary": {
+        "FULL": 3,
+        "PARTIAL": 2,
+        "REFUSED": 1
+      },
+      "detail": {
+        "不朽": {
+          "pet": "寂灭骨龙",
+          "status": "REFUSED",
+          "hook": null
+        },
+        "身经百练": {
+          "pet": "海豹船长",
+          "status": "FULL",
+          "hook": "on_enter"
+        },
+        "预警": {
+          "pet": "黑猫巫师",
+          "status": "PARTIAL",
+          "hook": "on_turn_start"
+        },
+        "泛音列": {
+          "pet": "圆号鱼",
+          "status": "FULL",
+          "hook": "after_status_skill"
+        },
+        "捉迷藏": {
+          "pet": "雪影娃娃",
+          "status": "PARTIAL",
+          "hook": "after_freeze_applied"
+        },
+        "专注力": {
+          "pet": "音速犬",
+          "status": "FULL",
+          "hook": "on_enter"
+        }
+      }
+    },
+    "service_capabilities_declared": {
+      "rules.query_catalog": true,
+      "rules.query_type_chart": true,
+      "mechanics.resolve_effect": false,
+      "team.evaluate": false,
+      "team.compare": false,
+      "battle.plan": false
+    },
+    "service_not_implemented_declared": {},
+    "service_routes": [
+      "/health",
+      "/rules/query",
+      "/team/evaluate",
+      "/team/compare",
+      "/battle/plan",
+      "/battle/new",
+      "/battle/legal",
+      "/battle/advance"
+    ]
+  },
+  "failures": [],
+  "findings": [
+    {
+      "id": "F-01",
+      "severity": "medium",
+      "kind": "contract_ambiguity",
+      "title": "/battle/plan 在「只有换人可做」的局面返回 coverage=1.0 但 branches_evaluated=0",
+      "evidence": "logs/latency-samples.json 的 plan_diagnostics；n=25 中 6 次 branches=0、coverage=1.0、timed_out=false",
+      "reproduce": "node /tmp/f02-latency.mjs <repoRoot> /tmp/f02-latency.json",
+      "location": "roco/src/roco_env/planner.py plan_actions（_my_candidates 空判与末尾 coverage 计算）",
+      "impact": "只看 coverage 的调用方会把「没搜」读成「搜完了」"
+    },
+    {
+      "id": "F-02",
+      "severity": "low",
+      "kind": "test_skip_by_guard",
+      "title": "npm test 的 browser 套件 1 条按既有条件守卫跳过",
+      "evidence": "npm-test.log: ﹣ ④ ... # 1 号位在 60 个回合内没有倒下 ... 本次跳过",
+      "location": "tests/replace.test.js:577",
+      "impact": "该补位场景本轮未被验证；守卫是仓库既有代码，非本任务放宽"
+    },
+    {
+      "id": "F-03",
+      "severity": "medium",
+      "kind": "declaration_mismatch",
+      "title": "/health 的 capabilities 把 team.evaluate / team.compare / battle.plan 报成 false，但三个端点实际可用",
+      "evidence": "GET /health capabilities 全 false；同会话 POST /team/evaluate 与 /battle/plan 均 ok:true",
+      "location": "roco/src/roco_env/service.py CAPABILITIES（146-153）",
+      "impact": "信任 capabilities 的消费方会误判端点不可用"
+    },
+    {
+      "id": "F-04",
+      "severity": "low",
+      "kind": "dead_code_path",
+      "title": "NOT_IMPLEMENTED 为空字典，未登记路径返回 404 not_found 而非 501 not_implemented",
+      "evidence": "POST /battle/summary → 404 not_found（error: 未知端点：/battle/summary）",
+      "location": "roco/src/roco_env/service.py ROUTES / NOT_IMPLEMENTED / do_POST",
+      "impact": "not_implemented() 处理函数不可达；客户端靠本地合成该错误"
+    },
+    {
+      "id": "F-05",
+      "severity": "low",
+      "kind": "unsupported_silent",
+      "title": "/battle/plan 的 unsupported 数组为空时也可能没有任何可用结论",
+      "evidence": "F-01 同一批样本：unsupported: [] 且 coverage=1.0",
+      "impact": "上层无法仅凭 unsupported 判断「这次没算」"
+    },
+    {
+      "id": "F-06",
+      "severity": "low",
+      "kind": "missing_prerequisite",
+      "title": "npm run test:smoke 依赖外部常驻的 127.0.0.1:8765 服务，命令本身不自举",
+      "evidence": "scripts/browser-smoke.mjs:27-29 探测失败则 exit 2；本轮通过是因为 8765 上本来有服务",
+      "impact": "干净机器上该命令直接拒绝运行，而不是给出自举步骤"
+    },
+    {
+      "id": "F-07",
+      "severity": "info",
+      "kind": "no_unsupported_observed",
+      "title": "默认配招 + greedy_damage 代打下，A/B/C 三组各 15 局的 MatchRecord.unsupported 均为 0",
+      "evidence": "logs/unsupported-mechanism-probe.json 与 §7.6 的统计",
+      "impact": "fail-closed 路径在本轮回归里是读码 + 探针证据，不是对局证据"
+    }
+  ],
+  "unsupported_mechanisms": {
+    "failure_modes": {
+      "F1": "抛 roco_env.effects.UnsupportedEffect（调用方拿异常，无比值）",
+      "F2": "记入 GameState.unsupported（回执 unsupported_seen / unverified_mechanics_seen，coverage=0）",
+      "F3": "结构化响应 unsupported_effect(422) / not_implemented(501) / not_found(404)，coverage=0、result=null",
+      "F4": "静默不解析/不结算/不登记（调用方无信号，最需警惕）"
+    },
+    "engine_invariants": [
+      {
+        "id": "U1",
+        "mechanism": "等级→面板换算公式未知，只支持 level=1",
+        "mode": "F1",
+        "source": "roco/src/roco_env/env.py:64-67 env._make_pet",
+        "probe_message": "未支持的机制：等级 2（等级→面板换算公式未知，本引擎只支持 level=1（M1 已登记为 unknown））"
+      },
+      {
+        "id": "U2",
+        "mechanism": "能量上限与回合末回能（MC-007）",
+        "mode": "F4",
+        "source": "roco/src/roco_env/env.py:45-46 ENERGY_MAX=6 / ENERGY_REGEN_PER_TURN=1（标注为假设）"
+      },
+      {
+        "id": "U3",
+        "mechanism": "同速同先手度裁决（MC-002）",
+        "mode": "F4",
+        "source": "roco/src/roco_env/env.py _rng_for / order_actions 第 4 排序键（docstring 标注为假设）"
+      },
+      {
+        "id": "U4",
+        "mechanism": "印记叠加/替换规则（MC-009）",
+        "mode": "F2",
+        "source": "roco/src/roco_env/env.py:607-620",
+        "probe_entry": [
+          {
+            "turn": 1,
+            "what": "印记「攻击印记」的叠加/替换规则",
+            "detail": "术语 3010 只给了「最多 1 正 + 1 负」，未定义同类替换（MC-009）；本引擎暂按累加层数处理",
+            "evidence": "3010"
+          }
+        ]
+      },
+      {
+        "id": "U5",
+        "mechanism": "传动（术语 1033）技能位移动",
+        "mode": "F2/F4",
+        "source": "roco/src/roco_env/parse.py UNPARSED_MARKERS(传动/号位)"
+      },
+      {
+        "id": "U6",
+        "mechanism": "天气/连击数/属性增减层数语义",
+        "mode": "F2/F4",
+        "source": "roco/src/roco_env/parse.py UNPARSED_MARKERS；env.py:663-664 天气登记"
+      },
+      {
+        "id": "U7",
+        "mechanism": "12 只精灵特性效果（MC-014…019）",
+        "mode": "F1/F4",
+        "source": "roco/src/roco_env/traits.py TRAITS（FULL 3 / PARTIAL 2 / REFUSED 1）"
+      }
+    ],
+    "numeric_assumptions_unverified": [
+      {
+        "id": "U8",
+        "mechanism": "官方伤害公式",
+        "mode": "F4",
+        "source": "roco/src/roco_env/effects.py:57-99 COMMUNITY_HYPOTHESIS_V1（verified=False）",
+        "marker": "damage 事件带 damage_model 与 formula_verified:false"
+      },
+      {
+        "id": "U9",
+        "mechanism": "本系加成 1.5 / 取整 / 最小 1",
+        "mode": "F4",
+        "source": "roco/src/roco_env/effects.py stab_multiplier"
+      },
+      {
+        "id": "U10",
+        "mechanism": "条件化威力取值时机与取整（MC-010）",
+        "mode": "F1/F2/F4",
+        "source": "roco/src/roco_env/effects.py effective_power；env.py:514-520 捕获后登记"
+      },
+      {
+        "id": "U11",
+        "mechanism": "百分比伤害/回复取整与基数（MC-011）",
+        "mode": "F4",
+        "source": "roco/src/roco_env/effects.py percent_of_max_hp / decay_layers"
+      },
+      {
+        "id": "U12",
+        "mechanism": "未实现回合末结算的状态",
+        "mode": "F1/F2",
+        "source": "roco/src/roco_env/effects.py status_tick",
+        "probe_message": "未支持的机制：状态「眩晕」（该状态没有实现回合末结算）"
+      },
+      {
+        "id": "U13",
+        "mechanism": "防御技能读不出减伤比例",
+        "mode": "F1",
+        "source": "roco/src/roco_env/effects.py parse_defense_reduction",
+        "probe_message": "未支持的机制：防御技能「X」（描述里读不出减伤比例）"
+      },
+      {
+        "id": "U14",
+        "mechanism": "未实现的道具效果",
+        "mode": "F2",
+        "source": "roco/src/roco_env/env.py _use_item else 分支",
+        "probe_entry": [
+          {
+            "turn": 1,
+            "what": "道具「神秘道具」",
+            "detail": "未实现",
+            "evidence": "神秘道具"
+          }
+        ]
+      },
+      {
+        "id": "U15",
+        "mechanism": "离场效果需要选择换上谁",
+        "mode": "F2",
+        "source": "roco/src/roco_env/env.py:659-662"
+      }
+    ],
+    "parser_uncovered_markers": {
+      "markers": [
+        "随机",
+        "选择",
+        "明",
+        "暗",
+        "传动",
+        "号位",
+        "连击",
+        "天气",
+        "眩晕",
+        "沉默",
+        "封印"
+      ],
+      "occurrences_in_all_824_skill_descriptions": {
+        "随机": 18,
+        "选择": 27,
+        "明": 1,
+        "暗": 3,
+        "传动": 18,
+        "号位": 16,
+        "连击": 76,
+        "天气": 13,
+        "眩晕": 4,
+        "沉默": 0,
+        "封印": 0
+      },
+      "note": "子串匹配；「明」等单字标记存在误命中可能；沉默/封印 命中 0 条"
+    },
+    "service_fail_closed": [
+      {
+        "id": "U16",
+        "mechanism": "kind ∈ {effect,power,damage,mechanic,resolve} 需要效果原语",
+        "mode": "F3",
+        "source": "roco/src/roco_env/service.py EFFECT_KINDS / _answer_effect",
+        "probe": "kind=damage, skill_id=skill_000744 → HTTP 422 unsupported_effect, coverage 0, result null"
+      },
+      {
+        "id": "U17",
+        "mechanism": "技能静态 power 不是最终伤害",
+        "mode": "F3(soft)",
+        "source": "roco/src/roco_env/service.py _skill_record",
+        "probe": "kind=skill → 200 但 effective_power/damage 恒为 null 且带 unsupported[{code:effect_resolution}]"
+      },
+      {
+        "id": "U18",
+        "mechanism": "双属性相性缺显式行（67/153）",
+        "mode": "F3",
+        "source": "roco/src/roco_env/service.py _answer_type_multiplier / _answer_type_row",
+        "probe": {
+          "singles": 18,
+          "dual_rows_in_snapshot": 102,
+          "two_single_combinations": 153,
+          "combinations_without_row": 67,
+          "examples": [
+            "光系|冰系",
+            "光系|普通系",
+            "光系|机械系",
+            "光系|武系",
+            "光系|毒系"
+          ]
+        }
+      },
+      {
+        "id": "U19",
+        "mechanism": "mechanics.resolve_effect 能力未实现",
+        "mode": "F3",
+        "source": "roco/src/roco_env/service.py CAPABILITIES / mechanics_coverage:0.0"
+      },
+      {
+        "id": "U20",
+        "mechanism": "NOT_IMPLEMENTED 端点（当前为空）",
+        "mode": "F3 失效",
+        "source": "roco/src/roco_env/service.py:156-157",
+        "probe": "POST /battle/summary → 404 not_found（不是 501）",
+        "finding": "F-04"
+      },
+      {
+        "id": "U21",
+        "mechanism": "隐藏信息防线（MC-013）",
+        "mode": "F3",
+        "source": "roco/src/roco_env/service.py find_hidden_keys + src/coach/roco-client.js HIDDEN_KEYS"
+      },
+      {
+        "id": "U22",
+        "mechanism": "规则集版本与快照指纹",
+        "mode": "F3",
+        "source": "roco/src/roco_env/service.py resolve_ruleset / expected_fingerprint"
+      }
+    ],
+    "observed_in_real_matches": {
+      "A_group_15_games_unsupported_entries": 0,
+      "B_group_15_games_unsupported_entries": 0,
+      "C_group_15_games_unsupported_entries": 0,
+      "note": "默认规范配招 + greedy_damage 代打下 fail-closed 未被触发（finding F-07）"
+    }
+  },
+  "logs": [
+    "browser-acceptance.log",
+    "demo-acceptance.log",
+    "environment.log",
+    "latency-harness.log",
+    "latency-samples.json",
+    "npm-run-test-env.log",
+    "npm-run-test-roco-all.log",
+    "npm-test.log",
+    "pilot-1000-metrics.json",
+    "pytest-substitution.log",
+    "run_pilot-1000.log",
+    "run_pilot.log",
+    "test-bridge.log",
+    "test-plan-e2e.log",
+    "test-roco-experience.log",
+    "test-smoke.log",
+    "test-toolbox-roco.log",
+    "unsupported-mechanism-probe.json",
+    "unsupported-mechanism-probe.stdout.log"
+  ],
+  "not_claimed": [
+    "不声称任何游戏规则被证实（21 条 microcase 全部未执行）",
+    "不声称任何强度/胜率结论（先导胜负计数是环境自检）",
+    "不声称 pytest 通过（本机无 pytest）",
+    "延迟是本机回环数字，不是生产数字",
+    "test:smoke 连到的 8765 服务不是本任务启动的"
+  ]
+}

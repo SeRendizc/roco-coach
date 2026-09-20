@@ -1,0 +1,220 @@
+$ # latency harness (throwaway, /tmp only): node /tmp/f02-latency.mjs <repoRoot> /tmp/f02-latency.json
+{
+  "host": "darwin arm64",
+  "node": "v24.20.0",
+  "samples": {
+    "plan_battle_round_trip_ms": {
+      "n": 25,
+      "min": 0.707,
+      "p50": 36.29,
+      "p95": 57.68,
+      "max": 57.794,
+      "mean": 31.945
+    },
+    "plan_battle_service_ms": {
+      "n": 25,
+      "min": 0.215,
+      "p50": 35.638,
+      "p95": 56.175,
+      "max": 56.644,
+      "mean": 31.288
+    },
+    "plan_battle_search_path_ms": {
+      "n": 19,
+      "min": 25.43,
+      "p50": 38.276,
+      "p95": 57.68,
+      "max": 57.794,
+      "mean": 41.716
+    },
+    "plan_battle_search_path_service_ms": {
+      "n": 19,
+      "min": 24.884,
+      "p50": 37.781,
+      "p95": 56.175,
+      "max": 56.644,
+      "mean": 41.023
+    },
+    "plan_battle_fast_path_ms": {
+      "n": 6,
+      "min": 0.707,
+      "p50": 0.932,
+      "p95": 1.767,
+      "max": 1.767,
+      "mean": 1.003
+    },
+    "battle_advance_round_trip_ms": {
+      "n": 30,
+      "min": 0.775,
+      "p50": 1.89,
+      "p95": 2.58,
+      "max": 2.821,
+      "mean": 1.868
+    },
+    "battle_advance_service_ms": {
+      "n": 30,
+      "min": 0.401,
+      "p50": 1.314,
+      "p95": 2.096,
+      "max": 2.142,
+      "mean": 1.279
+    },
+    "rules_query_round_trip_ms": {
+      "n": 40,
+      "min": 0.174,
+      "p50": 0.199,
+      "p95": 0.262,
+      "max": 0.58,
+      "mean": 0.217
+    },
+    "rules_query_service_ms": {
+      "n": 40,
+      "min": 0.01,
+      "p50": 0.014,
+      "p95": 0.046,
+      "max": 0.395,
+      "mean": 0.027
+    }
+  },
+  "notes": [
+    "同一局（seed=20260921, A 组 3 只）内推进；每个采样点都是一次真实 HTTP 往返。"
+  ],
+  "service": {
+    "baseUrl": "http://127.0.0.1:53547",
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "port": 53547
+  },
+  "plan_diagnostics": [
+    {
+      "i": 0,
+      "http_status": 200,
+      "coverage": 1,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 96,
+      "timed_out": false,
+      "latency_ms": 57.794
+    },
+    {
+      "i": 1,
+      "http_status": 200,
+      "coverage": 1,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 96,
+      "timed_out": false,
+      "latency_ms": 55.167
+    },
+    {
+      "i": 2,
+      "http_status": 200,
+      "coverage": 1,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 90,
+      "timed_out": false,
+      "latency_ms": 55.148
+    },
+    {
+      "i": 3,
+      "http_status": 200,
+      "coverage": 1,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 0,
+      "timed_out": false,
+      "latency_ms": 1.767
+    },
+    {
+      "i": 7,
+      "http_status": 200,
+      "coverage": 1,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 0,
+      "timed_out": false,
+      "latency_ms": 1.158
+    },
+    {
+      "i": 11,
+      "http_status": 200,
+      "coverage": 1,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 0,
+      "timed_out": false,
+      "latency_ms": 0.713
+    },
+    {
+      "i": 13,
+      "http_status": 200,
+      "coverage": 0,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 0,
+      "timed_out": false,
+      "latency_ms": 0.741
+    },
+    {
+      "i": 20,
+      "http_status": 200,
+      "coverage": 1,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 0,
+      "timed_out": false,
+      "latency_ms": 0.932
+    },
+    {
+      "i": 24,
+      "http_status": 200,
+      "coverage": 1,
+      "ok": true,
+      "unsupported_n": 0,
+      "branches": 0,
+      "timed_out": false,
+      "latency_ms": 0.707
+    }
+  ],
+  "plan_branches": 0,
+  "plan_note": "plan 的耗时是双峰的：branches_evaluated>0（真搜了）走完整搜索，branches_evaluated==0（局面没有可规划动作/补位期）立即返回。两个分布分开报告。",
+  "plan_errors": 0,
+  "plan_params": {
+    "depth": 2,
+    "beam": 4,
+    "analysis_seeds": [
+      11,
+      29,
+      47
+    ]
+  },
+  "request_bytes": {
+    "public_planner_state_min": 1155,
+    "public_planner_state_max": 1169,
+    "n": 25
+  },
+  "advance_games_used": 3,
+  "advance_seed_range": [
+    20260921,
+    20260923
+  ],
+  "advance_errors": 0,
+  "advance_final_result": null,
+  "advance_final_turn": 4,
+  "query_errors": 0,
+  "query_kinds": [
+    "pet",
+    "skill",
+    "learnset",
+    "term",
+    "type_multiplier",
+    "ruleset"
+  ],
+  "battle_new_ms": {
+    "ok": true,
+    "round_trip_ms": 1,
+    "service_latency_ms": 0.104
+  },
+  "snapshot_fingerprint": "affa4273ae5fb87578d038084e7a30dc6f5e2fd5e59d11049f0aa989c40a1f7a",
+  "ruleset_id": "roco-world-s4-2026-09-10"
+}

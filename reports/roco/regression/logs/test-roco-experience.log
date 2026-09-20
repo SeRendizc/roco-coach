@@ -1,0 +1,27 @@
+$ npm run test:roco-experience   # 附加：npm test:unit 里已包含 tests/roco-experience.test.js
+# started: 2026-09-20T19:19:41Z
+
+> test:roco-experience
+> node --test tests/roco-experience.test.js
+
+✔ 投影：公开字段原样搬运，私有字段一个都不进来 (0.477625ms)
+✔ 投影：局面结束后不可玩（经验层据此闭嘴） (0.077125ms)
+✔ 规划特征：gap 用期望区间宽度，不用 worst 的绝对值 (0.304542ms)
+✔ 陈旧判定：版本对不上就作废，只有一个入口 (0.047584ms)
+✔ 门控来自真实 experience.js：失焦是硬门控，不是「这次没什么可说」 (0.327833ms)
+✔ 危险局面给的是短提示；健康局面沉默（阈值来自经验层，不是这里拍的） (0.100625ms)
+✔ 频率预算：说过一次就在冷却里，同一手也不重复 (0.094959ms)
+✔ 提示文案：给建议与依据，不给胜率也不承诺必胜 (0.163625ms)
+✔ 局末教学入口：没有值得拎出来的决策点就说没有 (0.101334ms)
+ℹ tests 9
+ℹ suites 0
+ℹ pass 9
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 53.941667
+real 0.17
+user 0.16
+sys 0.03
+# exit=0 finished: 2026-09-20T19:19:42Z

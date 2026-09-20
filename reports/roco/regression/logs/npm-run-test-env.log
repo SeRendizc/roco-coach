@@ -1,0 +1,15 @@
+$ npm run test:env   # == cd roco && PYTHONPATH=src python3 -m unittest discover -s tests
+# started: 2026-09-20T19:14:21Z
+
+> test:env
+> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests
+
+..........................................................................................................................
+----------------------------------------------------------------------
+Ran 122 tests in 1.263s
+
+OK
+real 1.55
+user 1.48
+sys 0.05
+# exit=0 finished: 2026-09-20T19:14:22Z

@@ -1,0 +1,35 @@
+$ npm run test:toolbox-roco
+# started: 2026-09-20T19:14:11Z
+
+> test:toolbox-roco
+> node --test tests/evals/roco/toolbox-roco.test.js
+
+✔ query_rules 参数：只收稳定 id 与名字，额外参数、路径、URL、代码一律拒绝 (1.224417ms)
+✔ 其余四个工具的入参同样有界：额外参数、路径、隐藏信息都拒绝 (0.503083ms)
+✔ query_rules 回执带齐契约字段；机制不支持时 result 为 null 且没有编造数值 (1.032334ms)
+✔ state_version 对不上就拒绝执行（请求根本不发出去） (0.31175ms)
+✔ 没有权威版本时，同一对局内也不许版本倒退；来源如实写进 freshness (0.223084ms)
+✔ 引擎回执钉的状态与请求不符：丢弃结果，不返回旧状态算出的内容 (0.149125ms)
+✔ context 里的 stateVersion 也能作为权威来源；规划超时预算是显式常量 (0.116292ms)
+✔ evaluate_team 锁定伙伴：不满足约束的候选不返回，并说清改善/代价/对手池（G03） (0.37325ms)
+✔ evaluate_team 锁定伙伴：没有任何候选满足约束时如实说没有 (0.166417ms)
+✔ compare_team_change 透传 limitations 与「不等于更强」的原话；锁定伙伴被换掉就拒绝 (0.393709ms)
+✔ plan_actions 未实现：结构化 not_implemented、coverage 0、不编计划（G05） (0.412334ms)
+✔ plan_actions 搜索超时：如实报超时，不假装深搜完成（G05） (0.12125ms)
+✔ 规划器接入点：搜索没完成不给结论，完成了才给；签名固定（G05） (0.157792ms)
+✔ plan_actions 认引擎现状的字段名：recommended_label / main_counter / worst / timed_out（G05） (0.418042ms)
+✔ plan_actions 直连桥的公开方法：一次调用、桥独占 public 键，工具层不再手搓传输层 (0.256583ms)
+✔ summarize_battle 没有端点：结构化 not_implemented、coverage 0、不生成摘要 (0.1945ms)
+✔ 五个工具的成功/失败回执都带齐六个契约字段 (0.1855ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 68.742167
+real 0.23
+user 0.19
+sys 0.05
+# exit=0 finished: 2026-09-20T19:14:12Z

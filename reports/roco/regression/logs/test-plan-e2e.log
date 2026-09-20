@@ -1,0 +1,26 @@
+$ npm run test:plan-e2e
+# started: 2026-09-20T19:14:12Z
+
+> test:plan-e2e
+> node --test tests/evals/roco/plan-e2e.test.js
+
+✔ 公开 planner state 由引擎产出：无 seed/pending，对手后备只有公开事实 (96.118916ms)
+✔ 端到端：toolbox → roco-client → 真 Python 服务，公开状态产出计划 (478.474375ms)
+✔ 反证：把私有 serialize() 递进去必须被拒，客户端与服务端两层都拦 (459.414208ms)
+✔ 反证：任意深度的 seed 与对手待执行动作都在客户端被拦下，HTTP 请求数为 0 (87.1945ms)
+✔ 反证：同一公开观察 + 不同真实内部 seed → 公开面一致、结论一致、请求体无真实 seed (536.400541ms)
+✔ 三份隐藏信息词汇表必须一一对应（任何一侧改了都会在这里红） (0.797125ms)
+✔ 两个信任域互不串门：私有端点按路径白名单，教练端点永远扫描 (1.324958ms)
+✔ 对局域的回执带私有状态：桥按路径收下，公开视图只吐白名单字段 (0.401625ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1746.702542
+real 1.92
+user 1.27
+sys 0.25
+# exit=0 finished: 2026-09-20T19:14:14Z

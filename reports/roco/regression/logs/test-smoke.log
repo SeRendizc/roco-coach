@@ -1,0 +1,19 @@
+$ npm run test:smoke
+# started: 2026-09-20T19:18:24Z
+
+> test:smoke
+> node scripts/browser-smoke.mjs
+
+✓ 营地渲染出伙伴卡  (14 张)
+✓ 属性筛选真的在过滤
+✓ 进入对局
+✓ 播放速度已设为最快
+✓ 对局能打到结束  (15 次出招)
+✓ 过程中没有卡死  (非动画期最长连续无可点 0 次)
+✓ 控制台零报错
+
+全部通过
+real 20.76
+user 0.15
+sys 0.08
+# exit=0 finished: 2026-09-20T19:18:45Z

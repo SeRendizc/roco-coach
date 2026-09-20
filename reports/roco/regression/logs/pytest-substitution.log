@@ -1,0 +1,7 @@
+$ python -m pytest roco/tests   # 路线图书面命令（本机无 pytest，预期失败）
+# started: 2026-09-20T19:17:19Z
+/Library/Developer/CommandLineTools/usr/bin/python3: No module named pytest
+real 0.02
+user 0.01
+sys 0.00
+# exit=1 finished: 2026-09-20T19:17:19Z

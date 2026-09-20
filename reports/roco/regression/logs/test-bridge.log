@@ -1,0 +1,29 @@
+$ npm run test:bridge
+# started: 2026-09-20T19:14:07Z
+
+> test:bridge
+> node --test tests/evals/roco/bridge.test.js
+
+✔ 桥：能起停 Python 服务；/health 往返并报告规则集 id 与快照指纹 (462.007417ms)
+✔ 桥：静态事实带 ruleset/state_version/coverage/evidence_ids/延迟 (377.82425ms)
+✔ 桥：未知规则集 id → 可区分的 version_mismatch (377.539125ms)
+✔ 桥：机制不支持时返回 unsupported，而不是一个数字 (377.577125ms)
+✔ 桥：阵容评估已接规则 baseline，且明确不输出胜率 (402.967375ms)
+✔ 桥：本引擎持有的规则集加载不了 → ruleset_unsupported (435.523792ms)
+✔ 桥：服务超时是独立的一类（service） (204.688625ms)
+✔ 桥：拒绝携带隐藏信息，连发都不发 (368.58475ms)
+✔ 桥：双属性相性只用快照显式行（缺行时 unsupported，不相乘） (371.494417ms)
+✔ 桥：工具层声明了 5 个工具且必填项明确（get_visible_state 之外） (0.282791ms)
+✔ 桥：assertOk 能把结构化拒绝变成四类可区分的异常 (415.711583ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3865.832667
+real 4.00
+user 1.56
+sys 0.29
+# exit=0 finished: 2026-09-20T19:14:11Z

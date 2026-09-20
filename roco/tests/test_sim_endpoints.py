@@ -235,3 +235,96 @@ class TestTrustDomainBoundary(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestCapabilitiesMatchTheWiring(unittest.TestCase):
+    """能力声明必须与实际接线一致（F02 回归发现三个端点被报成 false）。"""
+
+    def setUp(self):
+        self.svc = RocoService()
+
+    def test_declared_capabilities_match_the_reachable_endpoints(self):
+        from roco_env.service import CAPABILITIES
+
+        # 声明为 true 的，必须真的能在不报错的情况下答上来
+        self.assertTrue(CAPABILITIES["team.evaluate"], "阵容评估已接上规则 baseline")
+        self.assertTrue(CAPABILITIES["team.compare"])
+        self.assertTrue(CAPABILITIES["battle.plan"])
+        status, env = self.svc.team_evaluate({**BASE, "state_version": 0, "team": TEAM})
+        self.assertEqual(status, 200)
+        self.assertTrue(env["ok"])
+        # 换人对比要求两支队伍**只差一只**（服务端就是这么校验的）
+        other = RS.pets_by_name("雪影娃娃")[0].pet_id
+        status, env = self.svc.team_compare({**BASE, "state_version": 0,
+                                            "team_before": TEAM, "team_after": [TEAM[0], TEAM[1], other]})
+        self.assertEqual(status, 200, env.get("error"))
+        self.assertTrue(env["ok"])
+
+    def test_health_reports_the_same_capabilities(self):
+        env = self.svc.health()
+        caps = env["result"]["capabilities"]
+        from roco_env.service import CAPABILITIES
+        self.assertEqual(caps, CAPABILITIES, "/health 里的能力表必须就是服务声明的那张表")
+
+    def test_unimplemented_endpoint_is_501_not_404(self):
+        """"还没做"与"地址写错了"必须分得开。"""
+        from roco_env.service import NOT_IMPLEMENTED
+
+        self.assertIn("/battle/summary", NOT_IMPLEMENTED, "至少要有一条真实未实现的能力，否则 501 不可达")
+        status, env = self.svc.not_implemented("/battle/summary", {**BASE, "state_version": 0})
+        self.assertEqual(status, 501)
+        self.assertEqual(env["error_type"], "not_implemented")
+        self.assertEqual(env["coverage"], 0.0)
+        self.assertIsNone(env["result"])
+        self.assertEqual(env["unsupported"][0]["code"], "battle_summary")
+        # 对照组：真的不存在的路径仍然是 404
+        status, env = self.svc.unknown_path("/no/such/thing")
+        self.assertEqual(status, 404)
+        self.assertEqual(env["error_type"], "not_found")
+
+
+class TestPlanCoverageIsHonest(unittest.TestCase):
+    """F02 回归发现：只有换人可做时 branches=0、timed_out=False、coverage=1.0，三个字段互相矛盾。"""
+
+    def test_replace_phase_plan_is_actually_evaluated(self):
+        """补位局面必须真的被算过。
+
+        F02 回归发现：补位时每个 rollout 都因 `step_joint` 抛异常被丢弃，
+        于是 branches_evaluated=0、timed_out=False、coverage=1.0，
+        而推荐其实来自 `_safe_step` 失败后原样返回的状态（等于没算）。
+        现在补位走 `step_replace`（补位是公开信息，枚举对手的换人是合法的）。
+        """
+        from roco_env import env as env_mod
+        from roco_env import planner as pm
+
+        st = env_mod.reset(TEAM, TEAM, seed=11, rs=RS)
+        st.player.pets[0].hp = 0
+        st.player.pets[0].fainted = True
+        st.phase = "replace"
+        st.replace_queue = ["player"]
+        plan = pm.plan_actions(st, RS, depth=2, beam=3, budget_ms=2000)
+        self.assertFalse(plan.timed_out, "没超时就说没超时")
+        self.assertIsNotNone(plan.recommended, "补位局面必须给出一个换人候选")
+        self.assertEqual(plan.dropped_branches, {},
+                         f"补位分支不该被丢弃（丢弃原因：{plan.dropped_branches}）")
+        self.assertIsNotNone(plan.expected)
+        # 补位局面里对手分布是有内容的（对手也要换人），所以覆盖率不该是 0
+        self.assertGreater(plan.coverage, 0.0)
+        payload = plan.to_dict()
+        for key in ("branches_evaluated", "no_counter_branches", "dropped_branches", "coverage", "timed_out"):
+            self.assertIn(key, payload, f"回执里必须有 {key}，否则看的人分不清「搜完了」与「没算」")
+
+    def test_normal_battle_reports_real_branches_and_full_coverage(self):
+        from roco_env import env as env_mod
+        from roco_env import planner as pm
+
+        st = env_mod.reset(TEAM, TEAM, seed=11, rs=RS)
+        plan = pm.plan_actions(st, RS, depth=2, beam=3, budget_ms=5000)
+        self.assertGreater(plan.branches_evaluated, 0)
+        self.assertEqual(plan.no_counter_branches, 0, "正常对局里对手分布不为空")
+        self.assertAlmostEqual(plan.coverage, 1.0, places=6)
+        self.assertFalse(plan.timed_out)
+        # 回执里必须同时能看到三个字段，别只给一个 coverage
+        payload = plan.to_dict()
+        for key in ("branches_evaluated", "no_counter_branches", "coverage", "timed_out"):
+            self.assertIn(key, payload)

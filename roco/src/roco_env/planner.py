@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from . import env as renv
-from .data import Ruleset
+from .data import Ruleset, RulesetError
 from .schema import ACTION_ITEM, ACTION_SKILL, ACTION_SWITCH, Action, GameState
 
 # 束宽与深度：默认值与上限。调大就慢，调小就浅——两者都要在回执里报出来。
@@ -49,12 +49,16 @@ class PlanResult:
     branches_evaluated: int
     depth_searched: int
     beam: int
-    coverage: float          # 实际搜完的比例（1.0 = 完整搜完）
+    coverage: float          # 对手反制被枚举过的比例（1.0 = 全部候选都对着对手分布搜过）
     timed_out: bool
     latency_ms: float
     opponent_model: str
     unsupported_seen: int
     note: str
+    #: 对手分布为空、只做了静态估值的候选数（不计入 branches_evaluated 与 coverage）。
+    no_counter_branches: int = 0
+    #: 被丢弃的分支数与原因（{异常类名: 次数}）。fail closed 的可见面。
+    dropped_branches: Dict[str, int] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -66,6 +70,8 @@ class PlanResult:
             "main_counter": self.main_counter,
             "counter_note": self.counter_note,
             "branches_evaluated": self.branches_evaluated,
+            "no_counter_branches": self.no_counter_branches,
+            "dropped_branches": dict(self.dropped_branches),
             "depth_searched": self.depth_searched,
             "beam": self.beam,
             "coverage": round(self.coverage, 4),
@@ -245,6 +251,13 @@ def plan_actions(
     opponent = "enemy" if side == "player" else "player"
     my_candidates = _my_candidates(state, rs, beam=beam)
     branches = 0
+    #: 被丢弃的分支数（非法或未支持的组合）与原因计数。
+    #: 只报 branches 不报丢弃数时，「搜了 3 个分支」与「13 个候选里 10 个算不出来」
+    #: 在回执里长得一模一样。
+    dropped: Dict[str, int] = {}
+    #: 对手分布为空、只做了静态估值的候选数。它们不是「搜索分支」。
+    #: 分开计的理由见下面 coverage 的判定：只统计真实枚举过的 (我方 × 对手) 组合。
+    no_counter = 0
     timed_out = False
     reached_depth = 0
 
@@ -263,6 +276,10 @@ def plan_actions(
     results: List[Dict[str, Any]] = []
     counters: Dict[Action, Tuple[str, float]] = {}
 
+    def _record_dropped_branch(exc: BaseException) -> None:
+        key = type(exc).__name__
+        dropped[key] = dropped.get(key, 0) + 1
+
     def rollout(root: GameState, first: Action, opp_action: Action, remaining: int,
                 alpha: float) -> float:
         """从 root 出发走一手，然后按「双方都取启发式最优」继续 remaining 层。
@@ -271,11 +288,33 @@ def plan_actions(
         """
         nonlocal branches
         try:
+            if root.phase == "replace":
+                # 补位阶段不能调 step_joint（引擎会直接抛「请用 step_replace」）。
+                # 原来这里没有分支，于是补位局面的**每一个** rollout 都走 except、
+                # 被丢弃成 alpha，结果是：branches_evaluated=0、timed_out=False、
+                # coverage=1.0 —— 三个字段互相矛盾，而且推荐实际上来自
+                # `_safe_step` 失败后原样返回的状态（等于没算）。F02 回归抓到的就是它。
+                #
+                # 补位是**公开**的：双方各自换谁，屏幕上都会显示，所以这里枚举对手的
+                # 每个换人候选是合法的，不违反隐藏信息边界（枚举的是「可能」，不是
+                # 「已经提交的那一个」）。
+                mine_first = first if side == "player" else opp_action
+                theirs_first = opp_action if side == "player" else first
+                cur = _clone(root)
+                if mine_first is not None and mine_first.kind == "switch" and mine_first.target_index is not None:
+                    renv.step_replace(cur, rs, "player", int(mine_first.target_index))
+                if theirs_first is not None and theirs_first.kind == "switch" and theirs_first.target_index is not None:
+                    queue = renv.needs_replacement(cur)
+                    if "enemy" in queue:
+                        renv.step_replace(cur, rs, "enemy", int(theirs_first.target_index))
+                # 补位不消耗战斗回合，`remaining` 不递减：这里的「深度」是换人次数
+                return evaluate(cur, rs, side)
             nxt = renv.step_joint(
                 _clone(root), rs, first if side == "player" else opp_action,
                 opp_action if side == "player" else first,
             )
-        except (ValueError, Exception):     # noqa: BLE001 —— 非法/未支持组合直接丢弃
+        except (ValueError, RulesetError) as exc:  # 非法/未支持组合直接丢弃
+            _record_dropped_branch(exc)
             return alpha
         branches += 1
         cur = nxt
@@ -307,9 +346,14 @@ def plan_actions(
             break
         dist = opponent_distribution(state, rs, beam=beam)
         if not dist:
+            # 对手分布为空（典型情形：补位阶段，对手侧没有可枚举的动作）。
+            # 这时仍然对我方每个候选做了静态估值，但**没有建模对手的反制**：
+            # 它是一次「无对手」的评估。数量单独计一栏（no_counter_branches），
+            # 因为它进 branches_evaluated 会把「搜了多少分支」说过头。
             score = evaluate(_safe_step(state, rs, action, None, side), rs, side)
             results.append({"action": action, "expected": score, "worst": score,
                             "best": score, "branch_scores": {}})
+            no_counter += 1
             reached_depth = 1
             continue
         per_opp: Dict[str, float] = {}
@@ -352,12 +396,30 @@ def plan_actions(
     counter_label, counter_score = counters.get(top["action"], (None, None))
 
     total_possible = len(my_candidates)
-    coverage = len(results) / total_possible if total_possible else 0.0
+    # coverage 的含义是「对手反制也被枚举过的比例」。对手分布为空的局面
+    # （补位阶段就是）**没有**搜索可言，只能是 0 —— 给 1.0 会让上层读成
+    # 「完整搜完了」，而实际拿到的是「没有对手模型时的静态估值」。
+    # 这个坑是被 F02 回归发现的：只有换人可做时 branches_evaluated=0、
+    # timed_out=False、coverage=1.0，三个字段互相矛盾。
+    searched = len(results) - no_counter
+    coverage = (searched / total_possible) if total_possible else 0.0
+    if no_counter and not searched:
+        coverage = 0.0
 
     note_parts = [
         f"搜了 {len(results)}/{total_possible} 个我方候选 × 对手 {beam} 个候选",
         f"深度 {reached_depth}",
     ]
+    if no_counter:
+        note_parts.append(
+            f"其中 {no_counter} 个候选**没有**对手分布可枚举（未建模反制，只做静态估值），"
+            "所以 coverage 不计入这些候选"
+        )
+    if dropped:
+        note_parts.append(
+            "丢弃的分支（非法或机制未支持，按 fail closed 不估值）："
+            + "、".join(f"{k}×{v}" for k, v in sorted(dropped.items()))
+        )
     if timed_out:
         note_parts.append(
             "**超时**：这是已完成的部分，不是完整搜索结果；上层不得当成深搜结论"

@@ -143,17 +143,30 @@ ERROR_HTTP_STATUS: Dict[str, int] = {
 
 # 能力清单：true 表示这个能力**现在**就能给出可核验的答案。
 # 引擎逻辑写完后把对应项改成 true，并同步补 microcase。
+#: 能力声明。**必须与实际接线一致**：报 false 而端点可用，会让调用方
+#: 以为「这条路没接上」而绕过它；报 true 而端点是空的，就是谎报。
+#: 这一张表由 test_sim_endpoints.py 的 capabilities 测试钉住，
+#: 加了端点却忘了改这里会变红（上一次就是这么被抓到的）。
 CAPABILITIES: Dict[str, bool] = {
     "rules.query_catalog": True,        # 精灵/技能/学习表/术语：纯静态数据
     "rules.query_type_chart": True,     # 相性：只用快照显式行
-    "mechanics.resolve_effect": False,  # 效果原语（effects.py 尚在并行开发）
-    "team.evaluate": False,
-    "team.compare": False,
-    "battle.plan": False,
+    "mechanics.resolve_effect": False,  # 效果原语：按技能逐条判定，未核验的一律 422
+    "team.evaluate": True,              # 规则 baseline 六特征（不输出胜率）
+    "team.compare": True,               # 换人前后对比：改善什么、代价什么
+    "battle.plan": True,                # 2—3 回合联合搜索（只收公开 planner state）
+    "battle.local_sim": True,           # 本地练习对局的私有域端点（Node 专用）
 }
 
-# 未实现的能力 → 结构化拒绝理由（绝不返回编造的数值）
+#: 未实现的端点 → 结构化 not_implemented 的业务含义。
+#: 字典为空时 `not_implemented()` 不可达，任何未登记路径都会退化成 404 not_found
+#: ——「这个功能没做」与「没有这个地址」是两回事，前者要能给调用方一个明确的 501。
+#: 所以保留一条目前确实还没做的能力：复盘摘要（实施书只定义了 5 个工具里的 4 个端点）。
 NOT_IMPLEMENTED: Dict[str, Dict[str, Any]] = {
+    "/battle/summary": {
+        "code": "battle_summary",
+        "reason": "复盘摘要需要事件序列与伤害结算；两者的结算时序尚未核验（MC-010/MC-012）",
+        "missing": ["event_ordering", "official_damage_formula"],
+    },
 }
 
 # 隐藏信息键（归一化后比较）：对手待执行动作、真实随机种子、私有状态。
@@ -1713,6 +1726,14 @@ class RocoRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self) -> None:  # noqa: N802
         path, _, _ = self.path.partition("?")
         if path not in ROUTES:
+            # 未登记路径分两种，必须分得开：
+            #   · 说得出「这个能力没做」的（在 NOT_IMPLEMENTED 里）→ 501 not_implemented；
+            #   · 其余 → 404 not_found。
+            # 之前 NOT_IMPLEMENTED 是空字典，任何路径都退化成 404，
+            # 「还没做」与「地址写错了」在回执里完全看不出区别。
+            if path in NOT_IMPLEMENTED:
+                self._dispatch(path, {})
+                return
             status, env = self.server.service.unknown_path(path)
             self._send(status, env)
             return
