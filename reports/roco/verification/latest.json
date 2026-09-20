@@ -6,7 +6,7 @@
    "id": "env",
    "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
    "ok": true,
-   "ms": 24737,
+   "ms": 24950,
    "tail": [
     "> test:env",
     "> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
@@ -16,48 +16,48 @@
    "id": "unit",
    "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
    "ok": true,
-   "ms": 14448,
+   "ms": 15185,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 14318.974875"
+    "ℹ duration_ms 15054.164833"
    ]
   },
   {
    "id": "bridge",
    "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
    "ok": true,
-   "ms": 3668,
+   "ms": 3682,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 3531.990458"
+    "ℹ duration_ms 3554.391583"
    ]
   },
   {
    "id": "toolbox-roco",
    "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
    "ok": true,
-   "ms": 181,
+   "ms": 184,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 53.854459"
+    "ℹ duration_ms 53.577208"
    ]
   },
   {
    "id": "plan-e2e",
    "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
    "ok": true,
-   "ms": 1719,
+   "ms": 1723,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 1590.909792"
+    "ℹ duration_ms 1597.238209"
    ]
   },
   {
@@ -80,10 +80,22 @@
    ]
   },
   {
+   "id": "guard-selftest",
+   "why": "注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑",
+   "ok": true,
+   "ms": 8071,
+   "tail": [
+    "  ✔ 红 generator-artifact-drift",
+    "  ✔ 红 companion-sayable-gone",
+    "  ✔ 红 dedup-gone",
+    "登记 7 条：红 7、仍绿 0、跳过 0 → pass"
+   ]
+  },
+  {
    "id": "browser-acceptance",
    "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
    "ok": true,
-   "ms": 20673,
+   "ms": 19789,
    "tail": [
     "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
     "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
@@ -95,7 +107,7 @@
    "id": "demo-acceptance",
    "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
    "ok": true,
-   "ms": 5683,
+   "ms": 5686,
    "tail": [
     "[demo-acceptance] ✔ 玩家抱怨时陪练先回应情绪（R2/R3） — R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。",
     "[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 ",

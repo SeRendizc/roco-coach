@@ -45,6 +45,10 @@ export const SUITES = [
     why: '轨迹集与判定器的两个方向；判定器写坏了只有这里看得见'},
   {id: 'model-manifest', cmd: 'node', args: ['scripts/model/verify-manifest.mjs'],
     why: '本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么'},
+  {id: 'guard-selftest', cmd: 'node', args: ['scripts/roco/guard-selftest.mjs'],
+    why: '注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，'
+      + '所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，'
+      + '第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑'},
   {id: 'browser-acceptance', cmd: 'node', args: ['scripts/roco/browser-acceptance.mjs'],
     why: '**页面真的能开**。第 24 轮的回归只有这条抓得到', quick: true},
   {id: 'demo-acceptance', cmd: 'npm', args: ['run', 'roco:demo-acceptance'],
