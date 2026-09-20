@@ -1,0 +1,110 @@
+{
+ "generated_by": "scripts/roco/verify-release.mjs",
+ "quick": false,
+ "suites": [
+  {
+   "id": "env",
+   "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
+   "ok": true,
+   "ms": 24865,
+   "tail": [
+    "> test:env",
+    "> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
+   ]
+  },
+  {
+   "id": "unit",
+   "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
+   "ok": true,
+   "ms": 14739,
+   "tail": [
+    "ℹ cancelled 0",
+    "ℹ skipped 0",
+    "ℹ todo 0",
+    "ℹ duration_ms 14608.046583"
+   ]
+  },
+  {
+   "id": "bridge",
+   "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
+   "ok": true,
+   "ms": 3690,
+   "tail": [
+    "ℹ cancelled 0",
+    "ℹ skipped 0",
+    "ℹ todo 0",
+    "ℹ duration_ms 3554.285625"
+   ]
+  },
+  {
+   "id": "toolbox-roco",
+   "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
+   "ok": true,
+   "ms": 187,
+   "tail": [
+    "ℹ cancelled 0",
+    "ℹ skipped 0",
+    "ℹ todo 0",
+    "ℹ duration_ms 55.135541"
+   ]
+  },
+  {
+   "id": "plan-e2e",
+   "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
+   "ok": true,
+   "ms": 1715,
+   "tail": [
+    "ℹ cancelled 0",
+    "ℹ skipped 0",
+    "ℹ todo 0",
+    "ℹ duration_ms 1587.702416"
+   ]
+  },
+  {
+   "id": "trajectories",
+   "why": "轨迹集与判定器的两个方向；判定器写坏了只有这里看得见",
+   "ok": true,
+   "ms": 864,
+   "tail": [
+    ""
+   ]
+  },
+  {
+   "id": "model-manifest",
+   "why": "本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么",
+   "ok": true,
+   "ms": 1205,
+   "tail": [
+    "✔ mlx-community/Qwen3.5-4B-4bit — 校验 11/11 个文件",
+    "manifest 校验通过"
+   ]
+  },
+  {
+   "id": "browser-acceptance",
+   "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
+   "ok": true,
+   "ms": 19781,
+   "tail": [
+    "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
+    "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
+    "[acceptance] screenshots: 01-camp.png, 02-filter.png, 03-battle.png, 04-battle-end.png",
+    "[acceptance] wrote /Users/serendizc/Developer/roco-coach/reports/roco/acceptance/browser-acceptance.json"
+   ]
+  },
+  {
+   "id": "demo-acceptance",
+   "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
+   "ok": true,
+   "ms": 5715,
+   "tail": [
+    "[demo-acceptance] ✔ 玩家抱怨时陪练先回应情绪（R2/R3） — R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。",
+    "[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 ",
+    "[demo-acceptance] ✔ 控制台没有报错 — []",
+    "[demo-acceptance] 结果：16 通过 / 0 失败；报告见 reports/roco/demo-acceptance/"
+   ]
+  }
+ ],
+ "failed": [],
+ "verdict": "pass",
+ "note": "时间戳与耗时是易变字段；这里保留是因为它要回答「哪一次跑的」，而稳定的验收产物各自另有落盘位置。"
+}

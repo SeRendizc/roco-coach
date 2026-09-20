@@ -62,6 +62,7 @@
     "roco:intervention-windows": "node scripts/roco/build-intervention-windows.mjs",
     "roco:intervention-model": "python3 scripts/roco/train-intervention-model.py --write",
     "roco:shadow-replay": "node scripts/roco/shadow-replay.mjs",
+    "verify:release": "node scripts/roco/verify-release.mjs",
     "roco:intervention-windows-roco": "python3 scripts/roco/build-roco-intervention-windows.py --write",
     "roco:intervention-model-roco": "python3 scripts/roco/train-intervention-model.py --write --out-model reports/roco/intervention-model-roco.json --out-report reports/roco/intervention-model-roco-report.json",
     "roco:companion-nonintrusion": "node scripts/roco/verify-companion-nonintrusion.mjs",
