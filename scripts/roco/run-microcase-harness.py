@@ -537,7 +537,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         bucket["engine_can_run"] += 1 if row["engine_can_run_it"] else 0
 
     payload = {
-        "generated_at": _iso(),
+        # `generated_at` **不放在这份稳定产物里**：它每次跑都会变。
+        # 与浏览器验收报告同一套做法 —— 稳定字段入库可 diff，
+        # 易变字段另存 `harness-run.json`（已在 .gitignore 里）。
         "generated_by": "scripts/roco/run-microcase-harness.py",
         "ruleset_id": rs.ruleset_id,
         "plan_id": header.get("plan_id"),
@@ -560,6 +562,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         os.makedirs(os.path.join(_ROOT, os.path.dirname(OUT_JSON)), exist_ok=True)
         with open(os.path.join(_ROOT, OUT_JSON), "w", encoding="utf-8") as fh:
             json.dump(payload, fh, ensure_ascii=False, indent=2)
+        run_path = os.path.join(_ROOT, os.path.dirname(OUT_JSON), "harness-run.json")
+        with open(run_path, "w", encoding="utf-8") as fh:
+            json.dump({"generated_at": _iso()}, fh, ensure_ascii=False, indent=2)
         write_doc(payload)
 
     print(json.dumps(summary, ensure_ascii=False, indent=2))

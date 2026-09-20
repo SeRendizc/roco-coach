@@ -299,7 +299,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         summary["statuses"][status] = summary["statuses"].get(status, 0) + 1
 
     payload = {
-        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        # 同样：易变时间戳不放进稳定产物，另存 `calibration-run.json`。
         "generated_by": "scripts/roco/calibrate-from-measurements.py",
         "ruleset_id": rs.ruleset_id,
         "important": [
@@ -316,6 +316,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     os.makedirs(os.path.join(_ROOT, os.path.dirname(OUT_JSON)), exist_ok=True)
     with open(os.path.join(_ROOT, OUT_JSON), "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=2)
+    run_path = os.path.join(_ROOT, os.path.dirname(OUT_JSON), "calibration-run.json")
+    with open(run_path, "w", encoding="utf-8") as fh:
+        json.dump({"generated_at": datetime.datetime.now(datetime.timezone.utc)
+                   .isoformat(timespec="seconds")}, fh, ensure_ascii=False, indent=2)
     write_doc(payload)
 
     print(json.dumps(summary, ensure_ascii=False, indent=2))
