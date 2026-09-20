@@ -203,15 +203,15 @@ B/C 组 3v3 实战跑通；`parse` 覆盖率语义修正；G02 判定为不过�
 
 | 套件 | 结果 |
 |---|---|
-| Node unit | **423 / 423** |
+| Node unit | **424 / 424** |
 | Node browser | **18（17 通过 / 1 按测试自身守卫 skip）** |
-| Python（引擎 + 服务 + 模型 + 回放） | **148 / 148**（1 skip） |
+| Python（引擎 + 服务 + 模型 + 回放 + 台账守卫） | **158 / 158**（1 skip） |
 | Node↔Python 桥契约 | **11 / 11** |
 | coach 工具层 | **17 / 17** |
 | 规划端到端（plan-e2e） | **10 / 10** |
 | 结构契约 | **8 / 8** |
-| 投影层（roco-experience） | **11 / 11** |
-| **合计** | **644 项，0 失败**（1 项按守卫 skip） |
+| 投影层（roco-experience） | **12 / 12** |
+| **合计** | **657 项，0 失败**（1 项按守卫 skip） |
 
 浏览器真机验收两项：`npm run roco:acceptance` 9/9、`npm run roco:demo-acceptance` 16/16。
 
@@ -230,6 +230,28 @@ B/C 组 3v3 实战跑通；`parse` 覆盖率语义修正；G02 判定为不过�
    并让 30 条 microcase 里的一部分可以真的判定通过；
 2. **录屏**（F03 那一项）——脚本已备好，我没有屏幕录制能力；
 3. **W4/W5/W6 是否解除「不训练模型」的边界**——不解除就只能停在这里。
+
+### E03 的「实测那一半」：台账 + 录入 + 标定（本轮新增）
+
+30 条 microcase 一条都没通过，原因只有一个：**没有任何游戏内实测**。
+但「引擎什么都没做」与「引擎已经对了」都不成立 —— 真实情况是第三种：
+引擎对每条待验机制都选了一个明确行为，并把它登记成假设。
+
+| 新增 | 做什么 | 结果 |
+|---|---|---|
+| `scripts/roco/run-microcase-harness.py` → `docs/roco/MICROCASE-HARNESS.md` | 逐条**真的跑一遍引擎**，记录「引擎现在怎么做 / 引用了哪条术语 / 未核验的那一点是什么」 | 30 条里 **26 条**有明确行为（`ENGINE_ASSUMPTION`）、**4 条**连前提都缺（`NOT_EXECUTABLE`：MC-014/023/024/025）。`verification_passed` **恒为 false** |
+| `scripts/roco/record-measurements.py` → `data/roco/measurements.jsonl`（追加式） | 实测录入：`damage` / `speed_tie` / `buff` 三种。必填字段缺一个就**拒收**，`damage=0` 也拒收 | 目前**文件为空** —— 仓库里不存在任何伪造的实测 |
+| `scripts/roco/calibrate-from-measurements.py` → `docs/roco/CALIBRATION.md` | 实测 vs 引擎：**容差必须由人给**（不给就只报告差异）；标定只反解系数并报出与假设的偏离，**不自动改公式** | 用一条演练数据跑通整条管线后即删除 |
+
+配套守卫（`roco/tests/test_microcase_harness.py`，7 项）：台账不许自称「通过」、
+每条必须有明确状态、`NOT_EXECUTABLE` 必须写清缺什么、探针必须有结构化字段。
+
+**伤害预览**（W3-04 延伸）：`/battle/plan` 新增可选 `damage_preview`，给出
+**原始伤害范围**（配招里所有攻击技能逐个试打）、`lethal`（够不够一击收掉）、
+`lethal_stable`（结论是否随分析种子变化）、以及 `formula_verified: false`。
+页面把「按未核验公式估，这一步能打出 130~425 点伤害；够收掉」直接显示在提示里。
+第一版采样用 `legal_actions` + planner beam，导致值域只有 130（漏掉了 425 的那一击）——
+改为遍历**配招里全部攻击技能**，并把这个错误写进测试名与注释。
 
 ### F01 / F02 / F03 交付（本轮完成）
 

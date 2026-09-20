@@ -145,6 +145,33 @@ export function rocoHintText(plan) {
  * 返回 null 表示这一局没有可教的东西——「没有亮点不硬夸」这条纪律在代码里，
  * 不在文案里。
  */
+/**
+ * 伤害预览写成一句话。
+ *
+ * 这一栏回答的是玩家真正会问的那个问题：「这一下打多少、够不够收」。
+ * 两条纪律：
+ *   · 数字来自**未核验公式**，所以必须带「估」字，不能说得像实测值；
+ *   · `lethal_stable` 为假时不许说「能收掉」——结论随分析种子变化就不是结论。
+ */
+export function rocoDamagePreviewText(plan) {
+  const dp = plan?.damage_preview;
+  if (!dp || dp.available !== true) return null;
+  if (!Number.isFinite(dp.min) || !Number.isFinite(dp.max)) return null;
+  const span = dp.min === dp.max ? `${dp.max}` : `${dp.min}~${dp.max}`;
+  const parts = [`按未核验公式估，这一步能打出 ${span} 点伤害`];
+  if (dp.best_label) parts.push(`最高的是「${dp.best_label}」`);
+  if (Number.isFinite(dp.foe_hp)) {
+    if (dp.lethal === true && dp.lethal_stable === true) {
+      parts.push(`对面场上还剩 ${dp.foe_hp}，够收掉`);
+    } else if (dp.lethal === true) {
+      parts.push(`有的分析种子能收掉（${dp.foe_hp}），换一个就不一定，别当保证`);
+    } else {
+      parts.push(`对面场上还剩 ${dp.foe_hp}，这一下收不掉`);
+    }
+  }
+  return parts.join('；');
+}
+
 export function rocoLessonEntry({events = [], turns = 0} = {}) {
   const list = Array.isArray(events) ? events : [];
   const faints = list.filter((e) => e?.kind === 'faint' || e?.kind === 'damage' && e?.detail?.fainted === true);

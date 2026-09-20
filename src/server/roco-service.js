@@ -246,6 +246,9 @@ export function createRocoService(options={}){
    depth:Number.isInteger(body.depth)?body.depth:2,
    beam:Number.isInteger(body.beam)?body.beam:4,
    analysisSeeds:[...ANALYSIS_SEEDS],
+   // 伤害预览（原始伤害范围 + 能不能一击收掉）。它是**未核验公式**的输出，
+   // 必须带着 formula_verified 一起回，页面也要把它标出来。
+   damagePreview:true,
   });
   counters.plans+=1;
   if(!envelope||envelope.ok!==true){
@@ -268,6 +271,22 @@ export function createRocoService(options={}){
    depth_searched:r.depth_searched??null,
    // 风险分支（W3-04）：推荐那一手在对手各种选择下的落差。
    // `fragile` 为真时页面把措辞降级——它是**产品阈值**，不是游戏机制。
+   // 原始伤害范围：玩家脑子里记的那个数字就是它。
+   damage_preview:r.damage_preview?{
+    available:r.damage_preview.available===true,
+    min:Number.isFinite(r.damage_preview.min)?r.damage_preview.min:null,
+    max:Number.isFinite(r.damage_preview.max)?r.damage_preview.max:null,
+    best_label:r.damage_preview.best_label??null,
+    lethal:r.damage_preview.lethal===true,
+    lethal_stable:r.damage_preview.lethal_stable===true,
+    foe_hp:Number.isFinite(r.damage_preview.foe_hp)?r.damage_preview.foe_hp:null,
+    formula_verified:r.damage_preview.formula_verified===true,
+    damage_model:r.damage_preview.damage_model??null,
+    samples:Array.isArray(r.damage_preview.samples)?r.damage_preview.samples.slice(0,8):[],
+    skipped_skills:Array.isArray(r.damage_preview.skipped_skills)?r.damage_preview.skipped_skills.slice(0,8):[],
+    candidates:Number.isInteger(r.damage_preview.candidates)?r.damage_preview.candidates:null,
+    note:r.damage_preview.note??null,
+   }:null,
    risk:r.risk?{
     downside_min:r.risk.downside_min??null,
     downside_max:r.risk.downside_max??null,

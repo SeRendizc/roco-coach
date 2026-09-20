@@ -676,3 +676,76 @@ class TestTeamModelGateIsEnforced(unittest.TestCase):
             self.skipTest("当前工作区没有过门槛的模型文件（未训练或未过门槛）")
         self.assertTrue(self.real.gate.get("passed"))
         self.assertEqual(self.real.features, self.tm.FEATURE_ORDER)
+
+
+class TestDamagePreview(unittest.TestCase):
+    """伤害预览：给的是**原始伤害范围**，且必须能看出它来自未核验公式。
+
+    玩家脑子里记的那个数字就是「这一下打多少」；`expected`/`worst` 是估值口径，
+    看不出够不够收。这一栏补的就是它 —— 而且它**只走公开状态**（MC-013）。
+    """
+
+    def setUp(self):
+        self.svc = RocoService()
+        self.rs = RS
+        self.team = TEAM
+
+    def _public(self, seed=11):
+        st = env_mod.reset(TEAM, TEAM, seed=seed, rs=self.rs)
+        return st, env_mod.public_planner_state(st, self.rs)
+
+    def test_preview_is_opt_in_and_reports_a_range(self):
+        st, pub = self._public()
+        body = {**BASE, "state_version": 0, "public": pub, "depth": 2, "beam": 4,
+                "analysis_seeds": [11]}
+        status, env = self.svc.battle_plan(dict(body))
+        self.assertEqual(status, 200, env.get("error"))
+        self.assertIsNone(env["result"]["damage_preview"],
+                          "没要求就不该算伤害预览（默认回执不变）")
+
+        status, env = self.svc.battle_plan({**body, "damage_preview": True})
+        self.assertEqual(status, 200, env.get("error"))
+        preview = env["result"]["damage_preview"]
+        self.assertTrue(preview["available"], preview.get("reason"))
+        self.assertLessEqual(preview["min"], preview["max"])
+        self.assertGreater(preview["max"], 0)
+        self.assertEqual(preview["foe_hp"], st.enemy.field_pet.hp)
+        self.assertIs(preview["lethal"], preview["max"] >= preview["foe_hp"])
+        self.assertIs(preview["formula_verified"], False,
+                      "伤害公式仍未核验，这个标记不能变成 true")
+        self.assertEqual(preview["damage_model"], "community-hypothesis-v1")
+        self.assertTrue(preview["samples"], "必须列出每个技能的伤害，便于核对")
+        for sample in preview["samples"]:
+            # 合并后的样本是**区间**（同一技能在不同分析种子下可能略有差异）
+            self.assertIn("label", sample)
+            self.assertIn("min", sample)
+            self.assertIn("max", sample)
+            self.assertLessEqual(sample["min"], sample["max"])
+
+    def test_preview_uses_the_whole_loadout_not_the_beam(self):
+        """值域来自**配招里所有攻击技能**，不是 planner 的 beam 候选。
+
+        用 beam 候选当值域会系统性低估「这一下最多打多少」——第一版就是这个错。
+        """
+        st, pub = self._public()
+        status, env = self.svc.battle_plan({
+            **BASE, "state_version": 0, "public": pub, "depth": 1, "beam": 1,
+            "analysis_seeds": [11], "damage_preview": True,
+        })
+        self.assertEqual(status, 200, env.get("error"))
+        preview = env["result"]["damage_preview"]
+        # beam=1 时 planner 只看一个候选；预览仍然要覆盖配招里的全部攻击技能
+        loadout = st.player.loadouts.get(st.player.field_pet.pet_id) or ()
+        attacks = [sid for sid in loadout if self.rs.skills[sid].is_attack]
+        self.assertGreaterEqual(preview["candidates"], min(len(attacks), 1))
+        self.assertGreaterEqual(len(preview["samples"]), 1)
+
+    def test_preview_only_sees_public_state(self):
+        """反证：把私有状态当 public 递进去，仍然被隐藏信息检测拦住。"""
+        st, _ = self._public()
+        private = env_mod.serialize(st)
+        status, env = self.svc.battle_plan({
+            **BASE, "state_version": 0, "public": private, "damage_preview": True,
+        })
+        self.assertEqual(status, 400)
+        self.assertEqual(env["error_type"], "hidden_information")

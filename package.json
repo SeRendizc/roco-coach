@@ -47,6 +47,9 @@
     "roco:traits": "python3 scripts/roco/export-trait-status.py --write",
     "roco:lineups": "python3 scripts/roco/build-lineup-legality.py",
     "roco:trajectories": "python3 scripts/roco/build-trajectories.py",
-    "roco:hidden-keys": "python3 scripts/roco/export-hidden-keys.py --write"
+    "roco:hidden-keys": "python3 scripts/roco/export-hidden-keys.py --write",
+    "roco:microcase-harness": "python3 scripts/roco/run-microcase-harness.py",
+    "roco:measure": "python3 scripts/roco/record-measurements.py",
+    "roco:calibrate": "python3 scripts/roco/calibrate-from-measurements.py"
   }
 }

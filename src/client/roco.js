@@ -19,6 +19,7 @@ import {
   rocoLessonEntry,
   rocoPlanFeatures,
   rocoGameView,
+  rocoDamagePreviewText,
   ROCO_MODE,
 } from '../coach/roco-experience.js';
 import {companionFacts, decideRegister, intentOf, chatReply, REGISTERS} from '../coach/companion.js';
@@ -205,11 +206,17 @@ function refreshHint({reason = 'turn', plan = state.plan} = {}) {
   $('hint-why').textContent = `依据：${text.why}`;
   // 「展开取舍」的内容分两档，但**只要规划跑过就给出可核对的数字**：
   // 让人能查到「这句话是算出来的，不是随口说的」。没跑过规划就如实说没有。
+  const preview = rocoDamagePreviewText(plan);
+  const riskLine = plan?.risk
+    ? `<p>风险：期望到最坏差 ${plan.risk.downside_max ?? '—'}${plan.risk.fragile ? '（**这一手不稳**）' : ''}${plan.risk.top_risks?.length ? ` · 最差的对手选择是「${plan.risk.top_risks[0].opponent_action}」` : ''}</p>`
+    : '';
   $('hint-body').innerHTML = plan?.ok
-    ? `<p>期望区间：${plan.expected ? `${plan.expected.min.toFixed(2)} ~ ${plan.expected.max.toFixed(2)}（均值 ${plan.expected.mean.toFixed(2)}）` : '——'}</p>
+    ? `${preview ? `<p><strong>${preview}</strong></p>` : ''}
+       <p>期望区间：${plan.expected ? `${plan.expected.min.toFixed(2)} ~ ${plan.expected.max.toFixed(2)}（均值 ${plan.expected.mean.toFixed(2)}）` : '——'}</p>
        <p>搜索：${plan.branches_evaluated ?? '—'} 个分支 · 深度 ${plan.depth_searched ?? '—'} · 分析种子 ${(plan.analysis_seeds ?? []).join('/')}</p>
        <p>对手应对：${plan.main_counter ?? '引擎没给出'}（是启发式建模，不是真人行为）</p>
-       <p class="muted">这是公开信息 + 固定分析种子的结果，真实对局 seed 没有参与；也不声称胜率。</p>`
+       ${riskLine}
+       <p class="muted">这是公开信息 + 固定分析种子的结果，真实对局 seed 没有参与；也不声称胜率。伤害数字来自**未核验公式**，是估值而不是实测值。</p>`
     : '<p class="muted">这条只是提醒你把注意力放到哪，不含具体数值结论。</p>';
   $('hint').hidden = false;
   $('hint-body').hidden = true;

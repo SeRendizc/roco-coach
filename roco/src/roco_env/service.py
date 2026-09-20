@@ -1290,6 +1290,12 @@ class RocoService:
             if not isinstance(sv, int) or sv < 0:
                 return self._answer_envelope(_bad_request("analysis_seeds 必须是非负整数"), body, started)
 
+        # 伤害预览（W3-04 延伸）：只在请求显式要求时算，且**只走公开状态**。
+        # 为什么要它：玩家脑子里记的那个数字就是「这一下打多少」，而
+        # `expected`/`worst` 是估值口径，看不出够不够收。这里给的是**原始伤害范围**
+        # 与「能不能一击收掉」，并明确标注它是未核验公式的输出。
+        damage_preview = body.get("damage_preview") is True
+
         depth = body.get("depth", pm.DEFAULT_DEPTH)
         beam = body.get("beam", pm.DEFAULT_BEAM)
         budget = body.get("budget_ms", pm.DEFAULT_BUDGET_MS)
@@ -1302,6 +1308,7 @@ class RocoService:
 
         # 跨种子聚合：每个 analysis seed 重建一次搜索状态
         per_seed = []
+        previews: List[Dict[str, Any]] = []
         unsupported_total = 0
         for sv in raw_seeds:
             try:
@@ -1317,6 +1324,10 @@ class RocoService:
             plan = pm.plan_actions(state, rs, depth=depth, beam=beam, budget_ms=budget)
             unsupported_total += plan.unsupported_seen
             per_seed.append(plan.to_dict())
+            if damage_preview:
+                # 只在**第一个**种子采样：伤害不依赖 analysis seed 之外的随机吗？
+                # 依赖。所以这里对每个种子都采，最后取包络（见下面的聚合）。
+                previews.append(self._damage_preview(state, rs))
 
         # 推荐必须跨种子一致才敢说「推荐」；不一致就如实说「随随机性变化」
         labels = {p["recommended_label"] for p in per_seed}
@@ -1365,6 +1376,7 @@ class RocoService:
                     "对手仍是启发式分布建模，不是真人行为。"
                 ),
             },
+            "damage_preview": self._merge_previews(previews) if damage_preview else None,
             "per_seed": per_seed,
         }
 
@@ -1546,6 +1558,142 @@ class RocoService:
         return self._sim_envelope(
             state, rs, strategy, body, started, event="battle_advance", events_from=events_before
         )
+
+    def _damage_preview(self, state, rs) -> Dict[str, Any]:
+        """对**公开状态重建出来的**局面采样一次原始伤害。
+
+        做法是「把每个合法动作各打一遍，看实际掉了多少血」——用的是引擎自己的
+        结算路径（`_execute` 的伤害分支），**不另写一份伤害公式**。
+        对手这一手不参与：伤害预览只回答「我这一下打多少、够不够收」，
+        不是一次联合结算的预测。
+
+        覆盖不到的地方如实登记：状态技能、道具、换人不产生伤害事件，
+        于是它们不进 min/max，并在 `skipped_kinds` 里列出来。
+        """
+        from . import env as env_mod
+        from . import effects as fx_mod
+
+        foe_hp = state.enemy.field_pet.hp
+        pet = state.player.field_pet
+        skill_table = rs.skills
+        attacks = []
+        for skill_id in (state.player.loadouts.get(pet.pet_id) or ()):
+            skill = skill_table.get(skill_id)
+            if skill is None or not skill.is_attack:
+                continue
+            attacks.append(skill_id)
+        if not attacks:
+            return {"available": False, "reason": "我方场上这只没有带任何攻击技能",
+                    "skipped_kinds": []}
+        # 逐个攻击技能测一次伤害，给出**真实范围**。
+        # 用配招表而不是 `legal_actions`：后者会被先手度/能量等过滤，
+        # 拿它当值域会系统性低估「这一下最多能打多少」。
+        class _Cand:
+            __slots__ = ("kind", "skill_id", "target_index", "item_id")
+
+            def __init__(self, skill_id):
+                self.kind = "skill"
+                self.skill_id = skill_id
+                self.target_index = None
+                self.item_id = None
+
+            def label(self, ruleset):
+                return ruleset.skill(self.skill_id).name
+
+            def to_dict(self):
+                return {"kind": "skill", "skill_id": self.skill_id}
+
+        candidates = [_Cand(sid) for sid in attacks]
+        damages: List[Dict[str, Any]] = []
+        skipped: List[str] = []
+        for action in candidates:
+            trial = env_mod.deserialize(env_mod.serialize(state), rs)
+            events_before = len(trial.events)
+            try:
+                env_mod._execute(trial, rs, "player", action)
+            except (ValueError, RulesetError, fx_mod.UnsupportedEffect):
+                skipped.append(action.kind)
+                continue
+            dealt = 0
+            for event in trial.events[events_before:]:
+                if event.kind == "damage" and event.detail.get("side") == "player":
+                    dealt += int(event.detail.get("damage") or 0)
+            if dealt <= 0:
+                # 没打出伤害：可能是被 fail closed 拦下（条件化威力未核验），
+                # 也可能是这只技能本来就不产生伤害事件。两种都如实登记。
+                skipped.append(action.skill_id)
+                continue
+            damages.append({
+                "label": action.label(rs),
+                "kind": "skill",
+                "skill_id": action.skill_id,
+                "damage": dealt,
+            })
+        if not damages:
+            return {"available": False,
+                    "reason": "配招里没有任何攻击技能能算出伤害（可能全部被 fail closed 拦下）",
+                    "skipped_skills": skipped}
+        low = min(d["damage"] for d in damages)
+        high = max(d["damage"] for d in damages)
+        best = max(damages, key=lambda d: d["damage"])
+        return {
+            "available": True,
+            "min": low,
+            "max": high,
+            "best_label": best["label"],
+            "lethal": high >= foe_hp,
+            "foe_hp": foe_hp,
+            "samples": damages,
+            "skipped_skills": skipped,
+            "candidates": len(candidates),
+            "formula_verified": fx_mod.active_damage_model().verified,
+            "damage_model": fx_mod.active_damage_model().name,
+        }
+
+    @staticmethod
+    def _merge_previews(previews: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        """把多个 analysis seed 的预览合并成**包络**。
+
+        不同的分析种子会重建出不同的分析状态（对手后备按满血建模，但同速裁决
+        等随机不同），所以伤害也不完全一样。合并口径：min 取最小、max 取最大、
+        `lethal` 取「**任何**一个种子都能收掉」——那是可以行动的结论；
+        反过来「有的种子收不掉」必须让人看见，所以另给 `lethal_stable`。
+        """
+        usable = [p for p in previews if p and p.get("available")]
+        if not usable:
+            return previews[0] if previews else {"available": False, "reason": "没有可用的预览"}
+        lethal_flags = [bool(p["lethal"]) for p in usable]
+        # 合并每个技能的伤害：同一个技能在不同分析种子下可能略有差异，
+        # 取**最小与最大**作为它的区间——不平均掉，因为玩家要的是「打多少」的界。
+        merged: Dict[str, Dict[str, Any]] = {}
+        for preview in usable:
+            for sample in preview.get("samples", []):
+                label = sample["label"]
+                entry = merged.setdefault(label, {"label": label, "min": sample["damage"],
+                                                  "max": sample["damage"]})
+                entry["min"] = min(entry["min"], sample["damage"])
+                entry["max"] = max(entry["max"], sample["damage"])
+        return {
+            "available": True,
+            "min": min(p["min"] for p in usable),
+            "max": max(p["max"] for p in usable),
+            "best_label": max(usable, key=lambda p: p["max"])["best_label"],
+            "lethal": all(lethal_flags),
+            "lethal_stable": len(set(lethal_flags)) == 1,
+            "foe_hp": usable[0]["foe_hp"],
+            "skipped_skills": sorted({k for p in usable for k in p.get("skipped_skills", [])}),
+            "candidates": max(p.get("candidates", 0) for p in usable),
+            "formula_verified": usable[0]["formula_verified"],
+            "damage_model": usable[0]["damage_model"],
+            "seeds_merged": len(usable),
+            "samples": sorted(merged.values(), key=lambda x: -x["max"]),
+            "note": (
+                "原始伤害范围：**未核验公式**的输出（COMMUNITY_HYPOTHESIS_V1），"
+                "不是游戏内实测值。`lethal` 表示所有分析种子都能一击收掉；"
+                "`lethal_stable` 为假表示结论随分析种子变化，别当保证。"
+                "状态技能/道具/换人不产生伤害，列在 skipped_kinds 里。"
+            ),
+        }
 
     def _sim_strategy(self, body: Dict[str, Any], started: float):
         """解析并绑定对手策略。名字必须在注册表里，绝不静默退回默认策略。"""

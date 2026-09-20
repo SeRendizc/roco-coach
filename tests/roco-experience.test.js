@@ -20,6 +20,7 @@ import {
   rocoLessonEntry,
   rocoIntervention,
   rocoInterventionText,
+  rocoDamagePreviewText,
   ROCO_MODE,
 } from '../src/coach/roco-experience.js';
 import {interventionDetail,interventionFeaturesOfGame} from '../src/coach/experience.js';
@@ -173,4 +174,30 @@ test('风险分支：没有 risk 字段时按「不脆」处理（旧回执兼�
   const text = rocoHintText({ok: true, recommendation: '龙血', worst: {min: 0.1, max: 0.2}});
   assert.match(text, /可以优先考虑/);
   assert.ok(!/不稳/.test(text));
+});
+
+test('伤害预览：说清「估」与「够不够收」，且结论不稳时不许打包票', () => {
+  const base = {
+    available: true, min: 130, max: 425, best_label: '坟场搏击',
+    lethal: true, lethal_stable: true, foe_hp: 425, formula_verified: false,
+  };
+  const lethal = rocoDamagePreviewText({damage_preview: base});
+  assert.match(lethal, /130~425/, '要给范围，不能只给一个数');
+  assert.match(lethal, /坟场搏击/);
+  assert.match(lethal, /够收掉/);
+  assert.match(lethal, /未核验/, '这是未核验公式的输出，必须标出来');
+
+  const unstable = rocoDamagePreviewText({damage_preview: {...base, lethal_stable: false}});
+  assert.ok(!/够收掉/.test(unstable), '结论随分析种子变化时不许说「够收掉」');
+  assert.match(unstable, /别当保证/);
+
+  const notLethal = rocoDamagePreviewText({damage_preview: {...base, lethal: false}});
+  assert.match(notLethal, /收不掉/);
+
+  // 同一数字时不写区间
+  const single = rocoDamagePreviewText({damage_preview: {...base, min: 300, max: 300}});
+  assert.match(single, /300 点/);
+
+  assert.equal(rocoDamagePreviewText({}), null);
+  assert.equal(rocoDamagePreviewText({damage_preview: {available: false}}), null);
 });
