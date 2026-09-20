@@ -922,7 +922,8 @@
       "title": "陪练盲评",
       "status": "NEEDS_HUMAN",
       "evidence": [],
-      "note": "需要 3—5 位真人评分。这是外部阻塞，不是代码问题。",
+      "needs": "NEEDS_HUMAN：3—5 位真人玩家，对陪练回复做盲评打分（同一条回复随机标成不同来源）",
+      "note": "这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。",
       "evidence_checked": [],
       "evidence_missing": []
     },

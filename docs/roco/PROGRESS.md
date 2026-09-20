@@ -67,7 +67,7 @@
 | W5-02 | Shadow replay | `NOT_STARTED` | — | 未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。 |
 | W5-03 | 主动介入规则评分 | `DONE` | `src/coach/policy.js`、`src/coach/experience.js`、`tests/intervention.test.js` | 规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。 |
 | W5-04 | 主动介入成本敏感分类器 | `NOT_STARTED` | — | 先建标签扩充 + 评测闭环（`scripts/roco/` 下还缺），再谈训练；硬门控不变。 |
-| W5-05 | 陪练盲评 | `NEEDS_HUMAN` | — | 需要 3—5 位真人评分。这是外部阻塞，不是代码问题。 |
+| W5-05 | 陪练盲评 | `NEEDS_HUMAN` | — | 这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。 |
 | W6-01 | learned value | `NOT_STARTED` | — | 未开工；依赖 W4-02 的候选数据。 |
 | W6-02 | Battle PPO | `NOT_STARTED` | — | 未开工；属训练，且需要 W4-04 的底座。 |
 | W6-03 | LLM Agentic RL | `NOT_STARTED` | — | 未开工；属训练，依赖 W5-01 的 gateway。 |
@@ -97,7 +97,8 @@
 - **W5-04 主动介入成本敏感分类器**（`NOT_STARTED`）
   - 先建标签扩充 + 评测闭环（`scripts/roco/` 下还缺），再谈训练；硬门控不变。
 - **W5-05 陪练盲评**（`NEEDS_HUMAN`）
-  - 需要 3—5 位真人评分。这是外部阻塞，不是代码问题。
+  - 这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。
+  - **缺的是谁**：NEEDS_HUMAN：3—5 位真人玩家，对陪练回复做盲评打分（同一条回复随机标成不同来源）
 - **W6-01 learned value**（`NOT_STARTED`）
   - 未开工；依赖 W4-02 的候选数据。
 - **W6-02 Battle PPO**（`NOT_STARTED`）

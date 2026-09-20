@@ -1,0 +1,17 @@
+=== 第 11 轮：dashboard 修正后的全量验证 @ 2026-09-20T21:42:52Z ===
+Ran 195 tests in 13.137s
+
+OK (skipped=1)
+ℹ tests 431
+ℹ pass 431
+ℹ fail 0
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0
+ℹ tests 17
+ℹ pass 17
+ℹ fail 0
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+traj verdict True
