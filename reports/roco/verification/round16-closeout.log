@@ -1,0 +1,17 @@
+=== 第 16 轮：全量收口验证 @ 2026-09-20T22:14:52Z ===
+Ran 208 tests in 24.457s
+
+OK (skipped=1)
+ℹ tests 463
+ℹ pass 463
+ℹ fail 0
+ℹ pass 11
+ℹ fail 0
+ℹ pass 17
+ℹ fail 0
+ℹ pass 10
+ℹ fail 0
+--- 本地模型 manifest
+manifest 校验通过
+--- 轨迹判定
+verdict True
