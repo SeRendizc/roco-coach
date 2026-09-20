@@ -62,8 +62,12 @@ export function loadInterventionModel(path = MODEL_PATH) {
 }
 
 /** 决策前可得的特征向量。**顺序必须与训练时一致**，所以对着 features 逐个取值。 */
+export const GAP_SCALE = 5.0;   // 与 assessDecision / 训练脚本同一把尺子
+
 export function featureVector(features = {}, model = null) {
-  const names = model?.features || ['intercept', 'risk', 'phase_replace', 'low_hp', 'turn_norm', 'legal_count_norm'];
+  const names = model?.features || ['intercept', 'risk', 'phase_replace', 'low_hp', 'turn_norm',
+    'legal_count_norm', 'planner_margin_norm'];
+  const margin = Number(features.plannerMargin);
   const values = {
     intercept: 1.0,
     risk: clamp01(features.risk),
@@ -71,6 +75,11 @@ export function featureVector(features = {}, model = null) {
     low_hp: clamp01(features.hpRatio ?? features.lowHp ?? 0) <= 0.35 ? 1.0 : 0.0,
     turn_norm: Math.min(Math.max(Number(features.turn) || 0, 0) / 40, 1),
     legal_count_norm: Math.min(Math.max(Number(features.legalCount) || 0, 0) / 12, 1),
+    // 枚举第一与第二的估值差，按同一把尺子归一。**决策前**可得（来自规划器枚举）。
+    // 缺失时按 0（= 没有分歧证据），这是保守方向：不抬高「该提示」的概率。
+    planner_margin_norm: Number.isFinite(margin)
+      ? Math.min(Math.max(margin, 0) / GAP_SCALE, 1)
+      : 0,
   };
   return names.map((name) => {
     if (!(name in values)) throw new Error(`未知特征：${name}（训练与推理的特征表必须一致）`);

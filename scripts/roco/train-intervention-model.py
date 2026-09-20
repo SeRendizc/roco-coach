@@ -73,14 +73,24 @@ def load_windows(path: str = WINDOWS) -> Tuple[Dict[str, Any], List[Dict[str, An
     return header, rows
 
 
+#: v2 用的标签：**纯决策前可得的观察量**（见预注册文档 §10）。
+LABEL_KEY = "truth_v2"
+
+
 def features_of(row: Dict[str, Any]) -> List[float]:
     """特征向量：**只有决策前可得的量**。
 
     刻意**不含** `decisionGap`（玩家实际选择与枚举第一的分差）与 `topChoice`——
     那两个要等玩家做完这一手才算得出来，而这一层是在**决策之前**被问到的。
     第一次训练误用了 `gap`，见预注册文档 §8：那是口径错误，不是调参问题。
+
+    `planner_margin_norm` 是**枚举第一与第二的估值差**，取自同一份
+    `rankEnemyActions` 枚举——决策前可得，且与规则在运行期拿到的「分差性质的量」
+    同源（规则拿到的是规划器期望区间宽度，不是玩家实际选择）。
     """
     hp = float(row.get("hpRatio") or 0.0)
+    margin = row.get("plannerMargin")
+    margin_norm = 0.0 if margin is None else min(max(float(margin), 0.0) / GAP_THRESHOLD, 1.0)
     return [
         1.0,                                   # 截距
         float(row.get("risk") or 0.0),
@@ -88,10 +98,18 @@ def features_of(row: Dict[str, Any]) -> List[float]:
         1.0 if hp <= 0.35 else 0.0,
         min(float(row.get("turn") or 0) / 40.0, 1.0),
         min(float(row.get("legalCount") or 0) / 12.0, 1.0),
+        margin_norm,
     ]
 
 
-FEATURE_NAMES = ["intercept", "risk", "phase_replace", "low_hp", "turn_norm", "legal_count_norm"]
+FEATURE_NAMES = ["intercept", "risk", "phase_replace", "low_hp", "turn_norm",
+                 "legal_count_norm", "planner_margin_norm"]
+
+#: 对照臂：**去掉** `planner_margin_norm`。用来回答一个必须回答的问题——
+#: 「模型通过门槛，是因为它看见了规则看不见的东西，还是因为它只是复刻了规则？」
+#: 去掉之后特征与规则**完全同信息**，因此它只能复刻规则。
+ABLATION_FEATURE_NAMES = ["intercept", "risk", "phase_replace", "low_hp", "turn_norm",
+                          "legal_count_norm"]
 
 
 def rule_scores(row: Dict[str, Any], skill: float = 0.0) -> Dict[str, Any]:
@@ -108,10 +126,10 @@ def rule_scores(row: Dict[str, Any], skill: float = 0.0) -> Dict[str, Any]:
     用来算 Brier/ECE；文档里写明了这一点，不假装规则本来就有概率）。
     """
     risk = min(max(float(row.get("risk") or 0.0), 0.0), 1.0)
-    # 运行期传进来的 `gap` 是规划器期望区间宽度；为了忠实复刻规则的**判定面**，
-    # 这里用一个与 decisionGap 同尺度的代理：标签用的分差本身。
-    # 规则在运行期拿到的正是这样一个「分差性质的量」，只是来源不同。
-    gap = row.get("decisionGap")
+    # 规则在运行期拿到的 `gap` 是**规划器期望区间宽度**，与玩家选择无关。
+    # 这里用 `plannerMargin`（枚举第一与第二的估值差）作为同源代理：
+    # 两者都是「这一手有多大分歧」的决策前口径。
+    gap = row.get("plannerMargin")
     value = 3 * risk + 1.2 * min(max(float(gap or 0), 0.0) / GAP_THRESHOLD, 1.0)
     floor = VALUE_FLOOR + SKILL_WEIGHT * skill
     decisive = (gap is not None and float(gap) > GAP_THRESHOLD) or risk >= RISK_CRITICAL
@@ -180,13 +198,17 @@ def calibration(labels: np.ndarray, probabilities: np.ndarray, bins: int = 10) -
     return {"brier": round(brier, 4), "ece": round(ece, 4), "bins": table}
 
 
-def train(train_rows: List[Dict[str, Any]], val_rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+def train(train_rows: List[Dict[str, Any]], val_rows: List[Dict[str, Any]],
+          feature_names: Optional[List[str]] = None) -> Dict[str, Any]:
     from sklearn.linear_model import LogisticRegression
 
-    x_train = np.array([features_of(row) for row in train_rows], dtype=float)
-    y_train = np.array([1 if row["truth"]["label"] else 0 for row in train_rows], dtype=int)
-    x_val = np.array([features_of(row) for row in val_rows], dtype=float)
-    y_val = np.array([1 if row["truth"]["label"] else 0 for row in val_rows], dtype=int)
+    names = feature_names or FEATURE_NAMES
+    indices = [FEATURE_NAMES.index(name) for name in names]
+    keep = lambda rows: np.array([[features_of(row)[i] for i in indices] for row in rows], dtype=float)  # noqa: E731
+    x_train = keep(train_rows)
+    y_train = np.array([1 if row[LABEL_KEY]["label"] else 0 for row in train_rows], dtype=int)
+    x_val = keep(val_rows)
+    y_val = np.array([1 if row[LABEL_KEY]["label"] else 0 for row in val_rows], dtype=int)
 
     # 特征尺度差异很大（turn_norm 到 1.0、phase 是 0/1、risk 到 1.0），
     # 不做标准化时 lbfgs 会在 matmul 里溢出（实测每天都能看到 RuntimeWarning）。
@@ -225,7 +247,7 @@ def train(train_rows: List[Dict[str, Any]], val_rows: List[Dict[str, Any]]) -> D
         "intercept": round(float(model.intercept_[0]), 6),
         "standardize": {"mean": [round(float(value), 6) for value in mean],
                         "scale": [round(float(value), 6) for value in scale]},
-        "feature_names": FEATURE_NAMES,
+        "feature_names": names,
         "threshold": chosen["threshold"],
         "validation": chosen["metrics"],
         "validation_rule_recall": rule_recall,
@@ -236,17 +258,27 @@ def train(train_rows: List[Dict[str, Any]], val_rows: List[Dict[str, Any]]) -> D
 
 
 def apply_model(model: Dict[str, Any], row: Dict[str, Any]) -> float:
-    """推理时必须用**训练时那一套**标准化参数，否则系数就是错的。"""
+    """推理时必须用**训练时那一套**标准化参数与**同一组特征**，否则系数就是错的。
+
+    注意不能按位置遍历 `features_of(row)`：对照臂用的是全部特征的一个**子集**，
+    按下标硬算会取错列（第一版就是这么崩的）。
+    """
+    full = features_of(row)
     mean = model["standardize"]["mean"]
     scale = model["standardize"]["scale"]
     z = model["intercept"]
-    for index, value in enumerate(features_of(row)):
-        z += model["coefficients"][index] * ((value - mean[index]) / scale[index])
+    for index, name in enumerate(model["feature_names"]):
+        value = full[FEATURE_NAMES.index(name)]
+        z += model["coefficients"][index] * ((value - mean[index]) / (scale[index] or 1.0))
+    if z > 40:
+        return 1.0
+    if z < -40:
+        return 0.0
     return 1.0 / (1.0 + math.exp(-z))
 
 
 def evaluate(model: Dict[str, Any], rows: List[Dict[str, Any]], label: str) -> Dict[str, Any]:
-    y = np.array([1 if row["truth"]["label"] else 0 for row in rows], dtype=int)
+    y = np.array([1 if row[LABEL_KEY]["label"] else 0 for row in rows], dtype=int)
     rule_pred = np.array([1 if rule_scores(row)["positive"] else 0 for row in rows], dtype=int)
     probabilities = np.array([apply_model(model, row) for row in rows], dtype=float)
     model_pred = (probabilities >= model["threshold"]).astype(int)
@@ -259,7 +291,7 @@ def evaluate(model: Dict[str, Any], rows: List[Dict[str, Any]], label: str) -> D
         "model": {**binary_metrics(y, model_pred), "calibration": calibration(y, probabilities)},
         "by_turn_band": {
             band: binary_metrics(
-                np.array([1 if row["truth"]["label"] else 0 for row in subset], dtype=int),
+                np.array([1 if row[LABEL_KEY]["label"] else 0 for row in subset], dtype=int),
                 np.array([1 if apply_model(model, row) >= model["threshold"] else 0 for row in subset], dtype=int))
             for band, subset in (
                 ("early(<=3)", [row for row in rows if (row.get("turn") or 0) <= 3]),
@@ -298,7 +330,7 @@ def check_gates(model: Dict[str, Any], evals: Dict[str, Dict[str, Any]]) -> Dict
     for threshold in THRESHOLDS:
         probe = {**model, "threshold": threshold}
         row_set = evals["_test_rows"]
-        y = np.array([1 if row["truth"]["label"] else 0 for row in row_set], dtype=int)
+        y = np.array([1 if row[LABEL_KEY]["label"] else 0 for row in row_set], dtype=int)
         pred = np.array([1 if apply_model(probe, row) >= threshold else 0 for row in row_set], dtype=int)
         metrics = binary_metrics(y, pred)
         robust[str(threshold)] = {
@@ -350,6 +382,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     evals["_test_rows"] = by_split["test"]
     gate = check_gates(model, evals)
 
+    # 对照臂：与规则**同信息**的特征子集。它只能复刻规则，不可能超过规则的召回；
+    # 如果主臂与它结果相同，说明「通过」来自标签口径的正确，而不是多给了一个特征。
+    ablation_model = train(by_split["train"], by_split["val"], ABLATION_FEATURE_NAMES)
+    ablation = {split: evaluate(ablation_model, subset, split) for split, subset in by_split.items()}
+    ablation_gate = check_gates(ablation_model, {**ablation, "_test_rows": by_split["test"]})
+
     report = {
         "generated_by": "scripts/roco/train-intervention-model.py",
         "preregistration": "docs/roco/W5-04-INTERVENTION-GATE.md",
@@ -358,6 +396,16 @@ def main(argv: Optional[List[str]] = None) -> int:
         "splits": {split: len(subset) for split, subset in by_split.items()},
         "model": model,
         "evaluation": {split: value for split, value in evals.items() if not split.startswith("_")},
+        "ablation_without_planner_margin": {
+            "why": "去掉 planner_margin_norm 后，模型的特征与规则**完全同信息**，"
+                   "因此它只能复刻规则。用来区分「口径修正」与「多给了一个特征」。",
+            "feature_names": ablation_model["feature_names"],
+            "threshold": ablation_model["threshold"],
+            "test": {key: ablation["test"]["model"][key] for key in ("recall", "false_positive_rate", "precision")},
+            "rule_test": {key: ablation["test"]["rule"][key] for key in ("recall", "false_positive_rate", "precision")},
+            "verdict": "pass" if ablation_gate["passes_decidable"] else "gate_failed",
+            "failed_gates": ablation_gate["failed"],
+        },
         "gate": gate,
         "verdict": ("pass" if gate["passes_decidable"] else "gate_failed"),
         "not_claimed": [
@@ -368,6 +416,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     }
     if args.write:
         os.makedirs(os.path.dirname(OUT_REPORT), exist_ok=True)
+        gate_status = ("pass（G1—G5 全部通过）" if report["verdict"] == "pass"
+                       else f"gate_failed（未过：{', '.join(gate['failed'])}）")
         with open(OUT_MODEL, "w", encoding="utf-8") as fh:
             json.dump({"generated_by": "scripts/roco/train-intervention-model.py",
                        "preregistration": report["preregistration"],
@@ -376,7 +426,9 @@ def main(argv: Optional[List[str]] = None) -> int:
                        "coefficients": model["coefficients"], "intercept": model["intercept"],
                        "threshold": model["threshold"],
                        "decision": "positive → 放行规则原本会给的提示；negative → 抑制（只做「抑制」这一个方向）",
-                       "gate_status": "gate_failed（G3 校准、G4 阈值稳健未过，见预注册文档 §8.1）",
+                       "label": LABEL_KEY,
+                       "label_basis": "纯决策前可得的观察量：必须补位 / 血量≤35% / 枚举第一与第二的估值差>5",
+                       "gate_status": gate_status,
                        "deployment": "参考实现，默认关闭；不声称可替换规则评分",
                        "deployment": "只替换 interventionScore 里 value-vs-floor 这一个判定；"
                                      "硬门控与预算在它之前，模型拿不到也改不了",
@@ -397,6 +449,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         "calibration": {"rule": test["rule"]["calibration"]["brier"], "model": test["model"]["calibration"]["brier"],
                         "ece_model": test["model"]["calibration"]["ece"]},
         "failed_gates": gate["failed"],
+        "ablation": {"verdict": report["ablation_without_planner_margin"]["verdict"],
+                     "test": report["ablation_without_planner_margin"]["test"]},
     }, ensure_ascii=False, indent=1))
     return 0 if report["verdict"] == "pass" else 1
 

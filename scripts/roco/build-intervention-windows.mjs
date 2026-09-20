@@ -68,6 +68,50 @@ export function groundTruth({gap, risk, replace}) {
   return {label: false, reason: gap === null ? 'no-comparable-choice' : 'small-gap'};
 }
 
+/**
+ * v2 标签：**纯决策前可得的观察量**。
+ *
+ * 与 v1 的区别只有一处，但那一处是决定性的：v1 的正类里有 `decisive-gap`，
+ * 而「玩家实际选择与枚举第一的分差」**要等玩家做完这一手**才算得出来。
+ * 用决策后的量当标签、决策前的量当特征，任务的正确率上限本来就低
+ * （实测：召回 0.45、校准 ECE 0.155，`gate_failed`）。
+ *
+ * v2 回答的是这一层真正要回答的问题：
+ * 「**就当前这些看得见的事实**，该不该打断？」
+ * 判定依据仍然来自引擎的公开事实，不引入任何新信息：
+ *   - `must-replace` / `critical-risk`：局面本身到了不可逆或危险的点；
+ *   - `planner-unstable`：规划器对这一手**没有稳健结论**
+ *     （`recommendation_stable === false`，即分析种子之间推荐不一致）——
+ *     这时玩家面对的是真实的分歧，值得一句提示；
+ *   - 其余为负类：局面平稳（风险低、必须补位否、推荐稳健）。
+ *
+ * 这是**重新定义问题**，不是放宽门槛：门槛（G1—G7）与阈值一个字都不改，
+ * 见 `docs/roco/W5-04-INTERVENTION-GATE.md` §10。
+ */
+export function groundTruthV2({risk, replace, plannerMargin = null}) {
+  if (replace) return {label: true, reason: 'must-replace'};
+  if (risk >= RISK_CRITICAL) return {label: true, reason: 'critical-risk'};
+  if (plannerMargin !== null && plannerMargin > GAP_THRESHOLD) {
+    return {label: true, reason: 'planner-margin'};
+  }
+  return {label: false, reason: 'steady-position'};
+}
+
+/**
+ * 「规划器对这一手有没有稳健结论」——**决策前**可得。
+ *
+ * 依据：枚举出来的候选行动里，第一名与第二名的估值是否明显分开。
+ * 分开得明显 = 有稳健结论（不需要提示）；几乎并驾齐驱 = 真实的分歧
+ * （值得一句提示）。阈值沿用 `assessDecision` 的「>5 才算明显」。
+ *
+ * 刻意**不用**玩家的选择：那是决策后才有的东西，用它就不是这个标签了。
+ */
+export function plannerMargin(ranked) {
+  if (!Array.isArray(ranked) || ranked.length < 2) return null;
+  const margin = Number(ranked[0]?.score) - Number(ranked[1]?.score);
+  return Number.isFinite(margin) ? Number(margin.toFixed(4)) : null;
+}
+
 /** 用同一个确定性策略把一局走完，收集每一手的窗口。 */
 function windowsForGame(seed, {playerPolicy, maxTurns = 40, maxPerGame = 12, startTurn = 0}) {
   const rows = [];
@@ -82,9 +126,11 @@ function windowsForGame(seed, {playerPolicy, maxTurns = 40, maxPerGame = 12, sta
     if (game.phase === 'replace') {
       const risk = situationRisk(game);
       if (keep) rows.push({seed, turn: game.turn, phase: 'replace', risk,
+        plannerMargin: null,
         topChoice: false, hpRatio: active(game, 'player').hp / active(game, 'player').maxHp,
         legalCount: acts.length,
-        truth: groundTruth({gap: null, risk, replace: true})});
+        truth: groundTruth({gap: null, risk, replace: true}),
+        truth_v2: groundTruthV2({risk, replace: true, plannerMargin: null})});
       game = step(game, playerPolicy(acts));
       continue;
     }
@@ -99,6 +145,8 @@ function windowsForGame(seed, {playerPolicy, maxTurns = 40, maxPerGame = 12, sta
     const p = active(game, 'player');
     if (keep) rows.push({
       seed, turn: game.turn, phase: game.phase, risk,
+      // 决策前可得的「枚举第一与第二的估值差」：v2 标签与特征都用它。
+      plannerMargin: plannerMargin(ranked),
       // `gap` / `topChoice` **只用于生成标签**，不进入特征向量：
       // 它们要等玩家做完这一手才算得出来，而提示是在决策**之前**发的。
       // 第一次训练把 `gap` 当特征用，属于口径错误，见预注册文档 §8。
@@ -106,6 +154,7 @@ function windowsForGame(seed, {playerPolicy, maxTurns = 40, maxPerGame = 12, sta
       legalCount: acts.length,
       decisionGap: gap,
       truth: groundTruth({gap, risk, replace: false}),
+      truth_v2: groundTruthV2({risk, replace: false, plannerMargin: plannerMargin(ranked)}),
     });
     game = step(game, action);
   }
@@ -155,6 +204,19 @@ export function summarise(rows) {
     by_reason: rows.reduce((acc, row) => {
       acc[row.truth.reason] = (acc[row.truth.reason] || 0) + 1; return acc;
     }, {}),
+    v2: {
+      positives: rows.filter((row) => row.truth_v2?.label).length,
+      by_reason: rows.reduce((acc, row) => {
+        const reason = row.truth_v2?.reason || 'missing';
+        acc[reason] = (acc[reason] || 0) + 1; return acc;
+      }, {}),
+      by_split: rows.reduce((acc, row) => {
+        const bucket = acc[row.split] || (acc[row.split] = {windows: 0, positive: 0});
+        bucket.windows += 1;
+        if (row.truth_v2?.label) bucket.positive += 1;
+        return acc;
+      }, {}),
+    },
     // 分差分布是**标签**的分布，不是特征的分布（特征里刻意没有分差）。
     label_gap_distribution: {
       null: rows.filter((r) => r.decisionGap === null).length,

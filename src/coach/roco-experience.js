@@ -214,6 +214,13 @@ export function rocoIntervention({view = null, session = null, plan = null, host
     risk: Number.isFinite(host.risk) ? host.risk : null,
     gap: planFeatures.gap,
     skill: planFeatures.skill,
+    // 判定层的 `planner_margin_norm` 要的是**枚举第一与第二名的估值差**。
+    // ⚠️ 当前规划器回执里**没有**这个量：`PlanResult` 只有 `expected/worst/best`，
+    // 没有「第二名是多少」。所以这里只能传 null（判定层按 0 处理 = 没有分歧证据），
+    // 判定层目前**不会**生效。要让它在真实链路上生效，必须先让规划器把
+    // top1-top2 的边际量带进回执——那是一次独立的、要动的服务改动，
+    // 见 docs/roco/W5-04-INTERVENTION-GATE.md §10.2。不编一个代理值假装接上了。
+    plannerMargin: Number.isFinite(plan?.margin) ? plan.margin : null,
     timeLeft: Number.isFinite(host.timeLeft) ? host.timeLeft : Infinity,
   });
   return interventionDetail(features);

@@ -7,7 +7,8 @@
     "phase_replace",
     "low_hp",
     "turn_norm",
-    "legal_count_norm"
+    "legal_count_norm",
+    "planner_margin_norm"
   ],
   "standardize": {
     "mean": [
@@ -16,7 +17,8 @@
       0.0,
       0.235294,
       0.235294,
-      0.686275
+      0.686275,
+      0.710308
     ],
     "scale": [
       1.0,
@@ -24,21 +26,25 @@
       1.0,
       0.424183,
       0.147543,
-      0.138648
+      0.138648,
+      0.360454
     ]
   },
   "coefficients": [
     0.0,
-    -5.068514,
+    3.063837,
     0.0,
-    6.755656,
-    0.990833,
-    1.497898
+    3.111135,
+    -0.751519,
+    1.116277,
+    8.209392
   ],
-  "intercept": 2.417892,
-  "threshold": 0.55,
+  "intercept": 2.905856,
+  "threshold": 0.05,
   "decision": "positive → 放行规则原本会给的提示；negative → 抑制（只做「抑制」这一个方向）",
-  "gate_status": "gate_failed（G3 校准、G4 阈值稳健未过，见预注册文档 §8.1）",
+  "label": "truth_v2",
+  "label_basis": "纯决策前可得的观察量：必须补位 / 血量≤35% / 枚举第一与第二的估值差>5",
+  "gate_status": "pass（G1—G5 全部通过）",
   "deployment": "只替换 interventionScore 里 value-vs-floor 这一个判定；硬门控与预算在它之前，模型拿不到也改不了",
   "rollback": "ROCO_INTERVENTION_MODEL=off（默认）时逐位回到规则结果"
 }

@@ -66,7 +66,7 @@
 | W5-01 | Model gateway | `NOT_STARTED` | — | 未开工。它要连真实模型，和 W4-02 的模型候选同一前置。 |
 | W5-02 | Shadow replay | `NOT_STARTED` | — | 未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。 |
 | W5-03 | 主动介入规则评分 | `DONE` | `src/coach/policy.js`、`src/coach/experience.js`、`tests/intervention.test.js` | 规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。 |
-| W5-04 | 主动介入成本敏感分类器 | `PARTIAL` | `docs/roco/W5-04-INTERVENTION-GATE.md`、`scripts/roco/build-intervention-windows.mjs`、`scripts/roco/train-intervention-model.py`、`src/coach/intervention-model.js`、`tests/evals/intervention-layer.test.js` | 预注册 → 窗口集 30 条扩到 3,740 条（seed family 切分 + family 外 OOD）→ 成本敏感分类器 → 只抑制的判定层（默认关闭、可回滚）→ 10 项守卫测试，已全部落地。**但门槛结果是 `gate_failed`**：G1 召回 / G2 误报 / G5 family 外通过，G3 校准（ECE 0.1546 > 0.10）与 G4 阈值稳健未过。原因是结构性的：标签依赖决策后才有的分差，特征只能用决策前的量。因此判定层**不进入产品路径**，规则评分仍是默认。 |
+| W5-04 | 主动介入成本敏感分类器 | `PARTIAL` | `docs/roco/W5-04-INTERVENTION-GATE.md`、`scripts/roco/build-intervention-windows.mjs`、`scripts/roco/train-intervention-model.py`、`src/coach/intervention-model.js`、`tests/evals/intervention-layer.test.js` | 预注册 → 窗口集 30 条扩到 3,740 条（seed family 切分 + family 外 OOD）→ 成本敏感分类器 → 只抑制的判定层（默认关闭、可回滚）→ 10 项守卫测试，已全部落地。两次口径的结果都留痕：**v1（决策后分差当标签）`gate_failed`**（G3 校准 ECE 0.1546、G4 阈值稳健未过），这是有效的负结论——问题定义不可测；**v2（纯决策前观察量）离线 6/6 通过**（ECE 0.0070、误报 0.0、family 外同样通过），消融臂证明通过不是因为多塞了特征。但运行期缺 `planner_margin_norm`（规划器回执没有「枚举第二名」），所以**判定层尚未在真实链路生效**，规则评分仍是默认。 |
 | W5-05 | 陪练盲评 | `NEEDS_HUMAN` | — | 这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。 |
 | W6-01 | learned value | `NOT_STARTED` | — | 未开工；依赖 W4-02 的候选数据。 |
 | W6-02 | Battle PPO | `NOT_STARTED` | — | 未开工；属训练，且需要 W4-04 的底座。 |
@@ -95,7 +95,7 @@
 - **W5-02 Shadow replay**（`NOT_STARTED`）
   - 未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。
 - **W5-04 主动介入成本敏感分类器**（`PARTIAL`）
-  - 预注册 → 窗口集 30 条扩到 3,740 条（seed family 切分 + family 外 OOD）→ 成本敏感分类器 → 只抑制的判定层（默认关闭、可回滚）→ 10 项守卫测试，已全部落地。**但门槛结果是 `gate_failed`**：G1 召回 / G2 误报 / G5 family 外通过，G3 校准（ECE 0.1546 > 0.10）与 G4 阈值稳健未过。原因是结构性的：标签依赖决策后才有的分差，特征只能用决策前的量。因此判定层**不进入产品路径**，规则评分仍是默认。
+  - 预注册 → 窗口集 30 条扩到 3,740 条（seed family 切分 + family 外 OOD）→ 成本敏感分类器 → 只抑制的判定层（默认关闭、可回滚）→ 10 项守卫测试，已全部落地。两次口径的结果都留痕：**v1（决策后分差当标签）`gate_failed`**（G3 校准 ECE 0.1546、G4 阈值稳健未过），这是有效的负结论——问题定义不可测；**v2（纯决策前观察量）离线 6/6 通过**（ECE 0.0070、误报 0.0、family 外同样通过），消融臂证明通过不是因为多塞了特征。但运行期缺 `planner_margin_norm`（规划器回执没有「枚举第二名」），所以**判定层尚未在真实链路生效**，规则评分仍是默认。
 - **W5-05 陪练盲评**（`NEEDS_HUMAN`）
   - 这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。
   - **缺的是谁**：NEEDS_HUMAN：3—5 位真人玩家，对陪练回复做盲评打分（同一条回复随机标成不同来源）
