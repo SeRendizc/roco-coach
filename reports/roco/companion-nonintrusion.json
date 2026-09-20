@@ -1,0 +1,276 @@
+{
+ "generated_by": "scripts/roco/verify-companion-nonintrusion.mjs",
+ "preregistration": "docs/roco/COMPANION-NONINTRUSION.md",
+ "fixture": {
+  "seeds": [
+   3,
+   5,
+   8,
+   11,
+   17,
+   23,
+   29,
+   31
+  ],
+  "should_speak_windows": 20,
+  "should_silent_windows": 86
+ },
+ "gates": {
+  "P1_silence_rate": {
+   "value": 0.9884,
+   "threshold": 0.9,
+   "passed": true,
+   "detail": "该沉默的窗口 86 个，实际沉默 85 个"
+  },
+  "P2_speak_rate": {
+   "value": 1,
+   "threshold": 0.8,
+   "passed": true,
+   "detail": "有素材的窗口 20 个，实际开口 20 个"
+  },
+  "P3_hard_boundary_violations": {
+   "value": 0,
+   "threshold": 0,
+   "passed": true,
+   "detail": [
+    {
+     "name": "pvp-live",
+     "why": "线上竞技不给赛中帮助",
+     "events": [],
+     "violated": false,
+     "limit": 4
+    },
+    {
+     "name": "preview",
+     "why": "预制体验不产生进度",
+     "events": [],
+     "violated": false,
+     "limit": 4
+    },
+    {
+     "name": "dismissed",
+     "why": "刚被点掉：本局静音优先",
+     "events": [],
+     "violated": false,
+     "limit": 4
+    },
+    {
+     "name": "quiet-preference",
+     "why": "显式安静：上限归零",
+     "events": [],
+     "violated": false,
+     "limit": 0
+    }
+   ]
+  },
+  "P4_over_limit": {
+   "value": 0,
+   "threshold": 0,
+   "passed": true,
+   "detail": [
+    {
+     "seed": 3,
+     "spoken": 4,
+     "limit": 4,
+     "over": false,
+     "underLimitFlagMismatch": 0
+    },
+    {
+     "seed": 5,
+     "spoken": 2,
+     "limit": 4,
+     "over": false,
+     "underLimitFlagMismatch": 0
+    },
+    {
+     "seed": 8,
+     "spoken": 4,
+     "limit": 4,
+     "over": false,
+     "underLimitFlagMismatch": 0
+    },
+    {
+     "seed": 11,
+     "spoken": 4,
+     "limit": 4,
+     "over": false,
+     "underLimitFlagMismatch": 0
+    },
+    {
+     "seed": 17,
+     "spoken": 3,
+     "limit": 4,
+     "over": false,
+     "underLimitFlagMismatch": 0
+    },
+    {
+     "seed": 23,
+     "spoken": 3,
+     "limit": 4,
+     "over": false,
+     "underLimitFlagMismatch": 0
+    },
+    {
+     "seed": 29,
+     "spoken": 0,
+     "limit": 4,
+     "over": false,
+     "underLimitFlagMismatch": 0
+    },
+    {
+     "seed": 31,
+     "spoken": 0,
+     "limit": 4,
+     "over": false,
+     "underLimitFlagMismatch": 0
+    }
+   ]
+  },
+  "P5_repeats": {
+   "value": 0,
+   "threshold": 0,
+   "passed": true
+  },
+  "P6_unsupported_lines": {
+   "value": 0,
+   "threshold": 0,
+   "passed": true,
+   "detail": [
+    {
+     "event": "live",
+     "register": "R4",
+     "seed": 3,
+     "chars": 33,
+     "valid": true,
+     "reasons": []
+    },
+    {
+     "event": "clutch",
+     "register": "R4",
+     "seed": 3,
+     "chars": 47,
+     "valid": true,
+     "reasons": []
+    },
+    {
+     "event": "blunder",
+     "register": "R4",
+     "seed": 3,
+     "chars": 47,
+     "valid": true,
+     "reasons": []
+    },
+    {
+     "event": "first-faint",
+     "register": "R4",
+     "seed": 3,
+     "chars": 57,
+     "valid": true,
+     "reasons": []
+    },
+    {
+     "event": "live",
+     "register": "R4",
+     "seed": 5,
+     "chars": 32,
+     "valid": true,
+     "reasons": []
+    },
+    {
+     "event": "first-faint",
+     "register": "R4",
+     "seed": 5,
+     "chars": 57,
+     "valid": true,
+     "reasons": []
+    },
+    {
+     "event": "clutch",
+     "register": "R4",
+     "seed": 8,
+     "chars": 47,
+     "valid": true,
+     "reasons": []
+    },
+    {
+     "event": "blunder",
+     "register": "R4",
+     "seed": 8,
+     "chars": 50,
+     "valid": true,
+     "reasons": []
+    }
+   ]
+  },
+  "P7_cue_slot_violations": {
+   "value": 0,
+   "threshold": 0,
+   "passed": true,
+   "detail": [
+    {
+     "name": "queued-too-long",
+     "input": {
+      "queuedAt": 1000,
+      "now": 21001
+     },
+     "expect": "drop",
+     "got": "drop",
+     "ok": true,
+     "reason": "排队超过 20000ms，这条已经不新鲜了"
+    },
+    {
+     "name": "just-shown",
+     "input": {
+      "queuedAt": 0,
+      "now": 1000,
+      "holdUntil": 4000
+     },
+     "expect": "hold",
+     "got": "hold",
+     "ok": true,
+     "reason": "刚显示过，5000ms 内不再重开，免得一闪一闪"
+    },
+    {
+     "name": "fresh-queue",
+     "input": {
+      "queuedAt": 900,
+      "now": 1000,
+      "holdUntil": 0
+     },
+     "expect": "show",
+     "got": "show",
+     "ok": true,
+     "reason": "可以开口（军师/老师在不在场都不影响）"
+    },
+    {
+     "name": "nothing-queued",
+     "input": {
+      "queuedAt": 0,
+      "now": 1000,
+      "holdUntil": 0
+     },
+     "expect": "idle",
+     "got": "idle",
+     "ok": true,
+     "reason": "可以开口（军师/老师在不在场都不影响）"
+    }
+   ]
+  }
+ },
+ "failed": [],
+ "verdict": "pass",
+ "not_claimed": [
+  "这不是真人验收：机器判定通过 ≠ 玩家不烦",
+  "不覆盖这份 fixture 之外的打扰形式",
+  "P1 高不代表陪练质量好，只说明该闭嘴时闭嘴了"
+ ],
+ "criteria_can_fail": {
+  "P1_can_fail": true,
+  "P2_can_fail": true,
+  "P1_can_fail_for_chatty": true,
+  "measured": {
+   "P1": 0.9884,
+   "P2": 1
+  }
+ }
+}

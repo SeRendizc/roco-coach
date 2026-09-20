@@ -549,9 +549,12 @@
       "status": "DONE",
       "evidence": [
         "src/coach/companion.js",
-        "tests/companion.test.js"
+        "tests/companion.test.js",
+        "docs/roco/COMPANION-NONINTRUSION.md",
+        "scripts/roco/verify-companion-nonintrusion.mjs",
+        "tests/evals/companion-nonintrusion.test.js"
       ],
-      "note": "六个场景；显式记忆（称呼/偏好/里程碑）与低置信的推测状态分开。",
+      "note": "六个场景；显式记忆（称呼/偏好/里程碑）与低置信的推测状态分开。**不打扰验收（第 20 轮）**：预注册 P1—P7，在真实主动触发通道 `companionEvents` 上量 8 个固定种子的逐回合重放——该沉默 86 个窗口**沉默率 0.9884**、该说话 20 个窗口**开口率 1.0**、硬边界（PVP / 预制体验 / 刚被点掉 / 显式安静）**违反 0**、每局上限与去重**各 0 违规**、每条话都有真实素材且过克制扫描。**这不是真人验收**：机器判定通过 ≠ 玩家不烦，那一半是 W5-05。",
       "evidence_checked": [
         {
           "path": "src/coach/companion.js",
@@ -559,6 +562,18 @@
         },
         {
           "path": "tests/companion.test.js",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/COMPANION-NONINTRUSION.md",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/verify-companion-nonintrusion.mjs",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/companion-nonintrusion.test.js",
           "exists": true
         }
       ],

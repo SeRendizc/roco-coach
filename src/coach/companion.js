@@ -2295,14 +2295,28 @@ export function bubbleDurationMs(text){
 // 闪一下比不说更烦，而且那半秒谁也读不完。
 export const COMPANION_DEFER={maxWaitMs:20000,minVisibleMs:5000};
 export function companionCueSlot({barVisible=false,queuedAt=0,now=0,holdUntil=0}={}){
- if(queuedAt&&now-queuedAt>COMPANION_DEFER.maxWaitMs)return {action:'drop',reason:`排队超过 ${COMPANION_DEFER.maxWaitMs}ms，这条已经不新鲜了`};
+ // `holdUntil` 的判断必须**先**做，而且不能挂在 `queuedAt` 上。
+ //
+ // 原来的写法把 `now<holdUntil` 放在 `queuedAt` 判断之后，于是「当前没有新消息排队、
+ // 但上一条刚显示过」时返回的是 `idle`——而那条消息还在最短可见窗口里，
+ // 正确的动作是 `hold`。这个顺序错误是第 20 轮的「不打扰」验收（P7）量出来的：
+ // 构造用例 `{queuedAt:0, now:1000, holdUntil:4000}` 期望 `hold`，实际拿到 `idle`。
+ // 最短暂停是防「一闪一闪」的机制，它不该依赖「有没有新消息在排队」。
+ // 顺序：先看「上一条还在最短可见窗口里吗」，再看排队是否已经过期。
+ //
+ // 为什么不反过来：排队过期是**丢掉**消息，而 hold 只是**等**。两者冲突时
+ // （上一条刚显示过 + 队列里有一条快过期的），丢掉是不可逆的，而等一两秒再判断
+ // 也许两个条件就都不成立了。所以这里不直接丢，而是**按窗口结束的时刻**判过期：
+ // 即使等到最短可见窗口结束，这条也已经不新鲜，才丢。
+ const visibleUntil=Math.max(now,now<holdUntil?holdUntil:now);
+ if(queuedAt&&visibleUntil-queuedAt>COMPANION_DEFER.maxWaitMs)return {action:'drop',reason:`排队超过 ${COMPANION_DEFER.maxWaitMs}ms，这条已经不新鲜了`};
+ if(now<holdUntil)return {action:'hold',reason:`刚显示过，${COMPANION_DEFER.minVisibleMs}ms 内不再重开，免得一闪一闪`};
  // 军师/老师说话时，陪练**照样可以说**。
  // 原来这里写的是「军师条在场：陪练让位」，理由是「两处同时说话=噪音」——那个理由站不住：
  // 两者位置不同（顶部条 vs 左下气泡），说的也是不同种类的话（战术建议 vs 陪伴）。
  // 实际后果是战斗里军师一开口陪练就被静音，而战斗里军师经常开口，等于把陪练废掉了。
  // 真正该守的是**内容**边界（陪练不给战术指令，见 checkCompanionRestraint），不是时间上的互斥。
  // barVisible 仍然收下，只用于避免同一条消息刚显示过又重开（下面的 holdUntil 已经覆盖）。
- if(now<holdUntil)return {action:'hold',reason:`刚显示过，${COMPANION_DEFER.minVisibleMs}ms 内不再重开，免得一闪一闪`};
  return {action:queuedAt?'show':'idle',reason:'可以开口（军师/老师在不在场都不影响）'};
 }
 

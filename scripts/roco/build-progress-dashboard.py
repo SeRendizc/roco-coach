@@ -158,8 +158,18 @@ ITEMS: List[Dict[str, Any]] = [
      "evidence": ["src/coach/teacher.js", "tests/coach.test.js"],
      "note": "每局默认只给一个关键决策；参数变化的相似题；不把一次答对写成掌握。"},
     {"id": "C02", "title": "陪练闭环", "status": DONE,
-     "evidence": ["src/coach/companion.js", "tests/companion.test.js"],
-     "note": "六个场景；显式记忆（称呼/偏好/里程碑）与低置信的推测状态分开。"},
+     "evidence": ["src/coach/companion.js", "tests/companion.test.js",
+                  "docs/roco/COMPANION-NONINTRUSION.md",
+                  "scripts/roco/verify-companion-nonintrusion.mjs",
+                  "tests/evals/companion-nonintrusion.test.js"],
+     "note": "六个场景；显式记忆（称呼/偏好/里程碑）与低置信的推测状态分开。"
+             "**不打扰验收（第 20 轮）**：预注册 P1—P7，在真实主动触发通道 "
+             "`companionEvents` 上量 8 个固定种子的逐回合重放——"
+             "该沉默 86 个窗口**沉默率 0.9884**、该说话 20 个窗口**开口率 1.0**、"
+             "硬边界（PVP / 预制体验 / 刚被点掉 / 显式安静）**违反 0**、"
+             "每局上限与去重**各 0 违规**、每条话都有真实素材且过克制扫描。"
+             "**这不是真人验收**：机器判定通过 ≠ 玩家不烦，那一半是 W5-05。"},
+
     {"id": "C03", "title": "记忆控制", "status": DONE,
      "evidence": ["src/coach/memory.js", "tests/companion.test.js"],
      "note": "查看 / 纠正 / 逐条删除 / 全部清除，保留 source 与 timestamp。"},

@@ -49,7 +49,7 @@
 | P01 | 重写 `should_intervene` 特征 | `DONE` | `src/coach/experience.js`、`src/coach/roco-experience.js`、`tests/roco-experience.test.js` | 四档动作 + 硬门控先于评分；阈值是产品参数而不是游戏机制。 |
 | P02 | 事件回放验收 | `DONE` | `tests/evals/intervention-windows.json`、`tests/intervention.test.js` | 30 个窗口（15 该提示 / 15 不该）；P01 精度 1.0、过期 0；报告明写这是离线 fixture 而不是人体实验。 |
 | C01 | 老师闭环 | `DONE` | `src/coach/teacher.js`、`tests/coach.test.js` | 每局默认只给一个关键决策；参数变化的相似题；不把一次答对写成掌握。 |
-| C02 | 陪练闭环 | `DONE` | `src/coach/companion.js`、`tests/companion.test.js` | 六个场景；显式记忆（称呼/偏好/里程碑）与低置信的推测状态分开。 |
+| C02 | 陪练闭环 | `DONE` | `src/coach/companion.js`、`tests/companion.test.js`、`docs/roco/COMPANION-NONINTRUSION.md`、`scripts/roco/verify-companion-nonintrusion.mjs`、`tests/evals/companion-nonintrusion.test.js` | 六个场景；显式记忆（称呼/偏好/里程碑）与低置信的推测状态分开。**不打扰验收（第 20 轮）**：预注册 P1—P7，在真实主动触发通道 `companionEvents` 上量 8 个固定种子的逐回合重放——该沉默 86 个窗口**沉默率 0.9884**、该说话 20 个窗口**开口率 1.0**、硬边界（PVP / 预制体验 / 刚被点掉 / 显式安静）**违反 0**、每局上限与去重**各 0 违规**、每条话都有真实素材且过克制扫描。**这不是真人验收**：机器判定通过 ≠ 玩家不烦，那一半是 W5-05。 |
 | C03 | 记忆控制 | `DONE` | `src/coach/memory.js`、`tests/companion.test.js` | 查看 / 纠正 / 逐条删除 / 全部清除，保留 source 与 timestamp。 |
 | F01 | 无聊天入口完整演示 | `DONE` | `src/client/roco.html`、`scripts/roco/demo-acceptance.mjs`、`reports/roco/demo-acceptance/demo-acceptance.json` | 16/16 通过；六条场景（无聊天框、危险时短提示、该沉默就不说、换阵容撤旧建议、局末一个教学入口、抱怨时先接情绪）。 |
 | F02 | 全链路回归 | `DONE` | `reports/roco/regression/F02-REGRESSION-2026-09-21.md` | 人读报告 + JSON + 18 份原始日志；P50/P95 实测；四条发现修掉三条、一条（test:smoke 不自举）如实留作已知问题。 |
