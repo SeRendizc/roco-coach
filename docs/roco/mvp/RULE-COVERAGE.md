@@ -146,3 +146,36 @@ EVAL_ELIGIBLE    可进入阵容模型训练与正式评测
 印记 / 天气 / 连击数 / 属性增减结算 / 蓄力是**待做**（fail closed），
 应对机制与先手排序是**已实现（术语背书 + 有测试）**，A 组 6 只特性 3 只 FULL、2 只 PARTIAL、1 只 REFUSED，
 其余 6 只特性未实现。
+
+---
+
+## W3-01 之后的更新（技能池与实测状态）
+
+上面那些数字是 M1 时代的（12 只 A 组 / 30 个候选技能）。W3-01 之后有变化，
+两套数字都留着，免得读的人以为没动过：
+
+| 项 | M1 时代 | 现在 |
+|---|---|---|
+| 接入引擎的精灵 | 6（A 组） | **12**（A 组 6 + B/C 组 6） |
+| 特性实现状态 | 未登记 | **FULL 6 / PARTIAL 2 / REFUSED 4**（`data/roco/engine-trait-status.json`） |
+| 候选技能池 | 30（12 只 × 4 去重） | **55**（新增 `candidate_extras` 一栏，3 个/只；规范配招未动） |
+| 解析层完全支持 | 16 / 30 | **29 / 55（52.7%）**，其中 13 个是纯伤害、走 damage 路径 |
+| microcase | 21 | **30**（新增 B/C 组 6 条 + 属性复合/减伤时机/取整 3 条） |
+| 通过实测核验的 microcase | 0 | **仍然是 0** |
+
+最后一行是这份表里最重要的：**扩域不等于核验。** 30 条 microcase 里
+26 条「引擎有明确行为」（那行为是假设）、4 条连前提都缺，
+**没有一条**因为「引擎写完了」而变成通过。逐条状态见
+`docs/roco/MICROCASE-HARNESS.md`；实测录入与标定见
+`scripts/roco/record-measurements.py` 与 `docs/roco/CALIBRATION.md`。
+
+### 两套「支持」不要混
+
+| 字段 | 说的是什么 | 现在的值 |
+|---|---|---|
+| `skills.json` 的 `effect_support` | **上游数据**对这条技能的支持声明 | 824/824 全是 `unsupported` |
+| `data/roco/engine-trait-status.json` 的 `status` | **本仓库引擎**对这条特性的实现状态 | FULL 6 / PARTIAL 2 / REFUSED 4 |
+| 支持等级 `current` | 「机制是否被**实测**核验过」 | 12 只全部 `KNOWLEDGE_ONLY` |
+
+第一个恒为 `unsupported` 是数据的事实，第二个是引擎的事实，第三个是**验收**的事实。
+把三者混着读必然得出错误结论 —— `PET-SUPPORT-MATRIX.md` 现在每个特性都分两行写。

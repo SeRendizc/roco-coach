@@ -302,6 +302,32 @@ roco.js:286 requestPlan() → api('/api/roco/plan',{battle_id,depth:2,beam:4})
 
 ---
 
+## 4.5 W3-04 之后 `/battle/plan` 多出来的三栏
+
+教练域的规划回执在 W3-04 之后多了三块内容。它们都是**可选**的，
+不带参数时回执与之前逐字节一致（有测试钉住）。
+
+| 栏 | 怎么开 | 是什么 | 纪律 |
+|---|---|---|---|
+| `risk` | 默认就有 | 推荐那一手在对手各种选择下的落差：`downside`（期望到最坏）、`top_risks`（最差的前三个**对手动作**）、`fragile`（是否超过产品阈值 `FRAGILE_DOWNSIDE=1.2`） | 阈值是**产品参数**（只影响措辞分级），不是游戏机制；对手仍是启发式分布建模 |
+| `damage_preview` | 请求里 `damage_preview: true` | **原始伤害范围**：配招里每个攻击技能各试打一遍取 min/max，外加 `lethal`（够不够一击收掉）、`lethal_stable`（结论是否随分析种子变化）、`foe_hp` | 数字来自 `COMMUNITY_HYPOTHESIS_V1`（**未核验**），回执里带 `formula_verified: false`；页面措辞必须带「估」字 |
+| `model_score` | `/team/evaluate` 带 `opponent_pool` + `opponent_team` | 过门槛的阵容模型分 | 必须显式声明对手池（12 维特征里 6 维是对手的）；门槛不过**不加载**模型；没有模型时回 `{available:false}` 而**不编概率** |
+
+一条实现细节值得记下来：`damage_preview` 的采样**不另写一份伤害公式**，
+而是对每个攻击技能各调一次引擎自己的结算分支（`env._execute`），看实际掉了多少血。
+第一版用 `legal_actions` 筛候选，于是只测到「诡刺 130」、漏掉了「坟场搏击 425」——
+用被过滤过的动作集合当值域会**系统性低估**上界。现在遍历配招里全部攻击技能，
+这条错误写在测试名里（`test_preview_uses_the_whole_loadout_not_the_beam`）。
+
+风险分支还引来一个真实的误报：回执里 `risk.worst_seed_risks[].opponent_action` 的
+值是「诡刺」这样的**动作名字串**，而隐藏信息检测是**按名字**扫的，
+于是整份 `/battle/plan` 回执被判成协议违规、内容被丢掉。
+修法是**按路径**放行：只在这些分析结果父路径（`risk` / `top_risks` / `per_seed` / `branches`）下、
+且值是**字符串**时放行；`state.opponent_action`、顶层 `opponent_action`、
+以及「值是对象」的情况**继续拦**（三种反例都有测试）。
+
+---
+
 ## 5. 这份架构**不**声称什么
 
 - 不声称与官方一致。所有数据来自社区归档，固定 revision 的 Lua 镜像（`data/roco/sources.yaml` 的 `ruleset.caveat`）。
@@ -310,3 +336,7 @@ roco.js:286 requestPlan() → api('/api/roco/plan',{battle_id,depth:2,beam:4})
   （`env.py:8-17`、`effects.py:28-39`）。哪些是「已实现 / 模拟 / 待做」见 `docs/roco/mvp/STATUS-LABELS.md`。
 - 不声称演示需要模型。演示页只调用 `/api/roco/*` 与 `/api/bootstrap`，**不调用** `/api/coach`
   （`roco.js` 实测无 `api/coach` 引用）→ 不需要 API key。
+- 不声称任何一条 microcase 已通过。30 条里 26 条「引擎有明确行为」（`ENGINE_ASSUMPTION`）、
+  4 条连前提都缺；**0 条**通过实测核验。见 `docs/roco/MICROCASE-HARNESS.md`。
+- 不声称伤害数字是实测值。`damage_preview` 与所有伤害事件都带
+  `formula_verified: false`，公式是 `COMMUNITY_HYPOTHESIS_V1`（社区实现，不是官方公式）。
