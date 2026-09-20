@@ -22,6 +22,9 @@ import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// 服务器导出的资源白名单与模块图：契约测试直接核对**服务器认定的事实**，
+// 而不是自己再算一遍（各自算一遍就会各自漂，白屏那次就是这么漏过去的）。
+import {publicAssets, browserModules as serverBrowserModules, moduleSpecifiers} from '../../src/server/index.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const git = (args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
@@ -157,16 +160,33 @@ test('结构契约：URL 空间与磁盘空间同构，页面短路径可用', a
   try {
     // ① 模块图里每个模块都必须取得到（这正是「白名单或路径拼接写错」的症状）
     const problems = [];
-    for (const rel of browserModules(ENTRY)) {
+    for (const rel of serverBrowserModules()) {
       const r = await fetch(base + rel);
       if (r.status !== 200) problems.push(`${rel} -> HTTP ${r.status}`);
     }
     assert.deepEqual(problems, [], `从 HTTP 拿不到的浏览器模块：\n${problems.join('\n')}`);
 
-    // ② 页面短路径是对外契约
-    for (const p of ['', 'index.html', 'connect.html']) {
+    // ② 页面短路径是对外契约。roco.html 是演示页的短路径，同样要能开。
+    for (const p of ['', 'index.html', 'connect.html', 'roco.html']) {
       const r = await fetch(base + p);
       assert.equal(r.status, 200, `页面路径 /${p} 应当可用，实际 ${r.status}`);
+    }
+
+    // ③ 每个 HTML 页面按**浏览器规则**解析出来的每个本地资源都必须能取到。
+    // 这条是白屏的直接反证：服务器给了 HTML，但页面自己的脚本 404。
+    for (const page of [...publicAssets].filter((a) => a.endsWith('.html'))) {
+      const url = page === 'src/client/index.html' ? '' : page.replace(/^src\/client\//, '');
+      const html = readFileSync(join(ROOT, page), 'utf8');
+      for (const m of html.matchAll(/(?:src|href)\s*=\s*["']([^"']+)["']/g)) {
+        const spec = m[1];
+        if (/^(https?:)?\/\//.test(spec) || spec.startsWith('data:') || spec.startsWith('#')) continue;
+        if (!/\.(js|css)$/.test(spec)) continue;
+        // 浏览器把相对路径解析到**页面 URL 的目录**上；
+        // 页面短路径都在根上，所以相对路径实际落在 /（这正是 roco.html 那次踩的坑）。
+        const resolved = spec.startsWith('/') ? spec : new URL(spec, base + url).pathname;
+        const r = await fetch(base.replace(/\/$/, '') + resolved);
+        assert.equal(r.status, 200, `${page} 引用 ${spec}，浏览器会请求 ${resolved}，实际 HTTP ${r.status}（页面会白屏）`);
+      }
     }
 
     // ③ 白名单是唯一边界：非白名单文件（含目录穿越尝试）一律取不到
@@ -177,5 +197,52 @@ test('结构契约：URL 空间与磁盘空间同构，页面短路径可用', a
   } finally {
     server.closeAllConnections?.();
     await new Promise((r) => server.close(r));
+  }
+});
+
+// ── 多页面的资源白名单（2026-09-21 加）────────────────────────────────────────
+//
+// 起因是一个**真实的白屏**：加了第二个页面 roco.html 之后，服务器确实把
+// roco.html 加进了白名单，但它自己的入口脚本 /src/client/roco.js 返回 404，
+// 页面一行 JS 都不执行。原因是那份模块图只从 app.js 出发，
+// 而且我把 HTML 里的绝对路径 `/src/client/roco.js` 当相对路径解析了一次，
+// 得到 `src/client/src/client/roco.js`。
+//
+// 单元测试当时全绿：它们查的是「磁盘上有没有这个文件」，查不出
+// 「运行中的服务器会不会给这个 URL 返回 404」。所以这条契约改成
+// **直接拿服务器导出的白名单来核对**，而不是各自算一遍。
+
+
+
+test('结构契约：多页面白名单——每个 HTML 页面的本地入口都在白名单里', () => {
+  const pages = [...publicAssets].filter((rel) => rel.endsWith('.html'));
+  assert.ok(pages.length >= 3, `应当至少有 3 个页面（营地/连接/演示），实际 ${pages.length}`);
+  for (const page of pages) {
+    const html = readFileSync(join(ROOT, page), 'utf8');
+    const specs = moduleSpecifiers(html);
+    assert.ok(specs.length > 0, `${page} 没有任何 module 脚本或 import，页面会是静的`);
+    for (const spec of specs) {
+      // 与 server.js 同一条规则：绝对路径与 URL 空间同构（仓库根 = URL 根），
+      // 相对路径按所在文件解析。URL 里能出现的形式只有这两种。
+      const rel = spec.startsWith('/') ? spec.slice(1) : relative(ROOT, resolve(ROOT, dirname(page), spec)).replace(/\\/g, '/');
+      assert.ok(publicAssets.has(rel),
+        `${page} 引用 ${spec}，但它不在服务器的资源白名单里（会返回 404、页面白屏）`);
+      assert.ok(existsSync(join(ROOT, rel)), `${page} 引用 ${spec}，磁盘上没有 ${rel}`);
+    }
+  }
+});
+
+test('结构契约：每个页面的模块图闭包都在白名单里且都真实存在', () => {
+  const graph = serverBrowserModules();
+  const pages = [...publicAssets].filter((rel) => rel.endsWith('.html'));
+  for (const page of pages) {
+    assert.ok(graph.has(page), `模块图漏了页面 ${page}`);
+  }
+  for (const rel of graph) {
+    assert.ok(existsSync(join(ROOT, rel)), `模块图里的 ${rel} 在磁盘上不存在`);
+  }
+  // 演示页那两个模块必须在图里：它们的缺失正是上面那次白屏
+  for (const need of ['src/client/roco.js', 'src/coach/roco-experience.js']) {
+    assert.ok(graph.has(need), `模块图里缺了 ${need}——它不会被服务器提供，页面会白屏`);
   }
 });

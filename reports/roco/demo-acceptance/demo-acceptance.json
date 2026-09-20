@@ -1,0 +1,95 @@
+{
+  "started_at": "2026-09-20T19:11:07.703Z",
+  "url": "http://127.0.0.1:52192/roco.html",
+  "checks": [
+    {
+      "name": "页面没有聊天入口（无 #chat-input / #chat-form / textarea）",
+      "ok": true,
+      "detail": "{\"chat\":false,\"coachApi\":false,\"textareas\":0}"
+    },
+    {
+      "name": "开局后页面拿到公开局面",
+      "ok": true
+    },
+    {
+      "name": "合法动作渲染成按钮（不只是文字）",
+      "ok": true
+    },
+    {
+      "name": "打危险了之后出现主动短提示（无聊天入口）",
+      "ok": true,
+      "detail": "hint=micro_hint action=micro_hint 血量比=0.39 自动推进=2 判定={\"gate\":null,\"action\":\"micro_hint\",\"reason\":\"moderate-risk\",\"value\":1.5,\"floor\":1.2,\"decisive\":false,\"budget\":null}"
+    },
+    {
+      "name": "提示给的是可执行建议，并说明依据",
+      "ok": true,
+      "detail": "可以优先考虑「龙吼」，注意对方可能换上第3位（最坏尾部 0.41 ~ 0.41） / 依据：moderate-risk"
+    },
+    {
+      "name": "展开里有可核对的搜索证据（区间、分支、分析种子）",
+      "ok": true,
+      "detail": "期望区间：0.77 ~ 0.82（均值 0.80） 搜索：90 个分支 · 深度 2 · 分析种子 11/29/47 对手应对：换上第3位（是启发式建模，不是真人行为） "
+    },
+    {
+      "name": "提示不把胜率当结论、也不承诺必胜",
+      "ok": true,
+      "detail": "可以优先考虑「龙吼」，注意对方可能换上第3位（最坏尾部 0.41 ~ 0.41）期望区间：0.77 ~ 0.82（均值 0.80） 搜索：90 个分支 · 深度 2 "
+    },
+    {
+      "name": "点掉后该沉默的局面不再提示",
+      "ok": true,
+      "detail": "hidden=true action=silent"
+    },
+    {
+      "name": "换人后旧建议不再挂在旧版本上",
+      "ok": true,
+      "detail": "换上第2位 v10 → v15"
+    },
+    {
+      "name": "换人这一手本身是引擎接受的合法动作",
+      "ok": true,
+      "detail": "换上第2位"
+    },
+    {
+      "name": "一局能真的打完（引擎给出结果）",
+      "ok": true,
+      "detail": "loss"
+    },
+    {
+      "name": "局末给出一个教学入口",
+      "ok": true,
+      "detail": "第 16 回合那个决策点值得回看（这一局 16 个回合）。"
+    },
+    {
+      "name": "局末教学入口在页面上真的显示了",
+      "ok": true
+    },
+    {
+      "name": "玩家抱怨时陪练先回应情绪（R2/R3）",
+      "ok": true,
+      "detail": "R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。"
+    },
+    {
+      "name": "页面上不出现真实对局 seed 或私有状态",
+      "ok": true
+    },
+    {
+      "name": "控制台没有报错",
+      "ok": true,
+      "detail": "[]"
+    }
+  ],
+  "screenshots": [
+    "01-loaded.png",
+    "01-battle-started.png",
+    "02-complex-hint.png",
+    "03-silent-after-dismiss.png",
+    "04-roster-change.png",
+    "05-lesson.png",
+    "06-companion-emotion.png"
+  ],
+  "console_errors": [],
+  "page_errors": [],
+  "passed": 16,
+  "failed": 0
+}

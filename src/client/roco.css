@@ -1,0 +1,60 @@
+/* 手游规则演示页的样式。
+   刻意不 import 营地页的 style.css 那一大坨：这个页面只有「两栏队伍 + 动作区 + 一条便签」，
+   复用整套营地样式会把演示页和营地的视觉改动绑在一起。变量名与深色基调保持一致，
+   所以两个页面看起来仍像同一个产品。 */
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#e3eaf1;background:#101723;font-size:14px;--panel:#1a2635;--line:#314154;--accent:#a8e5b0;--muted:#9caebe;--warn:#f0cb77;--danger:#ee8e76}
+*{box-sizing:border-box}
+body{margin:0}
+main{max-width:1100px;margin:auto;padding:16px 22px 90px}
+h1{font-size:21px;margin:0;letter-spacing:.4px}
+h1 small{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;padding:3px 7px;margin-left:8px}
+h2{font-size:15px;margin:0}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;height:46px;margin-bottom:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.header-actions{display:flex;align-items:center;gap:8px}
+button{font:inherit;cursor:pointer;color:#dfe8ef;background:#243345;border:1px solid #394a5e;padding:7px 12px;border-radius:8px}
+button:hover:not(:disabled){background:#324961;border-color:#7e9bb8}
+button:disabled{opacity:.38;cursor:not-allowed}
+button.primary,button.selected{color:#152c24;background:var(--accent);border-color:var(--accent);font-weight:600}
+input{font:inherit;background:#121e2c;color:#dbe5ef;border:1px solid var(--line);border-radius:6px;padding:6px}
+.lead{font-size:13px;line-height:1.75;color:#b9c7d4;margin:0 0 14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:13px}
+.section-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px}
+.muted{color:var(--muted);font-size:12px}
+.chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;background:#16222f;white-space:nowrap}
+.board{display:grid;grid-template-columns:1fr 110px 1fr;gap:11px;align-items:start}
+.side{min-width:0}
+.center{display:flex;flex-direction:column;align-items:center;gap:7px;padding-top:34px}
+.pets{display:grid;gap:8px}
+.pet{border:1px solid #36495e;border-radius:9px;padding:9px}
+.pet.active{border-color:#8dd49c;background:#1d3435}
+.pet.fainted{opacity:.45}
+.pet-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.pet-top strong{font-size:14px}
+.pet-top code{font-size:11px;color:var(--muted)}
+.bar{height:8px;border-radius:6px;background:#111d28;overflow:hidden;margin:7px 0 5px}
+.bar>div{height:100%;background:#90d5a8}
+.bar>div.low{background:var(--danger)}
+.pet-stats{display:flex;gap:12px;font-size:12px;color:#c6d2de}
+.bench{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
+.bench .slot{border:1px dashed #36495e;border-radius:7px;padding:6px;font-size:12px;color:var(--muted);text-align:center}
+.actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.action{text-align:left;display:flex;flex-direction:column;gap:3px;min-height:58px}
+.action small{font-size:11px;color:#b4c3d1}
+.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:11px}
+#say-input{flex:1;min-width:180px}
+.events{font-size:12.5px;line-height:1.8;color:#c1cfdc;max-height:200px;overflow:auto}
+.events p{margin:3px 0}
+.events p.turn{color:var(--warn);border-top:1px solid #344355;padding-top:5px}
+.events p.miss{color:var(--warn)}
+.reply{margin-top:9px;font-size:13.5px;line-height:1.7;border-left:3px solid var(--accent);padding:7px 11px;background:#1d2c30;border-radius:0 8px 8px 0}
+.checklist{font-size:12.5px;line-height:1.85;color:#b9c7d4;margin:0;padding-left:18px}
+.checklist code{color:#dcead8}
+.hint,.lesson{position:fixed;right:18px;width:340px;max-width:calc(100vw - 30px);background:#1e2d32;border:1px solid #698d7b;border-radius:13px;padding:13px;box-shadow:0 14px 50px #0009;z-index:20}
+.hint{bottom:18px}
+.lesson{bottom:200px;border-color:#8a7fb8}
+.hint-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hint-head strong{color:#bbebc5;font-size:13px}
+.hint p{margin:7px 0;font-size:13.5px;line-height:1.65}
+.hint-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hint-body{margin-top:8px;font-size:12px;line-height:1.7;color:#b9c7d4;border-top:1px dashed #3d5560;padding-top:7px}
+@media(max-width:860px){.board{grid-template-columns:1fr}.center{padding-top:0}.hint,.lesson{position:static;width:auto;margin:11px 0}}

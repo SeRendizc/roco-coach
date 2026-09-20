@@ -40,7 +40,9 @@
     "roco:docs": "node scripts/roco/build-support-matrix-doc.mjs && node scripts/roco/build-conflicts-doc.mjs && node scripts/roco/build-microcase-doc.mjs",
     "roco:pipeline": "npm run roco:parse-check && npm run roco:cross-check && npm run roco:import && npm run roco:matrix && npm run roco:microcases && npm run roco:docs",
     "roco:acceptance": "node scripts/roco/browser-acceptance.mjs",
-    "test:unit": "node --test tests/engine.test.js tests/rules.test.js tests/offline.test.js tests/mechanics.test.js tests/pvp.test.js tests/features.test.js tests/coach.test.js tests/companion.test.js tests/strategist.test.js tests/intervention.test.js tests/server.test.js tests/opponent.test.js tests/knowledge.test.js tests/evals/agent.test.js tests/evals/regression.test.js tests/evals/slow-model.test.js tests/wiring.test.js tests/copy.test.js tests/evals/player-copy.test.js tests/evals/tool-arguments.test.js tests/evals/roco/data-acceptance.test.js tests/evals/structure-contract.test.js",
-    "test:env": "cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
+    "test:unit": "node --test tests/engine.test.js tests/rules.test.js tests/offline.test.js tests/mechanics.test.js tests/pvp.test.js tests/features.test.js tests/coach.test.js tests/companion.test.js tests/strategist.test.js tests/intervention.test.js tests/server.test.js tests/opponent.test.js tests/knowledge.test.js tests/evals/agent.test.js tests/evals/regression.test.js tests/evals/slow-model.test.js tests/wiring.test.js tests/copy.test.js tests/evals/player-copy.test.js tests/evals/tool-arguments.test.js tests/evals/roco/data-acceptance.test.js tests/evals/structure-contract.test.js tests/roco-experience.test.js",
+    "test:env": "cd roco && PYTHONPATH=src python3 -m unittest discover -s tests",
+    "test:roco-experience": "node --test tests/roco-experience.test.js",
+    "roco:demo-acceptance": "node scripts/roco/demo-acceptance.mjs"
   }
 }

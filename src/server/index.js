@@ -40,6 +40,7 @@ const WEB_ENTRY='src/client/app.js';
 // 页面外壳手工列出：HTML/CSS 不是从 JS import 出来的。
 const publicAssets=new Set([
  'src/client/index.html','src/client/connect.html',
+ 'src/client/roco.html','src/client/roco.css',
  'src/client/style.css','src/client/connect.css','src/client/connect.js',
 ]);
 
@@ -54,20 +55,42 @@ const publicAssets=new Set([
 // 路径拼接也必须按**真实相对路径**算，不能再手工数目录层级：
 // 原来那份实现用 `base + spec` 再手撸 `..` 出栈，只对「一层子目录」成立；
 // M0/M1 之后的布局是 src/coach/*、src/game/* 这种两层结构，手撸版本会算错。
+//
+// 2026-09-21 修：这份图原来**只**从 WEB_ENTRY 出发，于是第二个页面（roco.html）
+// 自己的入口脚本不在图里，请求 /src/client/roco.js 直接 404、页面一行 JS 都不跑。
+// 现在把每个 HTML 页面里的 `<script type="module" src="...">` 也当作入口。
+// 单页时代这个漏洞看不出来，多页时代它一定会出来。
+function moduleSpecifiers(src){
+ const out=[];
+ for(const m of src.matchAll(/(?:^|\n)\s*import\s[^'"]*['"](\.[^'"]+)['"]/g))out.push(m[1]);
+ for(const m of src.matchAll(/<script[^>]*\stype=["']module["'][^>]*\ssrc=["']([^"']+)["']/g))out.push(m[1]);
+ return out;
+}
 function browserModules(){
- const seen=new Set(),queue=[WEB_ENTRY];
+ const seen=new Set(),queue=[];
+ for(const asset of publicAssets)if(asset.endsWith('.html'))queue.push(asset);
+ queue.push(WEB_ENTRY);
  while(queue.length){
   const file=queue.pop();
   if(seen.has(file))continue;seen.add(file);
   let src;try{src=readFileSync(join(root,file),'utf8');}catch{continue;}
-  for(const m of src.matchAll(/(?:^|\n)\s*import\s[^'"]*['"](\.[^'"]+)['"]/g)){
-   const rel=relative(root,resolve(root,dirname(file),m[1])).replace(/\\/g,'/');
+  for(const spec of moduleSpecifiers(src)){
+   // 绝对路径（`/src/client/roco.js`）与 URL 空间同构：仓库根就是 URL 根，
+   // 和静态资源那条规则一致。相对路径才按所在文件解析。
+   // 手工把绝对路径也当相对路径解析过一次，结果是 `src/client/src/client/roco.js`
+   // —— 页面的入口脚本 404、整页一行 JS 都不跑。
+   const rel=spec.startsWith('/')
+    ? spec.slice(1)
+    : relative(root,resolve(root,dirname(file),spec)).replace(/\\/g,'/');
    if(!seen.has(rel))queue.push(rel);
   }
  }
  return seen;
 }
 for(const file of browserModules())publicAssets.add(file);
+
+/** 供结构契约测试使用：白名单与模块图必须能被独立核对（见 tests/evals/structure-contract.test.js）。 */
+export {publicAssets,browserModules,moduleSpecifiers};
 
 const json=(res,status,value)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(value));};
 const fail=(status,message)=>Object.assign(new Error(message),{status});
@@ -214,7 +237,7 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
    // 这两个别名是**对外契约**（README、文档、用户书签都写着 /connect.html），
    // 所以即使文件搬进 src/client/ 也不改 URL。其余资源一律用真实相对路径，
    // 这样浏览器按 import 说明符解析出的 URL 与白名单条目是同构的。
-   const PAGE_ALIASES={'':'src/client/index.html','index.html':'src/client/index.html','connect.html':'src/client/connect.html'};
+   const PAGE_ALIASES={'':'src/client/index.html','index.html':'src/client/index.html','connect.html':'src/client/connect.html','roco.html':'src/client/roco.html'};
    const raw=decodeURIComponent(path.slice(1));
    const asset=Object.hasOwn(PAGE_ALIASES,raw)?PAGE_ALIASES[raw]:raw;
    if(asset.includes('..'))throw fail(404,'文件不存在');

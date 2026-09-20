@@ -1,0 +1,82 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 手游规则演示（无聊天入口）</title><link rel="stylesheet" href="/src/client/roco.css"></head><body>
+<main>
+<header>
+ <h1>小芽 · 手游规则演示 <small>roco-world-s4-2026-09-10</small></h1>
+ <div class="header-actions">
+  <span id="engine-status" class="chip">规则服务：未启动</span>
+  <button id="start-battle" class="primary">开一局</button>
+  <button id="reset-battle">重开</button>
+ </div>
+</header>
+
+<p class="lead">
+ 这一局由 <strong>Python 规则引擎</strong>按《洛克王国：世界》手游子集结算（S4 快照）。
+ 页面上<strong>没有聊天框</strong>：小芽只在这三处出现 —— 左侧的短提示、
+ 发生变化时的阵容建议、以及局末的一个教学入口。
+ 未核验的机制一律不猜（fail closed），界面会如实说「这里我们不知道」。
+</p>
+
+<section class="board">
+ <article class="panel side" id="self-panel">
+  <div class="section-title"><h2>你的队伍</h2><span class="muted" id="self-active"></span></div>
+  <div id="self-pets" class="pets"></div>
+ </article>
+ <div class="center">
+  <div id="turn-chip" class="chip">未开局</div>
+  <div id="phase-chip" class="muted">—</div>
+ </div>
+ <article class="panel side" id="foe-panel">
+  <div class="section-title"><h2>训练对手</h2><span class="muted">规则引擎驱动</span></div>
+  <div id="foe-field" class="pets"></div>
+  <div id="foe-bench" class="bench"></div>
+ </article>
+</section>
+
+<section class="panel">
+ <div class="section-title"><h2>这一回合的行动</h2><span class="muted" id="action-hint">开一局后这里会出现可执行的动作</span></div>
+ <div id="actions" class="actions"></div>
+ <div class="row">
+  <button id="plan">✦ 让小芽看一眼</button>
+  <button id="auto-turn">让双方各走一步（自动演示）</button>
+  <span id="plan-status" class="muted"></span>
+ </div>
+</section>
+
+<section class="panel" id="log-panel">
+ <div class="section-title"><h2>本回合发生了什么</h2><span class="muted">引擎事件，原样搬运</span></div>
+ <div id="events" class="events"></div>
+</section>
+
+<section class="panel">
+ <div class="section-title"><h2>对局记录</h2><span class="muted">只给一个关键决策点</span></div>
+ <div id="lesson" class="muted">还没打完一局。</div>
+ <form id="say-form" class="row">
+  <input id="say-input" maxlength="80" placeholder="想说点什么（例如「好烦，又输了」）" aria-label="对小芽说一句">
+  <button class="primary">说一句</button>
+ </form>
+ <div id="say-reply" class="reply" hidden></div>
+</section>
+
+<section class="panel">
+ <div class="section-title"><h2>这次演示覆盖了什么</h2></div>
+ <ul class="checklist" id="coverage"></ul>
+</section>
+</main>
+
+<!-- 无聊天入口的主动短提示：固定在右下角，像页面上的一条便签 -->
+<aside id="hint" class="hint" hidden role="status" aria-live="polite">
+ <div class="hint-head"><strong>✦ 小芽</strong><button id="hint-close" aria-label="本场不再主动提醒">×</button></div>
+ <p id="hint-text"></p>
+ <div class="hint-foot"><span id="hint-why" class="muted"></span><button id="hint-details">展开取舍</button></div>
+ <div id="hint-body" class="hint-body" hidden></div>
+</aside>
+
+<!-- 局末教学入口 -->
+<aside id="lesson-card" class="lesson" hidden>
+ <div class="hint-head"><strong>✦ 局末一个决策点</strong><button id="lesson-close" aria-label="关掉">×</button></div>
+ <p id="lesson-question"></p>
+ <p class="muted" id="lesson-note"></p>
+</aside>
+
+<script type="module" src="/src/client/roco.js"></script>
+</body></html>

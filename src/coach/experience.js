@@ -248,6 +248,31 @@ export function interventionFeatures({game=null,attention=null,session=null,mode
   risk:Number.isFinite(risk)?risk:situationRisk(game),gap,skill,timeLeft};
 }
 
+/**
+ * 同上的「装配」部分，但接受**已经投影好**的 game 对象。
+ *
+ * 存在的理由只有一个：手游规则那边（`coach/roco-experience.js`）已经把自己的公开视图
+ * 投影成了本文件认得的形状，而 `interventionFeatures` 会**再投影一次**
+ * —— 再投影一次就会丢掉投影结果（它拿到的是 {mode,player,enemy}，不是 roco 视图），
+ * 于是 risk 恒为 0、门控也可能判错。
+ *
+ * 装配逻辑只有这一处：`interventionFeatures` 调它，roco 那边也调它。
+ * 谁都不许再抄一份字段清单——抄一份就会漂一份。
+ */
+export function interventionFeaturesOfGame({game=null,attention=null,session=null,mode='gentle',now=0,host={},risk=null,gap=null,skill=null,timeLeft=Infinity}={}){
+ const tkey=game?turnKey(game):(host.decisionKey??null);
+ const answered=tkey!=null&&session?.said?.has?.(`turn:${tkey}`)?tkey:null;
+ return {game,battleMode:game?.mode??host.battleMode??null,preference:mode,mode,
+  focus:host.focus!==false,stale:host.stale===true,background:host.background===true,animating:host.animating===true,
+  chatting:host.chatting===true,preview:host.preview===true,ended:host.ended===true,active:host.active!==false,
+  dismissed:attention?.dismissed===true||session?.dismissed===true,
+  decisionKey:tkey,lastDecisionKey:answered??attention?.shownTurn??null,
+  recentHints:session?.hints??attention?.count??0,
+  lastHintAt:Number.isFinite(session?.lastAt)?session.lastAt:(Number.isFinite(attention?.lastShown)?attention.lastShown:-Infinity),
+  now,epoch:Number.isFinite(host.epoch)?host.epoch:null,stateEpoch:Number.isFinite(host.stateEpoch)?host.stateEpoch:null,
+  risk:Number.isFinite(risk)?risk:situationRisk(game),gap,skill,timeLeft};
+}
+
 export function decisiveOpportunity(game){
  if(!game||!['pve','pvp-local'].includes(game.mode)||game.result||game.phase!=='battle')return null;
  const p=active(game,'player'),q=active(game,'enemy');
