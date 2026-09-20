@@ -46,3 +46,7 @@ reports/roco/demo-acceptance/*.png
 
 # v0.1 一键启动产生的检出
 .v0.1-run/
+
+# 本地推理虚拟环境与下载缓存（第 14 轮）：权重与依赖都不入库
+.venv-mlx/
+tmp/uv-cache/
