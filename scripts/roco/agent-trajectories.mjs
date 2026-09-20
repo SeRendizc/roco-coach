@@ -402,6 +402,20 @@ export function finalAnswer(task, {trace = [], stopped = 'complete', arm, hints 
     return `这条我答不了具体数值：伤害公式还没有核验，未核验的东西我不编。`
       + `能说的是规则集里已核过的字段（技能静态威力、属性相性），具体打到谁身上多少点，未支持。`;
   }
+  // 「这个局面答不了这条问题」要说在前面。
+  //
+  // 踩过一次：任务声明 `forced_failure: 'plan'`（引擎给不出计划），但模型跑去查了
+  // `kind: 'ruleset'` 并拿到一份 `ok: true` 的规则集摘要。原来的模板看到「有 ok 回执」
+  // 就往通用那一支走，正文里**没有**任何限制措辞，于是被 `must_mention_limitation` 判挂。
+  // 那次判挂是对的，但**原因被记错了**：账面上像「模型文案问题」，
+  // 实际是模型选错了工具 + 模板在「答不了」这一支上不够诚实。
+  // 现在只要局面声明了答不了这件事，正文就必须先承认它——不管模型查到了什么。
+  const declaredFailure = String(hints?.forced_failure || '').trim();
+  if (declaredFailure && !results.some((r) => r.ok === true && Array.isArray(r.limitations) && r.limitations.length)) {
+    const what = declaredFailure === 'damage' ? '具体伤害' : declaredFailure === 'plan' ? '这一手的后续推演' : declaredFailure;
+    return `这条我答不了：${what}在当前规则集里未核验/没有端点，我不编。`
+      + `能说的是规则集里已核过的事实（精灵属性、技能静态威力、属性相性）。`;
+  }
   const pet = results.map((r) => r.result).find((r) => r?.record === 'pet');
   if (pet) return `${pet.name}是${(pet.types || []).join('、')}，种族值总和 ${pet.stat_total}。这些是规则集里核过的字段。`;
   const team = results.map((r) => r.result).find((r) => r?.features);
