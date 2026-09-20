@@ -132,6 +132,11 @@ test('其余四个工具的入参同样有界：额外参数、路径、隐藏�
  assert.equal(validToolArgs('plan_actions',{state:{turn:3,path:'/etc/passwd'},state_version:0}),false);
  assert.equal(validToolArgs('plan_actions',{state:{turn:3,opponent_pending_action:{skill:'skill_000744'}},state_version:0}),false);
  assert.equal(validToolArgs('plan_actions',{state:{turn:3,rng_seed:42},state_version:0}),false);
+ // 真实形状的公开 planner state 必须收得下（它天然有 5 层嵌套，约 1.7KB）
+ assert.equal(validToolArgs('plan_actions',{state:PUBLIC_STATE,state_version:STATE}),true,'公开 planner state 不能被误判成非法参数');
+ assert.equal(validToolArgs('plan_actions',{state:{...PUBLIC_STATE,payload:'x'.repeat(9000)},state_version:STATE}),false,'仍然有字节上限');
+ let deep={v:1};for(let i=0;i<12;i++)deep={v:deep};               // 12 层嵌套
+ assert.equal(validToolArgs('plan_actions',{state:deep,state_version:STATE}),false,'仍然有深度上限');
  assert.equal(validToolArgs('summarize_battle',{record:{match_id:'m1',file:'/etc/passwd'},state_version:0}),false);
  assert.equal(validToolArgs('summarize_battle',{record:{match_id:'m1',blob:'x'.repeat(4200)},state_version:0}),false,'对象有字节上限');
  assert.equal(validToolArgs('summarize_battle',{record:['m1'],state_version:0}),false,'数组不是公开记录对象');
@@ -252,7 +257,7 @@ test('context 里的 stateVersion 也能作为权威来源；规划超时预算�
   const fresh=await executeTool('query_rules',{kind:'pet',pet_id:A,state_version:9},{matchId:'m1',rocoStateVersion:9});
   assert.equal(fresh.ok,true);
   assert.equal(fresh.freshness.source,'context.rocoStateVersion');
-  assert.equal(ROCO_PLAN_TIMEOUT_MS,1500);
+  assert.equal(ROCO_PLAN_TIMEOUT_MS,8000,'客户端侧预算要盖住引擎默认的 3×2000ms 搜索');
  }finally{resetRocoTools();}
 });
 
@@ -421,7 +426,7 @@ test('规划器接入点：搜索没完成不给结论，完成了才给；签�
   assert.equal(partial.timeout.state,'incomplete');
   assert.equal(partial.timeout.timedOut,false);
   assert.equal(partial.search.completed,false);
-  assert.equal(partial.search.coverage,0);
+  assert.equal(partial.search.coverage,0.4,'搜索引擎自报的覆盖率要如实带出来，不能吞成 0，也不能当成完成');
   assert.equal(partial.recommendation,null,'搜索没完成就不能给推荐');
   assert.equal(partial.mainCounter,null);
   assert.equal(partial.worstCaseTail,null);
@@ -450,6 +455,90 @@ test('规划器接入点：搜索没完成不给结论，完成了才给；签�
   const raw=await planActionsViaPlanner({client:bridge2,state:{turn:4},state_version:STATE,timeoutMs:10});
   assert.equal(raw.ok,true);
   assert.equal(raw.result.recommendation,'换上潮甲龟');
+ }finally{resetRocoTools();}
+});
+
+test('plan_actions 认引擎现状的字段名：recommended_label / main_counter / worst / timed_out（G05）',async()=>{
+ const {bridge}=makeBridge({});
+ // 规则服务 /battle/plan 的真实 payload 形状（见 roco/src/roco_env/service.py 的 battle_plan）
+ const livePlan={
+  schema_version:1,state_version:STATE,turn:3,analysis_seeds:[1,2,3],
+  recommendation_stable:true,recommended_label:'换上潮甲龟',recommended_by_seed:{1:'换上潮甲龟'},
+  expected:{min:0.1,max:0.4,mean:0.25},worst:{min:-0.8,max:-0.5},best:{min:0.6,max:0.9},
+  main_counter:'能量果',counter_note:'对手最可能先补能量',branches_evaluated:9000,depth_searched:3,beam:8,
+  coverage:1,timed_out:false,unsupported_seen:0,opponent_model:'public-bench-nominal',
+ };
+ configureRocoTools({client:bridge,stateVersion:STATE,planner:async()=>engineOk({coverage:1,result:livePlan})});
+ try{
+  const receipt=await executeTool('plan_actions',{state:PUBLIC_STATE,state_version:STATE},ctx());
+  assert.equal(receipt.planAvailable,true);
+  assert.equal(receipt.recommendation,'换上潮甲龟');
+  assert.equal(receipt.recommendationStable,true);
+  assert.equal(receipt.mainCounter,'能量果');
+  assert.equal(receipt.mainCounterNote,'对手最可能先补能量');
+  assert.deepEqual(receipt.worstCaseTail,{min:-0.8,max:-0.5});
+  assert.deepEqual(receipt.expected,{min:0.1,max:0.4,mean:0.25});
+  assert.equal(receipt.search.completed,true);
+  assert.equal(receipt.search.coverage,1);
+  assert.equal(receipt.search.nodes,9000);
+  assert.equal(receipt.search.depth,3);
+  assert.equal(receipt.timeout.timedOut,false);
+  assert.equal(receipt.timeout.state,'completed');
+ }finally{resetRocoTools();}
+ // 引擎自报 timed_out：即使 ok，也不许把「超时前的最好结果」说成完成的推荐
+ const {bridge:bridge2}=makeBridge({});
+ configureRocoTools({client:bridge2,stateVersion:STATE,planner:async()=>engineOk({coverage:0.42,
+  result:{...livePlan,coverage:0.42,timed_out:true,recommended_label:'先防御',worst:{min:-1.2,max:-0.9},branches_evaluated:4200}})});
+ try{
+  const timedOut=await executeTool('plan_actions',{state:PUBLIC_STATE,state_version:STATE},ctx());
+  assert.equal(timedOut.timeout.timedOut,true);
+  assert.equal(timedOut.timeout.engineReported,true);
+  assert.equal(timedOut.timeout.state,'timed_out');
+  assert.equal(timedOut.search.completed,false,'引擎说超时就不算完成');
+  assert.equal(timedOut.search.coverage,0.42);
+  assert.equal(timedOut.search.nodes,4200);
+  assert.equal(timedOut.recommendation,null,'超时前的最好结果不能当推荐');
+  assert.equal(timedOut.planAvailable,false);
+  assert.match(timedOut.note,/没有完成的搜索/);
+ }finally{resetRocoTools();}
+});
+
+test('plan_actions 适配桥与服务的键名差异：桥发 state、服务要 public（不改 roco-client）',async()=>{
+ // 真实 roco-client 的 planActions 把请求体包在 state 键下，而 /battle/plan 要求 public。
+ // 工具层先走桥的公开方法，拿到「缺少 public」的 bad_request 后，用**桥自己的传输层**
+ // 补发一次同名端点；工具层不另起 HTTP。
+ const calls=[];
+ const client={
+  baseUrl:'http://127.0.0.1:9',rulesetId:RULESET_ID,
+  _payload(extra,options){return {ruleset_id:this.rulesetId,state_version:Number.isInteger(options?.stateVersion)?options.stateVersion:0,...extra};},
+  async planActions(){calls.push('planActions');return engineFail({code:ROCO_ERROR.BAD_REQUEST,error_type:ROCO_ERROR.BAD_REQUEST,failure_class:ROCO_FAILURE_CLASS.REQUEST,
+   message:'缺少 public：规划请求必须用 env.public_planner_state() 产出的公开 state，而不是 env.serialize() 的私有状态（后者含真实 seed 与对手待执行动作）'});},
+  async _request(method,path,payload,options){calls.push({method,path,payload,options});
+   if(!payload.public)return engineFail({code:ROCO_ERROR.BAD_REQUEST,error_type:ROCO_ERROR.BAD_REQUEST,message:'缺少 public'});
+   return engineOk({coverage:1,result:{recommended_label:'先防御',main_counter:'换上潮甲龟',worst:{min:-0.4,max:-0.2},branches_evaluated:500,depth_searched:2,recommendation_stable:true,timed_out:false}});},
+ };
+ configureRocoTools({client,stateVersion:STATE});
+ try{
+  const receipt=await executeTool('plan_actions',{state:PUBLIC_STATE,state_version:STATE},ctx());
+  assert.deepEqual(calls.map(x=>typeof x==='string'?x:x.path),['planActions','/battle/plan']);
+  assert.deepEqual(calls[1].payload.public,PUBLIC_STATE,'补发时用的是 public 键，且内容就是调用方给的公开 state');
+  assert.equal(calls[1].payload.state_version,STATE);
+  assert.equal(receipt.ok,true);
+  assert.equal(receipt.recommendation,'先防御');
+  assert.equal(receipt.mainCounter,'换上潮甲龟');
+  assert.deepEqual(receipt.worstCaseTail,{min:-0.4,max:-0.2});
+  assert.equal(receipt.search.completed,true);
+ }finally{resetRocoTools();}
+ // 桥没有私有传输层时不许硬撑：原样把 bad_request 交给调用方，不编一个计划
+ const {bridge:plain}=makeBridge({planActions:()=>engineFail({code:ROCO_ERROR.BAD_REQUEST,error_type:ROCO_ERROR.BAD_REQUEST,failure_class:ROCO_FAILURE_CLASS.REQUEST,message:'缺少 public：……'})});
+ configureRocoTools({client:plain,stateVersion:STATE,planner:undefined});
+ try{
+  const refused=await executeTool('plan_actions',{state:PUBLIC_STATE,state_version:STATE},ctx());
+  assert.equal(refused.ok,false);
+  assert.equal(refused.error_type,ROCO_ERROR.BAD_REQUEST);
+  assert.equal(refused.coverage,0);
+  assert.equal(refused.recommendation,null);
+  assert.equal(refused.planAvailable,false);
  }finally{resetRocoTools();}
 });
 

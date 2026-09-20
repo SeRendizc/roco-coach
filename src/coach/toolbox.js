@@ -367,8 +367,9 @@ export function executeTool(name,args,context,message=''){
 //      工具**不**补默认威力、不补胜率、不补搜索节点数——回执里没有编造的数值。
 //   3. **过期即拒绝**：调用方的 state_version 必须与当前状态一致（见 rocoStateVersionOf），
 //      并且同一对局内不许倒退。对不上就拒绝执行，而不是拿旧状态算一个结果出来。
-//   4. **没有端点的能力就说没有**：/battle/plan 尚未实现、复盘摘要没有端点，
-//      两者都返回结构化 not_implemented（coverage = 0），不假装算过。
+//   4. **没有算完就说没算完**：复盘摘要没有端点，规划器也可能未接入 / 超时 / 半途而废；
+//      这时一律返回结构化 not_implemented / timeout / incomplete（coverage 为 0，
+//      三条结论为 null），不假装算过，也不拿部分搜索结果当推荐。
 //
 // 状态版本从哪来：`rocoStateVersionOf(context)` 依次看
 //   ① 注入的 provider（configureRocoTools({stateVersion})，上层/运行时接这里）
@@ -378,8 +379,13 @@ export function executeTool(name,args,context,message=''){
 // 并在回执的 freshness.source 里如实写明 `first-call`，不含糊其辞。
 
 const ROCO_TOOL_NAMES=Object.freeze(['query_rules','evaluate_team','compare_team_change','plan_actions','summarize_battle']);
-/** 规划超时预算：超时就如实报超时，不许把部分搜索当完整结论。 */
-export const ROCO_PLAN_TIMEOUT_MS=1500;
+/**
+ * 客户端侧的规划预算：引擎默认按 3 个 analysis_seeds 串行搜索、每个最多 2000ms，
+ * 最坏约 6000ms，这里留出往返余量。它不是引擎的搜索预算（那个由服务端的
+ * `budget_ms` 决定，并且引擎会自己用 `timed_out` 上报是否搜完）；工具只保证
+ * 不会因为自己把超时掐得太短而把「引擎其实算完了」说成超时。
+ */
+export const ROCO_PLAN_TIMEOUT_MS=8000;
 
 let rocoClient=null;
 let rocoClientFactory=null;      // null = 用动态 import 来的 createRocoClient
@@ -737,7 +743,8 @@ async function rocoPlanActions(args,context,client,stateVersion,freshness,starte
   search:{completed,coverage:searchCoverage??(completed?receipt.coverage:0),timedOut:searchTimedOut,
    nodes:Number.isInteger(search?.nodes)?search.nodes:(Number.isInteger(plan?.branches_evaluated)?plan.branches_evaluated:null),
    depth:Number.isInteger(search?.depth)?search.depth:(Number.isInteger(plan?.depth_searched)?plan.depth_searched:null),
-   budget_ms:ROCO_PLAN_TIMEOUT_MS},
+   budget_ms:ROCO_PLAN_TIMEOUT_MS,
+   engineBudgetMs:Number.isInteger(plan?.budget_ms)?plan.budget_ms:null},
   timeout:{timedOut:searchTimedOut,state,budget_ms:ROCO_PLAN_TIMEOUT_MS,
    engineReported:plan?.timed_out===true},
   notImplemented:receipt.error_type===ROCO_ERROR.NOT_IMPLEMENTED

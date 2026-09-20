@@ -1534,6 +1534,8 @@ export function checkCompanionInformation(text,{parts=[],requireStance=false,kla
 //   · 玩家直接问账本时才讲账本（record 线程原样保留）。
 // 有记录时行为完全不变：接完话落一件真的记得的事（跨局记录 / 本命 / 答对过的题）。
 const PET_NAMES=SPECIES.map(s=>s.name).join('|');
+// 与 pet 线程同源的「具体话题」判据：本命/最喜欢这一类词 + 精灵名本身。
+const PET_TOPIC=new RegExp(`本命|最喜欢|最爱|最常带|主养|${PET_NAMES}`);
 // 战术问句是军师的活：这类句子不走闲聊线程，免得陪练抢答。
 const TACTICAL_HINT=/怎么打|怎么用|怎么配|怎么选|建议|该不该|怎么办|咋办|该怎么|换上|换成|换掉|技能|能量|克制|属性|先手|防御|守住|培养|加点|阵容|战术|值得|哪个好/;
 // 这一句家常话是哪一类：问候、说心情／状态（累／烦／没睡好）、要人陪聊、问陪练自己。
@@ -1724,9 +1726,12 @@ export const CHAT_THREADS=[
   match:new RegExp(`本命|最喜欢|最爱|最常带|哪只|哪一只|你记得.{0,6}(队伍|伙伴|宠物)|${PET_NAMES}`),
   signature:new RegExp(PET_NAMES),
   opener:(f,{message=''}={})=>{
-   const pet=knownPet(f);
+   // 他点了名就聊那只：`namedPet` 优先于「记录里最常出现的那只」。
+   // 原来这里只有 knownPet：玩家说「就聊聊烬尾狐吧」，回的是记录里倒下最多的芽角鹿——
+   // 问 A 答 B，C02 的「只聊精灵」就是被这一处破坏的（判据：回复里必须出现他点的那只）。
+   const pet=namedPet(message)||knownPet(f);
    const total=linesOf(f).length;
-   if(pet&&petFaints(f)>0)return {chat:`${pet}啊。`,memory:`你最近${total}局的记录里，它倒下过${petFaints(f)}次。`};
+   if(pet&&petFaints(f,pet)>0)return {chat:`${pet}啊。`,memory:`你最近${total}局的记录里，它倒下过${petFaints(f,pet)}次。`};
    // 有记录、但这一只一次都没倒下过：**这也是一条真的记录，而且是好消息**。
    // 上一版这里直接 return null，于是玩家问「我的本命是X」会掉回观察通道，
    // 拿到一段与 X 完全无关的统计（「最先倒下的都是Y」）——问 A 答 B 是最伤人的那种冷。
@@ -1734,9 +1739,9 @@ export const CHAT_THREADS=[
    if(!total){const said=namedPet(message);return {chat:said?`${said}啊。`:'你说哪只，我就聊哪只。',memory:null};}
    return null;},
   followup:(f,{message=''}={})=>{
-   const pet=knownPet(f),falls=petFirstFallen(f);
+   const pet=namedPet(message)||knownPet(f),falls=petFirstFallen(f,pet);
    if(pet&&falls)return {chat:`还说${pet}——`,memory:`最先倒下的有${falls.times}次是它，最近一次在第${falls.lastTurn}回合。`};
-   if(pet&&petFaints(f)>0)return {chat:`还说${pet}——`,memory:`它在这${linesOf(f).length}局里一共倒下过${petFaints(f)}次。`};
+   if(pet&&petFaints(f,pet)>0)return {chat:`还说${pet}——`,memory:`它在这${linesOf(f).length}局里一共倒下过${petFaints(f,pet)}次。`};
    if(!linesOf(f).length){const said=namedPet(message)||pet;return {chat:said?`还说${said}——`:'还聊伙伴啊，那我接着说。',memory:null};}
    return null;}},
  {id:'record',
@@ -1774,11 +1779,12 @@ function knownPet(f){
  const top=Object.entries(tally).sort((a,b)=>b[1]-a[1])[0];
  return top?top[0]:null;
 }
-function petAppearances(f){const pet=knownPet(f);return pet?linesOf(f).filter(e=>names(e.faints).includes(pet)).length:0;}
-function petFaints(f){return petAppearances(f);}
+// petName 可选：玩家自己点了名时用他点的那只，没点名才退回「记录里最常出现的那只」。
+function petAppearances(f,petName=null){const pet=petName||knownPet(f);return pet?linesOf(f).filter(e=>names(e.faints).includes(pet)).length:0;}
+function petFaints(f,petName=null){return petAppearances(f,petName);}
 // 它「最先倒下」过几次、最近一次在第几回合——续说那一轮换一件事讲，不重复开场那句。
-function petFirstFallen(f){
- const pet=knownPet(f);
+function petFirstFallen(f,petName=null){
+ const pet=petName||knownPet(f);
  if(!pet)return null;
  const rows=linesOf(f).filter(e=>name(e.firstFallen)===pet);
  if(!rows.length)return null;
@@ -1798,11 +1804,12 @@ function habitLine(f){
 export function chatThread(text='',{noReview=false}={}){
  const t=String(text||'');
  const threads=noReview?CHAT_THREADS.filter(thread=>thread.id!=='record'):CHAT_THREADS;
- // 点了名就聊那只：句子里出现精灵名时，pet 线程优先于泛泛的「聊聊」——
- // 「就聊聊烬尾狐吧」原来落进 self 线程，回的是与烬尾狐无关的「嗯，那就聊」，
- // 而 C02 的「只聊精灵」要的正是接住他点的这一只。心情与战术问句在 chatReply
- // 的更前面就已经让开了（MOOD_LINE / TACTICAL_HINT），所以这一条不会把这两类截走。
- if(t&&new RegExp(PET_NAMES).test(t)&&threads.some(x=>x.id==='pet'))return threads.find(x=>x.id==='pet');
+ // **具体的压过泛泛的**：他点了精灵名、或者问「本命／最常带」，就聊那一只。
+ // 「就聊聊烬尾狐吧」「就聊聊我的本命吧」原来都落进 self 线程（那张表里有「聊聊」），
+ // 回的是与那只精灵无关的「嗯，那就聊」——问 A 答 B，C02 的「只聊精灵」就是被这一处破坏的。
+ // 心情与战术问句在 chatReply 的更前面就已经让开了（MOOD_LINE / TACTICAL_HINT），
+ // 所以这一条只影响「闲聊里他明确说了聊哪只」的那一轮。
+ if(t&&PET_TOPIC.test(t)&&threads.some(x=>x.id==='pet'))return threads.find(x=>x.id==='pet');
  return threads.find(thread=>thread.match.test(t))||null;
 }
 // 上一轮聊的是哪个话题：先看玩家自己那句话，再看陪练的回话。

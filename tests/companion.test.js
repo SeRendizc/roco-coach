@@ -2307,7 +2307,13 @@ test('分享胜利：恭喜落在真实记录上，不复述屏幕，也不空�
  const recent=rememberBattle(memory,win).events.at(-1).time;
  const answer=companion({mode:'camp'},memory,'我赢了！',Date.parse(recent));
  assert.match(answer.text,/拿下了啊/);
- assert(answer.parts.some(p=>p.kind==='memory'),`要有真实记录支撑的那一句：${answer.text}`);
+ // 恭喜里必须有一句落在真实记录上（这条走 shareLine，句子来源标成 memory）。
+ // companion() 的返回包只带证据不带逐句来源，所以逐句来源在这里直接问场景层要。
+ const f=companionFacts(memory,{mode:'camp'},Date.parse(recent));
+ const line=shareLine({...f,sharing:true},Date.parse(recent));
+ assert(line,'真实记录里最后一局是赢的，应当有恭喜句');
+ assert(line.parts.some(p=>p.kind==='memory'),`要有真实记录支撑的那一句：${line.text}`);
+ assert(answer.text.includes(line.text),'模块给玩家的那句与场景层算出来的那句必须同源');
  assert(!SCREEN_ECHO.test(answer.text));
  assert.equal(checkCompanionRestraint(answer.text,{register:answer.register,facts:{allowPast:true}}).valid,true,answer.text);
  assert.equal(repeatedInformation(answer.text).repeated,false);
