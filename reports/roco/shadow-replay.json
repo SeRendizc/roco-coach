@@ -1,0 +1,5009 @@
+{
+ "generated_by": "scripts/roco/shadow-replay.mjs",
+ "arm": "rule",
+ "gateway": null,
+ "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
+ "summary": {
+  "tasks": 288,
+  "passed": 288,
+  "pass_rate": 1,
+  "stopped": {
+   "complete": 264,
+   "receipt-budget": 12,
+   "policy": 12
+  },
+  "latency": {
+   "p50_ms": 0,
+   "p95_ms": 1
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 72,
+    "passed": 72,
+    "pass_rate": 1,
+    "p50_ms": 1,
+    "p95_ms": 1
+   },
+   "roster_constraint": {
+    "total": 24,
+    "passed": 24,
+    "pass_rate": 1,
+    "p50_ms": 1,
+    "p95_ms": 2
+   },
+   "continue_stop": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 1,
+    "p95_ms": 1
+   },
+   "tool_failure": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 0,
+    "p95_ms": 0
+   },
+   "stale_state": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 0,
+    "p95_ms": 1
+   },
+   "evidence_conflict": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 0,
+    "p95_ms": 1
+   },
+   "silence": {
+    "total": 12,
+    "passed": 12,
+    "pass_rate": 1,
+    "p50_ms": 0,
+    "p95_ms": 0
+   },
+   "brief_explain": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 0,
+    "p95_ms": 0
+   }
+  }
+ },
+ "rows": [
+  {
+   "case_id": "rl-pet-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 4
+  },
+  {
+   "case_id": "rl-pet-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-type-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-type-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-type-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rl-learn-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-term-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-term-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-term-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-term-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-term-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-ruleset-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f0-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f0-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f0-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f0-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f1-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rc-eval-f1-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f1-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rc-eval-f1-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f2-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f2-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f2-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f2-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f0-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f0-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f0-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f0-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f1-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f1-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f1-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f1-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f2-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-swap-f2-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f2-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-swap-f2-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-answered-f0-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-answered-f0-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-answered-f0-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-answered-f0-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-answered-f1-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-answered-f1-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-answered-f1-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-answered-f1-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-answered-f2-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-answered-f2-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-answered-f2-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-answered-f2-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-lastturn-f0-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f0-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-lastturn-f0-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f0-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f1-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f1-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f1-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f1-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f2-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f2-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-lastturn-f2-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-lastturn-f2-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-diagnose-f0-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-diagnose-f0-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-diagnose-f0-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-diagnose-f0-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-locked",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-diagnose-f1-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-diagnose-f1-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-diagnose-f1-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-diagnose-f1-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-diagnose-f2-01",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-diagnose-f2-02",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "cs-diagnose-f2-03",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "cs-diagnose-f2-04",
+   "category": "continue_stop",
+   "arm": "rule",
+   "world": "camp-2",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "tf-damage-f0-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f0-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f0-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f0-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f1-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f1-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f1-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f1-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f2-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f2-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f2-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-damage-f2-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f0-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f0-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f0-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f0-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f1-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f1-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f1-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f1-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f2-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f2-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f2-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-plan-f2-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f0-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f0-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f0-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f0-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f1-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f1-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f1-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f1-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f2-01",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f2-02",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f2-03",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "tf-summary-f2-04",
+   "category": "tool_failure",
+   "arm": "rule",
+   "world": "battle-refuse",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f0-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f0-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f0-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f0-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f1-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f1-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f1-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f1-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f2-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f2-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f2-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-plan-f2-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hp-f0-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hp-f0-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hp-f0-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hp-f0-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ss-hp-f1-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hp-f1-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ss-hp-f1-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ss-hp-f1-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hp-f2-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ss-hp-f2-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hp-f2-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hp-f2-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 10
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ss-hint-f0-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f0-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f0-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f0-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f1-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f1-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f1-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f1-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f2-01",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f2-02",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f2-03",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ss-hint-f2-04",
+   "category": "stale_state",
+   "arm": "rule",
+   "world": "battle-stale",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-value-f0-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f0-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-value-f0-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f0-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f1-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-value-f1-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f1-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f1-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f2-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f2-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f2-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "ec-value-f2-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f0-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f0-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f0-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f0-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f1-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f1-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f1-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f1-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f2-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f2-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f2-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-form-f2-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f0-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f0-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f0-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f0-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f1-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f1-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f1-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f1-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f2-01",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f2-02",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f2-03",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "ec-strength-f2-04",
+   "category": "evidence_conflict",
+   "arm": "rule",
+   "world": "camp-conflict",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-submitted-f0-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-submitted-f1-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-submitted-f2-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-quiet-f0-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-quiet-f1-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-quiet-f2-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-noaction-f0-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-noaction-f1-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-noaction-f2-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-refuse-f0-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-refuse-f1-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "si-refuse-f2-01",
+   "category": "silence",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "policy",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f0-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f0-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f0-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f0-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f1-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f1-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f1-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f1-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f2-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f2-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f2-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-defense-f2-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f0-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f0-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f0-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f0-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f1-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f1-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f1-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f1-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f2-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f2-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f2-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-energy-f2-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f0-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f0-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f0-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f0-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-1",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f1-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f1-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f1-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f1-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f2-01",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-mid-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f2-02",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f2-03",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-open-0",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "be-loss-f2-04",
+   "category": "brief_explain",
+   "arm": "rule",
+   "world": "battle-late",
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  }
+ ]
+}

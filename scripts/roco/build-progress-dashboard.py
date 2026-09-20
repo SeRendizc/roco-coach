@@ -235,14 +235,23 @@ ITEMS: List[Dict[str, Any]] = [
     {"id": "W4-04", "title": "Qwen3-4B SFT", "status": NEEDS_HARDWARE,
      "evidence": [], "note": "同 W4-03；另外它依赖 W4-02 的模型候选那一半。"},
     {"id": "W4-05", "title": "同 Agent 回放门禁", "status": PARTIAL,
-     "evidence": ["scripts/roco/verify-agent-trajectories.mjs",
-                  "tests/evals/roco/agent-trajectories.test.js"],
-     "note": "门禁本身已经可用且自己被验证过（两个方向 + 漂移检查）。"
-             "「固定 pipeline / 模型 / SFT」三条 arm 的对比要等有 key 才能真正跑。"},
+     "evidence": ["scripts/roco/shadow-replay.mjs", "docs/roco/SHADOW-REPLAY.md",
+                  "reports/roco/shadow-replay.json", "reports/roco/shadow-replay-local_4b.json",
+                  "tests/evals/shadow-replay.test.js"],
+     "note": "门禁本身已建成并自证：同一任务集（288 条 / 8 类）、同一时代、同一判定器，"
+             "只换 provider。**本轮用本机 Qwen3.5-4B-4bit 实跑**：规则臂 288/288，"
+             "模型臂 **226/288（0.7847）**，逐任务对比退化 62、扳回 0；"
+             "退化**全部集中在两类**——`rules_lookup` 41 条、`roster_constraint` 21 条，"
+             "其余六类与规则臂持平。`invalid-arguments` 86 次。缺的那一半是 DeepSeek 臂"
+             "（要 key）。"},
     {"id": "W5-01", "title": "Model gateway", "status": NOT_STARTED, "evidence": [],
      "note": "未开工。它要连真实模型，和 W4-02 的模型候选同一前置。"},
-    {"id": "W5-02", "title": "Shadow replay", "status": NOT_STARTED, "evidence": [],
-     "note": "未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。"},
+    {"id": "W5-02", "title": "Shadow replay", "status": PARTIAL,
+     "evidence": ["scripts/roco/shadow-replay.mjs", "docs/roco/SHADOW-REPLAY.md",
+                  "tests/evals/shadow-replay.test.js"],
+     "note": "「把候选 provider 在**录制好的任务集**上重放、不与玩家交互地对比」已经可用："
+             "`npm run roco:shadow-replay -- --arm local_4b`。它只跑候选，不改玩家看到的任何东西。"
+             "缺的是真实流量回放（要用线上录制的请求），目前重放的是构造任务集。"},
     {"id": "W5-03", "title": "主动介入规则评分", "status": DONE,
      "evidence": ["src/coach/policy.js", "src/coach/experience.js", "tests/intervention.test.js"],
      "note": "规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。"},

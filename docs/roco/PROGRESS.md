@@ -17,8 +17,8 @@
 | `DONE` | 35 |
 | `NEEDS_HARDWARE` | 2 |
 | `NEEDS_HUMAN` | 1 |
-| `NOT_STARTED` | 6 |
-| `PARTIAL` | 4 |
+| `NOT_STARTED` | 5 |
+| `PARTIAL` | 5 |
 
 ## 逐项
 
@@ -62,9 +62,9 @@
 | W4-02 | 构造 2,000—5,000 条工具轨迹 | `PARTIAL` | `tests/evals/agent-trajectories-v1.jsonl`、`scripts/roco/agent-trajectories.mjs`、`scripts/roco/build-agent-trajectories.mjs`、`scripts/roco/verify-agent-trajectories.mjs`、`docs/roco/AGENT-TRAJECTORIES.md` | 4,536 条 / 12 个世界 / 7 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，判定器两个方向都被测过（正向 648/648、反向 13,656 个变体全挂）。缺的一半是**模型候选**：要 DeepSeek key，本机没有。 |
 | W4-03 | Qwen3-4B profiling | `NEEDS_HARDWARE` | — | 目标机器是 M5 Pro 48GB；本机不是，且用户不租云 GPU。属于硬件阻塞，不是产品决策阻塞。 |
 | W4-04 | Qwen3-4B SFT | `NEEDS_HARDWARE` | — | 同 W4-03；另外它依赖 W4-02 的模型候选那一半。 |
-| W4-05 | 同 Agent 回放门禁 | `PARTIAL` | `scripts/roco/verify-agent-trajectories.mjs`、`tests/evals/roco/agent-trajectories.test.js` | 门禁本身已经可用且自己被验证过（两个方向 + 漂移检查）。「固定 pipeline / 模型 / SFT」三条 arm 的对比要等有 key 才能真正跑。 |
+| W4-05 | 同 Agent 回放门禁 | `PARTIAL` | `scripts/roco/shadow-replay.mjs`、`docs/roco/SHADOW-REPLAY.md`、`reports/roco/shadow-replay.json`、`reports/roco/shadow-replay-local_4b.json`、`tests/evals/shadow-replay.test.js` | 门禁本身已建成并自证：同一任务集（288 条 / 8 类）、同一时代、同一判定器，只换 provider。**本轮用本机 Qwen3.5-4B-4bit 实跑**：规则臂 288/288，模型臂 **226/288（0.7847）**，逐任务对比退化 62、扳回 0；退化**全部集中在两类**——`rules_lookup` 41 条、`roster_constraint` 21 条，其余六类与规则臂持平。`invalid-arguments` 86 次。缺的那一半是 DeepSeek 臂（要 key）。 |
 | W5-01 | Model gateway | `NOT_STARTED` | — | 未开工。它要连真实模型，和 W4-02 的模型候选同一前置。 |
-| W5-02 | Shadow replay | `NOT_STARTED` | — | 未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。 |
+| W5-02 | Shadow replay | `PARTIAL` | `scripts/roco/shadow-replay.mjs`、`docs/roco/SHADOW-REPLAY.md`、`tests/evals/shadow-replay.test.js` | 「把候选 provider 在**录制好的任务集**上重放、不与玩家交互地对比」已经可用：`npm run roco:shadow-replay -- --arm local_4b`。它只跑候选，不改玩家看到的任何东西。缺的是真实流量回放（要用线上录制的请求），目前重放的是构造任务集。 |
 | W5-03 | 主动介入规则评分 | `DONE` | `src/coach/policy.js`、`src/coach/experience.js`、`tests/intervention.test.js` | 规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。 |
 | W5-04 | 主动介入成本敏感分类器 | `PARTIAL` | `docs/roco/W5-04-INTERVENTION-GATE.md`、`docs/roco/W5-04-INTERVENTION-GATE-V2.md`、`scripts/roco/build-roco-intervention-windows.py`、`scripts/roco/train-intervention-model.py`、`src/coach/intervention-model.js`、`tests/evals/intervention-layer.test.js` | 预注册 v2（H1—H8，误报上限改为**绝对值**）→ **手游引擎自己标定**的窗口集 2,544 条（seed family 切分 + family 外 OOD；边际量阈值 0.1465 只在训练侧估）→ 成本敏感分类器 → 只抑制的判定层 → 11 项守卫测试。**全部可判定判据通过**：H1 召回 0.900、H2 误报 0.0000、H3 ECE 0.0465、H4 在阈值 0.74 处 TPR 0.975/FPR 0.0162、H5 family 外 0.9097/0.0023。**判据有牙的证据**：对照臂（去掉边际量特征、与规则同信息）在同一套判据下挂掉 H1/H3/H4/H5。因此判定层获准进入 **shadow 可观测**（跑模型、记账、不改玩家看到的结果)；`on` 仍需真人审阅，尚未获准。 |
 | W5-05 | 陪练盲评 | `NEEDS_HUMAN` | — | 这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。 |
@@ -89,11 +89,11 @@
 - **W4-04 Qwen3-4B SFT**（`NEEDS_HARDWARE`）
   - 同 W4-03；另外它依赖 W4-02 的模型候选那一半。
 - **W4-05 同 Agent 回放门禁**（`PARTIAL`）
-  - 门禁本身已经可用且自己被验证过（两个方向 + 漂移检查）。「固定 pipeline / 模型 / SFT」三条 arm 的对比要等有 key 才能真正跑。
+  - 门禁本身已建成并自证：同一任务集（288 条 / 8 类）、同一时代、同一判定器，只换 provider。**本轮用本机 Qwen3.5-4B-4bit 实跑**：规则臂 288/288，模型臂 **226/288（0.7847）**，逐任务对比退化 62、扳回 0；退化**全部集中在两类**——`rules_lookup` 41 条、`roster_constraint` 21 条，其余六类与规则臂持平。`invalid-arguments` 86 次。缺的那一半是 DeepSeek 臂（要 key）。
 - **W5-01 Model gateway**（`NOT_STARTED`）
   - 未开工。它要连真实模型，和 W4-02 的模型候选同一前置。
-- **W5-02 Shadow replay**（`NOT_STARTED`）
-  - 未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。
+- **W5-02 Shadow replay**（`PARTIAL`）
+  - 「把候选 provider 在**录制好的任务集**上重放、不与玩家交互地对比」已经可用：`npm run roco:shadow-replay -- --arm local_4b`。它只跑候选，不改玩家看到的任何东西。缺的是真实流量回放（要用线上录制的请求），目前重放的是构造任务集。
 - **W5-04 主动介入成本敏感分类器**（`PARTIAL`）
   - 预注册 v2（H1—H8，误报上限改为**绝对值**）→ **手游引擎自己标定**的窗口集 2,544 条（seed family 切分 + family 外 OOD；边际量阈值 0.1465 只在训练侧估）→ 成本敏感分类器 → 只抑制的判定层 → 11 项守卫测试。**全部可判定判据通过**：H1 召回 0.900、H2 误报 0.0000、H3 ECE 0.0465、H4 在阈值 0.74 处 TPR 0.975/FPR 0.0162、H5 family 外 0.9097/0.0023。**判据有牙的证据**：对照臂（去掉边际量特征、与规则同信息）在同一套判据下挂掉 H1/H3/H4/H5。因此判定层获准进入 **shadow 可观测**（跑模型、记账、不改玩家看到的结果)；`on` 仍需真人审阅，尚未获准。
 - **W5-05 陪练盲评**（`NEEDS_HUMAN`）

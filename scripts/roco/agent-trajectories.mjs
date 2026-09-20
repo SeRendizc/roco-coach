@@ -484,6 +484,102 @@ export function nameInMessage(message) {
   return KNOWN_NAMES.find((item) => String(message).includes(item)) || null;
 }
 
+/**
+ * `local_4b`：让**本机的小模型**真的选工具（W4-05 / W5-02 的同 Agent 回放门禁）。
+ *
+ * 与其它 arm 的区别：那几支都是**写在代码里的规则**，这一支是模型。
+ * 它存在的意义是可替换性——同一个任务集、同一套判据、同一个判定器，
+ * 把「谁在选工具」换掉再跑一遍，就能回答「换模型之后哪些任务退化」。
+ *
+ * 事实边界（本轮之前已经踩过一次）：模型的输出**只**用来选工具，不能当事实。
+ * 它产出的 `args` 会照常走 `validToolArgs` 与真实引擎；不合法就是 `invalid-arguments`，
+ * 与规则臂同一条路径、同一套记账。
+ *
+ * `ask` 是注入的：生产里它是 `src/coach/local-model.js` 的网关客户端；
+ * 测试里可以塞一个假函数，于是这一支**不需要模型在线**也能测它的失败路径。
+ * 没有 `ask` 时这一支直接拒绝执行，而不是静默退回规则。
+ */
+export const LOCAL_TOOL_SYSTEM = [
+  '你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。',
+  '可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、',
+  'compare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、',
+  'read_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。',
+  '需要查证时输出 {"tool":"工具名","args":{...}}；证据已经足够时输出 {"stop":true}。',
+  '**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。',
+  '查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，',
+  '并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。',
+  '参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。',
+].join('');
+
+export function localModelPlanner(task, hints, {ask, system = LOCAL_TOOL_SYSTEM, maxTokens = 96, timeoutMs = 8000} = {}) {
+  if (typeof ask !== 'function') throw new Error('localModelPlanner 需要注入 ask（没有它就不是模型臂）');
+  let step = 0;
+  let decided = null;
+  const prompt = () => JSON.stringify({
+    message: task.message,
+    screen: hints.mode === 'camp' ? 'camp' : 'battle',
+    tools: Object.keys(TOOL_CONTRACTS),
+    hints: {
+      state_version: hints.state_version,
+      ...(hints.locked_pet ? {locked_pet: hints.locked_pet} : {}),
+      ...(hints.team ? {team: hints.team} : {}),
+      ...(hints.planner_margin !== undefined ? {planner_margin: hints.planner_margin} : {}),
+    },
+    receipts: decided,
+  });
+  return async () => {
+    step += 1;
+    // 只问一次：这一步测的是「模型一次能不能选对」，不是多轮自我修正。
+    // 多轮会让它有机会靠重试蒙对，混淆「选得准」与「试得多」。
+    if (step > 1) return {stop: true};
+    let text = null;
+    try {
+      const reply = await ask({system, prompt: prompt(), maxTokens, timeoutMs, temperature: 0});
+      text = typeof reply === 'string' ? reply : reply?.text ?? null;
+    } catch (error) {
+      decided = {raw: null, error: error?.code || 'ask-failed'};
+      return {stop: true};
+    }
+    const parsed = extractFirstJson(text);
+    decided = {raw: String(text ?? '').slice(0, 200), parsed};
+    if (!parsed || typeof parsed !== 'object' || parsed.stop === true) return {stop: true};
+    if (typeof parsed.tool !== 'string') return {stop: true};
+    const args = (parsed.args && typeof parsed.args === 'object' && !Array.isArray(parsed.args))
+      ? parsed.args : {};
+    // `state_version` 由**运行时**提供，不采信模型编的那个：
+    // 状态版本是权威量，让模型改它等于让它自己给自己发过期豁免。
+    const withVersion = TOOL_CONTRACTS[parsed.tool]?.arguments?.state_version !== undefined
+      ? {...args, state_version: hints.state_version} : args;
+    return {tool: parsed.tool, args: withVersion};
+  };
+}
+
+/**
+ * 从模型输出里抠出第一个 JSON 对象；抠不出来返回 null。
+ *
+ * 与 `src/coach/local-model.js` 的 `extractJson` 是**同一套判据**，但这里刻意各写一份：
+ * 那个模块 import 了 `node:child_process`，把它拖进这个纯评测脚本会让
+ * 「评测能不能跑」依赖「本机有没有那个子进程依赖」。两边是否漂移由
+ * `tests/evals/agent-trajectories.test.js` 直接比对两个函数的输出来守。
+ */
+export function extractFirstJson(text) {
+  const raw = String(text ?? '');
+  const start = raw.indexOf('{');
+  if (start === -1) return null;
+  let depth = 0;
+  for (let index = start; index < raw.length; index += 1) {
+    const char = raw[index];
+    if (char === '{') depth += 1;
+    else if (char === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        try { return JSON.parse(raw.slice(start, index + 1)); } catch { return null; }
+      }
+    }
+  }
+  return null;
+}
+
 /** 队伍/规划类参数一律丢掉——用来证明判定器真的在检查参数，不是只看工具名。 */
 export function dropStructuredArgs(planner) {
   return async (payload) => {

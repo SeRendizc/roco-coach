@@ -9,9 +9,9 @@
   ],
   "counts": {
     "DONE": 35,
-    "PARTIAL": 4,
+    "PARTIAL": 5,
     "NEEDS_HARDWARE": 2,
-    "NOT_STARTED": 6,
+    "NOT_STARTED": 5,
     "NEEDS_HUMAN": 1
   },
   "mvp_total": 30,
@@ -863,17 +863,32 @@
       "title": "同 Agent 回放门禁",
       "status": "PARTIAL",
       "evidence": [
-        "scripts/roco/verify-agent-trajectories.mjs",
-        "tests/evals/roco/agent-trajectories.test.js"
+        "scripts/roco/shadow-replay.mjs",
+        "docs/roco/SHADOW-REPLAY.md",
+        "reports/roco/shadow-replay.json",
+        "reports/roco/shadow-replay-local_4b.json",
+        "tests/evals/shadow-replay.test.js"
       ],
-      "note": "门禁本身已经可用且自己被验证过（两个方向 + 漂移检查）。「固定 pipeline / 模型 / SFT」三条 arm 的对比要等有 key 才能真正跑。",
+      "note": "门禁本身已建成并自证：同一任务集（288 条 / 8 类）、同一时代、同一判定器，只换 provider。**本轮用本机 Qwen3.5-4B-4bit 实跑**：规则臂 288/288，模型臂 **226/288（0.7847）**，逐任务对比退化 62、扳回 0；退化**全部集中在两类**——`rules_lookup` 41 条、`roster_constraint` 21 条，其余六类与规则臂持平。`invalid-arguments` 86 次。缺的那一半是 DeepSeek 臂（要 key）。",
       "evidence_checked": [
         {
-          "path": "scripts/roco/verify-agent-trajectories.mjs",
+          "path": "scripts/roco/shadow-replay.mjs",
           "exists": true
         },
         {
-          "path": "tests/evals/roco/agent-trajectories.test.js",
+          "path": "docs/roco/SHADOW-REPLAY.md",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/shadow-replay.json",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/shadow-replay-local_4b.json",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/shadow-replay.test.js",
           "exists": true
         }
       ],
@@ -891,10 +906,27 @@
     {
       "id": "W5-02",
       "title": "Shadow replay",
-      "status": "NOT_STARTED",
-      "evidence": [],
-      "note": "未开工。W4-02 的离线回放是它的雏形，但还没有影子流量。",
-      "evidence_checked": [],
+      "status": "PARTIAL",
+      "evidence": [
+        "scripts/roco/shadow-replay.mjs",
+        "docs/roco/SHADOW-REPLAY.md",
+        "tests/evals/shadow-replay.test.js"
+      ],
+      "note": "「把候选 provider 在**录制好的任务集**上重放、不与玩家交互地对比」已经可用：`npm run roco:shadow-replay -- --arm local_4b`。它只跑候选，不改玩家看到的任何东西。缺的是真实流量回放（要用线上录制的请求），目前重放的是构造任务集。",
+      "evidence_checked": [
+        {
+          "path": "scripts/roco/shadow-replay.mjs",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/SHADOW-REPLAY.md",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/shadow-replay.test.js",
+          "exists": true
+        }
+      ],
       "evidence_missing": []
     },
     {
