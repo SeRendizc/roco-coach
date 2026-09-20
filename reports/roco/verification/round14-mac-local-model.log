@@ -17,3 +17,17 @@ OK (skipped=1)
 ℹ fail 0
 ℹ pass 10
 ℹ fail 0
+--- test:unit 最终（含 21 项本地模型 + 1 项 models/ 内容守卫）
+ℹ tests 453
+ℹ pass 453
+ℹ fail 0
+ℹ skipped 0
+--- model:bench 复跑
+提示集 8 次调用；拿到回答 8，失败 0
+首 token p50/p95 = 214.5/271.9 ms
+总延迟 p50/p95 = 366.3/439.5 ms
+吞吐 p50 = 32.92 tok/s；峰值内存 2.51 GB
+结构化合法率 = 1（8/8）
+按类别：{"route":{"runs":4,"legal":4,"failures":0},"short":{"runs":2,"legal":2,"failures":0},"refuse":{"runs":2,"legal":2,"failures":0}}
+--- gateway health
+ok True ready True p50/p95 362.9 1621.7 peak 2.51
