@@ -236,8 +236,18 @@ ITEMS: List[Dict[str, Any]] = [
     {"id": "W5-03", "title": "主动介入规则评分", "status": DONE,
      "evidence": ["src/coach/policy.js", "src/coach/experience.js", "tests/intervention.test.js"],
      "note": "规则版已在链路里；W5-04 要做的是**替换它的一部分**，不是从零建。"},
-    {"id": "W5-04", "title": "主动介入成本敏感分类器", "status": NOT_STARTED, "evidence": [],
-     "note": "先建标签扩充 + 评测闭环（`scripts/roco/` 下还缺），再谈训练；硬门控不变。"},
+    {"id": "W5-04", "title": "主动介入成本敏感分类器", "status": PARTIAL,
+     "evidence": ["docs/roco/W5-04-INTERVENTION-GATE.md",
+                  "scripts/roco/build-intervention-windows.mjs",
+                  "scripts/roco/train-intervention-model.py",
+                  "src/coach/intervention-model.js",
+                  "tests/evals/intervention-layer.test.js"],
+     "note": "预注册 → 窗口集 30 条扩到 3,740 条（seed family 切分 + family 外 OOD）→ "
+             "成本敏感分类器 → 只抑制的判定层（默认关闭、可回滚）→ 10 项守卫测试，已全部落地。"
+             "**但门槛结果是 `gate_failed`**：G1 召回 / G2 误报 / G5 family 外通过，"
+             "G3 校准（ECE 0.1546 > 0.10）与 G4 阈值稳健未过。"
+             "原因是结构性的：标签依赖决策后才有的分差，特征只能用决策前的量。"
+             "因此判定层**不进入产品路径**，规则评分仍是默认。"},
     {"id": "W5-05", "title": "陪练盲评", "status": NEEDS_HUMAN, "evidence": [],
      "needs": "NEEDS_HUMAN：3—5 位真人玩家，对陪练回复做盲评打分（同一条回复随机标成不同来源）",
      "note": "这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。"},
