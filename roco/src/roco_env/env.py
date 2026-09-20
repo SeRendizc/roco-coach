@@ -111,7 +111,11 @@ def reset(
     if len(enemy) != 3:
         raise ValueError("对手也必须是 3 只")
 
-    problems = validate_team(rs, team, loadouts)
+    # 配招要**同时**对双方校验：`loadouts` 是一份合并的 {pet_id: [...]}，
+    # 里面有对手那三只的配招。只按我方队伍校验会把它报成
+    # 「配招提到了不在队伍里的 pet_xxx」——记录里带着两边配招时就会炸
+    # （做 E04 的回放测试时撞出来的）。
+    problems = validate_team(rs, team, loadouts, also_in=list(enemy))
     if problems:
         raise ValueError("队伍不合法：" + "；".join(problems))
 
@@ -207,11 +211,17 @@ class _EmptyLearnset:
 _EMPTY = _EmptyLearnset()
 
 
-def validate_team(rs: Ruleset, team: Sequence[str], loadouts: Optional[Dict[str, Sequence[str]]] = None) -> List[str]:
+def validate_team(rs: Ruleset, team: Sequence[str],
+                  loadouts: Optional[Dict[str, Sequence[str]]] = None,
+                  also_in: Optional[Sequence[str]] = None) -> List[str]:
     """校验队伍与配招，返回问题列表（空 = 合法）。
 
     配招规则来自 M1 的数据：技能必须在该精灵的学习表里。
     「6 选 4」的形态属于 UI 约定，本函数只查**可学性**。
+
+    `also_in` 是「不在 team 里、但配招合法」的精灵 id（典型是**对手**那三只）：
+    `loadouts` 常是一份合并了双方的 dict，只按我方队伍校验会把对手配招
+    误报成「提到了不在队伍里的 pet」。
     """
     problems: List[str] = []
     if len(team) != 3:
@@ -222,8 +232,9 @@ def validate_team(rs: Ruleset, team: Sequence[str], loadouts: Optional[Dict[str,
         if pid not in rs.pets:
             problems.append(f"未知精灵 {pid}")
     if loadouts:
+        allowed = set(team) | set(also_in or ())
         for pid, sids in loadouts.items():
-            if pid not in team:
+            if pid not in allowed:
                 problems.append(f"配招提到了不在队伍里的 {pid}")
                 continue
             for sid in sids:
@@ -560,10 +571,10 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
     #
     # 现在：己方物攻增益放大攻击面板；对手物防增减缩放防御面板；
     # 双方攻防一起过一遍 `ability_level`（社区口径，未核验 MC-010）。
-    # 面板值保持**未加成**的原始面板：攻防增减全部由 `ability` 承担。
-    # （两边同时乘会把增益约掉——`panel_value(×2)` 与 `ability_level(÷2)` 精确抵消，
-    #  表现是「加了 buff 伤害一点没变」，而且不报错。）
-    ability = fx.combined_ability_level(dict(pet.buffs), dict(defender.buffs))
+    # 面板值保持**未加成**的原始面板：攻防增减全部由这一个乘区承担，**只调一次**。
+    # （两边同时乘会把增益精确抵消——`buff_damage_multiplier` 的 docstring 里写了这条，
+    #  测试里也留了反例。）
+    ability = fx.buff_damage_multiplier(dict(pet.buffs), dict(defender.buffs))
 
     # 全技能威力增减（`parse.STAT_KEYS` 的 "全技能威力"）以及特性写的元素系威力。
     # `power_multiplier` 是**乘区**，所以每一项都折成系数再相乘。
@@ -863,14 +874,25 @@ def deserialize(d: Dict[str, Any], rs: Optional[Ruleset] = None) -> GameState:
 def replay(record: Dict[str, Any], rs: Optional[Ruleset] = None) -> GameState:
     """按记录重放一局，返回最终状态。
 
-    记录格式：{"team": [...], "enemy_team": [...], "seed": int, "actions": [[a, b], ...]}
+    记录格式::
+
+        {"team": [...], "enemy_team": [...], "seed": int,
+         "loadouts": {"pet_id": ["skill_id", ...]},   # 可选，但**必须**带上才能回放非规范配招
+         "actions": [[a, b], ...]}
+
     每一对是双方同一回合的联合动作。
 
-    回放可复现的前提是：本引擎里所有随机都来自 (seed, turn)，
-    没有任何地方读时钟或全局随机。
+    回放可复现的前提有两条：
+
+    1. 本引擎里所有随机都来自 (seed, turn)，没有任何地方读时钟或全局随机；
+    2. **配招要一起带上。** 合法动作是按配招枚举的（一只精灵只带 4 个技能），
+       所以用非规范配招打出来的记录，若回放时不传 `loadouts`，
+       `reset()` 会退回规范配招，那个技能就不再合法，回放直接抛
+       「行动不合法」。这个 bug 是我写「状态技能增减能否重放」的测试时撞出来的。
     """
     rs = rs or load_ruleset()
-    state = reset(record["team"], record.get("enemy_team"), seed=record["seed"], rs=rs)
+    state = reset(record["team"], record.get("enemy_team"), seed=record["seed"], rs=rs,
+                  loadouts=record.get("loadouts"))
     for pair in record["actions"]:
         if state.result:
             break

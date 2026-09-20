@@ -289,7 +289,13 @@ async function main() {
     pass: results.checks.filter((c) => c.pass).length,
     fail: results.checks.filter((c) => !c.pass).length,
   };
-  writeFileSync(join(OUT, 'browser-acceptance.json'), JSON.stringify(results, null, 2) + '\n');
+  // 分两份写：稳定的验收结论入库可 diff，每次运行都变的（时间戳、随机端口）另存一份。
+  // 混在一起写会让每次跑完 git 都显示「报告被改了」，久了就没人看它的 diff。
+  const volatile = {started_at: results.started_at, finished_at: results.finished_at, base: results.base};
+  const stable = {...results};
+  delete stable.started_at; delete stable.finished_at; delete stable.base;
+  writeFileSync(join(OUT, 'browser-acceptance.json'), JSON.stringify(stable, null, 2) + '\n');
+  writeFileSync(join(OUT, 'browser-acceptance-run.json'), JSON.stringify(volatile, null, 2) + '\n');
 
   log(`checks ${results.summary.pass}/${results.summary.total} pass`);
   for (const c of results.checks) log(`  ${c.pass ? '✔' : '✖'} ${c.name}`);

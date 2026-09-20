@@ -203,9 +203,16 @@ async function main(){
  check('页面上不出现真实对局 seed 或私有状态',!/"seed"\s*:/.test(pageText)&&!/replace_queue/.test(pageText));
  check('控制台没有报错',consoleErrors.length===0&&pageErrors.length===0,JSON.stringify([...consoleErrors,...pageErrors].slice(0,3)));
 
- const report={started_at:new Date().toISOString(),url:base+'roco.html',checks,screenshots:shots,
-  console_errors:consoleErrors,page_errors:pageErrors,passed:checks.filter((c)=>c.ok).length,failed:checks.filter((c)=>!c.ok).length};
- writeFileSync(join(OUT,'demo-acceptance.json'),JSON.stringify(report,null,2));
+ // 报告分两份写，这是刻意的：
+ //   · demo-acceptance.json       —— **稳定**的验收结论（检查项与截图名），入库，可 diff；
+ //   · demo-acceptance-run.json   —— 每次运行都变的（时间戳、随机端口），**不入库**。
+ // 混在一起写会让每次跑完 git 都显示「报告被改了」，久了就没人看它的 diff。
+ const checksOut={checks,screenshots:shots,console_errors:consoleErrors,page_errors:pageErrors,
+  passed:checks.filter((c)=>c.ok).length,failed:checks.filter((c)=>!c.ok).length};
+ const runOut={started_at:new Date().toISOString(),url:base+'roco.html'};
+ writeFileSync(join(OUT,'demo-acceptance.json'),JSON.stringify(checksOut,null,2)+'\n');
+ writeFileSync(join(OUT,'demo-acceptance-run.json'),JSON.stringify(runOut,null,2)+'\n');
+ const report={...checksOut,...runOut};
  log(`结果：${report.passed} 通过 / ${report.failed} 失败；报告见 reports/roco/demo-acceptance/`);
  if(keepOpen){log('--keep-open：进程保持，按 Ctrl+C 退出');return;}
  await close();kill();ws.close();

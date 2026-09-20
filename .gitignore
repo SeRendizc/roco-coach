@@ -27,5 +27,12 @@ data/roco/raw/NRC_AI.tar.gz
 .dsh-pushplus-token
 reports/roco/notify-log.jsonl
 
+# 浏览器验收：结论入库，**每次运行都变的那一份**与截图不入库。
+# 截图每次都是新文件（图片字节不同），留在库里会让 git 每次都被「改了」淹没。
+reports/roco/acceptance/*-run.json
+reports/roco/acceptance/*.png
+reports/roco/demo-acceptance/*-run.json
+reports/roco/demo-acceptance/*.png
+
 # v0.1 一键启动产生的检出
 .v0.1-run/

@@ -71,6 +71,10 @@ class Parsed:
     respond_clause: Optional[str] = None      # 「应对攻击：」后面的原文
     unparsed: List[str] = field(default_factory=list)   # 没读懂的原文片段
     fully_supported: bool = False
+    #: 描述里没有任何机制、且是带静态威力的攻击技能 —— 走 damage 路径即可，
+    #: 属于「完全支持」但不产生 effects。单独标出来是为了让报告能区分
+    #: 「靠解析器支持」与「靠伤害路径支持」。
+    plain_attack: bool = False
 
     def kinds(self) -> List[str]:
         return [e.kind for e in self.effects]
@@ -88,6 +92,18 @@ _DRAIN_ENERGY = re.compile(r"偷取敌方\s*(\d+)\s*能量")
 _ESCAPE = re.compile(r"(脱离|返场)")
 _WEATHER = re.compile(r"将天气改为([\u4e00-\u9fa5]+)")
 _RESPOND = re.compile(r"(应对(?:攻击|状态|防御))[：:](.+?)(?=。|$)")
+
+
+#: 纯伤害技能描述里**不该**出现的机制词。出现任何一个，它就不是「纯伤害」，
+#: 必须走解析路径或如实标未覆盖。
+_EXTRA_MECHANIC = (
+    "回复", "获得", "消耗", "连击", "印记", "蓄力", "驱散", "免疫", "附带",
+    "每", "若", "回合", "层", "影响", "奉献", "随机", "变",
+)
+
+
+def _has_extra_mechanic(desc: str) -> bool:
+    return any(word in desc for word in _EXTRA_MECHANIC)
 
 
 def parse_skill(skill) -> Parsed:
@@ -165,7 +181,24 @@ def parse_skill(skill) -> Parsed:
         if marker in desc and not any(marker in e.evidence for e in out.effects):
             out.unparsed.append(f"{marker}（出现在：{desc[:40]}）")
 
-    out.fully_supported = bool(out.effects) and not out.unparsed
+    # 「完全支持」有两种来源，以前只认第一种，把第二种整类算成「未覆盖」：
+    #   ① 描述里有机制、且全部被解析出来（`out.effects` 非空、`out.unparsed` 为空）；
+    #   ② **纯伤害技能**：描述只说「对敌方精灵造成物理/魔法伤害」，
+    #      没有任何机制要解析 —— 它走的是 damage 路径（静态威力 + 属性相性 + 本系加成），
+    #      引擎实际算得出来。把它算成 unsupported 会让覆盖率严重低估，
+    #      也会让工具的 coverage 字段对玩家说假话。
+    #   注意「造成物伤，自己回复1能量」**不**属于第二种：描述里有机制（回能），
+    #   而回能没有被解析（`_DRAIN_ENERGY` 只认「吸取对方能量」），所以它仍然是
+    #   部分/未覆盖 —— 这一条区别是有测试钉住的。
+    plain_attack = (
+        not out.effects
+        and not out.unparsed
+        and getattr(skill, "is_attack", False)
+        and getattr(skill, "power", None) is not None
+        and not _has_extra_mechanic(desc)
+    )
+    out.fully_supported = (bool(out.effects) and not out.unparsed) or plain_attack
+    out.plain_attack = plain_attack
     return out
 
 

@@ -26,6 +26,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 from roco_env import data as rdata          # noqa: E402
 from roco_env import env as env_mod         # noqa: E402
+from roco_env import effects as fx          # noqa: E402
 from roco_env.service import (              # noqa: E402
     PRIVATE_TRUST_DOMAIN,
     RocoService,
@@ -331,75 +332,234 @@ class TestPlanCoverageIsHonest(unittest.TestCase):
             self.assertIn(key, payload)
 
 
-class TestStatChangesReachTheDamage(unittest.TestCase):
-    """状态技能的属性增减必须真的进伤害。
+class TestBuffDamageWiring(unittest.TestCase):
+    """属性增减**有没有接进伤害**（程序不变量），以及**倍率是不是手游真值**（不知道）。
 
-    两个**真实而且是静默的** bug（F02 之后我自己在给 B/C 组接特性时撞出来的）：
+    监工复核时的硬性要求，这一组按它写：
 
-      ① 伤害计算里 `ability_level` 与 `power_multiplier` 是**硬编码 1.0**，
-         于是「自己获得物攻+60%」写进 `pet.buffs` 之后没有任何作用 ——
-         事件留着、数值上什么都没发生。不报错、不留痕。
-      ② `_defense_reduction` 写在 PetState 上、跨回合存活，回合开始从不清零：
-         第 1 回合用过防御之后，**之后每一回合**受到的伤害都被再减一次，
-         而且攻方自己行动时读的是它上一回合的减伤。
+      已证实、可以断言的是**程序接线与生命周期**：
+        · 零 buff 与旧基线逐字节一致（改了公式不许悄悄挪动基线）；
+        · 正/负增减**单调**；
+        · 增减只生效**一次**（重复计入会让倍率平方）；
+        · 防御减伤只在声明的回合窗口内生效、下一回合清除；
+        · 按动作记录 replay 完全确定（同一记录两次结果一致）；
+        · 事件仍然带 `formula_verified: false`。
 
-    这一组用「纯攻击对纯攻击」把防御/状态技能排除掉，只量属性增减的倍率。
+      **不能**断言成「手游真值」的是：
+        · 「+100% 恰好等于 ×2」；
+        · 攻防增减是相加还是相乘；
+        · 减伤百分比与结算时机。
+      这些属 `COMMUNITY_HYPOTHESIS_V1`（MC-010/011/020），没有一手来源。
+      所以下面的断言分成两组：一组只用**关系**（单调、一次、清零），
+      另一组显式对齐**社区假设模型**，并在名字里写明它验证的是模型自洽而非官方机制。
     """
 
-    @classmethod
-    def setUpClass(cls):
-        cls.rs = RS
-        cls.team = TEAM
+    def setUp(self):
+        self.rs = RS
 
     def _pure(self, st, side):
         return [a for a in env_mod.legal_actions(st, self.rs, side)
                 if a.kind == "skill" and not self.rs.skills[a.skill_id].is_status
                 and not self.rs.skills[a.skill_id].is_defense]
 
-    def _player_damage(self, *, atk=0, foe_def=0, power=0, foe_atk=0, seed=11):
-        st = env_mod.reset(self.team, self.team, seed=seed, rs=self.rs)
-        if atk:
-            st.player.field_pet.buffs["atk"] = atk
-        if power:
-            st.player.field_pet.buffs["power"] = power
-        if foe_def:
-            st.enemy.field_pet.buffs["def"] = foe_def
-        if foe_atk:
-            st.enemy.field_pet.buffs["atk"] = foe_atk
+    def _state(self, **buffs):
+        st = env_mod.reset(TEAM, TEAM, seed=11, rs=self.rs)
+        for key, value in buffs.items():
+            if key.startswith("foe_"):
+                st.enemy.field_pet.buffs[key[4:]] = value
+            else:
+                st.player.field_pet.buffs[key] = value
+        return st
+
+    def _player_damage(self, st):
         env_mod.step_joint(st, self.rs, self._pure(st, "player")[0], self._pure(st, "enemy")[0])
-        hits = [e.detail["damage"] for e in st.events
-                if e.kind == "damage" and e.detail.get("side") == "player"]
+        hits = [e for e in st.events if e.kind == "damage" and e.detail.get("side") == "player"]
         self.assertTrue(hits, "纯攻击对纯攻击必须产生一次我方伤害事件")
-        return hits[0]
+        return hits[0].detail
 
-    def test_attack_buff_multiplies_damage(self):
-        base = self._player_damage()
-        self.assertEqual(self._player_damage(atk=100), base * 2, "物攻+100% 应当把伤害翻倍")
-        self.assertEqual(self._player_damage(atk=60), int(base * 1.6), "物攻+60% 应当 ×1.6")
+    # ── 组 ①：程序接线与生命周期（这些是事实，可以强断言）──────────────
 
-    def test_foe_defense_buff_divides_damage(self):
-        base = self._player_damage()
-        self.assertEqual(self._player_damage(foe_def=50), int(base / 1.5), "对方物防+50% 应当把伤害压到 2/3")
+    def test_zero_buff_keeps_the_old_baseline(self):
+        """没有任何增减时，伤害必须与「接线之前的历史基线」一致。
 
-    def test_power_buff_multiplies_damage(self):
-        base = self._player_damage()
-        self.assertEqual(self._player_damage(power=30), int(base * 1.3), "全技能威力+30% 应当 ×1.3")
+        基线值 130 是从**接线之前的代码**上跑出来的（`诡刺` 40 威力、
+        属性 ×2、本系 ×1.5、面板 210.7 对 174.4）。它记在这里的意义是：
+        改动只许在「有 buff」时生效，不许把零 buff 的基线一起挪走。
+        """
+        detail = self._player_damage(self._state())
+        self.assertEqual(detail["damage"], 130, "零 buff 的基线被动过了")
+        self.assertEqual(detail["damage_model"], "community-hypothesis-v1")
+        self.assertIs(detail["formula_verified"], False, "伤害公式仍未核验，这个标记不能变成 true")
 
-    def test_foe_attack_buff_does_not_change_my_damage(self):
-        base = self._player_damage()
-        self.assertEqual(self._player_damage(foe_atk=100), base,
-                         "对手的物攻增益不该影响我打它的伤害（算错方向会在这里红）")
+    def test_buff_effects_are_monotone(self):
+        base = self._player_damage(self._state())["damage"]
+        up = self._player_damage(self._state(atk=60))["damage"]
+        up_more = self._player_damage(self._state(atk=120))["damage"]
+        down = self._player_damage(self._state(atk=-30))["damage"]
+        self.assertGreater(up, base)
+        self.assertGreater(up_more, up)
+        self.assertLess(down, base)
+        # 守方物防：升防伤害更低、降防伤害更高
+        guarded = self._player_damage(self._state(foe_def=50))["damage"]
+        exposed = self._player_damage(self._state(foe_def=-40))["damage"]
+        self.assertLess(guarded, base)
+        self.assertGreater(exposed, base)
 
-    def test_negative_buff_lowers_damage(self):
-        base = self._player_damage()
-        self.assertLess(self._player_damage(atk=-30), base, "物攻-30% 必须让伤害变低")
+    def test_buff_is_applied_exactly_once(self):
+        """增益只许进公式一次。
 
-    def test_defense_reduction_only_lasts_the_turn_it_was_used(self):
-        """防御减伤不许跨回合残留。"""
-        st = env_mod.reset(self.team, self.team, seed=11, rs=self.rs)
-        me = st.player.field_pet
-        setattr(me, "_defense_reduction", 0.7)
-        # 推进一回合：回合开始时必须被清零
+        判据：把伤害拆回「未加成面板」再乘上模型自己的预言系数，
+        应当等于实际伤害。若增益被算了两次，实际值会是预言的平方量级。
+        """
+        st = self._state(atk=100)
+        detail = self._player_damage(st)
+        predicted_multiplier = fx.buff_damage_multiplier({"atk": 100}, {})
+        baseline = self._player_damage(self._state())["damage"]
+        self.assertAlmostEqual(detail["damage"] / baseline, predicted_multiplier, delta=0.02,
+                               msg="实际倍率与模型预言不符——说明增益被算了不止一次")
+        self.assertAlmostEqual(detail["damage"] / baseline, 2.0, delta=0.02,
+                               msg="社区假设模型下 +100% 预言 ×2（**这是假设，不是手游真值**）")
+
+    def test_opponent_own_buffs_do_not_change_my_damage(self):
+        base = self._player_damage(self._state())["damage"]
+        self.assertEqual(self._player_damage(self._state(foe_atk=100))["damage"], base,
+                         "对手的物攻增益不该影响我打它的伤害（方向写错会在这里红）")
+
+    def test_defense_reduction_only_lasts_the_declared_turn(self):
+        """防御减伤只在使用的那个回合有效，下一回合必须清零。
+
+        这里**不**断言减伤的具体比例（那是未核验的游戏语义），
+        只断言「上一回合设进去的值不会活到下一回合」这个生命周期不变量。
+        """
+        st = self._state()
+        setattr(st.player.field_pet, "_defense_reduction", 0.7)
         env_mod.step_joint(st, self.rs, self._pure(st, "player")[0], self._pure(st, "enemy")[0])
         self.assertEqual(getattr(st.player.field_pet, "_defense_reduction", 0.0), 0.0,
-                         "上一回合的防御减伤必须在新回合开始时清零，否则后续每一击都被减伤")
+                         "上一回合的防御减伤活到了下一回合")
+
+    def test_replay_is_deterministic_through_the_real_record_format(self):
+        """按动作记录 replay 必须完全确定，且回放出来的伤害同样带未核验标记。
+
+        **不在这里手工设 buff。** `replay` 是从 `reset(seed)` 重新开始的，
+        只重放记录里的**动作**；手工预置的状态不在记录里，回放自然对不上
+        （我第一版就是手工设 buff 再断言事件一致，红得很对：那不是 replay 的输入）。
+        属性增减的正确来源是**状态技能**，它会作为动作进记录，所以能正常重放。
+        """
+        actions = []
+        st = env_mod.reset(TEAM, TEAM, seed=11, rs=self.rs)
+        for _ in range(6):
+            if st.result:
+                break
+            mine = self._pure(st, "player")
+            theirs = self._pure(st, "enemy")
+            if not mine or not theirs:
+                break
+            actions.append([mine[0].to_dict(), theirs[0].to_dict()])
+            env_mod.step_joint(st, self.rs, mine[0], theirs[0])
+        self.assertTrue(actions, "至少要推进一回合")
+        record = {"team": list(TEAM), "enemy_team": list(TEAM), "seed": 11,
+                  "loadouts": {k: list(v) for k, v in st.player.loadouts.items()},
+                  "actions": actions}
+        first = env_mod.replay(record, self.rs)
+        second = env_mod.replay(record, self.rs)
+        self.assertEqual(env_mod.serialize(first), env_mod.serialize(second),
+                         "同一记录回放两次结果不一致")
+        self.assertEqual([e.to_dict() for e in first.events], [e.to_dict() for e in st.events],
+                         "回放的事件序列与原局不一致")
+        for event in first.events:
+            if event.kind == "damage":
+                self.assertIs(event.detail.get("formula_verified"), False,
+                              "回放出来的伤害事件也必须带未核验标记")
+
+    def test_status_skill_buff_reaches_damage_and_survives_replay(self):
+        """状态技能写的属性增减：既进伤害，也能被回放。
+
+        用**配招**把「力量增效」（自己获得物攻+100%，能耗 1）放进队伍。
+        直接改 `pet.buffs` 不行：`replay` 从 `reset(seed)` 重新开始，
+        手工预置的状态不在记录里（我第一版就是这么写的，红得对）。
+        """
+        loadouts = {TEAM[0]: ["skill_000271"] + [s for s in self.rs.candidate_moveset(TEAM[0])
+                                                  if s != "skill_000271"][:3]}
+        st = env_mod.reset(TEAM, TEAM, seed=3, rs=self.rs, loadouts=loadouts)
+        buff_action = [a for a in env_mod.legal_actions(st, self.rs, "player")
+                       if a.skill_id == "skill_000271"]
+        self.assertTrue(buff_action, "力量增效（能耗 1）在开局就该是合法动作")
+        enemy_action = self._pure(st, "enemy")[0]
+        env_mod.step_joint(st, self.rs, buff_action[0], enemy_action)
+        self.assertEqual(st.player.field_pet.buffs.get("atk"), 100,
+                         "状态技能写的物攻+100% 必须落在 PetState 上")
+
+        # 记录里**必须**带 loadouts：合法动作按配招枚举，缺了它 reset 会退回
+        # 规范配招，「力量增效」就不再合法（这正是 replay 缺 loadouts 那个 bug）。
+        record = {"team": list(TEAM), "enemy_team": list(TEAM), "seed": 3,
+                  "loadouts": {k: list(v) for k, v in st.player.loadouts.items()},
+                  "actions": [[buff_action[0].to_dict(), enemy_action.to_dict()]]}
+        replayed = env_mod.replay(record, self.rs)
+        self.assertEqual(replayed.player.field_pet.buffs.get("atk"), 100,
+                         "回放没有复原状态技能造成的属性增减")
+        self.assertEqual([e.to_dict() for e in replayed.events],
+                         [e.to_dict() for e in st.events],
+                         "回放的事件序列与原局不一致")
+        for event in replayed.events:
+            if event.kind == "damage":
+                self.assertIs(event.detail.get("formula_verified"), False)
+
+    # ── 组 ②：与社区假设模型对齐（验证模型自洽，**不**声称手游真值）─────
+
+    def test_matches_the_community_hypothesis_model(self):
+        """实际伤害倍率与 `COMMUNITY_HYPOTHESIS_V1` 的折算一致。
+
+        这条证明的是「模型被正确实现」，**不是**「手游就是这么算的」——
+        两者差一次 microcase 实测。名字与断言都按这个口径写。
+        """
+        base = self._player_damage(self._state())["damage"]
+        for kw in ({"atk": 60}, {"atk": -30}, {"foe_def": 50}, {"foe_def": -60}):
+            with self.subTest(**kw):
+                st = self._state(**kw)
+                detail = self._player_damage(st)
+                attacker = {"atk": kw["atk"]} if "atk" in kw else {}
+                defender = {"def": kw["foe_def"]} if "foe_def" in kw else {}
+                predicted = fx.buff_damage_multiplier(attacker, defender)
+                self.assertAlmostEqual(detail["damage"] / base, predicted, delta=0.02)
+                self.assertIs(detail["formula_verified"], False)
+
+
+class TestReplayCarriesLoadouts(unittest.TestCase):
+    """E04 的确定性回放：记录必须自带配招。
+
+    `replay()` 只传了 team / enemy_team / seed 时，`reset()` 会退回**规范配招**；
+    而合法动作是按配招枚举的（一只精灵只带 4 个技能）。于是用非规范配招打出来的
+    记录回放时会抛「行动不合法」——这不是「回放不稳定」，是**记录不完整**。
+    这个 bug 是写「状态技能增减能否重放」的测试时撞出来的。
+    """
+
+    def setUp(self):
+        self.rs = RS
+
+    def test_match_with_nonstandard_loadout_replays(self):
+        from roco_env import opponents as ropp
+
+        team_a = [RS.pets_by_name(n)[0].pet_id for n in ("寂灭骨龙", "海豹船长", "黑猫巫师")]
+        team_b = [RS.pets_by_name(n)[0].pet_id for n in ("圆号鱼", "雪影娃娃", "音速犬")]
+        # 换成非规范配招：把「力量增效」塞进第一只
+        loadouts = {team_a[0]: ["skill_000271", "skill_000750", "skill_000576", "skill_000744"]}
+        record = ropp.play_match(self.rs, team_a, team_b, "greedy_damage", "greedy_damage",
+                                 seed=5, loadouts=loadouts)
+        # replay_plan() 必须带上配招
+        self.assertIn("loadouts", record.replay_plan(), "replay_plan 必须带 loadouts")
+        state = env_mod.replay(record.replay_plan(), self.rs)
+        self.assertEqual(state.turn, record.total_turns, "回放的回合数与记录不符")
+        self.assertEqual(state.result,
+                         {"player": "win", "enemy": "loss", "draw": "draw",
+                          "escaped": "escaped"}.get(record.winner, state.result))
+
+    def test_replay_without_loadouts_is_rejected_rather_than_silently_wrong(self):
+        """反证：记录里少了配招时，回放要**抛错**，不能悄悄换一套配招算出一局假的。"""
+        action = {"kind": "skill", "skill_id": "skill_000271"}   # 只在非规范配招里
+        enemy = {"kind": "skill", "skill_id": "skill_000286"}
+        record = {"team": list(TEAM), "enemy_team": list(TEAM), "seed": 3,
+                  "actions": [[action, enemy]]}
+        with self.assertRaises(ValueError) as ctx:
+            env_mod.replay(record, self.rs)
+        self.assertIn("不合法", str(ctx.exception),
+                      "缺配招时应当明确报「行动不合法」，而不是换一套配招继续算")

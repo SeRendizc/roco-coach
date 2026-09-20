@@ -876,11 +876,21 @@ class MatchRecord:
         )
 
     def replay_plan(self) -> Dict[str, Any]:
-        """交给 `env.replay()` 的最小记录（补位回合在 actions 里是 [side, slot]）。"""
+        """交给 `env.replay()` 的最小记录（补位回合在 actions 里是 [side, slot]）。
+
+        **必须带上 `loadouts`。** 合法动作按配招枚举，缺了它回放会退回规范配招，
+        非规范配招的技能就不再合法（实测抛「行动不合法」）。
+        记录里已经存了 `self.loadouts`，直接用。
+        """
         return {
             "team": list(self.team_a),
             "enemy_team": list(self.team_b),
             "seed": self.seed,
+            # 这一局双方**各自队伍**的配招。`reset()` 会把这份 dict 分别对
+            # team_a 与 team_b 校验（每边只认自己那三只），所以两边都要在，
+            # 但不属于任何一边的 id 会让它直接判「配招提到了不在队伍里的 pet」。
+            "loadouts": {k: list(v) for k, v in (self.loadouts or {}).items()
+                         if k in set(self.team_a) or k in set(self.team_b)},
             "actions": copy.deepcopy(self.actions),
         }
 
