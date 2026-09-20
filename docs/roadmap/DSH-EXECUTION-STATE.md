@@ -199,6 +199,18 @@ B/C 组 3v3 实战跑通；`parse` 覆盖率语义修正；G02 判定为不过�
 **不是**推荐配招、不是最优解；报告与 JSON 里都这么写。
 本轮的精灵数与技能数已满足 W3-01（12 只 / 55 技能，目标 12—20 / 40—60）。
 
+### 本轮（第 4 轮）新增
+
+| 交付 | 文件 | 结果 |
+|---|---|---|
+| microcase 执行台账 | `docs/roco/MICROCASE-HARNESS.md` + `reports/roco/microcases/harness.json` | 30 条里 **26 条**引擎有明确行为、**4 条**连前提都缺；`verification_passed` 恒为 false |
+| 实测录入 | `scripts/roco/record-measurements.py` → `data/roco/measurements.jsonl` | 文件**为空**：仓库里不存在任何伪造实测；演练数据（`source != manual`）不升级状态 |
+| 实测标定 | `docs/roco/CALIBRATION.md` + `reports/roco/microcases/calibration.json` | 容差**必须由人给**；标定只反解系数、不自动改公式 |
+| E04/E05 验收不变量 | `roco/tests/test_replay_invariants.py` | 100 条回放逐事件一致、终止后不可行动、随机对局无非法状态、observation 零泄漏 |
+| 伤害范围预览 | `/battle/plan` 的 `damage_preview` | 配招里每个攻击技能各试打一遍取 min/max；页面显示「按未核验公式估，能打出 130~425」 |
+| 进度台账 | `docs/roco/PROGRESS.md` + `reports/roco/dashboard.json` | MVP **29/30 DONE**、1 PARTIAL（E03）、3 条落在用户边界内；证据路径逐个检查过存在性 |
+| 文档追平代码 | `docs/roco/mvp/ARCHITECTURE.md` §4.5、`RULE-COVERAGE.md` | 把 W3 之后新增的三栏与三套「支持」口径写清 |
+
 ### 本轮的测试现状（更新）
 
 | 套件 | 结果 |
