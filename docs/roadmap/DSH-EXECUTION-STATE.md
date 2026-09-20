@@ -575,6 +575,21 @@ active goal 已按此重写（revision 2）。
 
 ## 2. 当前 HEAD 与工作区
 
+### 2.1 第 11 轮结束时的可恢复断点（每次压缩前更新）
+
+| 项 | 值 |
+|---|---|
+| HEAD | `33f58c8`（`fix(progress): name who is missing for the blind-review item`）—— 已推送 |
+| 工作区 | **干净**（`git status --porcelain` 为空） |
+| 验证 | Python **195**（1 skip）/ Node unit **431** / bridge 11 / toolbox-roco 17 / plan-e2e 10；demo-acceptance 16/16、浏览器 9/9；轨迹判定 `verdict=true`（结构 0 失败、回放 0 失败、漂移 0、反向对照 13,656/13,656） |
+| 日志 | `reports/roco/verification/round8..round11-*.log` |
+| 本轮**保留**的实验 | 无（本轮交付与实验分离，没有为刷指标改动过搜索或评分） |
+| 本轮**撤回/修正**的 | ① `skill_name` 参数键（工具不接受，任务不可完成）；② 判定器胜率判据整段扫描；③ 判定器冲突判据把「一致」判成「冲突」；④ 过期判据只卡正文；⑤ 换世界不清工具层状态版本导致串号；⑥ 给 `receiptSummary` 加注释时误删 `export`（测试全绿但生成器已不能跑） |
+| 下一步（不依赖外部条件） | **W5-04 的标签扩充 + 评测闭环**：`tests/evals/intervention-windows.json` 现在只有 30 条、且 `heldMs/hovers` 是假设值。先做**确定性标签扩充器**（同一条窗口在多个局面上重放，判据可程序化判定，两个方向都要测），再谈分类器。硬门控不变 |
+| 外部依赖（不影响上面继续做） | 一个 DeepSeek key（W4-02 的模型候选 / W4-05 三臂对比 / W5-01 gateway）、M5 Pro 48GB（W4-03/04）、3—5 位真人（W5-05）、一次游戏内实测（E03 已验证那一半）+ 录屏（F03） |
+
+### 2.2 交接基线（第 7 轮，保留原样）
+
 | 项 | 值 |
 |---|---|
 | 仓库 | `/Users/serendizc/Developer/roco-coach` |
