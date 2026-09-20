@@ -1,0 +1,841 @@
+{
+  "generated_at": "2026-09-20T20:16:06+00:00",
+  "generated_by": "scripts/roco/run-microcase-harness.py",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "plan_id": "microcases-v1",
+  "important": [
+    "**没有任何一条 microcase 因为这份台账而「通过」。**",
+    "`verification_passed` 恒为 false：通过只能来自游戏内实测。",
+    "`ENGINE_ASSUMPTION` 表示「引擎有明确行为，但该行为未核验」，不是「已确认正确」。",
+    "`observed` 是**真的跑一遍引擎**得到的结果，不是抄注释。"
+  ],
+  "measurement_intake": {
+    "file": "data/roco/measurements.jsonl",
+    "how": "python3 scripts/roco/record-measurements.py --help"
+  },
+  "summary": {
+    "total": 30,
+    "engine_can_run": 26,
+    "not_executable": 4,
+    "with_measurements": 0,
+    "verification_passed": 0,
+    "by_category": {
+      "priority": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "speed_tie": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "simultaneous_action": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "trigger_order": {
+        "total": 2,
+        "engine_can_run": 2
+      },
+      "voluntary_switch": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "knockout_replacement": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "energy": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "status_duration": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "marks": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "dynamic_damage": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "rounding": {
+        "total": 2,
+        "engine_can_run": 2
+      },
+      "hidden_information": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "a_group_trait": {
+        "total": 6,
+        "engine_can_run": 5
+      },
+      "respond_mechanics": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "charge": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "bc_group_trait": {
+        "total": 6,
+        "engine_can_run": 3
+      },
+      "stat_stacking": {
+        "total": 1,
+        "engine_can_run": 1
+      },
+      "defense_timing": {
+        "total": 1,
+        "engine_can_run": 1
+      }
+    }
+  },
+  "cases": [
+    {
+      "case_id": "MC-001",
+      "title": "行动优先级：先手度是否完全压过速度",
+      "category": "priority",
+      "priority": "P0",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "排序键为 (应对成功, 先手度, 速度, seed 随机)：先手度更高的技能忽略速度差先动，先手度相同时才比速度。",
+      "fields": {
+        "sort_key": [
+          "respond",
+          "priority",
+          "speed",
+          "tie"
+        ]
+      },
+      "evidence": "env.order_actions 的 docstring 引 Terms.lua#1020",
+      "assumption": "「先手度」的数值刻度未知：是先手+1 就绝对优先，还是在共享序列里比较。",
+      "missing": null,
+      "unresolved_questions": [
+        "先手度的**数值刻度**未知：是先手+1 就绝对优先，还是在某个共享序列里比较？",
+        "先手度是否可与其他「先手」叠加到超过对手的先手度？（文本说可叠加，但没给上限）",
+        "先手与「应对攻击」（术语 1016 说「本次行动必定先手」）哪个更强？",
+        "双方先手度完全相同、速度也相同时如何裁决？（文本没说，不得假定为随机或固定顺序）"
+      ]
+    },
+    {
+      "case_id": "MC-002",
+      "title": "同速裁决：速度完全相同时谁先动",
+      "category": "speed_tie",
+      "priority": "P0",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "同速且同先手度时用 seed 驱动的确定性随机裁决（同一 seed 可复现）",
+      "fields": {
+        "order_by_seed": [
+          [
+            "player",
+            "enemy"
+          ],
+          [
+            "player",
+            "enemy"
+          ],
+          [
+            "enemy",
+            "player"
+          ],
+          [
+            "enemy",
+            "player"
+          ]
+        ]
+      },
+      "evidence": "env.py 模块 docstring 第 14 行、order_actions 第 4 排序键",
+      "assumption": "手游是否有确定性规则（站位/入场顺序）未知；随机源是否可按 seed 复现未知。",
+      "missing": null,
+      "unresolved_questions": [
+        "同速是否真的存在确定性规则，还是内部随机？",
+        "若随机：随机源是否可按 seed 复现？（决定 replay 是否可能）",
+        "站位（1号位/2号位）是否参与裁决？",
+        "文本中的「传动」会改变技能位置（术语 1033），位置是否也影响出手顺序？"
+      ]
+    },
+    {
+      "case_id": "MC-003",
+      "title": "同时行动：双方行动是否基于同一事前状态",
+      "category": "simultaneous_action",
+      "priority": "P0",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "结算前先为双方各存一份 observation 哈希写进 history，所以「后出手的一方偷看对手选择」这类实现错误可以从回放里查出来。",
+      "fields": {
+        "hashes": {
+          "pre_observation_hash": "f7e0891eeda095bc",
+          "pre_observation_opponent_hash": "98ae65d8c4c32fc8"
+        },
+        "observation_pet_count": 3
+      },
+      "evidence": "env.step_joint 在结算前快照 observation 并写入 history",
+      "assumption": "手游是否真的同时结算未知（这与「同时行动」的描述一致，但没有实测）。",
+      "missing": null,
+      "unresolved_questions": [
+        "双方向时选择是否在同一事前状态上判定？（推测是，但无文本明证）",
+        "「应对」的判定是否在结算开始前统一进行？",
+        "若一方在结算中先倒下，其「应对」是否仍生效？"
+      ]
+    },
+    {
+      "case_id": "MC-004",
+      "title": "出手顺序的完整排序键与并列时的逐项降级",
+      "category": "trigger_order",
+      "priority": "P0",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "四级排序键，逐级降级：应对成功 > 先手度 > 速度 > seed 随机",
+      "fields": {
+        "levels": [
+          "respond",
+          "priority",
+          "speed",
+          "tie"
+        ]
+      },
+      "evidence": "env.order_actions",
+      "assumption": "「应对成功」与「先手度」谁更强、以及它们如何叠加，未实测。",
+      "missing": null,
+      "unresolved_questions": [
+        "排序键候选：应对成功 > 先手度 > 速度 > ???。哪一层在上？",
+        "「必定先手」是否压过一切先手度，还是等同一个大先手度值？",
+        "主动换宠在排序里的位置？（术语 1005「迅捷」暗示主动换入有特殊待遇）",
+        "道具/其他行动是否参与同一排序？"
+      ]
+    },
+    {
+      "case_id": "MC-005",
+      "title": "主动换宠是否占整回合，以及「迅捷」的触发条件",
+      "category": "voluntary_switch",
+      "priority": "P1",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "换宠先手度为常量 5（技能先手度通常为 0），道具为 4，且换宠**占整回合**（不再出招）",
+      "fields": {
+        "SWITCH_PRIORITY": 5,
+        "ITEM_PRIORITY": 4
+      },
+      "evidence": "env.py 常量 SWITCH_PRIORITY / ITEM_PRIORITY，注释标 MC-005",
+      "assumption": "「迅捷」的触发条件与换宠是否真的先于所有技能，数据未定义。",
+      "missing": null,
+      "unresolved_questions": [
+        "主动换宠到底占不占整回合？",
+        "「迅捷」只对第一个满足能量要求的迅捷技能生效 —— 若第一个不满足，是否顺延到下一个？",
+        "换入当回合被动承伤的顺序？",
+        "「本回合入场的精灵免疫此效果」（术语 1003/1024）中的「此效果」具体指哪些效果？"
+      ]
+    },
+    {
+      "case_id": "MC-006",
+      "title": "力竭后补位是否免费，以及多只同时力竭的补位队列",
+      "category": "knockout_replacement",
+      "priority": "P1",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "力竭后进入 phase=replace，补位**不消耗回合**（step_replace 不推进 turn）",
+      "fields": {
+        "needs_replacement": [
+          "player"
+        ],
+        "phase": "battle"
+      },
+      "evidence": "术语 3009（力竭下场不属于「离场」）；env.step_replace",
+      "assumption": "多只同时力竭时的补位**队列顺序**未实测。",
+      "missing": null,
+      "unresolved_questions": [
+        "力竭补位是否免费（不消耗回合）？",
+        "双方同回合都力竭时，补位顺序与「免疫此效果」如何交互？",
+        "补位入场的精灵是否触发「迸发」？",
+        "全部力竭与「同归于尽」的判定顺序？"
+      ]
+    },
+    {
+      "case_id": "MC-007",
+      "title": "能量的回合内结算顺序：消耗、回复、上限与返还",
+      "category": "energy",
+      "priority": "P1",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "上限 6、回合末回 1、入场初始 2、消耗**先扣**（合法性检查在读招之前）",
+      "fields": {
+        "ENERGY_MAX": 6,
+        "REGEN": 1,
+        "initial": 2
+      },
+      "evidence": "env.py 常量与 reset 的注释，全部标 MC-007",
+      "assumption": "上限、回能时机、初始值三条都来自假设，数据只给每条技能的能耗。",
+      "missing": null,
+      "unresolved_questions": [
+        "能量上限是多少？（当前快照只给出每条技能的能耗，未给出上限字段）",
+        "回合末是否自动回能？回多少？",
+        "技能自带回能与回合末回能的先后顺序（影响是否会溢出浪费）？",
+        "能量能否为负/是否会挡住不满足能耗的技能？（推测是，但需实测）"
+      ]
+    },
+    {
+      "case_id": "MC-008",
+      "title": "状态持续与衰减：灼烧「衰减一半层数」的取整方向",
+      "category": "status_duration",
+      "priority": "P2",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "伤害向下取整、最小 1（来自社区实现，不是官方公式）",
+      "fields": {
+        "damage_model": "community-hypothesis-v1",
+        "verified": false
+      },
+      "evidence": "effects.COMMUNITY_HYPOTHESIS_V1.notes",
+      "assumption": "取整方向与最小伤害都没有一手证据。",
+      "missing": null,
+      "unresolved_questions": [
+        "「衰减一半」在奇数值时向上还是向下取整？（未定义）",
+        "层数是否影响这次伤害的量，还是只影响剩余层数？（文本读起来只影响后续）",
+        "「2% 生命」的分母是最大生命还是当前生命？",
+        "2% 的取整方向？",
+        "灼烧与中毒能否同时存在？层数是否分别独立？",
+        "换宠下场后层数是否保留、是否暂停？（术语 3009 只说离场定义）"
+      ]
+    },
+    {
+      "case_id": "MC-009",
+      "title": "印记：同时只能各一个正负印记时的替换规则",
+      "category": "marks",
+      "priority": "P2",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "同类印记**累加层数**（术语 3010 只给了「最多 1 正 + 1 负」，未定义同类替换）",
+      "fields": {
+        "marks": {
+          "测试印记": 2
+        }
+      },
+      "evidence": "env._apply_status_effects 的 marks 分支，注释标 MC-009",
+      "assumption": "同类印记是累加还是替换，数据未定义。",
+      "missing": null,
+      "unresolved_questions": [
+        "施加第二种同类印记时：替换 / 叠加层数 / 拒绝？（三种都可能，必须实测）",
+        "哪些印记算「正面」、哪些算「负面」？（只有 3010 给了分类概念，未给清单）",
+        "印记归属：是「精灵拥有」还是「场地拥有」？术语 3010 同时说「精灵下场不消失」与「精灵最多拥有」，口径需澄清。",
+        "星陨印记的「消耗全部层数」与其他印记的层数语义是否一致？"
+      ]
+    },
+    {
+      "case_id": "MC-010",
+      "title": "动态/条件威力的取值时机与取整",
+      "category": "dynamic_damage",
+      "priority": "P2",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "条件化威力按描述里的可机械读出模式折算（例：敌方每有1能量 → 威力 ×(1-10%×能量)）；伤害公式为可替换假设",
+      "fields": {
+        "damage_model": "community-hypothesis-v1",
+        "verified": false,
+        "source": "ColinHong10/NRC_AI src/battle.py（社区实现）",
+        "example_skill": "甜蜜陷阱",
+        "samples": [
+          {
+            "enemy_energy": 0,
+            "power": 50.0,
+            "conditional": true,
+            "reason": "敌方能量 0 → 威力 ×1.00"
+          },
+          {
+            "enemy_energy": 2,
+            "power": 40.0,
+            "conditional": true,
+            "reason": "敌方能量 2 → 威力 ×0.80"
+          },
+          {
+            "enemy_energy": 6,
+            "power": 19.999999999999996,
+            "conditional": true,
+            "reason": "敌方能量 6 → 威力 ×0.40"
+          }
+        ]
+      },
+      "evidence": "effects.effective_power 的 docstring 列出已覆盖模式",
+      "assumption": "官方伤害公式与条件化威力的取值时机都没有来源。",
+      "missing": null,
+      "unresolved_questions": [
+        "条件化威力是在**选择技能时**还是**结算时**计算？（对手能量可能在同回合变化）",
+        "「-10%/能量」是加法叠加还是乘法叠加？",
+        "威力计算后的取整方向与时机（先乘后加还是先加后乘）？",
+        "「造成5倍伤害」是威力×5 还是最终伤害×5？（两者在防御/相性下结果不同）",
+        "多个条件同时命中时（如既有应对又满足阈值）如何复合？"
+      ]
+    },
+    {
+      "case_id": "MC-011",
+      "title": "百分比伤害与回复的取整方向",
+      "category": "rounding",
+      "priority": "P2",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "伤害向下取整、最小 1（来自社区实现，不是官方公式）",
+      "fields": {
+        "damage_model": "community-hypothesis-v1",
+        "verified": false
+      },
+      "evidence": "effects.COMMUNITY_HYPOTHESIS_V1.notes",
+      "assumption": "取整方向与最小伤害都没有一手证据。",
+      "missing": null,
+      "unresolved_questions": [
+        "百分比基数：最大生命 vs 当前生命？（术语 1004 写「若当前生命低于冻结比例」，暗示百分比按**最大生命**算而比较用当前生命）",
+        "取整方向：floor / round / ceil？",
+        "多个百分比效果同回合生效时，是各自独立取整还是先求和再取整？",
+        "吸血回复量的取整方向是否与伤害一致？",
+        "是否存在最小伤害为 1 的下限？"
+      ]
+    },
+    {
+      "case_id": "MC-012",
+      "title": "回合内的触发顺序：伤害、状态、印记、回能、离场的先后",
+      "category": "trigger_order",
+      "priority": "P2",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "回合内事件按「回合开始 → 行动（应对/防御/状态/攻击）→ 回合末状态 → 回能」的顺序写入 events",
+      "fields": {
+        "event_kinds_turn1": [
+          "turn_start",
+          "defense",
+          "defense",
+          "energy_regen",
+          "energy_regen"
+        ]
+      },
+      "evidence": "env._bump 的调用点顺序（step_joint → _execute → _end_of_turn）",
+      "assumption": "手游里「伤害、状态、印记、回能、离场」的相对顺序未实测；引擎按上面这个顺序写事件。",
+      "missing": null,
+      "unresolved_questions": [
+        "回合末多个效果（中毒/灼烧/寄生/光合印记/特性）的执行顺序？",
+        "同一精灵的多个回合末效果，顺序是否固定？跨精灵是否按速度排序？",
+        "若回合末伤害导致力竭，后续回合末效果是否仍触发？",
+        "「回合开始时」的传动效果与「回合结束时」效果的边界在哪？",
+        "回合末回能与能量消耗在时序上谁先？"
+      ]
+    },
+    {
+      "case_id": "MC-013",
+      "title": "隐藏信息：教练观察面不得包含对手待执行动作与真实随机种子",
+      "category": "hidden_information",
+      "priority": "P0",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "公开 planner state 不含 seed / _pending_* / 对手后备血量；任意深度、任意位置的 seed 都被 find_hidden_keys 拒绝（无例外）",
+      "fields": {
+        "hidden_count": 2,
+        "public_has_seed": false
+      },
+      "evidence": "env.public_planner_state + service.find_hidden_keys",
+      "assumption": "无（这一条是**产品不变量**，由测试而非实测保证）。",
+      "missing": null,
+      "unresolved_questions": [
+        "「隐藏精灵的信息」隐藏到什么粒度？（仅技能？还是连面板也隐藏？）",
+        "隐藏状态下教练应看到什么？（必须 fail closed，不能猜）",
+        "对手的**已知历史**（如上一回合出招）是否属于公开信息？",
+        "这些隐藏状态在 PVP 与 PVE 下是否一致？"
+      ]
+    },
+    {
+      "case_id": "MC-014",
+      "title": "A 组特性：寂灭骨龙「不朽」",
+      "category": "a_group_trait",
+      "priority": "P4",
+      "harness_status": "NOT_EXECUTABLE",
+      "verification_passed": false,
+      "engine_can_run_it": false,
+      "observed": "引擎侧实现状态 **REFUSED**",
+      "fields": {
+        "status": "REFUSED",
+        "hook": null,
+        "desc": "力竭4回合后复活。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "复活需要「力竭后仍占用一个回合计数位」这一状态，而本引擎在精灵力竭时立刻把它移出可行动集合（术语 3009 把力竭下场与主动离场分开）。要实现它必须先确认：4 回合从哪一刻开始计、复活后生命/能量/状态/印记如何初始化、能否被再次触发。四条都没有一手证据（MC-014），所以拒绝而不是近似。",
+      "missing": "复活需要「力竭后仍占用一个回合计数位」这一状态，而本引擎在精灵力竭时立刻把它移出可行动集合（术语 3009 把力竭下场与主动离场分开）。要实现它必须先确认：4 回合从哪一刻开始计、复活后生命/能量/状态/印记如何初始化、能否被再次触发。四条都没有一手证据（MC-014），所以拒绝而不是近似。",
+      "unresolved_questions": [
+        "复活后生命/能量/状态/印记如何初始化？「4回合」从哪一刻开始计？能被再次触发吗？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-015",
+      "title": "A 组特性：海豹船长「身经百练」",
+      "category": "a_group_trait",
+      "priority": "P4",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "引擎侧实现状态 **FULL**（钩子 `on_enter`）",
+      "fields": {
+        "status": "FULL",
+        "hook": "on_enter",
+        "desc": "己方精灵每应对1次，自己入场时水系和武系技能威力+20%。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "计数源明确（术语 1015/1016/1017 的「应对成功」），加成对象明确（水系与武系技能，入场时生效）。假设：每层 +20% 且可叠加；「入场时」= 换上该精灵的那个回合。",
+      "missing": null,
+      "unresolved_questions": [
+        "「应对1次」的计数范围（整局/单场/离场清空？）；+20% 是加法叠加还是乘法；是否只影响自己入场当回合？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-016",
+      "title": "A 组特性：黑猫巫师「预警」",
+      "category": "a_group_trait",
+      "priority": "P4",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "引擎侧实现状态 **PARTIAL**（钩子 `on_turn_start`）",
+      "fields": {
+        "status": "PARTIAL",
+        "hook": "on_turn_start",
+        "desc": "若敌方技能足够击败自己，回合开始时自己获得速度+50。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "「速度+50」已实现为速度属性增益。未实现的是**触发条件**「敌方技能足够击败自己」——它要求对每个合法敌方技能算一遍伤害并比较当前生命，而这依赖尚未核验的官方伤害公式（MC-010/011）；用未核验的公式去决定「会不会死」，会让一条被动特性建立在假设上。因此条件未实现，特性只在测试里被显式驱动。",
+      "missing": null,
+      "unresolved_questions": [
+        "「足够击败自己」的判定是否使用真实伤害公式（而我们没有公式）？「回合开始」在事件序的哪个位置？速度+50 是绝对加值还是百分比？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-017",
+      "title": "A 组特性：圆号鱼「泛音列」",
+      "category": "a_group_trait",
+      "priority": "P4",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "引擎侧实现状态 **FULL**（钩子 `after_status_skill`）",
+      "fields": {
+        "status": "FULL",
+        "hook": "after_status_skill",
+        "desc": "使用状态技能后，敌方获得「聒噪」技能的效果，持续3回合。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "「聒噪」的效果在数据里查得到（`聒噪` skill_000274：敌方获得全攻击技能能耗+2，持续3回合），所以不需要猜。实现为给对手挂一个能耗修正标记。",
+      "missing": null,
+      "unresolved_questions": [
+        "「聒噪」的效果已由数据解答为「敌方获得全攻击技能能耗+2，持续3回合」；仍待解的是：与湿润印记(-1)等能耗修改的复合顺序与上下限。",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-018",
+      "title": "A 组特性：雪影娃娃「捉迷藏」",
+      "category": "a_group_trait",
+      "priority": "P4",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "引擎侧实现状态 **PARTIAL**（钩子 `after_freeze_applied`）",
+      "fields": {
+        "status": "PARTIAL",
+        "hook": "after_freeze_applied",
+        "desc": "使敌方获得冻结时，也会使其获得全技能能耗+1。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "「给敌方挂全技能能耗+1」已实现为能耗修正标记。未实现的是它与**其他能耗修改**（湿润印记 -1、聒噪 +2）的复合顺序与下限——术语没有定义，属 MC-018 待验项，因此只登记标记、不在此处结算复合。",
+      "missing": null,
+      "unresolved_questions": [
+        "「全技能能耗+1」是永久还是与冻结同寿？与其他能耗修改（湿润印记-1）如何复合？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-019",
+      "title": "A 组特性：音速犬「专注力」",
+      "category": "a_group_trait",
+      "priority": "P4",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "引擎侧实现状态 **FULL**（钩子 `on_enter`）",
+      "fields": {
+        "status": "FULL",
+        "hook": "on_enter",
+        "desc": "入场首回合，获得物攻+100%。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "触发时机用 `entered_turn` 判定（换入即记录回合号），与术语 1010「迸发」所依据的字段是同一个。「首回合」判定为 entered_turn == 当前回合。",
+      "missing": null,
+      "unresolved_questions": [
+        "「首回合」的判定边界；+100% 与「迸发」是否叠加；换入是否算入场？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-020",
+      "title": "「应对攻击」的完整生命周期：必定先手、触发效果、防御技能冷却",
+      "category": "respond_mechanics",
+      "priority": "P1",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "应对成功 → 本次行动必定先手（排序键第 1 位）；防御技能进 1 回合冷却；减伤**无条件生效**（只有「应对效果」需要应对成功）",
+      "fields": {
+        "respond_kinds": [
+          "应对攻击",
+          "应对状态",
+          "应对防御"
+        ],
+        "cooldown_rounds": 2
+      },
+      "evidence": "术语 1015/1016/1017；effects.RESPOND_KINDS",
+      "assumption": "「减伤是否无条件」这一条是假设（effects.parse_defense_reduction 的 docstring 标 MC-020）。",
+      "missing": null,
+      "unresolved_questions": [
+        "「应对成功」时，是先手到能压过对手的一切先手度，还是只提升到某个层级？",
+        "「应对失败」时，技能的减伤部分是否仍然生效？（描述把减伤写在「应对」之前，暗示减伤无条件）",
+        "「防御技能进入 1 回合冷却」：是**只有被应对成功的那个技能**，还是**所有携带的防御技能**？",
+        "冷却对「下一个防御技能」是否也生效？",
+        "「必定先手」与双方都应对成功时如何裁决？",
+        "减伤 70% 与属性相性、其他减伤的复合顺序与取整？"
+      ]
+    },
+    {
+      "case_id": "MC-021",
+      "title": "蓄力：跨回合状态、「免疫所有离场效果」与「免蓄力」的消耗",
+      "category": "charge",
+      "priority": "P1",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "蓄力记在 PetState.charge 上（术语 1007）；蓄力当回合不出伤害，次回合释放；离场免疫与免蓄力消耗的时序未实现到可判定的程度",
+      "fields": {
+        "charge_field": "PetState.charge"
+      },
+      "evidence": "术语 1007/1033；schema.PetState.charge",
+      "assumption": "「离场免疫所有离场效果」的范围与「下次技能无需蓄力」的消耗时机均未实测。",
+      "missing": null,
+      "unresolved_questions": [
+        "蓄力期间是否公开可见（对手能否知道你在蓄力）？",
+        "蓄力期间被打断/被击倒如何处理？",
+        "「免疫所有离场效果」是否包括「脱离」「返场」「紧急脱离」以及被技能强制换下？",
+        "「下次技能无需蓄力」的消耗时机：是下一次尝试蓄力时，还是下一次行动时？",
+        "蓄力与「先手」如何交互？"
+      ]
+    },
+    {
+      "case_id": "MC-022",
+      "title": "B 组特性：画间沉铁兽「变形活画」",
+      "category": "bc_group_trait",
+      "priority": "P4",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "引擎侧实现状态 **FULL**（钩子 `on_action`）",
+      "fields": {
+        "status": "FULL",
+        "hook": "on_action",
+        "desc": "行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "「敌方的增益层数」在引擎里是可数的：对手场上精灵的 `buffs` 有多少个键就有多少层（`_apply_status_effects` 每加一项写一个键）。假设（MC-020）：把 `buffs` 的**键个数**当作「层数」，同一属性的两层合并成一个键时会被算成一层——数据没有定义层数的计数方式。速度部分在 `order_actions` 之前生效，实现为 `spe` 增益。",
+      "missing": null,
+      "unresolved_questions": [
+        "「1层增益」怎么计数——按 buff 键个数，还是按数值层数？增益被同一属性合并时算几层？威力与速度的加成上限？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-023",
+      "title": "B 组特性：秩序鱿墨「绝对秩序」",
+      "category": "bc_group_trait",
+      "priority": "P4",
+      "harness_status": "NOT_EXECUTABLE",
+      "verification_passed": false,
+      "engine_can_run_it": false,
+      "observed": "引擎侧实现状态 **REFUSED**",
+      "fields": {
+        "status": "REFUSED",
+        "hook": null,
+        "desc": "受到非敌方系别的技能攻击时伤害-50%。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "字面读法有两个都可疑：① 「技能系别不在敌方精灵的系别里」——那要先确认 `types.json` 的系别名与技能 `element` 是同一套词表（是同一套），但「非敌方系别」是否指「不属于对手任一属性」没有一手证据；② 若读成「与我方系别不同的技能」，那所有非本系技能都减半，量级完全不同。两种读法的结论差一倍，术语表里没有这一条，所以拒绝而不是任选一种。",
+      "missing": "字面读法有两个都可疑：① 「技能系别不在敌方精灵的系别里」——那要先确认 `types.json` 的系别名与技能 `element` 是同一套词表（是同一套），但「非敌方系别」是否指「不属于对手任一属性」没有一手证据；② 若读成「与我方系别不同的技能」，那所有非本系技能都减半，量级完全不同。两种读法的结论差一倍，术语表里没有这一条，所以拒绝而不是任选一种。",
+      "unresolved_questions": [
+        "「非敌方系别」指「不属于对手任一属性」，还是「与我方属性不同」？两种读法的减伤覆盖面差一倍。",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-024",
+      "title": "B 组特性：化蝶「化茧」",
+      "category": "bc_group_trait",
+      "priority": "P4",
+      "harness_status": "NOT_EXECUTABLE",
+      "verification_passed": false,
+      "engine_can_run_it": false,
+      "observed": "引擎侧实现状态 **REFUSED**",
+      "fields": {
+        "status": "REFUSED",
+        "hook": null,
+        "desc": "受到致命伤害时，获得1层萌化，并免疫此次伤害。（最多触发2次）"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "需要三件引擎目前没有确认的东西：①「萌化」这个状态在数据里出现在状态技能描述里，但它的**效果**没有定义；②「免疫此次伤害」发生在伤害结算的哪一步（扣血前还是扣血后、是否触发倒下判定）；③ 触发次数的计数是每局还是每次入场。三条都没证据（MC-021）。",
+      "missing": "需要三件引擎目前没有确认的东西：①「萌化」这个状态在数据里出现在状态技能描述里，但它的**效果**没有定义；②「免疫此次伤害」发生在伤害结算的哪一步（扣血前还是扣血后、是否触发倒下判定）；③ 触发次数的计数是每局还是每次入场。三条都没证据（MC-021）。",
+      "unresolved_questions": [
+        "「萌化」这个状态的效果是什么（数据里只出现在状态技能描述里，没有定义）？免疫发生在伤害结算的哪一步？「最多2次」是每局还是每次入场？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-025",
+      "title": "B 组特性：银月狼王「铭记于月亮」",
+      "category": "bc_group_trait",
+      "priority": "P4",
+      "harness_status": "NOT_EXECUTABLE",
+      "verification_passed": false,
+      "engine_can_run_it": false,
+      "observed": "引擎侧实现状态 **REFUSED**",
+      "fields": {
+        "status": "REFUSED",
+        "hook": null,
+        "desc": "获得自己击败的精灵的特性，每次攻击后自己失去5%生命。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "「获得对手的特性」要求引擎在**运行时**把另一只精灵的特性实现挂到自己身上。本引擎的特性是「按精灵 id 查表 + 固定钩子」，没有动态换表的机制；而其余 11 只里已经有 4 只是 REFUSED（拿到它们也没有意义）。要做它得先有一套「特性作为可组合对象」的重构，属于独立工作。",
+      "missing": "「获得对手的特性」要求引擎在**运行时**把另一只精灵的特性实现挂到自己身上。本引擎的特性是「按精灵 id 查表 + 固定钩子」，没有动态换表的机制；而其余 11 只里已经有 4 只是 REFUSED（拿到它们也没有意义）。要做它得先有一套「特性作为可组合对象」的重构，属于独立工作。",
+      "unresolved_questions": [
+        "「获得特性」是永久还是当局？被击败精灵的特性若自身也是获取型，是否递归？5% 生命是最大生命还是当前生命？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-026",
+      "title": "B 组特性：圣凯布米龙「热成像」",
+      "category": "bc_group_trait",
+      "priority": "P4",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "引擎侧实现状态 **FULL**（钩子 `on_turn_start`）",
+      "fields": {
+        "status": "FULL",
+        "hook": "on_turn_start",
+        "desc": "若上回合双方有精灵使用火系技能，本回合自己携带的虫系技能威力+100%。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "「上回合」用 `state.history` 的上一回合记录判定（引擎每回合都写player_action / enemy_action，能查出技能 id 与系别），不需要猜时序。加成对象明确（自己携带的虫系技能），实现为`buffs['power_bug']`，只有该系技能吃到。",
+      "missing": null,
+      "unresolved_questions": [
+        "「上回合」是否包含自己？「使用」是否要求技能真的结算成功（被取消算不算）？+100% 与其他威力加成的先后与叠加方式？",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-027",
+      "title": "B 组特性：月使鹭纳「冷光源」",
+      "category": "bc_group_trait",
+      "priority": "P4",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "引擎侧实现状态 **FULL**（钩子 `on_turn_start`）",
+      "fields": {
+        "status": "FULL",
+        "hook": "on_turn_start",
+        "desc": "若上回合双方有精灵使用翼系技能，本回合自己携带的冰系技能威力+100%。"
+      },
+      "evidence": "roco/src/roco_env/traits.py",
+      "assumption": "与「热成像」同一机制，只是系别换成翼系触发 / 冰系受益。两条都用同一个读取上回合记录的辅助函数，避免各写一份。",
+      "missing": null,
+      "unresolved_questions": [
+        "与热成像同形；额外要问的是两条特性同时在场时是否各自独立触发。",
+        "该特性的效果是否与描述文本完全一致（社区归档可能滞后于实际）？"
+      ]
+    },
+    {
+      "case_id": "MC-028",
+      "title": "属性增减的复合：多个来源同一属性时相加还是相乘",
+      "category": "stat_stacking",
+      "priority": "P1",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "多个来源的同一属性**相加**（`buff_damage_multiplier` 取 `1 + 攻方物攻增减`）",
+      "fields": {
+        "formula": "(1 + 攻方物攻增减) / max(0.1, 1 + 守方物防增减)"
+      },
+      "evidence": "effects.buff_damage_multiplier 的 docstring（标注 COMMUNITY_HYPOTHESIS_V1）",
+      "assumption": "相加还是相乘、有无上下限、取整在每一步还是最后一步，三条都无一手证据。",
+      "missing": null,
+      "unresolved_questions": [
+        "同一属性的两个来源是相加还是相乘？",
+        "增减是否有上下限（例如速度最低为 1、物防不能低于 0）？",
+        "取整发生在每一步还是最后一步？"
+      ]
+    },
+    {
+      "case_id": "MC-029",
+      "title": "防御减伤的结算时机与是否受属性增减影响",
+      "category": "defense_timing",
+      "priority": "P1",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "减伤**无条件生效**、乘在最终伤害上、只在使用的那个回合有效（回合开始清零）",
+      "fields": {
+        "cleared_at": "回合开始",
+        "applied_to": "最终伤害"
+      },
+      "evidence": "effects.parse_defense_reduction + env 的回合开始清理",
+      "assumption": "减伤比例与结算时机均未实测；「无条件」是假设。",
+      "missing": null,
+      "unresolved_questions": [
+        "减伤是无条件生效，还是必须应对成功？",
+        "减伤是乘在最终伤害上，还是在属性计算之前？",
+        "减伤与属性增减同时存在时的先后顺序？"
+      ]
+    },
+    {
+      "case_id": "MC-030",
+      "title": "伤害取整方向与最小伤害",
+      "category": "rounding",
+      "priority": "P2",
+      "harness_status": "ENGINE_ASSUMPTION",
+      "verification_passed": false,
+      "engine_can_run_it": true,
+      "observed": "伤害向下取整、最小 1（来自社区实现，不是官方公式）",
+      "fields": {
+        "damage_model": "community-hypothesis-v1",
+        "verified": false
+      },
+      "evidence": "effects.COMMUNITY_HYPOTHESIS_V1.notes",
+      "assumption": "取整方向与最小伤害都没有一手证据。",
+      "missing": null,
+      "unresolved_questions": [
+        "取整方向？",
+        "是否存在最小伤害保底（是 1 还是别的值）？",
+        "多段攻击是每段取整还是总和取整？"
+      ]
+    }
+  ]
+}
