@@ -387,6 +387,59 @@ def main(argv: Optional[List[str]] = None) -> int:
     with open(out_path, "w", encoding="utf-8") as fh:
         json.dump(report, fh, ensure_ascii=False, indent=2)
 
+    # ── 只有**过门槛**才导出可加载的模型 ────────────────────────────────
+    #
+    # 这是门槛的硬约束，不是礼貌：不过门槛就不该有「能直接用的模型文件」，
+    # 否则它迟早会被某个调用方 import 进去、绕开判定。
+    # 导出文件自带来源与限制，服务端加载后会把它们原样带进回执。
+    if passed:
+        model_path = os.path.join(_ROOT, args.out, "model.json")
+        with open(model_path, "w", encoding="utf-8") as fh:
+            json.dump({
+                "kind": "logistic-team-score",
+                "schema_version": 1,
+                "trained_at": report["generated_at"],
+                "data": args.data,
+                "rows": len(rows),
+                "split": parts["families"],
+                "features": FEATURE_NAMES,
+                "weights": [model.w[j] for j in range(len(FEATURE_NAMES))],
+                "intercept": model.b,
+                "standardization": {"mean": list(model.mean), "std": list(model.std)},
+                "temperature": temperature,
+                "gate": {
+                    "passed": True,
+                    "criteria": report["gate"]["criteria"],
+                    "test": {
+                        "model": {k: report["evaluation"]["test"]["model"][k]
+                                  for k in ("log_loss", "brier", "auc", "n")},
+                        "rules": {k: report["evaluation"]["test"]["rules"][k]
+                                  for k in ("log_loss", "brier", "auc")},
+                    },
+                },
+                "limitations": [
+                    "标签是**指定对手池**下的模拟结果，不是胜率，不是天梯强度。",
+                    "对手是 5 条启发式策略，不是真人；换一批对手是否成立**未经验证**。",
+                    "特征是与胜负相关的关系，不是游戏机制；权重不可解释为「速度更强」。",
+                    "只在**显式声明对手池**时可用；没有对手池就没有模型的输入。",
+                    "不得用于向玩家做强度排序或推荐「最强阵容」。",
+                ],
+                "how_to_use": (
+                    "构造 12 维特征：我方与对手各自的规则分项 "
+                    "(types/roles/speed/damage/energy/gaps)，"
+                    "先按 standardization 标准化，再乘 weights 加 intercept，"
+                    "最后除以 temperature 取 sigmoid。"
+                ),
+                "source_report": os.path.relpath(out_path, _ROOT),
+            }, fh, ensure_ascii=False, indent=2)
+        print(f"模型已导出（过门槛）：{os.path.relpath(model_path, _ROOT)}")
+    else:
+        # 不过门槛时**删掉**旧的导出文件，避免上次过门槛的模型被继续用
+        stale = os.path.join(_ROOT, args.out, "model.json")
+        if os.path.exists(stale):
+            os.remove(stale)
+            print("未过门槛：已删除旧的 model.json（不许留一个能直接用的模型）")
+
     print(json.dumps({
         "rows": len(rows), "split": parts["families"],
         "test_model": {k: report["evaluation"]["test"]["model"][k] for k in ("n", "log_loss", "brier", "auc")},

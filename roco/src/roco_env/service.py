@@ -109,12 +109,16 @@ try:  # 作为包导入：python3 -m roco_env.service
     from .data import DEFAULT_RULESET, Ruleset, RulesetError, load_ruleset
     from . import team as team_mod
     from . import env as env_mod
+    from . import opponents as opp
+    from . import team_model as tm
     from .schema import Action
 except ImportError:  # 直接当脚本跑：python3 roco/src/roco_env/service.py
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from roco_env.data import DEFAULT_RULESET, Ruleset, RulesetError, load_ruleset  # type: ignore
     from roco_env import team as team_mod  # type: ignore
     from roco_env import env as env_mod  # type: ignore
+    from roco_env import opponents as opp  # type: ignore
+    from roco_env import team_model as tm  # type: ignore
     from roco_env.schema import Action  # type: ignore
 
 
@@ -299,6 +303,10 @@ class Answer:
     unsupported: List[Dict[str, Any]] = field(default_factory=list)
     error_type: Optional[str] = None
     error: Optional[str] = None
+    #: 可选的模型分（W3-04）。`None` = 本次请求没要模型分。
+    #: 有值时是一个完整信封：`available` / `probability` / `opponent_pool` /
+    #: `not_a_winrate` / `limitations`，缺一不可。
+    model_score: Optional[Dict[str, Any]] = None
     #: 这条答案属于哪个信任域。默认 ``"coach"``：**不含**真实 seed 与对手待执行动作，
     #: 因此收尾时仍走隐藏信息扫描。只有本地对局域（``/battle/new|legal|advance``）
     #: 显式写成 ``"local_sim"``，那些端点的请求体本来就带私有状态。
@@ -587,6 +595,7 @@ class RocoService:
             error_type=answer.error_type,
             error=answer.error,
             result=answer.result,
+            **(dict(model_score=answer.model_score) if answer.model_score is not None else {}),
             **answer.extra,
         )
         status = ERROR_HTTP_STATUS.get(answer.error_type or "", 200)
@@ -1051,16 +1060,28 @@ class RocoService:
             error_type=answer.error_type,
             error=answer.error,
             result=answer.result,
+            **(dict(model_score=answer.model_score) if answer.model_score is not None else {}),
             **answer.extra,
         )
         return ERROR_HTTP_STATUS.get(answer.error_type or "", 200), env
 
     def team_evaluate(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
-        """规则 baseline 阵容评估。
+        """规则 baseline 阵容评估，**可选**再叠一层过门槛的模型分。
 
         注意它**不输出胜率**：只给分项特征与文字结论。
         如果请求里带了 loadouts，就用它；否则用固有技能。
         队伍合法性先按规则集校验，非法直接 400，不猜。
+
+        关于模型分（W3-04）——三条约束，缺一就不给模型分：
+
+        1. 请求必须显式带 `opponent_pool` **与** `opponent_team`：模型的特征里
+           有 6 维是对手的，没有对手就没有输入，也就没有可解释的适用范围；
+        2. 模型必须是**过门槛**的那一个（`team_model.load_team_model()` 会检查
+           `gate.passed`），没过门槛就返回 None，这里直接不加模型分；
+        3. 回执里必须带 `not_a_winrate` / `calibration` / `limitations`：
+           「在指定对手池下的模拟期望」与「胜率」是两件事，不能只给一个数。
+
+        默认行为**不变**：不带对手池时，回执与之前逐字节一致（只有规则分）。
         """
         started = time.perf_counter()
         rs, early = self._ruleset_ok(body)
@@ -1084,8 +1105,50 @@ class RocoService:
 
         payload = score.to_dict()
         evidence = sorted({e for f in score.features for e in f.evidence})
+
+        # ── 可选的模型分（W3-04）────────────────────────────────────────
+        model_score = None
+        opponent_pool = body.get("opponent_pool")
+        opponent_team = body.get("opponent_team")
+        if opponent_pool is not None or opponent_team is not None:
+            if not isinstance(opponent_pool, list) or not opponent_pool or not all(
+                    isinstance(x, str) and x for x in opponent_pool):
+                return self._answer_envelope(_bad_request(
+                    "opponent_pool 必须是非空的策略名数组（模型分只在声明的对手池下有效）"),
+                    body, started)
+            known = {s["name"] for s in opp.list_strategies()}
+            unknown = [x for x in opponent_pool if x not in known]
+            if unknown:
+                return self._answer_envelope(_bad_request(
+                    f"未知对手策略 {unknown}；可选：{sorted(known)}"), body, started)
+            if not isinstance(opponent_team, list) or len(opponent_team) != 3 or not all(
+                    isinstance(x, str) for x in opponent_team):
+                return self._answer_envelope(_bad_request(
+                    "opponent_team 必须是 3 个精灵 id 的数组（模型的 6 维特征来自对手阵容）"),
+                    body, started)
+            model = tm.load_team_model()
+            if model is None:
+                # 没有过门槛的模型：明确说「规则分是唯一评分」，不编一个默认概率。
+                model_score = {
+                    "available": False,
+                    "reason": "没有过门槛的阵容模型（门槛：未见家族上优于规则分且校准合理）",
+                    "fallback": "evaluate_team 继续使用规则评分",
+                }
+            else:
+                try:
+                    foe_score = team_mod.evaluate_team(opponent_team, rs=rs)
+                except ValueError as exc:
+                    return self._answer_envelope(_bad_request(f"对手阵容不合法：{exc}"), body, started)
+                mine_features = {f.name: f.value for f in score.features}
+                foe_features = {f.name: f.value for f in foe_score.features}
+                model_score = {
+                    "available": True,
+                    **tm.score_team(model, mine_features, foe_features, opponent_pool=opponent_pool),
+                }
+
         return self._answer_envelope(Answer(
             result=payload,
+            model_score=model_score,
             # coverage 表示「这些特征有多少来自真实数据」：全部来自规则集，故 1.0；
             # 但它**不代表**评估的准确性——准确性取决于未核验的伤害公式。
             coverage=1.0,

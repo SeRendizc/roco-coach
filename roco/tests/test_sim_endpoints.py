@@ -563,3 +563,116 @@ class TestReplayCarriesLoadouts(unittest.TestCase):
             env_mod.replay(record, self.rs)
         self.assertIn("不合法", str(ctx.exception),
                       "缺配招时应当明确报「行动不合法」，而不是换一套配招继续算")
+
+
+class TestTeamModelScoring(unittest.TestCase):
+    """W3-04：过门槛的模型接到 `evaluate_team` 上的三条硬约束。
+
+    1. **不带对手池就没有模型分**（默认行为一个字都不变）；
+    2. 模型分只在**显式声明**的对手池下给出，且必须带 `not_a_winrate` 与 limitations；
+    3. **没有过门槛的模型时不许编概率** —— 如实说「规则分是唯一评分」。
+    """
+
+    def setUp(self):
+        self.svc = RocoService()
+        self.mine = ["pet_000225", "pet_000190", "pet_000445"]
+        self.foe = ["pet_000417", "pet_000112", "pet_000062"]
+
+    def test_no_pool_means_no_model_score(self):
+        status, env = self.svc.team_evaluate({**BASE, "state_version": 0, "team": self.mine})
+        self.assertEqual(status, 200)
+        self.assertNotIn("model_score", env, "不声明对手池时不该出现模型分（默认行为必须不变）")
+
+    def test_declared_pool_gives_a_labelled_score(self):
+        status, env = self.svc.team_evaluate({
+            **BASE, "state_version": 0, "team": self.mine,
+            "opponent_pool": ["greedy_damage"], "opponent_team": self.foe,
+        })
+        self.assertEqual(status, 200, env.get("error"))
+        score = env["model_score"]
+        self.assertTrue(score["available"])
+        self.assertIn("probability", score)
+        self.assertEqual(score["opponent_pool"], ["greedy_damage"])
+        self.assertIs(score["not_a_winrate"], True, "模型分必须显式声明「这不是胜率」")
+        self.assertTrue(score["limitations"], "必须带限制说明")
+        self.assertEqual(score["calibration"], "simulated-vs-declared-opponent-pool")
+
+    def test_empty_or_unknown_pool_is_rejected(self):
+        for payload, why in (
+            ({"opponent_pool": []}, "空数组"),
+            ({"opponent_pool": "greedy_damage"}, "不是数组"),
+            ({"opponent_pool": ["nope"]}, "未知策略"),
+            ({"opponent_pool": ["greedy_damage"]}, "缺 opponent_team"),
+        ):
+            status, env = self.svc.team_evaluate({**BASE, "state_version": 0, "team": self.mine, **payload})
+            self.assertEqual(status, 400, f"{why} 应当被拒，实际 {status}")
+
+    def test_no_model_file_means_truthful_fallback(self):
+        """把模型路径指到不存在的文件：必须如实说「规则分是唯一评分」，不编概率。"""
+        from roco_env import team_model as tm
+
+        original = tm.DEFAULT_MODEL_PATH
+        try:
+            tm.DEFAULT_MODEL_PATH = os.path.join("reports", "roco", "definitely-not-here.json")
+            status, env = self.svc.team_evaluate({
+                **BASE, "state_version": 0, "team": self.mine,
+                "opponent_pool": ["greedy_damage"], "opponent_team": self.foe,
+            })
+        finally:
+            tm.DEFAULT_MODEL_PATH = original
+        self.assertEqual(status, 200, env.get("error"))
+        score = env["model_score"]
+        self.assertFalse(score["available"])
+        self.assertNotIn("probability", score, "没有模型时不许给一个默认概率")
+        self.assertIn("规则评分", score["fallback"])
+
+
+class TestTeamModelGateIsEnforced(unittest.TestCase):
+    """门槛不能只写在报告里，必须写在加载路径上。"""
+
+    def setUp(self):
+        from roco_env import team_model as tm
+        self.tm = tm
+        self.real = tm.load_team_model()
+
+    def test_gate_failure_blocks_loading(self):
+        import json as _json
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            blocked = os.path.join(tmp, "model.json")
+            with open(blocked, "w", encoding="utf-8") as fh:
+                _json.dump({
+                    "kind": "logistic-team-score",
+                    "features": list(self.tm.FEATURE_ORDER),
+                    "weights": [0.1] * 12, "intercept": 0.0,
+                    "standardization": {"mean": [0.0] * 12, "std": [1.0] * 12},
+                    "temperature": 1.0,
+                    "gate": {"passed": False},          # ← 没过门槛
+                }, fh)
+            self.assertIsNone(self.tm.load_team_model(blocked),
+                              "未过门槛的模型文件不许被加载")
+
+    def test_feature_order_mismatch_blocks_loading(self):
+        import json as _json
+        import tempfile
+
+        with tempfile.TemporaryDirectory() as tmp:
+            wrong = os.path.join(tmp, "model.json")
+            with open(wrong, "w", encoding="utf-8") as fh:
+                _json.dump({
+                    "kind": "logistic-team-score",
+                    "features": ["a"] * 12,             # ← 顺序不对
+                    "weights": [0.1] * 12, "intercept": 0.0,
+                    "standardization": {"mean": [0.0] * 12, "std": [1.0] * 12},
+                    "temperature": 1.0,
+                    "gate": {"passed": True},
+                }, fh)
+            self.assertIsNone(self.tm.load_team_model(wrong),
+                              "特征顺序不一致的模型不许被加载（权重会错配）")
+
+    def test_real_model_passes_the_gate(self):
+        if self.real is None:
+            self.skipTest("当前工作区没有过门槛的模型文件（未训练或未过门槛）")
+        self.assertTrue(self.real.gate.get("passed"))
+        self.assertEqual(self.real.features, self.tm.FEATURE_ORDER)

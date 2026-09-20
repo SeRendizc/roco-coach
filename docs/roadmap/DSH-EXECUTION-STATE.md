@@ -187,7 +187,7 @@ B/C 组 3v3 实战跑通；`parse` 覆盖率语义修正；G02 判定为不过�
 | **W3-01 扩到 12—20 只精灵、40—60 技能** | **完成** | 精灵 **12/12 接入引擎**（`roco/src/roco_env/traits.py`：FULL 6 / PARTIAL 2 / REFUSED 4）；microcase **21 → 30**；技能池 **30 → 55**（新增 `candidate_extras` 一栏，3 个/只，规范化配招**不动** —— 动它会作废 G02 已跑的 23,760 行）。55 个里解析层完全支持 **29**（其中 13 个纯伤害走 damage 路径），覆盖 52.7% |
 | **W3-02 数据增量与阵容合法性** | **完成** | 169 套社区阵容逐条台账：`data/roco/lineup-legality.jsonl` + `docs/roco/LINEUP-LEGALITY.md`。结论：**0 套可原样执行**（名册只有 12 只，快照里 622 只；169 套里 140 套来自 2026-04，早于 S4）。模拟池因此**不是**从这 169 套里选的，而是从自己的 12 只组出来的 `C(12,3)=220` |
 | W3-03 生成 1 万场以上轨迹 | **未开始** | 现有：pilot 1,000 局 + G02 数据集 23,760 行；1 万场轨迹需先固定 train/val/test family split（切分脚本已有，`train-team-model.py` 的 `family_split`） |
-| W3-04 升级工具（重训 evaluate_team / plan_actions 风险分支） | **未开始** | G02 已给出「允许的接入方式」：显式声明对手池、标注 not_a_winrate、不做强度排序、默认行为不变 |
+| **W3-04 升级工具** | **部分完成** | `evaluate_team` 已可叠一层**过门槛**的模型分：`roco/src/roco_env/team_model.py` + `team_evaluate` 的 `opponent_pool`/`opponent_team` 参数。三条约束写在加载路径上而不是文档里：门槛不过**不加载**、特征顺序不符**不加载**、没有模型时**不编概率**（明确说「规则分是唯一评分」）。`plan_actions` 的风险分支**未做**。模型文件 `reports/roco/g02-team/model.json` 只在过门槛时才导出 |
 | W4 / W5 / W6 | 未开始 | 依赖真人数据或本地模型训练，用户已明确不做（不下载/不训练模型） |
 
 **W3-01 的扩法要说清**：技能池从 30 扩到 55，靠的是**新开一栏** `candidate_extras`
