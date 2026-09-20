@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-09-20T20:06:30+00:00",
+  "generated_by": "scripts/roco/build-trajectories.py",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "snapshot_fingerprint": "5dd5607b39dd9edbed1fcf0f6eb935aa7280f0797f6f322dc664170459c8e97d",
+  "roster": [
+    "寂灭骨龙",
+    "海豹船长",
+    "黑猫巫师",
+    "圆号鱼",
+    "雪影娃娃",
+    "音速犬",
+    "画间沉铁兽",
+    "秩序鱿墨",
+    "化蝶",
+    "银月狼王",
+    "圣凯布米龙",
+    "月使鹭纳"
+  ],
+  "strategies": [
+    "random_legal",
+    "greedy_damage",
+    "conservative_switch",
+    "status_control",
+    "shallow_search"
+  ],
+  "strategy_version": 1,
+  "split": {
+    "train": 0.6,
+    "val": 0.2,
+    "test": 0.2
+  },
+  "split_seed": 20260921,
+  "base_seed": 20260921,
+  "turn_limit": 300,
+  "games_requested": 12000,
+  "games_played": 12000,
+  "transitions": {
+    "train": 139389,
+    "test": 47450,
+    "val": 47219
+  },
+  "total_transitions": 234058,
+  "families": {
+    "train": 7156,
+    "val": 2394,
+    "test": 2386
+  },
+  "truncated": 0,
+  "errors": 0,
+  "elapsed_s": 115.19,
+  "games_per_second": 104.18,
+  "turns": {
+    "mean": 16.8,
+    "p50": 15.0,
+    "max": 94
+  },
+  "files": {
+    "train": "reports/roco/trajectories/transitions-train.jsonl",
+    "val": "reports/roco/trajectories/transitions-val.jsonl",
+    "test": "reports/roco/trajectories/transitions-test.jsonl"
+  },
+  "disciplines": [
+    "家族在生成**之前**就按固定种子切好，同一家族不会跨侧。",
+    "只写公开观察哈希，不写私有状态（对手后备血量、内部字段）。",
+    "标签是模拟结果，不是胜率；轨迹是过渡样本，不是结论。"
+  ]
+}

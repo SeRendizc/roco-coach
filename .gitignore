@@ -27,6 +27,12 @@ data/roco/raw/NRC_AI.tar.gz
 .dsh-pushplus-token
 reports/roco/notify-log.jsonl
 
+# W3-03 轨迹：**只入库 manifest**（规模、切分、口径、种子）。
+# 12,000 局产生约 91MB 的 jsonl；把它们塞进 git 会让仓库无法维护，
+# 而它们**完全可复现**：manifest 里有 base_seed / split_seed / turn_limit / 策略版本，
+# 跑 `python3 scripts/roco/build-trajectories.py` 就能逐字节重放。
+reports/roco/trajectories/*.jsonl
+
 # 浏览器验收：结论入库，**每次运行都变的那一份**与截图不入库。
 # 截图每次都是新文件（图片字节不同），留在库里会让 git 每次都被「改了」淹没。
 reports/roco/acceptance/*-run.json
