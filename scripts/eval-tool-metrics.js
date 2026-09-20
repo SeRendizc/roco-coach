@@ -12,7 +12,7 @@
 //   staleInterception     过期/跨局结果有没有被拦住（新对局不能拿上一局的同号回合）
 //
 // 本模块是纯函数，不联网、不调用模型：真实调用由使用者决定何时跑。
-import {checkReceiptConsistency} from '../coach/runtime.js';
+import {checkReceiptConsistency} from '../src/coach/runtime.js';
 
 const tracesOf=row=>Array.isArray(row?.toolTrace)?row.toolTrace:[];
 const receiptFor=(row,tool)=>(tool?tracesOf(row).find(x=>x?.tool===tool):tracesOf(row)[0])||null;

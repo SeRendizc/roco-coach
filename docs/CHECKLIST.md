@@ -17,11 +17,11 @@
 - [x] P03 定义事件和状态 schema，包含可见性、规则版本、局面版本。验收：任何建议可定位到决策时状态。
 - [x] P04 建立长期回合/事件/提示存储与 ID；v0.6 已保留当前对局及最近3局的完整回合快照、对局ID和关键回合引用；本轮新增最多240条带ID/时间/来源的行动与提示事件；这是有界本机留存，不是永久云存储。验收：刷新、回营地、换对局、跨局复盘不混淆。
 - [x] P05 定义统一规则数据源，驱动 UI、引擎、工具、知识库；加入版本迁移。验收：数值修改不会造成提示与结算不一致。
-      - 已完成（2026-09-17）：`engine.js` 新增 `RULES` 单一数据源，结算函数全部改引用它；`rules.js` 生成 11 节界面规则文案，**奖励/经验曲线/等级上限/成长收益/速胜阈值全部由 `settle()`+`createGame()` 现场实测得出**，不写第二遍；`index.html` 规则弹窗与难度选项改为生成；`app.js` 的数值改读 `ruleFacts()`。`rules.test.js` 16 项是实测而非比常量。残留：`coach/*.js` 三处手写数字（当时不在可改范围，已列出）。产物 `docs/P05-RULES-SOURCE.md`。
-      - 本轮（2026-09-17）已完成 UI/引擎/知识库三侧的统一，**当时仍未勾**（该条此后已勾选，见上一条；以下保留当时的记录）。做法：`engine.js` 新增 `RULES`（倍率、公式系数、强化、防御、能量、状态跳数、携带物、回合上限、成长与培养收益），`damage()`/`resolveTurn()`/`createGame()` 改为引用它；新增 `rules.js` 生成全部界面规则文案，其中**奖励、升级经验曲线、等级上限、每级成长、每次培养收益、速胜阈值都用 `settle()` 与 `createGame()` 现场量出**（二分/差分探测），不在文案里写第二遍；`index.html` 的规则弹窗正文与难度选项改为生成，`app.js` 的强化百分比、能量上限、回合上限、速胜回合数、升级经验基数改为 `ruleFacts().*`；规则/技能/道具/环境的 `desc` 改为从自身字段派生（生成结果与改前逐字一致）。验收测试 `rules.test.js` 16 项，方式是**实测**而非比对常量：放大探针实测属性倍率与防御减伤、用文案里的系数重算 ≥100 组真实技能组合与 `damage()` 比对、真打一回合读日志验证灼烧跳数与剩余次数、真结算 win/draw/loss 读奖励、真连打 120 场验证等级停在 5、真构造 10/11 回合胜利验证速胜阈值；另把引擎字段拼成句子去 90 张知识卡里找（原来完全没有覆盖），并断言 `buildContext().battle.energyLimit === RULES.energy.max`（工具层）。产物：`docs/P05-RULES-SOURCE.md`。**未勾原因**：① `coach/*.js` 里仍有手写规则数字（`额外回2豆`、`等回合末回1豆`、`生命 +12 / 攻击 +4 / 速度 +3`），这些文件不在本轮可改范围，已在证据文档逐条列出并给出建议改法；② "版本迁移"只做到版本号单一来源 + 不匹配即阻断（`searchKnowledge` 返回 0 卡、`buildKnowledgePacket` blocked），存档格式迁移沿用既有实现未新增；③ `P06` 的"冻结后独立评测集"未做。
-      - 附带发现并修掉一个集成缺陷：新增 `rules.js` 后，既有测试 `browser.test.js` 的 `the server allowlist covers every browser module` 立即失败（`rules.js is imported by the browser but not in server.js publicAssets`），已在 `server.js` 的 `publicAssets` 补上。**补上之前，运行中的 8765 进程实测 `/rules.js` 返回 404，页面一行 JS 都不执行**（同期的 C17 实测独立撞到同一问题）；该进程随后被重启，之后用新增的 `scripts/cdp-rules-check.js` 在真实浏览器（headless Chrome 152 + CDP）复核：`/rules.js` **200**、无任何网络层补齐、营地渲染出 **12**（现为 14）张卡片、规则弹窗 **11 节 / 77 段 / 4316 字符**、关键句缺失 **0**、弹窗 `open:true` 660×569、控制台错误 **0**（`reports/p05-rules-browser-check.txt`、`reports/p05-rules-dialog.png`）。这说明**仓库状态一直是对的，坏的只是"运行中的旧进程"**——也说明只看单测不够，所以本项补了一条真浏览器核查。
+      - 已完成（2026-09-17）：`src/game/engine.js` 新增 `RULES` 单一数据源，结算函数全部改引用它；`src/game/rules.js` 生成 11 节界面规则文案，**奖励/经验曲线/等级上限/成长收益/速胜阈值全部由 `settle()`+`createGame()` 现场实测得出**，不写第二遍；`src/client/index.html` 规则弹窗与难度选项改为生成；`src/client/app.js` 的数值改读 `ruleFacts()`。`tests/rules.test.js` 16 项是实测而非比常量。残留：`src/coach/*.js` 三处手写数字（当时不在可改范围，已列出）。产物 `docs/P05-RULES-SOURCE.md`。
+      - 本轮（2026-09-17）已完成 UI/引擎/知识库三侧的统一，**当时仍未勾**（该条此后已勾选，见上一条；以下保留当时的记录）。做法：`src/game/engine.js` 新增 `RULES`（倍率、公式系数、强化、防御、能量、状态跳数、携带物、回合上限、成长与培养收益），`damage()`/`resolveTurn()`/`createGame()` 改为引用它；新增 `src/game/rules.js` 生成全部界面规则文案，其中**奖励、升级经验曲线、等级上限、每级成长、每次培养收益、速胜阈值都用 `settle()` 与 `createGame()` 现场量出**（二分/差分探测），不在文案里写第二遍；`src/client/index.html` 的规则弹窗正文与难度选项改为生成，`src/client/app.js` 的强化百分比、能量上限、回合上限、速胜回合数、升级经验基数改为 `ruleFacts().*`；规则/技能/道具/环境的 `desc` 改为从自身字段派生（生成结果与改前逐字一致）。验收测试 `tests/rules.test.js` 16 项，方式是**实测**而非比对常量：放大探针实测属性倍率与防御减伤、用文案里的系数重算 ≥100 组真实技能组合与 `damage()` 比对、真打一回合读日志验证灼烧跳数与剩余次数、真结算 win/draw/loss 读奖励、真连打 120 场验证等级停在 5、真构造 10/11 回合胜利验证速胜阈值；另把引擎字段拼成句子去 90 张知识卡里找（原来完全没有覆盖），并断言 `buildContext().battle.energyLimit === RULES.energy.max`（工具层）。产物：`docs/P05-RULES-SOURCE.md`。**未勾原因**：① `src/coach/*.js` 里仍有手写规则数字（`额外回2豆`、`等回合末回1豆`、`生命 +12 / 攻击 +4 / 速度 +3`），这些文件不在本轮可改范围，已在证据文档逐条列出并给出建议改法；② "版本迁移"只做到版本号单一来源 + 不匹配即阻断（`searchKnowledge` 返回 0 卡、`buildKnowledgePacket` blocked），存档格式迁移沿用既有实现未新增；③ `P06` 的"冻结后独立评测集"未做。
+      - 附带发现并修掉一个集成缺陷：新增 `src/game/rules.js` 后，既有测试 `tests/browser.test.js` 的 `the server allowlist covers every browser module` 立即失败（`rules.js is imported by the browser but not in server.js publicAssets`），已在 `src/server/index.js` 的 `publicAssets` 补上。**补上之前，运行中的 8765 进程实测 `/rules.js` 返回 404，页面一行 JS 都不执行**（同期的 C17 实测独立撞到同一问题）；该进程随后被重启，之后用新增的 `scripts/cdp-rules-check.js` 在真实浏览器（headless Chrome 152 + CDP）复核：`/rules.js` **200**、无任何网络层补齐、营地渲染出 **12**（现为 14）张卡片、规则弹窗 **11 节 / 77 段 / 4316 字符**、关键句缺失 **0**、弹窗 `open:true` 660×569、控制台错误 **0**（`reports/p05-rules-browser-check.txt`、`reports/p05-rules-dialog.png`）。这说明**仓库状态一直是对的，坏的只是"运行中的旧进程"**——也说明只看单测不够，所以本项补了一条真浏览器核查。
 - [x] P06 建立独立回归集和评测切分。包含建议并列合理、低置信度、证据缺失和应沉默场景。
-      - 已完成（2026-09-17）：`evals/regression-set.json` 16 条用例，覆盖**并列合理 / 低置信度 / 证据缺失 / 应沉默**四类，`evals/regression.test.js` 逐条判定并接入 `npm test`，全部离线可跑（不依赖模型与网络）。集合自身的说明里写明：由作者本轮编写，只能当回归网，不得当作质量评测集。
+      - 已完成（2026-09-17）：`tests/evals/regression-set.json` 16 条用例，覆盖**并列合理 / 低置信度 / 证据缺失 / 应沉默**四类，`tests/evals/regression.test.js` 逐条判定并接入 `npm test`，全部离线可跑（不依赖模型与网络）。集合自身的说明里写明：由作者本轮编写，只能当回归网，不得当作质量评测集。
 
 ## P1 军师与真正的工具 Agent
 
@@ -43,19 +43,19 @@
 依赖 A01、A05、A07；先规则基线，之后 RL 对照。
 
 - [x] U01 事件驱动候选提醒：对位/状态/资源/动作关注变化；停留仅作弱信号。
-      - 核实（2026-09-17）：`coach/experience.js` 的 `observe` / `trackAttention` / `attentionText` 已实现事件驱动候选（对位、倒下、资源、关注动作变化），停留只作为 `trackAttention` 的弱信号参与 `scanning` 判定；测试 `attention is bounded, respects silence and cannot fire in background`。
+      - 核实（2026-09-17）：`src/coach/experience.js` 的 `observe` / `trackAttention` / `attentionText` 已实现事件驱动候选（对位、倒下、资源、关注动作变化），停留只作为 `trackAttention` 的弱信号参与 `scanning` 判定；测试 `attention is bounded, respects silence and cannot fire in background`。
 - [x] U02 干预门控：重要性、确定性、可行动性、新颖性、已注意与打扰成本；允许沉默和延后。
       - 核实：`shouldNudge` 逐项门控——`active`（前台/非忙碌/非对局外）、`mode`（安静档）、`dismissed`（已注意）、`count>=2`（打扰成本上限）、`shownTurn`（同回合去重）、45 秒冷却（`now-lastShown<45000`）、`critical` 档只在风险时放行；`adaptiveGate` 再叠加降频与静默。
 - [x] U03 三档偏好及单条关闭（规则基础与门控测试）：适度、仅关键风险、关闭主动提醒；明确设置始终优先。
 - [x] U04 主界面布局复核：短字幕固定位置、不推动技能区、不抢焦点；完整桌面尺寸和窄屏测试。
       - 已完成（2026-09-17，浏览器实测）：在 1440×900 / 1280×720 / 1024×768 / 820×1180 / 390×844 五种尺寸下逐页检查，**横向溢出元素均为 0**，两个入口卡、当时 12 张（现为 14 张）伙伴卡与开始按钮在各尺寸都可见；手机尺寸下出征页正确隐藏关卡、显示对手行。短提示固定在底栏与面板内，不推动技能区。
 - [ ] U05 可选语音：开关、音量、短句播报、打断、去重和过期取消；文本与语音使用同一有效性检查。
-      - **已随语音停用而关闭（v0.11）**：`app.js` 的 `VOICE_FEATURE=false`，控件隐藏、`playVoice` 短路、已存的开启状态被改写为关闭。代码保留以便恢复，但在恢复并解决本机 macOS Chrome 的声音选择问题之前，本项不勾。
+      - **已随语音停用而关闭（v0.11）**：`src/client/app.js` 的 `VOICE_FEATURE=false`，控件隐藏、`playVoice` 短路、已存的开启状态被改写为关闭。代码保留以便恢复，但在恢复并解决本机 macOS Chrome 的声音选择问题之前，本项不勾。
 - [x] U06 字幕/语音可用性：没有语音也能获取关键信息；关闭语音不等于关闭字幕。
       - 核实并重新界定：语音已整体停用（`VOICE_FEATURE=false`，见 V08），所有关键信息本就以文字与字幕呈现，无语音时功能完整；关闭语音即关闭声音通道，字幕不受影响。原条目在语音停用后自动满足。
 - [x] U07 语言评审：具体、自然、无水平羞辱；不空泛安慰、不强行提问；使用者觉得烦时降低打扰。
       - 已完成（2026-09-17）：评审约 960 处玩家可见文案（**该规模数字已过时，现场复算见下一条**），**只改 5 处**（多余反问改陈述、兜底句具体化、空承诺改真实行为、术语堆砌改口语），**报告 3 处未改**并附建议文本。「无水平羞辱 / 不空泛安慰」逐类检索零命中（**"0 命中"这条现已不成立，见下一条**）。产物 `docs/LANGUAGE-REVIEW.md`。
-      - 本轮（2026-09-17）做了逐条评审，**当时仍未勾**（该条此后已勾选，见上一条；以下保留当时的记录）。方法：把 `app.js`、`index.html`、`coach/*.js`、`engine.js` 里的中文字符串字面量全部抽出来（约 400 条）按五条标准逐条判。**改了 5 处**：① `index.html` 预制场景按钮「需要一点提示吗？」→「展开这回合的取舍」（多余反问，按钮本身就是入口）；② `app.js` 赛后短字幕「要一起看一个关键回合吗？」→「本场已结束。下面有一个值得回看的关键回合。」；③ 分屏"我方教练"兜底句「当前没有明显更优的选择。」→「…：先比较对方留场和换宠两种分支。」（空泛改可执行）；④ 开场追问「需要时我再解释。」→「先按这个打，出招后我按新局面重算。」（空承诺改成程序真实行为）；⑤ 培养表脚注「受培养格与单项上限约束。」→「受培养格数与单项上限约束，加错了可以免费重置。」（术语堆砌改口语并补退路）。**报告但未改 3 处**（都在不在本轮可改范围的 `coach/*.js`，已给出建议文本）：`companion.js` 的通用安抚与写死的「我们已经练过速度判断了」、`teacher.js:61` 的「别等倒下再救」、`experience.js:66` 的「先别只盯着回血」。核查结论：`你应该/你必须/下次别` 等在评审当时 **0 命中**，**2026-09-17 晚现场复核已变为 3 处命中，且都在代码注释/检测器里**（`coach/companion.js:243` 的 `PREACH` 黑名单正则、`coach/experience.js:190` 与 `coach/teacher.js:40` 的注释），**实质结论（玩家可见文案里没有这类句子）仍成立**；`没关系/别灰心/加油` 仍只在黑名单检测器里命中（`coach/companion.js:259`）。评审规模现场复算（命令同 `docs/LANGUAGE-REVIEW.md` 第六节）：`app.js` 254、`engine.js` 166、`coach/*.js` 512——原记录的 247 / 160 / 420 分别是这三者的旧值，只有 `engine.js` 的 160 当时是对的。"觉得烦时降低打扰"由既有机制承担（`shouldNudge` 每局≤2 次/45 秒冷却/关闭后本场静默、`adaptiveGate` 按近 7 天关闭记录降频、安静档最前短路），本轮只做代码走查确认，未新增测试。产物：`docs/LANGUAGE-REVIEW.md`。**未勾原因**：没有真人读者验证，属 `R09`/`T04` 范围；本文件不能替代。
+      - 本轮（2026-09-17）做了逐条评审，**当时仍未勾**（该条此后已勾选，见上一条；以下保留当时的记录）。方法：把 `src/client/app.js`、`src/client/index.html`、`src/coach/*.js`、`src/game/engine.js` 里的中文字符串字面量全部抽出来（约 400 条）按五条标准逐条判。**改了 5 处**：① `src/client/index.html` 预制场景按钮「需要一点提示吗？」→「展开这回合的取舍」（多余反问，按钮本身就是入口）；② `src/client/app.js` 赛后短字幕「要一起看一个关键回合吗？」→「本场已结束。下面有一个值得回看的关键回合。」；③ 分屏"我方教练"兜底句「当前没有明显更优的选择。」→「…：先比较对方留场和换宠两种分支。」（空泛改可执行）；④ 开场追问「需要时我再解释。」→「先按这个打，出招后我按新局面重算。」（空承诺改成程序真实行为）；⑤ 培养表脚注「受培养格与单项上限约束。」→「受培养格数与单项上限约束，加错了可以免费重置。」（术语堆砌改口语并补退路）。**报告但未改 3 处**（都在不在本轮可改范围的 `src/coach/*.js`，已给出建议文本）：`src/coach/companion.js` 的通用安抚与写死的「我们已经练过速度判断了」、`src/coach/teacher.js:61` 的「别等倒下再救」、`src/coach/experience.js:66` 的「先别只盯着回血」。核查结论：`你应该/你必须/下次别` 等在评审当时 **0 命中**，**2026-09-17 晚现场复核已变为 3 处命中，且都在代码注释/检测器里**（`src/coach/companion.js:243` 的 `PREACH` 黑名单正则、`src/coach/experience.js:190` 与 `src/coach/teacher.js:40` 的注释），**实质结论（玩家可见文案里没有这类句子）仍成立**；`没关系/别灰心/加油` 仍只在黑名单检测器里命中（`src/coach/companion.js:259`）。评审规模现场复算（命令同 `docs/LANGUAGE-REVIEW.md` 第六节）：`src/client/app.js` 254、`src/game/engine.js` 166、`src/coach/*.js` 512——原记录的 247 / 160 / 420 分别是这三者的旧值，只有 `src/game/engine.js` 的 160 当时是对的。"觉得烦时降低打扰"由既有机制承担（`shouldNudge` 每局≤2 次/45 秒冷却/关闭后本场静默、`adaptiveGate` 按近 7 天关闭记录降频、安静档最前短路），本轮只做代码走查确认，未新增测试。产物：`docs/LANGUAGE-REVIEW.md`。**未勾原因**：没有真人读者验证，属 `R09`/`T04` 范围；本文件不能替代。
 - [x] U08 基础 Markdown、长文折叠和聊天高度复核（基础已有）；不把聊天当唯一价值入口。
       - 核实：`markdown()` 只做转义后的有限 Markdown（标题、列表、粗体、行内代码），不执行 HTML；"展开完整解释"的重复折叠已移除，长条目改为条目内滚动（`max-height:360px`），聊天不再是唯一入口（局内短提示与培养建议都不经过聊天）。
 
@@ -66,17 +66,17 @@
 - [x] M01 分离提示偏好、知识掌握、玩法目标与会话状态；事件附来源、时间和置信度。
 - [x] M02 保存关键经历，按任务检索记忆；不把全部对话长期塞进上下文。
 - [x] M03 多证据 Reflection：形成可修正假设；同时复盘小芽是否迟到、重复或错误。
-      - 核实：`coach/memory.js` 的 `coachSelfAudit` 统计 `coach-fallback`（错误）、`stale`（迟到/过期）、`dismiss`（重复打扰）三类事件并给出 evidenceIds，已接入 `memorySummary`，因此复盘时会同时复盘小芽自己是否迟到、重复或出错。
+      - 核实：`src/coach/memory.js` 的 `coachSelfAudit` 统计 `coach-fallback`（错误）、`stale`（迟到/过期）、`dismiss`（重复打扰）三类事件并给出 evidenceIds，已接入 `memorySummary`，因此复盘时会同时复盘小芽自己是否迟到、重复或出错。
 - [x] M04 查看、修正、删除记忆，同步清理摘要与检索索引；删除后不得继续引用。
 - [x] T01 关键复盘（v0.6 已完成整局统计、3个关键回合、按回合查看及直接伤害条件比较；本轮已补回合前多行动平均/最坏分支比较，明确近似同优与一回合边界）：区分事前合理性与事后结果；反事实列明假设；不用日志复述冒充解释。
 - [x] T02 培养原位建议（v0.6 已自动显示预算、当前关卡速度与加点伤害对比；v0.10已融合玩法目标、本命与保留资源选项）：关卡目标、宠物偏好、预算、阈值变化与保留资源选项。
 - [x] T03 生成有规则证据的相似练习；检验答案，允许退出；固定题库只作基线。
 - [ ] T04 无直接提示的迁移验证；区分提示下成功与独立成功；不以一次答对定终身。
-      - **本轮明确做不到，未勾，也没有用合成数据冒充。** 本项要验的是"撤掉提示之后玩家是否还能独立做对"，必须由真人被试在多个情境里重复观察才能成立；本项目没有真人被试，也没有受控实验条件（`reports/resources.json` 里没有可用被试与预算记录）。现有的替代物只到"记录独立行动、≥3 条跨局证据才形成可修正假设"这一层（`coach/memory.js` 的 journal 区分 `prompted`、`transferAssessment` 在证据不足时明确返回"尚不足以判断迁移"），它证明的是**机制存在**，不是**迁移发生**。因此本项保持未勾，且不应以 `R09` 之外的数据替代。
+      - **本轮明确做不到，未勾，也没有用合成数据冒充。** 本项要验的是"撤掉提示之后玩家是否还能独立做对"，必须由真人被试在多个情境里重复观察才能成立；本项目没有真人被试，也没有受控实验条件（`reports/resources.json` 里没有可用被试与预算记录）。现有的替代物只到"记录独立行动、≥3 条跨局证据才形成可修正假设"这一层（`src/coach/memory.js` 的 journal 区分 `prompted`、`transferAssessment` 在证据不足时明确返回"尚不足以判断迁移"），它证明的是**机制存在**，不是**迁移发生**。因此本项保持未勾，且不应以 `R09` 之外的数据替代。
 - [x] T05 陪练：真实事件关联的克制反馈、胜负后是否说话的判断、偏好跨局保持。
-      - 已完成（2026-09-17）：陪练闭环——`companionState()` 从真实对局历史派生 momentum/lossStreak/consideration/engagement，每条理由带数值与来源；档位 R0–R3 在三处真实生效（模板句、随证据包进模型的 `replyConstraints`、生成后的克制扫描）；主动气泡挂在本局首次减员与整局结束两个真实事件上，引用真实对手、倒下顺序与首个减员回合。**仍未做**：设计 §4.2–§4.4 的 journal 扩展、三因子检索、Reflection 合成，以及服务端档位提示词。产物 `docs/COMPANION-IMPLEMENTATION.md`、`companion.test.js`。
-      - 实现进展（2026-09-17，**当时不勾此项**；该条此后已勾选，见上一条）：三项硬要求已各有实现与自动测试——①真实事件关联：`memory.events` 新增对手阵容 / 倒下顺序 / 首个减员（成对记录回合与宠物）/ 剩余道具（`coach/memory.js:20-29`），陪练文本与依据只引用这些字段，测试 `templates cite the real match, the fallen pet and the opponent`；②胜负后是否说话：门控仍在 `coach.js:9-11`，档位改由 `proactiveRegister` 决定（连败 ≥2 → R3 收尾，否则 R1 只陈述事实），测试 `proactive companion cites the live match and stays silent by design`；③偏好跨局保持：`brief` / `detailed`、`稳健` / `速攻`、本命宠都会改变输出并经 `readMemory` 往返保留，测试 `player preferences survive matches and change the reply`。
-      - **当时为什么不勾**：T05 的验收口径包含真人语言评审（U07 当时未勾），本轮只有自动测试。⚠️ 原记录的后半句「主动通道在 `app.js` 里没有调用点（`notify()` 无调用处），气泡在真实 UI 中不会弹出」**当时就已不成立**：主动气泡是接线了的，`app.js` 里 `notify` 有定义也有调用（现场复核 `grep -n "notify" app.js` → 定义与调用各一处；`wiring.test.js` 把「陪练·主动气泡」列为必须接上的入口，`companion.test.js` 有对应断言）。完整说明与未做清单见 `docs/COMPANION-IMPLEMENTATION.md`（该文件的对应段落仍是旧的，属另一并发任务的修改范围）。
+      - 已完成（2026-09-17）：陪练闭环——`companionState()` 从真实对局历史派生 momentum/lossStreak/consideration/engagement，每条理由带数值与来源；档位 R0–R3 在三处真实生效（模板句、随证据包进模型的 `replyConstraints`、生成后的克制扫描）；主动气泡挂在本局首次减员与整局结束两个真实事件上，引用真实对手、倒下顺序与首个减员回合。**仍未做**：设计 §4.2–§4.4 的 journal 扩展、三因子检索、Reflection 合成，以及服务端档位提示词。产物 `docs/COMPANION-IMPLEMENTATION.md`、`tests/companion.test.js`。
+      - 实现进展（2026-09-17，**当时不勾此项**；该条此后已勾选，见上一条）：三项硬要求已各有实现与自动测试——①真实事件关联：`memory.events` 新增对手阵容 / 倒下顺序 / 首个减员（成对记录回合与宠物）/ 剩余道具（`src/coach/memory.js:20-29`），陪练文本与依据只引用这些字段，测试 `templates cite the real match, the fallen pet and the opponent`；②胜负后是否说话：门控仍在 `src/coach/session.js:9-11`，档位改由 `proactiveRegister` 决定（连败 ≥2 → R3 收尾，否则 R1 只陈述事实），测试 `proactive companion cites the live match and stays silent by design`；③偏好跨局保持：`brief` / `detailed`、`稳健` / `速攻`、本命宠都会改变输出并经 `readMemory` 往返保留，测试 `player preferences survive matches and change the reply`。
+      - **当时为什么不勾**：T05 的验收口径包含真人语言评审（U07 当时未勾），本轮只有自动测试。⚠️ 原记录的后半句「主动通道在 `src/client/app.js` 里没有调用点（`notify()` 无调用处），气泡在真实 UI 中不会弹出」**当时就已不成立**：主动气泡是接线了的，`src/client/app.js` 里 `notify` 有定义也有调用（现场复核 `grep -n "notify" src/client/app.js` → 定义与调用各一处；`tests/wiring.test.js` 把「陪练·主动气泡」列为必须接上的入口，`tests/companion.test.js` 有对应断言）。完整说明与未做清单见 `docs/COMPANION-IMPLEMENTATION.md`（该文件的对应段落仍是旧的，属另一并发任务的修改范围）。
 
 ## P1 上下文和证据链
 
@@ -88,7 +88,7 @@
 - [x] C04 超长工具结果分页/过滤；复杂任务拆解；避免反复摘要失真。
 - [x] C05 32K 限制和超长历史测试：能回查旧证据；压缩前后偏好/数值一致。
       - 补上了缺的那一半并通过：新增测试 `evidence trimmed out of the prompt is still retrievable from the archive`——800 条超长历史被裁到 32K 预算内、硬偏好保持、原始归档不被改写，且裁剪后仍能按回合取回第 1 回合的原始证据。另一半（32K 限制、压缩前后偏好/数值一致）由既有 32K 测试覆盖。
-      - 部分已达成：W04（官方 tokenizer 与 32K 裁剪）已覆盖"32K 限制"与"压缩前后偏好/数值一致"，证据为 `evals/agent.test.js:24`「context assembly trims to an explicit budget, preserves current facts and does not mutate the archive」（断言预算上限、preference 保持 'brief'、当前事实不变、原始存档不被改写）。**该测试原名**「32K assembly handles huge history, preserves exact current facts and does not mutate archive」，已改名（见 F17 类问题）。
+      - 部分已达成：W04（官方 tokenizer 与 32K 裁剪）已覆盖"32K 限制"与"压缩前后偏好/数值一致"，证据为 `tests/evals/agent.test.js:24`「context assembly trims to an explicit budget, preserves current facts and does not mutate the archive」（断言预算上限、preference 保持 'brief'、当前事实不变、原始存档不被改写）。**该测试原名**「32K assembly handles huge history, preserves exact current facts and does not mutate archive」，已改名（见 F17 类问题）。
       - **当时仍未达成**（该条此后已勾选，见上一条）：缺一条"裁剪之后仍能取回早期回合证据"的显式测试。上一条里新增的 `evidence trimmed out of the prompt is still retrievable from the archive` 正是这一条，补齐后本项勾选。
 - [x] C06 删除、损坏、过期证据测试：明确不足，不用摘要补造原始事实。
 
@@ -119,8 +119,8 @@
       - 证据（2026-09-17，44 条真实调用已跑完，**当时**本项仍未勾选；此后已勾选，见上一条）：`reports/live-model-eval-summary.md`、`reports/live-model-eval.json`、用例集与脚本 `scripts/eval-live-s04.js`、重算脚本 `scripts/analyze-live-eval.js`。44/44 全部 HTTP 200，0 超时、0 格式失败、0 编造数字、0 声称必胜；首选工具正确率 90.63%，但**多余工具调用率 75%（9/12 条本不该调工具的用例仍调了）**、模型主动停止仅 **1/31（3.23%）**、结束方式多为 `tool-budget`(16)/`repeated-tool`(11)；延迟 p50 4284ms、p90 6229ms；44 条总成本 ≈$0.0335（闲时价）。确凿失败：c44 道具名漂移（净化药写成"解药"）；`checkGroundedAnswer` 另有 6 条误报/派生值（本地路径数字、否定句"不是稳赢保证"、58+6 求和、-250.4 四舍五入）。该次运行发生在 A10 把工具轮次由 2 提到 3 之后，计数类指标已按 2 轮假设与 3 轮预算两种口径分别给出。
       - 补充（同日规划器改为"默认停止、调用是例外"后，用同一 44 条重跑）：对比报告 `reports/live-model-eval-before-after.md`。**多余工具调用率 75.00%→33.33%**（剔除标注错误的 c44 后 72.73%→27.27%）、**模型自停 3.23%→96.77%**、延迟 p50 4284→2798 ms、成本 $0.0335→$0.0209、严格正确率 31.25%→50.00%；**但新增失败模式：该调不调从 0/19 升到 7/19（cat1 5/11、cat3 2/8）**，其中 6 条所需事实本已在证据包（publicState/军师/教学证据）里、1 条是规划调用失败（`planner-failed-no-tools`）。因此这是一次权衡而非纯改善；两次均为单次运行、无重复测量，差值没有置信区间。
 - [x] S05 慢模型演示：快速出招后无旧文字、无旧语音、无重复补发。
-      - 客户端侧已完成（`evals/slow-model.test.js` 6 项，替换 `globalThis.fetch` 构造慢网，**未改生产代码**）：快速出招后不显示旧文字、不重复补发、过期结果被丢弃。**真浏览器慢响应未做**（需可控慢网环境，见 W09）。
-      - 本轮（2026-09-17）完成客户端侧的可复现验证，**当时仍未勾**（该条此后已勾选，见上一条；以下保留当时的记录）。做法：**没有修改 `coach/client.js`**，而是在测试里替换 `globalThis.fetch` 造可控慢网（`/api/bootstrap` 立即回、`/api/coach` 延迟 N 毫秒并如实响应 abort），驱动线上那条真实路径 `requestCoach → CoachScheduler.run → executeCoach → runCoach(本地预演) → assembleContext → fetch → checkGroundedAnswer`；替身按真实服务端合同回传 `stateToken`（`server.js` 的 `/api/coach` 返回 `stateToken: b.stateToken`）。新增 `evals/slow-model.test.js` 6 项，全部通过：① 慢回答 250ms + 40ms 时出招（`invalidateCoachRequests()`，即 `advanceContext`）→ 调用方拿到 `AbortError`、上游中止 1 次、被中止的请求 `completed===0`、**交付列表为空**；② 出招后按新局面重问 → 只交付新局面文本且 `stateToken===1`；③ 同一局面并发两次 → 上游只调 1 次；④ 连续三次快速出招 → 前两次 `AbortError`、上游 3 次/中止 2 次/完成 1 次、**只补发最后一条**；⑤ 静态断言"无旧语音"：`coach/client.js` 无任何 `speechSynthesis/playVoice/speak` 引用，`app.js` 的 `VOICE_FEATURE=false` 仍在、`playVoice` 停用时第一行返回、`speakCue` 受 `voiceEnabled` 约束；⑥ 慢到 600ms 且中途不出招 → 只交付一次、之后不补发。产物：`docs/S05-W09-SLOW-MODEL.md`，跑法 `npm run test:slow-model`。**未勾原因**：真实浏览器里叠加慢响应没做（那一半属 `W09`）；语音取消因语音已停用而没有可观察对象。`git diff` 显示 `coach/client.js` 有改动，那是同期并行任务（陪练档位约束）带来的，与本项无关。
+      - 客户端侧已完成（`tests/evals/slow-model.test.js` 6 项，替换 `globalThis.fetch` 构造慢网，**未改生产代码**）：快速出招后不显示旧文字、不重复补发、过期结果被丢弃。**真浏览器慢响应未做**（需可控慢网环境，见 W09）。
+      - 本轮（2026-09-17）完成客户端侧的可复现验证，**当时仍未勾**（该条此后已勾选，见上一条；以下保留当时的记录）。做法：**没有修改 `src/coach/client.js`**，而是在测试里替换 `globalThis.fetch` 造可控慢网（`/api/bootstrap` 立即回、`/api/coach` 延迟 N 毫秒并如实响应 abort），驱动线上那条真实路径 `requestCoach → CoachScheduler.run → executeCoach → runCoach(本地预演) → assembleContext → fetch → checkGroundedAnswer`；替身按真实服务端合同回传 `stateToken`（`src/server/index.js` 的 `/api/coach` 返回 `stateToken: b.stateToken`）。新增 `tests/evals/slow-model.test.js` 6 项，全部通过：① 慢回答 250ms + 40ms 时出招（`invalidateCoachRequests()`，即 `advanceContext`）→ 调用方拿到 `AbortError`、上游中止 1 次、被中止的请求 `completed===0`、**交付列表为空**；② 出招后按新局面重问 → 只交付新局面文本且 `stateToken===1`；③ 同一局面并发两次 → 上游只调 1 次；④ 连续三次快速出招 → 前两次 `AbortError`、上游 3 次/中止 2 次/完成 1 次、**只补发最后一条**；⑤ 静态断言"无旧语音"：`src/coach/client.js` 无任何 `speechSynthesis/playVoice/speak` 引用，`src/client/app.js` 的 `VOICE_FEATURE=false` 仍在、`playVoice` 停用时第一行返回、`speakCue` 受 `voiceEnabled` 约束；⑥ 慢到 600ms 且中途不出招 → 只交付一次、之后不补发。产物：`docs/S05-W09-SLOW-MODEL.md`，跑法 `npm run test:slow-model`。**未勾原因**：真实浏览器里叠加慢响应没做（那一半属 `W09`）；语音取消因语音已停用而没有可观察对象。`git diff` 显示 `src/coach/client.js` 有改动，那是同期并行任务（陪练档位约束）带来的，与本项无关。
 
 ## P2 游戏扩展预留
 
@@ -132,10 +132,10 @@
 - [x] G03 定义属性/增减益/环境结算顺序、持续时间、叠加上限、换宠及倒下规则。
 - [x] G04 小范围实现技能模板和机制测试后再填全宠物内容；同步知识库和存档版本。
 - [x] G05 按难度实现对手战术与搜索预算；不能看玩家待执行动作。
-      - 核实：`engine.js` 的 `chooseEnemy` 按难度分三档——轻松随机、标准优先伤害/治疗/回能、挑战枚举合法行动并计入连续换宠惯性成本；且决策只读回合前局面，"不读取玩家待执行动作"由 `AI decision is pure and independent of any submitted action` 测试保证。
+      - 核实：`src/game/engine.js` 的 `chooseEnemy` 按难度分三档——轻松随机、标准优先伤害/治疗/回能、挑战枚举合法行动并计入连续换宠惯性成本；且决策只读回合前局面，"不读取玩家待执行动作"由 `AI decision is pure and independent of any submitted action` 测试保证。
 - [x] G06 后期环境关卡、可反制路线、无天气队通关路径与奖励。
       - 核查与设计已完成（`docs/G06-LATE-GAME-DESIGN.md`），**没有真的加关卡**（会破坏平衡测试基线）。核查纠正了一个误解：**环境机制其实已经在线**（04 苔影密林=细雨、05 冠军高地=山风）；缺的是可反制路线的设计化、无天气队通关验证与奖励。
-      - 本轮（2026-09-17）只做现状核查与设计，**没有加、没有改任何关卡**（当时因此仍未勾；该条此后已勾选，见上一条）。核查结果先纠正一个容易搞错的印象：**环境机制与两个后期环境关卡其实已经在线**——`content.js` 的 `STAGES` 里 04 苔影密林带 `rain`、05 冠军高地带 `gale`，`stageOptions()` 会把 `environment` 透传给 `createGame`（实测 `createGame(17,['fox','turtle','deer'],stageOptions('grove')).environment` = 细雨 4 回合）。所以缺的不是机制而是三件事：**可反制路线的设计化**（实际存在三条：清风移除 / 撑过 4 回合（环境不续期）/ 换属性避开受损乘数，但没有测试或文档把它们定为设计意图）、**无天气队通关路径的验证**（没有任何仿真专门跑"不带清风也不带受益属性"的阵容打 04/05 关）、**奖励**。奖励上还发现一个具体问题：**速胜奖励在这两关实际不可达**——`reports/balance-calibration-summary.md` 的逐场统计显示 ≤10 回合获胜的 48 场**全部**来自第 1 关，第 4 关最快 15 回合、第 5 关最快 19 回合，而 `settle()` 的速胜阈值是 10 回合，等于"写得出、拿不到"（**时序提醒**：这两个数字出自 `reports/balance-calibration-summary.md` 那一轮校准，跑在属性相克表重写**之前**；用当前引擎复跑同一问题得 grove 16–17、summit 16 回合，≤10 回合 0 场，**结论不变、数字已过时**，详见 `docs/G06-LATE-GAME-DESIGN.md`）。设计约束（乘数 1.1/0.9 不要再拉大、清风不能成为唯一解、环境对双方同时生效）、奖励建议、验收方法（用矩阵脚本跑"带清风/不带清风/带受益属性"三组并断言不带清风也能通关）与"为什么现在不做"见 `docs/G06-LATE-GAME-DESIGN.md`。**未勾原因**：加关卡会让已归档的"关卡 × 阵容"矩阵全部过期，且"环境没有变成强制配招"目前没有数据支持。
+      - 本轮（2026-09-17）只做现状核查与设计，**没有加、没有改任何关卡**（当时因此仍未勾；该条此后已勾选，见上一条）。核查结果先纠正一个容易搞错的印象：**环境机制与两个后期环境关卡其实已经在线**——`src/game/content.js` 的 `STAGES` 里 04 苔影密林带 `rain`、05 冠军高地带 `gale`，`stageOptions()` 会把 `environment` 透传给 `createGame`（实测 `createGame(17,['fox','turtle','deer'],stageOptions('grove')).environment` = 细雨 4 回合）。所以缺的不是机制而是三件事：**可反制路线的设计化**（实际存在三条：清风移除 / 撑过 4 回合（环境不续期）/ 换属性避开受损乘数，但没有测试或文档把它们定为设计意图）、**无天气队通关路径的验证**（没有任何仿真专门跑"不带清风也不带受益属性"的阵容打 04/05 关）、**奖励**。奖励上还发现一个具体问题：**速胜奖励在这两关实际不可达**——`reports/balance-calibration-summary.md` 的逐场统计显示 ≤10 回合获胜的 48 场**全部**来自第 1 关，第 4 关最快 15 回合、第 5 关最快 19 回合，而 `settle()` 的速胜阈值是 10 回合，等于"写得出、拿不到"（**时序提醒**：这两个数字出自 `reports/balance-calibration-summary.md` 那一轮校准，跑在属性相克表重写**之前**；用当前引擎复跑同一问题得 grove 16–17、summit 16 回合，≤10 回合 0 场，**结论不变、数字已过时**，详见 `docs/G06-LATE-GAME-DESIGN.md`）。设计约束（乘数 1.1/0.9 不要再拉大、清风不能成为唯一解、环境对双方同时生效）、奖励建议、验收方法（用矩阵脚本跑"带清风/不带清风/带受益属性"三组并断言不带清风也能通关）与"为什么现在不做"见 `docs/G06-LATE-GAME-DESIGN.md`。**未勾原因**：加关卡会让已归档的"关卡 × 阵容"矩阵全部过期，且"环境没有变成强制配招"目前没有数据支持。
 - [x] G07 平衡矩阵、战术多样性、拖延上限、不同种子和配装测试；冻结规则后再重建评测集。
       - 已完成（2026-09-17）：**5,796 场 / 398 臂 / 185.3 秒**，11 个 study，覆盖不同种子的阵容与配装。结论之一：**速胜奖励在第 4、5 关不可达**（≤10 回合获胜的 48 场全部来自第 1 关，第 4 关最快 15、第 5 关 19 回合；该轮校准早于相克表重写，见 `docs/G06-LATE-GAME-DESIGN.md`）。产物 `reports/balance-matrix.md`。
       - 本轮（2026-09-17）把仿真从单点校准扩展成矩阵，**当时未勾**（该条此后已勾选，见上一条）。产物：新增脚本 `scripts/eval-balance-matrix.js`、结果 `reports/balance-matrix.json`（**5,796 场、398 个 arm、`partial:false`、规则版本 `RULES_VERSION=0.6`，用时 185.3 秒**（`durationMs` 185314）；种子写死在脚本里，三档种子集 12/20/24 个，从 100 起每步 +37，可复现）、叙述报告 `reports/balance-matrix.md`（58,229 字节 ≈ 56.9KB，10 节 + 复现清单）、原始输出 `reports/balance-matrix-stdout.txt` 与 `reports/balance-matrix-run.log`。共 11 个 study：**S1 核心矩阵**（9 阵容 × 3 难度 × 3 携带物，972 场）、**S2 战术多样性**（3 阵容 × 3 难度 × **8 种打法** greedy-damage/rushed/random/guard-first/switch-first/support-first/switch-seeking/one-turn-rank，864 场）、**S3 配招**（288 场）、**S4 同属性同位置替换**（6 组同系配对 × 20 种子，1,200 场，用来回答 G02 遗留的"旧宠职责是否被新宠替代"）、**S5 同队友轮换扫描**（720 场）、**S6 模式对照**（pve / pvp-local，192 场）、**S7 拖延上限**（216 场）、**S8 关卡对照**（48 场）、**S9 携带物对称对照**（216 场）、**S10a/S10b 与归档 studyA/studyC 的复现对照**（24 种子，1,080 场）。每个 arm 都带样本量、胜率与 Wilson 95% 置信区间、回合数的均值/标准差/最小/最大/p10/p50/p90、双方存活数、平局率与上限率，另有逐场 `bySeed` 可重算。
@@ -144,8 +144,8 @@
       - 报告第 10 节主动列了 **12 条"数据不足以支撑的结论"**：绝对胜率只在同一策略内可比（不能当玩家胜率或体感平衡）、没有真人策略分布、`pvp-local` 对手不是真人、每格 n=12–60 分不开小于 12–15pp 的差异（"无差异"只表示没测出差异）、配装只覆盖一小片（没有测"敌方带 A / 我方带 B"的对抗矩阵）、等级与培养维度未覆盖、**环境维度几乎未覆盖（只有 S8 的关卡 05 山风 24 场）**、战术多样性只描述脚本与 AI、教练/LLM 相关结论完全没有、那条雷系失衡只在单一条件下成立。
       - **当时未勾的原因**（该条此后已勾选）：① 数据全部来自无头仿真，玩家侧是固定脚本策略而**不是真人**（这正是 S2 能覆盖 8 种打法的原因，也是它不能代表真人的原因）；② "冻结规则后再重建评测集"这半句依赖 `P06` 的独立评测集，本轮未做；③ 环境维度只测了 24 场（S8 的关卡 05 山风两个臂 × 12 种子），`G06` 关心的"环境会不会变成强制配招"**本批数据回答不了**。
 - [x] G08 原位规则说明、有效伤害条件与状态计时；关闭 AI 也能理解并完成游戏。
-      - 已完成（2026-09-17）：规则页补齐**有效伤害条件**与**状态计时**；`offline.test.js` 只用引擎把三档难度各打完一局。真实浏览器实测：`/rules.js` 200、11 节/77 段、关键句缺失 0、弹窗可见、控制台 0 报错。产物 `docs/G08-RULES-IN-PLACE.md`、`scripts/cdp-rules-check.js`。**字符数已变**：`reports/p05-rules-browser-check.txt` 记录的是那次 DOM 实测的 **77 段 / 4316 字符**，当时 `rules.js` 之后又被改过；现场复算（`node -e "import('./rules.js').then(m=>{let t=0,c=0;for(const s of m.rulesSections()){t+=s.lines.length;c+=s.title.length+s.lines.join('').length}console.log(m.rulesSections().length,t,c)})"`）在写作时为 **11 节 / 79 行正文（另有 11 个标题）**、标题+正文 **4440** 字符——**这两个数会随 `rules.js` 与引擎数据变动，务必现场跑**（DOM 的 `<p>` 计数与 `rulesSections()` 的行数也不是同一口径）。
-      - 本轮（2026-09-17）补齐并加了自动证据，**当时仍未勾**（该条此后已勾选，见上一条；以下保留当时的记录）。改前缺口：规则弹窗只有一条公式句子，缺完整属性对应关系、防御减伤之外的限制、哪些技能穿透防御、强化/环境/携带物如何进公式、最低伤害，也缺"什么情况下这一手打不出伤害"；状态部分缺"施加当回合是否结算""能否叠加/刷新""防御能否清掉已有异常""后备是否暂停""减速是否追溯改顺序""强化几回合到期""携带物是否每局一次"。现在规则页由 `rules.js` 生成 11 节（伤害怎么算（有效伤害条件）9 行、状态与计时 8 行、行动顺序、能量、道具与携带物、**新增伙伴面板 14 只**（当时为 12 只，本轮新增两只普通系后为 14）、技能数值 23 条、关卡与难度、胜负奖励与培养、规则版本与存档、这一局的目标），数值全部来自 `engine.js` 的 `RULES`/`ENVIRONMENTS`/`SKILLS`/`ITEMS`/`HELD_ITEMS`/`SPECIES`。原位性：规则入口是页头"规则"按钮直接开弹窗、不经过小芽面板也不需要模型，出招按钮本身内联 `威力/消耗/优先级/说明`。新增 `offline.test.js` 5 项：① `engine.js` 的静态 import 图只有它自己、`rules.js`/`progression.js` 图里没有任何 `coach/` 模块；② **只用引擎把 easy/normal/hard 各打完一局**（笨策略"永远选第一个合法行动"），都到达终局、回合数不超 80、结束后 `settle()` 有奖励；③ 逐条断言规则页里有公式系数、最低伤害、两种倍率、65% 减伤、穿透说明、强化层数与上限、"目标已倒下/能量不够/原定行动取消"三个前提、两种异常的跳数与回合、当回合结算、不叠加、后备暂停、减速回合数、强化计时、携带物每局一次、环境回合数、80 回合平局，以及 23 技能/3 道具/14 宠都能查到；④ 规则按钮直接开弹窗、出招按钮内联说明；⑤ 规则页含"不连接模型"说明且对局对象里没有教练状态字段。产物：`docs/G08-RULES-IN-PLACE.md`。**浏览器侧已实测**（服务重启后）：`scripts/cdp-rules-check.js` 用 headless Chrome 152 + CDP 打开 http://127.0.0.1:8765/ 读真实 DOM，`/rules.js` 200、无网络层补齐、规则弹窗 11 节/77 段/4316 字符（**该快照早于 `rules.js` 的最后一次改动，见上一条的现场复算值**）、关键句缺失 0、难度下拉由 `DIFFICULTIES` 生成、弹窗 `open:true` 可见、控制台错误 0（`reports/p05-rules-browser-check.txt`、`reports/p05-rules-dialog.png`）。**未勾原因**：全部是"文案里有没有这句话 + 引擎能不能独立跑完 + 一次真实渲染"的自动断言，**没有真人可理解性测试**；规则页是长文本，未做折叠/搜索分层；**新增小节标题的窄屏视觉验收没做**（浏览器核查只跑了 1440×900 一个视口，`U04` 的尺寸走查在规则页改版之前）。
+      - 已完成（2026-09-17）：规则页补齐**有效伤害条件**与**状态计时**；`tests/offline.test.js` 只用引擎把三档难度各打完一局。真实浏览器实测：`/rules.js` 200、11 节/77 段、关键句缺失 0、弹窗可见、控制台 0 报错。产物 `docs/G08-RULES-IN-PLACE.md`、`scripts/cdp-rules-check.js`。**字符数已变**：`reports/p05-rules-browser-check.txt` 记录的是那次 DOM 实测的 **77 段 / 4316 字符**，当时 `src/game/rules.js` 之后又被改过；现场复算（`node -e "import('./src/game/rules.js').then(m=>{let t=0,c=0;for(const s of m.rulesSections()){t+=s.lines.length;c+=s.title.length+s.lines.join('').length}console.log(m.rulesSections().length,t,c)})"`）在写作时为 **11 节 / 79 行正文（另有 11 个标题）**、标题+正文 **4440** 字符——**这两个数会随 `src/game/rules.js` 与引擎数据变动，务必现场跑**（DOM 的 `<p>` 计数与 `rulesSections()` 的行数也不是同一口径）。
+      - 本轮（2026-09-17）补齐并加了自动证据，**当时仍未勾**（该条此后已勾选，见上一条；以下保留当时的记录）。改前缺口：规则弹窗只有一条公式句子，缺完整属性对应关系、防御减伤之外的限制、哪些技能穿透防御、强化/环境/携带物如何进公式、最低伤害，也缺"什么情况下这一手打不出伤害"；状态部分缺"施加当回合是否结算""能否叠加/刷新""防御能否清掉已有异常""后备是否暂停""减速是否追溯改顺序""强化几回合到期""携带物是否每局一次"。现在规则页由 `src/game/rules.js` 生成 11 节（伤害怎么算（有效伤害条件）9 行、状态与计时 8 行、行动顺序、能量、道具与携带物、**新增伙伴面板 14 只**（当时为 12 只，本轮新增两只普通系后为 14）、技能数值 23 条、关卡与难度、胜负奖励与培养、规则版本与存档、这一局的目标），数值全部来自 `src/game/engine.js` 的 `RULES`/`ENVIRONMENTS`/`SKILLS`/`ITEMS`/`HELD_ITEMS`/`SPECIES`。原位性：规则入口是页头"规则"按钮直接开弹窗、不经过小芽面板也不需要模型，出招按钮本身内联 `威力/消耗/优先级/说明`。新增 `tests/offline.test.js` 5 项：① `src/game/engine.js` 的静态 import 图只有它自己、`src/game/rules.js`/`src/game/progression.js` 图里没有任何 `src/coach/` 模块；② **只用引擎把 easy/normal/hard 各打完一局**（笨策略"永远选第一个合法行动"），都到达终局、回合数不超 80、结束后 `settle()` 有奖励；③ 逐条断言规则页里有公式系数、最低伤害、两种倍率、65% 减伤、穿透说明、强化层数与上限、"目标已倒下/能量不够/原定行动取消"三个前提、两种异常的跳数与回合、当回合结算、不叠加、后备暂停、减速回合数、强化计时、携带物每局一次、环境回合数、80 回合平局，以及 23 技能/3 道具/14 宠都能查到；④ 规则按钮直接开弹窗、出招按钮内联说明；⑤ 规则页含"不连接模型"说明且对局对象里没有教练状态字段。产物：`docs/G08-RULES-IN-PLACE.md`。**浏览器侧已实测**（服务重启后）：`scripts/cdp-rules-check.js` 用 headless Chrome 152 + CDP 打开 http://127.0.0.1:8765/ 读真实 DOM，`/rules.js` 200、无网络层补齐、规则弹窗 11 节/77 段/4316 字符（**该快照早于 `src/game/rules.js` 的最后一次改动，见上一条的现场复算值**）、关键句缺失 0、难度下拉由 `DIFFICULTIES` 生成、弹窗 `open:true` 可见、控制台错误 0（`reports/p05-rules-browser-check.txt`、`reports/p05-rules-dialog.png`）。**未勾原因**：全部是"文案里有没有这句话 + 引擎能不能独立跑完 + 一次真实渲染"的自动断言，**没有真人可理解性测试**；规则页是长文本，未做折叠/搜索分层；**新增小节标题的窄屏视觉验收没做**（浏览器核查只跑了 1440×900 一个视口，`U04` 的尺寸走查在规则页改版之前）。
 
 ## P2 提交材料
 
@@ -159,7 +159,7 @@
       - **一个口径冲突，未合并**：发布会口径为「**策略大模型**驱动」，转载自公众号的稿件为「**混元 3 preview** 驱动」；两者是否同一件事**未能核实**，文档里并列记录、不互相解释。
       - **如实写了「查不到」，这是本轮的主要结论之一**：**没有取得腾讯/和平精英官网或公众号原文**（官网 `gp.qq.com` 首页本轮为可读性损坏的编码且通栏是另一期版本内容，未见小田条目），因此没有任何一条结论能标为「官网原文级」；**机制层完全空白**——怎么关、有几档频率、是否在队友语音时避让，**一条都没找到**。由此，`docs/COMPANION-DESIGN.md` 原 §9.2 的 5 个待答问题**只答上 2 个**（入口形态、内容边界），第 2 问半答，第 4、5 问答不上；原假设「若小田也有避免打扰机制则说明是品类共识」**因查不到而不成立**——该机制目前**仍只有灵宝一侧的官方证据，是单点**。
       - **未从常识推导功能**：凡转载级描述（封烟救援、拒捡空投、M4 偏好记忆、生图回忆）均标注为转载级；媒体分析稿里的「打破可预测性」「反向训练」「千人千面」明确标为**分析性表述、不采信为功能事实**，并写明不足以区分「长期记忆+个性化提示」与「真的做了模型侧更新」。未推断其内部是否使用混元 3 preview / ReAct / RAG / Memory Stream / RL。
-      - **设计映射对着实际实现写**（`coach/companion.js`、`docs/COMPANION-IMPLEMENTATION.md`，不对着设想）。最值得借鉴的三条：① 公开资料只讲能力上限、不讲失败时怎么办，而小芽有 `checkCompanionRestraint` 越界回退与无模型时的模板降级；② **一条明确冲突——情绪边界相反**：小田以「有脾气、会吐槽你瞎指挥」为卖点，小芽把第一人称情绪断言与空泛鼓励**一律拦下**（因为小田卖「活人感」、小芽防 R1 油腻），**判断是小芽不该改**；③ 小田「拒绝并给替代方案」**只部分适用**——小田是队友（可被指挥）、小芽是教练（玩家自己出招），**「小芽不接管操作」这条边界不因小田改变**。
+      - **设计映射对着实际实现写**（`src/coach/companion.js`、`docs/COMPANION-IMPLEMENTATION.md`，不对着设想）。最值得借鉴的三条：① 公开资料只讲能力上限、不讲失败时怎么办，而小芽有 `checkCompanionRestraint` 越界回退与无模型时的模板降级；② **一条明确冲突——情绪边界相反**：小田以「有脾气、会吐槽你瞎指挥」为卖点，小芽把第一人称情绪断言与空泛鼓励**一律拦下**（因为小田卖「活人感」、小芽防 R1 油腻），**判断是小芽不该改**；③ 小田「拒绝并给替代方案」**只部分适用**——小田是队友（可被指挥）、小芽是教练（玩家自己出招），**「小芽不接管操作」这条边界不因小田改变**。
       - **结论**：资料足以确认「小田是什么」，**不足以做机制级设计对照**；`docs/COMPANION-DESIGN.md` §3 情绪模型**维持原样**，§9 已从「调研缺口」改写为「已完成调研」并标注为「有外部同向证据，无外部机制对照」。**本轮未改任何代码、测试、`report/`、`output/`。**
 - [x] F02 整理架构、任务链、模型职责、技术取舍、难点与失败案例。
 - [x] F03 完成评测数据表，记录规则版本、模型版本、样本量、延迟与成本，不填虚构成绩。
@@ -180,7 +180,7 @@ P01—P06 → A 与 C 基础 → U 与 M/T → R 实验 → S 与完整评测 �
 - [x] K01 原创本地战术卡11张、来源边界与反例。
 - [x] K02 离线词项检索、版本过滤、字符预算、引擎直接伤害证据；6项测试通过。
 - [x] K03 将检索注册为Agent工具，补结构化适用性、混合召回与引用校验，接入实际自动提示。
-      - 逐条核实（2026-09-17）：检索已注册为 Agent 工具 `search_rules`（`coach/runtime.js` 的工具表）；结构化适用性 `applicability(card,game)`（`coach/strategist.js`）；混合召回为词项 + 多语言嵌入 RRF（`coach/semantic-server.js`，`reports/semantic-summary.txt`）；引用校验 `verifyCitations` 对伪造 ID 关闭通过（`evals/agent.test.js`）；`strategist()` 内部直接检索，因此进入了实际提示路径。
+      - 逐条核实（2026-09-17）：检索已注册为 Agent 工具 `search_rules`（`src/coach/runtime.js` 的工具表）；结构化适用性 `applicability(card,game)`（`src/coach/strategist.js`）；混合召回为词项 + 多语言嵌入 RRF（`src/server/semantic-server.js`，`reports/semantic-summary.txt`）；引用校验 `verifyCitations` 对伪造 ID 关闭通过（`tests/evals/agent.test.js`）；`strategist()` 内部直接检索，因此进入了实际提示路径。
 
 K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCALIZATION.md。游戏扩展仍按预案分阶段处理。
 
@@ -197,10 +197,10 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
       - 已完成（2026-09-17，4,008 场无头仿真）：**惯性 6 分/上限 18 数据不支持改动**——912 次敌方决策改判 0 次，连换 streak 从未达到 2（上限不可达），penalty 0/3/6/9/12/18 与 cap 12/24 结果逐字节相同。**速胜 10 回合数据支持调整**——等级匹配培养下 0/96 胜场在 10 回合内达成（最快 11），仅满培养高速队打第 1 关可达（24/36），建议 10→12。`reports/balance-calibration.json`、`swift-threshold.json`。
       - 证据（2026-09-17，无头仿真 3,828 场，**当时**未勾选；此后已勾选，见上一条）：`reports/balance-calibration-summary.md`、`reports/balance-calibration.json`、`reports/swift-threshold.json`、脚本 `scripts/eval-balance-calibration.js` 与 `scripts/eval-swift-threshold.js`；参数化敌方选择器在 7,323 个状态上与线上 `chooseEnemy()` 不一致 0 次。**惯性成本 6/上限 18：数据不支持改动**——912 次敌方决策中改判 0 次，连换 streak 从未到 2（上限 18 不可达），penalty 0/3/6/9/12/18 与 cap 12/24 结果逐字节相同；若要真正抑制连续换宠，应改触发条件（"近 3 回合内换过"时 6 分即改判 24 次/48 场，玩家胜率 50%→20.8%），而不是改数值。**速胜 10 回合：数据支持调整**——等级匹配培养下 0/96 场胜利达成（最快 11 回合），仅"满培养高速队打第 1 关"可达（36 场中 24 场 = 66.67%）；若定位为普通玩家偶尔可得的挑战奖励建议 10→12（12–16 无差别），若定位为超额培养专属徽章则保留 10 并在界面写明。
 - [x] A10 从固定检索流程升级为模型可选择工具的有界ReAct，补适用条件执行校验、多回合搜索和证据引用校验。
-      - 已完成核心项（2026-09-17）：① **适用条件执行校验**——`gatherAgentEvidence` 对 `search_rules` 回执按 `applicability.status` 过滤，条件不满足的卡片不进入证据，只留 `notApplicableHere` 记录 ID，这是程序执行而非提示约束；② **多回合搜索**——工具轮次上限由 2 提到 3（循环上限 4），测试断言按回执逐步换手 `search_rules → compare_actions → read_state`；③ 引用校验由 `verifyCitations` 与 `checkGroundedAnswer` 覆盖。模型自主选工具本身早在 `server.js` 的 `provider.plan` 实现，本轮补的是执行侧校验。
+      - 已完成核心项（2026-09-17）：① **适用条件执行校验**——`gatherAgentEvidence` 对 `search_rules` 回执按 `applicability.status` 过滤，条件不满足的卡片不进入证据，只留 `notApplicableHere` 记录 ID，这是程序执行而非提示约束；② **多回合搜索**——工具轮次上限由 2 提到 3（循环上限 4），测试断言按回执逐步换手 `search_rules → compare_actions → read_state`；③ 引用校验由 `verifyCitations` 与 `checkGroundedAnswer` 覆盖。模型自主选工具本身早在 `src/server/index.js` 的 `provider.plan` 实现，本轮补的是执行侧校验。
 - [x] R10 建立无检索/基础检索/反例检索对照评测；真实DeepSeek效果仍待测，不把卡片数量当提升证据。
       - 已完成（2026-09-17）：128 条作者自写查询（112 正 / 16 负）四臂对照。Hit@3：无检索 0.00% / 关键词 88.39% / 混合 90.18% / **反例臂 91.07%**（MRR 0.8244）。反例臂对关键词 **不显著**（+2.68pp，McNemar p=0.4531，bootstrap 95% CI [−1.79,+7.14]pp）。**负例拒答三臂都只有 56.25%**——7 条越界提问仍召回卡片，这是本轮暴露的未解决问题。查询集非独立盲标，报告已注明。
-      - 证据（2026-09-17，128 条查询四臂对照，**当时**未勾选；此后已勾选，见上一条）：`reports/retrieval-extended-summary.md`、`reports/retrieval-extended.json`、查询集 `evals/retrieval-extended.json`、脚本 `scripts/eval-retrieval-extended.js`。Hit@3：none 0.00% / lexical 88.39% / hybrid 90.18% / 反例臂 91.07%（MRR 0.8007 / 0.7996 / 0.8244）；但**最好的反例臂相对 lexical 基线不显著**（+2.68 个百分点，McNemar 精确 p=0.4531，配对 bootstrap 95% CI [−1.79, +7.14] 个百分点；MRR +0.0237，p=0.4583），hybrid 同样不显著且 MRR 略低；负例拒答三臂都只有 56.25%（9/16 拒答，7 条越界提问仍召回卡片）。查询集为**同一作者自写、非独立盲标**，新写 92 条 Hit@3 93.48% 明显高于原有 20 条（75–81%），绝对数值偏乐观，不能当作外部基准。
+      - 证据（2026-09-17，128 条查询四臂对照，**当时**未勾选；此后已勾选，见上一条）：`reports/retrieval-extended-summary.md`、`reports/retrieval-extended.json`、查询集 `tests/evals/retrieval-extended.json`、脚本 `scripts/eval-retrieval-extended.js`。Hit@3：none 0.00% / lexical 88.39% / hybrid 90.18% / 反例臂 91.07%（MRR 0.8007 / 0.7996 / 0.8244）；但**最好的反例臂相对 lexical 基线不显著**（+2.68 个百分点，McNemar 精确 p=0.4531，配对 bootstrap 95% CI [−1.79, +7.14] 个百分点；MRR +0.0237，p=0.4583），hybrid 同样不显著且 MRR 略低；负例拒答三臂都只有 56.25%（9/16 拒答，7 条越界提问仍召回卡片）。查询集为**同一作者自写、非独立盲标**，新写 92 条 Hit@3 93.48% 明显高于原有 20 条（75–81%），绝对数值偏乐观，不能当作外部基准。
 
 本轮未完成训练、语义向量召回与个性化干预学习；原清单相应条目保持未勾选。当前8765服务已启动更新代码，密钥仍需在连接页面由用户录入。
 
@@ -301,7 +301,7 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
       - **已作废（v0.11）**：语音整体停用，见 V08 与 README。此条仅记录当时的实现，不代表当前可用。
 - [ ] V08 用户设备扬声器实际可听性、长局语音打扰程度仍需真人验证；不以onstart冒充听觉验收，U05/E08保持未勾。
       - **结论：验证失败并已停用。**用户实测首次播报正常，此后无论指定哪个 zh-CN 声音都播成粤语并伴随结尾爆音；触发点为 `speechSynthesis.cancel()`，间隔 300ms 也无法恢复，只有刷新页面复原。因此不改名为已完成，而是停用并保留记录。
-      - **v0.11 结论：验证失败并已停用。**用户实测：首次播报正常，此后无论选择哪个 zh-CN 声音（含婷婷、Google 普通话）都播成粤语并伴随结尾爆音；触发点是 `speechSynthesis.cancel()`，间隔 300ms 也无法恢复，只有刷新页面复原。当前已在 `app.js` 中以 `const VOICE_FEATURE=false` 整体关闭，UI 控件隐藏，代码保留待查。
+      - **v0.11 结论：验证失败并已停用。**用户实测：首次播报正常，此后无论选择哪个 zh-CN 声音（含婷婷、Google 普通话）都播成粤语并伴随结尾爆音；触发点是 `speechSynthesis.cancel()`，间隔 300ms 也无法恢复，只有刷新页面复原。当前已在 `src/client/app.js` 中以 `const VOICE_FEATURE=false` 整体关闭，UI 控件隐藏，代码保留待查。
 - [x] V09 模型生成指令不写进玩家聊天历史；旧历史中这条内部指令迁移清理；100项自动测试通过。
 
 以上没有删除原清单的未完成项。神经语义检索、精确tokenizer、生产权威状态、LLM权重RL和独立大样本质量评测仍未完成。
@@ -320,7 +320,7 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
 - [x] W07 SmolLM2-135M冻结骨干，REINFORCE更新两个输出行共1152参数；3种子×250轮，16条留出题15正确，未训练8正确。检查点、750行轨迹和参数变化已保存。仅是二选一工具任务，不等于多步LLM Agent训练。
 - [x] W08 用户重新配置后，v0.10真实DeepSeek五条调用与PVP拦截已执行。补位/整局/追问/天气有真实工具轨迹；发现名称漂移并补约束，独立质量评测S04仍未完成。
 - [ ] W09 新版完整浏览器慢响应、语音取消与长局验收。
-      - 本轮（2026-09-17）只完成其中两块，**本项仍未勾**。① **慢响应与取消**：`evals/slow-model.test.js` 6 项通过——用替换 `globalThis.fetch` 的方式造可控慢网，驱动真实 `coach/client.js`，验证出招后旧请求被中止且交付列表为空、连续三次快速出招只交付最后一条、同局面并发只调上游一次、慢到 600ms 也不重复补发（生产代码未改）。② **长局**：`reports/c17-endgame-browser.md` 的 headless Chrome 实测，8 局全部打完整场（14/14/15/17 回合）。**未做的三块**：真实浏览器里叠加慢响应跑完整链路（本机 8765 由用户持有，无法在不干预服务的前提下制造可控慢网，CDP 改写响应属额外干预）；**语音取消没有可观察对象**（语音整体停用 `VOICE_FEATURE=false`，恢复语音之前这一半无法验收）；慢回答下的浏览器渲染观感（短字幕占位、按钮禁用态、长时间 loading）未测，需真人观察或录屏。详见 `docs/S05-W09-SLOW-MODEL.md` 第五节。
+      - 本轮（2026-09-17）只完成其中两块，**本项仍未勾**。① **慢响应与取消**：`tests/evals/slow-model.test.js` 6 项通过——用替换 `globalThis.fetch` 的方式造可控慢网，驱动真实 `src/coach/client.js`，验证出招后旧请求被中止且交付列表为空、连续三次快速出招只交付最后一条、同局面并发只调上游一次、慢到 600ms 也不重复补发（生产代码未改）。② **长局**：`reports/c17-endgame-browser.md` 的 headless Chrome 实测，8 局全部打完整场（14/14/15/17 回合）。**未做的三块**：真实浏览器里叠加慢响应跑完整链路（本机 8765 由用户持有，无法在不干预服务的前提下制造可控慢网，CDP 改写响应属额外干预）；**语音取消没有可观察对象**（语音整体停用 `VOICE_FEATURE=false`，恢复语音之前这一半无法验收）；慢回答下的浏览器渲染观感（短字幕占位、按钮禁用态、长时间 loading）未测，需真人观察或录屏。详见 `docs/S05-W09-SLOW-MODEL.md` 第五节。
 - [x] W10 更新最终报告与原清单验收映射。
       - 已完成（2026-09-17）：`docs/W10-ACCEPTANCE-MAPPING.md` 把每一项未勾逐条映射到证据或缺失原因。**当时 PDF 未随本轮重新生成**（报告仍缺今天的全部新数据），这是当时唯一的交付面缺口。**2026-09-17 晚复核：该缺口已关闭**——`output/pdf/xiaoya-coach-report.pdf` 之后被重新生成（当前 396,798 字节，mtime 22:32），`report/sections/` 也在 `4135779`/`b37f9fb`/`fb5e92a` 之后重写过。
       - 本轮（2026-09-17）做了清单侧的映射，**最终报告与 PDF 当时未更新，当时本项仍未勾**（该条此后已勾选，见上一条）。产物 `docs/W10-ACCEPTANCE-MAPPING.md`：把**当时仍为 19 项**的未勾项逐条列出"本轮推进到什么程度 / 证据路径 / 为什么仍未勾"（**现在未勾是 9 项**：U05、T04、R03、R09、F01b、E08、V08、W09、X06），并明确本节之前 7 项的推进（`P05`/`U07`/`G08`/`S05`/`G07`/`C17`/`W10`）都附了可核查产物但都不够勾（**这 7 项现在都是 `[x]`**）。同时写明：**`report/` 的 LaTeX 源与 `output/pdf/xiaoya-coach-report.pdf` 本轮都没有重新生成**，因此现有 PDF 不能当作包含 P05/G08/U07/G07/C17 结果的提交稿（**已过时：两者之后都重新生成过**）；`reports/test-output.txt` 本轮也未改写（避免与并行任务互相覆盖）（**已过时：该文件已在 22:04 重写为 251/251/0，并随提交 `50ec5fe` 入库**）。要真正完成 `W10` 还差三步：把映射表压缩成一节写进 `report/sections/`、重新生成 PDF（`npm run build:report`）并逐页检查、更新 `reports/test-output.txt`。测试基线对比同时记录在该文件：改动前 151 项全绿（`git stash` 回 HEAD 连跑两次确认），本轮改动后见最新 `npm test` 输出。
@@ -332,14 +332,14 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
 
 |原项|本次依据|
 |---|---|
-|A01|coach/toolbox.js统一参数合同；非法参数、PVP、分支不变性、历史分页回归|
+|A01|src/coach/toolbox.js统一参数合同；非法参数、PVP、分支不变性、历史分页回归|
 |A03|90条带版本知识；真实MiniLM语义+词项RRF；三组逐题结果semantic-retrieval.json。比较已做，未声称答案增益|
-|A07/A08|scheduler.js取消/串行/去重/缓存；请求最多三次规划+一次生成（A10 把工具轮次由 2 提到 3）、固定输出/时间预算；HTTP断连上游取消测试。真实完整调用成本仍待聚合|
+|A07/A08|src/coach/scheduler.js取消/串行/去重/缓存；请求最多三次规划+一次生成（A10 把工具轮次由 2 提到 3）、固定输出/时间预算；HTTP断连上游取消测试。真实完整调用成本仍待聚合|
 |T02|memory目标/本命传入teacher；稀缺资源保留与不改变profile回归；原位简短结论|
 |C01/C04|官方tokenizer实际计数及API差值；工具分页、指定回合、超长拒绝；不裁断JSON|
 |R02/R06|5类模拟用户、增量帮助反事实、始终提示/沉默/挑场景等奖励审计。结果非真人效果|
 |R08|tool-router-rl.json与tool-router-head.pt；实际输出行参数变化、留出集对照；实验范围是二选一上下文bandit|
-|G01/G03/G04|14宠全部可试玩（按属性筛选；旧的"基础伙伴 8 / 战术伙伴 4"分组已在 `cf841c6` 删除，因为它"read as a gameplay distinction that does not exist"）；6选4、强化、驱散、携带物、4回合环境；mechanics.test.js 6项新机制验证，旧6宠成长迁移|
+|G01/G03/G04|14宠全部可试玩（按属性筛选；旧的"基础伙伴 8 / 战术伙伴 4"分组已在 `cf841c6` 删除，因为它"read as a gameplay distinction that does not exist"）；6选4、强化、驱散、携带物、4回合环境；tests/mechanics.test.js 6项新机制验证，旧6宠成长迁移|
 
 - [x] W11 浏览器新增伙伴、配招保存刷新、1440×900营地开始按钮同屏与卡片对齐验证。
 - [x] W12 完整114项回归通过，reports/test-output.txt更新。
@@ -376,11 +376,11 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
       - 真正该守的底线是**不读取对方待执行动作**，项目一直遵守且有测试；它不需要靠"整局闭麦"来实现。
       - **修正记录一**：v0.11 初版把所有对局一律闭麦，等于把军师在题目指定的 PVP 场景里禁用，属过度收紧。
       - **修正记录二**：随后改成"电脑对手开、真人同机关"，但这在逻辑上不自洽——电脑对手存在的意义就是模拟真人，两者必须一致。最终统一为"本地对战一律开"。
-      - 实现：`coach/policy.js` 只把 `pvp-live` 列为闭麦模式；观察层（`coach/experience.js`）与知识包接受 `pve` 与 `pvp-local`。
+      - 实现：`src/coach/policy.js` 只把 `pvp-live` 列为闭麦模式；观察层（`src/coach/experience.js`）与知识包接受 `pve` 与 `pvp-local`。
 - [x] X04 结算后若轮到对手补位（真人），自动弹出交接界面让对手选补位伙伴。
 - [x] X05 引擎支持：`createGame` 接受 `mode`，`resolveTurn` 支持 `manualReplace` 按 `replaceQueue` 轮流补位；PVE 路径行为不变。
 - [ ] X06 分屏对战的完整浏览器验收（两名真人、多局）与联网 PVP 仍未做；当前是同一台设备分屏，不是权威对局的 PVP。
-      - **本轮明确做不到，未勾。** 本项要的是**两名真人**在同一台设备上分屏对打多局，以及联网 PVP；本轮没有第二名真人被试，因此一次都没有实测。本轮的浏览器实测（`reports/c17-endgame-browser.md`）明确只覆盖 **PVE 训练**，脚本里没有打开过 `#go-pvp`、也没有选过"真人同机（分屏）"，不能拿来充当本项证据。分屏同屏的机制本身由既有自动测试覆盖（`pvp.test.js`：双方各自枚举合法行动、双方都锁定才亮牌、补位队列轮流处理、整局能正常终止），但那验证的是引擎与状态机，不是两名真人的实际操作体验。
+      - **本轮明确做不到，未勾。** 本项要的是**两名真人**在同一台设备上分屏对打多局，以及联网 PVP；本轮没有第二名真人被试，因此一次都没有实测。本轮的浏览器实测（`reports/c17-endgame-browser.md`）明确只覆盖 **PVE 训练**，脚本里没有打开过 `#go-pvp`、也没有选过"真人同机（分屏）"，不能拿来充当本项证据。分屏同屏的机制本身由既有自动测试覆盖（`tests/pvp.test.js`：双方各自枚举合法行动、双方都锁定才亮牌、补位队列轮流处理、整局能正常终止），但那验证的是引擎与状态机，不是两名真人的实际操作体验。
 
 ## 未勾 9 项：决定不做，及各自的理由
 
@@ -408,9 +408,9 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
 
 `S05`（慢模型演示）、`W09`（完整慢响应验收）。
 
-**现状更正**：`S05` **已勾选**（客户端侧那半已由 `evals/slow-model.test.js` 6 项补齐，见该条注释）；`W09` 仍未勾——缺的正是下面说的渲染层那一半。因此本节实际未勾的是 8 项（`S05` 除外），全仓库未勾共 9 项（另含不在本节的 `F01b`）。
+**现状更正**：`S05` **已勾选**（客户端侧那半已由 `tests/evals/slow-model.test.js` 6 项补齐，见该条注释）；`W09` 仍未勾——缺的正是下面说的渲染层那一半。因此本节实际未勾的是 8 项（`S05` 除外），全仓库未勾共 9 项（另含不在本节的 `F01b`）。
 
-**逻辑层已经验过**：`evals/slow-model.test.js` 用替换 `globalThis.fetch` 的方式构造慢响应，6 项覆盖"玩家先出招则慢回答中止""连出三招只送最后一个""超时答案不复活""同一局面合并为一次调用"，且未改生产代码。
+**逻辑层已经验过**：`tests/evals/slow-model.test.js` 用替换 `globalThis.fetch` 的方式构造慢响应，6 项覆盖"玩家先出招则慢回答中止""连出三招只送最后一个""超时答案不复活""同一局面合并为一次调用"，且未改生产代码。
 
 **没验的是渲染层**——在真实浏览器里肉眼确认提示条不会闪出过期文字。构造这个环境要么真连一个足够慢的网（本机延迟只有 2–4 秒，不够），要么往生产代码里注入延迟（会污染交付物）。
 
@@ -426,7 +426,7 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
 
 ### 为什么改
 
-原实现把局内主动提示接在 `app.js` 的 `notify()` → `coachEvent()` 上，那是**陪练**的通道（闲聊、情绪、记忆）。面试题里对战/阵容场景的决策建议属于**军师**，所以局内主动层整体移到 `coach/experience.js` 的军师触发层，`coachEvent` 只保留真正的陪练事件（本局第一次倒下、整局结束）。
+原实现把局内主动提示接在 `src/client/app.js` 的 `notify()` → `coachEvent()` 上，那是**陪练**的通道（闲聊、情绪、记忆）。面试题里对战/阵容场景的决策建议属于**军师**，所以局内主动层整体移到 `src/coach/experience.js` 的军师触发层，`coachEvent` 只保留真正的陪练事件（本局第一次倒下、整局结束）。
 
 ### 三类触发与各自的克制
 
@@ -440,10 +440,10 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
 
 ### 未做/近似（与正文条目一样如实记录）
 
-- `actionLabel`/`actionDetail`（`app.js:142/150`）是**没有任何调用点**的死代码；本次**没有删除**，因为它们是并行清理任务的失败点，删除会与该任务冲突。
+- `actionLabel`/`actionDetail`（`src/client/app.js:142/150`）是**没有任何调用点**的死代码；本次**没有删除**，因为它们是并行清理任务的失败点，删除会与该任务冲突。
 - 原「我方教练」内联面板（`updateCoach`）现在只在军师开口过时出现；`profile.coach.mode` 的 `mentor`/`critical` 对它的显示不再有影响——`critical` 现在只由 `strategistTrigger` 的犹豫分支读取。
-- `notify()` → `coachEvent` 的陪练通道**保持原样**（含 `first-faint`），因为 `features.test.js`/`companion.test.js` 断言了它；因此「伙伴倒下」会同时有陪练的一句情绪话和军师的一句战术话，两者措辞与账面完全分开。
-- 新增测试 `strategist.test.js` 11 项；`browser.test.js` 增 1 项接线守卫。测试数 191 → 202（全绿），本文件未新增勾选。
+- `notify()` → `coachEvent` 的陪练通道**保持原样**（含 `first-faint`），因为 `tests/features.test.js`/`tests/companion.test.js` 断言了它；因此「伙伴倒下」会同时有陪练的一句情绪话和军师的一句战术话，两者措辞与账面完全分开。
+- 新增测试 `tests/strategist.test.js` 11 项；`tests/browser.test.js` 增 1 项接线守卫。测试数 191 → 202（全绿），本文件未新增勾选。
 
 ---
 
@@ -483,4 +483,4 @@ K01/K02 是 A03 的基础工作，不代表完整RAG已完成。参见 RAG-LOCAL
 - 分角色抑制是跨局的 30 分钟窗口；本局内依旧是点掉即静音（更严格），两者不冲突。
 - 培养建议面板（`renderGrowthCoach`）的收起不写 dismiss 记录，因此不受分角色抑制影响。
 - 老师讲解是本地规则文案（读 `SKILLS` 字段 + `engine.damage`），不发模型请求，也没有走知识库引用。
-- 新增测试 12 项（`strategist.test.js` 第六～八节）；测试数 204 → 216（全绿）。本文件未新增勾选。
+- 新增测试 12 项（`tests/strategist.test.js` 第六～八节）；测试数 204 → 216（全绿）。本文件未新增勾选。

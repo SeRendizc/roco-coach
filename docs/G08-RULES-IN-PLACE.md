@@ -2,7 +2,7 @@
 
 清单项：`G08 原位规则说明、有效伤害条件与状态计时；关闭 AI 也能理解并完成游戏。`
 
-本轮完成时间：2026-09-17。产物：`rules.js`（生成规则页）、`index.html`、`app.js`、`offline.test.js`（5 项自动断言）。
+本轮完成时间：2026-09-17。产物：`src/game/rules.js`（生成规则页）、`src/client/index.html`、`src/client/app.js`、`tests/offline.test.js`（5 项自动断言）。
 
 ---
 
@@ -12,12 +12,12 @@
 
 | 要求 | 改前状况 |
 |---|---|
-| **原位规则说明** | 规则只在弹窗里。出招面板上的技能卡有消耗/威力/说明（`app.js` 已内联），但"为什么打不出伤害""这一手为什么被减伤"这类判断要玩家自己去弹窗里找。弹窗还混着大量数值，读者要在一大段里挑。 |
+| **原位规则说明** | 规则只在弹窗里。出招面板上的技能卡有消耗/威力/说明（`src/client/app.js` 已内联），但"为什么打不出伤害""这一手为什么被减伤"这类判断要玩家自己去弹窗里找。弹窗还混着大量数值，读者要在一大段里挑。 |
 | **有效伤害条件** | 只有一条公式句子。**缺**：属性倍率的完整对应关系（只写了三组示例：火克草、草克水、水克火）、防御减伤具体是多少个百分点之外还有哪些限制、哪些技能会穿透防御、强化怎么进公式、环境与携带物的乘数、最低伤害、以及"什么情况下这一手打不出伤害"。 |
 | **状态计时** | 有灼烧/中毒的跳数与持续回合，但**缺**：施加当回合是否结算、异常能否叠加/刷新、防御能不能清掉已有异常、换到后备是否暂停、减速持续几回合且不追溯改顺序、强化几回合到期、携带物是否每局一次。 |
 | **关闭 AI 也能完成游戏** | 实际上一直可以（引擎与教练完全解耦），但**没有任何自动证据**，也没在界面上告诉玩家"不连模型也能玩"。 |
 
-## 二、现在的规则页（11 节，全部由 `rules.js` 从引擎数据生成）
+## 二、现在的规则页（11 节，全部由 `src/game/rules.js` 从引擎数据生成）
 
 | 节 | 覆盖内容 |
 |---|---|
@@ -35,14 +35,14 @@
 
 **原位性**：规则入口是页头的"规则"按钮（`#rules-toggle`），直接开弹窗，不经过小芽面板、不需要模型；出招面板上的每个按钮本身带 `威力/消耗/优先级/说明`，回合内的判断不必先开弹窗。
 
-## 三、"关闭 AI 也能完成游戏"的自动证据（`offline.test.js`，5 项）
+## 三、"关闭 AI 也能完成游戏"的自动证据（`tests/offline.test.js`，5 项）
 
 | 测试 | 断言 |
 |---|---|
-| `the engine never depends on the coach` | `engine.js` 的静态 import 图**只有它自己**；`progression.js`、`rules.js` 的 import 图里没有任何 `coach/` 模块 → 规则与结算完全不依赖教练层 |
+| `the engine never depends on the coach` | `src/game/engine.js` 的静态 import 图**只有它自己**；`src/game/progression.js`、`src/game/rules.js` 的 import 图里没有任何 `src/coach/` 模块 → 规则与结算完全不依赖教练层 |
 | `a full PVE match completes with no coach module and no network` | 只用引擎（一个"永远选第一个合法行动"的笨策略）把 easy/normal/hard 三档各打完一局，断言都到达终局、回合数不超过 80、并且结束后 `settle()` 能给出奖励 |
 | `every number needed to finish a match is explained in place` | 逐条断言规则页里存在：公式两个系数、最低伤害、1.5/0.75 倍率、65% 减伤、穿透说明、每层 15% 与最多 2 层、以及"目标已倒下/能量不够/原定行动取消"三个前提；两种异常的跳数与持续回合；施加当回合结算、不叠加、后备暂停、减速回合数、强化计时、携带物每局一次、环境回合数、80 回合平局；23 个技能、3 种道具、12 只宠物都能查到 |
-| `the rules page can be read without opening the coach` | 规则按钮直接开弹窗（不经过小芽）；出招按钮内联 `sk.desc`/`sk.cost`/`sk.power`；`app.js` 从 `rules.js` 取文案；安静档是纯设置 |
+| `the rules page can be read without opening the coach` | 规则按钮直接开弹窗（不经过小芽）；出招按钮内联 `sk.desc`/`sk.cost`/`sk.power`；`src/client/app.js` 从 `src/game/rules.js` 取文案；安静档是纯设置 |
 | `turning the coach off does not disable any rule` | 规则页含"不连接模型"说明；版本号一致；对局对象里根本没有教练状态字段 |
 
 ## 三点五、浏览器实测（端到端）
@@ -50,28 +50,28 @@
 `scripts/cdp-rules-check.js` 用 headless Chrome 152 + CDP 打开运行中的 http://127.0.0.1:8765/ ，**不做任何网络层补齐**（`shim.installed: []`、`/rules.js` 返回 200），直接读真实 DOM：
 
 - 页面 JS 正常执行（营地渲染出 **12** 张伙伴卡片——**该快照拍在宠物扩展之前，现在是 14 张**）；
-- 规则弹窗里生成 **11** 节、**77** 段、**4316** 字符，顺序与 `rulesSections()` 一致（**这三个数是那次 DOM 快照的值；`rules.js` 之后又被改过，现场复算见下**）；
+- 规则弹窗里生成 **11** 节、**77** 段、**4316** 字符，顺序与 `rulesSections()` 一致（**这三个数是那次 DOM 快照的值；`src/game/rules.js` 之后又被改过，现场复算见下**）；
 - 关键句缺失数 **0**：`伤害 = 四舍五入`、`克制 ×1.5`、`减伤 65%`、`每回合末扣 6 点，持续 2 回合`、`换到后备时暂停计时与扣血`、`80 回合仍未分出胜负记平局`、`不连接模型` 全部在页面上；
 - 难度下拉为 `轻松 / 标准 / 挑战`（由 `DIFFICULTIES` 生成）；点「规则」按钮后弹窗 `open:true`、`visible:true`、660×569；
 - 控制台错误 **0**。
 
 原始输出 `reports/p05-rules-browser-check.txt`，截图 `reports/p05-rules-dialog.png`（可看到「训练规则」弹窗里的「这一局的目标」与「伤害怎么算（有效伤害条件）」两节及派生出的公式）。这只覆盖 **1440×900**，窄屏见下一节。
 
-> **现场复算与口径说明（2026-09-17 晚补）**：上面"77 段 / 4316 字符"来自那次 DOM 实测（统计的是弹窗里 `<p>` 的条数与 `#rules-body` 的 `textContent.length`）。此后 `rules.js` 又被改过，现场复算（`node -e "import('./rules.js').then(m=>{let t=0,c=0;for(const s of m.rulesSections()){t+=s.lines.length;c+=s.title.length+s.lines.join('').length}console.log(m.rulesSections().length,t,c)})"`）在写作时是 **11 节 / 79 行正文**、标题+正文合计 **4440 字符**——**这两个数随代码变动，务必现场跑**。**注意 DOM 的 `<p>` 计数与 `rulesSections()` 的行数不是同一口径**（标题在 DOM 里是 `<h3>`，不计入段数）。要看当前数字请重跑 `node scripts/cdp-rules-check.js`（需要 8765 在跑）。
+> **现场复算与口径说明（2026-09-17 晚补）**：上面"77 段 / 4316 字符"来自那次 DOM 实测（统计的是弹窗里 `<p>` 的条数与 `#rules-body` 的 `textContent.length`）。此后 `src/game/rules.js` 又被改过，现场复算（`node -e "import('./src/game/rules.js').then(m=>{let t=0,c=0;for(const s of m.rulesSections()){t+=s.lines.length;c+=s.title.length+s.lines.join('').length}console.log(m.rulesSections().length,t,c)})"`）在写作时是 **11 节 / 79 行正文**、标题+正文合计 **4440 字符**——**这两个数随代码变动，务必现场跑**。**注意 DOM 的 `<p>` 计数与 `rulesSections()` 的行数不是同一口径**（标题在 DOM 里是 `<h3>`，不计入段数）。要看当前数字请重跑 `node scripts/cdp-rules-check.js`（需要 8765 在跑）。
 
 ## 四、没做到的部分
 
 - **不是真人可理解性测试**。上面全部是"文案里有没有这句话"的自动断言，加上"引擎能不能独立跑完"与一次真实浏览器渲染。真正"玩家能不能只看规则就学会"需要真人被试，属于 `R09`/`T04` 的范围，本项不能替代。
-- **规则页是长文本**。按 11 节顺序阅读大约需要两三分钟；本轮没有做折叠、搜索或"新手只看这一节"的分层。窄屏适配依赖既有 `style.css` 的通用样式，本轮**没有**为新加的小节标题单独做视觉验收（`U04` 的尺寸走查是在规则页改版之前做的）；浏览器实测也只跑了 1440×900 一个视口。
-- **`coach/*.js` 里仍然有手写的规则数字**（`额外回2豆`、`等回合末回1豆`、`生命 +12 / 攻击 +4 / 速度 +3`），它们不在规则页上，但会出现在教练回复里。清单见 `docs/P05-RULES-SOURCE.md` 第四节。
-- 规则页只覆盖当前规则版本 `0.6`；`G06`（后期环境关卡）如果加了新环境，`ENVIRONMENTS` 里加一条就会自动出现在规则页，但**关卡本身的说明**仍写在 `content.js` 的 `STAGES` 里，那部分没有纳入生成。
+- **规则页是长文本**。按 11 节顺序阅读大约需要两三分钟；本轮没有做折叠、搜索或"新手只看这一节"的分层。窄屏适配依赖既有 `src/client/style.css` 的通用样式，本轮**没有**为新加的小节标题单独做视觉验收（`U04` 的尺寸走查是在规则页改版之前做的）；浏览器实测也只跑了 1440×900 一个视口。
+- **`src/coach/*.js` 里仍然有手写的规则数字**（`额外回2豆`、`等回合末回1豆`、`生命 +12 / 攻击 +4 / 速度 +3`），它们不在规则页上，但会出现在教练回复里。清单见 `docs/P05-RULES-SOURCE.md` 第四节。
+- 规则页只覆盖当前规则版本 `0.6`；`G06`（后期环境关卡）如果加了新环境，`ENVIRONMENTS` 里加一条就会自动出现在规则页，但**关卡本身的说明**仍写在 `src/game/content.js` 的 `STAGES` 里，那部分没有纳入生成。
 
 ## 五、可核查命令
 
 ```bash
-npm run test:rules                          # rules.test.js + offline.test.js
-node -e "import('./rules.js').then(m=>{for(const s of m.rulesSections())console.log('##',s.title,'—',s.lines.length,'行')})"
+npm run test:rules                          # tests/rules.test.js + tests/offline.test.js
+node -e "import('./src/game/rules.js').then(m=>{for(const s of m.rulesSections())console.log('##',s.title,'—',s.lines.length,'行')})"
 node scripts/cdp-rules-check.js              # 真浏览器核查（需 8765 在跑）
-grep -n 'id="rules-body"' index.html
-grep -n 'rules-toggle\|renderRules' app.js index.html
+grep -n 'id="rules-body"' src/client/index.html
+grep -n 'rules-toggle\|renderRules' src/client/app.js src/client/index.html
 ```

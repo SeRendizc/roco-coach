@@ -32,7 +32,7 @@
 
 | 类别 | 本轮内容 |
 |---|---|
-| **已在代码实现**（本轮之前就有，本轮只核实） | 375 项既有测试、`engine.js` 状态机与事件历史、有界工具循环、事实校验、陪练与记忆、PVP 熔断 |
+| **已在代码实现**（本轮之前就有，本轮只核实） | 375 项既有测试、`src/game/engine.js` 状态机与事件历史、有界工具循环、事实校验、陪练与记忆、PVP 熔断 |
 | **本轮新增并验证** | 数据来源台账与许可矩阵、三来源交叉核验、12 只精灵规范化数据、支持矩阵、A 组候选配招、microcase 计划、15 项数据域验收测试、浏览器验收脚本 |
 | **仅设计** | 全部 21 条 microcase（期望值为 `null`）、支持等级的升级路径、下一轮实现顺序 |
 | **未知待核验** | 官方伤害公式、等级→面板换算、能量上限与回能时机、同速裁决、印记替换规则、取整方向、A 组 6 只特性结算细节（共 74 个未解问题） |
@@ -55,14 +55,14 @@
   - 证据：`reports/roco/m0-baseline/evals.log` —— `eval:retrieval` 与 `eval:balance:quick` 均退出码 0
 - [x] **B1.6 禁止为了让新测试通过而删除旧测试**
   - 证据：`git diff --name-only` 对 `*.test.js` 为 **0 项**（既有测试文件**零改动**）
-  - 新增测试是**追加**：`package.json` 的 `test:unit` 仅在末尾追加 `evals/roco/data-acceptance.test.js`，并新增 `test:roco` 脚本；**既有脚本内容未改**
+  - 新增测试是**追加**：`package.json` 的 `test:unit` 仅在末尾追加 `tests/evals/roco/data-acceptance.test.js`，并新增 `test:roco` 脚本；**既有脚本内容未改**
   - 全量测试数从 375 → **390**（+15 新增），**无任何既有测试被删改**
 
 ### B2 KEEP / ADAPT / RETIRE / MISSING 审计
 
 - [x] **B2.1 建立 `docs/roco/M0-REPO-AUDIT.md`，逐文件标注去向**
   - 证据：`docs/roco/M0-REPO-AUDIT.md`
-  - 覆盖：`engine.js`、`content.js`、`progression.js`、`coach/{toolbox,runtime,scheduler,policy,strategist,retrieval,experience,memory,teacher,companion}.js`、`knowledge/*.json`、`server.js`、前端、测试与评测资产
+  - 覆盖：`src/game/engine.js`、`src/game/content.js`、`src/game/progression.js`、`src/coach/{toolbox,runtime,scheduler,policy,strategist,retrieval,experience,memory,teacher,companion}.js`、`knowledge/*.json`、`src/server/index.js`、前端、测试与评测资产
 - [x] **B2.2 记录文档与运行态不一致（不得静默取一边）**
   - 证据：同文件 §1，**5 处**不一致。最重要一条：`docs/IMPLEMENTATION-STATUS.md` 写「现场 257 项测试」，现场实为 **375 项**
 - [x] **B2.3 明确「RETIRE 是建议、本轮未执行」**
@@ -73,8 +73,8 @@
 - [x] **B3.1 区分历史失败与本轮回归**
   - 基线（改动前）**全部通过**，无历史失败
   - 全量复跑（`reports/roco/m1-data/npm-test-after.log`）：**unit 372/372 通过**、**browser 17 通过 + 1 跳过 / 18**
-  - 那 1 项跳过是**既有的、在代码里写明的**行为：`replace.test.js:577` 在 60 回合内没能打倒 1 号位时 `t.skip(...)`；HEAD commit `1717cd5` 的主题正是 *"the replacement case skips, it does not fail intermittently"*。**不是本轮引入的回归**
-  - 证据：`replace.test.js:575-577`、`git log -1 --format=%B HEAD`
+  - 那 1 项跳过是**既有的、在代码里写明的**行为：`tests/replace.test.js:577` 在 60 回合内没能打倒 1 号位时 `t.skip(...)`；HEAD commit `1717cd5` 的主题正是 *"the replacement case skips, it does not fail intermittently"*。**不是本轮引入的回归**
+  - 证据：`tests/replace.test.js:575-577`、`git log -1 --format=%B HEAD`
 
 ---
 
@@ -99,7 +99,7 @@
   - 理由：该归档只是**交叉核验的第二来源**，其数值不进入 `normalized/`（许可未确认，标 `REFERENCE_ONLY`），因此不随仓库分发**不会**让任何已交付结论失去依据
   - 证据：`.gitignore` 中的 `data/roco/raw/NRC_AI.tar.gz` 条目及其说明；入库总量 **8.7 MB / 60 个文件**（不含 NRC_AI 时）
 - [x] **C1.4 每条数据带 `game` / `ruleset` / `season` / `source_url` / `revision` / `fetched_at` / `sha256` / `license` / `redistribution` / `verification_status`**
-  - 证据：`data/roco/sources.yaml`（每一项都有）；`data/roco/provenance.jsonl`（18 行逐实体 provenance）；`evals/roco/data-acceptance.test.js` 的「每条记录都带 ruleset / game / 来源 / 许可 / 核验状态」用例**已通过**
+  - 证据：`data/roco/sources.yaml`（每一项都有）；`data/roco/provenance.jsonl`（18 行逐实体 provenance）；`tests/evals/roco/data-acceptance.test.js` 的「每条记录都带 ruleset / game / 来源 / 许可 / 核验状态」用例**已通过**
 
 ### C2 许可矩阵
 
@@ -201,7 +201,7 @@
   - 证据：`docs/roco/MICROCASE-PLAN.md` §3 覆盖对照表；测试断言类别集合完整
   - 优先级 / 速度同速 / 同时行动 / 主动换宠 / 倒下补位 / 能量 / 状态持续 / 触发顺序 / 动态伤害 / 取整 / 隐藏信息 / A 组特性
 - [x] **F2 每例包含：初始状态、公开观察、合法动作、联合动作、预期事件序列、证据来源、验证等级**
-  - 证据：`evals/roco/cases/microcases-v1.jsonl`（1 行 header + 21 行 case）；测试断言必需字段齐全
+  - 证据：`tests/evals/roco/cases/microcases-v1.jsonl`（1 行 header + 21 行 case）；测试断言必需字段齐全
 - [x] **F3 不能确认的字段写 `unknown`，不猜规则**
   - 证据：**全部 21 条**的 `expected_event_sequence` 都是 `null`；测试强制断言「不得编造期望事件序列」
   - verification.level 也标 `documented_text_only` / `planned`，`passed` 一律 `false`
@@ -226,7 +226,7 @@
   - 截图：`01-camp.png`、`02-filter.png`、`03-battle.png`、`04-battle-end.png`
 - [x] **G3 M1 新增数据未被页面暴露（本轮不接管默认 UI）**
   - 证据：验收项「M1 新增数据未被页面暴露」——对 `data/roco/sources.yaml`、`conflicts.jsonl`、`pets.json`、`scripts/roco/import-snapshot.mjs` 的请求**全部 404**
-  - 原因：`server.js` 的 `publicAssets` 白名单从 `app.js` 的 import 图推导，不含 `data/`
+  - 原因：`src/server/index.js` 的 `publicAssets` 白名单从 `src/client/app.js` 的 import 图推导，不含 `data/`
 - [x] **G4 页面仍能完整打完一局（真实浏览器）**
   - 证据：`04-battle-end.png` —— 第 13 回合、本场失利、全队经验 +12、成长已自动保存、战斗记录可读；验收项「对局能打到出现结果面板」与「过程中没有卡死」均通过
 - [x] **G5 控制台零报错**
@@ -242,7 +242,7 @@
 |---|---|---|
 | 只用《洛克王国：世界》**手游**数据，禁止混入页游 | ✅ | `sources.yaml` 的 `excluded_source_classes`；测试断言来源 URL 不得含 `roco.qq.com`；全部数据 `game: roco_world_mobile` |
 | 不把计划当成已实现 | ✅ | 21 条 microcase 全标 `PLAN_ONLY_NOT_EXECUTED` 且 `passed: false`；支持等级全为 `KNOWLEDGE_ONLY`；M0 审计明确 RETIRE 未执行 |
-| 不改名冒充手游机制 | ✅ | `engine.js` 的 `SKILLS`/`SPECIES` **一行未改**；候选配招全部来自手游 `Skills.lua` 并有测试强制其存在于学习表 |
+| 不改名冒充手游机制 | ✅ | `src/game/engine.js` 的 `SKILLS`/`SPECIES` **一行未改**；候选配招全部来自手游 `Skills.lua` 并有测试强制其存在于学习表 |
 | 未核验数据标 `unknown` / `unsupported` | ✅ | 824 条技能 `effect_support: unsupported`；`field_groups.official_damage_formula: unknown`；74 个未解问题登记在 microcase |
 | 不自行补齐威力 / 触发条件 / 结算时序 | ✅ | `power` 缺失为 `null`；测试禁止 `power === 0`；microcase 期望值全 `null` |
 | 社区阵容频次不得写成胜率 / 最优阵容 | ✅ | 本轮**完全未使用**社区频次做配招；`sources.yaml` 明确标注 `parsed_frequency_only` 与「没有段位/样本量/胜率」 |
@@ -254,7 +254,7 @@
 | 不提交 API key / 密码 / 本地模型权重 / 隐私数据 | ✅ | `.dsh-pushplus-token` 已加入 `.gitignore`；`server.log` 已 grep 确认 0 处密钥材料；未提交 `.models/`、`.venv-agent/` |
 | 不安装额外插件 | ✅ | 本轮未安装任何 DSH 插件；也不需要（见 `04-DSH-PLUGIN-DECISION.md`） |
 | 不提前替换默认 UI | ✅ | 见 G6 |
-| 不重写完整战斗引擎 | ✅ | `engine.js` 未修改 |
+| 不重写完整战斗引擎 | ✅ | `src/game/engine.js` 未修改 |
 | 不下载 / 训练模型 / 租用 GPU | ✅ | 未下载模型、未训练、未使用云 GPU |
 | 测试通过不替代数据真实性检查与页面验收 | ✅ | 除 390 项测试外，另有独立数据域验收（15 项）+ 三来源交叉核验 + 真实浏览器验收（8 项，含 4 张截图） |
 | 完成项必须指向具体代码/数据/测试/浏览器证据 | ✅ | 本文件每一项都有「证据」行 |

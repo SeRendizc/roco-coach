@@ -4,7 +4,7 @@
 
 **本轮定位：只做现状核查与设计层面的说明，不加、不改任何关卡。** 原因见第六节。
 
-本轮完成时间：2026-09-17。产物：本文件。核查依据：`engine.js`、`content.js`、`rules.js`、`mechanics.test.js`、`reports/balance-calibration-summary.md`、`reports/balance-matrix.md`。
+本轮完成时间：2026-09-17。产物：本文件。核查依据：`src/game/engine.js`、`src/game/content.js`、`src/game/rules.js`、`tests/mechanics.test.js`、`reports/balance-calibration-summary.md`、`reports/balance-matrix.md`。
 
 ---
 
@@ -13,7 +13,7 @@
 先纠正一个容易搞错的印象——**环境机制与两个后期环境关卡已经在正常游玩路径里了**，不是"只有机制没有内容"：
 
 ```js
-// content.js 的 STAGES（实际运行结果，非推测）
+// src/game/content.js 的 STAGES（实际运行结果，非推测）
 {id:'grove',  environment:'rain', name:'04 · 苔影密林', level:4, ...}
 {id:'summit', environment:'gale', name:'05 · 冠军高地', level:5, ...}
 // stageOptions() 会把 environment 透传给 createGame：
@@ -23,10 +23,10 @@
 
 | G06 要求 | 状态 | 证据 |
 |---|---|---|
-| **后期环境关卡** | **已完成（2 关）** | 04 苔影密林（细雨）、05 冠军高地（山风）；`stageOptions` 透传；规则页由 `ENVIRONMENTS` 生成说明；`mechanics.test.js` 断言"环境在第 4 回合结束、清风可提前移除且先于较慢伤害结算、历史保留环境" |
+| **后期环境关卡** | **已完成（2 关）** | 04 苔影密林（细雨）、05 冠军高地（山风）；`stageOptions` 透传；规则页由 `ENVIRONMENTS` 生成说明；`tests/mechanics.test.js` 断言"环境在第 4 回合结束、清风可提前移除且先于较慢伤害结算、历史保留环境" |
 | **可反制路线** | **机制上存在，但没有被设计化，也没有被验证** | 反制手段实际有三条：清风（1 豆，移除环境）、撑过 4 回合（环境不续期）、换属性避开受损乘数。但**没有任何测试或仿真断言"不带清风也能打过第 4/5 关"**；也没有文档写明这三条是设计意图 |
 | **无天气队通关路径** | **未验证** | 没有任何一批仿真专门跑过"不带清风、不带受益属性"的阵容去打 04/05 关 |
-| **奖励** | **未做，且发现一个具体问题** | 环境关卡没有任何专属奖励；更值得注意的是**速胜奖励在这两关实际不可达**——`reports/balance-calibration-summary.md` 的逐场统计：≤10 回合获胜 48 场**全部**来自第 1 关，第 4 关最快 15 回合、第 5 关最快 19 回合（超额培养队也是 0 场）。而 `settle()` 的速胜阈值正是 10 回合，所以 04/05 关的"首次 10 回合内获胜 +1 训练点"是**写得出、拿不到**的说明。⚠️ **时序提醒（2026-09-17 晚补）**：这两个数字出自 `reports/balance-calibration-summary.md:127,130`，那一轮校准跑在**属性相克表重写之前**（两者相隔约 2 小时）。用**当前引擎**重跑同一问题（12 种子 × 3 策略 × 4 支满培养队，`stageOptions` 的 grove/summit）得到 grove 16–17 回合、summit 16 回合，**≤10 回合 0 场**——**结论仍成立，引用的数字已过时于当前引擎**。（另：`app.js` 的界面文案已改为由 `ruleFacts().swiftTurnLimit` 生成，不再是手写。） |
+| **奖励** | **未做，且发现一个具体问题** | 环境关卡没有任何专属奖励；更值得注意的是**速胜奖励在这两关实际不可达**——`reports/balance-calibration-summary.md` 的逐场统计：≤10 回合获胜 48 场**全部**来自第 1 关，第 4 关最快 15 回合、第 5 关最快 19 回合（超额培养队也是 0 场）。而 `settle()` 的速胜阈值正是 10 回合，所以 04/05 关的"首次 10 回合内获胜 +1 训练点"是**写得出、拿不到**的说明。⚠️ **时序提醒（2026-09-17 晚补）**：这两个数字出自 `reports/balance-calibration-summary.md:127,130`，那一轮校准跑在**属性相克表重写之前**（两者相隔约 2 小时）。用**当前引擎**重跑同一问题（12 种子 × 3 策略 × 4 支满培养队，`stageOptions` 的 grove/summit）得到 grove 16–17 回合、summit 16 回合，**≤10 回合 0 场**——**结论仍成立，引用的数字已过时于当前引擎**。（另：`src/client/app.js` 的界面文案已改为由 `ruleFacts().swiftTurnLimit` 生成，不再是手写。） |
 
 也就是说：**机制与关卡在，反制/路径/奖励三件事没做**。
 
@@ -68,7 +68,7 @@
 
 ## 五、验收方法（做的时候按这个验，本轮不验）
 
-1. **机制层**：已有 `mechanics.test.js` 覆盖计时、移除与顺序；新增关卡再加"该关卡确实带环境""环境对双方生效"两条断言。
+1. **机制层**：已有 `tests/mechanics.test.js` 覆盖计时、移除与顺序；新增关卡再加"该关卡确实带环境""环境对双方生效"两条断言。
 2. **无天气队通关**：用 `scripts/eval-balance-matrix.js` 的框架，对 04/05 关各跑三组阵容——
    (a) 不带清风、不带受益属性；(b) 带清风；(c) 带受益属性。
    断言：**(a) 的胜率不为 0**，且 (c) 相对 (a) 的增益不超过预设上限（否则说明环境成了强制配招）。
@@ -90,16 +90,16 @@
 
 1. 先不加内容，只**补一条仿真**：用现有 04/05 关跑"带清风 / 不带清风 / 带受益属性"三组，拿到胜率与回合分布（这一步不需要改任何游戏文件）。
 2. 用数据决定速胜阈值走第四节 2(a) 还是 2(b)，并同步更新规则页文案（改 `settle` 或 `RULES` 后规则页会自动跟着变，见 `docs/P05-RULES-SOURCE.md`）。
-3. 再考虑是否加第 6 个关卡；若加，改的是 **`content.js` 手写前缀里的 `STAGES`**（`content.js:3`；`scripts/build-knowledge.js` 全文 25 行，里面**没有** `STAGES`/`grove`/`summit`，它只从 `SKILLS`/`SPECIES`/`TYPE_ADVANTAGES`/`knowledge/tactics.json` 生成——本文原文把文件点错了），改完必须 `npm run build:knowledge` 并确认 `knowledge.test.js` 仍然通过。
+3. 再考虑是否加第 6 个关卡；若加，改的是 **`src/game/content.js` 手写前缀里的 `STAGES`**（`src/game/content.js:3`；`scripts/build-knowledge.js` 全文 25 行，里面**没有** `STAGES`/`grove`/`summit`，它只从 `SKILLS`/`SPECIES`/`TYPE_ADVANTAGES`/`knowledge/tactics.json` 生成——本文原文把文件点错了），改完必须 `npm run build:knowledge` 并确认 `tests/knowledge.test.js` 仍然通过。
 
 ## 八、可核查命令
 
 ```bash
 # 现状：哪两个关卡带环境，环境是什么
-node -e "import('./content.js').then(async m=>{const {createGame}=await import('./engine.js');for(const s of m.STAGES){const g=createGame(17,['fox','turtle','deer'],m.stageOptions(s.id));console.log(s.id,s.name,s.environment||'无环境',g.environment?g.environment.name:'')}})"
+node -e "import('./src/game/content.js').then(async m=>{const {createGame}=await import('./src/game/engine.js');for(const s of m.STAGES){const g=createGame(17,['fox','turtle','deer'],m.stageOptions(s.id));console.log(s.id,s.name,s.environment||'无环境',g.environment?g.environment.name:'')}})"
 
 # 机制测试（环境计时与清风移除）
-node --test mechanics.test.js
+node --test tests/mechanics.test.js
 
 # 速胜在各关卡的可达性（04/05 关 0 场的来源）
 grep -n "第 4 关\|第 5 关\|≤10 回合" reports/balance-calibration-summary.md

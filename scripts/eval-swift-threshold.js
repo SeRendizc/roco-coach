@@ -5,9 +5,9 @@
 // the same level and point allocation the stage's own enemy team has, which is legal under
 // progression.js trainingCapacity = level + 3) and with an over-trained fast team as the upper bound.
 import {writeFileSync,mkdirSync} from 'node:fs';
-import {createGame,legalActions,resolveTurn,chooseEnemy,active,SKILLS,damage,rankEnemyActions} from '../engine.js';
-import {STAGES,stageOptions} from '../content.js';
-import {trainingCapacity} from '../progression.js';
+import {createGame,legalActions,resolveTurn,chooseEnemy,active,SKILLS,damage,rankEnemyActions} from '../src/game/engine.js';
+import {STAGES,stageOptions} from '../src/game/content.js';
+import {trainingCapacity} from '../src/game/progression.js';
 
 const THRESHOLD=10;
 const rng=seed=>{let s=seed>>>0;return()=>((s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296);};

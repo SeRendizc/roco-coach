@@ -1,4 +1,4 @@
-import {writeFileSync} from 'node:fs';import {createGame} from '../engine.js';import {newProfile} from '../progression.js';import {freshMemory} from '../coach/memory.js';import {buildContext,checkGroundedAnswer} from '../coach/runtime.js';
+import {writeFileSync} from 'node:fs';import {createGame} from '../src/game/engine.js';import {newProfile} from '../src/game/progression.js';import {freshMemory} from '../src/coach/memory.js';import {buildContext,checkGroundedAnswer} from '../src/coach/runtime.js';
 const origin='http://127.0.0.1:8765';const boot=await fetch(origin+'/api/bootstrap');const cookie=boot.headers.get('set-cookie')?.split(';')[0];const session=await boot.json();
 if(!session.configured){console.log('Live model not configured; no requests made');process.exit(2);}
 const g=createGame(17,['turtle','fox','sparrow'],{enemyTeam:['turtle','otter','deer']});g.turn=25;Object.assign(g.player.pets[0],{hp:28,maxHp:142,atk:36,def:32,speed:16,energy:6});Object.assign(g.enemy.pets[0],{hp:31,maxHp:161,atk:23,def:31,speed:13,energy:1});g.enemy.items.potion=0;g.enemy.pets.slice(1).forEach(p=>p.hp=0);

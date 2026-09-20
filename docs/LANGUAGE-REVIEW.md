@@ -2,9 +2,9 @@
 
 清单项：`U07 语言评审：具体、自然、无水平羞辱；不空泛安慰、不强行提问；使用者觉得烦时降低打扰。`
 
-评审时间：2026-09-17。评审范围：玩家能看到的全部文案——`app.js` 的提示语与状态行、`index.html` 的界面文字、`coach/*.js` 的回复模板、`engine.js` 的技能/道具/环境说明、`rules.js` 生成的规则页。
+评审时间：2026-09-17。评审范围：玩家能看到的全部文案——`src/client/app.js` 的提示语与状态行、`src/client/index.html` 的界面文字、`src/coach/*.js` 的回复模板、`src/game/engine.js` 的技能/道具/环境说明、`src/game/rules.js` 生成的规则页。
 
-评审方法：把每个文件里的中文字符串字面量逐条抽出来人工过一遍，按五条标准逐条判。评审规模（可用第六节的命令现场复算）——**以下数字已经过时，2026-09-17 晚现场复算是 `app.js` 254、`engine.js` 166、`coach/*.js` 512（只有 `engine.js` 的 160 是当时的正确值）**：~~`app.js` 247 条中文字符串字面量、`coach/*.js` 合计 420 条、`engine.js` 160 条~~（技能/道具/携带物/环境的说明与日志），`index.html` 118 处中文文本片段 + 18 个含中文的属性值（占位符、aria-label、title），合计约 960 处。
+评审方法：把每个文件里的中文字符串字面量逐条抽出来人工过一遍，按五条标准逐条判。评审规模（可用第六节的命令现场复算）——**以下数字已经过时，2026-09-17 晚现场复算是 `src/client/app.js` 254、`src/game/engine.js` 166、`src/coach/*.js` 512（只有 `src/game/engine.js` 的 160 是当时的正确值）**：~~`src/client/app.js` 247 条中文字符串字面量、`src/coach/*.js` 合计 420 条、`src/game/engine.js` 160 条~~（技能/道具/携带物/环境的说明与日志），`src/client/index.html` 118 处中文文本片段 + 18 个含中文的属性值（占位符、aria-label、title），合计约 960 处。
 
 1. **具体**：说了宠物名、血量、能量、回合数或具体技能，而不是"注意血量"。
 2. **自然**：像人说话，不是文告或说明书腔。
@@ -15,17 +15,17 @@
 最终结果：**改 5 处、报告 3 处未改（原因见下）、其余保持原样**。下面只列有判断价值的条目，不逐条抄 400 条原文。
 
 > **2026-09-17 晚复核（本文件多处已过时，逐条列在下面）**：
-> - **"改 5 处"里的第 3 处已被后续文案清扫替换**：`app.js` 现在是「这一回合没有明显更优的选择：**先看对手是留在场上还是换人**。」，`grep -n "先比较对方留场和换宠两种分支" app.js` → **0 命中**（被 `b2cd1f6` 的文案清扫改掉）。另外 4 处替换串仍在。
-> - **"报告 3 处未改"里 `coach/companion.js` 的两处已随陪练重写消失**，只剩 `coach/teacher.js`「别等倒下再救」与 `coach/experience.js`「先别只盯着回血」仍在（行号已从 61/66 漂移到 117/120）。
-> - **"无水平羞辱 0 命中"已不成立**：本文第六节的第一条命令现在返回 **3 处命中**，且都在代码注释/检测器里（`coach/companion.js:243` 的 `PREACH` 黑名单正则、`coach/experience.js:190`、`coach/teacher.js:40`）；**实质结论（玩家可见文案里没有这类句子）仍成立**。
-> - **§A 引的"HEAD 版本"文本在 HEAD 里不存在**：三段（`可以先缓一缓…`、`${memory.lessons.length?…}`、`memory.events.at(-1)`）在写入本文档的那次提交 `3db30c5` 里 `grep -c` 均为 0，只存在于其父提交——即"HEAD 版本"这个标注与实际不符；`:84` 说"并行任务正在把该文件重写……新增 `companionFacts` / `decideRegister` / `checkCompanionRestraint`"，这三者**已经存在**（现场复核：`coach/companion.js:44` `companionFacts`、`:115` `decideRegister`、`:250` `checkCompanionRestraint`），重写与本文档是同批落地的。
+> - **"改 5 处"里的第 3 处已被后续文案清扫替换**：`src/client/app.js` 现在是「这一回合没有明显更优的选择：**先看对手是留在场上还是换人**。」，`grep -n "先比较对方留场和换宠两种分支" src/client/app.js` → **0 命中**（被 `b2cd1f6` 的文案清扫改掉）。另外 4 处替换串仍在。
+> - **"报告 3 处未改"里 `src/coach/companion.js` 的两处已随陪练重写消失**，只剩 `src/coach/teacher.js`「别等倒下再救」与 `src/coach/experience.js`「先别只盯着回血」仍在（行号已从 61/66 漂移到 117/120）。
+> - **"无水平羞辱 0 命中"已不成立**：本文第六节的第一条命令现在返回 **3 处命中**，且都在代码注释/检测器里（`src/coach/companion.js:243` 的 `PREACH` 黑名单正则、`src/coach/experience.js:190`、`src/coach/teacher.js:40`）；**实质结论（玩家可见文案里没有这类句子）仍成立**。
+> - **§A 引的"HEAD 版本"文本在 HEAD 里不存在**：三段（`可以先缓一缓…`、`${memory.lessons.length?…}`、`memory.events.at(-1)`）在写入本文档的那次提交 `3db30c5` 里 `grep -c` 均为 0，只存在于其父提交——即"HEAD 版本"这个标注与实际不符；`:84` 说"并行任务正在把该文件重写……新增 `companionFacts` / `decideRegister` / `checkCompanionRestraint`"，这三者**已经存在**（现场复核：`src/coach/companion.js:44` `companionFacts`、`:115` `decideRegister`、`:250` `checkCompanionRestraint`），重写与本文档是同批落地的。
 > - **"玩家可见的问句只剩 3 类"不成立**（见第四节表格的更正）。
 
 ---
 
 ## 一、已修改（5 处）
 
-### 1. `index.html` · 预制场景的展开按钮：反问 → 陈述
+### 1. `src/client/index.html` · 预制场景的展开按钮：反问 → 陈述
 
 | | |
 |---|---|
@@ -34,7 +34,7 @@
 | 标准 | 5（不强行提问） |
 | 理由 | 这个按钮本身就是"点开看提示"的入口，再问一句"需要提示吗"是多余的一层确认，把决定权又推回给玩家。改成陈述句直接说明点开会得到什么（这回合的取舍），信息量更大且不需要玩家回答。 |
 
-### 2. `app.js` · 对局结束时的局内短字幕：反问 → 陈述
+### 2. `src/client/app.js` · 对局结束时的局内短字幕：反问 → 陈述
 
 | | |
 |---|---|
@@ -43,16 +43,16 @@
 | 标准 | 5（不强行提问）、1（具体） |
 | 理由 | 同上。它旁边就有"看看原因"按钮，问句没有增加信息。改后顺带说明展开后确实有关键回合可看（复盘数据来自真实归档，`archiveRound`），而不是空承诺。 |
 
-### 3. `app.js` · 双人分屏时"我方教练"的兜底句：空泛 → 可执行
+### 3. `src/client/app.js` · 双人分屏时"我方教练"的兜底句：空泛 → 可执行
 
 | | |
 |---|---|
 | 原文 | `当前没有明显更优的选择。` |
-| 改为 | `这一回合没有明显更优的选择：先比较对方留场和换宠两种分支。`（**2026-09-17 晚复核：该替换串已被 `b2cd1f6` 的文案清扫替换掉，`app.js` 现在是「…：先看对手是留在场上还是换人。」——改动的意图仍成立，字面已变**） |
+| 改为 | `这一回合没有明显更优的选择：先比较对方留场和换宠两种分支。`（**2026-09-17 晚复核：该替换串已被 `b2cd1f6` 的文案清扫替换掉，`src/client/app.js` 现在是「…：先看对手是留在场上还是换人。」——改动的意图仍成立，字面已变**） |
 | 标准 | 1（具体）、4（不空泛） |
-| 理由 | 原句只说"没有结论"，玩家拿不到下一步。改后点明该比较哪两种分支，和 `strategist.js` 实际用的枚举口径一致（对手留场 / 换宠）。 |
+| 理由 | 原句只说"没有结论"，玩家拿不到下一步。改后点明该比较哪两种分支，和 `src/coach/strategist.js` 实际用的枚举口径一致（对手留场 / 换宠）。 |
 
-### 4. `app.js` · 开场对位提示的追问文案：空承诺 → 具体行为
+### 4. `src/client/app.js` · 开场对位提示的追问文案：空承诺 → 具体行为
 
 | | |
 |---|---|
@@ -61,7 +61,7 @@
 | 标准 | 1（具体）、4（不空泛安慰） |
 | 理由 | "需要时我再解释"是空承诺，玩家不知道什么时候算"需要"。改后描述的是程序真实行为：每次出招后 `advanceContext()` 会让旧提示失效并按新局面重算（见 U09/A07 的实现与测试）。 |
 
-### 5. `app.js` · 培养数值对比表的脚注：术语堆叠 → 说清代价与退路
+### 5. `src/client/app.js` · 培养数值对比表的脚注：术语堆叠 → 说清代价与退路
 
 | | |
 |---|---|
@@ -74,11 +74,11 @@
 
 ## 二、发现问题但未修改（3 处，附建议改法）
 
-这三处都在 `coach/*.js` 里。本轮任务给出的可改文件是 `app.js / server.js / engine.js / index.html / style.css`，`coach/*.js` 不在其中；另外 `coach/companion.js` 同期正被另一个并行任务重写。因此这里只记录问题与建议文本，**没有实际改动**，不计入"已修"。
+这三处都在 `src/coach/*.js` 里。本轮任务给出的可改文件是 `src/client/app.js / src/server/index.js / src/game/engine.js / src/client/index.html / src/client/style.css`，`src/coach/*.js` 不在其中；另外 `src/coach/companion.js` 同期正被另一个并行任务重写。因此这里只记录问题与建议文本，**没有实际改动**，不计入"已修"。
 
-> **2026-09-17 晚复核**：本节标题里"三处都在 `coach/*.js` 里"仍成立，但**A 的三段引用在当前 HEAD 里都不存在**（见文首更正的第四条）；**B、C 两处仍在**（行号已漂移到 `coach/teacher.js:117` 与 `coach/experience.js:120`，`grep` 仍能命中「别等倒下再救」「先别只盯着回血」）。
+> **2026-09-17 晚复核**：本节标题里"三处都在 `src/coach/*.js` 里"仍成立，但**A 的三段引用在当前 HEAD 里都不存在**（见文首更正的第四条）；**B、C 两处仍在**（行号已漂移到 `src/coach/teacher.js:117` 与 `src/coach/experience.js:120`，`grep` 仍能命中「别等倒下再救」「先别只盯着回血」）。
 
-### A. `coach/companion.js`（HEAD 版本）· 空泛安慰 + 无依据的断言
+### A. `src/coach/companion.js`（HEAD 版本）· 空泛安慰 + 无依据的断言
 
 > **2026-09-17 晚复核**：下面三段代码在写入本文档的提交 `3db30c5` 里 `grep -c` 均为 0——它们只存在于该提交的**父提交**。也就是说这里的"（HEAD 版本）"标注是错的，举例的三段早已被重写掉。保留原文作为"当时发现的问题"记录。
 
@@ -92,9 +92,9 @@ ${memory.lessons.length?'我们已经练过速度判断了。':'想培养伙伴�
 - 标准 1：`我们已经练过速度判断了` 是写死的断言，只要 `lessons` 非空就会说"速度判断"，但实际练的可能是换宠或能量；这属于"无依据的具体化"，比不具体更糟。
 - 附带正确性问题：同一函数里 `memory.events.at(-1)` 在 `events` 缺失时会抛错，`last.stage` 为 `undefined` 时会生成"记得上一场是在 undefined，结果是…"。
 - 建议方向：安抚句必须挂到最近一场的真实字段（关卡名 + 结果 + 回合数 + 剩余道具），拿不到字段就不说这句；`lessons` 只能引用最近一条实际记录的内容，不能写死知识点名。
-- **状态更新**：并行任务正在把该文件重写为"状态模型 → 语气档位 → 真实事件模板 → 克制扫描"（新增 `companionFacts` / `decideRegister` / `checkCompanionRestraint` 与 `companion.test.js`）。上述三点正是新结构要解决的问题，因此这里不重复修，等重写落地后按新实现复核。
+- **状态更新**：并行任务正在把该文件重写为"状态模型 → 语气档位 → 真实事件模板 → 克制扫描"（新增 `companionFacts` / `decideRegister` / `checkCompanionRestraint` 与 `tests/companion.test.js`）。上述三点正是新结构要解决的问题，因此这里不重复修，等重写落地后按新实现复核。
 
-### B. `coach/teacher.js:61` · 复盘结语里的命令句
+### B. `src/coach/teacher.js:61` · 复盘结语里的命令句
 
 ```js
 `结束时还剩${m.remainingItems.potion}瓶回复药。下次在伙伴进入危险血线时，先比较吃药、换宠和继续攻击，别等倒下再救；有药不代表那回合吃药一定更好。`
@@ -103,7 +103,7 @@ ${memory.lessons.length?'我们已经练过速度判断了。':'想培养伙伴�
 - 标准 2 / 3：`别等倒下再救` 是命令句，且预设了玩家"就是拖到倒下"这个行为；虽然同一句已经用"有药不代表那回合吃药一定更好"做了对冲，前半句仍然像在训人。
 - 建议改法：`结束时还剩 N 瓶回复药。下次伙伴进入危险血线时，可以比较吃药、换宠和继续攻击三种做法；有药不代表那回合吃药一定更好。`（把"别…"换成"可以比较"，保留同样的三个选项与对冲。）
 
-### C. `coach/experience.js:66` · 残局提示里的"先别只盯着回血"
+### C. `src/coach/experience.js:66` · 残局提示里的"先别只盯着回血"
 
 ```js
 `双方都残血，但你还有进攻机会：${sk.name}对留场且不防御的目标算${best.hit}伤害，对方${q.hp}HP。先别只盯着回血；对方防御…会改变收尾条件。`
@@ -118,13 +118,13 @@ ${memory.lessons.length?'我们已经练过速度判断了。':'想培养伙伴�
 
 评审里最容易被误改成"更客气但更没用"的几类，逐条说明为什么不动：
 
-1. **`coach/strategist.js` 的"先让 X 补位"**：这是补位场景下的直接建议，附带了"它还剩 N HP、M 豆；补位免费，选好后再决定出招"，具体且可执行。改成"可以考虑让 X 补位"只会削弱信息，不改。
-2. **`coach/teacher.js` 的"暂时没有回合记录。完成一个回合后再来"**：明确说明缺什么、怎么获得，不是拒绝。保留。
-3. **`coach/strategist.js:100` 与 `coach/client.js:3` 的模型约束**（`缺少分支计算不得声称唯一最优或玩家失误`、`不要向玩家报内部局面评分`）：这些是给模型看的，不是玩家文案，但它们正是"无水平羞辱"的执行层保障，保留并在下面作为证据引用。（**归属更正**：本文原写"`coach/runtime.js`"，但那两句话实际在 `coach/client.js:3` 的 `RESPONSE_INSTRUCTIONS`；`grep` `coach/runtime.js` → 0 命中。）
-4. **`app.js` 的 `后端未启动，请运行 npm start`**：这是本机 Demo 的启动提示，读者就是运行项目的人，具体且可照做。不改（生产版另说，那是 F02/上线架构的内容）。
-5. **`index.html` 的两个问句**（首次进入的 `想让我怎么陪你玩？`、场景设置弹窗 `小芽怎样出现，感觉更合适？`）：这两处是真正需要玩家做选择的地方，问句是正常的交互文案，不属于"强行提问"。保留。
+1. **`src/coach/strategist.js` 的"先让 X 补位"**：这是补位场景下的直接建议，附带了"它还剩 N HP、M 豆；补位免费，选好后再决定出招"，具体且可执行。改成"可以考虑让 X 补位"只会削弱信息，不改。
+2. **`src/coach/teacher.js` 的"暂时没有回合记录。完成一个回合后再来"**：明确说明缺什么、怎么获得，不是拒绝。保留。
+3. **`src/coach/strategist.js:100` 与 `src/coach/client.js:3` 的模型约束**（`缺少分支计算不得声称唯一最优或玩家失误`、`不要向玩家报内部局面评分`）：这些是给模型看的，不是玩家文案，但它们正是"无水平羞辱"的执行层保障，保留并在下面作为证据引用。（**归属更正**：本文原写"`src/coach/runtime.js`"，但那两句话实际在 `src/coach/client.js:3` 的 `RESPONSE_INSTRUCTIONS`；`grep` `src/coach/runtime.js` → 0 命中。）
+4. **`src/client/app.js` 的 `后端未启动，请运行 npm start`**：这是本机 Demo 的启动提示，读者就是运行项目的人，具体且可照做。不改（生产版另说，那是 F02/上线架构的内容）。
+5. **`src/client/index.html` 的两个问句**（首次进入的 `想让我怎么陪你玩？`、场景设置弹窗 `小芽怎样出现，感觉更合适？`）：这两处是真正需要玩家做选择的地方，问句是正常的交互文案，不属于"强行提问"。保留。
 6. **小测题的问句**（`防御可以连续两回合使用吗？` 等）：题目的本质就是提问，且答完给判题与算式，保留。
-7. **`coach/experience.js:57` 的"拿不准时，先看对方留场和换宠两种情况"**：给了明确的两种分支和一个可展开比较的入口，属于合格的"低打扰提示"。保留。
+7. **`src/coach/experience.js:57` 的"拿不准时，先看对方留场和换宠两种情况"**：给了明确的两种分支和一个可展开比较的入口，属于合格的"低打扰提示"。保留。
 8. **语音相关文案**：语音整体停用（`VOICE_FEATURE=false`），本轮不评审、不修改。
 
 ---
@@ -133,20 +133,20 @@ ${memory.lessons.length?'我们已经练过速度判断了。':'想培养伙伴�
 
 | 标准 | 结论 | 证据 |
 |---|---|---|
-| 具体 | 基本达标 | 提示几乎都带宠物名/HP/豆/伤害数字：`experience.js:66`（`${sk.name}…算${best.hit}伤害，对方${q.hp}HP`）、`strategist.js:19/25/26`、`teacher.js:12/16`（`速度 X → Y`）。本轮把 3 处不具体的兜底句改成了具体句（改动 3、4）。 |
+| 具体 | 基本达标 | 提示几乎都带宠物名/HP/豆/伤害数字：`src/coach/experience.js:66`（`${sk.name}…算${best.hit}伤害，对方${q.hp}HP`）、`src/coach/strategist.js:19/25/26`、`src/coach/teacher.js:12/16`（`速度 X → Y`）。本轮把 3 处不具体的兜底句改成了具体句（改动 3、4）。 |
 | 自然 | 基本达标 | 本轮把 2 处文档腔改成口语（改动 5）；未发现需要整体重写的段落。 |
-| 无水平羞辱 | 达标（**复查方式需更正**） | 本文原写「全库检索 `你应该 / 你必须 / 你最好 / 下次别 / 别再 / 不要再`：0 命中」——**2026-09-17 晚按同一条命令实跑得到 3 处命中**，且都在代码注释/检测器里：`coach/companion.js:243`（`PREACH` 黑名单正则，用来**拒绝**这类话）、`coach/experience.js:190`（注释：「点掉就是「这局别再打断我」」）、`coach/teacher.js:40`（注释：「也不出现「你应该点这个」」）。**玩家可见文案里 0 命中这个实质结论仍成立**，但"零命中"作为可复现检查已不成立。`失误/做错/菜/水平` 只出现在"不要这么说"的约束里（`strategist.js:100` 给模型的指令、`teacher.js:75` 的 `不能据此断言长期策略错误`）。发现 2 处命令句（未改项 B、C）。 |
-| 不空泛安慰 | 达标 | 全库检索 `没关系 / 别灰心 / 加油 / 慢慢来 / 很正常 / 没事的`：命中 1 处，且该处是并行任务新增的**检测器**（`coach/companion.js` 的 `checkCompanionRestraint` 用这些词做黑名单，命中就拒绝输出；2026-09-17 现场命中位置是 `coach/companion.js:259`），不是会被说给玩家听的文案；真正的输出模板 0 命中。唯一一处通用安抚在 `coach/companion.js` 的 HEAD 版本（未改项 A），已记录。 |
-| 不强行提问 | 改后**部分**达标 | 本文原写「玩家可见的问句只剩 3 类：首次偏好选择、场景设置、小测题目，均属必要交互」——**这个断言不成立**：至少还有 `app.js` 的「离开会结束本次训练且没有奖励，返回营地吗？」与 `coach/companion.js` 的「这句我还没接准。你说的是哪一处？」，两处在评审当时（`3db30c5`）就已存在，属漏检。**仍然成立的是**：2 处多余的软件反问已改为陈述（改动 1、2）。 |
-| 觉得烦时降低打扰 | 已有机制，非本轮新增 | 三档以上偏好 + 单条关闭：`experience.js:shouldNudge`（每局最多 2 次、同回合去重、45 秒冷却、`dismissed` 后本场不再主动提示）；`memory.js:adaptiveGate`（静默档直接不放行、关键风险档只在风险时放行、按最近 7 天的关闭记录降频）。安静档由 `profile.coach.mode==='quiet'` 在门控最前面短路。 |
+| 无水平羞辱 | 达标（**复查方式需更正**） | 本文原写「全库检索 `你应该 / 你必须 / 你最好 / 下次别 / 别再 / 不要再`：0 命中」——**2026-09-17 晚按同一条命令实跑得到 3 处命中**，且都在代码注释/检测器里：`src/coach/companion.js:243`（`PREACH` 黑名单正则，用来**拒绝**这类话）、`src/coach/experience.js:190`（注释：「点掉就是「这局别再打断我」」）、`src/coach/teacher.js:40`（注释：「也不出现「你应该点这个」」）。**玩家可见文案里 0 命中这个实质结论仍成立**，但"零命中"作为可复现检查已不成立。`失误/做错/菜/水平` 只出现在"不要这么说"的约束里（`src/coach/strategist.js:100` 给模型的指令、`src/coach/teacher.js:75` 的 `不能据此断言长期策略错误`）。发现 2 处命令句（未改项 B、C）。 |
+| 不空泛安慰 | 达标 | 全库检索 `没关系 / 别灰心 / 加油 / 慢慢来 / 很正常 / 没事的`：命中 1 处，且该处是并行任务新增的**检测器**（`src/coach/companion.js` 的 `checkCompanionRestraint` 用这些词做黑名单，命中就拒绝输出；2026-09-17 现场命中位置是 `src/coach/companion.js:259`），不是会被说给玩家听的文案；真正的输出模板 0 命中。唯一一处通用安抚在 `src/coach/companion.js` 的 HEAD 版本（未改项 A），已记录。 |
+| 不强行提问 | 改后**部分**达标 | 本文原写「玩家可见的问句只剩 3 类：首次偏好选择、场景设置、小测题目，均属必要交互」——**这个断言不成立**：至少还有 `src/client/app.js` 的「离开会结束本次训练且没有奖励，返回营地吗？」与 `src/coach/companion.js` 的「这句我还没接准。你说的是哪一处？」，两处在评审当时（`3db30c5`）就已存在，属漏检。**仍然成立的是**：2 处多余的软件反问已改为陈述（改动 1、2）。 |
+| 觉得烦时降低打扰 | 已有机制，非本轮新增 | 三档以上偏好 + 单条关闭：`src/coach/experience.js:shouldNudge`（每局最多 2 次、同回合去重、45 秒冷却、`dismissed` 后本场不再主动提示）；`src/coach/memory.js:adaptiveGate`（静默档直接不放行、关键风险档只在风险时放行、按最近 7 天的关闭记录降频）。安静档由 `profile.coach.mode==='quiet'` 在门控最前面短路。 |
 
 ---
 
 ## 五、本轮评审的局限
 
 - 只做了**文本层**评审，没有真人读者。哪句话"让人觉得被冒犯"最终仍需真人试玩（这正是 `R09`/`T04` 未完成的部分，本文件不能替代）。
-- `coach/*.js` 的模板里有一部分是**按上下文拼接**的（例如 `teacher.js:12` 的条件三元、`strategist.js:20` 的分支），我只评审了能确定玩家会看到的完整句子；纯内部拼接片段（如 `'}；补位后下一回合…'`）按组合后的整句判断。
-- 并行任务正在改写 `coach/companion.js` / `coach/memory.js` / `coach.js`，本文件对这三个文件的结论以评审时的 HEAD 版本为准；重写完成后应重新过一遍新增模板。
+- `src/coach/*.js` 的模板里有一部分是**按上下文拼接**的（例如 `src/coach/teacher.js:12` 的条件三元、`src/coach/strategist.js:20` 的分支），我只评审了能确定玩家会看到的完整句子；纯内部拼接片段（如 `'}；补位后下一回合…'`）按组合后的整句判断。
+- 并行任务正在改写 `src/coach/companion.js` / `src/coach/memory.js` / `src/coach/session.js`，本文件对这三个文件的结论以评审时的 HEAD 版本为准；重写完成后应重新过一遍新增模板。
 - "降低打扰"的机制此前已有自动测试覆盖（`U02`/`U03` 的核实记录），本轮只做了代码走查确认，没有新增测试。
 
 ---
@@ -155,16 +155,16 @@ ${memory.lessons.length?'我们已经练过速度判断了。':'想培养伙伴�
 
 ```bash
 # 现场复查"无水平羞辱 / 不空泛安慰"这两条结论
-grep -rn "你应该\|你必须\|你最好\|下次别\|别再\|不要再" app.js index.html coach/*.js   # 写作时 0 命中；2026-09-17 实跑为 3 处命中，全在注释/黑名单检测器里，需逐条看是不是玩家文案
-grep -rn "没关系\|别灰心\|加油\|慢慢来\|很正常\|没事的" app.js index.html coach/*.js   # 期望只命中 companion.js 的黑名单检测器（现在是 coach/companion.js:259）
+grep -rn "你应该\|你必须\|你最好\|下次别\|别再\|不要再" src/client/app.js src/client/index.html src/coach/*.js   # 写作时 0 命中；2026-09-17 实跑为 3 处命中，全在注释/黑名单检测器里，需逐条看是不是玩家文案
+grep -rn "没关系\|别灰心\|加油\|慢慢来\|很正常\|没事的" src/client/app.js src/client/index.html src/coach/*.js   # 期望只命中 src/coach/companion.js 的黑名单检测器（现在是 src/coach/companion.js:259）
 
 # 评审规模（复算用）——本文的 247/420 是旧值，现场复算为 254/512
-node -e "const {readFileSync,readdirSync}=require('node:fs');const c=f=>{let n=0;for(const l of readFileSync(f,'utf8').split(String.fromCharCode(10)))for(const m of l.match(/(?:'|`)((?:[^'`\\]|\\.)*)(?:'|`)/g)||[])if(/[一-鿿]/.test(m.slice(1,-1)))n++;return n};console.log('app.js',c('app.js'),'engine.js',c('engine.js'));let t=0;for(const f of readdirSync('coach'))if(f.endsWith('.js'))t+=c('coach/'+f);console.log('coach/*.js',t)"
+node -e "const {readFileSync,readdirSync}=require('node:fs');const c=f=>{let n=0;for(const l of readFileSync(f,'utf8').split(String.fromCharCode(10)))for(const m of l.match(/(?:'|`)((?:[^'`\\]|\\.)*)(?:'|`)/g)||[])if(/[一-鿿]/.test(m.slice(1,-1)))n++;return n};console.log('src/client/app.js',c('src/client/app.js'),'src/game/engine.js',c('src/game/engine.js'));let t=0;for(const f of readdirSync('coach'))if(f.endsWith('.js'))t+=c('src/coach/'+f);console.log('src/coach/*.js',t)"
 
 # 本轮 5 处改动的位置
-grep -n "展开这回合的取舍" index.html
-grep -n "下面有一个值得回看的关键回合\|先按这个打，出招后我按新局面重算\|加错了可以免费重置" app.js   # 4 处里还剩 3 处；第 3 处已被 b2cd1f6 换成「先看对手是留在场上还是换人」
+grep -n "展开这回合的取舍" src/client/index.html
+grep -n "下面有一个值得回看的关键回合\|先按这个打，出招后我按新局面重算\|加错了可以免费重置" src/client/app.js   # 4 处里还剩 3 处；第 3 处已被 b2cd1f6 换成「先看对手是留在场上还是换人」
 
 # 规则页文案（P05/G08）已生成而非手写
-grep -n 'id="rules-body"' index.html
+grep -n 'id="rules-body"' src/client/index.html
 ```

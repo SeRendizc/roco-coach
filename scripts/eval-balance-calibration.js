@@ -7,8 +7,8 @@
 // engine.js must not be modified, so the enemy chooser is RE-IMPLEMENTED with parameters and
 // asserted equal to chooseEnemy() at the shipped values (penalty 6, cap 18, 3-turn window).
 import {writeFileSync,mkdirSync} from 'node:fs';
-import {createGame,legalActions,resolveTurn,chooseEnemy,rankEnemyActions,active,SKILLS,damage,multiplier} from '../engine.js';
-import {STAGES,stageOptions} from '../content.js';
+import {createGame,legalActions,resolveTurn,chooseEnemy,rankEnemyActions,active,SKILLS,damage,multiplier} from '../src/game/engine.js';
+import {STAGES,stageOptions} from '../src/game/content.js';
 
 const SHIPPED_PENALTY=6, SHIPPED_CAP=18, SHIPPED_WINDOW=3, SHIPPED_THRESHOLD=10;
 const rng=seed=>{let s=seed>>>0;return()=>((s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296);};

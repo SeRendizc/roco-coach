@@ -42,7 +42,7 @@ async function fetchJson(url,tries=80,gap=250){
 }
 
 // 从 app.js 出发找「服务器不提供但磁盘上有」的模块；只补这些，服务器正常提供的模块一律不动。
-async function findUnservedModules(entry='app.js'){
+async function findUnservedModules(entry='src/client/app.js'){
   const seen=new Set(),unserved=[],queue=[entry];
   while(queue.length){
     const rel=queue.shift();if(!rel||seen.has(rel))continue;seen.add(rel);
@@ -78,7 +78,7 @@ async function launch(){
 }
 
 const main=async()=>{
-  const graph=await findUnservedModules('app.js');
+  const graph=await findUnservedModules('src/client/app.js');
   log('import 图模块数：'+graph.checked.length+'；服务器不提供的模块：'+(graph.unserved.map(u=>u.path).join(', ')||'（无）'));
   const handle=await launch();
   log('Chrome：'+handle.version);

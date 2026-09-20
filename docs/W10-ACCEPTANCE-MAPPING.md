@@ -25,10 +25,10 @@
 
 | 项 | 类别 | 本轮推进 | 现状与证据路径 |
 |---|---|---|---|
-| `P05` 统一规则数据源 | C→**本轮做了** | **做了，未勾**（**现已勾选**） | `engine.js` 新增 `RULES` 并让结算引用它；新增 `rules.js` 生成全部界面规则文案（奖励/经验曲线/等级/培养收益用 `settle()`+`createGame()` **实测**得出）；`index.html`/`app.js` 改为读生成结果；新增 `rules.test.js` 16 项断言"UI 显示的数值 = 引擎实测值"。**仍未勾的原因**：`coach/*.js` 里还有手写规则数字（`额外回2豆`、`生命 +12` 等），且缺"冻结后的独立评测集"（那是 `P06`）。详见 `docs/P05-RULES-SOURCE.md` |
-| `U07` 语言评审 | C→**本轮做了** | **做了，未勾**（**现已勾选**） | 逐条评审 app.js / index.html / coach/*.js / engine.js 共 400+ 条文案（**规模数字已变**：现场复算 `app.js` 254 / `engine.js` 166 / `coach/*.js` 512，原文的 247 / 160 / 420 是旧值）；**改了 5 处**（2 处多余反问改陈述、1 处兜底句具体化、1 处空承诺改真实行为、1 处术语堆砌改口语；**其中第 3 处替换串后来被文案清扫改掉**，见 `docs/LANGUAGE-REVIEW.md`）；**原报的"3 处未改"里 `coach/companion.js` 的两处已随陪练重写消失**，只剩 `coach/teacher.js:117`「别等倒下再救」与 `coach/experience.js:120`「先别只盯着回血」仍在（行号已漂移）。详见 `docs/LANGUAGE-REVIEW.md`。**仍未勾的原因**：无真人读者验证（属 `R09`） |
-| `G08` 原位规则说明 | C→**本轮做了** | **做了，未勾**（**现已勾选**） | 规则页从"手写一段散文"改成 11 节生成内容，补齐**有效伤害条件**（公式各项、6 条克制关系、防御 65%、哪些技能穿透、强化/环境/携带物乘数、最低 1 点、以及"什么情况下打不出伤害"四个前提）与**状态计时**（两种异常跳数与回合、施加当回合结算、不叠加、后备暂停、减速回合与不追溯、强化计时、环境 4 回合、携带物每局一次）；新增 `offline.test.js` 5 项，其中一项**只用引擎把 easy/normal/hard 各打完一局**，证明关闭 AI 也能完成游戏。详见 `docs/G08-RULES-IN-PLACE.md`。**仍未勾的原因**：无真人可理解性测试；窄屏下的新小节标题未单独做视觉验收 |
-| `S05` 慢模型演示 | A→**本轮做了一半** | **客户端侧做了，未勾**（**现已勾选**） | 新增 `evals/slow-model.test.js` 6 项：替换 `globalThis.fetch` 造可控慢网，驱动真实 `coach/client.js`；**未改生产代码**（比注入更干净）。实测：出招后旧请求被中止且**交付列表为空**；连续三次快速出招只交付最后一条；同局面并发只调上游 1 次；慢到 600ms 也只交付一次。**仍未勾的原因**：真实浏览器里叠加慢响应没做（见 `W09`） |
+| `P05` 统一规则数据源 | C→**本轮做了** | **做了，未勾**（**现已勾选**） | `src/game/engine.js` 新增 `RULES` 并让结算引用它；新增 `src/game/rules.js` 生成全部界面规则文案（奖励/经验曲线/等级/培养收益用 `settle()`+`createGame()` **实测**得出）；`src/client/index.html`/`src/client/app.js` 改为读生成结果；新增 `tests/rules.test.js` 16 项断言"UI 显示的数值 = 引擎实测值"。**仍未勾的原因**：`src/coach/*.js` 里还有手写规则数字（`额外回2豆`、`生命 +12` 等），且缺"冻结后的独立评测集"（那是 `P06`）。详见 `docs/P05-RULES-SOURCE.md` |
+| `U07` 语言评审 | C→**本轮做了** | **做了，未勾**（**现已勾选**） | 逐条评审 src/client/app.js / src/client/index.html / src/coach/*.js / src/game/engine.js 共 400+ 条文案（**规模数字已变**：现场复算 `src/client/app.js` 254 / `src/game/engine.js` 166 / `src/coach/*.js` 512，原文的 247 / 160 / 420 是旧值）；**改了 5 处**（2 处多余反问改陈述、1 处兜底句具体化、1 处空承诺改真实行为、1 处术语堆砌改口语；**其中第 3 处替换串后来被文案清扫改掉**，见 `docs/LANGUAGE-REVIEW.md`）；**原报的"3 处未改"里 `src/coach/companion.js` 的两处已随陪练重写消失**，只剩 `src/coach/teacher.js:117`「别等倒下再救」与 `src/coach/experience.js:120`「先别只盯着回血」仍在（行号已漂移）。详见 `docs/LANGUAGE-REVIEW.md`。**仍未勾的原因**：无真人读者验证（属 `R09`） |
+| `G08` 原位规则说明 | C→**本轮做了** | **做了，未勾**（**现已勾选**） | 规则页从"手写一段散文"改成 11 节生成内容，补齐**有效伤害条件**（公式各项、6 条克制关系、防御 65%、哪些技能穿透、强化/环境/携带物乘数、最低 1 点、以及"什么情况下打不出伤害"四个前提）与**状态计时**（两种异常跳数与回合、施加当回合结算、不叠加、后备暂停、减速回合与不追溯、强化计时、环境 4 回合、携带物每局一次）；新增 `tests/offline.test.js` 5 项，其中一项**只用引擎把 easy/normal/hard 各打完一局**，证明关闭 AI 也能完成游戏。详见 `docs/G08-RULES-IN-PLACE.md`。**仍未勾的原因**：无真人可理解性测试；窄屏下的新小节标题未单独做视觉验收 |
+| `S05` 慢模型演示 | A→**本轮做了一半** | **客户端侧做了，未勾**（**现已勾选**） | 新增 `tests/evals/slow-model.test.js` 6 项：替换 `globalThis.fetch` 造可控慢网，驱动真实 `src/coach/client.js`；**未改生产代码**（比注入更干净）。实测：出招后旧请求被中止且**交付列表为空**；连续三次快速出招只交付最后一条；同局面并发只调上游 1 次；慢到 600ms 也只交付一次。**仍未勾的原因**：真实浏览器里叠加慢响应没做（见 `W09`） |
 | `G07` 平衡矩阵 | C→**本轮做了** | **做了，未勾**（**现已勾选**） | 新增 `scripts/eval-balance-matrix.js` 与 `reports/balance-matrix.json`、`reports/balance-matrix.md`（**58,229 字节**，原文写 34.7KB 是旧版大小）：**5,796 场 / 398 个 arm / 185.3 秒**（原文写 180.6 秒，那是被覆盖的旧 JSON `durationMs 180635`；当前 JSON 是 `185314`），11 个 study 覆盖 9 阵容 × 3 难度 × 3 携带物 × 8 种打法 × 多种子，含同属性同职责替换对照（回答 G02 遗留问题）、战术多样性、拖延上限（**当前 JSON 是 18 场到 80 回合上限**，原文写 16 场，同为旧 JSON 的值）、pve 与 pvp-local 模式对照、与归档 studyA/studyC 的复现对照；每个 arm 带样本量、Wilson 95% 置信区间与回合数分布。**仍未勾的原因**：结论只覆盖无头仿真、玩家侧是固定脚本而非真人；等级/培养与环境维度几乎未覆盖（**环境只有 24 场**，原文写 48 场是把 S8 总场次当成了环境臂的数）；"冻结规则后再重建评测集"这半句依赖 `P06` |
 | `C17` 残局提示长局浏览器触发 | C→**本轮做了一半** | **长局与尺寸做了，未勾**（**现已勾选**） | headless Chrome 152 + CDP 真实鼠标事件，真实走完营地→出征→开局→逐回合点行动，**8 局（2 视口×4 局）全部打完整场（14/14/15/17 回合）**，残局提示 **8/8 局各触发 1 次**，DOM 原文与 app 自写 `channel:'endgame'` 日志条数/回合号完全对齐；两种视口下提示条 `inViewport=true`、8/8 采样点命中自身、`occluded=false`。详见 `reports/c17-endgame-browser.md`、截图 `reports/c17/*.png`（26 张）。**仍未勾的原因**：慢模型并发未在同一浏览器里测；样本有限（4 个对局）；脚本固定弱打法，不代表人类打法 |
 | `F07` 面试演练 | C→**本轮只给提纲** | **未做，按要求不代做**（**现已勾选**） | `F07` 是给候选人本人准备的演练，本轮只整理 `docs/INTERVIEW-DRILL.md`：六个问题各自"要考什么 / 项目内可引用的证据 / 常见追问 / 不要说什么"，以及建议主动交代的三个失败案例。**演练本身必须由本人完成** |
@@ -38,10 +38,10 @@
 | `T04` 无提示迁移验证 | A（真人） | 做不到 | 需要真人被试 |
 | `R09` 人工试玩与迁移观察 | A（真人） | 做不到 | 需要真人被试；模拟收益与真人效果必须分开报告，本轮没有新增模拟收益数据 |
 | `X06` 分屏对战完整验收 | A（真人） | 做不到 | 需要两名真人多局；联网 PVP 更不在本机范围内 |
-| `T05` 陪练 | A（真人语言评审） | **本轮由并行任务推进** | 同期另一任务在重写 `coach/companion.js`（状态模型→语气档位→真实事件模板→克制扫描）+ `companion.test.js`；`U07` 的语言评审未含真人读者，所以该项仍未勾（清单里已由该任务写明原因） |
+| `T05` 陪练 | A（真人语言评审） | **本轮由并行任务推进** | 同期另一任务在重写 `src/coach/companion.js`（状态模型→语气档位→真实事件模板→克制扫描）+ `tests/companion.test.js`；`U07` 的语言评审未含真人读者，所以该项仍未勾（清单里已由该任务写明原因） |
 | `R03` 完整轨迹切分 | A | 未动 | 缺"未见种子/组合/行为模式的独立测试" |
 | `F04` 演示脚本与录像 | C | 未动 | 脚本已有（`docs/DEMO-WALKTHROUGH.md`、`docs/DEMO-ACCEPTANCE.md`），**录像未做**。**现已勾选**（F04 交付 `output/demo/` 21 张真实截图，并明确"这不是录像"） |
-| `W09` 完整浏览器慢响应 | A | **部分推进** | 客户端取消语义已由 `evals/slow-model.test.js` 覆盖；长局浏览器验收由 `C17` 覆盖；**慢响应 + 长局 + 语音取消同时在一个真实页面里跑通**没做（语音已停用，见 `docs/S05-W09-SLOW-MODEL.md` 第五节） |
+| `W09` 完整浏览器慢响应 | A | **部分推进** | 客户端取消语义已由 `tests/evals/slow-model.test.js` 覆盖；长局浏览器验收由 `C17` 覆盖；**慢响应 + 长局 + 语音取消同时在一个真实页面里跑通**没做（语音已停用，见 `docs/S05-W09-SLOW-MODEL.md` 第五节） |
 
 **本轮结束后仍未勾：19 项（数量不变）。** 其中 **6 项**（`P05`/`U07`/`G08`/`S05`/`G07`/`C17`/`W10` 中的 **7 项**）有了新的、可核查的产物，但都因为上面逐条写明的缺口保持未勾——这与项目"不把未验证的东西改名为已完成"的原则一致。
 
@@ -51,7 +51,7 @@
 
 | 提交物 | 状态 |
 |---|---|
-| `report/`（LaTeX 源：`main.tex`、`preamble.tex`、`sections/`） | **本轮未更新**。规则数据源（P05）、规则页（G08）、语言评审（U07）都不在报告正文里。**已过时**：`report/sections/` 之后被重写——`03-hard.tex:11` 记的正是 `rules.js` 没进白名单导致 `/rules.js` 404、整页白屏这一 P05 事件；`:167-171` 讲军师/经验层/规则页同源取数以及"把规则抄成自然语言副本"的教训；`:52-62` 讲文案/术语问题与新增的静态文案检查（`evals/player-copy.test.js`）。**这三件事都已进报告正文。** |
+| `report/`（LaTeX 源：`main.tex`、`preamble.tex`、`sections/`） | **本轮未更新**。规则数据源（P05）、规则页（G08）、语言评审（U07）都不在报告正文里。**已过时**：`report/sections/` 之后被重写——`03-hard.tex:11` 记的正是 `src/game/rules.js` 没进白名单导致 `/rules.js` 404、整页白屏这一 P05 事件；`:167-171` 讲军师/经验层/规则页同源取数以及"把规则抄成自然语言副本"的教训；`:52-62` 讲文案/术语问题与新增的静态文案检查（`tests/evals/player-copy.test.js`）。**这三件事都已进报告正文。** |
 | `output/pdf/xiaoya-coach-report.pdf` | **本轮未重新生成**。它仍是此前那一版，**不能当作包含本轮 P05/G08/U07/G07/C17 结果的提交稿**。**已过时**：该 PDF 之后被多次重新生成（`git log` 含 `b37f9fb` 的 `Bin 344947 -> 375293 bytes`）；**当前文件 396,798 字节、mtime 22:32**。 |
 | `reports/*.json` / `reports/*.md`（实验与实测证据） | **本轮新增**：`reports/balance-matrix.json`、`reports/balance-matrix.md`、`reports/c17-endgame-browser.md`、`reports/c17/*.png` |
 | `docs/*.md`（验收与说明） | **本轮新增**：`P05-RULES-SOURCE.md`、`G08-RULES-IN-PLACE.md`、`LANGUAGE-REVIEW.md`、`S05-W09-SLOW-MODEL.md`、`G06-LATE-GAME-DESIGN.md`、`INTERVIEW-DRILL.md`、`W10-ACCEPTANCE-MAPPING.md`（本文件） |
@@ -68,7 +68,7 @@
 | 时点 | 测试数 | 结果 | 说明 |
 |---|---|---|---|
 | 改动前（`git stash` 回到 HEAD，连续两次） | 151 | 151 通过 / 0 失败 | 可复现基线（**本文这一行未能核实**：需要检出 `849e131` 之前的提交重跑；本次只做到"当时的报告这么写"） |
-| 本轮改动后（最新一次） | 191 | 191 通过 / 0 失败 | 含本轮新增 `rules.test.js` 16 项、`offline.test.js` 5 项、`evals/slow-model.test.js` 6 项，以及并行任务新增的 `companion.test.js` 与其它用例（**当时值；该分布还漏了 `strategist`/`opponent`/`wiring`/`evals/player-copy` 四个也在 `npm test` 里的文件**） |
+| 本轮改动后（最新一次） | 191 | 191 通过 / 0 失败 | 含本轮新增 `tests/rules.test.js` 16 项、`tests/offline.test.js` 5 项、`tests/evals/slow-model.test.js` 6 项，以及并行任务新增的 `tests/companion.test.js` 与其它用例（**当时值；该分布还漏了 `strategist`/`opponent`/`wiring`/`tests/evals/player-copy` 四个也在 `npm test` 里的文件**） |
 | `reports/test-output.txt`（22:04） | **251** | 251 通过 / 0 失败 | 该产物重写后的值 |
 | 写这份修复报告时现场 `npm test` | **257** | **257 通过 / 0 失败** | 核对过程中曾因并发的"新增两只普通系"改动短暂出现 255/2，最终全绿 |
 
@@ -82,7 +82,7 @@
 4. **没有代做面试演练**（`F07` 只有提纲）。
 5. **没有真人被试**（`T04`/`R09`/`X06` 做不到，没有用合成数据冒充）。
 6. **没有重新生成最终报告与 PDF**（见第二节）。
-7. **没有重启 8765 服务**（本轮全程未重启、未另起服务）。过程记录：P05 新增 `rules.js` 后，正在运行的旧进程仍是旧白名单，`/rules.js` 返回 **404**，页面一行 JS 都不执行（`reports/c17-endgame-browser.md` 第 6 节独立实测到同一问题）。**该进程随后由他人重启**，之后 `scripts/cdp-rules-check.js` 在真实浏览器里复核：`/rules.js` **200**、无任何网络层补齐（`shim.installed: []`）、页面 JS 正常执行（营地 **12** 张卡片——该快照早于宠物扩展，现在是 14 张）、规则弹窗 11 节 / 77 段 / 4316 字符（**DOM 快照值；`rules.js` 之后又改过，现场 `rulesSections()` 复算为 11 节 / 79 行、标题+正文 4480 字符**）、关键句缺失 **0**、弹窗 `open:true` 660×569、控制台错误 **0**（原始输出 `reports/p05-rules-browser-check.txt`，截图 `reports/p05-rules-dialog.png`）。因此 P05/G08 的浏览器效果**已验收**，但要注意这是**重启之后**的状态；重启前它是坏的。
+7. **没有重启 8765 服务**（本轮全程未重启、未另起服务）。过程记录：P05 新增 `src/game/rules.js` 后，正在运行的旧进程仍是旧白名单，`/rules.js` 返回 **404**，页面一行 JS 都不执行（`reports/c17-endgame-browser.md` 第 6 节独立实测到同一问题）。**该进程随后由他人重启**，之后 `scripts/cdp-rules-check.js` 在真实浏览器里复核：`/rules.js` **200**、无任何网络层补齐（`shim.installed: []`）、页面 JS 正常执行（营地 **12** 张卡片——该快照早于宠物扩展，现在是 14 张）、规则弹窗 11 节 / 77 段 / 4316 字符（**DOM 快照值；`src/game/rules.js` 之后又改过，现场 `rulesSections()` 复算为 11 节 / 79 行、标题+正文 4480 字符**）、关键句缺失 **0**、弹窗 `open:true` 660×569、控制台错误 **0**（原始输出 `reports/p05-rules-browser-check.txt`，截图 `reports/p05-rules-dialog.png`）。因此 P05/G08 的浏览器效果**已验收**，但要注意这是**重启之后**的状态；重启前它是坏的。
 
 ## 五、可核查命令
 
@@ -98,6 +98,6 @@ ls -la docs/P05-RULES-SOURCE.md docs/G08-RULES-IN-PLACE.md docs/LANGUAGE-REVIEW.
        docs/S05-W09-SLOW-MODEL.md docs/G06-LATE-GAME-DESIGN.md docs/INTERVIEW-DRILL.md \
        docs/W10-ACCEPTANCE-MAPPING.md reports/balance-matrix.md reports/c17-endgame-browser.md
 
-# 运行中的服务是否提供 rules.js（重启前应为 404）
+# 运行中的服务是否提供 src/game/rules.js（重启前应为 404）
 curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8765/rules.js
 ```

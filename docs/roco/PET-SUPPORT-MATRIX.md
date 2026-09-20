@@ -406,7 +406,7 @@ B 组本轮**只做知识库**：不支持进入战斗，不支持强度结论�
 | 15 | 10 个技能是条件化/动态威力，静态 power 不能直接当最终伤害 | 所有涉及该机制的技能都必须 fail closed |
 
 这些缺口**没有**用任何默认值补齐。它们逐条转成了下一轮的 microcase：
-`evals/roco/cases/microcases-v1.jsonl`（计划态）。
+`tests/evals/roco/cases/microcases-v1.jsonl`（计划态）。
 
 ## 5. 数据来源与版本（每只精灵）
 

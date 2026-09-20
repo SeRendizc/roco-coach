@@ -12,13 +12,13 @@
 // Usage: node scripts/eval-live-s04.js [--limit N] [--only id1,id2]
 import {writeFileSync,mkdirSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
-import {createGame,legalActions,resolveTurn,chooseEnemy,active,SKILLS,damage,rankEnemyActions} from '../engine.js';
-import {stageOptions} from '../content.js';
-import {newProfile} from '../progression.js';
-import {freshMemory} from '../coach/memory.js';
-import {buildContext,checkGroundedAnswer,policyFor,gatherAgentEvidence} from '../coach/runtime.js';
-import {TOOL_CONTRACTS} from '../coach/toolbox.js';
-import {archiveRound} from '../coach/experience.js';
+import {createGame,legalActions,resolveTurn,chooseEnemy,active,SKILLS,damage,rankEnemyActions} from '../src/game/engine.js';
+import {stageOptions} from '../src/game/content.js';
+import {newProfile} from '../src/game/progression.js';
+import {freshMemory} from '../src/coach/memory.js';
+import {buildContext,checkGroundedAnswer,policyFor,gatherAgentEvidence} from '../src/coach/runtime.js';
+import {TOOL_CONTRACTS} from '../src/coach/toolbox.js';
+import {archiveRound} from '../src/coach/experience.js';
 import {judgeToolSelection,judgeArguments,judgeEvidenceMatch,judgeAnswerConsistency,judgeStaleInterception,summarizeToolLayers} from './eval-tool-metrics.js';
 
 const ORIGIN='http://127.0.0.1:8765';

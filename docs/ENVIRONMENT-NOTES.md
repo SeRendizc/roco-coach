@@ -1,8 +1,8 @@
 # 环境差异记录
 
-## replace.test.js 需要能启动 Chrome
+## tests/replace.test.js 需要能启动 Chrome
 
-`replace.test.js` 是无头浏览器端到端用例（真 Chrome + 真 server + 真点击），
+`tests/replace.test.js` 是无头浏览器端到端用例（真 Chrome + 真 server + 真点击），
 它**要求运行环境允许启动 Chrome 并写出 `DevToolsActivePort`**。
 
 **在受限沙箱里它必定失败**，报错形如「15 秒内没有生成 DevToolsActivePort」。
@@ -23,6 +23,6 @@
 
 | 需要 | 哪些 | 缺了会怎样 |
 |---|---|---|
-| Chrome | `replace.test.js`、`browser.test.js`、`npm run test:smoke` | 报环境错误，不是逻辑错误 |
+| Chrome | `tests/replace.test.js`、`tests/browser.test.js`、`npm run test:smoke` | 报环境错误，不是逻辑错误 |
 | 模型密钥 | `npm run eval:live*`（不在 `npm test` 里） | 需在 `/connect.html` 或 `./scripts/start.sh --save-key` 配 |
 | Python | 语义检索与两个训练实验 | 自动退回词项检索，产品仍可用 |

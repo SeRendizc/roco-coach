@@ -24,7 +24,7 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync, mkdirSync, readFileSync
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createCoachServer } from '../../server.js';
+import { createCoachServer } from '../../src/server/index.js';
 
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const OUT = join(ROOT, 'reports/roco/acceptance');

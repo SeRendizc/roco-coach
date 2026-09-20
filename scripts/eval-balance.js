@@ -1,5 +1,5 @@
 import {writeFileSync} from 'node:fs';
-import {SPECIES,createGame,step,legalActions,chooseEnemy} from '../engine.js';
+import {SPECIES,createGame,step,legalActions,chooseEnemy} from '../src/game/engine.js';
 // Equal level and identical standard policy, both seats, five seeds. Not a proof of balance.
 const rows=[];
 for(const a of SPECIES)for(const b of SPECIES)if(a.id!==b.id){

@@ -1,4 +1,4 @@
-// 生成 evals/roco/cases/microcases-v1.jsonl —— 下一轮「真实规则引擎」的 microcase 计划。
+// 生成 tests/evals/roco/cases/microcases-v1.jsonl —— 下一轮「真实规则引擎」的 microcase 计划。
 //
 // 关键定位（必须诚实）：
 //   本文件是**计划**，不是通过记录。所有 cases 的 `verification.level` 是
@@ -605,8 +605,8 @@ add({
 });
 
 // ── 写文件 ────────────────────────────────────────────────────────────
-const OUT = 'evals/roco/cases/microcases-v1.jsonl';
-mkdirSync('evals/roco/cases', { recursive: true });
+const OUT = 'tests/evals/roco/cases/microcases-v1.jsonl';
+mkdirSync('tests/evals/roco/cases', { recursive: true });
 
 const header = {
   record_type: 'microcase_plan_header',

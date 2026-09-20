@@ -20,7 +20,7 @@ import {spawn} from 'node:child_process';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {createCoachServer} from '../server.js';
+import {createCoachServer} from '../src/server/index.js';
 
 const PORT=Number(process.env.CDP_PORT||9336);
 const CHROME='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';

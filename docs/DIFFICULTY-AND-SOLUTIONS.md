@@ -5,7 +5,7 @@
 > 代码基线：UI v0.10（写作时）/ 当前 v0.11，游戏规则 v0.6，14 只宠物（写作时为 12；本轮新增磐耳羊/灵瞳猫两只普通系），可运行本机 Demo（`npm start`，http://127.0.0.1:8765/ ）。
 > 自动测试：写作时 **122 项全部通过**；此后 **127 → 251 → 257 项**。写这份修复报告时现场 `npm test` 为 **tests 257 / pass 257 / fail 0**（核对过程中曾因并发的"新增两只普通系"改动短暂出现过 255/2，最终已全绿）。**本文正文里出现的 122/127 一律是当时值，不要当现状读。**
 
-> **v0.11 变更提示（重要）**：本文写作于 commit `849e131`。此后 `121411d` 起，教练策略已反转——**只有线上竞技 `pvp-live` 闭麦，本地对战 `pvp-local` 一律允许教练**（`coach/policy.js` 的 `RANKED_MODES=['pvp-live']`）。本文中凡称「`pvp-local` 也被拒」「本地与正式 PVP 同一策略」「对局中陪练被压到 R0」的段落均已过时，请以 `docs/CHECKLIST.md` 的 X02/X03 为准。
+> **v0.11 变更提示（重要）**：本文写作于 commit `849e131`。此后 `121411d` 起，教练策略已反转——**只有线上竞技 `pvp-live` 闭麦，本地对战 `pvp-local` 一律允许教练**（`src/coach/policy.js` 的 `RANKED_MODES=['pvp-live']`）。本文中凡称「`pvp-local` 也被拒」「本地与正式 PVP 同一策略」「对局中陪练被压到 R0」的段落均已过时，请以 `docs/CHECKLIST.md` 的 X02/X03 为准。
 
 >
 > **文档基线：commit `849e131`（2026-09-17 14:25）。**本文所有行号与该提交一致。⚠️ **`docs/CHECKLIST.md` 的行号引用请不要再按行号找**：该文件此后被大量追加，本文里所有 `docs/CHECKLIST.md:NNN` 现在都指向别的行，**请按条目编号（A05 / C05 / G07 / S04 …）检索**。同理，本文写的 `reports/test-output.txt` 是"更早一次运行的产物（13:52，记录 114 项），尚未随本次提交重新生成"——**该文件后来已被重写为 251/251/0（mtime 22:04，随 `50ec5fe` 入库）**，这条不一致已经消失，但"报告与代码会各自漂移"这个论点仍成立（见下文难点 12）。
@@ -46,9 +46,9 @@
 
 游戏是回合制 PVE 宠物对战：玩家带 3 只伙伴，每回合在「技能 / 换宠 / 道具 / 防御 / 撤退」中选一个行动，双方同时决定。小芽（AI Coach）有三种角色感：
 
-- **军师**（`coach/strategist.js`）——实时局面下的行动比较与解释；
-- **老师**（`coach/teacher.js`）——整局复盘、培养建议、参数化练习；
-- **陪练**（`coach/companion.js`）——被动通道有状态模型（momentum / consideration / engagement）、语气档位 R0–R3、真实事件模板与克制扫描；主动通道（`coach.js`）有门控与档位但 UI 未接线。设计与实现说明见 `docs/COMPANION-DESIGN.md` 与 `docs/COMPANION-IMPLEMENTATION.md`。
+- **军师**（`src/coach/strategist.js`）——实时局面下的行动比较与解释；
+- **老师**（`src/coach/teacher.js`）——整局复盘、培养建议、参数化练习；
+- **陪练**（`src/coach/companion.js`）——被动通道有状态模型（momentum / consideration / engagement）、语气档位 R0–R3、真实事件模板与克制扫描；主动通道（`src/coach/session.js`）有门控与档位但 UI 未接线。设计与实现说明见 `docs/COMPANION-DESIGN.md` 与 `docs/COMPANION-IMPLEMENTATION.md`。
 
 三条链路共用一个原则（`docs/COACH-PLAN.md:11`）：**「就算玩家从不打开聊天，小芽也应有用。」** 下面 13 个难点基本都是这句话逼出来的。
 
@@ -82,16 +82,16 @@
 
 把主入口从「聊天框」改成「事件触发的小提示」，并把复杂解释降级为**按需展开的二级入口**：
 
-- **事件源**（`coach/experience.js`）：`observe()` 在每次局面变化时产生候选提示，触发原因是补位、属性劣势、能量不足、开场对位、回合结束重估之一；`decisiveOpportunity()` 在双方残血且存在合法攻击可收尾时给出条件化提示；`watchCandidate()` 处理玩家自己委托的条件。
-- **原位呈现**（`app.js` 的 `updateCoach`）：提示写进局内固定位置的短字幕 `#live-coach`，附带一个「看看原因」按钮展开计算依据。展开是**可选**的，收起状态已经包含可用事实，例如「可考虑：换上潮甲龟」。
+- **事件源**（`src/coach/experience.js`）：`observe()` 在每次局面变化时产生候选提示，触发原因是补位、属性劣势、能量不足、开场对位、回合结束重估之一；`decisiveOpportunity()` 在双方残血且存在合法攻击可收尾时给出条件化提示；`watchCandidate()` 处理玩家自己委托的条件。
+- **原位呈现**（`src/client/app.js` 的 `updateCoach`）：提示写进局内固定位置的短字幕 `#live-coach`，附带一个「看看原因」按钮展开计算依据。展开是**可选**的，收起状态已经包含可用事实，例如「可考虑：换上潮甲龟」。
 - **培养页同样原位**（v0.6 起）：宠物名称下面直接显示一句建议，展开才是加点前后比较表。
 - **删除反向入口**：v0.9 移除了「小芽场景」这个可见入口（`docs/CHECKLIST.md:236`），不让玩家觉得必须先进入某个「AI 模式」。
-- **模型不是前置条件**：提示的事实部分由本地规则先算出来，模型连上时再把字幕替换成模型措辞（`app.js`：先渲染本地 `hint`，异步请求返回后再 `$('live-copy').textContent = ...`）。未连接、失败或超长时显示本地版本并如实标注来源。
+- **模型不是前置条件**：提示的事实部分由本地规则先算出来，模型连上时再把字幕替换成模型措辞（`src/client/app.js`：先渲染本地 `hint`，异步请求返回后再 `$('live-copy').textContent = ...`）。未连接、失败或超长时显示本地版本并如实标注来源。
 
 ### 验证
 
-- 自动测试 `coach.test.js:99`「whole-match UI request can review archived evidence without network or model credentials」：不联网、不配置模型也能走完整局复盘。
-- 自动测试 `evals/agent.test.js:124`「analysis after a match invokes model with whole-match evidence rather than canned companion reply」：结束后进入的是整局分析，而不是陪练的通用话术。
+- 自动测试 `tests/coach.test.js:99`「whole-match UI request can review archived evidence without network or model credentials」：不联网、不配置模型也能走完整局复盘。
+- 自动测试 `tests/evals/agent.test.js:124`「analysis after a match invokes model with whole-match evidence rather than canned companion reply」：结束后进入的是整局分析，而不是陪练的通用话术。
 - 真实浏览器链路（`docs/reviews/2026-09-17-live-acceptance.md`）：普通进入冠军高地、8 回合失利，「结算无需开聊天，自动出现整局 8 回合总结，来源显示 DeepSeek，证据可展开」。
 - 真实模型五条调用中的 `faint-colloquial`、`auto-result` 两条均为自动触发链路，原始结果 `reports/live-model-v10.json`。
 
@@ -120,25 +120,25 @@
 「让模型更小心一点」「在 prompt 里写清楚不要编数字」都不成立，原因是：
 
 1. 数值错误是**不可局部修补**的。一句「造成 38 伤害」错了，后面所有基于它的取舍解释全错，而语气、结构、甚至引用都是对的，肉眼很难发现。
-2. 合法性是**组合问题**。一次行动是否合法取决于能量、是否连续防御、是否满血用治疗、是否存在环境可清、存活伙伴列表等（`engine.js:83` `legalActions`），让模型在自然语言里复算这套条件，等价于让它重写一遍规则引擎。
+2. 合法性是**组合问题**。一次行动是否合法取决于能量、是否连续防御、是否满血用治疗、是否存在环境可清、存活伙伴列表等（`src/game/engine.js:83` `legalActions`），让模型在自然语言里复算这套条件，等价于让它重写一遍规则引擎。
 3. 「哪一招更好」根本不是模型能凭常识回答的。同一目标 50 HP，一级狐的火花直接伤害 52、追猎 75，都耗 2 能量，两者都满足未防御未治疗的击倒条件（`docs/RAG-LOCALIZATION.md:34`）。**只有进一步比较对手分支才可能说明某招更稳**，不能因为 75 > 52 就提醒玩家「打错了」。
 
 ### 方案
 
 **把「算」和「说」切成两层，模型永远拿不到算的权力：**
 
-- **枚举层（引擎）**：`engine.js` 的 `legalActions()` 产出当前全部合法行动；`damage()` 是按属性倍率、增益层数、防御减伤、穿透、环境倍率、携带物一次性效果结算的纯函数；`rankEnemyActions()` 对我方全部合法应手加权枚举，返回每个对手行动的 `score`、`expected`（平均分）、`worst`（最坏分）与 `switchScore`（对方换宠分支最坏分）。评分口径在代码注释与界面文案中都写明「启发式评分，非胜率」。
-- **证据组装层**：`coach/strategist.js` 的 `strategist()` 把枚举结果整理成结构性证据：双方面板、直接伤害（含防御分支）、平均/最坏分、检索到的知识卡及其反例与适用条件。返回结构里带 `method: '合法行动枚举 → 共用结算器 → 平均收益与最坏情况比较'`。
-- **模型层**：模型只负责目标理解、工具选择、取舍解释与教学措辞。给它的是证据包，不是原始局面让它自己推。`coach/client.js:2` 的生成约束里明确「不要向玩家报内部局面评分，用可见的宠物、技能和状态解释」。
+- **枚举层（引擎）**：`src/game/engine.js` 的 `legalActions()` 产出当前全部合法行动；`damage()` 是按属性倍率、增益层数、防御减伤、穿透、环境倍率、携带物一次性效果结算的纯函数；`rankEnemyActions()` 对我方全部合法应手加权枚举，返回每个对手行动的 `score`、`expected`（平均分）、`worst`（最坏分）与 `switchScore`（对方换宠分支最坏分）。评分口径在代码注释与界面文案中都写明「启发式评分，非胜率」。
+- **证据组装层**：`src/coach/strategist.js` 的 `strategist()` 把枚举结果整理成结构性证据：双方面板、直接伤害（含防御分支）、平均/最坏分、检索到的知识卡及其反例与适用条件。返回结构里带 `method: '合法行动枚举 → 共用结算器 → 平均收益与最坏情况比较'`。
+- **模型层**：模型只负责目标理解、工具选择、取舍解释与教学措辞。给它的是证据包，不是原始局面让它自己推。`src/coach/client.js:2` 的生成约束里明确「不要向玩家报内部局面评分，用可见的宠物、技能和状态解释」。
 - **可解释性做成产品结构**：每条证据都是可展开的条目（例如「若对手不换宠、不防御，余烬追猎对当前目标计算伤害为 75；实际结算受对手行动影响」），而不是把内部评分倒给玩家。
 
 ### 验证
 
-- `coach.test.js:8`「strategist gives a legal action grounded in current state」：断言军师给出的首选行动确实属于 `legalActions(g)`。
-- `features.test.js:14`「AI decision is pure and independent of any submitted action」：对手决策不看玩家待执行动作。
-- `knowledge.test.js:19`「lower damage is not automatically a mistake when both moves can KO」：直接把上面那个「52 / 75」的反例固化成测试。
-- `knowledge.test.js:28`「live calculations exclude unaffordable attacks and restrict PVP/version mismatch」：能量不够的技能不进计算。
-- `engine.test.js:13`「100 varied complete games preserve invariants and terminate」：100 局随机完整对局，断言生命与能量始终在合法区间。
+- `tests/coach.test.js:8`「strategist gives a legal action grounded in current state」：断言军师给出的首选行动确实属于 `legalActions(g)`。
+- `tests/features.test.js:14`「AI decision is pure and independent of any submitted action」：对手决策不看玩家待执行动作。
+- `tests/knowledge.test.js:19`「lower damage is not automatically a mistake when both moves can KO」：直接把上面那个「52 / 75」的反例固化成测试。
+- `tests/knowledge.test.js:28`「live calculations exclude unaffordable attacks and restrict PVP/version mismatch」：能量不够的技能不进计算。
+- `tests/engine.test.js:13`「100 varied complete games preserve invariants and terminate」：100 局随机完整对局，断言生命与能量始终在合法区间。
 - `reports/live-model-v10.json` 中 `weather-tools` 一条：模型先调 `search_rules` 再调 `read_state`，说明它拿的是工具回执而不是自行心算。
 
 ### 边界
@@ -176,18 +176,18 @@
 
 四个互相独立的机制，缺一不可：
 
-1. **局面纪元（epoch）**——`coach/scheduler.js` 的 `CoachScheduler` 维护一个自增 `epoch`，所有任务键都拼成 `epoch + ':' + key`。`invalidate()` 时递增 epoch、`abort()` 正在跑的那个、清空排队表和缓存。任务真正开始前和真正返回后各检查一次 epoch，不一致就抛 `AbortError('局面已改变')` / `('建议已过期')`。同一个 epoch 内的相同请求会**合并**（复用同一个 Promise），并可选带 TTL 缓存（默认 10 秒、最多 12 条），避免同一局面重复烧钱。
-2. **任务戳（taskStamp / taskIsCurrent）**——`coach/experience.js:99`：任务记录 `epoch / matchId / rulesVersion / createdAt / validUntil`，展示前用 `taskIsCurrent()` 四重比较（纪元、对局、规则版本、是否过期），任一不符即丢弃。
-3. **展示前的版本校验**——网页端每次更新提示都自增 `hintEpoch`，异步回调里先比 `hintEpoch!==token` 再写 DOM（`app.js` 的 `updateCoach`）。玩家出招、关闭提示、切换模式、页面隐藏都会自增 `hintEpoch` 并调用 `cancelVoice()`。
-4. **服务端断连取消**——`server.js` 在监听请求断开后中止上游 `fetch`（`AbortSignal.any` 合并客户端断开与 35 秒超时）。
+1. **局面纪元（epoch）**——`src/coach/scheduler.js` 的 `CoachScheduler` 维护一个自增 `epoch`，所有任务键都拼成 `epoch + ':' + key`。`invalidate()` 时递增 epoch、`abort()` 正在跑的那个、清空排队表和缓存。任务真正开始前和真正返回后各检查一次 epoch，不一致就抛 `AbortError('局面已改变')` / `('建议已过期')`。同一个 epoch 内的相同请求会**合并**（复用同一个 Promise），并可选带 TTL 缓存（默认 10 秒、最多 12 条），避免同一局面重复烧钱。
+2. **任务戳（taskStamp / taskIsCurrent）**——`src/coach/experience.js:99`：任务记录 `epoch / matchId / rulesVersion / createdAt / validUntil`，展示前用 `taskIsCurrent()` 四重比较（纪元、对局、规则版本、是否过期），任一不符即丢弃。
+3. **展示前的版本校验**——网页端每次更新提示都自增 `hintEpoch`，异步回调里先比 `hintEpoch!==token` 再写 DOM（`src/client/app.js` 的 `updateCoach`）。玩家出招、关闭提示、切换模式、页面隐藏都会自增 `hintEpoch` 并调用 `cancelVoice()`。
+4. **服务端断连取消**——`src/server/index.js` 在监听请求断开后中止上游 `fetch`（`AbortSignal.any` 合并客户端断开与 35 秒超时）。
 
 ### 验证
 
-- `evals/agent.test.js:93`「slow results cannot cross an action, match, rules version or expiry boundary」：断言纪元变化、对局不同、规则版本不同、超期四种情况全部返回 `false`，只有四者都匹配才返回 `true`。
-- `evals/agent.test.js:184`「state invalidation aborts active work and discards queued old requests」：`invalidate()` 之后，正在跑的与还在排队的请求全部 rejected，且上游只被调用 1 次（排队的那个根本没发出去）。
-- `evals/agent.test.js:193`「same-state requests merge, cache clones, and epoch clears cache」：同局面合并、缓存返回克隆体（改一个不影响另一个）、epoch 变化清缓存。
-- `evals/agent.test.js:102`「invalid model numbers and network errors fall back with the original state token」：模型返回「造成 99999 伤害，必胜」时回退本地，且 `stateToken` 保持不变。
-- `server.test.js:32`「client disconnect aborts the upstream model request」。
+- `tests/evals/agent.test.js:93`「slow results cannot cross an action, match, rules version or expiry boundary」：断言纪元变化、对局不同、规则版本不同、超期四种情况全部返回 `false`，只有四者都匹配才返回 `true`。
+- `tests/evals/agent.test.js:184`「state invalidation aborts active work and discards queued old requests」：`invalidate()` 之后，正在跑的与还在排队的请求全部 rejected，且上游只被调用 1 次（排队的那个根本没发出去）。
+- `tests/evals/agent.test.js:193`「same-state requests merge, cache clones, and epoch clears cache」：同局面合并、缓存返回克隆体（改一个不影响另一个）、epoch 变化清缓存。
+- `tests/evals/agent.test.js:102`「invalid model numbers and network errors fall back with the original state token」：模型返回「造成 99999 伤害，必胜」时回退本地，且 `stateToken` 保持不变。
+- `tests/server.test.js:32`「client disconnect aborts the upstream model request」。
 
 ### 边界
 
@@ -220,23 +220,23 @@
 
 把出题、判题、取消全部收进程序，模型拿不到这条链路的改写权：
 
-- **题目由引擎参数化生成**（`coach/teacher.js` 的 `makeQuiz`）：取当前焦点宠的速度，按 `variant % 3` 取偏移量 `[2,4,3]`，题目问「培养一次敏捷（+3）后是先出手、后出手还是无法确定」。正确答案由偏移量算出：`<3 → 先`、`>3 → 后`、`=3 → 不确定`（同速由随机过程决定）。解析里带实际算式 `speed + 3 = ...`。三种变式（更快 / 更慢 / 平速）由 `quizCount` 递增轮换。
-- **状态机由 `memory.pendingQuiz` 承载**（`coach/memory.js`）：`{id, variant, question, answer, explanation, lesson, evidenceIds}` 写入本机记忆，刷新可恢复；`readMemory()` 会对它做结构校验，字段不合法就丢弃。
-- **锁定（locked）标志禁止模型介入**：`coach/runtime.js:59` 里 `deterministic = locked && !['review','match-review'].includes(next.lastTopic)`，而 `locked=true` 的路径不调用模型生成。小测的出题、判题、取消三条分支全部 `locked=true`。
-- **待答期间拦截泄题**：如果 `memory.pendingQuiz` 存在、玩家发的是追问而不是作答，返回的是「刚才这道题还在等你作答，我不该先报答案。」+ **重新贴出题目**，而不是答案（`coach/runtime.js:48`）。
+- **题目由引擎参数化生成**（`src/coach/teacher.js` 的 `makeQuiz`）：取当前焦点宠的速度，按 `variant % 3` 取偏移量 `[2,4,3]`，题目问「培养一次敏捷（+3）后是先出手、后出手还是无法确定」。正确答案由偏移量算出：`<3 → 先`、`>3 → 后`、`=3 → 不确定`（同速由随机过程决定）。解析里带实际算式 `speed + 3 = ...`。三种变式（更快 / 更慢 / 平速）由 `quizCount` 递增轮换。
+- **状态机由 `memory.pendingQuiz` 承载**（`src/coach/memory.js`）：`{id, variant, question, answer, explanation, lesson, evidenceIds}` 写入本机记忆，刷新可恢复；`readMemory()` 会对它做结构校验，字段不合法就丢弃。
+- **锁定（locked）标志禁止模型介入**：`src/coach/runtime.js:59` 里 `deterministic = locked && !['review','match-review'].includes(next.lastTopic)`，而 `locked=true` 的路径不调用模型生成。小测的出题、判题、取消三条分支全部 `locked=true`。
+- **待答期间拦截泄题**：如果 `memory.pendingQuiz` 存在、玩家发的是追问而不是作答，返回的是「刚才这道题还在等你作答，我不该先报答案。」+ **重新贴出题目**，而不是答案（`src/coach/runtime.js:48`）。
 - **答对只记「答对过一道练习」**：`next.lessons.push(quiz.lesson)` 只记课程名，不写「已掌握」（`docs/IMPLEMENTATION-STATUS.md:91`）。这一点直接决定了后面掌握的判定必须另走 `journal` 的独立行动证据（见难点 10）。
 
 ### 验证
 
-- `coach.test.js:10`「quiz closes the teaching loop and records success」：出题 → 答「先出手」→ 文本匹配「答对」→ `lessons` 长度 1 → `pendingQuiz` 归零。
-- `coach.test.js:31`「quiz waits for an answer, survives reload, handles question mark and cancels」：断言「等待作答 / 刷新后仍在 / 问号接续当前题 / 取消」四种行为。
-- `evals/agent.test.js:66`「parametric practice includes faster, slower and ties with engine-aligned answers」：三种变式的答案与引擎一致。
-- `evals/agent.test.js:70`「watch clarification does not inherit previous review topic」：话题不会被串到别处。
+- `tests/coach.test.js:10`「quiz closes the teaching loop and records success」：出题 → 答「先出手」→ 文本匹配「答对」→ `lessons` 长度 1 → `pendingQuiz` 归零。
+- `tests/coach.test.js:31`「quiz waits for an answer, survives reload, handles question mark and cancels」：断言「等待作答 / 刷新后仍在 / 问号接续当前题 / 取消」四种行为。
+- `tests/evals/agent.test.js:66`「parametric practice includes faster, slower and ties with engine-aligned answers」：三种变式的答案与引擎一致。
+- `tests/evals/agent.test.js:70`「watch clarification does not inherit previous review topic」：话题不会被串到别处。
 
 ### 边界
 
 - **「答对一次」不等于掌握，这一点项目自己反复声明。**`docs/COACH-PLAN.md:47` 原文：「选择题是辅助，答对一次不等于永久掌握。」`docs/IMPLEMENTATION-STATUS.md:91` 记录了对应修复：「答对只记为答对过一道练习，不再声称已经掌握。」`docs/CHECKLIST.md:283`（M03/T04/R09 一行括注）：真人迁移与自检闭环仍未完成。
-- **变式只有三种，且只有速度这一个知识点。**`makeQuiz` 的偏移量写成 `[2,4,3][variant % 3]`，即更快 / 更慢 / 平速三种；其它知识点（灼烧联动、换宠承伤、能量节奏）只有观战后的单选题（`coach/experience.js` 的 `lessonFor`），**没有参数化生成**，也**没有**对应的迁移验收。
+- **变式只有三种，且只有速度这一个知识点。**`makeQuiz` 的偏移量写成 `[2,4,3][variant % 3]`，即更快 / 更慢 / 平速三种；其它知识点（灼烧联动、换宠承伤、能量节奏）只有观战后的单选题（`src/coach/experience.js` 的 `lessonFor`），**没有参数化生成**，也**没有**对应的迁移验收。
 - 判题是**精确匹配**（正则匹配「先 / 后 / 不确定」），玩家用自然语言描述理由不会被判为作答，而是落到追问分支。这是**设计选择**，但它意味着这条链路对口语输入的鲁棒性**未验证**。
 
 ---
@@ -266,28 +266,28 @@
 
 **所有门控都放在「产生动作」之前，而不是产生之后再加过滤：**
 
-- **档位判定在最前**（`app.js` 的 `updateCoach`）：`box.hidden` 的计算里第一项就是 `profile.coach.mode === 'quiet'`，命中即 `return`，后面的候选计算、渲染、模型请求一概不发生。
-- **有证据支撑的降频**（`coach/memory.js` 的 `adaptiveGate`，第 30–40 行）返回 `{allow, reason}`，四种拒绝理由分别是 `explicit-quiet`、`explicit-critical`、`recent-dismissals`、`independent-success`。其中 `independent-success` 只在**该知识点存在至少 3 条可回查证据、且证据仍全部存在于 journal 中、且判定为可降频**时才生效——证据被删就立刻失效。`adaptiveGate` 被放在渲染之前（`app.js`：`if(!force && !adaptiveGate(...).allow){box.hidden=true; return;}`）。
+- **档位判定在最前**（`src/client/app.js` 的 `updateCoach`）：`box.hidden` 的计算里第一项就是 `profile.coach.mode === 'quiet'`，命中即 `return`，后面的候选计算、渲染、模型请求一概不发生。
+- **有证据支撑的降频**（`src/coach/memory.js` 的 `adaptiveGate`，第 30–40 行）返回 `{allow, reason}`，四种拒绝理由分别是 `explicit-quiet`、`explicit-critical`、`recent-dismissals`、`independent-success`。其中 `independent-success` 只在**该知识点存在至少 3 条可回查证据、且证据仍全部存在于 journal 中、且判定为可降频**时才生效——证据被删就立刻失效。`adaptiveGate` 被放在渲染之前（`src/client/app.js`：`if(!force && !adaptiveGate(...).allow){box.hidden=true; return;}`）。
 - **次数与间隔上限在用模型之前判断**：`autoCalls >= (mode==='mentor' ? 6 : 3)` 与 `hint.reason === lastAutoReason` 两个条件都在 `connectionStatus().then(...)` **之前** `return`，也就是说被拦下的提示**根本不发请求**。
 - **语音共用同一取消条件**：`speakCue()` 第一行就检查 `voiceEnabled / document.hidden / busy / preview / quiet / mode!=='pve'`，并且用 `matchId+':'+turn+':'+text` 去重。
-- **PVP 能力限制集中在 policy 层，且在最小函数的第一行拒绝**：判定逻辑收在 `coach/policy.js` 的 `isLiveMatch(context)`——它把 `pvp-live`（联网）与 `pvp-local`（同机轮流对战）**视为同一策略**，理由是公平性取决于「对面是不是人」，而不是「有没有开 socket」；并且在对局**已结束**时返回 `false`，让赛后复盘可以正常进行。调用点是四个最小函数的第一行：`runCoach`（`coach/runtime.js:31`）、`gatherAgentEvidence`（`coach/runtime.js:78`）、`executeTool`（`coach/toolbox.js:26`）、`strategist()`（`coach/strategist.js:9`）。`buildKnowledgePacket` 在检索之前就返回 `blocked`（`coach/strategist.js:84`）。
+- **PVP 能力限制集中在 policy 层，且在最小函数的第一行拒绝**：判定逻辑收在 `src/coach/policy.js` 的 `isLiveMatch(context)`——它把 `pvp-live`（联网）与 `pvp-local`（同机轮流对战）**视为同一策略**，理由是公平性取决于「对面是不是人」，而不是「有没有开 socket」；并且在对局**已结束**时返回 `false`，让赛后复盘可以正常进行。调用点是四个最小函数的第一行：`runCoach`（`src/coach/runtime.js:31`）、`gatherAgentEvidence`（`src/coach/runtime.js:78`）、`executeTool`（`src/coach/toolbox.js:26`）、`strategist()`（`src/coach/strategist.js:9`）。`buildKnowledgePacket` 在检索之前就返回 `blocked`（`src/coach/strategist.js:84`）。
 - **玩家自己的委托不豁免静默**：条件提醒（`watch`）只支持 `energy` / `finish` 两类，绑定当前对局、最多 1 条、10 回合内有效、触发即删除、新开局清除（`docs/EVIDENCE-SCHEMA.md:30`），并且「安静模式优先」。
 
 ### 验证
 
-- `coach.test.js:44`「attention is bounded, respects silence and cannot fire in background」。
-- `evals/agent.test.js:19`「dismissals persist with source and suppress only routine reminders」：2 次 `dismiss` 后普通提醒被拒（`reason === 'recent-dismissals'`），但带风险标志时仍然放行；空记忆时默认放行。
-- `coach.test.js:12`「PVP restriction happens before provider calls」：用一个 `called` 标志断言 provider 的 `generate` **一次都没被调用**。
-- `server.test.js:27`「PVP gating occurs before remote invocation even when configured」：已配置密钥的情况下，`count === 0`，即上游一次都没发。
-- `features.test.js:19`「PVP live blocks unsolicited and queried tactical help」：主动与被动两条路径都拒绝。
-- `evals/agent.test.js:200`「tool contracts reject unknown parameters and return bounded evidence pages」：这一条在 commit `849e131` 中被扩写成**同时断言策略的两半**——`pvp-local` 与 `pvp-live` 两种模式都抛 `policy`，而**对局结束后**同一个 `read_state` 调用必须**不再**被拦（源码注释写明理由：「the refusal message promises 『结束后我们再聊』, so post-match review must not stay blocked」）。
-- `pvp.test.js`（8 项，本次提交新增）：其中「a full hot-seat match terminates and keeps both sides independent」跑完整场同机轮流对战；「pve replacement behaviour is unchanged when manualReplace is absent」保证 PVE 路径未被这次改动影响。
-- `evals/agent.test.js:60`「watch registration is bounded, cancelled explicitly, and never crosses matches or PVP」。
+- `tests/coach.test.js:44`「attention is bounded, respects silence and cannot fire in background」。
+- `tests/evals/agent.test.js:19`「dismissals persist with source and suppress only routine reminders」：2 次 `dismiss` 后普通提醒被拒（`reason === 'recent-dismissals'`），但带风险标志时仍然放行；空记忆时默认放行。
+- `tests/coach.test.js:12`「PVP restriction happens before provider calls」：用一个 `called` 标志断言 provider 的 `generate` **一次都没被调用**。
+- `tests/server.test.js:27`「PVP gating occurs before remote invocation even when configured」：已配置密钥的情况下，`count === 0`，即上游一次都没发。
+- `tests/features.test.js:19`「PVP live blocks unsolicited and queried tactical help」：主动与被动两条路径都拒绝。
+- `tests/evals/agent.test.js:200`「tool contracts reject unknown parameters and return bounded evidence pages」：这一条在 commit `849e131` 中被扩写成**同时断言策略的两半**——`pvp-local` 与 `pvp-live` 两种模式都抛 `policy`，而**对局结束后**同一个 `read_state` 调用必须**不再**被拦（源码注释写明理由：「the refusal message promises 『结束后我们再聊』, so post-match review must not stay blocked」）。
+- `tests/pvp.test.js`（8 项，本次提交新增）：其中「a full hot-seat match terminates and keeps both sides independent」跑完整场同机轮流对战；「pve replacement behaviour is unchanged when manualReplace is absent」保证 PVE 路径未被这次改动影响。
+- `tests/evals/agent.test.js:60`「watch registration is bounded, cancelled explicitly, and never crosses matches or PVP」。
 
 ### 边界
 
 - **这是规则门控，不是学到的用户习惯模型。**`docs/IMPLEMENTATION-STATUS.md:102` 原话：「当前是可测的规则门控，还没有训练用户习惯模型。hover 不表示玩家水平低。」把停留/悬停当弱信号，而不是能力判断。
-- **前端门控不是权限边界，`pvp-local` 也一样。**`coach/policy.js` 的 `isLiveMatch()` 读的是 `context.mode` 与 `context.battle.mode`，而这两个值来自 `coach.js:25` 的 `coachContext(game, profile)`，即**客户端自己声明的模式**。`docs/EVIDENCE-SCHEMA.md:33` 写得很直白：当前模式和快照来自客户端，「这只能演示能力限制，不能保证恶意竞技客户端不会修改 mode。生产必须由服务器会话与对局服务决定权限」。**未做**真实权威服务端；同机轮流对战模式把这条边界暴露得更明显（一台机器上两个座位，模式完全由页面决定）。
+- **前端门控不是权限边界，`pvp-local` 也一样。**`src/coach/policy.js` 的 `isLiveMatch()` 读的是 `context.mode` 与 `context.battle.mode`，而这两个值来自 `src/coach/session.js:25` 的 `coachContext(game, profile)`，即**客户端自己声明的模式**。`docs/EVIDENCE-SCHEMA.md:33` 写得很直白：当前模式和快照来自客户端，「这只能演示能力限制，不能保证恶意竞技客户端不会修改 mode。生产必须由服务器会话与对局服务决定权限」。**未做**真实权威服务端；同机轮流对战模式把这条边界暴露得更明显（一台机器上两个座位，模式完全由页面决定）。
 - **降频假设本身的正确性未验证。**「至少 3 条独立证据 → 降频」是一个可修正假设，`docs/EXPERIMENTS.md` 与 `docs/CHECKLIST.md:283` 都把它归在真人迁移一类，未做真人验证。
 - 后台/动画中/聊天中/预制体验中不触发这几条，**只有单元测试覆盖**，没有在多标签页、多显示器或长时间挂机下的完整浏览器验收（W09 未勾）。
 
@@ -313,24 +313,24 @@
 
 分三层修，而不是改文案：
 
-1. **归档层**：`coach/experience.js` 的 `archiveRound()` 在每次回合结算后保存当前对局完整 history，并把结束的对局压入 `completed`（最多 3 场）。`readArchive()` 做严格结构校验——回合必须有 `before / after / action / events`，双方 pets 都必须是 3 只，history 长度上限 250；任何一条不合法就整条作废，不用残缺数据拼凑。
-2. **装配层**：`coach/runtime.js` 的 `buildContext()` 按**显式范围**选源——消息里出现「第 N 回合」就按回合取（`requestedTurn`，取不到就明确返回「这份对局记录里没有第 N 回合，不能用其他回合替代」）；否则按「本局 / 上一局」的正则选 current 或 previous。`summarizeMatch()` 产出整局统计（总回合、攻击/防御/道具/换宠/撤退计数、剩余道具、存活数）+ 按「减员与生命损失」排序取前 3 个关键回合。
-3. **显式范围字段 + 分页**：整局请求显式带 `scope: 'match'`（`coach/teacher.js` 的 `reviewMatch` 返回值），客户端对整局类问句统一加前缀「关于这份整局战报：」并用同一段导出常量 `MATCH_REVIEW_REQUEST`（`coach/runtime.js:2`）。`read_match` 工具支持 `offset/limit` 分页（`limit` 限 1..3），`read_evidence` 按回合取原始事件，取不到返回 `{missing:true, reason:'...不能用摘要补造'}`。
-4. **内部指令不落历史**：`coach/client.js` 记录原始 `originalMessage`，回写会话时把带指令的版本换回原问题；旧历史里的这条内部指令在 `readMemory()` 迁移时被剥掉。
+1. **归档层**：`src/coach/experience.js` 的 `archiveRound()` 在每次回合结算后保存当前对局完整 history，并把结束的对局压入 `completed`（最多 3 场）。`readArchive()` 做严格结构校验——回合必须有 `before / after / action / events`，双方 pets 都必须是 3 只，history 长度上限 250；任何一条不合法就整条作废，不用残缺数据拼凑。
+2. **装配层**：`src/coach/runtime.js` 的 `buildContext()` 按**显式范围**选源——消息里出现「第 N 回合」就按回合取（`requestedTurn`，取不到就明确返回「这份对局记录里没有第 N 回合，不能用其他回合替代」）；否则按「本局 / 上一局」的正则选 current 或 previous。`summarizeMatch()` 产出整局统计（总回合、攻击/防御/道具/换宠/撤退计数、剩余道具、存活数）+ 按「减员与生命损失」排序取前 3 个关键回合。
+3. **显式范围字段 + 分页**：整局请求显式带 `scope: 'match'`（`src/coach/teacher.js` 的 `reviewMatch` 返回值），客户端对整局类问句统一加前缀「关于这份整局战报：」并用同一段导出常量 `MATCH_REVIEW_REQUEST`（`src/coach/runtime.js:2`）。`read_match` 工具支持 `offset/limit` 分页（`limit` 限 1..3），`read_evidence` 按回合取原始事件，取不到返回 `{missing:true, reason:'...不能用摘要补造'}`。
+4. **内部指令不落历史**：`src/coach/client.js` 记录原始 `originalMessage`，回写会话时把带指令的版本换回原问题；旧历史里的这条内部指令在 `readMemory()` 迁移时被剥掉。
 
 ### 验证
 
-- `coach.test.js:61`「whole-match archive persists all turns, separates matches and preserves previews」。
-- `coach.test.js:88`「current-match selection and missing requested turn never substitute another match or turn」。
-- `coach.test.js:74`「selected review turn returns its evidence rather than the final hit」——点第 2 回合返回第 2 回合的证据，而不是最后一击。
-- `evals/agent.test.js:158`「automatic review prompt stays whole-match even when its instructions mention single-turn scores」——直接把上面那个被劫持的失败情形固化成回归。
-- `evals/agent.test.js:176`「generation instructions are not saved as the player message」。
-- `coach.test.js:105`「withdrawal is recorded separately from attacks in match summaries」。
+- `tests/coach.test.js:61`「whole-match archive persists all turns, separates matches and preserves previews」。
+- `tests/coach.test.js:88`「current-match selection and missing requested turn never substitute another match or turn」。
+- `tests/coach.test.js:74`「selected review turn returns its evidence rather than the final hit」——点第 2 回合返回第 2 回合的证据，而不是最后一击。
+- `tests/evals/agent.test.js:158`「automatic review prompt stays whole-match even when its instructions mention single-turn scores」——直接把上面那个被劫持的失败情形固化成回归。
+- `tests/evals/agent.test.js:176`「generation instructions are not saved as the player message」。
+- `tests/coach.test.js:105`「withdrawal is recorded separately from attacks in match summaries」。
 - 浏览器：`docs/IMPLEMENTATION-STATUS.md:71`（火花→撤退→刷新→整局复盘→详看第 1 回合，2 回合中攻击 1 次/撤退 1 次，第一回合读到 52/18 的条件伤害），以及 `docs/reviews/2026-09-17-live-acceptance.md`（8 回合败局，自动总结，追问后给出第 2/5/8 回合入口）。
 
 ### 边界
 
-- **「关键回合」是重要性启发式，不是最优策略。**排序权重是 `(减员+击倒)*100 + 生命损失 + (换宠?15:0)`（`coach/teacher.js:34`），`docs/IMPLEMENTATION-STATUS.md:73` 明确「当前关键回合按减员/生命变化排序，不等于多步最优策略」。
+- **「关键回合」是重要性启发式，不是最优策略。**排序权重是 `(减员+击倒)*100 + 生命损失 + (换宠?15:0)`（`src/coach/teacher.js:34`），`docs/IMPLEMENTATION-STATUS.md:73` 明确「当前关键回合按减员/生命变化排序，不等于多步最优策略」。
 - **整局复盘只有 3 个回合被详看，第 4 个之后需要重新指定回合装配**，这依赖原档仍在浏览器 localStorage 中（当前对局 + 最近 3 场结束对局）。更早的对局**无法补造**。
 - **真实模型的整局复盘质量未做独立评测**（**该条已过时：`S04` 现已勾选**，三轮共 132 次真实调用）。`docs/reviews/2026-09-17-live-acceptance.md:22` 原话：「此为开发定向回归，不能推断总体准确率；语义检查仍可能漏掉错误因果和不合理建议。」
 
@@ -355,21 +355,21 @@
 
 ### 方案
 
-- **只从回合前快照重建局面**：`compareTurnAlternatives()`（`coach/teacher.js:67`）以 `h.before` 克隆出一个新局（`version`、`mode:'pve'`、`seed:0`、`initialSeed:0`、清空 `history/log/frames`），再对**双方合法行动**做枚举，**完全不读 `h.opponent`**。这样即使真实对手那回合做了什么，也不会进入反事实。
+- **只从回合前快照重建局面**：`compareTurnAlternatives()`（`src/coach/teacher.js:67`）以 `h.before` 克隆出一个新局（`version`、`mode:'pve'`、`seed:0`、`initialSeed:0`、清空 `history/log/frames`），再对**双方合法行动**做枚举，**完全不读 `h.opponent`**。这样即使真实对手那回合做了什么，也不会进入反事实。
 - **分差阈值化，不平局化**：每条替代分支给出「平均分 / 最坏分」，并用 `ranked[0].score - actual.score <= 5` 判断是否为「与最高分接近，不能因排序不同就判错」。
-- **文案里写死假设**：返回文本固定带「只用回合前公开状态枚举，不把对方实际出招当成预先已知」，`coach/teacher.js` 的 `analyzeTurn` 也逐条注明「这是事前条件比较，对方治疗、换宠及先出手都可能改变结果」。
+- **文案里写死假设**：返回文本固定带「只用回合前公开状态枚举，不把对方实际出招当成预先已知」，`src/coach/teacher.js` 的 `analyzeTurn` 也逐条注明「这是事前条件比较，对方治疗、换宠及先出手都可能改变结果」。
 - **公开局面投影**（`docs/EVIDENCE-SCHEMA.md:7`）：真实随机种子被替换为 `0`，不含电脑待执行动作，实时提示上下文里的对局历史**故意为空**，复盘走独立的 `evidence` 字段——从数据层面隔开「实时」与「事后」。
-- **回答含义检查**：`checkGroundedAnswer()`（`coach/runtime.js:118`）把「先看对手出招再决定」判为 `simultaneous-action-order` 违规；把「第 N 回合还剩 X 血」绑定到**那一回合的 after 快照**，并允许「回合前/出招前/开始时/当时」的显式时点前缀（`after-hp-mismatch`）。
+- **回答含义检查**：`checkGroundedAnswer()`（`src/coach/runtime.js:118`）把「先看对手出招再决定」判为 `simultaneous-action-order` 违规；把「第 N 回合还剩 X 血」绑定到**那一回合的 after 快照**，并允许「回合前/出招前/开始时/当时」的显式时点前缀（`after-hp-mismatch`）。
 
 ### 验证
 
-- `evals/agent.test.js:85`「review alternatives use the decision snapshot and never the actual future enemy action」——直接断言改掉 `opponent / after` 不影响分析结果。
-- `evals/agent.test.js:236`「guard binds remaining HP to after snapshot and rejects observing simultaneous opponent action first」。
-- `evals/agent.test.js:77`「corrupt archive fails closed and old rules never receive current-rule counterfactuals」：损坏存档不补造；规则版本不匹配时只展示原始事件、不重新推算伤害。
-- `evals/agent.test.js:216`「branch simulation covers both tie orders without mutation or hidden seed dependence」：同速两种出手顺序都模拟，且不修改输入局面。
-- `evals/agent.test.js:168`「match grounding rejects damage assigned to an explicitly cancelled turn」。
-- `coach.test.js:80`「screenshot endgame flags attack opportunity with guard caveat」：用户截图的残局参数得到潮汐重击 38 伤害、防御时 13，**不会声称必杀**。
-- `evals/agent.test.js:52`「unsupported numeric claims and certainty are rejected while grounded comparisons pass」。
+- `tests/evals/agent.test.js:85`「review alternatives use the decision snapshot and never the actual future enemy action」——直接断言改掉 `opponent / after` 不影响分析结果。
+- `tests/evals/agent.test.js:236`「guard binds remaining HP to after snapshot and rejects observing simultaneous opponent action first」。
+- `tests/evals/agent.test.js:77`「corrupt archive fails closed and old rules never receive current-rule counterfactuals」：损坏存档不补造；规则版本不匹配时只展示原始事件、不重新推算伤害。
+- `tests/evals/agent.test.js:216`「branch simulation covers both tie orders without mutation or hidden seed dependence」：同速两种出手顺序都模拟，且不修改输入局面。
+- `tests/evals/agent.test.js:168`「match grounding rejects damage assigned to an explicitly cancelled turn」。
+- `tests/coach.test.js:80`「screenshot endgame flags attack opportunity with guard caveat」：用户截图的残局参数得到潮汐重击 38 伤害、防御时 13，**不会声称必杀**。
+- `tests/evals/agent.test.js:52`「unsupported numeric claims and certainty are rejected while grounded comparisons pass」。
 
 ### 边界
 
@@ -393,7 +393,7 @@
 ### 为什么难
 
 - **「加了向量就应该更聪明」是行业默认叙事，而本项目的数据不支持它。**`docs/INTERVIEW-GUIDE.md:49` 原话：「语义 RAG 已经运行，但纯语义 9/14 低于词项 11/14；混合仍 11/14，只改善 MRR。不能说『用了向量就更聪明』。」
-- **样本极小而且已经用过。**20 条查询里 4 条 dev、16 条 test，其中 14 条正例、2 条负例（`evals/retrieval.json` 实测计数）；`reports/semantic-retrieval.json` 的 `scope` 字段自己写着「Previously used small developer benchmark; not independent human or LLM answer evaluation」。用同一批已经看过的题比较两种方法，任何差异都可能只是噪声。
+- **样本极小而且已经用过。**20 条查询里 4 条 dev、16 条 test，其中 14 条正例、2 条负例（`tests/evals/retrieval.json` 实测计数）；`reports/semantic-retrieval.json` 的 `scope` 字段自己写着「Previously used small developer benchmark; not independent human or LLM answer evaluation」。用同一批已经看过的题比较两种方法，任何差异都可能只是噪声。
 - **「没有测出增益」和「RAG 无效」是两个命题。**`docs/reviews/2026-09-17-diagnosis-response.md:25`（**原引用写作 `:26`，行号笔误**；该文件自入库以来未被改过）明确拒绝了这个推论：「关键词与概念扩展在 14 条正例中相差 1 条，只说明本测试没观察到提升，不能推成 RAG 无效或永远无法完成。它也不是 BM25 与神经向量检索的直接比较。」
 - **还有一个隐藏的工程陷阱：报告里的策略名和代码里的实现不是一回事。**
 
@@ -401,9 +401,9 @@
 
 做法是「**保留基线 + 公开失败 + 下一轮另建盲测**」，而不是换掉默认检索：
 
-1. **先建立可审查的词项基线**：`coach/strategist.js` 的 `searchKnowledge()` 用中文双字切分 + 少量口语同义词（`奶→治疗`、`蓝量→能量`、`先动→先手 速度` 等）+ 标题权重 3 / 正文权重 1 的加权词项匹配，先做 `game==='pet-coach' && rulesVersion===matches && status==='active'` 的**版本过滤**，再排序，最后按字符预算（默认 2400）装包，无命中返回 `missing:true` 而不是硬塞一张卡。
+1. **先建立可审查的词项基线**：`src/coach/strategist.js` 的 `searchKnowledge()` 用中文双字切分 + 少量口语同义词（`奶→治疗`、`蓝量→能量`、`先动→先手 速度` 等）+ 标题权重 3 / 正文权重 1 的加权词项匹配，先做 `game==='pet-coach' && rulesVersion===matches && status==='active'` 的**版本过滤**，再排序，最后按字符预算（默认 2400）装包，无命中返回 `missing:true` 而不是硬塞一张卡。
 2. **概念扩展作为可对照的一档**：`expandQuery()` 用 8 组手写的领域词表（轮换/换宠/挡刀/双换…、补血/奶/回满/药水…）做查询扩展，配合 IDF 加权。代码注释写明这是「inspectable domain vocabulary, not a pretrained embedding model」。
-3. **真实语义检索**：`scripts/semantic-worker.py` + `coach/semantic-server.js` 用 `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`（CPU，384 维），以 RRF（`k=60`，`1/(60+rank)`）与词项结果融合；模型预热失败或请求失败时**退回词项并标注状态** `unavailable-or-warming`。
+3. **真实语义检索**：`scripts/semantic-worker.py` + `src/server/semantic-server.js` 用 `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`（CPU，384 维），以 RRF（`k=60`，`1/(60+rank)`）与词项结果融合；模型预热失败或请求失败时**退回词项并标注状态** `unavailable-or-warming`。
 4. **失败照原样保存**：`reports/retrieval.json`（75 卡那一轮的逐题结果）、`reports/semantic-retrieval.json`（含逐题 ids 与 `semanticStatus`）、以及两份 summary 都留在仓库里，不删不盖。
 
 ### 实测数字（均取自 `reports/` 下的原始文件）
@@ -426,16 +426,16 @@
 
 结论：**纯语义在命中数上低于基线（9/14 < 11/14）；混合没有提高命中数（仍 11/14），只把 MRR 从 0.667 提到 0.750。** 因此默认检索**保留词项基线**，向量作为可选融合档保留并标注状态。
 
-**一个必须自己指出的仪器问题**：报告里第三档叫 `hybrid`，但按当前 `coach/strategist.js` 的实现，`strategy !== 'lexical'` 只会走 `expandQuery()` + IDF 词项加权，文件内**没有任何向量代码**。也就是说，在**当前代码版本下** `reports/retrieval.json` 的 `hybrid` 档实测的是「概念扩展 + IDF 词项」，**不是**向量融合；真正的向量对照在 `reports/semantic-retrieval.json` 里，用的是 `lexical / semantic / fusion` 三个名字。历史运行时的实现**未能核实**（`coach/retrieval.js` 现在只是一个转发到 `strategist.js` 的兼容入口）。列在这里是因为它本身就是一个真实的复现陷阱：**两个都叫「混合」的东西，实际算法不同。**
+**一个必须自己指出的仪器问题**：报告里第三档叫 `hybrid`，但按当前 `src/coach/strategist.js` 的实现，`strategy !== 'lexical'` 只会走 `expandQuery()` + IDF 词项加权，文件内**没有任何向量代码**。也就是说，在**当前代码版本下** `reports/retrieval.json` 的 `hybrid` 档实测的是「概念扩展 + IDF 词项」，**不是**向量融合；真正的向量对照在 `reports/semantic-retrieval.json` 里，用的是 `lexical / semantic / fusion` 三个名字。历史运行时的实现**未能核实**（`src/coach/retrieval.js` 现在只是一个转发到 `src/coach/strategist.js` 的兼容入口）。列在这里是因为它本身就是一个真实的复现陷阱：**两个都叫「混合」的东西，实际算法不同。**
 
 ### 验证
 
-- `knowledge.test.js:6`「retrieves colloquial tactical questions with relevant cards」。
-- `knowledge.test.js:11`「unknown rules, unrelated queries and insufficient budget return no evidence」。
-- `knowledge.test.js:14`「foreign mechanics are retrieved as unsupported, not imported as live rules」——外部游戏机制（宝可梦倍率等）被标为不支持，不会被当成实时规则。
-- `knowledge.test.js:39`「switch mind games retrieve counterexamples rather than a certain prediction」——检索「读换」时召回的是**反例**，不是确定性预测。
-- `evals/agent.test.js:32`「RAG citations fail closed on deleted IDs and wrong rules version; applicability is explicit」：引用不存在的 ID 或错误规则版本时 `valid:false`；适用性返回 `candidate / conditions-not-met / reference-only` 三态，而不是真假。
-- `knowledge.test.js:49`「generated browser knowledge stays identical to source」、`knowledge.test.js:54`「generated reference facts stay tied to the engine rather than copied external game rules」：`content.js` 由 `node scripts/build-knowledge.js` 从 JSON 生成，两份必须一致；参考事实必须来自引擎而不是抄外部资料。
+- `tests/knowledge.test.js:6`「retrieves colloquial tactical questions with relevant cards」。
+- `tests/knowledge.test.js:11`「unknown rules, unrelated queries and insufficient budget return no evidence」。
+- `tests/knowledge.test.js:14`「foreign mechanics are retrieved as unsupported, not imported as live rules」——外部游戏机制（宝可梦倍率等）被标为不支持，不会被当成实时规则。
+- `tests/knowledge.test.js:39`「switch mind games retrieve counterexamples rather than a certain prediction」——检索「读换」时召回的是**反例**，不是确定性预测。
+- `tests/evals/agent.test.js:32`「RAG citations fail closed on deleted IDs and wrong rules version; applicability is explicit」：引用不存在的 ID 或错误规则版本时 `valid:false`；适用性返回 `candidate / conditions-not-met / reference-only` 三态，而不是真假。
+- `tests/knowledge.test.js:49`「generated browser knowledge stays identical to source」、`tests/knowledge.test.js:54`「generated reference facts stay tied to the engine rather than copied external game rules」：`src/game/content.js` 由 `node scripts/build-knowledge.js` 从 JSON 生成，两份必须一致；参考事实必须来自引擎而不是抄外部资料。
 - 复现命令：`node scripts/eval-retrieval.js`、`node scripts/eval-semantic.js`。
 
 ### 边界
@@ -504,7 +504,7 @@
 
 ### 验证
 
-- `evals/agent.test.js:38`「trained policy obeys hard constraints on all state combinations and differs from zero initialization」：遍历全部状态组合确认硬约束不被违反，且 Q 表不是全零（即确实发生了更新）。
+- `tests/evals/agent.test.js:38`「trained policy obeys hard constraints on all state combinations and differs from zero initialization」：遍历全部状态组合确认硬约束不被违反，且 Q 表不是全零（即确实发生了更新）。
 - 复现脚本与产物：`node scripts/train-intervention.js` → `reports/intervention.json` + `checkpoints/intervention-policy.json`；`.venv-agent/bin/python scripts/train-tool-router.py` → `reports/tool-router-rl.json` + `checkpoints/tool-router-head.pt`（750 行训练轨迹一并保存）。
 - 资源边界已记录：`reports/resources.json`（`docs/CHECKLIST.md:196` 括注：确认当前 arm64 环境、无已配置 CUDA 后端、Agent Lightning 资源依赖）。
 
@@ -554,10 +554,10 @@
 
 ### 验证
 
-- `evals/agent.test.js:45`「paired simulator does not credit hints for actions already correct without coaching」——直接把「抢功」这个失败形状固化成回归断言。
-- `evals/agent.test.js:38`「trained policy obeys hard constraints on all state combinations and differs from zero initialization」。
+- `tests/evals/agent.test.js:45`「paired simulator does not credit hints for actions already correct without coaching」——直接把「抢功」这个失败形状固化成回归断言。
+- `tests/evals/agent.test.js:38`「trained policy obeys hard constraints on all state combinations and differs from zero initialization」。
 - `reports/intervention.json` 的 `rewardAudits` 与 `trajectoryFiles`（含完整训练/验证/评测压缩轨迹，格式为 gzip concatenated JSONL）。
-- `evals/agent.test.js:229`「transfer assessment excludes prompted actions and requires different matches and situations」——**在线侧**也有同一个纪律：迁移判定必须排除「看过提示才做对」的行动，且要求跨局、跨情境。
+- `tests/evals/agent.test.js:229`「transfer assessment excludes prompted actions and requires different matches and situations」——**在线侧**也有同一个纪律：迁移判定必须排除「看过提示才做对」的行动，且要求跨局、跨情境。
 
 ### 边界
 
@@ -589,15 +589,15 @@
 
 **两级预算，先粗后细，且都不做「半个 JSON」这种破坏性裁剪：**
 
-**第一级 —— 浏览器端 UTF-8 字节保守预算**（`coach/runtime.js:97` 的 `assembleContext`）
-- 参数：`window=200000（WORKING_CONTEXT）, output=4096（OUTPUT_RESERVE）, system=4096, tools=2048` → 可用预算约 189824 字节。**本文原写作 `window=32768, output=512`，那是"项目此前按 32768 做预算"的旧值**；`coach/runtime.js` 现已改为 `WORKING_CONTEXT=200000` / `OUTPUT_RESERVE=4096`（同文件 `:179-186`，注释写明"此前项目按 32768 做预算，比真实窗口小约 30 倍"）。
+**第一级 —— 浏览器端 UTF-8 字节保守预算**（`src/coach/runtime.js:97` 的 `assembleContext`）
+- 参数：`window=200000（WORKING_CONTEXT）, output=4096（OUTPUT_RESERVE）, system=4096, tools=2048` → 可用预算约 189824 字节。**本文原写作 `window=32768, output=512`，那是"项目此前按 32768 做预算"的旧值**；`src/coach/runtime.js` 现已改为 `WORKING_CONTEXT=200000` / `OUTPUT_RESERVE=4096`（同文件 `:179-186`，注释写明"此前项目按 32768 做预算，比真实窗口小约 30 倍"）。
 - 装配策略：按任务类型过滤记忆（复盘任务只带同一 `matchId` 的条目，其他任务只带 `dismiss`），各类截最近 6 条；`evidenceIndex` 与 `conversation` 从头部（最旧的）开始丢弃；仍超预算时清空 `journal/reflections/events`；`lastMatch.keyTurns` **整个对象**弹出，绝不切一半 JSON。
 - 硬失败：仍超预算就抛错「当前证据超过上下文预算，请缩小到一个回合；原始记录仍保留在本机」——**宁可拒绝，不编造**。
 - 审计字段：`{task, window, outputReserve, systemReserve, toolReserve, estimatedInput, estimate:'UTF-8 byte upper budget; not exact model token count', retainedEvidenceIds}`——把「这是估计、不是精确计数」写进返回值。
 
-**第二级 —— 服务端官方 tokenizer 精确计数**（`coach/token-budget-server.js` + `scripts/count-tokens.py`）
-- 服务端在 `semantic: true` 下启动（`server.js` 末尾 `createCoachServer({semantic:true})`，即 `npm start` 的默认路径）时，用官方 DeepSeek V4 tokenizer 与 chat template 在本地实际计数，**计入序列化后的工具合同与回执**。
-- 参数：`window=200000（WORKING_CONTEXT）, output=320, reserve=1024`（**原写作 `window=32768`，是旧值**；见 `coach/token-budget-server.js:13`）；计数超限时按「保留系统约束与最后一条证据消息、从第 2 条开始删」的顺序裁剪，仍未通过就抛 `token-budget-exceeded`，路由层返回 413。tokenizer 不可用时（文件缺失/超时/失败）退回 `fallback:'conservative-byte-budget'`，不中断服务。
+**第二级 —— 服务端官方 tokenizer 精确计数**（`src/server/token-budget-server.js` + `scripts/count-tokens.py`）
+- 服务端在 `semantic: true` 下启动（`src/server/index.js` 末尾 `createCoachServer({semantic:true})`，即 `npm start` 的默认路径）时，用官方 DeepSeek V4 tokenizer 与 chat template 在本地实际计数，**计入序列化后的工具合同与回执**。
+- 参数：`window=200000（WORKING_CONTEXT）, output=320, reserve=1024`（**原写作 `window=32768`，是旧值**；见 `src/server/token-budget-server.js:13`）；计数超限时按「保留系统约束与最后一条证据消息、从第 2 条开始删」的顺序裁剪，仍未通过就抛 `token-budget-exceeded`，路由层返回 413。tokenizer 不可用时（文件缺失/超时/失败）退回 `fallback:'conservative-byte-budget'`，不中断服务。
 
 **实测差异**（`reports/live-model-v10.json`，五条真实调用）：
 
@@ -615,9 +615,9 @@
 
 ### 验证
 
-- `evals/agent.test.js:24`「context assembly trims to an explicit budget, preserves current facts and does not mutate the archive」（**该测试原名**「32K assembly handles huge history, preserves exact current facts and does not mutate archive」，已改名）：用 1000 条 ×1000 字的历史构造超长输入，断言 `estimatedInput <= 32768-512-4096-2048`、`preference` 仍为 `'brief'`、`context.battle.player` 与原始对象深度相等、**原始 memory 对象不被修改**（`dialogue.length === 1000`），并且 40000 字符的单条消息会抛「超过上下文预算」。
-- `evals/agent.test.js:200`「tool contracts reject unknown parameters and return bounded evidence pages」：`read_match` 的 `limit` 被限制在 1..3，返回分页字段 `nextOffset`；`read_evidence` 取不到的回合返回 `missing:true`。
-- `coach/runtime.js:88-89` 的工具回执预算：单次工具结果序列化后超过 **10000 字符**即停止循环（`stopped:'receipt-budget'`），而不是截断 JSON。
+- `tests/evals/agent.test.js:24`「context assembly trims to an explicit budget, preserves current facts and does not mutate the archive」（**该测试原名**「32K assembly handles huge history, preserves exact current facts and does not mutate archive」，已改名）：用 1000 条 ×1000 字的历史构造超长输入，断言 `estimatedInput <= 32768-512-4096-2048`、`preference` 仍为 `'brief'`、`context.battle.player` 与原始对象深度相等、**原始 memory 对象不被修改**（`dialogue.length === 1000`），并且 40000 字符的单条消息会抛「超过上下文预算」。
+- `tests/evals/agent.test.js:200`「tool contracts reject unknown parameters and return bounded evidence pages」：`read_match` 的 `limit` 被限制在 1..3，返回分页字段 `nextOffset`；`read_evidence` 取不到的回合返回 `missing:true`。
+- `src/coach/runtime.js:88-89` 的工具回执预算：单次工具结果序列化后超过 **10000 字符**即停止循环（`stopped:'receipt-budget'`），而不是截断 JSON。
 - 复现：`node scripts/count-tokens.py`；产物 `reports/token-budget.json`。
 
 ### 边界
@@ -659,7 +659,7 @@
 
 把版本可见化，并把「有没有生效」变成可以三秒回答的问题：
 
-1. **运行版本进 bootstrap**：`GET /api/bootstrap` 返回 `runtimeVersion: '0.10'`（`server.js:27`）。页面的 `connectionStatus()` 读它；读不到或拿不到会话就直接报「请启动新版本机后端」（`coach/client.js:5`）。`README.md:14` 把判定标准写死：「v0.10 的前后端需同时更新。`/api/bootstrap` 返回 `runtimeVersion=0.10` 才说明新后端已运行。」
+1. **运行版本进 bootstrap**：`GET /api/bootstrap` 返回 `runtimeVersion: '0.10'`（`src/server/index.js:27`）。页面的 `connectionStatus()` 读它；读不到或拿不到会话就直接报「请启动新版本机后端」（`src/coach/client.js:5`）。`README.md:14` 把判定标准写死：「v0.10 的前后端需同时更新。`/api/bootstrap` 返回 `runtimeVersion=0.10` 才说明新后端已运行。」
 2. **验收必须同时记录两个版本**：`docs/reviews/2026-09-17-diagnosis-response.md:9` 定下的规则是「今后验收必须同时记录 UI 和服务端版本」。于是 `docs/reviews/2026-09-17-live-acceptance.md` 开头就写「UI v0.9；运行后端 v0.8」——**明确记录了两者不一致**，而不是含糊地说「已验收」。
 3. **文档分层标注时点**：`docs/IMPLEMENTATION-STATUS.md` 顶部是当前状态，下面所有历史段落统一加「以下为历史记录，状态以本页顶部为准」，并在 v0.9 段里直接写「（此为 v0.9 时点状态；PDF 已于 13:49 以 v0.10 重新生成）」。
 4. **明确宣布「哪些改动要下次启动才生效」**：例如 v0.6 段写「客户端规则复盘与培养修复刷新即生效；新增服务端 `read_match` 工具将在下次后端启动时加载」，并加一句「不得把本地规则表现当成真实 DeepSeek 效果」。
@@ -667,20 +667,20 @@
 
 ### 验证
 
-- `server.test.js:26`「unconfigured coach runs locally; configured coach uses model and preserves evidence」：断言未配置时 `provider === 'local'` 且上游调用次数为 0，配置后为 `'deepseek'`——把「本地/远端」这个最容易含糊的状态差异变成断言。
+- `tests/server.test.js:26`「unconfigured coach runs locally; configured coach uses model and preserves evidence」：断言未配置时 `provider === 'local'` 且上游调用次数为 0，配置后为 `'deepseek'`——把「本地/远端」这个最容易含糊的状态差异变成断言。
 - `docs/CHECKLIST.md:223`（N08）：「更新 8765 运行态，bootstrap 实测 runtimeVersion=0.8；修正文档自动调用说明，旧设计稿标历史」——**证据就是 bootstrap 的返回值本身**。
 - `README.md:14` + `docs/DEMO-ACCEPTANCE.md:3`：把「怎么判断生效」写进了运行说明，而不是只写在开发笔记里。
 - 五条真实调用记录的 `reports/live-model-v10.json` 顶部带 `runtimeVersion: '0.10'`——**报告自带运行版本戳**。
 
 ### 本次写作期间新发生的一个实例（最直接）
 
-本文档的写作过程中，仓库在 14:25 落到 commit `849e131`（新增 `coach/policy.js`、`pvp-local` 模式与 `pvp.test.js`）。写作时同步核对发现：
+本文档的写作过程中，仓库在 14:25 落到 commit `849e131`（新增 `src/coach/policy.js`、`pvp-local` 模式与 `tests/pvp.test.js`）。写作时同步核对发现：
 
 | 对象 | 声称 | 实测 | 结论 |
 |---|---|---|---|
-| `package.json` 的 `test` 脚本 | 已包含 `pvp.test.js` | 实跑 `npm test` → **当时** `tests 122 / pass 122 / fail 0`（**现在现场为 257 项，见文首**） | ✅ 与提交信息一致（122/122） |
+| `package.json` 的 `test` 脚本 | 已包含 `tests/pvp.test.js` | 实跑 `npm test` → **当时** `tests 122 / pass 122 / fail 0`（**现在现场为 257 项，见文首**） | ✅ 与提交信息一致（122/122） |
 | `reports/test-output.txt` | 114 项通过 | 文件 mtime 13:52，早于 14:25 的提交 | ❌ **报告已陈旧，仍写着 114**（**2026-09-17 晚复核：该文件已重写为 251/251/0，mtime 22:04**） |
-| `coach/runtime.js` 等 5 个文件的行号 | — | 相对本文初稿普遍位移 1–8 行 | ❌ 已按新提交逐一校正 |
+| `src/coach/runtime.js` 等 5 个文件的行号 | — | 相对本文初稿普遍位移 1–8 行 | ❌ 已按新提交逐一校正 |
 
 这就是这条难点在真实工作流里的样子：**代码、测试脚本、报告三者会各自漂移，而漂移的默认方向是「报告落后于代码」**。本条难点的方案（bootstrap 报版本 + 验收同时记两个版本）只覆盖了「运行态」这一半，**覆盖不了报告与文档**——这一半目前仍靠人工核对。
 
@@ -689,7 +689,7 @@
 - **这是一个流程修复，不是技术修复。**没有任何机制能阻止「改了代码不重启」；只能让它在三秒内被发现。**未能核实**是否还有其它未记录在案的陈旧状态实例。
 - **报告与文档的漂移没有被任何自动化覆盖。**`reports/test-output.txt` 需要手动重跑才会更新（`docs/CHECKLIST.md` 的 W12「完整 114 项回归通过，reports/test-output.txt 更新」——**该清单项自身也停在 114**；2026-09-17 晚复核：文件已重写为 251，清单项的注释里也已写明这段历史）；没有 CI、没有 git hook、没有「报告必须晚于最后一次代码提交」的校验。上面那张表就是这个缺口的直接证据。
 - **历史文档里仍存在时点不一致的段落。**`docs/IMPLEMENTATION-STATUS.md` 与 `docs/CHECKLIST.md` 都靠「以本页顶部为准」这种人工约定来维持一致性，没有自动校验。
-- **`runtimeVersion` 是硬编码字符串**（`server.js:27`），不是从 `package.json` 或构建产物读取。也就是说它**不会自动跟随**代码变化，只能靠人改。这是一个已知的脆弱点，本文不宣称它已被解决。
+- **`runtimeVersion` 是硬编码字符串**（`src/server/index.js:27`），不是从 `package.json` 或构建产物读取。也就是说它**不会自动跟随**代码变化，只能靠人改。这是一个已知的脆弱点，本文不宣称它已被解决。
 - 生产环境下这套做法**不适用**：真实部署需要的是版本化部署与健康检查，而不是「问 bootstrap 要一个字符串」。此处只是把本机 Demo 的验收风险降到可管理。
 
 ---
@@ -712,7 +712,7 @@ v0.10 的五条真实 DeepSeek 调用中，有一条把游戏里的道具名说�
 
 **校验通过了。**而看实现细节就会发现，它**本来就拦不住这一条**：
 
-1. 数字校验只检查「不在证据集合里的数字」，并且**显式豁免 `'1'`、`'2'`、`'3'`**（`coach/runtime.js:139` 的 `!['1','2','3'].includes(n)`）。所以「2 瓶解药」里的「2」无论对错都不会触发 `unsupported-number`。
+1. 数字校验只检查「不在证据集合里的数字」，并且**显式豁免 `'1'`、`'2'`、`'3'`**（`src/coach/runtime.js:139` 的 `!['1','2','3'].includes(n)`）。所以「2 瓶解药」里的「2」无论对错都不会触发 `unsupported-number`。
 2. 其余数字——15、3、23、14、10、22、7——必须能在 `evidence / toolTrace / publicState / latestEvents / textFacts` 序列化后的文本里找到。这条用例一条都没报，说明**数值层面确实自洽**：错的不是数，是名字。
 3. 全部七类检查里，**没有任何一条检查「道具名是否属于本游戏的合法名称集合」**。所以「解药」「以太」畅通无阻。
 
@@ -727,29 +727,29 @@ v0.10 的五条真实 DeepSeek 调用中，有一条把游戏里的道具名说�
 
 **分两层，并且诚实地承认第二层没做完：**
 
-**第一层（已实现）：生成约束前置**——在发给模型的指令里显式写死名称映射。`coach/client.js:2` 的 `RESPONSE_INSTRUCTIONS` 现在包含：
+**第一层（已实现）：生成约束前置**——在发给模型的指令里显式写死名称映射。`src/coach/client.js:2` 的 `RESPONSE_INSTRUCTIONS` 现在包含：
 
 > 「道具名称只能使用回复药、净化药、能量果，不要把它们叫作解药或以太。」
 
 同一段约束里还有另外几条由真实失败案例换来的规则：「双方同时决定，不能先看对手本回合出招再决定自己的行动」（对应 `simultaneous-action-order`）、「复盘中 hpBefore 是回合开始、hpAfter 是结束」（对应 `after-hp-mismatch`）、「行动取消不能说成打出了伤害」（对应 `cancelled-action-claimed-as-hit`）。
 
-**第二层（已实现，但窄）——本文写作时能拦 7 类，现在能拦 9 类**：`checkGroundedAnswer()`（`coach/runtime.js:207`）目前能拦 9 类：同时决定被违反（`simultaneous-action-order`）、绝对承诺（`unsupported-certainty`，匹配「必胜/稳赢/保证获胜/一定能赢/百分之百/100%」）、**道具名称漂移（`item-name-drift`，见下方"2026-09-17 更新"）**、**因果语义（`causal-cancelled-action`：事件记录某方行动已取消时，正文不得声称该方造成伤害）**、能量满值误称（`energy-not-full`）、回合后生命与 after 快照不符（`after-hp-mismatch`）、取消的行动被说成命中（`cancelled-action-claimed-as-hit`）、**不在证据集合里的数字**（`unsupported-number`）、**不在召回卡集合里的引用 ID**（`unsupported-citation`）。任何一条命中就整体降级为本地答案，并把 `validation.reasons` 一起返回（`coach/client.js:24`）。
+**第二层（已实现，但窄）——本文写作时能拦 7 类，现在能拦 9 类**：`checkGroundedAnswer()`（`src/coach/runtime.js:207`）目前能拦 9 类：同时决定被违反（`simultaneous-action-order`）、绝对承诺（`unsupported-certainty`，匹配「必胜/稳赢/保证获胜/一定能赢/百分之百/100%」）、**道具名称漂移（`item-name-drift`，见下方"2026-09-17 更新"）**、**因果语义（`causal-cancelled-action`：事件记录某方行动已取消时，正文不得声称该方造成伤害）**、能量满值误称（`energy-not-full`）、回合后生命与 after 快照不符（`after-hp-mismatch`）、取消的行动被说成命中（`cancelled-action-claimed-as-hit`）、**不在证据集合里的数字**（`unsupported-number`）、**不在召回卡集合里的引用 ID**（`unsupported-citation`）。任何一条命中就整体降级为本地答案，并把 `validation.reasons` 一起返回（`src/coach/client.js:24`）。
 
 **第三层（仍未实现）**：从规则数据源导出**全部合法实体名**（技能、宠物、属性、状态、道具、关卡、环境），然后扫描模型输出里所有**疑似实体词**是否属于合法集合。**2026-09-17 更新**：上面第二层新增的 `item-name-drift` 是这一层的**窄版**——它用一张写死的错名黑名单（`解药|解毒药|以太|回血药|血瓶|蓝瓶|复活药|清醒药`）加正则匹配，不是"从引擎导出全部合法实体名再扫疑似实体词"。所以"名称漂移完全没人管"这个说法现在不成立，而**通用的实体集合校验这一层确实还没有**（瓶颈仍是中文领域分词/NER）。**本文不宣称这一层存在。**
 
 ### 验证
 
-- `evals/agent.test.js:52`「unsupported numeric claims and certainty are rejected while grounded comparisons pass」：断言不支持的数字与确定性承诺被拒，而有依据的比较通过。
-- `evals/agent.test.js:151`「five energy must not be described as full energy」：用户截图里「5 豆误称满豆」的回归。
-- `evals/agent.test.js:162`「numeric guard normalizes decimal formatting without dropping sign」。
-- `evals/agent.test.js:168`「match grounding rejects damage assigned to an explicitly cancelled turn」。
-- `evals/agent.test.js:236`「guard binds remaining HP to after snapshot and rejects observing simultaneous opponent action first」。
-- `coach.test.js:20`「runaway model output falls back to grounded packet」与 `evals/agent.test.js:133`「model length fallback never claims the template was generated by DeepSeek」：降级发生时**不冒充**模型回答。
+- `tests/evals/agent.test.js:52`「unsupported numeric claims and certainty are rejected while grounded comparisons pass」：断言不支持的数字与确定性承诺被拒，而有依据的比较通过。
+- `tests/evals/agent.test.js:151`「five energy must not be described as full energy」：用户截图里「5 豆误称满豆」的回归。
+- `tests/evals/agent.test.js:162`「numeric guard normalizes decimal formatting without dropping sign」。
+- `tests/evals/agent.test.js:168`「match grounding rejects damage assigned to an explicitly cancelled turn」。
+- `tests/evals/agent.test.js:236`「guard binds remaining HP to after snapshot and rejects observing simultaneous opponent action first」。
+- `tests/coach.test.js:20`「runaway model output falls back to grounded packet」与 `tests/evals/agent.test.js:133`「model length fallback never claims the template was generated by DeepSeek」：降级发生时**不冒充**模型回答。
 - 原始失败样本：`reports/live-model-v10.json` 的 `loss-analysis` 一行（`text` 里含「解药」「以太」，`validation.valid` 为 `true`）。
 
 ### 边界 —— 这一条必须最严格
 
-- **名称约束补上之后**当时**尚未复验。`docs/EXPERIMENTS.md:54` 原文：「已补名称约束，仍需复验。」**所以「名称漂移已经修好」这个说法在当时证据下不成立。** **2026-09-17 晚复核：已复验**——`evals/agent.test.js`「item-name drift is rejected even when every number is grounded」断言这条拦截生效；第三轮 44 条真实调用（`reports/live-model-eval.json`）的 `badAnswers` 里**没有任何 `item-name-drift`**。同类的因果语义也补了「an action recorded as cancelled cannot be described as having hit」。
+- **名称约束补上之后**当时**尚未复验。`docs/EXPERIMENTS.md:54` 原文：「已补名称约束，仍需复验。」**所以「名称漂移已经修好」这个说法在当时证据下不成立。** **2026-09-17 晚复核：已复验**——`tests/evals/agent.test.js`「item-name drift is rejected even when every number is grounded」断言这条拦截生效；第三轮 44 条真实调用（`reports/live-model-eval.json`）的 `badAnswers` 里**没有任何 `item-name-drift`**。同类的因果语义也补了「an action recorded as cancelled cannot be described as having hit」。
 - **`docs/CHECKLIST.md` 的 A05（输出校验）当时仍未勾**，原因是「数字/引用校验仍漏名称或因果语义错误」。名称问题正是这条未勾的实例之一。**2026-09-17 晚复核：A05 已勾选**——注释写明「本轮补上最后两块——道具名称漂移（`item-name-drift`）与因果语义（`causal-cancelled-action`）」。
 - **校验的自我描述写得很清楚**：`scope: 'Narrow numeric/citation/certainty guard; not a proof of all natural language correctness'`。`DEEPSEEK.md:35` 也写「语言模型输出并未逐句自动验证，事实依据可以展开核对，不能宣称所有生成建议已被程序证明」。
 - **因果语义错误完全没有校验。**上面这条回答里「还剩 3 瓶回复药」是对的，但它同时暗示了「药没用完是问题」——这个因果判断（该不该吃药、那几回合吃药是否更好）**没有任何自动检查覆盖**。`docs/reviews/2026-09-17-live-acceptance.md:22`：「语义检查仍可能漏掉错误因果和不合理建议。」
@@ -766,9 +766,9 @@ v0.10 的五条真实 DeepSeek 调用中，有一条把游戏里的道具名说�
 |---|---|---|
 | 真人学习增益 / 无提示迁移 | 未完成 | `docs/CHECKLIST.md:86`（R09 未勾）、`:283`（M03/T04/R09 括注） |
 | 独立大样本模型质量评测 | ~~未完成~~ **已完成（2026-09-17 晚复核）** | `docs/CHECKLIST.md` 的 S04 条目（三轮共 132 次真实调用）+ `reports/live-model-eval-before-after.md` |
-| 慢模型完整浏览器演示（无旧文字/旧语音） | **部分完成**：客户端侧已完成，浏览器侧仍未完成 | S05 条目（`evals/slow-model.test.js` 6 项，已勾）；W09 条目（仍未勾） |
+| 慢模型完整浏览器演示（无旧文字/旧语音） | **部分完成**：客户端侧已完成，浏览器侧仍未完成 | S05 条目（`tests/evals/slow-model.test.js` 6 项，已勾）；W09 条目（仍未勾） |
 | 长局残局提示的真实浏览器触发 | ~~未完成~~ **已完成（2026-09-17 晚复核）** | `docs/CHECKLIST.md` 的 C17 条目（8 局长局、残局提示 8/8）+ `reports/c17-endgame-browser.md` |
-| 名称约束补上后的复验 | ~~未复验~~ **已复验（2026-09-17 晚复核）** | `evals/agent.test.js`「item-name drift is rejected even when every number is grounded」；第三轮 44 条真实调用的 `badAnswers` 里没有任何 `item-name-drift`（`reports/live-model-eval.json`） |
+| 名称约束补上后的复验 | ~~未复验~~ **已复验（2026-09-17 晚复核）** | `tests/evals/agent.test.js`「item-name drift is rejected even when every number is grounded」；第三轮 44 条真实调用的 `badAnswers` 里没有任何 `item-name-drift`（`reports/live-model-eval.json`） |
 | 裁剪后仍能取回早期回合证据 | ~~缺显式测试~~ **已补（2026-09-17 晚复核）** | C05 条目：`evidence trimmed out of the prompt is still retrievable from the archive` |
 | 语音在用户设备上的实际可听性 | 未完成（语音已整体停用） | V08 条目（仍未勾）、E08 条目（仍未勾） |
 | 长上下文位置效应的独立测试 | 未做 | `docs/RESEARCH-NOTES.md:43` |

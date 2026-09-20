@@ -19,8 +19,8 @@
 //    so BOTH sides pick replacements (the enemy's replacement during 'replace' is chooseEnemy()).
 import {writeFileSync,mkdirSync} from 'node:fs';
 import {createGame,legalActions,resolveTurn,chooseEnemy,rankEnemyActions,active,SKILLS,damage,multiplier,
-  effectiveSpeed,SPECIES,HELD_ITEMS,RULES_VERSION,buildVersusOpponent} from '../engine.js';
-import {STAGES,stageOptions} from '../content.js';
+  effectiveSpeed,SPECIES,HELD_ITEMS,RULES_VERSION,buildVersusOpponent} from '../src/game/engine.js';
+import {STAGES,stageOptions} from '../src/game/content.js';
 
 // ── reproducibility ─────────────────────────────────────────────────────────────────────────
 // Fixed seed lists. No Date/Math.random anywhere: same file => same numbers.

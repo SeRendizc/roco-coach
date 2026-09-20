@@ -11,11 +11,11 @@
 // The shipped retriever instead concatenates principle+counterexample into ONE field at weight 1
 // and ignores `conditions` entirely, so the arm is a real difference, not a relabelled baseline.
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
-import {cards,searchKnowledge,applicability,RULES_VERSION} from '../coach/strategist.js';
-import {createGame} from '../engine.js';
-import {stageOptions} from '../content.js';
+import {cards,searchKnowledge,applicability,RULES_VERSION} from '../src/coach/strategist.js';
+import {createGame} from '../src/game/engine.js';
+import {stageOptions} from '../src/game/content.js';
 
-const dataset=JSON.parse(readFileSync(new URL('../evals/retrieval-extended.json',import.meta.url)));
+const dataset=JSON.parse(readFileSync(new URL('../tests/evals/retrieval-extended.json',import.meta.url)));
 const QUERIES=dataset.queries;
 const rng=seed=>{let s=seed>>>0;return()=>((s=(Math.imul(s,1664525)+1013904223)>>>0)/4294967296);};
 
@@ -147,7 +147,7 @@ const sensitivity=Object.fromEntries([0,2,5].map(bonus=>{
 }));
 
 const report={generatedAt:new Date().toISOString(),rulesVersion:RULES_VERSION,
- dataset:{file:'evals/retrieval-extended.json',name:dataset.name,provenance:dataset.provenance,
+ dataset:{file:'tests/evals/retrieval-extended.json',name:dataset.name,provenance:dataset.provenance,
   total:QUERIES.length,positive:QUERIES.filter(q=>q.relevant.length).length,negative:QUERIES.filter(q=>!q.relevant.length).length,
   original20Kept:QUERIES.filter(q=>q.split.startsWith('original')).length,newlyAuthored:QUERIES.filter(q=>q.split==='extended').length,
   randomGuessHitAt3:3/eligible.length},

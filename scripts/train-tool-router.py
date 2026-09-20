@@ -20,7 +20,7 @@ groups={
  'test':[
  ('Read the health bar of the pet fighting for me.',0),('Count my unused medicine in this battle.',0),('Check whether the enemy has zero energy.',0),('Identify the animal presently facing me.',0),('List my knocked-out companions.',0),('Check my team before recommending a replacement.',0),('What status is attached to my current companion?',0),('Tell me which round we have reached.',0),
  ('I do not understand why an item goes before a quick pet.',1),('Explain how elemental resistance changes a hit.',1),('Can I attack immediately after a voluntary swap?',1),('What are the rules for poison on a reserve?',1),('Describe the effect of using guard.',1),('What does the cleanse item remove?',1),('Explain how recoil is resolved.',1),('Is a replacement after a knockout a normal turn?',1)]}
-Path('evals/tool-router.json').write_text(json.dumps(groups,indent=2))
+Path('tests/evals/tool-router.json').write_text(json.dumps(groups,indent=2))
 ids=[tokenizer.encode(x,add_special_tokens=False) for x in ['A','B']];assert all(len(x)==1 for x in ids);ids=[x[0] for x in ids]
 features={};labels={}
 for split,rows in groups.items():

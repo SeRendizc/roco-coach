@@ -232,7 +232,7 @@ async function fetchJson(url, tries = 80, gap = 250) {
  * 本脚本不改仓库任何文件、也不重启服务，只在浏览器网络层把磁盘上的真文件补上，
  * 并把补的内容哈希记进报告（见 summary.moduleGraph.unserved / summary.shimState）。
  */
-async function findUnservedModules(baseUrl, rootDir, entry = 'app.js') {
+async function findUnservedModules(baseUrl, rootDir, entry = 'src/client/app.js') {
   const seen = new Set(), unserved = [], queue = [entry];
   while (queue.length) {
     const rel = queue.shift();
@@ -599,8 +599,8 @@ async function main() {
 
   let exitCode = 0;
   try {
-    const graph = await findUnservedModules(args.url, resolve('.'), 'app.js');
-    summary.moduleGraph = { entry: 'app.js', checked: graph.checked.length, modules: graph.checked, unserved: graph.unserved.map(u => ({ path: u.path, status: u.status, bytes: u.bytes, sha256: u.sha256 })) };
+    const graph = await findUnservedModules(args.url, resolve('.'), 'src/client/app.js');
+    summary.moduleGraph = { entry: 'src/client/app.js', checked: graph.checked.length, modules: graph.checked, unserved: graph.unserved.map(u => ({ path: u.path, status: u.status, bytes: u.bytes, sha256: u.sha256 })) };
     if (graph.unserved.length) {
       summary.problems.push('服务器 404 但磁盘存在的模块：' + graph.unserved.map(u => '/' + u.path).join(', ') + '（app.js 的 import 图会整体失败，页面一行 JS 都不执行；本脚本只在网络层补齐，未改仓库文件也未重启服务）');
       log('警告：这些模块服务器不提供 → ' + graph.unserved.map(u => '/' + u.path).join(', '));

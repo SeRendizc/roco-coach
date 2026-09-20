@@ -81,7 +81,7 @@
 | 17 | **冲突记录完成**：25 处差异全部分类，**未解决 = 0** | `docs/roco/DATA-CONFLICTS.md`、`data/roco/conflicts.jsonl` |
 | 18 | **12 只精灵支持矩阵完成**，含当前支持等级与下一轮目标等级 | `docs/roco/PET-SUPPORT-MATRIX.md`、`.../support-matrix.json` |
 | 19 | **A 组 6 只候选配招**：每只 4 技能，含角色、候选数、来源池与备选清单 | 同上 `candidate_moveset.selection_evidence` |
-| 20 | **microcase 计划完成**：21 条，覆盖任务书要求的全部 11 个方向 + 应对/蓄力 2 组 | `evals/roco/cases/microcases-v1.jsonl`、`docs/roco/MICROCASE-PLAN.md` |
+| 20 | **microcase 计划完成**：21 条，覆盖任务书要求的全部 11 个方向 + 应对/蓄力 2 组 | `tests/evals/roco/cases/microcases-v1.jsonl`、`docs/roco/MICROCASE-PLAN.md` |
 | 21 | 通知通道接通（PushPlus），阶段完成自动推送 | `scripts/roco/notify.mjs`、`reports/roco/notify-log.jsonl`（均已忽略入库） |
 
 ### 3.2 本轮的关键数据结论（每条都有落盘证据）
@@ -111,7 +111,7 @@
 | `docs/IMPLEMENTATION-STATUS.md` 顶部写「现场 `npm test` 为 **257 项**」 | 本轮开始时现场为 **375 项**（357 unit + 18 browser），全通过；本轮结束后为 **390 项** | 文档数字过时。以现场日志为准，**本文件不改该文档**（属 M0 审计发现，已登记在 `M0-REPO-AUDIT.md` §1） |
 | `README.md` 称 14 宠 | 代码/测试中确认 14 只自创宠物（含磐耳羊、灵瞳猫） | 一致 |
 | 交接包称基线 commit `1717cd5` | HEAD = `1717cd5…` | 一致 |
-| `03-IMPLEMENTATION-BRIEF.md` §2 称数据写在 `engine.js` / `content.js` / `progression.js` 等 | 已核对文件确实存在且非空（见 M0 审计） | 一致 |
+| `03-IMPLEMENTATION-BRIEF.md` §2 称数据写在 `src/game/engine.js` / `src/game/content.js` / `src/game/progression.js` 等 | 已核对文件确实存在且非空（见 M0 审计） | 一致 |
 | `README.md` 称「没有第三方 npm 运行依赖」 | `dependencies` 与 `devDependencies` **均为空对象** | 一致，且是重要优势；本轮未引入任何 npm 依赖 |
 
 ---
@@ -193,8 +193,8 @@
 | 2026-09-20T16:30Z | M0 仓库审计完成 | `docs/roco/M0-REPO-AUDIT.md` |
 | 2026-09-20T16:33Z | 许可矩阵完成（主来源 CC BY-NC-SA 4.0，两个 REFERENCE_ONLY） | `docs/roco/LICENSE-MATRIX.md` |
 | 2026-09-20T16:36Z | 12 只精灵支持矩阵 + A 组候选配招 + 冲突记录文档 | `docs/roco/{PET-SUPPORT-MATRIX,DATA-CONFLICTS}.md` |
-| 2026-09-20T16:39Z | microcase 计划 21 条（覆盖 11 个方向 + 应对/蓄力 2 组） | `evals/roco/cases/microcases-v1.jsonl`、`docs/roco/MICROCASE-PLAN.md` |
-| 2026-09-20T16:41Z | 新增 15 项数据域验收测试并接入 `test:unit`（追加，不删旧测试） | `evals/roco/data-acceptance.test.js` |
+| 2026-09-20T16:39Z | microcase 计划 21 条（覆盖 11 个方向 + 应对/蓄力 2 组） | `tests/evals/roco/cases/microcases-v1.jsonl`、`docs/roco/MICROCASE-PLAN.md` |
+| 2026-09-20T16:41Z | 新增 15 项数据域验收测试并接入 `test:unit`（追加，不删旧测试） | `tests/evals/roco/data-acceptance.test.js` |
 | 2026-09-20T16:42Z | 浏览器验收脚本 + 4 张互不相同截图，9/9 通过 | `reports/roco/acceptance/` |
 | 2026-09-20T16:43Z | 全量回归 **390/390 通过**（372 unit + 18 browser），0 跳过 | `reports/roco/m1-data/npm-test-final.log` |
 | 2026-09-20T16:43Z | M0/M1 验收 checklist 完成（A—L，每项带证据） | `docs/roco/M0-M1-ACCEPTANCE.md` |

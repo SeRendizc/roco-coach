@@ -1,7 +1,7 @@
 // 生成 docs/roco/MICROCASE-PLAN.md —— 下一轮真实规则引擎的 microcase 计划说明。
 import { readFileSync, writeFileSync } from 'node:fs';
 
-const lines = readFileSync('evals/roco/cases/microcases-v1.jsonl', 'utf8').trim().split('\n').map(JSON.parse);
+const lines = readFileSync('tests/evals/roco/cases/microcases-v1.jsonl', 'utf8').trim().split('\n').map(JSON.parse);
 const header = lines[0];
 const cases = lines.slice(1);
 
@@ -17,7 +17,7 @@ const P = (s = '') => L.push(s);
 
 P('# 下一轮真实规则引擎：microcase 计划 v1');
 P();
-P('> **本文件与 `evals/roco/cases/microcases-v1.jsonl` 都是计划，不是通过记录。**');
+P('> **本文件与 `tests/evals/roco/cases/microcases-v1.jsonl` 都是计划，不是通过记录。**');
 P('> 每一条的 `verification.passed` 都是 `false`。');
 P();
 P('| 项 | 值 |');
@@ -25,7 +25,7 @@ P('|---|---|');
 P(`| plan_id | \`${header.plan_id}\` |`);
 P(`| status | \`${header.status}\` |`);
 P(`| ruleset | \`${header.ruleset_id}\` |`);
-P(`| 机器可读版本 | \`evals/roco/cases/microcases-v1.jsonl\` |`);
+P(`| 机器可读版本 | \`tests/evals/roco/cases/microcases-v1.jsonl\` |`);
 P(`| case 数 | ${cases.length} |`);
 P(`| 快照术语表可用条目 | ${header.terms_glossary_available} |`);
 P(`| 生成方式 | \`scripts/roco/build-microcases.mjs\`（可复现） |`);

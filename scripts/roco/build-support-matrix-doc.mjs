@@ -217,7 +217,7 @@ P('|---|---|---|');
 [...blockers].forEach((b, i) => P(`| ${i + 1} | ${b} | 所有涉及该机制的技能都必须 fail closed |`));
 P();
 P('这些缺口**没有**用任何默认值补齐。它们逐条转成了下一轮的 microcase：');
-P('`evals/roco/cases/microcases-v1.jsonl`（计划态）。');
+P('`tests/evals/roco/cases/microcases-v1.jsonl`（计划态）。');
 P();
 
 P('## 5. 数据来源与版本（每只精灵）');

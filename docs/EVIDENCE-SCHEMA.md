@@ -13,7 +13,7 @@
 ## 教练事件
 
 journal事件：id、kind、matchId、turn、rulesVersion、time、source、confidence。
-- hint：channel为inline（`app.js:643`）、endgame（`app.js:721`）、watch（`app.js:830`），外加动态的 `role+'-'+trigger.reason`（`app.js:497`，如 `strategist-犹豫不决`）；表示当时已展示，不代表用户看懂或采纳。**原文列的是「inline、attention、endgame 或 watch」——`attention` 这个频道现在全仓库 0 命中**（`grep -rn "'attention'" app.js coach/ server.js` → 0），它在基线提交 `e5417e8` 时存在，属后来的漂移。
+- hint：channel为inline（`src/client/app.js:643`）、endgame（`src/client/app.js:721`）、watch（`src/client/app.js:830`），外加动态的 `role+'-'+trigger.reason`（`src/client/app.js:497`，如 `strategist-犹豫不决`）；表示当时已展示，不代表用户看懂或采纳。**原文列的是「inline、attention、endgame 或 watch」——`attention` 这个频道现在全仓库 0 命中**（`grep -rn "'attention'" src/client/app.js src/coach/ src/server/index.js` → 0），它在基线提交 `e5417e8` 时存在，属后来的漂移。
 - dismiss：用户明确关闭，用于近期普通提示降频。
 - decision：lesson、reasonable、prompted、scoreGap；来自公开状态的一回合评分比较，confidence为0.6。
 
@@ -23,7 +23,7 @@ journal事件：id、kind、matchId、turn、rulesVersion、time、source、conf
 
 卡片字段：id、game、rulesVersion、status、title、keywords、principle、counterexample、requiredEvidence、conditions、authority、inspiration。检索时先版本过滤。resolveCitation与verifyCitations校验存在性；applicability检查条件，返回candidate/conditions-not-met/reference-only，而非真值或最优性。
 
-工具只读，固定白名单；**`search_rules` 只接受 `query`；`read_match{offset,limit}`、`read_evidence{turn,matchId}` 也接受参数**（`coach/toolbox.js` 的 `TOOL_CONTRACTS`，由 `validToolArgs` 逐个校验范围；其余工具参数为空）；非法参数、重复调用、超大回执及预算耗尽停止。工具返回为证据数据，不具有修改系统权限的能力。
+工具只读，固定白名单；**`search_rules` 只接受 `query`；`read_match{offset,limit}`、`read_evidence{turn,matchId}` 也接受参数**（`src/coach/toolbox.js` 的 `TOOL_CONTRACTS`，由 `validToolArgs` 逐个校验范围；其余工具参数为空）；非法参数、重复调用、超大回执及预算耗尽停止。工具返回为证据数据，不具有修改系统权限的能力。
 
 **行动标识（`simulate_branch`）**：候选用稳定标识而不是合法行动列表下标——`skill:guard` / `switch:<伙伴物种id>` / `item:<道具id>:<伙伴物种id>`。索引会随能量、道具和倒下而整体位移，同一个下标在不同回合指向不同行动，回执里也无法核对；物种 id 在一局内不变。旧参数 `actionIndex/opponentIndex` 仍被接受（`validToolArgs` 两条路径都校验），但代码给出的参数一律用稳定标识。回执里必须列明 `simulated`（实际模拟了哪些行动）、`vs`（各候选面对同一组合法对手行动的收益与风险），并在 `freeReplacement` 上区分「主动换宠（消耗整回合）」与「倒下后的免费补位（不消耗回合、不触发对手行动）」。
 

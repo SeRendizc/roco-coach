@@ -175,7 +175,7 @@ P('| 「应对攻击」的判定窗口 | `unknown` | 描述写「应对攻击：
 P('| 先手优先级的具体数值 | `unknown` | 只有「先手+1」，没有与其他行动的相对顺序 |');
 P('| 同速/同时行动的裁决 | `unknown` | 完全不同体系的机制，无证据 |');
 P();
-P('这些缺口已逐条转成下一轮的 microcase 计划：`evals/roco/cases/microcases-v1.jsonl`。');
+P('这些缺口已逐条转成下一轮的 microcase 计划：`tests/evals/roco/cases/microcases-v1.jsonl`。');
 P();
 
 writeFileSync('docs/roco/DATA-CONFLICTS.md', lines.join('\n') + '\n');

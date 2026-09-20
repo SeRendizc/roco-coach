@@ -2,23 +2,23 @@
 
 更新：2026-09-16。**当前交付（该首轮状态描述已过时，见文末"第二轮更新"与"2026-09-17 现状更正"）**：离线检索工具基础与测试；~~尚未接入线上聊天/自动提示~~，不代表完整 RAG 或 ReAct 已验收。
 
-> **2026-09-17 现状更正**（逐条，复算命令见下）：检索**早已接入**军师与局内提示（`app.js` import `coach/strategist.js`）；知识卡从 11 张 → 30 张 → 45 张 → **49 张战术卡**，另有 `knowledge/reference.generated.json` 里由引擎生成的参考卡（原 41 条，随 `SPECIES` 重新生成，本轮新增两只普通系后为 44 条）；`knowledge.test.js` 从 6 项 → **11 项**；卡片适用性**已从文字声明变成字段**（见第 39 行的更正）；上下文预算是 **200K** 而不是 32K。下文各处的旧数字都加了行内更正。
+> **2026-09-17 现状更正**（逐条，复算命令见下）：检索**早已接入**军师与局内提示（`src/client/app.js` import `src/coach/strategist.js`）；知识卡从 11 张 → 30 张 → 45 张 → **49 张战术卡**，另有 `knowledge/reference.generated.json` 里由引擎生成的参考卡（原 41 条，随 `SPECIES` 重新生成，本轮新增两只普通系后为 44 条）；`tests/knowledge.test.js` 从 6 项 → **11 项**；卡片适用性**已从文字声明变成字段**（见第 39 行的更正）；上下文预算是 **200K** 而不是 32K。下文各处的旧数字都加了行内更正。
 
 ## 为什么借鉴宝可梦
 
 宝可梦官方对战指南讨论了速度与特殊先手、主动换宠的行动成本、治疗时机以及队伍属性覆盖。这些适合借鉴为“先问哪些问题”的战术思路。其具体倍率、双属性、特性及逃跑规则不能沿用到小兽训练场。
 
-来源：[宝可梦官方对战指南](https://diamondpearl.pokemon.com/en-gb/trainersguide/fundamentals/battling/)，访问日期 2026-09-16。没有整篇搬运攻略；本地战术卡自行编写，数值依据 engine.js / progression.js。外部来源仅作为思路出处，不作为本地规则权威。
+来源：[宝可梦官方对战指南](https://diamondpearl.pokemon.com/en-gb/trainersguide/fundamentals/battling/)，访问日期 2026-09-16。没有整篇搬运攻略；本地战术卡自行编写，数值依据 src/game/engine.js / src/game/progression.js。外部来源仅作为思路出处，不作为本地规则权威。
 
 ## 当前落地
 
 - `knowledge/tactics.json`：**49 张卡**（**原文写 11 张，后来依次扩到 30、45、49**；另有 `knowledge/reference.generated.json` 里由引擎生成的参考卡，条数随 `SPECIES`/`SKILLS`/`TYPE_ADVANTAGES` 生成），包含版本、标题、关键词、战术原则、反例、所需证据、本地权威文件和启发来源。
 - `knowledge/sources.json`：来源用途与本地化边界。
-- `coach/retrieval.js`：**该文件现在只有 2 行**（`export {RULES_VERSION,cards,searchKnowledge,buildKnowledgePacket} from './strategist.js'` 的兼容转发），真正实现已移到 `coach/strategist.js`。下面这段行为描述本身仍正确，但**归属错了文件**：中文双字切分、少量口语同义词、加权词项匹配；按游戏和版本过滤，限制返回条数与字符预算。无命中时返回缺证据，不硬塞攻略。
+- `src/coach/retrieval.js`：**该文件现在只有 2 行**（`export {RULES_VERSION,cards,searchKnowledge,buildKnowledgePacket} from './strategist.js'` 的兼容转发），真正实现已移到 `src/coach/strategist.js`。下面这段行为描述本身仍正确，但**归属错了文件**：中文双字切分、少量口语同义词、加权词项匹配；按游戏和版本过滤，限制返回条数与字符预算。无命中时返回缺证据，不硬塞攻略。
 - `buildKnowledgePacket`：附带当前合法攻击的普通/防御伤害，直接调用引擎。明确只算静止目标的直接伤害，不等于胜率，也不含对手将要执行的动作。
-- `knowledge.test.js`：**11 个测试**（原文写 6 个；多出的覆盖 switch-loop 反例、军师包、`content.js` 一致性、引擎参考卡、语义语料生成），覆盖口语、版本/空结果/预算、外部机制隔离、溢出伤害、合法技能/PVP、无战斗数据场景。
+- `tests/knowledge.test.js`：**11 个测试**（原文写 6 个；多出的覆盖 switch-loop 反例、军师包、`src/game/content.js` 一致性、引擎参考卡、语义语料生成），覆盖口语、版本/空结果/预算、外部机制隔离、溢出伤害、合法技能/PVP、无战斗数据场景。
 
-执行：`node --test knowledge.test.js`。**当前 11 项通过**（原文写 6 项），仅证明这些固定用例；不能推断真实模型回答准确率。
+执行：`node --test tests/knowledge.test.js`。**当前 11 项通过**（原文写 6 项），仅证明这些固定用例；不能推断真实模型回答准确率。
 
 这是可审查的关键词检索基线，不是语义向量检索。字符预算也不等于后续的 token 预算。当前本地函数的 PVP 拦截不是服务端竞争公平性的完整保障。
 
@@ -38,7 +38,7 @@
 ## 让 RAG 更聪明的下一步
 
 1. **补规则结构层**：由 SKILLS、SPECIES 和结算代码导出可核对规则；手写说明变更必须经测试。未来将统一规则版本源，避免手改常量漏同步。
-2. **补状态适用性**：~~当前卡片的 requiredEvidence 是文字声明。下一步转为明确字段~~ **已做（2026-09-17 更正）**：92 张卡全部带 `conditions` 数组（现场复算：`[...require('./knowledge/tactics.json'),...require('./knowledge/reference.generated.json')].filter(c=>Array.isArray(c.conditions)).length` 等于总卡数），`coach/strategist.js` 的 `applicability()` 返回 `candidate / conditions-not-met / reference-only`，`coach/runtime.js` 在把回执交给模型**之前**剔掉 `conditions-not-met` 的卡并记进 `notApplicableHere`。仍然成立的是最后半句：**检索命中不代表适用**。
+2. **补状态适用性**：~~当前卡片的 requiredEvidence 是文字声明。下一步转为明确字段~~ **已做（2026-09-17 更正）**：92 张卡全部带 `conditions` 数组（现场复算：`[...require('./knowledge/tactics.json'),...require('./knowledge/reference.generated.json')].filter(c=>Array.isArray(c.conditions)).length` 等于总卡数），`src/coach/strategist.js` 的 `applicability()` 返回 `candidate / conditions-not-met / reference-only`，`src/coach/runtime.js` 在把回执交给模型**之前**剔掉 `conditions-not-met` 的卡并记进 `notApplicableHere`。仍然成立的是最后半句：**检索命中不代表适用**。
 3. **混合召回**：保留当前词项基线，再加入中文向量检索。规则版本和模式先过滤，之后排序；用真实口语问法评测改善，不能只换技术名。
 4. **证据重排与反例配对**：推荐“先挂状态”时，同时召回“残血直接收尾”；模型必须说明本局为什么满足前提。
 5. **分支计算工具**：接共享结算器，返回数值和假设。RAG 不负责心算，模型负责选工具、理解取舍与解释。
@@ -62,7 +62,7 @@
 
 ## 第二轮更新：已接入军师（2026-09-16）
 
-以上“离线未接入”的描述是首轮状态。本轮知识卡扩至30张（**2026-09-17 更正：现为 49 张战术卡 + 引擎生成的参考卡**）；检索与构建证据的实现移至 coach/strategist.js，coach/retrieval.js 保留兼容导出（**该文件现在只有 2 行**）。通过 npm run build:knowledge 从JSON生成 content.js 中的浏览器数据，测试确保两份一致。客户端即时军师与服务端军师均能把卡片加入证据，~~真实DeepSeek质量尚未测量~~（**2026-09-17 更正：已测量**——44 条预注册用例三轮共 132 次真实调用，见 `reports/live-model-eval.json` 与 `docs/EXPERIMENTS.md`）。
+以上“离线未接入”的描述是首轮状态。本轮知识卡扩至30张（**2026-09-17 更正：现为 49 张战术卡 + 引擎生成的参考卡**）；检索与构建证据的实现移至 src/coach/strategist.js，src/coach/retrieval.js 保留兼容导出（**该文件现在只有 2 行**）。通过 npm run build:knowledge 从JSON生成 src/game/content.js 中的浏览器数据，测试确保两份一致。客户端即时军师与服务端军师均能把卡片加入证据，~~真实DeepSeek质量尚未测量~~（**2026-09-17 更正：已测量**——44 条预注册用例三轮共 132 次真实调用，见 `reports/live-model-eval.json` 与 `docs/EXPERIMENTS.md`）。
 
 新增分支证据来自共用结算器的一回合穷举：平均启发式分、最坏分、对方主动换宠时最坏分。不会将过去的换宠行为当作未来确定动作。挑战电脑连续主动换宠额外承担6/12/18分惯性成本，属于待校准的行为策略，不是禁止换宠的游戏规则，也不是纳什均衡求解或RL。
 

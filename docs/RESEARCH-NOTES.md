@@ -38,7 +38,7 @@
   https://github.com/microsoft/agent-lightning
 - Agent 工作流方法：路由、评审等可按需求组合，区别固定工作流与自主工具决策。
   https://www.anthropic.com/engineering/building-effective-agents
-- 上下文工程：压缩和外部结构化笔记帮助长时任务；~~小芽还需自行实现证据 ID、版本与删除同步~~ **2026-09-17 更正：这三项都已实现**——`coach/runtime.js:16` 生成形如 `…:turn:N` 的证据 ID；`coach/experience.js:153-154` 的 `taskStamp / taskIsCurrent` 校验 epoch + matchId + rulesVersion + TTL；`coach/memory.js:126-129` 的 `deleteMemoryEvidence` 级联删除引用它的反思（`evals/agent.test.js:16` 有断言）。
+- 上下文工程：压缩和外部结构化笔记帮助长时任务；~~小芽还需自行实现证据 ID、版本与删除同步~~ **2026-09-17 更正：这三项都已实现**——`src/coach/runtime.js:16` 生成形如 `…:turn:N` 的证据 ID；`src/coach/experience.js:153-154` 的 `taskStamp / taskIsCurrent` 校验 epoch + matchId + rulesVersion + TTL；`src/coach/memory.js:126-129` 的 `deleteMemoryEvidence` 级联删除引用它的反思（`tests/evals/agent.test.js:16` 有断言）。
   https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
 - Lost in the Middle：研究中的长上下文利用受位置影响。不能直接套用为某个当前 DeepSeek 型号的性能结论，但提示我们必须做独立的长历史检索测试。
   https://arxiv.org/abs/2307.03172

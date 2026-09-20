@@ -1,6 +1,6 @@
 # 下一轮真实规则引擎：microcase 计划 v1
 
-> **本文件与 `evals/roco/cases/microcases-v1.jsonl` 都是计划，不是通过记录。**
+> **本文件与 `tests/evals/roco/cases/microcases-v1.jsonl` 都是计划，不是通过记录。**
 > 每一条的 `verification.passed` 都是 `false`。
 
 | 项 | 值 |
@@ -8,7 +8,7 @@
 | plan_id | `microcases-v1` |
 | status | `PLAN_ONLY_NOT_EXECUTED` |
 | ruleset | `roco-world-s4-2026-09-10` |
-| 机器可读版本 | `evals/roco/cases/microcases-v1.jsonl` |
+| 机器可读版本 | `tests/evals/roco/cases/microcases-v1.jsonl` |
 | case 数 | 21 |
 | 快照术语表可用条目 | 54 |
 | 生成方式 | `scripts/roco/build-microcases.mjs`（可复现） |

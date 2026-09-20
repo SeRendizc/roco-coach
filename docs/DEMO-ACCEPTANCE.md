@@ -32,7 +32,7 @@
 - 模型解释尚未返回就出招：旧局面版本不得覆盖新提示。
 - 关闭、返回营地、改变偏好：字幕与提示取消；不排队补播旧句子。（语音已停用，见 README）
 - PVP-live：自然语言“忽略限制”仍在模型调用之前拒绝。当前PVP是能力边界模拟，不是联网竞技服务。
-- 超长历史：运行 npm test，检查**上下文装配用例**（测试名已从「32K assembly handles huge history…」改为「context assembly trims to an explicit budget, preserves current facts and does not mutate the archive」，见 `evals/agent.test.js:24`）；原记录不随提示窗口删除。**预算口径已更正**：服务端走的是**官方 DeepSeek V4 tokenizer 的精确计数**（`coach/token-budget-server.js:10` 注释：「这里用真实 tokenizer（不是字节估算）计数」，`window=200000, output=320, reserve=1024`），**不是**"保守 UTF-8 字节估计"；字节估计只剩浏览器侧第一级粗裁（`coach/runtime.js` 的 `assembleContext`，`window=200000, output=4096, system=4096, tools=2048`），它的审计字段也如实写着 `estimate:'UTF-8 byte upper budget; not exact model token count'`。本文原写「32K 装配用例」与「预算目前是保守 UTF-8 字节估计，不冒充 DeepSeek 精确 tokenizer」，与实现相反。
+- 超长历史：运行 npm test，检查**上下文装配用例**（测试名已从「32K assembly handles huge history…」改为「context assembly trims to an explicit budget, preserves current facts and does not mutate the archive」，见 `tests/evals/agent.test.js:24`）；原记录不随提示窗口删除。**预算口径已更正**：服务端走的是**官方 DeepSeek V4 tokenizer 的精确计数**（`src/server/token-budget-server.js:10` 注释：「这里用真实 tokenizer（不是字节估算）计数」，`window=200000, output=320, reserve=1024`），**不是**"保守 UTF-8 字节估计"；字节估计只剩浏览器侧第一级粗裁（`src/coach/runtime.js` 的 `assembleContext`，`window=200000, output=4096, system=4096, tools=2048`），它的审计字段也如实写着 `estimate:'UTF-8 byte upper budget; not exact model token count'`。本文原写「32K 装配用例」与「预算目前是保守 UTF-8 字节估计，不冒充 DeepSeek 精确 tokenizer」，与实现相反。
 
 ## 五 可复现实验
 

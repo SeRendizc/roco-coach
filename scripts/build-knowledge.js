@@ -1,6 +1,6 @@
 import {readFileSync,writeFileSync} from 'node:fs';
-import {SKILLS,SPECIES,TYPES,TYPE_ADVANTAGES,createGame,RULES} from '../engine.js';
-const source=new URL('../knowledge/tactics.json',import.meta.url),target=new URL('../content.js',import.meta.url);
+import {SKILLS,SPECIES,TYPES,TYPE_ADVANTAGES,createGame,RULES} from '../src/game/engine.js';
+const source=new URL('../knowledge/tactics.json',import.meta.url),target=new URL('../src/game/content.js',import.meta.url);
 const cards=JSON.parse(readFileSync(source,'utf8'));
 if(new Set(cards.map(c=>c.id)).size!==cards.length)throw Error('Duplicate knowledge ID');
 const version=createGame().version;

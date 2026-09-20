@@ -4,7 +4,7 @@
 // status=INCOMPLETE and the reason is carried through instead of being silently dropped.
 import {writeFileSync,readFileSync} from 'node:fs';
 import {spawnSync} from 'node:child_process';
-import {TOOL_CONTRACTS} from '../coach/toolbox.js';
+import {TOOL_CONTRACTS} from '../src/coach/toolbox.js';
 
 const RAW_PATH=process.env.RAW||'reports/live-model-eval-raw.json';
 const OUT_PATH=process.env.OUT||'reports/live-model-eval.json';

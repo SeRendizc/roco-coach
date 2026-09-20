@@ -4,13 +4,13 @@
   "type": "module",
   "scripts": {
     "test": "npm run test:unit && npm run test:browser",
-    "start": "node server.js",
-    "test:opponent": "node --test opponent.test.js",
-    "test:knowledge": "node --test knowledge.test.js",
-    "test:pvp": "node --test pvp.test.js",
-    "test:companion": "node --test companion.test.js",
-    "test:rules": "node --test rules.test.js offline.test.js",
-    "test:slow-model": "node --test evals/slow-model.test.js",
+    "start": "node src/server/index.js",
+    "test:opponent": "node --test tests/opponent.test.js",
+    "test:knowledge": "node --test tests/knowledge.test.js",
+    "test:pvp": "node --test tests/pvp.test.js",
+    "test:companion": "node --test tests/companion.test.js",
+    "test:rules": "node --test tests/rules.test.js tests/offline.test.js",
+    "test:slow-model": "node --test tests/evals/slow-model.test.js",
     "build:knowledge": "node scripts/build-knowledge.js",
     "build:report": ".venv-agent/bin/python scripts/build-report.py",
     "eval:retrieval": "node scripts/eval-retrieval.js",
@@ -22,8 +22,8 @@
     "train:intervention": "node scripts/train-intervention.js",
     "test:smoke": "node scripts/browser-smoke.mjs",
     "test:opponent-smoke": "node scripts/opponent-smoke.mjs",
-    "test:browser": "node --test --test-concurrency=1 browser.test.js replace.test.js",
-    "test:roco": "node --test evals/roco/data-acceptance.test.js",
+    "test:browser": "node --test --test-concurrency=1 tests/browser.test.js tests/replace.test.js",
+    "test:roco": "node --test tests/evals/roco/data-acceptance.test.js",
     "roco:parse-check": "node scripts/roco/selftest-lua-parse.mjs",
     "roco:hash": "node scripts/roco/hash-snapshot.mjs",
     "roco:cross-check": "python3 scripts/roco/cross-check.py",
@@ -33,6 +33,6 @@
     "roco:docs": "node scripts/roco/build-support-matrix-doc.mjs && node scripts/roco/build-conflicts-doc.mjs && node scripts/roco/build-microcase-doc.mjs",
     "roco:pipeline": "npm run roco:parse-check && npm run roco:cross-check && npm run roco:import && npm run roco:matrix && npm run roco:microcases && npm run roco:docs",
     "roco:acceptance": "node scripts/roco/browser-acceptance.mjs",
-    "test:unit": "node --test engine.test.js rules.test.js offline.test.js mechanics.test.js pvp.test.js features.test.js coach.test.js companion.test.js strategist.test.js server.test.js opponent.test.js knowledge.test.js evals/agent.test.js evals/regression.test.js evals/slow-model.test.js wiring.test.js copy.test.js evals/player-copy.test.js evals/tool-arguments.test.js evals/roco/data-acceptance.test.js"
+    "test:unit": "node --test tests/engine.test.js tests/rules.test.js tests/offline.test.js tests/mechanics.test.js tests/pvp.test.js tests/features.test.js tests/coach.test.js tests/companion.test.js tests/strategist.test.js tests/server.test.js tests/opponent.test.js tests/knowledge.test.js tests/evals/agent.test.js tests/evals/regression.test.js tests/evals/slow-model.test.js tests/wiring.test.js tests/copy.test.js tests/evals/player-copy.test.js tests/evals/tool-arguments.test.js tests/evals/roco/data-acceptance.test.js tests/evals/structure-contract.test.js"
   }
 }

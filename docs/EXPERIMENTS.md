@@ -47,11 +47,11 @@
 
 ## 4. 上下文与真实模型
 
-官方DeepSeek V4 tokenizer和chat template本地计数，**工作预算窗口 200000（`WORKING_CONTEXT`）**，输出预留320，安全余量1024（`coach/token-budget-server.js:11-16`；**本文原写作"窗口32768"，那是项目此前的保守值，已由官方 1M 容量下的 200K 工作预算取代**）。计入序列化工具合同与回执。超长历史测试按完整消息删除，保留系统约束、末尾28HP/6能量和回合证据ID。原始战报保留在浏览器归档，可指定回合重新装配；当前请求未带某回合时明确missing，不用摘要编造。
+官方DeepSeek V4 tokenizer和chat template本地计数，**工作预算窗口 200000（`WORKING_CONTEXT`）**，输出预留320，安全余量1024（`src/server/token-budget-server.js:11-16`；**本文原写作"窗口32768"，那是项目此前的保守值，已由官方 1M 容量下的 200K 工作预算取代**）。计入序列化工具合同与回执。超长历史测试按完整消息删除，保留系统约束、末尾28HP/6能量和回合证据ID。原始战报保留在浏览器归档，可指定回合重新装配；当前请求未带某回合时明确missing，不用摘要编造。
 
 v0.10真实调用：补位、败局分析、追问、自动总结、天气规则五条均由DeepSeek生成，3134–3722ms；PVP绕过3ms本地拒绝。tokenizer计数与API prompt_tokens相差2–3，保留余量并以API usage计费为准。usage当前只记录最终生成，规划调用未合计，不能用它当整条链成本。
 
-人工逐条阅读发现：败局分析把“净化药、能量果”叫作“解药、以太”，数字检查没有拦住；**名称约束与窄校验已补上并已复验**（`coach/runtime.js` 的 `item-name-drift` 与 `causal-cancelled-action`；测试 `item-name drift is rejected even when every number is grounded`；第三轮 44 条真实调用的 `badAnswers` 里没有任何 `item-name-drift`，见 `reports/live-model-eval.json`）。天气回答没有充分解释速度顺序，属于解释质量不足。接口成功与窄校验通过不等于全部答案正确。
+人工逐条阅读发现：败局分析把“净化药、能量果”叫作“解药、以太”，数字检查没有拦住；**名称约束与窄校验已补上并已复验**（`src/coach/runtime.js` 的 `item-name-drift` 与 `causal-cancelled-action`；测试 `item-name drift is rejected even when every number is grounded`；第三轮 44 条真实调用的 `badAnswers` 里没有任何 `item-name-drift`，见 `reports/live-model-eval.json`）。天气回答没有充分解释速度顺序，属于解释质量不足。接口成功与窄校验通过不等于全部答案正确。
 
 原始结果：`reports/live-model-v10.json`；旧v0.8数据保留。S04独立质量评测**当时**继续保留未勾（**2026-09-17 晚复核：S04 已勾选**，三轮共 132 次真实调用，产物 `reports/live-model-eval.json` 与 `reports/live-model-eval-before-after.md`）。
 

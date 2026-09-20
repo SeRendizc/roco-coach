@@ -2,9 +2,9 @@
 
 > 配套文档：`docs/COMPANION-DESIGN.md`（设计与实现状态逐条标注）、`docs/CHECKLIST.md` 的 T05（**仍未勾**）。
 >
-> 代码基线：`coach/companion.js`。**本文只描述当前这一版陪练**；§11 与 §12 保留的是「在场方式」与「重做」两件事的来路，凡与代码冲突处以代码为准。
+> 代码基线：`src/coach/companion.js`。**本文只描述当前这一版陪练**；§11 与 §12 保留的是「在场方式」与「重做」两件事的来路，凡与代码冲突处以代码为准。
 >
-> 全量 `npm test` 与 `companion.test.js` 的条数请现场跑，不要引用本文里的数字：测试数随代码增长，`package.json` 的 `test` 脚本是唯一权威。
+> 全量 `npm test` 与 `tests/companion.test.js` 的条数请现场跑，不要引用本文里的数字：测试数随代码增长，`package.json` 的 `test` 脚本是唯一权威。
 >
 > **本文只写已经跑起来、且有测试的东西。** 没做的部分单独列在「§6 仍然是设计的部分」与「§8 已知边界」，不用「部分实现」「理论上支持」这类说法。
 
@@ -19,27 +19,27 @@
         → 证据包（含档位与约束）交给模型改写 → 生成后克制扫描 → 越界则回退模板
 ```
 
-**主动通道**（对局中不请自来地说话）已经接线：`app.js` 的 `act()` 在每回合结算后调用 `companionEvents()`，命中事件就交给 `notify()` → `queueCompanionCue()`，左下角那个人的气泡会真的弹出来（`notify()` 的调用点在第一轮之后就已经接上，第三轮把它接到了新的出现方式上）。
+**主动通道**（对局中不请自来地说话）已经接线：`src/client/app.js` 的 `act()` 在每回合结算后调用 `companionEvents()`，命中事件就交给 `notify()` → `queueCompanionCue()`，左下角那个人的气泡会真的弹出来（`notify()` 的调用点在第一轮之后就已经接上，第三轮把它接到了新的出现方式上）。
 
 **陪练现在已经是一个在场的人**：`COMPANION_EVENTS` 一共 11 个事件（§11.1），出现方式是左下角带头像与名字的一个人（§11.2），说话额度与军师彻底分开（§11.3）。**情绪的边界见 §11.4**：可以说有落点的态度，不许播报自己的感受。
 
-改动落在 5 个文件，**没有新增任何模块**（浏览器只允许加载 `server.js` 的 `publicAssets` 白名单里的文件，新增文件会 404，所以 `coach/companion.js` 一个文件承担了状态、档位、模板与扫描）：
+改动落在 5 个文件，**没有新增任何模块**（浏览器只允许加载 `src/server/index.js` 的 `publicAssets` 白名单里的文件，新增文件会 404，所以 `src/coach/companion.js` 一个文件承担了状态、档位、模板与扫描）：
 
 | 文件 | 改了什么 |
 |---|---|
-| `coach/companion.js` | 从 6 行重写为状态模型 / 档位表 / 真实事件模板 / 克制扫描 / 主动侧模板 |
-| `coach/memory.js` | `rememberBattle` 记录真实对局事实（对手、倒下顺序、首个减员、剩余道具）；`readMemory` 逐字段校验新增字段 |
-| `coach.js` | `coachContext` 补上关卡、当前对位、倒下伙伴、剩余只数；`coachEvent` 接上 `proactiveRegister` + `proactiveText` |
-| `coach/client.js` | 陪练路由下增加一次 `checkCompanionRestraint`，越界回退本机模板（复用既有降级路径） |
-| `companion.test.js` | 新增 12 条测试；`package.json` 加入 `test` 脚本与 `test:companion` |
+| `src/coach/companion.js` | 从 6 行重写为状态模型 / 档位表 / 真实事件模板 / 克制扫描 / 主动侧模板 |
+| `src/coach/memory.js` | `rememberBattle` 记录真实对局事实（对手、倒下顺序、首个减员、剩余道具）；`readMemory` 逐字段校验新增字段 |
+| `src/coach/session.js` | `coachContext` 补上关卡、当前对位、倒下伙伴、剩余只数；`coachEvent` 接上 `proactiveRegister` + `proactiveText` |
+| `src/coach/client.js` | 陪练路由下增加一次 `checkCompanionRestraint`，越界回退本机模板（复用既有降级路径） |
+| `tests/companion.test.js` | 新增 12 条测试；`package.json` 加入 `test` 脚本与 `test:companion` |
 
-**未改动**：`app.js`、`server.js`、`engine.js`、`index.html`、`style.css`（硬性约束），也没有改 `coach/runtime.js`（陪练路由与 `companion(context, memory, message)` 的调用方式保持不变，因此这次改动与同批其他改动互不冲突）。
+**未改动**：`src/client/app.js`、`src/server/index.js`、`src/game/engine.js`、`src/client/index.html`、`src/client/style.css`（硬性约束），也没有改 `src/coach/runtime.js`（陪练路由与 `companion(context, memory, message)` 的调用方式保持不变，因此这次改动与同批其他改动互不冲突）。
 
 ---
 
 ## 2. 状态怎么算（`companionState`）
 
-`coach/companion.js:83`，纯函数，签名与设计一致：`companionState(memory, context, session, now)`。
+`src/coach/companion.js:83`，纯函数，签名与设计一致：`companionState(memory, context, session, now)`。
 
 | 字段 | 算法 | 数据来源（真实字段） |
 |---|---|---|
@@ -60,14 +60,14 @@
 
 **与设计的两处收窄**（不是遗漏，都有理由）：
 
-1. `engagement` 的 0 档：设计写「近 3 天内有对话 → 1；否则 1」，需要一个对话时间戳，而 `memory.dialogue` 的条目只有 `{role, content}`（`coach/runtime.js:79`）。实现改为「有历史 → 1；什么都没有 → 0」，并把 0 用来执行原则 P3：**没有任何真实经历时只输出最短承接句，不进入具体关切**。
-2. `engagement` 不参与升档：它只用来判定「有没有可依据的经历」，档位不会被它抬高——表驱动测试遍历 210 种组合断言 `engagement<=2`，且次数上限仍由 `coach.js` / `experience.js` 的既有门控承担。
+1. `engagement` 的 0 档：设计写「近 3 天内有对话 → 1；否则 1」，需要一个对话时间戳，而 `memory.dialogue` 的条目只有 `{role, content}`（`src/coach/runtime.js:79`）。实现改为「有历史 → 1；什么都没有 → 0」，并把 0 用来执行原则 P3：**没有任何真实经历时只输出最短承接句，不进入具体关切**。
+2. `engagement` 不参与升档：它只用来判定「有没有可依据的经历」，档位不会被它抬高——表驱动测试遍历 210 种组合断言 `engagement<=2`，且次数上限仍由 `src/coach/session.js` / `src/coach/experience.js` 的既有门控承担。
 
 ---
 
 ## 3. 档位怎么切换（R0–R4）
 
-决策顺序（先命中先返回，纯函数，`coach/companion.js:110`）：
+决策顺序（先命中先返回，纯函数，`src/coach/companion.js:110`）：
 
 | 顺序 | 条件 | 档位 |
 |---|---|---|
@@ -79,7 +79,7 @@
 | 6 | 非玩家发起 + 有一条尚未说过的真实观察 | **R1** |
 | 7 | 其余 | **R0** |
 
-档位表（`REGISTERS`，`coach/companion.js:12`）与生效方式：
+档位表（`REGISTERS`，`src/coach/companion.js:12`）与生效方式：
 
 | 档位 | 字数上限 | 问句上限 | 允许建议 | 真实输出示例（引擎实跑的对局） |
 |---|---|---|---|---|
@@ -94,11 +94,11 @@
 **档位是真的影响输出，不是算完就丢**，三个通道各有一条测试：
 
 1. **本机模板**（未接模型）：四个档位给出四段不同文本，且长度都在各自上限内（测试 `the register changes the wording, not only the field`）。
-2. **模型路径**：档位与 `replyConstraints`（`maxChars` / `maxQuestions` / `forbid` / 一句中文指令）随证据包进入 `game_evidence`（`server.js:96`），模型看到的是「本轮档位 R1：正文不超过40字，不要问句，只写有本机记录支撑的事实」。测试 `runCoach routes to the companion and hands the register to the model` 断言不同档位送出的约束不同（40 / 30 字上限）。
-   - **边界**：不能在服务端 system prompt 里另加一段档位指令，因为 `server.js` 不在本轮允许修改的文件里。这件事写在文档里，不假装做到了。
-3. **生成后强制**：`coach/client.js:31-34` 对陪练输出跑一次 `checkCompanionRestraint`，命中即回退到本机模板，并把原因写进 `fallbackReason`。测试 `a model reply that breaks the register falls back to the recorded template`（模型回「别灰心，你已经很棒了。」→ 被拦下，显示本机模板）。
+2. **模型路径**：档位与 `replyConstraints`（`maxChars` / `maxQuestions` / `forbid` / 一句中文指令）随证据包进入 `game_evidence`（`src/server/index.js:96`），模型看到的是「本轮档位 R1：正文不超过40字，不要问句，只写有本机记录支撑的事实」。测试 `runCoach routes to the companion and hands the register to the model` 断言不同档位送出的约束不同（40 / 30 字上限）。
+   - **边界**：不能在服务端 system prompt 里另加一段档位指令，因为 `src/server/index.js` 不在本轮允许修改的文件里。这件事写在文档里，不假装做到了。
+3. **生成后强制**：`src/coach/client.js:31-34` 对陪练输出跑一次 `checkCompanionRestraint`，命中即回退到本机模板，并把原因写进 `fallbackReason`。测试 `a model reply that breaks the register falls back to the recorded template`（模型回「别灰心，你已经很棒了。」→ 被拦下，显示本机模板）。
 
-**一处有意的重新界定**：设计里 R0 是「0 字，什么都不说」。主动通道确实如此（`coachEvent` 返回 `null`）；但被动通道（玩家先开口的聊天）不能返回空文本——`runCoach` 会以「教练暂时没有生成有效回答」抛错（`coach/runtime.js:76`）。所以 R0 在那里是最短承接句「我在。」（3 字），不新增事实、不评价、不提问。
+**一处有意的重新界定**：设计里 R0 是「0 字，什么都不说」。主动通道确实如此（`coachEvent` 返回 `null`）；但被动通道（玩家先开口的聊天）不能返回空文本——`runCoach` 会以「教练暂时没有生成有效回答」抛错（`src/coach/runtime.js:76`）。所以 R0 在那里是最短承接句「我在。」（3 字），不新增事实、不评价、不提问。
 
 ---
 
@@ -106,7 +106,7 @@
 
 陪练说的每一件「过去的事」都必须能在本机记录里指到。字段来源只有两处：
 
-**（1）跨局记录 `memory.events`**（`coach/memory.js:20-29` 新增，读回时逐字段校验 `:5-8`）：
+**（1）跨局记录 `memory.events`**（`src/coach/memory.js:20-29` 新增，读回时逐字段校验 `:5-8`）：
 
 | 字段 | 内容 | 例（引擎实跑：种子 1、青芽草地、17 回合） |
 |---|---|---|
@@ -162,7 +162,7 @@
 
 ## 7. 主动通道（`coachEvent`）
 
-- 门控不变（`coach.js:9-11`）：`isLiveMatch` / `quiet` / `dismissed` / `count>=2` 直接 `null`；非 `result` 事件两次至少隔 3 回合。
+- 门控不变（`src/coach/session.js:9-11`）：`isLiveMatch` / `quiet` / `dismissed` / `count>=2` 直接 `null`；非 `result` 事件两次至少隔 3 回合。
 - 档位：`proactiveRegister({lossStreak})`——连败 ≥2 → **R3**，否则 **R1**（只陈述事实）。
 - 措辞：`proactiveText(event, context, register)` 引用局内真实字段。实跑示例（种子 4、冠军高地、28 回合、胜利、倒下的两只分别是烬尾狐与潮甲龟、结束时剩 1 只、场上对手是潮甲龟——`coachContext` 的实测输出就是这些值）：
   - `first-faint` → `潮甲龟倒下了。还剩1只。补位不占回合，你先选。`
@@ -178,22 +178,22 @@
 **§8.1（已修复，保留标题以示来路）曾经是：主动气泡在 UI 里不会弹出。** 当时 `notify(event)` 只有定义、没有调用处。现在它有两个调用点：`act()` 里每回合结算后的事件循环，以及第三轮的 `queueCompanionCue()`。真实游玩中的出现已被 headless Chrome 实测到（§11.6，截图在 `reports/companion/`）。
 
 **§8.1b 仍然只是设计的两条（第三轮新增的边界）：**
-- **模型改写的主动侧文案没有走克制扫描。** `checkCompanionRestraint` 只接在被动通道（`coach/client.js` 的 `companionRestraint`）上；左下角气泡里显示的始终是本机模板（`proactiveText`），不经模型。也就是说：主动侧的措辞目前是**写死的模板**，不是模型生成的。
+- **模型改写的主动侧文案没有走克制扫描。** `checkCompanionRestraint` 只接在被动通道（`src/coach/client.js` 的 `companionRestraint`）上；左下角气泡里显示的始终是本机模板（`proactiveText`），不经模型。也就是说：主动侧的措辞目前是**写死的模板**，不是模型生成的。
 - **语音没有陪练这一路。** `speakCue()` 只服务顶部条/中间提示；陪练气泡是纯文字的（`VOICE_FEATURE=false`，语音整体停用）。
 
 **§8.2 记忆层一行没动。** 设计 §4.2 的 journal 扩展（`importance` / `poignancy` / `refs` / `lastAccess` / `supersededBy`，以及 `utterance` / `preference` / `milestone` 三类条目）、§4.3 的三因子检索打分（`0.5·recency + 0.3·importance + 0.2·relevance`，权重未标定）、§4.4 的 Reflection 合成（可否定 claim + `supersededBy`）**全部未实现**。本轮只把 `memory.events` 的字段加厚——它是对局摘要，不是玩家的经历条目，不改变这一差距。
 
 **§8.3 「多日未登录后由陪练先开口」未实现。** 只实现了玩家先开口时把「上一次记录是 N 天前」作为一条观察；主动开场需要 §8.1 的调用点。
 
-**§8.4 倾诉原文默认不进模型上下文：未实现。** 设计 §6 R3 的第 3 条缓解要求「倾诉原文默认不进入送给模型的上下文」。当前 `client.js` 会把最近 8 条对话（含玩家原话）放进请求，这一条**没有对应机制**，仍标【仅设计未实现】。
+**§8.4 倾诉原文默认不进模型上下文：未实现。** 设计 §6 R3 的第 3 条缓解要求「倾诉原文默认不进入送给模型的上下文」。当前 `src/coach/client.js` 会把最近 8 条对话（含玩家原话）放进请求，这一条**没有对应机制**，仍标【仅设计未实现】。
 
-**§8.5 没有服务端档位提示词。** `server.js` 的 system prompt 未改（不允许改），档位约束只能通过证据包字段与客户端事后扫描生效。
+**§8.5 没有服务端档位提示词。** `src/server/index.js` 的 system prompt 未改（不允许改），档位约束只能通过证据包字段与客户端事后扫描生效。
 
 **§8.6 没有真人语言评审，也没有密度验证。** 克制扫描能拦住「说了不该说的」，拦不住「说得太频繁」。这是 R1 风险的核心，只能靠真人试玩；U07 与 T05 **都仍未勾**，本轮没有做任何真人测试，也没有据此调整任何文案。
 
 **§8.7 `engagement` 的时间窗口未实现**（见 §2 收窄 1），需要先给 `memory.dialogue` 加时间戳。
 
-**§8.8 模型引用更早一局的数字时会被打回。** `assembleContext` 会带最近 3 条 `memory.events` 进上下文（`coach/runtime.js:195`），而陪练的 `evidence` 只详细描述最近一局。因此模型若引用倒数第二局的回合数，`checkGroundedAnswer` 的 `unsupported-number` 会判它不合格并回退到本机模板。**这是保守方向的失败**（玩家看到的是可核对的模板句，不是错数字），但会让模型改写在这类追问上更常被回退。修法是把陪练用到的 `events` 也写进 `evidence`，属于下一步的事，本轮没做。
+**§8.8 模型引用更早一局的数字时会被打回。** `assembleContext` 会带最近 3 条 `memory.events` 进上下文（`src/coach/runtime.js:195`），而陪练的 `evidence` 只详细描述最近一局。因此模型若引用倒数第二局的回合数，`checkGroundedAnswer` 的 `unsupported-number` 会判它不合格并回退到本机模板。**这是保守方向的失败**（玩家看到的是可核对的模板句，不是错数字），但会让模型改写在这类追问上更常被回退。修法是把陪练用到的 `events` 也写进 `evidence`，属于下一步的事，本轮没做。
 
 ---
 
@@ -205,7 +205,7 @@ npm run test:companion # 只跑陪练
 node scripts/cdp-companion-presence.js --viewport=1440x900 --port=9340   # 浏览器实测，见 §11.6
 ```
 
-`companion.test.js` 的测试与它们覆盖的要求：
+`tests/companion.test.js` 的测试与它们覆盖的要求：
 
 | 测试 | 覆盖 |
 |---|---|
@@ -227,7 +227,7 @@ node scripts/cdp-companion-presence.js --viewport=1440x900 --port=9340   # 浏�
 | ★ `one companion line at a time, and never at the same moment as the strategist bar` | `companionCueSlot` 的 show / hold / drop、排队超时、最小显示窗口 |
 | ★ `the bubble stays as long as the words need, and wears an existing pet portrait` | 时长公式（40 字 → 27 秒、10 字 → 18 秒）、位置常量、头像取自 `SPECIES` |
 
-`browser.test.js` 另加 1 条★：静态检查 `app.js` 是否真的接上了在场层（`companionSession` / `queueCompanionCue` / `flushCompanionCue` / `yieldCompanionCue` / `placeCompanionBubble` / `bubbleDurationMs` / `companionCueSlot`），以及 `strategistCue` 不再往陪练气泡里写正文、军师开口时陪练必须让位、悬停必须暂停计时、安静档必须立刻收起气泡。
+`tests/browser.test.js` 另加 1 条★：静态检查 `src/client/app.js` 是否真的接上了在场层（`companionSession` / `queueCompanionCue` / `flushCompanionCue` / `yieldCompanionCue` / `placeCompanionBubble` / `bubbleDurationMs` / `companionCueSlot`），以及 `strategistCue` 不再往陪练气泡里写正文、军师开口时陪练必须让位、悬停必须暂停计时、安静档必须立刻收起气泡。
 
 **测试数据不是手写的**：每一局都由引擎真实跑出来（随机出招必输、按枚举推荐出招会赢），测试里的期望值直接从 `game` 对象推导（`loss.player.pets.filter(p=>p.hp<=0).map(p=>p.name)`），因此「引用真实事件」这件事是被比对验证的，不是断言一句写死的文案。
 
@@ -247,11 +247,11 @@ T05 的验收口径包含**真人语言评审**（U07：具体、自然、无水
 
 | 事件 | 成立条件（可核对） | 读的是哪个字段 |
 |---|---|---|
-| `countered` | 末尾连续 ≥2 回合，对手当时在场那只是一直克制我方当时在场那只是一方 | `history[].before` 双方 active 宠物的 `type` + `engine.js` 的 `multiplier()` |
+| `countered` | 末尾连续 ≥2 回合，对手当时在场那只是一直克制我方当时在场那只是一方 | `history[].before` 双方 active 宠物的 `type` + `src/game/engine.js` 的 `multiplier()` |
 | `repeat-skill` | 末尾连续 ≥3 回合玩家用的是同一个技能 | `history[].action.id` |
 | `swing` | 我方血量占比从 ≥60% 掉到 ≤40%（或反向），且至少 4 个回合 | `history[].after` 双方全部宠物的 `hp/maxHp` |
 | `stalemate` | ≥8 回合，双方一只都没倒下 | 同上 |
-| `streak-win` / `streak-loss` | 结算时连胜 ≥2 / 连败 ≥3（跨局计数） | `memory.events` 的末尾连续结果（`coach.js` 的 `coachContext(game,profile,memory)`） |
+| `streak-win` / `streak-loss` | 结算时连胜 ≥2 / 连败 ≥3（跨局计数） | `memory.events` 的末尾连续结果（`src/coach/session.js` 的 `coachContext(game,profile,memory)`） |
 
 判定顺序就是优先级，且**一次调用最多返回一个事件**（`swing` > `countered` > `repeat-skill` > `stalemate`；`first-faint` 优先于全部局内事件；结算事件优先于一切）。同一事件本局只报一次。
 
@@ -280,7 +280,7 @@ T05 的验收口径包含**真人语言评审**（U07：具体、自然、无水
 
 ### 11.3 不同时出现：一条判定，三处执行
 
-判定只有一处——`coach/companion.js` 的 `companionCueSlot({barVisible,queuedAt,now,holdUntil})`，返回 `show` / `hold` / `drop`：
+判定只有一处——`src/coach/companion.js` 的 `companionCueSlot({barVisible,queuedAt,now,holdUntil})`，返回 `show` / `hold` / `drop`：
 
 1. **排队超时**：排队超过 `maxWaitMs`(20s) 直接丢掉（补一句过期的话不如不说）。
 2. **让位**：军师/老师正在说话（顶部条 **或** 中间那条 `#attention-cue`）→ 陪练排队，条收起来再补上。
@@ -420,8 +420,8 @@ T05 的验收口径包含**真人语言评审**（U07：具体、自然、无水
 
 ### 12.5 这一轮真正抓到的两个 bug（都是实测抓的，不是想出来的）
 
-1. **「提议得出来、但一句都发不出来」**：`soak` 的措辞里有「换人也没换掉这个局面」，撞上 `TACTICAL_OVERREACH` 的 `换(掉|上|成)`，于是每个回合都提议 `live`、每一次都被内容检查退回，一局只说了两次话，而自动测试全绿。修法有两处：把那句话改成可核对的数字（「挨的比另外两只加起来还多」），并把「能不能说」抽成 `fitReading`，触发层与发布层共用——`companion.test.js` 里那条「every reading the trigger proposes can actually be said out loud」守住它。
-2. **没说出来也算说过**：`app.js` 里有一句「有伙伴倒下就把 `first-faint` 标记成已说」，它会把因为冷却没轮上的减员观察直接烧掉。现在改成「没说出来就不算说过」，下个回合还在的话补上。
+1. **「提议得出来、但一句都发不出来」**：`soak` 的措辞里有「换人也没换掉这个局面」，撞上 `TACTICAL_OVERREACH` 的 `换(掉|上|成)`，于是每个回合都提议 `live`、每一次都被内容检查退回，一局只说了两次话，而自动测试全绿。修法有两处：把那句话改成可核对的数字（「挨的比另外两只加起来还多」），并把「能不能说」抽成 `fitReading`，触发层与发布层共用——`tests/companion.test.js` 里那条「every reading the trigger proposes can actually be said out loud」守住它。
+2. **没说出来也算说过**：`src/client/app.js` 里有一句「有伙伴倒下就把 `first-faint` 标记成已说」，它会把因为冷却没轮上的减员观察直接烧掉。现在改成「没说出来就不算说过」，下个回合还在的话补上。
 3. 顺带修掉的同类问题：soak 与减员那句重复说「伤害都落在它身上」（话题 `damage-focus`）、结算与交换比重复（话题 `damage-trade`）、老对手与习惯重复说「最先倒下的是谁」（话题 `first-fallen`）。
 
 ### 12.6 仍然不够的
@@ -444,7 +444,7 @@ T05 的验收口径包含**真人语言评审**（U07：具体、自然、无水
 - 落在**事件 / 玩家处境**上 → 合规；
 - 落在**陪练自己**身上 → 违规（「我看得有点急」把玩家变成来看 AI 着急的旁观者）。
 
-### 13.2 实现（全部在 `coach/companion.js`）
+### 13.2 实现（全部在 `src/coach/companion.js`）
 
 | 名字 | 作用 |
 |---|---|

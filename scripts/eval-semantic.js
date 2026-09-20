@@ -1,10 +1,10 @@
 import {readFileSync,writeFileSync} from 'node:fs';
-import {createSemanticRetriever} from '../coach/semantic-server.js';
-import {searchKnowledge} from '../coach/strategist.js';
+import {createSemanticRetriever} from '../src/server/semantic-server.js';
+import {searchKnowledge} from '../src/coach/strategist.js';
 const retriever=createSemanticRetriever();
 try{
  const until=Date.now()+120000;while(!retriever.ready&&Date.now()<until)await new Promise(r=>setTimeout(r,250));if(!retriever.ready)throw Error('Local embedding worker did not become ready');
- const cases=JSON.parse(readFileSync('evals/retrieval.json'));const rows=[];
+ const cases=JSON.parse(readFileSync('tests/evals/retrieval.json'));const rows=[];
  for(const c of cases)for(const strategy of ['lexical','semantic','fusion']){
   const r=strategy==='lexical'?searchKnowledge(c.q,{budget:6000}):await retriever.search(c.q,{strategy,budget:6000});const ids=r.cards.map(x=>x.id),rank=ids.findIndex(id=>c.relevant.includes(id));rows.push({...c,strategy,ids,hit:c.relevant.length?rank>=0:ids.length===0,mrr:rank<0?0:1/(rank+1),semanticStatus:r.semanticStatus});
  }

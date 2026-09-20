@@ -13,7 +13,7 @@
 // 每格 6 局、n 很小，只能说"对这一个策略、这 6 个种子而言"，不构成"更强/更弱"的断言。
 //
 // 用法：node scripts/eval-opponent-agent.js [每档局数] [并发]
-import {createGame,legalActions,resolveTurn,chooseEnemy} from '../engine.js';
+import {createGame,legalActions,resolveTurn,chooseEnemy} from '../src/game/engine.js';
 
 const BASE='http://127.0.0.1:8765/';
 const GAMES=Number(process.argv[2]||6);

@@ -1,6 +1,6 @@
 import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
-import {searchKnowledge,verifyCitations,cards} from '../coach/strategist.js';
-const cases=JSON.parse(readFileSync(new URL('../evals/retrieval.json',import.meta.url)));
+import {searchKnowledge,verifyCitations,cards} from '../src/coach/strategist.js';
+const cases=JSON.parse(readFileSync(new URL('../tests/evals/retrieval.json',import.meta.url)));
 const results={date:new Date().toISOString(),rulesVersion:'0.6',cardCount:cards.length,scope:'Hand-authored small offline retrieval benchmark; not LLM answer quality or independent external benchmark',strategies:{}};
 for(const strategy of ['none','lexical','hybrid']){
  const rows=cases.map(c=>{const ids=strategy==='none'?[]:searchKnowledge(c.q,{strategy,budget:6000}).cards.map(x=>x.id);const rank=ids.findIndex(id=>c.relevant.includes(id));return {...c,ids,hit:c.relevant.length?rank>=0:ids.length===0,mrr:rank<0?0:1/(rank+1),citationsValid:verifyCitations(ids).valid};});

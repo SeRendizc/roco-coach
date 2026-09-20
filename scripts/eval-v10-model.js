@@ -1,9 +1,9 @@
 import {writeFileSync} from 'node:fs';
-import {createGame,step,legalActions} from '../engine.js';
-import {newProfile} from '../progression.js';
-import {freshMemory} from '../coach/memory.js';
-import {buildContext,MATCH_REVIEW_REQUEST,assembleContext,checkGroundedAnswer} from '../coach/runtime.js';
-import {RESPONSE_INSTRUCTIONS} from '../coach/client.js';
+import {createGame,step,legalActions} from '../src/game/engine.js';
+import {newProfile} from '../src/game/progression.js';
+import {freshMemory} from '../src/coach/memory.js';
+import {buildContext,MATCH_REVIEW_REQUEST,assembleContext,checkGroundedAnswer} from '../src/coach/runtime.js';
+import {RESPONSE_INSTRUCTIONS} from '../src/coach/client.js';
 const origin='http://127.0.0.1:8765',boot=await fetch(origin+'/api/bootstrap'),cookie=boot.headers.get('set-cookie')?.split(';')[0],session=await boot.json();
 if(!session.configured||session.runtimeVersion!=='0.10'){console.log({configured:session.configured,runtimeVersion:session.runtimeVersion});process.exit(2);}
 const faint=createGame(2);faint.id='qa-faint';faint.player.pets[0].hp=0;faint.phase='replace';

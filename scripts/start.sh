@@ -44,7 +44,7 @@ if [ -n "$OLD" ]; then
   sleep 2
 fi
 
-DEEPSEEK_API_KEY="$KEY" nohup node server.js > tmp/server.log 2>&1 &
+DEEPSEEK_API_KEY="$KEY" nohup node src/server/index.js > tmp/server.log 2>&1 &
 sleep 3
 if curl -s -m 5 http://127.0.0.1:8765/api/bootstrap | grep -q '"configured":true'; then
   echo "已启动，密钥已加载。 http://127.0.0.1:8765/"
