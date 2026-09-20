@@ -93,6 +93,42 @@ tests/
 - **不删旧测试。** 新功能加测试，不改既有断言来让自己通过；
   如果某条断言的**前提**本身依赖随机性，就补 `t.skip` 并写明原因，而不是放宽它。
 
+## 3.5 `roco/` 内部（手游规则引擎）
+
+**Python 与 JavaScript 分域**：`roco/` 是手游规则的唯一来源，实施书明确要求
+「Node 不得再实现一套手游伤害公式」，目录边界让这条约束看得见。
+
+```
+roco/
+├── pyproject.toml          纯标准库，零依赖（可移植性是刻意维持的）
+├── src/roco_env/
+│   ├── data.py             规则集加载（唯一 I/O）+ 种族值→面板值换算
+│   ├── schema.py           数据结构、序列化、observation_for（隐藏信息边界）
+│   ├── effects.py          效果原语与伤害模型（未核验的标 unverified）
+│   ├── parse.py            技能描述 → 结构化效果
+│   ├── traits.py           A 组 6 只特性（FULL/PARTIAL/REFUSED）
+│   ├── team.py             阵容评分规则 baseline
+│   ├── env.py              reset/observe/legal_actions/step_joint/replay
+│   └── service.py          本地 HTTP 服务（Node 桥调用）
+├── tests/test_microcases.py
+├── tools/mine_effects.py   效果原语挖掘
+└── effect-inventory.json   挖掘产物
+```
+
+对应关系：`src/coach/roco-client.js` 是 **JS 侧唯一**允许触达规则引擎的适配器。
+
+跑法：
+
+```sh
+npm run test:env         # 引擎机制测试
+npm run test:bridge      # Node↔Python 契约测试
+```
+
+**改动规则**：新增机制时，先在 `parse.py`/`effects.py` 里能解析出来，
+再在 `env.py` 里应用；解析不出来就让它 fail closed，**不要**加默认值。
+伤害公式是一个具名可替换的假设（`COMMUNITY_HYPOTHESIS_V1`），
+拿到官方数据时只换那一处。
+
 ## 4. 其余目录
 
 | 目录 | 内容 | 是否入库 |

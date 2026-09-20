@@ -14,11 +14,14 @@
 
 模块划分：
 
-    data.py     规则集加载与只读访问（唯一 I/O 边界）
-    schema.py   数据结构与序列化
-    effects.py  效果原语；未实现的一律 UnsupportedEffect
+    data.py     规则集加载与只读访问（唯一 I/O 边界）+ 种族值→面板值换算
+    schema.py   数据结构、序列化、以及隐藏信息的唯一边界 observation_for
+    effects.py  效果原语与伤害模型；未实现的一律 UnsupportedEffect
+    parse.py    技能描述 → 结构化效果（读不出来就说读不出来）
+    traits.py   A 组 6 只特性，每条带 FULL / PARTIAL / REFUSED 状态
+    team.py     阵容评分的规则 baseline（分项证据，不给胜率）
     env.py      reset / observe / legal_actions / step_joint / serialize / replay
-    ruleset.py  规则版本、覆盖状态、支持等级
+    service.py  本地 HTTP 服务（供 Node 桥调用）
 
 证据等级：每个非平凡决策都在代码里注明它依据的是
 `Terms.lua` 的哪一条（``依据：术语 1016``）还是**假设**（``假设``）。
@@ -27,4 +30,4 @@
 
 __version__ = "0.1.0"
 
-__all__ = ["data", "schema", "effects", "env", "ruleset"]
+__all__ = ["data", "schema", "effects", "env", "parse", "traits", "team"]
