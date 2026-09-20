@@ -195,8 +195,30 @@ class TestReportGeneratorsAreIdempotent(unittest.TestCase):
         for script in self.GENERATORS:
             subprocess.run([sys.executable, os.path.join(_ROOT, script)],
                            cwd=_ROOT, env=env, capture_output=True, timeout=180)
+        # 记下产物的**内容摘要**，而不是只看 git status ——
+        # 只看 git status 有个盲区：如果第一次运行就把文件弄脏了，
+        # 基线里已经带着那个脏状态，第二次再变也看不出来。
+        # （真踩过：顶层漏了一个 dirty_files 字段，测试没红。）
+        import hashlib
+        produced = [
+            os.path.join(_ROOT, "reports", "roco", "microcases", "harness.json"),
+            os.path.join(_ROOT, "reports", "roco", "microcases", "harness.md"),
+            os.path.join(_ROOT, "docs", "roco", "MICROCASE-HARNESS.md"),
+            os.path.join(_ROOT, "reports", "roco", "dashboard.json"),
+            os.path.join(_ROOT, "docs", "roco", "PROGRESS.md"),
+        ]
+
+        def digests():
+            out = {}
+            for path in produced:
+                if os.path.exists(path):
+                    with open(path, "rb") as fh:
+                        out[path] = hashlib.sha256(fh.read()).hexdigest()
+            return out
+
         baseline = set(dirty())
-        # 再跑一遍：产物内容不该变
+        before = digests()
+        # 再跑一遍：产物内容必须**逐字节**一致
         for script in self.GENERATORS:
             subprocess.run([sys.executable, os.path.join(_ROOT, script)],
                            cwd=_ROOT, env=env, capture_output=True, timeout=180)
@@ -204,3 +226,6 @@ class TestReportGeneratorsAreIdempotent(unittest.TestCase):
         new = sorted(after - baseline)
         self.assertEqual(new, [],
                          f"第二次运行改了这些文件（说明产物里有易变字段）：{new}")
+        changed = sorted(k for k in before if before[k] != digests().get(k))
+        self.assertEqual(changed, [],
+                         f"第二次运行改了产物内容（说明里面有易变字段）：{changed}")
