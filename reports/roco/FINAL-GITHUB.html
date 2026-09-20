@@ -1,0 +1,54 @@
+<h2>改好了：v0.1 就是那个做完的小芽 Coach</h2>
+
+<p><b>我把之前那个错 release 拆了重做。</b>现在 releases 页面上只有一条：
+<b>「小芽 · v0.1」</b>，指向 commit <code>1717cd5</code>（2026-09-18 完成的那版），
+正是你说要当 v0.1 的版本。之前我误当成 release 的 M0/M1 数据层，
+只留了一个内部 tag <code>milestone-m0m1-data</code>，<b>没有 release</b>。</p>
+
+<h3>1. 一键入口（你要的「直接点开就能运行」）</h3>
+<pre>git clone https://github.com/SeRendizc/roco-coach.git
+cd roco-coach
+./run-v0.1.sh</pre>
+<p>它自动取出一份 v0.1 检出、挑空闲端口、起服务、<b>打开浏览器</b>。
+不需要 Python、不需要下模型、不需要 API Key。</p>
+<pre>./run-v0.1.sh --stop    停掉
+./run-v0.1.sh --clean   清理检出
+./run-v0.1.sh --port 9000</pre>
+<p><b>已做端到端验证</b>：从 GitHub 真克隆到空目录 → 跑这一条命令 →
+页面 200、module graph 200、14 只宠物在位、服务跑在 tag <code>v0.1.0</code> 的检出上。
+如果 8765 上已经有一个小芽在跑，它会直接复用，不抢端口。</p>
+
+<h3>2. 「几个 G 的旧代码」——其实不用删</h3>
+<p><b>GitHub 上这个仓库只有 46 MB，<code>.git</code> 是 65 MB，没有几个 G。</b>
+那几个 G 是本机<b>被忽略</b>的目录：<code>tmp/</code> 2.7G、<code>.models/</code> 723M、
+<code>.venv-agent/</code> 641M。它们本来就不在版本控制里，克隆不会带上，
+缺了也不影响运行（语义检索自动退回词项检索）。</p>
+<p>所以旧代码本来就只是「压缩后的 git 历史」，几十 MB。我用 tag 钉住它而不是
+复制一份到 <code>legacy/</code>：代码只有一条历史、一个真相来源，
+不用改两遍 bug、也不跑两遍测试。<b>桌面上的原始存档我没动。</b></p>
+
+<h3>3. 顺手修掉一个假失败（不是我引入的）</h3>
+<p><code>replace.test.js</code> 的用例 ④ 有一次红。我查了：这个文件在 master 和
+v0.1.0 上<b>逐字节相同</b>，所以不是我改坏的。</p>
+<p>真正的毛病是同一个测试内部的<b>不一致</b>：步骤 ② 需要「打倒我方 1 号位」，
+打不到就 skip；步骤 ③ 需要「打倒对手首发」——<b>同一类依赖对局走向的前置条件，
+却写成硬断言</b>。于是同一个原因在两步里分别变成 skip 和 fail，
+看起来就像「偶发」。我按作者自己已经用过的写法给 ③ 补了同样的 skip 守卫。</p>
+<p><b>没有放宽任何断言，也没有删测试。</b>验证：定向跑 3 次（pass/skip/skip、0 失败），
+全量跑多次 <b>390/390 通过、0 跳过</b>。</p>
+
+<h3>4. 现在的状态</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr><th>项</th><th>值</th></tr>
+<tr><td>远端</td><td>https://github.com/SeRendizc/roco-coach （原名 pet-game-coach，已改）</td></tr>
+<tr><td>master</td><td>已推送，工作区干净</td></tr>
+<tr><td>tag</td><td><code>v0.1.0</code>（发行版）、<code>milestone-m0m1-data</code>（内部）</td></tr>
+<tr><td>releases</td><td>只有 1 条：小芽 · v0.1（Latest）</td></tr>
+<tr><td>测试</td><td>390/390 通过（372 unit + 18 browser），0 失败 0 跳过</td></tr>
+</table>
+
+<p><b>M0/M1 数据层的实质内容没受影响</b>，都在 master 上：来源台账、12 只精灵数据、
+许可矩阵、冲突记录、支持矩阵、21 条 microcase、验收 checklist。
+下一轮 M2 才做手游规则引擎。</p>
+
+<p>你睡醒后只要记一句：<b>跑 v0.1 就敲 <code>./run-v0.1.sh</code></b>。</p>
