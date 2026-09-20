@@ -1,0 +1,3022 @@
+{
+  "generated_at": "2026-09-20T16:21:44.890Z",
+  "root": "data/roco/raw/extracted",
+  "file_count": 603,
+  "files": [
+    {
+      "path": ".claude/settings.local.json",
+      "bytes": 586,
+      "sha256": "6539e2ab9fc1c577ffabdac5490d8ae10e2760f1de5e79569336c8693656e755"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 899,
+      "sha256": "1cc76d95d199b7a4dbd95bce6fb9c9432fc1c7ef8f4f4f4a94565c0a31465b6f"
+    },
+    {
+      "path": "NRC_AI/data/nrc.db",
+      "bytes": 1245184,
+      "sha256": "bbeb189b240dada541922acbf45afa97daf30d99fd09e69f93e4eea1f6934416"
+    },
+    {
+      "path": "NRC_AI/data/pokemon_stats_verification_template.csv",
+      "bytes": 3432,
+      "sha256": "6bcdbe99428b225d55b4c820b6b30b4a2cbb08466279cb7b589db3be717063d9"
+    },
+    {
+      "path": "NRC_AI/data/pokemon_stats.xlsx",
+      "bytes": 63856,
+      "sha256": "44789ba43abfdfeb440f96733c0c47eb9a31ac74a5e33ce87c1cd81e270da519"
+    },
+    {
+      "path": "NRC_AI/data/raw/skills_wiki.csv",
+      "bytes": 216514,
+      "sha256": "5699669e4cd0933c656fd69795b1aff1d86367fd2ef7bc1a2075772cdcab9769"
+    },
+    {
+      "path": "NRC_AI/data/skills_all.csv",
+      "bytes": 44435,
+      "sha256": "e25bdaedcc0d96bd4e5ebfaf60de0302a14f0c53304e0590cfe8308c3af15855"
+    },
+    {
+      "path": "NRC_AI/data/skills.xlsx",
+      "bytes": 35828,
+      "sha256": "005decad95d8f78806a56cdaa2580a63873c3239dd46a6580c85f9032d88a715"
+    },
+    {
+      "path": "NRC_AI/data/spirit_evolution.csv",
+      "bytes": 75810,
+      "sha256": "b7d37eea3e81340dd1e281e0e6d02dcffd832c562394fd554d265746f4f11b8f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO001_迪莫.png",
+      "bytes": 279686,
+      "sha256": "7ae35ae4b8e35ed4e2d67fdf9bd73c36c216e2ad38d34dd91f0de24436ad8607"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO002_喵喵.png",
+      "bytes": 344275,
+      "sha256": "b26554b64a1dc8180f8afe47e8b3e861d8b07598b73bf987ee72cc1b523651dc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO003_喵呜.png",
+      "bytes": 435888,
+      "sha256": "a8fca210491c96271908094d6f2cfab15bdb1668b8f6ff4320a16d79fa6b196e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO004_叶冕魔力猫.png",
+      "bytes": 364564,
+      "sha256": "2c6fce5a33473d86d320c6ef3c13e53d9dad7b3822df0fdceb87199b319c3fbd"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO004_魔力猫.png",
+      "bytes": 384213,
+      "sha256": "6a9aca142617dc7c0d93b4af403052816566dbd5f6bf94a84ff4db3ffa1cc87f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO005_火花.png",
+      "bytes": 450128,
+      "sha256": "7a4a57c0e5b25436eca1ddd4a53aae14a76a0bb3baa0ec6440fbcb6ed7545dc9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO006_焰火.png",
+      "bytes": 460374,
+      "sha256": "61027769fd145c650e639f8844b093e32ad57e1df916713c7728b5545c021aaf"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO007_火神.png",
+      "bytes": 837807,
+      "sha256": "44791e0e5dff4a42a2b1a70b34de8f80c7bc1fc993c18ed35de869589ffc2efa"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO007_烈火战神.png",
+      "bytes": 876197,
+      "sha256": "61f24b7a87e7a527643938b7c9c8d21cab1fa7e67d8f51e4047fac3ca2ebff60"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO008_水蓝蓝.png",
+      "bytes": 328075,
+      "sha256": "a601368a60336c48ad3efb7e99ff1f04beb4566e927419952e8a2fa8028df937"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO009_波波拉.png",
+      "bytes": 419850,
+      "sha256": "117a1d8beffefe3e1a664cf5910ecf5489e560aa3547e119ce07733a09d29b2a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO010_水灵.png",
+      "bytes": 538568,
+      "sha256": "bbe2fa26ec79b5807aa1c180f6fe74a00ede9e7ed980a0bbc686d1fb54a07119"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO010_圣水守护.png",
+      "bytes": 889560,
+      "sha256": "36b26aebd8f5bfc267fc0e1567af631c73231ba439d9e1f9f82b10786b5dd8a0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO011_鸭吉吉.png",
+      "bytes": 304143,
+      "sha256": "5a65a68e1e9aa6ebe453ebea1d59dcec8cf409dca5f00b8ea0c51066a8dafdbe"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO011_鸭吉吉国王.png",
+      "bytes": 392286,
+      "sha256": "3c09b04430c2acd01f8d76758b1bf9777a9878ac874739aa1008caa0cee8bf12"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO012_板板壳.png",
+      "bytes": 421995,
+      "sha256": "14fdcecffa25b2d6d2edd2b813beeb4c94c37ca532c4c1e7df2bf9cbaec6b7cc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO013_咔咔壳.png",
+      "bytes": 395957,
+      "sha256": "c621f09f62cea04a61c45857772ae17f51d7028eb709503a45bfe41775f38478"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO014_水泡壳.png",
+      "bytes": 406095,
+      "sha256": "8e8f629c58bb04a5b72dedeaec2dd7ed187cd5730bc51699d9c9d32df57d56f4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO015_锥尾羊.png",
+      "bytes": 374164,
+      "sha256": "2ecc20c3a844523a919ddfe2319d8ddc9d3e42a8fb05f66f5364d1674600a531"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO016_铃兰羊.png",
+      "bytes": 390852,
+      "sha256": "2706d9a05905c083c1ce8af36ec8cbd0e3c7b3c7fdd4c211b2864c59ebb9f064"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO017_花影羚羊.png",
+      "bytes": 344966,
+      "sha256": "58676c68d60263fb63cd3c1c8eee4d1d9e704401bf05eb6e40fe4ab42d596683"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO018_雪绒鸟.png",
+      "bytes": 411393,
+      "sha256": "093f7a2f064832bfffe25abcac5d04a57eee166b1bc7c6314e9e364985ca14dd"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO019_冬羽雀.png",
+      "bytes": 289267,
+      "sha256": "597dc7cf2e84f63389c6bc00602bd76496867215c880e580e327f2214d8355a2"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO020_岚鸟.png",
+      "bytes": 357477,
+      "sha256": "6488b7e63def646f849d50c1b036e831929c5f0f6348dc4dd5b3d7d497a2b7b5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO020_霜翼领主.png",
+      "bytes": 492617,
+      "sha256": "150bb0528db8c5ac0f61270d3b353f6cf0f552fa41a89cdf2dd445df74581ad4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO021_小灵菇.png",
+      "bytes": 495147,
+      "sha256": "1e1b6cff0cc458f56eaf1b2872c45e5a303f572f084b959906763eebe5867d9d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO022_幻灵菇.png",
+      "bytes": 248120,
+      "sha256": "ac72694ebe8e28e7b4f9a7c7555da903d4b42bf7a980ae5f7b5ffd1026f1529a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO023_幻影灵菇.png",
+      "bytes": 409697,
+      "sha256": "4dc46c483ec21357a8638fc7e740eea2b4ee98958ec99ce0a419f690cf2f5678"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO024_石肤蜥.png",
+      "bytes": 703365,
+      "sha256": "fa374c0a021f0da8a34c56df5f0bfabdc3047301b954938b7f00a14b105d62ee"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO025_石刺蜥.png",
+      "bytes": 645570,
+      "sha256": "d5a8ceee574e092322bec0940253cc4587e588f4a28bde16b77c91eece79b1ba"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO026_石冠王蜥.png",
+      "bytes": 645789,
+      "sha256": "57a60e9647efc709fd933eed69f297abc8bdebfca53d2f3fc0f1f2125865ac2d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO027_布是石.png",
+      "bytes": 323649,
+      "sha256": "cc63ac8d5cba45fb578cdd33d1a1743679d7ccceaa52bfcbf5ab6b67ba48089f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO028_布是岩.png",
+      "bytes": 368838,
+      "sha256": "df04a28195116da2188c6a0a7008207da8941f80f1e415fcd640a1744a1d8faf"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO029_布克棱岩.png",
+      "bytes": 521553,
+      "sha256": "06c735df198f93350079196eb8382167a360c7d45251cc5ef58dd94faeed1133"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO029_迷嶂布莱克.png",
+      "bytes": 607391,
+      "sha256": "564be5b559af50b89eddcfce723c6d6e15da76e19d7a44bb3dce7daa1e6b144a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO030_恶魔叮.png",
+      "bytes": 408909,
+      "sha256": "0223d287d340fdeb9e1b22786bd6451ff9be45ddec1980bfbb40cf022edbc1e7"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO031_叮叮恶魔.png",
+      "bytes": 303627,
+      "sha256": "6bc8e28d623bfb4ded361170e3b87e47ff1444bc65ace1606ea108ff9238a2b4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO032_毛毛.png",
+      "bytes": 314404,
+      "sha256": "e5ee5b21231c22046f42bd09fbd67f9a528b8247b7474548850add2f9f4095c0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO033_爬爬.png",
+      "bytes": 404263,
+      "sha256": "791eaffd29e650fff3d2e2c656d69ee85a18d6afae670a0e33e6ca7e552210e3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO034_化蝶.png",
+      "bytes": 376981,
+      "sha256": "0817c99c4d3e368f7a1a844890f66d81ebc0eb7af04ffa02eb587a6c1a028eee"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO035_幻影荆棘.png",
+      "bytes": 597155,
+      "sha256": "7178b5aca4678a7024c85fb5bb0057379416b71f17ce217d48d8b107df87f022"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO035_幽影树.png",
+      "bytes": 472371,
+      "sha256": "a2a5721cae422451717d69487be0ae4cd3fce465f3e3d1ea372ba097a27a88f6"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO036_小鼠獭.png",
+      "bytes": 329392,
+      "sha256": "bfcd2838fa6e7597e140b1848874aeaac7ca4bcf414dc1ac8b45b2de556b9e0f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO037_燕尾獭.png",
+      "bytes": 398480,
+      "sha256": "f97e46209af89bbab89321c9f4839abdade19814fc3db0bbb5104fa601dd0383"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO038_卷胡巨獭.png",
+      "bytes": 407298,
+      "sha256": "33a8d490343a7e208b0cea2448cd913c6ba9df4f9611efb518ddad6b44e93424"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO039_矿晶虫.png",
+      "bytes": 354485,
+      "sha256": "e6dbad9064e206759e785cfb0604e1a260ee5844a1adf9482a42127bcca1f49a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO040_钻石蜗.png",
+      "bytes": 888604,
+      "sha256": "6bcbadf4a7976a7a0761ad9d6197f7b7ab9aa9b4e5be15791660082a67ee714b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO040_晶石蜗.png",
+      "bytes": 579936,
+      "sha256": "a3d088d0e213ccd86a39b48771a3c4562915149ebd26a14ed30610ec6a904ee9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO041_奇丽草.png",
+      "bytes": 275530,
+      "sha256": "65514f76e577ce77de4f7f9c4cc2decbaeac4678c98f9b04c7e177bd81ccbba5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO042_奇丽叶.png",
+      "bytes": 353273,
+      "sha256": "853d61832ccb2ea7bd77c2fbd051ca38cf81d1c052458fb97cbc78163d2e237f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO043_奇丽果.png",
+      "bytes": 633824,
+      "sha256": "b944f046cf430c94ffab729d74b385239387c4994c309009ded9e34a60ce5b4b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO043_奇丽花.png",
+      "bytes": 383120,
+      "sha256": "c821738b9e663d69e8129aa33b149af70d7506ca21f33b08c589dcc5548fc1a1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO044_丢丢.png",
+      "bytes": 363200,
+      "sha256": "88cfcb91bcca44517b32959cbcee85987aeaa0a150e39ba5ac6a77bc7b28c219"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO045_卡卡虫.png",
+      "bytes": 392034,
+      "sha256": "7cb5a459ef18b1b45f1ff940e395646042828d759d64b2623654ee745ed21578"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO046_卡瓦重.png",
+      "bytes": 376347,
+      "sha256": "6e57bcb9ae8b8c6030e608d07f4af93bb15cfbdc4fc3ddd6b46475e976d80c27"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO047_护主犬.png",
+      "bytes": 362678,
+      "sha256": "4200f89d60cbfa3e4d8389b946972a0fbcf19f65aefcd56f462006fe66ce91ac"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO048_风暴战犬.png",
+      "bytes": 633051,
+      "sha256": "e602f5c555f06a6738d904b6dd7bf8cd03ce0c37ba2899d0f3bc1724968abcfc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO048_音速犬.png",
+      "bytes": 438969,
+      "sha256": "6206dad8e069cb638971d76eac80e68ad1a99ed694aa486ce4cb6a1b7101ef73"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO049_绿耳松鼠.png",
+      "bytes": 385321,
+      "sha256": "3bb5959d6e3b4a6aaa87375f64ac5d957d08b724f0364722f3ad83b648d6f457"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO050_抱枕松鼠.png",
+      "bytes": 371462,
+      "sha256": "6fa36e34b203c1047d05737a257d1a6f0e73f43252c9bc4389a1e17a44946047"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO051_蹦床松鼠.png",
+      "bytes": 344643,
+      "sha256": "a6eb707bd3ed8a8c0793558302b39e7a716d299f30e7d7036abfbdf0eb4c0a93"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO052_嘟嘟煲.png",
+      "bytes": 386018,
+      "sha256": "2c27075a94ae46386480f64a8b88abaea7c796ad8cbe16722ac999e57258fdcf"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO053_嘟嘟锅.png",
+      "bytes": 448593,
+      "sha256": "2c2c3d1e79737c9e407bf7dded50446af563712a53f5bdac8722cdafeb4d65dc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO054_小灵面.png",
+      "bytes": 382379,
+      "sha256": "b033c768ac00ea84c055c998aa2ec43db303243a11eab2f5431e50f9a8e072fc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO055_暗影灵面.png",
+      "bytes": 277256,
+      "sha256": "c3066f27ce6708658ace2f66cce3b64e30260ce2c830b03ce1bcddff403d1e7f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO056_幽冥眼.png",
+      "bytes": 438138,
+      "sha256": "e957e437947971f52b4e0f0518703448f773eae0848fd09673835a2f5a40ee69"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO057_梦游.png",
+      "bytes": 317684,
+      "sha256": "728302fb50f6b1f9635d152d9e5c80f2986c289e66c51391f6cdee7b6f5fc1db"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO058_梦悠悠.png",
+      "bytes": 374270,
+      "sha256": "fc03182e561c08966121ff6683152c7b799861cb69e21498bdca30246f28bed8"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO059_兽花蕾.png",
+      "bytes": 549972,
+      "sha256": "8ba6d46be0ba71ae963f0c60e56ed0e4e8682779f4ea00f4467ac741bb18e7fc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO060_伏地兽.png",
+      "bytes": 315479,
+      "sha256": "d48ce10a80cffa367f3477a536662edf3c80ef2141eaeb9691277b8a8f6207eb"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO061_贪食鼹.png",
+      "bytes": 372730,
+      "sha256": "edb2c6f12b429e74ce2ea314a45780833f3afa926d022eafc698567effb60511"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO062_巨噬针鼹.png",
+      "bytes": 542319,
+      "sha256": "0cbd8820e07b1e873dd2a9c2f1834777a70390b2e56303b3f8429ad7875c4293"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO063_蹦蹦种子.png",
+      "bytes": 251488,
+      "sha256": "6b13fe12c4d186b243526596c5c5ba8b797553b428c7357df38beaab7dd01888"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO064_蹦蹦草.png",
+      "bytes": 387567,
+      "sha256": "382d35769d7a271f16f277f3a136e55237263e2028b62871dacd5c8df0d859f0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO065_蹦蹦果.png",
+      "bytes": 543977,
+      "sha256": "2b4f4dfcdbed63bb7d5bc4febc95a28cfa4bb0dfae0a383a48ca42a64577d331"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO065_蹦蹦花.png",
+      "bytes": 446274,
+      "sha256": "93bd96030a0377d92b13b2c57a717c9e9be82a8012fe3a1773a1598d0e171376"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO066_电咩咩.png",
+      "bytes": 422432,
+      "sha256": "c8b68e964b877cff3a553f18539df092659a44f4f67f6b76b6570c91660a3753"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO067_粉咩咩.png",
+      "bytes": 363999,
+      "sha256": "f00fbd1f03756a3a58570ccfb7ef9bf7815dc87c57f6161377e80c5f7e4b6d48"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO068_电球咩咩.png",
+      "bytes": 431334,
+      "sha256": "80313e85107eb3f58a8928ef717f6832a35172411be039bb7271c3c7822f7c24"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO069_蒲公英.png",
+      "bytes": 436379,
+      "sha256": "acd4112da26cf1d5b4af9a5a5c9663f7af494596801468947e8768ce698cb715"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO070_蒲公英娃娃.png",
+      "bytes": 498946,
+      "sha256": "3e2325ad597374ae8e53b2d80022a20acfaac529d58feceeb0b2a7d26f0e0c39"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO071_伊贝儿.png",
+      "bytes": 372971,
+      "sha256": "31017cb2e4cc14ceaeb32c81acad306ed17665678226ff890f15fb833d2f1c9b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO072_伊贝粉粉.png",
+      "bytes": 274016,
+      "sha256": "7b4c6cb68a7505eef5a519b7b7a94a61e37fdf288f720beb1c3209944f6585a5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO073_白发懒人.png",
+      "bytes": 483713,
+      "sha256": "fd5aebab00d13c17439c57ddf634e7e8e2b3d3f66f179896edc75e5a200cbf7d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO074_动力猿.png",
+      "bytes": 547521,
+      "sha256": "921c603b19008681d35d8bbe76ddc42891a0984533b2fb9b3306f9bbbfbc186f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO075_瞌睡王.png",
+      "bytes": 491754,
+      "sha256": "6b758069b9fdd6f6ae2d7b93d02b17190a7d03f252c717208f0374790da9f8ae"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO076_海盔虫.png",
+      "bytes": 455625,
+      "sha256": "ae8cdf888329b732800dfda437ff203a43e3038c4a638afce67d48da08f9481f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO077_刺盔虫.png",
+      "bytes": 469976,
+      "sha256": "b2d624517a89f0594ecd735c200a43e336f59aa35429c122aa10b4b552091932"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO078_千棘海针.png",
+      "bytes": 681508,
+      "sha256": "a00dd03ddc0b0d2b303058e2323a1627adcdebf6a94ad14915f8219cf42be511"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO078_千棘盔.png",
+      "bytes": 464166,
+      "sha256": "347acdbf765b4a40f8a37beb2bf706dc287aa417fa6fb3ac99e15ccbed9406a3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO079_菊花梨.png",
+      "bytes": 436658,
+      "sha256": "18d45447fc809bcaaff32854d9eedabf898ace412294abf8c034183216f3ab79"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO080_小星光.png",
+      "bytes": 316172,
+      "sha256": "3c569640c8826ad27f41528d88cc6774668dd34e4e47b9fb5e953c76912204ce"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO081_星光狮.png",
+      "bytes": 357652,
+      "sha256": "fe1bb491e46d9f700262a6c00c7d23586c6a33f1f3e3c3b56f3450dfaa5c59be"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO082_一窝蜂.png",
+      "bytes": 398283,
+      "sha256": "01a2c2735f83d6e606d6aefce9b393c474a2b07afb52b63ef81ae2c0863efefd"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO083_黄蜂后.png",
+      "bytes": 431000,
+      "sha256": "23ff1902749819c629a1e230355459176b697516a19aab7b1a687c074622a2a7"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO084_女王蜂.png",
+      "bytes": 415279,
+      "sha256": "bf22b263c8dbbd3e983a22cc512297d389bb798ac41af803ac2b2a75c48b315b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO084_花魁蜂后.png",
+      "bytes": 408459,
+      "sha256": "ad24824df06952f54fc1d9cf2249c824a4ef44dbf446f3a23d9f9bac8a06c774"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO085_小夜.png",
+      "bytes": 368624,
+      "sha256": "5bce5bd766399103f56884cadf4c2a38bea148001b74012522069fb346e36b19"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO086_紫夜.png",
+      "bytes": 382739,
+      "sha256": "2f545190ec5f7a13c16571fb880b76822e081730cf1462df405efcff2fbd1907"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO087_朔夜伊芙.png",
+      "bytes": 444715,
+      "sha256": "c4b3b73c702f90084cea25923fae97c09f86bc419ba5297518dd7f9c09a50e26"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO088_乖乖鹄.png",
+      "bytes": 369347,
+      "sha256": "e82d57fe56e4ebcbcd31a75429890677cd93a3839b8ba29387b554bbb143bd33"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO089_蓝珠天鹅.png",
+      "bytes": 344529,
+      "sha256": "294015eb0e25dfaaa72bc651aa2c5c9b11f9ee593178fe502fb70d6da8b231cb"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO090_翠顶夫人.png",
+      "bytes": 594170,
+      "sha256": "527bd324e00cd180d004e207da1dd47de76605ff79ae3b8ee1147a19d25838c9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO091_黑羽夫人.png",
+      "bytes": 737318,
+      "sha256": "84f1e5ac86ba9d9dfd530ef94957b774910a3931a851b14c99b78a4b8d42a3b0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO092_锤头鹳.png",
+      "bytes": 342978,
+      "sha256": "2bf2f28699193c97f009eaa76c6f935eb92417af7e57d16dd609dbdfd852fcdc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO093_绿草精灵.png",
+      "bytes": 401650,
+      "sha256": "55b56788e766ffe11389c243a3e3380d9d14b392b42af501be7d412ce9851f72"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO094_魔草巫灵.png",
+      "bytes": 408865,
+      "sha256": "d753cc5802ba271f5907c30ed6a8f2c4bf6d352dcc0c8d9ffbd3f5226b0d0804"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO095_记忆石.png",
+      "bytes": 377345,
+      "sha256": "7b0b7a1f03e6e5dc9a9603d344d317b347f621aa8076974ef67f6d3d7da5120e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO096_咔咔羽毛.png",
+      "bytes": 440988,
+      "sha256": "94b6b2046a2e19aec26ac243962587a8f4647513a348a19c330554856deea544"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO097_咔咔雀.png",
+      "bytes": 443432,
+      "sha256": "03a896576aba3f01f3d9f36cbc0e9294389b63aaf35d890d6c716724cca67f96"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO098_咔咔鸟.png",
+      "bytes": 430711,
+      "sha256": "3e517dc80e1a7c1a43e61c2448857c94d9bc911a97affe4fd7db665d3705a950"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO099_小草虫.png",
+      "bytes": 303563,
+      "sha256": "818781348e4a0091fa4c940185ccd547d87886efab8dd8831b6d055bb0e01f2e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO100_草衣虫.png",
+      "bytes": 411638,
+      "sha256": "0ecf152f34f0823bfcf9936851c533eb9108895e0eef19dcfeeb66db7cf0dc8f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO101_花衣蝶.png",
+      "bytes": 325682,
+      "sha256": "3140b8264d83924af41853708555bd41d4814f8a73a260d41dd6298042a37177"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO102_绿翼鸟.png",
+      "bytes": 355401,
+      "sha256": "6769b336b9f681ba20e8452e2ba4e1b7778863b8c54e98e8e46a39044a61b7f4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO103_魔翼鸟.png",
+      "bytes": 371341,
+      "sha256": "187b11ba72b1f515c942205e9b92d85ff0aa04f2c016861fc35e3bf6f40166bd"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO104_魔眷鸟.png",
+      "bytes": 378280,
+      "sha256": "5fe740e347dd3639e35e6167888c5162fc64096909b9334e3f404c71c8e9e8cc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO105_阿米亚特.png",
+      "bytes": 398499,
+      "sha256": "3456ab76ed05a110e15727ad003f06ccbe25ca2ea6424b633316c306ae1a9dc6"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO106_阿米樱.png",
+      "bytes": 431041,
+      "sha256": "787410532b495a013f3084769c71a2a3f0b4ed6a8255ff715885425077357c7e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO107_罗隐.png",
+      "bytes": 822197,
+      "sha256": "0626f484de80f5164142c4ac987743f4de9c21c0de3e60b0dd4d7bc49d81698b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO108_风铃鲨.png",
+      "bytes": 410566,
+      "sha256": "0a6f7de180174f2a15e0721c6583a82aa3164770e60a3a19dec766c77b1253ef"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO109_蓝蝶鲨.png",
+      "bytes": 344489,
+      "sha256": "5f558d95effef678a3555627ec3fc90e13af5e83877fcf46f9d2905265ba9198"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO110_神谕鲨.png",
+      "bytes": 434568,
+      "sha256": "8b32335d82d1a96b3aac5d9c8c740d93992389b96fc838d2735c8eaf49b887d9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO110_彩蝶鲨.png",
+      "bytes": 394131,
+      "sha256": "fbb7351502560c8cecd0ce92a2e4a50f9dcd13b0560e6eaeb3028ea2796d043d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO111_石石.png",
+      "bytes": 482712,
+      "sha256": "4a33b0b3bc94e4e14385818e201e970ff4514ee77ad12c26ae6b5494807b5e32"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO112_巨灵石.png",
+      "bytes": 667581,
+      "sha256": "767c1f8e759364b59fbd9ddfbc869bc8102d8a917d036da2e7685f3c25fac067"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO113_仪使者.png",
+      "bytes": 449828,
+      "sha256": "2a0eb6164dd4bf8501150853767900fddfff670fae33dcc848ef3aaf8e06ede6"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO114_仪式之星.png",
+      "bytes": 530849,
+      "sha256": "0d9ce4d6cf05eb822bc7a45e8262c70d0885d5ff7877e0e960fccc66875c0e71"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO115_仪式巨像.png",
+      "bytes": 574325,
+      "sha256": "041c0cda00e917556dde6dcc43d78c46da9b29ab61e4fef0bdadfb8f1bd9ed1a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO115_祭礼巨像.png",
+      "bytes": 837854,
+      "sha256": "b10e97eeca27524055799fe7a263ee02ce7b13a97e467b939311e09389ac06b7"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO116_小独角兽.png",
+      "bytes": 439479,
+      "sha256": "4f1ed15b61c4d8adadf6479173b989c60741b2eb671effd5db7650456ea0e662"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO117_白金独角兽.png",
+      "bytes": 426092,
+      "sha256": "a37330eb5fee4ecb702d5fd7020b9e520fa9f8c04380c1b8b6e210ea04534ef8"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO117_彩虹独角兽.png",
+      "bytes": 403356,
+      "sha256": "f6dd838cc52089e9acbf5a4f5fb0e4ab53f558609391433875a815b9549dc455"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO118_旋叶虫.png",
+      "bytes": 403203,
+      "sha256": "85d681561f3ff106ba1661fe1493866e1669af4a6882695db81cbb006f14a3c0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO119_蓬叶虫.png",
+      "bytes": 325233,
+      "sha256": "aac905711c16877a7fefd963b7b7f1bf0c6715de945f679cb2359d69bd08d341"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO120_风滚暮虫.png",
+      "bytes": 501104,
+      "sha256": "2707b6dbecc0882bd86f81e942afcebf7ede43a73a7fa83925749ca326b8069b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO121_小黑猫.png",
+      "bytes": 491984,
+      "sha256": "c11058e17ca2d72d845efa13b81bbe78c4301594c4be7abf1d7d1d82205e2fb3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO122_黑猫巫师.png",
+      "bytes": 481607,
+      "sha256": "0487f94c7457f1ce293012c8860f1003b94135d6498ed1031d6d08b65aeb050e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO122_黑猫密探.png",
+      "bytes": 583178,
+      "sha256": "1b800b91a530cebbb02425553153bee727314c222e6a4f03a190e350029b480a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO123_忽幽狸.png",
+      "bytes": 303967,
+      "sha256": "8b14db67fc01814832396d2294fb282458f7bc68debde236fa4e70cd4dc5870e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO124_影狸.png",
+      "bytes": 403975,
+      "sha256": "0f571db8c906642086f0eb2a86b1d153aac6589fedd4743446cb0864f17d1d88"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO125_多多.png",
+      "bytes": 456553,
+      "sha256": "93629f521efbcafc933d2c9ada7dfa731a1091031777b515197fa8ab18877db4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO126_多啦多.png",
+      "bytes": 376979,
+      "sha256": "d293c56fab0a804e3496824d2dabe7867ca0f0b511b428dd61d83faaf7449802"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO127_古啦多.png",
+      "bytes": 428042,
+      "sha256": "cbe66f8f9e0a95be46daceb7cbb09086aa5aabf5c71850058866b9a1b13a1fff"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO128_哭哭菇.png",
+      "bytes": 287050,
+      "sha256": "7755ecbf0b29574e94602178ac4284d8f53927bcb1df6d72bc86dadd14d427e4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO129_怖须菇.png",
+      "bytes": 386224,
+      "sha256": "c464b6bc9792f8c2c9da0e6286e827bfdb8db349bc7f129cfaca16e882d557da"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO130_怖哭菇.png",
+      "bytes": 470847,
+      "sha256": "b9e5c9ff088da912066c06462f7c484ee0dcc53d0dab97fab71ce8e414995f5d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO131_恶魔狼.png",
+      "bytes": 381927,
+      "sha256": "4184934902b858f3c52bc8d095f34d4837dddce063ade165f43a8a004032e4e4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO131_恶魔狼王.png",
+      "bytes": 593181,
+      "sha256": "1e7950388a3144591289b67d599c0b11a540529455ab2c87d4223600cd9d34ab"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO132_小电企鹅.png",
+      "bytes": 296544,
+      "sha256": "d9908d2d832df0b7613acd7a90d0730a5cc30f859b233519f5938440cb4b2ef3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO133_电企鹅.png",
+      "bytes": 348805,
+      "sha256": "6b05738d8f079f7832744f6df07a21ef0dc704abdeae3f82d2365ce8c9df2c4c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO134_雪豆丁.png",
+      "bytes": 304673,
+      "sha256": "5b4ad833d5b8461c8df6a054cc0fae43d2466e63215d8b3e8cac1310c0cbc662"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO135_雪蛮人.png",
+      "bytes": 485378,
+      "sha256": "125da83bbd8d76ed8cce83bc31822fe972a36e55e28b4e0162919699e5123de0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO136_雪巨人.png",
+      "bytes": 337485,
+      "sha256": "8e9874e63fbd1a11baedc3f378e7d5013fb69684e73d5fba0b93f2f6c16f0af8"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO137_呼呼猪.png",
+      "bytes": 352089,
+      "sha256": "0b0e14f9c8e2d4580eed4d6292d513c89772da7033d730aeb8189c857efee79f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO138_獠牙猪.png",
+      "bytes": 437376,
+      "sha256": "8a1a1621b028e715bed2cdfefa2a2debb942185c17eb75f2e56fdf7bc913bc11"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO139_雪娃娃.png",
+      "bytes": 481077,
+      "sha256": "aa6c4dedff40da6674e9573549065df2624faeddafa8bab8ce894e8575690853"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO140_冰封怨灵.png",
+      "bytes": 437131,
+      "sha256": "bf84c2e92056e2990581a1a4437e4fb28cb15adebfda1198b33b61c83dfc5f62"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO141_雪灵.png",
+      "bytes": 456946,
+      "sha256": "c3925b2fc1f04cf41c5f05f99475ebaf21e373bae571611f5268d8ec81a06623"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO142_大耳帽兜.png",
+      "bytes": 363142,
+      "sha256": "d7cc909fe03081096ff0a886e65e9be641a5442135b8744325fe5e6070320bd7"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO143_帽兜娃娃.png",
+      "bytes": 388611,
+      "sha256": "f12ca2c9e802ab72cb94991d802e69ff1dc3911d7c1a24cab14ec08a99d441d2"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO144_雪影冰灵.png",
+      "bytes": 784532,
+      "sha256": "f00287bd48f5db91edd0a3eefba359502692f5c345b5900cdd412a5dd2e5b649"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO144_雪影娃娃.png",
+      "bytes": 551478,
+      "sha256": "bbd85df3ba340d58920271bbd8c24df08a6a0183d954802d7cbee16b034253ad"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO145_权杖_Ⅱ.png",
+      "bytes": 392912,
+      "sha256": "3f8b0c9aec56f14e6a35b5bc6536791f8d12df92ddf46547ce136b75799de1d0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO146_权杖_Ⅴ.png",
+      "bytes": 482787,
+      "sha256": "cb597d336253cef98e09d826636df1135d77190a6bb450ae9913ec53ca38cd3a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO147_灵狐.png",
+      "bytes": 388124,
+      "sha256": "b21f71244edb2b2cb5a2a00eb7e67377c99a714fba549ba338f865f5efafd1cb"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO148_九尾狐.png",
+      "bytes": 311970,
+      "sha256": "7a54a6468b67138d26cd415da58e68407bff64fc47fe514d0b4f3528b9c34706"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO149_尖嘴狐仙.png",
+      "bytes": 398576,
+      "sha256": "eff8bedec3fd5f4e7b9cf8dcbf81f5c8d9224929f5ef6afd961217bfb500b37c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO150_里奥.png",
+      "bytes": 470308,
+      "sha256": "8ac4e48db2dc7a91fbc7d12f2823633c653bb08ac809380fb7da1a734d4db4ba"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO151_灵羽勇士.png",
+      "bytes": 379149,
+      "sha256": "52b8dcc4ebc51ed7549d523b991acd9d31ccb27cb0ac5f37ddfa052b9960a3b3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO152_圣羽翼王.png",
+      "bytes": 704404,
+      "sha256": "f1790f7a6991f159b06b335e3d3a3292e3c18a9f0015472cb8f162823f716ad9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO153_松仔.png",
+      "bytes": 591871,
+      "sha256": "262dd0b25c102fa8458e84c30cd61336d2cef679b35beb029115a48e63050237"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO154_松叶羊.png",
+      "bytes": 542956,
+      "sha256": "67ae3471a12898cdc9e1eca33b7cabc7760387ff0ffc125fef0a265a9763ff11"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO155_针叶巡林.png",
+      "bytes": 699949,
+      "sha256": "ed1820716407b41fe8270814d4adefb036cadf7012ea05445abb88ee6f961da4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO156_小勇狮.png",
+      "bytes": 542300,
+      "sha256": "d14b199bfcb5f09146af60a06af0c103a1700e4c9058e2c125ea4401e23f718d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO157_炽焰狮.png",
+      "bytes": 566782,
+      "sha256": "25bed04639210a79eb19309857744b67ffbda84bf0d485bfd1bc4209170dd8b6"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO158_炽心勇狮.png",
+      "bytes": 621750,
+      "sha256": "bd755a490298af5a27b640ee602d6b97dea1ec8d98f753cb274e701ac30cba55"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO159_水滴蛇.png",
+      "bytes": 526721,
+      "sha256": "c6e98c2e8446ada0ecf73f9a29b1002367393316e94b9c818896cb1b82cb6005"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO160_水蛇锁.png",
+      "bytes": 423778,
+      "sha256": "84eb054b751d456f9d56e6f7af623ff0828bf3c1bb72595c4090ec9ad4626f30"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO161_游蛇魔使.png",
+      "bytes": 410234,
+      "sha256": "25eadb44ba526bc4456a77e3455202280bba0ccdfa67b190ca00b9d89ead4f5e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO162_公平鸽.png",
+      "bytes": 518515,
+      "sha256": "3e6b6beeb77fbdca290044f977e45ad8159243f393cecf905ea8cfe64461aaf0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO163_小怂猫.png",
+      "bytes": 556600,
+      "sha256": "8b8a019cac76305a791f89bb09f9c1807c2cfa5f3e73b27c6a785b279a1625fb"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO164_怒目怂猫.png",
+      "bytes": 568513,
+      "sha256": "359fdd4fc72f7da799db12fa7eec9310f181f96110c01de90ccf0d4efe81cfc4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO165_小狮鹫.png",
+      "bytes": 381344,
+      "sha256": "653180175a87daf2af5a291ef13b0d08006ddcb23e67a24c7ccc73a9909c47fd"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO166_神圣狮鹫.png",
+      "bytes": 354015,
+      "sha256": "c3f54d25ac8c288da511680e376038bd762804a877ddc780f3344d29cb1ffed2"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO167_皇家狮鹫.png",
+      "bytes": 352041,
+      "sha256": "cdab398ee4ba59a0c353c611afda56f68d76d29d0d600f4de2d158d6ad576bc1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO168_圆眼蜘蛛.png",
+      "bytes": 455629,
+      "sha256": "8e55953b9f4b68d6d169b9b5437e59ad21f74e174e4f0cb6181640386f5e0d8a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO169_尖角蜘蛛.png",
+      "bytes": 496265,
+      "sha256": "8ecb9574ef7456b32c8da5293c1659f1fe065dc011a7896f6cd9649a29471b35"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO170_芋香巨角蛛.png",
+      "bytes": 454120,
+      "sha256": "203429299c8263618d891fbb12d7018aff6efab1a65b59670594ba87dffaa291"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO171_波波螺.png",
+      "bytes": 596649,
+      "sha256": "949e31bfebace77df7e2a99f331c09b863a4aa52a94ef9e46a2b3f7065fd916c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO172_消波螺.png",
+      "bytes": 446612,
+      "sha256": "ae482ddc05c472a0af97f70a50a537da97ecd7d4e46cbd9cb77c02d69711e9d1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO173_嗜波螺.png",
+      "bytes": 490807,
+      "sha256": "2ae6e81cd62679094541af4c9eb67e272fb26426b81880d12b204bb15a01269f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO174_菇菇丁.png",
+      "bytes": 323286,
+      "sha256": "427e46d4bbdf00fb1ca18a2bdca76835a1abdb94e50de894075da8c2100f6d64"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO175_多菇丁.png",
+      "bytes": 379134,
+      "sha256": "40be360a13f6445cb4f373bf827c48985fe9ee6a74ba3733e7045a17b1e2f8a8"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO176_九幽菇.png",
+      "bytes": 540890,
+      "sha256": "f7c1b1da314173b914d9755ed64ef001acc05801f42ef2d3fe821ddf7fe02a0f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO177_斑斑.png",
+      "bytes": 514638,
+      "sha256": "5b28002153c98016a6c638ccd2be41a880c1027c0af225bc7ed6ac4e46cf8f16"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO178_斑枭.png",
+      "bytes": 490309,
+      "sha256": "a282cc571731c183cba33ca3c93d4ed4ba62731f658a9ae44ea157fa12f11635"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO179_草头鸭.png",
+      "bytes": 291541,
+      "sha256": "c32a5cb720ed723f6782f5498a81820868a204558b47fe565198fa8496932667"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO180_卷毛鸭.png",
+      "bytes": 380254,
+      "sha256": "0580a0ff2e0a23c0a7537dc5310f0c38f6cc88c7a71bbcf814aa4865ed41df89"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO181_海豹战士.png",
+      "bytes": 465872,
+      "sha256": "e23a49b754b1c9462ac6da14a3792ca7bf63fe0a66aac342a9472e2cacb93ec4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO182_海豹船长.png",
+      "bytes": 451530,
+      "sha256": "029d95ad6efc6167e0b74dbc6f2d3dc6c77a926af35e356d3e782b6d74d9344f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO183_号儿鱼.png",
+      "bytes": 520310,
+      "sha256": "a9f0e38662c9c507fe594ae25e0d9b996321333517a9cbb45dcc931bbf96efb3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO184_圆号鱼.png",
+      "bytes": 653587,
+      "sha256": "8b1dcc839b8954307b385cf64083d1c2921b6918962176b5a7c946518fddb846"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO185_甜田螺.png",
+      "bytes": 405428,
+      "sha256": "4bbc50f1b2186e3aa02565d1494219f34d9220a4d4cad37f4fd0a7d675af99cb"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO186_壳乙螺.png",
+      "bytes": 486688,
+      "sha256": "1aecaba0b4158e6e9f8ca1b5771325a1f0ee46a4f9028ebd8c5090302db46bbf"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO187_卡洛儿.png",
+      "bytes": 404123,
+      "sha256": "44d292871fc602b64783209d5862941fc611e6487ffe3c90146bb90d1ff95372"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO188_棋棋.png",
+      "bytes": 346055,
+      "sha256": "8f65771c01369788e0887ca2a07ef05764c30fa210c05ce1b59e29676e42afa9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO189_棋骑士.png",
+      "bytes": 436238,
+      "sha256": "252297e2cb1b85707d6b9c944f35f06739e5799e92a41e12d35a6d429a26b870"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO190_棋齐垒.png",
+      "bytes": 454523,
+      "sha256": "27a2d1a1e9acfd0144bb65609f7622f1375a148dfeaec6f2afe55378ff5ef73a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO191_棋祈督.png",
+      "bytes": 441558,
+      "sha256": "fcc2353f0aecf4ed96a8b5a811ae48c7320ac9ff08f8754698bd44028c870426"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO192_棋契陛下.png",
+      "bytes": 527884,
+      "sha256": "aa5b9ad047b29a7574587c9f6e403443c730dba094084945fa2a0112e88a6e4f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO192_棋绮后.png",
+      "bytes": 395254,
+      "sha256": "39f39db074f866d1df4e2fdbf9bf050cd0af8da9b9676ba30998180bf96e9e4a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO193_奔波鼠.png",
+      "bytes": 412565,
+      "sha256": "74afe09c1283ea54f91f2ab0af113b685a5ab7c3a4129246c47dbcf6ffd33cd1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO194_流浪鼠.png",
+      "bytes": 535699,
+      "sha256": "b4f1bd5c6e2f1d9d9357945fafafaeb181d5567cbea989c3087b91a6c0ac69ce"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO195_呆小路.png",
+      "bytes": 316946,
+      "sha256": "bc36cc626b876d03d0ff2952fb01e6d2b9a2f51b2486fd5543d33cbf24b6b92e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO196_舞动路路.png",
+      "bytes": 405955,
+      "sha256": "d65d632ff1890118d563f55e68993938be5c0f66cfe93a6c539c1f74244560dc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO197_白发路路.png",
+      "bytes": 361277,
+      "sha256": "8e895eacf466201e0b03e73f77bd7a26c610e6973a3c26e82ab53473d36bfa2a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO198_逗逗.png",
+      "bytes": 551453,
+      "sha256": "b4d3187786cd02b8dc6e5608e9d33be5d20acb53e2d6840643a96268ace70fa1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO199_气球猫.png",
+      "bytes": 444433,
+      "sha256": "686beb6a87f421972a2ea05138724697eea37eb3bf0462a6f3fdff50043b3a88"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO200_奇梦咪.png",
+      "bytes": 813878,
+      "sha256": "8fb1a23c8ac0c7275f25c2794ed342fb554c22f9a443413604d7381dbdb0d892"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO200_梦想三三.png",
+      "bytes": 728413,
+      "sha256": "17bd314e5babe4aa328cec1ec6c7cf81c882830690a11602fee6303d034312b1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO201_花怨鳗.png",
+      "bytes": 510685,
+      "sha256": "dabb585139990092bb61ad0a345ed46120bc7c6a2a42522b26d28f769ee7a2fa"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO202_鳗尾兽.png",
+      "bytes": 811046,
+      "sha256": "3d88608f50866c55c9322226f771df778c850b206ef612fc5c9143b1aa3f47f0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO203_伊雷龙.png",
+      "bytes": 403193,
+      "sha256": "75e9a8033a00a08eccb23781735c349916f4078e3033db6ccd6f89c8dd58220b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO204_伊兰龙.png",
+      "bytes": 818401,
+      "sha256": "bb5548a8a6670dabdb54ee731f4023a164bbf03367ea34c6b484e8523a9bb570"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO204_伊兰亚龙.png",
+      "bytes": 566567,
+      "sha256": "3733c82bb64cc53dcce16cf8802ffafa463ff64afbdabcf0556877f01d3bf5e6"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO205_拉特.png",
+      "bytes": 467571,
+      "sha256": "aa0c4e4fb43db627fcde158edccd97c20a644697bbd7dd279a21ace544cf12a9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO206_酷拉.png",
+      "bytes": 440661,
+      "sha256": "66c7c737e8bc5fbf1318f419f2bf2ecf9c51c02a000e61655202ced4a035c9c7"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO207_闪电环.png",
+      "bytes": 503075,
+      "sha256": "8038978747e3fb63aeac71ea9dcbc261e3a3bd072f7107b487367eb3a18408a2"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO208_刺电环.png",
+      "bytes": 503858,
+      "sha256": "79265f604e36e8244896bf37a2e378d6736810bafa68945d829cbc07870faf98"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO209_荆棘电环.png",
+      "bytes": 435391,
+      "sha256": "e5d7dec8faa7ac90653971a5b2f589b4addb5c450e4452a27fda2b2558e348e2"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO210_小箱怪.png",
+      "bytes": 473114,
+      "sha256": "e6b3d41bd2d2636ad630a57afdac9d02f84ab0daf20e86298da93d9123588348"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO211_迷迷箱怪.png",
+      "bytes": 466324,
+      "sha256": "34274982ad54696c1bfaa59b6ed7ce673a39f44513cc8a908da3226ac2d7a37b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO212_古钟蛇.png",
+      "bytes": 397846,
+      "sha256": "abe1a2147cf005cdfb69f99c073d08e2441e2878d4c16f5e90a79a4f39216317"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO213_寒音蛇.png",
+      "bytes": 508031,
+      "sha256": "ec3191012c91c8112542e439646a41ea2a2f2fad82d160489b2f6c343e5544f5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO214_矮脚爬爬.png",
+      "bytes": 448225,
+      "sha256": "d1f9767bdd230f43aec031328e771045ace215018b063806907e2f4fe475e03b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO215_恶魔红钻.png",
+      "bytes": 462541,
+      "sha256": "28705972e581e02daf9fc4d39a3eb91c74be878ac0049f898f420da32d07bec4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO216_火尾瓦特.png",
+      "bytes": 392160,
+      "sha256": "33188ad5ded0cbd2243325f162364047a9bcbb78e8a12ce31ce097919103b5ff"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO217_火尾战士.png",
+      "bytes": 394005,
+      "sha256": "8b31fa89892a2e0bbbecd2915751a6a8ed7cde62d065618044eb392c6aa42f51"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO218_烈火守护.png",
+      "bytes": 541560,
+      "sha256": "e4d8c86836cca8be69a10440a9cf24a71b133cf627ed84769e06909c3ce3cdf8"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO219_里拉鳐.png",
+      "bytes": 427717,
+      "sha256": "7f3914e3e6a13f19b244a7fa21de79c6d07680a7b051840f2cfae49080a3c48c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO220_海枝枝.png",
+      "bytes": 382168,
+      "sha256": "3449690e924c7dc63efd0ebc6f8622957d4976142aa20d466801619fd46eb34b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO221_多西.png",
+      "bytes": 322844,
+      "sha256": "9bfd9d18fd4a1040f856d662d79b896478f299be621cbed528aa70919f0806a8"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO222_库多西.png",
+      "bytes": 441187,
+      "sha256": "695f9330f43171420f100172019af25844e91cd187610a0c8e082774d3c7f3b5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO223_波多西.png",
+      "bytes": 498880,
+      "sha256": "588b2d5d7ac0a6299048b323ddd3721895391e8ef036bbdcb754d070cadd3871"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO224_小翼龙.png",
+      "bytes": 381871,
+      "sha256": "4a79a2a4a8e7614824f37d336470a6eb2b592a5a7a541f315dd5d35019a2e7d5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO225_翼龙.png",
+      "bytes": 520400,
+      "sha256": "c7112f207a5a226d131358f3571a9abdfa6f9ad1e286cc51c100f6984cecc4ef"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO226_电动长颈鹿.png",
+      "bytes": 423273,
+      "sha256": "21e2ff205d31fff4bf556e071432f6f7ca16cd4b3556ce8d8ba0fce3ee9fd7a3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO227_奔乐鹿.png",
+      "bytes": 366690,
+      "sha256": "4e5ca64b36c1681aa604b27b94c0e6c3fa48c0b9edc13b364040f33c51f64c77"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO228_波普鹿.png",
+      "bytes": 628632,
+      "sha256": "8822c0bb6730a372bf3038cd63721b8599e5950866fae4da8c89cbb883dabfa3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO228_爵士鹿.png",
+      "bytes": 375393,
+      "sha256": "f03c40d09287777d67454d5db6febab5d6c3103c2b6df4b75a44c19c1a2ec17d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO229_缇塔.png",
+      "bytes": 484731,
+      "sha256": "35790777359662aa304243e97fc72a18afdb146bff5ffedf453e47ca75319d64"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO230_声波缇塔.png",
+      "bytes": 403832,
+      "sha256": "6c599ed04b73c7256b027ac243222b0aab95b8844e6c36177087a915c8e716a6"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO231_小鹬.png",
+      "bytes": 303426,
+      "sha256": "33b40543f19c90d174c19d7d649c0f3a5ebf447ece1eb34873413c0cbd3d84ac"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO232_鄙目鹬.png",
+      "bytes": 250111,
+      "sha256": "9666273a46c88890856b5783fb0018d72dd675677e6f92101220d6897a44060e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO233_高脚鹬.png",
+      "bytes": 304132,
+      "sha256": "047e2d3d8c4fc5ebb5bb1ce013563dfa6b1883f68225805bca0f2a530d073af0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO234_脆筒甜甜.png",
+      "bytes": 243758,
+      "sha256": "aee2955f48e589328068462f1e002d55f7cdd2a1f60e90a53ea5e64f11f707a1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO235_香草甜甜.png",
+      "bytes": 242438,
+      "sha256": "2bd35f7617e87d1bee0dbacabe714dbff9e8775b8c63cc6478bd51edbd4c9882"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO236_圣代甜甜.png",
+      "bytes": 390409,
+      "sha256": "870da02b7d96615bc06cd52e27f269d9f31826509fb6acd74f9350de301db7e0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO237_刺轮砣.png",
+      "bytes": 471718,
+      "sha256": "3dca8e3be3380272f764e398c41d38fcf133815418796fca31d85765acaf7b94"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO238_月亮砣.png",
+      "bytes": 514527,
+      "sha256": "e2bcbcdc997240be092978a4a22eea5af7b13f14362378b0a8a35555f24f0276"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO239_豆丁鱼.png",
+      "bytes": 383984,
+      "sha256": "a9787c3488b99fa9c8c9350fe25ce3628de48e881ddadef3684a0f651b192889"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO240_快鳍鱼.png",
+      "bytes": 339550,
+      "sha256": "c08eb78b1977d75b3361f6e45953ca30f19f77d282bad1064ba14a35aca9fa3a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO241_龙鱼.png",
+      "bytes": 377209,
+      "sha256": "e304a17e4e65a0abf951949a43c356613eec0bb9fd4bdbef6986a291699b072c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO242_胆小鳗鱼.png",
+      "bytes": 553617,
+      "sha256": "19245729eb6848d7da55be0205136fc24cba35333aa39b7c4029e8413cad3340"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO243_闪电鳗鱼.png",
+      "bytes": 665280,
+      "sha256": "32d0a4e411485039137ab0eaeac53c42c6534de9d000484c62533ee88527bb0d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO244_翡翠水母.png",
+      "bytes": 496637,
+      "sha256": "1091ba04e01e85aa669bfec04fbd153b616c5a2286cd9dcf9aa13a3f813c11cf"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO245_琉璃水母.png",
+      "bytes": 486039,
+      "sha256": "cc2e3c1902ab5cd24fb671ed980f2340dfabbc303e8da28088f27130b3e8c1c6"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO246_裘洛.png",
+      "bytes": 340852,
+      "sha256": "4ff49cd4c2238ff197b903f9bc63773781130ff9eecbc9abe5e2b0f739e8070d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO247_裘力.png",
+      "bytes": 413409,
+      "sha256": "967b6e3fdb386fcbe19bbd21fc7259644c1c5657682f7ea322619c7a0b3f6528"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO248_裘卡.png",
+      "bytes": 364760,
+      "sha256": "34c4f128bce69b290ca7851c7c90ad7444f92e22f78469601dc3d47aa8c5ad08"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO249_可爱猿.png",
+      "bytes": 472687,
+      "sha256": "165182033727304aa11ae2483372be64d376556bd9aa03357093cf882e0f6d8a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO250_炽热猿.png",
+      "bytes": 374323,
+      "sha256": "92262bbac134959cba8f87ad3cf9bc14f0616b1c95cde71c060e9a846ce4dbcc"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO251_火焰猿.png",
+      "bytes": 405177,
+      "sha256": "b2cc6157b2c1070f212b1788911aa103e2530ac0c71f0bb8c8d806b27d7be2c1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO252_布鲁斯.png",
+      "bytes": 420643,
+      "sha256": "23aeb53b41e40bc346406a0897e4ce58748daee8b3b719d314fdfa6b43f2b59b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO253_雪顶布鲁斯.png",
+      "bytes": 404717,
+      "sha256": "99e6e0d5946c2287a70c63cae100c5b2315c685ddcd2d14222f3585e07afb4dd"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO254_冰钻布鲁斯.png",
+      "bytes": 423435,
+      "sha256": "1e59fc2b75cd837ff799006aa7087982c46ccd3f81d657e3e047807127ee37b4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO255_治愈兔.png",
+      "bytes": 371652,
+      "sha256": "1632664a04033c7813c3035c7288658669ef596a659bf6f390d5f025071e2887"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO256_红丝绒.png",
+      "bytes": 501517,
+      "sha256": "7dc0c1a5471e9aa746038683f289bdcf31cd866158c7e3ec0b1c3fd433c69db9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO257_红绒十字.png",
+      "bytes": 474828,
+      "sha256": "8d746f5341bfe27f02b9ac946eeb76b5e5c1435061131b67df912c0b0347f952"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO258_乌达.png",
+      "bytes": 574600,
+      "sha256": "4af6a05717ac06b24ffbf0aa0db6aa2368383e6a9795410c8391aa9aa08dace9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO259_迷你乌.png",
+      "bytes": 694569,
+      "sha256": "28466d2d464eac2973b0a53dcc0e8a89d81e807dc9a691f0ada62f433f55814d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO260_乌拉塔.png",
+      "bytes": 744063,
+      "sha256": "095201ce0a0b1ddbb1e31b0df59efb292e0c4cf17cbdbb10a2f715f8884bcb28"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO261_螺旋帕帕.png",
+      "bytes": 569311,
+      "sha256": "a3b581b34a46e17bc79c6c4713f6f64b82d6fba8782c4a949072bcbcbed46aba"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO262_帕帕斯卡.png",
+      "bytes": 581327,
+      "sha256": "d97ac30d32162a392131327fd9a82dbea6fb6227a46a4c5113b27834026c0350"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO263_机械方方.png",
+      "bytes": 419367,
+      "sha256": "763e2e9a5f9d3659aff7431c43b8078da2d874f443ccbd8b903431001e9f4c22"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO264_多彩方方.png",
+      "bytes": 432978,
+      "sha256": "355748d350d6ed0311b49cf2a72bac48df540e494b9787149b3f3cfc2358358b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO265_立方人.png",
+      "bytes": 440106,
+      "sha256": "06f22a2e5df9697de94403818db0c6a33787a067684aaef04809630fd0f134ff"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO266_可立鸡.png",
+      "bytes": 389351,
+      "sha256": "66fd379d2b7e3604bccc86e0729e28a03a74a3801467ae0634501d3ed5e89aff"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO267_晕晕鸡.png",
+      "bytes": 363346,
+      "sha256": "52d06ee363096123d6457710d51bce4745091a384dc41fd97faea2bfacdcf306"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO268_绅士鸡.png",
+      "bytes": 364577,
+      "sha256": "fd60a6c3bae294ddf2d0047d7d3513b26857a0763de6e83d5de9641f09b7ba3c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO269_武者鸡.png",
+      "bytes": 345581,
+      "sha256": "7079ecd9f6b7b324f778554359f025064a6408ba5688a047f9006aa3ef703597"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO270_优优.png",
+      "bytes": 554508,
+      "sha256": "aefe97977b1e6e1a155a746a55201402e0f5ec1e31313714248b44a472c45f71"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO271_绒光优优.png",
+      "bytes": 454010,
+      "sha256": "674e464c02c50bcf240b912e261fbf76da7520c65b6d59e7310eafc92bd89748"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO272_噼啪鸟.png",
+      "bytes": 359076,
+      "sha256": "a901a8de30ab5498efb387ff018d62be511e94d44b16f4dd04d3f1191042f7d5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO273_深蓝鲸.png",
+      "bytes": 396711,
+      "sha256": "df8a24bb64e9d0789f1c1db69757320e99333dd1518c07f0d845945fa0442db0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO274_格兰种子.png",
+      "bytes": 302211,
+      "sha256": "65cb4f9d727d4bb022c6dbff79bf4ba783508574b989bd482c8ae03c14e2ae83"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO275_格兰花.png",
+      "bytes": 336445,
+      "sha256": "e19b5deb695c2fe2efb165c06e3bd2a3d5c92caa2049a53cfa056c48c674d09d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO276_格兰球.png",
+      "bytes": 367402,
+      "sha256": "41e76433ee92cad4cafcdd16adc7c56b67c802210236ac85636b3c5e6c3ffa65"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO277_地鼠.png",
+      "bytes": 299958,
+      "sha256": "11283cfe574ccb6958073fe2d2cd80da3dbd4510d036a5fbb110585ca08391fd"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO278_遁鼠.png",
+      "bytes": 336792,
+      "sha256": "886c3d87c75a402d5baff499701eb986a5499f2b966fdfb1ded66137069bde9b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO279_遁地鼠.png",
+      "bytes": 350841,
+      "sha256": "110c802ef53dd5255935846325f5501d2cd3309b30d217026b34c82416ff1933"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO280_墨鱿士.png",
+      "bytes": 326565,
+      "sha256": "8420df8d9b2536c812413a53d3c7641f98f896518cee97348a5f94e6a74fe041"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO281_混乱鱿彩.png",
+      "bytes": 389170,
+      "sha256": "83185b5058fdfeeceecd4d5658ffb6c4c8613e5f3a5271004925defd27a5519f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO282_秩序鱿墨.png",
+      "bytes": 439623,
+      "sha256": "eea59ae68eab2d5ef866a56a77c6808dc464488a89acbb554a32422d1a16e97f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO283_小甲虫.png",
+      "bytes": 390597,
+      "sha256": "62ff0b084be17c75ca402c517b369e5b00ae3f0754adf217e1c4aaef075aa57f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO284_铠甲虫.png",
+      "bytes": 561765,
+      "sha256": "074a667038ff9f54cafd208494002fb4ec8645c790083d5bac774c36bf56b7e5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO285_圣剑侍从.png",
+      "bytes": 698879,
+      "sha256": "282627aaa30cf8b156787f6485b8f07af6ce91ea80989847c189de5355720214"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO286_圣剑_X.png",
+      "bytes": 719606,
+      "sha256": "f00b473bd7964583524bfe5411de44150bfd7489b8ed8435bb1812b532f8e100"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO286_圣剑骑士.png",
+      "bytes": 753040,
+      "sha256": "4c3840e224a6ea6c7497c7cc1bacac6502a0d1dabc8f51568b330096eb60e6c2"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO287_吸泥鸥.png",
+      "bytes": 447790,
+      "sha256": "b1c7b7c954c8be0b31678a92852640fcf7337c76e44bccfe027de58250028a5d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO288_泥吼牙.png",
+      "bytes": 494711,
+      "sha256": "e741a6666af5af3fbc131231ffb669bef96249191704aad72a38cfac17cc4659"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO289_大头骨龙.png",
+      "bytes": 553291,
+      "sha256": "da9121831045a70907a8b8c48661ed6c6493a840e175b63cdd53a521cac466f9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO290_寂灭骨龙.png",
+      "bytes": 517372,
+      "sha256": "ed692f1386b30961a8174f2a32a94a84e7e81ff75b3f5a3fd6921ea055b3ecf1"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO291_厉毒小萝.png",
+      "bytes": 360134,
+      "sha256": "a3aea1743fe7929d7b897c7232758bc48e2e917571d2decf80a44a700f0a2a0f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO292_厉毒修萝.png",
+      "bytes": 425439,
+      "sha256": "554ea1148ee98bf7c37ae41cca95fe749b28c73a7a51b8d962f8d0cc08c97175"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO293_小帕尔.png",
+      "bytes": 375664,
+      "sha256": "5e878e86ba0fb3f88280f5be8246b8cb1db2a11056f49ecd9004334082315e0f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO294_帕尔萨斯.png",
+      "bytes": 449639,
+      "sha256": "b0e427639ba293d585120d3a7e5c672b837d85e2096c500d17b65ead821d4ba4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO295_龙息帕尔.png",
+      "bytes": 589438,
+      "sha256": "403a893ae85e59628b81abd8763cda5a6e0998344eb58a21d1b6138f42b74ea2"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO296_毛头小蛛.png",
+      "bytes": 442657,
+      "sha256": "b21af7b79e47ecc276d622141960b882578988d0644954622fc22d9e91d384bd"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO297_捕尘长绒.png",
+      "bytes": 414590,
+      "sha256": "c10444970ffb19a01ae3fe0cef32d0c887143b6914c636e37995f93c152e04ff"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO298_食尘短绒.png",
+      "bytes": 367702,
+      "sha256": "d8eeb65735a2c7cee961672c517a720b989080434cd24537a760f274a2e45111"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO299_画精灵.png",
+      "bytes": 536275,
+      "sha256": "8bf13e1cda7171faa82c7c06045f7319e8bc505a56c6d8e910d893d0b35c6289"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO300_画像守护.png",
+      "bytes": 664618,
+      "sha256": "bdd360370dd88a9c814f2eb001f2c60057fbd6e4c373b2b79780136ad0f8692e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO301_画间法师手.png",
+      "bytes": 620488,
+      "sha256": "1f4a723618f14b20f124e6f476699b07c1f710b1e0d851fc83b49ed7f58653ca"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO302_画间沉铁兽.png",
+      "bytes": 564410,
+      "sha256": "cef80b2e6aa10c459e57eec1cfbad1d356bd5ef4d5705e543379f89deec3f389"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO303_书魔虫.png",
+      "bytes": 513935,
+      "sha256": "6a8dadbc15dfd07646b397e6d2f3120899f4d340a1cd0270ada6e3915d913e32"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO304_书卷守护.png",
+      "bytes": 612870,
+      "sha256": "2506e876bdc68693e31ab97f7f169f91fde5d955f7fc822dab25a27f0fd19682"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO305_古卷执政官.png",
+      "bytes": 974259,
+      "sha256": "be7368aa356676b832ba29e98f02ad0cab17cbbfd725058155c470bca4e2eaa6"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO306_古卷匣魔像.png",
+      "bytes": 637961,
+      "sha256": "8019853d824d1f0adeeedd104cfbb5e07509f4996409777f30b850a314ef43d5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO307_绒绒.png",
+      "bytes": 312998,
+      "sha256": "7bfa8cdf340469bb6956be02a683fad150d37c87437cc53f0c32b4a331b10e3d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO308_小绒茧.png",
+      "bytes": 398701,
+      "sha256": "b2ec883d51e4210dd26da9017d66abef1256d05deb1500b7638133fdb5b00d38"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO309_绒仙子.png",
+      "bytes": 401244,
+      "sha256": "9a08a7dbe04d75e7d6581671cac25ad8cfe4514411a0689fdf121f4bbf21b87e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO310_犀角鸟.png",
+      "bytes": 466357,
+      "sha256": "6e2fe068b965730d4c0408ed3b2f1f72fe8dd7cf73e0b1971659a47ba84fc5b3"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO311_光纤兽.png",
+      "bytes": 558499,
+      "sha256": "ea5ea279da3cb17f13901cf4196cad2e794299e10a5c7bebb1e874d47dc4157d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO312_疾光千兽.png",
+      "bytes": 447398,
+      "sha256": "a02bd86e92445e66c3059a620a361e1f3d438a57d41be6bfb7c8a53e5655684e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO313_果冻.png",
+      "bytes": 314123,
+      "sha256": "16d370d7480d680ae44bee051431a3b085840c4953485fa923ebe03c18157cdf"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO314_抹茶布丁.png",
+      "bytes": 537167,
+      "sha256": "95502bf1ce1c51934684b0468b343b88fa7e6e3216786fb1285ea48d9086aec4"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO315_椰浆布丁.png",
+      "bytes": 1030609,
+      "sha256": "8a2c98bc26ac7bd8544f76b08b066426aeb5341bc8e8e50fe1820077853ba320"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO316_熔岩布丁.png",
+      "bytes": 516938,
+      "sha256": "016a3d20f6fcc3e5b1e68ec928b2f4318a27c79dbaedf12426d5cffe3baae27c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO317_星尘虫.png",
+      "bytes": 418900,
+      "sha256": "5654aba48ca58a1214b048b787677182bbb8b411039b90207477dbcb1a248b84"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO318_落星虫.png",
+      "bytes": 461722,
+      "sha256": "07a444f73ad6e6e8388dd1d24a40ca9a7eaae0ab127a488c3a88831f9e3695ea"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO319_陨星虫.png",
+      "bytes": 500623,
+      "sha256": "c93d53eab576d661810f9ae3b6003788d4cefffebc68ac4a6826cd02ff16985f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO320_双灯鱼.png",
+      "bytes": 413465,
+      "sha256": "731ec658b4bd35ffad7333d4063bfe19eefa80d0ed603394582e55ea25fd7bc5"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO321_利灯鱼.png",
+      "bytes": 510180,
+      "sha256": "e0d743c28fdfa189fd2daee2649e2a3bfe727243c23e94409c2332149e767cf0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO322_月牙雪熊.png",
+      "bytes": 296905,
+      "sha256": "a0e736851bee1715081d2a5edda7ff71a336d0b459ed1ba7322839654d81bb1a"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO323_嗜光嗡嗡.png",
+      "bytes": 481172,
+      "sha256": "709b001273f5b53716e0b4c96dcd68b2976878a04cfb4941854a4453a3bf4923"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO324_窃光蚊.png",
+      "bytes": 626554,
+      "sha256": "5fc7ecc851285c4935a89120288e8ad0e1107f8b6bef34020ad6a7ab6e53d6a9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO325_柴渣虫.png",
+      "bytes": 379559,
+      "sha256": "b4ec340a5caf59c548530e08cef3f9e8666baa3bf6b254dfb9d9b146446d1c4e"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO326_燃薪虫.png",
+      "bytes": 344946,
+      "sha256": "21a892e14cfe909b4eb7ba4fcc4fbe904382891eda7da6414ef33360a1654058"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO327_空空颅.png",
+      "bytes": 439922,
+      "sha256": "d16e336d3044c2cf7ba9fbcb67d92be08942f349dc3ff45a5993f51471517bb9"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO328_夜宿颅.png",
+      "bytes": 409310,
+      "sha256": "c0e70ff8baeb656dea45cf0332e2569d3923fd1d7b88d5c638ace51a78090dba"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO329_夜枭.png",
+      "bytes": 427716,
+      "sha256": "b99d81f060d03ddfd0deadb93ac2484af93b0e27efa2562e0da2919a24188f8f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO330_粉粉星.png",
+      "bytes": 458319,
+      "sha256": "1c8f7f6a3407534527fd8e2c4154d3cd03a2c90e2feaafa3d5f2e6f53c7e730d"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO331_小皮球.png",
+      "bytes": 313246,
+      "sha256": "2b077b2b5095452b3bfae0b732d15ff7b8490ef34b6d9b459a9882688f459cda"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO332_贝瑟.png",
+      "bytes": 468067,
+      "sha256": "61cc62e69b5cc47a87bae040881a81f983b47a80466f58c58803aa2539aca2be"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO333_贝加尔.png",
+      "bytes": 494092,
+      "sha256": "add57bff5766c700444606c92cf819151ff8ae4287cf6c4e9e3d6c2b8ca1d7ce"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO334_贝古斯.png",
+      "bytes": 496279,
+      "sha256": "4e68704a2babdc8d4608182653a2562bd647030b372d1cf1b46da5523366914c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO335_粉星仔.png",
+      "bytes": 517586,
+      "sha256": "1b0a45ba8a3b873ac9f7d1c98cf7edb8f3a59ce0689be6de72f8f04dee8d0ad0"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO336_粉耳星兔.png",
+      "bytes": 684276,
+      "sha256": "62754c4521a3d97eaf6e05996889bef54a8964bf5601ca81bf317c0c79bed918"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO337_落陨星兔.png",
+      "bytes": 665984,
+      "sha256": "f4642f37140d50e789ee0146974fae81cb3e4db5d332b6cc7555608ed255df71"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO338_布瓜蝌.png",
+      "bytes": 329853,
+      "sha256": "909ef33db83ee9595741501d516fd57035bfb0e767900135d48b8241199c497c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO339_上岸蛙.png",
+      "bytes": 512007,
+      "sha256": "96ad92dc9585ddc626ce53cbeaccb89353ed0d5e1480d1a11c4c549a91bad489"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO340_火红尾.png",
+      "bytes": 498591,
+      "sha256": "12a64ec133b5e44e88b5b2a4506f32bfd474838095439e50b6190fac5c1719fe"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO341_雅丹鬃.png",
+      "bytes": 590319,
+      "sha256": "a405fdeb9164ea3f30262a7802b601ff862a2c4d94c9ec614a2155159cfe468c"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO342_春团.png",
+      "bytes": 413277,
+      "sha256": "6d86cd51d4e8895ffd3d90bf163e612f6214b63764e3ad77a8435c9a6ff39e06"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO343_春兔.png",
+      "bytes": 509930,
+      "sha256": "226ef0d669a134b7092f6cf4d1e420a2240577bef4b76930ab4e9d09b4f4115f"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO344_春花兔.png",
+      "bytes": 400726,
+      "sha256": "fc5da5acaefe66a24495a8de333b7964d58c8dc65a4590d47d0a2d087a65aa48"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO345_幽星光.png",
+      "bytes": 480340,
+      "sha256": "3f1070110535948de5dfc70dd6d69e454593c4c9df1ce0e147b737bad64c460b"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO346_曜星光.png",
+      "bytes": 571153,
+      "sha256": "debe0c27389fd3ff0ba4b376be9def59409c53291b476ff286518f13959eac05"
+    },
+    {
+      "path": "NRC_AI/data/spirit_icons/NO347_暮星辰.png",
+      "bytes": 737705,
+      "sha256": "85f2e664002d4f4d60a6ca93438be8241a1172519c1e7fc04dfea0c7970d766e"
+    },
+    {
+      "path": "NRC_AI/docs/archive/ability_priority_matrix.md",
+      "bytes": 8311,
+      "sha256": "bfb5b5344203672bf11b5e2288cadf297214c7be7c878d313ff93a65f037f7f0"
+    },
+    {
+      "path": "NRC_AI/docs/archive/AUDIT_EXECUTIVE_SUMMARY.md",
+      "bytes": 5733,
+      "sha256": "66844898d88f6443f43a75c5df769f1e3d6d5bdb82aba2578f2331114d3ba5e7"
+    },
+    {
+      "path": "NRC_AI/docs/archive/AUDIT_FINDINGS_SUMMARY.md",
+      "bytes": 5484,
+      "sha256": "857a363d930f3ff986b6bcda9114b637434ace1e76e0ae2a0f81a388da51d1a6"
+    },
+    {
+      "path": "NRC_AI/docs/archive/AUDIT_QUICK_REFERENCE.txt",
+      "bytes": 6051,
+      "sha256": "42796bd535824e705177d4238e7d47417cd2b505661d8207f240f57c6497e282"
+    },
+    {
+      "path": "NRC_AI/docs/archive/AUDIT_README.md",
+      "bytes": 5755,
+      "sha256": "faa81b75c2de81b7c539a211d714c80afc3a52e531b8809ae01a31bbd12eca89"
+    },
+    {
+      "path": "NRC_AI/docs/archive/AUDIT_REPORT_2026-04-07.md",
+      "bytes": 14820,
+      "sha256": "e61785e7e69248d8bc889e00b51a1f01b2df48798621c7c7cd481a91b95c74c1"
+    },
+    {
+      "path": "NRC_AI/docs/archive/audit_summary.json",
+      "bytes": 4157,
+      "sha256": "6145410668de679a67faf884abbb7b76740b7b91a7f2d1f8275e2a19c85655b2"
+    },
+    {
+      "path": "NRC_AI/docs/archive/CLEANUP_CHECKLIST.md",
+      "bytes": 5471,
+      "sha256": "584907e7c6eabdd0daaf11ff4b29285d03d272e828f7ef7a1ee44ef658497575"
+    },
+    {
+      "path": "NRC_AI/docs/archive/CONFIGURATION_AUDIT_REPORT.md",
+      "bytes": 16857,
+      "sha256": "78ccb4fce9f6f1e80de30e7354557da15213094526d7fbd42a4ef91e88e0d02b"
+    },
+    {
+      "path": "NRC_AI/docs/archive/CONTINUATION_SESSION_FINAL_SUMMARY.md",
+      "bytes": 6086,
+      "sha256": "b11e18c644bce4af5cc123729b35b653daddef30a2477d5e7fde4e88039828ac"
+    },
+    {
+      "path": "NRC_AI/docs/archive/CURRENT_STATE_2026-04-07.md",
+      "bytes": 6275,
+      "sha256": "a1227be4018e139058cfcbf052d2ac9b1b11374696148d6fa577a0969893674e"
+    },
+    {
+      "path": "NRC_AI/docs/archive/damage_formula_precision_analysis.md",
+      "bytes": 8963,
+      "sha256": "fd012b46f3494deb7510a8241a032a0dad5385116e08d177204819ce6c8f75a0"
+    },
+    {
+      "path": "NRC_AI/docs/archive/FILE_INVENTORY.md",
+      "bytes": 10436,
+      "sha256": "17f8f601981d19a30e0ba28ab9810347337cc911303a7897c92c07b0c2e51146"
+    },
+    {
+      "path": "NRC_AI/docs/archive/FINAL_SESSION_SUMMARY.md",
+      "bytes": 8508,
+      "sha256": "699f28bbfc19ae2c897d0b5ee9e4d250163e57ef964f03d7ed2656c9de010901"
+    },
+    {
+      "path": "NRC_AI/docs/archive/game_mechanics_verification_checklist.md",
+      "bytes": 9060,
+      "sha256": "8e8bbaab54f71cb859fdb900e57827753a1939a4a996bb1cbb6664bba3ae6ee1"
+    },
+    {
+      "path": "NRC_AI/docs/archive/next_session_executable_tasks.md",
+      "bytes": 10793,
+      "sha256": "a507c2e02056d4eb0511702fa394abaa28c580c521fdbf52db2f45edcd357e76"
+    },
+    {
+      "path": "NRC_AI/docs/archive/pokemon_stat_calibration_plan.md",
+      "bytes": 5294,
+      "sha256": "e579f966f0372031ffb8f974c350ce7d6ed05b669b2bef40599356c0ec72d91f"
+    },
+    {
+      "path": "NRC_AI/docs/archive/PROJECT_AUDIT_2026-04-07.md",
+      "bytes": 16857,
+      "sha256": "78ccb4fce9f6f1e80de30e7354557da15213094526d7fbd42a4ef91e88e0d02b"
+    },
+    {
+      "path": "NRC_AI/docs/archive/PROJECT_AUDIT_2026-04-07.txt",
+      "bytes": 17423,
+      "sha256": "615b57aeeddae9960e8b82f10b158a6f8eaeb57514bb9034ad45aa70473b8ab1"
+    },
+    {
+      "path": "NRC_AI/docs/archive/QUICK_REFERENCE.md",
+      "bytes": 7279,
+      "sha256": "adc23b7270569ad623fe952c3a50f243bd951ea5d38414ca5c4155f227d69ab8"
+    },
+    {
+      "path": "NRC_AI/docs/archive/se_refactor_timing_decision.md",
+      "bytes": 6494,
+      "sha256": "bbbe8bc55d4624accb285b0ce0e82dbe2f0dd3923484e5d556fc3d76ba003a0a"
+    },
+    {
+      "path": "NRC_AI/docs/archive/SESSION_2026-04-07_CONTINUATION.md",
+      "bytes": 8849,
+      "sha256": "4499cdf115305f000512b05a2cf829445e6c7e10d0b2dc2cba05addf54aa458a"
+    },
+    {
+      "path": "NRC_AI/docs/archive/SESSION_2026-04-07_SUMMARY.md",
+      "bytes": 8517,
+      "sha256": "7412855c9afb35f34936248da36d1c60e7f90cc1f8a0cda793ccabdaf1b49237"
+    },
+    {
+      "path": "NRC_AI/docs/archive/SESSION_SUMMARY_2026-04-07.md",
+      "bytes": 11121,
+      "sha256": "33aaf5218bd7ecbc7cc32cbd9ed142ebc469eb08d7ea5a34d4b2d9cdd383114e"
+    },
+    {
+      "path": "NRC_AI/docs/archive/SESSION_SUMMARY_TIER2_2026-04-07.md",
+      "bytes": 9274,
+      "sha256": "0010c4ce054139123c17c1be43884123c0bd91dd752efe68afd6e3c9c204477b"
+    },
+    {
+      "path": "NRC_AI/docs/archive/SKILL_ABILITY_CONFIGURATION_AUDIT.md",
+      "bytes": 9305,
+      "sha256": "33d52eeba376fe286dd17686930d8b066b083b3ecb0e0a924e55711c89220582"
+    },
+    {
+      "path": "NRC_AI/docs/archive/TIER1_COMPLETE_NEXT_STEPS.md",
+      "bytes": 4731,
+      "sha256": "d2a8ac2cf6c273ab821eefbdbbe1ecf5313f4e9c850722bc8f90ccffd95caaad"
+    },
+    {
+      "path": "NRC_AI/docs/archive/TIER1_IMPLEMENTATION_2026-04-07.md",
+      "bytes": 6419,
+      "sha256": "bb53853ffed86537bd59cdb4c9494c5fcf7359166ef2221fe787b553a5772f2f"
+    },
+    {
+      "path": "NRC_AI/docs/archive/TIER2_COMPLETE_NEXT_STEPS.md",
+      "bytes": 5289,
+      "sha256": "34485a55f764f40a88c3b45ad3098ad649b12c64c46780446e888094815d1a47"
+    },
+    {
+      "path": "NRC_AI/docs/archive/TIER2_FINAL_COMPLETION_2026-04-07.md",
+      "bytes": 7860,
+      "sha256": "85f217a473fb0efb3ce6ae0ca0633be6ca10fbaffb0ba62c353e4d33f6167389"
+    },
+    {
+      "path": "NRC_AI/docs/archive/TIER2_IMPLEMENTATION_2026-04-07.md",
+      "bytes": 9190,
+      "sha256": "664a5157b9f683e6de01adc4bd830340b0d9e1eb1a0ecbd6be6269fc64fbcf0a"
+    },
+    {
+      "path": "NRC_AI/docs/COVERAGE_MATRIX.md",
+      "bytes": 9656,
+      "sha256": "2579d5c33a67aa5dd2aef7e3beccdec822693d2f29d7566d08b5ae8f0647133f"
+    },
+    {
+      "path": "NRC_AI/docs/SKILLS_ABILITIES_CONFIG_GUIDE.md",
+      "bytes": 22227,
+      "sha256": "899a6467ef2be5d910b2b51127d437b422d8e3c0dd020f185bcf3758c6084e91"
+    },
+    {
+      "path": "NRC_AI/LICENSE",
+      "bytes": 1066,
+      "sha256": "59e147c375f4d84ebaa856517ca30ee6f3f2f7ff564e4aba124fd77321ec9e5c"
+    },
+    {
+      "path": "NRC_AI/README.md",
+      "bytes": 3270,
+      "sha256": "0594617d9b3ef68e3521e309fa47d86036a6395680f4d6debc5b07e5d31cdd7d"
+    },
+    {
+      "path": "NRC_AI/requirements.txt",
+      "bytes": 66,
+      "sha256": "26e20544beaeb5281e49b0d33fbf5a8c6d14f6d97c4b54cafe6e82162342b17d"
+    },
+    {
+      "path": "NRC_AI/ROADMAP.md",
+      "bytes": 7511,
+      "sha256": "00a59d4a043645aa95516920923114075e32410a96d0cc7b9c4b6edffe31537b"
+    },
+    {
+      "path": "NRC_AI/run_web.py",
+      "bytes": 807,
+      "sha256": "0b72fe60af1627831ace1c8cb4fa572ef9e826b9242faa6d6990ec956c4a7d85"
+    },
+    {
+      "path": "NRC_AI/run.bat",
+      "bytes": 558,
+      "sha256": "fd8dbf18fdf88cb107a97654047b5c1eab707342f9772c44d45f277253ac915d"
+    },
+    {
+      "path": "NRC_AI/scripts/audit_effect_coverage.py",
+      "bytes": 8092,
+      "sha256": "f13a096656c6cab780fc96312181a2cb690e08156c1269dd888f7b62e41b0f59"
+    },
+    {
+      "path": "NRC_AI/scripts/crawl_pokemon_skills.py",
+      "bytes": 7782,
+      "sha256": "2fae39589ed42cdf43a2bec4c7216d5f9159515a25ddeb2e06ba2cbe0e0ed631"
+    },
+    {
+      "path": "NRC_AI/scripts/crawl_spirits.py",
+      "bytes": 12931,
+      "sha256": "cfb903c6c638cf0d9d2336fb5f41729c2ae75a230850dae253cbe2d2b6da248d"
+    },
+    {
+      "path": "NRC_AI/scripts/generate_skill_effects.py",
+      "bytes": 44946,
+      "sha256": "295e80de8d1ff9e1f5791f797a5cc787aa872b8d9ac199dcfb911bb548f63814"
+    },
+    {
+      "path": "NRC_AI/scripts/import_evolution.py",
+      "bytes": 6561,
+      "sha256": "93470797b459d3df76e4364fad1c8c191bf9d3bc9870f0c066daed69f6fe17dc"
+    },
+    {
+      "path": "NRC_AI/scripts/init_db.py",
+      "bytes": 15965,
+      "sha256": "57b17d66d0672cfc0261e7675c0cb68cee0c6472664bc9e0c097835302a5177f"
+    },
+    {
+      "path": "NRC_AI/scripts/scrape_skills_bilibili.py",
+      "bytes": 15411,
+      "sha256": "2585050fa63d3a264bfef09d3d095105d56eaaace85886ee26694c812a49ea44"
+    },
+    {
+      "path": "NRC_AI/scripts/scrape_skills.py",
+      "bytes": 9835,
+      "sha256": "820594fd2efb7db931793b07bfd0426fa219e5cd373730be69285938e06a3ae4"
+    },
+    {
+      "path": "NRC_AI/scripts/stats_verification_framework.py",
+      "bytes": 9196,
+      "sha256": "2117241648496778ad98616c8775949cd89374749dab3c734364bfae448c4374"
+    },
+    {
+      "path": "NRC_AI/src/__init__.py",
+      "bytes": 33,
+      "sha256": "1d5bbd62dcb6177842e0e220f23b301e8e0434e008572c31ee2eeb03e853770a"
+    },
+    {
+      "path": "NRC_AI/src/battle.py",
+      "bytes": 79472,
+      "sha256": "2c21976c4dc4835923e6446e866040470e6c98e7ba056bfde44babaac01ac4a4"
+    },
+    {
+      "path": "NRC_AI/src/effect_data.py",
+      "bytes": 68036,
+      "sha256": "1c712af329ef0a374c071660021c54e2fe389d575b78c24f129fe45df130995d"
+    },
+    {
+      "path": "NRC_AI/src/effect_engine.py",
+      "bytes": 927,
+      "sha256": "a8d1b2ebe39d211646d7a4712a410089521479269a4d6b0ddda5840608891792"
+    },
+    {
+      "path": "NRC_AI/src/effect_models.py",
+      "bytes": 29969,
+      "sha256": "5dff04f67f9d7f6bc219cf7573f9dd48c937b9026c5645d9fa794763c5e9495f"
+    },
+    {
+      "path": "NRC_AI/src/engine/__init__.py",
+      "bytes": 1501,
+      "sha256": "280b1b2bf8283706c84768ebc2f3a0e0b6255e637b09c26833686e933c0a8315"
+    },
+    {
+      "path": "NRC_AI/src/engine/_monolith.py",
+      "bytes": 161636,
+      "sha256": "7230e12b7399a0ec71516caa0ae870ba0cf8f80133672e4b7b901a2c1d7cd27b"
+    },
+    {
+      "path": "NRC_AI/src/main.py",
+      "bytes": 23758,
+      "sha256": "59e45a8b5bf2edb27ef069582ef7d4bd8213026bd8deee51a5898f2e56460783"
+    },
+    {
+      "path": "NRC_AI/src/mcts.py",
+      "bytes": 17933,
+      "sha256": "893f49cb127003631221551e0d6b0372dbe0de4ba2ceb9773e566659bba8ab2d"
+    },
+    {
+      "path": "NRC_AI/src/models.py",
+      "bytes": 22933,
+      "sha256": "72c695d8525ff50f4a1797b44a2053b15cbcc52e07d864b25162a0248e8e0ede"
+    },
+    {
+      "path": "NRC_AI/src/pokemon_db.py",
+      "bytes": 10433,
+      "sha256": "82404a03b26dfd3b5794547ff0f1eb02b83003eb10019e9efde6cbff3b945c49"
+    },
+    {
+      "path": "NRC_AI/src/pokemon_nature_table.py",
+      "bytes": 6261,
+      "sha256": "9de536d15045137ad75cc518170a8e086bf81b0cfd2676492938fd24375fd6ca"
+    },
+    {
+      "path": "NRC_AI/src/server.py",
+      "bytes": 59820,
+      "sha256": "bcbd259bb966e4ce1c08393aecdb75bd64564fd12c6708a4167caa52e6f21a70"
+    },
+    {
+      "path": "NRC_AI/src/skill_db.py",
+      "bytes": 6341,
+      "sha256": "796a915316a19bb014256a52a61b61c521613625a6677eee2e8f6b873e65759a"
+    },
+    {
+      "path": "NRC_AI/src/skill_effects_generated.py",
+      "bytes": 33972,
+      "sha256": "44625a7f99f3a35c43c0cb544096d1b20e8219c94c55f616a2e8fc837219e9cf"
+    },
+    {
+      "path": "NRC_AI/src/team_builder.py",
+      "bytes": 7513,
+      "sha256": "0306c39e8c6a88a649340ef0586afe09376fd599562fcfbca017045835595ff5"
+    },
+    {
+      "path": "NRC_AI/start.py",
+      "bytes": 307,
+      "sha256": "c09eeebaba8107cbc5f8396ccc9a38bdb3d60540a375420bf6d9ca3753bd84ff"
+    },
+    {
+      "path": "NRC_AI/tests/test_ability_batch2.py",
+      "bytes": 25416,
+      "sha256": "375383822e5c035e83a6e52fc897dcf61977bbb106122e81c9176c940aef94d0"
+    },
+    {
+      "path": "NRC_AI/tests/test_ability_batch3_e2e.py",
+      "bytes": 16456,
+      "sha256": "91bbbd9102cc343efc622e740ec09cae864466b6f85756272b56a2a0f62a4b8c"
+    },
+    {
+      "path": "NRC_AI/tests/test_ability_batch5_values.py",
+      "bytes": 8876,
+      "sha256": "a194dd5416d75c142f8d09ac2f891bcaa1492732f2fdb9331b5653127c79cf92"
+    },
+    {
+      "path": "NRC_AI/tests/test_ability_clarifications.py",
+      "bytes": 12218,
+      "sha256": "e152c87e4e959d23cf2262690546bdf64c79f80af9dd99472a35a23f71738a85"
+    },
+    {
+      "path": "NRC_AI/tests/test_ability_integration.py",
+      "bytes": 25072,
+      "sha256": "03557745faffa659ca217a810ab0e672acd6cea6c73bcf613b4fdb50a6770381"
+    },
+    {
+      "path": "NRC_AI/tests/test_battle_fixes.py",
+      "bytes": 23860,
+      "sha256": "de8eb5de4e2ea04a1a29bc0e4cb405e987d87d157aa9f72ec88def827ffacfbe"
+    },
+    {
+      "path": "NRC_AI/tests/test_battle_triggers.py",
+      "bytes": 6348,
+      "sha256": "d7e95d350878ad797320270b45b1728a4395f6ec615280429b0e86f53d176a30"
+    },
+    {
+      "path": "NRC_AI/tests/test_damage_calibration_baseline.py",
+      "bytes": 8478,
+      "sha256": "ea0c6b43768f92419183d277153fa0a5f55fe4d66d4aac9f1fc1c62c566506cd"
+    },
+    {
+      "path": "NRC_AI/tests/test_effect_generic_mechanics.py",
+      "bytes": 6248,
+      "sha256": "fed197fdf5a920ac9543e3a9c0e716b99fc4a6527b22415971fac8073c5e972a"
+    },
+    {
+      "path": "NRC_AI/tests/test_generate_skill_effects_patterns.py",
+      "bytes": 8078,
+      "sha256": "353b97ee5b77f4dcd53efb190265be3e62439de1a0ad60e6e0b26558bcf67539"
+    },
+    {
+      "path": "NRC_AI/tests/test_generated_skill_expansion.py",
+      "bytes": 1428,
+      "sha256": "7dc785018964a16ce565388e9f5c1d11d22adb26e56acc1b6a28635afa087296"
+    },
+    {
+      "path": "NRC_AI/tests/test_manual_high_value_skills.py",
+      "bytes": 3453,
+      "sha256": "478a4b40a8a46a8938338044b091613e502034ad1018f82bed67a5c72e003c0d"
+    },
+    {
+      "path": "NRC_AI/tests/test_server_skill_display.py",
+      "bytes": 1668,
+      "sha256": "4d475c38c47b34b549e80f10aac458cd43b5fc8a2fefe710d4dcce1393b33851"
+    },
+    {
+      "path": "NRC_AI/tests/test_skill_runtime_mappings.py",
+      "bytes": 24516,
+      "sha256": "2be74b49495f49a0983ba1e299c66300959648f6e22ee8af7c0aaa8d29683f93"
+    },
+    {
+      "path": "NRC_AI/tests/test_tier1_abilities.py",
+      "bytes": 7167,
+      "sha256": "adfcfaa0c942893569ff96369f81f74c7447d8cdc4d0c3a31b7465452522a246"
+    },
+    {
+      "path": "NRC_AI/tests/test_tier2_abilities.py",
+      "bytes": 7133,
+      "sha256": "a1d394a0eed836aa3d8c6c3f84dca068925fcf6f912ae63c46c6b32847779897"
+    },
+    {
+      "path": "NRC_AI/tests/test_tier2_remaining_abilities.py",
+      "bytes": 6371,
+      "sha256": "9fb17483eaef59d32637ac5a5894d98c190ccd56e7cf0339e14f8b2465c59eae"
+    },
+    {
+      "path": "NRC_AI/tests/test_turn_order_rules.py",
+      "bytes": 4433,
+      "sha256": "951ad7fbd9db41b3d86ea939d66103941a4e455356f41d77805a1bfc4bf5d3b2"
+    },
+    {
+      "path": "NRC_AI/web/assets/fonts/皇室战争 B.otf",
+      "bytes": 3881776,
+      "sha256": "18ff43f84b47a016755c1984248870b84e546dfbe15de448f073beac1f9ac3ca"
+    },
+    {
+      "path": "NRC_AI/web/assets/fonts/皇室战争 L.otf",
+      "bytes": 3967228,
+      "sha256": "eec5fb37a7495c8a08f3c8112a4b94db64f31d9ac05d68d3de32035e80df31bc"
+    },
+    {
+      "path": "NRC_AI/web/assets/fonts/HYXiaoBoHeiQiShiW.ttf",
+      "bytes": 3944032,
+      "sha256": "075d44e443e4c2116c5a4f69301080df54ad28741eb53c7bff846470859e3905"
+    },
+    {
+      "path": "NRC_AI/web/assets/img/banner.png",
+      "bytes": 1844352,
+      "sha256": "78053101d5d8703d9f157614d8023e2274000fe073ccc9e23f51b8f26809a800"
+    },
+    {
+      "path": "NRC_AI/web/assets/img/logo.png",
+      "bytes": 3671,
+      "sha256": "575791f8f136dc2c21d95e262618968556dfd0b7d4b823878264b823fbb83316"
+    },
+    {
+      "path": "NRC_AI/web/assets/img/star-bg.png",
+      "bytes": 879,
+      "sha256": "4e23a16f0e7de0d0a8b7426f14e6ab61b6327f12005ede7861ddec708a194416"
+    },
+    {
+      "path": "NRC_AI/web/assets/img/swoosh.png",
+      "bytes": 6396,
+      "sha256": "d9b228b0844ffc1a1397147ca422d2a82e8d0162070d61327444d1cc365816d4"
+    },
+    {
+      "path": "NRC_AI/web/assets/img/title-bg.png",
+      "bytes": 2230220,
+      "sha256": "974453c538bf2a200da08afd70c6d5ec4679dedc24763236f4aea0725e9a7222"
+    },
+    {
+      "path": "NRC_AI/web/battle.html",
+      "bytes": 50609,
+      "sha256": "4511b6ac666e05e27a305854d1debbd52a23f240bf65e8b462267898df72a8e6"
+    },
+    {
+      "path": "NRC_AI/web/index.html",
+      "bytes": 4813,
+      "sha256": "a2752bf0f0dcbdb353823260428d27a0ae045cd4fb00f736e9edd34830383c58"
+    },
+    {
+      "path": "NRC_AI/web/rules.html",
+      "bytes": 25175,
+      "sha256": "0566717513b9f5bd95ee598745369b304e777cb573debc97d138da773f766572"
+    },
+    {
+      "path": "NRC_AI/web/team.html",
+      "bytes": 56815,
+      "sha256": "adfa4ead99cb977f112d1be670c7ad057d41e05f1fdadf67460e2555abe75c7b"
+    },
+    {
+      "path": "NRC_AI/web/theme.css",
+      "bytes": 11957,
+      "sha256": "5f0f685a21bd89e10f1aab141f1e61f455e4f946b3d7d03c329a819490639e9e"
+    },
+    {
+      "path": "rocom-data/.env.example",
+      "bytes": 304,
+      "sha256": "e1861224bb199214a78ec1c331ea3e7baf6e9df70df16c043671748ea121cdb8"
+    },
+    {
+      "path": "rocom-data/.gitignore",
+      "bytes": 395,
+      "sha256": "00e199fb80ce7aa45657230948807d3aaa522a8f78fa3314cd0ba98071d4b9f1"
+    },
+    {
+      "path": "rocom-data/.vscode/tasks.json",
+      "bytes": 410,
+      "sha256": "25b059159b3a4b9bd9d441a416f59c90bf8aff123b5b4b5c088472f21ee8670c"
+    },
+    {
+      "path": "rocom-data/assets/llm_review_example.png",
+      "bytes": 213193,
+      "sha256": "59643115ef69bfd836f40390325e4659fd13e23dea7af85344fe749c6318998d"
+    },
+    {
+      "path": "rocom-data/assets/logo.png",
+      "bytes": 1694461,
+      "sha256": "64a18a61c6638cc428294f775a057e98a0f006bb4f9c98e32bac1137e2c20dcd"
+    },
+    {
+      "path": "rocom-data/assets/templates/咔咔鸟.png",
+      "bytes": 5046,
+      "sha256": "cb41d428d4f173430fab2e5b16f64a45af8f873e2701041280b3bfca3044b783"
+    },
+    {
+      "path": "rocom-data/assets/templates/popup/confirm.png",
+      "bytes": 11094,
+      "sha256": "4f98ccc09c85c6f028cc518926fca41791954bb4e80d0f47057d94ee1dfaa5b9"
+    },
+    {
+      "path": "rocom-data/assets/templates/popup/yes.png",
+      "bytes": 13254,
+      "sha256": "c44e1657be80881fe4cfcce25a405f6a001c5de49e1fa240569f9b18ce1959c4"
+    },
+    {
+      "path": "rocom-data/assets/templates/pvp/switch_panel_heart.png",
+      "bytes": 2124,
+      "sha256": "693e0d4fb02b4a06870786872769baa444bf694905df9e9f9aea54dc59973acf"
+    },
+    {
+      "path": "rocom-data/assets/templates/skills/防御.png",
+      "bytes": 9030,
+      "sha256": "f95a45afae3a8c12614c5f80e671702b123cfe0da0ff997a9dd8193594c58033"
+    },
+    {
+      "path": "rocom-data/assets/templates/skills/音波弹.png",
+      "bytes": 78156,
+      "sha256": "94f8fb3fdd2646bfa4cfe65df7cd61b8ca1af5244fffbe67c7aa9b3805d6d6ca"
+    },
+    {
+      "path": "rocom-data/assets/templates/skills/追打.png",
+      "bytes": 55513,
+      "sha256": "e5322ca3f1d54ba98d223730cd744a7ce26e3efdd7c4e2dcd68fe590fa6f1373"
+    },
+    {
+      "path": "rocom-data/assets/templates/skills/聚盐.png",
+      "bytes": 78866,
+      "sha256": "2e9a5a8f079eae3e67a16d8daabf39be0a856e4e72d9d7550b75b91d1a1dcd13"
+    },
+    {
+      "path": "rocom-data/assets/templates/skills/暴风眼.png",
+      "bytes": 51905,
+      "sha256": "5b7952ce506b6247608ee240eb6d7a294f163a6fb10d9cf09db4ecd6334d3aaa"
+    },
+    {
+      "path": "rocom-data/assets/templates/skills/energy.png",
+      "bytes": 18054,
+      "sha256": "e220a2dc41f423b7955296af8594d941c76e361e3bfe20f60d0750b23d207eef"
+    },
+    {
+      "path": "rocom-data/assets/templates/skills/escape.png",
+      "bytes": 3702,
+      "sha256": "61c926c78c11f6824efdc3bbda4db92d244513d4700952b46ff35968cd3b861f"
+    },
+    {
+      "path": "rocom-data/assets/templates/start_challenge.png",
+      "bytes": 25998,
+      "sha256": "c67e2b21bbf586849d7c94a6930162367e0a80fcc571c01969c0f2da499800cb"
+    },
+    {
+      "path": "rocom-data/battle.py",
+      "bytes": 50920,
+      "sha256": "dae8f41b5ac646083b06adb29b192bb7654bfd23e6b308f1f3b818aee102a824"
+    },
+    {
+      "path": "rocom-data/data/.gitkeep",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "rocom-data/data/experience/沙暴武.json",
+      "bytes": 4609,
+      "sha256": "b4c38d616a480b9e7565b4956dcb67cd1fd277b0d51f407a862653318804aeea"
+    },
+    {
+      "path": "rocom-data/data/experience/狼王队.json",
+      "bytes": 2173,
+      "sha256": "2d79ea0ad6edb2f7958a1afd241f9c1bb0ebb417d1e54a44086f705c23aa37af"
+    },
+    {
+      "path": "rocom-data/data/experience/预设毒队.json",
+      "bytes": 6580,
+      "sha256": "9549eabc6dafc00b7c413ee7248647dfffd1f0e20a176df736a02f865875f498"
+    },
+    {
+      "path": "rocom-data/data/lineups.csv",
+      "bytes": 115973,
+      "sha256": "d7ee6d1d0760aec165fb02f27b22d58d0ede43657ff171c3b1c25234b86efd64"
+    },
+    {
+      "path": "rocom-data/data/lineups.json",
+      "bytes": 435153,
+      "sha256": "eb769ee9a4eb71e3e2bb52d7a4d24dacc4428a1b034b30c4a8439e017a686b36"
+    },
+    {
+      "path": "rocom-data/data/llm_config.yaml.example",
+      "bytes": 568,
+      "sha256": "6ee64b673762d5cffbcae8966933a566e8c8d56b1db607bd64a6a2a437d1dee7"
+    },
+    {
+      "path": "rocom-data/data/skills_all.csv",
+      "bytes": 46214,
+      "sha256": "f70f65023089317d43594a53f45346a23fddda63154f0496063f7d95ea0bbd4d"
+    },
+    {
+      "path": "rocom-data/data/skills.csv",
+      "bytes": 36632,
+      "sha256": "fdfa6519404c8b6ec4f867c903d1b1a209f5e1380f7851d1f367f4302341772d"
+    },
+    {
+      "path": "rocom-data/data/sprites.csv",
+      "bytes": 1842048,
+      "sha256": "245dedad184f93672068328ae4e5a240c532165cd887c2f1d871b0d56bdd1568"
+    },
+    {
+      "path": "rocom-data/data/sprites.json",
+      "bytes": 5667196,
+      "sha256": "d501396c898ccb573ab514b5d7aa9583c116d262e1bf4684af3987aa63436b49"
+    },
+    {
+      "path": "rocom-data/data/strategies/_template.yaml",
+      "bytes": 2593,
+      "sha256": "4a106b4eb46a1701e2f8ad175e45b3771473784459c5e285c983c7285bc4448d"
+    },
+    {
+      "path": "rocom-data/data/strategies/平衡狼王队.yaml",
+      "bytes": 2977,
+      "sha256": "ecaf8b8258a8697bedb4c4d0f4d786b380ece1b14307162d32c120994c0a7087"
+    },
+    {
+      "path": "rocom-data/data/strategies/狼王队.yaml",
+      "bytes": 2561,
+      "sha256": "09c1b4962725d8ae1c0a5421452b517459723d1e81a6396b8c707dbfbe1d9dd3"
+    },
+    {
+      "path": "rocom-data/data/teams.json",
+      "bytes": 5939,
+      "sha256": "54306e56e99f43ab10637ed80311aafdf77bbda8b436c492a558706a924e04ef"
+    },
+    {
+      "path": "rocom-data/data/urls.csv",
+      "bytes": 185712,
+      "sha256": "7094f99592ab49dbd32ba0885a76974781af4822df13f0fab48a5f793debfaa0"
+    },
+    {
+      "path": "rocom-data/db_manage.py",
+      "bytes": 5175,
+      "sha256": "4338f09135e5f6a44e7c024e96e66337f1183cd886031e44cd75c889cdf1e878"
+    },
+    {
+      "path": "rocom-data/docs/superpowers/plans/2026-05-06-bwiki-lineup-scraper.md",
+      "bytes": 39213,
+      "sha256": "b6d8dbdb460d83ab4779e4919ee259e2dc886cc24fb814c61bfd690c45a32fd2"
+    },
+    {
+      "path": "rocom-data/docs/superpowers/plans/2026-05-06-rocom-avatar-scraper.md",
+      "bytes": 23790,
+      "sha256": "5fbd51c093f0676294d772553c1a0da5c98fe3a57d3b44615450ebfdf8609719"
+    },
+    {
+      "path": "rocom-data/docs/superpowers/specs/2026-05-06-bwiki-lineup-scraper-design.md",
+      "bytes": 8536,
+      "sha256": "ce43ae7c087e13bf0e5a7b13aa10550c72f2c1c0a81e32ae0d874f03a02bf73e"
+    },
+    {
+      "path": "rocom-data/docs/superpowers/specs/2026-05-06-rocom-avatar-scraper-design.md",
+      "bytes": 7752,
+      "sha256": "3d6009ebcf77125eb9d2584673dd3ee2aab6f40dbcba23b696a0a00901aa8183"
+    },
+    {
+      "path": "rocom-data/game_control/__init__.py",
+      "bytes": 382,
+      "sha256": "0ad1a7bb9afb2d8987ed29bb10e7d1857d099b27e32f1fde45573704a1b4eaed"
+    },
+    {
+      "path": "rocom-data/game_control/controller.py",
+      "bytes": 9372,
+      "sha256": "7af2b24b113659080bd45a400863c10f9052ece800aca3509e4f5ddac0c08a73"
+    },
+    {
+      "path": "rocom-data/game_control/exceptions.py",
+      "bytes": 359,
+      "sha256": "8d21635e26bb027bb5c9028a3de33627e98b809a4bdba43f45eb064c558fe419"
+    },
+    {
+      "path": "rocom-data/game_control/logger.py",
+      "bytes": 677,
+      "sha256": "e740acc6e314180dccf3f4387761f55324535812907399581041334663558d0e"
+    },
+    {
+      "path": "rocom-data/game_control/skill_executor.py",
+      "bytes": 806,
+      "sha256": "f52b115c655c5d2b91348e65dd9c2077ff02d5059d7ffd1ed17088a3bd55b9b9"
+    },
+    {
+      "path": "rocom-data/game_control/utils.py",
+      "bytes": 231,
+      "sha256": "0b5eb4c56035516df6333e68bc2a2ebf562fdafc08fb14e8b20da5faa50f363e"
+    },
+    {
+      "path": "rocom-data/game_control/window.py",
+      "bytes": 716,
+      "sha256": "d64977f55710631a6908ef84e1eda86fb1fde748310d8b6fb7c9971078e25d41"
+    },
+    {
+      "path": "rocom-data/import_images/狼王队.png",
+      "bytes": 1209804,
+      "sha256": "32bbb5c803f325516f4fb4cc7c5534d171f47b099007e0a39da3b084a6f743b4"
+    },
+    {
+      "path": "rocom-data/import_images/README.txt",
+      "bytes": 750,
+      "sha256": "ea44df9db5dc2502d27c173d337df13f687a7edf7776092030fa469cb1052f51"
+    },
+    {
+      "path": "rocom-data/lineup_scraper.py",
+      "bytes": 18081,
+      "sha256": "77e41507f6ef7858a1c6a22e9d3bbb670cb040350bf6c87be7582b859ed0c07f"
+    },
+    {
+      "path": "rocom-data/pvp/__init__.py",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "rocom-data/pvp/config.py",
+      "bytes": 2808,
+      "sha256": "7f883019f756d782e6bd50aaf5b1c6c63aa40e5f809a10215cf6cbcd72fbb669"
+    },
+    {
+      "path": "rocom-data/pvp/pvp_task.py",
+      "bytes": 8781,
+      "sha256": "4cbbe7746617d04a34eca42873155aebe6a286348226d0fb2cee1d197e4322c7"
+    },
+    {
+      "path": "rocom-data/README.md",
+      "bytes": 32198,
+      "sha256": "cc649c67877cc0a8fe1920bb73873a3fbf7045bb909bfd0acc5b46e252215b2f"
+    },
+    {
+      "path": "rocom-data/requirements.txt",
+      "bytes": 901,
+      "sha256": "34df6e28b8a3504d448a3a5455adc11f91c71f85210bf7ff22815a974e2d57a8"
+    },
+    {
+      "path": "rocom-data/rocom_scraper.py",
+      "bytes": 34288,
+      "sha256": "25b91f6ad6f7de14a27801ac9e3b060b28eb9b0795dbab71a1392efeacb3a411"
+    },
+    {
+      "path": "rocom-data/run.bat",
+      "bytes": 1324,
+      "sha256": "1a1cb1efd05dc1b0022dfd8e37236e41215afee96406658e65ba628111c46399"
+    },
+    {
+      "path": "rocom-data/sim/__init__.py",
+      "bytes": 721,
+      "sha256": "4f355727a51929dbead0237e12899121e62e3bfb4f9313a0cd4e910581e402cb"
+    },
+    {
+      "path": "rocom-data/sim/ability_engine.py",
+      "bytes": 48149,
+      "sha256": "f0544bfc202886f16063df5240324c2308f41740f6c5e60b647736284c242d2c"
+    },
+    {
+      "path": "rocom-data/sim/agent_base.py",
+      "bytes": 1078,
+      "sha256": "8a46d218bb838fa68677114073a77177df5efc07707d490d9f07e122ff26a441"
+    },
+    {
+      "path": "rocom-data/sim/batch_concurrent.py",
+      "bytes": 16973,
+      "sha256": "249b75d47fe53f162c47cb361f9f2e72dd4fbbe9d9996adf7fea40966f45b9f6"
+    },
+    {
+      "path": "rocom-data/sim/battle_engine.py",
+      "bytes": 37519,
+      "sha256": "757cceb1be9250215d47226252d09bd70242386b18b977de6146815dbf1e0465"
+    },
+    {
+      "path": "rocom-data/sim/battle_log_capture.py",
+      "bytes": 2127,
+      "sha256": "34c3d67bb475870ed4daadd825809e005e8d694c7bf9b0b46fb7dbcd2a997623"
+    },
+    {
+      "path": "rocom-data/sim/battle_state.py",
+      "bytes": 5288,
+      "sha256": "6edc5e2236d531ffce388c729bff94577f6cbc7713c6b9989a39e1b2497cc07e"
+    },
+    {
+      "path": "rocom-data/sim/counter_system.py",
+      "bytes": 6510,
+      "sha256": "5d906d11b3c137c9ccf3086b2c973a2c078b0d22d3c4a908ad9e5f67746b9095"
+    },
+    {
+      "path": "rocom-data/sim/damage_calc.py",
+      "bytes": 4492,
+      "sha256": "f040a3e35a0de14384f00e85135be15b11e5e77c212c27ba57b2301f934079ed"
+    },
+    {
+      "path": "rocom-data/sim/data_store.py",
+      "bytes": 32181,
+      "sha256": "a59029d2dda89e25d1c642e449b7ca0de8791872034ebaedd2a8f503682c4a28"
+    },
+    {
+      "path": "rocom-data/sim/experience_db.py",
+      "bytes": 12558,
+      "sha256": "de1561633954894934fdf1ae710cab9863f9299f70b1135f211800bff84deb44"
+    },
+    {
+      "path": "rocom-data/sim/human_agent.py",
+      "bytes": 6035,
+      "sha256": "d7e1ea23f5a20730c4770e6e5dd09da934d6a5e40296aa61856fa134f9dad03d"
+    },
+    {
+      "path": "rocom-data/sim/lineups_loader.py",
+      "bytes": 1415,
+      "sha256": "0f7b9a40f9dea2ed4e50b2f80f678b6c8345522e68dda158e6d756950431889b"
+    },
+    {
+      "path": "rocom-data/sim/llm_agent.py",
+      "bytes": 16522,
+      "sha256": "193a3b3939d136a473858389fc8c2a3047395ad6cbe82e0df5b2c6b59cc4f028"
+    },
+    {
+      "path": "rocom-data/sim/llm_review.py",
+      "bytes": 12617,
+      "sha256": "ae4e224992aebafc11b86810af218473db0568fa712109ca16d2aa3b532e6e7c"
+    },
+    {
+      "path": "rocom-data/sim/llm_team_generator.py",
+      "bytes": 11865,
+      "sha256": "6422cf0dc54322645136e516d2a12bc01035daa6837834efd8ba8ac0901595e8"
+    },
+    {
+      "path": "rocom-data/sim/mark_system.py",
+      "bytes": 3122,
+      "sha256": "f5198401dabb53eb4ab7b012c8b09b4107ade6769ba5aeef7226b126ba58a4c4"
+    },
+    {
+      "path": "rocom-data/sim/mcts_agent.py",
+      "bytes": 6269,
+      "sha256": "a3f15e50a11e87a7256b91a34b50516f5265748ef8b355f22a8f647f76b1b22c"
+    },
+    {
+      "path": "rocom-data/sim/mcts.py",
+      "bytes": 11850,
+      "sha256": "218a24caefe87c7836e9f32ef51b43f2920fb34966d9b68a6630216a567b367e"
+    },
+    {
+      "path": "rocom-data/sim/pokemon_db.py",
+      "bytes": 12059,
+      "sha256": "7278db7834a0577cc9148edad1a8e0abcda130e3a560e7bfe035cdd940aadc47"
+    },
+    {
+      "path": "rocom-data/sim/pokemon.py",
+      "bytes": 11223,
+      "sha256": "47a23987fb4db525e3f15c24931586064236c1faca0f131bc274d09ad11056d0"
+    },
+    {
+      "path": "rocom-data/sim/skill_db.py",
+      "bytes": 10501,
+      "sha256": "0d0e85406cdcabf02d9cd089e36692cdc9b17dc211c76b6ad49d5806028ea78b"
+    },
+    {
+      "path": "rocom-data/sim/skill.py",
+      "bytes": 5868,
+      "sha256": "e739f12f6768e65c6b84c47dc97fc5ce544efce9901a6349b5feff036cc24af9"
+    },
+    {
+      "path": "rocom-data/sim/strategy.py",
+      "bytes": 12973,
+      "sha256": "80c3f89c0999187a3eab4ccbef4ebbe8f260cec31bc98ff95baba9e53370f9f9"
+    },
+    {
+      "path": "rocom-data/sim/team_builder_interactive.py",
+      "bytes": 9191,
+      "sha256": "6ccc8d1d13aedd61c573af742ca4b543ed9bfa530449f079a6fc7038d037c3ef"
+    },
+    {
+      "path": "rocom-data/sim/team_builder.py",
+      "bytes": 3882,
+      "sha256": "c988327fb5a57ba90b519d9657dab3dbc0e24a6e794aafb963b6bb18aa348699"
+    },
+    {
+      "path": "rocom-data/sim/team_image_parser_ocr.py",
+      "bytes": 11598,
+      "sha256": "18f334a9ab20fe8345ee88d436f3415ef32a13dfa228ff75e901eb3f57038363"
+    },
+    {
+      "path": "rocom-data/sim/team_image_parser.py",
+      "bytes": 8525,
+      "sha256": "4af17b22a3afd3bf24b63b03e53791137b5ffe96926b783581953f1c30d8e2c6"
+    },
+    {
+      "path": "rocom-data/sim/team_roster.py",
+      "bytes": 7706,
+      "sha256": "05707c5662df824e6b843f8088a91d4063b72a98a88a1b080577a435faf30eac"
+    },
+    {
+      "path": "rocom-data/sim/types.py",
+      "bytes": 8271,
+      "sha256": "9bbe53901ab1a25c98773de3a9a32e8660467540457da6500b03802cf176032d"
+    },
+    {
+      "path": "rocom-data/tests/fixtures/rocom_avatar_list.html",
+      "bytes": 853,
+      "sha256": "4c77d46099c66e5a8e8ba791c4f284a69822ceb8547c5981aaaa0aca131ba94c"
+    },
+    {
+      "path": "rocom-data/tests/test_all.py",
+      "bytes": 21458,
+      "sha256": "e3e924ce36b6c455c44384e76cf7c80235516823b9e7210e505586ee19274f90"
+    },
+    {
+      "path": "rocom-data/tests/test_battle_log_capture.py",
+      "bytes": 2027,
+      "sha256": "12b41642d4f27b4f19174308af8ecf21fe761ae7e452c51b4784d263b54c1f79"
+    },
+    {
+      "path": "rocom-data/tests/test_c_group_abilities.py",
+      "bytes": 10693,
+      "sha256": "4037939c7b3631e454b0e2ef3bd28c2bb485b3cecdcf493efb84b79d241c650b"
+    },
+    {
+      "path": "rocom-data/tests/test_interactive.py",
+      "bytes": 10084,
+      "sha256": "8280d0148725a3b06fe760768a286c754265a9bd7237d99667a3e8e0ff5eeb4f"
+    },
+    {
+      "path": "rocom-data/tests/test_lineup_scraper.py",
+      "bytes": 13971,
+      "sha256": "ef9db5bd4bf25041914f51adca52efd1c2de1c9e7382b8d59e7c3418b4b56d54"
+    },
+    {
+      "path": "rocom-data/tests/test_llm_review_aggregate.py",
+      "bytes": 4140,
+      "sha256": "72d7f2ac3467929038decb9931e0539a515e0dee5cf2b2339cd5ca9422f097b8"
+    },
+    {
+      "path": "rocom-data/tests/test_rocom_scraper.py",
+      "bytes": 10233,
+      "sha256": "5af2bcaac1ea0fda2a94fcc2e12c9986bc7c75071ee3339a935b47f05afeb83e"
+    },
+    {
+      "path": "rocom-data/tools/ability_analysis.json",
+      "bytes": 12076,
+      "sha256": "00e0b135081adbb1ec872fe156e6470c44eb9092c269e9b649282dbb5bab0f88"
+    },
+    {
+      "path": "rocom-data/tools/analyze_abilities.py",
+      "bytes": 7599,
+      "sha256": "45385b7c468ca907432d50a9a517439649e0ad9c84264bf52a2cbb774d18a315"
+    },
+    {
+      "path": "rocom-data/tools/smoke_battle_cgroup.py",
+      "bytes": 2332,
+      "sha256": "a5bc9f1aaa343f7e486ca674d6f92505e397202eb587d7fb150c970605cfcd19"
+    },
+    {
+      "path": "rocom-data/train.py",
+      "bytes": 10374,
+      "sha256": "610ad4483a0d3ffa45647cf5e96da0d23490bd09aed593b884555f8842386a24"
+    },
+    {
+      "path": "rocom-data/viewer.py",
+      "bytes": 8818,
+      "sha256": "39eb1049b1459f858633c8818770c18aba1c2c6a6bf9df6e8ee37e2129c3114a"
+    },
+    {
+      "path": "rocom-data/win_util/__init__.py",
+      "bytes": 230,
+      "sha256": "956d9c0c59b3e51544126d3a3ee064af29f3ecefc2272792800aaccd46c94f59"
+    },
+    {
+      "path": "rocom-data/win_util/controller.py",
+      "bytes": 1099,
+      "sha256": "70a3385f7deb05497d79eed989d411e0ffed0eb1b9d750acf0f0810f9643cb2f"
+    },
+    {
+      "path": "rocom-data/win_util/image.py",
+      "bytes": 7347,
+      "sha256": "ddd3680d304d93a3b96e81528495d4fa6796c15d3af84a68ace021ece7af5fd2"
+    },
+    {
+      "path": "rocom-data/win_util/keyboard.py",
+      "bytes": 3722,
+      "sha256": "1bfdc13d56dc14651e90a7d2db8724bff09dd5935d23fdbe535b8a7ba7a3b028"
+    },
+    {
+      "path": "rocom-data/win_util/mouse.py",
+      "bytes": 3923,
+      "sha256": "0891d3b5f366caec37a3ad96447c95b91ad1b24c925bcf0ff3f79cda21ca116f"
+    },
+    {
+      "path": "rocom-data/win_util/pyproject.toml",
+      "bytes": 1500,
+      "sha256": "486002d7947b6e0255944906c77065e54e091de6a7678e8a0d2808d7123169d2"
+    },
+    {
+      "path": "rocom-data/win_util/README.md",
+      "bytes": 1359,
+      "sha256": "d36fba9092ad2cefee829a4ac2f2f7323d778dbbaa1792a13d54808518994e4b"
+    },
+    {
+      "path": "rocom-wiki-data/.gitignore",
+      "bytes": 38,
+      "sha256": "93edbecd8de977e48813be8b0e56f2723a60c9b6e32b75679df564b117fcd3df"
+    },
+    {
+      "path": "rocom-wiki-data/洛克王国世界图鉴Lite.xlsx",
+      "bytes": 90440,
+      "sha256": "c56f4ed77dcb308b2e954b4a675fce0b0b892c38db20f44f2b6ee2f43c931a78"
+    },
+    {
+      "path": "rocom-wiki-data/LICENSE",
+      "bytes": 1822,
+      "sha256": "5942b4a9149a731f82161ff65f29d774aea2b5801b8279b57c5c04421d4ee251"
+    },
+    {
+      "path": "rocom-wiki-data/README.md",
+      "bytes": 5254,
+      "sha256": "5bb481f912052e8fac61b095c9fcb76a6f2ef07572922c5118057ad1445f7036"
+    },
+    {
+      "path": "rocom-wiki-data/S4Season.lua",
+      "bytes": 34831,
+      "sha256": "e993287e69ae96ae5d3fd1dba8a1cf8c572dbd7a90d1ed4c3c3f9f4fba281f68"
+    },
+    {
+      "path": "rocom-wiki-data/tools/query_pet.py",
+      "bytes": 4087,
+      "sha256": "636e8ebbdb08c3a4c99b859fdc5a80dd4e00314052ba8429d09d1ba5d45ea1ec"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Catalog.lua",
+      "bytes": 929115,
+      "sha256": "537fba5e8cb779c1ef3e231342c2a196e85d0ecb2ee072186adb6e9f727a83d7"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Config.lua",
+      "bytes": 4582,
+      "sha256": "895d9e2b5e2b6b283a8bfaafe256ff909259f2b51f99c6e36f71abeb37717ce6"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Evolutions.lua",
+      "bytes": 181196,
+      "sha256": "4d1f76ce6cdac6cf8fdc40ee78548e93355525f1c30d98c8efa11bd1bfc17ebc"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Handbooks.lua",
+      "bytes": 633920,
+      "sha256": "8144d5493725185ef1966b29e891e797a35401de30d49a9d23b823a554c08c1a"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/History.lua",
+      "bytes": 694648,
+      "sha256": "d5b013a14cd72862dd0f06c1ce0dd524849963555718e510152cb1b73eb226c5"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Index.lua",
+      "bytes": 108036,
+      "sha256": "086831baeaf2c2584beb9e6a4adb5b82e374e276d6068e9ed202f41ec302ba1a"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Learnsets.lua",
+      "bytes": 539068,
+      "sha256": "740e84def6f142fca15b74d58c9851c18eb578ce004fd8a5991243300eef058e"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Overview.lua",
+      "bytes": 40053,
+      "sha256": "8a6dc3975def3fd1e2ed2247879329ee162ade686398fa95d53c5bc2284d6a59"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Skills.lua",
+      "bytes": 187055,
+      "sha256": "ed9132e1a3fd7f0cf287c8acbeb57e830ba0cfe2dc1f11946a72ef6329772f33"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/SkillStoneTopics.lua",
+      "bytes": 93712,
+      "sha256": "646eb370e8af2590f6389e0fde5ac25885ab063826fae68f5ea7f8733cb5d5cf"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Terms.lua",
+      "bytes": 6555,
+      "sha256": "f1830685d31732d3634f8857e14eec75b85ea56b923ceef218ede18182056488"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/TrainingReference.lua",
+      "bytes": 1071122,
+      "sha256": "a1d6d1d4c50e39664154be346cd04d3021f7e5b150b17638eec4a13126f551ac"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/data/Types.lua",
+      "bytes": 35441,
+      "sha256": "22999381d35c64ba50a71e695a9de5c6a45d0fb486fd6541ba6c785d70c2ab57"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/EvolutionConditions.lua",
+      "bytes": 1516,
+      "sha256": "e543bcf56399542a9db1237487d1523e1e934533d12d064b3edb96c55d994b03"
+    },
+    {
+      "path": "rocom-wiki-data/wiki_modules/Pets/Theme.lua",
+      "bytes": 2520,
+      "sha256": "87f905fd6636f6178a15357e718f76a56429fa625e4742493c8348e27225e36b"
+    }
+  ]
+}

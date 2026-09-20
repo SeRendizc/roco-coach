@@ -1,91 +1,105 @@
 {
   "rulesVersion": "0.6",
-  "games": 660,
+  "games": 910,
   "scope": "Level 1 default loadout, no items or weather, one-on-one standard policy, ordered pairs and five seeds. Does not establish 3v3 strategic balance.",
   "pets": [
     {
       "id": "fox",
       "name": "烬尾狐",
-      "winRate": 0.5454545454545454,
-      "drawRate": 0.09090909090909091,
-      "meanTurns": 2.1818181818181817
+      "winRate": 1,
+      "drawRate": 0,
+      "meanTurns": 2.909090909090909
     },
     {
       "id": "turtle",
       "name": "潮甲龟",
-      "winRate": 0.7272727272727273,
+      "winRate": 1.0909090909090908,
       "drawRate": 0,
-      "meanTurns": 4.7272727272727275
+      "meanTurns": 5.7272727272727275
     },
     {
       "id": "deer",
       "name": "芽角鹿",
-      "winRate": 0.5454545454545454,
+      "winRate": 0.8181818181818182,
       "drawRate": 0,
-      "meanTurns": 3.6363636363636362
+      "meanTurns": 4.545454545454546
     },
     {
       "id": "lion",
       "name": "炽鬃狮",
-      "winRate": 0.6363636363636364,
-      "drawRate": 0.09090909090909091,
-      "meanTurns": 2.5454545454545454
+      "winRate": 0.9090909090909091,
+      "drawRate": 0,
+      "meanTurns": 3.090909090909091
     },
     {
       "id": "otter",
       "name": "溪刃獭",
-      "winRate": 0.5454545454545454,
+      "winRate": 0.9090909090909091,
       "drawRate": 0,
-      "meanTurns": 2.6363636363636362
+      "meanTurns": 3.5454545454545454
     },
     {
       "id": "shroom",
       "name": "苔盾菇",
-      "winRate": 0.36363636363636365,
+      "winRate": 0.2727272727272727,
       "drawRate": 0,
-      "meanTurns": 7.909090909090909
+      "meanTurns": 12.545454545454545
     },
     {
       "id": "badger",
       "name": "砾背獾",
-      "winRate": 0.6363636363636364,
+      "winRate": 0.45454545454545453,
       "drawRate": 0,
-      "meanTurns": 3.8181818181818183
+      "meanTurns": 6.181818181818182
     },
     {
       "id": "sparrow",
       "name": "鸣电雀",
-      "winRate": 0.45454545454545453,
+      "winRate": 0.2727272727272727,
       "drawRate": 0,
-      "meanTurns": 2.727272727272727
+      "meanTurns": 3.3636363636363638
     },
     {
       "id": "falcon",
       "name": "岚翎隼",
-      "winRate": 0.2727272727272727,
+      "winRate": 0.5454545454545454,
       "drawRate": 0,
-      "meanTurns": 2.4545454545454546
+      "meanTurns": 3.272727272727273
     },
     {
       "id": "moth",
       "name": "云绒蛾",
-      "winRate": 0.18181818181818182,
+      "winRate": 0.36363636363636365,
       "drawRate": 0,
-      "meanTurns": 3.8181818181818183
+      "meanTurns": 5.7272727272727275
     },
     {
       "id": "rhino",
       "name": "晶角犀",
-      "winRate": 0.45454545454545453,
+      "winRate": 0.5454545454545454,
       "drawRate": 0,
-      "meanTurns": 4.909090909090909
+      "meanTurns": 7
     },
     {
       "id": "marten",
       "name": "伏光貂",
+      "winRate": 0.45454545454545453,
+      "drawRate": 0,
+      "meanTurns": 3.090909090909091
+    },
+    {
+      "id": "ram",
+      "name": "磐耳羊",
       "winRate": 0.5454545454545454,
       "drawRate": 0,
-      "meanTurns": 2.6363636363636362
+      "meanTurns": 5.545454545454546
+    },
+    {
+      "id": "cat",
+      "name": "灵瞳猫",
+      "winRate": 0.09090909090909091,
+      "drawRate": 0,
+      "meanTurns": 4
     }
   ],
   "rows": [
@@ -108,8 +122,8 @@
     {
       "a": "fox",
       "b": "lion",
-      "wins": 0,
-      "draws": 5,
+      "wins": 5,
+      "draws": 0,
       "n": 5,
       "meanTurns": 3
     },
@@ -132,10 +146,10 @@
     {
       "a": "fox",
       "b": "badger",
-      "wins": 0,
+      "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 2
+      "meanTurns": 3
     },
     {
       "a": "fox",
@@ -164,14 +178,30 @@
     {
       "a": "fox",
       "b": "rhino",
-      "wins": 0,
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "fox",
+      "b": "marten",
+      "wins": 5,
       "draws": 0,
       "n": 5,
       "meanTurns": 2
     },
     {
       "a": "fox",
-      "b": "marten",
+      "b": "ram",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "fox",
+      "b": "cat",
       "wins": 5,
       "draws": 0,
       "n": 5,
@@ -223,15 +253,15 @@
       "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 4
+      "meanTurns": 6
     },
     {
       "a": "turtle",
       "b": "sparrow",
-      "wins": 0,
+      "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 4
+      "meanTurns": 3
     },
     {
       "a": "turtle",
@@ -255,15 +285,31 @@
       "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 4
+      "meanTurns": 6
     },
     {
       "a": "turtle",
       "b": "marten",
-      "wins": 0,
+      "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 4
+      "meanTurns": 3
+    },
+    {
+      "a": "turtle",
+      "b": "ram",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 6
+    },
+    {
+      "a": "turtle",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
     },
     {
       "a": "deer",
@@ -300,29 +346,445 @@
     {
       "a": "deer",
       "b": "shroom",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 12
+    },
+    {
+      "a": "deer",
+      "b": "badger",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "deer",
+      "b": "sparrow",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "deer",
+      "b": "falcon",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "deer",
+      "b": "moth",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "deer",
+      "b": "rhino",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 5
+    },
+    {
+      "a": "deer",
+      "b": "marten",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "deer",
+      "b": "ram",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "deer",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "lion",
+      "b": "fox",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "lion",
+      "b": "turtle",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "lion",
+      "b": "deer",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "lion",
+      "b": "otter",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "lion",
+      "b": "shroom",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "lion",
+      "b": "badger",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "lion",
+      "b": "sparrow",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "lion",
+      "b": "falcon",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "lion",
+      "b": "moth",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "lion",
+      "b": "rhino",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "lion",
+      "b": "marten",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "lion",
+      "b": "ram",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "lion",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "otter",
+      "b": "fox",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "otter",
+      "b": "turtle",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "otter",
+      "b": "deer",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "otter",
+      "b": "lion",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "otter",
+      "b": "shroom",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "otter",
+      "b": "badger",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "otter",
+      "b": "sparrow",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "otter",
+      "b": "falcon",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "otter",
+      "b": "moth",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "otter",
+      "b": "rhino",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "otter",
+      "b": "marten",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "otter",
+      "b": "ram",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "otter",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "shroom",
+      "b": "fox",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "shroom",
+      "b": "turtle",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 18
+    },
+    {
+      "a": "shroom",
+      "b": "deer",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 12
+    },
+    {
+      "a": "shroom",
+      "b": "lion",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "shroom",
+      "b": "otter",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "shroom",
+      "b": "badger",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 23
+    },
+    {
+      "a": "shroom",
+      "b": "sparrow",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "shroom",
+      "b": "falcon",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "shroom",
+      "b": "moth",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 20
+    },
+    {
+      "a": "shroom",
+      "b": "rhino",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 26
+    },
+    {
+      "a": "shroom",
+      "b": "marten",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "shroom",
+      "b": "ram",
       "wins": 0,
       "draws": 0,
       "n": 5,
       "meanTurns": 13
     },
     {
-      "a": "deer",
-      "b": "badger",
+      "a": "shroom",
+      "b": "cat",
       "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 5
+    },
+    {
+      "a": "badger",
+      "b": "fox",
+      "wins": 0,
       "draws": 0,
       "n": 5,
       "meanTurns": 3
     },
     {
-      "a": "deer",
+      "a": "badger",
+      "b": "turtle",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 6
+    },
+    {
+      "a": "badger",
+      "b": "deer",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "badger",
+      "b": "lion",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "badger",
+      "b": "otter",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "badger",
+      "b": "shroom",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 23
+    },
+    {
+      "a": "badger",
       "b": "sparrow",
       "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 3
+      "meanTurns": 2
     },
     {
-      "a": "deer",
+      "a": "badger",
       "b": "falcon",
       "wins": 0,
       "draws": 0,
@@ -330,7 +792,7 @@
       "meanTurns": 2
     },
     {
-      "a": "deer",
+      "a": "badger",
       "b": "moth",
       "wins": 0,
       "draws": 0,
@@ -338,47 +800,175 @@
       "meanTurns": 3
     },
     {
-      "a": "deer",
+      "a": "badger",
       "b": "rhino",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 7
+    },
+    {
+      "a": "badger",
+      "b": "marten",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "badger",
+      "b": "ram",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 5
+    },
+    {
+      "a": "badger",
+      "b": "cat",
       "wins": 5,
       "draws": 0,
       "n": 5,
       "meanTurns": 4
     },
     {
-      "a": "deer",
-      "b": "marten",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "lion",
+      "a": "sparrow",
       "b": "fox",
       "wins": 0,
-      "draws": 5,
+      "draws": 0,
       "n": 5,
-      "meanTurns": 3
+      "meanTurns": 2
     },
     {
-      "a": "lion",
+      "a": "sparrow",
       "b": "turtle",
       "wins": 0,
       "draws": 0,
       "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "sparrow",
+      "b": "deer",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "sparrow",
+      "b": "lion",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
       "meanTurns": 2
     },
     {
-      "a": "lion",
-      "b": "deer",
+      "a": "sparrow",
+      "b": "otter",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "sparrow",
+      "b": "shroom",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "sparrow",
+      "b": "badger",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "sparrow",
+      "b": "falcon",
       "wins": 5,
       "draws": 0,
       "n": 5,
       "meanTurns": 2
     },
     {
-      "a": "lion",
+      "a": "sparrow",
+      "b": "moth",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "sparrow",
+      "b": "rhino",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "sparrow",
+      "b": "marten",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "sparrow",
+      "b": "ram",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "sparrow",
+      "b": "cat",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "falcon",
+      "b": "fox",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "falcon",
+      "b": "turtle",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "falcon",
+      "b": "deer",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "falcon",
+      "b": "lion",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "falcon",
       "b": "otter",
       "wins": 0,
       "draws": 0,
@@ -386,47 +976,39 @@
       "meanTurns": 2
     },
     {
-      "a": "lion",
+      "a": "falcon",
       "b": "shroom",
       "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 3
+      "meanTurns": 4
     },
     {
-      "a": "lion",
+      "a": "falcon",
       "b": "badger",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "falcon",
+      "b": "sparrow",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "falcon",
+      "b": "moth",
       "wins": 0,
       "draws": 0,
       "n": 5,
       "meanTurns": 3
     },
     {
-      "a": "lion",
-      "b": "sparrow",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "lion",
-      "b": "falcon",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "lion",
-      "b": "moth",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "lion",
+      "a": "falcon",
       "b": "rhino",
       "wins": 5,
       "draws": 0,
@@ -434,23 +1016,39 @@
       "meanTurns": 4
     },
     {
-      "a": "lion",
+      "a": "falcon",
       "b": "marten",
-      "wins": 5,
+      "wins": 0,
       "draws": 0,
       "n": 5,
       "meanTurns": 2
     },
     {
-      "a": "otter",
+      "a": "falcon",
+      "b": "ram",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "falcon",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "moth",
       "b": "fox",
-      "wins": 5,
+      "wins": 0,
       "draws": 0,
       "n": 5,
-      "meanTurns": 2
+      "meanTurns": 3
     },
     {
-      "a": "otter",
+      "a": "moth",
       "b": "turtle",
       "wins": 0,
       "draws": 0,
@@ -458,63 +1056,63 @@
       "meanTurns": 4
     },
     {
-      "a": "otter",
+      "a": "moth",
       "b": "deer",
       "wins": 0,
       "draws": 0,
       "n": 5,
-      "meanTurns": 2
+      "meanTurns": 4
     },
     {
-      "a": "otter",
+      "a": "moth",
       "b": "lion",
-      "wins": 5,
+      "wins": 0,
       "draws": 0,
       "n": 5,
-      "meanTurns": 2
+      "meanTurns": 3
     },
     {
-      "a": "otter",
+      "a": "moth",
+      "b": "otter",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "moth",
       "b": "shroom",
       "wins": 0,
       "draws": 0,
       "n": 5,
-      "meanTurns": 4
+      "meanTurns": 20
     },
     {
-      "a": "otter",
+      "a": "moth",
       "b": "badger",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "otter",
-      "b": "sparrow",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "otter",
-      "b": "falcon",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "otter",
-      "b": "moth",
       "wins": 5,
       "draws": 0,
       "n": 5,
       "meanTurns": 3
     },
     {
-      "a": "otter",
+      "a": "moth",
+      "b": "sparrow",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "moth",
+      "b": "falcon",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "moth",
       "b": "rhino",
       "wins": 5,
       "draws": 0,
@@ -522,15 +1120,135 @@
       "meanTurns": 4
     },
     {
-      "a": "otter",
+      "a": "moth",
       "b": "marten",
       "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "moth",
+      "b": "ram",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 5
+    },
+    {
+      "a": "moth",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "rhino",
+      "b": "fox",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "rhino",
+      "b": "turtle",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 6
+    },
+    {
+      "a": "rhino",
+      "b": "deer",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 5
+    },
+    {
+      "a": "rhino",
+      "b": "lion",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "rhino",
+      "b": "otter",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "rhino",
+      "b": "shroom",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 26
+    },
+    {
+      "a": "rhino",
+      "b": "badger",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 7
+    },
+    {
+      "a": "rhino",
+      "b": "sparrow",
+      "wins": 5,
       "draws": 0,
       "n": 5,
       "meanTurns": 2
     },
     {
-      "a": "shroom",
+      "a": "rhino",
+      "b": "falcon",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "rhino",
+      "b": "moth",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "rhino",
+      "b": "marten",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "rhino",
+      "b": "ram",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 5
+    },
+    {
+      "a": "rhino",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "marten",
       "b": "fox",
       "wins": 0,
       "draws": 0,
@@ -538,583 +1256,159 @@
       "meanTurns": 2
     },
     {
-      "a": "shroom",
+      "a": "marten",
       "b": "turtle",
       "wins": 0,
       "draws": 0,
       "n": 5,
-      "meanTurns": 18
+      "meanTurns": 3
     },
     {
-      "a": "shroom",
+      "a": "marten",
       "b": "deer",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "marten",
+      "b": "lion",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "marten",
+      "b": "otter",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "marten",
+      "b": "shroom",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "marten",
+      "b": "badger",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "marten",
+      "b": "sparrow",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "marten",
+      "b": "falcon",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "marten",
+      "b": "moth",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "marten",
+      "b": "rhino",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 2
+    },
+    {
+      "a": "marten",
+      "b": "ram",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "marten",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "ram",
+      "b": "fox",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "ram",
+      "b": "turtle",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 6
+    },
+    {
+      "a": "ram",
+      "b": "deer",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "ram",
+      "b": "lion",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "ram",
+      "b": "otter",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "ram",
+      "b": "shroom",
       "wins": 5,
       "draws": 0,
       "n": 5,
       "meanTurns": 13
     },
     {
-      "a": "shroom",
-      "b": "lion",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "shroom",
-      "b": "otter",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "shroom",
+      "a": "ram",
       "b": "badger",
       "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 10
+      "meanTurns": 5
     },
     {
-      "a": "shroom",
-      "b": "sparrow",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "shroom",
-      "b": "falcon",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "shroom",
-      "b": "moth",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 7
-    },
-    {
-      "a": "shroom",
-      "b": "rhino",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 18
-    },
-    {
-      "a": "shroom",
-      "b": "marten",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "badger",
-      "b": "fox",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "badger",
-      "b": "turtle",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "badger",
-      "b": "deer",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "badger",
-      "b": "lion",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "badger",
-      "b": "otter",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "badger",
-      "b": "shroom",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 10
-    },
-    {
-      "a": "badger",
-      "b": "sparrow",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "badger",
-      "b": "falcon",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "badger",
-      "b": "moth",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "badger",
-      "b": "rhino",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 8
-    },
-    {
-      "a": "badger",
-      "b": "marten",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "sparrow",
-      "b": "fox",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "sparrow",
-      "b": "turtle",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "sparrow",
-      "b": "deer",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "sparrow",
-      "b": "lion",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "sparrow",
-      "b": "otter",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "sparrow",
-      "b": "shroom",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "sparrow",
-      "b": "badger",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "sparrow",
-      "b": "falcon",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "sparrow",
-      "b": "moth",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "sparrow",
-      "b": "rhino",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "sparrow",
-      "b": "marten",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "falcon",
-      "b": "fox",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "falcon",
-      "b": "turtle",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "falcon",
-      "b": "deer",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "falcon",
-      "b": "lion",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "falcon",
-      "b": "otter",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "falcon",
-      "b": "shroom",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "falcon",
-      "b": "badger",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "falcon",
-      "b": "sparrow",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "falcon",
-      "b": "moth",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "falcon",
-      "b": "rhino",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "falcon",
-      "b": "marten",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "moth",
-      "b": "fox",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "moth",
-      "b": "turtle",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "moth",
-      "b": "deer",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "moth",
-      "b": "lion",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "moth",
-      "b": "otter",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "moth",
-      "b": "shroom",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 7
-    },
-    {
-      "a": "moth",
-      "b": "badger",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "moth",
-      "b": "sparrow",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "moth",
-      "b": "falcon",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "moth",
-      "b": "rhino",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "moth",
-      "b": "marten",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "rhino",
-      "b": "fox",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "rhino",
-      "b": "turtle",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "rhino",
-      "b": "deer",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "rhino",
-      "b": "lion",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "rhino",
-      "b": "otter",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "rhino",
-      "b": "shroom",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 18
-    },
-    {
-      "a": "rhino",
-      "b": "badger",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 8
-    },
-    {
-      "a": "rhino",
-      "b": "sparrow",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "rhino",
-      "b": "falcon",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "rhino",
-      "b": "moth",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "rhino",
-      "b": "marten",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "marten",
-      "b": "fox",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "marten",
-      "b": "turtle",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "marten",
-      "b": "deer",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 3
-    },
-    {
-      "a": "marten",
-      "b": "lion",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "marten",
-      "b": "otter",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "marten",
-      "b": "shroom",
-      "wins": 5,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 4
-    },
-    {
-      "a": "marten",
-      "b": "badger",
-      "wins": 0,
-      "draws": 0,
-      "n": 5,
-      "meanTurns": 2
-    },
-    {
-      "a": "marten",
+      "a": "ram",
       "b": "sparrow",
       "wins": 5,
       "draws": 0,
@@ -1122,28 +1416,148 @@
       "meanTurns": 3
     },
     {
-      "a": "marten",
+      "a": "ram",
       "b": "falcon",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "ram",
+      "b": "moth",
       "wins": 5,
       "draws": 0,
       "n": 5,
-      "meanTurns": 2
+      "meanTurns": 5
     },
     {
-      "a": "marten",
-      "b": "moth",
+      "a": "ram",
+      "b": "rhino",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 5
+    },
+    {
+      "a": "ram",
+      "b": "marten",
       "wins": 5,
       "draws": 0,
       "n": 5,
       "meanTurns": 3
     },
     {
-      "a": "marten",
-      "b": "rhino",
+      "a": "ram",
+      "b": "cat",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "cat",
+      "b": "fox",
       "wins": 0,
       "draws": 0,
       "n": 5,
       "meanTurns": 2
+    },
+    {
+      "a": "cat",
+      "b": "turtle",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "cat",
+      "b": "deer",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "cat",
+      "b": "lion",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "cat",
+      "b": "otter",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "cat",
+      "b": "shroom",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 5
+    },
+    {
+      "a": "cat",
+      "b": "badger",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "cat",
+      "b": "sparrow",
+      "wins": 5,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "cat",
+      "b": "falcon",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "cat",
+      "b": "moth",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "cat",
+      "b": "rhino",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 4
+    },
+    {
+      "a": "cat",
+      "b": "marten",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
+    },
+    {
+      "a": "cat",
+      "b": "ram",
+      "wins": 0,
+      "draws": 0,
+      "n": 5,
+      "meanTurns": 3
     }
   ]
 }

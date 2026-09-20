@@ -1,0 +1,150 @@
+{
+  "started_at": "2026-09-20T16:45:59.298Z",
+  "base": "http://127.0.0.1:51341/",
+  "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "checks": [
+    {
+      "name": "营地页渲染出伙伴卡",
+      "pass": true,
+      "detail": {
+        "title": "小兽训练场 · 小芽陪你成长",
+        "cardCount": 14,
+        "bodyHasVersion": true,
+        "firstCards": [
+          "1号位 🦊 烬尾狐 火 Lv.1 高速游击 · 火花挂灼烧，追猎增伤；疾爪先制",
+          "2号位 🐢 潮甲龟 水 Lv.1 守势水盾 · 防御时额外恢复 8 HP，适合",
+          "3号位 🦌 芽角鹿 草 Lv.1 吸血续航 · 生息藤吸血；速度与持续作战兼顾",
+          "🦁 炽鬃狮 火 Lv.1 破防重炮 · 重击穿过防御技能减伤；烈焰高爆发但反伤"
+        ],
+        "hasStartButton": true,
+        "typeButtons": [
+          "全部",
+          "火",
+          "水",
+          "草",
+          "岩",
+          "雷",
+          "风",
+          "普通"
+        ]
+      }
+    },
+    {
+      "name": "属性筛选真的在过滤",
+      "pass": true,
+      "detail": {
+        "available": true,
+        "buttons": 8,
+        "before": 14,
+        "after": 2,
+        "allFire": true,
+        "changed": true
+      }
+    },
+    {
+      "name": "筛选后截图确实处于「已筛选」状态",
+      "pass": true,
+      "detail": {
+        "filteredCards": 2,
+        "totalCards": 14
+      }
+    },
+    {
+      "name": "M1 新增数据未被页面暴露（不在 publicAssets 白名单）",
+      "pass": true,
+      "detail": {
+        "data/roco/sources.yaml": 404,
+        "data/roco/conflicts.jsonl": 404,
+        "data/roco/normalized/roco-world-s4-2026-09-10/pets.json": 404,
+        "scripts/roco/import-snapshot.mjs": 404
+      },
+      "note": "本轮不接管默认 UI，因此新数据不应被浏览器加载；全部 404 即为正确。"
+    },
+    {
+      "name": "M1 规范化数据在磁盘上存在且含 12 只目标精灵",
+      "pass": true,
+      "detail": {
+        "files": [
+          "history.json",
+          "import-report.json",
+          "learnsets.json",
+          "pets.json",
+          "skills.json",
+          "support-matrix.json",
+          "terms.json",
+          "types.json"
+        ],
+        "petCount": 12,
+        "ruleset": "roco-world-s4-2026-09-10"
+      }
+    },
+    {
+      "name": "能进入对局且公开面板可读",
+      "pass": true,
+      "detail": {
+        "style": {
+          "dialogOpen": true,
+          "buttons": [
+            "关键时搭把手危险对位或犹豫时，简短提醒",
+            "带我练一练多一点局面解释，逐步减少帮助",
+            "我先自己玩不主动打断，问我时再说"
+          ]
+        },
+        "speed": {
+          "set": true,
+          "value": "0"
+        },
+        "entered": {
+          "ok": true
+        },
+        "battle": {
+          "battleVisible": true,
+          "turn": "第 1 回合",
+          "actionCount": 4,
+          "playerName": "烬尾狐",
+          "enemyName": "芽角鹿"
+        }
+      }
+    },
+    {
+      "name": "对局能打到出现结果面板",
+      "pass": true,
+      "detail": {
+        "strikes": 15,
+        "ended": {
+          "resultVisible": true,
+          "text": "本场失利全队经验 +12 · 训练点 +1 · 返回营地继续培养"
+        }
+      }
+    },
+    {
+      "name": "过程中没有卡死（非动画期最长连续无可点 < 15）",
+      "pass": true,
+      "detail": {
+        "maxStuck": 0,
+        "strikes": 15
+      }
+    },
+    {
+      "name": "控制台零报错 / 零未捕获异常",
+      "pass": true,
+      "detail": {
+        "consoleErrors": [],
+        "pageErrors": [],
+        "failedRequests": []
+      }
+    }
+  ],
+  "screenshots": [
+    "01-camp.png",
+    "02-filter.png",
+    "03-battle.png",
+    "04-battle-end.png"
+  ],
+  "finished_at": "2026-09-20T16:46:19.462Z",
+  "summary": {
+    "total": 9,
+    "pass": 9,
+    "fail": 0
+  }
+}

@@ -1,0 +1,66 @@
+=== MODIFIED (tracked) ===
+ M .gitignore
+ M package.json
+ M reports/balance.json
+ M reports/retrieval.json
+
+=== NEW FILES (untracked, gitignored excluded) ===
+  data/roco/conflicts.jsonl
+  data/roco/normalized/roco-world-s4-2026-09-10/history.json
+  data/roco/normalized/roco-world-s4-2026-09-10/import-report.json
+  data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json
+  data/roco/normalized/roco-world-s4-2026-09-10/pets.json
+  data/roco/normalized/roco-world-s4-2026-09-10/skills.json
+  data/roco/normalized/roco-world-s4-2026-09-10/support-matrix.json
+  data/roco/normalized/roco-world-s4-2026-09-10/terms.json
+  data/roco/normalized/roco-world-s4-2026-09-10/types.json
+  data/roco/provenance.jsonl
+  data/roco/raw/rocom-data.tar.gz
+  data/roco/raw/rocom-wiki-data.tar.gz
+  data/roco/sources.yaml
+  docs/roadmap/DSH-EXECUTION-STATE.md
+  docs/roco/DATA-CONFLICTS.md
+  docs/roco/LICENSE-MATRIX.md
+  docs/roco/M0-M1-ACCEPTANCE.md
+  docs/roco/M0-REPO-AUDIT.md
+  docs/roco/MICROCASE-PLAN.md
+  docs/roco/PET-SUPPORT-MATRIX.md
+  evals/roco/cases/microcases-v1.jsonl
+  evals/roco/data-acceptance.test.js
+  reports/roco/acceptance/01-camp.png
+  reports/roco/acceptance/02-filter.png
+  reports/roco/acceptance/03-battle.png
+  reports/roco/acceptance/04-battle-end.png
+  reports/roco/acceptance/browser-acceptance.json
+  reports/roco/acceptance/browser-acceptance.log
+  reports/roco/m0-baseline/env.txt
+  reports/roco/m0-baseline/evals.log
+  reports/roco/m0-baseline/git-status.txt
+  reports/roco/m0-baseline/HEAD.txt
+  reports/roco/m0-baseline/npm-test.log
+  reports/roco/m0-baseline/server.log
+  reports/roco/m0-baseline/smoke.log
+  reports/roco/m1-data/cross-check.json
+  reports/roco/m1-data/cross-check.log
+  reports/roco/m1-data/final-file-list.txt
+  reports/roco/m1-data/import.log
+  reports/roco/m1-data/lua-parse-selftest.log
+  reports/roco/m1-data/npm-test-after.log
+  reports/roco/m1-data/npm-test-final.log
+  reports/roco/m1-data/raw-sha256.txt
+  reports/roco/m1-data/snapshot-file-inventory.json
+  reports/roco/stage-M0-report.html
+  reports/roco/stage-M1-report.html
+  scripts/roco/browser-acceptance.mjs
+  scripts/roco/build-conflicts-doc.mjs
+  scripts/roco/build-microcase-doc.mjs
+  scripts/roco/build-microcases.mjs
+  scripts/roco/build-support-matrix-doc.mjs
+  scripts/roco/build-support-matrix.mjs
+  scripts/roco/cross-check.py
+  scripts/roco/hash-snapshot.mjs
+  scripts/roco/import-snapshot.mjs
+  scripts/roco/lua-safe-parse.mjs
+  scripts/roco/notify.mjs
+  scripts/roco/schema.mjs
+  scripts/roco/selftest-lua-parse.mjs

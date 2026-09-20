@@ -1,0 +1,17 @@
+<h3>M0 基线 + 仓库审计：完成</h3>
+<p><b>本轮只做 M0+M1，未改任何运行代码。</b></p>
+<ol>
+<li><b>基线固化</b>：HEAD <code>1717cd5</code>，工作区开始时干净；Node 24.20.0 / npm 11.19.0 / Python 3.9.6。</li>
+<li><b>测试</b>：<code>npm test</code> = <b>375/375 通过</b>（357 unit + 18 browser），0 失败。</li>
+<li><b>页面</b>：<code>npm run test:smoke</code> 全部通过（14 张伙伴卡、属性筛选生效、进对局、16 次出招打到结束、无卡死、控制台零报错）。</li>
+<li><b>离线评测</b>：retrieval 与 balance:quick 均退出码 0。</li>
+<li><b>仓库审计</b>：逐模块 KEEP/ADAPT/RETIRE/MISSING 已落盘。</li>
+</ol>
+<p><b>关键结论</b>：<code>engine.js</code> 的「时序骨架 + 状态版本 + 事件历史」与
+<code>coach/runtime.js</code> 的「事实校验 + 有界工具循环」是本项目真正的资产，判定 KEEP；
+自创的 14 宠 / 23 技能 / 7 属性 / 伤害公式 / 优先级数值判定 RETIRE 且<b>只隔离不删除</b>（保留旧测试回归价值）。
+手游规则唯一来源 <code>roco_env</code> 与 5 个新工具判定 MISSING。</p>
+<p><b>发现 5 处文档与运行态不一致</b>，其中最重要一条：
+<code>docs/IMPLEMENTATION-STATUS.md</code> 写「现场 257 项测试」，现场实为 <b>375 项</b>。</p>
+<p><b>下一步</b>：M1 剩余部分——许可矩阵、12 只精灵支持矩阵、A 组候选配招、microcase 计划、浏览器验收证据。</p>
+<p>证据：<code>docs/roco/M0-REPO-AUDIT.md</code>、<code>reports/roco/m0-baseline/</code>。</p>

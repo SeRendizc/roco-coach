@@ -1,0 +1,83 @@
+<h2>小芽 M0/M1：全部完成，等待审阅</h2>
+<p><b>没有未解决的阻塞。</b>全量回归 <b>390/390 通过</b>（372 unit + 18 browser），0 失败 0 跳过；
+浏览器验收 <b>9/9 通过</b>；数据域验收 <b>15/15 通过</b>。本轮<b>未修改任何运行代码</b>。</p>
+
+<h3>1. 实际修改的文件</h3>
+<p><b>改动 4 个已入库文件</b>：</p>
+<ul>
+<li><code>.gitignore</code>：忽略解压后的第三方快照 + 172MB 的 NRC_AI 归档 + 本地 token 文件</li>
+<li><code>package.json</code>：<code>test:unit</code> <b>末尾追加</b>一个测试文件；新增 <code>test:roco</code> 与 9 个 <code>roco:*</code> 管线脚本（既有脚本内容未改）</li>
+<li><code>reports/balance.json</code>、<code>reports/retrieval.json</code>：这是运行 <code>eval:*</code> 时脚本<b>按设计原地写回</b>的结果，不是我手改</li>
+</ul>
+<p><b>新增 59 个文件</b>，分五类：数据域 <code>data/roco/**</code>、管线脚本 <code>scripts/roco/**</code>（13 个）、
+文档 <code>docs/roco/**</code>（6 份）+ <code>docs/roadmap/DSH-EXECUTION-STATE.md</code>、
+测试 <code>evals/roco/**</code>、证据 <code>reports/roco/**</code>（含 4 张截图）。</p>
+<p><b>未修改</b>：<code>engine.js</code>、<code>content.js</code>、<code>progression.js</code>、全部 <code>coach/*</code>、
+<code>knowledge/*</code>、前端全套、<code>server.js</code>、<b>以及全部 375 项既有测试</b>。</p>
+
+<h3>2. 数据来源 / 快照版本 / 许可矩阵</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr><th>来源</th><th>revision</th><th>许可</th><th>再分发</th></tr>
+<tr><td>JayeGT002/rocom-wiki-data（主源）</td><td><code>aff808eb</code> 2026-09-10</td><td>CC BY-NC-SA 4.0</td><td>可演绎/署名/非商业</td></tr>
+<tr><td>ColinHong10/NRC_AI</td><td><code>9b5801b0</code> 2026-04-20</td><td>MIT(代码)/数据未声明</td><td><b>REFERENCE_ONLY</b></td></tr>
+<tr><td>AofeiLi-code/rocom-data</td><td><code>d2c0533a</code> 2026-05-09</td><td><b>未声明</b></td><td><b>REFERENCE_ONLY</b></td></tr>
+</table>
+<p>归档 SHA256 与 <b>603 个文件的逐文件哈希</b>均已落盘。
+<b>结论：没有任何来源允许进入可商用数据包</b>；主源受 NC 约束，已在许可矩阵中写明。
+172MB 的 NRC_AI 归档<b>不入库</b>（会永久污染 git 历史），由「revision + 归档哈希 + 逐文件哈希 + 核验结果」四级保证复现。</p>
+
+<h3>3. 12 只精灵支持矩阵摘要</h3>
+<p><b>12/12 解析成功，孤儿技能引用 = 0。</b>全部当前支持等级 = <code>KNOWLEDGE_ONLY</code>——
+因为本轮<b>没有实现任何效果原语</b>，824 条技能的 <code>effect_support</code> 全为 <code>unsupported</code>。
+<b>数据字段齐全不等于机制可模拟</b>，这两件事在文档里被强制分开。</p>
+<p>来源核验：8 只已交叉核验（差异全部由版本改动记录解释）；<b>4 只单一来源无交叉核验</b>
+（化蝶 + C 组三只 S4 新精灵，它们不在 2026-04/05 的快照里）——已如实标注，不冒充已核验。</p>
+
+<h3>4. A 组候选配招与尚未支持的机制</h3>
+<ul>
+<li>寂灭骨龙：诡刺 / 龙血 / 坟场搏击 / 集中</li>
+<li>海豹船长：气波 / 水泡盾 / 一拳 / 取念</li>
+<li>黑猫巫师：彗星 / 防御 / 音爆 / 啮合传递</li>
+<li>圆号鱼：甩水 / 防御 / 许愿星 / 啮合传递</li>
+<li>雪影娃娃：风吹雪 / 防御 / 超级糖果 / 啮合传递</li>
+<li>音速犬：火苗 / 防御 / 火云车 / 焚烧烙印</li>
+</ul>
+<p>选择规则写死在脚本里可复现，<b>完全没有</b>用社区频次或攻略文章；每只附「候选数/来源池/备选清单」作为证据，
+并明确声明<b>不是最优解</b>。测试强制每个候选技能必须真实存在于该精灵学习表。</p>
+<p><b>尚未支持的机制</b>：所有技能效果原语、12 只里 10 只配招涉及的「应对攻击」三件事
+（必定先手 + 触发效果 + 防御技能 1 回合冷却）、蓄力与「免疫所有离场效果」、
+印记叠加/替换、动态威力取值时机、百分比取整方向。</p>
+
+<h3>5. 测试命令、通过数量与原始日志</h3>
+<table border="1" cellpadding="4" cellspacing="0">
+<tr><th>命令</th><th>结果</th><th>日志</th></tr>
+<tr><td><code>npm test</code></td><td><b>390/390</b>（372 unit + 18 browser）</td><td><code>reports/roco/m1-data/npm-test-final.log</code></td></tr>
+<tr><td><code>npm run test:roco</code></td><td><b>15/15</b></td><td>数据域独立验收（对拍原始 Lua）</td></tr>
+<tr><td><code>npm run test:smoke</code></td><td>全部通过</td><td><code>reports/roco/m0-baseline/smoke.log</code></td></tr>
+<tr><td><code>npm run roco:pipeline</code></td><td>全通过</td><td><code>reports/roco/m1-data/*.log</code></td></tr>
+<tr><td>基线（改动前）</td><td>375/375</td><td><code>reports/roco/m0-baseline/npm-test.log</code></td></tr>
+</table>
+
+<h3>6. 浏览器验收证据</h3>
+<p><b>9/9 通过</b>，4 张<b>互不相同</b>的截图：<code>01-camp.png</code>（营地，v0.11）、
+<code>02-filter.png</code>（筛选后只剩火系：烬尾狐/炽鬃狮）、<code>03-battle.png</code>（第 1 回合可操作）、
+<code>04-battle-end.png</code>（第 13 回合本场结束，成长已保存）。控制台零报错。</p>
+<p>另外证明：本轮新增的 <code>data/roco/**</code> 与 <code>scripts/roco/**</code>
+<b>全部 404</b>，即新数据<b>没有被页面加载</b>——本轮正确地没有接管默认 UI。</p>
+
+<h3>7. 风险、数据冲突与下一步</h3>
+<p><b>本轮最有价值的发现</b>：三来源交叉核验出 25 处数值差异，<b>全部有解释，未解决 = 0</b>。
+其中 <b>4 只精灵在 2026-05→09 之间被改过数值</b>（黑猫巫师/圆号鱼/音速犬/画间沉铁兽），
+主快照自带的 S1—S4 改动记录把每一处 <code>before→after</code> 都对上了。
+<b>如果直接采用 4—5 月的旧社区快照，会得到过时的种族值。</b>
+另一处：化蝶有 <b>4 个同名形态</b>，目标形态由图鉴称呼「化蝶（平常的样子）」唯一确定，其余 3 个形态一并登记不删除。</p>
+<p><b>下一步</b>：按 <code>docs/roco/MICROCASE-PLAN.md</code> §6 的顺序实现 <code>roco_env</code>，
+每步必须 fail closed（未核验机制返回 <code>unsupported_effect</code>，禁止退化成自创默认值）。</p>
+
+<h3>8. Checklist 结果</h3>
+<p>逐项打勾见 <code>docs/roco/M0-M1-ACCEPTANCE.md</code>（A—L 共 12 节，每项带证据）。
+M0/M1 范围内可验证的项目<b>已全部打勾</b>；<b>7 项保持未完成</b>（§J），
+它们全部属于「需要游戏内实测或官方资料才能确定」，本轮<b>没有用默认值补齐</b>，而是转成了
+<b>21 条 microcase</b> 与 <b>74 个未解问题</b>交给下一轮。</p>
+
+<p><b>我没有执行 git commit</b>：工作区保持原样，便于你直接审阅 diff 后再决定是否提交。</p>

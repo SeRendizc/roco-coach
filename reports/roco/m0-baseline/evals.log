@@ -1,0 +1,36 @@
+### npm run eval:retrieval
+  },
+  "hybrid": {
+    "dev": {
+      "n": 4,
+      "positiveN": 4,
+      "hitAt3": 0.75,
+      "mrr": 0.75,
+      "negativeCorrect": 0,
+      "negativeN": 0
+    },
+    "test": {
+      "n": 16,
+      "positiveN": 14,
+      "hitAt3": 0.7142857142857143,
+      "mrr": 0.6666666666666666,
+      "negativeCorrect": 1,
+      "negativeN": 2
+    }
+  }
+}
+
+### npm run eval:balance:quick
+    "winRate": 0.5454545454545454,
+    "drawRate": 0,
+    "meanTurns": 5.545454545454546
+  },
+  {
+    "id": "cat",
+    "name": "灵瞳猫",
+    "winRate": 0.09090909090909091,
+    "drawRate": 0,
+    "meanTurns": 4
+  }
+]
+EXIT=0

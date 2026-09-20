@@ -1,0 +1,579 @@
+{
+  "primary_source": {
+    "source_id": "wiki-rocom-snapshot",
+    "revision": "aff808eb60003457fe8a260d1ac3c9bd95d53872"
+  },
+  "cross_source": {
+    "source_id": "nrc-ai-sqlite",
+    "revision": "9b5801b08d349c6505a233c513faa5075f427035",
+    "snapshot_period": "2026-04",
+    "license_note": "MIT 覆盖仓库代码；上游数据权利未声明，故此来源仅作核验，标 REFERENCE_ONLY。"
+  },
+  "summary": {
+    "match": 0,
+    "with_differences": 8,
+    "not_present_in_cross_source": 4
+  },
+  "results": [
+    {
+      "pet_id": "pet_000225",
+      "name": "寂灭骨龙",
+      "title": "寂灭骨龙",
+      "target_group": "A",
+      "status": "cross_checked_with_differences",
+      "differences": [
+        {
+          "field": "types",
+          "kind": "value_mismatch",
+          "primary": [
+            "龙系",
+            "幽系"
+          ],
+          "cross_source": "龙",
+          "note": "两边属性集合不同。不取平均、不覆盖；两条都保留待人工核验。"
+        },
+        {
+          "field": "stats.hp",
+          "kind": "value_mismatch",
+          "primary": 120,
+          "cross_source": 92,
+          "delta": 28
+        },
+        {
+          "field": "stats.atk",
+          "kind": "value_mismatch",
+          "primary": 137,
+          "cross_source": 116,
+          "delta": 21
+        },
+        {
+          "field": "stats.def",
+          "kind": "value_mismatch",
+          "primary": 104,
+          "cross_source": 87,
+          "delta": 17
+        },
+        {
+          "field": "stats.spa",
+          "kind": "value_mismatch",
+          "primary": 50,
+          "cross_source": 41,
+          "delta": 9
+        },
+        {
+          "field": "stats.spd",
+          "kind": "value_mismatch",
+          "primary": 81,
+          "cross_source": 65,
+          "delta": 16
+        },
+        {
+          "field": "stats.spe",
+          "kind": "value_mismatch",
+          "primary": 60,
+          "cross_source": 85,
+          "delta": -25
+        }
+      ],
+      "primary": {
+        "types": [
+          "龙系",
+          "幽系"
+        ],
+        "stats": {
+          "hp": 120,
+          "atk": 137,
+          "def": 104,
+          "spa": 50,
+          "spd": 81,
+          "spe": 60
+        },
+        "game_id": 3269
+      },
+      "cross_source": {
+        "element": "龙",
+        "stats": {
+          "hp": 92,
+          "atk": 116,
+          "def": 87,
+          "spa": 41,
+          "spd": 65,
+          "spe": 85
+        }
+      }
+    },
+    {
+      "pet_id": "pet_000190",
+      "name": "海豹船长",
+      "title": "海豹船长",
+      "target_group": "A",
+      "status": "cross_checked_with_differences",
+      "differences": [
+        {
+          "field": "types",
+          "kind": "value_mismatch",
+          "primary": [
+            "武系",
+            "水系"
+          ],
+          "cross_source": "武",
+          "note": "两边属性集合不同。不取平均、不覆盖；两条都保留待人工核验。"
+        }
+      ],
+      "primary": {
+        "types": [
+          "武系",
+          "水系"
+        ],
+        "stats": {
+          "hp": 90,
+          "atk": 113,
+          "def": 111,
+          "spa": 109,
+          "spd": 77,
+          "spe": 100
+        },
+        "game_id": 3216
+      },
+      "cross_source": {
+        "element": "武",
+        "stats": {
+          "hp": 90,
+          "atk": 113,
+          "def": 111,
+          "spa": 109,
+          "spd": 77,
+          "spe": 100
+        }
+      }
+    },
+    {
+      "pet_id": "pet_000445",
+      "name": "黑猫巫师",
+      "title": "黑猫巫师",
+      "target_group": "A",
+      "status": "cross_checked_with_differences",
+      "differences": [
+        {
+          "field": "stats.hp",
+          "kind": "value_mismatch",
+          "primary": 149,
+          "cross_source": 152,
+          "delta": -3
+        },
+        {
+          "field": "stats.atk",
+          "kind": "value_mismatch",
+          "primary": 53,
+          "cross_source": 91,
+          "delta": -38
+        },
+        {
+          "field": "stats.def",
+          "kind": "value_mismatch",
+          "primary": 90,
+          "cross_source": 67,
+          "delta": 23
+        },
+        {
+          "field": "stats.spa",
+          "kind": "value_mismatch",
+          "primary": 124,
+          "cross_source": 163,
+          "delta": -39
+        },
+        {
+          "field": "stats.spd",
+          "kind": "value_mismatch",
+          "primary": 129,
+          "cross_source": 119,
+          "delta": 10
+        }
+      ],
+      "primary": {
+        "types": [
+          "普通系"
+        ],
+        "stats": {
+          "hp": 149,
+          "atk": 53,
+          "def": 90,
+          "spa": 124,
+          "spd": 129,
+          "spe": 70
+        },
+        "game_id": 3569
+      },
+      "cross_source": {
+        "element": "普通",
+        "stats": {
+          "hp": 152,
+          "atk": 91,
+          "def": 67,
+          "spa": 163,
+          "spd": 119,
+          "spe": 70
+        }
+      }
+    },
+    {
+      "pet_id": "pet_000417",
+      "name": "圆号鱼",
+      "title": "圆号鱼",
+      "target_group": "A",
+      "status": "cross_checked_with_differences",
+      "differences": [
+        {
+          "field": "stats.hp",
+          "kind": "value_mismatch",
+          "primary": 113,
+          "cross_source": 136,
+          "delta": -23
+        },
+        {
+          "field": "stats.atk",
+          "kind": "value_mismatch",
+          "primary": 31,
+          "cross_source": 34,
+          "delta": -3
+        }
+      ],
+      "primary": {
+        "types": [
+          "水系"
+        ],
+        "stats": {
+          "hp": 113,
+          "atk": 31,
+          "def": 95,
+          "spa": 95,
+          "spd": 110,
+          "spe": 105
+        },
+        "game_id": 3530
+      },
+      "cross_source": {
+        "element": "水",
+        "stats": {
+          "hp": 136,
+          "atk": 34,
+          "def": 95,
+          "spa": 95,
+          "spd": 110,
+          "spe": 105
+        }
+      }
+    },
+    {
+      "pet_id": "pet_000112",
+      "name": "雪影娃娃",
+      "title": "雪影娃娃",
+      "target_group": "A",
+      "status": "cross_checked_with_differences",
+      "differences": [
+        {
+          "field": "types",
+          "kind": "value_mismatch",
+          "primary": [
+            "冰系",
+            "萌系"
+          ],
+          "cross_source": "冰",
+          "note": "两边属性集合不同。不取平均、不覆盖；两条都保留待人工核验。"
+        }
+      ],
+      "primary": {
+        "types": [
+          "冰系",
+          "萌系"
+        ],
+        "stats": {
+          "hp": 130,
+          "atk": 103,
+          "def": 66,
+          "spa": 98,
+          "spd": 130,
+          "spe": 90
+        },
+        "game_id": 3123
+      },
+      "cross_source": {
+        "element": "冰",
+        "stats": {
+          "hp": 130,
+          "atk": 103,
+          "def": 66,
+          "spa": 98,
+          "spd": 130,
+          "spe": 90
+        }
+      }
+    },
+    {
+      "pet_id": "pet_000062",
+      "name": "音速犬",
+      "title": "音速犬",
+      "target_group": "A",
+      "status": "cross_checked_with_differences",
+      "differences": [
+        {
+          "field": "stats.atk",
+          "kind": "value_mismatch",
+          "primary": 116,
+          "cross_source": 128,
+          "delta": -12
+        },
+        {
+          "field": "stats.spa",
+          "kind": "value_mismatch",
+          "primary": 38,
+          "cross_source": 46,
+          "delta": -8
+        }
+      ],
+      "primary": {
+        "types": [
+          "火系"
+        ],
+        "stats": {
+          "hp": 85,
+          "atk": 116,
+          "def": 101,
+          "spa": 38,
+          "spd": 82,
+          "spe": 120
+        },
+        "game_id": 3071
+      },
+      "cross_source": {
+        "element": "火",
+        "stats": {
+          "hp": 85,
+          "atk": 128,
+          "def": 101,
+          "spa": 46,
+          "spd": 82,
+          "spe": 120
+        }
+      }
+    },
+    {
+      "pet_id": "pet_000474",
+      "name": "画间沉铁兽",
+      "title": "画间沉铁兽",
+      "target_group": "B",
+      "status": "cross_checked_with_differences",
+      "differences": [
+        {
+          "field": "types",
+          "kind": "value_mismatch",
+          "primary": [
+            "普通系",
+            "武系"
+          ],
+          "cross_source": "普通",
+          "note": "两边属性集合不同。不取平均、不覆盖；两条都保留待人工核验。"
+        },
+        {
+          "field": "stats.hp",
+          "kind": "value_mismatch",
+          "primary": 126,
+          "cross_source": 100,
+          "delta": 26
+        },
+        {
+          "field": "stats.atk",
+          "kind": "value_mismatch",
+          "primary": 147,
+          "cross_source": 160,
+          "delta": -13
+        },
+        {
+          "field": "stats.spa",
+          "kind": "value_mismatch",
+          "primary": 63,
+          "cross_source": 67,
+          "delta": -4
+        },
+        {
+          "field": "stats.spe",
+          "kind": "value_mismatch",
+          "primary": 92,
+          "cross_source": 105,
+          "delta": -13
+        }
+      ],
+      "primary": {
+        "types": [
+          "普通系",
+          "武系"
+        ],
+        "stats": {
+          "hp": 126,
+          "atk": 147,
+          "def": 100,
+          "spa": 63,
+          "spd": 76,
+          "spe": 92
+        },
+        "game_id": 3609
+      },
+      "cross_source": {
+        "element": "普通",
+        "stats": {
+          "hp": 100,
+          "atk": 160,
+          "def": 100,
+          "spa": 67,
+          "spd": 76,
+          "spe": 105
+        }
+      }
+    },
+    {
+      "pet_id": "pet_000451",
+      "name": "秩序鱿墨",
+      "title": "秩序鱿墨",
+      "target_group": "B",
+      "status": "cross_checked_with_differences",
+      "differences": [
+        {
+          "field": "types",
+          "kind": "value_mismatch",
+          "primary": [
+            "幽系",
+            "萌系"
+          ],
+          "cross_source": "幽",
+          "note": "两边属性集合不同。不取平均、不覆盖；两条都保留待人工核验。"
+        }
+      ],
+      "primary": {
+        "types": [
+          "幽系",
+          "萌系"
+        ],
+        "stats": {
+          "hp": 78,
+          "atk": 120,
+          "def": 124,
+          "spa": 39,
+          "spd": 113,
+          "spe": 130
+        },
+        "game_id": 3579
+      },
+      "cross_source": {
+        "element": "幽",
+        "stats": {
+          "hp": 78,
+          "atk": 120,
+          "def": 124,
+          "spa": 39,
+          "spd": 113,
+          "spe": 130
+        }
+      }
+    },
+    {
+      "pet_id": "pet_000124",
+      "name": "化蝶",
+      "title": "化蝶（平常的样子）",
+      "target_group": "B",
+      "status": "not_present_in_cross_source",
+      "differences": [],
+      "primary": {
+        "types": [
+          "虫系",
+          "萌系"
+        ],
+        "stats": {
+          "hp": 53,
+          "atk": 46,
+          "def": 66,
+          "spa": 46,
+          "spd": 66,
+          "spe": 100
+        },
+        "game_id": 3138
+      },
+      "cross_source": null,
+      "reason": "NRC_AI 快照为 2026-04，晚出的 S4 精灵不在其中；该精灵本轮只有单一来源，不能声明交叉核验通过。"
+    },
+    {
+      "pet_id": "pet_000608",
+      "name": "银月狼王",
+      "title": "银月狼王",
+      "target_group": "C",
+      "status": "not_present_in_cross_source",
+      "differences": [],
+      "primary": {
+        "types": [
+          "幽系",
+          "幻系"
+        ],
+        "stats": {
+          "hp": 115,
+          "atk": 128,
+          "def": 128,
+          "spa": 51,
+          "spd": 98,
+          "spe": 130
+        },
+        "game_id": 3763
+      },
+      "cross_source": null,
+      "reason": "NRC_AI 快照为 2026-04，晚出的 S4 精灵不在其中；该精灵本轮只有单一来源，不能声明交叉核验通过。"
+    },
+    {
+      "pet_id": "pet_000601",
+      "name": "圣凯布米龙",
+      "title": "圣凯布米龙",
+      "target_group": "C",
+      "status": "not_present_in_cross_source",
+      "differences": [],
+      "primary": {
+        "types": [
+          "火系",
+          "虫系"
+        ],
+        "stats": {
+          "hp": 79,
+          "atk": 116,
+          "def": 120,
+          "spa": 29,
+          "spd": 120,
+          "spe": 105
+        },
+        "game_id": 3576
+      },
+      "cross_source": null,
+      "reason": "NRC_AI 快照为 2026-04，晚出的 S4 精灵不在其中；该精灵本轮只有单一来源，不能声明交叉核验通过。"
+    },
+    {
+      "pet_id": "pet_000611",
+      "name": "月使鹭纳",
+      "title": "月使鹭纳",
+      "target_group": "C",
+      "status": "not_present_in_cross_source",
+      "differences": [],
+      "primary": {
+        "types": [
+          "翼系",
+          "冰系"
+        ],
+        "stats": {
+          "hp": 83,
+          "atk": 99,
+          "def": 104,
+          "spa": 100,
+          "spd": 113,
+          "spe": 115
+        },
+        "game_id": 3766
+      },
+      "cross_source": null,
+      "reason": "NRC_AI 快照为 2026-04，晚出的 S4 精灵不在其中；该精灵本轮只有单一来源，不能声明交叉核验通过。"
+    }
+  ]
+}
