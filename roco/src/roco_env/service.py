@@ -10,9 +10,25 @@
     GET  /health         服务与规则集身份：ruleset_id + snapshot_fingerprint
     GET  /rules/query    只读事实查询（也接受 POST）
     POST /rules/query    只读事实查询：精灵 / 技能 / 学习表 / 属性相性 / 术语
-    POST /team/evaluate  队伍强度评估        —— 引擎逻辑未实现 → not_implemented
-    POST /team/compare   换人前后对比        —— 引擎逻辑未实现 → not_implemented
-    POST /battle/plan    回合行动规划        —— 引擎逻辑未实现 → not_implemented
+    POST /team/evaluate  队伍规则特征评估（类型/角色/速度/伤害/能量/缺口，不给胜率）
+    POST /team/compare   换人前后对比：改善什么、代价什么、哪个对手池
+    POST /battle/plan    回合行动规划（**只接受公开 planner state**）
+    POST /battle/new     开一局本地练习对局（**私有域**，见下）
+    POST /battle/legal   列出私有一局里双方的合法动作（**私有域**）
+    POST /battle/advance 推进一个回合或一次补位（**私有域**）
+
+两个信任域（这是本服务最重要的一条边界）
+----------------------------------------
+
+``/battle/plan`` 属于**教练域**：教练只该看见公开信息，所以它只接受
+``env.public_planner_state()`` 的产物，请求里出现真实 seed / 对手待执行动作
+一律 ``hidden_information`` 拒绝——**连发都不发**（客户端也会先拦一次）。
+
+``/battle/new|legal|advance`` 属于**本地对局域**：它们由本机的 Node 服务调用，
+用来驱动一局本地练习对局，输入输出都含完整私有状态（含真实 seed）。回执里显式
+带 ``trust_domain: "local_sim"``。私有状态**不得返回浏览器**：浏览器只拿
+``public``（公开面）与事件摘要。教练侧请求也**不得**用这里的 state——
+那正是 ``/battle/plan`` 会拒绝的东西。两个域分开，而不是把边界放松。
 
 统一响应信封（**每个**响应都有，成功失败都一样）
 ------------------------------------------------
@@ -93,11 +109,13 @@ try:  # 作为包导入：python3 -m roco_env.service
     from .data import DEFAULT_RULESET, Ruleset, RulesetError, load_ruleset
     from . import team as team_mod
     from . import env as env_mod
+    from .schema import Action
 except ImportError:  # 直接当脚本跑：python3 roco/src/roco_env/service.py
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     from roco_env.data import DEFAULT_RULESET, Ruleset, RulesetError, load_ruleset  # type: ignore
     from roco_env import team as team_mod  # type: ignore
     from roco_env import env as env_mod  # type: ignore
+    from roco_env.schema import Action  # type: ignore
 
 
 # 分析用种子：与真实对局 seed 无关的固定集合。
@@ -268,7 +286,16 @@ class Answer:
     unsupported: List[Dict[str, Any]] = field(default_factory=list)
     error_type: Optional[str] = None
     error: Optional[str] = None
+    #: 这条答案属于哪个信任域。默认 ``"coach"``：**不含**真实 seed 与对手待执行动作，
+    #: 因此收尾时仍走隐藏信息扫描。只有本地对局域（``/battle/new|legal|advance``）
+    #: 显式写成 ``"local_sim"``，那些端点的请求体本来就带私有状态。
+    #: 这**不是**给 seed 开例外：教练域任何路径下的 seed 仍然一律被拒。
+    trust_domain: str = "coach"
     extra: Dict[str, Any] = field(default_factory=dict)
+
+
+#: 允许携带私有状态的信任域。仅本机 Node 调用，且回执不返回浏览器。
+PRIVATE_TRUST_DOMAIN = "local_sim"
 
 
 def _bad_request(msg: str) -> Answer:
@@ -387,25 +414,32 @@ class RocoService:
         )
 
     def _resolve_or_envelope(
-        self, body: Dict[str, Any], started: float
+        self, body: Dict[str, Any], started: float, trust_domain: str = "coach"
     ) -> Tuple[Optional[Ruleset], Optional[Tuple[int, Dict[str, Any]]], Optional[str], Any]:
-        """把「校验 ruleset + 指纹」收成一处，返回 (rs, 错误响应, 状态版本, 指纹)。"""
-        hidden = find_hidden_keys(body)
-        if hidden:
-            reason = (
-                "请求里出现了隐藏信息字段："
-                + ", ".join(hidden)
-                + "。依据 MC-013，教练观察面不得包含对手待执行动作或真实随机种子"
-            )
-            env = self._envelope(
-                started=started,
-                ruleset_id=self.served_ruleset_id,
-                state_version=body.get("state_version"),
-                error_type="hidden_information",
-                error=reason,
-                coverage=0.0,
-            )
-            return None, (ERROR_HTTP_STATUS["hidden_information"], env), None, None
+        """把「校验 ruleset + 指纹」收成一处，返回 (rs, 错误响应, 状态版本, 指纹)。
+
+        ``trust_domain`` 决定要不要扫隐藏信息。默认**要扫**；只有本地对局域
+        （``PRIVATE_TRUST_DOMAIN``）跳过，因为那些端点按设计就带私有状态。
+        跳过的是「这次请求的整体判定」，**不是**某个键的例外——教练域的
+        扫描函数 `find_hidden_keys` 仍然是「没有例外、任意深度」。
+        """
+        if trust_domain != PRIVATE_TRUST_DOMAIN:
+            hidden = find_hidden_keys(body)
+            if hidden:
+                reason = (
+                    "请求里出现了隐藏信息字段："
+                    + ", ".join(hidden)
+                    + "。依据 MC-013，教练观察面不得包含对手待执行动作或真实随机种子"
+                )
+                env = self._envelope(
+                    started=started,
+                    ruleset_id=self.served_ruleset_id,
+                    state_version=body.get("state_version"),
+                    error_type="hidden_information",
+                    error=reason,
+                    coverage=0.0,
+                )
+                return None, (ERROR_HTTP_STATUS["hidden_information"], env), None, None
 
         state_version, sv_err = _coerce_state_version(body.get("state_version"))
         if sv_err is not None:
@@ -970,17 +1004,29 @@ class RocoService:
 
     # ── 尚未实现的引擎端点 ──────────────────────────────────────────────
 
-    def _ruleset_ok(self, body: Dict[str, Any]) -> Tuple[Optional[Ruleset], Optional[Tuple[int, Dict[str, Any]]]]:
-        """复用既有的 ruleset/指纹/隐藏信息校验，只取 rs 与可能的错误响应。"""
-        rs, early, _sv, _fp = self._resolve_or_envelope(body, time.perf_counter())
+    def _ruleset_ok(
+        self, body: Dict[str, Any], trust_domain: str = "coach"
+    ) -> Tuple[Optional[Ruleset], Optional[Tuple[int, Dict[str, Any]]]]:
+        """复用既有的 ruleset/指纹/隐藏信息校验，只取 rs 与可能的错误响应。
+
+        ``trust_domain`` 必须由调用方**显式**给出：默认是教练域（扫隐藏信息）。
+        只有本地对局域才传 ``PRIVATE_TRUST_DOMAIN``，因为那些端点按设计就带私有状态。
+        """
+        rs, early, _sv, _fp = self._resolve_or_envelope(body, time.perf_counter(), trust_domain)
         return rs, early
 
     def _answer_envelope(
         self, answer: Answer, body: Dict[str, Any], started: float
     ) -> Tuple[int, Dict[str, Any]]:
         """把 Answer 包成契约信封。与 rules_query 的收尾保持一致，
-        这样 team 端点也自动带上 ruleset_id / coverage / evidence_ids / latency_ms。"""
-        _rs, _early, state_version, fingerprint = self._resolve_or_envelope(body, started)
+        这样 team 端点也自动带上 ruleset_id / coverage / evidence_ids / latency_ms。
+
+        信任域取自 ``Answer.trust_domain``：默认 ``"coach"`` 会再扫一次隐藏信息。
+        本地对局域要显式声明，否则它自己的私有状态会被自己的收尾扫描拒掉。
+        """
+        _rs, _early, state_version, fingerprint = self._resolve_or_envelope(
+            body, started, answer.trust_domain
+        )
         env = self._envelope(
             started=started,
             ruleset_id=self.served_ruleset_id,
@@ -1228,6 +1274,271 @@ class RocoService:
             ]},
         ), body, started)
 
+    # ── 本地对局驱动（与教练规划属于**两个信任域**）─────────────────────
+    #
+    # `/battle/plan` 只接受**公开** planner state：那是教练侧，真实 seed 与对手
+    # 待执行动作都是隐藏信息，桥连发都不发。
+    #
+    # 下面这三个端点不一样：它们由本机的 Node 服务调用，作用是**驱动一局本地
+    # 练习对局**（演示页用），输入输出都包含完整私有状态 —— 含真实 seed。
+    # 这不是把隐藏信息边界放松了，而是把两个域分开：
+    #
+    #   · 教练域：浏览器 → Node → /battle/plan，只带公开面。真实 seed 永远不出 Node。
+    #   · 对局域：Node → /battle/new|legal|advance，带私有状态。私有状态**不返回浏览器**，
+    #     浏览器拿到的只有 public_planner_state 与摘要事件。
+    #
+    # 因此这三个端点的回执里显式写着 `trust_domain: "local_sim"`，
+    # 并且它们的输出**不允许**直接塞进教练请求（教练请求由 public_planner_state 产出）。
+
+    def battle_new(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        """开一局本地练习对局，返回初始私有状态 + 公开面 + 双方合法动作。"""
+        started = time.perf_counter()
+        from . import env as env_mod
+
+        rs, early = self._ruleset_ok(body, PRIVATE_TRUST_DOMAIN)
+        if early is not None:
+            return early
+
+        team = body.get("team")
+        if not isinstance(team, list) or len(team) != 3 or not all(isinstance(x, str) for x in team):
+            return self._answer_envelope(_bad_request("team 必须是 3 个精灵 id 的数组"), body, started)
+        enemy_team = body.get("enemy_team", team)
+        if not isinstance(enemy_team, list) or len(enemy_team) != 3 or not all(isinstance(x, str) for x in enemy_team):
+            return self._answer_envelope(_bad_request("enemy_team 必须是 3 个精灵 id 的数组"), body, started)
+        seed = body.get("seed", 1)
+        if not isinstance(seed, int) or isinstance(seed, bool) or seed < 0:
+            return self._answer_envelope(_bad_request("seed 必须是非负整数"), body, started)
+        loadouts = body.get("loadouts")
+        if loadouts is not None and not isinstance(loadouts, dict):
+            return self._answer_envelope(_bad_request("loadouts 必须是 {pet_id: [skill_id...]}"), body, started)
+
+        try:
+            state = env_mod.reset(list(team), list(enemy_team), seed=seed, rs=rs, loadouts=loadouts)
+        except (ValueError, KeyError) as exc:
+            return self._answer_envelope(_bad_request(f"无法开局：{type(exc).__name__}: {exc}"), body, started)
+
+        strategy, why = self._sim_strategy(body, started)
+        if why is not None:
+            return why
+        return self._sim_envelope(state, rs, strategy, body, started, event="battle_new")
+
+    def battle_legal(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        """列出私有一局里双方当前的合法动作（私有域，见上）。"""
+        started = time.perf_counter()
+        state, rs, early = self._private_state(body, started)
+        if early is not None:
+            return early
+        strategy, why = self._sim_strategy(body, started)
+        if why is not None:
+            return why
+        return self._sim_envelope(state, rs, strategy, body, started, event="battle_legal")
+
+    def battle_advance(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        """推进一个回合（或一次补位）。
+
+        对手那一手由服务端按策略决定，且**在双方行动都提交之后**才结算 ——
+        策略只拿得到公开 observation（`opponents.wrap_observation` 是只读代理），
+        拿不到玩家的选择。
+        """
+        started = time.perf_counter()
+        from . import env as env_mod
+        from . import opponents as opp
+
+        state, rs, early = self._private_state(body, started)
+        if early is not None:
+            return early
+
+        strategy, why = self._sim_strategy(body, started)
+        if why is not None:
+            return why
+
+        raw_action = body.get("action")
+        player_strategy, player_why = self._player_strategy(body, started)
+        if player_why is not None:
+            return player_why
+        if raw_action is None and player_strategy is None:
+            return self._answer_envelope(_bad_request(
+                "必须给出 action（玩家这一手），或者给出 player_strategy 让策略代打"), body, started)
+        if raw_action is not None and not isinstance(raw_action, dict):
+            return self._answer_envelope(_bad_request("action 必须是对象（玩家这一手）"), body, started)
+        player_action = None
+        if isinstance(raw_action, dict):
+            try:
+                player_action = Action.from_dict(raw_action)
+            except (ValueError, RulesetError) as exc:
+                return self._answer_envelope(_bad_request(f"动作不合法：{exc}"), body, started)
+
+        # 事件要在推进**之前**记下长度：引擎的 state.events 只保留当前回合的，
+        # 回合末会清空（_end_of_turn），推进完再按 turn 过滤会拿到空数组。
+        # 这里取的是「这次推进新产生的那些事件」。
+        events_before = len(state.events)
+        try:
+            if state.phase == "replace":
+                # 补位可能**两边都要**补：对手倒下也要由本服务替它补位，
+                # 否则 state 会永远停在 phase=replace（真出现过：对手 0 号位倒下后
+                # 只补玩家一侧，推进 400 次还在同一回合）。
+                # 顺序按 `needs_replacement` 给的队列，和 `play_match` 一致；
+                # 每次补位只让那一方按策略选，不把对手换了谁告诉另一方。
+                if player_action is not None:
+                    if player_action.kind != "switch" or player_action.target_index is None:
+                        return self._answer_envelope(_bad_request(
+                            "当前是补位阶段，action 必须是 kind=switch 且带 target_index"), body, started)
+                queue = env_mod.needs_replacement(state)
+                if player_action is not None and "player" not in queue:
+                    queue = ["player"] + list(queue)
+                for side in queue:
+                    if state.phase != "replace":
+                        break
+                    if side == "player" and player_action is not None:
+                        env_mod.step_replace(state, rs, "player", int(player_action.target_index))
+                        player_action = None
+                        continue
+                    legal_side = env_mod.legal_actions(state, rs, side)
+                    switch = [a for a in legal_side if a.kind == "switch"]
+                    if not switch:
+                        continue
+                    chooser = player_strategy if side == "player" else strategy
+                    if chooser is None:
+                        return self._answer_envelope(_bad_request(
+                            "补位阶段需要 player_strategy（或显式 action）才能替玩家补位"), body, started)
+                    slot = chooser.act(
+                        env_mod.observe(state, rs, side), switch, int(state.seed), int(state.turn)
+                    ).target_index
+                    env_mod.step_replace(state, rs, side, int(slot))
+            else:
+                legal_enemy = env_mod.legal_actions(state, rs, "enemy")
+                if not legal_enemy:
+                    return self._answer_envelope(_bad_request("对手没有合法动作，无法推进"), body, started)
+                if player_action is None:
+                    legal_me = env_mod.legal_actions(state, rs, "player")
+                    if not legal_me:
+                        return self._answer_envelope(_bad_request("玩家没有合法动作，无法推进"), body, started)
+                    player_action = player_strategy.act(
+                        env_mod.observe(state, rs, "player"), legal_me, int(state.seed), int(state.turn)
+                    )
+                # 策略只能看 observation 代理；真实 seed 只用于它自己的确定性随机源。
+                obs = env_mod.observe(state, rs, "enemy")
+                enemy_action = strategy.act(obs, legal_enemy, int(state.seed), int(state.turn))
+                env_mod.step_joint(state, rs, player_action, enemy_action)
+        except (ValueError, RulesetError) as exc:
+            return self._answer_envelope(_bad_request(f"无法推进：{exc}"), body, started)
+
+        return self._sim_envelope(
+            state, rs, strategy, body, started, event="battle_advance", events_from=events_before
+        )
+
+    def _sim_strategy(self, body: Dict[str, Any], started: float):
+        """解析并绑定对手策略。名字必须在注册表里，绝不静默退回默认策略。"""
+        from . import opponents as opp
+
+        name = body.get("strategy", "greedy_damage")
+        if not isinstance(name, str):
+            return None, self._answer_envelope(_bad_request("strategy 必须是字符串"), body, started)
+        try:
+            return opp.get_strategy(name), None
+        except KeyError:
+            return None, self._answer_envelope(_bad_request(
+                f"未知策略 {name!r}；可选：{[s['name'] for s in opp.list_strategies()]}"), body, started)
+
+    def _player_strategy(self, body: Dict[str, Any], started: float):
+        """可选的「玩家一侧也交给策略」开关，用于自动演示与批量推演。
+
+        没给就是 None（正常玩法：玩家自己出招）。
+        """
+        from . import opponents as opp
+
+        name = body.get("player_strategy")
+        if name is None:
+            return None, None
+        if not isinstance(name, str):
+            return None, self._answer_envelope(_bad_request("player_strategy 必须是字符串"), body, started)
+        try:
+            return opp.get_strategy(name), None
+        except KeyError:
+            return None, self._answer_envelope(_bad_request(
+                f"未知 player_strategy {name!r}；可选：{[s['name'] for s in opp.list_strategies()]}"),
+                body, started)
+
+    def _private_state(self, body: Dict[str, Any], started: float):
+        """把 body 里的私有状态还原成 GameState。缺 state 就是调用方的错（400）。
+
+        顺带把规则集绑到策略的线程本地（`opponents.bind_ruleset`）：策略的启发式要读
+        技能表与属性相性，没绑定就会抛 `RulesetNotBound`。绑定放在这一处而不是每个
+        端点各写一次，是为了让「忘了绑定」不可能发生。
+        """
+        from . import env as env_mod
+        from . import opponents as opp
+
+        rs, early = self._ruleset_ok(body, PRIVATE_TRUST_DOMAIN)
+        if early is not None:
+            return None, None, early
+        raw = body.get("state")
+        if not isinstance(raw, dict):
+            return None, None, self._answer_envelope(_bad_request(
+                "state 必须是 env.serialize() 产出的私有状态（本地对局域专用）"), body, started)
+        try:
+            state = env_mod.deserialize(raw, rs)
+        except (ValueError, KeyError, TypeError) as exc:
+            return None, None, self._answer_envelope(_bad_request(
+                f"state 无法还原：{type(exc).__name__}: {exc}"), body, started)
+        opp.bind_ruleset(rs)
+        return state, rs, None
+
+    def _sim_envelope(
+        self, state, rs, strategy, body: Dict[str, Any], started: float, *, event: str,
+        events_from: int = 0,
+    ):
+        """本地对局域的统一回执：私有状态 + 公开面 + 双方合法动作 + 本回合事件。
+
+        ``events_from`` 是推进前 `state.events` 的长度，用来切出「这次新产生的事件」。
+        """
+        from . import env as env_mod
+
+        def acts(side: str) -> List[Dict[str, Any]]:
+            out = []
+            for action in env_mod.legal_actions(state, rs, side):
+                d = action.to_dict()
+                d["label"] = action.label(rs)
+                if action.kind == "skill" and action.skill_id:
+                    skill = rs.skill(action.skill_id)
+                    d["skill_name"] = skill.name
+                out.append(d)
+            return out
+
+        unsupported: List[Dict[str, Any]] = []
+        if state.unsupported:
+            unsupported.append({
+                "code": "unverified_mechanics_seen",
+                "reason": f"本局已登记 {len(state.unsupported)} 条未核验机制（fail closed，不生成默认值）",
+                "entries": list(state.unsupported)[:20],
+            })
+
+        return self._answer_envelope(Answer(
+            trust_domain=PRIVATE_TRUST_DOMAIN,
+            result={
+                "trust_domain": PRIVATE_TRUST_DOMAIN,
+                "note": (
+                    "这是**本地练习对局**的私有状态，含真实 seed；只允许留在本机 Node 里。"
+                    "教练侧请求必须用 public_planner_state 产出的公开面，不要把这个对象传过去。"
+                ),
+                "event": event,
+                "state": env_mod.serialize(state),
+                "state_version": state.state_version,
+                "phase": state.phase,
+                "turn": state.turn,
+                "result": state.result,
+                "public": env_mod.public_planner_state(state, rs, "player"),
+                "legal": {"player": acts("player"), "enemy": acts("enemy")},
+                "needs_replacement": env_mod.needs_replacement(state),
+                "events": [e.to_dict() for e in state.events[events_from:]] if event == "battle_advance" else [],
+                "strategy": {"name": strategy.name, "version": strategy.version},
+                "unsupported_seen": list(state.unsupported),
+            },
+            coverage=1.0 if not state.unsupported else 0.0,
+            evidence_ids=[ev(rs.ruleset_id, "public-state", str(state.state_version))],
+            unsupported=unsupported,
+        ), body, started)
+
     def not_implemented(self, path: str, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
         started = time.perf_counter()
         rs, early, state_version, fingerprint = self._resolve_or_envelope(body, started)
@@ -1259,7 +1570,7 @@ class RocoService:
             coverage=0.0,
             error_type="not_found",
             error=f"未知端点：{path}",
-            routes=["/health", "/rules/query", "/team/evaluate", "/team/compare", "/battle/plan"],
+            routes=list(ROUTES),
         )
         return ERROR_HTTP_STATUS["not_found"], env
 
@@ -1355,6 +1666,12 @@ class RocoRequestHandler(BaseHTTPRequestHandler):
                 status, env = service.team_compare(body)
             elif path == "/battle/plan":
                 status, env = service.battle_plan(body)
+            elif path == "/battle/new":
+                status, env = service.battle_new(body)
+            elif path == "/battle/legal":
+                status, env = service.battle_legal(body)
+            elif path == "/battle/advance":
+                status, env = service.battle_advance(body)
             elif path in NOT_IMPLEMENTED:
                 status, env = service.not_implemented(path, body)
             else:
@@ -1408,7 +1725,8 @@ class RocoRequestHandler(BaseHTTPRequestHandler):
         self._dispatch(path, body)
 
 
-ROUTES = ("/health", "/rules/query", "/team/evaluate", "/team/compare", "/battle/plan")
+ROUTES = ("/health", "/rules/query", "/team/evaluate", "/team/compare", "/battle/plan",
+          "/battle/new", "/battle/legal", "/battle/advance")
 
 
 # ── 进程入口 ────────────────────────────────────────────────────────────
