@@ -211,6 +211,18 @@ B/C 组 3v3 实战跑通；`parse` 覆盖率语义修正；G02 判定为不过�
 | 进度台账 | `docs/roco/PROGRESS.md` + `reports/roco/dashboard.json` | MVP **29/30 DONE**、1 PARTIAL（E03）、3 条落在用户边界内；证据路径逐个检查过存在性 |
 | 文档追平代码 | `docs/roco/mvp/ARCHITECTURE.md` §4.5、`RULE-COVERAGE.md` | 把 W3 之后新增的三栏与三套「支持」口径写清 |
 
+### 第 5 轮新增（一句话索引，细节在上面的小节里）
+
+| 交付 | 一句话 | 验证 |
+|---|---|---|
+| `scripts/roco/benchmark-planner.py` | planner 的客观基准：拿合法动作的一步推演值当「正确答案」 | `npm run roco:benchmark-planner` |
+| 候选筛选改为按一步推演值 | 量出**损失几乎全部来自候选裁剪**（60 局面里 41 个的最优不在候选里），改后 top1 0.27 → **0.59** | `roco/tests/test_planner.py` |
+| `SEARCH_SEED` + `finally` 恢复 | 分析种子原本泄漏进搜索内部推演，导致服务端**不给推荐**（已修） | `TestSearchIsDeterministicAcrossAnalysisSeeds`（2 项） |
+| `effects.compute_damage()` | 伤害抽成**唯一**实现，服务端预览不再克隆整份状态 | `TestDamageHasOneImplementation`（3 项） |
+| rollout 接住 `UnsupportedEffect` | 修一个真 crash：「硬门」这类防御技能会让整次 `plan_actions` 失败 | 同上 |
+| 负结论：即时伤害项 | 试过、量过（59% vs 57%，样本 100）、**撤了**；并记录一次错误的强结论 | `docs/roadmap/DSH-EXECUTION-STATE.md` |
+| 证据产物可 diff | 四份生成产物的易变字段另存 `*-run.json` | `TestReportGeneratorsAreIdempotent` |
+
 ### 本轮的测试现状（更新）
 
 | 套件 | 结果 |
