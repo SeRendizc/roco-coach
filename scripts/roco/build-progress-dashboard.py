@@ -236,7 +236,6 @@ def main() -> int:
         # 这份台账的用处就是让人看 diff，每次跑都变就没人看了。
         # 它们另存 `dashboard-run.json`（已 gitignore）。
         "generated_by": "scripts/roco/build-progress-dashboard.py",
-        "dirty_files": len([line for line in git("status", "--porcelain").splitlines() if line.strip()]),
         "important": [
             "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
             "`NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。",
