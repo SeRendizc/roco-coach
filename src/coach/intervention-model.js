@@ -26,7 +26,9 @@ import {fileURLToPath} from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const REPO_ROOT = join(HERE, '..', '..');
-export const MODEL_PATH = join(REPO_ROOT, 'reports', 'roco', 'intervention-model.json');
+//: 默认用**手游引擎标定**的那一份（第 18 轮）。旧演示引擎的模型留在
+//: `intervention-model.json`，两把尺子不可通约，不能混用（预注册文档 §10.4）。
+export const MODEL_PATH = join(REPO_ROOT, 'reports', 'roco', 'intervention-model-roco.json');
 
 /**
  * feature flag：
@@ -62,7 +64,11 @@ export function loadInterventionModel(path = MODEL_PATH) {
 }
 
 /** 决策前可得的特征向量。**顺序必须与训练时一致**，所以对着 features 逐个取值。 */
-export const GAP_SCALE = 5.0;   // 与 assessDecision / 训练脚本同一把尺子
+//: 边际量归一尺度。**必须按引擎标定**：旧演示引擎的分差中位数是 3 量级，
+//: 手游引擎的边际量落在 0.0009—0.86（中位数 0.059、75 分位 0.147）。
+//: 这个数来自 `intervention-windows-roco.jsonl` 头部记录的 75 分位阈值，
+//: 也就是「咬得紧」与「差得开」的分界；写死在这里是为了让判定层不依赖文件读取。
+export const GAP_SCALE = 0.146532;
 
 export function featureVector(features = {}, model = null) {
   const names = model?.features || ['intercept', 'risk', 'phase_replace', 'low_hp', 'turn_norm',

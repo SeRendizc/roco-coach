@@ -1,0 +1,50 @@
+{
+  "generated_by": "scripts/roco/train-intervention-model.py",
+  "preregistration": "docs/roco/W5-04-INTERVENTION-GATE.md",
+  "features": [
+    "intercept",
+    "risk",
+    "phase_replace",
+    "low_hp",
+    "turn_norm",
+    "legal_count_norm",
+    "planner_margin_norm"
+  ],
+  "standardize": {
+    "mean": [
+      1.0,
+      0.218887,
+      0.021079,
+      0.01855,
+      0.080923,
+      0.722316,
+      0.022712
+    ],
+    "scale": [
+      1.0,
+      0.119784,
+      0.143649,
+      0.134928,
+      0.041654,
+      0.108947,
+      0.029036
+    ]
+  },
+  "coefficients": [
+    0.0,
+    1.414819,
+    0.889097,
+    0.779011,
+    0.798654,
+    0.273111,
+    9.802147
+  ],
+  "intercept": -0.826018,
+  "threshold": 0.88,
+  "decision": "positive → 放行规则原本会给的提示；negative → 抑制（只做「抑制」这一个方向）",
+  "label": "truth_v2",
+  "label_basis": "纯决策前可得的观察量：必须补位 / 血量≤35% / 枚举第一与第二的估值差>5",
+  "gate_status": "gate_failed（未过：G4_threshold_robust, G5_ood）",
+  "deployment": "只替换 interventionScore 里 value-vs-floor 这一个判定；硬门控与预算在它之前，模型拿不到也改不了",
+  "rollback": "ROCO_INTERVENTION_MODEL=off（默认）时逐位回到规则结果"
+}

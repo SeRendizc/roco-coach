@@ -61,6 +61,8 @@
     "roco:verify-agent-trajectories": "node scripts/roco/verify-agent-trajectories.mjs",
     "roco:intervention-windows": "node scripts/roco/build-intervention-windows.mjs",
     "roco:intervention-model": "python3 scripts/roco/train-intervention-model.py --write",
+    "roco:intervention-windows-roco": "python3 scripts/roco/build-roco-intervention-windows.py --write",
+    "roco:intervention-model-roco": "python3 scripts/roco/train-intervention-model.py --write --out-model reports/roco/intervention-model-roco.json --out-report reports/roco/intervention-model-roco-report.json",
     "model:setup": "bash scripts/model/setup-mac.sh",
     "model:start": "bash scripts/model/start-mac.sh",
     "model:healthcheck": "bash scripts/model/healthcheck-mac.sh",

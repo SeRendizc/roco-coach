@@ -1,0 +1,1569 @@
+{
+  "generated_by": "scripts/roco/train-intervention-model.py",
+  "preregistration": "docs/roco/W5-04-INTERVENTION-GATE.md",
+  "window_set": "intervention-windows-roco-v1",
+  "window_set_path": "/Users/serendizc/Developer/roco-coach/tests/evals/roco/intervention-windows-roco.jsonl",
+  "engine": "手游规则引擎（roco_env.planner）",
+  "margin_threshold": 0.146532,
+  "margin_threshold_basis": "训练侧观测边际量的 75 分位。**必须按本引擎标定**：旧演示引擎的分差中位数是 3.06，本引擎是 0.04 量级，两把尺子差约 100 倍（见预注册文档 §10.4）。",
+  "window_set_digest_note": "窗口集由 build-intervention-windows.mjs 确定性生成（同一 seed 同一结果）",
+  "splits": {
+    "train": 1186,
+    "val": 381,
+    "test": 389,
+    "ood": 588
+  },
+  "model": {
+    "coefficients": [
+      0.0,
+      1.414819,
+      0.889097,
+      0.779011,
+      0.798654,
+      0.273111,
+      9.802147
+    ],
+    "intercept": -0.826018,
+    "standardize": {
+      "mean": [
+        1.0,
+        0.218887,
+        0.021079,
+        0.01855,
+        0.080923,
+        0.722316,
+        0.022712
+      ],
+      "scale": [
+        1.0,
+        0.119784,
+        0.143649,
+        0.134928,
+        0.041654,
+        0.108947,
+        0.029036
+      ]
+    },
+    "feature_names": [
+      "intercept",
+      "risk",
+      "phase_replace",
+      "low_hp",
+      "turn_norm",
+      "legal_count_norm",
+      "planner_margin_norm"
+    ],
+    "threshold": 0.88,
+    "validation": {
+      "n": 381,
+      "positives": 94,
+      "negatives": 287,
+      "tp": 86,
+      "fp": 0,
+      "fn": 8,
+      "tn": 287,
+      "precision": 1.0,
+      "recall": 0.9149,
+      "false_positive_rate": 0.0,
+      "false_negative_rate": 0.0851
+    },
+    "validation_rule_recall": 0.0213,
+    "threshold_sweep": [
+      {
+        "threshold": 0.01,
+        "recall": 1.0,
+        "false_positive_rate": 0.3624,
+        "feasible": true
+      },
+      {
+        "threshold": 0.02,
+        "recall": 1.0,
+        "false_positive_rate": 0.1951,
+        "feasible": true
+      },
+      {
+        "threshold": 0.03,
+        "recall": 1.0,
+        "false_positive_rate": 0.1672,
+        "feasible": true
+      },
+      {
+        "threshold": 0.04,
+        "recall": 1.0,
+        "false_positive_rate": 0.1672,
+        "feasible": true
+      },
+      {
+        "threshold": 0.05,
+        "recall": 1.0,
+        "false_positive_rate": 0.1498,
+        "feasible": true
+      },
+      {
+        "threshold": 0.06,
+        "recall": 1.0,
+        "false_positive_rate": 0.1463,
+        "feasible": true
+      },
+      {
+        "threshold": 0.07,
+        "recall": 1.0,
+        "false_positive_rate": 0.1463,
+        "feasible": true
+      },
+      {
+        "threshold": 0.08,
+        "recall": 1.0,
+        "false_positive_rate": 0.1463,
+        "feasible": true
+      },
+      {
+        "threshold": 0.09,
+        "recall": 1.0,
+        "false_positive_rate": 0.1289,
+        "feasible": true
+      },
+      {
+        "threshold": 0.1,
+        "recall": 1.0,
+        "false_positive_rate": 0.1254,
+        "feasible": true
+      },
+      {
+        "threshold": 0.11,
+        "recall": 1.0,
+        "false_positive_rate": 0.1254,
+        "feasible": true
+      },
+      {
+        "threshold": 0.12,
+        "recall": 1.0,
+        "false_positive_rate": 0.1254,
+        "feasible": true
+      },
+      {
+        "threshold": 0.13,
+        "recall": 1.0,
+        "false_positive_rate": 0.122,
+        "feasible": true
+      },
+      {
+        "threshold": 0.14,
+        "recall": 1.0,
+        "false_positive_rate": 0.122,
+        "feasible": true
+      },
+      {
+        "threshold": 0.15,
+        "recall": 1.0,
+        "false_positive_rate": 0.1185,
+        "feasible": true
+      },
+      {
+        "threshold": 0.16,
+        "recall": 1.0,
+        "false_positive_rate": 0.1185,
+        "feasible": true
+      },
+      {
+        "threshold": 0.17,
+        "recall": 1.0,
+        "false_positive_rate": 0.101,
+        "feasible": true
+      },
+      {
+        "threshold": 0.18,
+        "recall": 1.0,
+        "false_positive_rate": 0.101,
+        "feasible": true
+      },
+      {
+        "threshold": 0.19,
+        "recall": 1.0,
+        "false_positive_rate": 0.101,
+        "feasible": true
+      },
+      {
+        "threshold": 0.2,
+        "recall": 1.0,
+        "false_positive_rate": 0.101,
+        "feasible": true
+      },
+      {
+        "threshold": 0.21,
+        "recall": 1.0,
+        "false_positive_rate": 0.101,
+        "feasible": true
+      },
+      {
+        "threshold": 0.22,
+        "recall": 1.0,
+        "false_positive_rate": 0.101,
+        "feasible": true
+      },
+      {
+        "threshold": 0.23,
+        "recall": 1.0,
+        "false_positive_rate": 0.101,
+        "feasible": true
+      },
+      {
+        "threshold": 0.24,
+        "recall": 1.0,
+        "false_positive_rate": 0.0871,
+        "feasible": true
+      },
+      {
+        "threshold": 0.25,
+        "recall": 1.0,
+        "false_positive_rate": 0.0801,
+        "feasible": true
+      },
+      {
+        "threshold": 0.26,
+        "recall": 1.0,
+        "false_positive_rate": 0.0801,
+        "feasible": true
+      },
+      {
+        "threshold": 0.27,
+        "recall": 1.0,
+        "false_positive_rate": 0.0801,
+        "feasible": true
+      },
+      {
+        "threshold": 0.28,
+        "recall": 1.0,
+        "false_positive_rate": 0.0801,
+        "feasible": true
+      },
+      {
+        "threshold": 0.29,
+        "recall": 1.0,
+        "false_positive_rate": 0.0801,
+        "feasible": true
+      },
+      {
+        "threshold": 0.3,
+        "recall": 1.0,
+        "false_positive_rate": 0.0732,
+        "feasible": true
+      },
+      {
+        "threshold": 0.31,
+        "recall": 1.0,
+        "false_positive_rate": 0.0697,
+        "feasible": true
+      },
+      {
+        "threshold": 0.32,
+        "recall": 1.0,
+        "false_positive_rate": 0.0697,
+        "feasible": true
+      },
+      {
+        "threshold": 0.33,
+        "recall": 1.0,
+        "false_positive_rate": 0.0697,
+        "feasible": true
+      },
+      {
+        "threshold": 0.34,
+        "recall": 1.0,
+        "false_positive_rate": 0.0697,
+        "feasible": true
+      },
+      {
+        "threshold": 0.35,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.36,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.37,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.38,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.39,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.4,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.41,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.42,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.43,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.44,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.45,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.46,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.47,
+        "recall": 1.0,
+        "false_positive_rate": 0.0662,
+        "feasible": true
+      },
+      {
+        "threshold": 0.48,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.49,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.5,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.51,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.52,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.53,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.54,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.55,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.56,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.57,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.58,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.59,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.6,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.61,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.62,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.63,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.64,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.65,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.66,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.67,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.68,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.69,
+        "recall": 1.0,
+        "false_positive_rate": 0.0348,
+        "feasible": true
+      },
+      {
+        "threshold": 0.7,
+        "recall": 1.0,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.71,
+        "recall": 1.0,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.72,
+        "recall": 0.9681,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.73,
+        "recall": 0.9681,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.74,
+        "recall": 0.9681,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.75,
+        "recall": 0.9681,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.76,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.77,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.78,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.79,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.8,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.81,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0279,
+        "feasible": true
+      },
+      {
+        "threshold": 0.82,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0105,
+        "feasible": true
+      },
+      {
+        "threshold": 0.83,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0105,
+        "feasible": true
+      },
+      {
+        "threshold": 0.84,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0105,
+        "feasible": true
+      },
+      {
+        "threshold": 0.85,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0105,
+        "feasible": true
+      },
+      {
+        "threshold": 0.86,
+        "recall": 0.9574,
+        "false_positive_rate": 0.0105,
+        "feasible": true
+      },
+      {
+        "threshold": 0.87,
+        "recall": 0.9362,
+        "false_positive_rate": 0.0105,
+        "feasible": true
+      },
+      {
+        "threshold": 0.88,
+        "recall": 0.9149,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.89,
+        "recall": 0.8511,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.9,
+        "recall": 0.8085,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.91,
+        "recall": 0.8085,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.92,
+        "recall": 0.7872,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.93,
+        "recall": 0.7234,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.94,
+        "recall": 0.7234,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.95,
+        "recall": 0.7234,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.96,
+        "recall": 0.7021,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.97,
+        "recall": 0.6596,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.98,
+        "recall": 0.6596,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      },
+      {
+        "threshold": 0.99,
+        "recall": 0.6596,
+        "false_positive_rate": 0.0,
+        "feasible": true
+      }
+    ],
+    "cost_ratio": {
+      "false_negative": 3.0,
+      "false_positive": 1.0
+    },
+    "random_state": 20260921
+  },
+  "evaluation": {
+    "train": {
+      "split": "train",
+      "rule": {
+        "n": 1186,
+        "positives": 319,
+        "negatives": 867,
+        "tp": 29,
+        "fp": 0,
+        "fn": 290,
+        "tn": 867,
+        "precision": 1.0,
+        "recall": 0.0909,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.9091,
+        "calibration": {
+          "brier": 0.1997,
+          "ece": 0.1552,
+          "bins": [
+            {
+              "bucket": "0.0-0.1",
+              "n": 1002,
+              "mean_p": 0.0884,
+              "frequency": 0.1347
+            },
+            {
+              "bucket": "0.1-0.2",
+              "n": 155,
+              "mean_p": 0.121,
+              "frequency": 1.0
+            },
+            {
+              "bucket": "0.2-0.3",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.3-0.4",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.4-0.5",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.5-0.6",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.6-0.7",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.7-0.8",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.8-0.9",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.9-1.0",
+              "n": 29,
+              "mean_p": 0.95,
+              "frequency": 1.0
+            }
+          ]
+        },
+        "note": "规则的概率口径是把它的判定面映射得到（decisive→0.95，否则 sigmoid(margin/0.25)），规则本身只输出四选一"
+      },
+      "model": {
+        "n": 1186,
+        "positives": 319,
+        "negatives": 867,
+        "tp": 288,
+        "fp": 4,
+        "fn": 31,
+        "tn": 863,
+        "precision": 0.9863,
+        "recall": 0.9028,
+        "false_positive_rate": 0.0046,
+        "false_negative_rate": 0.0972,
+        "calibration": {
+          "brier": 0.0148,
+          "ece": 0.0379,
+          "bins": [
+            {
+              "bucket": "0.0-0.1",
+              "n": 778,
+              "mean_p": 0.0082,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.1-0.2",
+              "n": 30,
+              "mean_p": 0.1548,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.2-0.3",
+              "n": 7,
+              "mean_p": 0.243,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.3-0.4",
+              "n": 9,
+              "mean_p": 0.3252,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.4-0.5",
+              "n": 29,
+              "mean_p": 0.4685,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.5-0.6",
+              "n": 6,
+              "mean_p": 0.5219,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.6-0.7",
+              "n": 4,
+              "mean_p": 0.699,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.7-0.8",
+              "n": 19,
+              "mean_p": 0.7412,
+              "frequency": 1.0
+            },
+            {
+              "bucket": "0.8-0.9",
+              "n": 40,
+              "mean_p": 0.8832,
+              "frequency": 1.0
+            },
+            {
+              "bucket": "0.9-1.0",
+              "n": 264,
+              "mean_p": 0.9857,
+              "frequency": 0.9848
+            }
+          ]
+        }
+      },
+      "by_turn_band": {
+        "early(<=3)": {
+          "n": 670,
+          "positives": 67,
+          "negatives": 603,
+          "tp": 55,
+          "fp": 0,
+          "fn": 12,
+          "tn": 603,
+          "precision": 1.0,
+          "recall": 0.8209,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.1791
+        },
+        "mid(4-8)": {
+          "n": 516,
+          "positives": 252,
+          "negatives": 264,
+          "tp": 233,
+          "fp": 4,
+          "fn": 19,
+          "tn": 260,
+          "precision": 0.9831,
+          "recall": 0.9246,
+          "false_positive_rate": 0.0152,
+          "false_negative_rate": 0.0754
+        }
+      }
+    },
+    "val": {
+      "split": "val",
+      "rule": {
+        "n": 381,
+        "positives": 94,
+        "negatives": 287,
+        "tp": 2,
+        "fp": 0,
+        "fn": 92,
+        "tn": 287,
+        "precision": 1.0,
+        "recall": 0.0213,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.9787,
+        "calibration": {
+          "brier": 0.1964,
+          "ece": 0.149,
+          "bins": [
+            {
+              "bucket": "0.0-0.1",
+              "n": 330,
+              "mean_p": 0.0885,
+              "frequency": 0.1303
+            },
+            {
+              "bucket": "0.1-0.2",
+              "n": 49,
+              "mean_p": 0.1254,
+              "frequency": 1.0
+            },
+            {
+              "bucket": "0.2-0.3",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.3-0.4",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.4-0.5",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.5-0.6",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.6-0.7",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.7-0.8",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.8-0.9",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.9-1.0",
+              "n": 2,
+              "mean_p": 0.95,
+              "frequency": 1.0
+            }
+          ]
+        },
+        "note": "规则的概率口径是把它的判定面映射得到（decisive→0.95，否则 sigmoid(margin/0.25)），规则本身只输出四选一"
+      },
+      "model": {
+        "n": 381,
+        "positives": 94,
+        "negatives": 287,
+        "tp": 86,
+        "fp": 0,
+        "fn": 8,
+        "tn": 287,
+        "precision": 1.0,
+        "recall": 0.9149,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0851,
+        "calibration": {
+          "brier": 0.0266,
+          "ece": 0.0485,
+          "bins": [
+            {
+              "bucket": "0.0-0.1",
+              "n": 251,
+              "mean_p": 0.0078,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.1-0.2",
+              "n": 7,
+              "mean_p": 0.1573,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.2-0.3",
+              "n": 8,
+              "mean_p": 0.2533,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.3-0.4",
+              "n": 2,
+              "mean_p": 0.3233,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.4-0.5",
+              "n": 9,
+              "mean_p": 0.471,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.5-0.6",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.6-0.7",
+              "n": 2,
+              "mean_p": 0.699,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.7-0.8",
+              "n": 4,
+              "mean_p": 0.7217,
+              "frequency": 1.0
+            },
+            {
+              "bucket": "0.8-0.9",
+              "n": 22,
+              "mean_p": 0.8671,
+              "frequency": 0.6364
+            },
+            {
+              "bucket": "0.9-1.0",
+              "n": 76,
+              "mean_p": 0.9877,
+              "frequency": 1.0
+            }
+          ]
+        }
+      },
+      "by_turn_band": {
+        "early(<=3)": {
+          "n": 215,
+          "positives": 21,
+          "negatives": 194,
+          "tp": 17,
+          "fp": 0,
+          "fn": 4,
+          "tn": 194,
+          "precision": 1.0,
+          "recall": 0.8095,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.1905
+        },
+        "mid(4-8)": {
+          "n": 166,
+          "positives": 73,
+          "negatives": 93,
+          "tp": 69,
+          "fp": 0,
+          "fn": 4,
+          "tn": 93,
+          "precision": 1.0,
+          "recall": 0.9452,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0548
+        }
+      }
+    },
+    "test": {
+      "split": "test",
+      "rule": {
+        "n": 389,
+        "positives": 80,
+        "negatives": 309,
+        "tp": 6,
+        "fp": 0,
+        "fn": 74,
+        "tn": 309,
+        "precision": 1.0,
+        "recall": 0.075,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.925,
+        "calibration": {
+          "brier": 0.1562,
+          "ece": 0.1002,
+          "bins": [
+            {
+              "bucket": "0.0-0.1",
+              "n": 343,
+              "mean_p": 0.0883,
+              "frequency": 0.0991
+            },
+            {
+              "bucket": "0.1-0.2",
+              "n": 40,
+              "mean_p": 0.1255,
+              "frequency": 1.0
+            },
+            {
+              "bucket": "0.2-0.3",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.3-0.4",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.4-0.5",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.5-0.6",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.6-0.7",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.7-0.8",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.8-0.9",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.9-1.0",
+              "n": 6,
+              "mean_p": 0.95,
+              "frequency": 1.0
+            }
+          ]
+        },
+        "note": "规则的概率口径是把它的判定面映射得到（decisive→0.95，否则 sigmoid(margin/0.25)），规则本身只输出四选一"
+      },
+      "model": {
+        "n": 389,
+        "positives": 80,
+        "negatives": 309,
+        "tp": 72,
+        "fp": 0,
+        "fn": 8,
+        "tn": 309,
+        "precision": 1.0,
+        "recall": 0.9,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.1,
+        "calibration": {
+          "brier": 0.0263,
+          "ece": 0.0465,
+          "bins": [
+            {
+              "bucket": "0.0-0.1",
+              "n": 271,
+              "mean_p": 0.0101,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.1-0.2",
+              "n": 9,
+              "mean_p": 0.1641,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.2-0.3",
+              "n": 6,
+              "mean_p": 0.2407,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.3-0.4",
+              "n": 2,
+              "mean_p": 0.3233,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.4-0.5",
+              "n": 9,
+              "mean_p": 0.471,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.5-0.6",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.6-0.7",
+              "n": 2,
+              "mean_p": 0.699,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.7-0.8",
+              "n": 11,
+              "mean_p": 0.7448,
+              "frequency": 0.3636
+            },
+            {
+              "bucket": "0.8-0.9",
+              "n": 14,
+              "mean_p": 0.868,
+              "frequency": 0.7857
+            },
+            {
+              "bucket": "0.9-1.0",
+              "n": 65,
+              "mean_p": 0.9874,
+              "frequency": 1.0
+            }
+          ]
+        }
+      },
+      "by_turn_band": {
+        "early(<=3)": {
+          "n": 219,
+          "positives": 17,
+          "negatives": 202,
+          "tp": 14,
+          "fp": 0,
+          "fn": 3,
+          "tn": 202,
+          "precision": 1.0,
+          "recall": 0.8235,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.1765
+        },
+        "mid(4-8)": {
+          "n": 170,
+          "positives": 63,
+          "negatives": 107,
+          "tp": 58,
+          "fp": 0,
+          "fn": 5,
+          "tn": 107,
+          "precision": 1.0,
+          "recall": 0.9206,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.0794
+        }
+      }
+    },
+    "ood": {
+      "split": "ood",
+      "rule": {
+        "n": 588,
+        "positives": 155,
+        "negatives": 433,
+        "tp": 9,
+        "fp": 0,
+        "fn": 146,
+        "tn": 433,
+        "precision": 1.0,
+        "recall": 0.0581,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.9419,
+        "calibration": {
+          "brier": 0.2031,
+          "ece": 0.1579,
+          "bins": [
+            {
+              "bucket": "0.0-0.1",
+              "n": 504,
+              "mean_p": 0.0885,
+              "frequency": 0.1409
+            },
+            {
+              "bucket": "0.1-0.2",
+              "n": 75,
+              "mean_p": 0.1199,
+              "frequency": 1.0
+            },
+            {
+              "bucket": "0.2-0.3",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.3-0.4",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.4-0.5",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.5-0.6",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.6-0.7",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.7-0.8",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.8-0.9",
+              "n": 0,
+              "mean_p": null,
+              "frequency": null
+            },
+            {
+              "bucket": "0.9-1.0",
+              "n": 9,
+              "mean_p": 0.95,
+              "frequency": 1.0
+            }
+          ]
+        },
+        "note": "规则的概率口径是把它的判定面映射得到（decisive→0.95，否则 sigmoid(margin/0.25)），规则本身只输出四选一"
+      },
+      "model": {
+        "n": 588,
+        "positives": 155,
+        "negatives": 433,
+        "tp": 141,
+        "fp": 1,
+        "fn": 14,
+        "tn": 432,
+        "precision": 0.993,
+        "recall": 0.9097,
+        "false_positive_rate": 0.0023,
+        "false_negative_rate": 0.0903,
+        "calibration": {
+          "brier": 0.0174,
+          "ece": 0.0328,
+          "bins": [
+            {
+              "bucket": "0.0-0.1",
+              "n": 388,
+              "mean_p": 0.0085,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.1-0.2",
+              "n": 12,
+              "mean_p": 0.1522,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.2-0.3",
+              "n": 6,
+              "mean_p": 0.2499,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.3-0.4",
+              "n": 4,
+              "mean_p": 0.3143,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.4-0.5",
+              "n": 14,
+              "mean_p": 0.471,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.5-0.6",
+              "n": 2,
+              "mean_p": 0.5345,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.6-0.7",
+              "n": 2,
+              "mean_p": 0.699,
+              "frequency": 0.0
+            },
+            {
+              "bucket": "0.7-0.8",
+              "n": 9,
+              "mean_p": 0.7342,
+              "frequency": 0.8889
+            },
+            {
+              "bucket": "0.8-0.9",
+              "n": 23,
+              "mean_p": 0.8782,
+              "frequency": 0.8696
+            },
+            {
+              "bucket": "0.9-1.0",
+              "n": 128,
+              "mean_p": 0.9862,
+              "frequency": 0.9922
+            }
+          ]
+        }
+      },
+      "by_turn_band": {
+        "early(<=3)": {
+          "n": 331,
+          "positives": 31,
+          "negatives": 300,
+          "tp": 25,
+          "fp": 0,
+          "fn": 6,
+          "tn": 300,
+          "precision": 1.0,
+          "recall": 0.8065,
+          "false_positive_rate": 0.0,
+          "false_negative_rate": 0.1935
+        },
+        "mid(4-8)": {
+          "n": 257,
+          "positives": 124,
+          "negatives": 133,
+          "tp": 116,
+          "fp": 1,
+          "fn": 8,
+          "tn": 132,
+          "precision": 0.9915,
+          "recall": 0.9355,
+          "false_positive_rate": 0.0075,
+          "false_negative_rate": 0.0645
+        }
+      }
+    }
+  },
+  "ablation_without_planner_margin": {
+    "why": "去掉 planner_margin_norm 后，模型的特征与规则**完全同信息**，因此它只能复刻规则。用来区分「口径修正」与「多给了一个特征」。",
+    "feature_names": [
+      "intercept",
+      "risk",
+      "phase_replace",
+      "low_hp",
+      "turn_norm",
+      "legal_count_norm"
+    ],
+    "threshold": 0.88,
+    "test": {
+      "recall": 0.075,
+      "false_positive_rate": 0.0,
+      "precision": 1.0
+    },
+    "rule_test": {
+      "recall": 0.075,
+      "false_positive_rate": 0.0,
+      "precision": 1.0
+    },
+    "verdict": "gate_failed",
+    "failed_gates": [
+      "G3_calibration",
+      "G4_threshold_robust"
+    ]
+  },
+  "gate": {
+    "gates": {
+      "G1_recall_not_below_rule": {
+        "passed": true,
+        "detail": "model 0.9 vs rule 0.075"
+      },
+      "G2_false_positive_down": {
+        "passed": true,
+        "detail": "model 0.0 vs 0.75×rule 0.0"
+      },
+      "G3_calibration": {
+        "passed": true,
+        "detail": "brier model 0.0263 vs rule 0.1562；ECE 0.0465"
+      },
+      "G4_threshold_robust": {
+        "passed": false,
+        "detail": {
+          "0.35": {
+            "metrics": {
+              "n": 389,
+              "positives": 80,
+              "negatives": 309,
+              "tp": 80,
+              "fp": 21,
+              "fn": 0,
+              "tn": 288,
+              "precision": 0.7921,
+              "recall": 1.0,
+              "false_positive_rate": 0.068,
+              "false_negative_rate": 0.0
+            },
+            "g1": true,
+            "g2": false
+          },
+          "0.5": {
+            "metrics": {
+              "n": 389,
+              "positives": 80,
+              "negatives": 309,
+              "tp": 80,
+              "fp": 12,
+              "fn": 0,
+              "tn": 297,
+              "precision": 0.8696,
+              "recall": 1.0,
+              "false_positive_rate": 0.0388,
+              "false_negative_rate": 0.0
+            },
+            "g1": true,
+            "g2": false
+          },
+          "0.65": {
+            "metrics": {
+              "n": 389,
+              "positives": 80,
+              "negatives": 309,
+              "tp": 80,
+              "fp": 12,
+              "fn": 0,
+              "tn": 297,
+              "precision": 0.8696,
+              "recall": 1.0,
+              "false_positive_rate": 0.0388,
+              "false_negative_rate": 0.0
+            },
+            "g1": true,
+            "g2": false
+          }
+        }
+      },
+      "G5_ood": {
+        "passed": false,
+        "detail": {
+          "recall": "model 0.9097 vs rule 0.0581",
+          "false_positive": "model 0.0023 vs 0.75×rule 0.0（规则误报率为 0：该判据在此输入上不可达）"
+        }
+      },
+      "G6_latency": {
+        "passed": null,
+        "detail": "由 Node 侧计时（查表判定），见 verify-intervention-layer.mjs"
+      },
+      "G7_rollback": {
+        "passed": null,
+        "detail": "由 Node 测试证明（ROCO_INTERVENTION_MODEL=off 逐位回到规则）"
+      }
+    },
+    "failed": [
+      "G4_threshold_robust",
+      "G5_ood"
+    ],
+    "passes_decidable": false,
+    "definition": {
+      "G1_recall_not_below_rule": "recall_model >= recall_rule - 0.02",
+      "G2_false_positive_down": "FP_model <= 0.75 * FP_rule",
+      "G3_calibration": "brier_model <= brier_rule 且 ECE_model <= 0.10",
+      "G4_threshold_robust": "0.35/0.5/0.65 三个阈值上 G1 与 G2 仍成立",
+      "G5_ood": "family 外（seed >= 90000）上 G1 与 G2 仍成立",
+      "G6_latency": "判定层新增 P95 延迟 <= 1ms（查表，不调模型）",
+      "G7_rollback": "ROCO_INTERVENTION_MODEL=off 时逐位回到规则结果（由 Node 测试证明）"
+    }
+  },
+  "verdict": "gate_failed",
+  "not_claimed": [
+    "这不是胜率，也不声称干预在真人身上有效",
+    "准确率只表示「更贴独立依据」，不表示具备了规则没有的能力",
+    "硬门控与预算未被本层改动，也不可能被它改掉"
+  ]
+}

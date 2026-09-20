@@ -17,10 +17,8 @@ import {fileURLToPath} from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
 const {interventionDetail, interventionScore, resetInterventionLayer} = await import('../../src/coach/experience.js');
-const {interventionModelMode, loadInterventionModel, interventionModelDecision, interveneProbability, featureVector} =
-  await import('../../src/coach/intervention-model.js');
-
-const MODEL_PATH = join(ROOT, 'reports', 'roco', 'intervention-model.json');
+const {interventionModelMode, loadInterventionModel, interventionModelDecision, interveneProbability, featureVector,
+  MODEL_PATH} = await import('../../src/coach/intervention-model.js');
 const FEATURES = {game: null, active: true, focus: true, recentHints: 0, timeLeft: 100000};
 
 function withFlag(value, fn) {

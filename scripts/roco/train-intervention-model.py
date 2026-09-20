@@ -33,7 +33,10 @@ import numpy as np
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.abspath(os.path.join(_HERE, "..", ".."))
-WINDOWS = os.path.join(_ROOT, "tests", "evals", "roco", "intervention-windows-v2.jsonl")
+#: 默认用**手游引擎自己标定**的窗口集（第 18 轮）：旧演示引擎的分差是 3 量级、
+#: 手游引擎的边际量是 0.04 量级，两把尺子不可通约（见预注册文档 §10.4）。
+#: 要用旧集合跑对照就显式传 `--windows`。
+WINDOWS = os.path.join(_ROOT, "tests", "evals", "roco", "intervention-windows-roco.jsonl")
 OUT_MODEL = os.path.join(_ROOT, "reports", "roco", "intervention-model.json")
 OUT_REPORT = os.path.join(_ROOT, "reports", "roco", "intervention-model-report.json")
 
@@ -126,9 +129,10 @@ def rule_scores(row: Dict[str, Any], skill: float = 0.0) -> Dict[str, Any]:
     用来算 Brier/ECE；文档里写明了这一点，不假装规则本来就有概率）。
     """
     risk = min(max(float(row.get("risk") or 0.0), 0.0), 1.0)
-    # 规则在运行期拿到的 `gap` 是**规划器期望区间宽度**，与玩家选择无关。
-    # 这里用 `plannerMargin`（枚举第一与第二的估值差）作为同源代理：
-    # 两者都是「这一手有多大分歧」的决策前口径。
+    # 忠实复刻**现行 interventionScore 的判定面**（不改阈值）：
+    #   decisive = (gap 非空且 gap > 5) 或 risk ≥ 0.8 或必须补位
+    #   positive = decisive 或 (3*risk + 1.2*min(gap/5,1)) ≥ floor
+    # 这里直接用手游引擎的 `plannerMargin` 当 gap：它才是本链路真的会传进去的量。
     gap = row.get("plannerMargin")
     value = 3 * risk + 1.2 * min(max(float(gap or 0), 0.0) / GAP_THRESHOLD, 1.0)
     floor = VALUE_FLOOR + SKILL_WEIGHT * skill
@@ -230,7 +234,9 @@ def train(train_rows: List[Dict[str, Any]], val_rows: List[Dict[str, Any]],
     probabilities_val = model.predict_proba(x_val)[:, 1]
     chosen = None
     sweep = []
-    for threshold in [round(0.05 * step, 2) for step in range(1, 20)]:
+    # 阈值网格放到两位小数：手游引擎标定后的正类只有 ~7%，
+    # 概率会落在很小的区间里（0.00x—0.1x），0.05 的步长会整段跨过去。
+    for threshold in [round(0.01 * step, 3) for step in range(1, 100)]:
         predictions = (probabilities_val >= threshold).astype(int)
         metrics = binary_metrics(y_val, predictions)
         feasible = (metrics["recall"] or 0.0) >= rule_recall - 0.02
@@ -240,7 +246,11 @@ def train(train_rows: List[Dict[str, Any]], val_rows: List[Dict[str, Any]],
                          or metrics["false_positive_rate"] < chosen["metrics"]["false_positive_rate"]):
             chosen = {"threshold": threshold, "metrics": metrics}
     if chosen is None:
-        chosen = {"threshold": 0.5, "metrics": binary_metrics(y_val, (probabilities_val >= 0.5).astype(int))}
+        # 没有任何阈值能同时满足「召回不低于规则」——如实取一个能解释的默认值，
+        # 并把它记进报告，而不是悄悄换一个更宽松的判据。
+        chosen = {"threshold": 0.5,
+                  "metrics": binary_metrics(y_val, (probabilities_val >= 0.5).astype(int)),
+                  "note": "验证集上找不到同时满足召回门槛的阈值"}
 
     return {
         "coefficients": [round(float(value), 6) for value in model.coef_[0]],
@@ -314,9 +324,17 @@ def check_gates(model: Dict[str, Any], evals: Dict[str, Dict[str, Any]]) -> Dict
         return ok, f"model {model_recall} vs rule {rule_recall}"
 
     def g2(side: Dict[str, Any]) -> Tuple[bool, str]:
+        """误报必须下降。
+
+        注意规则误报率为 **0** 时这条**不可能**通过（任何误报都 > 0.75×0）——
+        这不是模型的缺陷，而是判据在退化输入上的性质。照实报，不改判据。
+        """
         rule_fp, model_fp = side["rule"]["false_positive_rate"], side["model"]["false_positive_rate"]
         ok = (rule_fp is not None and model_fp is not None and model_fp <= 0.75 * rule_fp)
-        return ok, f"model {model_fp} vs 0.75×rule {None if rule_fp is None else round(0.75 * rule_fp, 4)}"
+        detail = f"model {model_fp} vs 0.75×rule {None if rule_fp is None else round(0.75 * rule_fp, 4)}"
+        if rule_fp == 0 and model_fp:
+            detail += "（规则误报率为 0：该判据在此输入上不可达）"
+        return ok, detail
 
     g1_test, g1_why = g1(test)
     g2_test, g2_why = g2(test)
@@ -363,9 +381,12 @@ def check_gates(model: Dict[str, Any], evals: Dict[str, Dict[str, Any]]) -> Dict
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="W5-04 介入判定层训练与门槛判定")
     parser.add_argument("--write", action="store_true", help="把模型与报告写进 reports/roco/")
+    parser.add_argument("--windows", default=WINDOWS, help="窗口集路径")
+    parser.add_argument("--out-model", default=OUT_MODEL)
+    parser.add_argument("--out-report", default=OUT_REPORT)
     args = parser.parse_args(argv)
 
-    header, rows = load_windows()
+    header, rows = load_windows(args.windows)
     if not rows:
         sys.stderr.write("窗口集为空：先跑 node scripts/roco/build-intervention-windows.mjs\n")
         return 2
@@ -392,6 +413,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         "generated_by": "scripts/roco/train-intervention-model.py",
         "preregistration": "docs/roco/W5-04-INTERVENTION-GATE.md",
         "window_set": header.get("set_id"),
+        "window_set_path": args.windows,
+        "engine": header.get("engine", "旧演示引擎"),
+        "margin_threshold": header.get("margin_threshold"),
+        "margin_threshold_basis": header.get("margin_threshold_basis"),
         "window_set_digest_note": "窗口集由 build-intervention-windows.mjs 确定性生成（同一 seed 同一结果）",
         "splits": {split: len(subset) for split, subset in by_split.items()},
         "model": model,
@@ -418,7 +443,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         os.makedirs(os.path.dirname(OUT_REPORT), exist_ok=True)
         gate_status = ("pass（G1—G5 全部通过）" if report["verdict"] == "pass"
                        else f"gate_failed（未过：{', '.join(gate['failed'])}）")
-        with open(OUT_MODEL, "w", encoding="utf-8") as fh:
+        with open(args.out_model, "w", encoding="utf-8") as fh:
             json.dump({"generated_by": "scripts/roco/train-intervention-model.py",
                        "preregistration": report["preregistration"],
                        "features": FEATURE_NAMES,
@@ -435,7 +460,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                        "rollback": "ROCO_INTERVENTION_MODEL=off（默认）时逐位回到规则结果"},
                       fh, ensure_ascii=False, indent=2)
             fh.write("\n")
-        with open(OUT_REPORT, "w", encoding="utf-8") as fh:
+        with open(args.out_report, "w", encoding="utf-8") as fh:
             json.dump(report, fh, ensure_ascii=False, indent=2)
             fh.write("\n")
 

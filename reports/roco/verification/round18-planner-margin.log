@@ -19,3 +19,12 @@ OK (skipped=1)
 ℹ pass 11
 ℹ fail 0
 traj verdict True
+=== 第 18 轮（续）：手游标定 v3 @ 2026-09-20T22:28:07Z ===
+Ran 208 tests in 24.472s
+
+OK (skipped=1)
+ℹ tests 464
+ℹ pass 464
+ℹ fail 0
+ℹ pass 10
+ℹ fail 0
