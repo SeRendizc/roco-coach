@@ -31,13 +31,13 @@
           0.6542
         ],
         "mean_turns": 24.1,
-        "mean_seconds": 1.272,
+        "mean_seconds": 1.266,
         "decisions": 2030,
         "timed_out_decisions": 0,
         "fallbacks": 0,
         "fallback_rate": 0.0
       },
-      "seconds": 101.8,
+      "seconds": 101.3,
       "greedy_baseline": {
         "games": 40,
         "wins": 18,
@@ -65,13 +65,13 @@
           0.3279
         ],
         "mean_turns": 18.3,
-        "mean_seconds": 0.814,
+        "mean_seconds": 0.821,
         "decisions": 1603,
         "timed_out_decisions": 0,
         "fallbacks": 0,
         "fallback_rate": 0.0
       },
-      "seconds": 65.1,
+      "seconds": 65.7,
       "greedy_baseline": {
         "games": 40,
         "wins": 13,
@@ -99,13 +99,13 @@
           0.3682
         ],
         "mean_turns": 17.8,
-        "mean_seconds": 0.784,
+        "mean_seconds": 0.829,
         "decisions": 1557,
         "timed_out_decisions": 0,
         "fallbacks": 0,
         "fallback_rate": 0.0
       },
-      "seconds": 62.7,
+      "seconds": 66.3,
       "greedy_baseline": {
         "games": 40,
         "wins": 15,

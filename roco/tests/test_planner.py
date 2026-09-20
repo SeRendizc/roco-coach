@@ -274,3 +274,69 @@ class TestPlannerIsSideAware(unittest.TestCase):
             for side in ("player", "enemy"):
                 result = pl.plan_actions(state, RS, side=side, depth=2, beam=2, budget_ms=500)
                 self.assertIsNotNone(result, f"side={side} 的规划返回了 None")
+
+
+class TestFailedBranchesAreNotScored(unittest.TestCase):
+    """推不动的分支**不许**拿「原状态」当分数。
+
+    `_safe_step` 在步骤非法或机制未核验时**原样返回输入状态**。
+    如果估值函数直接 `evaluate` 它，就会得到一个「什么都没做」的分数 ——
+    而那个分数可能**恰好高于**真正可行、真正更好的动作，
+    于是执行不了的选项被排到前面去。
+
+    这是被基准量出来的：某个局面上 40 多个算不出来的动作共享同一个分数
+    （实测 `-1.2121`），而基准最优动作的分数**低于**它 ——
+    planner 在那个局面上「必然选错」。
+
+    具体触发点是「硬门」：一条**描述里读不出减伤比例**的防御技能。
+    引擎对它 fail closed（抛 `UnsupportedEffect`），于是推演推不动。
+    """
+
+    def _state_with_hard_gate(self):
+        """造一个「我方带了硬门」的局面。"""
+        pid = RS.pets_by_name("海豹船长")[0].pet_id          # 学得到「硬门」
+        hard_gate = [s.skill_id for s in RS.skills.values() if s.name == "硬门"][0]
+        others = [p.pet_id for p in RS.pets.values() if p.pet_id != pid][:2]
+        return renv.reset([pid] + others, [pid] + others, seed=1, rs=RS,
+                          loadouts={pid: [hard_gate]}), hard_gate
+
+    def test_impossible_action_scores_negative_infinity(self):
+        from roco_env import opponents as ropp
+        state, hard_gate = self._state_with_hard_gate()
+        ropp.bind_ruleset(RS)
+        action = [a for a in renv.legal_actions(state, RS, "player")
+                  if a.kind == ACTION_SKILL and a.skill_id == hard_gate]
+        self.assertTrue(action, "硬门应当在这个配招里出现")
+        value = pl.one_ply_value(state, RS, action[0], side="player", beam=3)
+        self.assertEqual(value, float("-inf"),
+                         "推不动的动作必须记成 -inf，不能拿「什么都没做」的分数")
+
+    def test_impossible_action_is_not_scored_as_the_current_state(self):
+        """反证：如果实现退回「直接估值 `_safe_step` 的返回值」，这条会红。"""
+        state, hard_gate = self._state_with_hard_gate()
+        baseline = pl.evaluate(state, RS, "player")
+        action = [a for a in renv.legal_actions(state, RS, "player")
+                  if a.kind == ACTION_SKILL and a.skill_id == hard_gate][0]
+        value = pl.one_ply_value(state, RS, action, side="player", beam=3)
+        self.assertNotEqual(value, baseline,
+                            "推不动的动作拿到了与「什么都没做」完全相同的分数 —— "
+                            "正是那个会把它排到前面的 bug")
+
+    def test_legal_actions_still_get_finite_scores(self):
+        """正常动作不受影响：仍然是有限值，不会一起被记成 -inf。"""
+        import random
+        ids = [RS.pets_by_name(n)[0].pet_id for n in
+               ("寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃", "音速犬")]
+        rng = random.Random(911)
+        finite = 0
+        for _ in range(10):
+            state = renv.reset(rng.sample(ids, 3), rng.sample(ids, 3),
+                               seed=rng.randrange(1, 10 ** 5), rs=RS)
+            for action in renv.legal_actions(state, RS, "player"):
+                if action.kind != ACTION_SKILL:
+                    continue
+                value = pl.one_ply_value(state, RS, action, side="player", beam=3)
+                if value != float("-inf"):
+                    finite += 1
+                break
+        self.assertGreater(finite, 5, "正常动作应当仍有有限分数")

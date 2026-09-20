@@ -272,19 +272,37 @@ def one_ply_value(state: GameState, rs: Ruleset, action: Action, *, side: str = 
 
     这是候选筛选用的判据，也是「基准最优」用的判据 —— **同一个函数**，
     所以「搜索有没有找到估值函数偏好」与「候选有没有把最优留住」是同一把尺子。
-    非法或算不出来的动作返回 `-inf`，保证它不会因为「恰好排前面」而被选中。
+
+    **推不动的分支必须排除，不能拿「原状态」当分数。**
+    `_safe_step` 在步骤非法或机制未核验时**原样返回输入状态**，于是
+    `evaluate(原状态)` 会给一个「什么都没做」的分数，可能**恰好**高于真正可行
+    的动作 —— 把执行不了的选项排到前面去。
+
+    这一条是被基准量出来的：某个局面上 40 多个算不出来的动作共享同一个分数
+    （实测 `-1.2121`），而基准最优动作的分数**低于**它，
+    于是 planner 在那个局面上「必然选错」。修法是只对**真的推演出来**的分支取期望；
+    一条都推不动时返回 `-inf`（明确表示「这个动作现在算不出来」），
+    这样它不会因为「恰好排前面」而被选中。
     """
     dist = opponent_distribution(state, rs, beam=beam)
     if not dist:
-        nxt = _safe_step(_clone(state), rs, action, None, side)
-        return evaluate(nxt, rs, side)
+        trial = _clone(state)
+        nxt = _safe_step(trial, rs, action, None, side)
+        return evaluate(nxt, rs, side) if nxt is not trial else float("-inf")
     total = 0.0
+    scored = 0.0
     for opp_action, weight in dist:
-        nxt = _safe_step(_clone(state), rs,
+        trial = _clone(state)
+        nxt = _safe_step(trial, rs,
                          action if side == "player" else opp_action,
                          opp_action if side == "player" else action, side)
+        if nxt is trial:
+            continue                      # 这一条对手分支推不动 → 不计入
         total += evaluate(nxt, rs, side) * weight
-    return total
+        scored += weight
+    if scored <= 0:
+        return float("-inf")              # 全部推不动 = 现在算不出来，不是「没变化」
+    return total / scored
 
 
 def _my_candidates(state: GameState, rs: Ruleset, *, beam: int,
@@ -457,6 +475,11 @@ def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidat
             theirs = opponent_distribution(cur, rs, beam=2)
             if not mine or not theirs:
                 break
+            # 说明：这里**只用分布里权重最高的那条对手线**推进，而不是对分布取期望。
+            # 试过改成「每个对手候选各推一步、按权重取期望」，目标是与基准一致；
+            # 实测既没有改善一步推演基准（top1 0.667 → 0.684），
+            # 也没有改善整局胜负（`greedy_damage` 44/80 → 41/80），
+            # 却让每次规划从 142ms 涨到 186ms。**证据不足就不加复杂度**，撤回。
             best_a = max(
                 mine,
                 key=lambda a: evaluate(

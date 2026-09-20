@@ -121,10 +121,17 @@ def positions(rs, count: int) -> List[Dict[str, Any]]:
 
 
 def baseline_values(rs, state, beam: int = 4) -> Dict[str, float]:
-    """每个**合法**动作的基准值：按对手分布做一次真实推演再估值。
+    """每个**能真的推演出来**的合法动作的基准值。
 
     基准用的是与 planner **同一个** `evaluate()`（这一点必须说清楚：
     它测的是「搜索有没有找到估值函数喜欢的那一手」，不是「估值函数对不对」）。
+
+    **推演失败的动作必须排除，不能给它打分。** `_safe_step` 在步骤非法或机制
+    未核验时**原样返回输入状态**，于是 `evaluate(原状态)` 会给出一个「什么都没做」
+    的分数。第一版没排除，结果一批算不出来的动作全部拿到同一个值
+    （实测 40+ 个动作共享 `-1.2121`），而那个值可能**恰好**高于真正的最优 ——
+    于是「基准最优」变成了一个根本执行不了的动作，planner 自然「选错」。
+    一个把失败当成选项的基准，会系统性地高估基准、低估 planner。
     """
     dist = pm.opponent_distribution(state, rs, beam=beam)
     out: Dict[str, float] = {}
@@ -132,15 +139,24 @@ def baseline_values(rs, state, beam: int = 4) -> Dict[str, float]:
         if action.kind == "escape":
             continue
         if not dist:
-            nxt = pm._safe_step(renv.deserialize(renv.serialize(state), rs), rs, action, None, "player")
+            trial = renv.deserialize(renv.serialize(state), rs)
+            nxt = pm._safe_step(trial, rs, action, None, "player")
+            if nxt is trial:
+                continue          # 推演没发生 → 不打分
             out[action.label(rs)] = pm.evaluate(nxt, rs, "player")
             continue
         total = 0.0
+        scored = 0
         for opp_action, weight in dist:
             trial = renv.deserialize(renv.serialize(state), rs)
             nxt = pm._safe_step(trial, rs, action, opp_action, "player")
+            if nxt is trial:
+                continue          # 这一条对手分支推不动 → 不计入
             total += pm.evaluate(nxt, rs, "player") * weight
-        out[action.label(rs)] = total
+            scored += weight
+        if scored <= 0:
+            continue              # 所有对手分支都推不动 → 这个动作不进基准
+        out[action.label(rs)] = total / scored
     return out
 
 
