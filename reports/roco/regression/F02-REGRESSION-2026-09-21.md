@@ -653,3 +653,29 @@ python3 /tmp/f02-unsupported-probe.py
 5. 延迟数字只属于**本机**（§4.2 读法第 4 条），不是生产数字。
 6. 未支持机制清单是「本轮未核验」的快照。机制一旦实现，这张表必须同步更新，
    且 `§7.6` 里 F4（静默假设）那几条应当优先补 microcase。
+
+---
+
+## 附：协调者补记（2026-09-21，报告写完之后）
+
+这份报告由子 agent 在 `b5c2453` 的工作区上跑出。写完之后协调者按它报的问题做了修改，
+所以**报告里的部分数字与代码状态已经不是最新的**。改动逐条对应：
+
+| 报告里的条目 | 现状 | 依据 |
+|---|---|---|
+| §5.1 `/battle/plan` 在只有换人可做时 `branches=0` 却 `coverage=1.0` | **已修**。补位局面的 rollout 改走 `step_replace`（原来一律调 `step_joint`，被引擎拒绝后每个分支都被丢弃，等于从来没算过）。`coverage` 的含义收窄为「对手反制被枚举过的比例」，并新增 `no_counter_branches` 与 `dropped_branches` 两栏 | `roco/src/roco_env/planner.py`；`roco/tests/test_sim_endpoints.py::TestPlanCoverageIsHonest` |
+| §5.3 `/health` 的 capabilities 把三个已接上的端点报成 `false` | **已修**。`team.evaluate` / `team.compare` / `battle.plan` 改为 `true`，新增 `battle.local_sim`；新增测试逐条核对 | `roco/src/roco_env/service.py` 的 `CAPABILITIES`；`TestCapabilitiesMatchTheWiring` |
+| §5.4 `NOT_IMPLEMENTED` 为空字典 → 未实现端点落成 404 | **已修**。登记 `/battle/summary`，`do_POST` 先查该表再退回 404，于是它回 **501 not_implemented** | 同上；`test_unimplemented_endpoint_is_501_not_404` |
+| §5.6 `npm run test:smoke` 依赖外部常驻 8765 服务，命令不自举 | **未改，留作已知问题**。它是 M0/M1 遗留的冒烟脚本；要改就得让它自己起服务，属于脚本自举的独立工作量 | — |
+
+数字变化（修改后重跑）：
+
+| 套件 | 报告里的值 | 现在 |
+|---|---|---|
+| Python `npm run test:env` | 122 | **127**（新增 5 项：能力表 3 项 + 补位规划 2 项） |
+| Node `test:plan-e2e` | 8 | 8（未变） |
+| Node `test:unit` | 421 | 421（未变） |
+
+报告里对演示页的描述（§5 与 F03 的录屏脚本所依据的界面）在改动后**没有变化**：
+改的是 Python 侧的规划与能力表，页面元素与文案一个都没动。
+`reports/roco/demo-acceptance/demo-acceptance.json` 在本轮重跑后仍是 16/16 通过。
