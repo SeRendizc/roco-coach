@@ -234,7 +234,7 @@ def tasks_rules_lookup() -> List[Dict[str, Any]]:
     specs = [
         ("rl-pet", "寂灭骨龙的种族值是多少", "pet", {"pet_id": "pet_000225"},
          "图鉴字段", "FAMILIES[0]"),
-        ("rl-skill", "坟场搏击的静态威力是多少", "skill", {"skill_name": "坟场搏击"},
+        ("rl-skill", "坟场搏击的静态威力是多少", "skill", {"name": "坟场搏击"},
          "技能静态威力", "FAMILIES[0]"),
         ("rl-type", "龙系打幽系是几倍", "type_multiplier",
          {"attack_element": "龙系", "defender_types": ["幽系"]},

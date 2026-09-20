@@ -283,6 +283,20 @@ depth=2 在那把尺子上看起来更差。这一轮补上另一半：
 对另外两个对手，**没有任何证据表明规划更好**。样本 40—80 局，
 区间宽度 ±10 个百分点，不足以支撑更强的说法。
 
+### 第 8 轮新增（W4-01 / W4-02，一句话索引）
+
+| 交付 | 一句话 | 证据 |
+|---|---|---|
+| **W4-01 Agent 任务集**（288 条 / 8 类） | 按**阵容家族、机制、表达模板**三重隔离切分，留出维度不出现在训练集，每类在 train/val/test 三侧都有样本 | `tests/evals/agent-tasks-v1.jsonl`、`scripts/roco/{build,verify}-agent-tasks.py`、`roco/tests/test_agent_tasks.py`（12 项） |
+| **任务集里有一个不可完成的参数**（真缺陷） | `query_rules` 的技能期望写成 `skill_name`，而工具契约只接受 `name`——任何 Agent 照做都会被 `validToolArgs` 判成非法参数。是「照期望重放」这一支 arm 把它撞出来的 | `test_expected_arguments_are_arguments_the_tool_actually_accepts`（从 `toolbox.js` 直接解析契约键） |
+| **W4-02 轨迹格式 + 判定器 + 离线回放** | 4,536 条轨迹 / 12 个世界 / 7 个 arm，全部由**真服务**产出的公开状态驱动，产物字节可复现 | `scripts/roco/agent-trajectories.mjs`、`docs/roco/AGENT-TRAJECTORIES.md` |
+| **判定器两个方向都被测了** | 正向：对照 arm 648/648；反向：**每条通过的记录按自己的判据改坏一次**，13,656 个变体全部判挂；另有漂移检查 | `reports/roco/agent-trajectories-verification.json` |
+| **反向对照抓出判定器自身三个真缺陷** | ① 胜率判据整段扫描会被前面的否定词骗过；② 冲突判据把「两个来源**一致**」判成「说出了冲突」；③ 过期判据只卡正文、不卡那次被拒的调用 | 同上；`tests/evals/roco/agent-trajectories.test.js`（6 项） |
+| **一个难查的串号 bug** | 构建器换世界时没清工具层的「见过的状态版本」，下一个世界拿自己的版本 0 去查被判成「版本倒退」——回执里写着「state_version 0 与当前状态 0 不一致」，两个数字一样却是过期错误 | `resetRocoTools()`；13 条冲突轨迹因此从「挂」变「过」 |
+
+这轮同样**没有**声称模型能力：`baseline` / `blind` 是写在代码里的规则，
+不是模型。W4-02 的「2,000—5,000 条**模型候选**」这一半仍缺 DeepSeek key。
+
 ### 第 7 轮新增（一句话索引）
 
 | 交付 | 一句话 | 证据 |
@@ -759,6 +773,11 @@ active goal 已按此重写（revision 2）。
 | 2026-09-21 | **属性增减真的进伤害了**（此前入口硬编码 1.0）、防御减伤不再跨回合残留 | commit `35d7120`；`TestBuffDamageWiring` |
 | 2026-09-21 | **W3-01：12 只精灵全部接入特性**（FULL 6 / PARTIAL 2 / REFUSED 4） | commit `2231191`；`roco/src/roco_env/traits.py` |
 | 2026-09-21 | 监工复核后：折算收敛到唯一函数、语义标注为假设、测试改按不变量写 | commit `9085af2`；`TestReplayCarriesLoadouts` |
+| 2026-09-21 | **W4-01 任务集**：288 条 / 8 类，三重维度隔离切分 + 判定器自检（两个方向） | commit `10325dd`；`roco/tests/test_agent_tasks.py` |
+| 2026-09-21 | 修掉任务集里 `skill_name` 这个不存在的参数键（照期望重放撞出来的） | `tools_argument_keys()` 合同比对 |
+| 2026-09-21 | **W4-02 轨迹集**：4,536 条 / 12 世界 / 7 arm + 离线回放 + 双向对照 | `docs/roco/AGENT-TRAJECTORIES.md`、`reports/roco/agent-trajectories-verification.json` |
+| 2026-09-21 | 反向对照抓出判定器三个真缺陷（胜率/冲突/过期各一），全部修掉 | 同上；本轮验证日志 |
+| 2026-09-21 | 第 9 轮验证：Python 195（1 skip）/ Node 430 / bridge 11 / toolbox 17 / plan-e2e 10；demo 16/16、浏览器 9/9；轨迹判定 verdict=true | `reports/roco/verification/round9-agent-trajectories.log` |
 
 ---
 
@@ -767,7 +786,8 @@ active goal 已按此重写（revision 2）。
 | # | 任务 | 依赖 | 现在能不能做 |
 |---|---|---|---|
 | 1 | **W4-01 固定 Agent 任务集**（八类：规则补查 / 阵容约束 / 继续停止 / 工具失败 / 状态过期 / 证据冲突 / 静默 / 简短解释；按**阵容家族、机制、表达模板**三重隔离切分） | 无 | **能**。现有 `tests/evals/*`、`tool-router.json`、`regression-set.json` 是起点 |
-| 2 | **W4-02 构造 2,000—5,000 条工具轨迹**（现有流程生成候选、程序校验、困难样本抽样；错误轨迹与修复理由必须保存） | W4-01 | **能**（要 DeepSeek key 才能生成候选；没有 key 时先建「轨迹格式 + 校验器 + 离线回放」这三件） |
+| 2 | **W4-02 构造 2,000—5,000 条工具轨迹** | W4-01 | **一半已完成**：轨迹格式 / 判定器 / 离线回放 / 4,536 条**规则 arms** 轨迹已落地（`docs/roco/AGENT-TRAJECTORIES.md`）。剩下一半是**模型候选**，要 DeepSeek key |
+| 2b | **W4-05 同 Agent 回放门禁** | W4-02 | **能起步**：判定器与回放已经是可复用门禁（4,536 条 + 13,656 个反例变体）。等有 key 时把「固定 pipeline / 模型 / SFT」三条 arm 接进同一套判据即可 |
 | 3 | **W5-04 主动介入模型**（成本敏感分类器，替换规则打分的**一部分**，硬门控不变） | 30+ 窗口的标签扩充 | **能起步**：先建标签扩充与评测闭环，再训模型 |
 | 4 | W4-03 / W4-04 Qwen3-4B profiling 与 SFT | **M5 Pro 48GB** | **硬件阻塞**（不租云 GPU） |
 | 5 | W5-05 陪练盲评 | **3—5 位真人** | **外部阻塞** |

@@ -48,29 +48,106 @@ from roco_env import env as renv  # noqa: E402
 TEAM_NAMES = ("寂灭骨龙", "海豹船长", "黑猫巫师")
 
 
-def build(seed: int) -> dict:
+def advance(state, rs, turns: int, strategy_name: str = "greedy_damage"):
+    """把这局推进若干回合，用来产出**中局**的公开状态。
+
+    轨迹集需要的不只是开局：开局双方满血、后备齐全，很多工具分支走不到。
+    推进用的是引擎自己的对手策略（`opponents.get_strategy`），和
+    `/battle/advance` 走**同一套**决策代码与同一个确定性随机源
+    `(seed, turn)`——所以同一 seed、同一回合数必然推出同一状态，
+    不引入时钟或全局 random。
+
+    推进不了就停在当前回合并**说明原因**，不伪造一个「看起来打到第 3 回合」的状态。
+    """
+    if turns <= 0:
+        return state
+    from roco_env import opponents as opp
+
+    # 策略需要**显式**绑定规则集才能估伤害（`_rs()` 宁愿抛错也不猜一个默认表）。
+    opp.bind_ruleset(rs)
+    strategy = opp.get_strategy(strategy_name)
+    for _ in range(turns):
+        if state.phase == "finished" or state.result is not None:
+            break
+        queue = renv.needs_replacement(state)
+        if state.phase == "replace" or queue:
+            for side in renv.needs_replacement(state):
+                legal = [a for a in renv.legal_actions(state, rs, side) if a.kind == "switch"]
+                if not legal:
+                    continue
+                slot = strategy.act(renv.observe(state, rs, side), legal, int(state.seed), int(state.turn))
+                renv.step_replace(state, rs, side, int(slot.target_index))
+            continue
+        legal_player = renv.legal_actions(state, rs, "player")
+        legal_enemy = renv.legal_actions(state, rs, "enemy")
+        if not legal_player or not legal_enemy:
+            sys.stderr.write("第 %d 回合没有合法动作，停止推进\n" % state.turn)
+            break
+        player_action = strategy.act(
+            renv.observe(state, rs, "player"), legal_player, int(state.seed), int(state.turn)
+        )
+        enemy_action = strategy.act(
+            renv.observe(state, rs, "enemy"), legal_enemy, int(state.seed), int(state.turn)
+        )
+        renv.step_joint(state, rs, player_action, enemy_action)
+    return state
+
+
+def build(seed: int, turns: int = 0, version: int = 0) -> dict:
     rs = rdata.load_ruleset()
     team = [rs.pets_by_name(name)[0].pet_id for name in TEAM_NAMES]
     state = renv.reset(team, team, seed=seed, rs=rs)
+    if turns:
+        state = advance(state, rs, turns)
+    if version:
+        # 「当前公开状态版本」由调用方指定：轨迹集要构造**同一份局面、不同版本号**
+        # 的世界，用来验证状态过期保护真的会作废旧结论（而不是靠约定不传旧版本）。
+        state.state_version = version
+    public = renv.public_planner_state(state, rs)
     return {
         "seed": seed,
+        "turns": turns,
+        "state_version": public.get("state_version"),
         "ruleset_id": rs.ruleset_id,
         "team": team,
-        "public": renv.public_planner_state(state, rs),
+        "strategy": "greedy_damage",
+        "public": public,
         "private": renv.serialize(state),
     }
 
 
 def main(argv) -> int:
-    if len(argv) != 2:
-        sys.stderr.write("用法：gen-plan-state.py <seed>\n")
+    seed = None
+    turns = 0
+    version = 0
+    rest = list(argv[1:])
+    while rest:
+        token = rest.pop(0)
+        if token == "--turns":
+            if not rest:
+                sys.stderr.write("--turns 需要一个整数\n")
+                return 2
+            turns = int(rest.pop(0))
+        elif token == "--version":
+            if not rest:
+                sys.stderr.write("--version 需要一个整数\n")
+                return 2
+            version = int(rest.pop(0))
+        elif token.startswith("--"):
+            sys.stderr.write("未知参数：%s\n" % token)
+            return 2
+        elif seed is None:
+            seed = int(token)
+        else:
+            sys.stderr.write("用法：gen-plan-state.py <seed> [--turns N] [--version N]\n")
+            return 2
+    if seed is None:
+        sys.stderr.write("用法：gen-plan-state.py <seed> [--turns N] [--version N]\n")
         return 2
-    try:
-        seed = int(argv[1])
-    except ValueError:
-        sys.stderr.write("seed 必须是整数\n")
+    if turns < 0 or version < 0:
+        sys.stderr.write("--turns / --version 不能为负\n")
         return 2
-    json.dump(build(seed), sys.stdout, ensure_ascii=False)
+    json.dump(build(seed, turns, version), sys.stdout, ensure_ascii=False)
     sys.stdout.write("\n")
     return 0
 

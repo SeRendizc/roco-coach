@@ -1,0 +1,202 @@
+{
+ "generated_by": "scripts/roco/verify-agent-trajectories.mjs",
+ "trajectory_set": "agent-trajectories-v1",
+ "format": "roco-agent-trajectory-v1",
+ "counts": {
+  "rows": 4536,
+  "tasks": 288,
+  "arms": [
+   "replay",
+   "baseline",
+   "stubborn",
+   "stop_now",
+   "no_rules",
+   "drop_args",
+   "blind"
+  ]
+ },
+ "structural": {
+  "total": 4536,
+  "passed": 4536,
+  "failed": 0,
+  "by_arm": {
+   "replay": {
+    "total": 648,
+    "passed": 648
+   },
+   "baseline": {
+    "total": 648,
+    "passed": 648
+   },
+   "stubborn": {
+    "total": 648,
+    "passed": 648
+   },
+   "stop_now": {
+    "total": 648,
+    "passed": 648
+   },
+   "no_rules": {
+    "total": 648,
+    "passed": 648
+   },
+   "drop_args": {
+    "total": 648,
+    "passed": 648
+   },
+   "blind": {
+    "total": 648,
+    "passed": 648
+   }
+  },
+  "first_failures": []
+ },
+ "replay": {
+  "total": 4536,
+  "passed": 4536,
+  "failed": 0,
+  "by_arm": {
+   "replay": {
+    "total": 648,
+    "passed": 648
+   },
+   "baseline": {
+    "total": 648,
+    "passed": 648
+   },
+   "stubborn": {
+    "total": 648,
+    "passed": 648
+   },
+   "stop_now": {
+    "total": 648,
+    "passed": 648
+   },
+   "no_rules": {
+    "total": 648,
+    "passed": 648
+   },
+   "drop_args": {
+    "total": 648,
+    "passed": 648
+   },
+   "blind": {
+    "total": 648,
+    "passed": 648
+   }
+  },
+  "first_failures": [],
+  "skipped": 0,
+  "note": null
+ },
+ "grader": {
+  "positive_expected": "全过（这批轨迹是按任务期望/规则 baseline 生成的）",
+  "negative_expected": "全挂（每条记录都被改坏一次）",
+  "positive": {
+   "total": 648,
+   "passed": 648
+  },
+  "negative": {
+   "total": 13656,
+   "passed": 13656
+  },
+  "per_criterion": {
+   "tool": {
+    "total": 2832,
+    "caught": 2832,
+    "example": "删掉应当调用的工具"
+   },
+   "args_must_match": {
+    "total": 1416,
+    "caught": 1416,
+    "example": "清空参数"
+   },
+   "max_tool_calls": {
+    "total": 3864,
+    "caught": 3864,
+    "example": "超出工具调用次数上限"
+   },
+   "must_not_fabricate": {
+    "total": 3000,
+    "caught": 3000,
+    "example": "正文里塞数字型结论"
+   },
+   "must_keep_locked": {
+    "total": 240,
+    "caught": 240,
+    "example": "把锁定的伙伴换掉"
+   },
+   "must_not_claim_winrate": {
+    "total": 612,
+    "caught": 612,
+    "example": "把分数说成胜率"
+   },
+   "must_mention_limitation": {
+    "total": 216,
+    "caught": 216,
+    "example": "抹掉限制说明"
+   },
+   "must_not_use_stale": {
+    "total": 216,
+    "caught": 216,
+    "example": "拿旧状态版本重算"
+   },
+   "must_surface_conflict": {
+    "total": 252,
+    "caught": 252,
+    "example": "不提冲突"
+   },
+   "must_not_speak": {
+    "total": 252,
+    "caught": 252,
+    "example": "该沉默时开口"
+   },
+   "max_reply_chars": {
+    "total": 756,
+    "caught": 756,
+    "example": "正文超长"
+   }
+  },
+  "per_arm": {
+   "replay": {
+    "total": 648,
+    "passed": 648,
+    "control": true
+   },
+   "baseline": {
+    "total": 648,
+    "passed": 648,
+    "control": false
+   },
+   "stubborn": {
+    "total": 648,
+    "passed": 576,
+    "control": false
+   },
+   "stop_now": {
+    "total": 648,
+    "passed": 360,
+    "control": false
+   },
+   "no_rules": {
+    "total": 648,
+    "passed": 432,
+    "control": false
+   },
+   "drop_args": {
+    "total": 648,
+    "passed": 576,
+    "control": false
+   },
+   "blind": {
+    "total": 648,
+    "passed": 624,
+    "control": false
+   }
+  },
+  "drift": 0,
+  "drift_example": null,
+  "passes": true
+ },
+ "verdict": true
+}

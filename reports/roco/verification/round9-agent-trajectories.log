@@ -1,0 +1,48 @@
+HEAD 10325dd44744cdcae4ae30857b52a7f7b229a9ab
+date 2026-09-20T21:37:15Z
+=== test:env ===
+----------------------------------------------------------------------
+Ran 195 tests in 13.037s
+
+OK (skipped=1)
+=== test:unit ===
+ℹ tests 424
+ℹ pass 424
+ℹ fail 0
+ℹ skipped 0
+=== bridge ===
+ℹ tests 11
+ℹ pass 11
+ℹ fail 0
+=== toolbox-roco ===
+ℹ tests 17
+ℹ pass 17
+ℹ fail 0
+=== plan-e2e ===
+ℹ tests 10
+ℹ pass 10
+ℹ fail 0
+=== test:unit (含新轨迹守卫) ===
+ℹ tests 424
+ℹ pass 424
+ℹ fail 0
+ℹ skipped 0
+=== demo-acceptance ===
+[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 
+[demo-acceptance] ✔ 控制台没有报错 — []
+[demo-acceptance] 结果：16 通过 / 0 失败；报告见 reports/roco/demo-acceptance/
+=== test:unit (final, 含轨迹守卫) ===
+ℹ tests 430
+ℹ pass 430
+ℹ fail 0
+ℹ skipped 0
+=== browser-acceptance ===
+[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）
+[acceptance]   ✔ 控制台零报错 / 零未捕获异常
+[acceptance] screenshots: 01-camp.png, 02-filter.png, 03-battle.png, 04-battle-end.png
+[acceptance] wrote /Users/serendizc/Developer/roco-coach/reports/roco/acceptance/browser-acceptance.json
+=== verify-agent-trajectories ===
+structural 4536 failed 0
+replay 4536 failed 0 skipped 0
+grader positive {'total': 648, 'passed': 648} negative {'total': 13656, 'passed': 13656} drift 0
+verdict True

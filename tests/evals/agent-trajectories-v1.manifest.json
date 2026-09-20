@@ -1,0 +1,387 @@
+{
+ "header": {
+  "format": "roco-agent-trajectory-v1",
+  "set_id": "agent-trajectories-v1",
+  "built_by": "scripts/roco/build-agent-trajectories.mjs",
+  "task_set": "agent-tasks-v1",
+  "task_set_digest": "f0b5d51a9142b09e43138e4dcf924698880c032bc8f9650cc5db77abc52ef975",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "worlds_per_task": 3,
+  "arms": [
+   "replay",
+   "baseline",
+   "stubborn",
+   "stop_now",
+   "no_rules",
+   "drop_args",
+   "blind"
+  ],
+  "categories": [
+   "brief_explain",
+   "continue_stop",
+   "evidence_conflict",
+   "roster_constraint",
+   "rules_lookup",
+   "silence",
+   "stale_state",
+   "tool_failure"
+  ],
+  "checkable": [
+   "tool",
+   "args_must_match",
+   "max_tool_calls",
+   "max_reply_chars",
+   "must_not_fabricate",
+   "must_mention_limitation",
+   "must_keep_locked",
+   "must_not_claim_winrate",
+   "must_surface_conflict",
+   "must_not_use_stale",
+   "must_not_speak"
+  ],
+  "totals": {
+   "trajectories": 4536,
+   "passed": 3864,
+   "engine_refused": 457,
+   "cases": 288,
+   "worlds": 12
+  },
+  "disciplines": [
+   "轨迹只记公开输入与工具回执摘要；回执全文不落盘，摘要是剔除延迟后的规范化摘要",
+   "正文只用回执里真的出现过的字段生成，不从任务期望抄答案",
+   "失败轨迹原样保留（stopped 记明原因），不做「重试到成功」的清洗",
+   "产物确定性：无时间戳、无 HEAD、无随机（随机只来自固定 seed 的哈希）"
+  ],
+  "arms_summary": {
+   "replay": {
+    "kind": "harness",
+    "note": "按任务期望重放：接线与判定器自检（应当全过）",
+    "limit": 3,
+    "total": 648,
+    "passed": 648,
+    "pass_rate": 1,
+    "per_category": {
+     "brief_explain": {
+      "total": 108,
+      "passed": 108
+     },
+     "continue_stop": {
+      "total": 108,
+      "passed": 108
+     },
+     "evidence_conflict": {
+      "total": 36,
+      "passed": 36
+     },
+     "roster_constraint": {
+      "total": 72,
+      "passed": 72
+     },
+     "rules_lookup": {
+      "total": 216,
+      "passed": 216
+     },
+     "silence": {
+      "total": 36,
+      "passed": 36
+     },
+     "stale_state": {
+      "total": 36,
+      "passed": 36
+     },
+     "tool_failure": {
+      "total": 36,
+      "passed": 36
+     }
+    },
+    "stopped": {
+     "complete": 576,
+     "receipt-budget": 36,
+     "policy": 36
+    }
+   },
+   "baseline": {
+    "kind": "baseline",
+    "note": "纯规则 baseline：只读消息与公开提示",
+    "limit": 3,
+    "total": 648,
+    "passed": 648,
+    "pass_rate": 1,
+    "per_category": {
+     "brief_explain": {
+      "total": 108,
+      "passed": 108
+     },
+     "continue_stop": {
+      "total": 108,
+      "passed": 108
+     },
+     "evidence_conflict": {
+      "total": 36,
+      "passed": 36
+     },
+     "roster_constraint": {
+      "total": 72,
+      "passed": 72
+     },
+     "rules_lookup": {
+      "total": 216,
+      "passed": 216
+     },
+     "silence": {
+      "total": 36,
+      "passed": 36
+     },
+     "stale_state": {
+      "total": 36,
+      "passed": 36
+     },
+     "tool_failure": {
+      "total": 36,
+      "passed": 36
+     }
+    },
+    "stopped": {
+     "complete": 576,
+     "receipt-budget": 36,
+     "policy": 36
+    }
+   },
+   "stubborn": {
+    "kind": "negative",
+    "note": "反证：故意拿过期状态版本去算",
+    "limit": 3,
+    "total": 648,
+    "passed": 576,
+    "pass_rate": 0.8889,
+    "per_category": {
+     "brief_explain": {
+      "total": 108,
+      "passed": 108
+     },
+     "continue_stop": {
+      "total": 108,
+      "passed": 108
+     },
+     "evidence_conflict": {
+      "total": 36,
+      "passed": 36
+     },
+     "roster_constraint": {
+      "total": 72,
+      "passed": 72
+     },
+     "rules_lookup": {
+      "total": 216,
+      "passed": 216
+     },
+     "silence": {
+      "total": 36,
+      "passed": 36
+     },
+     "stale_state": {
+      "total": 36,
+      "passed": 0
+     },
+     "tool_failure": {
+      "total": 36,
+      "passed": 0
+     }
+    },
+    "stopped": {
+     "complete": 576,
+     "receipt-budget": 36,
+     "policy": 36
+    }
+   },
+   "stop_now": {
+    "kind": "negative",
+    "note": "反证：一次都不查，直接答",
+    "limit": 3,
+    "total": 648,
+    "passed": 360,
+    "pass_rate": 0.5556,
+    "per_category": {
+     "brief_explain": {
+      "total": 108,
+      "passed": 108
+     },
+     "continue_stop": {
+      "total": 108,
+      "passed": 108
+     },
+     "evidence_conflict": {
+      "total": 36,
+      "passed": 36
+     },
+     "roster_constraint": {
+      "total": 72,
+      "passed": 0
+     },
+     "rules_lookup": {
+      "total": 216,
+      "passed": 0
+     },
+     "silence": {
+      "total": 36,
+      "passed": 36
+     },
+     "stale_state": {
+      "total": 36,
+      "passed": 36
+     },
+     "tool_failure": {
+      "total": 36,
+      "passed": 36
+     }
+    },
+    "stopped": {
+     "complete": 612,
+     "policy": 36
+    }
+   },
+   "no_rules": {
+    "kind": "negative",
+    "note": "反证：跳过规则查询，用来验「不许编造」",
+    "limit": 3,
+    "total": 648,
+    "passed": 432,
+    "pass_rate": 0.6667,
+    "per_category": {
+     "brief_explain": {
+      "total": 108,
+      "passed": 108
+     },
+     "continue_stop": {
+      "total": 108,
+      "passed": 108
+     },
+     "evidence_conflict": {
+      "total": 36,
+      "passed": 36
+     },
+     "roster_constraint": {
+      "total": 72,
+      "passed": 72
+     },
+     "rules_lookup": {
+      "total": 216,
+      "passed": 0
+     },
+     "silence": {
+      "total": 36,
+      "passed": 36
+     },
+     "stale_state": {
+      "total": 36,
+      "passed": 36
+     },
+     "tool_failure": {
+      "total": 36,
+      "passed": 36
+     }
+    },
+    "stopped": {
+     "complete": 612,
+     "policy": 36
+    }
+   },
+   "drop_args": {
+    "kind": "negative",
+    "note": "反证：丢掉队伍/状态参数，用来验参数判据",
+    "limit": 3,
+    "total": 648,
+    "passed": 576,
+    "pass_rate": 0.8889,
+    "per_category": {
+     "brief_explain": {
+      "total": 108,
+      "passed": 108
+     },
+     "continue_stop": {
+      "total": 108,
+      "passed": 108
+     },
+     "evidence_conflict": {
+      "total": 36,
+      "passed": 36
+     },
+     "roster_constraint": {
+      "total": 72,
+      "passed": 0
+     },
+     "rules_lookup": {
+      "total": 216,
+      "passed": 216
+     },
+     "silence": {
+      "total": 36,
+      "passed": 36
+     },
+     "stale_state": {
+      "total": 36,
+      "passed": 36
+     },
+     "tool_failure": {
+      "total": 36,
+      "passed": 36
+     }
+    },
+    "stopped": {
+     "complete": 468,
+     "receipt-budget": 36,
+     "invalid-arguments": 108,
+     "policy": 36
+    }
+   },
+   "blind": {
+    "kind": "baseline",
+    "note": "不给期望提示的规则 baseline：名字到 id 自己查",
+    "limit": 3,
+    "total": 648,
+    "passed": 624,
+    "pass_rate": 0.963,
+    "per_category": {
+     "brief_explain": {
+      "total": 108,
+      "passed": 108
+     },
+     "continue_stop": {
+      "total": 108,
+      "passed": 108
+     },
+     "evidence_conflict": {
+      "total": 36,
+      "passed": 36
+     },
+     "roster_constraint": {
+      "total": 72,
+      "passed": 72
+     },
+     "rules_lookup": {
+      "total": 216,
+      "passed": 192
+     },
+     "silence": {
+      "total": 36,
+      "passed": 36
+     },
+     "stale_state": {
+      "total": 36,
+      "passed": 36
+     },
+     "tool_failure": {
+      "total": 36,
+      "passed": 36
+     }
+    },
+    "stopped": {
+     "complete": 576,
+     "receipt-budget": 36,
+     "policy": 36
+    }
+   }
+  }
+ },
+ "rows": 4536
+}

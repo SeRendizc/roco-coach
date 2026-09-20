@@ -18,6 +18,7 @@ import collections
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 import unittest
@@ -26,7 +27,30 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 _ROOT = os.path.abspath(os.path.join(_HERE, "..", ".."))
 _BUILD = os.path.join(_ROOT, "scripts", "roco", "build-agent-tasks.py")
 _VERIFY = os.path.join(_ROOT, "scripts", "roco", "verify-agent-tasks.py")
+TOOLBOX = os.path.join(_ROOT, "src", "coach", "toolbox.js")
 TASKS = os.path.join(_ROOT, "tests", "evals", "agent-tasks-v1.jsonl")
+
+
+def tool_argument_keys():
+    """从工具箱源码里读每个工具**允许**的参数名。
+
+    为什么不在这里抄一份：抄下来的那份会随工具箱改动悄悄过期，于是
+    「任务期望里的参数名」可以一直是一个工具根本不接受的键，而测试仍然是绿的。
+    真实发生过：任务集里 `query_rules` 的期望参数写成 `skill_name`，
+    工具契约里只有 `name` —— 任何 Agent 照做都会被 `validToolArgs` 判成非法参数，
+    于是「接线自检」这一类轨迹全数变红，而没有任何测试能提前发现。
+    """
+    with open(TOOLBOX, encoding="utf-8") as handle:
+        source = handle.read()
+    contracts = source.split("export const TOOL_CONTRACTS=", 1)[1].split("\n};", 1)[0]
+    allowed = {}
+    for line in contracts.splitlines():
+        match = re.match(r"\s*([a-z_]+):\{description:", line)
+        if not match:
+            continue
+        body = line.split("arguments:{", 1)[1] if "arguments:{" in line else ""
+        allowed[match.group(1)] = set(re.findall(r"([A-Za-z_][A-Za-z0-9_]*):", body))
+    return allowed
 
 
 def _load(name: str, path: str):
@@ -51,6 +75,20 @@ class TestTaskSetIsUsableAsAGate(unittest.TestCase):
         for row in self.rows:
             hits = [k for k in checkable if k in row["expect"]]
             self.assertTrue(hits, f"{row['case_id']} 没有任何可程序化判定的判据")
+
+    def test_expected_arguments_are_arguments_the_tool_actually_accepts(self):
+        """期望里的参数名必须是工具箱真的接受的键，否则任务不可能被完成。"""
+        allowed = tool_argument_keys()
+        self.assertIn("query_rules", allowed, "没能从 toolbox.js 里解析出工具契约")
+        for row in self.rows:
+            expect = row["expect"]
+            tool = expect.get("tool")
+            if not tool:
+                continue
+            self.assertIn(tool, allowed, f"{row['case_id']} 期望的工具 {tool} 不存在")
+            want = expect.get("args_must_match") or {}
+            unknown = sorted(set(want) - allowed[tool])
+            self.assertEqual(unknown, [], f"{row['case_id']} 的期望参数 {unknown} 不是 {tool} 接受的键")
 
     def test_holdout_dimensions_never_leak_into_train(self):
         for dim in ("family", "mechanism", "template"):
