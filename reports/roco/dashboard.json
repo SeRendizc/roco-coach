@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-09-20T20:22:00+00:00",
+  "generated_at": "2026-09-20T20:32:41+00:00",
   "generated_by": "scripts/roco/build-progress-dashboard.py",
-  "head": "8e4d676db764e24715b3f76fa9e053a0d0219883",
+  "head": "df0855818efb84bfda3de76311bd27567367006f",
   "dirty_files": 0,
   "important": [
     "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
