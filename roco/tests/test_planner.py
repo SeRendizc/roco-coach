@@ -168,3 +168,54 @@ class TestBaselineComparison(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class TestSearchIsDeterministicAcrossAnalysisSeeds(unittest.TestCase):
+    """搜索内部的推演**不许**随分析种子换答案。
+
+    引擎把同速裁决建模成 seed 驱动的随机，而规划时状态是从公开面重建的、
+    带着分析种子。于是「搜索里推演出来的后续回合」也会用分析种子裁决同速 ——
+    结果是换个分析种子推荐就变，而变的原因不是「我们对局面知道多少」，
+    只是搜索内部几次掷骰子。
+
+    实测症状（改动之前）：三个分析种子给出「穿膛 / 使用能量果 / 穿膛」，
+    服务端聚合判定 `recommendation_stable=false`，**最终不给推荐**。
+    那是把「搜索内部的随机实现细节」误当成了「局面不确定性」。
+    """
+
+    def _public_state(self):
+        ids = [RS.pets_by_name(n)[0].pet_id for n in ("寂灭骨龙", "海豹船长", "黑猫巫师")]
+        ids_b = [RS.pets_by_name(n)[0].pet_id for n in ("圆号鱼", "雪影娃娃", "音速犬")]
+        state = renv.reset(ids, ids_b, seed=11, rs=RS)
+        return renv.public_planner_state(state, RS)
+
+    def test_same_public_state_gives_the_same_recommendation_for_every_seed(self):
+        pub = self._public_state()
+        labels = []
+        for analysis_seed in (11, 29, 47, 101):
+            state = renv.state_from_public_planner(pub, RS, analysis_seed=analysis_seed)
+            result = pl.plan_actions(state, RS, depth=2, beam=4, budget_ms=2000)
+            labels.append(result.recommended_label)
+            self.assertFalse(result.timed_out, "预算足够，不该超时")
+        self.assertEqual(len(set(labels)), 1,
+                         f"同一公开面在不同分析种子下推荐了不同的动作：{labels}")
+
+    def test_planning_does_not_change_the_callers_seed(self):
+        """规划用完必须把 seed 还回去。
+
+        搜索内部临时改 `state.seed` 来固定推演；如果忘了恢复，
+        调用方后续的 `replay`/`serialize` 就会拿到一个被改过的 seed ——
+        那是**静默污染**，比推荐错了更难查。
+        """
+        pub = self._public_state()
+        state = renv.state_from_public_planner(pub, RS, analysis_seed=11)
+        original = state.seed
+        pl.plan_actions(state, RS, depth=2, beam=4, budget_ms=2000)
+        self.assertEqual(state.seed, original, "规划改了调用方 state 的 seed 且没恢复")
+        # 异常路径也要恢复
+        state2 = renv.state_from_public_planner(pub, RS, analysis_seed=11)
+        original2 = state2.seed
+        with self.assertRaises(Exception):
+            pl.plan_actions(state2, RS, depth=2, beam=4, budget_ms=2000,
+                            clock=lambda: (_ for _ in ()).throw(RuntimeError("boom")))
+        self.assertEqual(state2.seed, original2, "异常路径没有恢复 seed")

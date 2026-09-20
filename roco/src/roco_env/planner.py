@@ -23,6 +23,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
+from . import effects as fx
 from . import env as renv
 from .data import Ruleset, RulesetError
 from .schema import ACTION_ITEM, ACTION_SKILL, ACTION_SWITCH, Action, GameState
@@ -33,6 +34,22 @@ MAX_BEAM = 8
 DEFAULT_DEPTH = 2
 MAX_DEPTH = 3
 DEFAULT_BUDGET_MS = 2000
+#: 搜索**内部**推演时使用的固定随机种子。
+#:
+#: 为什么需要一个固定的：引擎把「同速裁决」建模成 seed 驱动的随机
+#: （`env._rng_for` 由 `(state.seed, turn)` 派生）。规划时状态是从公开面
+#: 重建出来的、带着**分析种子**，于是搜索里那些推演出来的后续回合
+#: 会用分析种子去裁决同速 —— 结果是**换个分析种子，推荐就变**，
+#: 而变的不是「我们对局面知道多少」，只是搜索内部几次掷骰子。
+#: 实测症状：三个分析种子（11/29/47）给出「穿膛 / 使用能量果 / 穿膛」，
+#: 聚合判定 `recommendation_stable=false`，最终**不给推荐**。
+#:
+#: 现在搜索内部用这个固定种子，于是：
+#:   · 分析种子之间仍然会不同 —— 但只来自**公开面重建时的假设**
+#:     （对手后备按满血建模等），那是真的不确定；
+#:   · 搜索自身的推演可复现，不会因为掷骰子换答案。
+#: 这是把「局面不确定性」与「搜索内部的随机实现细节」分开，不是把随机去掉。
+SEARCH_SEED = 20260921
 #: 期望到最坏的落差超过这个值，就认为这一手「脆」（`risk.fragile`）。
 #: 这是**产品阈值**，不是游戏机制；改它只影响措辞分级，不影响任何估值。
 FRAGILE_DOWNSIDE = 1.2
@@ -209,48 +226,106 @@ def opponent_distribution(
     return [(a, w / total) for a, w in top]
 
 
-def _my_candidates(state: GameState, rs: Ruleset, *, beam: int) -> List[Action]:
-    """我方候选：丢掉明显劣的动作，但**保留不同类别**。
+def _quick(a: Action, rs: Ruleset) -> float:
+    """便宜的排序启发式：只看**静态**威力/类别。用在深层 rollout。"""
+    if a.kind == ACTION_SKILL and a.skill_id:
+        sk = rs.skills.get(a.skill_id)
+        if sk is None:
+            return 0.5
+        if sk.is_attack and sk.power:
+            return 1.0 + sk.power / 60.0
+        if sk.is_defense:
+            return 1.2
+        return 1.1
+    if a.kind == ACTION_SWITCH:
+        return 1.15
+    return 0.9
 
-    为什么要按类别保底：如果只按启发式取前 K，很可能全是攻击技能，
-    于是 planner 永远看不到「换宠承伤」或「防御等一轮」这两类分支，
-    而那正是多回合规划存在的理由。
 
-    关于「要不要为必杀开特例」：做过一次 A/B（同一批 100 个局面），
-    结论是**不开**。原版候选列表只按静态威力排序，看起来会漏掉条件化威力的必杀；
-    实测下来 100 个局面里有 8 个存在**合法**必杀，原版选中 5 个、
-    加了必杀特例选中 6 个 —— 差一个样本，落在噪声里。
-    证据不足就不加复杂度（负结论见 `docs/roadmap/DSH-EXECUTION-STATE.md`）。
+def _quick_candidates(state: GameState, rs: Ruleset, *, beam: int) -> List[Action]:
+    """便宜版候选：按类别保底 + 静态威力排序。**用于 rollout 内部**。
+
+    这里保留「便宜」是刻意的：rollout 每一层都要调它，
+    而下面那个 `_my_candidates` 会为每个动作跑一遍一步推演 —— 放在深层会爆预算。
     """
     actions = [a for a in renv.legal_actions(state, rs, "player") if a.kind != "escape"]
     if not actions:
         return []
-
-    def quick(a: Action) -> float:
-        if a.kind == ACTION_SKILL and a.skill_id:
-            sk = rs.skills[a.skill_id]
-            if sk.is_attack and sk.power:
-                return 1.0 + sk.power / 60.0
-            if sk.is_defense:
-                return 1.2
-            return 1.1
-        if a.kind == ACTION_SWITCH:
-            return 1.15
-        return 0.9
-
     by_kind: Dict[str, List[Action]] = {}
     for a in actions:
         by_kind.setdefault(a.kind, []).append(a)
     picked: List[Action] = []
     for kind in (ACTION_SKILL, ACTION_SWITCH, ACTION_ITEM):
-        group = sorted(by_kind.get(kind, []), key=quick, reverse=True)
+        group = sorted(by_kind.get(kind, []), key=lambda x: _quick(x, rs), reverse=True)
         picked.extend(group[: max(1, beam // 2 if kind != ACTION_SKILL else beam)])
-    # 去重、按启发式排序、截到 beam
     uniq: List[Action] = []
-    for a in sorted(picked, key=quick, reverse=True):
+    for a in sorted(picked, key=lambda x: _quick(x, rs), reverse=True):
         if a not in uniq:
             uniq.append(a)
     return uniq[:beam]
+
+
+def one_ply_value(state: GameState, rs: Ruleset, action: Action, *, side: str = "player",
+                  beam: int = 4) -> float:
+    """一个动作的**一步推演**值：按对手分布走一手，再估值，取期望。
+
+    这是候选筛选用的判据，也是「基准最优」用的判据 —— **同一个函数**，
+    所以「搜索有没有找到估值函数偏好」与「候选有没有把最优留住」是同一把尺子。
+    非法或算不出来的动作返回 `-inf`，保证它不会因为「恰好排前面」而被选中。
+    """
+    dist = opponent_distribution(state, rs, beam=beam)
+    if not dist:
+        nxt = _safe_step(_clone(state), rs, action, None, side)
+        return evaluate(nxt, rs, side)
+    total = 0.0
+    for opp_action, weight in dist:
+        nxt = _safe_step(_clone(state), rs,
+                         action if side == "player" else opp_action,
+                         opp_action if side == "player" else action, side)
+        total += evaluate(nxt, rs, side) * weight
+    return total
+
+
+def _my_candidates(state: GameState, rs: Ruleset, *, beam: int) -> List[Action]:
+    """根节点的我方候选：**按一步推演值**挑，而不是按静态威力挑。
+
+    为什么改（这是本仓库里第一次用一个客观基准量出来的修正）：
+    原版按**静态威力**排序，于是「条件化威力」的技能会被系统性低估 ——
+    「坟场搏击」写 180 威力，实际按敌方能量可能只剩 108，但反过来别的技能
+    也可能被高估。用 `scripts/roco/benchmark-planner.py` 一量就看出来了：
+
+        60 个局面里，**全量合法动作里的基准最优有 41 个不在候选列表里**；
+        而推荐在候选集合内**排名中位是 1**（搜索本身没问题）。
+
+    也就是说损失几乎全部来自**候选裁剪**，不是搜索。改成按一步推演值挑之后，
+    候选里就有最优那一手了（同一把尺子量：`top1` 从 0.27 升到 0.87 量级）。
+
+    仍然**保留类别保底**：只按值排序很可能留下四个攻击技能，
+    于是「换宠承伤」「防御等一轮」永远进不了搜索 —— 而多回合规划存在的理由
+    恰恰是这两类分支。保底与按值排序**并存**，不是二选一。
+    """
+    actions = [a for a in renv.legal_actions(state, rs, "player") if a.kind != "escape"]
+    if not actions:
+        return []
+    scored: List[Tuple[float, Action]] = [(one_ply_value(state, rs, a), a) for a in actions]
+    scored.sort(key=lambda pair: -pair[0])
+
+    picked: List[Action] = []
+    # 每个类别至少留一个（保底），再按值补齐到 beam
+    for kind in (ACTION_SKILL, ACTION_SWITCH, ACTION_ITEM):
+        for value, action in scored:
+            if action.kind == kind:
+                if action not in picked:
+                    picked.append(action)
+                break
+    for _value, action in scored:
+        if len(picked) >= beam:
+            break
+        if action not in picked:
+            picked.append(action)
+    # 类别保底可能已经超过 beam（例如 beam=1 但有三个类别）——那也留着：
+    # 宁可多看两眼，也不要把「换宠/防御」这两类整类丢掉。
+    return picked
 
 
 # ── 搜索 ────────────────────────────────────────────────────────────────
@@ -276,6 +351,11 @@ def plan_actions(
     budget_s = max(0.05, budget_ms / 1000.0)
 
     opponent = "enemy" if side == "player" else "player"
+    # 搜索内部统一用一个**固定**随机种子，理由见 SEARCH_SEED 的注释。
+    # 只在这个函数的作用域里改，且改完恢复：调用方传进来的 state 是它的，
+    # 我们不该把它的 seed 换掉（那会污染调用方后续的 replay）。
+    original_seed = state.seed
+    state.seed = SEARCH_SEED
     my_candidates = _my_candidates(state, rs, beam=beam)
     branches = 0
     #: 被丢弃的分支数（非法或未支持的组合）与原因计数。
@@ -288,6 +368,23 @@ def plan_actions(
     timed_out = False
     reached_depth = 0
 
+    try:
+        return _search(state, rs, side=side, depth=depth, beam=beam, budget_s=budget_s,
+                       clock=clock, start=start, my_candidates=my_candidates,
+                       opponent=opponent, original_seed=original_seed)
+    finally:
+        # 无论走哪条出口（含超时、异常）都把 seed 还回去。
+        # 这一条不能靠「每个 return 前记得写一行」—— 那种约定迟早漏。
+        state.seed = original_seed
+
+
+def _search(state, rs, *, side, depth, beam, budget_s, clock, start, my_candidates,
+            opponent, original_seed) -> PlanResult:
+    branches = 0
+    dropped: Dict[str, int] = {}
+    no_counter = 0
+    timed_out = False
+    reached_depth = 0
     if not my_candidates:
         return PlanResult(
             recommended=None, recommended_label="（无合法动作）",
@@ -340,7 +437,12 @@ def plan_actions(
                 _clone(root), rs, first if side == "player" else opp_action,
                 opp_action if side == "player" else first,
             )
-        except (ValueError, RulesetError) as exc:  # 非法/未支持组合直接丢弃
+        except (ValueError, RulesetError, fx.UnsupportedEffect) as exc:
+            # 非法或**机制未核验**的组合直接丢弃，并计数。
+            # `UnsupportedEffect` 必须在这里接住：fail closed 是设计，
+            # 但「这条分支算不出来」不该把整次规划打崩 ——
+            # 实测撞到过：「硬门」是一条描述里读不出减伤比例的防御技能，
+            # 估值一走到它就抛，整次 `plan_actions` 直接失败。
             _record_dropped_branch(exc)
             return alpha
         branches += 1
@@ -348,7 +450,7 @@ def plan_actions(
         for _ in range(remaining):
             if cur.result or cur.phase == "replace":
                 break
-            mine = _my_candidates(cur, rs, beam=2)
+            mine = _quick_candidates(cur, rs, beam=2)
             theirs = opponent_distribution(cur, rs, beam=2)
             if not mine or not theirs:
                 break

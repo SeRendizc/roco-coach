@@ -1,6 +1,6 @@
 # Microcase 执行台账
 
-> 生成时间：2026-09-20T20:26:31+00:00　生成脚本：`scripts/roco/run-microcase-harness.py`
+> 生成时间：2026-09-20T20:31:48+00:00　生成脚本：`scripts/roco/run-microcase-harness.py`
 > 规则集：`roco-world-s4-2026-09-10`　计划：`microcases-v1`
 
 ## 0. 这份台账**不是**什么
