@@ -237,6 +237,9 @@ B/C 组 3v3 实战跑通；`parse` 覆盖率语义修正；G02 判定为不过�
 | 投影层（roco-experience） | **12 / 12** |
 | **合计** | **674 项，0 失败**（1 项按守卫 skip） |
 
+（核对：424 unit + 17 browser 通过 + 175 Python + 11 桥 + 17 工具层 + 10 plan-e2e
++ 8 结构 + 12 投影 = 674。）
+
 浏览器真机验收两项：`npm run roco:acceptance` 9/9、`npm run roco:demo-acceptance` 16/16。
 
 ### 第 3—6 周旗舰版：W4/W5/W6 的阻塞（必须由用户决定，不是进度问题）
