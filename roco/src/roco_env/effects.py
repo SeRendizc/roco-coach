@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Sequence, Tuple
 
 from .data import Ruleset, Skill
 
@@ -279,6 +279,128 @@ def stab_multiplier(skill: Skill, attacker_types: Tuple[str, ...]) -> float:
     术语表也没有。所以它是假设，属 MC-010 待验项。
     """
     return 1.5 if skill.element in attacker_types else 1.0
+
+
+# ── 伤害计算（唯一实现；planner / service / env 都调它）──────────────────
+#
+# 为什么要有这么一层：伤害计算原本内联在 `env._execute` 里，于是「只想算一个数」
+# 的地方（planner 的估值、服务的伤害预览）要么重复实现公式、要么索性不算。
+# 结果是 planner 的启发式里**根本没有伤害项** —— 它会把 40 威力的一击
+# 排在 180 威力的一击前面（实测就是这样）。
+#
+# 这里把计算抽成纯函数：拿两只 PetState + 一个 Skill，返回伤害与全部中间量。
+# `env._execute` 走同一条路径，所以**不存在第二份公式**。
+
+
+@dataclass(frozen=True)
+class DamageOutcome:
+    """一次伤害计算的完整结果。中间量都要留着，否则没法追问「这个数怎么来的」。"""
+
+    damage: int
+    raw: int
+    power: float
+    conditional: bool
+    conditional_reason: str
+    type_multiplier: float
+    stab: float
+    attacker_atk: float
+    defender_def: float
+    ability_level: float
+    power_multiplier: float
+    defense_reduction: float
+    model: str
+    verified: bool
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "damage": self.damage,
+            "raw": self.raw,
+            "power": round(self.power, 4),
+            "conditional": self.conditional,
+            "conditional_reason": self.conditional_reason,
+            "type_multiplier": self.type_multiplier,
+            "stab": self.stab,
+            "attacker_atk": round(self.attacker_atk, 4),
+            "defender_def": round(self.defender_def, 4),
+            "ability_level": round(self.ability_level, 6),
+            "power_multiplier": round(self.power_multiplier, 6),
+            "defense_reduction": self.defense_reduction,
+            "damage_model": self.model,
+            "formula_verified": self.verified,
+        }
+
+
+def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
+                   *, attacker_species: Any = None, defender_species: Any = None) -> DamageOutcome:
+    """一次伤害的完整计算。**唯一实现。**
+
+    `attacker` / `defender` 是 `PetState`（要有 `buffs`、`energy`、`hp`）；
+    `*_species` 不给就按 `pet_id` 从规则集查。属性增减**只进一次**（走
+    `buff_damage_multiplier`），面板值保持未加成 —— 两边同时乘会把增益约掉。
+    """
+    attacker_species = attacker_species or rs.pet(attacker.pet_id)
+    defender_species = defender_species or rs.pet(defender.pet_id)
+
+    pr = effective_power(skill, attacker=attacker, defender=defender, rs=rs)
+    type_mult = rs.type_chart.multiplier(defender_species.types, skill.element)
+    stab = stab_multiplier(skill, attacker_species.types)
+    model = active_damage_model()
+
+    import roco_env.data as _data  # 局部导入：data 与 effects 互相引用，模块级会成环
+
+    atk_panel = _data.panel_stats(attacker_species.stats)
+    def_panel = _data.panel_stats(defender_species.stats)
+    atk_value = atk_panel.get("atk", float(attacker_species.stats.get("atk", 1)))
+    def_value = def_panel.get("def", float(defender_species.stats.get("def", 1)))
+
+    ability = buff_damage_multiplier(dict(attacker.buffs or {}), dict(defender.buffs or {}))
+
+    power_buff = 1.0 + float((attacker.buffs or {}).get("power", 0)) / 100.0
+    for element_key, element in (("power_water", "水系"), ("power_fight", "武系"),
+                                 ("power_bug", "虫系"), ("power_ice", "冰系")):
+        if element_key in (attacker.buffs or {}) and skill.element == element:
+            power_buff *= 1.0 + float(attacker.buffs[element_key]) / 100.0
+
+    reduction = float(getattr(defender, "_defense_reduction", 0.0) or 0.0)
+    raw = model.compute(
+        attacker_atk=float(atk_value),
+        defender_def=float(def_value),
+        power=float(pr.power),
+        type_multiplier=float(type_mult),
+        stab=float(stab),
+        hit_count=1,
+        power_multiplier=float(power_buff),
+        ability_level=float(ability),
+    )
+    damage = max(1, int(raw * (1.0 - reduction))) if reduction else raw
+    return DamageOutcome(
+        damage=damage, raw=raw, power=pr.power, conditional=pr.conditional,
+        conditional_reason=pr.reason, type_multiplier=type_mult, stab=stab,
+        attacker_atk=float(atk_value), defender_def=float(def_value),
+        ability_level=float(ability), power_multiplier=float(power_buff),
+        defense_reduction=reduction, model=model.name, verified=model.verified,
+    )
+
+
+def max_raw_damage(attacker: Any, defender: Any, loadout: Sequence[str], rs: Ruleset):
+    """配招里**所有攻击技能**里能打出的最大伤害，返回 `(damage, skill_id, outcome)`。
+
+    没有可算的攻击技能时返回 `(0, None, None)` —— **不是**一个默认值，
+    而是「这只精灵这一步打不出伤害」这个事实。
+    算不出来的技能（条件化威力未核验等）直接跳过，并计数（见 `skipped`）。
+    """
+    best = (0, None, None)
+    for skill_id in loadout or ():
+        skill = rs.skills.get(skill_id)
+        if skill is None or not skill.is_attack:
+            continue
+        try:
+            outcome = compute_damage(attacker, defender, skill, rs)
+        except UnsupportedEffect:
+            continue
+        if outcome.damage > best[0]:
+            best = (outcome.damage, skill_id, outcome)
+    return best
 
 
 # ── 状态（术语 1001/1002/1004/1008）────────────────────────────────────

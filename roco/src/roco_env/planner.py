@@ -123,6 +123,12 @@ def evaluate(state: GameState, rs: Ruleset, side: str) -> float:
       - 能量差（资源）
       - 场上对位相性差（谁克谁）
     返回大致落在 [-3, 3] 的实数，越大越好。
+
+    关于「要不要加即时伤害项」——**试过，撤了**。看起来是个明显的缺口
+    （估值里没有「谁打得更疼」），但 A/B 不支持它：同一批 100 个局面上，
+    加与不加的「选中最高伤害动作」比例是 59% 与 57%，中位数都是 1。
+    差 2 个百分点、样本 100，这是噪声，不是改善。
+    证据不足就不加复杂度；完整负结论见 `docs/roadmap/DSH-EXECUTION-STATE.md`。
     """
     if state.result == "win":
         return 10.0
@@ -209,6 +215,12 @@ def _my_candidates(state: GameState, rs: Ruleset, *, beam: int) -> List[Action]:
     为什么要按类别保底：如果只按启发式取前 K，很可能全是攻击技能，
     于是 planner 永远看不到「换宠承伤」或「防御等一轮」这两类分支，
     而那正是多回合规划存在的理由。
+
+    关于「要不要为必杀开特例」：做过一次 A/B（同一批 100 个局面），
+    结论是**不开**。原版候选列表只按静态威力排序，看起来会漏掉条件化威力的必杀；
+    实测下来 100 个局面里有 8 个存在**合法**必杀，原版选中 5 个、
+    加了必杀特例选中 6 个 —— 差一个样本，落在噪声里。
+    证据不足就不加复杂度（负结论见 `docs/roadmap/DSH-EXECUTION-STATE.md`）。
     """
     actions = [a for a in renv.legal_actions(state, rs, "player") if a.kind != "escape"]
     if not actions:

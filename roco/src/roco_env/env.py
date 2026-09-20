@@ -550,75 +550,38 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         _bump(state, "power_unsupported", {"side": side, "skill_id": skill.skill_id, "detail": str(exc)})
         return
 
+    # 伤害计算的全部细节都在 `effects.compute_damage` 里 —— **唯一实现**。
+    # 这里以前是内联的一大段；抽出去的理由是 planner 的估值与服务端的伤害预览
+    # 也需要算一个数，而内联版本逼得它们要么重复实现公式、要么索性不算
+    # （结果是 planner 的启发式里根本没有伤害项，会把 40 威力排在 180 威力前面）。
     attacker_pet = rs.pet(pet.pet_id)
     defender_pet = rs.pet(defender.pet_id)
-    type_mult = rs.type_chart.multiplier(defender_pet.types, skill.element)
-    stab = fx.stab_multiplier(skill, attacker_pet.types)
-    model = fx.active_damage_model()
-    # 面板值，不是种族值（见 data.PANEL_FORMULAS）
-    atk_panel = _data.panel_stats(attacker_pet.stats)
-    def_panel = _data.panel_stats(defender_pet.stats)
-    atk_value = atk_panel.get("atk", float(attacker_pet.stats.get("atk", 1)))
-    def_value = def_panel.get("def", float(defender_pet.stats.get("def", 1)))
-
-    # 属性增减要真的进伤害。
-    #
-    # 这一处曾经是**硬编码 1.0**：引擎把「自己获得物攻+60%」写进 `pet.buffs["atk"]`，
-    # 但伤害计算从不读它，`ability_level=1.0` 与 `power_multiplier=1.0` 把
-    # 全部增益/减益**静默丢掉**。也就是说状态技能打出去只留下一条事件，
-    # 数值上什么都没发生 —— 这种「看起来实现了、其实没接线」的 bug 最难发现，
-    # 因为它不报错、不留痕、测试也只看事件。
-    #
-    # 现在：己方物攻增益放大攻击面板；对手物防增减缩放防御面板；
-    # 双方攻防一起过一遍 `ability_level`（社区口径，未核验 MC-010）。
-    # 面板值保持**未加成**的原始面板：攻防增减全部由这一个乘区承担，**只调一次**。
-    # （两边同时乘会把增益精确抵消——`buff_damage_multiplier` 的 docstring 里写了这条，
-    #  测试里也留了反例。）
-    ability = fx.buff_damage_multiplier(dict(pet.buffs), dict(defender.buffs))
-
-    # 全技能威力增减（`parse.STAT_KEYS` 的 "全技能威力"）以及特性写的元素系威力。
-    # `power_multiplier` 是**乘区**，所以每一项都折成系数再相乘。
-    power_buff = 1.0 + float(pet.buffs.get("power", 0)) / 100.0
-    # 特性写的元素系威力（身经百练：水/武；热成像：虫；冷光源：冰）。
-    # 这张表是「特性键 → 系别」的唯一映射，特性那边写什么键这里就读什么键。
-    for element_key, element in (("power_water", "水系"), ("power_fight", "武系"),
-                                 ("power_bug", "虫系"), ("power_ice", "冰系")):
-        if element_key in pet.buffs and skill.element == element:
-            power_buff *= 1.0 + float(pet.buffs[element_key]) / 100.0
-
-    reduction = getattr(defender, "_defense_reduction", 0.0)
-    raw = model.compute(
-        attacker_atk=float(atk_value),
-        defender_def=float(def_value),
-        power=float(pr.power),
-        type_multiplier=float(type_mult),
-        stab=float(stab),
-        hit_count=1,
-        power_multiplier=float(power_buff),
-        ability_level=float(ability),
-    )
-    damage = max(1, int(raw * (1.0 - reduction))) if reduction else raw
-
+    outcome = fx.compute_damage(pet, defender, skill, rs,
+                                attacker_species=attacker_pet,
+                                defender_species=defender_pet)
+    damage = outcome.damage
     actual = min(defender.hp, damage)
     defender.hp -= actual
 
     state.log.append(
-        f"{label}的{rs.pet(pet.pet_id).name}使用{skill.name}，对{defender_pet.name}造成 {actual} 伤害"
-        f"{'（属性克制）' if type_mult > 1 else '（属性抵抗）' if type_mult < 1 else ''}"
-        f"{'（防御减伤）' if reduction else ''}。"
+        f"{label}的{attacker_pet.name}使用{skill.name}，对{defender_pet.name}造成 {actual} 伤害"
+        f"{'（属性克制）' if outcome.type_multiplier > 1 else '（属性抵抗）' if outcome.type_multiplier < 1 else ''}"
+        f"{'（防御减伤）' if outcome.defense_reduction else ''}。"
     )
     _bump(state, "damage", {
         "side": side,
         "skill_id": skill.skill_id,
         "target_slot": defender.slot,
         "damage": actual,
-        "power_used": pr.power,
-        "conditional_power": pr.conditional,
-        "conditional_reason": pr.reason,
-        "type_multiplier": type_mult,
-        "stab": stab,
-        "damage_model": model.name,
-        "formula_verified": model.verified,
+        "power_used": outcome.power,
+        "conditional_power": outcome.conditional,
+        "conditional_reason": outcome.conditional_reason,
+        "type_multiplier": outcome.type_multiplier,
+        "stab": outcome.stab,
+        "ability_level": outcome.ability_level,
+        "power_multiplier": outcome.power_multiplier,
+        "damage_model": outcome.model,
+        "formula_verified": outcome.verified,
     }, evidence=(skill.skill_id,))
 
     if defender.hp <= 0:

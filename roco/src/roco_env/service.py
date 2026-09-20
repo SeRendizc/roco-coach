@@ -1562,72 +1562,53 @@ class RocoService:
     def _damage_preview(self, state, rs) -> Dict[str, Any]:
         """对**公开状态重建出来的**局面采样一次原始伤害。
 
-        做法是「把每个合法动作各打一遍，看实际掉了多少血」——用的是引擎自己的
-        结算路径（`_execute` 的伤害分支），**不另写一份伤害公式**。
+        做法是「配招里每个攻击技能各算一遍」——用的是 `effects.compute_damage`，
+        也就是引擎**唯一**的那份伤害实现（`env._execute` 走同一条路）。
         对手这一手不参与：伤害预览只回答「我这一下打多少、够不够收」，
         不是一次联合结算的预测。
 
-        覆盖不到的地方如实登记：状态技能、道具、换人不产生伤害事件，
-        于是它们不进 min/max，并在 `skipped_kinds` 里列出来。
+        **用配招表而不是 `legal_actions`**：后者会被能量与先手度过滤掉，
+        拿它当值域会系统性低估上界（实测漏掉过 425 的那一击，只看到 130）。
+        代价是列表里可能包含能量不够、这一步打不出的技能 ——
+        所以每个样本都带 `energy`，让人自己判断这一步够不够用。
+
+        覆盖不到的地方如实登记：条件化威力读不出来的技能进 `skipped_skills`，
+        不猜、不填默认值。
         """
-        from . import env as env_mod
         from . import effects as fx_mod
 
         foe_hp = state.enemy.field_pet.hp
         pet = state.player.field_pet
-        skill_table = rs.skills
+        foe_pet = state.enemy.field_pet
         attacks = []
         for skill_id in (state.player.loadouts.get(pet.pet_id) or ()):
-            skill = skill_table.get(skill_id)
+            skill = rs.skills.get(skill_id)
             if skill is None or not skill.is_attack:
                 continue
-            attacks.append(skill_id)
+            attacks.append(skill)
         if not attacks:
             return {"available": False, "reason": "我方场上这只没有带任何攻击技能",
-                    "skipped_kinds": []}
-        # 逐个攻击技能测一次伤害，给出**真实范围**。
-        # 用配招表而不是 `legal_actions`：后者会被先手度/能量等过滤，
-        # 拿它当值域会系统性低估「这一下最多能打多少」。
-        class _Cand:
-            __slots__ = ("kind", "skill_id", "target_index", "item_id")
+                    "skipped_skills": []}
 
-            def __init__(self, skill_id):
-                self.kind = "skill"
-                self.skill_id = skill_id
-                self.target_index = None
-                self.item_id = None
-
-            def label(self, ruleset):
-                return ruleset.skill(self.skill_id).name
-
-            def to_dict(self):
-                return {"kind": "skill", "skill_id": self.skill_id}
-
-        candidates = [_Cand(sid) for sid in attacks]
+        # 用 `effects.compute_damage` —— 那是引擎**唯一**的伤害实现
+        # （`env._execute` 也走它）。以前这里是「克隆整份状态 + 跑一次 _execute +
+        # 从事件里读伤害」，能算但代价大得多，而且要求被算的局面必须是可执行的。
         damages: List[Dict[str, Any]] = []
         skipped: List[str] = []
-        for action in candidates:
-            trial = env_mod.deserialize(env_mod.serialize(state), rs)
-            events_before = len(trial.events)
+        for skill in attacks:
             try:
-                env_mod._execute(trial, rs, "player", action)
-            except (ValueError, RulesetError, fx_mod.UnsupportedEffect):
-                skipped.append(action.kind)
-                continue
-            dealt = 0
-            for event in trial.events[events_before:]:
-                if event.kind == "damage" and event.detail.get("side") == "player":
-                    dealt += int(event.detail.get("damage") or 0)
-            if dealt <= 0:
-                # 没打出伤害：可能是被 fail closed 拦下（条件化威力未核验），
-                # 也可能是这只技能本来就不产生伤害事件。两种都如实登记。
-                skipped.append(action.skill_id)
+                outcome = fx_mod.compute_damage(pet, foe_pet, skill, rs)
+            except fx_mod.UnsupportedEffect:
+                # fail closed：条件化威力读不出来的技能不猜，如实登记
+                skipped.append(skill.skill_id)
                 continue
             damages.append({
-                "label": action.label(rs),
+                "label": skill.name,
                 "kind": "skill",
-                "skill_id": action.skill_id,
-                "damage": dealt,
+                "skill_id": skill.skill_id,
+                "damage": outcome.damage,
+                "energy": skill.energy,
+                "formula_verified": outcome.verified,
             })
         if not damages:
             return {"available": False,
@@ -1645,7 +1626,7 @@ class RocoService:
             "foe_hp": foe_hp,
             "samples": damages,
             "skipped_skills": skipped,
-            "candidates": len(candidates),
+            "candidates": len(attacks),
             "formula_verified": fx_mod.active_damage_model().verified,
             "damage_model": fx_mod.active_damage_model().name,
         }

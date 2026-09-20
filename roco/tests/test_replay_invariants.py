@@ -18,6 +18,7 @@ import unittest
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
 from roco_env import data as rdata          # noqa: E402
+from roco_env import effects as fx          # noqa: E402
 from roco_env import env as renv            # noqa: E402
 from roco_env import opponents as ropp      # noqa: E402
 from roco_env import team as rteam          # noqa: E402
@@ -232,3 +233,70 @@ class TestObservationDoesNotLeak(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestDamageHasOneImplementation(unittest.TestCase):
+    """伤害只有**一份**实现：`effects.compute_damage`。
+
+    抽它出来的理由不是好看，而是原来它内联在 `env._execute` 里，
+    于是「只想算一个数」的地方（planner 的估值、服务的伤害预览）
+    要么重复实现公式、要么索性不算。重复实现迟早会漂，
+    而漂了以后两个地方给出的伤害数字会不一样，且没人会发现。
+
+    这里钉住等价性：同一局面下，
+    `effects.compute_damage(...)` 的结果与 `env._execute` 实际扣掉的血**必须一致**。
+    """
+
+    def _one_attack(self, seed=11):
+        st = renv.reset(ROSTER_IDS[0:3], ROSTER_IDS[3:6], seed=seed, rs=RS)
+        skill_id = "skill_000750"      # 诡刺：静态威力、无条件化
+        loader = {ROSTER_IDS[0]: [skill_id]}
+        st = renv.reset(ROSTER_IDS[0:3], ROSTER_IDS[3:6], seed=seed, rs=RS, loadouts=loader)
+        me = st.player.field_pet
+        foe = st.enemy.field_pet
+        skill = RS.skill(skill_id)
+        predicted = fx.compute_damage(me, foe, skill, RS)
+        # 让引擎真的打出这一手：对手选一个不产生减伤的技能
+        enemy_skill = [a for a in renv.legal_actions(st, RS, "enemy")
+                       if a.kind == ACTION_SKILL and not RS.skills[a.skill_id].is_defense
+                       and not RS.skills[a.skill_id].is_status]
+        if not enemy_skill:
+            self.skipTest("对手这个局面没有纯攻击动作")
+        before = foe.hp
+        renv.step_joint(st, RS, Action(ACTION_SKILL, skill_id=skill_id), enemy_skill[0])
+        after = st.enemy.field_pet.hp
+        return predicted, before - after
+
+    def test_shared_function_matches_what_the_engine_applies(self):
+        predicted, applied = self._one_attack()
+        self.assertEqual(predicted.damage, applied,
+                         "compute_damage 算出的伤害与引擎实际扣的血不一致 —— "
+                         "说明伤害有两份实现，而且已经漂了")
+        self.assertIs(predicted.verified, False, "公式仍未核验，这个标记不能变成 true")
+
+    def test_max_raw_damage_never_exceeds_a_real_attack(self):
+        """`max_raw_damage` 报的是上界，必须真的打得出来（不是纸面数字）。"""
+        loader = {ROSTER_IDS[0]: ["skill_000750"]}
+        st = renv.reset(ROSTER_IDS[0:3], ROSTER_IDS[3:6], seed=11, rs=RS, loadouts=loader)
+        me, foe = st.player.field_pet, st.enemy.field_pet
+        damage, skill_id, _outcome = fx.max_raw_damage(
+            me, foe, st.player.loadouts.get(me.pet_id) or (), RS)
+        self.assertGreater(damage, 0)
+        self.assertEqual(skill_id, "skill_000750")
+        enemy_skill = [a for a in renv.legal_actions(st, RS, "enemy")
+                       if a.kind == ACTION_SKILL and not RS.skills[a.skill_id].is_defense
+                       and not RS.skills[a.skill_id].is_status]
+        if not enemy_skill:
+            self.skipTest("对手这个局面没有纯攻击动作")
+        before = foe.hp
+        renv.step_joint(st, RS, Action(ACTION_SKILL, skill_id=skill_id), enemy_skill[0])
+        self.assertEqual(before - st.enemy.field_pet.hp, damage)
+
+    def test_max_raw_damage_returns_zero_when_nothing_can_hit(self):
+        """打不出伤害时返回 0 与 None —— **不是**一个默认值。"""
+        loader = {ROSTER_IDS[0]: ["skill_000286"]}      # 防御技能
+        st = renv.reset(ROSTER_IDS[0:3], ROSTER_IDS[3:6], seed=11, rs=RS, loadouts=loader)
+        me, foe = st.player.field_pet, st.enemy.field_pet
+        damage, skill_id, outcome = fx.max_raw_damage(
+            me, foe, st.player.loadouts.get(me.pet_id) or (), RS)
+        self.assertEqual((damage, skill_id, outcome), (0, None, None))
