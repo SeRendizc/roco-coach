@@ -1,0 +1,439 @@
+{
+  "generated_at": "2026-09-20T19:42:33+00:00",
+  "data": "reports/roco/g02-team/dataset.jsonl",
+  "rows": 2160,
+  "features": [
+    "mine.types",
+    "mine.roles",
+    "mine.speed",
+    "mine.damage",
+    "mine.energy",
+    "mine.gaps",
+    "foe.types",
+    "foe.roles",
+    "foe.speed",
+    "foe.damage",
+    "foe.energy",
+    "foe.gaps"
+  ],
+  "split": {
+    "total": 360,
+    "train": 216,
+    "val": 72,
+    "test": 72
+  },
+  "disclaimer": "标签是「指定对手池与固定预算下的模拟结果」，指标只在同一对手池与同一模拟口径下可比。这里的 log loss / Brier / 校准都不构成「谁强」的结论，也不声称天梯表现。",
+  "model": {
+    "kind": "logistic-regression",
+    "l2": 0.1,
+    "epochs": 800,
+    "temperature": 1.2745,
+    "temperature_fit_on": "val",
+    "l2_selected_on": "val",
+    "val_log_loss_at_selection": 0.6648,
+    "l2_grid": [
+      {
+        "l2": 0.0001,
+        "val_log_loss": 0.681
+      },
+      {
+        "l2": 0.001,
+        "val_log_loss": 0.6802
+      },
+      {
+        "l2": 0.01,
+        "val_log_loss": 0.675
+      },
+      {
+        "l2": 0.1,
+        "val_log_loss": 0.6648
+      }
+    ],
+    "weights": {
+      "mine.types": -0.32543,
+      "mine.roles": 0.00665,
+      "mine.speed": 0.09058,
+      "mine.damage": 0.03673,
+      "mine.energy": 0.14719,
+      "mine.gaps": 0.14076,
+      "foe.types": 0.34397,
+      "foe.roles": 0.10705,
+      "foe.speed": -0.07616,
+      "foe.damage": -0.08892,
+      "foe.energy": -0.02952,
+      "foe.gaps": -0.04349
+    },
+    "intercept": -0.06701,
+    "standardization": {
+      "mean": [
+        0.50976,
+        0.90432,
+        0.2839,
+        0.70638,
+        0.54522,
+        1.50926,
+        0.51417,
+        0.90355,
+        0.2797,
+        0.71944,
+        0.54176,
+        1.47685
+      ],
+      "std": [
+        0.04978,
+        0.11829,
+        0.08209,
+        0.20851,
+        0.0447,
+        0.61607,
+        0.05102,
+        0.12037,
+        0.08198,
+        0.19595,
+        0.04635,
+        0.5688
+      ]
+    }
+  },
+  "evaluation": {
+    "val": {
+      "model": {
+        "n": 432,
+        "positive_rate": 0.4491,
+        "mean_prediction": 0.4772,
+        "log_loss": 0.6628,
+        "brier": 0.2355,
+        "auc": 0.6171,
+        "calibration": {
+          "bins": [
+            {
+              "bin": "[0.2,0.3)",
+              "n": 24,
+              "predicted": 0.2736,
+              "actual": 0.2917,
+              "gap": -0.0181
+            },
+            {
+              "bin": "[0.3,0.4)",
+              "n": 102,
+              "predicted": 0.3458,
+              "actual": 0.2941,
+              "gap": 0.0517
+            },
+            {
+              "bin": "[0.4,0.5)",
+              "n": 132,
+              "predicted": 0.4585,
+              "actual": 0.5076,
+              "gap": -0.0491
+            },
+            {
+              "bin": "[0.5,0.6)",
+              "n": 96,
+              "predicted": 0.5492,
+              "actual": 0.375,
+              "gap": 0.1742
+            },
+            {
+              "bin": "[0.6,0.7)",
+              "n": 66,
+              "predicted": 0.6363,
+              "actual": 0.6364,
+              "gap": -0.0
+            },
+            {
+              "bin": "[0.7,0.8)",
+              "n": 12,
+              "predicted": 0.7578,
+              "actual": 1.0,
+              "gap": -0.2422
+            }
+          ],
+          "ece": 0.0736
+        }
+      },
+      "rules": {
+        "n": 432,
+        "positive_rate": 0.4491,
+        "mean_prediction": 0.4916,
+        "log_loss": 0.7323,
+        "brier": 0.2689,
+        "auc": 0.4453,
+        "calibration": {
+          "bins": [
+            {
+              "bin": "[0.3,0.4)",
+              "n": 90,
+              "predicted": 0.3653,
+              "actual": 0.4889,
+              "gap": -0.1235
+            },
+            {
+              "bin": "[0.4,0.5)",
+              "n": 120,
+              "predicted": 0.4279,
+              "actual": 0.4833,
+              "gap": -0.0554
+            },
+            {
+              "bin": "[0.5,0.6)",
+              "n": 198,
+              "predicted": 0.5639,
+              "actual": 0.4444,
+              "gap": 0.1195
+            },
+            {
+              "bin": "[0.6,0.7)",
+              "n": 24,
+              "predicted": 0.6869,
+              "actual": 0.1667,
+              "gap": 0.5202
+            }
+          ],
+          "ece": 0.1248
+        }
+      },
+      "rules_uncalibrated": {
+        "n": 432,
+        "positive_rate": 0.4491,
+        "mean_prediction": 0.4292,
+        "log_loss": 1.7452,
+        "brier": 0.354,
+        "auc": 0.4453,
+        "calibration": {
+          "bins": [
+            {
+              "bin": "[0.0,0.1)",
+              "n": 54,
+              "predicted": 0.0427,
+              "actual": 0.5185,
+              "gap": -0.4758
+            },
+            {
+              "bin": "[0.1,0.2)",
+              "n": 60,
+              "predicted": 0.1403,
+              "actual": 0.3667,
+              "gap": -0.2264
+            },
+            {
+              "bin": "[0.2,0.3)",
+              "n": 72,
+              "predicted": 0.2345,
+              "actual": 0.5417,
+              "gap": -0.3072
+            },
+            {
+              "bin": "[0.3,0.4)",
+              "n": 24,
+              "predicted": 0.3573,
+              "actual": 0.5417,
+              "gap": -0.1844
+            },
+            {
+              "bin": "[0.5,0.6)",
+              "n": 42,
+              "predicted": 0.5182,
+              "actual": 0.5714,
+              "gap": -0.0532
+            },
+            {
+              "bin": "[0.6,0.7)",
+              "n": 102,
+              "predicted": 0.6359,
+              "actual": 0.3725,
+              "gap": 0.2633
+            },
+            {
+              "bin": "[0.7,0.8)",
+              "n": 54,
+              "predicted": 0.7149,
+              "actual": 0.4815,
+              "gap": 0.2334
+            },
+            {
+              "bin": "[0.9,1.0)",
+              "n": 24,
+              "predicted": 1.0,
+              "actual": 0.1667,
+              "gap": 0.8333
+            }
+          ],
+          "ece": 0.2952
+        }
+      },
+      "delta": {
+        "log_loss_improvement": 0.0695,
+        "brier_improvement": 0.0334
+      }
+    },
+    "test": {
+      "model": {
+        "n": 432,
+        "positive_rate": 0.4329,
+        "mean_prediction": 0.4726,
+        "log_loss": 0.6704,
+        "brier": 0.2392,
+        "auc": 0.5896,
+        "calibration": {
+          "bins": [
+            {
+              "bin": "[0.1,0.2)",
+              "n": 12,
+              "predicted": 0.186,
+              "actual": 0.0833,
+              "gap": 0.1026
+            },
+            {
+              "bin": "[0.2,0.3)",
+              "n": 18,
+              "predicted": 0.2883,
+              "actual": 0.5,
+              "gap": -0.2117
+            },
+            {
+              "bin": "[0.3,0.4)",
+              "n": 54,
+              "predicted": 0.3719,
+              "actual": 0.2778,
+              "gap": 0.0942
+            },
+            {
+              "bin": "[0.4,0.5)",
+              "n": 174,
+              "predicted": 0.452,
+              "actual": 0.408,
+              "gap": 0.044
+            },
+            {
+              "bin": "[0.5,0.6)",
+              "n": 144,
+              "predicted": 0.5509,
+              "actual": 0.4236,
+              "gap": 0.1272
+            },
+            {
+              "bin": "[0.6,0.7)",
+              "n": 30,
+              "predicted": 0.6224,
+              "actual": 1.0,
+              "gap": -0.3776
+            }
+          ],
+          "ece": 0.1098
+        }
+      },
+      "rules": {
+        "n": 432,
+        "positive_rate": 0.4329,
+        "mean_prediction": 0.4689,
+        "log_loss": 0.6808,
+        "brier": 0.2438,
+        "auc": 0.5716,
+        "calibration": {
+          "bins": [
+            {
+              "bin": "[0.3,0.4)",
+              "n": 90,
+              "predicted": 0.3626,
+              "actual": 0.4222,
+              "gap": -0.0596
+            },
+            {
+              "bin": "[0.4,0.5)",
+              "n": 168,
+              "predicted": 0.4355,
+              "actual": 0.3274,
+              "gap": 0.1081
+            },
+            {
+              "bin": "[0.5,0.6)",
+              "n": 174,
+              "predicted": 0.5561,
+              "actual": 0.5402,
+              "gap": 0.0159
+            }
+          ],
+          "ece": 0.0608
+        }
+      },
+      "rules_uncalibrated": {
+        "n": 432,
+        "positive_rate": 0.4329,
+        "mean_prediction": 0.364,
+        "log_loss": 1.3101,
+        "brier": 0.2757,
+        "auc": 0.5716,
+        "calibration": {
+          "bins": [
+            {
+              "bin": "[0.0,0.1)",
+              "n": 54,
+              "predicted": 0.0256,
+              "actual": 0.3889,
+              "gap": -0.3633
+            },
+            {
+              "bin": "[0.1,0.2)",
+              "n": 84,
+              "predicted": 0.1592,
+              "actual": 0.2857,
+              "gap": -0.1265
+            },
+            {
+              "bin": "[0.2,0.3)",
+              "n": 60,
+              "predicted": 0.2474,
+              "actual": 0.45,
+              "gap": -0.2026
+            },
+            {
+              "bin": "[0.3,0.4)",
+              "n": 60,
+              "predicted": 0.3573,
+              "actual": 0.35,
+              "gap": 0.0073
+            },
+            {
+              "bin": "[0.5,0.6)",
+              "n": 66,
+              "predicted": 0.5166,
+              "actual": 0.7273,
+              "gap": -0.2107
+            },
+            {
+              "bin": "[0.6,0.7)",
+              "n": 60,
+              "predicted": 0.6349,
+              "actual": 0.35,
+              "gap": 0.2849
+            },
+            {
+              "bin": "[0.7,0.8)",
+              "n": 48,
+              "predicted": 0.7093,
+              "actual": 0.5208,
+              "gap": 0.1885
+            }
+          ],
+          "ece": 0.1919
+        }
+      },
+      "delta": {
+        "log_loss_improvement": 0.0104,
+        "brier_improvement": 0.0046
+      }
+    }
+  },
+  "gate": {
+    "baseline_note": "规则分那一栏用的是**在训练集上做过 Platt 缩放**的规则分（单变量逻辑回归，交叉熵最优）——也就是规则分能拿到的最好校准。用它比才算「模型 vs 规则分」，拿未校准的线性映射去比，赢的只是「没校准」这件事",
+    "criteria": {
+      "test_log_loss_better_than_rules": true,
+      "test_brier_better_than_rules": true,
+      "test_ece_le_0.05": false
+    },
+    "passed": false,
+    "decision": "**不过门槛：`evaluate_team` 继续使用规则评分。**模型只作为离线研究产物保留，不接入任何对玩家可见的结论。",
+    "note": "规则分看不见对手，模型看得见（12 个特征里 6 个是对手的）。所以「模型赢了」不等于「规则分不行」，只说明在没有拟合的情况下，多用一倍信息能换来更好的校准与排序。"
+  }
+}

@@ -182,6 +182,31 @@ def auc(y: Sequence[float], p: Sequence[float]) -> Optional[float]:
     return wins / (len(pos) * len(neg))
 
 
+def fit_temperature(logits: Sequence[float], y: Sequence[float]) -> float:
+    """温度缩放：logit/T 后再取 sigmoid，用**验证集**最小化 log loss。
+
+    这是标准做法，不是为了让指标好看：一个判别力弱（AUC 0.59）的模型天然会给
+    过于极端的概率，温度只把「说得多肯定」压回实际频率。T 在验证集上选，
+    测试集只用结果 —— 这一点写进报告。
+    """
+    def ll_at(t: float) -> float:
+        p = [1.0 / (1.0 + math.exp(-max(-30.0, min(30.0, z / t)))) for z in logits]
+        return log_loss(y, p)
+    lo, hi = 0.05, 20.0
+    for _ in range(60):                      # 三分搜索，够用且无依赖
+        m1 = lo + (hi - lo) / 3
+        m2 = hi - (hi - lo) / 3
+        if ll_at(m1) < ll_at(m2):
+            hi = m2
+        else:
+            lo = m1
+    return (lo + hi) / 2
+
+
+def apply_temperature(logits: Sequence[float], t: float) -> List[float]:
+    return [1.0 / (1.0 + math.exp(-max(-30.0, min(30.0, z / t)))) for z in logits]
+
+
 def calibration(y: Sequence[float], p: Sequence[float], bins: int = 10) -> Dict[str, Any]:
     rows = []
     ece = 0.0
@@ -250,23 +275,40 @@ def main(argv: Optional[List[str]] = None) -> int:
     X = {k: [vectorize(r) for r in v] for k, v in parts.items() if k != "families"}
     y = {k: [float(r["label"]) for r in v] for k, v in parts.items() if k != "families"}
 
-    # 规则分归一化成概率：先线性缩放到 [0,1]，再用训练集的实际频率做对数几率校准。
-    # 不对规则分做任何拟合，只把它变成一个能算 log loss 的分数——这一步必须说明，
-    # 否则会显得规则分「被故意调弱」。
+    # 规则分要变成概率才能算 log loss。**必须给它一个公平的映射**，
+    # 否则「模型赢了规则分」只是因为规则分被故意压扁了。
+    #
+    # 这里给两种口径，两种都报：
+    #   · raw      —— 线性缩放到 [0,1]（不拟合任何东西，最弱的口径）
+    #   · platt    —— 在训练集上对这一维做 Platt 缩放（单变量逻辑回归，交叉熵最优）
+    #                 这是**规则分能得到的最好校准**，所以门槛判定用这一条比。
+    # 只用 raw 比是不公平的：那不是「规则分」，那是「规则分没校准」。
     rule_raw = {k: [rule_score(r) for r in parts[k]] for k in ("train", "val", "test")}
-    lo = min(rule_raw["train"])
-    hi = max(rule_raw["train"])
-    span = (hi - lo) or 1.0
 
-    def rule_prob(raw: List[float]) -> List[float]:
-        share = [min(max((v - lo) / span, 0.0), 1.0) for v in raw]
-        base = statistics.fmean(y["train"])
-        base = min(max(base, 1e-6), 1 - 1e-6)
-        # 用训练集基准率把它压到线性区间里，避免出现 0/1 两个端点让 log loss 爆炸。
-        return [min(max(base + (s - 0.5) * 2 * (0.5 - abs(base - 0.5)) + (s - 0.5) * 0.0, 1e-6), 1 - 1e-6)
-                for s in share]
+    def linear_prob(raw: List[float]) -> List[float]:
+        lo, hi = min(rule_raw["train"]), max(rule_raw["train"])
+        span = (hi - lo) or 1.0
+        return [min(max((v - lo) / span, 1e-6), 1 - 1e-6) for v in raw]
 
-    model = Logistic(len(FEATURE_NAMES), l2=args.l2, epochs=args.epochs).fit(X["train"], y["train"])
+    platt = Logistic(1, l2=1e-4, epochs=args.epochs).fit([[v] for v in rule_raw["train"]], y["train"])
+
+    def platt_prob(raw: List[float]) -> List[float]:
+        return [platt.predict([v]) for v in raw]
+
+    # 在**验证集**上挑 L2（不是测试集）。给模型一个公平的调参机会，
+    # 否则「模型没赢」可能只是正则强度没选对。
+    candidates = []
+    for l2 in (1e-4, 1e-3, 1e-2, 1e-1):
+        fitted = Logistic(len(FEATURE_NAMES), l2=l2, epochs=args.epochs).fit(X["train"], y["train"])
+        val_ll = log_loss(y["val"], [fitted.predict(x) for x in X["val"]])
+        candidates.append((val_ll, l2, fitted))
+    candidates.sort(key=lambda t: t[0])
+    chosen_val_ll, chosen_l2, model = candidates[0]
+
+    # 温度缩放在验证集上拟合，测试集只用结果。
+    val_logits = [model.b + sum(model.w[j] * ((x[j] - model.mean[j]) / model.std[j])
+                                for j in range(len(model.w))) for x in X["val"]]
+    temperature = fit_temperature(val_logits, y["val"])
 
     report: Dict[str, Any] = {
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
@@ -275,7 +317,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         "features": FEATURE_NAMES,
         "split": parts["families"],
         "disclaimer": DISCLAIMER,
-        "model": {"kind": "logistic-regression", "l2": args.l2, "epochs": args.epochs,
+        "model": {"kind": "logistic-regression", "l2": chosen_l2, "epochs": args.epochs,
+                  "temperature": round(temperature, 4), "temperature_fit_on": "val",
+                  "l2_selected_on": "val", "val_log_loss_at_selection": round(chosen_val_ll, 4),
+                  "l2_grid": [{"l2": l2, "val_log_loss": round(ll, 4)} for ll, l2, _ in sorted(candidates, key=lambda t: t[1])],
                   "weights": {name: round(w, 5) for name, w in zip(FEATURE_NAMES, model.w)},
                   "intercept": round(model.b, 5),
                   "standardization": {"mean": [round(m, 5) for m in model.mean],
@@ -283,13 +328,23 @@ def main(argv: Optional[List[str]] = None) -> int:
         "evaluation": {},
     }
 
+    def model_prob(xs: Sequence[Sequence[float]]) -> List[float]:
+        out = []
+        for x in xs:
+            z = model.b + sum(model.w[j] * ((x[j] - model.mean[j]) / model.std[j])
+                              for j in range(len(model.w)))
+            out.append(1.0 / (1.0 + math.exp(-max(-30.0, min(30.0, z / temperature)))))
+        return out
+
     gate = {}
     for part in ("val", "test"):
-        p_model = [model.predict(x) for x in X[part]]
-        p_rule = rule_prob(rule_raw[part])
+        p_model = model_prob(X[part])
         report["evaluation"][part] = {
             "model": metrics_for(y[part], p_model),
-            "rules": metrics_for(y[part], p_rule),
+            # 规则分的两个口径都留着：判门槛用 platt（对规则分最有利的那个），
+            # raw 留作「未校准的规则分长什么样」的对照。
+            "rules": metrics_for(y[part], platt_prob(rule_raw[part])),
+            "rules_uncalibrated": metrics_for(y[part], linear_prob(rule_raw[part])),
         }
         report["evaluation"][part]["delta"] = {
             "log_loss_improvement": round(report["evaluation"][part]["rules"]["log_loss"]
@@ -307,6 +362,11 @@ def main(argv: Optional[List[str]] = None) -> int:
               and gate["test"]["brier_improvement"] > 0
               and ece <= 0.05)
     report["gate"] = {
+        "baseline_note": (
+            "规则分那一栏用的是**在训练集上做过 Platt 缩放**的规则分（单变量逻辑回归，"
+            "交叉熵最优）——也就是规则分能拿到的最好校准。用它比才算「模型 vs 规则分」，"
+            "拿未校准的线性映射去比，赢的只是「没校准」这件事"
+        ),
         "criteria": {
             "test_log_loss_better_than_rules": gate["test"]["log_loss_improvement"] > 0,
             "test_brier_better_than_rules": gate["test"]["brier_improvement"] > 0,
@@ -331,6 +391,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         "rows": len(rows), "split": parts["families"],
         "test_model": {k: report["evaluation"]["test"]["model"][k] for k in ("n", "log_loss", "brier", "auc")},
         "test_rules": {k: report["evaluation"]["test"]["rules"][k] for k in ("log_loss", "brier", "auc")},
+        "test_rules_uncalibrated": {k: report["evaluation"]["test"]["rules_uncalibrated"][k] for k in ("log_loss", "brier", "auc")},
         "delta": report["evaluation"]["test"]["delta"],
         "ece": ece, "passed": bool(passed),
     }, ensure_ascii=False, indent=2))

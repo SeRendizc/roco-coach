@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-09-20T19:41:49+00:00",
+  "commit": "dae565b12b13f46141ba0d4ae5cf411eddeaa60b",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "snapshot_fingerprint": "affa4273ae5fb87578d038084e7a30dc6f5e2fd5e59d11049f0aa989c40a1f7a",
+  "strategy_version": 1,
+  "a_group": [
+    "寂灭骨龙",
+    "海豹船长",
+    "黑猫巫师",
+    "圆号鱼",
+    "雪影娃娃",
+    "音速犬"
+  ],
+  "a_group_ids": [
+    "pet_000225",
+    "pet_000190",
+    "pet_000445",
+    "pet_000417",
+    "pet_000112",
+    "pet_000062"
+  ],
+  "opponent_pools": [
+    [
+      "random_legal"
+    ],
+    [
+      "greedy_damage"
+    ],
+    [
+      "greedy_damage",
+      "conservative_switch"
+    ],
+    [
+      "shallow_search",
+      "greedy_damage"
+    ],
+    [
+      "status_control",
+      "shallow_search"
+    ],
+    [
+      "random_legal",
+      "greedy_damage",
+      "shallow_search"
+    ]
+  ],
+  "player_strategies": [
+    "random_legal",
+    "greedy_damage",
+    "shallow_search"
+  ],
+  "player_by_pool": {
+    "0": "random_legal",
+    "1": "greedy_damage",
+    "2": "greedy_damage",
+    "3": "shallow_search",
+    "4": "greedy_damage",
+    "5": "random_legal"
+  },
+  "base_seed": 20260921,
+  "turn_limit": 300,
+  "families_requested": 360,
+  "families_completed": 360,
+  "games_per_family": 6,
+  "rows": 2160,
+  "skipped": 0,
+  "wins": 1010,
+  "draws": 0,
+  "label_mean": 0.4676,
+  "elapsed_s": 42.78,
+  "games_per_second": 50.49,
+  "median_seconds_per_game": 0.0188,
+  "truncated": 0,
+  "disclaimer": "标签是「在指定对手池与固定预算下的模拟结果」，不是胜率、不是强度、不是天梯表现。规则分与模型都只在「同一对手池」这个前提下可比。"
+}

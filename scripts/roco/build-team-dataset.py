@@ -155,9 +155,12 @@ def build(rs, families: int, games_per_family: int, budget_s: float, base_seed: 
     seen_families = set()
 
     # 先把**全部**可能的家族枚举出来、打乱，再按顺序取。
-    # 第一版是「随机抽一个 + 撞了就重抽」，看上去等价，实际把预算全烧在重抽上：
-    # 300 秒里只跑完 120 个家族（0.8 局/秒，而单跑一局是 0.01–0.04 秒）。
-    # 拒绝采样在「家族空间被枚举干净」时会退化成空转，这里改成无冲突的洗牌。
+    #
+    # 第一版是「随机抽一个 + 撞了就重抽」。看上去等价，实际把预算全烧在重抽上：
+    # 家族空间只有 20 阵容 × 6 对手池 × 3 策略 = 360 种，抽到第 120 个之后
+    # 单次命中新家族的概率掉到 1/3 以下，绝大多数迭代都在 `continue`。
+    # 300 秒里只跑完 120 个家族（0.8 局/秒，而单跑一局是 0.01–0.06 秒）。
+    # 拒绝采样在「家族空间快被抽干」时会退化成空转 —— 这里改成无冲突的洗牌。
     candidates: List[Tuple[List[str], int, str]] = []
     for mine in triples:
         for pool_index in range(len(OPPONENT_POOLS)):
@@ -202,90 +205,6 @@ def build(rs, families: int, games_per_family: int, budget_s: float, base_seed: 
                 "seconds": outcome["seconds"],
                 "rules_features": feats_mine,
                 "enemy_rules_features": feats_theirs,
-            })
-        completed_families += 1
-
-    elapsed = time.perf_counter() - started
-    winner = record.winner
-    if winner == "player":
-        label = 1
-    elif winner == "enemy":
-        label = 0
-    elif winner == "draw":
-        label = 0.5          # 平局按半胜处理，并在报告里说明
-    else:
-        return {"skip": True, "reason": f"未分胜负（{winner}）",
-                "truncated": bool(record.truncated), "error": record.error}
-    return {
-        "label": label,
-        "winner": winner,
-        "turns": int(record.total_turns or record.turns or 0),
-        "truncated": bool(record.truncated),
-        "seconds": round(elapsed, 4),
-    }
-
-
-def pick_opponent(rng: random.Random, triples: List[Tuple[str, ...]]) -> List[str]:
-    """对手阵容**按家族固定**：同一个家族里的所有对局用同一个对手阵容。
-
-    这样家族内的差异只来自 seed，不会混进「对手也换了」这个变量。
-    """
-    return list(rng.choice(triples))
-
-
-def build(rs, families: int, games_per_family: int, budget_s: float, base_seed: int,
-          turn_limit: int, player_strategy: Optional[str]) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
-    rng = random.Random(base_seed)
-    # A_GROUP 写的是**名字**（人读的），引擎要的是稳定 id。这里显式换算一次：
-    # 后面的 family key、规则特征、对局记录全部用 id，名字只留在 manifest 里给人看。
-    a_group_ids = [rs.pets_by_name(name)[0].pet_id for name in A_GROUP]
-    triples = list(itertools.combinations(a_group_ids, 3))
-    rows: List[Dict[str, Any]] = []
-    started = time.perf_counter()
-    skipped = 0
-    completed_families = 0
-    seen_families = set()
-
-    while completed_families < families:
-        if time.perf_counter() - started > budget_s:
-            break
-        mine = list(rng.choice(triples))
-        theirs = list(rng.choice(triples))
-        pool_index = rng.randrange(len(OPPONENT_POOLS))
-        pool = list(OPPONENT_POOLS[pool_index])
-        play_strategy = player_strategy or PLAYER_BY_POOL[pool_index]
-        family = family_key(mine, pool, play_strategy)
-        if family in seen_families:
-            # 同家族重复采样会让「家族数」看起来比实际多；重抽一个。
-            if len(seen_families) >= len(triples) * len(OPPONENT_POOLS) * len(PLAYER_STRATEGIES):
-                break
-            continue
-        seen_families.add(family)
-        feats_mine = team_features(rs, mine)
-        feats_theirs = team_features(rs, theirs)
-        for game in range(games_per_family):
-            seed = rng.randrange(1, 2 ** 31 - 1)
-            enemy_strategy = pool[game % len(pool)]
-            outcome = play_one(rs, mine, theirs, play_strategy, enemy_strategy, seed, turn_limit)
-            if outcome.get("skip"):
-                skipped += 1
-                continue
-            rows.append({
-                "family": family,
-                "team": mine,
-                "enemy_team": theirs,
-                "opponent_pool": pool,
-                "enemy_strategy": enemy_strategy,
-                "player_strategy": play_strategy,
-                "seed": seed,
-                "label": outcome["label"],
-                "winner": outcome["winner"],
-                "turns": outcome["turns"],
-                "truncated": outcome["truncated"],
-                "seconds": outcome["seconds"],
-                "rules_features": feats_mine,
-                "enemy_rules_features": feats_theirs,
-                "rules_score": rteam.rules_score(feats_mine) if hasattr(rteam, "rules_score") else None,
             })
         completed_families += 1
 
