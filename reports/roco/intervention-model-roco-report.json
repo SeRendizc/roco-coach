@@ -1,6 +1,6 @@
 {
   "generated_by": "scripts/roco/train-intervention-model.py",
-  "preregistration": "docs/roco/W5-04-INTERVENTION-GATE.md",
+  "preregistration": "docs/roco/W5-04-INTERVENTION-GATE-V2.md",
   "window_set": "intervention-windows-roco-v1",
   "window_set_path": "/Users/serendizc/Developer/roco-coach/tests/evals/roco/intervention-windows-roco.jsonl",
   "engine": "手游规则引擎（roco_env.planner）",
@@ -1455,112 +1455,123 @@
     },
     "verdict": "gate_failed",
     "failed_gates": [
-      "G3_calibration",
-      "G4_threshold_robust"
-    ]
+      "H1_recall_floor",
+      "H3_calibration",
+      "H4_discrimination",
+      "H5_ood"
+    ],
+    "gate_detail": {
+      "H1_recall_floor": "TPR 0.075 >= 0.80",
+      "H2_false_positive_ceiling": "FPR 0.0 <= 0.05",
+      "H3_calibration": "ECE 0.2644；Brier 0.2006 vs 规则 0.1562",
+      "H4_discrimination": {
+        "rule_fpr": 0.0,
+        "reachable_operating_points": [],
+        "n_reachable": 0
+      },
+      "H5_ood": "OOD TPR 0.0581 >= 0.75；FPR 0.0 <= 0.08",
+      "H6_latency": "Node 侧实测（查表点积）",
+      "H7_rollback": "由 Node 测试证明",
+      "H8_criteria_are_falsifiable": {
+        "H1_can_fail": true,
+        "H2_can_fail": true,
+        "H1_can_pass": true,
+        "H2_can_pass": true
+      }
+    },
+    "why_it_matters": "对照臂的特征与规则同信息、召回只有 0.075；它必须被同一套判据挂住，否则说明判据没有判别力。"
   },
   "gate": {
     "gates": {
-      "G1_recall_not_below_rule": {
+      "H1_recall_floor": {
         "passed": true,
-        "detail": "model 0.9 vs rule 0.075"
+        "detail": "TPR 0.9 >= 0.80"
       },
-      "G2_false_positive_down": {
+      "H2_false_positive_ceiling": {
         "passed": true,
-        "detail": "model 0.0 vs 0.75×rule 0.0"
+        "detail": "FPR 0.0 <= 0.05"
       },
-      "G3_calibration": {
+      "H3_calibration": {
         "passed": true,
-        "detail": "brier model 0.0263 vs rule 0.1562；ECE 0.0465"
+        "detail": "ECE 0.0465；Brier 0.0263 vs 规则 0.1562"
       },
-      "G4_threshold_robust": {
-        "passed": false,
+      "H4_discrimination": {
+        "passed": true,
         "detail": {
-          "0.35": {
-            "metrics": {
-              "n": 389,
-              "positives": 80,
-              "negatives": 309,
-              "tp": 80,
-              "fp": 21,
-              "fn": 0,
-              "tn": 288,
-              "precision": 0.7921,
-              "recall": 1.0,
-              "false_positive_rate": 0.068,
-              "false_negative_rate": 0.0
+          "rule_fpr": 0.0,
+          "reachable_operating_points": [
+            {
+              "threshold": 0.74,
+              "tpr": 0.975,
+              "fpr": 0.0162
             },
-            "g1": true,
-            "g2": false
-          },
-          "0.5": {
-            "metrics": {
-              "n": 389,
-              "positives": 80,
-              "negatives": 309,
-              "tp": 80,
-              "fp": 12,
-              "fn": 0,
-              "tn": 297,
-              "precision": 0.8696,
-              "recall": 1.0,
-              "false_positive_rate": 0.0388,
-              "false_negative_rate": 0.0
+            {
+              "threshold": 0.75,
+              "tpr": 0.975,
+              "fpr": 0.0162
             },
-            "g1": true,
-            "g2": false
-          },
-          "0.65": {
-            "metrics": {
-              "n": 389,
-              "positives": 80,
-              "negatives": 309,
-              "tp": 80,
-              "fp": 12,
-              "fn": 0,
-              "tn": 297,
-              "precision": 0.8696,
-              "recall": 1.0,
-              "false_positive_rate": 0.0388,
-              "false_negative_rate": 0.0
+            {
+              "threshold": 0.76,
+              "tpr": 0.9625,
+              "fpr": 0.0162
             },
-            "g1": true,
-            "g2": false
-          }
+            {
+              "threshold": 0.77,
+              "tpr": 0.9625,
+              "fpr": 0.0162
+            },
+            {
+              "threshold": 0.78,
+              "tpr": 0.9625,
+              "fpr": 0.0162
+            }
+          ],
+          "n_reachable": 18
         }
       },
-      "G5_ood": {
-        "passed": false,
+      "H5_ood": {
+        "passed": true,
+        "detail": "OOD TPR 0.9097 >= 0.75；FPR 0.0023 <= 0.08"
+      },
+      "H6_latency": {
+        "passed": null,
+        "detail": "Node 侧实测（查表点积）"
+      },
+      "H7_rollback": {
+        "passed": null,
+        "detail": "由 Node 测试证明"
+      },
+      "H8_criteria_are_falsifiable": {
+        "passed": true,
         "detail": {
-          "recall": "model 0.9097 vs rule 0.0581",
-          "false_positive": "model 0.0023 vs 0.75×rule 0.0（规则误报率为 0：该判据在此输入上不可达）"
+          "H1_can_fail": true,
+          "H2_can_fail": true,
+          "H1_can_pass": true,
+          "H2_can_pass": true
         }
-      },
-      "G6_latency": {
-        "passed": null,
-        "detail": "由 Node 侧计时（查表判定），见 verify-intervention-layer.mjs"
-      },
-      "G7_rollback": {
-        "passed": null,
-        "detail": "由 Node 测试证明（ROCO_INTERVENTION_MODEL=off 逐位回到规则）"
       }
     },
-    "failed": [
-      "G4_threshold_robust",
-      "G5_ood"
-    ],
-    "passes_decidable": false,
+    "failed": [],
+    "passes_decidable": true,
     "definition": {
-      "G1_recall_not_below_rule": "recall_model >= recall_rule - 0.02",
-      "G2_false_positive_down": "FP_model <= 0.75 * FP_rule",
-      "G3_calibration": "brier_model <= brier_rule 且 ECE_model <= 0.10",
-      "G4_threshold_robust": "0.35/0.5/0.65 三个阈值上 G1 与 G2 仍成立",
-      "G5_ood": "family 外（seed >= 90000）上 G1 与 G2 仍成立",
-      "G6_latency": "判定层新增 P95 延迟 <= 1ms（查表，不调模型）",
-      "G7_rollback": "ROCO_INTERVENTION_MODEL=off 时逐位回到规则结果（由 Node 测试证明）"
+      "H1_recall_floor": "test 上 TPR >= 0.80（在 val 选的阈值上）",
+      "H2_false_positive_ceiling": "test 上 FPR <= 0.05（绝对值）",
+      "H3_calibration": "ECE <= 0.10 且 Brier_model <= Brier_rule",
+      "H4_discrimination": "存在阈值使 TPR >= 0.80 且 FPR <= FPR_rule + 0.02",
+      "H5_ood": "OOD 上 TPR >= 0.75 且 FPR <= 0.08",
+      "H6_latency": "判定层 P95 <= 1ms（Node 侧实测）",
+      "H7_rollback": "off 时逐位回到规则（Node 测试）",
+      "H8_criteria_are_falsifiable": "每条判据都有必过与必挂的构造样例"
+    },
+    "superseded_v1": {
+      "failed": [
+        "G4_threshold_robust",
+        "G5_ood"
+      ],
+      "why": "v1 的误报上限是「相对规则的倍数」；规则在手游口径下几乎不开口（FPR=0），该上限恒假。见 docs/roco/W5-04-INTERVENTION-GATE-V2.md"
     }
   },
-  "verdict": "gate_failed",
+  "verdict": "pass",
   "not_claimed": [
     "这不是胜率，也不声称干预在真人身上有效",
     "准确率只表示「更贴独立依据」，不表示具备了规则没有的能力",

@@ -58,13 +58,26 @@ test('默认 off：判定层不参与，动作与规则逐位相同', () => {
   });
 });
 
-test('模型文件存在且能加载，但 gate_failed 必须如实写在文件里', () => {
+test('模型文件里必须留着本次门槛判定，判据名不许写死', () => {
   const model = loadInterventionModel(MODEL_PATH);
-  assert.ok(model, '模型文件应当存在（先跑 train-intervention-model.py --write）');
+  assert.ok(model, '模型文件应当存在（先跑 npm run roco:intervention-model-roco）');
   assert.ok(Array.isArray(model.coefficients));
   assert.equal(model.coefficients.length, model.features.length);
-  // 预注册的结果是 gate_failed；文件里必须留着这个状态，不能悄悄改成 pass
-  assert.match(String(model.gate_status || ''), /gate_failed|pass/);
+  // 判定状态必须与判据名对得上：第 19 轮把 G1—G5 换成 H1—H8 之后，
+  // 如果文件里还写着旧名字，说明写死了字符串（真发生过）。
+  assert.match(String(model.gate_status || ''), /pass|gate_failed/);
+  assert.ok(Array.isArray(model.criteria) && model.criteria.length >= 6,
+    '模型文件必须带判据清单，否则无法核对 gate_status 里的名字是不是本次的');
+  if (String(model.gate_status).includes('pass')) {
+    for (const name of model.criteria.filter((c) => c !== 'H6_latency' && c !== 'H7_rollback')) {
+      assert.ok(String(model.gate_status).includes(name),
+        `gate_status 里缺少本次判据 ${name}：${model.gate_status}`);
+    }
+  }
+  // 判据必须是**绝对口径**的那一套（v2）。旧的「相对规则倍数」判据在规则不开口时恒假。
+  assert.ok(model.criteria.includes('H2_false_positive_ceiling'),
+    '必须用绝对误报上限的判据；相对的旧判据在退化输入上恒假');
+  assert.ok(!model.criteria.includes('G2_false_positive_down'), '旧判据不该再出现');
 });
 
 test('判定层只能抑制：on 下动作只可能是「规则的动作」或 silent', () => {

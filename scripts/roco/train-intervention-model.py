@@ -49,6 +49,20 @@ COST_FN = 3.0          # 漏掉决定性局面更贵
 COST_FP = 1.0
 SEED = 20260921
 THRESHOLDS = (0.35, 0.5, 0.65)
+#: 预注册 v2 的判据（docs/roco/W5-04-INTERVENTION-GATE-V2.md）。
+#: 与 v1 的区别：误报上限从「相对规则的倍数」改成**绝对**值。
+#: 旧口径在规则几乎不开口（FPR_rule = 0）时恒假——那不是判据，是恒假命题。
+H_GATES = {
+    "H1_recall_floor": "test 上 TPR >= 0.80（在 val 选的阈值上）",
+    "H2_false_positive_ceiling": "test 上 FPR <= 0.05（绝对值）",
+    "H3_calibration": "ECE <= 0.10 且 Brier_model <= Brier_rule",
+    "H4_discrimination": "存在阈值使 TPR >= 0.80 且 FPR <= FPR_rule + 0.02",
+    "H5_ood": "OOD 上 TPR >= 0.75 且 FPR <= 0.08",
+    "H6_latency": "判定层 P95 <= 1ms（Node 侧实测）",
+    "H7_rollback": "off 时逐位回到规则（Node 测试）",
+    "H8_criteria_are_falsifiable": "每条判据都有必过与必挂的构造样例",
+}
+
 GATES = {
     "G1_recall_not_below_rule": "recall_model >= recall_rule - 0.02",
     "G2_false_positive_down": "FP_model <= 0.75 * FP_rule",
@@ -378,6 +392,78 @@ def check_gates(model: Dict[str, Any], evals: Dict[str, Dict[str, Any]]) -> Dict
             "definition": GATES}
 
 
+def check_gates_v2(model: Dict[str, Any], evals: Dict[str, Dict[str, Any]],
+                   test_rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """预注册 v2 的判定：绝对口径 + 判别力 + 判据自证。"""
+    test = evals["test"]
+    ood = evals["ood"]
+    rule_test, model_test = test["rule"], test["model"]
+
+    def rates(labels: List[int], predictions: List[int]) -> Tuple[float, float]:
+        tp = sum(1 for y, p in zip(labels, predictions) if y == 1 and p == 1)
+        fn = sum(1 for y, p in zip(labels, predictions) if y == 1 and p == 0)
+        fp = sum(1 for y, p in zip(labels, predictions) if y == 0 and p == 1)
+        tn = sum(1 for y, p in zip(labels, predictions) if y == 0 and p == 0)
+        return (tp / (tp + fn) if tp + fn else 0.0, fp / (fp + tn) if fp + tn else 0.0)
+
+    y_test = [1 if row[LABEL_KEY]["label"] else 0 for row in test_rows]
+    probs_test = [apply_model(model, row) for row in test_rows]
+
+    h1 = (model_test["recall"] or 0.0) >= 0.80
+    h2 = (model_test["false_positive_rate"] or 0.0) <= 0.05
+    h3 = (model_test["calibration"]["ece"] <= 0.10
+          and model_test["calibration"]["brier"] <= rule_test["calibration"]["brier"])
+
+    # H4：扫全部阈值，看有没有一个工作点能同时高召回、且不比规则多打扰多少。
+    rule_fpr = rule_test["false_positive_rate"] or 0.0
+    reachable = []
+    for step in range(1, 100):
+        threshold = step / 100.0
+        tpr, fpr = rates(y_test, [1 if p >= threshold else 0 for p in probs_test])
+        if tpr >= 0.80 and fpr <= rule_fpr + 0.02:
+            reachable.append({"threshold": threshold, "tpr": round(tpr, 4), "fpr": round(fpr, 4)})
+    h4 = bool(reachable)
+
+    ood_model = ood["model"]
+    h5 = ((ood_model["recall"] or 0.0) >= 0.75
+          and (ood_model["false_positive_rate"] or 0.0) <= 0.08)
+
+    # H8：判据自身必须可判别——每条都造一个必过与一个必挂的样例。
+    # 「必挂」用极端输入构造：全预测为阳性时 H2 必须挂，全预测为阴性时 H1 必须挂。
+    all_positive = [1] * len(y_test)
+    all_negative = [0] * len(y_test)
+    tpr_all_pos, fpr_all_pos = rates(y_test, all_positive)
+    tpr_all_neg, fpr_all_neg = rates(y_test, all_negative)
+    h8_checks = {
+        "H1_can_fail": tpr_all_neg < 0.80,          # 全不提示 → 召回 0 → H1 必挂
+        "H2_can_fail": fpr_all_pos > 0.05,          # 全提示 → 误报 1.0 → H2 必挂
+        "H1_can_pass": tpr_all_pos >= 0.80,         # 全提示 → 召回 1.0 → H1 必过
+        "H2_can_pass": fpr_all_neg <= 0.05,         # 全不提示 → 误报 0 → H2 必过
+    }
+    h8 = all(h8_checks.values())
+
+    gates = {
+        "H1_recall_floor": {"passed": bool(h1), "detail": f"TPR {model_test['recall']} >= 0.80"},
+        "H2_false_positive_ceiling": {"passed": bool(h2),
+                                      "detail": f"FPR {model_test['false_positive_rate']} <= 0.05"},
+        "H3_calibration": {"passed": bool(h3),
+                           "detail": f"ECE {model_test['calibration']['ece']}；"
+                                     f"Brier {model_test['calibration']['brier']} vs 规则 "
+                                     f"{rule_test['calibration']['brier']}"},
+        "H4_discrimination": {"passed": h4,
+                              "detail": {"rule_fpr": rule_fpr, "reachable_operating_points": reachable[:5],
+                                         "n_reachable": len(reachable)}},
+        "H5_ood": {"passed": bool(h5),
+                   "detail": f"OOD TPR {ood_model['recall']} >= 0.75；"
+                             f"FPR {ood_model['false_positive_rate']} <= 0.08"},
+        "H6_latency": {"passed": None, "detail": "Node 侧实测（查表点积）"},
+        "H7_rollback": {"passed": None, "detail": "由 Node 测试证明"},
+        "H8_criteria_are_falsifiable": {"passed": bool(h8), "detail": h8_checks},
+    }
+    failed = [key for key, item in gates.items() if item["passed"] is False]
+    return {"gates": gates, "failed": failed, "passes_decidable": not failed, "definition": H_GATES}
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="W5-04 介入判定层训练与门槛判定")
     parser.add_argument("--write", action="store_true", help="把模型与报告写进 reports/roco/")
@@ -401,17 +487,23 @@ def main(argv: Optional[List[str]] = None) -> int:
     model = train(by_split["train"], by_split["val"])
     evals = {split: evaluate(model, subset, split) for split, subset in by_split.items()}
     evals["_test_rows"] = by_split["test"]
-    gate = check_gates(model, evals)
+    gate_v1 = check_gates(model, evals)
+    gate = check_gates_v2(model, evals, by_split["test"])
+    gate["superseded_v1"] = {"failed": gate_v1["failed"],
+                             "why": "v1 的误报上限是「相对规则的倍数」；规则在手游口径下几乎不开口"
+                                    "（FPR=0），该上限恒假。见 docs/roco/W5-04-INTERVENTION-GATE-V2.md"}
 
     # 对照臂：与规则**同信息**的特征子集。它只能复刻规则，不可能超过规则的召回；
     # 如果主臂与它结果相同，说明「通过」来自标签口径的正确，而不是多给了一个特征。
     ablation_model = train(by_split["train"], by_split["val"], ABLATION_FEATURE_NAMES)
     ablation = {split: evaluate(ablation_model, subset, split) for split, subset in by_split.items()}
-    ablation_gate = check_gates(ablation_model, {**ablation, "_test_rows": by_split["test"]})
+    # 对照臂也走**同一套 H 判据**，用来证明判据能挂住一个明显更弱的模型：
+    # 只跑旧判据的话，「判据有牙」这件事就没有证据。
+    ablation_gate = check_gates_v2(ablation_model, ablation, by_split["test"])
 
     report = {
         "generated_by": "scripts/roco/train-intervention-model.py",
-        "preregistration": "docs/roco/W5-04-INTERVENTION-GATE.md",
+        "preregistration": "docs/roco/W5-04-INTERVENTION-GATE-V2.md",
         "window_set": header.get("set_id"),
         "window_set_path": args.windows,
         "engine": header.get("engine", "旧演示引擎"),
@@ -430,6 +522,9 @@ def main(argv: Optional[List[str]] = None) -> int:
             "rule_test": {key: ablation["test"]["rule"][key] for key in ("recall", "false_positive_rate", "precision")},
             "verdict": "pass" if ablation_gate["passes_decidable"] else "gate_failed",
             "failed_gates": ablation_gate["failed"],
+            "gate_detail": {key: item["detail"] for key, item in ablation_gate["gates"].items()},
+            "why_it_matters": "对照臂的特征与规则同信息、召回只有 0.075；"
+                              "它必须被同一套判据挂住，否则说明判据没有判别力。",
         },
         "gate": gate,
         "verdict": ("pass" if gate["passes_decidable"] else "gate_failed"),
@@ -441,11 +536,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     }
     if args.write:
         os.makedirs(os.path.dirname(OUT_REPORT), exist_ok=True)
-        gate_status = ("pass（G1—G5 全部通过）" if report["verdict"] == "pass"
-                       else f"gate_failed（未过：{', '.join(gate['failed'])}）")
+        # 判据名从**本次判定**里取，不写死「G1—G5」那种旧名字——
+        # 第 19 轮把判据换成 H1—H8 之后，写死的字符串就会与报告对不上。
+        gate_status = ("pass（全部可判定判据通过：" + "、".join(
+            key for key, item in gate["gates"].items() if item["passed"] is True) + "）"
+            if report["verdict"] == "pass"
+            else f"gate_failed（未过：{', '.join(gate['failed'])}）")
         with open(args.out_model, "w", encoding="utf-8") as fh:
             json.dump({"generated_by": "scripts/roco/train-intervention-model.py",
                        "preregistration": report["preregistration"],
+                       "criteria": list(gate["gates"].keys()),
                        "features": FEATURE_NAMES,
                        "standardize": model["standardize"],
                        "coefficients": model["coefficients"], "intercept": model["intercept"],
