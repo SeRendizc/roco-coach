@@ -1,7 +1,6 @@
 # 进度台账（路线图 vs 证据）
 
-> 生成时间：2026-09-20T20:32:41+00:00　HEAD：`df0855818efb`　未提交文件：0
-> 生成脚本：`scripts/roco/build-progress-dashboard.py`
+> 生成脚本：`scripts/roco/build-progress-dashboard.py`　（HEAD 与生成时间是易变字段，留在 `reports/roco/dashboard-run.json`）
 
 - `DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。
 - `NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。

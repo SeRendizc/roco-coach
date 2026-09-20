@@ -1,8 +1,6 @@
 {
-  "generated_at": "2026-09-20T20:32:41+00:00",
   "generated_by": "scripts/roco/build-progress-dashboard.py",
-  "head": "df0855818efb84bfda3de76311bd27567367006f",
-  "dirty_files": 0,
+  "dirty_files": 5,
   "important": [
     "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
     "`NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。",

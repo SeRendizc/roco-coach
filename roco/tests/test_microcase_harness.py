@@ -164,3 +164,43 @@ class TestProgressDashboard(unittest.TestCase):
     def test_ids_are_unique(self):
         ids = [item["id"] for item in self.module.ITEMS]
         self.assertEqual(len(ids), len(set(ids)), "台账里有重复 id")
+
+
+class TestReportGeneratorsAreIdempotent(unittest.TestCase):
+    """三个报告生成器连跑两次，工作区必须干净。
+
+    为什么值得一条测试：这些脚本的产物**要入库**（它们是证据）。
+    如果产物里带易变字段（时间戳、HEAD、未提交文件数），
+    每次跑完 `git status` 都会显示「文档被改了」—— 久了就没人看它的 diff，
+    而 diff 正是这些文档唯一的用处。
+
+    所以纪律是：**稳定字段入库，易变字段另存 `*-run.json`**（已在 .gitignore 里）。
+    这条测试就是那条纪律的执行者。
+    """
+
+    GENERATORS = [
+        os.path.join("scripts", "roco", "run-microcase-harness.py"),
+        os.path.join("scripts", "roco", "build-progress-dashboard.py"),
+    ]
+
+    def test_second_run_produces_no_diff(self):
+        env = dict(os.environ, PYTHONPATH=os.path.join(_ROOT, "roco", "src"))
+
+        def dirty():
+            out = subprocess.run(["git", "status", "--porcelain"], cwd=_ROOT,
+                                 capture_output=True, text=True)
+            return [line for line in out.stdout.splitlines() if line.strip()]
+
+        # 先跑一遍，把产物落到「已提交」的状态
+        for script in self.GENERATORS:
+            subprocess.run([sys.executable, os.path.join(_ROOT, script)],
+                           cwd=_ROOT, env=env, capture_output=True, timeout=180)
+        baseline = set(dirty())
+        # 再跑一遍：产物内容不该变
+        for script in self.GENERATORS:
+            subprocess.run([sys.executable, os.path.join(_ROOT, script)],
+                           cwd=_ROOT, env=env, capture_output=True, timeout=180)
+        after = set(dirty())
+        new = sorted(after - baseline)
+        self.assertEqual(new, [],
+                         f"第二次运行改了这些文件（说明产物里有易变字段）：{new}")

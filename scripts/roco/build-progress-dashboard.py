@@ -232,9 +232,10 @@ def main() -> int:
 
     mvp = [i for i in items if i["id"][0] in "MDETGSAPCF" and not i["id"].startswith("W")]
     payload = {
-        "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        # 易变字段（时间戳、HEAD、未提交文件数）**不进稳定产物**：
+        # 这份台账的用处就是让人看 diff，每次跑都变就没人看了。
+        # 它们另存 `dashboard-run.json`（已 gitignore）。
         "generated_by": "scripts/roco/build-progress-dashboard.py",
-        "head": git("rev-parse", "HEAD"),
         "dirty_files": len([line for line in git("status", "--porcelain").splitlines() if line.strip()]),
         "important": [
             "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
@@ -250,6 +251,13 @@ def main() -> int:
     os.makedirs(os.path.join(_ROOT, os.path.dirname(OUT_JSON)), exist_ok=True)
     with open(os.path.join(_ROOT, OUT_JSON), "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=2)
+    run_path = os.path.join(_ROOT, os.path.dirname(OUT_JSON), "dashboard-run.json")
+    with open(run_path, "w", encoding="utf-8") as fh:
+        json.dump({
+            "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+            "head": git("rev-parse", "HEAD"),
+            "dirty_files": len([x for x in git("status", "--porcelain").splitlines() if x.strip()]),
+        }, fh, ensure_ascii=False, indent=2)
     write_doc(payload)
     print(json.dumps({"counts": counts, "mvp_done": payload["mvp_done"],
                       "mvp_total": payload["mvp_total"],
@@ -264,9 +272,10 @@ def write_doc(payload: Dict[str, Any]) -> None:
     p = lines.append
     p("# 进度台账（路线图 vs 证据）")
     p("")
-    p(f"> 生成时间：{payload['generated_at']}　HEAD：`{payload['head'][:12]}`"
-      f"　未提交文件：{payload['dirty_files']}")
-    p(f"> 生成脚本：`scripts/roco/build-progress-dashboard.py`")
+    # 时间戳/HEAD/未提交数都是易变字段，不写进这份文档（否则每次跑都显示改动）。
+    # 它们留在 `reports/roco/dashboard-run.json` 里。
+    p("> 生成脚本：`scripts/roco/build-progress-dashboard.py`"
+      "　（HEAD 与生成时间是易变字段，留在 `reports/roco/dashboard-run.json`）")
     p("")
     for line in payload["important"]:
         p(f"- {line}")
