@@ -116,7 +116,13 @@ test('结构契约：src/ tests/ tools/ 下的每个文件都被 git 跟踪', ()
 
 test('结构契约：仓库顶层只允许约定俗成的目录与文件', () => {
   const allowedDirs = new Set(['src', 'tests', 'tools', 'scripts', 'docs', 'data', 'knowledge',
-    'reports', 'report', 'output', 'checkpoints', 'training']);
+    'reports', 'report', 'output', 'checkpoints', 'training',
+    // roco/ 是手游规则引擎（Python）。它单独成域是因为：
+    //   ① 语言不同（Python，规则引擎；JS，教练与页面）；
+    //   ② 实施书要求「Python roco_env 是手游规则唯一来源，Node 不得再实现一套」，
+    //      目录边界让这条约束看得见；
+    //   ③ 它有自己的 pyproject 与测试，不该混进 src/ 的模块图。
+    'roco']);
   // 顶层只允许这些文件。注意：文档一律进 docs/，
   // 所以这里**没有** COACH-ACCEPTANCE.md / DEEPSEEK.md / coach-design-notes.md 等文档（它们都在 docs/）。
   // 曾经允许过它们，结果它们就真的留在根目录了——允许清单必须等于实际想要的形态。
