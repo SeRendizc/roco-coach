@@ -92,9 +92,16 @@ export function rocoGameView(view, {matchId = null} = {}) {
  */
 export function rocoPlanFeatures(plan) {
   if (!plan || plan.ok !== true) return {gap: null, skill: null, timedOut: null, margin: null};
-  // 枚举第一与第二名的估值差。工具回执里叫 `firstSecondMargin`；
-  // 没有它时传 null（判定层按 0 处理 = 没有分歧证据），**不编一个代理值**。
-  const margin = Number.isFinite(plan.firstSecondMargin) ? plan.firstSecondMargin : null;
+  // 枚举第一与第二名的估值差。**两种写法都认**，因为同一个量在两个边界上的命名不同：
+  //   · 工具回执（toolbox.js 里给模型看的那个）用 camelCase `firstSecondMargin`；
+  //   · 页面这一侧的 plan 直接来自 `/api/roco/plan`（服务端由 Python 回执原样透传）
+  //     用 snake_case `first_second_margin`。
+  // 只认一种的后果不是报错，而是**安静地拿到 null**：判定层退回 sigmoid 口径，
+  // 运行时永远放行——「接上了但不生效」这类问题在第 21 与第 30 轮各出现过一次，
+  // 两次都是同一条量在搬运中换了名字。
+  const rawMargin = Number.isFinite(plan.firstSecondMargin) ? plan.firstSecondMargin
+    : (Number.isFinite(plan.first_second_margin) ? plan.first_second_margin : null);
+  const margin = rawMargin;
   const expected = plan.expected;
   const gap = expected && Number.isFinite(expected.min) && Number.isFinite(expected.max)
     ? Math.max(0, expected.max - expected.min)

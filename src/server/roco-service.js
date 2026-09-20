@@ -267,6 +267,12 @@ export function createRocoService(options={}){
    main_counter:r.main_counter??null,
    expected:r.expected??null,
    worst:r.worst??null,
+   // 枚举第一与第二名的估值差（一手推演尺度）。**必须透传到页面**：
+   // 主动介入判定层用「边际量 < 训练侧 75 分位」判断「这一手是不是真的两难」，
+   // 而它拿到的 `plan` 就是这个函数返回的对象。少传这一个字段的后果不是报错，
+   // 而是判定层拿到 null、悄悄退回 sigmoid 口径并在运行时永远放行——
+   // 「接上了但不生效」这类问题在第 21 轮已经踩过一次，这是它在**又一次搬运**里的复现。
+   first_second_margin:r.first_second_margin??null,
    branches_evaluated:r.branches_evaluated??null,
    depth_searched:r.depth_searched??null,
    // 风险分支（W3-04）：推荐那一手在对手各种选择下的落差。

@@ -370,6 +370,47 @@ sigmoid 概率降级为**诊断量**。它可解释、可复算，而且与 `pla
 两者的一致性没有被验证过，本文件不声称它成立。第 18 轮那个 2×2 用的是
 **同义**的代理量，与这里的运行时口径不同，这一点也写在这里免得被混用。
 
+## 13. 第 30 轮：把判定层真正接通（两个真缺陷，都在搬运环节）
+
+第 21 轮让判定层在**测试路径**上生效了。这一轮去量**真实页面路径**，发现它其实一直没生效——
+两个缺陷都在「同一条量跨边界搬运」上，且都不会报错：
+
+### 13.1 Node 桥没把 `first_second_margin` 放进 plan 响应
+
+页面拿到的 plan 来自 `/api/roco/plan`（`src/server/roco-service.js` 组装），
+那个对象里**没有**这个字段；判定层因此拿到 `null`，退回 sigmoid 口径，
+运行时永远放行。修法：在响应里透传该字段。
+
+### 13.2 同一个量在两侧命名不同，而 `rocoPlanFeatures` 只认一种
+
+- 工具回执（`toolbox.js`，给模型看的那一份）用 camelCase `firstSecondMargin`；
+- 页面这一侧的 plan 直接来自 Python 回执，用 snake_case `first_second_margin`。
+
+`rocoPlanFeatures` 只读 camelCase，于是**页面上永远返回 null**。
+修法：两种都认，并在注释里写明为什么会有两种名字。
+
+### 13.3 端到端证据
+
+用**真服务**跑一遍（`tests/evals/roco/intervention-margin-chain.test.js`）：
+
+```
+Python 引擎回执 first_second_margin.mean = 0.0293
+rocoPlanFeatures(pagePlan).margin        = 0.0293
+判定层                                    = decided_by: margin-quantile,
+                                            margin 0.0293 < 阈值 0.146532 → suppress
+```
+
+修之前最后一行是 `decided_by: sigmod-threshold`（拼写也是错的，一起改了）。
+修之后**判定层在真实页面上真的会动**——这是「真实调用链」这一条要求真正落地的时刻。
+
+### 13.4 教训
+
+同一条量跨三个边界（Python → Node 桥 → 浏览器）搬运，**每一次都可能安静地丢掉或改名**，
+而丢掉的后果是「看起来正常、实际不生效」——这是这个仓库反复出现的同一类错误
+（第 21 轮特征、第 24 轮 import、第 30 轮命名）。
+所以补了一条专门的端到端守卫：断言最后 `decided_by === 'margin-quantile'`，
+而不是断言某个中间字段存在。
+
 ## 9. 明确不声称
 
 - 不声称干预在真实玩家身上更有效（那需要真人盲评）；

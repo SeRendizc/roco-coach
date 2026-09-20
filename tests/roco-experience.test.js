@@ -71,8 +71,14 @@ test('规划特征：gap 用期望区间宽度，不用 worst 的绝对值', () 
   assert.equal(rocoPlanFeatures({ok: true, expected: {min: 0, max: 0}, recommendation_stable: false}).skill, 0);
   assert.deepEqual(rocoPlanFeatures(null), {gap: null, skill: null, timedOut: null, margin: null});
   assert.equal(rocoPlanFeatures({ok: false}).gap, null, '规划失败时不许编一个 gap');
-  // 枚举第一与第二名的估值差：工具回执里有就透传，没有就是 null（不编代理值）
+  // 枚举第一与第二名的估值差：**两种命名都要认**。
+  // 同一个量在两个边界上名字不同——工具回执用 camelCase，页面拿到的 plan 直接来自
+  // `/api/roco/plan`（Python 回执原样透传）用 snake_case。只认一种的后果不是报错，
+  // 而是安静地拿到 null：判定层退回 sigmoid 口径、运行时永远放行。
+  // 第 21 与第 30 轮各踩过一次，两次都是同一条量在搬运中换了名字。
   assert.equal(rocoPlanFeatures({ok: true, firstSecondMargin: 0.045}).margin, 0.045);
+  assert.equal(rocoPlanFeatures({ok: true, first_second_margin: 0.045}).margin, 0.045,
+    '页面这一侧的 snake_case 也必须认');
   assert.equal(rocoPlanFeatures({ok: true}).margin, null, '没有边际量时必须如实为 null');
 });
 
