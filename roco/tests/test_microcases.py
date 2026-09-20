@@ -467,20 +467,95 @@ class TestInvariants(unittest.TestCase):
 
 
 class TestTraits(unittest.TestCase):
-    """MC-014…019：A 组 6 只特性。
+    """MC-014…019：A 组 6 只特性。W3-01 之后扩到 12 只（B/C 组各 3 只）。
 
-    这个类同时断言**实现状态本身**——因为「6 只里几只真的可用」
+    这个类同时断言**实现状态本身**——因为「12 只里几只真的可用」
     必须是一个可核验的数字，而不是印象。REFUSED 的理由写在 traits.py 里。
     """
 
     def test_implementation_status_is_honest(self):
         from roco_env import traits as tr
         summary = tr.implementation_summary()
-        self.assertEqual(summary["FULL"] + summary["PARTIAL"] + summary["REFUSED"], 6,
-                         "A 组应当是 6 只特性")
+        self.assertEqual(summary["FULL"] + summary["PARTIAL"] + summary["REFUSED"], 12,
+                         "A 组 6 只 + B/C 组 6 只 = 12 只特性")
         self.assertGreater(summary["FULL"], 0)
         self.assertGreater(summary["REFUSED"], 0,
                            "至少有一条应当被明确拒绝——做不到和没做是两件事")
+        # 12 只里的每一只都要能在规则集里查到，且特性名与数据一致
+        for name, spec in tr.TRAITS.items():
+            pets = RS.pets_by_name(spec.pet_name)
+            self.assertTrue(pets, f"特性 {name} 写的精灵 {spec.pet_name} 不在规则集里")
+            pet = pets[0]
+            self.assertIsNotNone(pet.feature_skill_id,
+                                 f"{spec.pet_name} 没有特性技能 id，特性挂不上")
+            self.assertEqual(RS.skills[pet.feature_skill_id].name, name,
+                             f"{spec.pet_name} 的特性技能名与注册表不一致")
+            if spec.status == tr.REFUSED:
+                self.assertTrue(spec.reason and len(spec.reason) > 20,
+                                f"REFUSED 的特性 {name} 必须写清为什么做不到")
+
+    def test_new_bc_traits_are_wired_or_refused(self):
+        """W3-01 新增的 6 只：FULL 的必须真的挂上钩子，REFUSED 的必须给出理由。"""
+        from roco_env import traits as tr
+        expected = {
+            "变形活画": tr.FULL, "绝对秩序": tr.REFUSED, "化茧": tr.REFUSED,
+            "铭记于月亮": tr.REFUSED, "热成像": tr.FULL, "冷光源": tr.FULL,
+        }
+        for name, status in expected.items():
+            spec = tr.spec_for_trait_name(name)
+            self.assertIsNotNone(spec, f"缺少特性 {name}")
+            self.assertEqual(spec.status, status, f"{name} 的状态与预期不符")
+            if status == tr.FULL:
+                self.assertTrue(spec.hook, f"FULL 的特性 {name} 必须声明挂载钩子")
+
+    def test_hot_imaging_reads_last_turn_fire_skill(self):
+        """圣凯布米龙 [热成像]：上回合有人用火系技能 → 本回合虫系威力 +100%。"""
+        pid = RS.pets_by_name("圣凯布米龙")[0].pet_id
+        other = RS.pets_by_name("音速犬")[0].pet_id   # 火系
+        state = renv.reset([pid, A2, A3], [other, A2, A3], seed=1, rs=RS)
+        # 第 1 回合：对手用火系技能（音速犬的合法动作里挑一个火系技能）
+        fire = [a for a in renv.legal_actions(state, RS, "enemy")
+                if a.kind == "skill" and RS.skills[a.skill_id].element == "火系"]
+        if not fire:
+            self.skipTest("音速犬当前没有火系合法动作")
+        renv.step_joint(state, RS, renv.legal_actions(state, RS, "player")[0], fire[0])
+        # 第 1 回合打完，history 里才有记录。
+        # 「上回合」= history 的最后一条，所以加成在第 **2** 回合开始时生效——
+        # 这里必须真的推进到第 2 回合才能判定，否则测的是「入场即加成」这个错误行为。
+        renv.step_joint(state, RS, renv.legal_actions(state, RS, "player")[0],
+                        renv.legal_actions(state, RS, "enemy")[0])
+        self.assertEqual(state.player.field_pet.pet_id, pid)
+        self.assertEqual(state.player.field_pet.buffs.get("power_bug"), 100,
+                         "上回合有人用火系 → 本回合虫系技能威力 +100%")
+
+    def test_cold_light_source_reads_last_turn_wing_skill(self):
+        """月使鹭纳 [冷光源]：上回合有人用翼系技能 → 本回合冰系威力 +100%。"""
+        pid = RS.pets_by_name("月使鹭纳")[0].pet_id
+        other = RS.pets_by_name("月使鹭纳")[0].pet_id   # 翼系
+        state = renv.reset([pid, A2, A3], [other, A2, A3], seed=1, rs=RS)
+        wing = [a for a in renv.legal_actions(state, RS, "enemy")
+                if a.kind == "skill" and RS.skills[a.skill_id].element == "翼系"]
+        if not wing:
+            self.skipTest("月使鹭纳当前没有翼系合法动作")
+        renv.step_joint(state, RS, renv.legal_actions(state, RS, "player")[0], wing[0])
+        renv.step_joint(state, RS, renv.legal_actions(state, RS, "player")[0],
+                        renv.legal_actions(state, RS, "enemy")[0])
+        self.assertEqual(state.player.field_pet.buffs.get("power_ice"), 100,
+                         "上回合有人用翼系 → 本回合冰系技能威力 +100%")
+
+    def test_element_trait_does_not_fire_without_the_trigger(self):
+        """反证：上回合没人用触发系别时**不许**给加成。"""
+        pid = RS.pets_by_name("圣凯布米龙")[0].pet_id
+        state = renv.reset([pid, A2, A3], [A1, A2, A3], seed=1, rs=RS)
+        non_fire = [a for a in renv.legal_actions(state, RS, "enemy")
+                    if a.kind == "skill" and RS.skills[a.skill_id].element != "火系"]
+        if not non_fire:
+            self.skipTest("对手这个回合只有火系动作")
+        renv.step_joint(state, RS, renv.legal_actions(state, RS, "player")[0], non_fire[0])
+        renv.step_joint(state, RS, renv.legal_actions(state, RS, "player")[0],
+                        renv.legal_actions(state, RS, "enemy")[0])
+        self.assertIsNone(state.player.field_pet.buffs.get("power_bug"),
+                          "触发条件不成立时不许给加成（否则就是把特性当成常驻增益）")
 
     def test_speed_dog_gets_attack_on_entry(self):
         """音速犬 [专注力] 入场首回合物攻 +100%。"""

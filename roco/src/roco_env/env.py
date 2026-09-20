@@ -368,10 +368,15 @@ def step_joint(
     state.log.append(f"── 第 {state.turn} 回合 ──")
     _bump(state, "turn_start", {"turn": state.turn})
 
-    # 回合开始时的特性（预警）。条件未实现，只在显式驱动时生效。
+    # 回合开始时的特性：
+    #   · 预警（黑猫巫师）—— 触发条件依赖未核验的伤害公式，只在显式驱动时生效；
+    #   · 热成像 / 冷光源 —— 读**上回合记录**里有没有人用对应系别的技能（事实，不是推断）。
+    # 先把「技能 id → 系别」缓存一次，特性判定要用；每回合重建，成本可忽略。
+    tr.bind_skill_elements(rs)
     for side in ("player", "enemy"):
         evs: List[Dict[str, Any]] = []
         tr.on_turn_start(rs, state, side, evs)
+        tr.element_trait(rs, state, side, evs)
         for e in evs:
             _bump(state, e.pop("kind"), e)
 
@@ -479,6 +484,12 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
     skill = rs.skill(action.skill_id)
     pet.energy = max(0, pet.energy - skill.energy)   # 假设：消耗先扣（MC-007）
 
+    # 出手前的特性（变形活画）：按对手增益层数给自己加威力与速度。
+    act_evs: List[Dict[str, Any]] = []
+    tr.on_action(rs, state, side, act_evs)
+    for e in act_evs:
+        _bump(state, e.pop("kind"), e)
+
     # 应对成功判定：需要对手这一手是什么
     opp_action = _opponent_action_of(state, side)
     succeeded = _respond_success(action, opp_action, rs) if opp_action else False
@@ -557,7 +568,10 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
     # 全技能威力增减（`parse.STAT_KEYS` 的 "全技能威力"）以及特性写的元素系威力。
     # `power_multiplier` 是**乘区**，所以每一项都折成系数再相乘。
     power_buff = 1.0 + float(pet.buffs.get("power", 0)) / 100.0
-    for element_key, element in (("power_water", "水系"), ("power_fight", "武系")):
+    # 特性写的元素系威力（身经百练：水/武；热成像：虫；冷光源：冰）。
+    # 这张表是「特性键 → 系别」的唯一映射，特性那边写什么键这里就读什么键。
+    for element_key, element in (("power_water", "水系"), ("power_fight", "武系"),
+                                 ("power_bug", "虫系"), ("power_ice", "冰系")):
         if element_key in pet.buffs and skill.element == element:
             power_buff *= 1.0 + float(pet.buffs[element_key]) / 100.0
 
