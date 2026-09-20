@@ -22,6 +22,7 @@ const {localModelPlanner, extractFirstJson, LOCAL_TOOL_SYSTEM} =
   await import('../../scripts/roco/agent-trajectories.mjs');
 const {extractJson} = await import('../../src/coach/local-model.js');
 const {summarise, compare} = await import('../../scripts/roco/shadow-replay.mjs');
+const {digest: computeDigest} = await import('../../scripts/roco/agent-trajectories.mjs');
 
 const RULE_REPORT = join(ROOT, 'reports', 'roco', 'shadow-replay.json');
 const LOCAL_REPORT = join(ROOT, 'reports', 'roco', 'shadow-replay-local_4b.json');
@@ -129,6 +130,24 @@ test('参考臂的报告必须存在且自己是全过的（否则对比没有�
   assert.equal(report.summary.pass_rate, 1,
     '参考臂不全过时，这里的「退化」计数就不能解释');
   assert.ok(report.summary.tasks >= 200);
+});
+
+test('报告必须带提示版本：只比通过率分不出两次跑的是不是同一份提示', () => {
+  if (!existsSync(LOCAL_REPORT)) return;
+  const report = JSON.parse(readFileSync(LOCAL_REPORT, 'utf8'));
+  assert.ok(report.prompt_digest, '模型臂的报告必须带 prompt_digest');
+  assert.match(report.prompt_digest, /^[0-9a-f]{64}$/);
+  assert.equal(typeof report.prompt, 'string', '提示全文也要存，便于核对差异');
+  // 同一次跑里，digest 必须真的是那段提示的摘要（不是随手填的常量）
+  assert.equal(computeDigest(report.prompt), report.prompt_digest,
+    'prompt_digest 与 prompt 全文不一致');
+});
+
+test('参考臂不带提示：它没有模型提示，带一个空值会让人以为它也有', () => {
+  if (!existsSync(RULE_REPORT)) return;
+  const report = JSON.parse(readFileSync(RULE_REPORT, 'utf8'));
+  assert.equal(report.prompt_digest, null);
+  assert.equal(report.prompt, null);
 });
 
 test('模型臂的报告（如果跑过）必须带真实延迟与失败原因', () => {

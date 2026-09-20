@@ -499,6 +499,47 @@ export function nameInMessage(message) {
  * 测试里可以塞一个假函数，于是这一支**不需要模型在线**也能测它的失败路径。
  * 没有 `ask` 时这一支直接拒绝执行，而不是静默退回规则。
  */
+/**
+ * 模型臂的系统提示。
+ *
+ * 参数名与 kind 取值**从 `TOOL_CONTRACTS` 派生**，不手抄：手抄一份就会漂，
+ * 而漂了之后模型给的是工具不接受的键——那会被判 `invalid-arguments`，
+ * 看起来像「模型笨」，其实是提示与契约不一致。
+ *
+ * 第一版只列了工具名，于是 86 次失败里绝大多数是「工具选对了、参数名不对」。
+ * 把契约里的参数名与 `kind` 取值直接写进提示，是**补齐信息**，不是放宽判据：
+ * 判据（`checkTask` / `validToolArgs`）一个字没改。
+ */
+export function buildLocalToolSystem(contracts = TOOL_CONTRACTS) {
+  const allowed = Object.keys(contracts);
+  const schema = allowed.map((name) => {
+    const args = Object.keys(contracts[name].arguments || {});
+    return `- ${name}(${args.join(', ')})`;
+  }).join('\n');
+  const kinds = 'pet/skill/learnset/term/type_row/type_chart/type_multiplier/ruleset/effect';
+  return [
+    '你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。',
+    '每个工具**只接受下列参数名**（圆括号里就是它接受的键，多一个键都会被拒绝）：',
+    schema,
+    '需要查证时输出 {"tool":"工具名","args":{...}}；证据已经足够时输出 {"stop":true}。',
+    '**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。',
+    `查规则事实用 query_rules：\`kind\` 必须是 ${kinds} 之一，并给出该 kind 需要的定位参数`,
+    '（精灵/学习表用 pet_id；技能用 skill_id 或 name；术语用 term_id；属性相性用 attack_element + defender_types）。',
+    '需要「换掉某一只」这类比较时用 compare_team_change，它要 team_before / team_after（各 3 个稳定 id）',
+    '以及可选的 locked_pet；玩家锁定的那只**必须**留在队伍里。只评一套阵容用 evaluate_team（team 3 个 id）。',
+    '参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名，不要用下标代替稳定 id。',
+  ].join('\n');
+}
+
+/**
+ * 实际使用的系统提示：**第一版**（只列工具名 + 说明 kind 取值）。
+ *
+ * 试过把契约里的参数名逐条列进提示（`buildLocalToolSystem()`），在 288 条上量出来是
+ * **变差**：通过率 0.7847 → 0.7326，`rules_lookup` 从 31/72 掉到 13/72，
+ * 而且多出 27 次「什么都不查」和 12 次「去查当前位置」。提示更长、模型更犹豫。
+ * 所以默认保留这一版；那份实验的产物留在
+ * `reports/roco/shadow-replay-local_4b-promptv2.json`，函数也留着，随时可复跑。
+ */
 export const LOCAL_TOOL_SYSTEM = [
   '你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。',
   '可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、',
@@ -509,7 +550,7 @@ export const LOCAL_TOOL_SYSTEM = [
   '查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，',
   '并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。',
   '参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。',
-].join('');
+].join('\n');
 
 export function localModelPlanner(task, hints, {ask, system = LOCAL_TOOL_SYSTEM, maxTokens = 96, timeoutMs = 8000} = {}) {
   if (typeof ask !== 'function') throw new Error('localModelPlanner 需要注入 ask（没有它就不是模型臂）');

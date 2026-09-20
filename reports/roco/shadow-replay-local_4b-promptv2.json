@@ -2,65 +2,63 @@
  "generated_by": "scripts/roco/shadow-replay.mjs",
  "arm": "local_4b",
  "gateway": "http://127.0.0.1:8766",
- "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
- "prompt": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。\n可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、\ncompare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、\nread_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。\n需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。\n**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。\n查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，\n并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。\n参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。",
  "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
  "summary": {
   "tasks": 288,
-  "passed": 225,
-  "pass_rate": 0.7813,
+  "passed": 211,
+  "pass_rate": 0.7326,
   "stopped": {
-   "invalid-arguments": 93,
-   "complete": 171,
-   "receipt-budget": 12,
+   "complete": 189,
+   "invalid-arguments": 81,
+   "receipt-budget": 6,
    "policy": 12
   },
   "latency": {
-   "p50_ms": 585,
-   "p95_ms": 774
+   "p50_ms": 624,
+   "p95_ms": 1096
   },
   "by_category": {
    "rules_lookup": {
     "total": 72,
-    "passed": 32,
-    "pass_rate": 0.4444,
-    "p50_ms": 565,
-    "p95_ms": 628
+    "passed": 13,
+    "pass_rate": 0.1806,
+    "p50_ms": 641,
+    "p95_ms": 671
    },
    "roster_constraint": {
     "total": 24,
-    "passed": 3,
-    "pass_rate": 0.125,
-    "p50_ms": 626,
-    "p95_ms": 786
+    "passed": 12,
+    "pass_rate": 0.5,
+    "p50_ms": 1257,
+    "p95_ms": 1270
    },
    "continue_stop": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 619,
-    "p95_ms": 640
+    "p50_ms": 512,
+    "p95_ms": 919
    },
    "tool_failure": {
     "total": 36,
-    "passed": 34,
-    "pass_rate": 0.9444,
-    "p50_ms": 623,
-    "p95_ms": 791
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 831,
+    "p95_ms": 1100
    },
    "stale_state": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 390,
-    "p95_ms": 591
+    "p50_ms": 501,
+    "p95_ms": 514
    },
    "evidence_conflict": {
     "total": 36,
-    "passed": 36,
-    "pass_rate": 1,
-    "p50_ms": 616,
-    "p95_ms": 623
+    "passed": 30,
+    "pass_rate": 0.8333,
+    "p50_ms": 674,
+    "p95_ms": 762
    },
    "silence": {
     "total": 12,
@@ -73,8 +71,8 @@
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 569,
-    "p95_ms": 645
+    "p50_ms": 538,
+    "p95_ms": 735
    }
   }
  },
@@ -84,70 +82,110 @@
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
    ],
-   "wall_ms": 639
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 709
   },
   {
    "case_id": "rl-pet-f0-02",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
    ],
-   "wall_ms": 574
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 645
   },
   {
    "case_id": "rl-pet-f0-03",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
    ],
-   "wall_ms": 585
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 646
   },
   {
    "case_id": "rl-pet-f0-04",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
    ],
-   "wall_ms": 577
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 630
   },
   {
    "case_id": "rl-pet-f1-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
    ],
-   "wall_ms": 579
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 648
   },
   {
    "case_id": "rl-pet-f1-02",
@@ -169,7 +207,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 570
+   "wall_ms": 646
   },
   {
    "case_id": "rl-pet-f1-03",
@@ -191,7 +229,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 574
+   "wall_ms": 638
   },
   {
    "case_id": "rl-pet-f1-04",
@@ -213,75 +251,19 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 565
+   "wall_ms": 642
   },
   {
    "case_id": "rl-pet-f2-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 579
-  },
-  {
-   "case_id": "rl-pet-f2-02",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 579
-  },
-  {
-   "case_id": "rl-pet-f2-03",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 578
-  },
-  {
-   "case_id": "rl-pet-f2-04",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 query_rules",
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 577
-  },
-  {
-   "case_id": "rl-skill-f0-01",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-0",
    "trace": [
     {
      "tool": "query_rules",
      "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
+      "kind": "pet",
+      "pet_id": "pet_000190",
       "state_version": 0
      },
      "ok": true,
@@ -289,9 +271,97 @@
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 500
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 648
+  },
+  {
+   "case_id": "rl-pet-f2-02",
+   "category": "rules_lookup",
+   "arm": "local_4b",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 650
+  },
+  {
+   "case_id": "rl-pet-f2-03",
+   "category": "rules_lookup",
+   "arm": "local_4b",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 641
+  },
+  {
+   "case_id": "rl-pet-f2-04",
+   "category": "rules_lookup",
+   "arm": "local_4b",
+   "world": "camp-1",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 646
+  },
+  {
+   "case_id": "rl-skill-f0-01",
+   "category": "rules_lookup",
+   "arm": "local_4b",
+   "world": "camp-0",
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
+   ],
+   "wall_ms": 644
   },
   {
    "case_id": "rl-skill-f0-02",
@@ -313,7 +383,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 504
+   "wall_ms": 581
   },
   {
    "case_id": "rl-skill-f0-03",
@@ -335,7 +405,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 504
+   "wall_ms": 567
   },
   {
    "case_id": "rl-skill-f0-04",
@@ -357,73 +427,49 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 500
+   "wall_ms": 581
   },
   {
    "case_id": "rl-skill-f1-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-2",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
    ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 500
+   "wall_ms": 721
   },
   {
    "case_id": "rl-skill-f1-02",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
    ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 508
+   "wall_ms": 714
   },
   {
    "case_id": "rl-skill-f1-03",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
    ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 511
+   "wall_ms": 587
   },
   {
    "case_id": "rl-skill-f1-04",
@@ -445,137 +491,144 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 526
+   "wall_ms": 587
   },
   {
    "case_id": "rl-skill-f2-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
    ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 529
+   "wall_ms": 591
   },
   {
    "case_id": "rl-skill-f2-02",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
    ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 547
+   "wall_ms": 583
   },
   {
    "case_id": "rl-skill-f2-03",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
    ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 562
+   "wall_ms": 594
   },
   {
    "case_id": "rl-skill-f2-04",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
    ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 556
+   "wall_ms": 595
   },
   {
    "case_id": "rl-type-f0-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dusk"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 599
+   "wall_ms": 667
   },
   {
    "case_id": "rl-type-f0-02",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-2",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dusk"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 597
+   "wall_ms": 666
   },
   {
    "case_id": "rl-type-f0-03",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "shadow"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 596
+   "wall_ms": 655
   },
   {
    "case_id": "rl-type-f0-04",
@@ -589,119 +642,223 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 594
+   "wall_ms": 646
   },
   {
    "case_id": "rl-type-f1-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dull"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 592
+   "wall_ms": 665
   },
   {
    "case_id": "rl-type-f1-02",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dull"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 596
+   "wall_ms": 661
   },
   {
    "case_id": "rl-type-f1-03",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dull"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 609
+   "wall_ms": 670
   },
   {
    "case_id": "rl-type-f1-04",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-2",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dull"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 607
+   "wall_ms": 671
   },
   {
    "case_id": "rl-type-f2-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dusk"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 592
+   "wall_ms": 664
   },
   {
    "case_id": "rl-type-f2-02",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dull"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 608
+   "wall_ms": 666
   },
   {
    "case_id": "rl-type-f2-03",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dusk"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 602
+   "wall_ms": 669
   },
   {
    "case_id": "rl-type-f2-04",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "dragon",
+      "defender_types": [
+       "dull"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
    ],
-   "wall_ms": 598
+   "wall_ms": 671
   },
   {
    "case_id": "rl-learn-f0-01",
@@ -725,7 +882,7 @@
    "violations": [
     "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "wall_ms": 614
+   "wall_ms": 641
   },
   {
    "case_id": "rl-learn-f0-02",
@@ -749,7 +906,7 @@
    "violations": [
     "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "wall_ms": 625
+   "wall_ms": 656
   },
   {
    "case_id": "rl-learn-f0-03",
@@ -773,7 +930,7 @@
    "violations": [
     "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "wall_ms": 617
+   "wall_ms": 662
   },
   {
    "case_id": "rl-learn-f0-04",
@@ -797,75 +954,49 @@
    "violations": [
     "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "wall_ms": 617
+   "wall_ms": 658
   },
   {
    "case_id": "rl-learn-f1-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-2",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "learnset",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "receipt-budget",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": false,
    "violations": [
+    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "wall_ms": 619
+   "wall_ms": 658
   },
   {
    "case_id": "rl-learn-f1-02",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-2",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "learnset",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "stopped": "receipt-budget",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 627
+   "wall_ms": 656
   },
   {
    "case_id": "rl-learn-f1-03",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-2",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "learnset",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "stopped": "receipt-budget",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 622
+   "wall_ms": 658
   },
   {
    "case_id": "rl-learn-f1-04",
@@ -887,73 +1018,49 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 621
+   "wall_ms": 644
   },
   {
    "case_id": "rl-learn-f2-01",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-2",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "learnset",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "stopped": "receipt-budget",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 628
+   "wall_ms": 657
   },
   {
    "case_id": "rl-learn-f2-02",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "learnset",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "stopped": "receipt-budget",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 627
+   "wall_ms": 659
   },
   {
    "case_id": "rl-learn-f2-03",
    "category": "rules_lookup",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "learnset",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "stopped": "receipt-budget",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 636
+   "wall_ms": 649
   },
   {
    "case_id": "rl-learn-f2-04",
@@ -977,7 +1084,7 @@
    "violations": [
     "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
    ],
-   "wall_ms": 630
+   "wall_ms": 658
   },
   {
    "case_id": "rl-term-f0-01",
@@ -991,7 +1098,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 551
+   "wall_ms": 571
   },
   {
    "case_id": "rl-term-f0-02",
@@ -1005,7 +1112,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 518
+   "wall_ms": 572
   },
   {
    "case_id": "rl-term-f0-03",
@@ -1019,7 +1126,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 516
+   "wall_ms": 567
   },
   {
    "case_id": "rl-term-f0-04",
@@ -1033,7 +1140,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 507
+   "wall_ms": 569
   },
   {
    "case_id": "rl-term-f1-01",
@@ -1047,7 +1154,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 504
+   "wall_ms": 568
   },
   {
    "case_id": "rl-term-f1-02",
@@ -1061,7 +1168,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 516
+   "wall_ms": 575
   },
   {
    "case_id": "rl-term-f1-03",
@@ -1075,7 +1182,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 519
+   "wall_ms": 565
   },
   {
    "case_id": "rl-term-f1-04",
@@ -1089,7 +1196,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 519
+   "wall_ms": 564
   },
   {
    "case_id": "rl-term-f2-01",
@@ -1103,7 +1210,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 515
+   "wall_ms": 576
   },
   {
    "case_id": "rl-term-f2-02",
@@ -1117,7 +1224,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 511
+   "wall_ms": 571
   },
   {
    "case_id": "rl-term-f2-03",
@@ -1131,7 +1238,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 517
+   "wall_ms": 566
   },
   {
    "case_id": "rl-term-f2-04",
@@ -1145,7 +1252,7 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
    ],
-   "wall_ms": 517
+   "wall_ms": 569
   },
   {
    "case_id": "rl-ruleset-f0-01",
@@ -1154,19 +1261,19 @@
    "world": "camp-0",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 482
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 494
   },
   {
    "case_id": "rl-ruleset-f0-02",
@@ -1175,19 +1282,19 @@
    "world": "camp-0",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 490
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 496
   },
   {
    "case_id": "rl-ruleset-f0-03",
@@ -1196,33 +1303,40 @@
    "world": "camp-locked",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 483
-  },
-  {
-   "case_id": "rl-ruleset-f0-04",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-0",
-   "trace": [],
    "stopped": "complete",
    "passed": false,
    "violations": [
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
    ],
-   "wall_ms": 388
+   "wall_ms": 492
+  },
+  {
+   "case_id": "rl-ruleset-f0-04",
+   "category": "rules_lookup",
+   "arm": "local_4b",
+   "world": "camp-0",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 477
   },
   {
    "case_id": "rl-ruleset-f1-01",
@@ -1231,20 +1345,19 @@
    "world": "camp-2",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "name": "ruleset_0",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 547
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 490
   },
   {
    "case_id": "rl-ruleset-f1-02",
@@ -1253,20 +1366,19 @@
    "world": "camp-0",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "name": "寂灭骨龙",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 549
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 491
   },
   {
    "case_id": "rl-ruleset-f1-03",
@@ -1275,19 +1387,19 @@
    "world": "camp-2",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 477
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 494
   },
   {
    "case_id": "rl-ruleset-f1-04",
@@ -1296,19 +1408,19 @@
    "world": "camp-2",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 486
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 489
   },
   {
    "case_id": "rl-ruleset-f2-01",
@@ -1317,19 +1429,19 @@
    "world": "camp-0",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 491
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 496
   },
   {
    "case_id": "rl-ruleset-f2-02",
@@ -1338,19 +1450,19 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 484
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 493
   },
   {
    "case_id": "rl-ruleset-f2-03",
@@ -1359,19 +1471,19 @@
    "world": "camp-locked",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 487
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 497
   },
   {
    "case_id": "rl-ruleset-f2-04",
@@ -1380,19 +1492,19 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 483
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 496
   },
   {
    "case_id": "rc-eval-f0-01",
@@ -1408,6 +1520,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1415,11 +1528,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 754
+   "passed": true,
+   "violations": [],
+   "wall_ms": 908
   },
   {
    "case_id": "rc-eval-f0-02",
@@ -1435,6 +1546,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1442,11 +1554,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 756
+   "passed": true,
+   "violations": [],
+   "wall_ms": 918
   },
   {
    "case_id": "rc-eval-f0-03",
@@ -1462,6 +1572,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1469,11 +1580,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 783
+   "passed": true,
+   "violations": [],
+   "wall_ms": 913
   },
   {
    "case_id": "rc-eval-f0-04",
@@ -1489,6 +1598,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1496,11 +1606,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 786
+   "passed": true,
+   "violations": [],
+   "wall_ms": 919
   },
   {
    "case_id": "rc-eval-f1-01",
@@ -1516,6 +1624,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1523,11 +1632,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 782
+   "passed": true,
+   "violations": [],
+   "wall_ms": 923
   },
   {
    "case_id": "rc-eval-f1-02",
@@ -1543,6 +1650,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1550,11 +1658,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 793
+   "passed": true,
+   "violations": [],
+   "wall_ms": 913
   },
   {
    "case_id": "rc-eval-f1-03",
@@ -1563,10 +1669,14 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "evaluate_team",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1574,12 +1684,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 evaluate_team",
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 626
+   "passed": true,
+   "violations": [],
+   "wall_ms": 920
   },
   {
    "case_id": "rc-eval-f1-04",
@@ -1595,6 +1702,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1602,11 +1710,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 771
+   "passed": true,
+   "violations": [],
+   "wall_ms": 922
   },
   {
    "case_id": "rc-eval-f2-01",
@@ -1622,6 +1728,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1631,7 +1738,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 764
+   "wall_ms": 905
   },
   {
    "case_id": "rc-eval-f2-02",
@@ -1647,6 +1754,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1656,7 +1764,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 774
+   "wall_ms": 920
   },
   {
    "case_id": "rc-eval-f2-03",
@@ -1672,6 +1780,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -1681,21 +1790,33 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 774
+   "wall_ms": 911
   },
   {
    "case_id": "rc-eval-f2-04",
    "category": "roster_constraint",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 evaluate_team",
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"]} 的一次调用"
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
    ],
-   "wall_ms": 472
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 918
   },
   {
    "case_id": "rc-swap-f0-01",
@@ -1704,24 +1825,31 @@
    "world": "camp-2",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000445",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000000"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "not_found"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
-    "换掉了玩家锁定的 pet_000225"
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 624
+   "wall_ms": 1270
   },
   {
    "case_id": "rc-swap-f0-02",
@@ -1730,24 +1858,31 @@
    "world": "camp-locked",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000445",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "bad_request"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
-    "换掉了玩家锁定的 pet_000225"
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 615
+   "wall_ms": 1263
   },
   {
    "case_id": "rc-swap-f0-03",
@@ -1756,24 +1891,31 @@
    "world": "camp-2",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000445",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000000"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "not_found"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
-    "换掉了玩家锁定的 pet_000225"
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 614
+   "wall_ms": 1267
   },
   {
    "case_id": "rc-swap-f0-04",
@@ -1782,24 +1924,31 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000445",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000000"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "not_found"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
-    "换掉了玩家锁定的 pet_000225"
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 610
+   "wall_ms": 1265
   },
   {
    "case_id": "rc-swap-f1-01",
@@ -1808,23 +1957,31 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "bad_request"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 616
+   "wall_ms": 1272
   },
   {
    "case_id": "rc-swap-f1-02",
@@ -1833,23 +1990,31 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "bad_request"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 622
+   "wall_ms": 1265
   },
   {
    "case_id": "rc-swap-f1-03",
@@ -1858,24 +2023,31 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "bad_request"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
-    "换掉了玩家锁定的 pet_000225"
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 613
+   "wall_ms": 1265
   },
   {
    "case_id": "rc-swap-f1-04",
@@ -1884,24 +2056,31 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000000"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "not_found"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
-    "换掉了玩家锁定的 pet_000225"
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 630
+   "wall_ms": 1270
   },
   {
    "case_id": "rc-swap-f2-01",
@@ -1910,23 +2089,31 @@
    "world": "camp-0",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000445",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000445",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "bad_request"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
    ],
-   "wall_ms": 618
+   "wall_ms": 1257
   },
   {
    "case_id": "rc-swap-f2-02",
@@ -1935,23 +2122,31 @@
    "world": "camp-locked",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "bad_request"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
    ],
-   "wall_ms": 613
+   "wall_ms": 1266
   },
   {
    "case_id": "rc-swap-f2-03",
@@ -1960,23 +2155,31 @@
    "world": "camp-2",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000445",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "bad_request"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
    ],
-   "wall_ms": 613
+   "wall_ms": 1266
   },
   {
    "case_id": "rc-swap-f2-04",
@@ -1985,40 +2188,37 @@
    "world": "camp-1",
    "trace": [
     {
-     "tool": "query_rules",
+     "tool": "compare_team_change",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "bad_request"
     }
    ],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "没有调用应当调用的工具 compare_team_change",
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
    ],
-   "wall_ms": 618
+   "wall_ms": 1270
   },
   {
    "case_id": "cs-answered-f0-01",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 631
-  },
-  {
-   "case_id": "cs-answered-f0-02",
-   "category": "continue_stop",
-   "arm": "local_4b",
-   "world": "camp-2",
    "trace": [
     {
      "tool": "query_rules",
@@ -2034,7 +2234,18 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 609
+   "wall_ms": 648
+  },
+  {
+   "case_id": "cs-answered-f0-02",
+   "category": "continue_stop",
+   "arm": "local_4b",
+   "world": "camp-2",
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 592
   },
   {
    "case_id": "cs-answered-f0-03",
@@ -2056,18 +2267,29 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 620
+   "wall_ms": 649
   },
   {
    "case_id": "cs-answered-f0-04",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 640
+   "wall_ms": 653
   },
   {
    "case_id": "cs-answered-f1-01",
@@ -2089,7 +2311,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 623
+   "wall_ms": 643
   },
   {
    "case_id": "cs-answered-f1-02",
@@ -2111,29 +2333,51 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 604
+   "wall_ms": 635
   },
   {
    "case_id": "cs-answered-f1-03",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 622
+   "wall_ms": 650
   },
   {
    "case_id": "cs-answered-f1-04",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 618
+   "wall_ms": 651
   },
   {
    "case_id": "cs-answered-f2-01",
@@ -2144,7 +2388,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 620
+   "wall_ms": 653
   },
   {
    "case_id": "cs-answered-f2-02",
@@ -2155,7 +2399,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 612
+   "wall_ms": 655
   },
   {
    "case_id": "cs-answered-f2-03",
@@ -2166,7 +2410,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 633
+   "wall_ms": 657
   },
   {
    "case_id": "cs-answered-f2-04",
@@ -2177,7 +2421,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 631
+   "wall_ms": 658
   },
   {
    "case_id": "cs-lastturn-f0-01",
@@ -2195,7 +2439,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 471
+   "wall_ms": 492
   },
   {
    "case_id": "cs-lastturn-f0-02",
@@ -2213,7 +2457,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 460
+   "wall_ms": 503
   },
   {
    "case_id": "cs-lastturn-f0-03",
@@ -2231,7 +2475,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 468
+   "wall_ms": 505
   },
   {
    "case_id": "cs-lastturn-f0-04",
@@ -2249,7 +2493,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 467
+   "wall_ms": 513
   },
   {
    "case_id": "cs-lastturn-f1-01",
@@ -2267,7 +2511,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 467
+   "wall_ms": 503
   },
   {
    "case_id": "cs-lastturn-f1-02",
@@ -2285,18 +2529,25 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 465
+   "wall_ms": 501
   },
   {
    "case_id": "cs-lastturn-f1-03",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_last_turn",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 575
+   "wall_ms": 508
   },
   {
    "case_id": "cs-lastturn-f1-04",
@@ -2314,7 +2565,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 455
+   "wall_ms": 504
   },
   {
    "case_id": "cs-lastturn-f2-01",
@@ -2332,7 +2583,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 452
+   "wall_ms": 505
   },
   {
    "case_id": "cs-lastturn-f2-02",
@@ -2350,7 +2601,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 456
+   "wall_ms": 491
   },
   {
    "case_id": "cs-lastturn-f2-03",
@@ -2368,7 +2619,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 449
+   "wall_ms": 512
   },
   {
    "case_id": "cs-lastturn-f2-04",
@@ -2386,51 +2637,79 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 456
+   "wall_ms": 508
   },
   {
    "case_id": "cs-diagnose-f0-01",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 619
+   "wall_ms": 494
   },
   {
    "case_id": "cs-diagnose-f0-02",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 624
+   "wall_ms": 491
   },
   {
    "case_id": "cs-diagnose-f0-03",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 888
+   "wall_ms": 492
   },
   {
    "case_id": "cs-diagnose-f0-04",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-locked",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 635
+   "wall_ms": 495
   },
   {
    "case_id": "cs-diagnose-f1-01",
@@ -2441,7 +2720,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 638
+   "wall_ms": 659
   },
   {
    "case_id": "cs-diagnose-f1-02",
@@ -2452,29 +2731,59 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 628
+   "wall_ms": 657
   },
   {
    "case_id": "cs-diagnose-f1-03",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 629
+   "wall_ms": 919
   },
   {
    "case_id": "cs-diagnose-f1-04",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 631
+   "wall_ms": 926
   },
   {
    "case_id": "cs-diagnose-f2-01",
@@ -2483,20 +2792,16 @@
    "world": "camp-0",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 614
+   "wall_ms": 491
   },
   {
    "case_id": "cs-diagnose-f2-02",
@@ -2505,42 +2810,52 @@
    "world": "camp-2",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 614
+   "wall_ms": 492
   },
   {
    "case_id": "cs-diagnose-f2-03",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 619
+   "wall_ms": 501
   },
   {
    "case_id": "cs-diagnose-f2-04",
    "category": "continue_stop",
    "arm": "local_4b",
    "world": "camp-2",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 625
+   "wall_ms": 498
   },
   {
    "case_id": "tf-damage-f0-01",
@@ -2551,7 +2866,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 770
+   "wall_ms": 791
   },
   {
    "case_id": "tf-damage-f0-02",
@@ -2562,7 +2877,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 773
+   "wall_ms": 784
   },
   {
    "case_id": "tf-damage-f0-03",
@@ -2573,18 +2888,37 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 780
+   "wall_ms": 778
   },
   {
    "case_id": "tf-damage-f0-04",
    "category": "tool_failure",
    "arm": "local_4b",
    "world": "battle-refuse",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "effect",
+      "pet_id": "pet_000225",
+      "skill_id": "skill_000000",
+      "name": "坟场搏击",
+      "term_id": "term_000000",
+      "type": "type_row",
+      "defender_types": [
+       "type_000000"
+      ],
+      "attack_element": "element_000000",
+      "state_version": 10
+     },
+     "ok": false,
+     "error_type": "not_found"
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 780
+   "wall_ms": 1293
   },
   {
    "case_id": "tf-damage-f1-01",
@@ -2595,7 +2929,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 791
+   "wall_ms": 1096
   },
   {
    "case_id": "tf-damage-f1-02",
@@ -2606,7 +2940,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 788
+   "wall_ms": 1091
   },
   {
    "case_id": "tf-damage-f1-03",
@@ -2617,18 +2951,30 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 773
+   "wall_ms": 1100
   },
   {
    "case_id": "tf-damage-f1-04",
    "category": "tool_failure",
    "arm": "local_4b",
    "world": "battle-refuse",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "effect",
+      "pet_id": "pet_000225",
+      "skill_id": "pet_000190",
+      "state_version": 10
+     },
+     "ok": false,
+     "error_type": "not_found"
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 774
+   "wall_ms": 783
   },
   {
    "case_id": "tf-damage-f2-01",
@@ -2639,7 +2985,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 782
+   "wall_ms": 916
   },
   {
    "case_id": "tf-damage-f2-02",
@@ -2650,7 +2996,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 780
+   "wall_ms": 1095
   },
   {
    "case_id": "tf-damage-f2-03",
@@ -2661,10 +3007,36 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 783
+   "wall_ms": 919
   },
   {
    "case_id": "tf-damage-f2-04",
+   "category": "tool_failure",
+   "arm": "local_4b",
+   "world": "battle-refuse",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "effect",
+      "pet_id": "pet_000225",
+      "skill_id": "pet_000190",
+      "defender_types": [
+       "pet_000445"
+      ],
+      "state_version": 10
+     },
+     "ok": false,
+     "error_type": "not_found"
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 938
+  },
+  {
+   "case_id": "tf-plan-f0-01",
    "category": "tool_failure",
    "arm": "local_4b",
    "world": "battle-refuse",
@@ -2672,55 +3044,18 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 791
-  },
-  {
-   "case_id": "tf-plan-f0-01",
-   "category": "tool_failure",
-   "arm": "local_4b",
-   "world": "battle-refuse",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "name": "defense",
-      "state_version": 10
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "引擎答不了，正文却没有说清「未核验 / 没有端点 / 不支持」这类限制"
-   ],
-   "wall_ms": 551
+   "wall_ms": 1025
   },
   {
    "case_id": "tf-plan-f0-02",
    "category": "tool_failure",
    "arm": "local_4b",
    "world": "battle-refuse",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "name": "defense_vs_attack",
-      "state_version": 10
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "引擎答不了，正文却没有说清「未核验 / 没有端点 / 不支持」这类限制"
-   ],
-   "wall_ms": 555
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 803
   },
   {
    "case_id": "tf-plan-f0-03",
@@ -2731,7 +3066,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 551
+   "wall_ms": 1031
   },
   {
    "case_id": "tf-plan-f0-04",
@@ -2742,7 +3077,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 551
+   "wall_ms": 1021
   },
   {
    "case_id": "tf-plan-f1-01",
@@ -2753,7 +3088,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 623
+   "wall_ms": 831
   },
   {
    "case_id": "tf-plan-f1-02",
@@ -2764,7 +3099,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 612
+   "wall_ms": 1025
   },
   {
    "case_id": "tf-plan-f1-03",
@@ -2775,7 +3110,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 561
+   "wall_ms": 1019
   },
   {
    "case_id": "tf-plan-f1-04",
@@ -2786,7 +3121,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 635
+   "wall_ms": 1030
   },
   {
    "case_id": "tf-plan-f2-01",
@@ -2797,7 +3132,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 625
+   "wall_ms": 821
   },
   {
    "case_id": "tf-plan-f2-02",
@@ -2808,7 +3143,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 628
+   "wall_ms": 917
   },
   {
    "case_id": "tf-plan-f2-03",
@@ -2819,7 +3154,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 633
+   "wall_ms": 1035
   },
   {
    "case_id": "tf-plan-f2-04",
@@ -2830,7 +3165,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 628
+   "wall_ms": 832
   },
   {
    "case_id": "tf-summary-f0-01",
@@ -2838,10 +3173,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 396
+   "wall_ms": 677
   },
   {
    "case_id": "tf-summary-f0-02",
@@ -2849,10 +3184,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 386
+   "wall_ms": 623
   },
   {
    "case_id": "tf-summary-f0-03",
@@ -2860,10 +3195,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 395
+   "wall_ms": 617
   },
   {
    "case_id": "tf-summary-f0-04",
@@ -2871,10 +3206,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 389
+   "wall_ms": 614
   },
   {
    "case_id": "tf-summary-f1-01",
@@ -2882,10 +3217,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 393
+   "wall_ms": 617
   },
   {
    "case_id": "tf-summary-f1-02",
@@ -2893,10 +3228,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 389
+   "wall_ms": 623
   },
   {
    "case_id": "tf-summary-f1-03",
@@ -2904,10 +3239,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 385
+   "wall_ms": 624
   },
   {
    "case_id": "tf-summary-f1-04",
@@ -2915,10 +3250,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 384
+   "wall_ms": 630
   },
   {
    "case_id": "tf-summary-f2-01",
@@ -2926,10 +3261,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 382
+   "wall_ms": 616
   },
   {
    "case_id": "tf-summary-f2-02",
@@ -2937,10 +3272,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 385
+   "wall_ms": 623
   },
   {
    "case_id": "tf-summary-f2-03",
@@ -2948,10 +3283,10 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 383
+   "wall_ms": 606
   },
   {
    "case_id": "tf-summary-f2-04",
@@ -2959,54 +3294,82 @@
    "arm": "local_4b",
    "world": "battle-refuse",
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 386
+   "wall_ms": 677
   },
   {
    "case_id": "ss-plan-f0-01",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 371
+   "wall_ms": 506
   },
   {
    "case_id": "ss-plan-f0-02",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 375
+   "wall_ms": 503
   },
   {
    "case_id": "ss-plan-f0-03",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 382
+   "wall_ms": 491
   },
   {
    "case_id": "ss-plan-f0-04",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 383
+   "wall_ms": 507
   },
   {
    "case_id": "ss-plan-f1-01",
@@ -3015,20 +3378,16 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "寂灭骨龙",
-      "state_version": 10
-     },
+     "tool": "read_state",
+     "args": {},
      "ok": false,
-     "error_type": "not_found"
+     "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 543
+   "wall_ms": 505
   },
   {
    "case_id": "ss-plan-f1-02",
@@ -3037,20 +3396,16 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "寂灭骨龙",
-      "state_version": 10
-     },
+     "tool": "read_state",
+     "args": {},
      "ok": false,
-     "error_type": "not_found"
+     "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 537
+   "wall_ms": 501
   },
   {
    "case_id": "ss-plan-f1-03",
@@ -3059,20 +3414,16 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "寂灭骨龙",
-      "state_version": 10
-     },
+     "tool": "read_state",
+     "args": {},
      "ok": false,
-     "error_type": "not_found"
+     "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 550
+   "wall_ms": 497
   },
   {
    "case_id": "ss-plan-f1-04",
@@ -3081,20 +3432,16 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "search_rules",
-      "state_version": 10
-     },
+     "tool": "read_state",
+     "args": {},
      "ok": false,
-     "error_type": "not_found"
+     "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 543
+   "wall_ms": 496
   },
   {
    "case_id": "ss-plan-f2-01",
@@ -3103,20 +3450,16 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "画间沉铁兽",
-      "state_version": 10
-     },
+     "tool": "read_state",
+     "args": {},
      "ok": false,
-     "error_type": "not_found"
+     "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 576
+   "wall_ms": 497
   },
   {
    "case_id": "ss-plan-f2-02",
@@ -3125,20 +3468,16 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "画间沉铁兽",
-      "state_version": 10
-     },
+     "tool": "read_state",
+     "args": {},
      "ok": false,
-     "error_type": "not_found"
+     "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 563
+   "wall_ms": 505
   },
   {
    "case_id": "ss-plan-f2-03",
@@ -3147,20 +3486,16 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "画间沉铁兽",
-      "state_version": 10
-     },
+     "tool": "read_state",
+     "args": {},
      "ok": false,
-     "error_type": "not_found"
+     "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 564
+   "wall_ms": 509
   },
   {
    "case_id": "ss-plan-f2-04",
@@ -3169,119 +3504,178 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "draw",
-      "state_version": 10
-     },
+     "tool": "read_state",
+     "args": {},
      "ok": false,
-     "error_type": "not_found"
+     "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 525
+   "wall_ms": 484
   },
   {
    "case_id": "ss-hp-f0-01",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 397
+   "wall_ms": 501
   },
   {
    "case_id": "ss-hp-f0-02",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 387
+   "wall_ms": 504
   },
   {
    "case_id": "ss-hp-f0-03",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 378
+   "wall_ms": 504
   },
   {
    "case_id": "ss-hp-f0-04",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 391
+   "wall_ms": 498
   },
   {
    "case_id": "ss-hp-f1-01",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 386
+   "wall_ms": 500
   },
   {
    "case_id": "ss-hp-f1-02",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 390
+   "wall_ms": 507
   },
   {
    "case_id": "ss-hp-f1-03",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 390
+   "wall_ms": 505
   },
   {
    "case_id": "ss-hp-f1-04",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 386
+   "wall_ms": 499
   },
   {
    "case_id": "ss-hp-f2-01",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 388
+   "wall_ms": 487
   },
   {
    "case_id": "ss-hp-f2-02",
@@ -3290,42 +3684,52 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 10
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 600
+   "wall_ms": 499
   },
   {
    "case_id": "ss-hp-f2-03",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 390
+   "wall_ms": 504
   },
   {
    "case_id": "ss-hp-f2-04",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 394
+   "wall_ms": 514
   },
   {
    "case_id": "ss-hint-f0-01",
@@ -3336,7 +3740,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 387
+   "wall_ms": 456
   },
   {
    "case_id": "ss-hint-f0-02",
@@ -3347,7 +3751,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 391
+   "wall_ms": 449
   },
   {
    "case_id": "ss-hint-f0-03",
@@ -3358,18 +3762,25 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 395
+   "wall_ms": 446
   },
   {
    "case_id": "ss-hint-f0-04",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 397
+   "wall_ms": 500
   },
   {
    "case_id": "ss-hint-f1-01",
@@ -3380,7 +3791,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 393
+   "wall_ms": 444
   },
   {
    "case_id": "ss-hint-f1-02",
@@ -3391,51 +3802,79 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 389
+   "wall_ms": 441
   },
   {
    "case_id": "ss-hint-f1-03",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 378
+   "wall_ms": 500
   },
   {
    "case_id": "ss-hint-f1-04",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 388
+   "wall_ms": 502
   },
   {
    "case_id": "ss-hint-f2-01",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 382
+   "wall_ms": 511
   },
   {
    "case_id": "ss-hint-f2-02",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 381
+   "wall_ms": 515
   },
   {
    "case_id": "ss-hint-f2-03",
@@ -3444,31 +3883,34 @@
    "world": "battle-stale",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 10
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 591
+   "wall_ms": 500
   },
   {
    "case_id": "ss-hint-f2-04",
    "category": "stale_state",
    "arm": "local_4b",
    "world": "battle-stale",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 378
+   "wall_ms": 505
   },
   {
    "case_id": "ec-value-f0-01",
@@ -3490,7 +3932,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 605
+   "wall_ms": 662
   },
   {
    "case_id": "ec-value-f0-02",
@@ -3512,7 +3954,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 621
+   "wall_ms": 667
   },
   {
    "case_id": "ec-value-f0-03",
@@ -3534,7 +3976,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 615
+   "wall_ms": 667
   },
   {
    "case_id": "ec-value-f0-04",
@@ -3556,7 +3998,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 611
+   "wall_ms": 676
   },
   {
    "case_id": "ec-value-f1-01",
@@ -3567,40 +4009,34 @@
     {
      "tool": "query_rules",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
+      "kind": "type_multiplier",
+      "attack_element": "physical",
+      "defender_types": [
+       "pet_000225"
+      ],
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "unsupported_effect"
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 619
+   "passed": false,
+   "violations": [
+    "证据相互冲突，正文没有把冲突说出来"
+   ],
+   "wall_ms": 762
   },
   {
    "case_id": "ec-value-f1-02",
    "category": "evidence_conflict",
    "arm": "local_4b",
    "world": "camp-conflict",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 617
+   "wall_ms": 668
   },
   {
    "case_id": "ec-value-f1-03",
@@ -3611,18 +4047,23 @@
     {
      "tool": "query_rules",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
+      "kind": "type_multiplier",
+      "attack_element": "physical",
+      "defender_types": [
+       "pet_000225"
+      ],
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "unsupported_effect"
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 621
+   "passed": false,
+   "violations": [
+    "证据相互冲突，正文没有把冲突说出来"
+   ],
+   "wall_ms": 753
   },
   {
    "case_id": "ec-value-f1-04",
@@ -3633,18 +4074,23 @@
     {
      "tool": "query_rules",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
+      "kind": "type_multiplier",
+      "attack_element": "physical",
+      "defender_types": [
+       "pet_000225"
+      ],
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "unsupported_effect"
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 608
+   "passed": false,
+   "violations": [
+    "证据相互冲突，正文没有把冲突说出来"
+   ],
+   "wall_ms": 758
   },
   {
    "case_id": "ec-value-f2-01",
@@ -3655,40 +4101,34 @@
     {
      "tool": "query_rules",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
+      "kind": "type_multiplier",
+      "attack_element": "physical",
+      "defender_types": [
+       "pet_000225"
+      ],
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "unsupported_effect"
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 617
+   "passed": false,
+   "violations": [
+    "证据相互冲突，正文没有把冲突说出来"
+   ],
+   "wall_ms": 766
   },
   {
    "case_id": "ec-value-f2-02",
    "category": "evidence_conflict",
    "arm": "local_4b",
    "world": "camp-conflict",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 617
+   "wall_ms": 684
   },
   {
    "case_id": "ec-value-f2-03",
@@ -3699,18 +4139,23 @@
     {
      "tool": "query_rules",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
+      "kind": "type_multiplier",
+      "attack_element": "dark",
+      "defender_types": [
+       "physical"
+      ],
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "unsupported_effect"
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 607
+   "passed": false,
+   "violations": [
+    "证据相互冲突，正文没有把冲突说出来"
+   ],
+   "wall_ms": 684
   },
   {
    "case_id": "ec-value-f2-04",
@@ -3721,40 +4166,34 @@
     {
      "tool": "query_rules",
      "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
+      "kind": "type_multiplier",
+      "attack_element": "dark",
+      "defender_types": [
+       "physical"
+      ],
       "state_version": 0
      },
-     "ok": true,
-     "error_type": null
+     "ok": false,
+     "error_type": "unsupported_effect"
     }
    ],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 622
+   "passed": false,
+   "violations": [
+    "证据相互冲突，正文没有把冲突说出来"
+   ],
+   "wall_ms": 681
   },
   {
    "case_id": "ec-form-f0-01",
    "category": "evidence_conflict",
    "arm": "local_4b",
    "world": "camp-conflict",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 616
+   "wall_ms": 597
   },
   {
    "case_id": "ec-form-f0-02",
@@ -3763,20 +4202,16 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 623
+   "wall_ms": 519
   },
   {
    "case_id": "ec-form-f0-03",
@@ -3785,20 +4220,16 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 618
+   "wall_ms": 519
   },
   {
    "case_id": "ec-form-f0-04",
@@ -3807,42 +4238,27 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 607
+   "wall_ms": 521
   },
   {
    "case_id": "ec-form-f1-01",
    "category": "evidence_conflict",
    "arm": "local_4b",
    "world": "camp-conflict",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 609
+   "wall_ms": 674
   },
   {
    "case_id": "ec-form-f1-02",
@@ -3851,20 +4267,16 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 612
+   "wall_ms": 511
   },
   {
    "case_id": "ec-form-f1-03",
@@ -3873,20 +4285,16 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 605
+   "wall_ms": 511
   },
   {
    "case_id": "ec-form-f1-04",
@@ -3895,42 +4303,27 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 615
+   "wall_ms": 515
   },
   {
    "case_id": "ec-form-f2-01",
    "category": "evidence_conflict",
    "arm": "local_4b",
    "world": "camp-conflict",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 614
+   "wall_ms": 677
   },
   {
    "case_id": "ec-form-f2-02",
@@ -3939,20 +4332,16 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 617
+   "wall_ms": 511
   },
   {
    "case_id": "ec-form-f2-03",
@@ -3961,20 +4350,16 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 611
+   "wall_ms": 509
   },
   {
    "case_id": "ec-form-f2-04",
@@ -3983,20 +4368,16 @@
    "world": "camp-conflict",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 618
+   "wall_ms": 514
   },
   {
    "case_id": "ec-strength-f0-01",
@@ -4018,7 +4399,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 626
+   "wall_ms": 676
   },
   {
    "case_id": "ec-strength-f0-02",
@@ -4040,7 +4421,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 606
+   "wall_ms": 670
   },
   {
    "case_id": "ec-strength-f0-03",
@@ -4062,7 +4443,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 607
+   "wall_ms": 679
   },
   {
    "case_id": "ec-strength-f0-04",
@@ -4084,7 +4465,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 616
+   "wall_ms": 670
   },
   {
    "case_id": "ec-strength-f1-01",
@@ -4106,7 +4487,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 611
+   "wall_ms": 663
   },
   {
    "case_id": "ec-strength-f1-02",
@@ -4128,7 +4509,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 622
+   "wall_ms": 673
   },
   {
    "case_id": "ec-strength-f1-03",
@@ -4150,51 +4531,29 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 620
+   "wall_ms": 684
   },
   {
    "case_id": "ec-strength-f1-04",
    "category": "evidence_conflict",
    "arm": "local_4b",
    "world": "camp-conflict",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 616
+   "wall_ms": 679
   },
   {
    "case_id": "ec-strength-f2-01",
    "category": "evidence_conflict",
    "arm": "local_4b",
    "world": "camp-conflict",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 619
+   "wall_ms": 675
   },
   {
    "case_id": "ec-strength-f2-02",
@@ -4216,7 +4575,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 605
+   "wall_ms": 676
   },
   {
    "case_id": "ec-strength-f2-03",
@@ -4238,7 +4597,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 618
+   "wall_ms": 689
   },
   {
    "case_id": "ec-strength-f2-04",
@@ -4260,7 +4619,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 621
+   "wall_ms": 685
   },
   {
    "case_id": "si-submitted-f0-01",
@@ -4401,86 +4760,124 @@
    "world": "battle-open-0",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "name": "defense",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 569
+   "wall_ms": 510
   },
   {
    "case_id": "be-defense-f0-02",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-open-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 585
+   "wall_ms": 491
   },
   {
    "case_id": "be-defense-f0-03",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-open-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 585
+   "wall_ms": 496
   },
   {
    "case_id": "be-defense-f0-04",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-open-0",
-   "trace": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 379
+   "wall_ms": 498
   },
   {
    "case_id": "be-defense-f1-01",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-mid-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 670
+   "wall_ms": 500
   },
   {
    "case_id": "be-defense-f1-02",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-mid-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 634
+   "wall_ms": 499
   },
   {
    "case_id": "be-defense-f1-03",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-mid-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 645
+   "wall_ms": 505
   },
   {
    "case_id": "be-defense-f1-04",
@@ -4489,20 +4886,16 @@
    "world": "battle-mid-0",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "name": "defense_choice",
-      "state_version": 20
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 570
+   "wall_ms": 531
   },
   {
    "case_id": "be-defense-f2-01",
@@ -4511,42 +4904,52 @@
    "world": "battle-open-0",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "name": "defense_choice",
-      "state_version": 0
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 556
+   "wall_ms": 540
   },
   {
    "case_id": "be-defense-f2-02",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-mid-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 623
+   "wall_ms": 530
   },
   {
    "case_id": "be-defense-f2-03",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-open-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 623
+   "wall_ms": 511
   },
   {
    "case_id": "be-defense-f2-04",
@@ -4555,20 +4958,16 @@
    "world": "battle-mid-1",
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "name": "defense_choice",
-      "state_version": 15
-     },
-     "ok": true,
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
      "error_type": null
     }
    ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 535
+   "wall_ms": 524
   },
   {
    "case_id": "be-energy-f0-01",
@@ -4579,7 +4978,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 527
+   "wall_ms": 695
   },
   {
    "case_id": "be-energy-f0-02",
@@ -4590,30 +4989,18 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 524
+   "wall_ms": 680
   },
   {
    "case_id": "be-energy-f0-03",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-mid-1",
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "type_row",
-      "type": "energy",
-      "name": "power",
-      "state_version": 15
-     },
-     "ok": false,
-     "error_type": "not_found"
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 579
+   "wall_ms": 678
   },
   {
    "case_id": "be-energy-f0-04",
@@ -4624,18 +5011,32 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 530
+   "wall_ms": 678
   },
   {
    "case_id": "be-energy-f1-01",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-mid-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "energy",
+      "defender_types": [
+       "energy"
+      ],
+      "state_version": 15
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 615
+   "wall_ms": 692
   },
   {
    "case_id": "be-energy-f1-02",
@@ -4646,29 +5047,59 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 624
+   "wall_ms": 691
   },
   {
    "case_id": "be-energy-f1-03",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-open-1",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "energy",
+      "defender_types": [
+       "physical",
+       "special"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 628
+   "wall_ms": 732
   },
   {
    "case_id": "be-energy-f1-04",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-late",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "energy",
+      "defender_types": [
+       "physical",
+       "special"
+      ],
+      "state_version": 36
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 621
+   "wall_ms": 735
   },
   {
    "case_id": "be-energy-f2-01",
@@ -4679,7 +5110,7 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 630
+   "wall_ms": 696
   },
   {
    "case_id": "be-energy-f2-02",
@@ -4690,29 +5121,59 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 629
+   "wall_ms": 715
   },
   {
    "case_id": "be-energy-f2-03",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-open-0",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "energy",
+      "defender_types": [
+       "physical",
+       "special"
+      ],
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 633
+   "wall_ms": 730
   },
   {
    "case_id": "be-energy-f2-04",
    "category": "brief_explain",
    "arm": "local_4b",
    "world": "battle-late",
-   "trace": [],
-   "stopped": "invalid-arguments",
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "energy",
+      "defender_types": [
+       "physical",
+       "special"
+      ],
+      "state_version": 36
+     },
+     "ok": false,
+     "error_type": "unsupported_effect"
+    }
+   ],
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 628
+   "wall_ms": 739
   },
   {
    "case_id": "be-loss-f0-01",
@@ -4721,7 +5182,7 @@
    "world": "battle-open-1",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4730,7 +5191,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 457
+   "wall_ms": 530
   },
   {
    "case_id": "be-loss-f0-02",
@@ -4739,7 +5200,7 @@
    "world": "battle-open-1",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4748,7 +5209,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 462
+   "wall_ms": 546
   },
   {
    "case_id": "be-loss-f0-03",
@@ -4757,7 +5218,7 @@
    "world": "battle-mid-1",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4766,7 +5227,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 457
+   "wall_ms": 549
   },
   {
    "case_id": "be-loss-f0-04",
@@ -4775,7 +5236,7 @@
    "world": "battle-open-1",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_last_turn",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4784,7 +5245,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 450
+   "wall_ms": 538
   },
   {
    "case_id": "be-loss-f1-01",
@@ -4793,7 +5254,7 @@
    "world": "battle-late",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4802,7 +5263,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 450
+   "wall_ms": 505
   },
   {
    "case_id": "be-loss-f1-02",
@@ -4811,7 +5272,7 @@
    "world": "battle-late",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4820,7 +5281,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 451
+   "wall_ms": 520
   },
   {
    "case_id": "be-loss-f1-03",
@@ -4829,7 +5290,7 @@
    "world": "battle-late",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4838,7 +5299,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 449
+   "wall_ms": 527
   },
   {
    "case_id": "be-loss-f1-04",
@@ -4847,7 +5308,7 @@
    "world": "battle-open-0",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_last_turn",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4856,7 +5317,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 443
+   "wall_ms": 545
   },
   {
    "case_id": "be-loss-f2-01",
@@ -4865,7 +5326,7 @@
    "world": "battle-mid-0",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4874,7 +5335,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 525
   },
   {
    "case_id": "be-loss-f2-02",
@@ -4883,7 +5344,7 @@
    "world": "battle-open-0",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4892,7 +5353,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 442
+   "wall_ms": 520
   },
   {
    "case_id": "be-loss-f2-03",
@@ -4901,7 +5362,7 @@
    "world": "battle-open-0",
    "trace": [
     {
-     "tool": "read_match",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -4910,7 +5371,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 444
+   "wall_ms": 526
   },
   {
    "case_id": "be-loss-f2-04",
@@ -4920,7 +5381,10 @@
    "trace": [
     {
      "tool": "read_match",
-     "args": {},
+     "args": {
+      "offset": 0,
+      "limit": 1
+     },
      "ok": false,
      "error_type": null
     }
@@ -4928,7 +5392,126 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 445
+   "wall_ms": 605
   }
- ]
+ ],
+ "comparison": {
+  "compared": 288,
+  "regressed": 77,
+  "fixed": 0,
+  "both_failed": 0,
+  "by_category": {
+   "rules_lookup": {
+    "total": 72,
+    "regressed": 59,
+    "fixed": 0
+   },
+   "roster_constraint": {
+    "total": 24,
+    "regressed": 12,
+    "fixed": 0
+   },
+   "continue_stop": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "tool_failure": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "stale_state": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "evidence_conflict": {
+    "total": 36,
+    "regressed": 6,
+    "fixed": 0
+   },
+   "silence": {
+    "total": 12,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "brief_explain": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   }
+  },
+  "worst_regressions": [
+   {
+    "case_id": "rl-pet-f2-01",
+    "category": "rules_lookup",
+    "why": [
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rl-pet-f2-02",
+    "category": "rules_lookup",
+    "why": [
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rl-pet-f2-03",
+    "category": "rules_lookup",
+    "why": [
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rl-pet-f2-04",
+    "category": "rules_lookup",
+    "why": [
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rl-skill-f0-01",
+    "category": "rules_lookup",
+    "why": [
+     "没有调用应当调用的工具 query_rules",
+     "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
+    ],
+    "stopped": "invalid-arguments"
+   },
+   {
+    "case_id": "rl-skill-f1-01",
+    "category": "rules_lookup",
+    "why": [
+     "没有调用应当调用的工具 query_rules",
+     "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
+    ],
+    "stopped": "invalid-arguments"
+   },
+   {
+    "case_id": "rl-skill-f1-02",
+    "category": "rules_lookup",
+    "why": [
+     "没有调用应当调用的工具 query_rules",
+     "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
+    ],
+    "stopped": "invalid-arguments"
+   },
+   {
+    "case_id": "rl-skill-f1-03",
+    "category": "rules_lookup",
+    "why": [
+     "没有调用应当调用的工具 query_rules",
+     "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
+    ],
+    "stopped": "invalid-arguments"
+   }
+  ],
+  "against": "reports/roco/shadow-replay.json"
+ }
 }

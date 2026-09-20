@@ -33,7 +33,7 @@ import {
 } from './build-agent-trajectories.mjs';
 import {
   worldsFor, runInput, runArm, finalAnswer, refusalsIn, makePlanner, armLimit,
-  checkTask, receiptSummary, localModelPlanner, canonical, digest,
+  checkTask, receiptSummary, localModelPlanner, canonical, digest, LOCAL_TOOL_SYSTEM,
 } from './agent-trajectories.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -221,6 +221,11 @@ async function main(argv) {
     generated_by: 'scripts/roco/shadow-replay.mjs',
     arm,
     gateway: arm === 'rule' ? null : gateway,
+    // 提示版本进产物：两份报告只有提示不同时，光看通过率是分不出差别的，
+    // 必须能核对「这两次跑的是不是同一份提示」。没有它，第 22→23 轮那次
+    // 提示实验就只能靠人工记忆解释。
+    prompt_digest: arm === 'rule' ? null : digest(LOCAL_TOOL_SYSTEM),
+    prompt: arm === 'rule' ? null : LOCAL_TOOL_SYSTEM,
     note: '同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；'
       + '参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。',
     summary: summarise(rows),
