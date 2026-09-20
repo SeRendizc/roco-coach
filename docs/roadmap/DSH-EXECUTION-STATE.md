@@ -609,6 +609,9 @@ active goal 已按此重写（revision 2）。
 | 第 14 轮实测 | 固定提示集 8 次调用：首 token p50/p95 **214.5 / 318.1 ms**，总延迟 p50/p95 **362.9 / 470.5 ms**，29.8 tok/s，峰值内存 **2.51 GB**，结构化输出合法率 **1.0（8/8）** | `reports/roco/local-model/bench.json` |
 | 本轮**待验**（外部依赖） | ① 与 DeepSeek 的质量对照要 key（没有就不声称可替代云端）；② `short`/`refuse` 的「说得好不好」要人工审阅或盲评（程序合法率不等于质量） | `docs/CHECKLIST.md` 的 MP11/MP12 |
 | **Windows 3060（明天）** | 用户指令：本轮只做 Mac。3060 那台负责 LightGBM / 小网络 / 环境 profiling / rollout，不与 Mac 拼显存 | — |
+| **第 15 轮（W5-04）** | **主动介入判定层**：预注册（`docs/roco/W5-04-INTERVENTION-GATE.md`）先写判据；窗口集从 30 条扩到 **3,740 条**（按 seed family 切分 + family 外 OOD）；成本敏感分类器（`sklearn`，cost FN:FP = 3:1）；判定层只做**抑制**、默认关闭、可逐位回滚 | `scripts/roco/{build-intervention-windows.mjs,train-intervention-model.py}`、`src/coach/intervention-model.js`、`tests/evals/intervention-layer.test.js`（10 项） |
+| 第 15 轮**结论：gate_failed** | G1 召回、G2 误报、G5 family 外通过；**G3 校准（ECE 0.1546 > 0.10）与 G4 阈值稳健未通过**。结构性原因：标签依赖**决策后**才有的分差，而特征只能用决策前的量，天花板本就低。**判定层不进入产品路径，保持默认关闭** | `reports/roco/intervention-model-report.json`、预注册文档 §8.1 |
+| 第 15 轮修的两个真缺陷 | ① 第一次训练误用决策后方可得的分差当特征（口径错误，重训并留痕）；② shadow 模式**真的改了行为**——`interventionScore` 只看 `layer.suppress` 没看 `layer.active` | 同上；`tests/evals/intervention-layer.test.js` 的 shadow 用例 |
 | 下一步（最高优先，不依赖外部条件） | **查清整局基准里的座位效应**（第 12 轮发现）：`greedy_damage` 的 player 座位配对差 **+0.250（p=0.002）**、enemy 座位 **−0.150（p=0.070）**。`step_joint` 是同时结算，所以不是「先手优势」；嫌疑是自驱动循环在补位顺序 / 合法动作枚举 / `PlannerPlayer` 持有的 state 视角上两侧不对称。**查清之前不得把座位效应写进任何产品结论** |
 | 再下一步（不依赖外部条件） | **W5-04 的标签扩充 + 评测闭环**：`tests/evals/intervention-windows.json` 现在只有 30 条、且 `heldMs/hovers` 是假设值。先做**确定性标签扩充器**（同一条窗口在多个局面上重放，判据可程序化判定，两个方向都要测），再谈分类器。硬门控不变 |
 | 外部依赖（不影响上面继续做） | 一个 DeepSeek key（W4-02 的模型候选 / W4-05 三臂对比 / W5-01 gateway）、M5 Pro 48GB（W4-03/04）、3—5 位真人（W5-05）、一次游戏内实测（E03 已验证那一半）+ 录屏（F03） |

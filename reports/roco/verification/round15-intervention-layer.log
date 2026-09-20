@@ -1,0 +1,9 @@
+=== 第 15 轮：W5-04 介入判定层 @ 2026-09-20T22:12:52Z ===
+--- test:env
+Ran 208 tests in 24.494s
+
+OK (skipped=1)
+--- test:unit
+ℹ tests 453
+ℹ pass 453
+ℹ fail 0

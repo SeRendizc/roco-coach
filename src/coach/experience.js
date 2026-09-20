@@ -143,6 +143,8 @@ export function attentionText(game,action){
 //
 // 证据边界：权重与阈值是产品规则的编码，不是从真人数据拟合的；它们只用于在四个动作之间
 // 排序，不声称胜率，也不声称干预真的帮到了玩家。P02 的窗口评测是 fixture，不是人体实验。
+import {interventionModelDecision,loadInterventionModel} from './intervention-model.js';
+
 export const INTERVENTION_ACTIONS=['silent','micro_hint','action_hint','defer_to_review'];
 export const INTERVENTION_LIMITS={maxHintsPerMatch:2,cooldownMs:45000,actionableMs:3000,criticalRisk:0.8,valueFloor:1.2,skillWeight:1.4};
 
@@ -215,12 +217,48 @@ export function interventionScore(f={}){
  // 「仅关键风险」档：非关键局面连复盘条目都不生成——那是玩家明确划掉的注意力预算。
  if(preference==='critical'&&!decisive)
   return {action:'silent',reason:'critical-preference',value,floor,decisive,budget:null};
- if(decisive)
-  return {action:'action_hint',reason:gap!==null&&gap>REASONABLE_GAP?'decisive-gap':'critical-risk',value,floor,decisive,budget:null};
- if(value>=floor)
-  return {action:'micro_hint',reason:'moderate-risk',value,floor,decisive,budget:null};
- return {action:'silent',reason:'below-threshold',value,floor,decisive,budget:null};
+ // W5-04：成本敏感判定层。它**只能抑制**——放行时结果与规则逐位相同，
+ // 关闭时（默认）完全不参与。见 docs/roco/W5-04-INTERVENTION-GATE.md。
+ const layer=interventionLayer(f);
+ if(decisive||value>=floor){
+  // `layer.active` 只有在 flag 为 `on` 时为 true；`shadow` 会算出 suppress
+  // 但**不允许生效**——这里漏判 active 的话，shadow 就真的改了行为。
+  if(layer.active&&layer.suppress)return {action:'silent',reason:layer.reason,value,floor,decisive,budget:null,layer};
+  const action=decisive?'action_hint':'micro_hint';
+  const allowReason=decisive?(gap!==null&&gap>REASONABLE_GAP?'decisive-gap':'critical-risk'):'moderate-risk';
+  return {action,reason:allowReason,value,floor,decisive,budget:null,layer};
+ }
+ return {action:'silent',reason:'below-threshold',value,floor,decisive,budget:null,layer};
 }
+
+// 血量比例：没有 game 时用调用方给的值；`active()` 在没有 game 时会抛，
+// 所以这里必须先判 game —— 第一版就是在这里抛异常，被 catch 成 `layer-error`。
+function playerHpRatio(game,fallback){
+ if(!game)return Number.isFinite(fallback)?fallback:0;
+ const side=game.player||null,index=side?.active??0,pet=side?.pets?.[index];
+ if(!pet||!(pet.maxHp>0))return Number.isFinite(fallback)?fallback:0;
+ return pet.hp/pet.maxHp;
+}
+
+//: 判定层的模型是**懒加载**的：默认关闭时（`off`）一个字节都不读盘。
+let interventionModelCache=undefined;
+function interventionLayer(f={}){
+ try{
+  if(interventionModelCache===undefined)interventionModelCache=loadInterventionModel();
+  return interventionModelDecision({
+   risk:Number.isFinite(f.risk)?f.risk:situationRisk(f.game),
+   phase:f.game?.phase??f.phase??null,
+   hpRatio:playerHpRatio(f.game,f.hpRatio),
+   turn:f.game?.turn??f.turn??0,
+   legalCount:Number.isFinite(f.legalCount)?f.legalCount:0,
+  },{model:interventionModelCache});
+ }catch{
+  // 判定层出任何问题都不该影响提示链路：当作「不参与」。
+  return {active:false,suppress:false,reason:'layer-error',mode:'off',model_status:'error',probability:null,threshold:null};
+ }
+}
+/** 测试用：清掉模型缓存（换文件或换 flag 时）。 */
+export function resetInterventionLayer(){interventionModelCache=undefined;}
 
 // 完整判定（含门控标识），供测试、评测脚本与「为什么现在说」的解释入口使用。
 export function interventionDetail(features={}){
