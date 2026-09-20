@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 from . import effects as fx
 from . import parse
+from . import traits as tr
 from . import data as _data
 from .data import Ruleset, load_ruleset
 from .schema import (
@@ -115,6 +116,12 @@ def reset(
         side.active = 0
         side.field_pet.energy = 2        # 假设：入场初始能量 2。数据未定义（MC-007）
         side.field_pet.entered_turn = 1
+    # 首发入场：入场类特性（专注力/身经百练）在这里结算
+    for side in ("player", "enemy"):
+        events: List[Dict[str, Any]] = []
+        tr.on_enter(rs, state, side, events)
+        for e in events:
+            _bump(state, e.pop("kind"), e)
     state.log.append(f"对局开始。规则集 {rs.ruleset_id}，seed {seed}。")
     return state
 
@@ -342,6 +349,13 @@ def step_joint(
     state.log.append(f"── 第 {state.turn} 回合 ──")
     _bump(state, "turn_start", {"turn": state.turn})
 
+    # 回合开始时的特性（预警）。条件未实现，只在显式驱动时生效。
+    for side in ("player", "enemy"):
+        evs: List[Dict[str, Any]] = []
+        tr.on_turn_start(rs, state, side, evs)
+        for e in evs:
+            _bump(state, e.pop("kind"), e)
+
     # 冷却与临时标记在回合开始时递减/清除
     for side in (state.player, state.enemy):
         for p in side.pets:
@@ -417,6 +431,10 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         target.used_burst = False
         state.log.append(f"{label}换上了{rs.pet(target.pet_id).name}。")
         _bump(state, "switch", {"side": side, "to_slot": target.slot}, evidence=("3009",))
+        evs: List[Dict[str, Any]] = []
+        tr.on_enter(rs, state, side, evs)
+        for e in evs:
+            _bump(state, e.pop("kind"), e)
         return
 
     if action.kind == ACTION_ESCAPE:
@@ -448,6 +466,8 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
             f"{label}的{rs.pet(pet.pet_id).name}使用{skill.name}：本回合减伤 "
             f"{reduction * 100:.0f}%{'，应对成功' if succeeded else ''}。"
         )
+        if succeeded:
+            me._respond_count = int(getattr(me, "_respond_count", 0)) + 1
         _bump(state, "defense", {"side": side, "skill_id": skill.skill_id,
                                  "reduction": reduction, "respond": succeeded},
               evidence=("1015", "1016", "1017"))
@@ -592,6 +612,12 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
             _bump(state, "status_added", {"side": "enemy", "status": name,
                                           "layers": v["layers"]},
                   evidence=(spec.get("term", ""),))
+        elif eff.kind == "foe_status" and str(v["status"]) == "冻结":
+            # 见上方 foe_status 分支已写入状态；这里补特性钩子（捉迷藏）
+            evs2: List[Dict[str, Any]] = []
+            tr.after_freeze_applied(rs, state, side, evs2)
+            for e in evs2:
+                _bump(state, e.pop("kind"), e)
         elif eff.kind == "cleanse":
             cleared = sorted(foe.field_pet.buffs)
             foe.field_pet.buffs.clear()
@@ -624,6 +650,10 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
         )
         _bump(state, "status_applied", {"side": side, "skill_id": skill.skill_id,
                                         "effects": applied})
+        evs: List[Dict[str, Any]] = []
+        tr.after_status_skill(rs, state, side, skill, evs)
+        for e in evs:
+            _bump(state, e.pop("kind"), e)
     return applied > 0
 
 

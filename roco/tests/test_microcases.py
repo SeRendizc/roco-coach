@@ -437,5 +437,70 @@ class TestInvariants(unittest.TestCase):
                             Action(ACTION_ITEM, item_id="回复药"))
 
 
+class TestTraits(unittest.TestCase):
+    """MC-014…019：A 组 6 只特性。
+
+    这个类同时断言**实现状态本身**——因为「6 只里几只真的可用」
+    必须是一个可核验的数字，而不是印象。REFUSED 的理由写在 traits.py 里。
+    """
+
+    def test_implementation_status_is_honest(self):
+        from roco_env import traits as tr
+        summary = tr.implementation_summary()
+        self.assertEqual(summary["FULL"] + summary["PARTIAL"] + summary["REFUSED"], 6,
+                         "A 组应当是 6 只特性")
+        self.assertGreater(summary["FULL"], 0)
+        self.assertGreater(summary["REFUSED"], 0,
+                           "至少有一条应当被明确拒绝——做不到和没做是两件事")
+
+    def test_speed_dog_gets_attack_on_entry(self):
+        """音速犬 [专注力] 入场首回合物攻 +100%。"""
+        pid = RS.pets_by_name("音速犬")[0].pet_id
+        state = renv.reset([pid, A2, A3], [pid, A2, A3], seed=1, rs=RS)
+        self.assertEqual(state.player.field_pet.buffs.get("atk"), 100)
+
+    def test_flat_power_trait_counts_responds(self):
+        """海豹船长 [身经百练]：己方每应对 1 次，入场时水系/武系威力 +20%。"""
+        from roco_env import traits as tr
+        pid = RS.pets_by_name("海豹船长")[0].pet_id
+        state = renv.reset([A1, pid, A3], [A1, pid, A3], seed=1, rs=RS)
+        # 先人为记一次应对
+        state.player._respond_count = 2
+        # 换上海豹船长
+        slot = [i for i, p in enumerate(state.player.pets) if p.pet_id == pid][0]
+        bench = state.player.bench_indices()
+        if slot not in bench:
+            self.skipTest("海豹船长当前就在场上")
+        renv.step_joint(state, RS, Action(ACTION_SWITCH, target_index=slot),
+                        attack_actions(state, "enemy")[0])
+        self.assertEqual(state.player.field_pet.buffs.get("power_water"), 40)
+
+    def test_refused_trait_is_not_silently_approximated(self):
+        """寂灭骨龙 [不朽]（力竭4回合后复活）必须是 REFUSED，而不是被近似。"""
+        from roco_env import traits as tr
+        spec = tr.spec_for_trait_name("不朽")
+        self.assertIsNotNone(spec)
+        self.assertEqual(spec.status, tr.REFUSED)
+        self.assertIn("MC-014", spec.reason)
+
+    def test_partial_traits_say_what_is_missing(self):
+        """PARTIAL 必须写明缺的是哪一部分。"""
+        from roco_env import traits as tr
+        for name in ("预警", "捉迷藏"):
+            spec = tr.spec_for_trait_name(name)
+            self.assertEqual(spec.status, tr.PARTIAL, name)
+            self.assertTrue(spec.reason, f"{name} 必须说明缺什么")
+            self.assertIn("未实现", spec.reason, f"{name} 的理由要说明未实现的部分")
+
+    def test_loud_trait_effect_reads_its_number_from_data(self):
+        """圆号鱼 [泛音列] 引用「聒噪」——它的数值必须来自数据，不能写死。"""
+        from roco_env import traits as tr
+        spec = tr.spec_for_trait_name("泛音列")
+        self.assertEqual(spec.status, tr.FULL)
+        noisy = RS.skill_by_name("聒噪")
+        self.assertIn("能耗", noisy.desc)
+        self.assertIn("skill_000274", spec.reason, "理由里要指出数值出处")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

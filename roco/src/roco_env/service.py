@@ -40,11 +40,15 @@
     bad_request          400  请求体不合法（缺 ruleset_id / state_version、未知 kind）
     hidden_information   400  请求里出现对手待执行动作或真实随机种子（MC-013 不变量）
     not_found            404  规则集内部查不到这个 id
-    ruleset_unsupported  404  本引擎**自己持有的**规则集加载不了（数据缺失/损坏）
-    version_mismatch     409  请求的规则集不是本引擎持有的版本；或快照指纹对不上
+    ruleset_unsupported  404  本服务**声明的那个**规则集加载不了（该有的数据缺失/损坏）
+    version_mismatch     409  请求的规则集 id 不是本服务声明的版本；或快照指纹对不上
     unsupported_effect   422  机制未核验/未实现 —— fail closed，绝不给默认数值
     not_implemented      501  端点对应的引擎逻辑还没写
     internal_error       500  未预期异常
+
+**一个服务进程只服务一个规则集版本**（构造函数/`--ruleset` 声明）。
+请求别的 id 一律 `version_mismatch`，不会去装载调用方点名的版本 ——
+否则「这份回执对应哪个快照」就不再确定。
 
 fail closed 的三条纪律
 ----------------------
@@ -340,25 +344,33 @@ class RocoService:
     ) -> Tuple[Optional[Ruleset], Optional[str], Optional[str], Optional[str]]:
         """返回 (ruleset, error_type, error, fingerprint)。
 
+        **一个服务进程 = 一个规则集版本。** 本服务只回答它声明的那个版本，
+        不去装载调用方点名的别的版本 —— 否则「规则集身份」就不再是钉死的，
+        调用方也就无法确定自己拿到的是哪个快照。
+
         三种结局必须能分开：
 
-          * 装载成功            → 正常服务（哪怕请求的不是默认规则集）
-          * 请求的不是本引擎持有的版本 → version_mismatch（409）
-          * **本引擎自己该持有的**规则集加载不了 → ruleset_unsupported（404）
+          * 请求的 id == 本服务声明的 id，且装载成功 → 正常服务
+          * 请求的 id != 本服务声明的 id             → version_mismatch（409）
+          * 请求的 id == 声明的 id，但数据装载不了   → ruleset_unsupported（404）
+
+        后两条的区别是实质性的：前者是「你要的版本，我这份引擎没有」，
+        后者是「我该有的那份数据坏了/缺了」。调用方的处置完全不同。
         """
         if not isinstance(requested, str) or not requested.strip():
             return None, "bad_request", "缺少 ruleset_id", None
         requested = requested.strip()
-        rs, why = self.cache.get(requested)
-        if rs is not None:
-            return rs, None, None, rs.snapshot_fingerprint()
         if requested != self.served_ruleset_id:
             return (
                 None,
                 "version_mismatch",
-                f"请求的规则集「{requested}」不是本引擎持有的版本（本服务提供「{self.served_ruleset_id}」）：{why}",
+                f"请求的规则集「{requested}」不是本引擎持有的版本：本服务声明持有「{self.served_ruleset_id}」。"
+                "一个服务进程只服务一个规则集版本，需要别的版本请另起一个服务",
                 None,
             )
+        rs, why = self.cache.get(requested)
+        if rs is not None:
+            return rs, None, None, rs.snapshot_fingerprint()
         return (
             None,
             "ruleset_unsupported",
