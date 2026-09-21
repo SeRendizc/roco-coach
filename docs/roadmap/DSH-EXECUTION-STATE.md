@@ -1104,3 +1104,29 @@ the real lever is lineup + advances）。所以重新定位要换**阵容**，�
    **能开局并打完**（给出局数与失败样本）；③ `npm run test:env` 与 `test:unit` 全绿；
    ④ 页面端分页/搜索接上后才谈 UI 重排（监工要求：绿基线再动结构）。
 
+
+### C6.9 引擎侧「扩到 48 只」要动的三个输入（读完 `data.py` 的结论，第 59 轮）
+
+`load_ruleset()`（`roco/src/roco_env/data.py:281`）每只宠物要**三份输入同时对得上**，
+少一份就 fail closed（这是好事，扩的时候会立刻报错而不是静默少人）：
+
+| 输入 | 文件 | 现状 | 扩到 48 要做的 |
+|---|---|---|---|
+| 宠物记录（name/types/stats/feature_skill_id） | `normalized/<ruleset>/pets.json` | **12 只** | 追加 48 只（新 schema 版本或同 schema 的扩展条目；`ruleset_id`/`game` 字段必须与原文件一致，否则加载期直接 raise） |
+| 可学技能 | `normalized/<ruleset>/learnsets.json` | 12 只的条目 | 48 只各一份（**技能 id 必须都存在于 `skills.json`**：`data.py:340-352` 的孤儿检查会逐个报出来，缺一个就 raise） |
+| 规范配招 | `normalized/<ruleset>/support-matrix.json` | 12 条 | 48 条 `candidate_moveset.skills[].skill_id`（`data.py:368-380`） |
+
+要点：
+1. **不要新建第四份格式**——`pets/learnsets/support-matrix` 就是引擎的输入契约；
+   上一轮落的 `roster-48.json` 是**服务端/审计**用的登记层（带 provenance 与 refused 原因），
+   它是**来源**，不是引擎输入。扩池时用它生成上面三份的 48 只部分。
+2. `skills.json` 目前 824 个技能是**全量**的，48 只的技能 id 应当都能在其中找到——
+   所以理论上不需要动 `skills.json`；若某个 id 不在，那就是**数据缺口**，如实报出来，
+   不许把技能删掉去凑"每只 4 技能"。
+3. 扩完必须证明**不是只把数字变好看**：
+   - `python3 -c "from roco_env import data; rs=data.load_ruleset(); print(len(rs.pets))"` → 48
+   - 每只 `candidate_moveset()` 长度 == 4（`_answer_roster` 的 `moveset_size>0` 只是下限）
+   - `npm run test:env` 全绿（加载期校验 + microcase 的既有不变量）
+   - `/api/roco/roster?limit=48` → 48；`?type=草系` 只出草系；`?offset=24&limit=12` → 第 25—36 只
+   - **真服务抽样**：跨批次任取 3 只组阵容，`/battle/new` + `advance` 打到结束（给局数与失败样本）
+
