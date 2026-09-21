@@ -518,6 +518,19 @@ ITEMS: List[Dict[str, Any]] = [
      "note": "两件都**不在本轮范围**：真人盲评需要人，27B 需要用户按 "
              "`docs/roco/QWEN-27B-USER-RUN-GUIDE.md` 跑。本轮只把「可移植性」做实，"
              "**不声称**模型效果或真人体验有任何变化。"},
+    {"id": "A65-20", "title": "页面上陈旧**规划**必须整条丢弃（真实竞态，不是假想）",
+     "status": DONE,
+     "evidence": ["src/coach/roco-experience.js", "src/client/roco.js",
+                  "tests/roco-experience.test.js", "scripts/roco/demo-acceptance.mjs"],
+     "note": "`/api/roco/plan` 与 `/api/roco/battle/advance` 是两条独立往返。页面原来写 "
+             "`state.planAtVersion = state.view?.state_version ?? plan.state_version` —— "
+             "**优先取当前视图的版本号**，等于把旧规划盖上新的版本章，之后所有"
+             "「版本一致 ⇒ 没陈旧」的判断都放行它。现在唯一判据是 `rocoPlanFreshness()`："
+             "规划自己说属于哪一版才算哪一版，不一致就整条丢弃、记账"
+             "（`state.planStaleDiscards`）、回退规则短提示。浏览器实测**自然竞态真的撞上**"
+             "（局面 30 → 31、规划版本 30）：修复后丢弃；反证（把旧写法放回去）→ "
+             "构造竞态 `plan 保留=true planAtVersion=37`、自然竞态 `plan 版本=30 保留=true`，"
+             "`demo-acceptance` **117 通过 / 2 失败**。"},
 ]
 
 

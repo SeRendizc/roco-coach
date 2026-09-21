@@ -28,6 +28,7 @@ import {
   rocoIntervention,
   rocoInterventionText,
   rocoHintStale,
+  rocoPlanFreshness,
   rocoLessonEntry,
   rocoPlanFeatures,
   rocoGameView,
@@ -59,6 +60,9 @@ const state = {
   lastLiveView: null,
   plan: null,
   planAtVersion: null,
+  //: 陈旧规划被丢弃的账（可核对）：每条记它属于哪一版、丢弃时画面是哪一版。
+  //: 这是「陈旧结果取消」在页面上的出口 —— 与核心适配契约的 `lateDiscards()` 同口径。
+  planStaleDiscards: [],
   session: {hints: 0, lastAt: -Infinity, said: new Set(), dismissed: false},
   hint: null,          // {text, why, stateVersion, action, plan}
   dismissedThisMatch: false,
@@ -1202,6 +1206,7 @@ async function startBattle() {
     state.hint = null;
     state.plan = null;
     state.planAtVersion = null;
+    state.planStaleDiscards = [];
     state.events = [];
     state.matchEvents = [];
     state.lastLiveView = null;
@@ -1275,8 +1280,26 @@ async function requestPlan({reason = 'manual', explicit = false} = {}) {
   try {
     const plan = await api('/api/roco/plan', {battle_id: state.battleId, depth: 2, beam: 4});
     state.timings.push(Math.round(performance.now() - started));
+    // **陈旧结果取消**（第 65 轮修）：规划回执自己说自己属于哪一版局面，
+    // 与**现在**这一版比。不相等就整条丢弃 —— 不用它开口、不用它渲染比较区、
+    // 更不许把当前版本号盖到它头上（原来的 `state.view?.state_version ?? plan.state_version`
+    // 正是那么干的：把过期规划当成当前规划）。
+    const fresh = rocoPlanFreshness({plan, view: state.view});
+    if (!fresh.usable) {
+      state.plan = null;
+      state.planAtVersion = null;
+      state.planStaleDiscards.push({
+        plan_version: fresh.plan_version,
+        view_version: fresh.view_version,
+        at: Date.now(),
+      });
+      // 回退到规则短提示：这一手仍然能开口，但只说当前局面能说的事。
+      refreshHint({reason: 'stale-plan', plan: null, explicit});
+      $('plan-status').textContent = `没有采用这份建议：${fresh.reason}`;
+      return plan;
+    }
     state.plan = plan;
-    state.planAtVersion = state.view?.state_version ?? plan.state_version ?? null;
+    state.planAtVersion = fresh.plan_version;
     refreshHint({reason, plan, explicit});
     // 状态行只说**结果**，不再是「点一下只得到一句状态文案」的那句空话：
     // 真的开口了就说开口了，建议层沉默就如实说沉默（沉默也是结论）。

@@ -1731,6 +1731,58 @@ async function main(){
   staleAfter.consistent===true,
   `推进前浮条版本=${JSON.stringify(staleBefore)} → 推进后本局版本=${staleAfter.version} / `
   +`浮条版本=${JSON.stringify(staleAfter.hintVersion)}；一致=${staleAfter.consistent}`);
+ // ── 陈旧**规划**（第 65 轮修的真实竞态）────────────────────────────────────
+ // `/api/roco/plan` 与 `/api/roco/battle/advance` 是两条独立往返：规划**开始那一刻**的
+ // 局面可能已经不是回来时的局面。页面原来的写法是
+ // `state.planAtVersion = state.view?.state_version ?? plan.state_version`
+ // —— 它优先取**当前视图**的版本号，等于把旧规划盖上新的版本章，之后所有
+ // 「版本一致 ⇒ 没陈旧」的判断都放行它。判据只有一条：**规划自己说自己属于哪一版**。
+ //
+ // 第一段是**构造**竞态（确定性）：requestPlan 要等 HTTP 回来才会读 state.view，
+ // 所以在飞的时候把「当前局面」推到后面 7 版，回来那条必然对不上。
+ const racedPlan=JSON.parse(await js(`(async()=>{const d=window.rocoDemo;
+   const saved=d.state.view;const before=saved.state_version;
+   const p=d.requestPlan({reason:'manual',explicit:true});
+   d.state.view={...saved,state_version:before+7};
+   const plan=await p;
+   const s=d.state;const out={before,bumped:before+7,plan_version:plan?plan.state_version:null,
+    plan_kept:Boolean(s.plan),planAtVersion:s.planAtVersion,
+    discards:(s.planStaleDiscards||[]).slice(-1)[0]??null,
+    status:document.getElementById('plan-status').textContent,
+    hintVersion:s.hint?s.hint.stateVersion:null};
+   d.state.view=saved;d.refreshHint({reason:'manual'});
+   return JSON.stringify(out);})()`));
+ check('④ 陈旧规划必须整条丢弃并记账（构造竞态：规划属于旧版、回来时已推进）',
+  racedPlan.plan_kept===false&&racedPlan.planAtVersion===null
+  &&racedPlan.discards?.plan_version===racedPlan.before
+  &&racedPlan.discards?.view_version===racedPlan.bumped
+  &&/局面已推进/.test(racedPlan.status),
+  `规划属于 state_version=${racedPlan.plan_version}，回来时画面=${racedPlan.bumped}；`
+  +`plan 保留=${racedPlan.plan_kept} planAtVersion=${JSON.stringify(racedPlan.planAtVersion)}；`
+  +`丢弃账=${JSON.stringify(racedPlan.discards)}；状态行「${racedPlan.status}」`);
+ check('④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上',
+  racedPlan.hintVersion===null||racedPlan.hintVersion===racedPlan.bumped,
+  `浮条版本=${JSON.stringify(racedPlan.hintVersion)} / 丢弃时画面=${racedPlan.bumped}`);
+ // 第二段**不构造**：真的同时发 plan 与 advance，看现实里会不会撞上。
+ // 无论撞没撞上，**不变量**都必须成立：页面上保留的规划、以及浮条上的建议，
+ // 它们的版本必须等于当前局面 —— 「没撞上」也是允许的结论，但要用数字说清。
+ const naturalRace=JSON.parse(await js(`(async()=>{const d=window.rocoDemo;
+   const before=d.state.view.state_version;
+   const p=d.requestPlan({reason:'manual',explicit:true});
+   await d.autoTurn();
+   const plan=await p;const s=d.state;
+   return JSON.stringify({before,after:s.view.state_version,
+    plan_version:plan?plan.state_version:null,plan_kept:Boolean(s.plan),
+    planAtVersion:s.planAtVersion,
+    discards:(s.planStaleDiscards||[]).length,
+    hintVersion:s.hint?s.hint.stateVersion:null,viewVersion:s.view.state_version});})()`));
+ check('④ 自然竞态下的不变量：页面上的规划/建议必须属于**当前**局面',
+  (naturalRace.plan_kept===false||naturalRace.plan_version===naturalRace.viewVersion)
+  &&(naturalRace.hintVersion===null||naturalRace.hintVersion===naturalRace.viewVersion),
+  `同时发 plan 与 advance：局面 ${naturalRace.before} → ${naturalRace.after}；`
+  +`plan 版本=${JSON.stringify(naturalRace.plan_version)} 保留=${naturalRace.plan_kept}；`
+  +`浮条版本=${JSON.stringify(naturalRace.hintVersion)}；丢弃账累计=${naturalRace.discards}；`
+  +`（撞上与否由这两个版本号说话，不靠猜）`);
  // ③ 的最后一环：刷新之后教程仍然不出现（localStorage 那个键真的生效）
  await cdp.send('Page.reload');
  for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}

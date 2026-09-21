@@ -157,6 +157,40 @@ export function rocoPlanFeatures(plan) {
 }
 
 /**
+ * 一份**规划回执**是不是还属于当前局面（陈旧结果取消的唯一判据）。
+ *
+ * 为什么要有它（第 65 轮实测到的真实竞态）：`/api/roco/plan` 与
+ * `/api/roco/battle/advance` 是两条独立的 HTTP 往返。玩家点「让小芽看一眼」的同一瞬间
+ * 局面又推进了一手时，规划**开始那一刻**的局面已经不是回来时的局面了。
+ *
+ * 页面原来的写法是 `state.planAtVersion = state.view?.state_version ?? plan.state_version`
+ * —— 它**优先取当前视图的版本号**，于是把一份属于旧局面的规划盖上了新局面的版本章，
+ * 后面所有「版本一致 ⇒ 没陈旧」的判断都会放行它。这不是报错，是把过期建议当成
+ * 当前建议展示给玩家 —— 与适配契约里 `acceptResult/isStale` 那条纪律正好相反。
+ *
+ * 判据只看一件事：**规划自己说自己属于哪一版**，与当前视图的版本是否相等。
+ * 拿不到规划版本（字段缺失/不是整数）时按「不可用」处理（fail closed）：
+ * 「不知道它属于哪一版」不能算成「它就是当前这一版」。
+ */
+export function rocoPlanFreshness({plan = null, view = null} = {}) {
+  const planVersion = Number.isInteger(plan?.state_version) ? plan.state_version : null;
+  const viewVersion = Number.isInteger(view?.state_version) ? view.state_version : null;
+  if (planVersion === null || viewVersion === null) {
+    return {
+      usable: false, stale: true, plan_version: planVersion, view_version: viewVersion,
+      reason: `这份规划没有带上它属于哪一版局面（规划 ${planVersion ?? '（没给）'} / 当前 ${viewVersion ?? '（没给）'}）：拿不到就不当它是当前的`,
+    };
+  }
+  if (planVersion !== viewVersion) {
+    return {
+      usable: false, stale: true, plan_version: planVersion, view_version: viewVersion,
+      reason: `等待期间局面已推进（${planVersion} → ${viewVersion}）：这份规划属于已经不存在的局面，整条丢弃`,
+    };
+  }
+  return {usable: true, stale: false, plan_version: planVersion, view_version: viewVersion, reason: null};
+}
+
+/**
  * 陈旧判定的唯一入口。
  *
  * 提示是在某个 `state_version` 上算出来的；那条局面一旦推进（换人、结算、补位），

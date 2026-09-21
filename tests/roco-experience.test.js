@@ -16,6 +16,7 @@ import {
   rocoGameView,
   rocoPlanFeatures,
   rocoHintStale,
+  rocoPlanFreshness,
   rocoLessonEntry,
   rocoIntervention,
   rocoInterventionText,
@@ -88,6 +89,39 @@ test('陈旧判定：版本对不上就作废，只有一个入口', () => {
   assert.equal(rocoHintStale({stateVersion: 11}, 12), true);
   assert.equal(rocoHintStale(null, 11), true);
   assert.equal(rocoHintStale({}, 11), true, '没有版本信息的提示一律当过期');
+});
+
+test('规划回执的陈旧判定：规划自己说属于哪一版，才算哪一版（不许盖当前版本号）', () => {
+  // 这一条抓的是第 65 轮实测到的真实竞态：`/api/roco/plan` 与 `battle/advance`
+  // 是两条独立往返，规划**开始那一刻**的局面可能已经不是回来时的局面。
+  // 页面原来的写法 `state.view?.state_version ?? plan.state_version` 会优先取
+  // **当前视图**的版本号，于是把旧规划盖上新的版本章，之后所有「版本一致」的
+  // 判断都放行它 —— 过期建议被当成当前建议展示。
+  const fresh = rocoPlanFreshness({plan: {ok: true, state_version: 11}, view: {state_version: 11}});
+  assert.equal(fresh.usable, true);
+  assert.equal(fresh.stale, false);
+  assert.equal(fresh.plan_version, 11);
+  assert.equal(fresh.reason, null);
+
+  // 反证：把版本盖成当前视图那一版（旧的写法）在这组输入上会判成「可用」——
+  // 也就是说下面这三条断言真的在拦这个 bug，不是空的。
+  const raced = rocoPlanFreshness({plan: {ok: true, state_version: 11}, view: {state_version: 12}});
+  assert.equal(raced.usable, false, '规划属于 11、当前是 12 → 必须丢弃');
+  assert.equal(raced.stale, true);
+  assert.equal(raced.plan_version, 11, '判据必须看**规划自己**的版本，而不是当前视图的版本');
+  assert.equal(raced.view_version, 12);
+  assert.match(raced.reason, /局面已推进（11 → 12）/, '丢弃原因要可核对：说清从哪一版到哪一版');
+  assert.match(raced.reason, /丢弃/);
+
+  // fail closed：拿不到规划版本时不许当成「它就是当前这一版」。
+  for (const plan of [null, {}, {ok: true}, {ok: true, state_version: null}, {ok: true, state_version: '11'}]) {
+    const verdict = rocoPlanFreshness({plan, view: {state_version: 12}});
+    assert.equal(verdict.usable, false, `没有可用版本号的规划必须判为不可用：${JSON.stringify(plan)}`);
+    assert.equal(verdict.plan_version, null);
+  }
+  // 视图侧缺版本同样 fail closed（拿不到当前版本就没法说「一致」）。
+  assert.equal(rocoPlanFreshness({plan: {state_version: 12}, view: {}}).usable, false);
+  assert.equal(rocoPlanFreshness({plan: {state_version: 12}, view: null}).usable, false);
 });
 
 test('门控来自真实 experience.js：失焦是硬门控，不是「这次没什么可说」', () => {

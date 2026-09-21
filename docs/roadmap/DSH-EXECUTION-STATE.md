@@ -42,11 +42,11 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `0ee326d`）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `85b6fff`）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `cfe7f63`（时间 2026-09-21T10:17Z，14/14）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **14/14 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
-| 页面实测（最近一次） | `npm run roco:demo-acceptance` **116 通过 / 0 失败**（含 12 个真实局面的矩阵、真实鼠标/键盘交互、两档窄屏截图） |
+| 页面实测（最近一次） | `npm run roco:demo-acceptance` **119 通过 / 0 失败**（含 12 个真实局面的矩阵、真实鼠标/键盘交互、两档窄屏截图、陈旧规划的三条判据） |
 
 ### B. 第 45 轮已完成（都有定向用例 + 反证）
 
@@ -114,7 +114,7 @@ Mac 负责 27B 量化推理/教学式 LoRA 与产品 Demo；两机靠版本化�
 | 项 | 状态 | 证据 |
 |---|---|---|
 | **C4 用户亲训 27B 的引导**（`e851284`） | ✅ 交付 | `scripts/train/` 三个引导脚本 + 共享底座 + 夹具库；`docs/roco/QWEN-27B-USER-RUN-GUIDE.md`、`TRAINING-ROADMAP-4B-27B-VALUE.md`；`test --selftest` 共 **51 条断言全绿**（14/14 + 21/21 + 16/16），每套含必红反证；「脚本不能自己动手」是**可执行判据**（源码扫子进程/联网/写文件 API 即抛错）。**没有下载、没有训练、没有连 3060、4B v4 未动**。用户第一步：`npm run train:prereqs`（会给出 `must-measure`，不是 ready） |
-| **C6 界面改用你留的框架**（`6581ae1`） | 🟡 第一步完成 | `roco.html` 现在先加载 `src/client/style.css`，`roco.css` 只留本页差异；伙伴卡/后备/阵容卡/两侧面板改用框架组件（`.pet-icon/.hp-track/.energy/.pet-option/.bench-pet/.combatant/.arena`）；**验收脚本依赖的类名一个没动**。从截图里看出并修掉 4 件（中间列文字竖排、误删 `.chip`、结算结果显示英文 `win`、窄卡折行与六维被裁）。`demo-acceptance` **116 通过 / 0 失败**。**仍缺**：整页信息层级与「像游戏而不是验收台」的进一步重排（已出三页 mockup 并落地，见 `1cf3913`） |
+| **C6 界面改用你留的框架**（`6581ae1`） | 🟡 第一步完成 | `roco.html` 现在先加载 `src/client/style.css`，`roco.css` 只留本页差异；伙伴卡/后备/阵容卡/两侧面板改用框架组件（`.pet-icon/.hp-track/.energy/.pet-option/.bench-pet/.combatant/.arena`）；**验收脚本依赖的类名一个没动**。从截图里看出并修掉 4 件（中间列文字竖排、误删 `.chip`、结算结果显示英文 `win`、窄卡折行与六维被裁）。`demo-acceptance` **119 通过 / 0 失败**。**仍缺**：整页信息层级与「像游戏而不是验收台」的进一步重排（已出三页 mockup 并落地，见 `1cf3913`） |
 | 全量 kind 覆盖扫描（2640 局） | ⏳ 后台在跑 | 产物 `reports/roco/demo-acceptance/coach-kind-coverage-scan.json`（当前盘上还是 330 局的抽样版本，落盘后要提交并与矩阵对账） |
 | **批 0（子 agent `6c5a0d07`，进行中）** | ⏳ | 四件：① 修引擎两处 fail-closed 违规（先写必红用例再修，禁止把 unsupported 近似成普通伤害）；② **L1 全量图鉴导入**（622 只、独立只读层、逐字段 provenance、refused 原因码）；③ 48 只配招落库 + `/api/roco/roster` 扩到 48（分页/筛选、旧形状兼容、不许改界面样式）；④ 修 3 处会覆盖文档修正的过时句并重跑 `roco:docs`。**它报告前不要提交它新增的路径** |
 | **C1 48 只覆盖与规模**（`7ff1705`） | ✅ 审计/设计交付 | 三份文档说的是三件事：`PET-SUPPORT-MATRIX` 的「12 只全 KNOWLEDGE_ONLY」=**支持等级**（microcase 通过 0，属实），`PROGRESS` 的 FULL6/PARTIAL2/REFUSED4=**特性覆盖**（同值，属实）；**写错的是 `PET-SUPPORT-MATRIX` 原第 32 行「本轮没有实现任何效果原语」**（同文件 §2 自己写着「引擎侧 ✅ FULL」）。已改文档并补「引擎侧特性状态」列；**同源过时句仍有 3 处**（`build-support-matrix-doc.mjs:56`、`build-support-matrix.mjs:8,199,345`），不改的话 `roco:docs` 会把修正覆盖回去。48 只名单：独特技能 **76**、属性 18/18、角色 5 类齐、速度五档齐、硬机制 8/8、**fail closed 9/76（命中 22/48）**；实测 **C(48,3)=17,296 全合法、1000/1000 完赛**（p50 13 ms/p95 29 ms）。四层：L1 622 **未交付**（`normalized/pets.json` 只有 12 只）／L2 60/60／L3 26/48、29/60／L4 可玩性过、**UI 未做**。**两个实测缺陷未修**：攻击分支丢弃附带效果、防御分支丢弃「应对成功」子句且都不登记（违反 fail-closed），落点 `env.py:535-592`、`env.py:510-524` |
@@ -722,9 +722,9 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `0ee326d`（`test(structure): 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `85b6fff`（`docs(state): 第 65 轮收口记录 + 门禁双灯转绿 + 小时报存档`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
-| 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 9-9 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 116/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
+| 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 9-9 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
 | 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**；另有各自带反证的检查：`verify-agent-trajectories --selftest` 3/3、`verify-sft-split --selftest` 7/7、`model-arm-identity` 正反两向 |
 | 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**第 38 轮改掉了它的自指死锁**：原来它要求「最近一次 verify:release 必须是 pass」，而 `verify:release` 里又有 `unit`包含这条断言——一次失败之后每次跑都会因为上一次红而红，唯一出路是手改 `latest.json`。现在硬判据是 `last-green.json`（必须存在一次全绿、verdict=pass、套件数够、它记的 HEAD 仍在当前历史里），`latest.json` 红了只报**警告**。**第 45 轮又拆掉同形状的第二处死锁**：「落后 >12 个提交」原来是硬失败，而这条断言同时长在 `unit` 里——一个阶段提交超过 12 次之后，`last-green` 追不上、`verify:release` 永远绿不了，也永远写不出新的 `last-green`（实测 19 个提交时 14 个套件里只有 `unit` 与 `state-doc` 红，两条红的是同一条断言）。现在落后只报警告，`tests/evals/state-doc.test.js` 有一条正反两向的回归（反证：把警告改回硬失败，立刻红） |
@@ -1294,8 +1294,21 @@ UI 落地可以先做**最小一步**——把 48 只池的搜索/筛选/分页�
 3. 负载数字来自**本机 Node + 本机 Python 子进程**，不是手游真机端到端；超时率是**构造**出来的。
 4. **人工评测（W5-05，3—5 人盲评）与 Qwen 27B 部署/微调：延后，由用户自行恢复**
    （`PROGRESS.md` 记 `A65-19 NEEDS_HUMAN`，指南在 `docs/roco/QWEN-27B-USER-RUN-GUIDE.md`）。
-5. 已知竞态（如实记，未改）：`/api/roco/plan` 与 `/api/roco/battle/advance` 并发时，
-   plan 回执带的是它**开始时**那一版；页面上 plan 状态行可能落后一版。
+5. ~~已知竞态（如实记，未改）：`/api/roco/plan` 与 `/api/roco/battle/advance` 并发时，
+   plan 回执带的是它**开始时**那一版；页面上 plan 状态行可能落后一版。~~
+   → **后记（A65-20，已修）**：这条竞态**不是假想**——浏览器里同时发 plan 与 advance，
+   实测第一轮就撞上了（局面 30 → 31、规划版本 30）。页面原来的写法
+   `state.planAtVersion = state.view?.state_version ?? plan.state_version` **优先取当前视图的
+   版本号**，等于把旧规划盖上新的版本章，之后所有「版本一致 ⇒ 没陈旧」的判断都放行它。
+   现在唯一判据是 `src/coach/roco-experience.js` 的 `rocoPlanFreshness()`
+   （规划自己说属于哪一版才算哪一版；拿不到版本按 fail closed），不一致就：
+   整条丢弃 → 记账 `state.planStaleDiscards` → 回退规则短提示 → 状态行如实说明
+   「等待期间局面已推进（30 → 37）：这份规划属于已经不存在的局面，整条丢弃」。
+   判据：`tests/roco-experience.test.js` 的表驱动用例（含「优先取视图版本会判成可用」
+   这个反证）+ `demo-acceptance` 三条浏览器判据（构造竞态 / 丢弃后仍开口且不挂旧版 /
+   自然竞态的不变量）。**必红方向实测**：把旧写法放回去 → 构造竞态
+   `plan 保留=true planAtVersion=37`、自然竞态 `plan 版本=30 保留=true`，
+   `demo-acceptance` **117 通过 / 2 失败**；改回修复版 **119 通过 / 0 失败**。
 
 **外部阻塞（仍是三个，一个都没变）**：① 一个 DeepSeek key（云臂对照）；② 3—5 个真人（W5-05 盲评）；
 ③ 一次真机实测 + 录屏（E03/F03）。这三件都不是「再写代码」能解决的。

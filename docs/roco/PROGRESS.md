@@ -10,11 +10,11 @@
 
 ## 汇总
 
-- MVP 30 项中 `DONE`：**47 / 49**
+- MVP 30 项中 `DONE`：**48 / 50**
 
 | 状态 | 条数 |
 |---|---:|
-| `DONE` | 55 |
+| `DONE` | 56 |
 | `NEEDS_HUMAN` | 2 |
 | `NOT_STARTED` | 4 |
 | `PARTIAL` | 6 |
@@ -90,6 +90,7 @@
 | A65-17 | Qwen 工具提议 + 受控回退（网关挂起时立刻回退） | `DONE` | `tests/evals/roco/mock-host-integration.test.js`、`src/coach/shadow-tools.js` | 网关可用解析出 search_rules；挂起时在总时限内回退规则短提示并记录迟到结果丢弃。 |
 | A65-18 | RL shadow 档不得改变玩家看到的建议 | `DONE` | `tests/evals/roco/mock-host-integration.test.js`、`src/coach/intervention-model.js` | off 与 shadow 两档正文逐字相同；shadow 照算（active=false、给概率与 margin）；**如实记录默认档位是 off、on 未获准**。 |
 | A65-19 | 人工评测与 Qwen 27B 部署/微调（延后，由用户自行恢复） | `NEEDS_HUMAN` | — | 两件都**不在本轮范围**：真人盲评需要人，27B 需要用户按 `docs/roco/QWEN-27B-USER-RUN-GUIDE.md` 跑。本轮只把「可移植性」做实，**不声称**模型效果或真人体验有任何变化。 |
+| A65-20 | 页面上陈旧**规划**必须整条丢弃（真实竞态，不是假想） | `DONE` | `src/coach/roco-experience.js`、`src/client/roco.js`、`tests/roco-experience.test.js`、`scripts/roco/demo-acceptance.mjs` | `/api/roco/plan` 与 `/api/roco/battle/advance` 是两条独立往返。页面原来写 `state.planAtVersion = state.view?.state_version ?? plan.state_version` —— **优先取当前视图的版本号**，等于把旧规划盖上新的版本章，之后所有「版本一致 ⇒ 没陈旧」的判断都放行它。现在唯一判据是 `rocoPlanFreshness()`：规划自己说属于哪一版才算哪一版，不一致就整条丢弃、记账（`state.planStaleDiscards`）、回退规则短提示。浏览器实测**自然竞态真的撞上**（局面 30 → 31、规划版本 30）：修复后丢弃；反证（把旧写法放回去）→ 构造竞态 `plan 保留=true planAtVersion=37`、自然竞态 `plan 版本=30 保留=true`，`demo-acceptance` **117 通过 / 2 失败**。 |
 
 ## 证据路径检查
 
