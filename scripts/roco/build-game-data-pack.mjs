@@ -1467,7 +1467,10 @@ export function computeReadiness({pack, schema, unresolvedConflicts, freshnessSt
         evidence: [{
           check: 'release_gate.registry',
           file: 'scripts/roco/verify-release.mjs',
-          actual: `闸门套件 ${ids.length} 条；要求 ${JSON.stringify(wanted)}；命中 ${JSON.stringify(present)}`,
+          // **只陈述这一项自己的判据**（要求哪些套件、命中哪些），不写「闸门总数」：
+          // 写总数会让「加一条无关套件」也把 pack 弄成过期（第 86 轮实测踩到：加 rag-eval 套件后
+          // pack 与重建不一致，而这一项的结论其实没变）。判据要盯自己声称的东西。
+          actual: `要求 ${JSON.stringify(wanted)}；命中 ${JSON.stringify(present)}`,
         }],
       };
     }

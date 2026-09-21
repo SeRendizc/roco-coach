@@ -113516,7 +113516,7 @@
      {
       "check": "release_gate.registry",
       "file": "scripts/roco/verify-release.mjs",
-      "actual": "闸门套件 16 条；要求 [\"reconciliation\",\"game-data-pack\"]；命中 [\"reconciliation\",\"game-data-pack\"]"
+      "actual": "要求 [\"reconciliation\",\"game-data-pack\"]；命中 [\"reconciliation\",\"game-data-pack\"]"
      }
     ]
    }

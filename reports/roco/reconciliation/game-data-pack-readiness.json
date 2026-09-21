@@ -4,8 +4,8 @@
  "generated_by": "scripts/roco/verify-game-data-pack.mjs",
  "determinism": "本报告不含挂钟时间戳：同输入两次运行逐字节相同。指纹用文件 sha256，不用时间。",
  "pack_path": "data/roco/game-data-pack/v2/pack.json",
- "pack_bytes": 3429637,
- "pack_sha256": "ae4a9b65f0e559b6f5ed91c2f2555e5d34a4f98dcd66bcb0b73ea02c917781ee",
+ "pack_bytes": 3429615,
+ "pack_sha256": "629eef2731464808dc3f4bca55e73c4a69ce1598d1cc0689bb3a70a679164505",
  "schema_path": "data/roco/game-data-pack/v2/schema.json",
  "schema_bytes": 15237,
  "schema_sha256": "7ed3f4b1630730cdaf2720cac49b6a7ba88928ba4d6195264ef531b77b1c3a6b",
@@ -188,7 +188,7 @@
     {
      "check": "release_gate.registry",
      "file": "scripts/roco/verify-release.mjs",
-     "actual": "闸门套件 16 条；要求 [\"reconciliation\",\"game-data-pack\"]；命中 [\"reconciliation\",\"game-data-pack\"]"
+     "actual": "要求 [\"reconciliation\",\"game-data-pack\"]；命中 [\"reconciliation\",\"game-data-pack\"]"
     }
    ]
   }
