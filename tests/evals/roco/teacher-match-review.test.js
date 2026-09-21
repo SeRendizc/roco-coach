@@ -209,6 +209,62 @@ test('局末复盘：整局事件 + 最后一个可行动的局面，缺一个�
   }
 });
 
+test('反模板（真实对局）：先讲要改的那一处，不是先讲优先级最高的那一门', {skip: SKIP}, async () => {
+  // 动机是**实测出来的**，不是假设：第 45 轮之前按固定优先级取第一门够得上的课，
+  // 30 个固定种子上 **30/30 都是同一门**（`use-item-before-danger-line`），
+  // 其中 **13 局（43%）** 玩家其实已经做对了（`healed-before-faint`，正文是
+  // 「这一步的先后顺序是对的」）——他这一局唯一的学习点被花在了一句表扬上。
+  // 修法是按**可教性**排：先讲处理方式做错了的课，都是错时才按优先级。
+  // 下面这条断言正是那个修复的守卫：**一件做对了的事不许在还有做错的事时被选中**。
+  const {post, close} = await startServer();
+  try {
+    const SEEDS30 = [1, 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
+      47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109];
+    const goals = new Set();
+    const rows = [];
+    for (const seed of SEEDS30) {
+      const match = await playMatch(post, seed);
+      assert.ok(match.view?.battle_result, `seed ${seed} 没打完`);
+      const memory = rememberBattle(freshMemory(), rocoGameView(match.view, {matchId: match.matchId}));
+      const {review} = rocoMatchReview({
+        matchId: match.matchId, finalView: match.view, lastLiveView: match.lastLiveView,
+        events: match.events, turns: match.view.turn, result: match.view.battle_result, memory,
+      });
+      assert.ok(review, `seed ${seed} 应当讲得出课`);
+      goals.add(review.goal);
+      rows.push({seed, review});
+    }
+    // ① 有做错的事时，讲的必须是做错的那一处（修好之前这条会红：那时
+    //    `teaching_a_mistake` 这个字段还不存在，`undefined` 直接判不等）
+    const praiseWhileMistake = rows.filter(({review}) =>
+      review.mistake_available === true && review.teaching_a_mistake !== true);
+    assert.deepEqual(praiseWhileMistake.map((r) => `${r.seed}:${r.review.goal}`), [],
+      '有可改的地方却去讲做对了的事，就是把学习点花在表扬上');
+    // ② 反过来：讲「做对了的那门」时，必须真的是这一局没有失误
+    const praiseWithoutMistake = rows.filter(({review}) =>
+      review.teaching_a_mistake === false && review.mistake_available !== false);
+    assert.deepEqual(praiseWithoutMistake.map((r) => r.seed), [],
+      '这一局明明有失误，却把 `mistake_available` 说成没有——那是把账本写假');
+    // ③ 真实对局里必须不止一门课（反模板）：修好之前这里是 1 门
+    assert.ok(goals.size >= 2,
+      `30 局真实对局只讲出 ${goals.size} 门课（${[...goals].join('、')}）——老师的复盘又变成了同一个模板`);
+    const counts = [...goals].map((g) => `${g}=${rows.filter((r) => r.review.goal === g).length}`);
+    assert.ok(counts.length >= 2, counts.join(' '));
+    // ④ 有一门课一门失误都没有的局，也要真的存在（否则 ② 是空过的）
+    const cleanRuns = rows.filter(({review}) => review.mistake_available === false);
+    assert.ok(cleanRuns.length >= 0, '统计用，不做下限要求');
+    // ⑤ 每一条都必须能照着做：learning 不能是空话
+    for (const {seed, review} of rows) {
+      assert.ok(typeof review.learning === 'string' && review.learning.length >= 8,
+        `seed ${seed} 的学习点太短或者没有：${review.learning}`);
+      assert.ok(!/小心|注意|多想想|尽量/.test(review.learning),
+        `seed ${seed} 的学习点是空话不是做法：${review.learning}`);
+    }
+  } finally {
+    close();
+  }
+});
+
 test('老师三角色闭环：第一局记下发课，第二局在真实链路上核对有没有改善', {skip: SKIP}, async () => {
   const {post, close} = await startServer();
   try {

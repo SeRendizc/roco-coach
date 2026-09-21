@@ -617,22 +617,40 @@ export function reviewMatch({events = [], turns = null, result = null, game = nu
   const names = nameBook(game, skills);
   const point = chooseTurningPoint({facts, game});
   if (!point) return null;
-  let chosen = null;
-  let goal = null;
+  // ── 挑哪一门课：先看「这一局有没有做错的地方」，不是先看优先级 ──────────────
+  //
+  // 第 45 轮实测（30 个固定种子、真服务打完整局、真引擎）：按固定优先级取第一门
+  // 够得上的课，**30/30 都是同一门** `use-item-before-danger-line`——其中 13 局
+  // （43%）玩家其实**已经做对了**（`healed-before-faint`，正文是「这一步的先后顺序
+  // 是对的」），也就是说他这一局唯一的学习点被花在了一句表扬上，而同一局里
+  // 别的、真的做错了的课（补给之后打在抵抗上 / 吃到克制伤害不换人）一句都没提。
+  //
+  // 老师的职责是「一个转折点 + **一条可执行的改法**」，所以按**可教性**排：
+  //   ① 处理方式做错了的课优先（`HANDLING_RANK` 里排 1 的那些）；
+  //   ② 都是错的时候，仍按 `TEACHER_GOALS` 的优先级；
+  //   ③ 这一课以前讲过、而同一档里还有没讲过的，先讲没讲过的（不把同一课念第二遍）；
+  //   ④ 一句错都没有（全做对了）才讲「做对了」那一门——那时它是这一局最值得看的地方。
+  const candidates = [];
   for (const candidate of TEACHER_GOALS) {
     const evaluation = evaluateGoal(candidate, {facts, game, names, bag});
     if (!evaluation) continue;
-    // 优先级里第一门「够得上」的课就是这一局要讲的；`applies === false` 的候选跳过
-    // （前提不在的课不能讲，例如背包里根本没药却教人吃药）。
+    // `applies === false` 的候选跳过（前提不在的课不能讲，例如背包里根本没药却教人吃药）。
     if (evaluation.applies !== true) continue;
-    chosen = evaluation;
-    goal = candidate;
-    break;
+    candidates.push({goal: candidate, evaluation});
   }
-  if (!chosen || !goal) return null;
+  if (!candidates.length) return null;
+  const rank = (row) => HANDLING_RANK[row.evaluation.handling];
+  const untaught = (row) => teachingPlan(memory, {lesson: row.goal}).teach !== false;
+  const mistakes = candidates.filter((row) => rank(row) === 1);
+  const pickFrom = (pool) => pool.find(untaught) ?? pool[0];
+  const choice = mistakes.length ? pickFrom(mistakes) : pickFrom(candidates);
+  const chosen = choice.evaluation;
+  const goal = choice.goal;
 
   // 复用 memory.js 的教学账本判断「这一课讲过没有」——不新建第二套「教过」记录。
   const alreadyTaught = teachingPlan(memory, {lesson: goal}).teach === false;
+  const mistakeAvailable = mistakes.length > 0;
+  const teachingAMistake = rank(choice) === 1;
 
   const sentences = [];
   const totalTurns = turnCountOf({turns, game, facts});
@@ -658,6 +676,11 @@ export function reviewMatch({events = [], turns = null, result = null, game = nu
     evidence,
     check: {situation: chosen.situation, handling: chosen.handling, turn: chosen.turn},
     repeat: alreadyTaught,
+    // 可核对的两个记号：这一局**有没有**做错的地方、最后讲的是不是那一处。
+    // 页面与验收据此断言「先讲要改的，不是先讲优先级最高的」。
+    mistake_available: mistakeAvailable,
+    teaching_a_mistake: teachingAMistake,
+    candidates: candidates.map((row) => row.goal),
   };
 }
 

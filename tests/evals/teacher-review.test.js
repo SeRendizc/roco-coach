@@ -140,6 +140,66 @@ function matchF() {
   return {events, turns: 3, result: 'loss', game: null};
 }
 
+/**
+ * 对局 P：这一局**同时**有两门课够得上，而且优先级与可教性相反。
+ *
+ *   · `use-item-before-danger-line`（优先级最高）：第 4 回合先吃了药、第 5 回合才倒下
+ *     → 处理方式 `healed-before-faint`，也就是**做对了**（正文是「先后顺序是对的」）；
+ *   · `switch-out-of-the-bad-matchup`（优先级第二）：第 3 回合吃到属性克制的一击之后
+ *     一直没换人 → `stayed-in-after-bad-hit`，这是**真的做错了**。
+ *
+ * 第 45 轮之前的选法是「按优先级取第一门够得上的」，于是这一局会把唯一的学习点花在
+ * 一句表扬上。实测（30 个固定种子）这种「讲做对了的那门」占 **13/30**。修好之后
+ * 必须先讲要改的那一处——这条用例就是那件事的最小反证。
+ */
+function matchPraise() {
+  const view = viewOf({
+    battle_result: 'loss', phase: 'ended', turn: 5, state_version: 99,
+    self: {active: 0, pets: [{slot: 0, pet_id: 'pet_000225', name: '寂灭骨龙', hp: 0, max_hp: 425, energy: 1, fainted: true}]},
+    opponent: {active: 0, living_count: 1, field: {slot: 0, pet_id: 'pet_000445', name: '画间沉铁兽', hp: 260, max_hp: 380, energy: 2, fainted: false}, bench: []},
+    legal: [{kind: 'item', item_id: '回复药', label: '使用回复药'}],
+  });
+  const events = [
+    ev(3, 'turn_start', {turn: 3}, '第 3 回合开始。'),
+    ev(3, 'damage', {side: 'enemy', skill_id: 'skill_000311', target_slot: 0, damage: 180, type_multiplier: 2, formula_verified: false},
+      '对方的裂空命中，造成约 180 点伤害，属性克制。', ['skill_000311']),
+    ev(4, 'turn_start', {turn: 4}, '第 4 回合开始。'),
+    ev(4, 'item', {side: 'player', item: '回复药', healed: 45}, '我方使用了道具，回复 45 点生命。'),
+    ev(5, 'turn_start', {turn: 5}, '第 5 回合开始。'),
+    ev(5, 'damage', {side: 'enemy', skill_id: 'skill_000311', target_slot: 0, damage: 210, type_multiplier: 1, formula_verified: false},
+      '对方的裂空命中，造成约 210 点伤害。', ['skill_000311']),
+    ev(5, 'faint', {side: 'player', slot: 0}, '我方的精灵倒下了。', ['3009']),
+  ];
+  return {events, turns: 5, result: 'loss', game: rocoGameView(view, {matchId: 'm-P'})};
+}
+
+/**
+ * 对局 Q：一门失误都没有的一局（用来验 `teaching_a_mistake === false` 不是嘴上说说）。
+ *
+ * 对面倒下、补位之后我方**下一手没有被抵抗**（`next-hit-not-resisted`，属于做对了），
+ * 我方没有倒人、没有被抵抗的出手、没有异常扣血——于是「要改的那一处」根本不存在，
+ * 老师讲的只能是这一局做得对的地方。
+ */
+function matchClean() {
+  const view = viewOf({
+    battle_result: 'win', phase: 'ended', turn: 6, state_version: 121,
+    self: {active: 0, pets: [{slot: 0, pet_id: 'pet_000225', name: '寂灭骨龙', hp: 300, max_hp: 425, energy: 3, fainted: false}]},
+    opponent: {active: 1, living_count: 1, field: {slot: 1, pet_id: 'pet_000311', name: '潮甲龟', hp: 90, max_hp: 400, energy: 2, fainted: false}, bench: []},
+    legal: [{kind: 'skill', label: '龙血', skill_id: 'skill_000750'}],
+  });
+  const events = [
+    ev(5, 'turn_start', {turn: 5}, '第 5 回合开始。'),
+    ev(5, 'damage', {side: 'player', skill_id: 'skill_000750', target_slot: 0, damage: 205, type_multiplier: 2, formula_verified: false},
+      '我方的龙血命中，造成约 205 点伤害，属性克制。', ['skill_000750']),
+    ev(5, 'faint', {side: 'enemy', slot: 0}, '对方的精灵倒下了。', ['3009']),
+    ev(5, 'replacement', {side: 'enemy', slot: 1}, '对方补上了第 2 位精灵。'),
+    ev(6, 'turn_start', {turn: 6}, '第 6 回合开始。'),
+    ev(6, 'damage', {side: 'player', skill_id: 'skill_000750', target_slot: 1, damage: 190, type_multiplier: 2, formula_verified: false},
+      '我方的龙血命中，造成约 190 点伤害，属性克制。', ['skill_000750']),
+  ];
+  return {events, turns: 6, result: 'win', game: rocoGameView(view, {matchId: 'm-Q'})};
+}
+
 /** 只有一条伤害、没有减员也没有翻盘的一局：老师说不出话，应当沉默。 */
 function matchQuiet() {
   return {
@@ -253,6 +313,38 @@ test('转折点可以不是减员：没有减员时按累计伤害差翻盘挑',
   assert.deepEqual(review.turning_point.candidates, ['damage-lead-flip']);
   assert.equal(review.goal, 'stop-attacking-into-resistance');
   assert.equal(review.check.handling, 'repeated-resist');
+});
+
+test('同一局里有「做对的课」也有「做错的课」时，先讲要改的那一处（第 45 轮反模板）', () => {
+  const review = reviewMatch(matchPraise());
+  assert.ok(review);
+  // 两门课都够得上：可核对的两个记号都要如实写出来
+  assert.deepEqual(review.candidates, ['use-item-before-danger-line', 'switch-out-of-the-bad-matchup']);
+  assert.equal(review.mistake_available, true, '这一局确实有做错的地方');
+  assert.equal(review.teaching_a_mistake, true, '讲的那门必须是「要改的」');
+  // 优先级更高的那门（用药时机）这一局其实做对了；做错的是「吃到克制伤害不换人」
+  assert.equal(review.goal, 'switch-out-of-the-bad-matchup',
+    '按优先级取第一门会把学习点花在表扬上——那正是修掉的行为');
+  assert.equal(review.check.handling, 'stayed-in-after-bad-hit');
+  assert.match(review.learning, /换掉这一只/);
+  // 反向对照：只有「做对了」那一门够得上时，仍然讲它（不能因为没有失误就不讲）
+  const onlyGood = reviewMatch(matchA());
+  assert.equal(onlyGood.mistake_available, true, 'A 那一局是「有药没用」，属于失误');
+  assert.equal(onlyGood.goal, 'use-item-before-danger-line');
+  // B 那一局：补位之后第一手打在抵抗上 → 也是失误（不是「因为是对面倒人就讲它」）
+  const b = reviewMatch(matchB());
+  assert.equal(b.goal, 'read-the-replacement-first');
+  assert.equal(b.mistake_available, true);
+  assert.equal(b.teaching_a_mistake, true);
+  assert.equal(b.check.handling, 'next-hit-into-resist');
+  // 一局里一门失误都没有时：`mistake_available` / `teaching_a_mistake` 都必须是 false，
+  // 不是「讲了失误」也不是「假装有失误」——这一局讲的是做对了的地方。
+  const clean = reviewMatch(matchClean());
+  assert.ok(clean);
+  assert.equal(clean.goal, 'read-the-replacement-first');
+  assert.equal(clean.check.handling, 'next-hit-not-resisted');
+  assert.equal(clean.mistake_available, false, '这一局没有任何做错的地方');
+  assert.equal(clean.teaching_a_mistake, false);
 });
 
 test('两局不同的对局 → 不同的复盘与不同的学习点（反模板）', () => {
