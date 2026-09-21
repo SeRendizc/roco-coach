@@ -1,0 +1,63 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小芽 · 界面 mockup（结算页，1440×900 / 390×844）</title>
+<style>
+/* 界面 mockup：结算页。只定版式与主次，无脚本、无真实数据。
+   按监工结构：**结果 / 一个关键转折 / 下一局练习目标先显示**，其余统计与证据折叠；
+   不展示零值与内部术语。老师只给"一个关键错误或进步点 + 下一局目标"，完整复盘折叠；
+   陪练用轻量气泡 + 偏好记忆自然出现（不做三角色状态表）。 */
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#e3eaf1;background:#0d1420;font-size:14px;
+--panel:#1a2635;--line:#314154;--accent:#a8e5b0;--muted:#9caebe;--warn:#f0cb77}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-bottom:1px solid var(--line)}
+h1{font-size:19px;margin:0}h1 small{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;padding:2px 6px;margin-left:8px}
+button{font:inherit;cursor:pointer;color:#dfe8ef;background:#243345;border:1px solid #394a5e;padding:9px 14px;border-radius:9px;min-height:44px}
+button.primary{color:#152c24;background:var(--accent);border-color:var(--accent);font-weight:700}
+main{flex:1;display:grid;grid-template-columns:1.15fr 1fr;gap:16px;padding:18px 22px 28px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.result{display:flex;align-items:baseline;gap:12px}
+.result b{font-size:30px}
+.muted{color:var(--muted);font-size:12.5px}
+.turn{margin:14px 0 0;font-size:14.5px;line-height:1.7}
+.turn b{color:#bbebc5}
+.goal{margin-top:14px;border-left:3px solid var(--warn);padding:8px 12px;background:#1d2c30;border-radius:0 9px 9px 0;font-size:14px;line-height:1.65}
+.bubble{margin-top:6px;background:#2b403c;border:1px solid #4d6b5c;border-radius:12px 12px 12px 4px;padding:10px 13px;font-size:14px;line-height:1.65}
+.mem{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.mem span{font-size:11.5px;border:1px solid #4a6858;color:#cfe9d6;border-radius:999px;padding:2px 9px}
+details{margin-top:12px;background:#16222f;border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+summary{cursor:pointer;font-size:12.5px;color:var(--warn)}
+.stats{margin:8px 0 0;font-size:12.5px;color:#b4c3d1;line-height:1.8}
+@media (max-width:720px){
+ h1{font-size:16px}
+ main{grid-template-columns:1fr;padding:12px 14px 24px}
+ .result b{font-size:26px}
+}
+</style></head><body>
+<header>
+ <h1>小芽 · 洛克王国：世界 <small>结算</small></h1>
+ <div><button>看完整复盘</button> <button class="primary">开下一局</button></div>
+</header>
+
+<main>
+ <div>
+  <div class="card">
+   <div class="result"><b>我方胜</b><span class="muted">12 回合 · 训练场</span></div>
+   <p class="turn">关键转折在第 <b>7</b> 回合：寂灭骨龙只剩 22% 血还带着中毒，你换上潮甲龟顶住了音速犬那一手，
+    对面随后被迫换人——这一局从这里翻过来。</p>
+   <div class="goal"><b>下一局练一件事</b>：血线掉到一半以下时，先把回复药吃掉再决定继续输出还是换人。</div>
+  </div>
+ </div>
+
+ <div>
+  <div class="card">
+   <div class="muted">小芽（陪练）</div>
+   <div class="bubble">刚才那一局最后两个回合挺紧的吧？你说过想打得稳一些，我就没在中间打断你。</div>
+   <div class="mem"><span>称呼：老王</span><span>聊天风格：简短</span><span>输了先不复盘</span></div>
+   <details>
+    <summary>完整复盘与依据（默认收起）</summary>
+    <p class="stats">这一局的经过、每一次换人与用药的公开依据、以及本机小模型的对照结果都在这里。
+     只有你展开时才显示。</p>
+   </details>
+  </div>
+ </div>
+</main>
+</body></html>
