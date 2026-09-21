@@ -1,0 +1,746 @@
+{
+  "archetypes": [
+    {
+      "archetype_id": "poison_stack",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence": [
+        {
+          "claim": "13 号文档 §3 把「毒、翼王、陨星、萌化、冰、沙暴、武」写成版本 archetype seed：“社区资料提出主 C、副 C、拦截、协防等常见职能，但系统把它们作为 multi-label feature，不把「一主一副两拦截两协防」写成硬规则……是否仍强由版本数据和评测决定”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "13 号文档 §4 规定了未知对手时的五个口径：expected_meta_value / worst_archetype / CVaR-robustness / matchup_spread / execution_tolerance / coverage_confidence，并要求“不输出伪精确胜率”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §4",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "confidence": "COMMUNITY_CURRENT",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-TYPE-MULTIPLIER",
+          "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
+        }
+      ],
+      "feature_axes": [
+        {
+          "axis": "coverage",
+          "criterion": "coverage",
+          "how": "把成员的属性组合按 types.join(\"|\") 拼成防御键查 types.json：数「队伍里能接住某个攻击系别」的成员比例。"
+        },
+        {
+          "axis": "synergy",
+          "criterion": "synergy",
+          "how": "对每个成员数 answers(m,T)（其余成员里能接 T 的个数）与 shared(T)：毒系队伍同一弱点堆叠会被直接数出来。"
+        },
+        {
+          "axis": "respond",
+          "criterion": "respond",
+          "how": "从冻结 learnsets 的学招池里按 skills[].desc 词条数「应对攻击 / 应对状态 / 应对防御」出现次数。"
+        },
+        {
+          "axis": "energy",
+          "criterion": "energy",
+          "how": "取成员具体 build 的四个技能在 skills.json 的 energy，算 min / max / 合计 / 零费技能数。"
+        }
+      ],
+      "label": "毒系消耗",
+      "label_source": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3（「毒、翼王、陨星、萌化、冰、沙暴、武等体系作为版本 archetype seed」）",
+      "needs_recording": [
+        "标准 PVP 里「毒」系队伍的实机出场与胜负记录（当前一条都没有）",
+        "中毒 / 剧毒类状态的具体结算时序 microcase（对齐 MC-007 系列）"
+      ],
+      "notes": "毒系在台账里唯一有分级支撑的是「属性倍率四档」与「应对是真实机制」两条；「毒系体系当前很强」这个说法在台账里**没有**对应条目，所以本条目只登记「它是一批可识别的精灵」，不登记任何强弱。",
+      "seed_selection": {
+        "default_seeds": [
+          "厉毒修萝",
+          "古啦多",
+          "千棘盔"
+        ],
+        "note": "种子按选择器 type_tag_main_forms 在本仓数据上复算得到 28 个，全部在 pack 的 pet 实体里逐字命中；`default_seeds` 只是人工挑出的代表元，机器可复算的那份是这里的 selector（先验不写死榜单）。",
+        "selected_count": 28,
+        "selector": {
+          "kind": "type_tag_main_forms",
+          "type": "毒系"
+        },
+        "source": "type_tag_main_forms"
+      },
+      "seed_species": [
+        "刺盔虫",
+        "千棘海针",
+        "千棘盔",
+        "厉毒修萝",
+        "厉毒小萝",
+        "古啦多",
+        "古钟蛇",
+        "嘟嘟煲",
+        "嘟嘟锅",
+        "壳栗丝鼠",
+        "多啦多",
+        "多多",
+        "寒音蛇",
+        "尖角蜘蛛",
+        "影狸",
+        "徘徊爪爪",
+        "忽幽狸",
+        "栗鼠",
+        "海盔虫",
+        "烟花伯爵",
+        "烟花团",
+        "琉璃水母",
+        "翡翠水母",
+        "芋香巨角蛛",
+        "裘力",
+        "裘卡",
+        "裘洛",
+        "铆钉毛毛"
+      ]
+    },
+    {
+      "archetype_id": "wing_king_flyer",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence": [
+        {
+          "claim": "13 号文档 §3 把「毒、翼王、陨星、萌化、冰、沙暴、武」写成版本 archetype seed：“社区资料提出主 C、副 C、拦截、协防等常见职能，但系统把它们作为 multi-label feature，不把「一主一副两拦截两协防」写成硬规则……是否仍强由版本数据和评测决定”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "台账 EV-PVP-FAINT-MANA-LOSS：力竭通常扣 1 点魔力（来源只有 17173 转载里「额外损失1点魔力」间接支持），等级 CROSS_SOURCE_SUPPORTED，风险已在台账 notes 里如实登记。",
+          "confidence": "CROSS_SOURCE_SUPPORTED",
+          "date": "2026-03-18",
+          "ledger_entry": "EV-PVP-FAINT-MANA-LOSS",
+          "ref": "https://news.17173.com/content/03182026/104940843.shtml"
+        },
+        {
+          "claim": "台账 EV-ENERGY-ENDTURN-REGEN：没有找到「每条在场精灵回合末自动 +1」的证据，仓库的 ENERGY_REGEN_PER_TURN = 1 与多源材料冲突，属于 ENGINE_HYPOTHESIS。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-ENERGY-ENDTURN-REGEN",
+          "ref": "roco/src/roco_env/env.py#L59"
+        }
+      ],
+      "feature_axes": [
+        {
+          "axis": "speed",
+          "criterion": "speed",
+          "how": "用冻结迁移层 roster-48.json#pets[].stats.spe 与同行的 speed_tier 统计梯度；没有档位的一律 unknown，不拿 knowledge_only 值冒充。"
+        },
+        {
+          "axis": "pivot",
+          "criterion": "pivot",
+          "how": "从学招池里数 desc 含「迅捷」（台账 swift.injection：主动换入时自动使用）或含「自己脱离 / 立即替换」的技能。"
+        },
+        {
+          "axis": "coverage",
+          "criterion": "coverage",
+          "how": "同 poison_stack：属性防御键 × 18 个攻击系别的抗性承接。"
+        }
+      ],
+      "label": "翼王飞翼",
+      "label_source": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3（点名「翼王」）",
+      "needs_recording": [
+        "「飓风」类特性的实机触发与魔力扣减结算录屏（台账 EV-PVP-FAINT-MANA-LOSS 已挂 MC-E09）",
+        "翼系队伍的实机出场记录（当前一条都没有）"
+      ],
+      "notes": "「翼王」这个名字是从 13 号文档 §3 抄下来的，不是我们从数据里推的；它在 pack 里对应 pet_record「圣羽翼王」1 个实体。13 号文档点名它属于 archetype seed，但**没有**说它强。",
+      "seed_selection": {
+        "default_seeds": [
+          "圣羽翼王"
+        ],
+        "note": "种子按选择器 named_in_authority 在本仓数据上复算得到 1 个，全部在 pack 的 pet 实体里逐字命中；`default_seeds` 只是人工挑出的代表元，机器可复算的那份是这里的 selector（先验不写死榜单）。",
+        "selected_count": 1,
+        "selector": {
+          "kind": "named_in_authority",
+          "names": [
+            "圣羽翼王"
+          ]
+        },
+        "source": "named_in_authority"
+      },
+      "seed_species": [
+        "圣羽翼王"
+      ]
+    },
+    {
+      "archetype_id": "meteor_burst",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence": [
+        {
+          "claim": "13 号文档 §3 把「毒、翼王、陨星、萌化、冰、沙暴、武」写成版本 archetype seed：“社区资料提出主 C、副 C、拦截、协防等常见职能，但系统把它们作为 multi-label feature，不把「一主一副两拦截两协防」写成硬规则……是否仍强由版本数据和评测决定”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "台账 EV-ENERGY-MAX（topic energy.max）：外部资料多处支持常规上限 10、聚能 +5；仓库引擎 ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS，不得表述为游戏事实。",
+          "confidence": "CROSS_SOURCE_SUPPORTED",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-ENERGY-MAX",
+          "ref": "https://zhuanlan.zhihu.com/p/2040741873246024568"
+        },
+        {
+          "claim": "冻结层每个技能自注 effect_support = unsupported（「效果原语未实现；本轮只做静态数据导入，未验证触发条件与时序」），且来源没给静态威力的技能记 power_status = not_provided_by_source；所以本先验的任何特征轴都只能报结构，不能报威力或可用性。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json"
+        }
+      ],
+      "feature_axes": [
+        {
+          "axis": "energy",
+          "criterion": "energy",
+          "how": "取成员 build 的四个技能的 energy 与本次请求所用 ruleset 的 energy.max.value 对照，数超限技能数（本模块不写死任何能量数字）。"
+        },
+        {
+          "axis": "coverage",
+          "criterion": "coverage",
+          "how": "属性防御键 × 18 个攻击系别：数「有没有成员能接住」。"
+        },
+        {
+          "axis": "cost",
+          "criterion": "cost",
+          "how": "槽位与硬约束的可满足性算术：locked ∪ must_include 能不能装进六槽、必须换掉的只数是否超过上限。"
+        }
+      ],
+      "label": "陨星爆发",
+      "label_source": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3（点名「陨星」）",
+      "needs_recording": [
+        "能量上限到底是 6 还是 10 的实机 microcase（台账 EV-ENERGY-MAX 挂 MC-E01）",
+        "「陨星」这一挂的实机配招与出场记录（当前一条都没有）"
+      ],
+      "notes": "「陨星」在 pack 里命中两个名字：陨星虫（虫系 pet_record）与落陨星兔（幻系+幽系 pet_record）。本条只说明这两个名字真实存在；它们是不是同一个体系，13 号文档没有定义，我们也不替它定义。",
+      "seed_selection": {
+        "default_seeds": [
+          "陨星虫",
+          "落陨星兔"
+        ],
+        "note": "种子按选择器 name_contains 在本仓数据上复算得到 2 个，全部在 pack 的 pet 实体里逐字命中；`default_seeds` 只是人工挑出的代表元，机器可复算的那份是这里的 selector（先验不写死榜单）。",
+        "selected_count": 2,
+        "selector": {
+          "kind": "name_contains",
+          "text": "陨星"
+        },
+        "source": "name_contains"
+      },
+      "seed_species": [
+        "落陨星兔",
+        "陨星虫"
+      ]
+    },
+    {
+      "archetype_id": "sugar_morph",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence": [
+        {
+          "claim": "13 号文档 §3 把「毒、翼王、陨星、萌化、冰、沙暴、武」写成版本 archetype seed：“社区资料提出主 C、副 C、拦截、协防等常见职能，但系统把它们作为 multi-label feature，不把「一主一副两拦截两协防」写成硬规则……是否仍强由版本数据和评测决定”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "13 号文档 §4 规定了未知对手时的五个口径：expected_meta_value / worst_archetype / CVaR-robustness / matchup_spread / execution_tolerance / coverage_confidence，并要求“不输出伪精确胜率”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §4",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "台账 EV-TRAITS-TRIGGER-COMPLEXITY：公开特性已覆盖入场、离场、回合结束、每受到攻击、克制后、按技能系别、按队伍组成、能量上限突破、迅捷赋予、印记、连击等触发面；全量精确模拟的主要工作量在 trigger/effect 语义，不在精灵表行数。",
+          "confidence": "COMMUNITY_CURRENT",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-TRAITS-TRIGGER-COMPLEXITY",
+          "ref": "https://wiki.biligame.com/nrc/特性列表"
+        }
+      ],
+      "feature_axes": [
+        {
+          "axis": "energy",
+          "criterion": "energy",
+          "how": "萌化的层数会改能耗（例如特性「守护者」：己方其他精灵每有 1 层萌化，入场时全技能能耗 -1），所以这里数的是 build 四个技能的能耗曲线。"
+        },
+        {
+          "axis": "respond",
+          "criterion": "respond",
+          "how": "数「应对」词条出现次数：萌化里有多条是「防御应对成功」时才触发。"
+        },
+        {
+          "axis": "synergy",
+          "criterion": "synergy",
+          "how": "answers(m,T) / shared(T) 计数：萌化体系常常是「同一只反复上场」，弱点堆叠会被直接数出来。"
+        }
+      ],
+      "label": "萌化叠层",
+      "label_source": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3（点名「萌化」）",
+      "needs_recording": [
+        "萌化层数的获得 / 解除 / 上限实机规则（台账里没有这一条，BANNED 之外的社区说法一律不采信）",
+        "「萌化」体系在标准 PVP 里的实机出场与胜负记录（当前一条都没有）"
+      ],
+      "notes": "「萌化」在本仓的可核对面是 skills.json 里 desc 含「萌化」的 19 条技能（多为特性行），其中 12 只冻结迁移层的精灵学得到 4 条。本条只登记「萌化是数据里真实存在的词条」与「哪些精灵能学到它」，**没有**登记萌化到底怎么叠、叠上去强不强。",
+      "seed_selection": {
+        "default_seeds": [
+          "化蝶",
+          "雪影娃娃",
+          "秩序鱿墨",
+          "圆号鱼",
+          "黑猫巫师"
+        ],
+        "note": "种子按选择器 learnable_move_keyword 在本仓数据上复算得到 5 个，全部在 pack 的 pet 实体里逐字命中；`default_seeds` 只是人工挑出的代表元，机器可复算的那份是这里的 selector（先验不写死榜单）。",
+        "selected_count": 5,
+        "selector": {
+          "keyword": "萌化",
+          "kind": "learnable_move_keyword",
+          "pool": "冻结迁移层 data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json（12 只）"
+        },
+        "source": "learnable_move_keyword"
+      },
+      "seed_species": [
+        "化蝶",
+        "圆号鱼",
+        "秩序鱿墨",
+        "雪影娃娃",
+        "黑猫巫师"
+      ]
+    },
+    {
+      "archetype_id": "ice_control",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence": [
+        {
+          "claim": "13 号文档 §3 把「毒、翼王、陨星、萌化、冰、沙暴、武」写成版本 archetype seed：“社区资料提出主 C、副 C、拦截、协防等常见职能，但系统把它们作为 multi-label feature，不把「一主一副两拦截两协防」写成硬规则……是否仍强由版本数据和评测决定”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "confidence": "COMMUNITY_CURRENT",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-TYPE-MULTIPLIER",
+          "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
+        },
+        {
+          "claim": "台账 EV-LEAVE-SEMANTICS：「离场」包括主动更换或触发脱离效果，不包括力竭后下场；ACTIVE_SWITCH != SKILL_LEAVE != FAINT_REPLACEMENT。",
+          "confidence": "COMMUNITY_CURRENT",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-LEAVE-SEMANTICS",
+          "ref": "https://wiki.biligame.com/nrc/邪眼巨魔"
+        }
+      ],
+      "feature_axes": [
+        {
+          "axis": "coverage",
+          "criterion": "coverage",
+          "how": "属性防御键 × 18 个攻击系别：冰系队伍的防御承接面会被逐条数出来（这是唯一可复算的“控场”替代物）。"
+        },
+        {
+          "axis": "speed",
+          "criterion": "speed",
+          "how": "冻结迁移层速度档位统计（没有档位的 unknown）。"
+        },
+        {
+          "axis": "respond",
+          "criterion": "respond",
+          "how": "学招池里「应对」词条计数。"
+        }
+      ],
+      "label": "冰系控场",
+      "label_source": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3（点名「冰」）",
+      "needs_recording": [
+        "冰系控制类效果（冻结 / 减速）的实机结算时序（台账里没有条目）",
+        "冰系队伍的实机出场与胜负记录（当前一条都没有）"
+      ],
+      "notes": "本仓对「冰」能核对的只有两件事：pack 里有 32 只主形态冰系精灵（本条的种子选择器），features_axes 里的判据全部来自 RC-302。没有任何证据说冰系体系当前处于什么位置。",
+      "seed_selection": {
+        "default_seeds": [
+          "雪影娃娃",
+          "冰封怨灵",
+          "九尾狐"
+        ],
+        "note": "种子按选择器 type_tag_main_forms 在本仓数据上复算得到 32 个，全部在 pack 的 pet 实体里逐字命中；`default_seeds` 只是人工挑出的代表元，机器可复算的那份是这里的 selector（先验不写死榜单）。",
+        "selected_count": 32,
+        "selector": {
+          "kind": "type_tag_main_forms",
+          "type": "冰系"
+        },
+        "source": "type_tag_main_forms"
+      },
+      "seed_species": [
+        "九尾狐",
+        "冰封怨灵",
+        "冰钻布鲁斯",
+        "呼呼猪",
+        "大耳帽兜",
+        "小电企鹅",
+        "小雪人",
+        "尖嘴狐仙",
+        "布鲁斯",
+        "帽兜娃娃",
+        "幻雪兽",
+        "新月鹭",
+        "月使鹭纳",
+        "月牙雪熊",
+        "月辉鹭",
+        "椰浆布丁",
+        "灵狐",
+        "獠牙猪",
+        "电企鹅",
+        "睡铃雪影娃娃",
+        "脆筒甜甜",
+        "雪娃娃",
+        "雪巨人",
+        "雪影冰灵",
+        "雪影娃娃",
+        "雪怪",
+        "雪灵",
+        "雪灵兽",
+        "雪蛮人",
+        "雪豆丁",
+        "雪顶布鲁斯",
+        "饮雪狂兽"
+      ]
+    },
+    {
+      "archetype_id": "sandstorm_weather",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence": [
+        {
+          "claim": "13 号文档 §3 把「毒、翼王、陨星、萌化、冰、沙暴、武」写成版本 archetype seed：“社区资料提出主 C、副 C、拦截、协防等常见职能，但系统把它们作为 multi-label feature，不把「一主一副两拦截两协防」写成硬规则……是否仍强由版本数据和评测决定”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "台账 EV-ENERGY-MAX（topic energy.max）：外部资料多处支持常规上限 10、聚能 +5；仓库引擎 ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS，不得表述为游戏事实。",
+          "confidence": "CROSS_SOURCE_SUPPORTED",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-ENERGY-MAX",
+          "ref": "https://zhuanlan.zhihu.com/p/2040741873246024568"
+        },
+        {
+          "claim": "台账 EV-TURN-ORDER-STRICT：「应对 > 换宠 > 先手 > 速度」的**严格总序**本轮没找到同等强度的官方文字，引擎的确定性排序键只是有界实现，不是游戏规则。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-TURN-ORDER-STRICT",
+          "ref": "data/roco/evidence/rule-evidence-ledger.json"
+        }
+      ],
+      "feature_axes": [
+        {
+          "axis": "coverage",
+          "criterion": "coverage",
+          "how": "沙暴是天气，不直接改属性承接；这里数的是候选队伍在 18 个攻击系别上的防御承接面（天气只是这层的输入之一）。"
+        },
+        {
+          "axis": "respond",
+          "criterion": "respond",
+          "how": "学招池里「应对」词条计数：沙暴相关的三条技能里有「先手 +1」与「获得速度 +50」这类条件效果。"
+        },
+        {
+          "axis": "pivot",
+          "criterion": "pivot",
+          "how": "换入/离场手段计数：天气体系通常要靠主动换人来维持，这一条数的是 desc 含「迅捷 / 自己脱离 / 立即替换」的技能。"
+        }
+      ],
+      "label": "沙暴天气",
+      "label_source": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3（点名「沙暴」）",
+      "needs_recording": [
+        "沙暴天气的实机规则：改天气的回合归属、持续 8 回合的计数方式、天气结束时的时序（台账里没有条目）",
+        "哪几只精灵真的学得到「沙涌 / 扬尘 / 流沙统治者」——冻结迁移层 12 只里**一只都没有**，需要更全的学招数据或实机录屏",
+        "沙暴体系的实机出场记录（当前一条都没有）"
+      ],
+      "notes": "**如实登记的缺口**：skills.json 里 desc 含「沙暴」的有 3 条（沙涌 / 扬尘 / 流沙统治者），但冻结迁移层 learnsets.json 的 12 只精灵**没有任何一只**能学到它们——所以本条的 seed_species 只能是空的。这不是「沙暴不存在」，而是「本仓现有的可核对面里没有沙暴的载体」。按契约，空种子必须显式声明none_available 并挂上待录证据，不许静默降级成一个空体系。",
+      "seed_selection": {
+        "default_seeds": [],
+        "note": "本仓现有的可核对面里找不到载体：沙暴 相关技能没有任何冻结迁移层精灵学得到。按契约显式声明 none_available，并挂上 needs_recording，不静默降级成空体系。",
+        "selected_count": 0,
+        "selector": {
+          "keyword": "沙暴",
+          "kind": "learnable_move_keyword",
+          "outcome": "none_available",
+          "pool": "冻结迁移层 data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json（12 只）"
+        },
+        "source": "none_available"
+      },
+      "seed_species": []
+    },
+    {
+      "archetype_id": "fighting_press",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence": [
+        {
+          "claim": "13 号文档 §3 把「毒、翼王、陨星、萌化、冰、沙暴、武」写成版本 archetype seed：“社区资料提出主 C、副 C、拦截、协防等常见职能，但系统把它们作为 multi-label feature，不把「一主一副两拦截两协防」写成硬规则……是否仍强由版本数据和评测决定”。",
+          "confidence": "ENGINE_HYPOTHESIS",
+          "date": "2026-09-21",
+          "ledger_entry": "13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3",
+          "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
+        },
+        {
+          "claim": "台账 EV-TURN-ORDER-MECHANISMS-EXIST：应对是真实核心机制、技能存在先手 +1、主动换精灵是战斗动作、速度参与同层级先后——四件机制**存在**。",
+          "confidence": "CROSS_SOURCE_SUPPORTED",
+          "date": "2026-03-18",
+          "ledger_entry": "EV-TURN-ORDER-MECHANISMS-EXIST",
+          "ref": "https://news.17173.com/content/03182026/104940843.shtml"
+        },
+        {
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "confidence": "COMMUNITY_CURRENT",
+          "date": "2026-09-21",
+          "ledger_entry": "EV-TYPE-MULTIPLIER",
+          "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
+        }
+      ],
+      "feature_axes": [
+        {
+          "axis": "coverage",
+          "criterion": "coverage",
+          "how": "属性防御键 × 18 个攻击系别：武系队伍的“压制”在本仓里唯一可复算的替代物是防御承接面，而不是任何形容词。"
+        },
+        {
+          "axis": "speed",
+          "criterion": "speed",
+          "how": "冻结迁移层速度档位统计（没有档位的 unknown）。"
+        },
+        {
+          "axis": "energy",
+          "criterion": "energy",
+          "how": "成员 build 四个技能的能耗曲线 vs 本次请求的 ruleset energy.max.value。"
+        }
+      ],
+      "label": "武系压制",
+      "label_source": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3（点名「武」）",
+      "needs_recording": [
+        "出手顺序的完整排序键与并列时的逐项降级（台账 EV-TURN-ORDER-STRICT 已挂 MC-E05）",
+        "武系队伍的实机出场与胜负记录（当前一条都没有）"
+      ],
+      "notes": "「压制」这个词只出现在 label 里，作为**人类可读的体系名**；本条没有任何一条 feature_axes 用形容词。武系在 pack 里有 24 只主形态精灵（本条的种子选择器），其中冻结迁移层有 3 只带数据。",
+      "seed_selection": {
+        "default_seeds": [
+          "海豹船长",
+          "画间沉铁兽",
+          "炽心勇狮"
+        ],
+        "note": "种子按选择器 type_tag_main_forms 在本仓数据上复算得到 24 个，全部在 pack 的 pet 实体里逐字命中；`default_seeds` 只是人工挑出的代表元，机器可复算的那份是这里的 selector（先验不写死榜单）。",
+        "selected_count": 24,
+        "selector": {
+          "kind": "type_tag_main_forms",
+          "type": "武系"
+        },
+        "source": "type_tag_main_forms"
+      },
+      "seed_species": [
+        "动力猿",
+        "卷毛鸭",
+        "古卷匣魔像",
+        "学院呱呱",
+        "小勇狮",
+        "小怂猫",
+        "怒目怂猫",
+        "松仔",
+        "松叶羊",
+        "武者鸡",
+        "水滴蛇",
+        "水蛇锁",
+        "海豹战士",
+        "海豹船长",
+        "深渊蛙",
+        "游蛇魔使",
+        "炽心勇狮",
+        "炽焰狮",
+        "画间沉铁兽",
+        "瞌睡王",
+        "稻草人",
+        "稻草守护者",
+        "绅士鸡",
+        "针叶巡林"
+      ]
+    }
+  ],
+  "claim": {
+    "contains": [
+      "这一版环境里有哪些**可复算识别**的体系（archetype_id + 中文 label + 种子物种 + RC-302 判据构成的 feature_axes）",
+      "每个体系现在已经有的、逐条可核对的依据（evidence[]：url 或仓内文件 + 日期 + 台账六级等级）",
+      "每个体系**还缺什么实机证据**（needs_recording[]）",
+      "各体系在环境里的占比目前是 measured 还是 unknown，以及为什么（distribution[]）",
+      "RC-304 消费这份先验时的输入口径（usage.inputs）"
+    ],
+    "does_not_contain": [
+      "任何胜率、强度分、期望值、榜单名次——本先验**不产出**这类结论，也没有任何真实对局数据可以支撑它们",
+      "任何体系的占比数值：当前没有任何可核对的来源，distribution 全部是 unknown + value: null + reason",
+      "「哪个体系强」的判断：本先验只说清「哪些体系可以被识别、凭什么识别」，强弱要等离线评测与真实对局校准",
+      "任何绕过台账六级的新置信等级"
+    ]
+  },
+  "derived_from": [
+    {
+      "path": "data/roco/evidence/rule-evidence-ledger.json",
+      "role": "rule_evidence_ledger",
+      "sha256": "aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903"
+    },
+    {
+      "path": "data/roco/game-data-pack/v2/pack.json",
+      "role": "game_data_pack",
+      "sha256": "629eef2731464808dc3f4bca55e73c4a69ce1598d1cc0689bb3a70a679164505"
+    },
+    {
+      "path": "data/roco/rulesets/legacy-sim-v1.json",
+      "role": "ruleset_config",
+      "sha256": "f66f760304f1459ab6b62ea2491d8b89a47279b8766b887149622e4e2705cc46"
+    },
+    {
+      "path": "reports/roco/reconciliation/catalog-reconciliation.json",
+      "role": "catalog_reconciliation",
+      "sha256": "bca1bf352a1327b0d32c83c225079c1e4999a792d267fa6e3dc9470d4580c125"
+    },
+    {
+      "path": "data/roco/game-data-pack/v2/schema.json",
+      "role": "pack_schema",
+      "sha256": "7ed3f4b1630730cdaf2720cac49b6a7ba88928ba4d6195264ef531b77b1c3a6b"
+    }
+  ],
+  "distribution": [
+    {
+      "archetype_id": "poison_stack",
+      "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
+      "reason": "体系「毒系消耗」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
+      "source": "unknown",
+      "sources": [],
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "wing_king_flyer",
+      "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
+      "reason": "体系「翼王飞翼」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
+      "source": "unknown",
+      "sources": [],
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "meteor_burst",
+      "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
+      "reason": "体系「陨星爆发」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
+      "source": "unknown",
+      "sources": [],
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "sugar_morph",
+      "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
+      "reason": "体系「萌化叠层」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
+      "source": "unknown",
+      "sources": [],
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "ice_control",
+      "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
+      "reason": "体系「冰系控场」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
+      "source": "unknown",
+      "sources": [],
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "sandstorm_weather",
+      "needs_recording": "该体系还缺 3 条实机证据，逐条见 archetypes[].needs_recording",
+      "reason": "体系「沙暴天气」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
+      "source": "unknown",
+      "sources": [],
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "fighting_press",
+      "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
+      "reason": "体系「武系压制」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
+      "source": "unknown",
+      "sources": [],
+      "unit": null,
+      "value": null
+    }
+  ],
+  "meta_prior_id": "roco-meta-prior/v1#7c077248f9436238",
+  "schema": "roco-meta-prior/v1",
+  "usage": {
+    "consumer": "RC-304（对未知对手的队伍强度口径）。本先验是它的**唯一**版本化环境输入：没有先验就无法把「队伍强不强」写成对环境的期望，只能退化成对单只精灵的描述。",
+    "fields": "usage.inputs 里每个口径都写成**字段说明**，不是散文：definition 说它是什么，inputs 说它吃先验与 RC-302/RC-303 的哪些字段，honesty 说它在什么条件下必须 fail closed。",
+    "honesty": "这份先验**不能用来排序队伍**：它没有任何真实对局数据，distribution 全部是 unknown。它现在能做的只有三件事：定义这一版环境里有哪些可识别的体系、给出每个体系的可复算特征轴、把「我们还缺什么实机证据」列清楚。任何拿它当强度榜用的做法，都越过了它自己写下的边界。",
+    "inputs": {
+      "coverage_confidence": {
+        "consumer_field": "coverage_confidence",
+        "definition": "六宠 build 的规则与数据覆盖：属性倍率、速度档、能耗、应对、换入离场这些判据里，有多少有真实数据支撑、多少是 unknown。",
+        "honesty": "这是当前**唯一**能立刻算出来的口径：它是自我描述（我们知道自己知道多少），不是实力判断。覆盖率低时必须 fail closed 到「本先验只能用来定义体系与特征轴」。",
+        "inputs": [
+          "version_scope.ruleset_config_id（按哪套规则算）",
+          "derived_from[] 的 sha256（先验引用有没有漂移）",
+          "RC-302 的 CONFIDENCE_LEVELS 与 LEDGER_QUANTITIES（哪些量在台账里就是未知）",
+          "archetypes[].confidence（逐体系的证据等级）"
+        ]
+      },
+      "execution_tolerance": {
+        "consumer_field": "execution_tolerance",
+        "definition": "次优操作下掉多少：同一支队伍在非最优操作下的表现衰减。它需要一套可复跑的对局采样，本仓现在没有。",
+        "honesty": "规则本身还在 candidate 阶段时，容错数值一定是伪精确：只能报告「本版不可测」，不许给百分比。",
+        "inputs": [
+          "离线入口 buildOfflineLabelPlan（RC-303 离线段）产出的工作单",
+          "RC-102/RC-103 的出手顺序规则（台账里严格总序仍是 ENGINE_HYPOTHESIS）",
+          "ruleset 配置：energy.max 等量在候选配置与默认配置之间不一致"
+        ]
+      },
+      "expected_meta_value": {
+        "consumer_field": "expected_meta_value",
+        "definition": "六宠队伍对**版本对手分布**的期望表现。它必须先有一个分布，再谈期望；分布现在是 unknown，所以这个口径现在**算不出来**，只能如实返回 unknown 而不是拿一个数代填。",
+        "honesty": "分布 unknown 时禁止输出任何数值型期望：要么标 unknown，要么只给**相对排序**并附上 ENGINE_HYPOTHESIS。",
+        "inputs": [
+          "distribution[].source / value（当前全部 unknown ⇒ 期望无定义）",
+          "archetypes[].archetype_id 与 feature_axes（用来把一支队伍归到体系上）",
+          "RC-303 的 ranker_status（没有版本化 ranker 时只能是 missing，退化成规则相对排序）"
+        ]
+      },
+      "matchup_spread": {
+        "consumer_field": "matchup_spread",
+        "definition": "对局分布散不散：一支队伍是不是严重依赖撞到特定阵容。散度是对分布的矩，分布未知时它同样无定义。",
+        "honesty": "没有 matchup bank 时禁止报散度数值；只能报「无法计算」并列出缺失产物。",
+        "inputs": [
+          "distribution[]（分母）",
+          "逐体系的表现估计（当前不存在：没有离线联赛产物、没有 matchups bank）",
+          "archetypes[].feature_axes（把对手归体系的判据）"
+        ]
+      },
+      "worst_archetype": {
+        "consumer_field": "worst_archetype",
+        "definition": "最怕的主流体系：对每个 archetype 分别算队伍的相对表现，取最差的那个。它需要一个「主流」的定义，而主流 = 分布，分布现在是 unknown。",
+        "honesty": "分布 unknown 时只能输出「按**结构判据**算最吃亏的体系」，并明确标注这不是「最主流」，也不构成胜率结论。",
+        "inputs": [
+          "archetypes[].archetype_id / seed_species / feature_axes",
+          "distribution[].source（判断哪个体系算「主流」）",
+          "RC-302 的 coverage / synergy 诊断（可持续复算的那部分）"
+        ]
+      }
+    },
+    "not_in_scope": "不在范围内：不输出胜率、不排名、不输出上分效率与单只精灵的强弱、不采信社区攻略里的榜单名次。"
+  },
+  "version_scope": {
+    "as_of": "2026-09-21",
+    "ruleset_config_id": "legacy_sim_v1",
+    "ruleset_config_note": "legacy_sim_v1 是**默认**配置，但它的能量上限 6 被台账判为 ENGINE_HYPOTHESIS；mobile_s4_candidate_v2 是候选配置。本先验不替 RC-101 做规则选择，只把当前绑定如实写下来。",
+    "ruleset_config_path": "data/roco/rulesets/legacy-sim-v1.json",
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "season": "S4「月涌狂想」",
+    "season_id": "roco-world-s4-2026-09-10"
+  }
+}

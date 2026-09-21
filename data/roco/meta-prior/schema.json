@@ -1,0 +1,45 @@
+{
+  "schema": "roco-meta-prior-schema/v1",
+  "meta_prior_schema": "roco-meta-prior/v1",
+  "title": "版本化环境先验（Meta prior）契约",
+  "why": "匹配前不知道对手阵容，所以「队伍强不强」只能对着**版本环境分布**去说。在这份契约出现之前，仓库里没有任何地方机器可检查地记着「这一版环境里有哪些体系、每个体系凭什么被识别、占比是多少、哪些结论根本没证据」。一份说不清占比的先验，最后一定会被人用手写的 T0 榜单填满——本 schema 存在的唯一理由就是让它填不进去。",
+  "invariants": [
+    "禁止字段：任何层级出现 win_rate / tier / T0 / strength_score 一类字段（含 null）即不合法。判据在 scripts/roco/meta-prior-lib.mjs#BANNED_KEYS，扫的是**键名**，不是值。",
+    "`seed_species[]` 里的每个物种都必须在 data/roco/game-data-pack/v2/pack.json 的 pet 实体里真实存在（按 name 精确匹配）；`seed_selection.source` 说明它是怎么被选出来的（名称命中 / 是可复算选择器的代表元）。",
+    "`feature_axes[].criterion` 必须是 RC-302（src/coach/team-gaps.js）已经实现的判据 ID；本 schema 不接受自创形容词（例如「压制力强」「版本之子」）。",
+    "`evidence[]` 每条的 `ref` 必须是 http(s) URL，或仓库内**真实存在**的文件路径；`date` 与 `confidence` 都不能缺。",
+    "`confidence` 只能取台账（data/roco/evidence/rule-evidence-ledger.json）的六级：OFFICIAL_CURRENT / RECORDED_IN_GAME / COMMUNITY_CURRENT / CROSS_SOURCE_SUPPORTED / ENGINE_HYPOTHESIS / UNKNOWN。",
+    "`distribution[].source` 只有两种形态：`measured` 必须有至少一条可核对的来源；`unknown` 必须 value=null 且带 reason。没有来源的数值一律非法（构建器 fail closed，verify 与 test 都会拦）。",
+    "`derived_from[]` 的 sha256 必须与磁盘上的文件一致：先验不是新证据，它只是对已有产物的**引用**，引用漂移了就必须重建。"
+  ],
+  "version_scope": {
+    "required": ["season", "ruleset_id", "ruleset_config_id", "as_of"],
+    "note": "四项缺一不可。season 说明这是哪一版环境，ruleset_id + ruleset_config_id 说明按哪套规则算，as_of 说明这些结论是哪天有效的。少任何一项，这份先验就说不清它管的是哪一版。"
+  },
+  "archetype_required": [
+    "archetype_id",
+    "label",
+    "label_source",
+    "seed_species",
+    "seed_selection",
+    "feature_axes",
+    "evidence",
+    "confidence",
+    "needs_recording",
+    "notes"
+  ],
+  "archetype_id_pattern": "^[a-z][a-z0-9_]*$",
+  "axis_enum": ["coverage", "speed", "energy", "respond", "pivot", "synergy", "cost"],
+  "criterion_source": "src/coach/team-gaps.js#DIMENSION_CRITERIA（RC-302）",
+  "confidence_enum": [
+    "OFFICIAL_CURRENT",
+    "RECORDED_IN_GAME",
+    "COMMUNITY_CURRENT",
+    "CROSS_SOURCE_SUPPORTED",
+    "ENGINE_HYPOTHESIS",
+    "UNKNOWN"
+  ],
+  "distribution_source_enum": ["measured", "unknown"],
+  "derived_from_required": ["path", "sha256", "role"],
+  "usage_required": ["consumer", "inputs", "fields", "not_in_scope", "honesty"]
+}

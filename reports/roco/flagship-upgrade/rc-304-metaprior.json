@@ -1,0 +1,766 @@
+{
+  "archetype_count": 7,
+  "archetypes": [
+    {
+      "archetype_id": "poison_stack",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "distribution": {
+        "source": "unknown",
+        "unit": null,
+        "value": null
+      },
+      "evidence_levels": [
+        "ENGINE_HYPOTHESIS",
+        "ENGINE_HYPOTHESIS",
+        "COMMUNITY_CURRENT"
+      ],
+      "feature_axes": [
+        {
+          "axis": "coverage",
+          "criterion": "coverage"
+        },
+        {
+          "axis": "synergy",
+          "criterion": "synergy"
+        },
+        {
+          "axis": "respond",
+          "criterion": "respond"
+        },
+        {
+          "axis": "energy",
+          "criterion": "energy"
+        }
+      ],
+      "label": "毒系消耗",
+      "needs_recording": [
+        "标准 PVP 里「毒」系队伍的实机出场与胜负记录（当前一条都没有）",
+        "中毒 / 剧毒类状态的具体结算时序 microcase（对齐 MC-007 系列）"
+      ],
+      "seed_selection_source": "type_tag_main_forms",
+      "seed_species": [
+        "刺盔虫",
+        "千棘海针",
+        "千棘盔",
+        "厉毒修萝",
+        "厉毒小萝",
+        "古啦多",
+        "古钟蛇",
+        "嘟嘟煲",
+        "嘟嘟锅",
+        "壳栗丝鼠",
+        "多啦多",
+        "多多",
+        "寒音蛇",
+        "尖角蜘蛛",
+        "影狸",
+        "徘徊爪爪",
+        "忽幽狸",
+        "栗鼠",
+        "海盔虫",
+        "烟花伯爵",
+        "烟花团",
+        "琉璃水母",
+        "翡翠水母",
+        "芋香巨角蛛",
+        "裘力",
+        "裘卡",
+        "裘洛",
+        "铆钉毛毛"
+      ],
+      "seed_species_count": 28
+    },
+    {
+      "archetype_id": "wing_king_flyer",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "distribution": {
+        "source": "unknown",
+        "unit": null,
+        "value": null
+      },
+      "evidence_levels": [
+        "ENGINE_HYPOTHESIS",
+        "CROSS_SOURCE_SUPPORTED",
+        "ENGINE_HYPOTHESIS"
+      ],
+      "feature_axes": [
+        {
+          "axis": "speed",
+          "criterion": "speed"
+        },
+        {
+          "axis": "pivot",
+          "criterion": "pivot"
+        },
+        {
+          "axis": "coverage",
+          "criterion": "coverage"
+        }
+      ],
+      "label": "翼王飞翼",
+      "needs_recording": [
+        "「飓风」类特性的实机触发与魔力扣减结算录屏（台账 EV-PVP-FAINT-MANA-LOSS 已挂 MC-E09）",
+        "翼系队伍的实机出场记录（当前一条都没有）"
+      ],
+      "seed_selection_source": "named_in_authority",
+      "seed_species": [
+        "圣羽翼王"
+      ],
+      "seed_species_count": 1
+    },
+    {
+      "archetype_id": "meteor_burst",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "distribution": {
+        "source": "unknown",
+        "unit": null,
+        "value": null
+      },
+      "evidence_levels": [
+        "ENGINE_HYPOTHESIS",
+        "CROSS_SOURCE_SUPPORTED",
+        "ENGINE_HYPOTHESIS"
+      ],
+      "feature_axes": [
+        {
+          "axis": "energy",
+          "criterion": "energy"
+        },
+        {
+          "axis": "coverage",
+          "criterion": "coverage"
+        },
+        {
+          "axis": "cost",
+          "criterion": "cost"
+        }
+      ],
+      "label": "陨星爆发",
+      "needs_recording": [
+        "能量上限到底是 6 还是 10 的实机 microcase（台账 EV-ENERGY-MAX 挂 MC-E01）",
+        "「陨星」这一挂的实机配招与出场记录（当前一条都没有）"
+      ],
+      "seed_selection_source": "name_contains",
+      "seed_species": [
+        "落陨星兔",
+        "陨星虫"
+      ],
+      "seed_species_count": 2
+    },
+    {
+      "archetype_id": "sugar_morph",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "distribution": {
+        "source": "unknown",
+        "unit": null,
+        "value": null
+      },
+      "evidence_levels": [
+        "ENGINE_HYPOTHESIS",
+        "ENGINE_HYPOTHESIS",
+        "COMMUNITY_CURRENT"
+      ],
+      "feature_axes": [
+        {
+          "axis": "energy",
+          "criterion": "energy"
+        },
+        {
+          "axis": "respond",
+          "criterion": "respond"
+        },
+        {
+          "axis": "synergy",
+          "criterion": "synergy"
+        }
+      ],
+      "label": "萌化叠层",
+      "needs_recording": [
+        "萌化层数的获得 / 解除 / 上限实机规则（台账里没有这一条，BANNED 之外的社区说法一律不采信）",
+        "「萌化」体系在标准 PVP 里的实机出场与胜负记录（当前一条都没有）"
+      ],
+      "seed_selection_source": "learnable_move_keyword",
+      "seed_species": [
+        "化蝶",
+        "圆号鱼",
+        "秩序鱿墨",
+        "雪影娃娃",
+        "黑猫巫师"
+      ],
+      "seed_species_count": 5
+    },
+    {
+      "archetype_id": "ice_control",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "distribution": {
+        "source": "unknown",
+        "unit": null,
+        "value": null
+      },
+      "evidence_levels": [
+        "ENGINE_HYPOTHESIS",
+        "COMMUNITY_CURRENT",
+        "COMMUNITY_CURRENT"
+      ],
+      "feature_axes": [
+        {
+          "axis": "coverage",
+          "criterion": "coverage"
+        },
+        {
+          "axis": "speed",
+          "criterion": "speed"
+        },
+        {
+          "axis": "respond",
+          "criterion": "respond"
+        }
+      ],
+      "label": "冰系控场",
+      "needs_recording": [
+        "冰系控制类效果（冻结 / 减速）的实机结算时序（台账里没有条目）",
+        "冰系队伍的实机出场与胜负记录（当前一条都没有）"
+      ],
+      "seed_selection_source": "type_tag_main_forms",
+      "seed_species": [
+        "九尾狐",
+        "冰封怨灵",
+        "冰钻布鲁斯",
+        "呼呼猪",
+        "大耳帽兜",
+        "小电企鹅",
+        "小雪人",
+        "尖嘴狐仙",
+        "布鲁斯",
+        "帽兜娃娃",
+        "幻雪兽",
+        "新月鹭",
+        "月使鹭纳",
+        "月牙雪熊",
+        "月辉鹭",
+        "椰浆布丁",
+        "灵狐",
+        "獠牙猪",
+        "电企鹅",
+        "睡铃雪影娃娃",
+        "脆筒甜甜",
+        "雪娃娃",
+        "雪巨人",
+        "雪影冰灵",
+        "雪影娃娃",
+        "雪怪",
+        "雪灵",
+        "雪灵兽",
+        "雪蛮人",
+        "雪豆丁",
+        "雪顶布鲁斯",
+        "饮雪狂兽"
+      ],
+      "seed_species_count": 32
+    },
+    {
+      "archetype_id": "sandstorm_weather",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "distribution": {
+        "source": "unknown",
+        "unit": null,
+        "value": null
+      },
+      "evidence_levels": [
+        "ENGINE_HYPOTHESIS",
+        "CROSS_SOURCE_SUPPORTED",
+        "ENGINE_HYPOTHESIS"
+      ],
+      "feature_axes": [
+        {
+          "axis": "coverage",
+          "criterion": "coverage"
+        },
+        {
+          "axis": "respond",
+          "criterion": "respond"
+        },
+        {
+          "axis": "pivot",
+          "criterion": "pivot"
+        }
+      ],
+      "label": "沙暴天气",
+      "needs_recording": [
+        "沙暴天气的实机规则：改天气的回合归属、持续 8 回合的计数方式、天气结束时的时序（台账里没有条目）",
+        "哪几只精灵真的学得到「沙涌 / 扬尘 / 流沙统治者」——冻结迁移层 12 只里**一只都没有**，需要更全的学招数据或实机录屏",
+        "沙暴体系的实机出场记录（当前一条都没有）"
+      ],
+      "seed_selection_source": "none_available",
+      "seed_species": [],
+      "seed_species_count": 0
+    },
+    {
+      "archetype_id": "fighting_press",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "distribution": {
+        "source": "unknown",
+        "unit": null,
+        "value": null
+      },
+      "evidence_levels": [
+        "ENGINE_HYPOTHESIS",
+        "CROSS_SOURCE_SUPPORTED",
+        "COMMUNITY_CURRENT"
+      ],
+      "feature_axes": [
+        {
+          "axis": "coverage",
+          "criterion": "coverage"
+        },
+        {
+          "axis": "speed",
+          "criterion": "speed"
+        },
+        {
+          "axis": "energy",
+          "criterion": "energy"
+        }
+      ],
+      "label": "武系压制",
+      "needs_recording": [
+        "出手顺序的完整排序键与并列时的逐项降级（台账 EV-TURN-ORDER-STRICT 已挂 MC-E05）",
+        "武系队伍的实机出场与胜负记录（当前一条都没有）"
+      ],
+      "seed_selection_source": "type_tag_main_forms",
+      "seed_species": [
+        "动力猿",
+        "卷毛鸭",
+        "古卷匣魔像",
+        "学院呱呱",
+        "小勇狮",
+        "小怂猫",
+        "怒目怂猫",
+        "松仔",
+        "松叶羊",
+        "武者鸡",
+        "水滴蛇",
+        "水蛇锁",
+        "海豹战士",
+        "海豹船长",
+        "深渊蛙",
+        "游蛇魔使",
+        "炽心勇狮",
+        "炽焰狮",
+        "画间沉铁兽",
+        "瞌睡王",
+        "稻草人",
+        "稻草守护者",
+        "绅士鸡",
+        "针叶巡林"
+      ],
+      "seed_species_count": 24
+    }
+  ],
+  "audit_rules": [
+    {
+      "code": "SCHEMA",
+      "direction": "顶层 schema / meta_prior_id 不对，或版本作用域缺赛季、ruleset_id、ruleset_config_id、as_of 里的任意一项 ⇒ 红"
+    },
+    {
+      "code": "BANNED_KEY",
+      "direction": "任何层级出现胜率 / 榜单 / 强度分一类**键名**（写成 null 也算）⇒ 红"
+    },
+    {
+      "code": "ARCHETYPE_SHAPE",
+      "direction": "体系缺必填字段、archetype_id 不合 ^[a-z][a-z0-9_]*$、或 archetype_id 重复 ⇒ 红"
+    },
+    {
+      "code": "SEED_SPECIES",
+      "direction": "`seed_species[]` 里的物种在 pack 的 pet 实体里不存在 ⇒ 红（写了一个不存在的精灵名，等于编造环境里有它）"
+    },
+    {
+      "code": "SEED_SELECTION",
+      "direction": "体系没有任何种子物种却不声明 seed_selection.source=\"none_available\" 且 needs_recording 为空 ⇒ 红"
+    },
+    {
+      "code": "CRITERION",
+      "direction": "feature_axes[].criterion 不是 RC-302 已实现的判据 ID（自创形容词）⇒ 红"
+    },
+    {
+      "code": "EVIDENCE",
+      "direction": "某条 evidence 的 ref 既不是 http(s)、也不是仓里真实存在的文件，或缺 date / confidence ⇒ 红"
+    },
+    {
+      "code": "CONFIDENCE",
+      "direction": "confidence 用了台账六级之外的等级 ⇒ 红"
+    },
+    {
+      "code": "DISTRIBUTION",
+      "direction": "distribution 缺某个体系的一条；`measured` 却没有来源 → 红；`unknown` 却带非 null value 或没有 reason → 红"
+    },
+    {
+      "code": "USAGE",
+      "direction": "usage.inputs 缺 RC-304 的五个口径之一，或某个口径没有可读说明 ⇒ 红"
+    },
+    {
+      "code": "DERIVED_FROM",
+      "direction": "derived_from 缺必需角色、引用的文件不存在、或 sha256 与磁盘不一致 ⇒ 红（先验引用的产物已经变了）"
+    },
+    {
+      "code": "CHECK",
+      "direction": "`--check` 时磁盘上的 v1.json 与重新构建的结果不一致（含排序）⇒ 红"
+    }
+  ],
+  "criteria": [
+    {
+      "actual": "命中 0 条",
+      "criteria": "递归扫全部键名，命中 BANNED_KEYS 即红；BANNED_KEYS ⊇ RC-302 的 BANNED_CLAIM_KEYS。",
+      "label": "先验里没有任何胜率 / 榜单 / 强度分字段（含 null）",
+      "ok": true
+    },
+    {
+      "actual": "92 个种子，问题 0 条",
+      "criteria": "每个 seed_species 名字必须在 pack.json 的 pet 实体 name 集合（504 个）里逐字命中。",
+      "label": "种子物种在 pack 的 pet 实体里真实存在",
+      "ok": true
+    },
+    {
+      "actual": "用到 cost / coverage / energy / pivot / respond / speed / synergy",
+      "criteria": "criterion ∈ coverage / speed / energy / respond / pivot / synergy / cost（src/coach/team-gaps.js#DIMENSION_CRITERIA 的键）。",
+      "label": "feature_axes 复用的是 RC-302 已实现的判据，不是自创形容词",
+      "ok": true
+    },
+    {
+      "actual": "21 条证据，等级分布 {\"OFFICIAL_CURRENT\":0,\"RECORDED_IN_GAME\":0,\"COMMUNITY_CURRENT\":5,\"CROSS_SOURCE_SUPPORTED\":4,\"ENGINE_HYPOTHESIS\":12,\"UNKNOWN\":0}",
+      "criteria": "evidence[].ref 解析失败或缺 date / confidence 即红；confidence ∉ 台账六级即红。",
+      "label": "逐条证据可核对（http(s) 或仓内真实文件）且带日期与台账六级等级",
+      "ok": true
+    },
+    {
+      "actual": "带台账锚点的证据 11 条，台账条目 20 条",
+      "criteria": "evidence[].ledger_entry 形如 EV-* 时：该条目必须真的在 rule-evidence-ledger.json 里，且 confidence 与 ref 必须等于台账该条目的等级与首要来源（抄一份就会漂移）。",
+      "label": "逐条证据能指回台账条目，且等级与首要来源都与台账一致",
+      "ok": true
+    },
+    {
+      "actual": "measured 0 项 / unknown 7 项",
+      "criteria": "measured ⇒ sources 非空 + value 有限 + value_source；unknown ⇒ value === null + reason ≥ 12 字符 + 不挂 sources。",
+      "label": "distribution 只有两种形态：measured（有来源）或 unknown（value=null + reason）",
+      "ok": true
+    },
+    {
+      "actual": "rule_evidence_ledger:aefd634a8baf… | game_data_pack:629eef273146… | ruleset_config:f66f760304f1… | catalog_reconciliation:bca1bf352a13… | pack_schema:7ed3f4b16307…",
+      "criteria": "对每个引用路径重新算 sha256，与先验里写的比对；不一致即红（说明先验引用的产物已经换代）。",
+      "label": "derived_from 的 sha256 与磁盘一致",
+      "ok": true
+    },
+    {
+      "actual": "{\"season\":\"S4「月涌狂想」\",\"season_id\":\"roco-world-s4-2026-09-10\",\"ruleset_id\":\"roco-world-s4-2026-09-10\",\"ruleset_config_id\":\"legacy_sim_v1\",\"ruleset_config_path\":\"data/roco/rulesets/legacy-sim-v1.json\",\"ruleset_config_note\":\"legacy_sim_v1 是**默认**配置，但它的能量上限 6 被台账判为 ENGINE_HYPOTHESIS；mobile_s4_candidate_v2 是候选配置。本先验不替 RC-101 做规则选择，只把当前绑定如实写下来。\",\"as_of\":\"2026-09-21\"}",
+      "criteria": "version_scope 四项任一缺失或为空即红；还要与 pack 的规则绑定、台账的 ruleset_id 对得上。",
+      "label": "版本作用域四项齐全（赛季 + ruleset_id + ruleset_config_id + as_of）",
+      "ok": true
+    },
+    {
+      "actual": "磁盘上的 v1.json 与重新构建的结果逐字节一致",
+      "criteria": "node scripts/roco/build-meta-prior.mjs --check 比较重建文本与磁盘文本。",
+      "label": "构建可复跑：磁盘上的 v1.json 与重建结果逐字节一致",
+      "ok": true
+    },
+    {
+      "actual": "expected_meta_value / worst_archetype / matchup_spread / execution_tolerance / coverage_confidence",
+      "criteria": "usage.inputs 必须恰好覆盖 expected_meta_value / worst_archetype / matchup_spread / execution_tolerance / coverage_confidence，每个带 definition / inputs / honesty。",
+      "label": "usage 覆盖 RC-304 的五个口径",
+      "ok": true
+    }
+  ],
+  "criteria_used": [
+    "cost",
+    "coverage",
+    "energy",
+    "pivot",
+    "respond",
+    "speed",
+    "synergy"
+  ],
+  "determinism": {
+    "actual": "两次构建 28862 / 28862 字节，identical=true",
+    "criteria": "同一份输入连续两次 buildMetaPrior() 的 stableStringify 必须逐字节相同（没有挂钟字段、排序固定）。",
+    "ok": true
+  },
+  "distribution": [
+    {
+      "archetype_id": "poison_stack",
+      "source": "unknown",
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "wing_king_flyer",
+      "source": "unknown",
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "meteor_burst",
+      "source": "unknown",
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "sugar_morph",
+      "source": "unknown",
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "ice_control",
+      "source": "unknown",
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "sandstorm_weather",
+      "source": "unknown",
+      "unit": null,
+      "value": null
+    },
+    {
+      "archetype_id": "fighting_press",
+      "source": "unknown",
+      "unit": null,
+      "value": null
+    }
+  ],
+  "distribution_note": "仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以七个体系的占比全部是 unknown + value: null + reason。构建器在缺来源时**拒绝**写数值（fail closed）。",
+  "distribution_source": "unknown",
+  "evidence_confidence": {
+    "COMMUNITY_CURRENT": 5,
+    "CROSS_SOURCE_SUPPORTED": 4,
+    "ENGINE_HYPOTHESIS": 12,
+    "OFFICIAL_CURRENT": 0,
+    "RECORDED_IN_GAME": 0,
+    "UNKNOWN": 0
+  },
+  "evidence_count": 21,
+  "generated_by": "tests/roco-meta-prior.test.js（RC304_WRITE_REPORT=1 可重新生成；纯函数，无挂钟字段）",
+  "ledger_unknown_quantities_carried_over": [
+    "speed tie（同速谁先动）= UNKNOWN",
+    "能量上限 6 还是 10 = ENGINE_HYPOTHESIS（台账 EV-ENERGY-MAX）"
+  ],
+  "meta_prior_id": "roco-meta-prior/v1#7c077248f9436238",
+  "missing_real_evidence": [
+    "「萌化」体系在标准 PVP 里的实机出场与胜负记录（当前一条都没有）",
+    "「陨星」这一挂的实机配招与出场记录（当前一条都没有）",
+    "「飓风」类特性的实机触发与魔力扣减结算录屏（台账 EV-PVP-FAINT-MANA-LOSS 已挂 MC-E09）",
+    "中毒 / 剧毒类状态的具体结算时序 microcase（对齐 MC-007 系列）",
+    "冰系控制类效果（冻结 / 减速）的实机结算时序（台账里没有条目）",
+    "冰系队伍的实机出场与胜负记录（当前一条都没有）",
+    "出手顺序的完整排序键与并列时的逐项降级（台账 EV-TURN-ORDER-STRICT 已挂 MC-E05）",
+    "哪几只精灵真的学得到「沙涌 / 扬尘 / 流沙统治者」——冻结迁移层 12 只里**一只都没有**，需要更全的学招数据或实机录屏",
+    "标准 PVP 里「毒」系队伍的实机出场与胜负记录（当前一条都没有）",
+    "武系队伍的实机出场与胜负记录（当前一条都没有）",
+    "沙暴体系的实机出场记录（当前一条都没有）",
+    "沙暴天气的实机规则：改天气的回合归属、持续 8 回合的计数方式、天气结束时的时序（台账里没有条目）",
+    "翼系队伍的实机出场记录（当前一条都没有）",
+    "能量上限到底是 6 还是 10 的实机 microcase（台账 EV-ENERGY-MAX 挂 MC-E01）",
+    "萌化层数的获得 / 解除 / 上限实机规则（台账里没有这一条，BANNED 之外的社区说法一律不采信）"
+  ],
+  "not_a_ranking": [
+    "不能用它给队伍排序：它没有任何真实对局数据，分布全部是 unknown，期望值、散度、容错都无定义。",
+    "不能用它说「哪个体系强」：它只登记「哪些体系可以被识别、凭什么识别」，强弱要等离线评测与真实对局校准。",
+    "不能把它当成胜率来源：先验里连一个数值型占比都没有，更没有胜率字段。",
+    "不能把社区攻略的排名搬进来：台账只允许台账六级，社区结论不得升成官方结论。",
+    "不能拿它当「最新版本」的通用结论：它绑定 S4「月涌狂想」+ roco-world-s4-2026-09-10 + legacy_sim_v1 + 2026-09-21，换版本必须重建。"
+  ],
+  "red_proofs": [
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[BANNED_KEY] archetypes[1].win_rate：这是禁令字段名（禁令与 RC-302 BANNED_CLAIM_KEYS 同源）：它要么给出胜率/榜单式的伪精确结论，要么让人以为这份先验以后会填它。写 null 也不允许——禁令必须是结构性的。",
+      "expect_code": "BANNED_KEY",
+      "id": "1",
+      "label": "给某个体系填 win_rate ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "archetypes[].win_rate"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[BANNED_KEY] archetypes[0].tier：这是禁令字段名（禁令与 RC-302 BANNED_CLAIM_KEYS 同源）：它要么给出胜率/榜单式的伪精确结论，要么让人以为这份先验以后会填它。写 null 也不允许——禁令必须是结构性的。",
+      "expect_code": "BANNED_KEY",
+      "id": "1b",
+      "label": "把禁令字段写成 null 也 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "archetypes[].tier = null"
+    },
+    {
+      "actual": "ok=false；问题 3 条，去掉 meta_prior_id 漂移后：[DISTRIBUTION] distribution[poison_stack].sources：source=\"measured\" 却没有任何来源：占比必须逐条给 url/文件 + 日期 + 等级，缺来源的数值一律不合法 | [DISTRIBUTION] distribution[poison_stack].value_source：measured 必须写清这个数值本身出自哪里：value_source.availability ∈ {available, not_available}，available 时 ref 必须可核对",
+      "expect_code": "DISTRIBUTION",
+      "id": "2",
+      "label": "distribution 缺来源却写成 measured ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "distribution[].sources"
+    },
+    {
+      "actual": "ok=false；问题 3 条，去掉 meta_prior_id 漂移后：[DISTRIBUTION] distribution[poison_stack].sources：source=\"measured\" 却没有任何来源：占比必须逐条给 url/文件 + 日期 + 等级，缺来源的数值一律不合法 | [DISTRIBUTION] distribution[poison_stack].value_source：measured 必须写清这个数值本身出自哪里：value_source.availability ∈ {available, not_available}，available 时 ref 必须可核对",
+      "expect_code": "DISTRIBUTION",
+      "id": "2b",
+      "label": "measured 有来源却没写清数值出自哪里 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "distribution[].value_source"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DISTRIBUTION] distribution[sugar_morph].value：source=\"unknown\" 时 value 必须是 null，实际 0.25（我们没有任何真实对局数据，不许用看起来合理的数字填充）",
+      "expect_code": "DISTRIBUTION",
+      "id": "3",
+      "label": "unknown 却带非 null value ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "distribution[].value"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DISTRIBUTION] distribution[sugar_morph].reason：source=\"unknown\" 时必须写清原因（至少 12 个字符），实际 \"\"",
+      "expect_code": "DISTRIBUTION",
+      "id": "3b",
+      "label": "unknown 没有 reason ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "distribution[].reason"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[SEED_SPECIES] archetypes[meteor_burst].seed_species[0]：陨星龙王 不在 pack 的 pet 实体里（pack 现有 504 个名字）——先验不许写环境里不存在的精灵",
+      "expect_code": "SEED_SPECIES",
+      "id": "4",
+      "label": "seed_species 引用不存在的精灵 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "archetypes[].seed_species"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[CONFIDENCE] archetypes[poison_stack].confidence：confidence 不在台账六级里：\"VERIFIED_OFFICIAL\"（六级 = OFFICIAL_CURRENT / RECORDED_IN_GAME / COMMUNITY_CURRENT / CROSS_SOURCE_SUPPORTED / ENGINE_HYPOTHESIS / UNKNOWN）",
+      "expect_code": "CONFIDENCE",
+      "id": "5",
+      "label": "confidence 用了台账之外的等级 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "archetypes[].confidence"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[CONFIDENCE] archetypes[poison_stack].evidence[2].confidence：台账 EV-TYPE-MULTIPLIER 的等级是 COMMUNITY_CURRENT，这里写的是 OFFICIAL_CURRENT（等级只能与台账一致）",
+      "expect_code": "CONFIDENCE",
+      "id": "5c",
+      "label": "逐条证据的等级与台账不一致 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "archetypes[].evidence[].confidence"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[EVIDENCE] archetypes[poison_stack].evidence[0].ref：ref 既不是 http(s)、也不是仓里真实存在的文件：\"docs/roco/根本不存在.md\"",
+      "expect_code": "EVIDENCE",
+      "id": "6",
+      "label": "evidence 的 url/文件不可核对 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "archetypes[].evidence[].ref"
+    },
+    {
+      "actual": "ok=false；问题 5 条，去掉 meta_prior_id 漂移后：[SCHEMA] version_scope.season：版本作用域的 season 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版 | [SCHEMA] version_scope.ruleset_id：版本作用域的 ruleset_id 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版 | [SCHEMA] version_scope.ruleset_config_id：版本作用域的 ruleset_config_id 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版 | [SCHEMA] version_scope.as_of：版本作用域的 as_of 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版",
+      "expect_code": "SCHEMA",
+      "id": "7",
+      "label": "version_scope 缺赛季或 ruleset ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "version_scope.*"
+    },
+    {
+      "actual": "ok=false；问题 3 条，去掉 meta_prior_id 漂移后：[CRITERION] archetypes[poison_stack].feature_axes[0].axis：axis 不在 RC-302 的七维里：\"看起来很压制\" | [CRITERION] archetypes[poison_stack].feature_axes[0].criterion：criterion 不是 src/coach/team-gaps.js#DIMENSION_CRITERIA 的判据 ID：\"看起来很压制\"（合法 ID：coverage / speed / energy / respond / pivot / synergy / cost）——先验不许自创形容词",
+      "expect_code": "CRITERION",
+      "id": "9",
+      "label": "feature_axes 用自创形容词当判据 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "archetypes[].feature_axes[].criterion"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DERIVED_FROM] derived_from[1].sha256：data/roco/game-data-pack/v2/pack.json 的 sha256 与磁盘不一致：先验写 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘是 629eef2731464808dc3f4bca55e73c4a69ce1598d1cc0689bb3a70a679164505",
+      "expect_code": "DERIVED_FROM",
+      "id": "10",
+      "label": "derived_from 的 sha256 与磁盘不一致 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "derived_from[].sha256"
+    },
+    {
+      "actual": "ok=false；问题 1 条，去掉 meta_prior_id 漂移后：(无)",
+      "expect_code": "SCHEMA",
+      "id": "11",
+      "label": "改了正文却不更新 meta_prior_id ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "meta_prior_id"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[SEED_SPECIES] archetypes[sandstorm_weather].seed_species：没有种子物种时，必须声明 seed_selection.source=\"none_available\"、写清 note、并且 needs_recording 非空（实际 source=\"learnable_move_keyword\"、needs_recording=0 条）",
+      "expect_code": "SEED_SPECIES",
+      "id": "13",
+      "label": "空种子却不声明 none_available ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "archetypes[].seed_species"
+    }
+  ],
+  "report_version": "roco-rc304-metaprior-report/v1",
+  "seed_species_total": 92,
+  "soft_problems": [],
+  "upstream": {
+    "builder": "scripts/roco/build-meta-prior.mjs",
+    "contract": "data/roco/meta-prior/v1.json",
+    "design_docs": [
+      "/tmp/roco-coach-handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md §3 / §4",
+      "/tmp/roco-coach-handoff-revised-2026-09-21/10-SOURCES-AND-CONFIDENCE.md"
+    ],
+    "schema": "data/roco/meta-prior/schema.json",
+    "task": "MetaPriorV1 —— 版本化环境先验契约（RC-304 的前置）",
+    "verifier": "scripts/roco/verify-meta-prior.mjs"
+  },
+  "verifier_codes": [
+    "ARCHETYPE_SHAPE",
+    "BANNED_KEY",
+    "CHECK",
+    "CONFIDENCE",
+    "CRITERION",
+    "DERIVED_FROM",
+    "DISTRIBUTION",
+    "EVIDENCE",
+    "SCHEMA",
+    "SEED_SELECTION",
+    "SEED_SPECIES",
+    "USAGE"
+  ],
+  "version_scope": {
+    "as_of": "2026-09-21",
+    "ruleset_config_id": "legacy_sim_v1",
+    "ruleset_config_note": "legacy_sim_v1 是**默认**配置，但它的能量上限 6 被台账判为 ENGINE_HYPOTHESIS；mobile_s4_candidate_v2 是候选配置。本先验不替 RC-101 做规则选择，只把当前绑定如实写下来。",
+    "ruleset_config_path": "data/roco/rulesets/legacy-sim-v1.json",
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "season": "S4「月涌狂想」",
+    "season_id": "roco-world-s4-2026-09-10"
+  },
+  "what_it_can_do_now": [
+    "定义这一版环境里有哪些可识别的体系（archetype_id + 中文 label）。",
+    "给出每个体系的可复算特征轴（feature_axes，判据直接引用 RC-302）。",
+    "把「我们还缺什么实机证据」列清楚（needs_recording，按体系聚合）。",
+    "给 RC-304 提供 coverage_confidence 这一条**现在就能算**的口径（自我描述，不是实力判断）。"
+  ]
+}
