@@ -107,7 +107,16 @@ Mac 负责 27B 量化推理/教学式 LoRA 与产品 Demo；两机靠版本化�
 下一轮按 P1-1/P1-4 做**玩家界面重排**：复用既有设计系统（配色/字体/组件/间距 token），
 把「验收台」的观感换掉；先做一屏 mockup 截图给监工看过再铺开。
 
-### C7. 已派出的子 agent（简报原文见会话，这里记要点，丢了也能重建）
+### C6.5 第 45 轮下半场新增完成项（接在 C1—C6 之后）
+
+| 项 | 状态 | 证据 |
+|---|---|---|
+| **C4 用户亲训 27B 的引导**（`e851284`） | ✅ 交付 | `scripts/train/` 三个引导脚本 + 共享底座 + 夹具库；`docs/roco/QWEN-27B-USER-RUN-GUIDE.md`、`TRAINING-ROADMAP-4B-27B-VALUE.md`；`test --selftest` 共 **51 条断言全绿**（14/14 + 21/21 + 16/16），每套含必红反证；「脚本不能自己动手」是**可执行判据**（源码扫子进程/联网/写文件 API 即抛错）。**没有下载、没有训练、没有连 3060、4B v4 未动**。用户第一步：`npm run train:prereqs`（会给出 `must-measure`，不是 ready） |
+| **C6 界面改用你留的框架**（`6581ae1`） | 🟡 第一步完成 | `roco.html` 现在先加载 `src/client/style.css`，`roco.css` 只留本页差异；伙伴卡/后备/阵容卡/两侧面板改用框架组件（`.pet-icon/.hp-track/.energy/.pet-option/.bench-pet/.combatant/.arena`）；**验收脚本依赖的类名一个没动**。从截图里看出并修掉 4 件（中间列文字竖排、误删 `.chip`、结算结果显示英文 `win`、窄卡折行与六维被裁）。`demo-acceptance` **75 通过 / 0 失败**。**仍缺**：整页信息层级与「像游戏而不是验收台」的进一步重排（下一轮先出 mockup 给监工看） |
+| 全量 kind 覆盖扫描（2640 局） | ⏳ 后台在跑 | 产物 `reports/roco/demo-acceptance/coach-kind-coverage-scan.json`（当前盘上还是 330 局的抽样版本，落盘后要提交并与矩阵对账） |
+| **C1 48 只覆盖与规模**（子 agent） | ⏳ 进行中 | 已产出未提交：`docs/roco/ROSTER-48.md`、`ROSTER-60.md`、`COVERAGE-AXES.md`、`COVERAGE-LAYERS.md`、`STRESS-AND-PLANNING-DESIGN.md`、`scripts/roco/audit-roster-48.py`、`reports/roco/coverage/`，并改了 `docs/roco/PET-SUPPORT-MATRIX.md`。**它报告前不要提交这些路径**（`ff81037` 的教训：不要收在写的文件） |
+
+
 
 | 子 agent | 任务要点 | 交付物（约定） | 边界 |
 |---|---|---|---|
@@ -693,7 +702,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `30935d8`（`feat(companion): 「她记住了什么」在页面上可见、可逐条忘掉（P1-3）`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后当前一两个提交是正常的：写文档本身也要一次提交。）**第 45 轮两次更正**：这一行先是 `cf05b09`（落后 3 个提交，`verify:state-doc` 允许落后 ≤12 所以没报错），改成 `3654ff1` 之后又落后了 6 个提交——**这一行必须跟着每个阶段的最后一个提交走**，它是「接手的人从哪继续」的锚点 |
+| HEAD | `e851284`（`feat(train): Qwen3.8-27B 的**用户亲训**引导脚本与教学文档（C4，不代跑）`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 9-9 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance.json` 的 `summary.passed/total`），不在这里手抄 |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
