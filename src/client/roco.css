@@ -219,7 +219,15 @@ body[data-roco-picking="yes"] #action-panel{display:none}
 .hint{position:fixed;left:50%;transform:translateX(-50%);
  bottom:calc(var(--bottombar,0px) + 14px);width:min(680px,calc(100vw - 32px));
  background:#1e2d32;border:1px solid #698d7b;border-radius:12px;padding:10px 14px;
- box-shadow:0 10px 40px #0008;z-index:24}
+ /* z-index 31：浮条必须**盖在开发者抽屉（`#about-drawer` 是 30）之上**。
+    手机版式里抽屉是全宽、贴着页面顶部的一整块，实测它会把浮条的**第一行**
+    （「做什么」）压掉一半——浮条自己量到的高度是对的，所以这种遮挡只有
+    「谁在最上面」能抓住。第 64 轮把这条从 24 调到 31 就是修这个。 */
+ box-shadow:0 10px 40px #0008;z-index:31;
+ /* 展开比较区之后浮条会长高（第 64 轮）：**整条浮条**不许顶出视口，
+    否则「做什么 / 为什么」这两行会被推到屏幕外面——玩家点开比较区反而看不到结论。
+    超出部分在浮条内部滚动，底边（贴着动作栏）不动。 */
+ max-height:calc(100vh - var(--bottombar,0px) - 28px);overflow:auto;overscroll-behavior:contain}
 .hint-line{display:flex;align-items:flex-start;gap:9px}
 .hint-line strong{color:#bbebc5;font-size:13px;white-space:nowrap}
 .hint-line p{margin:0;flex:1;min-width:0;font-size:13.5px;line-height:1.6;
@@ -230,6 +238,12 @@ body[data-roco-picking="yes"] #action-panel{display:none}
 .hint-body{margin-top:8px;font-size:12px;line-height:1.7;color:#b9c7d4;
  border-top:1px dashed #3d5560;padding-top:7px}
 .hint-body p{margin:6px 0}
+/* 并列比较区（第 64 轮）：动作逐条列，每条自带【事实】/【估计】/【不确定】标签。 */
+.hint-body ul.cmp{list-style:none;margin:4px 0 8px;padding:0;display:grid;gap:5px}
+.hint-body ul.cmp li{background:#16222f;border:1px solid #2c3d4a;border-radius:8px;
+ padding:6px 8px;font-size:12px;line-height:1.6}
+.hint-body ul.cmp li[data-cmp-recommended="yes"]{border-color:#698d7b;background:#1a2b2c}
+.hint-body ul.cmp b{color:#dbe7f0}
 
 /* ── 伙伴详情抽屉：面板数值 + 四个技能（卡片首层不放这些）─────────────────── */
 .pet-detail{position:fixed;right:16px;top:118px;bottom:calc(var(--bottombar,0px) + 16px);

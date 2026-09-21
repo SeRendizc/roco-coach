@@ -1,0 +1,478 @@
+{
+ "generated_by": "scripts/roco/browser-product-wiring.mjs",
+ "schema": "roco-product-wiring/v1",
+ "generated_at": "2026-09-21T09:09:31.711Z",
+ "url": "http://127.0.0.1:56933/roco.html",
+ "match": {
+  "battle_id": "s1-22ywr7gs",
+  "seed": 20260921,
+  "result": "win",
+  "turn": 17,
+  "events": 118,
+  "mine": [
+   "音速犬",
+   "雪影娃娃",
+   "圆号鱼"
+  ],
+  "foe": [
+   "音速犬"
+  ],
+  "bubbles_auto": 2
+ },
+ "coach": {
+  "auto_bubbles": [
+   {
+    "at": "turn-3",
+    "hidden": false,
+    "turn": 4,
+    "action": "micro_hint",
+    "gate": null,
+    "reason": "moderate-risk",
+    "layer": {
+     "active": false,
+     "suppress": false,
+     "reason": "layer-error",
+     "mode": "off",
+     "model_status": "error",
+     "probability": null,
+     "threshold": null
+    },
+    "kind": "ko-now",
+    "text": "「火云车」估 414，够收对面「音速犬」这 366 血：这一轮直接收",
+    "why": "依据：对面只剩 366 血，「火云车」的估算伤害（414）把它盖住了 · 风险：对面换人可以先躲掉这一下（换人比技能先动）"
+   },
+   {
+    "at": "turn-4",
+    "hidden": false,
+    "turn": 4,
+    "action": "defer_to_review",
+    "gate": null,
+    "reason": "cooldown",
+    "layer": null,
+    "kind": null,
+    "text": "这一手值得留到局后看一眼。现在先按你的判断走。",
+    "why": "依据：cooldown"
+   }
+  ],
+  "manual_compare": {
+   "turn": 4,
+   "hidden": false,
+   "text": "「火云车」估 414，够收对面「音速犬」这 190 血：这一轮直接收",
+   "why": "依据：对面只剩 190 血，「火云车」的估算伤害（414）把它盖住了 · 风险：对面换人可以先躲掉这一下（换人比技能先动）",
+   "planStatus": "已在浮条上给出这一手（第 4 回合）；展开可看并列比较",
+   "acts": [
+    "防御",
+    "火苗",
+    "火云车"
+   ],
+   "rec": [
+    "火云车"
+   ],
+   "future": [
+    "【事实】引擎把这一手往后算了 2 层、覆盖 87 个分支（固定分析种子 11/29/47）。",
+    "【估计】期望估计：0.88（三个分析种子给出同一个值，所以这里没有区间可报）",
+    "【估计】对手最可能的应对：「防御」——引擎说这是启发式建模，不是真人行为。",
+    "【估计】按未核验公式估，这一步能打出 88~414 点伤害；最高的是「火云车」；对面场上还剩 190，够收掉",
+    "【不确定】风险：期望到最坏差 0.7737 · 最差的对手选择是「防御」"
+   ],
+   "tags": {
+    "fact": true,
+    "estimate": true,
+    "uncertain": true
+   },
+   "legal": [
+    "防御",
+    "火苗",
+    "火云车",
+    "焚烧烙印",
+    "换上第2位",
+    "换上第3位",
+    "使用净化药",
+    "使用回复药",
+    "使用能量果",
+    "撤退"
+   ],
+   "plan": {
+    "branches": 87,
+    "depth": 2,
+    "counter": "防御",
+    "recommendation": "火云车",
+    "stable": true
+   }
+  },
+  "quiet_position_fallback": {
+   "hook": "explicit-facts",
+   "hintAction": "explicit-facts",
+   "hidden": false,
+   "text": "这一手引擎没有值得单独说的局面事实：下面是它真的给了的东西，你自己挑。",
+   "acts": 3,
+   "future": 5
+  }
+ },
+ "teacher": {
+  "lesson": "shown",
+  "goal": "read-the-replacement-first",
+  "point": "first-faint",
+  "repeat": "no",
+  "checked": "no",
+  "improved": "unknown",
+  "cardHidden": false,
+  "question": "这一局一共 17 个回合，最后赢了下来。第 4 回合 对方第 1 位 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。",
+  "learning": "这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。",
+  "progress": "",
+  "note": "依据：第 4 回合：对方第 1 位 倒下（第一次减员）。 对方第 1 位 第 4 回合倒下，之后我方第 6 回合那一手倍率 0.5，用的是「火苗」（打在抵抗上）。",
+  "turnLine": "关键转折在第 4 回合（这一局 17 个回合）。",
+  "teachRows": 1
+ },
+ "companion": {
+  "register": "R1",
+  "why": "玩家主动搭话：先接住这句话，再落一件自己真的记得的事",
+  "seen": "yes",
+  "reply": "潮甲龟啊。这1局的记录里，它一次都没倒下过。",
+  "rows": [
+   "本命：潮甲龟",
+   "称呼：老王"
+  ],
+  "statedRows": 2,
+  "storedStated": [
+   "称呼：老王",
+   "本命：潮甲龟"
+  ],
+  "memoryHook": "2"
+ },
+ "local_model": {
+  "latency_ms": 474,
+  "digest_pin": "a5cb0fbcc53f",
+  "panel": " 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 474 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 / 不一致」。模型只提议工具，它给的参数仍要由规则引擎逐项校验后才生效，最终结论始终以规则引擎为准。 面板只在开发者抽屉里，玩家正文不经过它。默认不自动跑。",
+  "rule_advice_before": {
+   "advice": "这一手值得留到局后看一眼。现在先按你的判断走。",
+   "plan": "火云车",
+   "plan_at_version": 25,
+   "state_version": 120
+  },
+  "rule_advice_after": {
+   "advice": "这一手值得留到局后看一眼。现在先按你的判断走。",
+   "plan": "火云车",
+   "plan_at_version": 25,
+   "state_version": 120
+  }
+ },
+ "wiring": {
+  "rag": {
+   "browser": {
+    "events": 118,
+    "events_with_evidence": 51,
+    "sample": [
+     {
+      "kind": "defense",
+      "text": "我方用防御防御，减伤约 0.7。",
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     },
+     {
+      "kind": "defense",
+      "text": "对方用防御防御，减伤约 0.7。",
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     }
+    ],
+    "raw_drawer_has_evidence": true,
+    "raw_drawer_len": 1098
+   },
+   "engine_roster_evidence_ids": [
+    "ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2"
+   ],
+   "browser_roster_keys": [
+    "ok",
+    "total",
+    "offset",
+    "limit",
+    "count",
+    "usable_count",
+    "team_size",
+    "note",
+    "pets"
+   ]
+  },
+  "memory": {
+   "stated": [
+    {
+     "kind": "address",
+     "label": "称呼：老王",
+     "value": "老王"
+    },
+    {
+     "kind": "favorite",
+     "label": "本命：潮甲龟",
+     "value": "turtle"
+    }
+   ],
+   "journal_kinds": [
+    "teach"
+   ],
+   "stored_stated": 2,
+   "stored_journal": 1,
+   "visible_rows": [
+    "本命：潮甲龟",
+    "称呼：老王"
+   ]
+  },
+  "rl": {
+   "page_layer": {
+    "active": false,
+    "suppress": false,
+    "reason": "layer-error",
+    "mode": "off",
+    "model_status": "error",
+    "probability": null,
+    "threshold": null
+   },
+   "displayed_action": "defer_to_review",
+   "displayed_reason": "cooldown",
+   "browser_has_process": false,
+   "node_side": {
+    "on": {
+     "mode": "on",
+     "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+     "suppresses_by": "only",
+     "active": true,
+     "suppress": true,
+     "probability": 1,
+     "threshold": 0.88,
+     "margin": 0.01,
+     "margin_threshold": 0.146532,
+     "decided_by": "margin-quantile",
+     "reason": "model-suppress"
+    },
+    "off": {
+     "mode": "off",
+     "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+     "suppresses_by": "only",
+     "active": false,
+     "suppress": false,
+     "probability": null,
+     "threshold": null,
+     "reason": "flag-off"
+    }
+   },
+   "note": "页面侧这一层没有真实生效（见 checks 里那两条的实测值）；它只做「抑制」一个方向。"
+  }
+ },
+ "steps": [
+  {
+   "step": "整局",
+   "turns_driven": 19,
+   "result": "win",
+   "turn": 17,
+   "events": 118,
+   "bubbles_auto": 2
+  },
+  {
+   "step": "老师",
+   "lesson_hooks": {
+    "goal": "read-the-replacement-first",
+    "point": "first-faint",
+    "checked": "no",
+    "improved": "unknown",
+    "repeat": "no"
+   },
+   "question": "这一局一共 17 个回合，最后赢了下来。第 4 回合 对方第 1 位 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。",
+   "learning": "这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。"
+  },
+  {
+   "step": "陪练",
+   "register": "R1",
+   "why": "玩家主动搭话：先接住这句话，再落一件自己真的记得的事",
+   "reply": "潮甲龟啊。这1局的记录里，它一次都没倒下过。",
+   "memory_rows": [
+    "本命：潮甲龟",
+    "称呼：老王"
+   ],
+   "stated": 2,
+   "stored": [
+    "称呼：老王",
+    "本命：潮甲龟"
+   ]
+  },
+  {
+   "step": "本机小模型",
+   "panel": " 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 474 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 / 不一致」。模型只提议工具，它给的参数仍要由规则引擎逐项校验后才生效，最终结论始终以规则引擎为准。 面板只在开发者抽屉里，玩家正文不经过它。默认不自动跑。",
+   "latency_ms": 474,
+   "digest_pin": "a5cb0fbcc53f",
+   "rule_advice_before": {
+    "advice": "这一手值得留到局后看一眼。现在先按你的判断走。",
+    "plan": "火云车",
+    "plan_at_version": 25,
+    "state_version": 120
+   },
+   "rule_advice_after": {
+    "advice": "这一手值得留到局后看一眼。现在先按你的判断走。",
+    "plan": "火云车",
+    "plan_at_version": 25,
+    "state_version": 120
+   }
+  },
+  {
+   "step": "RAG",
+   "browser": {
+    "events": 118,
+    "events_with_evidence": 51,
+    "sample": [
+     {
+      "kind": "defense",
+      "text": "我方用防御防御，减伤约 0.7。",
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     },
+     {
+      "kind": "defense",
+      "text": "对方用防御防御，减伤约 0.7。",
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     }
+    ],
+    "raw_drawer_has_evidence": true
+   },
+   "engine_roster_evidence_ids": [
+    "ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2"
+   ],
+   "browser_roster_keys": [
+    "ok",
+    "total",
+    "offset",
+    "limit",
+    "count",
+    "usable_count",
+    "team_size",
+    "note",
+    "pets"
+   ]
+  },
+  {
+   "step": "Memory",
+   "stated": [
+    {
+     "kind": "address",
+     "label": "称呼：老王",
+     "value": "老王"
+    },
+    {
+     "kind": "favorite",
+     "label": "本命：潮甲龟",
+     "value": "turtle"
+    }
+   ],
+   "journal_kinds": [
+    "teach"
+   ],
+   "stored_stated": 2,
+   "stored_journal": 1,
+   "visible_rows": [
+    "本命：潮甲龟",
+    "称呼：老王"
+   ]
+  },
+  {
+   "step": "RL",
+   "layer": {
+    "active": false,
+    "suppress": false,
+    "reason": "layer-error",
+    "mode": "off",
+    "model_status": "error",
+    "probability": null,
+    "threshold": null
+   },
+   "action": "defer_to_review",
+   "reason": "cooldown"
+  }
+ ],
+ "checks": [
+  {
+   "name": "① 军师：引擎判定「这一手没什么可说」时，点了也仍然给比较区（浮条如实写没话，不编）",
+   "ok": true,
+   "detail": "开局第 1 回合判定 silent，点「让小芽看一眼」后 action=explicit-facts；浮条「这一手引擎没有值得单独说的局面事实：下面是它真的给了的东西，你自己挑。」；并列 3 个真实合法动作 / 后续 5 条"
+  },
+  {
+   "name": "① 军师：这一局里自动出现过气泡，且每条都带真实的局面 kind（或明确是「留到复盘」那一档）",
+   "ok": true,
+   "detail": "自动出现 2 次：第4回合[ko-now]「「火云车」估 414，够收对面「…」 ／ 第4回合[defer_to_review]「这一手值得留到局后看一眼。现在先…」；没有 kind 的 1 条（都是 defer_to_review=true）"
+  },
+  {
+   "name": "① 军师：真实点「让小芽看一眼」后有并列比较区（≥2 个合法动作 + 后续回合 + 三档标注）",
+   "ok": true,
+   "detail": "第 4 回合：浮条「「火云车」估 414，够收对面「音速犬」这 190 血：这一轮直接收」；并列 3 个（防御、火苗、火云车，推荐 [\"火云车\"]）；后续 5 条；规划回执 分支=87 深度=2 对手应对=\"防御\""
+  },
+  {
+   "name": "② 老师：局末真的自动出现复盘卡片，并且钩子给出了「一个关键转折」",
+   "ok": true,
+   "detail": "data-roco-teacher-point=\"first-faint\"；关键转折在第 4 回合（这一局 17 个回合）。"
+  },
+  {
+   "name": "② 老师：给了「下一局练一件事」，并且写进了教学账本（journal 里的 teach 行）",
+   "ok": true,
+   "detail": "data-roco-teacher-goal=「read-the-replacement-first」；teach 行 1；学习点「这一局学到一件事：对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。」"
+  },
+  {
+   "name": "③ 陪练：说一句话后拿到真实语域（R0—R3），并且回的是一句中文（不是 [object Object]）",
+   "ok": true,
+   "detail": "data-roco-companion=R1（why=玩家主动搭话：先接住这句话，再落一件自己真的记得的事，seen=yes）：潮甲龟啊。这1局的记录里，它一次都没倒下过。"
+  },
+  {
+   "name": "③ 陪练：偏好记忆真的进了「她记住了什么」（页面 + localStorage 都写进去了）",
+   "ok": true,
+   "detail": "面板 2 条：本命：潮甲龟、称呼：老王；localStorage 里的 stated=[\"称呼：老王\",\"本命：潮甲龟\"]"
+  },
+  {
+   "name": "④ 本机小模型：点一下真的问到了一次工具提议（有耗时与提示摘要钉子）",
+   "ok": true,
+   "detail": "耗时 474 ms；提示摘要钉子 a5cb0fbcc53f…；面板「 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 474 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 」"
+  },
+  {
+   "name": "④ 本机小模型不改变规则引擎给出的行动建议（问前 === 问后，而且问之前确实有建议）",
+   "ok": true,
+   "detail": "问之前 {\"advice\":\"这一手值得留到局后看一眼。现在先按你的判断走。\",\"plan\":\"火云车\",\"plan_at_version\":25,\"state_version\":120} → 问之后 {\"advice\":\"这一手值得留到局后看一眼。现在先按你的判断走。\",\"plan\":\"火云车\",\"plan_at_version\":25,\"state_version\":120}"
+  },
+  {
+   "name": "⑤ RAG：规则检索的证据（事件回执里的 evidence 行号）真的到了浏览器，并且在开发者抽屉里可见",
+   "ok": true,
+   "detail": "这一局 118 条事件，其中 51 条带 evidence；样例 {\"kind\":\"defense\",\"text\":\"我方用防御防御，减伤约 0.7。\",\"evidence\":[\"1015\",\"1016\",\"1017\"]}；原始 JSON 里含 \"evidence\"=true"
+  },
+  {
+   "name": "⑤ RAG：精灵/技能级证据串（evidence_ids）**没有**到浏览器——如实记下缺口",
+   "ok": true,
+   "detail": "引擎回执有 evidence_ids=[\"ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2\"]，但 /api/roco/roster 的键是 [\"ok\",\"total\",\"offset\",\"limit\",\"count\",\"usable_count\",\"team_size\",\"note\",\"pets\"]（服务端映射时丢掉了）"
+  },
+  {
+   "name": "⑤ Memory：偏好（stated）与账本（journal）都被页面真实读写（内存 + localStorage）",
+   "ok": true,
+   "detail": "stated 2 条 [\"称呼：老王\",\"本命：潮甲龟\"]；journal [\"teach\"]；localStorage stated/journal=2/1；面板可见 2 条"
+  },
+  {
+   "name": "⑤ RL：介入判定层**只抑制不新增**（Node 侧真调一次），且当前没有改变玩家看到的建议",
+   "ok": true,
+   "detail": "页面上最后一次算过的 layer={\"active\":false,\"suppress\":false,\"reason\":\"layer-error\",\"mode\":\"off\",\"model_status\":\"error\",\"probability\":null,\"threshold\":null}；Node 侧同一模块 mode=on → {\"active\":true,\"suppress\":true,\"suppresses_by\":\"only\",\"reason\":\"model-suppress\"}，mode=off → {\"active\":false,\"suppress\":false,\"reason\":\"flag-off\"}（逐位回到规则结果）；玩家看到的仍是规则建议「「火云车」估 414，够收对面「雪影娃娃」这 190 血：这一轮直接收」"
+  },
+  {
+   "name": "⑤ RL 现状说明：这一层在页面上确实**没有生效**——原因也记下来（不说成生效）",
+   "ok": true,
+   "detail": "active=false suppress=false mode=\"off\" reason=\"layer-error\"；页面里 typeof process=\"undefined\"（`interventionModelMode(env = process.env)` 的默认参数在浏览器里取不到 process，异常被 experience.js 的 try/catch 兜成 layer-error；这就是「接上了但没生效」那一类）"
+  }
+ ],
+ "console_errors": [],
+ "page_errors": [],
+ "passed": 14,
+ "failed": 0
+}

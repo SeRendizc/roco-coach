@@ -29,6 +29,13 @@
     <p><button id="shadow-run">问一次本机小模型</button>
      <span class="muted">要拉起本地推理，几秒；只在这一局里对照一次。</span></p>
     <div id="shadow-panel" hidden></div>
+    <!-- 威力来源的 fail-closed 凭据（第 64 轮）。
+         玩家层**不显示**没给的威力（也绝不补 0），但「引擎这一招到底给没给威力」
+         必须可核对：原始 `power_status` 逐条列在这里，默认收起。
+         为什么放这里而不是技能按钮上：那是工程字段，不是玩家的话。 -->
+    <div class="section-title"><h3>威力来源（fail-closed 凭据）</h3></div>
+    <p class="muted">玩家层不显示没给的威力，也绝不补 0；这一份是引擎给的原始来源状态。</p>
+    <pre id="power-status-raw" class="raw">点开这一栏后按当前局面与名单生成。</pre>
     <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
     <ul class="checklist" id="coverage"></ul>
    </div>

@@ -184,6 +184,12 @@ async function main(){
  for(let i=0;i<80;i++){await sleep(250);if(await js('document.readyState')==='complete')break;}
  for(let i=0;i<80;i++){if(await js(`document.body.dataset.rocoReady==='yes'`))break;await sleep(250);}
  shots.push(await shoot('01-loaded'));
+ // 首屏那一刻的教程状态（第 64 轮）：对局一开始教程就会**自动收起**，所以
+ // 「三步都在」这条只能在开局之前量——量不到开局前的样子，那条判据就成了空话。
+ const onboardAtLoad=JSON.parse(await js(`(()=>{const b=document.getElementById('onboard-bar');
+  return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:b.hidden,
+   steps:document.querySelectorAll('#onboard li').length,
+   h:Math.round(b.getBoundingClientRect().height)});})()`));
 
  // ── 场景 0：这一页确实没有聊天入口 ──────────────────────────────────
  const noChat=await js(`({chat:!!document.querySelector('#chat-input'), coachApi:!!document.querySelector('form#chat-form'), textareas:document.querySelectorAll('textarea').length})`);
@@ -203,9 +209,13 @@ async function main(){
  check('动作按钮上不出现技能内部 id',
   !/skill_\d/.test(await js(`document.getElementById('actions').innerHTML`)),
   actionText.slice(0,60).replace(/\s+/g,' '));
- check('威力缺来源时说「来源未给」，不写成 0',
-  !/威力\s*0\b/.test(actionText),
-  (actionText.match(/威力[^·\n]{0,12}/g)||[]).slice(0,3).join(' | '));
+ // 第 64 轮口径：引擎没给威力的技能，按钮上**整段不写**（原来写的是「威力来源未给」，
+ // 那是 `power_status: 'not_provided_by_source'` 的直译，是工程话）。
+ // 这里两条：① 不许写成 0（那是编数据）；② 玩家层不许出现那句工程话
+ //（原始 `power_status` 的去处在开发者抽屉里，由第 64 轮那一段单独判）。
+ check('威力缺来源时不写成 0，也不把工程话写在按钮上',
+  !/威力\s*0\b/.test(actionText)&&!/来源未给|not_provided_by_source|power_status/.test(actionText),
+  (actionText.match(/威力[^·\n]{0,12}/g)||[]).slice(0,3).join(' | ')||'（按钮上没有威力段）');
  await snapshot('01-开局前');
  shots.push(await shoot('01-battle-started'));
 
@@ -327,8 +337,12 @@ async function main(){
     chips:chips.length,chipsWithSymbol:chips.filter((t)=>/[^\u4e00-\u9fff\s]/.test(t)).length,
     chipsWithName:chips.filter((t)=>/[\u4e00-\u9fff]+系/.test(t)).length,
     imgs:document.querySelectorAll('img').length,externalStyles:document.querySelectorAll('link[href^="http"],script[src^="http"]').length});})()`));
+ // 教程那一条量的是**首屏那一刻**的样子（`onboardAtLoad`）：第 64 轮起对局一开
+ // 它就自动收起（见文件末尾那一段判据），所以推进到这里它已经不是 shown 了。
+ // 判的仍然是原来那件事：第一次来的人看得到三步。
  check('开局引导渲染出三步（少一步这一页就又要先看半天）',
-  visual.onboard==='shown'&&visual.steps===3,JSON.stringify({hook:visual.onboard,steps:visual.steps}));
+  onboardAtLoad.hook==='shown'&&onboardAtLoad.steps===3&&onboardAtLoad.h>0&&visual.steps===3,
+  JSON.stringify({开局时:onboardAtLoad,现在:visual.onboard}));
  // 候选池 12 → 48 之后，断言必须跟着池子大小走（写死 12 会在这条上假红）。
  // 真正要守的是：**筛出来的每一张卡都有形象**（empty===0），而不是"刚好 12 只"。
  check(`每个系别都有形象：阵容卡上的 emoji 徽记齐全（${visual.avatars} 张卡，没有空的）`,
@@ -376,10 +390,18 @@ async function main(){
  check('这一课真的记进了账本（下一次才有得核对）',teacher.teachRows>=1,`teach 行 ${teacher.teachRows}`);
 
  // ── 场景 6：玩家抱怨时陪练先回应情绪 ────────────────────────────────
- const reply=await js(`(()=>{const r=window.rocoDemo.say('好烦，又输了');return {register:r.register,reply:r.reply};})()`);
+ const reply=await js(`(()=>{const r=window.rocoDemo.say('好烦，又输了');
+   return {register:r.register,reply:r.reply,shown:(document.getElementById('say-reply').textContent||'').trim()};})()`);
  await sleep(200);
  const replyShown=await js(`!document.getElementById('say-reply').hidden`);
- check('玩家抱怨时陪练先回应情绪（R2/R3）',['R2','R3'].includes(reply.register)&&replyShown,`${reply.register}: ${String(reply.reply).slice(0,60)}`);
+ // 第 64 轮补：**玩家实际读到的那句话**必须是人话。`chatReply` 返回的是结构
+ // （`{text, parts, ...}`），页面原来把整个结构塞进 `textContent`，于是气泡上印的是
+ // `[object Object]`——原来的判据只看语域与「气泡显示了吗」，两条都能过。
+ check('玩家抱怨时陪练先回应情绪（R2/R3），且回话是一句中文（不是 [object Object]）',
+  ['R2','R3'].includes(reply.register)&&replyShown
+  &&/[\u4e00-\u9fff]/.test(reply.reply)&&!/\[object/.test(reply.reply)
+  &&reply.shown===String(reply.reply).trim(),
+  `${reply.register}: ${String(reply.reply).slice(0,60)}`);
  shots.push(await shoot('06-companion-emotion'));
 
  // ── P1-3：她记住了什么，玩家看得见、也能一条条忘掉 ──────────────────────
@@ -1370,6 +1392,13 @@ async function main(){
   `1440×900 clientW/scrollW=${mBattle.clientW}/${mBattle.scrollW}；截图 ${shotBattle}`);
 
  // ⑩ 教程：只在首次出现；真实点击「跳过」之后不再占位，且**刷新之后仍然不出现**
+ //
+ // 第 64 轮起教程在「开一局」时就会自动收起，所以到这里它已经是 hidden 了。
+ // 这一条判的是**「跳过」这条路**，因此先把登记键清掉、刷新一次，把教程放回来
+ // ——否则量到的是「自动收起」的结果，那一条在文件末尾单独判。
+ await js(`localStorage.removeItem('roco-coach-onboard-v1')`);
+ await cdp.send('Page.reload');
+ for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}
  await setViewport(1440,900);
  const onboardBefore=JSON.parse(await js(`(()=>{const bar=document.getElementById('onboard-bar');
   return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:bar.hidden,
@@ -1397,6 +1426,324 @@ async function main(){
   onboardReloaded.ready==='yes'&&onboardReloaded.hidden===true&&onboardReloaded.h===0
   &&onboardReloaded.hook==='hidden',
   `刷新后 hook=${onboardReloaded.hook} 高=${onboardReloaded.h}px 键=${JSON.stringify(onboardReloaded.flag)}`);
+
+ // ═══════════════════════════════════════════════════════════════════════════
+ // 第 64 轮：四个真实 UX 缺陷（监工实测/点名）——**真实键鼠**逐条判据
+ // ═══════════════════════════════════════════════════════════════════════════
+ //
+ // 四条缺陷与修法（页面侧）：
+ //   ① 卡片上反复出现「未知」占位（缺 role 就印「定位：未标注」）→ 没数据就不渲染那一行；
+ //   ② 玩家层出现工程话「威力来源未给」→ 玩家层不写（没给就不写威力），
+ //      原始 `power_status` 进**默认收起的开发者抽屉**；
+ //   ③ 三步教程只有点「跳过」才消失 → 对局一开始就自动收起（且写 localStorage）；
+ //   ④ 点「让小芽看一眼」只说「建议已就绪」→ 真的给出军师浮条（≤2 行）+
+ //      可展开的并列比较（≥2 个真实合法动作 + 后续 2—3 回合 + 事实/估计/不确定）。
+ //
+ // 这一组只用**浏览器自己的输入通道**（CDP 的真鼠标/真键盘）：`element.click()`
+ // 或直接改 state 会绕过出问题的那条路径，而玩家遇到的 bug 恰恰在事件通道上。
+ //
+ // 位置：整个脚本的最后。三条理由：
+ //   · 它要一局**从头开始**的对局（会重开一局），放前面会把矩阵的采样打乱；
+ //   · 它最后会刷新页面（验「下次进来也不再显示」），刷新之后 state 全清；
+ //   · 它量的是最终版式，前面的判据已经把页面推到过各种状态。
+ await setViewport(1440,900);
+
+ // ── ① 宠物卡上不许有占位文案（遍历**所有**卡片的文本）──────────────────────
+ //
+ // 口径：玩家看得见的那一层（阵容池卡片）里，`未知 / 未标注 / 未给` 一个都不许有。
+ // 「没有的数据就不要占位」是这个口径的唯一来源——引擎没给定位就不写定位那一行。
+ const CARD_PLACEHOLDER=/未知|未标注|未给/;
+ const cardScan=async()=>JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('#roster .pick')];
+   const text=cards.map((c)=>c.innerText.replace(/\\s+/g,' ')).join('\\n');
+   const hit=text.match(${CARD_PLACEHOLDER.toString()});
+   const around=hit?text.slice(Math.max(0,hit.index-14),hit.index+14):null;
+   return JSON.stringify({cards:cards.length,hit:hit?hit[0]:null,around,roles:cards.filter((c)=>c.querySelector('.card-role')).length});})()`));
+ const cardPages=[];
+ let cardsSeen=0;
+ let cardHit=null;
+ for(let page=1;page<=4;page+=1){
+  const scan=await cardScan();
+  cardsSeen+=scan.cards;
+  cardPages.push({page,cards:scan.cards,hit:scan.hit,roles:scan.roles});
+  if(scan.hit&&!cardHit)cardHit={page,...scan};
+  if(page<4){await mouseClick('#page-next');await sleep(700);}
+ }
+ // 必红反证：把一句占位文案塞回卡片，**同一个检查器**必须当场抓住它。
+ // 检查器自己写错（比如正则打错）会让它看起来「很严」实际什么都没量，
+ // 所以这条反证与上面那条用的是同一个函数与同一个正则。
+ await js(`(()=>{const el=document.querySelector('#roster .pick .card-role');
+   if(el)el.textContent='定位：未标注';return true;})()`);
+ const cardPoison=await cardScan();
+ await js(`window.rocoDemo.renderRoster()`);
+ const cardRestored=await cardScan();
+ check('① 宠物卡上没有占位文案（遍历 4 页共 48 张卡的可见文本）',
+  cardsSeen===48&&cardPages.length===4&&cardHit===null,
+  cardHit?`命中 ${JSON.stringify(cardHit)}`
+   :`扫过 ${cardsSeen} 张卡（${cardPages.map((p)=>`第${p.page}页${p.cards}张`).join('/')}），`
+    +`占位命中 0；带定位行的卡 ${cardPages[0].roles}/${cardPages[0].cards}（第 1 页）`);
+ check('① 反证：把「定位：未标注」塞回卡片，同一个检查器必须抓住（否则上一条是空话）',
+  cardPoison.hit==='未标注'&&cardRestored.hit===null,
+  `注入后命中 ${JSON.stringify(cardPoison.hit)}（片段「${cardPoison.around}」）；重画后命中 ${JSON.stringify(cardRestored.hit)}`);
+ // 回到第 1 页（4 页扫描把它推到了第 4 页）
+ for(let i=0;i<3;i+=1){await mouseClick('#page-prev');await sleep(500);}
+ await js(`(()=>{const id='lesson-card';const el=document.getElementById(id);if(el)el.hidden=true;return true;})()`);
+
+ // ── ③ 教程：对局一开始就自动收起（先把它放回来，再真点「开一局」）──────────
+ await js(`localStorage.removeItem('roco-coach-onboard-v1')`);
+ await cdp.send('Page.reload');
+ for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}
+ await setViewport(1440,900);
+ const onboardPre=JSON.parse(await js(`(()=>{const b=document.getElementById('onboard-bar');
+  return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:b.hidden,
+   steps:document.querySelectorAll('#onboard li').length,h:Math.round(b.getBoundingClientRect().height),
+   flag:localStorage.getItem('roco-coach-onboard-v1')});})()`));
+ // 写死双方阵容与 seed：④ 要走到一个**真的开口**的局面（矩阵 08 那一格的条件），
+ // 页面默认的对手阵容是 `Math.random()` 挑的，不写死就每次都不同。
+ await js(`(()=>{const d=window.rocoDemo;
+  d.state.pick.player=['pet_000062','pet_000112','pet_000417'];
+  d.state.pick.enemy=['pet_000062','pet_000112','pet_000417'];
+  d.state.pick.side='player';d.renderRoster();d.state.seedOverride=20260921;return true;})()`);
+ await mouseClick('#start-battle');
+ for(let i=0;i<120;i++){if(await js(`document.body.dataset.rocoView==='ready'&&document.getElementById('select-panel').hidden`))break;await sleep(250);}
+ await sleep(400);
+ const onboardPost=JSON.parse(await js(`(()=>{const b=document.getElementById('onboard-bar');
+  return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:b.hidden,
+   h:Math.round(b.getBoundingClientRect().height),
+   flag:localStorage.getItem('roco-coach-onboard-v1'),
+   turn:window.rocoDemo.state.view?window.rocoDemo.state.view.turn:null});})()`));
+ check('③ 真实鼠标点「开一局」之后教程自动收起（hidden 且高度 0px，不是只靠 CSS 藏）',
+  onboardPre.hook==='shown'&&onboardPre.steps===3&&onboardPre.h>0
+  &&onboardPost.hook==='hidden'&&onboardPost.hidden===true&&onboardPost.h===0,
+  `开局前 ${onboardPre.steps} 步 / 高 ${onboardPre.h}px（${onboardPre.hook}）→ `
+  +`开局后（第 ${onboardPost.turn} 回合）高 ${onboardPost.h}px / hidden=${onboardPost.hidden}（${onboardPost.hook}）`);
+ check('③ 自动收起同样写 localStorage 登记键（下次进来不再显示）',
+  onboardPre.flag===null&&onboardPost.flag==='1',
+  `开局前 ${JSON.stringify(onboardPre.flag)} → 开局后 ${JSON.stringify(onboardPost.flag)}`);
+
+ // ── ① 续：**对战页的宠物卡与后备条**（「未知」真正反复出现过的地方）─────────
+ // 选阵容页那 48 张卡上「定位」都有值（48 只全部登记过 role），所以那一面上占位文案
+ // 本来就不出现；玩家实际反复看到的是这里：每局都印的「状态未知」（对手两条后备）
+ // 与「异常：—」（双方场上）。这一条量的是**对战页**的四类卡片。
+ const BATTLE_CARDS='#self-pets .pet, #foe-field .pet, #self-bench .bench-pet, #foe-bench .bench-pet';
+ const battleCardScan=async()=>JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll(${JSON.stringify(BATTLE_CARDS)})];
+   const text=cards.map((c)=>c.innerText.replace(/\\s+/g,' ')).join('\\n');
+   const hit=text.match(${CARD_PLACEHOLDER.toString()});
+   return JSON.stringify({cards:cards.length,hit:hit?hit[0]:null,
+    around:hit?text.slice(Math.max(0,hit.index-16),hit.index+16):null,sample:text.slice(0,200)});})()`));
+ const battleCards=await battleCardScan();
+ // 必红反证：把「状态未知」塞回一条后备（修之前每一局的对手后备都是这一句）。
+ const battlePoison=await js(`(()=>{const el=document.querySelector('#foe-bench .bench-pet');
+   if(!el)return {ok:false};el.insertAdjacentHTML('beforeend','<div class="stats">状态未知</div>');
+   const text=[...document.querySelectorAll(${JSON.stringify(BATTLE_CARDS)})].map((c)=>c.innerText).join('\\n');
+   const hit=text.match(${CARD_PLACEHOLDER.toString()});
+   return {ok:true,hit:hit?hit[0]:null};})()`);
+ await js('window.rocoDemo.render()');
+ const battleRestored=await battleCardScan();
+ check('① 对战页的宠物卡与后备条上也没有占位文案（这是「未知」原来反复出现的地方）',
+  battleCards.cards===6&&battleCards.hit===null,
+  battleCards.hit?`命中 ${JSON.stringify(battleCards)}`
+   :`扫过 ${battleCards.cards} 张卡；片段「${battleCards.sample}」`);
+ check('① 反证：把「状态未知」塞回一条后备，同一个检查器必须抓住',
+  battlePoison.ok===true&&battlePoison.hit==='未知'&&battleRestored.hit===null,
+  `注入后命中 ${JSON.stringify(battlePoison.hit)}；重画后命中 ${JSON.stringify(battleRestored.hit)}`);
+
+ // ── ② 玩家层没有工程话；原始 power_status 在默认收起的开发者抽屉里 ─────────
+ const ENGINEER_POWER=/来源未给|not_provided_by_source|power_status/;
+ const powerFacts=JSON.parse(await js(`(()=>{const legal=window.rocoDemo.state.view.legal||[];
+   const skills=legal.map((a)=>a.skill).filter(Boolean);
+   return JSON.stringify({actions:legal.length,skills:skills.length,
+    unknown:skills.filter((s)=>!Number.isFinite(s.power)).length,
+    statuses:[...new Set(skills.map((s)=>s.power_status))]});})()`));
+ const actionsTextNow=await js(`document.getElementById('actions').innerText.replace(/\\s+/g,' ')`);
+ // 玩家可见层 = 整个 body 去掉**默认收起的开发者抽屉**（`#about-drawer`）。
+ // 展开比较区（`#hint-body`）**不排除**：它也是玩家点得到的，同样不许出现工程话。
+ const playerTextNow=await js(`(()=>{const clone=document.body.cloneNode(true);
+   const dev=clone.querySelector('#about-drawer');if(dev)dev.remove();
+   return (clone.innerText||'').replace(/\\s+/g,' ');})()`);
+ const playerHit=(playerTextNow.match(ENGINEER_POWER)||[])[0]??null;
+ // 抽屉默认是收起的 → 先断言这一点，再真鼠标点开
+ const drawerClosed=await js(`document.getElementById('about-drawer').open===false`);
+ await mouseClick('#about-drawer > summary');
+ await sleep(300);
+ const powerEvidence=JSON.parse(await js(`(()=>{const pre=document.getElementById('power-status-raw');
+   const text=pre?pre.textContent:'';
+   const lines=text.split('\\n').filter(Boolean);
+   return JSON.stringify({open:document.getElementById('about-drawer').open,len:text.length,
+    lines:lines.length,hasKey:text.includes('power_status'),
+    hasNotProvided:text.includes('not_provided_by_source'),
+    sample:lines.slice(0,3)});})()`));
+ await mouseClick('#about-drawer > summary');
+ await sleep(200);
+ check('② 玩家可见层没有「来源未给 / not_provided_by_source / power_status」',
+  playerHit===null&&!ENGINEER_POWER.test(actionsTextNow),
+  playerHit?`命中 ${playerHit}`:`动作栏 ${powerFacts.actions} 个动作（其中 ${powerFacts.skills} 个技能、`
+   +`${powerFacts.unknown} 个没给威力）玩家层一个工程词都没有`);
+ check('② 开发者抽屉默认收起，展开后能看到原始 power_status（fail-closed 凭据）',
+  drawerClosed===true&&powerEvidence.open===true&&powerEvidence.hasKey&&powerEvidence.hasNotProvided
+  &&powerEvidence.lines>=2,
+  `抽屉默认收起=${drawerClosed}；证据 ${powerEvidence.lines} 行 / ${powerEvidence.len} 字节，`
+  +`含 power_status=${powerEvidence.hasKey}、含 not_provided_by_source=${powerEvidence.hasNotProvided}；`
+  +`样例「${String(powerEvidence.sample[1]??'').trim()}」`);
+
+ // ── ④ 真实鼠标点「让小芽看一眼」：浮条 + 可展开的并列比较 ───────────────────
+ // 先推进到一个**真的会开口**的局面（门控与评分照常跑，页面默认的记账不动）。
+ let planDriven=0;
+ let bubbleSpoken=false;
+ for(let i=0;i<14;i+=1){
+  bubbleSpoken=await js(`Boolean(window.rocoDemo.state.hint)`);
+  if(bubbleSpoken)break;
+  if(await js(`Boolean(window.rocoDemo.state.view.battle_result)`))break;
+  await js('window.rocoDemo.autoTurn()');
+  planDriven+=1;
+  await sleep(200);
+ }
+ const spokenSnap=JSON.parse(await js(`(()=>{const s=window.rocoDemo.state;const t=s.hint;
+  return JSON.stringify({turn:s.view?s.view.turn:null,action:s.lastDetail?s.lastDetail.action:null,
+   kind:t?t.kind??(s.lastDetail&&s.lastDetail.advice?s.lastDetail.advice.kind:null):null,
+   text:t?t.text:null});})()`));
+ // 玩家先**真的点掉**（×）——「点掉之后本局不再主动开口」这条纪律不能被这一轮改动破坏。
+ if(bubbleSpoken){await mouseClick('#hint-close');await sleep(250);}
+ const afterDismiss=JSON.parse(await js(`(()=>{const s=window.rocoDemo.state.session;
+  return JSON.stringify({dismissed:s.dismissed,hintHidden:document.getElementById('hint').hidden});})()`));
+ // 再用**真实鼠标**点「让小芽看一眼」
+ await mouseClick('#plan');
+ await sleep(1600);
+ const bubble=JSON.parse(await js(`(()=>{const box=document.getElementById('hint');
+   const text=document.getElementById('hint-text');
+   const why=document.getElementById('hint-why');
+   const line=document.querySelector('#hint .hint-line');
+   const foot=document.querySelector('#hint .hint-foot');
+   const lh=(el)=>{const cs=getComputedStyle(el);const fs=parseFloat(cs.fontSize)||13;
+     const l=parseFloat(cs.lineHeight);return Number.isFinite(l)&&l>0?l:fs*1.6;};
+   const textLines=Math.max(1,Math.round(text.getBoundingClientRect().height/lh(text)));
+   const whyLines=Math.max(1,Math.round(why.getBoundingClientRect().height/lh(why)));
+   const clipped=text.scrollHeight>text.clientHeight+1;
+   return JSON.stringify({hidden:box.hidden,text:text.textContent.trim(),why:why.textContent.trim(),
+    planStatus:document.getElementById('plan-status').textContent.trim(),
+    logicalLines:[line,foot].filter(Boolean).map((el)=>el.className),textLines,whyLines,clipped,
+    lineH:Math.round(line.getBoundingClientRect().height),footH:Math.round(foot.getBoundingClientRect().height),
+    bodyHidden:document.getElementById('hint-body').hidden});})()`));
+ const hasWhat=bubble.text.length>=6;
+ const hasWhy=/依据/.test(bubble.why);
+ const hasRisk=/风险/.test(bubble.why);
+ check('④ 真实点「让小芽看一眼」：浮条真的出现（不再只写一句「建议已就绪」）',
+  afterDismiss.dismissed===true&&bubble.hidden===false&&hasWhat&&hasWhy&&hasRisk,
+  `自动推进 ${planDriven} 手到第 ${spokenSnap.turn} 回合（自动开口 kind=${spokenSnap.kind}）；`
+  +`点掉后 dismissed=${afterDismiss.dismissed} / 浮条隐藏=${bubble.hidden}；`
+  +`做什么「${bubble.text}」/ 为什么=${hasWhy} / 风险=${hasRisk}；状态行「${bubble.planStatus}」`);
+ check('④ 浮条不超过两行：2 个文本行（做什么 + 为什么·风险），且第一行没有被截断',
+  bubble.logicalLines.length===2&&bubble.textLines<=2&&bubble.clipped===false,
+  `逻辑行 ${bubble.logicalLines.length} 个（${bubble.logicalLines.join(' + ')}）；`
+  +`实测可视行数 #hint-text=${bubble.textLines} / #hint-why=${bubble.whyLines}；`
+  +`像素高 文本行 ${bubble.lineH}px + 依据行 ${bubble.footH}px；`
+  +`第一行被截断=${bubble.clipped}`);
+ // 展开比较区（真实鼠标点「展开取舍」）
+ await mouseClick('#hint-details');
+ await sleep(400);
+ const compare=JSON.parse(await js(`(()=>{const body=document.getElementById('hint-body');
+   const acts=[...body.querySelectorAll('[data-cmp-action]')].map((li)=>li.dataset.cmpLabel);
+   const rec=[...body.querySelectorAll('[data-cmp-action][data-cmp-recommended="yes"]')].map((li)=>li.dataset.cmpLabel);
+   const future=[...body.querySelectorAll('[data-cmp-future]')].map((li)=>li.innerText.replace(/\\s+/g,' '));
+   const legal=(window.rocoDemo.state.view.legal||[]).map((a)=>a.label);
+   const t=body.innerText;
+   return JSON.stringify({hidden:body.hidden,acts,rec,future,futureCount:future.length,legal,
+    fact:t.includes('【事实】'),estimate:t.includes('【估计】'),uncertain:t.includes('【不确定】'),
+    sample:future.slice(0,3),plan:window.rocoDemo.state.plan?{ok:window.rocoDemo.state.plan.ok,
+      branches:window.rocoDemo.state.plan.branches_evaluated,
+      depth:window.rocoDemo.state.plan.depth_searched,
+      counter:window.rocoDemo.state.plan.main_counter,
+      stable:window.rocoDemo.state.plan.recommendation_stable}:null});})()`));
+ const actsAllLegal=compare.acts.length>0&&compare.acts.every((label)=>compare.legal.includes(label));
+ // 比较区是**玩家点得到**的地方（只是默认收起），所以它同样不许出现② 那三个工程词：
+ // 没给威力的技能在比较区里也只是**不写**威力，不写「来源未给」。
+ const compareEngineerHit=(await js(`document.getElementById('hint-body').innerText`)).match(ENGINEER_POWER);
+ check('④ 展开的比较区里也没有工程话（威力没给就是不写，不写「来源未给」）',
+  !compareEngineerHit,
+  compareEngineerHit?`命中 ${compareEngineerHit[0]}`:'比较区正文一个工程词都没有');
+ check('④ 展开后的比较区并列 ≥2 个**这一回合真实合法**的动作（逐个核对动作表）',
+  compare.hidden===false&&compare.acts.length>=2&&actsAllLegal,
+  `并列 ${compare.acts.length} 个：${compare.acts.join('、')}；`
+  +`这一回合合法动作 ${compare.legal.length} 个（${compare.legal.slice(0,6).join('、')}…）；`
+  +`每一个都在动作表里=${actsAllLegal}；引擎推荐那一手也在并列里=${JSON.stringify(compare.rec)}`);
+ check('④ 比较区给出后续 2—3 回合的后果（来自规划回执的真实字段）',
+  compare.futureCount>=3
+  &&compare.sample.some((line)=>/往后算了|层/.test(line))
+  &&compare.sample.some((line)=>/期望/.test(line))
+  &&compare.future.some((line)=>/对手最可能的应对/.test(line)),
+  `后续条目 ${compare.futureCount} 条；规划回执 分支=${compare.plan?.branches} 深度=${compare.plan?.depth} `
+  +`对手应对=${JSON.stringify(compare.plan?.counter)} 稳健=${compare.plan?.stable}；`
+  +`样例「${String(compare.sample[0]).slice(0,60)}」`);
+ check('④ 比较区标明「事实 / 估计 / 不确定」三类',
+  compare.fact&&compare.estimate&&compare.uncertain,
+  `【事实】=${compare.fact} 【估计】=${compare.estimate} 【不确定】=${compare.uncertain}`);
+ // 真实截图：1440×900 与 390×844（**含展开后的比较区**），并量横向溢出
+ const hintBoxOf=async()=>JSON.parse(await js(`(()=>{const h=document.getElementById('hint');
+   const r=h.getBoundingClientRect();
+   const vh=document.documentElement.clientHeight;
+   return JSON.stringify({top:Math.round(r.top),bottom:Math.round(r.bottom),h:Math.round(r.height),vh,
+    scrollTop:h.scrollTop,scrollable:h.scrollHeight>h.clientHeight+1,
+    bottombar:getComputedStyle(document.documentElement).getPropertyValue('--bottombar').trim()});})()`));
+ const hint1440=await hintBoxOf();
+ const shotCmp1440=await uiShoot('ux-hint-compare-1440x900');
+ const overflow1440=await overflowOf();
+ await setViewport(390,844,true);
+ await sleep(500);
+ const hint390=await hintBoxOf();
+ const shotCmp390=await uiShoot('ux-hint-compare-390x844');
+ const overflow390=await overflowOf();
+ check('④ 两张真实截图（含展开后的比较区）都不横向溢出（clientW === scrollW）',
+  overflow1440.clientW===overflow1440.scrollW&&overflow390.clientW===overflow390.scrollW,
+  `1440×900 clientW/scrollW=${overflow1440.clientW}/${overflow1440.scrollW}；`
+  +`390×844 clientW/scrollW=${overflow390.clientW}/${overflow390.scrollW}；截图 ${shotCmp1440}、${shotCmp390}`);
+ // 光看「截图不横向溢出」是不够的：展开之后浮条会长高，**竖着**顶出屏幕同样会把
+ // 「做什么 / 为什么」推出可视区（390 下实测过一次）。所以这里量浮条自己的框：
+ // 上边 ≥ 0、下边 ≤ 视口高、滚动停在顶部（scrollTop === 0）。
+ check('④ 展开后浮条不顶出屏幕，且滚动停在顶部（两行结论还在可视区里）',
+  hint1440.top>=0&&hint1440.bottom<=hint1440.vh&&hint1440.scrollTop===0
+  &&hint390.top>=0&&hint390.bottom<=hint390.vh&&hint390.scrollTop===0,
+  `1440×900 浮条 top/bottom/视口高=${hint1440.top}/${hint1440.bottom}/${hint1440.vh}`
+  +`（高 ${hint1440.h}px，内部可滚动=${hint1440.scrollable}，scrollTop=${hint1440.scrollTop}，--bottombar=${hint1440.bottombar}）；`
+  +`390×844 top/bottom/视口高=${hint390.top}/${hint390.bottom}/${hint390.vh}`
+  +`（高 ${hint390.h}px，内部可滚动=${hint390.scrollable}，scrollTop=${hint390.scrollTop}，--bottombar=${hint390.bottombar}）`);
+ // 「谁在最上面」只有 `elementFromPoint` 答得准：量高度量不出遮挡。
+ // 手机版式下开发者抽屉是全宽的一条，z-index 比浮条高时会把「做什么」那一行压掉一半
+ // ——第 64 轮实测过（浮条高度、行数、滚动位置全对，就是看不见）。
+ const occlusion=JSON.parse(await js(`(()=>{const box=document.getElementById('hint');
+   const p=document.getElementById('hint-text');const r=p.getBoundingClientRect();
+   const hit=document.elementFromPoint(Math.round(r.left+Math.min(40,r.width/2)),Math.round(r.top+6));
+   return JSON.stringify({inside:Boolean(hit&&box.contains(hit)),hitId:hit?hit.id||hit.className||hit.tagName:null,
+    hintZ:getComputedStyle(box).zIndex,drawerZ:getComputedStyle(document.getElementById('about-drawer')).zIndex});})()`));
+ check('④ 浮条的第一行真的在**最上面**（没有被开发者抽屉盖住）',
+  occlusion.inside===true&&Number(occlusion.hintZ)>Number(occlusion.drawerZ),
+  `elementFromPoint 落在浮条里=${occlusion.inside}（命中的是 ${occlusion.hitId}）；`
+  +`z-index 浮条=${occlusion.hintZ} / 开发者抽屉=${occlusion.drawerZ}`);
+ await setViewport(1440,900);
+ // 旧建议随状态变化失效（沿用 state_version 机制）：推进一手之后，浮条上那条建议
+ // 不许还挂在旧版本上（要么收起来、要么已经是这一手的）。
+ const staleBefore=await js(`window.rocoDemo.state.hint?window.rocoDemo.state.hint.stateVersion:null`);
+ await js('window.rocoDemo.autoTurn()');
+ await sleep(900);
+ const staleAfter=JSON.parse(await js(`(()=>{const s=window.rocoDemo.state;
+   return JSON.stringify({version:s.view?s.view.state_version:null,
+    hintVersion:s.hint?s.hint.stateVersion:null,
+    consistent:!s.hint||s.hint.stateVersion===(s.view?s.view.state_version:null)});})()`));
+ check('④ 状态一变，旧建议就地作废（浮条上那条不许挂在旧 state_version 上）',
+  staleAfter.consistent===true,
+  `推进前浮条版本=${JSON.stringify(staleBefore)} → 推进后本局版本=${staleAfter.version} / `
+  +`浮条版本=${JSON.stringify(staleAfter.hintVersion)}；一致=${staleAfter.consistent}`);
+ // ③ 的最后一环：刷新之后教程仍然不出现（localStorage 那个键真的生效）
+ await cdp.send('Page.reload');
+ for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}
+ await sleep(300);
+ const onboardAfterReload=JSON.parse(await js(`(()=>{const b=document.getElementById('onboard-bar');
+   return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:b.hidden,
+    h:Math.round(b.getBoundingClientRect().height),
+    flag:localStorage.getItem('roco-coach-onboard-v1')});})()`));
+ check('③ 自动收起之后再进来也不再显示（刷新后 hidden / 高 0px / 登记键仍在）',
+  onboardAfterReload.hidden===true&&onboardAfterReload.h===0
+  &&onboardAfterReload.hook==='hidden'&&onboardAfterReload.flag==='1',
+  `刷新后 hook=${onboardAfterReload.hook} hidden=${onboardAfterReload.hidden} `
+  +`高=${onboardAfterReload.h}px 键=${JSON.stringify(onboardAfterReload.flag)}`);
 
  const checksOut={checks,screenshots:shots,dom_snapshots:snapshots.length,
   console_errors:consoleErrors,page_errors:pageErrors,
