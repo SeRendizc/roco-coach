@@ -329,8 +329,10 @@ async function main(){
     imgs:document.querySelectorAll('img').length,externalStyles:document.querySelectorAll('link[href^="http"],script[src^="http"]').length});})()`));
  check('开局引导渲染出三步（少一步这一页就又要先看半天）',
   visual.onboard==='shown'&&visual.steps===3,JSON.stringify({hook:visual.onboard,steps:visual.steps}));
- check('每个系别都有形象：阵容卡上的 emoji 徽记齐全（12 只都有，没有空的）',
-  visual.avatars===12&&visual.empty===0,JSON.stringify({avatars:visual.avatars,empty:visual.empty,distinct:visual.distinct}));
+ // 候选池 12 → 48 之后，断言必须跟着池子大小走（写死 12 会在这条上假红）。
+ // 真正要守的是：**筛出来的每一张卡都有形象**（empty===0），而不是"刚好 12 只"。
+ check(`每个系别都有形象：阵容卡上的 emoji 徽记齐全（${visual.avatars} 张卡，没有空的）`,
+  visual.avatars>=12&&visual.empty===0,JSON.stringify({avatars:visual.avatars,empty:visual.empty,distinct:visual.distinct}));
  check('系别不只靠颜色：每个色块同时带系别文字与图形符号',
   visual.chips===visual.chipsWithName&&visual.chipsWithSymbol===visual.chips,
   JSON.stringify({chips:visual.chips,name:visual.chipsWithName,symbol:visual.chipsWithSymbol}));
@@ -573,10 +575,10 @@ async function main(){
    kind: 'ko-now', seed: 20260921,
    player: ['pet_000225', 'pet_000190', 'pet_000445'],
    enemy: ['pet_000225', 'pet_000190', 'pet_000445'], advances: 5},
-  {id: '02-ko-now-mid', label: '双方都还有 39% 血，但我方这一手刚好够收（收线成立）',
+  {id: '02-ko-now-mid', label: '双方都还有 52% 血，但我方这一手刚好够收（收线成立）',
    kind: 'ko-now', seed: 20260921,
-   player: ['pet_000112', 'pet_000611', 'pet_000124'],
-   enemy: ['pet_000112', 'pet_000611', 'pet_000124'], advances: 11},
+   player: ['pet_000062', 'pet_000601', 'pet_000608'],
+   enemy: ['pet_000062', 'pet_000601', 'pet_000608'], advances: 3},
   {id: '03-energy-short', label: '想放的那一招放不出来、而且它估算盖得过对面血量（能量不够）',
    kind: 'energy-short', seed: 20260921,
    player: ['pet_000225', 'pet_000190', 'pet_000445'],
@@ -597,22 +599,27 @@ async function main(){
    kind: 'replace-required', seed: 20260921,
    player: ['pet_000225', 'pet_000190', 'pet_000445'],
    enemy: ['pet_000225', 'pet_000190', 'pet_000445'], advances: 9},
-  {id: '08-switch-low-hp-mid', label: '我方 24% 血、后备两只都厚，换人是这一轮的主要问题',
+  {id: '08-switch-low-hp-mid', label: '我方 33% 血、后备两只都厚，换人是这一轮的主要问题',
    kind: 'switch-low-hp', seed: 20260921,
    player: ['pet_000062', 'pet_000112', 'pet_000417'],
-   enemy: ['pet_000062', 'pet_000112', 'pet_000417'], advances: 8},
-  {id: '09-switch-low-hp-low', label: '我方被压到 15%、对面还有 37%，该不该把资产换下来',
-   kind: 'switch-low-hp', seed: 20260921,
-   player: ['pet_000190', 'pet_000608', 'pet_000611'],
-   enemy: ['pet_000062', 'pet_000445', 'pet_000417'], advances: 6},
+   enemy: ['pet_000062', 'pet_000112', 'pet_000417'], advances: 9},
+  // 第 63 轮：原来这一格是第二个体感不同的换人局面（09-switch-low-hp-low，15% 血）。
+  // 引擎修复（36832d1）之后抽样扫描（110 局）第一次真的**显示**出 `foe-low-hp`
+  // （命中 16 / 开口 10，旧版是命中 4 / 开口 0），而判据要求「抽样说可达、矩阵里却没有」
+  // 必须变红——所以必须为它腾一格。矩阵上限 12，`switch-low-hp` 已经由第 8 条覆盖，
+  // 第 9 条让给 `foe-low-hp`（kind 覆盖从 8 种升到 9 种），期望 kind 一字未改。
+  {id: '09-foe-low-hp', label: '对面被压到 38/442 = 8.6%、而我方这一轮没有一招稳收（先兑现，别让它换人喘口气）',
+   kind: 'foe-low-hp', seed: 20260921,
+   player: ['pet_000112', 'pet_000225', 'pet_000445'],
+   enemy: ['pet_000112', 'pet_000225', 'pet_000445'], advances: 6},
   {id: '10-speed-faster', label: '我方速度 130 快过对面 92：同一档对拼是我先出手',
    kind: 'speed-decides', seed: 20260921,
    player: ['pet_000451', 'pet_000601', 'pet_000112'],
    enemy: ['pet_000474', 'pet_000124', 'pet_000417'], advances: 5},
-  {id: '11-speed-slower-defend', label: '对面速度快过我方、而我方这一轮有「防御」可以顶这一下',
+  {id: '11-speed-slower-defend', label: '对面速度快过我方（105 vs 100）、而我方这一轮有「防御」可以顶这一下',
    kind: 'speed-decides', seed: 20260921,
-   player: ['pet_000225', 'pet_000190', 'pet_000445'],
-   enemy: ['pet_000112', 'pet_000611', 'pet_000190'], advances: 11},
+   player: ['pet_000124', 'pet_000445', 'pet_000417'],
+   enemy: ['pet_000417', 'pet_000445', 'pet_000124'], advances: 6},
   {id: '12-peaceful-silent', label: '双方开满血、局面平稳（没有值得说的局面事实，应当沉默）',
    kind: null, seed: 20260921,
    player: ['pet_000112', 'pet_000611', 'pet_000124'],
@@ -816,11 +823,13 @@ async function main(){
  const fullScanKinds = fullScan?.scan?.kinds ?? null;
  //: 已知的矩阵覆盖缺口：全量说能显示、但这一轮 12 个局面的预算里没有为它定位窗口。
  const DISCLOSED_COVERAGE_GAPS = {
-  'foe-low-hp': '全量扫描（2640 局 / 34021 个窗口）显示它**能**显示（6 次；'
-   + 'first_shown 在第 7 回合、我方血量比 0.483、对面 5.3% 血、micro_hint），'
-   + '出现率约 0.018%。抽样扫描（110 局）里它是「命中 4 / 显示 0」，'
-   + '**抽样本身证明不了「不可达」**。这一轮矩阵上限 12 格、已经 8 种 kind，'
-   + '没有为它定位窗口；定位办法见 docs/roco/BROWSER-POSITION-MATRIX.md §5.3。',
+  'foe-low-hp': '第 63 轮起它**已经进矩阵**（第 9 条，双方 38/442 的互残窗口）：'
+   + '引擎修复 36832d1 之后抽样扫描（110 局）第一次真的显示出它（命中 16 / 开口 10；'
+   + '旧版是命中 4 / 开口 0），判据随即要求矩阵为它腾一格。'
+   + '这里留存的是历史口径：全量扫描（2640 局 / 34021 个窗口）当年显示它 6 次、'
+   + 'first_shown 在第 7 回合、我方血量比 0.483、对面 5.3% 血，出现率约 0.018%。'
+   + '它只在「对面 ≤10% 血」且「我方合法招没有一招估算够得到那条血线」同时成立时开口，'
+   + '而且我方 ≤35% 血、对面更快时会被主动让给换人那一条。',
  };
 
  // ── 汇总：每条判据的实际数值都写进产物 ──────────────────────────────────────
@@ -1154,6 +1163,240 @@ async function main(){
   snapshots.length>=3&&dirty.length===0,
   dirty.length?JSON.stringify(dirty.slice(0,3)):`${snapshots.length} 步全部干净`);
  for(const item of dirty.slice(0,5))log(`  快照 ${item.step} / ${item.field} 命中 ${item.hit}：${item.sample}`);
+
+
+ // ── 第 60 轮 UI 落地：**真实键鼠**判据（搜索 / 筛选 / 翻页 / 分段选择器 / 跳过教程）──
+ //
+ // 这一组必须走浏览器自己的输入通道：`element.click()` 或直接改 `state.pool` 都会绕过
+ // 出问题的那条路径——玩家遇到的 bug 恰恰是「点上去没反应」，而那种 bug 在
+ // `element.click()` 里同样会发生、在直接改 state 里根本不会。
+ //
+ // 位置在最后，两条理由：
+ //   ① 前面的判据已经把页面推到「一局打完又在打」的状态，测交互最自然；
+ //   ② 最后一条会**刷新页面**（教程的「跳过」要跨刷新证明），刷新之后 state 全清，
+ //      放在中间会把后面的判据全打乱。
+ const uiShoot=async(name)=>{const{data}=await cdp.send('Page.captureScreenshot',{format:'png'});
+  const rel=`ui-${name}.png`;writeFileSync(join(ROOT,'reports/roco',rel),Buffer.from(data,'base64'));
+  shots.push(rel);return rel;};
+ const setViewport=async(width,height,mobile=false)=>{
+  await cdp.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile});
+  await sleep(420);};
+ const overflowOf=async()=>JSON.parse(await js(`JSON.stringify({clientW:document.documentElement.clientWidth,
+  scrollW:document.documentElement.scrollWidth,clientH:document.documentElement.clientHeight})`));
+ const cardsNow=async()=>JSON.parse(await js(`JSON.stringify([...document.querySelectorAll('#roster button[data-pet]')].map((b)=>b.dataset.pet))`));
+ // 悬浮层与开发者抽屉都先收起来：前者是固定定位会盖住要点的地方，后者在前面的判据里
+ // 被显式打开过（`check('开发者抽屉能正常展开')`），不收的话截图里全是工程说明。
+ const hideFloats=async()=>js(`(()=>{for(const id of ['hint','pet-detail','lesson-card']){
+  const el=document.getElementById(id);if(el)el.hidden=true;}
+  const drawer=document.getElementById('about-drawer');if(drawer)drawer.open=false;return true;})()`);
+
+ // ① 阵容池：对局进行中它是收起的，真实鼠标点「重选阵容」把它放回来
+ const pickHiddenBefore=await js(`document.getElementById('select-panel').hidden`);
+ await mouseClick('#reopen-pick');
+ const pickHiddenAfter=await js(`document.getElementById('select-panel').hidden`);
+ check('真实鼠标点「重选阵容」能把收起的阵容池放回来',
+  pickHiddenBefore===true&&pickHiddenAfter===false,
+  `点之前收起=${pickHiddenBefore}；点之后收起=${pickHiddenAfter}`);
+ await hideFloats();
+ await setViewport(1440,900);
+
+ // ② 分页：真实鼠标点「下一页」，卡片集合必须换掉（不是同一批卡片换个数字）
+ const pageOne=await cardsNow();
+ const pageLabelOne=await js(`document.getElementById('pool-page').textContent`);
+ await mouseClick('#page-next');
+ await sleep(700);
+ const pageTwo=await cardsNow();
+ const pageLabelTwo=await js(`document.getElementById('pool-page').textContent`);
+ const overlap=pageTwo.filter((id)=>pageOne.includes(id));
+ check('真实鼠标点「下一页」：每页 12 张、集合变了、且与第 1 页没有一张重合',
+  pageOne.length===12&&pageTwo.length===12&&overlap.length===0&&pageLabelOne!==pageLabelTwo,
+  `第 1 页 ${pageOne.length} 张（${pageLabelOne}） → 第 2 页 ${pageTwo.length} 张（${pageLabelTwo}）；重合 ${overlap.length} 张`);
+ await mouseClick('#page-prev');
+ await sleep(700);
+ const pageBack=await cardsNow();
+ check('真实鼠标点「上一页」回到第 1 页，卡片逐张相同',
+  JSON.stringify(pageBack)===JSON.stringify(pageOne),
+  `回到 ${pageBack.length} 张；与第 1 页逐张相同=${JSON.stringify(pageBack)===JSON.stringify(pageOne)}`);
+
+ // ③ 搜索：**真键盘输入**（Input.insertText 走浏览器自己的输入通道）
+ await mouseClick('#pool-search');
+ await cdp.send('Input.insertText',{text:'音速'});
+ await sleep(650);
+ const searched=JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('#roster button[data-pet]')];
+  return JSON.stringify({value:document.getElementById('pool-search').value,
+   names:cards.map((c)=>(c.querySelector('.nm')||{}).textContent||''),
+   pool:document.body.dataset.rocoPool??null,total:document.body.dataset.rocoPoolTotal??null,
+   count:cards.length});})()`));
+ check('搜索框真的收到键盘输入，阵容池按名字过滤（每一张都含搜索词）',
+  searched.value==='音速'&&searched.count>=1&&searched.count<12
+  &&searched.names.every((n)=>n.includes('音速')),
+  `输入框="${searched.value}"；命中 ${searched.count} 张：${searched.names.join('、')}；`
+  +`data-roco-pool=${searched.pool}/${searched.total}`);
+ // 用真键盘清空：全选 + 退格（不是直接改 value）
+ await cdp.send('Input.dispatchKeyEvent',{type:'keyDown',key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2,commands:['selectAll']});
+ await cdp.send('Input.dispatchKeyEvent',{type:'keyUp',key:'a',code:'KeyA',windowsVirtualKeyCode:65,modifiers:2});
+ await cdp.send('Input.dispatchKeyEvent',{type:'keyDown',key:'Backspace',code:'Backspace',windowsVirtualKeyCode:8,nativeVirtualKeyCode:8,commands:['deleteBackward']});
+ await cdp.send('Input.dispatchKeyEvent',{type:'keyUp',key:'Backspace',code:'Backspace',windowsVirtualKeyCode:8,nativeVirtualKeyCode:8});
+ await sleep(700);
+ const clearedValue=await js(`document.getElementById('pool-search').value`);
+ const backToFull=await cardsNow();
+ check('真键盘清空搜索词之后阵容池回到完整一页（没把筛掉的那 11 张留在外面）',
+  clearedValue===''&&backToFull.length===12,
+  `输入框="${clearedValue}"；卡片回到 ${backToFull.length} 张`);
+
+ // ④ 属性筛选：真实鼠标开菜单 → 点某一项（原生 <select> 在无头 Chrome 里按不动，见页面注释）
+ await mouseClick('#filter-type-menu > summary');
+ await mouseClick('#filter-type button[data-type="草系"]');
+ await sleep(700);
+ const typedFilter=JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('#roster button[data-pet]')];
+  return JSON.stringify({side:document.body.dataset.rocoPoolType??null,count:cards.length,
+   chips:cards.map((c)=>[...c.querySelectorAll('.type')].map((t)=>t.textContent.trim()).join('|'))});})()`));
+ check('真实鼠标按属性筛选：卡片集合真的变化，且**每一张**都带这个属性',
+  typedFilter.side==='草系'&&typedFilter.count>0&&typedFilter.count<12
+  &&typedFilter.chips.every((c)=>c.includes('草系')),
+  `属性=${typedFilter.side}；${typedFilter.count} 张卡片属性=${typedFilter.chips.join(' / ')}`);
+ await mouseClick('#filter-type-menu > summary');
+ await mouseClick('#filter-type button[data-type=""]');
+ await sleep(700);
+ const typeReset=await cardsNow();
+ check('真实鼠标把属性筛选改回「全部」之后池子恢复', typeReset.length===12, `回到 ${typeReset.length} 张`);
+
+ // ⑤ 定位筛选：同上，且逐张核对定位
+ await mouseClick('#filter-role-menu > summary');
+ await mouseClick('#filter-role button[data-role="attacker"]');
+ await sleep(700);
+ const roledFilter=JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('#roster button[data-pet]')];
+  return JSON.stringify({side:document.body.dataset.rocoPoolRole??null,count:cards.length,
+   roles:cards.map((c)=>(c.querySelector('.card-role')||{}).textContent||'')});})()`));
+ check('真实鼠标按定位筛选：卡片集合变化，且每一张的定位都等于所选项',
+  roledFilter.side==='attacker'&&roledFilter.count>0&&roledFilter.roles.length>0
+  &&roledFilter.roles.every((r)=>r==='定位：输出'),
+  `定位=${roledFilter.side}；${roledFilter.count} 张定位=${[...new Set(roledFilter.roles)].join(' / ')}`);
+ await mouseClick('#filter-role-menu > summary');
+ await mouseClick('#filter-role button[data-role=""]');
+ await sleep(700);
+
+ // ⑥ 我方/对手 = 分段选择器：真实点击切换，aria-pressed、面板标记、当前侧样式三者同步
+ const segState=async()=>JSON.parse(await js(`(()=>{const tabs=[...document.querySelectorAll('.side-tab')];
+  return JSON.stringify({sides:tabs.map((t)=>t.dataset.side),pressed:tabs.map((t)=>t.getAttribute('aria-pressed')),
+   bgs:tabs.map((t)=>getComputedStyle(t).backgroundColor),
+   panel:document.getElementById('select-panel').dataset.rocoPickSide,border:getComputedStyle(document.getElementById('side-enemy')).boxShadow});})()`));
+ await mouseClick('#side-seg .side-tab[data-side="enemy"]');
+ await sleep(200);
+ const segEnemy=await segState();
+ check('分段选择器用真实点击切到「对手」：aria-pressed / 面板标记 / 当前侧样式三者同步',
+  segEnemy.sides.join(',')==='player,enemy'&&segEnemy.pressed.join(',')==='false,true'
+  &&segEnemy.panel==='enemy'&&segEnemy.bgs[0]!==segEnemy.bgs[1],
+  `sides=${segEnemy.sides.join(',')} pressed=${segEnemy.pressed.join(',')} 面板=${segEnemy.panel} `
+  +`背景 ${segEnemy.bgs.join(' vs ')}`);
+ await mouseClick('#side-seg .side-tab[data-side="player"]');
+ await sleep(200);
+ const segPlayer=await segState();
+ check('分段选择器用真实点击切回「我方」：状态跟着反过来',
+  segPlayer.pressed.join(',')==='true,false'&&segPlayer.panel==='player'
+  &&segPlayer.bgs[0]!==segPlayer.bgs[1],
+  `pressed=${segPlayer.pressed.join(',')} 面板=${segPlayer.panel} 背景 ${segPlayer.bgs.join(' vs ')}`);
+
+ // ⑦ 详情抽屉：面板数值与四个技能只在抽屉里，卡片首层没有
+ const cardLayer=JSON.parse(await js(`JSON.stringify({stats:document.querySelectorAll('#roster .pick .stats').length,
+  moves:document.querySelectorAll('#roster .pick .mv').length,keys:document.querySelectorAll('#roster .pick .card-key').length,
+  roles:document.querySelectorAll('#roster .pick .card-role').length})`));
+ check('卡片首层只给「名字/属性/定位/一个特点」：没有六维面板、没有四技能长列表',
+  cardLayer.stats===0&&cardLayer.moves===0&&cardLayer.keys===12&&cardLayer.roles===12,
+  JSON.stringify(cardLayer));
+ await mouseClick('#roster button[data-detail]');
+ await sleep(320);
+ const petDetailBox=JSON.parse(await js(`(()=>{const d=document.getElementById('pet-detail');
+  return JSON.stringify({hidden:d.hidden,stats:document.querySelectorAll('#pet-detail .detail-stats li').length,
+   moves:document.querySelectorAll('#pet-detail .detail-moves li').length,
+   text:d.textContent.replace(/\\s+/g,' ').slice(0,120),
+   hook:document.body.dataset.rocoDetail??null});})()`));
+ check('真实鼠标点「详情」：抽屉里给出面板数值与四个技能',
+  petDetailBox.hidden===false&&petDetailBox.stats>=6&&petDetailBox.moves===4
+  &&/^pet_\d+$/.test(petDetailBox.hook||''),
+  `面板 ${petDetailBox.stats} 项 / 技能 ${petDetailBox.moves} 条：${petDetailBox.text}`);
+ await mouseClick('#pet-detail-close');
+ await sleep(200);
+ const detailClosed=await js(`document.getElementById('pet-detail').hidden`);
+ check('真实鼠标点「详情」的关闭按钮：抽屉能关掉', detailClosed===true, `hidden=${detailClosed}`);
+
+ // ⑧ 真实页面截图：1440×900 与 390×844 的选阵容页各一张（量 clientW/scrollW）
+ await js(`window.scrollTo(0,0)`);
+ await setViewport(1440,900);
+ const m1440=await overflowOf();
+ const shotRoster1440=await uiShoot('roster-1440x900');
+ await setViewport(390,844,true);
+ const m390=await overflowOf();
+ const shotRoster390=await uiShoot('roster-390x844');
+ check('选阵容页两张真实截图都不横向溢出（clientW === scrollW）',
+  m1440.clientW===m1440.scrollW&&m390.clientW===m390.scrollW,
+  `1440×900 clientW/scrollW=${m1440.clientW}/${m1440.scrollW}；390×844 clientW/scrollW=${m390.clientW}/${m390.scrollW}；`
+  +`截图 ${shotRoster1440}、${shotRoster390}`);
+
+ // ⑨ 对战页：真实鼠标点「开一局」之后阵容池完全收起，动作固定在底部
+ await setViewport(1440,900);
+ const startDisabled=await js(`document.getElementById('start-battle').disabled`);
+ await mouseClick('#start-battle');
+ for(let i=0;i<120;i++){if(await js(`document.body.dataset.rocoView==='ready'&&document.getElementById('select-panel').hidden`))break;await sleep(250);}
+ const battlefield=JSON.parse(await js(`(()=>{const b=document.getElementById('battle-panel');
+  const a=document.getElementById('action-panel');
+  const bar=a.getBoundingClientRect();
+  return JSON.stringify({selectHidden:document.getElementById('select-panel').hidden,
+   briefHidden:document.getElementById('lineup-brief').hidden,
+   brief:(document.getElementById('lineup-brief').textContent||'').replace(/\\s+/g,' ').trim().slice(0,80),
+   reopen:Boolean(document.getElementById('reopen-pick')),
+   actions:document.querySelectorAll('#actions button[data-action]').length,
+   stageActive:document.querySelectorAll('#self-pets .pet.active, #foe-field .pet.active').length,
+   selfBench:document.querySelectorAll('#self-bench .bench-pet').length,
+   foeBench:document.querySelectorAll('#foe-bench .bench-pet').length,
+   actionFixed:getComputedStyle(a).position,
+   actionBottom:Math.round(bar.bottom),viewportH:document.documentElement.clientHeight,
+   battleVisible:!b.hidden});})()`));
+ check('真实鼠标点「开一局」：阵容池完全收起，只留一行摘要 + 「重选阵容」',
+  startDisabled===false&&battlefield.battleVisible&&battlefield.selectHidden===true
+  &&battlefield.briefHidden===false&&battlefield.reopen===true,
+  `开局按钮可用=${startDisabled===false}；阵容池收起=${battlefield.selectHidden}；摘要「${battlefield.brief}」`);
+ check('对战页中央是双方当前宠物的战斗舞台，后备压成小条',
+  battlefield.stageActive===2&&battlefield.selfBench===2&&battlefield.foeBench===2,
+  `舞台上 ${battlefield.stageActive} 只 / 我方后备 ${battlefield.selfBench} 条 / 对手后备 ${battlefield.foeBench} 条`);
+ check('合法动作固定在底部且一屏可点（动作栏底边贴着视口底）',
+  battlefield.actions>0&&battlefield.actionFixed==='fixed'
+  &&Math.abs(battlefield.actionBottom-battlefield.viewportH)<=2,
+  `动作 ${battlefield.actions} 个；position=${battlefield.actionFixed} 底边=${battlefield.actionBottom} 视口高=${battlefield.viewportH}`);
+ const mBattle=await overflowOf();
+ const shotBattle=await uiShoot('battle-1440x900');
+ check('对战页真实截图不横向溢出（clientW === scrollW）',
+  mBattle.clientW===mBattle.scrollW,
+  `1440×900 clientW/scrollW=${mBattle.clientW}/${mBattle.scrollW}；截图 ${shotBattle}`);
+
+ // ⑩ 教程：只在首次出现；真实点击「跳过」之后不再占位，且**刷新之后仍然不出现**
+ await setViewport(1440,900);
+ const onboardBefore=JSON.parse(await js(`(()=>{const bar=document.getElementById('onboard-bar');
+  return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:bar.hidden,
+   steps:document.querySelectorAll('#onboard li').length,h:Math.round(bar.getBoundingClientRect().height)});})()`));
+ await mouseClick('#onboard-skip');
+ await sleep(300);
+ const onboardAfter=JSON.parse(await js(`(()=>{const bar=document.getElementById('onboard-bar');
+  return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:bar.hidden,
+   h:Math.round(bar.getBoundingClientRect().height),flag:localStorage.getItem('roco-coach-onboard-v1')});})()`));
+ check('教程只在首次出现：真实点击「跳过」之后它不再占位（高度归零）',
+  onboardBefore.hook==='shown'&&onboardBefore.steps===3&&onboardBefore.h>0
+  &&onboardAfter.hidden===true&&onboardAfter.h===0&&onboardAfter.hook==='hidden',
+  `跳过前 ${onboardBefore.steps} 步 / 高 ${onboardBefore.h}px（${onboardBefore.hook}） → `
+  +`跳过后 高 ${onboardAfter.h}px（${onboardAfter.hook}）`);
+ check('「跳过」写进了 localStorage 的登记键（不是只改这一次的 DOM）',
+  onboardAfter.flag==='1',`localStorage['roco-coach-onboard-v1']=${JSON.stringify(onboardAfter.flag)}`);
+ await cdp.send('Page.reload');
+ for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}
+ await sleep(400);
+ const onboardReloaded=JSON.parse(await js(`(()=>{const bar=document.getElementById('onboard-bar');
+  return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:bar.hidden,
+   h:Math.round(bar.getBoundingClientRect().height),
+   flag:localStorage.getItem('roco-coach-onboard-v1'),ready:document.body.dataset.rocoReady??null});})()`));
+ check('刷新之后教程仍然不出现（localStorage 那个键真的生效）',
+  onboardReloaded.ready==='yes'&&onboardReloaded.hidden===true&&onboardReloaded.h===0
+  &&onboardReloaded.hook==='hidden',
+  `刷新后 hook=${onboardReloaded.hook} 高=${onboardReloaded.h}px 键=${JSON.stringify(onboardReloaded.flag)}`);
 
  const checksOut={checks,screenshots:shots,dom_snapshots:snapshots.length,
   console_errors:consoleErrors,page_errors:pageErrors,

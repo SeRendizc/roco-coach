@@ -39,7 +39,7 @@
 | --- | --- |
 | 逐局面矩阵（12 条 + 汇总 + 引擎侧扫描） | `reports/roco/demo-acceptance/coach-positions-browser.json` |
 | 每个局面一张截图 | `reports/roco/demo-acceptance/09-position-01-ko-now.png` … `09-position-12-silent.png`（`.gitignore` 第 45 行 `reports/roco/demo-acceptance/*.png` 一直把截图挡在 git 外，这是仓库原有约定，没有改；它们在磁盘上，报告里按名字引用） |
-| 同一次运行的全部判据（当前 70 条，其中矩阵 12 条） | `reports/roco/demo-acceptance/demo-acceptance.json` |
+| 同一次运行的全部判据（第 63 轮重新定位那一次是 97 条，其中矩阵 12 条；页面侧的判据还在增加，这个数只是当次快照） | `reports/roco/demo-acceptance/demo-acceptance.json` |
 | 只读产物的守卫 | `tests/evals/roco/browser-position-matrix.test.js`（在 `package.json` 的 `test:unit` 显式列表里） |
 | 全量 kind 覆盖扫描（2640 局，约 33 分钟） | `npm run roco:kind-coverage` → `reports/roco/demo-acceptance/coach-kind-coverage-scan.json`（产物里的 `coverage_scan.full_scan_report` 会把它一起记下来） |
 
@@ -51,7 +51,7 @@ node --test tests/evals/roco/browser-position-matrix.test.js   # 只读产物的
 npm run roco:kind-coverage            # 全量 2640 局覆盖扫描，约 33 分钟（独立命令，不阻塞上面两条）
 ```
 
-`npm run roco:demo-acceptance` 会：跑完页面/产品判据（当前 58 条）→ 跑 12 个局面的矩阵
+`npm run roco:demo-acceptance` 会：跑完页面/产品判据（第 63 轮那次是 85 条）→ 跑 12 个局面的矩阵
 （**两遍**，共 24 局）→ 跑 110 局的抽样 kind 覆盖扫描 → 写产物 → 用 12 条新判据把矩阵量一遍；
 如果 `coach-kind-coverage-scan.json` 在，还会把全量扫描的数字一并记进产物。
 本机实测这段总耗时 **93 秒**（另有约 5 秒的 Chrome 启动）。
@@ -112,16 +112,16 @@ npm run roco:kind-coverage            # 全量 2640 局覆盖扫描，约 33 分
 | # | 局面 id | 期望 kind | 推进 | 回合/阶段 | 我方场上 | 对手场上 | 实际气泡（原句） |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `01-ko-now-lethal` | `ko-now` | 5 | 6 / battle | 寂灭骨龙 龙/幽 35/425 E3 | 寂灭骨龙 龙/幽 35/425 E3 | 「诡刺」估 130，够收对面「寂灭骨龙」这 35 血：这一轮直接收 |
-| 2 | `02-ko-now-mid` | `ko-now` | 11 | 12 / battle | 雪影娃娃 冰/萌 173/442 E3 | 雪影娃娃 冰/萌 173/442 E3 | 「超级糖果」估 176，够收对面「雪影娃娃」这 173 血：这一轮直接收 |
+| 2 | `02-ko-now-mid` | `ko-now` | 3 | 4 / battle | 音速犬 火 190/366 E6 | 音速犬 火 190/366 E6 | 「火云车」估 414，够收对面「音速犬」这 190 血：这一轮直接收 |
 | 3 | `03-energy-short` | `energy-short` | 3 | 4 / battle | 寂灭骨龙 龙/幽 165/425 E3 | 寂灭骨龙 龙/幽 165/425 E3 | 能量还差 1 才能收掉它：先吃「能量果」补上，这一轮别硬顶 |
-| 4 | `04-type-resisted` | `type-resisted` | 5 | 6 / battle | 雪影娃娃 冰/萌 214/442 E2 | 雪影娃娃 冰/萌 214/442 E2 | 「风吹雪」打「雪影娃娃」只有抵抗（26 伤害）：别再硬用它 |
-| 5 | `05-type-favoured` | `type-favoured` | 5 | 6 / battle | 圆号鱼 水 230/413 E5 | 圣凯布米龙 火/虫 238/355 E5 | 「甩水」上一手打出克制（39 伤害）：继续用它压上去 |
+| 4 | `04-type-resisted` | `type-resisted` | 5 | 6 / battle | 雪影娃娃 冰/萌 214/442 E4 | 雪影娃娃 冰/萌 214/442 E4 | 「风吹雪」打「雪影娃娃」只有抵抗（26 伤害）：别再硬用它 |
+| 5 | `05-type-favoured` | `type-favoured` | 5 | 6 / battle | 圆号鱼 水 230/413 E6 | 圣凯布米龙 火/虫 238/355 E5 | 「甩水」上一手打出克制（39 伤害）：继续用它压上去 |
 | 6 | `06-foe-energy-high` | `foe-energy-high` | 7 | 8 / battle | 圆号鱼 水 169/413 E6 | 圣凯布米龙 火/虫 199/355 E6 | 对面能量到 6 了（上限 6）：重招随时来，别拿残血硬接这一手 |
 | 7 | `07-replace-required` | `replace-required` | 9 | 8 / replace | 寂灭骨龙 龙/幽 0/425 E3 | 黑猫巫师 普通 474/474 E2 | 「寂灭骨龙」倒了，换「海豹船长」顶上：对面「黑猫巫师」还在场，补位别一上来就挨打 |
-| 8 | `08-switch-low-hp-mid` | `switch-low-hp` | 8 | 8 / battle | 音速犬 火 89/366 E1 | 圆号鱼 水 413/413 E1 | 你只剩 24% 血，换「雪影娃娃」上来：它还厚，别把「音速犬」白送掉 |
-| 9 | `09-switch-low-hp-low` | `switch-low-hp` | 6 | 7 / battle | 海豹船长 武/水 57/374 E4 | 音速犬 火 134/366 E1 | 你只剩 15% 血，换「银月狼王」上来：它还厚，别把「海豹船长」白送掉 |
-| 10 | `10-speed-faster` | `speed-decides` | 5 | 6 / battle | 秩序鱿墨 幽/萌 174/354 E1 | 画间沉铁兽 普通/武 293/435 E5 | 你速度 130 快过它 92：这一轮先手压上去，别把节奏让掉 |
-| 11 | `11-speed-slower-defend` | `speed-decides` | 11 | 9 / battle | 黑猫巫师 普通 180/474 E3 | 月使鹭纳 翼/冰 362/362 E0 | 它速度 115 快过你 70：别硬对拼，先换人或者用「防御」顶这一下 |
+| 8 | `08-switch-low-hp-mid` | `switch-low-hp` | 9 | 9 / battle | 音速犬 火 120/366 E6 | 圆号鱼 水 354/413 E6 | 你只剩 33% 血，换「雪影娃娃」上来：它还厚，别把「音速犬」白送掉 |
+| 9 | `09-foe-low-hp` | `foe-low-hp` | 6 | 7 / battle | 雪影娃娃 冰/萌 38/442 E2 | 雪影娃娃 冰/萌 38/442 E2 | 对面「雪影娃娃」只剩 38 血：这一轮先把它补掉，别让它换人喘口气 |
+| 10 | `10-speed-faster` | `speed-decides` | 5 | 6 / battle | 秩序鱿墨 幽/萌 174/354 E1 | 画间沉铁兽 普通/武 321/435 E6 | 你速度 130 快过它 92：这一轮先手压上去，别把节奏让掉 |
+| 11 | `11-speed-slower-defend` | `speed-decides` | 6 | 7 / battle | 化蝶 虫/萌 115/311 E6 | 圆号鱼 水 269/413 E2 | 它速度 105 快过你 100：别硬对拼，先换人或者用「防御」顶这一下 |
 | 12 | `12-peaceful-silent` | **（期望沉默）** | 0 | 1 / battle | 雪影娃娃 冰/萌 442/442 E2 | 雪影娃娃 冰/萌 442/442 E2 | **（没有气泡）** |
 
 阵容（`pet_id` 只写在代码里，产物里只有真名）：
@@ -129,12 +129,13 @@ npm run roco:kind-coverage            # 全量 2640 局覆盖扫描，约 33 分
 | # | 我方 | 对手 |
 | --- | --- | --- |
 | 1 / 3 / 7 | 寂灭骨龙 + 海豹船长 + 黑猫巫师 | 同我方（镜像） |
-| 2 / 4 / 12 | 雪影娃娃 + 月使鹭纳 + 化蝶 | 同我方（镜像） |
+| 2 | 音速犬 + 圣凯布米龙 + 银月狼王 | 同我方（镜像） |
+| 4 / 12 | 雪影娃娃 + 月使鹭纳 + 化蝶 | 同我方（镜像） |
 | 5 / 6 | 圆号鱼 + 银月狼王 + 圣凯布米龙 | 圣凯布米龙 + 银月狼王 + 圆号鱼（倒序） |
 | 8 | 音速犬 + 雪影娃娃 + 圆号鱼 | 同我方（镜像） |
-| 9 | 海豹船长 + 银月狼王 + 月使鹭纳 | 音速犬 + 黑猫巫师 + 圆号鱼 |
+| 9 | 雪影娃娃 + 寂灭骨龙 + 黑猫巫师 | 同我方（镜像） |
 | 10 | 秩序鱿墨 + 圣凯布米龙 + 雪影娃娃 | 画间沉铁兽 + 化蝶 + 圆号鱼 |
-| 11 | 寂灭骨龙 + 海豹船长 + 黑猫巫师 | 雪影娃娃 + 月使鹭纳 + 海豹船长 |
+| 11 | 化蝶 + 黑猫巫师 + 圆号鱼 | 圆号鱼 + 黑猫巫师 + 化蝶 |
 
 ### 3.1 唯一的沉默局面：第 12 条
 
@@ -144,6 +145,32 @@ npm run roco:kind-coverage            # 全量 2640 局覆盖扫描，约 33 分
 也就是说：这条沉默有**两个**独立原因同时成立——门控没放行（满血 → `situationRisk = 0.2`
 → `value 0.6 < floor 1.2`），而且就算放行，`coachAdvice` 也没有一条值得说的事实。
 产物里的 `silent_reason` 就是这么写的，不是一句「没有建议」。
+
+### 3.2 第 63 轮：引擎修复之后的漂移与重新定位（表里那几条数字的来历）
+
+提交 `36832d1` 修了引擎两处 fail-closed 违规（攻击分支不再丢弃附带效果、防御分支不再
+丢弃「应对成功」子句），**战斗走向因此改变**：同一批写死的阵容/种子不再复现它们当初要
+隔离的事实。这就是「一个根因、两处表现」（`docs/roadmap/DSH-EXECUTION-STATE.md` §C6.10）：
+引擎侧 `tests/evals/roco/coach-positions.test.js` 与本文的 12 个局面是同一件事的两种表现。
+
+被停掉的子 agent 留下过一条实测结论，重新定位照它做：**对固定阵容来说种子几乎不改变结果，
+真正的杠杆是「阵容 + 推进手数」**——所以下面换的是阵容（与手数），不是种子。
+
+| # | 局面 | 期望 kind | 修复后实际 | 那一刻的实测数字 | 处置 |
+| --- | --- | --- | --- | --- | --- |
+| 2 | `02-ko-now-mid` | `ko-now` | `switch-low-hp` | 「雪影娃娃镜像」t11（推进 11）：我方 73/442 = **16.5%**、对面 362/362 = **满血**，`finish=false`——收线事实**本身不成立**（漂移） | 换阵容：音速犬镜像 t4，双方 190/366 = 51.9%，火云车估 414 ≥ 190 |
+| 8 | `08-switch-low-hp-mid` | `switch-low-hp` | `type-resisted` | 「音速犬+雪影娃娃+圆号鱼」镜像 t8（推进 8）：我方 133/366 = **36.3%**，刚好在 35% 红线上方 → 换人那条不成立；上一手火苗只打出抵抗（46）→ 属性那条先开口 | **同一阵容只动 1 手**（8 → 9）：t9 我方 120/366 = 32.8%，换人成立 |
+| 11 | `11-speed-slower-defend` | `speed-decides` | `switch-low-hp` | 原阵容 t11（推进 11）：我方 77/474 = **16.2%**，而对手 月使鹭纳 362/362——速度事实（70 vs 115）**仍然成立**，但被**更高优先级**的换人那条（优先级 5 vs 10）压住 | 换阵容：化蝶 × 圆号鱼 t7，100 vs 105、我方 37%、收不掉、也没有待决的属性倍率→ 速度成为最优先事实；「防御」这一轮合法，句子仍是原来的那一句 |
+| 9 | `09-foe-low-hp` | （新格） | — | 引擎修复后**抽样扫描（110 局）第一次真的显示出** `foe-low-hp`：命中 16 / 开口 10（旧版命中 4 / 开口 0）。判据 `kinds_reachable_but_missing_from_matrix` 随即变红 | 矩阵上限 12，`switch-low-hp` 已由第 8 条覆盖 → 把第 9 格让给它（原来的 `09-switch-low-hp-low` 退出），kind 覆盖 8 → 9 种 |
+
+引擎侧的对应改动（同一根因的另一处表现）：
+
+| 局面 | 期望 kind | 修复后 | 处置 |
+| --- | --- | --- | --- |
+| `04-type-resisted` | `type-resisted` | 「装置失败：取不到隔离窗口」 | 命名事实**仍成立**（上一手倍率 0.5、那一招这一轮还放得出来，t6 实际开口也正是 `type-resisted`）；失效的是这条 case 的**隔离判据**「所有合法招倍率 < 1」——修复让「超级糖果」变成这一手合法且中性的一招。换阵容（海豹船长 × 银月狼王：气波 ×0.25、一拳 ×0.25 全被抗），判据一字未改 |
+| `06-ko-now-mid` | `ko-now` | 「装置失败：取不到隔离窗口」 | **漂移**：原阵容 t4/t5/t6 我方 54.3% / 54.3% / 48.4%、对面同血（都在 35%–60% 档内），但这个血量下**没有一招估算够线**（`finish=false`）；t7（adv=6）起双方一起掉到 38/442 = 8.6% 滑出档位，t10 对面才换成满血月使鹭纳 362/362 而我方 83/442 = 18.8%。换阵容（音速犬镜像 t4，双方 51.9%，火云车估 414 ≥ 190） |
+
+两处期望 kind **一个字都没有改**；被改的只有「用哪一批写死的阵容/手数把那个事实摆出来」。
 
 ---
 
@@ -163,17 +190,17 @@ npm run roco:kind-coverage            # 全量 2640 局覆盖扫描，约 33 分
 
 ---
 
-## 5. kind 覆盖：8 种可达 + 3 种不可达
+## 5. kind 覆盖：9 种可达 + 2 种不可达
 
 `coach-advice.js` 对外契约一共 11 个 kind（`COACH_ADVICE_KINDS`）。
-矩阵实测到 **8 种**：
+矩阵实测到 **9 种**：
 
 ```
-energy-short  foe-energy-high  ko-now  replace-required
+energy-short  foe-energy-high  foe-low-hp  ko-now  replace-required
 speed-decides  switch-low-hp  type-favoured  type-resisted
 ```
 
-矩阵本身证明不了「剩下 3 种为什么没进来」，所以 `demo-acceptance.mjs` 会跑**两份**
+矩阵本身证明不了「剩下 2 种为什么没进来」，所以 `demo-acceptance.mjs` 会跑**两份**
 引擎侧扫描，两份都走页面正在用的那个服务、同一条
 （`/api/roco/battle/new → advance → plan → rocoIntervention`）、**都不用随机**：
 
@@ -189,15 +216,15 @@ speed-decides  switch-low-hp  type-favoured  type-resisted
 
 | kind | 命中 | 气泡真的显示 | 低血档沉默 | 满血档沉默 | 结论 |
 | --- | --- | --- | --- | --- | --- |
-| `energy-short` | 228 | 60 | 0 | 168 | 可达（矩阵 #3） |
-| `ko-now` | 183 | 114 | 0 | 69 | 可达（矩阵 #1/#2） |
-| `switch-low-hp` | 246 | 246 | 0 | 0 | 可达（矩阵 #8/#9） |
-| `speed-decides` | 286 | 98 | 0 | 188 | 可达（矩阵 #10/#11） |
-| `type-resisted` | 94 | 34 | 0 | 60 | 可达（矩阵 #4） |
-| `type-favoured` | 27 | **2** | 0 | 25 | 可达（矩阵 #5） |
-| `replace-required` | 68 | 68 | 0 | 0 | 可达（矩阵 #7） |
+| `energy-short` | 212 | 51 | 0 | 161 | 可达（矩阵 #3） |
+| `ko-now` | 181 | 121 | 0 | 60 | 可达（矩阵 #1/#2） |
+| `switch-low-hp` | 257 | 257 | 0 | 0 | 可达（矩阵 #8） |
+| `speed-decides` | 297 | 99 | 0 | 198 | 可达（矩阵 #10/#11） |
+| `type-resisted` | 92 | 33 | 0 | 59 | 可达（矩阵 #4） |
+| `type-favoured` | 29 | **4** | 0 | 25 | 可达（矩阵 #5） |
+| `replace-required` | 71 | 71 | 0 | 0 | 可达（矩阵 #7） |
+| `foe-low-hp` | 16 | **10** | 0 | 6 | 可达（矩阵 #9，第 63 轮起） |
 | `foe-energy-high` | 9 | **1** | 0 | 8 | 可达（矩阵 #6） |
-| `foe-low-hp` | 4 | 0 | 0 | 4 | 抽样里没显示过（**不等于不可达**，见 §5.3） |
 | `ko-maybe` | 0 | 0 | 0 | 0 | 结构上不可达（§5.1） |
 | `foe-status-ticking` | 0 | 0 | 0 | 0 | 没有入口（§5.2） |
 
@@ -209,8 +236,8 @@ speed-decides  switch-low-hp  type-favoured  type-resisted
 | `replace-required` | 1732 | 1732 | 0 | 0 | 0 | 可达（矩阵 #7） |
 | `ko-now` | 4192 | 2684 | 2684 | 0 | 1508 | 可达（矩阵 #1/#2） |
 | `ko-maybe` | 0 | 0 | 0 | 0 | 0 | **不可达**（§5.1） |
-| `foe-low-hp` | 67 | **6** | 6 | 0 | 61 | **可达但极稀有**（§5.3） |
-| `switch-low-hp` | 6151 | 6151 | 5415 | 0 | 0 | 可达（矩阵 #8/#9） |
+| `foe-low-hp` | 67 | **6** | 6 | 0 | 61 | 可达；第 63 轮起已在矩阵里（#9） |
+| `switch-low-hp` | 6151 | 6151 | 5415 | 0 | 0 | 可达（矩阵 #8） |
 | `energy-short` | 4967 | 1433 | 1433 | 0 | 3534 | 可达（矩阵 #3） |
 | `foe-status-ticking` | 0 | 0 | 0 | 0 | 0 | **不可达**（§5.2） |
 | `type-resisted` | 2706 | 842 | 842 | 0 | 1864 | 可达（矩阵 #4） |
@@ -231,34 +258,31 @@ speed-decides  switch-low-hp  type-favoured  type-resisted
 中毒/灼烧/寄生（不支持的那些 fail closed），而 `POST /api/roco/battle/new` 不接受
 `loadouts`——别的地方也挂不上去。抽样 110 局、全量 2640 局里都命中 **0** 次。
 
-### 5.3 `foe-low-hp`：**可达，但这一轮矩阵没有覆盖它（已披露的缺口）**
+### 5.3 `foe-low-hp`：第 63 轮起**已经进矩阵**（第 9 条）
 
-- 全量扫描：命中 67 次，**气泡真的显示 6 次**。`first_shown` 写在第 7 回合、
-  `phase = battle`、`action = micro_hint`、我方血量比 0.483、对面 5.3% 血，
-  文案形状「对面「◆」只剩 # 血：这一轮先把它补掉，别让它换人喘口气」。
-  出现率约 **6 / 34021 ≈ 0.018%**。
-- 抽样扫描（110 局）：命中 4 次、显示 **0** 次，**全部**落在我方血量比 > 0.6 的窗口
-  （低血档 0 次）。那 4 次被门控压住的原因是
-  `value = 3 × risk = 0.6 < floor = 1.2`——压住它们的是**门控**，不是检测器。
-- 所以：**抽样扫描证明不了「不可达」**，只能说「小样本里逮不到」。
-  这一轮矩阵上限 12 格、已经 8 种 kind，没有为它定位窗口，
-  于是它被登记在产物的 `summary.kinds_reachable_only_in_full_scan` 里，
-  带 `disclosed: true` 与一条披露理由。判据要求：全量说可达而矩阵里没有的 kind
-  **必须被披露**，披露不出理由就变红。
-- 想把它补进矩阵：`npm run roco:kind-coverage`（全量）会记录
-  `kinds['foe-low-hp'].shown_windows[]`（**阵容、seed、第几手、血量比、形状**），
-  按那条窗口写进 `POSITION_MATRIX` 再跑一遍即可。
-  ⚠️ 措辞精确一点：**盘上那份 `coach-kind-coverage-scan.json` 是旧版扫描器写的**，
-  它每个 kind 只留了 `first_shown`（第 7 回合那一条就是从这里读的），**没有** `shown_windows[]`；
-  当前代码已经会记 `shown_windows[]`，重跑一次就会出现。产物 `coverage_scan.kinds[*].shown_windows`
-  是本次抽样扫描记的（12 个局面里那 8 种 kind 各 0—4 条）。
+- 引擎修复 `36832d1` 之后，抽样扫描（110 局）**第一次真的显示出**它：
+  命中 16 / 气泡显示 **10**（本轮修复前是命中 4 / 显示 0）。
+  判据 `kinds_reachable_but_missing_from_matrix` 立刻变红——「抽样说可达、矩阵里却没有」
+  不许放过。矩阵上限 12、`switch-low-hp` 已由第 8 条覆盖，于是把原来的
+  `09-switch-low-hp-low` 让给它：第 9 条现在是「雪影娃娃 × 雪影娃娃」t7，
+  双方 38/442 = 8.6%，对面 ≤10% 血而这一轮**没有一招估算够线**（`finish=false`）。
+- 换成矩阵里的格子以后，它的开口条件写清楚了：**对面 ≤10% 血**且
+  **我方合法招没有一招估算够得到那条血线**（够得到就先被 `ko-now` 接走）。
+  唯一的例外是「我方 ≤35% 血、而且对面比我快」——那时它主动让给换人那条。
+- 历史口径（第一份全量扫描，2640 局 / 34021 个窗口）：命中 67 次、真的显示 **6** 次，
+  `first_shown` 在第 7 回合、我方血量比 0.483、对面 5.3% 血，出现率约 **0.018%**。
+  那份报告仍在盘上（`reports/roco/demo-acceptance/coach-kind-coverage-scan.json`），
+  产物把它整份记进 `coverage_scan.full_scan_report`。抽样那一列**证明不了「不可达」**，
+  只能说「小样本里逮不到」——第 63 轮这次正好是它反过来打脸抽样的例子。
+- 这台扫描器现在会记 `kinds['<kind>'].shown_windows[]`（**阵容、seed、第几手、血量比、形状**），
+  再要挪动某一格，照那条窗口写进 `POSITION_MATRIX` 重跑即可。
 
 ### 5.4 这一节的走法都不是「放宽判据」
 
 矩阵那条判据是：
 
 ```
-互不相同的 kind ≥ 8   ← 本次走这一支（实际 8 种）
+互不相同的 kind ≥ 8   ← 本次走这一支（实际 9 种）
 或：把 11 个 kind 列全，每个缺口给出实测命中数 + 机制原因，且观测数 ≥ 6
 ```
 
@@ -268,25 +292,28 @@ speed-decides  switch-low-hp  type-favoured  type-resisted
 1. 抽样扫描说「这个 kind 的气泡真的显示过」而矩阵里却没有 → 直接变红。
    第 5、6 条局面就是被它逼出来的：第一版矩阵只有 6 种 kind，
    它报出 `type-favoured` 显示过 2 次、`foe-energy-high` 显示过 1 次。
+   **第 63 轮它又逼了一次**：引擎修复后它报出 `foe-low-hp` 显示 10 次，
+   于是第 9 格让给了 `foe-low-hp`（原来的 `09-switch-low-hp-low` 退出）。
 2. 全量扫描（产物在时）说「这个 kind 显示过」而矩阵里却没有 →
    必须出现在 `summary.kinds_reachable_only_in_full_scan` 里且 `disclosed: true`
    并给出 ≥40 字的理由，否则 `undisclosed_coverage_gaps` 非空 → 直接变红。
-   `foe-low-hp` 走的就是这一支。
+   `foe-low-hp` 以前走的是这一支；现在它已在矩阵里，这一支在本次运行是空的。
 
 ---
 
-## 6. 形状去重：9 种形状、最大重复 2 次
+## 6. 形状去重：10 种形状、最大重复 2 次
 
 形状归一化（需求逐字口径）：引号里的名称/动作 → `「◆」`，任何数字 → `#`。
 
 ```
 2 × 「◆」估 #，够收对面「◆」这 # 血：这一轮直接收
-2 × 你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉
 1 × 能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶
 1 × 「◆」打「◆」只有抵抗（# 伤害）：别再硬用它
 1 × 「◆」上一手打出克制（# 伤害）：继续用它压上去
 1 × 对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手
 1 × 「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打
+1 × 你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉
+1 × 对面「◆」只剩 # 血：这一轮先把它补掉，别让它换人喘口气
 1 × 你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉
 1 × 它速度 # 快过你 #：别硬对拼，先换人或者用「◆」顶这一下
 ```
@@ -296,69 +323,87 @@ speed-decides  switch-low-hp  type-favoured  type-resisted
 守卫**不看产物里的汇总字段**，而是从每一条的 `dom.text` 重新算形状，
 再与汇总核对——汇总写错了也会红。
 
+（第 63 轮修复前这一节是「9 种形状、最大重复 3 次」，红的正是这条判据：
+换人那条形状被 02/09/11 三个局面共用。重新定位后换人那条只剩第 8 条一家，
+而第 9 条换成 `foe-low-hp` 又添了一种新形状。）
+
 ---
 
 ## 7. 反证（机械注入，实际报错原文）
 
-### 7.1 把行为改回去：检测器优先级换掉 → 检查变红
+### 7.1 把某条 `expected_kind` 改成另一个值 → 变红（第 63 轮实测）
 
-把 `DETECTORS` 里 `detectSwitchLowHp` 提到 `detectKo` **之前**
-（这正是那一类「优先级被挪坏」的注入），然后跑完整验收。
-实际报错（`demo-acceptance` 的输出，原样）：
-
-```
-[demo-acceptance] ✖ 局面矩阵：每个局面实际开口的 kind === 写死的期望 kind（12/12） — [{"id":"01-ko-now-lethal","expected":"ko-now","got":"switch-low-hp"}]
-[demo-acceptance] ✖ 局面矩阵：没有任何形状重复超过一次（实际最大重复 3 次，上限 2） — 形状 9 种 / 最大重复 3 次；超限 [{"shape":"你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉","count":3}]
-[demo-acceptance] 结果：55 通过 / 2 失败
-```
-
-同一次注入下，只读产物的守卫也红（`node --test tests/evals/roco/browser-position-matrix.test.js`
-→ `pass 8 / fail 2`）：
+把 `POSITION_MATRIX` 第 9 条的 `kind: 'foe-low-hp'` 改成 `'ko-now'`（其余一个字不动），
+跑 `node scripts/roco/demo-acceptance.mjs`。实际报错（原样）：
 
 ```
-✖ 浏览器局面矩阵：每个局面的实际 kind === 写死的期望 kind
-  AssertionError [ERR_ASSERTION]: 实际开口的检测器与写死的期望不一致：要么局面漂了，要么优先级被改坏了
-✖ 浏览器局面矩阵：没有任何形状重复超过一次（形状由守卫重算，不看 summary）
-  AssertionError [ERR_ASSERTION]: 这些形状出现了 3 次以上（同一句式换数字）：
+[demo-acceptance] ✖ 局面矩阵：每个局面实际开口的 kind === 写死的期望 kind（12/12） — [{"id":"09-foe-low-hp","expected":"ko-now","got":"foe-low-hp"}]
+[demo-acceptance] 结果：70 通过 / 6 失败；报告见 reports/roco/demo-acceptance/
 ```
 
-还原：注入前 `sha256(src/coach/coach-advice.js) = bace4815ed87d61bc8fe6c1366a9f8b64394c6a1dae26780aac090de971370de`，
-从注入前的副本还原后**逐字节相同**（`diff` 为空），`git status --porcelain src/coach/coach-advice.js` 无输出。
+改回 `'foe-low-hp'` 后同一条判据回绿（同一次运行里其余矩阵判据也全绿）：
 
-### 7.2 形状去重判据不是空的：构造两条同形状必须被判重
+```
+[demo-acceptance] ✔ 局面矩阵：每个局面实际开口的 kind === 写死的期望 kind（12/12） — 01-ko-now-lethal=ko-now … 09-foe-low-hp=foe-low-hp …
+```
 
-把产物里第 11 条的 `dom.text` / `shape` / `node_recompute.text` 改成与第 10 条**同形**
-（只改逐条记录，`summary` 一个字不动），再跑只读守卫：
+### 7.2 结构注入：把写死的「推进手数」改回修复前那一手 → 变红
+
+期望 kind 一个字没动，只把第 8 条写死的 `advances: 9` 改回 `8`（就是修复前那一手），
+跑同一条命令。实际报错：
+
+```
+[demo-acceptance] ✖ 局面矩阵：每个局面实际开口的 kind === 写死的期望 kind（12/12） — [{"id":"08-switch-low-hp-mid","expected":"switch-low-hp","got":"type-resisted"}]
+[demo-acceptance] ✖ 局面矩阵：互不相同的 kind ≥ 8（实际 8 种；分支 count>=8） — 观测到 8 种：energy-short/foe-energy-high/foe-low-hp/ko-now/replace-required/speed-decides/type-favoured/type-resisted
+[demo-acceptance] 结果：73 通过 / 3 失败；报告见 reports/roco/demo-acceptance/
+```
+
+改回 `9` 之后两条都回绿（`9 种`、`switch-low-hp` 回到观测集）。这条注入证明的是
+**「手数」这一格是承重的**，不是写给读的人看的装饰。
+
+### 7.3 只读守卫不是空的：把产物里两条记录改成同形 → 变红
+
+把第 11 条的 `dom.text` / `dom.why` / `shape` / `node_recompute.text` /
+`node_recompute.kind` / `kind` / `expected_kind` **整份复制**成第 10 条的
+（`summary` 一个字不动），再跑 `node --test tests/evals/roco/browser-position-matrix.test.js`：
 
 ```
 ✖ 浏览器局面矩阵：没有任何形状重复超过一次（形状由守卫重算，不看 summary）
   AssertionError [ERR_ASSERTION]: summary.distinct_shapes 与重算不符
-ℹ pass 9 / fail 1
+  10 !== 9
+ℹ pass 10 / fail 1
 ```
 
-也就是：**两条形状相同的记录被数出来了**（形状种数 9 → 8），判据不是空的。
-还原：产物 `sha256` 改前改后都是
-`3e4320fcf80099c609c516f89ba03e397157e240940a2840fa63f998515fa4d3`（逐字节相同），
-守卫恢复 `pass 10 / fail 0`。
+更粗的注入（只改 `dom.text`、不改 `shape`）会先撞上同一条判据里的
+「记录的形状与按 dom.text 重算的不一致」：
 
-### 7.3 确定性不是「说说的」
+```
+  AssertionError [ERR_ASSERTION]: 11-speed-slower-defend 记录的形状与按 dom.text 重算的不一致：
+    记录 它速度 # 快过你 #：别硬对拼，先换人或者用「◆」顶这一下
+    重算 你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉
+ℹ pass 9 / fail 2
+```
+
+还原产物后守卫 `pass 11 / fail 0`。
+
+### 7.4 确定性不是「说说的」
 
 同一批写死的输入跑两遍（pass A / pass B），去掉 `pass` 与截图名后逐字节比对：
 
 ```
-digest_pass_a = digest_pass_b = e19f02c1f3221e429ff9573f7e20f7edccdecb22d3e8abca49d7bc7fbfbeaa2c
+digest_pass_a = digest_pass_b = 1ee1da0dd023d88cc7833589268cea3a125ba5a76057694fce10053266453109
 byte_identical = true
 ```
 
 更强的版本：产物文件刻意**不含任何时间戳与随机端口**，所以**独立运行的整份
-`coach-positions-browser.json` 也是逐字节相同的**——
+`coach-positions-browser.json` 也是逐字节相同的**——第 63 轮重新定位之后，
+矩阵摘要 `digest_pass_a` 在 4 次独立运行里都是上面这个值；
+其中最后两次是连续两次独立运行，整份文件
+`sha256 = 884885fafcaa8ff91335ed2d3b0b24a6eb17ff3838e787b00ab810059833906f`
+**逐字节相同**（跑一次 → 量 sha → 再跑一次 → 量 sha，两次一样）。
 
-- 当前代码（含全量扫描披露字段）连续两次独立运行：
-  `sha256 = 3e4320fcf80099c609c516f89ba03e397157e240940a2840fa63f998515fa4d3`；
-- 加入披露字段之前连续三次独立运行：
-  `sha256 = fe08b4cfeb1493783314f05e45e20ca5c038c8d205c919f660a0ea2dd97493af`。
-
-（换了代码内容，产物摘要当然会变；这里说的是**同一版代码重复跑**的结果。）
+（换了代码内容，产物摘要当然会变；这里说的是**同一版代码重复跑**的结果。
+重新定位之前那一版的摘要是 `3e4320fc…`，留着只为了说明「这一版和上一版不是同一份」。）
 易变的东西（`started_at`、URL）单独写在 `demo-acceptance-run.json` 里，那份不入库。
 
 `scripts/roco/demo-acceptance.mjs` 里 `POSITION_MATRIX` 那一段**没有任何 `Math.random()`**
@@ -389,7 +434,7 @@ byte_identical = true
 | 层 | 文件 | 它证明什么 | 它证明不了什么 |
 | --- | --- | --- | --- |
 | 引擎侧 10 个隔离局面 | `tests/evals/roco/coach-positions.test.js` | 在**真引擎**上，10 种局面各自得到对路的检测器（逐例断言 kind），7 种形状 | 页面有没有真的把这句话显示出来 |
-| 浏览器 12 个局面矩阵 | 本文 + `coach-positions-browser.json` | 页面上**真的显示**的那一句、与 Node 侧重算逐字相同；8 种 kind；9 种形状 | 这些局面代表了所有可能局面 |
+| 浏览器 12 个局面矩阵 | 本文 + `coach-positions-browser.json` | 页面上**真的显示**的那一句、与 Node 侧重算逐字相同；9 种 kind；10 种形状 | 这些局面代表了所有可能局面 |
 | kind 覆盖扫描 | `coach-kind-coverage-scan.mjs` / 产物里的 `coverage_scan` | 每个 kind 命中几次、显示几次、沉默时血量比多少 | 不是穷举；`--stride 1` 才是全量 |
 
 两侧共用同一份构造（`scripts/roco/coach-position-harness.mjs`）：`windowOf` /
