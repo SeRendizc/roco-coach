@@ -45,6 +45,32 @@
    "rule_silent_layer_suppresses": 52,
    "rule_silent_layer_allows": 62
   },
+  "adjudication": {
+   "note": "第三方仲裁量：risk 分支（规则与判定层都没用）与深度 3 重规划，判据在跑之前写死",
+   "disagree": {
+    "n": 54,
+    "fragile_rate": 0.1852,
+    "downside_max_median": 0.3294,
+    "deep_flip_rate": 0.4444,
+    "deep_flip_n": 54,
+    "margin_median": 0.0363
+   },
+   "agree": {
+    "n": 24,
+    "fragile_rate": 0,
+    "downside_max_median": 0.1445,
+    "deep_flip_rate": 0.4167,
+    "deep_flip_n": 24,
+    "margin_median": 0.8953
+   },
+   "spearman_margin_vs_downside": 0.3026,
+   "one_ply_note": "判定层的 `first_second_margin` 是**一手推演**量（`planner.py` 写明「只在一手推演值上算」），而推荐动作由深度 2 搜索选出；两者不同层，这本身就是分歧的来源之一。",
+   "verdict_checks": {
+    "A1_fragile_higher_in_disagree": true,
+    "A2_downside_higher_in_disagree": true,
+    "A3_flip_higher_in_disagree": true
+   }
+  },
   "disagreement_by_hp_band": {
    ">0.6": {
     "total": 114,

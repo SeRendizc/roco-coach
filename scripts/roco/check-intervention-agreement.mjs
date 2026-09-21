@@ -73,7 +73,7 @@ export function riskBand(hpRatio) {
   return 0.2;
 }
 
-function observation({seed, turn, plan, off, on, view, mode = 'fresh', carried = null}) {
+function observation({seed, turn, plan, off, on, view, mode = 'fresh', carried = null, deep = null}) {
   const features = rocoPlanFeatures(plan);
   const hpRatio = hpRatioOf(view);
   const gap = features.gap;
@@ -107,7 +107,45 @@ function observation({seed, turn, plan, off, on, view, mode = 'fresh', carried =
     carried_layer_speaks: SPOKEN.has(carried?.on?.action),
     carried_rule_gate: carried?.off?.gate ?? null,
     carried_layer_suppressed: carried?.on?.layer?.suppress === true,
+    // ── 第三方仲裁量（规则与判定层**都没有用**的那些）──────────────────────
+    // `risk` 是规划器回执本来就有的字段：期望到最坏的落差，以及引擎自己标的 fragile。
+    risk_downside_max: Number.isFinite(plan?.risk?.downside_max) ? plan.risk.downside_max : null,
+    risk_fragile: plan?.risk?.fragile === true,
+    recommendation: plan?.recommendation ?? plan?.recommended_label ?? null,
+    // 深度 3 / beam 8（引擎的 MAX_DEPTH / MAX_BEAM，取满）重规划一次：
+    // 推荐动作翻了说明这个局面本来就不稳。
+    deep_available: deep !== null,
+    deep_recommendation: deep?.recommendation ?? deep?.recommended_label ?? null,
+    deep_margin: typeof deep?.first_second_margin?.mean === 'number' ? deep.first_second_margin.mean : null,
+    deep_risk_fragile: deep?.risk?.fragile === true,
+    deep_risk_downside_max: Number.isFinite(deep?.risk?.downside_max) ? deep.risk.downside_max : null,
+    recommendation_flipped: deep !== null && (deep.recommendation ?? deep.recommended_label ?? null)
+      !== (plan?.recommendation ?? plan?.recommended_label ?? null),
   };
+}
+
+/** Spearman 相关（秩相关；小样本也能算，不假设线性）。 */
+export function spearman(xs, ys) {
+  const n = Math.min(xs.length, ys.length);
+  if (n < 4) return null;
+  const rank = (list) => {
+    const order = list.map((value, index) => ({value, index})).sort((a, b) => a.value - b.value);
+    const out = new Array(list.length);
+    order.forEach((item, position) => { out[item.index] = position + 1; });
+    return out;
+  };
+  const rx = rank(xs.slice(0, n));
+  const ry = rank(ys.slice(0, n));
+  const mean = (list) => list.reduce((a, b) => a + b, 0) / list.length;
+  const mx = mean(rx); const my = mean(ry);
+  let num = 0; let dx = 0; let dy = 0;
+  for (let index = 0; index < n; index += 1) {
+    num += (rx[index] - mx) * (ry[index] - my);
+    dx += (rx[index] - mx) ** 2;
+    dy += (ry[index] - my) ** 2;
+  }
+  if (dx === 0 || dy === 0) return null;
+  return Number((num / Math.sqrt(dx * dy)).toFixed(4));
 }
 
 export function summarise(rows) {
@@ -145,6 +183,52 @@ export function summarise(rows) {
     if (row.rule_speaks && row.layer_suppressed) bucket.disagree += 1;
   }
   const carried = scored.filter((row) => row.carried_rule_action !== null || row.carried_layer_action !== null);
+  // ── 第三方仲裁（判据见 docs/roco/W5-04-ADJUDICATION.md，跑之前写好的）──
+  const disagreeCell = cells.rule_speaks_layer_suppresses.filter((row) => row.risk_downside_max !== null);
+  const agreeCell = cells.rule_speaks_layer_allows.filter((row) => row.risk_downside_max !== null);
+  const rate = (list, predicate) => (list.length ? Number((list.filter(predicate).length / list.length).toFixed(4)) : null);
+  const median = (list, key) => {
+    const values = list.map(key).filter((value) => Number.isFinite(value));
+    if (!values.length) return null;
+    values.sort((a, b) => a - b);
+    return Number(values[Math.floor(values.length / 2)].toFixed(4));
+  };
+  const adjudication = {
+    note: '第三方仲裁量：risk 分支（规则与判定层都没用）与深度 3 重规划，判据在跑之前写死',
+    disagree: {
+      n: disagreeCell.length,
+      fragile_rate: rate(disagreeCell, (row) => row.risk_fragile),
+      downside_max_median: median(disagreeCell, (row) => row.risk_downside_max),
+      deep_flip_rate: rate(disagreeCell.filter((row) => row.deep_available), (row) => row.recommendation_flipped),
+      deep_flip_n: disagreeCell.filter((row) => row.deep_available).length,
+      margin_median: median(disagreeCell, (row) => row.margin),
+    },
+    agree: {
+      n: agreeCell.length,
+      fragile_rate: rate(agreeCell, (row) => row.risk_fragile),
+      downside_max_median: median(agreeCell, (row) => row.risk_downside_max),
+      deep_flip_rate: rate(agreeCell.filter((row) => row.deep_available), (row) => row.recommendation_flipped),
+      deep_flip_n: agreeCell.filter((row) => row.deep_available).length,
+      margin_median: median(agreeCell, (row) => row.margin),
+    },
+    spearman_margin_vs_downside: spearman(
+      scored.filter((row) => row.margin !== null && row.risk_downside_max !== null).map((row) => row.margin),
+      scored.filter((row) => row.margin !== null && row.risk_downside_max !== null).map((row) => row.risk_downside_max)),
+    one_ply_note: ('判定层的 `first_second_margin` 是**一手推演**量（`planner.py` 写明'
+      + '「只在一手推演值上算」），而推荐动作由深度 2 搜索选出；两者不同层，'
+      + '这本身就是分歧的来源之一。'),
+  };
+  adjudication.verdict_checks = {
+    A1_fragile_higher_in_disagree: adjudication.disagree.fragile_rate !== null
+      && adjudication.agree.fragile_rate !== null
+      && adjudication.disagree.fragile_rate > adjudication.agree.fragile_rate,
+    A2_downside_higher_in_disagree: adjudication.disagree.downside_max_median !== null
+      && adjudication.agree.downside_max_median !== null
+      && adjudication.disagree.downside_max_median > adjudication.agree.downside_max_median,
+    A3_flip_higher_in_disagree: adjudication.disagree.deep_flip_rate !== null
+      && adjudication.agree.deep_flip_rate !== null
+      && adjudication.disagree.deep_flip_rate > adjudication.agree.deep_flip_rate,
+  };
   const thresholdCounts = scored.reduce((acc, row) => {
     if (row.margin === null) { acc.margin_null = (acc.margin_null || 0) + 1; return acc; }
     if (row.layer_suppressed) acc.below_threshold = (acc.below_threshold || 0) + 1;
@@ -193,6 +277,7 @@ export function summarise(rows) {
       suppressed: scored.filter((row) => row.layer_suppressed).length,
     },
     matrix: Object.fromEntries(Object.entries(cells).map(([key, list]) => [key, list.length])),
+    adjudication,
     disagreement_by_hp_band: byHpBand,
     // S5
     only_suppresses_violations: violations.length,
@@ -260,6 +345,9 @@ async function main() {
         if (view.phase === 'battle') {
           const plan = await post('/api/roco/plan', {battle_id: started.battle_id, depth: 2, beam: 4});
           if (plan.ok) {
+            // 深度 3 / beam 8 = 引擎的 MAX_DEPTH / MAX_BEAM，**取满**（不是挑的）。
+            const deep = await post('/api/roco/plan',
+              {battle_id: started.battle_id, depth: 3, beam: 8, budget_ms: 2000});
             const now = 1000 + turn * 1000;
             const offCarried = evaluate(view, plan, 'off', carriedOff, {});
             const onCarried = evaluate(view, plan, 'on', carriedOn, {});
@@ -267,7 +355,8 @@ async function main() {
             carry(carriedOn, onCarried, now);
             rows.push(observation({seed, turn: view.turn ?? turn, plan,
               off: evaluate(view, plan, 'off'), on: evaluate(view, plan, 'on'), view,
-              mode: 'fresh', carried: {off: offCarried, on: onCarried}}));
+              mode: 'fresh', carried: {off: offCarried, on: onCarried},
+              deep: deep.ok ? deep : null}));
             if (turn === 0) {
               // `dismissed` **不在 `host` 上**：`interventionFeaturesOfGame` 读的是
               // `attention.dismissed || session.dismissed`。第一版把它放进 host，
@@ -315,6 +404,7 @@ async function main() {
         max_ms: layerMs.length ? Number(Math.max(...layerMs).toFixed(3)) : null,
       },
       settings: {seeds: options.seeds, seeds_started: seedsDone, turns: options.turns,
+        deep_search: 'depth 3 / beam 8（引擎 MAX_DEPTH / MAX_BEAM）',
         reasonable_gap: REASONABLE_GAP, critical_risk: INTERVENTION_LIMITS.criticalRisk,
         session: '每个窗口都是全新 session（hints 0 / lastAt -Infinity）'},
       question: ('① 「抑制」是否等于「规则犯错」？② 规则的 decisive-gap 分支在手游引擎上'

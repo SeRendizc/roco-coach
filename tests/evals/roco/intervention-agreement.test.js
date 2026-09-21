@@ -151,6 +151,25 @@ test('真服务：`gap ≡ 0`（三个分析种子给出同一个 expected），
     assert.ok(INTERVENTION_LIMITS.criticalRisk === 0.8, 'criticalRisk 变了：这一段的结论要重算');
   });
 
+test('真服务：仲裁量（risk 分支）必须在真实回执里，而且两边都没用它',
+  {skip: SKIP}, async () => {
+    // 第 40 轮的仲裁用 `risk.downside_max` / `risk.fragile`——引擎自己的稳健性信号。
+    // 它们要是哪天从回执里消失，仲裁就会**静默变成空过**（那一格全 null，
+    // 比例算不出来，看起来像「没有分歧」）。所以在这里钉住它们的存在与类型。
+    const windows = await realWindows({battles: 2, turns: 2});
+    assert.ok(windows.length >= 1, '没有取到窗口');
+    for (const {plan} of windows) {
+      assert.ok(plan.risk && typeof plan.risk === 'object', '真实回执必须带 risk 分支');
+      assert.equal(typeof plan.risk.downside_max, 'number', 'risk.downside_max 必须是数');
+      assert.equal(typeof plan.risk.fragile, 'boolean', 'risk.fragile 必须是布尔');
+      assert.ok(Number.isFinite(plan.risk.threshold));
+      // 判定层的特征里**没有** risk：它只用 margin。这保证了仲裁量是独立的。
+      const features = rocoPlanFeatures(plan);
+      assert.deepEqual(Object.keys(features).sort(), ['gap', 'margin', 'skill', 'timedOut'],
+        '判定的特征集变了：仲裁量还是不是独立的需要重新确认');
+    }
+  });
+
 test('玩家看到的「期望」那行不许把点估计写成区间', () => {
   // 实测：手游引擎上 min === max，于是页面上原来写的是「0.58 ~ 0.58」——
   // 标签承诺了一个它没有的东西。
