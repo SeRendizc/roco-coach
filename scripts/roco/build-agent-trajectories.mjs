@@ -24,7 +24,10 @@ import {configureRocoTools, resetRocoTools} from '../../src/coach/toolbox.js';
 import {
   FORMAT, ARM_NAMES, ARMS, armLimit, canonical, digest, finalAnswer, makePlanner,
   runArm, runInput, receiptSummary, worldsFor, CHECKABLE, refusalsIn, checkTask,
+  LOCAL_TOOL_SYSTEM,
 } from './agent-trajectories.mjs';
+import {gatewayAsk} from './local-model-ask.mjs';
+import {modelIdentity} from './model-identity.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -37,10 +40,12 @@ const PYTHON_BIN = process.env.ROCO_PYTHON || 'python3';
 const WORLDS_PER_TASK = Number(process.env.ROCO_TRAJ_WORLDS || 3);
 
 function args(argv) {
-  const out = {arms: null, write: true, quiet: false};
+  const out = {arms: null, write: true, quiet: false, out: null, gateway: null};
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === '--check') out.write = false;
     else if (argv[i] === '--quiet') out.quiet = true;
+    else if (argv[i] === '--out') out.out = String(argv[++i]);
+    else if (argv[i] === '--gateway') out.gateway = String(argv[++i]);
     else if (argv[i] === '--arms') out.arms = String(argv[++i]).split(',').map((x) => x.trim()).filter(Boolean);
   }
   return out;
@@ -51,6 +56,16 @@ export function loadTasks(path = TASKS) {
     .map((line) => JSON.parse(line))
     .filter((row) => row.record_type === 'agent_task');
 }
+
+/**
+ * 模型臂的 `ask`：问本地网关，拿到一段文本。
+ *
+ * 实现只有一处（`local-model-ask.mjs`），`shadow-replay.mjs` 与这里共用。
+ * 各写一遍必然漂移，而漂移的后果是两条链上的模型行为不可比、却看不出来。
+ *
+ * `ask` 只在这里建一次，`makePlanner` 用在每条轨迹上。
+ */
+
 
 async function pickFreePort() {
   const probe = createNetServer();
@@ -163,6 +178,23 @@ async function main() {
   const arms = options.arms || ARM_NAMES.slice();
   for (const arm of arms) if (!ARMS[arm]) throw new Error(`未知 arm：${arm}`);
   const tasks = loadTasks();
+  const modelArms = arms.filter((arm) => ARMS[arm].kind === 'model');
+  const gateway = options.gateway
+    || `http://127.0.0.1:${process.env.ROCO_LOCAL_PORT || 8766}`;
+  if (modelArms.length) {
+    // 模型臂必须有网关：**没有就明确失败**，不许安静地产出一份「其实是规则臂」的产物。
+    const ask = gatewayAsk(gateway);
+    try {
+      const probe = await ask({prompt: '{"stop":true}', maxTokens: 8, timeoutMs: 20000});
+      if (typeof probe?.text !== 'string') throw new Error('网关返回形状不对');
+    } catch (error) {
+      process.stderr.write(`[agent-trajectories] 模型臂需要可用的本地网关（${gateway}）：`
+        + `${error?.message || error}\n先跑 bash scripts/model/start-mac.sh\n`);
+      process.exitCode = 2;
+      return;
+    }
+  }
+  const ask = modelArms.length ? gatewayAsk(gateway) : null;
   const port = await pickFreePort();
   const client = new RocoClient({port, rulesetId: RULESET_ID, timeoutMs: 20000, startTimeoutMs: 30000});
   const rows = [];
@@ -217,7 +249,7 @@ async function main() {
       for (const arm of arms) {
         callIndex = 0;
         const spec = {arm, arm_kind: ARMS[arm].kind, mode: input.mode, screen: input.screen, authority: authority.authority};
-        const planner = makePlanner(arm, task, input.hints);
+        const planner = makePlanner(arm, task, input.hints, {ask});
         const run = await runArm({task, arm, input, planner, limit: armLimit(arm)});
         const reply = finalAnswer(task, {trace: run.trace, stopped: run.stopped, arm, hints: input.hints});
         const engineRefused = refusalsIn(run.trace).length > 0;
@@ -232,15 +264,24 @@ async function main() {
     await client.stopService().catch(() => {});
   }
 
-  const manifest = buildManifest(tasks, rows, arms);
+  const manifest = buildManifest(tasks, rows, arms,
+    {identity: modelArms.length ? modelIdentity(gateway) : null});
+  // 模型臂的产物写到自己那份路径上（默认仍是规则臂那份）。理由：规则臂那份是
+  // **字节可复现**的门禁，模型臂做不到（同一份权重重跑也可能逐条不同），
+  // 混进同一个文件会让「字节可复现」这个性质变成假的。
+  const outJsonl = options.out || OUT_JSONL;
+  const outManifest = options.out
+    ? options.out.replace(/\.jsonl$/, '.manifest.json')
+    : OUT_MANIFEST;
   if (options.write) {
-    mkdirSync(OUT_DIR, {recursive: true});
+    mkdirSync(dirname(outJsonl), {recursive: true});
     const header = JSON.stringify({record_type: 'agent_trajectory_header', ...manifest.header});
-    writeFileSync(OUT_JSONL, `${[header, ...rows.map((row) => JSON.stringify(row))].join('\n')}\n`);
-    writeFileSync(OUT_MANIFEST, `${JSON.stringify(manifest, null, 1)}\n`);
+    writeFileSync(outJsonl, `${[header, ...rows.map((row) => JSON.stringify(row))].join('\n')}\n`);
+    writeFileSync(outManifest, `${JSON.stringify(manifest, null, 1)}\n`);
   }
   const summary = summarise(rows);
-  process.stdout.write(`${JSON.stringify({summary, manifest: manifest.header}, null, 1)}\n`);
+  process.stdout.write(`${JSON.stringify({summary, manifest: manifest.header,
+    written_to: options.write ? outJsonl : null}, null, 1)}\n`);
   if (!options.quiet) process.stderr.write(`[agent-trajectories] 轨迹 ${rows.length} 条，判定通过 ${summary.passed}/${rows.length}\n`);
 }
 
@@ -273,7 +314,7 @@ function summarise(rows) {
 }
 
 /** 头部与清单：只放稳定字段（没有时间戳、没有 HEAD）。 */
-function buildManifest(tasks, rows, arms) {
+function buildManifest(tasks, rows, arms, {identity = null} = {}) {
   const categories = [...new Set(rows.map((row) => row.category))].sort();
   const byArm = {};
   for (const arm of arms) {
@@ -300,6 +341,10 @@ function buildManifest(tasks, rows, arms) {
     built_by: 'scripts/roco/build-agent-trajectories.mjs',
     task_set: 'agent-tasks-v1',
     task_set_digest: digest(readFileSync(TASKS, 'utf8')),
+    // 模型臂的产物必须记身份：模型路径 + 适配器 + 权重 sha256 + 提示摘要。
+    // 规则臂为 null（它不经过模型）。
+    model_identity: identity,
+    prompt_digest: rows.some((row) => ARMS[row.arm]?.kind === 'model') ? digest(LOCAL_TOOL_SYSTEM) : null,
     ruleset_id: RULESET_ID,
     worlds_per_task: WORLDS_PER_TASK,
     arms,
@@ -317,6 +362,10 @@ function buildManifest(tasks, rows, arms) {
       '正文只用回执里真的出现过的字段生成，不从任务期望抄答案',
       '失败轨迹原样保留（stopped 记明原因），不做「重试到成功」的清洗',
       '产物确定性：无时间戳、无 HEAD、无随机（随机只来自固定 seed 的哈希）',
+      ...(rows.some((row) => ARMS[row.arm]?.kind === 'model')
+        ? ['**模型臂这一份不声称字节可复现**：同一份权重重跑也可能逐条不同。'
+          + '它靠 `model_identity`（适配器 sha256 + 提示摘要）钉住，而不是靠重跑一致。']
+        : []),
     ],
     arms_summary: byArm,
   };

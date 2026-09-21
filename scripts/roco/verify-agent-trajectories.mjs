@@ -17,7 +17,7 @@
 import {execFileSync} from 'node:child_process';
 import {createServer as createNetServer} from 'node:net';
 import {readFileSync, writeFileSync, existsSync, mkdirSync} from 'node:fs';
-import {dirname, join} from 'node:path';
+import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {RocoClient, RULESET_ID} from '../../src/coach/roco-client.js';
@@ -35,12 +35,15 @@ const PYTHON_BIN = process.env.ROCO_PYTHON || 'python3';
 const BUILDER_WORLDS_PER_TASK = Number(process.env.ROCO_TRAJ_WORLDS || 3);
 
 function args(argv) {
-  const out = {write: true, quiet: false, selftest: false, limit: 0};
+  const out = {write: true, quiet: false, selftest: false, limit: 0, trajectories: null, out: null};
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === '--check') out.write = false;
     else if (argv[index] === '--quiet') out.quiet = true;
     else if (argv[index] === '--selftest') out.selftest = true;
     else if (argv[index] === '--limit') out.limit = Number(argv[++index]);
+    // 模型臂那一份走同一套检查，只是换输入与输出路径（第 41 轮加的）。
+    else if (argv[index] === '--trajectories') out.trajectories = String(argv[++index]);
+    else if (argv[index] === '--out') out.out = String(argv[++index]);
   }
   return out;
 }
@@ -224,9 +227,16 @@ export function corruptionsFor(row, task) {
 export function producerCheck(header, rows, tasks, {manifest = null} = {}) {
   const problems = [];
   const declared = header?.worlds_per_task;
+  // 「每任务几个世界」由产物头部自己声明，**按声明的值重算世界选法**。
+  //
+  // 原来这里把「必须等于生成器默认值」当成硬失败。第 41 轮加了模型臂的那一份
+  // （它刻意取满 9 个世界，而规则臂那份是 3），同一条硬断言就没法同时成立——
+  // 但真正要守的不变式从来不是「等于默认值」，而是**产物与当前 `worldsFor` 对得上**。
+  // 所以改成：核心比较按声明值做；「与默认值不同」只记进 `notes`，由读报告的人判断。
+  const notes = [];
   if (declared !== BUILDER_WORLDS_PER_TASK) {
-    problems.push(`产物头部记的 worlds_per_task=${declared}，生成器默认是 ${BUILDER_WORLDS_PER_TASK}`
-      + '（产物必须是默认构建出来的，否则门禁覆盖的是别的配置）');
+    notes.push(`产物头部记的 worlds_per_task=${declared}，生成器当前默认是 ${BUILDER_WORLDS_PER_TASK}`
+      + '（不判红；但引用这份产物时要写明它的配置）');
   }
   // 只用一个 arm 就够：每个 (任务, 世界) 组合在**每个** arm 里都各有一条记录。
   // 取头部声明的第一个 arm（而不是 `rows[0]`），这样传入子集时也不会选错。
@@ -278,6 +288,8 @@ export function producerCheck(header, rows, tasks, {manifest = null} = {}) {
   return {
     passed: problems.length === 0,
     problems,
+    notes,
+    worlds_per_task: declared,
     arm,
     tasks_compared: tasks.length,
     distinct_worlds: worlds.size,
@@ -306,16 +318,23 @@ function summarise(rows, extra = {}) {
 
 async function main() {
   const options = args(process.argv.slice(2));
-  if (!existsSync(TRAJECTORIES)) {
-    process.stderr.write(`[verify-trajectories] 找不到 ${TRAJECTORIES}，先跑 build-agent-trajectories.mjs\n`);
+  const trajectoriesPath = options.trajectories ? resolve(options.trajectories) : TRAJECTORIES;
+  const outPath = options.out
+    ? resolve(options.out)
+    : (options.trajectories ? OUT.replace(/\.json$/, '-model.json') : OUT);
+  if (!existsSync(trajectoriesPath)) {
+    process.stderr.write(`[verify-trajectories] 找不到 ${trajectoriesPath}，先跑 build-agent-trajectories.mjs\n`);
     process.exit(2);
   }
-  const all = loadTrajectories();
+  const all = loadTrajectories(trajectoriesPath);
   const header = all.find((row) => row.record_type === 'agent_trajectory_header');
   const rows = all.filter((row) => row.record_type === 'agent_trajectory');
   const tasks = loadTrajectories(TASKS).filter((row) => row.record_type === 'agent_task');
   const taskById = new Map(tasks.map((task) => [task.case_id, task]));
-  const manifest = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8')) : null;
+  const manifestPath = options.trajectories
+    ? trajectoriesPath.replace(/\.jsonl$/, '.manifest.json')
+    : MANIFEST;
+  const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : null;
 
   // ⓪ 生产者一致性（最便宜的一项，最先跑；它红了后面的回放没有意义）
   const producer = producerCheck(header, rows, tasks, {manifest});
@@ -403,6 +422,9 @@ async function main() {
   const report = {
     generated_by: 'scripts/roco/verify-agent-trajectories.mjs',
     trajectory_set: header?.set_id || null,
+    trajectories: trajectoriesPath,
+    // 模型臂的产物**不声称字节可复现**，但要记身份：这一栏是它的可核对锚点。
+    model_identity: header?.model_identity || null,
     format: header?.format || null,
     counts: {rows: rows.length, tasks: tasks.length, arms: header?.arms || null},
     producer,
@@ -431,8 +453,8 @@ async function main() {
     && report.grader.passes;
 
   if (options.write) {
-    mkdirSync(dirname(OUT), {recursive: true});
-    writeFileSync(OUT, `${JSON.stringify(report, null, 1)}\n`);
+    mkdirSync(dirname(outPath), {recursive: true});
+    writeFileSync(outPath, `${JSON.stringify(report, null, 1)}\n`);
   }
   if (!options.quiet) process.stdout.write(`${JSON.stringify({
     producer: {passed: report.producer.passed, problems: report.producer.problems,

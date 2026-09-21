@@ -677,6 +677,13 @@ export const ARMS = Object.freeze({
   no_rules: {kind: 'negative', note: '反证：跳过规则查询，用来验「不许编造」', make: (task, hints) => withoutRuleLookup(rulesBaselinePlanner(task, hints))},
   drop_args: {kind: 'negative', note: '反证：丢掉队伍/状态参数，用来验参数判据', make: (task, hints) => dropStructuredArgs(rulesBaselinePlanner(task, hints))},
   blind: {kind: 'baseline', note: '不给期望提示的规则 baseline：名字到 id 自己查', make: (task, hints) => blindPlanner(task, hints), blind: true},
+  // ── 模型臂（W4-02 的第二半）──────────────────────────────────────────────
+  //
+  // 没有 `make`：模型臂需要注入一个 `ask`（网关调用），不能是一个纯函数。
+  // `makePlanner(arm, task, hints, {ask})` 会把它交给 `localModelPlanner`。
+  // 它产生的轨迹与规则臂**同格式、同判定器**，所以两份产物可以用同一把尺子比。
+  local_4b: {kind: 'model', note: '本机 Qwen3.5-4B-4bit + LoRA 适配器：真模型自己选工具（需网关）',
+    model: true},
 
 });
 
@@ -687,10 +694,21 @@ export function armLimit(arm) {
   return ARMS[arm]?.limit ?? 3;
 }
 
-/** 一次性造好一个 arm 的规划器。 */
-export function makePlanner(arm, task, hints) {
+/**
+ * 一次性造好一个 arm 的规划器。
+ *
+ * 模型臂必须注入 `ask`：**没有注入就抛**，不许安静地退化成一个规则臂——
+ * 那会让「模型臂」的产物其实是规则的，而产物里看不出来。
+ */
+export function makePlanner(arm, task, hints, {ask = null} = {}) {
   const entry = ARMS[arm];
   if (!entry) throw new Error(`未知 arm：${arm}`);
+  if (entry.kind === 'model') {
+    if (typeof ask !== 'function') {
+      throw new Error(`arm ${arm} 是模型臂，必须注入 ask（否则它产出的不是模型轨迹）`);
+    }
+    return localModelPlanner(task, hints, {ask});
+  }
   return entry.make(task, hints);
 }
 

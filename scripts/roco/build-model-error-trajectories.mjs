@@ -19,7 +19,7 @@
 
 import {createHash} from 'node:crypto';
 import {writeFileSync, readFileSync, mkdirSync, existsSync} from 'node:fs';
-import {dirname, join} from 'node:path';
+import {dirname, join, relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -29,6 +29,9 @@ export const ROOT = join(HERE, '..', '..');
 // 与它指向的路径早就不是同一份东西了。现在指向显式的基座产物，并把摘要记下来。
 export const SOURCE = join(ROOT, 'reports', 'roco', 'shadow-replay-base.json');
 export const OUT = join(ROOT, 'tests', 'evals', 'roco', 'model-error-trajectories-v1.jsonl');
+//: 第 41 轮：SFT 之后还剩哪些错。来源是**模型候选轨迹集**（走同一个判定器）。
+export const SOURCE_AFTER_SFT = join(ROOT, 'tests', 'evals', 'agent-trajectories-model-v1.jsonl');
+export const OUT_AFTER_SFT = join(ROOT, 'tests', 'evals', 'roco', 'model-error-trajectories-v4.jsonl');
 
 /**
  * 失败分类。每一类都对应一个**可核对的证据**与一个**候选修复**。
@@ -97,10 +100,39 @@ export function classify(row) {
   return {id: 'unclassified', evidence: '没有匹配到任何已知失败分类', candidate_fix: null};
 }
 
+/**
+ * 读出源产物里的「一行一条结果」。
+ *
+ * 两种形状都认，因为这一层的两个来源本来就不同：
+ *   · `shadow-replay-*.json`（JSON）：`report.rows`，判定结果在**顶层** `passed`/`violations`；
+ *   · `agent-trajectories-*.jsonl`（JSONL）：头部一行 + 每行一条，判定结果在 `checks` 里。
+ * 第一版只认前者，所以「用模型候选轨迹集重建目录」这件事做不了——
+ * 而两种形状的差别只是**同一个判定器的结果放在哪一层**，不该成为阻碍。
+ */
+export function loadSource(source) {
+  const raw = readFileSync(source, 'utf8');
+  if (source.endsWith('.jsonl')) {
+    const all = raw.split('\n').filter((line) => line.trim()).map((line) => JSON.parse(line));
+    const rows = all.filter((row) => row.record_type === 'agent_trajectory').map((row) => ({
+      case_id: row.case_id, category: row.category, arm: row.arm,
+      passed: row.checks?.passed === true, violations: row.checks?.violations ?? [],
+      trace: row.trace, stopped: row.stopped, wall_ms: row.wall_ms ?? null,
+      world: row.input?.world?.id ?? null,
+    }));
+    const header = all.find((row) => row.record_type === 'agent_trajectory_header') ?? {};
+    return {report: {arm: header.arms?.[0] ?? 'local_4b', prompt_digest: header.prompt_digest ?? null,
+      summary: {pass_rate: header.totals?.trajectories
+        ? Number(((header.totals.passed ?? 0) / header.totals.trajectories).toFixed(4)) : null},
+      identity: header.model_identity ?? null, rows}, rows};
+  }
+  const report = JSON.parse(raw);
+  return {report, rows: report.rows};
+}
+
 export function build({source = SOURCE} = {}) {
-  const report = JSON.parse(readFileSync(source, 'utf8'));
+  const {report, rows: sourceRows} = loadSource(source);
   const rows = [];
-  for (const row of report.rows) {
+  for (const row of sourceRows) {
     if (row.passed) continue;
     const klass = classify(row);
     rows.push({
@@ -115,6 +147,7 @@ export function build({source = SOURCE} = {}) {
       tool_calls: row.trace,
       stopped: row.stopped,
       wall_ms: row.wall_ms,
+      world: row.world ?? null,
       /** 候选修复：**未经复测**，不得读成「已修好」。 */
       candidate_fix: klass.candidate_fix,
       verified: false,
@@ -138,19 +171,28 @@ export function summarise(rows) {
 
 function main(argv) {
   const check = argv.includes('--check');
-  if (!existsSync(SOURCE)) {
-    process.stderr.write(`[model-errors] 找不到 ${SOURCE}；先跑 bash scripts/model/measure-arms.sh base=\n`);
+  const arg = (name, fallback) => {
+    const index = argv.indexOf(name);
+    return index >= 0 ? argv[index + 1] : fallback;
+  };
+  // 两个来源：基座那次（v1，找的是模板不诚实那类问题）与 SFT 之后那次（v4，看还剩什么）。
+  const source = argv.includes('--after-sft') ? SOURCE_AFTER_SFT : arg('--source', SOURCE);
+  const out = argv.includes('--after-sft') ? OUT_AFTER_SFT : arg('--out', OUT);
+  const setName = argv.includes('--after-sft') ? 'model-error-trajectories-v4' : 'model-error-trajectories-v1';
+  const relSource = relative(ROOT, source);
+  if (!existsSync(source)) {
+    process.stderr.write(`[model-errors] 找不到 ${source}\n`);
     return 2;
   }
-  const {report, rows} = build();
+  const {report, rows} = build({source});
   const summary = summarise(rows);
   const header = {
     record_type: 'model_error_trajectory_header',
-    set_id: 'model-error-trajectories-v1',
+    set_id: setName,
     built_by: 'scripts/roco/build-model-error-trajectories.mjs',
-    source: 'reports/roco/shadow-replay-base.json',
+    source: relSource,
     // 源文件的**内容摘要**：只记路径不够——路径上的文件会被换掉，摘要不会。
-    source_sha256: createHash('sha256').update(readFileSync(SOURCE)).digest('hex'),
+    source_sha256: createHash('sha256').update(readFileSync(source)).digest('hex'),
     source_arm: report.arm,
     source_identity: report.identity || null,
     source_prompt_digest: report.prompt_digest || null,
@@ -164,10 +206,10 @@ function main(argv) {
     summary,
   };
   if (!check) {
-    mkdirSync(dirname(OUT), {recursive: true});
-    writeFileSync(OUT, `${[JSON.stringify(header), ...rows.map((r) => JSON.stringify(r))].join('\n')}\n`);
+    mkdirSync(dirname(out), {recursive: true});
+    writeFileSync(out, `${[JSON.stringify(header), ...rows.map((r) => JSON.stringify(r))].join('\n')}\n`);
   }
-  process.stdout.write(`${JSON.stringify({written: !check, out: check ? null : OUT, summary}, null, 1)}\n`);
+  process.stdout.write(`${JSON.stringify({written: !check, out: check ? null : out, summary}, null, 1)}\n`);
   return 0;
 }
 

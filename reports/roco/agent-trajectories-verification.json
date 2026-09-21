@@ -1,6 +1,8 @@
 {
  "generated_by": "scripts/roco/verify-agent-trajectories.mjs",
  "trajectory_set": "agent-trajectories-v1",
+ "trajectories": "/Users/serendizc/Developer/roco-coach/tests/evals/agent-trajectories-v1.jsonl",
+ "model_identity": null,
  "format": "roco-agent-trajectory-v1",
  "counts": {
   "rows": 6048,
@@ -18,6 +20,8 @@
  "producer": {
   "passed": true,
   "problems": [],
+  "notes": [],
+  "worlds_per_task": 3,
   "arm": "replay",
   "tasks_compared": 288,
   "distinct_worlds": 23,

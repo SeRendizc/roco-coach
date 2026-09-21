@@ -1,0 +1,149 @@
+[agent-trajectories] 288 条任务 × 9 个世界 × 1 个 arm = 1752 条轨迹
+  200/1752
+  400/1752
+  600/1752
+  800/1752
+  1000/1752
+  1200/1752
+  1400/1752
+  1600/1752
+{
+ "summary": {
+  "total": 1752,
+  "passed": 1617,
+  "by_arm": {
+   "local_4b": {
+    "total": 1752,
+    "passed": 1617,
+    "violations": {
+     "没有调用应当调用的工具 query_rules": 30,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pe": 24,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"": 6,
+     "没有调用应当调用的工具 evaluate_team": 42,
+     "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_0": 42,
+     "换掉了玩家锁定的 pet_000225": 45,
+     "compare_team_change 的参数里没有同时满足 {\"team_be": 63,
+     "没有调用应当调用的工具 compare_team_change": 27
+    }
+   }
+  },
+  "stopped": {
+   "complete": 1584,
+   "receipt-budget": 108,
+   "policy": 60
+  },
+  "engine_refused": 68
+ },
+ "manifest": {
+  "format": "roco-agent-trajectory-v1",
+  "set_id": "agent-trajectories-v1",
+  "built_by": "scripts/roco/build-agent-trajectories.mjs",
+  "task_set": "agent-tasks-v1",
+  "task_set_digest": "f0b5d51a9142b09e43138e4dcf924698880c032bc8f9650cc5db77abc52ef975",
+  "model_identity": {
+   "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
+   "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v4",
+   "adapter_sha256": "362cc02087177eb5b61e185d324630aa8319408ebb2b64ff1c37c9c5bd9e33d6",
+   "gateway_reachable": true,
+   "ready": true,
+   "adapter_file": "adapters.safetensors",
+   "adapter_basename": "qwen35-4b-tool-v4",
+   "identity_digest": "68439b22605d9a638eda96ce5e2c23bb871db02fdbe947824e43b8be53533148",
+   "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d"
+  },
+  "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "worlds_per_task": 9,
+  "arms": [
+   "local_4b"
+  ],
+  "categories": [
+   "brief_explain",
+   "continue_stop",
+   "evidence_conflict",
+   "roster_constraint",
+   "rules_lookup",
+   "silence",
+   "stale_state",
+   "tool_failure"
+  ],
+  "checkable": [
+   "tool",
+   "args_must_match",
+   "max_tool_calls",
+   "max_reply_chars",
+   "must_not_fabricate",
+   "must_mention_limitation",
+   "must_keep_locked",
+   "must_not_claim_winrate",
+   "must_surface_conflict",
+   "must_not_use_stale",
+   "must_not_speak"
+  ],
+  "totals": {
+   "trajectories": 1752,
+   "passed": 1617,
+   "engine_refused": 68,
+   "cases": 288,
+   "worlds": 23
+  },
+  "disciplines": [
+   "轨迹只记公开输入与工具回执摘要；回执全文不落盘，摘要是剔除延迟后的规范化摘要",
+   "正文只用回执里真的出现过的字段生成，不从任务期望抄答案",
+   "失败轨迹原样保留（stopped 记明原因），不做「重试到成功」的清洗",
+   "产物确定性：无时间戳、无 HEAD、无随机（随机只来自固定 seed 的哈希）",
+   "**模型臂这一份不声称字节可复现**：同一份权重重跑也可能逐条不同。它靠 `model_identity`（适配器 sha256 + 提示摘要）钉住，而不是靠重跑一致。"
+  ],
+  "arms_summary": {
+   "local_4b": {
+    "kind": "model",
+    "note": "本机 Qwen3.5-4B-4bit + LoRA 适配器：真模型自己选工具（需网关）",
+    "limit": 3,
+    "total": 1752,
+    "passed": 1617,
+    "pass_rate": 0.9229,
+    "per_category": {
+     "brief_explain": {
+      "total": 180,
+      "passed": 180
+     },
+     "continue_stop": {
+      "total": 324,
+      "passed": 324
+     },
+     "evidence_conflict": {
+      "total": 108,
+      "passed": 108
+     },
+     "roster_constraint": {
+      "total": 216,
+      "passed": 111
+     },
+     "rules_lookup": {
+      "total": 648,
+      "passed": 618
+     },
+     "silence": {
+      "total": 60,
+      "passed": 60
+     },
+     "stale_state": {
+      "total": 108,
+      "passed": 108
+     },
+     "tool_failure": {
+      "total": 108,
+      "passed": 108
+     }
+    },
+    "stopped": {
+     "complete": 1584,
+     "receipt-budget": 108,
+     "policy": 60
+    }
+   }
+  }
+ },
+ "written_to": "tests/evals/agent-trajectories-model-v1.jsonl"
+}
+[agent-trajectories] 轨迹 1752 条，判定通过 1617/1752

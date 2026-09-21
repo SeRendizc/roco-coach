@@ -46,50 +46,9 @@ const PYTHON_BIN = process.env.ROCO_PYTHON || 'python3';
 /** 与任务集对齐的默认世界数（与 build 一致，保证同一条任务落在同一个局面上）。 */
 const WORLDS_PER_TASK = 1;
 
-/**
- * 这份报告**是哪个模型产出的**。
- *
- * 为什么必须记（第 37 轮的真实事故）：报告原来只有 `arm` / `gateway` / `prompt_digest`，
- * **没有模型身份**；而运行器每次把结果写到同一个 `-local_4b.json`。
- * 于是存档逐次错位——`shadow-replay-sft-v2.json` 里装的其实是 v1 的成绩，
- * `-sft-v3.json` 里装的是 v2 的，真正的 v3 结果（0.7118）**一个产物都没留下**。
- * 台账和文档于是都在引用一组对不上号的数字，而没有任何检查会发现。
- *
- * 只记路径还不够：同一个路径上的适配器会被重训覆盖。所以同时把权重文件哈希记下来，
- * 名字对不上、内容对不上，都能被后来的人当场看出来。
- */
-export function modelIdentity(gatewayUrl, adapterPath = process.env.ROCO_LOCAL_ADAPTER || null) {
-  const identity = {model: null, adapter: adapterPath, adapter_sha256: null, gateway_reachable: false};
-  try {
-    const health = JSON.parse(execFileSync('curl', ['-sS', '-m', '5', `${gatewayUrl}/healthz`],
-      {encoding: 'utf8'}));
-    identity.gateway_reachable = true;
-    identity.model = health.model ?? null;
-    identity.adapter = health.adapter ?? adapterPath;
-    identity.ready = health.ready === true;
-  } catch {
-    // 网关没起时留 null：报告照样写出来，但身份栏为空——不许拿「不知道」当「一样」。
-  }
-  const dir = identity.adapter;
-  if (dir && existsSync(dir)) {
-    // 优先哈希真正的权重文件；只有配置时退回配置，并在字段名上说清楚。
-    const candidates = readdirSync(dir).filter((name) => name.endsWith('.safetensors')).sort();
-    const file = candidates.includes('adapters.safetensors') ? 'adapters.safetensors' : candidates[0];
-    if (file) {
-      identity.adapter_file = file;
-      identity.adapter_sha256 = createHash('sha256').update(readFileSync(join(dir, file))).digest('hex');
-    } else if (existsSync(join(dir, 'adapter_config.json'))) {
-      identity.adapter_file = 'adapter_config.json';
-      identity.adapter_sha256 = createHash('sha256')
-        .update(readFileSync(join(dir, 'adapter_config.json'))).digest('hex');
-    }
-    identity.adapter_basename = basename(dir);
-  }
-  const promptDigest = digest(LOCAL_TOOL_SYSTEM);
-  identity.identity_digest = digest(canonical(identity));
-  identity.prompt_digest = promptDigest;
-  return identity;
-}
+// `modelIdentity` 搬到了 `model-identity.mjs`（轨迹生成器也要用它，
+// 放在这里会形成循环引用）。这里重新导出，保持既有 import 路径不变。
+export {modelIdentity} from './model-identity.mjs';
 
 async function pickFreePort() {
   const probe = createNetServer();
@@ -103,33 +62,8 @@ async function pickFreePort() {
   return port;
 }
 
-/** 真实网关客户端：一次请求，带超时；拿不到就如实抛，由臂记成失败。 */
-export function gatewayAsk(baseUrl, {timeoutMs = 8000} = {}) {
-  return async ({system = null, prompt, maxTokens = 96, temperature = 0, timeoutMs: perCall = null}) => {
-    const controller = new AbortController();
-    const budget = perCall === null ? timeoutMs : perCall;
-    const timer = setTimeout(() => controller.abort(), budget);
-    try {
-      const response = await fetch(`${baseUrl}/v1/chat/completions`, {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-          messages: [...(system ? [{role: 'system', content: system}] : []),
-            {role: 'user', content: prompt}],
-          max_tokens: maxTokens, temperature, timeout_ms: budget,
-        }),
-        signal: controller.signal,
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        throw Object.assign(new Error(payload?.error?.message || `HTTP ${response.status}`),
-          {code: payload?.error?.code || 'http-error'});
-      }
-      return {text: payload.choices?.[0]?.message?.content ?? '', x_roco: payload.x_roco || null};
-    } finally {
-      clearTimeout(timer);
-    }
-  };
-}
+
+// `gatewayAsk` 的实现见 `local-model-ask.mjs`（上面已重新导出）。
 
 /** 跑一条任务：同一个世界、同一个判定器，只换「谁在选工具」。 */
 export async function replayTask({task, world, state, authority, arm, ask, client}) {
@@ -276,6 +210,16 @@ export function compare(reference, candidate) {
     worst_regressions: regressed.slice(0, 8),
   };
 }
+
+/**
+ * 存档名与身份是否对得上。返回不一致的理由，一致时返回 `null`。
+ *
+ * 这是「存档错位」那一类事故的守卫：`-sft-v2.json` 里装着 v1 的成绩，
+ * 光看通过率是看不出来的（数字都合理），只有把**文件名**与**报告里记的适配器**
+ * 对上，才能当场发现。约定：
+ *   · `shadow-replay-base.json`    → `adapter === null`
+ *   · `shadow-replay-sft-vN.json`  → `adapter_basename === qwen35-4b-tool-vN`
+ *   · 其它（如 `-local_4b.json`）   → 只要求有身份，不要求名字匹配
 
 /**
  * 存档名与身份是否对得上。返回不一致的理由，一致时返回 `null`。

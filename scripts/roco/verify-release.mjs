@@ -54,6 +54,12 @@ export const SUITES = [
     why: '真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过'},
   {id: 'trajectories', cmd: 'node', args: ['scripts/roco/verify-agent-trajectories.mjs', '--quiet'],
     why: '轨迹集与判定器的两个方向；判定器写坏了只有这里看得见'},
+  {id: 'trajectories-model', cmd: 'node',
+    args: ['scripts/roco/verify-agent-trajectories.mjs',
+      '--trajectories', 'tests/evals/agent-trajectories-model-v1.jsonl', '--quiet'],
+    why: 'W4-02 的第二半（模型候选轨迹）：同一把尺子、同一个判定器。'
+      + '这一份**不声称字节可复现**（模型重跑会逐条不同），它靠 `model_identity` 钉住；'
+      + '结构与离线回放仍然必须全过——模型臂的产物要是格式漂了，模型与规则就没法横向比'},
   {id: 'sft-split', cmd: 'node', args: ['scripts/roco/verify-sft-split.mjs', '--quiet'],
     why: 'SFT 训练数据的切分：家族是否都在训练侧、留出有没有泄漏、'
       + '报告里的自我描述与切分模式是否自洽，以及**逐字节复现**。'

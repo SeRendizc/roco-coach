@@ -1,0 +1,144 @@
+{
+ "generated_by": "scripts/roco/verify-agent-trajectories.mjs",
+ "trajectory_set": "agent-trajectories-v1",
+ "trajectories": "/Users/serendizc/Developer/roco-coach/tests/evals/agent-trajectories-model-v1.jsonl",
+ "model_identity": {
+  "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
+  "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v4",
+  "adapter_sha256": "362cc02087177eb5b61e185d324630aa8319408ebb2b64ff1c37c9c5bd9e33d6",
+  "gateway_reachable": true,
+  "ready": true,
+  "adapter_file": "adapters.safetensors",
+  "adapter_basename": "qwen35-4b-tool-v4",
+  "identity_digest": "68439b22605d9a638eda96ce5e2c23bb871db02fdbe947824e43b8be53533148",
+  "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d"
+ },
+ "format": "roco-agent-trajectory-v1",
+ "counts": {
+  "rows": 1752,
+  "tasks": 288,
+  "arms": [
+   "local_4b"
+  ]
+ },
+ "producer": {
+  "passed": true,
+  "problems": [],
+  "notes": [
+   "产物头部记的 worlds_per_task=9，生成器当前默认是 3（不判红；但引用这份产物时要写明它的配置）"
+  ],
+  "worlds_per_task": 9,
+  "arm": "local_4b",
+  "tasks_compared": 288,
+  "distinct_worlds": 23,
+  "header_worlds": 23,
+  "mismatched": 0,
+  "first_mismatches": []
+ },
+ "structural": {
+  "total": 1752,
+  "passed": 1752,
+  "failed": 0,
+  "by_arm": {
+   "local_4b": {
+    "total": 1752,
+    "passed": 1752
+   }
+  },
+  "first_failures": []
+ },
+ "replay": {
+  "total": 1752,
+  "passed": 1752,
+  "failed": 0,
+  "by_arm": {
+   "local_4b": {
+    "total": 1752,
+    "passed": 1752
+   }
+  },
+  "first_failures": [],
+  "skipped": 0,
+  "note": null
+ },
+ "grader": {
+  "positive_expected": "全过（这批轨迹是按任务期望/规则 baseline 生成的）",
+  "negative_expected": "全挂（每条记录都被改坏一次）",
+  "positive": {
+   "total": 0,
+   "passed": 0
+  },
+  "negative": {
+   "total": 5988,
+   "passed": 5988
+  },
+  "per_criterion": {
+   "tool": {
+    "total": 1458,
+    "caught": 1458,
+    "example": "删掉应当调用的工具"
+   },
+   "args_must_match": {
+    "total": 729,
+    "caught": 729,
+    "example": "清空参数"
+   },
+   "max_tool_calls": {
+    "total": 1617,
+    "caught": 1617,
+    "example": "超出工具调用次数上限"
+   },
+   "must_not_fabricate": {
+    "total": 1338,
+    "caught": 1338,
+    "example": "正文里塞数字型结论"
+   },
+   "must_keep_locked": {
+    "total": 63,
+    "caught": 63,
+    "example": "把锁定的伙伴换掉"
+   },
+   "must_not_claim_winrate": {
+    "total": 219,
+    "caught": 219,
+    "example": "把分数说成胜率"
+   },
+   "must_mention_limitation": {
+    "total": 108,
+    "caught": 108,
+    "example": "抹掉限制说明"
+   },
+   "must_not_use_stale": {
+    "total": 108,
+    "caught": 108,
+    "example": "拿旧状态版本重算"
+   },
+   "must_surface_conflict": {
+    "total": 108,
+    "caught": 108,
+    "example": "不提冲突"
+   },
+   "must_not_speak": {
+    "total": 60,
+    "caught": 60,
+    "example": "该沉默时开口"
+   },
+   "max_reply_chars": {
+    "total": 180,
+    "caught": 180,
+    "example": "正文超长"
+   }
+  },
+  "per_arm": {
+   "local_4b": {
+    "total": 1752,
+    "passed": 1617,
+    "control": false
+   }
+  },
+  "drift": 0,
+  "drift_example": null,
+  "passes": true
+ },
+ "verdict": true
+}
