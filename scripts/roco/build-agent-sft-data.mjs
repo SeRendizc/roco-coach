@@ -33,7 +33,16 @@ import {cleanEnv} from '../../tests/helpers/subprocess.mjs';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
 const OUT_DIR = join(ROOT, 'reports', 'roco', 'sft');
-export const WORLDS_PER_TASK = 4;
+// 之前的默认是 4（每条任务配 4 个局面）。第 35 轮的结论是「训练数据不够大，
+// 于是任何留出都要拿覆盖率去换」，所以这里把局面数变成**可配的**：
+// 局面轮换本身是确定性的（同一个 seed/turn 组合每次都产出同一个局面），
+// 所以加局面 = 加数据，不引入新的随机性。
+export const WORLDS_PER_TASK = Number(process.env.ROCO_SFT_WORLDS || 4);
+
+//: 是否使用 v2 的机制留出切分。
+//: `strict`（默认）= v2 的切分（留出两个机制），`all` = 全部进训练（只留少量验证）。
+//: 保留两种是为了能**只改数据量、不改切分**地做对照。
+export const SPLIT_MODE = process.env.ROCO_SFT_SPLIT || 'strict';
 
 async function pickFreePort() {
   const probe = createNetServer();
@@ -150,14 +159,22 @@ export const HOLDOUT_TEMPLATES = Object.freeze({
   // `scripts/roco/verify-sft-split.mjs` 会独立复核这两条性质（不靠这里的注释）。
   // 留出**两种最常用的问法**（`直问` + `背景`，合计 42% 的任务）。
   // 再留就一定会抽走某个机制在训练里的最后几条——穷举的边界在这里。
-  test: ['直问', '背景'],
+  test: [],   // v2 的 test 侧由 `sftSideOf` 的机制留出决定；模板不再参与
   // 验证侧留 `追问`（最长的表达，用来看 loss 是否真的在降）
   val: ['追问'],
 });
 
 export function sftSideOf(task) {
+  if (SPLIT_MODE === 'all') {
+    // 全部进训练，只按任务哈希留 5% 做验证。用来回答
+    // 「roster_constraint 的缺口是数据量问题还是留出设计问题」。
+    return hashKey(task.case_id) % 20 === 0 ? 'val' : 'train';
+  }
+  // v2 的切分：留出机制（`轮次推进` / `拒绝`），其余进训练。
+  // 第 34 轮用这一套拿到 0.9306，是当前最佳。
+  const heldOut = ['轮次推进', '拒绝'];
+  if (heldOut.includes(task.split.mechanism)) return 'test';
   const template = task.split.template;
-  if (HOLDOUT_TEMPLATES.test.includes(template)) return 'test';
   if (HOLDOUT_TEMPLATES.val.includes(template)) return 'val';
   return 'train';
 }

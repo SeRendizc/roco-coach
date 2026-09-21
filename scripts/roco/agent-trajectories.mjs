@@ -709,14 +709,27 @@ export function makePlanner(arm, task, hints) {
  * 多一个就意味着同一条任务里有一部分必然答不对，而那不是 Agent 的错。
  */
 const WORLD_TEMPLATES = [
-  {id: 'camp', mode: 'camp', env: [], variants: [{seed: 11, turns: 0}, {seed: 19, turns: 0}, {seed: 21, turns: 0}]},
-  {id: 'camp-locked', mode: 'camp', env: [], locked: true, variants: [{seed: 12, turns: 0}]},
-  {id: 'camp-conflict', mode: 'camp', env: ['conflict'], conflict: true, variants: [{seed: 16, turns: 0}]},
+  // 每个模板多给几个变体。**这不是为了好看**：第 36 轮量出「训练数据上不去」
+  // 的真正原因不是任务数（288 条已经不少），而是**世界池太小**——
+  // 一条任务能落到的局面只有 1—5 个（`tool_failure` 甚至只有 1 个：
+  // 它要求的 `failure` 条件只有那一个世界满足）。于是「加任务」加不出数据，
+  // 必须加局面。局面由 (seed, turns) 唯一确定，加变体不引入新的随机性。
+  {id: 'camp', mode: 'camp', env: [], variants: [
+    {seed: 11, turns: 0}, {seed: 19, turns: 0}, {seed: 21, turns: 0},
+    {seed: 31, turns: 0}, {seed: 33, turns: 0}, {seed: 37, turns: 0}]},
+  {id: 'camp-locked', mode: 'camp', env: [], locked: true, variants: [
+    {seed: 12, turns: 0}, {seed: 41, turns: 0}, {seed: 43, turns: 0}]},
+  {id: 'camp-conflict', mode: 'camp', env: ['conflict'], conflict: true, variants: [
+    {seed: 16, turns: 0}, {seed: 47, turns: 0}, {seed: 53, turns: 0}]},
   {id: 'battle-open', mode: 'battle', env: ['damage'], can_answer: 'damage', variants: [{seed: 13, turns: 0}, {seed: 23, turns: 0}]},
   {id: 'battle-mid', mode: 'battle', env: ['damage'], can_answer: 'damage', variants: [{seed: 14, turns: 4}, {seed: 24, turns: 3}]},
   {id: 'battle-late', mode: 'battle', env: ['damage'], can_answer: 'damage', variants: [{seed: 18, turns: 8}]},
-  {id: 'battle-refuse', mode: 'battle', env: ['damage', 'failure'], can_answer: 'damage', forced_failure: 'damage', variants: [{seed: 15, turns: 2}]},
-  {id: 'battle-stale', mode: 'battle', env: ['damage', 'bumped'], can_answer: 'damage', bump_version: true, variants: [{seed: 17, turns: 2}]},
+  // 这两个条件世界是**最稀缺的**：`tool_failure` 与 `stale_state` 各只有 1 个可用局面。
+  // 它们的变体直接决定这两类任务的训练样本量。
+  {id: 'battle-refuse', mode: 'battle', env: ['damage', 'failure'], can_answer: 'damage',
+    forced_failure: 'damage', variants: [{seed: 15, turns: 2}, {seed: 51, turns: 2}, {seed: 59, turns: 3}]},
+  {id: 'battle-stale', mode: 'battle', env: ['damage', 'bumped'], can_answer: 'damage',
+    bump_version: true, variants: [{seed: 17, turns: 2}, {seed: 57, turns: 2}, {seed: 61, turns: 4}]},
 ];
 
 export const WORLDS = Object.freeze(WORLD_TEMPLATES.flatMap((template) => template.variants.map((variant, index) => ({
