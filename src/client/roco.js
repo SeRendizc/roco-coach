@@ -126,8 +126,37 @@ const TYPE_COLOR = {
   冰系: '#69c2d6', 龙系: '#7b61c9', 幽系: '#6b5b95', 萌系: '#e58fc0', 虫系: '#8fae4a',
   幻系: '#b06fd0', 自然系: '#5fae7a',
 };
+//: 系别「形象」：**自制 emoji 徽记**，与配色一一对应。
+//:
+//: 为什么是 emoji 而不是图：官方立绘的素材许可不明，抓进来就是把许可风险塞进产品
+//: （`docs/roco/LICENSE-MATRIX.md` 的口径）。emoji 是字体自带的字符，零外链、零下载，
+//: 放大不糊、离线可用，也天然满足「色盲友好」——图形之外还有文字标签与 emoji 两个信号。
+//:
+//: ⚠ 这张表必须与 `TYPE_COLOR` **同一个键集**：少一个系别，那一系的伙伴就会退回
+//: 一个默认灰块，在页面上看起来像「这只伙伴没有形象」。守卫在
+//: `tests/roco-experience.test.js` 里逐键比对两张表（少一个键就红）。
+const TYPE_EMOJI = {
+  普通系: '🐾', 火系: '🔥', 水系: '💧', 武系: '🥊', 翼系: '🪶',
+  冰系: '❄️', 龙系: '🐉', 幽系: '👻', 萌系: '🎀', 虫系: '🐛',
+  幻系: '✨', 自然系: '🌿',
+};
 function typeChips(types) {
-  return (types ?? []).map((t) => `<span class="type" style="background:${TYPE_COLOR[t] ?? '#6b7280'}">${t}</span>`).join('');
+  return (types ?? []).map((t) => `<span class="type" style="background:${TYPE_COLOR[t] ?? '#6b7280'}">${TYPE_EMOJI[t] ?? ''}${t}</span>`).join('');
+}
+/**
+ * 一只伙伴的头像块：主系别的 emoji + 该系颜色。
+ *
+ * 用的是**主系别**（`types[0]`）——双系伙伴只给一个徽记，因为卡片上已经有完整的
+ * 系别标签；这里要的是「一眼认得出是哪一类」，不是再列一遍属性表。
+ * 名字拿不到（`ui_public_view` 的后备不给名字）时不编：返回空串。
+ */
+function petAvatar(pet) {
+  if (!pet || !pet.name) return '';
+  const main = (pet.types ?? [])[0] ?? null;
+  if (!main) return '';
+  const color = TYPE_COLOR[main] ?? '#6b7280';
+  const emoji = TYPE_EMOJI[main] ?? '';
+  return `<span class="avatar" style="border-color:${color}" aria-hidden="true">${emoji}</span>`;
 }
 
 /**
@@ -147,7 +176,7 @@ function petCard(pet) {
     ? `<span class="muted">生命 ${pet.stats.hp} · 攻击 ${pet.stats.atk} · 防御 ${pet.stats.def} · 魔攻 ${pet.stats.spa} · 魔防 ${pet.stats.spd} · 速度 ${pet.stats.spe}</span>`
     : '';
   return `<div class="pet ${pet.fainted ? 'fainted' : ''}">
-    <div class="pet-top"><strong>${name}</strong>${typeChips(pet.types)}</div>
+    <div class="pet-top">${petAvatar(pet)}<strong>${name}</strong>${typeChips(pet.types)}</div>
     <div class="bar"><div class="${hpClass(ratio)}" style="width:${pct(pet.hp, pet.max_hp)}%"></div></div>
     <div class="pet-stats"><span>生命 ${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span><span>能量 ${pet.energy ?? '—'}</span>${statuses ? `<span>异常 ${statuses}</span>` : ''}</div>
     ${stats ? `<div class="pet-more">${stats}</div>` : ''}
@@ -407,7 +436,7 @@ function renderRoster() {
     if (enemy.includes(pet.pet_id)) classes.push('picked-enemy');
     const moves = pet.moveset.map((m) => m.name).join('、');
     return `<button class="${classes.join(' ')}" data-pet="${pet.pet_id}">
-      <div class="nm">${pet.name}</div>
+      <div class="nm">${petAvatar(pet)}${pet.name}</div>
       <div>${typeChips(pet.types)}</div>
       <div class="mv">${moves || '（引擎未给配招）'}</div>
     </button>`;
@@ -771,6 +800,13 @@ async function boot() {
     $('engine-status').dataset.rocoStatus = 'error';
   }
   document.body.dataset.rocoReady = 'yes';
+  // 开局引导是**静态三步**（选阵容 → 开一局 → 她自己会说话），不依赖任何数据，
+  // 所以这里只留一个验收钩子：脚本据此断言「引导真的渲染出来了」，
+  // 而且断言的是**文字条数**——三步少一步，这一页就又变回「先看半天才知道怎么用」。
+  const onboard = document.getElementById('onboard');
+  document.body.dataset.rocoOnboard = onboard && onboard.children.length === 3
+    ? 'shown'
+    : 'missing';
 }
 
 // 验收脚本要驱动这些动作：显式挂到一个命名空间上，比让脚本去点按钮里的中文更稳。

@@ -265,3 +265,30 @@ test('页面局末复盘接的是「整局事件 + 最后一个可行动的局�
   assert.match(start[1], /state\.matchEvents = \[\]/, '开新局要清空整局事件');
   assert.match(start[1], /state\.lastLiveView = null/, '开新局要清掉上一局的快照');
 });
+
+// ── 形象体系（P1-1）：自制 emoji 与配色必须同一个键集 ──────────────────────
+//
+// 为什么值得单独一条：少一个系别不会报错，只是那一系的伙伴在页面上变成一个
+// 没有图形的灰块——「12 只里总有几只看起来不像伙伴」。而两张表分别演进时，
+// 这种缺口只会越来越多，没人会发现。
+test('12 个系别的 emoji 与配色逐键对齐，且不引用任何外链素材（自制形象）', () => {
+  const page = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
+  const keysOf = (name) => {
+    const block = page.match(new RegExp(`const ${name} = \\{([\\s\\S]*?)\\};`));
+    assert.ok(block, `页面里应当有 ${name}`);
+    return [...block[1].matchAll(/([\u4e00-\u9fff]+系)\s*:/g)].map((m) => m[1]);
+  };
+  const colors = keysOf('TYPE_COLOR');
+  const emoji = keysOf('TYPE_EMOJI');
+  assert.equal(colors.length, 12, `12 只伙伴的系别都要有配色，实际 ${colors.length}`);
+  assert.deepEqual([...emoji].sort(), [...colors].sort(),
+    'emoji 表与配色表必须是同一个键集（少一个系别 = 那一系的伙伴没有形象）');
+  // 每个 emoji 都必须是真字符（空串会让 `typeChips` 静默退化成一个只有文字的标签）
+  const emojiBlock = page.match(/const TYPE_EMOJI = \{([\s\S]*?)\};/)[1];
+  const values = [...emojiBlock.matchAll(/[\u4e00-\u9fff]+系\s*:\s*'([^']*)'/g)].map((m) => m[1]);
+  assert.equal(values.length, 12, `emoji 表里要逐条写出 12 个值，实际 ${values.length}`);
+  assert.deepEqual(values.filter((v) => v.trim() === ''), [], '不许有空 emoji');
+  assert.ok(!/https?:\/\/[^"' ]+\.(png|jpe?g|webp|svg)/i.test(page),
+    '形象一律自制（emoji / 色块），不引用任何外链图片素材');
+  assert.ok(!/<img\b/i.test(page), '页面里不该有 <img>：官方立绘的许可不明，不抓');
+});
