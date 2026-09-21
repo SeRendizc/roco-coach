@@ -36,7 +36,7 @@
 
 | RC | 内容 | 状态 |
 |---|---|---|
-| RC-301 | RecommendationRequest 合同（六宠、锁定、must include/exclude、`UNKNOWN_PREMATCH`） | NOT_STARTED |
+| RC-301 | RecommendationRequest 合同（六宠、锁定、must include/exclude、`UNKNOWN_PREMATCH`） | **DONE** | `src/coach/team-request.js`（13 字段 / 27 错误码 / 7 信息码 / 归一化 / 自然语言抽取）+ `toolbox.js` 增量工具合同 + `tests/roco-team-request.test.js`（17 条 / 8 组反证）+ `reports/roco/flagship-upgrade/rc-301-team-request.json` + `docs/roco/TEAM-REQUEST.md`。**要点**：mode/规则集不许自创、`team_size` 由模式推导、默认 `UNKNOWN_PREMATCH` 且标明是代入值、未知字段不静默丢弃、`ok:false` 时 request 恒 null。**两条边界**：工具**故意未进** `TOOL_CONTRACTS`（会牵动已发布评测的提示摘要与 13 个工具名 → 排进 RC-305）；抽取器朴素，新增 `MENTION_WITHOUT_FIELD` 信息码让「点了名但没落进 schema」**不再静默** |
 | RC-302 | 缺口诊断（coverage/speed/energy/respond/pivot/synergy/cost，每条带证据与置信） | NOT_STARTED |
 | RC-303 | 候选生成（全量 600+ → 召回 20～50 → Beam 补全六宠 → Completion Value / Ranker） | NOT_STARTED |
 | RC-304 | 未知对手下的队伍比较（环境价值 / 最差体系 / 容错 / 覆盖置信） | NOT_STARTED |

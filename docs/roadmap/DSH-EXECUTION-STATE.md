@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `666593a`；v3 纠偏与 RC-101～RC-205 见 §C6.15～§C6.24）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `0096f44`；v3 纠偏与 RC-101～RC-301 见 §C6.15～§C6.25）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **17/17 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `666593a`（`feat(rc205): 精灵盒子 UI`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `0096f44`（`feat(rc301): RecommendationRequest 合同`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1583,3 +1583,25 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
 `support` 词表暂只有 `KNOWLEDGE_ONLY`（未接 RC-403）；比较只覆盖 8 个字段。
 
 **下一条**：RC-301…306（六槽阵容工坊 + 3 秒 Serving）；Phases 0B 已完成（201/202/203/204/205）。
+
+### C6.25 RC-301 RecommendationRequest 合同（第 88 轮，Phase 0C 开始）
+
+**交付**（提交 `0096f44`）：`src/coach/team-request.js`（13 字段 schema + **27 错误码 + 7 信息码** + 归一化 +
+自然语言→候选 schema）+ `toolbox.js` 增量独立工具合同（既有 13 个工具未动）+ 17 条测试（8 组必红反证）+
+机器可读报告 + `docs/roco/TEAM-REQUEST.md`。
+
+**要点**：`mode` 必须来自 `battle-modes.json`（**不许自创**）、`team_size` 由模式注册表参数推导（标准 PVP = 6）、
+只给 mode 时实测得到 `visibility=UNKNOWN_PREMATCH` / `team_size=6` / `ruleset_config_id=mobile_s4_candidate_v2`
+且 info 标明是代入/推导值、未知字段一律拒（不静默丢弃）、`ok:false` 时 `request` 恒 `null`。
+自然语言侧 `NO_REQUEST_INTENT`（「随便配一队」说明缺什么）与 `UNRESOLVED_MENTION`（别名/错别字不猜）。
+
+**主线程修掉一处静默缺口**：原实现在「点了名但没有字段接住」时什么都不报 →
+「铠甲虫还有熔岩巨兽都带上，标准PVP」返回 `ok:true` 而 `must_include` 为空，调用方以为收下了名字。
+新增信息码 `MENTION_WITHOUT_FIELD`：**不阻塞**（否则正常句子被判死＝能力退化），但**必须可见**并点名。
+实测两条句子都带上这条 info。
+
+**两条如实边界**：① 工具**故意没进 `TOOL_CONTRACTS`**（那张表同时喂 `shadow-tools.js` 标签、已发布评测钉死的
+13 个工具名与提示 SHA-256、runtime 模型可见列表）→ **模型现在调不到它**，接进可见列表要连那三处一起改（排进 RC-305）；
+② 抽取器朴素，调用方必须把原话与 schema 一起看（写进报告与文档）。
+
+**下一条**：RC-302 缺口诊断（coverage/speed/energy/respond/pivot/synergy/cost，每条带证据与置信）。
