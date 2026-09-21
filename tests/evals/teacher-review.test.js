@@ -518,3 +518,43 @@ test('反向对照 ③：没有转折点就编一个「关键回合」是抓得�
   assert.ok(naiveTurningPoint(quiet), '天真实现会为这一局编出一个转折点');
   assert.equal(reviewMatch(quiet), null, '真实实现在没有转折点时返回 null');
 });
+
+test('对手倒下那一只：拿不到名字时只写位次，绝不拿场上那一只顶替（含只给投影的入参）', () => {
+  // ── 这条用例的来历：一次 `git add -A` 误收 ────────────────────────────────
+  //
+  // 提交 `ff81037` 里那份 `teacher-review.js` 是子 agent **写到一半**的版本（819 行），
+  // 它的 `petInfoAt` 对对手多了一条兜底：`slot === 0` 时退回**投影数组的第 0 位**，
+  // 也就是「现在场上那一只」。用同一批事件实测（只给投影、没有原始 `roco` 视图的 game）：
+  //
+  //   ff81037  → 「第 2 回合 对方 潮甲龟 倒下，这是全场第一次减员」   ← 把场上那只安到倒下那只头上
+  //   当前版本 → 「第 2 回合 对方第 1 位 倒下，这是全场第一次减员」   ← 名字拿不到就只写位次
+  //
+  // 后续提交把那一段兜底删掉了，行为变成正确的——但那正是「靠后续覆盖掩盖」的形状：
+  // 误收的那一份**真的会说错话**，而且没有任何测试会红。这条用例把它钉死。
+  const game = {
+    id: 'projected-only', version: 'v', result: 'loss', turn: 5,
+    player: {active: 0, items: {回复药: 1},
+      pets: [{slot: 0, id: 'pet_000225', name: '寂灭骨龙', hp: 0, maxHp: 425, energy: 1, fainted: true}]},
+    // 对手只有**投影**：场上那一只叫潮甲龟，后备没有信息
+    enemy: {active: 0, pets: [{id: 'pet_000311', name: '潮甲龟', hp: 200, maxHp: 400, energy: 2, fainted: false}]},
+  };
+  const events = [
+    ev(2, 'turn_start', {turn: 2}, '第 2 回合开始。'),
+    ev(2, 'damage', {side: 'player', skill_id: 'skill_000750', target_slot: 0, damage: 400,
+      type_multiplier: 2, formula_verified: false}, '我方的龙血命中，造成约 400 点伤害，属性克制。', ['skill_000750']),
+    ev(2, 'faint', {side: 'enemy', slot: 0}, '对方的精灵倒下了。', ['3009']),
+    ev(3, 'turn_start', {turn: 3}, '第 3 回合开始。'),
+    ev(3, 'damage', {side: 'enemy', skill_id: 'skill_000311', target_slot: 0, damage: 210,
+      type_multiplier: 1, formula_verified: false}, '对方的裂空命中，造成约 210 点伤害。', ['skill_000311']),
+    ev(3, 'faint', {side: 'player', slot: 0}, '我方的精灵倒下了。', ['3009']),
+  ];
+  const review = reviewMatch({events, turns: 5, result: 'loss', game});
+  assert.ok(review);
+  assert.equal(review.turning_point.what, '第 2 回合 对方第 1 位 倒下，这是全场第一次减员',
+    '对手倒下的那一只拿不到名字时，只能写位次');
+  assert.ok(!/潮甲龟/.test(review.text), `不许把场上那一只的名字安到倒下那一只头上：${review.text}`);
+  assert.ok(!review.evidence.some((line) => /潮甲龟/.test(line)), JSON.stringify(review.evidence));
+  // 反向对照：**真的**知道是谁倒下时，仍然要点名（别为了这条把名字一刀切掉）
+  const named = reviewMatch({...matchSplit({playerFaintTurn: 7, enemyFaintTurn: 3}), result: 'loss'});
+  assert.match(named.turning_point.what, /对方第 1 位|潮甲龟/);
+});
