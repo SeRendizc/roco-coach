@@ -242,9 +242,10 @@ function petShape(name, hp, maxHp) {
   return {name: typeof name === 'string' && name ? name : null, hp: numberOf(hp), maxHp: numberOf(maxHp)};
 }
 
-/** 取「某一方第 slot 位」的公开信息：优先认原始视图的 `slot` 字段，退化到投影数组下标。 */
+/** 取「某一方第 slot 位」的公开信息：只按视图里的 `slot` 字段找，找不到就不给名字。 */
 function petInfoAt(game, side, slot) {
   const object = asObject(game);
+  if (!Number.isInteger(slot)) return null;
   const raw = rawSidePets(object, side) ?? (side === PLAYER
     ? (Array.isArray(object?.self?.pets) ? object.self.pets : null)
     : (() => {
@@ -253,21 +254,18 @@ function petInfoAt(game, side, slot) {
       const list = [field, ...bench].filter(Boolean);
       return list.length ? list : null;
     })());
-  if (Number.isInteger(slot) && Array.isArray(raw)) {
+  if (Array.isArray(raw)) {
     const hit = raw.find((pet) => pet && pet.slot === slot);
     if (hit) return petShape(hit.name ?? hit.pet_id, hit.hp, hit.max_hp);
   }
   if (side === PLAYER) {
+    // 己方全体在视图里是齐的（含已倒下的那一只），下标就是位次——`rocoGameView` 的约定。
     const pet = Array.isArray(object?.player?.pets) ? object.player.pets[slot] : null;
     if (pet) return petShape(pet.name, pet.hp, pet.maxHp);
-    return null;
   }
-  // 对手的投影数组第 0 位就是场上那一只；后备没有血量（隐藏信息，见 rocoGameView）。
-  if (slot === 0) {
-    const pet = Array.isArray(object?.enemy?.pets) ? object.enemy.pets[0] : null;
-    if (pet) return petShape(pet.name, pet.hp, pet.maxHp);
-  }
-  // slot 不明时**不拿第一只顶替**：宁可没有名字，也不能把别人的战绩安到这一只头上。
+  // 对手**不能**退到「场上那一只」：对面倒下之后会补位，终局视图的 `opponent.field`
+  // 已经是**换上来的那一只**，而 `ui_public_view` 的后备只给 `slot` 与 `fainted`、不给名字。
+  // 拿现在场上那一只顶替倒下那一只，就是把这一局的战绩安到另一只头上。宁可不给名字。
   return null;
 }
 
@@ -295,13 +293,20 @@ function blowSkillSuffix(blow, names) {
 function nameBook(game, skills) {
   const table = {};
   const object = asObject(game);
-  const sources = [object?.roco?.legal, object?.legal, asObject(skills).legal];
+  // 三个真实来源：页面这一侧的合法动作（`roco.legal`）、
+  // `ui_public_view` 给出的**己方配招全表**（`self.skills`，`ui_action_public` 加的 `skill.name`）、
+  // 以及调用方显式给的技能表。对手的技能名公开数据里没有，所以拿不到就是拿不到。
+  const sources = [object?.roco?.legal, object?.legal, object?.roco?.self?.skills, object?.self?.skills, asObject(skills).legal];
   for (const source of sources) {
     if (!Array.isArray(source)) continue;
     for (const action of source) {
       const id = action?.skill_id;
-      const label = action?.label;
-      if (typeof id === 'string' && typeof label === 'string' && label && !table[id]) table[id] = label;
+      if (typeof id !== 'string' || !id || table[id]) continue;
+      // 合法动作里三种写法都见过：`skill_name`（`ui_legal_actions` 加的）、
+      // `skill.name`（`ui_action_public` 加的）、以及 `label`（动作名＝技能名）。
+      const label = [action.skill_name, action?.skill?.name, action?.label]
+        .find((value) => typeof value === 'string' && value);
+      if (label) table[id] = label;
     }
   }
   if (asObject(skills).skills && typeof skills.skills === 'object') {
@@ -312,8 +317,20 @@ function nameBook(game, skills) {
   return {skills: table};
 }
 
-/** 背包里还有没有回复药（只在投影层能读到时才算数，读不到就是不知道）。 */
-function bagHasHealItem(game) {
+/**
+ * 背包里还有没有回复药。
+ *
+ * ⚠️ **终局视图里读不到背包**：引擎的 `legal_actions` 在 `state.result` 非空时直接返回 `[]`
+ * （`env.py` 开头那句 `if state.result: return []`），而 `rocoGameView` 的 `items` 是从
+ * 合法动作里数出来的。所以调用方要么把**最后一次还有合法动作**的那份视图传进来，
+ * 要么显式给 `bag`。两条都不给时这里返回 false，那一课就不会被讲——不知道背包里有什么，
+ * 就不教人吃药。
+ */
+function bagHasHealItem(game, bag = null) {
+  const explicit = asObject(bag);
+  if (Object.keys(explicit).length) {
+    return HEAL_ITEM_IDS.some((id) => Number(explicit[id]) > 0);
+  }
   const items = asObject(asObject(game).player).items;
   if (!items || typeof items !== 'object') return false;
   return HEAL_ITEM_IDS.some((id) => Number(items[id]) > 0);
@@ -410,23 +427,33 @@ function firstOf(list, side) {
  * 混在一起的后果是：下一局局面重复、但这一课的前提不在（背包里没药）时，
  * 会把「没法比较」说成「没有改善」。
  */
-function evaluateGoal(goal, {facts, game, names}) {
+function evaluateGoal(goal, {facts, game, names, bag = null}) {
   if (goal === 'use-item-before-danger-line' || goal === 'switch-out-of-the-bad-matchup') {
     const faint = firstOf(facts.faints, PLAYER);
     if (!faint) return null;
     const base = {situation: 'our-pet-fainted', turn: faint.turn, pet: {side: PLAYER, slot: faint.slot}};
     const pet = describePet(game, PLAYER, faint.slot);
+    // 「是什么把它打下去的」：倒下的前一条**打在这一只身上**的对方伤害。
+    // `faint` 事件自己没有技能字段（`env.py` 只记 `{side, slot}`），所以只能从伤害事件里取，
+    // 取不到就不写这一句——不拿别的回合的那一击顶替。
+    const fatal = [...facts.blows].reverse().find((blow) => blow.side === ENEMY
+      && blow.index < faint.index
+      && blow.turn === faint.turn
+      && (blow.targetSlot === null || faint.slot === null || blow.targetSlot === faint.slot)) ?? null;
+    const fatalLine = fatal
+      ? `第 ${faint.turn} 回合 ${pet.label} 是在一次约 ${fatal.damage} 点伤害之后倒下的${blowSkillSuffix(fatal, names)}。`
+      : null;
     if (goal === 'use-item-before-danger-line') {
       const heal = facts.items.find((item) => item.side === PLAYER && item.healed !== null && item.healed > 0) ?? null;
-      const available = Boolean(heal) || bagHasHealItem(game);
+      const available = Boolean(heal) || bagHasHealItem(game, bag);
       if (!available) {
-        return {...base, applies: false, handling: null, evidence: [`${pet.label} 第 ${faint.turn} 回合倒下；这一局没有可用回复药的记录，所以不谈用药时机。`]};
+        return {...base, applies: false, handling: null, evidence: [fatalLine, `${pet.label} 第 ${faint.turn} 回合倒下；这一局没有可用回复药的记录，所以不谈用药时机。`].filter(Boolean)};
       }
       const healedFirst = Boolean(heal) && (heal.index < faint.index);
       const handling = healedFirst ? 'healed-before-faint' : 'no-heal-before-faint';
-      const evidence = healedFirst
-        ? [`${pet.label} 倒下之前，第 ${heal.turn} 回合先用过回复药（回 ${heal.healed} 点）。`]
-        : [`${pet.label} 倒下之前没有用过回复药（这一局没有我方用药的记录；背包里还有回复药）。`];
+      const evidence = [fatalLine, healedFirst
+        ? `${pet.label} 倒下之前，第 ${heal.turn} 回合先用过回复药（回 ${heal.healed} 点）。`
+        : `${pet.label} 倒下之前没有用过回复药（这一局没有我方用药的记录；背包里还有回复药）。`].filter(Boolean);
       return {...base, applies: true, handling, evidence};
     }
     // switch-out-of-the-bad-matchup：先看有没有吃到过属性克制的伤害（只算打在**后来倒下那一只**
@@ -437,15 +464,15 @@ function evaluateGoal(goal, {facts, game, names}) {
       && blow.index < faint.index
       && (blow.targetSlot === null || faint.slot === null || blow.targetSlot === faint.slot)) ?? null;
     if (!badHit) {
-      return {...base, applies: false, handling: null, evidence: [`${pet.label} 第 ${faint.turn} 回合倒下，但倒下之前没有吃到属性克制的伤害记录。`]};
+      return {...base, applies: false, handling: null, evidence: [fatalLine, `${pet.label} 第 ${faint.turn} 回合倒下，但倒下之前没有吃到属性克制的伤害记录。`].filter(Boolean)};
     }
     const switched = facts.switches.some((row) => row.side === PLAYER && row.index > badHit.index && row.index < faint.index);
     const handling = switched ? 'switched-out-after-bad-hit' : 'stayed-in-after-bad-hit';
     return {
       ...base, applies: true, handling,
-      evidence: [switched
-        ? [`第 ${badHit.turn} 回合吃到属性克制的伤害（约 ${badHit.damage} 点${blowSkillSuffix(badHit, names)}）之后换过人，但 ${pet.label} 还是在第 ${faint.turn} 回合倒下。`]
-        : [`第 ${badHit.turn} 回合 ${pet.label} 吃到属性克制的伤害（约 ${badHit.damage} 点${blowSkillSuffix(badHit, names)}），到第 ${faint.turn} 回合倒下之间没有换人。`]],
+      evidence: [fatalLine, switched
+        ? `第 ${badHit.turn} 回合吃到属性克制的伤害（约 ${badHit.damage} 点${blowSkillSuffix(badHit, names)}）之后换过人，但 ${pet.label} 还是在第 ${faint.turn} 回合倒下。`
+        : `第 ${badHit.turn} 回合 ${pet.label} 吃到属性克制的伤害（约 ${badHit.damage} 点${blowSkillSuffix(badHit, names)}），到第 ${faint.turn} 回合倒下之间没有换人。`].filter(Boolean),
     };
   }
 
@@ -585,7 +612,7 @@ function hpEvidence(game, side, slot) {
  * }}
  * 返回 null ＝ 这一局没有可说的：没有转折点，或者挑不出该讲哪一课。宁可沉默。
  */
-export function reviewMatch({events = [], turns = null, result = null, game = null, memory = null, skills = null} = {}) {
+export function reviewMatch({events = [], turns = null, result = null, game = null, memory = null, skills = null, bag = null} = {}) {
   const facts = teacherMatchFacts({events});
   const names = nameBook(game, skills);
   const point = chooseTurningPoint({facts, game});
@@ -593,7 +620,7 @@ export function reviewMatch({events = [], turns = null, result = null, game = nu
   let chosen = null;
   let goal = null;
   for (const candidate of TEACHER_GOALS) {
-    const evaluation = evaluateGoal(candidate, {facts, game, names});
+    const evaluation = evaluateGoal(candidate, {facts, game, names, bag});
     if (!evaluation) continue;
     // 优先级里第一门「够得上」的课就是这一局要讲的；`applies === false` 的候选跳过
     // （前提不在的课不能讲，例如背包里根本没药却教人吃药）。
@@ -684,7 +711,7 @@ export function checkLearningProgress({memory = null, match = null} = {}) {
   const goal = record.goal;
   const facts = teacherMatchFacts({events: Array.isArray(asObject(match).events) ? match.events : []});
   const game = asObject(match).game ?? null;
-  const evaluation = evaluateGoal(goal, {facts, game});
+  const evaluation = evaluateGoal(goal, {facts, game, names: nameBook(game, asObject(match).skills ?? null), bag: asObject(match).bag ?? null});
   const plan = teachingPlan(memory, {lesson: goal});
   const situation = typeof record.situation === 'string' && record.situation ? record.situation : null;
   const lessonName = goal;
