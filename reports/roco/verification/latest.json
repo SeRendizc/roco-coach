@@ -6,7 +6,7 @@
    "id": "env",
    "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
    "ok": true,
-   "ms": 26188,
+   "ms": 30407,
    "tail": [
     "> test:env",
     "> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
@@ -16,55 +16,55 @@
    "id": "unit",
    "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
    "ok": true,
-   "ms": 35157,
+   "ms": 47970,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 35038.800333"
+    "ℹ duration_ms 47822.348"
    ]
   },
   {
    "id": "bridge",
    "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
    "ok": true,
-   "ms": 3138,
+   "ms": 3407,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 3004.429166"
+    "ℹ duration_ms 3233.013208"
    ]
   },
   {
    "id": "toolbox-roco",
    "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
    "ok": true,
-   "ms": 170,
+   "ms": 205,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 47.958583"
+    "ℹ duration_ms 62.711959"
    ]
   },
   {
    "id": "plan-e2e",
    "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
    "ok": true,
-   "ms": 1348,
+   "ms": 1545,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 1234.617125"
+    "ℹ duration_ms 1403.547833"
    ]
   },
   {
    "id": "trajectories",
    "why": "轨迹集与判定器的两个方向；判定器写坏了只有这里看得见",
    "ok": true,
-   "ms": 800,
+   "ms": 1036,
    "tail": [
     ""
    ]
@@ -73,7 +73,7 @@
    "id": "trajectories-model",
    "why": "W4-02 的第二半（模型候选轨迹）：同一把尺子、同一个判定器。这一份**不声称字节可复现**（模型重跑会逐条不同），它靠 `model_identity` 钉住；结构与离线回放仍然必须全过——模型臂的产物要是格式漂了，模型与规则就没法横向比",
    "ok": true,
-   "ms": 572,
+   "ms": 597,
    "tail": [
     ""
    ]
@@ -82,7 +82,7 @@
    "id": "sft-split",
    "why": "SFT 训练数据的切分：家族是否都在训练侧、留出有没有泄漏、报告里的自我描述与切分模式是否自洽，以及**逐字节复现**。第 37 轮发现报告把「留出机制」描述成「留出模板」，那一类错误只有这条抓得到",
    "ok": true,
-   "ms": 2712,
+   "ms": 3573,
    "tail": [
     "  \"test.jsonl\": true,",
     "  \"dataset-report.json\": true",
@@ -94,7 +94,7 @@
    "id": "model-manifest",
    "why": "本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么",
    "ok": true,
-   "ms": 1127,
+   "ms": 1271,
    "tail": [
     "✔ mlx-community/Qwen3.5-4B-4bit — 校验 11/11 个文件",
     "manifest 校验通过"
@@ -104,7 +104,7 @@
    "id": "provenance",
    "why": "数据溯源：每条来源有可核对的锚点（归档哈希 / 逐文件清单）、逐实体的 provenance 台账完整。「所有数据必须记录来源」这条边界从散文变成检查",
    "ok": true,
-   "ms": 271,
+   "ms": 300,
    "tail": [
     "规范化文件 10 份，来源 4 个，provenance 18 条，快照校验通过 3 个",
     "溯源完整"
@@ -114,9 +114,11 @@
    "id": "state-doc",
    "why": "状态文档与现实一致：声明的 HEAD 还在历史里、验证产物在、没有引用不存在的路径。第 30 轮的教训是文档能漂，而读它的人会在错的前提上继续做事",
    "ok": true,
-   "ms": 47,
+   "ms": 64,
    "tail": [
-    "状态文档：声明 HEAD 87d0eea，当前 87d0eea，最近一次全绿运行 85b6fff",
+    "状态文档：声明 HEAD 87d0eea，当前 9175f31，最近一次全绿运行 87d0eea",
+    "警告（不阻断）：最近一次 verify:release 是 failed：失败套件 [\"unit\"]（不阻断，但要说出来）",
+    "警告（不阻断）：套件 unit 最近一次是失败的",
     "一致"
    ]
   },
@@ -124,19 +126,19 @@
    "id": "guard-selftest",
    "why": "注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑",
    "ok": true,
-   "ms": 9049,
+   "ms": 11171,
    "tail": [
-    "  ✔ 红 generator-artifact-drift",
     "  ✔ 红 companion-sayable-gone",
     "  ✔ 红 dedup-gone",
-    "登记 10 条：红 10、仍绿 0、跳过 0 → pass"
+    "  ✔ 红 energy-literal-outside-ruleset",
+    "登记 11 条：红 11、仍绿 0、跳过 0 → pass"
    ]
   },
   {
    "id": "browser-acceptance",
    "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
    "ok": true,
-   "ms": 19816,
+   "ms": 20745,
    "tail": [
     "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
     "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
@@ -148,10 +150,10 @@
    "id": "demo-acceptance",
    "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
    "ok": true,
-   "ms": 127981,
+   "ms": 152812,
    "tail": [
     "[demo-acceptance] ✔ ④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上 — 浮条版本=37 / 丢弃时画面=37",
-    "[demo-acceptance] ✔ ④ 自然竞态下的不变量：页面上的规划/建议必须属于**当前**局面 — 同时发 plan 与 advance：局面 30 → 31；plan 版本=30 保留=false；浮条版本=31；丢弃账累计=2；（撞上与否由这两个版本号说话，不靠猜）",
+    "[demo-acceptance] ✔ ④ 自然竞态下的不变量：页面上的规划/建议必须属于**当前**局面 — 同时发 plan 与 advance：局面 30 → 31；plan 版本=30 保留=false；浮条版本=null；丢弃账累计=4；（撞上与否由这两个版本号说话，不靠猜）",
     "[demo-acceptance] ✔ ③ 自动收起之后再进来也不再显示（刷新后 hidden / 高 0px / 登记键仍在） — 刷新后 hook=hidden hidden=true 高=0px 键=\"1\"",
     "[demo-acceptance] 结果：119 通过 / 0 失败；报告见 reports/roco/demo-acceptance/"
    ]

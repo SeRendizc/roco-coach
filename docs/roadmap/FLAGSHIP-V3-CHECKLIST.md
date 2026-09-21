@@ -12,13 +12,13 @@
 | RC | 内容 | 状态 | 证据 / 备注 |
 |---|---|---|---|
 | RC-000 | 当前 master 基线审计 | **DONE** | `scripts/roco/flagship-baseline.mjs`、`reports/roco/flagship-upgrade/baseline.json`（6/6 自检） |
-| RC-101 | 版本化规则配置（`legacy_sim_v1` / `mobile_s4_candidate_v2`） | NOT_STARTED | 目标：JS/Python/UI 都不再各写一份常量 |
-| RC-102 | 能量证据与 microcase（candidate 只能进 candidate） | NOT_STARTED | 依赖 evidence ledger 的 `energy.*` 条目 |
+| RC-101 | 版本化规则配置（`legacy_sim_v1` / `mobile_s4_candidate_v2`） | **DONE** | `data/roco/rulesets/{legacy-sim-v1,mobile-s4-candidate-v2}.json`、`roco/src/roco_env/rule_config.py`、`roco/tests/test_rule_config.py`（17）、`tests/roco-rule-config.test.js`（7）、结构判据「能量字面量只许住在配置里」（`structure-contract`，0 处违规 / 9 条反证全红）、`guard-selftest` 11 条全红、影响报告 `reports/roco/flagship-upgrade/rc-101-rule-config.json`、`docs/roco/RULE-CONFIG.md`。**默认逐位不变**（275 env / 715 unit 全绿）；candidate 只是登记，入场能量仍是 UNKNOWN（MC-E04 未录） |
+| RC-102 | 能量证据与 microcase（candidate 只能进 candidate） | IN_PROGRESS | 配置与 microcase 落点已就绪（`MC-E01/E02/E03/E04` + `data/roco/evidence/rule-evidence-microcase-records.json`）；**缺的是实机录制**（外部阻塞），录到之前 candidate 不得 promotion |
 | RC-103 | 回合顺序与回合末登记表 | NOT_STARTED | 未知顺序 fail closed |
 | RC-104 | 规则 → 产物失效图 | **DONE** | `data/roco/artifact-registry.json`、`scripts/roco/artifact-invalidation.mjs`、`reports/roco/flagship-upgrade/artifact-invalidation.json`（6/6 自检，13 条禁止重跑） |
 | — | 规则证据台账（evidence ledger，贯穿所有 RC） | **DONE** | `data/roco/evidence/rule-evidence-ledger.json`（20 条：OFFICIAL 3 / COMMUNITY 7 / CROSS_SOURCE 7 / HYPOTHESIS 3 / RECORDED **0**）、`data/roco/evidence/rule-evidence-microcase-records.json`（14 条待录 MC-E**）、`scripts/roco/verify-evidence-ledger.mjs`（12 条自检）、`tests/roco-evidence-ledger.test.js`（17 条）、`docs/roco/RULE-EVIDENCE-LEDGER.md`；含一处对升级包来源指向的**证伪**（见 REDIRECT §7） |
 | — | BattleMode 参数化登记 | **DONE**（登记）/ 待接代码 | `data/roco/battle-modes.json`（RC-101 消费它） |
-| — | 六槽 UI 与 3 秒 Serving 拆分 | **DONE**（拆分文档） | `docs/roadmap/FLAGSHIP-V3-REDIRECT.md` §5 |
+| — | 六槽 UI 与 3 秒 Serving 拆分 | **DONE**（拆分文档 + **mockup 定稿**） | `docs/roadmap/FLAGSHIP-V3-REDIRECT.md` §5；mockup：`docs/roco/ui-mockup-six-slot.html` + `reports/roco/ui-mockup-six-slot-{1440x900,390x844}.png`（量测产物 `...-mockup.json`，0 问题） |
 
 **P0A 验收**：双规则并存；旧 replay 可重放；candidate 差异报告可复现；未验证规则没有被静默 promotion。
 
@@ -102,3 +102,18 @@
 ## 最近更新
 
 - 2026-09-21（v3 纠偏第一批）：RC-000、RC-104、BattleMode 登记、六槽 UI 与 3s Serving 拆分、长期 goal 更新。
+
+## 本轮附带修掉的两处真实缺陷（都不是计划，是实测踩到的）
+
+| # | 缺陷 | 判据与证据 |
+|---|---|---|
+| 1 | **第二个陈旧规划洞**：`autoTurn` 不经过 `requestPlan` 的丢弃路径，于是「计划先到、局面后动」时旧规划会被拿去说话 | `demo-acceptance` 实测红（`plan 版本=30 保留=true`，当前 31）→ 修法放在 `refreshHint` 唯一入口 → 复跑 **119/0** |
+| 2 | **按真实时钟算天数的测试**（预存在）：`replay()` 注入 now=今天 22:00 而事件时间戳来自真实时钟，22:00 之后「6 天前」被 floor 成 5 天 | 22:06 实测红（`你上次来是5天前…`）→ 新增 `backdateFrom()` 按注入时钟锚定 + 对 6 个整点验一遍 + 一个两个时间戳都由测试给定的反向控制 |
+| 3 | 门禁失败**不可诊断**：`latest.json` 只留尾部 4 行，本轮碰到「`unit` 门禁红、单跑 715/715 绿」却查不出是哪个用例 | 现在每次失败落 `reports/roco/verification/failures/<suite>-<时间>.log`（完整输出） |
+
+## 一条如实登记的语义分歧（留给后面决定，不偷偷选一边）
+
+`companion.js` 里 `daysAgo` 用**毫秒差取整**（`floor((now-t)/DAY)`），而同一份账本里的
+`todayCount` / 会话分组用的是**本地日历日**（`dayKeyOf`）。两者对「跨午夜但不足 24 小时」的情形给出不同答案
+（昨晚 22:00 → 今晚 21:00：毫秒差算「今天」，日历日算「昨天」）。
+修复 #2 时只把**测试**钉成确定性，**没有**改产品语义；要不要统一成日历日语义需要单独一个 RC（有玩家可感知的影响）。

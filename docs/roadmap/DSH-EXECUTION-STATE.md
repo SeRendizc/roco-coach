@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `87d0eea`；v3 纠偏批次见 §C6.15）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `9175f31`；v3 纠偏与 RC-101 见 §C6.15／§C6.16）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `cfe7f63`（时间 2026-09-21T10:17Z，14/14）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **14/14 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -723,7 +723,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `87d0eea`（`docs(reports): 小时报 10:55Z 存档`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `9175f31`（`feat(v3-ui): 六槽阵容工坊 mockup 定稿`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 9-9 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1376,3 +1376,30 @@ game adapter + mock host/三角色/有界工具循环/release guard。
 **下一条 RC**：RC-101 版本化规则配置（`legacy_sim_v1` / `mobile_s4_candidate_v2`），
 让 JS/Python/UI 都不再各写一份常量；随后 RC-102 能量 candidate 与 microcase、RC-103 回合顺序登记表。
 **在规则 candidate 落定前不得重跑轨迹/SFT/team model/介入窗口**（这正是 `do_not_regenerate` 那 13 条）。
+
+### C6.16 RC-101 版本化规则配置（第 81 轮）+ 三处实测缺陷
+
+**RC-101 已交付**（提交 `24b0b34`）：`data/roco/rulesets/{legacy-sim-v1,mobile-s4-candidate-v2}.json`
+成为能量/时序的**唯一事实源**；`rule_config.py` 加载校验（未知 id/缺字段/指纹不符/UNKNOWN 带值一律 fail closed）；
+`env.py` 四处 `min(ENERGY_MAX,…)` + 回能 + 入场能量改为读配置，`GameState` 记录 `ruleset_config_id`，
+`reset/replay` 可显式选配置。**默认逐位不变**（275 env + 715 unit 全绿）。
+candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNOWN，MC-E04 未录）**。
+判据：结构判据「能量字面量只许住在配置里」（0 违规 / 9 条内存反证全红 / 3 条不许误伤）、
+`tests/roco-rule-config.test.js` 7 条、`guard-selftest` 11 条全红、影响报告复用失效图算出
+**18 条受影响 / 13 条禁止重跑**。
+
+**同轮修掉的三处实测缺陷**（提交 `a41abf9`、`756fbe9`）：
+1. **能力退化**：`coach-advice` 改成只认公开视图里的 `opponent.energy_max`，而那条字段当时**没人下发**，
+   于是「对面能量快满了」会**静默消失**。已接通 引擎 `ui_public_view` → Node `publicView` → 教练层，
+   并补判据（有上限才说话、没上限必须沉默）；顺带清掉营地提示词里写死的「能量上限6」。
+2. **第二个陈旧规划洞**：`autoTurn` 不经过 `requestPlan` 的丢弃路径 → 旧规划被拿去说话
+   （`demo-acceptance` 实测 `plan 版本=30 保留=true`）。修法放在 `refreshHint` 唯一入口。
+3. **门禁失败不可诊断**：`latest.json` 只留尾部 4 行，本轮碰到「`unit` 门禁红、单跑 715/715 绿」
+   却查不出是哪个用例；现在失败会落 `reports/roco/verification/failures/<suite>-<时间>.log`。
+   同时修掉一个**预存在**的按真实时钟算天数的测试（`replay()` 注入 22:00 vs 真实时间戳 → 22:00 后「6 天前」算成 5 天）。
+
+**如实登记的语义分歧（未偷偷改产品）**：`daysAgo` 用毫秒差取整，而 `todayCount`/会话分组用本地日历日；
+跨午夜但不足 24 小时时两者答案不同。修测试时只把测试钉成确定性，产品语义要不要统一留作单独 RC。
+
+**下一条 RC**：RC-102（能量 microcase —— 需要**实机录制**，外部阻塞）/ RC-103（回合顺序与回合末登记表，
+可以在没有实机的情况下先做「登记表 + fail closed」那一半）。
