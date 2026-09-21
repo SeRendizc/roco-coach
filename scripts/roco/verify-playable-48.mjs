@@ -2,7 +2,8 @@
 // 「可玩 48 只」的真服务验收：分页/筛选 + 真打 3v3 到结束。
 //
 // 它证明的是**接上真服务之后**的行为，不是磁盘上的数字：
-//   · `/api/roco/roster` 无参时回执形状与加参数之前**逐键相同**（向后兼容）；
+//   · `/api/roco/roster` 无参时**旧键一个不少、语义不变**（第 61 轮起多出出处键：
+//     顶层 `evidence_ids` 与逐只/逐招的 `evidence_ids`，是加性变更）；
 //   · `?limit=48` → 48、`?offset=24&limit=12` → 第 25—36 只、`?type=草系` 只出草系；
 //   · `?role=` 与独立审计产物（`reports/roco/coverage/roster-48.json`）对账，
 //     不是拿引擎自己的输出验证引擎自己；
@@ -24,10 +25,16 @@ const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/,
 const DATA = join(ROOT, 'data', 'roco', 'normalized', 'roco-world-s4-2026-09-10');
 const AUDIT = join(ROOT, 'reports', 'roco', 'coverage', 'roster-48.json');
 const OUT = join(ROOT, 'reports', 'roco', 'coverage', 'playable-48-live-verification.json');
-/** 无参回执的顶层键：这就是「向后兼容」的定义，多一个少一个都算破坏。 */
-const LEGACY_KEYS = Object.freeze(['ok', 'count', 'usable_count', 'team_size', 'note', 'pets']);
-/** 无参回执里每只精灵的键：pets[] 的**元素形状**也不能动。 */
-const LEGACY_PET_KEYS = Object.freeze(['pet_id', 'name', 'types', 'stats', 'pet_class', 'stage', 'moveset_size', 'moveset']);
+/**
+ * 无参回执的顶层键。第 61 轮加了 `evidence_ids`（roster 级出处）——这是**加性**变更：
+ * 旧键一个没少、语义没变，所以清单里补上新键，而不是把这条兼容性检查删掉。
+ */
+const LEGACY_KEYS = Object.freeze(['ok', 'count', 'usable_count', 'team_size', 'note', 'pets', 'evidence_ids']);
+/**
+ * 无参回执里每只精灵的键。第 61 轮每只多了自己的 `evidence_ids`
+ * （`ev:<ruleset>:pets.json#<pet_id>`）——同样是加性变更。
+ */
+const LEGACY_PET_KEYS = Object.freeze(['pet_id', 'name', 'types', 'stats', 'pet_class', 'stage', 'moveset_size', 'moveset', 'evidence_ids']);
 const SEEDS = Object.freeze([20260921, 5, 11]);
 const TURN_CAP = 200;
 
@@ -81,14 +88,23 @@ async function main() {
   const server = await startServer({});
   const startedAt = Date.now();
   try {
-    // ── ① 无参回执：形状与扩池之前逐键相同 ────────────────────────────────
+    // ── ① 无参回执：旧键逐键都在（加出处是**加性**变更，旧键没动）──────────
     const base = await server.get('/api/roco/roster');
-    check('GET /api/roco/roster 的顶层键与扩池前逐键相同',
-      sortedKeys(base) === [...LEGACY_KEYS].sort().join(','),
+    check('GET /api/roco/roster 的顶层键包含全部旧键（加性变更：只多 evidence_ids）',
+      [...LEGACY_KEYS].every((k) => k in base) && sortedKeys(base) === [...LEGACY_KEYS].sort().join(','),
       {got: Object.keys(base), want: [...LEGACY_KEYS]});
-    check('GET /api/roco/roster 的 pets[] 元素键与扩池前逐键相同',
+    check('GET /api/roco/roster 的 pets[] 元素键包含全部旧键（只多 evidence_ids）',
       base.pets.every((p) => sortedKeys(p) === [...LEGACY_PET_KEYS].sort().join(',')),
       {sample: Object.keys(base.pets[0])});
+    check('GET /api/roco/roster 逐只、逐招都带自己的出处（pets.json#… / skills.json#…）',
+      (() => {
+        const ruleset = /^ev:([^:]+):roster#/.exec(String((base.evidence_ids ?? [])[0] ?? ''))?.[1] ?? null;
+        if (!ruleset) return false;
+        return base.pets.every((p) => (p.evidence_ids ?? []).join(',') === `ev:${ruleset}:pets.json#${p.pet_id}`
+          && (p.moveset ?? []).every((m) => (m.evidence_ids ?? []).join(',') === `ev:${ruleset}:skills.json#${m.skill_id}`));
+      })(),
+      {answer_evidence: base.evidence_ids ?? null,
+        sample_pet: base.pets[0]?.evidence_ids, sample_move: base.pets[0]?.moveset?.[0]?.evidence_ids});
     check('GET /api/roco/roster → count=48 / usable_count=48',
       base.count === 48 && base.usable_count === 48,
       {count: base.count, usable_count: base.usable_count});

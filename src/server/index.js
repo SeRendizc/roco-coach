@@ -211,7 +211,8 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
     // 可选用精灵名单（P0-3）：只读、全公开事实。放在 GET 上是刻意的——
     // 它不改任何状态，也没有 CSRF 风险。
     // 第 60 轮：名单扩到 48 只后要能分页/筛选，所以查询串原样交给 roster()
-    // （参数白名单在 rocoService.roster 里；**不传参数时回执形状与之前逐键相同**）。
+    // （参数白名单在 rocoService.roster 里）。第 61 轮起回执多了出处的键
+    // （顶层 `evidence_ids` + 逐只/逐招的 `evidence_ids`）——**加性**变更，旧键没动。
     if(path==='/api/roco/roster'&&req.method==='GET')return json(res,200,await rocoService.roster(Object.fromEntries(new URL(req.url,origin).searchParams)));
     if(req.method!=='POST')throw fail(405,'仅支持 POST');
     if(req.headers.origin!==origin||!req.headers['content-type']?.startsWith('application/json'))throw fail(403,'请求来源或类型不正确');

@@ -454,6 +454,60 @@ export function checksPlanFields(records) {
   ];
 }
 
+/**
+ * roster 回执里「精灵/技能级出处」的判据本体。
+ *
+ * 返回 `{ok, failures, ruleset, checked}`：`failures` 为空才算合格。
+ * 抽成纯函数**只有一个理由**：反证要复用同一条判据——
+ * 把 `evidence_ids` 剥掉再喂进来，它必须给 `ok:false`。
+ * 判据写成「包含 `.json` 就算过」，剥掉字段也照样绿。
+ *
+ * 逐只、逐招要求**精确相等**（`=== ev:<ruleset>:pets.json#<pet_id>`），
+ * 不是「看起来像」：形状对、钉错精灵同样算红。
+ */
+export function rosterEvidenceVerdict({answerEvidence, pagedAnswerEvidence, pets, pagedPets}) {
+  const failures = [];
+  const answer = Array.isArray(answerEvidence) ? answerEvidence : [];
+  const ruleset = answer
+    .map((id) => /^ev:([^:]+):roster#total=/.exec(String(id))?.[1] ?? null)
+    .find(Boolean) ?? null;
+  if (answer.length === 0) failures.push('无参分支的顶层 evidence_ids 为空（roster 级那条没有出口）');
+  if (ruleset === null) failures.push(`顶层 evidence_ids 形状不对（应为 ev:<ruleset>:roster#total=…）：${JSON.stringify(answer)}`);
+  if (!Array.isArray(pagedAnswerEvidence) || pagedAnswerEvidence.length === 0) {
+    failures.push('分页分支的顶层 evidence_ids 为空');
+  }
+  const rows = Array.isArray(pets) ? pets : [];
+  const pagedRows = Array.isArray(pagedPets) ? pagedPets : [];
+  if (rows.length === 0) failures.push('无参分支的回执里没有 pets');
+  // 分页分支是**另一段 return**：只核无参分支等于漏了一半，所以逐只/逐招两批一起核。
+  if (pagedRows.length === 0) failures.push('分页分支的回执里没有 pets');
+  let moves = 0;
+  for (const pet of [...rows, ...pagedRows]) {
+    const wantPet = `ev:${ruleset}:pets.json#${pet.pet_id}`;
+    const gotPet = Array.isArray(pet.evidence_ids) ? pet.evidence_ids : null;
+    if (gotPet === null || gotPet.length !== 1 || gotPet[0] !== wantPet) {
+      failures.push(`${pet.pet_id} 的 evidence_ids=${JSON.stringify(gotPet)}，应为 ["${wantPet}"]`);
+    }
+    for (const move of Array.isArray(pet.moveset) ? pet.moveset : []) {
+      moves += 1;
+      if (move.missing_in_skills_json === true) {
+        // 孤儿技能：引擎说「skills.json 里没有这条」，出处只能是空数组，不许编
+        if (!(Array.isArray(move.evidence_ids) && move.evidence_ids.length === 0)) {
+          failures.push(`${pet.pet_id}/${move.skill_id} 是孤儿技能却带了出处：${JSON.stringify(move.evidence_ids ?? null)}`);
+        }
+        continue;
+      }
+      const wantSkill = `ev:${ruleset}:skills.json#${move.skill_id}`;
+      const gotSkill = Array.isArray(move.evidence_ids) ? move.evidence_ids : null;
+      if (gotSkill === null || gotSkill.length !== 1 || gotSkill[0] !== wantSkill) {
+        failures.push(`${pet.pet_id}/${move.skill_id} 的 evidence_ids=${JSON.stringify(gotSkill)}，应为 ["${wantSkill}"]`);
+      }
+    }
+  }
+  return {ok: failures.length === 0, failures, ruleset,
+    checked: {pets: rows.length, moves, pagedPets: pagedRows.length}};
+}
+
 /** ⑥ RAG 引用。 */
 export function checksRagEvidence({events, rosterRow}) {
   const checks = [];
@@ -471,19 +525,74 @@ export function checksRagEvidence({events, rosterRow}) {
     actual: sample.join(' | ') || '(none)',
     expected: '至少一条是行号或 json#实体（引擎当前给的是行号，如实记录）',
   });
-  // 技能/精灵级 evidence 是**如实探测**，不是「必须为真」：
-  // 引擎侧有出处（`/rules/query` 的回执带 evidence_ids），但 `roco-service.js` 的
-  // roster 映射层没有把它搬出来——所以这一条判的是**「探测本身成功」**，
-  // 探测结果（有/没有）写进 actual，缺口写进文档。把判据写成「必须为真」
-  // 会逼着实现去补一个字段来让测试变绿，那不是这条要实现的东西。
+
+  // 精灵/技能级出处：**真判据**（第 61 轮 A65-16 修掉了「映射层丢掉 evidence_ids」）。
+  // 引擎侧一直有出处，缺的是 `roco-service.js` 的 roster 映射层；现在逐只/逐招都搬出来了。
+  const verdict = rosterEvidenceVerdict({
+    answerEvidence: rosterRow?.answer_evidence,
+    pagedAnswerEvidence: rosterRow?.answer_evidence_paged,
+    pets: rosterRow?.pets,
+    pagedPets: rosterRow?.paged_pets,
+  });
   checks.push({
-    name: '⑥ 技能/精灵级 evidence 的**缺口被如实探测出来**（不是假装有）',
-    ok: rosterRow !== null && typeof rosterRow.has_evidence_ids === 'boolean',
-    actual: rosterRow ? JSON.stringify(rosterRow) : '(no roster probe)',
-    expected: 'roster 探测成功；has_evidence_ids 如实为 false（引擎有出处、映射层没搬 → 缺口已登记）',
+    name: '⑥ 精灵/技能级 evidence_ids 透到宿主可见层，且逐只/逐招钉到自己的记录（两个分支）',
+    ok: verdict.ok,
+    actual: verdict.ok
+      ? `无参 ${verdict.checked.pets} 只、分页 ${verdict.checked.pagedPets} 只，`
+        + `逐招 ${verdict.checked.moves} 招全部核对通过；`
+        + `例：${JSON.stringify(rosterRow?.first_pet_evidence)} / ${JSON.stringify(rosterRow?.first_move_evidence)}`
+      : verdict.failures.slice(0, 3).join('；'),
+    expected: '每只 = ev:<ruleset>:pets.json#<pet_id>，每招 = ev:<ruleset>:skills.json#<skill_id>（两个分支都要）',
+  });
+  // 抽查形状：显式要求 `pets.json#<自己的 pet_id>` / `skills.json#<自己的 skill_id>`，
+  // 而不是「含 .json 就行」。
+  const firstPetId = rosterRow?.first_pet_id ?? null;
+  const firstMoveId = rosterRow?.first_move_id ?? null;
+  const petShape = new RegExp(`^ev:[^:]+:pets\\.json#${firstPetId}$`);
+  const moveShape = new RegExp(`^ev:[^:]+:skills\\.json#${firstMoveId}$`);
+  checks.push({
+    name: '⑥ 抽查：精灵出处形如 `pets.json#<pet_id>`、技能出处形如 `skills.json#<skill_id>`',
+    ok: firstPetId !== null && firstMoveId !== null
+      && Array.isArray(rosterRow?.first_pet_evidence) && rosterRow.first_pet_evidence.length === 1
+      && petShape.test(String(rosterRow.first_pet_evidence[0]))
+      && Array.isArray(rosterRow?.first_move_evidence) && rosterRow.first_move_evidence.length === 1
+      && moveShape.test(String(rosterRow.first_move_evidence[0])),
+    actual: `${JSON.stringify(rosterRow?.first_pet_evidence ?? null)} / ${JSON.stringify(rosterRow?.first_move_evidence ?? null)}`,
+    expected: `ev:<ruleset>:pets.json#${firstPetId} / ev:<ruleset>:skills.json#${firstMoveId}`,
+  });
+
+  // 反证：剥掉字段，同一条判据必须变红。没有这一条，上面两条可能是恒真的。
+  const base = () => structuredClone({
+    answerEvidence: rosterRow?.answer_evidence,
+    pagedAnswerEvidence: rosterRow?.answer_evidence_paged,
+    pets: rosterRow?.pets,
+    pagedPets: rosterRow?.paged_pets,
+  });
+  const counterproofs = [
+    ['顶层 evidence_ids 被丢掉', (c) => { c.answerEvidence = []; }],
+    ['分页分支的顶层 evidence_ids 被丢掉', (c) => { c.pagedAnswerEvidence = []; }],
+    ['pets[].evidence_ids 被丢掉（映射层回退成旧形状）', (c) => { for (const p of c.pets) delete p.evidence_ids; }],
+    ['分页分支 pets[].evidence_ids 被丢掉', (c) => { for (const p of c.pagedPets) delete p.evidence_ids; }],
+    ['moveset[].evidence_ids 被丢掉', (c) => { for (const p of c.pets) for (const m of p.moveset) delete m.evidence_ids; }],
+  ];
+  const redReports = [];
+  let allRed = rosterRow !== null && rosterRow !== undefined;
+  for (const [what, mutate] of counterproofs) {
+    const copy = allRed ? base() : null;
+    if (copy) mutate(copy);
+    const stripped = copy ? rosterEvidenceVerdict(copy) : {ok: true, failures: ['(no roster probe)']};
+    if (stripped.ok !== false) allRed = false;
+    redReports.push(`${what} → ${stripped.failures[0] ?? '(仍然判绿)'}`);
+  }
+  checks.push({
+    name: '⑥ 反证：把 evidence_ids 剥掉，上面那条判据必须变红（判据有牙）',
+    ok: allRed,
+    actual: redReports.join('；'),
+    expected: '5 种剥法都必须让判据给 ok:false',
   });
   return checks;
 }
+
 
 /** ⑦ 网关：工具提议 + 受控回退。 */
 export function checksGateway({success, fallback, deadlineMs}) {

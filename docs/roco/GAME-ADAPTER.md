@@ -138,7 +138,7 @@ match-start → turn-start → action-resolved → replacement-required → matc
 | 缺口 | 现状 | 证据 |
 |---|---|---|
 | 事件级 `evidence` 是**行号**，不是 `…json#实体` | 引擎就是这么给的；宿主可见层收到的也是行号 | mock-host 场景 c3 的 actual |
-| 精灵/技能级 `evidence_ids` **没有**透到宿主可见层 | `/rules/query` 的回执有，`src/server/roco-service.js` 的 roster 映射层没有搬它 | mock-host 场景 c3 记为 `has_evidence_ids: false` |
+| ~~精灵/技能级 `evidence_ids` **没有**透到宿主可见层~~ **（已修，第 61 轮）** | `/rules/query` 的 roster 回执逐只带 `ev:<ruleset>:pets.json#<pet_id>`、逐招带 `ev:<ruleset>:skills.json#<skill_id>`；`src/server/roco-service.js` 的映射层两个分支（不传参数 / 分页）都搬出来，Answer 级那条也有了顶层出口。孤儿技能（`missing_in_skills_json`）**不编**出处，`evidence_ids` 是空数组 | 判据：mock-host 场景 c3「⑥ 精灵/技能级 evidence_ids 透到宿主可见层…」+ 同组反证；`roco/tests/test_roster_evidence.py`（9 例含反证）；`tests/evals/roco/roster-evidence.test.js`（含反证） |
 | RL 判定层在页面上默认 `off` | 默认档位不改任何结论；`on` 仍需真人审阅 | `docs/roco/PROGRESS.md` / `docs/roco/W5-04-INTERVENTION-GATE.md` |
 | 手游真机指标 | 未做 | — |
 

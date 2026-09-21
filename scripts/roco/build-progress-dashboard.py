@@ -492,11 +492,17 @@ ITEMS: List[Dict[str, Any]] = [
              "read-the-replacement-first；后续局核对 checked=true / improved=false"
              "（没出现不许说成做到了）。"},
     {"id": "A65-16", "title": "RAG 引用透传到宿主可见层",
-     "status": PARTIAL,
+     "status": DONE,
      "evidence": ["tests/evals/roco/mock-host/scenarios.mjs",
-                  "reports/roco/product-wiring/full-match-wiring.json"],
-     "note": "事件级 evidence 真的到（29/76 条，形如行号）；**精灵/技能级 evidence_ids 在 roco-service.js "
-             "的 roster 映射层被丢掉**，测试如实记 `has_evidence_ids: false` —— 缺口已登记，没修成绿的。"},
+                  "tests/evals/roco/roster-evidence.test.js",
+                  "roco/tests/test_roster_evidence.py",
+                  "src/server/roco-service.js"],
+     "note": "事件级 evidence 真的到（形如行号）；精灵/技能级 evidence_ids 已逐只/逐招透到宿主可见层"
+             "（`ev:<ruleset>:pets.json#<pet_id>` / `…skills.json#<skill_id>`），roster 映射层的"
+             "**两个分支**（不传参数 / 分页）都搬，Answer 级那条走顶层 `evidence_ids`。"
+             "三条判据都带反证（剥掉字段必红）：mock-host 场景 c3、Node 的 roster-evidence 测试、"
+             "Python 的 test_roster_evidence。**如实记录**：事件级 evidence 仍是行号，"
+             "不是 `…json#实体`（另见 GAME-ADAPTER §7 那一行）。"},
     {"id": "A65-17", "title": "Qwen 工具提议 + 受控回退（网关挂起时立刻回退）",
      "status": DONE,
      "evidence": ["tests/evals/roco/mock-host-integration.test.js", "src/coach/shadow-tools.js"],

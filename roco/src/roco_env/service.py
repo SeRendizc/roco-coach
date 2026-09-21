@@ -790,8 +790,21 @@ class RocoService:
           · `role`：按角色筛。role 来自 48 只登记层的**标注**（`roster-48.json`），
             不是引擎数值；没有标注的精灵 role 是 null，按 role 筛时不会被算进来。
 
-        **不传这四个参数时**，返回与加参数之前**逐字段相同**的结果（同样按 pet_id 升序、
-        同样全量），所以旧页面与旧验收脚本不受影响。
+        **不传这四个参数时**，返回的旧键与加参数之前一致：同样按 pet_id 升序、同样全量，
+        `ok/count/usable_count/team_size/note/pets` 的语义一个没动。
+
+        第 61 轮起这是一次**加性的 schema 变更**（有意为之，不是「形状不变」）：
+
+          · `pets[]` 每个元素多一个 `evidence_ids`，钉到它自己的那张图鉴记录
+            （`ev:<ruleset>:pets.json#<pet_id>`）；
+          · `pets[].moveset[]` 每个技能多一个 `evidence_ids`，钉到它自己的技能记录
+            （`ev:<ruleset>:skills.json#<skill_id>`）；
+          · 孤儿技能（`missing_in_skills_json: true`，`skills.json` 里查不到这条）
+            **不编出处**，`evidence_ids` 是空数组——找不到就是找不到；
+          · roster 级那条（`Answer.evidence_ids`）保持原样，它只说明「这份名单是哪一次
+            查询（total/offset/limit）」，钉不到具体某只精灵。
+
+        只读旧键的调用方不受影响；要出处就得读新键。
         """
         limit = query.get("limit")
         offset = query.get("offset", 0)
@@ -836,10 +849,20 @@ class RocoService:
             for sid in moveset:
                 skill = rs.skills.get(sid)
                 if skill is None:
-                    # 学习表里的孤儿引用在加载期就该炸；真出现就如实上报，不跳过
-                    moves.append({"skill_id": sid, "missing_in_skills_json": True})
+                    # 学习表里的孤儿引用在加载期就该炸；真出现就如实上报，不跳过。
+                    # **不编出处**：`skills.json` 里根本没有这条记录，任何 id 都是编的，
+                    # 所以 evidence 只能是空数组，具体原因由 missing_in_skills_json 说明。
+                    moves.append({
+                        "skill_id": sid,
+                        "missing_in_skills_json": True,
+                        "evidence_ids": [],
+                    })
                 else:
-                    moves.append(self._skill_record(rs, skill))
+                    moves.append({
+                        **self._skill_record(rs, skill),
+                        # 每一招自己的出处：skills.json 里那一条。roster 级那条钉不到它。
+                        "evidence_ids": [ev(rs.ruleset_id, "skills.json", skill.skill_id)],
+                    })
             selected.append({
                 "pet_id": pet_id,
                 "name": pet.name,
@@ -854,6 +877,9 @@ class RocoService:
                 # 空配招的精灵在引擎里连合法动作都出不来。
                 "moveset_size": len(moves),
                 "moveset": moves,
+                # 每只精灵自己的出处：pets.json 里那一条图鉴记录。
+                # roster 级那条只说明「这份名单是哪一次查询」，钉不到具体某只，所以逐只再给。
+                "evidence_ids": [ev(rs.ruleset_id, "pets.json", pet_id)],
             })
 
         total = len(selected)

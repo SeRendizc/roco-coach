@@ -11,7 +11,8 @@
 //      工具提议（耗时、提示摘要钉子），并证明它**不改变**规则引擎给出的行动建议；
 //   ⑤ 接线守卫：
 //        RAG   —— 规则检索的证据（事件回执里的 `evidence`）真的到了浏览器；
-//                 并如实报出精灵/技能级证据串在 `/api/roco/roster` 这一层被丢掉了；
+//                 `/api/roco/roster` 的精灵/技能级证据串（`evidence_ids`）也真的到了
+//                 （第 61 轮 A65-16 修掉了映射层丢字段的缺口，判据带反证）；
 //        Memory—— `memory.stated` 与账本 `journal`（teach 行）真的被页面读写；
 //        RL    —— 介入判定层当前处于什么模式、`active` 是不是真、有没有改变玩家看到的建议。
 //                 **不生效就写不生效**，不许说成生效。
@@ -386,20 +387,35 @@ async function main(){
  const engineEvidence=rosterEnvelope?.result?.evidence_ids
   ??rosterEnvelope?.evidence_ids??null;
  const browserRoster=await (await fetch(base+'api/roco/roster?limit=2&offset=0')).json();
+ // 浏览器这一层：逐只、逐招的出处都在。判据抽成纯函数，好让下面的反证复用同一条——
+ // 写成「键名里含 evidence 就算过」的话，剥掉字段也照样绿。
+ const rosterRuleset=/^ev:([^:]+):roster#/.exec(String((browserRoster.evidence_ids??[])[0]??''))?.[1]??null;
+ const rosterEvidenceOk=(row)=>
+  rosterRuleset!==null&&Array.isArray(row?.pets)&&row.pets.length>0&&row.pets.every((p)=>
+   (p.evidence_ids??[]).join(',')===`ev:${rosterRuleset}:pets.json#${p.pet_id}`
+   &&(p.moveset??[]).every((m)=>(m.evidence_ids??[]).join(',')===`ev:${rosterRuleset}:skills.json#${m.skill_id}`));
+ const rosterStrippedPets={...browserRoster,
+  pets:(browserRoster.pets??[]).map((p)=>{const copy={...p};delete copy.evidence_ids;return copy;})};
  steps.push({step:'RAG',browser:{events:ragBrowser.events,
   events_with_evidence:ragBrowser.events_with_evidence,sample:ragBrowser.sample,
   raw_drawer_has_evidence:ragBrowser.raw_drawer_has_evidence},
   engine_roster_evidence_ids:engineEvidence,
-  browser_roster_keys:Object.keys(browserRoster)});
+  browser_roster_keys:Object.keys(browserRoster),
+  browser_roster_sample:{pet:browserRoster.pets?.[0]?.evidence_ids??null,
+   move:browserRoster.pets?.[0]?.moveset?.[0]?.evidence_ids??null}});
  check('⑤ RAG：规则检索的证据（事件回执里的 evidence 行号）真的到了浏览器，并且在开发者抽屉里可见',
   ragBrowser.events_with_evidence>=1&&ragBrowser.raw_drawer_has_evidence===true,
   `这一局 ${ragBrowser.events} 条事件，其中 ${ragBrowser.events_with_evidence} 条带 evidence；`
   +`样例 ${JSON.stringify(ragBrowser.sample[0]??null)}；原始 JSON 里含 "evidence"=${ragBrowser.raw_drawer_has_evidence}`);
- check('⑤ RAG：精灵/技能级证据串（evidence_ids）**没有**到浏览器——如实记下缺口',
-  Array.isArray(engineEvidence)&&engineEvidence.length>0
-  &&!Object.keys(browserRoster).some((k)=>/evidence/.test(k)),
-  `引擎回执有 evidence_ids=${JSON.stringify(engineEvidence)}，`
-  +`但 /api/roco/roster 的键是 ${JSON.stringify(Object.keys(browserRoster))}（服务端映射时丢掉了）`);
+ check('⑤ RAG：精灵/技能级证据串（evidence_ids）真的到了浏览器（逐只 pets.json#…、逐招 skills.json#…）',
+  rosterEvidenceOk(browserRoster),
+  `引擎回执 evidence_ids=${JSON.stringify(engineEvidence)}；/api/roco/roster 的键是 `
+  +`${JSON.stringify(Object.keys(browserRoster))}，样例 `
+  +`${JSON.stringify(browserRoster.pets?.[0]?.evidence_ids??null)} / `
+  +`${JSON.stringify(browserRoster.pets?.[0]?.moveset?.[0]?.evidence_ids??null)}`);
+ check('⑤ 反证：把 pets[].evidence_ids 剥掉，上面那条判据必须变红（判据有牙）',
+  rosterEvidenceOk(browserRoster)&&!rosterEvidenceOk(rosterStrippedPets),
+  `剥掉 pets[].evidence_ids 之后判据=${rosterEvidenceOk(rosterStrippedPets)?'仍然绿（这条判据是空的）':'变红'}`);
  await mouseClick('#about-drawer > summary');
  await sleep(200);
 
@@ -476,7 +492,12 @@ async function main(){
   local_model:{latency_ms:shadow.latency_ms,digest_pin:shadow.digest_pin,panel:shadow.text,
    rule_advice_before:JSON.parse(recBefore),rule_advice_after:JSON.parse(recAfter)},
   wiring:{rag:{browser:ragBrowser,engine_roster_evidence_ids:engineEvidence,
-    browser_roster_keys:Object.keys(browserRoster)},
+    browser_roster_keys:Object.keys(browserRoster),
+    browser_roster_sample:{pet:browserRoster.pets?.[0]?.evidence_ids??null,
+     move:browserRoster.pets?.[0]?.moveset?.[0]?.evidence_ids??null},
+    roster_evidence_ok:rosterEvidenceOk(browserRoster),
+    // 反证：剥掉 pets[].evidence_ids 之后判据必须给 false
+    roster_evidence_counterproof:rosterEvidenceOk(rosterStrippedPets)===false},
    memory:memoryGuard,rl:{page_layer:lastLayer,displayed_action:layer.action,displayed_reason:layer.reason,
     browser_has_process:layer.hasProcess,
     node_side:{on:{...layerOn},off:{...layerOff}},
@@ -496,8 +517,12 @@ async function main(){
   `- RL 判定层：页面侧 mode=${JSON.stringify(layerMode)} active=${layerActive} reason=${JSON.stringify(layerReason)}`
   +`，typeof process=${layer.hasProcess?'defined（意外）':'undefined（这正是它在浏览器里算不成的直接原因）'}`
   +'——**这一层当前没有生效**；Node 侧同一模块 mode=on 时 `suppresses_by=only`（只抑制、不新增）。',
-  `- RAG 精灵/技能级证据：引擎回执带 evidence_ids=${JSON.stringify(engineEvidence)}，`
-  +'但 `/api/roco/roster` 的回执键里没有它——浏览器拿不到精灵/技能级的证据串',""].join('\n');
+  `- RAG 精灵/技能级证据（第 61 轮 A65-16 **已修**）：引擎回执带 evidence_ids=${JSON.stringify(engineEvidence)}，`
+  +`\`/api/roco/roster\` 的顶层键含 evidence_ids=${Object.keys(browserRoster).includes('evidence_ids')}；`
+  +`逐只样例 ${JSON.stringify(browserRoster.pets?.[0]?.evidence_ids??null)}、`
+  +`逐招样例 ${JSON.stringify(browserRoster.pets?.[0]?.moveset?.[0]?.evidence_ids??null)}；`
+  +`判据（逐只/逐招精确比对）=${rosterEvidenceOk(browserRoster)}，`
+  +`反证（剥掉字段必红）=${rosterEvidenceOk(rosterStrippedPets)===false}。`,""].join('\n');
  writeFileSync(join(OUT,'full-match-wiring.md'),md);
  log(`结果：${report.passed} 通过 / ${report.failed} 失败；产物见 reports/roco/product-wiring/`);
  if(keepOpen){log('--keep-open：进程保持，按 Ctrl+C 退出');return;}

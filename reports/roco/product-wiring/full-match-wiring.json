@@ -1,10 +1,10 @@
 {
  "generated_by": "scripts/roco/browser-product-wiring.mjs",
  "schema": "roco-product-wiring/v1",
- "generated_at": "2026-09-21T09:09:31.711Z",
- "url": "http://127.0.0.1:56933/roco.html",
+ "generated_at": "2026-09-21T10:28:02.472Z",
+ "url": "http://127.0.0.1:64560/roco.html",
  "match": {
-  "battle_id": "s1-22ywr7gs",
+  "battle_id": "s1-c0vh2jkh",
   "seed": 20260921,
   "result": "win",
   "turn": 17,
@@ -29,13 +29,14 @@
     "gate": null,
     "reason": "moderate-risk",
     "layer": {
+     "mode": "off",
+     "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+     "suppresses_by": "only",
      "active": false,
      "suppress": false,
-     "reason": "layer-error",
-     "mode": "off",
-     "model_status": "error",
      "probability": null,
-     "threshold": null
+     "threshold": null,
+     "reason": "flag-off"
     },
     "kind": "ko-now",
     "text": "「火云车」估 414，够收对面「音速犬」这 366 血：这一轮直接收",
@@ -141,9 +142,9 @@
   "memoryHook": "2"
  },
  "local_model": {
-  "latency_ms": 474,
+  "latency_ms": 475,
   "digest_pin": "a5cb0fbcc53f",
-  "panel": " 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 474 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 / 不一致」。模型只提议工具，它给的参数仍要由规则引擎逐项校验后才生效，最终结论始终以规则引擎为准。 面板只在开发者抽屉里，玩家正文不经过它。默认不自动跑。",
+  "panel": " 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 475 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 / 不一致」。模型只提议工具，它给的参数仍要由规则引擎逐项校验后才生效，最终结论始终以规则引擎为准。 面板只在开发者抽屉里，玩家正文不经过它。默认不自动跑。",
   "rule_advice_before": {
    "advice": "这一手值得留到局后看一眼。现在先按你的判断走。",
    "plan": "火云车",
@@ -197,8 +198,19 @@
     "usable_count",
     "team_size",
     "note",
-    "pets"
-   ]
+    "pets",
+    "evidence_ids"
+   ],
+   "browser_roster_sample": {
+    "pet": [
+     "ev:roco-world-s4-2026-09-10:pets.json#pet_000012"
+    ],
+    "move": [
+     "ev:roco-world-s4-2026-09-10:skills.json#skill_000632"
+    ]
+   },
+   "roster_evidence_ok": true,
+   "roster_evidence_counterproof": true
   },
   "memory": {
    "stated": [
@@ -225,13 +237,14 @@
   },
   "rl": {
    "page_layer": {
+    "mode": "off",
+    "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+    "suppresses_by": "only",
     "active": false,
     "suppress": false,
-    "reason": "layer-error",
-    "mode": "off",
-    "model_status": "error",
     "probability": null,
-    "threshold": null
+    "threshold": null,
+    "reason": "flag-off"
    },
    "displayed_action": "defer_to_review",
    "displayed_reason": "cooldown",
@@ -302,8 +315,8 @@
   },
   {
    "step": "本机小模型",
-   "panel": " 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 474 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 / 不一致」。模型只提议工具，它给的参数仍要由规则引擎逐项校验后才生效，最终结论始终以规则引擎为准。 面板只在开发者抽屉里，玩家正文不经过它。默认不自动跑。",
-   "latency_ms": 474,
+   "panel": " 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 475 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 / 不一致」。模型只提议工具，它给的参数仍要由规则引擎逐项校验后才生效，最终结论始终以规则引擎为准。 面板只在开发者抽屉里，玩家正文不经过它。默认不自动跑。",
+   "latency_ms": 475,
    "digest_pin": "a5cb0fbcc53f",
    "rule_advice_before": {
     "advice": "这一手值得留到局后看一眼。现在先按你的判断走。",
@@ -357,8 +370,17 @@
     "usable_count",
     "team_size",
     "note",
-    "pets"
-   ]
+    "pets",
+    "evidence_ids"
+   ],
+   "browser_roster_sample": {
+    "pet": [
+     "ev:roco-world-s4-2026-09-10:pets.json#pet_000012"
+    ],
+    "move": [
+     "ev:roco-world-s4-2026-09-10:skills.json#skill_000632"
+    ]
+   }
   },
   {
    "step": "Memory",
@@ -387,13 +409,14 @@
   {
    "step": "RL",
    "layer": {
+    "mode": "off",
+    "model_status": "pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）",
+    "suppresses_by": "only",
     "active": false,
     "suppress": false,
-    "reason": "layer-error",
-    "mode": "off",
-    "model_status": "error",
     "probability": null,
-    "threshold": null
+    "threshold": null,
+    "reason": "flag-off"
    },
    "action": "defer_to_review",
    "reason": "cooldown"
@@ -438,7 +461,7 @@
   {
    "name": "④ 本机小模型：点一下真的问到了一次工具提议（有耗时与提示摘要钉子）",
    "ok": true,
-   "detail": "耗时 474 ms；提示摘要钉子 a5cb0fbcc53f…；面板「 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 474 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 」"
+   "detail": "耗时 475 ms；提示摘要钉子 a5cb0fbcc53f…；面板「 规则引擎（真值来源）规则引擎这一步没有给出行动建议 本机小模型（只提议工具）模型说：不用再查了 耗时 475 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 」"
   },
   {
    "name": "④ 本机小模型不改变规则引擎给出的行动建议（问前 === 问后，而且问之前确实有建议）",
@@ -451,9 +474,14 @@
    "detail": "这一局 118 条事件，其中 51 条带 evidence；样例 {\"kind\":\"defense\",\"text\":\"我方用防御防御，减伤约 0.7。\",\"evidence\":[\"1015\",\"1016\",\"1017\"]}；原始 JSON 里含 \"evidence\"=true"
   },
   {
-   "name": "⑤ RAG：精灵/技能级证据串（evidence_ids）**没有**到浏览器——如实记下缺口",
+   "name": "⑤ RAG：精灵/技能级证据串（evidence_ids）真的到了浏览器（逐只 pets.json#…、逐招 skills.json#…）",
    "ok": true,
-   "detail": "引擎回执有 evidence_ids=[\"ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2\"]，但 /api/roco/roster 的键是 [\"ok\",\"total\",\"offset\",\"limit\",\"count\",\"usable_count\",\"team_size\",\"note\",\"pets\"]（服务端映射时丢掉了）"
+   "detail": "引擎回执 evidence_ids=[\"ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=2\"]；/api/roco/roster 的键是 [\"ok\",\"total\",\"offset\",\"limit\",\"count\",\"usable_count\",\"team_size\",\"note\",\"pets\",\"evidence_ids\"]，样例 [\"ev:roco-world-s4-2026-09-10:pets.json#pet_000012\"] / [\"ev:roco-world-s4-2026-09-10:skills.json#skill_000632\"]"
+  },
+  {
+   "name": "⑤ 反证：把 pets[].evidence_ids 剥掉，上面那条判据必须变红（判据有牙）",
+   "ok": true,
+   "detail": "剥掉 pets[].evidence_ids 之后判据=变红"
   },
   {
    "name": "⑤ Memory：偏好（stated）与账本（journal）都被页面真实读写（内存 + localStorage）",
@@ -463,16 +491,16 @@
   {
    "name": "⑤ RL：介入判定层**只抑制不新增**（Node 侧真调一次），且当前没有改变玩家看到的建议",
    "ok": true,
-   "detail": "页面上最后一次算过的 layer={\"active\":false,\"suppress\":false,\"reason\":\"layer-error\",\"mode\":\"off\",\"model_status\":\"error\",\"probability\":null,\"threshold\":null}；Node 侧同一模块 mode=on → {\"active\":true,\"suppress\":true,\"suppresses_by\":\"only\",\"reason\":\"model-suppress\"}，mode=off → {\"active\":false,\"suppress\":false,\"reason\":\"flag-off\"}（逐位回到规则结果）；玩家看到的仍是规则建议「「火云车」估 414，够收对面「雪影娃娃」这 190 血：这一轮直接收」"
+   "detail": "页面上最后一次算过的 layer={\"mode\":\"off\",\"model_status\":\"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）\",\"suppresses_by\":\"only\",\"active\":false,\"suppress\":false,\"probability\":null,\"threshold\":null,\"reason\":\"flag-off\"}；Node 侧同一模块 mode=on → {\"active\":true,\"suppress\":true,\"suppresses_by\":\"only\",\"reason\":\"model-suppress\"}，mode=off → {\"active\":false,\"suppress\":false,\"reason\":\"flag-off\"}（逐位回到规则结果）；玩家看到的仍是规则建议「「火云车」估 414，够收对面「雪影娃娃」这 190 血：这一轮直接收」"
   },
   {
    "name": "⑤ RL 现状说明：这一层在页面上确实**没有生效**——原因也记下来（不说成生效）",
    "ok": true,
-   "detail": "active=false suppress=false mode=\"off\" reason=\"layer-error\"；页面里 typeof process=\"undefined\"（`interventionModelMode(env = process.env)` 的默认参数在浏览器里取不到 process，异常被 experience.js 的 try/catch 兜成 layer-error；这就是「接上了但没生效」那一类）"
+   "detail": "active=false suppress=false mode=\"off\" reason=\"flag-off\"；页面里 typeof process=\"undefined\"（`interventionModelMode(env = process.env)` 的默认参数在浏览器里取不到 process，异常被 experience.js 的 try/catch 兜成 layer-error；这就是「接上了但没生效」那一类）"
   }
  ],
  "console_errors": [],
  "page_errors": [],
- "passed": 14,
+ "passed": 15,
  "failed": 0
 }

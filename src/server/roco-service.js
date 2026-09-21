@@ -385,9 +385,16 @@ export function createRocoService(options={}){
   *
   * 第 60 轮：候选池扩到 48 只，名单要能分页/筛选。查询参数**白名单转发**
   * （`offset`/`limit`/`type`/`role`），别的键一律不带进引擎。
-  * **不传参数时回执形状逐键不变**（`ok/count/usable_count/team_size/note/pets`，
-  * 连 `pets[]` 的元素形状也不动）——旧页面与既有验收脚本靠这个形状；
-  * 传了参数才追加 `total/offset/limit`（以及逐只的 `role/speed_tier`）。
+  *
+  * 第 61 轮：出处（`evidence_ids`）一路透到这里。这是一次**加性的 schema 变更**：
+  * 旧键一个没删没改（`ok/count/usable_count/team_size/note/pets` 与 `pets[]` 元素
+  * 原有字段的语义都不变），新增的是
+  *   · 顶层 `evidence_ids`：roster 级那条（只说明「这份名单是哪一次查询」）；
+  *   · `pets[].evidence_ids`：每只精灵自己的 `ev:<ruleset>:pets.json#<pet_id>`；
+  *   · `pets[].moveset[].evidence_ids`：每一招自己的 `ev:<ruleset>:skills.json#<skill_id>`；
+  *   · `pets[].moveset[].missing_in_skills_json`：孤儿技能由引擎登记，出处只能是空数组，
+  *     这个标记一起带出去，好让宿主分得清「引擎说没有出处」与「映射层把字段丢了」。
+  * 传了参数才追加 `total/offset/limit`（以及逐只的 `role/speed_tier`）——这一条没变。
   */
  async function roster(query={}){
   const up=await ensure();
@@ -413,6 +420,9 @@ export function createRocoService(options={}){
   const out=unwrap(envelope);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
   const r=out.result||{};
+  // Answer 级出处直接读信封：`unwrap()` 只回 `result`，它不搬 `evidence_ids`。
+  // 这条钉的是「这份名单是哪一次查询（total/offset/limit）」，钉不到具体精灵/技能。
+  const answerEvidence=Array.isArray(envelope?.evidence_ids)?envelope.evidence_ids:[];
   const pets=(Array.isArray(r.pets)?r.pets:[]).map((p)=>({
    pet_id:p.pet_id??null,name:p.name??null,types:Array.isArray(p.types)?p.types:[],
    stats:p.stats??null,pet_class:p.pet_class??null,stage:p.stage??null,
@@ -420,21 +430,29 @@ export function createRocoService(options={}){
    moveset:(Array.isArray(p.moveset)?p.moveset:[]).map((m)=>({
     skill_id:m.skill_id??null,name:m.name??null,element:m.element??null,category:m.category??null,
     energy:m.energy??null,power:m.power??null,power_status:m.power_status??null,
-    damage_class:m.damage_class??null,desc:m.desc??null,is_trait:m.is_trait===true})),
+    damage_class:m.damage_class??null,desc:m.desc??null,is_trait:m.is_trait===true,
+    // 孤儿技能（skills.json 里查不到）在引擎侧就没有出处，这里照搬空数组，**不补**一个假 id。
+    missing_in_skills_json:m.missing_in_skills_json===true,
+    evidence_ids:Array.isArray(m.evidence_ids)?m.evidence_ids:[]})),
    // role/speed_tier 是登记层的**标注**（不是引擎数值）：只在带参数时带出去，
-   // 这样默认回执的 pets[] 元素形状与加参数之前逐键相同。
+   // 默认回执的 pets[] 元素只多 `evidence_ids`（加性），原有键一个没动。
    ...(paged?{role:p.role??null,speed_tier:p.speed_tier??null}:{}),
+   // 每只精灵自己的出处：`ev:<ruleset>:pets.json#<pet_id>`。
+   evidence_ids:Array.isArray(p.evidence_ids)?p.evidence_ids:[],
   }));
   if(!paged){
    return {ok:true,count:r.count??0,usable_count:r.usable_count??0,team_size:r.team_size??3,
-    note:r.note??null,pets};
+    note:r.note??null,pets,
+    // 加性键：旧页面只读旧键，不受影响；要出处就得读这里和 pets[]/moveset[]。
+    evidence_ids:answerEvidence};
   }
   return {ok:true,
    // 分页账目：`total` 是**筛选后**的总数，`count` 是这一页的条数——两者不是一回事
    total:r.total??pets.length,offset:r.offset??0,limit:r.limit??null,
    count:r.count??pets.length,usable_count:r.usable_count??0,team_size:r.team_size??3,
    ...(r.filters?{filters:r.filters}:{}),
-   note:r.note??null,pets};
+   note:r.note??null,pets,
+   evidence_ids:answerEvidence};
  }
 
  async function planBattle(body={}){

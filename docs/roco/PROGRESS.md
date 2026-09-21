@@ -10,14 +10,14 @@
 
 ## 汇总
 
-- MVP 30 项中 `DONE`：**46 / 49**
+- MVP 30 项中 `DONE`：**47 / 49**
 
 | 状态 | 条数 |
 |---|---:|
-| `DONE` | 54 |
+| `DONE` | 55 |
 | `NEEDS_HUMAN` | 2 |
 | `NOT_STARTED` | 4 |
-| `PARTIAL` | 7 |
+| `PARTIAL` | 6 |
 
 ## 逐项
 
@@ -86,7 +86,7 @@
 | A65-13 | 浏览器可见行为验收（真实键鼠 + 截图 + clientW/scrollW） | `DONE` | `reports/roco/adapter-acceptance/browser-adapter-acceptance.json`、`scripts/roco/browser-adapter-acceptance.mjs` | 13/13 通过；两档布局 clientW == scrollW（1440/1440、390/390），浮条内部 360/360。 |
 | A65-14 | 陪练情绪 + 显式偏好记忆（拒绝有时效） | `DONE` | `tests/evals/roco/mock-host-integration.test.js` | 偏好原话进记忆；拒绝的 expires_at 过期前后各判一次（1 → 0）。 |
 | A65-15 | 老师局末闭环（转折 + 改法 + 下一局目标 + 后续局核对） | `DONE` | `tests/evals/roco/mock-host/run.mjs`、`src/coach/teacher-review.js` | 真实对局：转折第 13 回合、改法「补位后先确认是谁再决定打谁」、目标 read-the-replacement-first；后续局核对 checked=true / improved=false（没出现不许说成做到了）。 |
-| A65-16 | RAG 引用透传到宿主可见层 | `PARTIAL` | `tests/evals/roco/mock-host/scenarios.mjs`、`reports/roco/product-wiring/full-match-wiring.json` | 事件级 evidence 真的到（29/76 条，形如行号）；**精灵/技能级 evidence_ids 在 roco-service.js 的 roster 映射层被丢掉**，测试如实记 `has_evidence_ids: false` —— 缺口已登记，没修成绿的。 |
+| A65-16 | RAG 引用透传到宿主可见层 | `DONE` | `tests/evals/roco/mock-host/scenarios.mjs`、`tests/evals/roco/roster-evidence.test.js`、`roco/tests/test_roster_evidence.py`、`src/server/roco-service.js` | 事件级 evidence 真的到（形如行号）；精灵/技能级 evidence_ids 已逐只/逐招透到宿主可见层（`ev:<ruleset>:pets.json#<pet_id>` / `…skills.json#<skill_id>`），roster 映射层的**两个分支**（不传参数 / 分页）都搬，Answer 级那条走顶层 `evidence_ids`。三条判据都带反证（剥掉字段必红）：mock-host 场景 c3、Node 的 roster-evidence 测试、Python 的 test_roster_evidence。**如实记录**：事件级 evidence 仍是行号，不是 `…json#实体`（另见 GAME-ADAPTER §7 那一行）。 |
 | A65-17 | Qwen 工具提议 + 受控回退（网关挂起时立刻回退） | `DONE` | `tests/evals/roco/mock-host-integration.test.js`、`src/coach/shadow-tools.js` | 网关可用解析出 search_rules；挂起时在总时限内回退规则短提示并记录迟到结果丢弃。 |
 | A65-18 | RL shadow 档不得改变玩家看到的建议 | `DONE` | `tests/evals/roco/mock-host-integration.test.js`、`src/coach/intervention-model.js` | off 与 shadow 两档正文逐字相同；shadow 照算（active=false、给概率与 margin）；**如实记录默认档位是 off、on 未获准**。 |
 | A65-19 | 人工评测与 Qwen 27B 部署/微调（延后，由用户自行恢复） | `NEEDS_HUMAN` | — | 两件都**不在本轮范围**：真人盲评需要人，27B 需要用户按 `docs/roco/QWEN-27B-USER-RUN-GUIDE.md` 跑。本轮只把「可移植性」做实，**不声称**模型效果或真人体验有任何变化。 |
@@ -121,8 +121,6 @@
   - 未开工；属训练，依赖 W5-01 的 gateway。
 - **W6-04 最终交付**（`NOT_STARTED`）
   - 未开工；依赖 W6-01—03。
-- **A65-16 RAG 引用透传到宿主可见层**（`PARTIAL`）
-  - 事件级 evidence 真的到（29/76 条，形如行号）；**精灵/技能级 evidence_ids 在 roco-service.js 的 roster 映射层被丢掉**，测试如实记 `has_evidence_ids: false` —— 缺口已登记，没修成绿的。
 - **A65-19 人工评测与 Qwen 27B 部署/微调（延后，由用户自行恢复）**（`NEEDS_HUMAN`）
   - 两件都**不在本轮范围**：真人盲评需要人，27B 需要用户按 `docs/roco/QWEN-27B-USER-RUN-GUIDE.md` 跑。本轮只把「可移植性」做实，**不声称**模型效果或真人体验有任何变化。
   - **缺的是谁**：用户本人：陪练盲评的真人评分（W5-05），以及按指南跑 27B 的部署/微调

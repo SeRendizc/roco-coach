@@ -421,31 +421,42 @@ T('场景 c2：陪练情绪 + 显式偏好记忆（含拒绝有时效）', async
 
 // ── 12. 场景 c3：RAG 引用透传到宿主可见层 ─────────────────────────────────
 
-T('场景 c3：RAG 引用（事件级 evidence 透传；技能级如实记缺口）', async () => {
+T('场景 c3：RAG 引用透传到宿主可见层（事件级 + 精灵/技能级 evidence_ids）', async () => {
   const service = await startEngine();
   try {
     const scenario = SCENARIOS.find((s) => s.id === 'c3');
     const block = await runBattleScenario(scenario, {service});
-    // roster 行：宿主能不能拿到精灵/技能级 evidence。
-    const roster = await service.roster({limit: 2, offset: 0});
+    // roster 行：宿主能不能拿到精灵/技能级 evidence。**两条分支都探**
+    // （不传参数 / 传分页参数），因为映射层是两段 return，漏一段就只有一半透出来。
+    const roster = await service.roster();
+    const paged = await service.roster({limit: 2, offset: 0});
     const first = roster.pets?.[0] ?? null;
     const firstMove = first?.moveset?.[0] ?? null;
-    // 如实探测：宿主可见层的 roster 行里**有没有** evidence_ids？
-    // 现在没有（`roco-service.js` 的映射层丢掉了它）——这一条就记 false，
-    // 不修成 true 来「让判据好看」。缺口的去向写在 docs/roco/GAME-ADAPTER.md。
+    const pagedFirst = paged.pets?.[0] ?? null;
     const rosterRow = first
       ? {
+        pet_count: roster.pets.length,
         pet_keys: Object.keys(first),
+        paged_pet_keys: pagedFirst ? Object.keys(pagedFirst) : [],
+        first_pet_id: first.pet_id,
         first_pet_evidence: first.evidence_ids ?? null,
+        first_move_id: firstMove?.skill_id ?? null,
         first_move_keys: firstMove ? Object.keys(firstMove) : [],
         first_move_evidence: firstMove?.evidence_ids ?? null,
+        // Answer 级那条（roster 级）：两个分支各自的出口
+        answer_evidence: roster.evidence_ids ?? null,
+        answer_evidence_paged: paged.evidence_ids ?? null,
+        // 全量 pets 交给判据逐只/逐招核（48 只、192 招），不是只看第一只
+        pets: roster.pets,
+        // 分页分支是另一段 return：它自己那 2 只也要逐只/逐招核
+        paged_pets: paged.pets,
         has_evidence_ids: Array.isArray(first.evidence_ids) && first.evidence_ids.length > 0,
         has_move_evidence_ids: Array.isArray(firstMove?.evidence_ids) && firstMove.evidence_ids.length > 0,
       }
       : null;
     const checks = report(checksRagEvidence({events: block.events, rosterRow}));
-    assert.ok(checks[0].ok, '事件级 evidence 必须透传');
-    assert.ok(checks[1].ok, '事件级 evidence 必须指向可核对的原始出处（行号 / 快照路径）');
+    // 逐条断言——包括「反证」那一条：它证明前面几条不是恒真的。
+    for (const c of checks) assert.ok(c.ok, `${c.name} → 实际：${c.actual}`);
     log(`事件级 evidence 例：${JSON.stringify(block.events.find((e) => e.evidence?.length)?.evidence)}`);
   } finally {
     await service.stop();
