@@ -1575,6 +1575,16 @@
    }
   ],
   "kinds_reachable_but_missing_from_matrix": [],
+  "kinds_reachable_only_in_full_scan": [
+   {
+    "kind": "foe-low-hp",
+    "hit": 67,
+    "shown": 6,
+    "disclosed": true,
+    "reason": "全量扫描（2640 局 / 34021 个窗口）显示它**能**显示（6 次；first_shown 在第 7 回合、我方血量比 0.483、对面 5.3% 血、micro_hint），出现率约 0.018%。抽样扫描（110 局）里它是「命中 4 / 显示 0」，**抽样本身证明不了「不可达」**。这一轮矩阵上限 12 格、已经 8 种 kind，没有为它定位窗口；定位办法见 docs/roco/BROWSER-POSITION-MATRIX.md §5.3。"
+   }
+  ],
+  "undisclosed_coverage_gaps": [],
   "distinct_shapes": 9,
   "shape_counts": {
    "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收": 2,
@@ -2232,7 +2242,100 @@
       }
      ]
     }
-   }
+   },
+   "full_scan_report": {
+    "present": true,
+    "file": "reports/roco/demo-acceptance/coach-kind-coverage-scan.json",
+    "schema": "roco-coach-kind-coverage/v1",
+    "command": "node scripts/roco/coach-kind-coverage-scan.mjs --stride 1",
+    "sample": {
+     "stride": 1,
+     "triples_total": 1320,
+     "seeds": [
+      20260921,
+      5,
+      11
+     ],
+     "lineups": 2640,
+     "note": "我方三人排列按固定顺序枚举后每 stride 个取一个，每个再配「镜像对手」与「倒序对手」；不用随机——样本一变，「哪些 kind 不可达」这句话就没有可比性。"
+    },
+    "battles_scanned": 2640,
+    "steps_scanned": 34021,
+    "kinds": {
+     "energy-short": {
+      "hit": 4967,
+      "shown": 1433,
+      "shown_battle_phase": 1433,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 3534
+     },
+     "ko-now": {
+      "hit": 4192,
+      "shown": 2684,
+      "shown_battle_phase": 2684,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 1508
+     },
+     "switch-low-hp": {
+      "hit": 6151,
+      "shown": 6151,
+      "shown_battle_phase": 5415,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 0
+     },
+     "speed-decides": {
+      "hit": 7307,
+      "shown": 2369,
+      "shown_battle_phase": 1663,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 4938
+     },
+     "replace-required": {
+      "hit": 1732,
+      "shown": 1732,
+      "shown_battle_phase": 0,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 0
+     },
+     "type-resisted": {
+      "hit": 2706,
+      "shown": 842,
+      "shown_battle_phase": 842,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 1864
+     },
+     "foe-energy-high": {
+      "hit": 286,
+      "shown": 40,
+      "shown_battle_phase": 40,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 246
+     },
+     "type-favoured": {
+      "hit": 378,
+      "shown": 63,
+      "shown_battle_phase": 63,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 315
+     },
+     "foe-low-hp": {
+      "hit": 67,
+      "shown": 6,
+      "shown_battle_phase": 6,
+      "silent_at_low_hp": 0,
+      "silent_at_full_hp": 61
+     }
+    }
+   },
+   "kinds_reachable_only_in_full_scan": [
+    {
+     "kind": "foe-low-hp",
+     "hit": 67,
+     "shown": 6,
+     "disclosed": true,
+     "reason": "全量扫描（2640 局 / 34021 个窗口）显示它**能**显示（6 次；first_shown 在第 7 回合、我方血量比 0.483、对面 5.3% 血、micro_hint），出现率约 0.018%。抽样扫描（110 局）里它是「命中 4 / 显示 0」，**抽样本身证明不了「不可达」**。这一轮矩阵上限 12 格、已经 8 种 kind，没有为它定位窗口；定位办法见 docs/roco/BROWSER-POSITION-MATRIX.md §5.3。"
+    }
+   ]
   },
   "determinism": {
    "passes": 2,

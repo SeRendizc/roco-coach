@@ -117,6 +117,46 @@ test('浏览器局面矩阵：kind 覆盖 ≥8 种，或如实登记不可达清
       && summary.coverage_scan.steps_scanned > 0, '覆盖扫描没有真的跑过');
   });
 
+test('浏览器局面矩阵：全量扫描说「可达」而矩阵里没有的 kind，必须被披露（不许当成不可达）',
+  {skip: existsSync(ARTIFACT) ? false : MISSING}, () => {
+    const {summary, matrix} = read();
+    const observed = new Set(matrix.filter((r) => r.spoken === true).map((r) => r.kind).filter(Boolean));
+    const full = summary.coverage_scan.full_scan_report;
+    assert.ok(full, 'coverage_scan.full_scan_report 必须在（在不在都要写清楚）');
+    if (full.present === false) {
+      // 没跑过全量扫描 → 不许凭空产生「只在全量里可达」的结论。
+      assert.deepEqual(summary.kinds_reachable_only_in_full_scan ?? [], [],
+        '没有全量报告却给出了「只在全量里可达」的清单');
+      return;
+    }
+    const reachableOnly = Object.entries(full.kinds)
+      .filter(([kind, e]) => e.shown > 0 && !observed.has(kind)).map(([kind]) => kind).sort();
+    const recorded = (summary.kinds_reachable_only_in_full_scan ?? []).map((x) => x.kind).sort();
+    assert.deepEqual(recorded, reachableOnly,
+      '「全量说可达、矩阵里却没有」的清单与全量报告对不上');
+    for (const entry of summary.kinds_reachable_only_in_full_scan) {
+      assert.equal(entry.disclosed, true,
+        `${entry.kind}：全量扫描说它真的显示过，矩阵里却没有，而且没有披露`);
+      assert.equal(typeof entry.reason, 'string', `${entry.kind} 的披露没有理由`);
+      assert.ok(entry.reason.length >= 40, `${entry.kind} 的披露理由太短：${entry.reason}`);
+    }
+    assert.deepEqual(summary.undisclosed_coverage_gaps ?? [], [], '存在可达但未披露的 kind');
+    // 数字必须与落盘的全量报告逐项一致——不能产物里写一套、报告里扫出另一套。
+    const reportPath = join(ROOT, 'reports', 'roco', 'demo-acceptance', 'coach-kind-coverage-scan.json');
+    assert.ok(existsSync(reportPath),
+      `产物引用了全量报告，但 ${reportPath} 不在。两种修法（选一）：`
+      + '① 把 `npm run roco:kind-coverage` 的产物一起提交；'
+      + '② 在没有它的环境里重跑 `npm run roco:demo-acceptance`，'
+      + '产物会把 full_scan_report 记成 present:false（那样这一条会走「没有全量报告」那一支）');
+    const report = JSON.parse(readFileSync(reportPath, 'utf8'));
+    assert.equal(full.battles_scanned, report.scan.battles_scanned, '全量扫描局数与报告不一致');
+    assert.equal(full.steps_scanned, report.scan.steps_scanned, '全量扫描窗口数与报告不一致');
+    for (const [kind, entry] of Object.entries(full.kinds)) {
+      assert.equal(entry.shown, report.scan.kinds[kind]?.shown ?? 0,
+        `${kind} 的「显示次数」与全量报告不一致`);
+    }
+  });
+
 test('浏览器局面矩阵：没有任何形状重复超过一次（形状由守卫重算，不看 summary）',
   {skip: existsSync(ARTIFACT) ? false : MISSING}, () => {
     const {matrix, summary} = read();

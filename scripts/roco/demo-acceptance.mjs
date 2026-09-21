@@ -773,6 +773,26 @@ async function main(){
   post: await serverPostFor(base), lineups: coverageSample.lineups, maxTurns: 12});
  const scanKinds = coverage.kinds;
 
+ // ── 全量扫描报告（可选，`npm run roco:kind-coverage` 的产物）────────────────
+ //
+ // 为什么必须读它：抽样扫描的样本小，**逮不到极稀有的 kind**，
+ // 而「抽样里没显示过」不等于「显示不了」。本仓第一次跑全量就抓到了这种情况
+ // （`foe-low-hp` 在 110 局里 0 次显示、在 2640 局里显示了 6 次）。
+ // 所以：只要这份报告在，任何「全量说能显示、矩阵里却没有」的 kind **都必须被披露**，
+ // 披露不出理由就让判据变红——不能靠「抽样没看见」把它说成不可达。
+ const FULL_SCAN_PATH = join(OUT, 'coach-kind-coverage-scan.json');
+ const fullScan = existsSync(FULL_SCAN_PATH)
+  ? JSON.parse(readFileSync(FULL_SCAN_PATH, 'utf8')) : null;
+ const fullScanKinds = fullScan?.scan?.kinds ?? null;
+ //: 已知的矩阵覆盖缺口：全量说能显示、但这一轮 12 个局面的预算里没有为它定位窗口。
+ const DISCLOSED_COVERAGE_GAPS = {
+  'foe-low-hp': '全量扫描（2640 局 / 34021 个窗口）显示它**能**显示（6 次；'
+   + 'first_shown 在第 7 回合、我方血量比 0.483、对面 5.3% 血、micro_hint），'
+   + '出现率约 0.018%。抽样扫描（110 局）里它是「命中 4 / 显示 0」，'
+   + '**抽样本身证明不了「不可达」**。这一轮矩阵上限 12 格、已经 8 种 kind，'
+   + '没有为它定位窗口；定位办法见 docs/roco/BROWSER-POSITION-MATRIX.md §5.3。',
+ };
+
  // ── 汇总：每条判据的实际数值都写进产物 ──────────────────────────────────────
  const spoken = passA.filter((r) => r.spoken);
  const kindCounts = new Map();
@@ -809,8 +829,17 @@ async function main(){
  const missedReachable = Object.entries(scanKinds)
   .filter(([kind, e]) => e.shown > 0 && !observedSet.has(kind))
   .map(([kind, e]) => ({kind, shown: e.shown}));
+ const fullScanReachable = fullScanKinds
+  ? Object.entries(fullScanKinds)
+    .filter(([kind, e]) => e.shown > 0 && !observedSet.has(kind))
+    .map(([kind, e]) => ({kind, hit: e.hit, shown: e.shown,
+      disclosed: typeof DISCLOSED_COVERAGE_GAPS[kind] === 'string',
+      reason: DISCLOSED_COVERAGE_GAPS[kind] ?? null}))
+  : [];
+ const undisclosedReachable = fullScanReachable.filter((x) => !x.disclosed);
  const coverageBranch = kinds.length >= 8 ? 'count>=8' : 'honest-shortfall';
  const coverageOk = missedReachable.length === 0
+  && undisclosedReachable.length === 0
   && (kinds.length >= 8
    || (ledger.length === COACH_ADVICE_KINDS.length
     && gapEntries.every((g) => typeof g.reason === 'string' && g.reason.length >= 40)
@@ -835,6 +864,18 @@ async function main(){
   full_scan: 'node scripts/roco/coach-kind-coverage-scan.mjs'
    + '（全量 2640 局，产物 reports/roco/demo-acceptance/coach-kind-coverage-scan.json）',
   kinds: scanKindsPublic,
+  // 全量报告在场就一起记下来：抽样说不了的话，由它来说。
+  full_scan_report: fullScan ? {
+   present: true, file: 'reports/roco/demo-acceptance/coach-kind-coverage-scan.json',
+   schema: fullScan.schema ?? null, command: fullScan.command ?? null,
+   sample: fullScan.sample ?? null,
+   battles_scanned: fullScan.scan?.battles_scanned ?? null,
+   steps_scanned: fullScan.scan?.steps_scanned ?? null,
+   kinds: Object.fromEntries(Object.entries(fullScanKinds ?? {}).map(([kind, e]) => [kind, {
+     hit: e.hit, shown: e.shown, shown_battle_phase: e.shown_battle_phase,
+     silent_at_low_hp: e.silent_at_low_hp, silent_at_full_hp: e.silent_at_full_hp}])),
+  } : {present: false, file: 'reports/roco/demo-acceptance/coach-kind-coverage-scan.json'},
+  kinds_reachable_only_in_full_scan: fullScanReachable,
  };
 
  const matrixSummary = {
@@ -853,6 +894,8 @@ async function main(){
   kind_coverage_branch: coverageBranch,
   kinds_unreachable: gapEntries,
   kinds_reachable_but_missing_from_matrix: missedReachable,
+  kinds_reachable_only_in_full_scan: fullScanReachable,
+  undisclosed_coverage_gaps: undisclosedReachable.map((x) => x.kind),
   distinct_shapes: shapeCounts.size,
   shape_counts: Object.fromEntries([...shapeCounts.entries()].sort((a, b) => b[1] - a[1])),
   max_shape_repeat: maxShapeRepeat,
@@ -924,7 +967,13 @@ async function main(){
      + `引擎侧扫描 ${coverage.battles_scanned} 局 / ${coverage.steps_scanned} 个窗口认定不可达：`
      + `${gapEntries.map((g) => `${g.kind}(命中${g.hit}/开口${g.shown}/低血档${g.silent_at_low_hp})`).join('、')}；`
      + `台账 ${ledger.length}/${COACH_ADVICE_KINDS.length} 列全；`
-     + `扫描说可达却没进矩阵的 ${missedReachable.length} 个`);
+     + `抽样扫描说可达却没进矩阵的 ${missedReachable.length} 个；`
+     + `全量扫描说可达却没进矩阵的 ${fullScanReachable.length} 个`
+     + `（未披露 ${undisclosedReachable.length} 个：`
+     + `${undisclosedReachable.map((x) => x.kind).join('/') || '无'}）`
+     + (fullScanReachable.length
+       ? `；已披露的缺口 ${fullScanReachable.map((x) => `${x.kind}(全量显示${x.shown}次)`).join('、')}`
+       : ''));
  check(`局面矩阵：没有任何形状重复超过一次（实际最大重复 ${maxShapeRepeat} 次，上限 2）`,
   shapeRepeatOverLimit.length === 0 && spoken.length > 0,
   `形状 ${shapeCounts.size} 种 / 最大重复 ${maxShapeRepeat} 次；`

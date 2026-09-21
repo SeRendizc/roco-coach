@@ -19,7 +19,7 @@
 
 - **不声称 12 个局面代表了所有可能的局面。** 它们是 12 个**写死的**真实窗口，
   证明的是「这 12 个局面各自得到对路的建议、而且互相不是同一句式」。
-  覆盖面靠 §5 的引擎侧扫描单独说明。
+  覆盖面靠 §5 的两份引擎侧扫描单独说明；其中 `foe-low-hp` 是**已知的、已披露的**覆盖缺口。
 - **不声称气泡一定能帮玩家赢。** 一条都没有跑过真人对照；文案质量是「说得具体、
   可核对、不编造」，不是「有效」。
 - **不声称未核验机制可用。** 伤害一律带「估」（引擎自己标着 `formula_verified: false`），
@@ -39,20 +39,21 @@
 | --- | --- |
 | 逐局面矩阵（12 条 + 汇总 + 引擎侧扫描） | `reports/roco/demo-acceptance/coach-positions-browser.json` |
 | 每个局面一张截图 | `reports/roco/demo-acceptance/09-position-01-ko-now.png` … `09-position-12-silent.png`（`.gitignore` 第 45 行 `reports/roco/demo-acceptance/*.png` 一直把截图挡在 git 外，这是仓库原有约定，没有改；它们在磁盘上，报告里按名字引用） |
-| 同一次运行的 57 条判据 | `reports/roco/demo-acceptance/demo-acceptance.json` |
+| 同一次运行的全部判据（当前 70 条，其中矩阵 12 条） | `reports/roco/demo-acceptance/demo-acceptance.json` |
 | 只读产物的守卫 | `tests/evals/roco/browser-position-matrix.test.js`（在 `package.json` 的 `test:unit` 显式列表里） |
-| 更全的 kind 覆盖扫描（可选） | `npm run roco:kind-coverage` → `reports/roco/demo-acceptance/coach-kind-coverage-scan.json` |
+| 全量 kind 覆盖扫描（2640 局，约 33 分钟） | `npm run roco:kind-coverage` → `reports/roco/demo-acceptance/coach-kind-coverage-scan.json`（产物里的 `coverage_scan.full_scan_report` 会把它一起记下来） |
 
 跑法：
 
 ```bash
 npm run roco:demo-acceptance          # 真 Python 规则服务 + 真无头 Chrome；本机实测 93 秒
 node --test tests/evals/roco/browser-position-matrix.test.js   # 只读产物的守卫（<1 秒）
-npm run roco:kind-coverage            # 全量 2640 局覆盖扫描，约 30 分钟（可选）
+npm run roco:kind-coverage            # 全量 2640 局覆盖扫描，约 33 分钟（独立命令，不阻塞上面两条）
 ```
 
-`npm run roco:demo-acceptance` 会：跑完原有的 45 条产品判据 → 跑 12 个局面的矩阵（**两遍**，
-共 24 局）→ 跑 110 局的 kind 覆盖扫描 → 写产物 → 用 12 条新判据把矩阵量一遍。
+`npm run roco:demo-acceptance` 会：跑完页面/产品判据（当前 58 条）→ 跑 12 个局面的矩阵
+（**两遍**，共 24 局）→ 跑 110 局的抽样 kind 覆盖扫描 → 写产物 → 用 12 条新判据把矩阵量一遍；
+如果 `coach-kind-coverage-scan.json` 在，还会把全量扫描的数字一并记进产物。
 本机实测这段总耗时 **93 秒**（另有约 5 秒的 Chrome 启动）。
 本文件里所有数字都来自上面这几份产物；没有一处是估的。
 
@@ -172,10 +173,19 @@ energy-short  foe-energy-high  ko-now  replace-required
 speed-decides  switch-low-hp  type-favoured  type-resisted
 ```
 
-矩阵本身证明不了「剩下 3 种为什么没进来」，所以 `demo-acceptance.mjs` 会在
-**页面正在用的那个服务**上再跑一遍引擎侧覆盖扫描：按固定顺序枚举我方三人排列
-（1320 个），每 24 个取一个，每个再配「镜像对手」与「倒序对手」= 110 局，
-逐个窗口记 `kind / action / 显示与否 / 那一刻我方血量比`。本次结果：
+矩阵本身证明不了「剩下 3 种为什么没进来」，所以 `demo-acceptance.mjs` 会跑**两份**
+引擎侧扫描，两份都走页面正在用的那个服务、同一条
+（`/api/roco/battle/new → advance → plan → rocoIntervention`）、**都不用随机**：
+
+- **抽样扫描（每次运行都跑，约 1 分钟）**：按固定顺序枚举我方三人排列（1320 个），
+  每 24 个取一个，每个再配「镜像对手」与「倒序对手」= **110 局**。
+  它进判据：任何「抽样说这个 kind 的气泡真的显示过、而矩阵里却没有」的 kind，
+  直接变红（第一版矩阵只有 6 种 kind，就是被它逼出第 5、6 条局面的）。
+- **全量扫描（`npm run roco:kind-coverage`，约 33 分钟，产物另存）**：
+  `stride 1` = **2640 局 / 34021 个窗口**。它不进「≥8 种 kind」那条判据，
+  但**进披露判据**：它说「真的显示过」而矩阵里没有的 kind，必须被披露（见 §5.3、§5.4）。
+
+抽样扫描的表（本次运行，`coverage_scan.kinds`）：
 
 | kind | 命中 | 气泡真的显示 | 低血档沉默 | 满血档沉默 | 结论 |
 | --- | --- | --- | --- | --- | --- |
@@ -187,32 +197,63 @@ speed-decides  switch-low-hp  type-favoured  type-resisted
 | `type-favoured` | 27 | **2** | 0 | 25 | 可达（矩阵 #5） |
 | `replace-required` | 68 | 68 | 0 | 0 | 可达（矩阵 #7） |
 | `foe-energy-high` | 9 | **1** | 0 | 8 | 可达（矩阵 #6） |
-| `foe-low-hp` | 4 | 0 | **0** | 4 | **不可达**（见下） |
-| `ko-maybe` | 0 | 0 | 0 | 0 | **结构上不可达** |
-| `foe-status-ticking` | 0 | 0 | 0 | 0 | **没有入口** |
+| `foe-low-hp` | 4 | 0 | 0 | 4 | 抽样里没显示过（**不等于不可达**，见 §5.3） |
+| `ko-maybe` | 0 | 0 | 0 | 0 | 结构上不可达（§5.1） |
+| `foe-status-ticking` | 0 | 0 | 0 | 0 | 没有入口（§5.2） |
+
+全量扫描的表（`reports/roco/demo-acceptance/coach-kind-coverage-scan.json`，
+`battles_scanned = 2640`、`steps_scanned = 34021`）：
+
+| kind | 命中 | 气泡真的显示 | 其中 battle 阶段 | 低血档沉默 | 满血档沉默 | 结论 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `replace-required` | 1732 | 1732 | 0 | 0 | 0 | 可达（矩阵 #7） |
+| `ko-now` | 4192 | 2684 | 2684 | 0 | 1508 | 可达（矩阵 #1/#2） |
+| `ko-maybe` | 0 | 0 | 0 | 0 | 0 | **不可达**（§5.1） |
+| `foe-low-hp` | 67 | **6** | 6 | 0 | 61 | **可达但极稀有**（§5.3） |
+| `switch-low-hp` | 6151 | 6151 | 5415 | 0 | 0 | 可达（矩阵 #8/#9） |
+| `energy-short` | 4967 | 1433 | 1433 | 0 | 3534 | 可达（矩阵 #3） |
+| `foe-status-ticking` | 0 | 0 | 0 | 0 | 0 | **不可达**（§5.2） |
+| `type-resisted` | 2706 | 842 | 842 | 0 | 1864 | 可达（矩阵 #4） |
+| `type-favoured` | 378 | 63 | 63 | 0 | 315 | 可达（矩阵 #5） |
+| `speed-decides` | 7307 | 2369 | 1663 | 0 | 4938 | 可达（矩阵 #10/#11） |
+| `foe-energy-high` | 286 | 40 | 40 | 0 | 246 | 可达（矩阵 #6） |
 
 ### 5.1 `ko-maybe`：结构上不可达
 
 `damage_preview.samples[]` 里**每一个技能只有一个数**（三个分析种子对同一招给出同一个
 `damage`），而 `ko-maybe` 要的正是「下限 < 血 ≤ 上限」这个形状——它不存在。
 `damage_preview.min/max` 只是「最弱那招 / 最狠那招」两个**不同**技能的包络。
-110 局 / 1413 个窗口里命中 0 次。
+抽样 110 局、全量 2640 局里都命中 **0** 次。
 
 ### 5.2 `foe-status-ticking`：没有入口
 
 12 只手游精灵的**规范配招**里，没有任何一招在引擎 `effect_support` 支持范围内会施加
 中毒/灼烧/寄生（不支持的那些 fail closed），而 `POST /api/roco/battle/new` 不接受
-`loadouts`——别的地方也挂不上去。110 局 / 1413 个窗口里命中 0 次。
+`loadouts`——别的地方也挂不上去。抽样 110 局、全量 2640 局里都命中 **0** 次。
 
-### 5.3 `foe-low-hp`：检测器成立过，但被门控压住
+### 5.3 `foe-low-hp`：**可达，但这一轮矩阵没有覆盖它（已披露的缺口）**
 
-命中 4 次，**全部**落在我方血量比 > 0.6 的窗口（低血档命中 0 次）。
-`interventionScore` 的 `value = 3 × risk`，血量比 > 0.6 → `risk = 0.2` → `value = 0.6`
-< `floor = 1.2` → 判 `silent`。压住它的是**门控**，不是检测器。
-它要开口还得同时满足「对面 ≤10% 血」与「我方合法招没有一招估算够得到那条血线」
-（否则先被 `ko-now` 接走），这两个条件在真实推进里没有和我方半血同时出现过。
+- 全量扫描：命中 67 次，**气泡真的显示 6 次**。`first_shown` 写在第 7 回合、
+  `phase = battle`、`action = micro_hint`、我方血量比 0.483、对面 5.3% 血，
+  文案形状「对面「◆」只剩 # 血：这一轮先把它补掉，别让它换人喘口气」。
+  出现率约 **6 / 34021 ≈ 0.018%**。
+- 抽样扫描（110 局）：命中 4 次、显示 **0** 次，**全部**落在我方血量比 > 0.6 的窗口
+  （低血档 0 次）。那 4 次被门控压住的原因是
+  `value = 3 × risk = 0.6 < floor = 1.2`——压住它们的是**门控**，不是检测器。
+- 所以：**抽样扫描证明不了「不可达」**，只能说「小样本里逮不到」。
+  这一轮矩阵上限 12 格、已经 8 种 kind，没有为它定位窗口，
+  于是它被登记在产物的 `summary.kinds_reachable_only_in_full_scan` 里，
+  带 `disclosed: true` 与一条披露理由。判据要求：全量说可达而矩阵里没有的 kind
+  **必须被披露**，披露不出理由就变红。
+- 想把它补进矩阵：`npm run roco:kind-coverage`（全量）会记录
+  `kinds['foe-low-hp'].shown_windows[]`（**阵容、seed、第几手、血量比、形状**），
+  按那条窗口写进 `POSITION_MATRIX` 再跑一遍即可。
+  ⚠️ 措辞精确一点：**盘上那份 `coach-kind-coverage-scan.json` 是旧版扫描器写的**，
+  它每个 kind 只留了 `first_shown`（第 7 回合那一条就是从这里读的），**没有** `shown_windows[]`；
+  当前代码已经会记 `shown_windows[]`，重跑一次就会出现。产物 `coverage_scan.kinds[*].shown_windows`
+  是本次抽样扫描记的（12 个局面里那 8 种 kind 各 0—4 条）。
 
-### 5.4 这一节的两种走法都不是「放宽判据」
+### 5.4 这一节的走法都不是「放宽判据」
 
 矩阵那条判据是：
 
@@ -221,11 +262,16 @@ speed-decides  switch-low-hp  type-favoured  type-resisted
 或：把 11 个 kind 列全，每个缺口给出实测命中数 + 机制原因，且观测数 ≥ 6
 ```
 
-另一支（`honest-shortfall`）在代码里保留着，也要能把上面三张表填出来才会判过。
-另外还有一条**反向**判据：引擎侧扫描说「这个 kind 的气泡真的显示过」而矩阵里却没有
-对应的局面 → `summary.kinds_reachable_but_missing_from_matrix` 非空 → 直接变红。
-第 5 条与第 6 条局面就是被这条判据逼出来的：第一版矩阵只有 6 种 kind，扫描报出
-`type-favoured` 显示过 2 次、`foe-energy-high` 显示过 1 次，判据红了，才把它们加进来。
+另一支（`honest-shortfall`）在代码里保留着，也要能把上面两张表填出来才会判过。
+另外有两条**反向**判据：
+
+1. 抽样扫描说「这个 kind 的气泡真的显示过」而矩阵里却没有 → 直接变红。
+   第 5、6 条局面就是被它逼出来的：第一版矩阵只有 6 种 kind，
+   它报出 `type-favoured` 显示过 2 次、`foe-energy-high` 显示过 1 次。
+2. 全量扫描（产物在时）说「这个 kind 显示过」而矩阵里却没有 →
+   必须出现在 `summary.kinds_reachable_only_in_full_scan` 里且 `disclosed: true`
+   并给出 ≥40 字的理由，否则 `undisclosed_coverage_gaps` 非空 → 直接变红。
+   `foe-low-hp` 走的就是这一支。
 
 ---
 
@@ -292,7 +338,7 @@ speed-decides  switch-low-hp  type-favoured  type-resisted
 
 也就是：**两条形状相同的记录被数出来了**（形状种数 9 → 8），判据不是空的。
 还原：产物 `sha256` 改前改后都是
-`fe08b4cfeb1493783314f05e45e20ca5c038c8d205c919f660a0ea2dd97493af`（逐字节相同），
+`3e4320fcf80099c609c516f89ba03e397157e240940a2840fa63f998515fa4d3`（逐字节相同），
 守卫恢复 `pass 10 / fail 0`。
 
 ### 7.3 确定性不是「说说的」
@@ -304,9 +350,15 @@ digest_pass_a = digest_pass_b = e19f02c1f3221e429ff9573f7e20f7edccdecb22d3e8abca
 byte_identical = true
 ```
 
-更强的版本：产物文件刻意**不含任何时间戳与随机端口**，所以连续**三次独立运行**
-写出来的整份 `coach-positions-browser.json` 也是逐字节相同的
-（`sha256 = fe08b4cfeb1493783314f05e45e20ca5c038c8d205c919f660a0ea2dd97493af`）。
+更强的版本：产物文件刻意**不含任何时间戳与随机端口**，所以**独立运行的整份
+`coach-positions-browser.json` 也是逐字节相同的**——
+
+- 当前代码（含全量扫描披露字段）连续两次独立运行：
+  `sha256 = 3e4320fcf80099c609c516f89ba03e397157e240940a2840fa63f998515fa4d3`；
+- 加入披露字段之前连续三次独立运行：
+  `sha256 = fe08b4cfeb1493783314f05e45e20ca5c038c8d205c919f660a0ea2dd97493af`。
+
+（换了代码内容，产物摘要当然会变；这里说的是**同一版代码重复跑**的结果。）
 易变的东西（`started_at`、URL）单独写在 `demo-acceptance-run.json` 里，那份不入库。
 
 `scripts/roco/demo-acceptance.mjs` 里 `POSITION_MATRIX` 那一段**没有任何 `Math.random()`**
