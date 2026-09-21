@@ -32,7 +32,7 @@
 | `energy.regen.per_turn` | `1` | `ENGINE_HYPOTHESIS` | `EV-ENERGY-ENDTURN-REGEN` | refutes（台账判「被多源反驳」） |
 | `energy.initial` | `2` | `CROSS_SOURCE_SUPPORTED` | `EV-ENERGY-INITIAL` | refutes（台账说「只当占位值，需 MC-E04」） |
 | `energy.charge` | `null` | `ENGINE_HYPOTHESIS` | —（无引用） | 引擎没有「聚能」这个动作；`null` = 不适用，不是「聚能 = 0」 |
-| `turn_order.end_turn.order` | `["status_tick","regen"]` | `ENGINE_HYPOTHESIS` | —（无引用） | 台账没登记组内顺序，所以**不借**别的条目凑引用 |
+| `turn_order.end_turn.order` | `["status_tick","regen"]` | `ENGINE_HYPOTHESIS` | —（无引用） | 台账没登记组内顺序，所以**不借**别的条目凑引用（RC-103 起还多了 `action_order` / `speed_tie` / `unknown_stages_allowed`，见 `docs/roco/TURN-ORDER.md`） |
 | `battle_mode.id` | `demo-training-3v3` | — | — | 迁移夹具，**不得**作为标准 PVP 的实现依据 |
 
 ### `mobile_s4_candidate_v2`（候选，`status: CANDIDATE_NOT_FOR_DEFAULT`）
@@ -43,8 +43,8 @@
 | `energy.regen.per_turn` | `0` | `ENGINE_HYPOTHESIS` | `EV-ENERGY-ENDTURN-REGEN` | supports | `CANDIDATE_HYPOTHESIS`（MC-E03 未录） |
 | `energy.initial` | **`null`** | `UNKNOWN` | —（无引用） | — | **unknown**：不填一个看起来合理的数 |
 | `energy.charge` | `5` | `CROSS_SOURCE_SUPPORTED` | `EV-ENERGY-CHARGE` | supports | `CANDIDATE_HYPOTHESIS`（MC-E02 未录） |
-| `turn_order.end_turn.known_order` | `["respond","switch","priority","speed"]` | `ENGINE_HYPOTHESIS` | `EV-TURN-ORDER-STRICT` | supports | 社区口径，**不是**严格总序 |
-| `turn_order.end_turn.speed_tie` | **`null`** | `UNKNOWN` | —（无引用） | — | 同速平手判据 UNKNOWN |
+| `turn_order.action_order` | `["respond","switch","priority","speed"]` | `ENGINE_HYPOTHESIS` | `EV-TURN-ORDER-STRICT` | supports | 社区口径，**不是**严格总序（RC-103 从 `end_turn.known_order` 改名并提到 `turn_order` 下） |
+| `turn_order.speed_tie` | **`null`** | `UNKNOWN` | —（无引用） | — | 同速平手判据 UNKNOWN（引擎会抛错，不用随机数假装知道规则，见 `docs/roco/TURN-ORDER.md`） |
 | `battle_mode.id` | `pvp-standard-six-pet` | — | — | — | 登记表里是 `CANDIDATE` |
 
 关键差别（`reports/roco/flagship-upgrade/rc-101-rule-config.json` 的 `field_diff` 就是它）：
@@ -81,7 +81,7 @@ UNKNOWN → 不得施工
 | 字段 | 为什么 unknown | 待录 case |
 | --- | --- | --- |
 | `energy.initial`（candidate） | 10 号文档 §7：「首次入场具体能量：需实机/更强一手证据」 | `MC-E04` |
-| `turn_order.end_turn.speed_tie`（candidate） | 10 号文档 §8：「speed tie = UNKNOWN」 | `MC-E05` |
+| `turn_order.speed_tie`（candidate） | 10 号文档 §8：「speed tie = UNKNOWN」 | `MC-E05` |
 | `energy.charge.breaks_cap`（candidate，未建模） | 聚能是否可突破上限、无合法技能时是否自动聚能——台账明说未定 | `MC-E02` |
 | `turn_order.end_turn.order` | 台账没有登记组内顺序；候选沿用 legacy 的占位只是「有界」 | `MC-E03` |
 

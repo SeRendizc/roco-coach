@@ -100,7 +100,11 @@ test('RC-102 判决：空记录表 → 候选配置每个字段都 NOT_PROMOTABL
   assert.equal(report.summary.REFUTED, 0, '没有记录就没有反证');
   assert.equal(report.summary.NOT_PROMOTABLE, report.fields.length,
     `所有字段都必须 NOT_PROMOTABLE，实际 ${report.summary.NOT_PROMOTABLE}/${report.fields.length}`);
-  assert.equal(report.summary.fields, 9, `候选配置的带 confidence 叶子数是 9，实际 ${report.summary.fields}`);
+  // RC-103 起候选的 `turn_order` 从 3 条叶子变成 4 条
+  // （`end_turn.known_order` → `action_order` 并提到 `turn_order` 下、`end_turn.speed_tie` →
+  //  `speed_tie`，另加 `end_turn.unknown_stages_allowed`）—— 这里数的仍然是**恰好**多少条，
+  // 不是「至少」：叶子数一变就必须有人来解释，不许静默漂移。
+  assert.equal(report.summary.fields, 10, `候选配置的带 confidence 叶子数是 10，实际 ${report.summary.fields}`);
   // 理由必须点到具体的 MC-E 编号（或明确写「没有对应的 microcase」），不能只说「证据不足」
   for (const field of report.fields) {
     const text = field.reasons.map((reason) => reason.text).join(' ');
@@ -111,7 +115,7 @@ test('RC-102 判决：空记录表 → 候选配置每个字段都 NOT_PROMOTABL
   assert.match(fieldOf(report, 'energy.charge').reasons[0].text, /MC-E02/);
   assert.match(fieldOf(report, 'energy.regen.per_turn').reasons[0].text, /MC-E03/);
   assert.match(fieldOf(report, 'energy.initial').reasons[0].text, /MC-E04/);
-  assert.match(fieldOf(report, 'turn_order.end_turn.known_order').reasons[0].text, /MC-E05/);
+  assert.match(fieldOf(report, 'turn_order.action_order').reasons[0].text, /MC-E05/);
   // 缺哪些录制也必须是机器可读的一份清单
   assert.deepEqual(report.missing_recordings.map((row) => row.microcase_id), ['MC-E01', 'MC-E02', 'MC-E03', 'MC-E04', 'MC-E05']);
   for (const row of report.missing_recordings) {
@@ -270,7 +274,7 @@ test('RC-102 边界：报告只写 rule-promotion.json，且 data/ 下的只读�
       ledgerPath: abs(LEDGER_PATH),
       recordingsPath: tamperedPath,
     });
-    assert.equal(report.summary.fields, 9);
+    assert.equal(report.summary.fields, 10);
     assert.equal(fieldOf(report, 'energy.max').promotion_status, 'NOT_PROMOTABLE');
     console.log(`    实际（/tmp 里的坏副本）登记表问题原文：`
       + report.input_issues.map((issue) => `[${issue.rule}] ${issue.microcase_id} — ${issue.detail}`).join(' | '));

@@ -58,6 +58,13 @@ CONFIDENCE_LEVELS = (
 #: 台账条目对某个配置值是「支持」还是「反驳」。
 EVIDENCE_ROLES = ("supports", "refutes")
 
+#: `turn_order.speed_tie` 允许的取值（RC-103）。
+#:
+#: `"random_seeded"` = **如实登记的工程权宜**：引擎用 seed 驱动的确定性随机来裁决同速，
+#: 这不是游戏规则，MC-E05 之前也没有任何证据支持它。`None` = UNKNOWN（引擎会 fail closed，
+#: 绝不回落到随机数）。任何别的字符串都是**非法值**，加载期就该炸。
+SPEED_TIE_POLICIES = ("random_seeded",)
+
 #: 每个配置**必须**存在的字段路径（缺任何一个就 fail closed）。
 REQUIRED_PATHS = (
     "energy.max",
@@ -65,7 +72,10 @@ REQUIRED_PATHS = (
     "energy.regen.applies_to",
     "energy.initial",
     "energy.charge",
+    "turn_order.action_order",
+    "turn_order.speed_tie",
     "turn_order.end_turn.order",
+    "turn_order.end_turn.unknown_stages_allowed",
     "battle_mode.id",
     "battle_mode.team_size",
     "battle_mode.active_count",
@@ -316,6 +326,50 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
         if inner is not None and (not isinstance(inner, int) or isinstance(inner, bool) or inner < 0):
             bad(f"energy.initial 必须是 >= 0 的整数或 null（未知），实际 {inner!r}")
 
+    # ── turn_order（RC-103）：顺序登记表只判**形状**与**合法取值** ──────────
+    #
+    # 「这个阶段引擎实不实现得了」是引擎侧的事（`env.py` 遇到未声明/未实现阶段会抛
+    # `UnsupportedEffect`）—— 两处判据各管一段，谁也不替谁兜底：这里管「配置是不是
+    # 一份合法可读的登记表」，引擎管「我能不能按它跑」。
+    for path in ("turn_order.action_order", "turn_order.end_turn.order"):
+        node = _dig(config, path)
+        if node is _MISSING:
+            continue                      # 缺字段已经由 REQUIRED_PATHS 报过，别报两遍
+        if not isinstance(node, dict) or "value" not in node:
+            bad(f"{path} 不是带 value 的字段记录")
+            continue
+        seq = node["value"]
+        if not isinstance(seq, list) or not seq:
+            bad(f"{path} 必须是非空数组（顺序本身就是它的内容），实际 {seq!r}")
+            continue
+        if any(not isinstance(x, str) or not x for x in seq):
+            bad(f"{path} 的元素必须是非空字符串，实际 {seq!r}")
+            continue
+        if len(set(seq)) != len(seq):
+            bad(f"{path} 里有重复项（同一个阶段不许声明两次）：{seq!r}")
+
+    tie_node = _dig(config, "turn_order.speed_tie")
+    if tie_node is not _MISSING:
+        if not isinstance(tie_node, dict) or "value" not in tie_node:
+            bad("turn_order.speed_tie 不是带 value 的字段记录")
+        else:
+            tie = tie_node["value"]
+            if tie not in (None, "unknown") and tie not in SPEED_TIE_POLICIES:
+                bad(f"turn_order.speed_tie 只允许 {SPEED_TIE_POLICIES} 或 null（UNKNOWN），实际 {tie!r}"
+                    "—— 平手裁决没有任何实机证据（MC-E05），不许填一个「看起来合理」的策略")
+
+    stages_node = _dig(config, "turn_order.end_turn.unknown_stages_allowed")
+    if stages_node is not _MISSING:
+        if not isinstance(stages_node, dict) or "value" not in stages_node:
+            bad("turn_order.end_turn.unknown_stages_allowed 不是带 value 的字段记录")
+        else:
+            allowed = stages_node["value"]
+            if not isinstance(allowed, bool):
+                bad(f"turn_order.end_turn.unknown_stages_allowed 必须是布尔，实际 {allowed!r}")
+            elif allowed:
+                bad("turn_order.end_turn.unknown_stages_allowed=true 不被本引擎支持："
+                    "那等于允许回合末存在未声明阶段，与「不知道就先抛」直接冲突")
+
     for item in config.get("unknowns", []) or []:
         if not isinstance(item, dict) or not item.get("path") or not item.get("reason"):
             bad(f"unknowns 条目必须有 path 与 reason，实际 {item!r}")
@@ -342,7 +396,16 @@ class RuleConfig:
     #: `None` = **未知**（不是 0）。要用的调用方必须显式处理。
     energy_initial: Optional[int]
     energy_charge: Optional[int]
+    #: 行动排序的**声明维度**（RC-103）。legacy 是引擎现状（respond/priority/speed）；
+    #: candidate 声明的是社区口径的总序（respond/switch/priority/speed），引擎只实现了其中一部分。
+    action_order: Tuple[str, ...]
+    #: 同速平手策略（RC-103）。`None` = UNKNOWN：引擎必须抛错，不许用随机数假装知道规则。
+    speed_tie: Optional[str]
+    #: 平手策略卡在哪条 microcase 上（错误信息里要点名，救命用）。
+    speed_tie_microcase_id: Optional[str]
     end_turn_order: Tuple[str, ...]
+    #: 配置是否允许回合末存在**未声明**的阶段。`True` 会被加载期拒掉；引擎再兜一层。
+    end_turn_unknown_stages_allowed: bool
     path: str
     raw: Dict[str, Any] = dc_field(repr=False, default_factory=dict)
 
@@ -376,6 +439,20 @@ class RuleConfig:
             )
         return self.energy_initial
 
+    def require_speed_tie(self) -> str:
+        """拿同速平手策略；**UNKNOWN 就抛错**，绝不回落到随机数。
+
+        与 `require_energy_initial()` 同一条纪律：一个「看起来合理」的策略比一个错误更坏 ——
+        它会让「用随机数决定的先后」看起来像一条已被验证的规则（10 号文档 §8 明确 speed tie = UNKNOWN）。
+        """
+        if self.speed_tie is None or self.speed_tie == "unknown":
+            raise RuleConfigError(
+                f"规则配置 {self.ruleset_config_id} 的 turn_order.speed_tie 是 UNKNOWN"
+                f"（待录 microcase {self.speed_tie_microcase_id or '未登记'}）——"
+                "同速平手判据没有实机证据，引擎不许用随机数假装知道规则"
+            )
+        return self.speed_tie
+
     def fingerprint(self) -> str:
         """配置内容的 sha256（供报告与 replay 绑定用）。"""
         payload = json.dumps(self.raw, ensure_ascii=False, sort_keys=True).encode("utf-8")
@@ -407,6 +484,37 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
     if not isinstance(end_turn, list) or not end_turn:
         raise RuleConfigError(f"规则配置 {ruleset_config_id} 的 turn_order.end_turn.order 必须是非空数组")
 
+    action_order = _leaf_value(config, "turn_order.action_order")
+    if not isinstance(action_order, list) or not action_order:
+        raise RuleConfigError(f"规则配置 {ruleset_config_id} 的 turn_order.action_order 必须是非空数组")
+
+    speed_tie = _leaf_value(config, "turn_order.speed_tie")
+    if speed_tie not in (None, "unknown") and speed_tie not in SPEED_TIE_POLICIES:
+        raise RuleConfigError(
+            f"规则配置 {ruleset_config_id} 的 turn_order.speed_tie={speed_tie!r} 不是已知策略"
+            f"（允许 {SPEED_TIE_POLICIES} 或 null）—— 不许用随机数假装知道规则"
+        )
+    tie_microcase = None
+    tie_leaf = _dig(config, "turn_order.speed_tie")
+    if isinstance(tie_leaf, dict):
+        tie_microcase = tie_leaf.get("microcase_id") or None
+    if not tie_microcase:
+        tie_microcase = next(
+            (u.get("microcase_id") for u in config.get("unknowns", []) or []
+             if u.get("path") == "turn_order.speed_tie"), None)
+
+    allowed_unknown_stages = _leaf_value(config, "turn_order.end_turn.unknown_stages_allowed")
+    if not isinstance(allowed_unknown_stages, bool):
+        raise RuleConfigError(
+            f"规则配置 {ruleset_config_id} 的 turn_order.end_turn.unknown_stages_allowed "
+            f"必须是布尔，实际 {allowed_unknown_stages!r}"
+        )
+    if allowed_unknown_stages:
+        raise RuleConfigError(
+            f"规则配置 {ruleset_config_id} 的 turn_order.end_turn.unknown_stages_allowed=true "
+            "不被本引擎支持：那等于允许回合末存在未声明阶段（RC-103 fail closed）"
+        )
+
     return RuleConfig(
         ruleset_config_id=config["ruleset_config_id"],
         is_default=bool(config["is_default"]),
@@ -420,7 +528,11 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         energy_regen_per_turn=_leaf_value(config, "energy.regen.per_turn"),
         energy_initial=_leaf_value(config, "energy.initial"),
         energy_charge=_leaf_value(config, "energy.charge"),
+        action_order=tuple(str(x) for x in action_order),
+        speed_tie=None if speed_tie == "unknown" else speed_tie,
+        speed_tie_microcase_id=tie_microcase,
         end_turn_order=tuple(str(x) for x in end_turn),
+        end_turn_unknown_stages_allowed=allowed_unknown_stages,
         path=os.path.relpath(path, _repo_root()),
         raw=config,
     )
@@ -490,7 +602,11 @@ def summarize(config: RuleConfig) -> Dict[str, Any]:
         "energy_regen_per_turn": config.energy_regen_per_turn,
         "energy_initial": config.energy_initial,
         "energy_charge": config.energy_charge,
+        "action_order": list(config.action_order),
+        "speed_tie": config.speed_tie,
+        "speed_tie_microcase_id": config.speed_tie_microcase_id,
         "end_turn_order": list(config.end_turn_order),
+        "end_turn_unknown_stages_allowed": config.end_turn_unknown_stages_allowed,
         "ledger_sha256": config.derived_from_ledger_sha256,
         "fingerprint": config.fingerprint(),
         "unknowns": config.unknowns,
@@ -511,6 +627,11 @@ def describe_fields(config: RuleConfig) -> List[Dict[str, Any]]:
             "evidence_id": leaf.get("evidence_id"),
             "evidence_role": leaf.get("evidence_role"),
             "reason": leaf.get("reason"),
+            # RC-103：待录 microcase 与「值本身还没被验证」这层登记也要进报告 ——
+            # 只有值没有 case 的话，「缺哪一条证据」就只能靠人去翻配置。
+            "microcase_id": leaf.get("microcase_id"),
+            "microcase_status": leaf.get("microcase_status"),
+            "value_status": leaf.get("value_status"),
         })
     return rows
 
@@ -535,6 +656,54 @@ def selftest() -> int:
          f"max={candidate.energy_max} regen={candidate.energy_regen_per_turn}")
     push("candidate 的入场能量是 unknown（null）而不是一个数", candidate.energy_initial is None,
          repr(candidate.energy_initial))
+
+    # ── RC-103：turn_order 三件套 ─────────────────────────────────────────
+    push("legacy 的 action_order 如实等于引擎现状",
+         legacy.action_order == ("respond", "priority", "speed"), str(legacy.action_order))
+    push("legacy 的 speed_tie 是「如实登记的工程权宜」random_seeded",
+         legacy.speed_tie == "random_seeded", repr(legacy.speed_tie))
+    push("legacy 的回合末阶段顺序是 status_tick → regen",
+         legacy.end_turn_order == ("status_tick", "regen"), str(legacy.end_turn_order))
+    push("两份配置的 unknown_stages_allowed 都是 false（放行未知阶段 = 与 fail closed 冲突）",
+         legacy.end_turn_unknown_stages_allowed is False
+         and candidate.end_turn_unknown_stages_allowed is False,
+         f"legacy={legacy.end_turn_unknown_stages_allowed} candidate={candidate.end_turn_unknown_stages_allowed}")
+    push("candidate 的 speed_tie 是 UNKNOWN（null）而不是一个策略", candidate.speed_tie is None,
+         repr(candidate.speed_tie))
+    try:
+        candidate.require_speed_tie()
+        push("反证④：candidate 取平手策略必须抛错（UNKNOWN 不许回落到随机数）", False, "没有抛错")
+    except RuleConfigError as exc:
+        push("反证④：candidate 取平手策略必须抛错（UNKNOWN 不许回落到随机数）",
+             "speed_tie" in str(exc) and "MC-E05" in str(exc), str(exc)[:140])
+
+    # 反证⑤：非法平手策略（看起来很像那么回事的 "speed_first"）必须在加载期被判红
+    bad_tie = json.loads(json.dumps(legacy.raw))
+    bad_tie["turn_order"]["speed_tie"]["value"] = "speed_first"
+    problems5 = validate_config(bad_tie, _load_ledger())
+    push("反证⑤：speed_tie='speed_first' 这种自造策略必须被判红",
+         any("speed_tie" in p for p in problems5), str(problems5)[:160])
+
+    # 反证⑥：删掉 turn_order.action_order 必须被判红（缺字段不许静默跳过）
+    missing_action = json.loads(json.dumps(legacy.raw))
+    del missing_action["turn_order"]["action_order"]
+    problems6 = validate_config(missing_action, _load_ledger())
+    push("反证⑥：删掉 turn_order.action_order 必须被判红",
+         any("turn_order.action_order" in p for p in problems6), str(problems6)[:160])
+
+    # 反证⑦：未知阶段开关被打开必须被判红
+    allowed = json.loads(json.dumps(legacy.raw))
+    allowed["turn_order"]["end_turn"]["unknown_stages_allowed"]["value"] = True
+    problems7 = validate_config(allowed, _load_ledger())
+    push("反证⑦：unknown_stages_allowed=true 必须被判红",
+         any("unknown_stages_allowed" in p for p in problems7), str(problems7)[:160])
+
+    # 反证⑧：回合末阶段列表里出现重复项必须被判红（同一个阶段声明两次 = 双重结算）
+    dup = json.loads(json.dumps(legacy.raw))
+    dup["turn_order"]["end_turn"]["order"]["value"] = ["status_tick", "regen", "regen"]
+    problems8 = validate_config(dup, _load_ledger())
+    push("反证⑧：end_turn.order 里重复的阶段必须被判红",
+         any("重复" in p for p in problems8), str(problems8)[:160])
 
     # 反证①：未知配置 id 必须抛错
     try:

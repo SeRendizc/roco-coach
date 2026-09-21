@@ -77,6 +77,30 @@
     }
   },
   "turn_order": {
+    "action_order": {
+      "value": [
+        "respond",
+        "switch",
+        "priority",
+        "speed"
+      ],
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": "EV-TURN-ORDER-STRICT",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E05",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "社区实测常概括「应对 > 换宠 > 先手 > 速度」，但 10 号文档 §8 明确严格总排序本轮没有同等强度官方文字；EV-TURN-ORDER-STRICT 自己也写着「不得据此对外解释为什么这样排」。这条是**候选声明的总序**（candidate 口径），引擎侧目前只如实实现到 legacy 那条 action_order，两者的差距见 docs/roco/TURN-ORDER.md"
+    },
+    "speed_tie": {
+      "value": null,
+      "confidence": "UNKNOWN",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "10 号文档 §8：speed tie = UNKNOWN，判据见 MC-E05（同速多次录像是否总是同一侧先动；若随机则仍属 UNKNOWN、不得写成规则）。engine 在这个值不是 random_seeded 时**抛错**，不用随机数假装知道规则",
+      "microcase_id": "MC-E05",
+      "microcase_status": "NOT_RECORDED"
+    },
     "end_turn": {
       "order": {
         "value": [
@@ -86,29 +110,15 @@
         "confidence": "ENGINE_HYPOTHESIS",
         "evidence_id": null,
         "evidence_role": null,
-        "reason": "候选沿用 legacy 的组内顺序只是「有界占位」，台账与 10 号文档都没确认它；引用留空，不许借 EV-TURN-ORDER-STRICT（那条讲的是应对/先手/换人/速度的总序）"
+        "reason": "候选沿用 legacy 的组内顺序只是「有界占位」，台账与 10 号文档都没确认它；引用留空，不许借 EV-TURN-ORDER-STRICT（那条讲的是应对/先手/换人/速度的总序）。microcase 留空：台账里没有「回合末阶段顺序」条目；本配置的 unknowns 里那条 MC-E03 只是「回合末有没有默认回能」的读数计划，不是顺序判据，故不在这里充数",
+        "microcase_id": null
       },
-      "known_order": {
-        "value": [
-          "respond",
-          "switch",
-          "priority",
-          "speed"
-        ],
+      "unknown_stages_allowed": {
+        "value": false,
         "confidence": "ENGINE_HYPOTHESIS",
-        "evidence_id": "EV-TURN-ORDER-STRICT",
-        "evidence_role": "supports",
-        "microcase_id": "MC-E05",
-        "microcase_status": "NOT_RECORDED",
-        "value_status": "CANDIDATE_HYPOTHESIS",
-        "reason": "社区实测常概括「应对 > 换宠 > 先手 > 速度」，但 10 号文档 §8 明确严格总排序本轮没有同等强度官方文字"
-      },
-      "speed_tie": {
-        "value": null,
-        "confidence": "UNKNOWN",
         "evidence_id": null,
         "evidence_role": null,
-        "reason": "10 号文档 §8：speed tie = UNKNOWN，判据见 MC-E05"
+        "reason": "引擎纪律开关（同 legacy）：false = 本配置声明的回合末阶段是穷尽的，遇到未声明阶段必须抛错。候选**不允许**用它放宽任何未知阶段 —— 「不知道就先抛」正是这份候选存在的意义"
       }
     }
   },
@@ -120,7 +130,7 @@
       "microcase_id": "MC-E04"
     },
     {
-      "path": "turn_order.end_turn.speed_tie",
+      "path": "turn_order.speed_tie",
       "value": null,
       "reason": "同速平手判据 UNKNOWN",
       "microcase_id": "MC-E05"
@@ -131,7 +141,7 @@
         "status_tick",
         "regen"
       ],
-      "reason": "组内顺序未核验，仅为有界占位",
+      "reason": "组内顺序未核验，仅为有界占位（MC-E03 只回答「回合末有没有默认回能」，不回答阶段顺序）",
       "microcase_id": "MC-E03"
     },
     {

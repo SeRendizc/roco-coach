@@ -13,7 +13,13 @@
   - 能量上限与回合末回能的精确规则（MC-007）；**技能自带的「自己回复N能量」**
     会按描述结算，但「技能回能 vs 回合末回能 vs 能量上限」的先后顺序同样没有
     一手证据（MC-007），所以每一次都会写进 `state.unsupported`
-  - 同速且同先手度时的裁决依据；此处用 seed 驱动的确定性随机，**这是假设**（MC-002）
+  - 同速且同先手度时的裁决依据（MC-002 / MC-E05）。**策略来自规则配置**：
+    `turn_order.speed_tie == "random_seeded"` 时用 seed 驱动的确定性随机 —— 这是**如实登记的
+    工程权宜**，不是游戏规则；配置里是 UNKNOWN（null）时 `order_actions` 直接抛
+    `UnsupportedEffect`，**不用随机数假装知道规则**
+  - 回合末的**阶段顺序**（RC-103）：顺序本身没有一手证据，所以引擎**只**按配置声明的
+    `turn_order.end_turn.order` 结算；声明与实现只要对不上（多一个、少一个）就抛
+    `UnsupportedEffect`，不静默跳过、也不退回一个默认顺序
   - 印记的叠加/替换规则（MC-009）
   - 「传动」的技能位移动（术语 1033）
   - 天气、连击数、属性增减的层数语义
@@ -74,6 +80,23 @@ ENERGY_MAX: int = _RULE_CONFIG.energy_max
 ENERGY_REGEN_PER_TURN: int = _RULE_CONFIG.energy_regen_per_turn
 SWITCH_PRIORITY = 5         # 假设：主动换宠占整回合，且先于技能。数据未定义（MC-005）
 ITEM_PRIORITY = 4           # 假设：道具先于技能
+
+# ── 回合顺序登记表（RC-103）─────────────────────────────────────────────
+#
+# 这一节把「引擎到底认识哪些顺序维度/阶段」写成**代码里的唯一清单**，好让配置里
+# 声明的顺序能被真正核对：`rule_config.py` 管「配置是不是一份合法登记表」，
+# 这里管「引擎能不能按它跑」。对不上就抛 `fx.UnsupportedEffect`，绝不静默忽略。
+
+#: 引擎**实现**的回合末阶段。配置声明的顺序必须与它双向覆盖（多一个/少一个都抛）。
+#: 顺序的作用域是**每一只在场精灵内部**：先算这只的状态伤害、再算这只的回能 ——
+#: 这正是 `turn_order.end_turn.order` 声明的语义（不是「全体先状态伤害、再全体回能」，
+#: 后者会改变日志/事件顺序，也就是改变默认行为）。
+END_TURN_STAGES_IMPLEMENTED: Tuple[str, ...] = ("status_tick", "regen")
+
+#: 引擎认识的**行动排序维度**名。配置里出现别的名字就抛错。
+#: 注意：`switch` 是「认识」但**不是独立比较维** —— 主动换宠被折算成固定先手度
+#: （`SWITCH_PRIORITY`）后进 `priority` 那一维。这个差距如实登记在报告里，别当它不存在。
+ACTION_ORDER_DIMENSIONS: Tuple[str, ...] = ("respond", "switch", "priority", "speed")
 
 DEFAULT_ITEM_STOCK = {"回复药": 3, "净化药": 2, "能量果": 2}
 ITEM_EFFECTS = {"回复药": ("heal", 45), "净化药": ("cleanse", 0), "能量果": ("energy", 4)}
@@ -339,6 +362,36 @@ def _respond_success(action: Action, opponent_action: Action, rs: Ruleset) -> bo
     return target == opp_kind
 
 
+def require_declared_action_order(cfg: RuleConfig) -> Tuple[str, ...]:
+    """配置声明的行动排序维度必须是引擎认识的名字（RC-103）。
+
+    与 `require_declared_end_turn_stages` 同一条纪律：**不静默忽略**。
+    引用了引擎不认识的维度名（例如 "weather"）时抛 `UnsupportedEffect`，
+    而不是「跳过它、按认识的几个排」—— 那等于把一条没实现的规则当成没发生。
+    """
+    declared = tuple(cfg.action_order)
+    unknown = [name for name in declared if name not in ACTION_ORDER_DIMENSIONS]
+    if unknown:
+        raise fx.UnsupportedEffect(
+            f"行动排序维度「{'、'.join(unknown)}」",
+            f"规则配置 {cfg.ruleset_config_id} 的 turn_order.action_order 声明了本引擎不认识的维度"
+            f"（认识的：{'、'.join(ACTION_ORDER_DIMENSIONS)}）——"
+            "不静默忽略，也不退回默认比较语义",
+        )
+    return declared
+
+
+def _tie_is_decisive(entries: Sequence[Dict[str, Any]]) -> bool:
+    """排序是不是**真的**要用到「平手」这一维。
+
+    只看排序键的前三维 (respond, priority, speed)：只要有两个 entry 在这三维上完全相同，
+    比较就会落到平手裁决上。这样「没有平手」的对局在 UNKNOWN 配置下仍然能跑 ——
+    「不知道」只在**被问到**的时候才抛，不是一律抛。
+    """
+    keys = [(e["respond"], e["priority"], e["speed"]) for e in entries]
+    return len(set(keys)) != len(keys)
+
+
 def order_actions(
     state: GameState,
     rs: Ruleset,
@@ -346,17 +399,26 @@ def order_actions(
     enemy_action: Action,
     *,
     rng: random.Random,
+    cfg: Optional[RuleConfig] = None,
 ) -> List[Tuple[str, Action]]:
     """把双方动作排成一个执行序列。
 
     排序键（从上到下）：
       1. 应对成功（术语 1015/1016/1017：「本次行动必定先手」）
-      2. 先手度（术语 1020）
+      2. 先手度（术语 1020；主动换宠/道具折算成固定先手度，假设，MC-005）
       3. 速度（术语 1020 的补集：先手度相同时才比速度）
-      4. seed 驱动的确定性随机（**假设**：同速裁决。MC-002 待验）
+      4. 同速平手裁决 —— **策略来自配置**（MC-002 / MC-E05）
+
+    第 4 维的纪律（RC-103）：
+      · 配置写 `"random_seeded"` → 用 seed 驱动的确定性随机。这是**如实登记的工程权宜**，
+        不是游戏规则（10 号文档 §8：speed tie = UNKNOWN）；
+      · 配置写 `null`（UNKNOWN）→ **抛 `fx.UnsupportedEffect`**，而且只在排序真的需要
+        这一维时抛（见 `_tie_is_decisive`）—— 不许用随机数假装知道规则。
 
     返回 [(side, action), ...]，按实际执行顺序。
     """
+    cfg = cfg or _rule_config.get_rule_config()
+    require_declared_action_order(cfg)
     entries = []
     for side, action, opp in (("player", player_action, enemy_action),
                               ("enemy", enemy_action, player_action)):
@@ -367,8 +429,28 @@ def order_actions(
             "respond": _respond_success(action, opp, rs),
             "priority": _priority_of(action, rs),
             "speed": pet.stats.get("spe", 1) if hasattr(pet, "stats") else rs.pet(pet.pet_id).stats.get("spe", 1),
-            "tie": rng.random(),
+            "tie": None,
         })
+    if _tie_is_decisive(entries):
+        policy = cfg.speed_tie
+        if policy in (None, "unknown"):
+            raise fx.UnsupportedEffect(
+                "速度平手裁决(speed_tie)",
+                f"规则配置 {cfg.ruleset_config_id} 的 turn_order.speed_tie 是 UNKNOWN"
+                f"（待录 microcase {cfg.speed_tie_microcase_id or '未登记'}）——"
+                "本回合双方在 (应对成功, 先手度, 速度) 上完全相同，需要一个引擎没有依据的裁决；"
+                "不许用随机数假装知道规则",
+            )
+        if policy not in _rule_config.SPEED_TIE_POLICIES:
+            raise fx.UnsupportedEffect(
+                "速度平手裁决(speed_tie)",
+                f"规则配置 {cfg.ruleset_config_id} 的 turn_order.speed_tie={policy!r} 不是已知策略"
+                f"（允许 {_rule_config.SPEED_TIE_POLICIES} 或 null）",
+            )
+    for e in entries:
+        # 逐位不变：随机数的**消耗次数与顺序**（先 player 后 enemy）与改动前完全一致，
+        # 不论上面走的是哪条策略分支。`random_seeded` 这个策略名是如实登记，不是规则。
+        e["tie"] = rng.random()
     entries.sort(key=lambda e: (not e["respond"], -e["priority"], -e["speed"], e["tie"]))
     return [(e["side"], e["action"]) for e in entries]
 
@@ -418,7 +500,7 @@ def step_joint(
     setattr(state, "_pending_enemy", enemy_action)
 
     rng = _rng_for(state)
-    order = order_actions(state, rs, player_action, enemy_action, rng=rng)
+    order = order_actions(state, rs, player_action, enemy_action, rng=rng, cfg=cfg)
 
     pre_player = observation_for(state, rs, "player")
     pre_enemy = observation_for(state, rs, "enemy")
@@ -922,48 +1004,111 @@ def _use_item(state: GameState, rs: Ruleset, side: str, action: Action,
         _note_unsupported(state, f"道具「{item_id}」", "未实现", item_id)
 
 
+def require_declared_end_turn_stages(cfg: RuleConfig) -> Tuple[str, ...]:
+    """把配置声明的回合末阶段与引擎**实现**的阶段对一遍；任何一边对不上都抛错。
+
+    RC-103 的核心纪律：**不静默跳过、不默认顺序**。
+      · 配置声明了引擎没实现的阶段 → 引擎不知道怎么结算它 → 抛（消息点名阶段）；
+      · 引擎需要结算的阶段没被声明 → 配置不完整 → 抛（消息点名阶段）。
+    `turn_order.end_turn.unknown_stages_allowed` 为真时也抛：那等于允许「未知阶段」，
+    与 fail closed 直接冲突（配置加载期已经拒过一次，这里再兜一层）。
+    """
+    if cfg.end_turn_unknown_stages_allowed:
+        raise fx.UnsupportedEffect(
+            "回合末未声明阶段放行(unknown_stages_allowed)",
+            f"规则配置 {cfg.ruleset_config_id} 的 turn_order.end_turn.unknown_stages_allowed=true，"
+            "等于允许回合末存在未知阶段 —— 本引擎不允许（不知道就先抛，RC-103）",
+        )
+    declared = tuple(cfg.end_turn_order)
+    unknown = [name for name in declared if name not in END_TURN_STAGES_IMPLEMENTED]
+    if unknown:
+        raise fx.UnsupportedEffect(
+            f"回合末阶段「{'、'.join(unknown)}」",
+            f"规则配置 {cfg.ruleset_config_id} 的 turn_order.end_turn.order 声明了它，"
+            f"但本引擎没有实现这个阶段（引擎实现：{'、'.join(END_TURN_STAGES_IMPLEMENTED)}）——"
+            "不静默跳过，也不退回默认顺序",
+        )
+    missing = [name for name in END_TURN_STAGES_IMPLEMENTED if name not in declared]
+    if missing:
+        raise fx.UnsupportedEffect(
+            f"回合末阶段「{'、'.join(missing)}」",
+            f"规则配置 {cfg.ruleset_config_id} 的 turn_order.end_turn.order 没有声明它，"
+            f"但引擎需要结算这个阶段（引擎实现：{'、'.join(END_TURN_STAGES_IMPLEMENTED)}）——"
+            "少一个阶段就不许只按「剩下的」结算",
+        )
+    return declared
+
+
+def _end_turn_status_tick(state: GameState, rs: Ruleset, side: SideState, pet: PetState) -> None:
+    """结算一只在场精灵身上的所有状态伤害（术语 1001/1002/1008）。"""
+    for name in list(pet.statuses.keys()):
+        try:
+            dmg = fx.status_tick(pet.hp, pet.max_hp, name)
+        except fx.UnsupportedEffect as exc:
+            _note_unsupported(state, f"状态「{name}」", str(exc))
+            continue
+        pet.hp = max(0, pet.hp - dmg)
+        info = pet.statuses[name]
+        layers = int(info.get("layers", 1))
+        spec = fx.END_OF_TURN_STATUS.get(name, {})
+        info["layers"] = fx.decay_layers(layers, half=bool(spec.get("decays")))
+        state.log.append(f"{rs.pet(pet.pet_id).name}受到{name}伤害 {dmg}（剩余 {info['layers']} 层）。")
+        _bump(state, "status_tick", {
+            "side": side.name, "status": name, "damage": dmg,
+            "layers_after": info["layers"],
+        }, evidence=(spec.get("term", ""),))
+        if info["layers"] <= 0:
+            pet.statuses.pop(name, None)
+        if pet.hp <= 0:
+            pet.fainted = True
+            state.log.append(f"{rs.pet(pet.pet_id).name}倒下了。")
+            _bump(state, "faint", {"side": side.name, "slot": pet.slot})
+            break
+
+
+def _end_turn_regen(state: GameState, side: SideState, pet: PetState, cfg: RuleConfig) -> None:
+    """回合末回能（数值来自配置：`energy.regen.per_turn` + `energy.max` 夹取）。"""
+    before = pet.energy
+    pet.energy = min(cfg.energy_max, pet.energy + cfg.energy_regen_per_turn)
+    if pet.energy != before:
+        _bump(state, "energy_regen", {"side": side.name, "energy": pet.energy})
+
+
 def _end_of_turn(state: GameState, rs: Ruleset,
                  cfg: Optional[RuleConfig] = None) -> None:
-    cfg = cfg or _rule_config.get_rule_config()
-    """回合末结算。
+    """回合末结算：**按配置声明的阶段顺序**逐个结算（RC-103）。
 
-    依据：术语 1001/1002/1008 都写「回合结束时」造成百分比伤害；
-    1002 额外衰减层数。
-    **假设**：先结算状态伤害，再回能（MC-012 待验：组内顺序未定义）。
+    依据：术语 1001/1002/1008 都写「回合结束时」造成百分比伤害；1002 额外衰减层数。
+    **组内顺序本身没有一手证据**（台账没有登记这一条，10 号文档 §7 也这么说），
+    所以这里不写死顺序，只做两件事：
+
+      1. 按 `turn_order.end_turn.order` 声明的顺序结算（阶段名 → 下面的实现映射）；
+      2. 声明与实现只要对不上就抛 `fx.UnsupportedEffect`（见 `require_declared_end_turn_stages`）。
+
+    顺序的作用域是**每一只在场精灵内部**：先算这只的状态伤害，再算这只的回能。
+    这正是 `["status_tick", "regen"]` 声明的语义；把它读成「全体先状态伤害、再全体回能」
+    会改变日志与事件顺序，也就是改掉默认行为。
     """
+    cfg = cfg or _rule_config.get_rule_config()
+    stages = require_declared_end_turn_stages(cfg)
     for side in (state.player, state.enemy):
         pet = side.field_pet
         if not pet.alive:
             continue
-        for name in list(pet.statuses.keys()):
-            try:
-                dmg = fx.status_tick(pet.hp, pet.max_hp, name)
-            except fx.UnsupportedEffect as exc:
-                _note_unsupported(state, f"状态「{name}」", str(exc))
+        for stage in stages:
+            # 与改动前一致：被自己的状态伤害打死的那只不再回能（原来是 `if pet.alive:` 那道门）
+            if not pet.alive:
                 continue
-            pet.hp = max(0, pet.hp - dmg)
-            info = pet.statuses[name]
-            layers = int(info.get("layers", 1))
-            spec = fx.END_OF_TURN_STATUS.get(name, {})
-            info["layers"] = fx.decay_layers(layers, half=bool(spec.get("decays")))
-            state.log.append(f"{rs.pet(pet.pet_id).name}受到{name}伤害 {dmg}（剩余 {info['layers']} 层）。")
-            _bump(state, "status_tick", {
-                "side": side.name, "status": name, "damage": dmg,
-                "layers_after": info["layers"],
-            }, evidence=(spec.get("term", ""),))
-            if info["layers"] <= 0:
-                pet.statuses.pop(name, None)
-            if pet.hp <= 0:
-                pet.fainted = True
-                state.log.append(f"{rs.pet(pet.pet_id).name}倒下了。")
-                _bump(state, "faint", {"side": side.name, "slot": pet.slot})
-                break
-
-        if pet.alive:
-            before = pet.energy
-            pet.energy = min(cfg.energy_max, pet.energy + cfg.energy_regen_per_turn)
-            if pet.energy != before:
-                _bump(state, "energy_regen", {"side": side.name, "energy": pet.energy})
+            if stage == "status_tick":
+                _end_turn_status_tick(state, rs, side, pet)
+            elif stage == "regen":
+                _end_turn_regen(state, side, pet, cfg)
+            else:                                     # pragma: no cover - 上面已经挡过
+                raise fx.UnsupportedEffect(
+                    f"回合末阶段「{stage}」",
+                    f"规则配置 {cfg.ruleset_config_id} 声明了它，但本引擎没有对应的实现 ——"
+                    "不静默跳过",
+                )
 
 
 def _finish(state: GameState) -> None:

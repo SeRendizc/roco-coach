@@ -68,6 +68,26 @@
     }
   },
   "turn_order": {
+    "action_order": {
+      "value": [
+        "respond",
+        "priority",
+        "speed"
+      ],
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "如实登记**当前引擎真的在做什么**（RC-103）：排序键 = (应对成功, 先手度, 速度, seed 随机)。主动换宠/道具**不是**独立维度：它们被折算成固定先手度（换宠 5 / 道具 4，均为假设，MC-005）后一起进「先手度」这一维。台账里唯一相关的是 EV-TURN-ORDER-STRICT，而它自注「引擎可以有一套确定性排序键，但不得把它写成游戏规则，也不得据此对外解释为什么这样排」——拿它给这个实现背书就是把假设说成规则，所以引用留空、只用 reason 登记。严格总序待 MC-E05"
+    },
+    "speed_tie": {
+      "value": "random_seeded",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "**如实登记的工程权宜**：同速且同先手度时，当前引擎用 seed 驱动的确定性随机来决定谁先动（`env.py::_rng_for` + `order_actions` 的第 4 个排序键），不是任何一条游戏规则。10 号文档 §8 把 speed tie 判为 UNKNOWN，MC-E05 的通过判据是「同速多次录像是否总是同一侧先动」；在那之前这个值只描述**引擎行为**，不描述游戏。引用留空（台账没有「同速裁决」条目可引）",
+      "microcase_id": "MC-E05",
+      "microcase_status": "NOT_RECORDED"
+    },
     "end_turn": {
       "order": {
         "value": [
@@ -77,7 +97,15 @@
         "confidence": "ENGINE_HYPOTHESIS",
         "evidence_id": null,
         "evidence_role": null,
-        "reason": "台账没有登记「回合末组内顺序」这一条；10 号文档 §7 只说顺序未被一手证据确认。这里如实写成 ENGINE_HYPOTHESIS + reason，引用留空，**不**借别的条目凑引用"
+        "reason": "台账没有登记「回合末组内顺序」这一条；10 号文档 §7 只说顺序未被一手证据确认。这里如实写成 ENGINE_HYPOTHESIS + reason，引用留空，**不**借别的条目凑引用。microcase 留空：台账里没有对应条目，也不把候选配置自己的 MC-E03 映射借过来 ——「回合末阶段谁先谁后」目前没有任何一条已登记的 case 专门回答它",
+        "microcase_id": null
+      },
+      "unknown_stages_allowed": {
+        "value": false,
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "这是**引擎纪律开关**，不是游戏规则：`false` 表示「本配置声明的回合末阶段就是穷尽的」，引擎遇到没声明的阶段必须抛错（RC-103 的 fail closed）。台账里没有任何条目给它背书 ——它约束的是我们自己的实现，不是手游的行为，所以按 ENGINE_HYPOTHESIS + reason 登记"
       }
     }
   }

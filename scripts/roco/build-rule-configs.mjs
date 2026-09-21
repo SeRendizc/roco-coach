@@ -31,6 +31,9 @@ export const RULESET_DIR = 'data/roco/rulesets';
 export const LEGACY_ID = 'legacy_sim_v1';
 export const CANDIDATE_ID = 'mobile_s4_candidate_v2';
 
+/** RC-103：`turn_order.speed_tie` 允许的取值。`null` = UNKNOWN（不是「随便挑一个」）。 */
+export const SPEED_TIE_POLICIES = Object.freeze(new Set(['random_seeded']));
+
 const readJson = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8'));
 const sha256Of = (rel) => createHash('sha256').update(readFileSync(join(ROOT, rel))).digest('hex');
 
@@ -71,7 +74,7 @@ export function buildConfigs({ledger, battleModes}) {
   /** 逐位冻结的基线不标候选元数据；候选配置才需要「值还没被验证」这层登记。 */
   const policyFor = {[LEGACY_ID]: 'FROZEN_BIT_EXACT_BASELINE', [CANDIDATE_ID]: 'BLOCKED_UNTIL_MICROCASE'};
 
-  const field = (value, confidence, evidenceId, reason = null, role = 'supports') => {
+  const field = (value, confidence, evidenceId, reason = null, role = 'supports', extra = {}) => {
     const entry = evidenceId ? (ledger.entries ?? []).find((e) => e.id === evidenceId) : null;
     const blocked = field.policy === 'BLOCKED_UNTIL_MICROCASE';
     return {
@@ -86,6 +89,9 @@ export function buildConfigs({ledger, battleModes}) {
       ...(blocked && entry && entry.needs_microcase && !(value === null || value === 'unknown')
         ? {value_status: 'CANDIDATE_HYPOTHESIS'} : {}),
       ...(reason ? {reason} : {}),
+      // 显式补充（`microcase_id` / `microcase_status` / `microcase_id: null` 这类）：
+      // 没有台账条目可引、但确实卡在一条待录 case 上的字段只能这样登记。
+      ...extra,
     };
   };
 
@@ -147,10 +153,29 @@ export function buildConfigs({ledger, battleModes}) {
         + '不是「聚能 = 0」；台账 EV-ENERGY-CHARGE 讲的是 candidate 的 +5，不能拿它给 legacy 的 null 背书'),
     },
     turn_order: {
+      action_order: field(['respond', 'priority', 'speed'], 'ENGINE_HYPOTHESIS', null,
+        '如实登记**当前引擎真的在做什么**（RC-103）：排序键 = (应对成功, 先手度, 速度, seed 随机)。'
+        + '主动换宠/道具**不是**独立维度：它们被折算成固定先手度（换宠 5 / 道具 4，均为假设，MC-005）后'
+        + '一起进「先手度」这一维。台账里唯一相关的是 EV-TURN-ORDER-STRICT，而它自注「引擎可以有一套'
+        + '确定性排序键，但不得把它写成游戏规则，也不得据此对外解释为什么这样排」——拿它给这个实现背书'
+        + '就是把假设说成规则，所以引用留空、只用 reason 登记。严格总序待 MC-E05'),
+      speed_tie: field('random_seeded', 'ENGINE_HYPOTHESIS', null,
+        '**如实登记的工程权宜**：同速且同先手度时，当前引擎用 seed 驱动的确定性随机来决定谁先动'
+        + '（`env.py::_rng_for` + `order_actions` 的第 4 个排序键），不是任何一条游戏规则。'
+        + '10 号文档 §8 把 speed tie 判为 UNKNOWN，MC-E05 的通过判据是「同速多次录像是否总是同一侧先动」；'
+        + '在那之前这个值只描述**引擎行为**，不描述游戏。引用留空（台账没有「同速裁决」条目可引）',
+        'supports', {microcase_id: 'MC-E05', microcase_status: 'NOT_RECORDED'}),
       end_turn: {
         order: field(['status_tick', 'regen'], 'ENGINE_HYPOTHESIS', null,
           '台账没有登记「回合末组内顺序」这一条；10 号文档 §7 只说顺序未被一手证据确认。'
-          + '这里如实写成 ENGINE_HYPOTHESIS + reason，引用留空，**不**借别的条目凑引用'),
+          + '这里如实写成 ENGINE_HYPOTHESIS + reason，引用留空，**不**借别的条目凑引用。'
+          + 'microcase 留空：台账里没有对应条目，也不把候选配置自己的 MC-E03 映射借过来 ——'
+          + '「回合末阶段谁先谁后」目前没有任何一条已登记的 case 专门回答它',
+          'supports', {microcase_id: null}),
+        unknown_stages_allowed: field(false, 'ENGINE_HYPOTHESIS', null,
+          '这是**引擎纪律开关**，不是游戏规则：`false` 表示「本配置声明的回合末阶段就是穷尽的」，'
+          + '引擎遇到没声明的阶段必须抛错（RC-103 的 fail closed）。台账里没有任何条目给它背书 ——'
+          + '它约束的是我们自己的实现，不是手游的行为，所以按 ENGINE_HYPOTHESIS + reason 登记'),
       },
     },
   };
@@ -180,19 +205,34 @@ export function buildConfigs({ledger, battleModes}) {
         '聚能是主动行动、回复 5；是否可突破上限、无合法技能时是否自动聚能 —— 台账明说未定，故不在本配置里断言'),
     },
     turn_order: {
+      action_order: field(['respond', 'switch', 'priority', 'speed'], 'ENGINE_HYPOTHESIS', 'EV-TURN-ORDER-STRICT',
+        '社区实测常概括「应对 > 换宠 > 先手 > 速度」，但 10 号文档 §8 明确严格总排序本轮没有同等强度官方文字；'
+        + 'EV-TURN-ORDER-STRICT 自己也写着「不得据此对外解释为什么这样排」。'
+        + '这条是**候选声明的总序**（candidate 口径），引擎侧目前只如实实现到 legacy 那条 action_order，'
+        + '两者的差距见 docs/roco/TURN-ORDER.md'),
+      speed_tie: field(null, 'UNKNOWN', null,
+        '10 号文档 §8：speed tie = UNKNOWN，判据见 MC-E05（同速多次录像是否总是同一侧先动；'
+        + '若随机则仍属 UNKNOWN、不得写成规则）。engine 在这个值不是 random_seeded 时**抛错**，'
+        + '不用随机数假装知道规则',
+        'supports', {microcase_id: 'MC-E05', microcase_status: 'NOT_RECORDED'}),
       end_turn: {
         order: field(['status_tick', 'regen'], 'ENGINE_HYPOTHESIS', null,
           '候选沿用 legacy 的组内顺序只是「有界占位」，台账与 10 号文档都没确认它；'
-          + '引用留空，不许借 EV-TURN-ORDER-STRICT（那条讲的是应对/先手/换人/速度的总序）'),
-        known_order: field(['respond', 'switch', 'priority', 'speed'], 'ENGINE_HYPOTHESIS', 'EV-TURN-ORDER-STRICT',
-          '社区实测常概括「应对 > 换宠 > 先手 > 速度」，但 10 号文档 §8 明确严格总排序本轮没有同等强度官方文字'),
-        speed_tie: field(null, 'UNKNOWN', null, '10 号文档 §8：speed tie = UNKNOWN，判据见 MC-E05'),
+          + '引用留空，不许借 EV-TURN-ORDER-STRICT（那条讲的是应对/先手/换人/速度的总序）。'
+          + 'microcase 留空：台账里没有「回合末阶段顺序」条目；本配置的 unknowns 里那条 MC-E03 只是'
+          + '「回合末有没有默认回能」的读数计划，不是顺序判据，故不在这里充数',
+          'supports', {microcase_id: null}),
+        unknown_stages_allowed: field(false, 'ENGINE_HYPOTHESIS', null,
+          '引擎纪律开关（同 legacy）：false = 本配置声明的回合末阶段是穷尽的，遇到未声明阶段必须抛错。'
+          + '候选**不允许**用它放宽任何未知阶段 —— 「不知道就先抛」正是这份候选存在的意义'),
       },
     },
     unknowns: [
       {path: 'energy.initial', value: null, reason: '首次入场能量需实机（MC-E04）', microcase_id: 'MC-E04'},
-      {path: 'turn_order.end_turn.speed_tie', value: null, reason: '同速平手判据 UNKNOWN', microcase_id: 'MC-E05'},
-      {path: 'turn_order.end_turn.order', value: ['status_tick', 'regen'], reason: '组内顺序未核验，仅为有界占位', microcase_id: 'MC-E03'},
+      {path: 'turn_order.speed_tie', value: null, reason: '同速平手判据 UNKNOWN', microcase_id: 'MC-E05'},
+      {path: 'turn_order.end_turn.order', value: ['status_tick', 'regen'],
+        reason: '组内顺序未核验，仅为有界占位（MC-E03 只回答「回合末有没有默认回能」，不回答阶段顺序）',
+        microcase_id: 'MC-E03'},
       {path: 'energy.charge.breaks_cap', value: null, reason: '聚能是否可突破上限未定（MC-E02）', microcase_id: 'MC-E02'},
     ],
   };
@@ -216,6 +256,21 @@ export function buildConfigs({ledger, battleModes}) {
 // energy-cap-scanner-allow: 这一行是被测对象（冻结基线），不是事实源
 export const LEGACY_BIT_EXACT = Object.freeze({energy_max: 6, energy_regen_per_turn: 1, energy_initial: 2});
 
+/**
+ * RC-103：legacy 的 `turn_order` 登记也必须是**逐位冻结**的引擎行为。
+ *
+ * 为什么它和上面的能量三件套一样属于「被测对象」而不是「又抄一份常量」：
+ * 这三个值描述的是 `env.py` **当前真的在做什么**，改掉任何一个都等于改默认路径的
+ * 排序语义（例如把 speed_tie 从 random_seeded 改成 null 会让默认对局开始抛错）。
+ * 所以生成器必须先挡住它，坏值根本落不了盘。
+ */
+export const LEGACY_TURN_ORDER_BIT_EXACT = Object.freeze({
+  action_order: ['respond', 'priority', 'speed'],
+  speed_tie: 'random_seeded',
+  end_turn_order: ['status_tick', 'regen'],
+  end_turn_unknown_stages_allowed: false,
+});
+
 function checkLegacyBitExact(configs, problems) {
   const legacy = configs.find((c) => c.ruleset_config_id === LEGACY_ID);
   if (!legacy) {
@@ -231,6 +286,20 @@ function checkLegacyBitExact(configs, problems) {
     if (bits[key] !== expected) {
       problems.push(`${LEGACY_ID}：${key} 必须与当前引擎逐位相同（期望 ${expected}，实际 ${JSON.stringify(bits[key])}）`
         + '—— 默认路径变了，所有既有 replay 与产物就不再成立');
+    }
+  }
+  const orderBits = {
+    action_order: legacy.turn_order?.action_order?.value,
+    speed_tie: legacy.turn_order?.speed_tie?.value,
+    end_turn_order: legacy.turn_order?.end_turn?.order?.value,
+    end_turn_unknown_stages_allowed: legacy.turn_order?.end_turn?.unknown_stages_allowed?.value,
+  };
+  for (const [key, expected] of Object.entries(LEGACY_TURN_ORDER_BIT_EXACT)) {
+    const actual = orderBits[key];
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      problems.push(`${LEGACY_ID}：turn_order.${key} 必须如实等于引擎当前行为`
+        + `（期望 ${JSON.stringify(expected)}，实际 ${JSON.stringify(actual)}）`
+        + '—— 这不是「一个可以调的参数」，而是默认路径本身的快照；要改先改引擎并出迁移影响报告');
     }
   }
   // 能量上限/回能/初始能量的字面量只许住在规则配置里；这里比对的是**冻结基线**，
@@ -263,6 +332,39 @@ export function validateConfig(config, ledger) {
   }
   if (!energy.regen || !('per_turn' in energy.regen)) bad('缺 energy.regen.per_turn');
   if (!energy.initial) bad('缺 energy.initial（未知也必须显式写成一条记录）');
+
+  // RC-103：turn_order 三件套的形状判据（值非法就 fail closed，不许「读不出来就跳过」）。
+  // 这里只判**形状**；「这个阶段引擎实不实现得了」「平手策略引擎支不支持」是引擎侧的事
+  // （`rule_config.py` 与 `env.py`），两处判据各管一段，谁也不替谁兜底。
+  const turnOrder = config?.turn_order ?? {};
+  const checkOrderList = (leaf, label) => {
+    const wanted = leaf?.value;
+    if (!Array.isArray(wanted) || wanted.length === 0) {
+      bad(`${label} 必须是非空数组，实际 ${JSON.stringify(wanted)}`);
+      return;
+    }
+    if (wanted.some((x) => typeof x !== 'string' || !x)) {
+      bad(`${label} 的元素必须是非空字符串，实际 ${JSON.stringify(wanted)}`);
+    }
+    if (new Set(wanted).size !== wanted.length) {
+      bad(`${label} 里有重复项（同一个阶段不许声明两次）：${JSON.stringify(wanted)}`);
+    }
+  };
+  checkOrderList(turnOrder.action_order, 'turn_order.action_order');
+  checkOrderList(turnOrder.end_turn?.order, 'turn_order.end_turn.order');
+  const tieLeaf = turnOrder.speed_tie;
+  if (!tieLeaf || typeof tieLeaf !== 'object' || !('value' in tieLeaf)) {
+    bad('缺 turn_order.speed_tie（未知也必须显式写成一条记录，不许省略）');
+  } else if (tieLeaf.value !== null && !SPEED_TIE_POLICIES.has(tieLeaf.value)) {
+    bad(`turn_order.speed_tie 只允许 ${[...SPEED_TIE_POLICIES].join(' / ')} 或 null（UNKNOWN），`
+      + `实际 ${JSON.stringify(tieLeaf.value)}`);
+  }
+  const stagesLeaf = turnOrder.end_turn?.unknown_stages_allowed;
+  if (!stagesLeaf || typeof stagesLeaf !== 'object' || !('value' in stagesLeaf)) {
+    bad('缺 turn_order.end_turn.unknown_stages_allowed（引擎要不要放行未知阶段必须机器可读）');
+  } else if (typeof stagesLeaf.value !== 'boolean') {
+    bad(`turn_order.end_turn.unknown_stages_allowed 必须是布尔，实际 ${JSON.stringify(stagesLeaf.value)}`);
+  }
 
   /** 递归遍历所有 {value, confidence, evidence_id} 叶子，逐条核对台账。 */
   const leaves = [];
@@ -441,6 +543,39 @@ function selftest() {
   push('反证⑦：有 evidence_id 却不写 evidence_role 必须被判红',
     validateConfig(noRole[1], ledger).some((p) => p.includes('evidence_role 必须是')),
     JSON.stringify(validateConfig(noRole[1], ledger)).slice(0, 240));
+
+  // ── RC-103：turn_order 登记表的反证 ───────────────────────────────────
+  // 反证⑧：legacy 的 speed_tie 从「如实登记引擎行为」改成 null → 冻结基线判据必须红
+  const tieUnknown = JSON.parse(JSON.stringify(configs));
+  tieUnknown[0].turn_order.speed_tie.value = null;
+  const tieProblems = [];
+  checkLegacyBitExact(tieUnknown, tieProblems);
+  push('反证⑧：legacy 的 speed_tie 从 random_seeded 改成 null 必须被判红',
+    tieProblems.some((p) => p.includes('speed_tie')), JSON.stringify(tieProblems).slice(0, 240));
+
+  // 反证⑨：legacy 的 action_order 少一个维度 → 必须红（默认排序语义被改掉了）
+  const dropped = JSON.parse(JSON.stringify(configs));
+  dropped[0].turn_order.action_order.value = ['respond', 'speed'];
+  const dropProblems = [];
+  checkLegacyBitExact(dropped, dropProblems);
+  push('反证⑨：legacy 的 action_order 少一维必须被判红',
+    dropProblems.some((p) => p.includes('action_order')), JSON.stringify(dropProblems).slice(0, 240));
+
+  // 反证⑩：candidate 的 speed_tie 是 UNKNOWN（null），填回 random_seeded → 必须红
+  //         （那等于把「引擎权宜」当成候选规则 promote 进配置）
+  const filledTie = JSON.parse(JSON.stringify(configs));
+  filledTie[1].turn_order.speed_tie.value = 'random_seeded';
+  push('反证⑩：给 UNKNOWN 的 speed_tie 填回 random_seeded 必须被判红',
+    validateConfig(filledTie[1], ledger).some((p) => p.includes('turn_order.speed_tie')),
+    JSON.stringify(validateConfig(filledTie[1], ledger)).slice(0, 240));
+
+  // 反证⑪：把 unknown_stages_allowed 改成 true（允许引擎跑未声明阶段）→ 必须红
+  const allowed = JSON.parse(JSON.stringify(configs));
+  allowed[0].turn_order.end_turn.unknown_stages_allowed.value = true;
+  const allowedProblems = [];
+  checkLegacyBitExact(allowed, allowedProblems);
+  push('反证⑪：unknown_stages_allowed 改成 true 必须被判红（那等于允许未知阶段）',
+    allowedProblems.some((p) => p.includes('unknown_stages_allowed')), JSON.stringify(allowedProblems).slice(0, 240));
 
   const failed = checks.filter((c) => !c.ok);
   for (const c of checks) console.log(`${c.ok ? '✔' : '✖'} ${c.name} — 实际：${c.actual}`);
