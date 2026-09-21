@@ -1,185 +1,354 @@
 /* 手游演示页的样式 —— **只保留这一页特有的差异**。
    第 45 轮之前这里是一整套自建样式（面板/按钮/卡片/血条/浮层都自己写了一遍），
    与营地页的 `src/client/style.css`（监工留的 UI 框架）并存，于是两个页面像两个产品。
-   现在框架那一份先加载（`roco.html` 里 style.css 在前），这里只写：
-     · 演示页特有的三栏布局与便签位置；
-     · 阵容选择的「这一侧点不动」状态与提示；
-     · 记忆面板（营地页没有这个组件）；
-     · 伤害浮层（框架里有 `.float-number`，这一页按卡片的定位重写了一份）。
-   凡是框架里已经有的（面板/按钮/输入/`.pet-icon`/`.hp-track`/`.energy`/`.bench-pet`/
-   `.pet-option`/`.action`/`.stats`/`.type`），这里**一个字都不重复**。 */
-/* 手游规则演示页的样式。
-   刻意不 import 营地页的 style.css 那一大坨：这个页面只有「两栏队伍 + 动作区 + 一条便签」，
-   复用整套营地样式会把演示页和营地的视觉改动绑在一起。变量名与深色基调保持一致，
-   所以两个页面看起来仍像同一个产品。 */
-h1 small{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;padding:3px 7px;margin-left:8px}
-.header-actions{display:flex;align-items:center;gap:8px}
-.lead{font-size:13px;line-height:1.75;color:#b9c7d4;margin:0 0 14px}
-/* 开局引导（P1-2）：三步，横排；窄屏自动换行成一列。
-   字号比正文大一点、行距更松，因为它是「第一次来的人」唯一会先读的东西。 */
-.onboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;margin:0 0 14px;padding:0;counter-reset:step}
-.onboard li{display:flex;flex-direction:column;gap:3px;background:#16222f;border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:13.5px}
-.onboard li::before{counter-increment:step;content:"第 " counter(step) " 步";font-size:11px;color:var(--accent);letter-spacing:.5px}
-.onboard strong{font-size:14px}
-.onboard span{font-size:12.5px;color:var(--muted);line-height:1.6}
-@media(max-width:720px){.onboard{grid-template-columns:1fr}}
-/* 头像徽记（P1-1）：自制 emoji + 主系别色描边，零外链、离线可用。
-   色盲友好靠三个信号叠加——emoji 图形、色块、以及旁边的系别文字。 */
-.avatar{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:7px;border:1.5px solid var(--line);background:#132030;font-size:13px;line-height:1;margin-right:6px;vertical-align:-4px}
-.pet .avatar{width:24px;height:24px;font-size:14px}
-.pick .avatar{margin-right:5px}
-.type{display:inline-flex;align-items:center;gap:3px}
-/* 键盘可达性：这个页面上所有可点东西都要看得见焦点（触屏之外还有键盘/无障碍场景）。 */
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
-/* 尊重系统的「减少动态效果」：本页的过渡只是装饰，关掉不影响任何判据。 */
-@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-.board{display:grid;grid-template-columns:1fr 110px 1fr;gap:11px;align-items:start}
-.side{min-width:0}
-.center{display:flex;flex-direction:column;align-items:center;gap:7px;padding-top:34px}
+   现在框架那一份先加载（`roco.html` 里 style.css 在前），这里只写框架里没有的东西：
+     · 三页各自的结构（选阵容页 / 对战页 / 结算页）与它们的固定底栏；
+     · 阵容池的轻卡、分段选择器、筛选行、分页；
+     · 军师的两行小浮条、伙伴详情抽屉（框架里没有这两个组件）；
+     · 记忆面板（营地页没有这个组件）与伤害浮层。
+   凡是框架里已经有的（`.panel`/`button`/`input`/`select`/`.type`/`.hp-track`/`.hp-fill`/
+   `.energy`/`.bench-pet`/`.action`/`.stats`/`.pet-icon`/`.muted`/`.section-title`），
+   这里**一个字都不重复**。 */
+
+/* ── 页头 ─────────────────────────────────────────────────────────────────
+   只放：游戏标题、回合状态、轻量小芽入口、重开/重试、右上角抽屉。
+   规则版本、服务状态、验收钩子、工程说明全部在抽屉里（默认收起）。 */
+.topbar{align-items:center;flex-wrap:wrap;row-gap:6px;height:auto;min-height:44px}
+.topbar h1 small{font-size:11px;padding:2px 6px}
+.header-actions{gap:8px;flex-wrap:wrap}
+.chip{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:999px;
+ padding:3px 10px;background:#16222f;white-space:nowrap;color:#cfe0d4}
+#turn-chip{color:#f0cb77}
+#phase-chip{white-space:nowrap}
+/* 抽屉：躲在页头右上角，**默认收起**。
+   展开时它**在流里**把页头撑高，而不是盖在页面上——第一版做成 `position:fixed` 浮层，
+   实测它正好压住阵容池第一行最右边那张卡，真实鼠标点上去落在抽屉上（验收里
+   「我方已满 3 只时点第 4 只」就是这么红的）。工程信息不该抢走可点区域。 */
+#about-drawer{position:relative;width:330px;max-width:100%;z-index:30;background:#16222f;
+ border:1px solid var(--line);border-radius:11px;padding:10px 12px;
+ box-shadow:0 14px 44px #0009;max-height:70vh;overflow:auto}
+#about-drawer>summary{cursor:pointer;font-size:12.5px;color:var(--warn)}
+.dev-body{font-size:12.5px;line-height:1.7;color:#b9c7d4}
+.dev-body p{margin:8px 0}
+.dev-body code{color:#dcead8}
+.checklist{font-size:12.5px;line-height:1.8;color:#b9c7d4;margin:0;padding-left:18px}
+.checklist code{color:#dcead8}
+
+/* ── 三步教程：只在第一次出现，可跳过；跳过之后 `hidden`，不占位 ───────────── */
+.onboard-bar{display:flex;align-items:stretch;gap:10px;margin:0 0 12px}
+.onboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;
+ margin:0;padding:0;flex:1;counter-reset:step}
+.onboard li{display:flex;flex-direction:column;gap:3px;background:#16222f;border:1px solid var(--line);
+ border-radius:11px;padding:9px 12px;font-size:13.5px;min-width:0}
+.onboard li::before{counter-increment:step;content:"第 " counter(step) " 步";font-size:11px;
+ color:var(--accent);letter-spacing:.5px}
+.onboard strong{font-size:13.5px}
+.onboard span{font-size:12.5px;color:var(--muted);line-height:1.55}
+.onboard-skip{align-self:center;font-size:12px;padding:6px 12px;min-height:0}
+
+/* ── 选阵容页 ─────────────────────────────────────────────────────────────── */
+.select-panel{border-color:#3c5b6e}
+/* 固定队伍栏：已选 3 只始终可见（我方/对手共用同一套「这一局带谁」）。 */
+.teambar{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.teambar .side{background:#16222f;border:1px solid var(--line);border-radius:12px;padding:9px 11px;min-width:0}
+.teambar .side.active{box-shadow:0 0 0 2px #8dd49c inset;border-color:#8dd49c}
+.teambar .side.enemy.active{box-shadow:0 0 0 2px #e8a76a inset;border-color:#e8a76a}
+.side-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:13px}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:7px}
+.slot{border:1px dashed #36495e;border-radius:8px;padding:6px 8px;font-size:12.5px;text-align:center;
+ color:var(--muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot.on{border-style:solid;border-color:#8dd49c;color:#dff3e3;background:#1d3435}
+.side.enemy .slot.on{border-color:#e8a76a;color:#f6e3d0;background:#33291d}
+/* 阵容池：搜索 + 属性/定位筛选 + 分页；卡片只给第一层信息。 */
+.pool{padding-bottom:6px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.filters .muted{margin-left:auto}
+/* 我方/对手 = **分段选择器**（不是复选框）。 */
+.seg{display:inline-flex;background:#16222f;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg .side-tab{border:0;border-radius:0;min-height:38px;padding:6px 16px;background:transparent;color:#dfe8ef}
+.seg .side-tab[aria-pressed="true"]{background:var(--accent);color:#152c24;font-weight:700}
+.seg .side-tab[data-side="enemy"][aria-pressed="true"]{background:#e8a76a;color:#2a1c10}
+#pool-search{width:240px;min-height:38px}
+/* 属性/定位筛选：折叠菜单，样式与框架的输入框同一条。 */
+.fmenu{position:relative}
+.fmenu>summary{cursor:pointer;list-style:none;background:#121e2c;border:1px solid var(--line);
+ border-radius:8px;padding:8px 11px;min-height:38px;font-size:13px;color:#dbe5ef;
+ display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.fmenu>summary::-webkit-details-marker{display:none}
+.fmenu>summary::after{content:'▾';color:var(--muted);font-size:11px}
+.fmenu[open]>summary{border-color:#7e9bb8}
+.fmenu-body{position:absolute;left:0;top:calc(100% + 4px);z-index:18;width:max-content;max-width:min(420px,80vw);
+ display:flex;flex-wrap:wrap;gap:5px;padding:8px;background:#16222f;border:1px solid var(--line);
+ border-radius:10px;box-shadow:0 12px 36px #0009}
+.filter-chip{font-size:12px;padding:4px 10px;min-height:0;background:#121e2c;border:1px solid var(--line)}
+.filter-chip[aria-pressed="true"]{background:var(--accent);color:#152c24;border-color:var(--accent);font-weight:600}
+.pick-summary{margin:8px 0 0;font-size:12px;overflow-wrap:anywhere}
+/* 点击/键盘的即时反馈：说清「为什么这一下没选上」以及下一步怎么做。 */
+.pick-hint{margin:6px 0 2px;font-size:12.5px;line-height:1.6;color:var(--warn);min-height:1.2em}
+.roster{margin-top:10px}
+.roster-status{margin:10px 0 0}
+.pool-empty{grid-column:1/-1}
+/* 一页轻卡：首层只有 emoji 头像、名字、属性、定位与**一个**最关键特点。 */
+.card-wrap{display:grid;gap:3px;min-width:0}
+#roster .pick{display:block;text-align:left;background:var(--panel);border:1px solid var(--line);
+ border-radius:12px;padding:9px 10px;min-width:0;min-height:96px;position:relative;font-weight:400}
+#roster .pick.chosen{border-color:#8dd49c;background:#1d3435}
+#roster .pick.picked-enemy{border-color:#e8a76a;background:#33291d}
+#roster .pick.blocked{opacity:.55;border-style:dashed}
+#roster .pick.blocked:hover{border-color:#7d6a4a;background:#1f2530}
+.card-top{display:flex;align-items:center;gap:6px;min-width:0}
+#roster .pick .nm{font-size:15.5px;font-weight:700;color:#e3eaf1;min-width:0;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pet-option-types{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0 0}
+.card-role{margin-top:5px;font-size:12px;color:var(--warn);display:block}
+.card-key{margin-top:3px;font-size:12px;color:#b4c3d1;line-height:1.5;display:block;overflow-wrap:anywhere}
+.pick .taken{position:absolute;right:8px;top:8px;font-size:10.5px;color:#c9b07a;
+ border:1px solid #6b5b3a;border-radius:5px;padding:1px 5px;white-space:nowrap;background:#1a2635}
+.pick .taken.picked{color:#8dd49c;border-color:#4a6858}
+.card-more{justify-self:end;font-size:11px;min-height:0;padding:2px 9px;background:transparent;
+ border:1px solid var(--line);color:var(--muted)}
+/* 底部固定：分页 + 主操作（选阵容页唯一主操作就是「开一局」）。 */
+.footbar{position:fixed;left:0;right:0;bottom:0;z-index:22;display:flex;align-items:center;gap:10px;
+ flex-wrap:wrap;background:#101a26;border-top:1px solid var(--line);padding:10px 20px}
+.footbar .muted{margin-right:auto}
+.pool-tools{display:flex;gap:6px}
+.pool-tools button{font-size:12px;padding:5px 10px;min-height:0}
+.pager{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.pager button{font-size:12.5px;padding:5px 10px;min-height:0}
+
+/* ── 结算页：结果 / 一个关键转折 / 下一局目标先显示 ───────────────────────── */
+.result-panel{border-color:#5f8e6c;background:#1b2b2c}
+.result-head{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.result-head b{font-size:26px;color:#d8f5dc}
+.result-head .muted{font-size:12.5px}
+.lesson-card{border-color:#8a7fb8}
+.lesson-card .result-turn{margin:6px 0 0;font-size:14px;line-height:1.7}
+.lesson-card .result-goal{margin-top:10px;border-left:3px solid var(--warn);padding:8px 12px;
+ background:#1d2c30;border-radius:0 9px 9px 0;font-size:14px;line-height:1.65}
+.lesson-card .result-goal b{color:#f0cb77;margin-right:6px}
+.lesson-full,.dev-raw{margin-top:10px;background:#121e2c;border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+.lesson-full>summary,.dev-raw>summary{cursor:pointer;font-size:12.5px;color:var(--warn)}
+.lesson-full p{margin:8px 0 0;font-size:12.5px;line-height:1.75}
+.lesson-close{font-size:12px;padding:5px 10px;min-height:0}
+
+/* ── 对战页：中央战斗舞台 + 后备小条 ─────────────────────────────────────── */
+.battle{border-color:#3c5b6e}
+.lineup-brief{display:flex;align-items:center;justify-content:space-between;gap:10px;
+ background:#16222f;border:1px solid var(--line);border-radius:10px;padding:7px 12px;margin-bottom:10px;
+ font-size:12.5px}
+.lineup-brief strong{color:#dbe7f1}
+.lineup-brief button{padding:4px 10px;font-size:12px;min-height:0}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:10px;align-items:start}
+.fighter{background:#16222f;border:1px solid var(--line);border-radius:13px;padding:12px;min-width:0}
+.fighter-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
+.side-tag{font-size:12px;border-radius:999px;padding:2px 9px;border:1px solid var(--line);white-space:nowrap}
+.side-tag.player{color:#cfeed6;border-color:#4a6858;background:#1d3435}
+.side-tag.enemy{color:#f6e3d0;border-color:#6b5b3a;background:#33291d}
+.vs{align-self:center;text-align:center;font-size:13px;color:#667e99;letter-spacing:1px}
 .pets{display:grid;gap:8px}
-.pet{position:relative;border:1px solid #36495e;border-radius:9px;padding:9px}
+.pet{position:relative;border:1px solid #36495e;border-radius:10px;padding:10px;min-width:0;background:#1a2635}
 .pet.active{border-color:#8dd49c;background:#1d3435}
-.pet.fainted{opacity:.45}
-.pet-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
-.pet-top strong{font-size:14px}
-.pet-top code{font-size:11px;color:var(--muted)}
-.bar{height:8px;border-radius:6px;background:#111d28;overflow:hidden;margin:7px 0 5px}
-.bar>div{height:100%;background:#90d5a8;transition:width .25s ease-out}
-.bar>div.low{background:var(--danger)}
-.pet-stats{display:flex;gap:12px;font-size:12px;color:#c6d2de}
-.bench{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
-.bench .slot{border:1px dashed #36495e;border-radius:7px;padding:6px;font-size:12px;color:var(--muted);text-align:center}
-.actions{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
-.action{text-align:left;display:flex;flex-direction:column;gap:3px;min-height:58px}
-.action small{font-size:11px;color:#b4c3d1}
-.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:11px}
-#say-input{flex:1;min-width:180px}
-.events{font-size:12.5px;line-height:1.8;color:#c1cfdc;max-height:200px;overflow:auto}
+.pet.fainted{opacity:.5}
+.pet-heading{display:flex;align-items:center;gap:8px;flex-wrap:wrap;row-gap:2px}
+.pet-heading h3{font-size:19px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pet-status{color:#ffb492;font-size:12px;display:block}
+.pet-types{display:flex;flex-wrap:wrap;gap:4px;margin-left:auto}
+.pet .hp-line{display:flex;justify-content:space-between;font-size:12.5px;margin:10px 0 5px}
+.pet .hp-track{background:#111d28;overflow:hidden;border-radius:8px;height:11px}
+.pet .hp-fill{background:#90d5a8;height:100%;transition:width .35s}
+.pet .hp-fill.low{background:#ee8e76}
+.pet .energy{font-size:15px;color:#f0cb77;letter-spacing:3px;margin:8px 0 0}
+.pet .energy small{font-size:12px;letter-spacing:0;color:var(--muted)}
+.bench-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.bench-col{min-width:0}
+.bench-label{display:block;margin-bottom:5px}
+.bench{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.bench-pet{border:1px dashed #36495e;border-radius:8px;padding:6px 8px;font-size:12px;
+ color:var(--muted);min-width:0;overflow-wrap:anywhere}
+.bench-pet strong{font-size:11.5px;font-weight:600}
+.bench-pet.fainted{opacity:.5}
+.battle-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.battle-tools button{font-size:12.5px;padding:6px 11px;min-height:0}
+
+/* 战斗记录：不抢主视线（一屏看得完，超出自己滚）。 */
+.log-panel{border-color:#314154}
+.events{font-size:12.5px;line-height:1.75;color:#c1cfdc;max-height:11.5em;overflow:auto}
 .events p{margin:3px 0}
 .events p.turn{color:var(--warn);border-top:1px solid #344355;padding-top:5px}
 .events p.miss{color:var(--warn)}
-.reply{margin-top:9px;font-size:13.5px;line-height:1.7;border-left:3px solid var(--accent);padding:7px 11px;background:#1d2c30;border-radius:0 8px 8px 0}
-.checklist{font-size:12.5px;line-height:1.85;color:#b9c7d4;margin:0;padding-left:18px}
-.checklist code{color:#dcead8}
-.hint,.lesson{position:fixed;right:18px;width:340px;max-width:calc(100vw - 30px);background:#1e2d32;border:1px solid #698d7b;border-radius:13px;padding:13px;box-shadow:0 14px 50px #0009;z-index:20}
-.hint{bottom:18px}
-.lesson{bottom:200px;border-color:#8a7fb8}
-.hint-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.hint-head strong{color:#bbebc5;font-size:13px}
-.hint p{margin:7px 0;font-size:13.5px;line-height:1.65}
-.hint-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.hint-body{margin-top:8px;font-size:12px;line-height:1.7;color:#b9c7d4;border-top:1px dashed #3d5560;padding-top:7px}
-@media(max-width:860px){.board{grid-template-columns:1fr}.center{padding-top:0}.hint,.lesson{position:static;width:auto;margin:11px 0}}
-/* 手机优先：这一页是给手游玩家看的，触控目标按 44px 下限走（Apple HIG / WCAG 2.5.5）。
-   桌面字号仍是 14px；窄屏把基础字号与按钮内边距一起放大，避免「手机上点不准」。 */
-@media(max-width:720px){
- :root{font-size:15px}
- button{min-height:44px;padding:10px 14px}
- .action{min-height:64px}
- .actions{grid-template-columns:1fr}
- .pick{min-height:56px}
- .pet-stats{flex-wrap:wrap;gap:8px}
- .hint,.lesson{width:auto}
- /* 长句在窄屏上不要挤成一行：事件区与依据区是读得最多的两处。 */
- .events,.hint p,.hint-body{line-height:1.85}
-}
+.raw{font-size:11px;line-height:1.5;color:#9fb0c0;max-height:220px;overflow:auto;margin:8px 0 0}
+
+/* ── 底栏：合法动作固定在底部，一屏可点 ──────────────────────────────────── */
+.action-panel{position:fixed;left:0;right:0;bottom:0;z-index:23;background:#101a26;
+ border-top:1px solid var(--line);border-radius:0;padding:9px 20px 11px;max-height:46vh;overflow:auto}
+.action-panel>#action-hint{display:block;margin-bottom:7px}
+/* ⚠ 这里必须用 `#actions`：框架里那条是 `#actions{grid-template-columns:1fr 1fr}`
+   （ID 选择器），写成 `.actions` 会被它压过去——实测动作栏因此变成 2 列 5 行、
+   把底栏撑到 554px 高、整块盖住半屏。 */
+#actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;align-content:start;
+ /* 框架那条 `#actions{grid-auto-rows:minmax(96px,auto)}` 也是 ID 选择器，不覆盖的话
+    每行被撑到 96px：9 个动作 = 3 行 = 348px 的底栏，直接吃掉四成屏幕。 */
+ grid-auto-rows:auto}
+#actions .action{text-align:left;display:flex;flex-direction:column;gap:1px;height:58px;min-height:58px;
+ padding:6px 9px;overflow:hidden}
+#actions .action span{font-size:13px}
+#actions .action small{font-size:11.5px;color:#b4c3d1;line-height:1.35;display:-webkit-box;
+ -webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+/* 玩家在重选阵容时，动作栏先让位（否则两条固定底栏会叠在一起）。 */
+body[data-roco-picking="yes"] #action-panel{display:none}
+
+/* ── 小芽（陪练）：轻量气泡 + 偏好记忆 ───────────────────────────────────── */
+.companion-line{margin:0 0 8px;background:#2b403c;border:1px solid #4d6b5c;
+ border-radius:12px 12px 12px 4px;padding:9px 12px;font-size:13.5px;line-height:1.65}
+.reply{margin-top:9px;font-size:13.5px;line-height:1.7;border-left:3px solid var(--accent);
+ padding:7px 11px;background:#1d2c30;border-radius:0 8px 8px 0}
+.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:11px}
+#say-input{flex:1;min-width:180px}
 
 /* 记忆面板（P1-3）：每行一条「玩家自己说过的」，右侧一个「忘掉」。
    刻意不做成表格——它是给玩家核对「她记了什么」的，不是数据管理界面。 */
 .memory{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
-.memory li{display:flex;align-items:center;gap:8px;background:#16222f;border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:13px}
-.mem-kind{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;padding:1px 6px;white-space:nowrap}
+.memory li{display:flex;align-items:center;gap:8px;background:#16222f;border:1px solid var(--line);
+ border-radius:9px;padding:7px 10px;font-size:13px}
+.mem-kind{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;
+ padding:1px 6px;white-space:nowrap}
 .mem-label{flex:1;min-width:0;overflow-wrap:anywhere}
-.mem-forget{font-size:12px;padding:4px 9px;white-space:nowrap}
-@media(max-width:720px){.memory li{flex-wrap:wrap}.mem-label{flex-basis:100%}}
+.mem-forget{font-size:12px;padding:4px 9px;white-space:nowrap;min-height:0}
+
+/* ── 军师：关键局面自动出现的**两行以内**小浮条；展开才看取舍 ─────────────── */
+.hint{position:fixed;left:50%;transform:translateX(-50%);
+ bottom:calc(var(--bottombar,0px) + 14px);width:min(680px,calc(100vw - 32px));
+ background:#1e2d32;border:1px solid #698d7b;border-radius:12px;padding:10px 14px;
+ box-shadow:0 10px 40px #0008;z-index:24}
+.hint-line{display:flex;align-items:flex-start;gap:9px}
+.hint-line strong{color:#bbebc5;font-size:13px;white-space:nowrap}
+.hint-line p{margin:0;flex:1;min-width:0;font-size:13.5px;line-height:1.6;
+ display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hint-head button,.hint-line button{white-space:nowrap;padding:2px 8px;line-height:1.4;min-height:0}
+.hint-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:5px}
+.hint-foot button{white-space:nowrap;flex:0 0 auto;font-size:12px;padding:3px 9px;min-height:0}
+.hint-body{margin-top:8px;font-size:12px;line-height:1.7;color:#b9c7d4;
+ border-top:1px dashed #3d5560;padding-top:7px}
+.hint-body p{margin:6px 0}
+
+/* ── 伙伴详情抽屉：面板数值 + 四个技能（卡片首层不放这些）─────────────────── */
+.pet-detail{position:fixed;right:16px;top:118px;bottom:calc(var(--bottombar,0px) + 16px);
+ width:340px;max-width:calc(100vw - 32px);
+ background:#16222f;border:1px solid var(--line);border-radius:12px;padding:12px 14px;
+ overflow:auto;z-index:26;box-shadow:0 14px 50px #0009}
+.pet-detail-body{font-size:12.5px;line-height:1.6;color:#c6d2de}
+.detail-stats{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
+ margin:9px 0 0;padding:0}
+.detail-stats li{display:flex;align-items:baseline;justify-content:space-between;gap:5px;
+ background:#121e2c;border:1px solid var(--line);border-radius:7px;padding:4px 7px;font-size:12px}
+.detail-stats b{color:#e3eaf1}
+.detail-moves{list-style:none;display:grid;gap:6px;margin:8px 0 0;padding:0}
+.detail-moves li{display:flex;flex-direction:column;gap:2px;background:#121e2c;
+ border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12.5px}
+.detail-moves small{color:#9fb0c0;line-height:1.5}
+.pet-detail .section-title{margin:10px 0 0}
+
+/* 头像徽记（P1-1）：自制 emoji + 主系别色描边，零外链、离线可用。
+   色盲友好靠三个信号叠加——emoji 图形、色块、以及旁边的系别文字。 */
+.avatar{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;
+ border-radius:7px;border:1.5px solid var(--line);background:#132030;font-size:14px;line-height:1;
+ flex:0 0 auto}
+#roster .pick .avatar{width:26px;height:26px;font-size:15px}
+.type{display:inline-flex;align-items:center;gap:3px;font-size:11.5px}
+.pet .type{font-size:12px}
+
+/* 键盘可达性：这个页面上所有可点东西都要看得见焦点（触屏之外还有键盘/无障碍场景）。 */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+/* 尊重系统的「减少动态效果」：本页的过渡只是装饰，关掉不影响任何判据。 */
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* 伤害数字浮层（P1-1）：一闪而过，不占版面、不进无障碍树（aria-hidden）。
    克制用暖色、被抵抗用灰色——颜色之外数字本身带负号，不靠颜色单独表意。 */
-.dmg-float{position:absolute;right:9px;top:7px;font-weight:700;font-size:15px;color:#f2d5a0;pointer-events:none;animation:dmg-rise 1.2s ease-out forwards}
+.dmg-float{position:absolute;right:9px;top:7px;font-weight:700;font-size:15px;color:#f2d5a0;
+ pointer-events:none;animation:dmg-rise 1.2s ease-out forwards}
 .dmg-float.strong{color:#ff9f86;font-size:17px}
 .dmg-float.weak{color:#a9bccd;font-size:13px}
-@keyframes dmg-rise{0%{opacity:0;transform:translateY(6px)}18%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-12px)}}
-
-/* 阵容选择：当前选的是哪一侧、哪些卡点不动、点不动的原因（第 45 轮 UX hotfix）。
-   玩家实测反馈：把某只随机分给对手之后，我方阶段点它**完全没反应**，
-   而卡片既没有禁用样式也没有提示，于是判断「点不动」。 */
-#select-panel{border-color:#3c5b6e}
-#select-panel[data-roco-pick-side="player"]{border-left:4px solid #8dd49c}
-#select-panel[data-roco-pick-side="enemy"]{border-left:4px solid #e8a76a}
-.side-tab[aria-pressed="true"]{box-shadow:0 0 0 2px #8dd49c inset}
-.side-tab[data-side="enemy"][aria-pressed="true"]{box-shadow:0 0 0 2px #e8a76a inset}
-.pick-hint{margin:8px 0 2px;font-size:12.5px;line-height:1.6;color:var(--warn);min-height:1.2em}
-.pick{position:relative}
-.pick.blocked{opacity:.55;border-style:dashed}
-.pick.blocked:hover{border-color:#7d6a4a;background:#1f2530}
-.pick .taken{font-size:10.5px;color:#c9b07a;border:1px solid #6b5b3a;border-radius:5px;padding:1px 5px;margin-left:6px;white-space:nowrap}
-.pick .taken.picked{color:#8dd49c;border-color:#4a6858}
-.pick.picked-player{border-color:#8dd49c;background:#1d3435}
-.pick.picked-enemy{border-color:#e8a76a;background:#33291d}
-@media(max-width:720px){.pick-hint{font-size:13px}}
-
-/* ── 第 45 轮：接入框架之后的页面差异（只写框架里没有的）─────────────────── */
-
-/* 12 只阵容卡：框架的 `.roster` 是 3 列（营地页只有 6 只），这里在宽屏放 4 列，
-   免得选一次阵容要滚三屏；窄屏跟着框架的断点走。 */
-@media(min-width:1100px){#roster{grid-template-columns:repeat(4,minmax(0,1fr))}}
-#roster .pet-option .stats{grid-template-columns:1fr 1fr;gap:2px 8px}
-#roster .pet-option .mv{font-size:11.5px;color:var(--muted);min-height:0;margin:2px 0 0}
-#roster .pet-option .nm{display:flex;align-items:center;gap:6px}
-.pet-option-types{margin:2px 0 6px}
-
-/* 六维：一行念完太长，按框架的 `.stats` 排成两列三行。 */
-.pet-stats{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;font-size:12px;color:#c6d2de;margin-top:6px}
-
-/* 便签（提示/复盘）底部那一行：按钮原来被挤成竖排的「展开取舍」四个字。 */
-.hint-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.hint-foot button{white-space:nowrap;flex:0 0 auto}
-.hint-head button{white-space:nowrap;padding:2px 8px;line-height:1.4}
+@keyframes dmg-rise{0%{opacity:0;transform:translateY(6px)}18%{opacity:1;transform:translateY(0)}
+ 100%{opacity:0;transform:translateY(-12px)}}
 
 /* 抽屉里的对照表：框架没有表格样式，给一条最低限度的边框与行距。 */
 .dev-body table.shadow{width:100%;border-collapse:collapse;font-size:12.5px;margin:6px 0}
-.dev-body table.shadow th{text-align:left;color:var(--accent);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+.dev-body table.shadow th{text-align:left;color:var(--accent);font-weight:600;padding:6px 8px;
+ border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
 .dev-body table.shadow td{padding:6px 8px;border-bottom:1px solid #26323f;color:#c6d2de;vertical-align:top}
 .dev-body table.shadow tr:last-child td{border-bottom:none}
 
-/* 场上伙伴：宽屏两列，别让一张卡横跨半个屏幕（血条拉得太长反而不像游戏界面）。 */
+/* ── 宽屏：选阵容页 4 列轻卡；对战页 = 舞台（左）+ 记录（右）───────────────── */
 @media(min-width:1100px){
- #self-pets{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
- #foe-field{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
- .board.arena{grid-template-columns:minmax(0,1fr) 60px minmax(0,1fr)}
+ #roster{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+@media(min-width:861px){
+ /* 对战页两栏：左边是舞台与后备，右边是这一回合的记录（记录不抢主视线）。 */
+ body[data-roco-view="ready"] main{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);
+  gap:0 14px;align-items:start}
+ body[data-roco-view="ready"] main>.topbar,
+ body[data-roco-view="ready"] main>.onboard-bar,
+ body[data-roco-view="ready"] main>#select-panel,
+ body[data-roco-view="ready"] main>#result-panel,
+ body[data-roco-view="ready"] main>#lesson-card,
+ body[data-roco-view="ready"] main>#action-panel{grid-column:1/-1}
+ body[data-roco-view="ready"] main>#battle-panel{grid-column:1}
+ /* 记录与陪练都在右栏：左栏是舞台，右栏不抢主视线的两件事。
+    放在左栏下方会被固定底栏压住「说一句」——那正是玩家最常点的地方。 */
+ body[data-roco-view="ready"] main>#log-panel,
+ body[data-roco-view="ready"] main>#companion-card{grid-column:2}
+}
+/* 底栏是固定定位，正文要给它让出位置，否则最后一段永远被压住。 */
+main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 
-/* 中间那一列原来只有 60px，回合文字被挤成竖排（第 35 回 / 合 · 补 / 位）。
-   框架里没有 `.chip`（那是这一页的组件），之前误删了，补回来。 */
-.chip{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:999px;
- padding:4px 10px;background:#16222f;white-space:nowrap}
-@media(min-width:1100px){.board.arena{grid-template-columns:minmax(0,1fr) 132px minmax(0,1fr)}}
-.center{white-space:nowrap;text-align:center;gap:6px}
-.center .muted{white-space:nowrap}
-
-/* 卡片变窄之后两处折行很难看：伙伴名被拆成「寂灭骨 / 龙」，六维里的「速度」被拆成两行。 */
-.pet-heading h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pet-heading{flex-wrap:wrap;row-gap:2px}
-.pet-types{display:flex;flex-wrap:wrap;gap:4px}
-.pet-stats span{white-space:nowrap}
-
-/* 两列布局下卡片更窄，六维两列会被裁掉（实测「魔防 104 · 魔」被切）。改成三列两行。 */
-#self-pets .pet-stats,#foe-field .pet-stats{grid-template-columns:repeat(3,minmax(0,1fr));font-size:11.5px}
-
-/* ── 第 46 轮：把页面「减重」（监工原话：UI 这么胖干啥？非常不实用）─────────────
-   实测的胖点：① 选完精灵之后那块选择区还占半屏；② 8 个动作每个 90px 高、两列铺开；
-   ③ 每个区块上下留白过多。这里只动密度，不动信息。 */
-.lineup-brief{display:flex;align-items:center;justify-content:space-between;gap:10px;
- background:#16222f;border:1px solid var(--line);border-radius:10px;padding:7px 12px;margin:0 0 10px;font-size:12.5px}
-.lineup-brief strong{color:#dbe7f1}
-.lineup-brief button{padding:4px 10px;font-size:12px}
-.panel{padding:12px;margin-bottom:10px}
-.section-title{margin-bottom:8px}
-main{padding-bottom:26px}
-#actions{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:6px}
-.action{min-height:50px;padding:6px 9px;gap:2px}
-.action span{font-size:13px}
-.action small{font-size:11.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-#roster .pet-option{padding:9px 10px}
-#roster .pet-option .stats{font-size:11.5px}
-.events{max-height:150px}
+/* ── 手机版式（390×844）：第一版 mockup 在窄屏上是坏的——实测发现四处：
+   ① 三步教程把「跳过」挤出屏幕；② 队伍栏 3 列把伙伴名挤成竖排（「寂灭骨龙」竖着写）；
+   ③ 阵容池 4 列同上，卡片文字竖排不可读；④ 固定底栏把主操作+说明+分页挤成一行。
+   这里按「手机上只保留一列信息」重排：卡片 2 列、队伍栏一列、底栏分两行、
+   抽屉与详情变成页内折叠/整宽浮层。 */
+@media (max-width:720px){
+ :root{font-size:15px}
+ .topbar h1{font-size:17px}
+ #about-drawer{width:auto;max-width:none;margin:8px 0 0;order:-1;max-height:none}
+ /* 教程在手机上挤成**一行**（mockup 的手机版式）：三步各占一张卡会把阵容池整个推到
+    首屏之外，而这三步是「第一次来的人唯一会先读的东西」——读得到才有用。 */
+ .onboard-bar{flex-direction:row;align-items:flex-start;flex-wrap:wrap;gap:4px 8px}
+ .onboard{display:flex;flex-wrap:wrap;gap:2px 10px;flex:1 1 100%}
+ .onboard li{flex-direction:row;align-items:baseline;gap:4px;background:transparent;border:0;
+  padding:0;font-size:12.5px}
+ .onboard li::before{content:"第 " counter(step) " 步"}
+ .onboard strong{font-size:12.5px}
+ .onboard span{display:none}
+ .onboard-skip{align-self:center;margin-left:auto}
+ .teambar{grid-template-columns:1fr;gap:10px}
+ .slots{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .slot{padding:6px 4px;font-size:12px}
+ .filters{gap:6px}
+ .filters .muted{margin-left:0;flex-basis:100%}
+ #pool-search{width:100%}
+ .fmenu{flex:1 1 40%}
+ .fmenu>summary{width:100%;justify-content:space-between}
+ .fmenu-body{width:min(320px,86vw)}
+ #roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ #roster .pick{min-height:104px;padding:8px 9px}
+ #roster .pick .nm{font-size:15px}
+ .card-key{font-size:11.5px}
+ /* 底栏分两行（mockup 的手机版式）：第一行主操作，第二行工具 + 翻页；不横向溢出。 */
+ .footbar{flex-wrap:wrap;gap:6px;padding:8px 12px}
+ #start-battle{flex:1 1 100%;order:1;width:100%}
+ .footbar .muted{flex:1 1 100%;order:2;margin-right:0;font-size:11.5px}
+ .pool-tools{order:3;flex:1 1 auto;justify-content:flex-start}
+ .pool-tools button{flex:0 0 auto}
+ .pager{order:4;flex:0 0 auto;margin-left:auto;justify-content:flex-end}
+ .stage{grid-template-columns:1fr;gap:8px}
+ .vs{display:none}
+ .bench-row{grid-template-columns:1fr}
+ #actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #actions .action{height:52px;min-height:52px}
+ /* 军师浮条贴底、整宽；动作栏（两行）之上。 */
+ .hint{left:14px;right:14px;transform:none;width:auto}
+ .pet-detail{left:14px;right:14px;width:auto;top:auto;max-height:52vh}
+ .hint-body{line-height:1.8}
+ .events{line-height:1.8}
+ .detail-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

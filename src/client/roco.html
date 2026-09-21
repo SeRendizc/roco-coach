@@ -1,116 +1,199 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 手游规则演示（无聊天入口）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/roco.css"></head><body>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 洛克王国：世界（训练场）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/roco.css"></head><body>
 <main>
-<header>
- <h1>小芽 · 手游规则演示 <small>roco-world-s4-2026-09-10</small></h1>
+
+<!-- ── 页头：只放游戏标题、轻量小芽入口、回合状态与右上角抽屉 ─────────────────
+     规则版本 / 服务状态 / 验收钩子 / 工程说明**全部**在 `#about-drawer` 里，默认收起。 -->
+<header class="topbar">
+ <h1>小芽 · 洛克王国：世界 <small>训练场</small></h1>
  <div class="header-actions">
-  <span id="engine-status" class="chip">规则服务：未启动</span>
-  <button id="start-battle" class="primary">开一局</button>
-  <button id="engine-retry" hidden>重试</button>
+  <span id="turn-chip" class="chip">未开局</span>
+  <span id="phase-chip" class="muted"></span>
+  <button id="coach-entry" title="叫小芽过来说一句">✦ 小芽</button>
   <button id="reset-battle">重开</button>
+  <button id="engine-retry" hidden>重试</button>
+  <!-- 开发者抽屉：默认收起。工程信息只在这里出现。 -->
+  <details class="dev" id="about-drawer">
+   <summary>关于这一页（规则快照 / 服务状态 / 验收钩子 / 工程说明）</summary>
+   <div class="dev-body">
+    <p><span id="engine-status" class="chip">规则服务：未启动</span></p>
+    <p>结算由 <strong>Python 规则引擎</strong>按手游子集完成，规则快照
+     <code id="about-ruleset">roco-world-s4-2026-09-10</code>。</p>
+    <p><strong>未核验的机制一律不猜</strong>（fail closed）：引擎会说「这里我们不知道」，
+     而不是补一个默认值。页面上带「未核验」字样的数字都是估值，不是实测值。</p>
+    <p>页面上的 <code>data-roco-*</code> 属性是<strong>验收钩子</strong>：自动化验收脚本读它们
+     判断「该出现的是否出现」。它们对玩家不可见，也不要依赖它们做产品逻辑。</p>
+    <p>本机小模型（Qwen3.5-4B + LoRA 适配器）只作为<strong>对照项</strong>出现在下面：
+     它只提议工具，参数照常过引擎校验，<strong>规则引擎仍是唯一真值来源</strong>，
+     默认不参与生成玩家看到的正文。</p>
+    <div class="section-title"><h3>本机小模型对照（它真的在参与吗）</h3></div>
+    <p><button id="shadow-run">问一次本机小模型</button>
+     <span class="muted">要拉起本地推理，几秒；只在这一局里对照一次。</span></p>
+    <div id="shadow-panel" hidden></div>
+    <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
+    <ul class="checklist" id="coverage"></ul>
+   </div>
+  </details>
  </div>
 </header>
 
-<p class="lead">
- 选好双方阵容就能开局。这一局按《洛克王国：世界》当前赛季的规则结算，
- 小芽会在关键时刻主动开口 —— 提醒、建议、以及局末的一次复盘。
- <strong>没有聊天框</strong>：她该说话时自己会出来。
-</p>
+<!-- ── 开局引导（P1-2）：只在**第一次**来的时候出现，可跳过，跳过之后不再占位 ── -->
+<div class="onboard-bar" id="onboard-bar">
+ <ol class="onboard" id="onboard">
+  <li><strong>选我方 3 只</strong><span>点一下加入，再点一下移出</span></li>
+  <li><strong>选对手 3 只</strong><span>切到「对手」那一侧再点</span></li>
+  <li><strong>开一局</strong><span>不用问她：该说话时小芽自己会出来</span></li>
+ </ol>
+ <button id="onboard-skip" class="onboard-skip">跳过</button>
+</div>
 
-<!-- 开局引导（P1-2）：三步，读完就知道这一页怎么用。不写功能说明，只写操作。 -->
-<ol class="onboard" id="onboard">
- <li><strong>选阵容</strong><span>双方各 3 只，点一下加入</span></li>
- <li><strong>开一局</strong><span>引擎按赛季规则真结算，一局十几回合</span></li>
- <li><strong>她自己会说话</strong><span>关键时刻出现提示，局末给一次复盘</span></li>
-</ol>
+<!-- ── 选阵容页（`#select-panel`）：固定队伍栏 + 阵容池 ───────────────────────
+     没有空的「你的队伍／训练对手」大框：这一页只有「已选的 3 只」与「48 只池子」。 -->
+<section class="panel select-panel" id="select-panel" data-roco-pick-side="player">
 
-<!-- 开发者抽屉：工程说明、数据版本、验收钩子。**默认收起**，玩家看不到这些。 -->
-<details class="dev" id="about-drawer">
- <summary>关于这一页（数据版本 / 验收钩子 / 工程说明）</summary>
- <div class="dev-body">
-  <p>结算由 <strong>Python 规则引擎</strong>按手游子集完成，规则快照
-   <code id="about-ruleset">roco-world-s4-2026-09-10</code>。</p>
-  <p><strong>未核验的机制一律不猜</strong>（fail closed）：引擎会说「这里我们不知道」，
-   而不是补一个默认值。页面上带「未核验」字样的数字都是估值，不是实测值。</p>
-  <p>页面上的 <code>data-roco-*</code> 属性是<strong>验收钩子</strong>：自动化验收脚本读它们
-   判断「该出现的是否出现」。它们对玩家不可见，也不要依赖它们做产品逻辑。</p>
-  <p>本机小模型（Qwen3.5-4B + LoRA 适配器）只作为<strong>对照项</strong>出现在
-   下方面板里：它只提议工具，参数照常过引擎校验，<strong>规则引擎仍是唯一真值来源</strong>，
-   默认不参与生成玩家看到的正文。</p>
-  <div class="section-title"><h3>本机小模型对照（它真的在参与吗）</h3></div>
-  <p><button id="shadow-run">问一次本机小模型</button>
-   <span class="muted">要拉起本地推理，几秒；只在这一局里对照一次。</span></p>
-  <div id="shadow-panel" hidden></div>
-  <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
-  <ul class="checklist" id="coverage"></ul>
+ <!-- 固定队伍栏：已选 3 只始终可见，我方/对手共用同一套「这一局带谁」 -->
+ <div class="teambar">
+  <div class="side player" id="side-player">
+   <div class="side-head"><b>我方</b><span class="muted"><span id="count-player">0</span>/3 · 正在选</span></div>
+   <div class="slots">
+    <span class="slot empty" id="slot-player-0">点下面的卡片加入</span>
+    <span class="slot empty" id="slot-player-1">第 2 位</span>
+    <span class="slot empty" id="slot-player-2">第 3 位</span>
+   </div>
+  </div>
+  <div class="side enemy" id="side-enemy">
+   <div class="side-head"><b>对手</b><span class="muted"><span id="count-enemy">0</span>/3</span></div>
+   <div class="slots">
+    <span class="slot empty" id="slot-enemy-0">点下面的卡片加入</span>
+    <span class="slot empty" id="slot-enemy-1">第 2 位</span>
+    <span class="slot empty" id="slot-enemy-2">第 3 位</span>
+   </div>
+  </div>
  </div>
-</details>
 
-<section class="board arena">
- <article class="panel side combatant" id="self-panel">
-  <div class="section-title"><h2>你的队伍</h2><span class="muted" id="self-active"></span></div>
-  <div id="self-pets" class="pets"></div>
- </article>
- <div class="center versus">
-  <div id="turn-chip" class="chip">未开局</div>
-  <div id="phase-chip" class="muted">—</div>
+ <!-- 阵容池：搜索 + 属性/定位筛选 + 分页（每页 12），卡片只给第一层信息 -->
+ <div class="pool">
+  <div class="filters">
+   <div class="seg" id="side-seg" role="group" aria-label="现在给哪一侧选">
+    <button class="side-tab selected" data-side="player" aria-pressed="true">我方</button>
+    <button class="side-tab" data-side="enemy" aria-pressed="false">对手</button>
+   </div>
+   <input type="search" id="pool-search" placeholder="搜索名字（48 只）" aria-label="按名字搜索" autocomplete="off">
+   <!-- 属性/定位筛选：折叠菜单里的按钮组。
+        为什么不是原生 <select>：原生下拉在无头 Chrome 里**打不开也按不动**
+        （实测：聚焦后真实 ArrowDown 完全不改 value），那样就没法写「真实键鼠」判据。
+        折叠菜单是页内 DOM，鼠标点得到、键盘也走得到，样式仍与输入框同一条。 -->
+   <details class="fmenu" id="filter-type-menu">
+    <summary>属性：<span id="filter-type-label">全部</span></summary>
+    <div class="fmenu-body" id="filter-type" role="group" aria-label="按属性筛选"></div>
+   </details>
+   <details class="fmenu" id="filter-role-menu">
+    <summary>定位：<span id="filter-role-label">全部</span></summary>
+    <div class="fmenu-body" id="filter-role" role="group" aria-label="按定位筛选"></div>
+   </details>
+   <span class="muted" id="pool-count">正在读取…</span>
+  </div>
+  <p id="pick-summary" class="muted pick-summary"></p>
+  <!-- 点击/键盘的即时反馈：说清「为什么这一下没选上」以及下一步怎么做。
+       role=status + aria-live 让键盘与读屏用户也拿得到同一句话。 -->
+  <p id="pick-hint" class="pick-hint" role="status" aria-live="polite"></p>
+  <div id="roster" class="roster"></div>
+  <p class="muted roster-status" id="roster-status">正在读取精灵名单…</p>
  </div>
- <article class="panel side combatant" id="foe-panel">
-  <div class="section-title"><h2>训练对手</h2><span class="muted">规则引擎驱动</span></div>
-  <div id="foe-field" class="pets"></div>
-  <div id="foe-bench" class="bench"></div>
- </article>
+
+ <!-- 底部固定：分页 + 主操作（首屏唯一主操作就是「开一局」） -->
+ <div class="footbar" id="pool-footbar">
+  <button id="start-battle" class="primary" disabled>开一局（双方各 3 只）</button>
+  <span class="muted" id="start-note">选满双方各 3 只才能开始</span>
+  <div class="pool-tools">
+   <button id="random-enemy">对手随机</button>
+   <button id="clear-pick">清空</button>
+  </div>
+  <div class="pager">
+   <button id="page-prev">上一页</button>
+   <span id="pool-page">1 / 1</span>
+   <button id="page-next">下一页</button>
+  </div>
+ </div>
 </section>
 
-<!-- 对局进行中的一行阵容摘要（选择面板收起来之后，玩家仍看得见自己选了什么） -->
-<div id="lineup-brief" class="lineup-brief" hidden></div>
-
-<!-- ── 阵容选择（P0-3）：12 只真实精灵，双方各选 3 ───────────────────── -->
-<section class="panel" id="select-panel">
- <div class="section-title"><h2>选择双方阵容</h2>
-  <span class="muted"><span id="roster-status">正在读取精灵名单…</span></span></div>
- <div class="pick-row">
-  <button class="side-tab selected" data-side="player">我方（<span id="count-player">0</span>/3）</button>
-  <button class="side-tab" data-side="enemy">对手（<span id="count-enemy">0</span>/3）</button>
-  <button id="random-enemy">对手随机</button>
-  <button id="clear-pick">清空</button>
+<!-- ── 结算页：结果 / 一个关键转折 / 下一局练习目标**先显示** ─────────────────── -->
+<section class="panel result-panel" id="result-panel" hidden>
+ <div class="result-head">
+  <b id="result-verdict">—</b>
+  <span class="muted" id="result-turns"></span>
+  <span class="muted" id="lesson"></span>
  </div>
- <div id="pick-summary" class="muted"></div>
- <!-- 点击/键盘的即时反馈：说清「为什么这一下没选上」以及下一步怎么做。
-      role=status + aria-live 让键盘与读屏用户也拿得到同一句话。 -->
- <p id="pick-hint" class="pick-hint" role="status" aria-live="polite"></p>
- <div id="roster" class="roster"></div>
 </section>
 
-<section class="panel action-panel">
- <div class="section-title"><h2>这一回合的行动</h2><span class="muted" id="action-hint">开一局后这里会出现可执行的动作</span></div>
- <div id="actions" class="actions"></div>
- <div class="row">
+<!-- 老师的复盘（局末）：一个关键错误或进步点 + 下一局目标；完整复盘折叠。 -->
+<section class="panel lesson-card" id="lesson-card" hidden>
+ <div class="section-title"><h2>✦ 局末复盘</h2><span class="muted">一个关键点 + 下一局练一件事</span></div>
+ <p id="lesson-question" class="result-turn"></p>
+ <div class="result-goal"><b>下一局练一件事</b><span id="lesson-learning"></span></div>
+ <p class="muted" id="lesson-progress"></p>
+ <details class="lesson-full">
+  <summary>完整复盘与依据（默认收起）</summary>
+  <p class="muted" id="lesson-note"></p>
+  <p class="muted" id="result-stats"></p>
+ </details>
+ <p><button id="lesson-close" class="lesson-close">收起这次复盘</button></p>
+</section>
+
+<!-- ── 对战页：中央是双方当前宠物的战斗舞台，后备压成小条 ───────────────────── -->
+<section class="panel battle" id="battle-panel" hidden>
+ <!-- 对局进行中的一行阵容摘要（阵容池收起来之后，玩家仍看得见自己选了什么） -->
+ <div id="lineup-brief" class="lineup-brief" hidden></div>
+
+ <div class="stage">
+  <article class="fighter" id="self-panel">
+   <div class="fighter-head"><span class="side-tag player">我方场上</span><span class="muted" id="self-active"></span></div>
+   <div id="self-pets" class="pets"></div>
+  </article>
+  <div class="vs" aria-hidden="true">VS</div>
+  <article class="fighter" id="foe-panel">
+   <div class="fighter-head"><span class="side-tag enemy">对手场上</span><span class="muted">规则引擎驱动</span></div>
+   <div id="foe-field" class="pets"></div>
+  </article>
+ </div>
+
+ <div class="bench-row">
+  <div class="bench-col"><span class="muted bench-label">我方后备</span><div id="self-bench" class="bench"></div></div>
+  <div class="bench-col"><span class="muted bench-label">对手后备</span><div id="foe-bench" class="bench"></div></div>
+ </div>
+
+ <div class="battle-tools">
   <button id="plan">✦ 让小芽看一眼</button>
   <button id="auto-turn">让双方各走一步（自动演示）</button>
   <span id="plan-status" class="muted"></span>
  </div>
 </section>
 
-<section class="panel log-panel" id="log-panel">
+<!-- 战斗记录：不抢主视线（最多 6 行、可滚动）；原始 JSON 收在默认折叠区里。 -->
+<section class="panel log-panel" id="log-panel" hidden>
  <div class="section-title"><h2>这一回合发生了什么</h2></div>
  <div id="events" class="events"></div>
- <!-- 原始事件 JSON：**默认收起**。玩家读句子；要查数据的人自己展开。 -->
  <details class="dev">
   <summary>调试信息（引擎原始事件，默认收起）</summary>
   <pre id="events-raw" class="raw"></pre>
  </details>
 </section>
 
-<section class="panel">
- <div class="section-title"><h2>对局记录</h2><span class="muted">只给一个关键转折</span></div>
- <div id="lesson" class="muted">还没打完一局。</div>
+<!-- ── 底栏：合法动作**固定**在这里，一屏可点 ──────────────────────────────── -->
+<section class="panel action-panel" id="action-panel" hidden>
+ <span class="muted" id="action-hint">开一局后这里会出现可执行的动作</span>
+ <div id="actions" class="actions"></div>
+</section>
+
+<!-- ── 小芽（陪练）：轻量气泡 + 偏好记忆；刻意不做「三角色状态表」 ───────────── -->
+<section class="panel companion" id="companion-card">
+ <div class="section-title"><h2>小芽</h2><span class="muted">她该说话时自己会出来</span></div>
+ <p id="companion-line" class="companion-line" hidden></p>
+ <div id="say-reply" class="reply" hidden></div>
  <form id="say-form" class="row">
   <input id="say-input" maxlength="80" placeholder="想说点什么（例如「好烦，又输了」）" aria-label="对小芽说一句">
   <button class="primary">说一句</button>
  </form>
- <div id="say-reply" class="reply" hidden></div>
- <!-- 记忆（P1-3）：**玩家可见、可逐条忘掉**。只列「他自己说过的」，不列对局记录——
-      把战绩摘要和长期偏好混在一张单子上，正是「拿摘要冒充记忆」的另一种写法。 -->
+ <!-- 记忆（P1-3）：**玩家可见、可逐条忘掉**。只列「他自己说过的」，不列对局记录。 -->
  <div class="section-title" id="memory-head"><h3>小芽记住的（都是你说过的）</h3>
   <span class="muted">说错了？直接再说一句就能改，或者点「忘掉」</span></div>
  <ul id="memory-list" class="memory"></ul>
@@ -119,21 +202,19 @@
 
 </main>
 
-<!-- 无聊天入口的主动短提示：固定在右下角，像页面上的一条便签 -->
+<!-- 军师：关键局面自动出现的**两行以内**小浮条；展开才看动作比较与长效后果 -->
 <aside id="hint" class="hint" hidden role="status" aria-live="polite">
- <div class="hint-head"><strong>✦ 小芽</strong><button id="hint-close" aria-label="本场不再主动提醒">×</button></div>
- <p id="hint-text"></p>
+ <div class="hint-line"><strong>✦ 小芽</strong><p id="hint-text"></p>
+  <button id="hint-close" aria-label="本场不再主动提醒">×</button></div>
  <div class="hint-foot"><span id="hint-why" class="muted"></span><button id="hint-details">展开取舍</button></div>
  <div id="hint-body" class="hint-body" hidden></div>
 </aside>
 
-<!-- 局末复盘（老师：一个转折点 + 一条可执行的改法 + 上一次那一课的核对） -->
-<aside id="lesson-card" class="lesson" hidden>
- <div class="hint-head"><strong>✦ 局末复盘</strong><button id="lesson-close" aria-label="关掉">×</button></div>
- <p id="lesson-question"></p>
- <p id="lesson-learning"></p>
- <p class="muted" id="lesson-progress"></p>
- <p class="muted" id="lesson-note"></p>
+<!-- 伙伴详情抽屉：面板数值与四个技能只在展开时出现（卡片首层不放这些） -->
+<aside id="pet-detail" class="pet-detail" hidden aria-label="伙伴详情">
+ <div class="hint-head"><strong id="pet-detail-name">伙伴详情</strong>
+  <button id="pet-detail-close" aria-label="关掉">×</button></div>
+ <div id="pet-detail-body" class="pet-detail-body"></div>
 </aside>
 
 <script type="module" src="/src/client/roco.js"></script>

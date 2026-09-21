@@ -11,6 +11,18 @@
 // 页面没有任何输入框是「问教练」的：唯一的输入框是「对小芽说一句」，
 // 它走的是陪练的情绪回应，不是战术问答。这是刻意的——F01 要证明的正是
 // 「不打开聊天也能得到帮助」。
+//
+// ── 版式（第 60 轮 UI 落地）─────────────────────────────────────────────────
+// 三页结构都按定稿的 mockup 落进这一个文档里，靠 `body[data-roco-view]` 与
+// 各区块的 `hidden` 切换：
+//   · **选阵容页**：页头（标题 + 轻量小芽入口）+ 固定队伍栏 + 阵容池
+//     （分段选择器 / 搜索 / 属性·定位筛选 / 每页 12 / 详情抽屉）。
+//     规则版本、服务状态、验收钩子、工程说明**全部**在右上角 `#about-drawer`，默认收起。
+//   · **对战页**：阵容池完全收起（只留 `#lineup-brief` 一行 + 「重选阵容」），
+//     中央是双方当前宠物的战斗舞台，后备压成小条，合法动作固定在底部。
+//   · **结算页**：结果 / 一个关键转折 / 下一局练习目标先显示，统计与证据折叠。
+// 小芽不做三角色状态表：军师是两行以内的自动浮条，陪练是轻量气泡 + 可见记忆，
+// 老师只在局末给一个关键点与下一局目标。
 
 import {
   rocoIntervention,
@@ -50,12 +62,21 @@ const state = {
   memory: freshMemory(),
   timings: [],         // 每次 /api/roco/plan 的往返耗时（P50/P95 报告要用）
   // ── 阵容选择（P0-3）──────────────────────────────────────────────
-  roster: [],          // 12 只真实精灵（来自 /api/roco/roster）
-  pick: {player: [], enemy: [], side: 'player', hint: ''},
+  // `roster` 是**全量名单**（48 只，带 role/speed_tier）：选中项的名字回查、
+  // 筛选下拉的选项表、以及「同一只不能同时在两边」的判断都要它。
+  // 屏幕上渲染的是 `pool.rows`（当前页最多 12 只）——48 张长卡平铺是这一轮要拆掉的东西。
+  roster: [],
+  pick: {player: [], enemy: [], side: 'player', hint: '', open: false},
+  // 阵容池的**视图状态**（第 60 轮）：搜索 / 属性 / 定位 / 分页。
+  // `seq` 是并发保护：搜索框每敲一个字都会发一次请求，回来晚的那次不许覆盖新结果。
+  pool: {keyword: '', type: '', role: '', offset: 0, pageSize: 12, total: 0, rows: [], seq: 0},
+  detail: null,        // 详情抽屉里正在看的那一只
   seedOverride: null,  // 只给验收脚本换局用；界面上没有这个开关
 };
 
 const MEMORY_KEY = 'roco-coach-memory-v1';
+//: 教程「跳过」的记账。**刷新之后仍然要跳过**，所以存在 localStorage 而不是内存里。
+const ONBOARD_KEY = 'roco-coach-onboard-v1';
 
 const $ = (id) => document.getElementById(id);
 
@@ -122,10 +143,17 @@ const pct = (hp, max) => (Number.isFinite(hp) && Number.isFinite(max) && max > 0
 
 //: 系别配色：**自制色块**，不抓官方图（素材许可不明）。
 //: 色盲友好：颜色之外同时给文字标签，所以不认颜色也能读。
+//: 候选池从 12 只扩到 **48** 只之后，名单里多出 7 种系别（草系、地系、恶系、毒系、
+//: 电系、机械系、光系）。实测症状：48 张卡里有 **17 张没有形象**（`{avatars:48, empty:17}`），
+//: 而它们正是数量最多的一批。所以这两张表按**数据里真的出现过的系别**补齐——
+//: 守卫（`tests/roco-experience.test.js`）现在从 `pets.json` 取出全部系别逐个比对，
+//: 少一个就不是「以后再说」，而是那一类伙伴在页面上变成一个没有图形的灰块。
 const TYPE_COLOR = {
   普通系: '#9aa0a6', 火系: '#e8714a', 水系: '#4a90d9', 武系: '#c0563f', 翼系: '#7fb2e5',
   冰系: '#69c2d6', 龙系: '#7b61c9', 幽系: '#6b5b95', 萌系: '#e58fc0', 虫系: '#8fae4a',
   幻系: '#b06fd0', 自然系: '#5fae7a',
+  草系: '#5fae7a', 地系: '#b08a5a', 毒系: '#9b6bb5', 光系: '#e8d67a',
+  恶系: '#6b5b7b', 机械系: '#8a97a8', 电系: '#e8c34a',
 };
 //: 系别「形象」：**自制 emoji 徽记**，与配色一一对应。
 //:
@@ -140,10 +168,26 @@ const TYPE_EMOJI = {
   普通系: '🐾', 火系: '🔥', 水系: '💧', 武系: '🥊', 翼系: '🪶',
   冰系: '❄️', 龙系: '🐉', 幽系: '👻', 萌系: '🎀', 虫系: '🐛',
   幻系: '✨', 自然系: '🌿',
+  草系: '🌿', 地系: '⛰️', 毒系: '☠️', 光系: '☀️',
+  恶系: '🌑', 机械系: '⚙️', 电系: '⚡',
 };
+const typeColor = (type) => TYPE_COLOR[type] ?? '#6b7280';
+const typeEmoji = (type) => TYPE_EMOJI[type] ?? '';
+
 function typeChips(types) {
-  return (types ?? []).map((t) => `<span class="type" style="background:${TYPE_COLOR[t] ?? '#6b7280'}">${TYPE_EMOJI[t] ?? ''}${t}</span>`).join('');
+  return (types ?? []).map((t) => `<span class="type" style="background:${typeColor(t)}">${typeEmoji(t)}${t}</span>`).join('');
 }
+
+//: 定位（引擎侧的标注，不是引擎数值）与速度档的中文名。
+const ROLE_LABEL = {attacker: '输出', tank: '坦克', recovery: '回复', control: '控制', support: '辅助'};
+const ROLE_ORDER = ['attacker', 'tank', 'recovery', 'control', 'support'];
+const TYPE_ORDER = ['普通系', '火系', '水系', '武系', '翼系', '冰系', '龙系', '幽系', '萌系',
+  '虫系', '幻系', '自然系', '草系', '地系', '恶系', '毒系', '电系', '机械系', '光系'];
+//: 异常状态的中文名（与引擎侧 `events_text._STATUS` 同源口径；这里只做显示）。
+const STATUS_LABEL = {burn: '灼烧', poison: '中毒', paralysis: '麻痹', freeze: '冰冻',
+  sleep: '睡眠', confusion: '混乱', seal: '封印'};
+const RESULT_CN = {win: '我方胜', loss: '我方负', draw: '平局', escaped: '撤退', ongoing: '未结束'};
+
 /**
  * 一只伙伴的头像块：主系别的 emoji + 该系颜色。
  *
@@ -155,19 +199,16 @@ function petAvatar(pet) {
   if (!pet || !pet.name) return '';
   const main = (pet.types ?? [])[0] ?? null;
   if (!main) return '';
-  const color = TYPE_COLOR[main] ?? '#6b7280';
-  const emoji = TYPE_EMOJI[main] ?? '';
   // 两个类名都在：`pet-icon` 是营地页（`src/client/style.css`）里既有的**大 emoji 形象**，
-  // `avatar` 是第 45 轮加的徽记，验收脚本按它取值。**视觉只用一份**（framework 那一份）。
-  return `<span class="avatar pet-icon" style="border-color:${color}" aria-hidden="true">${emoji}</span>`;
+  // `avatar` 是第 45 轮加的徽记，验收脚本按它取值。**视觉只用一份**（roco.css 那一份）。
+  return `<span class="avatar pet-icon" style="border-color:${typeColor(main)}" aria-hidden="true">${typeEmoji(main)}</span>`;
 }
 
 /**
- * 一张精灵卡。
+ * 一只伙伴在**战斗舞台**上的卡。
  *
- * 第 42 轮 P0：原来这里把 `pet_id` 用 `<code>` 印在名字旁边，玩家看到的是
- * 「寂灭骨龙 pet_000225」。**内部 id 不进玩家视野**——它只出现在调试抽屉里。
- * 同时补上系别标签与六维摘要（数据里本来就有，只是从来没被页面用过）。
+ * 这是对战页中央那一块：血量、能量、异常三项要一眼看得清，别的都进详情抽屉。
+ * 六维面板原来印在这里（`pet-stats`），第 60 轮挪进详情抽屉——舞台上它只是噪声。
  */
 function petCard(pet, {active = false} = {}) {
   if (!pet) return '';
@@ -175,26 +216,45 @@ function petCard(pet, {active = false} = {}) {
   const statuses = pet.statuses && Object.keys(pet.statuses).length
     ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : '';
   const name = pet.name ?? '未知伙伴';
-  const stats = pet.stats
-    ? `<span class="muted">生命 ${pet.stats.hp} · 攻击 ${pet.stats.atk} · 防御 ${pet.stats.def} · 魔攻 ${pet.stats.spa} · 魔防 ${pet.stats.spd} · 速度 ${pet.stats.spe}</span>`
-    : '';
   // `data-slot` 与 `.active` 只用于把「伤害数字」浮在**被打中**的那只身上（见 flashDamage）：
   // 卡片的位次是 `ui_public_view` 给的公开字段，不是自己数的。
   const slot = Number.isInteger(pet.slot) ? ` data-slot="${pet.slot}"` : '';
-  // 结构沿用营地页既有组件（`style.css` 的 `.pet-heading/.hp-line/.hp-track/.hp-fill/.energy`）：
-  // 同一种「一只伙伴」在两页长得不同，是第 45 轮监工点名的问题（「全部重新搭建啊？」）。
   const energyDots = Number.isFinite(pet.energy)
     ? `${'●'.repeat(Math.max(0, Math.min(10, pet.energy)))}<small> ${pet.energy} 豆</small>`
     : '—';
-  return `<div class="pet combatant ${pet.fainted ? 'fainted' : ''}${active ? ' active' : ''}"${slot}>
+  return `<div class="pet ${pet.fainted ? 'fainted' : ''}${active ? ' active' : ''}"${slot}>
     <div class="pet-heading">${petAvatar(pet)}
-      <div><h3>${name}</h3>${statuses ? `<small>异常 ${statuses}</small>` : ''}</div>
+      <div><h3>${name}</h3><small class="pet-status">${statuses ? `异常：${statuses}` : '异常：—'}</small></div>
       <span class="pet-types">${typeChips(pet.types)}</span></div>
     <div class="hp-line"><span>生命</span><span>${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span></div>
     <div class="hp-track"><div class="hp-fill ${hpClass(ratio)}" style="width:${pct(pet.hp, pet.max_hp)}%"></div></div>
     <div class="energy">${energyDots}</div>
-    ${stats ? `<div class="pet-stats">${stats}</div>` : ''}
   </div>`;
+}
+
+/** 后备**小条**：只给「第几位 + 名字 + 血量/能量」，一张大卡是舞台上的主角才有的待遇。 */
+function benchStrip(pet, index) {
+  const hp = Number.isFinite(pet.hp) && Number.isFinite(pet.max_hp) ? `${pet.hp}/${pet.max_hp}` : '血量未知';
+  const energy = Number.isFinite(pet.energy) ? ` · ${pet.energy} 豆` : '';
+  return `<div class="bench-pet ${pet.fainted ? 'fainted' : ''}">
+    <strong>第 ${index + 1} 位</strong>
+    <div class="stats">${pet.fainted ? '已倒下' : `${pet.name ?? '未知伙伴'} · ${hp}${energy}`}</div></div>`;
+}
+
+/**
+ * 卡片首层的那**一个**最关键特点。
+ *
+ * 只用名单里真的给了的字段（`moveset[].power` 与 `stats.spe`），不编：
+ * 引擎没给威力的那一招不算威力，速度档是登记层的标注。
+ */
+function keyFeature(pet) {
+  const moves = Array.isArray(pet.moveset) ? pet.moveset : [];
+  const hit = moves.filter((m) => Number.isFinite(m.power)).sort((a, b) => b.power - a.power)[0] ?? null;
+  const speed = Number.isFinite(pet?.stats?.spe) ? pet.stats.spe : null;
+  const bits = [];
+  bits.push(hit && hit.power > 0 ? `最狠一招「${hit.name}」威力 ${hit.power}` : '配招里没有带威力的攻击招');
+  if (speed !== null) bits.push(`速度 ${speed}${pet.speed_tier ? `（${pet.speed_tier}）` : ''}`);
+  return bits.join(' · ');
 }
 
 //: 建议层 `evidence` 里那些键的中文名。
@@ -227,30 +287,30 @@ function factValue(value) {
   return String(value);
 }
 
-//: 异常状态的中文名（与引擎侧 `events_text._STATUS` 同源口径；这里只做显示）。
-const STATUS_LABEL = {burn: '灼烧', poison: '中毒', paralysis: '麻痹', freeze: '冰冻',
-  sleep: '睡眠', confusion: '混乱', seal: '封印'};
-
 function render() {
   const view = state.view;
   // 玩家只该看到「能不能玩」。版本号是给排查用的，进开发者抽屉（P0-4）。
   $('engine-status').textContent = view ? '规则服务：已连接' : '规则服务：未启动';
+  $('engine-status').dataset.rocoStatus = view ? 'ready' : 'idle';
   const aboutVersion = $('about-ruleset');
   if (aboutVersion && view?.ruleset_id) {
     aboutVersion.textContent = `${view.ruleset_id} · 本局状态版本 ${view.state_version}`;
   }
-  $('engine-status').dataset.rocoStatus = view ? 'ready' : 'idle';
+  // 结算结果是引擎给的英文（win/loss/draw/escaped）。玩家不该在界面上看到 `win`。
   $('turn-chip').textContent = view ? `第 ${view.turn} 回合 · ${view.phase === 'replace' ? '补位' : '对战'}` : '未开局';
-  // 结算结果是引擎给的英文（win/loss/draw/escaped）。玩家不该在界面上看到 `win`——
-  // 这是第 45 轮从截图里看出来的（「对局结束：win」），不是测试报出来的。
-  const RESULT_CN = {win: '我方胜', loss: '我方负', draw: '平局', escaped: '撤退', ongoing: '未结束'};
   $('phase-chip').textContent = view?.battle_result
     ? `对局结束：${RESULT_CN[view.battle_result] ?? view.battle_result}`
     : '';
   $('self-active').textContent = view?.self?.active != null ? `场上：第 ${view.self.active + 1} 位` : '';
-  $('self-pets').innerHTML = (view?.self?.pets ?? [])
-    .map((pet, index) => petCard(pet, {active: index === view?.self?.active})).join('');
+
+  // ── 战斗舞台：双方**当前**那一只 + 后备小条 ──────────────────────────────
+  const pets = view?.self?.pets ?? [];
+  const activeIndex = Number.isInteger(view?.self?.active) ? view.self.active : 0;
+  $('self-pets').innerHTML = view ? petCard(pets[activeIndex] ?? pets[0] ?? null, {active: true}) : '';
+  $('self-bench').innerHTML = pets
+    .map((pet, index) => (index === activeIndex ? '' : benchStrip(pet, index))).join('');
   $('foe-field').innerHTML = view?.opponent?.field ? petCard(view.opponent.field, {active: true}) : '';
+  // 对手后备在公开视图里**只有位次与是否倒下**（血量是隐藏信息），照实说。
   $('foe-bench').innerHTML = (view?.opponent?.bench ?? [])
     .map((b) => `<div class="bench-pet ${b.fainted ? 'fainted' : ''}">`
       + `<strong>第 ${(b.slot ?? 0) + 1} 位</strong>`
@@ -258,7 +318,9 @@ function render() {
     .join('');
 
   const actions = view?.legal ?? [];
-  $('action-hint').textContent = view ? `${actions.length} 个合法动作` : '开一局后这里会出现可执行的动作';
+  $('action-hint').textContent = view
+    ? (view.battle_result ? '这一局已经结束：重开一局继续练' : `${actions.length} 个合法动作，点一下就走这一手`)
+    : '开一局后这里会出现可执行的动作';
   $('actions').innerHTML = actions.map((action, index) => {
     // 技能按钮上写**玩家看得懂的东西**：系别 · 能耗 · 威力（或来源未给）· 一句说明。
     // 第 42 轮之前这里写的是 `技能 · skill_000750`——一个内部 id。
@@ -290,12 +352,12 @@ function render() {
     button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
   }
 
-  const logs = [];
   // 事件区**只渲染中文句子**（`event.text`，引擎侧生成）。
   //
   // 第 42 轮之前这里是 `${event.kind} · ${JSON.stringify(event.detail)}`，
   // 玩家看到的是 `enemy damage · {"amount":25,...}` —— 引擎内部标识符 + 内部数据结构。
   // 原始 JSON 没有丢，但只出现在「调试信息」折叠区里（默认收起）。
+  const logs = [];
   const raw = [];
   for (const event of state.events) {
     const text = typeof event.text === 'string' && event.text ? event.text : null;
@@ -322,15 +384,16 @@ function render() {
     ? `state_version=${state.planAtVersion} coverage=${state.plan.coverage ?? '—'} timed_out=${state.plan.timed_out === true}`
     : '';
 
-  // ── 打完就可以收起阵容选择（监工实测：选完精灵那块还一直杵在页面上，占掉半屏）──
-  // 对局进行中 → 收起，只留一行「我方 A/B/C ｜ 对手 X/Y/Z」+ 重选入口；
-  // 一局结束 → 自动放出来，因为下一局要重新选。玩家随时可以手动重选。
-  const running = Boolean(view && !view.battle_result);
+  // ── 三页的切换（同一个文档，靠 hidden 与 body 上的标记）─────────────────
+  //
+  // 对局一开始阵容池就**完全收起**（只留一行摘要 + 「重选阵容」）；一局打完也不自动
+  // 放出来——先让玩家把结算看完。玩家随时可以点「重选阵容」把它叫回来。
+  const busy = Boolean(view);
   const pickPanel = $('select-panel');
-  if (pickPanel) pickPanel.hidden = running && !state.pick.open;
+  if (pickPanel) pickPanel.hidden = busy && !state.pick.open;
   const brief = $('lineup-brief');
   if (brief) {
-    brief.hidden = !running || state.pick.open;
+    brief.hidden = !(busy && !state.pick.open);
     if (!brief.hidden) {
       const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
       // 摘要要用**这一局真正在打的那几只**：玩家用默认阵容开局时 `state.pick` 是空的，
@@ -347,8 +410,15 @@ function render() {
       $('reopen-pick').addEventListener('click', () => { state.pick.open = true; render(); });
     }
   }
+  $('battle-panel').hidden = !busy;
+  $('log-panel').hidden = !busy;
+  $('action-panel').hidden = !busy;
+  $('result-panel').hidden = !view?.battle_result;
+  // 阵容池一打开，动作栏就让位（两条固定底栏不能叠在一起）。
+  document.body.dataset.rocoPicking = state.pick.open ? 'yes' : 'no';
   document.body.dataset.rocoView = view ? 'ready' : 'empty';
   renderMemory();
+  syncBottomBars();
 }
 
 // ── 伤害数字浮层（P1-1）─────────────────────────────────────────────────────
@@ -419,6 +489,43 @@ function forgetMemory(id) {
 function escapeAttr(value) {
   return String(value ?? '').replace(/[&<>"']/g, (c) => (
     {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
+}
+
+/**
+ * 把「当前那条固定底栏」的高度写进 `--bottombar`。
+ *
+ * 为什么不让 CSS 猜：底栏有两条（选阵容页的 `#pool-footbar` 与对战页的 `#action-panel`），
+ * 高度又随动作条数与窄屏换行变化（实测 3 行动作 = 234px）。写死一个数字的结果就是
+ * 「军师浮条盖住动作按钮」或者「详情抽屉被底栏切掉一截」——两种都是点了没反应的那类 bug。
+ * 所以每次重画都量一次真实高度，浮层与正文下边距都按它算。
+ */
+function syncBottomBars() {
+  const bars = [$('action-panel'), $('pool-footbar')];
+  const visible = bars.find((el) => el && el.getClientRects().length > 0 && !el.closest('[hidden]'));
+  const height = visible ? Math.round(visible.getBoundingClientRect().height) : 0;
+  document.documentElement.style.setProperty('--bottombar', `${height}px`);
+  document.body.dataset.rocoBottombar = String(height);
+}
+
+// ── 教程：只在第一次出现，可跳过，跳过之后不再占位（刷新也还在）───────────────
+function onboardDismissed() {
+  try { return localStorage.getItem(ONBOARD_KEY) === '1'; } catch { return false; }
+}
+function applyOnboard() {
+  const bar = $('onboard-bar');
+  const onboard = $('onboard');
+  if (!bar) return;
+  const shown = !onboardDismissed();
+  bar.hidden = !shown;
+  // 验收钩子：`shown` 要求「三步都在」——少一步这一页就又变回「先看半天才知道怎么用」。
+  document.body.dataset.rocoOnboard = shown && onboard && onboard.children.length === 3
+    ? 'shown'
+    : 'hidden';
+}
+function dismissOnboard() {
+  try { localStorage.setItem(ONBOARD_KEY, '1'); } catch { /* 隐私模式：这次仍然收起来，只是不跨会话 */ }
+  applyOnboard();
+  document.body.dataset.rocoOnboardDismissed = 'yes';
 }
 
 // ── 提示：显示 / 作废 / 展开 ────────────────────────────────────────────────
@@ -530,6 +637,173 @@ function applyResult(data) {
   else refreshHint({reason: 'after-advance'});
 }
 
+// ── 阵容池（P0-3 / 第 60 轮）────────────────────────────────────────────────
+//
+// 48 只不许平铺：屏幕上一页 12 张轻卡（头像 / 名字 / 属性 / 定位 / 一个最关键特点），
+// 面板数值与四个技能进 `#pet-detail` 抽屉。搜索走前端（服务端的白名单参数只有
+// offset/limit/type/role，没有名字查询），属性与定位走后端筛选，翻页走后端分页。
+
+/**
+ * 属性/定位筛选的按钮组（折叠菜单里）。
+ *
+ * 为什么不是原生 `<select>`：原生下拉在无头 Chrome 里打不开也按不动——实测「聚焦之后
+ * 派发真实 ArrowDown」完全不改 value，于是「属性/定位筛选」这一条就写不出真实键鼠判据。
+ * 按钮组是页内 DOM：真实鼠标点得到、键盘 Tab+Enter 也走得到，样式与输入框同一条。
+ */
+function renderFilterMenus() {
+  const build = (box, options, current, attr) => {
+    if (!box) return;
+    box.innerHTML = options.map(([value, label]) => `<button class="filter-chip" data-${attr}="${escapeAttr(value)}"
+      aria-pressed="${value === current ? 'true' : 'false'}">${escapeAttr(label)}</button>`).join('');
+    for (const button of box.querySelectorAll('button')) {
+      button.addEventListener('click', () => {
+        state.pool[attr] = button.dataset[attr];
+        const menu = box.closest('details');
+        if (menu) menu.open = false;
+        renderFilterMenus();
+        void loadPool({reset: true});
+      });
+    }
+  };
+  const types = new Set();
+  const roles = new Set();
+  for (const pet of state.roster) {
+    for (const t of pet.types ?? []) types.add(t);
+    if (pet.role) roles.add(pet.role);
+  }
+  build($('filter-type'), [['', '全部属性'], ...TYPE_ORDER.filter((t) => types.has(t)).map((t) => [t, t])],
+    state.pool.type, 'type');
+  build($('filter-role'), [['', '全部定位'], ...ROLE_ORDER.filter((r) => roles.has(r)).map((r) => [r, ROLE_LABEL[r]])],
+    state.pool.role, 'role');
+  const typeLabel = $('filter-type-label');
+  if (typeLabel) typeLabel.textContent = state.pool.type || '全部';
+  const roleLabel = $('filter-role-label');
+  if (roleLabel) roleLabel.textContent = state.pool.role ? (ROLE_LABEL[state.pool.role] ?? state.pool.role) : '全部';
+  document.body.dataset.rocoPoolType = state.pool.type || 'all';
+  document.body.dataset.rocoPoolRole = state.pool.role || 'all';
+}
+
+/** 筛选下拉的选项来源：只列名单里真的出现过的属性与定位，顺序固定（免得每次刷新都在变）。 */
+function buildFilterOptions() {
+  renderFilterMenus();
+}
+
+/**
+ * 拉一页阵容池。
+ *
+ * 两条路径，都从**同一个服务**取数（不另起第二个数据源）：
+ *   · 有搜索词：按属性/定位取回**全部**匹配项（`offset=0` 让回执带上 role/speed_tier），
+ *     在前端按名字过滤，再本地分页；
+ *   · 没有搜索词：把分页交给服务端（`limit`/`offset`），页面只渲染回来的那一页。
+ * `seq` 是并发保护：搜索框每敲一下都会发请求，回来晚的那次不许覆盖新结果。
+ */
+async function loadPool({reset = false} = {}) {
+  const pool = state.pool;
+  if (reset) pool.offset = 0;
+  const seq = (pool.seq += 1);
+  const query = new URLSearchParams();
+  if (pool.type) query.set('type', pool.type);
+  if (pool.role) query.set('role', pool.role);
+  if (pool.keyword) query.set('offset', '0');
+  else {
+    query.set('limit', String(pool.pageSize));
+    query.set('offset', String(pool.offset));
+  }
+  try {
+    const data = await getJson(`/api/roco/roster?${query.toString()}`);
+    if (seq !== pool.seq) return;               // 有更晚的一次请求在飞，丢弃这一次的结果
+    if (!data.ok) throw new Error(data.error || '名单读取失败');
+    const key = pool.keyword;
+    const all = key
+      ? data.pets.filter((pet) => String(pet.name ?? '').includes(key))
+      : data.pets;
+    pool.total = key ? all.length : (data.total ?? data.count ?? all.length);
+    const from = key ? pool.offset : 0;
+    pool.rows = all.slice(from, from + pool.pageSize);
+    document.body.dataset.rocoPool = String(pool.rows.length);
+    document.body.dataset.rocoPoolTotal = String(pool.total);
+    renderRoster();
+  } catch (error) {
+    if (seq !== pool.seq) return;
+    $('pool-count').textContent = `名单读取失败：${error.message}`;
+    $('roster-status').textContent = `名单读取失败：${error.message}`;
+  }
+}
+
+/** 阵容池底部那一行：第几页 / 一共几页 / 筛出几只。 */
+function renderPoolMeta() {
+  const pool = state.pool;
+  const pages = Math.max(1, Math.ceil(pool.total / pool.pageSize));
+  const page = Math.min(pages, Math.floor(pool.offset / pool.pageSize) + 1);
+  $('pool-page').textContent = `${page} / ${pages}`;
+  $('pool-count').textContent = pool.total
+    ? `${pool.total} 只里筛出 ${pool.rows.length} 只 · 每页 ${pool.pageSize}`
+    : '没有符合筛选条件的伙伴';
+  $('page-prev').disabled = pool.offset <= 0;
+  $('page-next').disabled = pool.offset + pool.pageSize >= pool.total;
+}
+
+/** 固定队伍栏：已选 3 只始终可见（这一页的「这一局带谁」）。 */
+function renderTeambar() {
+  const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
+  for (const side of ['player', 'enemy']) {
+    const ids = state.pick[side];
+    for (let i = 0; i < 3; i += 1) {
+      const slot = $(`slot-${side}-${i}`);
+      if (!slot) continue;
+      const id = ids[i] ?? null;
+      slot.textContent = id ? nameOf(id) : (i === 0 ? '点下面的卡片加入' : `第 ${i + 1} 位`);
+      slot.classList.toggle('on', Boolean(id));
+      slot.classList.toggle('empty', !id);
+      if (id) slot.dataset.rocoPet = id; else delete slot.dataset.rocoPet;
+    }
+    const block = $(`side-${side}`);
+    if (block) block.classList.toggle('active', state.pick.side === side);
+  }
+}
+
+/** 一页轻卡：首层只有 emoji 头像、名字、属性、定位与一个最关键特点。 */
+function renderPoolCards() {
+  const grid = $('roster');
+  if (!grid) return;
+  const {player, enemy, side} = state.pick;
+  const onThisSide = side === 'player' ? player : enemy;
+  const otherSide = side === 'player' ? enemy : player;
+  grid.innerHTML = state.pool.rows.map((pet) => {
+    const classes = ['pick', 'pet-option'];
+    const onSide = onThisSide.includes(pet.pet_id);
+    const offSide = otherSide.includes(pet.pet_id);
+    // 复用营地页的 `chosen`（框架的选择态）与这一页自己的两侧态；验收脚本按 `.pick` 取值。
+    if (onSide) classes.push(side === 'player' ? 'picked-player' : 'picked-enemy', 'chosen');
+    // 这一侧点不动的两种情况：已经分给对面、或这一侧已经满 3 只（且它还没被选）。
+    const blocked = !onSide && (offSide || onThisSide.length >= 3);
+    if (blocked) classes.push('blocked');
+    const badge = offSide ? `<span class="taken">${side === 'player' ? '对手已选' : '我方已选'}</span>`
+      : (onSide ? '<span class="taken picked">已选</span>' : '');
+    const why = offSide
+      ? `${pet.name} 已经分给${side === 'player' ? '对手' : '我方'}了：点一下会告诉你怎么改`
+      : (blocked ? `${sideName(side)}已经选满 3 只` : '');
+    return `<div class="card-wrap">
+      <button class="${classes.join(' ')}" data-pet="${pet.pet_id}"
+        aria-disabled="${blocked ? 'true' : 'false'}" title="${escapeAttr(why)}">
+        ${badge}
+        <span class="card-top">${petAvatar(pet)}<strong class="nm">${pet.name}</strong></span>
+        <span class="pet-option-types">${typeChips(pet.types)}</span>
+        <span class="card-role">定位：${ROLE_LABEL[pet.role] ?? '未标注'}</span>
+        <span class="card-key">特点：${keyFeature(pet)}</span>
+      </button>
+      <button class="card-more" data-detail="${pet.pet_id}"
+        aria-label="看 ${escapeAttr(pet.name)} 的面板数值与四个技能">详情 ▸</button>
+    </div>`;
+  }).join('') || '<p class="muted pool-empty">没有符合筛选条件的伙伴：换个属性或定位试试。</p>';
+  for (const button of grid.querySelectorAll('button[data-pet]')) {
+    button.addEventListener('click', () => togglePick(button.dataset.pet));
+  }
+  for (const button of grid.querySelectorAll('button[data-detail]')) {
+    button.addEventListener('click', () => openPetDetail(button.dataset.detail));
+  }
+}
+
 /**
  * 阵容选择（P0-3）。
  *
@@ -551,43 +825,56 @@ function renderRoster() {
   const nameOf = (id) => (state.roster.find((p) => p.pet_id === id)?.name) ?? id;
   $('pick-summary').textContent = `我方：${player.map(nameOf).join('、') || '（未选）'} ｜ `
     + `对手：${enemy.map(nameOf).join('、') || '（未选）'}`;
-  $('start-battle').disabled = !(player.length === 3 && enemy.length === 3);
+  const enough = player.length === 3 && enemy.length === 3;
+  $('start-battle').disabled = !enough;
+  $('start-note').textContent = enough ? '双方都满了，可以开一局' : '选满双方各 3 只才能开始';
   // 点击/键盘的即时反馈区（`role=status` + aria-live，键盘用户也听得到）
   const hint = $('pick-hint');
   if (hint) hint.textContent = state.pick.hint || '';
   // 当前正在选哪一侧：**不能只靠一个淡色 tab**（玩家实测反馈就是分不清）。
   $('select-panel').dataset.rocoPickSide = side;
-  const onThisSide = side === 'player' ? player : enemy;
-  const otherSide = side === 'player' ? enemy : player;
-  grid.innerHTML = state.roster.map((pet) => {
-    const classes = ['pick'];
-    const onSide = onThisSide.includes(pet.pet_id);
-    const offSide = otherSide.includes(pet.pet_id);
-    if (onSide) classes.push(side === 'player' ? 'picked-player' : 'picked-enemy');
-    // 这一侧点不动的两种情况：已经分给对面、或这一侧已经满 3 只（且它还没被选）。
-    const blocked = !onSide && (offSide || onThisSide.length >= 3);
-    if (blocked) classes.push('blocked');
-    const badge = offSide ? `<span class="taken">${side === 'player' ? '对手已选' : '我方已选'}</span>`
-      : (onSide ? '<span class="taken picked">已选</span>' : '');
-    const why = offSide
-      ? `${pet.name} 已经分给${side === 'player' ? '对手' : '我方'}了：点一下会告诉你怎么改`
-      : (blocked ? `${sideName(side)}已经选满 3 只` : '');
-    const moves = pet.moveset.map((m) => m.name).join('、');
-    // 复用营地页的 `.pet-option`（同一个「选一只伙伴」组件）：`chosen` 是框架的选择态，
-    // `picked-player/picked-enemy` 是这一页自己的两侧态；两者都留着，验收脚本按 `.pick` 取值。
-    const framework = ['pet-option', onSide ? 'chosen' : ''].filter(Boolean).join(' ');
-    return `<button class="${classes.join(' ')} ${framework}" data-pet="${pet.pet_id}"
-      aria-disabled="${blocked ? 'true' : 'false'}" title="${why}">
-      <div class="nm">${petAvatar(pet)}<strong>${pet.name}</strong>${badge}</div>
-      <div class="pet-option-types">${typeChips(pet.types)}</div>
-      ${pet.stats ? `<div class="stats"><span>生命 ${pet.stats.hp}</span><span>攻击 ${pet.stats.atk}</span>`
-        + `<span>防御 ${pet.stats.def}</span><span>速度 ${pet.stats.spe}</span></div>` : ''}
-      <div class="mv">${moves || '（引擎未给配招）'}</div>
-    </button>`;
+  renderTeambar();
+  renderPoolCards();
+  renderPoolMeta();
+}
+
+/** 详情抽屉：面板数值 + 四个技能。卡片首层**不放**这些。 */
+function openPetDetail(petId) {
+  const pet = state.roster.find((p) => p.pet_id === petId)
+    ?? state.pool.rows.find((p) => p.pet_id === petId);
+  const box = $('pet-detail');
+  if (!pet || !box) return;
+  state.detail = petId;
+  $('pet-detail-name').textContent = `${pet.name} · 详情`;
+  const stats = pet.stats ?? {};
+  const statRows = [['生命', stats.hp], ['攻击', stats.atk], ['防御', stats.def],
+    ['魔攻', stats.spa], ['魔防', stats.spd], ['速度', stats.spe]]
+    .filter(([, value]) => Number.isFinite(value))
+    .map(([label, value]) => `<li><span>${label}</span><b>${value}</b></li>`).join('');
+  const moves = (pet.moveset ?? []).map((move) => {
+    const meta = [move.element, move.category,
+      Number.isFinite(move.energy) ? `能耗 ${move.energy}` : null,
+      Number.isFinite(move.power) ? `威力 ${move.power}` : (move.is_trait ? '特性' : '威力来源未给'),
+    ].filter(Boolean).join(' · ');
+    return `<li><b>${move.name}</b><span class="muted">${meta}</span>`
+      + `${move.desc ? `<small>${move.desc}</small>` : ''}</li>`;
   }).join('');
-  for (const button of grid.querySelectorAll('button[data-pet]')) {
-    button.addEventListener('click', () => togglePick(button.dataset.pet));
-  }
+  $('pet-detail-body').innerHTML =
+    `<p class="muted">${typeChips(pet.types)} 定位：${ROLE_LABEL[pet.role] ?? '未标注'}`
+    + `${pet.speed_tier ? ` · 速度档 ${pet.speed_tier}` : ''}</p>
+     <ul class="detail-stats">${statRows || '<li class="muted">引擎未给面板数值</li>'}</ul>
+     <div class="section-title"><h3>四个技能</h3></div>
+     <ul class="detail-moves">${moves || '<li class="muted">引擎未给配招</li>'}</ul>
+     <p class="muted">面板数值与配招来自规则引擎；「威力来源未给」表示来源没给，不是 0。</p>`;
+  box.hidden = false;
+  document.body.dataset.rocoDetail = petId;
+}
+
+function closePetDetail() {
+  const box = $('pet-detail');
+  if (box) box.hidden = true;
+  state.detail = null;
+  document.body.dataset.rocoDetail = 'none';
 }
 
 function togglePick(petId) {
@@ -607,7 +894,7 @@ function togglePick(petId) {
     // **完全没反应**，卡片既没有禁用样式也没有提示，于是「点不动」——那是把一条
     // 产品规则（同一只不能同时在两边）表现成了一个坏掉的按钮。
     //
-    // 现在：卡片本身带 `blocked` 状态与「对手已选／我方已选」角标（见 renderRoster），
+    // 现在：卡片本身带 `blocked` 状态与「对手已选／我方已选」角标（见 renderPoolCards），
     // 点它/键盘回车都会得到一句可执行的提示：先把它从对面取消，或者切到那一侧。
     setPickHint(`${nameOf(petId)} 已经分给${sideName(side === 'player' ? 'enemy' : 'player')}了。`
       + `先在这一侧点它取消，或点上面的「${sideName(side === 'player' ? 'enemy' : 'player')}」切过去。`);
@@ -619,7 +906,7 @@ function togglePick(petId) {
     // 我方满了就自动切到对手，省一次点击
     if (side === 'player' && list.length === 3 && pick.enemy.length < 3) {
       pick.side = 'enemy';
-      setPickHint(`我方 3 只已满，已自动切到「对手」。`);
+      setPickHint('我方 3 只已满，已自动切到「对手」。');
     }
   }
   renderRoster();
@@ -631,9 +918,13 @@ function setPickHint(text) {
   state.pick.hint = text;
 }
 
+/**
+ * 全量名单（48 只，带 role/speed_tier）：选中项的名字回查、筛选下拉、以及
+ * 「同一只不能同时在两边」都靠它。**不渲染**——渲染的是 `loadPool()` 给的那一页。
+ */
 async function loadRoster() {
   try {
-    const data = await getJson('/api/roco/roster');
+    const data = await getJson('/api/roco/roster?limit=200&offset=0');
     if (!data.ok) throw new Error(data.error || '名单读取失败');
     state.roster = data.pets.filter((p) => p.moveset_size > 0);
     $('roster-status').textContent = `${state.roster.length} 只可选（配招来自引擎规范配招）`;
@@ -641,6 +932,7 @@ async function loadRoster() {
       // 对手默认给一个随机阵容，玩家可以直接开局
       state.pick.enemy = [...state.roster].sort(() => Math.random() - 0.5).slice(0, 3).map((p) => p.pet_id);
     }
+    buildFilterOptions();
     renderRoster();
   } catch (error) {
     $('roster-status').textContent = `名单读取失败：${error.message}`;
@@ -716,6 +1008,26 @@ function wirePickControls() {
     state.pick.hint = '两边都清空了，重新选吧。';
     renderRoster();
   });
+  // 搜索 / 属性 / 定位 / 翻页：四个入口都直接改 `pool` 的视图状态，再拉一页。
+  const search = $('pool-search');
+  if (search) {
+    let timer = null;
+    const apply = () => {
+      state.pool.keyword = search.value.trim();
+      void loadPool({reset: true});
+    };
+    search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(apply, 120); });
+    search.addEventListener('change', apply);
+  }
+  $('page-prev')?.addEventListener('click', () => {
+    state.pool.offset = Math.max(0, state.pool.offset - state.pool.pageSize);
+    void loadPool();
+  });
+  $('page-next')?.addEventListener('click', () => {
+    state.pool.offset += state.pool.pageSize;
+    void loadPool();
+  });
+  $('pet-detail-close')?.addEventListener('click', closePetDetail);
 }
 
 async function startBattle() {
@@ -729,8 +1041,10 @@ async function startBattle() {
     state.matchEvents = [];
     state.lastLiveView = null;
     state.pick.open = false;
-    $('lesson').textContent = '还没打完一局。';
+    $('lesson').textContent = '';
     $('lesson-card').hidden = true;
+    $('companion-line').hidden = true;
+    closePetDetail();
     hideHint();
     // 带上玩家选好的双方阵容（P0-3）。没选够 3 只时不传，让服务端用默认阵容，
     // 而不是发一个会被拒的请求。
@@ -802,17 +1116,53 @@ async function requestPlan({reason = 'manual'} = {}) {
   }
 }
 
-// ── 局末：老师的复盘（一个转折点 + 一条可执行的改法 + 上次那一课的核对）────────
+// ── 结算：结果 / 一个关键转折 / 下一局目标（统计与证据折叠）─────────────────
 //
-// 这一段的两个输入都必须来自**真实局面**，不能从终局视图反推：
+// 局末这一段的两个输入都必须来自**真实局面**，不能从终局视图反推：
 //   · `events` 用整局的 `state.matchEvents`（`view.events` 只有最后一次推进的那些）；
 //   · `game` 用 `state.lastLiveView`（最后一个还能行动的局面）——终局视图里对手场上
 //     已经是补位上来的那一只，拿它去找「倒下的那一只」就会张冠李戴。
 // 复盘拿不到转折点或没有够得上的课时**不硬凑**：退回原来那条只讲一个回合的短句，
 // 并如实说「没有值得单独拎出来的决策点」。
+//
+// 结算页的三条纪律（第 60 轮）：
+//   ① 结果 / 一个关键转折 / 下一局练习目标**先显示**，统计与依据折叠；
+//   ② **不展示零值**（「换人 0 次」这种一行都不出现）；
+//   ③ **不出现内部术语**（回合、名字、伤害都能对人说清）。
+function matchStats(events, view) {
+  const fainted = {player: 0, enemy: 0};
+  let switches = 0;
+  let items = 0;
+  let biggest = 0;
+  for (const event of Array.isArray(events) ? events : []) {
+    const detail = event?.detail ?? {};
+    if (event?.kind === 'faint') {
+      const side = detail.side === 'enemy' ? 'enemy' : (detail.side === 'player' ? 'player' : null);
+      if (side) fainted[side] += 1;
+    } else if (event?.kind === 'switch') switches += 1;
+    else if (event?.kind === 'item') items += 1;
+    else if (event?.kind === 'damage') {
+      const amount = Number(detail.damage);
+      if (Number.isFinite(amount) && amount > biggest) biggest = amount;
+    }
+  }
+  const rows = [];
+  if (Number.isInteger(view?.turn)) rows.push(`${view.turn} 个回合`);
+  if (fainted.enemy) rows.push(`对面倒下 ${fainted.enemy} 只`);
+  if (fainted.player) rows.push(`我方倒下 ${fainted.player} 只`);
+  if (switches) rows.push(`换人 ${switches} 次`);
+  if (items) rows.push(`用道具 ${items} 次`);
+  if (biggest) rows.push(`单次最高伤害约 ${biggest}`);
+  return rows.join(' · ');
+}
+
 async function finishMatch() {
   const view = state.view;
   if (!view?.battle_result) return;
+  $('result-verdict').textContent = RESULT_CN[view.battle_result] ?? view.battle_result;
+  $('result-turns').textContent = `${view.turn} 回合 · 训练场`;
+  $('result-stats').textContent = matchStats(state.matchEvents, view);
+
   const finalGame = rocoGameView(view, {matchId: state.battleId});
   // 真实记录：赢了也记，输了也记。记的是引擎结算出来的那一局，不是编的。
   state.memory = rememberBattle(state.memory, finalGame);
@@ -831,17 +1181,28 @@ async function finishMatch() {
     memory: state.memory,
   });
 
+  // 陪练（轻量气泡）：局末用一句人话接住，不打断、也不冒充复盘。
+  const prefs = memoryItems(state.memory).filter((row) => row.group === 'stated');
+  const bubble = $('companion-line');
+  if (bubble) {
+    bubble.textContent = prefs.length
+      ? `这一局打完了。你说的「${prefs[0].label}」我记着，下一局照办。`
+      : '这一局打完了。想聊刚才哪一手，或者告诉我你的偏好，我下次照办。';
+    bubble.hidden = false;
+  }
+
+  // 完整复盘里的**依据**：零值不展示（「0 / 425 生命」这种一行不留）。
+  const evidence = (review?.evidence ?? []).filter((line) => !/\b0\s*\/\s*\d+\s*生命/.test(line));
+
   if (review) {
     $('lesson-question').textContent = review.text;
     $('lesson-learning').textContent = review.learning ? `这一局学到一件事：${review.learning}` : '';
     $('lesson-progress').textContent = progress.checked && progress.recurred && progress.note
       ? `上一次那一课的核对：${progress.note}`
       : '';
-    $('lesson-note').textContent = review.evidence.length
-      ? `依据：${review.evidence.join(' ')}`
-      : '';
+    $('lesson-note').textContent = evidence.length ? `依据：${evidence.join(' ')}` : '';
     $('lesson-card').hidden = false;
-    $('lesson').textContent = `第 ${review.turning_point.turn ?? '—'} 回合那个转折点值得回看（这一局 ${view.turn} 个回合）。`;
+    $('lesson').textContent = `关键转折在第 ${review.turning_point.turn ?? '—'} 回合（这一局 ${view.turn} 个回合）。`;
     document.body.dataset.rocoLesson = 'shown';
     document.body.dataset.rocoTeacherGoal = String(review.goal ?? '');
     document.body.dataset.rocoTeacherPoint = String(review.turning_point.rule ?? '');
@@ -869,7 +1230,7 @@ async function finishMatch() {
     $('lesson-card').hidden = false;
   }
   $('lesson').textContent = entry
-    ? `第 ${entry.turn ?? '—'} 回合那个决策点值得回看（这一局 ${view.turn} 个回合）。`
+    ? `关键转折在第 ${entry.turn ?? '—'} 回合（这一局 ${view.turn} 个回合）。`
     : `这一局 ${view.turn} 个回合结束，没有值得单独拎出来的决策点。`;
   document.body.dataset.rocoLesson = entry ? 'shown' : 'none';
   document.body.dataset.rocoTeacherGoal = '';
@@ -922,6 +1283,8 @@ const COVERAGE = [
   ['状态变化撤销旧建议', '推进后 data-roco-hint-version 变大，旧提示先撤下'],
   ['局末一个教学入口', 'data-roco-lesson="shown"'],
   ['玩家抱怨时陪练先回应情绪', 'data-roco-companion="R2"|"R3" 且回话已显示'],
+  ['48 只阵容池的搜索/属性/定位/分页', 'data-roco-pool 与 data-roco-pool-total 随筛选变化'],
+  ['教程只在首次出现、可跳过', 'data-roco-onboard="shown" → 跳过 → "hidden"，刷新仍 hidden'],
 ];
 
 function renderCoverage() {
@@ -946,12 +1309,19 @@ function bind() {
   $('lesson-close').addEventListener('click', () => {
     $('lesson-card').hidden = true;
   });
+  // 轻量小芽入口：把玩家带到陪练那一条（她自己说话的地方），不新开聊天窗口。
+  $('coach-entry').addEventListener('click', () => {
+    $('companion-card').scrollIntoView({block: 'center', behavior: 'smooth'});
+    $('say-input').focus();
+  });
+  $('onboard-skip').addEventListener('click', dismissOnboard);
   $('say-form').addEventListener('submit', (event) => {
     event.preventDefault();
     say($('say-input').value);
     $('say-input').value = '';
   });
   // 窗口失焦/回到前台时重新判一次：失焦是硬门控，回来之后要能重新开口。
+  window.addEventListener('resize', () => syncBottomBars());
   window.addEventListener('blur', () => refreshHint({reason: 'blur'}));
   window.addEventListener('focus', () => refreshHint({reason: 'focus'}));
 }
@@ -960,12 +1330,14 @@ async function boot() {
   state.memory = loadMemory();
   renderCoverage();
   bind();
-  // 阵容选择：先接线，再读名单（读名单会顺带给出一个随机的对手阵容）
+  applyOnboard();
+  // 阵容选择：先接线，再读名单（读名单会顺带给出一个随机的对手阵容与第一页池子）
   wirePickControls();
   wireShadowPanel();
   render();
   renderMemory();
   await loadRoster();
+  await loadPool({reset: true});
   // ── 规则服务没就绪时的**自愈与退路**（监工 14:17 现场回归）──────────────────
   //
   // 现场表现：页面写「规则服务：未启动」、阵容区卡在「正在读取精灵名单…」、双方 0/3，
@@ -998,7 +1370,7 @@ async function boot() {
       try { ready = await loadStatus(); } catch { $('engine-status').dataset.rocoStatus = 'error'; }
       if (ready) {
         // 冷启动时第一次名单往往已经失败了，就绪后补一次（不覆盖玩家已经改好的选择）
-        if (!state.roster.length) await loadRoster();
+        if (!state.roster.length) { await loadRoster(); await loadPool({reset: true}); }
         return;
       }
       await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -1006,19 +1378,14 @@ async function boot() {
     $('engine-status').textContent = '规则服务：暂时连不上，点「重试」';
   }
   await bootData();
+  applyOnboard();
   document.body.dataset.rocoReady = 'yes';
-  // 开局引导是**静态三步**（选阵容 → 开一局 → 她自己会说话），不依赖任何数据，
-  // 所以这里只留一个验收钩子：脚本据此断言「引导真的渲染出来了」，
-  // 而且断言的是**文字条数**——三步少一步，这一页就又变回「先看半天才知道怎么用」。
-  const onboard = document.getElementById('onboard');
-  document.body.dataset.rocoOnboard = onboard && onboard.children.length === 3
-    ? 'shown'
-    : 'missing';
 }
 
 // 验收脚本要驱动这些动作：显式挂到一个命名空间上，比让脚本去点按钮里的中文更稳。
 window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, refreshHint, render,
   loadShadowPanel,
-  loadRoster, togglePick, renderRoster};
+  loadRoster, togglePick, renderRoster,
+  loadPool, openPetDetail, closePetDetail, dismissOnboard, onboardDismissed, syncBottomBars};
 
 void boot();
