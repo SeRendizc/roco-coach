@@ -59,7 +59,10 @@ export function rocoGameView(view, {matchId = null} = {}) {
   }
   return {
     id: matchId,
-    mode: ROCO_MODE,
+    // 模式：**公开视图自己说了就听它**（`pvp-live` 是线上竞技，门控必须看得见），
+    // 没说才回落到训练场的默认值。第一版写死成 `ROCO_MODE`，于是「PVP 不给战术分析」
+    // 那道门控在手游链路上**永远不命中**——不报错，只是照常说。
+    mode: typeof view.mode === 'string' && view.mode ? view.mode : ROCO_MODE,
     version: view.ruleset_id ?? null,
     // `battle_result` 是这局的结果（null = 进行中）。经验层用 `result` 判断「已结束」。
     result: view.battle_result ?? null,
@@ -294,6 +297,11 @@ export function rocoIntervention({view = null, session = null, plan = null, host
     // 因此判定层尚未按本引擎标定，见 docs/roco/W5-04-INTERVENTION-GATE.md §10.4。
     plannerMargin: planFeatures.margin,
     timeLeft: Number.isFinite(host.timeLeft) ? host.timeLeft : Infinity,
+    // RL 判定层的档位（off/shadow/on）。**必须由宿主显式传入**：
+    // 默认值在 `intervention-model.js` 里是「读进程环境变量」，而浏览器没有那个东西，
+    // 于是「shadow 档到底跑没跑」在页面上根本没法验。让宿主说清楚自己是哪一档，
+    // 判定层就不再依赖环境——这也是「mock 宿主能证明 shadow 不改行为」的前提。
+    interventionMode: typeof host.interventionMode === 'string' ? host.interventionMode : null,
   });
   const detail = interventionDetail(features);
   // ── P1：建议必须**因局面而异**（第 43 轮的真实失败样例）────────────────

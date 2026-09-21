@@ -267,7 +267,9 @@ function interventionLayer(f={}){
    turn:game?.turn??f.turn??0,
    legalCount:Number.isFinite(f.legalCount)?f.legalCount:legalCountOf(game),
    plannerMargin:Number.isFinite(f.plannerMargin)?f.plannerMargin:null,
-  },{model:interventionModelCache});
+  },{model:interventionModelCache,
+   // 档位：宿主显式给就按宿主给的；没给才回落到「读环境变量」的老口径。
+   ...(typeof f.interventionMode==='string'?{mode:f.interventionMode}:{})});
  }catch{
   // 判定层出任何问题都不该影响提示链路：当作「不参与」。
   return {active:false,suppress:false,reason:'layer-error',mode:'off',model_status:'error',probability:null,threshold:null};
@@ -288,7 +290,7 @@ export function shouldIntervene(features={}){return interventionDetail(features)
 // 从真实的局内对象投影出特征向量（纯函数，不碰 DOM）：
 // 把宿主层已经在检查的事实（document.hidden / hasFocus / busy / asking / preview / result）
 // 收进一个可断言的对象。P02 的录制窗口用的就是同一组字段名。
-export function interventionFeatures({game=null,attention=null,session=null,mode='gentle',now=0,host={},risk=null,gap=null,skill=null,timeLeft=Infinity,plannerMargin=null}={}){
+export function interventionFeatures({game=null,attention=null,session=null,mode='gentle',now=0,host={},risk=null,gap=null,skill=null,timeLeft=Infinity,plannerMargin=null,interventionMode=null}={}){
  const tkey=game?turnKey(game):(host.decisionKey??null);
  const answered=tkey!=null&&session?.said?.has?.(`turn:${tkey}`)?tkey:null;
  return {game,battleMode:game?.mode??host.battleMode??null,preference:mode,mode,
@@ -300,7 +302,10 @@ export function interventionFeatures({game=null,attention=null,session=null,mode
   lastHintAt:Number.isFinite(session?.lastAt)?session.lastAt:(Number.isFinite(attention?.lastShown)?attention.lastShown:-Infinity),
   now,epoch:Number.isFinite(host.epoch)?host.epoch:null,stateEpoch:Number.isFinite(host.stateEpoch)?host.stateEpoch:null,
   risk:Number.isFinite(risk)?risk:situationRisk(game),gap,skill,timeLeft,
-  plannerMargin:Number.isFinite(plannerMargin)?plannerMargin:null};
+  plannerMargin:Number.isFinite(plannerMargin)?plannerMargin:null,
+  // RL 判定层的档位。`null` = 让判定层自己决定（读进程环境变量，Node 侧的老口径）；
+  // 宿主显式给了就按宿主给的走 —— 浏览器里没有进程环境变量，所以页面必须能显式指定。
+  interventionMode:typeof interventionMode==='string'?interventionMode:null};
 }
 
 /**
@@ -314,7 +319,7 @@ export function interventionFeatures({game=null,attention=null,session=null,mode
  * 装配逻辑只有这一处：`interventionFeatures` 调它，roco 那边也调它。
  * 谁都不许再抄一份字段清单——抄一份就会漂一份。
  */
-export function interventionFeaturesOfGame({game=null,attention=null,session=null,mode='gentle',now=0,host={},risk=null,gap=null,skill=null,timeLeft=Infinity,plannerMargin=null}={}){
+export function interventionFeaturesOfGame({game=null,attention=null,session=null,mode='gentle',now=0,host={},risk=null,gap=null,skill=null,timeLeft=Infinity,plannerMargin=null,interventionMode=null}={}){
  const tkey=game?turnKey(game):(host.decisionKey??null);
  const answered=tkey!=null&&session?.said?.has?.(`turn:${tkey}`)?tkey:null;
  return {game,battleMode:game?.mode??host.battleMode??null,preference:mode,mode,
@@ -326,7 +331,8 @@ export function interventionFeaturesOfGame({game=null,attention=null,session=nul
   lastHintAt:Number.isFinite(session?.lastAt)?session.lastAt:(Number.isFinite(attention?.lastShown)?attention.lastShown:-Infinity),
   now,epoch:Number.isFinite(host.epoch)?host.epoch:null,stateEpoch:Number.isFinite(host.stateEpoch)?host.stateEpoch:null,
   risk:Number.isFinite(risk)?risk:situationRisk(game),gap,skill,timeLeft,
-  plannerMargin:Number.isFinite(plannerMargin)?plannerMargin:null};
+  plannerMargin:Number.isFinite(plannerMargin)?plannerMargin:null,
+  interventionMode:typeof interventionMode==='string'?interventionMode:null};
 }
 
 export function decisiveOpportunity(game){

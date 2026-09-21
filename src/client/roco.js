@@ -40,6 +40,9 @@ import {companionFacts, decideRegister, intentOf, chatReply, REGISTERS} from '..
 import {freshMemory, readMemory, rememberBattle, rememberPreference,
   memoryItems, deleteMemoryItem, MEMORY_GROUPS} from '../coach/memory.js';
 import {recordTeacherReview, recordLearningCheck} from '../coach/teacher-review.js';
+// 并列比较的**结构**住在核心（纯函数），页面只负责渲染成 HTML：
+// 这样「多动作比较 + 未来 2—3 回合后果」在 mock 宿主与报告里也是同一份数据。
+import {rocoCompareModel} from '../coach/compare-model.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
 const state = {
@@ -503,6 +506,21 @@ function escapeAttr(value) {
     {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 }
 
+/** 文本节点的转义。比较区的每一条文字都来自核心模型，仍然统一转义。 */
+function escapeHtml(value) {
+  return escapeAttr(value);
+}
+
+/**
+ * 把核心模型里的 `**加粗**` 收成一个很小的子集。
+ *
+ * 比较区是**唯一**允许出现强调的地方（「这一手没有稳健结论」那一句），
+ * 而它故意只支持这一种子集——不做通用 Markdown，免得把引擎文本变成渲染器输入。
+ */
+function boldMarkup(text) {
+  return String(text ?? '').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+}
+
 /**
  * 把「当前那条固定底栏」的高度写进 `--bottombar`。
  *
@@ -566,73 +584,31 @@ function hideHint(action = 'silent', gate = '') {
  * 不写胜率、不承诺必胜；拿不到的信息一律写成「没给」，不许编。
  */
 function compareBlockHtml(plan, view) {
-  const legal = Array.isArray(view?.legal) ? view.legal : [];
-  const ok = plan?.ok === true;
-  const recommended = ok ? (plan.recommendation ?? null) : null;
-  const preview = ok ? rocoDamagePreviewText(plan) : null;
-  const dp = ok && plan.damage_preview?.available === true ? plan.damage_preview : null;
+  // **结构来自核心**（`coach/compare-model.js` 的 `rocoCompareModel`），页面只渲染：
+  // 这样 mock 宿主、报告与评测脚本拿到的是**同一份**比较，而不是「页面里有、别处没有」。
+  // 三档标签（事实/估计/不确定）与每一条文字都由那一层产出——页面不再自己判
+  // 「什么时候写【不确定】」，否则两份口径迟早会漂。
+  const model = rocoCompareModel({plan, legal: Array.isArray(view?.legal) ? view.legal : [], view});
   const head = '<p><strong>并列比较（这一回合能走的动作）</strong></p>';
-  if (!legal.length) {
-    return head + '<p class="muted">【不确定】这一刻引擎没有给出可执行的动作（可能已经打完这一局）。</p>';
+  if (!model.available) {
+    return `${head}<p class="muted">【不确定】${escapeHtml(model.reason ?? '引擎没有给出可比较的动作')}。</p>`;
   }
-  // 至少并列 2 个合法动作；**推荐那一手必须在里面**——否则「引擎推荐」那一行会漏掉，
-  // 比较就少了一边（推荐的那一招未必排在合法动作表的最前面）。
-  const picks = legal.slice(0, 3);
-  if (recommended !== null && !picks.some((a) => (a.label ?? '') === recommended)) {
-    const hit = legal.find((a) => (a.label ?? '') === recommended);
-    if (hit) { if (picks.length >= 3) picks[picks.length - 1] = hit; else picks.push(hit); }
-  }
-  const rows = picks.map((action, index) => {
-    const skill = action.skill ?? null;
-    // 威力只在引擎给了的时候写（同玩家层：没给就不写，也不补 0）。
-    const bits = [skill?.element, skill?.category,
-      Number.isFinite(skill?.energy) ? `能耗 ${skill.energy}` : null,
-      Number.isFinite(skill?.power) ? `威力 ${skill.power}` : null].filter(Boolean).join(' · ');
-    const label = action.label ?? action.kind ?? '（没有名字的动作）';
-    const isRecommended = recommended !== null && label === recommended;
-    const lines = [`【事实】第 ${index + 1} 个合法动作：<b>${label}</b>`
-      + `${bits ? `<span class="muted">（${bits}）</span>` : ''}`];
-    if (isRecommended && ok) {
-      lines.push(`【估计】引擎推荐这一手：${expectedLine(plan)}`
-        + `${dp && dp.best_label === skill?.name && preview ? `；${preview}` : ''}`);
-    } else if (ok) {
-      lines.push('【不确定】往后 2—3 回合的推演：引擎这一次只算出了推荐那一手，'
-        + '这个动作没有单独的后续推演（拿不到就不编）。');
-    } else {
-      lines.push('【不确定】这一手没有跑通规划：引擎没给后续回合的推演（拿不到就不编）。');
-    }
-    return `<li data-cmp-action="${index}" data-cmp-label="${escapeAttr(label)}"`
-      + `${isRecommended ? ' data-cmp-recommended="yes"' : ''}>${lines.join('<br>')}</li>`;
+  const renderLine = (line) => `【${line.tag}】${boldMarkup(escapeHtml(line.text))}`;
+  // 第一行里的动作名字要加粗（<b>）——它原来就是这么渲染的，改口径会让既有截图/
+  // 验收脚本上的文案对不上。所以这里只对**第 1 行**做一次精确替换。
+  const renderFirst = (pick) => {
+    const line = pick.lines[0];
+    const escaped = escapeHtml(line.text);
+    const label = escapeHtml(pick.label);
+    const withBold = escaped.includes(label) ? escaped.replace(label, `<b>${label}</b>`) : `<b>${label}</b>${escaped}`;
+    return `【${line.tag}】${boldMarkup(withBold)}`;
+  };
+  const rows = model.picks.map((pick) => {
+    const body = [renderFirst(pick), ...pick.lines.slice(1).map(renderLine)].join('<br>');
+    return `<li data-cmp-action="${pick.index}" data-cmp-label="${escapeAttr(pick.label)}"`
+      + `${pick.recommended ? ' data-cmp-recommended="yes"' : ''}>${body}</li>`;
   }).join('');
-  const future = [];
-  if (ok) {
-    const depth = plan.depth_searched ?? null;
-    const branches = plan.branches_evaluated ?? null;
-    const seeds = Array.isArray(plan.analysis_seeds) ? plan.analysis_seeds : [];
-    future.push(`【事实】引擎把这一手往后算了 ${depth === null ? '（没给层数）' : `${depth} 层`}、`
-      + `覆盖 ${branches === null ? '（没给分支数）' : `${branches} 个分支`}`
-      + `${seeds.length ? `（固定分析种子 ${seeds.join('/')}）` : ''}。`);
-    future.push(`【估计】${expectedLine(plan)}`);
-    future.push(plan.main_counter
-      ? `【估计】对手最可能的应对：「${plan.main_counter}」——引擎说这是启发式建模，不是真人行为。`
-      : '【不确定】对手最可能的应对：引擎这一次没给。');
-    future.push(preview
-      ? `【估计】${preview}`
-      : '【不确定】伤害估算：引擎这一次没有给出可用的预览。');
-    if (plan.risk) {
-      future.push(`【不确定】风险：期望到最坏差 ${plan.risk.downside_max ?? '（没给）'}`
-        + `${plan.risk.fragile ? '（这一手不稳）' : ''}`
-        + `${plan.risk.top_risks?.length ? ` · 最差的对手选择是「${plan.risk.top_risks[0].opponent_action}」` : ''}`);
-    }
-    if (plan.recommendation_stable === false) {
-      future.push('【不确定】引擎说这一手**没有稳健结论**：换个分析口径推荐的动作就会变，'
-        + '所以上面那条推荐只能当参考，不是保证。');
-    }
-  } else {
-    future.push('【不确定】往后 2—3 回合的后果：这一手没有跑通规划，引擎没给（拿不到就不编）。');
-    // 这一句是页面原来对「没有规划」的如实交代，保留：它回答的是「展开里为什么没有数字」。
-    future.push('这条只是提醒你把注意力放到哪，不含具体数值结论。');
-  }
+  const future = model.future.map(renderLine);
   return `${head}<ul class="cmp">${rows}</ul>`
     + '<p><strong>往后 2—3 回合</strong></p>'
     + `<ul class="cmp">${future.map((line, index) => `<li data-cmp-future="${index}">${line}</li>`).join('')}</ul>`;
@@ -680,6 +656,10 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
       ended: Boolean(view.battle_result),
       background: document.hidden === true,
       focus: document.hasFocus(),
+      // RL 判定层的档位必须**由页面显式传**：浏览器里没有 `process.env`，
+      // 判定层自己读不到那个 flag（默认 off）。传 null 时判定层走它自己的默认口径
+      // ——那是「如实记录当前档位」，不是「假装它在生效」。
+      interventionMode: window.__ROCO_INTERVENTION_MODE ?? null,
     },
   });
   // 判定结论原样记在 state 上：页面的「为什么现在说」与验收脚本都读它，

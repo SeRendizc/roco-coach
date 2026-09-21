@@ -1,0 +1,364 @@
+{
+  "schema": "roco-adapter-browser-acceptance/v1",
+  "generated_by": "scripts/roco/browser-adapter-acceptance.mjs",
+  "generated_at": "2026-09-21T10:04:47.180Z",
+  "url": "http://127.0.0.1:60639/roco.html",
+  "checks": [
+    {
+      "name": "① 选阵容页 1440×900 无横向溢出（scrollW ≤ clientW）",
+      "ok": true,
+      "detail": "clientW=1440 scrollW=1440"
+    },
+    {
+      "name": "② 对战页 1440×900 无横向溢出",
+      "ok": true,
+      "detail": "clientW=1440 scrollW=1440"
+    },
+    {
+      "name": "③ 门控/动作钩子被写出（判定层真的跑过）",
+      "ok": true,
+      "detail": "{\"gate\":\"below-threshold\",\"action\":\"silent\",\"hint\":\"hidden\",\"version\":null,\"stateVersion\":1}"
+    },
+    {
+      "name": "④ 展开取舍真的有并列：≥2 个 [data-cmp-action]",
+      "ok": true,
+      "detail": "actions=3 labels=[\"防御\",\"火苗\",\"换上第2位\"]"
+    },
+    {
+      "name": "⑤ 未来 2—3 回合后果真的有：≥2 条 [data-cmp-future]",
+      "ok": true,
+      "detail": "futures=5"
+    },
+    {
+      "name": "⑥ 三档标签（事实/估计/不确定）都在可见文本里",
+      "ok": true,
+      "detail": "{\"fact\":true,\"estimate\":true,\"uncertain\":true}"
+    },
+    {
+      "name": "⑦ 引擎推荐那一手在并列里（若引擎给了推荐）",
+      "ok": true,
+      "detail": "recommended=[\"火苗\"]"
+    },
+    {
+      "name": "⑧ 对战页 390×844 无横向溢出",
+      "ok": true,
+      "detail": "clientW=390 scrollW=390"
+    },
+    {
+      "name": "⑨ 窄屏下的比较区不横向溢出（浮条内部 scrollW ≤ clientW）",
+      "ok": true,
+      "detail": "{\"actions\":3,\"futures\":5,\"hintClientW\":360,\"hintScrollW\":360,\"hintClientH\":539,\"hintScrollH\":1031,\"fits\":true}"
+    },
+    {
+      "name": "⑩ 窄屏下比较区仍然渲染出并列与后果",
+      "ok": true,
+      "detail": "{\"actions\":3,\"futures\":5}"
+    },
+    {
+      "name": "⑪ 自动推进按钮真的点得到（那一点上就是它，不是浮层）",
+      "ok": true,
+      "detail": "点到的元素：{\"tag\":\"BUTTON\",\"id\":\"auto-turn\",\"cls\":\"\",\"hit_target\":true}（按钮 187×31 @ 352,459）"
+    },
+    {
+      "name": "⑫ 推进一手后 state_version 真的变了（陈旧判定的前提）",
+      "ok": true,
+      "detail": "8 → 15；endState={\"result\":null,\"turn\":3,\"phase\":\"battle\",\"planStatus\":\"\"}；页面网络账=[{\"url\":\"/api/roco/plan\",\"status\":200,\"ms\":79},{\"url\":\"/api/roco/plan\",\"status\":200,\"ms\":82},{\"url\":\"/api/roco/battle/advance\",\"status\":200,\"ms\":19},{\"url\":\"/api/roco/battle/advance\",\"status\":200,\"ms\":9}]；服务端计时=[{\"op\":\"plan\",\"ms\":76,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"plan\",\"ms\":79,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"battle/advance\",\"ms\":5,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"battle/advance\",\"ms\":5,\"ok\":true,\"status\":null,\"error\":null}]"
+    },
+    {
+      "name": "⑬ 控制台零报错、零未捕获异常",
+      "ok": true,
+      "detail": "console=0 page=0"
+    }
+  ],
+  "steps": [
+    {
+      "at": "lineup-1440x900",
+      "metrics": {
+        "clientW": 1440,
+        "scrollW": 1440,
+        "bodyScrollW": 1440,
+        "innerW": 1440
+      }
+    },
+    {
+      "at": "teams",
+      "picked": {
+        "player": [
+          "pet_000062",
+          "pet_000112",
+          "pet_000417"
+        ],
+        "enemy": [
+          "pet_000124",
+          "pet_000190",
+          "pet_000445"
+        ]
+      }
+    },
+    {
+      "at": "battle-1440x900",
+      "metrics": {
+        "clientW": 1440,
+        "scrollW": 1440,
+        "bodyScrollW": 1440,
+        "innerW": 1440
+      }
+    },
+    {
+      "at": "hooks-at-open",
+      "hooks": {
+        "gate": "below-threshold",
+        "action": "silent",
+        "hint": "hidden",
+        "version": null,
+        "stateVersion": 1
+      }
+    },
+    {
+      "at": "compare-1440x900",
+      "compare": {
+        "hint_hidden": false,
+        "hint_text": "这一手引擎没有值得单独说的局面事实：下面是它真的给了的东西，你自己挑。",
+        "hint_action": "explicit-facts",
+        "actions": [
+          "0",
+          "1",
+          "2"
+        ],
+        "labels": [
+          "防御",
+          "火苗",
+          "换上第2位"
+        ],
+        "recommended": [
+          "火苗"
+        ],
+        "futures": [
+          "【事实】引擎把这一手往后算了 2 层、覆盖 96 个分支（固定分析种子 11/29/47）。",
+          "【估计】期望估计：0.54（三个分析种子给出同一个值，所以这里没有区间可报）",
+          "【估计】对手最可能的应对：「换上第2位」——引擎说这是启发式建模，不是真人行为。",
+          "【估计】按未核验公式估，这一步能打出 229~1069 点伤害；最高的是「火云车」；对面场上还剩 311，够收掉",
+          "【不确定】风险：期望到最坏差 1.1924 · 最差的对手选择是「换上第2位」"
+        ],
+        "tags": {
+          "fact": true,
+          "estimate": true,
+          "uncertain": true
+        }
+      }
+    },
+    {
+      "at": "battle-390x844",
+      "metrics": {
+        "clientW": 390,
+        "scrollW": 390,
+        "bodyScrollW": 390,
+        "innerW": 390
+      }
+    },
+    {
+      "at": "compare-390x844",
+      "narrowCompare": {
+        "actions": 3,
+        "futures": 5,
+        "hintClientW": 360,
+        "hintScrollW": 360,
+        "hintClientH": 539,
+        "hintScrollH": 1031,
+        "fits": true
+      }
+    },
+    {
+      "at": "advance",
+      "versionBefore": 8,
+      "versionAfter": 15,
+      "changed": true,
+      "hit": {
+        "x": 352,
+        "y": 459,
+        "w": 187,
+        "h": 31,
+        "top": {
+          "tag": "BUTTON",
+          "id": "auto-turn",
+          "cls": "",
+          "hit_target": true
+        }
+      },
+      "endState": {
+        "result": null,
+        "turn": 3,
+        "phase": "battle",
+        "planStatus": ""
+      },
+      "pageFetchLog": [
+        {
+          "url": "/api/roco/battle/new",
+          "status": 200,
+          "ms": 5
+        },
+        {
+          "url": "/api/roco/plan",
+          "status": 200,
+          "ms": 68
+        },
+        {
+          "url": "/api/roco/plan",
+          "status": 200,
+          "ms": 79
+        },
+        {
+          "url": "/api/roco/plan",
+          "status": 200,
+          "ms": 82
+        },
+        {
+          "url": "/api/roco/battle/advance",
+          "status": 200,
+          "ms": 19
+        },
+        {
+          "url": "/api/roco/battle/advance",
+          "status": 200,
+          "ms": 9
+        }
+      ],
+      "requests": [
+        {
+          "at": 1789985074647,
+          "url": "/api/roco/roster?limit=12&offset=0",
+          "method": "GET"
+        },
+        {
+          "at": 1789985074654,
+          "url": "/api/roco/status",
+          "method": "GET"
+        },
+        {
+          "at": 1789985075274,
+          "url": "/api/roco/battle/new",
+          "method": "POST"
+        },
+        {
+          "at": 1789985075283,
+          "url": "/api/roco/plan",
+          "method": "POST"
+        },
+        {
+          "at": 1789985076067,
+          "url": "/api/roco/plan",
+          "method": "POST"
+        },
+        {
+          "at": 1789985079539,
+          "url": "/api/roco/plan",
+          "method": "POST"
+        },
+        {
+          "at": 1789985082283,
+          "url": "/api/roco/battle/advance",
+          "method": "POST"
+        },
+        {
+          "at": 1789985086676,
+          "url": "/api/roco/battle/advance",
+          "method": "POST"
+        }
+      ]
+    }
+  ],
+  "console_errors": [],
+  "page_errors": [],
+  "api_requests": [
+    {
+      "at": 1789985074558,
+      "url": "/api/roco/roster?limit=200&offset=0",
+      "method": "GET"
+    },
+    {
+      "at": 1789985074647,
+      "url": "/api/roco/roster?limit=12&offset=0",
+      "method": "GET"
+    },
+    {
+      "at": 1789985074654,
+      "url": "/api/roco/status",
+      "method": "GET"
+    },
+    {
+      "at": 1789985075274,
+      "url": "/api/roco/battle/new",
+      "method": "POST"
+    },
+    {
+      "at": 1789985075283,
+      "url": "/api/roco/plan",
+      "method": "POST"
+    },
+    {
+      "at": 1789985076067,
+      "url": "/api/roco/plan",
+      "method": "POST"
+    },
+    {
+      "at": 1789985079539,
+      "url": "/api/roco/plan",
+      "method": "POST"
+    },
+    {
+      "at": 1789985082283,
+      "url": "/api/roco/battle/advance",
+      "method": "POST"
+    },
+    {
+      "at": 1789985086676,
+      "url": "/api/roco/battle/advance",
+      "method": "POST"
+    }
+  ],
+  "server_timings": [
+    {
+      "op": "battle/new",
+      "ms": 2,
+      "ok": true,
+      "status": null
+    },
+    {
+      "op": "plan",
+      "ms": 66,
+      "ok": true,
+      "status": null,
+      "error": null
+    },
+    {
+      "op": "plan",
+      "ms": 76,
+      "ok": true,
+      "status": null,
+      "error": null
+    },
+    {
+      "op": "plan",
+      "ms": 79,
+      "ok": true,
+      "status": null,
+      "error": null
+    },
+    {
+      "op": "battle/advance",
+      "ms": 5,
+      "ok": true,
+      "status": null,
+      "error": null
+    },
+    {
+      "op": "battle/advance",
+      "ms": 5,
+      "ok": true,
+      "status": null,
+      "error": null
+    }
+  ],
+  "passed": 13,
+  "failed": 0
+}

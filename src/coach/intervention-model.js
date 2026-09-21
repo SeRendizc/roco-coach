@@ -41,8 +41,27 @@ export const INTERVENTION_MODEL = GENERATED_INTERVENTION_MODEL;
  *   `shadow` —— 模型照算但**不改变**结果，只记 `lastShadow` 供对照；
  *   `on` —— 模型认为该抑制时抑制（只抑制，不新增）。
  * 未知取值一律当作 `off`（保守）。
+ *
+ * ⚠️ **这个函数必须能在浏览器里跑**。它进浏览器模块图（`experience.js` → 这里），
+ * 而浏览器**没有 `process` 全局**。第一版写成 `env = process.env` 作为默认参数，
+ * 于是浏览器里这一句直接抛 `ReferenceError: process is not defined`——
+ * 抛点在 `experience.js` 的 `interventionLayer()` 的 try 里，被 catch 成
+ * `{reason:'layer-error', model_status:'error'}`。症状不是报错页面，而是
+ * **判定层在页面上从来没生效过**，而报告里只看到一行 `layer-error`。
+ *
+ * 现在的写法：默认值只在**真的存在** `process` 时才取它的 env。
+ * 浏览器里 `interventionModelMode()` 返回 `off`（与「没有 flag 就是 off」同口径），
+ * 而且**不抛**。这一条由 `tests/evals/roco/game-adapter.test.js` 用
+ * 「把 globalThis.process 拿掉再调用」钉住——必红方向是恢复 `process.env` 写法即抛。
  */
-export function interventionModelMode(env = process.env) {
+function processEnv() {
+  // 不用 `typeof process`：在浏览器里 `typeof process` 是安全的，但打包器/工具链
+  // 可能把它静态替换掉。直接读 globalThis 更明确，也不依赖任何全局存在。
+  const env = globalThis.process?.env;
+  return env && typeof env === 'object' ? env : {};
+}
+
+export function interventionModelMode(env = processEnv()) {
   const raw = String(env.ROCO_INTERVENTION_MODEL || 'off').trim().toLowerCase();
   if (raw === 'off' || raw === 'shadow' || raw === 'on') return raw;
   if (raw === '1' || raw === 'true') return 'on';
