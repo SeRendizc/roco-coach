@@ -1404,3 +1404,24 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
 
 **下一条 RC**：RC-102（能量 microcase —— 需要**实机录制**，外部阻塞）/ RC-103（回合顺序与回合末登记表，
 可以在没有实机的情况下先做「登记表 + fail closed」那一半）。
+
+### C6.17 RC-102：promotion 闸门（第 81 轮后半）
+
+**交付**（提交 `471fd34`）：`scripts/roco/evaluate-rule-promotion.mjs` 逐字段判
+`PROMOTABLE / NOT_PROMOTABLE / REFUTED`（13 条判据：缺记录 / 等级不足 / 观测值与候选冲突 → REFUTED /
+`pass_criteria` 要求的观测键不齐 / `media_ref` 不可核对 / 记录过期 / 台账查不到 `evidence_id` …）；
+`data/roco/evidence/microcase-recordings.json` 是它的输入（**空表是正确状态**，填假记录比缺记录更坏）；
+`tests/roco-rule-promotion.test.js` 8 条 + `--selftest` 12 条（10 条反证）；`docs/roco/RULE-PROMOTION.md`。
+**它只报告不写配置**（`writes_config: false`，前后 sha256 一致由测试断言），
+`candidate_config_can_be_default` **恒 false**。
+
+**当前结论**：`recordings` 为空 → **9/9 NOT_PROMOTABLE**、REFUTED 0、`can_be_default = false`。
+反证实测：伪造 `MC-E01` 记录 → `energy.max` 转 `PROMOTABLE`（判据不是恒假）；观测值改成 12 →
+`REFUTED` 且配置 sha256 未变；`COMMUNITY_CURRENT` 记录被拒。
+
+**顺带报出的结构事实**：`battle_mode.team_size` / `active_count` **没有 microcase 落点** ——
+要推进必须先立 case 并挂进台账（属规则/台账范围）。已同步到协作区 `BLOCKERS.md`
+（`B-20260921-03` 的 requested_action 覆盖「录制」，这条结构缺口写在该条与 `RULE-PROMOTION.md` 里）。
+
+**下一条**：RC-201/202（621/579/242 对账 + 统一 `GameDataPackV2`）——它是**最有可能先变成 `ready`**
+的契约（纯数据/schema/来源，不依赖实机录制），也是 Windows 侧 `TeamFeatureV2` 的前置。
