@@ -22,6 +22,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {existsSync, readFileSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {join} from 'node:path';
 
 import {
   ROOT,
@@ -39,7 +41,7 @@ import {
   latestLiveSnapshotPath,
 } from '../scripts/roco/reconcile-catalog.mjs';
 
-import {PAGES, analyzePage} from '../scripts/roco/fetch-live-snapshot.mjs';
+import {PAGES, analyzePage, checkLiveLicence, licenceFromSources} from '../scripts/roco/fetch-live-snapshot.mjs';
 
 function log(...args) {
   // node --test 会把 stdout 打出来；报告里要贴实际值，所以显式打印。
@@ -485,4 +487,58 @@ test('声明计数为 null 时不许被当成 0 参与差值', () => {
   assert.equal(report.reconciled, false);
   assert.equal(report.buckets.only_in_frozen.filter((e) => e.group === 'battle_skill').length, 0,
     'unparsed 的技能页不许让 579 条技能被误报成「公网缺失」');
+});
+
+test('RC-201 许可与再分发：快照必须登记许可，且与 sources.yaml 逐字一致（必红方向）', () => {
+  // 为什么这条必须存在：公网快照是**别人站点的内容**。对账结论可以复核，
+  // 但「这份内容什么许可、能不能再分发、证据在哪」如果没登记，复核者只能靠猜。
+  const sourcesText = readFileSync(join(ROOT, 'data/roco/sources.yaml'), 'utf8');
+  const snapshot = JSON.parse(readFileSync(join(ROOT, 'data/roco/live/2026-09-21/public-index.json'), 'utf8'));
+  assert.deepEqual(checkLiveLicence(snapshot, sourcesText), [],
+    `快照许可登记不合规：${JSON.stringify(checkLiveLicence(snapshot, sourcesText))}`);
+  const licence = snapshot.metadata.licence;
+  assert.equal(licence.license, 'CC-BY-NC-SA-4.0');
+  assert.equal(licence.redistribution, 'DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL');
+  assert.equal(licence.fetched_content_committed_to_git, false, '抓到的 HTML 不进 git');
+  assert.ok(existsSync(join(ROOT, licence.license_evidence)), '许可证据文件必须真实存在');
+
+  // 反向控制①：抹掉许可 → 必须红
+  const stripped = JSON.parse(JSON.stringify(snapshot));
+  delete stripped.metadata.licence;
+  assert.ok(checkLiveLicence(stripped, sourcesText).some((p) => p.includes('licence 缺失')),
+    `实际：${JSON.stringify(checkLiveLicence(stripped, sourcesText))}`);
+  // 反向控制②：把再分发条款改成「无限制」→ 必须红（与 sources.yaml 不一致）
+  const widened = JSON.parse(JSON.stringify(snapshot));
+  widened.metadata.licence.redistribution = 'UNLIMITED';
+  assert.ok(checkLiveLicence(widened, sourcesText).some((p) => p.includes('不一致')),
+    `实际：${JSON.stringify(checkLiveLicence(widened, sourcesText))}`);
+  // 反向控制③：许可证据指向不存在的文件 → 必须红
+  const fakeEvidence = JSON.parse(JSON.stringify(snapshot));
+  fakeEvidence.metadata.licence.license_evidence = 'data/roco/nope.txt';
+  assert.ok(checkLiveLicence(fakeEvidence, sourcesText).some((p) => p.includes('指向的文件不存在')));
+  // 反向控制④：把原始 HTML 的落地路径挪到没被忽略的地方 → 必须红
+  const leakyHtml = JSON.parse(JSON.stringify(snapshot));
+  leakyHtml.metadata.pages['pet-index'].html_path = 'data/roco/live/2026-09-21/pet-index.html';
+  assert.ok(checkLiveLicence(leakyHtml, sourcesText).some((p) => p.includes('不在被忽略的')),
+    `实际：${JSON.stringify(checkLiveLicence(leakyHtml, sourcesText))}`);
+  // 反向控制⑤：sources.yaml 里没有那条来源 → 必须红，不许默默放过
+  const emptySources = 'schema_version: 1\ngame: roco_world_mobile\n';
+  assert.ok(licenceFromSources(emptySources).problems.some((p) => p.includes('没有登记来源')));
+});
+
+test('RC-201 报告：licence_ok 必须为真，且与快照逐字一致；抓到的 HTML 不在 git 里', () => {
+  const report = JSON.parse(readFileSync(join(ROOT, 'reports/roco/reconciliation/catalog-reconciliation.json'), 'utf8'));
+  const snapshot = JSON.parse(readFileSync(join(ROOT, 'data/roco/live/2026-09-21/public-index.json'), 'utf8'));
+  assert.equal(report.licence_ok, true, `报告 licence_ok=${report.licence_ok}`);
+  assert.deepEqual(report.inputs.live.licence, snapshot.metadata.licence,
+    '报告里的许可必须与快照逐字一致（不许各写一份）');
+  // 反向控制：licence_ok 的判据必须真的有牙 —— 缺任一项就该是 false
+  const missing = {...snapshot.metadata.licence, redistribution: null};
+  assert.equal(Boolean(missing.license && missing.redistribution && missing.license_evidence), false);
+  // HTML 落在被忽略的目录（仓库里不该有抓到的公网 HTML）
+  const tracked = execFileSync('git', ['ls-files', 'data/roco/live'], {cwd: ROOT, encoding: 'utf8'}).trim().split('\n').filter(Boolean);
+  assert.deepEqual(tracked.filter((f) => /\.html?$/.test(f)), [], `data/roco/live 下不该有入库的 HTML：${tracked}`);
+  assert.equal(execFileSync('git', ['check-ignore', 'data/roco/raw/extracted/live-bwiki/2026-09-21/pet-index.html'],
+    {cwd: ROOT, encoding: 'utf8'}).trim(), 'data/roco/raw/extracted/live-bwiki/2026-09-21/pet-index.html',
+  '抓到的 HTML 必须落在被 .gitignore 忽略的路径');
 });

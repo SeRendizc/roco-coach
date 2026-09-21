@@ -804,6 +804,15 @@ export function reconcile({
       parsed_counts: parsedCounts,
       live_page_status: pageStatus,
     },
+    // 许可是否登记齐全（缺 license/redistribution/evidence 就是 false）。
+    // 它与 `reconciled` 分开：对账能不能做，与内容能不能再分发，是两件事。
+    licence_ok: Boolean(
+      evidence.live
+      && evidence.live.licence
+      && evidence.live.licence.license
+      && evidence.live.licence.redistribution
+      && evidence.live.licence.license_evidence,
+    ),
     count_table: countTable,
     deltas,
     buckets: {
@@ -945,6 +954,11 @@ export function buildReport({livePath = null} = {}) {
           Object.entries((liveSnapshot.metadata && liveSnapshot.metadata.pages) || {})
             .map(([k, v]) => [k, {url: v.url, http_status: v.http_status, bytes: v.bytes, sha256: v.sha256, fetched_at: v.fetched_at}]),
         ),
+        // **许可与再分发**必须随快照一起进报告：对账结论要能被别人复核，
+        // 而「这份公网内容是什么许可、能不能再分发」是复核的第一问。
+        // 值搬运自快照 metadata（快照那边又从 sources.yaml 搬），这里**不重新发明**。
+        licence: (liveSnapshot.metadata && liveSnapshot.metadata.licence) || null,
+        licence_problems: (liveSnapshot.metadata && liveSnapshot.metadata.licence_problems) || [],
       }
       : {
         path: loaded.livePath ? relative(ROOT, loaded.livePath) : null,

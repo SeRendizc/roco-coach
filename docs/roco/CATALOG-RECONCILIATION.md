@@ -420,3 +420,29 @@ console.log(v.length, t.length, v.length-t.length)"   # 824 245 579
      `verification_status: reconciled_against_frozen_l1`。
      注意本文件规则 2 要求「固定 revision，不得写『最新』」——公网页没有 commit SHA，
      用页面内容的 SHA256 当 revision 是满足这条规则**意图**的做法（固定、可复现、可核对）。
+
+### 10.9 许可与再分发：已随快照一起登记（本轮补上）
+
+上面第 8 条说的是「没有往 `sources.yaml` 追加**新来源**」。**许可登记本身不能省** ——
+复核这份对账的第一个人会问「这份公网内容是什么许可、能不能再分发」。所以本轮补上的是：
+
+- `data/roco/live/2026-09-21/public-index.json#metadata.licence`：
+  `basis: SAME_SITE_AS_REGISTERED_SOURCE` / `source_id: wiki-rocom-snapshot` /
+  `license: CC-BY-NC-SA-4.0` / `redistribution: DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL` /
+  `license_evidence: data/roco/raw/extracted/rocom-wiki-data/LICENSE` /
+  `fetched_content_committed_to_git: false`。
+  **值是从 `sources.yaml` 搬运的，不是新发明的**：抓的是**同一个站点**（`wiki.biligame.com/nrc`），
+  而该站点内容的许可登记在 `wiki-rocom-snapshot` 那一条上。`basis_note` 里明写
+  「本仓库**没有**在站点页面上独立取证」——不把推断说成取证。
+- `reports/roco/reconciliation/catalog-reconciliation.json`：顶层 `licence_ok`，
+  且 `inputs.live.licence` 与快照**逐字一致**（一处事实，两个读者）。
+  `licence_ok` 与 `reconciled` **刻意分开**：对账能不能做，与内容能不能再分发，是两件事。
+- 判据（`tests/roco-catalog-reconciliation.test.js`，本轮 8 → **10** 条）：
+  快照许可必须登记且与 `sources.yaml` 逐字一致；`license_evidence` 指向的文件必须真实存在；
+  HTML 落地路径必须落在被忽略的 `raw/extracted/` 下。**必红反证**（实测）：
+  抹掉许可 → `metadata.licence 缺失…`；把再分发改成 `UNLIMITED` →
+  `与 sources.yaml 的 DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL 不一致`；
+  证据指向不存在的文件 → `指向的文件不存在`；把 HTML 路径挪出忽略目录 → `不在被忽略的 raw/extracted/ 下`。
+
+**仍然不改 `sources.yaml`**（理由同上一条 8）；如果接手的人要新增来源条目，
+建议的字段与本轮采到的许可值就是上面这些。

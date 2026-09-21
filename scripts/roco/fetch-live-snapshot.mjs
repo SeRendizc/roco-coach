@@ -49,6 +49,9 @@ import {createHash} from 'node:crypto';
 import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs';
 import {dirname, join, relative} from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
+// 来源台账的解析器**复用** `verify-provenance.mjs` 的那一份：
+// 许可/再分发这两个字段的真相在 `data/roco/sources.yaml`，本脚本只搬运与核对，不自己发明。
+import {parseSources} from './verify-provenance.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = join(HERE, '..', '..');
@@ -65,6 +68,87 @@ const WIKI_BASE = 'https://wiki.biligame.com/nrc/';
 export const USER_AGENT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
   + '(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
+/**
+ * 这次直连抓取的公网快照，沿用哪一条**已登记来源**的许可条款。
+ *
+ * 为什么不是新开一个 source_id：抓的是**同一个站点**（`wiki.biligame.com/nrc`），
+ * 而站点内容的许可登记在 `wiki-rocom-snapshot` 这一条上（`license: CC-BY-NC-SA-4.0`，
+ * `redistribution: DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL`，证据是仓库里那份 LICENSE 文件）。
+ * 我们**没有**在站点页面上独立取证，所以这里只声称「沿用已登记的那条」，不声称「站点页面自己写了这条」。
+ */
+export const LIVE_SNAPSHOT_SOURCE_ID = 'wiki-rocom-snapshot';
+
+/**
+ * 从 sources.yaml 的文本里取出这次快照要沿用的许可字段。
+ *
+ * **fail closed**：查不到那条 source_id、或缺 license/redistribution 时返回 `problems`，
+ * 调用方必须把它写进产物并让校验器拒绝 —— 不允许「没有许可信息」被当成「默认可以再分发」。
+ */
+export function licenceFromSources(text, sourceId = LIVE_SNAPSHOT_SOURCE_ID) {
+  const entry = parseSources(text).find((row) => row.source_id === sourceId) ?? null;
+  const problems = [];
+  if (!entry) problems.push(`sources.yaml 里没有登记来源 ${sourceId}`);
+  const license = entry?.license ?? null;
+  const redistribution = entry?.redistribution ?? null;
+  if (!license) problems.push(`${sourceId} 在 sources.yaml 里没有 license`);
+  if (!redistribution) problems.push(`${sourceId} 在 sources.yaml 里没有 redistribution`);
+  return {
+    value: {
+      basis: 'SAME_SITE_AS_REGISTERED_SOURCE',
+      source_id: sourceId,
+      license,
+      redistribution,
+      license_evidence: entry?.license_evidence ?? null,
+      basis_note: '直连抓取的是与已登记来源同一站点（wiki.biligame.com/nrc）；'
+        + '许可字段**搬运自** sources.yaml 的那一条，本仓库没有在站点页面上独立取证。',
+      fetched_content_committed_to_git: false,
+      raw_html_path_is_gitignored: true,
+    },
+    problems,
+  };
+}
+
+/**
+ * 校验一份快照产物的许可登记（纯函数，供测试直接做反证）。
+ *
+ * `sourcesText` 传入 `sources.yaml` 的原文；返回违规列表（空 = 合规）。
+ */
+export function checkLiveLicence(snapshot, sourcesText) {
+  const problems = [];
+  const licence = snapshot?.metadata?.licence ?? null;
+  if (!licence) {
+    problems.push('metadata.licence 缺失：抓来的公网内容没有许可登记');
+    return problems;
+  }
+  const {value: expected, problems: sourceProblems} = licenceFromSources(sourcesText, licence.source_id);
+  problems.push(...sourceProblems);
+  for (const key of ['license', 'redistribution', 'license_evidence']) {
+    if (!licence[key]) problems.push(`metadata.licence.${key} 缺失`);
+    else if (expected[key] && licence[key] !== expected[key]) {
+      problems.push(`metadata.licence.${key}=${licence[key]} 与 sources.yaml 的 ${expected[key]} 不一致`);
+    }
+  }
+  if (licence.fetched_content_committed_to_git !== false) {
+    problems.push('metadata.licence.fetched_content_committed_to_git 必须是 false（抓到的 HTML 不进 git）');
+  }
+  // 许可证据必须**可核对**：`license_evidence` 是仓库内相对路径时必须真的存在。
+  // 指向一个不存在的文件等于「有许可声明但没证据」——那和没登记没区别。
+  const evidence = licence.license_evidence;
+  if (evidence && !/^https?:\/\//.test(evidence) && !existsSync(join(ROOT, evidence))) {
+    problems.push(`metadata.licence.license_evidence 指向的文件不存在：${evidence}`);
+  }
+  // 抓到的原始 HTML 必须落在被忽略的路径（否则一次 git add -A 就会把公网全文带进仓库）。
+  const pageMeta = snapshot?.metadata?.pages ?? {};
+  for (const [key, page] of Object.entries(pageMeta)) {
+    const html = page?.html_path;
+    if (!html) continue;
+    if (!html.includes('raw/extracted/')) {
+      problems.push(`metadata.pages.${key}.html_path=${html} 不在被忽略的 raw/extracted/ 下`);
+    }
+  }
+  return problems;
+}
 
 /** 派生结果（入库）与 HTML 落地（忽略）的路径规则。 */
 export function derivedPath(date = TODAY) {
@@ -408,6 +492,18 @@ function sleep(ms) {
   return new Promise((resolve) => { setTimeout(resolve, ms); });
 }
 
+/** 读 `data/roco/sources.yaml` 并取出本次快照沿用的许可（读不到也返回 problems，不抛）。 */
+function readLicence() {
+  const path = join(ROOT, 'data', 'roco', 'sources.yaml');
+  if (!existsSync(path)) {
+    return {value: {basis: 'SAME_SITE_AS_REGISTERED_SOURCE', source_id: LIVE_SNAPSHOT_SOURCE_ID,
+      license: null, redistribution: null, license_evidence: null,
+      fetched_content_committed_to_git: false, raw_html_path_is_gitignored: true},
+    problems: ['data/roco/sources.yaml 不存在：无法登记许可']};
+  }
+  return licenceFromSources(readFileSync(path, 'utf8'));
+}
+
 /** 组装完整产物（result 段 + metadata 段）。 */
 export async function buildSnapshot({
   date = TODAY, offline = false, fetches = null, attempts = 5, baseDelay = 2000, pageDelay = 1200,
@@ -470,10 +566,14 @@ export async function buildSnapshot({
     }])),
   };
 
+  const licence = readLicence();
   const metadata = {
     generated_at: new Date().toISOString(),
     offline_mode: offline,
     user_agent: offline ? null : USER_AGENT,
+    // 许可登记（从 sources.yaml 搬运；查不到就是 null 并把问题写出来，不编条款）
+    licence: licence.value,
+    licence_problems: licence.problems,
     pages: metadataPages,
     result_sha256: sha256(JSON.stringify(result, null, 2)),
   };
