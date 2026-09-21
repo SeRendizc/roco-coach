@@ -1,0 +1,678 @@
+{
+  "schema": "roco-rule-evidence-ledger/v1",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "generated_by": "手工登记（证据台账不是生成物：它记录来源与置信等级，脚本只能检查合规，不能替人判断）",
+  "game": "roco_world_mobile",
+  "source_id": "handoff-10-sources-and-confidence-2026-09-21",
+  "provenance": {
+    "authority": "/tmp/roco-coach-handoff-revised-2026-09-21/10-SOURCES-AND-CONFIDENCE.md",
+    "authority_note": "本台账的每一条 claim 与 confidence 均以 10 号文档（来源与置信度矩阵）为唯一权威清单；下面的 sources[].quote 是从 10 号文档抄下的原文摘句，不是本文件自己总结的。",
+    "checked_repo_head": "87d0eea",
+    "checked_at": "2026-09-21",
+    "recheck_rule": "每次施工前从当前 HEAD 重新验证（10 号文档 §14）。",
+    "no_invented_urls": "所有 URL 取自 10 号文档；本文件不新造 URL、不新造引文。URL 可用性本轮逐条用 curl 探过（见 docs/roco/RULE-EVIDENCE-LEDGER.md §4）。"
+  },
+  "topic_crosswalk": {
+    "why": "topic 字符串是对外的稳定引用键（data/roco/artifact-registry.json 的 rule_topics 用同一套），所以这里把台账实际用的 topic 与共享登记表对一遍。",
+    "shared_registry": "data/roco/artifact-registry.json",
+    "shared_registry_topics": [
+      "energy.max",
+      "energy.initial",
+      "energy.regen",
+      "energy.charge",
+      "turn_order.priority",
+      "turn_order.speed",
+      "turn_order.end_turn",
+      "battle_mode.standard_pvp",
+      "battle_mode.speed_duel",
+      "battle_mode.territory_trial",
+      "type.multiplier",
+      "marks.persistence",
+      "swift.injection",
+      "leave.semantics",
+      "traits.triggers",
+      "roster.universe",
+      "pvp.fairness"
+    ],
+    "ledger_extensions": [
+      {
+        "topic": "pvp.standard.team_size",
+        "maps_to": "battle_mode.standard_pvp",
+        "why": "v3 纠偏指令点名要 topic 形如 pvp.standard.team_size，因此台账用这个更细的键；它对共享登记表的 battle_mode.standard_pvp。"
+      },
+      {
+        "topic": "product.pairing_ai",
+        "maps_to": null,
+        "why": "官方已发布配队 AI 是产品/竞争事实，不是战斗规则主题，共享登记表里没有对应项，故不映射。"
+      }
+    ]
+  },
+  "confidence_levels": [
+    {
+      "id": "OFFICIAL_CURRENT",
+      "definition": "官方当前材料直接支持（官方公告 / 官方账号发布的内容），且仍在当前版本有效期内。",
+      "can_promote_to_current_rule": true,
+      "evidence_required": "至少一条 sources[] 带 official_first_party 标记。"
+    },
+    {
+      "id": "RECORDED_IN_GAME",
+      "definition": "项目自己保存的可复核实机 case（录屏 / 截图 / 实测记录）。",
+      "can_promote_to_current_rule": true,
+      "evidence_required": "至少一条 sources[] 带 recorded_gameplay 标记。"
+    },
+    {
+      "id": "COMMUNITY_CURRENT",
+      "definition": "社区资料或社区归档当前可见（BWIKI、攻略、社区实测）。网页“当前可见”不等于官方真值。",
+      "can_promote_to_current_rule": false,
+      "evidence_required": "至少一条 sources[]。"
+    },
+    {
+      "id": "CROSS_SOURCE_SUPPORTED",
+      "definition": "至少两个独立来源指向同一结论，但没有任何一条是官方一手或可复核实机。",
+      "can_promote_to_current_rule": false,
+      "evidence_required": "至少两条 URL 不同的 sources[]。"
+    },
+    {
+      "id": "ENGINE_HYPOTHESIS",
+      "definition": "工程假设：为了让引擎有界运行而选定的值或语义，没有外部证据支持，或与外部材料冲突。",
+      "can_promote_to_current_rule": false,
+      "evidence_required": "至少一条 sources[]（引擎代码行 / 待验计划）。"
+    },
+    {
+      "id": "UNKNOWN",
+      "definition": "当前无证据；不得据此施工，也不得用模型记忆补齐。",
+      "can_promote_to_current_rule": false,
+      "evidence_required": "允许 sources[] 为空，但必须以“未知”措辞写入 claim，且挂在待录 microcase 上。"
+    }
+  ],
+  "confidence_levels_note": "只有前两级（OFFICIAL_CURRENT / RECORDED_IN_GAME）能直接成为 current 规则。COMMUNITY_CURRENT / CROSS_SOURCE_SUPPORTED 只能建 candidate ruleset；ENGINE_HYPOTHESIS 只能是有界占位；UNKNOWN 不得施工。这是 10 号文档 §“重要订正”的硬要求：只有官方材料或项目自己保存的可复核实机 case 才能直接 promotion 为 current rule。",
+  "source_markers": [
+    {
+      "id": "official_first_party",
+      "definition": "官方一手：官方公告 / 官方账号发布页。"
+    },
+    {
+      "id": "official_reproduction",
+      "definition": "官方公告的媒体或转述转载（例如 17173 全文转载官方更新公告）。**不计入前两级**，因为无法证明与原文逐字一致。"
+    },
+    {
+      "id": "recorded_gameplay",
+      "definition": "项目自己保存的可复核实机证据（录屏 / 截图 / 实测台账）。本轮**尚无任何来源取此值**。"
+    },
+    {
+      "id": "community",
+      "definition": "社区页面 / 社区归档 / 社区攻略。"
+    },
+    {
+      "id": "repo_internal",
+      "definition": "本仓库内部事实源（代码 / 快照数据 / 待验计划），不是外部证据。"
+    },
+    {
+      "id": "product_context",
+      "definition": "产品设计前提（例如“匹配前不知道对手阵容”是我们要做的产品场景），不是游戏规则证据。"
+    }
+  ],
+  "entries": [
+    {
+      "id": "EV-ENERGY-MAX",
+      "topic": "energy.max",
+      "claim": "能量上限：我们打算按 candidate ruleset 施工“常规上限 10”。当前引擎的 ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS，不得表述为游戏事实。",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "sources": [
+        {
+          "url": "https://zhuanlan.zhihu.com/p/2040741873246024568",
+          "date": "2026-09-21",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "外部资料多处支持常规上限 10、聚能 +5"
+        },
+        {
+          "url": "https://www.douyin.com/video/7489841837251857673",
+          "date": "2026-09-21",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "外部资料多处支持常规上限 10、聚能 +5"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E01",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "tests/evals/agent-trajectories-v1.jsonl",
+        "tests/evals/roco/intervention-windows-roco.jsonl",
+        "reports/roco/sft/dataset-report.json",
+        "reports/roco/planner-benchmark.json",
+        "src/client/roco.js"
+      ],
+      "notes": "10 号文档 §7 判定原文：常规 max=10：CROSS_SOURCE_SUPPORTED。对应的 microcase 是仓库已有计划 MC-007（能量的回合内结算顺序：消耗、回复、上限与返还）。在 RECORDED_IN_GAME/官方证据之前，只能进 candidate ruleset。"
+    },
+    {
+      "id": "EV-ENERGY-CHARGE",
+      "topic": "energy.charge",
+      "claim": "聚能：我们打算按 candidate ruleset 施工“聚能是一个主动行动，回复 5 能量”。聚能是否可突破上限、以及无有效技能时是否自动聚能，均未定，不得写成事实。",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "sources": [
+        {
+          "url": "https://zhuanlan.zhihu.com/p/2040741873246024568",
+          "date": "2026-09-21",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "而现行公开资料多处支持：常规能量上限 10；聚能是一个主动行动，回复 5；并非“每回合天然 +1”。"
+        },
+        {
+          "url": "https://www.douyin.com/video/7489841837251857673",
+          "date": "2026-09-21",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "外部资料多处支持常规上限 10、聚能 +5"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E02",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "src/client/roco.js",
+        "reports/roco/adapter-load/adapter-load.json"
+      ],
+      "notes": "10 号文档 §7 判定原文：聚能 +5：CROSS_SOURCE_SUPPORTED。10 号文档 §00-READ-ME-FIRST §2 把它写成“聚能是一个主动行动，回复 5”，与仓库现有 ITEM_EFFECTS 里的能量果 +4 是两件事，不得混用。"
+    },
+    {
+      "id": "EV-ENERGY-ENDTURN-REGEN",
+      "topic": "energy.regen",
+      "claim": "回合末自然回能：没有找到“手游默认每条在场精灵回合末自动 +1”的证据；现有仓库假设 ENERGY_REGEN_PER_TURN = 1 与多源材料冲突。我们打算按“默认无自然回能，把回能当作技能/特性/道具效果”建模，等 MC-E03 实机确认。",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "sources": [
+        {
+          "url": "roco/src/roco_env/env.py#L59",
+          "date": "2026-09-21",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "ENERGY_REGEN_PER_TURN = 1   # 假设：存活在场者回合末 +1（MC-007）"
+        },
+        {
+          "url": "docs/roco/MICROCASE-PLAN.md",
+          "date": "2026-09-21",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "MC-007 | 能量的回合内结算顺序：消耗、回复、上限与返还 | ❌ 未知（null）"
+        },
+        {
+          "url": "https://news.17173.com/content/03182026/104940843.shtml",
+          "date": "2026-03-18",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "official_reproduction",
+          "quote": "奇丽花： 特性“养分重吸收”：回合结束时，回复4→3能量。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E03",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "tests/evals/agent-trajectories-v1.jsonl",
+        "reports/roco/planner-benchmark.json",
+        "src/coach/intervention-model.generated.js"
+      ],
+      "notes": "10 号文档 §7 判定原文：默认回合末 +1：ENGINE_HYPOTHESIS，且被多源材料反驳。17173 全文转载的官方更新公告里出现的“回合结束时回复能量”都是**特性**效果（奇丽花/奇丽果），不是默认回能——这条只用来反驳，不作为自然回能存在的证据。"
+    },
+    {
+      "id": "EV-ENERGY-INITIAL",
+      "topic": "energy.initial",
+      "claim": "首次入场能量：仓库现在写“入场初始 2”，10 号文档判定为“需实机/更强一手证据”。在 MC-E04 录到之前，我们只把它当占位值，不写进任何对外文案。",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "sources": [
+        {
+          "url": "roco/src/roco_env/env.py#L60",
+          "date": "2026-09-21",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "仓库自己标 HYPOTHESIS。（10 号文档 §7 对当前仓库 ENERGY_MAX=6 / END TURN +1 / initial=2 的记述）"
+        },
+        {
+          "url": "https://www.douyin.com/video/7489841837251857673",
+          "date": "2026-09-21",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "首次入场具体能量：需实机/更强一手证据"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E04",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "tests/evals/roco/intervention-windows-roco.jsonl"
+      ],
+      "notes": "10 号文档 §7 判定原文：首次入场具体能量：需实机/更强一手证据。这里不写 UNKNOWN 是因为 10 号文档没有把它判成 UNKNOWN；“我们不知道”的结论由 needs_microcase=true + claim 的“占位值”措辞表达。"
+    },
+    {
+      "id": "EV-ENERGY-COST8-EXISTS",
+      "topic": "energy.max",
+      "claim": "技能能耗 8 的存在：已冻结快照里确实存在能耗为 8 的技能，因此“上限 6”会把它们永久判成不可用——这是必须建 candidate ruleset 的工程理由。该条只证明“能耗 8 存在”，不证明“上限是 10”。",
+      "confidence": "COMMUNITY_CURRENT",
+      "sources": [
+        {
+          "url": "https://wiki.biligame.com/nrc/技能图鉴",
+          "date": "2026-09-21",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "当前 BWIKI 还存在能耗 8 技能、“立即回复 10 能量”“突破能量上限”等文本。"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+        "roco/src/roco_env/env.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48"
+      ],
+      "notes": "10 号文档 §7 原文提到能耗 8 技能存在。本轮在冻结快照 data/roco/normalized/roco-world-s4-2026-09-10/skills.json 里核对：能耗 > 6 的技能共 20 条（7 点 11 条、8 点 3 条：过山车 / 岩土暴击 / 隐藏条款，10 点 3 条：地震 / 气沉丹田 / 彼岸之手，另有 1 条记为 30 点的「抛石」，数值本身可疑）。这 20 条在 ENERGY_MAX=6 下会被永久判成不可用——这就是必须建 candidate ruleset 的工程理由。本条不标 needs_microcase：它是“数据里有没有这种东西”的存在性判断，可在快照里直接核对；真正需要实机的是“上限到底是不是 10”，那是 EV-ENERGY-MAX / MC-E01。"
+    },
+    {
+      "id": "EV-PVP-STANDARD-TEAM-SIZE",
+      "topic": "pvp.standard.team_size",
+      "claim": "标准 PVP 六宠：我们打算按 cross-source 结论建 candidate ruleset，支持六只编队；**禁止**在文档或界面里写成“官方已确认标准 PVP 是六只”。",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "sources": [
+        {
+          "url": "https://www.taptap.cn/moment/808879358071540062",
+          "date": "2026-05-27",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "一套阵容来说拿小编理解包括主C副C、拦截俩个、协防俩个一共六只精灵"
+        },
+        {
+          "url": "https://news.17173.com/content/03182026/104940843.shtml",
+          "date": "2026-03-18",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "official_reproduction",
+          "quote": "支持随机精灵对战，最多可携带6只随机精灵，可指定系别随机或全随机，精灵技能也将完全随机。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E07",
+      "affected_artifacts": [
+        "src/client/roco.js",
+        "src/coach/roco-client.js",
+        "reports/roco/demo-acceptance/demo-acceptance.json",
+        "data/roco/battle-modes.json",
+        "reports/roco/product-wiring/full-match-wiring.json"
+      ],
+      "notes": "10 号文档 §12.1 原文：标准 PVP 六宠、通常 4 点魔力、力竭通常 -1 = CROSS_SOURCE_SUPPORTED，且工程结论明确“在录制标准 PVP 的编队、匹配、开场、力竭和结算 microcase 前，不把 4 点魔力写成官方已确认事实”。另一条被 10 号文档列为 OFFICIAL_CURRENT 的“PVP 随机精灵最多可携带 6 只”，本轮实测其来源 https://www.taptap.cn/moment/838434682965067210 打开后是「极速对决」活动公告（3v3、2 点魔力主题），**不含**六只上限文字；因此本条不升为 OFFICIAL_CURRENT，登记为 CROSS_SOURCE_SUPPORTED 并在报告里如实说明这次对 10 号文档的证伪。"
+    },
+    {
+      "id": "EV-PVP-STANDARD-MANA",
+      "topic": "battle_mode.standard_pvp",
+      "claim": "标准 PVP 通常 4 点魔力：我们打算按 candidate ruleset 施工“4 点魔力”，并在 UI 里标成候选规则。禁止写成官方已确认。",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "sources": [
+        {
+          "url": "https://news.17173.com/content/03182026/104940843.shtml",
+          "date": "2026-03-18",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "official_reproduction",
+          "quote": "甜心续航： 自己和敌方获得萌化：回复40%生命和4能量；"
+        },
+        {
+          "url": "https://www.taptap.cn/moment/808879358071540062",
+          "date": "2026-05-27",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "在PVP对战过程中，优先级最高的是应对，俗称博弈。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E08",
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "src/client/roco.js",
+        "reports/roco/demo-acceptance/demo-acceptance.json"
+      ],
+      "notes": "等级来自 10 号文档 §12.1（CROSS_SOURCE_SUPPORTED），**本条没有升等级**。风险如实登记：这 4 点魔力我只有 10 号文档的转述，两份来源列表里都没有任何一处逐字写出“标准 PVP 每方 4 点魔力”，17173 那条引句是特性回能里的“4能量”。所以这条的降级风险最高，microcase 优先级最高。"
+    },
+    {
+      "id": "EV-PVP-FAINT-MANA-LOSS",
+      "topic": "battle_mode.standard_pvp",
+      "claim": "力竭扣魔力：目标是先让对方魔力归零，力竭通常扣 1 点魔力（而不是直接判负）。我们打算按 candidate ruleset 施工，并让胜负判据可切换。",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "sources": [
+        {
+          "url": "https://news.17173.com/content/03182026/104940843.shtml",
+          "date": "2026-03-18",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "official_reproduction",
+          "quote": "圣羽翼王： 特性“飓风”：……被敌方精灵击败时，自己额外损失1点魔力。"
+        },
+        {
+          "url": "https://www.gameres.com/forum/t/917446",
+          "date": "2026-05-07",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "在战斗方面又有哪些特色。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E09",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "roco/src/roco_env/schema.py",
+        "data/roco/battle-modes.json",
+        "reports/roco/demo-acceptance/demo-acceptance.json"
+      ],
+      "notes": "等级来自 10 号文档 §12.1（力竭通常 -1 = CROSS_SOURCE_SUPPORTED；§13-PVP 文档 §4 写“目标是先让对方魔力归零，而不是默认打光六只”）。风险如实登记：gameres 那篇是产品拆解，全文没有“魔力”扣减规则的逐字句，只有 17173 的“额外损失1点魔力”间接支持扣减存在。因此本条实质证据弱于 EV-PVP-STANDARD-MANA 以外的其他条。"
+    },
+    {
+      "id": "EV-PVP-SPEED-DUEL-MODE",
+      "topic": "battle_mode.speed_duel",
+      "claim": "官方「极速对决」是独立的限时活动模式：精灵 3v3、每方 2 点魔力、必须至少上阵 1 只本期主题精灵。我们把它实现成独立 BattleMode，绝不与标准 PVP 混用同一套参数。",
+      "confidence": "OFFICIAL_CURRENT",
+      "sources": [
+        {
+          "url": "https://www.taptap.cn/moment/838434682965067210",
+          "date": "2026-08-17",
+          "level": "OFFICIAL_CURRENT",
+          "marker": "official_first_party",
+          "quote": "本期「精灵3v3」每方拥有2点魔力值，可上阵3只精灵。队伍中必须包含至少1只「魔力猫」、「水灵」或「火神」，满足条件后方可发起匹配；"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "src/client/roco.js",
+        "reports/roco/demo-acceptance/demo-acceptance.json",
+        "reports/roco/product-wiring/full-match-wiring.json"
+      ],
+      "notes": "10 号文档 §12.1 原文：官方极速对决：3v3、2 点魔力 = OFFICIAL_CURRENT（限时活动模式）。来源是 TapTap「洛克王国：世界官方公告」账号发布的原文，本轮已逐字核对引句。"
+    },
+    {
+      "id": "EV-PVP-UNKNOWN-OPPONENT",
+      "topic": "pvp.fairness",
+      "claim": "匹配前不知道对手阵容：这是**产品场景**（阵容工坊固定 UNKNOWN_PREMATCH），不是一条可引用的游戏规则。所有“对手会怎么打”的推断都必须标成先验而不是事实。",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "sources": [
+        {
+          "url": "tests/evals/roco/cases/microcases-v1.jsonl",
+          "date": "2026-09-21",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "product_context",
+          "quote": "MC-013 | P0 | `hidden_information` | 隐藏信息：教练观察面不得包含对手待执行动作与真实随机种子 | ❌ 未知（null）"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E11",
+      "affected_artifacts": [
+        "src/coach/roco-client.js",
+        "src/client/roco.js",
+        "reports/roco/product-wiring/full-match-wiring.json"
+      ],
+      "notes": "10 号文档 §12.1 原文：匹配前未知对手 = PRODUCT_CONTEXT / 待实机录屏固定；13 号文档 §1 把工程处理写成“阵容工坊固定 UNKNOWN_PREMATCH”。本条只挂产品设计前提与仓库待验 case（MC-013），不挂官方来源：领地试炼公告里“提前查看敌方词条”说的是**活动 PVE**，与“标准 PVP 匹配前看不到对手”不是同一条规则，挂在同一条上会让它看起来像已有官方支撑（校验器现在会直接拦这种写法）。那条官方材料登记在 EV-BATTLEMODE-PARAMETERIZED 上，跟着它真正支撑的那条走。"
+    },
+    {
+      "id": "EV-PVP-OPPONENT-ROSTER-VISIBLE",
+      "topic": "pvp.fairness",
+      "claim": "入局后可见对方精灵（配招与策略仍未知）：我们打算把“可见 roster”与“隐藏 build”分开建模，隐藏部分 fail closed。",
+      "confidence": "COMMUNITY_CURRENT",
+      "sources": [
+        {
+          "url": "https://www.taptap.cn/moment/808879358071540062",
+          "date": "2026-05-27",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "首先考虑的是速度，决定双方精灵先后手，在同样可以击败对方情况下，速度快的精灵先手进攻，优势肯定是很大的"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E12",
+      "affected_artifacts": [
+        "src/coach/roco-client.js",
+        "src/client/roco.js",
+        "roco/src/roco_env/schema.py"
+      ],
+      "notes": "10 号文档 §12.1 原文：进入对局后可看对方精灵 = COMMUNITY_CURRENT / 待实机录屏固定；§13-PVP 文档 §1 写“可见 roster 与隐藏 build 分开建模”。本条来源只有一篇社区攻略（正文讲的是属性公式与职能，没有逐字写“入局后能看到对方六只”），因此**不升等级、也不加第二条凑数**——风险如实登记在报告里。"
+    },
+    {
+      "id": "EV-SWIFT-INJECTION",
+      "topic": "swift.injection",
+      "claim": "迅捷：主动更换精灵入场时，自动使用“第一个能量满足要求且带迅捷”的技能。我们据此把主动换入、技能槽有序、自动注入动作、能量合法性四件事一起建模。",
+      "confidence": "COMMUNITY_CURRENT",
+      "sources": [
+        {
+          "url": "https://wiki.biligame.com/nrc/小鹬",
+          "date": "2026-09-21",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "BWIKI 小鹬页面说明：迅捷通过主动更换精灵入场时，使用第一个能量满足要求并带有迅捷的技能。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E13",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "roco/src/roco_env/schema.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "tests/evals/roco/coach-positions.test.js"
+      ],
+      "notes": "10 号文档 §4 判定 COMMUNITY_CURRENT，工程影响原文：主动换入、技能槽有序、自动注入动作、能量合法性。对应的仓库已有计划是 MC-005（主动换宠是否占整回合，以及「迅捷」的触发条件）。“槽内顺序取第一个满足者”这个细节只有社区页面一处，实机必须录。"
+    },
+    {
+      "id": "EV-MARKS-PERSISTENCE",
+      "topic": "marks.persistence",
+      "claim": "印记：精灵下场后印记不消失、新入场继承；同屏最多 1 种正面 + 1 种负面。我们据此把印记建模成 SideState，而不是普通精灵 buff。",
+      "confidence": "COMMUNITY_CURRENT",
+      "sources": [
+        {
+          "url": "https://wiki.biligame.com/nrc/印记",
+          "date": "2026-09-21",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "BWIKI：精灵下场后印记不消失，新入场继承；最多同时 1 种正面和 1 种负面印记。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E14",
+      "affected_artifacts": [
+        "roco/src/roco_env/schema.py",
+        "roco/src/roco_env/env.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "docs/roco/PET-SUPPORT-MATRIX.md"
+      ],
+      "notes": "10 号文档 §5 判定 COMMUNITY_CURRENT，工程影响原文：mark 更像 SideState，不是普通 Pet buff。同类印记是累加还是替换，10 号文档未定义，仓库已有计划 MC-009 正是问这个。"
+    },
+    {
+      "id": "EV-TYPE-MULTIPLIER",
+      "topic": "type.multiplier",
+      "claim": "属性倍率：当前可观察到 ×3、×2、×0.5、×0.25 四档。我们**不再**沿用旧资料里“所有双弱 ×4”的说法。具体是哪几组对应哪一档仍需逐条核对。",
+      "confidence": "COMMUNITY_CURRENT",
+      "sources": [
+        {
+          "url": "https://wiki.biligame.com/nrc/深渊罗隐",
+          "date": "2026-09-21",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25。"
+        },
+        {
+          "url": "https://wiki.biligame.com/nrc/溯源钟",
+          "date": "2026-09-21",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25。"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "data/roco/normalized/roco-world-s4-2026-09-10/types.json",
+        "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
+        "roco/src/roco_env/env.py",
+        "reports/roco/g02-team/model.json"
+      ],
+      "notes": "10 号文档 §6 判定 COMMUNITY_CURRENT，并明确“不要沿用旧资料里‘所有双弱 ×4’”。needs_microcase=false：它可以在 BWIKI 条目与快照数据上核对，不需要实机；需要实机的是“倍率在实战取值与取整”的时机，那属于已有计划 MC-010/MC-030。"
+    },
+    {
+      "id": "EV-TURN-ORDER-MECHANISMS-EXIST",
+      "topic": "turn_order.priority",
+      "claim": "应对、先手 +1、主动换人、速度参与同层级先后——这四件机制**存在**，我们按真实机制实现，不当成可选项。",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "sources": [
+        {
+          "url": "https://news.17173.com/content/03182026/104940843.shtml",
+          "date": "2026-03-18",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "official_reproduction",
+          "quote": "有效预防：技能能耗2→1，减伤50%，应对攻击：下一次行动获得先手+1；"
+        },
+        {
+          "url": "https://www.taptap.cn/moment/808879358071540062",
+          "date": "2026-05-27",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "community",
+          "quote": "在PVP对战过程中，优先级最高的是应对，俗称博弈。……除了应对优先级外，首先考虑的是速度，决定双方精灵先后手"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48"
+      ],
+      "notes": "10 号文档 §8 原文：可以确认：应对是真实核心机制、技能存在先手 +1、主动换精灵是战斗动作、速度参与同层级先后；mechanisms existence = COMMUNITY_CURRENT / CROSS_SOURCE_SUPPORTED。needs_microcase=false 只针对“存在性”这条；真正要录的是“严格总序”，见 EV-TURN-ORDER-STRICT。"
+    },
+    {
+      "id": "EV-TURN-ORDER-STRICT",
+      "topic": "turn_order.priority",
+      "claim": "应对/先手/换人/速度的**严格总序**：社区常概括成“应对 > 换宠 > 先手 > 速度”，但本轮没找到同等强度的官方文字。在 MC-E05 录到之前，引擎可以有一套确定性排序键，但**不得**把它写成游戏规则，也不得据此对外解释“为什么这样排”。",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "sources": [
+        {
+          "url": "data/roco/evidence/rule-evidence-ledger.json",
+          "date": "2026-09-21",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "（10 号文档 §8 的登记原文，本台账 provenance.authority 指向该文档）mechanisms existence = COMMUNITY_CURRENT / CROSS_SOURCE_SUPPORTED；strict total order = ENGINE_HYPOTHESIS / NEEDS_MICROCASE；speed tie = UNKNOWN"
+        },
+        {
+          "url": "docs/roco/MICROCASE-PLAN.md",
+          "date": "2026-09-21",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "MC-004 | 出手顺序的完整排序键与并列时的逐项降级 | ❌ 未知（null）"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E05",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "tests/evals/roco/coach-positions.test.js",
+        "reports/roco/planner-benchmark.json",
+        "tests/evals/roco/intervention-windows-roco.jsonl"
+      ],
+      "notes": "10 号文档 §8 判定原文：strict total order = ENGINE_HYPOTHESIS / NEEDS_MICROCASE；speed tie = UNKNOWN。仓库已有计划里 MC-001/MC-002/MC-003/MC-004 覆盖这一类。引擎现在的排序键是（应对成功, 先手度, 速度, seed 随机），那只是有界实现，不是规则。来源只登记仓库内可见的两条（本台账与 MICROCASE-PLAN），不把 /tmp 交付包路径写进来源——那不是可复现的仓库锚点；交付包的权威性由本台账顶层 provenance.authority 承担。"
+    },
+    {
+      "id": "EV-LEAVE-SEMANTICS",
+      "topic": "leave.semantics",
+      "claim": "离场语义：主动更换、技能/脱离效果导致的离场、力竭后下场是**三种不同的事**；特性里的“离场”只包括前两种，不包括力竭后下场。我们据此把 ACTIVE_SWITCH != SKILL_LEAVE != FAINT_REPLACEMENT 写成三个独立事件。",
+      "confidence": "COMMUNITY_CURRENT",
+      "sources": [
+        {
+          "url": "https://wiki.biligame.com/nrc/邪眼巨魔",
+          "date": "2026-09-21",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "当前特性页面明确：“离场”包括主动更换或触发脱离效果，不包括力竭后下场。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E16",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "roco/src/roco_env/schema.py",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "docs/roco/PET-SUPPORT-MATRIX.md"
+      ],
+      "notes": "10 号文档 §9 判定 COMMUNITY_CURRENT，工程影响原文：ACTIVE_SWITCH != SKILL_LEAVE != FAINT_REPLACEMENT。仓库已有计划 MC-005（主动换宠）与 MC-006（力竭补位队列）分别覆盖两侧。"
+    },
+    {
+      "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
+      "topic": "traits.triggers",
+      "claim": "特性触发复杂度：公开特性已覆盖入场、离场、回合结束、每受到攻击、克制后、按技能系别、按队伍组成、能量上限突破、迅捷赋予、印记、连击等触发面。全量精确模拟的主要工作量在 trigger/effect 语义，不在精灵表行数。",
+      "confidence": "COMMUNITY_CURRENT",
+      "sources": [
+        {
+          "url": "https://wiki.biligame.com/nrc/特性列表",
+          "date": "2026-09-21",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "当前特性列表已包含入场、离场、回合结束、每受到攻击、克制后、按技能系别、按队伍组成、能量上限突破、迅捷赋予、印记、连击等。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E17",
+      "affected_artifacts": [
+        "data/roco/engine-trait-status.json",
+        "docs/roco/PET-SUPPORT-MATRIX.md",
+        "docs/roco/EFFECT-PRIMITIVES.md",
+        "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48"
+      ],
+      "notes": "10 号文档 §10 判定 COMMUNITY_CURRENT，原文：说明全量精确模拟的主要工作量在 trigger/effect semantics，不是 pet table 行数。仓库已有计划里 A/B/C 组特性共 12 条（MC-014…MC-027）覆盖逐只特性。"
+    },
+    {
+      "id": "EV-OFFICIAL-PAIRING-AI",
+      "topic": "product.pairing_ai",
+      "claim": "官方已发布智能配队 AI 伙伴「斯嘉丽」（2026-08-07，官方 B 站账号）。因此“AI 配队助手”不能作为本项目的唯一创新点；旗舰卖点必须是局中决策、主动触发、规则可验证、训练与评测。",
+      "confidence": "OFFICIAL_CURRENT",
+      "sources": [
+        {
+          "url": "https://www.bilibili.com/video/BV1iMuh66EiP/",
+          "date": "2026-08-07",
+          "level": "OFFICIAL_CURRENT",
+          "marker": "official_first_party",
+          "quote": "官方 Bilibili 账号 2026-08-07 发布“智能配队 AI 伙伴「斯嘉丽」”。"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "docs/roco/COACH-ADVICE-DESIGN.md",
+        "docs/roco/DEMO-PLAN.md",
+        "src/client/roco.js"
+      ],
+      "notes": "10 号文档 §11 判定 VERIFIED_OFFICIAL——该等级不在本台账的六选一里，按“官方账号在官方平台发布”映射为 OFFICIAL_CURRENT，并在报告里写明这次映射。本轮用 B 站 web-interface/view 接口核对：BV1iMuh66EiP 标题为《洛克王国：世界》洛个明白，智能配队 AI 伙伴「斯嘉丽」来啦！，up 主「洛克王国世界」（mid 626796832），pubdate 2026-08-07T13:11:12Z。"
+    },
+    {
+      "id": "EV-BATTLEMODE-PARAMETERIZED",
+      "topic": "battle_mode.territory_trial",
+      "claim": "BattleMode 必须参数化：官方端已经同时存在 2v2 + 特性共享（领地试炼）与 3v3 + 2 魔力（极速对决）。team_size / active_count / trait_sharing / boss_form 不得全硬编码成一种 PVP 模式。",
+      "confidence": "OFFICIAL_CURRENT",
+      "sources": [
+        {
+          "url": "https://www.taptap.cn/moment/849700086890891385",
+          "date": "2026-09-17",
+          "level": "OFFICIAL_CURRENT",
+          "marker": "official_first_party",
+          "quote": "在独特的特性共享系统加持下，己方登场的两只精灵将彼此共享特性！……*本次首领信物：满月砣的信物（获得首领信物后，可使对应具备首领血脉的精灵完成首领化）。"
+        },
+        {
+          "url": "https://www.taptap.cn/moment/809020453778620585",
+          "date": "2026-05-28",
+          "level": "OFFICIAL_CURRENT",
+          "marker": "official_first_party",
+          "quote": "✦活动预告「领地试炼」——高难度2v2挑战来啦！……*本次首领信物：深渊罗隐的信物（获得首领信物后，可在战斗中使用魔法-进化之力，使对应具备首领血脉的精灵完成首领化）。"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "roco/src/roco_env/env.py",
+        "src/client/roco.js",
+        "reports/roco/product-wiring/full-match-wiring.json"
+      ],
+      "notes": "10 号文档 §12 原文：官方 2026-09 领地试炼公告存在 2v2、特性共享、首领信物/首领化；说明 team_size / active_count / trait_sharing / boss_form 不应全硬编码成一种 PVP 模式。两条来源都是 TapTap「洛克王国：世界」官方公告账号的原文，本轮已逐句核对。"
+    }
+  ]
+}
