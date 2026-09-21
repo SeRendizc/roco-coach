@@ -42,7 +42,9 @@ export function strategist(context){
 }
 
 const aliases = [['奶', '治疗'], ['秒杀', '击倒 收尾'], ['蓝量', '能量'], ['先动', '先手 速度'], ['肉盾', '承伤 防御']];
-function tokens(text) {
+// 导出分词器：RC-204 的同语料基线要用**同一个**分词器，否则「基线差」里就混进了
+// 分词差异，而不是别名/过滤/BM25/rerank 的贡献。只加 export，行为一字未改。
+export function tokens(text) {
   let s = String(text).toLowerCase();
   for (const [from, to] of aliases) if (s.includes(from)) s += ' ' + to;
   return new Set([...s.matchAll(/[a-z0-9]+|[\u4e00-\u9fff]{2,}/g)].flatMap(m =>

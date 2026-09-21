@@ -1,0 +1,1201 @@
+{
+  "schema": "roco-rag-heldout-queries/v1",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "as_of": "2026-09-21",
+  "heldout_definition": {
+    "what": "RC-204 的 held-out 检索查询集。五类，每类 ≥8 条。",
+    "origin": "由本仓库的编码代理手写；每条查询的期望值都从**语料本身**推导，出处写在 derived_from 与 why 里。",
+    "not_from_fixtures": "查询文本与 tests/evals/retrieval.json / tests/evals/retrieval-extended.json 的既有条目归一化后交集必须为空（scripts/roco/eval-rag-retrieval.mjs 的 checkFixtureIntersection 判据）。",
+    "not_verbatim_in_corpus": "查询不得逐字出现在索引语料里：checkLeakage 做「完全包含」与「最长公共子串」两个方向的检查。",
+    "expected_is_not_model_memory": "期望值只允许两类：① 语料里确实存在的记录（pack 实体 / 台账条目 / ruleset 配置 / owned 个体 / 冲突条目）；② 明确判为 ABSTAIN（语料冲突、等级不足、或语料里根本没有该名字，且附缺席证明）。",
+    "annotator_note": "IAA 为 0：只有一名标注者（写出本文件的代理）。这是**内部一致性评测**，不是独立盲评，也不是玩家体验评测。"
+  },
+  "evidence_level_enum": [
+    "OFFICIAL_CURRENT",
+    "RECORDED_IN_GAME",
+    "COMMUNITY_CURRENT",
+    "CROSS_SOURCE_SUPPORTED",
+    "ENGINE_HYPOTHESIS",
+    "UNKNOWN"
+  ],
+  "evidence_level_semantics": {
+    "field": "evidence_level_expected = 这条期望的答案在语料里由哪一级证据支撑。",
+    "abstain_queries": "expected=ABSTAIN 时，这个字段写的是「这条若要当事实结论，需要哪一级」——④ 类全部写 RECORDED_IN_GAME（没有任何语料达到），所以它们必须弃答；C11 写 UNKNOWN（语料里根本没有该名字）。",
+    "min_evidence_level": "检索时的硬门槛：最强候选弱于它 → 弃答，且原因里附上候选 id 与它的等级。"
+  },
+  "categories": {
+    "entity_alias": "① 实体/别名：名字、形态名、编号、game_id、owned 个体；含**只在公网索引里标记的形态**（冻结 title 无形态后缀、公网 data-form 标了 lord/regional）与只在冻结 title 里出现的描述性形态名。",
+    "skill_mechanic": "② 技能/机制语义：技能标签、特性双属性、印记/迅捷/离场/触发面等机制结论。",
+    "rule_version": "③ 规则与版本：哪套 ruleset 配置、默认/候选状态、某字段在某一版里写成多少、台账条目的实机挂点。",
+    "conflict_abstain": "④ 冲突/证据不足：期望结论就是 ABSTAIN。分三种原因：身份冲突未解决（pack 自己标 UNRESOLVED）、等级不足（只有假设/社区级证据）、语料里根本没有这个名字。",
+    "lineup_counter": "⑤ 阵容/克制：六宠口径、魔力与力竭、对手未知的产品前提、模式参数化、属性倍率、按属性筛实体。"
+  },
+  "queries": [
+    {
+      "id": "E01",
+      "category": "entity_alias",
+      "query": "雪绒鸟在公网索引里被标成地区形态了吗",
+      "expected": "pet::pet_000420",
+      "acceptable_entity_keys": [
+        "pet::pet_000420",
+        "pet::pet_000229",
+        "pet::pet_000230",
+        "pet::pet_000231"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000420",
+        "anchors": [
+          "雪绒鸟",
+          "地区"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000420。它的 form_axis 是 divergence 条目：冻结 title 是「雪绒鸟」（无形态后缀，frozen.title.plain），公网 data-form=regional（live.form.regional），两条一起进 form_axis。同名同 record 组的 pet_000229/230/231（春天/夏天/秋天的样子）公网形态也含 regional，所以它们同样算可接受答案。证据等级取来源 wiki（10 号文档：网页当前可见=COMMUNITY_CURRENT）。"
+    },
+    {
+      "id": "E02",
+      "category": "entity_alias",
+      "query": "彩虹独角兽在公开索引里是首领形态吗",
+      "expected": "pet::pet_000535",
+      "acceptable_entity_keys": [
+        "pet::pet_000535"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000535",
+        "anchors": [
+          "彩虹独角兽",
+          "首领"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000535。它同样在 form_axis.assignments 里带 divergence=true：冻结 title 无后缀，公网 data-form=lord，所以「首领」这个标记**只**在公网索引那一侧出现（live.form.lord → 首领）。名字在 1446 条里唯一，所以答案唯一。"
+    },
+    {
+      "id": "E03",
+      "category": "entity_alias",
+      "query": "编号 002 是哪个精灵",
+      "expected": "pet::pet_000001",
+      "acceptable_entity_keys": [
+        "pet::pet_000001"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000001",
+        "anchors": [
+          "喵喵",
+          "002"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000001 的 tags.number=002（冻结层编号）。按 tags.number 在 622 条 pet 记录里做唯一性检查：值为 002 的只有 1 条，所以期望唯一。这条测的是「编号/别名」这条路，不是全文相似。"
+    },
+    {
+      "id": "E04",
+      "category": "entity_alias",
+      "query": "哪个精灵的 game_id 是 3001",
+      "expected": "pet::pet_000001",
+      "acceptable_entity_keys": [
+        "pet::pet_000001"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000001",
+        "anchors": [
+          "喵喵",
+          "3001"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000001 的 tags.game_id=3001。game_id 在 1446 条实体里 1446 个取值互不相同，因此答案唯一。这条同时是「数字别名必须落在数字边界上」的反例守护：查询里的 3001 不许把编号 001 的实体捞上来。"
+    },
+    {
+      "id": "E05",
+      "category": "entity_alias",
+      "query": "蓬松的样子说的是哪只鸭吉吉的形态",
+      "expected": "pet::pet_000011",
+      "acceptable_entity_keys": [
+        "pet::pet_000011"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000011",
+        "anchors": [
+          "鸭吉吉",
+          "蓬松的样子"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000011 的 title「鸭吉吉（蓬松的样子）」。同名「鸭吉吉」在 pack 里有 6 条（pet_000011/000033/000353/000354/000393/000513），括号里的形态名各不相同，所以只有 000011 命中「蓬松的样子」。这条测描述性形态名（只在冻结 title 里出现）的别名表。"
+    },
+    {
+      "id": "E06",
+      "category": "entity_alias",
+      "query": "抓挠在公网索引里算什么类别",
+      "expected": "battle_skill::skill_000246",
+      "acceptable_entity_keys": [
+        "battle_skill::skill_000246"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:battle_skill::skill_000246",
+        "anchors": [
+          "抓挠",
+          "物攻"
+        ]
+      },
+      "why": "出处=pack:battle_skill::skill_000246 的 tags_live.category=物攻（冻结侧 tags.category=攻击）。「物攻」这个字面只在公网索引那一侧的字段里出现，所以期望值同时依赖实体名与 case 来源范围过滤。"
+    },
+    {
+      "id": "E07",
+      "category": "entity_alias",
+      "query": "own-0001 是哪只精灵的个体，带哪几个技能",
+      "expected": "owned::own-0001",
+      "acceptable_entity_keys": [
+        "owned::own-0001"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "owned_pet",
+        "ref": "owned:own-0001",
+        "anchors": [
+          "own-0001",
+          "铠甲虫"
+        ]
+      },
+      "why": "出处=data/roco/owned/owned-pets.json 的实例 own-0001：species_id=pet_000012（铠甲虫）、四个技能 skill_000648/000633/000651/000645，provenance 指向 layer-playable-48/learnsets.json 与 full-catalog.json。等级记 COMMUNITY_CURRENT（技能来自冻结快照），面板类字段在语料里自带 UNKNOWN（unknown_fields=panel_stats）。"
+    },
+    {
+      "id": "E08",
+      "category": "entity_alias",
+      "query": "偏振这个特性的双属性标注是什么",
+      "expected": "trait::skill_000001",
+      "acceptable_entity_keys": [
+        "trait::skill_000001"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:trait::skill_000001",
+        "anchors": [
+          "偏振",
+          "光",
+          "地"
+        ]
+      },
+      "why": "出处=pack:trait::skill_000001 的 tags_live.primary_type=光、secondary_type=地（冻结侧 tags.element=无系别）。242 条 trait 记录里有 242 条带双属性字段，但「偏振」这个名字在 1446 条里唯一，所以期望唯一。"
+    },
+    {
+      "id": "E09",
+      "category": "entity_alias",
+      "query": "缓一缓在公网索引里带什么标签",
+      "expected": "battle_skill::skill_000337",
+      "acceptable_entity_keys": [
+        "battle_skill::skill_000337"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:battle_skill::skill_000337",
+        "anchors": [
+          "缓一缓",
+          "回能"
+        ]
+      },
+      "why": "出处=pack:battle_skill::skill_000337 的 tags_live.tags=回能（公网索引专有字段）。「回能」在 579 个技能里命中 31 条，是通用标签，所以期望只能靠名字「缓一缓」定位——这正是别名表该做的事。"
+    },
+    {
+      "id": "M01",
+      "category": "skill_mechanic",
+      "query": "印记在精灵下场之后会不会消失",
+      "expected": "EV-MARKS-PERSISTENCE",
+      "acceptable_entity_keys": [
+        "EV-MARKS-PERSISTENCE"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-MARKS-PERSISTENCE",
+        "anchors": [
+          "印记",
+          "印记不消失"
+        ]
+      },
+      "why": "出处=台账 EV-MARKS-PERSISTENCE（topic=marks.persistence，confidence=COMMUNITY_CURRENT，来源 BWIKI 印记页）：下场后印记不消失、新入场继承、同屏最多 1 正 1 负。等级按台账自身登记，不升级。注意这条查询里出现了「精灵」两个字，硬过滤会把它滤到 pet 类——检索层必须能发现这个过滤把更好的候选滤掉了并退回（intent.filter_fallback）。"
+    },
+    {
+      "id": "M02",
+      "category": "skill_mechanic",
+      "query": "精灵主动换上来的时候迅捷会自动放技能吗",
+      "expected": "EV-SWIFT-INJECTION",
+      "acceptable_entity_keys": [
+        "EV-SWIFT-INJECTION"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-SWIFT-INJECTION",
+        "anchors": [
+          "迅捷",
+          "第一个能量满足要求"
+        ]
+      },
+      "why": "出处=台账 EV-SWIFT-INJECTION（topic=swift.injection，COMMUNITY_CURRENT）：主动换入时自动使用第一个能量满足要求且带迅捷的技能。与 M01 一样带「精灵」硬过滤诱饵。措辞刻意不照抄 claim 原句（泄漏判据要求与任一条语料文档的最长逐字重合 ≤8 个中文字符）。"
+    },
+    {
+      "id": "M03",
+      "category": "skill_mechanic",
+      "query": "离场包括哪些情形，力竭下场算吗",
+      "expected": "EV-LEAVE-SEMANTICS",
+      "acceptable_entity_keys": [
+        "EV-LEAVE-SEMANTICS"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-LEAVE-SEMANTICS",
+        "anchors": [
+          "离场",
+          "力竭后下场"
+        ]
+      },
+      "why": "出处=台账 EV-LEAVE-SEMANTICS（leave.semantics，COMMUNITY_CURRENT）：特性里的「离场」只包括主动更换与技能/脱离效果，不包括力竭后下场。"
+    },
+    {
+      "id": "M04",
+      "category": "skill_mechanic",
+      "query": "技能耗能存在 8 的情况吗",
+      "expected": "EV-ENERGY-COST8-EXISTS",
+      "acceptable_entity_keys": [
+        "EV-ENERGY-COST8-EXISTS"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-ENERGY-COST8-EXISTS",
+        "anchors": [
+          "能耗",
+          "8"
+        ]
+      },
+      "why": "出处=台账 EV-ENERGY-COST8-EXISTS（energy.max，COMMUNITY_CURRENT）：冻结快照里确实存在能耗 8 的技能，所以上限 6 会把它们永久判成不可用。该条只证明「能耗 8 存在」，不证明「上限是 10」。查询里的「技能」会把硬过滤指向 battle_skill，正确候选在台账类里——同样依赖退回机制。"
+    },
+    {
+      "id": "M05",
+      "category": "skill_mechanic",
+      "query": "特性触发面都覆盖了哪些时机",
+      "expected": "EV-TRAITS-TRIGGER-COMPLEXITY",
+      "acceptable_entity_keys": [
+        "EV-TRAITS-TRIGGER-COMPLEXITY"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-TRAITS-TRIGGER-COMPLEXITY",
+        "anchors": [
+          "入场",
+          "离场",
+          "回合结束"
+        ]
+      },
+      "why": "出处=台账 EV-TRAITS-TRIGGER-COMPLEXITY（traits.triggers，COMMUNITY_CURRENT）：公开特性已覆盖入场/离场/回合结束/每受到攻击/克制后/按技能系别/按队伍组成/能量上限突破/迅捷赋予/印记/连击等触发面。"
+    },
+    {
+      "id": "M06",
+      "category": "skill_mechanic",
+      "query": "应对和先手这些机制是真实存在的吗",
+      "expected": "EV-TURN-ORDER-MECHANISMS-EXIST",
+      "acceptable_entity_keys": [
+        "EV-TURN-ORDER-MECHANISMS-EXIST"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-TURN-ORDER-MECHANISMS-EXIST",
+        "anchors": [
+          "应对",
+          "先手"
+        ]
+      },
+      "why": "出处=台账 EV-TURN-ORDER-MECHANISMS-EXIST（turn_order.priority，CROSS_SOURCE_SUPPORTED）：应对、先手 +1、主动换人、速度参与同层级先后这四件机制存在；**存在性**是 CROSS_SOURCE_SUPPORTED，而严格总序是另一条（EV-TURN-ORDER-STRICT，ENGINE_HYPOTHESIS，见 C05 弃答）。这条测「同主题下的分级必须在结果里如实带出来」。"
+    },
+    {
+      "id": "M07",
+      "category": "skill_mechanic",
+      "query": "属性倍率一共有哪几档",
+      "expected": "EV-TYPE-MULTIPLIER",
+      "acceptable_entity_keys": [
+        "EV-TYPE-MULTIPLIER"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-TYPE-MULTIPLIER",
+        "anchors": [
+          "×3",
+          "×0.25"
+        ]
+      },
+      "why": "出处=台账 EV-TYPE-MULTIPLIER（type.multiplier，COMMUNITY_CURRENT）：可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。"
+    },
+    {
+      "id": "M08",
+      "category": "skill_mechanic",
+      "query": "吞噬这个技能在公网索引里的属性是什么",
+      "expected": "battle_skill::skill_000269",
+      "acceptable_entity_keys": [
+        "battle_skill::skill_000269"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:battle_skill::skill_000269",
+        "anchors": [
+          "吞噬",
+          "tags_live.element"
+        ]
+      },
+      "why": "出处=pack:battle_skill::skill_000269：它的 tags_live.element 给出公网索引侧的系别（冻结侧 tags.element 是「…系」写法），名字「吞噬」在 1446 条里唯一。这条测「技能实体的字段」而不是机制结论。"
+    },
+    {
+      "id": "R01",
+      "category": "rule_version",
+      "query": "S4 现在默认用哪一套 ruleset 配置",
+      "expected": "ruleset_config::legacy_sim_v1",
+      "acceptable_entity_keys": [
+        "ruleset_config::legacy_sim_v1"
+      ],
+      "evidence_level_expected": "ENGINE_HYPOTHESIS",
+      "min_evidence_level": null,
+      "requires_ruleset_config_id": "legacy_sim_v1",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/legacy-sim-v1.json",
+        "anchors": [
+          "legacy_sim_v1",
+          "默认配置 是"
+        ]
+      },
+      "why": "出处=pack.ruleset_binding.ruleset_config_id=legacy_sim_v1 且 ruleset_config_is_default=true；对应 data/roco/rulesets/legacy-sim-v1.json 的 is_default=true、status=LEGACY_BASELINE_BIT_EXACT。「哪套是默认」是仓库内部登记事实（source_markers 里的 repo_internal），所以等级记 ENGINE_HYPOTHESIS，不冒充游戏事实。这条同时是版本命中率的分母之一。"
+    },
+    {
+      "id": "R02",
+      "category": "rule_version",
+      "query": "哪套配置被标成不能当默认",
+      "expected": "ruleset_config::mobile_s4_candidate_v2",
+      "acceptable_entity_keys": [
+        "ruleset_config::mobile_s4_candidate_v2"
+      ],
+      "evidence_level_expected": "ENGINE_HYPOTHESIS",
+      "min_evidence_level": null,
+      "requires_ruleset_config_id": "mobile_s4_candidate_v2",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/mobile-s4-candidate-v2.json",
+        "anchors": [
+          "mobile_s4_candidate_v2",
+          "CANDIDATE_NOT_FOR_DEFAULT"
+        ]
+      },
+      "why": "出处=data/roco/rulesets/mobile-s4-candidate-v2.json 的 status=CANDIDATE_NOT_FOR_DEFAULT、is_default=false、requires_microcase_before_default=true；pack.ruleset_binding.ruleset_configs_available 也把它登记成 is_default=false。等级同上：仓库登记事实 → ENGINE_HYPOTHESIS。"
+    },
+    {
+      "id": "R03",
+      "category": "rule_version",
+      "query": "候选配置把常规能量上限施工成多少",
+      "expected": "ruleset_config::mobile_s4_candidate_v2#energy.max",
+      "acceptable_entity_keys": [
+        "ruleset_config::mobile_s4_candidate_v2#energy.max",
+        "ruleset_config::mobile_s4_candidate_v2"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "requires_ruleset_config_id": "mobile_s4_candidate_v2",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/mobile-s4-candidate-v2.json",
+        "anchors": [
+          "energy.max",
+          "value=10"
+        ]
+      },
+      "why": "出处=候选配置 energy.max: value=10、confidence=CROSS_SOURCE_SUPPORTED、evidence_id=EV-ENERGY-MAX、value_status=CANDIDATE_HYPOTHESIS。字段段落文档会把 evidence_id JOIN 到台账 claim，所以中文问「常规能量上限」能查到英文键 energy.max；这正是规则与版本类「查某个字段在哪一版写成多少」的样子。"
+    },
+    {
+      "id": "R04",
+      "category": "rule_version",
+      "query": "默认配置里能量上限写的几",
+      "expected": "ruleset_config::legacy_sim_v1",
+      "acceptable_entity_keys": [
+        "ruleset_config::legacy_sim_v1",
+        "ruleset_config::legacy_sim_v1#energy.max"
+      ],
+      "evidence_level_expected": "ENGINE_HYPOTHESIS",
+      "min_evidence_level": null,
+      "requires_ruleset_config_id": "legacy_sim_v1",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/legacy-sim-v1.json",
+        "anchors": [
+          "energy.max",
+          "value=6"
+        ]
+      },
+      "why": "出处=legacy 基线配置 energy.max: value=6、confidence=ENGINE_HYPOTHESIS、evidence_id=EV-ENERGY-MAX 但 evidence_role=**refutes**（台账结论是「打算按 10 施工」，所以这条证据反驳 6，而不是给 6 背书）。所以期望等级是 ENGINE_HYPOTHESIS，绝不能因为「有 evidence_id」就升到 CROSS_SOURCE_SUPPORTED。"
+    },
+    {
+      "id": "R05",
+      "category": "rule_version",
+      "query": "候选配置里首次入场能量填了吗",
+      "expected": "ruleset_config::mobile_s4_candidate_v2",
+      "acceptable_entity_keys": [
+        "ruleset_config::mobile_s4_candidate_v2",
+        "ruleset_config::mobile_s4_candidate_v2#energy.initial"
+      ],
+      "evidence_level_expected": "UNKNOWN",
+      "min_evidence_level": null,
+      "requires_ruleset_config_id": "mobile_s4_candidate_v2",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/mobile-s4-candidate-v2.json",
+        "anchors": [
+          "energy.initial",
+          "value=null"
+        ]
+      },
+      "why": "出处=候选配置 energy.initial: value=null、confidence=UNKNOWN、reason 引 10 号文档「首次入场具体能量：需实机/更强一手证据」，以及 unknowns[] 里 path=energy.initial、microcase_id=MC-E04。期望等级记 UNKNOWN：语料明确说这里没填。"
+    },
+    {
+      "id": "R06",
+      "category": "rule_version",
+      "query": "台账里能量上限那条结论挂在哪张 microcase",
+      "expected": "EV-ENERGY-MAX",
+      "acceptable_entity_keys": [
+        "EV-ENERGY-MAX"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-ENERGY-MAX",
+        "anchors": [
+          "MC-E01",
+          "常规上限 10"
+        ]
+      },
+      "why": "出处=台账 EV-ENERGY-MAX：needs_microcase=true、microcase_id=MC-E01、confidence=CROSS_SOURCE_SUPPORTED（两条社区来源）。「台账」是强意图词，会把答案空间钉在 20 条条目里。"
+    },
+    {
+      "id": "R07",
+      "category": "rule_version",
+      "query": "哪条台账说回合末自然回能被多源反驳",
+      "expected": "EV-ENERGY-ENDTURN-REGEN",
+      "acceptable_entity_keys": [
+        "EV-ENERGY-ENDTURN-REGEN"
+      ],
+      "evidence_level_expected": "ENGINE_HYPOTHESIS",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-ENERGY-ENDTURN-REGEN",
+        "anchors": [
+          "回合末自然回能",
+          "与多源材料冲突"
+        ]
+      },
+      "why": "出处=台账 EV-ENERGY-ENDTURN-REGEN（energy.regen）：claim 明说「没有找到…证据；现有仓库假设 ENERGY_REGEN_PER_TURN=1 与多源材料冲突」；等级 ENGINE_HYPOTHESIS、needs_microcase=true、MC-E03。"
+    },
+    {
+      "id": "R08",
+      "category": "rule_version",
+      "query": "哪份配置的 status 写着 LEGACY_BASELINE_BIT_EXACT",
+      "expected": "ruleset_config::legacy_sim_v1",
+      "acceptable_entity_keys": [
+        "ruleset_config::legacy_sim_v1"
+      ],
+      "evidence_level_expected": "ENGINE_HYPOTHESIS",
+      "min_evidence_level": null,
+      "requires_ruleset_config_id": "legacy_sim_v1",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/legacy-sim-v1.json",
+        "anchors": [
+          "LEGACY_BASELINE_BIT_EXACT"
+        ]
+      },
+      "why": "出处=legacy-sim-v1.json 的 status=LEGACY_BASELINE_BIT_EXACT。这条用**逐位基线**而不是自然语言问法，测结构化字段（status）能直接被查到，且仍要求版本命中（requires_ruleset_config_id=legacy_sim_v1）。"
+    },
+    {
+      "id": "C01",
+      "category": "conflict_abstain",
+      "query": "同速时多次录像能看出谁先动吗",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/mobile-s4-candidate-v2.json",
+        "anchors": [
+          "turn_order.speed_tie",
+          "UNKNOWN"
+        ]
+      },
+      "why": "出处=候选配置 turn_order.speed_tie: value=null、confidence=UNKNOWN，reason 明说「10 号文档 §8：speed tie = UNKNOWN，判据见 MC-E05」；legacy 配置对应的 speed_tie 同为假设/未知。同速谁先动是**未定**，要当事实结论需要 RECORDED_IN_GAME（实机录像），语料里没有 → 必须弃答。"
+    },
+    {
+      "id": "C02",
+      "category": "conflict_abstain",
+      "query": "初次入场到底给几点能量，实机测过吗",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-ENERGY-INITIAL",
+        "anchors": [
+          "首次入场能量",
+          "MC-E04"
+        ]
+      },
+      "why": "出处=台账 EV-ENERGY-INITIAL（CROSS_SOURCE_SUPPORTED，needs_microcase=true，MC-E04）+ 候选配置 energy.initial=null/UNKNOWN。10 号文档判为「需实机/更强一手证据」；在 MC-E04 录到之前只能当占位值，所以问题「到底几点」必须弃答。"
+    },
+    {
+      "id": "C03",
+      "category": "conflict_abstain",
+      "query": "聚能能不能突破能量上限",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-ENERGY-CHARGE",
+        "anchors": [
+          "聚能",
+          "是否可突破上限"
+        ]
+      },
+      "why": "出处=台账 EV-ENERGY-CHARGE（CROSS_SOURCE_SUPPORTED，MC-E02）：「聚能是否可突破上限、以及无有效技能时是否自动聚能，均未定，不得写成事实」；候选配置 unknowns 里 energy.charge.breaks_cap=null。「能不能突破」要实机级证据 → 弃答。"
+    },
+    {
+      "id": "C04",
+      "category": "conflict_abstain",
+      "query": "回合末会自然回一点能量吗",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-ENERGY-ENDTURN-REGEN",
+        "anchors": [
+          "回合末自然回能",
+          "ENGINE_HYPOTHESIS"
+        ]
+      },
+      "why": "出处=台账 EV-ENERGY-ENDTURN-REGEN：现有仓库假设回合末 +1 被多源材料反驳，等级只有 ENGINE_HYPOTHESIS，且 needs_microcase=true（MC-E03）。引擎里那条 +1 是工程假设，不是游戏事实 → 弃答（这正是 R07 查得到、但这里是「当事实断言」所以不答的对照）。"
+    },
+    {
+      "id": "C05",
+      "category": "conflict_abstain",
+      "query": "应对和换宠谁先结算，这条严格总序有官方文字吗",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-TURN-ORDER-STRICT",
+        "anchors": [
+          "严格总序",
+          "不得"
+        ]
+      },
+      "why": "出处=台账 EV-TURN-ORDER-STRICT（ENGINE_HYPOTHESIS，MC-E05）：社区常概括「应对 > 换宠 > 先手 > 速度」，但本轮没找到同等强度官方文字；台账自己写着「不得把它写成游戏规则」。问「有没有官方文字」的诚实答案是「没有，只有假设」→ 弃答。"
+    },
+    {
+      "id": "C06",
+      "category": "conflict_abstain",
+      "query": "我的个体面板换算公式有吗",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "owned_pet",
+        "ref": "owned:own-0001",
+        "anchors": [
+          "面板换算公式未校准"
+        ]
+      },
+      "why": "出处=owned-pets.json 每个实例的 nature/talent/specialty/bloodline.effect=UNKNOWN、effect_reason=「面板换算公式未校准（见 10 号文档 §13）」，且 unknown_fields 含 panel_stats。10 号文档 §13 明说「不因字段存在就自造换算」→ 弃答。"
+    },
+    {
+      "id": "C07",
+      "category": "conflict_abstain",
+      "query": "冻结层和公网索引的字段值逐条比过吗",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "pack_conflict_policy",
+        "ref": "pack:conflicts.classes",
+        "anchors": [
+          "VALUE_CONFLICT",
+          "没比过"
+        ]
+      },
+      "why": "出处=pack.conflicts.classes.VALUE_CONFLICT：「本轮为 0 —— 这不是「没有差异」，是「没比过」：公网索引页没有种族值/学招表/效果文本，所以没有任何值可逐条比」。所以「逐条比过吗」的答案是「没有比过」，不能回答「一致」→ 弃答。"
+    },
+    {
+      "id": "C08",
+      "category": "conflict_abstain",
+      "query": "幽影树的突变样子对应哪个 id",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "pack_conflict",
+        "ref": "pack:CF-UNRESOLVED-0001",
+        "anchors": [
+          "pet::pet_000532",
+          "pet_000056"
+        ]
+      },
+      "why": "出处=pack.conflicts.items 的 CF-UNRESOLVED-0001（IDENTITY_CONFLICT，status=UNRESOLVED）：entity_key=pet::pet_000532，counterpart_ids=[pet_000056]，同名不同 id，无法排除公网把两者并成一条。查询里没有 id、也没有带括号的完整 title，所以不构成消歧 → 弃答。"
+    },
+    {
+      "id": "C09",
+      "category": "conflict_abstain",
+      "query": "腾挪这个特性该算哪一条",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "pack_conflict",
+        "ref": "pack:CF-UNRESOLVED-0002",
+        "anchors": [
+          "trait::skill_000164",
+          "skill_000134"
+        ]
+      },
+      "why": "出处=pack.conflicts.items 的 CF-UNRESOLVED-0002（UNRESOLVED）：trait::skill_000164 与同名 skill_000134 谁是公网那一条没有定论。冻结侧本身有 3 组同名不同 id 的技能/特性记录，所以「同名」不足以当身份 → 弃答。"
+    },
+    {
+      "id": "C10",
+      "category": "conflict_abstain",
+      "query": "保卫和好象坏象到底是特性还是技能",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "pack_conflict",
+        "ref": "pack:CF-UNRESOLVED-0003",
+        "anchors": [
+          "trait::skill_000165",
+          "skill_000135"
+        ]
+      },
+      "why": "出处=pack.conflicts.items 的 CF-UNRESOLVED-0003（保卫，trait::skill_000165 vs skill_000135）与 CF-UNRESOLVED-0004（好象坏象，trait::skill_000166 vs skill_000136），两条都是 UNRESOLVED 的同名不同 id。问「到底是特性还是技能」在语料里没有唯一答案 → 弃答。"
+    },
+    {
+      "id": "C11",
+      "category": "conflict_abstain",
+      "query": "破晓之刃这把武器在语料里有吗",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "UNKNOWN",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "pack_absence",
+        "ref": "absence:破晓之刃",
+        "anchors": [
+          "破晓之刃"
+        ]
+      },
+      "why": "出处=absence:破晓之刃（缺席证明，不是一条记录）。1446 条 pack 实体的 name/title、20 条台账的 claim、2 份配置的正文里都不含「破晓之刃」——判据 checkDerivation 对 absence 类做全语料反向扫描，任何一条 name/title 命中就会把它判红。语料里没有这个名字，就必须 NO_MATCH 弃答，而不是拿一个字形相近的东西顶上。等级记 UNKNOWN：语料对该名字没有任何证据。"
+    },
+    {
+      "id": "L01",
+      "category": "lineup_counter",
+      "query": "标准 PVP 到底带几只，官方确认过吗",
+      "expected": "EV-PVP-STANDARD-TEAM-SIZE",
+      "acceptable_entity_keys": [
+        "EV-PVP-STANDARD-TEAM-SIZE"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-PVP-STANDARD-TEAM-SIZE",
+        "anchors": [
+          "标准 PVP 六宠",
+          "官方已确认"
+        ]
+      },
+      "why": "出处=台账 EV-PVP-STANDARD-TEAM-SIZE（pvp.standard.team_size，CROSS_SOURCE_SUPPORTED，MC-E07）：打算按 cross-source 结论支持六只编队，但**禁止**写成「官方已确认标准 PVP 是六只」。所以「官方确认过吗」的正确答案是这条条目本身 + 它的等级，而不是一句「是」。"
+    },
+    {
+      "id": "L02",
+      "category": "lineup_counter",
+      "query": "标准 PVP 的魔力点数按几点施工",
+      "expected": "EV-PVP-STANDARD-MANA",
+      "acceptable_entity_keys": [
+        "EV-PVP-STANDARD-MANA"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-PVP-STANDARD-MANA",
+        "anchors": [
+          "4 点魔力",
+          "禁止写成官方已确认"
+        ]
+      },
+      "why": "出处=台账 EV-PVP-STANDARD-MANA（battle_mode.standard_pvp，CROSS_SOURCE_SUPPORTED，MC-E08）：按 candidate ruleset 施工「4 点魔力」，UI 标候选规则，禁止写成官方已确认。"
+    },
+    {
+      "id": "L03",
+      "category": "lineup_counter",
+      "query": "力竭以后魔力怎么扣，会直接判负吗",
+      "expected": "EV-PVP-FAINT-MANA-LOSS",
+      "acceptable_entity_keys": [
+        "EV-PVP-FAINT-MANA-LOSS"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-PVP-FAINT-MANA-LOSS",
+        "anchors": [
+          "力竭扣魔力",
+          "-1"
+        ]
+      },
+      "why": "出处=台账 EV-PVP-FAINT-MANA-LOSS（battle_mode.standard_pvp，CROSS_SOURCE_SUPPORTED，MC-E09）：目标是先让对方魔力归零，力竭通常扣 1 点魔力，而不是直接判负。"
+    },
+    {
+      "id": "L04",
+      "category": "lineup_counter",
+      "query": "匹配之前看不到对手阵容，这算规则吗",
+      "expected": "EV-PVP-UNKNOWN-OPPONENT",
+      "acceptable_entity_keys": [
+        "EV-PVP-UNKNOWN-OPPONENT"
+      ],
+      "evidence_level_expected": "ENGINE_HYPOTHESIS",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-PVP-UNKNOWN-OPPONENT",
+        "anchors": [
+          "匹配前不知道对手阵容",
+          "产品场景"
+        ]
+      },
+      "why": "出处=台账 EV-PVP-UNKNOWN-OPPONENT（pvp.fairness）：claim 明说这是**产品场景**（阵容工坊固定 UNKNOWN_PREMATCH），不是一条可引用的游戏规则；来源标记是 product_context，所以等级落 ENGINE_HYPOTHESIS。这条正是「对手未知」口径的语料出处。"
+    },
+    {
+      "id": "L05",
+      "category": "lineup_counter",
+      "query": "进对局之后能看见对面哪几只，配招也能看见吗",
+      "expected": "EV-PVP-OPPONENT-ROSTER-VISIBLE",
+      "acceptable_entity_keys": [
+        "EV-PVP-OPPONENT-ROSTER-VISIBLE"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-PVP-OPPONENT-ROSTER-VISIBLE",
+        "anchors": [
+          "可见对方精灵",
+          "隐藏 build"
+        ]
+      },
+      "why": "出处=台账 EV-PVP-OPPONENT-ROSTER-VISIBLE（pvp.fairness，COMMUNITY_CURRENT，MC-E12）：入局后可见对方精灵，配招与策略仍未知；隐藏部分 fail closed。"
+    },
+    {
+      "id": "L06",
+      "category": "lineup_counter",
+      "query": "极速对决是几打几，几点魔力",
+      "expected": "EV-PVP-SPEED-DUEL-MODE",
+      "acceptable_entity_keys": [
+        "EV-PVP-SPEED-DUEL-MODE"
+      ],
+      "evidence_level_expected": "OFFICIAL_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-PVP-SPEED-DUEL-MODE",
+        "anchors": [
+          "3v3",
+          "2 点魔力"
+        ]
+      },
+      "why": "出处=台账 EV-PVP-SPEED-DUEL-MODE（battle_mode.speed_duel，OFFICIAL_CURRENT，来源标记 official_first_party，TapTap 官方 2026-08 公告）：官方极速对决是独立限时活动模式，3v3、每方 2 点魔力、至少 1 只本期主题精灵。这是语料里少数 OFFICIAL_CURRENT 条目之一。"
+    },
+    {
+      "id": "L07",
+      "category": "lineup_counter",
+      "query": "领地试炼那种模式要单独参数化吗",
+      "expected": "EV-BATTLEMODE-PARAMETERIZED",
+      "acceptable_entity_keys": [
+        "EV-BATTLEMODE-PARAMETERIZED"
+      ],
+      "evidence_level_expected": "OFFICIAL_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-BATTLEMODE-PARAMETERIZED",
+        "anchors": [
+          "BattleMode 必须参数化",
+          "2v2"
+        ]
+      },
+      "why": "出处=台账 EV-BATTLEMODE-PARAMETERIZED（battle_mode.territory_trial，OFFICIAL_CURRENT，两条 official_first_party 公告）：官方端同时存在 2v2 + 特性共享（领地试炼）与 3v3 + 2 魔力（极速对决），team_size / active_count / trait_sharing / boss_form 不得全硬编码。"
+    },
+    {
+      "id": "L08",
+      "category": "lineup_counter",
+      "query": "草毒双属性的海神球形态是哪几只精灵",
+      "expected": "pet::pet_000016",
+      "acceptable_entity_keys": [
+        "pet::pet_000016",
+        "pet::pet_000017",
+        "pet::pet_000018",
+        "pet::pet_000537"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000016",
+        "anchors": [
+          "蹦蹦种子",
+          "海神球形态",
+          "毒系"
+        ]
+      },
+      "why": "出处=pack 里 title 含「海神球形态」的四条：pet_000016(蹦蹦种子)/000017(蹦蹦草)/000018(蹦蹦花)/000537(蹦蹦果)，四条的 tags.types 都是 [草系,毒系]，所以四条都算可接受答案。这条测「按属性 + 形态名筛实体」的多答案口径，而不是唯一名字匹配。"
+    },
+    {
+      "id": "L09",
+      "category": "lineup_counter",
+      "query": "光草双属性的圣草迪莫是什么形态",
+      "expected": "pet::pet_000559",
+      "acceptable_entity_keys": [
+        "pet::pet_000559"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000559",
+        "anchors": [
+          "圣草迪莫",
+          "草系"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000559（圣草迪莫）tags.types=[光系,草系]，公网 data-form=lord（live.form.lord），所以它同时是「光+草双属性」与「首领形态」。迪莫系列里只有它是光/草，答案唯一。"
+    }
+  ],
+  "probe_queries": [
+    {
+      "id": "P01",
+      "category": "entity_alias",
+      "query": "祭礼巨像在公网索引里被标成首领形态了吗",
+      "expected": "pet::pet_000542",
+      "acceptable_entity_keys": [
+        "pet::pet_000542"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000542",
+        "anchors": [
+          "祭礼巨像",
+          "首领"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000542（form_axis divergence=true，公网 data-form=lord）。"
+    },
+    {
+      "id": "P02",
+      "category": "entity_alias",
+      "query": "哪只精灵的 game_id 是 3012",
+      "expected": "pet::pet_000011",
+      "acceptable_entity_keys": [
+        "pet::pet_000011"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000011",
+        "anchors": [
+          "鸭吉吉",
+          "3012"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000011 的 tags.game_id=3012。"
+    },
+    {
+      "id": "P03",
+      "category": "entity_alias",
+      "query": "种子弹在公网索引里算什么类别",
+      "expected": "battle_skill::skill_000338",
+      "acceptable_entity_keys": [
+        "battle_skill::skill_000338"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:battle_skill::skill_000338",
+        "anchors": [
+          "种子弹",
+          "物攻"
+        ]
+      },
+      "why": "出处=pack:battle_skill::skill_000338 的 tags_live.category=物攻、tags_live.tags=回能。"
+    },
+    {
+      "id": "P04",
+      "category": "entity_alias",
+      "query": "特性氧循环的双属性是什么",
+      "expected": "trait::skill_000003",
+      "acceptable_entity_keys": [
+        "trait::skill_000003"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:trait::skill_000003",
+        "anchors": [
+          "氧循环",
+          "草"
+        ]
+      },
+      "why": "出处=pack:trait::skill_000003 的 tags_live.primary_type=草、secondary_type=草。"
+    },
+    {
+      "id": "P05",
+      "category": "rule_version",
+      "query": "官方有没有发布过配队 AI 伙伴",
+      "expected": "EV-OFFICIAL-PAIRING-AI",
+      "acceptable_entity_keys": [
+        "EV-OFFICIAL-PAIRING-AI"
+      ],
+      "evidence_level_expected": "OFFICIAL_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-OFFICIAL-PAIRING-AI",
+        "anchors": [
+          "斯嘉丽",
+          "官方"
+        ]
+      },
+      "why": "出处=台账 EV-OFFICIAL-PAIRING-AI（product.pairing_ai，OFFICIAL_CURRENT，官方 B 站 2026-08-07）。"
+    },
+    {
+      "id": "P06",
+      "category": "skill_mechanic",
+      "query": "连击和印记这类触发面记在台账哪一条",
+      "expected": "EV-TRAITS-TRIGGER-COMPLEXITY",
+      "acceptable_entity_keys": [
+        "EV-TRAITS-TRIGGER-COMPLEXITY"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-TRAITS-TRIGGER-COMPLEXITY",
+        "anchors": [
+          "连击",
+          "印记"
+        ]
+      },
+      "why": "出处=台账 EV-TRAITS-TRIGGER-COMPLEXITY 的 claim 列举了包含连击/印记在内的触发面。"
+    },
+    {
+      "id": "P07",
+      "category": "rule_version",
+      "query": "候选配置里聚能回复几点能量",
+      "expected": "ruleset_config::mobile_s4_candidate_v2#energy.charge",
+      "acceptable_entity_keys": [
+        "ruleset_config::mobile_s4_candidate_v2#energy.charge",
+        "ruleset_config::mobile_s4_candidate_v2"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "requires_ruleset_config_id": "mobile_s4_candidate_v2",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/mobile-s4-candidate-v2.json",
+        "anchors": [
+          "energy.charge",
+          "value=5"
+        ]
+      },
+      "why": "出处=候选配置 energy.charge: value=5、confidence=CROSS_SOURCE_SUPPORTED、evidence_id=EV-ENERGY-CHARGE。"
+    },
+    {
+      "id": "P08",
+      "category": "rule_version",
+      "query": "两份配置里哪份的能量上限写着 10",
+      "expected": "ruleset_config::mobile_s4_candidate_v2",
+      "acceptable_entity_keys": [
+        "ruleset_config::mobile_s4_candidate_v2",
+        "ruleset_config::mobile_s4_candidate_v2#energy.max"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "requires_ruleset_config_id": "mobile_s4_candidate_v2",
+      "derived_from": {
+        "kind": "ruleset_config",
+        "ref": "ruleset:data/roco/rulesets/mobile-s4-candidate-v2.json",
+        "anchors": [
+          "energy.max",
+          "value=10"
+        ]
+      },
+      "why": "出处=候选配置 energy.max: value=10（legacy 是 6）。"
+    },
+    {
+      "id": "P09",
+      "category": "lineup_counter",
+      "query": "标准 PVP 是不是官方确认的六宠",
+      "expected": "EV-PVP-STANDARD-TEAM-SIZE",
+      "acceptable_entity_keys": [
+        "EV-PVP-STANDARD-TEAM-SIZE"
+      ],
+      "evidence_level_expected": "CROSS_SOURCE_SUPPORTED",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "ledger_entry",
+        "ref": "ledger:EV-PVP-STANDARD-TEAM-SIZE",
+        "anchors": [
+          "标准 PVP 六宠",
+          "禁止"
+        ]
+      },
+      "why": "出处=台账 EV-PVP-STANDARD-TEAM-SIZE：六宠是 CROSS_SOURCE_SUPPORTED，且明确禁止写成「官方已确认」。"
+    },
+    {
+      "id": "P10",
+      "category": "conflict_abstain",
+      "query": "冰系被哪些属性克制",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "UNKNOWN",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_absence",
+        "ref": "absence:克制表",
+        "anchors": [
+          "克制表"
+        ]
+      },
+      "why": "语料里没有克制表：pack 只有系别标签，台账 EV-TYPE-MULTIPLIER 只说有四档倍率、并明说「具体是哪几组对应哪一档仍需逐条核对」。所以「冰系被谁克制」在语料里无法回答 → 期望弃答。"
+    },
+    {
+      "id": "P11",
+      "category": "conflict_abstain",
+      "query": "我的 own-0001 性格加成是什么",
+      "expected": "ABSTAIN",
+      "acceptable_entity_keys": [],
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
+      "derived_from": {
+        "kind": "owned_pet",
+        "ref": "owned:own-0001",
+        "anchors": [
+          "nature.effect=UNKNOWN"
+        ]
+      },
+      "why": "出处=owned-pets.json own-0001 的 nature.effect=UNKNOWN、effect_reason=「面板换算公式未校准」。性格加成在语料里就是 UNKNOWN → 弃答。"
+    },
+    {
+      "id": "P12",
+      "category": "entity_alias",
+      "query": "地鼠在公网索引里是什么形态",
+      "expected": "pet::pet_000019",
+      "acceptable_entity_keys": [
+        "pet::pet_000019",
+        "pet::pet_000355"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000019",
+        "anchors": [
+          "地鼠",
+          "地区"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000019（title 地鼠（枯水期的样子），公网 data-form=main|regional）与 pet::pet_000355（储水时的样子，regional）。两条都算可接受。"
+    },
+    {
+      "id": "P13",
+      "category": "entity_alias",
+      "query": "pet_000532 这个实体是什么",
+      "expected": "pet::pet_000532",
+      "acceptable_entity_keys": [
+        "pet::pet_000532"
+      ],
+      "evidence_level_expected": "COMMUNITY_CURRENT",
+      "min_evidence_level": null,
+      "derived_from": {
+        "kind": "pack_entity",
+        "ref": "pack:pet::pet_000532",
+        "anchors": [
+          "幽影树",
+          "突变"
+        ]
+      },
+      "why": "出处=pack:pet::pet_000532 的 entity_key 与 title「幽影树（突变的样子）」。这条是**故意保留的探针**：pack 的正文里没有实体 id，所以「按 id 直接查」很可能查不到 —— 如果它失败，就是一条如实登记的检索缺口（见 docs/roco/RAG-EVAL.md §还差什么）。"
+    }
+  ],
+  "probe_definition": "探针集（probe）：在主集之外另写一批查询，写完先跑一次并记录结果，**不根据结果回调措辞**。首轮 13 条里 11 条按预期、2 条失败：P13（按实体 id 直查查不到，因为 pack 正文不含 id）与 P10（问「冰系被什么克制」，索引按系别标签召回了冰系精灵，没有弃答）。两处缺口里，P13 是索引层的基本能力缺失，已修（实体 id 进别名表）；P10 需要「匹配表在语料里是否可用」这类领域信号，顺手加一条按关键词弃答的规则等于对探针过拟合，所以**保留失败**并如实登记。探针指标不过闸门。",
+  "query_manifest": {
+    "total": 45,
+    "by_category": {
+      "conflict_abstain": 11,
+      "entity_alias": 9,
+      "lineup_counter": 9,
+      "rule_version": 8,
+      "skill_mechanic": 8
+    },
+    "ids_sha256": "03a600a25048591587ea4f2095fa21b427eb0614621bd0d06ad4f9b38bcd7739"
+  }
+}

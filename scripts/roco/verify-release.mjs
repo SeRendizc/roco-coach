@@ -69,6 +69,13 @@ export const SUITES = [
   {id: 'provenance', cmd: 'node', args: ['scripts/roco/verify-provenance.mjs'],
     why: '数据溯源：每条来源有可核对的锚点（归档哈希 / 逐文件清单）、'
       + '逐实体的 provenance 台账完整。「所有数据必须记录来源」这条边界从散文变成检查'},
+  {id: 'rag-eval', cmd: 'node', args: ['scripts/roco/eval-rag-retrieval.mjs'],
+    why: 'RC-204：RAG 检索的 held-out 评测必须在闸门里跑判据（13 组：覆盖/泄漏/fixture 交集/'
+      + '推导出处/弃答一致性/冲突弃答/grounded/版本命中/证据等级/三套基线都报/清单指纹/探针登记/无挂钟）。'
+      + '**它报告自己的失败**：探针里有 1 条真的没按预期（「冰系被哪些属性克制」按系别标签召回而不是弃答，'
+      + '语料里确实没有克制表），如实登记、不过闸门 —— 保留失败比做过拟合修复更有价值。'
+      + '确定性：两次运行除 metadata.generated_at 外逐字节相同（1.6s）。'
+      + '判据的牙在 `unit`（tests/roco-rag-eval.test.js 21 条含 6 条必红反证）。'},
   {id: 'game-data-pack', cmd: 'node', args: ['scripts/roco/verify-game-data-pack.mjs'],
     why: 'RC-202：统一索引包 `data/roco/game-data-pack/v2/pack.json` 必须与 schema 一致、'
       + '逐实体 provenance 的 artifact_sha256 与磁盘对得上、licence_ref 在 sources.yaml 里找得到、'
