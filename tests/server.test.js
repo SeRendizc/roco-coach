@@ -137,3 +137,65 @@ test('shadow 档不许改变玩家看到的结果：工具选择也必须是 bas
   assert.ok(localCalls>before,'shadow 档下本地模型一次都没被跑到——那 shadow 就没有可观测性了');
  }finally{delete process.env.ROCO_LOCAL_MODEL;}
 });
+
+test('UI 视图与模型协议必须分开：页面拿到真名，规划协议一个字段都不多',async t=>{
+ // 第 42 轮 P0-1：用户实测页面显示 `pet_000225`。根因是桥把
+ // `public_planner_state`（模型最小协议，**刻意不含 name**）当成 UI 状态用了。
+ // 这条守卫在**桥**这一层钉两件事：
+ //   ① 有 `result.ui` 时，输出必须带真名/系别/技能说明；
+ //   ② 没有 `result.ui` 时仍能退回旧路径（形状不变，只是没名字）——
+ //      否则老 fixture / 老测试会因为这次改动而炸。
+ const {publicView} = await import('../src/server/roco-service.js');
+ const uiEnvelope = {
+  state_version: 12, turn: 3, phase: 'battle', result: null,
+  ui: {
+   schema_version: 1, ruleset_id: 'rs', state_version: 12, turn: 3, phase: 'battle', result: null, side: 'player',
+   self: {active: 0, pets: [{slot: 0, pet_id: 'pet_000225', name: '寂灭骨龙', types: ['龙系', '幽系'],
+     stats: {hp: 120, atk: 137}, hp: 425, max_hp: 425, energy: 2, fainted: false, statuses: {}, marks: {}}],
+    // **真实形状是嵌套的**：`ui.self.skills` 里每一项是「被装饰过的动作」，
+    // 技能本体在 `.skill` 下面（与 `legal[].skill` 同形）。第一版这里写成了扁平形状，
+    // 于是断言失败在**测试自己捏的假 payload** 上，而不是代码上——
+    // 这正是第 31 轮「守卫自己捏了一个服务端从不发的形状」那类错误的同一个形状。
+    skills: [{skill_id: 'skill_1', kind: 'skill', skill: {name: '音爆', element: '普通系', category: '攻击',
+      energy: 4, power: 130, power_status: 'static_value_present', damage_class: '魔攻',
+      desc: '造成魔法伤害。', is_trait: false}}]},
+   opponent: {active: 0, living_count: 3, field: {slot: 0, pet_id: 'pet_000190', name: '海豹船长',
+     types: ['武系', '水系'], hp: 374, max_hp: 374, energy: 0, fainted: false, statuses: {}, marks: {}},
+    bench: [{slot: 1, fainted: false}, {slot: 2, fainted: false}]},
+   legal: {player: [{kind: 'skill', label: '音爆', skill_id: 'skill_1', skill_name: '音爆',
+     skill: {name: '音爆', element: '普通系', energy: 4, power: 130, power_status: 'static_value_present',
+       desc: '造成魔法伤害。'}}], enemy: []},
+  },
+  public: {schema_version: 1, state_version: 12, turn: 3, phase: 'battle', result: null,
+   self: {active: 0, pets: [{slot: 0, pet_id: 'pet_000225', hp: 425, max_hp: 425, energy: 2, fainted: false,
+     statuses: {}, marks: {}}], loadouts: {}},
+   opponent: {active: 0, living_count: 3, field: {slot: 0, pet_id: 'pet_000190', hp: 374, max_hp: 374,
+     energy: 0, fainted: false, statuses: {}, marks: {}}, bench: [{slot: 1, pet_id: 'pet_000190', fainted: false}]}},
+  legal: {player: [], enemy: []}, needs_replacement: [], events: [], unsupported_seen: [],
+ };
+ // 先钉**输入形状**：`ui.self.skills` 必须是嵌套的。假 payload 写成扁平形状时，
+ // 这条会先红——把「测试写错了」与「代码写错了」分开，省掉一轮误判。
+ for (const row of uiEnvelope.ui.self.skills) {
+  assert.ok(row.skill && typeof row.skill === 'object',
+   'ui.self.skills 的每一项都必须带嵌套的 .skill（与 legal[].skill 同形）');
+ }
+ const view = publicView(uiEnvelope);
+ assert.equal(view.self.pets[0].name, '寂灭骨龙', '己方必须有真名');
+ assert.deepEqual(view.self.pets[0].types, ['龙系', '幽系']);
+ assert.deepEqual(view.self.pets[0].stats, {hp: 120, atk: 137});
+ assert.equal(view.opponent.field.name, '海豹船长', '对手**场上**那一只也有名字（就画在屏幕上）');
+ assert.equal(view.self.skills[0].name, '音爆');
+ assert.equal(view.self.skills[0].desc, '造成魔法伤害。');
+ assert.equal(view.legal[0].skill.power, 130);
+ assert.equal(view.legal[0].skill.power_status, 'static_value_present');
+ // 对手后备：只给位次与是否倒下（手游里上场前不亮明），且**不带 id**
+ assert.deepEqual(view.opponent.bench, [{slot: 1, fainted: false}, {slot: 2, fainted: false}]);
+ assert.ok(!JSON.stringify(view.opponent.bench).includes('pet_'), '后备不许泄露对手阵容');
+
+ // 反向：没有 `ui` 时退回旧路径，形状不变、名字为 null（而不是抛错）
+ const legacy = publicView({state_version: 1, turn: 1, phase: 'battle', result: null,
+  public: uiEnvelope.public, legal: {player: [], enemy: []}, needs_replacement: [], events: [], unsupported_seen: []});
+ assert.equal(legacy.self.pets[0].name, null, '没有 ui 视图时名字必须是 null，不许编');
+ assert.equal(legacy.self.pets[0].pet_id, 'pet_000225');
+ assert.deepEqual(legacy.opponent.bench, [{slot: 1, fainted: false}]);
+});

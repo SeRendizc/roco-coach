@@ -80,3 +80,47 @@
 - **不打开 `on`**：模型在 Demo 里是「可观测的对照项」，不是决策者。
 - **不删旧测试**、不把验收脚本改成只测接线。
 - 模型/评测线**暂停但不回滚**：产物与预注册文档原位保留。
+
+---
+
+## 进度
+
+| 子项 | 状态 | 证据 |
+|---|---|---|
+| P0-1 数据面分离 | ✅ **完成** | `env.ui_public_view` + `_sim_envelope` 的 `result.ui` + 桥 `publicView` ui 优先；守卫 `roco/tests/test_ui_public_view.py`（12 项）与 `tests/server.test.js` 的桥守卫（含「没有 ui 时退回旧路径」反向） |
+| P0-2 … P0-7 | ⏳ 排队中 | 见上表 |
+
+### P0-1 交付细节（含顺带修掉的两个真问题）
+
+**做了什么**
+
+| 平面 | 改动 |
+|---|---|
+| Python `env.py` | 新增 `ui_public_view(state, rs, side)`——**并行**视图，带真名/系别/六维/技能说明；新增 `ui_action_public` / `ui_legal_actions` 作为动作装饰的**唯一实现** |
+| Python `service.py` | `_sim_envelope` 加 `result.ui`；协议那份 `acts()` 改为**复用同一实现再剔掉 `skill`**，形状一个字段都没变 |
+| Node `roco-service.js` | `publicView` 优先读 `result.ui`，没有时退回 `public`（老 fixture 不炸）；对手**场上**那一只改用与己方**同一个成型函数**（第一版手写字段清单，漏了 `name`，界面上对手仍然无名） |
+| 守卫 | `roco/tests/test_ui_public_view.py` 12 项 + `tests/server.test.js` 桥守卫 |
+
+**四条判据都钉住了**：① 规划协议里**不许**出现 `name`/`types`/`stats`（它为 UI 变胖就失去了「最小」的意义）；
+② UI 视图必须有真名与系别（且必须是规则集里那个名字）；③ 两个视图的 `state_version`/`turn`/`phase`
+与同一只精灵的 `hp`/`max_hp`/`energy` **必须一致**；④ 对手**后备**在 UI 里只给位次与是否倒下——
+连 `pet_id` 都不给（手游里上场前不亮明；给了也只能渲染成占位），而**规划协议仍留着它**（重建搜索要用），
+这一条有反向断言。
+
+**顺带修掉两个真问题**
+
+1. **`Skill.power_status` 在加载时被丢掉了。** 数据里 824 条技能**每条都带**这个字段
+   （`static_value_present` 358 / `not_provided_by_source` 466），而 dataclass 没有它、
+   加载时也没读。后果：界面上分不出「本来就没威力」（防御/状态类）与「来源没给威力」——
+   而那正是「不许编数据」要守住的那条线。已补上，并加了一条**从数据量出来**的不变式：
+   `static_value_present ⟺ power 是数字`、`not_provided_by_source ⟺ power 是 None`，
+   对全部 824 条逐一核。
+2. **两次「守卫自己写错」**，都当场被抓：（a）我第一版断言「没威力就必须有 power_status」，
+   被 `龙血`（防御类）判红——**假设本身是错的**，改成从数据量出来的不变式；
+   （b）Node 侧假 payload 把 `ui.self.skills` 写成了**扁平**形状，而真实形状是嵌套的
+   （技能本体在 `.skill` 下）——与第 31 轮「守卫捏了一个服务端从不发的形状」是同一个形状的错误。
+   现在两条测试都**先钉输入形状**再断言，把「测试写错了」与「代码写错了」分开。
+
+**一条既有断言按新口径更新**：`plan-e2e.test.js` 原来断言 UI 里对手后备含 `pet_id`——
+那是把**规划协议**的形状当成了 UI 的形状。已改为 `['fainted','slot']` 并写明理由，
+同时保留规划协议那一侧的反向断言。

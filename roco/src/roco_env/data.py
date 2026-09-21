@@ -37,7 +37,12 @@ class Skill:
     category: str          # 特性 / 攻击 / 状态 / 防御
     element: str
     energy: int
-    power: Optional[int]   # None = 该来源未给出静态威力（**不是 0 伤害**）
+    power: Optional[int]   # None = 没有静态威力（见 power_status，**不是 0 伤害**）
+    #: 来源对「静态威力」的说法。normalized/skills.json 里**每条都带**，
+    #: 只有两个取值：`static_value_present` / `not_provided_by_source`。
+    #: 第 42 轮补上：原来这个字段在加载时被丢掉，于是界面上「本来就没威力」（防御/状态）
+    #: 与「来源没给威力」（本该报缺）分不出来——而那正是「不许编数据」要守住的那条线。
+    power_status: Optional[str]
     damage_class: Optional[str]
     desc: str
     is_trait: bool
@@ -299,6 +304,7 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
             element=s.get("element") or "",
             energy=int(s.get("energy") or 0),
             power=s.get("power"),
+            power_status=s.get("power_status"),
             damage_class=s.get("damage_class"),
             desc=s.get("desc") or "",
             is_trait=bool(s.get("is_trait")),

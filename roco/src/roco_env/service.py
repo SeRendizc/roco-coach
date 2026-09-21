@@ -1759,14 +1759,11 @@ class RocoService:
         from . import env as env_mod
 
         def acts(side: str) -> List[Dict[str, Any]]:
+            # **同一个实现**（`env.ui_action_public`），再把 UI 专用的 `skill`
+            # 那一段剔掉——协议这里的字段形状一个都不变，两条链因此不可能漂移。
             out = []
-            for action in env_mod.legal_actions(state, rs, side):
-                d = action.to_dict()
-                d["label"] = action.label(rs)
-                if action.kind == "skill" and action.skill_id:
-                    skill = rs.skill(action.skill_id)
-                    d["skill_name"] = skill.name
-                out.append(d)
+            for action in env_mod.ui_legal_actions(state, rs, side):
+                out.append({k: v for k, v in action.items() if k != "skill"})
             return out
 
         unsupported: List[Dict[str, Any]] = []
@@ -1792,6 +1789,10 @@ class RocoService:
                 "turn": state.turn,
                 "result": state.result,
                 "public": env_mod.public_planner_state(state, rs, "player"),
+                # **并行**的 UI 视图：带真名与系别。刻意**不**给 `public` 加名字——
+                # 那是交给模型规划的最小协议，名字对搜索没用、只是白烧 token。
+                # 两个视图描述同一时刻的同一局，`state_version` 必须一致。
+                "ui": env_mod.ui_public_view(state, rs, "player"),
                 "legal": {"player": acts("player"), "enemy": acts("enemy")},
                 "needs_replacement": env_mod.needs_replacement(state),
                 "events": [e.to_dict() for e in state.events[events_from:]] if event == "battle_advance" else [],

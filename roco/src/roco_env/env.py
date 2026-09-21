@@ -969,6 +969,143 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
     }
 
 
+UI_PUBLIC_VIEW_SCHEMA_VERSION = 1
+
+
+def ui_action_public(action: Dict[str, Any], rs: Ruleset) -> Dict[str, Any]:
+    """合法动作补上 UI 需要的东西：技能名、系别、能耗、威力与**来源状态**。
+
+    `power_status` 必须原样带出来：来源没给威力的技能，界面上要显示成
+    「来源未给威力」，**不许**补一个数字（那是编数据）。
+
+    这一处是**唯一实现**：`service._sim_envelope` 里给协议用的 `legal` 也走它
+    （再剔掉 `skill` 那一段），避免两处各写一份、然后其中一处漏字段。
+    """
+    out = dict(action)
+    skill_id = action.get("skill_id")
+    if not skill_id:
+        return out
+    try:
+        skill = rs.skill(skill_id)
+    except Exception:  # noqa: BLE001
+        return out
+    out["skill"] = {
+        "name": skill.name,
+        "element": getattr(skill, "element", None),
+        "category": getattr(skill, "category", None),
+        "energy": getattr(skill, "energy", None),
+        "power": getattr(skill, "power", None),
+        "power_status": getattr(skill, "power_status", None),
+        "damage_class": getattr(skill, "damage_class", None),
+        "desc": getattr(skill, "desc", None),
+        "is_trait": bool(getattr(skill, "is_trait", False)),
+        "effect_support": getattr(skill, "effect_support", None),
+    }
+    return out
+
+
+def ui_legal_actions(state: "GameState", rs: Ruleset, side: str) -> List[Dict[str, Any]]:
+    """UI 用的合法动作：与协议 `legal` 同形，但每个技能动作带 `skill` 说明。"""
+    out: List[Dict[str, Any]] = []
+    for action in legal_actions(state, rs, side):
+        d = action.to_dict()
+        d["label"] = action.label(rs)
+        if action.kind == "skill" and action.skill_id:
+            d["skill_name"] = rs.skill(action.skill_id).name
+        out.append(ui_action_public(d, rs))
+    return out
+
+
+def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dict[str, Any]:
+    """**给浏览器 UI 看**的公开视图。与 `public_planner_state` 是**两条并行的协议**。
+
+    为什么要分开（第 42 轮，用户实测反馈）
+    ------------------------------------
+    `public_planner_state` 是**交给模型规划用的最小协议**——它刻意不含 `name`，
+    因为名字对搜索没有用、只是白烧 token。而页面一直拿它当 UI 状态用，于是玩家看到的是
+    `pet_000225` 而不是「寂灭骨龙」。
+
+    正确的修法**不是**给规划协议加 `name`（那会为了 UI 扩大模型协议，且每个 token 都要付钱），
+    而是让 UI 有自己的视图：两边都从同一份权威状态生成，各自只带自己需要的东西。
+
+    公开性口径（按手游里**屏幕上能看到的**）
+    --------------------------------------
+      · 己方全体：名字、系别、六维、血/能量、异常、印记、配招——都是自己的信息；
+      · 对手**场上**：名字、系别、血/能量、异常、印记——血条与名字就画在屏幕上；
+      · 对手**后备**：**只有位次与是否倒下**。手游里后备直到上场才亮明，
+        所以这里不给名字、不给血、不给配招（与 `public_planner_state` 同一条公开性规则）；
+      · `state_version` / `turn` / `phase` / `result` 与规划协议**必须一致**——
+        两个视图描述的是同一时刻的同一局，不一致就是 bug。
+    """
+    view = public_planner_state(state, rs, side)
+    me = getattr(state, side)
+    foe = getattr(state, "enemy" if side == "player" else "player")
+
+    def pet_public(pet_id: str) -> Dict[str, Any]:
+        """从规则集取展示用的静态信息。查不到就如实留空，不猜。"""
+        try:
+            pet = rs.pet(pet_id)
+        except Exception:  # noqa: BLE001 — 规则集里没有这只精灵时必须能降级
+            return {"name": None, "types": [], "stats": None, "class": None, "stage": None}
+        return {
+            "name": pet.name,
+            "types": list(getattr(pet, "types", []) or []),
+            "stats": dict(getattr(pet, "stats", {}) or {}) or None,
+            "class": getattr(pet, "pet_class", None),
+            "stage": getattr(pet, "stage", None),
+        }
+
+    def decorate(panel: Dict[str, Any]) -> Dict[str, Any]:
+        out = dict(panel)
+        out.update(pet_public(panel.get("pet_id")))
+        return out
+
+    self_panel = dict(view["self"])
+    self_panel["pets"] = [decorate(p) for p in view["self"]["pets"]]
+    # 己方当前可用的技能（配招里那一套），UI 的技能面板直接用它
+    self_panel["skills"] = [
+        ui_action_public({"skill_id": sid, "kind": "skill"}, rs)
+        for sid in sorted({sid for ids in (me.loadouts or {}).values() for sid in ids})
+    ]
+    # UI 自己的合法动作表（带技能说明）。协议那份 `legal` 在 service 里，
+    # 字段一个都不变——两条链各取所需。
+    ui_legal = {
+        "player": ui_legal_actions(state, rs, "player"),
+        "enemy": ui_legal_actions(state, rs, "enemy"),
+    }
+
+    foe_panel = dict(view["opponent"])
+    foe_panel["field"] = decorate(view["opponent"]["field"]) if view["opponent"]["field"] else None
+    # 后备：**只给位次与是否倒下**，连 `pet_id` 都不给。
+    #
+    # 规划协议里后备是带 `pet_id` 的（重建搜索状态要用），但 UI 不该拿它：
+    #   ① 手游里后备直到上场才亮明，提前给 id 等于泄露对手阵容；
+    #   ② 就算给了，页面上也只能渲染成 `pet_000190` —— 又一个 ID 占位。
+    # 所以 UI 这一侧只保留「这个位次还在不在」。这条是**公开性假设**，
+    # 写进 `notes` 而不是当成既定事实。
+    foe_panel["bench"] = [{"slot": b.get("slot"), "fainted": b.get("fainted")}
+                          for b in view["opponent"]["bench"]]
+
+    return {
+        "schema_version": UI_PUBLIC_VIEW_SCHEMA_VERSION,
+        "ruleset_id": view["ruleset_id"],
+        # 与规划协议同一时刻的同一局：这三个字段必须逐字相同
+        "state_version": view["state_version"],
+        "turn": view["turn"],
+        "phase": view["phase"],
+        "result": view["result"],
+        "side": side,
+        "self": self_panel,
+        "opponent": foe_panel,
+        "legal": ui_legal,
+        "notes": {
+            "opponent_bench": "后备只给位次与是否倒下：手游里后备直到上场才亮明",
+            "coach_protocol": "教练/规划用的是另一份最小协议（public_planner_state），"
+                              "两者描述同一时刻，字段各自独立",
+        },
+    }
+
+
 def state_from_public_planner(
     public: Dict[str, Any],
     rs: Ruleset,

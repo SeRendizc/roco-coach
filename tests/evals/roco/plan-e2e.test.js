@@ -463,8 +463,17 @@ test('对局域的回执带私有状态：桥按路径收下，公开视图只�
     assert.ok(!('state' in view), '公开视图不得包含私有 state');
     assert.equal(view.self.pets[0].hp, 400, '场上面板是公开的');
     assert.equal(view.opponent.field.hp, 300, '对手场上面板是公开的（画在屏幕上）');
-    assert.deepEqual(Object.keys(view.opponent.bench[0]).sort(), ['fainted', 'pet_id', 'slot'],
-      '对手后备只给位次/id/是否倒下');
+    // 第 42 轮改：UI 视图里对手后备**连 `pet_id` 都不给**，只留位次与是否倒下。
+    //
+    // 旧断言写的是 `['fainted','pet_id','slot']` —— 那是把**规划协议**的形状当成了 UI 的形状。
+    // 规划协议必须留 `pet_id`（重建搜索状态要用），但 UI 不该拿它：
+    //   ① 手游里后备直到上场才亮明，提前给 id 等于泄露对手阵容；
+    //   ② 就算给了，页面上也只能渲染成 `pet_000190`，又是一个 ID 占位。
+    // 规划协议那一侧仍然留着 `pet_id`，由 `roco/tests/test_ui_public_view.py` 反向钉住。
+    assert.deepEqual(Object.keys(view.opponent.bench[0]).sort(), ['fainted', 'slot'],
+      'UI 里对手后备只给位次与是否倒下');
+    assert.ok(!JSON.stringify(view.opponent.bench).includes('pet_'),
+      'UI 里对手后备不许带 id（会泄露阵容，而且只能渲染成占位）');
     assert.equal(view.cpu_legal_count, 1, '对手有几个合法动作是公开的（不公开是哪些）');
     assert.equal(view.legal[0].label, '龙血', '自己的合法动作要带标签，页面要渲染按钮');
   } finally {

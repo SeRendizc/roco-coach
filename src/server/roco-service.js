@@ -42,20 +42,40 @@ export const DEMO_SEED=20260921;
 export const STRATEGIES=Object.freeze(['random_legal','greedy_damage','conservative_switch','status_control','shallow_search']);
 
 /**
- * 把服务端回执裁剪成**浏览器可以看**的公开视图。
+ * 给浏览器 UI 看的公开视图。
+ *
+ * **两条协议，别混用**（第 42 轮，用户实测反馈 `pet_000225` 占位）：
+ *   · `result.ui`（`env.ui_public_view`）= **UI 视图**：带真名、系别、六维、技能说明；
+ *   · `result.public`（`env.public_planner_state`）= **给模型规划的最小协议**：
+ *     刻意不含 `name`（名字对搜索没用、只是白烧 token）。
+ *
+ * 之前这里直接拿 `public` 当 UI 状态用，于是页面上显示 id 而不是「寂灭骨龙」。
+ * 正确修法是让 UI 有自己的视图，**不是**给规划协议加字段——后者会为了 UI
+ * 扩大模型协议，而这份协议是要付 token 的。
+ *
+ * `result.ui` 不存在时（老 fixture / 老测试）退回从 `public` 组装，形状保持一致，
+ * 只是没有名字。这样旧调用点不会因为这次改动而炸。
  *
  * 白名单式：只有这里列出的字段会出去。私有状态（`state`）、seed、对手后备明细
  * 都不在列表里——不是「过滤掉」，是**从来没有**被复制出来。
  */
 export function publicView(result){
  if(!result||typeof result!=='object')return null;
+ const ui=result.ui&&typeof result.ui==='object'?result.ui:null;
+ if(!result||typeof result!=='object')return null;
  const pets=list=>(Array.isArray(list)?list:[]).map(p=>({
   slot:p?.slot??null,pet_id:p?.pet_id??null,name:p?.name??null,hp:p?.hp??null,max_hp:p?.max_hp??null,
   energy:p?.energy??null,fainted:p?.fainted===true,statuses:p?.statuses??{},marks:p?.marks??{},
   ...(p?.buffs?{buffs:p.buffs}:{}),
+  // 展示字段（只有 `result.ui` 才带；没有就是 null，界面据 null 显示「未知」而不是编一个）
+  name:p?.name??null,types:Array.isArray(p?.types)?p.types:[],stats:p?.stats??null,
+  class:p?.class??null,stage:p?.stage??null,
  }));
  const publicState=result.public&&typeof result.public==='object'?result.public:null;
- const foeField=publicState?.opponent?.field??null;
+ // UI 视图优先；没有它时退回规划协议（旧 fixture 仍能渲染，只是没名字）
+ const selfState=ui?.self??publicState?.self??null;
+ const foeState=ui?.opponent??publicState?.opponent??null;
+ const foeField=foeState?.field??null;
  return {
   schema_version:1,
   ruleset_id:publicState?.ruleset_id??null,
@@ -63,19 +83,27 @@ export function publicView(result){
   turn:Number.isInteger(result.turn)?result.turn:null,
   phase:typeof result.phase==='string'?result.phase:null,
   battle_result:result.result??null,
-  self:{active:publicState?.self?.active??null,pets:pets(publicState?.self?.pets)},
+  self:{active:selfState?.active??null,pets:pets(selfState?.pets),
+   // 己方可用技能（配招那一套）：UI 的技能面板直接用它
+   skills:Array.isArray(ui?.self?.skills)?ui.self.skills.map(skillRow):[]},
   // 对手**场上**那一只是公开的（血条与能量画在屏幕上）；后备只有位次与是否倒下。
   opponent:{
-   active:publicState?.opponent?.active??null,
-   living_count:publicState?.opponent?.living_count??null,
-   field:foeField?{slot:foeField.slot??null,pet_id:foeField.pet_id??null,hp:foeField.hp??null,
-    max_hp:foeField.max_hp??null,energy:foeField.energy??null,fainted:foeField.fainted===true,
-    statuses:foeField.statuses??{},marks:foeField.marks??{}}:null,
-   bench:(Array.isArray(publicState?.opponent?.bench)?publicState.opponent.bench:[]).map(b=>({
-    slot:b?.slot??null,pet_id:b?.pet_id??null,fainted:b?.fainted===true})),
+   active:foeState?.active??null,
+   living_count:foeState?.living_count??null,
+   // 对手**场上**那一只与己方走**同一个成型函数**：名字与系别就画在屏幕上，
+   // 所以它和己方一样带展示字段。手写一份字段清单的结果就是这里漏掉 name
+   // （第 42 轮第一次改就漏了，界面上对手仍然是无名）。
+   field:foeField?pets([foeField])[0]:null,
+   // 后备：UI 视图**只给位次与是否倒下**（手游里上场前不亮明），所以这里也不带 id。
+   bench:(Array.isArray(foeState?.bench)?foeState.bench:[]).map(b=>({
+    slot:b?.slot??null,fainted:b?.fainted===true})),
   },
-  legal:(Array.isArray(result.legal?.player)?result.legal.player:[]).map(a=>({
+  // UI 的合法动作优先（`ui.legal.player` 带技能说明）；没有就退回协议那份。
+  legal:(Array.isArray(ui?.legal?.player)?ui.legal.player
+   :(Array.isArray(result.legal?.player)?result.legal.player:[])).map(a=>({
    kind:a?.kind??null,label:a?.label??null,skill_id:a?.skill_id??null,skill_name:a?.skill_name??null,
+   // 技能说明：来自 `result.ui` 的装饰（缺省为 null，界面显示「说明未提供」）
+   skill:a?.skill??null,
    target_index:a?.target_index??null,item_id:a?.item_id??null})),
   cpu_legal_count:Array.isArray(result.legal?.enemy)?result.legal.enemy.length:null,
   needs_replacement:Array.isArray(result.needs_replacement)?result.needs_replacement.slice():[],
@@ -85,6 +113,25 @@ export function publicView(result){
   strategy:result.strategy?{name:result.strategy.name??null,version:result.strategy.version??null}:null,
   assumptions:publicState?.assumptions??null,
   unsupported_count:Array.isArray(result.unsupported_seen)?result.unsupported_seen.length:0,
+ };
+}
+
+/** 己方技能行：与 `legal[].skill` **同一种形状**，UI 只写一套渲染。 */
+function skillRow(item){
+ const skill=item?.skill??null;
+ return {
+  skill_id:item?.skill_id??null,
+  name:skill?.name??null,
+  element:skill?.element??null,
+  category:skill?.category??null,
+  energy:skill?.energy??null,
+  power:skill?.power??null,
+  // 这条必须原样带出去：威力是**来源没给**的时候，界面要照实说，
+  // 绝不补一个数字（那是编数据）。
+  power_status:skill?.power_status??null,
+  damage_class:skill?.damage_class??null,
+  desc:skill?.desc??null,
+  is_trait:skill?.is_trait===true,
  };
 }
 
