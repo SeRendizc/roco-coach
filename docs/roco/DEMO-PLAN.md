@@ -97,8 +97,8 @@ export function rocoHintText(plan) { ... }
 
 | 子项 | 内容 | 估工 |
 |---|---|---|
-| P1-1 形象体系 | 12 只精灵的统一视觉：系别配色 + emoji 剪影 + 状态图标；血条/能量条动画；伤害数字浮层 | 1—2 轮 |
-| P1-2 教学流程 | 开局引导（30 秒内说清这是什么）、局末教学页（一个关键决策点 + 一条可执行改法）、可回看 | 1—1.5 轮 |
+| P1-1 形象体系 | 12 只精灵的统一视觉：系别配色 + emoji 徽记 + 状态标签；血条/能量条动画；伤害数字浮层 | 1—2 轮 |
+| P1-2 教学流程 | 开局引导（30 秒内说清这是什么）、局末教学页（一个关键转折 + 一条可执行改法）、可回看 | 1—1.5 轮 |
 | P1-3 陪练人格 | 小芽的口吻统一（情绪回应 / 克制 / 不打扰）、记忆可见可纠正（偏好与长期记忆独立展示，不是对局摘要） | 1 轮 |
 | P1-4 布局与可读性 | 移动端优先的布局、对比度、色盲友好的系别标识（不只靠颜色）、字号与触控目标 | 1 轮 |
 | P1-5 加载与性能 | 首屏 < 1.5 s、每回合渲染 < 100 ms、图片零外链（全本地矢量/emoji）、长局内存不涨 | 0.5—1 轮 |
@@ -145,6 +145,10 @@ export function rocoHintText(plan) { ... }
 | P0-7 产品验收 | ✅ **完成** | 一条命令跑完：`npm run roco:demo-acceptance` → **49 条产品判据** + **9 张截图** + **每步 DOM 快照**（`reports/roco/demo-acceptance/demo-dom-snapshots.json`）。覆盖：真实名字 / 无裸 JSON / 无工程词 / 可完成一局 / 提示自动出现且多样 / 静默与失效 / 局末教学 / 陪练情绪 / 本机模型真实参与 / 阵容选择端到端。**没有另建 `demo-product-acceptance.mjs`**——理由见下 |
 | **P1-a~g 建议质量** | 🟡 **主体完成，三处如实标注未覆盖**（第 45 轮复核） | `src/coach/coach-advice.js`（11 个局面检测器）+ 接入 `rocoIntervention`；引擎层验收 10 个隔离局面（`tests/evals/roco/coach-positions.test.js`，逐例断言 kind）；**浏览器验收** 6 局 / 23 次气泡 / **6 种形状** / 最大占比 35%（`demo-acceptance`，38 条判据）；`rocoHintText` 旧模板已删除。**未覆盖的三处（复核 P1 原始要求时发现的）**：① 展开区给的是**这一条建议**的依据（期望区间 / 伤害预览 / 搜索分支数与深度 / 对手主要应对），**不是**把 2—3 个合法动作并列对比（`coach-advice.js` 每个检测器取的是最优的那一个）；② 「未来 2—3 回合的后果」只有搜索深度与「对手主要应对」这层间接体现，没有逐回合叙述；③ 「结合用户水平」这一条**没有数据支撑**——仓库里没有玩家水平模型，只有提醒偏好（quiet/brief/额度/点掉）真的被咨询。这三条不是实现疏漏，是能力边界，写在文档里而不是留在乐观的 ✅ 后面 |
 | **P1-2 教学流程（老师的局末复盘接进页面 + 反模板）** | 🚧 **主体完成（第 45 轮）** | 页面局末从「一个决策点问题」升级为**真实复盘**：`rocoMatchReview` 用**整局事件** + **最后一个还能行动的局面**装配 `reviewMatch`，局末卡片给出「一个转折点 + 一条可执行的改法 + 上一次那一课的核对」。判据在 `tests/evals/roco/teacher-match-review.test.js`（真服务打完整局，2 条用例）：整局 70 条事件 vs 最后一次推进只有 6 条（差 11.7×）、终局视图 `legal` 为空会让「背包里有没有药」变成假的并**换掉那一门课**（seed 5：`use-item-before-danger-line` → `switch-out-of-the-bad-matchup`）、对手倒下那一只只会写「对方第 N 位」（反证：手工把名字塞进后备位次后，判定立刻看得见）。**反模板实测（同一轮）**：真服务 30 局，修复前 `use-item-before-danger-line` **30/30**、其中 **13 局（43%）** 讲的是玩家已经做对的事；改成按可教性排之后 **17/13 两门课、表扬 0/30**。同时如实记下两条负结论：转折点 `damage-lead-flip` 在收官对局里实际不可达（30/30 都是 `first-faint`），五门课只有两门在这批对局里够得上。**仍缺**：开局引导（30 秒内说清这是什么）、复盘可回看 | `src/client/roco.js`、`src/coach/roco-experience.js` 的 `rocoMatchReview`、`tests/evals/roco/teacher-match-review.test.js` |
+| **P1-1 形象体系** | 🟡 **首版完成（第 45 轮）** | 12 个系别各一个**自制 emoji 徽记** + 既有系别配色，渲染成阵容卡与场上伙伴卡的头像块；零外链、零 `<img>`（不抓官方立绘）。色盲友好靠三信号叠加：emoji 图形 + 色块 + 系别文字。浏览器实测 12 张阵容卡全部有头像、0 空 emoji、页面 `<img>` 数 0。守卫逐键比对 emoji 表与配色表（反证：删掉「自然系」立刻红）。**仍缺**：血条/能量条动画、伤害数字浮层、状态图标（现在只有文字标签） | `src/client/roco.js` 的 `TYPE_EMOJI`/`petAvatar`、`src/client/roco.css`、`tests/roco-experience.test.js` |
+| **P1-2 开局引导** | ✅ **完成（第 45 轮）** | 正文上方三步条「选阵容 → 开一局 → 她自己会说话」，只写操作不写功能说明；`data-roco-onboard` 断言的**是步数**（少一步就 missing）。浏览器实测 `shown`、3 步 | `src/client/roco.html`、`src/client/roco.js` |
+| **P1-4 布局与可读性** | 🟡 **首版完成（第 45 轮）** | 窄屏触控目标按 44px 下限（按钮/动作/阵容卡）、基础字号 15px、动作区单列、长句行距放宽；`:focus-visible` 焦点可见；`prefers-reduced-motion` 关掉装饰性过渡。色盲友好见 P1-1。**仍缺**：真机（手机浏览器）上的对比度与字号复核，那要真机截图 | `src/client/roco.css` |
+| **P1-5 加载与性能** | ✅ **完成（第 45 轮）** | 四个量全部实测并留产物：首屏 ready **154 ms**（要求 <1500）、`render()` p50 **0.1 ms** / p95 0.3（要求 <100）、外部来源资源 **0** 个（20 个请求全同源，合计 655,947 B）、25 步 JS 堆 +0.48 MB 且后两档持平。命令 `node scripts/roco/measure-demo-perf.mjs --json reports/roco/demo-perf.json` | `scripts/roco/measure-demo-perf.mjs`、`reports/roco/demo-perf.json`、`docs/roco/DEMO-PERF.md` |
 | **P1-3 陪练人格** | 🚧 **进行中（第 45 轮修掉审计点名的三处）** | 第 43 轮的陪练审计点名三处、第 45 轮逐个修好：① 判成情绪却接不住（「输了」换来一段战报）→ 情绪字面量归一 + 加载期自检；② 情绪与拒绝被复盘路由截走（`输了`/`别复盘了` → `route='teacher'`）→ 归陪练，显式分析问法仍归老师；③ 静默偏好到不了聊天链路 → `runCoach` 透传 `preference`。契约测试 13/13（三条 TODO 改正向断言 + 反向对照），撤回修复后 4 条变红。**仍缺**：`chatStyle` 未影响措辞、聊天侧无额度机制、情绪词表覆盖范围（`打得不好`/`心态炸了`）需真实语料定口径 | `src/coach/runtime.js`、`src/coach/companion.js`、`tests/evals/companion-contract.test.js`、`docs/roco/COMPANION-GAP-AUDIT.md` §10 |
 
 ### P0-1 交付细节（含顺带修掉的两个真问题）
