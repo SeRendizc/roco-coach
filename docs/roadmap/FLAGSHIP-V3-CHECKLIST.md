@@ -26,8 +26,8 @@
 
 | RC | 内容 | 状态 |
 |---|---|---|
-| RC-201 | 公网 621/579/242 与仓库 622/824 的对账（不删记录凑数） | NOT_STARTED |
-| RC-202 | 统一 GameDataPack（catalog/skills/traits/learnsets/…/battle_modes/source manifest） | NOT_STARTED |
+| RC-201 | 公网 621/579/242 与仓库 622/824 的对账（不删记录凑数） | **DONE** | `scripts/roco/fetch-live-snapshot.mjs` + `scripts/roco/reconcile-catalog.mjs` + `data/roco/live/2026-09-21/public-index.json` + `reports/roco/reconciliation/catalog-reconciliation.json` + `tests/roco-catalog-reconciliation.test.js`（8 条 / 6 个注入全红）+ `docs/roco/CATALOG-RECONCILIATION.md`。**实测三张页 http 200、计数与页面声明逐一对齐（621/579/242）**；**824 = 579 战斗技能 + 245 特性**（口径，非缺数据）；622 vs 621 = `pet_000532`（公网并进基础卡分组）；245 vs 242 = `skill_000164/165/166`（公网索引侧不存在）。四桶：only_in_frozen 4 / only_in_live 0 / changed 0 / unresolved 4。**边界**：公网页是导航页，无数值 → 未做字段级校验 |
+| RC-202 | 统一 GameDataPack（catalog/skills/traits/learnsets/…/battle_modes/source manifest） | IN_PROGRESS | 对账已就绪（RC-201）；`docs/roco/CATALOG-RECONCILIATION.md` §9 列出从 `draft` → `ready` 还缺的 9 项：统一 schema、逐实体许可、逐实体 provenance、冲突处理策略、形态口径统一、字段级覆盖证明、ruleset 绑定、不可得字段清单、把对账接进 verify-release |
 | RC-203 | OwnedPet / BattleBuild（同种多实例、有序四技能、锁定、约 80 个 Demo 个体） | NOT_STARTED |
 | RC-204 | RAG 索引与 held-out 评测（Recall@K / MRR / 版本命中 / grounding / 冲突弃答） | NOT_STARTED |
 | RC-205 | 精灵盒子 UI（我的/全图鉴、搜索、个体比较） | NOT_STARTED |

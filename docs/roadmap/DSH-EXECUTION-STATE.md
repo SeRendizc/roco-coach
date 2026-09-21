@@ -1425,3 +1425,25 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
 
 **下一条**：RC-201/202（621/579/242 对账 + 统一 `GameDataPackV2`）——它是**最有可能先变成 `ready`**
 的契约（纯数据/schema/来源，不依赖实机录制），也是 Windows 侧 `TeamFeatureV2` 的前置。
+
+### C6.18 RC-201 公网快照对账（第 82 轮）
+
+**交付**（提交 `9f217f4`）：`scripts/roco/{fetch-live-snapshot,reconcile-catalog}.mjs`、
+`data/roco/live/2026-09-21/public-index.json`、`reports/roco/reconciliation/catalog-reconciliation.json`、
+`tests/roco-catalog-reconciliation.test.js`（8 条 / 6 个注入全红）、`docs/roco/CATALOG-RECONCILIATION.md`。
+
+**这次真的抓到了公网**（不是抄升级包的数字）：三张 BWIKI 索引页 2026-09-21T14:43Z、UA 固定、http 全 200、
+逐页 sha256 留档；抽出计数与页面声明完全一致 —— 精灵 **621** / 技能 **579** / 特性 **242**。
+反爬是真的（精灵页实测连续 4 次 567 才 200）；抓不到记 `blocked` + 证据，**不产出数字**。
+
+**差异解释（可核对）**：**824 = 579 战斗技能 + 245 特性**（口径不同，战斗技能 579 = 579 差 0）；
+**622 vs 621** = `pet_000532`「幽影树」（公网并进基础卡分组，冻结独立成条）；
+**245 vs 242** = `skill_000164/165/166`（game_id 200281/282/283，公网索引侧 0 次出现）。
+四桶 `only_in_frozen 4 / only_in_live 0 / changed 0 / unresolved 4`，每组都有 `explained` 与 `unexplained_gap`。
+
+**边界（如实）**：公网索引页是**导航页**，只给 id/名字/标签，**没有**种族值/学招表/数值 ——
+本次**没有**做字段级数值校验；`GameDataPackV2` 仍 `draft`，`CATALOG-RECONCILIATION.md` §9 列了 9 项缺口。
+抓到的 HTML 落在**已忽略**的 `data/roco/raw/extracted/live-bwiki/`，仓库里只提交派生 JSON。
+
+**下一条**：RC-202（统一 GameDataPack：schema + 逐实体 provenance/许可 + 冲突策略 + 把对账接进闸门），
+它是 `GameDataPackV2` 变 `ready` 的剩余部分，也是 Windows 侧 `TeamFeatureV2` 的前置。
