@@ -1074,3 +1074,33 @@ the real lever is lineup + advances）。所以重新定位要换**阵容**，�
 6. 严禁为了让验收变绿去改 `src/coach/coach-advice.js`（建议层判据）；若失败其实源于
    建议层，停下来报告。
 
+
+### C6.8 「48 只可选」的确切根因与最小改法（第 58 轮实测定位）
+
+监工要求先做到「服务可启动、名单可加载、可玩 48 只 3v3」。**服务侧已经是好的**，
+卡点在名单只出 12 只，根因已逐行定位：
+
+- 页面/接口链路：`src/client/roco.js` → `GET /api/roco/roster`（`src/server/index.js:213`）
+  → `rocoService.roster()`（`src/server/roco-service.js:382`）→ Python `kind:'roster'`
+  → `_answer_roster`（`roco/src/roco_env/service.py:776`）。
+- **根因**：`_answer_roster` 遍历的是 `sorted(rs.pets)`，而 Ruleset 加载的宠物来自
+  `data/roco/normalized/roco-world-s4-2026-09-10/pets.json`——那份目前只有 **12 只**
+  （实测 `curl /api/roco/roster` → `count:12, usable_count:12`）。
+  所以不是接口过滤掉了，而是**引擎的候选池里只有 12 只**。
+- 现有的 `limit = query.get("limit")`（`service.py:780`）只是截断参数，Node 侧
+  `client.query({kind:'roster'},{})` 也没传——**分页/筛选要从这里接**。
+
+**最小改法（下一轮，按顺序）**：
+1. 让 Ruleset 的候选池扩到 48：把上一轮落库的
+   `data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json`（48 只 + 各自 4 个有证据技能
+   + `support: simulable_core_pool`）作为**叠加层**接进加载期；**不替换**现有 12 只那份
+   （它带着引擎侧 4 技能与合法性校验，是基线）。加载期要断言：叠加后每只仍有 4 个技能、
+   且 `candidate_moveset` 非空——否则 fail closed，不许静默跳过。
+2. `_answer_roster` 支持 `offset/limit/type/role` 四个查询参数（`limit` 已存在），
+   并在返回里带 `total`/`offset`/`limit`；Node `roster()` 原样转发这些参数，
+   **不传参数时行为与现在一致**（旧形状向后兼容：`ok/count/usable_count/team_size/note/pets`）。
+3. 验收（缺一不可）：① `/api/roco/roster?limit=48` 返回 48、`?type=草系` 只出草系、
+   `?offset=24&limit=12` 出第 25—36 只；② 真服务抽样：跨批次任取 3 只组任意合法 3v3
+   **能开局并打完**（给出局数与失败样本）；③ `npm run test:env` 与 `test:unit` 全绿；
+   ④ 页面端分页/搜索接上后才谈 UI 重排（监工要求：绿基线再动结构）。
+
