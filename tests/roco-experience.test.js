@@ -23,6 +23,7 @@ import {
   ROCO_MODE,
 } from '../src/coach/roco-experience.js';
 import {normaliseAdviceShape} from '../src/coach/coach-advice.js';
+import {readFileSync} from 'node:fs';
 import {interventionDetail,interventionFeaturesOfGame} from '../src/coach/experience.js';
 
 const view = (over = {}) => ({
@@ -227,4 +228,40 @@ test('伤害预览：说清「估」与「够不够收」，且结论不稳时�
 
   assert.equal(rocoDamagePreviewText({}), null);
   assert.equal(rocoDamagePreviewText({damage_preview: {available: false}}), null);
+});
+
+// ── 页面接线自检（第 45 轮补）────────────────────────────────────────────────
+//
+// 为什么静态也要查一遍：这一层已经出过四次「接上了但没生效」，而第 45 轮这一处
+// 更坏——**输入错了但不报错**：
+//   · 复盘的事件必须用**整局累计**的 `state.matchEvents`，不是 `state.events`
+//     （后者只有这一次推进的事件，见 `service.py:1860`）；
+//   · 局面必须用 `state.lastLiveView`（最后一个还能行动的局面），不是终局视图
+//     （终局里 `legal` 为空 → `player.items` 为空 → 「有没有药」变成假的）。
+// 这两条在纯函数那一侧已经有用例（`tests/evals/roco/teacher-match-review.test.js`
+// 用真对局验过），但**页面有没有这样调用**只能在这里查：改了这行、纯函数测试照样绿。
+test('页面局末复盘接的是「整局事件 + 最后一个可行动的局面」（接错了不会报错）', () => {
+  const page = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
+  const call = page.match(/rocoMatchReview\(\{([\s\S]{0,400}?)\}\)/);
+  assert.ok(call, '页面必须调用 rocoMatchReview 来装配复盘（不许自己拼）');
+  const args = call[1];
+  assert.match(args, /events:\s*state\.matchEvents/, `复盘要用整局事件，当前：${args.slice(0, 200)}`);
+  assert.match(args, /lastLiveView:\s*state\.lastLiveView/, `复盘要用最后一个可行动的局面，当前：${args.slice(0, 200)}`);
+  assert.doesNotMatch(args, /events:\s*state\.events\b/, '用这一次推进的事件做整局复盘会安静地少讲一大截');
+  // 累计必须发生在换掉 `state.view` 之前，否则快照永远慢一拍（legal 已经空了）。
+  const apply = page.match(/function applyResult\(data\)\s*\{([\s\S]{0,1500}?)\n\}/);
+  assert.ok(apply, '页面里应当有 applyResult');
+  const body = apply[1];
+  const at = (needle) => body.indexOf(needle);
+  assert.ok(at('state.matchEvents') >= 0, 'applyResult 要累计整局事件');
+  assert.ok(at('state.lastLiveView') >= 0, 'applyResult 要在换 view 之前留一份「还能行动的局面」');
+  assert.ok(at('state.lastLiveView') < at('state.view = data.view'),
+    '顺序反了：先换 view 再留快照，拿到的是终局视图');
+  assert.ok(at('state.matchEvents') < at('state.view = data.view'),
+    '顺序反了：先换 view 再累计，会漏掉最后一次推进的事件');
+  // 开局要把两份快照清干净，否则上一局的局面会被带进新的一局。
+  const start = page.match(/async function startBattle\(\)\s*\{([\s\S]{0,2000}?)\n\}/);
+  assert.ok(start, '页面里应当有 startBattle');
+  assert.match(start[1], /state\.matchEvents = \[\]/, '开新局要清空整局事件');
+  assert.match(start[1], /state\.lastLiveView = null/, '开新局要清掉上一局的快照');
 });
