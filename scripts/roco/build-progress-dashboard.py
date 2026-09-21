@@ -261,10 +261,14 @@ ITEMS: List[Dict[str, Any]] = [
              "每类在 train/val/test 三侧都有样本。判定器自检两个方向都要对。"},
     {"id": "W4-02", "title": "构造工具轨迹（原计划 2,000—5,000 条，实际按真实世界覆盖走）", "status": PARTIAL,
      "evidence": ["tests/evals/agent-trajectories-v1.jsonl",
+                  "tests/evals/agent-trajectories-model-v1.jsonl",
+                  "tests/evals/roco/model-error-trajectories-v1.jsonl",
+                  "tests/evals/roco/model-error-trajectories-v4.jsonl",
                   "scripts/roco/agent-trajectories.mjs",
                   "scripts/roco/build-agent-trajectories.mjs",
                   "scripts/roco/verify-agent-trajectories.mjs",
-                  "docs/roco/AGENT-TRAJECTORIES.md"],
+                  "docs/roco/AGENT-TRAJECTORIES.md",
+                  "docs/roco/W4-02-MODEL-CANDIDATES.md"],
      "note": "{traj:,} 条 / {worlds} 个世界 / {arms} 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，"
              "判定器两个方向都被测过（正向 {pos}/{pos}、反向 {neg:,} 个变体全挂）；"
              "另有**生产者一致性**检查（生成器改了而产物没重建会判红）。"
@@ -389,7 +393,11 @@ ITEMS: List[Dict[str, Any]] = [
      "needs": "NEEDS_HUMAN：3—5 位真人玩家，对陪练回复做盲评打分（同一条回复随机标成不同来源）",
      "note": "这是外部阻塞，不是代码问题：没有真人评分就无法声称「陪练像不像人」。"},
     {"id": "W6-01", "title": "learned value", "status": NOT_STARTED, "evidence": [],
-     "note": "未开工；依赖 W4-02 的候选数据。"},
+     "note": "未开工。**数据依赖已经具备**：W4-02 的候选数据（第 41 轮，"
+             "`tests/evals/agent-trajectories-model-v1.jsonl` 1,752 条 + 错误目录）"
+             "与本机 12,000 局的轨迹集（`reports/roco/trajectories/`，按种子可复现，不入库）都在。"
+             "它是「不再手工调 `evaluate`，而是从真实 rollout 学一个价值函数」那条路，"
+             "要单独预注册门槛（family 外指标、与现有 `evaluate` 的配对比较、回滚开关）。"},
     {"id": "W6-02", "title": "Battle PPO", "status": NOT_STARTED, "evidence": [],
      "note": "未开工；属训练，且需要 W4-04 的底座。"},
     {"id": "W6-03", "title": "LLM Agentic RL", "status": NOT_STARTED, "evidence": [],
