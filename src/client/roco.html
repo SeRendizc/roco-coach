@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 手游规则演示（无聊天入口）</title><link rel="stylesheet" href="/src/client/roco.css"></head><body>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 手游规则演示（无聊天入口）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/roco.css"></head><body>
 <main>
 <header>
  <h1>小芽 · 手游规则演示 <small>roco-world-s4-2026-09-10</small></h1>
@@ -44,16 +44,16 @@
  </div>
 </details>
 
-<section class="board">
- <article class="panel side" id="self-panel">
+<section class="board arena">
+ <article class="panel side combatant" id="self-panel">
   <div class="section-title"><h2>你的队伍</h2><span class="muted" id="self-active"></span></div>
   <div id="self-pets" class="pets"></div>
  </article>
- <div class="center">
+ <div class="center versus">
   <div id="turn-chip" class="chip">未开局</div>
   <div id="phase-chip" class="muted">—</div>
  </div>
- <article class="panel side" id="foe-panel">
+ <article class="panel side combatant" id="foe-panel">
   <div class="section-title"><h2>训练对手</h2><span class="muted">规则引擎驱动</span></div>
   <div id="foe-field" class="pets"></div>
   <div id="foe-bench" class="bench"></div>
@@ -77,7 +77,7 @@
  <div id="roster" class="roster"></div>
 </section>
 
-<section class="panel">
+<section class="panel action-panel">
  <div class="section-title"><h2>这一回合的行动</h2><span class="muted" id="action-hint">开一局后这里会出现可执行的动作</span></div>
  <div id="actions" class="actions"></div>
  <div class="row">
@@ -87,7 +87,7 @@
  </div>
 </section>
 
-<section class="panel" id="log-panel">
+<section class="panel log-panel" id="log-panel">
  <div class="section-title"><h2>这一回合发生了什么</h2></div>
  <div id="events" class="events"></div>
  <!-- 原始事件 JSON：**默认收起**。玩家读句子；要查数据的人自己展开。 -->

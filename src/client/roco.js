@@ -157,7 +157,9 @@ function petAvatar(pet) {
   if (!main) return '';
   const color = TYPE_COLOR[main] ?? '#6b7280';
   const emoji = TYPE_EMOJI[main] ?? '';
-  return `<span class="avatar" style="border-color:${color}" aria-hidden="true">${emoji}</span>`;
+  // 两个类名都在：`pet-icon` 是营地页（`src/client/style.css`）里既有的**大 emoji 形象**，
+  // `avatar` 是第 45 轮加的徽记，验收脚本按它取值。**视觉只用一份**（framework 那一份）。
+  return `<span class="avatar pet-icon" style="border-color:${color}" aria-hidden="true">${emoji}</span>`;
 }
 
 /**
@@ -179,11 +181,19 @@ function petCard(pet, {active = false} = {}) {
   // `data-slot` 与 `.active` 只用于把「伤害数字」浮在**被打中**的那只身上（见 flashDamage）：
   // 卡片的位次是 `ui_public_view` 给的公开字段，不是自己数的。
   const slot = Number.isInteger(pet.slot) ? ` data-slot="${pet.slot}"` : '';
-  return `<div class="pet ${pet.fainted ? 'fainted' : ''}${active ? ' active' : ''}"${slot}>
-    <div class="pet-top">${petAvatar(pet)}<strong>${name}</strong>${typeChips(pet.types)}</div>
-    <div class="bar"><div class="${hpClass(ratio)}" style="width:${pct(pet.hp, pet.max_hp)}%"></div></div>
-    <div class="pet-stats"><span>生命 ${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span><span>能量 ${pet.energy ?? '—'}</span>${statuses ? `<span>异常 ${statuses}</span>` : ''}</div>
-    ${stats ? `<div class="pet-more">${stats}</div>` : ''}
+  // 结构沿用营地页既有组件（`style.css` 的 `.pet-heading/.hp-line/.hp-track/.hp-fill/.energy`）：
+  // 同一种「一只伙伴」在两页长得不同，是第 45 轮监工点名的问题（「全部重新搭建啊？」）。
+  const energyDots = Number.isFinite(pet.energy)
+    ? `${'●'.repeat(Math.max(0, Math.min(10, pet.energy)))}<small> ${pet.energy} 豆</small>`
+    : '—';
+  return `<div class="pet combatant ${pet.fainted ? 'fainted' : ''}${active ? ' active' : ''}"${slot}>
+    <div class="pet-heading">${petAvatar(pet)}
+      <div><h3>${name}</h3>${statuses ? `<small>异常 ${statuses}</small>` : ''}</div>
+      <span class="pet-types">${typeChips(pet.types)}</span></div>
+    <div class="hp-line"><span>生命</span><span>${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span></div>
+    <div class="hp-track"><div class="hp-fill ${hpClass(ratio)}" style="width:${pct(pet.hp, pet.max_hp)}%"></div></div>
+    <div class="energy">${energyDots}</div>
+    ${stats ? `<div class="pet-stats">${stats}</div>` : ''}
   </div>`;
 }
 
@@ -231,13 +241,20 @@ function render() {
   }
   $('engine-status').dataset.rocoStatus = view ? 'ready' : 'idle';
   $('turn-chip').textContent = view ? `第 ${view.turn} 回合 · ${view.phase === 'replace' ? '补位' : '对战'}` : '未开局';
-  $('phase-chip').textContent = view?.battle_result ? `对局结束：${view.battle_result}` : '';
+  // 结算结果是引擎给的英文（win/loss/draw/escaped）。玩家不该在界面上看到 `win`——
+  // 这是第 45 轮从截图里看出来的（「对局结束：win」），不是测试报出来的。
+  const RESULT_CN = {win: '我方胜', loss: '我方负', draw: '平局', escaped: '撤退', ongoing: '未结束'};
+  $('phase-chip').textContent = view?.battle_result
+    ? `对局结束：${RESULT_CN[view.battle_result] ?? view.battle_result}`
+    : '';
   $('self-active').textContent = view?.self?.active != null ? `场上：第 ${view.self.active + 1} 位` : '';
   $('self-pets').innerHTML = (view?.self?.pets ?? [])
     .map((pet, index) => petCard(pet, {active: index === view?.self?.active})).join('');
   $('foe-field').innerHTML = view?.opponent?.field ? petCard(view.opponent.field, {active: true}) : '';
   $('foe-bench').innerHTML = (view?.opponent?.bench ?? [])
-    .map((b) => `<div class="slot">第 ${(b.slot ?? 0) + 1} 位${b.fainted ? ' · 已倒下' : ' · 状态未知'}</div>`)
+    .map((b) => `<div class="bench-pet ${b.fainted ? 'fainted' : ''}">`
+      + `<strong>第 ${(b.slot ?? 0) + 1} 位</strong>`
+      + `<div class="stats">${b.fainted ? '已倒下' : '状态未知'}</div></div>`)
     .join('');
 
   const actions = view?.legal ?? [];
@@ -531,10 +548,15 @@ function renderRoster() {
       ? `${pet.name} 已经分给${side === 'player' ? '对手' : '我方'}了：点一下会告诉你怎么改`
       : (blocked ? `${sideName(side)}已经选满 3 只` : '');
     const moves = pet.moveset.map((m) => m.name).join('、');
-    return `<button class="${classes.join(' ')}" data-pet="${pet.pet_id}"
+    // 复用营地页的 `.pet-option`（同一个「选一只伙伴」组件）：`chosen` 是框架的选择态，
+    // `picked-player/picked-enemy` 是这一页自己的两侧态；两者都留着，验收脚本按 `.pick` 取值。
+    const framework = ['pet-option', onSide ? 'chosen' : ''].filter(Boolean).join(' ');
+    return `<button class="${classes.join(' ')} ${framework}" data-pet="${pet.pet_id}"
       aria-disabled="${blocked ? 'true' : 'false'}" title="${why}">
-      <div class="nm">${petAvatar(pet)}${pet.name}${badge}</div>
-      <div>${typeChips(pet.types)}</div>
+      <div class="nm">${petAvatar(pet)}<strong>${pet.name}</strong>${badge}</div>
+      <div class="pet-option-types">${typeChips(pet.types)}</div>
+      ${pet.stats ? `<div class="stats"><span>生命 ${pet.stats.hp}</span><span>攻击 ${pet.stats.atk}</span>`
+        + `<span>防御 ${pet.stats.def}</span><span>速度 ${pet.stats.spe}</span></div>` : ''}
       <div class="mv">${moves || '（引擎未给配招）'}</div>
     </button>`;
   }).join('');
