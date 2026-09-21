@@ -1,0 +1,5626 @@
+{
+  "schema_version": 1,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "layer": "layer-playable-48",
+  "generated_by": "scripts/roco/build-roster-48-engine-inputs.mjs",
+  "generated_from": {
+    "data/roco/normalized/<ruleset>/pets.json": "8ba09fd7a05e1d023a6add5e79a81408e7890606b3067da4d15662f7f48fcdb0",
+    "data/roco/normalized/<ruleset>/learnsets.json": "0a68366b6624f94efec43b6ee036152bbb37f84e396024f3e63fb868220f3052",
+    "data/roco/normalized/<ruleset>/support-matrix.json": "4cddb0cbeb262efca01b86aeda31ee2f30037822ef053e137036432dc2c32e74",
+    "data/roco/normalized/<ruleset>/skills.json": "9d01a6476a529be750973b4b3e8eb939112773f6a8b685e15e67516092e278e4",
+    "data/roco/normalized/<ruleset>/roster-48.json": "565377046e1329285205bedd343419cb6c3d80acf687dce635b979b3f622970b",
+    "reports/roco/coverage/roster-48.json": "acd0738a6c8dc2746e92339af5193485808dcd2f6f8915f59f1ac5bb8c23410b",
+    "tmp/roco-full-catalog.json": "17db01004724048972512f4866ddeadf993cd47074fc2d049d2d692444d7c065"
+  },
+  "caveats": [
+    "支持等级 current 一律 KNOWLEDGE_ONLY：技能效果原语未核验，microcase 通过数为 0。",
+    "候选配招来自 48 只名单的选择规则（reports/roco/coverage/roster-48.json#selection_rules），本层不重新选招。",
+    "A/B/C 分组只对任务书的 12 只成立；新增 36 只不编分组。"
+  ],
+  "pet_count": 36,
+  "pets": [
+    {
+      "pet_id": "pet_000484",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "迷迷箱怪",
+      "title": "迷迷箱怪",
+      "game_id": 3619,
+      "number": "211",
+      "types": [
+        "机械系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 138,
+        "atk": 129,
+        "def": 153,
+        "spa": 129,
+        "spd": 153,
+        "spe": 80
+      },
+      "stat_total": 782,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000133",
+        "name": "虚假宝箱",
+        "desc": "自己力竭时，敌方获得攻防+20%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_5ccca003e3ca",
+        "native": 16,
+        "blood": 18,
+        "stones": 20,
+        "pool_size": 54,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:type=机械系,alsoCovers=22,pool=54,total=782",
+        "roles_filled": {
+          "free_attack": "skill_000816",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000317",
+          "mechanism_support": "skill_000481"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000816",
+            "name": "粒子对撞",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000317",
+            "name": "后发制人",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 3,
+            "power": 155,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物理伤害，先手-1。",
+            "mechanisms": [
+              "damage",
+              "priority"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000481",
+            "name": "齿轮切开",
+            "category": "攻击",
+            "element": "机械系",
+            "energy": 5,
+            "power": 130,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，本技能位于1号或3号位时能耗-2，传动1。",
+            "mechanisms": [
+              "damage",
+              "energy",
+              "position"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "position",
+        "priority",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000330",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "权杖-V",
+      "title": "权杖-V",
+      "game_id": 3411,
+      "number": "146",
+      "types": [
+        "机械系"
+      ],
+      "stats": {
+        "hp": 103,
+        "atk": 105,
+        "def": 136,
+        "spa": 97,
+        "spd": 136,
+        "spe": 75
+      },
+      "stat_total": 652,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000105",
+        "name": "机械变式",
+        "desc": "若回合内自己携带的技能位置发生变化，该技能能耗永久-1。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_da3187da31e6",
+        "native": 16,
+        "blood": 18,
+        "stones": 17,
+        "pool_size": 51,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:type=机械系,alsoCovers=18,pool=51,total=652",
+        "roles_filled": {
+          "free_attack": "skill_000321",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000477",
+          "mechanism_support": "skill_000289"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000321",
+            "name": "彗星",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 0,
+            "power": 240,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，每失去5%生命，本次技能威力-10，使用后消耗全部生命。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000477",
+            "name": "离子震荡",
+            "category": "攻击",
+            "element": "机械系",
+            "energy": 3,
+            "power": 90,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，本技能位于3号位时威力+40，传动1。",
+            "mechanisms": [
+              "damage",
+              "position"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000289",
+            "name": "无畏之心",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 5,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤100%，应对攻击：减免的伤害变为回复自己生命，且本技能能耗永久+2。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "heal",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "position",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000167",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "电咩咩",
+      "title": "电咩咩",
+      "game_id": 3190,
+      "number": "066",
+      "types": [
+        "电系"
+      ],
+      "stats": {
+        "hp": 47,
+        "atk": 49,
+        "def": 55,
+        "spa": 49,
+        "spd": 57,
+        "spe": 75
+      },
+      "stat_total": 332,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000079",
+        "name": "快充",
+        "desc": "离场时回复10能量。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_fcebc7374ebe",
+        "native": 13,
+        "blood": 18,
+        "stones": 19,
+        "pool_size": 50,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:type=电系,alsoCovers=17,pool=50,total=332",
+        "roles_filled": {
+          "free_attack": "skill_000265",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000602",
+          "mechanism_support": "skill_000603"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000265",
+            "name": "魔能爆",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 0,
+            "power": 1,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，使用时消耗所有能量，消耗越高，伤害越高。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000602",
+            "name": "强制重启",
+            "category": "攻击",
+            "element": "电系",
+            "energy": 3,
+            "power": 90,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，应对状态：回合结束时使敌方精灵返场。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "heal",
+              "escape"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000603",
+            "name": "电离爆破",
+            "category": "状态",
+            "element": "电系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "敌方获得魔攻-20%，速度-20，2连击。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "stat_mod"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "heal",
+        "multi_hit",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000172",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "闪电环",
+      "title": "闪电环",
+      "game_id": 3195,
+      "number": "207",
+      "types": [
+        "电系"
+      ],
+      "stats": {
+        "hp": 64,
+        "atk": 49,
+        "def": 51,
+        "spa": 49,
+        "spd": 50,
+        "spe": 72
+      },
+      "stat_total": 335,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000081",
+        "name": "防过载保护",
+        "desc": "每次行动后脱离。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_61abf901ad63",
+        "native": 16,
+        "blood": 18,
+        "stones": 19,
+        "pool_size": 53,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:type=电系,alsoCovers=15,pool=53,total=335",
+        "roles_filled": {
+          "free_attack": "skill_000580",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000596",
+          "mechanism_support": "skill_000602"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000580",
+            "name": "导电撞击",
+            "category": "攻击",
+            "element": "电系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000596",
+            "name": "交叉闪电",
+            "category": "攻击",
+            "element": "电系",
+            "energy": 3,
+            "power": 100,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000602",
+            "name": "强制重启",
+            "category": "攻击",
+            "element": "电系",
+            "energy": 3,
+            "power": 90,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，应对状态：回合结束时使敌方精灵返场。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "heal",
+              "escape"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "escape",
+        "heal",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000219",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "獠牙猪",
+      "title": "獠牙猪",
+      "game_id": 3263,
+      "number": "138",
+      "types": [
+        "冰系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 123,
+        "atk": 119,
+        "def": 110,
+        "spa": 41,
+        "spd": 101,
+        "spe": 85
+      },
+      "stat_total": 579,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000042",
+        "name": "冻土",
+        "desc": "每携带1个冰系技能进入战斗，地系技能威力+10%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_6ee3e37d8238",
+        "native": 14,
+        "blood": 18,
+        "stones": 14,
+        "pool_size": 46,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=control,alsoCovers=14,pool=46,total=579",
+        "roles_filled": {
+          "free_attack": "skill_000321",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000519",
+          "mechanism_support": "skill_000546"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000321",
+            "name": "彗星",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 0,
+            "power": 240,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，每失去5%生命，本次技能威力-10，使用后消耗全部生命。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000519",
+            "name": "岩脉崩毁",
+            "category": "攻击",
+            "element": "地系",
+            "energy": 4,
+            "power": 120,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，本技能能耗固定为4。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000546",
+            "name": "丢冰块",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 3,
+            "power": 90,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方获得速度-30。",
+            "mechanisms": [
+              "damage",
+              "stat_mod"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000609",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "新月鹭",
+      "title": "新月鹭",
+      "game_id": 3764,
+      "number": "446",
+      "types": [
+        "翼系",
+        "冰系"
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 59,
+        "def": 62,
+        "spa": 60,
+        "spd": 68,
+        "spe": 69
+      },
+      "stat_total": 368,
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "51-70",
+      "trait": {
+        "skill_id": "skill_000198",
+        "name": "冷光源",
+        "desc": "若上回合双方有精灵使用翼系技能，本回合自己携带的冰系技能威力+100%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_da630e35c0e9",
+        "native": 15,
+        "blood": 18,
+        "stones": 16,
+        "pool_size": 49,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=control,alsoCovers=12,pool=49,total=368",
+        "roles_filled": {
+          "free_attack": "skill_000541",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000700",
+          "mechanism_support": "skill_000808"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000541",
+            "name": "冰锥",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000700",
+            "name": "回旋风暴",
+            "category": "攻击",
+            "element": "翼系",
+            "energy": 3,
+            "power": 100,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000808",
+            "name": "多维击打",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 4,
+            "power": 15,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "mark"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "mark",
+        "multi_hit",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000243",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "卡卡虫",
+      "title": "卡卡虫（雪山附近的样子）",
+      "game_id": 3293,
+      "number": "045",
+      "types": [
+        "草系",
+        "冰系"
+      ],
+      "stats": {
+        "hp": 62,
+        "atk": 54,
+        "def": 64,
+        "spa": 11,
+        "spd": 58,
+        "spe": 108
+      },
+      "stat_total": 357,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "trait": {
+        "skill_id": "skill_000007",
+        "name": "诈死",
+        "desc": "自己力竭时，少损失1点魔力。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_d8dd1381c0fa",
+        "native": 14,
+        "blood": 18,
+        "stones": 14,
+        "pool_size": 46,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=control,alsoCovers=11,pool=46,total=357",
+        "roles_filled": {
+          "free_attack": "skill_000541",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000532",
+          "mechanism_support": "skill_000368"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000541",
+            "name": "冰锥",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000532",
+            "name": "冰雹",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 4,
+            "power": 105,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：额外使敌方获得全技能能耗+3。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000368",
+            "name": "抽枝",
+            "category": "攻击",
+            "element": "草系",
+            "energy": 4,
+            "power": 90,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：自己回复50%生命和5能量。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "heal",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000218",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "呼呼猪",
+      "title": "呼呼猪",
+      "game_id": 3262,
+      "number": "137",
+      "types": [
+        "冰系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 98,
+        "atk": 95,
+        "def": 88,
+        "spa": 33,
+        "spd": 81,
+        "spe": 68
+      },
+      "stat_total": 463,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "51-70",
+      "trait": {
+        "skill_id": "skill_000042",
+        "name": "冻土",
+        "desc": "每携带1个冰系技能进入战斗，地系技能威力+10%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_6ee3e37d8238",
+        "native": 14,
+        "blood": 18,
+        "stones": 14,
+        "pool_size": 46,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=control,alsoCovers=9,pool=46,total=463",
+        "roles_filled": {
+          "free_attack": "skill_000321",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000519",
+          "mechanism_support": "skill_000546"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000321",
+            "name": "彗星",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 0,
+            "power": 240,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，每失去5%生命，本次技能威力-10，使用后消耗全部生命。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000519",
+            "name": "岩脉崩毁",
+            "category": "攻击",
+            "element": "地系",
+            "energy": 4,
+            "power": 120,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，本技能能耗固定为4。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000546",
+            "name": "丢冰块",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 3,
+            "power": 90,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方获得速度-30。",
+            "mechanisms": [
+              "damage",
+              "stat_mod"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000240",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "丢丢",
+      "title": "丢丢（雪山附近的样子）",
+      "game_id": 3290,
+      "number": "044",
+      "types": [
+        "草系",
+        "冰系"
+      ],
+      "stats": {
+        "hp": 46,
+        "atk": 41,
+        "def": 48,
+        "spa": 8,
+        "spd": 44,
+        "spe": 81
+      },
+      "stat_total": 268,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000007",
+        "name": "诈死",
+        "desc": "自己力竭时，少损失1点魔力。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_d8dd1381c0fa",
+        "native": 14,
+        "blood": 18,
+        "stones": 14,
+        "pool_size": 46,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=control,alsoCovers=8,pool=46,total=268",
+        "roles_filled": {
+          "free_attack": "skill_000541",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000532",
+          "mechanism_support": "skill_000368"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000541",
+            "name": "冰锥",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000532",
+            "name": "冰雹",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 4,
+            "power": 105,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：额外使敌方获得全技能能耗+3。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000368",
+            "name": "抽枝",
+            "category": "攻击",
+            "element": "草系",
+            "energy": 4,
+            "power": 90,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：自己回复50%生命和5能量。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "heal",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000479",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "嗜光嗡嗡",
+      "title": "嗜光嗡嗡",
+      "game_id": 3614,
+      "number": "323",
+      "types": [
+        "恶系",
+        "光系"
+      ],
+      "stats": {
+        "hp": 74,
+        "atk": 91,
+        "def": 57,
+        "spa": 91,
+        "spd": 100,
+        "spe": 92
+      },
+      "stat_total": 505,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "trait": {
+        "skill_id": "skill_000148",
+        "name": "血型吸引",
+        "desc": "敌方每携带1种系别的技能，自己攻击时威力+10。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_4e4be8347526",
+        "native": 15,
+        "blood": 18,
+        "stones": 21,
+        "pool_size": 54,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:type=光系,alsoCovers=14,pool=54,total=505",
+        "roles_filled": {
+          "free_attack": "skill_000782",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000787",
+          "mechanism_support": "skill_000629"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000782",
+            "name": "迫害",
+            "category": "攻击",
+            "element": "恶系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000787",
+            "name": "跌落",
+            "category": "攻击",
+            "element": "恶系",
+            "energy": 3,
+            "power": 120,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成大量物伤，自己获得物攻-50%，应对状态：改为获得物攻+50%。",
+            "mechanisms": [
+              "respond",
+              "stat_mod"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000629",
+            "name": "过敏原",
+            "category": "攻击",
+            "element": "毒系",
+            "energy": 3,
+            "power": 35,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，1连击，若敌方有中毒效果，本次技能连击数+2。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "status_dot"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "multi_hit",
+        "respond",
+        "shield",
+        "stat_mod",
+        "status_dot"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000613",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "智辉章脑",
+      "title": "智辉章脑",
+      "game_id": 3768,
+      "number": "453",
+      "types": [
+        "光系",
+        "水系"
+      ],
+      "stats": {
+        "hp": 112,
+        "atk": 53,
+        "def": 87,
+        "spa": 123,
+        "spd": 124,
+        "spe": 100
+      },
+      "stat_total": 599,
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "trait": {
+        "skill_id": "skill_000200",
+        "name": "基因编辑",
+        "desc": "自己携带技能的基础能耗，变为上回合双方使用的技能能耗之和。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_1828f13f54f1",
+        "native": 13,
+        "blood": 18,
+        "stones": 13,
+        "pool_size": 44,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:type=光系,alsoCovers=12,pool=44,total=599",
+        "roles_filled": {
+          "free_attack": "skill_000418",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000458",
+          "mechanism_support": "skill_000599"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000418",
+            "name": "甩水",
+            "category": "攻击",
+            "element": "水系",
+            "energy": 0,
+            "power": 30,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000458",
+            "name": "虹光冲击",
+            "category": "攻击",
+            "element": "光系",
+            "energy": 3,
+            "power": 100,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000599",
+            "name": "过载回路",
+            "category": "状态",
+            "element": "电系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "回合结束自己返场，下回合所选技能使用次数+1。",
+            "mechanisms": [
+              "heal",
+              "escape"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "heal",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000450",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "混乱鱿彩",
+      "title": "混乱鱿彩",
+      "game_id": 3578,
+      "number": "281",
+      "types": [
+        "幽系",
+        "恶系"
+      ],
+      "stats": {
+        "hp": 129,
+        "atk": 122,
+        "def": 131,
+        "spa": 53,
+        "spd": 99,
+        "spe": 70
+      },
+      "stat_total": 604,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "51-70",
+      "trait": {
+        "skill_id": "skill_000157",
+        "name": "涂鸦",
+        "desc": "使用非本系技能时威力+50%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_95f11887ef71",
+        "native": 16,
+        "blood": 18,
+        "stones": 18,
+        "pool_size": 52,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:type=恶系,alsoCovers=12,pool=52,total=604",
+        "roles_filled": {
+          "free_attack": "skill_000725",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000744",
+          "mechanism_support": "skill_000793"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000725",
+            "name": "鞭打",
+            "category": "攻击",
+            "element": "萌系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000744",
+            "name": "坟场搏击",
+            "category": "攻击",
+            "element": "幽系",
+            "energy": 4,
+            "power": 180,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，敌方每有1能量，本次技能威力-10%。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000793",
+            "name": "伪造账单",
+            "category": "状态",
+            "element": "恶系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "若敌方本回合回复生命，改为失去2倍（含溢出的回复量）。先手+1。",
+            "mechanisms": [
+              "heal",
+              "priority"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "priority",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000248",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "蹦蹦种子",
+      "title": "蹦蹦种子（短毛球形态）",
+      "game_id": 3298,
+      "number": "063",
+      "types": [
+        "草系",
+        "毒系"
+      ],
+      "stats": {
+        "hp": 57,
+        "atk": 62,
+        "def": 48,
+        "spa": 66,
+        "spd": 67,
+        "spe": 48
+      },
+      "stat_total": 348,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "<=50",
+      "trait": {
+        "skill_id": "skill_000005",
+        "name": "生物碱",
+        "desc": "使用草系技能时，敌方获得2层中毒。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_3085be4a15be",
+        "native": 16,
+        "blood": 18,
+        "stones": 21,
+        "pool_size": 55,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=<=50,alsoCovers=11,pool=55,total=348",
+        "roles_filled": {
+          "free_attack": "skill_000673",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000340",
+          "mechanism_support": "skill_000612"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000673",
+            "name": "气波",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000340",
+            "name": "仙人掌刺击",
+            "category": "攻击",
+            "element": "草系",
+            "energy": 6,
+            "power": 150,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000612",
+            "name": "毒液渗透",
+            "category": "攻击",
+            "element": "毒系",
+            "energy": 5,
+            "power": 120,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，敌方每有1层中毒效果，本技能能耗-1，敌方获得1层中毒。",
+            "mechanisms": [
+              "damage",
+              "energy",
+              "status_dot"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "respond",
+        "shield",
+        "status_dot"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000143",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "花魁蜂后",
+      "title": "花魁蜂后",
+      "game_id": 3157,
+      "number": "084",
+      "types": [
+        "虫系",
+        "翼系"
+      ],
+      "stats": {
+        "hp": 145,
+        "atk": 54,
+        "def": 45,
+        "spa": 49,
+        "spd": 45,
+        "spe": 44
+      },
+      "stat_total": 382,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "<=50",
+      "trait": {
+        "skill_id": "skill_000053",
+        "name": "虫群鼓舞",
+        "desc": "队伍中每有1只其他的虫系精灵，自己入场时获得攻防速+10%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_dc3ea63c96eb",
+        "native": 16,
+        "blood": 18,
+        "stones": 19,
+        "pool_size": 53,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=<=50,alsoCovers=9,pool=53,total=382",
+        "roles_filled": {
+          "free_attack": "skill_000696",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000650",
+          "mechanism_support": "skill_000610"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000696",
+            "name": "鸣叫",
+            "category": "攻击",
+            "element": "翼系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000650",
+            "name": "翅刃",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 3,
+            "power": 85,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "mark"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000610",
+            "name": "连续毒针",
+            "category": "攻击",
+            "element": "毒系",
+            "energy": 2,
+            "power": 15,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，2连击，每次连击使敌方获得1层中毒。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "status_dot"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "mark",
+        "multi_hit",
+        "respond",
+        "shield",
+        "status_dot"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000308",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "深蓝鲸",
+      "title": "深蓝鲸",
+      "game_id": 3381,
+      "number": "273",
+      "types": [
+        "水系"
+      ],
+      "stats": {
+        "hp": 137,
+        "atk": 44,
+        "def": 125,
+        "spa": 121,
+        "spd": 141,
+        "spe": 50
+      },
+      "stat_total": 618,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "<=50",
+      "trait": {
+        "skill_id": "skill_000035",
+        "name": "倾轧",
+        "desc": "携带的技能受能耗变化效果的影响翻倍。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_fd37e278031c",
+        "native": 13,
+        "blood": 18,
+        "stones": 17,
+        "pool_size": 48,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=<=50,alsoCovers=8,pool=48,total=618",
+        "roles_filled": {
+          "free_attack": "skill_000418",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000251",
+          "mechanism_support": "skill_000591"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000418",
+            "name": "甩水",
+            "category": "攻击",
+            "element": "水系",
+            "energy": 0,
+            "power": 30,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000251",
+            "name": "音爆",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 4,
+            "power": 130,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000591",
+            "name": "集中",
+            "category": "防御",
+            "element": "电系",
+            "energy": 2,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己回合结束返场。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "heal",
+              "escape"
+            ],
+            "learn_from": "blood",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "heal",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000548",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "女王蜂",
+      "title": "女王蜂",
+      "game_id": 5015,
+      "number": "084",
+      "types": [
+        "虫系",
+        "翼系"
+      ],
+      "stats": {
+        "hp": 145,
+        "atk": 50,
+        "def": 42,
+        "spa": 45,
+        "spd": 42,
+        "spe": 40
+      },
+      "stat_total": 364,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "<=50",
+      "trait": {
+        "skill_id": "skill_000213",
+        "name": "虫群突袭",
+        "desc": "队伍中每有1只其他的虫系精灵，自己入场时获得攻防速+15%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_8a31d96dbdde",
+        "native": 16,
+        "blood": 18,
+        "stones": 19,
+        "pool_size": 53,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=<=50,alsoCovers=6,pool=53,total=364",
+        "roles_filled": {
+          "free_attack": "skill_000696",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000650",
+          "mechanism_support": "skill_000610"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000696",
+            "name": "鸣叫",
+            "category": "攻击",
+            "element": "翼系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000650",
+            "name": "翅刃",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 3,
+            "power": 85,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "mark"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000610",
+            "name": "连续毒针",
+            "category": "攻击",
+            "element": "毒系",
+            "energy": 2,
+            "power": 15,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，2连击，每次连击使敌方获得1层中毒。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "status_dot"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "mark",
+        "multi_hit",
+        "respond",
+        "shield",
+        "status_dot"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000152",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "雪蛮人",
+      "title": "雪蛮人",
+      "game_id": 3173,
+      "number": "135",
+      "types": [
+        "冰系"
+      ],
+      "stats": {
+        "hp": 130,
+        "atk": 139,
+        "def": 111,
+        "spa": 63,
+        "spd": 83,
+        "spe": 48
+      },
+      "stat_total": 574,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "<=50",
+      "trait": {
+        "skill_id": "skill_000041",
+        "name": "结晶水",
+        "desc": "初始能量为0，入场前己方精灵每放1次冰系技能，回复3能量。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_e96061379a46",
+        "native": 13,
+        "blood": 18,
+        "stones": 17,
+        "pool_size": 48,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=<=50,alsoCovers=4,pool=48,total=574",
+        "roles_filled": {
+          "free_attack": "skill_000541",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000532",
+          "mechanism_support": "skill_000683"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000541",
+            "name": "冰锥",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000532",
+            "name": "冰雹",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 4,
+            "power": 105,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：额外使敌方获得全技能能耗+3。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000683",
+            "name": "马步",
+            "category": "状态",
+            "element": "武系",
+            "energy": 3,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%，获得物攻+150%。",
+            "mechanisms": [
+              "heal",
+              "stat_mod",
+              "priority"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "priority",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000012",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "铠甲虫",
+      "title": "铠甲虫",
+      "game_id": 3013,
+      "number": "284",
+      "types": [
+        "虫系"
+      ],
+      "stats": {
+        "hp": 132,
+        "atk": 95,
+        "def": 128,
+        "spa": 43,
+        "spd": 82,
+        "spe": 75
+      },
+      "stat_total": 555,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000057",
+        "name": "坚韧铠甲",
+        "desc": "每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_b04b99dccb26",
+        "native": 13,
+        "blood": 18,
+        "stones": 17,
+        "pool_size": 48,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=tank,alsoCovers=9,pool=48,total=555",
+        "roles_filled": {
+          "free_attack": "skill_000632",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000650",
+          "mechanism_support": "skill_000704"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000632",
+            "name": "啃咬",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000650",
+            "name": "翅刃",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 3,
+            "power": 85,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "mark"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000704",
+            "name": "风隐",
+            "category": "状态",
+            "element": "翼系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "敌方和自己均脱离，先手-1。",
+            "mechanisms": [
+              "escape",
+              "priority"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "mark",
+        "multi_hit",
+        "priority",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000542",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "祭礼巨像",
+      "title": "祭礼巨像",
+      "game_id": 5009,
+      "number": "115",
+      "types": [
+        "地系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 106,
+        "atk": 96,
+        "def": 115,
+        "spa": 101,
+        "spd": 119,
+        "spe": 85
+      },
+      "stat_total": 622,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000218",
+        "name": "坠星",
+        "desc": "敌方每有1层星陨印记，自己的技能威力+20%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_72b71d69627a",
+        "native": 16,
+        "blood": 18,
+        "stones": 20,
+        "pool_size": 54,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=tank,alsoCovers=7,pool=54,total=622",
+        "roles_filled": {
+          "free_attack": "skill_000807",
+          "reactive_defense": "skill_000525",
+          "main_attack": "skill_000516",
+          "mechanism_support": "skill_000808"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000807",
+            "name": "偷师",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 0,
+            "power": 30,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000525",
+            "name": "不动如山",
+            "category": "防御",
+            "element": "地系",
+            "energy": 2,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤90%，应对攻击：自己获得物攻+50%。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "stat_mod"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000516",
+            "name": "陨石",
+            "category": "攻击",
+            "element": "地系",
+            "energy": 3,
+            "power": 100,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000808",
+            "name": "多维击打",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 4,
+            "power": 15,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "mark"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "mark",
+        "multi_hit",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000153",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "雪巨人",
+      "title": "雪巨人",
+      "game_id": 3174,
+      "number": "136",
+      "types": [
+        "冰系"
+      ],
+      "stats": {
+        "hp": 162,
+        "atk": 174,
+        "def": 139,
+        "spa": 79,
+        "spd": 104,
+        "spe": 60
+      },
+      "stat_total": 718,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "51-70",
+      "trait": {
+        "skill_id": "skill_000041",
+        "name": "结晶水",
+        "desc": "初始能量为0，入场前己方精灵每放1次冰系技能，回复3能量。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_e96061379a46",
+        "native": 13,
+        "blood": 18,
+        "stones": 17,
+        "pool_size": 48,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=tank,alsoCovers=6,pool=48,total=718",
+        "roles_filled": {
+          "free_attack": "skill_000541",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000532",
+          "mechanism_support": "skill_000683"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000541",
+            "name": "冰锥",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000532",
+            "name": "冰雹",
+            "category": "攻击",
+            "element": "冰系",
+            "energy": 4,
+            "power": 105,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：额外使敌方获得全技能能耗+3。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000683",
+            "name": "马步",
+            "category": "状态",
+            "element": "武系",
+            "energy": 3,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%，获得物攻+150%。",
+            "mechanisms": [
+              "heal",
+              "stat_mod",
+              "priority"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "priority",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000545",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "千棘海针",
+      "title": "千棘海针",
+      "game_id": 5012,
+      "number": "078",
+      "types": [
+        "水系",
+        "毒系"
+      ],
+      "stats": {
+        "hp": 118,
+        "atk": 32,
+        "def": 94,
+        "spa": 85,
+        "spd": 133,
+        "spe": 100
+      },
+      "stat_total": 562,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "91-110",
+      "trait": {
+        "skill_id": "skill_000229",
+        "name": "溶解腐蚀",
+        "desc": "每携带1个毒系技能进入战斗，水系技能使敌方获得2层中毒。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_cdefb837d871",
+        "native": 13,
+        "blood": 18,
+        "stones": 15,
+        "pool_size": 46,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=tank,alsoCovers=5,pool=46,total=562",
+        "roles_filled": {
+          "free_attack": "skill_000418",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000612",
+          "mechanism_support": "skill_000483"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000418",
+            "name": "甩水",
+            "category": "攻击",
+            "element": "水系",
+            "energy": 0,
+            "power": 30,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000612",
+            "name": "毒液渗透",
+            "category": "攻击",
+            "element": "毒系",
+            "energy": 5,
+            "power": 120,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，敌方每有1层中毒效果，本技能能耗-1，敌方获得1层中毒。",
+            "mechanisms": [
+              "damage",
+              "energy",
+              "status_dot"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000483",
+            "name": "啮合传递",
+            "category": "状态",
+            "element": "机械系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+            "mechanisms": [
+              "stat_mod",
+              "position"
+            ],
+            "learn_from": "blood",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "position",
+        "respond",
+        "shield",
+        "stat_mod",
+        "status_dot"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000130",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "朔夜伊芙",
+      "title": "朔夜伊芙",
+      "game_id": 3144,
+      "number": "087",
+      "types": [
+        "恶系"
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 115,
+        "def": 104,
+        "spa": 105,
+        "spd": 85,
+        "spe": 115
+      },
+      "stat_total": 624,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "trait": {
+        "skill_id": "skill_000062",
+        "name": "嫁祸",
+        "desc": "自己每失去25%生命，连击数+2。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_508c3189ccde",
+        "native": 15,
+        "blood": 18,
+        "stones": 18,
+        "pool_size": 51,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=attacker,alsoCovers=9,pool=51,total=624",
+        "roles_filled": {
+          "free_attack": "skill_000766",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000768",
+          "mechanism_support": "skill_000483"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000766",
+            "name": "魔爪",
+            "category": "攻击",
+            "element": "恶系",
+            "energy": 0,
+            "power": 30,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000768",
+            "name": "蝙蝠",
+            "category": "攻击",
+            "element": "恶系",
+            "energy": 2,
+            "power": 65,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，并吸血100%。",
+            "mechanisms": [
+              "damage",
+              "heal"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000483",
+            "name": "啮合传递",
+            "category": "状态",
+            "element": "机械系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+            "mechanisms": [
+              "stat_mod",
+              "position"
+            ],
+            "learn_from": "blood",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "position",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000328",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "声波缇塔",
+      "title": "声波缇塔",
+      "game_id": 3407,
+      "number": "230",
+      "types": [
+        "机械系"
+      ],
+      "stats": {
+        "hp": 92,
+        "atk": 124,
+        "def": 113,
+        "spa": 48,
+        "spd": 85,
+        "spe": 105
+      },
+      "stat_total": 567,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "trait": {
+        "skill_id": "skill_000128",
+        "name": "向心力",
+        "desc": "1号和2号位技能获得传动1和威力+30。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_87230f93064b",
+        "native": 14,
+        "blood": 18,
+        "stones": 17,
+        "pool_size": 49,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=attacker,alsoCovers=7,pool=49,total=567",
+        "roles_filled": {
+          "free_attack": "skill_000476",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000481",
+          "mechanism_support": "skill_000610"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000476",
+            "name": "拆卸",
+            "category": "攻击",
+            "element": "机械系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000481",
+            "name": "齿轮切开",
+            "category": "攻击",
+            "element": "机械系",
+            "energy": 5,
+            "power": 130,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，本技能位于1号或3号位时能耗-2，传动1。",
+            "mechanisms": [
+              "damage",
+              "energy",
+              "position"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000610",
+            "name": "连续毒针",
+            "category": "攻击",
+            "element": "毒系",
+            "energy": 2,
+            "power": 15,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，2连击，每次连击使敌方获得1层中毒。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "status_dot"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "multi_hit",
+        "position",
+        "respond",
+        "shield",
+        "status_dot"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000118",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "皇家狮鹫",
+      "title": "皇家狮鹫（崖间地的样子）",
+      "game_id": 3129,
+      "number": "167",
+      "types": [
+        "翼系"
+      ],
+      "stats": {
+        "hp": 107,
+        "atk": 116,
+        "def": 127,
+        "spa": 69,
+        "spd": 65,
+        "spe": 120
+      },
+      "stat_total": 604,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "trait": {
+        "skill_id": "skill_000049",
+        "name": "乘风连击",
+        "desc": "使用翼系技能后，获得连击数+1。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_9d978eb3fa75",
+        "native": 13,
+        "blood": 18,
+        "stones": 17,
+        "pool_size": 48,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=attacker,alsoCovers=6,pool=48,total=604",
+        "roles_filled": {
+          "free_attack": "skill_000686",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000698",
+          "mechanism_support": "skill_000298"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000686",
+            "name": "啄击",
+            "category": "攻击",
+            "element": "翼系",
+            "energy": 0,
+            "power": 15,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，2连击。",
+            "mechanisms": [
+              "damage",
+              "multi_hit"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000698",
+            "name": "羽刃",
+            "category": "攻击",
+            "element": "翼系",
+            "energy": 2,
+            "power": 75,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：回合结束使敌方紧急脱离。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "escape"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000298",
+            "name": "复写",
+            "category": "状态",
+            "element": "普通系",
+            "energy": 0,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "每回合随机变成自己未携带的技能，且该技能能耗-2。",
+            "mechanisms": [
+              "energy",
+              "random"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "multi_hit",
+        "random",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000458",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "深渊蛙",
+      "title": "深渊蛙",
+      "game_id": 3593,
+      "number": "429",
+      "types": [
+        "水系",
+        "武系"
+      ],
+      "stats": {
+        "hp": 113,
+        "atk": 143,
+        "def": 116,
+        "spa": 60,
+        "spd": 87,
+        "spe": 110
+      },
+      "stat_total": 629,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "trait": {
+        "skill_id": "skill_000176",
+        "name": "王子的诺言",
+        "desc": "每回合各1次，获得增益时，同时获得全技能能耗-1，获得减益时，同时获得全技能能耗+1。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_4c696a240c8b",
+        "native": 13,
+        "blood": 18,
+        "stones": 14,
+        "pool_size": 45,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=attacker,alsoCovers=4,pool=45,total=629",
+        "roles_filled": {
+          "free_attack": "skill_000645",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000422",
+          "mechanism_support": "skill_000683"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000645",
+            "name": "蛰针",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000422",
+            "name": "水刃",
+            "category": "攻击",
+            "element": "水系",
+            "energy": 4,
+            "power": 115,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：本技能能耗永久-3。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000683",
+            "name": "马步",
+            "category": "状态",
+            "element": "武系",
+            "energy": 3,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%，获得物攻+150%。",
+            "mechanisms": [
+              "heal",
+              "stat_mod",
+              "priority"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "priority",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000556",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "棋契陛下",
+      "title": "棋契陛下（白棋棋骑士分支）",
+      "game_id": 5023,
+      "number": "189",
+      "types": [
+        "武系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 200,
+        "def": 140,
+        "spa": 91,
+        "spd": 115,
+        "spe": 125
+      },
+      "stat_total": 761,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "trait": {
+        "skill_id": "skill_000226",
+        "name": "御驾亲征",
+        "desc": "棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_7f6b65b94e2c",
+        "native": 18,
+        "blood": 18,
+        "stones": 20,
+        "pool_size": 56,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=attacker,alsoCovers=3,pool=56,total=761",
+        "roles_filled": {
+          "free_attack": "skill_000673",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000677",
+          "mechanism_support": "skill_000683"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000673",
+            "name": "气波",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000677",
+            "name": "影袭",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 3,
+            "power": 100,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000683",
+            "name": "马步",
+            "category": "状态",
+            "element": "武系",
+            "energy": 3,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%，获得物攻+150%。",
+            "mechanisms": [
+              "heal",
+              "stat_mod",
+              "priority"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "heal",
+        "priority",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000448",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "爆焰喷喷",
+      "title": "爆焰喷喷",
+      "game_id": 3573,
+      "number": "357",
+      "types": [
+        "火系",
+        "龙系"
+      ],
+      "stats": {
+        "hp": 112,
+        "atk": 127,
+        "def": 131,
+        "spa": 63,
+        "spd": 81,
+        "spe": 110
+      },
+      "stat_total": 624,
+      "release": {
+        "date": "2026-05-21",
+        "version": "1.0.1"
+      },
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "trait": {
+        "skill_id": "skill_000174",
+        "name": "大火球",
+        "desc": "自己使用2次不同的火系技能后，下次技能无需蓄力，随后特性重置。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_efd7db96df24",
+        "native": 13,
+        "blood": 18,
+        "stones": 13,
+        "pool_size": 44,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=attacker,alsoCovers=1,pool=44,total=624",
+        "roles_filled": {
+          "free_attack": "skill_000401",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000567",
+          "mechanism_support": "skill_000415"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000401",
+            "name": "炎息",
+            "category": "攻击",
+            "element": "火系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000567",
+            "name": "龙之利爪",
+            "category": "攻击",
+            "element": "龙系",
+            "energy": 3,
+            "power": 130,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "蓄力，造成物伤并吸血50%。",
+            "mechanisms": [
+              "damage",
+              "charge",
+              "heal"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000415",
+            "name": "焚尽",
+            "category": "状态",
+            "element": "火系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "驱散自己所有印记，每驱散1层，获得物攻+50%。巧变：火系攻击技能。",
+            "mechanisms": [
+              "mark",
+              "stat_mod"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "charge",
+        "damage",
+        "heal",
+        "mark",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000137",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "多多",
+      "title": "多多",
+      "game_id": 3151,
+      "number": "125",
+      "types": [
+        "毒系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 51,
+        "atk": 53,
+        "def": 80,
+        "spa": 53,
+        "spd": 44,
+        "spe": 54
+      },
+      "stat_total": 335,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "51-70",
+      "trait": {
+        "skill_id": "skill_000096",
+        "name": "毒牙",
+        "desc": "使敌方获得中毒时，也会使其获得物攻-40%和速度-40。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_55bcd174f525",
+        "native": 17,
+        "blood": 18,
+        "stones": 19,
+        "pool_size": 54,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=51-70,alsoCovers=6,pool=54,total=335",
+        "roles_filled": {
+          "free_attack": "skill_000725",
+          "reactive_defense": "skill_000626",
+          "main_attack": "skill_000612",
+          "mechanism_support": "skill_000591"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000725",
+            "name": "鞭打",
+            "category": "攻击",
+            "element": "萌系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000626",
+            "name": "不可接触",
+            "category": "防御",
+            "element": "毒系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤50%，敌方每有1层中毒效果，本技能减伤+10%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "status_dot"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000612",
+            "name": "毒液渗透",
+            "category": "攻击",
+            "element": "毒系",
+            "energy": 5,
+            "power": 120,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，敌方每有1层中毒效果，本技能能耗-1，敌方获得1层中毒。",
+            "mechanisms": [
+              "damage",
+              "energy",
+              "status_dot"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000591",
+            "name": "集中",
+            "category": "防御",
+            "element": "电系",
+            "energy": 2,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己回合结束返场。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "heal",
+              "escape"
+            ],
+            "learn_from": "blood",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "heal",
+        "respond",
+        "shield",
+        "status_dot"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000162",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "瑰眼仔",
+      "title": "瑰眼仔",
+      "game_id": 3183,
+      "number": "400",
+      "types": [
+        "恶系",
+        "虫系"
+      ],
+      "stats": {
+        "hp": 67,
+        "atk": 59,
+        "def": 59,
+        "spa": 60,
+        "spd": 71,
+        "spe": 57
+      },
+      "stat_total": 373,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "51-70",
+      "trait": {
+        "skill_id": "skill_000061",
+        "name": "瞳中倒影",
+        "desc": "自己或其他精灵离场时，自己与更换入场的精灵交换血量百分比。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_2b0e1c5639a5",
+        "native": 15,
+        "blood": 18,
+        "stones": 19,
+        "pool_size": 52,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=51-70,alsoCovers=4,pool=52,total=373",
+        "roles_filled": {
+          "free_attack": "skill_000632",
+          "reactive_defense": "skill_000644",
+          "main_attack": "skill_000788",
+          "mechanism_support": "skill_000793"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000632",
+            "name": "啃咬",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000644",
+            "name": "掩护",
+            "category": "防御",
+            "element": "虫系",
+            "energy": 2,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，紧急脱离，应对攻击：下个入场精灵获得减伤。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "escape"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000788",
+            "name": "骗局",
+            "category": "攻击",
+            "element": "恶系",
+            "energy": 4,
+            "power": 110,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，能量不足时，消耗5%生命代替1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000793",
+            "name": "伪造账单",
+            "category": "状态",
+            "element": "恶系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "若敌方本回合回复生命，改为失去2倍（含溢出的回复量）。先手+1。",
+            "mechanisms": [
+              "heal",
+              "priority"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "heal",
+        "multi_hit",
+        "priority",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000456",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "十字蝌蚪",
+      "title": "十字蝌蚪",
+      "game_id": 3591,
+      "number": "427",
+      "types": [
+        "水系"
+      ],
+      "stats": {
+        "hp": 68,
+        "atk": 86,
+        "def": 70,
+        "spa": 36,
+        "spd": 52,
+        "spe": 66
+      },
+      "stat_total": 378,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "51-70",
+      "trait": {
+        "skill_id": "skill_000176",
+        "name": "王子的诺言",
+        "desc": "每回合各1次，获得增益时，同时获得全技能能耗-1，获得减益时，同时获得全技能能耗+1。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_4c696a240c8b",
+        "native": 13,
+        "blood": 18,
+        "stones": 14,
+        "pool_size": 45,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=51-70,alsoCovers=3,pool=45,total=378",
+        "roles_filled": {
+          "free_attack": "skill_000645",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000422",
+          "mechanism_support": "skill_000683"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000645",
+            "name": "蛰针",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000422",
+            "name": "水刃",
+            "category": "攻击",
+            "element": "水系",
+            "energy": 4,
+            "power": 115,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，应对状态：本技能能耗永久-3。",
+            "mechanisms": [
+              "damage",
+              "respond",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000683",
+            "name": "马步",
+            "category": "状态",
+            "element": "武系",
+            "energy": 3,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%，获得物攻+150%。",
+            "mechanisms": [
+              "heal",
+              "stat_mod",
+              "priority"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "heal",
+        "priority",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000139",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "古啦多",
+      "title": "古啦多",
+      "game_id": 3153,
+      "number": "127",
+      "types": [
+        "毒系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 88,
+        "def": 134,
+        "spa": 88,
+        "spd": 74,
+        "spe": 90
+      },
+      "stat_total": 559,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000096",
+        "name": "毒牙",
+        "desc": "使敌方获得中毒时，也会使其获得物攻-40%和速度-40。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_55bcd174f525",
+        "native": 17,
+        "blood": 18,
+        "stones": 19,
+        "pool_size": 54,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:role=support,alsoCovers=4,pool=54,total=559",
+        "roles_filled": {
+          "free_attack": "skill_000725",
+          "reactive_defense": "skill_000626",
+          "main_attack": "skill_000612",
+          "mechanism_support": "skill_000591"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000725",
+            "name": "鞭打",
+            "category": "攻击",
+            "element": "萌系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000626",
+            "name": "不可接触",
+            "category": "防御",
+            "element": "毒系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤50%，敌方每有1层中毒效果，本技能减伤+10%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "status_dot"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000612",
+            "name": "毒液渗透",
+            "category": "攻击",
+            "element": "毒系",
+            "energy": 5,
+            "power": 120,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，敌方每有1层中毒效果，本技能能耗-1，敌方获得1层中毒。",
+            "mechanisms": [
+              "damage",
+              "energy",
+              "status_dot"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000591",
+            "name": "集中",
+            "category": "防御",
+            "element": "电系",
+            "energy": 2,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤80%，应对攻击：自己回合结束返场。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "heal",
+              "escape"
+            ],
+            "learn_from": "blood",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "heal",
+        "respond",
+        "shield",
+        "status_dot"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000163",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "耳翎瑰魅",
+      "title": "耳翎瑰魅",
+      "game_id": 3184,
+      "number": "401",
+      "types": [
+        "恶系",
+        "虫系"
+      ],
+      "stats": {
+        "hp": 89,
+        "atk": 78,
+        "def": 79,
+        "spa": 80,
+        "spd": 95,
+        "spe": 76
+      },
+      "stat_total": 497,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000061",
+        "name": "瞳中倒影",
+        "desc": "自己或其他精灵离场时，自己与更换入场的精灵交换血量百分比。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_2b0e1c5639a5",
+        "native": 15,
+        "blood": 18,
+        "stones": 19,
+        "pool_size": 52,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=71-90,alsoCovers=3,pool=52,total=497",
+        "roles_filled": {
+          "free_attack": "skill_000632",
+          "reactive_defense": "skill_000644",
+          "main_attack": "skill_000788",
+          "mechanism_support": "skill_000793"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000632",
+            "name": "啃咬",
+            "category": "攻击",
+            "element": "虫系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000644",
+            "name": "掩护",
+            "category": "防御",
+            "element": "虫系",
+            "energy": 2,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，紧急脱离，应对攻击：下个入场精灵获得减伤。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "escape"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000788",
+            "name": "骗局",
+            "category": "攻击",
+            "element": "恶系",
+            "energy": 4,
+            "power": 110,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，能量不足时，消耗5%生命代替1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000793",
+            "name": "伪造账单",
+            "category": "状态",
+            "element": "恶系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "若敌方本回合回复生命，改为失去2倍（含溢出的回复量）。先手+1。",
+            "mechanisms": [
+              "heal",
+              "priority"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "escape",
+        "heal",
+        "multi_hit",
+        "priority",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000100",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "仪式巨像",
+      "title": "仪式巨像",
+      "game_id": 3111,
+      "number": "115",
+      "types": [
+        "地系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 106,
+        "atk": 84,
+        "def": 115,
+        "spa": 89,
+        "spd": 119,
+        "spe": 85
+      },
+      "stat_total": 598,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000029",
+        "name": "观星",
+        "desc": "敌方每有1层星陨印记，自己的地系技能威力+20%。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_d4bd6711431e",
+        "native": 16,
+        "blood": 18,
+        "stones": 20,
+        "pool_size": 54,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "deficit:tier=71-90,alsoCovers=1,pool=54,total=598",
+        "roles_filled": {
+          "free_attack": "skill_000807",
+          "reactive_defense": "skill_000525",
+          "main_attack": "skill_000516",
+          "mechanism_support": "skill_000808"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000807",
+            "name": "偷师",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 0,
+            "power": 30,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，自己回复1能量。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000525",
+            "name": "不动如山",
+            "category": "防御",
+            "element": "地系",
+            "energy": 2,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤90%，应对攻击：自己获得物攻+50%。",
+            "mechanisms": [
+              "respond",
+              "shield",
+              "stat_mod"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000516",
+            "name": "陨石",
+            "category": "攻击",
+            "element": "地系",
+            "energy": 3,
+            "power": 100,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000808",
+            "name": "多维击打",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 4,
+            "power": 15,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "mark"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "mark",
+        "multi_hit",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000485",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "学院呱呱",
+      "title": "学院呱呱",
+      "game_id": 3620,
+      "number": "375",
+      "types": [
+        "武系"
+      ],
+      "stats": {
+        "hp": 132,
+        "atk": 99,
+        "def": 92,
+        "spa": 99,
+        "spd": 92,
+        "spe": 100
+      },
+      "stat_total": 614,
+      "release": {
+        "date": "2026-05-21",
+        "version": "1.0.1"
+      },
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "trait": {
+        "skill_id": "skill_000149",
+        "name": "留学生",
+        "desc": "自己全技能能耗+2，可以学习全部攻击技能石。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_edbc1d14f56b",
+        "native": 8,
+        "blood": 18,
+        "stones": 271,
+        "pool_size": 294,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "greedy:type=0,role=0,tier=0,newHardMech=0,newMech=0,pool=294,total=614",
+        "roles_filled": {
+          "free_attack": "skill_000302",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000673",
+          "mechanism_support": "skill_000567"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000302",
+            "name": "落星",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 0,
+            "power": 45,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000673",
+            "name": "气波",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000567",
+            "name": "龙之利爪",
+            "category": "攻击",
+            "element": "龙系",
+            "energy": 3,
+            "power": 130,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "蓄力，造成物伤并吸血50%。",
+            "mechanisms": [
+              "damage",
+              "charge",
+              "heal"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "charge",
+        "damage",
+        "heal",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000473",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "画间法师手",
+      "title": "画间法师手",
+      "game_id": 3608,
+      "number": "301",
+      "types": [
+        "普通系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 101,
+        "atk": 53,
+        "def": 94,
+        "spa": 131,
+        "spd": 120,
+        "spe": 120
+      },
+      "stat_total": 619,
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "trait": {
+        "skill_id": "skill_000140",
+        "name": "灰色肖像",
+        "desc": "攻击会使敌方已有的减益层数+3。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_a333037c2b72",
+        "native": 15,
+        "blood": 18,
+        "stones": 25,
+        "pool_size": 58,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "greedy:type=0,role=0,tier=0,newHardMech=0,newMech=0,pool=58,total=619",
+        "roles_filled": {
+          "free_attack": "skill_000673",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000248",
+          "mechanism_support": "skill_000808"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000673",
+            "name": "气波",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000248",
+            "name": "飞踢",
+            "category": "攻击",
+            "element": "普通系",
+            "energy": 3,
+            "power": 110,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "对敌方精灵造成物理伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000808",
+            "name": "多维击打",
+            "category": "攻击",
+            "element": "幻系",
+            "energy": 4,
+            "power": 15,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+            "mechanisms": [
+              "damage",
+              "multi_hit",
+              "mark"
+            ],
+            "learn_from": "stones",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "mark",
+        "multi_hit",
+        "respond",
+        "shield"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    },
+    {
+      "pet_id": "pet_000575",
+      "group": null,
+      "order": null,
+      "group_status": "not_assigned_by_m1_brief",
+      "name": "棋契陛下",
+      "title": "棋契陛下（白棋棋祈督分支）",
+      "game_id": 5042,
+      "number": "191",
+      "types": [
+        "武系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 126,
+        "atk": 147,
+        "def": 143,
+        "spa": 147,
+        "spd": 118,
+        "spe": 85
+      },
+      "stat_total": 766,
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "trait": {
+        "skill_id": "skill_000226",
+        "name": "御驾亲征",
+        "desc": "棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
+        "effect_support": "unsupported",
+        "engine_status": null,
+        "engine_hook": null,
+        "engine_reason": null
+      },
+      "learnset": {
+        "learnset_id": "learnset_3864e8954776",
+        "native": 17,
+        "blood": 18,
+        "stones": 21,
+        "pool_size": 56,
+        "orphan_skill_refs": []
+      },
+      "candidate_moveset": {
+        "note": "这 4 个技能由 48 只名单的选择规则选出（不是最优解、不是社区推荐、不是胜率结果）；本层只搬运，不重新选招。",
+        "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+        "rule_source": "reports/roco/coverage/roster-48.json#selection_rules.moveset_rule",
+        "selection_reason": "greedy:type=0,role=0,tier=0,newHardMech=0,newMech=0,pool=56,total=766",
+        "roles_filled": {
+          "free_attack": "skill_000673",
+          "reactive_defense": "skill_000286",
+          "main_attack": "skill_000519",
+          "mechanism_support": "skill_000483"
+        },
+        "skills": [
+          {
+            "slot": "free_attack",
+            "skill_id": "skill_000673",
+            "name": "气波",
+            "category": "攻击",
+            "element": "武系",
+            "energy": 0,
+            "power": 40,
+            "power_status": "static_value_present",
+            "damage_class": "魔攻",
+            "desc": "对敌方精灵造成魔法伤害。",
+            "mechanisms": [
+              "damage"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "reactive_defense",
+            "skill_id": "skill_000286",
+            "name": "防御",
+            "category": "防御",
+            "element": "普通系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "减伤70%，应对攻击。",
+            "mechanisms": [
+              "respond",
+              "shield"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "main_attack",
+            "skill_id": "skill_000519",
+            "name": "岩脉崩毁",
+            "category": "攻击",
+            "element": "地系",
+            "energy": 4,
+            "power": 120,
+            "power_status": "static_value_present",
+            "damage_class": "物攻",
+            "desc": "造成物伤，本技能能耗固定为4。",
+            "mechanisms": [
+              "damage",
+              "energy"
+            ],
+            "learn_from": "native",
+            "effect_support": "unsupported"
+          },
+          {
+            "slot": "mechanism_support",
+            "skill_id": "skill_000483",
+            "name": "啮合传递",
+            "category": "状态",
+            "element": "机械系",
+            "energy": 1,
+            "power": null,
+            "power_status": "not_provided_by_source",
+            "damage_class": null,
+            "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+            "mechanisms": [
+              "stat_mod",
+              "position"
+            ],
+            "learn_from": "blood",
+            "effect_support": "unsupported"
+          }
+        ],
+        "missing_roles": [],
+        "alternatives_considered": null,
+        "alternatives_note": "本层不生成替代项：替代项在审计产物里，按需去那里取，不在这里复算。"
+      },
+      "support": {
+        "current": "KNOWLEDGE_ONLY",
+        "reason": "能进 3v3、能进规划与复盘（配招与合法性由引擎校验），但技能 effect_support 仍全部是 unsupported、microcase 通过数为 0，因此**不**声称效果已核验。",
+        "target_next": "SIM_PARTIAL",
+        "target_note": "为所选 4 技能实现效果原语并通过 microcase 后升级；升级判据不在本层。"
+      },
+      "mechanisms_covered": [
+        "damage",
+        "energy",
+        "position",
+        "respond",
+        "shield",
+        "stat_mod"
+      ],
+      "blockers_before_simulation": [
+        "所有技能 effect_support = unsupported：效果原语未实现/未核验",
+        "新增 36 只的特性在引擎侧没有登记（engine-trait-status.json 只覆盖 M1 12 只）",
+        "等级→面板换算公式未知；官方伤害公式无来源"
+      ]
+    }
+  ]
+}

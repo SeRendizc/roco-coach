@@ -16,6 +16,15 @@ from typing import Any, Dict, FrozenSet, List, Optional, Tuple
 
 DEFAULT_RULESET = "roco-world-s4-2026-09-10"
 
+#: 叠加层目录名（相对规则集目录）。它是**同 schema** 的引擎输入，不是第四套格式：
+#: 里面同样是 `pets.json` / `learnsets.json` / `support-matrix.json` 三份，
+#: 只放基线没有的新增精灵。生成器见 `scripts/roco/build-roster-48-engine-inputs.mjs`。
+LAYER_DIRNAME = "layer-playable-48"
+LAYER_FILES = ("pets", "learnsets", "support-matrix")
+
+#: 规范配招的技能个数。3v3 的每个技能位都要有牌可打，少一个就 fail closed。
+MOVESET_SIZE = 4
+
 
 class RulesetError(RuntimeError):
     """规则集缺失或不一致。加载期就该炸，不要拖到对局中途。"""
@@ -76,6 +85,10 @@ class Pet:
     learnset_id: Optional[str]
     release_date: Optional[str]
     game_id: Optional[int]
+    #: 角色 / 速度档来自 48 只登记层（`roster-48.json` 的 **标注**，不是引擎数值）。
+    #: 基线宠物没有这两个字段时是 None——**不猜**，调用方自己决定能不能按它筛。
+    role: Optional[str] = None
+    speed_tier: Optional[str] = None
 
     @property
     def stat_total(self) -> int:
@@ -278,6 +291,45 @@ def _sha256(path: str) -> str:
     return h.hexdigest()
 
 
+def _layer_files(base: str) -> Dict[str, str]:
+    """叠加层里**真实存在**的契约文件（相对规则集目录）。
+
+    没有叠加层目录时返回空字典：基线单独也能加载（旧 fixture 不受影响）。
+    """
+    out: Dict[str, str] = {}
+    layer_dir = os.path.join(base, LAYER_DIRNAME)
+    if not os.path.isdir(layer_dir):
+        return out
+    for name in LAYER_FILES:
+        path = os.path.join(layer_dir, f"{name}.json")
+        if os.path.exists(path):
+            out[name] = path
+    return out
+
+
+def _merge_layer_collection(base_doc: Dict[str, Any], layer_doc: Optional[Dict[str, Any]],
+                            key: str, label: str) -> None:
+    """把叠加层的内层集合合并进基线。
+
+    **同一 id 在两层都出现即 fail closed**：叠加层只应包含基线没有的新增精灵，
+    两份副本一旦同时存在，就没人说得清哪一份才是这一局的数值。宁可加载期炸，
+    也不要静默取其中一份。
+    """
+    if not layer_doc:
+        return
+    incoming = layer_doc.get(key)
+    if not isinstance(incoming, dict) or not incoming:
+        raise RulesetError(f"{LAYER_DIRNAME}/{label} 缺少非空的 `{key}` 集合")
+    target = base_doc.setdefault(key, {})
+    dupes = sorted(set(target) & set(incoming))
+    if dupes:
+        raise RulesetError(
+            f"{LAYER_DIRNAME}/{label} 与基线重复定义 {len(dupes)} 个 id"
+            f"（叠加层只应包含新增条目）：" + "; ".join(dupes[:5])
+        )
+    target.update(incoming)
+
+
 def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) -> Ruleset:
     """从 normalized 数据加载规则集，并在加载期做一致性校验。"""
     base = os.path.join(root or _repo_root(), "data", "roco", "normalized", ruleset_id)
@@ -285,6 +337,25 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
     paths = {n: os.path.join(base, f"{n}.json") for n in names}
     raw = {k: _read_json(v) for k, v in paths.items()}
     files = {f"{k}.json": _sha256(v) for k, v in paths.items()}
+
+    # ── 叠加层：同 schema 的新增精灵（可玩池 = 基线 + 本层）─────────────────
+    # 为什么是叠加层而不是原地追加：基线三份文件是 M1 的验收基线（12 只、
+    # 有逐实体 provenance 与既有验收钉着），把「引擎候选池」与「M1 目标集」
+    # 挤进同一份文件会让两条不同的账互相污染。详见生成脚本的头注。
+    layer_paths = _layer_files(base)
+    layer = {name: _read_json(path) for name, path in layer_paths.items()}
+    for name, doc in sorted(layer.items()):
+        if doc.get("ruleset_id") != ruleset_id:
+            raise RulesetError(
+                f"{LAYER_DIRNAME}/{name}.json 的 ruleset_id 是 {doc.get('ruleset_id')}，期望 {ruleset_id}"
+            )
+        if doc.get("game") != "roco_world_mobile":
+            raise RulesetError(f"{LAYER_DIRNAME}/{name}.json 的 game 是 {doc.get('game')}，必须是手游")
+        if doc.get("layer") not in (None, LAYER_DIRNAME):
+            raise RulesetError(
+                f"{LAYER_DIRNAME}/{name}.json 的 layer 是 {doc.get('layer')}，期望 {LAYER_DIRNAME}"
+            )
+        files[f"{LAYER_DIRNAME}/{name}.json"] = _sha256(layer_paths[name])
 
     for name, doc in raw.items():
         if doc.get("ruleset_id") != ruleset_id:
@@ -294,6 +365,15 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
         if doc.get("game") != "roco_world_mobile":
             raise RulesetError(f"{name}.json 的 game 是 {doc.get('game')}，必须是手游")
     source_revision = raw["pets"].get("source_revision", "")
+
+    _merge_layer_collection(raw["pets"], layer.get("pets"), "pets", "pets.json")
+    _merge_layer_collection(raw["learnsets"], layer.get("learnsets"), "learnsets", "learnsets.json")
+    layer_roles: Dict[str, Any] = {}
+    if layer.get("pets"):
+        annotations = layer["pets"].get("role_annotations") or {}
+        if not isinstance(annotations, dict):
+            raise RulesetError(f"{LAYER_DIRNAME}/pets.json 的 role_annotations 必须是对象")
+        layer_roles = annotations
 
     skills: Dict[str, Skill] = {}
     for sid, s in raw["skills"]["skills"].items():
@@ -315,6 +395,7 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
     by_name: Dict[str, List[str]] = {}
     for pid, p in raw["pets"]["pets"].items():
         stats = {k: int(v) for k, v in (p.get("stats") or {}).items() if v is not None}
+        annotation = layer_roles.get(pid) or {}
         pets[pid] = Pet(
             pet_id=pid,
             name=p["name"],
@@ -325,6 +406,8 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
             learnset_id=p.get("learnset_id"),
             release_date=(p.get("release") or {}).get("date"),
             game_id=p.get("game_id"),
+            role=annotation.get("role"),
+            speed_tier=annotation.get("speed_tier"),
         )
         by_name.setdefault(p["name"], []).append(pid)
 
@@ -365,19 +448,60 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
         for k, v in raw["terms"]["terms"].items()
     }
 
-    # 候选配招：来自 M1 的 support-matrix（可选文件）。
+    # 候选配招：来自 M1 的 support-matrix（可选文件）+ 叠加层的同名字段。
     # 缺失时**不编**，只是没有规范配招，调用方需自己给。
     movesets: Dict[str, Tuple[str, ...]] = {}
+    matrix_sources: List[Tuple[str, Dict[str, Any]]] = []
     matrix_path = os.path.join(base, "support-matrix.json")
     if os.path.exists(matrix_path):
         with open(matrix_path, "r", encoding="utf-8") as fh:
-            matrix = json.load(fh)
+            matrix_sources.append(("support-matrix.json", json.load(fh)))
+        files["support-matrix.json"] = _sha256(matrix_path)
+    if layer.get("support-matrix"):
+        matrix_sources.append((f"{LAYER_DIRNAME}/support-matrix.json", layer["support-matrix"]))
+    for label, matrix in matrix_sources:
         for entry in matrix.get("pets", []):
             cm = entry.get("candidate_moveset") or {}
             ids = tuple(s["skill_id"] for s in (cm.get("skills") or []) if s.get("skill_id"))
-            if ids:
-                movesets[entry["pet_id"]] = ids
-        files["support-matrix.json"] = _sha256(matrix_path)
+            if not ids:
+                continue
+            pid = entry["pet_id"]
+            if pid in movesets:
+                raise RulesetError(
+                    f"候选配招重复定义：{pid}（{label}）——基线已有这一只，叠加层不许再定义一遍"
+                )
+            movesets[pid] = ids
+
+    # 加载期硬校验（§C6.8）：叠加之后**每只**都必须正好 4 个互不重复、
+    # 真实存在且**自己学得到**的技能。任何一个不满足就在加载期炸，
+    # 不许静默少人、不许把配招缩到 3 个、更不许删技能去凑数。
+    if movesets:
+        roster_problems: List[str] = []
+        for pid in sorted(pets):
+            ids = movesets.get(pid) or ()
+            if not ids:
+                roster_problems.append(f"{pid} 没有候选配招")
+                continue
+            if len(ids) != MOVESET_SIZE:
+                roster_problems.append(
+                    f"{pid} 的候选配招是 {len(ids)} 个技能（要求 {MOVESET_SIZE}）：{', '.join(ids)}"
+                )
+            if len(set(ids)) != len(ids):
+                roster_problems.append(f"{pid} 的候选配招有重复技能：{', '.join(ids)}")
+            ls = learnsets.get(pid)
+            if ls is None:
+                roster_problems.append(f"{pid} 没有学习表")
+                continue
+            for sid in ids:
+                if sid not in skills:
+                    roster_problems.append(f"{pid} 的候选配招技能 {sid} 不在 skills.json（孤儿引用）")
+                elif sid not in ls.all_skill_ids:
+                    roster_problems.append(f"{pid} 学不到候选配招技能 {sid}")
+        if roster_problems:
+            raise RulesetError(
+                f"候选配招校验失败 {len(roster_problems)} 项（fail closed，不静默跳过）："
+                + "; ".join(roster_problems[:8])
+            )
 
     return Ruleset(
         ruleset_id=ruleset_id,

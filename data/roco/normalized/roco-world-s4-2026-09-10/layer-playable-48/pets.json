@@ -1,0 +1,2136 @@
+{
+  "schema_version": 1,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "layer": "layer-playable-48",
+  "source_id": "wiki-rocom-snapshot",
+  "source_revision": "aff808eb60003457fe8a260d1ac3c9bd95d53872",
+  "generated_by": "scripts/roco/build-roster-48-engine-inputs.mjs",
+  "generated_from": {
+    "data/roco/normalized/<ruleset>/pets.json": "8ba09fd7a05e1d023a6add5e79a81408e7890606b3067da4d15662f7f48fcdb0",
+    "data/roco/normalized/<ruleset>/learnsets.json": "0a68366b6624f94efec43b6ee036152bbb37f84e396024f3e63fb868220f3052",
+    "data/roco/normalized/<ruleset>/support-matrix.json": "4cddb0cbeb262efca01b86aeda31ee2f30037822ef053e137036432dc2c32e74",
+    "data/roco/normalized/<ruleset>/skills.json": "9d01a6476a529be750973b4b3e8eb939112773f6a8b685e15e67516092e278e4",
+    "data/roco/normalized/<ruleset>/roster-48.json": "565377046e1329285205bedd343419cb6c3d80acf687dce635b979b3f622970b",
+    "reports/roco/coverage/roster-48.json": "acd0738a6c8dc2746e92339af5193485808dcd2f6f8915f59f1ac5bb8c23410b",
+    "tmp/roco-full-catalog.json": "17db01004724048972512f4866ddeadf993cd47074fc2d049d2d692444d7c065"
+  },
+  "claims": {
+    "is": [
+      "这 36 只可以进引擎候选池：有真名/真系别/真六维/真学招表/4 个有出处的技能"
+    ],
+    "is_not": [
+      "效果已核验",
+      "全量 622 只都能模拟",
+      "版本强势度",
+      "M1 的 A/B/C 分组"
+    ]
+  },
+  "merge_rule": "load_ruleset() 读基线三份 + 本层三份；同一 pet_id 在本层重复出现即 fail closed。本层只放基线没有的 36 只，48 = 12 基线 + 36 本层。",
+  "note": "同 schema 的引擎输入叠加层；基线三份文件逐字节未动。",
+  "pet_count": 36,
+  "pets": {
+    "pet_000484": {
+      "pet_id": "pet_000484",
+      "name": "迷迷箱怪",
+      "title": "迷迷箱怪",
+      "form": null,
+      "game_id": 3619,
+      "number": "211",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "机械系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 138,
+        "atk": 129,
+        "def": 153,
+        "spa": 129,
+        "spd": 153,
+        "spe": 80
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000133",
+      "learnset_id": "learnset_5ccca003e3ca",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000484\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000484\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000484\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000484\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000484\"].role"
+      }
+    },
+    "pet_000330": {
+      "pet_id": "pet_000330",
+      "name": "权杖-V",
+      "title": "权杖-V",
+      "form": null,
+      "game_id": 3411,
+      "number": "146",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "机械系"
+      ],
+      "stats": {
+        "hp": 103,
+        "atk": 105,
+        "def": 136,
+        "spa": 97,
+        "spd": 136,
+        "spe": 75
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000105",
+      "learnset_id": "learnset_da3187da31e6",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000330\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000330\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000330\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000330\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000330\"].role"
+      }
+    },
+    "pet_000167": {
+      "pet_id": "pet_000167",
+      "name": "电咩咩",
+      "title": "电咩咩",
+      "form": null,
+      "game_id": 3190,
+      "number": "066",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "电系"
+      ],
+      "stats": {
+        "hp": 47,
+        "atk": 49,
+        "def": 55,
+        "spa": 49,
+        "spd": 57,
+        "spe": 75
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000079",
+      "learnset_id": "learnset_fcebc7374ebe",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000167\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000167\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000167\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000167\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000167\"].role"
+      }
+    },
+    "pet_000172": {
+      "pet_id": "pet_000172",
+      "name": "闪电环",
+      "title": "闪电环",
+      "form": null,
+      "game_id": 3195,
+      "number": "207",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "电系"
+      ],
+      "stats": {
+        "hp": 64,
+        "atk": 49,
+        "def": 51,
+        "spa": 49,
+        "spd": 50,
+        "spe": 72
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000081",
+      "learnset_id": "learnset_61abf901ad63",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000172\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000172\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000172\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000172\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000172\"].role"
+      }
+    },
+    "pet_000219": {
+      "pet_id": "pet_000219",
+      "name": "獠牙猪",
+      "title": "獠牙猪",
+      "form": null,
+      "game_id": 3263,
+      "number": "138",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "冰系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 123,
+        "atk": 119,
+        "def": 110,
+        "spa": 41,
+        "spd": 101,
+        "spe": 85
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000042",
+      "learnset_id": "learnset_6ee3e37d8238",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000219\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000219\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000219\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000219\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000219\"].role"
+      }
+    },
+    "pet_000609": {
+      "pet_id": "pet_000609",
+      "name": "新月鹭",
+      "title": "新月鹭",
+      "form": null,
+      "game_id": 3764,
+      "number": "446",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "翼系",
+        "冰系"
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 59,
+        "def": 62,
+        "spa": 60,
+        "spd": 68,
+        "spe": 69
+      },
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "feature_skill_id": "skill_000198",
+      "learnset_id": "learnset_da630e35c0e9",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000609\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000609\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000609\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000609\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000609\"].role"
+      }
+    },
+    "pet_000243": {
+      "pet_id": "pet_000243",
+      "name": "卡卡虫",
+      "title": "卡卡虫（雪山附近的样子）",
+      "form": null,
+      "game_id": 3293,
+      "number": "045",
+      "class": "昆虫类精灵",
+      "stage": 2,
+      "types": [
+        "草系",
+        "冰系"
+      ],
+      "stats": {
+        "hp": 62,
+        "atk": 54,
+        "def": 64,
+        "spa": 11,
+        "spd": 58,
+        "spe": 108
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000007",
+      "learnset_id": "learnset_d8dd1381c0fa",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000243\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000243\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000243\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000243\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000243\"].role"
+      }
+    },
+    "pet_000218": {
+      "pet_id": "pet_000218",
+      "name": "呼呼猪",
+      "title": "呼呼猪",
+      "form": null,
+      "game_id": 3262,
+      "number": "137",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "冰系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 98,
+        "atk": 95,
+        "def": 88,
+        "spa": 33,
+        "spd": 81,
+        "spe": 68
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000042",
+      "learnset_id": "learnset_6ee3e37d8238",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000218\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000218\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000218\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000218\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000218\"].role"
+      }
+    },
+    "pet_000240": {
+      "pet_id": "pet_000240",
+      "name": "丢丢",
+      "title": "丢丢（雪山附近的样子）",
+      "form": null,
+      "game_id": 3290,
+      "number": "044",
+      "class": "昆虫类精灵",
+      "stage": 1,
+      "types": [
+        "草系",
+        "冰系"
+      ],
+      "stats": {
+        "hp": 46,
+        "atk": 41,
+        "def": 48,
+        "spa": 8,
+        "spd": 44,
+        "spe": 81
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000007",
+      "learnset_id": "learnset_d8dd1381c0fa",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000240\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000240\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000240\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000240\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000240\"].role"
+      }
+    },
+    "pet_000479": {
+      "pet_id": "pet_000479",
+      "name": "嗜光嗡嗡",
+      "title": "嗜光嗡嗡",
+      "form": null,
+      "game_id": 3614,
+      "number": "323",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "恶系",
+        "光系"
+      ],
+      "stats": {
+        "hp": 74,
+        "atk": 91,
+        "def": 57,
+        "spa": 91,
+        "spd": 100,
+        "spe": 92
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000148",
+      "learnset_id": "learnset_4e4be8347526",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000479\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000479\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000479\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000479\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000479\"].role"
+      }
+    },
+    "pet_000613": {
+      "pet_id": "pet_000613",
+      "name": "智辉章脑",
+      "title": "智辉章脑",
+      "form": null,
+      "game_id": 3768,
+      "number": "453",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "光系",
+        "水系"
+      ],
+      "stats": {
+        "hp": 112,
+        "atk": 53,
+        "def": 87,
+        "spa": 123,
+        "spd": 124,
+        "spe": 100
+      },
+      "release": {
+        "date": "2026-09-10",
+        "version": "1.1.1"
+      },
+      "feature_skill_id": "skill_000200",
+      "learnset_id": "learnset_1828f13f54f1",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000613\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000613\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000613\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000613\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000613\"].role"
+      }
+    },
+    "pet_000450": {
+      "pet_id": "pet_000450",
+      "name": "混乱鱿彩",
+      "title": "混乱鱿彩",
+      "form": null,
+      "game_id": 3578,
+      "number": "281",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "幽系",
+        "恶系"
+      ],
+      "stats": {
+        "hp": 129,
+        "atk": 122,
+        "def": 131,
+        "spa": 53,
+        "spd": 99,
+        "spe": 70
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000157",
+      "learnset_id": "learnset_95f11887ef71",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000450\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000450\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000450\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000450\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000450\"].role"
+      }
+    },
+    "pet_000248": {
+      "pet_id": "pet_000248",
+      "name": "蹦蹦种子",
+      "title": "蹦蹦种子（短毛球形态）",
+      "form": null,
+      "game_id": 3298,
+      "number": "063",
+      "class": "植物类精灵",
+      "stage": 1,
+      "types": [
+        "草系",
+        "毒系"
+      ],
+      "stats": {
+        "hp": 57,
+        "atk": 62,
+        "def": 48,
+        "spa": 66,
+        "spd": 67,
+        "spe": 48
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000005",
+      "learnset_id": "learnset_3085be4a15be",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000248\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000248\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000248\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000248\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000248\"].role"
+      }
+    },
+    "pet_000143": {
+      "pet_id": "pet_000143",
+      "name": "花魁蜂后",
+      "title": "花魁蜂后",
+      "form": null,
+      "game_id": 3157,
+      "number": "084",
+      "class": "昆虫类精灵",
+      "stage": 3,
+      "types": [
+        "虫系",
+        "翼系"
+      ],
+      "stats": {
+        "hp": 145,
+        "atk": 54,
+        "def": 45,
+        "spa": 49,
+        "spd": 45,
+        "spe": 44
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000053",
+      "learnset_id": "learnset_dc3ea63c96eb",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000143\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000143\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000143\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000143\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000143\"].role"
+      }
+    },
+    "pet_000308": {
+      "pet_id": "pet_000308",
+      "name": "深蓝鲸",
+      "title": "深蓝鲸",
+      "form": null,
+      "game_id": 3381,
+      "number": "273",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "水系"
+      ],
+      "stats": {
+        "hp": 137,
+        "atk": 44,
+        "def": 125,
+        "spa": 121,
+        "spd": 141,
+        "spe": 50
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000035",
+      "learnset_id": "learnset_fd37e278031c",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000308\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000308\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000308\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000308\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000308\"].role"
+      }
+    },
+    "pet_000548": {
+      "pet_id": "pet_000548",
+      "name": "女王蜂",
+      "title": "女王蜂",
+      "form": null,
+      "game_id": 5015,
+      "number": "084",
+      "class": "自然类精灵",
+      "stage": 4,
+      "types": [
+        "虫系",
+        "翼系"
+      ],
+      "stats": {
+        "hp": 145,
+        "atk": 50,
+        "def": 42,
+        "spa": 45,
+        "spd": 42,
+        "spe": 40
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000213",
+      "learnset_id": "learnset_8a31d96dbdde",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000548\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000548\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000548\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000548\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000548\"].role"
+      }
+    },
+    "pet_000152": {
+      "pet_id": "pet_000152",
+      "name": "雪蛮人",
+      "title": "雪蛮人",
+      "form": null,
+      "game_id": 3173,
+      "number": "135",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "冰系"
+      ],
+      "stats": {
+        "hp": 130,
+        "atk": 139,
+        "def": 111,
+        "spa": 63,
+        "spd": 83,
+        "spe": 48
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000041",
+      "learnset_id": "learnset_e96061379a46",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000152\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000152\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000152\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000152\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000152\"].role"
+      }
+    },
+    "pet_000012": {
+      "pet_id": "pet_000012",
+      "name": "铠甲虫",
+      "title": "铠甲虫",
+      "form": null,
+      "game_id": 3013,
+      "number": "284",
+      "class": "昆虫类精灵",
+      "stage": 2,
+      "types": [
+        "虫系"
+      ],
+      "stats": {
+        "hp": 132,
+        "atk": 95,
+        "def": 128,
+        "spa": 43,
+        "spd": 82,
+        "spe": 75
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000057",
+      "learnset_id": "learnset_b04b99dccb26",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000012\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000012\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000012\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000012\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000012\"].role"
+      }
+    },
+    "pet_000542": {
+      "pet_id": "pet_000542",
+      "name": "祭礼巨像",
+      "title": "祭礼巨像",
+      "form": null,
+      "game_id": 5009,
+      "number": "115",
+      "class": "岩石类精灵",
+      "stage": 4,
+      "types": [
+        "地系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 106,
+        "atk": 96,
+        "def": 115,
+        "spa": 101,
+        "spd": 119,
+        "spe": 85
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000218",
+      "learnset_id": "learnset_72b71d69627a",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000542\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000542\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000542\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000542\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000542\"].role"
+      }
+    },
+    "pet_000153": {
+      "pet_id": "pet_000153",
+      "name": "雪巨人",
+      "title": "雪巨人",
+      "form": null,
+      "game_id": 3174,
+      "number": "136",
+      "class": "自然类精灵",
+      "stage": 3,
+      "types": [
+        "冰系"
+      ],
+      "stats": {
+        "hp": 162,
+        "atk": 174,
+        "def": 139,
+        "spa": 79,
+        "spd": 104,
+        "spe": 60
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000041",
+      "learnset_id": "learnset_e96061379a46",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000153\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000153\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000153\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000153\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000153\"].role"
+      }
+    },
+    "pet_000545": {
+      "pet_id": "pet_000545",
+      "name": "千棘海针",
+      "title": "千棘海针",
+      "form": null,
+      "game_id": 5012,
+      "number": "078",
+      "class": "自然类精灵",
+      "stage": 4,
+      "types": [
+        "水系",
+        "毒系"
+      ],
+      "stats": {
+        "hp": 118,
+        "atk": 32,
+        "def": 94,
+        "spa": 85,
+        "spd": 133,
+        "spe": 100
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000229",
+      "learnset_id": "learnset_cdefb837d871",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000545\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000545\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000545\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000545\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000545\"].role"
+      }
+    },
+    "pet_000130": {
+      "pet_id": "pet_000130",
+      "name": "朔夜伊芙",
+      "title": "朔夜伊芙",
+      "form": null,
+      "game_id": 3144,
+      "number": "087",
+      "class": "漂浮类精灵",
+      "stage": 3,
+      "types": [
+        "恶系"
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 115,
+        "def": 104,
+        "spa": 105,
+        "spd": 85,
+        "spe": 115
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000062",
+      "learnset_id": "learnset_508c3189ccde",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000130\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000130\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000130\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000130\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000130\"].role"
+      }
+    },
+    "pet_000328": {
+      "pet_id": "pet_000328",
+      "name": "声波缇塔",
+      "title": "声波缇塔",
+      "form": null,
+      "game_id": 3407,
+      "number": "230",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "机械系"
+      ],
+      "stats": {
+        "hp": 92,
+        "atk": 124,
+        "def": 113,
+        "spa": 48,
+        "spd": 85,
+        "spe": 105
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000128",
+      "learnset_id": "learnset_87230f93064b",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000328\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000328\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000328\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000328\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000328\"].role"
+      }
+    },
+    "pet_000118": {
+      "pet_id": "pet_000118",
+      "name": "皇家狮鹫",
+      "title": "皇家狮鹫（崖间地的样子）",
+      "form": null,
+      "game_id": 3129,
+      "number": "167",
+      "class": "动物类精灵",
+      "stage": 3,
+      "types": [
+        "翼系"
+      ],
+      "stats": {
+        "hp": 107,
+        "atk": 116,
+        "def": 127,
+        "spa": 69,
+        "spd": 65,
+        "spe": 120
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000049",
+      "learnset_id": "learnset_9d978eb3fa75",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000118\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000118\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000118\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000118\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000118\"].role"
+      }
+    },
+    "pet_000458": {
+      "pet_id": "pet_000458",
+      "name": "深渊蛙",
+      "title": "深渊蛙",
+      "form": null,
+      "game_id": 3593,
+      "number": "429",
+      "class": "自然类精灵",
+      "stage": 3,
+      "types": [
+        "水系",
+        "武系"
+      ],
+      "stats": {
+        "hp": 113,
+        "atk": 143,
+        "def": 116,
+        "spa": 60,
+        "spd": 87,
+        "spe": 110
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000176",
+      "learnset_id": "learnset_4c696a240c8b",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000458\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000458\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000458\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000458\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000458\"].role"
+      }
+    },
+    "pet_000556": {
+      "pet_id": "pet_000556",
+      "name": "棋契陛下",
+      "title": "棋契陛下（白棋棋骑士分支）",
+      "form": null,
+      "game_id": 5023,
+      "number": "189",
+      "class": "自然类精灵",
+      "stage": 4,
+      "types": [
+        "武系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 200,
+        "def": 140,
+        "spa": 91,
+        "spd": 115,
+        "spe": 125
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000226",
+      "learnset_id": "learnset_7f6b65b94e2c",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000556\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000556\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000556\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000556\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000556\"].role"
+      }
+    },
+    "pet_000448": {
+      "pet_id": "pet_000448",
+      "name": "爆焰喷喷",
+      "title": "爆焰喷喷",
+      "form": null,
+      "game_id": 3573,
+      "number": "357",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "火系",
+        "龙系"
+      ],
+      "stats": {
+        "hp": 112,
+        "atk": 127,
+        "def": 131,
+        "spa": 63,
+        "spd": 81,
+        "spe": 110
+      },
+      "release": {
+        "date": "2026-05-21",
+        "version": "1.0.1"
+      },
+      "feature_skill_id": "skill_000174",
+      "learnset_id": "learnset_efd7db96df24",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000448\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000448\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000448\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000448\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000448\"].role"
+      }
+    },
+    "pet_000137": {
+      "pet_id": "pet_000137",
+      "name": "多多",
+      "title": "多多",
+      "form": null,
+      "game_id": 3151,
+      "number": "125",
+      "class": "植物类精灵",
+      "stage": 1,
+      "types": [
+        "毒系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 51,
+        "atk": 53,
+        "def": 80,
+        "spa": 53,
+        "spd": 44,
+        "spe": 54
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000096",
+      "learnset_id": "learnset_55bcd174f525",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000137\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000137\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000137\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000137\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000137\"].role"
+      }
+    },
+    "pet_000162": {
+      "pet_id": "pet_000162",
+      "name": "瑰眼仔",
+      "title": "瑰眼仔",
+      "form": null,
+      "game_id": 3183,
+      "number": "400",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "恶系",
+        "虫系"
+      ],
+      "stats": {
+        "hp": 67,
+        "atk": 59,
+        "def": 59,
+        "spa": 60,
+        "spd": 71,
+        "spe": 57
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000061",
+      "learnset_id": "learnset_2b0e1c5639a5",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000162\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000162\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000162\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000162\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000162\"].role"
+      }
+    },
+    "pet_000456": {
+      "pet_id": "pet_000456",
+      "name": "十字蝌蚪",
+      "title": "十字蝌蚪",
+      "form": null,
+      "game_id": 3591,
+      "number": "427",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "水系"
+      ],
+      "stats": {
+        "hp": 68,
+        "atk": 86,
+        "def": 70,
+        "spa": 36,
+        "spd": 52,
+        "spe": 66
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000176",
+      "learnset_id": "learnset_4c696a240c8b",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000456\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000456\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000456\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000456\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000456\"].role"
+      }
+    },
+    "pet_000139": {
+      "pet_id": "pet_000139",
+      "name": "古啦多",
+      "title": "古啦多",
+      "form": null,
+      "game_id": 3153,
+      "number": "127",
+      "class": "自然类精灵",
+      "stage": 3,
+      "types": [
+        "毒系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 88,
+        "def": 134,
+        "spa": 88,
+        "spd": 74,
+        "spe": 90
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000096",
+      "learnset_id": "learnset_55bcd174f525",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000139\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000139\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000139\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000139\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000139\"].role"
+      }
+    },
+    "pet_000163": {
+      "pet_id": "pet_000163",
+      "name": "耳翎瑰魅",
+      "title": "耳翎瑰魅",
+      "form": null,
+      "game_id": 3184,
+      "number": "401",
+      "class": "自然类精灵",
+      "stage": 2,
+      "types": [
+        "恶系",
+        "虫系"
+      ],
+      "stats": {
+        "hp": 89,
+        "atk": 78,
+        "def": 79,
+        "spa": 80,
+        "spd": 95,
+        "spe": 76
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000061",
+      "learnset_id": "learnset_2b0e1c5639a5",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000163\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000163\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000163\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000163\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000163\"].role"
+      }
+    },
+    "pet_000100": {
+      "pet_id": "pet_000100",
+      "name": "仪式巨像",
+      "title": "仪式巨像",
+      "form": null,
+      "game_id": 3111,
+      "number": "115",
+      "class": "岩石类精灵",
+      "stage": 3,
+      "types": [
+        "地系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 106,
+        "atk": 84,
+        "def": 115,
+        "spa": 89,
+        "spd": 119,
+        "spe": 85
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000029",
+      "learnset_id": "learnset_d4bd6711431e",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000100\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000100\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000100\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000100\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000100\"].role"
+      }
+    },
+    "pet_000485": {
+      "pet_id": "pet_000485",
+      "name": "学院呱呱",
+      "title": "学院呱呱",
+      "form": null,
+      "game_id": 3620,
+      "number": "375",
+      "class": "自然类精灵",
+      "stage": 1,
+      "types": [
+        "武系"
+      ],
+      "stats": {
+        "hp": 132,
+        "atk": 99,
+        "def": 92,
+        "spa": 99,
+        "spd": 92,
+        "spe": 100
+      },
+      "release": {
+        "date": "2026-05-21",
+        "version": "1.0.1"
+      },
+      "feature_skill_id": "skill_000149",
+      "learnset_id": "learnset_edbc1d14f56b",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000485\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000485\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000485\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000485\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000485\"].role"
+      }
+    },
+    "pet_000473": {
+      "pet_id": "pet_000473",
+      "name": "画间法师手",
+      "title": "画间法师手",
+      "form": null,
+      "game_id": 3608,
+      "number": "301",
+      "class": "自然类精灵",
+      "stage": 3,
+      "types": [
+        "普通系",
+        "幻系"
+      ],
+      "stats": {
+        "hp": 101,
+        "atk": 53,
+        "def": 94,
+        "spa": 131,
+        "spd": 120,
+        "spe": 120
+      },
+      "release": {
+        "date": "2026-03-26",
+        "version": "1.0.0"
+      },
+      "feature_skill_id": "skill_000140",
+      "learnset_id": "learnset_a333037c2b72",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000473\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000473\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000473\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000473\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000473\"].role"
+      }
+    },
+    "pet_000575": {
+      "pet_id": "pet_000575",
+      "name": "棋契陛下",
+      "title": "棋契陛下（白棋棋祈督分支）",
+      "form": null,
+      "game_id": 5042,
+      "number": "191",
+      "class": "自然类精灵",
+      "stage": 4,
+      "types": [
+        "武系",
+        "地系"
+      ],
+      "stats": {
+        "hp": 126,
+        "atk": 147,
+        "def": 143,
+        "spa": 147,
+        "spd": 118,
+        "spe": 85
+      },
+      "release": {
+        "date": "2026-07-16",
+        "version": "1.1.0"
+      },
+      "feature_skill_id": "skill_000226",
+      "learnset_id": "learnset_3864e8954776",
+      "target": null,
+      "target_status": "not_assigned_by_m1_brief",
+      "unknown_fields": [
+        "form",
+        "image",
+        "siblings",
+        "effect_verification"
+      ],
+      "refused": [
+        "R2/R3 快照与引擎里部分效果仍未核验或未实现：进战斗前必须过合法性与 fail-closed 登记",
+        "R4 特性只登记了名称与描述；效果是否被引擎实现要逐条核对（12 条已实现）"
+      ],
+      "orphan_skill_refs": [],
+      "source_fields": {
+        "identity": "tmp/roco-full-catalog.json#pets[\"pet_000575\"]",
+        "stats": "tmp/roco-full-catalog.json#pets[\"pet_000575\"].stats",
+        "types": "tmp/roco-full-catalog.json#pets[\"pet_000575\"].types",
+        "learnset_id": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000575\"].learnset_id",
+        "role": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[\"pet_000575\"].role"
+      }
+    }
+  },
+  "role_annotations": {
+    "pet_000062": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000112": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000124": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000190": {
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "91-110",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000225": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "51-70",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000417": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000445": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "51-70",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000451": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000474": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000601": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000608": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000611": {
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": ">=111",
+      "selection_reason": "must_include:M1 现有 12 只（已有候选配招与特性登记，证据链最短）",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000484": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:type=机械系,alsoCovers=22,pool=54,total=782",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000330": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:type=机械系,alsoCovers=18,pool=51,total=652",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000167": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:type=电系,alsoCovers=17,pool=50,total=332",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000172": {
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:type=电系,alsoCovers=15,pool=53,total=335",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000219": {
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:role=control,alsoCovers=14,pool=46,total=579",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000609": {
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "51-70",
+      "selection_reason": "deficit:role=control,alsoCovers=12,pool=49,total=368",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000243": {
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "selection_reason": "deficit:role=control,alsoCovers=11,pool=46,total=357",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000218": {
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "51-70",
+      "selection_reason": "deficit:role=control,alsoCovers=9,pool=46,total=463",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000240": {
+      "role": "control",
+      "role_rule": "技能池里「冻结/眩晕/禁足/沉默/封印/麻痹」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:role=control,alsoCovers=8,pool=46,total=268",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000479": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "selection_reason": "deficit:type=光系,alsoCovers=14,pool=54,total=505",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000613": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "selection_reason": "deficit:type=光系,alsoCovers=12,pool=44,total=599",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000450": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "51-70",
+      "selection_reason": "deficit:type=恶系,alsoCovers=12,pool=52,total=604",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000248": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "<=50",
+      "selection_reason": "deficit:tier=<=50,alsoCovers=11,pool=55,total=348",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000143": {
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "<=50",
+      "selection_reason": "deficit:tier=<=50,alsoCovers=9,pool=53,total=382",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000308": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "<=50",
+      "selection_reason": "deficit:tier=<=50,alsoCovers=8,pool=48,total=618",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000548": {
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "<=50",
+      "selection_reason": "deficit:tier=<=50,alsoCovers=6,pool=53,total=364",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000152": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "<=50",
+      "selection_reason": "deficit:tier=<=50,alsoCovers=4,pool=48,total=574",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000012": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:role=tank,alsoCovers=9,pool=48,total=555",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000542": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:role=tank,alsoCovers=7,pool=54,total=622",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000153": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "51-70",
+      "selection_reason": "deficit:role=tank,alsoCovers=6,pool=48,total=718",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000545": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "91-110",
+      "selection_reason": "deficit:role=tank,alsoCovers=5,pool=46,total=562",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000130": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "selection_reason": "deficit:role=attacker,alsoCovers=9,pool=51,total=624",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000328": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "selection_reason": "deficit:role=attacker,alsoCovers=7,pool=49,total=567",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000118": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "selection_reason": "deficit:role=attacker,alsoCovers=6,pool=48,total=604",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000458": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "selection_reason": "deficit:role=attacker,alsoCovers=4,pool=45,total=629",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000556": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "selection_reason": "deficit:role=attacker,alsoCovers=3,pool=56,total=761",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000448": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": "91-110",
+      "selection_reason": "deficit:role=attacker,alsoCovers=1,pool=44,total=624",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000137": {
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "51-70",
+      "selection_reason": "deficit:tier=51-70,alsoCovers=6,pool=54,total=335",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000162": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "51-70",
+      "selection_reason": "deficit:tier=51-70,alsoCovers=4,pool=52,total=373",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000456": {
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "51-70",
+      "selection_reason": "deficit:tier=51-70,alsoCovers=3,pool=45,total=378",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000139": {
+      "role": "support",
+      "role_rule": "技能池里「自己获得/敌方获得/驱散」类描述 ≥3 条",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:role=support,alsoCovers=4,pool=54,total=559",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000163": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:tier=71-90,alsoCovers=3,pool=52,total=497",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000100": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "selection_reason": "deficit:tier=71-90,alsoCovers=1,pool=54,total=598",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000485": {
+      "role": "recovery",
+      "role_rule": "技能池里「回复生命/吸血」类描述 ≥2 条",
+      "speed_tier": "91-110",
+      "selection_reason": "greedy:type=0,role=0,tier=0,newHardMech=0,newMech=0,pool=294,total=614",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000473": {
+      "role": "attacker",
+      "role_rule": "物攻或魔攻 ≥115 且 速度 ≥95（高速输出）",
+      "speed_tier": ">=111",
+      "selection_reason": "greedy:type=0,role=0,tier=0,newHardMech=0,newMech=0,pool=58,total=619",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    },
+    "pet_000575": {
+      "role": "tank",
+      "role_rule": "生命+物防+魔防 ≥340（承伤）",
+      "speed_tier": "71-90",
+      "selection_reason": "greedy:type=0,role=0,tier=0,newHardMech=0,newMech=0,pool=56,total=766",
+      "source": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "note": "角色/速度档来自 48 只登记层（选人规则见 reports/roco/coverage/roster-48.json#selection_rules）；它是**标注**，不是引擎数值。"
+    }
+  }
+}

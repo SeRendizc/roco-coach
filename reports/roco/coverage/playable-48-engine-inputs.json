@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/roco/build-roster-48-engine-inputs.mjs",
+  "command": "node scripts/roco/build-roster-48-engine-inputs.mjs",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "layer_dir": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+  "base_pets": 12,
+  "layer_pets": 36,
+  "total_pets": 48,
+  "role_annotations": 48,
+  "files": {
+    "pets.json": {
+      "bytes": 82540,
+      "sha256": "0557f9e94684e83595949497513a4a9e59011fb765f92cbf0cacceee11a67ef4"
+    },
+    "learnsets.json": {
+      "bytes": 220041,
+      "sha256": "939b586256fd45ef2bfa0ffea11e0d3c870bd462e0fd38ceb88e819a87c18cae"
+    },
+    "support-matrix.json": {
+      "bytes": 195439,
+      "sha256": "b9a58b7230dd75cba112fae6c181224b854f57eabf77324f8b4d184dbf8a526e"
+    }
+  },
+  "base_files_sha256": {
+    "pets.json": "8ba09fd7a05e1d023a6add5e79a81408e7890606b3067da4d15662f7f48fcdb0",
+    "learnsets.json": "0a68366b6624f94efec43b6ee036152bbb37f84e396024f3e63fb868220f3052",
+    "support-matrix.json": "4cddb0cbeb262efca01b86aeda31ee2f30037822ef053e137036432dc2c32e74"
+  },
+  "new_pet_ids": [
+    "pet_000484",
+    "pet_000330",
+    "pet_000167",
+    "pet_000172",
+    "pet_000219",
+    "pet_000609",
+    "pet_000243",
+    "pet_000218",
+    "pet_000240",
+    "pet_000479",
+    "pet_000613",
+    "pet_000450",
+    "pet_000248",
+    "pet_000143",
+    "pet_000308",
+    "pet_000548",
+    "pet_000152",
+    "pet_000012",
+    "pet_000542",
+    "pet_000153",
+    "pet_000545",
+    "pet_000130",
+    "pet_000328",
+    "pet_000118",
+    "pet_000458",
+    "pet_000556",
+    "pet_000448",
+    "pet_000137",
+    "pet_000162",
+    "pet_000456",
+    "pet_000139",
+    "pet_000163",
+    "pet_000100",
+    "pet_000485",
+    "pet_000473",
+    "pet_000575"
+  ],
+  "base_pet_ids": [
+    "pet_000225",
+    "pet_000190",
+    "pet_000445",
+    "pet_000417",
+    "pet_000112",
+    "pet_000062",
+    "pet_000474",
+    "pet_000451",
+    "pet_000124",
+    "pet_000608",
+    "pet_000601",
+    "pet_000611"
+  ]
+}
