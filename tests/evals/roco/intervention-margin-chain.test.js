@@ -14,62 +14,73 @@ import {createServer as createNetServer} from 'node:net';
 import {fileURLToPath} from 'node:url';
 import {dirname, join} from 'node:path';
 
-import {RocoClient, RULESET_ID} from '../../../src/coach/roco-client.js';
+import {createCoachServer} from '../../../src/server/index.js';
 import {rocoPlanFeatures, rocoIntervention} from '../../../src/coach/roco-experience.js';
 import {resetInterventionLayer} from '../../../src/coach/experience.js';
 import {cleanEnv} from '../../helpers/subprocess.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..', '..');
-const GENERATOR = join(ROOT, 'scripts', 'roco', 'gen-plan-state.py');
 const PYTHON_BIN = process.env.ROCO_PYTHON || 'python3';
-const PYTHON = RocoClient.probePython(PYTHON_BIN);
+const PYTHON = probePython(PYTHON_BIN);
 const SKIP = PYTHON.ok ? false : `python3 不可用（${PYTHON.error}）`;
 
-async function freePort() {
-  const probe = createNetServer();
-  probe.unref();
-  await new Promise((resolve, reject) => {
-    probe.once('error', reject);
-    probe.listen(0, '127.0.0.1', resolve);
-  });
-  const {port} = probe.address();
-  await new Promise((resolve) => probe.close(resolve));
-  return port;
+function probePython(bin) {
+  try {
+    execFileSync(bin, ['-c', 'import sys;print(sys.version_info[0])'], {encoding: 'utf8'});
+    return {ok: true};
+  } catch (error) {
+    return {ok: false, error: String(error.message).slice(0, 80)};
+  }
 }
 
-test('边际量必须从引擎经真桥到达判定层（命名或透传一旦断裂，这条会红）',
+test('边际量必须从引擎经**真实路由**到达判定层（第 39 轮：这条以前是假的）',
   {skip: SKIP}, async () => {
-    const state = JSON.parse(execFileSync(PYTHON_BIN, [GENERATOR, '7', '--turns', '3'], {
-      cwd: ROOT, encoding: 'utf8', maxBuffer: 8 * 1024 * 1024, env: cleanEnv(),
-    }));
-    const client = new RocoClient({port: await freePort(), rulesetId: RULESET_ID,
-      timeoutMs: 20000, startTimeoutMs: 30000});
+    // 为什么改成走真实路由：
+    //
+    // 上一版这条测试自己捏了一个 payload —— `first_second_margin: mean`（**标量**）。
+    // 而 `/api/roco/plan` 真的发的是对象 `{min,max,mean,scale,note}`，
+    // `rocoPlanFeatures` 里的 `Number.isFinite({...})` 因此是 false → `margin = null`
+    // → 判定层退回 sigmoid 兜底口径 → **页面上永远放行**。
+    // 也就是说：这条「端到端守卫」当时守的是一条**不存在的**链路，
+    // 它自己是绿的，而真实链路上这一层从来没生效过。
+    //
+    // 现在它只做一件事：把真实路由的返回值**原样**喂给判定层，断言 `decided_by`。
+    const server = createCoachServer({});
+    await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const base = `http://127.0.0.1:${server.address().port}`;
     try {
-      await client.startService();
-      const envelope = await client.planActions(state.public,
-        {stateVersion: state.state_version, depth: 2, beam: 4});
-      assert.equal(envelope.ok, true, `规划失败：${envelope.message || envelope.code}`);
-      // ① 引擎必须给这条量
-      assert.ok(envelope.result.first_second_margin,
-        '引擎回执必须带 first_second_margin（否则产品侧无法判断「这一手是不是真的两难」）');
-      const mean = envelope.result.first_second_margin.mean;
-      assert.equal(typeof mean, 'number');
+      const bootRes = await fetch(`${base}/api/bootstrap`);
+      const boot = await bootRes.json();
+      const cookie = bootRes.headers.get('set-cookie') || '';
+      const post = (path, data) => fetch(base + path, {method: 'POST', headers: {
+        Origin: base, Cookie: cookie, 'Content-Type': 'application/json', 'X-Coach-CSRF': boot.csrf},
+      body: JSON.stringify(data)}).then((r) => r.json());
 
-      // ② 页面拿到的 plan 形状（服务端由 Python 回执原样透传，用 snake_case）
-      const pagePlan = {ok: true, expected: envelope.result.expected,
-        recommendation_stable: envelope.result.recommendation_stable,
-        first_second_margin: mean};
-      const features = rocoPlanFeatures(pagePlan);
-      assert.equal(features.margin, mean,
-        'rocoPlanFeatures 必须认得页面这一侧的 snake_case 命名');
+      const started = await post('/api/roco/battle/new', {seed: 20260921});
+      assert.equal(started.ok, true, `开局失败：${started.error || ''}`);
+      const plan = await post('/api/roco/plan', {battle_id: started.battle_id, depth: 2, beam: 4});
+      assert.equal(plan.ok, true, `规划失败：${plan.error || ''}`);
 
-      // ③ 判定层必须**真的**用上它，而不是退回 sigmoid 口径
+      // ① 引擎给的形状必须被如实带出来（对象，不是标量）
+      assert.ok(plan.first_second_margin && typeof plan.first_second_margin === 'object',
+        '真实路由必须带 first_second_margin 对象（含 mean）');
+      assert.equal(typeof plan.first_second_margin.mean, 'number');
+      assert.equal(typeof plan.expected, 'object');
+      assert.equal(plan.first_second_margin.scale, 'one-ply-value');
+
+      // ② `rocoPlanFeatures` 必须把**这一个**数取出来（S1）
+      const features = rocoPlanFeatures(plan);
+      assert.equal(features.margin, plan.first_second_margin.mean,
+        'rocoPlanFeatures 必须认得引擎真的在发的对象形状；取不出来就是又一次「接上了但不生效」');
+
+      // ③ 判定层必须真的按边际量刻度判定，而不是退回 sigmoid（S2）
       const previous = process.env.ROCO_INTERVENTION_MODEL;
       process.env.ROCO_INTERVENTION_MODEL = 'on';
       resetInterventionLayer();
       try {
-        const view = {state_version: state.state_version, phase: 'battle', turn: 5, battle_result: null,
+        const view = {state_version: plan.state_version ?? started.view?.state_version ?? 0,
+          phase: 'battle', turn: 5, battle_result: null,
           self: {pets: [{pet_id: 'a', name: 'A', hp: 110, max_hp: 120, energy: 3}]},
           opponent: {field: {pet_id: 'b', name: 'B', hp: 100, max_hp: 120, energy: 2}, bench: []},
           legal: [{kind: 'skill', skill_id: 's1'}]};
@@ -77,10 +88,10 @@ test('边际量必须从引擎经真桥到达判定层（命名或透传一旦�
           view,
           session: {hints: 0, lastAt: -Infinity, dismissed: false, said: new Set(),
             readings: new Set(), topics: new Set(), limit: 3},
-          plan: pagePlan, host: {focus: true, preference: 'gentle'}, now: 1000});
+          plan, host: {focus: true, preference: 'gentle'}, now: 1000});
         assert.equal(detail.layer.decided_by, 'margin-quantile',
           '判定层必须用边际量刻度判定；退回 sigmoid 就说明这条量在中途丢了');
-        assert.equal(detail.layer.margin, mean);
+        assert.equal(detail.layer.margin, plan.first_second_margin.mean);
         assert.ok(Number.isFinite(detail.layer.margin_threshold));
       } finally {
         if (previous === undefined) delete process.env.ROCO_INTERVENTION_MODEL;
@@ -88,7 +99,8 @@ test('边际量必须从引擎经真桥到达判定层（命名或透传一旦�
         resetInterventionLayer();
       }
     } finally {
-      await client.stopService().catch(() => {});
+      server.closeAllConnections?.();
+      server.close();
     }
   });
 

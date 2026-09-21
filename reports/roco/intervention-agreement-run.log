@@ -1,0 +1,74 @@
+{
+ "summary": {
+  "windows": 240,
+  "scored": 192,
+  "margin_vs_threshold": {
+   "at_or_above_threshold": 86,
+   "below_threshold": 106
+  },
+  "carried": {
+   "n": 192,
+   "rule_speaks": 24,
+   "layer_speaks": 24,
+   "rule_blocked_by_gate": 0
+  },
+  "gap": {
+   "n": 192,
+   "min": 0,
+   "median": 0,
+   "p95": 0,
+   "max": 0,
+   "above_reasonable_gap_5": 0,
+   "all_zero": true
+  },
+  "margin": {
+   "n": 192,
+   "min": 0.0238,
+   "median": 0.10000000000000002,
+   "p95": 0.8953000000000001,
+   "max": 0.8953
+  },
+  "decisive": {
+   "by_gap": 0,
+   "by_risk": 20,
+   "any": 20
+  },
+  "layer": {
+   "decided_by": {
+    "margin-quantile": 192
+   },
+   "suppressed": 106
+  },
+  "matrix": {
+   "rule_speaks_layer_suppresses": 54,
+   "rule_speaks_layer_allows": 24,
+   "rule_silent_layer_suppresses": 52,
+   "rule_silent_layer_allows": 62
+  },
+  "disagreement_by_hp_band": {
+   ">0.6": {
+    "total": 114,
+    "rule_speaks": 0,
+    "layer_suppresses": 52,
+    "disagree": 0
+   },
+   "0.35—0.6": {
+    "total": 58,
+    "rule_speaks": 58,
+    "layer_suppresses": 44,
+    "disagree": 44
+   },
+   "≤0.35": {
+    "total": 20,
+    "rule_speaks": 20,
+    "layer_suppresses": 10,
+    "disagree": 10
+   }
+  },
+  "only_suppresses_violations": 0,
+  "only_suppresses_examples": [],
+  "gated_windows": 0,
+  "gated_windows_spoken": 0
+ },
+ "written_to": "/Users/serendizc/Developer/roco-coach/reports/roco/intervention-agreement.json"
+}

@@ -20,6 +20,7 @@ import {
   rocoPlanFeatures,
   rocoGameView,
   rocoDamagePreviewText,
+  expectedLine,
   ROCO_MODE,
 } from '../coach/roco-experience.js';
 import {companionFacts, decideRegister, intentOf, chatReply, REGISTERS} from '../coach/companion.js';
@@ -212,7 +213,7 @@ function refreshHint({reason = 'turn', plan = state.plan} = {}) {
     : '';
   $('hint-body').innerHTML = plan?.ok
     ? `${preview ? `<p><strong>${preview}</strong></p>` : ''}
-       <p>期望区间：${plan.expected ? `${plan.expected.min.toFixed(2)} ~ ${plan.expected.max.toFixed(2)}（均值 ${plan.expected.mean.toFixed(2)}）` : '——'}</p>
+       <p>${expectedLine(plan)}</p>
        <p>搜索：${plan.branches_evaluated ?? '—'} 个分支 · 深度 ${plan.depth_searched ?? '—'} · 分析种子 ${(plan.analysis_seeds ?? []).join('/')}</p>
        <p>对手应对：${plan.main_counter ?? '引擎没给出'}（是启发式建模，不是真人行为）</p>
        ${riskLine}

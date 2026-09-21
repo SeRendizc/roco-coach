@@ -88,8 +88,50 @@ export function rocoGameView(view, {matchId = null} = {}) {
  * 说明这一手越依赖随机性，越不值得用一句短提示把玩家钉住。这里**不**用 worst 的绝对值，
  * 因为那是估值函数的口径（负数很常见），拿它当「分差」会系统性误判。
  *
+ * ⚠️ **第 39 轮实测：手游引擎上 `gap` 恒为 0。**
+ * 服务端把 `expected` 聚合成 `{min,max,mean}` 是靠跑三个分析种子
+ * （`service.py` 里的 `for sv in raw_seeds`），但 `plan_actions` 在重建出来的分析状态上
+ * 是**确定性**的：192 个运行时窗口 × 3 个种子，`expected` 逐位相同 → `gap ≡ 0`。
+ * 后果不是「很少触发」，而是**结构上不可能触发**：
+ *   · `interventionScore` 的 `decisive-gap` 分支在这条链上是**死代码**；
+ *   · `value = 3*risk + 1.2*min(gap/5, 1)` 的第二项恒为 0；
+ *   · 于是规则在手游侧**只按血量档位说话**（`speaks ⟺ risk >= 0.4 ⟺ hp_ratio <= 0.6`）。
+ * 「规则用规划器分差判断」这句话在手游侧不成立，任何据此写下的结论都要重读。
+ * 这一条由 `tests/evals/roco/intervention-agreement.test.js` 用**真服务**钉住，
+ * 免得它哪天变回非零而没人知道；页面上的「期望区间」也据此改成按真实形状说话
+ * （见本文件的 `expectedLine`，页面直接 import 它）。
+ *
  * 返回的对象可以直接喂给 `interventionFeatures(...)`（它再补 game/risk/timeLeft）。
  */
+/**
+ * 从 plan 里取出「枚举第一与第二的估值差」这一个数。
+ *
+ * **它有三种形状，而且第三种是真实 bridge 用的那一种**（第 39 轮实测）：
+ *   1. 标量，camelCase `firstSecondMargin` —— 工具回执（`toolbox.js` 给模型看的那份）；
+ *   2. 标量，snake_case `first_second_margin` —— 早期假设的页面形状；
+ *   3. 对象 `{min, max, mean, scale, note}`，snake_case —— **`/api/roco/plan` 真的发的是这个**
+ *      （服务端把三个分析种子的结果聚合成区间）。
+ *
+ * 只认前两种的后果不是报错，而是 `Number.isFinite({...}) === false` →
+ * `margin = null` → 判定层退回 sigmoid 兜底口径 → **页面上永远放行**。
+ * 这就是第 21、30 轮之后同一形状问题的第三次复现，而第 30 轮那条端到端守卫
+ * 之所以没抓住，是因为它自己捏了一个标量 `first_second_margin: mean` 喂进来。
+ *
+ * 取 `mean` 的理由：训练侧（`build-roco-intervention-windows.py`）用的是
+ * **单次** `plan_actions` 的标量，三个种子的均值是与它同量纲、同尺度的聚合；
+ * 阈值 `decision_margin_threshold = 0.146532` 是在那把尺子上标定的。
+ * 区间本身宽不宽由 `recommendation_stable` 另行表达（不稳定时 `skill` 记 0）。
+ */
+export function firstSecondMarginOf(plan) {
+  if (!plan) return null;
+  const candidates = [plan.firstSecondMargin, plan.first_second_margin];
+  for (const value of candidates) {
+    if (Number.isFinite(value)) return value;
+    if (value && typeof value === 'object' && Number.isFinite(value.mean)) return value.mean;
+  }
+  return null;
+}
+
 export function rocoPlanFeatures(plan) {
   if (!plan || plan.ok !== true) return {gap: null, skill: null, timedOut: null, margin: null};
   // 枚举第一与第二名的估值差。**两种写法都认**，因为同一个量在两个边界上的命名不同：
@@ -99,9 +141,7 @@ export function rocoPlanFeatures(plan) {
   // 只认一种的后果不是报错，而是**安静地拿到 null**：判定层退回 sigmoid 口径，
   // 运行时永远放行——「接上了但不生效」这类问题在第 21 与第 30 轮各出现过一次，
   // 两次都是同一条量在搬运中换了名字。
-  const rawMargin = Number.isFinite(plan.firstSecondMargin) ? plan.firstSecondMargin
-    : (Number.isFinite(plan.first_second_margin) ? plan.first_second_margin : null);
-  const margin = rawMargin;
+  const margin = firstSecondMarginOf(plan);
   const expected = plan.expected;
   const gap = expected && Number.isFinite(expected.min) && Number.isFinite(expected.max)
     ? Math.max(0, expected.max - expected.min)
@@ -251,4 +291,28 @@ export function rocoInterventionText(detail, plan) {
   const hint = rocoHintText(plan);
   if (!hint) return {text: '先看局面：对手场上的血条与能量都是公开的，按它来选。', why: detail.reason};
   return {text: hint, why: detail.reason};
+}
+
+/**
+ * 「期望」那一行怎么写。
+ *
+ * 第 39 轮实测：手游引擎上三个分析种子给出的 `expected` **完全相同**
+ * （`gap = expected.max - expected.min` 在所有量过的窗口里恒为 0），
+ * 因为 `plan_actions` 在重建出来的分析状态上是确定性的。
+ * 所以原来那句「期望区间：0.58 ~ 0.58（均值 0.58）」是把一个**点估计**写成区间
+ * ——标签承诺了一个它没有的东西。这里按真实形状说话：
+ *   · 区间真的有宽度 → 写区间；
+ *   · 三个种子一致 → 写「估计 X（三个分析种子一致）」，不假装有区间。
+ * 两种都注明「不是胜率、不是置信区间」。
+ */
+export function expectedLine(plan) {
+  const expected = plan?.expected;
+  if (!expected || !Number.isFinite(expected.min) || !Number.isFinite(expected.max)) {
+    return '期望值：——（引擎没给出）';
+  }
+  const width = expected.max - expected.min;
+  if (width <= 1e-9) {
+    return `期望估计：${expected.mean.toFixed(2)}（三个分析种子给出同一个值，所以这里没有区间可报）`;
+  }
+  return `期望区间：${expected.min.toFixed(2)} ~ ${expected.max.toFixed(2)}（均值 ${expected.mean.toFixed(2)}）`;
 }
