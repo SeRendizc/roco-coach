@@ -1201,3 +1201,41 @@ seed=5 strategy=greedy_damage team=[pet_000112+pet_000611+pet_000124] enemy=[（
 UI 落地可以先做**最小一步**——把 48 只池的搜索/筛选/分页接上（接口已就绪：
 `/api/roco/roster?limit&offset&type&role`，不传参数保持旧形状），再逐页替换版式。
 
+
+### C6.13 冻结中的 GO 交接（模型臂回执重录；适配线完成后执行）
+
+**背景**：48 只扩池让 `query_rules{kind:ruleset}` 回执 `bytes/digest` 变了，轨迹里的回执过期。
+规则臂已重录并提交；**模型臂已重录但尚未提交**（冻结等待，避免与适配线在制品相撞）。
+
+**待提交（就这两个，逐路径 add）**：
+| 文件 | 变化 | sha256 |
+|---|---|---|
+| `tests/evals/agent-trajectories-model-v1.jsonl` | 1752 行不变；仅 **108 行** `.trace[0].receipt.{bytes,digest}` 变（tool/args/chosen_by 零变化） | `8f92cdf3605331c4e8166cea593e7b01ce6dc42f77fabad3c713a7859ef52fa0` |
+| `tests/evals/roco/model-error-trajectories-v4.jsonl` | 135/135 条逐条相同；仅 header `source_sha256` `9c2625e1…` → `8f92cdf3…` | `9da643f207381d8ca6c3259f220c0773969f818177ff9c66981e9038e388fc5b` |
+
+**已独立复核（主线程亲手跑）**：`verify-agent-trajectories --trajectories tests/evals/agent-trajectories-model-v1.jsonl --quiet` → **rc=0**；
+`prompt_digest = a5cb0fbcc53f…`、adapter sha256 `362cc020…` 均未变；4 个相关测试 **25/25 rc=0**，
+其中「两条独立代码路径在 **288 个共同窗口**逐条判定一致（0 unmatched / 0 mismatched）」证明重录没改变任何 pass/fail、也没换窗口。
+
+**为什么现在不跑 gate（必须遵守）**：适配契约线（`4488f46a`）正在写 `src/coach/**`（含
+`intervention-model.js`）、`src/client/roco.js`、`package.json`；而 `verify-release` 里的
+**`guard-selftest` 会改写并恢复 `src/coach/intervention-model.js`**（`guard-selftest.mjs:40,55`）——
+带冲突跑会①把对方在制品混进 verdict，②恢复注入时**静默覆盖对方的编辑**（`ff81037` 那类事故）。
+
+**GO 前置条件与顺序**（适配线报告完成并停止写盘后执行）：
+1. 确认树安静（记 sha 基线，跑完用 sha 变化判定"本次产物"，不靠眼看）；
+2. `node scripts/roco/verify-release.mjs` **串行**、`> /tmp/gate.log 2>&1; rc=$?`（**不许用管道吞退出码**）；
+3. **两盏灯都绿**且 `reports/roco/verification/last-green.json` 的 `head == 当前 HEAD`；
+4. 逐路径 `git add`（上面两个文件 + 内容确实变化了的本次产物：`verification/{latest,last-green}.json`、
+   `agent-trajectories-verification{,-model}.json`、`acceptance/browser-acceptance.json`、`reports/roco/ui-*.png`）
+   → commit（信息里写"模型臂回执重录 + gate 14/14 全绿"并附 last-green 的 HEAD）→ `git push`；
+5. **任一条件不满足就停下**，把失败原文交回来；**绝不带冲突跑 gate、绝不未绿先提交/推送**。
+**绝不 add**：`package.json`、`src/client/**`、`src/coach/{experience,intervention-model,roco-experience}.js`
+与适配线新增的未跟踪路径（`docs/roco/GAME-ADAPTER.md`、`src/coach/{game-adapter,compare-model}.js`、
+`tests/evals/roco/{game-adapter.test.js,mock-host-integration.test.js,mock-host/}`、
+`scripts/roco/{browser-adapter-acceptance,measure-adapter-load}.mjs`、`reports/roco/{adapter-acceptance,adapter-load}/`）。
+
+**一条必须记住的教训（活例子）**：HEAD 里那份 `agent-trajectories-verification-model.json`
+声称 replay **1752/1752**，而它对应的 jsonl 现在回放只有 **1644/1752**——说明那份报告早于
+48 只那批引擎改动生成、此后没人重新生成。**静态看产物看不出来，只有重跑才算证据。**
+
