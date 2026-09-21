@@ -215,6 +215,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--budget-ms", type=int, default=1500)
     parser.add_argument("--compare", action="store_true",
                         help="同时量 immediate_greedy（朴素基线）作为对照")
+    parser.add_argument("--out", default=None,
+                        help="输出路径；默认写入库的 reports/roco/…。测试用临时路径，避免把入库的完整报告覆盖成小样本")
     parser.add_argument("--limit", type=int, default=0, help="只跑前 N 个局面（自检）")
     args = parser.parse_args(argv)
 
@@ -267,8 +269,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             "note": "两侧局面集合必须相同；top1 是配对比例，不是两个独立样本",
         }
 
-    os.makedirs(os.path.join(_ROOT, os.path.dirname(OUT_JSON)), exist_ok=True)
-    with open(os.path.join(_ROOT, OUT_JSON), "w", encoding="utf-8") as fh:
+    # `--out` 只给测试用（临时路径）。入库那份是**完整样本**，
+    # 不能被一次 `--positions 6` 的自检覆盖成小样本——第 11 轮就这么丢过一次。
+    target = args.out or os.path.join(_ROOT, OUT_JSON)
+    if not os.path.isabs(target):
+        target = os.path.join(_ROOT, target)
+    os.makedirs(os.path.dirname(target), exist_ok=True)
+    with open(target, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=2)
     run_path = os.path.join(_ROOT, os.path.dirname(OUT_JSON), "planner-benchmark-run.json")
     with open(run_path, "w", encoding="utf-8") as fh:

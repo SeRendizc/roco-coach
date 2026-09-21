@@ -42,6 +42,7 @@ const state = {
   // ── 阵容选择（P0-3）──────────────────────────────────────────────
   roster: [],          // 12 只真实精灵（来自 /api/roco/roster）
   pick: {player: [], enemy: [], side: 'player'},
+  seedOverride: null,  // 只给验收脚本换局用；界面上没有这个开关
 };
 
 const MEMORY_KEY = 'roco-coach-memory-v1';
@@ -142,6 +143,36 @@ function petCard(pet) {
     <div class="pet-stats"><span>生命 ${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span><span>能量 ${pet.energy ?? '—'}</span>${statuses ? `<span>异常 ${statuses}</span>` : ''}</div>
     ${stats ? `<div class="pet-more">${stats}</div>` : ''}
   </div>`;
+}
+
+//: 建议层 `evidence` 里那些键的中文名。
+//:
+//: **键名本身不进玩家句子**，只用于展开区，让人能核对「这句话是按哪些公开事实说的」。
+//: 这份表是照着 `coach-advice.js` 实际产出的键写的（第 43 轮把它跑了一整局，
+//: 把出现的键全收下来再填），不是照着想象写的——第一版填的是 `foe_hp`/`my_hp` 这种
+//: 不存在的键，展开区因此显示成 `fainted 寂灭骨龙 · bench [object Object]`。
+const ADVICE_FACT_LABEL = {
+  active: '我方场上', fainted: '已倒下', bench: '后备', pick: '建议换上',
+  pickHp: '换上后血量', pickMaxHp: '换上后血量上限',
+  foe: '对手场上', foeHp: '对手血量', foeMaxHp: '对手血量上限', foeRatio: '对手血量比例',
+  myHp: '我方血量', myMaxHp: '我方血量上限', ratio: '我方血量比例',
+  move: '技能', element: '技能系别', multiplier: '属性倍率', damage: '估算伤害',
+  foeSpe: '对手速度', mySpe: '我方速度', foeActsFirst: '对手先手', defendLegal: '可防御',
+  energy: '当前能量', needEnergy: '需要能量', status: '异常',
+  estimate: '估算伤害', formulaVerified: '伤害公式已核验', seeds: '分析种子数',
+};
+
+/** 证据值的**安全**显示：数组里的对象也摊平成人能读的一行，不出现 [object Object]。 */
+function factValue(value) {
+  if (value === null || value === undefined) return '—';
+  if (typeof value === 'boolean') return value ? '是' : '否';
+  if (Array.isArray(value)) {
+    return value.map((item) => (item && typeof item === 'object'
+      ? [item.name, item.hp !== undefined ? `${item.hp}/${item.maxHp}` : null].filter(Boolean).join(' ')
+      : String(item))).join('、');
+  }
+  if (typeof value === 'object') return Object.entries(value).map(([k, v]) => `${k} ${v}`).join(' ');
+  return String(value);
 }
 
 //: 异常状态的中文名（与引擎侧 `events_text._STATUS` 同源口径；这里只做显示）。
@@ -284,14 +315,23 @@ function refreshHint({reason = 'turn', plan = state.plan} = {}) {
   state.hint = {...text, stateVersion: view.state_version, action: detail.action, plan, reason};
   $('hint-text').textContent = text.text;
   $('hint-why').textContent = `依据：${text.why}`;
+  // **说过的不再说**（数字不同也算同一句）。建议层用归一化形状判重，
+  // 这里把形状记下来；不记的话同一句会在每个回合反复出现——那正是玩家抱怨的毛病。
+  if (text.shape && state.session.said) state.session.said.add(text.shape);
+  // 建议层给的**可核对证据**（用了哪些公开事实）单独列出来，工程术语只到这里为止。
+  if (text.evidence) state.lastAdviceEvidence = text.evidence;
   // 「展开取舍」的内容分两档，但**只要规划跑过就给出可核对的数字**：
   // 让人能查到「这句话是算出来的，不是随口说的」。没跑过规划就如实说没有。
   const preview = rocoDamagePreviewText(plan);
   const riskLine = plan?.risk
     ? `<p>风险：期望到最坏差 ${plan.risk.downside_max ?? '—'}${plan.risk.fragile ? '（**这一手不稳**）' : ''}${plan.risk.top_risks?.length ? ` · 最差的对手选择是「${plan.risk.top_risks[0].opponent_action}」` : ''}</p>`
     : '';
+  const adviceEvidence = state.lastAdviceEvidence
+    ? `<p class="muted">这条建议用了这些公开事实：${Object.entries(state.lastAdviceEvidence)
+        .map(([k, v]) => `${ADVICE_FACT_LABEL[k] ?? k} ${factValue(v)}`).join(' · ')}</p>`
+    : '';
   $('hint-body').innerHTML = plan?.ok
-    ? `${preview ? `<p><strong>${preview}</strong></p>` : ''}
+    ? `${adviceEvidence}${preview ? `<p><strong>${preview}</strong></p>` : ''}
        <p>${expectedLine(plan)}</p>
        <p>搜索：${plan.branches_evaluated ?? '—'} 个分支 · 深度 ${plan.depth_searched ?? '—'} · 分析种子 ${(plan.analysis_seeds ?? []).join('/')}</p>
        <p>对手应对：${plan.main_counter ?? '引擎没给出'}（是启发式建模，不是真人行为）</p>
@@ -417,6 +457,9 @@ async function startBattle() {
     const body = {strategy: 'greedy_damage'};
     if (state.pick.player.length === 3) body.team = state.pick.player.slice();
     if (state.pick.enemy.length === 3) body.enemy_team = state.pick.enemy.slice();
+    // 验收脚本要能换局（不同 seed → 不同局面），用来证明气泡不是同一个句式。
+    // 玩家界面不暴露这个；只有 `window.rocoDemo` 会去设它。
+    if (Number.isInteger(state.seedOverride) && state.seedOverride >= 0) body.seed = state.seedOverride;
     const data = await api('/api/roco/battle/new', body);
     state.battleId = data.battle_id;
     applyResult(data);

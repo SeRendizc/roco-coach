@@ -16,6 +16,7 @@
 // 也就不会顺着投影漏进任何提示文案。
 
 import {interventionDetail,interventionFeaturesOfGame} from './experience.js';
+import {coachAdvice, normaliseAdviceShape} from './coach-advice.js';
 
 /** 手游 3v3 训练场在旧引擎口径下的「模式」：它属于本地 PvE 练习。 */
 export const ROCO_MODE = 'pve';
@@ -163,31 +164,16 @@ export function rocoHintStale(hint, version) {
 }
 
 /**
- * 提示文案：只用公开事实，且**必须**能说清「依据是什么」。
+ * （已删除）旧的 `rocoHintText(plan)`。第 43 轮删掉，理由留在这里：
  *
- * 措辞纪律（与页面、报告口径一致）：
- *   · 不说胜率、不说「最优」、不说「一定能赢」；
- *   · 推荐动作直接用引擎给的标签；
- *   · 区间是「跨分析种子的期望区间」，不是置信区间——不写「概率」。
+ * 它**只拿得到 planner 结果**，看不到局面，于是每一手「脆」的局面都落到同一句
+ * 「「X」这一手不稳：…先看区间再定（最坏尾部 a ~ b）」——玩家实测判定为没用，
+ * 而且「区间/尾部」是工程话，不该出现在给玩家的气泡里。
+ *
+ * 现在由 `coach-advice.js` 依据真实局面产出建议（做什么 / 为什么是现在 / 一个风险），
+ * `rocoIntervention` 在手里还有 view/session/plan 的时候就算好挂在 `detail.advice` 上。
+ * 保留这段说明是为了让后来的人知道**为什么这里空了**，而不是再写一个「只吃 plan」的文案函数。
  */
-export function rocoHintText(plan) {
-  if (!plan || plan.ok !== true) return null;
-  if (plan.recommendation_stable === false) {
-    return '这一手没有稳健结论：换个分析种子推荐会变。先按局面常识走，局后再看取舍。';
-  }
-  if (!plan.recommendation) return null;
-  const worst = plan.worst;
-  const tail = worst && Number.isFinite(worst.min) && Number.isFinite(worst.max)
-    ? `（最坏尾部 ${worst.min.toFixed(2)} ~ ${worst.max.toFixed(2)}）`
-    : '';
-  // 风险分支（W3-04）：这一手「脆」的时候**降级措辞**，不说「可以优先考虑」。
-  // `fragile` 来自规划器按产品阈值判定的 downside，不是游戏机制。
-  if (plan.risk && plan.risk.fragile === true) {
-    const gap = Number.isFinite(plan.risk.downside_max) ? plan.risk.downside_max.toFixed(2) : '—';
-    return `「${plan.recommendation}」这一手不稳：对手换个选择就要亏约 ${gap}，先看区间再定${tail}`;
-  }
-  return `可以优先考虑「${plan.recommendation}」${plan.main_counter ? `，注意对方可能${plan.main_counter}` : ''}${tail}`;
-}
 
 /**
  * 局末教学入口：一局结束后给**一个**关键决策点，而不是一份战报。
@@ -272,7 +258,27 @@ export function rocoIntervention({view = null, session = null, plan = null, host
     plannerMargin: planFeatures.margin,
     timeLeft: Number.isFinite(host.timeLeft) ? host.timeLeft : Infinity,
   });
-  return interventionDetail(features);
+  const detail = interventionDetail(features);
+  // ── P1：建议必须**因局面而异**（第 43 轮的真实失败样例）────────────────
+  //
+  // 旧的 `rocoHintText(plan)` 只拿得到 planner 结果，于是每一手「脆」的局面都落到
+  // 同一句「…先看区间再定（最坏尾部 …）」，玩家实测判定为没用。根因是**结构**：
+  // 判定完之后position 就被丢掉了。
+  //
+  // 现在在这里（手里还有 view/session/plan/host）先把建议算出来挂到 detail 上，
+  // 文案层只负责把它取出来。`coachAdvice` 返回 null 表示**这一手没有值得说的局面事实**，
+  // 那就沉默——不为了「总得说点什么」退回旧模板。
+  detail.advice = null;
+  detail.advice_error = null;
+  try {
+    detail.advice = coachAdvice({game, plan, session, host});
+  } catch (error) {
+    // 建议层出问题**不许**把整页搞挂，也不许退回旧模板：记下错误、这一手沉默，
+    // 错误留给开发者面板。上下文留给排查，别吞掉。
+    detail.advice_error = {message: String(error?.message ?? error).slice(0, 200),
+      at: new Date().toISOString()};
+  }
+  return detail;
 }
 
 /**
@@ -288,9 +294,29 @@ export function rocoInterventionText(detail, plan) {
   if (detail.action === 'defer_to_review') {
     return {text: '这一手值得留到局后看一眼。现在先按你的判断走。', why: detail.reason};
   }
-  const hint = rocoHintText(plan);
-  if (!hint) return {text: '先看局面：对手场上的血条与能量都是公开的，按它来选。', why: detail.reason};
-  return {text: hint, why: detail.reason};
+  // **建议层优先**。它看得到局面（换宠博弈 / 速度 / 能量 / 状态 / 后备 / 上一手），
+  // 而 `plan` 只当作证据。它说 null 就沉默：硬说一句「引擎推荐 X」正是要修掉的毛病。
+  const advice = detail.advice ?? null;
+  if (advice) {
+    return {
+      text: advice.text,
+      // 「为什么是现在 + 一个关键风险」一起给玩家；工程术语只进展开证据。
+      why: [advice.why, advice.risk ? `风险：${advice.risk}` : null].filter(Boolean).join(' · '),
+      kind: advice.kind,
+      evidence: advice.evidence,
+      shape: normaliseAdviceShape(advice.text),
+    };
+  }
+  // 建议层说「这一手没有值得说的局面事实」→ **沉默**。
+  //
+  // 第 43 轮的产品口径：没有稳定优势时允许沉默，硬说一句就是玩家抱怨的那种废话。
+  // 这里返回 null，页面整条提示不出现（门控层已经决定「可以说话」，但「有话可说」
+  // 是另一回事——`detail.reason` 里的 `critical-risk` 这类工程词因此也不会漏给玩家）。
+  if (detail.advice_error) {
+    // 建议层出错要看得见，但看的地方是开发者面板，不是玩家气泡。
+    return null;
+  }
+  return null;
 }
 
 /**

@@ -16,13 +16,13 @@ import {
   rocoGameView,
   rocoPlanFeatures,
   rocoHintStale,
-  rocoHintText,
   rocoLessonEntry,
   rocoIntervention,
   rocoInterventionText,
   rocoDamagePreviewText,
   ROCO_MODE,
 } from '../src/coach/roco-experience.js';
+import {normaliseAdviceShape} from '../src/coach/coach-advice.js';
 import {interventionDetail,interventionFeaturesOfGame} from '../src/coach/experience.js';
 
 const view = (over = {}) => ({
@@ -101,7 +101,15 @@ test('门控来自真实 experience.js：失焦是硬门控，不是「这次没
     game, attention: null, session: session(), mode: 'gentle', now: 1_000,
     host: {focus: true}, risk: null, gap: null, skill: null, timeLeft: Infinity,
   }));
-  assert.deepEqual(focused, direct, '包装层的结果必须与经验层逐个字段一致');
+  // 第 43 轮起：包装层会**额外**挂上建议（`advice`）与它的错误栏（`advice_error`）。
+  // 那是刻意的——建议必须在这一层算，因为只有这里同时拿得到 view/session/plan/host。
+  // 除此之外的每个字段仍然必须与经验层逐个相同：判定**不许**在这一层被改一遍。
+  const {advice, advice_error, ...fromExperience} = focused;
+  assert.deepEqual(fromExperience, direct,
+    '除了 advice / advice_error，包装层的结果必须与经验层逐个字段一致');
+  assert.ok('advice' in focused && 'advice_error' in focused,
+    '包装层必须挂上 advice 与 advice_error 两栏');
+  assert.equal(advice_error, null, '正常路径不该有建议错误');
 
   const blurred = rocoIntervention({...base, host: {focus: false}});
   assert.equal(blurred.action, 'silent');
@@ -131,22 +139,44 @@ test('频率预算：说过一次就在冷却里，同一手也不重复', () =>
   assert.equal(rocoIntervention({view: view(), session: dismissed, now: 2_000, host: {focus: true}}).gate, 'hint-dismissed');
 });
 
-test('提示文案：给建议与依据，不给胜率也不承诺必胜', () => {
-  const plan = {ok: true, recommendation: '龙血', recommendation_stable: true, main_counter: '换上潮甲龟',
-    worst: {min: -1.3636, max: -1.105}, expected: {min: -1, max: -0.4, mean: -0.7}, analysis_seeds: [11, 29, 47]};
-  const text = rocoHintText(plan);
-  assert.match(text, /龙血/);
-  assert.match(text, /最坏尾部/);
-  assert.ok(!/胜率|最优|一定能赢|概率/.test(text), `文案里不得出现承诺或概率：${text}`);
-  // 推荐随种子变化时不给单一推荐
-  const unstable = rocoHintText({ok: true, recommendation_stable: false, recommendation: '龙血'});
-  assert.ok(!/龙血/.test(unstable), '结论不稳健时不该把某一手当推荐说出来');
+test('提示文案：建议由**局面**决定，看不到局面就沉默（第 43 轮改）', () => {
+  // 旧版本这里断言的是 `rocoHintText(plan)` 的模板措辞（含「最坏尾部」）。
+  // 那正是用户实测判定为没用的那一句，函数已删。这一组改成钉**新契约**：
+  //   · 有局面建议时：把建议原样交出去，并带上「为什么是现在」与一个风险；
+  //   · 没有建议时：**沉默**（返回 null），不许退回模板；
+  //   · 无论哪种，玩家可见文字里不许有工程术语、不许承诺胜负。
+  const ENGINEER = /最坏尾部|区间|margin|score|种子|coverage|state_version|critical-risk|moderate-risk|\{\s*"/;
+  const plan = {ok: true, recommendation: '龙血', recommendation_stable: true,
+    main_counter: '换上潮甲龟', worst: {min: -1.3636, max: -1.105},
+    expected: {min: -1, max: -0.4, mean: -0.7}, analysis_seeds: [11, 29, 47]};
 
-  const detail = rocoIntervention({view: view(), session: session(), now: 1_000, host: {focus: true}});
-  const withText = rocoInterventionText(detail, plan);
-  assert.ok(withText.text.length > 0);
-  assert.ok(withText.why.length > 0, '必须能说清依据');
+  // ① 建议层给了建议 → 原样用它的句子，并把「为什么 + 风险」拼进依据
+  const withAdvice = rocoInterventionText({
+    action: 'action_hint', reason: 'moderate-risk',
+    advice: {text: '「诡刺」打「画间沉铁兽」只有抵抗：别再硬用它',
+      why: '上一手被属性抵抗', risk: '硬打等于把回合让出去', kind: 'type-resisted',
+      evidence: {multiplier: 0.5}},
+  }, plan);
+  assert.ok(withAdvice && withAdvice.text.length > 0);
+  assert.match(withAdvice.why, /上一手被属性抵抗/);
+  assert.match(withAdvice.why, /风险：/);
+  assert.equal(withAdvice.kind, 'type-resisted');
+  assert.equal(withAdvice.shape, normaliseAdviceShape('「诡刺」打「画间沉铁兽」只有抵抗：别再硬用它'),
+    '必须带归一化形状，页面靠它判「同一句不再重复」');
+  assert.ok(!ENGINEER.test(withAdvice.text) && !ENGINEER.test(withAdvice.why),
+    `玩家可见文字里出现工程术语：${withAdvice.text} / ${withAdvice.why}`);
+
+  // ② 建议层没话说 → **沉默**。这是产品口径：没有稳定优势时不必硬说。
+  assert.equal(rocoInterventionText({action: 'action_hint', reason: 'critical-risk', advice: null}, plan), null,
+    '没有局面建议时必须沉默，不许退回旧模板');
+  // ③ 建议层报错 → 同样沉默（错误进开发者面板，不进气泡）
+  assert.equal(rocoInterventionText({action: 'micro_hint', advice: null, advice_error: {message: 'boom'}}, plan), null);
+  // ④ 规则说沉默 → 一律 null
   assert.equal(rocoInterventionText({action: 'silent'}, plan), null, '沉默时不该产出任何文案');
+  assert.equal(rocoInterventionText(null, plan), null);
+  // ⑤ 局末复习档保留它自己那句话（与建议层无关）
+  const deferred = rocoInterventionText({action: 'defer_to_review', reason: 'not-actionable-now'}, plan);
+  assert.match(deferred.text, /局后/);
 });
 
 test('局末教学入口：没有值得拎出来的决策点就说没有', () => {
@@ -159,30 +189,18 @@ test('局末教学入口：没有值得拎出来的决策点就说没有', () =>
   assert.match(onlySwitch.question, /换人/);
 });
 
-test('风险分支：这一手脆的时候把措辞降级，不说「可以优先考虑」', () => {
-  // `fragile` 来自规划器按**产品阈值**判定的 downside（期望到最坏的距离），
-  // 不是游戏机制。这里只钉住「措辞随 fragile 变化」这一件事，
-  // 以及「脆弱时必须给出落差量级」——不把阈值本身当成事实断言。
-  const plan = {
-    ok: true, recommendation: '坟场搏击', recommendation_stable: true,
-    main_counter: '换上第3位', worst: {min: -1.36, max: -1.10},
-    risk: {fragile: true, downside_max: 1.56, threshold: 1.2,
-      top_risks: [{opponent_action: '诡刺', score: -1.36, loss_vs_expected: 1.56}]},
-  };
-  const text = rocoHintText(plan);
-  assert.ok(!/可以优先考虑/.test(text), '脆弱的一手不该说「可以优先考虑」');
-  assert.match(text, /不稳/);
-  assert.match(text, /1\.56/, '必须给出落差量级，光说「不稳」等于没说');
-  assert.match(text, /-1\.36/, '仍然要给最坏尾部区间');
-
-  const solid = rocoHintText({...plan, risk: {fragile: false, downside_max: 0.2}});
-  assert.match(solid, /可以优先考虑/, '不脆的一手用原来的措辞');
-});
-
-test('风险分支：没有 risk 字段时按「不脆」处理（旧回执兼容）', () => {
-  const text = rocoHintText({ok: true, recommendation: '龙血', worst: {min: 0.1, max: 0.2}});
-  assert.match(text, /可以优先考虑/);
-  assert.ok(!/不稳/.test(text));
+test('（已删）风险分支的旧措辞用例', () => {
+  // 旧的两条用例断言 `rocoHintText` 在 `risk.fragile` 时把措辞降级成
+  // 「…这一手不稳…最坏尾部…」。那个函数已删、那种措辞正是被否掉的，
+  // 所以这里不再保留一个「测模板」的用例。
+  //
+  // 它原来要守的意图**没有丢**，只是换了地方：
+  //   · 「不许承诺胜负 / 不许说最优」→ 本轮新契约用例 + demo 验收的工程术语判据；
+  //   · 「脆弱的一手不许说『可以优先考虑』」→ 现在根本不存在「推荐某手」这种句子，
+  //     建议由 `coach-advice.js` 按局面给出，逐条都有 why 与 risk；
+  //   · 「必须给出落差量级」→ 变成 `evidence` 里的可核对事实，在展开区展示，
+  //     并有 `tests/evals/coach-advice.test.js` 与 10 个真实局面验收钉着。
+  assert.ok(true);
 });
 
 test('伤害预览：说清「估」与「够不够收」，且结论不稳时不许打包票', () => {

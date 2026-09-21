@@ -134,11 +134,28 @@ async function main(){
  // ── 场景 2：危险局面主动短提示（risk 由真实血量算出来）─────────────
  // 不能靠注入 risk 作弊：这里让引擎真打到危险血量，再看门控与评分怎么判。
  let drove=0;
+ // 第 43 轮起：**允许沉默**。所以不能只在这一刻要求「必须有提示」——
+ // 要求的是「整局里至少自动出现过一次」，且出现时必须是可执行建议。
+ // 这里在推进过程中把每次出现的句子与依据抓下来（玩家没点任何按钮）。
+ const autoShown=[];
+ const sampleHint=async()=>{
+  const shown=await js(`!document.getElementById('hint').hidden`);
+  if(!shown)return;
+  const text=await js(`document.getElementById('hint-text').textContent`);
+  const why=await js(`document.getElementById('hint-why').textContent`);
+  // 建议的**种类**由建议层给出，页面挂在 lastDetail.advice 上。
+  // 用它断言「这句话来自某个真实局面检测器」，而不是「长得像一句话」。
+  const kind=await js(`(window.rocoDemo.state.lastDetail&&window.rocoDemo.state.lastDetail.advice&&window.rocoDemo.state.lastDetail.advice.kind)||null`);
+  if(text&&!autoShown.some((x)=>x.text===text))autoShown.push({text,why,kind});
+ };
+ await sampleHint();
  for(let i=0;i<40;i++){
   const risk=await js(`(()=>{const s=window.rocoDemo.state;if(!s.view||s.view.battle_result)return 0;
     const p=s.view.self.pets[s.view.self.active]||{};return p.max_hp>0?p.hp/p.max_hp:1;})()`);
   if(risk<=0.4)break;
   await js('window.rocoDemo.autoTurn()');
+  await sleep(80);
+  await sampleHint();
   drove+=1;
   await sleep(120);
   if(await js(`Boolean(window.rocoDemo.state.view&&window.rocoDemo.state.view.battle_result)`))break;
@@ -155,9 +172,34 @@ async function main(){
  const hintWhy=await js(`document.getElementById('hint-why').textContent`);
  const hintBody=await js(`document.getElementById('hint-body').textContent`);
  const detail=await js('JSON.stringify(window.rocoDemo.state.lastDetail||null)');
- check('打危险了之后出现主动短提示（无聊天入口）',data.rocoHint&&data.rocoHint!=='hidden',
-  `hint=${data.rocoHint} action=${data.rocoAction} 血量比=${hpRatio} 自动推进=${drove} 判定=${detail}`);
- check('提示给的是可执行建议，并说明依据',['action_hint','micro_hint'].includes(data.rocoHint)&&hintText.length>0&&/依据/.test(hintWhy),`${hintText.slice(0,60)} / ${hintWhy}`);
+ await sampleHint();
+ // 判据 1：**没有点任何按钮**，小芽也要自己出现过。这是「主动」的定义。
+ check('整局内小芽至少自动出现一次（没有任何点击）',autoShown.length>=1,
+  `自动出现 ${autoShown.length} 次；自动推进 ${drove} 次；样例=${autoShown.slice(0,2).map((x)=>x.text).join(' ｜ ')}`);
+ // 判据 2：出现的那句话必须是**能行动的**，并且说清「为什么是现在」与一个风险。
+ // 判据 3：玩家可见的文字里不许有工程术语（那些只允许进展开区或开发者面板）。
+ const ENGINEER=/critical-risk|moderate-risk|state_version|coverage|margin|decisionKey|decisive|floor|价值|null|\{\s*"/;
+ const first=autoShown[0]??{text:'',why:''};
+ // 「可行动」的判据：必须来自某个**真实的局面检测器**（kind 已知），
+ // 且句子里点到了具体的东西——引号里的技能/伙伴名，或一个明确的动作词。
+ // 只要求「像一句话」是没有意义的：旧模板也像一句话。
+ const ACTION_WORD=/换|收|补位|防御|吃|躲|观察|先|别/;
+ const KNOWN_KINDS=new Set(['replace-required','ko-now','ko-maybe','foe-low-hp','switch-low-hp',
+  'energy-short','foe-status-ticking','type-resisted','type-favoured','speed-decides','foe-energy-high']);
+ check('出现的建议都来自真实局面检测器（kind 已知，不是拼出来的句子）',
+  autoShown.every((x)=>KNOWN_KINDS.has(x.kind)),
+  autoShown.map((x)=>`${x.kind??'(无)'}:${String(x.text).slice(0,24)}`).join(' ／ '));
+ check('出现的建议点名了具体动作/伙伴，并给出「为什么是现在」',
+  first.text.length>=8&&(/[「」]/.test(first.text)||ACTION_WORD.test(first.text))
+   &&first.why.length>0&&/依据/.test(first.why),
+  `[${first.kind}] ${String(first.text).slice(0,50)} / ${String(first.why).slice(0,50)}`);
+ check('玩家可见的建议与依据里没有工程术语',
+  autoShown.every((x)=>!ENGINEER.test(x.text)&&!ENGINEER.test(x.why)),
+  autoShown.map((x)=>`${x.text}||${x.why}`).join(' ／ ').slice(0,140));
+ // 这一刻可以沉默（产品允许），但**如果**说话了，必须是上面的那种句子
+ check('这一刻要么给出可执行建议，要么是明确的沉默（不允许含糊）',
+  (data.rocoHint==='hidden')||(['action_hint','micro_hint'].includes(data.rocoHint)&&hintText.length>0),
+  `hint=${data.rocoHint} 血量比=${hpRatio} 判定=${detail}`);
  // 只在**规划跑过**时要求证据面板有数字：W3-04 之后「脆」的一手措辞会降级，
  // 而没跑规划时面板本来就说「不含具体数值结论」——那是如实陈述，不是失败。
  const hasPlan=await js('Boolean(window.rocoDemo.state.plan&&window.rocoDemo.state.plan.ok)');
@@ -289,6 +331,57 @@ async function main(){
  const pageText=await js('document.documentElement.outerHTML');
  check('页面上不出现真实对局 seed 或私有状态',!/"seed"\s*:/.test(pageText)&&!/replace_queue/.test(pageText));
  check('控制台没有报错',consoleErrors.length===0&&pageErrors.length===0,JSON.stringify([...consoleErrors,...pageErrors].slice(0,3)));
+
+ // ── P1 浏览器验收：**多个真实局面下气泡必须长得不一样** ────────────────
+ //
+ // 用户实测原话：气泡反复只说「某技能这一手不稳…先看区间再定（最坏尾部…）」，
+ // 明确感知为没用。根因是文案只拿得到 planner 结果。引擎层的验收在
+ // `tests/evals/roco/coach-positions.test.js`（10 个隔离局面、逐例断言 kind）；
+ // 这里补的是**浏览器这一侧**：换不同的局，把真实渲染出来的气泡收下来，
+ // 断言它不是同一个句式换数字。
+ //
+ // 形状归一化与引擎侧同一口径：数字 → `#`，引号里的技能/伙伴名 → `「◆」`。
+ const shapeOf = (text) => text
+   .replace(/\d+(?:\.\d+)?/g, '#')
+   .replace(/「[^」]*」/g, '「◆」');
+ const shapeCount = new Map();
+ const seenNotes = [];
+ for (const seed of [20260921, 5, 777, 31337, 424242, 9001]) {
+  // **必须包在 IIFE 里**：`Runtime.evaluate` 共用同一个全局作用域，
+  // 裸写 `const ids` 会在第二次求值时撞上「Identifier 'ids' has already been declared」。
+  await js(`(()=>{const d=window.rocoDemo;
+    d.state.pick.player=[];d.state.pick.enemy=[];
+    const ids=d.state.roster.map((p)=>p.pet_id).sort(()=>Math.random()-0.5);
+    d.state.pick.player=ids.slice(0,3);d.state.pick.enemy=ids.slice(3,6);
+    d.renderRoster();})()`);
+  await js(`(async()=>{window.rocoDemo.state.seedOverride=${seed};await window.rocoDemo.startBattle();})()`);
+  await sleep(400);
+  for (let turn = 0; turn < 12; turn += 1) {
+   await js('window.rocoDemo.autoTurn()');
+   await sleep(120);
+   const shown = await js(`!document.getElementById('hint').hidden`);
+   if (shown) {
+    const text = await js(`document.getElementById('hint-text').textContent`);
+    if (text && text.trim()) {
+     const shape = shapeOf(text.trim());
+     shapeCount.set(shape, (shapeCount.get(shape) || 0) + 1);
+     if (seenNotes.length < 8) seenNotes.push(text.trim());
+    }
+   }
+   if (await js(`Boolean(window.rocoDemo.state.view&&window.rocoDemo.state.view.battle_result)`)) break;
+  }
+ }
+ const totalSpoken = [...shapeCount.values()].reduce((a, b) => a + b, 0);
+ const maxShare = totalSpoken ? Math.max(...shapeCount.values()) / totalSpoken : 0;
+ check('六个不同局面里气泡至少出现 3 次（否则样本不足，下面的判据会空过）',
+  totalSpoken >= 3, `共 ${totalSpoken} 次；样例=${seenNotes.slice(0, 3).join(' ｜ ')}`);
+ check('气泡在**种类**上不同，不是同一句式换数字（浏览器实测）',
+  shapeCount.size >= 3, `形状 ${shapeCount.size} 种：${[...shapeCount.keys()].map((x) => x.slice(0, 40)).join(' ／ ')}`);
+ check('没有哪一种句式占到 60% 以上', maxShare <= 0.6,
+  `最大占比 ${(maxShare * 100).toFixed(0)}%（${[...shapeCount.values()].join('/')}）`);
+ check('浏览器里的气泡不含工程术语（区间/尾部/margin 等）',
+  !seenNotes.some((t) => /最坏尾部|区间|margin|score|种子|coverage|state_version|\{\s*"/.test(t)),
+  seenNotes.join(' ｜ ').slice(0, 140));
 
  // ── P0-3 端到端：**选好的阵容真的进了引擎** ────────────────────────────
  // 放在最后：它会重开一局，不能让后面的判据读到这一局的状态。

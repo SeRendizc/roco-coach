@@ -886,6 +886,14 @@ export class RocoClient {
     if (Number.isInteger(options.beam)) body.beam = options.beam;
     if (Number.isInteger(options.budgetMs)) body.budget_ms = options.budgetMs;
     if (Array.isArray(options.analysisSeeds)) body.analysis_seeds = options.analysisSeeds;
+    // 伤害预览（原始伤害范围 + 能不能一击收掉）。
+    //
+    // 第 43 轮补：`roco-service.js` 一直在传 `damagePreview: true`，而这里**从来没读过它**，
+    // 于是服务端永远收不到 `damage_preview`、回执里那一栏恒为 null，
+    // 页面上的「这一步能打出多少、够不够收」就一直是空的——又是「接上了但不生效」，
+    // 而且不报错。第四个同类问题了（前三次：特征只读调用方字段、命名不一致、
+    // 边际量对象形状）。
+    if (options.damagePreview === true) body.damage_preview = true;
     return this._request('POST', '/battle/plan', this._payload(body, options), options);
   }
 

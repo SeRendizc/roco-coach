@@ -2,7 +2,7 @@
   "generated_by": "scripts/roco/check-planner-calibration.py",
   "ruleset_id": "roco-world-s4-2026-09-10",
   "settings": {
-    "games": 3,
+    "games": 80,
     "opponent": "status_control",
     "depth": 2,
     "beam": 3,
@@ -10,36 +10,505 @@
   },
   "question": "plan_actions 自报的 expected 能不能当作「这一手好不好」的代理？判据：胜局的 expected 是否显著高于非胜局。",
   "summary": {
-    "games": 3,
-    "wins": 1,
-    "non_wins": 2,
-    "expected_when_win": -0.0916,
-    "expected_when_not_win": 0.3304,
-    "expected_ci95_win": null,
-    "expected_ci95_not_win": [
-      -0.1388,
-      0.7996
+    "games": 80,
+    "wins": 35,
+    "non_wins": 45,
+    "expected_when_win": 0.4341,
+    "expected_when_not_win": 0.3884,
+    "expected_ci95_win": [
+      0.299,
+      0.5692
     ],
-    "worst_when_win": -0.2821,
-    "worst_when_not_win": 0.002
+    "expected_ci95_not_win": [
+      0.2492,
+      0.5275
+    ],
+    "worst_when_win": 0.2466,
+    "worst_when_not_win": 0.1885,
+    "difference": 0.0458,
+    "welch_t": 0.462,
+    "significant_at_95": false,
+    "verdict": "**不显著**：|t| < 1.96，差异与「没有差异」无法区分。在这一口径下 expected **不能**当作「这一手好不好」的信心代理。"
   },
   "rows": [
     {
-      "expected": -0.0916313686703609,
-      "worst": -0.28213764779523265,
-      "label": "换上第2位",
+      "expected": -0.04458448067427305,
+      "worst": -0.15942138139301573,
+      "label": "使用能量果",
       "result": "win"
     },
     {
-      "expected": 0.09102761731569481,
-      "worst": -0.17434985787861101,
+      "expected": 0.3071877315296993,
+      "worst": 0.25611381742562744,
       "label": "使用能量果",
       "result": "loss"
     },
     {
-      "expected": 0.5698251570532649,
-      "worst": 0.17841949363887832,
+      "expected": 0.6561930802222397,
+      "worst": 0.19830659536541884,
       "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": 1.0649580304649984,
+      "worst": 0.6345132743362832,
+      "label": "彗星",
+      "result": "win"
+    },
+    {
+      "expected": 1.0098633803802022,
+      "worst": 0.982803633534688,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.7950009076877853,
+      "worst": 0.7518518518518518,
+      "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": -0.00023520252464168112,
+      "worst": -0.13589128697042363,
+      "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": -0.2097592711269824,
+      "worst": -0.2731277157706399,
+      "label": "换上第3位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.41560705067476,
+      "worst": 0.24558556447360705,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.25575537668048587,
+      "worst": 0.2222201091865883,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.730094417929031,
+      "worst": -0.09979248806806373,
+      "label": "彗星",
+      "result": "win"
+    },
+    {
+      "expected": 0.8708537981913329,
+      "worst": 0.6881363244176013,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": -0.07343643000709799,
+      "worst": -0.16637168141592928,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": 0.01513213133589637,
+      "worst": -0.05654911838790938,
+      "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.10063653843488185,
+      "worst": -0.1329503937647154,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.1925089030186088,
+      "worst": -0.3702207948615015,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.2464542609549648,
+      "worst": 0.15493829637438764,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.8599035888417642,
+      "worst": 0.7575315033495363,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 1.6538335301905889,
+      "worst": 1.5894476650200378,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.40552765978372535,
+      "worst": 0.362106181921246,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.532567689189003,
+      "worst": 0.3632206442131636,
+      "label": "换上第3位",
+      "result": "win"
+    },
+    {
+      "expected": 0.24024363760719844,
+      "worst": 0.04264084331957636,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": 0.8620778109238991,
+      "worst": 0.8061385827314271,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.5698425262364002,
+      "worst": 0.5305443169203388,
+      "label": "蛰针",
+      "result": "win"
+    },
+    {
+      "expected": 0.9802496610739849,
+      "worst": 0.9506202533625494,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": -0.005575275397796835,
+      "worst": -0.08441860465116274,
+      "label": "换上第3位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.9299998050092083,
+      "worst": 0.9111987614520396,
+      "label": "换上第3位",
+      "result": "win"
+    },
+    {
+      "expected": -0.3534229796831015,
+      "worst": -0.5355001199328375,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.4100498402221494,
+      "worst": 0.3799600367620483,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.5794873891863497,
+      "worst": -0.06659295037915841,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.2333620585883568,
+      "worst": 0.15549153750094483,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.41513727293267216,
+      "worst": 0.2495719339941124,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.3984778361217839,
+      "worst": 0.36789573954163485,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.05678277162460721,
+      "worst": -0.23323554065381402,
+      "label": "换上第3位",
+      "result": "win"
+    },
+    {
+      "expected": 0.2550626792562277,
+      "worst": 0.1465034965034967,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": -0.1307311766194989,
+      "worst": -0.5535805971342218,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 1.0250400779438846,
+      "worst": 0.9862659190294432,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.12435793337376091,
+      "worst": 0.03406988948135825,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.3569156729139006,
+      "worst": -0.1715970961887478,
+      "label": "换上第3位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.8729176093724916,
+      "worst": 0.8069792094726544,
+      "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.9311942362967982,
+      "worst": 0.8854644256359296,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": -0.057522338810140336,
+      "worst": -0.19734115903167815,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.37746304478169623,
+      "worst": 0.16799437760171068,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 1.469002648201223,
+      "worst": 0.3116844301084367,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.26350968309169875,
+      "worst": -0.1434460016488046,
+      "label": "换上第3位",
+      "result": "win"
+    },
+    {
+      "expected": 1.3853939938427473,
+      "worst": 1.2285143869631403,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.3284452870476359,
+      "worst": 0.264000451263538,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": 0.3546661376366712,
+      "worst": 0.29983680449755284,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": -0.025991347736869213,
+      "worst": -0.08465984281740332,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.5027105980109383,
+      "worst": 0.45793311746619136,
+      "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": -0.05923531204356505,
+      "worst": -0.7799743808710502,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": 1.027923631686479,
+      "worst": 0.6041736227045075,
+      "label": "彗星",
+      "result": "win"
+    },
+    {
+      "expected": 0.3572928191852788,
+      "worst": 0.3101508563023251,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": 0.5260619200306651,
+      "worst": 0.11579774150005401,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.16596114474327445,
+      "worst": 0.08711781548990846,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": -0.06328903654485057,
+      "worst": -0.1312594382361825,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.3903983806842028,
+      "worst": 0.37552673549903454,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": -0.40870594669130683,
+      "worst": -0.4702318544840444,
+      "label": "防御",
+      "result": "loss"
+    },
+    {
+      "expected": 0.45244645943275585,
+      "worst": 0.4017507413930662,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.3493902756425791,
+      "worst": -0.17465116279069764,
+      "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": 1.3969606444218354,
+      "worst": 0.9287927774657996,
+      "label": "冰锥",
+      "result": "loss"
+    },
+    {
+      "expected": 0.8895376624868021,
+      "worst": 0.8326913847714901,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.05149137081923691,
+      "worst": -0.004027664768104122,
+      "label": "防御",
+      "result": "loss"
+    },
+    {
+      "expected": -0.15468420044937223,
+      "worst": -0.21576125824271722,
+      "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.3394956238037751,
+      "worst": 0.28308335000361773,
+      "label": "换上第3位",
+      "result": "win"
+    },
+    {
+      "expected": -0.31120785872950507,
+      "worst": -0.36941537377093997,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.35258577319916695,
+      "worst": 0.07442396313364057,
+      "label": "换上第2位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.6310186347766341,
+      "worst": 0.33218091976435116,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 1.2838844067814648,
+      "worst": 1.1817711807086733,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": 0.5044645695737785,
+      "worst": 0.46178364852114706,
+      "label": "换上第3位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.0692141935946192,
+      "worst": 0.04066463017078244,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": 0.11112667002720944,
+      "worst": 0.01702449121428673,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.7405062775220776,
+      "worst": 0.5307339449541285,
+      "label": "换上第2位",
+      "result": "win"
+    },
+    {
+      "expected": 0.39203902415806396,
+      "worst": 0.3590709087832121,
+      "label": "使用能量果",
+      "result": "win"
+    },
+    {
+      "expected": 0.06731239904681513,
+      "worst": -0.16132280730956258,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.2688190367341756,
+      "worst": -0.5572250039117508,
+      "label": "气波",
+      "result": "loss"
+    },
+    {
+      "expected": 0.13066560340244548,
+      "worst": 0.03808187134502927,
+      "label": "使用能量果",
+      "result": "loss"
+    },
+    {
+      "expected": 0.07181647624635279,
+      "worst": -0.5713195875273378,
+      "label": "气波",
+      "result": "loss"
+    },
+    {
+      "expected": -0.21066540945789516,
+      "worst": -0.27392215134011855,
+      "label": "换上第3位",
+      "result": "loss"
+    },
+    {
+      "expected": 0.1749707230295568,
+      "worst": 0.12191086750840102,
+      "label": "防御",
       "result": "loss"
     }
   ],

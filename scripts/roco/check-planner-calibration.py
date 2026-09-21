@@ -88,6 +88,8 @@ def main(argv=None) -> int:
     parser.add_argument("--depth", type=int, default=2)
     parser.add_argument("--beam", type=int, default=3)
     parser.add_argument("--budget-ms", type=int, default=800)
+    parser.add_argument("--out", default=None,
+                        help="输出路径；默认写入库的 reports/roco/…。测试用临时路径，避免把入库的完整报告覆盖成小样本")
     parser.add_argument("--seed-base", type=int, default=700000)
     args = parser.parse_args(argv)
 
@@ -165,7 +167,10 @@ def main(argv=None) -> int:
             "结论只在「这套引擎 + 这个对手 + 这串种子」范围内成立。",
         ],
     }
-    out = os.path.join(_ROOT, "reports", "roco", "planner-calibration.json")
+    # 同 `benchmark-planner.py`：`--out` 给测试用，入库那份是完整样本。
+    out = args.out or os.path.join(_ROOT, "reports", "roco", "planner-calibration.json")
+    if not os.path.isabs(out):
+        out = os.path.join(_ROOT, out)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, ensure_ascii=False, indent=2)

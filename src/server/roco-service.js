@@ -361,6 +361,10 @@ export function createRocoService(options={}){
    // 原始伤害范围：玩家脑子里记的那个数字就是它。
    damage_preview:r.damage_preview?{
     available:r.damage_preview.available===true,
+    // **为什么没有预览**也要带出去。引擎在「我方场上这只没带攻击技能」或
+    // 「全部被 fail closed 拦下」时会给 `reason`；不带的话页面只能显示空白，
+    // 而那看起来像坏了，其实是引擎如实说了「算不出来」。
+    reason:r.damage_preview.reason??null,
     min:Number.isFinite(r.damage_preview.min)?r.damage_preview.min:null,
     max:Number.isFinite(r.damage_preview.max)?r.damage_preview.max:null,
     best_label:r.damage_preview.best_label??null,

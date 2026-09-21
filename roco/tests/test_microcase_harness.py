@@ -20,6 +20,7 @@ import importlib.util
 import json
 import os
 import subprocess
+import tempfile
 import sys
 import unittest
 
@@ -260,16 +261,43 @@ class TestBenchmarksAreReproducible(unittest.TestCase):
             import hashlib
             return hashlib.sha256(fh.read()).hexdigest()
 
+    # 这一组要守的是**可复现**（同参数两次跑出的字节一致），
+    # 而不是「把入库的那份完整报告重算一遍」。原来它直接写
+    # `reports/roco/planner-benchmark.json`，于是跑一次测试就把入库的完整样本
+    # 覆盖成 `--positions 6` 的小样本——第 11 轮这么丢过一次，第 43 轮又发生了
+    # （`loadouts` 修复让数字变了，diff 一出来才发现是测试写的）。
+    # 现在输出到临时目录：既保持可复现断言，也不碰入库产物。
     def test_one_ply_benchmark_is_reproducible(self):
         script = os.path.join("scripts", "roco", "benchmark-planner.py")
-        out = os.path.join("reports", "roco", "planner-benchmark.json")
-        first = self._run(script, ["--positions", "6"], out)
-        second = self._run(script, ["--positions", "6"], out)
+        with tempfile.TemporaryDirectory() as tmp:
+            out_one = os.path.join(tmp, "one.json")
+            out_two = os.path.join(tmp, "two.json")
+            first = self._run(script, ["--positions", "6", "--out", out_one], out_one)
+            second = self._run(script, ["--positions", "6", "--out", out_two], out_two)
         self.assertEqual(first, second, "同参数两次跑出的基准报告不一致")
 
     def test_planner_calibration_is_reproducible(self):
         script = os.path.join("scripts", "roco", "check-planner-calibration.py")
-        out = os.path.join("reports", "roco", "planner-calibration.json")
-        first = self._run(script, ["--games", "3"], out)
-        second = self._run(script, ["--games", "3"], out)
+        with tempfile.TemporaryDirectory() as tmp:
+            out_one = os.path.join(tmp, "one.json")
+            out_two = os.path.join(tmp, "two.json")
+            first = self._run(script, ["--games", "3", "--out", out_one], out_one)
+            second = self._run(script, ["--games", "3", "--out", out_two], out_two)
         self.assertEqual(first, second, "同参数两次跑出的标定报告不一致")
+
+    def test_committed_benchmark_is_not_a_selftest_sample(self):
+        # 反向守卫：入库那份必须是**完整样本**，不是自检跑的小样本。
+        # 测试写坏入库产物这件事发生过两次，所以给它一条会红的检查。
+        import json as _json
+        for rel, floor in (("reports/roco/planner-benchmark.json", 50),
+                           ("reports/roco/planner-calibration.json", 20)):
+            with open(os.path.join(_ROOT, rel), encoding="utf-8") as fh:
+                payload = _json.load(fh)
+            if "planner" in payload:
+                n = payload["planner"].get("positions") or 0
+            else:
+                n = (payload.get("summary") or {}).get("games") or 0
+            self.assertGreaterEqual(
+                n, floor,
+                f"{rel} 只有 {n} 个样本（下限 {floor}）：它多半被自检覆盖了，"
+                "重建命令见 docs/roco/BENCHMARKS.md")

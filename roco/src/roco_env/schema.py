@@ -164,6 +164,15 @@ class SideState:
             "name": self.name,
             "active": self.active,
             "items": dict(self.items),
+            # **配招必须一起序列化**。`from_dict` 一直在读它，而这里从来没写过，
+            # 于是每一次 `serialize → deserialize` 往返（私有域的每个端点都要走）
+            # 都会把配招丢成 `{}`。后果不是报错，而是**安静地换了输入**：
+            #   · `public_planner_state` 的 `loadouts` 变成空 → 规划器重建状态时
+            #     退回 `learnsets.all_skill_ids`（全部可学技能），候选池与真实
+            #     合法动作不是同一套；
+            #   · `_damage_preview` 找不到任何攻击技能 → 页面上的伤害预览恒为不可用。
+            # 第 43 轮由「伤害预览为什么一直是空」追到这里。
+            "loadouts": {k: list(v) for k, v in (self.loadouts or {}).items()},
             "pets": [p.to_dict() for p in self.pets],
         }
 
