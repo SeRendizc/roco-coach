@@ -966,15 +966,46 @@ async function boot() {
   render();
   renderMemory();
   await loadRoster();
-  try {
-    await bootstrap();
+  // ── 规则服务没就绪时的**自愈与退路**（监工 14:17 现场回归）──────────────────
+  //
+  // 现场表现：页面写「规则服务：未启动」、阵容区卡在「正在读取精灵名单…」、双方 0/3，
+  // 整页不可开局，而且**没有任何重试入口**——只能刷新浏览器赌一次。
+  // 服务本身是好的（`/api/roco/status` 实测 available:true、roster ok:true），
+  // 所以这是**冷启动时序**问题：页面比规则服务先到，却把「暂时没起来」写成了终态。
+  //
+  // 现在：① 未就绪就按 3 秒一轮自动重试（最多 10 轮），期间文案说清"正在启动"；
+  //      ② 无论成功失败，头部都出现「重试」按钮（一键重跑状态与名单）；
+  //      ③ 就绪后自动补一次名单加载（冷启动时那一次常常是失败的）。
+  const loadStatus = async () => {
     const status = await fetch('/api/roco/status', {cache: 'no-store'}).then((r) => r.json());
-    $('engine-status').textContent = status.available ? '规则服务：已就绪' : '规则服务：就绪后自动启动';
+    $('engine-status').textContent = status.available ? '规则服务：已就绪' : '规则服务：正在启动…';
     $('engine-status').dataset.rocoStatus = status.available ? 'ready' : 'idle';
-  } catch (error) {
-    $('engine-status').textContent = `规则服务：未连接（${error.message}）`;
-    $('engine-status').dataset.rocoStatus = 'error';
+    return status.available === true;
+  };
+  const retry = $('engine-retry');
+  if (retry) retry.addEventListener('click', () => { void bootData(); });
+  async function bootData() {
+    if (retry) retry.hidden = false;
+    try {
+      await bootstrap();
+    } catch (error) {
+      $('engine-status').textContent = `规则服务：未连接（${error.message}）`;
+      $('engine-status').dataset.rocoStatus = 'error';
+      return;
+    }
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      let ready = false;
+      try { ready = await loadStatus(); } catch { $('engine-status').dataset.rocoStatus = 'error'; }
+      if (ready) {
+        // 冷启动时第一次名单往往已经失败了，就绪后补一次（不覆盖玩家已经改好的选择）
+        if (!state.roster.length) await loadRoster();
+        return;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+    }
+    $('engine-status').textContent = '规则服务：暂时连不上，点「重试」';
   }
+  await bootData();
   document.body.dataset.rocoReady = 'yes';
   // 开局引导是**静态三步**（选阵容 → 开一局 → 她自己会说话），不依赖任何数据，
   // 所以这里只留一个验收钩子：脚本据此断言「引导真的渲染出来了」，
