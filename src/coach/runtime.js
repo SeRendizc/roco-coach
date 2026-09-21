@@ -4,7 +4,7 @@ export const MATCH_REVIEW_REQUEST='总结整局：先说这局的走向，再选
 import {strategist,searchKnowledge,RULES_VERSION,cards,resolveCitation} from './strategist.js';
 import {teacher,makeQuiz,review,summarizeMatch,reviewMatch,analyzeTurn,compareTurnAlternatives} from './teacher.js';
 import {companion} from './companion.js';
-import {rememberPreference} from './memory.js';
+import {rememberPreference,playerWishes} from './memory.js';
 // Local provider boundary. Future server provider may phrase this evidence packet with DeepSeek.
 export const localProvider={name:'local',async generate(packet){return packet.text;}};
 export function buildContext(game,profile,focus,archive=null,stageId='meadow',message=''){
@@ -29,13 +29,45 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  // /api/coach 返回的 meta 是 route:'teacher'。把附加说明切掉再路由，规则包照旧带着它。
  const answerRequirements='\n回答要求：';
  const routingText=String(message||'').split(answerRequirements)[0];
- context={...context,goal:memory.goal||null,favorite:memory.favorite||null};
+ // **把教练档位透传下去**（第 45 轮，陪练审计发现）。
+ //
+ // `decideRegister` 里有一道闸门 `context.preference==='quiet'`，而这条链上从来没人
+ // 传过 `preference`——`buildContext` 的键里只有 `profile.coach.mode`。于是那句判断
+ // 在聊天链路上**永远不命中**：玩家把提示档设成「安静」，主动提示确实停了，
+ // 但只要他打一句话，陪练照样按 R1/R2 回。实测：`buildContext(...).preference===undefined`
+ // 而 `profile.coach.mode==='quiet'`。
+ //
+ // ⚠ `context.mode` 是**游戏模式**（camp/battle，来自 game.mode），与教练档位同名不同物，
+ // 所以这里不能复用 `mode`，必须另给 `preference`。
+ context={...context,goal:memory.goal||null,favorite:memory.favorite||null,
+  preference:context.preference??context.profile?.coach?.mode??null};
  let next=rememberPreference(memory,message),packet,route=role,locked=false;
  const previous=Array.isArray(conversation)&&conversation.length?conversation.slice(-8):(memory.dialogue||[]);
  const followup=/^[？?]+$|什么意思|为什么|为啥|没懂|说反|连续性|接着|然后呢/.test(routingText);
  const ruleCard=cards.find(c=>c.id.startsWith('rule:')&&routingText.includes(c.title.split(' ')[0])&&/消耗|威力|优先级|面板|介绍|多少/.test(routingText));
- const situational=/咋办|怎么办|怎么救|救一下|救命|分析|输了|输在哪|打不过|damn/i.test(routingText);
- const matchRequest=/整局|整场|上一局|一整局/.test(routingText)||/复盘|回顾/.test(routingText)&&!/回合/.test(routingText)||(situational||followup)&&!!(context.battle?.result||!context.battle&&context.lastMatch);
+ // **「输了」是情绪，不是分析请求**（第 45 轮陪练审计的 2 号缺陷）。
+ //
+ // 上一版把「输了」和「输在哪」一起放进 `situational`，于是下面那条
+ // `(situational||followup)&&已结束的一局` 成立：玩家刚打完一局、只说一句「输了」，
+ // 消息就被判成复盘请求送去老师通道，拿回来的是一整段战报。产品把
+ // 「把战绩摘要冒充共情」列为禁止项，`EMOTION_WORDS` 又把「输了」算作情绪——
+ // 两边各判各的，玩家拿到的东西就是两套规则打架的结果。
+ //
+ // 现在只有**真正的分析问法**才算 situational：输在哪、哪里出问题、为什么输、怎么办…
+ // 「输了」单独出现就留给陪练（两张词表同源见 companion.js 的 EMOTION_WORDS / MOOD_LINE）。
+ const ANALYSIS_ASK=/咋办|怎么办|怎么救|救一下|救命|分析|输在哪|哪里出|问题出在|为什么输|为啥输|打不过|damn/i;
+ // 「别复盘了」里也有「复盘」两个字，但这句话要的是**不要**复盘。
+ // 拒绝以整句为准，不靠关键词命中——它同时挡住下面 matchRequest 与 review 两个分支，
+ // 让这句话落到陪练，由 memory.stated 的 refusal 出口回答（"好，不复盘了。"）。
+ const refusesReview=/别复盘|不想复盘|不要复盘|不复盘|别回顾|不想回顾|别总结|别说了/.test(routingText);
+ const situational=ANALYSIS_ASK.test(routingText);
+ // 已经说过「先别复盘」（memory.stated 的 refusal:review，带时效）时，
+ // 「打完一局 + 一句情绪或追问」不再构成复盘请求。**玩家再明确要复盘**照旧走老师：
+ // 显式请求优先于旧拒绝，这一轮也会把 review-after-loss 写成 yes。
+ const wishes=playerWishes(next);
+ const reviewRequest=/整局|整场|上一局|一整局/.test(routingText)||/复盘|回顾/.test(routingText)&&!/回合/.test(routingText);
+ const reviewInferred=(situational||followup)&&!!(context.battle?.result||!context.battle&&context.lastMatch);
+ const matchRequest=!refusesReview&&(reviewRequest||reviewInferred&&!wishes.refusedReview);
  const quizRequest=/小测|练习题|出.{0,5}题/.test(routingText);
  if(isLiveMatch(context))return {text:'线上竞技 PVP 赛中不提供战术分析或教学，结束后我们再聊。',evidence:[],memory:next,route:'policy',provider:'local'};
  if(next.goal!==memory.goal){next.lastTopic='preference';packet={text:`记住了，你更想${next.goal==='稳健'?'打得稳一些，培养时我会优先比较生存空间':'打得主动些，培养时我会优先比较输出和先手'}。这个偏好随时可以改。`,evidence:['来源：你明确表达的玩法目标。']};locked=true;}
@@ -58,7 +90,7 @@ export async function runCoach({message,role='auto',context,memory,conversation=
  }else if(followup&&memory.lastTopic==='quiz'){
    packet={text:'你是在接着问刚才的小测。'+(previous.filter(x=>x.role==='assistant').at(-1)?.content||'可以重新出一道题，我们一步步来。'),evidence:[]};route='teacher';locked=true;
  }else if(matchRequest){packet=reviewMatch(context);route='teacher';next.lastTopic='match-review';locked=true;}
- else if(/复盘|回顾|详看第.+回合/.test(routingText)){packet=context.requestedTurn&&!context.lastTurn?{text:`这份对局记录里没有第 ${context.requestedTurn} 回合，不能用其他回合替代。`,evidence:[]}:review(context);if(context.lastTurn)packet={...packet,evidence:[...packet.evidence,compareTurnAlternatives(context.lastTurn,context.evidenceRulesVersion||'0.6')?.text].filter(Boolean),text:`第 ${context.lastTurn.before.turn} 回合：${analyzeTurn(context.lastTurn,{rulesVersion:context.evidenceRulesVersion||'0.6'})}`};route='teacher';next.lastTopic='review';locked=true;}
+ else if(!refusesReview&&/复盘|回顾|详看第.+回合/.test(routingText)){packet=context.requestedTurn&&!context.lastTurn?{text:`这份对局记录里没有第 ${context.requestedTurn} 回合，不能用其他回合替代。`,evidence:[]}:review(context);if(context.lastTurn)packet={...packet,evidence:[...packet.evidence,compareTurnAlternatives(context.lastTurn,context.evidenceRulesVersion||'0.6')?.text].filter(Boolean),text:`第 ${context.lastTurn.before.turn} 回合：${analyzeTurn(context.lastTurn,{rulesVersion:context.evidenceRulesVersion||'0.6'})}`};route='teacher';next.lastTopic='review';locked=true;}
  if(!packet&&followup&&['review','match-review'].includes(memory.lastTopic)){packet=memory.lastTopic==='match-review'?reviewMatch(context):review(context);route='teacher';locked=true;}
  if(!packet){
    // 换宠/守备这类「选哪个行动」的问法也是军师问题：只说「守一下和换潮甲龟哪个好」时

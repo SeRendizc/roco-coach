@@ -80,10 +80,11 @@ test('情绪意图路由：词表内的情绪词被判成 emotion，并走心情
   for (const message of ['好烦', '难受', '不想玩了']) {
     assert.equal(intentOf(message), 'emotion', `${message} 应当被判成情绪`);
   }
-  // TODO(companion): '今天有点累' / '今天没睡好' 这类状态词目前不在
-  // EMOTION_WORDS（companion.js:255）里，所以 intent='other'。它们的正文出口
-  // 仍然是 moodLine（:1675），实测不含战报，所以这一条不要紧；
-  // 但它说明「情绪意图」和「情绪出口」是两张表（见下一条与审计 §3.2）。
+  // 状态词（累了／没睡好）**故意不算情绪**：它们在心情出口里（MOOD_LINE），
+  // 但不是情绪本身。判成 emotion 会把档位从 R1 抬到 R2、让第一轮就开始讲对局
+  // （实测：`今天有点累` → R2 + 连败句），所以这条不对称是有意的。
+  // 第 45 轮修的是另一头：**判得成情绪的词必须接得住**（见下一条与 companion.js 的
+  // EMOTION_WORDS_LIST 自检）——原来的缺陷是「判成情绪却拼不出句子」，方向相反。
   for (const message of ['今天有点累', '今天没睡好']) {
     assert.equal(intentOf(message), 'other');
   }
@@ -123,24 +124,26 @@ test('空账本与有记录时，同一句心情拿到的是同一句陪伴（�
   assert.ok(!REPORT.test(recorded.text), recorded.text);
 });
 
-test('已知缺口（记录当前行为，故意保持绿色）：EMOTION_WORDS 里有一半的词接不住，会掉进观察通道', () => {
-  // TODO(companion): EMOTION_WORDS（src/coach/companion.js:255）与
-  // MOOD_LINE / MOOD_WORD_RE（:1555、:1637）不同源。输了／好菜／气死／崩了／好难
-  // 被判成 emotion，但 moodLine 拼不出词（:1675 返回 null），于是 R2 那一格落到
-  // reading=pick(CLASSES)（:2018），玩家拿到一段纯战报——正是契约第 4 条要挡的
-  // 「战绩摘要冒充共情」。
-  // 目标行为：这五个词与 MOOD_LINE 同源，回答里一个战报读数都没有。
-  // 缺口报告：docs/roco/COMPANION-GAP-AUDIT.md §4.1。
-  // 这条用例变红 = 缺口被修好了 → 请改成正向断言（!REPORT.test）并更新审计。
+test('情绪词一律走心情出口：五个曾经接不住的词，回答里一个战报读数都没有（第 45 轮已修）', () => {
+  // 修复前的病灶：EMOTION_WORDS 与 MOOD_LINE / MOOD_WORD_RE 各写一张表，
+  // 输了／好菜／气死／崩了／好难被判成 emotion，却拼不出心情那一句，
+  // 于是 R2 落到 reading=pick(CLASSES)，玩家拿到一段纯战报——
+  // 正是契约第 4 条要挡的「战绩摘要冒充共情」。
+  // 现在这几张表由同一批字面量派生（companion.js 的 EMOTION_EXTRA_WORDS），
+  // 模块加载时另有一条自检：取不到词或拼不出整句就直接抛错。
   const memory = memoryWith(['win', 'win', 'win']);
-  const leaked = [];
   for (const message of ['输了', '好菜', '气死', '崩了', '好难']) {
-    assert.equal(intentOf(message), 'emotion', `${message} 现在被判成情绪`);
+    assert.equal(intentOf(message), 'emotion', `${message} 应当被判成情绪`);
     const packet = companion({}, memory, message, NOW);
-    if (REPORT.test(packet.text)) leaked.push(message);
+    assert.ok(packet.text.includes(message),
+      `${message} 要把他自己用过的那个词接回来（mimic）：${packet.text}`);
+    assert.ok(!REPORT.test(packet.text),
+      `${message} 的回答是汇报不是陪着：${packet.text}`);
   }
-  assert.deepEqual(leaked, ['输了', '好菜', '气死', '崩了', '好难'],
-    'TODO(companion)：这五个词的回复目前是纯战报；目标是与 MOOD_LINE 同源、不报战绩');
+  // 反向对照：带「输在哪」的分析问法**不该**掉进陪伴句——
+  // 同源的目的是让情绪被接住，不是把所有含「输」的话都变成安慰。
+  const asked = companion({}, memory, '输在哪', NOW);
+  assert.ok(!/^输了啊/.test(asked.text), `分析问法不该拿到心情句：${asked.text}`);
 });
 
 // ── 条款三：长期偏好的往返、纠正、删除 ───────────────────────────────────────
@@ -304,43 +307,70 @@ test('气泡时序：先判 hold 再判排队过期，超时优先丢弃', () =>
   }).action, 'drop', '既不新鲜又刚显示过时，丢掉比压着更合适');
 });
 
-test('已知缺口（记录当前行为）：静默偏好只有主动侧收到，聊天链路的 context 里没有 preference', () => {
+test('静默偏好同时管住局内气泡与聊天回话（第 45 轮已修，正向断言）', async () => {
   // 闸门本身是好的：把 preference 递进去就生效——主动侧正是这样做的（session.js:63）。
   assert.equal(decideRegister({context: {preference: 'quiet'}, intent: 'chat', playerInitiated: true}).register,
     'R0');
   assert.equal(companion({preference: 'quiet'}, freshMemory(), '你好', NOW).register, 'R0');
   assert.equal(companion({}, freshMemory(), '你好', NOW).register, 'R1');
 
-  // TODO(runtime): 聊天链路 buildContext（runtime.js:10-27）不带 preference，
-  // runCoach 也只补 goal / favorite（runtime.js:32），于是 decideRegister 的
-  // `context.preference==='quiet'`（companion.js:531）在聊天侧永远不命中：
-  // 同一个「安静」设置只对局内主动气泡生效，管不住聊天里的回话。
-  // 目标：buildContext / runCoach 把 profile.coach.mode 作为 preference 传下去。
+  // ✅ 已修（第 45 轮）：`runCoach` 现在把 `profile.coach.mode` 作为 `preference`
+  // 透传给决定层，所以「安静」档在聊天侧也生效了。
+  //
+  // 这条原来是一个 TODO（断言 `context.preference===undefined` 且判定**不是** R0）。
+  // 修好之后按它自己的说明翻成正向断言——TODO 里写的就是「这条变红 = 缺口被修好了」。
   const profile = {coach: {mode: 'quiet'}, pets: [], lossStreak: 0};
   const context = buildContext(null, profile, 'fox');
-  assert.equal(context.preference, undefined);
-  assert.equal(context.profile.coach.mode, 'quiet', '档位确实在 profile 里，只是没被送到决定层');
-  assert.notEqual(decideRegister({context, intent: 'chat', playerInitiated: true}).register, 'R0');
+  // `buildContext` 本身仍然不带 preference（它只负责把 profile 原样带上），
+  // 透传点在 `runCoach`——那里才是决定层之前的最后一道。
+  assert.equal(context.profile.coach.mode, 'quiet', '档位确实在 profile 里');
+  const quietRun = await runCoach({
+    message: '你好', role: 'auto', context: structuredClone(context), memory: freshMemory(), conversation: [],
+  });
+  assert.equal(quietRun.meta?.register ?? quietRun.register, 'R0',
+    '「安静」档必须同时管住局内气泡与聊天回话');
+  // 反向对照：档位是 gentle 时，同一句话不该被静音
+  const gentle = buildContext(null, {coach: {mode: 'gentle'}, pets: [], lossStreak: 0}, 'fox');
+  const gentleRun = await runCoach({
+    message: '你好', role: 'auto', context: structuredClone(gentle), memory: freshMemory(), conversation: [],
+  });
+  assert.notEqual(gentleRun.meta?.register ?? gentleRun.register, 'R0',
+    'gentle 档不该被这道闸门拦住');
 });
 
-test('已知缺口（记录当前行为）：玩家说「输了」或「别复盘了」时，真实路由把话交给了老师', async () => {
+test('情绪与拒绝优先于复盘路由：输了 / 别复盘了 归陪练，分析问法仍归老师（第 45 轮已修）', async () => {
   const game = finishedGame(11);
   assert.ok(game.result, '这一局要真的打完，matchRequest 才会成立');
   const context = buildContext(game, {coach: {mode: 'gentle'}, pets: [], lossStreak: 0}, 'fox');
+  const run = (message, memory = freshMemory()) => runCoach({
+    message, role: 'auto', context: structuredClone(context),
+    memory: rememberPreference(memory, message), conversation: [],
+  });
   const routes = {};
-  for (const message of ['输了', '别复盘了']) {
-    const memory = rememberPreference(freshMemory(), message);
-    const result = await runCoach({
-      message, role: 'auto', context: structuredClone(context), memory, conversation: [],
-    });
-    routes[message] = result.route;
+  for (const message of ['输了', '别复盘了']) routes[message] = (await run(message)).route;
+  // 修好之前：两句都 route='teacher'——「输了」是 EMOTION_WORDS 里的词，
+  // 却被 runtime 的 matchRequest 提前截走；「别复盘了」明明写进了 memory.stated
+  // 的 refusal:review，teacher 一个字段都没读，照样返回一整段复盘。
+  assert.deepEqual(routes, {'输了': 'companion', '别复盘了': 'companion'});
+
+  // 情绪那句话拿到的必须是陪伴句，不是换了壳的战报（同一条契约的前半）。
+  const upset = await run('输了');
+  const upsetText = upset.text ?? '';
+  assert.ok(!/回合|倒下|伤害|\d+胜|\d+负/.test(upsetText),
+    `「输了」不许换来一段战报：${upsetText}`);
+  // 拒绝那句话要被执行，而不只是被记录。
+  const refused = await run('别复盘了');
+  assert.ok(/不复盘/.test(refused.text ?? ''), `拒绝要被回答：${refused.text}`);
+
+  // 反向对照：真正的分析问法照旧走老师——把词表同源做成了「含输就安慰」就是做过头了。
+  for (const message of ['输在哪', '整局复盘一下', '为什么输了']) {
+    const r = await run(message);
+    assert.equal(r.route, 'teacher', `「${message}」是分析请求，不能掉进陪伴句：${r.text}`);
   }
-  // TODO(runtime / teacher): '输了' 是 EMOTION_WORDS 里的词（companion.js:255），
-  // 但 runtime.js:38 的 matchRequest 在路由之前就命中，route 变成 teacher，
-  // 陪练根本拿不到这句话；'别复盘了' 更重——拒绝已经在路由前写进 memory.stated
-  // （runtime.js:33 → memory.js:283-284），而 teacher.js 一处都没读 playerWishes，
-  // 仍然返回一段完整复盘：拒绝被记录了，却没有被执行。
-  // 目标：情绪与拒绝优先于 matchRequest；复盘入口先读 playerWishes(...).refusedReview。
-  // 缺口报告：docs/roco/COMPANION-GAP-AUDIT.md §2.2。
-  assert.deepEqual(routes, {'输了': 'teacher', '别复盘了': 'teacher'});
+  // 反向对照之二：已经说过「先别复盘」时，光是一句追问不再触发复盘；
+  // 但玩家**再明确要**复盘仍旧走老师（显式请求优先于旧拒绝）。
+  const memory = rememberPreference(freshMemory(), '输了别复盘，我不想听');
+  assert.equal(playerWishes(memory).refusedReview, true, '拒绝已经记进 memory.stated');
+  assert.equal((await run('然后呢', memory)).route, 'companion', '旧拒绝生效期间不再推复盘');
+  assert.equal((await run('复盘一下吧', memory)).route, 'teacher', '玩家改主意了要照办');
 });
