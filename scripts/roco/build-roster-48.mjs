@@ -396,7 +396,10 @@ const out = {
   generated_by: 'scripts/roco/build-roster-48.mjs',
   command: 'node scripts/roco/build-roster-48.mjs',
   ruleset_id: existingPets.ruleset_id,
-  generated_at: new Date().toISOString(),
+  // 产物里**不放生成时间**：它让同一份输入的两次运行不再是逐字节相同，而这份产物是
+  // `verify-coverage-axes.mjs` 的输入（第 46 轮实测：重跑只差这一行）。要记时间就记在
+  // 提交信息或报告里，不要污染可复现的产物。
+  generated_at: null,
   sources: {
     catalog: { path: 'data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/Catalog.lua', sha256: sha256(catalogPath), entries: Object.keys(catalog).length },
     learnsets_lua: { path: 'data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/Learnsets.lua', sha256: sha256(learnsetsPath), entries: Object.keys(luaLearnsets).length },
