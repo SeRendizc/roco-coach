@@ -48,6 +48,10 @@ const publicAssets=new Set([
  // RC-205 精灵盒子：HTML/CSS 是页面外壳，JS 由下面的模块图自动收录
  // （`box.html` 里的 `<script type="module" src="/src/client/box.js">` 是入口）。
  'src/client/box.html','src/client/box.css',
+ // RC-305 六槽阵容工作台是**可挂载模块**（`src/client/team-workshop.js`），挂在产品页
+ // `roco.html` 上；`workshop.html` 只是单独调试该模块的开发夹具（薄壳），
+ // JS 由模块图自动收录（HTML 里的 `<script type="module">` 是入口）。
+ 'src/client/workshop.html',
  'src/client/style.css','src/client/connect.css','src/client/connect.js',
 ]);
 
@@ -70,6 +74,10 @@ const publicAssets=new Set([
 function moduleSpecifiers(src){
  const out=[];
  for(const m of src.matchAll(/(?:^|\n)\s*import\s[^'"]*['"](\.[^'"]+)['"]/g))out.push(m[1]);
+ // 2026-09-22 修：`src=["']…` 里的 `\s` 会匹配到 `type="module"` 的 `e` 与 `"` 之间那个**空**位置，
+ // 于是 `type="module"` 后面的任意内容都被当成 `src="…"`——一份内联 `<script type="module">`
+ // 会取出 `...`（`'.slice(0,3)`）这种垃圾说明符，进模块图之后就是「磁盘上不存在」。
+ // 属性名必须**从空白开始**（`\ssrc=`），闭引号也必须是**属性自己的**引号。
  for(const m of src.matchAll(/<script[^>]*\stype=["']module["'][^>]*\ssrc=["']([^"']+)["']/g))out.push(m[1]);
  return out;
 }
@@ -229,6 +237,14 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
      const result=await rocoService.box(Object.fromEntries(new URL(req.url,origin).searchParams));
      return json(res,result.status||200,result);
     }
+    // 阵容工坊（RC-305）：`GET /api/roco/workshop`。
+    // 与盒子逐字同一条先例——只读、公开数据、不要 CSRF、**不经 Python**：
+    // 页面把六个槽位当查询串发上来，服务端调 RC-301→302→303→304 的纯函数回来。
+    // 非法参数必须是 400（`ok:false` + 点名），所以状态码同样取自回执。
+    if(path==='/api/roco/workshop'&&req.method==='GET'){
+     const result=await rocoService.workshop(Object.fromEntries(new URL(req.url,origin).searchParams));
+     return json(res,result.status||200,result);
+    }
     if(req.method!=='POST')throw fail(405,'仅支持 POST');
     if(req.headers.origin!==origin||!req.headers['content-type']?.startsWith('application/json'))throw fail(403,'请求来源或类型不正确');
     const sid=req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1],s=sessions.get(sid);
@@ -312,10 +328,10 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
    // 页面 URL 保持稳定短路径：/ 与 /index.html 都给营地页，/connect.html 给连接页。
    // 这两个别名是**对外契约**（README、文档、用户书签都写着 /connect.html），
    // 所以即使文件搬进 src/client/ 也不改 URL。`/roco.html`（训练场）与
-   // `/box.html`（RC-205 精灵盒子）同理：短路径是对外契约，文件搬家不改 URL。
+   // `/box.html`（RC-205 精灵盒子）与 `/workshop.html`（RC-305 阵容工坊）同理：短路径是对外契约，文件搬家不改 URL。
    // 其余资源一律用真实相对路径，
    // 这样浏览器按 import 说明符解析出的 URL 与白名单条目是同构的。
-   const PAGE_ALIASES={'':'src/client/index.html','index.html':'src/client/index.html','connect.html':'src/client/connect.html','roco.html':'src/client/roco.html','box.html':'src/client/box.html'};
+   const PAGE_ALIASES={'':'src/client/index.html','index.html':'src/client/index.html','connect.html':'src/client/connect.html','roco.html':'src/client/roco.html','box.html':'src/client/box.html','workshop.html':'src/client/workshop.html'};
    const raw=decodeURIComponent(path.slice(1));
    const asset=Object.hasOwn(PAGE_ALIASES,raw)?PAGE_ALIASES[raw]:raw;
    if(asset.includes('..'))throw fail(404,'文件不存在');

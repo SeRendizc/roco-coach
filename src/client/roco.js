@@ -12,16 +12,19 @@
 // 它走的是陪练的情绪回应，不是战术问答。这是刻意的——F01 要证明的正是
 // 「不打开聊天也能得到帮助」。
 //
-// ── 版式（第 60 轮 UI 落地）─────────────────────────────────────────────────
-// 三页结构都按定稿的 mockup 落进这一个文档里，靠 `body[data-roco-view]` 与
-// 各区块的 `hidden` 切换：
-//   · **选阵容页**：页头（标题 + 轻量小芽入口）+ 固定队伍栏 + 阵容池
-//     （分段选择器 / 搜索 / 属性·定位筛选 / 每页 12 / 详情抽屉）。
-//     规则版本、服务状态、验收钩子、工程说明**全部**在右上角 `#about-drawer`，默认收起。
-//   · **对战页**：阵容池完全收起（只留 `#lineup-brief` 一行 + 「重选阵容」），
-//     中央是双方当前宠物的战斗舞台，后备压成小条，合法动作固定在底部。
-//   · **结算页**：结果 / 一个关键转折 / 下一局练习目标先显示，统计与证据折叠。
-// 小芽不做三角色状态表：军师是两行以内的自动浮条，陪练是轻量气泡 + 可见记忆，
+// ── 版式（第 92 轮，用户 P0 试玩反馈重排）──────────────────────────────────
+//   · **选阵容页**：页面一进来就是「选精灵」——固定队伍栏 + 阵容池 + 常驻翻页。
+//     搜索 / 属性·定位筛选 / 翻页**全部走服务端分页**（`offset/limit/type/role`），
+//     筛选一变就回到第 1 页，并把页码夹到新结果集范围内。卡片首层是
+//     「名字 + 属性 + 定位 + **机制**」，基础面板**单独成块**；
+//     模板句「最狠一招『X』威力 a · 速度 b」已经删掉（`keyFeature` 不再存在）。
+//   · **对战页**：顶部对称（双方资源条 + 当前精灵 + 队伍状态），中间公开战况，
+//     底部是**按引擎 kind 分组**的行动坞（技能 / 物品 / 换精灵 / 更多）。
+//     资源条（魔力/心）只渲染**引擎给的数**；引擎没有这个量就写「未核验」并指向
+//     开发者抽屉，绝不画心形计数器、也不补一个 4（见 `resourceHtml`）。
+//   · **小芽**：宽屏是右侧 Coach 栏（战斗区右侧），窄屏贴底一整块；
+//     输入与最近一句回复**同屏可见**（判据量 `getBoundingClientRect`）。
+// 小芽不做三角色状态表：军师是两行以内的自动浮条，陪练是同一栏里的气泡 + 可见记忆，
 // 老师只在局末给一个关键点与下一局目标。
 
 import {
@@ -30,10 +33,9 @@ import {
   rocoHintStale,
   rocoPlanFreshness,
   rocoLessonEntry,
-  rocoPlanFeatures,
-  rocoGameView,
   rocoDamagePreviewText,
   rocoMatchReview,
+  rocoGameView,
   expectedLine,
   ROCO_MODE,
 } from '../coach/roco-experience.js';
@@ -44,6 +46,10 @@ import {recordTeacherReview, recordLearningCheck} from '../coach/teacher-review.
 // 并列比较的**结构**住在核心（纯函数），页面只负责渲染成 HTML：
 // 这样「多动作比较 + 未来 2—3 回合后果」在 mock 宿主与报告里也是同一份数据。
 import {rocoCompareModel} from '../coach/compare-model.js';
+// RC-305 六槽阵容工作台：**整块挂在 #team-workshop 上的模块**。它自己消费
+// `/api/roco/workshop`（RC-301 合同 → RC-302 七维缺口 → RC-303 候选 → RC-304 环境先验），
+// 页面层不重算、不另写第二套模板。挂载点见 roco.html 的 `#team-workshop`。
+import {mountTeamWorkshop} from './team-workshop.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
 const state = {
@@ -55,13 +61,11 @@ const state = {
   // 局末复盘要按整局找转折点，只拿最后一次推进的事件是找不到的。
   matchEvents: [],
   // **最后一个还能行动的局面**。终局视图里 `legal` 已经空了、对手场上也换成了
-  // 补位上来的那一只；拿它做复盘会把「对方倒下的那一只」认成现在场上这只
-  // （teacher-review.js:266-269 明确不许这么顶替，宁可不给名字）。
+  // 补位上来的那一只；拿它做复盘会把「对方倒下的那一只」认成现在场上这只。
   lastLiveView: null,
   plan: null,
   planAtVersion: null,
   //: 陈旧规划被丢弃的账（可核对）：每条记它属于哪一版、丢弃时画面是哪一版。
-  //: 这是「陈旧结果取消」在页面上的出口 —— 与核心适配契约的 `lateDiscards()` 同口径。
   planStaleDiscards: [],
   session: {hints: 0, lastAt: -Infinity, said: new Set(), dismissed: false},
   hint: null,          // {text, why, stateVersion, action, plan}
@@ -69,15 +73,25 @@ const state = {
   memory: freshMemory(),
   timings: [],         // 每次 /api/roco/plan 的往返耗时（P50/P95 报告要用）
   // ── 阵容选择（P0-3）──────────────────────────────────────────────
-  // `roster` 是**全量名单**（48 只，带 role/speed_tier）：选中项的名字回查、
+  // `roster` 是**全量名单**（带 role/speed_tier/trait/mechanism_line）：选中项的名字回查、
   // 筛选下拉的选项表、以及「同一只不能同时在两边」的判断都要它。
   // 屏幕上渲染的是 `pool.rows`（当前页最多 12 只）——48 张长卡平铺是这一轮要拆掉的东西。
   roster: [],
+  //: 引擎/登记层报的候选宇宙总数（`/api/roco/roster` 的 `total`）。文案里**不写死 48**：
+  //: 48 只是迁移夹具，候选宇宙按 v3 是全量图鉴（catalog=622）。
+  rosterTotal: null,
   pick: {player: [], enemy: [], side: 'player', hint: '', open: false},
-  // 阵容池的**视图状态**（第 60 轮）：搜索 / 属性 / 定位 / 分页。
-  // `seq` 是并发保护：搜索框每敲一个字都会发一次请求，回来晚的那次不许覆盖新结果。
-  pool: {keyword: '', type: '', role: '', offset: 0, pageSize: 12, total: 0, rows: [], seq: 0},
+  // 阵容池的**视图状态**（第 92 轮重做）：搜索 / 属性 / 定位 / 分页。
+  // `page` 是**唯一**的页码真值，`offset` 由它算出来再发给服务端；
+  // 这样「页码」与「真的取了哪一段」不可能对不上（P0-1 要的正是这一点）。
+  // `idsByPage` 记下**每一页真的渲染过哪些 pet_id**，验收脚本拿它与
+  // 「直接按 offset 问服务端」的结果逐一对齐——同一份数据、两条路径。
+  pool: {keyword: '', type: '', role: '', page: 1, pageSize: 12, total: 0, pages: 1,
+    rows: [], idsByPage: {}, source: null, seq: 0},
   detail: null,        // 详情抽屉里正在看的那一只
+  coach: {open: false}, // 小芽那一栏是否展开（默认收起，避免一进来就盖住战况）
+  mode: null,          // `/api/roco/status` 的 mode（注册表原文），页面只渲染不写死
+  teamWorkshop: null,  // RC-305 工作台回传的同一份评价（页面不重算）
   seedOverride: null,  // 只给验收脚本换局用；界面上没有这个开关
 };
 
@@ -97,8 +111,7 @@ async function bootstrap() {
 
 /**
  * 只读接口。`/api/` 下的**写**请求一律 POST + CSRF；只读的用 GET——
- * 服务端就是这么分的（`/api/roco/status` 与 `/api/roco/roster`），
- * 拿 POST 去撞只会得到一句「接口不存在」。第一次就踩了这个。
+ * 服务端就是这么分的（`/api/roco/status` 与 `/api/roco/roster`）。
  */
 async function getJson(path) {
   const response = await fetch(path, {cache: 'no-store', signal: AbortSignal.timeout(30000)});
@@ -116,7 +129,6 @@ async function api(path, body) {
   });
   let response = await send();
   // 重启后端会清掉内存里的会话，页面还留着旧 cookie，第一个请求必然 403。
-  // 重建会话并原样重试一次，别让演示卡在一次莫名其妙的失败上。
   if (response.status === 403) {
     session = null;
     await bootstrap();
@@ -150,11 +162,6 @@ const pct = (hp, max) => (Number.isFinite(hp) && Number.isFinite(max) && max > 0
 
 //: 系别配色：**自制色块**，不抓官方图（素材许可不明）。
 //: 色盲友好：颜色之外同时给文字标签，所以不认颜色也能读。
-//: 候选池从 12 只扩到 **48** 只之后，名单里多出 7 种系别（草系、地系、恶系、毒系、
-//: 电系、机械系、光系）。实测症状：48 张卡里有 **17 张没有形象**（`{avatars:48, empty:17}`），
-//: 而它们正是数量最多的一批。所以这两张表按**数据里真的出现过的系别**补齐——
-//: 守卫（`tests/roco-experience.test.js`）现在从 `pets.json` 取出全部系别逐个比对，
-//: 少一个就不是「以后再说」，而是那一类伙伴在页面上变成一个没有图形的灰块。
 const TYPE_COLOR = {
   普通系: '#9aa0a6', 火系: '#e8714a', 水系: '#4a90d9', 武系: '#c0563f', 翼系: '#7fb2e5',
   冰系: '#69c2d6', 龙系: '#7b61c9', 幽系: '#6b5b95', 萌系: '#e58fc0', 虫系: '#8fae4a',
@@ -163,14 +170,6 @@ const TYPE_COLOR = {
   恶系: '#6b5b7b', 机械系: '#8a97a8', 电系: '#e8c34a',
 };
 //: 系别「形象」：**自制 emoji 徽记**，与配色一一对应。
-//:
-//: 为什么是 emoji 而不是图：官方立绘的素材许可不明，抓进来就是把许可风险塞进产品
-//: （`docs/roco/LICENSE-MATRIX.md` 的口径）。emoji 是字体自带的字符，零外链、零下载，
-//: 放大不糊、离线可用，也天然满足「色盲友好」——图形之外还有文字标签与 emoji 两个信号。
-//:
-//: ⚠ 这张表必须与 `TYPE_COLOR` **同一个键集**：少一个系别，那一系的伙伴就会退回
-//: 一个默认灰块，在页面上看起来像「这只伙伴没有形象」。守卫在
-//: `tests/roco-experience.test.js` 里逐键比对两张表（少一个键就红）。
 const TYPE_EMOJI = {
   普通系: '🐾', 火系: '🔥', 水系: '💧', 武系: '🥊', 翼系: '🪶',
   冰系: '❄️', 龙系: '🐉', 幽系: '👻', 萌系: '🎀', 虫系: '🐛',
@@ -194,40 +193,207 @@ const TYPE_ORDER = ['普通系', '火系', '水系', '武系', '翼系', '冰系
 const STATUS_LABEL = {burn: '灼烧', poison: '中毒', paralysis: '麻痹', freeze: '冰冻',
   sleep: '睡眠', confusion: '混乱', seal: '封印'};
 const RESULT_CN = {win: '我方胜', loss: '我方负', draw: '平局', escaped: '撤退', ongoing: '未结束'};
+//: 技能类别的中文名：数据里给的是中文（攻击/防御/状态），这里只兜一层英文枚举，
+//: 免得将来引擎换成枚举名时页面上出现 `status` 这种工程词。认不出就原样显示。
+const SKILL_CATEGORY_CN = {attack: '攻击', defend: '防御', defense: '防御', status: '状态',
+  support: '辅助', passive: '特性'};
+const categoryCn = (value) => (typeof value === 'string' && value ? (SKILL_CATEGORY_CN[value] ?? value) : null);
 
 /**
  * 一只伙伴的头像块：主系别的 emoji + 该系颜色。
  *
  * 用的是**主系别**（`types[0]`）——双系伙伴只给一个徽记，因为卡片上已经有完整的
- * 系别标签；这里要的是「一眼认得出是哪一类」，不是再列一遍属性表。
- * 名字拿不到（`ui_public_view` 的后备不给名字）时不编：返回空串。
+ * 系别标签。名字拿不到时不编：返回空串。
  */
 function petAvatar(pet) {
   if (!pet || !pet.name) return '';
   const main = (pet.types ?? [])[0] ?? null;
   if (!main) return '';
-  // 两个类名都在：`pet-icon` 是营地页（`src/client/style.css`）里既有的**大 emoji 形象**，
-  // `avatar` 是第 45 轮加的徽记，验收脚本按它取值。**视觉只用一份**（roco.css 那一份）。
   return `<span class="avatar pet-icon" style="border-color:${typeColor(main)}" aria-hidden="true">${typeEmoji(main)}</span>`;
 }
 
+// ── 基础面板（P0-1）────────────────────────────────────────────────────────
+//
+// 六维**单独成块**，字段名与顺序与盒子那一层同一套（`src/server/roco-service.js`
+// 的 `BOX_STAT_FIELDS`），不另造一套说法。
+// 冻结数据里**真的没有**的那一项如实写「本仓库没有这一项」——不补 0、不省略成
+// 一行空白（省略会让玩家以为「这只伙伴没有魔攻」而不是「数据没登记」）。
+const STAT_FIELDS = [['hp', '生命'], ['atk', '物攻'], ['def', '物防'],
+  ['spa', '魔攻'], ['spd', '魔防'], ['spe', '速度']];
+const STAT_MISSING = '本仓库没有这一项';
+
+/** 基础面板那一段的 HTML：给到的写数值，没给的如实标出来。 */
+function statBlockHtml(stats) {
+  const box = stats && typeof stats === 'object' ? stats : {};
+  const cells = STAT_FIELDS.map(([key, label]) => {
+    const value = box[key];
+    return Number.isFinite(value)
+      ? `<span><i>${label}</i><b>${value}</b></span>`
+      : `<span title="${STAT_MISSING}"><i>${label}</i><b class="muted">${STAT_MISSING}</b></span>`;
+  }).join('');
+  return `<span class="ck-title">基础面板（六维）</span><span class="ck-grid">${cells}</span>`;
+}
+
+//: 没有可核对机制时卡片首层写这一句。它**不是**模板句的替代品，而是一句如实的
+//: 「这一项我们不知道」——回落到「最狠一招 + 速度档」那类模板是明确禁止的。
+const MECHANISM_UNKNOWN = '机制资料待确认';
+
 /**
- * 一只伙伴在**战斗舞台**上的卡。
+ * **机制**：卡片首层唯一那句「有区分度」的话（P0-1）。
  *
- * 这是对战页中央那一块：血量、能量、异常三项要一眼看得清，别的都进详情抽屉。
- * 六维面板原来印在这里（`pet-stats`），第 60 轮挪进详情抽屉——舞台上它只是噪声。
+ * 取值口径（与 RC-305 那一路约定的契约一致，**页面不自己发明机制**）：
+ *   ① 服务端给的是对象 `pet.mechanism = {line, status, name, tags}`（`roster()` 的加性字段）；
+ *      `line` 非空且 `status === 'FROZEN_DESC'` ⇒ **逐字**显示它（登记层已经压到一行，
+ *      页面**不截断、不改写**）；
+ *   ② `line` 为空，或 `status` 不是 `FROZEN_DESC` ⇒ 「机制资料待确认」——
+ *      **未核验的机制不上首层**；
+ *   ③ 兼容平铺写法（`pet.mechanism_line` / `pet.mechanism_status`，同一套规则）；
+ *   ④ 两种都没有 ⇒ 「机制资料待确认」。
+ *
+ * `status` 只用来控制显示：`FROZEN_DESC` / `MECHANISM_UNCONFIRMED` 这类枚举名
+ * **绝不**印到页面上（判据在 `tests/roco-page-ux.test.js` 里有一条反向断言）。
+ *
+ * 为什么删掉原来那句「最狠一招『X』威力 a · 速度 b」：它在 48 张卡上几乎逐字重复，
+ * 玩家看不出这一只与那一只有什么不同（用户原话：「过于模板化、根本没意义」）。
+ * 威力并没有丢：它在详情抽屉与技能卡上逐条列着。
+ */
+function mechanismOf(pet) {
+  const record = pet?.mechanism && typeof pet.mechanism === 'object' ? pet.mechanism : {};
+  const line = String(record.line ?? pet?.mechanism_line ?? '').trim();
+  const status = record.status ?? pet?.mechanism_status ?? null;
+  if (line && status === 'FROZEN_DESC') return line;
+  return MECHANISM_UNKNOWN;
+}
+
+/**
+ * 机制那一行的**来源标注**（小字）：只用登记层给的 `tags`（标签 + 技能条数）。
+ *
+ * 它不是强度排序，也不做任何推断——只是把「这句话是从哪几条效果里压出来的」
+ * 如实摆出来，好让玩家核对。没有可核对的东西时返回空串（不占位、不写「未知」）。
+ */
+function mechanismSourceNote(pet) {
+  const record = pet?.mechanism && typeof pet.mechanism === 'object' ? pet.mechanism : null;
+  const tags = Array.isArray(record?.tags) ? record.tags : [];
+  const bits = tags
+    .filter((tag) => tag && typeof tag.tag === 'string' && tag.tag)
+    .map((tag) => (Number.isFinite(tag.skills) ? `${tag.tag} ${tag.skills} 条` : tag.tag));
+  return bits.length ? `来自配招：${bits.join(' · ')}` : '';
+}
+
+/**
+ * 行动坞的分组（P0-5）：**只按引擎给的 `kind` 分**，页面不自己重分类。
+ *
+ * 为什么这件事要单拎出来当纯函数：分组是这一轮唯一「页面替引擎下结论」的地方，
+ * 一旦页面自己把 `item` 说成「技能」、或者把某个 kind 悄悄藏掉，玩家就会看到
+ * 一份与引擎不一致的动作表，而且不会报错。所以：
+ *   · 每个动作必须落在**已知 kind** 之一，出现未知 kind 时抛出——
+ *     那时候要改的是这张表，不是「顺手忽略」；
+ *   · 每一组的条数就是它真的收到的条数（`actions` 里能看到是哪些），
+ *     验收脚本拿它与 `view.legal` 逐项对齐；
+ *   · `escape`（撤退）与 `struggle`（挣扎，无合法技能时的保底）合并进「更多」——
+ *     它们都是「不是常规主入口」的那一类，而且**存在本身就是事实**，不许藏掉。
+ *
+ * ⚠ 标准 PVP（`pvp-standard-six-pet`）下**不该**出现物品与逃跑：那是旧引擎的动作。
+ * 用户口径（P0-5）是「按 BattleMode 隐藏，并在页面上标候选规则」+ 把「引擎需按模式
+ * 裁剪合法动作」写进报告。`standardPvpActive()` 与 `UI_HIDDEN_IN_STANDARD_PVP` 就是
+ * 这条口径的落点；它**只影响显示**，不改变引擎给的动作表（真正的裁剪要改 Python，
+ * 属于 RC-306，本页不动）。
+ */
+const ACTION_GROUPS = Object.freeze([
+  {id: 'skill', title: '技能', note: '引擎给出的合法技能'},
+  {id: 'item', title: '物品', note: '引擎给出的可用物品（名字来自引擎）'},
+  {id: 'switch', title: '换精灵', note: '换人 / 补位'},
+  {id: 'escape', title: '更多', note: '撤退一类；标准 PVP 下不该出现'},
+]);
+const KNOWN_ACTION_KINDS = new Set(['skill', 'item', 'switch', 'escape', 'struggle']);
+//: 标准 PVP 下按模式隐藏的动作类型（P0-5）。**只隐藏、不假装引擎没给**：
+//: 被隐藏的条数会写进 `data-roco-actions-hidden`，报告里也要说明。
+const UI_HIDDEN_IN_STANDARD_PVP = Object.freeze(['item', 'escape', 'struggle']);
+/** 当前模式是不是注册表里的标准 PVP（工作坊那个六宠候选模式）。 */
+function standardPvpActive(mode = state.mode) {
+  return mode?.id === 'pvp-standard-six-pet' || mode?.contract_id === 'pvp-standard-six-pet';
+}
+
+/**
+ * 把一个动作表分组成 `[{id,title,note,actions}]`。
+ *
+ * @param {Array} actions 引擎给的合法动作（`view.legal`）
+ * @param {object} options `{mode, hideStandardPvpLegacy}`：标准 PVP 下是否隐藏旧动作
+ * @returns {{groups:Array, hidden:Array, known:boolean}}
+ */
+function actionGroupsOf(actions, {mode = state.mode, hideStandardPvpLegacy = true} = {}) {
+  const list = Array.isArray(actions) ? actions : [];
+  const unknown = list.filter((action) => !KNOWN_ACTION_KINDS.has(action?.kind));
+  if (unknown.length) {
+    return {groups: [], hidden: [], known: false,
+      reason: `引擎给了没见过的动作类型：${unknown.map((a) => String(a?.kind)).join('、')}`
+        + '（不许静默丢掉：要么补进 ACTION_GROUPS，要么让引擎别给）'};
+  }
+  const hide = hideStandardPvpLegacy && standardPvpActive(mode);
+  const hidden = [];
+  const visible = [];
+  for (const action of list) {
+    if (hide && UI_HIDDEN_IN_STANDARD_PVP.includes(action.kind)) { hidden.push(action); continue; }
+    visible.push(action);
+  }
+  const buckets = new Map(ACTION_GROUPS.map((group) => [group.id, []]));
+  for (const action of visible) buckets.get(action.kind === 'struggle' ? 'escape' : action.kind).push(action);
+  return {known: true, hidden, groups: ACTION_GROUPS.map((group) => ({...group, actions: buckets.get(group.id)}))};
+}
+
+/**
+ * 双方资源条（P0-6）：**魔力 / 心**只渲染引擎给的数。
+ *
+ * 这一条是这一轮最容易「编」的地方：用户说标准 PVP 是 4 心、心没了就输，
+ * 但**本仓库的引擎（`legacy_sim_v1`）根本没有这个量**（胜负按打光判定），
+ * 公开视图里也没有 `mana` / `hearts` 字段。所以：
+ *   · 引擎给了 → 原样显示（并且是引擎的数，不是抄来的 4）；
+ *   · 引擎没给 → 写「未核验」，并说明「本仓库的引擎还没有这个量」+ 指向开发者抽屉。
+ * 反证在 `tests/roco-page-ux.test.js`：把 4 写死进这一段，那一条必须变红。
+ */
+const MANA_UNVERIFIED = '未核验';
+function resourceHtml({mana = null, label = '魔力 / 心'} = {}) {
+  if (Number.isFinite(mana)) {
+    return `<span class="res-name">${label}</span><span class="res-value">${mana}</span>`;
+  }
+  return `<span class="res-name">${label}</span>`
+    + `<span class="res-value">${MANA_UNVERIFIED}</span>`
+    + '<span class="res-note">本仓库的引擎还没有这个量（未核验）：'
+    + '胜负按打光判定，魔力/心的真实规则要等候选规则落地与实机录制。'
+    + '原始依据在右上角「关于这一页」的开发者抽屉里。</span>';
+}
+
+/** 一方队伍状态（哪只在场、倒了没、还有几个能打）。名字只给公开视图真的给的那些。 */
+function rosterLineHtml(pets, {active = null, foe = false} = {}) {
+  const list = Array.isArray(pets) ? pets : [];
+  const living = list.filter((pet) => pet && pet.fainted !== true).length;
+  const chips = list.length
+    ? list.map((pet, index) => {
+      const name = typeof pet?.name === 'string' && pet.name ? pet.name : `第 ${index + 1} 位`;
+      const classes = ['rl'];
+      if (index === active) classes.push('active');
+      if (pet?.fainted === true) classes.push('fainted');
+      if (foe) classes.push('foe');
+      const hp = Number.isFinite(pet?.hp) && Number.isFinite(pet?.max_hp) ? ` ${pet.hp}/${pet.max_hp}` : '';
+      return `<span class="${classes.join(' ')}">${escapeAttr(name)}${hp}</span>`;
+    }).join('')
+    : (foe
+      ? '<span class="rl foe">对手后备在公开视图里只给位次与是否倒下</span>'
+      : '<span class="rl">还没有上场</span>');
+  return `<span class="rl-self">还能打 ${living}/${list.length || 0}</span>${chips}`;
+}
+
+/**
+ * 一只伙伴在**战斗舞台**上的卡（对战页中央那一块）。
+ *
+ * 血量、能量、异常三项一眼看得清，别的都进详情抽屉。
  */
 function petCard(pet, {active = false} = {}) {
   if (!pet) return '';
   const ratio = pet.max_hp > 0 ? pet.hp / pet.max_hp : 0;
   const statuses = pet.statuses && Object.keys(pet.statuses).length
     ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : '';
-  // **没有的数据不占位**（第 64 轮）：名字拿不到就不渲染名字这一行，异常为空就整行不渲染。
-  // 原来的 `未知伙伴` / `异常：—` 会在每一张卡上重复同一句「未知」——看起来像坏数据，
-  // 实际是界面在替引擎说「我不知道」，占的是玩家一眼扫过去的位置。
   const name = typeof pet.name === 'string' && pet.name ? pet.name : '';
-  // `data-slot` 与 `.active` 只用于把「伤害数字」浮在**被打中**的那只身上（见 flashDamage）：
-  // 卡片的位次是 `ui_public_view` 给的公开字段，不是自己数的。
   const slot = Number.isInteger(pet.slot) ? ` data-slot="${pet.slot}"` : '';
   const energyDots = Number.isFinite(pet.energy)
     ? `${'●'.repeat(Math.max(0, Math.min(10, pet.energy)))}<small> ${pet.energy} 豆</small>`
@@ -242,10 +408,8 @@ function petCard(pet, {active = false} = {}) {
   </div>`;
 }
 
-/** 后备**小条**：只给「第几位 + 名字 + 血量/能量」，一张大卡是舞台上的主角才有的待遇。 */
+/** 后备**小条**：只给「第几位 + 名字 + 血量/能量」，没给的那一段就不写。 */
 function benchStrip(pet, index) {
-  // 没给的那一段就不写：原来血量拿不到会印一句「血量未知」，48 只里只要引擎少给一个
-  // 字段，这一行就在整页重复同一句占位。缺字段就是缺字段，不占位。
   const bits = [];
   if (typeof pet.name === 'string' && pet.name) bits.push(pet.name);
   if (Number.isFinite(pet.hp) && Number.isFinite(pet.max_hp)) bits.push(`${pet.hp}/${pet.max_hp}`);
@@ -256,28 +420,7 @@ function benchStrip(pet, index) {
     <div class="stats">${line}</div>` : ''}</div>`;
 }
 
-/**
- * 卡片首层的那**一个**最关键特点。
- *
- * 只用名单里真的给了的字段（`moveset[].power` 与 `stats.spe`），不编：
- * 引擎没给威力的那一招不算威力，速度档是登记层的标注。
- */
-function keyFeature(pet) {
-  const moves = Array.isArray(pet.moveset) ? pet.moveset : [];
-  const hit = moves.filter((m) => Number.isFinite(m.power)).sort((a, b) => b.power - a.power)[0] ?? null;
-  const speed = Number.isFinite(pet?.stats?.spe) ? pet.stats.spe : null;
-  const bits = [];
-  bits.push(hit && hit.power > 0 ? `最狠一招「${hit.name}」威力 ${hit.power}` : '配招里没有带威力的攻击招');
-  if (speed !== null) bits.push(`速度 ${speed}${pet.speed_tier ? `（${pet.speed_tier}）` : ''}`);
-  return bits.join(' · ');
-}
-
 //: 建议层 `evidence` 里那些键的中文名。
-//:
-//: **键名本身不进玩家句子**，只用于展开区，让人能核对「这句话是按哪些公开事实说的」。
-//: 这份表是照着 `coach-advice.js` 实际产出的键写的（第 43 轮把它跑了一整局，
-//: 把出现的键全收下来再填），不是照着想象写的——第一版填的是 `foe_hp`/`my_hp` 这种
-//: 不存在的键，展开区因此显示成 `fainted 寂灭骨龙 · bench [object Object]`。
 const ADVICE_FACT_LABEL = {
   active: '我方场上', fainted: '已倒下', bench: '后备', pick: '建议换上',
   pickHp: '换上后血量', pickMaxHp: '换上后血量上限',
@@ -302,9 +445,77 @@ function factValue(value) {
   return String(value);
 }
 
+/**
+ * 模式徽记（D5）：**读注册表原文**，页面上不写死「标准 PVP · 六宠」这类字符串。
+ *
+ * 数据从 `/api/roco/status` 的 `mode` 转发过来（`modeSummary()` 读
+ * `data/roco/battle-modes.json`）。**服务端还没转发时**才退回下面这份镜像，
+ * 它只是为了不让页面在集成期显示成「未读取」——`mode` 一到就以服务端为准。
+ *
+ * 判据（浏览器验收会读）：
+ *   · `data-roco-mode` = 注册表里的 mode id；
+ *   · 页面上出现「候选规则（待实机核对）」当且仅当注册表里 status/confidence
+ *     说明它是候选（CANDIDATE / CROSS_SOURCE_SUPPORTED / ENGINE_HYPOTHESIS）；
+ *   · 「匹配前对手未知」那一句只在注册表/台账真的给了 `prematch` 时出现。
+ */
+const MODE_MIRROR = Object.freeze({
+  id: 'pvp-standard-six-pet',
+  label: '标准 PVP 六宠阵容工坊（候选模式）',
+  status: 'CANDIDATE',
+  confidence: 'CROSS_SOURCE_SUPPORTED',
+  parameters: {team_size: 6, active_count: 1, mana_pool: 4, faint_mana_cost: 1},
+  engine: {team_size: 3, ruleset_id: 'roco-world-s4-2026-09-10'},
+  unknowns_count: 4,
+  prematch: {visibility: 'UNKNOWN_PREMATCH', evidence_id: 'EV-PVP-UNKNOWN-OPPONENT'},
+});
+/** 服务端给了 `mode` 就用它；没给（老服务端）才用镜像。 */
+const resolveMode = (serverMode) => (serverMode && typeof serverMode === 'object' && serverMode.id
+  ? serverMode
+  : MODE_MIRROR);
+
+function modeChipHtml(mode) {
+  if (!mode || typeof mode !== 'object') {
+    return '<span class="chip mode-chip-muted">模式：注册表未读取</span>';
+  }
+  const parts = [`<span class="chip" id="mode-label">${escapeAttr(mode.label ?? mode.id ?? '未知模式')}</span>`];
+  const status = String(mode.status ?? '');
+  const confidence = String(mode.confidence ?? '');
+  if (status === 'CANDIDATE' || confidence === 'CROSS_SOURCE_SUPPORTED' || confidence === 'ENGINE_HYPOTHESIS') {
+    parts.push('<span class="chip mode-chip-candidate">候选规则（待实机核对）</span>');
+  }
+  if (mode.engine?.team_size != null && mode.parameters?.team_size != null
+    && mode.engine.team_size !== mode.parameters.team_size) {
+    parts.push(`<span class="chip mode-chip-muted">引擎实际 ${mode.engine.team_size} 只 · 注册表 ${mode.parameters.team_size} 只</span>`);
+  }
+  if (mode.unknowns_count) {
+    parts.push(`<span class="mode-unknown">注册表里登记了 ${mode.unknowns_count} 项未核实（原文在开发者抽屉）</span>`);
+  }
+  // 「匹配前对手未知」：注册表/台账给了 `prematch` 才写这一句（首屏可见）。
+  if (mode.prematch?.visibility === 'UNKNOWN_PREMATCH') {
+    parts.push('<span class="chip mode-chip-muted" id="prematch-chip">匹配前对手未知 · 按版本环境倾向评价（UNKNOWN_PREMATCH）</span>');
+  }
+  return parts.join('');
+}
+
+function renderMode() {
+  const box = $('mode-line');
+  if (!box) return;
+  state.mode = resolveMode(state.mode);
+  box.innerHTML = modeChipHtml(state.mode);
+  document.body.dataset.rocoMode = state.mode?.id ?? 'none';
+  document.body.dataset.rocoPrematch = state.mode?.prematch?.visibility ?? 'none';
+  document.body.dataset.rocoStandardPvp = standardPvpActive() ? 'yes' : 'no';
+  const raw = $('mode-raw');
+  if (raw) {
+    raw.textContent = state.mode
+      ? JSON.stringify(state.mode, null, 1)
+      : '模式注册表还没读到：它由 /api/roco/status 转发（读 data/roco/battle-modes.json）。';
+  }
+}
+
 function render() {
   const view = state.view;
-  // 玩家只该看到「能不能玩」。版本号是给排查用的，进开发者抽屉（P0-4）。
+  // 玩家只该看到「能不能玩」。版本号是给排查用的，进开发者抽屉。
   $('engine-status').textContent = view ? '规则服务：已连接' : '规则服务：未启动';
   $('engine-status').dataset.rocoStatus = view ? 'ready' : 'idle';
   const aboutVersion = $('about-ruleset');
@@ -318,15 +529,36 @@ function render() {
     : '';
   $('self-active').textContent = view?.self?.active != null ? `场上：第 ${view.self.active + 1} 位` : '';
 
-  // ── 战斗舞台：双方**当前**那一只 + 后备小条 ──────────────────────────────
-  const pets = view?.self?.pets ?? [];
+  // ── 双方状态条：资源（魔力/心）+ 当前精灵 + 队伍状态 ────────────────────
+  const selfPets = view?.self?.pets ?? [];
   const activeIndex = Number.isInteger(view?.self?.active) ? view.self.active : 0;
-  $('self-pets').innerHTML = view ? petCard(pets[activeIndex] ?? pets[0] ?? null, {active: true}) : '';
-  $('self-bench').innerHTML = pets
+  const selfRes = $('self-resource');
+  if (selfRes) {
+    // 引擎的公开视图里**没有** mana/hearts 这两个量，所以这里只能是 null；
+    // 真给了就显示真值（见 resourceHtml 的注释与反证测试）。
+    selfRes.innerHTML = resourceHtml({mana: Number.isFinite(view?.self?.mana) ? view.self.mana : null});
+    selfRes.classList.toggle('unknown', !Number.isFinite(view?.self?.mana));
+  }
+  const foeRes = $('foe-resource');
+  if (foeRes) {
+    foeRes.innerHTML = resourceHtml({mana: Number.isFinite(view?.opponent?.mana) ? view.opponent.mana : null});
+    foeRes.classList.toggle('unknown', !Number.isFinite(view?.opponent?.mana));
+  }
+  const selfLine = $('self-roster-line');
+  if (selfLine) selfLine.innerHTML = rosterLineHtml(selfPets, {active: activeIndex});
+  const foeLine = $('foe-roster-line');
+  if (foeLine) {
+    // 对手后备在公开视图里只有位次与是否倒下——照实说，不补名字。
+    const foeBench = (view?.opponent?.bench ?? []).map((b) => ({name: `第 ${(b.slot ?? 0) + 1} 位`, fainted: b.fainted === true}));
+    foeLine.innerHTML = rosterLineHtml([view?.opponent?.field ?? null, ...foeBench].filter(Boolean),
+      {active: view?.opponent?.field ? 0 : null, foe: true});
+  }
+
+  // ── 战斗舞台：双方**当前**那一只 + 后备小条 ──────────────────────────────
+  $('self-pets').innerHTML = view ? petCard(selfPets[activeIndex] ?? selfPets[0] ?? null, {active: true}) : '';
+  $('self-bench').innerHTML = selfPets
     .map((pet, index) => (index === activeIndex ? '' : benchStrip(pet, index))).join('');
   $('foe-field').innerHTML = view?.opponent?.field ? petCard(view.opponent.field, {active: true}) : '';
-  // 对手后备在公开视图里**只有位次与是否倒下**（血量是隐藏信息），照实说。
-  // 「状态未知」这一行第 64 轮去掉了：没公开的东西不必逐条占位，倒下时标一句就够。
   $('foe-bench').innerHTML = (view?.opponent?.bench ?? [])
     .map((b) => `<div class="bench-pet ${b.fainted ? 'fainted' : ''}">`
       + `<strong>第 ${(b.slot ?? 0) + 1} 位</strong>`
@@ -334,48 +566,14 @@ function render() {
       + '</div>')
     .join('');
 
+  // ── 行动坞：按引擎 kind 分组 ────────────────────────────────────────────
   const actions = view?.legal ?? [];
   $('action-hint').textContent = view
-    ? (view.battle_result ? '这一局已经结束：重开一局继续练' : `${actions.length} 个合法动作，点一下就走这一手`)
+    ? (view.battle_result ? '这一局已经结束：重开一局继续练' : `${actions.length} 个合法动作，按类型分组，点一下就走这一手`)
     : '开一局后这里会出现可执行的动作';
-  $('actions').innerHTML = actions.map((action, index) => {
-    // 技能按钮上写**玩家看得懂的东西**：系别 · 能耗 · 威力（引擎给了才写）· 一句说明。
-    // 第 42 轮之前这里写的是 `技能 · skill_000750`——一个内部 id。
-    // 第 64 轮：引擎没给威力的技能**整段不写**。原来是「威力来源未给」——那是
-    // `power_status: 'not_provided_by_source'` 的直译，是工程话，不该出现在玩家的按钮上。
-    // 事实没有丢：原始 `power_status` 逐条进了右上角默认收起的开发者抽屉
-    // （见 `renderPowerEvidence()`），那里才是可核对的凭据，玩家层只写人话。
-    const skill = action.skill ?? null;
-    let detail;
-    if (action.kind === 'skill' && skill) {
-      const bits = [skill.element, skill.category];
-      if (skill.energy !== null && skill.energy !== undefined) bits.push(`能耗 ${skill.energy}`);
-      if (skill.power !== null && skill.power !== undefined) bits.push(`威力 ${skill.power}`);
-      detail = `${bits.filter(Boolean).join(' · ')}${skill.desc ? ` — ${skill.desc}` : ''}`;
-    } else if (action.kind === 'skill') {
-      detail = '技能（引擎未给说明）';
-    } else if (action.kind === 'switch') {
-      detail = `换人 → 第 ${(action.target_index ?? 0) + 1} 位`;
-    } else if (action.kind === 'item') {
-      detail = `道具 · ${action.item_id ?? ''}`;
-    } else if (action.kind === 'escape') {
-      detail = '⚠ 结束这一局（逃跑会立刻判负）';
-    } else {
-      detail = String(action.kind ?? '');
-    }
-    return `<button class="action" data-action="${index}" ${view.battle_result ? 'disabled' : ''}
-      title="${String(skill?.desc ?? '').replace(/"/g, '&quot;')}">
-      <span>${action.label ?? action.kind}</span><small>${detail}</small></button>`;
-  }).join('');
-  for (const button of $('actions').querySelectorAll('button[data-action]')) {
-    button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
-  }
+  renderActions(actions, Boolean(view?.battle_result));
 
   // 事件区**只渲染中文句子**（`event.text`，引擎侧生成）。
-  //
-  // 第 42 轮之前这里是 `${event.kind} · ${JSON.stringify(event.detail)}`，
-  // 玩家看到的是 `enemy damage · {"amount":25,...}` —— 引擎内部标识符 + 内部数据结构。
-  // 原始 JSON 没有丢，但只出现在「调试信息」折叠区里（默认收起）。
   const logs = [];
   const raw = [];
   for (const event of state.events) {
@@ -383,30 +581,20 @@ function render() {
     const cls = event.kind === 'turn_start' ? 'turn' : (event.kind === 'unsupported' ? 'miss' : '');
     if (event.kind === 'turn_start' && text) logs.push(`<p class="turn">${text}</p>`);
     else if (text) logs.push(`<p${cls ? ` class="${cls}"` : ''}>${text}</p>`);
-    // 没有中文句子时**不猜**：如实说这一条还没有中文说法（正常情况下不会走到这里，
-    // 因为 Python 侧对每个 kind 都有句子，且测试会跑真对局收全集）
     else logs.push('<p class="muted">这一条还没有中文说法（请把调试信息里的原始事件报上来）。</p>');
     raw.push({turn: event.turn, kind: event.kind, side: event.side,
       ...(event.extra && Object.keys(event.extra).length ? {extra: event.extra} : {}),
       detail: event.detail ?? null, evidence: event.evidence ?? []});
   }
   $('events').innerHTML = logs.length ? logs.join('') : '<p class="muted">还没推进。</p>';
-  // 原始事件 JSON 进默认收起的调试区
   const rawBox = $('events-raw');
-  if (rawBox) {
-    rawBox.textContent = raw.length ? JSON.stringify(raw, null, 1) : '（还没有事件）';
-  }
-  // 这一行原来把「规划状态版本 / 覆盖 / 超时」直接写在玩家区（P0-4 要清掉）。
-  // 现在：玩家区只在出错时说一句人话，工程细节进开发者抽屉。
+  if (rawBox) rawBox.textContent = raw.length ? JSON.stringify(raw, null, 1) : '（还没有事件）';
   $('plan-status').textContent = state.plan && state.plan.timed_out ? '这一手算得慢了点，先用规则提示' : '';
   $('plan-status').dataset.detail = state.plan
     ? `state_version=${state.planAtVersion} coverage=${state.plan.coverage ?? '—'} timed_out=${state.plan.timed_out === true}`
     : '';
 
   // ── 三页的切换（同一个文档，靠 hidden 与 body 上的标记）─────────────────
-  //
-  // 对局一开始阵容池就**完全收起**（只留一行摘要 + 「重选阵容」）；一局打完也不自动
-  // 放出来——先让玩家把结算看完。玩家随时可以点「重选阵容」把它叫回来。
   const busy = Boolean(view);
   const pickPanel = $('select-panel');
   if (pickPanel) pickPanel.hidden = busy && !state.pick.open;
@@ -415,8 +603,6 @@ function render() {
     brief.hidden = !(busy && !state.pick.open);
     if (!brief.hidden) {
       const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
-      // 摘要要用**这一局真正在打的那几只**：玩家用默认阵容开局时 `state.pick` 是空的，
-      // 原来那版就会显示「我方（未选）」——明明在打（监工从截图里看出来的）。
       const mine = state.pick.player.length
         ? state.pick.player.map(nameOf)
         : (view?.self?.pets ?? []).map((p) => p.name).filter(Boolean);
@@ -436,16 +622,91 @@ function render() {
   // 阵容池一打开，动作栏就让位（两条固定底栏不能叠在一起）。
   document.body.dataset.rocoPicking = state.pick.open ? 'yes' : 'no';
   document.body.dataset.rocoView = view ? 'ready' : 'empty';
+  renderMode();
   renderMemory();
+  renderCompanion();
   syncBottomBars();
+}
+
+/**
+ * 行动坞的 DOM：**先推不动分组，再按分组渲染**。
+ *
+ * 技能卡上给全（P0-4）：名称 / 属性 / 类别 / 能耗 / 威力（引擎给了才写）/ **说明文字**。
+ * 引擎没给威力时**整段不写**（第 64 轮口径：不写「来源未给」这种工程话，也绝不补 0），
+ * 原始 `power_status` 逐条在开发者抽屉里可核对（见 `renderPowerEvidence`）。
+ */
+function actionCardHtml(action, index, {disabled = false} = {}) {
+  const skill = action?.skill ?? null;
+  const kind = action?.kind ?? null;
+  let title = action?.label ?? kind ?? '动作';
+  let meta = '';
+  let desc = '';
+  if (kind === 'skill') {
+    title = skill?.name ?? action?.skill_name ?? title;
+    const bits = [skill?.element, categoryCn(skill?.category)];
+    if (Number.isFinite(skill?.energy)) bits.push(`能耗 ${skill.energy}`);
+    if (Number.isFinite(skill?.power)) bits.push(`威力 ${skill.power}`);
+    meta = bits.filter(Boolean).join(' · ');
+    desc = typeof skill?.desc === 'string' ? skill.desc : '';
+  } else if (kind === 'item') {
+    // 物品名用**引擎给的真实名字**（`item_id` 就是冻结数据里的名字），不编、不翻译。
+    title = action?.item_id ?? title;
+    meta = '物品 · 占用本回合行动';
+  } else if (kind === 'switch') {
+    title = action?.label ?? `换上第 ${(action?.target_index ?? 0) + 1} 位`;
+    meta = `换精灵 → 第 ${(action?.target_index ?? 0) + 1} 位`;
+  } else if (kind === 'escape') {
+    meta = '撤退：结束这一局';
+  } else if (kind === 'struggle') {
+    meta = '挣扎：没有合法技能时的保底动作';
+  }
+  const classes = ['action'];
+  if (kind === 'escape' || kind === 'struggle') classes.push('is-escape');
+  return `<button class="${classes.join(' ')}" data-action="${index}" data-kind="${escapeAttr(String(kind))}"
+    ${disabled ? 'disabled' : ''} title="${escapeAttr(desc || meta)}">
+    <span>${escapeHtml(String(title))}</span>
+    ${meta ? `<small class="act-meta">${escapeHtml(meta)}</small>` : ''}
+    ${desc ? `<small class="act-desc">${escapeHtml(desc)}</small>` : ''}</button>`;
+}
+
+function renderActions(actions, disabled) {
+  const box = $('actions');
+  if (!box) return;
+  const grouped = actionGroupsOf(actions);
+  if (!grouped.known) {
+    // 不静默：分组表与引擎不一致时必须看得见（这是页面唯一替引擎下结论的地方）。
+    box.innerHTML = `<p class="act-none">动作表读不出来：${escapeHtml(String(grouped.reason))}</p>`;
+    document.body.dataset.rocoActionGroups = 'error';
+    return;
+  }
+  const visible = grouped.groups.filter((group) => group.actions.length > 0);
+  box.innerHTML = visible.map((group) => `<section class="act-group" data-act-group="${group.id}">
+    <div class="act-group-head"><b>${group.title}</b>
+      <span class="muted">${group.actions.length} 个 · ${group.note}</span></div>
+    <div class="act-row">${group.actions.map((action) => {
+      const index = actions.indexOf(action);
+      return actionCardHtml(action, index, {disabled});
+    }).join('')}</div>
+  </section>`).join('') || '<p class="act-none">这一手引擎没有给任何合法动作。</p>';
+  for (const button of box.querySelectorAll('button[data-action]')) {
+    button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
+  }
+  if (grouped.hidden.length) {
+    // 标准 PVP 下被模式隐藏的动作**如实记账**（不假装引擎没给）：报告与开发者抽屉读它。
+    box.insertAdjacentHTML('beforeend', `<p class="act-none">按当前模式（候选规则）隐藏了 `
+      + `${grouped.hidden.length} 个旧引擎动作：`
+      + `${[...new Set(grouped.hidden.map((a) => a.kind))].join('、')}。`
+      + `引擎需按模式裁剪合法行动（RC-306），本页只做显示层。</p>`);
+  }
+  // 验收钩子：**逐组条数**，与引擎动作表逐项对齐（P0-5 的判据读它）。
+  document.body.dataset.rocoActionGroups = visible.map((g) => `${g.id}:${g.actions.length}`).join(',') || 'none';
+  document.body.dataset.rocoActionsHidden = String(grouped.hidden.length);
 }
 
 // ── 伤害数字浮层（P1-1）─────────────────────────────────────────────────────
 //
-// 事件里的 `detail.side` 是**打人的那一方**（`events_text.py` 的句子是「对方的诡刺命中」），
-// 所以浮层要落在**对面那只**身上。拿不到就不浮——不为了好看把数字安到另一只头上。
-// 数字后面永远带一个「约」的意思：引擎的伤害公式是社区假设（`formula_verified:false`），
-// 所以这里写成 `−130` 并在卡片下方保留原来的文字事件，不为动画额外造一个「精确值」。
+// 事件里的 `detail.side` 是**打人的那一方**，所以浮层要落在**对面那只**身上。
+// 数字后面永远带一个「约」的意思：引擎的伤害公式是社区假设（`formula_verified:false`）。
 function flashDamage(events) {
   for (const event of Array.isArray(events) ? events : []) {
     if (event?.kind !== 'damage') continue;
@@ -469,12 +730,8 @@ function flashDamage(events) {
 
 // ── 记忆（P1-3）：可见、可逐条忘掉 ─────────────────────────────────────────
 //
-// 只列 `group === 'stated'`（玩家自己说过的那几条：称呼／本命／聊天风格／输了要不要复盘／
-// 玩法目标／拒绝）。**故意不列对局记录与行为记录**：把战绩摘要和长期偏好混成一张单子，
-// 就是「拿摘要冒充记忆」的另一种写法，也正是 P1 要避免的那件事。
-//
-// 纠正不另做一套 UI：玩家再说一句（「以后叫我老王」）就是纠正——`rememberPreference`
-// 本来就是按 kind 覆盖旧值的。这里只提供「忘掉」，因为「删除」没有别的入口。
+// 只列 `group === 'stated'`（玩家自己说过的那几条）。**故意不列对局记录与行为记录**：
+// 把战绩摘要和长期偏好混成一张单子，就是「拿摘要冒充记忆」的另一种写法。
 function renderMemory() {
   const list = $('memory-list');
   if (!list) return;
@@ -494,7 +751,7 @@ function renderMemory() {
 }
 
 // 记的是**真的删掉了**：`deleteMemoryItem` 在没有这条时会返回 `deleted:false`，
-// 那种情况下不改页面，也不假装成功（它还会级联清掉由这条推出来的判断）。
+// 那种情况下不改页面，也不假装成功。
 function forgetMemory(id) {
   const result = deleteMemoryItem(state.memory, {id});
   if (!result.deleted) return;
@@ -510,7 +767,7 @@ function escapeAttr(value) {
     {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 }
 
-/** 文本节点的转义。比较区的每一条文字都来自核心模型，仍然统一转义。 */
+/** 文本节点的转义。 */
 function escapeHtml(value) {
   return escapeAttr(value);
 }
@@ -518,20 +775,18 @@ function escapeHtml(value) {
 /**
  * 把核心模型里的 `**加粗**` 收成一个很小的子集。
  *
- * 比较区是**唯一**允许出现强调的地方（「这一手没有稳健结论」那一句），
- * 而它故意只支持这一种子集——不做通用 Markdown，免得把引擎文本变成渲染器输入。
+ * 比较区是**唯一**允许出现强调的地方，而它故意只支持这一种子集——不做通用 Markdown。
  */
 function boldMarkup(text) {
   return String(text ?? '').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
 }
 
 /**
- * 把「当前那条固定底栏」的高度写进 `--bottombar`。
+ * 把「当前那条固定底栏」与「小芽那一栏」的高度写进 CSS 变量。
  *
- * 为什么不让 CSS 猜：底栏有两条（选阵容页的 `#pool-footbar` 与对战页的 `#action-panel`），
- * 高度又随动作条数与窄屏换行变化（实测 3 行动作 = 234px）。写死一个数字的结果就是
- * 「军师浮条盖住动作按钮」或者「详情抽屉被底栏切掉一截」——两种都是点了没反应的那类 bug。
- * 所以每次重画都量一次真实高度，浮层与正文下边距都按它算。
+ * 为什么不让 CSS 猜：底栏高度随动作条数与窄屏换行变化；小芽那一栏在窄屏是贴底的一块，
+ * 军师浮条必须落在它**上面**，否则两条固定浮层会互相盖住（实测过：浮条盖住小芽的输入行，
+ * 玩家点了没反应）。所以每次重画都量一次真实高度，浮层与正文下边距都按它算。
  */
 function syncBottomBars() {
   const bars = [$('action-panel'), $('pool-footbar')];
@@ -539,6 +794,95 @@ function syncBottomBars() {
   const height = visible ? Math.round(visible.getBoundingClientRect().height) : 0;
   document.documentElement.style.setProperty('--bottombar', `${height}px`);
   document.body.dataset.rocoBottombar = String(height);
+  const coach = $('companion-card');
+  const coachShown = Boolean(coach && !coach.hidden && coach.getClientRects().length > 0);
+  const coachHeight = coachShown ? Math.round(coach.getBoundingClientRect().height) : 0;
+  // 窄屏时小芽是**贴底**的一块，动作坞必须为它让出高度：两条固定浮层相加超过视口，
+  // 结果就是输入框被顶到屏幕外（实测 390×844 下 say-input 的 bottom=868>844）。
+  // 让出之后动作坞自己在内部滚动，卡片尺寸与可点性不变。
+  // 宽屏时小芽是**右侧栏**（不占底边），浮条只需要落在动作栏之上。
+  const wide = window.matchMedia('(min-width:861px)').matches;
+  const actionCap = wide ? 0 : Math.max(160, Math.round(window.innerHeight * 0.30));
+  document.documentElement.style.setProperty('--action-cap', `${actionCap}px`);
+  document.documentElement.style.setProperty('--coach-rail', wide && coachShown ? '356px' : '0px');
+  document.documentElement.style.setProperty('--coach-under', wide ? '0px' : `${coachHeight + 8}px`);
+  document.body.dataset.rocoCoachHeight = String(coachHeight);
+  document.body.dataset.rocoCoachOpen = coachShown ? 'yes' : 'no';
+  document.body.dataset.rocoActionCap = String(actionCap);
+}
+
+// ── 小芽那一栏（P0-2）：打开 / 收起 / 可见性 ────────────────────────────────
+//
+// 三条产品要求（各自都有浏览器判据）：
+//   ① 页头「✦ 小芽」点一下有可见反应（这一栏展开 + 焦点落到输入框）；
+//   ② 真的能输入并拿到回复（走 `say()`，与原来同一条路径）；
+//   ③ **不打开这一栏也要能出现主动提示**（军师浮条与它是两条独立的通道）。
+function renderCompanion() {
+  const card = $('companion-card');
+  if (!card) return;
+  card.hidden = !state.coach.open;
+  const close = $('companion-close');
+  if (close) close.setAttribute('aria-expanded', state.coach.open ? 'true' : 'false');
+  document.body.dataset.rocoCoach = state.coach.open ? 'open' : 'closed';
+}
+
+/**
+ * 输入框与**最近一句回复**是否都在视口里（判据量这个，不靠眼看）。
+ *
+ * 返回实际数值，`window.rocoDemo.companionVisibility()` 也是它——
+ * 验收脚本与页面读同一份量法，不会出现「脚本量到的和页面显示的不一样」。
+ */
+function companionVisibility() {
+  const card = $('companion-card');
+  const input = $('say-input');
+  const reply = $('say-reply');
+  const form = $('say-form');
+  const vh = window.innerHeight;
+  const vw = window.innerWidth;
+  const rectOf = (el) => {
+    if (!el || el.hidden) return null;
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 && r.height === 0) return null;
+    return {top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), right: Math.round(r.right)};
+  };
+  const inView = (r) => Boolean(r && r.top >= 0 && r.bottom <= vh && r.left >= 0 && r.right <= vw);
+  const inputRect = rectOf(input);
+  const replyRect = rectOf(reply);
+  const formRect = rectOf(form);
+  return {
+    open: Boolean(card && !card.hidden),
+    viewport: {width: vw, height: vh},
+    card: rectOf(card),
+    form: formRect,
+    input: inputRect,
+    reply: replyRect,
+    replyHidden: Boolean(reply?.hidden),
+    inputInView: inView(inputRect),
+    replyInView: replyRect ? inView(replyRect) : null,
+    formInView: inView(formRect),
+    // 排版诊断（判据红了要能一眼看出是「谁把谁顶出去了」）：
+    bottombar: Math.round(Number.parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue('--bottombar')) || 0),
+    actionCap: Math.round(Number.parseFloat(getComputedStyle(document.documentElement)
+      .getPropertyValue('--action-cap')) || 0),
+    actionPanel: rectOf($('action-panel')),
+    // 这一条是 D3 的判据：输入框和「最后一条回复」都在首屏。
+    // 回复还没出现过时（`replyHidden`）这一条按输入框 + 表单算，不假装有回复。
+    bothOnScreen: inView(inputRect) && (replyRect ? inView(replyRect) : true),
+  };
+}
+
+function openCompanion({focus = true} = {}) {
+  state.coach.open = true;
+  renderCompanion();
+  syncBottomBars();
+  const body = $('companion-body');
+  if (body) body.scrollTop = body.scrollHeight;
+  if (focus) {
+    const input = $('say-input');
+    if (input) input.focus({preventScroll: true});
+  }
+  document.body.dataset.rocoCoachSeen = 'yes';
 }
 
 // ── 教程：只在第一次出现，可跳过，跳过之后不再占位（刷新也还在）───────────────
@@ -566,40 +910,26 @@ function dismissOnboard() {
 function hideHint(action = 'silent', gate = '') {
   $('hint').hidden = true;
   document.body.dataset.rocoHint = 'hidden';
+  document.body.dataset.rocoHintVisible = 'no';
   // dataset 必须反映**最后一次判定**，包括「判定为沉默」和「被硬门控拦下」。
-  // 只在显示提示时写 dataset 的话，页面会一直挂着上一次的 action
-  // ——验收脚本读到的就是过期的结论（这正是「状态变化撤销旧建议」要防的那类错）。
   document.body.dataset.rocoAction = action;
   document.body.dataset.rocoGate = gate;
+  syncBottomBars();
 }
 
 /**
  * 「比较区」：把这一手**并列**出来（默认收起，点「展开取舍」才看）。
  *
- * 这一块是第 64 轮补上的：在此之前点「让小芽看一眼」只会在状态行上写一句
- * 「建议已就绪」——玩家拿不到任何可比较的东西。现在它至少给三样：
- *   · 这一回合**真实的合法动作**（来自公开视图 `view.legal`，一个都不编）；
- *   · 引擎**真的给了**的后续推演（`/api/roco/plan` 回执的 expected / main_counter /
- *     branches / depth / damage_preview / risk）；引擎只算推荐那一手，别的手没给
- *     就照实说没给，不补数字；
- *   · 每一行标出【事实】/【估计】/【不确定】——沿用页面既有的口径
- *     （`expectedLine` 写「估计」、伤害预览写「按未核验公式估」）。
- *
- * 不写胜率、不承诺必胜；拿不到的信息一律写成「没给」，不许编。
+ * 结构来自核心（`rocoCompareModel`），页面只渲染：mock 宿主、报告与评测脚本
+ * 拿到的是**同一份**比较，而不是「页面里有、别处没有」。
  */
 function compareBlockHtml(plan, view) {
-  // **结构来自核心**（`coach/compare-model.js` 的 `rocoCompareModel`），页面只渲染：
-  // 这样 mock 宿主、报告与评测脚本拿到的是**同一份**比较，而不是「页面里有、别处没有」。
-  // 三档标签（事实/估计/不确定）与每一条文字都由那一层产出——页面不再自己判
-  // 「什么时候写【不确定】」，否则两份口径迟早会漂。
   const model = rocoCompareModel({plan, legal: Array.isArray(view?.legal) ? view.legal : [], view});
   const head = '<p><strong>并列比较（这一回合能走的动作）</strong></p>';
   if (!model.available) {
     return `${head}<p class="muted">【不确定】${escapeHtml(model.reason ?? '引擎没有给出可比较的动作')}。</p>`;
   }
   const renderLine = (line) => `【${line.tag}】${boldMarkup(escapeHtml(line.text))}`;
-  // 第一行里的动作名字要加粗（<b>）——它原来就是这么渲染的，改口径会让既有截图/
-  // 验收脚本上的文案对不上。所以这里只对**第 1 行**做一次精确替换。
   const renderFirst = (pick) => {
     const line = pick.lines[0];
     const escaped = escapeHtml(line.text);
@@ -622,14 +952,9 @@ function compareBlockHtml(plan, view) {
  * 每一次局面变化之后都走这里。
  *
  * 三条纪律都在这一段里，页面别处不许再自己判：
- *   ① 旧提示必须先作废（版本对不上就撤下来，不给玩家看已经不存在局面的建议）；
- *   ② 说不说由 `rocoIntervention` 决定，这里不补判「我觉得该提醒一下」；
- *   ③ 玩家点掉之后本局不再主动开口（`session.dismissed`），但玩家自己问仍然会答。
- *
- * `explicit` 就是「玩家自己问」那一支（点「让小芽看一眼」）。它**不是**绕开判定层：
- * 门控与评分照常跑，只是把「本局不再主动开口」和「刚说过 / 冷却中」这两条
- * **主动**纪律让开一次——玩家主动来问，重复正是他要的东西。用的是会话的一份副本，
- * 所以主动提示的配额与冷却不会被玩家的手动查询消耗掉。
+ *   ① 旧提示必须先作废（版本对不上就撤下来）；
+ *   ② 说不说由 `rocoIntervention` 决定；
+ *   ③ 玩家点掉之后本局不再主动开口，但玩家自己问仍然会答。
  */
 function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}) {
   const view = state.view;
@@ -638,24 +963,15 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
     return hideHint('silent', 'not-in-match');
   }
   if (state.hint && rocoHintStale(state.hint, view.state_version)) {
-    // 局面已经推进：先把旧提示撤掉并记账，再把新局面的判定结果放上去。
     state.hint = null;
     hideHint('silent', 'stale-state');
   }
-  // **用规划之前先问它属不属于当前局面**（第 81 轮浏览器实测抓到的第二个陈旧洞）。
-  //
-  // 第 65 轮只在 `requestPlan` 那条路径上丢弃陈旧规划（请求在飞时状态推进）。但
-  // **自动推进**（`autoTurn`）不经过那条路径：它推进完直接 `applyResult → refreshHint`，
-  // 而 `refreshHint` 默认拿的就是 `state.plan`。于是「计划先到、局面后动」这个顺序下，
-  // 一份为旧局面算出来的规划会被拿去说话——浏览器判据实测到
-  // `plan 版本=30 保留=true`（当前已是 31）。放在这个入口处理，两条推进路径一起覆盖。
   if (plan) {
     const fresh = rocoPlanFreshness({plan, view});
     if (!fresh.usable) {
       state.planStaleDiscards.push({plan_version: fresh.plan_version, view_version: fresh.view_version,
         at: Date.now(), source: `refresh-hint:${reason}`});
       if (state.plan === plan) { state.plan = null; state.planAtVersion = null; }
-      // 这一手的规划作废：浮条与比较区按「没有规划」如实处理（拿不到就不编）。
       plan = null;
     }
   }
@@ -677,14 +993,9 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
       ended: Boolean(view.battle_result),
       background: document.hidden === true,
       focus: document.hasFocus(),
-      // RL 判定层的档位必须**由页面显式传**：浏览器里没有 `process.env`，
-      // 判定层自己读不到那个 flag（默认 off）。传 null 时判定层走它自己的默认口径
-      // ——那是「如实记录当前档位」，不是「假装它在生效」。
       interventionMode: window.__ROCO_INTERVENTION_MODE ?? null,
     },
   });
-  // 判定结论原样记在 state 上：页面的「为什么现在说」与验收脚本都读它，
-  // 免得两处各自解释一遍门控结果（那正是「一处在冷却里、另一处照说不误」的来源）。
   state.lastDetail = detail;
   document.body.dataset.rocoGate = detail.gate ?? '';
   document.body.dataset.rocoAction = detail.action;
@@ -692,15 +1003,6 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
   if (!adviceText && !explicit) {
     return hideHint('silent', detail.gate ?? detail.reason ?? '');
   }
-  // 玩家自己按了「让小芽看一眼」：**一定要给东西**。
-  //
-  // 判定层可能说「这一手没有值得单独说的局面事实」——那是合法的结论，但「问了
-  // 就给一句状态文案」正是这一轮要修的毛病。所以这里分两档，都不编：
-  //   · 建议层有话 → 浮条就是它（做什么 + 为什么是现在 + 一个关键风险）；
-  //   · 建议层没话 → 浮条**如实写没话**，而比较区照给（合法动作与规划回执
-  //     跟建议层无关，是引擎真的给了的东西）。
-  // 这一档单独记成 `action='explicit-facts'`：它**不算**一次主动打断，
-  // 所以不消耗「每局最多几条」的预算（见 requestPlan 里的记账）。
   const text = adviceText ?? {
     text: '这一手引擎没有值得单独说的局面事实：下面是它真的给了的东西，你自己挑。',
     why: '建议层这一手没有成立的局面事实（不是出错，是它认为不值得占用你的注意力）',
@@ -709,15 +1011,8 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
   state.hint = {...text, stateVersion: view.state_version, action: hintAction, plan, reason};
   $('hint-text').textContent = text.text;
   $('hint-why').textContent = `依据：${text.why}`;
-  // **说过的不再说**（数字不同也算同一句）。建议层用归一化形状判重，
-  // 这里把形状记下来；不记的话同一句会在每个回合反复出现——那正是玩家抱怨的毛病。
   if (adviceText?.shape && state.session.said) state.session.said.add(adviceText.shape);
-  // 建议层给的**可核对证据**（用了哪些公开事实）单独列出来，工程术语只到这里为止。
-  // 只在这一手真的给了建议时留下；没给就清掉，免得把上一手的证据挂到这一手下面
-  // ——那是一条会骗人的凭据。
   state.lastAdviceEvidence = adviceText?.evidence ?? null;
-  // 「展开取舍」的内容分两档，但**只要规划跑过就给出可核对的数字**：
-  // 让人能查到「这句话是算出来的，不是随口说的」。没跑过规划就如实说没有。
   const preview = rocoDamagePreviewText(plan);
   const riskLine = plan?.risk
     ? `<p>风险：期望到最坏差 ${plan.risk.downside_max ?? '—'}${plan.risk.fragile ? '（**这一手不稳**）' : ''}${plan.risk.top_risks?.length ? ` · 最差的对手选择是「${plan.risk.top_risks[0].opponent_action}」` : ''}</p>`
@@ -733,13 +1028,18 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
     <p>对手应对：${plan?.main_counter ?? '引擎没给出'}（是启发式建模，不是真人行为）</p>
     ${riskLine}
     <p class="muted">这是公开信息 + 固定分析种子的结果，真实对局 seed 没有参与；也不声称胜率。伤害数字来自**未核验公式**，是估值而不是实测值。</p>`;
+  // 军师浮条与「小芽那一栏」是**两条独立通道**：浮条自己冒出来，不要求玩家先打开那一栏
+  // （F01 要证的正是这个）。两条同时在时浮条在上，`--coach-under` 保证它不压住输入行。
+  // ⚠ 这一行**必须**在：`#hint` 的 `hidden` 属性来自 HTML 的初始状态，
+  // 少了它浮条会写着正文却永远不显示（实测：`data-roco-hint-visible="yes"`
+  // 与 `#hint[hidden]` 同时成立，玩家一个字都看不到）。第 92 轮重写时漏过一次。
   $('hint').hidden = false;
   $('hint-body').hidden = true;
-  // 每次重新开口都把浮条滚回顶部：内容比一屏长时它是滚动容器，上一次看比较区
-  // 停在中间的滚动位置会**留着**，新一句的「做什么」就会显示在可视区之外。
   $('hint').scrollTop = 0;
   document.body.dataset.rocoHint = hintAction;
+  document.body.dataset.rocoHintVisible = 'yes';
   document.body.dataset.rocoHintVersion = String(state.hint.stateVersion);
+  syncBottomBars();
 }
 
 function recordHintSaid() {
@@ -749,33 +1049,123 @@ function recordHintSaid() {
 
 // ── 对局推进 ────────────────────────────────────────────────────────────────
 function applyResult(data) {
-  // 换掉 `state.view` **之前**先留两份东西（顺序不能反，见 state 里的注释）：
+  // 换掉 `state.view` **之前**先留两份东西（顺序不能反）：
   //   · 上一个局面还能行动 → 它是「最后一个可决策的局面」，复盘要用它；
-  //   · 这一次推进产生的事件 → 追加进整局事件流，而 `state.events` 仍是本回合的（渲染用）。
+  //   · 这一次推进产生的事件 → 追加进整局事件流。
   if (Array.isArray(state.view?.legal) && state.view.legal.length) state.lastLiveView = state.view;
   const fresh = Array.isArray(data.view?.events) ? data.view.events : null;
   if (fresh) state.matchEvents = [...state.matchEvents, ...fresh];
   state.view = data.view;
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();
-  // 伤害数字浮层（P1-1）：只浮**这一次推进新产生**的那些伤害，不重放历史。
   flashDamage(data.view?.events);
   if (state.view?.battle_result) void finishMatch();
   else refreshHint({reason: 'after-advance'});
 }
 
-// ── 阵容池（P0-3 / 第 60 轮）────────────────────────────────────────────────
+// ── 阵容池（P0-1 / 第 92 轮重做）────────────────────────────────────────────
 //
-// 48 只不许平铺：屏幕上一页 12 张轻卡（头像 / 名字 / 属性 / 定位 / 一个最关键特点），
-// 面板数值与四个技能进 `#pet-detail` 抽屉。搜索走前端（服务端的白名单参数只有
-// offset/limit/type/role，没有名字查询），属性与定位走后端筛选，翻页走后端分页。
+// 48 只不许平铺：屏幕上一页 12 张卡。**分页 / 筛选 / 搜索三条路都走
+// `/api/roco/roster`**（`offset/limit/type/role` 是服务端的白名单参数），页面不另起
+// 第二个数据源、也不自己猜总数。搜索没有服务端参数，所以那一条用「一次取回全部再本地
+// 分页」，但**页码与 offset 仍然由同一个 `page` 算出来**——不管走哪条路，
+// 「第 n 页 = offset (n-1)*12」都成立，服务端返回的那一页可以直接逐张对齐。
+//
+// 池子大小不写死文案：候选宇宙按 v3 是全量图鉴（catalog=622），48 只只是迁移夹具。
+// 页面上显示的总数一律读服务端回执（`pool.total` / `state.rosterTotal`）。
+
+/**
+ * 页码 → offset。整页分页只有一个真值来源（`state.pool.page`）：
+ * 第 n 页 = `(n-1) × 每页`。写成具名函数而不是散在点击处理里——
+ * 「下一页只改页码文本、不改 offset」正是这一轮要修的缺陷，它必须只有一个落点。
+ */
+function offsetOfPage(page, pageSize) {
+  const safe = Number.isFinite(Number(page)) ? Math.floor(Number(page)) : 1;
+  return Math.max(0, (Math.max(1, safe) - 1) * pageSize);
+}
+
+/**
+ * 按当前视图状态取一页。
+ *
+ * 三条路径都返回**同一个形状**：`{rows, total, offset, source}`，调用方不关心数据是怎么来的。
+ */
+async function fetchPoolPage() {
+  const pool = state.pool;
+  const keyword = pool.keyword;
+  const query = new URLSearchParams();
+  if (pool.type) query.set('type', pool.type);
+  if (pool.role) query.set('role', pool.role);
+  const offset = offsetOfPage(pool.page, pool.pageSize);
+  if (keyword) {
+    // 搜索：先按属性/定位取回全部匹配项，再在本地按名字过滤 + 分页。
+    query.set('offset', '0');
+    query.set('limit', '200');
+  } else {
+    query.set('offset', String(offset));
+    query.set('limit', String(pool.pageSize));
+  }
+  const data = await getJson(`/api/roco/roster?${query.toString()}`);
+  if (!data.ok) throw new Error(data.error || '名单读取失败');
+  const pets = Array.isArray(data.pets) ? data.pets : [];
+  if (!keyword) {
+    // 服务端分页：`total` 是**筛选后**的总数，`offset` 是它真的取的那一段——直接用。
+    return {rows: pets, total: Number(data.total ?? pets.length),
+      offset: Number(data.offset ?? offset), limit: data.limit ?? pool.pageSize, source: 'server'};
+  }
+  const matched = pets.filter((pet) => String(pet.name ?? '').includes(keyword));
+  return {rows: matched.slice(offset, offset + pool.pageSize), total: matched.length,
+    offset, limit: pool.pageSize, source: 'client-search'};
+}
+
+/**
+ * 拉一页并渲染。
+ *
+ * `seq` 是并发保护：搜索框每敲一下都会发请求，回来晚的那次不许覆盖新结果。
+ * 页码在这里**夹到新结果集范围内**（结果只剩 1 页时不能停在 3/3，next 必须 disabled），
+ * 夹过之后**重新取一次**，绝不把旧 offset 的那一段留在屏幕上。
+ */
+async function loadPool({reset = false} = {}) {
+  const pool = state.pool;
+  if (reset) pool.page = 1;
+  const seq = (pool.seq += 1);
+  try {
+    const page = await fetchPoolPage();
+    if (seq !== pool.seq) return;
+    pool.total = Math.max(0, page.total);
+    pool.pages = Math.max(1, Math.ceil(pool.total / pool.pageSize));
+    const pageNo = Math.min(Math.max(1, pool.page), pool.pages);
+    if (pageNo !== pool.page) {
+      pool.page = pageNo;
+      document.body.dataset.rocoPoolClamped = 'yes';
+      const again = await fetchPoolPage();
+      if (seq !== pool.seq) return;
+      pool.rows = again.rows;
+    } else {
+      pool.rows = page.rows;
+      document.body.dataset.rocoPoolClamped = 'no';
+    }
+    const offset = offsetOfPage(pool.page, pool.pageSize);
+    pool.source = page.source;
+    pool.idsByPage[pool.page] = pool.rows.map((pet) => pet.pet_id);
+    document.body.dataset.rocoPool = String(pool.rows.length);
+    document.body.dataset.rocoPoolTotal = String(pool.total);
+    document.body.dataset.rocoPoolPage = String(pool.page);
+    document.body.dataset.rocoPoolPages = String(pool.pages);
+    document.body.dataset.rocoPoolOffset = String(offset);
+    document.body.dataset.rocoPoolSource = page.source;
+    renderRoster();
+  } catch (error) {
+    if (seq !== pool.seq) return;
+    $('pool-count').textContent = `名单读取失败：${error.message}`;
+    $('roster-status').textContent = `名单读取失败：${error.message}`;
+  }
+}
 
 /**
  * 属性/定位筛选的按钮组（折叠菜单里）。
  *
- * 为什么不是原生 `<select>`：原生下拉在无头 Chrome 里打不开也按不动——实测「聚焦之后
- * 派发真实 ArrowDown」完全不改 value，于是「属性/定位筛选」这一条就写不出真实键鼠判据。
- * 按钮组是页内 DOM：真实鼠标点得到、键盘 Tab+Enter 也走得到，样式与输入框同一条。
+ * 为什么不是原生 `<select>`：原生下拉在无头 Chrome 里打不开也按不动——
+ * 实测「聚焦之后派发真实 ArrowDown」完全不改 value，于是这一条写不出真实键鼠判据。
  */
 function renderFilterMenus() {
   const build = (box, options, current, attr) => {
@@ -788,6 +1178,7 @@ function renderFilterMenus() {
         const menu = box.closest('details');
         if (menu) menu.open = false;
         renderFilterMenus();
+        // 筛选一变就回到第 1 页（P0-1）：页码与结果集必须同时变。
         void loadPool({reset: true});
       });
     }
@@ -810,64 +1201,24 @@ function renderFilterMenus() {
   document.body.dataset.rocoPoolRole = state.pool.role || 'all';
 }
 
-/** 筛选下拉的选项来源：只列名单里真的出现过的属性与定位，顺序固定（免得每次刷新都在变）。 */
+/** 筛选下拉的选项来源：只列名单里真的出现过的属性与定位，顺序固定。 */
 function buildFilterOptions() {
   renderFilterMenus();
 }
 
-/**
- * 拉一页阵容池。
- *
- * 两条路径，都从**同一个服务**取数（不另起第二个数据源）：
- *   · 有搜索词：按属性/定位取回**全部**匹配项（`offset=0` 让回执带上 role/speed_tier），
- *     在前端按名字过滤，再本地分页；
- *   · 没有搜索词：把分页交给服务端（`limit`/`offset`），页面只渲染回来的那一页。
- * `seq` 是并发保护：搜索框每敲一下都会发请求，回来晚的那次不许覆盖新结果。
- */
-async function loadPool({reset = false} = {}) {
-  const pool = state.pool;
-  if (reset) pool.offset = 0;
-  const seq = (pool.seq += 1);
-  const query = new URLSearchParams();
-  if (pool.type) query.set('type', pool.type);
-  if (pool.role) query.set('role', pool.role);
-  if (pool.keyword) query.set('offset', '0');
-  else {
-    query.set('limit', String(pool.pageSize));
-    query.set('offset', String(pool.offset));
-  }
-  try {
-    const data = await getJson(`/api/roco/roster?${query.toString()}`);
-    if (seq !== pool.seq) return;               // 有更晚的一次请求在飞，丢弃这一次的结果
-    if (!data.ok) throw new Error(data.error || '名单读取失败');
-    const key = pool.keyword;
-    const all = key
-      ? data.pets.filter((pet) => String(pet.name ?? '').includes(key))
-      : data.pets;
-    pool.total = key ? all.length : (data.total ?? data.count ?? all.length);
-    const from = key ? pool.offset : 0;
-    pool.rows = all.slice(from, from + pool.pageSize);
-    document.body.dataset.rocoPool = String(pool.rows.length);
-    document.body.dataset.rocoPoolTotal = String(pool.total);
-    renderRoster();
-  } catch (error) {
-    if (seq !== pool.seq) return;
-    $('pool-count').textContent = `名单读取失败：${error.message}`;
-    $('roster-status').textContent = `名单读取失败：${error.message}`;
-  }
-}
-
-/** 阵容池底部那一行：第几页 / 一共几页 / 筛出几只。 */
+/** 阵容池底部那一行：第几页 / 一共几页 / 筛出几只；翻页按钮的可用性也从这里来。 */
 function renderPoolMeta() {
   const pool = state.pool;
-  const pages = Math.max(1, Math.ceil(pool.total / pool.pageSize));
-  const page = Math.min(pages, Math.floor(pool.offset / pool.pageSize) + 1);
+  const pages = Math.max(1, pool.pages);
+  const page = Math.min(pages, Math.max(1, pool.page));
   $('pool-page').textContent = `${page} / ${pages}`;
   $('pool-count').textContent = pool.total
-    ? `${pool.total} 只里筛出 ${pool.rows.length} 只 · 每页 ${pool.pageSize}`
+    ? `${pool.total} 只里这一页 ${pool.rows.length} 只 · 每页 ${pool.pageSize}`
     : '没有符合筛选条件的伙伴';
-  $('page-prev').disabled = pool.offset <= 0;
-  $('page-next').disabled = pool.offset + pool.pageSize >= pool.total;
+  $('page-prev').disabled = page <= 1;
+  $('page-next').disabled = page >= pages;
+  document.body.dataset.rocoPagePrevDisabled = $('page-prev').disabled ? 'yes' : 'no';
+  document.body.dataset.rocoPageNextDisabled = $('page-next').disabled ? 'yes' : 'no';
 }
 
 /** 固定队伍栏：已选 3 只始终可见（这一页的「这一局带谁」）。 */
@@ -889,7 +1240,12 @@ function renderTeambar() {
   }
 }
 
-/** 一页轻卡：首层只有 emoji 头像、名字、属性、定位与一个最关键特点。 */
+/**
+ * 一页轻卡：首层是「名字 / 属性 / 定位 / **机制**」+ **基础面板单独成块**（P0-1）。
+ *
+ * 机制那一行来自服务端压好的 `mechanism_line`（见 `mechanismOf` 的口径）；
+ * 它取不到就写「机制资料待确认」。六维各占一格，冻结数据里没有的那一项如实标出来。
+ */
 function renderPoolCards() {
   const grid = $('roster');
   if (!grid) return;
@@ -899,13 +1255,10 @@ function renderPoolCards() {
   grid.innerHTML = state.pool.rows.map((pet) => {
     const classes = ['pick', 'pet-option'];
     // 「定位」只有登记层真的标注过才渲染（`ROLE_LABEL` 里没有就是不认识/没给）。
-    // 原来回退成「定位：未标注」——48 张卡里缺一个字段，这一行就反复印同一句占位。
     const roleLabel = ROLE_LABEL[pet.role] ?? null;
     const onSide = onThisSide.includes(pet.pet_id);
     const offSide = otherSide.includes(pet.pet_id);
-    // 复用营地页的 `chosen`（框架的选择态）与这一页自己的两侧态；验收脚本按 `.pick` 取值。
     if (onSide) classes.push(side === 'player' ? 'picked-player' : 'picked-enemy', 'chosen');
-    // 这一侧点不动的两种情况：已经分给对面、或这一侧已经满 3 只（且它还没被选）。
     const blocked = !onSide && (offSide || onThisSide.length >= 3);
     if (blocked) classes.push('blocked');
     const badge = offSide ? `<span class="taken">${side === 'player' ? '对手已选' : '我方已选'}</span>`
@@ -913,6 +1266,9 @@ function renderPoolCards() {
     const why = offSide
       ? `${pet.name} 已经分给${side === 'player' ? '对手' : '我方'}了：点一下会告诉你怎么改`
       : (blocked ? `${sideName(side)}已经选满 3 只` : '');
+    const mech = mechanismOf(pet);
+    const mechIsNone = mech === MECHANISM_UNKNOWN;
+    const mechNote = mechanismSourceNote(pet);
     return `<div class="card-wrap">
       <button class="${classes.join(' ')}" data-pet="${pet.pet_id}"
         aria-disabled="${blocked ? 'true' : 'false'}" title="${escapeAttr(why)}">
@@ -920,12 +1276,14 @@ function renderPoolCards() {
         <span class="card-top">${petAvatar(pet)}<strong class="nm">${pet.name ?? ''}</strong></span>
         <span class="pet-option-types">${typeChips(pet.types)}</span>
         ${roleLabel ? `<span class="card-role">定位：${roleLabel}</span>` : ''}
-        <span class="card-key">特点：${keyFeature(pet)}</span>
+        <span class="card-mech${mechIsNone ? ' none' : ''}">机制：${escapeHtml(mech)}</span>
+        ${mechNote ? `<span class="card-mech-source">${escapeHtml(mechNote)}</span>` : ''}
+        <span class="card-key">${statBlockHtml(pet.stats)}</span>
       </button>
       <button class="card-more" data-detail="${pet.pet_id}"
-        aria-label="看 ${escapeAttr(pet.name)} 的面板数值与四个技能">详情 ▸</button>
+        aria-label="看 ${escapeAttr(pet.name)} 的完整面板与四个技能">详情 ▸</button>
     </div>`;
-  }).join('') || '<p class="muted pool-empty">没有符合筛选条件的伙伴：换个属性或定位试试。</p>';
+  }).join('') || '<p class="muted pool-empty">没有符合筛选条件的伙伴：换个属性或定位，或者点「清除筛选」。</p>';
   for (const button of grid.querySelectorAll('button[data-pet]')) {
     button.addEventListener('click', () => togglePick(button.dataset.pet));
   }
@@ -935,11 +1293,8 @@ function renderPoolCards() {
 }
 
 /**
- * 阵容选择（P0-3）。
- *
- * 数据来自 `/api/roco/roster`——**真名、真系别、真六维、真规范配招**，
- * 不是手写的样例。选择规则很简单：点一次加入当前正在选的一方，再点一次移出；
- * 我方满了自动切到对手那一边。双方各 3 只才能开局。
+ * 阵容选择（P0-3）：数据来自 `/api/roco/roster`——真名、真系别、真六维、真规范配招。
+ * 选择规则很简单：点一次加入当前正在选的一方，再点一次移出；我方满了自动切到对手。
  */
 function renderRoster() {
   const grid = $('roster');
@@ -958,17 +1313,16 @@ function renderRoster() {
   const enough = player.length === 3 && enemy.length === 3;
   $('start-battle').disabled = !enough;
   $('start-note').textContent = enough ? '双方都满了，可以开一局' : '选满双方各 3 只才能开始';
-  // 点击/键盘的即时反馈区（`role=status` + aria-live，键盘用户也听得到）
   const hint = $('pick-hint');
   if (hint) hint.textContent = state.pick.hint || '';
-  // 当前正在选哪一侧：**不能只靠一个淡色 tab**（玩家实测反馈就是分不清）。
+  // 当前正在选哪一侧：**不能只靠一个淡色 tab**。
   $('select-panel').dataset.rocoPickSide = side;
   renderTeambar();
   renderPoolCards();
   renderPoolMeta();
 }
 
-/** 详情抽屉：面板数值 + 四个技能。卡片首层**不放**这些。 */
+/** 详情抽屉：完整面板 + 四个技能（能耗 / 威力 / 类别 / 说明），文字不截断。 */
 function openPetDetail(petId) {
   const pet = state.roster.find((p) => p.pet_id === petId)
     ?? state.pool.rows.find((p) => p.pet_id === petId);
@@ -977,26 +1331,30 @@ function openPetDetail(petId) {
   state.detail = petId;
   $('pet-detail-name').textContent = `${pet.name} · 详情`;
   const stats = pet.stats ?? {};
-  const statRows = [['生命', stats.hp], ['攻击', stats.atk], ['防御', stats.def],
-    ['魔攻', stats.spa], ['魔防', stats.spd], ['速度', stats.spe]]
-    .filter(([, value]) => Number.isFinite(value))
-    .map(([label, value]) => `<li><span>${label}</span><b>${value}</b></li>`).join('');
+  // 六维**逐项**给：没登记的那一项如实说「本仓库没有这一项」，不省略成空白。
+  const statRows = STAT_FIELDS.map(([key, label]) => (Number.isFinite(stats[key])
+    ? `<li><span>${label}</span><b>${stats[key]}</b></li>`
+    : `<li><span>${label}</span><b class="muted">${STAT_MISSING}</b></li>`)).join('');
   const moves = (pet.moveset ?? []).map((move) => {
     // 威力只有引擎给了才写（第 64 轮）：没给就整段不写，不印「来源未给」这句工程话，
     // 也不补 0。原始 `power_status` 在开发者抽屉里逐条列着（可核对）。
-    const meta = [move.element, move.category,
+    const meta = [move.element, categoryCn(move.category),
       Number.isFinite(move.energy) ? `能耗 ${move.energy}` : null,
       Number.isFinite(move.power) ? `威力 ${move.power}` : (move.is_trait ? '特性' : null),
     ].filter(Boolean).join(' · ');
-    return `<li><b>${move.name}</b>${meta ? `<span class="muted">${meta}</span>` : ''}`
-      + `${move.desc ? `<small>${move.desc}</small>` : ''}</li>`;
+    return `<li><b>${escapeHtml(move.name)}</b>${meta ? `<span class="muted">${meta}</span>` : ''}`
+      + `${move.desc ? `<small>${escapeHtml(move.desc)}</small>` : ''}</li>`;
   }).join('');
-  // 定位同理：没标注就不写这一行（原来写成「定位：未标注」）。
   const roleLabel = ROLE_LABEL[pet.role] ?? null;
+  const trait = pet.trait && pet.trait.name
+    ? `<p><b>特性：${escapeHtml(pet.trait.name)}</b>${pet.trait.desc ? ` — ${escapeHtml(pet.trait.desc)}` : ''}</p>`
+    : '';
   $('pet-detail-body').innerHTML =
     `<p class="muted">${typeChips(pet.types)}${roleLabel ? ` 定位：${roleLabel}` : ''}`
     + `${pet.speed_tier ? ` · 速度档 ${pet.speed_tier}` : ''}</p>
-     <ul class="detail-stats">${statRows || '<li class="muted">引擎未给面板数值</li>'}</ul>
+     ${trait}
+     <div class="section-title"><h3>基础面板（六维）</h3></div>
+     <ul class="detail-stats">${statRows}</ul>
      <div class="section-title"><h3>四个技能</h3></div>
      <ul class="detail-moves">${moves || '<li class="muted">引擎未给配招</li>'}</ul>
      <p class="muted">面板数值与配招来自规则引擎。引擎没给威力的技能**不显示威力**，也不当成 0；
@@ -1023,14 +1381,7 @@ function togglePick(petId) {
     list.splice(at, 1);
     setPickHint(`${nameOf(petId)} 已从${sideName(side)}移出。`);
   } else if (other.includes(petId)) {
-    // ── 这里原来是 `return`（静默无反应）─────────────────────────────────────
-    //
-    // 玩家实测原话：随机把某只分给对手之后（例如音速犬、化蝶），在我方阶段点它
-    // **完全没反应**，卡片既没有禁用样式也没有提示，于是「点不动」——那是把一条
-    // 产品规则（同一只不能同时在两边）表现成了一个坏掉的按钮。
-    //
-    // 现在：卡片本身带 `blocked` 状态与「对手已选／我方已选」角标（见 renderPoolCards），
-    // 点它/键盘回车都会得到一句可执行的提示：先把它从对面取消，或者切到那一侧。
+    // 原来这里是静默 `return`（点不动）：现在点它/键盘回车都会得到一句可执行的提示。
     setPickHint(`${nameOf(petId)} 已经分给${sideName(side === 'player' ? 'enemy' : 'player')}了。`
       + `先在这一侧点它取消，或点上面的「${sideName(side === 'player' ? 'enemy' : 'player')}」切过去。`);
   } else if (list.length >= 3) {
@@ -1038,7 +1389,6 @@ function togglePick(petId) {
   } else {
     list.push(petId);
     setPickHint(`${nameOf(petId)} 加入${sideName(side)}（${list.length}/3）。`);
-    // 我方满了就自动切到对手，省一次点击
     if (side === 'player' && list.length === 3 && pick.enemy.length < 3) {
       pick.side = 'enemy';
       setPickHint('我方 3 只已满，已自动切到「对手」。');
@@ -1054,18 +1404,26 @@ function setPickHint(text) {
 }
 
 /**
- * 全量名单（48 只，带 role/speed_tier）：选中项的名字回查、筛选下拉、以及
+ * 全量名单（带 role/speed_tier/trait/mechanism_line）：选中项的名字回查、筛选下拉、以及
  * 「同一只不能同时在两边」都靠它。**不渲染**——渲染的是 `loadPool()` 给的那一页。
+ *
+ * 默认阵容：**我方留空**（用户要先自己选，「宠物先让我选」），对手给名单里前 3 只
+ * ——不是随机：随机会让「刚才为什么是这三只」永远说不清，验收也只能靠运气。
  */
 async function loadRoster() {
   try {
     const data = await getJson('/api/roco/roster?limit=200&offset=0');
     if (!data.ok) throw new Error(data.error || '名单读取失败');
     state.roster = data.pets.filter((p) => p.moveset_size > 0);
+    state.rosterTotal = Number.isFinite(Number(data.total)) ? Number(data.total) : null;
     $('roster-status').textContent = `${state.roster.length} 只可选（配招来自引擎规范配招）`;
+    const search = $('pool-search');
+    if (search) {
+      // 搜索框的提示读**真实总数**，不写死「48 只」：候选宇宙按 v3 是全量图鉴。
+      search.placeholder = state.rosterTotal ? `搜索名字（${state.rosterTotal} 只）` : '搜索名字';
+    }
     if (!state.pick.enemy.length) {
-      // 对手默认给一个随机阵容，玩家可以直接开局
-      state.pick.enemy = [...state.roster].sort(() => Math.random() - 0.5).slice(0, 3).map((p) => p.pet_id);
+      state.pick.enemy = state.roster.slice(0, 3).map((p) => p.pet_id);
     }
     buildFilterOptions();
     renderRoster();
@@ -1077,19 +1435,14 @@ async function loadRoster() {
 /**
  * shadow 对照面板（P0-5，开发者抽屉内）。
  *
- * 它回答一个问题：**本机那个小模型真的在参与吗？**
- * 面板并列两类提议：规则引擎这一步的「行动建议」，与本地模型这一步的「要不要查工具」。
- * 两者不是同一个决定，所以面板**不判一致/不一致**——那样会让人以为它们在同一维度上。
- *
- * 纪律：模型只提议工具；参数照过引擎校验；玩家正文不经过这条路径。
- * 默认不自动跑（要显式点按钮）：它要拉起本地模型，属于开发者工具，不是玩家路径。
+ * 它回答一个问题：**本机那个小模型真的在参与吗？** 面板并列两类提议，但**不判一致/不一致**
+ * ——两者不是同一个决定。
  */
 async function loadShadowPanel() {
   const box = $('shadow-panel');
   if (!box) return;
   box.hidden = false;
   if (!state.battleId) {
-    // **不静默返回**：静默会让面板看起来「坏了」，而实际只是还没开局。
     box.innerHTML = '<p class="muted">先开一局，再问本机小模型。</p>';
     return;
   }
@@ -1130,13 +1483,8 @@ function wireShadowPanel() {
 /**
  * 威力来源的 **fail-closed 凭据**（第 64 轮）。
  *
- * 玩家层不再出现「威力来源未给」这句工程话（它是 `power_status:
- * 'not_provided_by_source'` 的直译），但**事实不许丢**：哪一招的来源没给威力，
- * 必须还能逐条核对——所以原始 `power_status` 落在这里（默认收起的开发者抽屉）。
- *
- * 这是「玩家层说人话」与「工程层留凭据」的分工：同一份事实，两个读者两种写法。
- * 生成放在抽屉展开时（而不是每次 render）——48 只的配招表有好几百行，
- * 没人展开就不该算。
+ * 玩家层不再出现「威力来源未给」这句工程话，但**事实不许丢**：哪一招的来源没给威力，
+ * 必须还能逐条核对。生成放在抽屉展开时（而不是每次 render）——48 只的配招表有好几百行。
  */
 function renderPowerEvidence() {
   const box = $('power-status-raw');
@@ -1151,7 +1499,6 @@ function renderPowerEvidence() {
     for (const skill of legal) rows.push(line(skill));
     rows.push('');
   }
-  // 名单里 48 只的配招（去重）：任何一招的来源状态都查得到，不只是这一轮放得出的那些。
   const seen = new Set();
   const rosterRows = [];
   for (const pet of state.roster) {
@@ -1175,24 +1522,35 @@ function renderPowerEvidence() {
 function wireDevDrawer() {
   const drawer = $('about-drawer');
   // 展开时才生成：没人看就不算那几百行。
-  if (drawer) drawer.addEventListener('toggle', () => { if (drawer.open) renderPowerEvidence(); });
+  if (drawer) drawer.addEventListener('toggle', () => {
+    if (drawer.open) { renderPowerEvidence(); renderMode(); }
+  });
 }
 
 function wirePickControls() {
   for (const tab of document.querySelectorAll('.side-tab')) {
-    tab.addEventListener('click', () => { state.pick.side = tab.dataset.side; renderRoster(); });
-  }
-  for (const tab of document.querySelectorAll('.side-tab')) {
-    tab.addEventListener('click', () => setPickHint(`现在选的是「${sideName(tab.dataset.side)}」。`));
+    tab.addEventListener('click', () => {
+      state.pick.side = tab.dataset.side;
+      setPickHint(`现在选的是「${sideName(tab.dataset.side)}」。`);
+      renderRoster();
+    });
   }
   $('random-enemy')?.addEventListener('click', () => {
     state.pick.enemy = [...state.roster].sort(() => Math.random() - 0.5).slice(0, 3).map((p) => p.pet_id);
+    setPickHint('对手换成随机 3 只了。');
     renderRoster();
   });
   $('clear-pick')?.addEventListener('click', () => {
     state.pick.player = []; state.pick.enemy = []; state.pick.side = 'player';
     state.pick.hint = '两边都清空了，重新选吧。';
     renderRoster();
+  });
+  $('filter-reset')?.addEventListener('click', () => {
+    state.pool.type = ''; state.pool.role = ''; state.pool.keyword = '';
+    const search = $('pool-search');
+    if (search) search.value = '';
+    renderFilterMenus();
+    void loadPool({reset: true});
   });
   // 搜索 / 属性 / 定位 / 翻页：四个入口都直接改 `pool` 的视图状态，再拉一页。
   const search = $('pool-search');
@@ -1205,12 +1563,16 @@ function wirePickControls() {
     search.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(apply, 120); });
     search.addEventListener('change', apply);
   }
+  // 翻页（P0-1）：`page` 是唯一真值，offset 由它算出来发给服务端；
+  // 页码到底之后按钮 disabled，越界不再请求。
   $('page-prev')?.addEventListener('click', () => {
-    state.pool.offset = Math.max(0, state.pool.offset - state.pool.pageSize);
+    if (state.pool.page <= 1) return;
+    state.pool.page -= 1;
     void loadPool();
   });
   $('page-next')?.addEventListener('click', () => {
-    state.pool.offset += state.pool.pageSize;
+    if (state.pool.page >= state.pool.pages) return;
+    state.pool.page += 1;
     void loadPool();
   });
   $('pet-detail-close')?.addEventListener('click', closePetDetail);
@@ -1233,32 +1595,20 @@ async function startBattle() {
     $('companion-line').hidden = true;
     closePetDetail();
     hideHint();
-    // 带上玩家选好的双方阵容（P0-3）。没选够 3 只时不传，让服务端用默认阵容，
-    // 而不是发一个会被拒的请求。
     const body = {strategy: 'greedy_damage'};
     if (state.pick.player.length === 3) body.team = state.pick.player.slice();
     if (state.pick.enemy.length === 3) body.enemy_team = state.pick.enemy.slice();
-    // 验收脚本要能换局（不同 seed → 不同局面），用来证明气泡不是同一个句式。
-    // 玩家界面不暴露这个；只有 `window.rocoDemo` 会去设它。
+    // 验收脚本要能换局（不同 seed → 不同局面）。玩家界面不暴露这个。
     if (Number.isInteger(state.seedOverride) && state.seedOverride >= 0) body.seed = state.seedOverride;
     const data = await api('/api/roco/battle/new', body);
     state.battleId = data.battle_id;
     applyResult(data);
-    // ── 教程**开局就自动收起**（第 64 轮）─────────────────────────────────────
-    //
-    // 原来的行为：只有点「跳过」才消失。于是第一次来的玩家开完局，三步教程还挂在
-    // 战斗页顶上占着一整块位置——那三步的动作（选人、开一局）此刻已经做完了。
-    // 现在：对局真的开起来之后自动收起（`hidden` → 不占位），并写进
-    // `roco-coach-onboard-v1`，下一次进来也不再显示（同一条 localStorage 契约）。
-    // 放在 `applyResult` 之后：开局失败时不该把教程吞掉。
+    // 教程在开局后自动收起（第 64 轮）：三步的动作此刻已经做完了。
     dismissOnboard();
-    // 开局也要判一次：F01 要求「修改阵容后出现一条有证据建议」，
-    // 而本演示的阵容修改就是换人——开局这一手同样是一手，值得给一次机会。
     await requestPlan({reason: 'match-start'});
   } catch (error) {
     $('plan-status').textContent = `开局失败：${error.message}`;
   } finally {
-    // 不要无条件启用：按钮的可用性由「双方是否各选满 3 只」决定
     renderRoster();
   }
 }
@@ -1272,7 +1622,7 @@ async function playAction(action) {
     // 「状态变化撤销旧建议」：换了人/补了位之后，上一手算出来的建议就地作废。
     if (state.planAtVersion !== null && state.planAtVersion !== before) state.plan = null;
     if (action.kind === 'switch' || state.view?.phase === 'replace') {
-      state.session.dismissed = false;   // 阵容变了，重新给一次机会
+      state.session.dismissed = false;
       refreshHint({reason: 'roster-changed', plan: null});
       await requestPlan({reason: 'roster-changed'});
     }
@@ -1297,10 +1647,7 @@ async function requestPlan({reason = 'manual', explicit = false} = {}) {
   try {
     const plan = await api('/api/roco/plan', {battle_id: state.battleId, depth: 2, beam: 4});
     state.timings.push(Math.round(performance.now() - started));
-    // **陈旧结果取消**（第 65 轮修）：规划回执自己说自己属于哪一版局面，
-    // 与**现在**这一版比。不相等就整条丢弃 —— 不用它开口、不用它渲染比较区、
-    // 更不许把当前版本号盖到它头上（原来的 `state.view?.state_version ?? plan.state_version`
-    // 正是那么干的：把过期规划当成当前规划）。
+    // **陈旧结果取消**：规划回执自己说自己属于哪一版局面，与**现在**这一版比。
     const fresh = rocoPlanFreshness({plan, view: state.view});
     if (!fresh.usable) {
       state.plan = null;
@@ -1310,7 +1657,6 @@ async function requestPlan({reason = 'manual', explicit = false} = {}) {
         view_version: fresh.view_version,
         at: Date.now(),
       });
-      // 回退到规则短提示：这一手仍然能开口，但只说当前局面能说的事。
       refreshHint({reason: 'stale-plan', plan: null, explicit});
       $('plan-status').textContent = `没有采用这份建议：${fresh.reason}`;
       return plan;
@@ -1318,16 +1664,12 @@ async function requestPlan({reason = 'manual', explicit = false} = {}) {
     state.plan = plan;
     state.planAtVersion = fresh.plan_version;
     refreshHint({reason, plan, explicit});
-    // 状态行只说**结果**，不再是「点一下只得到一句状态文案」的那句空话：
-    // 真的开口了就说开口了，建议层沉默就如实说沉默（沉默也是结论）。
     const spoken = Boolean(state.hint);
     $('plan-status').textContent = explicit && spoken
       ? `已在浮条上给出这一手（第 ${state.view?.turn ?? '—'} 回合）；展开可看并列比较`
       : (plan.recommendation_stable === false
         ? '这一手没有稳健结论（换个算法会变）'
         : (spoken ? '建议已给出' : '这一手引擎没有值得单独说的局面事实（拿不到就不编）'));
-    // 只有**真的主动说了一句建议**才算一次打断；玩家自己问来的那份「事实比较」
-    // （`explicit-facts`）不消耗每局的提示预算。
     if (state.hint && state.hint.action !== 'explicit-facts') recordHintSaid();
     return plan;
   } catch (error) {
@@ -1337,18 +1679,6 @@ async function requestPlan({reason = 'manual', explicit = false} = {}) {
 }
 
 // ── 结算：结果 / 一个关键转折 / 下一局目标（统计与证据折叠）─────────────────
-//
-// 局末这一段的两个输入都必须来自**真实局面**，不能从终局视图反推：
-//   · `events` 用整局的 `state.matchEvents`（`view.events` 只有最后一次推进的那些）；
-//   · `game` 用 `state.lastLiveView`（最后一个还能行动的局面）——终局视图里对手场上
-//     已经是补位上来的那一只，拿它去找「倒下的那一只」就会张冠李戴。
-// 复盘拿不到转折点或没有够得上的课时**不硬凑**：退回原来那条只讲一个回合的短句，
-// 并如实说「没有值得单独拎出来的决策点」。
-//
-// 结算页的三条纪律（第 60 轮）：
-//   ① 结果 / 一个关键转折 / 下一局练习目标**先显示**，统计与依据折叠；
-//   ② **不展示零值**（「换人 0 次」这种一行都不出现）；
-//   ③ **不出现内部术语**（回合、名字、伤害都能对人说清）。
 function matchStats(events, view) {
   const fainted = {player: 0, enemy: 0};
   let switches = 0;
@@ -1384,13 +1714,9 @@ async function finishMatch() {
   $('result-stats').textContent = matchStats(state.matchEvents, view);
 
   const finalGame = rocoGameView(view, {matchId: state.battleId});
-  // 真实记录：赢了也记，输了也记。记的是引擎结算出来的那一局，不是编的。
   state.memory = rememberBattle(state.memory, finalGame);
   saveMemory();
 
-  // 「用整局事件 + 最后一个可行动的局面，并且先核对上一课」这三条不许弄错的规则
-  // 都在 `rocoMatchReview` 里，页面只负责把三份真实输入交出去。这样 Node 侧的验收
-  // 能用同一段装配逻辑跑真对局，而不是只读一遍页面源码。
   const {progress, review} = rocoMatchReview({
     matchId: state.battleId,
     finalView: view,
@@ -1411,7 +1737,6 @@ async function finishMatch() {
     bubble.hidden = false;
   }
 
-  // 完整复盘里的**依据**：零值不展示（「0 / 425 生命」这种一行不留）。
   const evidence = (review?.evidence ?? []).filter((line) => !/\b0\s*\/\s*\d+\s*生命/.test(line));
 
   if (review) {
@@ -1431,8 +1756,6 @@ async function finishMatch() {
     document.body.dataset.rocoTeacherImproved = progress.improved === true
       ? 'yes'
       : (progress.improved === false ? 'no' : 'unknown');
-    // 账本只记真的发生过的东西：`recordTeacherReview` / `recordLearningCheck`
-    // 各自在「回合不是整数」「improved 不是布尔」时**拒绝写入**（teacher-review.js:783-836）。
     state.memory = recordTeacherReview(state.memory, {matchId: state.battleId, review});
     state.memory = recordLearningCheck(state.memory, {
       matchId: state.battleId, check: progress, goal: progress.goal,
@@ -1463,12 +1786,14 @@ async function finishMatch() {
  * 玩家说一句：走**陪练**那一层（离线模板），不是战术问答。
  *
  * 为什么不是问答：这个页面要证明的是「不打开聊天也能得到帮助」，
- * 所以这里的输入框只处理情绪与偏好。战术问题会让页面变回一个聊天窗口，
- * 那就把 F01 想证明的东西证明没了。
+ * 所以这里的输入框只处理情绪与偏好。战术问题会让页面变回一个聊天窗口。
  */
 function say(text) {
   const message = String(text || '').trim();
   if (!message) return null;
+  // 说了话就把这一栏打开：输入框与回复必须在**同一屏**（P0-2）——
+  // 玩家不会在看不见的地方得到回复。
+  if (!state.coach.open) openCompanion({focus: false});
   const intent = intentOf(message);
   const game = state.view ? rocoGameView(state.view, {matchId: state.battleId}) : null;
   const context = {battle: game, mode: game?.mode ?? ROCO_MODE};
@@ -1481,23 +1806,22 @@ function say(text) {
   });
   const noReview = Boolean(state.memory.stated?.some?.((entry) => entry?.kind === 'review-after-loss' && entry?.value === false));
   // ⚠ `chatReply` 返回的是**结构**（`{text, parts, thread, ...}`），不是字符串。
-  // 直接把结构塞进 `textContent` 的结果是玩家看到 `[object Object]`——第 64 轮
-  // 做整局产品接线验证时抓到的真实缺陷（原来的判据只看 `data-roco-companion` 与
-  // 「气泡显示了吗」，两条都能过）。这里按它的契约取 `.text`，取不到才退回兜底句。
   const built = chatReply({message, memory: state.memory, facts, intent, limit: REGISTERS[register]?.limit, noReview});
   const builtText = typeof built === 'string' ? built : (typeof built?.text === 'string' ? built.text : null);
   const reply = builtText
     ?? (intent === 'emotion' ? '嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。' : '我在。想聊哪一只伙伴，或者刚才那一手？');
-  // 偏好是玩家自己说出来的才记（例如「说简短点」），不是从行为推的。
   state.memory = rememberPreference(state.memory, message);
   saveMemory();
   $('say-reply').hidden = false;
   $('say-reply').textContent = reply;
-  // 这一句可能刚写下/改掉一条长期偏好（「以后叫我老王」），列表要立刻跟上。
   renderMemory();
   document.body.dataset.rocoCompanion = register;
   document.body.dataset.rocoCompanionWhy = reason;
   document.body.dataset.rocoCompanionSeen = 'yes';
+  // 回复写完之后把中间那段滚到底：保证「最近一句回复」真的出现在可视区里。
+  const body = $('companion-body');
+  if (body) body.scrollTop = body.scrollHeight;
+  syncBottomBars();
   return {register, reason, reply};
 }
 
@@ -1509,7 +1833,10 @@ const COVERAGE = [
   ['状态变化撤销旧建议', '推进后 data-roco-hint-version 变大，旧提示先撤下'],
   ['局末一个教学入口', 'data-roco-lesson="shown"'],
   ['玩家抱怨时陪练先回应情绪', 'data-roco-companion="R2"|"R3" 且回话已显示'],
-  ['48 只阵容池的搜索/属性/定位/分页', 'data-roco-pool 与 data-roco-pool-total 随筛选变化'],
+  ['阵容池的搜索/属性/定位/分页', 'data-roco-pool-offset / data-roco-pool-page 跟着翻页变'],
+  ['行动坞按引擎 kind 分组', 'data-roco-action-groups="skill:n,item:n,switch:n,escape:n"'],
+  ['模式徽记读注册表（不写死字符串）', 'data-roco-mode + 「候选规则（待实机核对）」按注册表出现'],
+  ['魔力/心只显示引擎给的数（没有就写未核验）', 'data-roco-standard-pvp + 资源条文案'],
   ['教程只在首次出现、可跳过', 'data-roco-onboard="shown" → 跳过 → "hidden"，刷新仍 hidden'],
 ];
 
@@ -1531,20 +1858,19 @@ function bind() {
   $('hint-details').addEventListener('click', () => {
     const body = $('hint-body');
     body.hidden = !body.hidden;
-    // 展开/收起之后把浮条滚回顶部（第 64 轮）：浮条自己是一个滚动容器
-    // （内容长过一屏时 `overflow:auto`），而浏览器会把**刚被点的按钮**滚进视野——
-    // 那个按钮在展开区上方，于是「做什么 / 为什么」这两行会被推出浮条可视区。
-    // 实测：390×844 下展开后第一行被切掉一半，而判据只量了浮条高度、量不到这个。
     const box = $('hint');
     if (box) box.scrollTop = 0;
+    syncBottomBars();
   });
   $('lesson-close').addEventListener('click', () => {
     $('lesson-card').hidden = true;
   });
-  // 轻量小芽入口：把玩家带到陪练那一条（她自己说话的地方），不新开聊天窗口。
-  $('coach-entry').addEventListener('click', () => {
-    $('companion-card').scrollIntoView({block: 'center', behavior: 'smooth'});
-    $('say-input').focus();
+  // 轻量小芽入口（P0-2）：点一下**有可见反应**——这一栏展开、焦点落到输入框。
+  $('coach-entry').addEventListener('click', () => openCompanion());
+  $('companion-close').addEventListener('click', () => {
+    state.coach.open = false;
+    renderCompanion();
+    syncBottomBars();
   });
   $('onboard-skip').addEventListener('click', dismissOnboard);
   $('say-form').addEventListener('submit', (event) => {
@@ -1558,31 +1884,49 @@ function bind() {
   window.addEventListener('focus', () => refreshHint({reason: 'focus'}));
 }
 
+/**
+ * 挂载 RC-305 六槽阵容工作台。
+ *
+ * 两件事刻意写在这里：
+ *   · **失败不拖垮整页**：模块自己读 `/api/roco/workshop`，它挂了也不该让训练场页白屏；
+ *   · 把**同一份**阵容评估交给小芽那一层：模块每次队伍变化都派发 `team-workshop:change`，
+ *     这里只把它记到 `state.teamWorkshop` 上，供军师/复盘读取——不重算、不另写一套模板。
+ */
+function mountWorkshop() {
+  const root = $('team-workshop');
+  if (!root) return;
+  try {
+    window.rocoTeamWorkshop = mountTeamWorkshop(root, {
+      onTeamChange: (detail) => { state.teamWorkshop = detail; },
+    });
+  } catch (error) {
+    root.dataset.twState = 'failed';
+    root.dataset.twError = String(error?.message ?? error);
+  }
+}
+
 async function boot() {
   state.memory = loadMemory();
   renderCoverage();
   bind();
   applyOnboard();
-  // 阵容选择：先接线，再读名单（读名单会顺带给出一个随机的对手阵容与第一页池子）
+  // 阵容选择：先接线，再读名单（读名单会顺带给出一个默认对手阵容与第一页池子）。
   wirePickControls();
   wireShadowPanel();
   wireDevDrawer();
+  renderMode();
   render();
   renderMemory();
+  renderCompanion();
   await loadRoster();
   await loadPool({reset: true});
   // ── 规则服务没就绪时的**自愈与退路**（监工 14:17 现场回归）──────────────────
-  //
-  // 现场表现：页面写「规则服务：未启动」、阵容区卡在「正在读取精灵名单…」、双方 0/3，
-  // 整页不可开局，而且**没有任何重试入口**——只能刷新浏览器赌一次。
-  // 服务本身是好的（`/api/roco/status` 实测 available:true、roster ok:true），
-  // 所以这是**冷启动时序**问题：页面比规则服务先到，却把「暂时没起来」写成了终态。
-  //
-  // 现在：① 未就绪就按 3 秒一轮自动重试（最多 10 轮），期间文案说清"正在启动"；
-  //      ② 无论成功失败，头部都出现「重试」按钮（一键重跑状态与名单）；
-  //      ③ 就绪后自动补一次名单加载（冷启动时那一次常常是失败的）。
+  // ① 未就绪就按 3 秒一轮自动重试（最多 10 轮）；② 无论成功失败都出现「重试」按钮；
+  // ③ 就绪后自动补一次名单加载（冷启动时那一次常常是失败的）。
   const loadStatus = async () => {
     const status = await fetch('/api/roco/status', {cache: 'no-store'}).then((r) => r.json());
+    state.mode = status.mode ?? state.mode;
+    renderMode();
     $('engine-status').textContent = status.available ? '规则服务：已就绪' : '规则服务：正在启动…';
     $('engine-status').dataset.rocoStatus = status.available ? 'ready' : 'idle';
     return status.available === true;
@@ -1602,7 +1946,6 @@ async function boot() {
       let ready = false;
       try { ready = await loadStatus(); } catch { $('engine-status').dataset.rocoStatus = 'error'; }
       if (ready) {
-        // 冷启动时第一次名单往往已经失败了，就绪后补一次（不覆盖玩家已经改好的选择）
         if (!state.roster.length) { await loadRoster(); await loadPool({reset: true}); }
         return;
       }
@@ -1612,6 +1955,7 @@ async function boot() {
   }
   await bootData();
   applyOnboard();
+  mountWorkshop();
   document.body.dataset.rocoReady = 'yes';
 }
 
@@ -1619,6 +1963,16 @@ async function boot() {
 window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, refreshHint, render,
   loadShadowPanel, renderPowerEvidence,
   loadRoster, togglePick, renderRoster,
-  loadPool, openPetDetail, closePetDetail, dismissOnboard, onboardDismissed, syncBottomBars};
+  loadPool, openPetDetail, closePetDetail, dismissOnboard, onboardDismissed, syncBottomBars,
+  mountWorkshop,
+  // 第 92 轮新增的**纯渲染/纯函数**出口：单元测试与浏览器验收读同一条实现，
+  // 免得「测试里另写一份正则」变成另一套口径。
+  actionGroupsOf, actionCardHtml, resourceHtml, rosterLineHtml, statBlockHtml, mechanismOf,
+  modeChipHtml, companionVisibility, openCompanion, offsetOfPage, standardPvpActive, resolveMode,
+  mechanismSourceNote, MODE_MIRROR,
+  // 这几条渲染入口也给出去：验收脚本要在**不点按钮**的前提下把某一页/某一栏重画一次，
+  // 而它必须走页面自己的渲染，不能在脚本里另写一份 DOM。
+  renderCompanion, renderFilterMenus, renderMode,
+  MANA_UNVERIFIED, MECHANISM_UNKNOWN, ACTION_GROUPS, STAT_FIELDS, STAT_MISSING};
 
 void boot();

@@ -1,14 +1,20 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 洛克王国：世界（训练场）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/roco.css"></head><body>
 <main>
 
-<!-- ── 页头：只放游戏标题、轻量小芽入口、回合状态与右上角抽屉 ─────────────────
+<!-- ── 页头：游戏标题 + **模式徽记** + 小芽入口 + 抽屉 ──────────────────────
+     模式徽记（`#mode-line`）由 `/api/roco/status` 的 `mode` 原样渲染：
+     注册表（data/roco/battle-modes.json）里的 label / status / confidence
+     **一个字都不在本文件里写死**；读不到就写「注册表未读取」，不补默认徽记。
      规则版本 / 服务状态 / 验收钩子 / 工程说明**全部**在 `#about-drawer` 里，默认收起。 -->
 <header class="topbar">
  <h1>小芽 · 洛克王国：世界 <small>训练场</small></h1>
+ <div class="mode-line" id="mode-line" aria-live="polite">
+  <span class="chip" id="mode-label">模式：正在读取…</span>
+ </div>
  <div class="header-actions">
   <span id="turn-chip" class="chip">未开局</span>
   <span id="phase-chip" class="muted"></span>
-  <button id="coach-entry" title="叫小芽过来说一句">✦ 小芽</button>
+  <button id="coach-entry" title="叫小芽出来说一句">✦ 小芽</button>
   <button id="reset-battle">重开</button>
   <button id="engine-retry" hidden>重试</button>
   <!-- 开发者抽屉：默认收起。工程信息只在这里出现。 -->
@@ -18,6 +24,10 @@
     <p><span id="engine-status" class="chip">规则服务：未启动</span></p>
     <p>结算由 <strong>Python 规则引擎</strong>按手游子集完成，规则快照
      <code id="about-ruleset">roco-world-s4-2026-09-10</code>。</p>
+    <p><strong>本仓库的引擎现在还没有「魔力 / 心」这个量</strong>（<code>legacy_sim_v1</code> 的胜负按
+     打光判定），所以战斗页那一栏只显示「未核验」，**不画计数器也不补一个 4**。
+     真实实现属于候选规则落地（并等 <code>MC-E08</code> 实机录制）——这一条写在
+     <code>docs/roco/USER-DIRECTIVES-2026-09-22.md</code> 的 D5 里。</p>
     <p><strong>未核验的机制一律不猜</strong>（fail closed）：引擎会说「这里我们不知道」，
      而不是补一个默认值。页面上带「未核验」字样的数字都是估值，不是实测值。</p>
     <p>页面上的 <code>data-roco-*</code> 属性是<strong>验收钩子</strong>：自动化验收脚本读它们
@@ -31,11 +41,13 @@
     <div id="shadow-panel" hidden></div>
     <!-- 威力来源的 fail-closed 凭据（第 64 轮）。
          玩家层**不显示**没给的威力（也绝不补 0），但「引擎这一招到底给没给威力」
-         必须可核对：原始 `power_status` 逐条列在这里，默认收起。
-         为什么放这里而不是技能按钮上：那是工程字段，不是玩家的话。 -->
+         必须可核对：原始 `power_status` 逐条列在这里，默认收起。 -->
     <div class="section-title"><h3>威力来源（fail-closed 凭据）</h3></div>
     <p class="muted">玩家层不显示没给的威力，也绝不补 0；这一份是引擎给的原始来源状态。</p>
     <pre id="power-status-raw" class="raw">点开这一栏后按当前局面与名单生成。</pre>
+    <!-- 模式注册表的**原文**（不是转述）：读自 data/roco/battle-modes.json -->
+    <div class="section-title"><h3>模式注册表（原文，未核验项逐条列出）</h3></div>
+    <pre id="mode-raw" class="raw">正在读取模式注册表…</pre>
     <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
     <ul class="checklist" id="coverage"></ul>
    </div>
@@ -43,18 +55,31 @@
  </div>
 </header>
 
-<!-- ── 开局引导（P1-2）：只在**第一次**来的时候出现，可跳过，跳过之后不再占位 ── -->
+<!-- ── 开局引导（P0-3）：**不遮挡、不拦截**候选卡的点击 ─────────────────────
+     它是选阵容页上方的一条轻提示（在流里、不覆盖任何卡片、高度只有一行），
+     可以跳过，跳过之后不再占位。 -->
 <div class="onboard-bar" id="onboard-bar">
  <ol class="onboard" id="onboard">
   <li><strong>选我方 3 只</strong><span>点一下加入，再点一下移出</span></li>
   <li><strong>选对手 3 只</strong><span>切到「对手」那一侧再点</span></li>
-  <li><strong>开一局</strong><span>不用问她：该说话时小芽自己会出来</span></li>
+  <li><strong>开一局</strong><span>该说话时小芽自己会出来</span></li>
  </ol>
  <button id="onboard-skip" class="onboard-skip">跳过</button>
 </div>
 
+<!-- ── RC-305 六槽阵容工作台（挂载点）───────────────────────────────────────
+     整块由 `src/client/team-workshop.js` 的 `mountTeamWorkshop()` 渲染到**自己的
+     shadow root** 里：队伍六个槽位 / 候选池（全量图鉴）/ 当前评估 / 右侧 Coach 栏。
+     它消费 `/api/roco/workshop`（RC-301→302→303→304），这一页不重算评价。
+     **位置由主线程裁定**：它在 `#select-panel` **之前**，首屏顺序是
+     「页头 → 六槽工作台 → 旧的 3v3 迁移练习区」；挂载调用在 roco.js 的
+     `mountWorkshop()`，失败只在这里标状态，不拖垮整页。这一页的判据**不依赖**
+     它与 `#select-panel` 的先后（只要求两者都在常规流里、互不重叠）。 -->
+<section id="team-workshop" aria-label="六槽阵容工作台"></section>
+
 <!-- ── 选阵容页（`#select-panel`）：固定队伍栏 + 阵容池 ───────────────────────
-     没有空的「你的队伍／训练对手」大框：这一页只有「已选的 3 只」与「48 只池子」。 -->
+     这一页只有「已选的 3 只」与「48 只池子」。搜索 / 属性·定位筛选 / 分页全部走
+     `/api/roco/roster` 的 `offset/limit/type/role`（服务端分页，页面不自建第二份数据）。 -->
 <section class="panel select-panel" id="select-panel" data-roco-pick-side="player">
 
  <!-- 固定队伍栏：已选 3 只始终可见，我方/对手共用同一套「这一局带谁」 -->
@@ -77,7 +102,7 @@
   </div>
  </div>
 
- <!-- 阵容池：搜索 + 属性/定位筛选 + 分页（每页 12），卡片只给第一层信息 -->
+ <!-- 阵容池：搜索 + 属性/定位筛选 + 分页（每页 12），卡片首层是「认得出 + 有区分度」 -->
  <div class="pool">
   <div class="filters">
    <div class="seg" id="side-seg" role="group" aria-label="现在给哪一侧选">
@@ -87,8 +112,7 @@
    <input type="search" id="pool-search" placeholder="搜索名字（48 只）" aria-label="按名字搜索" autocomplete="off">
    <!-- 属性/定位筛选：折叠菜单里的按钮组。
         为什么不是原生 <select>：原生下拉在无头 Chrome 里**打不开也按不动**
-        （实测：聚焦后真实 ArrowDown 完全不改 value），那样就没法写「真实键鼠」判据。
-        折叠菜单是页内 DOM，鼠标点得到、键盘也走得到，样式仍与输入框同一条。 -->
+        （实测：聚焦后真实 ArrowDown 完全不改 value），那样就没法写「真实键鼠」判据。 -->
    <details class="fmenu" id="filter-type-menu">
     <summary>属性：<span id="filter-type-label">全部</span></summary>
     <div class="fmenu-body" id="filter-type" role="group" aria-label="按属性筛选"></div>
@@ -97,6 +121,7 @@
     <summary>定位：<span id="filter-role-label">全部</span></summary>
     <div class="fmenu-body" id="filter-role" role="group" aria-label="按定位筛选"></div>
    </details>
+   <button id="filter-reset" class="filter-reset">清除筛选</button>
    <span class="muted" id="pool-count">正在读取…</span>
   </div>
   <p id="pick-summary" class="muted pick-summary"></p>
@@ -109,16 +134,14 @@
 
  <!-- 底部固定：分页 + 主操作（首屏唯一主操作就是「开一局」） -->
  <div class="footbar" id="pool-footbar">
+  <button id="page-prev" aria-label="上一页">‹ 上一页</button>
+  <span id="pool-page" class="pager-label">1 / 1</span>
+  <button id="page-next" aria-label="下一页">下一页 ›</button>
   <button id="start-battle" class="primary" disabled>开一局（双方各 3 只）</button>
   <span class="muted" id="start-note">选满双方各 3 只才能开始</span>
   <div class="pool-tools">
    <button id="random-enemy">对手随机</button>
    <button id="clear-pick">清空</button>
-  </div>
-  <div class="pager">
-   <button id="page-prev">上一页</button>
-   <span id="pool-page">1 / 1</span>
-   <button id="page-next">下一页</button>
   </div>
  </div>
 </section>
@@ -146,19 +169,35 @@
  <p><button id="lesson-close" class="lesson-close">收起这次复盘</button></p>
 </section>
 
-<!-- ── 对战页：中央是双方当前宠物的战斗舞台，后备压成小条 ───────────────────── -->
+<!-- ── 对战页：中央是双方当前宠物的战斗舞台 + 双方阵容状态 ──────────────────── -->
 <section class="panel battle" id="battle-panel" hidden>
  <!-- 对局进行中的一行阵容摘要（阵容池收起来之后，玩家仍看得见自己选了什么） -->
  <div id="lineup-brief" class="lineup-brief" hidden></div>
 
+ <!-- 顶部对称：双方资源条（魔力/心）+ 当前精灵 + 队伍状态。
+      **资源条的数字只能来自引擎**：引擎没给（mana/hearts 都是 null）就写「未核验」
+      并指向开发者抽屉，绝不画心形计数、也绝不替它补一个 4。 -->
+ <div class="sidebars">
+  <div class="sidebar player" id="self-bar">
+   <div class="sb-head"><span class="side-tag player">我方</span><span class="muted" id="self-active"></span></div>
+   <div class="resource" id="self-resource"></div>
+   <div class="roster-line" id="self-roster-line"></div>
+  </div>
+  <div class="vs" aria-hidden="true">VS</div>
+  <div class="sidebar enemy" id="foe-bar">
+   <div class="sb-head"><span class="side-tag enemy">对手</span><span class="muted">规则引擎驱动</span></div>
+   <div class="resource" id="foe-resource"></div>
+   <div class="roster-line" id="foe-roster-line"></div>
+  </div>
+ </div>
+
  <div class="stage">
   <article class="fighter" id="self-panel">
-   <div class="fighter-head"><span class="side-tag player">我方场上</span><span class="muted" id="self-active"></span></div>
+   <div class="fighter-head"><span class="side-tag player">我方场上</span><span class="muted" id="self-field-note"></span></div>
    <div id="self-pets" class="pets"></div>
   </article>
-  <div class="vs" aria-hidden="true">VS</div>
   <article class="fighter" id="foe-panel">
-   <div class="fighter-head"><span class="side-tag enemy">对手场上</span><span class="muted">规则引擎驱动</span></div>
+   <div class="fighter-head"><span class="side-tag enemy">对手场上</span><span class="muted" id="foe-field-note"></span></div>
    <div id="foe-field" class="pets"></div>
   </article>
  </div>
@@ -185,27 +224,35 @@
  </details>
 </section>
 
-<!-- ── 底栏：合法动作**固定**在这里，一屏可点 ──────────────────────────────── -->
+<!-- ── 底栏：合法动作**按引擎 kind 分组**固定在这里，一屏可点 ──────────────── -->
 <section class="panel action-panel" id="action-panel" hidden>
  <span class="muted" id="action-hint">开一局后这里会出现可执行的动作</span>
  <div id="actions" class="actions"></div>
 </section>
 
-<!-- ── 小芽（陪练）：轻量气泡 + 偏好记忆；刻意不做「三角色状态表」 ───────────── -->
-<section class="panel companion" id="companion-card">
- <div class="section-title"><h2>小芽</h2><span class="muted">她该说话时自己会出来</span></div>
- <p id="companion-line" class="companion-line" hidden></p>
- <div id="say-reply" class="reply" hidden></div>
- <form id="say-form" class="row">
+<!-- ── 小芽（陪练 / 军师）：重排后的浮条；输入与最近一句回复**同屏可见** ───────
+     宽屏它是右侧 Coach 栏（固定定位），窄屏它是贴底的一整块；
+     两种版式下 `#say-form` 与 `#say-reply` 都在首屏（判据量 `getBoundingClientRect`）。 -->
+<aside class="companion" id="companion-card" aria-label="小芽">
+ <div class="companion-head">
+  <strong>✦ 小芽</strong>
+  <span class="muted" id="companion-sub">她该说话时自己会出来</span>
+  <button id="companion-close" aria-label="收起小芽这一栏">收起</button>
+ </div>
+ <div class="companion-body" id="companion-body">
+  <p id="companion-line" class="companion-line" hidden></p>
+  <div id="say-reply" class="reply" hidden></div>
+  <!-- 记忆（P1-3）：**玩家可见、可逐条忘掉**。只列「他自己说过的」，不列对局记录。 -->
+  <div class="section-title" id="memory-head"><h3>小芽记住的（都是你说过的）</h3>
+   <span class="muted">说错了？直接再说一句就能改，或者点「忘掉」</span></div>
+  <ul id="memory-list" class="memory"></ul>
+  <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>
+ </div>
+ <form id="say-form" class="say-form">
   <input id="say-input" maxlength="80" placeholder="想说点什么（例如「好烦，又输了」）" aria-label="对小芽说一句">
   <button class="primary">说一句</button>
  </form>
- <!-- 记忆（P1-3）：**玩家可见、可逐条忘掉**。只列「他自己说过的」，不列对局记录。 -->
- <div class="section-title" id="memory-head"><h3>小芽记住的（都是你说过的）</h3>
-  <span class="muted">说错了？直接再说一句就能改，或者点「忘掉」</span></div>
- <ul id="memory-list" class="memory"></ul>
- <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>
-</section>
+</aside>
 
 </main>
 

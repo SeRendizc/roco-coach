@@ -3,15 +3,23 @@
    与营地页的 `src/client/style.css`（监工留的 UI 框架）并存，于是两个页面像两个产品。
    现在框架那一份先加载（`roco.html` 里 style.css 在前），这里只写框架里没有的东西：
      · 三页各自的结构（选阵容页 / 对战页 / 结算页）与它们的固定底栏；
-     · 阵容池的轻卡、分段选择器、筛选行、分页；
+     · 模式徽记、阵容池的轻卡、分段选择器、筛选行、分页；
      · 军师的两行小浮条、伙伴详情抽屉（框架里没有这两个组件）；
-     · 记忆面板（营地页没有这个组件）与伤害浮层。
+     · **小芽那一栏**（宽屏 = 右侧 Coach 栏，窄屏 = 贴底一块）与伤害浮层。
    凡是框架里已经有的（`.panel`/`button`/`input`/`select`/`.type`/`.hp-track`/`.hp-fill`/
    `.energy`/`.bench-pet`/`.action`/`.stats`/`.pet-icon`/`.muted`/`.section-title`），
-   这里**一个字都不重复**。 */
+   这里**一个字都不重复**。
+
+   ── 第 92 轮版式（用户 P0 试玩反馈）────────────────────────────────────────
+   这一轮改的是**结构**，不是配色：
+     · 选阵容页：分页 / 筛选 / 搜索真的分页（服务端 offset），引导条只占一行、不遮挡卡片；
+     · 卡片首层：定位 + **机制**（有区分度）+ **基础面板单独成块**，不再是模板句；
+     · 对战页：顶部双方资源/队伍状态、中间战况、底部按引擎 kind 分组的行动坞；
+     · 小芽：宽屏是右侧 Coach 栏（浮条之上），窄屏贴底，输入与回复同屏可见。
+   所以下面那些 `position:fixed` 的高度都改成跟着 `--bottombar` 算，不再各写一个魔数。 */
 
 /* ── 页头 ─────────────────────────────────────────────────────────────────
-   只放：游戏标题、回合状态、轻量小芽入口、重开/重试、右上角抽屉。
+   只放：游戏标题、模式徽记、回合状态、轻量小芽入口、重开/重试、右上角抽屉。
    规则版本、服务状态、验收钩子、工程说明全部在抽屉里（默认收起）。 */
 .topbar{align-items:center;flex-wrap:wrap;row-gap:6px;height:auto;min-height:44px}
 .topbar h1 small{font-size:11px;padding:2px 6px}
@@ -20,6 +28,15 @@
  padding:3px 10px;background:#16222f;white-space:nowrap;color:#cfe0d4}
 #turn-chip{color:#f0cb77}
 #phase-chip{white-space:nowrap}
+/* 模式徽记：**注册表的原文**（label / status / confidence），只是换个读法。
+   `候选规则（待实机核对）` 这个徽记不是装饰：它说明「六宠」目前是 CANDIDATE。 */
+.mode-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.mode-line .chip{font-size:11.5px}
+#mode-label{color:#dbe7f1}
+.mode-chip-candidate{color:#f0cb77;border-color:#6b5b3a;background:#2a2318}
+.mode-chip-official{color:#bbebc5;border-color:#4a6858;background:#1d3435}
+.mode-chip-muted{color:#a9bccd}
+.mode-unknown{font-size:11.5px;color:#f0cb77}
 /* 抽屉：躲在页头右上角，**默认收起**。
    展开时它**在流里**把页头撑高，而不是盖在页面上——第一版做成 `position:fixed` 浮层，
    实测它正好压住阵容池第一行最右边那张卡，真实鼠标点上去落在抽屉上（验收里
@@ -34,17 +51,20 @@
 .checklist{font-size:12.5px;line-height:1.8;color:#b9c7d4;margin:0;padding-left:18px}
 .checklist code{color:#dcead8}
 
-/* ── 三步教程：只在第一次出现，可跳过；跳过之后 `hidden`，不占位 ───────────── */
-.onboard-bar{display:flex;align-items:stretch;gap:10px;margin:0 0 12px}
-.onboard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;
- margin:0;padding:0;flex:1;counter-reset:step}
-.onboard li{display:flex;flex-direction:column;gap:3px;background:#16222f;border:1px solid var(--line);
- border-radius:11px;padding:9px 12px;font-size:13.5px;min-width:0}
+/* ── 三步教程：**只占一行**、可跳过；跳过之后 `hidden`，不占位 ───────────────
+   P0-2 的判据是「任何情况下它都不遮挡候选卡」：这里是 `display:flex` 的常规流元素，
+   没有 `position`、没有 `z-index`、没有覆盖层，高度按一行算。 */
+.onboard-bar{display:flex;align-items:center;gap:8px;margin:0 0 10px;
+ background:#16222f;border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.onboard{display:flex;align-items:baseline;gap:4px 14px;flex-wrap:wrap;list-style:none;
+ margin:0;padding:0;flex:1;min-width:0;counter-reset:step}
+.onboard li{display:flex;align-items:baseline;gap:5px;font-size:12.5px;min-width:0;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .onboard li::before{counter-increment:step;content:"第 " counter(step) " 步";font-size:11px;
- color:var(--accent);letter-spacing:.5px}
-.onboard strong{font-size:13.5px}
-.onboard span{font-size:12.5px;color:var(--muted);line-height:1.55}
-.onboard-skip{align-self:center;font-size:12px;padding:6px 12px;min-height:0}
+ color:var(--accent);letter-spacing:.5px;flex:0 0 auto}
+.onboard strong{font-size:12.5px;flex:0 0 auto}
+.onboard span{font-size:11.5px;color:var(--muted)}
+.onboard-skip{align-self:center;font-size:12px;padding:3px 10px;min-height:0;margin-left:auto;flex:0 0 auto}
 
 /* ── 选阵容页 ─────────────────────────────────────────────────────────────── */
 .select-panel{border-color:#3c5b6e}
@@ -59,7 +79,7 @@
  color:var(--muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .slot.on{border-style:solid;border-color:#8dd49c;color:#dff3e3;background:#1d3435}
 .side.enemy .slot.on{border-color:#e8a76a;color:#f6e3d0;background:#33291d}
-/* 阵容池：搜索 + 属性/定位筛选 + 分页；卡片只给第一层信息。 */
+/* 阵容池：搜索 + 属性/定位筛选 + 分页；卡片首层是「认得出 + 有区分度」。 */
 .pool{padding-bottom:6px}
 .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .filters .muted{margin-left:auto}
@@ -68,7 +88,8 @@
 .seg .side-tab{border:0;border-radius:0;min-height:38px;padding:6px 16px;background:transparent;color:#dfe8ef}
 .seg .side-tab[aria-pressed="true"]{background:var(--accent);color:#152c24;font-weight:700}
 .seg .side-tab[data-side="enemy"][aria-pressed="true"]{background:#e8a76a;color:#2a1c10}
-#pool-search{width:240px;min-height:38px}
+#pool-search{width:220px;min-height:38px}
+.filter-reset{font-size:12px;padding:5px 10px;min-height:0}
 /* 属性/定位筛选：折叠菜单，样式与框架的输入框同一条。 */
 .fmenu{position:relative}
 .fmenu>summary{cursor:pointer;list-style:none;background:#121e2c;border:1px solid var(--line);
@@ -88,10 +109,13 @@
 .roster{margin-top:10px}
 .roster-status{margin:10px 0 0}
 .pool-empty{grid-column:1/-1}
-/* 一页轻卡：首层只有 emoji 头像、名字、属性、定位与**一个**最关键特点。 */
+/* ── 一页轻卡（P0-1）─────────────────────────────────────────────────────
+   首层只有四样：**名字 / 属性 / 定位 / 机制**，加上**基础面板单独成块**。
+   这里刻意**没有** `特点：最狠一招「X」威力 a · 速度 b` 那种模板句：
+   `mechanismOf()` 只在数据里真有机制可引用时给句子，否则如实写「机制资料待确认」。 */
 .card-wrap{display:grid;gap:3px;min-width:0}
 #roster .pick{display:block;text-align:left;background:var(--panel);border:1px solid var(--line);
- border-radius:12px;padding:9px 10px;min-width:0;min-height:96px;position:relative;font-weight:400}
+ border-radius:12px;padding:9px 10px;min-width:0;min-height:150px;position:relative;font-weight:400}
 #roster .pick.chosen{border-color:#8dd49c;background:#1d3435}
 #roster .pick.picked-enemy{border-color:#e8a76a;background:#33291d}
 #roster .pick.blocked{opacity:.55;border-style:dashed}
@@ -101,20 +125,38 @@
  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pet-option-types{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0 0}
 .card-role{margin-top:5px;font-size:12px;color:var(--warn);display:block}
-.card-key{margin-top:3px;font-size:12px;color:#b4c3d1;line-height:1.5;display:block;overflow-wrap:anywhere}
+/* 机制（有区分度）：来自登记层特性 / 技能效果 / 应对·先手·印记关键字；没有就如实说不给。 */
+.card-mech{margin-top:4px;font-size:12px;color:#cfe0d4;line-height:1.45;display:block;
+ overflow-wrap:anywhere}
+.card-mech.none{color:var(--muted)}
+/* 机制那一行的来源（登记层 tags 的条数）：小字、不抢主视线，没有就不占位。 */
+.card-mech-source{display:block;margin-top:2px;font-size:10.5px;color:var(--muted);
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 基础面板：**单独成块**（六维各占一格，冻结数据缺哪一项就如实标出来）。 */
+.card-key{margin-top:6px;padding:6px 7px;background:#121e2c;border:1px solid #26323f;
+ border-radius:8px;display:block}
+.card-key .ck-title{display:block;font-size:10.5px;color:var(--muted);letter-spacing:.4px;margin-bottom:4px}
+.card-key .ck-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px 6px}
+.card-key .ck-grid span{display:flex;align-items:baseline;justify-content:space-between;gap:3px;
+ font-size:11px;color:#b4c3d1;min-width:0}
+.card-key .ck-grid b{color:#e3eaf1;font-weight:600}
+.card-key .ck-missing{display:block;font-size:11px;color:var(--muted);margin-top:3px}
 .pick .taken{position:absolute;right:8px;top:8px;font-size:10.5px;color:#c9b07a;
  border:1px solid #6b5b3a;border-radius:5px;padding:1px 5px;white-space:nowrap;background:#1a2635}
 .pick .taken.picked{color:#8dd49c;border-color:#4a6858}
 .card-more{justify-self:end;font-size:11px;min-height:0;padding:2px 9px;background:transparent;
  border:1px solid var(--line);color:var(--muted)}
-/* 底部固定：分页 + 主操作（选阵容页唯一主操作就是「开一局」）。 */
+/* ── 底部固定：**翻页 + 开一局**（选阵容页唯一主操作）─────────────────────
+   翻页按钮**常驻**、`disabled` 状态明确（P0-1 的判据看的就是它）。 */
 .footbar{position:fixed;left:0;right:0;bottom:0;z-index:22;display:flex;align-items:center;gap:10px;
  flex-wrap:wrap;background:#101a26;border-top:1px solid var(--line);padding:10px 20px}
 .footbar .muted{margin-right:auto}
 .pool-tools{display:flex;gap:6px}
 .pool-tools button{font-size:12px;padding:5px 10px;min-height:0}
-.pager{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);white-space:nowrap}
-.pager button{font-size:12.5px;padding:5px 10px;min-height:0}
+.pager-label{font-size:12.5px;color:var(--muted);white-space:nowrap;
+ border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#121e2c}
+#page-prev,#page-next{font-size:13px;padding:8px 14px;min-height:42px}
+#page-prev:disabled,#page-next:disabled{opacity:.45}
 
 /* ── 结算页：结果 / 一个关键转折 / 下一局目标先显示 ───────────────────────── */
 .result-panel{border-color:#5f8e6c;background:#1b2b2c}
@@ -131,20 +173,38 @@
 .lesson-full p{margin:8px 0 0;font-size:12.5px;line-height:1.75}
 .lesson-close{font-size:12px;padding:5px 10px;min-height:0}
 
-/* ── 对战页：中央战斗舞台 + 后备小条 ─────────────────────────────────────── */
+/* ── 对战页：顶部双方状态 → 中央舞台 → 后备小条 ─────────────────────────── */
 .battle{border-color:#3c5b6e}
 .lineup-brief{display:flex;align-items:center;justify-content:space-between;gap:10px;
  background:#16222f;border:1px solid var(--line);border-radius:10px;padding:7px 12px;margin-bottom:10px;
  font-size:12.5px}
 .lineup-brief strong{color:#dbe7f1}
 .lineup-brief button{padding:4px 10px;font-size:12px;min-height:0}
-.stage{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:10px;align-items:start}
-.fighter{background:#16222f;border:1px solid var(--line);border-radius:13px;padding:12px;min-width:0}
-.fighter-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
+/* 双方对称状态条：资源（魔力/心）+ 当前精灵 + 队伍状态。 */
+.sidebars{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:10px;align-items:stretch}
+.sidebar{background:#16222f;border:1px solid var(--line);border-radius:13px;padding:10px 12px;min-width:0}
+.sidebar.enemy{border-color:#3a3327}
+.sb-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:7px}
 .side-tag{font-size:12px;border-radius:999px;padding:2px 9px;border:1px solid var(--line);white-space:nowrap}
 .side-tag.player{color:#cfeed6;border-color:#4a6858;background:#1d3435}
 .side-tag.enemy{color:#f6e3d0;border-color:#6b5b3a;background:#33291d}
+/* 资源（魔力 / 心）：**只渲染引擎给的数**；没给就是一句「未核验」，没有计数器。 */
+.resource{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12.5px}
+.resource .res-name{color:var(--muted)}
+.resource .res-value{font-size:19px;font-weight:700;color:#f0cb77;letter-spacing:1px}
+.resource.unknown .res-value{font-size:12.5px;font-weight:400;color:#f0cb77;letter-spacing:0}
+.resource .res-note{font-size:11.5px;color:var(--muted);line-height:1.5;flex:1 1 100%}
+.roster-line{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.roster-line .rl{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:#c6d2de;
+ border:1px solid #2c3d4a;border-radius:999px;padding:2px 8px;background:#121e2c;max-width:100%}
+.roster-line .rl.active{border-color:#8dd49c;color:#dff3e3}
+.roster-line .rl.fainted{opacity:.5;text-decoration:line-through}
+.roster-line .rl.foe{color:#a9bccd}
+.roster-line .rl-self{font-size:11.5px;color:var(--muted);white-space:nowrap}
 .vs{align-self:center;text-align:center;font-size:13px;color:#667e99;letter-spacing:1px}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start;margin-top:10px}
+.fighter{background:#16222f;border:1px solid var(--line);border-radius:13px;padding:12px;min-width:0}
+.fighter-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
 .pets{display:grid;gap:8px}
 .pet{position:relative;border:1px solid #36495e;border-radius:10px;padding:10px;min-width:0;background:#1a2635}
 .pet.active{border-color:#8dd49c;background:#1d3435}
@@ -178,56 +238,98 @@
 .events p.miss{color:var(--warn)}
 .raw{font-size:11px;line-height:1.5;color:#9fb0c0;max-height:220px;overflow:auto;margin:8px 0 0}
 
-/* ── 底栏：合法动作固定在底部，一屏可点 ──────────────────────────────────── */
+/* ── 行动坞（P0-5）：按**引擎给的 kind** 分成 技能 / 聚能·物品 / 换精灵 / 更多 ──
+   不再 4 列等宽平铺：一组一段，段内卡片按内容自适应；左右对齐（不是硬拉伸）。
+   每个技能卡带名称 / 属性 / 类别 / 能耗 / 威力（给到才写）/ **说明文字**，可点高度 ≥44px。 */
 .action-panel{position:fixed;left:0;right:0;bottom:0;z-index:23;background:#101a26;
- border-top:1px solid var(--line);border-radius:0;padding:9px 20px 11px;max-height:46vh;overflow:auto}
+ border-top:1px solid var(--line);border-radius:0;padding:9px 20px 11px;max-height:44vh;overflow:auto}
 .action-panel>#action-hint{display:block;margin-bottom:7px}
 /* ⚠ 这里必须用 `#actions`：框架里那条是 `#actions{grid-template-columns:1fr 1fr}`
    （ID 选择器），写成 `.actions` 会被它压过去——实测动作栏因此变成 2 列 5 行、
    把底栏撑到 554px 高、整块盖住半屏。 */
-#actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;align-content:start;
- /* 框架那条 `#actions{grid-auto-rows:minmax(96px,auto)}` 也是 ID 选择器，不覆盖的话
-    每行被撑到 96px：9 个动作 = 3 行 = 348px 的底栏，直接吃掉四成屏幕。 */
+#actions{display:block;
+ /* 框架那条 `#actions{grid-auto-rows:minmax(96px,auto)}` 也是 ID 选择器，同样要压掉。 */
  grid-auto-rows:auto}
-#actions .action{text-align:left;display:flex;flex-direction:column;gap:1px;height:58px;min-height:58px;
- padding:6px 9px;overflow:hidden}
-#actions .action span{font-size:13px}
-#actions .action small{font-size:11.5px;color:#b4c3d1;line-height:1.35;display:-webkit-box;
- -webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+#actions .act-group{margin:0 0 8px}
+#actions .act-group:last-child{margin-bottom:0}
+#actions .act-group-head{display:flex;align-items:baseline;gap:8px;margin:0 0 5px;font-size:12px;
+ color:#dbe7f1}
+#actions .act-group-head b{font-size:12.5px;color:#f0cb77;font-weight:700}
+#actions .act-group-head .muted{font-size:11.5px}
+#actions .act-row{display:flex;flex-wrap:wrap;gap:7px;align-items:stretch}
+#actions .action{text-align:left;display:flex;flex-direction:column;gap:2px;
+ flex:1 1 210px;max-width:420px;min-height:52px;padding:7px 10px;overflow:hidden}
+#actions .action span{font-size:13.5px;font-weight:700}
+#actions .action small{font-size:11.5px;color:#b4c3d1;line-height:1.4;display:block;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#actions .action small.act-desc{white-space:normal;-webkit-line-clamp:2;display:-webkit-box;
+ -webkit-box-orient:vertical}
+#actions .action.is-escape{border-color:#6b5b3a;color:#f6e3d0}
+#actions .act-none{font-size:12px;color:var(--muted);margin:0}
 /* 玩家在重选阵容时，动作栏先让位（否则两条固定底栏会叠在一起）。 */
 body[data-roco-picking="yes"] #action-panel{display:none}
 
-/* ── 小芽（陪练）：轻量气泡 + 偏好记忆 ───────────────────────────────────── */
+/* ── 小芽（陪练 / 军师）：**重排**（P0-2）──────────────────────────────────
+   它是一栏，不是一个「很矮的卡片」：宽屏贴右侧（战斗区右侧的 Coach 栏位置），
+   窄屏贴底整块。两种情况下 `#say-form`（输入）与 `#say-reply`（最近一句回复）
+   都在面板底部固定可见——中间那段（记忆）才是滚动区。 */
+.companion{position:fixed;right:14px;z-index:27;width:min(340px,calc(100vw - 28px));
+ bottom:calc(var(--bottombar,0px) + 14px);
+ /* ⚠ 上界必须**同时**减掉动作坞与一点边距：窄屏下贴底两条固定浮层相加时，
+    40vh 会算出比可用高度更大的值，于是这一栏的底边被顶出视口——
+    实测 390×844 下 `#say-input` 的 bottom=868 > 844，输入框根本看不到。
+    这里是「输入与最近一句回复都在首屏」那条判据的护城河。 */
+ max-height:calc(100vh - var(--bottombar,0px) - 28px);
+ display:flex;flex-direction:column;gap:8px;background:#16222f;border:1px solid #4d6b5c;
+ border-radius:12px;padding:10px 12px;box-shadow:0 12px 40px #0009}
+.companion[hidden]{display:none}
+.companion-head{display:flex;align-items:baseline;gap:8px;flex:0 0 auto}
+.companion-head strong{color:#bbebc5;font-size:13.5px}
+.companion-head .muted{font-size:11.5px;flex:1;min-width:0}
+.companion-head button{font-size:11.5px;padding:2px 8px;min-height:0}
+/* 中间滚动区：记忆在这里滚，输入与回复永远在它下面。 */
+.companion-body{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
 .companion-line{margin:0 0 8px;background:#2b403c;border:1px solid #4d6b5c;
  border-radius:12px 12px 12px 4px;padding:9px 12px;font-size:13.5px;line-height:1.65}
-.reply{margin-top:9px;font-size:13.5px;line-height:1.7;border-left:3px solid var(--accent);
+.reply{margin:0 0 8px;font-size:13.5px;line-height:1.7;border-left:3px solid var(--accent);
  padding:7px 11px;background:#1d2c30;border-radius:0 8px 8px 0}
-.row{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:11px}
-#say-input{flex:1;min-width:180px}
+/* 输入行：`flex:0 0 auto` —— 它不参与中间那段滚动，所以永远在面板底部可见。 */
+.say-form{display:flex;align-items:center;gap:8px;flex:0 0 auto;flex-wrap:wrap}
+#say-input{flex:1 1 150px;min-width:0;min-height:40px}
+.say-form button{flex:0 0 auto;min-height:40px}
+.companion .section-title{margin:0 0 4px}
+.companion .section-title h3{font-size:12.5px}
+.companion .section-title .muted{font-size:11px}
 
 /* 记忆面板（P1-3）：每行一条「玩家自己说过的」，右侧一个「忘掉」。
    刻意不做成表格——它是给玩家核对「她记了什么」的，不是数据管理界面。 */
 .memory{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
-.memory li{display:flex;align-items:center;gap:8px;background:#16222f;border:1px solid var(--line);
+.memory li{display:flex;align-items:center;gap:8px;background:#121e2c;border:1px solid var(--line);
  border-radius:9px;padding:7px 10px;font-size:13px}
 .mem-kind{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;
  padding:1px 6px;white-space:nowrap}
 .mem-label{flex:1;min-width:0;overflow-wrap:anywhere}
 .mem-forget{font-size:12px;padding:4px 9px;white-space:nowrap;min-height:0}
 
-/* ── 军师：关键局面自动出现的**两行以内**小浮条；展开才看取舍 ─────────────── */
+/* ── 军师：关键局面自动出现的**两行以内**小浮条；展开才看取舍 ───────────────
+   它在**小芽那一栏之上**（z-index 更高），所以两条不会互相盖住；
+   底边跟着 `--bottombar` 与 Coach 栏高度一起算（见 JS 的 syncBottomBars）。 */
 .hint{position:fixed;left:50%;transform:translateX(-50%);
  bottom:calc(var(--bottombar,0px) + 14px);width:min(680px,calc(100vw - 32px));
  background:#1e2d32;border:1px solid #698d7b;border-radius:12px;padding:10px 14px;
- /* z-index 31：浮条必须**盖在开发者抽屉（`#about-drawer` 是 30）之上**。
+ /* z-index 32：浮条必须**盖在开发者抽屉（`#about-drawer` 是 30）与小芽栏（27）之上**。
     手机版式里抽屉是全宽、贴着页面顶部的一整块，实测它会把浮条的**第一行**
     （「做什么」）压掉一半——浮条自己量到的高度是对的，所以这种遮挡只有
     「谁在最上面」能抓住。第 64 轮把这条从 24 调到 31 就是修这个。 */
- box-shadow:0 10px 40px #0008;z-index:31;
+ box-shadow:0 10px 40px #0008;z-index:32;
  /* 展开比较区之后浮条会长高（第 64 轮）：**整条浮条**不许顶出视口，
     否则「做什么 / 为什么」这两行会被推到屏幕外面——玩家点开比较区反而看不到结论。
     超出部分在浮条内部滚动，底边（贴着动作栏）不动。 */
  max-height:calc(100vh - var(--bottombar,0px) - 28px);overflow:auto;overscroll-behavior:contain}
+/* 浮条开口时把小芽那一栏压到底下去：两条固定浮层不能抢同一块地方。
+   `body[data-roco-hint-visible="yes"]` 由 `refreshHint()`/`hideHint()` 维护。 */
+body[data-roco-hint-visible="yes"] .companion{z-index:26}
+body[data-roco-hint-visible="yes"] .companion .companion-body{visibility:hidden}
 .hint-line{display:flex;align-items:flex-start;gap:9px}
 .hint-line strong{color:#bbebc5;font-size:13px;white-space:nowrap}
 .hint-line p{margin:0;flex:1;min-width:0;font-size:13.5px;line-height:1.6;
@@ -249,7 +351,7 @@ body[data-roco-picking="yes"] #action-panel{display:none}
 .pet-detail{position:fixed;right:16px;top:118px;bottom:calc(var(--bottombar,0px) + 16px);
  width:340px;max-width:calc(100vw - 32px);
  background:#16222f;border:1px solid var(--line);border-radius:12px;padding:12px 14px;
- overflow:auto;z-index:26;box-shadow:0 14px 50px #0009}
+ overflow:auto;z-index:28;box-shadow:0 14px 50px #0009}
 .pet-detail-body{font-size:12.5px;line-height:1.6;color:#c6d2de}
 .detail-stats{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
  margin:9px 0 0;padding:0}
@@ -292,46 +394,49 @@ body[data-roco-picking="yes"] #action-panel{display:none}
 .dev-body table.shadow td{padding:6px 8px;border-bottom:1px solid #26323f;color:#c6d2de;vertical-align:top}
 .dev-body table.shadow tr:last-child td{border-bottom:none}
 
-/* ── 宽屏：选阵容页 4 列轻卡；对战页 = 舞台（左）+ 记录（右）───────────────── */
+/* RC-305 六槽工作台的挂载点：宽屏时它占左栏上半部；模块自己管自己的样式。 */
+#team-workshop{display:block;min-width:0}
+
+/* ── 宽屏：选阵容页 4 列轻卡；对战页 = 舞台（左）+ 记录（右），小芽在右侧 Coach 栏 ── */
 @media(min-width:1100px){
  #roster{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
 @media(min-width:861px){
- /* 对战页两栏：左边是舞台与后备，右边是这一回合的记录（记录不抢主视线）。 */
+ /* 对战页两栏：左边是舞台与后备，右边是这一回合的记录（记录不抢主视线）。
+    小芽是**固定定位的右侧 Coach 栏**（不在流里），所以它不参与这个 grid。 */
  body[data-roco-view="ready"] main{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);
-  gap:0 14px;align-items:start}
+  gap:0 14px;align-items:start;
+  /* 右侧给小芽那一栏让位（宽屏时它是固定定位的）。 */
+  padding-right:var(--coach-rail,0px)}
  body[data-roco-view="ready"] main>.topbar,
  body[data-roco-view="ready"] main>.onboard-bar,
  body[data-roco-view="ready"] main>#select-panel,
  body[data-roco-view="ready"] main>#result-panel,
  body[data-roco-view="ready"] main>#lesson-card,
- body[data-roco-view="ready"] main>#action-panel{grid-column:1/-1}
+ body[data-roco-view="ready"] main>#action-panel,
+ body[data-roco-view="ready"] main>#team-workshop{grid-column:1/-1}
  body[data-roco-view="ready"] main>#battle-panel{grid-column:1}
- /* 记录与陪练都在右栏：左栏是舞台，右栏不抢主视线的两件事。
-    放在左栏下方会被固定底栏压住「说一句」——那正是玩家最常点的地方。 */
- body[data-roco-view="ready"] main>#log-panel,
- body[data-roco-view="ready"] main>#companion-card{grid-column:2}
+ body[data-roco-view="ready"] main>#log-panel{grid-column:2}
 }
 /* 底栏是固定定位，正文要给它让出位置，否则最后一段永远被压住。 */
 main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 
 /* ── 手机版式（390×844）：第一版 mockup 在窄屏上是坏的——实测发现四处：
-   ① 三步教程把「跳过」挤出屏幕；② 队伍栏 3 列把伙伴名挤成竖排（「寂灭骨龙」竖着写）；
+   ① 三步教程把「跳过」挤出屏幕；② 队伍栏 3 列把伙伴名挤成竖排（「寂灭龙骨」竖着写）；
    ③ 阵容池 4 列同上，卡片文字竖排不可读；④ 固定底栏把主操作+说明+分页挤成一行。
-   这里按「手机上只保留一列信息」重排：卡片 2 列、队伍栏一列、底栏分两行、
-   抽屉与详情变成页内折叠/整宽浮层。 */
+   这一轮（P0）再修四处：⑤ 引导条只占一行、不遮挡卡片；⑥ 翻页按钮放进底栏第一行；
+   ⑦ 行动坞按分组纵向排，卡片不横向溢出；⑧ 小芽贴底整块，输入与回复都在首屏。 */
 @media (max-width:720px){
  :root{font-size:15px}
  .topbar h1{font-size:17px}
  #about-drawer{width:auto;max-width:none;margin:8px 0 0;order:-1;max-height:none}
- /* 教程在手机上挤成**一行**（mockup 的手机版式）：三步各占一张卡会把阵容池整个推到
-    首屏之外，而这三步是「第一次来的人唯一会先读的东西」——读得到才有用。 */
- .onboard-bar{flex-direction:row;align-items:flex-start;flex-wrap:wrap;gap:4px 8px}
+ .mode-line{order:-1;flex-basis:100%}
+ .mode-line .chip{font-size:11px}
+ /* 教程在手机上挤成**一行**：三步各占一张卡会把阵容池整个推到首屏之外，
+    而这三步是「第一次来的人唯一会先读的东西」——读得到才有用。 */
+ .onboard-bar{flex-wrap:wrap;gap:4px 8px;padding:5px 8px}
  .onboard{display:flex;flex-wrap:wrap;gap:2px 10px;flex:1 1 100%}
- .onboard li{flex-direction:row;align-items:baseline;gap:4px;background:transparent;border:0;
-  padding:0;font-size:12.5px}
- .onboard li::before{content:"第 " counter(step) " 步"}
- .onboard strong{font-size:12.5px}
+ .onboard li{flex-direction:row;align-items:baseline;gap:4px;font-size:12px}
  .onboard span{display:none}
  .onboard-skip{align-self:center;margin-left:auto}
  .teambar{grid-template-columns:1fr;gap:10px}
@@ -343,25 +448,44 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  .fmenu{flex:1 1 40%}
  .fmenu>summary{width:100%;justify-content:space-between}
  .fmenu-body{width:min(320px,86vw)}
+ .filter-reset{flex:0 0 auto}
  #roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
- #roster .pick{min-height:104px;padding:8px 9px}
+ #roster .pick{min-height:168px;padding:8px 9px}
  #roster .pick .nm{font-size:15px}
- .card-key{font-size:11.5px}
- /* 底栏分两行（mockup 的手机版式）：第一行主操作，第二行工具 + 翻页；不横向溢出。 */
+ .card-mech{font-size:11.5px}
+ .card-key .ck-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .card-key .ck-grid span{font-size:10.5px}
+ /* 底栏分两行（mockup 的手机版式）：第一行 = 翻页 + 主操作；第二行 = 说明 + 工具。
+    翻页按钮 44px 高，点得到。 */
  .footbar{flex-wrap:wrap;gap:6px;padding:8px 12px}
- #start-battle{flex:1 1 100%;order:1;width:100%}
- .footbar .muted{flex:1 1 100%;order:2;margin-right:0;font-size:11.5px}
- .pool-tools{order:3;flex:1 1 auto;justify-content:flex-start}
+ #page-prev,#page-next{order:1;flex:0 0 auto;min-height:44px;padding:8px 12px}
+ #start-battle{flex:1 1 100%;order:2;width:100%;min-height:44px}
+ .footbar .muted{flex:1 1 100%;order:3;margin-right:0;font-size:11.5px}
+ .pool-tools{order:4;flex:1 1 auto;justify-content:flex-start}
  .pool-tools button{flex:0 0 auto}
- .pager{order:4;flex:0 0 auto;margin-left:auto;justify-content:flex-end}
+ .sidebars{grid-template-columns:1fr;gap:8px}
  .stage{grid-template-columns:1fr;gap:8px}
  .vs{display:none}
  .bench-row{grid-template-columns:1fr}
- #actions{grid-template-columns:repeat(2,minmax(0,1fr))}
- #actions .action{height:52px;min-height:52px}
- /* 军师浮条贴底、整宽；动作栏（两行）之上。 */
- .hint{left:14px;right:14px;transform:none;width:auto}
+ /* 行动坞：分组纵向排；每组内卡片两列，宽度自适应、不横向溢出。
+    高度**必须**给个上界：窄屏下它与贴底的小芽栏是两条固定浮层，动作坞无限长就会
+    把「输入 + 最近一句回复」顶出视口（实测 390×844 下 say-input 的 bottom=868>844）。
+    超出部分在动作坞内部滚动，卡片本身尺寸与可点性不变。 */
+ .action-panel{padding:8px 12px 10px;max-height:min(34vh,var(--action-cap,100vh))}
+ #actions .action{flex:1 1 46%;max-width:none;min-height:56px}
+ #actions .action small{white-space:normal;-webkit-line-clamp:2;display:-webkit-box;
+  -webkit-box-orient:vertical}
+ /* 小芽贴底整块：输入与最近一句回复都在首屏。高度上界已经从动作坞真实高度算出来
+    （`--bottombar`），中间那段记忆自己滚——输入行永远钉在这一栏的底部。 */
+ .companion{left:10px;right:10px;width:auto;
+  max-height:calc(100vh - var(--bottombar,0px) - 24px)}
+ .companion-body{max-height:24vh}
+ .companion-line,.reply{margin-bottom:6px;padding:7px 10px;font-size:12.5px}
+ #say-input,.say-form button{min-height:38px}
+ .companion .section-title{margin-bottom:2px}
+ .companion-head{flex-wrap:wrap;row-gap:2px}
  .pet-detail{left:14px;right:14px;width:auto;top:auto;max-height:52vh}
+ .hint{left:14px;right:14px;transform:none;width:auto}
  .hint-body{line-height:1.8}
  .events{line-height:1.8}
  .detail-stats{grid-template-columns:repeat(2,minmax(0,1fr))}

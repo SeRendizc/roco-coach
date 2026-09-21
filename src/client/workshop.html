@@ -1,0 +1,21 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小芽 · 阵容工坊（RC-305 开发夹具，不是产品页）</title>
+<link rel="stylesheet" href="/src/client/style.css"></head><body>
+<!-- ─────────────────────────────────────────────────────────────────────────────
+     这是 **RC-305 六槽阵容工作台的开发夹具/薄壳**，**不是产品页**。
+     产品页是 `src/client/roco.html`：那边由主线程把 `mountTeamWorkshop()` 挂到
+     `#team-workshop` 上；渲染主体、评价逻辑、两层分界都在
+     `src/client/team-workshop.js` 这个模块里。
+
+     留这一个壳的唯一用途：不开整张训练场页，单独调试这个模块（改样式、看数据契约）。
+     它自己不写任何评价逻辑、不引第二套模板。
+     ───────────────────────────────────────────────────────────────────────────── -->
+<main>
+ <header class="topbar" style="height:auto;flex-wrap:wrap">
+  <h1>阵容工坊 <small>RC-305 开发夹具</small></h1>
+  <span class="muted" id="fixture-note">产品页是 /roco.html；这里只挂载同一个模块</span>
+ </header>
+ <div id="team-workshop"></div>
+</main>
+<script type="module" src="/src/client/workshop-fixture.js"></script>
+</body></html>

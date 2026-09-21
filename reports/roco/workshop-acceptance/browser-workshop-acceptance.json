@@ -1,0 +1,777 @@
+{
+ "generated_by": "scripts/roco/browser-workshop-acceptance.mjs",
+ "page": "roco.html（产品页，#team-workshop 挂载点）",
+ "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
+ "module": "src/client/team-workshop.js（mountTeamWorkshop）",
+ "judged_at": "2026-09-21T19:25:54.150Z",
+ "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
+ "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
+ "screenshots": [
+  "reports/roco/workshop-acceptance/workshop-01-roco-page-1440x900.png",
+  "reports/roco/workshop-acceptance/workshop-02-two-selected-1440x900.png",
+  "reports/roco/workshop-acceptance/workshop-03-six-selected-1440x900.png",
+  "reports/roco/workshop-acceptance/workshop-04-fixture-1440x900.png",
+  "reports/roco/workshop-acceptance/workshop-05-six-selected-390x844.png",
+  "reports/roco/workshop-acceptance/workshop-06-two-selected-390x844.png"
+ ],
+ "viewport_metrics": [
+  {
+   "viewport": "1440x900",
+   "at": "roco-page",
+   "clientW": 1440,
+   "scrollW": 1440,
+   "bodyScrollW": 1440,
+   "innerW": 1440
+  },
+  {
+   "viewport": "390x844",
+   "at": "six-selected",
+   "clientW": 390,
+   "scrollW": 390,
+   "bodyScrollW": 390,
+   "innerW": 390
+  },
+  {
+   "viewport": "390x844",
+   "at": "two-selected",
+   "clientW": 390,
+   "scrollW": 390,
+   "bodyScrollW": 390,
+   "innerW": 390
+  }
+ ],
+ "checks": [
+  {
+   "id": "01-产品页挂载",
+   "judge": "产品页 roco.html 上有 #team-workshop，模块在自己的 shadow root 里渲染（不是另起一套临时页面）",
+   "ok": true,
+   "actual": "shadow root=true dataset.twSlots=6 槽位节点=6"
+  },
+  {
+   "id": "02-六个槽位",
+   "judge": "第一次打开就画出 6 个槽位（不是「已选 3 只固定栏」），filled == 已选数",
+   "ok": true,
+   "actual": "slots=6 节点=6 filled=0 selected=0"
+  },
+  {
+   "id": "03-徽记与候选池",
+   "judge": "逐字在：「标准 PVP · 六宠」「候选规则（待实机核对）」「匹配前对手未知」「候选来自全图鉴」，候选池 ≥600",
+   "ok": true,
+   "actual": "池总量=622 徽记全在=yes"
+  },
+  {
+   "id": "04-宽屏不溢出",
+   "judge": "1440×900：产品页与模块都没有横向溢出（scrollW == clientW）",
+   "ok": true,
+   "actual": "clientW=1440 scrollW=1440 bodyScrollW=1440"
+  },
+  {
+   "id": "05-候选含图鉴物种",
+   "judge": "候选池里能点到「我没有的图鉴物种」（证明候选宇宙是 600+，不是 48 只）",
+   "ok": true,
+   "actual": "命中 千棘海针（磨损的样子）"
+  },
+  {
+   "id": "06-只看收藏开关",
+   "judge": "真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok",
+   "ok": true,
+   "actual": "开了之后 state=ok（selected=0）；关掉之后 state=ok；命中={\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<DIV<SECTION#select-panel<MAIN<BODY<HTML<undefined\"}"
+  },
+  {
+   "id": "07-图鉴物种照实拒绝",
+   "judge": "点一只自己没有的图鉴物种：服务端照实说明为什么不能进队，页面把它显示出来（不静默忽略）",
+   "ok": true,
+   "actual": "state=bad-request 错误=\"selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000562）\""
+  },
+  {
+   "id": "08-错误态可恢复",
+   "judge": "错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里",
+   "ok": true,
+   "actual": "加点={\"added\":true,\"probe\":{\"rows\":1,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":0,\"after\":1} state=ok selected=1"
+  },
+  {
+   "id": "09-真实键鼠选到第 2 只",
+   "judge": "真实键盘搜名字 + 真实鼠标点候选：已选 == 2，六个槽位里两个填上了",
+   "ok": true,
+   "actual": "state=ok selected=2 填了 2/6 槽"
+  },
+  {
+   "id": "10-恰好三个候选",
+   "judge": "已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径（偏好保留池空时 RC-303 会如实回落，第三个位置由召回的参考候选补上并标「候选参考」）",
+   "ok": true,
+   "actual": "标签=强度|稳定|候选参考 候选节点=3 缺口节点=10"
+  },
+  {
+   "id": "11-候选与核心同源",
+   "judge": "路由的 next_candidates 逐条带 RC-303 的口径 id（strength / stability / preference），去重或回落时如实标 recall_tail，而不是页面层另编一个候选",
+   "ok": true,
+   "actual": "tradeoff_id=[\"strength\",\"stability\",\"recall_tail\"]（source=[\"progressive_next\",\"progressive_next\",\"recall_tail\"]）"
+  },
+  {
+   "id": "12-缺口清单在评估区",
+   "judge": "评估区呈现 RC-302 的缺口口径（缺什么 / 台账里标未核实），且没有工程键名",
+   "ok": true,
+   "actual": "缺口节点=10 路由口径=[\"属性覆盖\",\"速度层次\",\"能量曲线\",\"应对手段\",\"换入换出\",\"队内互补\",\"资源消耗\"]"
+  },
+  {
+   "id": "13-评估随阵容变化",
+   "judge": "从 2 只加到 5 只之后：下一只候选换了人、缺口清单还在、仍然恰好三个候选",
+   "ok": true,
+   "actual": "2 只时候选=[\"仪式巨像\",\"伊兰亚龙\",\"画间沉铁兽\"]；5 只时=[\"画间沉铁兽\",\"黑猫巫师\",\"嗜光嗡嗡\"]"
+  },
+  {
+   "id": "14-连续选入六只",
+   "judge": "连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体",
+   "ok": true,
+   "actual": "selected=6 填了 6/6 槽；加点记录=[{\"name\":\"铠甲虫\",\"added\":false,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":1,\"after\":1},{\"name\":\"音速犬\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000062\"},\"beforeCount\":1,\"after\":2},{\"name\":\"仪式巨像\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000100\"},\"beforeCount\":2,\"after\":3},{\"name\":\"雪影娃娃\",\"added\":true,\"probe\":{\"rows\":5,\"match\":1,\"species\":\"pet_000112\"},\"beforeCount\":3,\"after\":4},{\"name\":\"皇家狮鹫（崖间地的样子）\",\"added\":true,\"probe\":{\"rows\":5,\"match\":1,\"species\":\"pet_000118\"},\"beforeCount\":4,\"after\":5},{\"name\":\"化蝶（平常的样子）\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000124\"},\"beforeCount\":5,\"after\":6}]"
+  },
+  {
+   "id": "15-满六只五轴",
+   "judge": "选满六只后出现完整诊断：五轴都在；能算的给值，算不出的给原因且不带值（不补 0）",
+   "ok": true,
+   "actual": "轴节点=5；环境价值:算不出 / 最怕的体系:算不出 / 对局离散度:算不出 / 操作容错:算不出 / 覆盖置信:能算"
+  },
+  {
+   "id": "16-最大短板与替换建议",
+   "judge": "完整诊断里有主短板（缺口/未知清单）与**一个**最小替换：换出/换入各一只，并说清是结构理由",
+   "ok": true,
+   "actual": "缺口=0 未知=6 替换显示=true 换出=音速犬 换入=卷毛鸭"
+  },
+  {
+   "id": "17-玩家层载荷",
+   "judge": "路由的 player 段里没有工程键，也没有 id 形状的展示值",
+   "ok": true,
+   "actual": "扫过 3408 字节"
+  },
+  {
+   "id": "18-玩家层无工程话",
+   "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
+   "ok": true,
+   "actual": "扫过 1399 字；样例「 队伍（六个槽位） 六个槽位都满了 标准 PVP · 六宠 候选规则（待实机核对） 匹配前对手未知 · 按版本环境倾向评价 候选来自全图鉴 600+ 铠甲虫 虫系 有具体构建（结构…」"
+  },
+  {
+   "id": "19-无胜率与百分数",
+   "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法",
+   "ok": true,
+   "actual": "扫过 1399 字无命中"
+  },
+  {
+   "id": "20-未知写在玩家层",
+   "judge": "「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）",
+   "ok": true,
+   "actual": "未知条目=6；含「现在算不出来」=true"
+  },
+  {
+   "id": "21-非法参数(selected)",
+   "judge": "「selected=own-0001,own-0002,own-0003,own-0004」必须 HTTP 400 + ok:false 并点名 selected",
+   "ok": true,
+   "actual": "HTTP 400 error=「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」"
+  },
+  {
+   "id": "21-非法参数(mode)",
+   "judge": "「mode=zzz」必须 HTTP 400 + ok:false 并点名 mode",
+   "ok": true,
+   "actual": "HTTP 400 error=「[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3v3 / pvp-standard-six-pet / pvp-speed-duel-3」"
+  },
+  {
+   "id": "21-非法参数(zzz)",
+   "judge": "「zzz=1」必须 HTTP 400 + ok:false 并点名 zzz",
+   "ok": true,
+   "actual": "HTTP 400 error=「未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/favourites_only/max_replacements）」"
+  },
+  {
+   "id": "21-非法参数(max_replacements)",
+   "judge": "「max_replacements=abc」必须 HTTP 400 + ok:false 并点名 max_replacements",
+   "ok": true,
+   "actual": "HTTP 400 error=「max_replacements 必须是非负整数（实际 \"abc\"）」"
+  },
+  {
+   "id": "21-非法参数(favourites_only)",
+   "judge": "「favourites_only=yes」必须 HTTP 400 + ok:false 并点名 favourites_only",
+   "ok": true,
+   "actual": "HTTP 400 error=「favourites_only 只能是 true 或 false（实际 \"yes\"）」"
+  },
+  {
+   "id": "21-非法参数(selected)",
+   "judge": "「selected=pet_000012」必须 HTTP 400 + ok:false 并点名 selected",
+   "ok": true,
+   "actual": "HTTP 400 error=「selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000012）」"
+  },
+  {
+   "id": "21-非法参数(locked)",
+   "judge": "「locked=own-0007」必须 HTTP 400 + ok:false 并点名 locked",
+   "ok": true,
+   "actual": "HTTP 400 error=「[LOCKED_NOT_SELECTED] locked：锁定的 own-0007 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 \"own-0007\"）」"
+  },
+  {
+   "id": "22-六槽上限",
+   "judge": "同名参数下 6 只必须 200、7 只必须 400：上限只认六个槽位",
+   "ok": true,
+   "actual": "6 只 → HTTP 200；7 只 → HTTP 400「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」"
+  },
+  {
+   "id": "23-开发夹具",
+   "judge": "workshop.html 只是单独调试同一模块的薄壳（能挂上、标题写明是夹具，不冒充产品页）",
+   "ok": true,
+   "actual": "夹具就绪=true 标题=「小芽 · 阵容工坊（RC-305 开发夹具，不是产品页）」"
+  },
+  {
+   "id": "24-产品页重新选满六只",
+   "judge": "回到产品页后仍能用真实键鼠选满六只（窄屏量测的前提）",
+   "ok": true,
+   "actual": "selected=6"
+  },
+  {
+   "id": "25-窄屏不溢出",
+   "judge": "390×844：scrollW == clientW",
+   "ok": true,
+   "actual": "clientW=390 scrollW=390 bodyScrollW=390"
+  },
+  {
+   "id": "26-触控目标",
+   "judge": "390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44",
+   "ok": true,
+   "actual": "量了 12 个元素，全部达标"
+  },
+  {
+   "id": "27-移动端顺序",
+   "judge": "390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」",
+   "ok": true,
+   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":600},{\"cls\":\"tw-cand\",\"top\":1291},{\"cls\":\"tw-eval\",\"top\":1542},{\"cls\":\"tw-coach\",\"top\":2875}]"
+  },
+  {
+   "id": "28-窄屏候选区",
+   "judge": "390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在",
+   "ok": true,
+   "actual": "clientW=390 scrollW=390 next=3 缺口=10"
+  },
+  {
+   "id": "29-控制台干净",
+   "judge": "整轮下来没有 console.error，也没有未捕获异常",
+   "ok": true,
+   "actual": "consoleErrors=[] pageErrors=[]"
+  }
+ ],
+ "counterproofs": [
+  {
+   "id": "02-六个槽位",
+   "judge": "把槽位数改成 3（退回「已选 3 只固定栏」）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "槽位数必须是 6，实际 3 | 页面上必须画出 6 个槽位节点，实际 3",
+   "actual": "slots=3 / slotNodes=3 / filled=3"
+  },
+  {
+   "id": "03-候选规则徽记",
+   "judge": "把「候选规则（待实机核对）」徽记去掉必须被同一条判据抓住",
+   "ok": true,
+   "hit": "缺徽记「候选规则（待实机核对）」",
+   "actual": "{hasCandidateBadge:false,poolTotal:622}"
+  },
+  {
+   "id": "03-候选池 600+",
+   "judge": "把候选池写成 48/60（迁移夹具）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "候选池总量必须 ≥600（全量图鉴），实际 60",
+   "actual": "{poolTotal:60}"
+  },
+  {
+   "id": "07-图鉴物种照实拒绝",
+   "judge": "把「静默接受」的样本过同一条判据必须报错",
+   "ok": true,
+   "hit": "selected=pet_000562 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
+   "actual": "{ok:true} / HTTP 200"
+  },
+  {
+   "id": "10-恰好三个候选",
+   "judge": "把三个候选改成两个必须被同一条判据抓住",
+   "ok": true,
+   "hit": "下一只候选必须恰好 3 个，实际 2 | 页面上必须画出 3 个候选节点，实际 2",
+   "actual": "count=2 / labels=[强度,稳定]"
+  },
+  {
+   "id": "10-候选标签去重",
+   "judge": "三个候选里有两个是同一个取舍标签（等于只有两个选择）必须被抓住",
+   "ok": true,
+   "hit": "三个候选的取舍标签必须两两不同，实际 [\"强度\",\"强度\",\"候选参考\"]",
+   "actual": "labels=[强度,强度,候选参考]"
+  },
+  {
+   "id": "13-评估随阵容变化",
+   "judge": "把「阵容变了候选一字未变」的样本过同一条判据必须报错",
+   "ok": true,
+   "hit": "阵容从 2 只变到 5 只，下一只候选却一字未变：[\"甲\",\"乙\",\"丙\"]",
+   "actual": "{2 只:[甲,乙,丙]} → {5 只:[甲,乙,丙]}"
+  },
+  {
+   "id": "15-满六只五轴",
+   "judge": "把「算不出来」的轴填成 0 必须被同一条判据抓住",
+   "ok": true,
+   "hit": "轴「环境价值」算不出来却带着值 0（不许补 0） | 轴「环境价值」算不出来却没点名缺什么：null",
+   "actual": "{环境价值: available:false, value:0}"
+  },
+  {
+   "id": "17-玩家层载荷",
+   "judge": "把 pet_id / instance_id 混进 player 段必须被同一条判据抓住",
+   "ok": true,
+   "hit": "玩家层出现工程键 slots[0].pet_id | 玩家层的 slots[0].pet_id 里出现 id 形状的值：pet_000062 | 玩家层出现工程键 next_candidates[0].instance_id | 玩家层的 next_candidates[0].instance_id 里出现 id 形状的值：own-0001",
+   "actual": "{\"slots\":[{\"pet_id\":\"pet_000062\"}],\"next_candidates\":[{\"instance_id\":\"own-0001\"}]}"
+  },
+  {
+   "id": "18-玩家层无工程话",
+   "judge": "往玩家区注入 pet_id / state_version 后同一条判据必须命中",
+   "ok": true,
+   "hit": "玩家可见文本里出现工程词「pet_id」 | 玩家可见文本里没有任何「未核实 / 未知」的说明",
+   "actual": "「音速犬 pet_id=pet_000062 state_version=roco-workshop/v1」"
+  },
+  {
+   "id": "19-无胜率与百分数",
+   "judge": "把「胜率 58%」写进可见文本必须被同一条判据抓住",
+   "ok": true,
+   "hit": "玩家可见文本里出现伪精确「胜率 58」 | 玩家可见文本里没有任何「未核实 / 未知」的说明",
+   "actual": "「这套阵容胜率 58%」"
+  },
+  {
+   "id": "21-非法参数(mode)",
+   "judge": "把「非法 mode 静默接受」的样本过同一条判据必须报错",
+   "ok": true,
+   "hit": "mode=zzz 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
+   "actual": "{ok:true} / HTTP 200"
+  },
+  {
+   "id": "21-非法参数(第七个槽位)",
+   "judge": "把「接受第 7 个槽位」的样本过同一条判据必须报错",
+   "ok": true,
+   "hit": "selected=own-0001,own-0002,own-0003,own-0004,own-0005,own-0006,own-0007 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
+   "actual": "{ok:true,player:{selected_count:7}} / HTTP 200"
+  },
+  {
+   "id": "26-触控目标",
+   "judge": "一个 30×30 的按钮必须被同一条判据抓住",
+   "ok": true,
+   "hit": "BUTTON.tiny 只有 30×30",
+   "actual": "BUTTON.tiny 30×30"
+  },
+  {
+   "id": "27-移动端顺序",
+   "judge": "把顺序改成「评估在候选池前面」必须被同一条判据抓住",
+   "ok": true,
+   "hit": "移动端区块顺序必须是 [\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"]，实际 [\"tw-team\",\"tw-eval\",\"tw-cand\",\"tw-coach\"]",
+   "actual": "order=[tw-team,tw-eval,tw-cand,tw-coach]"
+  }
+ ],
+ "console_errors": [],
+ "page_errors": [],
+ "steps": [
+  {
+   "at": "boot",
+   "facts": {
+    "state": "ok",
+    "selected": "0",
+    "remaining": "6",
+    "slots": "6",
+    "filled": "0",
+    "next": "0",
+    "nextLabels": "",
+    "axes": "",
+    "axesAvailable": "",
+    "poolTotal": "622",
+    "poolRows": "12",
+    "error": null,
+    "hasPayload": true
+   },
+   "dom": {
+    "slotNodes": 6,
+    "filledNodes": 0,
+    "nextNodes": 0,
+    "gapNodes": 0,
+    "axisNodes": 0,
+    "unknownNodes": 0,
+    "entranceNodes": 3,
+    "replacementShown": false,
+    "hasModeBadge": true,
+    "hasCandidateBadge": true,
+    "hasUnknownPrematch": true,
+    "hasFullUniverse": true,
+    "mentionsLegacySlots": false,
+    "nextNames": [],
+    "shadowPresent": true
+   }
+  },
+  {
+   "at": "two-selected",
+   "facts": {
+    "state": "ok",
+    "selected": "2",
+    "remaining": "4",
+    "slots": "6",
+    "filled": "2",
+    "next": "3",
+    "nextLabels": "强度|稳定|候选参考",
+    "axes": "",
+    "axesAvailable": "",
+    "poolTotal": "1",
+    "poolRows": "1",
+    "error": "selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000562）",
+    "hasPayload": true
+   },
+   "dom": {
+    "slotNodes": 6,
+    "filledNodes": 2,
+    "nextNodes": 3,
+    "gapNodes": 10,
+    "axisNodes": 0,
+    "unknownNodes": 0,
+    "entranceNodes": 0,
+    "replacementShown": false,
+    "hasModeBadge": true,
+    "hasCandidateBadge": true,
+    "hasUnknownPrematch": true,
+    "hasFullUniverse": true,
+    "mentionsLegacySlots": false,
+    "nextNames": [
+     "仪式巨像",
+     "伊兰亚龙",
+     "画间沉铁兽"
+    ],
+    "shadowPresent": true
+   },
+   "addResults": [
+    {
+     "name": "铠甲虫",
+     "added": false,
+     "probe": {
+      "rows": 2,
+      "match": 1,
+      "species": "pet_000012"
+     },
+     "beforeCount": 1,
+     "after": 1
+    },
+    {
+     "name": "音速犬",
+     "added": true,
+     "probe": {
+      "rows": 2,
+      "match": 1,
+      "species": "pet_000062"
+     },
+     "beforeCount": 1,
+     "after": 2
+    },
+    {
+     "name": "仪式巨像",
+     "added": true,
+     "probe": {
+      "rows": 3,
+      "match": 1,
+      "species": "pet_000100"
+     },
+     "beforeCount": 2,
+     "after": 3
+    },
+    {
+     "name": "雪影娃娃",
+     "added": true,
+     "probe": {
+      "rows": 5,
+      "match": 1,
+      "species": "pet_000112"
+     },
+     "beforeCount": 3,
+     "after": 4
+    },
+    {
+     "name": "皇家狮鹫（崖间地的样子）",
+     "added": true,
+     "probe": {
+      "rows": 5,
+      "match": 1,
+      "species": "pet_000118"
+     },
+     "beforeCount": 4,
+     "after": 5
+    },
+    {
+     "name": "化蝶（平常的样子）",
+     "added": true,
+     "probe": {
+      "rows": 6,
+      "match": 1,
+      "species": "pet_000124"
+     },
+     "beforeCount": 5,
+     "after": 6
+    }
+   ]
+  },
+  {
+   "at": "five-selected",
+   "facts": {
+    "state": "ok",
+    "selected": "5",
+    "remaining": "1",
+    "slots": "6",
+    "filled": "5",
+    "next": "3",
+    "nextLabels": "强度|候选参考|候选参考",
+    "axes": "",
+    "axesAvailable": "",
+    "poolTotal": "1",
+    "poolRows": "1",
+    "error": "selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000562）",
+    "hasPayload": true
+   },
+   "dom": {
+    "slotNodes": 6,
+    "filledNodes": 5,
+    "nextNodes": 3,
+    "gapNodes": 10,
+    "axisNodes": 0,
+    "unknownNodes": 0,
+    "entranceNodes": 0,
+    "replacementShown": false,
+    "hasModeBadge": true,
+    "hasCandidateBadge": true,
+    "hasUnknownPrematch": true,
+    "hasFullUniverse": true,
+    "mentionsLegacySlots": false,
+    "nextNames": [
+     "画间沉铁兽",
+     "黑猫巫师",
+     "嗜光嗡嗡"
+    ],
+    "shadowPresent": true
+   },
+   "addResults": [
+    {
+     "name": "铠甲虫",
+     "added": false,
+     "probe": {
+      "rows": 2,
+      "match": 1,
+      "species": "pet_000012"
+     },
+     "beforeCount": 1,
+     "after": 1
+    },
+    {
+     "name": "音速犬",
+     "added": true,
+     "probe": {
+      "rows": 2,
+      "match": 1,
+      "species": "pet_000062"
+     },
+     "beforeCount": 1,
+     "after": 2
+    },
+    {
+     "name": "仪式巨像",
+     "added": true,
+     "probe": {
+      "rows": 3,
+      "match": 1,
+      "species": "pet_000100"
+     },
+     "beforeCount": 2,
+     "after": 3
+    },
+    {
+     "name": "雪影娃娃",
+     "added": true,
+     "probe": {
+      "rows": 5,
+      "match": 1,
+      "species": "pet_000112"
+     },
+     "beforeCount": 3,
+     "after": 4
+    },
+    {
+     "name": "皇家狮鹫（崖间地的样子）",
+     "added": true,
+     "probe": {
+      "rows": 5,
+      "match": 1,
+      "species": "pet_000118"
+     },
+     "beforeCount": 4,
+     "after": 5
+    },
+    {
+     "name": "化蝶（平常的样子）",
+     "added": true,
+     "probe": {
+      "rows": 6,
+      "match": 1,
+      "species": "pet_000124"
+     },
+     "beforeCount": 5,
+     "after": 6
+    }
+   ]
+  },
+  {
+   "at": "six-selected",
+   "facts": {
+    "state": "ok",
+    "selected": "6",
+    "remaining": "0",
+    "slots": "6",
+    "filled": "6",
+    "next": "0",
+    "nextLabels": "",
+    "axes": "环境价值|最怕的体系|对局离散度|操作容错|覆盖置信",
+    "axesAvailable": "覆盖置信",
+    "poolTotal": "1",
+    "poolRows": "1",
+    "error": "selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000562）",
+    "hasPayload": true
+   },
+   "dom": {
+    "slotNodes": 6,
+    "filledNodes": 6,
+    "nextNodes": 0,
+    "gapNodes": 0,
+    "axisNodes": 5,
+    "unknownNodes": 6,
+    "entranceNodes": 0,
+    "replacementShown": true,
+    "hasModeBadge": true,
+    "hasCandidateBadge": true,
+    "hasUnknownPrematch": true,
+    "hasFullUniverse": true,
+    "mentionsLegacySlots": false,
+    "nextNames": [],
+    "shadowPresent": true
+   },
+   "addResults": [
+    {
+     "name": "铠甲虫",
+     "added": false,
+     "probe": {
+      "rows": 2,
+      "match": 1,
+      "species": "pet_000012"
+     },
+     "beforeCount": 1,
+     "after": 1
+    },
+    {
+     "name": "音速犬",
+     "added": true,
+     "probe": {
+      "rows": 2,
+      "match": 1,
+      "species": "pet_000062"
+     },
+     "beforeCount": 1,
+     "after": 2
+    },
+    {
+     "name": "仪式巨像",
+     "added": true,
+     "probe": {
+      "rows": 3,
+      "match": 1,
+      "species": "pet_000100"
+     },
+     "beforeCount": 2,
+     "after": 3
+    },
+    {
+     "name": "雪影娃娃",
+     "added": true,
+     "probe": {
+      "rows": 5,
+      "match": 1,
+      "species": "pet_000112"
+     },
+     "beforeCount": 3,
+     "after": 4
+    },
+    {
+     "name": "皇家狮鹫（崖间地的样子）",
+     "added": true,
+     "probe": {
+      "rows": 5,
+      "match": 1,
+      "species": "pet_000118"
+     },
+     "beforeCount": 4,
+     "after": 5
+    },
+    {
+     "name": "化蝶（平常的样子）",
+     "added": true,
+     "probe": {
+      "rows": 6,
+      "match": 1,
+      "species": "pet_000124"
+     },
+     "beforeCount": 5,
+     "after": 6
+    }
+   ],
+   "selected_keys": "6"
+  },
+  {
+   "at": "bad-params",
+   "rows": [
+    "selected=own-0001,own-0002,own-0003,own-0004,own-0005,own-00 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）\",\"problems\":",
+    "mode=zzz → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3",
+    "zzz=1 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/favourites_only/",
+    "max_replacements=abc → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"max_replacements 必须是非负整数（实际 \\\"abc\\\"）\",\"problems\":[\"max_replacements 必须是非负整数（",
+    "favourites_only=yes → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"favourites_only 只能是 true 或 false（实际 \\\"yes\\\"）\",\"problems\":[\"favourites_only 只",
+    "selected=pet_000012 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000012）\",\"problems\":[\"selected ",
+    "locked=own-0007 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[LOCKED_NOT_SELECTED] locked：锁定的 own-0007 既不在 selected 也不在 must_include：lock"
+   ]
+  },
+  {
+   "at": "narrow-two",
+   "facts": {
+    "state": "ok",
+    "selected": "2",
+    "remaining": "4",
+    "slots": "6",
+    "filled": "2",
+    "next": "3",
+    "nextLabels": "强度|稳定|候选参考",
+    "axes": "",
+    "axesAvailable": "",
+    "poolTotal": "1",
+    "poolRows": "1",
+    "error": null,
+    "hasPayload": true
+   },
+   "dom": {
+    "slotNodes": 6,
+    "filledNodes": 2,
+    "nextNodes": 3,
+    "gapNodes": 10,
+    "axisNodes": 0,
+    "unknownNodes": 0,
+    "entranceNodes": 0,
+    "replacementShown": false,
+    "hasModeBadge": true,
+    "hasCandidateBadge": true,
+    "hasUnknownPrematch": true,
+    "hasFullUniverse": true,
+    "mentionsLegacySlots": false,
+    "nextNames": [
+     "仪式巨像",
+     "伊兰亚龙",
+     "画间沉铁兽"
+    ],
+    "shadowPresent": true
+   },
+   "metrics": {
+    "clientW": 390,
+    "scrollW": 390,
+    "bodyScrollW": 390,
+    "innerW": 390
+   }
+  }
+ ],
+ "ok": true
+}
