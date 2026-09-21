@@ -156,3 +156,35 @@ node scripts/model/verify-manifest.mjs        # 通过：11/11 个文件
   换提示长度都会变；不是产品 SLA。
 - **27B teacher 未部署**，也不在局内路径上。
 - **Windows 3060 未做**（按用户指令留到明天）。
+
+## shadow 档的契约：跑本地，但**不改变玩家看到的结果**
+
+第 38 轮修掉一个破坏这条契约的缺陷，记在这里免得再犯。
+
+`createCoachServer` 的 `applyLocalModel` 原来**无论 `shadow` 还是 `on`** 都把
+`wrapped.plan` 换成本地规划器。而 `src/coach/runtime.js` 正是用 `provider.plan`
+决定**去查哪些工具**：
+
+```js
+if (useModel && provider.plan && (...)) { ... gatherAgentEvidence({plan: provider.plan, ...}) }
+```
+
+于是 shadow 档下「查什么」被本地模型改掉了：收集到的证据不同，最终正文就可能不同。
+**shadow 的意义就是「先量，不改」**——这条契约在工具选择这一环上被破坏过。
+
+现在的行为：
+
+| 档位 | `generate`（正文） | `plan`（选工具） |
+|---|---|---|
+| `off` | 原样返回 base，本地进程一次都不启动 | 不接管 |
+| `shadow` | 返回 base 的结果，另外跑一次本地并记 `shadow` | **不接管**：本地规划器照跑（记录在 `shadowPlans`），但返回的永远是 base 的决定；base 本来没有 `plan` 时也不凭空加 |
+| `on` | 本地成功就用本地，失败回退 base 并记 `lastFallback` | 本地规划器接管 |
+
+守在哪里：`tests/server.test.js` 的
+「shadow 档不许改变玩家看到的结果」——它只做一件最硬的事：**同一条请求在 `off` 与
+`shadow` 两档下各跑一次，正文 / provider / 路由 / 证据必须完全一致**，同时本地模型
+必须真的被调用过（否则 shadow 没有可观测性）。
+
+> 测试里用的是注入的假模型（`createCoachServer({localModelFactory})`）。**不要**在单测里
+> 用真的 `LocalModel`：它会拉起 3 GB 的 MLX 子进程。第一次写这条测试时就是这么挂到
+> 超时的，还留下了孤儿进程。

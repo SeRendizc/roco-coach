@@ -113,7 +113,10 @@ function validateOpponent(b){
  if(b.goal!==null&&b.goal!==undefined&&!['稳健','速攻'].includes(b.goal))throw fail(400,'目标偏好无效');
  for(const side of ['player','enemy']){const s=c[side];if(!s||!Array.isArray(s.pets)||s.pets.length!==3||!Number.isInteger(s.active)||s.active<0||s.active>2)throw fail(400,'战况无效');for(const p of s.pets){if(!Array.isArray(p.skills)||p.skills.length>6||![p.hp,p.maxHp,p.atk,p.def,p.speed,p.energy].every(Number.isFinite))throw fail(400,'宠物状态无效');}for(const [id,count]of Object.entries(s.items||{}))if(!Number.isInteger(count)||count<0||count>99)throw fail(400,'道具数量无效');}
 }
-export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=false,roco=null}={}){
+export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=false,roco=null,
+  // 本地模型工厂。**注入点是为了测试**：默认实现会真的拉起 3 GB 的 MLX 子进程，
+  // 单测里绝不该这么干（第 38 轮实测：直接跑会把测试挂死到超时，还留下孤儿进程）。
+  localModelFactory=()=>new LocalModel()}={}){
  const retriever=semantic?createSemanticRetriever():null;
  // roco 规则服务网关：按需启动 Python 子进程，空闲自动回收。注入是为了测试能换成假的。
  const rocoService=roco||createRocoService();
@@ -124,7 +127,7 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
   // 默认关闭时一个字节都不该占。见 src/coach/local-model.js 的 feature flag。
   let localSingleton=null;
   const localModel=()=>{
-   if(!localSingleton)localSingleton=new LocalModel();
+   if(!localSingleton)localSingleton=localModelFactory();
    return localSingleton;
   };
   /**
@@ -138,9 +141,33 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
    const mode=localModelMode();
    if(mode==='off'||!base)return base;
    const wrapped=wrapWithLocalModel(base,{model:localModel(),mode});
-   // 工具选择也交给本地模型（失败方向同样是「拿不准就停止查证」）。
-   wrapped.plan=createLocalPlan({model:localModel(),tools:['read_state','search_rules','compare_actions',
+   const localPlan=createLocalPlan({model:localModel(),tools:['read_state','search_rules','compare_actions',
     'simulate_branch','inspect_training','read_match','read_evidence','read_last_turn']});
+   // 只有 `on` 档才让本地模型**接管**工具选择（失败方向同样是「拿不准就停止查证」）。
+   //
+   // 第 38 轮修：原来无论哪一档都直接把 `wrapped.plan` 换成本地规划器。而
+   // `runtime.js` 正是用 `provider.plan` 决定去查哪些工具，于是 **shadow 档下
+   // 「查什么」被本地模型改掉了** —— 证据不同，答案就可能不同。shadow 的契约是
+   // 「跑本地，但**不改变玩家看到的结果**」，那条契约在工具选择这一环上被破坏过。
+   // （第 15 轮在介入层上也踩过同一形状的坑：shadow 真的改了行为。）
+   if(mode==='on'){wrapped.plan=localPlan;return wrapped;}
+   // shadow：本地规划器照跑（这是可观测性），但**决定仍然来自 base**。
+   // 注意只有 base 本来就有 plan 时才包一层：凭空加一个 plan 本身就会改变
+   // 证据收集路径（`runtime.js` 有 `provider.plan &&` 这个前提）。
+   if(typeof base.plan==='function'){
+    const basePlan=base.plan;
+    wrapped.shadowPlans=[];
+    wrapped.plan=async(task)=>{
+     const decision=await basePlan(task);
+     try{
+      const local=await localPlan.plan(task);
+      wrapped.shadowPlans.push({base:decision,local,local_decision:localPlan.lastDecision||null});
+     }catch(error){
+      wrapped.shadowPlans.push({base:decision,local:null,error:error?.code||'unknown'});
+     }
+     return decision;
+    };
+   }
    return wrapped;
   };
  // 本机开发用的可选入口：启动时从环境变量读一次密钥，读进内存后不再引用它。

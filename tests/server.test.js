@@ -9,7 +9,7 @@ import {freshMemory} from '../src/coach/memory.js';
 import {createGame,legalActions,step} from '../src/game/engine.js';
 import {summarizeMatch} from '../src/coach/teacher.js';
 const fixtureKey='sk-fixture-only-not-a-real-api-key';
-async function setup(t,fetchImpl){const server=createCoachServer({fetchImpl});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>{server.closeAllConnections();server.close();});const base='http://127.0.0.1:'+server.address().port;let cookie='',boot;
+async function setup(t,fetchImpl,extra={}){const server=createCoachServer({fetchImpl,...extra});await new Promise(r=>server.listen(0,'127.0.0.1',r));t.after(()=>{server.closeAllConnections();server.close();});const base='http://127.0.0.1:'+server.address().port;let cookie='',boot;
  async function bootstrap(){const r=await fetch(base+'/api/bootstrap',{headers:cookie?{Cookie:cookie}:{}});if(r.headers.get('set-cookie'))cookie=r.headers.get('set-cookie').split(';')[0];boot=await r.json();return boot;}
  await bootstrap();
  async function post(path,data,extra={},options={}){return fetch(base+path,{method:'POST',headers:{Origin:base,Cookie:cookie,'Content-Type':'application/json','X-Coach-CSRF':boot.csrf,...extra},body:JSON.stringify(data),...options});}
@@ -99,4 +99,41 @@ test('整局复盘：给模型的指令写清了 0 值口径，而 0 值数据�
  assert.equal(evidence.textFacts.counts.escapes,0);
  // 本地那句统计（只讲非零的那一类）也在包里，模型可以照它的说法写。
  assert.match(String(evidence.textFacts?JSON.stringify(evidence):''),/出手\d+次/);
+});
+
+test('shadow 档不许改变玩家看到的结果：工具选择也必须是 base 的决定（第 38 轮的回归）',async t=>{
+ // 第 38 轮修的缺陷：`applyLocalModel` 原来无论 shadow 还是 on 都把 `wrapped.plan`
+ // 换成本地规划器，而 `runtime.js` 用 `provider.plan` 决定查哪些工具 —— 于是
+ // **shadow 档下「查什么」被本地模型改掉了**，证据不同、答案就可能不同，
+ // 而 shadow 的契约是「跑本地但不改变玩家看到的结果」。
+ //
+ // 这条测试只看**两次真实请求的返回是否逐字相同**，不看注释也不看内部记录。
+ // 假模型是必须的：真的 `LocalModel` 会拉起 3 GB 的 MLX 子进程，单测里会把
+ // 测试挂死到超时（第一次写这条时就踩了，还留下孤儿进程）。
+ let localCalls=0;
+ const fakeModel={async start(){},async stop(){},
+  async generate(){localCalls++;return {text:'{"stop":true}',first_token_ms:1,total_ms:2,tokens_per_second:10};}};
+ const cloud=async(url,args)=>{
+  const body=JSON.parse(args.body);
+  const system=String(body.messages?.[0]?.content||'');
+  if(system.includes('选择只读工具'))return new Response(JSON.stringify({choices:[{message:{content:'{"stop":true}'}}]}));
+  return ok();
+ };
+ const runOnce=async(mode)=>{
+  process.env.ROCO_LOCAL_MODEL=mode;
+  const x=await setup(t,cloud,{localModelFactory:()=>fakeModel});
+  await x.connect();
+  const answer=await(await x.post('/api/coach',chat())).json();
+  return {answer,route:answer.route};
+ };
+ try{
+  const off=await runOnce('off');
+  const before=localCalls;
+  const shadow=await runOnce('shadow');
+  assert.equal(shadow.answer.text,off.answer.text,'shadow 档改变了玩家看到的正文');
+  assert.equal(shadow.answer.provider,off.answer.provider,'shadow 档改变了 provider');
+  assert.equal(shadow.route,off.route,'shadow 档改变了路由');
+  assert.deepEqual(shadow.answer.evidence,off.answer.evidence,'shadow 档改变了收集到的证据（工具选择被替换了）');
+  assert.ok(localCalls>before,'shadow 档下本地模型一次都没被跑到——那 shadow 就没有可观测性了');
+ }finally{delete process.env.ROCO_LOCAL_MODEL;}
 });
