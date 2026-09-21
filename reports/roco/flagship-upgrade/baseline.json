@@ -1,0 +1,102 @@
+{
+  "schema": "roco-flagship-baseline/v1",
+  "generated_by": "scripts/roco/flagship-baseline.mjs",
+  "generated_at": "2026-09-21T13:19:19.890Z",
+  "head": {
+    "sha": "87d0eea467e60c3acab46d9e8a79c201e2ec534d",
+    "subject": "docs(reports): 小时报 10:55Z 存档（RAG 出处打通 + 核心 DOM 判据 + 陈旧规划竞态修复）",
+    "branch": "master",
+    "remote": "https://github.com/SeRendizc/roco-coach.git",
+    "dirty_files": [
+      "M docs/roadmap/DSH-EXECUTION-STATE.md",
+      " M package.json",
+      "?? data/roco/artifact-registry.json",
+      "?? data/roco/battle-modes.json",
+      "?? docs/roadmap/FLAGSHIP-V3-CHECKLIST.md",
+      "?? docs/roadmap/FLAGSHIP-V3-REDIRECT.md",
+      "?? reports/roco/flagship-upgrade/",
+      "?? scripts/roco/artifact-invalidation.mjs",
+      "?? scripts/roco/flagship-baseline.mjs",
+      "?? tests/roco-v3-redirect.test.js"
+    ]
+  },
+  "runtime": {
+    "node": "v24.20.0",
+    "python": "Python 3.9.6"
+  },
+  "rule_baseline": {
+    "ruleset_id": "roco-world-s4-2026-09-10",
+    "engine_energy": {
+      "ENERGY_MAX": 6,
+      "ENERGY_REGEN_PER_TURN": 1,
+      "initial_energy_from_source": 2,
+      "source_file": "roco/src/roco_env/env.py"
+    },
+    "confidence_note": "ENERGY_MAX=6 / 回合末 +1 在 env.py 里自注为「假设」；外部多源交叉支持 max=10 / 聚能 +5。因此当前引擎是 legacy 基线，不得再据此生产新轨迹（见 evidence ledger）。",
+    "battle_modes_present": [
+      "pve-training-3v3（当前 Demo 练习局）"
+    ],
+    "battle_modes_missing": [
+      "pvp-standard-six-pet（候选）",
+      "pvp-speed-duel-3v3（极速对决，OFFICIAL_CURRENT）",
+      "pvp-territory-trial-2v2（领地试炼，特性共享/首领形态）"
+    ]
+  },
+  "data_scale": {
+    "ruleset_dir": "data/roco/normalized/roco-world-s4-2026-09-10",
+    "pets_baseline_layer": 12,
+    "skills_baseline_layer": 824,
+    "full_catalog": 622,
+    "roster_48": 48,
+    "layer_playable_48_pets": null,
+    "note": "这些是**仓库冻结快照**的规模，不等于当前公网可见规模（621/579/242 需另做对账）。"
+  },
+  "model_identity": {
+    "registry_present": true,
+    "registry_sha256": "080b372a280efa9ecf26365119eeb6dfe46cc187de63bb64603094db51ecc374",
+    "local_models": [
+      {
+        "id": null,
+        "path": null,
+        "revision": "0e7ffd5c62",
+        "license": "apache-2.0"
+      }
+    ],
+    "adapter": {
+      "path": ".models/adapters/qwen35-4b-tool-v4",
+      "note": "权重与适配器不进 git；这里只登记路径与登记表指纹。"
+    }
+  },
+  "artifacts": {
+    "fingerprints": {
+      "tests/evals/agent-trajectories-v1.jsonl": "ccf633a36da95da4325f6d0decebb72faeaf7fd5f876556040e5b534df6fc9e9",
+      "tests/evals/agent-trajectories-model-v1.jsonl": "8f92cdf3605331c4e8166cea593e7b01ce6dc42f77fabad3c713a7859ef52fa0",
+      "tests/evals/roco/model-error-trajectories-v4.jsonl": "9da643f207381d8ca6c3259f220c0773969f818177ff9c66981e9038e388fc5b",
+      "tests/evals/roco/intervention-windows-roco.jsonl": "55e370da7c8da29bca8e0dda05fa496e31e02df48e25770041ffbe3240043011",
+      "tests/evals/roco/intervention-windows-v2.jsonl": "937c32d1525db604c221c63a688333dba98533e4a059fd27296485676a6512b0",
+      "src/coach/intervention-model.generated.js": "a6167867816b0bafea216332334ae40cb8321a7e70d1fb68e3c6776e69969ed1",
+      "reports/roco/g02-team/model.json": "142eec0b0e6e1aef8957b205b9cfd677967aa697e2b0e2fb6e03e6ed79a40068",
+      "reports/roco/demo-perf.json": "6d930709b695d09d0f98f27467d0392d532a2fd86d7aecf89eec7d5ca9ae033f"
+    },
+    "note": "旧规则产物的 sha256。规则 candidate 一旦被采纳，这些必须重新生成并改绑 ruleset。"
+  },
+  "gate": {
+    "latest": {
+      "verdict": "pass",
+      "ok_suites": 14,
+      "suites": 14,
+      "failed": []
+    },
+    "last_green": {
+      "verdict": "pass",
+      "head": "85b6fff9bf356847380e0d78e82e010d94165705",
+      "ran_at": "2026-09-21T10:52:11.038Z",
+      "suites": 14
+    }
+  },
+  "known_gaps_this_audit_does_not_cover": [
+    "不跑测试（跑测试是 verify-release 的事），因此这里只有上一次门禁的灯，不是本次结论。",
+    "公网 621/579/242 与仓库 622/824 的对账**没做**（那是 RC-201）。",
+    "实机 microcase 一个都还没有（需要录制实机）。"
+  ]
+}

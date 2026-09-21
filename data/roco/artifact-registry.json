@@ -1,0 +1,380 @@
+{
+  "schema": "roco-artifact-registry/v1",
+  "generated_by": "手工登记（结构性事实，不是生成物）",
+  "why": "RC-104：规则/模式一变，哪些产物必须作废或重建，必须是**查得到的**，而不是靠人回想。每条产物声明它依赖哪些规则主题（rule topic），invalidation 脚本据此算出受影响清单。",
+  "rules": [
+    "每条 artifact 必须声明至少一个 depends_on（没有依赖的产物说明我们不知道它为什么对）。",
+    "每个 rule topic 至少被一条 artifact 依赖（没人依赖的主题说明这张图漏了东西）。",
+    "status=legacy 的产物**绑定旧规则**：在对应规则 candidate 被采纳前，禁止重跑生成（那只会再生产一批绑定旧规则的产物）。",
+    "path 必须真的存在（或作为 glob 至少命中一个文件）——登记表不允许写想象中的路径。"
+  ],
+  "rule_topics": [
+    {
+      "id": "energy.max",
+      "why": "能量上限：引擎假设 6，外部多源交叉支持 10（candidate）"
+    },
+    {
+      "id": "energy.initial",
+      "why": "入场初始能量：引擎假设 2，实机未定"
+    },
+    {
+      "id": "energy.regen",
+      "why": "回合末自然回能：引擎假设 +1，多源材料反驳"
+    },
+    {
+      "id": "energy.charge",
+      "why": "聚能：社区交叉支持 +5"
+    },
+    {
+      "id": "turn_order.priority",
+      "why": "应对/先手/换人/速度的严格总序：工程假设，需 microcase"
+    },
+    {
+      "id": "turn_order.speed",
+      "why": "速度与同速平手：平手判据 UNKNOWN"
+    },
+    {
+      "id": "turn_order.end_turn",
+      "why": "回合末结算顺序（DOT/特性/天气/回能/补位）"
+    },
+    {
+      "id": "battle_mode.standard_pvp",
+      "why": "标准 PVP：六宠、通常 4 魔力（CROSS_SOURCE_SUPPORTED）"
+    },
+    {
+      "id": "battle_mode.speed_duel",
+      "why": "极速对决：3v3、2 点魔力（OFFICIAL_CURRENT，独立模式）"
+    },
+    {
+      "id": "battle_mode.territory_trial",
+      "why": "领地试炼：2v2、特性共享、首领形态（官方公告）"
+    },
+    {
+      "id": "type.multiplier",
+      "why": "属性倍率 ×3/×2/×0.5/×0.25（COMMUNITY_CURRENT）"
+    },
+    {
+      "id": "marks.persistence",
+      "why": "印记下场不消失、入场继承、正负各一（COMMUNITY_CURRENT）"
+    },
+    {
+      "id": "swift.injection",
+      "why": "迅捷：主动换入时自动使用第一个满足能量且带迅捷的技能"
+    },
+    {
+      "id": "leave.semantics",
+      "why": "离场 = 主动更换或脱离效果，不含力竭下场"
+    },
+    {
+      "id": "traits.triggers",
+      "why": "特性触发语义（入场/离场/回合末/受击/克制后/队伍组成/能量上限突破…）"
+    },
+    {
+      "id": "roster.universe",
+      "why": "候选宇宙：全量 600+，还是某个固定名单"
+    },
+    {
+      "id": "pvp.fairness",
+      "why": "线上竞技不给战术分析等公平边界"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": "ruleset-normalized-layer",
+      "kind": "data",
+      "status": "current",
+      "path": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
+      "depends_on": [
+        "roster.universe",
+        "type.multiplier",
+        "marks.persistence"
+      ],
+      "rebuild": "npm run roco:pipeline",
+      "note": "数据层本身不依赖能量/时序假设，但 roster 口径变化要重导。"
+    },
+    {
+      "id": "playable-48-layer",
+      "kind": "data",
+      "status": "legacy-fixture",
+      "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+      "depends_on": [
+        "roster.universe",
+        "energy.max",
+        "traits.triggers",
+        "marks.persistence",
+        "swift.injection",
+        "leave.semantics",
+        "battle_mode.standard_pvp"
+      ],
+      "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs",
+      "note": "48 只是**迁移夹具**：它的可玩性以当前引擎规则为准，规则一改资格要重算。"
+    },
+    {
+      "id": "full-catalog-l1",
+      "kind": "data",
+      "status": "current",
+      "path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+      "depends_on": [
+        "roster.universe",
+        "type.multiplier"
+      ],
+      "rebuild": "npm run roco:full-catalog"
+    },
+    {
+      "id": "traj-rule-arm-v1",
+      "kind": "trajectory",
+      "status": "legacy",
+      "path": "tests/evals/agent-trajectories-v1.jsonl",
+      "depends_on": [
+        "energy.max",
+        "energy.initial",
+        "energy.regen",
+        "turn_order.priority",
+        "turn_order.speed",
+        "roster.universe",
+        "energy.charge",
+        "turn_order.end_turn",
+        "swift.injection",
+        "leave.semantics"
+      ],
+      "rebuild": "npm run roco:agent-trajectories",
+      "note": "规则 candidate 采纳前**禁止重跑**：重跑只会再生产一批绑定旧规则的轨迹。"
+    },
+    {
+      "id": "traj-model-arm-v1",
+      "kind": "trajectory",
+      "status": "legacy",
+      "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+      "depends_on": [
+        "energy.max",
+        "energy.initial",
+        "energy.regen",
+        "turn_order.priority",
+        "roster.universe",
+        "energy.charge",
+        "turn_order.end_turn"
+      ],
+      "rebuild": "npm run roco:agent-trajectories-model"
+    },
+    {
+      "id": "model-error-trajectories-v4",
+      "kind": "trajectory",
+      "status": "legacy",
+      "path": "tests/evals/roco/model-error-trajectories-v4.jsonl",
+      "depends_on": [
+        "energy.max",
+        "roster.universe",
+        "energy.charge"
+      ],
+      "rebuild": "npm run roco:model-errors"
+    },
+    {
+      "id": "sft-dataset",
+      "kind": "training-data",
+      "status": "legacy",
+      "path": "reports/roco/sft/dataset-report.json",
+      "depends_on": [
+        "energy.max",
+        "energy.initial",
+        "roster.universe",
+        "turn_order.priority",
+        "energy.charge",
+        "turn_order.end_turn"
+      ],
+      "rebuild": "npm run roco:sft-data",
+      "note": "SFT 任务里含「能量够不够 / 这一手合法吗」，基础规则一改这些样本的答案就变了。"
+    },
+    {
+      "id": "team-model-g02",
+      "kind": "model",
+      "status": "legacy",
+      "path": "reports/roco/g02-team/model.json",
+      "depends_on": [
+        "energy.max",
+        "roster.universe",
+        "type.multiplier",
+        "turn_order.speed",
+        "energy.charge",
+        "turn_order.end_turn"
+      ],
+      "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
+    },
+    {
+      "id": "intervention-windows-roco",
+      "kind": "fixture",
+      "status": "legacy",
+      "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+      "depends_on": [
+        "energy.max",
+        "turn_order.priority",
+        "roster.universe",
+        "turn_order.end_turn",
+        "marks.persistence"
+      ],
+      "rebuild": "npm run roco:intervention-windows"
+    },
+    {
+      "id": "intervention-model-generated",
+      "kind": "model",
+      "status": "legacy",
+      "path": "src/coach/intervention-model.generated.js",
+      "depends_on": [
+        "energy.max",
+        "turn_order.priority",
+        "energy.charge"
+      ],
+      "rebuild": "python3 scripts/roco/train-intervention-model.py",
+      "note": "判定层的特征里含能量与边际量：规则一变特征分布就漂。"
+    },
+    {
+      "id": "planner-benchmarks",
+      "kind": "report",
+      "status": "legacy",
+      "path": "reports/roco/planner-benchmark.json",
+      "depends_on": [
+        "energy.max",
+        "turn_order.priority",
+        "turn_order.speed",
+        "type.multiplier",
+        "energy.charge",
+        "turn_order.end_turn",
+        "marks.persistence"
+      ],
+      "rebuild": "npm run roco:benchmark-planner"
+    },
+    {
+      "id": "position-fixtures",
+      "kind": "fixture",
+      "status": "legacy-fixture",
+      "path": "tests/evals/roco/coach-positions.test.js",
+      "depends_on": [
+        "energy.max",
+        "energy.initial",
+        "turn_order.priority",
+        "turn_order.speed",
+        "turn_order.end_turn",
+        "marks.persistence",
+        "swift.injection",
+        "leave.semantics",
+        "battle_mode.standard_pvp"
+      ],
+      "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）",
+      "note": "第 63 轮已经吃过一次：引擎 fail-closed 修复改变战斗走向，12 个局面全部失配。"
+    },
+    {
+      "id": "browser-position-matrix",
+      "kind": "report",
+      "status": "legacy-fixture",
+      "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+      "depends_on": [
+        "energy.max",
+        "turn_order.priority",
+        "turn_order.speed",
+        "turn_order.end_turn",
+        "marks.persistence",
+        "swift.injection"
+      ],
+      "rebuild": "npm run roco:demo-acceptance"
+    },
+    {
+      "id": "demo-acceptance-report",
+      "kind": "report",
+      "status": "current",
+      "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+      "depends_on": [
+        "energy.max",
+        "roster.universe",
+        "pvp.fairness",
+        "battle_mode.standard_pvp",
+        "battle_mode.speed_duel",
+        "turn_order.priority",
+        "turn_order.speed"
+      ],
+      "rebuild": "npm run roco:demo-acceptance"
+    },
+    {
+      "id": "adapter-load-report",
+      "kind": "report",
+      "status": "current",
+      "path": "reports/roco/adapter-load/adapter-load.json",
+      "depends_on": [
+        "energy.max",
+        "roster.universe",
+        "battle_mode.standard_pvp",
+        "energy.charge"
+      ],
+      "rebuild": "npm run roco:adapter-load"
+    },
+    {
+      "id": "demo-perf-report",
+      "kind": "report",
+      "status": "current",
+      "path": "reports/roco/demo-perf.json",
+      "depends_on": [
+        "roster.universe",
+        "energy.max"
+      ],
+      "rebuild": "node scripts/roco/measure-demo-perf.mjs"
+    },
+    {
+      "id": "pet-support-matrix-doc",
+      "kind": "doc",
+      "status": "legacy",
+      "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+      "depends_on": [
+        "traits.triggers",
+        "energy.max",
+        "type.multiplier",
+        "marks.persistence",
+        "swift.injection",
+        "leave.semantics",
+        "turn_order.end_turn"
+      ],
+      "rebuild": "npm run roco:docs"
+    },
+    {
+      "id": "roster-48-doc",
+      "kind": "doc",
+      "status": "legacy-fixture",
+      "path": "docs/roco/ROSTER-48.md",
+      "depends_on": [
+        "roster.universe",
+        "energy.max",
+        "battle_mode.standard_pvp"
+      ],
+      "rebuild": "node scripts/roco/build-roster-48.mjs"
+    },
+    {
+      "id": "client-roco-page",
+      "kind": "ui",
+      "status": "current",
+      "path": "src/client/roco.js",
+      "depends_on": [
+        "energy.max",
+        "battle_mode.standard_pvp",
+        "pvp.fairness",
+        "battle_mode.speed_duel",
+        "battle_mode.territory_trial",
+        "energy.charge",
+        "marks.persistence"
+      ],
+      "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）",
+      "note": "v3 要求六槽 + 工程字段进抽屉；这里是「能量上限文案」与「固定 3 只」两处硬编码的落点。"
+    },
+    {
+      "id": "mock-host-evidence",
+      "kind": "report",
+      "status": "current",
+      "path": "reports/roco/product-wiring/full-match-wiring.json",
+      "depends_on": [
+        "energy.max",
+        "pvp.fairness",
+        "roster.universe",
+        "battle_mode.standard_pvp",
+        "battle_mode.speed_duel",
+        "battle_mode.territory_trial"
+      ],
+      "rebuild": "node scripts/roco/browser-product-wiring.mjs"
+    }
+  ]
+}

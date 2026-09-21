@@ -1,0 +1,151 @@
+{
+  "schema": "roco-battle-modes/v1",
+  "generated_by": "手工登记（规则事实，不是生成物）",
+  "game": "roco_world_mobile",
+  "why": "v3 纠偏要求 BattleMode 参数化：官方「极速对决」3v3/2 魔力、标准 PVP 六宠、领地试炼 2v2 是**不同模式**，不能共用一个硬编码。置信等级沿用 data/roco/evidence/rule-evidence-ledger.json。",
+  "confidence_levels": [
+    "OFFICIAL_CURRENT",
+    "RECORDED_IN_GAME",
+    "COMMUNITY_CURRENT",
+    "CROSS_SOURCE_SUPPORTED",
+    "ENGINE_HYPOTHESIS",
+    "UNKNOWN"
+  ],
+  "parameter_names": [
+    "team_size",
+    "active_count",
+    "mana_pool",
+    "faint_mana_cost",
+    "trait_sharing",
+    "boss_form",
+    "level_normalization"
+  ],
+  "modes": [
+    {
+      "id": "demo-training-3v3",
+      "label": "当前 Demo 练习局（迁移夹具）",
+      "status": "LEGACY_FIXTURE",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "ruleset_binding": "legacy_sim_v1",
+      "parameters": {
+        "team_size": 3,
+        "active_count": 1,
+        "mana_pool": null,
+        "faint_mana_cost": null,
+        "trait_sharing": false,
+        "boss_form": false,
+        "level_normalization": null
+      },
+      "sources": [
+        {"kind": "repo", "ref": "roco/src/roco_env/env.py", "note": "当前引擎的练习局；能量常量自带「假设」注释。"}
+      ],
+      "needs_microcase": false,
+      "unknowns": ["mana 相关字段在当前引擎里根本不存在（胜负按打光判定），因此它是 legacy 夹具，不定义标准 PVP。"],
+      "product_note": "只用于防回归与演示；**不得**作为标准 PVP 的实现依据。"
+    },
+    {
+      "id": "pvp-standard-six-pet",
+      "label": "标准 PVP 六宠阵容工坊（候选模式）",
+      "status": "CANDIDATE",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "ruleset_binding": "mobile_s4_candidate_v2",
+      "parameters": {
+        "team_size": 6,
+        "active_count": 1,
+        "mana_pool": 4,
+        "faint_mana_cost": 1,
+        "trait_sharing": false,
+        "boss_form": false,
+        "level_normalization": "demo_standardized_max_level"
+      },
+      "sources": [
+        {"kind": "official", "ref": "https://www.taptap.cn/moment/838434682965067210", "confidence": "OFFICIAL_CURRENT", "settled": "官方 PVP 更新：随机精灵**最多可携带 6 只**。"},
+        {"kind": "community", "ref": "https://news.17173.com/content/03182026/104940843.shtml", "confidence": "CROSS_SOURCE_SUPPORTED", "settled": "标准 PVP 六宠、通常 4 点魔力、力竭通常扣 1 —— 交叉支持，非官方原文。"},
+        {"kind": "community", "ref": "https://www.gameres.com/forum/t/917446", "confidence": "CROSS_SOURCE_SUPPORTED", "settled": "同上口径的第二来源。"},
+        {"kind": "repo", "ref": "https://github.com/AofeiLi-code/rocom-data", "confidence": "COMMUNITY_CURRENT", "settled": "社区数据仓，用于交叉核对字段口径。"}
+      ],
+      "needs_microcase": true,
+      "microcase_ids": ["MC-BM01", "MC-BM02", "MC-BM03"],
+      "unknowns": [
+        "6 只是否**必须**选满（还是 1～6 都允许）——未核实。",
+        "4 点魔力是「通常」还是固定值；不同活动/段位是否不同——未核实。",
+        "力竭扣魔力的准确语义（扣谁、扣多少、是否可被效果改变）——未核实。",
+        "先手/出场顺序与 6 只编队的对应关系——未核实。"
+      ],
+      "product_note": "**禁止**把 4 点魔力或六宠写成官方已确认事实；UI 上标「候选规则（待实机核对）」而不是「官方规则」。"
+    },
+    {
+      "id": "pvp-speed-duel-3v3",
+      "label": "极速对决（限时活动）",
+      "status": "ACTIVITY",
+      "confidence": "OFFICIAL_CURRENT",
+      "ruleset_binding": "mobile_s4_candidate_v2",
+      "parameters": {
+        "team_size": 3,
+        "active_count": 1,
+        "mana_pool": 2,
+        "faint_mana_cost": null,
+        "trait_sharing": false,
+        "boss_form": false,
+        "level_normalization": null
+      },
+      "sources": [
+        {"kind": "official", "ref": "https://www.taptap.cn/moment/838434682965067210", "confidence": "OFFICIAL_CURRENT", "settled": "官方公告：极速对决为 3v3、2 点魔力的限时活动模式。"}
+      ],
+      "needs_microcase": false,
+      "unknowns": ["活动是否回归/复刻；与标准模式共用哪些结算细节。"],
+      "product_note": "**独立 BattleMode**。它的 3v3 与 2 魔力**不能**拿来当标准 PVP 的口径（这正是 v3 要纠正的错误）。"
+    },
+    {
+      "id": "pvp-territory-trial-2v2",
+      "label": "领地试炼（2v2 / 特性共享 / 首领形态）",
+      "status": "ACTIVITY",
+      "confidence": "OFFICIAL_CURRENT",
+      "ruleset_binding": "mobile_s4_candidate_v2",
+      "parameters": {
+        "team_size": 2,
+        "active_count": 2,
+        "mana_pool": null,
+        "faint_mana_cost": null,
+        "trait_sharing": true,
+        "boss_form": true,
+        "level_normalization": null
+      },
+      "sources": [
+        {"kind": "official", "ref": "https://www.taptap.cn/moment/849700086890891385", "confidence": "OFFICIAL_CURRENT", "settled": "领地试炼公告：2v2、特性共享、首领信物/首领化。"},
+        {"kind": "official", "ref": "https://www.taptap.cn/moment/809020453778620585", "confidence": "OFFICIAL_CURRENT", "settled": "同类活动的第二份公告。"}
+      ],
+      "needs_microcase": true,
+      "microcase_ids": ["MC-BM04"],
+      "unknowns": ["特性共享的具体范围（双方？同队？）；首领化的数值改动。"],
+      "product_note": "证明 `team_size / active_count / trait_sharing / boss_form` **必须参数化**，不能全硬编码成一种 PVP。"
+    },
+    {
+      "id": "pve-camp",
+      "label": "营地/剧情 PVE（现有效）",
+      "status": "EXISTING",
+      "confidence": "OFFICIAL_CURRENT",
+      "ruleset_binding": "legacy_sim_v1",
+      "parameters": {
+        "team_size": null,
+        "active_count": 1,
+        "mana_pool": null,
+        "faint_mana_cost": null,
+        "trait_sharing": false,
+        "boss_form": false,
+        "level_normalization": null
+      },
+      "sources": [
+        {"kind": "repo", "ref": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json", "confidence": "COMMUNITY_CURRENT", "settled": "营地页用的是项目已有的 PVE 契约（src/game/rules.js）。"}
+      ],
+      "needs_microcase": false,
+      "unknowns": [],
+      "product_note": "本阶段不动。"
+    }
+  ],
+  "invariants": [
+    "标准 PVP 六宠的 confidence **不得**是 OFFICIAL_CURRENT / RECORDED_IN_GAME（在录到实机 microcase 之前）。",
+    "极速对决的 team_size 必须是 3、mana_pool 必须是 2；它不是标准模式。",
+    "任何模式的 team_size 都不得来自「当前 Demo 的 48 只名单」——候选宇宙与模式规模是两件事。"
+  ]
+}

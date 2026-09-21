@@ -1,0 +1,1231 @@
+{
+  "schema": "roco-artifact-invalidation/v1",
+  "generated_by": "scripts/roco/artifact-invalidation.mjs",
+  "generated_at": "2026-09-21T13:18:27.211Z",
+  "registry": {
+    "path": "data/roco/artifact-registry.json",
+    "sha256": "196f377bad94ec83025a42ba25d82990a5f0617d0d0a2316a710b06d43c2684a",
+    "artifacts": 20,
+    "rule_topics": 17
+  },
+  "registry_problems": [],
+  "requested_topics": [],
+  "unknown_topics": [],
+  "changed_topics": [
+    "energy.max",
+    "energy.initial",
+    "energy.regen",
+    "energy.charge",
+    "turn_order.priority",
+    "turn_order.speed",
+    "turn_order.end_turn",
+    "battle_mode.standard_pvp",
+    "battle_mode.speed_duel",
+    "battle_mode.territory_trial",
+    "type.multiplier",
+    "marks.persistence",
+    "swift.injection",
+    "leave.semantics",
+    "traits.triggers",
+    "roster.universe",
+    "pvp.fairness"
+  ],
+  "by_topic": {
+    "energy.max": [
+      {
+        "id": "playable-48-layer",
+        "kind": "data",
+        "status": "legacy-fixture",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs"
+      },
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      },
+      {
+        "id": "model-error-trajectories-v4",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/roco/model-error-trajectories-v4.jsonl",
+        "rebuild": "npm run roco:model-errors"
+      },
+      {
+        "id": "sft-dataset",
+        "kind": "training-data",
+        "status": "legacy",
+        "path": "reports/roco/sft/dataset-report.json",
+        "rebuild": "npm run roco:sft-data"
+      },
+      {
+        "id": "team-model-g02",
+        "kind": "model",
+        "status": "legacy",
+        "path": "reports/roco/g02-team/model.json",
+        "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
+      },
+      {
+        "id": "intervention-windows-roco",
+        "kind": "fixture",
+        "status": "legacy",
+        "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+        "rebuild": "npm run roco:intervention-windows"
+      },
+      {
+        "id": "intervention-model-generated",
+        "kind": "model",
+        "status": "legacy",
+        "path": "src/coach/intervention-model.generated.js",
+        "rebuild": "python3 scripts/roco/train-intervention-model.py"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "browser-position-matrix",
+        "kind": "report",
+        "status": "legacy-fixture",
+        "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "demo-acceptance-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "adapter-load-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/adapter-load/adapter-load.json",
+        "rebuild": "npm run roco:adapter-load"
+      },
+      {
+        "id": "demo-perf-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-perf.json",
+        "rebuild": "node scripts/roco/measure-demo-perf.mjs"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      },
+      {
+        "id": "roster-48-doc",
+        "kind": "doc",
+        "status": "legacy-fixture",
+        "path": "docs/roco/ROSTER-48.md",
+        "rebuild": "node scripts/roco/build-roster-48.mjs"
+      },
+      {
+        "id": "client-roco-page",
+        "kind": "ui",
+        "status": "current",
+        "path": "src/client/roco.js",
+        "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）"
+      },
+      {
+        "id": "mock-host-evidence",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/product-wiring/full-match-wiring.json",
+        "rebuild": "node scripts/roco/browser-product-wiring.mjs"
+      }
+    ],
+    "energy.initial": [
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      },
+      {
+        "id": "sft-dataset",
+        "kind": "training-data",
+        "status": "legacy",
+        "path": "reports/roco/sft/dataset-report.json",
+        "rebuild": "npm run roco:sft-data"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      }
+    ],
+    "energy.regen": [
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      }
+    ],
+    "energy.charge": [
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      },
+      {
+        "id": "model-error-trajectories-v4",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/roco/model-error-trajectories-v4.jsonl",
+        "rebuild": "npm run roco:model-errors"
+      },
+      {
+        "id": "sft-dataset",
+        "kind": "training-data",
+        "status": "legacy",
+        "path": "reports/roco/sft/dataset-report.json",
+        "rebuild": "npm run roco:sft-data"
+      },
+      {
+        "id": "team-model-g02",
+        "kind": "model",
+        "status": "legacy",
+        "path": "reports/roco/g02-team/model.json",
+        "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
+      },
+      {
+        "id": "intervention-model-generated",
+        "kind": "model",
+        "status": "legacy",
+        "path": "src/coach/intervention-model.generated.js",
+        "rebuild": "python3 scripts/roco/train-intervention-model.py"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "adapter-load-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/adapter-load/adapter-load.json",
+        "rebuild": "npm run roco:adapter-load"
+      },
+      {
+        "id": "client-roco-page",
+        "kind": "ui",
+        "status": "current",
+        "path": "src/client/roco.js",
+        "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）"
+      }
+    ],
+    "turn_order.priority": [
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      },
+      {
+        "id": "sft-dataset",
+        "kind": "training-data",
+        "status": "legacy",
+        "path": "reports/roco/sft/dataset-report.json",
+        "rebuild": "npm run roco:sft-data"
+      },
+      {
+        "id": "intervention-windows-roco",
+        "kind": "fixture",
+        "status": "legacy",
+        "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+        "rebuild": "npm run roco:intervention-windows"
+      },
+      {
+        "id": "intervention-model-generated",
+        "kind": "model",
+        "status": "legacy",
+        "path": "src/coach/intervention-model.generated.js",
+        "rebuild": "python3 scripts/roco/train-intervention-model.py"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "browser-position-matrix",
+        "kind": "report",
+        "status": "legacy-fixture",
+        "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "demo-acceptance-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      }
+    ],
+    "turn_order.speed": [
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "team-model-g02",
+        "kind": "model",
+        "status": "legacy",
+        "path": "reports/roco/g02-team/model.json",
+        "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "browser-position-matrix",
+        "kind": "report",
+        "status": "legacy-fixture",
+        "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "demo-acceptance-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      }
+    ],
+    "turn_order.end_turn": [
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      },
+      {
+        "id": "sft-dataset",
+        "kind": "training-data",
+        "status": "legacy",
+        "path": "reports/roco/sft/dataset-report.json",
+        "rebuild": "npm run roco:sft-data"
+      },
+      {
+        "id": "team-model-g02",
+        "kind": "model",
+        "status": "legacy",
+        "path": "reports/roco/g02-team/model.json",
+        "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
+      },
+      {
+        "id": "intervention-windows-roco",
+        "kind": "fixture",
+        "status": "legacy",
+        "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+        "rebuild": "npm run roco:intervention-windows"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "browser-position-matrix",
+        "kind": "report",
+        "status": "legacy-fixture",
+        "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      }
+    ],
+    "battle_mode.standard_pvp": [
+      {
+        "id": "playable-48-layer",
+        "kind": "data",
+        "status": "legacy-fixture",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "demo-acceptance-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "adapter-load-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/adapter-load/adapter-load.json",
+        "rebuild": "npm run roco:adapter-load"
+      },
+      {
+        "id": "roster-48-doc",
+        "kind": "doc",
+        "status": "legacy-fixture",
+        "path": "docs/roco/ROSTER-48.md",
+        "rebuild": "node scripts/roco/build-roster-48.mjs"
+      },
+      {
+        "id": "client-roco-page",
+        "kind": "ui",
+        "status": "current",
+        "path": "src/client/roco.js",
+        "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）"
+      },
+      {
+        "id": "mock-host-evidence",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/product-wiring/full-match-wiring.json",
+        "rebuild": "node scripts/roco/browser-product-wiring.mjs"
+      }
+    ],
+    "battle_mode.speed_duel": [
+      {
+        "id": "demo-acceptance-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "client-roco-page",
+        "kind": "ui",
+        "status": "current",
+        "path": "src/client/roco.js",
+        "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）"
+      },
+      {
+        "id": "mock-host-evidence",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/product-wiring/full-match-wiring.json",
+        "rebuild": "node scripts/roco/browser-product-wiring.mjs"
+      }
+    ],
+    "battle_mode.territory_trial": [
+      {
+        "id": "client-roco-page",
+        "kind": "ui",
+        "status": "current",
+        "path": "src/client/roco.js",
+        "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）"
+      },
+      {
+        "id": "mock-host-evidence",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/product-wiring/full-match-wiring.json",
+        "rebuild": "node scripts/roco/browser-product-wiring.mjs"
+      }
+    ],
+    "type.multiplier": [
+      {
+        "id": "ruleset-normalized-layer",
+        "kind": "data",
+        "status": "current",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
+        "rebuild": "npm run roco:pipeline"
+      },
+      {
+        "id": "full-catalog-l1",
+        "kind": "data",
+        "status": "current",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+        "rebuild": "npm run roco:full-catalog"
+      },
+      {
+        "id": "team-model-g02",
+        "kind": "model",
+        "status": "legacy",
+        "path": "reports/roco/g02-team/model.json",
+        "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      }
+    ],
+    "marks.persistence": [
+      {
+        "id": "ruleset-normalized-layer",
+        "kind": "data",
+        "status": "current",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
+        "rebuild": "npm run roco:pipeline"
+      },
+      {
+        "id": "playable-48-layer",
+        "kind": "data",
+        "status": "legacy-fixture",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs"
+      },
+      {
+        "id": "intervention-windows-roco",
+        "kind": "fixture",
+        "status": "legacy",
+        "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+        "rebuild": "npm run roco:intervention-windows"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "browser-position-matrix",
+        "kind": "report",
+        "status": "legacy-fixture",
+        "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      },
+      {
+        "id": "client-roco-page",
+        "kind": "ui",
+        "status": "current",
+        "path": "src/client/roco.js",
+        "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）"
+      }
+    ],
+    "swift.injection": [
+      {
+        "id": "playable-48-layer",
+        "kind": "data",
+        "status": "legacy-fixture",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs"
+      },
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "browser-position-matrix",
+        "kind": "report",
+        "status": "legacy-fixture",
+        "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      }
+    ],
+    "leave.semantics": [
+      {
+        "id": "playable-48-layer",
+        "kind": "data",
+        "status": "legacy-fixture",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs"
+      },
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      }
+    ],
+    "traits.triggers": [
+      {
+        "id": "playable-48-layer",
+        "kind": "data",
+        "status": "legacy-fixture",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      }
+    ],
+    "roster.universe": [
+      {
+        "id": "ruleset-normalized-layer",
+        "kind": "data",
+        "status": "current",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
+        "rebuild": "npm run roco:pipeline"
+      },
+      {
+        "id": "playable-48-layer",
+        "kind": "data",
+        "status": "legacy-fixture",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs"
+      },
+      {
+        "id": "full-catalog-l1",
+        "kind": "data",
+        "status": "current",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+        "rebuild": "npm run roco:full-catalog"
+      },
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      },
+      {
+        "id": "model-error-trajectories-v4",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/roco/model-error-trajectories-v4.jsonl",
+        "rebuild": "npm run roco:model-errors"
+      },
+      {
+        "id": "sft-dataset",
+        "kind": "training-data",
+        "status": "legacy",
+        "path": "reports/roco/sft/dataset-report.json",
+        "rebuild": "npm run roco:sft-data"
+      },
+      {
+        "id": "team-model-g02",
+        "kind": "model",
+        "status": "legacy",
+        "path": "reports/roco/g02-team/model.json",
+        "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
+      },
+      {
+        "id": "intervention-windows-roco",
+        "kind": "fixture",
+        "status": "legacy",
+        "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+        "rebuild": "npm run roco:intervention-windows"
+      },
+      {
+        "id": "demo-acceptance-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "adapter-load-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/adapter-load/adapter-load.json",
+        "rebuild": "npm run roco:adapter-load"
+      },
+      {
+        "id": "demo-perf-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-perf.json",
+        "rebuild": "node scripts/roco/measure-demo-perf.mjs"
+      },
+      {
+        "id": "roster-48-doc",
+        "kind": "doc",
+        "status": "legacy-fixture",
+        "path": "docs/roco/ROSTER-48.md",
+        "rebuild": "node scripts/roco/build-roster-48.mjs"
+      },
+      {
+        "id": "mock-host-evidence",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/product-wiring/full-match-wiring.json",
+        "rebuild": "node scripts/roco/browser-product-wiring.mjs"
+      }
+    ],
+    "pvp.fairness": [
+      {
+        "id": "demo-acceptance-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "client-roco-page",
+        "kind": "ui",
+        "status": "current",
+        "path": "src/client/roco.js",
+        "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）"
+      },
+      {
+        "id": "mock-host-evidence",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/product-wiring/full-match-wiring.json",
+        "rebuild": "node scripts/roco/browser-product-wiring.mjs"
+      }
+    ]
+  },
+  "affected": [
+    {
+      "id": "ruleset-normalized-layer",
+      "kind": "data",
+      "status": "current",
+      "path": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
+      "rebuild": "npm run roco:pipeline",
+      "depends_on": [
+        "roster.universe",
+        "type.multiplier",
+        "marks.persistence"
+      ]
+    },
+    {
+      "id": "playable-48-layer",
+      "kind": "data",
+      "status": "legacy-fixture",
+      "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+      "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs",
+      "depends_on": [
+        "roster.universe",
+        "energy.max",
+        "traits.triggers",
+        "marks.persistence",
+        "swift.injection",
+        "leave.semantics",
+        "battle_mode.standard_pvp"
+      ]
+    },
+    {
+      "id": "full-catalog-l1",
+      "kind": "data",
+      "status": "current",
+      "path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+      "rebuild": "npm run roco:full-catalog",
+      "depends_on": [
+        "roster.universe",
+        "type.multiplier"
+      ]
+    },
+    {
+      "id": "traj-rule-arm-v1",
+      "kind": "trajectory",
+      "status": "legacy",
+      "path": "tests/evals/agent-trajectories-v1.jsonl",
+      "rebuild": "npm run roco:agent-trajectories",
+      "depends_on": [
+        "energy.max",
+        "energy.initial",
+        "energy.regen",
+        "turn_order.priority",
+        "turn_order.speed",
+        "roster.universe",
+        "energy.charge",
+        "turn_order.end_turn",
+        "swift.injection",
+        "leave.semantics"
+      ]
+    },
+    {
+      "id": "traj-model-arm-v1",
+      "kind": "trajectory",
+      "status": "legacy",
+      "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+      "rebuild": "npm run roco:agent-trajectories-model",
+      "depends_on": [
+        "energy.max",
+        "energy.initial",
+        "energy.regen",
+        "turn_order.priority",
+        "roster.universe",
+        "energy.charge",
+        "turn_order.end_turn"
+      ]
+    },
+    {
+      "id": "model-error-trajectories-v4",
+      "kind": "trajectory",
+      "status": "legacy",
+      "path": "tests/evals/roco/model-error-trajectories-v4.jsonl",
+      "rebuild": "npm run roco:model-errors",
+      "depends_on": [
+        "energy.max",
+        "roster.universe",
+        "energy.charge"
+      ]
+    },
+    {
+      "id": "sft-dataset",
+      "kind": "training-data",
+      "status": "legacy",
+      "path": "reports/roco/sft/dataset-report.json",
+      "rebuild": "npm run roco:sft-data",
+      "depends_on": [
+        "energy.max",
+        "energy.initial",
+        "roster.universe",
+        "turn_order.priority",
+        "energy.charge",
+        "turn_order.end_turn"
+      ]
+    },
+    {
+      "id": "team-model-g02",
+      "kind": "model",
+      "status": "legacy",
+      "path": "reports/roco/g02-team/model.json",
+      "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team",
+      "depends_on": [
+        "energy.max",
+        "roster.universe",
+        "type.multiplier",
+        "turn_order.speed",
+        "energy.charge",
+        "turn_order.end_turn"
+      ]
+    },
+    {
+      "id": "intervention-windows-roco",
+      "kind": "fixture",
+      "status": "legacy",
+      "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+      "rebuild": "npm run roco:intervention-windows",
+      "depends_on": [
+        "energy.max",
+        "turn_order.priority",
+        "roster.universe",
+        "turn_order.end_turn",
+        "marks.persistence"
+      ]
+    },
+    {
+      "id": "intervention-model-generated",
+      "kind": "model",
+      "status": "legacy",
+      "path": "src/coach/intervention-model.generated.js",
+      "rebuild": "python3 scripts/roco/train-intervention-model.py",
+      "depends_on": [
+        "energy.max",
+        "turn_order.priority",
+        "energy.charge"
+      ]
+    },
+    {
+      "id": "planner-benchmarks",
+      "kind": "report",
+      "status": "legacy",
+      "path": "reports/roco/planner-benchmark.json",
+      "rebuild": "npm run roco:benchmark-planner",
+      "depends_on": [
+        "energy.max",
+        "turn_order.priority",
+        "turn_order.speed",
+        "type.multiplier",
+        "energy.charge",
+        "turn_order.end_turn",
+        "marks.persistence"
+      ]
+    },
+    {
+      "id": "position-fixtures",
+      "kind": "fixture",
+      "status": "legacy-fixture",
+      "path": "tests/evals/roco/coach-positions.test.js",
+      "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）",
+      "depends_on": [
+        "energy.max",
+        "energy.initial",
+        "turn_order.priority",
+        "turn_order.speed",
+        "turn_order.end_turn",
+        "marks.persistence",
+        "swift.injection",
+        "leave.semantics",
+        "battle_mode.standard_pvp"
+      ]
+    },
+    {
+      "id": "browser-position-matrix",
+      "kind": "report",
+      "status": "legacy-fixture",
+      "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+      "rebuild": "npm run roco:demo-acceptance",
+      "depends_on": [
+        "energy.max",
+        "turn_order.priority",
+        "turn_order.speed",
+        "turn_order.end_turn",
+        "marks.persistence",
+        "swift.injection"
+      ]
+    },
+    {
+      "id": "demo-acceptance-report",
+      "kind": "report",
+      "status": "current",
+      "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+      "rebuild": "npm run roco:demo-acceptance",
+      "depends_on": [
+        "energy.max",
+        "roster.universe",
+        "pvp.fairness",
+        "battle_mode.standard_pvp",
+        "battle_mode.speed_duel",
+        "turn_order.priority",
+        "turn_order.speed"
+      ]
+    },
+    {
+      "id": "adapter-load-report",
+      "kind": "report",
+      "status": "current",
+      "path": "reports/roco/adapter-load/adapter-load.json",
+      "rebuild": "npm run roco:adapter-load",
+      "depends_on": [
+        "energy.max",
+        "roster.universe",
+        "battle_mode.standard_pvp",
+        "energy.charge"
+      ]
+    },
+    {
+      "id": "demo-perf-report",
+      "kind": "report",
+      "status": "current",
+      "path": "reports/roco/demo-perf.json",
+      "rebuild": "node scripts/roco/measure-demo-perf.mjs",
+      "depends_on": [
+        "roster.universe",
+        "energy.max"
+      ]
+    },
+    {
+      "id": "pet-support-matrix-doc",
+      "kind": "doc",
+      "status": "legacy",
+      "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+      "rebuild": "npm run roco:docs",
+      "depends_on": [
+        "traits.triggers",
+        "energy.max",
+        "type.multiplier",
+        "marks.persistence",
+        "swift.injection",
+        "leave.semantics",
+        "turn_order.end_turn"
+      ]
+    },
+    {
+      "id": "roster-48-doc",
+      "kind": "doc",
+      "status": "legacy-fixture",
+      "path": "docs/roco/ROSTER-48.md",
+      "rebuild": "node scripts/roco/build-roster-48.mjs",
+      "depends_on": [
+        "roster.universe",
+        "energy.max",
+        "battle_mode.standard_pvp"
+      ]
+    },
+    {
+      "id": "client-roco-page",
+      "kind": "ui",
+      "status": "current",
+      "path": "src/client/roco.js",
+      "rebuild": "（手改；界面文案里出现「6 能量上限」「已选 3 只」时必须同步）",
+      "depends_on": [
+        "energy.max",
+        "battle_mode.standard_pvp",
+        "pvp.fairness",
+        "battle_mode.speed_duel",
+        "battle_mode.territory_trial",
+        "energy.charge",
+        "marks.persistence"
+      ]
+    },
+    {
+      "id": "mock-host-evidence",
+      "kind": "report",
+      "status": "current",
+      "path": "reports/roco/product-wiring/full-match-wiring.json",
+      "rebuild": "node scripts/roco/browser-product-wiring.mjs",
+      "depends_on": [
+        "energy.max",
+        "pvp.fairness",
+        "roster.universe",
+        "battle_mode.standard_pvp",
+        "battle_mode.speed_duel",
+        "battle_mode.territory_trial"
+      ]
+    }
+  ],
+  "summary": {
+    "topics": 17,
+    "affected": 20,
+    "artifacts_total": 20,
+    "by_status": {
+      "current": 7,
+      "legacy-fixture": 4,
+      "legacy": 9
+    },
+    "by_kind": {
+      "data": 3,
+      "trajectory": 3,
+      "training-data": 1,
+      "model": 2,
+      "fixture": 2,
+      "report": 6,
+      "doc": 2,
+      "ui": 1
+    }
+  },
+  "do_not_regenerate": [
+    {
+      "id": "playable-48-layer",
+      "status": "legacy-fixture",
+      "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "traj-rule-arm-v1",
+      "status": "legacy",
+      "path": "tests/evals/agent-trajectories-v1.jsonl",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "traj-model-arm-v1",
+      "status": "legacy",
+      "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "model-error-trajectories-v4",
+      "status": "legacy",
+      "path": "tests/evals/roco/model-error-trajectories-v4.jsonl",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "sft-dataset",
+      "status": "legacy",
+      "path": "reports/roco/sft/dataset-report.json",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "team-model-g02",
+      "status": "legacy",
+      "path": "reports/roco/g02-team/model.json",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "intervention-windows-roco",
+      "status": "legacy",
+      "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "intervention-model-generated",
+      "status": "legacy",
+      "path": "src/coach/intervention-model.generated.js",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "planner-benchmarks",
+      "status": "legacy",
+      "path": "reports/roco/planner-benchmark.json",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "position-fixtures",
+      "status": "legacy-fixture",
+      "path": "tests/evals/roco/coach-positions.test.js",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "browser-position-matrix",
+      "status": "legacy-fixture",
+      "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "pet-support-matrix-doc",
+      "status": "legacy",
+      "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    },
+    {
+      "id": "roster-48-doc",
+      "status": "legacy-fixture",
+      "path": "docs/roco/ROSTER-48.md",
+      "why": "绑定旧规则的产物：对应规则 candidate 被采纳前重跑，只会再生产一批绑定旧规则的东西。"
+    }
+  ]
+}
