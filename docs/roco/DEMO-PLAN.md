@@ -139,7 +139,8 @@ export function rocoHintText(plan) { ... }
 | P0-1 数据面分离 | ✅ **完成** | `env.ui_public_view` + `_sim_envelope` 的 `result.ui` + 桥 `publicView` ui 优先；守卫 `roco/tests/test_ui_public_view.py`（12 项）与 `tests/server.test.js` 的桥守卫（含「没有 ui 时退回旧路径」反向） |
 | P0-2 事件中文化 | ✅ **完成** | `roco/src/roco_env/events_text.py`（一处实现，23 个 kind）+ `roco/tests/test_event_text.py`（13 项，跑真对局收全集）+ 页面折叠区 + `demo-acceptance` 里 6 条产品判据 |
 | P0-3 战斗 Demo UI | 🚧 **大部完成**：真名/系别色块标签/六维/血条/能量/状态；**阵容与对手选择**（12 只真实精灵、双方各选 3、开局把选好的阵容真的送进引擎）；技能说明上按钮。**仍缺**：布局重做 | `src/client/roco.js`、`src/client/roco.html`、`reports/roco/demo-acceptance/` |
-| P0-4 … P0-7 | ⏳ 排队中 | 见上表 |
+| P0-4 开发者抽屉 | ✅ **完成** | 导语只留人话；工程说明 / 数据版本 / `data-roco-*` 验收钩子 / 验收清单全部进**默认收起**的 `#about-drawer`；顶部状态与规划状态里的「状态版本 / 覆盖 / 超时」清出玩家区。判据：抽屉默认收起、玩家可见区域（排除两个默认收起的折叠区）无工程话。`demo-acceptance` **43 条判据**全过 |
+| P0-5 … P0-7 | ⏳ 排队中 | 见上表 |
 | **P1-a~g 建议质量** | ✅ **完成** | `src/coach/coach-advice.js`（11 个局面检测器）+ 接入 `rocoIntervention`；引擎层验收 10 个隔离局面（`tests/evals/roco/coach-positions.test.js`，逐例断言 kind）；**浏览器验收** 6 局 / 23 次气泡 / **6 种形状** / 最大占比 35%（`demo-acceptance`，38 条判据）；`rocoHintText` 旧模板已删除 |
 
 ### P0-1 交付细节（含顺带修掉的两个真问题）

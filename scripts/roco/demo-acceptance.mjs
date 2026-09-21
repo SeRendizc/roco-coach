@@ -332,6 +332,36 @@ async function main(){
  check('页面上不出现真实对局 seed 或私有状态',!/"seed"\s*:/.test(pageText)&&!/replace_queue/.test(pageText));
  check('控制台没有报错',consoleErrors.length===0&&pageErrors.length===0,JSON.stringify([...consoleErrors,...pageErrors].slice(0,3)));
 
+ // ── P0-4 产品判据：工程话只在默认收起的开发者抽屉里 ────────────────────
+ const drawer=JSON.parse(await js(`(()=>{const d=document.getElementById('about-drawer');
+  return JSON.stringify({exists:Boolean(d),open:d?d.open:null,
+   summary:d&&d.querySelector('summary')?d.querySelector('summary').textContent:'',
+   coverageInside:Boolean(d&&d.querySelector('#coverage')),
+   shadowInside:Boolean(d&&d.querySelector('#shadow-panel'))});})()`));
+ check('开发者抽屉存在且**默认收起**',drawer.exists&&drawer.open===false,JSON.stringify(drawer));
+ check('验收清单与模型面板都在抽屉里',drawer.coverageInside&&drawer.shadowInside,JSON.stringify(drawer));
+
+ // 玩家可见区域 = 抽屉之外 **且** 折叠证据之外。
+ //
+ // 口径来自产品要求：工程术语只允许出现在「展开证据」或「开发者面板」里。
+ // 所以这里同时排除两个**默认收起**的区域，并且先断言它们真的是收起的——
+ // 否则「排除」就成了放过：一个默认展开的证据区等于把工程话摆到玩家面前。
+ const collapsed=JSON.parse(await js(`(()=>{const b=document.getElementById('hint-body');
+  const d=document.getElementById('about-drawer');
+  return JSON.stringify({hintBodyHidden:b?b.hidden:null,drawerOpen:d?d.open:null});})()`));
+ check('折叠证据区与开发者抽屉默认都是收起的（排除它们才不算放过）',
+  collapsed.hintBodyHidden===true&&collapsed.drawerOpen===false,JSON.stringify(collapsed));
+ const playerText=JSON.parse(await js(`(()=>{const clone=document.body.cloneNode(true);
+  for(const sel of ['#about-drawer','#hint-body']){const n=clone.querySelector(sel); if(n)n.remove();}
+  return JSON.stringify(clone.innerText||'');})()`));
+ const FORBIDDEN_PLAYER=/fail closed|data-roco|state_version|状态版本|coverage|覆盖度|margin|score|决策阈值|critical-risk|最坏尾部|分析种子/;
+ check('玩家可见区域没有工程话与验收钩子说明',!FORBIDDEN_PLAYER.test(playerText),
+  (playerText.match(FORBIDDEN_PLAYER)||[]).join(',')||'（干净）');
+ check('玩家可见区域仍然说人话（有中文、有「开一局」这类操作词）',
+  /[\u4e00-\u9fff]/.test(playerText)&&/开一局|阵容|回合/.test(playerText),
+  playerText.slice(0,80).replace(/\s+/g,' '));
+ shots.push(await shoot('07-dev-drawer-collapsed'));
+
  // ── P1 浏览器验收：**多个真实局面下气泡必须长得不一样** ────────────────
  //
  // 用户实测原话：气泡反复只说「某技能这一手不稳…先看区间再定（最坏尾部…）」，

@@ -181,7 +181,12 @@ const STATUS_LABEL = {burn: '灼烧', poison: '中毒', paralysis: '麻痹', fre
 
 function render() {
   const view = state.view;
-  $('engine-status').textContent = view ? `规则服务：已连接 · 状态版本 ${view.state_version}` : '规则服务：未启动';
+  // 玩家只该看到「能不能玩」。版本号是给排查用的，进开发者抽屉（P0-4）。
+  $('engine-status').textContent = view ? '规则服务：已连接' : '规则服务：未启动';
+  const aboutVersion = $('about-ruleset');
+  if (aboutVersion && view?.ruleset_id) {
+    aboutVersion.textContent = `${view.ruleset_id} · 本局状态版本 ${view.state_version}`;
+  }
   $('engine-status').dataset.rocoStatus = view ? 'ready' : 'idle';
   $('turn-chip').textContent = view ? `第 ${view.turn} 回合 · ${view.phase === 'replace' ? '补位' : '对战'}` : '未开局';
   $('phase-chip').textContent = view?.battle_result ? `对局结束：${view.battle_result}` : '';
@@ -250,8 +255,11 @@ function render() {
   if (rawBox) {
     rawBox.textContent = raw.length ? JSON.stringify(raw, null, 1) : '（还没有事件）';
   }
-  $('plan-status').textContent = state.plan
-    ? `规划状态版本 ${state.planAtVersion}${state.plan.coverage != null ? ` · 覆盖 ${state.plan.coverage}` : ''}${state.plan.timed_out ? ' · 超时' : ''}`
+  // 这一行原来把「规划状态版本 / 覆盖 / 超时」直接写在玩家区（P0-4 要清掉）。
+  // 现在：玩家区只在出错时说一句人话，工程细节进开发者抽屉。
+  $('plan-status').textContent = state.plan && state.plan.timed_out ? '这一手算得慢了点，先用规则提示' : '';
+  $('plan-status').dataset.detail = state.plan
+    ? `state_version=${state.planAtVersion} coverage=${state.plan.coverage ?? '—'} timed_out=${state.plan.timed_out === true}`
     : '';
 
   document.body.dataset.rocoView = view ? 'ready' : 'empty';
@@ -511,8 +519,8 @@ async function requestPlan({reason = 'manual'} = {}) {
     state.plan = plan;
     state.planAtVersion = state.view?.state_version ?? plan.state_version ?? null;
     $('plan-status').textContent = plan.recommendation_stable === false
-      ? '这一手没有稳健结论（推荐随分析种子变化）'
-      : `建议已就绪 · ${plan.branches_evaluated ?? '—'} 个分支 · 覆盖 ${plan.coverage ?? '—'}`;
+      ? '这一手没有稳健结论（换个算法会变）'
+      : '建议已就绪';
     refreshHint({reason, plan});
     if (state.hint) recordHintSaid();
     return plan;

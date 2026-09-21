@@ -10,11 +10,29 @@
 </header>
 
 <p class="lead">
- 这一局由 <strong>Python 规则引擎</strong>按《洛克王国：世界》手游子集结算（S4 快照）。
- 页面上<strong>没有聊天框</strong>：小芽只在这三处出现 —— 左侧的短提示、
- 发生变化时的阵容建议、以及局末的一个教学入口。
- 未核验的机制一律不猜（fail closed），界面会如实说「这里我们不知道」。
+ 选好双方阵容就能开局。这一局按《洛克王国：世界》当前赛季的规则结算，
+ 小芽会在关键时刻主动开口 —— 提醒、建议、以及局末的一次复盘。
+ <strong>没有聊天框</strong>：她该说话时自己会出来。
 </p>
+
+<!-- 开发者抽屉：工程说明、数据版本、验收钩子。**默认收起**，玩家看不到这些。 -->
+<details class="dev" id="about-drawer">
+ <summary>关于这一页（数据版本 / 验收钩子 / 工程说明）</summary>
+ <div class="dev-body">
+  <p>结算由 <strong>Python 规则引擎</strong>按手游子集完成，规则快照
+   <code id="about-ruleset">roco-world-s4-2026-09-10</code>。</p>
+  <p><strong>未核验的机制一律不猜</strong>（fail closed）：引擎会说「这里我们不知道」，
+   而不是补一个默认值。页面上带「未核验」字样的数字都是估值，不是实测值。</p>
+  <p>页面上的 <code>data-roco-*</code> 属性是<strong>验收钩子</strong>：自动化验收脚本读它们
+   判断「该出现的是否出现」。它们对玩家不可见，也不要依赖它们做产品逻辑。</p>
+  <p>本机小模型（Qwen3.5-4B + LoRA 适配器）只作为<strong>对照项</strong>出现在
+   下方面板里：它只提议工具，参数照常过引擎校验，<strong>规则引擎仍是唯一真值来源</strong>，
+   默认不参与生成玩家看到的正文。</p>
+  <div id="shadow-panel" hidden></div>
+  <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
+  <ul class="checklist" id="coverage"></ul>
+ </div>
+</details>
 
 <section class="board">
  <article class="panel side" id="self-panel">
@@ -76,10 +94,6 @@
  <div id="say-reply" class="reply" hidden></div>
 </section>
 
-<section class="panel">
- <div class="section-title"><h2>这次演示覆盖了什么</h2></div>
- <ul class="checklist" id="coverage"></ul>
-</section>
 </main>
 
 <!-- 无聊天入口的主动短提示：固定在右下角，像页面上的一条便签 -->
