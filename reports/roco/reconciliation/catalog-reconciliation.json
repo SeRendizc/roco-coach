@@ -37,23 +37,34 @@
           "http_status": 200,
           "bytes": 1382704,
           "sha256": "812f5c7dfe81d55978f89c69ba1667aedb6bb669af0468ab031fd2f00d0af107",
-          "fetched_at": "2026-09-21T14:45:16.671Z"
+          "fetched_at": "2026-09-21T14:54:00.404Z"
         },
         "skill-index": {
           "url": "https://wiki.biligame.com/nrc/%E6%8A%80%E8%83%BD%E5%9B%BE%E9%89%B4",
           "http_status": 200,
           "bytes": 1575409,
           "sha256": "171c0d5be2eaf354a06ea00845228a463c9c0ed513b18e3ef0be870f6a7da27a",
-          "fetched_at": "2026-09-21T14:45:16.674Z"
+          "fetched_at": "2026-09-21T14:54:00.409Z"
         },
         "trait-index": {
           "url": "https://wiki.biligame.com/nrc/%E7%89%B9%E6%80%A7%E5%9B%BE%E9%89%B4",
           "http_status": 200,
           "bytes": 805953,
           "sha256": "0c19b59d37c62cc6f77d520a03953dbe6a06ddd985f308a39e02ea136d12afae",
-          "fetched_at": "2026-09-21T14:45:16.676Z"
+          "fetched_at": "2026-09-21T14:54:00.411Z"
         }
-      }
+      },
+      "licence": {
+        "basis": "SAME_SITE_AS_REGISTERED_SOURCE",
+        "source_id": "wiki-rocom-snapshot",
+        "license": "CC-BY-NC-SA-4.0",
+        "redistribution": "DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL",
+        "license_evidence": "data/roco/raw/extracted/rocom-wiki-data/LICENSE",
+        "basis_note": "直连抓取的是与已登记来源同一站点（wiki.biligame.com/nrc）；许可字段**搬运自** sources.yaml 的那一条，本仓库没有在站点页面上独立取证。",
+        "fetched_content_committed_to_git": false,
+        "raw_html_path_is_gitignored": true
+      },
+      "licence_problems": []
     },
     "declared_counts": {
       "frozen": {
@@ -87,6 +98,7 @@
       "trait-index": "ok"
     }
   },
+  "licence_ok": true,
   "count_table": [
     {
       "layer": "file",
@@ -1618,6 +1630,6 @@
       }
     ]
   },
-  "generated_at": "2026-09-21T14:45:16.745Z",
+  "generated_at": "2026-09-21T14:54:03.677Z",
   "generated_by": "scripts/roco/reconcile-catalog.mjs"
 }
