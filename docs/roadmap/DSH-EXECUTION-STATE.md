@@ -599,7 +599,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `3b33094`（`feat(evals): complete W4-02's model-candidate half with the local model`）—— 已推送。（按本文件 §2.1 的口径，文档声明的 HEAD 落后当前一两个提交是正常的：写文档本身也要一次提交。） |
+| HEAD | `054d135`（`docs(state): correct the stale hardware judgment and record the model's real identity`）—— 已推送。（按本文件 §2.1 的口径，文档声明的 HEAD 落后当前一两个提交是正常的：写文档本身也要一次提交。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 / demo），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
