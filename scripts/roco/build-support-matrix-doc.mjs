@@ -53,7 +53,8 @@ P('```');
 P();
 P('**本轮 12 只精灵的当前等级一律是 `KNOWLEDGE_ONLY`。**');
 P();
-P('理由（可核验）：本轮**没有实现任何效果原语**，也没有通过任何一个 microcase。');
+P('理由（可核验）：**引擎侧已经实现了**这些效果原语（`roco/src/roco_env/effects.py`、`traits.py`），'
+  + '但没有通过任何一个 microcase——**缺的是验收，不是实现**（第 46 轮修正）。');
 P(`\`skills.json\` 里全部 ${skills.counts.total} 条技能的 \`effect_support\` 都是 \`unsupported\`。`);
 P('因此任何精灵都**不能**进入战斗，也不能用于强度结论——');
 P('**数据字段齐全不等于机制可模拟**，这两件事必须分开。');

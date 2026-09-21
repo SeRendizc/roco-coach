@@ -5,7 +5,7 @@
 //
 // 硬性口径：
 //   - 支持等级**不**因为「数据字段齐全」就升级为可模拟。所有技能的 effect_support 都是
-//     `unsupported`，因为本轮没有实现任何效果原语，也没有通过任何 microcase。
+//     `unsupported`，因为**验收**（microcase）还没有做，而不是实现没做：`effects.py`/`traits.py` 里已经有对应实现。
 //   - 候选配招是「一组在数据中真实存在、且机制覆盖互不重复的 4 个技能」，
 //     不是最优解、不是社区推荐、不是胜率结果。
 //   - 描述文本里的机制（印记 / 蓄力 / 应对 / 减伤%）**只登记为待核验**，
@@ -196,7 +196,8 @@ function selectCandidate(pet, learnset) {
 // ── 支持等级判定 ────────────────────────────────────────────────────────
 // 判定依据（严格）：
 //   · effect primitives 已实现且 microcase 通过 → SIM_VERIFIED
-//   · 本轮：一个都没有实现 → 任何精灵都不可能超过 KNOWLEDGE_ONLY
+//   · 第 46 轮更正：**实现都在**（`effects.py`/`traits.py`），缺的是验收（microcase 通过 0）
+//     → 支持等级因此停在 KNOWLEDGE_ONLY；别再把「没验收」读成「没实现」。
 //   · A 组额外具备「有证据的候选配招」，属于下一轮 SIM 的目标群，
 //     但**当前仍不可模拟**，因此标 KNOWLEDGE_ONLY 并写明 target。
 // 引擎侧的特性实现状态（由 scripts/roco/export-trait-status.py 生成）。
