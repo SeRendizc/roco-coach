@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `cd607a5`；v3 纠偏与 RC-101/RC-201/RC-202/RC-103 见 §C6.15～§C6.21）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `b5f555a`；v3 纠偏与 RC-101～RC-203 见 §C6.15～§C6.22）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **16/16 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `cd607a5`（`chore(rc103): 重建 game-data-pack（输入哈希变了）+ 刷新两份派生报告与文档`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `b5f555a`（`feat(rc203): OwnedPet / BattleBuild`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **16 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1518,3 +1518,23 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
 （叶子数 9 → 10、两处路径改名）；失效图补上 `turn_order.action_order` / `speed_tie` 两个主题（19 主题）。
 
 **下一条**：RC-203 OwnedPet/BattleBuild（六宠工坊的数据前置）或 RC-204 RAG 索引与 held-out 评测。
+
+### C6.22 RC-203 OwnedPet / BattleBuild（第 85 轮）
+
+**交付**（提交 `b5f555a`）：`data/roco/owned/{schema.json,owned-pets.json}`、
+`scripts/roco/{build-owned-pets,verify-owned-pets,owned-pets-lib}.mjs`、17 条测试（13 条必红反证）、
+`reports/roco/flagship-upgrade/rc-203-owned-pets.json`、`docs/roco/OWNED-PETS.md`。
+
+**实测**：80 实例 / 48 species / 80 BattleBuild / 189 技能引用；每个实例四个**有序**且**真实可学**的技能
+（逐个核对 learnset）；同种不同个体 32 组；逐实体 provenance 与 `licence_ref`，`artifact_sha256` 与磁盘核对；
+`--check` 逐字节相同。养成属性 `nature`/`talent`/`specialty` 的 `value` 恒为 `null`、
+`bloodline.value` 56/80 为 `null`、`panel_stats`/`derived_stats` 全 `null` —— **效果一律 UNKNOWN，不发明公式**。
+
+**主线程修掉一处会误导的说法**：报告里「不在 `layer-playable-48` 目录的 species = 12」看着像
+「候选宇宙不止 48 只」的证据，但那 12 只是**基线层**、本来就在 roster-48 之内（按 roster-48 口径池外 = 0）。
+已把 `buildability_ceiling`（`proves_600_buildable: false` / 48 / 574）与
+`alternative_reading`（池外 0）**做成构建器产出**，并加必红判据（把 `proves_600_buildable` 翻成 true
+或把跳过数填 0 → 报错）。**结论**：48 是**冻结 learnset 覆盖**的上限（12 基线 + 36 overlay，上游另 264 份未导入），
+不是白名单，但现在是边界；突破需导入 learnset 或 RC-402 按需编译。
+
+**下一条**：RC-204（RAG 索引 + held-out 评测：Recall@K / MRR / 版本命中 / grounding / 冲突弃答）。
