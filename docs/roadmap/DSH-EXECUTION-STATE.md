@@ -599,9 +599,9 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `054d135`（`docs(state): correct the stale hardware judgment and record the model's real identity`）—— 已推送。（按本文件 §2.1 的口径，文档声明的 HEAD 落后当前一两个提交是正常的：写文档本身也要一次提交。） |
+| HEAD | `521850a`（`feat(demo): put real skill facts on the action buttons and check them mid-battle`）—— 已推送。（按本文件 §2.1 的口径，文档声明的 HEAD 落后当前一两个提交是正常的：写文档本身也要一次提交。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
-| 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 / demo），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写） |
+| 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 9-9 / demo **25-25 产品判据**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
 | 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**；另有各自带反证的检查：`verify-agent-trajectories --selftest` 3/3、`verify-sft-split --selftest` 7/7、`model-arm-identity` 正反两向 |
 | 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**第 38 轮改掉了它的自指死锁**：原来它要求「最近一次 verify:release 必须是 pass」，而 `verify:release` 里又有 `unit`包含这条断言——一次失败之后每次跑都会因为上一次红而红，唯一出路是手改 `latest.json`。现在硬判据是 `last-green.json`（必须存在一次全绿、且不能落后 >12 个提交），`latest.json` 红了只报**警告** |
