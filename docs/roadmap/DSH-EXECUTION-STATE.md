@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `9175f31`；v3 纠偏与 RC-101 见 §C6.15／§C6.16）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `7cbc4d2`；v3 纠偏与 RC-101/RC-201 见 §C6.15／§C6.16／§C6.19）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `cfe7f63`（时间 2026-09-21T10:17Z，14/14）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **14/14 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `9175f31`（`feat(v3-ui): 六槽阵容工坊 mockup 定稿`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `7cbc4d2`（`feat(rc201): 快照/对账脚本登记许可并校验它`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 9-9 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1447,3 +1447,25 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
 
 **下一条**：RC-202（统一 GameDataPack：schema + 逐实体 provenance/许可 + 冲突策略 + 把对账接进闸门），
 它是 `GameDataPackV2` 变 `ready` 的剩余部分，也是 Windows 侧 `TeamFeatureV2` 的前置。
+
+### C6.19 RC-201 闭环（第 83 轮）：许可登记 + 定向验证 + 协作同步
+
+人类指令要求把 RC-201 收成一个闭环（审阅差异与 licence/source_scope → 定向测试 → offline check →
+`git diff --check` → 逐路径提交 → 更新 checklist 与执行状态 → 同步协作区），**并且 RC-201 未闭环前不展开 RC-202**。
+
+**审阅发现并修掉的缺口**：快照产物有 url/http/sha256/UA/attempts，却**没有许可登记** ——
+而它是别人站点的内容。两个提交（`8162a3b` 产物 + `7cbc4d2` 脚本/判据）：快照
+`metadata.licence` 从 `sources.yaml` **搬运**（复用 `verify-provenance.mjs` 的 `parseSources`）
+`CC-BY-NC-SA-4.0` / `DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL` / 证据文件路径 /
+`fetched_content_committed_to_git: false`，并写明「没有在站点页面上独立取证」；
+报告顶层加 `licence_ok` 且 `inputs.live.licence` 与快照逐字一致；判据 8 → **10** 条，
+4 条必红反证（抹掉许可 / 再分发改成 `UNLIMITED` / 证据指向不存在文件 / HTML 路径挪出忽略目录）。
+**重抓一次**验证主结果稳定：三页全 200（特性页一次 567 重试），逐页 sha256 与上一轮一致，
+`result_sha256` 仍是 `a6cbea14…`。
+
+**定向验证（按要求不跑全量 release gate）**：`node --test tests/roco-catalog-reconciliation.test.js`
+→ **10/10**；`node scripts/roco/fetch-live-snapshot.mjs --check --offline` → rc=0 且 `result` 段
+逐字节一致；`git diff --check` → rc=0；逐路径提交（**未用 `git add -A`**）；工作区干净。
+
+**RC-202 前置未清 → 暂不展开**（已按要求停掉并行子任务）。`GameDataPackV2` 从 `draft` → `ready`
+的 9 项逐条列在 `FLAGSHIP-V3-CHECKLIST.md` 新增小节与 `CATALOG-RECONCILIATION.md` §9。

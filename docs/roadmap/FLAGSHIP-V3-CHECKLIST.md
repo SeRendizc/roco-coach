@@ -26,8 +26,8 @@
 
 | RC | 内容 | 状态 |
 |---|---|---|
-| RC-201 | 公网 621/579/242 与仓库 622/824 的对账（不删记录凑数） | **DONE** | `scripts/roco/fetch-live-snapshot.mjs` + `scripts/roco/reconcile-catalog.mjs` + `data/roco/live/2026-09-21/public-index.json` + `reports/roco/reconciliation/catalog-reconciliation.json` + `tests/roco-catalog-reconciliation.test.js`（8 条 / 6 个注入全红）+ `docs/roco/CATALOG-RECONCILIATION.md`。**实测三张页 http 200、计数与页面声明逐一对齐（621/579/242）**；**824 = 579 战斗技能 + 245 特性**（口径，非缺数据）；622 vs 621 = `pet_000532`（公网并进基础卡分组）；245 vs 242 = `skill_000164/165/166`（公网索引侧不存在）。四桶：only_in_frozen 4 / only_in_live 0 / changed 0 / unresolved 4。**边界**：公网页是导航页，无数值 → 未做字段级校验 |
-| RC-202 | 统一 GameDataPack（catalog/skills/traits/learnsets/…/battle_modes/source manifest） | IN_PROGRESS | 对账已就绪（RC-201）；`docs/roco/CATALOG-RECONCILIATION.md` §9 列出从 `draft` → `ready` 还缺的 9 项：统一 schema、逐实体许可、逐实体 provenance、冲突处理策略、形态口径统一、字段级覆盖证明、ruleset 绑定、不可得字段清单、把对账接进 verify-release |
+| RC-201 | 公网 621/579/242 与仓库 622/824 的对账（不删记录凑数） | **DONE** | `scripts/roco/fetch-live-snapshot.mjs` + `scripts/roco/reconcile-catalog.mjs` + `data/roco/live/2026-09-21/public-index.json` + `reports/roco/reconciliation/catalog-reconciliation.json` + `tests/roco-catalog-reconciliation.test.js`（8 条 / 6 个注入全红）+ `docs/roco/CATALOG-RECONCILIATION.md`。**实测三张页 http 200、计数与页面声明逐一对齐（621/579/242）**；**824 = 579 战斗技能 + 245 特性**（口径，非缺数据）；622 vs 621 = `pet_000532`（公网并进基础卡分组）；245 vs 242 = `skill_000164/165/166`（公网索引侧不存在）。四桶：only_in_frozen 4 / only_in_live 0 / changed 0 / unresolved 4。**边界**：公网页是导航页，无数值 → 未做字段级校验。**许可闭环**（`8162a3b` + `7cbc4d2`）：快照 `metadata.licence` 从 `sources.yaml` 搬运（`CC-BY-NC-SA-4.0` / `DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL` / 证据文件路径 / `fetched_content_committed_to_git: false`），报告顶层 `licence_ok` 且 `inputs.live.licence` 与快照逐字一致；判据 8 → **10** 条，4 条必红反证（抹掉许可 / 再把分发改成 UNLIMITED / 证据指向不存在文件 / HTML 路径挪出忽略目录） |
+| RC-202 | 统一 GameDataPack（catalog/skills/traits/learnsets/…/battle_modes/source manifest） | **前置未清，暂不展开** | 对账已就绪（RC-201）；`docs/roco/CATALOG-RECONCILIATION.md` §9 列出从 `draft` → `ready` 还缺的 9 项：统一 schema、逐实体许可、逐实体 provenance、冲突处理策略、形态口径统一、字段级覆盖证明、ruleset 绑定、不可得字段清单、把对账接进 verify-release |
 | RC-203 | OwnedPet / BattleBuild（同种多实例、有序四技能、锁定、约 80 个 Demo 个体） | NOT_STARTED |
 | RC-204 | RAG 索引与 held-out 评测（Recall@K / MRR / 版本命中 / grounding / 冲突弃答） | NOT_STARTED |
 | RC-205 | 精灵盒子 UI（我的/全图鉴、搜索、个体比较） | NOT_STARTED |
@@ -117,3 +117,20 @@
 `todayCount` / 会话分组用的是**本地日历日**（`dayKeyOf`）。两者对「跨午夜但不足 24 小时」的情形给出不同答案
 （昨晚 22:00 → 今晚 21:00：毫秒差算「今天」，日历日算「昨天」）。
 修复 #2 时只把**测试**钉成确定性，**没有**改产品语义；要不要统一成日历日语义需要单独一个 RC（有玩家可感知的影响）。
+
+## RC-202 前置条件（`GameDataPackV2` 从 `draft` → `ready` 的 9 项，逐条来自 `CATALOG-RECONCILIATION.md` §9）
+
+| # | 缺什么 | 算做完的标准 |
+|---|---|---|
+| 1 | 统一 schema（现在三份不同形状的产物，没有共同命名空间） | 带版本号与字段级必填/可空声明的 schema；`record_kind` 词表进 enum；同一校验器校验冻结与派生快照 |
+| 2 | 许可逐条落到实体 | 每条（至少每个 `source_scope`）带 `license` + `redistribution`；`REFERENCE_ONLY` **不得**进可分发产物，且有守卫 |
+| 3 | 逐实体 provenance（冻结侧目前是层内统一，公网侧已逐条） | 冻结侧补到 `{source_id, artifact_path, artifact_sha256, pointer}`，两侧同一结构 |
+| 4 | 冲突处理策略（现在只有「如实记」） | 冲突分类 + 判定（`IDENTITY_CONFLICT` / `VALUE_CONFLICT` / `GRANULARITY_CONFLICT`），未解决时生成器**拒绝**产出 `ready` |
+| 5 | 形态口径统一（实测 34 条标注不一致） | 一份两侧都能映射的「形态轴」对照表 + 34 条逐条落表 |
+| 6 | 覆盖证明（只比了名字/编号/属性标签） | 字段级逐字段比对（含「快照没有这个字段」的显式分支）+ 覆盖率与冲突数 |
+| 7 | 版本/新鲜度绑定 | 数据包带 `ruleset_id` 与 `as_of`；跨来源时间一致性守卫（公网快照早于冻结 revision 则标 `STALE`） |
+| 8 | 不可得字段的显式清单 | 契约级 `contains / does_not_contain`，消费侧 fail closed（`FULL-CATALOG.md` 的 `claims.is/is_not` 先例提到契约层） |
+| 9 | 对账自动化进闸门 | `fetch --check --offline` + `reconcile` + 判据进 `verify-release.mjs` 登记表（由主线程串行维护） |
+
+**纪律**：这 9 项没有全部满足之前，`CONTRACTS.md` 里的 `GameDataPackV2` **保持 `draft`**，
+Windows 侧不得据此开始正式训练。
