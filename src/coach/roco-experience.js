@@ -17,6 +17,7 @@
 
 import {interventionDetail,interventionFeaturesOfGame} from './experience.js';
 import {coachAdvice, normaliseAdviceShape} from './coach-advice.js';
+import {reviewMatch, checkLearningProgress} from './teacher-review.js';
 
 /** 手游 3v3 训练场在旧引擎口径下的「模式」：它属于本地 PvE 练习。 */
 export const ROCO_MODE = 'pve';
@@ -222,6 +223,42 @@ export function rocoLessonEntry({events = [], turns = 0} = {}) {
       : '那次换人是为了挡哪一手？事后看值不值？',
     note: `这一局共 ${turns} 个回合。只挑这一个决策点，不把整局复盘一遍。`,
   };
+}
+
+/**
+ * 局末复盘的**装配层**：把「老师的判定」需要的两个真实输入从一个页面的状态里挑出来。
+ *
+ * 为什么要有这一层（而不是让页面自己拼）：这两个输入各有一条**不许弄错**的规则，
+ * 而弄错了不会报错、只会让玩家看到一段错的复盘：
+ *
+ *   ① `events` 必须是**整局**的事件。服务端每次推进只回这一次产生的事件
+ *      （`service.py:1860` 的 `state.events[events_from:]`），只拿最后一次推进的那几条
+ *      是找不到转折点的。**并入必须在换掉 `view` 之前**完成。
+ *   ② 局面必须用**最后一个还能行动的局面**（`lastLiveView`），不是终局视图：
+ *      终局里对手场上已经是补位上来的那一只，拿它去认「倒下的那一只」就是张冠李戴
+ *      （`teacher-review.js:266-269` 宁可只写「对方第 N 位」也不顶替）。
+ *
+ * 另外：**核对上一课要在记录这一课之前**做。反过来的话 `latestTeaching` 拿到的
+ * 就是刚写进去的这一条，等于自己跟自己比。
+ *
+ * 纯函数、不碰 DOM、不读时钟（时间戳由 `recordTeacherReview` 自己取），
+ * 所以 Node 侧的验收可以用真对局的视图直接调它。
+ */
+export function rocoMatchReview({
+  matchId = null, finalView = null, lastLiveView = null,
+  events = [], turns = null, result = null, memory = null,
+} = {}) {
+  const finalGame = rocoGameView(finalView, {matchId});
+  const reviewGame = lastLiveView ? rocoGameView(lastLiveView, {matchId}) : finalGame;
+  const progress = checkLearningProgress({memory, match: {events, game: reviewGame}});
+  const review = reviewMatch({
+    events,
+    turns,
+    result: result ?? finalView?.battle_result ?? null,
+    game: reviewGame,
+    memory,
+  });
+  return {finalGame, reviewGame, progress, review, usedLastLiveView: Boolean(lastLiveView)};
 }
 
 /**

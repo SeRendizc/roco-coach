@@ -147,6 +147,38 @@ test('结构契约：全仓 js/mjs 的相对 import 都指向真实文件', () =
   assert.deepEqual(bad, [], `有 import 指向不存在的文件：\n${bad.join('\n')}`);
 });
 
+test('结构契约：每个 Node 测试文件都必须被某个 npm script 或自检登记表引用', () => {
+  // 为什么要有这一条：「孤儿守卫不是守卫」。这个仓库里已经出现过至少五次同形状的事故——
+  // 测试写好了、全绿、从来没人跑（`coach-advice.test.js` 14 项、`guard-selftest.test.js` 6 项、
+  // `coach-positions.test.js` 10 个真实局面、`model-arm-identity`、`teacher-review`）。
+  // 它们绿着，所以没人发现；等到某次改动把它们覆盖的东西弄坏，也没有任何东西会红。
+  //
+  // 判据（两条来源，都是**真的会去跑**的东西）：
+  //   ① `package.json` 的任意 script 里出现这个相对路径（`test:unit` 是显式枚举的）；
+  //   ② `scripts/roco/guard-selftest.mjs` 的登记表里出现这个路径（注入自检直接 `node --test` 它）。
+  // **不认**文档或注释里的提及——那正是「写了但没跑」的来源。
+  const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+  const scriptText = Object.values(pkg.scripts || {}).join('\n');
+  const registry = readFileSync(join(ROOT, 'scripts/roco/guard-selftest.mjs'), 'utf8');
+  const isReferenced = (rel) => scriptText.includes(rel) || registry.includes(rel);
+  const walk = (dir) => readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((entry) => {
+    const rel = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) return entry.name === 'node_modules' ? [] : walk(rel);
+    return entry.name.endsWith('.test.js') ? [rel] : [];
+  });
+  const files = walk('tests');
+  assert.ok(files.length > 30, `应当扫到几十个测试文件，实际 ${files.length} 个（扫描逻辑坏了？）`);
+  const orphans = files.filter((rel) => !isReferenced(rel));
+  assert.deepEqual(orphans, [],
+    `这些测试文件没有被任何 npm script 或 guard-selftest 登记表跑到（绿着，但永远不会执行）：\n${orphans.join('\n')}`);
+  // 反向验证：拿一个不存在的路径走同一个判定，必须被判成「没人跑」——
+  // 否则上面那条断言可能只是因为 `isReferenced` 恒为真。
+  assert.equal(isReferenced('tests/evals/__不存在__.test.js'), false,
+    '判定函数对不存在的路径返回 true，说明它没有真的在比对路径');
+  assert.equal(isReferenced('tests/evals/coach-advice.test.js'), true,
+    '已知被 test:unit 引用的文件必须判成「有引用」');
+});
+
 test('结构契约：src/ tests/ tools/ 下没有会被忽略的源文件', () => {
   // 这条契约的本意是「别把源文件写进被 .gitignore 吞掉的位置」——
   // 例如误用 tmp/ 或 .models/ 的规则，导致文件永远不会被提交。

@@ -20,11 +20,13 @@ import {
   rocoPlanFeatures,
   rocoGameView,
   rocoDamagePreviewText,
+  rocoMatchReview,
   expectedLine,
   ROCO_MODE,
 } from '../coach/roco-experience.js';
 import {companionFacts, decideRegister, intentOf, chatReply, REGISTERS} from '../coach/companion.js';
 import {freshMemory, readMemory, rememberBattle, rememberPreference} from '../coach/memory.js';
+import {recordTeacherReview, recordLearningCheck} from '../coach/teacher-review.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
 const state = {
@@ -32,6 +34,13 @@ const state = {
   battleId: null,
   view: null,
   events: [],
+  // 整局的**全部**事件（`view.events` 只有这一次推进产生的那些，见 service.py:1860）。
+  // 局末复盘要按整局找转折点，只拿最后一次推进的事件是找不到的。
+  matchEvents: [],
+  // **最后一个还能行动的局面**。终局视图里 `legal` 已经空了、对手场上也换成了
+  // 补位上来的那一只；拿它做复盘会把「对方倒下的那一只」认成现在场上这只
+  // （teacher-review.js:266-269 明确不许这么顶替，宁可不给名字）。
+  lastLiveView: null,
   plan: null,
   planAtVersion: null,
   session: {hints: 0, lastAt: -Infinity, said: new Set(), dismissed: false},
@@ -359,6 +368,12 @@ function recordHintSaid() {
 
 // ── 对局推进 ────────────────────────────────────────────────────────────────
 function applyResult(data) {
+  // 换掉 `state.view` **之前**先留两份东西（顺序不能反，见 state 里的注释）：
+  //   · 上一个局面还能行动 → 它是「最后一个可决策的局面」，复盘要用它；
+  //   · 这一次推进产生的事件 → 追加进整局事件流，而 `state.events` 仍是本回合的（渲染用）。
+  if (Array.isArray(state.view?.legal) && state.view.legal.length) state.lastLiveView = state.view;
+  const fresh = Array.isArray(data.view?.events) ? data.view.events : null;
+  if (fresh) state.matchEvents = [...state.matchEvents, ...fresh];
   state.view = data.view;
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();
@@ -510,6 +525,8 @@ async function startBattle() {
     state.plan = null;
     state.planAtVersion = null;
     state.events = [];
+    state.matchEvents = [];
+    state.lastLiveView = null;
     $('lesson').textContent = '还没打完一局。';
     $('lesson-card').hidden = true;
     hideHint();
@@ -583,17 +600,69 @@ async function requestPlan({reason = 'manual'} = {}) {
   }
 }
 
-// ── 局末：一个教学入口 + 陪练的情绪回应 ─────────────────────────────────────
+// ── 局末：老师的复盘（一个转折点 + 一条可执行的改法 + 上次那一课的核对）────────
+//
+// 这一段的两个输入都必须来自**真实局面**，不能从终局视图反推：
+//   · `events` 用整局的 `state.matchEvents`（`view.events` 只有最后一次推进的那些）；
+//   · `game` 用 `state.lastLiveView`（最后一个还能行动的局面）——终局视图里对手场上
+//     已经是补位上来的那一只，拿它去找「倒下的那一只」就会张冠李戴。
+// 复盘拿不到转折点或没有够得上的课时**不硬凑**：退回原来那条只讲一个回合的短句，
+// 并如实说「没有值得单独拎出来的决策点」。
 async function finishMatch() {
   const view = state.view;
   if (!view?.battle_result) return;
-  const game = rocoGameView(view, {matchId: state.battleId});
+  const finalGame = rocoGameView(view, {matchId: state.battleId});
   // 真实记录：赢了也记，输了也记。记的是引擎结算出来的那一局，不是编的。
-  state.memory = rememberBattle(state.memory, game);
+  state.memory = rememberBattle(state.memory, finalGame);
   saveMemory();
-  const entry = rocoLessonEntry({events: state.events, turns: view.turn});
+
+  // 「用整局事件 + 最后一个可行动的局面，并且先核对上一课」这三条不许弄错的规则
+  // 都在 `rocoMatchReview` 里，页面只负责把三份真实输入交出去。这样 Node 侧的验收
+  // 能用同一段装配逻辑跑真对局，而不是只读一遍页面源码。
+  const {progress, review} = rocoMatchReview({
+    matchId: state.battleId,
+    finalView: view,
+    lastLiveView: state.lastLiveView,
+    events: state.matchEvents,
+    turns: view.turn,
+    result: view.battle_result,
+    memory: state.memory,
+  });
+
+  if (review) {
+    $('lesson-question').textContent = review.text;
+    $('lesson-learning').textContent = review.learning ? `这一局学到一件事：${review.learning}` : '';
+    $('lesson-progress').textContent = progress.checked && progress.recurred && progress.note
+      ? `上一次那一课的核对：${progress.note}`
+      : '';
+    $('lesson-note').textContent = review.evidence.length
+      ? `依据：${review.evidence.join(' ')}`
+      : '';
+    $('lesson-card').hidden = false;
+    $('lesson').textContent = `第 ${review.turning_point.turn ?? '—'} 回合那个转折点值得回看（这一局 ${view.turn} 个回合）。`;
+    document.body.dataset.rocoLesson = 'shown';
+    document.body.dataset.rocoTeacherGoal = String(review.goal ?? '');
+    document.body.dataset.rocoTeacherPoint = String(review.turning_point.rule ?? '');
+    document.body.dataset.rocoTeacherRepeat = review.repeat ? 'yes' : 'no';
+    document.body.dataset.rocoTeacherChecked = progress.checked ? 'yes' : 'no';
+    document.body.dataset.rocoTeacherImproved = progress.improved === true
+      ? 'yes'
+      : (progress.improved === false ? 'no' : 'unknown');
+    // 账本只记真的发生过的东西：`recordTeacherReview` / `recordLearningCheck`
+    // 各自在「回合不是整数」「improved 不是布尔」时**拒绝写入**（teacher-review.js:783-836）。
+    state.memory = recordTeacherReview(state.memory, {matchId: state.battleId, review});
+    state.memory = recordLearningCheck(state.memory, {
+      matchId: state.battleId, check: progress, goal: progress.goal,
+    });
+    saveMemory();
+    return;
+  }
+
+  const entry = rocoLessonEntry({events: state.matchEvents, turns: view.turn});
   if (entry) {
     $('lesson-question').textContent = entry.question;
+    $('lesson-learning').textContent = '';
+    $('lesson-progress').textContent = '';
     $('lesson-note').textContent = entry.note;
     $('lesson-card').hidden = false;
   }
@@ -601,6 +670,10 @@ async function finishMatch() {
     ? `第 ${entry.turn ?? '—'} 回合那个决策点值得回看（这一局 ${view.turn} 个回合）。`
     : `这一局 ${view.turn} 个回合结束，没有值得单独拎出来的决策点。`;
   document.body.dataset.rocoLesson = entry ? 'shown' : 'none';
+  document.body.dataset.rocoTeacherGoal = '';
+  document.body.dataset.rocoTeacherPoint = '';
+  document.body.dataset.rocoTeacherChecked = 'no';
+  document.body.dataset.rocoTeacherImproved = 'unknown';
 }
 
 /**
