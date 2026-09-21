@@ -1,0 +1,322 @@
+{
+ "schema_version": 1,
+ "report": "game-data-pack-readiness",
+ "generated_by": "scripts/roco/verify-game-data-pack.mjs",
+ "determinism": "本报告不含挂钟时间戳：同输入两次运行逐字节相同。指纹用文件 sha256，不用时间。",
+ "pack_path": "data/roco/game-data-pack/v2/pack.json",
+ "pack_bytes": 3429637,
+ "pack_sha256": "ab0a22bc3d6055d15e0a989f75ce9d42acfe72edaf740ffec5e21b48aaf0dfe0",
+ "schema_path": "data/roco/game-data-pack/v2/schema.json",
+ "schema_bytes": 15237,
+ "schema_sha256": "7ed3f4b1630730cdaf2720cac49b6a7ba88928ba4d6195264ef531b77b1c3a6b",
+ "game_data_pack_v2_status": "draft",
+ "conflict_gate": "BLOCKED_UNRESOLVED_CONFLICTS",
+ "satisfied_count": 8,
+ "total_items": 9,
+ "items": [
+  {
+   "id": 1,
+   "key": "unified_schema",
+   "title": "统一 schema",
+   "missing": "三份不同形状的产物没有同一命名空间契约",
+   "done_when": "带版本号 / 字段级必填声明的 schema；record_kind 词表进 enum；同一份校验器同时校验冻结产物与派生快照",
+   "satisfied": true,
+   "owner": null,
+   "note": null,
+   "evidence": [
+    {
+     "check": "schema.x-roco-contract.record_kind_enum / required_entity_fields / source_scope_enum",
+     "file": "data/roco/game-data-pack/v2/schema.json",
+     "actual": "record_kind_enum=[\"pet_record\",\"pet_form\",\"battle_skill\",\"trait_record\"]；required_entity_fields=[\"entity_key\",\"record_kind\",\"name\",\"provenance\",\"licence_ref\",\"source_scope\"]；实体 1446 条（scope=frozen_l1/live_bwiki），由**同一份**校验器检查"
+    }
+   ]
+  },
+  {
+   "id": 2,
+   "key": "licence_per_entity",
+   "title": "许可逐条落到实体",
+   "missing": "具体到某一条实体没有机器可读的许可字段",
+   "done_when": "每条带 licence_ref 且能解析到 sources.yaml；REFERENCE_ONLY 的来源不得进入可分发分节",
+   "satisfied": true,
+   "owner": null,
+   "note": null,
+   "evidence": [
+    {
+     "check": "entity.licence_ref + source_registry.redistribution + 分节归属",
+     "file": "data/roco/game-data-pack/v2/pack.json",
+     "actual": "带 licence_ref 的实体 1446/1446；distributable=1446，reference_only=0；来源登记 5 条（REFERENCE_ONLY 2 条）"
+    },
+    {
+     "check": "licence_ref ∈ sources.yaml + 台账逐字一致 + REFERENCE_ONLY 不在 distributable",
+     "file": "data/roco/sources.yaml",
+     "actual": "licence_ref 查不到的实体 0 条；台账与 sources.yaml 不一致 0 处；REFERENCE_ONLY 混进 distributable 0 条"
+    }
+   ]
+  },
+  {
+   "id": 3,
+   "key": "per_entity_provenance",
+   "title": "逐实体 provenance",
+   "missing": "冻结侧只有层内统一 provenance，与公网侧粒度不对等",
+   "done_when": "两侧都补到 {source_id, artifact_path, artifact_sha256, pointer} 的逐条粒度，且 sha256 与磁盘一致",
+   "satisfied": true,
+   "owner": null,
+   "note": null,
+   "evidence": [
+    {
+     "check": "逐实体 provenance 的四个必填字段 + 两侧粒度对等",
+     "file": "data/roco/game-data-pack/v2/pack.json",
+     "actual": "provenance 条目 2888 条（frozen_l1 1446 / live_bwiki 1442）；artifact_sha256 与磁盘的一致性由 verify-game-data-pack.mjs 逐条核对"
+    },
+    {
+     "check": "provenance.artifact_sha256 与磁盘逐条一致 + pointer 可解析",
+     "file": "data/roco/game-data-pack/v2/pack.json",
+     "actual": "provenance 条目 2888 条；sha 对不上 0 条；指针解析不到 0 条"
+    }
+   ]
+  },
+  {
+   "id": 4,
+   "key": "conflict_policy",
+   "title": "冲突处理策略",
+   "missing": "只有 conflicts.jsonl 与「不合并、如实记」的纪律，没有可执行的仲裁规则",
+   "done_when": "写明 IDENTITY_CONFLICT / VALUE_CONFLICT / GRANULARITY_CONFLICT 的判定；冲突未解决时**拒绝**产出 ready",
+   "satisfied": true,
+   "owner": null,
+   "note": null,
+   "evidence": [
+    {
+     "check": "conflicts.classes / total / unresolved / 逐条证据",
+     "file": "data/roco/game-data-pack/v2/pack.json#conflicts",
+     "actual": "分类={\"IDENTITY_CONFLICT\":65,\"VALUE_CONFLICT\":0,\"GRANULARITY_CONFLICT\":34}；total=99，unresolved=4；未解决 ⇒ 就绪判定必须是 draft（当前 status=draft）"
+    },
+    {
+     "check": "冲突条目与 RC-201 报告逐条一致 + 未解决时拒绝 ready",
+     "file": "reports/roco/reconciliation/catalog-reconciliation.json",
+     "actual": "未解决冲突 4 条；与 RC-201 对不上的地方 0 处；声明状态 \"draft\""
+    }
+   ]
+  },
+  {
+   "id": 5,
+   "key": "form_axis",
+   "title": "形态（pet_form）口径统一",
+   "missing": "两侧对「这条算不算形态」有 34 条标注不一致",
+   "done_when": "一份两侧都能映射到「基础/首领/地区/突变/其它」的对照表，34 条不一致逐条落表",
+   "satisfied": true,
+   "owner": null,
+   "note": null,
+   "evidence": [
+    {
+     "check": "form_axis.assignments 覆盖所有非基础精灵 + divergence 条数与 GRANULARITY_CONFLICT 条数一致",
+     "file": "data/roco/game-data-pack/v2/pack.json#form_axis",
+     "actual": "assignments=196；counts={\"BASE\":426,\"LORD\":64,\"REGIONAL\":131,\"MUTATION\":1,\"OTHER\":0,\"UNMAPPED\":0}；divergence=34"
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "key": "field_level_coverage",
+   "title": "覆盖证明（不只是计数）",
+   "missing": "没有证明「同 id 的内容一致」——只比了名字、编号、属性标签；种族值、可学技能、效果文本都没比",
+   "done_when": "两份产物在字段级比一遍（带容差与「快照没有这个字段」的显式分支），逐字段给出覆盖率与冲突数",
+   "satisfied": false,
+   "owner": null,
+   "note": "字段级矩阵已产出（逐字段覆盖率 + 不可比分支），但**有实质价值的一致性证明仍不成立**：种族值 / 学招表 / 效果文本 / 静态威力在公网索引页里**不存在**，逐条判据只能到 NOT_COMPARABLE_PUBLIC_INDEX_LACKS_FIELD。要真正做完，需要一份**数据导出**来源（详情页或官方导出），本轮没有。因此此项按「能不能证明数值一致」判定为 false。",
+   "evidence": [
+    {
+     "check": "field_level_coverage.static_false",
+     "file": null,
+     "actual": "字段级矩阵已产出（逐字段覆盖率 + 不可比分支），但**有实质价值的一致性证明仍不成立**：种族值 / 学招表 / 效果文本 / 静态威力在公网索引页里**不存在**，逐条判据只能到 NOT_COMPARABLE_PUBLIC_INDEX_LACKS_FIELD。要真正做完，需要一份**数据导出**来源（详情页或官方导出），本轮没有。因此此项按「能不能证明数值一致」判定为 false。"
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "key": "version_freshness",
+   "title": "版本/新鲜度字段",
+   "missing": "公网快照与冻结 ruleset 之间没有显式绑定",
+   "done_when": "包带 ruleset_id + as_of；跨来源时间一致性有守卫（公网快照日期早于冻结 revision 日期 ⇒ STALE）",
+   "satisfied": true,
+   "owner": null,
+   "note": null,
+   "evidence": [
+    {
+     "check": "ruleset_binding 必填 + freshness 守卫",
+     "file": "data/roco/game-data-pack/v2/pack.json#ruleset_binding",
+     "actual": "ruleset_id=roco-world-s4-2026-09-10；ruleset_config_id=legacy_sim_v1；as_of=2026-09-21；freshness=FRESH（2026-09-21 >= 2026-09-10）"
+    },
+    {
+     "check": "freshness 重算 + ruleset_binding 指纹与磁盘一致",
+     "file": "data/roco/game-data-pack/v2/pack.json#ruleset_binding",
+     "actual": "重算新鲜度=FRESH（声明 FRESH）；ruleset 绑定问题 0 处"
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "key": "unavailable_fields",
+   "title": "不可得字段的显式清单",
+   "missing": "没有契约级的「本包含什么、不含什么」",
+   "done_when": "包显式声明 contains / does_not_contain 与不可得字段允许清单，并在消费侧 fail closed",
+   "satisfied": true,
+   "owner": null,
+   "note": null,
+   "evidence": [
+    {
+     "check": "contract.contains / does_not_contain / unknown_fields 允许清单",
+     "file": "data/roco/game-data-pack/v2/pack.json#contract",
+     "actual": "contains=7 条；does_not_contain=13 条；unknown_fields_allowlist=[\"traits\",\"skill_timing\",\"panel_formula\",\"season_strength\",\"release\",\"power\"]"
+    },
+    {
+     "check": "unknown_fields 按冻结产物重算 + contract.does_not_contain 覆盖覆盖矩阵",
+     "file": "data/roco/game-data-pack/v2/pack.json#contract",
+     "actual": "unknown_fields 算不回来的实体 0 条；与来源自述不一致 0 条；契约缺项 0 处"
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "key": "reconciliation_in_release_gate",
+   "title": "对账自动化进闸门",
+   "missing": "本次是手工触发脚本",
+   "done_when": "把 fetch --check --offline + reconcile + 判据进 verify-release.mjs 的登记表",
+   "satisfied": true,
+   "owner": null,
+   "note": null,
+   "evidence": [
+    {
+     "check": "release_gate.registry",
+     "file": "scripts/roco/verify-release.mjs",
+     "actual": "闸门套件 16 条；要求 [\"reconciliation\",\"game-data-pack\"]；命中 [\"reconciliation\",\"game-data-pack\"]"
+    }
+   ]
+  }
+ ],
+ "blocking": [
+  {
+   "kind": "readiness_item",
+   "id": 6,
+   "key": "field_level_coverage",
+   "why": "字段级矩阵已产出（逐字段覆盖率 + 不可比分支），但**有实质价值的一致性证明仍不成立**：种族值 / 学招表 / 效果文本 / 静态威力在公网索引页里**不存在**，逐条判据只能到 NOT_COMPARABLE_PUBLIC_INDEX_LACKS_FIELD。要真正做完，需要一份**数据导出**来源（详情页或官方导出），本轮没有。因此此项按「能不能证明数值一致」判定为 false。"
+  },
+  {
+   "kind": "unresolved_conflicts",
+   "count": 4,
+   "why": "冲突未解决 ⇒ 就绪判定不得为 ready（不是警告，是拒绝）"
+  }
+ ],
+ "rule_build": "READINESS_ITEMS 逐项（static_false 项不由数据推出）：9 项全 satisfied 且 conflicts.unresolved=0 且 freshness!=STALE ⇒ ready，否则 draft。本轮 8/9 项 satisfied，未解决冲突 4 条，新鲜度 FRESH。",
+ "checks": [
+  {
+   "check": "schema_compliance",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "schema_file",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "artifacts_on_disk",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "provenance_on_disk",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "provenance_pointers",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "refs_pointers",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "licence_refs",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "distribution_sections",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "unknown_fields",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "orphan_references",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "conflicts_vs_rc201",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "freshness_guard",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "contract_completeness",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "coverage_matrix",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "ruleset_binding",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "entity_identity",
+   "ok": true,
+   "problems": 0
+  },
+  {
+   "check": "readiness_declaration",
+   "ok": true,
+   "problems": 0
+  }
+ ],
+ "scale": {
+  "entities": 1446,
+  "provenance_entries": 2888,
+  "by_record_kind": {
+   "battle_skill": 579,
+   "pet_form": 162,
+   "pet_record": 460,
+   "trait_record": 245
+  },
+  "by_section": {
+   "distributable": 1446,
+   "reference_only": 0
+  },
+  "conflicts": 99,
+  "unresolved_conflicts": 4,
+  "form_axis": {
+   "BASE": 426,
+   "LORD": 64,
+   "REGIONAL": 131,
+   "MUTATION": 1,
+   "OTHER": 0,
+   "UNMAPPED": 0
+  },
+  "orphan_references": 0
+ }
+}

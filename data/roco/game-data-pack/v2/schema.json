@@ -1,0 +1,714 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "roco-game-data-pack/v2/schema.json",
+ "title": "GameDataPackV2",
+ "description": "《洛克王国：世界》手游 GameDataPackV2 —— 统一索引包契约。本 schema 是**自描述**的：record_kind 词表、逐实体必填字段、许可与来源策略、不可得字段允许清单、契约级 contains / does_not_contain 全部由本文件声明；校验器读本文件，而不是把常量再抄一份到代码里。",
+ "schema_version": "roco-game-data-pack/v2",
+ "type": "object",
+ "required": [
+  "schema_version",
+  "pack_id",
+  "metadata",
+  "ruleset_binding",
+  "freshness",
+  "contract",
+  "unknown_fields_allowlist",
+  "unknown_fields_scope",
+  "artifacts",
+  "source_registry",
+  "sections",
+  "conflicts",
+  "form_axis",
+  "field_coverage_matrix",
+  "readiness"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema_version": {
+   "type": "string",
+   "const": "roco-game-data-pack/v2"
+  },
+  "pack_id": {
+   "type": "string",
+   "const": "roco-game-data-pack-v2"
+  },
+  "metadata": {
+   "type": "object"
+  },
+  "ruleset_binding": {
+   "type": "object"
+  },
+  "freshness": {
+   "type": "object"
+  },
+  "contract": {
+   "type": "object",
+   "required": [
+    "contains",
+    "does_not_contain"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "contains": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object"
+     }
+    },
+    "does_not_contain": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object"
+     }
+    }
+   }
+  },
+  "unknown_fields_allowlist": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "string"
+   }
+  },
+  "unknown_fields_scope": {
+   "type": "object"
+  },
+  "artifacts": {
+   "type": "object"
+  },
+  "source_registry": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object"
+   }
+  },
+  "sections": {
+   "type": "object",
+   "required": [
+    "distributable",
+    "reference_only"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "distributable": {
+     "type": "object",
+     "required": [
+      "definition",
+      "entities"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "definition": {
+       "type": "string"
+      },
+      "entities": {
+       "type": "array",
+       "items": {
+        "$ref": "#/$defs/entity"
+       }
+      }
+     }
+    },
+    "reference_only": {
+     "type": "object",
+     "required": [
+      "definition",
+      "entities",
+      "note"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "definition": {
+       "type": "string"
+      },
+      "note": {
+       "type": "string"
+      },
+      "entities": {
+       "type": "array",
+       "items": {
+        "$ref": "#/$defs/entity"
+       }
+      }
+     }
+    }
+   }
+  },
+  "conflicts": {
+   "type": "object",
+   "required": [
+    "classes",
+    "resolution_policy",
+    "total",
+    "unresolved",
+    "items"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "classes": {
+     "type": "object"
+    },
+    "resolution_policy": {
+     "type": "object"
+    },
+    "total": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "unresolved": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "items": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "conflict_id",
+       "class",
+       "status",
+       "entity_keys",
+       "evidence",
+       "reason",
+       "source_ref"
+      ],
+      "additionalProperties": true,
+      "properties": {
+       "conflict_id": {
+        "type": "string"
+       },
+       "class": {
+        "type": "string",
+        "enum": [
+         "IDENTITY_CONFLICT",
+         "VALUE_CONFLICT",
+         "GRANULARITY_CONFLICT"
+        ]
+       },
+       "status": {
+        "type": "string",
+        "enum": [
+         "UNRESOLVED",
+         "RESOLVED_BY_POLICY",
+         "RESOLVED_BY_FORM_AXIS"
+        ]
+       },
+       "resolution": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "entity_keys": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "type": "string"
+        }
+       },
+       "evidence": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+         "type": "object"
+        }
+       },
+       "reason": {
+        "type": "string"
+       },
+       "source_ref": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
+  },
+  "form_axis": {
+   "type": "object",
+   "required": [
+    "axes",
+    "rules",
+    "assignments",
+    "counts"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "axes": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object"
+     }
+    },
+    "rules": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object"
+     }
+    },
+    "assignments": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    },
+    "counts": {
+     "type": "object"
+    }
+   }
+  },
+  "field_coverage_matrix": {
+   "type": "object",
+   "required": [
+    "rows",
+    "comparable_field_allowlist",
+    "verdict_vocabulary"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "rows": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object"
+     }
+    },
+    "comparable_field_allowlist": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "verdict_vocabulary": {
+     "type": "object"
+    }
+   }
+  },
+  "readiness": {
+   "type": "object",
+   "required": [
+    "game_data_pack_v2_status",
+    "conflict_gate",
+    "satisfied_count",
+    "total_items",
+    "items",
+    "blocking"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "game_data_pack_v2_status": {
+     "type": "string",
+     "enum": [
+      "draft",
+      "ready"
+     ]
+    },
+    "conflict_gate": {
+     "type": "string"
+    },
+    "satisfied_count": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "total_items": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "items": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "object"
+     }
+    },
+    "blocking": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    }
+   }
+  }
+ },
+ "x-roco-contract": {
+  "record_kind_enum": [
+   "pet_record",
+   "pet_form",
+   "battle_skill",
+   "trait_record"
+  ],
+  "record_kind_vocabulary": {
+   "pet_record": "精灵图鉴条目（基础形态）",
+   "pet_form": "精灵的形态/分支记录（首领形态、地区形态、突变的样子……）",
+   "battle_skill": "战斗技能（攻击/防御/状态）",
+   "trait_record": "特性（技能的 category=特性）",
+   "skill_record": "**未在逐条产物里使用**。它是 `skills.json` 的**文件级**总称，= battle_skill + trait_record（824 = 579 + 245），只在计数表里以 `frozen_skills_file_records` 出现。之所以不拿它当逐条的 record_kind：逐条时它什么也没说清，还会和上面两个值重叠。"
+  },
+  "required_entity_fields": [
+   "entity_key",
+   "record_kind",
+   "name",
+   "provenance",
+   "licence_ref",
+   "source_scope"
+  ],
+  "required_provenance_fields": [
+   "source_id",
+   "artifact_path",
+   "artifact_sha256",
+   "pointer"
+  ],
+  "source_scope_enum": [
+   "frozen_l1",
+   "live_bwiki"
+  ],
+  "unknown_fields_allowlist": [
+   "traits",
+   "skill_timing",
+   "panel_formula",
+   "season_strength",
+   "release",
+   "power"
+  ],
+  "unknown_fields_scope": {
+   "frozen_l1": {
+    "pet_record": [
+     "traits",
+     "skill_timing",
+     "panel_formula",
+     "season_strength"
+    ],
+    "pet_form": [
+     "traits",
+     "skill_timing",
+     "panel_formula",
+     "season_strength"
+    ],
+    "battle_skill": [
+     "power"
+    ],
+    "trait_record": [
+     "power"
+    ],
+    "conditional": {
+     "release": "该精灵在冻结快照里没有上线日期（实测 1 条：pet_000532）。"
+    }
+   },
+   "live_bwiki": {
+    "*": [],
+    "note": "公网索引页是导航页，它缺失的字段是**契约级**的（见 contract.does_not_contain），不逐条进 unknown_fields。"
+   }
+  },
+  "live_index_missing_fields": [
+   "stats",
+   "learnset",
+   "release",
+   "class",
+   "feature_skill_id",
+   "power",
+   "energy",
+   "damage_class",
+   "desc"
+  ],
+  "comparable_field_allowlist": [
+   "id",
+   "name",
+   "number",
+   "type",
+   "element"
+  ],
+  "distribution_classes": {
+   "distributable": "逐条来源的 license/redistribution 都不是 REFERENCE_ONLY，可以随包分发（主快照 CC-BY-NC-SA-4.0 / 署名-非商业-相同方式共享，必须署名）。",
+   "reference_only": "至少一条逐条来源的 redistribution === REFERENCE_ONLY：**不得**进入任何可分发产物，只在本仓库内部核对。"
+  },
+  "conflict_classes": {
+   "IDENTITY_CONFLICT": "同一名字对应不同 id（或同一 id 对应不同名字）：**身份**本身有歧义，按名字对齐会合并两个不同的东西。本轮样本：RC-201 的 4 条 unresolved + 61 组同组同名不同 id。",
+   "VALUE_CONFLICT": "同一 id 的**字段值**在两侧不一致。本轮**为 0** —— 这不是\"没有差异\"，是\"没比过\"：公网索引页没有种族值/学招表/效果文本，所以没有任何值可逐条比（见 field_coverage_matrix）。",
+   "GRANULARITY_CONFLICT": "两侧对\"这条算不算一条独立记录\"口径不同（形态粒度）。本轮样本：RC-201 的 34 条 convention_notes（冻结 pet_record vs 公网 pet_form）。"
+  },
+  "conflict_resolution": {
+   "IDENTITY_KEY_IS_GROUP_PLUS_ID": "身份 = 比较组 + id，名字不参与对齐；因此\"同名不同 id\"各自独立成条，不合并（RC-201 已按此判定）。",
+   "FORM_AXIS_UNION_TABLE": "形态标注取两侧**并集**（任一来源标为非基础即非基础），逐条落 form_axis.assignments；轴未知则 UNMAPPED。"
+  },
+  "form_axis_enum": [
+   "BASE",
+   "LORD",
+   "REGIONAL",
+   "MUTATION",
+   "OTHER",
+   "UNMAPPED"
+  ],
+  "form_axis_rules": [
+   {
+    "rule_id": "frozen.title.plain",
+    "when": "冻结 title === name（无括号后缀）",
+    "axis": "BASE"
+   },
+   {
+    "rule_id": "frozen.title.mutation",
+    "when": "冻结 title 后缀含「突变」",
+    "axis": "MUTATION"
+   },
+   {
+    "rule_id": "frozen.title.lord",
+    "when": "冻结 title 后缀含「首领」",
+    "axis": "LORD"
+   },
+   {
+    "rule_id": "frozen.title.regional",
+    "when": "冻结 title 后缀含「地区」",
+    "axis": "REGIONAL"
+   },
+   {
+    "rule_id": "frozen.title.residual",
+    "when": "冻结 title 有括号后缀，但不是首领/地区/突变关键词",
+    "axis": "OTHER"
+   },
+   {
+    "rule_id": "live.form.main",
+    "when": "公网 data-form === main",
+    "axis": "BASE"
+   },
+   {
+    "rule_id": "live.form.lord",
+    "when": "公网 data-form 含 lord",
+    "axis": "LORD"
+   },
+   {
+    "rule_id": "live.form.regional",
+    "when": "公网 data-form 含 regional",
+    "axis": "REGIONAL"
+   },
+   {
+    "rule_id": "union.any_non_base",
+    "when": "任一来源标为非基础 ⇒ 取该轴（并集；两侧都非基础时取公网轴，另一个进 secondary_axes）",
+    "axis": "(来自证据)"
+   },
+   {
+    "rule_id": "unknown.token",
+    "when": "任一来源出现词表外的形态标注",
+    "axis": "UNMAPPED"
+   }
+  ],
+  "ruleset_binding_required": [
+   "ruleset_id",
+   "ruleset_config_id",
+   "ruleset_config_path",
+   "as_of",
+   "evidence_ledger_path",
+   "evidence_ledger_sha256",
+   "reconciliation_report_path",
+   "reconciliation_report_sha256"
+  ],
+  "ready_gate": "game_data_pack_v2_status === \"ready\" 当且仅当 9 项全部 satisfied **且** conflicts.unresolved === 0 **且** freshness.status !== \"STALE\"。"
+ },
+ "$defs": {
+  "provenance": {
+   "type": "object",
+   "required": [
+    "source_id",
+    "artifact_path",
+    "artifact_sha256",
+    "pointer"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "source_id": {
+     "type": "string",
+     "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "artifact_path": {
+     "type": "string",
+     "pattern": "^[^/].+$"
+    },
+    "artifact_sha256": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    },
+    "pointer": {
+     "type": "string",
+     "pattern": "^[A-Za-z0-9_.[\\]-]+$"
+    },
+    "source_scope": {
+     "type": "string",
+     "enum": [
+      "frozen_l1",
+      "live_bwiki"
+     ]
+    },
+    "page": {
+     "type": "string"
+    },
+    "selector": {
+     "type": "string"
+    }
+   }
+  },
+  "entity": {
+   "type": "object",
+   "required": [
+    "entity_key",
+    "id",
+    "group",
+    "record_kind",
+    "name",
+    "title",
+    "source_scope",
+    "form_axis",
+    "tags",
+    "licence_ref",
+    "provenance",
+    "refs",
+    "unknown_fields"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "entity_key": {
+     "type": "string",
+     "pattern": "^[a-z_]+::[A-Za-z0-9_]+$"
+    },
+    "id": {
+     "type": "string"
+    },
+    "group": {
+     "type": "string",
+     "enum": [
+      "pet",
+      "battle_skill",
+      "trait"
+     ]
+    },
+    "record_kind": {
+     "type": "string",
+     "enum": [
+      "pet_record",
+      "pet_form",
+      "battle_skill",
+      "trait_record"
+     ]
+    },
+    "record_kind_divergence": {
+     "type": "object"
+    },
+    "name": {
+     "type": "string"
+    },
+    "title": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "source_scope": {
+     "type": "string",
+     "enum": [
+      "frozen_l1",
+      "live_bwiki"
+     ]
+    },
+    "form_axis": {
+     "type": "object",
+     "required": [
+      "axis",
+      "secondary_axes",
+      "rule_ids"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "axis": {
+       "type": "string",
+       "enum": [
+        "BASE",
+        "LORD",
+        "REGIONAL",
+        "MUTATION",
+        "OTHER",
+        "UNMAPPED"
+       ]
+      },
+      "secondary_axes": {
+       "type": "array",
+       "items": {
+        "type": "string",
+        "enum": [
+         "BASE",
+         "LORD",
+         "REGIONAL",
+         "MUTATION",
+         "OTHER",
+         "UNMAPPED"
+        ]
+       }
+      },
+      "rule_ids": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      },
+      "divergence": {
+       "type": "boolean"
+      },
+      "reasons": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "tags": {
+     "type": "object"
+    },
+    "tags_live": {
+     "type": "object"
+    },
+    "licence_ref": {
+     "type": "string",
+     "pattern": "^[A-Za-z0-9._-]+$"
+    },
+    "provenance": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "$ref": "#/$defs/provenance"
+     }
+    },
+    "refs": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "field",
+       "artifact_path",
+       "pointer"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "field": {
+        "type": "string"
+       },
+       "artifact_path": {
+        "type": "string"
+       },
+       "pointer": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "unknown_fields": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}
