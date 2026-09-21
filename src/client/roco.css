@@ -43,14 +43,14 @@ input{font:inherit;background:#121e2c;color:#dbe5ef;border:1px solid var(--line)
 .side{min-width:0}
 .center{display:flex;flex-direction:column;align-items:center;gap:7px;padding-top:34px}
 .pets{display:grid;gap:8px}
-.pet{border:1px solid #36495e;border-radius:9px;padding:9px}
+.pet{position:relative;border:1px solid #36495e;border-radius:9px;padding:9px}
 .pet.active{border-color:#8dd49c;background:#1d3435}
 .pet.fainted{opacity:.45}
 .pet-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .pet-top strong{font-size:14px}
 .pet-top code{font-size:11px;color:var(--muted)}
 .bar{height:8px;border-radius:6px;background:#111d28;overflow:hidden;margin:7px 0 5px}
-.bar>div{height:100%;background:#90d5a8}
+.bar>div{height:100%;background:#90d5a8;transition:width .25s ease-out}
 .bar>div.low{background:var(--danger)}
 .pet-stats{display:flex;gap:12px;font-size:12px;color:#c6d2de}
 .bench{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
@@ -98,3 +98,10 @@ input{font:inherit;background:#121e2c;color:#dbe5ef;border:1px solid var(--line)
 .mem-label{flex:1;min-width:0;overflow-wrap:anywhere}
 .mem-forget{font-size:12px;padding:4px 9px;white-space:nowrap}
 @media(max-width:720px){.memory li{flex-wrap:wrap}.mem-label{flex-basis:100%}}
+
+/* 伤害数字浮层（P1-1）：一闪而过，不占版面、不进无障碍树（aria-hidden）。
+   克制用暖色、被抵抗用灰色——颜色之外数字本身带负号，不靠颜色单独表意。 */
+.dmg-float{position:absolute;right:9px;top:7px;font-weight:700;font-size:15px;color:#f2d5a0;pointer-events:none;animation:dmg-rise 1.2s ease-out forwards}
+.dmg-float.strong{color:#ff9f86;font-size:17px}
+.dmg-float.weak{color:#a9bccd;font-size:13px}
+@keyframes dmg-rise{0%{opacity:0;transform:translateY(6px)}18%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-12px)}}

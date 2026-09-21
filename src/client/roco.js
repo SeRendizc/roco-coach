@@ -167,7 +167,7 @@ function petAvatar(pet) {
  * 「寂灭骨龙 pet_000225」。**内部 id 不进玩家视野**——它只出现在调试抽屉里。
  * 同时补上系别标签与六维摘要（数据里本来就有，只是从来没被页面用过）。
  */
-function petCard(pet) {
+function petCard(pet, {active = false} = {}) {
   if (!pet) return '';
   const ratio = pet.max_hp > 0 ? pet.hp / pet.max_hp : 0;
   const statuses = pet.statuses && Object.keys(pet.statuses).length
@@ -176,7 +176,10 @@ function petCard(pet) {
   const stats = pet.stats
     ? `<span class="muted">生命 ${pet.stats.hp} · 攻击 ${pet.stats.atk} · 防御 ${pet.stats.def} · 魔攻 ${pet.stats.spa} · 魔防 ${pet.stats.spd} · 速度 ${pet.stats.spe}</span>`
     : '';
-  return `<div class="pet ${pet.fainted ? 'fainted' : ''}">
+  // `data-slot` 与 `.active` 只用于把「伤害数字」浮在**被打中**的那只身上（见 flashDamage）：
+  // 卡片的位次是 `ui_public_view` 给的公开字段，不是自己数的。
+  const slot = Number.isInteger(pet.slot) ? ` data-slot="${pet.slot}"` : '';
+  return `<div class="pet ${pet.fainted ? 'fainted' : ''}${active ? ' active' : ''}"${slot}>
     <div class="pet-top">${petAvatar(pet)}<strong>${name}</strong>${typeChips(pet.types)}</div>
     <div class="bar"><div class="${hpClass(ratio)}" style="width:${pct(pet.hp, pet.max_hp)}%"></div></div>
     <div class="pet-stats"><span>生命 ${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span><span>能量 ${pet.energy ?? '—'}</span>${statuses ? `<span>异常 ${statuses}</span>` : ''}</div>
@@ -230,8 +233,9 @@ function render() {
   $('turn-chip').textContent = view ? `第 ${view.turn} 回合 · ${view.phase === 'replace' ? '补位' : '对战'}` : '未开局';
   $('phase-chip').textContent = view?.battle_result ? `对局结束：${view.battle_result}` : '';
   $('self-active').textContent = view?.self?.active != null ? `场上：第 ${view.self.active + 1} 位` : '';
-  $('self-pets').innerHTML = (view?.self?.pets ?? []).map(petCard).join('');
-  $('foe-field').innerHTML = view?.opponent?.field ? petCard(view.opponent.field) : '';
+  $('self-pets').innerHTML = (view?.self?.pets ?? [])
+    .map((pet, index) => petCard(pet, {active: index === view?.self?.active})).join('');
+  $('foe-field').innerHTML = view?.opponent?.field ? petCard(view.opponent.field, {active: true}) : '';
   $('foe-bench').innerHTML = (view?.opponent?.bench ?? [])
     .map((b) => `<div class="slot">第 ${(b.slot ?? 0) + 1} 位${b.fainted ? ' · 已倒下' : ' · 状态未知'}</div>`)
     .join('');
@@ -303,6 +307,33 @@ function render() {
 
   document.body.dataset.rocoView = view ? 'ready' : 'empty';
   renderMemory();
+}
+
+// ── 伤害数字浮层（P1-1）─────────────────────────────────────────────────────
+//
+// 事件里的 `detail.side` 是**打人的那一方**（`events_text.py` 的句子是「对方的诡刺命中」），
+// 所以浮层要落在**对面那只**身上。拿不到就不浮——不为了好看把数字安到另一只头上。
+// 数字后面永远带一个「约」的意思：引擎的伤害公式是社区假设（`formula_verified:false`），
+// 所以这里写成 `−130` 并在卡片下方保留原来的文字事件，不为动画额外造一个「精确值」。
+function flashDamage(events) {
+  for (const event of Array.isArray(events) ? events : []) {
+    if (event?.kind !== 'damage') continue;
+    const detail = event.detail ?? {};
+    const amount = Number(detail.damage);
+    if (!Number.isFinite(amount)) continue;
+    const targetSide = detail.side === 'enemy' ? 'player' : (detail.side === 'player' ? 'enemy' : null);
+    if (!targetSide) continue;
+    const host = document.querySelector(targetSide === 'player' ? '#self-pets .pet.active' : '#foe-field .pet.active');
+    if (!host) continue;
+    const multiplier = Number(detail.type_multiplier);
+    const kind = multiplier > 1 ? ' strong' : (multiplier < 1 ? ' weak' : '');
+    const float = document.createElement('span');
+    float.className = `dmg-float${kind}`;
+    float.textContent = `−${amount}`;
+    float.setAttribute('aria-hidden', 'true');
+    host.appendChild(float);
+    setTimeout(() => float.remove(), 1200);
+  }
 }
 
 // ── 记忆（P1-3）：可见、可逐条忘掉 ─────────────────────────────────────────
@@ -451,6 +482,8 @@ function applyResult(data) {
   state.view = data.view;
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();
+  // 伤害数字浮层（P1-1）：只浮**这一次推进新产生**的那些伤害，不重放历史。
+  flashDamage(data.view?.events);
   if (state.view?.battle_result) void finishMatch();
   else refreshHint({reason: 'after-advance'});
 }
