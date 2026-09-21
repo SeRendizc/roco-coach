@@ -62,6 +62,18 @@ const winGame=()=>play(4,{smart:true});
 const history=games=>games.reduce((memory,game)=>rememberBattle(memory,game),freshMemory());
 // 把真实记录的时间往前挪：久别那一类需要「隔了几天」，而时钟不可能靠打一局走完。
 function backdate(memory,days){return {...memory,events:memory.events.map(e=>({...e,time:new Date(Date.parse(e.time)-days*86400000).toISOString()}))};}
+/**
+ * 把记录挪到「相对**注入的那个 now** 是 days 天前」。
+ *
+ * 与 `backdate`（相对**真实时钟**）成对，因为这两条路用的是两个不同的 now：
+ *   · `companionLedger(memory, game, Date.now())` —— 真实时钟，`backdate` 就够；
+ *   · `replay()` —— 注入的 `REPLAY_NOW`（今天 22:00，为了让问候时段可复现）。
+ * 事件时间戳来自真实时钟，所以 22:00 之后跑测试时 `floor((now-t)/DAY)` 会**少算一天**：
+ * 第 81 轮 22:06 实测到「断言 6 天前、实际输出 5 天前」。测试的结论不该取决于跑它的时刻。
+ */
+function backdateFrom(memory,days,now,{step=60000}={}){
+ return {...memory,events:memory.events.map((e,i)=>({...e,time:new Date(now-days*86400000-(i+1)*step).toISOString()}))};
+}
 
 // ── 时间注入：问候与「半夜还在打」都不能靠真实时钟碰运气 ──────────────────────
 // 固定的当地时刻（2026-09-18 是随便挑的一天，只有「几点」有意义），
@@ -1376,7 +1388,7 @@ test('moment 7 milestone: a first clear is celebrated with the ledger, not with 
 test('moment 8 return: coming back after days still remembers where you left off',()=>{
  let memory=freshMemory();
  for(const [seed,options] of [[1,{}],[2,{}],[4,{strategy:'smart'}]])memory=rememberBattle(memory,play(seed,options));
- const away=backdate(memory,6);
+ const away=backdateFrom(memory,6,REPLAY_NOW);
  const {lines}=replay(9,away);
  const line=momentLine(lines,'return:','久别');
  assert(/6天前/.test(line.text),line.text);
@@ -1384,6 +1396,30 @@ test('moment 8 return: coming back after days still remembers where you left off
  assert(!/想你了|好久不见呀|欢迎回来/.test(line.text));
  assertSpeakable(line);
 });
+test('久别的天数按**注入的时钟**算：跑测试的时刻不该改变结论（含 22:00 之后）',()=>{
+ // 这一条钉的是上面那个真实缺陷：`replay()` 注入 now=今天 22:00，而事件时间戳来自真实时钟，
+ // 于是 22:00 之后跑测试时「6 天前」会被 floor 成 5 天。判据对**每一个整点**都成立。
+ const memory=history([lossGame(),play(2)]);
+ for(const hour of [0,6,12,21,22,23]){
+  const now=new Date();now.setHours(hour,59,0,0);
+  const away=backdateFrom(memory,6,now.getTime());
+  const cross=companionLedger(away,play(9),now.getTime());
+  assert.equal(cross.session.daysAgo,6,`注入 ${hour}:59 时算出来是 ${cross.session.daysAgo} 天，应当恒为 6`);
+ }
+ // 反向控制：**两个时间戳都由本测试给定**，所以它与真实时钟无关。
+ // 注入的 now = 某天 22:00，事件时间 = 那天往前 6 天再晚 10 分钟（22:10）——
+ // 毫秒差是 6 天差 10 分钟，`floor` 就会给出 5 天：这正是修复前的现象。
+ const now0=new Date(2026,8,21,22,0,0,0).getTime();
+ const naive={...memory,events:memory.events.map((e,i)=>({...e,
+   time:new Date(now0-6*86400000+10*60000+i*1000).toISOString()}))};
+ assert.equal(Math.floor((now0-Date.parse(naive.events[0].time))/86400000),5,
+  '反向控制：注入时刻比事件时刻早 10 分钟时，按毫秒差取整就是 5 天（老写法会这么算）');
+ // 而按注入的时钟锚定之后，同一批记录是**确定的 6 天**：
+ const anchored=backdateFrom(memory,6,now0);
+ assert.equal(Math.floor((now0-Date.parse(anchored.events[0].time))/86400000),6,
+  '锚定之后必须稳定是 6 天，不随跑测试的时刻漂');
+});
+
 test('moment 9 stage again: the same stage is noted gently, on the turn it stopped last time',()=>{
  let memory=freshMemory();
  for(const seed of [1,2])memory=rememberBattle(memory,play(seed,{}));

@@ -642,6 +642,23 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
     state.hint = null;
     hideHint('silent', 'stale-state');
   }
+  // **用规划之前先问它属不属于当前局面**（第 81 轮浏览器实测抓到的第二个陈旧洞）。
+  //
+  // 第 65 轮只在 `requestPlan` 那条路径上丢弃陈旧规划（请求在飞时状态推进）。但
+  // **自动推进**（`autoTurn`）不经过那条路径：它推进完直接 `applyResult → refreshHint`，
+  // 而 `refreshHint` 默认拿的就是 `state.plan`。于是「计划先到、局面后动」这个顺序下，
+  // 一份为旧局面算出来的规划会被拿去说话——浏览器判据实测到
+  // `plan 版本=30 保留=true`（当前已是 31）。放在这个入口处理，两条推进路径一起覆盖。
+  if (plan) {
+    const fresh = rocoPlanFreshness({plan, view});
+    if (!fresh.usable) {
+      state.planStaleDiscards.push({plan_version: fresh.plan_version, view_version: fresh.view_version,
+        at: Date.now(), source: `refresh-hint:${reason}`});
+      if (state.plan === plan) { state.plan = null; state.planAtVersion = null; }
+      // 这一手的规划作废：浮条与比较区按「没有规划」如实处理（拿不到就不编）。
+      plan = null;
+    }
+  }
   if (state.session.dismissed && !explicit) {
     state.lastDetail = {action: 'silent', gate: 'hint-dismissed', reason: 'hard-gate:hint-dismissed'};
     return hideHint('silent', 'hint-dismissed');

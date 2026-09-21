@@ -17,7 +17,7 @@
 import {execFileSync} from 'node:child_process';
 import {writeFileSync, mkdirSync} from 'node:fs';
 import {execFileSync as gitExec} from 'node:child_process';
-import {dirname, join} from 'node:path';
+import {dirname, join, relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -99,8 +99,24 @@ function run(suite) {
       tail: stdout.trim().split('\n').slice(-4).join('\n')};
   } catch (error) {
     const output = `${error.stdout || ''}\n${error.stderr || ''}`.trim();
+    // **失败必须留全量输出**：`latest.json` 只留尾部几行，而「哪个用例红了」通常在中段。
+    // 第 81 轮实测踩到：`unit` 在门禁里红、单跑却绿，而尾部只剩栈帧 —— 那是
+    // 「有失败但不可诊断」。现在每次失败都落一份完整日志，并在 tail 里写出路径。
+    const dir = join(ROOT, 'reports', 'roco', 'verification', 'failures');
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    let fullLog = null;
+    let note = '';
+    try {
+      mkdirSync(dir, {recursive: true});
+      fullLog = join(dir, `${suite.id}-${stamp}.log`);
+      writeFileSync(fullLog, `${suite.cmd} ${(suite.args ?? []).join(' ')}\n\n${output}\n`);
+      note = `\n[full log] ${relative(ROOT, fullLog)}`;
+    } catch (writeError) {
+      note = `\n[full log] 写入失败：${writeError?.message ?? writeError}`;
+    }
     return {id: suite.id, why: suite.why, ok: false, ms: Date.now() - started,
-      tail: output.split('\n').slice(-12).join('\n')};
+      full_log: fullLog ? relative(ROOT, fullLog) : null,
+      tail: output.split('\n').slice(-12).join('\n') + note};
   }
 }
 
