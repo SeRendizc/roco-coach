@@ -48,6 +48,8 @@ function build(rawText) {
   return {
     schema_version: 'roco-roster-store/v1',
     ruleset_id: RULESET,
+    game: 'roco_world_mobile',
+    source_id: upstreamSourceId(),
     layer: 'L3-simulable-core-pool',
     generated_by: 'scripts/roco/build-roster-48-store.mjs',
     claims: {is: ['这 48 只能进 3v3、能进规划与复盘（配招与合法性由引擎校验）'],
@@ -76,6 +78,15 @@ function verify(doc) {
   }
   if (!doc?.provenance?.source_sha256) problems.push('缺 provenance.source_sha256');
   return problems;
+}
+
+
+/** 顶层 `source_id` 指向 `data/roco/sources.yaml` 里真实登记的来源（查清单，不写死）。 */
+function upstreamSourceId() {
+  const text = readFileSync(join(ROOT, 'data', 'roco', 'sources.yaml'), 'utf8');
+  const ids = [...text.matchAll(/-\s*source_id:\s*([\w.-]+)/g)].map((m) => m[1]);
+  if (!ids.length) throw new Error('data/roco/sources.yaml 里没有任何 source_id');
+  return ids.find((id) => /rocom|wiki/i.test(id)) ?? ids[0];
 }
 
 function main() {

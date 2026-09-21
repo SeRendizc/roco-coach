@@ -1,6 +1,8 @@
 {
  "schema_version": "roco-full-catalog/v1",
  "ruleset_id": "roco-world-s4-2026-09-10",
+ "game": "roco_world_mobile",
+ "source_id": "wiki-rocom-snapshot",
  "layer": "L1-knowledge-only",
  "generated_by": "scripts/roco/build-full-catalog.mjs",
  "claims": {

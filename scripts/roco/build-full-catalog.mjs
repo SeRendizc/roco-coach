@@ -115,6 +115,8 @@ function build() {
   return {
     schema_version: 'roco-full-catalog/v1',
     ruleset_id: RULESET,
+    game: 'roco_world_mobile',
+    source_id: upstreamSourceId(),
     layer: 'L1-knowledge-only',
     generated_by: 'scripts/roco/build-full-catalog.mjs',
     claims: {
@@ -153,9 +155,20 @@ function verify(doc) {
     if (!pet.provenance?.snapshot_sha256) problems.push(`${pet.pet_id} 缺 provenance.snapshot_sha256`);
   }
   if (!doc.provenance?.upstream) problems.push('缺 upstream 来源（原始快照路径与 sha256）');
+  if (doc.game !== 'roco_world_mobile') problems.push(`顶层 game 必须是 roco_world_mobile，实际 ${doc.game}`);
+  if (!doc.source_id) problems.push('缺顶层 source_id：说不清这份数据从哪来');
   const share = doc.coverage?.pets_total ? doc.coverage.with_learnset / doc.coverage.pets_total : 0;
   if (share < 0.3) problems.push(`带学招表的比例只有 ${(share * 100).toFixed(0)}%——低于 30% 说明导入路径不对`);
   return problems;
+}
+
+
+/** 顶层 `source_id` 指向 `data/roco/sources.yaml` 里真实登记的来源（查清单，不写死）。 */
+function upstreamSourceId() {
+  const text = readFileSync(join(ROOT, 'data', 'roco', 'sources.yaml'), 'utf8');
+  const ids = [...text.matchAll(/-\s*source_id:\s*([\w.-]+)/g)].map((m) => m[1]);
+  if (!ids.length) throw new Error('data/roco/sources.yaml 里没有任何 source_id');
+  return ids.find((id) => /rocom|wiki/i.test(id)) ?? ids[0];
 }
 
 function main() {

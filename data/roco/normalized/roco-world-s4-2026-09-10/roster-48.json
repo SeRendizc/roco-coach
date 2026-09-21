@@ -1,6 +1,8 @@
 {
  "schema_version": "roco-roster-store/v1",
  "ruleset_id": "roco-world-s4-2026-09-10",
+ "game": "roco_world_mobile",
+ "source_id": "wiki-rocom-snapshot",
  "layer": "L3-simulable-core-pool",
  "generated_by": "scripts/roco/build-roster-48-store.mjs",
  "claims": {
