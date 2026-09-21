@@ -42,10 +42,11 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `85b6fff`）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `87d0eea`；v3 纠偏批次见 §C6.15）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `cfe7f63`（时间 2026-09-21T10:17Z，14/14）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **14/14 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
+| **v3 纠偏生效（2026-09-21）** | **标准 PVP 改按六宠设计**（候选规则，`CROSS_SOURCE_SUPPORTED`，禁止写成官方事实）；官方 3v3/2 魔力是**极速对决**独立 BattleMode；**48 只只是迁移夹具**，候选宇宙是全量 600+；匹配前对手未知，按版本 Meta prior 评价；**在线 3 秒内禁止批量模拟**。停止用旧规则（max=6/入场 2/回合末 +1）生成或重训任何产物（13 条已进「禁止重跑」清单）。入口：`docs/roadmap/FLAGSHIP-V3-REDIRECT.md`、`docs/roadmap/FLAGSHIP-V3-CHECKLIST.md`；机器可读：`reports/roco/flagship-upgrade/{baseline,artifact-invalidation}.json`、`data/roco/battle-modes.json`、`data/roco/evidence/rule-evidence-ledger.json` |
 | 页面实测（最近一次） | `npm run roco:demo-acceptance` **119 通过 / 0 失败**（含 12 个真实局面的矩阵、真实鼠标/键盘交互、两档窄屏截图、陈旧规划的三条判据） |
 
 ### B. 第 45 轮已完成（都有定向用例 + 反证）
@@ -722,7 +723,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `85b6fff`（`docs(state): 第 65 轮收口记录 + 门禁双灯转绿 + 小时报存档`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `87d0eea`（`docs(reports): 小时报 10:55Z 存档`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 9-9 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1337,3 +1338,41 @@ UI 落地可以先做**最小一步**——把 48 只池的搜索/筛选/分页�
   且漏掉**副作用式静态 import**（`import './x.js'`）——探针文件把这两个洞都暴露出来了。
   **教训**：写「扫全仓」这类守卫时，先问「集合是怎么选出来的、新文件会不会被漏掉」。
 
+### C6.15 v3 纠偏（标准 PVP 六宠 / 600+ 候选宇宙 / 3 秒阵容工坊）—— 第一批已落盘
+
+**人类指令（2026-09-21）**：把旧目标纠偏到 v3 六宠低延迟方案。必读五份文档已完整读完
+（`00-READ-ME-FIRST` / `10-SOURCES-AND-CONFIDENCE` / `13-PVP-SIX-PET-LOW-LATENCY-DESIGN` /
+`08-IMPLEMENTATION-ROADMAP` / `09-CODING-AGENT-MASTER-PROMPT`），随后对当前 HEAD 做了基线审计。
+
+**审计结论（`reports/roco/flagship-upgrade/baseline.json`，6/6 自检）**：
+HEAD `87d0eea`、工作区干净、门禁 14/14 绿；引擎 `ENERGY_MAX=6` / 回合末 `+1` / 入场 `2`（源码自注**假设**）；
+L1 目录 622 / roster-48 = 48；当前只有一种 BattleMode（练习局 3v3，**连魔力概念都没有**）。
+
+**停止 / 保留 / 迁移**：见 `docs/roadmap/FLAGSHIP-V3-REDIRECT.md` §2。
+一句话：**停止**用旧规则产出任何训练/轨迹类产物、停止把标准 PVP 当 3v3 或固定 3 只、
+停止把 48/60 当运行时白名单、停止在线批量模拟、停止把社区交叉支持写成官方事实；
+**保留**（KEEP + revalidate，不许重写）多动作比较/未来后果/stale-plan 丢弃/PVP 门控/RAG 证据/
+game adapter + mock host/三角色/有界工具循环/release guard。
+
+**第一批实际改动**（都是可复跑产物，不是计划）：
+- `scripts/roco/flagship-baseline.mjs` → `reports/roco/flagship-upgrade/baseline.json`（RC-000）；
+- `data/roco/artifact-registry.json` + `scripts/roco/artifact-invalidation.mjs` →
+  `reports/roco/flagship-upgrade/artifact-invalidation.json`（RC-104：20 条产物 × 17 个规则主题，
+  **13 条绑定旧规则 → 禁止重跑**；自检 6/6，含「删掉依赖它就必须从清单消失」的反证）；
+- `data/roco/battle-modes.json`（六宠候选 / 极速对决 3v3·2 魔力 / 领地试炼 2v2 / 练习局 legacy，
+  每条带来源与置信等级 + 待录 microcase）；
+- `tests/roco-v3-redirect.test.js`（9 条判据、6 条反向控制，9/9 绿）；
+- `docs/roadmap/FLAGSHIP-V3-REDIRECT.md` + `docs/roadmap/FLAGSHIP-V3-CHECKLIST.md`；
+- 规则证据台账：`data/roco/evidence/rule-evidence-ledger.json`（20 条：OFFICIAL_CURRENT 3 / COMMUNITY_CURRENT 7 /
+  CROSS_SOURCE_SUPPORTED 7 / ENGINE_HYPOTHESIS 3 / **RECORDED_IN_GAME 0**；14 条待实机 microcase）、
+  `data/roco/evidence/rule-evidence-microcase-records.json`（MC-E01…E15，每条写清通过判据）、
+  `scripts/roco/{verify-evidence-ledger,evidence-ledger-lib}.mjs`（12 条自检）、`tests/roco-evidence-ledger.test.js`（17 条）、
+  `docs/roco/RULE-EVIDENCE-LEDGER.md`。
+  **它当场证伪了升级包 10 号文档一处来源指向**：§12.1 把「随机精灵最多携带 6 只」标 `OFFICIAL_CURRENT` 并署
+  `taptap.cn/moment/838434682965067210`，实测该 URL 是**极速对决**公告（3v3/2 魔力），正文没有那句话 ——
+  所以 `EV-PVP-STANDARD-TEAM-SIZE` 保持 `CROSS_SOURCE_SUPPORTED`。这条正好证明「先建台账再施工」不是形式主义。
+  另：冻结快照里**能耗 >6 的技能 20 条**（8 点 3 条 / 10 点 3 条），在 `ENERGY_MAX=6` 下永久不可用 —— 这是 RC-102 的直接输入。
+
+**下一条 RC**：RC-101 版本化规则配置（`legacy_sim_v1` / `mobile_s4_candidate_v2`），
+让 JS/Python/UI 都不再各写一份常量；随后 RC-102 能量 candidate 与 microcase、RC-103 回合顺序登记表。
+**在规则 candidate 落定前不得重跑轨迹/SFT/team model/介入窗口**（这正是 `do_not_regenerate` 那 13 条）。
