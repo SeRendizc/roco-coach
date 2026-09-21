@@ -1,0 +1,98 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<title>小芽 · 界面 mockup（对战页，1440×900）</title>
+<style>
+/* 这是**界面 mockup**，不是产品页面：只用来定版式与主次，没有真实数据、没有脚本。
+   版式按监工给的六条结构画：对战页 = 中央战斗舞台 + 后备小条 + 底部固定动作区 +
+   两行内的小芽浮条；工程信息全部收进右上角默认折叠的抽屉。 */
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#e3eaf1;background:#0d1420;font-size:14px;
+--panel:#1a2635;--line:#314154;--accent:#a8e5b0;--muted:#9caebe;--warn:#f0cb77;--danger:#ee8e76}
+*{box-sizing:border-box}body{margin:0;height:900px;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--line)}
+h1{font-size:19px;margin:0}h1 small{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;padding:2px 6px;margin-left:8px}
+.muted{color:var(--muted);font-size:12px}
+button{font:inherit;cursor:pointer;color:#dfe8ef;background:#243345;border:1px solid #394a5e;padding:9px 14px;border-radius:9px;min-height:44px}
+button.primary{color:#152c24;background:var(--accent);border-color:var(--accent);font-weight:600}
+main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:16px 20px 8px}
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+.fighter{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.fighter.active{border-color:#8dd49c;box-shadow:0 0 0 1px #8dd49c33 inset}
+.icon{font-size:40px;line-height:1}
+.nm{font-size:20px;font-weight:700}
+.chips span{display:inline-block;font-size:12px;border-radius:5px;padding:1px 7px;margin-right:4px;background:#3b4a5c}
+.hp{display:flex;justify-content:space-between;font-size:12.5px;margin:12px 0 5px}
+.track{height:12px;border-radius:7px;background:#111d28;overflow:hidden}
+.track>div{height:100%;background:#90d5a8}.track>div.low{background:var(--danger)}
+.energy{margin-top:8px;color:var(--warn);letter-spacing:3px;font-size:15px}
+.status{margin-top:6px;font-size:12.5px;color:#ffb492}
+.bench{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.bench div{border:1px dashed #36495e;border-radius:9px;padding:7px 9px;font-size:12.5px;color:var(--muted);text-align:center}
+/* 小芽：军师版是**两行以内**的小浮条，不抢主视线；展开才看取舍。 */
+.coach{position:fixed;left:50%;transform:translateX(-50%);bottom:150px;max-width:620px;background:#1e2d32;border:1px solid #698d7b;
+ border-radius:12px;padding:10px 14px;box-shadow:0 10px 40px #0008;font-size:13.5px;line-height:1.6;z-index:5}
+.coach b{color:#bbebc5}
+.coach .more{font-size:12px;color:var(--muted);margin-top:4px}
+/* 底部固定动作区：一屏可点，不横向溢出。 */
+.actions{position:fixed;left:0;right:0;bottom:0;background:#101a26;border-top:1px solid var(--line);padding:12px 20px;
+ display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.actions button{text-align:left;min-height:56px;display:flex;flex-direction:column;gap:2px;justify-content:center}
+.actions small{font-size:11.5px;color:#b4c3d1}
+details{position:fixed;right:16px;top:56px;width:280px;background:#16222f;border:1px solid var(--line);border-radius:10px;padding:10px 12px;z-index:9}
+summary{cursor:pointer;font-size:12.5px;color:var(--warn)}
+.log{font-size:12px;color:var(--muted);line-height:1.7;max-height:96px;overflow:hidden}
+</style></head><body>
+<header>
+ <h1>小芽 · 洛克王国：世界 <small>训练场</small></h1>
+ <div><span class="muted">第 7 回合 · 对战</span> <button>重开</button> <button class="primary">开一局</button></div>
+</header>
+
+<main>
+ <div>
+  <div class="stage">
+   <div class="fighter active">
+    <div style="display:flex;gap:12px;align-items:center"><span class="icon">🐉</span>
+     <div><div class="nm">寂灭骨龙</div><div class="chips"><span>龙系</span><span>幽系</span></div></div></div>
+    <div class="hp"><span>生命</span><span>93 / 425</span></div>
+    <div class="track"><div class="low" style="width:22%"></div></div>
+    <div class="energy">●●○○○○ <span class="muted" style="letter-spacing:0">2 豆</span></div>
+    <div class="status">异常：中毒（回合末 −18）</div>
+   </div>
+   <div class="fighter">
+    <div style="display:flex;gap:12px;align-items:center"><span class="icon">🥊</span>
+     <div><div class="nm">音速犬</div><div class="chips"><span>火系</span></div></div></div>
+    <div class="hp"><span>生命</span><span>102 / 366</span></div>
+    <div class="track"><div class="low" style="width:28%"></div></div>
+    <div class="energy">●○○○○○ <span class="muted" style="letter-spacing:0">1 豆</span></div>
+    <div class="status">异常：—</div>
+   </div>
+  </div>
+  <div class="bench">
+   <div>第 2 位<br>海豹船长 · 0 豆</div><div>第 3 位<br>黑猫巫师 · 4 豆</div><div>已倒下<br>雪影娃娃</div>
+  </div>
+ </div>
+
+ <div>
+  <div class="muted" style="margin-bottom:8px">这一回合发生了什么（记录不抢主视线，最长 6 行）</div>
+  <div class="log">
+   第 7 回合开始。<br>我方的诡刺命中，造成约 35 点伤害，属性克制。<br>对方的音速犬使用了「烈焰冲」，造成约 62 点伤害。<br>
+   寂灭骨龙身上的中毒在回合末扣了 18 点。<br>对局继续：双方都还在场。
+  </div>
+ </div>
+</main>
+
+<div class="coach">
+ <b>换海豹船长上来</b>：寂灭骨龙只剩 22% 血、还带着中毒，对面音速犬这一手 102 就能收掉它。
+ <div class="more">展开看取舍：换人这一回合让出先手，但能保住这一只；不换则大概率这一回合就倒。</div>
+</div>
+
+<div class="actions">
+ <button>龙血<small>龙系 · 能耗 4 · 威力 95</small></button>
+ <button>集中<small>状态 · 能耗 2 · 威力来源未给</small></button>
+ <button>换上海豹船长<small>换人 → 第 2 位</small></button>
+ <button>使用回复药<small>道具 · 回复药</small></button>
+</div>
+
+<details>
+ <summary>关于这一页（工程信息 / 数据版本 / 验收钩子）</summary>
+ <p class="muted" style="margin:8px 0 0">规则快照、服务状态、data-roco-* 验收钩子、覆盖清单——全部只在这里出现，默认收起。</p>
+</details>
+</body></html>

@@ -1,0 +1,122 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<title>小芽 · 界面 mockup（选阵容页，1440×900）</title>
+<style>
+/* 界面 mockup：选阵容页。只定版式与主次，没有真实数据、没有脚本。
+   按监工给的结构：首屏只留标题 + 轻量小芽入口 + 已选 3 只的固定队伍栏 + 阵容池；
+   版本/服务/验收钩子/工程说明全进右上角默认折叠抽屉；三步教程只在首次显示且可跳过；
+   删掉空的「你的队伍／训练对手」大框。阵容池 = 搜索 + 属性/定位筛选 + 分页 + 轻量卡。 */
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#e3eaf1;background:#0d1420;font-size:14px;
+--panel:#1a2635;--line:#314154;--accent:#a8e5b0;--muted:#9caebe;--warn:#f0cb77}
+*{box-sizing:border-box}body{margin:0;height:900px;display:flex;flex-direction:column}
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--line)}
+h1{font-size:19px;margin:0}h1 small{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;padding:2px 6px;margin-left:8px}
+.muted{color:var(--muted);font-size:12px}
+button{font:inherit;cursor:pointer;color:#dfe8ef;background:#243345;border:1px solid #394a5e;padding:8px 12px;border-radius:9px;min-height:44px}
+button.primary{color:#152c24;background:var(--accent);border-color:var(--accent);font-weight:600}
+/* 首次使用才出现的三步教程：可跳过、完成后不占位（这里画"首次"的样子） */
+.onboard{display:flex;gap:10px;align-items:center;padding:10px 20px;background:#16222f;border-bottom:1px solid var(--line);font-size:13px}
+.onboard b{color:var(--accent)}
+.onboard .skip{margin-left:auto;font-size:12px;padding:4px 10px;min-height:0}
+/* 固定队伍栏：已选 3 只始终可见，是我方/对手共用的"这一局带谁" */
+.teambar{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line)}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.side.active{box-shadow:0 0 0 2px #8dd49c inset;border-color:#8dd49c}
+.side.enemy.active{box-shadow:0 0 0 2px #e8a76a inset;border-color:#e8a76a}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.slot{border:1px dashed #36495e;border-radius:9px;padding:7px 9px;font-size:12.5px;text-align:center}
+.slot.on{border-style:solid;border-color:#8dd49c;color:#dff3e3}
+.side.enemy .slot.on{border-color:#e8a76a;color:#f6e3d0}
+.slot.empty{color:var(--muted)}
+/* 我方/对手 = 清晰分段选择器（不是复选框） */
+.seg{display:inline-flex;background:#16222f;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{border:0;border-radius:0;min-height:38px;padding:6px 16px;background:transparent}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#152c24;font-weight:700}
+.seg button.enemy[aria-pressed="true"]{background:#e8a76a}
+/* 阵容池：搜索 + 筛选 + 分页；卡片只给第一层信息 */
+.pool{flex:1;overflow:hidden;padding:12px 20px 96px}
+.filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input,select{font:inherit;color:#dbe5ef;background:#121e2c;border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px}
+input[type=search]{width:260px}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}
+.card{position:relative;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:104px}
+.card .top{display:flex;gap:8px;align-items:center}
+.card .icon{font-size:28px}
+.card .nm{font-size:16px;font-weight:700}
+.card .chips span{display:inline-block;font-size:11.5px;border-radius:5px;padding:1px 6px;margin:2px 4px 0 0;background:#3b4a5c}
+.card .role{margin-top:6px;font-size:12px;color:var(--warn)}
+.card .key{margin-top:4px;font-size:12px;color:#b4c3d1;line-height:1.5}
+.card .taken{position:absolute;right:8px;top:8px;font-size:10.5px;color:#c9b07a;border:1px solid #6b5b3a;border-radius:5px;padding:1px 5px}
+.card.picked{border-color:#8dd49c;background:#1d3435}
+.card.blocked{opacity:.5;border-style:dashed}
+.card .more{position:absolute;right:8px;bottom:8px;font-size:11px;color:var(--muted)}
+.hintline{margin-top:10px;font-size:12.5px;color:var(--warn);min-height:1.3em}
+/* 底部固定：分页 + 主操作（首屏唯一主操作就是"开一局"） */
+.footbar{position:fixed;left:0;right:0;bottom:0;background:#101a26;border-top:1px solid var(--line);padding:12px 20px;display:flex;align-items:center;gap:10px}
+.pager{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
+details{position:fixed;right:16px;top:56px;width:300px;background:#16222f;border:1px solid var(--line);border-radius:10px;padding:10px 12px;z-index:9}
+summary{cursor:pointer;font-size:12.5px;color:var(--warn)}
+</style></head><body>
+<header>
+ <h1>小芽 · 洛克王国：世界 <small>训练场</small></h1>
+ <div><button>让小芽看一眼</button> <button class="primary">开一局</button></div>
+</header>
+
+<div class="onboard">
+ <span><b>1</b> 选我方 3 只</span><span><b>2</b> 选对手 3 只</span><span><b>3</b> 开一局，小芽自己会开口</span>
+ <button class="skip">跳过</button>
+</div>
+
+<div class="teambar">
+ <div class="side active">
+  <div><b>我方</b> <span class="muted">3/3 · 正在选</span></div>
+  <div class="slots">
+   <div class="slot on">🐉 寂灭骨龙</div><div class="slot on">🥊 音速犬</div><div class="slot on">🐢 潮甲龟</div>
+  </div>
+ </div>
+ <div class="side enemy">
+  <div><b>对手</b> <span class="muted">0/3</span></div>
+  <div class="slots">
+   <div class="slot empty">点右边的卡片加入</div><div class="slot empty">第 2 位</div><div class="slot empty">第 3 位</div>
+  </div>
+ </div>
+</div>
+
+<div class="pool">
+ <div class="filters">
+  <div class="seg"><button aria-pressed="true">我方</button><button class="enemy" aria-pressed="false">对手</button></div>
+  <input type="search" placeholder="搜索名字（48 只）">
+  <select><option>全部属性</option><option>草系</option><option>火系</option></select>
+  <select><option>全部定位</option><option>输出</option><option>坦克</option><option>回复</option></select>
+  <span class="muted">48 只里筛出 12 只 · 每页 12</span>
+ </div>
+
+ <div class="cards">
+  <button class="card picked"><span class="taken">我方已选</span>
+   <div class="top"><span class="icon">🐉</span><span class="nm">寂灭骨龙</span></div>
+   <div class="chips"><span>龙系</span><span>幽系</span></div>
+   <div class="role">定位：输出</div><div class="key">特点：龙血无视防御</div><span class="more">详情 ▸</span></button>
+  <button class="card"><div class="top"><span class="icon">🌿</span><span class="nm">喵喵</span></div>
+   <div class="chips"><span>草系</span></div>
+   <div class="role">定位：回复</div><div class="key">特点：回合末自回</div><span class="more">详情 ▸</span></button>
+  <button class="card blocked"><span class="taken">对手已选</span>
+   <div class="top"><span class="icon">🔥</span><span class="nm">音速犬</span></div>
+   <div class="chips"><span>火系</span></div>
+   <div class="role">定位：输出</div><div class="key">特点：速度 120 抢手</div><span class="more">详情 ▸</span></button>
+  <button class="card"><div class="top"><span class="icon">❄️</span><span class="nm">雪影娃娃</span></div>
+   <div class="chips"><span>冰系</span><span>萌系</span></div>
+   <div class="role">定位：控制</div><div class="key">特点：先手冻结</div><span class="more">详情 ▸</span></button>
+ </div>
+ <div class="hintline">音速犬 已经分给对手了。先在这一侧点它取消，或点上面的「对手」切过去。</div>
+</div>
+
+<div class="footbar">
+ <button class="primary">开一局（双方各 3 只）</button>
+ <span class="muted">选满双方各 3 只才能开始</span>
+ <div class="pager"><button>上一页</button><span>1 / 4</span><button>下一页</button></div>
+</div>
+
+<details>
+ <summary>关于这一页（规则快照 / 服务状态 / 验收钩子 / 工程说明）</summary>
+ <p class="muted" style="margin:8px 0 0">只在这里出现：规则版本、服务状态、data-roco-*、覆盖清单、本机模型对照。</p>
+</details>
+</body></html>
