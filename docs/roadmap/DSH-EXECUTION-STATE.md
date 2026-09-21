@@ -1130,3 +1130,34 @@ the real lever is lineup + advances）。所以重新定位要换**阵容**，�
    - `/api/roco/roster?limit=48` → 48；`?type=草系` 只出草系；`?offset=24&limit=12` → 第 25—36 只
    - **真服务抽样**：跨批次任取 3 只组阵容，`/battle/new` + `advance` 打到结束（给局数与失败样本）
 
+
+### C6.10 门禁现状与「一个根因、两处表现」（第 63 轮实测）
+
+**第 63 轮完整 gate（串行，修掉 provenance 之后）**：
+```
+verdict: failed
+failed: ["unit", "demo-acceptance"]      # 修前是 ["unit","provenance","demo-acceptance"]
+```
+`provenance` 已由 `fb794fd` 修好（两份新产物补顶层 `game` 与 `source_id`，从 `sources.yaml` 查）。
+
+**关键结论：`unit` 与 `demo-acceptance` 是同一条根因，不是两个问题。**
+
+`unit` 的失败点在 `tests/evals/roco/coach-positions.test.js:308`：
+```
+seed=5 strategy=greedy_damage team=[pet_000112+pet_000611+pet_000124] enemy=[（缺省＝与我方同队）]
+  → 在 14 个回合里没有出现这个局面
+```
+即 `36832d1` 的引擎 fail-closed 修复（附带效果与「应对成功」子句不再被静默丢弃）**改变了战斗走向**，
+于是**手工挑出来的局面不再复现它当初要隔离的事实**。浏览器侧的 3 条失配
+（`02-ko-now-mid` 期望 `ko-now` 得 `switch-low-pc-hp`、`08` 期望 `switch-low-pc-hp` 得 `type-resisted`、
+`11` 期望 `speed-decides` 得 `switch-low-pc-hp`）是**同一件事的另一种表现**：
+两边都用同一批写死的阵容/种子，都建立在修复前的引擎上。
+
+**所以修法是**：一次重新定位**同时**覆盖
+- `tests/evals/roco/coach-positions.test.js` 的 10 个引擎侧局面，与
+- `scripts/roco/demo-acceptance.mjs` 的 `POSITION_MATRIX` 12 个浏览器局面，
+用**阵容**（不是种子——被停 agent 实测：固定阵容下种子几乎不改变结果）重挑；
+每换一次都要确认「该局面要隔离的事实真的是那一刻最优先的事实」，期望 kind 不变，
+并保留两条守卫：**互不相同 kind ≥8** 与**文案形状最大重复 ≤2**。
+只改一处会一边绿一边红。
+
