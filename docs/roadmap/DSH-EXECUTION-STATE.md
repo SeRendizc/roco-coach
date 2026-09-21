@@ -46,6 +46,7 @@
 | 最近一次**全绿** gate | `cfe7f63`（时间 2026-09-21T10:17Z，14/14）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **14/14 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
+| **跨机器协作区（2026-09-21 建立）** | Mac DSH（我）与 Windows DSH 通过 `SeRendizc/ai-dev-platform` 的 `coord/roco-coach` 分支上 `projects/roco-coach/` 交换**durable facts**：我只改 `MAC_STATUS.md` 与 `CONTRACTS.md`，需要 Windows 的事追加 `BLOCKERS.md`，方向性改变追加 `DECISIONS.md`；**契约只有证据齐全才能标 `ready`**（它是正式训练闸门）。摘要与同步循环见 `docs/roadmap/CROSS-MACHINE-COORDINATION.md`；每个工作阶段开始与结束各同步一次 |
 | **v3 纠偏生效（2026-09-21）** | **标准 PVP 改按六宠设计**（候选规则，`CROSS_SOURCE_SUPPORTED`，禁止写成官方事实）；官方 3v3/2 魔力是**极速对决**独立 BattleMode；**48 只只是迁移夹具**，候选宇宙是全量 600+；匹配前对手未知，按版本 Meta prior 评价；**在线 3 秒内禁止批量模拟**。停止用旧规则（max=6/入场 2/回合末 +1）生成或重训任何产物（13 条已进「禁止重跑」清单）。入口：`docs/roadmap/FLAGSHIP-V3-REDIRECT.md`、`docs/roadmap/FLAGSHIP-V3-CHECKLIST.md`；机器可读：`reports/roco/flagship-upgrade/{baseline,artifact-invalidation}.json`、`data/roco/battle-modes.json`、`data/roco/evidence/rule-evidence-ledger.json` |
 | 页面实测（最近一次） | `npm run roco:demo-acceptance` **119 通过 / 0 失败**（含 12 个真实局面的矩阵、真实鼠标/键盘交互、两档窄屏截图、陈旧规划的三条判据） |
 
