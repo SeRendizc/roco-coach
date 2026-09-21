@@ -101,6 +101,7 @@ Windows 不得开始正式训练。
 
 | 时间（UTC） | 方向 | 协作区 commit | 我改了什么 |
 |---|---|---|---|
+| 2026-09-21T15:05Z | Mac → 协作区 | `173eddb`（`5c70bcd..173eddb`） | **阶段末同步**：`MAC_STATUS.md` 产品 HEAD 推到 `e4dbd53`，新增 RC-102 promotion 闸门条目（只报告不写配置、空登记表下 9/9 NOT_PROMOTABLE、反证证明判据非恒假）、`test:unit` 715→723、Next 新增「`battle_mode.*` 没有 microcase 落点」这条结构缺口（**不需要 Windows 行动**）；`CONTRACTS.md` 的 BattleModeV2 `validation` 补上闸门结论（状态仍 `draft`，训练闸门仍 blocked） |
 | 2026-09-21T14:22Z | Mac → 协作区 | `5c70bcd`（`f839dcf..5c70bcd`） | `MAC_STATUS.md` 首份（产品 HEAD `b183b32`、v3 纠偏、台账/失效图/RC-101、产物指纹表、缺实机录制）；`CONTRACTS.md` 如实标注（BattleModeV2/GameDataPackV2 = `draft`，其余 `missing`，TeamDatasetV2 = `invalidated`，**训练闸门 blocked**）；`BLOCKERS.md` 追加 `B-20260921-03`（缺实机录制 → 候选规则不得 promotion）与 `B-20260921-04`（Windows 不得消费 draft/invalidated）；`DECISIONS.md` 追加 `D-20260921-03`（六宠标准模式 / 对手未知 / 600+ 候选 / 在线禁批量模拟） |
 
 **没做的事（诚实记录）**：本次**没有**把任何契约标成 `ready`（证据不足）；
