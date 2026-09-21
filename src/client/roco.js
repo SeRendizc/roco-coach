@@ -39,6 +39,9 @@ const state = {
   dismissedThisMatch: false,
   memory: freshMemory(),
   timings: [],         // 每次 /api/roco/plan 的往返耗时（P50/P95 报告要用）
+  // ── 阵容选择（P0-3）──────────────────────────────────────────────
+  roster: [],          // 12 只真实精灵（来自 /api/roco/roster）
+  pick: {player: [], enemy: [], side: 'player'},
 };
 
 const MEMORY_KEY = 'roco-coach-memory-v1';
@@ -51,6 +54,17 @@ async function bootstrap() {
   const response = await fetch('/api/bootstrap', {cache: 'no-store', signal: AbortSignal.timeout(8000)});
   if (!response.ok) throw new Error('请启动新版本机后端（npm start）');
   session = await response.json();
+}
+
+/**
+ * 只读接口。`/api/` 下的**写**请求一律 POST + CSRF；只读的用 GET——
+ * 服务端就是这么分的（`/api/roco/status` 与 `/api/roco/roster`），
+ * 拿 POST 去撞只会得到一句「接口不存在」。第一次就踩了这个。
+ */
+async function getJson(path) {
+  const response = await fetch(path, {cache: 'no-store', signal: AbortSignal.timeout(30000)});
+  if (!response.ok) throw new Error(`请求失败（HTTP ${response.status}）`);
+  return response.json();
 }
 
 async function api(path, body) {
@@ -304,6 +318,89 @@ function applyResult(data) {
   else refreshHint({reason: 'after-advance'});
 }
 
+/**
+ * 阵容选择（P0-3）。
+ *
+ * 数据来自 `/api/roco/roster`——**真名、真系别、真六维、真规范配招**，
+ * 不是手写的样例。选择规则很简单：点一次加入当前正在选的一方，再点一次移出；
+ * 我方满了自动切到对手那一边。双方各 3 只才能开局。
+ */
+function renderRoster() {
+  const grid = $('roster');
+  if (!grid) return;
+  const {player, enemy, side} = state.pick;
+  $('count-player').textContent = String(player.length);
+  $('count-enemy').textContent = String(enemy.length);
+  for (const tab of document.querySelectorAll('.side-tab')) {
+    tab.classList.toggle('selected', tab.dataset.side === side);
+  }
+  const nameOf = (id) => (state.roster.find((p) => p.pet_id === id)?.name) ?? id;
+  $('pick-summary').textContent = `我方：${player.map(nameOf).join('、') || '（未选）'} ｜ `
+    + `对手：${enemy.map(nameOf).join('、') || '（未选）'}`;
+  $('start-battle').disabled = !(player.length === 3 && enemy.length === 3);
+  grid.innerHTML = state.roster.map((pet) => {
+    const classes = ['pick'];
+    if (player.includes(pet.pet_id)) classes.push('picked-player');
+    if (enemy.includes(pet.pet_id)) classes.push('picked-enemy');
+    const moves = pet.moveset.map((m) => m.name).join('、');
+    return `<button class="${classes.join(' ')}" data-pet="${pet.pet_id}">
+      <div class="nm">${pet.name}</div>
+      <div>${typeChips(pet.types)}</div>
+      <div class="mv">${moves || '（引擎未给配招）'}</div>
+    </button>`;
+  }).join('');
+  for (const button of grid.querySelectorAll('button[data-pet]')) {
+    button.addEventListener('click', () => togglePick(button.dataset.pet));
+  }
+}
+
+function togglePick(petId) {
+  const pick = state.pick;
+  const side = pick.side;
+  const list = pick[side];
+  const at = list.indexOf(petId);
+  if (at >= 0) list.splice(at, 1);
+  else {
+    // 同一只精灵不能同时出现在两边：那是自相矛盾的阵容
+    const other = side === 'player' ? pick.enemy : pick.player;
+    if (other.includes(petId)) return;
+    if (list.length >= 3) return;
+    list.push(petId);
+    // 我方满了就自动切到对手，省一次点击
+    if (side === 'player' && list.length === 3 && pick.enemy.length < 3) pick.side = 'enemy';
+  }
+  renderRoster();
+}
+
+async function loadRoster() {
+  try {
+    const data = await getJson('/api/roco/roster');
+    if (!data.ok) throw new Error(data.error || '名单读取失败');
+    state.roster = data.pets.filter((p) => p.moveset_size > 0);
+    $('roster-status').textContent = `${state.roster.length} 只可选（配招来自引擎规范配招）`;
+    if (!state.pick.enemy.length) {
+      // 对手默认给一个随机阵容，玩家可以直接开局
+      state.pick.enemy = [...state.roster].sort(() => Math.random() - 0.5).slice(0, 3).map((p) => p.pet_id);
+    }
+    renderRoster();
+  } catch (error) {
+    $('roster-status').textContent = `名单读取失败：${error.message}`;
+  }
+}
+
+function wirePickControls() {
+  for (const tab of document.querySelectorAll('.side-tab')) {
+    tab.addEventListener('click', () => { state.pick.side = tab.dataset.side; renderRoster(); });
+  }
+  $('random-enemy')?.addEventListener('click', () => {
+    state.pick.enemy = [...state.roster].sort(() => Math.random() - 0.5).slice(0, 3).map((p) => p.pet_id);
+    renderRoster();
+  });
+  $('clear-pick')?.addEventListener('click', () => {
+    state.pick.player = []; state.pick.enemy = []; state.pick.side = 'player'; renderRoster();
+  });
+}
+
 async function startBattle() {
   $('start-battle').disabled = true;
   try {
@@ -315,7 +412,12 @@ async function startBattle() {
     $('lesson').textContent = '还没打完一局。';
     $('lesson-card').hidden = true;
     hideHint();
-    const data = await api('/api/roco/battle/new', {strategy: 'greedy_damage'});
+    // 带上玩家选好的双方阵容（P0-3）。没选够 3 只时不传，让服务端用默认阵容，
+    // 而不是发一个会被拒的请求。
+    const body = {strategy: 'greedy_damage'};
+    if (state.pick.player.length === 3) body.team = state.pick.player.slice();
+    if (state.pick.enemy.length === 3) body.enemy_team = state.pick.enemy.slice();
+    const data = await api('/api/roco/battle/new', body);
     state.battleId = data.battle_id;
     applyResult(data);
     // 开局也要判一次：F01 要求「修改阵容后出现一条有证据建议」，
@@ -324,7 +426,8 @@ async function startBattle() {
   } catch (error) {
     $('plan-status').textContent = `开局失败：${error.message}`;
   } finally {
-    $('start-battle').disabled = false;
+    // 不要无条件启用：按钮的可用性由「双方是否各选满 3 只」决定
+    renderRoster();
   }
 }
 
@@ -476,7 +579,10 @@ async function boot() {
   state.memory = loadMemory();
   renderCoverage();
   bind();
+  // 阵容选择：先接线，再读名单（读名单会顺带给出一个随机的对手阵容）
+  wirePickControls();
   render();
+  await loadRoster();
   try {
     await bootstrap();
     const status = await fetch('/api/roco/status', {cache: 'no-store'}).then((r) => r.json());
@@ -490,6 +596,7 @@ async function boot() {
 }
 
 // 验收脚本要驱动这些动作：显式挂到一个命名空间上，比让脚本去点按钮里的中文更稳。
-window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, refreshHint, render};
+window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, refreshHint, render,
+  loadRoster, togglePick, renderRoster};
 
 void boot();

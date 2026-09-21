@@ -280,6 +280,33 @@ export function createRocoService(options={}){
   * 只把**公开面**交给桥；`analysis_seeds` 用固定集合，**不读**本局的真实 seed。
   * 这正是「同一公开观察 + 不同真实 seed → 结论一致」在真实链路上的落点。
   */
+ /**
+  * 可选用精灵名单（P0-3 阵容选择）。
+  *
+  * 走 `rules_query` 的 `kind: "roster"`，**不新开端点**：信任域的路径白名单有专门的
+  * 测试钉着，动它得先想清楚。这份数据全是公开事实（名字、系别、六维、规范配招）。
+  */
+ async function roster(){
+  const up=await ensure();
+  if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
+  touch();
+  const envelope=await client.query({kind:'roster'},{});
+  const out=unwrap(envelope);
+  if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
+  const r=out.result||{};
+  return {ok:true,count:r.count??0,usable_count:r.usable_count??0,team_size:r.team_size??3,
+   note:r.note??null,
+   pets:(Array.isArray(r.pets)?r.pets:[]).map((p)=>({
+    pet_id:p.pet_id??null,name:p.name??null,types:Array.isArray(p.types)?p.types:[],
+    stats:p.stats??null,pet_class:p.pet_class??null,stage:p.stage??null,
+    moveset_size:p.moveset_size??0,
+    moveset:(Array.isArray(p.moveset)?p.moveset:[]).map((m)=>({
+     skill_id:m.skill_id??null,name:m.name??null,element:m.element??null,category:m.category??null,
+     energy:m.energy??null,power:m.power??null,power_status:m.power_status??null,
+     damage_class:m.damage_class??null,desc:m.desc??null,is_trait:m.is_trait===true})),
+   }))};
+ }
+
  async function planBattle(body={}){
   const session=sessionOf(body.battle_id);
   if(!session)return {ok:false,status:404,error:'对局不存在或已失效：请重新开一局'};
@@ -364,6 +391,6 @@ export function createRocoService(options={}){
   };
  }
 
- return {status,startBattle,advanceBattle,planBattle,ensure,stop,publicView,
+ return {status,startBattle,advanceBattle,planBattle,roster,ensure,stop,publicView,
   _sessions:sessions,_client:()=>client};
 }

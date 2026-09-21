@@ -31,22 +31,22 @@
     {
       "name": "打危险了之后出现主动短提示（无聊天入口）",
       "ok": true,
-      "detail": "hint=micro_hint action=micro_hint 血量比=0.39 自动推进=2 判定={\"gate\":null,\"action\":\"micro_hint\",\"reason\":\"moderate-risk\",\"value\":1.5,\"floor\":1.2,\"decisive\":false,\"budget\":null,\"layer\":{\"active\":false,\"suppress\":false,\"reason\":\"layer-error\",\"mode\":\"off\",\"model_status\":\"error\",\"probability\":null,\"threshold\":null}}"
+      "detail": "hint=action_hint action=action_hint 血量比=0.07 自动推进=10 判定={\"gate\":null,\"action\":\"action_hint\",\"reason\":\"critical-risk\",\"value\":2.4,\"floor\":1.2,\"decisive\":true,\"budget\":null,\"layer\":{\"active\":false,\"suppress\":false,\"reason\":\"layer-error\",\"mode\":\"off\",\"model_status\":\"error\",\"probability\":null,\"threshold\":null}}"
     },
     {
       "name": "提示给的是可执行建议，并说明依据",
       "ok": true,
-      "detail": "可以优先考虑「使用能量果」，注意对方可能换上第3位（最坏尾部 0.71 ~ 0.71） / 依据：moderate-risk"
+      "detail": "可以优先考虑「换上第3位」，注意对方可能啮合传递（最坏尾部 1.65 ~ 1.65） / 依据：critical-risk"
     },
     {
       "name": "展开里有可核对的搜索证据（区间、分支、分析种子）",
       "ok": true,
-      "detail": " 期望估计：0.97（三个分析种子给出同一个值，所以这里没有区间可报） 搜索：84 个分支 · 深度 2 · 分析种子 11/29/47 对手应对：换上第3位"
+      "detail": " 期望估计：2.37（三个分析种子给出同一个值，所以这里没有区间可报） 搜索：87 个分支 · 深度 2 · 分析种子 11/29/47 对手应对：啮合传递（"
     },
     {
       "name": "提示不把胜率当结论、也不承诺必胜",
       "ok": true,
-      "detail": "可以优先考虑「使用能量果」，注意对方可能换上第3位（最坏尾部 0.71 ~ 0.71） 期望估计：0.97（三个分析种子给出同一个值，所以这里没有区间可报） "
+      "detail": "可以优先考虑「换上第3位」，注意对方可能啮合传递（最坏尾部 1.65 ~ 1.65） 期望估计：2.37（三个分析种子给出同一个值，所以这里没有区间可报） "
     },
     {
       "name": "点掉后该沉默的局面不再提示",
@@ -56,7 +56,7 @@
     {
       "name": "换人后旧建议不再挂在旧版本上",
       "ok": true,
-      "detail": "换上第2位 v10 → v15"
+      "detail": "换上第2位 v46 → v51"
     },
     {
       "name": "换人这一手本身是引擎接受的合法动作",
@@ -66,12 +66,12 @@
     {
       "name": "一局能真的打完（引擎给出结果）",
       "ok": true,
-      "detail": "loss"
+      "detail": "win"
     },
     {
       "name": "局末给出一个教学入口",
       "ok": true,
-      "detail": "第 16 回合那个决策点值得回看（这一局 16 个回合）。"
+      "detail": "第 20 回合那个决策点值得回看（这一局 20 个回合）。"
     },
     {
       "name": "局末教学入口在页面上真的显示了",
@@ -83,14 +83,34 @@
       "detail": "R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。"
     },
     {
+      "name": "可选精灵至少 6 只（实际 12 只名额）",
+      "ok": true,
+      "detail": "count=12"
+    },
+    {
+      "name": "名单里是真名，不是 pet_ 占位",
+      "ok": true,
+      "detail": "音速犬、雪影娃娃、化蝶、海豹船长、寂灭骨龙"
+    },
+    {
+      "name": "名单状态写了「配招来自引擎」",
+      "ok": true,
+      "detail": "12 只可选（配招来自引擎规范配招）"
+    },
+    {
+      "name": "双方各选 3 只后开局按钮可用",
+      "ok": true,
+      "detail": "disabled=false player=3 enemy=3"
+    },
+    {
       "name": "事件区渲染的是中文句子（不是 kind + JSON）",
       "ok": true,
-      "detail": "第 16 回合开始。 对方的升龙咆哮命中，造成约 133 点伤害（伤害公式未核验，这是引擎估值），属性克制。 我方的精灵倒下了。 我方这一手没有打出去（已"
+      "detail": "第 20 回合开始。 对方的气波命中，造成约 125 点伤害（伤害公式未核验，这是引擎估值），属性克制。 我方的彗星命中，造成约 201 点伤害（伤害公式未"
     },
     {
       "name": "事件区里没有内部事件标识符（kind）",
       "ok": true,
-      "detail": "第 16 回合开始。 对方的升龙咆哮命中，造成约 133 点伤害（伤害公式未核验，这是引擎估值），属性克制。 我方的精灵倒下了。 我方这一手没有打出去（已"
+      "detail": "第 20 回合开始。 对方的气波命中，造成约 125 点伤害（伤害公式未核验，这是引擎估值），属性克制。 我方的彗星命中，造成约 201 点伤害（伤害公式未"
     },
     {
       "name": "事件区里没有精灵/技能的内部 id",
@@ -100,7 +120,7 @@
     {
       "name": "原始事件 JSON 收在折叠区里（默认收起）",
       "ok": true,
-      "detail": "{\"hasDetails\":true,\"open\":false,\"rawLen\":1097,\"rawLooksJson\":true}"
+      "detail": "{\"hasDetails\":true,\"open\":false,\"rawLen\":1402,\"rawLooksJson\":true}"
     },
     {
       "name": "队伍/对手/行动面板里不出现 pet_ / skill_ 占位",
@@ -110,7 +130,7 @@
     {
       "name": "面板里精灵显示的是真名（不是 id）",
       "ok": true,
-      "detail": "寂灭骨龙 龙系 幽系 生命 0 / 425 能量 1 生命 120 · 攻击 137 · 防御 104 · 魔攻 50 · 魔防 81 · 速度 60 海豹船长"
+      "detail": "寂灭骨龙 龙系 幽系 生命 29 / 425 能量 1 生命 120 · 攻击 137 · 防御 104 · 魔攻 50 · 魔防 81 · 速度 60 海豹船"
     },
     {
       "name": "页面上不出现真实对局 seed 或私有状态",
@@ -120,6 +140,16 @@
       "name": "控制台没有报错",
       "ok": true,
       "detail": "[]"
+    },
+    {
+      "name": "选好的我方阵容真的进了引擎（名字逐位对上）",
+      "ok": true,
+      "detail": "期望 音速犬、雪影娃娃、化蝶 ／ 实际 音速犬、雪影娃娃、化蝶"
+    },
+    {
+      "name": "选好的对手阵容也进了引擎",
+      "ok": true,
+      "detail": "期望 海豹船长 ／ 实际 海豹船长"
     }
   ],
   "screenshots": [
@@ -133,6 +163,6 @@
   ],
   "console_errors": [],
   "page_errors": [],
-  "passed": 25,
+  "passed": 31,
   "failed": 0
 }

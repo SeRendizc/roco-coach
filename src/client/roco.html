@@ -32,6 +32,20 @@
  </article>
 </section>
 
+<!-- ── 阵容选择（P0-3）：12 只真实精灵，双方各选 3 ───────────────────── -->
+<section class="panel" id="select-panel">
+ <div class="section-title"><h2>选择双方阵容</h2>
+  <span class="muted"><span id="roster-status">正在读取精灵名单…</span></span></div>
+ <div class="pick-row">
+  <button class="side-tab selected" data-side="player">我方（<span id="count-player">0</span>/3）</button>
+  <button class="side-tab" data-side="enemy">对手（<span id="count-enemy">0</span>/3）</button>
+  <button id="random-enemy">对手随机</button>
+  <button id="clear-pick">清空</button>
+ </div>
+ <div id="pick-summary" class="muted"></div>
+ <div id="roster" class="roster"></div>
+</section>
+
 <section class="panel">
  <div class="section-title"><h2>这一回合的行动</h2><span class="muted" id="action-hint">开一局后这里会出现可执行的动作</span></div>
  <div id="actions" class="actions"></div>

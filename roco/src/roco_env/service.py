@@ -596,6 +596,11 @@ class RocoService:
                 answer = self._answer_skill(rs, query)
             elif kind == "learnset":
                 answer = self._answer_learnset(rs, query)
+            elif kind == "roster":
+                # 给 UI 用的**可选用精灵名单**：真名、系别、六维、规范配招的四个技能。
+                # 走 `rules_query` 而不是新开端点，是为了不碰信任域的路径白名单
+                # （那条白名单有专门的测试钉着，动它得先想清楚）。
+                answer = self._answer_roster(rs, query)
             elif kind == "term":
                 answer = self._answer_term(rs, query)
             elif kind in ("type_row", "type_chart"):
@@ -767,6 +772,57 @@ class RocoService:
                 }
             ]
         return answer
+
+    def _answer_roster(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
+        """可选用精灵名单（第 42 轮 P0-3：阵容选择要真数据）。
+
+        每只给：真名、系别、六维、**规范配招的四个技能**（含说明与威力来源状态）。
+        配招用 `rs.candidate_moveset()`——那是引擎真正会带上场的那一套，
+        所以页面上展示的技能就是这一局实际能用的技能，不是另编一份。
+        """
+        limit = query.get("limit")
+        pets = []
+        for pet_id in sorted(rs.pets):
+            pet = rs.pets[pet_id]
+            moveset = list(rs.candidate_moveset(pet_id) or ())
+            moves = []
+            for sid in moveset:
+                skill = rs.skills.get(sid)
+                if skill is None:
+                    # 学习表里的孤儿引用在加载期就该炸；真出现就如实上报，不跳过
+                    moves.append({"skill_id": sid, "missing_in_skills_json": True})
+                else:
+                    moves.append(self._skill_record(rs, skill))
+            pets.append({
+                "pet_id": pet_id,
+                "name": pet.name,
+                "types": list(getattr(pet, "types", []) or []),
+                "stats": dict(getattr(pet, "stats", {}) or {}),
+                "pet_class": getattr(pet, "pet_class", None),
+                "stage": getattr(pet, "stage", None),
+                # 有没有可用技能是这个名单能不能真上场的硬条件：
+                # 空配招的精灵在引擎里连合法动作都出不来。
+                "moveset_size": len(moves),
+                "moveset": moves,
+            })
+        if isinstance(limit, int) and limit > 0:
+            pets = pets[:limit]
+        usable = [p for p in pets if p["moveset_size"] > 0]
+        return Answer(
+            result={
+                "record": "roster",
+                "ruleset_id": rs.ruleset_id,
+                "count": len(pets),
+                "usable_count": len(usable),
+                "pets": pets,
+                # 3v3：页面按这个数来限制选择
+                "team_size": 3,
+                "note": "配招是引擎的规范配招（candidate_moveset），即这一局实际能用的技能；"
+                        "威力按来源如实标注，`not_provided_by_source` 表示来源没给，不是 0。",
+            },
+            coverage=1.0,
+            evidence_ids=[ev(rs.ruleset_id, "roster", str(len(pets)))],
+        )
 
     def _answer_learnset(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
         pet_id = query.get("pet_id") or query.get("id")

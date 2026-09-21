@@ -208,6 +208,9 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
     // GET /api/roco/status 是唯一的只读接口：演示页打开时先问一次「规则服务在不在」，
     // 它不改状态、不需要 CSRF，也不碰密钥。其余 /api/ 一律 POST + CSRF。
     if(path==='/api/roco/status'&&req.method==='GET')return json(res,200,await rocoService.status());
+    // 可选用精灵名单（P0-3）：只读、全公开事实。放在 GET 上是刻意的——
+    // 它不改任何状态，也没有 CSRF 风险。
+    if(path==='/api/roco/roster'&&req.method==='GET')return json(res,200,await rocoService.roster());
     if(req.method!=='POST')throw fail(405,'仅支持 POST');
     if(req.headers.origin!==origin||!req.headers['content-type']?.startsWith('application/json'))throw fail(403,'请求来源或类型不正确');
     const sid=req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1],s=sessions.get(sid);

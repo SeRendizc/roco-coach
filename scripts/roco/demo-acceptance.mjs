@@ -217,6 +217,31 @@ async function main(){
  check('玩家抱怨时陪练先回应情绪（R2/R3）',['R2','R3'].includes(reply.register)&&replyShown,`${reply.register}: ${String(reply.reply).slice(0,60)}`);
  shots.push(await shoot('06-companion-emotion'));
 
+ // ── P0-3 产品判据：阵容选择要能用、要真数据 ──────────────────────────
+ const rosterInfo=JSON.parse(await js(`(()=>{const g=document.getElementById('roster');
+  const btns=g?g.querySelectorAll('button[data-pet]'):[];
+  const names=[...btns].map((b)=>b.querySelector('.nm')?b.querySelector('.nm').textContent:'');
+  return JSON.stringify({count:btns.length,names:names.slice(0,14),
+   status:(document.getElementById('roster-status')||{}).textContent||'',
+   hasMoves:[...btns].filter((b)=>/[\u4e00-\u9fff]/.test(b.textContent)).length});})()`));
+ check('可选精灵至少 6 只（实际 12 只名额）',rosterInfo.count>=6,`count=${rosterInfo.count}`);
+ check('名单里是真名，不是 pet_ 占位',
+  rosterInfo.names.length>0&&rosterInfo.names.every((n)=>n&&!/pet_\d/.test(n)),
+  rosterInfo.names.slice(0,5).join('、'));
+ check('名单状态写了「配招来自引擎」',/配招/.test(rosterInfo.status),rosterInfo.status);
+
+ // 选满双方 3 只 → 开局必须带上这套阵容
+ const picked=JSON.parse(await js(`(()=>{const d=window.rocoDemo;
+  d.state.pick.player=[];d.state.pick.enemy=[];
+  const ids=d.state.roster.map((p)=>p.pet_id);
+  d.state.pick.player=ids.slice(0,3);
+  d.state.pick.enemy=ids.slice(3,6);
+  d.renderRoster();
+  return JSON.stringify({player:d.state.pick.player,enemy:d.state.pick.enemy,
+   disabled:document.getElementById('start-battle').disabled});})()`));
+ check('双方各选 3 只后开局按钮可用',picked.disabled===false&&picked.player.length===3&&picked.enemy.length===3,
+  `disabled=${picked.disabled} player=${picked.player.length} enemy=${picked.enemy.length}`);
+
  // ── P0-2 产品判据：玩家看到的是人话，不是引擎内部结构 ────────────────
  //
  // 这一组是**产品**判据，不是接线判据。第 42 轮用户实测反馈事件区把
@@ -264,6 +289,27 @@ async function main(){
  const pageText=await js('document.documentElement.outerHTML');
  check('页面上不出现真实对局 seed 或私有状态',!/"seed"\s*:/.test(pageText)&&!/replace_queue/.test(pageText));
  check('控制台没有报错',consoleErrors.length===0&&pageErrors.length===0,JSON.stringify([...consoleErrors,...pageErrors].slice(0,3)));
+
+ // ── P0-3 端到端：**选好的阵容真的进了引擎** ────────────────────────────
+ // 放在最后：它会重开一局，不能让后面的判据读到这一局的状态。
+ const teamFlow=JSON.parse(await js(`(async()=>{const d=window.rocoDemo;
+  const ids=d.state.roster.map((p)=>p.pet_id);
+  const wantPlayer=ids.slice(0,3), wantEnemy=ids.slice(3,6);
+  d.state.pick.player=wantPlayer.slice(); d.state.pick.enemy=wantEnemy.slice();
+  d.renderRoster();
+  await d.startBattle();
+  const v=d.state.view||{};
+  const names=(side)=>(v[side]&&v[side].pets?v[side].pets.map((p)=>p.name):[]);
+  const want=wantPlayer.map((id)=>d.state.roster.find((p)=>p.pet_id===id).name);
+  return JSON.stringify({ok:Boolean(v.self),want,wantEnemy,got:names('self'),
+   gotFoe:(v.opponent&&v.opponent.field)?v.opponent.field.name:null,
+   foeExpected:d.state.roster.find((p)=>p.pet_id===wantEnemy[0]).name});})()`));
+ check('选好的我方阵容真的进了引擎（名字逐位对上）',
+  JSON.stringify(teamFlow.got)===JSON.stringify(teamFlow.want),
+  `期望 ${teamFlow.want.join('、')} ／ 实际 ${teamFlow.got.join('、')}`);
+ check('选好的对手阵容也进了引擎',
+  teamFlow.gotFoe===teamFlow.foeExpected,
+  `期望 ${teamFlow.foeExpected} ／ 实际 ${teamFlow.gotFoe}`);
 
  // 报告分两份写，这是刻意的：
  //   · demo-acceptance.json       —— **稳定**的验收结论（检查项与截图名），入库，可 diff；
