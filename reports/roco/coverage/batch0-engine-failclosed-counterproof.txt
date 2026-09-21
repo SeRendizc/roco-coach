@@ -1,0 +1,38 @@
+test_energy_gain_is_applied_or_registered (tests.test_fail_closed_branches.AttackBranchDropsAttachedEffects) ... FAIL
+test_registered_unsupported_carries_a_reason (tests.test_fail_closed_branches.AttackBranchDropsAttachedEffects)
+登记时**必须**写明原因，不能塞一个空字符串。 ... ok
+test_registered_unsupported_carries_a_reason (tests.test_fail_closed_branches.DefenseBranchDropsRespondClause) ... ok
+test_respond_clause_applied_when_respond_succeeds (tests.test_fail_closed_branches.DefenseBranchDropsRespondClause) ... FAIL
+test_respond_clause_registered_when_respond_fails (tests.test_fail_closed_branches.DefenseBranchDropsRespondClause)
+没应对成功时，这条子句**不能**被当成已生效（也不能静默）。 ... FAIL
+test_registering_effects_does_not_invent_a_damage_event (tests.test_fail_closed_branches.NeverApproximatedAsPlainDamage) ... ok
+
+======================================================================
+FAIL: test_energy_gain_is_applied_or_registered (tests.test_fail_closed_branches.AttackBranchDropsAttachedEffects)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/serendizc/Developer/roco-coach/roco/tests/test_fail_closed_branches.py", line 124, in test_energy_gain_is_applied_or_registered
+    self.assertTrue(
+AssertionError: [] is not true : 甩水的附带效果「自己回复1能量」既没生效也没登记：energy 4 -> 4，energy_events=[]，unsupported=[]，parse.effects=['self_energy']，parse.unparsed=[]
+
+======================================================================
+FAIL: test_respond_clause_applied_when_respond_succeeds (tests.test_fail_closed_branches.DefenseBranchDropsRespondClause)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/serendizc/Developer/roco-coach/roco/tests/test_fail_closed_branches.py", line 173, in test_respond_clause_applied_when_respond_succeeds
+    self.assertTrue(
+AssertionError: [] is not true : 水泡盾的「应对成功：自己获得魔攻+70%」既没生效也没登记：buffs={}，unsupported=[]，parsed=['self_stat']
+
+======================================================================
+FAIL: test_respond_clause_registered_when_respond_fails (tests.test_fail_closed_branches.DefenseBranchDropsRespondClause)
+没应对成功时，这条子句**不能**被当成已生效（也不能静默）。
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/serendizc/Developer/roco-coach/roco/tests/test_fail_closed_branches.py", line 188, in test_respond_clause_registered_when_respond_fails
+    self.assertTrue(
+AssertionError: [] is not true : 应对失败时既没生效也没登记（静默丢弃）：buffs={}，unsupported=[]
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+FAILED (failures=3)

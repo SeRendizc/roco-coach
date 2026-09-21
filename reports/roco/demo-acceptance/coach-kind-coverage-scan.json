@@ -1,0 +1,841 @@
+{
+ "generated_by": "scripts/roco/coach-kind-coverage-scan.mjs",
+ "schema": "roco-coach-kind-coverage/v1",
+ "command": "node scripts/roco/coach-kind-coverage-scan.mjs --stride 1",
+ "sample": {
+  "stride": 1,
+  "triples_total": 1320,
+  "seeds": [
+   20260921,
+   5,
+   11
+  ],
+  "lineups": 2640,
+  "note": "我方三人排列按固定顺序枚举后每 stride 个取一个，每个再配「镜像对手」与「倒序对手」；不用随机——样本一变，「哪些 kind 不可达」这句话就没有可比性。"
+ },
+ "scan": {
+  "battles_scanned": 2640,
+  "steps_scanned": 34021,
+  "kinds": {
+   "energy-short": {
+    "hit": 4967,
+    "shown": 1433,
+    "shown_battle_phase": 1433,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 3534,
+    "first_shown": {
+     "turn": 4,
+     "phase": "battle",
+     "action": "micro_hint",
+     "my_hp_ratio": 0.519,
+     "foe_hp_ratio": 0.519,
+     "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+    },
+    "shown_windows": [
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 3,
+      "turn": 4,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.519,
+      "foe_hp_ratio": 0.519,
+      "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 4,
+      "turn": 5,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.519,
+      "foe_hp_ratio": 0.519,
+      "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+     },
+     {
+      "seed": 5,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000190"
+      ],
+      "enemyTeam": null,
+      "advances": 3,
+      "turn": 4,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.519,
+      "foe_hp_ratio": 0.519,
+      "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+     },
+     {
+      "seed": 5,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000190"
+      ],
+      "enemyTeam": null,
+      "advances": 4,
+      "turn": 5,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.519,
+      "foe_hp_ratio": 0.519,
+      "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+     }
+    ]
+   },
+   "ko-now": {
+    "hit": 4192,
+    "shown": 2684,
+    "shown_battle_phase": 2684,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 1508,
+    "first_shown": {
+     "turn": 6,
+     "phase": "battle",
+     "action": "action_hint",
+     "my_hp_ratio": 0.279,
+     "foe_hp_ratio": 0.279,
+     "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+    },
+    "shown_windows": [
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 5,
+      "turn": 6,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.279,
+      "foe_hp_ratio": 0.279,
+      "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 8,
+      "turn": 8,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.224,
+      "foe_hp_ratio": 0.482,
+      "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 9,
+      "turn": 9,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.224,
+      "foe_hp_ratio": 0.328,
+      "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 12,
+      "turn": 11,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.178,
+      "foe_hp_ratio": 0.264,
+      "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+     }
+    ]
+   },
+   "switch-low-hp": {
+    "hit": 6151,
+    "shown": 6151,
+    "shown_battle_phase": 5415,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 0,
+    "first_shown": {
+     "turn": 6,
+     "phase": "replace",
+     "action": "action_hint",
+     "my_hp_ratio": 0.279,
+     "foe_hp_ratio": 0,
+     "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+    },
+    "shown_windows": [
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 6,
+      "turn": 6,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0.279,
+      "foe_hp_ratio": 0,
+      "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 7,
+      "turn": 7,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.279,
+      "foe_hp_ratio": 1,
+      "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 10,
+      "turn": 9,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0.224,
+      "foe_hp_ratio": 0,
+      "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": null,
+      "advances": 11,
+      "turn": 10,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.224,
+      "foe_hp_ratio": 1,
+      "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+     }
+    ]
+   },
+   "speed-decides": {
+    "hit": 7307,
+    "shown": 2369,
+    "shown_battle_phase": 1663,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 4938,
+    "first_shown": {
+     "turn": 3,
+     "phase": "replace",
+     "action": "action_hint",
+     "my_hp_ratio": 0.954,
+     "foe_hp_ratio": 0,
+     "shape": "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉"
+    },
+    "shown_windows": [
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000124"
+      ],
+      "enemyTeam": [
+       "pet_000124",
+       "pet_000112",
+       "pet_000062"
+      ],
+      "advances": 3,
+      "turn": 3,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0.954,
+      "foe_hp_ratio": 0,
+      "shape": "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉"
+     },
+     {
+      "seed": 5,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000190"
+      ],
+      "enemyTeam": null,
+      "advances": 12,
+      "turn": 11,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0.759,
+      "foe_hp_ratio": 0,
+      "shape": "它速度 # 快过你 #：别硬对拼，这一轮先换人躲一下"
+     },
+     {
+      "seed": 11,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000225"
+      ],
+      "enemyTeam": [
+       "pet_000225",
+       "pet_000112",
+       "pet_000062"
+      ],
+      "advances": 11,
+      "turn": 10,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 1,
+      "foe_hp_ratio": 0,
+      "shape": "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000417"
+      ],
+      "enemyTeam": [
+       "pet_000417",
+       "pet_000112",
+       "pet_000062"
+      ],
+      "advances": 9,
+      "turn": 9,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0.399,
+      "foe_hp_ratio": 0,
+      "shape": "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉"
+     }
+    ]
+   },
+   "replace-required": {
+    "hit": 1732,
+    "shown": 1732,
+    "shown_battle_phase": 0,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 0,
+    "first_shown": {
+     "turn": 6,
+     "phase": "replace",
+     "action": "action_hint",
+     "my_hp_ratio": 0,
+     "foe_hp_ratio": 0.279,
+     "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+    },
+    "shown_windows": [
+     {
+      "seed": 5,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000190"
+      ],
+      "enemyTeam": null,
+      "advances": 6,
+      "turn": 6,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0,
+      "foe_hp_ratio": 0.279,
+      "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+     },
+     {
+      "seed": 11,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000225"
+      ],
+      "enemyTeam": null,
+      "advances": 11,
+      "turn": 10,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0,
+      "foe_hp_ratio": 0.871,
+      "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+     },
+     {
+      "seed": 11,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000225"
+      ],
+      "enemyTeam": [
+       "pet_000225",
+       "pet_000112",
+       "pet_000062"
+      ],
+      "advances": 9,
+      "turn": 9,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0,
+      "foe_hp_ratio": 0.016,
+      "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+     },
+     {
+      "seed": 5,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000445"
+      ],
+      "enemyTeam": null,
+      "advances": 6,
+      "turn": 6,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0,
+      "foe_hp_ratio": 0.279,
+      "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+     }
+    ]
+   },
+   "type-resisted": {
+    "hit": 2706,
+    "shown": 842,
+    "shown_battle_phase": 842,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 1864,
+    "first_shown": {
+     "turn": 6,
+     "phase": "battle",
+     "action": "micro_hint",
+     "my_hp_ratio": 0.525,
+     "foe_hp_ratio": 0.671,
+     "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+    },
+    "shown_windows": [
+     {
+      "seed": 5,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000190"
+      ],
+      "enemyTeam": [
+       "pet_000190",
+       "pet_000112",
+       "pet_000062"
+      ],
+      "advances": 5,
+      "turn": 6,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.525,
+      "foe_hp_ratio": 0.671,
+      "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+     },
+     {
+      "seed": 11,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000225"
+      ],
+      "enemyTeam": [
+       "pet_000225",
+       "pet_000112",
+       "pet_000062"
+      ],
+      "advances": 5,
+      "turn": 6,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.459,
+      "foe_hp_ratio": 0.696,
+      "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+     },
+     {
+      "seed": 5,
+      "team": [
+       "pet_000062",
+       "pet_000112",
+       "pet_000601"
+      ],
+      "enemyTeam": null,
+      "advances": 8,
+      "turn": 8,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.482,
+      "foe_hp_ratio": 0.224,
+      "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+     },
+     {
+      "seed": 11,
+      "team": [
+       "pet_000062",
+       "pet_000124",
+       "pet_000190"
+      ],
+      "enemyTeam": [
+       "pet_000190",
+       "pet_000124",
+       "pet_000062"
+      ],
+      "advances": 5,
+      "turn": 6,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.525,
+      "foe_hp_ratio": 0.671,
+      "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+     }
+    ]
+   },
+   "foe-energy-high": {
+    "hit": 286,
+    "shown": 40,
+    "shown_battle_phase": 40,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 246,
+    "first_shown": {
+     "turn": 8,
+     "phase": "battle",
+     "action": "micro_hint",
+     "my_hp_ratio": 0.409,
+     "foe_hp_ratio": 0.561,
+     "shape": "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手"
+    },
+    "shown_windows": [
+     {
+      "seed": 11,
+      "team": [
+       "pet_000417",
+       "pet_000062",
+       "pet_000601"
+      ],
+      "enemyTeam": [
+       "pet_000601",
+       "pet_000062",
+       "pet_000417"
+      ],
+      "advances": 7,
+      "turn": 8,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.409,
+      "foe_hp_ratio": 0.561,
+      "shape": "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000417",
+       "pet_000112",
+       "pet_000601"
+      ],
+      "enemyTeam": [
+       "pet_000601",
+       "pet_000112",
+       "pet_000417"
+      ],
+      "advances": 7,
+      "turn": 8,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.409,
+      "foe_hp_ratio": 0.561,
+      "shape": "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手"
+     },
+     {
+      "seed": 5,
+      "team": [
+       "pet_000417",
+       "pet_000124",
+       "pet_000601"
+      ],
+      "enemyTeam": [
+       "pet_000601",
+       "pet_000124",
+       "pet_000417"
+      ],
+      "advances": 7,
+      "turn": 8,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.409,
+      "foe_hp_ratio": 0.561,
+      "shape": "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手"
+     },
+     {
+      "seed": 11,
+      "team": [
+       "pet_000417",
+       "pet_000190",
+       "pet_000601"
+      ],
+      "enemyTeam": [
+       "pet_000601",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "advances": 7,
+      "turn": 8,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.409,
+      "foe_hp_ratio": 0.561,
+      "shape": "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手"
+     }
+    ]
+   },
+   "type-favoured": {
+    "hit": 378,
+    "shown": 63,
+    "shown_battle_phase": 63,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 315,
+    "first_shown": {
+     "turn": 10,
+     "phase": "battle",
+     "action": "micro_hint",
+     "my_hp_ratio": 0.591,
+     "foe_hp_ratio": 0.634,
+     "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去"
+    },
+    "shown_windows": [
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000112",
+       "pet_000417",
+       "pet_000062"
+      ],
+      "enemyTeam": [
+       "pet_000062",
+       "pet_000417",
+       "pet_000112"
+      ],
+      "advances": 10,
+      "turn": 10,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.591,
+      "foe_hp_ratio": 0.634,
+      "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000112",
+       "pet_000417",
+       "pet_000062"
+      ],
+      "enemyTeam": [
+       "pet_000062",
+       "pet_000417",
+       "pet_000112"
+      ],
+      "advances": 11,
+      "turn": 11,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.591,
+      "foe_hp_ratio": 0.598,
+      "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去"
+     },
+     {
+      "seed": 5,
+      "team": [
+       "pet_000112",
+       "pet_000417",
+       "pet_000601"
+      ],
+      "enemyTeam": [
+       "pet_000601",
+       "pet_000417",
+       "pet_000112"
+      ],
+      "advances": 9,
+      "turn": 9,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.404,
+      "foe_hp_ratio": 0.561,
+      "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去"
+     },
+     {
+      "seed": 11,
+      "team": [
+       "pet_000124",
+       "pet_000417",
+       "pet_000062"
+      ],
+      "enemyTeam": [
+       "pet_000062",
+       "pet_000417",
+       "pet_000124"
+      ],
+      "advances": 10,
+      "turn": 10,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.591,
+      "foe_hp_ratio": 0.642,
+      "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去"
+     }
+    ]
+   },
+   "foe-low-hp": {
+    "hit": 67,
+    "shown": 6,
+    "shown_battle_phase": 6,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 61,
+    "first_shown": {
+     "turn": 7,
+     "phase": "battle",
+     "action": "micro_hint",
+     "my_hp_ratio": 0.483,
+     "foe_hp_ratio": 0.053,
+     "shape": "对面「◆」只剩 # 血：这一轮先把它补掉，别让它换人喘口气"
+    },
+    "shown_windows": [
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000474",
+       "pet_000445"
+      ],
+      "enemyTeam": [
+       "pet_000445",
+       "pet_000474",
+       "pet_000062"
+      ],
+      "advances": 8,
+      "turn": 7,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.483,
+      "foe_hp_ratio": 0.053,
+      "shape": "对面「◆」只剩 # 血：这一轮先把它补掉，别让它换人喘口气"
+     },
+     {
+      "seed": 20260921,
+      "team": [
+       "pet_000062",
+       "pet_000474",
+       "pet_000445"
+      ],
+      "enemyTeam": [
+       "pet_000445",
+       "pet_000474",
+       "pet_000062"
+      ],
+      "advances": 9,
+      "turn": 8,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.329,
+      "foe_hp_ratio": 0.053,
+      "shape": "对面「◆」只剩 # 血：这一轮先把它补掉，别让它换人喘口气"
+     },
+     {
+      "seed": 5,
+      "team": [
+       "pet_000225",
+       "pet_000417",
+       "pet_000601"
+      ],
+      "enemyTeam": null,
+      "advances": 10,
+      "turn": 10,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.274,
+      "foe_hp_ratio": 0.052,
+      "shape": "对面「◆」只剩 # 血：这一轮先把它补掉，别让它换人喘口气"
+     },
+     {
+      "seed": 11,
+      "team": [
+       "pet_000225",
+       "pet_000417",
+       "pet_000608"
+      ],
+      "enemyTeam": [
+       "pet_000608",
+       "pet_000417",
+       "pet_000225"
+      ],
+      "advances": 10,
+      "turn": 10,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.528,
+      "foe_hp_ratio": 0.058,
+      "shape": "对面「◆」只剩 # 血：这一轮先把它补掉，别让它换人喘口气"
+     }
+    ]
+   }
+  }
+ },
+ "all_kinds": [
+  "replace-required",
+  "ko-now",
+  "ko-maybe",
+  "foe-low-hp",
+  "switch-low-hp",
+  "energy-short",
+  "foe-status-ticking",
+  "type-resisted",
+  "type-favoured",
+  "speed-decides",
+  "foe-energy-high"
+ ],
+ "kinds_never_hit": [
+  "ko-maybe",
+  "foe-status-ticking"
+ ],
+ "elapsed_ms": 1805734
+}

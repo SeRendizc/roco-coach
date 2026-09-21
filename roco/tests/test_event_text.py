@@ -112,6 +112,16 @@ SAMPLE_EVENTS = {
     "status_unsupported": {"kind": "status_unsupported", "turn": 4, "detail": {
         "side": "enemy", "skill_id": "skill_000576"}},
     "unsupported": {"kind": "unsupported", "turn": 4, "detail": {"what": "某条未核验机制"}},
+    # 第 47 轮批 0：攻击/防御分支的附带效果「生效或登记」，多出这两个 kind。
+    "energy_gain": {"kind": "energy_gain", "turn": 3, "detail": {
+        "side": "player", "skill_id": "skill_000418", "amount": 1, "energy_after": 4,
+        "assumption": "MC-007", "evidence_text": "自己回复1能量"}},
+    "effects_registered_unsupported": {"kind": "effects_registered_unsupported", "turn": 3,
+                                       "detail": {
+                                           "side": "player", "skill_id": "skill_000321",
+                                           "parsed_effects": 0, "unclaimed_spans": 2,
+                                           "unparsed_markers": 0,
+                                           "reason": "攻击分支只结算伤害"}},
     # 效果层/特性层直接塞进列表的那一类：**扁平形状**，没有 `detail` 包裹
     "trait": {"kind": "trait", "trait": "专注力", "side": "player", "effect": "atk +100%",
               "evidence": "feature_skill"},

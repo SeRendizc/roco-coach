@@ -54,11 +54,11 @@ class Effect:
     """一条被解析出来的效果。"""
 
     kind: str                    # self_stat / self_mark / foe_stat / foe_status / foe_mark /
-                                 # cleanse / heal / drain_energy / escape / weather
+                                 # cleanse / heal / self_energy / drain_energy / escape / weather
     target: str                  # self / foe
     value: Dict[str, object] = field(default_factory=dict)
     evidence: str = ""           # 原文片段
-    term: Optional[str] = None   # 术语 id（若该机制在术语表里有定义）
+    term: Optional[str] = None   # 术语 id（若该机制在术语表里有定义）；MC-xxx = 待验项
 
 
 @dataclass
@@ -88,6 +88,7 @@ _FOE_STATUS = re.compile(r"敌方获得\s*(\d+)\s*层\s*(冻结|中毒|灼烧|�
 _FOE_STAT = re.compile(r"敌方获得(双攻|双防|物攻|魔攻|物防|魔防|速度)\s*([-－])\s*(\d+)%")
 _CLEANSE = re.compile(r"驱散敌方所有(增益|减益)|驱散双方所有印记")
 _HEAL = re.compile(r"回复\s*(\d+)\s*%?\s*生命")
+_SELF_ENERGY = re.compile(r"自己(?:回复|获得)\s*(\d+)\s*能量")
 _DRAIN_ENERGY = re.compile(r"偷取敌方\s*(\d+)\s*能量")
 _ESCAPE = re.compile(r"(脱离|返场)")
 _WEATHER = re.compile(r"将天气改为([\u4e00-\u9fa5]+)")
@@ -104,6 +105,37 @@ _EXTRA_MECHANIC = (
 
 def _has_extra_mechanic(desc: str) -> bool:
     return any(word in desc for word in _EXTRA_MECHANIC)
+
+
+def unclaimed_mechanic_spans(skill) -> List[str]:
+    """描述里出现、但**没有被任何解析结果覆盖**的机制词片段。
+
+    为什么需要它：`plain_attack` 与 `unparsed` 都只能回答「这条技能是不是纯伤害」，
+    回答不了「哪一段没被处理」。第 46 轮审计发现攻击分支把「造成魔伤，自己回复1能量」
+    整条附带效果静默丢掉，就是因为没有任何函数能指出「这段文本没人认领」。
+    调用方（`env._execute` 的攻击 / 防御区段）拿它去写 `state.unsupported`。
+
+    判定方式：对每个机制词，找出描述里它的出现位置；如果某个位置落在**任意一条
+    已解析效果的 `evidence` 覆盖范围**内，就算已被认领，否则算未认领。
+    """
+    desc = skill.desc or ""
+    parsed = parse_skill(skill)
+    covered = [(desc.find(e.evidence), e.evidence) for e in parsed.effects if e.evidence]
+    covered = [(i, i + len(t)) for i, t in covered if i >= 0]
+    spans: List[str] = []
+    for word in _EXTRA_MECHANIC:
+        start = 0
+        while True:
+            idx = desc.find(word, start)
+            if idx < 0:
+                break
+            if not any(lo <= idx < hi for lo, hi in covered):
+                # 取该词所在的整条分句，作为给人看的原因
+                lo = max(desc.rfind(c, 0, idx) for c in "，。；") + 1
+                hi = min([p for p in (desc.find(c, idx) for c in "，。；") if p >= 0] or [len(desc)])
+                spans.append(f"{word}：{desc[lo:hi].strip()}")
+            start = idx + 1
+    return spans
 
 
 def parse_skill(skill) -> Parsed:
@@ -156,6 +188,32 @@ def parse_skill(skill) -> Parsed:
     if m:
         out.effects.append(Effect(kind="heal", target="self",
                                   value={"percent": int(m.group(1))}, evidence=m.group(0)))
+
+    # 「自己回复1能量」：**第 47 轮批 0 补上**。以前这条既没被解析、也没被登记，
+    # 而攻击分支根本不看描述，于是整条效果被静默丢弃（缺陷，见
+    # `roco/tests/test_fail_closed_branches.py`）。
+    # 为什么可以解析而不是继续 fail closed：文本是机械可读的，且本仓库自己的
+    # 效果清单 `roco/tools/mine_effects.py:267-274` 早就把它登记为 `energy_gain`。
+    # 但**时序没有手游证据**：能量上限、回合末回能、技能自带回能的先后顺序
+    # 是 MC-007 未解问题（见同一条清单的 note），所以用它时必须带 `assumption`。
+    # 「若上回合…自己回复7能量」「敌方每有1层冻结，自己回复1能量」这类**带条件**的
+    # 回能，条件本身要么依赖未实现的机制（冻结层数语义），要么依赖回合历史。
+    # 无条件地结算会变成**静默错算**，所以这一类不生成效果，转而进 `unparsed`。
+    # 判据只看**同一条分句内** match 之前的文字，避免把描述别处的「若」误算进来。
+    conditional_gain = False
+    for m in _SELF_ENERGY.finditer(desc):
+        head = desc[:m.start()]
+        clause = re.split(r"[，,。]", head)[-1]
+        if any(word in clause for word in ("若", "每有", "每", "当", "如果")):
+            conditional_gain = True
+    if conditional_gain:
+        out.effects = [e for e in out.effects if e.kind != "self_energy"]
+        out.unparsed.append(f"条件化回能（出现在：{desc[:40]}）")
+    else:
+        for m in _SELF_ENERGY.finditer(desc):
+            out.effects.append(Effect(kind="self_energy", target="self",
+                                      value={"amount": int(m.group(1))},
+                                      evidence=m.group(0), term="MC-007"))
 
     m = _DRAIN_ENERGY.search(desc)
     if m:

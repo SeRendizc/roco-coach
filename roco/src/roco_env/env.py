@@ -10,12 +10,25 @@
 
 尚未核验因而**没有**在这里实现的机制（会 fail closed）：
 
-  - 能量上限与回合末回能的精确规则（MC-007）
+  - 能量上限与回合末回能的精确规则（MC-007）；**技能自带的「自己回复N能量」**
+    会按描述结算，但「技能回能 vs 回合末回能 vs 能量上限」的先后顺序同样没有
+    一手证据（MC-007），所以每一次都会写进 `state.unsupported`
   - 同速且同先手度时的裁决依据；此处用 seed 驱动的确定性随机，**这是假设**（MC-002）
   - 印记的叠加/替换规则（MC-009）
   - 「传动」的技能位移动（术语 1033）
   - 天气、连击数、属性增减的层数语义
-  - 12 只精灵的特性效果（MC-014…019）
+  - 特性效果：`traits.py` 已登记 12 条（FULL 6 / PARTIAL 2 / REFUSED 4），
+    其余精灵的特性**未登记**（MC-014…019 仍未闭合；`engine-trait-status.json` 是账本）
+
+**第 47 轮批 0 修掉的两处静默丢弃**（第 46 轮审计实测发现，用例见
+`roco/tests/test_fail_closed_branches.py`）：
+
+  - 攻击分支以前只算伤害，描述里被解析出的附带效果（例「造成魔伤，自己回复1能量」）
+    **既不生效也不登记**；
+  - 防御分支应用减伤后直接 `return`，「应对成功：自己获得魔攻+70%」同样静默消失。
+  现在两条路径统一走「**要么真的生效、要么进 `state.unsupported` 并带原因**」，
+  并额外把描述里**没有任何解析结果认领**的机制词片段登记出来
+  （`parse.unclaimed_mechanic_spans`）。禁止把 unsupported 效果近似成普通伤害。
 """
 
 from __future__ import annotations
@@ -521,6 +534,30 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         _bump(state, "defense", {"side": side, "skill_id": skill.skill_id,
                                  "reduction": reduction, "respond": succeeded},
               evidence=("1015", "1016", "1017"))
+        # 「应对攻击：自己获得魔攻+70%」这类**应对子句**：
+        # 应对成功 → 真的应用（见 `_apply_effect_batch`）；
+        # 应对失败 → **登记**为 unsupported，绝不能当成已生效。
+        # 第 46 轮审计实测这一支以前直接 return：`buffs={}`、`unsupported=[]`，
+        # 效果被静默丢弃。缺陷由 `roco/tests/test_fail_closed_branches.py` 钉住。
+        parsed_def = parse.parse_skill(skill)
+        if parsed_def.effects or parsed_def.unparsed:
+            if succeeded:
+                applied = _apply_effect_batch(state, rs, side, skill, parsed_def)
+                state.log.append(
+                    f"应对成功，{parsed_def.skill_name}的应对效果结算 {applied} 条。"
+                )
+            else:
+                _register_parsed_effects(
+                    state, rs, side, skill, parsed_def, applied=False,
+                    reason="「应对成功」子句的条件没有成立（对手这一手不是该技能应对的类别）",
+                )
+            # 认不出来的机制词无论应对成不成功都要登记：它们不属于已结算的那部分。
+            for span in parse.unclaimed_mechanic_spans(skill):
+                _note_unsupported(
+                    state, f"技能「{skill.name}」的附带机制",
+                    f"描述里有引擎未认领的机制词 —— {span}；该段不在减伤与"
+                    "「应对成功」子句的可结算范围内", skill.skill_id,
+                )
         return
 
     if skill.is_status:
@@ -591,6 +628,22 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         state.log.append(f"{defender_pet.name}倒下了。")
         _bump(state, "faint", {"side": foe_side, "slot": defender.slot}, evidence=("3009",))
 
+    # 附带效果：**先应用解析得出的部分，再登记认不出来的部分**。
+    # 以前这里什么都没有 —— 「造成魔伤，自己回复1能量」被整条静默丢弃
+    # （实测 energy 不变、events=['damage']、unsupported=[]）。纪律不允许：
+    # 要么真的生效，要么如实登记。禁止把 unsupported 效果近似成普通伤害。
+    parsed_atk = parse.parse_skill(skill)
+    if parsed_atk.effects or parsed_atk.unparsed:
+        applied = _apply_effect_batch(state, rs, side, skill, parsed_atk)
+        if applied:
+            state.log.append(f"{skill.name}的附带效果结算 {applied} 条。")
+        # 解析不出来的、以及描述里没被任何解析结果认领的机制词，全部登记。
+        _register_parsed_effects(
+            state, rs, side, skill, parsed_atk, applied=True,
+            reason="攻击分支只结算伤害、以及**已解析并已应用**的附带效果；"
+                   "这一段没有对应的实现",
+        )
+
 
 def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bool:
     """应用一个状态技能被解析出来的效果。返回是否**至少应用了一条**。
@@ -603,10 +656,39 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
     if not parsed.effects or parsed.unparsed:
         return False
 
+    applied = _apply_effect_batch(state, rs, side, skill, parsed)
+
+    if applied:
+        me = getattr(state, side)
+        label = "你" if side == "player" else "对手"
+        state.log.append(
+            f"{label}的{rs.pet(me.field_pet.pet_id).name}使用{skill.name}，应用 {applied} 条效果。"
+        )
+        _bump(state, "status_applied", {"side": side, "skill_id": skill.skill_id,
+                                        "effects": applied})
+        evs: List[Dict[str, Any]] = []
+        tr.after_status_skill(rs, state, side, skill, evs)
+        for e in evs:
+            _bump(state, e.pop("kind"), e)
+    return applied > 0
+
+
+def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
+                        parsed) -> int:
+    """把 `parse.parse_skill` 解析出的一批效果应用到状态上，返回**应用成功的条数**。
+
+    抽出来的理由（第 47 轮批 0）：攻击分支与防御分支以前完全不调用这段逻辑，
+    于是描述里被解析出来的附带效果被**静默丢弃**——既没生效，也没进
+    `state.unsupported`。两处缺陷由 `roco/tests/test_fail_closed_branches.py` 钉住。
+
+    仍然不做部分应用：应用不了的（`escape` / `weather`）**登记**为 unsupported，
+    计入返回值之外的 `state.unsupported`，绝不当成生效。
+    「带假设的效果」（`self_energy`）会生效，但**同时**登记 assumption，
+    让上层能说出「这个数字来自 MC-007 未定的时序」。
+    """
     me = getattr(state, side)
     foe = getattr(state, "enemy" if side == "player" else "player")
     pet = me.field_pet
-    label = "你" if side == "player" else "对手"
     applied = 0
 
     for eff in parsed.effects:
@@ -642,6 +724,11 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
             name = str(v["status"])
             spec = fx.END_OF_TURN_STATUS.get(name)
             if spec is None:
+                # 未实现的持续状态：登记，不当成生效。
+                _note_unsupported(
+                    state, f"状态「{name}」", "该状态没有回合末结算实现（effects.py 未登记）",
+                    skill.skill_id,
+                )
                 continue
             tgt = foe.field_pet
             tgt.statuses[name] = {
@@ -651,12 +738,13 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
             _bump(state, "status_added", {"side": "enemy", "status": name,
                                           "layers": v["layers"]},
                   evidence=(spec.get("term", ""),))
-        elif eff.kind == "foe_status" and str(v["status"]) == "冻结":
-            # 见上方 foe_status 分支已写入状态；这里补特性钩子（捉迷藏）
-            evs2: List[Dict[str, Any]] = []
-            tr.after_freeze_applied(rs, state, side, evs2)
-            for e in evs2:
-                _bump(state, e.pop("kind"), e)
+            if name == "冻结":
+                # 特性钩子（捉迷藏）。以前这一支永远不可达（前面的 elif 已经吃掉
+                # 所有 `foe_status`），现在挂在同一个分支里。
+                evs2: List[Dict[str, Any]] = []
+                tr.after_freeze_applied(rs, state, side, evs2)
+                for e in evs2:
+                    _bump(state, e.pop("kind"), e)
         elif eff.kind == "cleanse":
             cleared = sorted(foe.field_pet.buffs)
             foe.field_pet.buffs.clear()
@@ -669,6 +757,26 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
             pet.hp += healed
             applied += 1
             _bump(state, "heal", {"side": side, "healed": healed})
+        elif eff.kind == "self_energy":
+            amount = int(v["amount"])
+            before = pet.energy
+            pet.energy = min(ENERGY_MAX, pet.energy + amount)
+            gained = pet.energy - before
+            applied += 1
+            # 时序未核验：能量上限 / 回合末回能 / 技能自带回能的先后顺序是 MC-007。
+            # 这里选择「出手结算时立即回能」，并把**这个选择本身**登记出来。
+            _note_unsupported(
+                state, f"技能「{skill.name}」的自带回能时序",
+                f"描述「{eff.evidence}」机械可读，因此按 {amount} 点结算；"
+                "但「技能回能 vs 回合末回能 vs 能量上限」的先后顺序无一手证据（MC-007），"
+                "本引擎按「出手结算时立即回能」处理",
+                skill.skill_id,
+            )
+            _bump(state, "energy_gain", {
+                "side": side, "skill_id": skill.skill_id, "amount": gained,
+                "energy_after": pet.energy, "assumption": "MC-007",
+                "evidence_text": eff.evidence,
+            }, evidence=("MC-007",))
         elif eff.kind == "drain_energy":
             amount = int(v["amount"])
             taken = min(amount, foe.field_pet.energy)
@@ -682,18 +790,64 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
                               "离场需要选择换上谁，属补位流程；引擎未自动代选", "3009")
         elif eff.kind == "weather":
             _note_unsupported(state, f"天气「{v['weather']}」", "引擎尚未实现天气层", "")
+    return applied
 
-    if applied:
-        state.log.append(
-            f"{label}的{rs.pet(pet.pet_id).name}使用{skill.name}，应用 {applied} 条效果。"
+
+def _register_parsed_effects(state: GameState, rs: Ruleset, side: str, skill,
+                             parsed, *, applied: bool, reason: str) -> None:
+    """攻击 / 防御分支的**登记**入口。
+
+    这两个分支以前直接 `return`，描述里被解析出来却没被执行的效果连一条记录都没有。
+    本函数把它们逐条登记进 `state.unsupported`，并附上**为什么没结算**。
+    没有解析结果、也没有未认领机制词时它什么都不做（纯伤害技能不受影响）。
+
+    `applied=True` 表示这批效果**刚刚被 `_apply_effect_batch` 处理过**：
+    那时只登记「批量处理不了的那些」（离场 / 天气 / 未登记的状态），
+    已经生效的不再重复登记。`applied=False` 表示一条都没结算（应对失败 / 攻击分支
+    没吃下的部分），此时逐条登记。
+    """
+    unclaimed = parse.unclaimed_mechanic_spans(skill)
+    handled_kinds = {
+        "self_stat", "foe_stat", "self_mark", "foe_mark", "cleanse", "heal",
+        "self_energy", "drain_energy",
+    }
+    for eff in parsed.effects:
+        if applied and eff.kind in handled_kinds:
+            continue
+        if applied and eff.kind == "foe_status" and fx.END_OF_TURN_STATUS.get(str(eff.value["status"])):
+            continue
+        label = {
+            "self_stat": "自己属性增减", "foe_stat": "敌方属性增减",
+            "self_mark": "自己印记", "foe_mark": "敌方印记",
+            "foe_status": "敌方持续状态", "cleanse": "驱散",
+            "heal": "回复生命", "self_energy": "自带回能",
+            "drain_energy": "偷取能量", "escape": "离场", "weather": "天气",
+        }.get(eff.kind, eff.kind)
+        _note_unsupported(
+            state, f"技能「{skill.name}」的{label}",
+            f"描述片段「{eff.evidence}」被解析出但未在此分支结算：{reason}",
+            skill.skill_id,
         )
-        _bump(state, "status_applied", {"side": side, "skill_id": skill.skill_id,
-                                        "effects": applied})
-        evs: List[Dict[str, Any]] = []
-        tr.after_status_skill(rs, state, side, skill, evs)
-        for e in evs:
-            _bump(state, e.pop("kind"), e)
-    return applied > 0
+    for raw in getattr(parsed, "unparsed", ()) or ():
+        _note_unsupported(
+            state, f"技能「{skill.name}」的未解析机制",
+            f"解析器没有覆盖这一段 —— {raw}；{reason}",
+            skill.skill_id,
+        )
+    for span in unclaimed:
+        _note_unsupported(
+            state, f"技能「{skill.name}」的附带机制",
+            f"描述里有引擎未认领的机制词 —— {span}；{reason}",
+            skill.skill_id,
+        )
+    if parsed.effects or unclaimed or getattr(parsed, "unparsed", ()):
+        _bump(state, "effects_registered_unsupported", {
+            "side": side, "skill_id": skill.skill_id,
+            "parsed_effects": len(parsed.effects), "unclaimed_spans": len(unclaimed),
+            "unparsed_markers": len(getattr(parsed, "unparsed", ()) or ()),
+            "reason": reason,
+        })
+
 
 
 def _opponent_action_of(state: GameState, side: str) -> Optional[Action]:

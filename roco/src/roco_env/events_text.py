@@ -161,6 +161,28 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
         amount = _num(detail.get("taken"))
         return f"{side}被抽走 {amount} 点能量。" if amount else f"{side}的能量被抽走。"
 
+    if kind == "energy_gain":
+        amount = _num(detail.get("amount"))
+        # 回能时序是 MC-007 未解项（`env.py` 里登记了 assumption），所以要标出来。
+        tail = "（回能时序未核验，按出手时立即回能处理）" if detail.get("assumption") else ""
+        if amount:
+            return f"{side}用{skill_name()}回收了 {amount} 点能量{tail}。"
+        return f"{side}用{skill_name()}回收能量，但已达上限{tail}。"
+
+    if kind == "effects_registered_unsupported":
+        effect_count = detail.get("parsed_effects")
+        span_count = detail.get("unclaimed_spans")
+        marker_count = detail.get("unparsed_markers")
+        parts = []
+        if effect_count:
+            parts.append(f"{effect_count} 条已解析效果")
+        if marker_count:
+            parts.append(f"{marker_count} 处未解析机制")
+        if span_count:
+            parts.append(f"{span_count} 处未认领机制词")
+        what = "、".join(parts) if parts else "附加效果"
+        return f"{side}的{skill_name()}有{what}**没有结算**（未核验，不猜数值），已如实登记。"
+
     if kind == "item":
         item = _ITEM.get(str(detail.get("item")), "道具")
         if detail.get("healed") is not None:
@@ -259,6 +281,9 @@ KNOWN_EVENT_KINDS = frozenset({
     "switch", "replacement", "defense", "buff_self", "debuff_foe", "mark_added",
     "status_added", "status_applied", "status_tick", "cleanse", "escape",
     "action_cancelled", "game_end", "power_unsupported", "status_unsupported", "unsupported",
+    # 第 47 轮批 0 补：攻击/防御分支的附带效果现在「生效或登记」，
+    # 于是多出这两个 kind（`env._apply_effect_batch` / `env._register_parsed_effects`）。
+    "energy_gain", "effects_registered_unsupported",
     # 效果层/特性层直接塞进事件列表的那一类（扁平形状，没有 `detail`）
     "trait",
 })

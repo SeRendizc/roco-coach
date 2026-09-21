@@ -1,0 +1,13 @@
+test_energy_gain_is_applied_or_registered (tests.test_fail_closed_branches.AttackBranchDropsAttachedEffects) ... ok
+test_registered_unsupported_carries_a_reason (tests.test_fail_closed_branches.AttackBranchDropsAttachedEffects)
+登记时**必须**写明原因，不能塞一个空字符串。 ... ok
+test_registered_unsupported_carries_a_reason (tests.test_fail_closed_branches.DefenseBranchDropsRespondClause) ... ok
+test_respond_clause_applied_when_respond_succeeds (tests.test_fail_closed_branches.DefenseBranchDropsRespondClause) ... ok
+test_respond_clause_registered_when_respond_fails (tests.test_fail_closed_branches.DefenseBranchDropsRespondClause)
+没应对成功时，这条子句**不能**被当成已生效（也不能静默）。 ... ok
+test_registering_effects_does_not_invent_a_damage_event (tests.test_fail_closed_branches.NeverApproximatedAsPlainDamage) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.002s
+
+OK
