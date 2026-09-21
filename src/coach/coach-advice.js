@@ -74,15 +74,17 @@ const FOE_FINISH_RATIO = 0.1;
 /**
  * 「对面能量快满了」的**产品阈值**：5。
  *
- * 依据：引擎 `ENERGY_MAX = 6`（`roco/src/roco_env/env.py`），每回合回 1 点，
- * `能量果` 一次给 4 点（同文件 `ITEM_EFFECTS`）。到 5 就意味着对面**当下**
- * 放得出几乎任何一招（配招里最贵的那几招能耗 3—5）。这是一个档位判断，
- * 没有官方「高能量」定义，所以它是产品阈值。**不是游戏规则。**
+ * 依据：默认规则配置 `legacy_sim_v1` 的上限 6（`data/roco/rulesets/legacy-sim-v1.json`，
+ * 唯一事实源），每回合回 1 点，`能量果` 一次给 4 点（引擎 `ITEM_EFFECTS`）。
+ * 到 5 就意味着对面**当下**放得出几乎任何一招（配招里最贵的那几招能耗 3—5）。
+ * 这是一个档位判断，没有官方「高能量」定义，所以它是产品阈值。**不是游戏规则。**
  */
 const FOE_ENERGY_ALERT = 5;
 
-/** 引擎的能量上限，只用来在证据里说明「离满还差多少」。 */
-const ENERGY_MAX = 6;
+// 这一层**不再**持有能量上限的字面量（RC-101：全仓只有规则配置文件可以出现它）。
+// 上限从**公开视图**里读：服务端把规则配置里的 `energy_max` 一起发下来时
+// （`opponent.energy_max`），本层才知道「离满还差多少」；发不下来时**不说话**，
+// 而不是照抄一个可能已经过期的 6。判据见 `detectFoeEnergyHigh`。
 
 // ── 小工具 ────────────────────────────────────────────────────────────────
 
@@ -262,6 +264,10 @@ function readPosition(game) {
     // 用它去索引就会读到一条后备记录（血/速度/名字全是 null），于是检测器**安静地不说话**。
     foe: foePets[0] ?? null,
     foeBench: foePets.slice(1),
+    // 能量上限来自公开视图里的**规则配置**（`opponent.energy_max` / `self.energy_max`）。
+    // 读不到就是 null —— 本层宁可不说，也不猜一个上限。
+    energyMax: num(rawFoe?.energy_max) ?? num(rawFoe?.energyMax)
+      ?? num(rawSelf?.energy_max) ?? num(rawSelf?.energyMax) ?? null,
     legal,
     skills,
     events: Array.isArray(raw?.events) ? raw.events : [],
@@ -650,17 +656,25 @@ function detectSpeed(pos) {
   );
 }
 
-/** 11. 对面能量快满了：下一手随时可能是重招。只提醒风险，不替玩家挑招。 */
+/**
+ * 11. 对面能量快满了：下一手随时可能是重招。只提醒风险，不替玩家挑招。
+ *
+ * 上限来自公开视图（`pos.energyMax`，服务端从规则配置里带下来）。**读不到上限就沉默**：
+ * 这句话里唯一有价值的数字就是「上限」，判据不够就开口等于编规则。
+ * 沉默是允许的（见文件头的第三条纪律），所以这里不用一个抄来的默认值兜底。
+ */
 function detectFoeEnergyHigh(pos) {
   const foe = pos.foe;
   const energy = num(foe?.energy);
-  if (!foe || foe.fainted || energy === null || energy < FOE_ENERGY_ALERT) return null;
+  const energyMax = num(pos.energyMax);
+  if (!foe || foe.fainted || energy === null || energyMax === null) return null;
+  if (energy < FOE_ENERGY_ALERT) return null;
   return candidate(
     'foe-energy-high',
-    `对面能量到 ${show(energy)} 了（上限 ${ENERGY_MAX}）：重招随时来，别拿残血硬接这一手`,
-    `它能量已经攒到 ${show(energy)}（上限 ${ENERGY_MAX}），这一轮随时放得出重招`,
+    `对面能量到 ${show(energy)} 了（上限 ${show(energyMax)}）：重招随时来，别拿残血硬接这一手`,
+    `它能量已经攒到 ${show(energy)}（上限 ${show(energyMax)}），这一轮随时放得出重招`,
     '这一下硬接可能直接倒一只，先把厚的那只留在场上',
-    {foe: foe.name, foeEnergy: energy, energyMax: ENERGY_MAX, foeHp: foe.hp},
+    {foe: foe.name, foeEnergy: energy, energyMax, foeHp: foe.hp},
   );
 }
 

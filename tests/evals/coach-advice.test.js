@@ -26,6 +26,15 @@ import {rocoGameView} from '../../src/coach/roco-experience.js';
 
 const RULESET = 'roco-world-s4-2026-09-10';
 
+/**
+ * 能量上限（RC-101 起）不再由教练层硬编码，而是随公开视图下发（`opponent.energy_max`）。
+ * fixture 里的这个数照**规则配置**取，不另抄一份：配置文件是唯一事实源。
+ * 页面还没把 `energy_max` 接进公开视图 —— 那时这条检测器**沉默**而不是猜一个上限。
+ */
+const RULESET_ENERGY_MAX = JSON.parse(readFileSync(
+  new URL('../../data/roco/rulesets/legacy-sim-v1.json', import.meta.url), 'utf8',
+)).energy.max.value;
+
 /** 真实技能行（数值全部抄自 data/roco/normalized/roco-world-s4-2026-09-10/skills.json）。 */
 const SKILLS = {
   音爆: {skill_id: 'skill_000251', name: '音爆', element: '普通系', category: '攻击', energy: 4, power: 130, power_status: 'static_value_present'},
@@ -109,6 +118,9 @@ function view({stateVersion, turn, phase = 'battle', result = null, pets, skills
       living_count: 3,
       field: foeField,
       bench: foeBench,
+      // 规则配置里的能量上限（服务端将来要从同一份配置带下来；fixture 现在就按那个形状写，
+      // 这样「教练层读不到上限就沉默」这条行为不会被一个手搭的形状掩盖过去）。
+      energy_max: RULESET_ENERGY_MAX,
     },
     legal,
     cpu_legal_count: 0,

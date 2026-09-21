@@ -84,13 +84,20 @@ export function publicView(result){
   turn:Number.isInteger(result.turn)?result.turn:null,
   phase:typeof result.phase==='string'?result.phase:null,
   battle_result:result.result??null,
-  self:{active:selfState?.active??null,pets:pets(selfState?.pets),
+  self:{active:selfState?.active??null,
+   // 能量上限来自**规则配置**（引擎 `ui_public_view` 读当前生效配置后带出来）。
+   // 教练层用它判断「对面离满还差多少」；这里不透出去，那一类建议就只能沉默。
+   // 读不到就是 null（界面与教练层都不许拿一个抄来的默认值兜底）。
+   energy_max:Number.isInteger(selfState?.energy_max)?selfState.energy_max:null,
+   pets:pets(selfState?.pets),
    // 己方可用技能（配招那一套）：UI 的技能面板直接用它
    skills:Array.isArray(ui?.self?.skills)?ui.self.skills.map(skillRow):[]},
   // 对手**场上**那一只是公开的（血条与能量画在屏幕上）；后备只有位次与是否倒下。
   opponent:{
    active:foeState?.active??null,
    living_count:foeState?.living_count??null,
+   // 对手的能量上限是**规则常量**（双方同一份配置），不是隐藏信息。
+   energy_max:Number.isInteger(foeState?.energy_max)?foeState.energy_max:null,
    // 对手**场上**那一只与己方走**同一个成型函数**：名字与系别就画在屏幕上，
    // 所以它和己方一样带展示字段。手写一份字段清单的结果就是这里漏掉 name
    // （第 42 轮第一次改就漏了，界面上对手仍然是无名）。
