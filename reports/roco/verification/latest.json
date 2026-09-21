@@ -6,7 +6,7 @@
    "id": "env",
    "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
    "ok": true,
-   "ms": 25712,
+   "ms": 26014,
    "tail": [
     "> test:env",
     "> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
@@ -16,55 +16,55 @@
    "id": "unit",
    "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
    "ok": true,
-   "ms": 15329,
+   "ms": 15012,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 15204.238792"
+    "ℹ duration_ms 14881.731417"
    ]
   },
   {
    "id": "bridge",
    "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
    "ok": true,
-   "ms": 2969,
+   "ms": 2996,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 2840.438416"
+    "ℹ duration_ms 2865.792416"
    ]
   },
   {
    "id": "toolbox-roco",
    "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
    "ok": true,
-   "ms": 189,
+   "ms": 190,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 56.522084"
+    "ℹ duration_ms 55.568125"
    ]
   },
   {
    "id": "plan-e2e",
    "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
    "ok": true,
-   "ms": 1342,
+   "ms": 1330,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 1213.549375"
+    "ℹ duration_ms 1201.644125"
    ]
   },
   {
    "id": "trajectories",
    "why": "轨迹集与判定器的两个方向；判定器写坏了只有这里看得见",
    "ok": true,
-   "ms": 802,
+   "ms": 799,
    "tail": [
     ""
    ]
@@ -73,7 +73,7 @@
    "id": "trajectories-model",
    "why": "W4-02 的第二半（模型候选轨迹）：同一把尺子、同一个判定器。这一份**不声称字节可复现**（模型重跑会逐条不同），它靠 `model_identity` 钉住；结构与离线回放仍然必须全过——模型臂的产物要是格式漂了，模型与规则就没法横向比",
    "ok": true,
-   "ms": 565,
+   "ms": 571,
    "tail": [
     ""
    ]
@@ -82,7 +82,7 @@
    "id": "sft-split",
    "why": "SFT 训练数据的切分：家族是否都在训练侧、留出有没有泄漏、报告里的自我描述与切分模式是否自洽，以及**逐字节复现**。第 37 轮发现报告把「留出机制」描述成「留出模板」，那一类错误只有这条抓得到",
    "ok": true,
-   "ms": 2706,
+   "ms": 2707,
    "tail": [
     "  \"test.jsonl\": true,",
     "  \"dataset-report.json\": true",
@@ -94,7 +94,7 @@
    "id": "model-manifest",
    "why": "本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么",
    "ok": true,
-   "ms": 1173,
+   "ms": 1175,
    "tail": [
     "✔ mlx-community/Qwen3.5-4B-4bit — 校验 11/11 个文件",
     "manifest 校验通过"
@@ -104,7 +104,7 @@
    "id": "provenance",
    "why": "数据溯源：每条来源有可核对的锚点（归档哈希 / 逐文件清单）、逐实体的 provenance 台账完整。「所有数据必须记录来源」这条边界从散文变成检查",
    "ok": true,
-   "ms": 274,
+   "ms": 277,
    "tail": [
     "规范化文件 8 份，来源 4 个，provenance 18 条，快照校验通过 3 个",
     "溯源完整"
@@ -116,7 +116,7 @@
    "ok": true,
    "ms": 62,
    "tail": [
-    "状态文档：声明 HEAD ff87ef7，当前 93eb755，最近一次全绿运行 421a058",
+    "状态文档：声明 HEAD cf05b09，当前 9811f54，最近一次全绿运行 93eb755",
     "一致"
    ]
   },
@@ -124,7 +124,7 @@
    "id": "guard-selftest",
    "why": "注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑",
    "ok": true,
-   "ms": 8105,
+   "ms": 8067,
    "tail": [
     "  ✔ 红 generator-artifact-drift",
     "  ✔ 红 companion-sayable-gone",
@@ -136,7 +136,7 @@
    "id": "browser-acceptance",
    "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
    "ok": true,
-   "ms": 19719,
+   "ms": 19761,
    "tail": [
     "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
     "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
@@ -148,12 +148,12 @@
    "id": "demo-acceptance",
    "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
    "ok": true,
-   "ms": 22369,
+   "ms": 19904,
    "tail": [
-    "[demo-acceptance] ✔ 浏览器里的气泡不含工程术语（区间/尾部/margin 等） — 你只剩 6% 血，换「雪影娃娃」上来：它还厚，别把「化蝶」白送掉 ｜ 「化蝶」倒了，换「雪影娃娃」顶上：对面「画间沉铁兽」还在场，补位别一上来就挨打 ｜ 它速度 105 快过你 90：别硬对拼，这一轮先换人躲一下 ｜ 「啃咬」打「寂灭骨龙」只有抵抗（58 伤害）：别再硬用它 ｜ ",
     "[demo-acceptance] ✔ 选好的我方阵容真的进了引擎（名字逐位对上） — 期望 音速犬、雪影娃娃、化蝶 ／ 实际 音速犬、雪影娃娃、化蝶",
     "[demo-acceptance] ✔ 选好的对手阵容也进了引擎 — 期望 海豹船长 ／ 实际 海豹船长",
-    "[demo-acceptance] 结果：48 通过 / 0 失败；报告见 reports/roco/demo-acceptance/"
+    "[demo-acceptance] ✔ 每一步 DOM 快照的**可见文本**都干净（共 3 步 × 9 个字段） — 3 步全部干净",
+    "[demo-acceptance] 结果：49 通过 / 0 失败；报告见 reports/roco/demo-acceptance/"
    ]
   }
  ],

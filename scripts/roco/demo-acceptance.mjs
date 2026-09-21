@@ -94,8 +94,31 @@ async function main(){
   writeFileSync(join(OUT,`${name}.png`),Buffer.from(data,'base64'));return `${name}.png`;};
  const bodyData=()=>js(`(()=>{const d=document.body.dataset;const out={};for(const k of Object.keys(d))if(k.startsWith('roco'))out[k]=d[k];return out;})()`);
 
- const checks=[];const shots=[];
+ const checks=[];const shots=[];const snapshots=[];
  const check=(name,ok,detail)=>{checks.push({name,ok:Boolean(ok),detail});log(ok?'✔':'✖',name,detail?'— '+detail:'');};
+
+ /**
+  * 每步的 **DOM 快照**（P0-7）。
+  *
+  * 为什么要它：截图只能证明「当时长这样」，而验收要回答的是「玩家在整个流程里
+  * 有没有看到不该看的东西」。所以每一步都取一份**结构化的可见文本 + 关键状态**，
+  * 最后统一扫一遍——只看最后一个状态会漏掉中途的泄漏。
+  *
+  * 存的是文本而不是整份 HTML：整份 HTML 每次跑都变（随机端口、时间戳），
+  * 入库之后 diff 全是噪声，久了就没人看。这里只留可核对的字段。
+  */
+ const snapshot=async(label)=>{
+  const data=JSON.parse(await js(`(()=>{const d=document.body.dataset;
+   const out={};for(const k of Object.keys(d))if(k.startsWith('roco'))out[k]=d[k];
+   const txt=(id)=>{const el=document.getElementById(id);return el?(el.textContent||'').trim().slice(0,300):null;};
+   return JSON.stringify({datasets:out,hintText:txt('hint-text'),hintWhy:txt('hint-why'),
+    events:txt('events'),actions:txt('actions'),roster:txt('roster-status'),
+    selfPets:txt('self-pets'),foeField:txt('foe-field'),foeBench:txt('foe-bench'),
+    planStatus:txt('plan-status'),actionButtons:document.querySelectorAll('#actions button[data-action]').length,
+    drawerOpen:Boolean(document.getElementById('about-drawer')&&document.getElementById('about-drawer').open),
+    hintHidden:Boolean(document.getElementById('hint')&&document.getElementById('hint').hidden)});})()`));
+  snapshots.push({step:label,...data});
+ };
 
  // ── 打开演示页 ───────────────────────────────────────────────────────
  // 无头 Chrome 里页面默认不是「聚焦窗口」，而失焦是**硬门控**（`window-unfocused`）——
@@ -129,6 +152,7 @@ async function main(){
  check('威力缺来源时说「来源未给」，不写成 0',
   !/威力\s*0\b/.test(actionText),
   (actionText.match(/威力[^·\n]{0,12}/g)||[]).slice(0,3).join(' | '));
+ await snapshot('01-开局前');
  shots.push(await shoot('01-battle-started'));
 
  // ── 场景 2：危险局面主动短提示（risk 由真实血量算出来）─────────────
@@ -214,6 +238,7 @@ async function main(){
  check('提示不把胜率当结论、也不承诺必胜',
   !/\d+\s*%\s*(胜|赢)|胜率\s*[:：]?\s*\d|概率\s*[:：]?\s*\d|最优|一定能赢/.test(hintAll),
   hintAll.slice(0,90).replace(/\s+/g,' '));
+ await snapshot('02-危险提示');
  shots.push(await shoot('02-complex-hint'));
 
  // ── 场景 3：玩家点掉之后本场不再提示（该沉默就沉默）──────────────
@@ -224,6 +249,7 @@ async function main(){
  data=await bodyData();
  const hintHidden=await js(`document.getElementById('hint').hidden`);
  check('点掉后该沉默的局面不再提示',hintHidden===true&&data.rocoAction==='silent',`hidden=${hintHidden} action=${data.rocoAction}`);
+ await snapshot('03-点掉后沉默');
  shots.push(await shoot('03-silent-after-dismiss'));
 
  // ── 场景 4：阵容变化后重新给建议，且旧建议随状态变化作废 ────────────
@@ -476,10 +502,38 @@ async function main(){
  //   · demo-acceptance.json       —— **稳定**的验收结论（检查项与截图名），入库，可 diff；
  //   · demo-acceptance-run.json   —— 每次运行都变的（时间戳、随机端口），**不入库**。
  // 混在一起写会让每次跑完 git 都显示「报告被改了」，久了就没人看它的 diff。
- const checksOut={checks,screenshots:shots,console_errors:consoleErrors,page_errors:pageErrors,
+ // 快照的**跨步不变量**：整条流程里任何一步的**玩家可见文本**都不许出现
+ // 内部 id、裸 JSON 或工程词。只看最终状态会漏掉中途泄漏，所以逐快照扫。
+ //
+ // 扫的是**文本字段的值**，不是整个快照对象——第一版把 `JSON.stringify(snap)`
+ // 拿去匹配，于是每一份都命中 `{"`（那是快照自己的 JSON 包装）。
+ // 检查器自己写错会让它看起来「很严」，实际量的是自己。
+ //
+ // `datasets` **不扫**：`data-roco-*` 是登记在案的验收钩子，对玩家不可见
+ // （开发者抽屉里写明了这一点）。把钩子算成泄漏，等于要求验收脚本不能留下证据。
+ const SNAP_TEXT_FIELDS=['hintText','hintWhy','events','actions','roster','selfPets','foeField','foeBench','planStatus'];
+ const SNAP_FORBIDDEN=/pet_\d|skill_\d|\{\s*"|\bstate_version\b|最坏尾部|critical-risk|fail closed/;
+ const dirty=[];
+ for(const snap of snapshots){
+  for(const field of SNAP_TEXT_FIELDS){
+   const value=snap[field];
+   if(typeof value!=='string')continue;
+   const hit=value.match(SNAP_FORBIDDEN);
+   if(hit)dirty.push({step:snap.step,field,hit:hit[0],sample:value.slice(0,90)});
+  }
+ }
+ check(`每一步 DOM 快照的**可见文本**都干净（共 ${snapshots.length} 步 × ${SNAP_TEXT_FIELDS.length} 个字段）`,
+  snapshots.length>=3&&dirty.length===0,
+  dirty.length?JSON.stringify(dirty.slice(0,3)):`${snapshots.length} 步全部干净`);
+ for(const item of dirty.slice(0,5))log(`  快照 ${item.step} / ${item.field} 命中 ${item.hit}：${item.sample}`);
+
+ const checksOut={checks,screenshots:shots,dom_snapshots:snapshots.length,
+  console_errors:consoleErrors,page_errors:pageErrors,
   passed:checks.filter((c)=>c.ok).length,failed:checks.filter((c)=>!c.ok).length};
  const runOut={started_at:new Date().toISOString(),url:base+'roco.html'};
  writeFileSync(join(OUT,'demo-acceptance.json'),JSON.stringify(checksOut,null,2)+'\n');
+ // 快照单独一份：它比结论大得多，混在一起会让结论那份没法读。
+ writeFileSync(join(OUT,'demo-dom-snapshots.json'),JSON.stringify(snapshots,null,2)+'\n');
  writeFileSync(join(OUT,'demo-acceptance-run.json'),JSON.stringify(runOut,null,2)+'\n');
  const report={...checksOut,...runOut};
  log(`结果：${report.passed} 通过 / ${report.failed} 失败；报告见 reports/roco/demo-acceptance/`);
