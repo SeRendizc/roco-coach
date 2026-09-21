@@ -165,3 +165,21 @@ h1 small{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radi
 
 /* 两列布局下卡片更窄，六维两列会被裁掉（实测「魔防 104 · 魔」被切）。改成三列两行。 */
 #self-pets .pet-stats,#foe-field .pet-stats{grid-template-columns:repeat(3,minmax(0,1fr));font-size:11.5px}
+
+/* ── 第 46 轮：把页面「减重」（监工原话：UI 这么胖干啥？非常不实用）─────────────
+   实测的胖点：① 选完精灵之后那块选择区还占半屏；② 8 个动作每个 90px 高、两列铺开；
+   ③ 每个区块上下留白过多。这里只动密度，不动信息。 */
+.lineup-brief{display:flex;align-items:center;justify-content:space-between;gap:10px;
+ background:#16222f;border:1px solid var(--line);border-radius:10px;padding:7px 12px;margin:0 0 10px;font-size:12.5px}
+.lineup-brief strong{color:#dbe7f1}
+.lineup-brief button{padding:4px 10px;font-size:12px}
+.panel{padding:12px;margin-bottom:10px}
+.section-title{margin-bottom:8px}
+main{padding-bottom:26px}
+#actions{grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:6px}
+.action{min-height:50px;padding:6px 9px;gap:2px}
+.action span{font-size:13px}
+.action small{font-size:11.5px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#roster .pet-option{padding:9px 10px}
+#roster .pet-option .stats{font-size:11.5px}
+.events{max-height:150px}

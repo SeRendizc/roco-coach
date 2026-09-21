@@ -1041,6 +1041,18 @@ async function main(){
 
  // ── 真实鼠标/键盘交互：点不动的卡必须有反馈，切侧必须看得出来（第 45 轮 UX hotfix）──
  //
+ // 对局进行中阵容选择是**收起**的（第 46 轮减重），所以先用真实鼠标点「重选阵容」把它放出来——
+ // 这条同时也验收了「收起之后还能一键回来」。
+ const briefVisible=await js(`(()=>{const b=document.getElementById('lineup-brief');
+   return JSON.stringify({briefShown:b?!b.hidden:null,panelHidden:document.getElementById('select-panel').hidden,
+     hasReopen:Boolean(document.getElementById('reopen-pick'))});})()`);
+ if (JSON.parse(briefVisible).panelHidden) {
+  await mouseClick('#reopen-pick');
+  const reopened=await js(`document.getElementById('select-panel').hidden`);
+  check('对局进行中阵容选择是收起的，点「重选阵容」能真的放出来',
+    JSON.parse(briefVisible).briefShown===true&&reopened===false,
+    `briefShown=${JSON.parse(briefVisible).briefShown} reopened=${reopened===false?'已展开':'仍收起'}`);
+ }
  // 先把两个**固定定位**的悬浮层收起来：提示条（bottom:18px）与局末卡片（bottom:200px）
  // 会盖住页面右下角，被盖住的位置点下去落在浮层上——这跟「元素在视口外」一样，
  // 都属于「事件派发了但没落在你想的地方」，而且同样不会报错。

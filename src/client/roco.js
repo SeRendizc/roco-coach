@@ -322,6 +322,23 @@ function render() {
     ? `state_version=${state.planAtVersion} coverage=${state.plan.coverage ?? '—'} timed_out=${state.plan.timed_out === true}`
     : '';
 
+  // ── 打完就可以收起阵容选择（监工实测：选完精灵那块还一直杵在页面上，占掉半屏）──
+  // 对局进行中 → 收起，只留一行「我方 A/B/C ｜ 对手 X/Y/Z」+ 重选入口；
+  // 一局结束 → 自动放出来，因为下一局要重新选。玩家随时可以手动重选。
+  const running = Boolean(view && !view.battle_result);
+  const pickPanel = $('select-panel');
+  if (pickPanel) pickPanel.hidden = running && !state.pick.open;
+  const brief = $('lineup-brief');
+  if (brief) {
+    brief.hidden = !running || state.pick.open;
+    if (!brief.hidden) {
+      const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
+      brief.innerHTML = `<span>我方 <strong>${state.pick.player.map(nameOf).join('、') || '（未选）'}</strong>`
+        + ` ｜ 对手 <strong>${state.pick.enemy.map(nameOf).join('、') || '（未选）'}</strong></span>`
+        + '<button id="reopen-pick">重选阵容</button>';
+      $('reopen-pick').addEventListener('click', () => { state.pick.open = true; render(); });
+    }
+  }
   document.body.dataset.rocoView = view ? 'ready' : 'empty';
   renderMemory();
 }
@@ -703,6 +720,7 @@ async function startBattle() {
     state.events = [];
     state.matchEvents = [];
     state.lastLiveView = null;
+    state.pick.open = false;
     $('lesson').textContent = '还没打完一局。';
     $('lesson-card').hidden = true;
     hideHint();
