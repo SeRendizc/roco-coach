@@ -25,7 +25,8 @@ import {
   ROCO_MODE,
 } from '../coach/roco-experience.js';
 import {companionFacts, decideRegister, intentOf, chatReply, REGISTERS} from '../coach/companion.js';
-import {freshMemory, readMemory, rememberBattle, rememberPreference} from '../coach/memory.js';
+import {freshMemory, readMemory, rememberBattle, rememberPreference,
+  memoryItems, deleteMemoryItem, MEMORY_GROUPS} from '../coach/memory.js';
 import {recordTeacherReview, recordLearningCheck} from '../coach/teacher-review.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
@@ -301,6 +302,50 @@ function render() {
     : '';
 
   document.body.dataset.rocoView = view ? 'ready' : 'empty';
+  renderMemory();
+}
+
+// ── 记忆（P1-3）：可见、可逐条忘掉 ─────────────────────────────────────────
+//
+// 只列 `group === 'stated'`（玩家自己说过的那几条：称呼／本命／聊天风格／输了要不要复盘／
+// 玩法目标／拒绝）。**故意不列对局记录与行为记录**：把战绩摘要和长期偏好混成一张单子，
+// 就是「拿摘要冒充记忆」的另一种写法，也正是 P1 要避免的那件事。
+//
+// 纠正不另做一套 UI：玩家再说一句（「以后叫我老王」）就是纠正——`rememberPreference`
+// 本来就是按 kind 覆盖旧值的。这里只提供「忘掉」，因为「删除」没有别的入口。
+function renderMemory() {
+  const list = $('memory-list');
+  if (!list) return;
+  const rows = memoryItems(state.memory).filter((row) => row.group === 'stated');
+  list.hidden = rows.length === 0;
+  $('memory-empty').hidden = rows.length > 0;
+  list.innerHTML = rows.map((row) => `<li data-memory="${escapeAttr(row.id)}">
+    <span class="mem-kind">${MEMORY_GROUPS[row.group] ?? row.group}</span>
+    <span class="mem-label">${escapeAttr(row.label)}</span>
+    <span class="muted">${escapeAttr(String(row.time || '').slice(0, 10))}</span>
+    <button class="mem-forget" data-forget="${escapeAttr(row.id)}" aria-label="忘掉这条">忘掉</button>
+  </li>`).join('');
+  for (const button of list.querySelectorAll('button[data-forget]')) {
+    button.addEventListener('click', () => forgetMemory(button.dataset.forget));
+  }
+  document.body.dataset.rocoMemory = rows.length ? String(rows.length) : 'none';
+}
+
+// 记的是**真的删掉了**：`deleteMemoryItem` 在没有这条时会返回 `deleted:false`，
+// 那种情况下不改页面，也不假装成功（它还会级联清掉由这条推出来的判断）。
+function forgetMemory(id) {
+  const result = deleteMemoryItem(state.memory, {id});
+  if (!result.deleted) return;
+  state.memory = result.memory;
+  saveMemory();
+  renderMemory();
+}
+
+// 属性值里只放这两处会用到的东西：id 与 label 都是我们自己构造的字符串，
+// 但仍然统一转义——将来谁把玩家原话放进来，也不会多出一个注入点。
+function escapeAttr(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => (
+    {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 }
 
 // ── 提示：显示 / 作废 / 展开 ────────────────────────────────────────────────
@@ -733,6 +778,8 @@ function say(text) {
   saveMemory();
   $('say-reply').hidden = false;
   $('say-reply').textContent = reply;
+  // 这一句可能刚写下/改掉一条长期偏好（「以后叫我老王」），列表要立刻跟上。
+  renderMemory();
   document.body.dataset.rocoCompanion = register;
   document.body.dataset.rocoCompanionWhy = reason;
   document.body.dataset.rocoCompanionSeen = 'yes';
@@ -789,6 +836,7 @@ async function boot() {
   wirePickControls();
   wireShadowPanel();
   render();
+  renderMemory();
   await loadRoster();
   try {
     await bootstrap();

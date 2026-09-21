@@ -264,13 +264,13 @@ export function statedFromMessage(message,{now=Date.now()}={}){
   if(ADDRESS_CLEAR.test(t)){
    removed.push('stated:address');
    // 「别叫我小明，叫我老王」里后面那个才是要的；只有一个匹配说明那正是被拒绝的那个。
-   if(matches.length>=2)add('address',matches.at(-1),`怎么称呼你：${matches.at(-1)}`);
-  }else add('address',matches[0],`怎么称呼你：${matches[0]}`);
+   if(matches.length>=2)add('address',matches.at(-1),`称呼：${matches.at(-1)}`);
+  }else add('address',matches[0],`称呼：${matches[0]}`);
  }
  const pets=PET_ROWS.filter(p=>t.includes(p.name));
  if(pets.length&&(FAVORITE_LINE.test(t)||FAVORITE_RESET.test(t))){
-  if(FAVORITE_RESET.test(t)){removed.push('stated:favorite:*');const last=pets.at(-1);add('favorite',last.id,last.name);}
-  else for(const p of pets)add('favorite',p.id,p.name);
+  if(FAVORITE_RESET.test(t)){removed.push('stated:favorite:*');const last=pets.at(-1);add('favorite',last.id,`本命：${last.name}`);}
+  else for(const p of pets)add('favorite',p.id,`本命：${p.name}`);
  }
  if(BRIEF_LINE.test(t)&&!DETAILED_LINE.test(t))add('chat-style','brief','聊天风格：简短一点');
  if(DETAILED_LINE.test(t)&&!BRIEF_LINE.test(t))add('chat-style','detailed','聊天风格：多说一点');
@@ -463,7 +463,7 @@ export function correctMemoryItem(memory,{id,value,now=Date.now()}={}){
  // 本命传名字或 id 都收：先把值归一到 id，再把 id 也换了（否则「本命：潮甲龟」会挂在 fox 的 id 上）。
  const pet=item.kind==='favorite'?PET_ROWS.find(p=>p.id===value||p.name===value)||null:null;
  const nextValue=pet?pet.id:String(value);
- const label=item.kind==='favorite'?(pet?pet.name:previous):item.kind==='address'?`怎么称呼你：${nextValue}`:item.kind==='chat-style'?(nextValue==='detailed'?'聊天风格：多说一点':'聊天风格：简短一点'):item.kind==='review-after-loss'?(nextValue==='yes'?'输了以后：想复盘':'输了以后：先不复盘'):`${item.label.split('：')[0]}：${nextValue}`;
+ const label=item.kind==='favorite'?`本命：${pet?pet.name:previous}`:item.kind==='address'?`称呼：${nextValue}`:item.kind==='chat-style'?(nextValue==='detailed'?'聊天风格：多说一点':'聊天风格：简短一点'):item.kind==='review-after-loss'?(nextValue==='yes'?'输了以后：想复盘':'输了以后：先不复盘'):`${item.label.split('：')[0]}：${nextValue}`;
  const nextId=item.kind==='favorite'?`stated:favorite:${slug(nextValue)}`:item.id;
  m.stated[at]={...item,id:nextId,value:nextValue.slice(0,STATED_LIMITS.value),label,time,correctedAt:time,previous};
  // 同类里如果已经有同一条（本命改成另一条已经存在的记录），把重复的那条并掉。

@@ -89,3 +89,12 @@ input{font:inherit;background:#121e2c;color:#dbe5ef;border:1px solid var(--line)
  /* 长句在窄屏上不要挤成一行：事件区与依据区是读得最多的两处。 */
  .events,.hint p,.hint-body{line-height:1.85}
 }
+
+/* 记忆面板（P1-3）：每行一条「玩家自己说过的」，右侧一个「忘掉」。
+   刻意不做成表格——它是给玩家核对「她记了什么」的，不是数据管理界面。 */
+.memory{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:6px}
+.memory li{display:flex;align-items:center;gap:8px;background:#16222f;border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:13px}
+.mem-kind{font-size:11px;color:var(--accent);border:1px solid #4a6858;border-radius:5px;padding:1px 6px;white-space:nowrap}
+.mem-label{flex:1;min-width:0;overflow-wrap:anywhere}
+.mem-forget{font-size:12px;padding:4px 9px;white-space:nowrap}
+@media(max-width:720px){.memory li{flex-wrap:wrap}.mem-label{flex-basis:100%}}
