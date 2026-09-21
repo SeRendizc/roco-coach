@@ -27,7 +27,8 @@
     ],
     "rulesets": [
       "legacy_sim_v1",
-      "mobile_s4_candidate_v2"
+      "mobile_s4_candidate_v2",
+      "mobile_s4_candidate_v3"
     ],
     "missing": [],
     "sample_instance_id": "own-0001",
@@ -933,7 +934,7 @@
       "actual": "UNKNOWN_RULESET",
       "ok": true,
       "actual_output": [
-        "[UNKNOWN_RULESET] ruleset_config_id：rulesets/*.json 里没有这份配置：不许自创（现有 legacy_sim_v1 / mobile_s4_candidate_v2）（实际值 \"made_up_ruleset_v9\"）"
+        "[UNKNOWN_RULESET] ruleset_config_id：rulesets/*.json 里没有这份配置：不许自创（现有 legacy_sim_v1 / mobile_s4_candidate_v2 / mobile_s4_candidate_v3）（实际值 \"made_up_ruleset_v9\"）"
       ]
     },
     {

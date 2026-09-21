@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import unittest
 
 from roco_env import env as renv
@@ -316,7 +317,17 @@ class ConfigFileIndependenceTest(unittest.TestCase):
         for token in ("= 6", "= 10", "ENERGY_MAX = "):
             self.assertNotIn(token, source,
                              f"加载器里出现了内联常量 {token!r} —— 那它就又成了一份事实源")
-        self.assertLess(len(source), 40000)
+        # RC-105：新增的 mana / actions 判据同样是**只读配置**的 —— 4 / 1 / True 这些值
+        # 一个字都不许抄进加载器。上面那几条 token 判据管不到新字段名，所以这里补精确的。
+        for name in ("mana_pool", "mana_faint_cost", "mana_loss_when_zero", "mana_surrender",
+                     "unknown_kinds_allowed"):
+            self.assertIsNone(
+                re.search(rf"\b{name}\s*=\s*(?:\d|True\b|False\b)", source),
+                f"加载器把 {name} 内联成了字面量 —— 事实源只能是 data/roco/rulesets/*.json")
+        # 这条上限是「加载器别长成第二份事实源」的**粗粒度代理**：精确判据是上面那几条
+        # token / 正则。RC-105 为 mana/actions 加了两组加载期校验（纯声明式判断，没有内联
+        # 任何规则值），文件从 ~29.7k 字符长到 ~42k，所以上限随之上调。
+        self.assertLess(len(source), 46000)
 
 
 if __name__ == "__main__":  # pragma: no cover

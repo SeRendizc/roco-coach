@@ -1534,7 +1534,8 @@
       "instances_without_zero_cost_move": 46,
       "moves_over_cap_by_ruleset": {
         "legacy_sim_v1": 8,
-        "mobile_s4_candidate_v2": 0
+        "mobile_s4_candidate_v2": 0,
+        "mobile_s4_candidate_v3": 0
       },
       "ruleset_caps": [
         {
@@ -1547,6 +1548,12 @@
           "ruleset_config_id": "mobile_s4_candidate_v2",
           "cap": 10,
           "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+          "confidence": "CROSS_SOURCE_SUPPORTED"
+        },
+        {
+          "ruleset_config_id": "mobile_s4_candidate_v3",
+          "cap": 10,
+          "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
           "confidence": "CROSS_SOURCE_SUPPORTED"
         }
       ],

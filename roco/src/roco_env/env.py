@@ -50,9 +50,11 @@ from . import rule_config as _rule_config
 from .data import Ruleset, load_ruleset
 from .rule_config import RuleConfig, RuleConfigError
 from .schema import (
+    ACTION_CHARGE,
     ACTION_ESCAPE,
     ACTION_ITEM,
     ACTION_SKILL,
+    ACTION_SURRENDER,
     ACTION_SWITCH,
     Action,
     Event,
@@ -97,6 +99,13 @@ END_TURN_STAGES_IMPLEMENTED: Tuple[str, ...] = ("status_tick", "regen")
 #: 注意：`switch` 是「认识」但**不是独立比较维** —— 主动换宠被折算成固定先手度
 #: （`SWITCH_PRIORITY`）后进 `priority` 那一维。这个差距如实登记在报告里，别当它不存在。
 ACTION_ORDER_DIMENSIONS: Tuple[str, ...] = ("respond", "switch", "priority", "speed")
+
+#: RC-105：引擎**真的会产出**的动作类。配置的 `actions.allowed_kinds` 里出现别的名字
+#: （例如 `struggle` —— 它在 `VALID_KINDS` 里，但本引擎不会把它列进合法动作）就抛错：
+#: 声明了一个引擎产不出的动作类，等于把「没实现」说成「已支持」。
+ACTION_KINDS_IMPLEMENTED: Tuple[str, ...] = (
+    ACTION_SKILL, ACTION_CHARGE, ACTION_SWITCH, ACTION_SURRENDER, ACTION_ITEM, ACTION_ESCAPE,
+)
 
 DEFAULT_ITEM_STOCK = {"回复药": 3, "净化药": 2, "能量果": 2}
 ITEM_EFFECTS = {"回复药": ("heal", 45), "净化药": ("cleanse", 0), "能量果": ("energy", 4)}
@@ -203,6 +212,17 @@ def reset(
         side.active = 0
         side.field_pet.energy = initial_energy
         side.field_pet.entered_turn = 1
+        # RC-105：只有声明了 `mana` 的配置才给魔力。legacy / v2 里 `mana_pool is None`
+        # → `SideState.mana` 保持 `None`（序列化里不会出现这个键，8 条 golden 指纹不变）；
+        # 这里**不**回落到 0 —— 0 是「魔力归零、已经判负」，不是「没有这个概念」。
+        if cfg.has_mana:
+            if cfg.mana_pool is None:
+                raise fx.UnsupportedEffect(
+                    "开局魔力(mana.pool)",
+                    f"规则配置 {cfg.ruleset_config_id} 声明了 mana，但 mana.pool 是 UNKNOWN(null) ——"
+                    "引擎不知道该发多少点魔力，不许回落到 legacy 或任意数",
+                )
+            side.mana = int(cfg.mana_pool)
     # 首发入场：入场类特性（专注力/身经百练）在这里结算
     for side in ("player", "enemy"):
         events: List[Dict[str, Any]] = []
@@ -216,29 +236,87 @@ def reset(
 # ── 合法动作 ────────────────────────────────────────────────────────────
 
 
-def legal_actions(state: GameState, rs: Ruleset, side: str) -> List[Action]:
+def require_declared_action_kinds(cfg: RuleConfig) -> Optional[Tuple[str, ...]]:
+    """配置声明的合法动作类必须是引擎**真的会产出**的那些（RC-105）。
+
+    与 `require_declared_action_order` / `require_declared_end_turn_stages` 同一条纪律：
+    **不静默忽略**。引用了引擎产不出的动作类（例如 `struggle`）时抛 `UnsupportedEffect`，
+    而不是「跳过它、按认识的几个发」—— 那等于把一条没实现的规则当成没发生。
+
+    返回 `None` = 这份配置**没有**声明 `actions`（legacy / v2），调用方保持原行为。
+    """
+    if cfg.allowed_kinds is None:
+        return None
+    unknown = [kind for kind in cfg.allowed_kinds if kind not in ACTION_KINDS_IMPLEMENTED]
+    if unknown:
+        raise fx.UnsupportedEffect(
+            f"动作类别「{'、'.join(unknown)}」",
+            f"规则配置 {cfg.ruleset_config_id} 的 actions.allowed_kinds 声明了本引擎不会产出的动作类"
+            f"（引擎会产出：{'、'.join(ACTION_KINDS_IMPLEMENTED)}）——"
+            "不静默忽略，也不把它当成一个空集合里的成员",
+        )
+    return cfg.allowed_kinds
+
+
+def legal_actions(state: GameState, rs: Ruleset, side: str,
+                  config: Optional[Any] = None) -> List[Action]:
     """这一方现在能做什么。
 
     依据：
       - 技能可用条件：能量足够（能耗 ≤ 当前能量）——**假设**，数据未定义不足时的行为。
       - 防御冷却中不可再用（术语 1016）。
       - 主动换宠只在有存活后备时可用。
+
+    RC-105：**按当前规则配置的 `actions` 裁剪**：
+      - `allowed_kinds` 是**声明的**合法动作类（顺序 = 展示顺序，聚能是独立动作类）；
+      - `forbidden_kinds` 里的类**一律不出现**（标准 PVP：道具与逃跑）；
+      - `unknown_kinds_allowed: false` 时，若这里要产出一个**没在 `allowed_kinds` 里声明**的
+        类，**抛错**而不是静默放过 —— 静默放过等于把配置的声明当成建议；
+      - 没有声明 `actions` 的配置（legacy / v2）走原路径，道具与逃跑继续存在
+        （legacy 是 PVE/练习局）。
     """
+    cfg = _rule_config.get_rule_config(
+        config if config is not None else (state.ruleset_config_id or None)
+    )
     if state.result:
         return []
     me = getattr(state, side)
     pet = me.field_pet
     acts: List[Action] = []
 
+    allowed = require_declared_action_kinds(cfg)
+    forbidden = set(cfg.forbidden_kinds or ())
+
+    def emit(action: Action) -> None:
+        """把一个候选动作放进结果里（或者按配置拒绝它）。
+
+        三档，顺序就是判据的顺序：
+          1. `forbidden_kinds` → 静默丢弃（它**不得**出现在对外合法动作里）；
+          2. 没声明 `actions` → 原样放行（legacy 行为）；
+          3. 声明了但这一类不在 `allowed_kinds`：
+             · `unknown_kinds_allowed: false` → **抛错**（不静默放过）；
+             · `true` → 配置显式放行未声明的类，按配置走。
+        """
+        kind = action.kind
+        if kind in forbidden:
+            return
+        if allowed is not None and kind not in allowed and not cfg.unknown_kinds_allowed:
+            raise fx.UnsupportedEffect(
+                f"动作类别「{kind}」",
+                f"规则配置 {cfg.ruleset_config_id} 的 actions.allowed_kinds 没有声明它，"
+                "且 actions.unknown_kinds_allowed=false —— 不许静默产出一个未声明的动作类",
+            )
+        acts.append(action)
+
     if state.phase == "replace":
         # 补位：只允许换人，且是强制的（术语 3009 把力竭下场与主动离场分开）
         for i in me.bench_indices():
-            acts.append(Action(kind=ACTION_SWITCH, target_index=i))
+            emit(Action(kind=ACTION_SWITCH, target_index=i))
         return acts
 
     if not pet.alive:
         for i in me.bench_indices():
-            acts.append(Action(kind=ACTION_SWITCH, target_index=i))
+            emit(Action(kind=ACTION_SWITCH, target_index=i))
         return acts
 
     # 按**配招**枚举，不是整个学习表（图鉴可学 ≠ 这场带得上）
@@ -251,16 +329,25 @@ def legal_actions(state: GameState, rs: Ruleset, side: str) -> List[Action]:
             continue
         if skill.is_defense and pet.defense_cooldown > 0:
             continue          # 术语 1016
-        acts.append(Action(kind=ACTION_SKILL, skill_id=sid))
+        emit(Action(kind=ACTION_SKILL, skill_id=sid))
+
+    # RC-105：聚能只在这份配置**声明**它是合法动作类时出现。
+    # 不声明（legacy / v2）时连尝试都不尝试 —— 否则 `emit` 会在 legacy 下把聚能加进去，
+    # 那就是凭空给默认路径加了一个动作。
+    if allowed is not None and ACTION_CHARGE in allowed:
+        emit(Action(kind=ACTION_CHARGE))
 
     for i in me.bench_indices():
-        acts.append(Action(kind=ACTION_SWITCH, target_index=i))
+        emit(Action(kind=ACTION_SWITCH, target_index=i))
 
     for item_id, count in sorted(me.items.items()):
         if count > 0:
-            acts.append(Action(kind=ACTION_ITEM, item_id=item_id, target_index=me.active))
+            emit(Action(kind=ACTION_ITEM, item_id=item_id, target_index=me.active))
 
-    acts.append(Action(kind=ACTION_ESCAPE))
+    if allowed is not None and ACTION_SURRENDER in allowed:
+        emit(Action(kind=ACTION_SURRENDER))
+
+    emit(Action(kind=ACTION_ESCAPE))
     return acts
 
 
@@ -551,6 +638,23 @@ def step_joint(
     })
 
     # 有谁倒下就进补位局面；补位**不消耗回合**（术语 3009：力竭下场不属于「离场」）
+    _advance_after_turn(state, cfg)
+
+    return state
+
+
+def _advance_after_turn(state: GameState, cfg: RuleConfig) -> None:
+    """回合收尾：判胜负 / 进补位 / 推进回合（RC-105 抽出来的**同一个实现**）。
+
+    抽出成函数只是为了「两条路径不许各写一份」；语义与改动前**逐字相同**，除了
+    下面这一条新增的分支：
+
+      RC-105：在**声明了 `mana` 或 `actions` 的配置**下，结算过程中可能已经判出胜负
+      （魔力归零、投降）——那时**不再覆盖**它。legacy / v2 没有这两块，`state.result`
+      只可能是结算途中的逃跑结果，走的仍然是原来那条路径，逐位不变。
+    """
+    if state.result is not None and (cfg.has_mana or cfg.allowed_kinds is not None):
+        return
     queue = needs_replacement(state)
     if not _both_side_alive(state):
         _finish(state)
@@ -561,8 +665,6 @@ def step_joint(
     else:
         state.turn += 1
         state.phase = "battle"
-
-    return state
 
 
 def _obs_hash(obs: Dict[str, Any]) -> str:
@@ -599,6 +701,32 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         _bump(state, "action_cancelled", {"side": side, "reason": "fainted"})
         return
 
+    if action.kind not in ACTION_KINDS_IMPLEMENTED:
+        raise fx.UnsupportedEffect(
+            f"动作类别「{action.kind}」",
+            "本引擎没有这个动作类的结算实现（已知："
+            f"{'、'.join(ACTION_KINDS_IMPLEMENTED)}）—— 不静默跳过",
+        )
+    # RC-105：声明了 `actions` 的配置下，一个**没被声明**的动作类不许被静默执行。
+    # `step_joint` 的合法性检查通常已经挡住了这条路；这里再兜一层，因为 `_execute`
+    # 也可以被直接调用（测试、脚本），而「配置写了 false 就必须抛」是配置层的承诺。
+    if cfg.allowed_kinds is not None:
+        if action.kind not in cfg.allowed_kinds and not cfg.unknown_kinds_allowed:
+            raise fx.UnsupportedEffect(
+                f"动作类别「{action.kind}」",
+                f"规则配置 {cfg.ruleset_config_id} 的 actions.allowed_kinds 没有声明它，"
+                "且 actions.unknown_kinds_allowed=false —— 不许静默执行未声明的动作类",
+            )
+    elif action.kind in (ACTION_CHARGE, ACTION_SURRENDER):
+        # legacy / v2 **没有**声明 `actions`，因而也没有这两个动作类：它们只在 RC-105 的
+        # 候选配置里存在（聚能是独立动作类、投降是标准 PVP 的退出方式）。
+        # 没有声明就执行 = 凭空给默认路径加动作，所以这里 fail closed。
+        raise fx.UnsupportedEffect(
+            f"动作类别「{action.kind}」",
+            f"规则配置 {cfg.ruleset_config_id} 没有声明 actions，因而也没有「{action.kind}」"
+            "这个动作类（它是 RC-105 候选才引入的独立动作类）—— 不静默执行",
+        )
+
     if action.kind == ACTION_SWITCH:
         target = me.pets[action.target_index or 0]
         pet.charge = None            # 主动离场会中断蓄力（术语 1007 的例外见 MC-021）
@@ -622,6 +750,14 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
 
     if action.kind == ACTION_ITEM:
         _use_item(state, rs, side, action, cfg)
+        return
+
+    if action.kind == ACTION_CHARGE:
+        _use_charge(state, rs, side, action, cfg)
+        return
+
+    if action.kind == ACTION_SURRENDER:
+        _surrender(state, cfg, side)
         return
 
     skill = rs.skill(action.skill_id)
@@ -746,6 +882,8 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         defender.charge = None
         state.log.append(f"{defender_pet.name}倒下了。")
         _bump(state, "faint", {"side": foe_side, "slot": defender.slot}, evidence=("3009",))
+        # RC-105：力竭 → 那一方扣魔力；归零就立即判负（只在声明了 mana 的配置下发生）
+        _settle_faint_mana(state, rs, cfg, foe_side)
 
     # 附带效果：**先应用解析得出的部分，再登记认不出来的部分**。
     # 以前这里什么都没有 —— 「造成魔伤，自己回复1能量」被整条静默丢弃
@@ -977,6 +1115,138 @@ def _opponent_action_of(state: GameState, side: str) -> Optional[Action]:
     return getattr(state, "_pending_" + ("enemy" if side == "player" else "player"), None)
 
 
+# ── RC-105：魔力（心）结算 + 聚能 / 投降 ────────────────────────────────
+#
+# 只在**声明了 `mana`** 的配置下生效（`cfg.has_mana`）。legacy / v2 走这里每一处
+# 都会立刻返回：那些模式里根本没有「魔力」这条概念，引擎也就不该凭空造出一个 0
+# （0 的意思是「魔力归零、已经判负」）。
+
+
+def _settle_faint_mana(state: GameState, rs: Ruleset, cfg: RuleConfig, fainted_side: str) -> None:
+    """某方精灵力竭 → **那一方**扣 `mana.faint_cost`；魔力 ≤ 0 立即判负。
+
+    依据：台账 EV-PVP-FAINT-MANA-LOSS（CROSS_SOURCE_SUPPORTED，MC-E09 未录制）——
+    「目标是先让对方魔力归零，力竭通常扣 1 点魔力（而不是直接判负）」。
+    等级是 CROSS_SOURCE_SUPPORTED 而不是官方原文，所以这是**候选口径**，不是已确认规则。
+    """
+    if not cfg.has_mana:
+        return                      # legacy / v2：没有魔力这条概念，什么都不做
+    if state.result:
+        return                      # 已经判出胜负（例如另一方先归零）就不再扣
+    side_state = getattr(state, fainted_side)
+    if side_state.mana is None:
+        return                      # 配置声明了 mana 但这一方没有 → 不该发生，别编一个数
+    cost = cfg.mana_faint_cost
+    if cost is None:
+        raise fx.UnsupportedEffect(
+            "力竭扣魔力的数额(mana.faint_cost)",
+            f"规则配置 {cfg.ruleset_config_id} 声明了 mana，但 mana.faint_cost 是 UNKNOWN(null) ——"
+            "不许按 0 或任意数处理",
+        )
+    side_state.mana = side_state.mana - int(cost)
+    label = "你" if fainted_side == "player" else "对手"
+    state.log.append(f"{label}的精灵力竭，{label}失去 {int(cost)} 点魔力（剩余 {side_state.mana}）。")
+    _bump(state, "mana_loss", {
+        "side": fainted_side,
+        "faint_cost": int(cost),
+        "mana": side_state.mana,
+    }, evidence=("EV-PVP-FAINT-MANA-LOSS",))
+    if cfg.mana_loss_when_zero:
+        _finish_mana_depletion(state, cfg)
+
+
+def _finish_mana_depletion(state: GameState, cfg: RuleConfig) -> None:
+    """魔力 ≤ 0 → **立即**判负（另一方胜）。双方同时归零时判平局。
+
+    依据：同上 EV-PVP-FAINT-MANA-LOSS 的 claim「目标是先让对方魔力归零」。
+    「双方同一时刻归零怎么算」台账没有条目 —— 这里按平局处理，并把它登记为未知项
+    （见报告 `unknowns`），**不**假装知道优先级。
+    """
+    player_mana = state.player.mana
+    enemy_mana = state.enemy.mana
+    if player_mana is None or enemy_mana is None:
+        return
+    player_out = player_mana <= 0
+    enemy_out = enemy_mana <= 0
+    if not player_out and not enemy_out:
+        return
+    if player_out and enemy_out:
+        state.result = "draw"
+    elif player_out:
+        state.result = "loss"
+    else:
+        state.result = "win"
+    state.phase = "ended"
+    state.log.append({
+        "win": "对手的魔力归零了，你赢了。",
+        "loss": "你的魔力归零了。",
+        "draw": "双方魔力同时归零。",
+    }[state.result])
+    _bump(state, "game_end", {
+        "result": state.result,
+        "reason": "mana_depleted",
+        "player_mana": player_mana,
+        "enemy_mana": enemy_mana,
+    }, evidence=("EV-PVP-FAINT-MANA-LOSS",))
+
+
+def _use_charge(state: GameState, rs: Ruleset, side: str, action: Action, cfg: RuleConfig) -> None:
+    """聚能：回复 `energy.charge` 点能量（数值来自配置，**未知就抛**）。
+
+    依据：台账 EV-ENERGY-CHARGE（CROSS_SOURCE_SUPPORTED，MC-E02 未录制）：
+    「聚能是一个主动行动，回复 5」。台账同时明说**未定**的两件事 —— 可否突破上限、
+    无合法技能时是否自动聚能 —— 所以这里只做「夹到上限」，并把这两条如实登记出来，
+    绝不把它们当成已知规则。
+    """
+    me = getattr(state, side)
+    pet = me.field_pet
+    label = "你" if side == "player" else "对手"
+    amount = cfg.energy_charge
+    if amount is None:
+        raise fx.UnsupportedEffect(
+            "聚能的回能量(energy.charge)",
+            f"规则配置 {cfg.ruleset_config_id} 的 energy.charge 是 UNKNOWN(null) ——"
+            "引擎不知道聚能回多少能量，不许按 0 或任意数处理",
+        )
+    before = pet.energy
+    pet.energy = min(cfg.energy_max, before + int(amount))
+    gained = pet.energy - before
+    state.log.append(
+        f"{label}的{rs.pet(pet.pet_id).name}聚能，回复 {gained} 点能量（当前 {pet.energy}）。"
+    )
+    _note_unsupported(
+        state, "聚能与能量上限的先后顺序",
+        f"描述「聚能回复 {int(amount)} 点」按配置结算；但「聚能是否可突破上限」与"
+        "「无合法技能时是否自动聚能」台账明说未定（MC-E02 未录制），"
+        "本引擎按「夹到 energy.max」处理",
+        "EV-ENERGY-CHARGE",
+    )
+    _bump(state, "charge", {
+        "side": side, "energy_gained": gained, "energy": pet.energy,
+    }, evidence=("EV-ENERGY-CHARGE",))
+
+
+def _surrender(state: GameState, cfg: RuleConfig, side: str) -> None:
+    """投降：**投降方判负**。
+
+    台账里**没有**任何条目讲投降的语义（是否算判负、是否额外扣魔力、是否消耗回合），
+    所以这是一个 `ENGINE_HYPOTHESIS`（配置 `mana.surrender` 的 reason 里写着同一件事），
+    这里把它连同「本引擎按投降方判负处理」一起登记出来 —— 不假装它是已确认规则。
+    """
+    if state.result:
+        return
+    state.result = "loss" if side == "player" else "win"
+    state.phase = "ended"
+    state.log.append("你投降了，本局判负。" if side == "player" else "对手投降了，本局判胜。")
+    _note_unsupported(
+        state, "投降的结算语义",
+        f"规则配置 {cfg.ruleset_config_id} 把投降列为合法动作类（mana.surrender），"
+        "但台账与 10 号文档都没有条目定义它的语义（是否算判负、是否扣魔力、是否消耗回合）；"
+        "本引擎按「投降方判负」处理，并把它登记为 ENGINE_HYPOTHESIS",
+    )
+    _bump(state, "surrender", {"side": side, "result": state.result})
+
+
 def _use_item(state: GameState, rs: Ruleset, side: str, action: Action,
               cfg: Optional[RuleConfig] = None) -> None:
     cfg = cfg or _rule_config.get_rule_config()
@@ -1039,8 +1309,10 @@ def require_declared_end_turn_stages(cfg: RuleConfig) -> Tuple[str, ...]:
     return declared
 
 
-def _end_turn_status_tick(state: GameState, rs: Ruleset, side: SideState, pet: PetState) -> None:
+def _end_turn_status_tick(state: GameState, rs: Ruleset, side: SideState, pet: PetState,
+                          cfg: Optional[RuleConfig] = None) -> None:
     """结算一只在场精灵身上的所有状态伤害（术语 1001/1002/1008）。"""
+    cfg = cfg or _rule_config.get_rule_config(state.ruleset_config_id or None)
     for name in list(pet.statuses.keys()):
         try:
             dmg = fx.status_tick(pet.hp, pet.max_hp, name)
@@ -1063,6 +1335,8 @@ def _end_turn_status_tick(state: GameState, rs: Ruleset, side: SideState, pet: P
             pet.fainted = True
             state.log.append(f"{rs.pet(pet.pet_id).name}倒下了。")
             _bump(state, "faint", {"side": side.name, "slot": pet.slot})
+            # RC-105：被状态伤害打死同样触发「力竭扣魔力」（只在声明 mana 的配置下）
+            _settle_faint_mana(state, rs, cfg, side.name)
             break
 
 
@@ -1092,6 +1366,10 @@ def _end_of_turn(state: GameState, rs: Ruleset,
     cfg = cfg or _rule_config.get_rule_config()
     stages = require_declared_end_turn_stages(cfg)
     for side in (state.player, state.enemy):
+        # RC-105：魔力归零已经在结算途中判出胜负 —— 不再继续结算回合末，
+        # 也不覆盖那个结果。legacy / v2 没有 mana（`has_mana=False`），这条不触发。
+        if cfg.has_mana and state.result:
+            return
         pet = side.field_pet
         if not pet.alive:
             continue
@@ -1100,7 +1378,7 @@ def _end_of_turn(state: GameState, rs: Ruleset,
             if not pet.alive:
                 continue
             if stage == "status_tick":
-                _end_turn_status_tick(state, rs, side, pet)
+                _end_turn_status_tick(state, rs, side, pet, cfg)
             elif stage == "regen":
                 _end_turn_regen(state, side, pet, cfg)
             else:                                     # pragma: no cover - 上面已经挡过
@@ -1298,6 +1576,11 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
         "turn": state.turn,
         "phase": state.phase,
         "result": state.result,
+        # RC-105：魔力是**公开**信息（它就是胜负判据，两边的界面都画着它）。
+        # 只有声明了 mana 的配置才有这一个键：legacy / v2 里这条概念不存在，
+        # 补一个 0 会被读成「已经判负」。
+        **({"mana": {"self": me.mana, "opponent": foe.mana}}
+           if (me.mana is not None or foe.mana is not None) else {}),
         "self": {
             "active": me.active,
             "items": dict(me.items),
@@ -1463,6 +1746,9 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
         "phase": view["phase"],
         "result": view["result"],
         "side": side,
+        # RC-105：魔力（若这份配置声明了它）。两个视图描述同一时刻的同一局，
+        # 所以这一块照抄规划协议那一份，不另算一遍。
+        **({"mana": view["mana"]} if "mana" in view else {}),
         "self": self_panel,
         "opponent": foe_panel,
         "legal": ui_legal,
@@ -1568,6 +1854,11 @@ def state_from_public_planner(
     )
     # 己方配招来自公开信息；对手配招是假设值
     state.player.loadouts = {k: tuple(v) for k, v in (own.get("loadouts") or {}).items()}
+    # RC-105：魔力（若公开面里带了）。缺键 → None（= 那份配置没有魔力系统），**不是 0**。
+    mana_public = public.get("mana")
+    if isinstance(mana_public, dict):
+        state.player.mana = mana_public.get("self")
+        state.enemy.mana = mana_public.get("opponent")
     if side != "player":
         # 保证 player/enemy 两个名字都可用（内部一律用 player/enemy 命名）
         state.player, state.enemy = state.enemy, state.player

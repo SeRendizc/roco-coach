@@ -33,6 +33,40 @@ DEFAULT_RULE_CONFIG_ID = "legacy_sim_v1"
 #: 候选配置 id（实机 microcase 支持前**不得**作为默认）。
 CANDIDATE_RULE_CONFIG_ID = "mobile_s4_candidate_v2"
 
+#: RC-105 的候选配置 id：第一个声明「魔力系统 + 合法动作裁剪」的配置。同样是候选。
+MANA_ACTIONS_CANDIDATE_ID = "mobile_s4_candidate_v3"
+
+#: 声明 `mana` / `actions` 的配置白名单（RC-105）。
+#:
+#: 只有名单里的配置**必须**写全这两块；legacy 与 v2 显式登记为「没有魔力系统、不裁剪
+#: 合法动作」。把新字段直接塞进 `REQUIRED_PATHS` 会让两份既有配置当场加载失败（等于改掉
+#: 默认行为）或逼人给 legacy 补一个假 0 —— 所以「谁必须有」是一份显式名单。
+#: 名单之外的配置**如果**写了这两块，一样会被逐字段校验。
+MANA_ACTIONS_CONFIG_IDS = (MANA_ACTIONS_CANDIDATE_ID,)
+
+#: RC-105：`mana` / `actions` 里每个字段都必须写全的路径。
+MANA_REQUIRED_PATHS = (
+    "mana.pool",
+    "mana.faint_cost",
+    "mana.loss_when_zero",
+    "mana.surrender",
+)
+ACTIONS_REQUIRED_PATHS = (
+    "actions.allowed_kinds",
+    "actions.forbidden_kinds",
+    "actions.unknown_kinds_allowed",
+)
+
+#: RC-105：配置里允许写的**动作类名**（配置 schema 的词汇表）。
+#: 与 `schema.VALID_KINDS`（引擎白名单）分开登记：本模块刻意不 import `schema`/`data`，
+#: 两边一致由 `roco/tests/test_mana_actions.py` 钉住。
+KNOWN_ACTION_KINDS = (
+    "skill", "charge", "switch", "surrender", "item", "escape", "struggle",
+)
+
+#: RC-105：`actions.kinds.<kind>.value` 的合法取值。
+ACTION_KIND_STATUSES = ("allowed", "forbidden")
+
 #: 运行时选择配置的环境变量名。
 ENV_VAR = "ROCO_RULE_CONFIG"
 
@@ -221,6 +255,111 @@ def _leaf_value(config: Dict[str, Any], path: str) -> Any:
 # ── 校验 ────────────────────────────────────────────────────────────────
 
 
+def _validate_mana(config: Dict[str, Any], bad) -> None:
+    """RC-105：`mana` 块的形状与取值域。没写 `mana`（legacy / v2）直接跳过。
+
+    只判「配置是不是一份合法可读的登记表」；「引擎能不能按它跑」是 `env.py` 的事。
+    """
+    node = config.get("mana")
+    if node is None:
+        return
+    if not isinstance(node, dict):
+        bad("mana 必须是对象（pool / faint_cost / loss_when_zero / surrender）")
+        return
+    for key in ("pool", "faint_cost"):
+        leaf = node.get(key)
+        if not isinstance(leaf, dict) or "value" not in leaf:
+            continue                       # 缺字段由白名单那条报，别报两遍
+        value = leaf["value"]
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            bad(f"mana.{key} 必须是 >= 0 的整数，实际 {value!r}")
+        elif key == "pool" and value == 0:
+            bad("mana.pool 必须 > 0：魔力池为 0 等于开局即判负，那不是一份可玩的模式")
+    for key in ("loss_when_zero", "surrender"):
+        leaf = node.get(key)
+        if not isinstance(leaf, dict) or "value" not in leaf:
+            continue
+        if not isinstance(leaf["value"], bool):
+            bad(f"mana.{key} 必须是布尔（机器可读的开关），实际 {leaf['value']!r}")
+
+
+def _validate_actions(config: Dict[str, Any], bad) -> None:
+    """RC-105：`actions` 块的形状、取值域与两张清单的自洽性。
+
+    判据：两张清单非空无重复、元素是已知动作类、**不许有交集**；`unknown_kinds_allowed`
+    是布尔；`actions.kinds` **恰好**覆盖两张清单里的每个 kind 且每个都带
+    `confidence` / `evidence_id`（没台账支撑就 ENGINE_HYPOTHESIS + reason）。
+    """
+    node = config.get("actions")
+    if node is None:
+        return
+    if not isinstance(node, dict):
+        bad("actions 必须是对象（allowed_kinds / forbidden_kinds / unknown_kinds_allowed / kinds）")
+        return
+
+    def kind_list(key: str) -> Optional[List[str]]:
+        leaf = node.get(key)
+        if not isinstance(leaf, dict) or "value" not in leaf:
+            return None                    # 缺字段由白名单那条报
+        seq = leaf["value"]
+        if not isinstance(seq, list) or not seq:
+            bad(f"actions.{key} 必须是非空数组（顺序就是展示顺序），实际 {seq!r}")
+            return None
+        if any(not isinstance(x, str) or not x for x in seq):
+            bad(f"actions.{key} 的元素必须是非空字符串，实际 {seq!r}")
+            return None
+        if len(set(seq)) != len(seq):
+            bad(f"actions.{key} 里有重复项：{seq!r}")
+        unknown = [x for x in seq if x not in KNOWN_ACTION_KINDS]
+        if unknown:
+            bad(f"actions.{key} 里有引擎不认识的动作类 {'、'.join(unknown)}"
+                f"（已知：{'、'.join(KNOWN_ACTION_KINDS)}）")
+            return None
+        return seq
+
+    allowed = kind_list("allowed_kinds")
+    forbidden = kind_list("forbidden_kinds")
+    if allowed is not None and forbidden is not None:
+        overlap = sorted(set(allowed) & set(forbidden))
+        if overlap:
+            bad(f"actions.allowed_kinds 与 actions.forbidden_kinds 有交集 {overlap} ——"
+                "同一个动作类不可能既合法又禁止")
+
+    flag = node.get("unknown_kinds_allowed")
+    if flag is not None and (not isinstance(flag, dict) or "value" not in flag):
+        bad("actions.unknown_kinds_allowed 不是带 value 的字段记录")
+    elif isinstance(flag, dict) and "value" in flag and not isinstance(flag["value"], bool):
+        bad(f"actions.unknown_kinds_allowed 必须是布尔，实际 {flag['value']!r}")
+
+    kinds = node.get("kinds")
+    if not isinstance(kinds, dict):
+        bad("actions.kinds 必须是「动作类 → 登记」的对象（每个 kind 都要写 confidence/evidence_id）")
+        return
+    if allowed is not None and forbidden is not None:
+        wanted = set(allowed) | set(forbidden)
+        missing = sorted(wanted - set(kinds))
+        extra = sorted(set(kinds) - wanted)
+        if missing:
+            bad(f"actions.kinds 少了这些动作类：{missing}（每个 kind 都要有登记）")
+        if extra:
+            bad(f"actions.kinds 里有 allowed/forbidden 两张清单都没提到的动作类：{extra}")
+    for kind, leaf in kinds.items():
+        if kind not in KNOWN_ACTION_KINDS:
+            bad(f"actions.kinds 里有引擎不认识的动作类 {kind!r}")
+            continue
+        if not isinstance(leaf, dict) or "value" not in leaf:
+            bad(f"actions.kinds.{kind} 不是带 value 的字段记录")
+            continue
+        status = leaf["value"]
+        if status not in ACTION_KIND_STATUSES:
+            bad(f"actions.kinds.{kind}.value 必须是 {'/'.join(ACTION_KIND_STATUSES)}，实际 {status!r}")
+            continue
+        if allowed is not None and forbidden is not None:
+            expected = "allowed" if kind in allowed else "forbidden"
+            if status != expected:
+                bad(f"actions.kinds.{kind}.value={status!r} 与两张清单不一致（按清单应为 {expected}）")
+
+
 def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optional[str] = None) -> List[str]:
     """校验一份配置，返回问题列表（空 = 合规）。
 
@@ -253,6 +392,19 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
     for path in REQUIRED_PATHS:
         if _dig(config, path) is _MISSING:
             bad(f"缺字段 {path}")
+
+    # ── RC-105：mana / actions 只有**白名单配置**才必填 ─────────────────────
+    #
+    # 不做成无条件 REQUIRED_PATHS：legacy 必须逐位不变，而它（以及 v2）里根本没有
+    # 「魔力」这条概念。无条件要求 `mana.pool` 只有两个后果 —— 给 legacy 补一个假 0
+    # （编规则：0 的意思是「已经判负」），或让默认路径当场加载失败。
+    requires_mana_actions = config.get("ruleset_config_id") in MANA_ACTIONS_CONFIG_IDS
+    if requires_mana_actions:
+        for path in MANA_REQUIRED_PATHS + ACTIONS_REQUIRED_PATHS:
+            if _dig(config, path) is _MISSING:
+                bad(f"缺字段 {path}（声明了 mana/actions 的配置必须把这两块写全）")
+    _validate_mana(config, bad)
+    _validate_actions(config, bad)
 
     # BattleMode 必须是登记表里真实存在的模式
     mode_id = _dig(config, "battle_mode.id")
@@ -406,8 +558,40 @@ class RuleConfig:
     end_turn_order: Tuple[str, ...]
     #: 配置是否允许回合末存在**未声明**的阶段。`True` 会被加载期拒掉；引擎再兜一层。
     end_turn_unknown_stages_allowed: bool
+    # ── RC-105：魔力（心）与合法动作裁剪 ──────────────────────────────────
+    #
+    # legacy / v2 里这七个数全是 `None` —— **不是 0、也不是空列表**：`None` 的意思是
+    # 「这份配置没有声明这个概念」，那一刻不该出现 mana 字段、也不该裁剪任何动作类。
+    #: 每方开局的魔力（心）。`None` = 本配置没有魔力系统。
+    mana_pool: Optional[int]
+    #: 某方精灵力竭时该方扣多少魔力。
+    mana_faint_cost: Optional[int]
+    #: 魔力 ≤ 0 是否**立即**判负（另一方胜）。
+    mana_loss_when_zero: Optional[bool]
+    #: 本候选是否把「投降」当成一个合法动作类。
+    mana_surrender: Optional[bool]
+    #: 合法动作的**声明清单**（顺序 = 展示顺序）。`None` = 不裁剪（legacy 行为）。
+    allowed_kinds: Optional[Tuple[str, ...]]
+    #: 一律不得出现在合法动作里的动作类。
+    forbidden_kinds: Tuple[str, ...]
+    #: `False` 时，产出未在 `allowed_kinds` 里声明的动作类必须**抛错**，不许静默放过。
+    unknown_kinds_allowed: Optional[bool]
     path: str
     raw: Dict[str, Any] = dc_field(repr=False, default_factory=dict)
+
+    @property
+    def has_mana(self) -> bool:
+        """这份配置是否声明了魔力系统（看原始 JSON 里有没有 `mana` 块）。
+
+        不用 `mana_pool is not None` 判断：`pool` 本身可以是 UNKNOWN(null)，
+        「声明了 mana 但值未知」与「没有 mana 这个概念」必须能分辨。
+        """
+        return isinstance(self.raw.get("mana"), dict)
+
+    @property
+    def has_actions(self) -> bool:
+        """这份配置是否声明了合法动作裁剪（看原始 JSON 里有没有 `actions` 块）。"""
+        return isinstance(self.raw.get("actions"), dict)
 
     @property
     def requires_microcase_before_default(self) -> bool:
@@ -515,6 +699,25 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
             "不被本引擎支持：那等于允许回合末存在未声明阶段（RC-103 fail closed）"
         )
 
+    # ── RC-105：mana / actions（只有声明了它们的配置才有值，其余一律 None）──
+    # 取值域判据上面已经把关过；这一段只管读成字段，尤其要保住 None 与 0 的区别。
+    raw_mana = config.get("mana")
+    has_mana = isinstance(raw_mana, dict)
+    mana_pool = _leaf_value(config, "mana.pool") if has_mana else None
+    mana_faint_cost = _leaf_value(config, "mana.faint_cost") if has_mana else None
+    mana_loss_when_zero = _leaf_value(config, "mana.loss_when_zero") if has_mana else None
+    mana_surrender = _leaf_value(config, "mana.surrender") if has_mana else None
+
+    raw_actions = config.get("actions")
+    has_actions = isinstance(raw_actions, dict)
+    allowed_kinds: Optional[Tuple[str, ...]] = None
+    forbidden_kinds: Tuple[str, ...] = ()
+    unknown_kinds_allowed: Optional[bool] = None
+    if has_actions:
+        allowed_kinds = tuple(str(x) for x in _leaf_value(config, "actions.allowed_kinds"))
+        forbidden_kinds = tuple(str(x) for x in _leaf_value(config, "actions.forbidden_kinds"))
+        unknown_kinds_allowed = _leaf_value(config, "actions.unknown_kinds_allowed")
+
     return RuleConfig(
         ruleset_config_id=config["ruleset_config_id"],
         is_default=bool(config["is_default"]),
@@ -533,6 +736,13 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         speed_tie_microcase_id=tie_microcase,
         end_turn_order=tuple(str(x) for x in end_turn),
         end_turn_unknown_stages_allowed=allowed_unknown_stages,
+        mana_pool=mana_pool,
+        mana_faint_cost=mana_faint_cost,
+        mana_loss_when_zero=mana_loss_when_zero,
+        mana_surrender=mana_surrender,
+        allowed_kinds=allowed_kinds,
+        forbidden_kinds=forbidden_kinds,
+        unknown_kinds_allowed=unknown_kinds_allowed,
         path=os.path.relpath(path, _repo_root()),
         raw=config,
     )
@@ -607,6 +817,16 @@ def summarize(config: RuleConfig) -> Dict[str, Any]:
         "speed_tie_microcase_id": config.speed_tie_microcase_id,
         "end_turn_order": list(config.end_turn_order),
         "end_turn_unknown_stages_allowed": config.end_turn_unknown_stages_allowed,
+        # RC-105：魔力与合法动作裁剪。没有声明的配置这里是 null / 空，**不是 0**。
+        "has_mana": config.has_mana,
+        "mana_pool": config.mana_pool,
+        "mana_faint_cost": config.mana_faint_cost,
+        "mana_loss_when_zero": config.mana_loss_when_zero,
+        "mana_surrender": config.mana_surrender,
+        "has_actions": config.has_actions,
+        "allowed_kinds": list(config.allowed_kinds) if config.allowed_kinds is not None else None,
+        "forbidden_kinds": list(config.forbidden_kinds),
+        "unknown_kinds_allowed": config.unknown_kinds_allowed,
         "ledger_sha256": config.derived_from_ledger_sha256,
         "fingerprint": config.fingerprint(),
         "unknowns": config.unknowns,
@@ -644,18 +864,70 @@ def selftest() -> int:
         checks.append((name, bool(ok), actual))
 
     configs = {cid: load_config(cid) for cid in available_rule_configs()}
-    push("磁盘上两份配置都通过校验", len(configs) >= 2, ", ".join(configs))
+    push("磁盘上每份配置都通过校验", len(configs) >= 2, ", ".join(configs))
     legacy = configs[DEFAULT_RULE_CONFIG_ID]
     push("默认仍是 legacy，且它 is_default=true", legacy.is_default and os.environ.get(ENV_VAR, "") == "",
          f"{legacy.ruleset_config_id} is_default={legacy.is_default}")
     push("legacy 的能量三件套与当前引擎逐位相同",
          (legacy.energy_max, legacy.energy_regen_per_turn, legacy.energy_initial) == (6, 1, 2),
          f"max={legacy.energy_max} regen={legacy.energy_regen_per_turn} initial={legacy.energy_initial}")
+    push("legacy 没有魔力系统、也不裁剪合法动作（mana/actions 都不存在）",
+         legacy.has_mana is False and legacy.has_actions is False
+         and legacy.mana_pool is None and legacy.allowed_kinds is None,
+         f"has_mana={legacy.has_mana} has_actions={legacy.has_actions} "
+         f"mana_pool={legacy.mana_pool!r} allowed={legacy.allowed_kinds!r}")
     candidate = configs[CANDIDATE_RULE_CONFIG_ID]
     push("candidate 的上限是 10、自然回能是 0", (candidate.energy_max, candidate.energy_regen_per_turn) == (10, 0),
          f"max={candidate.energy_max} regen={candidate.energy_regen_per_turn}")
     push("candidate 的入场能量是 unknown（null）而不是一个数", candidate.energy_initial is None,
          repr(candidate.energy_initial))
+
+    # ── RC-105：v3 的 mana / actions ──────────────────────────────────────
+    mana_cfg = configs.get(MANA_ACTIONS_CANDIDATE_ID)
+    push("v3 在磁盘上、且是候选（is_default=false，不得作为默认）",
+         mana_cfg is not None and mana_cfg.is_default is False, repr(mana_cfg and mana_cfg.is_default))
+    if mana_cfg is not None:
+        push("v3 的魔力池是 4、力竭扣 1、归零判负、允许投降",
+             (mana_cfg.mana_pool, mana_cfg.mana_faint_cost,
+              mana_cfg.mana_loss_when_zero, mana_cfg.mana_surrender) == (4, 1, True, True),
+             f"pool={mana_cfg.mana_pool} faint={mana_cfg.mana_faint_cost} "
+             f"loss_when_zero={mana_cfg.mana_loss_when_zero} surrender={mana_cfg.mana_surrender}")
+        push("v3 的 allowed_kinds 顺序即展示顺序，且聚能是独立动作类",
+             mana_cfg.allowed_kinds == ("skill", "charge", "switch", "surrender"),
+             str(mana_cfg.allowed_kinds))
+        push("v3 的 forbidden_kinds 是 item/escape（标准 PVP 无道具与逃跑）",
+             mana_cfg.forbidden_kinds == ("item", "escape"), str(mana_cfg.forbidden_kinds))
+        push("v3 不放行未声明的动作类", mana_cfg.unknown_kinds_allowed is False,
+             repr(mana_cfg.unknown_kinds_allowed))
+        # 反证⑨：把 item 塞进 allowed_kinds（两张清单交集非空）必须被判红
+        overlap = json.loads(json.dumps(mana_cfg.raw))
+        overlap["actions"]["allowed_kinds"]["value"].append("item")
+        overlap["actions"]["kinds"]["item"]["value"] = "allowed"
+        problems9 = validate_config(overlap, _load_ledger())
+        push("反证⑨：把 item 同时写进 allowed 与 forbidden 必须被判红",
+             any("交集" in p for p in problems9), str(problems9)[:160])
+        # 反证⑩：自造一个引擎不认识的动作类必须被判红
+        invented_kind = json.loads(json.dumps(mana_cfg.raw))
+        invented_kind["actions"]["allowed_kinds"]["value"].append("fuse")
+        invented_kind["actions"]["kinds"]["fuse"] = {
+            "value": "allowed", "confidence": "ENGINE_HYPOTHESIS",
+            "evidence_id": None, "evidence_role": None, "reason": "自造动作类",
+        }
+        problems10 = validate_config(invented_kind, _load_ledger())
+        push("反证⑩：自造动作类 fuzz 必须被判红（不许写引擎不认识的 kind）",
+             any("不认识的动作类" in p for p in problems10), str(problems10)[:160])
+        # 反证⑪：力竭扣减写成负数必须被判红
+        negative = json.loads(json.dumps(mana_cfg.raw))
+        negative["mana"]["faint_cost"]["value"] = -1
+        problems11 = validate_config(negative, _load_ledger())
+        push("反证⑪：mana.faint_cost=-1 必须被判红（负数不是一份可读的登记）",
+             any("faint_cost" in p and ">= 0" in p for p in problems11), str(problems11)[:160])
+        # 反证⑫：白名单配置缺 mana.loss_when_zero 必须被判红
+        dropped_mana = json.loads(json.dumps(mana_cfg.raw))
+        dropped_mana["mana"].pop("loss_when_zero")
+        problems12 = validate_config(dropped_mana, _load_ledger())
+        push("反证⑫：v3 缺 mana.loss_when_zero 必须被判红",
+             any("mana.loss_when_zero" in p for p in problems12), str(problems12)[:160])
 
     # ── RC-103：turn_order 三件套 ─────────────────────────────────────────
     push("legacy 的 action_order 如实等于引擎现状",

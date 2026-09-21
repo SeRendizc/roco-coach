@@ -19,7 +19,7 @@ import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {
-  BATTLE_MODES_PATH, CANDIDATE_ID, LEGACY_ID, LEDGER_PATH, RULESET_DIR,
+  BATTLE_MODES_PATH, CANDIDATE_ID, LEGACY_ID, LEDGER_PATH, RULESET_DIR, V3_CANDIDATE_ID,
   buildConfigs, checkConfigsForTest, validateConfig,
 } from '../scripts/roco/build-rule-configs.mjs';
 
@@ -49,7 +49,11 @@ function leaves(node, prefix = '') {
 }
 
 test('RC-101 规则配置：两份都在，且生成逻辑与磁盘一致', () => {
-  assert.deepEqual(configs.map((c) => c.ruleset_config_id).sort(), [CANDIDATE_ID, LEGACY_ID].sort());
+  // RC-105 起磁盘上有**三**份：legacy（默认）、v2（能量候选）、v3（mana/actions 候选）。
+  // 这是一条「恰好等于」的判据：配置数量一变就必须有人来解释（v3 的判据在
+  // tests/roco-mana-actions.test.js），不许新配置悄悄落盘。
+  assert.deepEqual(configs.map((c) => c.ruleset_config_id).sort(),
+    [CANDIDATE_ID, LEGACY_ID, V3_CANDIDATE_ID].sort());
   assert.deepEqual(checkConfigsForTest(), [],
     '磁盘上的配置与生成逻辑不一致（台账改过就必须重新生成）：见上');
   for (const config of configs) {

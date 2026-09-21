@@ -1,0 +1,386 @@
+{
+  "schema": "roco-ruleset-config/v1",
+  "ruleset_config_id": "mobile_s4_candidate_v3",
+  "game": "roco_world_mobile",
+  "source_id": "handoff-10-sources-and-confidence-2026-09-21",
+  "derived_from_ledger_sha256": "aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903",
+  "derived_from_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
+  "status": "CANDIDATE_NOT_FOR_DEFAULT",
+  "promotion_policy": "BLOCKED_UNTIL_MICROCASE",
+  "battle_mode": {
+    "id": "pvp-standard-six-pet",
+    "label": "标准 PVP 六宠阵容工坊（候选模式）",
+    "registry_status": "CANDIDATE",
+    "registry_confidence": "CROSS_SOURCE_SUPPORTED",
+    "team_size": {
+      "value": 6,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "取登记表里 pvp-standard-six-pet 的 team_size=6。模式规模来自EV-PVP-STANDARD-TEAM-SIZE（CROSS_SOURCE_SUPPORTED，MC-E07 未录制），不是官方确认；注意**引擎侧**的 reset 目前仍然只接受 3v3 的训练场队伍 —— 模式规模与场地规模尚未打通，这一点如实写进报告而不是假装已经支持六只"
+    },
+    "active_count": {
+      "value": 1,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "同上：模式参数，不是能量/魔力规则；引用留空以免借别的台账条目给模式背书"
+    }
+  },
+  "notes": [
+    "候选规则：只在显式选择时生效（ROCO_RULE_CONFIG / 显式参数）。**不得**作为默认。",
+    "在 v2 之上补齐两件事：`mana`（魔力/心结算）与 `actions`（合法动作裁剪）。",
+    "`energy` 与 `turn_order` 从 v2 **逐字复制**，一个值都没改 —— 本配置只新增，不重新解释既有口径。",
+    "魔力四件套里：pool / faint_cost / loss_when_zero 引台账 EV-PVP-STANDARD-MANA 与",
+    "EV-PVP-FAINT-MANA-LOSS（都是 CROSS_SOURCE_SUPPORTED，MC-E08/MC-E09 未录制）；",
+    "surrender 没有任何台账支撑，按 ENGINE_HYPOTHESIS 登记（投降的语义未定）。",
+    "任何字段都没有升级到 OFFICIAL_CURRENT —— MC-E07/E08/E09 未录制之前它一直是候选。"
+  ],
+  "is_default": false,
+  "requires_microcase_before_default": true,
+  "energy": {
+    "max": {
+      "value": 10,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-ENERGY-MAX",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E01",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS"
+    },
+    "regen": {
+      "per_turn": {
+        "value": 0,
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": "EV-ENERGY-ENDTURN-REGEN",
+        "evidence_role": "supports",
+        "microcase_id": "MC-E03",
+        "microcase_status": "NOT_RECORDED",
+        "value_status": "CANDIDATE_HYPOTHESIS",
+        "reason": "台账证据倾向「默认无自然回能」（ENGINE_HYPOTHESIS 被多源反驳）；但它仍是假设，不是实机结论，所以值为 0 且不做任何 promotion"
+      },
+      "applies_to": "field_pet_only",
+      "note": "0 = 默认不发生；回能只能来自技能 / 特性 / 道具，等 MC-E03。"
+    },
+    "initial": {
+      "value": null,
+      "confidence": "UNKNOWN",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "10 号文档 §7 原文：「首次入场具体能量：需实机/更强一手证据」。按 RC-101 要求留 unknown，不填一个看起来合理的数；实机判据见 MC-E04。"
+    },
+    "charge": {
+      "value": 5,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-ENERGY-CHARGE",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E02",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "聚能是主动行动、回复 5；是否可突破上限、无合法技能时是否自动聚能 —— 台账明说未定，故不在本配置里断言"
+    }
+  },
+  "turn_order": {
+    "action_order": {
+      "value": [
+        "respond",
+        "switch",
+        "priority",
+        "speed"
+      ],
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": "EV-TURN-ORDER-STRICT",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E05",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "社区实测常概括「应对 > 换宠 > 先手 > 速度」，但 10 号文档 §8 明确严格总排序本轮没有同等强度官方文字；EV-TURN-ORDER-STRICT 自己也写着「不得据此对外解释为什么这样排」。这条是**候选声明的总序**（candidate 口径），引擎侧目前只如实实现到 legacy 那条 action_order，两者的差距见 docs/roco/TURN-ORDER.md"
+    },
+    "speed_tie": {
+      "value": null,
+      "confidence": "UNKNOWN",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "10 号文档 §8：speed tie = UNKNOWN，判据见 MC-E05（同速多次录像是否总是同一侧先动；若随机则仍属 UNKNOWN、不得写成规则）。engine 在这个值不是 random_seeded 时**抛错**，不用随机数假装知道规则",
+      "microcase_id": "MC-E05",
+      "microcase_status": "NOT_RECORDED"
+    },
+    "end_turn": {
+      "order": {
+        "value": [
+          "status_tick",
+          "regen"
+        ],
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "候选沿用 legacy 的组内顺序只是「有界占位」，台账与 10 号文档都没确认它；引用留空，不许借 EV-TURN-ORDER-STRICT（那条讲的是应对/先手/换人/速度的总序）。microcase 留空：台账里没有「回合末阶段顺序」条目；本配置的 unknowns 里那条 MC-E03 只是「回合末有没有默认回能」的读数计划，不是顺序判据，故不在这里充数",
+        "microcase_id": null
+      },
+      "unknown_stages_allowed": {
+        "value": false,
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "引擎纪律开关（同 legacy）：false = 本配置声明的回合末阶段是穷尽的，遇到未声明阶段必须抛错。候选**不允许**用它放宽任何未知阶段 —— 「不知道就先抛」正是这份候选存在的意义"
+      }
+    }
+  },
+  "mana": {
+    "pool": {
+      "value": 4,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-PVP-STANDARD-MANA",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E08",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "标准 PVP 通常每方 4 点魔力。台账本条自注「两份来源里都没有一处逐字写出标准 PVP 每方 4 点魔力」、降级风险最高，所以它只是候选口径，**不**写成官方确认；判据见 MC-E08"
+    },
+    "faint_cost": {
+      "value": 1,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-PVP-FAINT-MANA-LOSS",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E09",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "力竭通常扣 1 点魔力。台账本条只有 17173「被击败时自己额外损失1点魔力」间接支持，第二条来源是产品拆解、没有逐字句 —— 证据强度弱于其他条，判据见 MC-E09"
+    },
+    "loss_when_zero": {
+      "value": true,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-PVP-FAINT-MANA-LOSS",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E09",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "同一台账条目的 claim 写着「目标是先让对方魔力归零，而不是默认打光整队」——所以「归零即判负」引它，等级与它逐字相同；双方**同时**归零怎么算台账没有条目，引擎按平局处理并登记为未知项"
+    },
+    "surrender": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "**投降没有任何台账支撑**：它是独立动作类（合法动作里必须出现，因为标准 PVP 既无道具也无逃跑），但「投降算不算判负的独立动作、是否扣魔力、是否消耗回合」台账与 10 号文档都没有条目。这里只登记「本候选把它列为合法动作类」这一实现选择，引擎按「投降方判负」处理并登记为假设，不编一个看起来合理的代价"
+    }
+  },
+  "actions": {
+    "allowed_kinds": {
+      "value": [
+        "skill",
+        "charge",
+        "switch",
+        "surrender"
+      ],
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "数组顺序**就是展示顺序**（skill → charge → switch → surrender）。聚能是独立动作类，不是技能的子类、也不是「能量不足时的兜底」（EV-ENERGY-CHARGE：聚能是一个主动行动）。整张清单本身是一条**引擎策略声明**：台账只支持其中「聚能是主动行动」这一点（见 kinds.charge），「标准 PVP 的动作全集就这四类」没有台账条目，所以引用留空、按 ENGINE_HYPOTHESIS 登记"
+    },
+    "forbidden_kinds": {
+      "value": [
+        "item",
+        "escape"
+      ],
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "标准 PVP 无道具与逃跑；仅当某 PVE 模式登记允许时才出现。台账没有「标准 PVP 禁道具/禁逃跑」的条目 —— 这是从「该模式的动作全集」推出来的引擎策略，不是引文"
+    },
+    "unknown_kinds_allowed": {
+      "value": false,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "**引擎纪律开关**，不是游戏规则：`false` = 本配置声明的动作类就是穷尽的，引擎若要产出一个没在 allowed_kinds 里声明的动作类必须**抛错**（不静默放过、也不静默丢弃）。台账里没有任何条目给它背书 —— 它约束的是我们自己的实现"
+    },
+    "kinds": {
+      "skill": {
+        "value": "allowed",
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "技能是引擎一直在结算的动作类（legacy 的合法动作里就有它），台账里没有专门条目讲「技能是合法动作」——它属于实现现状，按 ENGINE_HYPOTHESIS 登记"
+      },
+      "charge": {
+        "value": "allowed",
+        "confidence": "CROSS_SOURCE_SUPPORTED",
+        "evidence_id": "EV-ENERGY-CHARGE",
+        "evidence_role": "supports",
+        "microcase_id": "MC-E02",
+        "microcase_status": "NOT_RECORDED",
+        "value_status": "CANDIDATE_HYPOTHESIS",
+        "reason": "台账原文「聚能是一个主动行动，回复 5」——它支持「聚能是一个**动作**」，但该条 needs_microcase=true（MC-E02 未录制），所以它是候选假设；「可否突破上限」「无合法技能时是否自动聚能」台账明说未定，本配置不断言"
+      },
+      "switch": {
+        "value": "allowed",
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "主动换宠与强制补位都是引擎一直在结算的动作类（术语 3009 把力竭下场与主动离场分开）；台账没有「换宠是合法动作」的条目，按 ENGINE_HYPOTHESIS 登记。注意它的**先手度**（换宠 5）仍是 MC-005 未定的假设"
+      },
+      "surrender": {
+        "value": "allowed",
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "投降是标准 PVP 的独立动作类（无道具无逃跑，玩家需要一个「认输」的出口）。台账没有任何条目讲它的语义 —— 见 mana.surrender 的 reason"
+      },
+      "item": {
+        "value": "forbidden",
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "道具（回复药 / 净化药 / 能量果）在标准 PVP 里不出现；它们在 `env.DEFAULT_ITEM_STOCK` 里，属于 PVE/练习局（legacy、pve-camp）。台账没有对应条目，这是从模式口径推出来的策略"
+      },
+      "escape": {
+        "value": "forbidden",
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "逃跑在标准 PVP 里不出现（对局以魔力归零结算，玩家用「投降」退出）。台账没有对应条目，这是从模式口径推出来的策略"
+      }
+    }
+  },
+  "repo_internal_evidence": [
+    {
+      "kind": "repo_internal",
+      "ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record": "skills.skill_000007",
+      "name": "诈死（特性）",
+      "quote": "自己力竭时，少损失1点魔力。",
+      "supports": [
+        "mana.faint_cost"
+      ],
+      "note": "「少损失 1 点」只有在「力竭默认会损失魔力、且默认损失是 1 点」时才有意义 ——这是 faint_cost=1 的仓内文本佐证，与 EV-PVP-FAINT-MANA-LOSS 的口径一致"
+    },
+    {
+      "kind": "repo_internal",
+      "ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record": "skills.skill_000060",
+      "name": "付给恶魔的赎价（特性）",
+      "quote": "击败敌方精灵时，敌方额外损失1点魔力。被敌方精灵击败时，自己额外损失1点魔力。",
+      "supports": [
+        "mana.faint_cost"
+      ],
+      "note": "「**额外**损失 1 点」说明基础的力竭扣减是独立存在的一笔；本条描述的是加成，不改变基础值，所以本配置只登记基础 faint_cost=1"
+    },
+    {
+      "kind": "repo_internal",
+      "ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record": "skills.skill_000113",
+      "name": "飓风（特性）",
+      "quote": "对本精灵的技能，若其他翼系精灵携带相同技能，则获得迅捷。被敌方精灵击败时，自己额外损失1点魔力。",
+      "supports": [
+        "mana.faint_cost"
+      ],
+      "note": "第三条独立文本同样写「额外损失 1 点魔力」—— 与 skill_000060 互为同口径的第二处落点（但仍属同一份社区快照，因此不构成台账级的「两条不同 URL 来源」）"
+    },
+    {
+      "kind": "repo_internal",
+      "ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record": "skills.skill_000226",
+      "name": "御驾亲征（特性）",
+      "quote": "棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
+      "supports": [
+        "mana.faint_cost",
+        "mana.pool"
+      ],
+      "note": "① 再次确认「力竭 → 扣魔力」这条语义在游戏文本里存在；② 「4 魔力」是**逐字**出现的量（一次扣掉相当于整个候选池子的量），说明「4」在魔力语境里真实存在。**边界**：这条讲的是「棋契陛下」首领/棋契形态，**不能**当作标准 PVP 的默认值，所以它只是 pool=4 的旁证，不是依据；本配置按标准口径取 faint_cost=1，不把这个 4 点特例当默认"
+    },
+    {
+      "kind": "repo_internal",
+      "ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record": "skills.skill_000142 / skills.skill_000143",
+      "name": "图书守卫者 / 构装契约者（特性）",
+      "quote": "入场时，若自己魔力值为1，自己获得双攻+100%。 / 入场时，若敌方魔力值为1，自己获得双防+100%。",
+      "supports": [
+        "mana.pool",
+        "mana.loss_when_zero"
+      ],
+      "note": "两块文本都以「魔力值为 **1**」为条件 —— 说明魔力是一方一个的整数量、而且 1 是一个会被技能读到的临界值（不是「用完就没了的资源池」这种含糊说法）"
+    },
+    {
+      "kind": "repo_internal",
+      "ref": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+      "record": "pets[18] pet_000243 卡卡虫 / pets[20] pet_000240 丢丢",
+      "quote": "特性「诈死」：自己力竭时，少损失1点魔力。",
+      "supports": [
+        "mana.faint_cost"
+      ],
+      "note": "同一段文本也挂在 roster-48 的可用精灵上（本项目的 48 只练习名单里有它），所以它不是一条只在图鉴里存在的死文本"
+    },
+    {
+      "kind": "repo_internal",
+      "ref": "data/roco/normalized/roco-world-s4-2026-09-10/history.json",
+      "record": "pets.pet_000475[1].changes[2]",
+      "quote": "入场时，若自己魔力值为1，自己获得双攻+50%。 → …+100%",
+      "supports": [
+        "mana.pool"
+      ],
+      "note": "这条历史改动改的是加成幅度、**没有改**「魔力值为 1」这个条件 —— 再一次说明魔力值的量纲与临界点在本快照的两个版本里都成立"
+    },
+    {
+      "kind": "repo_internal",
+      "ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record": "扫描口径（全文正则）",
+      "name": "「魔力」命中的完整清单",
+      "quote": "skills.skill_000007 / 000060 / 000113 / 000142 / 000143 / 000226 六条 desc；另有 skill_000262 / 000460 / 000748 / 000781 四条只在 flavor（风味文案）里出现「魔力」",
+      "supports": [
+        "mana.pool",
+        "mana.faint_cost"
+      ],
+      "note": "这 6 条 desc 全部是**特性**，是仓内唯一来自游戏内文本的魔力语义线索；flavor 那 4 条是世界观文案（「阻断别人的魔力也是一种战斗方式」等），**不**作为规则证据。等级仍是 CROSS_SOURCE_SUPPORTED（社区快照），MC-E08 未录制前不得写成官方已确认"
+    }
+  ],
+  "unknowns": [
+    {
+      "path": "mana.pool",
+      "value": 4,
+      "reason": "4 点魔力只有 10 号文档转述 + 社区交叉口径（EV-PVP-STANDARD-MANA 自注降级风险最高），需实机",
+      "microcase_id": "MC-E08"
+    },
+    {
+      "path": "mana.faint_cost",
+      "value": 1,
+      "reason": "力竭扣 1 点魔力只有间接支持（EV-PVP-FAINT-MANA-LOSS），扣谁/扣多少/能否被效果改变未核实",
+      "microcase_id": "MC-E09"
+    },
+    {
+      "path": "mana.loss_when_zero",
+      "value": true,
+      "reason": "「先让对方魔力归零」来自同一台账条目；**双方同时归零**怎么算没有任何条目",
+      "microcase_id": "MC-E09"
+    },
+    {
+      "path": "mana.surrender",
+      "value": true,
+      "reason": "投降的语义（算不算判负、是否扣魔力、是否消耗回合）没有任何台账条目：只登记实现选择",
+      "microcase_id": null
+    },
+    {
+      "path": "battle_mode.team_size",
+      "value": 6,
+      "reason": "标准 PVP 六宠来自 EV-PVP-STANDARD-TEAM-SIZE（CROSS_SOURCE_SUPPORTED，MC-E07 未录制）；引擎训练场目前仍只接受 3v3，模式规模与场地规模尚未打通",
+      "microcase_id": "MC-E07"
+    },
+    {
+      "path": "actions.allowed_kinds",
+      "value": [
+        "skill",
+        "charge",
+        "switch",
+        "surrender"
+      ],
+      "reason": "「标准 PVP 的动作全集就是这四类」没有台账条目；其中只有 charge 有台账支持（EV-ENERGY-CHARGE）",
+      "microcase_id": null
+    },
+    {
+      "path": "energy.charge.breaks_cap",
+      "value": null,
+      "reason": "聚能是否可突破上限、无合法技能时是否自动聚能未定（MC-E02）",
+      "microcase_id": "MC-E02"
+    }
+  ]
+}

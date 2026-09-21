@@ -24,8 +24,28 @@ ACTION_SWITCH = "switch"
 ACTION_ITEM = "item"
 ACTION_ESCAPE = "escape"
 ACTION_STRUGGLE = "struggle"   # 无合法技能时的保底；是否真实存在存疑，见 README
+# RC-105：**聚能**是标准 PVP 的独立动作类（不是某个技能的子类，也不是「能量不足时的兜底」）。
+# 依据：台账 EV-ENERGY-CHARGE（CROSS_SOURCE_SUPPORTED）：「聚能是一个主动行动，回复 5」；
+# 该条 needs_microcase=true，MC-E02 未录制 —— 所以「它是独立动作类」这件事在配置里是候选假设。
+ACTION_CHARGE = "charge"
+# RC-105：**投降**是独立动作类（合法动作里必须出现，标准 PVP 没有道具与逃跑）。
+# 台账里**没有**任何条目讲投降的语义（是否算判负、是否扣魔力）—— 见 `mana.surrender` 的 reason。
+ACTION_SURRENDER = "surrender"
 
-VALID_KINDS = (ACTION_SKILL, ACTION_SWITCH, ACTION_ITEM, ACTION_ESCAPE, ACTION_STRUGGLE)
+VALID_KINDS = (ACTION_SKILL, ACTION_SWITCH, ACTION_ITEM, ACTION_ESCAPE, ACTION_STRUGGLE,
+               ACTION_CHARGE, ACTION_SURRENDER)
+
+#: RC-105：每种动作类**必须**带齐的字段。缺了就在构造期抛 `ValueError`
+#: （`Action.__post_init__` 真的会跑，不是一句注释）。`charge` / `surrender` /
+#: `escape` / `struggle` 不带字段，所以不在这里出现。
+#:
+#: `item` 只要 `item_id`：目标位省略时引擎按「自己场上那只」处理
+#: （`_use_item` 里 `target_index or me.active`），既有调用点就是这么传的。
+ACTION_REQUIRED_FIELDS = {
+    ACTION_SKILL: ("skill_id",),
+    ACTION_SWITCH: ("target_index",),
+    ACTION_ITEM: ("item_id",),
+}
 
 
 @dataclass(frozen=True)
@@ -40,6 +60,16 @@ class Action:
     skill_id: Optional[str] = None    # kind == skill
     target_index: Optional[int] = None  # kind == switch / item 的目标位
     item_id: Optional[str] = None     # kind == item
+
+    #: RC-105：每种动作类**必须**带齐的字段。缺了就在构造期抛 `ValueError`。
+    REQUIRED_FIELDS = ACTION_REQUIRED_FIELDS
+
+    def __post_init__(self) -> None:
+        if self.kind not in VALID_KINDS:
+            raise ValueError(f"未知动作类型：{self.kind}")
+        for name in ACTION_REQUIRED_FIELDS.get(self.kind, ()):
+            if getattr(self, name) is None:
+                raise ValueError(f"动作 {self.kind} 缺字段 {name}")
 
     def to_dict(self) -> Dict[str, Any]:
         d: Dict[str, Any] = {"kind": self.kind}
@@ -70,7 +100,9 @@ class Action:
             return f"换上第{(self.target_index or 0) + 1}位"
         if self.kind == ACTION_ITEM:
             return f"使用{self.item_id}"
-        return {"escape": "撤退", "struggle": "挣扎"}.get(self.kind, self.kind)
+        return {"escape": "撤退", "struggle": "挣扎",
+                # RC-105：聚能/投降是**独立动作类**，名字照实写，不借用技能的叫法
+                "charge": "聚能", "surrender": "投降"}.get(self.kind, self.kind)
 
 
 # ── 精灵与队伍 ──────────────────────────────────────────────────────────
@@ -148,6 +180,12 @@ class SideState:
     # 每只精灵这场带的 4 个技能（pet_id -> skill_id 元组）。
     # 合法动作按它枚举：图鉴可学 ≠ 这场带得上。
     loadouts: Dict[str, Any] = field(default_factory=dict)
+    #: RC-105：这一方还剩多少**魔力（心）**。
+    #:
+    #: `None` = **本局的规则配置没有声明魔力系统**（legacy / v2）——
+    #: 那一刻引擎里**不存在**这条概念，序列化里也**不会出现** `mana` 键。
+    #: 给它补一个 0 就是编规则：0 的意思是「已经判负」，而不是「没有这个概念」。
+    mana: Optional[int] = None
 
     @property
     def field_pet(self) -> PetState:
@@ -174,6 +212,10 @@ class SideState:
             # 第 43 轮由「伤害预览为什么一直是空」追到这里。
             "loadouts": {k: list(v) for k, v in (self.loadouts or {}).items()},
             "pets": [p.to_dict() for p in self.pets],
+            # RC-105：**只有声明了魔力系统的配置才写这个键**。legacy / v2 的序列化
+            # 因此一个字节都不变（8 条 golden 指纹仍然成立）；反过来，声明了 mana 的
+            # 模式也不许被补一个 0 —— `0` 是「魔力归零、已经判负」，不是「没有这个概念」。
+            **({"mana": self.mana} if self.mana is not None else {}),
         }
 
     @staticmethod
@@ -184,6 +226,8 @@ class SideState:
             items=dict(d.get("items") or {}),
             loadouts={k: tuple(v) for k, v in (d.get("loadouts") or {}).items()},
             pets=[PetState.from_dict(p) for p in d["pets"]],
+            # 老存档没有这个键 → `None`（= 当时那份配置没有魔力系统），不是 0。
+            mana=d.get("mana"),
         )
 
 
@@ -339,6 +383,13 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
             "active": is_active,
         }
 
+    # RC-105：魔力（心）是**公开**信息（它就是胜负判据本身，画在两边的界面上）。
+    # 但**只有声明了魔力系统的配置**才写这个键：legacy / v2 里这条概念不存在，
+    # 补一个 0 会被读成「已经判负」——那是编规则，不是公开性取舍。
+    mana_block = None
+    if me.mana is not None or foe.mana is not None:
+        mana_block = {"self": me.mana, "opponent": foe.mana}
+
     return {
         "side": side,
         "turn": state.turn,
@@ -346,6 +397,7 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
         "result": state.result,
         "state_version": state.state_version,
         "ruleset_id": state.ruleset_id,
+        **({"mana": mana_block} if mana_block is not None else {}),
         "self": {
             "active": me.active,
             "items": dict(me.items),

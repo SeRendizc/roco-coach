@@ -111,7 +111,11 @@ test('RC-301 判据④：自创 mode 必须判红', () => {
 test('RC-301 判据⑤：自创 ruleset_config_id 必须判红', () => {
   const result = validateRecommendationRequest({...base(), ruleset_config_id: 'made_up_ruleset_v9'}, inputs);
   expectCode(result, 'UNKNOWN_RULESET', '⑤ rulesets/*.json 里没有的配置 id');
-  assert.deepEqual([...registry.rulesetById.keys()], ['legacy_sim_v1', 'mobile_s4_candidate_v2']);
+  // 注册表**恰好**等于磁盘上那几份配置：配置数量一变就必须有人来解释。
+  // RC-105 起多了一份 `mobile_s4_candidate_v3`（mana + actions 候选；判据见
+  // tests/roco-mana-actions.test.js）。它同样是候选，**不**改变任何默认口径。
+  assert.deepEqual([...registry.rulesetById.keys()],
+    ['legacy_sim_v1', 'mobile_s4_candidate_v2', 'mobile_s4_candidate_v3']);
 });
 
 test('RC-301 判据⑥：标准 PVP 用 team_size=3 必须判红', () => {

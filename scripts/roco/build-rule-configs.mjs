@@ -10,7 +10,7 @@
 //
 // 跑法：
 //
-//     node scripts/roco/build-rule-configs.mjs            # 写两份配置 + 打印 diff 摘要
+//     node scripts/roco/build-rule-configs.mjs            # 写全部配置 + 打印 diff 摘要
 //     node scripts/roco/build-rule-configs.mjs --check    # 只校验（内容/指纹/台账引用/置信等级）
 //     node scripts/roco/build-rule-configs.mjs --json     # 校验结果打到 stdout
 //     node scripts/roco/build-rule-configs.mjs --selftest # 自检（含反向控制）
@@ -30,9 +30,40 @@ export const BATTLE_MODES_PATH = 'data/roco/battle-modes.json';
 export const RULESET_DIR = 'data/roco/rulesets';
 export const LEGACY_ID = 'legacy_sim_v1';
 export const CANDIDATE_ID = 'mobile_s4_candidate_v2';
+/** RC-105：第一个声明 `mana`（魔力/心）与 `actions`（合法动作裁剪）的候选配置。 */
+export const V3_CANDIDATE_ID = 'mobile_s4_candidate_v3';
 
 /** RC-103：`turn_order.speed_tie` 允许的取值。`null` = UNKNOWN（不是「随便挑一个」）。 */
 export const SPEED_TIE_POLICIES = Object.freeze(new Set(['random_seeded']));
+
+/**
+ * RC-105：配置里允许写的动作类（与 `roco_env/rule_config.py::KNOWN_ACTION_KINDS` 一致）。
+ * 这是**配置 schema 的词汇表**；「引擎真的会产出哪些」是另一份清单
+ * （`roco_env/env.py::ACTION_KINDS_IMPLEMENTED`），两处判据各管一段。
+ */
+export const KNOWN_ACTION_KINDS = Object.freeze(new Set([
+  'skill', 'charge', 'switch', 'surrender', 'item', 'escape', 'struggle',
+]));
+
+/** RC-105：`actions.kinds.<kind>.value` 的合法取值。 */
+export const ACTION_KIND_STATUSES = Object.freeze(new Set(['allowed', 'forbidden']));
+
+/**
+ * RC-105：**必须**写全 `mana` / `actions` 的配置白名单。
+ *
+ * 只有名单里的配置被要求带这两块；`legacy_sim_v1` 与 `mobile_s4_candidate_v2` 显式登记为
+ * 「没有魔力系统、不裁剪合法动作」。把新字段设成**所有配置都必填**会有两个后果：
+ * 要么给 legacy 补一个假的 0（那是编规则），要么 legacy 当场加载失败（默认路径直接崩）。
+ */
+export const MANA_ACTIONS_CONFIG_IDS = Object.freeze([V3_CANDIDATE_ID]);
+
+/** RC-105：`mana` / `actions` 里每个字段都必须写全的路径。 */
+export const MANA_REQUIRED_PATHS = Object.freeze([
+  'mana.pool', 'mana.faint_cost', 'mana.loss_when_zero', 'mana.surrender',
+]);
+export const ACTIONS_REQUIRED_PATHS = Object.freeze([
+  'actions.allowed_kinds', 'actions.forbidden_kinds', 'actions.unknown_kinds_allowed',
+]);
 
 const readJson = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8'));
 const sha256Of = (rel) => createHash('sha256').update(readFileSync(join(ROOT, rel))).digest('hex');
@@ -50,7 +81,8 @@ export function ledgerIndex(ledger) {
 }
 
 /**
- * 构造两份配置（纯函数：同样的台账 → 逐字节同样的结果）。
+ * 构造全部配置（纯函数：同样的台账 → 逐字节同样的结果）。现在是三份：
+ * legacy（逐位基线）、v2（能量候选）、v3（RC-105：mana + actions 候选）。
  *
  * 字段值的纪律：
  *   · `legacy_sim_v1` 的每个值都等于**当前引擎行为**，一个比特都不改（这是防回归基线）；
@@ -72,7 +104,11 @@ export function buildConfigs({ledger, battleModes}) {
    *   · `reason` —— 为什么是 null / 为什么这条证据只能当占位。
    */
   /** 逐位冻结的基线不标候选元数据；候选配置才需要「值还没被验证」这层登记。 */
-  const policyFor = {[LEGACY_ID]: 'FROZEN_BIT_EXACT_BASELINE', [CANDIDATE_ID]: 'BLOCKED_UNTIL_MICROCASE'};
+  const policyFor = {
+    [LEGACY_ID]: 'FROZEN_BIT_EXACT_BASELINE',
+    [CANDIDATE_ID]: 'BLOCKED_UNTIL_MICROCASE',
+    [V3_CANDIDATE_ID]: 'BLOCKED_UNTIL_MICROCASE',
+  };
 
   const field = (value, confidence, evidenceId, reason = null, role = 'supports', extra = {}) => {
     const entry = evidenceId ? (ledger.entries ?? []).find((e) => e.id === evidenceId) : null;
@@ -96,7 +132,7 @@ export function buildConfigs({ledger, battleModes}) {
   };
 
   /** 每个配置共享的骨架字段（schema / id / game / 来源 / 指纹）。 */
-  const skeleton = (id, status, modeId, notes, promotionPolicy) => {
+  const skeleton = (id, status, modeId, notes, promotionPolicy, modeReasons = {}) => {
     // promotionPolicy 是机器可读的：'BLOCKED_UNTIL_MICROCASE' 的配置里，引用了待验台账条目的
     // 字段**不许**带具体值（校验器会判红）；'FROZEN_BIT_EXACT_BASELINE' 是唯一的例外，
     // 因为它存在的全部意义就是「与当前引擎逐位相同」。
@@ -117,9 +153,13 @@ export function buildConfigs({ledger, battleModes}) {
         registry_status: mode.status,
         registry_confidence: mode.confidence,
         team_size: field(mode.parameters.team_size, 'ENGINE_HYPOTHESIS', null,
-          '暂时取登记表里的模式参数；本配置只定义能量与时序，不含魔力系统（那是 RC-1xx 的另一件事）'),
+          // RC-105：v3 起这份配置确实定义了模式规模，所以 reason 不能再写「本配置只定义能量与时序」——
+          // 「模式规模有多可信」与「这份配置包含什么」是两件事，后者必须如实。
+          modeReasons.teamSize
+          ?? '暂时取登记表里的模式参数；本配置只定义能量与时序，不含魔力系统（那是 RC-1xx 的另一件事）'),
         active_count: field(mode.parameters.active_count, 'ENGINE_HYPOTHESIS', null,
-          '同上：模式参数，不是能量规则；引用留空以免借能量台账条目给模式背书'),
+          modeReasons.activeCount
+          ?? '同上：模式参数，不是能量规则；引用留空以免借能量台账条目给模式背书'),
       },
       notes,
     };
@@ -237,7 +277,179 @@ export function buildConfigs({ledger, battleModes}) {
     ],
   };
 
-  return [legacy, candidate];
+  // ── RC-105：`mobile_s4_candidate_v3`（魔力 + 合法动作裁剪）──────────────────
+  //
+  // 与 v2 的关系：`energy` 与 `turn_order` **逐字复制**（直接深拷贝 v2 的那两块，
+  // 不是重写一遍同样的值 —— 重写就会漂）。差别只有两处：
+  //   ① 新增 `mana`：4 点魔力 / 力竭扣 1 / 归零判负 / 允许投降；
+  //   ② 新增 `actions`：合法动作类 skill→charge→switch→surrender，禁 item/escape。
+  // 两份配置绑的是**同一个** BattleMode（pvp-standard-six-pet），所以「模式口径」没变，
+  // 变的是「这个模式怎么结算」。仍然 `BLOCKED_UNTIL_MICROCASE`：MC-E07/E08/E09 都没录。
+  field.policy = policyFor[V3_CANDIDATE_ID];
+  const manaActionsCandidate = {
+    ...skeleton(V3_CANDIDATE_ID, 'CANDIDATE_NOT_FOR_DEFAULT', 'pvp-standard-six-pet', [
+      '候选规则：只在显式选择时生效（ROCO_RULE_CONFIG / 显式参数）。**不得**作为默认。',
+      '在 v2 之上补齐两件事：`mana`（魔力/心结算）与 `actions`（合法动作裁剪）。',
+      '`energy` 与 `turn_order` 从 v2 **逐字复制**，一个值都没改 —— 本配置只新增，不重新解释既有口径。',
+      '魔力四件套里：pool / faint_cost / loss_when_zero 引台账 EV-PVP-STANDARD-MANA 与',
+      'EV-PVP-FAINT-MANA-LOSS（都是 CROSS_SOURCE_SUPPORTED，MC-E08/MC-E09 未录制）；',
+      'surrender 没有任何台账支撑，按 ENGINE_HYPOTHESIS 登记（投降的语义未定）。',
+      '任何字段都没有升级到 OFFICIAL_CURRENT —— MC-E07/E08/E09 未录制之前它一直是候选。',
+    ], 'BLOCKED_UNTIL_MICROCASE', {
+      teamSize: '取登记表里 pvp-standard-six-pet 的 team_size=6。模式规模来自'
+        + 'EV-PVP-STANDARD-TEAM-SIZE（CROSS_SOURCE_SUPPORTED，MC-E07 未录制），不是官方确认；'
+        + '注意**引擎侧**的 reset 目前仍然只接受 3v3 的训练场队伍 —— 模式规模与场地规模尚未打通，'
+        + '这一点如实写进报告而不是假装已经支持六只',
+      activeCount: '同上：模式参数，不是能量/魔力规则；引用留空以免借别的台账条目给模式背书',
+    }),
+    is_default: false,
+    requires_microcase_before_default: true,
+    // 与 v2 逐字相同（深拷贝，保证「一个值都没改」是结构上成立的，而不是靠人肉比对）
+    energy: JSON.parse(JSON.stringify(candidate.energy)),
+    turn_order: JSON.parse(JSON.stringify(candidate.turn_order)),
+    mana: {
+      pool: field(4, 'CROSS_SOURCE_SUPPORTED', 'EV-PVP-STANDARD-MANA',
+        '标准 PVP 通常每方 4 点魔力。台账本条自注「两份来源里都没有一处逐字写出标准 PVP 每方 4 点'
+        + '魔力」、降级风险最高，所以它只是候选口径，**不**写成官方确认；判据见 MC-E08'),
+      faint_cost: field(1, 'CROSS_SOURCE_SUPPORTED', 'EV-PVP-FAINT-MANA-LOSS',
+        '力竭通常扣 1 点魔力。台账本条只有 17173「被击败时自己额外损失1点魔力」间接支持，'
+        + '第二条来源是产品拆解、没有逐字句 —— 证据强度弱于其他条，判据见 MC-E09'),
+      loss_when_zero: field(true, 'CROSS_SOURCE_SUPPORTED', 'EV-PVP-FAINT-MANA-LOSS',
+        '同一台账条目的 claim 写着「目标是先让对方魔力归零，而不是默认打光整队」——'
+        + '所以「归零即判负」引它，等级与它逐字相同；双方**同时**归零怎么算台账没有条目，'
+        + '引擎按平局处理并登记为未知项'),
+      surrender: field(true, 'ENGINE_HYPOTHESIS', null,
+        '**投降没有任何台账支撑**：它是独立动作类（合法动作里必须出现，因为标准 PVP 既无道具也无逃跑），'
+        + '但「投降算不算判负的独立动作、是否扣魔力、是否消耗回合」台账与 10 号文档都没有条目。'
+        + '这里只登记「本候选把它列为合法动作类」这一实现选择，引擎按「投降方判负」处理并登记为假设，'
+        + '不编一个看起来合理的代价'),
+    },
+    actions: {
+      allowed_kinds: field(['skill', 'charge', 'switch', 'surrender'], 'ENGINE_HYPOTHESIS', null,
+        '数组顺序**就是展示顺序**（skill → charge → switch → surrender）。聚能是独立动作类，'
+        + '不是技能的子类、也不是「能量不足时的兜底」（EV-ENERGY-CHARGE：聚能是一个主动行动）。'
+        + '整张清单本身是一条**引擎策略声明**：台账只支持其中「聚能是主动行动」这一点（见 kinds.charge），'
+        + '「标准 PVP 的动作全集就这四类」没有台账条目，所以引用留空、按 ENGINE_HYPOTHESIS 登记'),
+      forbidden_kinds: field(['item', 'escape'], 'ENGINE_HYPOTHESIS', null,
+        '标准 PVP 无道具与逃跑；仅当某 PVE 模式登记允许时才出现。台账没有「标准 PVP 禁道具/禁逃跑」'
+        + '的条目 —— 这是从「该模式的动作全集」推出来的引擎策略，不是引文'),
+      unknown_kinds_allowed: field(false, 'ENGINE_HYPOTHESIS', null,
+        '**引擎纪律开关**，不是游戏规则：`false` = 本配置声明的动作类就是穷尽的，引擎若要产出一个'
+        + '没在 allowed_kinds 里声明的动作类必须**抛错**（不静默放过、也不静默丢弃）。'
+        + '台账里没有任何条目给它背书 —— 它约束的是我们自己的实现'),
+      kinds: {
+        // 每个 kind 一条登记：有台账就引，没有就 ENGINE_HYPOTHESIS + reason。
+        // `value` 是 allowed/forbidden，与上面两张清单**必须**一致（校验器会判红）。
+        skill: field('allowed', 'ENGINE_HYPOTHESIS', null,
+          '技能是引擎一直在结算的动作类（legacy 的合法动作里就有它），台账里没有专门条目讲'
+          + '「技能是合法动作」——它属于实现现状，按 ENGINE_HYPOTHESIS 登记'),
+        charge: field('allowed', 'CROSS_SOURCE_SUPPORTED', 'EV-ENERGY-CHARGE',
+          '台账原文「聚能是一个主动行动，回复 5」——它支持「聚能是一个**动作**」，'
+          + '但该条 needs_microcase=true（MC-E02 未录制），所以它是候选假设；'
+          + '「可否突破上限」「无合法技能时是否自动聚能」台账明说未定，本配置不断言'),
+        switch: field('allowed', 'ENGINE_HYPOTHESIS', null,
+          '主动换宠与强制补位都是引擎一直在结算的动作类（术语 3009 把力竭下场与主动离场分开）；'
+          + '台账没有「换宠是合法动作」的条目，按 ENGINE_HYPOTHESIS 登记。'
+          + '注意它的**先手度**（换宠 5）仍是 MC-005 未定的假设'),
+        surrender: field('allowed', 'ENGINE_HYPOTHESIS', null,
+          '投降是标准 PVP 的独立动作类（无道具无逃跑，玩家需要一个「认输」的出口）。'
+          + '台账没有任何条目讲它的语义 —— 见 mana.surrender 的 reason'),
+        item: field('forbidden', 'ENGINE_HYPOTHESIS', null,
+          '道具（回复药 / 净化药 / 能量果）在标准 PVP 里不出现；'
+          + '它们在 `env.DEFAULT_ITEM_STOCK` 里，属于 PVE/练习局（legacy、pve-camp）。'
+          + '台账没有对应条目，这是从模式口径推出来的策略'),
+        escape: field('forbidden', 'ENGINE_HYPOTHESIS', null,
+          '逃跑在标准 PVP 里不出现（对局以魔力归零结算，玩家用「投降」退出）。'
+          + '台账没有对应条目，这是从模式口径推出来的策略'),
+      },
+    },
+    // RC-105：**仓内冻结快照的原文**佐证（不是台账条目，也不改台账等级）。
+    //
+    // 为什么单独放一块：这些是**唯一来自游戏内文本**的魔力语义线索（技能/特性 desc），
+    // 比任何转述都强。但它们只有一份仓内来源，不满足「两条不同 URL 来源」的台账入库门槛，
+    // 所以**不新增台账条目、也不升级任何等级** —— 如实登记成 `repo_internal` 佐证，
+    // 谁要 promotion 谁去录 MC-E08 / MC-E09。
+    repo_internal_evidence: [
+      {kind: 'repo_internal', ref: 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json',
+        record: 'skills.skill_000007', name: '诈死（特性）',
+        quote: '自己力竭时，少损失1点魔力。',
+        supports: ['mana.faint_cost'],
+        note: '「少损失 1 点」只有在「力竭默认会损失魔力、且默认损失是 1 点」时才有意义 ——'
+          + '这是 faint_cost=1 的仓内文本佐证，与 EV-PVP-FAINT-MANA-LOSS 的口径一致'},
+      {kind: 'repo_internal', ref: 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json',
+        record: 'skills.skill_000060', name: '付给恶魔的赎价（特性）',
+        quote: '击败敌方精灵时，敌方额外损失1点魔力。被敌方精灵击败时，自己额外损失1点魔力。',
+        supports: ['mana.faint_cost'],
+        note: '「**额外**损失 1 点」说明基础的力竭扣减是独立存在的一笔；本条描述的是加成，'
+          + '不改变基础值，所以本配置只登记基础 faint_cost=1'},
+      {kind: 'repo_internal', ref: 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json',
+        record: 'skills.skill_000113', name: '飓风（特性）',
+        quote: '对本精灵的技能，若其他翼系精灵携带相同技能，则获得迅捷。被敌方精灵击败时，自己额外损失1点魔力。',
+        supports: ['mana.faint_cost'],
+        note: '第三条独立文本同样写「额外损失 1 点魔力」—— 与 skill_000060 互为同口径的第二处落点'
+          + '（但仍属同一份社区快照，因此不构成台账级的「两条不同 URL 来源」）'},
+      {kind: 'repo_internal', ref: 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json',
+        record: 'skills.skill_000226', name: '御驾亲征（特性）',
+        quote: '棋契陛下大幅提升种族资质，力竭时扣除4魔力。',
+        supports: ['mana.faint_cost', 'mana.pool'],
+        note: '① 再次确认「力竭 → 扣魔力」这条语义在游戏文本里存在；'
+          + '② 「4 魔力」是**逐字**出现的量（一次扣掉相当于整个候选池子的量），'
+          + '说明「4」在魔力语境里真实存在。**边界**：这条讲的是「棋契陛下」首领/棋契形态，'
+          + '**不能**当作标准 PVP 的默认值，所以它只是 pool=4 的旁证，不是依据；'
+          + '本配置按标准口径取 faint_cost=1，不把这个 4 点特例当默认'},
+      {kind: 'repo_internal', ref: 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json',
+        record: 'skills.skill_000142 / skills.skill_000143', name: '图书守卫者 / 构装契约者（特性）',
+        quote: '入场时，若自己魔力值为1，自己获得双攻+100%。 / 入场时，若敌方魔力值为1，自己获得双防+100%。',
+        supports: ['mana.pool', 'mana.loss_when_zero'],
+        note: '两块文本都以「魔力值为 **1**」为条件 —— 说明魔力是一方一个的整数量、'
+          + '而且 1 是一个会被技能读到的临界值（不是「用完就没了的资源池」这种含糊说法）'},
+      {kind: 'repo_internal', ref: 'data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json',
+        record: 'pets[18] pet_000243 卡卡虫 / pets[20] pet_000240 丢丢',
+        quote: '特性「诈死」：自己力竭时，少损失1点魔力。',
+        supports: ['mana.faint_cost'],
+        note: '同一段文本也挂在 roster-48 的可用精灵上（本项目的 48 只练习名单里有它），'
+          + '所以它不是一条只在图鉴里存在的死文本'},
+      {kind: 'repo_internal', ref: 'data/roco/normalized/roco-world-s4-2026-09-10/history.json',
+        record: 'pets.pet_000475[1].changes[2]',
+        quote: '入场时，若自己魔力值为1，自己获得双攻+50%。 → …+100%',
+        supports: ['mana.pool'],
+        note: '这条历史改动改的是加成幅度、**没有改**「魔力值为 1」这个条件 —— 再一次说明'
+          + '魔力值的量纲与临界点在本快照的两个版本里都成立'},
+      {kind: 'repo_internal', ref: 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json',
+        record: '扫描口径（全文正则）', name: '「魔力」命中的完整清单',
+        quote: 'skills.skill_000007 / 000060 / 000113 / 000142 / 000143 / 000226 六条 desc；'
+          + '另有 skill_000262 / 000460 / 000748 / 000781 四条只在 flavor（风味文案）里出现「魔力」',
+        supports: ['mana.pool', 'mana.faint_cost'],
+        note: '这 6 条 desc 全部是**特性**，是仓内唯一来自游戏内文本的魔力语义线索；'
+          + 'flavor 那 4 条是世界观文案（「阻断别人的魔力也是一种战斗方式」等），**不**作为规则证据。'
+          + '等级仍是 CROSS_SOURCE_SUPPORTED（社区快照），MC-E08 未录制前不得写成官方已确认'},
+    ],
+    unknowns: [
+      {path: 'mana.pool', value: 4,
+        reason: '4 点魔力只有 10 号文档转述 + 社区交叉口径（EV-PVP-STANDARD-MANA 自注降级风险最高），需实机',
+        microcase_id: 'MC-E08'},
+      {path: 'mana.faint_cost', value: 1,
+        reason: '力竭扣 1 点魔力只有间接支持（EV-PVP-FAINT-MANA-LOSS），扣谁/扣多少/能否被效果改变未核实',
+        microcase_id: 'MC-E09'},
+      {path: 'mana.loss_when_zero', value: true,
+        reason: '「先让对方魔力归零」来自同一台账条目；**双方同时归零**怎么算没有任何条目',
+        microcase_id: 'MC-E09'},
+      {path: 'mana.surrender', value: true,
+        reason: '投降的语义（算不算判负、是否扣魔力、是否消耗回合）没有任何台账条目：只登记实现选择',
+        microcase_id: null},
+      {path: 'battle_mode.team_size', value: 6,
+        reason: '标准 PVP 六宠来自 EV-PVP-STANDARD-TEAM-SIZE（CROSS_SOURCE_SUPPORTED，MC-E07 未录制）；'
+          + '引擎训练场目前仍只接受 3v3，模式规模与场地规模尚未打通',
+        microcase_id: 'MC-E07'},
+      {path: 'actions.allowed_kinds', value: ['skill', 'charge', 'switch', 'surrender'],
+        reason: '「标准 PVP 的动作全集就是这四类」没有台账条目；其中只有 charge 有台账支持（EV-ENERGY-CHARGE）',
+        microcase_id: null},
+      {path: 'energy.charge.breaks_cap', value: null,
+        reason: '聚能是否可突破上限、无合法技能时是否自动聚能未定（MC-E02）', microcase_id: 'MC-E02'},
+    ],
+  };
+
+  return [legacy, candidate, manaActionsCandidate];
 }
 
 /**
@@ -308,6 +520,114 @@ function checkLegacyBitExact(configs, problems) {
   if (legacy.is_default !== true) problems.push(`${LEGACY_ID}：必须仍然是默认配置（is_default=true）`);
 }
 
+/** 按点号路径取值；缺任何一段返回 undefined。 */
+function dig(node, path) {
+  let cur = node;
+  for (const part of path.split('.')) {
+    if (cur === null || typeof cur !== 'object' || !(part in cur)) return undefined;
+    cur = cur[part];
+  }
+  return cur;
+}
+
+/**
+ * RC-105：校验 `mana` / `actions` 两块。
+ *
+ * 与 Python 侧的 `rule_config.py::_validate_mana / _validate_actions` 是**两份并行的判据**
+ * （生成器这一侧管「落盘前」），所以两边都必须真的判：任何一份漏掉，
+ * 坏值就有机会落进 `data/roco/rulesets/`。
+ */
+export function checkManaActions(config, bad) {
+  const mana = config?.mana;
+  if (mana !== undefined) {
+    if (mana === null || typeof mana !== 'object') {
+      bad('mana 必须是对象（pool / faint_cost / loss_when_zero / surrender）');
+    } else {
+      for (const key of ['pool', 'faint_cost']) {
+        const leaf = mana[key];
+        if (!leaf || typeof leaf !== 'object' || !('value' in leaf)) continue;
+        const value = leaf.value;
+        if (!Number.isInteger(value) || value < 0) bad(`mana.${key} 必须是 >= 0 的整数，实际 ${JSON.stringify(value)}`);
+        else if (key === 'pool' && value === 0) bad('mana.pool 必须 > 0：魔力池为 0 等于开局即判负');
+      }
+      for (const key of ['loss_when_zero', 'surrender']) {
+        const leaf = mana[key];
+        if (!leaf || typeof leaf !== 'object' || !('value' in leaf)) continue;
+        if (typeof leaf.value !== 'boolean') bad(`mana.${key} 必须是布尔，实际 ${JSON.stringify(leaf.value)}`);
+      }
+    }
+  }
+
+  const actions = config?.actions;
+  if (actions !== undefined) {
+    if (actions === null || typeof actions !== 'object') {
+      bad('actions 必须是对象（allowed_kinds / forbidden_kinds / unknown_kinds_allowed / kinds）');
+    } else {
+      const kindList = (key) => {
+        const leaf = actions[key];
+        if (!leaf || typeof leaf !== 'object' || !('value' in leaf)) return null;
+        const seq = leaf.value;
+        if (!Array.isArray(seq) || seq.length === 0) {
+          bad(`actions.${key} 必须是非空数组，实际 ${JSON.stringify(seq)}`);
+          return null;
+        }
+        if (seq.some((x) => typeof x !== 'string' || !x)) {
+          bad(`actions.${key} 的元素必须是非空字符串，实际 ${JSON.stringify(seq)}`);
+          return null;
+        }
+        if (new Set(seq).size !== seq.length) bad(`actions.${key} 里有重复项：${JSON.stringify(seq)}`);
+        const unknown = seq.filter((x) => !KNOWN_ACTION_KINDS.has(x));
+        if (unknown.length) {
+          bad(`actions.${key} 里有引擎不认识的动作类 ${unknown.join('、')}`);
+          return null;
+        }
+        return seq;
+      };
+      const allowed = kindList('allowed_kinds');
+      const forbidden = kindList('forbidden_kinds');
+      if (allowed && forbidden) {
+        const overlap = allowed.filter((k) => forbidden.includes(k));
+        if (overlap.length) {
+          bad(`actions.allowed_kinds 与 actions.forbidden_kinds 有交集 ${JSON.stringify(overlap)}`);
+        }
+      }
+      const flag = actions.unknown_kinds_allowed;
+      if (flag && typeof flag === 'object' && 'value' in flag && typeof flag.value !== 'boolean') {
+        bad(`actions.unknown_kinds_allowed 必须是布尔，实际 ${JSON.stringify(flag.value)}`);
+      }
+      const kinds = actions.kinds;
+      if (!kinds || typeof kinds !== 'object') {
+        bad('actions.kinds 必须是「动作类 → 登记」的对象（每个 kind 都要写 confidence/evidence_id）');
+      } else {
+        if (allowed && forbidden) {
+          const wanted = new Set([...allowed, ...forbidden]);
+          const missing = [...wanted].filter((k) => !(k in kinds));
+          const extra = Object.keys(kinds).filter((k) => !wanted.has(k));
+          if (missing.length) bad(`actions.kinds 少了这些动作类：${JSON.stringify(missing)}`);
+          if (extra.length) bad(`actions.kinds 里有两张清单都没提到的动作类：${JSON.stringify(extra)}`);
+        }
+        for (const [kind, leaf] of Object.entries(kinds)) {
+          if (!KNOWN_ACTION_KINDS.has(kind)) { bad(`actions.kinds 里有引擎不认识的动作类 ${kind}`); continue; }
+          if (!leaf || typeof leaf !== 'object' || !('value' in leaf)) {
+            bad(`actions.kinds.${kind} 不是带 value 的字段记录`);
+            continue;
+          }
+          if (!ACTION_KIND_STATUSES.has(leaf.value)) {
+            bad(`actions.kinds.${kind}.value 必须是 allowed/forbidden，实际 ${JSON.stringify(leaf.value)}`);
+            continue;
+          }
+          if (allowed && forbidden) {
+            const expected = allowed.includes(kind) ? 'allowed' : 'forbidden';
+            if (leaf.value !== expected) {
+              bad(`actions.kinds.${kind}.value=${JSON.stringify(leaf.value)} 与两张清单不一致（应为 ${expected}）`);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 /** 校验一份配置：结构、台账引用、置信等级逐字相等、unknown 必须有 reason。 */
 export function validateConfig(config, ledger) {
   const problems = [];
@@ -365,6 +685,18 @@ export function validateConfig(config, ledger) {
   } else if (typeof stagesLeaf.value !== 'boolean') {
     bad(`turn_order.end_turn.unknown_stages_allowed 必须是布尔，实际 ${JSON.stringify(stagesLeaf.value)}`);
   }
+
+  // ── RC-105：mana / actions 是**白名单配置**才必需的字段 ────────────────
+  // 同 Python 侧：legacy / v2 里根本没有「魔力」这条概念，无条件要求它们带 mana.pool
+  // 只有两种写法 —— 给 legacy 补一个假 0（编规则），或者让它当场加载失败（默认路径崩）。
+  if (MANA_ACTIONS_CONFIG_IDS.includes(config?.ruleset_config_id)) {
+    for (const path of [...MANA_REQUIRED_PATHS, ...ACTIONS_REQUIRED_PATHS]) {
+      if (dig(config, path) === undefined) {
+        bad(`缺字段 ${path}（声明了 mana/actions 的配置必须把这两块写全）`);
+      }
+    }
+  }
+  checkManaActions(config, bad);
 
   /** 递归遍历所有 {value, confidence, evidence_id} 叶子，逐条核对台账。 */
   const leaves = [];
@@ -488,9 +820,9 @@ function selftest() {
   const battleModes = readJson(BATTLE_MODES_PATH);
   const configs = buildConfigs({ledger, battleModes});
 
-  push('两份配置都通过校验', configs.every((c) => validateConfig(c, ledger).length === 0),
+  push('每份配置都通过校验', configs.every((c) => validateConfig(c, ledger).length === 0),
     JSON.stringify(configs.flatMap((c) => validateConfig(c, ledger))).slice(0, 300));
-  push('磁盘上的两份配置与生成逻辑一致（--check）', checkConfigsForTest().length === 0,
+  push('磁盘上的每份配置与生成逻辑一致（--check）', checkConfigsForTest().length === 0,
     JSON.stringify(checkConfigsForTest()).slice(0, 300));
 
   // 反证①：把 legacy 的能量上限改成 10 → 「默认逐位不变」这条判据必须红
@@ -577,6 +909,57 @@ function selftest() {
   push('反证⑪：unknown_stages_allowed 改成 true 必须被判红（那等于允许未知阶段）',
     allowedProblems.some((p) => p.includes('unknown_stages_allowed')), JSON.stringify(allowedProblems).slice(0, 240));
 
+  // ── RC-105：mana / actions 登记表的反证 ───────────────────────────────
+  const manaConfig = configs.find((c) => c.ruleset_config_id === V3_CANDIDATE_ID);
+  push('v3 在生成结果里，且 is_default=false（候选不得作为默认）',
+    Boolean(manaConfig) && manaConfig.is_default === false, JSON.stringify(manaConfig?.is_default));
+
+  // 反证⑫：把 item 塞进 allowed_kinds（两张清单交集非空）→ 必须红
+  const overlap = JSON.parse(JSON.stringify(configs));
+  const overlapCfg = overlap.find((c) => c.ruleset_config_id === V3_CANDIDATE_ID);
+  overlapCfg.actions.allowed_kinds.value.push('item');
+  overlapCfg.actions.kinds.item.value = 'allowed';
+  const overlapProblems = validateConfig(overlapCfg, ledger);
+  push('反证⑫：把 item 同时写进 allowed 与 forbidden 必须被判红（交集非空）',
+    overlapProblems.some((p) => p.includes('交集')), JSON.stringify(overlapProblems).slice(0, 240));
+
+  // 反证⑬：删掉 v3 的 mana.pool → 必须红（白名单配置缺字段 fail closed）
+  const droppedPool = JSON.parse(JSON.stringify(configs));
+  const droppedCfg = droppedPool.find((c) => c.ruleset_config_id === V3_CANDIDATE_ID);
+  delete droppedCfg.mana.pool;
+  push('反证⑬：v3 缺 mana.pool 必须被判红',
+    validateConfig(droppedCfg, ledger).some((p) => p.includes('mana.pool')),
+    JSON.stringify(validateConfig(droppedCfg, ledger)).slice(0, 240));
+
+  // 反证⑭：自造一个引擎不认识的动作类 → 必须红
+  const inventedKind = JSON.parse(JSON.stringify(configs));
+  const inventedCfg = inventedKind.find((c) => c.ruleset_config_id === V3_CANDIDATE_ID);
+  inventedCfg.actions.allowed_kinds.value.push('fuse');
+  inventedCfg.actions.kinds.fuse = {
+    value: 'allowed', confidence: 'ENGINE_HYPOTHESIS', evidence_id: null, evidence_role: null,
+    reason: '自造动作类（反证用）',
+  };
+  push('反证⑭：自造动作类 fuse 必须被判红',
+    validateConfig(inventedCfg, ledger).some((p) => p.includes('不认识的动作类')),
+    JSON.stringify(validateConfig(inventedCfg, ledger)).slice(0, 240));
+
+  // 反证⑮：legacy 里多出一个假的 mana 块 → 「默认没有魔力」这条判据必须红
+  const fakeMana = JSON.parse(JSON.stringify(configs));
+  const legacyCfg = fakeMana.find((c) => c.ruleset_config_id === LEGACY_ID);
+  legacyCfg.mana = {
+    pool: {value: 0, confidence: 'ENGINE_HYPOTHESIS', evidence_id: null, evidence_role: null,
+      reason: '伪造：legacy 里补一个 0'},
+    faint_cost: {value: 0, confidence: 'ENGINE_HYPOTHESIS', evidence_id: null, evidence_role: null,
+      reason: '伪造'},
+    loss_when_zero: {value: false, confidence: 'ENGINE_HYPOTHESIS', evidence_id: null, evidence_role: null,
+      reason: '伪造'},
+    surrender: {value: false, confidence: 'ENGINE_HYPOTHESIS', evidence_id: null, evidence_role: null,
+      reason: '伪造'},
+  };
+  const fakeManaProblems = validateConfig(legacyCfg, ledger);
+  push('反证⑮：legacy 里补一个假的 mana=0 必须被判红（0 是「已判负」，不是「没有这条概念」）',
+    fakeManaProblems.some((p) => p.includes('mana.pool')), JSON.stringify(fakeManaProblems).slice(0, 240));
+
   const failed = checks.filter((c) => !c.ok);
   for (const c of checks) console.log(`${c.ok ? '✔' : '✖'} ${c.name} — 实际：${c.actual}`);
   console.log(`自检：${checks.length - failed.length}/${checks.length} 通过`);
@@ -590,7 +973,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const problems = checkConfigsForTest();
     if (argv.includes('--json')) console.log(JSON.stringify({problems}, null, 2));
     else if (problems.length) for (const p of problems) console.log(`✖ ${p}`);
-    else console.log(`✔ ${RULESET_DIR} 的两份配置与台账一致（台账指纹 ${sha256Of(LEDGER_PATH).slice(0, 16)}…）`);
+    else console.log(`✔ ${RULESET_DIR} 的全部配置与台账一致（台账指纹 ${sha256Of(LEDGER_PATH).slice(0, 16)}…）`);
     process.exit(problems.length ? 1 : 0);
   }
   process.exit(writeConfigs());

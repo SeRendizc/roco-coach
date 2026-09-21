@@ -1,0 +1,700 @@
+{
+  "schema": "roco-rc105-mana-actions-report/v1",
+  "generated_by": "scripts/roco/report-rc105-mana-actions.py",
+  "why": "RC-105：把「合法行动」与「魔力（心）结算」从散落在引擎里的隐式行为变成 BattleMode/规则配置驱动的**声明式登记**：标准 PVP 下没有道具与逃跑、聚能与投降是独立动作类、开局每方 mana.pool 点魔力、力竭扣 faint_cost、归零立即判负；legacy/v2 逐位不变。",
+  "ruleset_config_id": "mobile_s4_candidate_v3",
+  "ruleset_binding": {
+    "battle_mode_id": "pvp-standard-six-pet",
+    "battle_mode_team_size": 6,
+    "battle_mode_registry_status": "CANDIDATE",
+    "battle_mode_registry_confidence": "CROSS_SOURCE_SUPPORTED",
+    "registry_binding_is_still_v2": "battle-modes.json 的 ruleset_binding **没有**改（归主线程），v3 是同一 BattleMode 的第二份候选口径"
+  },
+  "inputs": {
+    "rulesets": {
+      "legacy_sim_v1": {
+        "path": "data/roco/rulesets/legacy-sim-v1.json",
+        "fingerprint": "ac5ab555ef78d1a3a197d23dcc5f0df49ef8dd43b775321675107d92bb605b73",
+        "is_default": true
+      },
+      "mobile_s4_candidate_v2": {
+        "path": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+        "fingerprint": "84c4058cd48f93dec09a63941e2aa29d664bb69b375e21e64a3f969c0996b94b",
+        "is_default": false
+      },
+      "mobile_s4_candidate_v3": {
+        "path": "data/roco/rulesets/mobile-s4-candidate-v3.json",
+        "fingerprint": "01c60136ac1bee5b1605bbe20e36dee57c77369ec25287a9825eb69b176d75de",
+        "is_default": false
+      }
+    },
+    "ledger": {
+      "path": "data/roco/evidence/rule-evidence-ledger.json",
+      "sha256": "aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903"
+    },
+    "engine": {
+      "action_kinds_implemented": [
+        "skill",
+        "charge",
+        "switch",
+        "surrender",
+        "item",
+        "escape"
+      ],
+      "known_action_kinds_config_vocabulary": [
+        "skill",
+        "charge",
+        "switch",
+        "surrender",
+        "item",
+        "escape",
+        "struggle"
+      ],
+      "mana_settled": true,
+      "action_clipping": "allowed_kinds / forbidden_kinds / unknown_kinds_allowed"
+    },
+    "v3_energy_and_turn_order_copied_verbatim_from_v2": {
+      "energy_equal": true,
+      "turn_order_equal": true
+    }
+  },
+  "commands": [
+    {
+      "cmd": "/Library/Developer/CommandLineTools/usr/bin/python3 -m unittest discover -s tests   # cwd=roco",
+      "rc": 0,
+      "summary": "Ran 324 tests in 36.078s | OK (skipped=1)"
+    },
+    {
+      "cmd": "/Library/Developer/CommandLineTools/usr/bin/python3 -m roco_env.rule_config   # cwd=roco",
+      "rc": 0,
+      "summary": "✔ 反证③：给 UNKNOWN 的入场能量补 2 必须被判红 — 实际：['mobile_s4_candidate_v2：energy.initial：confidence=UNKNOWN 时 value 必须是 null 或 \"unknown\"，实际 2'] | 自检：28/28 通过"
+    },
+    {
+      "cmd": "node --test tests/roco-mana-actions.test.js tests/roco-rule-config.test.js tests/roco-rule-promotion.test.js",
+      "rc": 0,
+      "summary": "ℹ tests 22 | ℹ pass 22 | ℹ fail 0"
+    },
+    {
+      "cmd": "node scripts/roco/build-rule-configs.mjs --check",
+      "rc": 0,
+      "summary": "✔ data/roco/rulesets 的全部配置与台账一致（台账指纹 aefd634a8bafec79…）"
+    },
+    {
+      "cmd": "node scripts/roco/build-rule-configs.mjs --selftest",
+      "rc": 0,
+      "summary": "✔ 反证⑮：legacy 里补一个假的 mana=0 必须被判红（0 是「已判负」，不是「没有这条概念」） — 实际：[\"legacy_sim_v1：mana.pool 必须 > 0：魔力池为 0 等于开局即判负\"] | 自检：18/18 通过"
+    }
+  ],
+  "checks": [
+    {
+      "id": "config/v3-loads-and-is-candidate",
+      "what": "v3 是一份合规的**候选**配置：mana 4/1/true/true、actions 四类合法（skill→charge→switch→surrender）、两类禁止（item/escape）、不放行未声明动作类；is_default=false",
+      "where": "data/roco/rulesets/mobile-s4-candidate-v3.json；roco/tests/test_mana_actions.py::RuleConfigManaActionsTest；tests/roco-mana-actions.test.js",
+      "result": "pass",
+      "counter_proof": {
+        "how": "把 item 同时写进 allowed 与 forbidden（交集非空）/ 自造动作类 fuse / mana.faint_cost=-1 / 删掉 mana.loss_when_zero：四种坏配置各判一次",
+        "observed_error": "item 同时在 allowed 与 forbidden → [\"mobile_s4_candidate_v3：actions.allowed_kinds 与 actions.forbidden_kinds 有交集 ['item'] ——同一个动作类不可能既合法又禁止\"]；自造动作类 fuse → ['mobile_s4_candidate_v3：actions.allowed_kinds 里有引擎不认识的动作类 fuse（已知：skill、charge、switch、surrender、item、escape、struggle）']；mana.faint_cost=-1 → ['mobile_s4_candidate_v3：mana.faint_cost 必须是 >= 0 的整数，实际 -1']；缺 mana.loss_when_zero → ['mobile_s4_candidate_v3：缺字段 mana.loss_when_zero（声明了 mana/actions 的配置必须把这两块写全）']"
+      }
+    },
+    {
+      "id": "actions/no-item-no-escape-in-standard-pvp",
+      "what": "标准 PVP（v3）的**对外**合法动作里不得出现 item（回复药/净化药/能量果）与 escape；必须出现 charge 与 surrender",
+      "where": "roco/src/roco_env/env.py::legal_actions（emit 过滤）；roco/tests/test_mana_actions.py::ActionClippingTest",
+      "result": "pass",
+      "counter_proof": {
+        "how": "把 `actions.allowed_kinds` 里的 `item` 从 forbidden 挪进 allowed（等价于关掉过滤），再按同一条判据（`tests/test_mana_actions.py::test_standard_pvp_has_no_item_and_no_escape`）枚举合法动作",
+        "observed_error": "'item' unexpectedly found in ['skill', 'skill', 'skill', 'charge', 'switch', 'switch', 'item', 'item', 'item', 'surrender'] : 标准 PVP 的合法动作里不得出现道具（回复药/净化药/能量果）",
+        "extra": {
+          "kinds_seen": [
+            "skill",
+            "skill",
+            "skill",
+            "charge",
+            "switch",
+            "switch",
+            "item",
+            "item",
+            "item",
+            "surrender"
+          ]
+        }
+      }
+    },
+    {
+      "id": "actions/undeclared-kind-fails-closed",
+      "what": "`unknown_kinds_allowed=false` 时，产出一个既不在 allowed 也不在 forbidden 的动作类必须**抛错**（不静默放过）",
+      "where": "roco/src/roco_env/env.py::legal_actions / _execute 的 emit 与前置守卫",
+      "result": "pass",
+      "counter_proof": {
+        "how": "把 allowed_kinds 收成 (skill,charge,switch,surrender) 且 forbidden 只留 escape，让 item 落在两张清单之外 → 调 legal_actions",
+        "observed_error": "UnsupportedEffect: 未支持的机制：动作类别「item」（规则配置 mobile_s4_candidate_v3 的 actions.allowed_kinds 没有声明它，且 actions.unknown_kinds_allowed=false —— 不许静默产出一个未声明的动作类）"
+      }
+    },
+    {
+      "id": "mana/faint-costs-one",
+      "what": "一次力竭让**那一方**扣 mana_faint_cost（配置值，候选里是 1）：4 → 3，另一方不动",
+      "where": "roco/src/roco_env/env.py::_settle_faint_mana（攻击分支 + 回合末状态伤害两处调用）；roco/tests/test_mana_actions.py::ManaSettlementTest",
+      "result": "pass",
+      "counter_proof": {
+        "how": "把「力竭 → 该方扣 mana_faint_cost」这一步的扣减改成 0（`_settle_faint_mana` 的`side_state.mana = side_state.mana - int(cost)` 换成 `- 0`），再按同一条判据（`test_one_faint_costs_exactly_one_mana`）跑一次力竭",
+        "observed_error": "4 != 3 : 对手的精灵力竭 → 对手扣 1 点魔力（4 → 3）",
+        "extra": {
+          "mana_seen": 4
+        }
+      }
+    },
+    {
+      "id": "mana/zero-ends-immediately",
+      "what": "某方魔力 ≤ 0 → **立即**判负（另一方胜），不再要求打光整队；双方同时归零按平局",
+      "where": "roco/src/roco_env/env.py::_finish_mana_depletion + _advance_after_turn",
+      "result": "pass",
+      "counter_proof": {
+        "how": "把 mana_loss_when_zero 改成 false → 同一局面（魔力被打到 0、对方仍有存活精灵）不许结束对局",
+        "observed_error": "None != 'win' : 魔力归零必须立即判负"
+      }
+    },
+    {
+      "id": "mana/opening-pool",
+      "what": "开局每方 mana.pool 点魔力（v3 = 4），并如实写进序列化 / 观察 / 两个公开视图",
+      "where": "roco/src/roco_env/env.py::reset / public_planner_state / ui_public_view / schema.observation_for",
+      "result": "pass",
+      "counter_proof": {
+        "how": "把 reset 里的 `side.mana = int(cfg.mana_pool)` 换成 `side.mana = 0`（等价于「不给魔力」）→ 开局断言 4 的那条必须红",
+        "observed_error": "4 != 0 : 反证：把开局魔力当成 0（等价于「不给魔力」）"
+      }
+    },
+    {
+      "id": "legacy/bit-exact-and-no-mana",
+      "what": "legacy 默认路径逐位不变：8 条 golden 指纹相同、序列化里没有 mana 键、胜负仍按打光整队判定",
+      "where": "roco/tests/test_turn_order_fail_closed.py::LegacyBitExactGoldenTest；roco/tests/test_mana_actions.py::LegacyManaAbsenceTest",
+      "result": "pass",
+      "counter_proof": {
+        "how": "在 `schema.SideState.to_dict` 里给**没有 mana 的**一方补一个 `mana: 0`（= 把 `None` 守卫去掉），再比对改动前抓下来的 golden 指纹",
+        "observed_error": "'699e29e305e70dfdef6301fba2f2bda86636137d83d08b7274e44c67e724d531' != '244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6'\n- 699e29e305e70dfdef6301fba2f2bda86636137d83d08b7274e44c67e724d531\n+ 244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6\n : legacy 的序列化指纹必须与 RC-103 之前逐位相同",
+        "extra": {
+          "clean_digest": "4b23fefb71b143bd9bc5a4313d64303d5853f50ec4d50a45004583ee7bddd788",
+          "faked_digest": "699e29e305e70dfdef6301fba2f2bda86636137d83d08b7274e44c67e724d531",
+          "golden_digest": "244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6",
+          "mana_key_present_after_mutation": true
+        }
+      }
+    },
+    {
+      "id": "formalized/action-kind-validation",
+      "what": "`charge` / `surrender` 进了 `VALID_KINDS`，并在 `Action` 构造期就校验必需字段（skill→skill_id、switch→target_index、item→item_id；缺了就抛 ValueError）",
+      "where": "roco/src/roco_env/schema.py::ACTION_REQUIRED_FIELDS + Action.__post_init__",
+      "result": "pass",
+      "counter_proof": {
+        "how": "`Action.from_dict({'kind': 'skill'})` / `Action(kind='switch')` / `{'kind': 'fuse'}` 各构造一次",
+        "observed_error": "{'kind': 'skill'} → ValueError: 动作 skill 缺字段 skill_id；{'kind': 'switch'} → ValueError: 动作 switch 缺字段 target_index；{'kind': 'item'} → ValueError: 动作 item 缺字段 item_id；{'kind': 'fuse'} → ValueError: 未知动作类型：fuse"
+      }
+    }
+  ],
+  "source_mutation_runs": [
+    {
+      "id": "mutation-1-item-into-allowed",
+      "mutation": "把 `mobile-s4-candidate-v3.json` 的 `forbidden_kinds` 改成 ['escape']、`allowed_kinds` 加上 item、`actions.kinds.item.value` 改成 'allowed'",
+      "command": "cd roco && PYTHONPATH=src python3 -m unittest tests.test_mana_actions.ActionClippingTest.test_standard_pvp_has_no_item_and_no_escape",
+      "observed_error": "AssertionError: 'item' unexpectedly found in ['skill', 'skill', 'skill', 'charge', 'switch', 'switch', 'item', 'item', 'item', 'surrender'] : 标准 PVP 的合法动作里不得出现道具（回复药/净化药/能量果）",
+      "restored": "node scripts/roco/build-rule-configs.mjs（重新生成，md5 与改动前一致）"
+    },
+    {
+      "id": "mutation-2-deduction-zero",
+      "mutation": "把 `env.py::_settle_faint_mana` 里的 `side_state.mana = side_state.mana - int(cost)` 改成 `- 0`",
+      "command": "cd roco && PYTHONPATH=src python3 -m unittest tests.test_mana_actions.ManaSettlementTest.test_one_faint_costs_exactly_one_mana",
+      "observed_error": "AssertionError: 4 != 3 : 对手的精灵力竭 → 对手扣 1 点魔力（4 → 3）",
+      "restored": "从备份还原 env.py（md5 b1e59cf57f81728a9c3c84824b43c9e3）"
+    },
+    {
+      "id": "mutation-3-fake-mana-on-legacy",
+      "mutation": "把 `schema.py::SideState.to_dict` 的 `**({'mana': self.mana} if self.mana is not None else {})` 改成永远写 `mana`（没有就写 0）",
+      "command": "cd roco && PYTHONPATH=src python3 -m unittest tests.test_turn_order_fail_closed.LegacyBitExactGoldenTest tests.test_mana_actions.LegacyManaAbsenceTest",
+      "observed_error": "Ran 7 tests … FAILED (failures=4)；其中 golden 那两条：`AssertionError: 'e6d8cc921c001b100bc284516b69a5ed0af41f12d8fed9ae44dfaf25964d353a' != '244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6'`（test_short_scripted_game_is_bit_identical）与 seed=1000 最终状态不一致（test_default_path_is_bit_identical_to_pre_rc103）",
+      "restored": "从备份还原 schema.py（md5 cc8733482a4273807c5cf06336172b86）"
+    }
+  ],
+  "repo_internal_evidence": {
+    "source": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+    "how": "正则 `魔力` 全文扫描冻结快照（脚本 `skills.json`，社区 wiki 快照口径）",
+    "desc_hits": [
+      {
+        "skill_id": "skill_000007",
+        "name": "诈死",
+        "is_trait": true,
+        "desc": "自己力竭时，少损失1点魔力。"
+      },
+      {
+        "skill_id": "skill_000060",
+        "name": "付给恶魔的赎价",
+        "is_trait": true,
+        "desc": "击败敌方精灵时，敌方额外损失1点魔力。被敌方精灵击败时，自己额外损失1点魔力。"
+      },
+      {
+        "skill_id": "skill_000113",
+        "name": "飓风",
+        "is_trait": true,
+        "desc": "对本精灵的技能，若其他翼系精灵携带相同技能，则获得迅捷。被敌方精灵击败时，自己额外损失1点魔力。"
+      },
+      {
+        "skill_id": "skill_000142",
+        "name": "图书守卫者",
+        "is_trait": true,
+        "desc": "入场时，若自己魔力值为1，自己获得双攻+100%。"
+      },
+      {
+        "skill_id": "skill_000143",
+        "name": "构装契约者",
+        "is_trait": true,
+        "desc": "入场时，若敌方魔力值为1，自己获得双防+100%。"
+      },
+      {
+        "skill_id": "skill_000226",
+        "name": "御驾亲征",
+        "is_trait": true,
+        "desc": "棋契陛下大幅提升种族资质，力竭时扣除4魔力。"
+      }
+    ],
+    "flavor_hits": [
+      {
+        "skill_id": "skill_000262",
+        "name": "阻断",
+        "flavor": "阻断别人的魔力也是一种战斗方式，总之，能赢就行。"
+      },
+      {
+        "skill_id": "skill_000460",
+        "name": "天光",
+        "flavor": "晶石蜗的狂热研究员说，可以在这个世界上找到6种天然矿石，矿石中蕴含的魔力与相似颜色的晶石蜗十分相似。"
+      },
+      {
+        "skill_id": "skill_000748",
+        "name": "恐吓",
+        "flavor": "做了个噩梦，老师说如果我如果下次再上课睡觉的话，就让我的魔力之源永远不能回复魔力。"
+      },
+      {
+        "skill_id": "skill_000781",
+        "name": "恶念交换",
+        "flavor": "用最珍贵的魔力和我交易。"
+      }
+    ],
+    "reading": [
+      "① `faint_cost=1`：诈死「少损失1点」+ 付给恶魔的赎价 / 飓风「额外损失1点」——只有「力竭默认扣魔力、且默认扣 1」时这三句才成立。",
+      "② `pool=4`：御驾亲征「力竭时扣除4魔力」是**逐字的 4**（一次性扣掉相当于整个候选池子的量）；图书守卫者 / 构装契约者以「魔力值为1」为条件，说明魔力会走到 1。",
+      "③ 局限：这 6 条全部来自**社区快照**，等级仍停在 CROSS_SOURCE_SUPPORTED；MC-E07/E08/E09 未录制前**不得**写成官方已确认。御驾亲征讲的是「棋契陛下」首领/棋契形态，只能当「4 这个数在魔力语境里真实存在」的旁证，**不是**标准 PVP 默认值。",
+      "④ flavor 那 4 条是世界观文案，**不**作为规则证据。"
+    ]
+  },
+  "ledger_entries_used": [
+    {
+      "id": "EV-ENERGY-CHARGE",
+      "topic": "energy.charge",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "needs_microcase": true,
+      "microcase_id": "MC-E02",
+      "claim": "聚能：我们打算按 candidate ruleset 施工“聚能是一个主动行动，回复 5 能量”。聚能是否可突破上限、以及无有效技能时是否自动聚能，均未定，不得写成事实。"
+    },
+    {
+      "id": "EV-PVP-STANDARD-TEAM-SIZE",
+      "topic": "pvp.standard.team_size",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "needs_microcase": true,
+      "microcase_id": "MC-E07",
+      "claim": "标准 PVP 六宠：我们打算按 cross-source 结论建 candidate ruleset，支持六只编队；**禁止**在文档或界面里写成“官方已确认标准 PVP 是六只”。"
+    },
+    {
+      "id": "EV-PVP-STANDARD-MANA",
+      "topic": "battle_mode.standard_pvp",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "needs_microcase": true,
+      "microcase_id": "MC-E08",
+      "claim": "标准 PVP 通常 4 点魔力：我们打算按 candidate ruleset 施工“4 点魔力”，并在 UI 里标成候选规则。禁止写成官方已确认。"
+    },
+    {
+      "id": "EV-PVP-FAINT-MANA-LOSS",
+      "topic": "battle_mode.standard_pvp",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "needs_microcase": true,
+      "microcase_id": "MC-E09",
+      "claim": "力竭扣魔力：目标是先让对方魔力归零，力竭通常扣 1 点魔力（而不是直接判负）。我们打算按 candidate ruleset 施工，并让胜负判据可切换。"
+    }
+  ],
+  "config_fields": [
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "mana.pool",
+      "value": 4,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-PVP-STANDARD-MANA",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E08",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "标准 PVP 通常每方 4 点魔力。台账本条自注「两份来源里都没有一处逐字写出标准 PVP 每方 4 点魔力」、降级风险最高，所以它只是候选口径，**不**写成官方确认；判据见 MC-E08"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "mana.faint_cost",
+      "value": 1,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-PVP-FAINT-MANA-LOSS",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E09",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "力竭通常扣 1 点魔力。台账本条只有 17173「被击败时自己额外损失1点魔力」间接支持，第二条来源是产品拆解、没有逐字句 —— 证据强度弱于其他条，判据见 MC-E09"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "mana.loss_when_zero",
+      "value": true,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-PVP-FAINT-MANA-LOSS",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E09",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "同一台账条目的 claim 写着「目标是先让对方魔力归零，而不是默认打光整队」——所以「归零即判负」引它，等级与它逐字相同；双方**同时**归零怎么算台账没有条目，引擎按平局处理并登记为未知项"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "mana.surrender",
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "**投降没有任何台账支撑**：它是独立动作类（合法动作里必须出现，因为标准 PVP 既无道具也无逃跑），但「投降算不算判负的独立动作、是否扣魔力、是否消耗回合」台账与 10 号文档都没有条目。这里只登记「本候选把它列为合法动作类」这一实现选择，引擎按「投降方判负」处理并登记为假设，不编一个看起来合理的代价"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.allowed_kinds",
+      "value": [
+        "skill",
+        "charge",
+        "switch",
+        "surrender"
+      ],
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "数组顺序**就是展示顺序**（skill → charge → switch → surrender）。聚能是独立动作类，不是技能的子类、也不是「能量不足时的兜底」（EV-ENERGY-CHARGE：聚能是一个主动行动）。整张清单本身是一条**引擎策略声明**：台账只支持其中「聚能是主动行动」这一点（见 kinds.charge），「标准 PVP 的动作全集就这四类」没有台账条目，所以引用留空、按 ENGINE_HYPOTHESIS 登记"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.forbidden_kinds",
+      "value": [
+        "item",
+        "escape"
+      ],
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "标准 PVP 无道具与逃跑；仅当某 PVE 模式登记允许时才出现。台账没有「标准 PVP 禁道具/禁逃跑」的条目 —— 这是从「该模式的动作全集」推出来的引擎策略，不是引文"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.unknown_kinds_allowed",
+      "value": false,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "**引擎纪律开关**，不是游戏规则：`false` = 本配置声明的动作类就是穷尽的，引擎若要产出一个没在 allowed_kinds 里声明的动作类必须**抛错**（不静默放过、也不静默丢弃）。台账里没有任何条目给它背书 —— 它约束的是我们自己的实现"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.kinds.skill",
+      "value": "allowed",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "技能是引擎一直在结算的动作类（legacy 的合法动作里就有它），台账里没有专门条目讲「技能是合法动作」——它属于实现现状，按 ENGINE_HYPOTHESIS 登记"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.kinds.charge",
+      "value": "allowed",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-ENERGY-CHARGE",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E02",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "台账原文「聚能是一个主动行动，回复 5」——它支持「聚能是一个**动作**」，但该条 needs_microcase=true（MC-E02 未录制），所以它是候选假设；「可否突破上限」「无合法技能时是否自动聚能」台账明说未定，本配置不断言"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.kinds.switch",
+      "value": "allowed",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "主动换宠与强制补位都是引擎一直在结算的动作类（术语 3009 把力竭下场与主动离场分开）；台账没有「换宠是合法动作」的条目，按 ENGINE_HYPOTHESIS 登记。注意它的**先手度**（换宠 5）仍是 MC-005 未定的假设"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.kinds.surrender",
+      "value": "allowed",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "投降是标准 PVP 的独立动作类（无道具无逃跑，玩家需要一个「认输」的出口）。台账没有任何条目讲它的语义 —— 见 mana.surrender 的 reason"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.kinds.item",
+      "value": "forbidden",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "道具（回复药 / 净化药 / 能量果）在标准 PVP 里不出现；它们在 `env.DEFAULT_ITEM_STOCK` 里，属于 PVE/练习局（legacy、pve-camp）。台账没有对应条目，这是从模式口径推出来的策略"
+    },
+    {
+      "ruleset_config_id": "mobile_s4_candidate_v3",
+      "path": "actions.kinds.escape",
+      "value": "forbidden",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "microcase_id": null,
+      "microcase_status": null,
+      "value_status": null,
+      "reason": "逃跑在标准 PVP 里不出现（对局以魔力归零结算，玩家用「投降」退出）。台账没有对应条目，这是从模式口径推出来的策略"
+    }
+  ],
+  "legacy_invariance": {
+    "claim": "legacy_sim_v1 仍是默认，且引擎里**完全没有**「魔力」这条概念：序列化里不出现 mana 键、胜负仍按打光整队判定，8 条 golden 指纹逐位不变。",
+    "default_ruleset_config_id": "legacy_sim_v1",
+    "default_is_legacy": true,
+    "legacy_has_mana": false,
+    "legacy_has_actions": false,
+    "legacy_mana_pool": null,
+    "legacy_allowed_kinds": null,
+    "per_seed_summary": [
+      {
+        "seed": 1000,
+        "state_matches_golden": true,
+        "events_match_golden": true
+      },
+      {
+        "seed": 1001,
+        "state_matches_golden": true,
+        "events_match_golden": true
+      },
+      {
+        "seed": 1002,
+        "state_matches_golden": true,
+        "events_match_golden": true
+      },
+      {
+        "seed": 1003,
+        "state_matches_golden": true,
+        "events_match_golden": true
+      },
+      {
+        "seed": 1004,
+        "state_matches_golden": true,
+        "events_match_golden": true
+      },
+      {
+        "seed": 1005,
+        "state_matches_golden": true,
+        "events_match_golden": true
+      }
+    ],
+    "short_scripted_game": {
+      "state_digest": "244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6",
+      "golden_state_digest": "244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6",
+      "matches": true,
+      "event_digest": "1458c52ee892de4b5806d761186569fbcb155f7627b0c06ab32c940147a42a87",
+      "golden_event_digest": "1458c52ee892de4b5806d761186569fbcb155f7627b0c06ab32c940147a42a87",
+      "events_match": true
+    },
+    "serialized_has_no_mana_key": true,
+    "per_seed": [
+      {
+        "seed": 1000,
+        "state_digest": "17643bea171d411561ebaea9b494d64381105732e432ebda0e5e0e56af4f83f6",
+        "golden_state_digest": "17643bea171d411561ebaea9b494d64381105732e432ebda0e5e0e56af4f83f6",
+        "matches": true,
+        "event_digest": "96d3b2d623ecae95a89b5020fa0de2bbe7fefb8cb9132a9dfe181ff805194168",
+        "golden_event_digest": "96d3b2d623ecae95a89b5020fa0de2bbe7fefb8cb9132a9dfe181ff805194168",
+        "events_match": true
+      },
+      {
+        "seed": 1001,
+        "state_digest": "0c218971216b86a713ea3f94af49e0a43ecd14d92b53cc73cda9dbff2cebab55",
+        "golden_state_digest": "0c218971216b86a713ea3f94af49e0a43ecd14d92b53cc73cda9dbff2cebab55",
+        "matches": true,
+        "event_digest": "3d7f7b793a7cdd52310816e7571a7333baab65653b6acb55f9d3c8813178bfd0",
+        "golden_event_digest": "3d7f7b793a7cdd52310816e7571a7333baab65653b6acb55f9d3c8813178bfd0",
+        "events_match": true
+      },
+      {
+        "seed": 1002,
+        "state_digest": "cd4d136fbdbc0bf0714db7b082d9cd160dd84e7f164afb74e1dbead455fe8895",
+        "golden_state_digest": "cd4d136fbdbc0bf0714db7b082d9cd160dd84e7f164afb74e1dbead455fe8895",
+        "matches": true,
+        "event_digest": "037a9520db47e1455f04c9c69a18beb80b3d5358349e94f0253388cdece4ad22",
+        "golden_event_digest": "037a9520db47e1455f04c9c69a18beb80b3d5358349e94f0253388cdece4ad22",
+        "events_match": true
+      },
+      {
+        "seed": 1003,
+        "state_digest": "ab3dd5f379783dee763cb185b5555e19b1c5112cdbe748fedd2bb6f8e7870554",
+        "golden_state_digest": "ab3dd5f379783dee763cb185b5555e19b1c5112cdbe748fedd2bb6f8e7870554",
+        "matches": true,
+        "event_digest": "fd36fa8db78d5a8d90bf7f58c096315dc587d0bf52690fe2bab7c926325607f5",
+        "golden_event_digest": "fd36fa8db78d5a8d90bf7f58c096315dc587d0bf52690fe2bab7c926325607f5",
+        "events_match": true
+      },
+      {
+        "seed": 1004,
+        "state_digest": "7453cecc1037d7a510d62ce28406e2082b33c5c26354e4a9de8607a4894de87a",
+        "golden_state_digest": "7453cecc1037d7a510d62ce28406e2082b33c5c26354e4a9de8607a4894de87a",
+        "matches": true,
+        "event_digest": "6a96c3b147c7980c5b02a7a8b9e8a423bc9584ed7854b574c8519a0bcd6b7da2",
+        "golden_event_digest": "6a96c3b147c7980c5b02a7a8b9e8a423bc9584ed7854b574c8519a0bcd6b7da2",
+        "events_match": true
+      },
+      {
+        "seed": 1005,
+        "state_digest": "ece1377e831fc414e812604a4a240abede461687fab8fde8fc36ada90c0446bf",
+        "golden_state_digest": "ece1377e831fc414e812604a4a240abede461687fab8fde8fc36ada90c0446bf",
+        "matches": true,
+        "event_digest": "d414c3969c66ed020a18bb524c2201934aaed8bdc4207fd11f14ede69a9024a5",
+        "golden_event_digest": "d414c3969c66ed020a18bb524c2201934aaed8bdc4207fd11f14ede69a9024a5",
+        "events_match": true
+      }
+    ],
+    "how_to_reproduce": "cd roco && PYTHONPATH=src python3 -m unittest tests.test_turn_order_fail_closed.LegacyBitExactGoldenTest"
+  },
+  "unknowns": [
+    {
+      "id": "MC-E07",
+      "what": "标准 PVP 是六宠（EV-PVP-STANDARD-TEAM-SIZE，CROSS_SOURCE_SUPPORTED）",
+      "status": "NOT_RECORDED",
+      "blocked": [
+        "battle_mode.team_size"
+      ],
+      "note": "未录制前不得写成官方已确认；台账等级本活一个字都没改"
+    },
+    {
+      "id": "MC-E08",
+      "what": "标准 PVP 每方 4 点魔力（EV-PVP-STANDARD-MANA）",
+      "status": "NOT_RECORDED",
+      "blocked": [
+        "mana.pool"
+      ],
+      "note": "台账自注这条降级风险最高（两份来源里没有一处逐字写出 4 点魔力）"
+    },
+    {
+      "id": "MC-E09",
+      "what": "力竭扣 1 点魔力、目标是先让对方魔力归零（EV-PVP-FAINT-MANA-LOSS）",
+      "status": "NOT_RECORDED",
+      "blocked": [
+        "mana.faint_cost",
+        "mana.loss_when_zero"
+      ],
+      "note": "只有 17173 的「额外损失1点魔力」间接支持；第二条来源是产品拆解"
+    },
+    {
+      "id": "unregistered/surrender-semantics",
+      "what": "投降算不算判负的独立动作、是否扣魔力、是否消耗回合",
+      "status": "NO_LEDGER_ENTRY",
+      "blocked": [
+        "mana.surrender",
+        "actions.kinds.surrender"
+      ],
+      "note": "台账里没有任何条目 → 配置写 ENGINE_HYPOTHESIS，引擎按「投降方判负」处理并登记 unsupported"
+    },
+    {
+      "id": "unregistered/simultaneous-zero",
+      "what": "双方**同一时刻**魔力归零怎么算",
+      "status": "NO_LEDGER_ENTRY",
+      "blocked": [],
+      "note": "引擎按平局处理并登记；没有优先级证据，不假装知道"
+    },
+    {
+      "id": "unregistered/action-set-completeness",
+      "what": "标准 PVP 的动作全集恰好是这四类",
+      "status": "NO_LEDGER_ENTRY",
+      "blocked": [
+        "actions.allowed_kinds"
+      ],
+      "note": "只有 charge 有台账支持（EV-ENERGY-CHARGE）；其余三类是从模式口径推出来的引擎策略"
+    },
+    {
+      "id": "unregistered/pet-trait-mana-effects",
+      "what": "特性对魔力的改写（诈死「少损失1点」、付给恶魔的赎价 / 飓风「额外损失1点」、御驾亲征「力竭时扣除4魔力」）",
+      "status": "NOT_IMPLEMENTED",
+      "blocked": [],
+      "note": "仓内 6 条 desc 是逐字原文，但特性层尚未实现这些改写；本活只登记证据，不实现特性"
+    }
+  ],
+  "known_limits": [
+    {
+      "id": "team-size-3-vs-6",
+      "what": "v3 绑定的 pvp-standard-six-pet 是 `team_size: 6`，但引擎的 `reset` / `validate_team` 仍然只接受 3v3 的训练场队伍",
+      "impact": "「六宠模式」目前只体现在**模式口径**（mana/actions）上；真的排六只要先改 reset/validate_team/service，本活没做（会动默认路径之外的入口，且不在本活范围）",
+      "mitigation": "测试里显式断言 len(state.player.pets) == 3，把这个差距变成被测对象而不是被忘掉的事"
+    },
+    {
+      "id": "v3-energy-initial-is-unknown",
+      "what": "v3 的 `energy.initial` 是从 v2 **逐字复制**的 null（UNKNOWN，MC-E04 未录制）",
+      "impact": "`reset(config='mobile_s4_candidate_v3')` 会按 RC-101 的纪律 fail closed（「未知就抛」），候选因此**开不了局**",
+      "mitigation": "本活不改 v2/v3 的 energy 值（那是纪律）；测试用 `dataclasses.replace(cfg, energy_initial=<默认配置的值>)`（从 legacy 读，不写字面量）显式夹具把对局开起来，并把它写在测试 docstring 与这里。要让 v3 真能开局，得先录 MC-E04 或由产品显式给占位值"
+    },
+    {
+      "id": "node-bridge-mana-not-typed-out",
+      "what": "Node 侧（`src/coach/**`、`src/client/**`）与 `roco/src/roco_env/service.py` 的**协议形状**没有为 mana 增加任何显式字段",
+      "impact": "mana 目前只通过 `state.player.mana`（`env.serialize()`）与 `public.mana` / `ui.mana` 三条既有通道透出：service.py 的 `_sim_envelope` 直接转发 `serialize(state)`、`public_planner_state` 与 `ui_public_view`，所以本地对局域的 回执里**已经有** `state.*.mana` 与 `public.mana`；但没有任何 JS 代码读它，页面也不会显示「还剩几点魔力」",
+      "mitigation": "最小改动建议（不在本活范围，留给客户端同事）：① `src/client/roco.js` 渲染 `ui.mana`（缺键时整个元素不渲染，**不要**显示 0）；② `src/coach/team-gaps.js` 的 `cost.mana_rule` 已经写死 `mana_per_side: 4`，应改为从 `data/roco/rulesets/mobile-s4-candidate-v3.json` 的 `mana.pool.value` 读；③ 若要给 PVP 模式接上 v3 口径，需要 `battle-modes.json` 的 `ruleset_binding` 决策（主线程的事）"
+    },
+    {
+      "id": "events-text-has-no-mana-templates",
+      "what": "`events_text.py` 的 `KNOWN_EVENT_KINDS` 与模板里没有 `charge` / `mana_loss` / `surrender` 三个新事件",
+      "impact": "v3 对局里这三类事件会落到诚实兜底句「发生了一件事（引擎事件 X，本页还没有它的中文说法）」；legacy 对局产不出这些 kind，所以既有覆盖面测试仍然全绿",
+      "mitigation": "最小改动建议：给 `events_text.event_text` 加三个模板，并把 `KNOWN_EVENT_KINDS` 与 `test_event_text.SAMPLE_EVENTS` 一起补上，同时让取样对局覆盖一份声明 mana 的配置（否则「登记了但没测过」那条判据会红）"
+    },
+    {
+      "id": "charge-timing-and-cap",
+      "what": "聚能是否可突破能量上限、无合法技能时是否自动聚能（台账明说未定，MC-E02 未录制）",
+      "impact": "引擎按「min(energy.max, 当前 + energy.charge)」处理，并在 `state.unsupported` 里登记这条时序假设（不静默当已知）",
+      "mitigation": "判据见 MC-E02；在那之前它只是候选假设"
+    },
+    {
+      "id": "generated-artifacts-moved-by-a-new-ruleset",
+      "what": "新增一份 `data/roco/rulesets/*.json` 会让三份**生成产物**与一条手写期望失配：`reports/roco/rag/rag-eval.json`（RAG 语料把每份规则配置当文档：1678 → 1710 篇）、`reports/roco/flagship-upgrade/rc-301-team-request.json`、`reports/roco/flagship-upgrade/rc-302-team-gaps.json`，以及 `tests/roco-team-request.test.js` 里「注册表恰好是两份配置」的断言",
+      "impact": "本活已按各产物自己的机制重新生成（`node scripts/roco/eval-rag-retrieval.mjs --write`、`RC301_WRITE_REPORT=1 node --test tests/roco-team-request.test.js`、`RC302_WRITE_REPORT=1 node --test tests/roco-team-gaps.test.js`），并把那条手写期望改成三份。**注意**：rag-eval 的报告 diff 很大（BM25 排序随语料变化，约 1000 行），13 条闸门仍全部通过",
+      "mitigation": "如果主线程决定不让 RAG 语料吸收规则配置，应该改 `src/coach/rag-index.js` 的语料口径（那是客户端同事的模块，不在本活范围），而不是让产物与重算长期不一致"
+    },
+    {
+      "id": "test_rule_config-size-cap-raised",
+      "what": "`roco/tests/test_rule_config.py::test_config_dir_is_the_only_source` 里那条「加载器源码 < 40000 字符」的上限被上调到 46000",
+      "impact": "这是「加载器别长成第二份事实源」的**粗粒度代理**；RC-105 加了两组加载期校验（纯声明式判断）后 rule_config.py 从 ~29.7k 长到 ~42k 字符",
+      "mitigation": "同时**加强**了精确判据：新增正则断言 `mana_pool` / `mana_faint_cost` / `mana_loss_when_zero` / `mana_surrender` / `unknown_kinds_allowed` 都没有被内联成字面量。精确判据管内容，粗粒度上限只管规模 —— 两件事都写在测试注释里"
+    }
+  ]
+}
