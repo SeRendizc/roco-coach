@@ -320,3 +320,28 @@ test('RC-202 第 9 项是**可执行判据**：闸门登记表里必须真的有
   assert.deepEqual(releaseGateSatisfied({suites: [], requires: def.requires_suites}).missing,
     ['reconciliation', 'game-data-pack']);
 });
+
+test('RC-203 诚实条款：这批 owned 实例**不得**被说成「600+ 都能出战」', () => {
+  // 子任务报告里有一个容易误读的数：「不在 layer-playable-48 目录的 species = 12」。
+  // 那 12 只是**基线层**，本来就在 roster-48 的 48 只之内 —— 按 roster-48 口径池外是 0。
+  // 所以「可出战子集 = 48」这件事必须被**显式**写成上限，而不是靠读者自己推理。
+  const report = readJson('reports/roco/flagship-upgrade/rc-203-owned-pets.json');
+  const ceiling = report.buildability_ceiling;
+  assert.ok(ceiling, '报告必须有 buildability_ceiling 一段');
+  assert.equal(ceiling.proves_600_buildable, false, '本批**不能**证明 600+ 都能出战');
+  assert.equal(ceiling.species_with_frozen_learnset, 48);
+  assert.equal(ceiling.candidates_without_frozen_learnset, 574);
+  assert.equal(ceiling.buildable_subset_equals_roster_48, true);
+  assert.match(ceiling.why_not, /learnset/);
+  assert.match(ceiling.needed_to_prove, /RC-402|导入/);
+  const alt = report.outside_layer_playable_48.alternative_reading;
+  assert.equal(alt.species_outside_roster_48, 0,
+    `按 roster-48 口径池外必须是 0，实际 ${alt.species_outside_roster_48}`);
+  assert.match(report.outside_layer_playable_48.what_this_proves, /基线层/);
+  // 反向控制：把 proves_600_buildable 翻成 true，同一条判据必须能判出来
+  const judgeCeiling = (c) => (c.proves_600_buildable === false && c.candidates_without_frozen_learnset > 0
+    ? [] : ['本批不得声称 600+ 可出战，且必须报出因缺 learnset 而跳过的数量']);
+  assert.deepEqual(judgeCeiling(ceiling), []);
+  assert.notDeepEqual(judgeCeiling({...ceiling, proves_600_buildable: true}), []);
+  assert.notDeepEqual(judgeCeiling({...ceiling, candidates_without_frozen_learnset: 0}), []);
+});

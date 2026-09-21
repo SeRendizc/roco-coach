@@ -1,0 +1,1393 @@
+{
+  "schema_version": "roco-owned-pets-schema/v1",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "generated_by": "scripts/roco/build-owned-pets.mjs",
+  "generator_version": "rc203-owned-pets/1",
+  "note": [
+    "这是 OwnedPet / BattleBuild 的**自描述**契约，不是装饰：build-owned-pets.mjs 按它产出，",
+    "verify-owned-pets.mjs 用同一个 buildOwnedPetSchema() 重建并与磁盘逐字节比对。",
+    "养成属性（nature/talent/specialty/bloodline）只存**标签**：effect 恒为 UNKNOWN，",
+    "reason 恒为「面板换算公式未校准（见 10 号文档 §13）」，microcase_id 恒为 null。",
+    "本仓没有任何一处声称知道这些标签换算成面板数值的公式。"
+  ],
+  "contracts": {
+    "OwnedPetDataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "ruleset_id",
+        "game",
+        "generated_by",
+        "generated_at",
+        "clock_fields",
+        "seed",
+        "source",
+        "licence_ref",
+        "unknown_fields_allowlist",
+        "counts",
+        "candidate_universe",
+        "skips",
+        "growth_attribute_policy",
+        "provenance",
+        "instances",
+        "battle_builds",
+        "dataset_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "string",
+          "const": "roco-owned-pets/v1"
+        },
+        "ruleset_id": {
+          "type": "string",
+          "const": "roco-world-s4-2026-09-10"
+        },
+        "game": {
+          "type": "string",
+          "const": "roco_world_mobile"
+        },
+        "generated_by": {
+          "type": "string",
+          "const": "scripts/roco/build-owned-pets.mjs"
+        },
+        "generated_at": {
+          "type": "string",
+          "const": "2026-09-10T00:00:00.000Z"
+        },
+        "clock_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 0
+        },
+        "seed": {
+          "type": "integer",
+          "const": 20301
+        },
+        "source": {
+          "type": "string",
+          "const": "repo_generator_fixed_seed"
+        },
+        "licence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown_fields_allowlist": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "instances",
+            "species",
+            "species_in_layer_playable_48",
+            "species_outside_layer_playable_48",
+            "same_species_groups",
+            "same_species_groups_with_difference",
+            "battle_builds",
+            "skills_referenced"
+          ],
+          "properties": {
+            "instances": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "species": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "species_in_layer_playable_48": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "species_outside_layer_playable_48": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "same_species_groups": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "same_species_groups_with_difference": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "battle_builds": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "skills_referenced": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "candidate_universe": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "pack_pet_entities",
+            "with_frozen_learnset"
+          ]
+        },
+        "skips": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "no_frozen_learnset",
+            "insufficient_learnable_skills"
+          ]
+        },
+        "growth_attribute_policy": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "effect",
+            "reason"
+          ]
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": [
+              "source_id",
+              "source_scope",
+              "artifact_path",
+              "artifact_sha256"
+            ],
+            "properties": {
+              "source_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "pointer": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "instances": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "instance_id",
+              "species_id",
+              "species_name",
+              "species_tier",
+              "level",
+              "nature",
+              "talent",
+              "specialty",
+              "bloodline",
+              "skills",
+              "skills_source",
+              "base_stats",
+              "panel_stats",
+              "source",
+              "favourite",
+              "locked",
+              "provenance",
+              "licence_ref",
+              "unknown_fields",
+              "build_hash"
+            ],
+            "properties": {
+              "instance_id": {
+                "type": "string",
+                "pattern": "^own-[0-9]{4}$"
+              },
+              "species_id": {
+                "type": "string",
+                "pattern": "^pet_[0-9]{6}$"
+              },
+              "species_name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "species_tier": {
+                "type": "string",
+                "enum": [
+                  "baseline",
+                  "overlay"
+                ]
+              },
+              "level": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "nature": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "value",
+                  "value_source",
+                  "effect",
+                  "effect_reason",
+                  "microcase_id"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "value_source": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "effect": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "effect_reason": {
+                    "type": "string",
+                    "const": "面板换算公式未校准（见 10 号文档 §13）"
+                  },
+                  "microcase_id": {
+                    "type": "null"
+                  }
+                }
+              },
+              "talent": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "value",
+                  "value_source",
+                  "effect",
+                  "effect_reason",
+                  "microcase_id"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "value_source": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "effect": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "effect_reason": {
+                    "type": "string",
+                    "const": "面板换算公式未校准（见 10 号文档 §13）"
+                  },
+                  "microcase_id": {
+                    "type": "null"
+                  }
+                }
+              },
+              "specialty": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "value",
+                  "value_source",
+                  "effect",
+                  "effect_reason",
+                  "microcase_id"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "value_source": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "effect": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "effect_reason": {
+                    "type": "string",
+                    "const": "面板换算公式未校准（见 10 号文档 §13）"
+                  },
+                  "microcase_id": {
+                    "type": "null"
+                  }
+                }
+              },
+              "bloodline": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "value",
+                  "value_source",
+                  "effect",
+                  "effect_reason",
+                  "microcase_id",
+                  "value_pointer",
+                  "blood_skill_id"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "value_source": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "effect": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "effect_reason": {
+                    "type": "string",
+                    "const": "面板换算公式未校准（见 10 号文档 §13）"
+                  },
+                  "microcase_id": {
+                    "type": "null"
+                  },
+                  "value_pointer": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "blood_skill_id": {
+                    "type": "string",
+                    "pattern": "^skill_[0-9]{6}$",
+                    "nullable": true
+                  }
+                }
+              },
+              "skills": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^skill_[0-9]{6}$"
+                },
+                "minItems": 4,
+                "maxItems": 4,
+                "uniqueItems": true
+              },
+              "skills_source": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "artifact_path",
+                  "artifact_sha256",
+                  "pointer"
+                ],
+                "properties": {
+                  "artifact_path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "artifact_sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "pointer": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              },
+              "base_stats": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "hp",
+                  "atk",
+                  "def",
+                  "spa",
+                  "spd",
+                  "spe"
+                ],
+                "properties": {
+                  "hp": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "atk": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "def": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "spa": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "spd": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "spe": {
+                    "type": "integer",
+                    "minimum": 1
+                  }
+                }
+              },
+              "panel_stats": {
+                "type": "null",
+                "nullable": true
+              },
+              "source": {
+                "type": "string",
+                "const": "repo_generator_fixed_seed"
+              },
+              "favourite": {
+                "type": "boolean"
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "provenance": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": [
+                    "source_id",
+                    "source_scope",
+                    "artifact_path",
+                    "artifact_sha256"
+                  ],
+                  "properties": {
+                    "source_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "source_scope": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "artifact_path": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "artifact_sha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "pointer": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "minItems": 1
+              },
+              "licence_ref": {
+                "type": "string",
+                "minLength": 1
+              },
+              "unknown_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "build_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "minItems": 80
+        },
+        "battle_builds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "build_id",
+              "owned_pet_instance_id",
+              "species_id",
+              "effective_form",
+              "form_sources",
+              "ordered_skills",
+              "effective_bloodline",
+              "derived_stats",
+              "derived_stats_confidence",
+              "ruleset_id",
+              "unknown_fields",
+              "build_hash"
+            ],
+            "properties": {
+              "build_id": {
+                "type": "string",
+                "pattern": "^build-own-[0-9]{4}$"
+              },
+              "owned_pet_instance_id": {
+                "type": "string",
+                "pattern": "^own-[0-9]{4}$"
+              },
+              "species_id": {
+                "type": "string",
+                "pattern": "^pet_[0-9]{6}$"
+              },
+              "effective_form": {
+                "type": "string",
+                "minLength": 1
+              },
+              "form_sources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "required": [
+                    "source_id",
+                    "source_scope",
+                    "artifact_path",
+                    "artifact_sha256"
+                  ],
+                  "properties": {
+                    "source_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "source_scope": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "artifact_path": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "artifact_sha256": {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    "pointer": {
+                      "type": "string"
+                    },
+                    "note": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "minItems": 1
+              },
+              "ordered_skills": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^skill_[0-9]{6}$"
+                },
+                "minItems": 4,
+                "maxItems": 4,
+                "uniqueItems": true
+              },
+              "effective_bloodline": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "value",
+                  "value_source",
+                  "effect",
+                  "effect_reason",
+                  "microcase_id",
+                  "value_pointer",
+                  "blood_skill_id"
+                ],
+                "properties": {
+                  "value": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "value_source": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "effect": {
+                    "type": "string",
+                    "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+                  },
+                  "effect_reason": {
+                    "type": "string",
+                    "const": "面板换算公式未校准（见 10 号文档 §13）"
+                  },
+                  "microcase_id": {
+                    "type": "null"
+                  },
+                  "value_pointer": {
+                    "type": "string",
+                    "nullable": true
+                  },
+                  "blood_skill_id": {
+                    "type": "string",
+                    "pattern": "^skill_[0-9]{6}$",
+                    "nullable": true
+                  }
+                }
+              },
+              "derived_stats": {
+                "type": "null",
+                "nullable": true
+              },
+              "derived_stats_confidence": {
+                "type": "string",
+                "const": "UNKNOWN"
+              },
+              "ruleset_id": {
+                "type": "string",
+                "const": "roco-world-s4-2026-09-10"
+              },
+              "unknown_fields": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "build_hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          },
+          "minItems": 80
+        },
+        "dataset_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "OwnedPet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "instance_id",
+        "species_id",
+        "species_name",
+        "species_tier",
+        "level",
+        "nature",
+        "talent",
+        "specialty",
+        "bloodline",
+        "skills",
+        "skills_source",
+        "base_stats",
+        "panel_stats",
+        "source",
+        "favourite",
+        "locked",
+        "provenance",
+        "licence_ref",
+        "unknown_fields",
+        "build_hash"
+      ],
+      "properties": {
+        "instance_id": {
+          "type": "string",
+          "pattern": "^own-[0-9]{4}$"
+        },
+        "species_id": {
+          "type": "string",
+          "pattern": "^pet_[0-9]{6}$"
+        },
+        "species_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "species_tier": {
+          "type": "string",
+          "enum": [
+            "baseline",
+            "overlay"
+          ]
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "nature": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "value",
+            "value_source",
+            "effect",
+            "effect_reason",
+            "microcase_id"
+          ],
+          "properties": {
+            "value": {
+              "type": "string",
+              "nullable": true
+            },
+            "value_source": {
+              "type": "string",
+              "nullable": true
+            },
+            "effect": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "effect_reason": {
+              "type": "string",
+              "const": "面板换算公式未校准（见 10 号文档 §13）"
+            },
+            "microcase_id": {
+              "type": "null"
+            }
+          }
+        },
+        "talent": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "value",
+            "value_source",
+            "effect",
+            "effect_reason",
+            "microcase_id"
+          ],
+          "properties": {
+            "value": {
+              "type": "string",
+              "nullable": true
+            },
+            "value_source": {
+              "type": "string",
+              "nullable": true
+            },
+            "effect": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "effect_reason": {
+              "type": "string",
+              "const": "面板换算公式未校准（见 10 号文档 §13）"
+            },
+            "microcase_id": {
+              "type": "null"
+            }
+          }
+        },
+        "specialty": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "value",
+            "value_source",
+            "effect",
+            "effect_reason",
+            "microcase_id"
+          ],
+          "properties": {
+            "value": {
+              "type": "string",
+              "nullable": true
+            },
+            "value_source": {
+              "type": "string",
+              "nullable": true
+            },
+            "effect": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "effect_reason": {
+              "type": "string",
+              "const": "面板换算公式未校准（见 10 号文档 §13）"
+            },
+            "microcase_id": {
+              "type": "null"
+            }
+          }
+        },
+        "bloodline": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "value",
+            "value_source",
+            "effect",
+            "effect_reason",
+            "microcase_id",
+            "value_pointer",
+            "blood_skill_id"
+          ],
+          "properties": {
+            "value": {
+              "type": "string",
+              "nullable": true
+            },
+            "value_source": {
+              "type": "string",
+              "nullable": true
+            },
+            "effect": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "effect_reason": {
+              "type": "string",
+              "const": "面板换算公式未校准（见 10 号文档 §13）"
+            },
+            "microcase_id": {
+              "type": "null"
+            },
+            "value_pointer": {
+              "type": "string",
+              "nullable": true
+            },
+            "blood_skill_id": {
+              "type": "string",
+              "pattern": "^skill_[0-9]{6}$",
+              "nullable": true
+            }
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^skill_[0-9]{6}$"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "skills_source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "artifact_path",
+            "artifact_sha256",
+            "pointer"
+          ],
+          "properties": {
+            "artifact_path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "artifact_sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "pointer": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "base_stats": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "hp",
+            "atk",
+            "def",
+            "spa",
+            "spd",
+            "spe"
+          ],
+          "properties": {
+            "hp": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "atk": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "def": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "spa": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "spd": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "spe": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
+        "panel_stats": {
+          "type": "null",
+          "nullable": true
+        },
+        "source": {
+          "type": "string",
+          "const": "repo_generator_fixed_seed"
+        },
+        "favourite": {
+          "type": "boolean"
+        },
+        "locked": {
+          "type": "boolean"
+        },
+        "provenance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": [
+              "source_id",
+              "source_scope",
+              "artifact_path",
+              "artifact_sha256"
+            ],
+            "properties": {
+              "source_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "pointer": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "licence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "build_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "BattleBuild": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "build_id",
+        "owned_pet_instance_id",
+        "species_id",
+        "effective_form",
+        "form_sources",
+        "ordered_skills",
+        "effective_bloodline",
+        "derived_stats",
+        "derived_stats_confidence",
+        "ruleset_id",
+        "unknown_fields",
+        "build_hash"
+      ],
+      "properties": {
+        "build_id": {
+          "type": "string",
+          "pattern": "^build-own-[0-9]{4}$"
+        },
+        "owned_pet_instance_id": {
+          "type": "string",
+          "pattern": "^own-[0-9]{4}$"
+        },
+        "species_id": {
+          "type": "string",
+          "pattern": "^pet_[0-9]{6}$"
+        },
+        "effective_form": {
+          "type": "string",
+          "minLength": 1
+        },
+        "form_sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": [
+              "source_id",
+              "source_scope",
+              "artifact_path",
+              "artifact_sha256"
+            ],
+            "properties": {
+              "source_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source_scope": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "artifact_sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "pointer": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          },
+          "minItems": 1
+        },
+        "ordered_skills": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^skill_[0-9]{6}$"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true
+        },
+        "effective_bloodline": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "value",
+            "value_source",
+            "effect",
+            "effect_reason",
+            "microcase_id",
+            "value_pointer",
+            "blood_skill_id"
+          ],
+          "properties": {
+            "value": {
+              "type": "string",
+              "nullable": true
+            },
+            "value_source": {
+              "type": "string",
+              "nullable": true
+            },
+            "effect": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+            },
+            "effect_reason": {
+              "type": "string",
+              "const": "面板换算公式未校准（见 10 号文档 §13）"
+            },
+            "microcase_id": {
+              "type": "null"
+            },
+            "value_pointer": {
+              "type": "string",
+              "nullable": true
+            },
+            "blood_skill_id": {
+              "type": "string",
+              "pattern": "^skill_[0-9]{6}$",
+              "nullable": true
+            }
+          }
+        },
+        "derived_stats": {
+          "type": "null",
+          "nullable": true
+        },
+        "derived_stats_confidence": {
+          "type": "string",
+          "const": "UNKNOWN"
+        },
+        "ruleset_id": {
+          "type": "string",
+          "const": "roco-world-s4-2026-09-10"
+        },
+        "unknown_fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "build_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "GrowthAttribute": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "value",
+        "value_source",
+        "effect",
+        "effect_reason",
+        "microcase_id"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "nullable": true
+        },
+        "value_source": {
+          "type": "string",
+          "nullable": true
+        },
+        "effect": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "effect_reason": {
+          "type": "string",
+          "const": "面板换算公式未校准（见 10 号文档 §13）"
+        },
+        "microcase_id": {
+          "type": "null"
+        }
+      }
+    },
+    "BloodlineAttribute": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "value",
+        "value_source",
+        "effect",
+        "effect_reason",
+        "microcase_id",
+        "value_pointer",
+        "blood_skill_id"
+      ],
+      "properties": {
+        "value": {
+          "type": "string",
+          "nullable": true
+        },
+        "value_source": {
+          "type": "string",
+          "nullable": true
+        },
+        "effect": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]*$"
+        },
+        "effect_reason": {
+          "type": "string",
+          "const": "面板换算公式未校准（见 10 号文档 §13）"
+        },
+        "microcase_id": {
+          "type": "null"
+        },
+        "value_pointer": {
+          "type": "string",
+          "nullable": true
+        },
+        "blood_skill_id": {
+          "type": "string",
+          "pattern": "^skill_[0-9]{6}$",
+          "nullable": true
+        }
+      }
+    },
+    "ProvenanceEntry": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "source_id",
+        "source_scope",
+        "artifact_path",
+        "artifact_sha256"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "pointer": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "StatVector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hp",
+        "atk",
+        "def",
+        "spa",
+        "spd",
+        "spe"
+      ],
+      "properties": {
+        "hp": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "atk": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "def": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spa": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spd": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "spe": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "Counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "instances",
+        "species",
+        "species_in_layer_playable_48",
+        "species_outside_layer_playable_48",
+        "same_species_groups",
+        "same_species_groups_with_difference",
+        "battle_builds",
+        "skills_referenced"
+      ],
+      "properties": {
+        "instances": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "species": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "species_in_layer_playable_48": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "species_outside_layer_playable_48": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "same_species_groups": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "same_species_groups_with_difference": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "battle_builds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "skills_referenced": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "policies": {
+    "unknown_fields_rule": [
+      "unknown_fields 必须**恰好等于**按实例本身重算出来的集合：",
+      "① 顶层字段值为 null；② 顶层字段是养成属性且 value === null。",
+      "反向也判红：把有值的字段塞进 unknown_fields（例如 level）同样不允许。"
+    ],
+    "growth_effect_rule": [
+      "effect 只能是 \"UNKNOWN\"，或者一个在 GROWTH_EFFECT_EVIDENCE_IDS 里能查到的证据 id（本仓该白名单当前为空，所以任何非 UNKNOWN 的 effect 都会红）。",
+      "禁止出现 formula / multiplier / modifier / percent / ratio / coefficient / bonus 这类被发明的字段。"
+    ],
+    "forbidden_growth_field_pattern": "(formula|multiplier|modifier|percent|ratio|coefficient|bonus|公式|系数|加成值)",
+    "determinism_rule": [
+      "固定 seed=20301；除了由 ruleset_id 推导的 generated_at 之外没有任何挂钟字段（clock_fields 恒为空）。",
+      "同输入两次运行逐字节相同；build-owned-pets.mjs --check 逐字节比对，不做任何字段豁免。"
+    ],
+    "learnset_rule": [
+      "四个技能必须逐个属于该 species 在冻结目录 learnsets.json 里的 native_skills。",
+      "凑不出四个技能（或任何技能查不到）的精灵一律跳过，不补、不改、不猜。"
+    ],
+    "layer_rule": [
+      "layer-playable-48 目录（36 只 overlay）只是迁移夹具的一层；",
+      "baseline 层（主 learnsets.json 的 12 只）在该目录之外，判据要求这类 species 至少 12 个。"
+    ],
+    "battle_build_rule": [
+      "ordered_skills 是**有序**数组，必须与 OwnedPet.skills 逐位相同（顺序敏感）。",
+      "derived_stats 恒为 null：面板换算未校准，所以不给数。"
+    ]
+  },
+  "x_roco_contract": {
+    "instance_target": 80,
+    "min_species": 40,
+    "min_outside_layer_playable_48": 12,
+    "min_same_species_groups": 20,
+    "seed": 20301
+  }
+}
