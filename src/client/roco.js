@@ -51,7 +51,7 @@ const state = {
   timings: [],         // 每次 /api/roco/plan 的往返耗时（P50/P95 报告要用）
   // ── 阵容选择（P0-3）──────────────────────────────────────────────
   roster: [],          // 12 只真实精灵（来自 /api/roco/roster）
-  pick: {player: [], enemy: [], side: 'player'},
+  pick: {player: [], enemy: [], side: 'player', hint: ''},
   seedOverride: null,  // 只给验收脚本换局用；界面上没有这个开关
 };
 
@@ -502,19 +502,38 @@ function renderRoster() {
   $('count-player').textContent = String(player.length);
   $('count-enemy').textContent = String(enemy.length);
   for (const tab of document.querySelectorAll('.side-tab')) {
-    tab.classList.toggle('selected', tab.dataset.side === side);
+    const active = tab.dataset.side === side;
+    tab.classList.toggle('selected', active);
+    tab.setAttribute('aria-pressed', active ? 'true' : 'false');
   }
   const nameOf = (id) => (state.roster.find((p) => p.pet_id === id)?.name) ?? id;
   $('pick-summary').textContent = `我方：${player.map(nameOf).join('、') || '（未选）'} ｜ `
     + `对手：${enemy.map(nameOf).join('、') || '（未选）'}`;
   $('start-battle').disabled = !(player.length === 3 && enemy.length === 3);
+  // 点击/键盘的即时反馈区（`role=status` + aria-live，键盘用户也听得到）
+  const hint = $('pick-hint');
+  if (hint) hint.textContent = state.pick.hint || '';
+  // 当前正在选哪一侧：**不能只靠一个淡色 tab**（玩家实测反馈就是分不清）。
+  $('select-panel').dataset.rocoPickSide = side;
+  const onThisSide = side === 'player' ? player : enemy;
+  const otherSide = side === 'player' ? enemy : player;
   grid.innerHTML = state.roster.map((pet) => {
     const classes = ['pick'];
-    if (player.includes(pet.pet_id)) classes.push('picked-player');
-    if (enemy.includes(pet.pet_id)) classes.push('picked-enemy');
+    const onSide = onThisSide.includes(pet.pet_id);
+    const offSide = otherSide.includes(pet.pet_id);
+    if (onSide) classes.push(side === 'player' ? 'picked-player' : 'picked-enemy');
+    // 这一侧点不动的两种情况：已经分给对面、或这一侧已经满 3 只（且它还没被选）。
+    const blocked = !onSide && (offSide || onThisSide.length >= 3);
+    if (blocked) classes.push('blocked');
+    const badge = offSide ? `<span class="taken">${side === 'player' ? '对手已选' : '我方已选'}</span>`
+      : (onSide ? '<span class="taken picked">已选</span>' : '');
+    const why = offSide
+      ? `${pet.name} 已经分给${side === 'player' ? '对手' : '我方'}了：点一下会告诉你怎么改`
+      : (blocked ? `${sideName(side)}已经选满 3 只` : '');
     const moves = pet.moveset.map((m) => m.name).join('、');
-    return `<button class="${classes.join(' ')}" data-pet="${pet.pet_id}">
-      <div class="nm">${petAvatar(pet)}${pet.name}</div>
+    return `<button class="${classes.join(' ')}" data-pet="${pet.pet_id}"
+      aria-disabled="${blocked ? 'true' : 'false'}" title="${why}">
+      <div class="nm">${petAvatar(pet)}${pet.name}${badge}</div>
       <div>${typeChips(pet.types)}</div>
       <div class="mv">${moves || '（引擎未给配招）'}</div>
     </button>`;
@@ -528,18 +547,41 @@ function togglePick(petId) {
   const pick = state.pick;
   const side = pick.side;
   const list = pick[side];
+  const other = side === 'player' ? pick.enemy : pick.player;
   const at = list.indexOf(petId);
-  if (at >= 0) list.splice(at, 1);
-  else {
-    // 同一只精灵不能同时出现在两边：那是自相矛盾的阵容
-    const other = side === 'player' ? pick.enemy : pick.player;
-    if (other.includes(petId)) return;
-    if (list.length >= 3) return;
+  const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
+  if (at >= 0) {
+    list.splice(at, 1);
+    setPickHint(`${nameOf(petId)} 已从${sideName(side)}移出。`);
+  } else if (other.includes(petId)) {
+    // ── 这里原来是 `return`（静默无反应）─────────────────────────────────────
+    //
+    // 玩家实测原话：随机把某只分给对手之后（例如音速犬、化蝶），在我方阶段点它
+    // **完全没反应**，卡片既没有禁用样式也没有提示，于是「点不动」——那是把一条
+    // 产品规则（同一只不能同时在两边）表现成了一个坏掉的按钮。
+    //
+    // 现在：卡片本身带 `blocked` 状态与「对手已选／我方已选」角标（见 renderRoster），
+    // 点它/键盘回车都会得到一句可执行的提示：先把它从对面取消，或者切到那一侧。
+    setPickHint(`${nameOf(petId)} 已经分给${sideName(side === 'player' ? 'enemy' : 'player')}了。`
+      + `先在这一侧点它取消，或点上面的「${sideName(side === 'player' ? 'enemy' : 'player')}」切过去。`);
+  } else if (list.length >= 3) {
+    setPickHint(`${sideName(side)}已经选满 3 只了。点一只已选的取消，或切到另一侧。`);
+  } else {
     list.push(petId);
+    setPickHint(`${nameOf(petId)} 加入${sideName(side)}（${list.length}/3）。`);
     // 我方满了就自动切到对手，省一次点击
-    if (side === 'player' && list.length === 3 && pick.enemy.length < 3) pick.side = 'enemy';
+    if (side === 'player' && list.length === 3 && pick.enemy.length < 3) {
+      pick.side = 'enemy';
+      setPickHint(`我方 3 只已满，已自动切到「对手」。`);
+    }
   }
   renderRoster();
+}
+
+/** 阵容选择里两方的中文说法与提示区：提示是**可执行的下一步**，不是「不能选」。 */
+const sideName = (side) => (side === 'enemy' ? '对手' : '我方');
+function setPickHint(text) {
+  state.pick.hint = text;
 }
 
 async function loadRoster() {
@@ -615,12 +657,17 @@ function wirePickControls() {
   for (const tab of document.querySelectorAll('.side-tab')) {
     tab.addEventListener('click', () => { state.pick.side = tab.dataset.side; renderRoster(); });
   }
+  for (const tab of document.querySelectorAll('.side-tab')) {
+    tab.addEventListener('click', () => setPickHint(`现在选的是「${sideName(tab.dataset.side)}」。`));
+  }
   $('random-enemy')?.addEventListener('click', () => {
     state.pick.enemy = [...state.roster].sort(() => Math.random() - 0.5).slice(0, 3).map((p) => p.pet_id);
     renderRoster();
   });
   $('clear-pick')?.addEventListener('click', () => {
-    state.pick.player = []; state.pick.enemy = []; state.pick.side = 'player'; renderRoster();
+    state.pick.player = []; state.pick.enemy = []; state.pick.side = 'player';
+    state.pick.hint = '两边都清空了，重新选吧。';
+    renderRoster();
   });
 }
 

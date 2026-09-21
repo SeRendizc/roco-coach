@@ -116,6 +116,36 @@ async function main(){
   return r.result.value;};
  const shoot=async(name)=>{const{data}=await cdp.send('Page.captureScreenshot',{format:'png'});
   writeFileSync(join(OUT,`${name}.png`),Buffer.from(data,'base64'));return `${name}.png`;};
+ // ── 真实交互（第 45 轮）：用 CDP 派发**真的鼠标与键盘事件** ──────────────────
+ //
+ // 为什么不能只用 `element.click()` 或直接改 `state.pick`：玩家遇到的 bug 恰恰是
+ // 「点上去没反应」——那种 bug 在 `element.click()` 里同样会发生，但**在 `state.pick`
+ // 里不会**（程序设状态根本不走事件）。所以这一组必须走浏览器自己的输入通道。
+ const rectOf=async(sel)=>{const raw=await js(`(()=>{const el=document.querySelector(${JSON.stringify(sel)});
+   if(!el)return 'null';const r=el.getBoundingClientRect();
+   return JSON.stringify({x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)});})()`);
+  return raw==='null'?null:JSON.parse(raw);};
+ const mouseClick=async(sel)=>{
+  // 点之前先把目标滚到视口中间：`getBoundingClientRect` 是视口坐标，
+  // 元素在视口外时派发出去的事件会落在别的地方（而且**不会报错**，看起来像「点了没反应」——
+  // 正是我们自己在修的那类 bug）。第一次写这条判据时就踩到了：同一张卡在探针里能点、
+  // 在整段验收里点不到，差别就是页面已经滚下去了。
+  await js(`document.querySelector(${JSON.stringify(sel)}).scrollIntoView({block:'center'})`);
+  await sleep(150);
+  const r=await rectOf(sel);
+  if(!r)throw new Error(`找不到可点的元素：${sel}`);
+  for(const type of ['mousePressed','mouseReleased'])
+   await cdp.send('Input.dispatchMouseEvent',{type,x:r.x,y:r.y,button:'left',clickCount:1});
+  await sleep(120);};
+ const keyActivate=async(sel,key='Enter')=>{
+  await js(`document.querySelector(${JSON.stringify(sel)}).scrollIntoView({block:'center'})`);
+  await js(`document.querySelector(${JSON.stringify(sel)}).focus()`);
+  const code=key==='Enter'?'Enter':'Space';
+  const vk=key==='Enter'?13:32;
+  await cdp.send('Input.dispatchKeyEvent',{type:'keyDown',key,code,windowsVirtualKeyCode:vk,nativeVirtualKeyCode:vk});
+  await cdp.send('Input.dispatchKeyEvent',{type:'keyUp',key,code,windowsVirtualKeyCode:vk,nativeVirtualKeyCode:vk});
+  await sleep(120);};
+
  const bodyData=()=>js(`(()=>{const d=document.body.dataset;const out={};for(const k of Object.keys(d))if(k.startsWith('roco'))out[k]=d[k];return out;})()`);
 
  const checks=[];const shots=[];const snapshots=[];
@@ -1008,6 +1038,60 @@ async function main(){
   !== shapeOf('你只剩 8% 血，换「海豹船长」上来：它还厚，别把「寂灭骨龙」白送掉');
  check('局面矩阵：形状去重判据本身不是空的（换技能名与数字 → 同形状；换句式 → 不同形状）',
   shapeProbe && shapeProbeDifferent, `同模板换名字与数字判为同形=${shapeProbe}；换句式判为不同形=${shapeProbeDifferent}`);
+
+ // ── 真实鼠标/键盘交互：点不动的卡必须有反馈，切侧必须看得出来（第 45 轮 UX hotfix）──
+ //
+ // 先把两个**固定定位**的悬浮层收起来：提示条（bottom:18px）与局末卡片（bottom:200px）
+ // 会盖住页面右下角，被盖住的位置点下去落在浮层上——这跟「元素在视口外」一样，
+ // 都属于「事件派发了但没落在你想的地方」，而且同样不会报错。
+ await js(`(()=>{const h=document.getElementById('hint');if(h)h.hidden=true;
+   const l=document.getElementById('lesson-card');if(l)l.hidden=true;})()`);
+ //
+ // 玩家实测原话：随机把某只分给对手之后（音速犬/化蝶），我方阶段点它**完全没反应**，
+ // 卡片既没有禁用样式也没有提示，于是判断「点不动」。这一组**用 CDP 派发真的鼠标与
+ // 键盘事件**——`element.click()` 或直接改 `state.pick` 都会绕过出问题的那条路径。
+ const pickProbe=JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('#roster button[data-pet]')];
+   return JSON.stringify({cards:cards.length,
+     blocked:cards.filter((c)=>c.classList.contains('blocked')).length,
+     taken:cards.filter((c)=>c.querySelector('.taken')).length});})()`));
+ check('阵容卡有「这一侧点不动」的状态（blocked / 角标），不是静默无反应',
+  pickProbe.cards>=6&&(pickProbe.blocked>0||pickProbe.taken>0),JSON.stringify(pickProbe));
+ const crossSetup=JSON.parse(await js(`(()=>{const d=window.rocoDemo;const ids=d.state.roster.map((p)=>p.pet_id);
+   d.state.pick.player=[];d.state.pick.enemy=[ids[0]];d.state.pick.side='player';d.state.pick.hint='';
+   d.renderRoster();return JSON.stringify({target:ids[0]});})()`));
+ await mouseClick(`#roster button[data-pet="${crossSetup.target}"]`);
+ const crossAfter=JSON.parse(await js(`(()=>{const d=window.rocoDemo;
+   const el=document.querySelector('#roster button[data-pet="${crossSetup.target}"]');
+   return JSON.stringify({hint:document.getElementById('pick-hint').textContent,
+     blocked:el.classList.contains('blocked'),aria:el.getAttribute('aria-disabled'),
+     stillEnemy:d.state.pick.enemy.includes('${crossSetup.target}'),
+     player:d.state.pick.player.length});})()`));
+ check('鼠标点「已分给对手」的卡：给出可执行的提示，而且不会悄悄改阵容',
+  crossAfter.hint.length>=6&&crossAfter.blocked===true&&crossAfter.aria==='true'
+  &&crossAfter.stillEnemy===true&&crossAfter.player===0,JSON.stringify(crossAfter));
+ await keyActivate(`#roster button[data-pet="${crossSetup.target}"]`);
+ const keyAfter=await js(`document.getElementById('pick-hint').textContent`);
+ check('键盘（聚焦 + 回车）点同一张卡，拿到同一句提示',
+  String(keyAfter).includes('已经分给对手'),String(keyAfter));
+ const fullSetup=JSON.parse(await js(`(()=>{const d=window.rocoDemo;const ids=d.state.roster.map((p)=>p.pet_id);
+   d.state.pick.player=ids.slice(0,3);d.state.pick.enemy=[];d.state.pick.side='player';d.state.pick.hint='';
+   d.renderRoster();return JSON.stringify({fourth:ids[3]});})()`));
+ await mouseClick(`#roster button[data-pet="${fullSetup.fourth}"]`);
+ const fullAfter=JSON.parse(await js(`(()=>{const d=window.rocoDemo;
+   return JSON.stringify({hint:document.getElementById('pick-hint').textContent,
+     player:d.state.pick.player.length});})()`));
+ check('我方已满 3 只时点第 4 只：提示说清「已满」且不改变阵容',
+  /已满|选满/.test(fullAfter.hint)&&fullAfter.player===3,JSON.stringify(fullAfter));
+ await mouseClick('#select-panel .side-tab[data-side="enemy"]');
+ const sideAfter=JSON.parse(await js(`(()=>{const tabs=[...document.querySelectorAll('.side-tab')];
+   return JSON.stringify({pressed:tabs.map((t)=>t.getAttribute('aria-pressed')),
+     panel:document.getElementById('select-panel').dataset.rocoPickSide,
+     hint:document.getElementById('pick-hint').textContent});})()`));
+ check('点「对手」切换选择侧：tab 的 aria-pressed 与面板标记都跟着变',
+  sideAfter.pressed.join(',')==='false,true'&&sideAfter.panel==='enemy',JSON.stringify(sideAfter));
+ await js(`(()=>{const d=window.rocoDemo;const ids=d.state.roster.map((p)=>p.pet_id);
+   d.state.pick.player=ids.slice(0,3);d.state.pick.enemy=ids.slice(3,6);d.state.pick.side='player';
+   d.state.pick.hint='';d.renderRoster();})()`);
 
  // ── P0-3 端到端：**选好的阵容真的进了引擎** ────────────────────────────
  // 放在最后：它会重开一局，不能让后面的判据读到这一局的状态。

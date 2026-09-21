@@ -71,6 +71,9 @@
   <button id="clear-pick">清空</button>
  </div>
  <div id="pick-summary" class="muted"></div>
+ <!-- 点击/键盘的即时反馈：说清「为什么这一下没选上」以及下一步怎么做。
+      role=status + aria-live 让键盘与读屏用户也拿得到同一句话。 -->
+ <p id="pick-hint" class="pick-hint" role="status" aria-live="polite"></p>
  <div id="roster" class="roster"></div>
 </section>
 

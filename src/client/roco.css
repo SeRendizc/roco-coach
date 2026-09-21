@@ -105,3 +105,21 @@ input{font:inherit;background:#121e2c;color:#dbe5ef;border:1px solid var(--line)
 .dmg-float.strong{color:#ff9f86;font-size:17px}
 .dmg-float.weak{color:#a9bccd;font-size:13px}
 @keyframes dmg-rise{0%{opacity:0;transform:translateY(6px)}18%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-12px)}}
+
+/* 阵容选择：当前选的是哪一侧、哪些卡点不动、点不动的原因（第 45 轮 UX hotfix）。
+   玩家实测反馈：把某只随机分给对手之后，我方阶段点它**完全没反应**，
+   而卡片既没有禁用样式也没有提示，于是判断「点不动」。 */
+#select-panel{border-color:#3c5b6e}
+#select-panel[data-roco-pick-side="player"]{border-left:4px solid #8dd49c}
+#select-panel[data-roco-pick-side="enemy"]{border-left:4px solid #e8a76a}
+.side-tab[aria-pressed="true"]{box-shadow:0 0 0 2px #8dd49c inset}
+.side-tab[data-side="enemy"][aria-pressed="true"]{box-shadow:0 0 0 2px #e8a76a inset}
+.pick-hint{margin:8px 0 2px;font-size:12.5px;line-height:1.6;color:var(--warn);min-height:1.2em}
+.pick{position:relative}
+.pick.blocked{opacity:.55;border-style:dashed}
+.pick.blocked:hover{border-color:#7d6a4a;background:#1f2530}
+.pick .taken{font-size:10.5px;color:#c9b07a;border:1px solid #6b5b3a;border-radius:5px;padding:1px 5px;margin-left:6px;white-space:nowrap}
+.pick .taken.picked{color:#8dd49c;border-color:#4a6858}
+.pick.picked-player{border-color:#8dd49c;background:#1d3435}
+.pick.picked-enemy{border-color:#e8a76a;background:#33291d}
+@media(max-width:720px){.pick-hint{font-size:13px}}
