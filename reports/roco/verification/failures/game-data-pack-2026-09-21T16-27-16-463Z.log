@@ -1,0 +1,17 @@
+node scripts/roco/verify-game-data-pack.mjs
+
+[verify] 实体 1446 条，provenance 2888 条；sha 对不上 0，指针解析不到 0
+[verify] 许可：licence_ref 查不到 0；台账不一致 0；REFERENCE_ONLY 混进 distributable 0
+[verify] unknown_fields 算不回来 0；孤儿引用 0；新鲜度 声明=FRESH 重算=FRESH
+[verify] 就绪判定 draft （8/9 项 satisfied，未解决冲突 4）
+[verify]   §9-1 unified_schema: satisfied
+[verify]   §9-2 licence_per_entity: satisfied
+[verify]   §9-3 per_entity_provenance: satisfied
+[verify]   §9-4 conflict_policy: satisfied
+[verify]   §9-5 form_axis: satisfied
+[verify]   §9-6 field_level_coverage: NOT satisfied
+[verify]   §9-7 version_freshness: satisfied
+[verify]   §9-8 unavailable_fields: satisfied
+[verify]   §9-9 reconciliation_in_release_gate: satisfied
+[verify] ✖ 1 条问题：
+  就绪报告不是最新的：reports/roco/reconciliation/game-data-pack-readiness.json 与「现在重算」不一致（先跑 node scripts/roco/verify-game-data-pack.mjs --write）

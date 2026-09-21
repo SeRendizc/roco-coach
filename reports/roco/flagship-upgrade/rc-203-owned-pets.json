@@ -6,8 +6,8 @@
   "clock_fields": [],
   "artifact": {
     "path": "data/roco/owned/owned-pets.json",
-    "sha256": "30a4a82ec046237537f86f0b30762d41c7c98baf48cf0333ac5917cbdc49639d",
-    "dataset_hash": "931ec6e323ec77baf02a34dcb3964a9001da0824e0c1cc489154c4de4fc541b7",
+    "sha256": "3ff29910843c7bace2132223fde70f8656a7ccc1edc6c3abe4c8ec29196c4374",
+    "dataset_hash": "4b69a662b4a69b82addd03fba0ef9703d2c3c5f69ab52af7c43c396bce21ac1f",
     "instances": 80,
     "battle_builds": 80
   },
