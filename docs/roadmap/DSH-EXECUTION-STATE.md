@@ -1186,3 +1186,18 @@ seed=5 strategy=greedy_damage team=[pet_000112+pet_000611+pet_000124] enemy=[（
 **纪律（写进流程，不再靠记性）：跑测试不许用管道接在 `&&` 前面——退出码一旦被吞，
 红就会被提交成绿。**
 
+
+### C6.12 第 73—75 轮在飞的两个子任务（简报要点，掉上下文也能重建）
+
+截至写这一节时，**两个子任务都还没落盘**（`git status` 里只有运行产物，没有 `src|tests|scripts` 改动）。
+它们的简报要点记在这里：
+
+| 子任务 | 目标 | 硬约束（都来自本阶段踩过的坑） | 验收 |
+|---|---|---|---|
+| `1d52940f` 重定位 | 按 §C6.7/§C6.10 用**阵容**重新定位：引擎侧 `tests/evals/roco/coach-positions.test.js` 的 10 个局面 + 浏览器侧 `demo-acceptance.mjs` 的 `POSITION_MATRIX` 12 个局面，**一次覆盖两处** | 禁止改 expected kind；禁止动 `coach-advice.js` 与 `roco/src/**`；保留 kind ≥8 与形状最大重复 ≤2；跑测试不许用管道吞退出码 | 两个套件同时回绿；每条给因果证据（事实是否仍成立）；两遍逐字节可复现 |
+| `2115179e` UI 落地 | 把三页 mockup（`docs/roco/ui-mockup*.html`）落成 `src/client/roco.{html,js,css}`：选阵容页只留标题+小芽入口+固定队伍栏+阵容池；工程信息进折叠抽屉；教程仅首次且可跳过；删空框；**48 只池＝搜索+属性/定位筛选+分页(每页 12)**，卡片首层只给 emoji/名字/属性/定位/一个特点，详情进抽屉；我方/对手用分段选择器；对战页池子完全收起、动作固定底部；小芽三处呈现不做状态表 | **不许新增失败**（当前 73/76，那 3 条是引擎漂移与本任务无关，严禁改 expected）；必须保留 `#roster/#select-panel/#onboard/#about-drawer/#memory-list/#lineup-brief` 等 id 与 `.pick/.side-tab/.avatar/.type/.taken/.mem-label` 等类名及全部 `data-roco-*` 钩子；样式继续用 `style.css`；不改 `roco/src/**`、`src/coach/**`；不许 `git add -A` | 真实键鼠判据（搜索/筛选/翻页/分段切换/跳过教程）+ 真实页面 1440×900 与 390×844 截图（量 `clientW/scrollW`）+ `demo-acceptance` 新增失败=0 |
+
+**如果它们迟迟不落盘**：重定位按 §C6.7 由主线程自己做（换阵容、期望不变）；
+UI 落地可以先做**最小一步**——把 48 只池的搜索/筛选/分页接上（接口已就绪：
+`/api/roco/roster?limit&offset&type&role`，不传参数保持旧形状），再逐页替换版式。
+
