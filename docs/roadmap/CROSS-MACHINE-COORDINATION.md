@@ -101,6 +101,7 @@ Windows 不得开始正式训练。
 
 | 时间（UTC） | 方向 | 协作区 commit | 我改了什么 |
 |---|---|---|---|
+| 2026-09-21T21:00Z | Mac → 协作区 | `78f488d`（`a094e42..78f488d`） | **阶段末同步（RC-205，Phase 0B 完成）**：`MAC_STATUS.md` 产品 HEAD → `283e0c4`；盒子 UI（新页面 + 只读路由不经 Python；catalog 622 / mine 80；同种 compare，不同种 400；非法参数不取整不夹紧；玩家层 vs 开发者抽屉分界；22/22 判据 + 5/5 反证、真实键鼠、390px 0 个不达标、7 张截图）；`test:unit` 800、门禁 17/17；Next → **RC-301…306**（正式训练闸门仍 blocked）；`CONTRACTS.md` 补上 Pet Box 消费入口 |
 | 2026-09-21T20:05Z | Mac → 协作区 | `a094e42`（`09a847e..a094e42`） | **阶段末同步（RC-204）**：`MAC_STATUS.md` 产品 HEAD → `5ce997d`；RC-204 held-out 评测（45 条五类 + 13 条探针；新版全 1.000 但标明是**开发集**数字、**1 条探针保留失败**；同语料基线对照；旧实现全 0 是 id 空间不同）与派生链连锁失效的两处修法；`test:unit` 789、门禁 **17/17**；`CONTRACTS.md` 的 `GameDataPackV2` validation 补上 RAG 消费与度量入口 |
 | 2026-09-21T18:55Z | Mac → 协作区 | `09a847e`（`d836491..09a847e`） | **阶段末同步（RC-203）**：`MAC_STATUS.md` 产品 HEAD → `ed75848`；RC-203 OwnedPet/BattleBuild（80 实例 / 48 species / 32 组同种不同个体 / 13 条反证）与**诚实纠正**（「12 只在 layer-playable-48 之外」不等于候选宇宙 > 48：按 roster-48 口径池外 0；`buildability_ceiling.proves_600_buildable=false`、574 只因缺 learnset 跳过、48 是覆盖上限不是白名单）纳入；`CONTRACTS.md` **新增 `OwnedPetV1`（draft）**并写明为什么还不 ready |
 | 2026-09-21T18:05Z | Mac → 协作区 | `d836491`（`7f7109c..d836491`） | **阶段末同步（RC-103）**：`MAC_STATUS.md` 产品 HEAD → `af46981`；RC-103 回合顺序登记表 + 未核验顺序 fail closed（legacy 逐位不变用 8 个 golden 指纹当判据）、三条如实登记的差距、pack 因输入哈希重建（`ab0a22bc…`→`ae4a9b65…`，就绪仍 draft 8/9）、失效图 +2 主题、`test:env` 295、门禁 **16/16**；`CONTRACTS.md` 的 `BattleModeV2` 补上 turn_order 登记事实，状态仍 `draft` |
