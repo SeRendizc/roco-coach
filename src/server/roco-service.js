@@ -107,8 +107,15 @@ export function publicView(result){
    target_index:a?.target_index??null,item_id:a?.item_id??null})),
   cpu_legal_count:Array.isArray(result.legal?.enemy)?result.legal.enemy.length:null,
   needs_replacement:Array.isArray(result.needs_replacement)?result.needs_replacement.slice():[],
+  // 事件：**中文句子**（`text`，引擎侧生成，只有引擎知道每个 detail 键是什么意思）
+  // 与原始 JSON（`detail`，页面收进默认隐藏的调试区）都带出去。
+  // 页面必须用 `text` 渲染；`detail` 只给开发者抽屉。
   events:(Array.isArray(result.events)?result.events:[]).map(e=>({
    turn:e?.turn??null,kind:e?.kind??null,side:e?.side??null,detail:e?.detail??null,
+   // 效果层/特性层的事件是**扁平**的（字段在顶层），所以这里把顶层其余键也带上，
+   // 否则调试抽屉里会缺字段、而句子又是对的——那种不一致最难查。
+   extra:Object.fromEntries(Object.entries(e??{}).filter(([k])=>!['turn','kind','side','detail','evidence','text'].includes(k))),
+   text:typeof e?.text==='string'?e.text:null,
    evidence:Array.isArray(e?.evidence)?e.evidence.slice(0,4):[]})),
   strategy:result.strategy?{name:result.strategy.name??null,version:result.strategy.version??null}:null,
   assumptions:publicState?.assumptions??null,

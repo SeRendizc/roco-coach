@@ -43,8 +43,13 @@
 </section>
 
 <section class="panel" id="log-panel">
- <div class="section-title"><h2>本回合发生了什么</h2><span class="muted">引擎事件，原样搬运</span></div>
+ <div class="section-title"><h2>这一回合发生了什么</h2></div>
  <div id="events" class="events"></div>
+ <!-- 原始事件 JSON：**默认收起**。玩家读句子；要查数据的人自己展开。 -->
+ <details class="dev">
+  <summary>调试信息（引擎原始事件，默认收起）</summary>
+  <pre id="events-raw" class="raw"></pre>
+ </details>
 </section>
 
 <section class="panel">

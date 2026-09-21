@@ -95,16 +95,44 @@ function saveMemory() {
 const hpClass = (ratio) => (ratio <= 0.35 ? 'low' : '');
 const pct = (hp, max) => (Number.isFinite(hp) && Number.isFinite(max) && max > 0 ? Math.max(0, Math.min(100, (hp / max) * 100)) : 0);
 
+//: 系别配色：**自制色块**，不抓官方图（素材许可不明）。
+//: 色盲友好：颜色之外同时给文字标签，所以不认颜色也能读。
+const TYPE_COLOR = {
+  普通系: '#9aa0a6', 火系: '#e8714a', 水系: '#4a90d9', 武系: '#c0563f', 翼系: '#7fb2e5',
+  冰系: '#69c2d6', 龙系: '#7b61c9', 幽系: '#6b5b95', 萌系: '#e58fc0', 虫系: '#8fae4a',
+  幻系: '#b06fd0', 自然系: '#5fae7a',
+};
+function typeChips(types) {
+  return (types ?? []).map((t) => `<span class="type" style="background:${TYPE_COLOR[t] ?? '#6b7280'}">${t}</span>`).join('');
+}
+
+/**
+ * 一张精灵卡。
+ *
+ * 第 42 轮 P0：原来这里把 `pet_id` 用 `<code>` 印在名字旁边，玩家看到的是
+ * 「寂灭骨龙 pet_000225」。**内部 id 不进玩家视野**——它只出现在调试抽屉里。
+ * 同时补上系别标签与六维摘要（数据里本来就有，只是从来没被页面用过）。
+ */
 function petCard(pet) {
   if (!pet) return '';
   const ratio = pet.max_hp > 0 ? pet.hp / pet.max_hp : 0;
-  const statuses = pet.statuses && Object.keys(pet.statuses).length ? `异常：${Object.keys(pet.statuses).join('、')}` : '';
+  const statuses = pet.statuses && Object.keys(pet.statuses).length
+    ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : '';
+  const name = pet.name ?? '未知伙伴';
+  const stats = pet.stats
+    ? `<span class="muted">生命 ${pet.stats.hp} · 攻击 ${pet.stats.atk} · 防御 ${pet.stats.def} · 魔攻 ${pet.stats.spa} · 魔防 ${pet.stats.spd} · 速度 ${pet.stats.spe}</span>`
+    : '';
   return `<div class="pet ${pet.fainted ? 'fainted' : ''}">
-    <div class="pet-top"><strong>${pet.name ?? pet.pet_id ?? '伙伴'}</strong><code>${pet.pet_id ?? ''}</code></div>
+    <div class="pet-top"><strong>${name}</strong>${typeChips(pet.types)}</div>
     <div class="bar"><div class="${hpClass(ratio)}" style="width:${pct(pet.hp, pet.max_hp)}%"></div></div>
-    <div class="pet-stats"><span>生命 ${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span><span>能量 ${pet.energy ?? '—'}</span>${statuses ? `<span>${statuses}</span>` : ''}</div>
+    <div class="pet-stats"><span>生命 ${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span><span>能量 ${pet.energy ?? '—'}</span>${statuses ? `<span>异常 ${statuses}</span>` : ''}</div>
+    ${stats ? `<div class="pet-more">${stats}</div>` : ''}
   </div>`;
 }
+
+//: 异常状态的中文名（与引擎侧 `events_text._STATUS` 同源口径；这里只做显示）。
+const STATUS_LABEL = {burn: '灼烧', poison: '中毒', paralysis: '麻痹', freeze: '冰冻',
+  sleep: '睡眠', confusion: '混乱', seal: '封印'};
 
 function render() {
   const view = state.view;
@@ -134,12 +162,30 @@ function render() {
   }
 
   const logs = [];
+  // 事件区**只渲染中文句子**（`event.text`，引擎侧生成）。
+  //
+  // 第 42 轮之前这里是 `${event.kind} · ${JSON.stringify(event.detail)}`，
+  // 玩家看到的是 `enemy damage · {"amount":25,...}` —— 引擎内部标识符 + 内部数据结构。
+  // 原始 JSON 没有丢，但只出现在「调试信息」折叠区里（默认收起）。
+  const raw = [];
   for (const event of state.events) {
-    if (event.kind === 'turn_start') logs.push(`<p class="turn">第 ${event.turn} 回合</p>`);
-    else if (event.kind === 'unsupported') logs.push(`<p class="miss">未核验、因此未结算：${event.detail?.what ?? '——'}</p>`);
-    else logs.push(`<p>${event.side === 'player' ? '我方' : event.side === 'enemy' ? '对方' : ''} ${event.kind}${event.detail ? ` · ${typeof event.detail === 'string' ? event.detail : JSON.stringify(event.detail)}` : ''}</p>`);
+    const text = typeof event.text === 'string' && event.text ? event.text : null;
+    const cls = event.kind === 'turn_start' ? 'turn' : (event.kind === 'unsupported' ? 'miss' : '');
+    if (event.kind === 'turn_start' && text) logs.push(`<p class="turn">${text}</p>`);
+    else if (text) logs.push(`<p${cls ? ` class="${cls}"` : ''}>${text}</p>`);
+    // 没有中文句子时**不猜**：如实说这一条还没有中文说法（正常情况下不会走到这里，
+    // 因为 Python 侧对每个 kind 都有句子，且测试会跑真对局收全集）
+    else logs.push('<p class="muted">这一条还没有中文说法（请把调试信息里的原始事件报上来）。</p>');
+    raw.push({turn: event.turn, kind: event.kind, side: event.side,
+      ...(event.extra && Object.keys(event.extra).length ? {extra: event.extra} : {}),
+      detail: event.detail ?? null, evidence: event.evidence ?? []});
   }
   $('events').innerHTML = logs.length ? logs.join('') : '<p class="muted">还没推进。</p>';
+  // 原始事件 JSON 进默认收起的调试区
+  const rawBox = $('events-raw');
+  if (rawBox) {
+    rawBox.textContent = raw.length ? JSON.stringify(raw, null, 1) : '（还没有事件）';
+  }
   $('plan-status').textContent = state.plan
     ? `规划状态版本 ${state.planAtVersion}${state.plan.coverage != null ? ` · 覆盖 ${state.plan.coverage}` : ''}${state.plan.timed_out ? ' · 超时' : ''}`
     : '';

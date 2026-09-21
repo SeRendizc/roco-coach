@@ -101,6 +101,8 @@ import sys
 import threading
 import time
 import traceback
+
+from . import events_text
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, List, Optional, Tuple
@@ -1795,7 +1797,12 @@ class RocoService:
                 "ui": env_mod.ui_public_view(state, rs, "player"),
                 "legal": {"player": acts("player"), "enemy": acts("enemy")},
                 "needs_replacement": env_mod.needs_replacement(state),
-                "events": [e.to_dict() for e in state.events[events_from:]] if event == "battle_advance" else [],
+                # 事件带**中文句子**（`text`）与原始 JSON（`detail` 保留原样）。
+                # 句子在 Python 侧生成：只有引擎知道每个 detail 键是什么意思，
+                # 放到浏览器里再抄一份必然漂移。原始 JSON 一并带出去，
+                # 但页面把它收进默认隐藏的调试区（玩家只该看到句子）。
+                "events": [dict(e.to_dict(), text=events_text.event_text(e.to_dict(), rs))
+                           for e in state.events[events_from:]] if event == "battle_advance" else [],
                 "strategy": {"name": strategy.name, "version": strategy.version},
                 "unsupported_seen": list(state.unsupported),
             },

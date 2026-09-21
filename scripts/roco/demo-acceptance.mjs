@@ -205,6 +205,49 @@ async function main(){
  check('玩家抱怨时陪练先回应情绪（R2/R3）',['R2','R3'].includes(reply.register)&&replyShown,`${reply.register}: ${String(reply.reply).slice(0,60)}`);
  shots.push(await shoot('06-companion-emotion'));
 
+ // ── P0-2 产品判据：玩家看到的是人话，不是引擎内部结构 ────────────────
+ //
+ // 这一组是**产品**判据，不是接线判据。第 42 轮用户实测反馈事件区把
+ // `kind` + JSON `detail` 原样搬给玩家，所以这里直接看**渲染出来的文字**。
+ const eventsText=await js(`document.getElementById('events').innerText`);
+ const eventsHtml=await js(`document.getElementById('events').innerHTML`);
+ check('事件区渲染的是中文句子（不是 kind + JSON）',
+  eventsText.length>0&&/[\u4e00-\u9fff]/.test(eventsText)
+   &&!/[a-z_]{4,}\s*·/.test(eventsText)&&!/\{\s*"/.test(eventsText),
+  eventsText.slice(0,80).replace(/\s+/g,' '));
+ check('事件区里没有内部事件标识符（kind）',
+  !/\b(turn_start|energy_regen|status_tick|action_cancelled|mark_added|debuff_foe)\b/.test(eventsText),
+  eventsText.slice(0,80).replace(/\s+/g,' '));
+ check('事件区里没有精灵/技能的内部 id',
+  !/pet_\d|skill_\d/.test(eventsText)&&!/pet_\d|skill_\d/.test(eventsHtml),
+  (eventsHtml.match(/pet_\d+|skill_\d+/g)||[]).slice(0,3).join(','));
+
+ // 原始 JSON 必须在**默认收起**的折叠区里
+ // ⚠ 这些表达式是**模板字面量**，`\{` 会在 Node 这一侧就被吃成 `{`、
+ // `\n` 会变成真换行——第一版就这么写，结果是页面收到 `/{s*"/` 与一个断掉的
+ // 字符串字面量（`join('` + 真换行 + `')`），报「Invalid or unexpected token」。
+ // 要送到页面里的反斜杠，在模板里必须写成 `\\`。
+ const rawInfo=await js(`(()=>{const d=document.querySelector('details.dev');
+  const pre=document.getElementById('events-raw');
+  return JSON.stringify({hasDetails:Boolean(d),open:d?d.open:null,
+   rawLen:pre?pre.textContent.length:0,
+   rawLooksJson:pre?/\\{\\s*"/.test(pre.textContent):false});})()`);
+ const raw=JSON.parse(rawInfo);
+ check('原始事件 JSON 收在折叠区里（默认收起）',
+  raw.hasDetails&&raw.open===false&&raw.rawLen>0&&raw.rawLooksJson,
+  rawInfo);
+
+ // ── 产品判据：整页不许出现 ID 占位 ─────────────────────────────────
+ // 面板区域（队伍/对手/行动）是玩家看的；内部 id 只允许出现在调试折叠区里。
+ const panelsText=await js(`['self-pets','foe-field','foe-bench','actions','hint-text','hint-why']
+  .map((id)=>{const el=document.getElementById(id);return el?el.innerText:''}).join('\\n')`);
+ check('队伍/对手/行动面板里不出现 pet_ / skill_ 占位',
+  !/pet_\d|skill_\d/.test(panelsText),
+  (panelsText.match(/pet_\d+|skill_\d+/g)||[]).slice(0,3).join(','));
+ check('面板里精灵显示的是真名（不是 id）',
+  /[\u4e00-\u9fff]{2,}/.test(panelsText)&&!/pet_\d/.test(panelsText),
+  panelsText.slice(0,80).replace(/\s+/g,' '));
+
  // ── 反证：隐藏信息不得出现在页面里 ──────────────────────────────────
  const pageText=await js('document.documentElement.outerHTML');
  check('页面上不出现真实对局 seed 或私有状态',!/"seed"\s*:/.test(pageText)&&!/replace_queue/.test(pageText));
