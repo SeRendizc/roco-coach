@@ -1,0 +1,3648 @@
+npm run test:unit
+
+> test:unit
+> node --test tests/engine.test.js tests/rules.test.js tests/offline.test.js tests/mechanics.test.js tests/pvp.test.js tests/features.test.js tests/coach.test.js tests/companion.test.js tests/strategist.test.js tests/intervention.test.js tests/server.test.js tests/opponent.test.js tests/knowledge.test.js tests/evals/agent.test.js tests/evals/regression.test.js tests/evals/slow-model.test.js tests/wiring.test.js tests/copy.test.js tests/evals/player-copy.test.js tests/evals/tool-arguments.test.js tests/evals/roco/data-acceptance.test.js tests/evals/roco/agent-trajectories.test.js tests/evals/roco/browser-position-matrix.test.js tests/evals/local-model.test.js tests/evals/intervention-layer.test.js tests/evals/companion-nonintrusion.test.js tests/evals/shadow-replay.test.js tests/evals/roco/model-error-trajectories.test.js tests/evals/roco/intervention-margin-chain.test.js tests/evals/roco/intervention-agreement.test.js tests/evals/roco/model-arm-identity.test.js tests/evals/roco/model-trajectories.test.js tests/evals/shadow-tools.test.js tests/evals/claim-honesty.test.js tests/evals/teacher-review.test.js tests/evals/companion-contract.test.js tests/evals/subprocess-env.test.js tests/evals/state-doc.test.js tests/evals/provenance.test.js tests/evals/structure-contract.test.js tests/roco-experience.test.js tests/roco-full-catalog.test.js tests/evals/roco/coach-positions.test.js tests/evals/roco/teacher-match-review.test.js tests/evals/roco/game-adapter.test.js tests/evals/roco/mock-host-integration.test.js tests/evals/coach-advice.test.js tests/evals/guard-selftest.test.js tests/evals/roco/roster-evidence.test.js tests/roco-v3-redirect.test.js tests/roco-evidence-ledger.test.js tests/roco-rule-config.test.js tests/roco-rule-promotion.test.js tests/roco-catalog-reconciliation.test.js tests/roco-game-data-pack.test.js tests/roco-owned-pets.test.js tests/roco-rag-eval.test.js tests/roco-box.test.js tests/roco-team-request.test.js tests/roco-team-gaps.test.js tests/roco-team-candidates.test.js tests/roco-meta-prior.test.js
+
+✔ strategist gives a legal action grounded in current state (22.284875ms)
+✔ teacher reads selected pet and resource limits (1.20175ms)
+✔ quiz closes the teaching loop and records success (0.725416ms)
+✔ explicit preference persists and preview results are not remembered (0.613041ms)
+✔ PVP restriction happens before provider calls (0.469375ms)
+✔ context excludes real RNG and invalid provider output is rejected (12.784666ms)
+✔ ordinary play closes observation choice feedback and relevant practice (14.660875ms)
+✔ round survives camp and serialization without leaking into new match (48.648542ms)
+✔ newest rounds first preserves event order; Markdown never executes HTML (1.013875ms)
+✔ runaway model output falls back to grounded packet (15.621083ms)
+✔ seed explanation and follow-up cannot be rewritten as pet resources (0.3685ms)
+✔ quiz waits for an answer, survives reload, handles question mark and cancels (0.672375ms)
+✔ provider receives earlier dialogue and topic instead of an isolated follow-up (0.407208ms)
+✔ attention is bounded, respects silence and cannot fire in background (0.338333ms)
+✔ agent planner can adapt to tool receipts and invalid tools never execute (24.743875ms)
+✔ whole-match archive persists all turns, separates matches and preserves previews (104.360083ms)
+✔ selected review turn returns its evidence rather than the final hit (74.736875ms)
+✔ screenshot endgame flags attack opportunity with guard caveat (0.283542ms)
+✔ current-match selection and missing requested turn never substitute another match or turn (39.046583ms)
+✔ whole-match UI request can review archived evidence without network or model credentials (12.88675ms)
+✔ withdrawal is recorded separately from attacks in match summaries (17.502542ms)
+✔ roster advice derives shared weaknesses and coverage from the real type chart (0.308625ms)
+✔ goal preference reweights the same enumeration and can flip the recommendation (6124.026959ms)
+✔ hard-requirement detection is programmatic, not left to the planner (0.187125ms)
+✔ tool policy is decided in code, and the model is only consulted when a tool is required (0.496791ms)
+✔ low HP with a potion in the bag is surfaced; without one it is not (24.037166ms)
+✔ the countered hint states both directions, because the chart is symmetric (15.6065ms)
+✔ 整局复盘默认只给一个关键决策：当时的信息、两个候选动作、后果在展开区各一句 (105.61025ms)
+✔ 关键决策取的是事前差值最大的那一回合，不是事后结果最惨的那一回合 (141.500458ms)
+✔ 相似练习：参数改了、答案由算术算出，而且变式之间不是同一道题 (103.64725ms)
+✔ 小测的变式表每一档都不同：第 4 次出题不再与第 1 次一模一样 (0.39875ms)
+✔ 独立解出才算一次：有提示的答对不算，一次答对也不是掌握 (1.126167ms)
+✔ 记忆查看：每一条都带来源与时间；情绪只写成假设，且不从沉默与连败推出来 (0.739709ms)
+✔ 记忆纠正：新的值生效，旧值不再被引用；旧值推出来的假设一起失效 (0.862458ms)
+✔ 逐条删除：删掉的记录连同引用它的推断一起消失，摘要里再也读不到 (0.575375ms)
+✔ 全部清空与按组清空：清的是记忆，不是游戏成长 (0.269875ms)
+✔ 拒绝有时效：删掉拒绝那一条、或者等它过期，复盘就重新允许 (0.181583ms)
+✔ the ledger reads real cross-match records: rematch, first-fallen habit, pace, items, stage (202.762ms)
+✔ the ledger keeps cross-match classes that only the companion can see (81.665958ms)
+✔ every line the companion says carries something the player cannot already see (242.884708ms)
+✔ the cross-match classes really show up in play, not only in the ledger (154.328834ms)
+✔ one loss never becomes comfort, and silence stays a real output (9.995291ms)
+✔ companion facts degrade to null instead of default values (0.741458ms)
+✔ the previous wording fails the same self-check (negative verification) (25.497916ms)
+✔ the information self-check is not vacuous (0.124292ms)
+✔ companion state is derived from real matches, dismissals and dialogue (187.629125ms)
+✔ register table: silence stays first and engagement never raises the ceiling (260.442792ms)
+✔ the register changes the wording and the length ceiling (177.291333ms)
+✔ the passive channel answers with the same cross-match material, not with the live board (148.631792ms)
+✔ every number the companion says is backed by its own evidence (158.78275ms)
+✔ player preferences survive matches and change the reply (139.621083ms)
+✔ each companion event fires once per match, and stops when the facts stop (56.981416ms)
+✔ every reading the trigger proposes can actually be said out loud (230.727667ms)
+✔ the companion budget is its own: the strategist going quiet never silences it, and the other way round (156.121209ms)
+✔ the same fact is never said twice in one match, and the cooldown is real (52.169792ms)
+✔ a line is 2–3 sentences and every one of them carries a fact (38.593709ms)
+✔ cross-match memory is what it leads with, and the live numbers come from real turns (78.478125ms)
+✔ the goal preference changes which observation it leads with, not the facts (21.777167ms)
+✔ restraint scan keeps the hard lines and blocks self-reported feelings (128.724833ms)
+✔ runCoach routes to the companion and hands the register to the model (135.297417ms)
+✔ a model reply that breaks the register falls back to the recorded template (10.662542ms)
+✔ the proactive path stays silent when the screen is the only thing to repeat (133.823417ms)
+✔ 陪练一次只说一句，但军师条在场并不阻止它——时间互斥已取消 (0.146792ms)
+✔ the bubble stays as long as the words need, and wears an existing pet portrait (0.210959ms)
+✔ how long since the player last played is spoken from the real timestamp (44.733583ms)
+✔ the same fact never comes back wearing different words in one match (71.407416ms)
+✔ the five stances are all really spoken, and each one lands on a recorded event (1777.335375ms)
+✔ the stance belongs to the event class, and removing it makes the line unsayable (negative verification) (40.379042ms)
+✔ scene 1+2: a real win and a real loss/faint, with the words it actually says (515.762375ms)
+✔ scene 3: coming back after six days, it remembers where you left off (46.171583ms)
+✔ scene 4: the player opens the chat, and the second turn continues the same thread (143.285875ms)
+✔ small talk never hijacks a tactical question, and never invents a chat thread (29.735916ms)
+✔ fresh memory: the three greetings get three different answers, and the second turn continues that thread (131.334375ms)
+✔ negative verification: the old 「一律 R0／一律『我在。』」 chat channel fails this acceptance (0.220958ms)
+✔ 路由只认玩家原话：附加的「回答要求」不能把陪练顶成老师 (1.6355ms)
+✔ the appended 「回答要求」 never changes how the companion reads the player (0.599292ms)
+✔ 页面默认的「自动」角色 + 拼接说明：闲聊仍归陪练，真复盘仍归老师 (1.062375ms)
+✔ 军师/老师在场时陪练照样能说话——内容边界不等于时间互斥 (0.072708ms)
+✔ 空账本闲聊：不播报「我这儿是空的」，不推人走，不念全零，不列菜单 (124.982042ms)
+✔ negative verification: the old 「记录还是空的／去开一局吧」 copy fails this acceptance (0.337458ms)
+✔ moment 1 highlight: a finish off a half-health foe is praised on that exact strike (56.390833ms)
+✔ moment 2a blunder: the kill left standing gets comfort on that hand, not a lecture (8.287625ms)
+✔ moment 2b blunder: the hit that landed exactly on the last HP gets comfort on that hand (18.6075ms)
+✔ moment 3 clutch: surviving on a sliver is reacted to on that turn (7.476584ms)
+✔ moment 4 collapse: partners falling one after another is 憋屈 on those two turns (7.607667ms)
+✔ moment 5 comeback: a win from behind is marvelled at on the turn it turned (122.197625ms)
+✔ moment 6 near-miss: a loss by a sliver is 可惜 and carries no analysis (46.513542ms)
+✔ moment 7 milestone: a first clear is celebrated with the ledger, not with a stat sheet (54.894084ms)
+✔ moment 8 return: coming back after days still remembers where you left off (40.148625ms)
+✔ 久别的天数按**注入的时钟**算：跑测试的时刻不该改变结论（含 22:00 之后） (103.420666ms)
+✔ moment 9 stage again: the same stage is noted gently, on the turn it stopped last time (21.179583ms)
+✔ moment 10 narrow win: it breathes first, then looks back at the last blow (71.71875ms)
+✔ the hard lines hold on every moment line, and a fresh memory never invents a past (84.201333ms)
+✔ negative verification: hang the affect back on an aggregate statistic and the scenes go red (69.330875ms)
+✔ 人味①接词：玩家自己用过的那个词必须被接回来 (236.1485ms)
+✔ 人味②停在心情上：玩家说心情时，回答里不许出现战报 (258.128375ms)
+✔ 人味③不当客服：被动通道不出现客服腔与系统状态 (727.972917ms)
+✔ R0 被搭话时答得住：安静档与线上竞技下的心事不再掉回「我在。」 (234.995ms)
+✔ R0 仍然不主动开口：门控一条都不动 (245.815625ms)
+✔ negative verification: 把 R0 的上限改回 8，上面两条验收必须变红 (233.349542ms)
+✔ 四个时段各说各的那一句，边界钉在整点上 (0.544125ms)
+✔ 时段问候只在碰面那一轮说，而且是「看见」不是「劝」 (0.24875ms)
+✔ 半夜还在打：引用的是记录里的时间戳，不是钟表 (61.215041ms)
+✔ 打久了给的是许可，不是命令：句子里带着这一波真实的局数 (89.563667ms)
+✔ 凌晨 + 打久了：合并成一句，不重复说时间 (85.747458ms)
+✔ 接住状态①：三种说法 × 两种账本，都是两拍（接词 → 落点），第一轮都不提对局 (973.650375ms)
+✔ 接住状态②：问候让位——「好早啊，今天没睡好」里那个「好」不许把「没睡好」挤掉 (2755.691541ms)
+✔ 接住状态③：状态词族一个都不许漏（漏一个就退回账本或问候） (3463.315708ms)
+✔ 接住状态④：「我是小芽」只在真正的第一次见面（记录为空）说一次 (223.140958ms)
+✔ 接住状态⑤：模型那一侧的约束同步改口径（不再要战报，也不许提对局） (226.951292ms)
+✔ 接住状态⑥：走引擎那条路（runCoach）拿到的是同一段话 (219.24375ms)
+✔ 接住状态⑦：两轮下来仍停在他身上（第二轮是「还…」，不是拐回对局） (435.346291ms)
+✔ negative verification: 把行为改回去（先说问候再拿记录收尾），这一把尺必须变红 (438.964334ms)
+✔ 问候轮①：哈喽／你好／在吗的回答里不许出现回合数、胜负、血线、速度比较与任何战术词 (120.677875ms)
+✔ 问候轮②：模型那一侧的同一条硬线——实测那句整段过不了扫描 (110.6565ms)
+✔ negative verification: 拆掉问候轮的三道约束，上一条验收必须变红 (116.767291ms)
+✔ 显式记忆：称呼、本命、聊天风格、输了要不要复盘、里程碑都记下来，而且带来源与时间 (5.600667ms)
+✔ 纠正偏好：承认新值，一个字都不提旧值 (19.002375ms)
+✔ 拒绝建议与不想说话：只应一声，不劝、不给建议、不推复盘 (19.419625ms)
+✔ 拒绝之后不再推复盘：同一份记录，拒绝前会讲、拒绝后不讲，过期后再讲 (18.915958ms)
+✔ 分享胜利：恭喜落在真实记录上，不复述屏幕，也不空泛打鸡血 (118.237416ms)
+✔ 只聊精灵：他点名哪只就聊哪只，且用他自己说过的本命 (18.031083ms)
+✔ 情绪是假设不是标签：低置信、短时、可覆盖，而且不从沉默与连败推出来 (18.356208ms)
+✔ 三条验收的判据本身不是空的：同一屏说两遍、复述屏幕、拒绝后推复盘都要能被判出来 (36.608208ms)
+✔ 六个场景一张表：每一条都接得住，而且每条都过得了硬线 (216.345959ms)
+✔ 整局回顾里没有 JSON、没有内部 ID、不念为 0 的计数 (956.356625ms)
+✔ 整局统计：count=0 的类别整类省略，不在文案里换句式列一遍 (0.182625ms)
+✔ 整局统计的负向样本：把所有类别列出来必须被判为违规 (0.094125ms)
+✔ 整局回顾：四类全 0 的那一局整类省略（本地这一侧的回归保护） (191.785916ms)
+✔ 0 值判据本身不是空的：列一遍为违规，提到一个不算 (0.176917ms)
+✔ 整局统计仍然保留真的发生过的事 (0.078541ms)
+✔ 整局回顾的折叠句不会在展开区里再说一遍 (745.185958ms)
+✔ 这条重复判据不是空洞的：用户截图里那一对必须被判为重复 (0.130083ms)
+✔ 分支比较的「怎么读」整条回顾只说一次，且不再用内部评分口吻 (621.802083ms)
+✔ 关键回合的文案里不出现回合 ID，比较句也不再复述同一句模板 (12.543041ms)
+✔ 老师的技能讲解依据不是 JSON (0.344792ms)
+✔ 展开区的首段：本地结论不删，与顶部重复才删 (21.938166ms)
+✔ 展开区不复述折叠时那句话 (0.087666ms)
+✔ app.js 里那句话只有一个落脚处：折叠条，展开区只留依据 (0.686292ms)
+✔ 这套判据不是空洞的：修改前的原句贴进来必须报错 (0.283875ms)
+✔ 模型接管顶部条后，展开区不得留下第二套结论（措辞不同也不行） (0.685083ms)
+✔ 本地路径（没有模型回答）下展开区的依据不得被删 (0.061792ms)
+✔ invalid actions leave original state untouched (1.338833ms)
+✔ defense reduces damage, blocks new status and cannot repeat (3.758417ms)
+✔ switch sends damage to the new pet and consumes the round (2.539292ms)
+✔ healing occurs before attacks and consumes exactly one item (5.020167ms)
+✔ fainted actor loses attack, replacement is free (5.214958ms)
+✔ status ticks immediately, expires and pauses on bench (5.601208ms)
+✔ simultaneous status knockouts produce draw (1.180875ms)
+✔ escape terminates without enemy damage (0.385417ms)
+✔ seed and actions are reproducible, inputs remain immutable (40.402041ms)
+✔ 100 varied complete games preserve invariants and terminate (10564.7595ms)
+✔ three independent receipts reduce routine coaching; helped actions do not prove mastery (6.995ms)
+✔ dismissals persist with source and suppress only routine reminders (0.165375ms)
+✔ context assembly trims to an explicit budget, preserves current facts and does not mutate the archive (15.168667ms)
+✔ RAG citations fail closed on deleted IDs and wrong rules version; applicability is explicit (14.781583ms)
+✔ trained policy obeys hard constraints on all state combinations and differs from zero initialization (0.802042ms)
+✔ paired simulator does not credit hints for actions already correct without coaching (0.529792ms)
+✔ unsupported numeric claims and certainty are rejected while grounded comparisons pass (0.886875ms)
+✔ watch registration is bounded, cancelled explicitly, and never crosses matches or PVP (2.053959ms)
+✔ parametric practice includes faster, slower and ties with engine-aligned answers (0.377042ms)
+✔ watch clarification does not inherit previous review topic (0.373792ms)
+✔ corrupt archive fails closed and old rules never receive current-rule counterfactuals (9.867291ms)
+✔ review alternatives use the decision snapshot and never the actual future enemy action (38.58675ms)
+✔ slow results cannot cross an action, match, rules version or expiry boundary (0.157625ms)
+✔ invalid model numbers and network errors fall back with the original state token (42.816667ms)
+✔ direct skill facts use generated engine knowledge and preserve follow-up evidence (0.414125ms)
+✔ colloquial help at replacement sees public state and ranks only living reserves (10.319875ms)
+✔ analysis after a match invokes model with whole-match evidence rather than canned companion reply (20.663666ms)
+✔ context assembly retains the just-finished turn for colloquial battle questions (13.418792ms)
+✔ model length fallback never claims the template was generated by DeepSeek (23.60775ms)
+✔ client sends whole-match requests to connected backend instead of intercepting review topic (42.442166ms)
+✔ automatic and manual requests share a queue rather than forcing a busy fallback (19.901541ms)
+✔ five energy must not be described as full energy (1.4395ms)
+✔ automatic review prompt stays whole-match even when its instructions mention single-turn scores (42.0615ms)
+✔ numeric guard normalizes decimal formatting without dropping sign (0.0825ms)
+✔ match grounding rejects damage assigned to an explicitly cancelled turn (0.258208ms)
+✔ generation instructions are not saved as the player message (34.160542ms)
+✔ state invalidation aborts active work and discards queued old requests (0.993209ms)
+✔ same-state requests merge, cache clones, and epoch clears cache (0.181375ms)
+✔ tool contracts reject unknown parameters and return bounded evidence pages (22.680375ms)
+✔ branch simulation covers both tie orders without mutation or hidden seed dependence (0.848583ms)
+✔ training preserves scarce resources for an explicitly preferred partner (0.316958ms)
+✔ transfer assessment excludes prompted actions and requires different matches and situations (0.237042ms)
+✔ guard binds remaining HP to after snapshot and rejects observing simultaneous opponent action first (0.254875ms)
+✔ item-name drift is rejected even when every number is grounded (0.04725ms)
+✔ evidence trimmed out of the prompt is still retrievable from the archive (30.1605ms)
+✔ an action recorded as cancelled cannot be described as having hit (0.300708ms)
+✔ guards do not fire on negated certainty or on numbers quoted from a knowledge card (0.103917ms)
+
+[claim-honesty] 扫描 139 个文件（docs markdown + reports markdown + src/client）
+  docs/CHECKLIST.md  争议=0 放行=0 判红=0
+  docs/COACH-ACCEPTANCE.md  争议=0 放行=0 判红=0
+  docs/COACH-PLAN.md  争议=0 放行=0 判红=0
+  docs/COMPANION-DESIGN.md  争议=0 放行=0 判红=0
+  docs/COMPANION-IMPLEMENTATION.md  争议=0 放行=0 判红=0
+  docs/DEEPSEEK.md  争议=0 放行=0 判红=0
+  docs/DEMO-ACCEPTANCE.md  争议=0 放行=0 判红=0
+  docs/DEMO-WALKTHROUGH.md  争议=0 放行=0 判红=0
+  docs/DIFFICULTY-AND-SOLUTIONS.md  争议=0 放行=0 判红=0
+  docs/DOCS-AUDIT-FIXES.md  争议=0 放行=0 判红=0
+  docs/DOCS-AUDIT.md  争议=0 放行=0 判红=0
+  docs/ENVIRONMENT-NOTES.md  争议=0 放行=0 判红=0
+  docs/EVIDENCE-SCHEMA.md  争议=0 放行=0 判红=0
+  docs/EXPERIMENTS.md  争议=0 放行=0 判红=0
+  docs/G06-LATE-GAME-DESIGN.md  争议=0 放行=0 判红=0
+  docs/G08-RULES-IN-PLACE.md  争议=0 放行=0 判红=0
+  docs/GAME-EXPANSION-PROPOSAL.md  争议=0 放行=0 判红=0
+  docs/IMPLEMENTATION-STATUS.md  争议=0 放行=0 判红=0
+  docs/INTERVIEW-DRILL.md  争议=0 放行=0 判红=0
+  docs/INTERVIEW-GUIDE.md  争议=0 放行=0 判红=0
+  docs/LANGUAGE-REVIEW.md  争议=0 放行=0 判红=0
+  docs/LINGBAO-RESEARCH.md  争议=0 放行=0 判红=0
+  docs/P05-RULES-SOURCE.md  争议=0 放行=0 判红=0
+  docs/RAG-LOCALIZATION.md  争议=0 放行=0 判红=0
+  docs/README.md  争议=0 放行=0 判红=0
+  docs/RELEASE-v0.1.md  争议=0 放行=0 判红=0
+  docs/RESEARCH-NOTES.md  争议=0 放行=0 判红=0
+  docs/S05-W09-SLOW-MODEL.md  争议=0 放行=0 判红=0
+  docs/STRUCTURE.md  争议=0 放行=0 判红=0
+  docs/W10-ACCEPTANCE-MAPPING.md  争议=0 放行=0 判红=0
+  docs/XIAOTIAN-RESEARCH.md  争议=0 放行=0 判红=0
+  docs/coach-design-notes.md  争议=0 放行=0 判红=0
+  docs/reviews/2026-09-17-diagnosis-response.md  争议=0 放行=0 判红=0
+  docs/reviews/2026-09-17-live-acceptance.md  争议=0 放行=0 判红=0
+  docs/roadmap/CROSS-MACHINE-COORDINATION.md  争议=0 放行=0 判红=0
+  docs/roadmap/DSH-EXECUTION-STATE.md  争议=4 放行=4 判红=0
+  docs/roadmap/FLAGSHIP-V3-CHECKLIST.md  争议=0 放行=0 判红=0
+  docs/roadmap/FLAGSHIP-V3-REDIRECT.md  争议=0 放行=0 判红=0
+  docs/roadmap/MORNING-REPORT-2026-09-21-v2.md  争议=0 放行=0 判红=0
+  docs/roadmap/MORNING-REPORT-2026-09-21.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/00-READ-ME-FIRST.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/01-PROJECT-POSITIONING-AND-SCOPE.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/02-DATA-SCALE-AND-CULTIVATION.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/03-BATTLE-RULES-AND-TURN-RESOLUTION.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/04-SIMULATOR-ARCHITECTURE.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/05-TEAM-BUILDING-AND-COACH.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/06-UI-UX-REDESIGN.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/07-AI-TRAINING-AND-EVALUATION.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/08-IMPLEMENTATION-ROADMAP.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/09-CODING-AGENT-MASTER-PROMPT.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/10-SOURCES-AND-CONFIDENCE.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/11-CURRENT-REPO-GAP-AUDIT.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/12-REVISION-NOTES.md  争议=0 放行=0 判红=0
+  docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md  争议=0 放行=0 判红=0
+  docs/roco/AGENT-TRAJECTORIES.md  争议=1 放行=1 判红=0
+  docs/roco/BENCHMARKS.md  争议=0 放行=0 判红=0
+  docs/roco/BROWSER-POSITION-MATRIX.md  争议=0 放行=0 判红=0
+  docs/roco/CALIBRATION.md  争议=0 放行=0 判红=0
+  docs/roco/CATALOG-RECONCILIATION.md  争议=0 放行=0 判红=0
+  docs/roco/COACH-ADVICE-DESIGN.md  争议=0 放行=0 判红=0
+  docs/roco/COMPANION-GAP-AUDIT.md  争议=0 放行=0 判红=0
+  docs/roco/COMPANION-NONINTRUSION.md  争议=0 放行=0 判红=0
+  docs/roco/COVERAGE-AXES.md  争议=0 放行=0 判红=0
+  docs/roco/COVERAGE-LAYERS.md  争议=0 放行=0 判红=0
+  docs/roco/DATA-CONFLICTS.md  争议=0 放行=0 判红=0
+  docs/roco/DEMO-PERF.md  争议=0 放行=0 判红=0
+  docs/roco/DEMO-PLAN.md  争议=2 放行=2 判红=0
+  docs/roco/EFFECT-PRIMITIVES.md  争议=0 放行=0 判红=0
+  docs/roco/FULL-CATALOG.md  争议=0 放行=0 判红=0
+  docs/roco/GAME-ADAPTER.md  争议=0 放行=0 判红=0
+  docs/roco/GAME-DATA-PACK.md  争议=0 放行=0 判红=0
+  docs/roco/GUARD-SELFTEST.md  争议=0 放行=0 判红=0
+  docs/roco/LICENSE-MATRIX.md  争议=0 放行=0 判红=0
+  docs/roco/LINEUP-LEGALITY.md  争议=0 放行=0 判红=0
+  docs/roco/LOCAL-MODEL.md  争议=0 放行=0 判红=0
+  docs/roco/M0-M1-ACCEPTANCE.md  争议=0 放行=0 判红=0
+  docs/roco/M0-REPO-AUDIT.md  争议=0 放行=0 判红=0
+  docs/roco/META-PRIOR.md  争议=0 放行=0 判红=0
+  docs/roco/MICROCASE-HARNESS.md  争议=0 放行=0 判红=0
+  docs/roco/MICROCASE-PLAN.md  争议=0 放行=0 判红=0
+  docs/roco/OWNED-PETS.md  争议=0 放行=0 判红=0
+  docs/roco/PET-BOX.md  争议=0 放行=0 判红=0
+  docs/roco/PET-SUPPORT-MATRIX.md  争议=0 放行=0 判红=0
+  docs/roco/PROGRESS.md  争议=4 放行=4 判红=0
+  docs/roco/QWEN-27B-USER-RUN-GUIDE.md  争议=0 放行=0 判红=0
+  docs/roco/RAG-EVAL.md  争议=0 放行=0 判红=0
+  docs/roco/RELEASE-v0.1.md  争议=0 放行=0 判红=0
+  docs/roco/ROSTER-48.md  争议=0 放行=0 判红=0
+  docs/roco/ROSTER-60.md  争议=0 放行=0 判红=0
+  docs/roco/RULE-CONFIG.md  争议=0 放行=0 判红=0
+  docs/roco/RULE-EVIDENCE-LEDGER.md  争议=0 放行=0 判红=0
+  docs/roco/RULE-PROMOTION.md  争议=0 放行=0 判红=0
+  docs/roco/SHADOW-REPLAY.md  争议=1 放行=1 判红=0
+  docs/roco/STRESS-AND-PLANNING-DESIGN.md  争议=0 放行=0 判红=0
+  docs/roco/TEACHER-REVIEW.md  争议=0 放行=0 判红=0
+  docs/roco/TEAM-CANDIDATES.md  争议=0 放行=0 判红=0
+  docs/roco/TEAM-GAPS.md  争议=0 放行=0 判红=0
+  docs/roco/TEAM-REQUEST.md  争议=0 放行=0 判红=0
+  docs/roco/TRAINING-ENV.md  争议=0 放行=0 判红=0
+  docs/roco/TRAINING-ROADMAP-4B-27B-VALUE.md  争议=0 放行=0 判红=0
+  docs/roco/TURN-ORDER.md  争议=0 放行=0 判红=0
+  docs/roco/W4-02-MODEL-CANDIDATES.md  争议=1 放行=1 判红=0
+  docs/roco/W4-04-SFT-PREREGISTRATION.md  争议=2 放行=2 判红=0
+  docs/roco/W5-04-ADJUDICATION.md  争议=0 放行=0 判红=0
+  docs/roco/W5-04-INTERVENTION-GATE-V2.md  争议=0 放行=0 判红=0
+  docs/roco/W5-04-INTERVENTION-GATE.md  争议=0 放行=0 判红=0
+  docs/roco/W5-04-SUPPRESSION-VS-RULE.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/ARCHITECTURE.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/DATA-CARD.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/DEMO-SCRIPT.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/RULE-COVERAGE.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/STATUS-LABELS.md  争议=0 放行=0 判红=0
+  README.md  争议=0 放行=0 判红=0
+  reports/balance-calibration-summary.md  争议=0 放行=0 判红=0
+  reports/balance-matrix-notes.md  争议=0 放行=0 判红=0
+  reports/balance-matrix.md  争议=0 放行=0 判红=0
+  reports/c17-endgame-browser.md  争议=0 放行=0 判红=0
+  reports/live-model-eval-before-after.md  争议=0 放行=0 判红=0
+  reports/live-model-eval-summary.md  争议=0 放行=0 判红=0
+  reports/planner-tuning-log.md  争议=0 放行=0 判红=0
+  reports/retrieval-extended-summary.md  争议=0 放行=0 判红=0
+  reports/roco/g02-team/G02-MODEL-2026-09-21-v1.md  争议=0 放行=0 判红=0
+  reports/roco/g02-team/G02-MODEL-2026-09-21-v2.md  争议=0 放行=0 判红=0
+  reports/roco/intervention/README.md  争议=0 放行=0 判红=0
+  reports/roco/invalidated/README.md  争议=1 放行=1 判红=0
+  reports/roco/pilot-1000/README.md  争议=0 放行=0 判红=0
+  reports/roco/product-wiring/full-match-wiring.md  争议=0 放行=0 判红=0
+  reports/roco/regression/F02-REGRESSION-2026-09-21.md  争议=0 放行=0 判红=0
+  reports/roco/verification/README.md  争议=0 放行=0 判红=0
+  reports/roco/verification/hourly-2026-09-21T1019Z.md  争议=0 放行=0 判红=0
+  reports/roco/verification/hourly-2026-09-21T1055Z.md  争议=0 放行=0 判红=0
+  src/client/app.js  争议=0 放行=0 判红=0
+  src/client/box.js  争议=0 放行=0 判红=0
+  src/client/connect.js  争议=0 放行=0 判红=0
+  src/client/roco.js  争议=0 放行=0 判红=0
+  src/client/box.html  争议=0 放行=0 判红=0
+  src/client/connect.html  争议=0 放行=0 判红=0
+  src/client/index.html  争议=0 放行=0 判红=0
+  src/client/roco.html  争议=0 放行=0 判红=0
+[claim-honesty] 争议用法逐条：
+  · docs/roadmap/DSH-EXECUTION-STATE.md:754  [275/288] → allowed-window-disclosed
+      | **P0 的 7 条问题（都已定位到代码）** | ① `pet_000225` 占位：`_sim_envelope` 把 `public_planner_state`（Agent 最小协议，**刻意不含 name**）同时当浏览器 UI 状态 → 新增并行的 `ui_public_view`，**不动** `coach_planner_state`；② 事件把 `kind`+JSON 搬给玩家（`roco.js:140`）→ 中文
+  · docs/roadmap/DSH-EXECUTION-STATE.md:759  [275/288, 0.9549] → allowed-window-disclosed
+      | **SFT v4（本机训完、过预注册门槛）** | 数据 1,752 条（train 1,395 / val 306 / test 51，`strict` 机制留出；**逐字节可复现**，由 `verify-sft-split.mjs` 在临时目录重跑比对）。LoRA r=8 / 8 层 / 900 iters / lr 1e-5 / mask-prompt / seed 20260921；train loss **0.001**、
+  · docs/roadmap/DSH-EXECUTION-STATE.md:762  [275/288] → allowed-window-disclosed
+      | **第 41 轮（W4-02 的第二半用本地模型补齐，不再等 key）** | W4-02 的「模型候选轨迹」一直记成「要 DeepSeek key」。第 39 轮之后这个前提不成立了：本机有真的接进链路的工具选择模型（v4 适配器，288 条门禁 275/288）。本轮把 arm 扩成**模型臂**（`ARMS.local_4b`，`makePlanner` 注入 `ask`，没有注入就**抛**——不许安静退化成一个规则臂），用
+  · docs/roadmap/DSH-EXECUTION-STATE.md:769  [275/288, 0.9549] → allowed-window-disclosed
+      | **第 38 轮（模型臂成绩存档错位：一处「文档说得通、产物对不上」的事故）** | 给轨迹集补「生产者一致性」检查时顺手查了模型臂的存档，发现 **`-sft-v2.json` 里装的其实是 v1 的成绩、`-sft-v3.json` 里装的是 v2 的、真正的 v3 一个产物都没留下**——而文档与台账一直照着这组对不上号的数字往下走。根因三条：① 报告里**没有模型身份**（只有 arm/gateway/prompt_dige
+  · docs/roco/AGENT-TRAJECTORIES.md:217  [275/288] → allowed-window-disclosed
+      > 可以引用的能力口径是 **1,752 个窗口 / 92.29%**，不是单世界门禁的 275/288。
+  · docs/roco/DEMO-PLAN.md:21  [275/288, 95.49%] → allowed-window-disclosed
+      | 6 | 1,752 广泛世界的结果可能被单世界数字掩盖 | `docs/roco/W4-02-MODEL-CANDIDATES.md` §5.2 已写明，但容易被 `275/288=95.49%`（单世界 288 窗口）盖住 | Demo 与文档**只用 1,752 口径**：**1,617/1,752 = 92.29%**，共同 864 窗口**退化 42 / 扳回 0**；`ROCO_LOCAL_MODEL` 保持默认 `off
+  · docs/roco/DEMO-PLAN.md:35  [275/288] → allowed-prohibition
+      | P0-6 诚实口径 | Demo 页与文档只用 **1,752 口径（92.29%，配对退化 42/扳回 0）**；`off` 保持默认 | 全局搜索不得出现用 `275/288` 描述"整体能力"的句子；设置项里 `on` 不可从 UI 打开 | 0.5 轮 |
+  · docs/roco/PROGRESS.md:63  [275/288, 0.9549] → allowed-window-disclosed
+      | W4-04 | Qwen3-4B SFT | `PARTIAL` | `scripts/roco/build-agent-sft-data.mjs`、`scripts/roco/verify-sft-split.mjs`、`scripts/roco/build-agent-trajectories.mjs`、`docs/roco/W4-04-SFT-PREREGISTRATION.md`、`reports/roco/sft/data
+  · docs/roco/PROGRESS.md:65  [0.9549] → allowed-window-disclosed
+      | W4-05 | 同 Agent 回放门禁 | `PARTIAL` | `scripts/roco/shadow-replay.mjs`、`scripts/model/measure-arms.sh`、`docs/roco/SHADOW-REPLAY.md`、`docs/roco/W4-04-SFT-PREREGISTRATION.md`、`reports/roco/shadow-replay.json`、`reports/roco/
+  · docs/roco/PROGRESS.md:107  [275/288, 0.9549] → allowed-ruler-written-per-arm
+      **预注册判据 P1—P8 全部满足**（判据在跑之前写死在 `docs/roco/W4-04-SFT-PREREGISTRATION.md`）：v4 **275/288（0.9549）**，优于 v2 的 268/288；`roster_constraint` 8→**13/24**，`rules_lookup` 68→**70/72**，`invalid-arguments` 0，p50 435 ms / p95 1054 ms，f
+  · docs/roco/PROGRESS.md:109  [0.9549] → allowed-ruler-written-per-arm
+      规则臂 288/288；**五个 arm 在一条命令下重测完**（`scripts/model/measure-arms.sh`），每份产物都带适配器 sha256：基座 225/288（0.7813）、v1 229（0.7951）、v2 268（0.9306）、v3 204（0.7083）、**v4 275（0.9549）**。
+  · docs/roco/SHADOW-REPLAY.md:324  [275/288, 0.9549] → allowed-shadow-replay-gate-doc
+      | **v4** | **275/288** | **0.9549** | 435 ms | 1054 ms | 0 | **0.9271** | **0.9259** |
+  · docs/roco/W4-02-MODEL-CANDIDATES.md:10  [275/288] → allowed-window-disclosed
+      `docs/roco/W4-04-SFT-PREREGISTRATION.md`，288 条门禁 **275/288**），
+  · docs/roco/W4-04-SFT-PREREGISTRATION.md:134  [275/288, 0.9549] → allowed-preregistration
+      | **v4** | **275/288** | **0.9549** | 435 ms | 1054 ms | 0 | **0.9271** | **0.9259** | `…-tool-v4` |
+  · docs/roco/W4-04-SFT-PREREGISTRATION.md:183  [0.9549] → allowed-window-disclosed
+      v4 的 0.9549 是「同一把尺子上的横向比较」，
+  · reports/roco/invalidated/README.md:36  [275/288, 0.9549] → allowed-retired-archive
+      | v4 | 275/288 | 0.9549 | `362cc0208717` |
+[claim-honesty] 放行理由分布： {
+  'allowed-window-disclosed': 10,
+  'allowed-prohibition': 1,
+  'allowed-ruler-written-per-arm': 2,
+  'allowed-shadow-replay-gate-doc': 1,
+  'allowed-preregistration': 1,
+  'allowed-retired-archive': 1
+}
+✔ 扫描 docs / reports 的 markdown 与玩家端源码：单世界 288 数字不得被当成整体能力 (90.308167ms)
+✔ 宽口径诚实注记：模型候选文档与台账都必须有 92.29%（或 1,617/1,752）与配对退化 42 / 扳回 0 (0.782916ms)
+✔ 玩家页面不能把本地模型打开：客户端没有写 on 的入口 (1.717417ms)
+✔ local-model 的 feature flag 默认 off，未知取值一律退化成 off (0.419833ms)
+✔ 反向对照：故意违规的输入必须被判红（检查器不能是「总是 true」） (1.490333ms)
+✔ 台账说模型候选那一半已补齐，轨迹文档不得再声称它没做 (0.350042ms)
+✔ 每个检测器在自己那份局面上开口，并报出自己的 kind (0.692875ms)
+✔ 可达的 kind 至少有 6 个（不同局面结构上不同） (0.079625ms)
+✔ 均势局面返回 null（沉默），而不是硬凑一句话 (0.202ms)
+✔ 提示文案里没有任何工程词 (0.097208ms)
+✔ 每句话都指向一个具体动作/伙伴/技能或明确立场，且 why 与 risk 都不为空 (0.143709ms)
+✔ 句子不说胜率、不说「最优」、不承诺赢 (0.061708ms)
+✔ 每个 kind 的句子形状互不相同，且不靠换数字重复 (0.08075ms)
+✔ 同一句已经说过就不再重复（重复提示本身就是噪声） (0.102584ms)
+✔ 缺少规划回执时，依赖它的检测器不猜（其余照常开口） (0.129917ms)
+✔ 直接递原始公开视图（没有经过 rocoGameView 投影）也能读出同一个局面 (0.137083ms)
+✔ 对手的 active 是它在自己队伍里的位次，不能拿它索引「场上那只」 (0.102375ms)
+✔ 上一手那一招这一轮放不出来时，不猜「换个同系别的招」 (0.108792ms)
+✔ 「更狠一点但决定不了这一轮」的贵招放不出来时不开口 (0.132208ms)
+✔ 本模块在浏览器模块图里安全：没有 node:* / require / import (0.400958ms)
+✔ 情绪意图路由：词表内的情绪词被判成 emotion，并走心情出口而不是观察通道 (9.269083ms)
+✔ 玩家只说了一句心情时，回答不许出现任何战绩读数（词表内的情绪词） (1.460917ms)
+✔ 空账本与有记录时，同一句心情拿到的是同一句陪伴（不由账本决定） (3.294833ms)
+✔ 情绪词一律走心情出口：五个曾经接不住的词，回答里一个战报读数都没有（第 45 轮已修） (1.867208ms)
+✔ 长期偏好往返：记住 → 序列化 → 读回，值、来源与旧字段同步 (1.509334ms)
+✔ 长期偏好可纠正、可逐条删除，删掉之后决定不再引用旧值 (0.443625ms)
+✔ 未知或畸形的偏好值在决定层安全降级：不猜、不默认、不崩 (0.836709ms)
+✔ 说话长短：brief 真的更短，而且玩家自己说过的那一份（chatStyle）真的被读到（第 45 轮已修） (1.19ms)
+✔ 不打扰（主动侧）：硬边界、额度、冷却、去重都能在没有浏览器的情况下钉住 (0.756875ms)
+✔ 每局额度随近 7 天的主动关闭次数收紧（0 / 1 / 3 → 4 / 1 / 0） (0.234625ms)
+✔ 气泡时序：先判 hold 再判排队过期，超时优先丢弃 (0.091667ms)
+✔ 静默偏好同时管住局内气泡与聊天回话（第 45 轮已修，正向断言） (2.089792ms)
+✔ 情绪与拒绝优先于复盘路由：输了 / 别复盘了 归陪练，分析问法仍归老师（第 45 轮已修） (38.302667ms)
+✔ 验收脚本跑完必须是 pass，且每条判据都过 (1873.304125ms)
+✔ 判据不是恒真：构造「永远不说」与「每回合都说」的陪练，各自会挂 (1578.761041ms)
+✔ 硬边界：四类局面下一句话都不许说，且安静偏好的上限真的归零 (0.262375ms)
+✔ 气泡时序：hold 的判断先于「有没有新消息排队」 (0.121583ms)
+✔ 同一件事一局内不会被说第二遍 (0.150084ms)
+✔ 文档里必须写明这不是真人验收 (0.359959ms)
+✔ 报告落盘后与现场重跑一致（产物不许过期） (3395.386958ms)
+✔ 子进程环境必须清掉测试运行器自己的变量（否则自检永远是假绿） (1.421917ms)
+✔ 登记表非空，且每条都写清「抓的是什么」 (0.155083ms)
+✔ 每个注入点现在就真的存在：找不到就是登记的守卫已经过时 (6.78175ms)
+✔ 注入后文件必须被恢复（否则自检会污染工作区） (1062.693042ms)
+✔ 找不到注入点时如实报 skip，而不是假装红 (0.137959ms)
+✔ 恢复失败要报错，不能静默留下被改过的文件 (930.063542ms)
+✔ 默认 off：判定层不参与，动作与规则逐位相同 (1.218583ms)
+✔ 模型文件里必须留着本次门槛判定，判据名不许写死 (0.261625ms)
+✔ 判定层只能抑制：on 下动作只可能是「规则的动作」或 silent (0.317125ms)
+✔ 模型不可用（文件缺失）时退回规则结果，而不是变成静默 (1.332583ms)
+✔ 特征表对不上时明确拒绝，而不是按错的系数算 (0.153709ms)
+✔ shadow 模式：照算但不改变结果 (0.194208ms)
+✔ G6 延迟：判定层 P95 远低于 1ms（查表点积，无模型调用） (4.629541ms)
+✔ featureVector 与模型声明的特征顺序严格对应 (0.109666ms)
+✔ planner_margin_norm 只在真的拿到边际量时非零（不编代理值） (0.089625ms)
+✔ 判定层在**真实链路**上真的会触发，而且用的是可解释的边际量刻度 (3.137417ms)
+✔ flag 读法保守：未知取值当作 off (0.08925ms)
+✔ off 路径完全不依赖模型文件：磁盘上那份不在也照常 (1.011208ms)
+✔ feature flag 默认关闭：没设置时不会走本地模型 (0.74925ms)
+✔ 回滚开关：off 模式下本地模型**一次都不被调用**（这是「能退回规则臂」的依据） (0.23225ms)
+✔ 超时不是异常：到点必须 reject 并把这次计成 timeout (115.737875ms)
+✔ 推理进程崩溃时在途请求立刻失败，而不是各自等满超时 (67.095ms)
+✔ 取消（AbortSignal）也要立刻释放，不等超时 (74.203667ms)
+✔ 上游返回 ok=false 时要如实变成错误，不能返回空字符串冒充成功 (56.160625ms)
+✔ provider 一定会回退，并且把回退原因留在 lastFallback (3053.775625ms)
+✔ provider 在本地可用时返回模型输出，并清掉上一次的回退记录 (58.078166ms)
+✔ 没有 fallback 就不允许构造 provider：降级路径是必填的 (0.251708ms)
+✔ 网关：OpenAI 形状的响应带 x_roco 的延迟与内存字段 (75.591167ms)
+✔ 网关：超时返回 504 且形状是 error.type=timeout，而不是 200 (127.020416ms)
+✔ 网关：并发打满时快速失败为 429，不无限排队 (871.47225ms)
+✔ 网关：stream=true 明确 501，不假装支持 (44.36225ms)
+✔ manifest 校验必须真的比 SHA256：改一个字节就要报错 (3050.831667ms)
+✔ manifest 里登记的许可证与来源是必需的，缺了要报错 (1339.464416ms)
+✔ 工具选择：不认识的工具名一律当作「停止」，而不是猜一个 (0.82025ms)
+✔ 工具选择：输出不是 JSON、或模型超时，都退化成停止 (0.2555ms)
+✔ 工具选择：合法输出要真的变成一次调用 (0.077375ms)
+✔ shadow 模式：本地跑一遍，但玩家看到的结果仍然来自云端 (59.061292ms)
+✔ on 模式：本地成功就走本地，失败就回退并且不抛给玩家 (3113.415167ms)
+✔ on 模式：证据包过长时直接不试本地，明确记账而不是截断后假装成功 (53.109625ms)
+✔ 权重目录不进 git：.models/ 与 .venv-mlx/ 都在 .gitignore 里 (8.474458ms)
+✔ no player-facing string uses internal vocabulary (65.479584ms)
+✔ no coach module string literal contains banned vocabulary (6.059583ms)
+✔ 真实数据的溯源必须完整（这条红了就是真问题，不是检查器太严） (356.856459ms)
+✔ 解析器只认真正的来源条目：末尾的 license_summary 不算 (0.242208ms)
+✔ 块标量与带数字的字段名都要能解析（两个已修的解析 bug） (0.2095ms)
+✔ 子文件（part_of）不该被要求自带 revision 与归档哈希 (0.355583ms)
+✔ 反证：缺 source_id 的规范化数据必须被判出来 (0.1565ms)
+✔ 反证：ruleset_id 不对必须被判出来 (0.071084ms)
+✔ regression set covers all four required scenario categories (0.598458ms)
+✔ r01 [silence] 玩家已经出招，旧提示必须消失 (0.242125ms)
+✔ r02 [silence] 安静档下不得主动提示，即便有可行动风险 (0.06ms)
+✔ r03 [silence] 同一回合不得重复提示 (0.059541ms)
+✔ r04 [silence] 玩家忽略过提示后提高打扰成本，不得连续催促 (0.108ms)
+✔ r05 [low-confidence] 绝对承诺一律拒绝，无论数字是否可核 (0.407ms)
+✔ r06 [low-confidence] 否定形式的确定性（不是稳赢）不得被误判为承诺 (0.161417ms)
+✔ r07 [low-confidence] 不得声称看过对手待执行的动作 (0.061917ms)
+✔ r08 [low-confidence] 把已取消的行动说成命中必须拦下 (0.905959ms)
+✔ r09 [missing-evidence] 道具名不得漂移（净化药被叫成解药） (0.271667ms)
+✔ r10 [missing-evidence] 凭空数字必须拦下 (0.075958ms)
+✔ r11 [missing-evidence] 引用不存在的知识卡必须失败关闭 (0.132458ms)
+✔ r12 [missing-evidence] 引用已被删除或规则版本不符的卡片必须失败关闭 (0.041625ms)
+✔ r13 [tied-options] 同分行动不得被描述成明显更优 (19.318792ms)
+✔ r14 [tied-options] 枚举结论必须带边界说明，不能暗示全局最优 (11.79625ms)
+✔ r15 [tied-options] 目标偏好改变后推荐可以变，但依据仍须是同一批枚举 (4830.214416ms)
+✔ r16 [tied-options] 不设偏好时结果必须稳定 (13.334583ms)
+✔ 轨迹集存在，且规模不低于 W4-02 的两千条下限 (2.233875ms)
+✔ 文档里那行「N 条 / M 个世界 / K 个 arm」必须与产物一致 (3.271583ms)
+✔ 产物必须是**现在这个生成器**产出来的（生产者一致性，含反向对照） (154.038584ms)
+✔ 每条轨迹都有可判定的判据、回执摘要与停止原因 (9.93075ms)
+✔ 八个类别与全部 arm 都有轨迹，切分信息随行带出 (2.797458ms)
+✔ 反证 arm 真的被判挂，而不是与基线一模一样 (0.096542ms)
+✔ 生成器与判定器都能被加载：模块导出漂了要在这里断，而不是在产物里 (70.277ms)
+✔ 判定器两个方向都对，且生成时的判定与现在重判一致 (2577.585166ms)
+✔ 轨迹集覆盖到每条任务，且没有留下重复的 traj_id (2.225541ms)
+✔ 浏览器局面矩阵：产物存在且结构完整 (0.939917ms)
+✔ 浏览器局面矩阵：8—12 个写死的局面，全部真的推进到位 (1.475ms)
+✔ 浏览器局面矩阵：每个局面的实际 kind === 写死的期望 kind (0.717875ms)
+✔ 浏览器局面矩阵：至少 10 个局面真的有气泡产出，沉默的必须写清原因 (0.378791ms)
+✔ 浏览器局面矩阵：kind 覆盖 ≥8 种，或如实登记不可达清单（11 个 kind 列全） (0.3505ms)
+✔ 浏览器局面矩阵：全量扫描说「可达」而矩阵里没有的 kind，必须被披露（不许当成不可达） (0.479625ms)
+✔ 浏览器局面矩阵：没有任何形状重复超过一次（形状由守卫重算，不看 summary） (0.428542ms)
+✔ 浏览器局面矩阵：DOM 气泡 === Node 侧用同一批公开量重算的文案（逐条） (0.309917ms)
+✔ 浏览器局面矩阵：每条气泡都含「做什么 / 为什么是现在 / 一个关键风险」，且真的渲染给玩家 (0.321167ms)
+✔ 浏览器局面矩阵：玩家可见文案里没有工程术语，产物里没有内部 id / 隐藏信息 / 评分 (1.037542ms)
+✔ 浏览器局面矩阵：同一批写死的输入跑两遍，结果逐字节相同 (0.293ms)
+
+=== 10 个隔离过的真实局面上的真实建议 =====================================
+局面 → 实际 kind → 形状 → 原句（共 9/10 个局面开口）
+01-ko-now-lethal         对手场上残血、我方可以收掉（lethal available）             kind=ko-now              「◆」估 #，够收对面「◆」这 # 血：这一轮直接收 | 「诡刺」估 130，够收对面「寂灭骨龙」这 35 血：这一轮直接收
+02-energy-short          能量不足：关键技能能耗高于当前能量，而那一招正好能收掉                 kind=energy-short        能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶 | 能量还差 1 才能收掉它：先吃「能量果」补上，这一轮别硬顶
+03-switch-low-hp         我方场上残血、后备有健康精灵（换人是否值得）                      kind=switch-low-hp       你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉 | 你只剩 33% 血，换「雪影娃娃」上来：它还厚，别把「音速犬」白送掉
+04-type-resisted         属性被抗：上一手那一招被抵抗、这一轮还在用它                      kind=type-resisted       「◆」打「◆」只有抵抗（# 伤害）：别再硬用它 | 「气波」打「银月狼王」只有抵抗（3 伤害）：别再硬用它
+05-replace-own-faint     我方场上倒下、需要补位（phase == replace 且我方 fainted）   kind=replace-required    「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打 | 「寂灭骨龙」倒了，换「海豹船长」顶上：对面「黑猫巫师」还在场，补位别一上来就挨打
+06-ko-now-mid            双方都还有余血（52%），但我方这一手刚好够收（收线成立）               kind=ko-now              「◆」估 #，够收对面「◆」这 # 血：这一轮直接收 | 「火云车」估 414，够收对面「音速犬」这 190 血：这一轮直接收
+07-switch-low-hp-low     我方被压到 15%、后备有厚的那只，该不该换                      kind=switch-low-hp       你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉 | 你只剩 26% 血，换「银月狼王」上来：它还厚，别把「海豹船长」白送掉
+08-speed-slower          对手比我方快：同一档对拼是它先出手                           kind=speed-decides       它速度 # 快过你 #：别硬对拼，这一轮先换人躲一下 | 它速度 90 快过你 60：别硬对拼，这一轮先换人躲一下
+09-speed-faster          我方比对手快：这一轮可以先手压上去                           kind=speed-decides       你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉 | 你速度 130 快过它 92：这一轮先手压上去，别把节奏让掉
+10-peaceful              双方都接近满血、局面平稳（没有值得说的局面事实，应当沉默）               kind=（无建议）               （silent：没有文案） | 
+
+--- 形状统计（引号内容/数字/精灵名/技能名 → 占位符）---------------------
+   2 × 「◆」估 #，够收对面「◆」这 # 血：这一轮直接收
+   2 × 你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉
+   1 × 能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶
+   1 × 「◆」打「◆」只有抵抗（# 伤害）：别再硬用它
+   1 × 「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打
+   1 × 它速度 # 快过你 #：别硬对拼，这一轮先换人躲一下
+   1 × 你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉
+  不同形状 7 种；开口局面 9 个
+
+--- 检测器 kind 统计 ----------------------------------------------------
+   2 × ko-now
+   2 × switch-low-hp
+   2 × speed-decides
+   1 × energy-short
+   1 × type-resisted
+   1 × replace-required
+  不同 kind 6 种
+
+--- 每个局面的取证（真引擎参数）-----------------------------------------
+  01-ko-now-lethal seed=20260921 strategy=greedy_damage team=[pet_000225+pet_000190+pet_000445] enemy=[（缺省＝与我方同队）] | 推进 6 步到 turn 6（phase=battle）
+      证据：对手 寂灭骨龙 35HP；合法招「诡刺」估 130，收得掉
+      期望 kind=ko-now → 实际 kind=ko-now；判定 action_hint；plan 推荐=诡刺
+  02-energy-short seed=20260921 strategy=greedy_damage team=[pet_000225+pet_000190+pet_000445] enemy=[（缺省＝与我方同队）] | 推进 4 步到 turn 4（phase=battle）
+      证据：寂灭骨龙 3 能量；放不出的「坟场搏击」估 411~411 盖得过对面 165 血
+      期望 kind=energy-short → 实际 kind=energy-short；判定 micro_hint；plan 推荐=使用能量果
+  03-switch-low-hp seed=20260921 strategy=greedy_damage team=[pet_000062+pet_000112+pet_000417] enemy=[（缺省＝与我方同队）] | 推进 10 步到 turn 9（phase=battle）
+      证据：我方 120/366；后备 雪影娃娃 442/442、圆号鱼 413/413
+      期望 kind=switch-low-hp → 实际 kind=switch-low-hp；判定 action_hint；plan 推荐=火云车
+  04-type-resisted seed=20260921 strategy=greedy_damage team=[pet_000190+pet_000124+pet_000608] enemy=[pet_000608+pet_000124+pet_000190] | 推进 6 步到 turn 6（phase=battle）
+      证据：上一手那一招被抵抗（倍率 0.25）；这一轮合法招 气波×0.25
+      期望 kind=type-resisted → 实际 kind=type-resisted；判定 micro_hint；plan 推荐=换上第3位
+  05-replace-own-faint seed=20260921 strategy=greedy_damage team=[pet_000225+pet_000190+pet_000445] enemy=[（缺省＝与我方同队）] | 推进 10 步到 turn 8（phase=replace）
+      证据：phase=replace，我方 寂灭骨龙 0/425（已倒下），可选换人 2 个
+      期望 kind=replace-required → 实际 kind=replace-required；判定 action_hint；plan 推荐=换上第2位
+  06-ko-now-mid seed=20260921 strategy=greedy_damage team=[pet_000062+pet_000601+pet_000608] enemy=[（缺省＝与我方同队）] | 推进 4 步到 turn 4（phase=battle）
+      证据：对手 音速犬 190HP（我方还有 52%）；合法招「火云车」估 414，收得掉
+      期望 kind=ko-now → 实际 kind=ko-now；判定 micro_hint；plan 推荐=火云车
+  07-switch-low-hp-low seed=20260921 strategy=greedy_damage team=[pet_000190+pet_000608+pet_000611] enemy=[pet_000062+pet_000445+pet_000417] | 推进 6 步到 turn 6（phase=battle）
+      证据：我方 海豹船长 98/374；后备 银月狼王 416/416、月使鹭纳 362/362
+      期望 kind=switch-low-hp → 实际 kind=switch-low-hp；判定 action_hint；plan 推荐=使用能量果
+  08-speed-slower seed=20260921 strategy=conservative_switch team=[pet_000225+pet_000190+pet_000445] enemy=[pet_000112+pet_000611+pet_000190] | 推进 6 步到 turn 6（phase=battle）
+      证据：我方 寂灭骨龙 速度 60，对手 雪影娃娃 速度 90（它更快）
+      期望 kind=speed-decides → 实际 kind=speed-decides；判定 micro_hint；plan 推荐=换上第3位
+  09-speed-faster seed=20260921 strategy=greedy_damage team=[pet_000451+pet_000601+pet_000112] enemy=[pet_000474+pet_000124+pet_000417] | 推进 7 步到 turn 7（phase=battle）
+      证据：我方 秩序鱿墨 速度 130，对手 画间沉铁兽 速度 92（我更快）
+      期望 kind=speed-decides → 实际 kind=speed-decides；判定 micro_hint；plan 推荐=使用回复药
+  10-peaceful seed=20260921 strategy=greedy_damage team=[pet_000112+pet_000611+pet_000124] enemy=[（缺省＝与我方同队）] | 推进 1 步到 turn 1（phase=battle）
+      证据：我方 442/442，对手 442/442
+      期望 kind=（应当沉默） → 实际 kind=（无建议）；判定 silent；plan 推荐=使用能量果
+
+--- 取不到「隔离窗口」的检测器（覆盖缺口，不是断言失败）-----------------
+  · ko-maybe（估 X~Y 跨过血线）：引擎对**同一个技能**在三个分析种子下的估算是同一个数（min === max），所以「下限 < 血 ≤ 上限」结构上不可能成立；damage_preview 的 min/max 只是「最弱那招 / 最狠那招」两个**不同**技能的包络。
+  · foe-status-ticking（对面中毒/灼烧/寄生掉血）：12 只精灵的规范配招没有一个直接施加这三种状态，而 POST /api/roco/battle/new 不接受 loadouts；取念→复制引燃只在第 44 轮之前的配招序列化缺陷下成立（修好后取念只复制对手真实带的 1–3 个技能）。冻结/萌化还会被 _apply_status_effects 直接跳过。
+  · type-favoured（我方上一手打出克制、这一轮还在用那一招）：45 局 / ~500 个窗口里只命中 1 次，而且那一次我方满血（血量比 1.0）→ 主动提示门控直接沉默（risk 0.2 < 门槛）。**压住它的是门控，不是检测器**；能开口的窗口里它总被更前面的检测器盖过。
+  · foe-energy-high（对面能量 ≥5）：优先级排在第 11 位，所有命中的窗口都先满足了 speed-decides 或属性检测器，所以它从来没有成为那句建议。
+=========================================================================
+
+✔ P1 验收：10 个真实局面各自得到「对路」的建议，且句子在种类上不同 (2141.757167ms)
+✔ M1: 原始快照与规范化数据均已就位（缺失时明确 skip 而不是假装通过） (0.521542ms)
+✔ M1: 每条记录都带 ruleset / game / 来源 / 许可 / 核验状态（不得有无出处数据） (4.180958ms)
+✔ M1: 规范化精灵与原始 Lua 逐字段一致（独立重新解析对拍） (44.75025ms)
+✔ M1: 动态/条件威力不得被当成 0 伤害（power 缺失必须为 null 而非 0） (3.2005ms)
+✔ M1: 所有技能的效果支持状态必须是 unsupported（本轮未实现任何原语） (5.99975ms)
+✔ M1: 孤儿技能引用为 0（学习表引用的技能必须都存在） (3.405625ms)
+✔ M1: 同名异形态必须显式登记且形态选择有据（化蝶 4 形态） (0.860041ms)
+✔ M1: 冲突台账每条都有处置结论；未解决项不得被降级隐藏 (0.341042ms)
+✔ M1: 支持等级与目标等级必须分开，且不得声称已完成 (0.644667ms)
+✔ M1: 候选配招的技能必须真实存在于该精灵的学习表（禁止拼凑） (2.768041ms)
+✔ M1: microcase 计划必须是「计划」——期望值为 null 且验证未通过 (0.56225ms)
+✔ M1: 来源台账不得含页游数据，且未确认许可必须标 REFERENCE_ONLY (0.522709ms)
+✔ M1: 第三方 Lua 只被文本解析，从未执行（无 eval/Function/require 第三方） (0.193542ms)
+✔ M1: 12 只目标精灵与交接材料清单完全一致（不增不减） (0.196708ms)
+✔ M1: 主快照固定 revision 的 SHA256 与实际文件一致（可复现性） (2.23575ms)
+✔ 契约版本、违规分类、三个白名单都是显式导出的常量 (1.049209ms)
+✔ 合法输入：三份校验全过，且归一化后的字段就是核心要用的那一些 (0.867ms)
+✔ 公开遥测：对手后备多任何一个字段都拒（隐藏信息边界，白名单式） (0.190833ms)
+✔ 公开遥测：缺字段 / 错类型 / 模式非法 / 越界位次都被逐条报出 (0.811ms)
+✔ 公开遥测：未核验机制带原因就收，并原样带出原因（fail closed 而不是失败） (0.462833ms)
+✔ 合法动作：威力与出处必须成对；「有数字没出处」和「没数字也没状态」都拒 (0.141917ms)
+✔ 合法动作：未知类别、缺 label、换人缺位次、技能缺 id 都拒 (0.128708ms)
+✔ 合法动作：道具名可以从「使用回复药」这类动作句子里剥出来（可核对的一次剥壳） (0.058125ms)
+✔ 事件流：缺文案 / 缺出处 / 版本回退 / 生命周期乱序都被拒 (0.115334ms)
+✔ 偏好：拒绝必须有 kind / expires_at / 原话，并按时间真的失效 (0.947417ms)
+✔ 未核验机制：必须带 code 与 reason；明确禁止 approximate (0.729417ms)
+✔ 工具提议：只认工具与参数；模型给的事实/结论一律不进提议 (0.11525ms)
+✔ 回执优先：编数字 / 编动作 / 把没有记录的回合当事实讲，都会被丢掉并换回执那一句 (0.354209ms)
+✔ 装配：缺任何一项宿主能力都在装配期拒绝（不是运行期降级） (0.535417ms)
+✔ 会话：状态版本必须严格递增；合法动作不沿用上一回合 (0.301125ms)
+✔ 会话：规则集不一致直接拒（钉住的版本与宿主给的必须相同） (0.100875ms)
+✔ 会话：acceptResult / isStale 是「迟到结果必须丢弃」的唯一判据 (0.119875ms)
+✔ 会话：建议流程在版本未变时接受规划，在版本推进时整条丢弃 (4.36375ms)
+✔ 会话：没有状态就调 advise 会明确报错（不是静默返回空） (0.247583ms)
+✔ 会话：记忆写入必须带 kind，并真的落到宿主 (0.264375ms)
+✔ 会话：applyEvent 会拦顺序错误与缺文案的事件 (0.165667ms)
+✔ assertNoViolations：空列表放行，非空抛结构化错误（违规条目可逐条读） (0.046833ms)
+✔ 边际量：引擎发的对象形状必须能被取出来（第 39 轮那个缺陷的反面） (0.525ms)
+✔ 真服务：margin 取得到，判定层用边际量刻度而不是 sigmoid 兜底 (717.973417ms)
+✔ 真服务：`gap ≡ 0`（三个分析种子给出同一个 expected），所以规则只按血量说话 (1247.380042ms)
+✔ 真服务：仲裁量（risk 分支）必须在真实回执里，而且两边都没用它 (625.960583ms)
+✔ 玩家看到的「期望」那行不许把点估计写成区间 (0.228667ms)
+✔ 边际量必须从引擎经**真实路由**到达判定层（第 39 轮：这条以前是假的） (328.244042ms)
+✔ 桥的 plan 响应必须带边际量字段（少传一个字段不会报错，只会静默失效） (0.854334ms)
+✔ 契约版本与违规分类是显式导出的（换宿主时改这里的版本号，不是改代码） (0.453541ms)
+✔ 装配期：宿主少一个能力就拒绝装配（不许运行期降级） (0.535834ms)
+  · ✔ 反证①：对手后备带 hp/pet_id → 必须拒（隐藏信息边界） — 实际：violations=["hidden_field_leaked@telemetry.opponent.bench[0].hp","hidden_field_leaked@telemetry.opponent.bench[0].pet_id"]；判据：hidden_field_leaked
+  · ✔ 反证②：少 state_version → 必须拒（不许静默兜底成 0） — 实际：["bad_type@telemetry.state_version"]；判据：bad_type@telemetry.state_version
+  · ✔ 反证③：有威力数值却没有 power_status → 必须拒（不许当普通伤害） — 实际：["unverified_power_without_status@legal[0].power_status"]；判据：unverified_power_without_status
+  · ✔ 反证④：未核验机制没有 reason → 必须拒；带 reason 才收 — 实际：{"带原因":"accepted","缺原因":"游戏适配契约违规（1 条）：unsupported_without_reason@unsupported.effect_resolution.reason"}；判据：带原因 accepted / 缺原因报 unsupported_without_reason
+  · ✔ 反证⑤：事件缺 text + 版本回退 → 必须拒 — 实际：["missing_field@events[0].text","state_version_not_monotonic@events[1].state_version"]；判据：missing_field@events[0].text + state_version_not_monotonic
+  · ✔ 反证⑥：玩家拒绝没有 expires_at → 必须拒（拒绝不许是永久状态） — 实际：["missing_field@preferences.refusals[0].expires_at"]；判据：missing_field@preferences.refusals[0].expires_at
+  · ✔ 反证⑦：宿主缺 plan/proposeTool 等能力 → 装配期就拒（不许运行期降级） — 实际：游戏适配契约违规（5 条）：kernel_capability_missing@host.plan, kernel_capability_missing@host.proposeTool, kernel_capability_missing@host.readPreference, kernel_capability_missing@host.writeMemory, kernel_capabil；判据：game_adapter_contract_violation … kernel_capability_missing@host.plan
+  · ✔ 反证⑧：模型正文与回执冲突（编数字/编动作）→ 丢弃模型正文，改用回执那一句 — 实际：{"ok":false,"text":"按引擎回执：这一手没有给出这个数字。","conflicts":[{"code":"unsupported-number","value":999,"token":"999"},{"code":"unsupported-action","name":"火云车"}]}；判据：ok=false 且 text 为回退句
+  · ✔ 反证⑨：慢请求 + 状态已变 → 迟到结果被丢弃，并记录原因 — 实际：{"fallback":true,"reason":"等待期间局面已推进（1 → 2）：这条建议属于已经不存在的局面，整条丢弃","discarded":[{"accepted":false,"code":"stale_result_discarded","result_version":1,"current_version":2,"reason":"state-advanced","at_ms":1790015290953,"observed_at_version":2},{"code":"stale_result_discarded","result_version":1,"current_version":2,"reason":"state-advanced-before-return"}]}；判据：fallback=true 且 discarded 里带 state-advanced
+  · ✔ 反证⑩：浏览器里没有 process 全局时，判定层 flag 读取必须不抛（修复前抛 ReferenceError → layer-error） — 实际：{"mode":"off","error":null}
+✔ 反证：必红输入逐条被拒，贴出实际报错 (42.724083ms)
+  · 纯函数检测器：n=83，P50=0.0208ms，P95=0.1114ms，max=0.3631ms
+✔ 硬行为①：局面检测是纯函数（无 DOM），48 只名册 × 多窗口的 P50/P95 毫秒数 (15476.860458ms)
+  · 状态推进：{"reason":"state-advanced","from":1,"to":2,"at_ms":1790015306443}
+  · 丢弃记录：[{"accepted":false,"code":"stale_result_discarded","result_version":1,"current_version":2,"reason":"state-advanced","at_ms":1790015306493,"observed_at_version":2},{"code":"stale_result_discarded","result_version":1,"current_version":2,"reason":"state-advanced-before-return"}]
+  · 反证（版本未变）：fallback=false，丢弃 0 条
+✔ 硬行为②：慢请求 + 状态已变 → 迟到结果被丢弃并记录原因（含超时路径） (62.626334ms)
+  · 正常路径：0ms（规则 0ms + 服务端规划 0ms），fallback=false
+  · 超时路径：3001ms（墙钟 3001ms），timed_out=true，fallback=true，原因：建议总时限 3000ms 内没有拿到规划：回退规则短提示，迟到的规划结果会被丢弃
+  · 回退产物："micro_hint：规则短提示"
+  · 回退发生：true；超时率：1/2
+  · 威力来源状态：未知招:unsupported→来源未给威力（power_status=unsupported），不近似成普通伤害 | 来源没给威力:not_provided_by_source→来源未给威力（power_status=not_provided_by_source），不近似成普通伤害
+  · 必红：unverified_power_without_status@legal[0].power_status — 给了威力数值却没有出处：power=120 必须配 power_status=static_value_present，实际 undefined
+  · pvp-live：action=silent，gate=pvp-live，reason=hard-gate:pvp-live
+  · pve（同局面反证）：action=action_hint，gate=null
+  · 已结束：action=silent，gate=ended
+  · 模型提议（可用）：tool=search_rules，raw={"tool":"search_rules","args":{"query":"能量"}}，latency=0ms
+  · 模型提议（不可用）：error=ask-failed，choice={"stop":true,"reason":"ask-failed"}
+  · 工具提议被收下：{"ok":true,"accepted":true,"stop":false,"tool":"read_state","args":{},"validated_by":"host"}
+  · 不在允许集合里的工具：{"ok":false,"reason":"模型提议了不在允许集合里的工具：drop_database","accepted":false}
+  · 回执优先：ok=false，conflicts=[{"code":"unsupported-number","value":999,"token":"999"},{"code":"unsupported-action","name":"火云车"}]，最终正文=「按引擎回执：没有这个数字。」
+✔ 硬行为③：建议总时限 3s —— 正常路径 / 超时路径耗时 + 是否回退 (3148.291208ms)
+✔ 硬行为④：unknown/unsupported 必须带原因，禁止近似成普通伤害 (0.368167ms)
+✔ 硬行为⑤：线上竞技 PVP 中不得给出战术分析（保留 policy 行为） (0.40125ms)
+✔ 硬行为⑥：LLM 只能提议工具；模型输出与回执不一致时以引擎为准 (0.655916ms)
+  · ✔ ① 军师真的出现了（自动开口 ≥1 次，不是一次都没说） — 实际：9 次产出（其中打断 1 次）；判据：≥1 次
+  · ✔ ① 每局打断上限：micro_hint + action_hint ≤ 2（INTERVENTION_LIMITS.maxHintsPerMatch） — 实际：1 次打断；判据：≤2 次
+  · ✔ ① 额度用尽后不再打断：第 3 次起只能是 silent 或 defer_to_review（留到局后） — 实际：超额度打断 0 次；额度外的产出 0 条（全部为 defer_to_review：true）；判据：0 次超额度打断
+  · ✔ ① 去重：同一句不重复（本条回放把去重开关**关掉**以观察原始产物，只记录不判红） — 实际：2/9 个不同形状（重复 7 次；去重开关关闭，产品形态下由 session.said 拦掉）；判据：仅记录（开关关闭）
+  · ✔ ① 两级档位：产出文案的档位来自 {micro_hint, action_hint, defer_to_review} — 实际：action_hint/defer_to_review；判据：micro_hint/action_hint/defer_to_review
+  · ✔ ① 该沉默就沉默：门控判定 silent 的窗口没有文案 — 实际：0 个窗口既有 silent 又有文案；沉默窗口 15 个；判据：0
+  · ✔ ① 军师真的出现了（自动开口 ≥1 次，不是一次都没说） — 实际：2 次产出（其中打断 1 次）；判据：≥1 次
+  · ✔ ① 每局打断上限：micro_hint + action_hint ≤ 2（INTERVENTION_LIMITS.maxHintsPerMatch） — 实际：1 次打断；判据：≤2 次
+  · ✔ ① 额度用尽后不再打断：第 3 次起只能是 silent 或 defer_to_review（留到局后） — 实际：超额度打断 0 次；额度外的产出 0 条（全部为 defer_to_review：true）；判据：0 次超额度打断
+  · ✔ ① 去重（去重开关打开）：同一句（数字不同也算同一句）不重复出现 — 实际：2/2 个不同形状；判据：形状全不重复
+  · ✔ ① 两级档位：产出文案的档位来自 {micro_hint, action_hint, defer_to_review} — 实际：action_hint/defer_to_review；判据：micro_hint/action_hint/defer_to_review
+  · ✔ ① 该沉默就沉默：门控判定 silent 的窗口没有文案 — 实际：0 个窗口既有 silent 又有文案；沉默窗口 22 个；判据：0
+  · 必红反证：额度={"action":"defer_to_review","gate":null,"reason":"hint-budget"}；冷却={"action":"defer_to_review","gate":null,"reason":"cooldown"}；点掉={"action":"silent","gate":"hint-dismissed","reason":"hard-gate:hint-dismissed"}；陈旧={"action":"silent","gate":"stale-state","reason":"hard-gate:stale-state"}
+  · ✔ ① 必红反证：额度用尽 → 不再打断（动作降为 defer_to_review，reason=hint-budget） — 实际：{"action":"defer_to_review","gate":null,"reason":"hint-budget"}；判据：action=defer_to_review, reason=hint-budget, gate=null
+  · ✔ ① 必红反证：冷却期内 → 不再打断（动作降为 defer_to_review，reason=cooldown） — 实际：{"action":"defer_to_review","gate":null,"reason":"cooldown"}；判据：action=defer_to_review, reason=cooldown, gate=null
+  · ✔ ① 必红反证：玩家点掉之后本局不再主动开口（硬门控 hint-dismissed） — 实际：{"action":"silent","gate":"hint-dismissed","reason":"hard-gate:hint-dismissed"}；判据：gate=hint-dismissed, action=silent
+  · ✔ ① 必红反证：陈旧状态必须被硬门控拦下（stale-state） — 实际：{"action":"silent","gate":"stale-state","reason":"hard-gate:stale-state"}；判据：gate=stale-state, action=silent
+  · 对照（无门控）：{"action":"action_hint","gate":null,"reason":"critical-risk"}
+✔ 场景 a1：军师自动出现且不打扰（两级档位 / 额度 / 冷却 / 去重 / 点掉） (7358.280791ms)
+  · ✔ ② 建议合法且可执行：被当成可执行建议点名的动作都在本回合合法动作表里 — 16 个窗口 / 71 处点名，0 处越界（另有 14 处被文案明说「这一轮做不到」）
+  · ✔ ② 建议合法且可执行：被当成可执行建议点名的动作都在本回合合法动作表里 — 24 个窗口 / 106 处点名，0 处越界（另有 18 处被文案明说「这一轮做不到」）
+  · ✔ ② 建议合法且可执行：被当成可执行建议点名的动作都在本回合合法动作表里 — 24 个窗口 / 110 处点名，0 处越界（另有 18 处被文案明说「这一轮做不到」）
+  · ✔ ③ 可展开的多动作比较：至少并列 2 个合法动作 — 14/16 个窗口并列 ≥2 个动作
+  · ✔ ③ 三档标签齐全：事实 / 估计 / 不确定都真的出现过 — {"事实":55,"估计":56,"不确定":41}
+  · ✔ ③ 未来 2—3 回合后果：比较区给出 ≥2 条后续结论 — 5/5/5/5/5/5/5/5/5/5/5/5/5/5
+  · ✔ ③ 引擎推荐的那一手必须在并列里（不许漏边） — 0 个窗口漏了推荐
+  · ✔ ③ 可展开的多动作比较：至少并列 2 个合法动作 — 24/24 个窗口并列 ≥2 个动作
+  · ✔ ③ 三档标签齐全：事实 / 估计 / 不确定都真的出现过 — {"事实":94,"估计":96,"不确定":70}
+  · ✔ ③ 未来 2—3 回合后果：比较区给出 ≥2 条后续结论 — 5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5
+  · ✔ ③ 引擎推荐的那一手必须在并列里（不许漏边） — 0 个窗口漏了推荐
+  · ✔ ③ 可展开的多动作比较：至少并列 2 个合法动作 — 24/24 个窗口并列 ≥2 个动作
+  · ✔ ③ 三档标签齐全：事实 / 估计 / 不确定都真的出现过 — {"事实":95,"估计":96,"不确定":71}
+  · ✔ ③ 未来 2—3 回合后果：比较区给出 ≥2 条后续结论 — 5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5
+  · ✔ ③ 引擎推荐的那一手必须在并列里（不许漏边） — 0 个窗口漏了推荐
+  · ✔ ⑤ 规划回执带真实后续字段：层数 / 分支数 / 固定分析种子 / 对手应对 / 期望值 — {"depth":16,"branches":16,"seeds":16,"counter":16,"expected":16,"damage_preview":16}
+  · ✔ ⑤ 伤害预览标着「公式未核验」（formula_verified=false），不许说成实测 — 16 个可用预览
+  · ✔ ⑤ 规划回执带真实后续字段：层数 / 分支数 / 固定分析种子 / 对手应对 / 期望值 — {"depth":24,"branches":24,"seeds":24,"counter":24,"expected":24,"damage_preview":24}
+  · ✔ ⑤ 伤害预览标着「公式未核验」（formula_verified=false），不许说成实测 — 24 个可用预览
+  · ✔ ⑤ 规划回执带真实后续字段：层数 / 分支数 / 固定分析种子 / 对手应对 / 期望值 — {"depth":24,"branches":24,"seeds":24,"counter":24,"expected":24,"damage_preview":24}
+  · ✔ ⑤ 伤害预览标着「公式未核验」（formula_verified=false），不许说成实测 — 24 个可用预览
+✔ 场景 b1/b2/b3：建议合法可执行 + 多动作比较 + 未来 2—3 回合后果 + 真实规划字段 (9360.551208ms)
+  · ✔ ④ 老师局末闭环：给出**一个**关键转折（不是一份战报） — 实际：{"turn":13,"rule":"first-faint","candidates":["first-faint"],"what":"第 13 回合 我方 铠甲虫 倒下，这是全场第一次减员","evidence":["第 13 回合：我方 铠甲虫 倒下（第一次减员）。"]}；判据：turning_point.turn 为整数且 what 为字符串
+  · ✔ ④ 一条可执行的改法 + 一条 next-match 练习目标 — 实际：{"learning":"对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。","goal":"read-the-replacement-first"}；判据：learning 与 goal 都非空
+  · ✔ ④ 复盘正文可核对：含回合数与结果，且只讲一个点 — 实际：这一局一共 24 个回合，结果没有记下来。第 13 回合 我方 铠甲虫 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。；判据：正文非空且提到回合
+  · ✔ ④ 后续局核对：给出可核对的结论（checked=true），并说清「没出现就证明不了什么」 — 实际：{"checked":true,"recurred":true,"improved":false,"note":"「对面有伙伴倒下」这一局又出现了。对比第 20 回合（上一次：补位之后第一手打在抵抗上）与第 20 回合（这一次：补位之后第一手打在抵抗上）。两次的处理方式一样，所以这一局看不到变化。"}；判据：checked=true 且有 note
+  · ✔ ④ 核对结论不许把「没出现」说成「做到了」 — 实际：{"improved":false,"recurred":true}；判据：improved=true 只在 recurred=true 时出现
+  · 复盘 A：这一局一共 24 个回合，结果没有记下来。第 13 回合 我方 铠甲虫 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。
+  · 复盘 B 的核对：{"checked":true,"goal":"read-the-replacement-first","recurred":true,"improved":false,"situation":"enemy-pet-fainted","note":"「对面有伙伴倒下」这一局又出现了。对比第 20 回合（上一次：补位之后第一手打在抵抗上）与第 20 回合（这一次：补位之后第一手打在抵抗上）。两次的处理方式一样，所以这一局看不到变化。","evidence":["对比第 20 回合（上一次：补位之后第一手打在抵抗上）与第 20 回合（这一次：补位之后第一手打在抵抗上）。","对方第 1 位 第 20 回合倒下，之后我方第 22 回合那一手倍率 0.5，用的是「魔爪」（打在抵抗上）。"],"turns":[20,20],"plan":{"teach":false,"reason":"这一课已经教过，没有新的反证就不再重复"}}
+  · ✔ ⑤ 显式偏好记忆：玩家自己说过的偏好被真的写进记忆（带原话） — 实际：[{"id":"stated:address","kind":"address","value":"老王","label":"称呼：老王","source":"player-stated","time":"2026-09-21T18:28:53.912Z","evidenceIds":[]},{"id":"stated:goal","kind":"goal","value":"稳健","label；判据：记忆里含「老王」
+  · ✔ ⑤ 拒绝带时效：时效内有效、过期后自动失效（不是永久状态） — 实际：{"内":1,"过期后":0}；判据：{内:1, 过期后:0}
+  · 记忆项：["address","goal"]
+✔ 场景 c1：老师局末闭环（一个转折 + 一条改法 + 下一局目标 + 后续局核对） (7549.64375ms)
+✔ 场景 c2：陪练情绪 + 显式偏好记忆（含拒绝有时效） (1.088417ms)
+  · ✔ ⑥ 事件级 evidence：宿主可见层真的拿到原始出处 — 实际：29/76 条事件带 evidence；判据：≥1 条
+  · ✔ ⑥ 事件级 evidence 指向可核对的**原始出处**（快照行号或 `…json#实体`） — 实际：1015 | 1016 | 1017；判据：至少一条是行号或 json#实体（引擎当前给的是行号，如实记录）
+  · ✔ ⑥ 精灵/技能级 evidence_ids 透到宿主可见层，且逐只/逐招钉到自己的记录（两个分支） — 实际：无参 48 只、分页 2 只，逐招 200 招全部核对通过；例：["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"] / ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]；判据：每只 = ev:<ruleset>:pets.json#<pet_id>，每招 = ev:<ruleset>:skills.json#<skill_id>（两个分支都要）
+  · ✔ ⑥ 抽查：精灵出处形如 `pets.json#<pet_id>`、技能出处形如 `skills.json#<skill_id>` — 实际：["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"] / ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]；判据：ev:<ruleset>:pets.json#pet_000012 / ev:<ruleset>:skills.json#skill_000632
+  · ✔ ⑥ 反证：把 evidence_ids 剥掉，上面那条判据必须变红（判据有牙） — 实际：顶层 evidence_ids 被丢掉 → 无参分支的顶层 evidence_ids 为空（roster 级那条没有出口）；分页分支的顶层 evidence_ids 被丢掉 → 分页分支的顶层 evidence_ids 为空；pets[].evidence_ids 被丢掉（映射层回退成旧形状） → pet_000012 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]；分页分支 pets[].evidence_ids 被丢掉 → pet_000012 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]；moveset[].evidence_ids 被丢掉 → pet_000012/skill_000632 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]；判据：5 种剥法都必须让判据给 ok:false
+  · 事件级 evidence 例：["1015","1016","1017"]
+✔ 场景 c3：RAG 引用透传到宿主可见层（事件级 + 精灵/技能级 evidence_ids） (2115.419167ms)
+  · 网关可用（真提示 + 真提议）：tool=search_rules，raw={"tool":"search_rules","args":{"query":"能量"}}，latency=0ms
+  · 网关挂起：fallback=true，latency=1201ms，reason=建议总时限 1200ms 内没有拿到规划：回退规则短提示，迟到的规划结果会被丢弃，丢弃=0
+  · ✔ ⑦ 网关可用时：模型只提议**工具**，不产出事实或数值 — 实际：{"tool":"search_rules","latency_ms":0,"choice":{"tool":"search_rules","args":{"query":"能量"}}}；判据：tool 为字符串且提议里没有事实字段
+  · ✔ ⑦ 网关不可用（挂起）时：在建议总时限内回退规则短提示，并丢弃迟到的模型结果 — 实际：{"latency_ms":1201,"fallback_reason":"建议总时限 1200ms 内没有拿到规划：回退规则短提示，迟到的规划结果会被丢弃","discarded":1}；判据：fallback=true 且 latency ≤ 1200+200ms 且 discarded ≥1
+  · 迟到结果丢弃账：[{"accepted":false,"code":"stale_result_discarded","result_version":2,"current_version":2,"reason":"after-deadline","after_timeout":true,"at_ms":1790015337740,"note":"总时限 1200ms 已过，这条规划回来得太晚：丢弃，不用它覆盖已经给玩家的规则短提示"}]
+  · 判定层：off={"mode":"off","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":false,"suppress":false,"probability":null,"threshold":null,"reason":"flag-off"}
+  · 判定层：shadow={"mode":"shadow","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":false,"suppress":true,"probability":1,"threshold":0.88,"margin":0.05,"margin_threshold":0.146532,"decided_by":"margin-quantile","reason":"model-suppress"}
+  · 判定层：on={"mode":"on","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":true,"suppress":true,"probability":1,"threshold":0.88,"margin":0.05,"margin_threshold":0.146532,"decided_by":"margin-quantile","reason":"model-suppress"}
+  · 玩家看到的正文：off=「对面「雪影娃娃」只剩 20 血：这一轮先把它补掉，别让它换人喘口气」 shadow=「对面「雪影娃娃」只剩 20 血：这一轮先把它补掉，别让它换人喘口气」
+  · ✔ ⑧ shadow 档：判定层照算（给出概率与 margin），但 active=false — 实际：{"mode":"shadow","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":false,"suppress":false,"probability":0.9498,"threshold":0.88,"margin":null,"margin_threshold":null,"decided_by":"sigmod-threshold","reason":"model-allow"}；判据：active=false 且 reason ≠ layer-error
+  · ✔ ⑧ shadow 档不得改变玩家看到的建议：与 off 档逐字相同 — 实际：{"off_text":"对面「雪影娃娃」只剩 20 血：这一轮先把它补掉，别让它换人喘口气","shadow_text":"对面「雪影娃娃」只剩 20 血：这一轮先把它补掉，别让它换人喘口气"}；判据：两档正文与 kind 相同
+  · ✔ ⑧ flag 解析：off 档下不改结论；报告的 mode 字段如实反映当前档位 — 实际：off；判据：off|shadow|on
+  · 当前 feature flag：off（默认 off；on 需真人审阅，未获准）
+  · layer-error 是否仍存在：否（已修：浏览器无 process 全局也不再抛）
+  · roster coverage：覆盖 48/48
+✔ 场景 d1：Qwen 工具提议 + 受控回退（网关不可用时立刻回退规则短提示并丢弃迟到结果） (2940.121917ms)
+✔ 场景 d2：介入 / RL shadow 回执 —— shadow 不得改变玩家看到的建议，并如实标出 layer-error 是否已修 (1.242166ms)
+✔ 名册覆盖：8 个场景的双方阵容必须覆盖登记层全部 48 只 (2.012208ms)
+✔ 反向对照：身份对不上时必须被抓（这是这一组的意义所在） (0.607375ms)
+✔ 报告装配必须写进身份栏，而不是靠文件名猜 (0.529792ms)
+✔ 每个已存档的模型臂报告，文件名与身份必须对得上 (6.169ms)
+✔ 已作废的错位存档必须留在 invalidated/ 并且写明原因 (0.278ms)
+✔ 目录来自**模型臂**，不是规则臂，且带上提示版本 (0.495667ms)
+✔ 每条错误都有分类、证据与候选修复，且没有任何一条自称修好 (0.141958ms)
+✔ 分类不许有空桶：声明过的每一类都要能在样本上触发 (0.175ms)
+✔ 候选修复的措辞不许读成「已修好」 (0.173917ms)
+✔ 重新生成与盘上产物一致（产物不许过期） (2.530792ms)
+✔ 预算/策略类必须单列：它们不是模型能力问题 (0.117625ms)
+✔ 模型候选轨迹集存在、规模够、且每条都带判据与失败原因 (4.288667ms)
+✔ 模型身份必须记全，且与文件名一致（第 38 轮存档错位的教训） (0.210917ms)
+✔ 八类 × 三侧都在，且与规则臂同格式同判定器 (44.363791ms)
+✔ 失败原样保留，不做「重试到成功」 (0.828333ms)
+✔ 两条独立代码路径必须给出同一组数字（轨迹生成器 vs 影子回放） (1.504875ms)
+✔ 清单与 jsonl 头部一致（两份产物要么一起重建，要么都不用） (2.658542ms)
+  · 顶层 evidence_ids=["ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=None"]
+  · 抽样 pet_000012 的出处=["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]；skill_000632 的出处=["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]
+✔ 无参回执：顶层带 roster 级出处，pets[] 逐只、moveset[] 逐招带自己的出处 (367.621667ms)
+✔ 分页分支同样带出处（limit/offset），且分页账目没被挤掉 (364.508541ms)
+  · 反证「顶层 evidence_ids 被丢掉」→ 判据报错：顶层 evidence_ids 为空（Answer 级那条没有出口）
+  · 反证「pets[].evidence_ids 被丢掉（映射层回退成旧形状）」→ 判据报错：pet_000012 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]
+  · 反证「moveset[].evidence_ids 被丢掉」→ 判据报错：pet_000012/skill_000632 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]
+  · 反证「出处钉到了别的精灵（形状对、内容错）」→ 判据报错：pet_000012 的 evidence_ids=["ev:roco-world-s4-2026-09-10:pets.json#pet_000062"]，应为 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]
+✔ 反证：把 evidence_ids 剥掉之后，上面那条判据必须变红 (355.508042ms)
+  · ?limit=abc → limit 必须是非负整数（实际 "abc"）
+✔ 坏参数照旧 fail closed（加出处没有放松参数校验） (345.276917ms)
+✔ 局末复盘：整局事件 + 最后一个可行动的局面，缺一个结论就变（真服务） (567.358041ms)
+✔ 反模板（真实对局）：先讲要改的那一处，不是先讲优先级最高的那一门 (3168.693167ms)
+✔ 老师三角色闭环：第一局记下发课，第二局在真实链路上核对有没有改善 (411.813708ms)
+✔ 模型臂在 ask 抛错时必须失败，不许静默回退到规则 (1.199084ms)
+✔ 没有注入 ask 时直接拒绝构造：没有模型就不是模型臂 (0.19875ms)
+✔ 状态版本由运行时覆盖，不采信模型编的那个 (0.224917ms)
+✔ 模型给的未知工具名原样交给引擎层去拒绝，不在这里猜 (0.074333ms)
+✔ 模型输出不是 JSON 时只能停止 (0.092041ms)
+✔ 模型臂只问一次：不给它靠重试蒙对的机会 (0.079ms)
+✔ 系统提示必须写在代码里，且要求默认停止 (0.077125ms)
+✔ 本地 JSON 提取与产品侧实现不许漂移 (0.116416ms)
+✔ 对比函数如实分出退化 / 扳回 / 都错 (0.121208ms)
+✔ 汇总里的通过率与分位数是可复算的 (0.23625ms)
+✔ 参考臂的报告必须存在且自己是全过的（否则对比没有意义） (0.523834ms)
+✔ 报告必须带提示版本：只比通过率分不出两次跑的是不是同一份提示 (0.586833ms)
+✔ 报告装配本身必须带提示摘要：这条不看落盘产物，只看代码 (1.365209ms)
+✔ 参考臂不带提示：它没有模型提示，带一个空值会让人以为它也有 (2.515459ms)
+✔ 模型臂的报告（如果跑过）必须带真实延迟与失败原因 (0.642542ms)
+✔ 摘要守卫：LOCAL_TOOL_SYSTEM 与已发布产物里的那份一字不差 (0.671959ms)
+✔ 反向对照：改动一个字，摘要守卫必须变红（证明这道守卫有牙） (0.125ms)
+✔ toolPromptFor 逐字复现评测发出去的那条 user 提示 (0.414584ms)
+✔ locked_pet / team / planner_margin 按评测的条件逻辑进出提示 (1.178583ms)
+✔ 与评测脚本那份拷贝逐字一致（防两份拷贝各自漂） (5.857ms)
+✔ askGateway 发出网关认的请求体，并如实返回延迟 (0.351333ms)
+✔ askGateway 非 2xx 抛出带 code 的错误（错误语义与 gatewayAsk 相同） (0.279583ms)
+✔ modelToolChoice：正常工具提议 (0.189792ms)
+✔ modelToolChoice：模型的正文里夹着解释和代码块时也能抠出第一个对象 (0.134834ms)
+✔ modelToolChoice：{"stop":true} 是合法决定，不是失败 (0.162166ms)
+✔ modelToolChoice：抠不出 JSON 一律 unparseable，且不抛 (0.190417ms)
+✔ modelToolChoice：编出来的工具名被显式拒绝，且不抛 (0.109125ms)
+✔ modelToolChoice：网络失败 / 非 2xx 都记成失败，不抛，也不假装模型说了话 (0.136542ms)
+✔ compareToolChoices：一致与不一致都要说清，且说明里不出现工程词 (0.297459ms)
+✔ compareToolChoices：契约里的每个工具都有中文说法，不会把工具名原样端给玩家 (0.086333ms)
+✔ shadowToolDecision：一步拿到面板要的全部字段（含摘要钉子） (0.173625ms)
+✔ a slow model answer is aborted when the player acts first, so no stale text is delivered (364.514375ms)
+✔ after a fast action only the newest position is delivered (153.327917ms)
+✔ the same position asked twice is merged into one upstream call (no duplicate delivery) (152.038916ms)
+✔ three rapid actions in a row deliver exactly one answer: the last one (135.65875ms)
+✔ the client layer never speaks: no speech call exists on the answer path (1.249125ms)
+✔ a slow answer that arrives after the deadline is not resurrected (809.827125ms)
+✔ 只把像哈希的片段当哈希：纯数字与短标识不算 (0.528666ms)
+✔ 声明的 HEAD 从那一行读出来，读不到就返回 null (0.18775ms)
+✔ 反证：声明一个不在历史里的 HEAD 必须被判不一致 (29.515542ms)
+✔ 反证：引用不存在的产物路径必须被判不一致 (42.122833ms)
+✔ 当前仓库的状态文档必须一致 (42.229625ms)
+✔ 自指死锁的回归：最近一次 verify:release 是红的，**不该**让闸门永远卡死 (37.245584ms)
+✔ 同类死锁的第二处：全绿记录「太久没跑」只能是警告，不能判红（第 45 轮实测） (101.663708ms)
+✔ 结构契约：index.html 引用的每个本地模块都真实存在 (1.070542ms)
+✔ 结构契约：浏览器模块图里不许出现 node:*（静态 import） (31.973375ms)
+✔ 反证：扫描逻辑真的能抓到静态 node:*（否则上面的守卫是空的） (0.416875ms)
+✔ 结构契约：Coach 核心的静态 import 图到不了页面层，也不出现 node:* (7.657584ms)
+✔ 反证：核心图这条判据不是空的（node:* / 页面层 / 动态 import 三种对照） (10.368625ms)
+✔ 结构契约：核心图的 src/coach/** 不读浏览器全局（剥注释与字符串后按标识符扫） (15.434833ms)
+✔ 反证：浏览器全局这条判据不是空的（真使用会红、注释/字符串/属性名不会） (12.3285ms)
+✔ 结构契约：入口模块图里每个相对 import 都解析到真实文件 (3.092083ms)
+✔ 结构契约：能量上限/回能/初始能量的字面量只许住在规则配置里（RC-101） (141.157334ms)
+✔ 结构契约：全仓 js/mjs 的相对 import 都指向真实文件 (130.895834ms)
+✔ 反证：还没 `git add` 的新文件也必须被上面那条规则扫到 (141.26075ms)
+✔ 结构契约：每个 Node 测试文件都必须被某个 npm script 或自检登记表引用 (0.889375ms)
+✔ 结构契约：src/ tests/ tools/ 下没有会被忽略的源文件 (29.074333ms)
+✖ 结构契约：仓库顶层只允许约定俗成的目录与文件 (0.968083ms)
+✔ 结构契约：models/ 里只有登记表，没有任何权重文件 (0.387666ms)
+✔ 结构契约：URL 空间与磁盘空间同构，页面短路径可用 (230.17125ms)
+✔ 结构契约：多页面白名单——每个 HTML 页面的本地入口都在白名单里 (0.458125ms)
+✔ 结构契约：每个页面的模块图闭包都在白名单里且都真实存在 (6.799375ms)
+✔ cleanEnv 清掉测试运行器的变量，但不动别的 (0.618333ms)
+✔ 测试里跑 `node --test` 的地方必须显式清环境 (10.229625ms)
+✔ 这条守卫自己不是空的：违规样例必须被判出来 (0.163625ms)
+✔ guard-selftest 自己的多个入口都不许留下脏文件 (0.231875ms)
+✔ 复盘由事件决定：我方倒下时要点名那一回合与那一只 (1.79175ms)
+✔ 没有值得一提的事件就沉默：返回 null，不编号一个「关键回合」 (0.135ms)
+✔ 转折点可以不是减员：没有减员时按累计伤害差翻盘挑 (0.437458ms)
+✔ 同一局里有「做对的课」也有「做错的课」时，先讲要改的那一处（第 45 轮反模板） (0.488917ms)
+✔ 两局不同的对局 → 不同的复盘与不同的学习点（反模板） (2.652958ms)
+✔ 在后续局验证：没有讲过的课就什么都不说 (0.282833ms)
+✔ 在后续局验证：局面没再出现 → improved 为 null，并明说没出现证明不了什么 (3.625083ms)
+✔ 挂账的回合必须是「这门课的局面」那一回合，不是转折点那一回合（第 45 轮实测抓到） (0.451625ms)
+✔ 在后续局验证：局面重复、处理方式一样 → improved 为 false (0.214542ms)
+✔ 在后续局验证：局面重复、处理方式变了 → improved 为 true，且依据点名两个回合 (0.246709ms)
+✔ 在后续局验证：局面重复但这一课的前提不在 → 也不给改善结论 (0.164542ms)
+✔ 禁止词汇：复盘与核对产出的每一句都不许出现承诺或工程术语 (0.465458ms)
+✔ 反向对照 ①：固定问句换汤不换药，反模板判据抓得住 (0.415417ms)
+✔ 反向对照 ②：没有重复出现就宣称「有改善」是抓得住的假结论 (0.202583ms)
+✔ 反向对照 ③：没有转折点就编一个「关键回合」是抓得住的 (0.179708ms)
+✔ 对手倒下那一只：拿不到名字时只写位次，绝不拿场上那一只顶替（含只给投影的入参） (0.250584ms)
+✔ R01 隐式「上一回合」取最近一个已结算回合，而不是被裁空数组的长度 (30.042583ms)
+✔ R01 显式「第 N 回合」与「上一回合」是两条路径，互不覆盖 (41.293083ms)
+✔ R01 没有已结算回合时返回无记录，绝不伪造第 1 回合 (0.609875ms)
+✔ R01 跨局不串：新对局不能取上一局的同号回合，显式问上一局仍可取 (39.81275ms)
+✔ R01 政策第一步真的用上了修好的回合参数 (22.277167ms)
+✔ R02 「防御还是换龟」「守一下和换潮甲龟哪个好」都解析成正确候选 (43.086833ms)
+✔ R02 回执列明实际模拟的行动，两个候选面对同一组对手行动 (38.813791ms)
+✔ R02 非法换宠要说明原因，而不是模拟成别的行动 (71.7165ms)
+✔ R02 指代不明时追问，不默认取第一个行动 (32.030125ms)
+✔ R02 主动换宠与倒下后的免费补位成本不同，不能混用 (76.338041ms)
+✔ R02 工具回执真的会送到模型，最终回答与回执一致；不一致就回退本地结论 (43.95475ms)
+✔ R03 分层判分：修复前的回执必须判红，修复后的回执必须判绿 (0.641375ms)
+✔ R03 分层判分覆盖分支候选、跨局拦截与回答一致性 (0.561625ms)
+✔ R03 回答一致性校验器：缺失证据、没模拟过的行动、成本说反都要拦 (0.867542ms)
+✔ R03 评测集里保留 R01/R02 失败用例，且判分层已接入 (0.854083ms)
+✔ R06 README 代码块里的每条命令都真实存在 (0.719958ms)
+✔ 有界循环能走满两个回执：政策首步之后，planner 读到回执再要第二个工具，然后停 (0.57275ms)
+✔ 两回执 loop 回归（用生产路径的六参 buildContext，独立复现过） (7.041875ms)
+✔ fox has exclusive burn combo; lion trades recoil for burst (2.606ms)
+✔ lion recoil and guard penetration are actually resolved (0.794416ms)
+✔ deer drain and turtle guard recover health (0.273917ms)
+✔ preemptive skill acts before a faster ordinary attacker (0.495375ms)
+✔ AI chooses guaranteed knockout instead of healing a scratch (4.274583ms)
+✔ AI heals when it prevents a lethal hit and preserves a winning position (0.31275ms)
+✔ AI decision is pure and independent of any submitted action (24.744625ms)
+✔ training changes next battle, caps allocation, reset refunds (0.582625ms)
+✔ battle rewards are once-only, progress levels and survive serialization (0.386792ms)
+✔ invalid saved growth falls back safely (0.198708ms)
+✔ companion can initiate without a complaint and respects suppression (15.345042ms)
+✔ PVP live blocks unsolicited and queried tactical help (0.246833ms)
+✔ difficulty is saved and changes decision behavior without stat bonuses (81.885542ms)
+✔ old two-point saves remain valid with the expanded cap (0.175125ms)
+✔ stages apply fixed opponent levels and actual training stats (1.460458ms)
+✔ winning clears a stage and old saves receive an empty clear list (0.181417ms)
+✔ all preset scenes are isolated and cannot award progression (0.277833ms)
+✔ swift bonus is once per stage; slower wins keep their base reward (0.232625ms)
+✔ energy recovery belongs to surviving active pet after switching (0.281ms)
+✔ search reports finite explicit branch scores without inspecting pending actions (6.217333ms)
+✔ six-pet saves gain new pets without losing trained stats or wallet (0.133458ms)
+✔ sparrow slow changes next turn, guard blocks it, reserve timer pauses (0.785917ms)
+✔ badger counter only triggers from attacks while guarding (0.434291ms)
+✔ slow timer pauses while its owner is on the bench (0.511083ms)
+✔ P01 动作输出恰好四个，且任何输入都落在其中 (0.901542ms)
+✔ P01 五个硬门控：评分再强也不能把它们换回来 (0.19675ms)
+✔ P01 宿主门控：后台、动画、聊天、预制、结束、不在对局、每决策一次都不开口 (0.185083ms)
+✔ P01 预算是硬上限：决定性局面转成 defer_to_review，而不是消失也不是打断 (0.27075ms)
+✔ P01 四动作判定：决定性 → action_hint，中等风险 → micro_hint，来不及 → defer，没证据 → silent (0.123625ms)
+✔ P01 技能证据只抬高门槛，压不过真实分差 (0.136917ms)
+✔ P01 仅关键风险档：非关键局面连复盘条目都不生成 (0.091666ms)
+✔ P01 既有克制仍然有效：每局 2 条、45 秒冷却、每决策一次、点掉即静音 (0.202917ms)
+✔ P01 陈旧状态由 scheduler 的 epoch 提供，且不影响既有合并/取消语义 (11.115833ms)
+✔ P01 interventionFeatures 把真实对象投影成同一组字段，不碰 DOM (0.350167ms)
+✔ P02 fixture：30 个窗口，15 个该提示 / 15 个不该提示，每个都有溯源与理由 (0.137334ms)
+✔ P02 fixture 可复现：文件的特征与标注就是生成器的输出 (754.820583ms)
+✔ P02 验收：stale hint rate = 0，且相对固定等待规则减少误报、保住关键召回 (0.2125ms)
+✔ retrieves colloquial tactical questions with relevant cards (17.128583ms)
+✔ unknown rules, unrelated queries and insufficient budget return no evidence (4.075083ms)
+✔ foreign mechanics are retrieved as unsupported, not imported as live rules (2.409292ms)
+✔ lower damage is not automatically a mistake when both moves can KO (2.225708ms)
+✔ live calculations exclude unaffordable attacks and restrict PVP/version mismatch (3.060083ms)
+✔ camp knowledge does not invent battle data (1.638791ms)
+✔ switch mind games retrieve counterexamples rather than a certain prediction (1.900459ms)
+✔ live strategist supplies retrieved sources and simulated switch branches (11.51175ms)
+✔ generated browser knowledge stays identical to source (2.271917ms)
+✔ generated reference facts stay tied to the engine rather than copied external game rules (1.098583ms)
+✔ the semantic corpus is generated from the same source as content.js (1.266042ms)
+✔ old six-pet saves preserve progress and unlock new loadouts without spending points (1.455625ms)
+✔ buff damage, duration, stack cap and switching use actual turn resolution (3.823708ms)
+✔ guard blocks dispel while ordinary hit removes buffs (0.547792ms)
+✔ held items trigger once and energy seed respects post-action threshold (0.802125ms)
+✔ environment expires on fourth turn, clearwind removes it before slower damage and history preserves it (2.610917ms)
+✔ new default rosters keep all difficulty choices legal and finite (40.091666ms)
+✔ the engine never depends on the coach: rules and settlement are self-contained (1.946083ms)
+✔ a full PVE match completes with no coach module and no network (99.205875ms)
+✔ every number needed to finish a match is explained in place (12.342458ms)
+✔ the rules page can be read without opening the coach, and in-battle cards explain skills in place (0.800458ms)
+✔ turning the coach off does not disable any rule, and the version stays consistent (0.444084ms)
+✔ 没配密钥时教练只用本机引擎，而且一个模型请求都不发 (45.576083ms)
+✔ 模型返回非法结构时退回本机引擎，并说明为什么退回 (114.527084ms)
+✔ 模型悬挂时不会卡死：对手决策与请求调度都自带超时上限 (280.2785ms)
+✔ agent 的候选表就是引擎的合法行动表（去掉撤退），一个不多一个不少 (1.439375ms)
+✔ 每个候选项都带基本信息：技能名、消耗、威力/先制，模型不需要自己编技能 (0.370333ms)
+✔ 难度分级给的信息量不同：easy 没有教练建议也没有评分，normal 有建议没评分，hard 两个都有 (17.03975ms)
+✔ 模型只能回答合法序号；越界、乱码、列表外的行动一律解析为 null (0.36425ms)
+✔ 正常路径：模型选哪个就是哪个，chooseEnemy 不参与决策 (18.499541ms)
+✔ 非法选择：模型给了列表外的行动 → action 为 null、source 标明原因，交给调用方兜底 (46.377042ms)
+✔ 超时兜底：模型调用悬挂时，decideOpponentAction 自己在 timeoutMs 内结束（不悬挂、不抛） (79.12875ms)
+✔ 超时兜底：模型调用抛错（网络/鉴权）→ model-error，action 为 null (17.521625ms)
+✔ 未配置兜底：没有模型调用入口时立刻返回 unconfigured，不做任何计算 (0.188625ms)
+✔ 畸形局面不抛异常：没有合法行动时返回 no-legal-actions (0.14625ms)
+✔ 教练建议真的进了提示词：同一局面下"听教练的模型"给出的选择和"没有建议时"不同 (34.81725ms)
+✔ hard 的评分就是引擎自己的枚举结果：照最高分选的模型与引擎硬档选择一致 (26.011042ms)
+✔ agent 的建议来自它自己那一侧：建议的行动必须落在对手自己的合法列表里 (17.849417ms)
+✔ 闸门：合法选择原样通过，非法选择退回 chooseEnemy (58.06625ms)
+✔ 补位阶段：chooseEnemy 在这个局面会抛，兜底必须改走引擎自己的补位语义 (0.544375ms)
+✔ 兜底永不抛：局面残缺时返回 null 而不是异常 (0.24425ms)
+✔ legalEnemyActions 永远不含撤退，且始终是引擎合法行动的子集 (0.270458ms)
+✔ /api/opponent：模型答合法序号 → 200 且返回引擎认得的行动 (71.856583ms)
+✔ /api/opponent：难度直接决定提示词里带不带教练建议和评分 (35.886583ms)
+✔ /api/opponent：未配置密钥时零上游调用、立刻返回 unconfigured（本地对战照常可玩） (44.837834ms)
+✔ /api/opponent：模型给非法序号 → action 为 null，绝不放行 (36.850917ms)
+✔ /api/opponent：上游超时/网络错 → 有界返回，不把失败抛给浏览器 (4037.369625ms)
+✔ /api/opponent 与 /api/coach 并行：玩家正在问教练时，对手决策不会被 429 挡掉 (52.813792ms)
+✔ /api/opponent：请求体校验（难度、局面、模式）与来源校验都照旧生效 (52.728375ms)
+✔ 对手 agent 的提示词把局面当数据：系统提示里写明"下面是指令以外的数据"且只允许输出序号 (47.440958ms)
+✔ 对手 agent 不碰玩家教练的状态：/api/opponent 不返回对话、记忆或证据包 (94.210875ms)
+✔ 整局跑通：agent（假模型）与引擎兜底交替出现，每一步都是合法行动 (517.417583ms)
+✔ 补位局面下 rankEnemyActions 不许抛：算不出的分支跳过，战斗局面的排序不受影响 (1.191958ms)
+✔ 战斗回合的排序保持稳定：枚举器跳过不可结算分支之后，前三名不变 (18.72925ms)
+✔ pvp-local game carries its own mode and log line (0.846916ms)
+✔ the submitted opponent action resolves instead of the AI choice (10.59575ms)
+✔ each side enumerates only its own legal actions (0.265375ms)
+✔ a fainted opponent is queued for manual replacement and is not auto-picked (0.455459ms)
+✔ a fainted local player is queued for manual replacement the same way (0.390958ms)
+✔ the replace queue handles two sides needing replacement one after the other (0.2545ms)
+✔ pve replacement behaviour is unchanged when manualReplace is absent (7.228208ms)
+✔ a full hot-seat match terminates and keeps both sides independent (10.719417ms)
+  · [实际] box.html → HTTP 200 text/html; charset=utf-8
+  · [实际] src/client/box.js → HTTP 200 text/javascript; charset=utf-8
+  · [实际] src/client/box.css → HTTP 200 text/css; charset=utf-8
+✔ 接线：/box.html 与它的三个文件都在白名单里，而且真的取得到 (63.247042ms)
+  · [实际] catalog total = 622 ；这一页 = 24 ；覆盖 = {"catalog_pets":622,"pet_record":460,"pet_form":162,"with_moveset_layer":48,"owned_instances":80,"owned_species":48,"panel_stats_non_null":0,"base_stats_available":48}
+✔ 路由契约：kind=catalog 是**全量 622**，不是 48 只迁移层 (36.395083ms)
+  · [实际] 我的盒子分页合计 = 80 ；数据文件 = 80
+  · [实际] 收藏 = 24 （数据文件 24 ）；锁定 = 8 （ 8 ）；pet_000012 = 2 （ 2 ）
+✔ 路由契约：kind=mine 是 80 个个体，分页加起来还是 80 (31.041917ms)
+  · [实际] pet_000062 = 音速犬 种族值（迁移层登记，不是等级换算后的面板值） ；四招 = 自由位:火苗(威力30) 应对位:防御(威力本仓库没有这一项) 主攻位:火云车(威力140) 机制位:焚烧烙印(威力本仓库没有这一项)
+  · [实际] pet_000001 = 喵喵 ； 本仓库没有这一项：这只精灵不在有配招与数值的 48 只迁移层里（全图鉴 622 条里只有 48 条配过招）。
+  · [实际] own-0001 = 铠甲虫 Lv70 ；个体属性 = 性格:（没有这一项） 资质:（没有这一项） 特长:（没有这一项） 血脉:（没有这一项） ；四个技能 = 尾后针→飞断→网缚→蛰针
+✔ 路由契约：detail 有面板/配招就给，没有就如实说没有（不许编） (12.863833ms)
+  · [实际] compare own-0001 / own-0002 （ pet_000012 ）= 等级:不同 | 性格:未知 | 资质:未知 | 特长:未知 | 血脉:未知 | 四个技能（按顺序）:不同 | 收藏:相同 | 锁定:相同 ； 这两只有 2 栏不同、4 栏未知。
+✔ 路由契约：compare 只接受同种的两个个体，逐字段给相同/不同/未知 (3.3075ms)
+  · [实际] compare=own-0001,own-0003 → HTTP 400 {"ok":false,"status":400,"error":"这两只不是同一种精灵（pet_000012 / pet_000062），不能逐字段比较：逐字段比较的前提是同一物种的不同个体。","detail":{"a":"pet_000012","b":"pet_000062"}}
+✔ 路由契约：不同种比较必须 400 + 原因（判据与浏览器验收同一份） (3.108917ms)
+  · [实际] 20 个非法参数全部 fail closed：
+  ·     limit=1e3 → 400 {"ok":false,"status":400,"error":"limit 必须是非负整数（实际 \"1e3\"；不接受 1e3 / -1 / 1.5 这类写法）；必须给出 k
+  ·     limit=1.5 → 400 {"ok":false,"status":400,"error":"limit 必须是非负整数（实际 \"1.5\"；不接受 1e3 / -1 / 1.5 这类写法）；必须给出 k
+  ·     limit=-1 → 400 {"ok":false,"status":400,"error":"limit 必须是非负整数（实际 \"-1\"；不接受 1e3 / -1 / 1.5 这类写法）；必须给出 ki
+  ·     limit=abc → 400 {"ok":false,"status":400,"error":"limit 必须是非负整数（实际 \"abc\"；不接受 1e3 / -1 / 1.5 这类写法）；必须给出 k
+  ·     limit=0 → 400 {"ok":false,"status":400,"error":"limit 必须在 1..60 之间（实际 0）；必须给出 kind=catalog 或 kind=mine，或
+  ·     limit=61 → 400 {"ok":false,"status":400,"error":"limit 必须在 1..60 之间（实际 61）；必须给出 kind=catalog 或 kind=mine，
+  ·     offset=-1 → 400 {"ok":false,"status":400,"error":"offset 必须是非负整数（实际 \"-1\"；不接受 1e3 / -1 / 1.5 这类写法）；必须给出 k
+  ·     offset=1e3 → 400 {"ok":false,"status":400,"error":"offset 必须是非负整数（实际 \"1e3\"；不接受 1e3 / -1 / 1.5 这类写法）；必须给出 
+  ·     kind=catalog&favourite=yes → 400 {"ok":false,"status":400,"error":"favourite 只能是 true 或 false（实际 \"yes\"）"}
+  ·     kind=catalog&type=不存在系 → 400 {"ok":false,"status":400,"error":"type 必须是 草系 / 水系 / 火系 / 光系 / 恶系 / 翼系 / 普通系 / 虫系 / 地系 / 毒
+  ·     kind=catalog&role=boss → 400 {"ok":false,"status":400,"error":"role 必须是 attacker / tank / recovery / control / support 
+  ·     kind=catalog&support=NOT_A_LEVEL → 400 {"ok":false,"status":400,"error":"support 必须是 KNOWLEDGE_ONLY 之一（实际 \"NOT_A_LEVEL\"）"}
+  ·     kind=catalog&record_kind=pet → 400 {"ok":false,"status":400,"error":"record_kind 必须是 pet_record / pet_form 之一（实际 \"pet\"）"}
+  ·     kind=catalog&zzz=1 → 400 {"ok":false,"status":400,"error":"未知参数 zzz（白名单：kind/q/type/role/support/record_kind/favour
+  ·     kind=catalog&species_id=abc → 400 {"ok":false,"status":400,"error":"species_id 必须是 pet_ 加 6 位数字（实际 \"abc\"）"}
+  ·     q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx → 400 {"ok":false,"status":400,"error":"q 太长了（最多 40 个字符）；必须给出 kind=catalog 或 kind=mine，或者用 detai
+  ·     (空) → 400 {"ok":false,"status":400,"error":"必须给出 kind=catalog 或 kind=mine，或者用 detail=<id> / compare=
+  ·     kind=catalog&detail=pet_000001 → 400 {"ok":false,"status":400,"error":"kind / detail / compare 只能出现一个（实际同时给了 kind 与 detail）"}
+  ·     compare=own-0001 → 400 {"ok":false,"status":400,"error":"compare 必须是两个用逗号分开的个体 id（例如 own-0001,own-0002；实际 \"own-0
+  ·     compare=own-0001,own-0002,own-0003 → 400 {"ok":false,"status":400,"error":"compare 必须是两个用逗号分开的个体 id（例如 own-0001,own-0002；实际 \"own-0
+  · [反证实际输出] ["非法 limit=\"1e3\" 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true","静默取整：接受了 limit=\"1e3\" 并返回 limit=1"]
+✔ 参数白名单：非法参数 ok:false + 400，不静默取整、不静默忽略 (40.123459ms)
+  · [实际] pet_form 总数 = 162 ；示例 = 鸭吉吉（蓬松的样子）
+✔ 参数白名单：合法参数的边界值必须真的被接受（否则「拒绝」可能只是坏掉了） (30.070125ms)
+  · [实际] dev 段含 state_version/coverage/provenance/unknown_fields/source_scope/licence；player 段扫过 15327 字节无命中
+  · [实际] 页面源码判据 = （干净）
+✔ 玩家层：路由的 player 段没有工程键，页面源码的工程词只在开发者抽屉里 (12.052708ms)
+  · [实际] 玩家文案判据： 10 段文案无命中；未知原因样例「 两边都没有登记这一项的取值，所以这一栏标「未知」而不是「不同」。另外，养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 」
+  · [反证实际输出] pet_id 混进玩家层卡片 → ["玩家层出现工程键 cards[0].pet_id","玩家层的 cards[0].pet_id 里出现 id 形状的值：pet_000012"]
+  · [反证实际输出] unknown_fields 混进玩家层 → ["玩家层出现工程键 cards[0].unknown_fields"]
+  · [反证实际输出] compare 接受不同种 → ["不同种比较必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true","必须给出「不是同一种」的原因，实际 error=undefined"]
+  · [反证实际输出] 非法 limit 静默取整 → ["非法 limit=\"1e3\" 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true","静默取整：接受了 limit=\"1e3\" 并返回 limit=1"]
+  · [反证实际输出] catalog 总数写成 48 → ["catalog 总数必须 == 622，实际 48"]
+  · [反证实际输出] 工程话跑出开发者抽屉 → ["box.js 的玩家区代码里出现工程词「provenance」","box.html 的玩家标记里出现工程词「provenance」"]
+✔ 玩家层：玩家可见文案里不出现工程话与伪精确数值（对实际回执的断言） (7.049333ms)
+✔ 反证：六条判据都抓得住违规样本（实际输出原文见日志） (0.268ms)
+[实际] reconciled = true
+[实际] reason = 三张页全部 ok；声明计数与解析条数一致；三个比较组的计数差都由 only_in_frozen/only_in_live 逐条解释且条目数核对通过；unresolved 只含已写明原因的诊断项（同名不同 id 的歧义）。
+[实际] delta pet: 冻结声明 622 - 公网声明 621 = 1；only_in_frozen=1 only_in_live=0 changed=0 explained=true
+[实际] delta battle_skill: 冻结声明 579 - 公网声明 579 = 0；only_in_frozen=0 only_in_live=0 changed=0 explained=true
+[实际] delta trait: 冻结声明 245 - 公网声明 242 = 3；only_in_frozen=3 only_in_live=0 changed=0 explained=true
+[实际] bucket_sizes = {"only_in_frozen":4,"only_in_live":0,"changed":0,"unresolved":4}
+[实际] only_in_frozen ids = pet_000532「幽影树」 / skill_000164「腾挪」 / skill_000165「保卫」 / skill_000166「好象坏象」
+[实际] only_in_live ids = （空）
+[实际] changed = []
+[实际] unresolved ids = pet_000532[same_name_different_id] / skill_000164[same_name_different_id] / skill_000165[same_name_different_id] / skill_000166[same_name_different_id]
+[实际] 完整快照 only_in_frozen = pet_000532 / skill_000164 / skill_000165 / skill_000166
+[实际] 删两条后 only_in_frozen = pet_000004 / pet_000532 / skill_000164 / skill_000165 / skill_000166 / skill_000246
+[实际] 命中条目： [{"id":"skill_000246","name":"抓挠","kind":"battle_skill"},{"id":"pet_000004","name":"迪莫","kind":"pet_record"}]
+[实际] 声明/解析不一致条目 = live_bwiki 的 pet 组：产物**声明** 621 条，但实际解析出 620 条。声明与解析不一致时不允许拿其中任何一个当结论。
+[实际] 完整快照 reconciled = true
+[实际] blocked 快照 reconciled = false
+[实际] blocked 快照 reason = 公网快照被拦或未解析：trait-index=blocked（HTTP 567；未取到 200 响应，不产出任何计数。）
+[实际] trait delta = {"frozen_count":245,"live_count":null,"delta":null,"only_in_frozen":0,"explanation":"公网页面 trait-index 状态 blocked（HTTP 567；未取到 200 响应，不产出任何计数。）：公网侧计数不可得（记 null，不记 0），因此本组不给差值，也不做逐条比对。见 unresolved 里对应的那一条。"}
+[实际] blocked 时 trait 组 only_in_frozen 条数 = 0
+[实际] 反证：若把 blocked 当成 0 条，trait 组会误报 245 条「公网缺失」；实际记了 0 条
+[实际] 无快照 reconciled = false | reason = 公网快照不可用：没有任何页面结果（public-index.json 缺失或结构不对）。**不把这种情况当成「公网 0 条」**，因此 reconciled=false。
+[实际] normalizeName("幽影树") = "幽影树"
+[实际] normalizeName("幽影树（突变的样子）") = "幽影树(突变的样子)"
+[实际] 坏归一化(剥后缀) => "幽影树" vs "幽影树"
+[实际] normalizeName("迪莫&nbsp;") = "迪莫"
+[实际] normalizeName(" 迪莫 ") = "迪莫"
+[实际] normalizeName("迪莫　") = "迪莫"
+[实际] normalizeName("迪​莫") = "迪莫"
+[实际] entityKey(trait, skill_000134) = trait::skill_000134 | entityKey(trait, skill_000164) = trait::skill_000164
+[实际] 坏身份键(按名字) => trait::name::腾挪 vs trait::name::腾挪
+[实际] 冻结侧两条同名记录：skill_000134「腾挪」(game_id=200236) 与 skill_000164「腾挪」(game_id=200281)
+[实际] 真数据 pet 组 only_in_frozen = [{"id":"pet_000532","name":"幽影树","title":"幽影树（突变的样子）"}]
+[实际] 非零差值组 = pet:1 / trait:3
+[实际] pet 的解释 = 冻结侧多出 1 条，已在 only_in_frozen 逐条列出：pet_000532「幽影树」；差值 = 冻结声明 622 - 公网声明 621 = 1，与桶内条目数（only_in_frozen 1 - only_in_live 0 = 1）一致。
+[实际] pet 解释里提到的 id = pet_000532（桶内 id = pet_000532）
+[实际] trait 的解释 = 冻结侧多出 3 条，已在 only_in_frozen 逐条列出：skill_000164「腾挪」、skill_000165「保卫」、skill_000166「好象坏象」；差值 = 冻结声明 245 - 公网声明 242 = 3，与桶内条目数（only_in_frozen 3 - only_in_live 0 = 3）一致。
+[实际] trait 解释里提到的 id = skill_000164,skill_000165,skill_000166（桶内 id = skill_000164,skill_000165,skill_000166）
+[实际] 声明 623 时的 pet delta = {"frozen_count":623,"live_count":621,"delta":2,"only_in_frozen":1,"explained":false,"unexplained_gap":{"delta":2,"explained_by_buckets":1,"missing":1,"detail":"冻结声明 623 - 公网声明 621 = 2，但 only_in_frozen 1 - only_in_live 0 = 1，还差 1 条没有归属。"},"explanation":""}
+[实际] 声明 623 时 reconciled = false | reason = 声明计数与解析条数不一致：frozen_l1/pet 声明 623 vs 解析 622 有计数差但没有可核对归因的解释：pet 冻结 623 vs 公网 621（冻结声明 623 - 公网声明 621 = 2，但 only_in_frozen 1 - only_in_live 0 = 1，还差 1 条没有归属。）——桶里没有条目能解释它，所以不允许当作已对账。
+[实际] 567 页面 status=blocked declared=null entities=0 reason=HTTP 567；未取到 200 响应，不产出任何计数。
+[实际] 无响应 status=blocked reason=HTTP no-response：fetch failed；未取到 200 响应，不产出任何计数。
+[实际] 声明 5 / 实际 3 张卡 => status=unparsed declared=5 entities=3 reason=卡片数 3 ≠ 页面声明计数 5（不编造数字，按未解析处理）
+[实际] 声明 3 / 实际 3 张卡 => status=ok declared=3 entities=3
+[实际] 无声明计数 => status=unparsed declared=null reason=页面里找不到可解析的声明计数；卡片元素数为 0（不编造数字，按未解析处理）
+[实际] 技能页 unparsed 时 battle_skill delta = {"group":"battle_skill","frozen_count":579,"live_count":null,"delta":null,"only_in_frozen":0,"only_in_live":0,"changed":0,"explained":false,"unexplained_gap":null,"explanation":"公网页面 skill-index 状态 unparsed（页面里找不到可解析的声明计数）：公网侧计数不可得（记 null，不记 0），因此本组不给差值，也不做逐条比对。见 unresolved 里对应的那一条。"}
+✔ 真实对账：reconciled=true，四个桶逐条给出 id (23.436625ms)
+✔ 判据①：删掉一条公网实体，only_in_frozen 必须指名列出它（必红方向） (36.434334ms)
+✔ 判据②：快照被标 blocked，reconciled 必须 false（必红方向 + 反向） (37.072292ms)
+✔ 判据③：名字归一化不许合并不同形态（必红方向） (18.590166ms)
+✔ 判据④：计数差必须给出非空且可核对的解释（必红方向） (22.688792ms)
+✔ fetch fail-closed：非 200 记 blocked 且不产出数字 (0.314625ms)
+✔ fetch fail-closed：声明计数 ≠ 卡片数记 unparsed，不产出数字 (0.919125ms)
+✔ 声明计数为 null 时不许被当成 0 参与差值 (12.869209ms)
+✔ RC-201 许可与再分发：快照必须登记许可，且与 sources.yaml 逐字一致（必红方向） (5.599ms)
+✔ RC-201 报告：licence_ok 必须为真，且与快照逐字一致；抓到的 HTML 不在 git 里 (20.458334ms)
+  · 台账 schema = roco-rule-evidence-ledger/v1
+  · ruleset_id = roco-world-s4-2026-09-10
+  · 条目数 = 20
+  · 等级分布 = {"OFFICIAL_CURRENT":3,"RECORDED_IN_GAME":0,"COMMUNITY_CURRENT":7,"CROSS_SOURCE_SUPPORTED":7,"ENGINE_HYPOTHESIS":3,"UNKNOWN":0}
+  · 需实机 microcase = 14
+  · 覆盖 topic = battle_mode.speed_duel, battle_mode.standard_pvp, battle_mode.territory_trial, energy.charge, energy.initial, energy.max, energy.regen, leave.semantics, marks.persistence, product.pairing_ai, pvp.fairness, pvp.standard.team_size, swift.injection, traits.triggers, turn_order.priority, type.multiplier
+  · 等级顺序 = OFFICIAL_CURRENT > RECORDED_IN_GAME > COMMUNITY_CURRENT > CROSS_SOURCE_SUPPORTED > ENGINE_HYPOTHESIS > UNKNOWN
+  · OFFICIAL_CURRENT: can_promote_to_current_rule = true
+  · RECORDED_IN_GAME: can_promote_to_current_rule = true
+  · COMMUNITY_CURRENT: can_promote_to_current_rule = false
+  · CROSS_SOURCE_SUPPORTED: can_promote_to_current_rule = false
+  · ENGINE_HYPOTHESIS: can_promote_to_current_rule = false
+  · UNKNOWN: can_promote_to_current_rule = false
+  · 已登记条目 = EV-ENERGY-MAX, EV-ENERGY-CHARGE, EV-ENERGY-ENDTURN-REGEN, EV-ENERGY-INITIAL, EV-ENERGY-COST8-EXISTS, EV-PVP-STANDARD-TEAM-SIZE, EV-PVP-STANDARD-MANA, EV-PVP-FAINT-MANA-LOSS, EV-PVP-SPEED-DUEL-MODE, EV-PVP-UNKNOWN-OPPONENT, EV-PVP-OPPONENT-ROSTER-VISIBLE, EV-SWIFT-INJECTION, EV-MARKS-PERSISTENCE, EV-TYPE-MULTIPLIER, EV-TURN-ORDER-MECHANISMS-EXIST, EV-TURN-ORDER-STRICT, EV-LEAVE-SEMANTICS, EV-TRAITS-TRIGGER-COMPLEXITY, EV-OFFICIAL-PAIRING-AI, EV-BATTLEMODE-PARAMETERIZED
+  · 实际等级 = {"EV-ENERGY-MAX":"CROSS_SOURCE_SUPPORTED","EV-ENERGY-CHARGE":"CROSS_SOURCE_SUPPORTED","EV-ENERGY-ENDTURN-REGEN":"ENGINE_HYPOTHESIS","EV-ENERGY-INITIAL":"CROSS_SOURCE_SUPPORTED","EV-PVP-SPEED-DUEL-MODE":"OFFICIAL_CURRENT","EV-BATTLEMODE-PARAMETERIZED":"OFFICIAL_CURRENT"}
+  · 台账要求的 case = MC-E01, MC-E02, MC-E03, MC-E04, MC-E05, MC-E07, MC-E08, MC-E09, MC-E11, MC-E12, MC-E13, MC-E14, MC-E16, MC-E17
+  · 录屏清单里的 case = MC-E01, MC-E02, MC-E03, MC-E04, MC-E05, MC-E07, MC-E08, MC-E09, MC-E11, MC-E12, MC-E13, MC-E14, MC-E16, MC-E17, MC-E20
+  · EV-ENERGY-MAX ← https://zhuanlan.zhihu.com/p/2040741873246024568（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-MAX ← https://www.douyin.com/video/7489841837251857673（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-CHARGE ← https://zhuanlan.zhihu.com/p/2040741873246024568（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-CHARGE ← https://www.douyin.com/video/7489841837251857673（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-ENDTURN-REGEN ← roco/src/roco_env/env.py#L59（http=false 仓库文件=true marker=repo_internal）
+  · EV-ENERGY-ENDTURN-REGEN ← docs/roco/MICROCASE-PLAN.md（http=false 仓库文件=true marker=repo_internal）
+  · EV-ENERGY-ENDTURN-REGEN ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-ENERGY-INITIAL ← roco/src/roco_env/env.py#L60（http=false 仓库文件=true marker=repo_internal）
+  · EV-ENERGY-INITIAL ← https://www.douyin.com/video/7489841837251857673（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-COST8-EXISTS ← https://wiki.biligame.com/nrc/技能图鉴（http=true 仓库文件=false marker=community）
+  · EV-PVP-STANDARD-TEAM-SIZE ← https://www.taptap.cn/moment/808879358071540062（http=true 仓库文件=false marker=community）
+  · EV-PVP-STANDARD-TEAM-SIZE ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-PVP-STANDARD-MANA ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-PVP-STANDARD-MANA ← https://www.taptap.cn/moment/808879358071540062（http=true 仓库文件=false marker=community）
+  · EV-PVP-FAINT-MANA-LOSS ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-PVP-FAINT-MANA-LOSS ← https://www.gameres.com/forum/t/917446（http=true 仓库文件=false marker=community）
+  · EV-PVP-SPEED-DUEL-MODE ← https://www.taptap.cn/moment/838434682965067210（http=true 仓库文件=false marker=official_first_party）
+  · EV-PVP-UNKNOWN-OPPONENT ← tests/evals/roco/cases/microcases-v1.jsonl（http=false 仓库文件=true marker=product_context）
+  · EV-PVP-OPPONENT-ROSTER-VISIBLE ← https://www.taptap.cn/moment/808879358071540062（http=true 仓库文件=false marker=community）
+  · EV-SWIFT-INJECTION ← https://wiki.biligame.com/nrc/小鹬（http=true 仓库文件=false marker=community）
+  · EV-MARKS-PERSISTENCE ← https://wiki.biligame.com/nrc/印记（http=true 仓库文件=false marker=community）
+  · EV-TYPE-MULTIPLIER ← https://wiki.biligame.com/nrc/深渊罗隐（http=true 仓库文件=false marker=community）
+  · EV-TYPE-MULTIPLIER ← https://wiki.biligame.com/nrc/溯源钟（http=true 仓库文件=false marker=community）
+  · EV-TURN-ORDER-MECHANISMS-EXIST ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-TURN-ORDER-MECHANISMS-EXIST ← https://www.taptap.cn/moment/808879358071540062（http=true 仓库文件=false marker=community）
+  · EV-TURN-ORDER-STRICT ← data/roco/evidence/rule-evidence-ledger.json（http=false 仓库文件=true marker=repo_internal）
+  · EV-TURN-ORDER-STRICT ← docs/roco/MICROCASE-PLAN.md（http=false 仓库文件=true marker=repo_internal）
+  · EV-LEAVE-SEMANTICS ← https://wiki.biligame.com/nrc/邪眼巨魔（http=true 仓库文件=false marker=community）
+  · EV-TRAITS-TRIGGER-COMPLEXITY ← https://wiki.biligame.com/nrc/特性列表（http=true 仓库文件=false marker=community）
+  · EV-OFFICIAL-PAIRING-AI ← https://www.bilibili.com/video/BV1iMuh66EiP/（http=true 仓库文件=false marker=official_first_party）
+  · EV-BATTLEMODE-PARAMETERIZED ← https://www.taptap.cn/moment/849700086890891385（http=true 仓库文件=false marker=official_first_party）
+  · EV-BATTLEMODE-PARAMETERIZED ← https://www.taptap.cn/moment/809020453778620585（http=true 仓库文件=false marker=official_first_party）
+  · 来源总条数 = 32
+  · 改写前 confidence = CROSS_SOURCE_SUPPORTED → 改写后 = OFFICIAL_CURRENT
+  · 实际报错原文 = EV-ENERGY-MAX: OFFICIAL_CURRENT 必须至少有一条 official_first_party 来源；实际 marker 集合：["community","community"]
+  · 被抬到 OFFICIAL_CURRENT 的条目数 = 17
+  · 幸存者（抬上去竟然还是绿的） = 0 
+  · 实际报错原文 = EV-PVP-STANDARD-TEAM-SIZE: OFFICIAL_CURRENT 必须至少有一条 official_first_party 来源；实际 marker 集合：["community","official_reproduction"]
+  · 改写前 microcase_id = "MC-E13" → 改写后 = undefined
+  · 实际报错原文 = EV-SWIFT-INJECTION: 缺少字段 microcase_id（实际值：undefined） | EV-SWIFT-INJECTION: needs_microcase=true 时 microcase_id 必须形如 MC-E01，实际：null
+  · 改写前 sources 条数 = 1 → 改写后 = 0
+  · 实际报错原文 = EV-MARKS-PERSISTENCE: sources 为空：等级 COMMUNITY_CURRENT 没有任何来源
+  · 剩余来源 = ["https://news.17173.com/content/03182026/104940843.shtml"]
+  · 实际报错原文 = EV-PVP-STANDARD-MANA: CROSS_SOURCE_SUPPORTED 至少需要两条 URL 不同的来源；实际 1 条：["https://news.17173.com/content/03182026/104940843.shtml"]
+  · 实际报错原文 = EV-TYPE-MULTIPLIER: affected_artifacts 不能为空，实际：[]
+  · 实际报错原文 = EV-ENERGY-MAX: confidence 不在六选一里："VERIFIED_OFFICIAL"
+  · 实际报错原文 = EV-ENERGY-MAX: 来源 https://www.taptap.cn/moment/838434682965067210 的 level=OFFICIAL_CURRENT 强于条目等级 CROSS_SOURCE_SUPPORTED（来源最多只能与条目同级） | EV-ENERGY-MAX: 等级 CROSS_SOURCE_SUPPORTED 的条目带了 official_first_party 来源 ["https://www.taptap.cn/moment/838434682965067210"]：官方一手来源只能出现在 OFFICIAL_CURRENT 条目上（否则这条来源看起来像是在支撑它）
+  · 实际报错原文 = ledger: 台账引用了 MC-E99，但录屏清单里没有这条 case（“要录什么”没有落点）
+✔ 台账文件存在，且是合法 JSON（schema 与 ruleset 对得上） (1.424417ms)
+✔ 真台账逐条合规（这条红了就是真问题，不是判据太严） (1.982833ms)
+✔ 六个等级的定义齐全，且只有前两级能直接成为 current 规则 (0.662333ms)
+✔ 指令点名要覆盖的规则条目一条都不能少 (0.1295ms)
+✔ 工程假设与外部证据不许互相冒充（能量上限/聚能/回能/初始值的等级） (0.136084ms)
+✔ “需要实机”的条目必须真挂着 case，且 case 写清了怎么录、录到什么算通过 (0.141041ms)
+✔ 每条来源都有 http(s) URL，等级不高于它支撑的条目 (0.648625ms)
+✔ 反证①：把一条 CROSS_SOURCE_SUPPORTED 抬成 OFFICIAL_CURRENT → 必须红（来源不够官方） (0.627625ms)
+✔ 反证①-全量：每一条抬到 OFFICIAL_CURRENT 都必须红（不许有幸存者） (5.31575ms)
+✔ 反证①-转载：只有官方公告转载的条目抬成 OFFICIAL_CURRENT → 必须红 (0.469458ms)
+✔ 反证②：删掉需要 microcase 条目的 microcase_id → 必须红 (0.56225ms)
+✔ 反证③：把某条的 sources 清空 → 必须红 (0.491208ms)
+✔ 反证④：CROSS_SOURCE_SUPPORTED 只剩一条来源 → 必须红 (0.407084ms)
+✔ 反证⑤：affected_artifacts 清空 → 必须红（没有“改了谁都不影响”的规则） (0.328583ms)
+✔ 反证⑥：confidence 写成不在六选一里的值 → 必须红 (0.32325ms)
+✔ 反证⑦：把官方一手来源挂到非 OFFICIAL_CURRENT 条目上 → 必须红 (0.677917ms)
+✔ 反证⑧：引用一个清单里不存在的 microcase → 必须红 (0.330625ms)
+✔ 投影：公开字段原样搬运，私有字段一个都不进来 (0.718958ms)
+✔ 投影：局面结束后不可玩（经验层据此闭嘴） (0.108125ms)
+✔ 规划特征：gap 用期望区间宽度，不用 worst 的绝对值 (0.440333ms)
+✔ 陈旧判定：版本对不上就作废，只有一个入口 (0.063958ms)
+✔ 规划回执的陈旧判定：规划自己说属于哪一版，才算哪一版（不许盖当前版本号） (0.183334ms)
+✔ 门控来自真实 experience.js：失焦是硬门控，不是「这次没什么可说」 (1.27275ms)
+✔ 危险局面给的是短提示；健康局面沉默（阈值来自经验层，不是这里拍的） (0.258917ms)
+✔ 频率预算：说过一次就在冷却里，同一手也不重复 (0.987292ms)
+✔ 提示文案：建议由**局面**决定，看不到局面就沉默（第 43 轮改） (0.377083ms)
+✔ 局末教学入口：没有值得拎出来的决策点就说没有 (0.205042ms)
+✔ （已删）风险分支的旧措辞用例 (0.0485ms)
+✔ 伤害预览：说清「估」与「够不够收」，且结论不稳时不许打包票 (0.1155ms)
+✔ 页面局末复盘接的是「整局事件 + 最后一个可行动的局面」（接错了不会报错） (0.9005ms)
+✔ 12 个系别的 emoji 与配色逐键对齐，且不引用任何外链素材（自制形象） (0.923792ms)
+✔ L1 图鉴层：622 只全在，且**只**允许 knowledge_only (1.230166ms)
+✔ L1 图鉴层：每只都必须写清「我不知道什么」（unknown_fields + refused + provenance） (0.442291ms)
+✔ L1 图鉴层：检索可用，且过滤条件不许放过不属于它的条目 (0.5265ms)
+✔ 反证：把 support 改成 simulable、或删掉 unknown_fields，校验器必须报出来 (0.314458ms)
+  · [实际] 实体 = 1446 ；provenance 条目 = 2888
+  · [实际] 分组 = {"battle_skill":579,"pet_form":162,"pet_record":460,"trait_record":245}
+  · [实际] 分节 = {"distributable":1446,"reference_only":0}
+  · [实际] 判据 = schema_compliance:ok schema_file:ok artifacts_on_disk:ok provenance_on_disk:ok provenance_pointers:ok refs_pointers:ok licence_refs:ok distribution_sections:ok unknown_fields:ok orphan_references:ok conflicts_vs_rc201:ok freshness_guard:ok contract_completeness:ok coverage_matrix:ok ruleset_binding:ok entity_identity:ok readiness_declaration:ok
+  · [实际] 问题 = (无)
+  · [实际] 抄进包的值字段 = 0 
+  · [实际] 带 stats ref = 622 ；带 learnable_skills ref = 622
+  · [实际] record_kind_enum = ["pet_record","pet_form","battle_skill","trait_record"]
+  · [实际] required_entity_fields = ["entity_key","record_kind","name","provenance","licence_ref","source_scope"]
+  · [实际] required_provenance_fields = ["source_id","artifact_path","artifact_sha256","pointer"]
+  · [实际] conflicts = {"IDENTITY_CONFLICT":65,"GRANULARITY_CONFLICT":34} ；total = 99 ；unresolved = 4
+  · [实际] 未解决条目 = pet::pet_000532,trait::skill_000164,trait::skill_000165,trait::skill_000166
+  · [实际] VALUE_CONFLICT 说明 = 同一 id 的**字段值**在两侧不一致。本轮**为 0** —— 这不是"没有 …
+  · [实际] form_axis.counts = {"BASE":426,"LORD":64,"REGIONAL":131,"MUTATION":1,"OTHER":0,"UNMAPPED":0} ；divergence = 34
+  · [实际] 可比字段 = pet.id, pet.name, pet.number, pet.type, battle_skill.id, battle_skill.name, battle_skill.element, trait.id, trait.name
+  · [实际] 「公网索引页没有」字段 = pet.class, pet.stats, pet.learnset, pet.release, pet.feature_skill_id, battle_skill.power, battle_skill.energy, battle_skill.damage_class, battle_skill.desc
+  · [实际] pet.type 逐条 = {"group":"pet","field":"type","matched_entities":621,"frozen_present":621,"live_present":621,"equal":621,"unequal":0,"unequal_examples":[],"verdict":"COMPARABLE_PUBLIC_INDEX_HAS_FIELD","comparable":true,"normalization":"剥掉「系」字后按 | 拼接比较（冻结「光系|草系」vs 公网「光|草」）。","reason":"属性标签逐条可比（这是「能比的四个字段」之一）。"}
+  · [实际] status = draft ；satisfied = 8/9
+  · [实际] §9-1 unified_schema: satisfied=true 证据=schema.x-roco-contract.record_kind_enum / required_entity_fields / source_scope_enum
+  · [实际] §9-2 licence_per_entity: satisfied=true 证据=entity.licence_ref + source_registry.redistribution + 分节归属+licence_ref ∈ sources.yaml + 台账逐字一致 + REFERENCE_ONLY 不在 distributable
+  · [实际] §9-3 per_entity_provenance: satisfied=true 证据=逐实体 provenance 的四个必填字段 + 两侧粒度对等+provenance.artifact_sha256 与磁盘逐条一致 + pointer 可解析
+  · [实际] §9-4 conflict_policy: satisfied=true 证据=conflicts.classes / total / unresolved / 逐条证据+冲突条目与 RC-201 报告逐条一致 + 未解决时拒绝 ready
+  · [实际] §9-5 form_axis: satisfied=true 证据=form_axis.assignments 覆盖所有非基础精灵 + divergence 条数与 GRANULARITY_CONFLICT 条数一致
+  · [实际] §9-6 field_level_coverage: satisfied=false 证据=field_level_coverage.static_false
+  · [实际] §9-7 version_freshness: satisfied=true 证据=ruleset_binding 必填 + freshness 守卫+freshness 重算 + ruleset_binding 指纹与磁盘一致
+  · [实际] §9-8 unavailable_fields: satisfied=true 证据=contract.contains / does_not_contain / unknown_fields 允许清单+unknown_fields 按冻结产物重算 + contract.does_not_contain 覆盖覆盖矩阵
+  · [实际] §9-9 reconciliation_in_release_gate: satisfied=true 证据=release_gate.registry
+  · [实际] blocking = field_level_coverage, unresolved_conflicts
+  · [实际] 两次重建 = 逐字节相同 ；磁盘 pack.json 3336458 字节 vs 重建 3336458 字节
+  · [实际] rc = 1 ；原文 = [schema_compliance] battle_skill::skill_000246 没有 provenance —— 说不清这条从哪来
+  · [实际] rc = 1 ；原文 = [artifacts_on_disk] artifacts.data/roco/normalized/roco-world-s4-2026-09-10/skills.json.sha256=0000000000000000000000000000000000000000000000000000000000000000，磁盘实际 9d01a6476a529be750973b4b3e8eb939112773f6a8b685e15e67516092e278e4
+  · [实际] rc = 1 ；原文 = [schema_compliance] battle_skill::skill_000246 的 licence_ref=not-a-registered-source 在 source_registry 里查不到
+  · [实际] rc = 1 ；原文 = [schema_compliance] battle_skill::skill_000246 的来源 nrc-ai-sqlite 是 REFERENCE_ONLY，却出现在 distributable 分节里
+  · [实际] rc = 1 ；原文 = [schema_compliance] pet::pet_000001 的 ref「stats」有指针却被同时标进 unknown_fields —— 有值就不许标 unknown
+  · [实际] 漏报方向 rc = 1 ；原文 = [unknown_fields] pet::pet_000001 的 unknown_fields=["panel_formula","season_strength","skill_timing"]，按冻结产物重算应为 ["panel_formula","season_strength","skill_timing","traits"]（有值却标 unknown / 缺了却漏报，两个方向都算错）
+  · [实际] rc = 1 ；原文 = [schema_compliance] 就绪判定是 ready，但有 4 条未解决冲突 —— 未解决冲突必须**拒绝** ready，不是发警告
+  · [实际] 声明与重算不一致 rc = 1
+  · [实际] 坏指针 rc = 1 ；原文 = [provenance_pointers] battle_skill::skill_000246 provenance[0].pointer=pets[99999] 在 data/roco/normalized/roco-world-s4-2026-09-10/skills.json 里解析不到
+  · [实际] STALE+ready rc = 1 ；原文 = [schema_compliance] freshness.guard 的比较结果与 left/right 对不上
+  · [实际] 契约缺项 rc = 1 ；原文 = [contract_completeness] 覆盖矩阵说 pet.stats 公网索引页没有，但 contract.does_not_contain 没写它
+  · [实际] 台账篡改 rc = 1 ；原文 = [licence_refs] source_registry.wiki-rocom-snapshot.redistribution="UNLIMITED" 与 sources.yaml 的 "DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL" 不一致
+  · [实际] 报告判据组 = schema_compliance schema_file artifacts_on_disk provenance_on_disk provenance_pointers refs_pointers licence_refs distribution_sections unknown_fields orphan_references conflicts_vs_rc201 freshness_guard contract_completeness coverage_matrix ruleset_binding entity_identity readiness_declaration
+  · [实际] 规模 = {"entities":1446,"provenance_entries":2888,"by_record_kind":{"battle_skill":579,"pet_form":162,"pet_record":460,"trait_record":245},"by_section":{"distributable":1446,"reference_only":0},"conflicts":99,"unresolved_conflicts":4,"form_axis":{"BASE":426,"LORD":64,"REGIONAL":131,"MUTATION":1,"OTHER":0,"UNMAPPED":0},"orphan_references":0}
+✔ 真产物：1446 条实体全部过判据（17 组），逐条给 provenance 与 licence_ref (34.660917ms)
+✔ 真产物：只做索引——大块数值一律只给 refs，不抄进包 (5.595917ms)
+✔ schema：record_kind enum 用 RC-201 那份词表，必填字段齐备 (0.403542ms)
+✔ 冲突：4 条未解决 + 61 组同名不同 id + 34 条形态口径，逐条带证据；未解决即拒绝 ready (0.734917ms)
+✔ 覆盖矩阵：可比字段只许是 id/名字/编号/属性标签，其余逐条给出「公网索引页没有」 (0.193417ms)
+✔ 就绪：9 项逐条 satisfied + 证据；只有全 satisfied 才允许 ready (28.8235ms)
+✔ 可复跑：内存重建两次逐字节相同，并与磁盘上的 pack.json/schema.json 一致 (95.912917ms)
+✔ 反证① 抽掉某实体 provenance ⇒ 红 (31.613459ms)
+✔ 反证② artifact_sha256 对不上磁盘 ⇒ 红（登记表一起改坏，只有磁盘判据能抓） (32.527875ms)
+✔ 反证③ licence_ref 在 sources.yaml 里查不到 ⇒ 红 (29.07825ms)
+✔ 反证④ REFERENCE_ONLY 混进 distributable ⇒ 红 (30.201625ms)
+✔ 反证⑤ 有值的字段被标进 unknown_fields ⇒ 红（缺了却漏报也 ⇒ 红） (52.202375ms)
+✔ 反证⑥ 冲突未解决却把就绪标成 ready ⇒ 红 (51.378292ms)
+✔ 反证⑦ 指针指到不存在的下标 / 快照 STALE 却 ready ⇒ 红 (51.549833ms)
+✔ 反证⑧ sources.yaml 查不到、报告缺项、契约缺项都 ⇒ 红 (52.807375ms)
+✔ 就绪报告：存在、可解析、不含挂钟时间戳（确定性） (0.217791ms)
+  · [实际输出] ⓪-1 --check = {"ok":true,"reason":"磁盘上的 v1.json 与重新构建的结果逐字节一致"}
+  · [实际输出] ⓪-2 校验器结论 = {"ok":true,"problems":[]}
+  · [实际输出] ⓪-3 先验规模 = {"meta_prior_id":"roco-meta-prior/v1#7c077248f9436238","archetypes":7,"evidence":21,"evidence_confidence":{"OFFICIAL_CURRENT":0,"RECORDED_IN_GAME":0,"COMMUNITY_CURRENT":5,"CROSS_SOURCE_SUPPORTED":4,"ENGINE_HYPOTHESIS":12,"UNKNOWN":0},"distribution_source":"unknown"}
+  · [实际输出] ①-1 禁令键名扫描 = {"banned_keys":20,"hits":[]}
+  · [实际输出] ①-2 给体系插 win_rate = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#0cfc704e730f9343","[BANNED_KEY] archetypes[0].win_rate：这是禁令字段名（禁令与 RC-302 BANNED_CLAIM_KEYS 同源）：它要么给出胜率/榜单式的伪精确结论，要么让人以为这份先验以后会填它。写 null 也不允许——禁令必须是结构性的。"]}
+  · [实际输出] ①-3 把禁令字段写成 null 也算（禁令必须是结构性的） = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#4013154ab08bf967","[BANNED_KEY] archetypes[0].tier：这是禁令字段名（禁令与 RC-302 BANNED_CLAIM_KEYS 同源）：它要么给出胜率/榜单式的伪精确结论，要么让人以为这份先验以后会填它。写 null 也不允许——禁令必须是结构性的。"]}
+  · [实际输出] ① 体系顶层插 win_rate = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#903dd5e0957b89b4","[BANNED_KEY] archetypes[1].win_rate：这是禁令字段名（禁令与 RC-302 BANNED_CLAIM_KEYS 同源）：它要么给出胜率/榜单式的伪精确结论，要么让人以为这份先验以后会填它。写 null 也不允许——禁令必须是结构性的。"]}
+  · [实际输出] ② 把 unknown 改成 measured 但不给来源 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#d624dc77ea667a81","[DISTRIBUTION] distribution[poison_stack].sources：source=\"measured\" 却没有任何来源：占比必须逐条给 url/文件 + 日期 + 等级，缺来源的数值一律不合法","[DISTRIBUTION] distribution[poison_stack].value_source：measured 必须写清这个数值本身出自哪里：value_source.availability ∈ {available, not_available}，available 时 ref 必须可核对"]}
+  · [实际输出] ②b measured 有来源但没有 value_source = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#6386685273ab6efa","[DISTRIBUTION] distribution[poison_stack].value_source：measured 必须写清这个数值本身出自哪里：value_source.availability ∈ {available, not_available}，available 时 ref 必须可核对"]}
+  · [实际输出] ③ 给 unknown 项填一个 0.25 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#5c73ce19ef7e0526","[DISTRIBUTION] distribution[sugar_morph].value：source=\"unknown\" 时 value 必须是 null，实际 0.25（我们没有任何真实对局数据，不许用看起来合理的数字填充）"]}
+  · [实际输出] ③b 抹掉 unknown 的 reason = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#7f9328f9efe7ce9c","[DISTRIBUTION] distribution[sugar_morph].reason：source=\"unknown\" 时必须写清原因（至少 12 个字符），实际 \"\""]}
+  · [实际输出] ③b 实测分布形态 = {"on_disk":["unknown","unknown","unknown","unknown","unknown","unknown","unknown"],"summary":{"measured":0,"unknown":7},"distribution_source":"unknown"}
+  · [实际输出] ④ 把种子换成一个 pack 里没有的名字 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#7331bdae863a126e","[SEED_SPECIES] archetypes[meteor_burst].seed_species[0]：陨星龙王 不在 pack 的 pet 实体里（pack 现有 504 个名字）——先验不许写环境里不存在的精灵"]}
+  · [实际输出] ④ 可核对面 = {"pack_pet_names":504,"pack_pet_entities":622}
+  · [实际输出] ④b 沙暴体系实况 = {"seed_species":[],"seed_selection":"none_available","needs_recording":3}
+  · [实际输出] ④b 把 none_available 抹掉 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#7a0338bee6500467","[SEED_SPECIES] archetypes[sandstorm_weather].seed_species：没有种子物种时，必须声明 seed_selection.source=\"none_available\"、写清 note、并且 needs_recording 非空（实际 source=\"learnable_move_keyword\"、needs_recording=0 条）"]}
+  · [实际输出] ⑤ 体系用了一个不在六级里的等级 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#98cd70d6f11e0af9","[CONFIDENCE] archetypes[poison_stack].confidence：confidence 不在台账六级里：\"VERIFIED_OFFICIAL\"（六级 = OFFICIAL_CURRENT / RECORDED_IN_GAME / COMMUNITY_CURRENT / CROSS_SOURCE_SUPPORTED / ENGINE_HYPOTHESIS / UNKNOWN）"]}
+  · [实际输出] ⑤b 逐条证据用了一个不在六级里的等级 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#2c11bce37cab0212","[CONFIDENCE] archetypes[poison_stack].evidence[0].confidence：confidence 不在台账六级里：\"STRONG\""]}
+  · [实际输出] ⑤ 实际用到的等级 = {"used":["COMMUNITY_CURRENT","CROSS_SOURCE_SUPPORTED","ENGINE_HYPOTHESIS"],"legal":["OFFICIAL_CURRENT","RECORDED_IN_GAME","COMMUNITY_CURRENT","CROSS_SOURCE_SUPPORTED","ENGINE_HYPOTHESIS","UNKNOWN"]}
+  · [实际输出] ⑤c-1 台账锚点 = {"ledger_entry":"EV-TYPE-MULTIPLIER","ref":"https://wiki.biligame.com/nrc/深渊罗隐","date":"2026-09-21","confidence":"COMMUNITY_CURRENT","claim":"台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy 判据所依赖的那种倍率。"}
+  · [实际输出] ⑤c-2 抬高等级 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#84bb9f8602bac9b6","[CONFIDENCE] archetypes[poison_stack].evidence[2].confidence：台账 EV-TYPE-MULTIPLIER 的等级是 COMMUNITY_CURRENT，这里写的是 OFFICIAL_CURRENT（等级只能与台账一致）"]}
+  · [实际输出] ⑤c-3 换掉首要来源 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#5a7004aacf46eee1","[EVIDENCE] archetypes[poison_stack].evidence[2].ref：台账 EV-TYPE-MULTIPLIER 的首要来源是 \"https://wiki.biligame.com/nrc/深渊罗隐\"，这里写的是 \"https://example.com/别的页面\""]}
+  · [实际输出] ⑤c-4 指向不存在的台账条目 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#a650f2c55033920d","[EVIDENCE] archetypes[poison_stack].evidence[2].ledger_entry：台账里没有 EV-NOT-IN-LEDGER（“我们记在台账里了”如果台账里没有，和没记是一样的）"]}
+  · [实际输出] ⑥a 指向一个仓里不存在的文件 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#5cee937ff4617bb2","[EVIDENCE] archetypes[poison_stack].evidence[0].ref：ref 既不是 http(s)、也不是仓里真实存在的文件：\"docs/roco/根本不存在.md\""]}
+  · [实际输出] ⑥b 抹掉日期 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#a02e897e717b365e","[EVIDENCE] archetypes[poison_stack].evidence[0].date：date 必须是 YYYY-MM-DD，实际 \"\""]}
+  · [实际输出] ⑥c 用一个既不是 http(s) 也不是仓内文件的 scheme = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#f913345502ff57c0","[EVIDENCE] archetypes[poison_stack].evidence[0].ref：ref 既不是 http(s)、也不是仓里真实存在的文件：\"ftp://example.com/x\""]}
+  · [实际输出] ⑥ 实际引用清单 = ["data/roco/evidence/rule-evidence-ledger.json","data/roco/normalized/roco-world-s4-2026-09-10/skills.json","docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md","https://news.17173.com/content/03182026/104940843.shtml","https://wiki.biligame.com/nrc/深渊罗隐","https://wiki.biligame.com/nrc/特性列表","https://wiki.biligame.com/nrc/邪眼巨魔","https://zhuanlan.zhihu.com/p/2040741873246024568","roco/src/roco_env/env.py#L59"]
+  · [实际输出] ⑦ 把版本作用域四项全删掉 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#e60f004b8369008a","[SCHEMA] version_scope.season：版本作用域的 season 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版","[SCHEMA] version_scope.ruleset_id：版本作用域的 ruleset_id 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版","[SCHEMA] version_scope.ruleset_config_id：版本作用域的 ruleset_config_id 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版","[SCHEMA] version_scope.as_of：版本作用域的 as_of 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版"]}
+  · [实际输出] ⑦ 逐项报错 = ["[SCHEMA] version_scope.season：版本作用域的 season 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版","[SCHEMA] version_scope.ruleset_id：版本作用域的 ruleset_id 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版","[SCHEMA] version_scope.ruleset_config_id：版本作用域的 ruleset_config_id 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版","[SCHEMA] version_scope.as_of：版本作用域的 as_of 缺失或为空（实际值 null）——缺它这份先验就说不清管的是哪一版"]
+  · [实际输出] ⑧-1 两次构建 = {"first_bytes":28862,"second_bytes":28862,"identical":true}
+  · [实际输出] ⑧-2 排序实测 = {"archetype_ids":["poison_stack","wing_king_flyer","meteor_burst","sugar_morph","ice_control","sandstorm_weather","fighting_press"],"seed_species_sample":["刺盔虫","千棘海针","千棘盔","厉毒修萝","厉毒小萝","古啦多"]}
+  · [实际输出] ⑧-3 故意改一个字节之后的 --check = {"ok":false,"reason":"磁盘上的 v1.json 与重新构建的结果不一致：第 738 行起不同\n  重建：\"    \\\"as_of\\\": \\\"2026-09-21\\\",\"\n  磁盘：\"    \\\"as_of\\\": \\\"2026-09-20\\\",\""}
+  · [实际输出] ⑨-1 用到的判据 = {"used":["cost","coverage","energy","pivot","respond","speed","synergy"],"legal":["coverage","speed","energy","respond","pivot","synergy","cost"]}
+  · [实际输出] ⑨-2 台账六级 = {"levels":["OFFICIAL_CURRENT","RECORDED_IN_GAME","COMMUNITY_CURRENT","CROSS_SOURCE_SUPPORTED","ENGINE_HYPOTHESIS","UNKNOWN"],"ledger_levels":["OFFICIAL_CURRENT","RECORDED_IN_GAME","COMMUNITY_CURRENT","CROSS_SOURCE_SUPPORTED","ENGINE_HYPOTHESIS","UNKNOWN"]}
+  · [实际输出] ⑨-3 用自创形容词当判据 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#75e5d2522a312207","[CRITERION] archetypes[poison_stack].feature_axes[0].axis：axis 不在 RC-302 的七维里：\"看起来很压制\"","[CRITERION] archetypes[poison_stack].feature_axes[0].criterion：criterion 不是 src/coach/team-gaps.js#DIMENSION_CRITERIA 的判据 ID：\"看起来很压制\"（合法 ID：coverage / speed / energy / respond / pivot / synergy / cost）——先验不许自创形容词"]}
+  · [实际输出] ⑩-1 引用角色 = {"roles":["rule_evidence_ledger","game_data_pack","ruleset_config","catalog_reconciliation","pack_schema"],"required":["rule_evidence_ledger","game_data_pack","ruleset_config","catalog_reconciliation"]}
+  · [实际输出] ⑩-2 把 pack 的 sha256 改成错的 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#8ad2c6a8bf16bf81","[DERIVED_FROM] derived_from[1].sha256：data/roco/game-data-pack/v2/pack.json 的 sha256 与磁盘不一致：先验写 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘是 629eef2731464808dc3f4bca55e73c4a69ce1598d1cc0689bb3a70a679164505"]}
+  · [实际输出] ⑩-3 删掉台账引用 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#b3d2c9b8048b8c62","[DERIVED_FROM] derived_from：缺少角色 rule_evidence_ledger（应指向 data/roco/evidence/rule-evidence-ledger.json）"]}
+  · [实际输出] ⑩-4 实际引用 = ["rule_evidence_ledger=data/roco/evidence/rule-evidence-ledger.json#aefd634a8baf…","game_data_pack=data/roco/game-data-pack/v2/pack.json#629eef273146…","ruleset_config=data/roco/rulesets/legacy-sim-v1.json#f66f760304f1…","catalog_reconciliation=reports/roco/reconciliation/catalog-reconciliation.json#bca1bf352a13…","pack_schema=data/roco/game-data-pack/v2/schema.json#7ed3f4b16307…"]
+  · [实际输出] ⑪-1 磁盘 ID 与重算 ID = {"on_disk":"roco-meta-prior/v1#7c077248f9436238","recomputed":"roco-meta-prior/v1#7c077248f9436238","builder":"roco-meta-prior/v1#7c077248f9436238"}
+  · [实际输出] ⑪-2 改正文不改 ID = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#ff09b716f85d8209"]}
+  · [实际输出] ⑫-1 口径清单 = {"keys":["expected_meta_value","worst_archetype","matchup_spread","execution_tolerance","coverage_confidence"],"required":["expected_meta_value","worst_archetype","matchup_spread","execution_tolerance","coverage_confidence"]}
+  · [实际输出] ⑫-2 删掉一个口径 = {"ok":false,"problems":["[SCHEMA] meta_prior_id：meta_prior_id 是 \"roco-meta-prior/v1#7c077248f9436238\"，按正文重算应为 roco-meta-prior/v1#12c5f6fbf2dcf497","[USAGE] usage.inputs.worst_archetype：缺少 RC-304 输入口径 worst_archetype"]}
+  · [实际输出] ⑫-3 先验不能用来做什么 = 这份先验**不能用来排序队伍**：它没有任何真实对局数据，distribution 全部是 unknown。它现在能做的只有三件事：定义这一版环境里有哪些可识别的体系、给出每个体系的可复算特征轴、把「我们还缺什么实机证据」列清楚。任何拿它当强度榜用的做法，都越过了它自己写下的边界。
+  · [实际输出] ⑬-1 schema = {"schema":"roco-meta-prior-schema/v1","meta_prior_schema":"roco-meta-prior/v1","confidence_enum":["OFFICIAL_CURRENT","RECORDED_IN_GAME","COMMUNITY_CURRENT","CROSS_SOURCE_SUPPORTED","ENGINE_HYPOTHESIS","UNKNOWN"],"axis_enum":["coverage","speed","energy","respond","pivot","synergy","cost"],"criterion_source":"src/coach/team-gaps.js#DIMENSION_CRITERIA（RC-302）"}
+  · [实际输出] ⑬-2 审计规则 = ["SCHEMA：顶层 schema / meta_prior_id 不对，或版本作用域缺赛季、ruleset_id、ruleset_config_id、as_of 里的任意一项 ⇒ 红","BANNED_KEY：任何层级出现胜率 / 榜单 / 强度分一类**键名**（写成 null 也算）⇒ 红","ARCHETYPE_SHAPE：体系缺必填字段、archetype_id 不合 ^[a-z][a-z0-9_]*$、或 archetype_id 重复 ⇒ 红","SEED_SPECIES：`seed_species[]` 里的物种在 pack 的 pet 实体里不存在 ⇒ 红（写了一个不存在的精灵名，等于编造环境里有它）","SEED_SELECTION：体系没有任何种子物种却不声明 seed_selection.source=\"none_available\" 且 needs_recording 为空 ⇒ 红","CRITERION：feature_axes[].criterion 不是 RC-302 已实现的判据 ID（自创形容词）⇒ 红","EVIDENCE：某条 evidence 的 ref 既不是 http(s)、也不是仓里真实存在的文件，或缺 date / confidence ⇒ 红","CONFIDENCE：confidence 用了台账六级之外的等级 ⇒ 红","DISTRIBUTION：distribution 缺某个体系的一条；`measured` 却没有来源 → 红；`unknown` 却带非 null value 或没有 reason → 红","USAGE：usage.inputs 缺 RC-304 的五个口径之一，或某个口径没有可读说明 ⇒ 红","DERIVED_FROM：derived_from 缺必需角色、引用的文件不存在、或 sha256 与磁盘不一致 ⇒ 红（先验引用的产物已经变了）","CHECK：`--check` 时磁盘上的 v1.json 与重新构建的结果不一致（含排序）⇒ 红"]
+  · [实际输出] ⑭-1 报告可复跑 = {"bytes":24398,"deterministic":true,"distribution_source":"unknown"}
+  · [实际输出] ⑭-2 报告头 = {"report_version":"roco-rc304-metaprior-report/v1","meta_prior_id":"roco-meta-prior/v1#7c077248f9436238","archetypes":7,"evidence_confidence":{"OFFICIAL_CURRENT":0,"RECORDED_IN_GAME":0,"COMMUNITY_CURRENT":5,"CROSS_SOURCE_SUPPORTED":4,"ENGINE_HYPOTHESIS":12,"UNKNOWN":0},"distribution_source":"unknown"}
+  · [实际输出] ⑭-2b 报告里的必红方向 = ["1 给某个体系填 win_rate ⇒ 红 → passed=true","1b 把禁令字段写成 null 也 ⇒ 红 → passed=true","2 distribution 缺来源却写成 measured ⇒ 红 → passed=true","2b measured 有来源却没写清数值出自哪里 ⇒ 红 → passed=true","3 unknown 却带非 null value ⇒ 红 → passed=true","3b unknown 没有 reason ⇒ 红 → passed=true","4 seed_species 引用不存在的精灵 ⇒ 红 → passed=true","5 confidence 用了台账之外的等级 ⇒ 红 → passed=true","5c 逐条证据的等级与台账不一致 ⇒ 红 → passed=true","6 evidence 的 url/文件不可核对 ⇒ 红 → passed=true","7 version_scope 缺赛季或 ruleset ⇒ 红 → passed=true","9 feature_axes 用自创形容词当判据 ⇒ 红 → passed=true","10 derived_from 的 sha256 与磁盘不一致 ⇒ 红 → passed=true","11 改了正文却不更新 meta_prior_id ⇒ 红 → passed=true","13 空种子却不声明 none_available ⇒ 红 → passed=true"]
+  · [实际输出] ⑭-3 与磁盘上的报告对照 = {"on_disk":"roco-meta-prior/v1#7c077248f9436238","built":"roco-meta-prior/v1#7c077248f9436238"}
+✔ RC-304-0 基线：磁盘上的 v1.json 与重建结果逐字节一致，且自检通过 (12.111416ms)
+✔ RC-304-1 先验只产出「体系 + 可复算特征轴 + 不知道」，不含任何胜率或榜单结论 (22.787417ms)
+✔ RC-304-① 给某个体系填 win_rate 必须红（BANNED_KEY） (10.148667ms)
+✔ RC-304-② distribution 缺来源却写成 measured 必须红（DISTRIBUTION） (10.83025ms)
+✔ RC-304-②b 就算补了来源，没写清数值出自哪里也必须红（DISTRIBUTION.value_source） (10.649292ms)
+✔ RC-304-③ unknown 却带非 null value 必须红（DISTRIBUTION） (11.556916ms)
+✔ RC-304-③b unknown 没有 reason 必须红，且分布形态如实是 unknown (9.973458ms)
+✔ RC-304-④ seed_species 引用不存在的精灵必须红（SEED_SPECIES） (10.207167ms)
+✔ RC-304-④b 空种子必须显式声明 none_available + 挂上待录证据 (10.890334ms)
+✔ RC-304-⑤ confidence 用了台账之外的等级必须红（CONFIDENCE） (21.365417ms)
+✔ RC-304-⑤c 逐条证据必须能被台账核对：等级与首要来源都不许自己抄一份 (31.534625ms)
+✔ RC-304-⑥ evidence 的 url/文件不可核对必须红（EVIDENCE） (32.806625ms)
+✔ RC-304-⑦ version_scope 缺赛季或 ruleset 必须红（SCHEMA） (10.694292ms)
+✔ RC-304-⑧ 构建器两次运行结果必须逐字节一致（含排序） (44.31ms)
+✔ RC-304-⑨ feature_axes 复用 RC-302 判据，等级只有台账那一份定义 (12.19425ms)
+✔ RC-304-⑩ derived_from 的 sha256 与磁盘一致，先验只是引用 (20.717875ms)
+✔ RC-304-⑪ meta_prior_id 与正文自洽：改一个字节就换一个 ID (11.079084ms)
+✔ RC-304-⑫ usage 覆盖 RC-304 的五个口径，且每个都写了诚实边界 (10.592959ms)
+✔ RC-304-⑬ schema.json 与判据同源，没有第二份定义 (0.287ms)
+✔ RC-304-⑭ 机器可读报告可复跑，且报告里的分布形态与先验如实一致 (466.765375ms)
+  · [实际] 实例 = 80 ；species = 48 ；battle_builds = 80
+  · [实际] 分组 = schema_compliance:ok schema_file:ok species_existence:ok species_universe:ok learnset_membership:ok skill_order:ok instance_identity:ok growth_attributes:ok unknown_fields:ok provenance_on_disk:ok licence_refs:ok build_hashes:ok battle_builds:ok base_stats_pointers:ok determinism_declaration:ok declared_counts:ok
+  · [实际] 问题 = (无)
+  · [实际] 实例 = 80 ；species = 48 ；不在 layer-playable-48 的 = 12
+  · [实际] 不在 layer-playable-48 的 species 逐只点名 = pet_000062,pet_000112,pet_000124,pet_000190,pet_000225,pet_000417,pet_000445,pet_000451,pet_000474,pet_000601,pet_000608,pet_000611
+  · [实际] 同种组 = 32
+  · [实际] 逐个核对的技能引用 = 320
+  · [实际] 养成属性条目 = 320 （全部 effect=UNKNOWN）
+  · [实际] 实例级 unknown_fields 取值集合 = ["bloodline+nature+panel_stats+specialty+talent","nature+panel_stats+specialty+talent"]
+  · [实际] dataset_hash = 4b69a662b4a69b82addd03fba0ef9703d2c3c5f69ab52af7c43c396bce21ac1f
+  · [实际] sha256(owned-pets.json) = 3ff29910843c7bace2132223fde70f8656a7ccc1edc6c3abe4c8ec29196c4374
+  · [实际] schema 契约 = OwnedPetDataset,OwnedPet,BattleBuild,GrowthAttribute,BloodlineAttribute,ProvenanceEntry,StatVector,Counts
+  · [实际] different_fields = ["level","skills"]
+  · [实际] unknown_fields = ["nature","talent","specialty","bloodline"]
+  · [实际] fields.level = {"field":"level","status":"different","a":50,"b":90}
+  · [实际] fields.nature = {"field":"nature","status":"unknown","a":null,"b":null,"detail":"双方取值均不可得","effect":"unknown","effect_reason":"面板换算公式未校准（见 10 号文档 §13）"}
+  · [实际] fields.skills = {"field":"skills","status":"different","a":["skill_000246","skill_000273","skill_000359","skill_000249"],"b":["skill_000246","skill_000273","skill_000359","skill_000342"],"order_sensitive":true,"skills_as_set":"different"}
+  · [实际] 只换顺序：skills = different ；skills_as_set = same
+  · [实际] 不同物种抛错 = OwnedPetSpeciesMismatchError ： compareOwnedPets 只接受同一 species_id 的两个个体：a=pet_000012 b=pet_000062
+  · [实际] 基线判据 = PASS
+  · [实际] 红   R01 抽掉一个实例的 provenance → 期望 provenance_on_disk；原文 = [provenance_on_disk] own-0001 没有 provenance 条目
+  · [实际] 红   R02 把 artifact_sha256 改成与磁盘不符 → 期望 provenance_on_disk；原文 = [provenance_on_disk] own-0002 的 data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json artifact_sha256=0000000000000000000000000000000000000000000000000000000000000000，磁盘实际=939b586256fd45ef2bfa0ffea11e0d3c870bd462e0fd38ceb88e819a87c18cae
+  · [实际] 红   R03 把一个技能换成该精灵学不到的技能（全量 skills.json 里真实存在，但不在该 species 的 learnset 里） → 期望 learnset_membership；原文 = [learnset_membership] own-0003（pet_000062）的 skill_000001 不在该 species 的 data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json native_skills 里
+  · [实际] 红   R04 把四个技能改成三个 → 期望 learnset_membership；原文 = [learnset_membership] own-0004 的 skills 有 3 个（要求恰好 4 个）: ["skill_000385","skill_000316","skill_000402"]
+  · [实际] 红   R05 把某只的 species_id 改成不存在的 → 期望 species_existence；原文 = [species_existence] own-0005 的 species_id=pet_999999 在冻结 full-catalog 与 pack 里都找不到
+  · [实际] 红   R06 给 nature.effect 填一个具体数值（发明公式） → 期望 growth_attributes；原文 = [growth_attributes] own-0006.nature.effect=0.2 既不是 UNKNOWN 也不在证据 id 白名单 [] 里——这是被发明的养成公式
+  · [实际] 红   R07 实例降到 79 个 → 期望 species_universe；原文 = [species_universe] 实例只有 79 个 < 80
+  · [实际] 红   R08 把有值的字段塞进 unknown_fields（level） → 期望 unknown_fields；原文 = [unknown_fields] own-0007.unknown_fields 多报 ["level"]（这些字段是有值的，不能标 unknown）
+  · [实际] 红   R09 把 BattleBuild 的技能位顺序反转 → 期望 skill_order；原文 = [skill_order] own-0008 的 skills=["skill_000316","skill_000529","skill_000724","skill_000728"]，但 battle_build.ordered_skills=["skill_000728","skill_000724","skill_000529","skill_000316"]——技能位顺序被改动了
+  · [实际] 红   R10 把 licence_ref 改成查不到的来源 → 期望 licence_refs；原文 = [licence_refs] own-0009 的 licence_ref="licence-not-registered-anywhere" 在 pack.source_registry 与 data/roco/sources.yaml 里都找不到
+  · [实际] 红   R11 给养成属性加一个被发明的公式字段 → 期望 growth_attributes；原文 = [growth_attributes] own-0010.talent 出现了被发明的公式字段 formula
+  · [实际] 红   R13 给 effect 编一个查不到的证据 id → 期望 growth_attributes；原文 = [growth_attributes] own-0010.talent.effect="microcase:panel-formula-v1" 既不是 UNKNOWN 也不在证据 id 白名单 [] 里——这是被发明的养成公式
+  · [实际] 红   R12 把 base_stats 改成与冻结目录不符 → 期望 base_stats_pointers；原文 = [base_stats_pointers] own-0011 的 base_stats={"atk":46,"def":66,"hp":54,"spa":46,"spd":66,"spe":100}，冻结目录 pets[123].stats={"atk":46,"def":66,"hp":53,"spa":46,"spd":66,"spe":100}
+  · [实际] rc = 1 ；原文 = [provenance_on_disk] own-0001 没有 provenance 条目
+  · [实际] rc = 1 ；原文 = [provenance_on_disk] own-0002 的 data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json artifact_sha256=ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘实际=939b586256fd45ef2bfa0ffea11e0d3c870bd462e0fd38ceb88e819a87c18cae
+  · [实际] 学了学不到的 rc = 1 ；原文 = [learnset_membership] own-0003（pet_000062）的 skill_000001 不在该 species 的 data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json native_skills 里
+  · [实际] 三个技能的 rc = 1 ；原文 = [learnset_membership] own-0004 的 skills 有 3 个（要求恰好 4 个）: ["skill_000385","skill_000316","skill_000402"]
+  · [实际] 假 species rc = 1 ；原文 = [species_existence] own-0005 的 species_id=pet_999999 在冻结 full-catalog 与 pack 里都找不到
+  · [实际] 79 个实例 rc = 1 ；原文 = [species_universe] 实例只有 79 个 < 80
+  · [实际] effect=0.2 rc = 1 ；原文 = [growth_attributes] own-0006.nature.effect=0.2 既不是 UNKNOWN 也不在证据 id 白名单 [] 里——这是被发明的养成公式
+  · [实际] 公式字段 rc = 1 ；原文 = [growth_attributes] own-0006.specialty 出现了被发明的公式字段 multiplier
+  · [实际] 臆造证据 id rc = 1 ；原文 = [growth_attributes] own-0006.talent.effect="microcase:panel-formula-v1" 既不是 UNKNOWN 也不在证据 id 白名单 [] 里——这是被发明的养成公式
+  · [实际] 手写标签后 unknown_fields 不一致 rc = 1 ；原文 = [unknown_fields] own-0006.unknown_fields 多报 ["nature"]（这些字段是有值的，不能标 unknown）
+  · [实际] rc = 1 ；原文 = [unknown_fields] own-0007.unknown_fields 多报 ["level"]（这些字段是有值的，不能标 unknown）
+  · [实际] 漏报方向 rc = 1 ；原文 = [unknown_fields] own-0007.unknown_fields 漏报 ["talent"]（这些字段确实不可得）
+  · [实际] 顺序反转 rc = 1 ；原文 = [skill_order] own-0008 的 skills=["skill_000316","skill_000529","skill_000724","skill_000728"]，但 battle_build.ordered_skills=["skill_000728","skill_000724","skill_000529","skill_000316"]——技能位顺序被改动了
+  · [实际] 假 licence_ref rc = 1 ；原文 = [licence_refs] own-0009 的 licence_ref="licence-not-registered-anywhere" 在 pack.source_registry 与 data/roco/sources.yaml 里都找不到
+  · [实际] 改 base_stats rc = 1 ；原文 = [base_stats_pointers] own-0010 的 base_stats={"atk":116,"def":127,"hp":108,"spa":69,"spd":65,"spe":120}，冻结目录 pets[117].stats={"atk":116,"def":127,"hp":107,"spa":69,"spd":65,"spe":120}
+  · [实际] 判据条数 = 19 ；checks = 16
+  · [实际] C06 不在 48 层 = 12
+  · [实际] C07 同种组 = 32（其中有差异 32）
+  · [实际] 备选口径 roster-48 池外 species = 0
+  · [实际] 跳过 = {"reasons":[{"reason":"no_frozen_learnset","count":574,"detail":"pack 里有这只，但冻结 normalized/ 目录里没有它的 learnsets.json 条目（四技能与合法性未校验）"},{"reason":"insufficient_learnable_skills","count":0,"detail":"有 learnset，但 native_skills 里在全量 skills.json 里查得到的不足 4 个"},{"reason":"no_blood_skills_in_learnset","count":0,"detail":"有 learnset，但 blood_skills 一个都查不到——血脉标签无从取值（不猜）"},{"reason":"species_not_in_pack","count":0,"detail":"有 learnset，但不在 pack 的 pet 实体里（来源台账对不上）"}],"no_frozen_learnset":574,"insufficient_learnable_skills":0,"no_blood_skills_in_learnset":0,"species_not_in_pack":0,"skipped_species_total":574}
+  · [实际] unknown 属性 = nature,talent,specialty,bloodline.value,bloodline.effect,panel_stats,battle_builds[].derived_stats
+✔ 真产物：80 个 owned 实例过全部 16 组判据 (47.43475ms)
+✔ 真产物：实例数 / species 数 / 不在 48 层的逐只点名 / 同种组数 (0.754792ms)
+✔ 真产物：四个技能逐个都在该 species 的 learnsets.json native_skills 里 (3.929917ms)
+✔ 真产物：养成属性全部是 UNKNOWN，且没有任何被发明的公式字段 (0.679ms)
+✔ 真产物：unknown_fields 与「确实不可得」双向一致 (0.417209ms)
+✔ 确定性：同一输入两次重建逐字节相同，且没有任何挂钟字段 (36.611333ms)
+✔ schema.json 是契约：磁盘内容与「现在重建」逐字节相同 (0.261708ms)
+✔ compareOwnedPets：同种不同个体的逐字段结论，以及不同物种必须抛错 (3.258542ms)
+✔ 反证：13 条注入全部翻红（逐条打印实际输出原文） (210.933458ms)
+✔ 反证① 抽掉一个实例的 provenance ⇒ 红 (12.712667ms)
+✔ 反证② artifact_sha256 与磁盘不符 ⇒ 红 (13.281792ms)
+✔ 反证③④ 技能换成学不到的 / 四个改成三个 ⇒ 红 (30.646417ms)
+✔ 反证⑤⑦ species_id 不存在 / 实例降到 79 个 ⇒ 红 (31.500375ms)
+✔ 反证⑥⑪ nature.effect 填数值 / 长出公式字段 ⇒ 红 (59.358625ms)
+✔ 反证⑧ 有值的字段塞进 unknown_fields ⇒ 红 (31.040958ms)
+✔ 反证⑨⑩⑫ BattleBuild 顺序反转 / licence_ref 查不到 / base_stats 不符 ⇒ 红 (40.391ms)
+✔ RC-203 报告：存在、可解析、逐条给出判据文本与实际值、不含挂钟字段 (1.254667ms)
+  · [实际] 报告字节 = 335612 ；schema = roco-rag-eval/v1
+  · [实际] 两次重算 = 逐字节相同
+  · [实际] 总计 = 45 ；分类 = {"entity_alias":9,"skill_mechanic":8,"rule_version":8,"conflict_abstain":11,"lineup_counter":9}
+  · [实际] 最长逐字重合 top3 = R07:7(回合末自然回能) R03:6(常规能量上限) R05:6(首次入场能量)
+  · [实际] 既有 fixture 条数 = 148 ；交集 = 0 ；最高 token Jaccard = {"value":0.1667,"heldout":"M08","fixture":"x69"}
+  · [实际] 出处种类 = {"pack_entity":11,"owned_pet":2,"ledger_entry":20,"ruleset_config":7,"pack_conflict_policy":1,"pack_conflict":3,"pack_absence":1}
+  · [实际] 声明 = {"total":45,"by_category":{"conflict_abstain":11,"entity_alias":9,"lineup_counter":9,"rule_version":8,"skill_mechanic":8},"ids_sha256":"03a600a25048591587ea4f2095fa21b427eb0614621bd0d06ad4f9b38bcd7739"} ；重算 = {"total":45,"by_category":{"conflict_abstain":11,"entity_alias":9,"lineup_counter":9,"rule_version":8,"skill_mechanic":8},"ids_sha256":"03a600a25048591587ea4f2095fa21b427eb0614621bd0d06ad4f9b38bcd7739"}
+  · [实际] baseline_searchKnowledge: R@1=0 R@3=0 R@10=0 MRR=0 实体命中=0 版本命中=0 冲突弃答=0
+  · [实际] baseline_lexical_pack: R@1=0.7058823529411765 R@3=0.8235294117647058 R@10=0.9411764705882353 MRR=0.7814075630252101 实体命中=0.9411764705882353 版本命中=0.3333333333333333 冲突弃答=0
+  · [实际] rag_index: R@1=1 R@3=1 R@10=1 MRR=1 实体命中=1 版本命中=1 冲突弃答=1
+  · [实际] 抽样 = 44 ；grounded = 44 ；precision = 1
+  · [实际] 等级不一致的查询 = 0 ；等级匹配率 = 1
+  · [实际] 弃答原因分布 = {"EVIDENCE_LEVEL_INSUFFICIENT":7,"UNRESOLVED_IDENTITY_CONFLICT":3,"NO_MATCH":1}
+  · [实际] 探针 = 13 条；未按预期 = P10
+  · [实际] 判据 = coverage:ok leakage:ok fixture_intersection:ok derivation:ok abstain_consistency:ok conflict_abstention:ok grounded:ok version_hit:ok evidence_level:ok baselines_reported:ok query_manifest:ok probe_reported:ok no_clock:ok
+  · [实际] rc = 1 ；E01 hit@1 true → false ；Recall@1 1 → 0.9705882352941176
+  · [实际] rc = 1 ；清单判据=红（声明 45 → 实际 44） ；弃答分母 11 → 10
+  · [实际] rc = 1 ；抹掉 pet::pet_000011 的 1 条 provenance ；grounded precision 1 → 0.9772727272727273 ；问题原文 = E05 → pet::pet_000011: pet::pet_000011 没有任何 provenance 条目
+  · [实际] rc = 1 ；问题条数 = 11；原文 = C01 期望 ABSTAIN 却被算成命中 | C02 期望 ABSTAIN 却被算成命中
+  · [实际] rc = 1 ；原文 = E01 泄漏：contained_in=["injected::leak"] max_lcs=18（限 8）
+  · [实际] rc = 1 ；原文 = E02 与既有 fixture injected 逐字相同：彩虹独角兽在公开索引里是首领形态吗
+  · [实际] R1 把 E01 的 expected 改成 EV-BATTLEMODE-PARAMETERIZED → 按预期翻红；该条 hit@1=false（原 true）；Recall@1 1 → 0.9705882352941176
+  · [实际] R2 删掉 ④ 类查询 C01 → 按预期翻红；清单判据=红（声明 45 条 → 实际 44 条）；弃答分母 11 → 10
+  · [实际] R3 抹掉 pet::pet_000011 的 provenance → 按预期翻红；grounded precision 1 → 0.9772727272727273；grounded 判据=红
+  · [实际] R4 把 ABSTAIN 也算成命中 → 按预期翻红；abstain_consistency 判据=红；问题=11 条
+  · [实际] R5 把 E01 的查询原文塞进语料 → 按预期翻红；泄漏条数=1；E01 泄漏：contained_in=["injected::leak"] max_lcs=18（限 8）
+  · [实际] R6 把既有 fixture 条目换成 E02 的查询 → 按预期翻红；交集=1：E02 与既有 fixture injected 逐字相同：彩虹独角兽在公开索引里是首领形态吗
+  · [实际] scope = RC-204 held-out 检索评测：内部一致性 + 可追溯性判据。不是端到端回答质量、不是玩家体验、不是独立盲评。
+  · [实际] vector = NOT_IMPLEMENTED（无本地嵌入模型、不联网；接口留在 rag-index.searchIndex 的 vector 选项上）
+✔ 真产物：reports/roco/rag/rag-eval.json 存在、可解析、与重算逐字节一致（--check 判据） (6.419625ms)
+✔ 可复跑：同输入两次计算结果逐字节相同（generated_at 在单独 metadata 里） (1629.13575ms)
+✔ 五类各 ≥8 条、总计 ≥40 条，且分类计数与清单声明一致 (0.23175ms)
+✔ held-out：查询不逐字出现在语料里（完全包含 + 最长逐字重合） (0.160417ms)
+✔ held-out：与 tests/evals/retrieval*.json 的既有条目交集为空（给出判据与最大相似度） (0.698667ms)
+✔ held-out：每条期望值都能在语料里追到出处（ref 存在 + anchors 命中；absence 类反向扫描） (0.278ms)
+✔ 清单：query_manifest 与查询集一致（删改一条查询必须被发现） (0.289875ms)
+✔ 指标：三套检索器（含现有 searchKnowledge 原样）都有完整指标，基线差如实报出 (0.2585ms)
+✔ grounded precision：抽样 top-1 逐条能追到 provenance/证据（1.0 才算过） (0.243208ms)
+✔ 证据等级：六级常量与台账库一致；每条查询声明的等级都在六级内 (0.222875ms)
+✔ 每条查询的逐条明细都在：top-3 + 命中与否 + 为什么 + 弃答原因 (0.379209ms)
+✔ 探针集：另外写、只跑一次、失败也登记（不许只报主集） (0.169875ms)
+✔ 判据集合：十三组全部通过，且每组都写了「什么输入必须让它红」 (0.108666ms)
+✔ 反证① 把某条查询的 expected 改成错实体 ⇒ 该条判错且指标下降 (789.708333ms)
+✔ 反证② 删掉一条 ④ 类查询 ⇒ 清单判据红、弃答分母变化被记录 (1548.386ms)
+✔ 反证③ 抹掉某条结果的 provenance ⇒ grounded precision 下降、判据红 (1546.12ms)
+✔ 反证④ 让 runner 把 ABSTAIN 算成命中 ⇒ 口径判据红 (800.871709ms)
+✔ 反证⑤ 把一条 query 原文塞进语料 ⇒ 泄漏判据红 (541.706542ms)
+✔ 反证⑥ held-out 与既有 fixture 交集非空 ⇒ 红 (7.050125ms)
+✔ 反证自检：--selftest 的六条注入反证全部按预期翻红 (6567.465542ms)
+✔ 边界：报告自己声明了不声称的东西（不是端到端 / 不是真人体验 / 向量未做） (0.158ms)
+✔ RC-101 规则配置：两份都在，且生成逻辑与磁盘一致 (2.887875ms)
+✔ RC-101 规则配置：两份配置本身合规（结构 / 必填 / BattleMode 指向真实模式） (0.628209ms)
+✔ RC-101 规则配置：台账指纹必须对得上（台账改了配置就得重生成） (0.43375ms)
+✔ RC-101 规则配置：每个 evidence_id 在台账里真的存在，且置信等级逐字相等 (0.699958ms)
+✔ RC-101 规则配置：unknown 必须是 null + reason，不许补一个看起来合理的数 (0.477792ms)
+✔ RC-101 规则配置：candidate 带具体值的字段必须标 CANDIDATE_HYPOTHESIS + microcase_id (0.472041ms)
+✔ RC-101 规则配置：两个配置的字段 diff 与台账结论一致（candidate 没有被静默 promotion） (0.093917ms)
+    实际逐字段判决：{"fields":10,"PROMOTABLE":0,"NOT_PROMOTABLE":10,"REFUTED":0,"recordings":0}
+      battle_mode.team_size=NOT_PROMOTABLE
+      battle_mode.active_count=NOT_PROMOTABLE
+      energy.max=NOT_PROMOTABLE
+      energy.regen.per_turn=NOT_PROMOTABLE
+      energy.initial=NOT_PROMOTABLE
+      energy.charge=NOT_PROMOTABLE
+      turn_order.action_order=NOT_PROMOTABLE
+      turn_order.speed_tie=NOT_PROMOTABLE
+      turn_order.end_turn.order=NOT_PROMOTABLE
+      turn_order.end_turn.unknown_stages_allowed=NOT_PROMOTABLE
+    实际：energy.max=PROMOTABLE；其余 PROMOTABLE 0 条
+    实际（等级不足 COMMUNITY_CURRENT）：energy.max=NOT_PROMOTABLE — MC-E01 记录的 confidence="COMMUNITY_CURRENT" 不是 RECORDED_IN_GAME / OFFICIAL_CURRENT：这一级不足以 promotion
+    实际：energy.max=REFUTED
+      台账 EV-ENERGY-MAX 现在是 CROSS_SOURCE_SUPPORTED；本次记录是 RECORDED_IN_GAME。promotion 时台账那条必须一并改成 RECORDED_IN_GAME/OFFICIAL_CURRENT —— 改台账是人的决定，本脚本不代做
+      观测到的能量读数最大值 energy_max_observed=12 与候选值 10 不一致
+    实际配置 sha256：before=e3435f8438485c72… after=e3435f8438485c72…
+    实际（过期记录）：记录过期：recorded_at=2020-01-01 距今天 2455 天，超过上限 548 天（旧录像对应的可能是另一个游戏版本，必须重录）
+    实际：变绿字段 ["energy.max","energy.regen.per_turn","energy.charge"]；can_be_default=false
+    实际：12 条，失败 0 条
+    实际反证条数：10
+    实际（/tmp 里的坏副本）登记表问题原文：[record.confidence] MC-E01 — confidence 只允许 RECORDED_IN_GAME / OFFICIAL_CURRENT，实际 "COMMUNITY_CURRENT"（社区页面 / 官方转载 / 仓库内部事实源都不能顶这里）
+    实际 sha256：{"candidate":"e3435f8438485c729c930a58d86454f1d38447782277249dcf4e0302271eab71","ledger":"aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903","caseRecords":"9a4d3e37df8e93e0ee10248b8b60cb1ef295328b581cda25ad56d43c114f349b","recordings":"e49e6edc9405194b73032238f25f380c0664b58ff28f8016eb1befff345c84c9"}
+✔ RC-102 登记表：真仓库的 recordings 必须是空数组（本阶段没有录到任何实机） (0.949708ms)
+✔ RC-102 判决：空记录表 → 候选配置每个字段都 NOT_PROMOTABLE，且理由点名缺哪条 MC-E (2.997333ms)
+✔ RC-102 判决：伪造一条合法记录（内存）→ 对应字段变 PROMOTABLE（证明判据不是恒假） (1.653667ms)
+✔ RC-102 判决：记录与候选值冲突 → REFUTED，且配置 sha256 前后完全一致（脚本不改配置） (0.727875ms)
+✔ RC-102 判决：media_ref / pass_criteria / 记录过期 / 日期不可解析 各有必红方向 (4.724292ms)
+✔ RC-102 判决：candidate_config_can_be_default 恒为 false（即使字段全绿也不许自动转默认） (0.797834ms)
+✔ RC-102 自检：--selftest 的 12 条用例全部通过（≥6 条反证） (4.479583ms)
+✔ RC-102 边界：报告只写 rule-promotion.json，且 data/ 下的只读输入一个字节都没变 (3.188792ms)
+  · [实际输出] ⓪-1 基线审计 = {
+ "ok": true,
+ "problems": []
+}
+  · [实际输出] ⓪-2 候选宇宙实测 = {
+ "owned_instances": 80,
+ "catalog_pet_entities": 622,
+ "validated_species": 48,
+ "recall_count": 50,
+ "pool": {
+  "universe": "catalog",
+  "pool_size": 650,
+  "universe_size": 702,
+  "owned_pool": 76,
+  "catalog_pool": 574,
+  "eligible_after_policy": 620,
+  "favourites_only": false,
+  "excluded_by_constraints": 3
+ }
+}
+  · [实际输出] ⓪-3 候选的 namespace 分布 = [
+ "catalog_species",
+ "owned_instance"
+]
+  · [实际输出] ⓪-4 缺证据/缺 unverified/置信不在台账六级的候选数 = 0
+  · [实际输出] ⓪-5 Top-K = {
+ "top_k": 4,
+ "ranks": [
+  1,
+  2,
+  3,
+  4
+ ]
+}
+  · [实际输出] ⓪-6 Top-K 队伍里的图鉴物种成员 = [
+ "pet_000001",
+ "pet_000001",
+ "pet_000001",
+ "pet_000001"
+]
+  · [实际输出] ⓪-7 beam 预算与实际值 = {
+ "beamWidth": 3,
+ "nodeBudget": 120,
+ "timeBudgetMs": 40,
+ "maxTeams": 6,
+ "actual_nodes": 10,
+ "actual_elapsed_ms": null
+}
+  · [实际输出] ⓪-8 默认 beam 预算 = {
+ "beamWidth": 4,
+ "nodeBudget": 2000,
+ "timeBudgetMs": 50,
+ "maxTeams": 24,
+ "actual_nodes": 13,
+ "actual_elapsed_ms": null
+}
+  · [实际输出] ①-1 原始召回的实测数 = {
+ "count": 50,
+ "limits": {
+  "min": 20,
+  "max": 50,
+  "eligible_after_policy": 620
+ },
+ "pool": 650
+}
+  · [实际输出] ①-2 candidate_universe=owned 的召回数 = {
+ "count": 47,
+ "pool": 78
+}
+  · [实际输出] ①-3 收窄到收藏池再排除 16 只 = {
+ "count": 5,
+ "pool_size": 52,
+ "eligible": 5,
+ "shortfall_reason": "5 个 < 下界 20（按 policy 收窄后可用 5 个）：候选池打分后有 52 个可召回（下界 20、上界 50）；按 policy 收窄后只有 5 个可用条目（打分池 52 个）：这已经是从注入的候选宇宙里、在当前约束下能拿出的全部；当前 candidate_universe = owned（玩家箱子口径）：只有 80 个实例可召回；要按 600+ 图鉴召回请显式给 policy.candidate_universe = 'catalog'；宁可如实报「凑不满」，也不用不满足硬约束的条目凑数"
+}
+  · [实际输出] ①-3b 召回 5 个（<20）却把 shortfall_reason 抹掉 = {
+ "audit_ok": false,
+ "problems": [
+  "[RECALL_COUNT_UNEXPLAINED] recall.count：召回 5 个 < 下界 20，却没有 shortfall_reason：凑不满也要说明为什么，不许凑数，也不许沉默"
+ ]
+}
+  · [实际输出] ①-4 召回 7 个（<20）但 shortfall_reason 为空 = {
+ "audit_ok": false,
+ "problems": [
+  "[RECALL_COUNT_UNEXPLAINED] recall.count：召回 7 个 < 下界 20，却没有 shortfall_reason：凑不满也要说明为什么，不许凑数，也不许沉默"
+ ]
+}
+  · [实际输出] ①-5 召回 50 个但上界写 5、overflow_reason 为空 = {
+ "audit_ok": false,
+ "problems": [
+  "[RECALL_COUNT_UNEXPLAINED] recall.count：召回 50 个 > 上界 5，却没有 overflow_reason"
+ ]
+}
+  · [实际输出] ①-6 count 与 candidates.length 不一致 = {
+ "audit_ok": false,
+ "problems": [
+  "[RECALL_COUNT_UNEXPLAINED] recall.count：召回 53 个 > 上界 50，却没有 overflow_reason",
+  "[RECALL_SHAPE] recall.count：count=53 与 candidates.length=50 不一致"
+ ]
+}
+  · [实际输出] ①-7 owned 全被排除后的召回 = {
+ "count": 0,
+ "shortfall_reason": "0 个 < 下界 20（按 policy 收窄后可用 0 个）：候选池打分后有 0 个可召回（下界 20、上界 50）；候选池是空的：队伍已有 3 / 6 只，702 个条目被 must_exclude / 已选 / species_unique 排除之后，没有剩下可召回的条目；当前 candidate_universe = owned（玩家箱子口径）：只有 80 个实例可召回；要按 600+ 图鉴召回请显式给 policy.candidate_universe = 'catalog'；宁可如实报「凑不满」，也不用不满足硬约束的条目凑数",
+ "problems": [
+  "[CONSTRAINT_VIOLATED] 还差 3 个槽位，但召回只有 0 个候选：补不出完整队伍，按 fail closed 如实报，不拿不满足硬约束的条目凑数"
+ ]
+}
+  · [实际输出] ②-1 真实源码在线段的禁止模式命中 = {
+ "online_section_lines": 94,
+ "hits": []
+}
+  · [实际输出] ②-2 注入引擎调用后的命中 = [
+ "[ONLINE_SUBPROCESS_CALL] 第2行 RocoClient ⇒ const client = new RocoClient('python3');",
+ "[ONLINE_ENGINE_CALL] 第3行 plan_actions ⇒ const plan = client.plan_actions({});",
+ "[ONLINE_ENGINE_CALL] 第4行 step_joint ⇒ const out = step_joint(plan, {});"
+]
+  · [实际输出] ②-3 被替换后的在线段命中 = [
+ "[ONLINE_SUBPROCESS_CALL] 第3行 RocoClient",
+ "[ONLINE_ENGINE_CALL] 第4行 plan_actions",
+ "[ONLINE_ENGINE_CALL] 第5行 step_joint"
+]
+  · [实际输出] ②-4 用被替换的源码走审计 = {
+ "ok": false,
+ "problems": [
+  "[ONLINE_SUBPROCESS_CALL] src/coach/team-candidates.mjs:3：在线段出现 RocoClient：在线候选生成里出现 Python 引擎客户端类：在线路径不连接引擎（实际源码 \"const client = new RocoClient('python3');\"）",
+  "[ONLINE_ENGINE_CALL] src/coach/team-candidates.mjs:4：在线段出现 plan_actions：在线候选生成里出现引擎的规划入口：那属于离线 league/自博弈，不属于 300ms 的在线预算（实际源码 \"const plan = client.plan_actions({});\"）",
+  "[ONLINE_ENGINE_CALL] src/coach/team-candidates.mjs:5：在线段出现 step_joint：在线候选生成里出现引擎的联合推进入口：候选生成只读静态数据，跑模拟是离线产标签的事（实际源码 \"const out = step_joint(plan, {});\"）"
+ ]
+}
+  · [实际输出] ②-5 离线入口 buildOfflineLabelPlan 的位置 = {
+ "in_online_section": false,
+ "in_offline_section": true,
+ "caller": "scripts/roco/measure-team-candidates.mjs 之外的离线流程（人工/后续 RC），本 RC 只钉边界"
+}
+  · [实际输出] ②-6 离线工作单（它自己不跑模拟） = {
+ "runs_simulations": false,
+ "steps": 8,
+ "outputs": [
+  "data/roco/ranker/team-ranker-v1.json exists=false",
+  "data/roco/ranker/completion-value-v1.json exists=false",
+  "reports/roco/team-candidates/matchup-bank.json exists=false"
+ ]
+}
+  · [实际输出] ③-1 排序器状态 = {
+ "ranker_status": "missing",
+ "reason": "调用方没有注入排序器：本仓现在**没有**训练好的 Team Ranker 产物（13 号文档 §5.1 的离线链路尚未产出），所以不能假装有模型。排序退化成规则打分，并按台账标 confidence = ENGINE_HYPOTHESIS。",
+ "confidence": "ENGINE_HYPOTHESIS",
+ "score_source": "rule_score"
+}
+  · [实际输出] ③-2 产出里的伪精确键 = []
+  · [实际输出] ③-3 resolveRanker(null) = {
+ "status": "missing",
+ "ranker": null,
+ "ranker_id": null,
+ "version": null,
+ "reason": "调用方没有注入排序器：本仓现在**没有**训练好的 Team Ranker 产物（13 号文档 §5.1 的离线链路尚未产出），所以不能假装有模型。排序退化成规则打分，并按台账标 confidence = ENGINE_HYPOTHESIS。"
+}
+  · [实际输出] ③-4 ranker_status 改成 'ready'（但没有注入排序器） = {
+ "audit_ok": false,
+ "problems": [
+  "[RANKER_OVERCLAIM] ranking.ranker_injected：ranker_status=ready，但 ranker_injected 不是 true：报「有排序器」就必须同时说明这次真的注入了它，否则就是把 missing 事后改成 ready"
+ ]
+}
+  · [实际输出] ③-5 ranker 缺失却把排序置信写成 OFFICIAL_CURRENT = {
+ "audit_ok": false,
+ "problems": [
+  "[RANKER_OVERCLAIM] ranking.confidence：ranker_status=missing 时 confidence 必须是 ENGINE_HYPOTHESIS，实际 \"OFFICIAL_CURRENT\""
+ ]
+}
+  · [实际输出] ③-6 给 Top-K 队伍塞 win_rate = {
+ "audit_ok": false,
+ "problems": [
+  "[PSEUDO_PRECISION] plan.ranking.teams[0].win_rate：键 win_rate：伪精确数值（胜率/强度分/评分/期望值一类）不许出现在产出里，任何层级都不行"
+ ]
+}
+  · [实际输出] ③-7 队伍说明里直接写胜率 62% = {
+ "audit_ok": false,
+ "problems": [
+  "[PSEUDO_PRECISION] plan.ranking.teams[0].unverified[0]：胜率：这只队伍的胜率是 62%，可以直接用",
+  "[PSEUDO_PRECISION] plan.ranking.teams[0].unverified[0]：%（伪精确百分数）：这只队伍的胜率是 62%，可以直接用"
+ ]
+}
+  · [实际输出] ③-8 否定句（不是胜率）的审计结果 = {
+ "ok": true,
+ "problems": []
+}
+  · [实际输出] ③-9 注入排序器后的排序状态 = {
+ "ranker_status": "ready",
+ "ranker_id": "team-ranker/v1",
+ "score_source": "ranker",
+ "confidence": "ENGINE_HYPOTHESIS"
+}
+  · [实际输出] ④-1 注入宇宙与产出 = {
+ "injected_catalog_pet_entities": 622,
+ "injected_owned_instances": 80,
+ "reported_catalog_pet_entities": 622,
+ "reported_owned_instances": 80,
+ "pool_size": 650
+}
+  · [实际输出] ④-2 注入更小宇宙后的索引 = {
+ "owned_instances": 10,
+ "owned_species": 5,
+ "catalog_pet_entities": 0,
+ "catalog_species": 5,
+ "validated_species": 48,
+ "species_with_frozen_learnset": 48,
+ "registered_attack_types": 18,
+ "pets_without_type_tags": 0,
+ "catalog_tier_learnset_tier": "native_only",
+ "speed_values_available": 5,
+ "speed_validated": 5,
+ "speed_knowledge_only": 0
+}
+  · [实际输出] ④-3 更小宇宙下的召回 = {
+ "count": 4,
+ "shortfall_reason": "4 个 < 下界 20（按 policy 收窄后可用 4 个）：候选池打分后有 8 个可召回（下界 20、上界 50）；按 policy 收窄后只有 4 个可用条目（打分池 8 个）：这已经是从注入的候选宇宙里、在当前约束下能拿出的全部；宁可如实报「凑不满」，也不用不满足硬约束的条目凑数",
+ "facts": {
+  "owned_instances": 10,
+  "owned_species": 5,
+  "catalog_pet_entities": 0,
+  "catalog_species": 5,
+  "validated_species": 48,
+  "species_with_frozen_learnset": 48,
+  "registered_attack_types": 18,
+  "pets_without_type_tags": 0,
+  "catalog_tier_learnset_tier": "native_only",
+  "speed_values_available": 5,
+  "speed_validated": 5,
+  "speed_knowledge_only": 0
+ }
+}
+  · [实际输出] ④-4 产出把宇宙写成 48 只（注入的是 622 + 80） = {
+ "audit_ok": false,
+ "problems": [
+  "[WHITELIST_FIXED_POOL] recall.facts.catalog_pet_entities：注入的 pack 有 622 个 pet 实体，产出却写 48：候选宇宙没有跟着注入数据走",
+  "[WHITELIST_FIXED_POOL] recall.facts.owned_instances：注入的 owned 有 80 个实例，产出却写 48"
+ ]
+}
+  · [实际输出] ④-5 候选池比注入宇宙还大 = {
+ "audit_ok": false,
+ "problems": [
+  "[WHITELIST_FIXED_POOL] recall.pool.pool_size：产出的候选池（703）比注入的候选宇宙（702 个条目）还大：候选不可能凭空出现"
+ ]
+}
+  · [实际输出] ④-5b 产出把候选宇宙写成 60 只（真实 pack 是 622） = {
+ "audit_ok": false,
+ "problems": [
+  "[WHITELIST_FIXED_POOL] recall.facts.catalog_pet_entities：注入的 pack 有 622 个 pet 实体，产出却写 60：候选宇宙没有跟着注入数据走"
+ ]
+}
+  · [实际输出] ④-6 召回里的图鉴物种（前 5 个） = [
+ "pet_000001(喵喵)",
+ "pet_000496(优优)",
+ "pet_000497(绒光优优)",
+ "pet_000324(晶尾蝎)",
+ "pet_000325(蝎子王)"
+]
+  · [实际输出] ⑤-1 基线的硬约束实际落位 = {
+ "must_include": [
+  "pet_000001"
+ ],
+ "must_exclude": [
+  "own-0009",
+  "own-0010"
+ ],
+ "locked": [
+  "own-0001"
+ ],
+ "teams_member_species": [
+  [
+   "pet_000012",
+   "pet_000012",
+   "pet_000001",
+   "pet_000100",
+   "pet_000328",
+   "pet_000130"
+  ],
+  [
+   "pet_000012",
+   "pet_000012",
+   "pet_000001",
+   "pet_000328",
+   "pet_000100",
+   "pet_000130"
+  ],
+  [
+   "pet_000012",
+   "pet_000012",
+   "pet_000001",
+   "pet_000100",
+   "pet_000328",
+   "pet_000474"
+  ],
+  [
+   "pet_000012",
+   "pet_000012",
+   "pet_000001",
+   "pet_000100",
+   "pet_000328",
+   "pet_000474"
+  ]
+ ]
+}
+  · [实际输出] ⑤-2 把 must_include 的成员删掉 = {
+ "audit_ok": false,
+ "problems": [
+  "[CONSTRAINT_VIOLATED] beam.teams：must_include 里的 pet_000001 在补全结果里找不到：约束被违反，或者根本补不出队伍"
+ ]
+}
+  · [实际输出] ⑤-3 把 must_exclude 的成员塞进队伍 = {
+ "audit_ok": false,
+ "problems": [
+  "[CONSTRAINT_VIOLATED] beam.teams：must_exclude 里的 own-0009 出现在队伍成员 owned:own-0009 里"
+ ]
+}
+  · [实际输出] ⑤-4 把 locked 的实例换掉 = {
+ "audit_ok": false,
+ "problems": [
+  "[CONSTRAINT_VIOLATED] beam.teams：locked 的实例 own-0001 不在任何补全队伍里"
+ ]
+}
+  · [实际输出] ⑤-5 召回里剔掉硬要求后的补全 = {
+ "teams": 4,
+ "ok": false,
+ "problems": [
+  "[CONSTRAINT_VIOLATED] 硬要求 pet_000001 既不在当前队伍里、也不在召回池里：按 policy.candidate_universe=catalog，补不出满足约束的队伍。请把它放进 selected / locked，或放开 policy 让图鉴物种参与召回"
+ ]
+}
+  · [实际输出] ⑤-6 产出里 must_include 没落位 = {
+ "audit_ok": false,
+ "problems": [
+  "[CONSTRAINT_VIOLATED] beam.teams：must_include 里的 pet_000001 在补全结果里找不到：约束被违反，或者根本补不出队伍"
+ ]
+}
+  · [实际输出] ⑥-1 两次运行的逐段摘要 = {
+ "recall": [
+  50,
+  50
+ ],
+ "teams": [
+  4,
+  4
+ ],
+ "top_k": [
+  4,
+  4
+ ],
+ "picks": [
+  3,
+  3
+ ]
+}
+  · [实际输出] ⑥-2 用第二份做 snapshot 的审计 = {
+ "ok": true,
+ "problems": []
+}
+  · [实际输出] ⑥-3 两次运行的候选分数差 0.0001 = {
+ "audit_ok": false,
+ "problems": [
+  "[NONDETERMINISTIC] recall：同一输入两次运行的输出不是逐字节相同（含 tie-break）"
+ ]
+}
+  · [实际输出] ⑥-4 候选键的前 8 个与是否含已选实例 = {
+ "keys": [
+  "catalog:pet_000001",
+  "owned:own-0006",
+  "owned:own-0045",
+  "owned:own-0017",
+  "owned:own-0052",
+  "owned:own-0062",
+  "owned:own-0035",
+  "owned:own-0008"
+ ],
+ "in_team_leaked": 0
+}
+  · [实际输出] ⑥-5 同分相邻对的 tie-break 检查 = {
+ "pairs": 22,
+ "violations": []
+}
+  · [实际输出] ⑦-1 预算逐项对照 = [
+ "recall: P95 23.034ms / 预算 150ms ⇒ within_budget=true",
+ "beam_and_ranker: P95 25.923ms / 预算 300ms ⇒ within_budget=true",
+ "first_screen: P95 29.398ms / 预算 800ms ⇒ within_budget=true",
+ "state_and_version: P95 nullms / 预算 50ms ⇒ within_budget=true"
+]
+  · [实际输出] ⑦-2 判定与实测矛盾的项 = []
+  · [实际输出] ⑦-3 实测超预算的项 = {
+ "should_be_over": [],
+ "reported_over": [],
+ "all_within_budget": true
+}
+  · [实际输出] ⑦-4 排名器状态对延迟的影响 = {
+ "status": "missing",
+ "note": "本仓没有版本化 Team Ranker 产物：score 段实际跑的是规则打分。这一格是**下界**——接上真实模型后必须重测，并重跑本脚本"
+}
+  · [实际输出] ⑦-5 把 P95=999ms 写成 within_budget=true 的审计 = {
+ "ok": false,
+ "problems": [
+  "[LATENCY_BUDGET_FALSE_PASS] latency.budget_comparison.recall：实测 P95 999ms 与预算 150ms 的关系是 within=false，报告却写 within_budget=true"
+ ]
+}
+  · [实际输出] ⑦-6 真实延迟报告走审计 = {
+ "ok": true,
+ "problems": []
+}
+  · [实际输出] ⑧-1 已选 3 只时的三个候选 = [
+ "强度(strength) → owned:own-0006 边际增益 28.3333 未承接弱点 4",
+ "稳定(stability) → catalog:pet_000331 边际增益 23.4722 未承接弱点 2",
+ "偏好保留(preference) → owned:own-0006 边际增益 28.3333 未承接弱点 4"
+]
+  · [实际输出] ⑧-2 已选 2 只的 pick 数 = {
+ "applies": true,
+ "picks": 3
+}
+  · [实际输出] ⑧-2 已选 5 只的 pick 数 = {
+ "applies": true,
+ "picks": 3
+}
+  · [实际输出] ⑧-3 已选 0 只 = {
+ "applies": false,
+ "picks": 0,
+ "reason": "已选 0 只：渐进推荐只在已选 2～5 只时给「下一只」（13 号文档 §6）"
+}
+  · [实际输出] ⑧-3 已选 1 只 = {
+ "applies": false,
+ "picks": 0,
+ "reason": "已选 1 只：渐进推荐只在已选 2～5 只时给「下一只」（13 号文档 §6）"
+}
+  · [实际输出] ⑧-3 已选 6 只 = {
+ "applies": false,
+ "picks": 0,
+ "reason": "已选 6 只：渐进推荐只在已选 2～5 只时给「下一只」（13 号文档 §6）"
+}
+  · [实际输出] ⑧-4 只返回 2 个 next 候选 = {
+ "audit_ok": false,
+ "problems": [
+  "[PROGRESSIVE_NOT_THREE] progressive.picks：已选 3 只时下一只候选必须是恰好 3 个，实际 2 个"
+ ]
+}
+  · [实际输出] ⑧-5 第一个候选没有 tradeoff_label = {
+ "audit_ok": false,
+ "problems": [
+  "[PROGRESSIVE_NOT_THREE] progressive.picks[owned:own-0006]：取舍标签 undefined 不是 强度 / 稳定 / 偏好保留 之一"
+ ]
+}
+  · [实际输出] ⑧-6 三个候选都用「强度」口径 = {
+ "audit_ok": false,
+ "problems": [
+  "[PROGRESSIVE_NOT_THREE] progressive.picks：口径 strength 出现了两次：三个候选必须覆盖三个口径",
+  "[PROGRESSIVE_NOT_THREE] progressive.picks：口径 strength 出现了两次：三个候选必须覆盖三个口径"
+ ]
+}
+  · [实际输出] ⑧-7 已选 3 只却报 applies:false = {
+ "audit_ok": false,
+ "problems": [
+  "[PROGRESSIVE_NOT_THREE] progressive.applies：已选 3 只时 applies 应当是 true，实际是 false：2～5 只必须给恰好三个候选，其它只数不许硬凑三个"
+ ]
+}
+  · [实际输出] ⑧-8 直接调 progressiveNext（已选 4 只） = {
+ "applies": true,
+ "pick_count": 3,
+ "labels": [
+  "强度",
+  "稳定",
+  "偏好保留"
+ ]
+}
+  · [实际输出] ⑨-1 报告两次生成是否逐字节相同 = true
+  · [实际输出] ⑨-2 报告的判据结论 = [
+ "召回数量落在 [20, 50] 或给出短欠原因 ⇒ ok=true",
+ "在线段没有引擎 / 子进程调用 ⇒ ok=true",
+ "没有排序器时 ranker_status = missing 且排序标 ENGINE_HYPOTHESIS ⇒ ok=true",
+ "候选能用到注入宇宙（600+）里的实体，不是固定白名单 ⇒ ok=true",
+ "硬约束零违反（must_include / must_exclude / locked） ⇒ ok=true",
+ "确定性：两次运行逐字节相同 ⇒ ok=true",
+ "渐进推荐恰好 3 个候选且带取舍标签 ⇒ ok=true",
+ "每个候选与每支队伍都有机器证据 ⇒ ok=true"
+]
+  · [实际输出] ⑨-3 离线/在线边界 = {
+ "online_entrypoints": [
+  "recallCandidates",
+  "beamComplete",
+  "scoreTeams",
+  "progressiveNext",
+  "buildTeamCandidatePlan",
+  "auditTeamCandidates",
+  "loadTeamCandidatesInputs"
+ ],
+ "offline_entrypoints": [
+  "buildOfflineLabelPlan"
+ ],
+ "scan_result": {
+  "online_section_lines": 94,
+  "forbidden_hits": []
+ }
+}
+  · [实际输出] ⑨-4 排序器口径 = {
+ "status": "missing",
+ "degrade_to": "rule_score",
+ "no_win_rate": true,
+ "weights": {
+  "coverage": 0.3,
+  "synergy": 0.2,
+  "speed": 0.15,
+  "energy": 0.1,
+  "respond": 0.1,
+  "pivot": 0.05,
+  "preference": 0.05,
+  "evidence": 0.05
+ }
+}
+  · [实际输出] ⑨-5 真实样例 = {
+ "id": "empty-team",
+ "recall_count": 50,
+ "teams": 6,
+ "progressive": 0
+}
+  · [实际输出] ⑨-6 磁盘报告与重算报告是否一致 = {
+ "disk_bytes": 850069,
+ "recomputed_matches_disk": true,
+ "hint": "不一致时跑 RC303_WRITE_REPORT=1 node --test tests/roco-team-candidates.test.js 重写"
+}
+  · [实际输出] ⑩-1 RC-302 是否出现候选生成的导出 = {
+ "mentions_recall_candidates": false,
+ "mentions_beam_complete": false
+}
+  · [实际输出] ⑩-2 RC-303 是否 import RC-302 的判据 = {
+ "imports_team_gaps": true,
+ "uses_build_gap_index": true,
+ "redefines_respond_keywords": false,
+ "redefines_pivot_keywords": false
+}
+✔ RC-303 基线：正确产出自检通过，且候选宇宙真的来自注入数据（不是 48 只白名单） (41.095709ms)
+✔ RC-303 基线的三段预算都是显式参数，且报告里给实际值 (51.448583ms)
+✔ RC-303 判据①：召回数越界却不解释必须判红 (56.211125ms)
+✔ RC-303 判据②：在线导出段里出现引擎/子进程调用必须判红 (20.285625ms)
+✔ RC-303 判据③：没有排序器却报 ready 或输出胜率必须判红 (55.926084ms)
+✔ RC-303 判据④：候选必须跟注入宇宙走，不许固定白名单 (27.842834ms)
+✔ RC-303 判据⑤：违反硬约束的队伍必须判红 (54.597042ms)
+✔ RC-303 判据⑥：同一输入两次运行不同必须判红 (45.29325ms)
+✔ RC-303 判据⑦：超预算却报通过必须判红，且真实报告与实测自洽 (27.068666ms)
+✔ RC-303 判据⑧：渐进推荐必须恰好三个且带取舍标签 (125.133583ms)
+✔ RC-303 报告：可复跑 + 离线/在线边界声明齐全 + 排序器不存在的后果写清楚 (960.485ms)
+✔ RC-303 与 RC-302 的边界：候选生成不做缺口诊断，缺口诊断不做候选生成 (0.786959ms)
+  · [实际输出] ① 被抹掉证据的那条 gap = {
+ "id": "coverage.unresisted.光系",
+ "machine_evidence": []
+}
+  · [实际输出] ① 抹掉 machine_evidence = {
+ "audit_ok": false,
+ "problems": [
+  "[EVIDENCE_MISSING] gaps[0](coverage.unresisted.光系)：gap 没有 machine_evidence：没有证据的结论不许出现"
+ ]
+}
+  · [实际输出] ① 原始输出的证据条数（逐条） = [
+ {
+  "id": "coverage.unresisted.光系",
+  "count": 7,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"虫系\"].weak|resist"
+ },
+ {
+  "id": "coverage.unresisted.地系",
+  "count": 7,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"虫系\"].weak|resist"
+ },
+ {
+  "id": "coverage.unresisted.幽系",
+  "count": 7,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"虫系\"].weak|resist"
+ },
+ {
+  "id": "coverage.unresisted.恶系",
+  "count": 7,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"虫系\"].weak|resist"
+ },
+ {
+  "id": "coverage.unresisted.水系",
+  "count": 7,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"虫系\"].weak|resist"
+ },
+ {
+  "id": "coverage.unresisted.龙系",
+  "count": 7,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"虫系\"].weak|resist"
+ },
+ {
+  "id": "speed.team_tiers",
+  "count": 6,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[pet_id=pet_000012].stats.spe.spe"
+ },
+ {
+  "id": "speed.turn_order_inference",
+  "count": 2,
+  "sample": "data/roco/evidence/rule-evidence-ledger.json#entries[topic=turn_order.priority].claim.confidence"
+ },
+ {
+  "id": "speed.validated_domain",
+  "count": 3,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[].stats.spe.count_with_value"
+ },
+ {
+  "id": "energy.build_curve",
+  "count": 8,
+  "sample": "data/roco/owned/owned-pets.json#instances[instance_id=own-0001].skills.skills"
+ },
+ {
+  "id": "energy.power_and_effect_unverified",
+  "count": 9,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[\"skill_000271\"].power_status.power_status"
+ },
+ {
+  "id": "respond.build_missing",
+  "count": 4,
+  "sample": "data/roco/owned/owned-pets.json#instances[instance_id=own-0001].skills → data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[].desc.desc"
+ },
+ {
+  "id": "respond.effect_unverified",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[skill_id in [\"skill_000259\",\"skill_000282\",\"skill_000286\",\"skill_000288\",\"skill_000289\",\"skill_000327\",\"skill_000328\",\"skill_000331\",\"skill_000354\",\"skill_000379\",\"skill_000388\",\"skill_000391\",\"skill_000429\",\"skill_000505\",\"skill_000506\",\"skill_000509\",\"skill_000524\",\"skill_000525\",\"skill_000553\",\"skill_000588\",\"skill_000591\",\"skill_000644\",\"skill_000650\",\"skill_000653\",\"skill_000694\",\"skill_000706\",\"skill_000745\",\"skill_000757\",\"skill_000780\",\"skill_000787\",\"skill_000791\",\"skill_000815\",\"skill_000821\",\"skill_000833\"]].effect_support.effect_support"
+ },
+ {
+  "id": "pivot.tool_coverage",
+  "count": 6,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[\"skill_000694\"].desc.desc"
+ },
+ {
+  "id": "pivot.trait_based_unverified",
+  "count": 6,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[\"skill_000008\"].desc.desc"
+ },
+ {
+  "id": "synergy.shared_weakness.水系",
+  "count": 4,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"火系\"].weak[].weak"
+ },
+ {
+  "id": "synergy.summary",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types.keys"
+ },
+ {
+  "id": "synergy.unanswered_weakness.地系.instance:own-0003",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"火系\"].weak[].weak"
+ },
+ {
+  "id": "synergy.unanswered_weakness.地系.instance:own-0004",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"火系\"].weak[].weak"
+ },
+ {
+  "id": "synergy.unanswered_weakness.幽系.instance:own-0005",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"地系|幻系\"].weak[].weak"
+ },
+ {
+  "id": "synergy.unanswered_weakness.幽系.instance:own-0006",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"地系|幻系\"].weak[].weak"
+ },
+ {
+  "id": "synergy.unanswered_weakness.水系.instance:own-0003",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"火系\"].weak[].weak"
+ },
+ {
+  "id": "synergy.unanswered_weakness.水系.instance:own-0004",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"火系\"].weak[].weak"
+ },
+ {
+  "id": "synergy.unanswered_weakness.水系.instance:own-0005",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"地系|幻系\"].weak[].weak"
+ },
+ {
+  "id": "synergy.unanswered_weakness.水系.instance:own-0006",
+  "count": 2,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[\"地系|幻系\"].weak[].weak"
+ },
+ {
+  "id": "cost.build_support",
+  "count": 3,
+  "sample": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets.count"
+ },
+ {
+  "id": "cost.mana_rule",
+  "count": 2,
+  "sample": "data/roco/evidence/rule-evidence-ledger.json#entries[topic=battle_mode.standard_pvp].claim.confidence"
+ }
+]
+  · [实际输出] ① 证据项缺 pointer = {
+ "audit_ok": false,
+ "problems": [
+  "[EVIDENCE_MISSING] gaps[1](coverage.unresisted.地系).machine_evidence[0]：证据项必须带 source_file / pointer / field"
+ ]
+}
+  · [实际输出] ② 原始输出的置信等级分布 = {
+ "COMMUNITY_CURRENT": 21,
+ "ENGINE_HYPOTHESIS": 2,
+ "UNKNOWN": 3,
+ "CROSS_SOURCE_SUPPORTED": 1
+}
+  · [实际输出] ② confidence=VERY_SURE = {
+ "audit_ok": false,
+ "problems": [
+  "[CONFIDENCE_NOT_IN_LEDGER] gaps[0](coverage.unresisted.光系)：confidence \"VERY_SURE\" 不在台账六级里"
+ ]
+}
+  · [实际输出] ② confidence=S_TIER = {
+ "audit_ok": false,
+ "problems": [
+  "[CONFIDENCE_NOT_IN_LEDGER] gaps[0](coverage.unresisted.光系)：confidence \"S_TIER\" 不在台账六级里"
+ ]
+}
+  · [实际输出] ② confidence=CONFIRMED = {
+ "audit_ok": false,
+ "problems": [
+  "[CONFIDENCE_NOT_IN_LEDGER] gaps[0](coverage.unresisted.光系)：confidence \"CONFIRMED\" 不在台账六级里"
+ ]
+}
+  · [实际输出] ② confidence=COMMUNITY_HOT = {
+ "audit_ok": false,
+ "problems": [
+  "[CONFIDENCE_NOT_IN_LEDGER] gaps[0](coverage.unresisted.光系)：confidence \"COMMUNITY_HOT\" 不在台账六级里"
+ ]
+}
+  · [实际输出] ② 总置信用了台账外的等级 = {
+ "audit_ok": false,
+ "problems": [
+  "[CONFIDENCE_NOT_IN_LEDGER] diagnosis.confidence：总置信 \"TOTALLY_FINE\" 不在台账六级里"
+ ]
+}
+  · [实际输出] ③ 原始速度域的实测值 = {
+ "domain": {
+  "basis": "validated_layer",
+  "metric": "speed_tier / stats.spe",
+  "known": 48,
+  "unknown": 574,
+  "total": 622
+ },
+ "value": {
+  "validated_species": 48,
+  "knowledge_only_species": 622,
+  "pack_pet_entities": 622,
+  "panel_formula_unknown_species": 622
+ },
+ "unverified": [
+  "未核实：全量 622 只的速度层次（验证层只有 48 只，另外 574 只没有冻结速度档）",
+  "未核实：速度平手（同速谁先动） —— 台账 turn_order.priority 记 UNKNOWN（entries[topic=turn_order.priority].notes，逐字命中 \"speed tie = UNKNOWN\"）",
+  "未核实：面板换算（等级/性格/天赋 → 实战速度）—— owned 的 nature/talent/specialty/panel_stats 全是 UNKNOWN"
+ ]
+}
+  · [实际输出] ③a 声称验证层已知 622 只 = {
+ "audit_ok": false,
+ "problems": [
+  "[DOMAIN_OVERCLAIM] gaps[8](speed.validated_domain)：声称验证层已知 622 个，但验证层只有 48 个（{\"basis\":\"validated_layer\",\"metric\":\"speed_tier / stats.spe\",\"known\":622,\"unknown\":0,\"total\":622}）：不许把只有 48 只有值的量当成「全量都知道」"
+ ]
+}
+  · [实际输出] ③b 正文声称全 622 都知道 = {
+ "audit_ok": false,
+ "problems": [
+  "[DOMAIN_OVERCLAIM] gaps[8](speed.validated_domain).why：全量断言：全 622 只的速度层次都已登记，可以据此排先后 —— 但该维度的验证层只有 48 个，pack 里有 622 个"
+ ]
+}
+  · [实际输出] ③c known + unknown ≠ total = {
+ "audit_ok": false,
+ "problems": [
+  "[DOMAIN_OVERCLAIM] gaps[8](speed.validated_domain)：domain 计数不闭合：known(48) + unknown(622) ≠ total(622)"
+ ]
+}
+  · [实际输出] ④ 原始输出里有没有胜率/强度分这类字段 = {
+ "has_win_rate": false,
+ "confidence_levels_used": [
+  "COMMUNITY_CURRENT",
+  "ENGINE_HYPOTHESIS",
+  "UNKNOWN",
+  "CROSS_SOURCE_SUPPORTED"
+ ]
+}
+  · [实际输出] ④ 塞进 win_rate 字段 = {
+ "audit_ok": false,
+ "problems": [
+  "[PSEUDO_PRECISION] gaps[0](coverage.unresisted.光系).value.win_rate：键 win_rate：0.53"
+ ]
+}
+  · [实际输出] ④ 正文写胜率百分数 = {
+ "audit_ok": false,
+ "problems": [
+  "[PSEUDO_PRECISION] gaps[0](coverage.unresisted.光系).why：胜率：这套阵容的胜率是 62%，所以缺口不重要",
+  "[PSEUDO_PRECISION] gaps[0](coverage.unresisted.光系).why：%（伪精确百分数）：这套阵容的胜率是 62%，所以缺口不重要"
+ ]
+}
+  · [实际输出] ④ 塞进 strength_score 字段 = {
+ "audit_ok": false,
+ "problems": [
+  "[PSEUDO_PRECISION] gaps[1](coverage.unresisted.地系).value.strength_score：键 strength_score：91"
+ ]
+}
+  · [实际输出] ⑤ 七只硬要求（六个槽位）的实际输出 = {
+ "ok": false,
+ "problems": [
+  "[UNSATISFIABLE_CONSTRAINTS] cost：硬约束不可满足（cost.unsatisfiable.slots_exceeded）：按 RC-302 的纪律 fail closed，ok:false，不给出「看起来能用」的诊断"
+ ],
+ "blocking": [
+  {
+   "id": "cost.unsatisfiable.slots_exceeded",
+   "why": "必须留在队里的条目有 7 个，但只有 6 个槽位：硬的不可满足；本条按 RC-302 的纪律 fail closed（ok:false），不给「看起来能用」的诊断"
+  }
+ ]
+}
+  · [实际输出] ⑤ 把不可满足的结果改成 ok:true = {
+ "audit_ok": false,
+ "problems": [
+  "[UNSATISFIABLE_NOT_FAILED] diagnosis.ok：有 1 条 blocking 缺口（cost.unsatisfiable.slots_exceeded）却 ok:true"
+ ]
+}
+  · [实际输出] ⑤ 假的失败（ok:false 但没有 blocking） = [
+ "[SOMETHING_ELSE] x：假的失败：没有任何 blocking 依据"
+]
+  · [实际输出] ⑤ ok:false 但没有 blocking 依据 = {
+ "audit_ok": false,
+ "problems": [
+  "[UNSATISFIABLE_NOT_FAILED] diagnosis.ok：ok:false 但没有任何 blocking 缺口或 UNSATISFIABLE_CONSTRAINTS 问题：fail closed 必须有依据"
+ ]
+}
+  · [实际输出] ⑥ 正文引用「T0 强势体系，必带」 = {
+ "audit_ok": false,
+ "problems": [
+  "[COMMUNITY_TIER_LABEL] gaps[0](coverage.unresisted.光系).why：T0：依据社区榜单：T0 强势体系，必带",
+  "[COMMUNITY_TIER_LABEL] gaps[0](coverage.unresisted.光系).why：强势：依据社区榜单：T0 强势体系，必带",
+  "[COMMUNITY_TIER_LABEL] gaps[0](coverage.unresisted.光系).why：必带：依据社区榜单：T0 强势体系，必带"
+ ]
+}
+  · [实际输出] ⑥ 正文引用「这就是梯队第一」 = {
+ "audit_ok": false,
+ "problems": [
+  "[COMMUNITY_TIER_LABEL] gaps[0](coverage.unresisted.光系).why：梯队：依据社区榜单：这就是梯队第一"
+ ]
+}
+  · [实际输出] ⑥ 正文引用「版本之子，上分首选」 = {
+ "audit_ok": false,
+ "problems": [
+  "[COMMUNITY_TIER_LABEL] gaps[0](coverage.unresisted.光系).why：版本之子：依据社区榜单：版本之子，上分首选",
+  "[COMMUNITY_TIER_LABEL] gaps[0](coverage.unresisted.光系).why：上分首选：依据社区榜单：版本之子，上分首选"
+ ]
+}
+  · [实际输出] ⑥ 在 value 里挂 tier: T0 = {
+ "audit_ok": false,
+ "problems": [
+  "[PSEUDO_PRECISION] gaps[2](coverage.unresisted.幽系).value.tier：键 tier：\"T0\"",
+  "[COMMUNITY_TIER_LABEL] gaps[2](coverage.unresisted.幽系).value.tier：T0：T0"
+ ]
+}
+  · [实际输出] ⑦ 依赖 UNKNOWN 量的那条 gap（原始） = {
+ "id": "speed.turn_order_inference",
+ "severity": "info",
+ "confidence": "ENGINE_HYPOTHESIS",
+ "depends_on": [
+  "turn_order.priority"
+ ],
+ "unverified": [
+  "未核实：速度平手（同速谁先动） —— 台账 turn_order.priority 记 UNKNOWN（entries[topic=turn_order.priority].notes，逐字命中 \"speed tie = UNKNOWN\"）"
+ ]
+}
+  · [实际输出] ⑦a 把 UNKNOWN 的相关结论升级成 high = {
+ "audit_ok": false,
+ "problems": [
+  "[UNKNOWN_ESCALATED] gaps[7](speed.turn_order_inference)：依赖的 turn_order.priority（台账 UNKNOWN）上限是 medium，但这条 gap 的 severity 是 high"
+ ]
+}
+  · [实际输出] ⑦b 把 UNKNOWN 的相关结论升级成 blocking = {
+ "audit_ok": false,
+ "problems": [
+  "[UNKNOWN_ESCALATED] gaps[7](speed.turn_order_inference)：依赖的 turn_order.priority（台账 UNKNOWN）上限是 medium，但这条 gap 的 severity 是 blocking",
+  "[UNSATISFIABLE_NOT_FAILED] diagnosis.ok：有 1 条 blocking 缺口（speed.turn_order_inference）却 ok:true"
+ ]
+}
+  · [实际输出] ⑦c 不点名那条 UNKNOWN 量 = {
+ "audit_ok": false,
+ "problems": [
+  "[UNKNOWN_ESCALATED] gaps[7](speed.turn_order_inference)：依赖的 turn_order.priority 是台账 UNKNOWN，但 unverified 里没有点名「速度平手（同速谁先动）」"
+ ]
+}
+  · [实际输出] ⑦ 原始输出里所有点到「速度平手」的 gap = [
+ {
+  "id": "speed.team_tiers",
+  "severity": "info"
+ },
+ {
+  "id": "speed.turn_order_inference",
+  "severity": "info"
+ },
+ {
+  "id": "speed.validated_domain",
+  "severity": "info"
+ },
+ {
+  "id": "respond.effect_unverified",
+  "severity": "info"
+ }
+]
+  · [实际输出] ⑧ 两次运行的差异长度 = {
+ "first": 73085,
+ "second": 73085
+}
+  · [实际输出] ⑧ 输出里的浮点残渣（0.30000000000000004 这类） = null
+  · [实际输出] ⑨ 七个维度的 gap 数与严重度 = [
+ {
+  "dimension": "coverage",
+  "gaps": 6,
+  "severities": [
+   "low",
+   "medium"
+  ]
+ },
+ {
+  "dimension": "speed",
+  "gaps": 3,
+  "severities": [
+   "info"
+  ]
+ },
+ {
+  "dimension": "energy",
+  "gaps": 2,
+  "severities": [
+   "info"
+  ]
+ },
+ {
+  "dimension": "respond",
+  "gaps": 2,
+  "severities": [
+   "low",
+   "info"
+  ]
+ },
+ {
+  "dimension": "pivot",
+  "gaps": 2,
+  "severities": [
+   "info"
+  ]
+ },
+ {
+  "dimension": "synergy",
+  "gaps": 10,
+  "severities": [
+   "high",
+   "info"
+  ]
+ },
+ {
+  "dimension": "cost",
+  "gaps": 2,
+  "severities": [
+   "info"
+  ]
+ }
+]
+  · [实际输出] ⑨ 真实输出的审计结果 = {
+ "ok": true,
+ "problems": []
+}
+  · 审计规则 10 条，每条都有必红方向
+  · [实际输出] ⑩ 分布（每维度的关键实测值） = {
+ "instances": 80,
+ "coverage_resist_counts": [
+  "光系:17/14",
+  "冰系:15/16",
+  "地系:9/25",
+  "幻系:14/14",
+  "幽系:9/12",
+  "恶系:16/15",
+  "普通系:27/0",
+  "机械系:26/29",
+  "武系:18/25",
+  "毒系:26/8",
+  "水系:15/19",
+  "火系:23/30",
+  "电系:25/18",
+  "翼系:23/22",
+  "草系:28/21",
+  "萌系:15/19",
+  "虫系:37/14",
+  "龙系:6/3"
+ ],
+ "speed": {
+  "with_validated_spe": 80,
+  "tiers": {
+   "51-70": 15,
+   "71-90": 24,
+   "91-110": 20,
+   "<=50": 7,
+   ">=111": 14
+  },
+  "validated_species": 48,
+  "knowledge_only_species": 622
+ },
+ "energy": {
+  "without_zero_cost": 46,
+  "without_static_power": 152,
+  "moves_total": 320
+ },
+ "respond": {
+  "criteria": "从冻结 `learnsets.json`（native_skills + blood_skills + skill_stones）里取出学招池，用 `skills[].desc` 的词条判定应对种类：`应对攻击` / `应对状态` / `应对防御`（三者互不替代）；再单独统计这四个技能（build）里有没有带任一种应对。只报「描述里出现了这个应对词条」，不报它能不能挡住什么（效果原语未实现）。",
+  "build_variant_counts": {
+   "应对攻击": 30,
+   "应对状态": 25,
+   "应对防御": 13
+  },
+  "instances_without_any_respond_in_build": 23,
+  "learnset_variant_species": {
+   "应对攻击": 48,
+   "应对状态": 34,
+   "应对防御": 36
+  }
+ },
+ "pivot": {
+  "criteria": "换入/离场手段 = 学招池里（去掉 `category === \"特性\"`）满足 `desc` 含 `迅捷`（台账 swift.injection：主动换入时自动使用）或含 `自己脱离` / `立即替换` 的技能。再单独统计 build 是否携带。主动换人本身是基础行动（台账 turn_order.priority 登记它存在），所以「没有换入手段」不等于「不能换人」。",
+  "instances_with_tool_in_build": 7,
+  "learnset_species_with_tool": 28,
+  "learnset_species_total": 48
+ },
+ "synergy": {
+  "weakness_total": 304
+ },
+ "cost": {
+  "criteria": "把请求里的硬约束折成可满足性算术：required = locked ∪ must_include（必须留在队里）；replaceable = selected 里不在 required 的条目；槽位不够（|required| > team_size）、必须换掉的只数超过 max_replacements、候选池（owned，或 favourites_only 时只算收藏）凑不满剩余槽位、required 里出现 owned 里没有的物种 ⇒ 任一成立即 `blocking` + `ok:false`（fail closed）。",
+  "candidate_universe_instances": 80,
+  "favourite_instances": 24,
+  "distinct_species": 48
+ }
+}
+  · [实际输出] ⑪ seven-required = {
+ "rc301": {
+  "ok": true,
+  "problems": []
+ },
+ "rc302": {
+  "ok": false,
+  "problems": [
+   "[UNSATISFIABLE_CONSTRAINTS] cost：硬约束不可满足（cost.unsatisfiable.slots_exceeded）：按 RC-302 的纪律 fail closed，ok:false，不给出「看起来能用」的诊断"
+  ],
+  "blocking": [
+   "cost.unsatisfiable.slots_exceeded"
+  ]
+ }
+}
+  · [实际输出] ⑪ unowned-species = {
+ "rc301": {
+  "ok": true,
+  "problems": []
+ },
+ "rc302": {
+  "ok": false,
+  "problems": [
+   "[UNSATISFIABLE_CONSTRAINTS] cost：硬约束不可满足（cost.unsatisfiable.required_not_owned）：按 RC-302 的纪律 fail closed，ok:false，不给出「看起来能用」的诊断"
+  ],
+  "blocking": [
+   "cost.unsatisfiable.required_not_owned"
+  ]
+ }
+}
+  · [实际输出] ⑪ churn-limited = {
+ "rc301": {
+  "ok": true,
+  "problems": []
+ },
+ "rc302": {
+  "ok": false,
+  "problems": [
+   "[UNSATISFIABLE_CONSTRAINTS] cost：硬约束不可满足（cost.unsatisfiable.churn_limit）：按 RC-302 的纪律 fail closed，ok:false，不给出「看起来能用」的诊断"
+  ],
+  "blocking": [
+   "cost.unsatisfiable.churn_limit"
+  ]
+ }
+}
+  · [实际输出] ⑪ 全部样例的 RC-301 校验结果 = [
+ {
+  "id": "empty-team",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "single-locked",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "three-selected",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "full-six",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "six-favourites-only",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "species-ref-included",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "stacked-weakness-six",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "no-cheap-move-six",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "churn-limited",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "seven-required",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "must-include-unowned-species",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "legacy-ruleset-cap",
+  "rc301_ok": true,
+  "code": null
+ },
+ {
+  "id": "named-opponent",
+  "rc301_ok": true,
+  "code": null
+ }
+]
+  · [实际输出] ⑫ 报告里失败的判据 = []
+  · 报告新鲜度：逐字节一致（1209625 字节，13 个样例）
+  · [实际输出] ⑬ 空队诊断 = {
+ "ok": true,
+ "confidence": "UNKNOWN",
+ "gaps": [
+  "coverage.no_members",
+  "speed.no_members",
+  "speed.validated_domain",
+  "energy.no_builds",
+  "respond.no_members",
+  "pivot.no_members",
+  "synergy.no_members",
+  "cost.mana_rule"
+ ]
+}
+  · [实际输出] ⑬ 总置信的实际计算 = {
+ "gap_confidences": [
+  "COMMUNITY_CURRENT"
+ ],
+ "total": "COMMUNITY_CURRENT",
+ "recomputed": "COMMUNITY_CURRENT"
+}
+  · [实际输出] ⑭ 未知量清单 = [
+ {
+  "id": "speed_tie",
+  "topic": "turn_order.priority",
+  "level": "UNKNOWN",
+  "cap": "medium",
+  "pattern_hit": true,
+  "microcase": null
+ },
+ {
+  "id": "energy_max",
+  "topic": "energy.max",
+  "level": "ENGINE_HYPOTHESIS",
+  "cap": "high",
+  "pattern_hit": true,
+  "microcase": "MC-E01"
+ },
+ {
+  "id": "energy_regen",
+  "topic": "energy.regen",
+  "level": "ENGINE_HYPOTHESIS",
+  "cap": "high",
+  "pattern_hit": true,
+  "microcase": "MC-E03"
+ },
+ {
+  "id": "energy_initial",
+  "topic": "energy.initial",
+  "level": "CROSS_SOURCE_SUPPORTED",
+  "cap": "high",
+  "pattern_hit": true,
+  "microcase": "MC-E04"
+ },
+ {
+  "id": "standard_mana",
+  "topic": "battle_mode.standard_pvp",
+  "level": "CROSS_SOURCE_SUPPORTED",
+  "cap": "medium",
+  "pattern_hit": true,
+  "microcase": "MC-E08"
+ }
+]
+  · [实际输出] ⑭ 台账被改坏后的输出 = [
+ "[LEDGER_PATTERN_MISSING] ledger#turn_order.priority：台账里找不到这条未知量的登记句：\"speed tie = UNKNOWN\"（entries[topic=turn_order.priority].notes）。台账变了就不再拿它当「已知的未知」，先人工核对再放开"
+]
+  · [实际输出] ⑮ plain-six = {
+ "rows": {
+  "team_size": 6,
+  "required": 0,
+  "required_refs": [],
+  "selected": 6,
+  "kept": 6,
+  "replaceable": 6,
+  "max_replacements": null,
+  "favourites_only": false,
+  "species_unique": false,
+  "allow_unowned": false,
+  "candidate_pool": 80,
+  "candidate_available": 74,
+  "needed_new_members": 0
+ },
+ "blocking": []
+}
+  · [实际输出] ⑮ five-selected-one-slot = {
+ "rows": {
+  "team_size": 6,
+  "required": 0,
+  "required_refs": [],
+  "selected": 5,
+  "kept": 5,
+  "replaceable": 5,
+  "max_replacements": null,
+  "favourites_only": false,
+  "species_unique": false,
+  "allow_unowned": false,
+  "candidate_pool": 80,
+  "candidate_available": 75,
+  "needed_new_members": 1
+ },
+ "blocking": []
+}
+  · [实际输出] ⑮ seven-required = {
+ "rows": {
+  "team_size": 6,
+  "required": 7,
+  "required_refs": [
+   "own-0001",
+   "own-0002",
+   "own-0003",
+   "own-0004",
+   "own-0005",
+   "own-0006",
+   "own-0007"
+  ],
+  "selected": 0,
+  "kept": 7,
+  "replaceable": 0,
+  "max_replacements": null,
+  "favourites_only": false,
+  "species_unique": false,
+  "allow_unowned": false,
+  "candidate_pool": 80,
+  "candidate_available": 73,
+  "needed_new_members": 0
+ },
+ "blocking": [
+  {
+   "id": "cost.unsatisfiable.slots_exceeded",
+   "why": "必须留在队里的条目有 7 个，但只有 6 个槽位：硬的不可满足"
+  }
+ ]
+}
+  · [实际输出] ⑮ churn-zero = {
+ "rows": {
+  "team_size": 6,
+  "required": 3,
+  "required_refs": [
+   "own-0005",
+   "own-0006",
+   "own-0007"
+  ],
+  "selected": 4,
+  "kept": 7,
+  "replaceable": 4,
+  "max_replacements": 0,
+  "favourites_only": false,
+  "species_unique": false,
+  "allow_unowned": false,
+  "min_drops_from_selected": 1,
+  "candidate_pool": 80,
+  "candidate_available": 73,
+  "needed_new_members": 0
+ },
+ "blocking": [
+  {
+   "id": "cost.unsatisfiable.churn_limit",
+   "why": "必须从已选里换掉至少 1 只，但 max_replacements = 0：「已选都要保」与「必须腾出槽位给硬要求」不可同时成立"
+  }
+ ]
+}
+  · [实际输出] ⑮ unowned-species = {
+ "rows": {
+  "team_size": 6,
+  "required": 1,
+  "required_refs": [
+   "pet_000001"
+  ],
+  "selected": 0,
+  "kept": 1,
+  "replaceable": 0,
+  "max_replacements": null,
+  "favourites_only": false,
+  "species_unique": false,
+  "allow_unowned": false,
+  "candidate_pool": 80,
+  "candidate_available": 80,
+  "needed_new_members": 5
+ },
+ "blocking": [
+  {
+   "id": "cost.unsatisfiable.required_not_owned",
+   "why": "must_include 里有 1 个 species 在 owned 里一只都没有：按 team_source=owned 的候选宇宙，这几个要求无法满足（要放开就得显式给 policy.allow_unowned = true，并且它不再是「我的箱子」口径）"
+  }
+ ]
+}
+  · [实际输出] ⑮ unowned-allowed = {
+ "rows": {
+  "team_size": 6,
+  "required": 1,
+  "required_refs": [
+   "pet_000001"
+  ],
+  "selected": 0,
+  "kept": 1,
+  "replaceable": 0,
+  "max_replacements": null,
+  "favourites_only": false,
+  "species_unique": false,
+  "allow_unowned": true,
+  "candidate_pool": 80,
+  "candidate_available": 80,
+  "needed_new_members": 5
+ },
+ "blocking": []
+}
+  · [实际输出] ⑮ 收藏池口径 = {
+ "team_size": 6,
+ "required": 0,
+ "required_refs": [],
+ "selected": 5,
+ "kept": 5,
+ "replaceable": 5,
+ "max_replacements": null,
+ "favourites_only": true,
+ "species_unique": false,
+ "allow_unowned": false,
+ "candidate_pool": 24,
+ "candidate_available": 19,
+ "needed_new_members": 1
+}
+  · [实际输出] ⑯ 数据文件读取次数与长度 = [
+ {
+  "file": "data/roco/owned/owned-pets.json",
+  "bytes": 335543
+ },
+ {
+  "file": "data/roco/game-data-pack/v2/pack.json",
+  "bytes": 3336458
+ },
+ {
+  "file": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json",
+  "bytes": 147314
+ },
+ {
+  "file": "data/roco/normalized/roco-world-s4-2026-09-10/types.json",
+  "bytes": 85265
+ },
+ {
+  "file": "data/roco/evidence/rule-evidence-ledger.json",
+  "bytes": 27674
+ }
+]
+✔ RC-302 判据①：gap 抹掉 machine_evidence 必须判红（没有证据的结论不许出现） (14.155083ms)
+✔ RC-302 判据②：confidence 用了台账之外的等级必须判红 (7.312667ms)
+✔ RC-302 判据③：只有 48 只有值的量不许说成「全 622 都知道」 (8.120167ms)
+✔ RC-302 判据④：出现伪精确胜率/强度分必须判红 (10.585083ms)
+✔ RC-302 判据⑤：must_include 不可满足却返回 ok:true 必须判红 (9.407125ms)
+✔ RC-302 判据⑥：用社区榜单词（T0/强势/必带）当依据必须判红 (13.36725ms)
+✔ RC-302 判据⑦：台账 UNKNOWN 的量被写成确定结论必须判红 (6.415834ms)
+✔ RC-302 判据⑧：同一输入两次运行结果必须逐字节一致（顺序/浮点都稳） (144.903084ms)
+✔ RC-302 判据⑨：七个维度都有可复算判据，真实输出全部自带证据与置信 (3.150458ms)
+✔ RC-302 判据⑩：80 个实例上的分布可复跑（实测值） (7.046958ms)
+✔ RC-302 判据⑪：RC-301 说「合同合法」而 RC-302 说「不可满足」——两个 RC 的边界 (27.253791ms)
+✔ RC-302 判据⑫：报告与生成逻辑逐字节一致，且 ≥6 个真实样例（含 fail closed 样例） (67.399458ms)
+✔ RC-302 判据⑬：总置信取「非 info 缺口里最弱的一条」，且空队只报域与未知 (3.26375ms)
+✔ RC-302 判据⑭：未知量清单必须能在台账里逐字命中，且台账变了就判红 (2.350667ms)
+✔ RC-302 判据⑮：cost 可满足性算术逐条可复算（含 max_replacements 与收藏池收窄） (1.711041ms)
+✔ RC-302 判据⑯：读盘只读不写（数据文件在测试前后逐字节一致） (69.957916ms)
+  · [实际输出] ① selected_pets 这种未登记字段 = [
+ "[UNKNOWN_FIELD] selected_pets：合同没有登记这个字段：它不会被采纳，也不会被忽略——请改用 mode / team_size / visibility / must_include / must_exclude / locked / selected / max_replacements / favourites_only / preference / ruleset_config_id / opponent_roster / constraints 之一（实际值 [\"own-0001\"]）"
+]
+  · [实际输出] ② 同一实例既必须包含又必须排除 = [
+ "[MUST_INCLUDE_EXCLUDE_OVERLAP] must_include/must_exclude：同一条目既必须包含又必须排除：own-0001（矛盾约束不许带到下游）（实际值 [\"own-0001\"]）"
+]
+  · [实际输出] ② 去掉交集后 = []
+  · [实际输出] ③ owned 里不存在的 instance_id = [
+ "[UNKNOWN_INSTANCE_ID] must_include：must_include 里的 \"own-9999\" 在登记表里查不到：instance_id 必须来自 owned-pets.json，species_id 必须来自 pack 的 pet 实体——不许猜（实际值 \"own-9999\"）"
+]
+  · [实际输出] ③ pack 里不存在的 species_id = [
+ "[UNKNOWN_SPECIES_ID] must_include：must_include 里的 \"pet_999999\" 在登记表里查不到：instance_id 必须来自 owned-pets.json，species_id 必须来自 pack 的 pet 实体——不许猜（实际值 \"pet_999999\"）"
+]
+  · [实际输出] ③ species_id 塞进 locked（锁定只能指向实例） = [
+ "[UNKNOWN_INSTANCE_ID] locked：locked 要求 instance_id，但 \"pet_000012\" 是 species_id（owned 里没有这个实例）（实际值 \"pet_000012\"）",
+ "[UNKNOWN_INSTANCE_ID] selected：selected 要求 instance_id，但 \"pet_000012\" 是 species_id（owned 里没有这个实例）（实际值 \"pet_000012\"）"
+]
+  · [实际输出] ④ 注册表里没有的模式 id = [
+ "[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3v3 / pvp-standard-six-pet / pvp-speed-duel-3v3 / pvp-territory-trial-2v2 / pve-camp）（实际值 \"pvp-standard-eight-pet\"）",
+ "[MISSING_FIELD] ruleset_config_id：必须给出规则集 id，且它要出现在 rulesets/*.json 里（模式 pvp-standard-eight-pet 没有 ruleset_binding）（实际值 null）"
+]
+  · [实际输出] ④ 注册表里的 5 个模式 = [
+ "demo-training-3v3",
+ "pvp-standard-six-pet",
+ "pvp-speed-duel-3v3",
+ "pvp-territory-trial-2v2",
+ "pve-camp"
+]
+  · [实际输出] ⑤ rulesets/*.json 里没有的配置 id = [
+ "[UNKNOWN_RULESET] ruleset_config_id：rulesets/*.json 里没有这份配置：不许自创（现有 legacy_sim_v1 / mobile_s4_candidate_v2）（实际值 \"made_up_ruleset_v9\"）"
+]
+  · [实际输出] ⑥ 标准 PVP 传 3 只 = [
+ "[MODE_TEAM_SIZE_MISMATCH] team_size：与模式 pvp-standard-six-pet 的注册表参数不一致：注册表是 6，请求是 3。标准 PVP 是 6 个槽位；要 3 只请用极速对决/练习局这类独立模式（实际值 3）"
+]
+  · [实际输出] ⑥ 极速对决 3 只 = {
+ "mode": "pvp-speed-duel-3v3",
+ "team_size": 3,
+ "visibility": "UNKNOWN_PREMATCH",
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] ⑦ 已知场景但没有 opponent_roster = [
+ "[OPPONENT_INFO_REQUIRED] opponent_roster：visibility=KNOWN_SCENARIO 却没有任何对手信息：已知场景必须给出对手条目，否则请用 UNKNOWN_PREMATCH（实际值 null）"
+]
+  · [实际输出] ⑦ 给出对手之后 = {
+ "request": {
+  "mode": "pvp-standard-six-pet",
+  "team_size": 6,
+  "visibility": "KNOWN_SCENARIO",
+  "max_replacements": null,
+  "favourites_only": false,
+  "preference": null,
+  "ruleset_config_id": "mobile_s4_candidate_v2",
+  "opponent_roster": [
+   "pet_000012"
+  ]
+ },
+ "info": [
+  "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+  "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+  "[VISIBILITY_NOT_DEFAULT] visibility：标准 PVP 的首选口径是 UNKNOWN_PREMATCH（匹配前不知道对手）；本次用的是 KNOWN_SCENARIO，下游不得把它当成匹配前口径（实际值 \"KNOWN_SCENARIO\"）",
+  "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+ ]
+}
+  · [实际输出] ⑦b UNKNOWN_PREMATCH 下给出具体对手 = [
+ "[OPPONENT_INFO_NOT_ALLOWED] opponent_roster：visibility=UNKNOWN_PREMATCH 下不允许给出具体对手：匹配前不知道对手，不能把匹配前当成匹配后（实际值 [\"pet_000012\"]）"
+]
+  · [实际输出] ⑧ requestFromNaturalLanguage("随便配一队") = {
+ "ok": false,
+ "request": null,
+ "problems": [
+  "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"随便配一队\"）"
+ ]
+}
+  · [实际输出] ⑧ 反向控制（点名 + 说模式） = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "must_include": [
+  "pet_000012"
+ ],
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] 只给 mode 的请求 = {
+ "request": {
+  "mode": "pvp-standard-six-pet",
+  "team_size": 6,
+  "visibility": "UNKNOWN_PREMATCH",
+  "max_replacements": null,
+  "favourites_only": false,
+  "preference": null,
+  "ruleset_config_id": "mobile_s4_candidate_v2"
+ },
+ "info": [
+  "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+  "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+  "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+  "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+ ]
+}
+  · [实际输出] PVE 营地（注册表没有 team_size） = [
+ "[MODE_TEAM_SIZE_UNKNOWN] team_size：模式 pve-camp 在 battle-modes.json 里没有 team_size：不给默认值，请显式给出或换一个有登记的模式（实际值 null）"
+]
+  · [实际输出] locked 不在 must_include ∪ selected = [
+ "[LOCKED_NOT_SELECTED] locked：锁定的 own-0001 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 \"own-0001\"）"
+]
+  · [实际输出] selected 含锁定项 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "locked": [
+  "own-0001"
+ ],
+ "selected": [
+  "own-0001"
+ ],
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "legacy_sim_v1"
+}
+  · [实际输出] selected 超过 team_size = [
+ "[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）"
+]
+  · [实际输出] max_replacements 负数 = [
+ "[INVALID_TYPE] max_replacements：max_replacements 必须是非负整数（不夹紧、不取整）（实际值 -1）"
+]
+  · [实际输出] max_replacements 小数（不取整） = [
+ "[INVALID_TYPE] max_replacements：max_replacements 必须是非负整数（不夹紧、不取整）（实际值 1.5）"
+]
+  · [实际输出] constraints 里的未登记子键 = [
+ "[UNKNOWN_CONSTRAINT_KEY] constraints.no_legendaries：未登记的约束键；已登记的只有 no_duplicate_instances / species_unique / avoid_unknown_mechanics（实际值 true）"
+]
+  · [实际输出] 材料 = {
+ "favourite": "own-0001",
+ "nonFavouriteSpecies": "pet_000118"
+}
+  · [实际输出] favourites_only 与「必须带非收藏」冲突 = [
+ "[MUST_INCLUDE_HAS_UNOWNED_SPECIES] must_include：favourites_only=true，但 pet_000118 对应的物种 pet_000118 没有任何一只收藏个体（实际值 \"pet_000118\"）",
+ "[LOCKED_FAVOURITES_ONLY_CONFLICT] favourites_only：favourites_only=true，但 must_include/locked 里 [\"pet_000118\"] 没有一只是收藏：约束不可同时满足（实际值 [\"pet_000118\"]）"
+]
+  · [实际输出] favourites_only + 收藏个体 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "must_include": [
+  "own-0001"
+ ],
+ "max_replacements": null,
+ "favourites_only": true,
+ "preference": null,
+ "ruleset_config_id": "legacy_sim_v1"
+}
+  · [实际输出] 只有队内约束、没有点名任何一只 = [
+ "[TEAM_CONSTRAINT_WITHOUT_NAMES] constraints：只给了队内约束（不重复/每只不一样），却没点名任何一只、没有已选槽位、也没有收窄候选池：没有任何可评估的对象，这不是一份可执行的请求。请至少点名一只（或给出 selected / favourites_only）（实际值 {\"species_unique\":true}）"
+]
+  · [实际输出] locked ∩ must_exclude = [
+ "[MUST_INCLUDE_EXCLUDE_OVERLAP] must_include/must_exclude：同一条目既必须包含又必须排除：own-0001（矛盾约束不许带到下游）（实际值 [\"own-0001\"]）",
+ "[LOCKED_EXCLUDED_CONFLICT] locked：锁定的 own-0001 又在 must_exclude 里：锁定的必须留在队里，被排除的不许进队，二者不可同时成立（实际值 \"own-0001\"）"
+]
+  · [实际输出] 两种顺序的规范化结果 = {
+ "forward": [
+  "own-0001",
+  "own-0002"
+ ],
+ "backward": [
+  "own-0001",
+  "own-0002"
+ ]
+}
+  · [实际输出] 空数组的 info = [
+ "[EMPTY_LIST] must_include：must_include 是空数组：等于没给，不会被当成「这条约束成立」（实际值 []）"
+]
+  · [实际输出] 能：给铠甲虫配一队标准PVP = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] 能：标准PVP，队伍里必须有铠甲虫 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "must_include": [
+  "pet_000012"
+ ],
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] 能：标准PVP，队伍里必须有 own-0001 并且锁定 own-0001 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "must_include": [
+  "own-0001"
+ ],
+ "locked": [
+  "own-0001"
+ ],
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] 能：标准PVP，别带铠甲虫，队伍里必须有音速犬 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "must_include": [
+  "pet_000062"
+ ],
+ "must_exclude": [
+  "pet_000012"
+ ],
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] 能：帮我配一队，只要收藏的，注意不要重复 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "max_replacements": null,
+ "favourites_only": true,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2",
+ "constraints": {
+  "species_unique": true
+ }
+}
+  · [实际输出] 能：极速对决，带上铠甲虫 = {
+ "mode": "pvp-speed-duel-3v3",
+ "team_size": 3,
+ "visibility": "UNKNOWN_PREMATCH",
+ "must_include": [
+  "pet_000012"
+ ],
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] 能：标准PVP，别带铠甲虫 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "must_exclude": [
+  "pet_000012"
+ ],
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] 能：标准PVP，说详细一点 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": "detailed",
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+  · [实际输出] 能：标准PVP，对手是 pet_000012，针对一下 = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "KNOWN_SCENARIO",
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2",
+ "opponent_roster": [
+  "pet_000012"
+ ]
+}
+  · [实际输出] 不能：随便配一队 = {
+ "ok": false,
+ "problems": [
+  "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"随便配一队\"）"
+ ]
+}
+  · [实际输出] 不能：帮我配一队 = {
+ "ok": false,
+ "problems": [
+  "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"帮我配一队\"）"
+ ]
+}
+  · [实际输出] 不能：标准PVP，队伍里必须有喷火驼 = {
+ "ok": false,
+ "problems": [
+  "[UNRESOLVED_MENTION] text：原话里这些片段出现在「点名」的位置上，但没能对应到登记表里的精灵：「喷火驼」。别名、简称、错别字一律**不猜**是哪一只：请改成登记表里的完整名字或 instance_id（实际值 [\"喷火驼\"]）"
+ ]
+}
+  · [实际输出] 不能：标准PVP，锁定喷火驼 = {
+ "ok": false,
+ "problems": [
+  "[UNRESOLVED_MENTION] text：原话里这些片段出现在「点名」的位置上，但没能对应到登记表里的精灵：「喷火驼」。别名、简称、错别字一律**不猜**是哪一只：请改成登记表里的完整名字或 instance_id（实际值 [\"喷火驼\"]）"
+ ]
+}
+  · [实际输出] 不能：极速对决，标准PVP，带铠甲虫 = {
+ "ok": false,
+ "problems": [
+  "[CONTRADICTORY_FLAGS] mode：同一句话里出现了互斥的模式说法：标准PVP、极速对决——不替你选一个（实际值 [\"pvp-standard-six-pet\",\"pvp-speed-duel-3v3\"]）",
+  "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"极速对决，标准PVP，带铠甲虫\"）"
+ ]
+}
+  · [实际输出] 不能：六只，带铠甲虫 = {
+ "ok": false,
+ "problems": [
+  "[MODE_SIZE_WITHOUT_MODE] mode：只说了「6 只」，没说模式：标准 PVP 是 6、极速对决是 3、领地试炼是 2，不许挑一个当默认。请补上模式（例如「标准PVP」）（实际值 6）"
+ ]
+}
+  · [实际输出] 不能：标准PVP，不要重复，每只都要不一样，配一队 = {
+ "ok": false,
+ "problems": [
+  "[TEAM_CONSTRAINT_WITHOUT_NAMES] constraints：只给了队内约束（不重复/每只不一样），却没点名任何一只、没有已选槽位、也没有收窄候选池：没有任何可评估的对象，这不是一份可执行的请求。请至少点名一只（或给出 selected / favourites_only）（实际值 {\"species_unique\":true}）"
+ ]
+}
+  · [实际输出] 不能：把对面的精灵都换掉吧 = {
+ "ok": false,
+ "problems": [
+  "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"把对面的精灵都换掉吧\"）"
+ ]
+}
+  · [实际输出] 工具回执（schema 路径） = {
+ "ok": true,
+ "request": {
+  "mode": "pvp-standard-six-pet",
+  "team_size": 6,
+  "visibility": "UNKNOWN_PREMATCH",
+  "must_include": [
+   "pet_000012"
+  ],
+  "max_replacements": null,
+  "favourites_only": false,
+  "preference": null,
+  "ruleset_config_id": "legacy_sim_v1"
+ },
+ "problems": [],
+ "info": [
+  {
+   "code": "DERIVED_FIELD",
+   "field": "team_size",
+   "detail": "没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6",
+   "value": 6
+  },
+  {
+   "code": "DEFAULTED_FIELD",
+   "field": "visibility",
+   "detail": "没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）",
+   "value": "UNKNOWN_PREMATCH"
+  },
+  {
+   "code": "MODE_NOTE",
+   "field": "mode",
+   "detail": "模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）",
+   "value": 4
+  }
+ ],
+ "doesNotRecommend": true,
+ "needs": [],
+ "contract": {
+  "allowed_fields": [
+   "mode",
+   "team_size",
+   "visibility",
+   "must_include",
+   "must_exclude",
+   "locked",
+   "selected",
+   "max_replacements",
+   "favourites_only",
+   "preference",
+   "ruleset_config_id",
+   "opponent_roster",
+   "constraints"
+  ],
+  "constraint_keys": [
+   "no_duplicate_instances",
+   "species_unique",
+   "avoid_unknown_mechanics"
+  ],
+  "paths": {
+   "ownedPets": "data/roco/owned/owned-pets.json",
+   "pack": "data/roco/game-data-pack/v2/pack.json",
+   "battleModes": "data/roco/battle-modes.json",
+   "rulesets": "data/roco/rulesets"
+  }
+ },
+ "source": "schema"
+}
+  · [实际输出] 工具回执（非法 mode） = {
+ "ok": false,
+ "request": null,
+ "problems": [
+  {
+   "code": "UNKNOWN_MODE",
+   "field": "mode",
+   "detail": "battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3v3 / pvp-standard-six-pet / pvp-speed-duel-3v3 / pvp-territory-trial-2v2 / pve-camp）",
+   "value": "pvp-standard-eight-pet"
+  },
+  {
+   "code": "MISSING_FIELD",
+   "field": "ruleset_config_id",
+   "detail": "必须给出规则集 id，且它要出现在 rulesets/*.json 里（模式 pvp-standard-eight-pet 没有 ruleset_binding）",
+   "value": null
+  }
+ ],
+ "info": [
+  {
+   "code": "DEFAULTED_FIELD",
+   "field": "visibility",
+   "detail": "没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）",
+   "value": "UNKNOWN_PREMATCH"
+  }
+ ],
+ "doesNotRecommend": true,
+ "needs": [
+  "mode",
+  "ruleset_config_id"
+ ],
+ "contract": {
+  "allowed_fields": [
+   "mode",
+   "team_size",
+   "visibility",
+   "must_include",
+   "must_exclude",
+   "locked",
+   "selected",
+   "max_replacements",
+   "favourites_only",
+   "preference",
+   "ruleset_config_id",
+   "opponent_roster",
+   "constraints"
+  ],
+  "constraint_keys": [
+   "no_duplicate_instances",
+   "species_unique",
+   "avoid_unknown_mechanics"
+  ],
+  "paths": {
+   "ownedPets": "data/roco/owned/owned-pets.json",
+   "pack": "data/roco/game-data-pack/v2/pack.json",
+   "battleModes": "data/roco/battle-modes.json",
+   "rulesets": "data/roco/rulesets"
+  }
+ },
+ "source": "schema"
+}
+  · [实际输出] 工具回执（随便配一队） = {
+ "ok": false,
+ "request": null,
+ "problems": [
+  {
+   "code": "NO_REQUEST_INTENT",
+   "field": "text",
+   "detail": "这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一",
+   "value": "随便配一队"
+  }
+ ],
+ "info": [],
+ "doesNotRecommend": true,
+ "needs": [
+  "text"
+ ],
+ "contract": {
+  "allowed_fields": [
+   "mode",
+   "team_size",
+   "visibility",
+   "must_include",
+   "must_exclude",
+   "locked",
+   "selected",
+   "max_replacements",
+   "favourites_only",
+   "preference",
+   "ruleset_config_id",
+   "opponent_roster",
+   "constraints"
+  ],
+  "constraint_keys": [
+   "no_duplicate_instances",
+   "species_unique",
+   "avoid_unknown_mechanics"
+  ],
+  "paths": {
+   "ownedPets": "data/roco/owned/owned-pets.json",
+   "pack": "data/roco/game-data-pack/v2/pack.json",
+   "battleModes": "data/roco/battle-modes.json",
+   "rulesets": "data/roco/rulesets"
+  }
+ },
+ "source": "natural_language"
+}
+  · [实际输出] 工具回执（无数据源） = {
+ "ok": true,
+ "request": {
+  "mode": "pvp-standard-six-pet",
+  "team_size": 6,
+  "visibility": "UNKNOWN_PREMATCH",
+  "max_replacements": null,
+  "favourites_only": false,
+  "preference": null,
+  "ruleset_config_id": "mobile_s4_candidate_v2"
+ },
+ "problems": [],
+ "info": [
+  {
+   "code": "DEFAULTED_FIELD",
+   "field": "mode",
+   "detail": "没给 mode：代入标准 PVP 六宠阵容工坊（pvp-standard-six-pet），这是本阶段核心模式（13 号设计文档 §2）",
+   "value": "pvp-standard-six-pet"
+  },
+  {
+   "code": "DERIVED_FIELD",
+   "field": "ruleset_config_id",
+   "detail": "没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2",
+   "value": "mobile_s4_candidate_v2"
+  },
+  {
+   "code": "DERIVED_FIELD",
+   "field": "team_size",
+   "detail": "没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6",
+   "value": 6
+  },
+  {
+   "code": "DEFAULTED_FIELD",
+   "field": "visibility",
+   "detail": "没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）",
+   "value": "UNKNOWN_PREMATCH"
+  },
+  {
+   "code": "MODE_NOTE",
+   "field": "mode",
+   "detail": "模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）",
+   "value": 4
+  }
+ ],
+ "doesNotRecommend": true,
+ "needs": [],
+ "contract": {
+  "allowed_fields": [
+   "mode",
+   "team_size",
+   "visibility",
+   "must_include",
+   "must_exclude",
+   "locked",
+   "selected",
+   "max_replacements",
+   "favourites_only",
+   "preference",
+   "ruleset_config_id",
+   "opponent_roster",
+   "constraints"
+  ],
+  "constraint_keys": [
+   "no_duplicate_instances",
+   "species_unique",
+   "avoid_unknown_mechanics"
+  ],
+  "paths": {
+   "ownedPets": "data/roco/owned/owned-pets.json",
+   "pack": "data/roco/game-data-pack/v2/pack.json",
+   "battleModes": "data/roco/battle-modes.json",
+   "rulesets": "data/roco/rulesets"
+  }
+ },
+ "source": "schema"
+}
+  · [实际输出] TOOL_CONTRACTS 的键 = [
+ "read_state",
+ "search_rules",
+ "compare_actions",
+ "simulate_branch",
+ "inspect_training",
+ "read_match",
+ "read_evidence",
+ "read_last_turn",
+ "query_rules",
+ "evaluate_team",
+ "compare_team_change",
+ "plan_actions",
+ "summarize_battle"
+]
+  · [实际输出] 报告里失败的判据 = []
+  · [实际输出] 报告判据条数与全部码 = {
+ "criteria": 25,
+ "error_codes": [
+  "INVALID_TYPE",
+  "UNKNOWN_FIELD",
+  "UNKNOWN_CONSTRAINT_KEY",
+  "MISSING_FIELD",
+  "INVALID_ENUM",
+  "UNKNOWN_MODE",
+  "MODE_TEAM_SIZE_UNKNOWN",
+  "MODE_TEAM_SIZE_MISMATCH",
+  "UNKNOWN_RULESET",
+  "UNKNOWN_INSTANCE_ID",
+  "UNKNOWN_SPECIES_ID",
+  "LOCKED_NOT_SELECTED",
+  "LOCKED_EXCLUDED_CONFLICT",
+  "TEAM_CONSTRAINT_WITHOUT_NAMES",
+  "FAVOURITES_ONLY_EMPTY_POOL",
+  "MUST_INCLUDE_EXCLUDE_OVERLAP",
+  "SELECTED_OVER_TEAM_SIZE",
+  "SELECTED_HAS_EXCLUDED",
+  "MUST_INCLUDE_HAS_UNOWNED_SPECIES",
+  "LOCKED_FAVOURITES_ONLY_CONFLICT",
+  "UNKNOWN_OPPONENT",
+  "OPPONENT_INFO_REQUIRED",
+  "OPPONENT_INFO_NOT_ALLOWED",
+  "MODE_SIZE_WITHOUT_MODE",
+  "UNRESOLVED_MENTION",
+  "NO_REQUEST_INTENT",
+  "CONTRADICTORY_FLAGS"
+ ]
+}
+  · 报告新鲜度：逐字节一致（43536 字节）
+  · [实际输出] ⑨ 锁定一个不存在的名字 = {
+ "ok": false,
+ "problems": [
+  "[UNRESOLVED_MENTION] text：原话里这些片段出现在「点名」的位置上，但没能对应到登记表里的精灵：「喷火驼」。别名、简称、错别字一律**不猜**是哪一只：请改成登记表里的完整名字或 instance_id（实际值 [\"喷火驼\"]）"
+ ]
+}
+  · [实际输出] ⑨ 反向控制（真名字） = {
+ "mode": "pvp-standard-six-pet",
+ "team_size": 6,
+ "visibility": "UNKNOWN_PREMATCH",
+ "must_include": [
+  "pet_000012"
+ ],
+ "max_replacements": null,
+ "favourites_only": false,
+ "preference": null,
+ "ruleset_config_id": "mobile_s4_candidate_v2"
+}
+✔ RC-301 判据①：未知字段必须被判红，不许静默丢弃 (1.694917ms)
+✔ RC-301 判据②：must_include 与 must_exclude 有交集必须判红 (1.572833ms)
+✔ RC-301 判据③：不存在的 instance_id / species_id 必须判红 (1.303084ms)
+✔ RC-301 判据④：自创 mode 必须判红 (2.151792ms)
+✔ RC-301 判据⑤：自创 ruleset_config_id 必须判红 (0.427916ms)
+✔ RC-301 判据⑥：标准 PVP 用 team_size=3 必须判红 (0.491666ms)
+✔ RC-301 判据⑦：KNOWN_SCENARIO 却不给对手信息必须判红 (0.7025ms)
+✔ RC-301 判据⑧：「随便配一队」必须 ok:false 并说明缺什么，不许编出队伍名单 (13.929416ms)
+✔ RC-301 合同：标准 PVP 默认 UNKNOWN_PREMATCH，team_size 由注册表推导 (0.877291ms)
+✔ RC-301 合同：锁定/已选/替换预算的约束逐条成立 (1.691042ms)
+✔ RC-301 合同：favourites_only 与队内约束的可满足性不许含糊 (0.851291ms)
+✔ RC-301 规范化：只改编码不改语义，且空数组不算约束成立 (0.743ms)
+✔ RC-301 自然语言：能映射的必须过，不能映射的必须红且说明缺什么 (29.834167ms)
+✔ RC-301 工具：只回「经校验的请求 + 问题」，不产生推荐结果 (3.485ms)
+✔ RC-301 工具：不塞进 TOOL_CONTRACTS，既有 13 个工具的口径一个字没改 (0.113667ms)
+✔ RC-301 报告：与生成逻辑逐字节一致，且每条判据都绿 (45.956334ms)
+✔ RC-301 判据⑨（附加必红方向）：自然语言里认不出的名字不许落进任何字段 (3.20575ms)
+✔ RC-000 基线：能量常量从源码读，读不到就是 null（不许猜默认值） (2.250542ms)
+✔ RC-101 规则配置：默认配置的能量三件套就是引擎默认行为（改配置就红） (0.5445ms)
+✔ RC-000 基线：机器可读，且如实登记「本次审计不覆盖什么」 (107.122333ms)
+✔ RC-104 失效图：登记表合规（路径真实、每个主题都有人依赖、每条产物都能重建） (0.510708ms)
+✔ RC-104 失效图：反证 —— 规则本体坏掉时必须红（四条） (0.712833ms)
+✔ RC-104 失效图：受影响清单是**算出来**的，不是写死的 (0.42925ms)
+✔ RC-104 失效图：绑定旧规则的产物必须进「禁止重跑」清单（人类指令：先别用旧规则生成轨迹） (0.147625ms)
+✔ BattleMode：标准 PVP 六宠是 CANDIDATE，绝不许写成官方已确认 (0.120625ms)
+✔ BattleMode：极速对决是独立模式（3v3 / 2 魔力），不能拿来当标准模式 (0.07975ms)
+✔ BattleMode：候选模式的 team_size 不得来自「当前 Demo 的 48 只名单」 (0.192542ms)
+✔ 六槽 UI mockup：量测判据必须有牙（横向溢出 / 槽位数 / 徽记 / 伪胜率） (0.228042ms)
+✔ 六槽 UI mockup：产物必须已落盘且为绿（截图 + 量测） (0.538584ms)
+✔ RC-101 接线：规则配置里的 energy_max 必须透到公开视图（读不到就是 null，不猜） (0.299959ms)
+✔ RC-101 接线：教练的「对面能量快满」有上限才说话，没上限就沉默（fail closed） (0.776667ms)
+✔ RC-202 第 9 项是**可执行判据**：闸门登记表里必须真的有那两条套件（必红方向） (0.114625ms)
+✔ RC-203 诚实条款：这批 owned 实例**不得**被说成「600+ 都能出战」 (0.947667ms)
+✔ the rules page is generated, not hand-written, and covers every skill (16.187709ms)
+✔ type multipliers shown on the rules page match measured engine damage (0.654ms)
+✔ guard reduction and piercing skills shown on the rules page match measured damage (0.918542ms)
+✔ damage formula coefficients on the rules page reproduce engine damage (1.436083ms)
+✔ status timing and ticks shown on the rules page match a real resolved turn (1.045666ms)
+✔ energy, item and turn-limit numbers shown on the rules page match the engine (1.535708ms)
+✔ environment multipliers and durations shown on the rules page match the engine (1.14175ms)
+✔ reward, xp and training numbers shown on the rules page match a real settle() (5.305ms)
+✔ swift-win threshold shown on the rules page matches settle() (1.070417ms)
+✔ every skill description states the same numbers as its own data fields (1.357833ms)
+✔ a rules-version mismatch blocks advice instead of showing stale numbers (5.984292ms)
+✔ the tool layer quotes the same rule numbers as the engine (7.877292ms)
+✔ the tactics knowledge base states the same numbers as the engine (0.318541ms)
+✔ the difficulty list on the page comes from DIFFICULTIES (1.451333ms)
+✔ legal actions and the rules page agree about what is affordable (0.789959ms)
+✔ species panels quoted in the rules page come from SPECIES (0.195208ms)
+✔ the rules-boundary card does not contradict the engine about types or environments (0.200292ms)
+✔ browser-compatible ciphertext loads a memory-only credential and status never exposes it (83.664875ms)
+✔ encryption nonce is single-use and malformed ciphertext is rejected (55.345959ms)
+✔ cross-origin, missing CSRF, DNS rebinding and server source requests are blocked (48.92125ms)
+✔ verification reaches only official HTTPS endpoint with bearer auth and marks verified (77.193666ms)
+✔ invalid authentication reports safe errors without reflecting upstream response (65.571208ms)
+✔ unconfigured coach runs locally; configured coach uses model and preserves evidence (52.132ms)
+✔ PVP gating occurs before remote invocation even when configured (44.906584ms)
+✔ disconnect clears configuration; blank output and malformed input fail safely (34.154542ms)
+✔ network errors are sanitized (33.10025ms)
+✔ client disconnect aborts the upstream model request (33.949459ms)
+✔ every local mode the client can send is accepted by the coach endpoint (88.535334ms)
+✔ 整局复盘：给模型的指令写清了 0 值口径，而 0 值数据照给模型 (160.006792ms)
+✔ shadow 档不许改变玩家看到的结果：工具选择也必须是 base 的决定（第 38 轮的回归） (66.207417ms)
+✔ UI 视图与模型协议必须分开：页面拿到真名，规划协议一个字段都不多 (0.6475ms)
+✔ 军师在伙伴倒下时开口，补位理由来自真实血量，且不当成胜率 (1.25275ms)
+✔ 倒下触发不会在没人倒下、或已经说过一次之后重复开口 (0.336708ms)
+✔ 犹豫触发沿用 trackAttention 的悬停记录与 shouldNudge 门槛 (0.533667ms)
+✔ 悬停记录是对象时也要能分出「不同选项」（app.js 现在就存对象） (0.40625ms)
+✔ 犹豫不成立的时候真的不说：只看一个选项、看得太短、安静档、已提示过、已关闭 (0.665ms)
+✔ 犹豫复用 shouldNudge：45 秒冷却与本局两次上限都算数 (12.360417ms)
+✔ 策略错误必须同时有真实分差和 after 快照上的后果 (60.023166ms)
+✔ 不该说的时候真的不说：分差太小、选了更强的一手、对手已被收掉、整局已结束 (50.9405ms)
+✔ 可救却减员是真实枚举分差 + after 里的倒下，不是「有药就该吃」 (27.083333ms)
+✔ 一局打满也只有这三次开口，理由不重复，且都来自三类之一 (218.825791ms)
+✔ 冷却与每回合一次是硬约束：刚说过就不会连着说 (0.500542ms)
+✔ 每条开口都带可读的理由和行动名，不出现胜率或命令句 (0.601792ms)
+✔ 长停留：停的就是推荐解 → 老师只讲解这一招，军师闭嘴 (8.214125ms)
+✔ 长停留：明显不是最优 → 军师委婉建议换掉（给台阶，不判错） (7.100084ms)
+✔ 来回换不算长停留：犹豫照旧成立，长停留一定为 null (5.985083ms)
+✔ 长停留优先于犹豫：扫过两个选项后又停在同一个上 ≥10 秒，不说「来回看」 (6.575667ms)
+✔ 长停留的门槛与克制：不足 10 秒、安静档、点掉、每局限一次、每局总上限 (6.264042ms)
+✔ 指针离开选项区就不再是长停留（盯着空白处不算盯着技能看） (8.295792ms)
+✔ 学过就不再教：这一课已经教过、又没有新的反证，就不再主动讲 (8.407458ms)
+✔ 没学会就再教（军师联动）：3 次独立行动都不合理 → 标回未掌握，并且能说出为什么 (7.820083ms)
+✔ 再教的边界：证据不够、只是被提示后做错、或者独立做对了，都不重新开课 (0.276042ms)
+✔ 第一层：只叉了一次教学，教学类安静，军师类照常（不该一起哑掉） (0.213541ms)
+✔ 第二层：两类都被叉掉 → 接到 adaptiveGate 上一律静默 (0.061459ms)
+✔ 点掉即静音优先：本局点掉之后，无论教没教过、有没有再教证据都不再开口 (6.013708ms)
+✔ every id app.js looks up is declared in the HTML or created by app.js itself (1.114458ms)
+✔ app.js dead functions are reported, not silently ignored (7.274375ms)
+✔ every capability the interview asks for has an entry point wired (0.467542ms)
+✔ 异常路径不许让 busy 卡住：busy=true 必须紧贴 try，finally 第一句必须放掉它 (0.264875ms)
+✔ 看门狗不许有任何能永远挡住自己的前置条件 (0.171375ms)
+✔ 教练记账绝不允许把一步棋卡死 (0.088458ms)
+ℹ tests 865
+ℹ suites 0
+ℹ pass 864
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 48652.471875
+
+✖ failing tests:
+
+test at tests/evals/structure-contract.test.js:870:1
+✖ 结构契约：仓库顶层只允许约定俗成的目录与文件 (0.968083ms)
+  AssertionError [ERR_ASSERTION]: 仓库顶层出现了未登记的条目。要么把它归入 src/tests/tools，要么加进这条测试的允许清单并说明理由：
+  requirements-train.lock.txt
+  + actual - expected
+  
+  + [
+  +   'requirements-train.lock.txt'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Developer/roco-coach/tests/evals/structure-contract.test.js:897:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: [ 'requirements-train.lock.txt' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
