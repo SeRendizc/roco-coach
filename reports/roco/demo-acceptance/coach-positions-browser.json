@@ -1,0 +1,2244 @@
+{
+ "generated_by": "scripts/roco/demo-acceptance.mjs",
+ "schema": "roco-coach-positions-browser/v1",
+ "how_this_was_produced": {
+  "page": "roco.html（真页面 + 真 Python 规则服务），CDP 驱动无头 Chrome",
+  "sampling": [
+   "阵容与 seed 写死在 POSITION_MATRIX 里，Math.random 一次都不用",
+   "推进期间 session.dismissed=true（途中的提示不进 said 记账）",
+   "到位后放开并就这一手问一次 /api/roco/plan",
+   "hints=0 / lastAt=-Infinity：只把时钟往前拨，门控与评分照常跑"
+  ],
+  "node_side": "scripts/roco/coach-position-harness.mjs 的 adviceOf()：同一份 view/plan/said 独立重算 coachAdvice",
+  "kind_ledger": "kinds_unreachable 的命中数来自 coverage_scan（同一份产物里的引擎侧扫描）"
+ },
+ "matrix": [
+  {
+   "index": 1,
+   "id": "01-ko-now-lethal",
+   "label": "双方都被打到残血（8%），我方合法招的估算下限盖过对手当前血",
+   "expected_kind": "ko-now",
+   "seed": 20260921,
+   "advances_planned": 5,
+   "pass": "A",
+   "driven_advances": 5,
+   "ended_early": false,
+   "turn": 6,
+   "phase": "battle",
+   "observable": {
+    "turn": 6,
+    "phase": "battle",
+    "my_active": {
+     "name": "寂灭骨龙",
+     "types": [
+      "龙系",
+      "幽系"
+     ],
+     "hp": 35,
+     "max_hp": 425,
+     "energy": 3,
+     "spe": 60,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "寂灭骨龙",
+     "types": [
+      "龙系",
+      "幽系"
+     ],
+     "hp": 35,
+     "max_hp": 425,
+     "energy": 3,
+     "spe": 60,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "海豹船长",
+      "hp": 374,
+      "max_hp": 374,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "黑猫巫师",
+      "hp": 474,
+      "max_hp": 474,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 7,
+     "by_kind": {
+      "skill": 1,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "诡刺",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "「诡刺」估 130，够收对面「寂灭骨龙」这 35 血：这一轮直接收",
+    "why": "依据：对面只剩 35 血，「诡刺」的估算伤害（130）把它盖住了 · 风险：对面换人可以先躲掉这一下（换人比技能先动）"
+   },
+   "dataset": {
+    "hint": "action_hint",
+    "action": "action_hint"
+   },
+   "decision": {
+    "action": "action_hint",
+    "gate": null,
+    "reason": "critical-risk"
+   },
+   "kind": "ko-now",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "ko-now",
+    "text": "「诡刺」估 130，够收对面「寂灭骨龙」这 35 血：这一轮直接收",
+    "why": "对面只剩 35 血，「诡刺」的估算伤害（130）把它盖住了",
+    "risk": "对面换人可以先躲掉这一下（换人比技能先动）"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-01-ko-now.png"
+  },
+  {
+   "index": 2,
+   "id": "02-ko-now-mid",
+   "label": "双方都还有 39% 血，但我方这一手刚好够收（收线成立）",
+   "expected_kind": "ko-now",
+   "seed": 20260921,
+   "advances_planned": 11,
+   "pass": "A",
+   "driven_advances": 11,
+   "ended_early": false,
+   "turn": 12,
+   "phase": "battle",
+   "observable": {
+    "turn": 12,
+    "phase": "battle",
+    "my_active": {
+     "name": "雪影娃娃",
+     "types": [
+      "冰系",
+      "萌系"
+     ],
+     "hp": 173,
+     "max_hp": 442,
+     "energy": 3,
+     "spe": 90,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "雪影娃娃",
+     "types": [
+      "冰系",
+      "萌系"
+     ],
+     "hp": 173,
+     "max_hp": 442,
+     "energy": 3,
+     "spe": 90,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "月使鹭纳",
+      "hp": 362,
+      "max_hp": 362,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "化蝶",
+      "hp": 311,
+      "max_hp": 311,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 8,
+     "by_kind": {
+      "skill": 3,
+      "switch": 2,
+      "item": 2,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "啮合传递",
+      "风吹雪",
+      "超级糖果",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "「超级糖果」估 176，够收对面「雪影娃娃」这 173 血：这一轮直接收",
+    "why": "依据：对面只剩 173 血，「超级糖果」的估算伤害（176）把它盖住了 · 风险：对面换人可以先躲掉这一下（换人比技能先动）"
+   },
+   "dataset": {
+    "hint": "micro_hint",
+    "action": "micro_hint"
+   },
+   "decision": {
+    "action": "micro_hint",
+    "gate": null,
+    "reason": "moderate-risk"
+   },
+   "kind": "ko-now",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "ko-now",
+    "text": "「超级糖果」估 176，够收对面「雪影娃娃」这 173 血：这一轮直接收",
+    "why": "对面只剩 173 血，「超级糖果」的估算伤害（176）把它盖住了",
+    "risk": "对面换人可以先躲掉这一下（换人比技能先动）"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-02-ko-now.png"
+  },
+  {
+   "index": 3,
+   "id": "03-energy-short",
+   "label": "想放的那一招放不出来、而且它估算盖得过对面血量（能量不够）",
+   "expected_kind": "energy-short",
+   "seed": 20260921,
+   "advances_planned": 3,
+   "pass": "A",
+   "driven_advances": 3,
+   "ended_early": false,
+   "turn": 4,
+   "phase": "battle",
+   "observable": {
+    "turn": 4,
+    "phase": "battle",
+    "my_active": {
+     "name": "寂灭骨龙",
+     "types": [
+      "龙系",
+      "幽系"
+     ],
+     "hp": 165,
+     "max_hp": 425,
+     "energy": 3,
+     "spe": 60,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "寂灭骨龙",
+     "types": [
+      "龙系",
+      "幽系"
+     ],
+     "hp": 165,
+     "max_hp": 425,
+     "energy": 3,
+     "spe": 60,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "海豹船长",
+      "hp": 374,
+      "max_hp": 374,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "黑猫巫师",
+      "hp": 474,
+      "max_hp": 474,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 9,
+     "by_kind": {
+      "skill": 3,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "龙血",
+      "集中",
+      "诡刺",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "能量还差 1 才能收掉它：先吃「能量果」补上，这一轮别硬顶",
+    "why": "依据：「坟场搏击」估 411 盖得过对面 165 血，但「寂灭骨龙」还差 1 点能量 · 风险：这一轮吃道具虽然先动，但对面那一手照样会打过来"
+   },
+   "dataset": {
+    "hint": "micro_hint",
+    "action": "micro_hint"
+   },
+   "decision": {
+    "action": "micro_hint",
+    "gate": null,
+    "reason": "moderate-risk"
+   },
+   "kind": "energy-short",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "energy-short",
+    "text": "能量还差 1 才能收掉它：先吃「能量果」补上，这一轮别硬顶",
+    "why": "「坟场搏击」估 411 盖得过对面 165 血，但「寂灭骨龙」还差 1 点能量",
+    "risk": "这一轮吃道具虽然先动，但对面那一手照样会打过来"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-03-energy-short.png"
+  },
+  {
+   "index": 4,
+   "id": "04-type-resisted",
+   "label": "我方上一手那一招被对面属性抵抗，而这一轮还放得出来",
+   "expected_kind": "type-resisted",
+   "seed": 20260921,
+   "advances_planned": 5,
+   "pass": "A",
+   "driven_advances": 5,
+   "ended_early": false,
+   "turn": 6,
+   "phase": "battle",
+   "observable": {
+    "turn": 6,
+    "phase": "battle",
+    "my_active": {
+     "name": "雪影娃娃",
+     "types": [
+      "冰系",
+      "萌系"
+     ],
+     "hp": 214,
+     "max_hp": 442,
+     "energy": 2,
+     "spe": 90,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "雪影娃娃",
+     "types": [
+      "冰系",
+      "萌系"
+     ],
+     "hp": 214,
+     "max_hp": 442,
+     "energy": 2,
+     "spe": 90,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "月使鹭纳",
+      "hp": 362,
+      "max_hp": 362,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "化蝶",
+      "hp": 311,
+      "max_hp": 311,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 8,
+     "by_kind": {
+      "skill": 2,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "啮合传递",
+      "风吹雪",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "「风吹雪」打「雪影娃娃」只有抵抗（26 伤害）：别再硬用它",
+    "why": "依据：上一手「风吹雪」被对面属性抵抗，这一轮再用就是同样的轻伤害 · 风险：硬打这一手等于把回合让给对面，改招或先换人都比它强"
+   },
+   "dataset": {
+    "hint": "micro_hint",
+    "action": "micro_hint"
+   },
+   "decision": {
+    "action": "micro_hint",
+    "gate": null,
+    "reason": "moderate-risk"
+   },
+   "kind": "type-resisted",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "type-resisted",
+    "text": "「风吹雪」打「雪影娃娃」只有抵抗（26 伤害）：别再硬用它",
+    "why": "上一手「风吹雪」被对面属性抵抗，这一轮再用就是同样的轻伤害",
+    "risk": "硬打这一手等于把回合让给对面，改招或先换人都比它强"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-04-type-resisted.png"
+  },
+  {
+   "index": 5,
+   "id": "05-type-favoured",
+   "label": "我方上一手打出了克制倍率，而这一轮那一招仍然合法",
+   "expected_kind": "type-favoured",
+   "seed": 20260921,
+   "advances_planned": 5,
+   "pass": "A",
+   "driven_advances": 5,
+   "ended_early": false,
+   "turn": 6,
+   "phase": "battle",
+   "observable": {
+    "turn": 6,
+    "phase": "battle",
+    "my_active": {
+     "name": "圆号鱼",
+     "types": [
+      "水系"
+     ],
+     "hp": 230,
+     "max_hp": 413,
+     "energy": 5,
+     "spe": 105,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "圣凯布米龙",
+     "types": [
+      "火系",
+      "虫系"
+     ],
+     "hp": 238,
+     "max_hp": 355,
+     "energy": 5,
+     "spe": 105,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "银月狼王",
+      "hp": 416,
+      "max_hp": 416,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "圣凯布米龙",
+      "hp": 355,
+      "max_hp": 355,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 9,
+     "by_kind": {
+      "skill": 3,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "许愿星",
+      "甩水",
+      "啮合传递",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "「甩水」上一手打出克制（39 伤害）：继续用它压上去",
+    "why": "依据：「甩水」打对面「圣凯布米龙」是克制伤害，换成别的招反而更轻 · 风险：对面换人躲一下，这个克制关系就不一定还在了"
+   },
+   "dataset": {
+    "hint": "micro_hint",
+    "action": "micro_hint"
+   },
+   "decision": {
+    "action": "micro_hint",
+    "gate": null,
+    "reason": "moderate-risk"
+   },
+   "kind": "type-favoured",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "type-favoured",
+    "text": "「甩水」上一手打出克制（39 伤害）：继续用它压上去",
+    "why": "「甩水」打对面「圣凯布米龙」是克制伤害，换成别的招反而更轻",
+    "risk": "对面换人躲一下，这个克制关系就不一定还在了"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-05-type-favoured.png"
+  },
+  {
+   "index": 6,
+   "id": "06-foe-energy-high",
+   "label": "对手能量攒到 5 以上、双方速度相等（轮到「威胁预告」这条最低优先级的检测器）",
+   "expected_kind": "foe-energy-high",
+   "seed": 20260921,
+   "advances_planned": 7,
+   "pass": "A",
+   "driven_advances": 7,
+   "ended_early": false,
+   "turn": 8,
+   "phase": "battle",
+   "observable": {
+    "turn": 8,
+    "phase": "battle",
+    "my_active": {
+     "name": "圆号鱼",
+     "types": [
+      "水系"
+     ],
+     "hp": 169,
+     "max_hp": 413,
+     "energy": 6,
+     "spe": 105,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "圣凯布米龙",
+     "types": [
+      "火系",
+      "虫系"
+     ],
+     "hp": 199,
+     "max_hp": 355,
+     "energy": 6,
+     "spe": 105,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "银月狼王",
+      "hp": 416,
+      "max_hp": 416,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "圣凯布米龙",
+      "hp": 355,
+      "max_hp": 355,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 9,
+     "by_kind": {
+      "skill": 3,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "许愿星",
+      "甩水",
+      "啮合传递",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "对面能量到 6 了（上限 6）：重招随时来，别拿残血硬接这一手",
+    "why": "依据：它能量已经攒到 6（上限 6），这一轮随时放得出重招 · 风险：这一下硬接可能直接倒一只，先把厚的那只留在场上"
+   },
+   "dataset": {
+    "hint": "micro_hint",
+    "action": "micro_hint"
+   },
+   "decision": {
+    "action": "micro_hint",
+    "gate": null,
+    "reason": "moderate-risk"
+   },
+   "kind": "foe-energy-high",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "foe-energy-high",
+    "text": "对面能量到 6 了（上限 6）：重招随时来，别拿残血硬接这一手",
+    "why": "它能量已经攒到 6（上限 6），这一轮随时放得出重招",
+    "risk": "这一下硬接可能直接倒一只，先把厚的那只留在场上"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-06-foe-energy-high.png"
+  },
+  {
+   "index": 7,
+   "id": "07-replace-required",
+   "label": "我方场上那只倒了，必须补位（phase == replace 且我方的 fainted）",
+   "expected_kind": "replace-required",
+   "seed": 20260921,
+   "advances_planned": 9,
+   "pass": "A",
+   "driven_advances": 9,
+   "ended_early": false,
+   "turn": 8,
+   "phase": "replace",
+   "observable": {
+    "turn": 8,
+    "phase": "replace",
+    "my_active": {
+     "name": "寂灭骨龙",
+     "types": [
+      "龙系",
+      "幽系"
+     ],
+     "hp": 0,
+     "max_hp": 425,
+     "energy": 3,
+     "spe": 60,
+     "statuses": [],
+     "fainted": true
+    },
+    "foe_active": {
+     "name": "黑猫巫师",
+     "types": [
+      "普通系"
+     ],
+     "hp": 474,
+     "max_hp": 474,
+     "energy": 2,
+     "spe": 70,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "海豹船长",
+      "hp": 374,
+      "max_hp": 374,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "黑猫巫师",
+      "hp": 474,
+      "max_hp": 474,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 0,
+      "fainted": true
+     },
+     {
+      "slot": 1,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 2,
+     "by_kind": {
+      "switch": 2
+     },
+     "skill_names": [],
+     "action_labels": [
+      "换上第2位",
+      "换上第3位"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "「寂灭骨龙」倒了，换「海豹船长」顶上：对面「黑猫巫师」还在场，补位别一上来就挨打",
+    "why": "依据：场上的伙伴已经倒下，这一手只能补位，没有别的选择 · 风险：补上来的这只这一轮就要接对面的手（黑猫巫师）"
+   },
+   "dataset": {
+    "hint": "action_hint",
+    "action": "action_hint"
+   },
+   "decision": {
+    "action": "action_hint",
+    "gate": null,
+    "reason": "critical-risk"
+   },
+   "kind": "replace-required",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "replace-required",
+    "text": "「寂灭骨龙」倒了，换「海豹船长」顶上：对面「黑猫巫师」还在场，补位别一上来就挨打",
+    "why": "场上的伙伴已经倒下，这一手只能补位，没有别的选择",
+    "risk": "补上来的这只这一轮就要接对面的手（黑猫巫师）"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-07-replace-required.png"
+  },
+  {
+   "index": 8,
+   "id": "08-switch-low-hp-mid",
+   "label": "我方 24% 血、后备两只都厚，换人是这一轮的主要问题",
+   "expected_kind": "switch-low-hp",
+   "seed": 20260921,
+   "advances_planned": 8,
+   "pass": "A",
+   "driven_advances": 8,
+   "ended_early": false,
+   "turn": 8,
+   "phase": "battle",
+   "observable": {
+    "turn": 8,
+    "phase": "battle",
+    "my_active": {
+     "name": "音速犬",
+     "types": [
+      "火系"
+     ],
+     "hp": 89,
+     "max_hp": 366,
+     "energy": 1,
+     "spe": 120,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "圆号鱼",
+     "types": [
+      "水系"
+     ],
+     "hp": 413,
+     "max_hp": 413,
+     "energy": 1,
+     "spe": 105,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "雪影娃娃",
+      "hp": 442,
+      "max_hp": 442,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "圆号鱼",
+      "hp": 413,
+      "max_hp": 413,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 0,
+      "fainted": true
+     },
+     {
+      "slot": 1,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 7,
+     "by_kind": {
+      "skill": 1,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "火苗",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "你只剩 24% 血，换「雪影娃娃」上来：它还厚，别把「音速犬」白送掉",
+    "why": "依据：场上这只血量已经到底（89/366），后备里有更厚的伙伴 · 风险：换人这一手虽然先动，但上来的那只照样要吃对面这一下"
+   },
+   "dataset": {
+    "hint": "action_hint",
+    "action": "action_hint"
+   },
+   "decision": {
+    "action": "action_hint",
+    "gate": null,
+    "reason": "critical-risk"
+   },
+   "kind": "switch-low-hp",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "switch-low-hp",
+    "text": "你只剩 24% 血，换「雪影娃娃」上来：它还厚，别把「音速犬」白送掉",
+    "why": "场上这只血量已经到底（89/366），后备里有更厚的伙伴",
+    "risk": "换人这一手虽然先动，但上来的那只照样要吃对面这一下"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-08-switch-low-hp.png"
+  },
+  {
+   "index": 9,
+   "id": "09-switch-low-hp-low",
+   "label": "我方被压到 15%、对面还有 37%，该不该把资产换下来",
+   "expected_kind": "switch-low-hp",
+   "seed": 20260921,
+   "advances_planned": 6,
+   "pass": "A",
+   "driven_advances": 6,
+   "ended_early": false,
+   "turn": 7,
+   "phase": "battle",
+   "observable": {
+    "turn": 7,
+    "phase": "battle",
+    "my_active": {
+     "name": "海豹船长",
+     "types": [
+      "武系",
+      "水系"
+     ],
+     "hp": 57,
+     "max_hp": 374,
+     "energy": 4,
+     "spe": 100,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "音速犬",
+     "types": [
+      "火系"
+     ],
+     "hp": 134,
+     "max_hp": 366,
+     "energy": 1,
+     "spe": 120,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "银月狼王",
+      "hp": 416,
+      "max_hp": 416,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "月使鹭纳",
+      "hp": 362,
+      "max_hp": 362,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 9,
+     "by_kind": {
+      "skill": 3,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "取念",
+      "水泡盾",
+      "气波",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "你只剩 15% 血，换「银月狼王」上来：它还厚，别把「海豹船长」白送掉",
+    "why": "依据：场上这只血量已经到底（57/374），后备里有更厚的伙伴 · 风险：换人这一手虽然先动，但上来的那只照样要吃对面这一下"
+   },
+   "dataset": {
+    "hint": "action_hint",
+    "action": "action_hint"
+   },
+   "decision": {
+    "action": "action_hint",
+    "gate": null,
+    "reason": "critical-risk"
+   },
+   "kind": "switch-low-hp",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "switch-low-hp",
+    "text": "你只剩 15% 血，换「银月狼王」上来：它还厚，别把「海豹船长」白送掉",
+    "why": "场上这只血量已经到底（57/374），后备里有更厚的伙伴",
+    "risk": "换人这一手虽然先动，但上来的那只照样要吃对面这一下"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-09-switch-low-hp.png"
+  },
+  {
+   "index": 10,
+   "id": "10-speed-faster",
+   "label": "我方速度 130 快过对面 92：同一档对拼是我先出手",
+   "expected_kind": "speed-decides",
+   "seed": 20260921,
+   "advances_planned": 5,
+   "pass": "A",
+   "driven_advances": 5,
+   "ended_early": false,
+   "turn": 6,
+   "phase": "battle",
+   "observable": {
+    "turn": 6,
+    "phase": "battle",
+    "my_active": {
+     "name": "秩序鱿墨",
+     "types": [
+      "幽系",
+      "萌系"
+     ],
+     "hp": 174,
+     "max_hp": 354,
+     "energy": 1,
+     "spe": 130,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "画间沉铁兽",
+     "types": [
+      "普通系",
+      "武系"
+     ],
+     "hp": 293,
+     "max_hp": 435,
+     "energy": 5,
+     "spe": 92,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "圣凯布米龙",
+      "hp": 355,
+      "max_hp": 355,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "雪影娃娃",
+      "hp": 442,
+      "max_hp": 442,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 7,
+     "by_kind": {
+      "skill": 1,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "诡刺",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "你速度 130 快过它 92：这一轮先手压上去，别把节奏让掉",
+    "why": "依据：速度比你慢的是对面，同一档出手顺序里你先动 · 风险：对面要是掏先手招，速度再快也快不过它"
+   },
+   "dataset": {
+    "hint": "micro_hint",
+    "action": "micro_hint"
+   },
+   "decision": {
+    "action": "micro_hint",
+    "gate": null,
+    "reason": "moderate-risk"
+   },
+   "kind": "speed-decides",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "speed-decides",
+    "text": "你速度 130 快过它 92：这一轮先手压上去，别把节奏让掉",
+    "why": "速度比你慢的是对面，同一档出手顺序里你先动",
+    "risk": "对面要是掏先手招，速度再快也快不过它"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-10-speed-decides.png"
+  },
+  {
+   "index": 11,
+   "id": "11-speed-slower-defend",
+   "label": "对面速度快过我方、而我方这一轮有「防御」可以顶这一下",
+   "expected_kind": "speed-decides",
+   "seed": 20260921,
+   "advances_planned": 11,
+   "pass": "A",
+   "driven_advances": 11,
+   "ended_early": false,
+   "turn": 9,
+   "phase": "battle",
+   "observable": {
+    "turn": 9,
+    "phase": "battle",
+    "my_active": {
+     "name": "黑猫巫师",
+     "types": [
+      "普通系"
+     ],
+     "hp": 180,
+     "max_hp": 474,
+     "energy": 3,
+     "spe": 70,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "月使鹭纳",
+     "types": [
+      "翼系",
+      "冰系"
+     ],
+     "hp": 362,
+     "max_hp": 362,
+     "energy": 0,
+     "spe": 115,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "寂灭骨龙",
+      "hp": 0,
+      "max_hp": 425,
+      "energy": 2,
+      "fainted": true
+     },
+     {
+      "name": "海豹船长",
+      "hp": 374,
+      "max_hp": 374,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 0,
+      "fainted": true
+     },
+     {
+      "slot": 2,
+      "fainted": true
+     }
+    ],
+    "legal": {
+     "total": 8,
+     "by_kind": {
+      "skill": 3,
+      "switch": 1,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "防御",
+      "彗星",
+      "啮合传递",
+      "换上第2位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": false,
+    "text": "它速度 115 快过你 70：别硬对拼，先换人或者用「防御」顶这一下",
+    "why": "依据：对面的速度比你高，同档对拼是它先出手 · 风险：硬拼的话这一下会先落在你身上"
+   },
+   "dataset": {
+    "hint": "micro_hint",
+    "action": "micro_hint"
+   },
+   "decision": {
+    "action": "micro_hint",
+    "gate": null,
+    "reason": "moderate-risk"
+   },
+   "kind": "speed-decides",
+   "advice_contract": {
+    "has_text": true,
+    "has_why": true,
+    "has_risk": true,
+    "why_in_dom": true,
+    "risk_in_dom": true
+   },
+   "spoken": true,
+   "silent_reason": null,
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": "speed-decides",
+    "text": "它速度 115 快过你 70：别硬对拼，先换人或者用「防御」顶这一下",
+    "why": "对面的速度比你高，同档对拼是它先出手",
+    "risk": "硬拼的话这一下会先落在你身上"
+   },
+   "node_matches_dom": true,
+   "node_matches_page_kind": true,
+   "shape": "它速度 # 快过你 #：别硬对拼，先换人或者用「◆」顶这一下",
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-11-speed-decides.png"
+  },
+  {
+   "index": 12,
+   "id": "12-peaceful-silent",
+   "label": "双方开满血、局面平稳（没有值得说的局面事实，应当沉默）",
+   "expected_kind": null,
+   "seed": 20260921,
+   "advances_planned": 0,
+   "pass": "A",
+   "driven_advances": 0,
+   "ended_early": false,
+   "turn": 1,
+   "phase": "battle",
+   "observable": {
+    "turn": 1,
+    "phase": "battle",
+    "my_active": {
+     "name": "雪影娃娃",
+     "types": [
+      "冰系",
+      "萌系"
+     ],
+     "hp": 442,
+     "max_hp": 442,
+     "energy": 2,
+     "spe": 90,
+     "statuses": [],
+     "fainted": false
+    },
+    "foe_active": {
+     "name": "雪影娃娃",
+     "types": [
+      "冰系",
+      "萌系"
+     ],
+     "hp": 442,
+     "max_hp": 442,
+     "energy": 2,
+     "spe": 90,
+     "statuses": [],
+     "fainted": false
+    },
+    "my_bench": [
+     {
+      "name": "月使鹭纳",
+      "hp": 362,
+      "max_hp": 362,
+      "energy": 0,
+      "fainted": false
+     },
+     {
+      "name": "化蝶",
+      "hp": 311,
+      "max_hp": 311,
+      "energy": 0,
+      "fainted": false
+     }
+    ],
+    "foe_bench": [
+     {
+      "slot": 1,
+      "fainted": false
+     },
+     {
+      "slot": 2,
+      "fainted": false
+     }
+    ],
+    "legal": {
+     "total": 9,
+     "by_kind": {
+      "skill": 3,
+      "switch": 2,
+      "item": 3,
+      "escape": 1
+     },
+     "skill_names": [],
+     "action_labels": [
+      "防御",
+      "啮合传递",
+      "风吹雪",
+      "换上第2位",
+      "换上第3位",
+      "使用净化药",
+      "使用回复药",
+      "使用能量果",
+      "撤退"
+     ]
+    }
+   },
+   "dom": {
+    "hidden": true,
+    "text": null,
+    "why": null
+   },
+   "dataset": {
+    "hint": "hidden",
+    "action": "silent"
+   },
+   "decision": {
+    "action": "silent",
+    "gate": null,
+    "reason": "below-threshold"
+   },
+   "kind": null,
+   "advice_contract": null,
+   "spoken": false,
+   "silent_reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null",
+   "silent_with_advice": false,
+   "node_recompute": {
+    "kind": null,
+    "text": null,
+    "why": null,
+    "risk": null
+   },
+   "node_matches_dom": false,
+   "node_matches_page_kind": true,
+   "shape": null,
+   "terms_in_player_copy": [],
+   "screenshot": "09-position-12-silent.png"
+  }
+ ],
+ "matrix_pass_b_digest": "e19f02c1f3221e429ff9573f7e20f7edccdecb22d3e8abca49d7bc7fbfbeaa2c",
+ "summary": {
+  "generated_by": "scripts/roco/demo-acceptance.mjs",
+  "schema": "roco-coach-positions-browser/v1",
+  "positions_total": 12,
+  "positions_reached": 12,
+  "positions_with_bubble": 11,
+  "positions_silent": 1,
+  "silent_positions": [
+   {
+    "id": "12-peaceful-silent",
+    "turn": 1,
+    "phase": "battle",
+    "kind": null,
+    "decision": {
+     "action": "silent",
+     "gate": null,
+     "reason": "below-threshold"
+    },
+    "reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null"
+   }
+  ],
+  "distinct_kinds": 8,
+  "kinds_observed": {
+   "energy-short": 1,
+   "foe-energy-high": 1,
+   "ko-now": 2,
+   "replace-required": 1,
+   "speed-decides": 2,
+   "switch-low-hp": 2,
+   "type-favoured": 1,
+   "type-resisted": 1
+  },
+  "coach_advice_kinds_total": 11,
+  "kind_coverage_ledger": [
+   "energy-short",
+   "foe-energy-high",
+   "foe-low-hp",
+   "foe-status-ticking",
+   "ko-maybe",
+   "ko-now",
+   "replace-required",
+   "speed-decides",
+   "switch-low-hp",
+   "type-favoured",
+   "type-resisted"
+  ],
+  "kind_coverage_branch": "count>=8",
+  "kinds_unreachable": [
+   {
+    "kind": "ko-maybe",
+    "hit": 0,
+    "shown": 0,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 0,
+    "battles": 110,
+    "steps": 1413,
+    "reason": "结构上不可能成立：`damage_preview.samples[]` 里**每一个技能只有一个数**（三个分析种子对同一招给出同一个 damage），所以「下限 < 血 ≤ 上限」这个形状不存在；`damage_preview.min/max` 只是「最弱那招 / 最狠那招」两个**不同**技能的包络。本轮抽样扫描（110 局 / 1413 个窗口）命中 0 次。"
+   },
+   {
+    "kind": "foe-low-hp",
+    "hit": 4,
+    "shown": 0,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 4,
+    "battles": 110,
+    "steps": 1413,
+    "reason": "命中 4 次，全部落在我方血量比 > 0.6 的窗口（低血档命中 0 次）→ 同样被「value 0.6 < floor 1.2」压成 silent。它要成立还得同时满足「对面 ≤10% 血」与「我方合法招没有一招估算够得到那条血线」（否则先被 ko-now 接走），这两个条件在真实推进里没有和我方半血同时出现过。"
+   },
+   {
+    "kind": "foe-status-ticking",
+    "hit": 0,
+    "shown": 0,
+    "silent_at_low_hp": 0,
+    "silent_at_full_hp": 0,
+    "battles": 110,
+    "steps": 1413,
+    "reason": "没有入口：12 只手游精灵的规范配招里，没有任何一招在引擎`effect_support` 支持范围内会施加 中毒/灼烧/寄生（不支持的那些 fail closed），而 `POST /api/roco/battle/new` 不接受 loadouts —— 别的地方也挂不上去。本轮抽样扫描（110 局 / 1413 个窗口）命中 0 次。"
+   }
+  ],
+  "kinds_reachable_but_missing_from_matrix": [],
+  "distinct_shapes": 9,
+  "shape_counts": {
+   "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收": 2,
+   "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉": 2,
+   "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶": 1,
+   "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它": 1,
+   "「◆」上一手打出克制（# 伤害）：继续用它压上去": 1,
+   "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手": 1,
+   "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打": 1,
+   "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉": 1,
+   "它速度 # 快过你 #：别硬对拼，先换人或者用「◆」顶这一下": 1
+  },
+  "max_shape_repeat": 2,
+  "shape_repeat_limit": 2,
+  "shapes_over_limit": [],
+  "dom_node_mismatches": [],
+  "kind_mismatches_vs_expected": [],
+  "kind_mismatches_node_vs_page": 0,
+  "missing_advice_parts": [],
+  "why_or_risk_not_rendered": [],
+  "positions_with_engineering_terms": [],
+  "positions_with_errors": [],
+  "silent_with_advice": [],
+  "coverage_scan": {
+   "source": "engine-side scan over the same live service（/api/roco/battle/new → advance → plan → rocoIntervention）",
+   "sample": {
+    "stride": 24,
+    "triples_total": 1320,
+    "seeds": [
+     20260921,
+     5,
+     11
+    ],
+    "lineups": 110
+   },
+   "sample_digest": "977f65bf520a6f04b79f2fcddd88c6e4f4d0af51f88d8d9e859d6b481aa1cf37",
+   "battles_scanned": 110,
+   "steps_scanned": 1413,
+   "full_scan": "node scripts/roco/coach-kind-coverage-scan.mjs（全量 2640 局，产物 reports/roco/demo-acceptance/coach-kind-coverage-scan.json）",
+   "kinds": {
+    "energy-short": {
+     "hit": 228,
+     "shown": 60,
+     "shown_battle_phase": 60,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 168,
+     "first_shown": {
+      "turn": 4,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.519,
+      "foe_hp_ratio": 0.519,
+      "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+     },
+     "shown_windows": [
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 3,
+       "turn": 4,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.519,
+       "foe_hp_ratio": 0.519,
+       "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 4,
+       "turn": 5,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.519,
+       "foe_hp_ratio": 0.519,
+       "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+      },
+      {
+       "seed": 5,
+       "team": [
+        "音速犬",
+        "海豹船长",
+        "黑猫巫师"
+       ],
+       "enemyTeam": null,
+       "advances": 3,
+       "turn": 4,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.519,
+       "foe_hp_ratio": 0.519,
+       "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+      },
+      {
+       "seed": 5,
+       "team": [
+        "音速犬",
+        "海豹船长",
+        "黑猫巫师"
+       ],
+       "enemyTeam": null,
+       "advances": 4,
+       "turn": 5,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.519,
+       "foe_hp_ratio": 0.519,
+       "shape": "能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶"
+      }
+     ]
+    },
+    "ko-now": {
+     "hit": 183,
+     "shown": 114,
+     "shown_battle_phase": 114,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 69,
+     "first_shown": {
+      "turn": 6,
+      "phase": "battle",
+      "action": "action_hint",
+      "my_hp_ratio": 0.279,
+      "foe_hp_ratio": 0.279,
+      "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+     },
+     "shown_windows": [
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 5,
+       "turn": 6,
+       "phase": "battle",
+       "action": "action_hint",
+       "my_hp_ratio": 0.279,
+       "foe_hp_ratio": 0.279,
+       "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 8,
+       "turn": 8,
+       "phase": "battle",
+       "action": "action_hint",
+       "my_hp_ratio": 0.224,
+       "foe_hp_ratio": 0.482,
+       "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 9,
+       "turn": 9,
+       "phase": "battle",
+       "action": "action_hint",
+       "my_hp_ratio": 0.224,
+       "foe_hp_ratio": 0.328,
+       "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 12,
+       "turn": 11,
+       "phase": "battle",
+       "action": "action_hint",
+       "my_hp_ratio": 0.178,
+       "foe_hp_ratio": 0.264,
+       "shape": "「◆」估 #，够收对面「◆」这 # 血：这一轮直接收"
+      }
+     ]
+    },
+    "switch-low-hp": {
+     "hit": 246,
+     "shown": 246,
+     "shown_battle_phase": 216,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 0,
+     "first_shown": {
+      "turn": 6,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0.279,
+      "foe_hp_ratio": 0,
+      "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+     },
+     "shown_windows": [
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 6,
+       "turn": 6,
+       "phase": "replace",
+       "action": "action_hint",
+       "my_hp_ratio": 0.279,
+       "foe_hp_ratio": 0,
+       "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 7,
+       "turn": 7,
+       "phase": "battle",
+       "action": "action_hint",
+       "my_hp_ratio": 0.279,
+       "foe_hp_ratio": 1,
+       "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 10,
+       "turn": 9,
+       "phase": "replace",
+       "action": "action_hint",
+       "my_hp_ratio": 0.224,
+       "foe_hp_ratio": 0,
+       "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": null,
+       "advances": 11,
+       "turn": 10,
+       "phase": "battle",
+       "action": "action_hint",
+       "my_hp_ratio": 0.224,
+       "foe_hp_ratio": 1,
+       "shape": "你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉"
+      }
+     ]
+    },
+    "speed-decides": {
+     "hit": 286,
+     "shown": 98,
+     "shown_battle_phase": 68,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 188,
+     "first_shown": {
+      "turn": 3,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0.954,
+      "foe_hp_ratio": 0,
+      "shape": "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉"
+     },
+     "shown_windows": [
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "雪影娃娃",
+        "化蝶"
+       ],
+       "enemyTeam": [
+        "化蝶",
+        "雪影娃娃",
+        "音速犬"
+       ],
+       "advances": 3,
+       "turn": 3,
+       "phase": "replace",
+       "action": "action_hint",
+       "my_hp_ratio": 0.954,
+       "foe_hp_ratio": 0,
+       "shape": "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉"
+      },
+      {
+       "seed": 5,
+       "team": [
+        "音速犬",
+        "海豹船长",
+        "黑猫巫师"
+       ],
+       "enemyTeam": null,
+       "advances": 12,
+       "turn": 11,
+       "phase": "replace",
+       "action": "action_hint",
+       "my_hp_ratio": 0.759,
+       "foe_hp_ratio": 0,
+       "shape": "它速度 # 快过你 #：别硬对拼，这一轮先换人躲一下"
+      },
+      {
+       "seed": 5,
+       "team": [
+        "音速犬",
+        "海豹船长",
+        "黑猫巫师"
+       ],
+       "enemyTeam": [
+        "黑猫巫师",
+        "海豹船长",
+        "音速犬"
+       ],
+       "advances": 9,
+       "turn": 7,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.492,
+       "foe_hp_ratio": 1,
+       "shape": "它速度 # 快过你 #：别硬对拼，先换人或者用「◆」顶这一下"
+      },
+      {
+       "seed": 11,
+       "team": [
+        "雪影娃娃",
+        "化蝶",
+        "音速犬"
+       ],
+       "enemyTeam": [
+        "音速犬",
+        "化蝶",
+        "雪影娃娃"
+       ],
+       "advances": 8,
+       "turn": 7,
+       "phase": "battle",
+       "action": "action_hint",
+       "my_hp_ratio": 0.045,
+       "foe_hp_ratio": 0.899,
+       "shape": "它速度 # 快过你 #：别硬对拼，这一轮先换人躲一下"
+      }
+     ]
+    },
+    "replace-required": {
+     "hit": 68,
+     "shown": 68,
+     "shown_battle_phase": 0,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 0,
+     "first_shown": {
+      "turn": 6,
+      "phase": "replace",
+      "action": "action_hint",
+      "my_hp_ratio": 0,
+      "foe_hp_ratio": 0.279,
+      "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+     },
+     "shown_windows": [
+      {
+       "seed": 5,
+       "team": [
+        "音速犬",
+        "海豹船长",
+        "黑猫巫师"
+       ],
+       "enemyTeam": null,
+       "advances": 6,
+       "turn": 6,
+       "phase": "replace",
+       "action": "action_hint",
+       "my_hp_ratio": 0,
+       "foe_hp_ratio": 0.279,
+       "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+      },
+      {
+       "seed": 5,
+       "team": [
+        "音速犬",
+        "海豹船长",
+        "黑猫巫师"
+       ],
+       "enemyTeam": [
+        "黑猫巫师",
+        "海豹船长",
+        "音速犬"
+       ],
+       "advances": 3,
+       "turn": 3,
+       "phase": "replace",
+       "action": "action_hint",
+       "my_hp_ratio": 0,
+       "foe_hp_ratio": 0.599,
+       "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+      },
+      {
+       "seed": 5,
+       "team": [
+        "音速犬",
+        "海豹船长",
+        "黑猫巫师"
+       ],
+       "enemyTeam": [
+        "黑猫巫师",
+        "海豹船长",
+        "音速犬"
+       ],
+       "advances": 6,
+       "turn": 5,
+       "phase": "replace",
+       "action": "action_hint",
+       "my_hp_ratio": 0,
+       "foe_hp_ratio": 0.072,
+       "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "画间沉铁兽",
+        "海豹船长"
+       ],
+       "enemyTeam": null,
+       "advances": 12,
+       "turn": 11,
+       "phase": "replace",
+       "action": "action_hint",
+       "my_hp_ratio": 0,
+       "foe_hp_ratio": 0.759,
+       "shape": "「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打"
+      }
+     ]
+    },
+    "type-resisted": {
+     "hit": 94,
+     "shown": 34,
+     "shown_battle_phase": 34,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 60,
+     "first_shown": {
+      "turn": 6,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.525,
+      "foe_hp_ratio": 0.671,
+      "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+     },
+     "shown_windows": [
+      {
+       "seed": 20260921,
+       "team": [
+        "音速犬",
+        "画间沉铁兽",
+        "海豹船长"
+       ],
+       "enemyTeam": [
+        "海豹船长",
+        "画间沉铁兽",
+        "音速犬"
+       ],
+       "advances": 5,
+       "turn": 6,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.525,
+       "foe_hp_ratio": 0.671,
+       "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+      },
+      {
+       "seed": 11,
+       "team": [
+        "雪影娃娃",
+        "化蝶",
+        "音速犬"
+       ],
+       "enemyTeam": null,
+       "advances": 5,
+       "turn": 6,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.484,
+       "foe_hp_ratio": 0.484,
+       "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+      },
+      {
+       "seed": 11,
+       "team": [
+        "雪影娃娃",
+        "化蝶",
+        "音速犬"
+       ],
+       "enemyTeam": [
+        "音速犬",
+        "化蝶",
+        "雪影娃娃"
+       ],
+       "advances": 7,
+       "turn": 6,
+       "phase": "battle",
+       "action": "action_hint",
+       "my_hp_ratio": 0.264,
+       "foe_hp_ratio": 0.899,
+       "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "雪影娃娃",
+        "寂灭骨龙",
+        "黑猫巫师"
+       ],
+       "enemyTeam": null,
+       "advances": 5,
+       "turn": 6,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.484,
+       "foe_hp_ratio": 0.484,
+       "shape": "「◆」打「◆」只有抵抗（# 伤害）：别再硬用它"
+      }
+     ]
+    },
+    "foe-energy-high": {
+     "hit": 9,
+     "shown": 1,
+     "shown_battle_phase": 1,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 8,
+     "first_shown": {
+      "turn": 8,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.409,
+      "foe_hp_ratio": 0.561,
+      "shape": "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手"
+     },
+     "shown_windows": [
+      {
+       "seed": 20260921,
+       "team": [
+        "圆号鱼",
+        "银月狼王",
+        "圣凯布米龙"
+       ],
+       "enemyTeam": [
+        "圣凯布米龙",
+        "银月狼王",
+        "圆号鱼"
+       ],
+       "advances": 7,
+       "turn": 8,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.409,
+       "foe_hp_ratio": 0.561,
+       "shape": "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手"
+      }
+     ]
+    },
+    "foe-low-hp": {
+     "hit": 4,
+     "shown": 0,
+     "shown_battle_phase": 0,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 4,
+     "first_shown": null,
+     "shown_windows": []
+    },
+    "type-favoured": {
+     "hit": 27,
+     "shown": 2,
+     "shown_battle_phase": 2,
+     "silent_at_low_hp": 0,
+     "silent_at_full_hp": 25,
+     "first_shown": {
+      "turn": 6,
+      "phase": "battle",
+      "action": "micro_hint",
+      "my_hp_ratio": 0.557,
+      "foe_hp_ratio": 0.67,
+      "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去"
+     },
+     "shown_windows": [
+      {
+       "seed": 20260921,
+       "team": [
+        "圆号鱼",
+        "银月狼王",
+        "圣凯布米龙"
+       ],
+       "enemyTeam": [
+        "圣凯布米龙",
+        "银月狼王",
+        "圆号鱼"
+       ],
+       "advances": 5,
+       "turn": 6,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.557,
+       "foe_hp_ratio": 0.67,
+       "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去"
+      },
+      {
+       "seed": 20260921,
+       "team": [
+        "圆号鱼",
+        "银月狼王",
+        "圣凯布米龙"
+       ],
+       "enemyTeam": [
+        "圣凯布米龙",
+        "银月狼王",
+        "圆号鱼"
+       ],
+       "advances": 6,
+       "turn": 7,
+       "phase": "battle",
+       "action": "micro_hint",
+       "my_hp_ratio": 0.409,
+       "foe_hp_ratio": 0.561,
+       "shape": "「◆」上一手打出克制（# 伤害）：继续用它压上去"
+      }
+     ]
+    }
+   }
+  },
+  "determinism": {
+   "passes": 2,
+   "byte_identical": true,
+   "digest_pass_a": "e19f02c1f3221e429ff9573f7e20f7edccdecb22d3e8abca49d7bc7fbfbeaa2c",
+   "digest_pass_b": "e19f02c1f3221e429ff9573f7e20f7edccdecb22d3e8abca49d7bc7fbfbeaa2c"
+  }
+ }
+}

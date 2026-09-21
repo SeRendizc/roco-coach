@@ -32,7 +32,7 @@
 // 不做任何手工构造的假局面（第 39 轮的漏检根因就是守卫自己捏了一个服务端不发的形状）。
 //
 // ── 「形状」怎么算 ──────────────────────────────────────────────────────────
-// 需求原话是「换技能名和数字不算不同」，所以形状归一化做三件事（见 `shapeOf`）：
+// 需求原话是「换技能名和数字不算不同」，所以形状归一化做三件事（见 `shapeOfWithNames`）：
 //   ① 引号里的动作/技能/道具标签 → `「◆」`；
 //   ② 任何数字（含小数点与负号）→ `#`；
 //   ③ 裸露的精灵名 / 技能名 → `◆`（名字表从 data/roco/normalized 读，不写死在这里）。
@@ -46,275 +46,38 @@
 //
 // python3 不可用时整条 skip（与 intervention-margin-chain.test.js 同一口径）。
 
+
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {execFileSync} from 'node:child_process';
-import {readFileSync} from 'node:fs';
-import {dirname, join} from 'node:path';
-import {fileURLToPath} from 'node:url';
 
-import {createCoachServer} from '../../../src/server/index.js';
 import {rocoIntervention, rocoInterventionText} from '../../../src/coach/roco-experience.js';
+// ── 共享装置 ────────────────────────────────────────────────────────────────
+// 「公开视图 → coachAdvice 入参」的构造只此一份：`scripts/roco/coach-position-harness.mjs`。
+// 浏览器侧（`scripts/roco/demo-acceptance.mjs`）用**同一个模块**重算同一批可观测量，
+// 两边各抄一份的后果不是报错，而是慢慢漂——到那时你分不清是页面错了还是重算错了。
+import {
+  SKIP,
+  startServer,
+  findPosition,
+  describeConfig,
+  freshSession,
+  windowOf,
+  hpRatio,
+  foeRatio,
+  previewOf,
+  legalDamageSamples,
+  finishAvailable,
+  blockedDecisive,
+  healthyBench,
+  lastPlayerTypeHit,
+  resistedHitPending,
+  noPendingTypeMatchup,
+  shapeOfWithNames,
+  namesSomething,
+  fabricatedClaims,
+  FORBIDDEN,
+} from '../../../scripts/roco/coach-position-harness.mjs';
 
-const HERE = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(HERE, '..', '..', '..');
-const DATA = join(ROOT, 'data', 'roco', 'normalized', 'roco-world-s4-2026-09-10');
-
-function probePython(bin) {
-  try {
-    execFileSync(bin, ['-c', 'import sys;print(sys.version_info[0])'], {encoding: 'utf8'});
-    return {ok: true};
-  } catch (error) {
-    return {ok: false, error: String(error.message).slice(0, 80)};
-  }
-}
-
-const PYTHON = probePython(process.env.ROCO_PYTHON || 'python3');
-const SKIP = PYTHON.ok ? false : `python3 不可用（${PYTHON.error}）`;
-
-// ── 规则集数据（只读，用来把真实局面翻译成可读证据；不改任何东西）──────────
-const readJson = (name) => JSON.parse(readFileSync(join(DATA, name), 'utf8'));
-const PETS = readJson('pets.json').pets;
-const SKILLS = readJson('skills.json').skills;
-const TYPE_CHART = readJson('types.json').types;
-const SUPPORT = readJson('support-matrix.json');
-
-/** 每只精灵的规范配招（引擎 `Ruleset.candidate_moveset` 的同一份来源）。 */
-const MOVESETS = {};
-for (const entry of SUPPORT.pets || []) {
-  const ids = ((entry.candidate_moveset || {}).skills || [])
-    .map((s) => s.skill_id).filter(Boolean);
-  if (ids.length) MOVESETS[entry.pet_id] = ids;
-}
-
-/** 属性倍率：与引擎同一个方向（攻方系别 → 守方属性表）。 */
-function typeMultiplier(element, defenderTypes) {
-  const key = [...(defenderTypes || [])].sort().join('|');
-  const row = TYPE_CHART[key];
-  if (!row) return 1;
-  for (const r of row.resist || []) if (r.type === element) return r.multiplier;
-  for (const w of row.weak || []) if (w.type === element) return w.multiplier;
-  return 1;
-}
-
-const NAMES = [...new Set([
-  ...Object.values(PETS).map((p) => p.name),
-  ...Object.values(SKILLS).map((s) => s.name),
-].filter((n) => typeof n === 'string' && n.length >= 2))].sort((a, b) => b.length - a.length);
-const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const NAME_RE = new RegExp(NAMES.map(escapeRe).join('|'), 'g');
-
-/**
- * 句子形状：把「这一句在说什么」之外的东西全部抹掉——
- *   ① 引号里的动作/技能/道具标签（`「使用能量果」` `「换上第2位」` `「彗星」`）→ `「◆」`；
- *   ② 任何数字（含小数点与负号）→ `#`；
- *   ③ 裸露的精灵名 / 技能名（「注意对方可能诡刺」里的「诡刺」）→ `◆`。
- *
- * 需求原话是「换个技能名和数字不算不同」。所以名字与数字**两样**都要归一化：
- * 只归一化数字的话，同一个模板的十次复现会因为技能名/道具标签不同而被算成十种形状，
- * 那正好把这个缺陷放过。名字表从 data/roco/normalized 读，不写死在这里。
- */
-function shapeOf(text) {
-  return String(text)
-    .replace(/「[^」]{0,40}」/g, '「◆」')
-    .replace(/-?\d+(?:\.\d+)?/g, '#')
-    .replace(NAME_RE, '◆');
-}
-
-// 不带 /g 的探针：`/g` 正则的 `test()` 有 lastIndex 状态，会随调用次数飘。
-const NAME_PROBE = new RegExp(NAME_RE.source);
-
-/**
- * D 的判据：这句话点了名没有。
- *   · 引号里的动作/技能/道具标签；或
- *   · 任何一个真实存在的精灵名 / 技能名（裸写，如「注意对方可能诡刺」）；或
- *   · 一句明确的**动作**（换人 / 换上 / 吃果 / 补位 / 防御 / 收掉 / 别硬顶 …）；
- *   · 或一句明确的「先观察 / 不硬给答案」立场。
- *
- * 为什么动作词也算：速度局面那句「它速度 90 快过你 60：别硬对拼，这一轮先换人躲一下」
- * 既没有引号也没有技能名，但它给的是**动作**（换人）加一个具体观察（速度差），
- * 完全满足 D 的本意；D 要挡的是「只说了一个区间、什么也没让人做」的那种句子。
- */
-const ACTION_PATTERN = /换人|换上|顶上|切换到|使用|吃「|补位|防御|收掉|收线|直接收|补上|别硬顶|别硬对拼|躲一下|拖住节奏|压上去/;
-const STANCE_PATTERN = /先按你的判断走|先看局面|按局面常识走|先观察|保持观察|允许沉默|再观察/;
-
-function namesSomething(text) {
-  if (/「[^」]{1,24}」/.test(text)) return true;
-  if (NAME_PROBE.test(text)) return true;
-  if (ACTION_PATTERN.test(text)) return true;
-  return STANCE_PATTERN.test(text);
-}
-
-const FORBIDDEN = ['state_version', 'quota', 'coverage', 'margin', 'worst', '尾部', '区间',
-  '分支', '分析种子', 'score', 'critical', 'degrade', 'JSON', 'undefined', 'null', 'NaN'];
-
-const freshSession = () => ({hints: 0, lastAt: -Infinity, dismissed: false, said: new Set(),
-  readings: new Set(), topics: new Set(), limit: 3});
-
-// ── 真服务 + 真路由 ────────────────────────────────────────────────────────
-async function startServer() {
-  const server = createCoachServer({});
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const base = `http://127.0.0.1:${server.address().port}`;
-  const bootRes = await fetch(`${base}/api/bootstrap`);
-  const boot = await bootRes.json();
-  const cookie = bootRes.headers.get('set-cookie') || '';
-  const post = (path, data) => fetch(base + path, {
-    method: 'POST',
-    headers: {Origin: base, Cookie: cookie, 'Content-Type': 'application/json', 'X-Coach-CSRF': boot.csrf},
-    body: JSON.stringify(data),
-  }).then((r) => r.json());
-  return {
-    post,
-    close: () => { server.closeAllConnections?.(); server.close(); },
-  };
-}
-
-/** 把一份真实公开视图压成判定用的最小事实集（只读公开字段）。 */
-function windowOf(view) {
-  const activeIndex = Number.isInteger(view?.self?.active) ? view.self.active : 0;
-  const me = view?.self?.pets?.[activeIndex] ?? null;
-  const foe = view?.opponent?.field ?? null;
-  const legal = Array.isArray(view?.legal) ? view.legal : [];
-  const damaging = legal
-    .filter((a) => a.kind === 'skill' && a.skill && a.skill.power != null)
-    .map((a) => ({name: a.skill_name, skill_id: a.skill_id, element: a.skill.element,
-      energy: a.skill.energy, power: a.skill.power,
-      mult: foe ? typeMultiplier(a.skill.element, foe.types || []) : 1}));
-  return {
-    // 原始公开视图：rocoIntervention 只接受这一份形状，投影在 rocoGameView 里做。
-    rawView: view,
-    turn: view.turn ?? null,
-    phase: view.phase ?? null,
-    me: me ? {pet_id: me.pet_id, name: me.name, hp: me.hp, max: me.max_hp, energy: me.energy,
-      statuses: me.statuses || {}, fainted: me.fainted === true, spe: me.stats?.spe ?? null} : null,
-    bench: (view?.self?.pets || []).map((p, index) => ({pet_id: p.pet_id, name: p.name,
-      hp: p.hp, max: p.max_hp, energy: p.energy, statuses: p.statuses || {},
-      fainted: p.fainted === true, isActive: index === activeIndex})),
-    foe: foe ? {pet_id: foe.pet_id, name: foe.name, hp: foe.hp, max: foe.max_hp, energy: foe.energy,
-      types: foe.types || [], statuses: foe.statuses || {}, marks: foe.marks || {},
-      buffs: foe.buffs || {}, fainted: foe.fainted === true, spe: foe.stats?.spe ?? null} : null,
-    legal,
-    damaging,
-    // 己方全队的配招技能（UI 视图公开）：断言 F 的「这个名字/这个能耗真的在这场里」会用到。
-    selfSkills: (view?.self?.skills || []).filter(Boolean)
-      .map((s) => ({name: s.name, energy: s.energy, power: s.power})),
-    // 上一手的公开事件（属性倍率、状态结算都在这）：局面判据要读它，断言 F 也要读它。
-    events: (Array.isArray(view?.events) ? view.events : [])
-      .map((e) => ({kind: e?.kind ?? null, side: e?.side ?? null, detail: e?.detail ?? null})),
-    items: legal.filter((a) => a.kind === 'item').map((a) => a.item_id ?? a.label),
-    tickEvents: (Array.isArray(view?.events) ? view.events : [])
-      .map((e) => e?.text).filter((t) => typeof t === 'string' && /因(灼烧|中毒|寄生)损失/.test(t)),
-    switchCount: legal.filter((a) => a.kind === 'switch').length,
-  };
-}
-
-const hpRatio = (w) => (w.me && w.me.max > 0 ? w.me.hp / w.me.max : 1);
-const foeRatio = (w) => (w.foe && w.foe.max > 0 ? w.foe.hp / w.foe.max : 1);
-
-/** 规划回执里的伤害预览（引擎的原始伤害估算；第 44 轮起这条链真的通了）。 */
-const previewOf = (w) => (w.plan?.damage_preview?.available === true ? w.plan.damage_preview : null);
-
-/**
- * **合法**技能的估算区间。
- *
- * `damage_preview.min/max` 是**整份配招**（含这一步出不了的招）的包络，不能直接拿来
- * 回答「这一手收不收得掉」——那要按**合法**动作去 `samples` 里查同一招。
- */
-function legalDamageSamples(w) {
-  const preview = previewOf(w);
-  if (!preview || !Array.isArray(preview.samples)) return [];
-  const legalNames = new Set(w.damaging.map((d) => d.name));
-  return preview.samples.filter((s) => s && legalNames.has(s.label));
-}
-
-/** 这一轮真有「稳收」的一手（合法招的估算下限 ≥ 对手当前血）。 */
-const finishAvailable = (w) => Boolean(w.foe) && w.foe.hp > 0
-  && legalDamageSamples(w).some((s) => Number.isFinite(s.min) && s.min >= w.foe.hp);
-
-/** 规范配招里这一招的能耗（引擎自己的配招来源；不是猜的）。 */
-function loadoutEnergyOf(petId, skillName) {
-  const skill = (MOVESETS[petId] || []).map((sid) => SKILLS[sid])
-    .find((s) => s && s.name === skillName);
-  return skill && Number.isFinite(skill.energy) ? skill.energy : null;
-}
-
-/**
- * 「更狠的那一招放不出来，而且它估算盖得过对面血量」——这是 energy-short 检测器的
- * 公开事实判据（能耗 > 当前能量 + 估算能收）。用它把「能量局面」与「只是招不够狠」分开。
- */
-function blockedDecisive(w) {
-  const preview = previewOf(w);
-  if (!preview || !w.foe || !w.me) return false;
-  const legalNames = new Set(w.damaging.map((d) => d.name));
-  return (preview.samples || []).some((s) => s && !legalNames.has(s.label)
-    && Number.isFinite(s.max) && s.max >= w.foe.hp
-    && (loadoutEnergyOf(w.me.pet_id, s.label) ?? 0) > w.me.energy);
-}
-
-/** 后备里有血比 ≥60% 的健康伙伴（switch-low-hp 的前提之一）。 */
-const healthyBench = (w) => w.bench.some((b) => !b.isActive && !b.fainted && b.max > 0 && b.hp / b.max >= 0.6);
-
-/**
- * 引擎公开事件里「我方上一手打出的、带属性倍率的那一击」。
- * 与建议层 `lastMyTypeHit` 同一口径：那一击之后对面没有换人/倒下，倍率才属于**现在**场上这只。
- */
-function lastPlayerTypeHit(w) {
-  const events = w.events;
-  for (let i = events.length - 1; i >= 0; i -= 1) {
-    const e = events[i];
-    const detail = e?.detail && typeof e.detail === 'object' ? e.detail : {};
-    if (e?.kind !== 'damage' || detail.side !== 'player') continue;
-    const multiplier = detail.type_multiplier;
-    if (!Number.isFinite(multiplier)) continue;
-    const changed = events.slice(i + 1).some((x) => {
-      const d = x?.detail && typeof x.detail === 'object' ? x.detail : {};
-      return d.side === 'enemy' && ['switch', 'replacement', 'faint'].includes(x?.kind);
-    });
-    if (changed) return null;
-    return {multiplier, skillId: typeof detail.skill_id === 'string' ? detail.skill_id : null};
-  }
-  return null;
-}
-
-/** 上一手那一招被抵抗，而且这一轮还放得出来（建议层 type-resisted 的前提）。 */
-function resistedHitPending(w) {
-  const hit = lastPlayerTypeHit(w);
-  return Boolean(hit) && hit.multiplier < 1
-    && w.damaging.some((d) => d.skill_id === hit.skillId);
-}
-
-/** 上一手那一招没有属性信息（倍率恰好 1 或没打出伤害）→ type 检测器不会开口。 */
-function noPendingTypeMatchup(w) {
-  const hit = lastPlayerTypeHit(w);
-  return !hit || hit.multiplier === 1;
-}
-
-async function findPosition({post, config, canAskPlan, isMatch, maxTurns = 14}) {
-  const request = {seed: config.seed, strategy: config.strategy};
-  if (config.team) request.team = config.team;
-  if (config.enemyTeam) request.enemy_team = config.enemyTeam;
-  const started = await post('/api/roco/battle/new', request);
-  if (!started.ok) return {error: `开局失败：${started.error || ''}`};
-  let current = started;
-  for (let step = 0; step < maxTurns; step += 1) {
-    const view = current.view;
-    if (!view || view.battle_result) break;
-    const w = windowOf(view);
-    // 计划必须在**推进之前**问：plan 描述的是这一手所在的局面。
-    if (canAskPlan(w)) {
-      w.plan = await post('/api/roco/plan', {battle_id: started.battle_id, depth: 2, beam: 4});
-    }
-    const advanced = await post('/api/roco/battle/advance',
-      {battle_id: started.battle_id, auto: true});
-    if (!advanced.ok) break;
-    if (isMatch(w)) return {config, window: w, steps: step + 1};
-    current = advanced;
-  }
-  return {error: `在 ${maxTurns} 个回合里没有出现这个局面`};
-}
-
-const DEFAULT_TEAM = ['pet_000225', 'pet_000190', 'pet_000445'];
 const CFG_A = {seed: 20260921, strategy: 'greedy_damage'};
 const CFG_C = {seed: 20260921, strategy: 'greedy_damage', team: ['pet_000062', 'pet_000112', 'pet_000417']};
 const CFG_D = {seed: 20260921, strategy: 'conservative_switch',
@@ -522,85 +285,12 @@ const CASES = [
   },
 ];
 
-function describeConfig(config) {
-  const team = config.team ? config.team.join('+') : DEFAULT_TEAM.join('+');
-  const enemy = config.enemyTeam ? config.enemyTeam.join('+') : '（缺省＝与我方同队）';
-  return `seed=${config.seed} strategy=${config.strategy} team=[${team}] enemy=[${enemy}]`;
-}
-
 // ── 断言 F：不允许编造（hint 说的每个具体事实，同一个局面里必须真的有）──────
 //
-// 事实来源只有三处：公开视图（血压/能量/速度/异常/印记/合法动作/配招技能名）、
-// `/api/roco/plan` 回执（伤害预览、期望/最坏/风险这些引擎自己算出来的数）、
-// 以及这两份里字符串自带的数字（例如推荐标签「换上第3位」里的 3）。
-// hint 里出现别的东西就是编造；这条守卫把「说得像真的」挡在验收之外。
-function numericFactsOf(w) {
-  const values = [];
-  const push = (v) => { if (Number.isFinite(v)) values.push(v); };
-  const petFacts = (p) => {
-    if (!p) return;
-    push(p.hp); push(p.max); push(p.energy); push(p.spe);
-    if (p.max > 0) { push(p.hp / p.max * 100); push(Math.round(p.hp / p.max * 100)); }
-    for (const v of Object.values(p.statuses || {})) {
-      if (typeof v === 'number') push(v);
-      else if (v && typeof v === 'object') push(v.layers);
-    }
-  };
-  push(w.turn);
-  push(w.switchCount);
-  push(w.items.length);
-  petFacts(w.me); petFacts(w.foe);
-  for (const b of w.bench) petFacts(b);
-  for (const d of w.damaging) { push(d.energy); push(d.power); }
-  // 全队配招（UI 公开面板）：不提这一块，「能量还差 4」这类**由配招能耗算出来**的
-  // 数字就会被误判成编造。
-  for (const s of w.selfSkills) { push(s.energy); push(s.power); }
-  const plan = w.plan || {};
-  const dp = plan.damage_preview;
-  if (dp) {
-    push(dp.min); push(dp.max); push(dp.foe_hp); push(dp.candidates);
-    for (const s of dp.samples || []) { push(s?.min); push(s?.max); }
-  }
-  for (const bucket of [plan.expected, plan.worst, plan.best, plan.first_second_margin]) {
-    if (bucket && typeof bucket === 'object') for (const v of Object.values(bucket)) push(v);
-  }
-  if (plan.risk) { push(plan.risk.downside_min); push(plan.risk.downside_max); push(plan.risk.threshold); }
-  for (const label of [plan.recommendation, plan.main_counter]) {
-    if (typeof label === 'string') for (const m of label.match(/-?\d+(?:\.\d+)?/g) || []) push(Number(m));
-  }
-  // 「还差多少」这类差值也要有依据：能量与血量之间的差是最常见的。
-  const base = [w.me?.hp, w.me?.max, w.foe?.hp, w.foe?.max, w.me?.energy, w.foe?.energy,
-    dp?.min, dp?.max, dp?.foe_hp, ...w.damaging.map((d) => d.energy),
-    ...w.selfSkills.map((s) => s.energy)].filter(Number.isFinite);
-  for (let i = 0; i < base.length; i += 1) {
-    for (let j = i + 1; j < base.length; j += 1) push(Math.abs(base[i] - base[j]));
-  }
-  return values;
-}
-
-function fabricatedClaims(text, w) {
-  const problems = [];
-  const allowed = new Set();
-  for (const p of [w.me, w.foe, ...w.bench]) if (p?.name) allowed.add(p.name);
-  for (const d of w.damaging) allowed.add(d.name);
-  for (const s of w.selfSkills) if (s.name) allowed.add(s.name);
-  for (const s of w.plan?.damage_preview?.samples || []) if (s?.label) allowed.add(s.label);
-  if (w.plan?.recommendation) allowed.add(w.plan.recommendation);
-  if (w.plan?.main_counter) allowed.add(w.plan.main_counter);
-  for (const name of NAMES) {
-    if (!String(text).includes(name)) continue;
-    if (!allowed.has(name)) problems.push(`提到的「${name}」在这个局面里不存在`);
-  }
-  const facts = numericFactsOf(w);
-  for (const token of String(text).match(/-?\d+(?:\.\d+)?/g) || []) {
-    const value = Number(token);
-    if (!facts.some((v) => Math.abs(v - value) <= 0.006)) {
-      problems.push(`数字 ${token} 在这个局面里找不到依据`);
-    }
-  }
-  return problems;
-}
-
+// 实现搬到了共享装置（`scripts/roco/coach-position-harness.mjs` 的
+// `numericFactsOf` / `fabricatedClaims`）：浏览器侧矩阵要用**同一把尺子**核对
+// 页面上的气泡，两边各写一份必然漂。判据本身没有放宽——事实来源仍然只有三处：
+// 公开视图、`/api/roco/plan` 回执、以及这两份里字符串自带的数字。
 test('P1 验收：10 个真实局面各自得到「对路」的建议，且句子在种类上不同',
   {skip: SKIP}, async () => {
     const {post, close} = await startServer();
@@ -645,7 +335,7 @@ test('P1 验收：10 个真实局面各自得到「对路」的建议，且句�
           gate: detail.gate,
           evidence: c.evidence(w),
           text: spoken ? spoken.text : null,
-          shape: spoken ? shapeOf(spoken.text) : null,
+          shape: spoken ? shapeOfWithNames(spoken.text) : null,
           recommendation: w.plan?.recommendation ?? null,
           window: w,
         });
