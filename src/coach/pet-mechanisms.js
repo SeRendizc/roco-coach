@@ -58,10 +58,27 @@ export function createMechanismIndex({readFile}) {
 }
 
 /**
+ * 列表层要用的**最小**机制字段（卡片首层）。
+ *
+ * 为什么单独列一份：名单接口的载荷会被验收脚本逐键扫「有没有漏工程字段」，
+ * 所以列表层只带这四个玩家看得懂的键；`desc` 原文与 `unverified[]` 留给详情/抽屉。
+ */
+export function rosterMechanism(row) {
+  const player = playerMechanism(row);
+  return {
+    line: player.mechanism_line,
+    status: player.mechanism_status,
+    name: player.mechanism_name,
+    tags: player.mechanism_tags,
+  };
+}
+
+/**
  * 把产物里的一行整理成**玩家层**能直接渲染的字段。
  *
  * 不知道就说不知道：`MECHANISM_UNCONFIRMED` / 缺行 / 行不是字符串 ⇒ `mechanism_line` 是 fallback，
- * `feature.desc` 是 null。威力不进首层（`feature.power` 只给展开详情用，来源没给就是 null）。
+ * `mechanism_desc` / `mechanism_name` 是 null。威力不进首层（产物里的 `feature.power`
+ * 只给展开详情用，来源没给就是 null）。
  */
 export function playerMechanism(row) {
   const status = MECHANISM_STATUSES.includes(row?.mechanism_status) ? row.mechanism_status : 'MECHANISM_UNCONFIRMED';

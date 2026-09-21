@@ -476,3 +476,34 @@ test('RC-302 判据⑯：读盘只读不写（数据文件在测试前后逐字�
     assert.ok(existsSync(join(ROOT, file)), `${file} 必须还在原处`);
   }
 });
+
+// ── 魔力口径的唯一事实源（2026-09-22 追加）────────────────────────────────
+//
+// `cost.mana_rule` 这条 gap 里的 `mana_per_side: 4` 是**写死在模块里**的，
+// 而 RC-105 的候选配置 `data/roco/rulesets/mobile-s4-candidate-v3.json` 才是它的事实源
+// （`mana.pool.value = 4`）。两处各写一遍就会各自漂移——所以这里钉一条：
+// 模块里的数字必须与配置**逐字相等**，配置被改（例如 4 → 5）而模块没跟，必须红。
+test('⑰ cost.mana_rule 的魔力数字必须与候选规则配置逐字一致（漂移就红）', () => {
+  const v3 = (inputs.rulesets ?? []).find((r) => r?.ruleset_config_id === 'mobile_s4_candidate_v3');
+  assert.ok(v3, '候选配置 mobile_s4_candidate_v3 必须被 loadTeamGapsInputs 加载进来');
+  assert.equal(v3.mana.pool.value, 4, '候选配置的魔力池是 4');
+  assert.equal(v3.mana.pool.confidence, 'CROSS_SOURCE_SUPPORTED', '等级不许在配置里被悄悄升级');
+  assert.equal(v3.mana.pool.microcase_id, 'MC-E08', '魔力池的判据仍是未录制的 MC-E08');
+
+  const diagnosis = diagnose({selected: ids.slice(0, 3)});
+  const gapRow = diagnosis.gaps.find((g) => g.id === 'cost.mana_rule');
+  assert.ok(gapRow, 'cost.mana_rule 这条 gap 必须存在');
+  raw('⑰ 模块里写的 mana_per_side 与配置里的 mana.pool.value', {
+    module: gapRow.value.mana_per_side, config: v3.mana.pool.value,
+  });
+  assert.equal(gapRow.value.mana_per_side, v3.mana.pool.value,
+    `模块写死 ${gapRow.value.mana_per_side}，配置是 ${v3.mana.pool.value}：两处已经漂移`);
+
+  // 反证：把配置改成 5（内存副本，不写盘）之后，上面那条相等判据必须**不再成立**——
+  // 否则这条检查是空转的。
+  const tampered = clone(v3);
+  tampered.mana.pool.value = 5;
+  raw('⑰ 反证：配置改成 5 之后', {module: gapRow.value.mana_per_side, config: tampered.mana.pool.value});
+  assert.notEqual(gapRow.value.mana_per_side, tampered.mana.pool.value,
+    '把配置改成 5 之后仍相等 ⇒ 这条检查抓不到漂移');
+});

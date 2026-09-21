@@ -105,11 +105,18 @@ test('路由契约：kind=catalog 是**全量 622**，不是 48 只迁移层', a
     '48 只能是「迁移层配过招的条数」，它不该等于全量');
   assert.equal(json.dev.coverage.pet_record + json.dev.coverage.pet_form, 622,
     '精灵 460 + 形态 162 应当正好是 622');
-  // 卡片首层只有玩家该看到的那几样
+  // 卡片首层只有玩家该看到的那几样（`mechanism` 是 2026-09-22 人类 P0 之后加的**加性**键：
+  // 卡片首层的「机制」必须是可核对原文，不是前端模板句；它只带 line/status/name/tags，
+  // 出处原文与 unverified[] 留在详情层）。
   const card = json.player.cards[0];
   assert.deepEqual(Object.keys(card).sort(),
-    ['alias', 'form_label', 'has_metrics', 'has_moveset', 'name', 'role_label', 'select', 'support_label', 'types'].sort(),
+    ['alias', 'form_label', 'has_metrics', 'has_moveset', 'mechanism', 'name', 'role_label', 'select', 'support_label', 'types'].sort(),
     `卡片首层的键变了：${show(Object.keys(card))}`);
+  assert.deepEqual(Object.keys(card.mechanism).sort(), ['line', 'name', 'status', 'tags'].sort(),
+    `机制字段只允许这四个玩家键：${show(Object.keys(card.mechanism))}`);
+  assert.equal(card.mechanism.status, 'FROZEN_DESC', '全图鉴 622 只都该解析到冻结 desc');
+  assert.ok(card.mechanism.line.length <= 60 && card.mechanism.line.includes('「'),
+    `机制行该是「特性「X」：…」的样子，实际 ${show(card.mechanism.line)}`);
 });
 
 test('路由契约：kind=mine 是 80 个个体，分页加起来还是 80', async () => {
