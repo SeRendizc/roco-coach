@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `42596b0`；v3 纠偏与 RC-101/RC-201/RC-202 见 §C6.15～§C6.20）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `cd607a5`；v3 纠偏与 RC-101/RC-201/RC-202/RC-103 见 §C6.15～§C6.21）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **16/16 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `42596b0`（`feat(rc202): 统一 GameDataPackV2 索引包`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `cd607a5`（`chore(rc103): 重建 game-data-pack（输入哈希变了）+ 刷新两份派生报告与文档`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **16 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1493,3 +1493,28 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
   已改成「与登记表一致 + 反向控制」，而不是删断言。
 
 **下一条**：RC-103（回合顺序/回合末登记表，不依赖实机）或先补 RC-202 的第 6 项（需要数据导出）。
+
+### C6.21 RC-103 回合顺序登记表 + 未核验顺序 fail closed（第 84 轮）
+
+**要修的真问题**：速度平手一直是 `env.py` 排序键里的 `rng.random()` 决定的，而证据台账写明
+`speed tie = UNKNOWN` —— 用随机数充当规则，就是「把不知道写成默认值」。
+
+**交付**（提交 `b96e616`、`cd607a5`）：两份 ruleset 补齐 `turn_order`（`action_order` / `speed_tie` /
+`end_turn.order` / `end_turn.unknown_stages_allowed`，逐字段带 value/confidence/evidence_id/microcase）；
+引擎 `_end_of_turn()` 按**配置声明的阶段顺序**迭代（作用域=每只在场精灵内部，故 legacy 事件顺序不变），
+声明与实现多一个/少一个都抛 `UnsupportedEffect` 并点名阶段与配置 id；平手策略从配置读，
+`random_seeded`（legacy，注释写明是**工程权宜**）或 `null/UNKNOWN`（candidate，**真出现平手才抛**，含 MC-E05）。
+生成器新增 `LEGACY_TURN_ORDER_BIT_EXACT`，坏值落不了盘（4 条新反证）。
+
+**legacy 逐位不变是判据不是嘴说的**：改动前抓的 8 个 golden 指纹（6 局固定 seed 的状态+事件 sha256、
+一段固定动作序列）改动后复算**全部相等**，已硬编码进测试；既有 275 条 env 测试一条未改，现 295 条全过。
+
+**如实登记的差距**：candidate 严格总序仍未确认（`switch` 折算成固定先手度 `SWITCH_PRIORITY=5`，是假设，
+不是第四维）；`end_turn` 组内顺序台账无对应条目（`microcase_id: null` + 写明不借别的）；
+平手 UNKNOWN 是**运行时**才抛（间歇性 fail closed，非加载期）。
+
+**连带项（如实记录）**：pack 因输入哈希变化而**重建**（`ab0a22bc…` → `ae4a9b65…`，`artifacts[]` 只一条变，
+就绪仍 `draft` 8/9）；`rule-promotion.json` / `rc-101-rule-config.json` / `RULE-PROMOTION.md` 同步刷新
+（叶子数 9 → 10、两处路径改名）；失效图补上 `turn_order.action_order` / `speed_tie` 两个主题（19 主题）。
+
+**下一条**：RC-203 OwnedPet/BattleBuild（六宠工坊的数据前置）或 RC-204 RAG 索引与 held-out 评测。
