@@ -1,0 +1,177 @@
+{
+ "generated_by": "scripts/roco/measure-demo-perf.mjs",
+ "schema": "roco-demo-perf/v1",
+ "first_screen": {
+  "ready_ms": 154,
+  "dom_content_loaded_ms": 47,
+  "load_ms": 48,
+  "resources": 20,
+  "total_transfer_bytes": 655947,
+  "resource_list": [
+   {
+    "n": "roco.css",
+    "url": "http://127.0.0.1:62253/src/client/roco.css",
+    "t": "link",
+    "s": 7239,
+    "d": 3
+   },
+   {
+    "n": "roco.js",
+    "url": "http://127.0.0.1:62253/src/client/roco.js",
+    "t": "script",
+    "s": 43035,
+    "d": 3
+   },
+   {
+    "n": "roco-experience.js",
+    "url": "http://127.0.0.1:62253/src/coach/roco-experience.js",
+    "t": "script",
+    "s": 20951,
+    "d": 3
+   },
+   {
+    "n": "memory.js",
+    "url": "http://127.0.0.1:62253/src/coach/memory.js",
+    "t": "script",
+    "s": 47414,
+    "d": 5
+   },
+   {
+    "n": "companion.js",
+    "url": "http://127.0.0.1:62253/src/coach/companion.js",
+    "t": "script",
+    "s": 226675,
+    "d": 4
+   },
+   {
+    "n": "teacher-review.js",
+    "url": "http://127.0.0.1:62253/src/coach/teacher-review.js",
+    "t": "script",
+    "s": 48033,
+    "d": 6
+   },
+   {
+    "n": "coach-advice.js",
+    "url": "http://127.0.0.1:62253/src/coach/coach-advice.js",
+    "t": "script",
+    "s": 36336,
+    "d": 4
+   },
+   {
+    "n": "experience.js",
+    "url": "http://127.0.0.1:62253/src/coach/experience.js",
+    "t": "script",
+    "s": 50626,
+    "d": 4
+   },
+   {
+    "n": "policy.js",
+    "url": "http://127.0.0.1:62253/src/coach/policy.js",
+    "t": "script",
+    "s": 2545,
+    "d": 5
+   },
+   {
+    "n": "engine.js",
+    "url": "http://127.0.0.1:62253/src/game/engine.js",
+    "t": "script",
+    "s": 32076,
+    "d": 5
+   },
+   {
+    "n": "strategist.js",
+    "url": "http://127.0.0.1:62253/src/coach/strategist.js",
+    "t": "script",
+    "s": 13406,
+    "d": 2
+   },
+   {
+    "n": "intervention-model.js",
+    "url": "http://127.0.0.1:62253/src/coach/intervention-model.js",
+    "t": "script",
+    "s": 10523,
+    "d": 2
+   },
+   {
+    "n": "teacher.js",
+    "url": "http://127.0.0.1:62253/src/coach/teacher.js",
+    "t": "script",
+    "s": 34655,
+    "d": 2
+   },
+   {
+    "n": "content.js",
+    "url": "http://127.0.0.1:62253/src/game/content.js",
+    "t": "script",
+    "s": 59352,
+    "d": 1
+   },
+   {
+    "n": "intervention-model.generated.js",
+    "url": "http://127.0.0.1:62253/src/coach/intervention-model.generated.js",
+    "t": "script",
+    "s": 1675,
+    "d": 1
+   },
+   {
+    "n": "progression.js",
+    "url": "http://127.0.0.1:62253/src/game/progression.js",
+    "t": "script",
+    "s": 4546,
+    "d": 2
+   },
+   {
+    "n": "roster",
+    "url": "http://127.0.0.1:62253/api/roco/roster",
+    "t": "fetch",
+    "s": 14834,
+    "d": 101
+   },
+   {
+    "n": "favicon.ico",
+    "url": "http://127.0.0.1:62253/favicon.ico",
+    "t": "other",
+    "s": 327,
+    "d": 1
+   },
+   {
+    "n": "bootstrap",
+    "url": "http://127.0.0.1:62253/api/bootstrap",
+    "t": "fetch",
+    "s": 913,
+    "d": 1
+   },
+   {
+    "n": "status",
+    "url": "http://127.0.0.1:62253/api/roco/status",
+    "t": "fetch",
+    "s": 786,
+    "d": 2
+   }
+  ],
+  "external_resources": 0
+ },
+ "per_turn": {
+  "steps": 25,
+  "render_p50_ms": 0.1,
+  "render_p95_ms": 0.3,
+  "render_max_ms": 0.3,
+  "step_p50_ms": 4,
+  "step_p95_ms": 7
+ },
+ "memory": {
+  "samples_mb": [
+   1.93,
+   2.22,
+   2.41,
+   2.41
+  ],
+  "growth_mb": 0.48
+ },
+ "dom_nodes": 294,
+ "not_claimed": [
+  "网络限速/CDN 下的表现",
+  "真实手机浏览器的内存",
+  "并发玩家下的表现"
+ ]
+}
