@@ -1,6 +1,13 @@
 {
  "generated_by": "scripts/roco/check-intervention-agreement.mjs",
  "preregistration": "docs/roco/W5-04-SUPPRESSION-VS-RULE.md",
+ "latency": {
+  "note": "rocoIntervention 一次调用的墙钟（含特征装配与逻辑回归推理，不含模型加载）",
+  "n": 552,
+  "p50_ms": 0.022,
+  "p95_ms": 0.093,
+  "max_ms": 0.12
+ },
  "settings": {
   "seeds": 24,
   "seeds_started": 24,

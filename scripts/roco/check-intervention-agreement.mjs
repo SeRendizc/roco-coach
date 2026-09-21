@@ -23,6 +23,7 @@
 //     node scripts/roco/check-intervention-agreement.mjs --seeds 12 --turns 8
 
 import {writeFileSync, mkdirSync} from 'node:fs';
+import {performance} from 'node:perf_hooks';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -44,6 +45,12 @@ function args(argv) {
     return index >= 0 ? Number(argv[index + 1]) : fallback;
   };
   return {seeds: value('--seeds', 10), turns: value('--turns', 8), quiet: argv.includes('--quiet')};
+}
+
+function quantile(list, p) {
+  if (!list.length) return null;
+  const sorted = [...list].sort((a, b) => a - b);
+  return Number(sorted[Math.min(sorted.length - 1, Math.floor(p * sorted.length))].toFixed(3));
 }
 
 function freshSession() {
@@ -215,11 +222,18 @@ async function main() {
       Origin: base, Cookie: cookie, 'Content-Type': 'application/json', 'X-Coach-CSRF': boot.csrf},
     body: JSON.stringify(data)}).then((r) => r.json());
 
+    // 判定层的**延迟**也一起量：它是产品路径上的一步，报告必须给延迟。
+    // 只量 `rocoIntervention` 这一次调用的墙钟（含特征装配 + 逻辑回归推理），
+    // 不含模型加载（那是懒加载、只发生一次）。
+    const layerMs = [];
     const evaluate = (view, plan, mode, session, host = {}) => {
       process.env.ROCO_INTERVENTION_MODEL = mode;
       resetInterventionLayer();
-      return rocoIntervention({view, session: session ?? freshSession(), plan,
+      const started = performance.now();
+      const detail = rocoIntervention({view, session: session ?? freshSession(), plan,
         host: {focus: true, preference: 'gentle', ...host}, now: 1000});
+      if (mode === 'on') layerMs.push(performance.now() - started);
+      return detail;
     };
     /** 把一次结论写回 session：开口就记一条并更新时间戳（频率预算与冷却是这样生效的）。 */
     const carry = (session, detail, now) => {
@@ -293,6 +307,13 @@ async function main() {
     const report = {
       generated_by: 'scripts/roco/check-intervention-agreement.mjs',
       preregistration: 'docs/roco/W5-04-SUPPRESSION-VS-RULE.md',
+      latency: {
+        note: 'rocoIntervention 一次调用的墙钟（含特征装配与逻辑回归推理，不含模型加载）',
+        n: layerMs.length,
+        p50_ms: quantile(layerMs, 0.5),
+        p95_ms: quantile(layerMs, 0.95),
+        max_ms: layerMs.length ? Number(Math.max(...layerMs).toFixed(3)) : null,
+      },
       settings: {seeds: options.seeds, seeds_started: seedsDone, turns: options.turns,
         reasonable_gap: REASONABLE_GAP, critical_risk: INTERVENTION_LIMITS.criticalRisk,
         session: '每个窗口都是全新 session（hints 0 / lastAt -Infinity）'},

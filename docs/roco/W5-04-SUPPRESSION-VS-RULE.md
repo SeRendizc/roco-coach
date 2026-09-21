@@ -163,13 +163,24 @@ npm run roco:intervention-agreement -- --seeds 24 --turns 10
 | S5 只许抑制（`on` 开口 ⊆ `off` 开口） | **违反 0** |
 | S6 硬门控不被翻案 | 120 个门控反证窗口（5 类 × 24 局）**全部命中预期门控**，开口 **0** |
 | S4 `off` 档不参与 | `active === false`（`tests/evals/local-model.test.js` 另有「不启动模型」的证明） |
+| 延迟（goal 要求的四项之一） | `rocoIntervention` 一次调用 p50 **0.022 ms**、p95 **0.093 ms**、max 0.12 ms（n=552，含特征装配 + 逻辑回归推理，不含模型加载）。相对同一条链上 400 ms 量级的模型调用与 3 秒的局内预算，可以忽略 |
 
 > S6 第一次写是**空过**的：我把 `dismissed` 放进了 `host`，而 `interventionFeaturesOfGame`
 > 读的是 `session.dismissed` → 门控根本没触发（`gate: null`），却被算成「通过」。
 > 现在每一格都要核对**真的**触发了哪个门控（`matched 120/120`）。
 > **空过的检查比没有检查更危险**——它看起来是绿的。
 
-### 4.6 仍然不声称
+### 4.6 goal 要求同时给的四项（W5-04 这一项）
+
+| 要求 | 本轮给的 |
+|---|---|
+| 规则 baseline | **真规则**的 2×2（§4.3）：规则侧 78 个开口窗口，与判定层抑制 54 个 |
+| family 外指标 | 判定层模型的 H5 OOD：TPR 0.9097 / FPR 0.0023（`reports/roco/intervention-model-roco-report.json`） |
+| 校准 | ECE 0.0465、Brier 0.0148（同上） |
+| 延迟 | p50 0.022 ms / p95 0.093 ms（§4.5） |
+| 回滚开关状态 | `ROCO_INTERVENTION_MODEL` 默认 `off`；`off` 下 `active === false` 且**不加载模型**，已测 |
+
+### 4.7 仍然不声称
 
 - **不声称**分歧格里「层对、规则错」。本轮只把分歧量出来（54 条、margin 中位数 0.0363），
   谁对需要局外仲裁（更深搜索或真人），没有做。
