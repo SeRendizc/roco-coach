@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `d709065`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `d45b31d`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29，第 93 轮的三路 P0/RC-105 见 §C6.30）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **17/17 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -1682,3 +1682,48 @@ HYPOTHESIS 12）→ 每个体系 confidence 实测 `ENGINE_HYPOTHESIS`。
 **下一条**：**RC-305 阵容工坊 UI 与工具合同**（六槽、渐进推荐、工程字段进抽屉；并把 RC-301 的
 `request_team_recommendation` 接进模型可见工具列表 —— 那要同时改 `shadow-tools.js` 标签、已发布评测的
 13 个工具名与提示 SHA-256 钉子）。
+
+### C6.30 第 93 轮：人类 P0 试玩反馈（两条消息）+ RC-105 插入 + 产品面裁定
+
+**触发**：用户在真实试玩后连续给两组反馈（原文落点 `docs/roco/USER-DIRECTIVES-2026-09-22.md`，
+第一条 5 点、第二条 P0 清单）。要点：翻页是坏的（不是丑）、小芽面板不可用、进页面应**先选精灵**、
+卡片**不许再用模板化「特点」**、行动区**按类型分类**且标准 PVP **不得出现道具与逃跑**、
+小芽位置重做、六槽固定工作台、**4 心/魔力归零判负**、**全面接入洛手真实机制**；
+并明确「**不另起一套临时页面**」「**不要只改颜色和间距**」。
+
+**架构裁定（本轮定，后续不再摇摆）**：
+1. **产品面只有一页** = `src/client/roco.html`。RC-305 的六槽工作台 + 评估 + 右侧 Coach 栏
+   改为**可挂载模块** `src/client/team-workshop.js`（`mountTeamWorkshop(rootEl, opts)`），
+   由 `roco.js` 挂载；`workshop.html` 降级为开发夹具。数据契约仍是 `GET /api/roco/workshop`
+   （直接消费 RC-302/303/304，前端不得另写评估模板，不得出胜率/伪精确强度）。
+2. **合法行动由 BattleMode 决定**：标准 PVP 主入口 = 技能 / 聚能 / 换精灵，投降进次级；
+   旧引擎的**回复药 / 净化药 / 逃跑**在标准 PVP 下不得出现；前端只渲染引擎给的 `kind`。
+3. **数值只来自引擎**：魔力（心）若引擎没给就显示「未核验」，**禁止**画假心形计数器。
+
+**台账复核（本轮结论，避免重复劳动）**：所有者断言的「六精灵 / 4 心 / 心没输 PVP」**已有**三条
+等级正确的条目覆盖 —— `EV-PVP-STANDARD-TEAM-SIZE`(MC-E07)、`EV-PVP-STANDARD-MANA`(MC-E08)、
+`EV-PVP-FAINT-MANA-LOSS`(MC-E09)，均为 `CROSS_SOURCE_SUPPORTED`。
+**一次尝试**新增第 21 条（`EV-PVP-STANDARD-HEARTS`，把本文件当 `project_owner_directive` 来源）
+被检查器拒绝：`CROSS_SOURCE_SUPPORTED` 要求**两条 URL 不同的来源**，而该条只有 1 条 URL；
+同时改坏了台账顶层结构（`confidence_levels` 由列表误写成对象）导致 `--selftest` 报
+「confidence_levels 里缺少等级定义 UNKNOWN」。**已 `git checkout` 回滚**，复核后
+`verify-evidence-ledger.mjs` rc=0、`--selftest` 12/12 绿。结论：**所有者指令不构成独立来源**，
+真正缺的是 **`MC-E08` 实机录制**，不是台账条目。
+
+**派单（三路并行，文件不重叠）**：
+- `a031264e` → 只改 `src/client/roco.{html,js,css}`：翻页真实改 offset/页码/卡片并在搜索/筛选变化时重置、
+  小芽入口/手动说话/自动提示可用、教程不挡操作、卡片首层重做（名字/属性/体系·定位/真机制，
+  缺证据写「机制资料待确认」）、基础面板单独成组、行动坞按 `kind` 分类、战斗页顶部对称信息、
+  六槽只留挂载点。每条要有**变红方向**。
+- `5f627c96` → `GET /api/roco/workshop` + `src/client/team-workshop.js` 可挂载模块 + `workshop.html` 降级；
+  不抢 `roco.js` 渲染主体。
+- `3c6f1027` → **RC-105**（引擎侧，新配置 `mobile-s4-candidate-v3` + `ACTION_CHARGE`/`ACTION_SURRENDER`
+  + 按配置裁剪合法行动 + 魔力结算），硬门是 `legacy_sim_v1` **逐位不变**（8 条 golden fingerprint
+  + `test:env` 295 条）。
+
+**验收清单（用户给的 A1～A8，见指令文档 §第二批 P0 段落）**：A1 翻四页并返回、A2 六宠渐进评估、
+A3 标准 PVP 无道具/逃跑（含负向）、A4 4 点魔力与力竭扣减、A5 四技能可完整阅读、A6 小芽不聊天也出提示、
+A7 1440/390 无遮挡无横向溢出、A8 页面看不到的能力不得只凭单元测试算完成。
+
+**本轮未完成（如实登记）**：上述三路尚在跑；`MC-E08` 仍未录制；跨机协作区本轮**未同步**
+（本地 clone 落后 origin 17 个提交、且工作区外写入需扩权，改到阶段末一次性同步）。
