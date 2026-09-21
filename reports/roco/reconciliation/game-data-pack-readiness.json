@@ -5,7 +5,7 @@
  "determinism": "本报告不含挂钟时间戳：同输入两次运行逐字节相同。指纹用文件 sha256，不用时间。",
  "pack_path": "data/roco/game-data-pack/v2/pack.json",
  "pack_bytes": 3429637,
- "pack_sha256": "ab0a22bc3d6055d15e0a989f75ce9d42acfe72edaf740ffec5e21b48aaf0dfe0",
+ "pack_sha256": "ae4a9b65f0e559b6f5ed91c2f2555e5d34a4f98dcd66bcb0b73ea02c917781ee",
  "schema_path": "data/roco/game-data-pack/v2/schema.json",
  "schema_bytes": 15237,
  "schema_sha256": "7ed3f4b1630730cdaf2720cac49b6a7ba88928ba4d6195264ef531b77b1c3a6b",

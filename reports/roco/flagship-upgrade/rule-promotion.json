@@ -6,7 +6,7 @@
   "inputs": {
     "candidate_config": {
       "path": "data/roco/rulesets/mobile-s4-candidate-v2.json",
-      "sha256": "b74ea79ae953e62dca8dab753e0cf94d194e5c448a37a67b690af6a3a1aeb8ab"
+      "sha256": "e3435f8438485c729c930a58d86454f1d38447782277249dcf4e0302271eab71"
     },
     "ledger": {
       "path": "data/roco/evidence/rule-evidence-ledger.json",
@@ -98,8 +98,8 @@
         "speed_tie_deterministic"
       ],
       "blocks_fields": [
-        "turn_order.end_turn.known_order",
-        "turn_order.end_turn.speed_tie"
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ]
     }
   ],
@@ -247,33 +247,7 @@
       "deciding_gate": "evidence"
     },
     {
-      "path": "turn_order.end_turn.order",
-      "config": "mobile_s4_candidate_v2",
-      "value": [
-        "status_tick",
-        "regen"
-      ],
-      "value_kind": "array",
-      "confidence": "ENGINE_HYPOTHESIS",
-      "evidence_id": null,
-      "evidence_role": null,
-      "ledger_confidence": null,
-      "needs_microcase": false,
-      "microcase_id": "MC-E03",
-      "microcase_from": "config.unknowns",
-      "value_status": null,
-      "promotion_status": "NOT_PROMOTABLE",
-      "pending_ledger_bump": null,
-      "reasons": [
-        {
-          "gate": "evidence",
-          "text": "缺 MC-E03 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
-        }
-      ],
-      "deciding_gate": "evidence"
-    },
-    {
-      "path": "turn_order.end_turn.known_order",
+      "path": "turn_order.action_order",
       "config": "mobile_s4_candidate_v2",
       "value": [
         "respond",
@@ -301,7 +275,7 @@
       "deciding_gate": "evidence"
     },
     {
-      "path": "turn_order.end_turn.speed_tie",
+      "path": "turn_order.speed_tie",
       "config": "mobile_s4_candidate_v2",
       "value": null,
       "value_kind": "null",
@@ -311,7 +285,7 @@
       "ledger_confidence": null,
       "needs_microcase": false,
       "microcase_id": "MC-E05",
-      "microcase_from": "config.unknowns",
+      "microcase_from": "leaf",
       "value_status": null,
       "promotion_status": "NOT_PROMOTABLE",
       "pending_ledger_bump": null,
@@ -326,17 +300,66 @@
         }
       ],
       "deciding_gate": "evidence"
+    },
+    {
+      "path": "turn_order.end_turn.order",
+      "config": "mobile_s4_candidate_v2",
+      "value": [
+        "status_tick",
+        "regen"
+      ],
+      "value_kind": "array",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "ledger_confidence": null,
+      "needs_microcase": false,
+      "microcase_id": "MC-E03",
+      "microcase_from": "config.unknowns",
+      "value_status": null,
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "缺 MC-E03 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "turn_order.end_turn.unknown_stages_allowed",
+      "config": "mobile_s4_candidate_v2",
+      "value": false,
+      "value_kind": "boolean",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "ledger_confidence": null,
+      "needs_microcase": false,
+      "microcase_id": null,
+      "microcase_from": null,
+      "value_status": null,
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "没有对应的 microcase：这个字段既不在 microcase-records 的 case 里，也没有 unknowns 里的 microcase_id，「录什么才能 promotion」没有落点"
+        }
+      ],
+      "deciding_gate": "evidence"
     }
   ],
   "summary": {
-    "fields": 9,
+    "fields": 10,
     "PROMOTABLE": 0,
-    "NOT_PROMOTABLE": 9,
+    "NOT_PROMOTABLE": 10,
     "REFUTED": 0,
     "recordings": 0
   },
   "candidate_config_can_be_default": false,
-  "candidate_config_can_be_default_reason": "候选配置在「每个字段都 PROMOTABLE」之前不得作为默认；本脚本不实现自动转默认，当前 0/9 个字段可 promotion（all_promotable=false），且即便全绿也需要人类显式批准，所以恒为 false",
+  "candidate_config_can_be_default_reason": "候选配置在「每个字段都 PROMOTABLE」之前不得作为默认；本脚本不实现自动转默认，当前 0/10 个字段可 promotion（all_promotable=false），且即便全绿也需要人类显式批准，所以恒为 false",
   "all_fields_promotable": false,
   "config_unchanged": true
 }

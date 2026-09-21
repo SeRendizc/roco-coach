@@ -44,7 +44,7 @@
   "ruleset_label": "S4「月涌狂想」赛季",
   "ruleset_config_id": "legacy_sim_v1",
   "ruleset_config_path": "data/roco/rulesets/legacy-sim-v1.json",
-  "ruleset_config_sha256": "e5a3d41b324498e9808585c48545a6ca745e2b8159d9e97473ed2fe6b3a9c2c0",
+  "ruleset_config_sha256": "f66f760304f1459ab6b62ea2491d8b89a47279b8766b887149622e4e2705cc46",
   "ruleset_config_is_default": true,
   "ruleset_configs_available": [
    {
@@ -310,8 +310,8 @@
    "source_id": null
   },
   "data/roco/rulesets/legacy-sim-v1.json": {
-   "sha256": "e5a3d41b324498e9808585c48545a6ca745e2b8159d9e97473ed2fe6b3a9c2c0",
-   "bytes": 3833,
+   "sha256": "f66f760304f1459ab6b62ea2491d8b89a47279b8766b887149622e4e2705cc46",
+   "bytes": 6164,
    "source_id": "handoff-10-sources-and-confidence-2026-09-21"
   },
   "data/roco/evidence/rule-evidence-ledger.json": {

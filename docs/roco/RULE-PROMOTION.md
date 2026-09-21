@@ -135,8 +135,8 @@ node scripts/roco/evaluate-rule-promotion.mjs --config  /tmp/bad-config.json --j
 | `energy.initial` | `null` | `UNKNOWN` | — | `MC-E04` | **NOT_PROMOTABLE** | 还是 `UNKNOWN=null`：没有候选值可 promotion + 缺 `MC-E04` 记录 |
 | `energy.charge` | `5` | `CROSS_SOURCE_SUPPORTED` | `EV-ENERGY-CHARGE` | `MC-E02` | **NOT_PROMOTABLE** | 缺 `MC-E02` 记录 |
 | `turn_order.end_turn.order` | `["status_tick","regen"]` | `ENGINE_HYPOTHESIS` | — | `MC-E03`（来自 `unknowns`） | **NOT_PROMOTABLE** | 缺 `MC-E03` 记录 |
-| `turn_order.end_turn.known_order` | `["respond","switch","priority","speed"]` | `ENGINE_HYPOTHESIS` | `EV-TURN-ORDER-STRICT` | `MC-E05` | **NOT_PROMOTABLE** | 缺 `MC-E05` 记录 |
-| `turn_order.end_turn.speed_tie` | `null` | `UNKNOWN` | — | `MC-E05` | **NOT_PROMOTABLE** | 还是 `UNKNOWN=null` + 缺 `MC-E05` 记录 |
+| `turn_order.action_order` | `["respond","switch","priority","speed"]` | `ENGINE_HYPOTHESIS` | `EV-TURN-ORDER-STRICT` | `MC-E05` | **NOT_PROMOTABLE** | 缺 `MC-E05` 记录 |
+| `turn_order.speed_tie` | `null` | `UNKNOWN` | — | `MC-E05` | **NOT_PROMOTABLE** | 还是 `UNKNOWN=null` + 缺 `MC-E05` 记录 |
 
 ```text
 candidate_config_can_be_default = false
@@ -161,7 +161,7 @@ reason: 候选配置在「每个字段都 PROMOTABLE」之前不得作为默认�
 | `MC-E02` | `energy.charge` | 聚能差值、满能量再聚能是否变化 | `MC-007` |
 | `MC-E03` | `energy.regen.per_turn`、`turn_order.end_turn.order` | 无回能特性精灵的回合末增量（对照带特性者） | `MC-007` |
 | `MC-E04` | `energy.initial` | 首次入场读数、换入是否继承剩余能量 | `MC-007` |
-| `MC-E05` | `turn_order.end_turn.known_order`、`turn_order.end_turn.speed_tie` | 四段两两对抗的先后、同速是否固定先手 | `MC-004` |
+| `MC-E05` | `turn_order.action_order`、`turn_order.speed_tie` | 四段两两对抗的先后、同速是否固定先手 | `MC-004` |
 
 两条**结构上**不可能靠录制解决的字段（要如实说出来，而不是假装等待录制）：
 
