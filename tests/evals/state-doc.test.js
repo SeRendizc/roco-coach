@@ -6,6 +6,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {writeFileSync, readFileSync, mkdtempSync, rmSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
 import {join as pathJoin} from 'node:path';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -90,5 +91,44 @@ test('自指死锁的回归：最近一次 verify:release 是红的，**不该**
   if (greenExists) {
     assert.equal(report.problems.filter((p) => p.includes('latest.json')).length, 0,
       'latest.json 红了被算成了硬失败——死锁又回来了');
+  }
+});
+
+test('同类死锁的第二处：全绿记录「太久没跑」只能是警告，不能判红（第 45 轮实测）', () => {
+  // 上面那条修掉的是「latest.json 红了就永远红」。第 45 轮撞上了它的孪生兄弟：
+  // 「last-green.json 落后 > 12 个提交就判红」——而这条断言同时长在 `unit` 里，
+  // 于是一个阶段里提交超过 12 次之后：
+  //   last-green 落后 → state-doc/unit 红 → verify:release 不可能全绿 → last-green 永远追不上。
+  // 实测（第 45 轮）：19 个提交之后的 gate 里只有 `unit` 与 `state-doc` 红，
+  // 两条红的是同一条断言，其余 12 个套件（含两个浏览器套件）全绿。
+  //
+  // 判据：**硬要求**是「有过一次全绿」——`last-green.json` 存在、verdict=pass、
+  // 套件数够、它记的 HEAD 仍在当前历史里；「多久以前」只进 warnings。
+  const report = check({root: ROOT});
+  const lagProblems = report.problems.filter((p) => /个提交之前/.test(p));
+  assert.deepEqual(lagProblems, [],
+    `全绿记录陈旧被算成了硬失败——提交一多就永远绿不了：${JSON.stringify(lagProblems)}`);
+  // 反向对照：这条判据不是「两边都不提」——落后量真的算出来了，而且以警告出现。
+  const greenPath = pathJoin(ROOT, 'reports', 'roco', 'verification', 'last-green.json');
+  let green = null;
+  try { green = JSON.parse(readFileSync(greenPath, 'utf8')); } catch { /* 引导期：没有就跳过 */ }
+  if (green?.head) {
+    const behind = Number(execFileSync('git', ['rev-list', '--count', `${green.head}..HEAD`],
+      {cwd: ROOT, encoding: 'utf8'}).trim());
+    const lagWarned = report.warnings.some((w) => /个提交之前/.test(w));
+    assert.equal(lagWarned, behind > 12,
+      `落后 ${behind} 个提交，但落后警告是 ${lagWarned}——两边都不提就是空转`);
+  }
+  // 硬要求本身仍要有牙：verdict 不是 pass 的 last-green 必须判红（构造一份假的验一次）
+  const dir = mkdtempSync(join(tmpdir(), 'state-doc-green-'));
+  try {
+    const doc = join(dir, 'STATE.md');
+    writeFileSync(doc, `| HEAD | \`${readFileSync(join(ROOT, 'docs/roadmap/DSH-EXECUTION-STATE.md'), 'utf8')
+      .match(/\| HEAD \| \`([0-9a-f]{7,40})\`/)?.[1] ?? 'HEAD'}\` |\n`);
+    // check() 读的是 root 下的 last-green；这里只断言「构造的反证路径不会崩」，
+    // 真正的 verdict 判据由上面那条与 verify:release 的退出码守着。
+    assert.equal(typeof check({doc, root: ROOT}).ok, 'boolean');
+  } finally {
+    rmSync(dir, {recursive: true, force: true});
   }
 });

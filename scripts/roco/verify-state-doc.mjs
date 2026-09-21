@@ -131,8 +131,22 @@ export function check({doc = DOC, root = ROOT} = {}) {
           problems.push(`最近一次全绿运行记的 HEAD ${green.head.slice(0, 7)} 不在当前历史里`);
         }
         if (behind !== null && behind > 12) {
-          problems.push(`最近一次全绿运行在 ${behind} 个提交之前（HEAD ${head.slice(0, 7)}），`
-            + '闸门已经太久没跑过了');
+          // ── **这一条只能是警告，不能判红**（第 45 轮实测踩到）──────────────────
+          //
+          // 第 38 轮修掉过一次同形状的死锁（`latest.json` 必须全绿，而全绿要先过 unit
+          // 里的这条检查），当时的修法是把硬判据换成 `last-green.json`。但「落后 > 12
+          // 个提交就判红」把死锁换了个位置又造了出来：
+          //   · 一个阶段里提交超过 12 次（第 45 轮真实发生：19 次）→ 这条判红；
+          //   · 它同时长在 `unit` 里 → `unit` 红 → `verify:release` 不可能全绿；
+          //   · 而 `last-green.json` 只有全绿才会被写 → 永远追不上 → 永远红。
+          // 实测：14 个套件里只有 `unit` 与 `state-doc` 红，两条红的是同一条断言，
+          // 其余 12 个（含两个浏览器套件）全绿。
+          //
+          // 所以：硬要求保留「`last-green.json` 存在、verdict=pass、套件数够、其 HEAD
+          // 仍在当前历史里」——这些证明**真的有过一次全绿**；而「多久以前」只报警告。
+          // 强制性本来就来自 `verify:release` 自己的退出码，不靠这条断言。
+          warnings.push(`最近一次全绿运行在 ${behind} 个提交之前（HEAD ${head.slice(0, 7)}）：`
+            + '闸门该重跑了（这一条不阻断——否则提交一多就永远绿不了，第 45 轮实测踩到）');
         }
       }
     } catch (error) {
