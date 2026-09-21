@@ -1,0 +1,45 @@
+{
+ "generated_by": "scripts/roco/build-agent-sft-data.mjs",
+ "purpose": "W4-04 的工具选择 SFT 数据：目标来自**任务期望**，不是规则臂或模型的输出",
+ "source_task_set": "agent-tasks-v1",
+ "worlds_per_task": 4,
+ "origin": "synthetic/constructed — 不是真人对话，不得据此声称真人效果",
+ "split_rule": "沿用任务集的 family 切分；test 家族不在训练侧出现",
+ "counts": {
+  "total": 828,
+  "by_side": {
+   "test": 276,
+   "val": 197,
+   "train": 355
+  },
+  "by_category": {
+   "rules_lookup": 288,
+   "roster_constraint": 96,
+   "continue_stop": 144,
+   "tool_failure": 36,
+   "stale_state": 36,
+   "evidence_conflict": 36,
+   "silence": 48,
+   "brief_explain": 144
+  },
+  "families_by_side": {
+   "test": {},
+   "val": {},
+   "train": {}
+  }
+ },
+ "families": {
+  "test": [
+   "A组三人-无锁定"
+  ],
+  "val": [
+   "A组三人-锁定寂灭骨龙",
+   "混编三人-含B组"
+  ],
+  "train": [
+   "A组三人-锁定寂灭骨龙",
+   "混编三人-含B组"
+  ]
+ },
+ "holdout_leak": []
+}
