@@ -19,6 +19,7 @@ import {
 import {
   invalidate, validateRegistry,
 } from '../scripts/roco/artifact-invalidation.mjs';
+import {judge} from '../scripts/roco/shot-mockup.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8'));
@@ -175,4 +176,40 @@ test('BattleMode：候选模式的 team_size 不得来自「当前 Demo 的 48 �
   // 并且登记表必须**明写**这条纪律（否则下一个人不知道）
   assert.ok(modes.invariants.some((line) => line.includes('48') && line.includes('不得')),
     `invariants 里应当明写「模式规模不得取自 Demo 名单」，实际：${JSON.stringify(modes.invariants)}`);
+});
+
+test('六槽 UI mockup：量测判据必须有牙（横向溢出 / 槽位数 / 徽记 / 伪胜率）', () => {
+  // 判据本体在 `scripts/roco/shot-mockup.mjs` 的 `judge()`。这里对同一份量测做正反两向：
+  // 一份合格量测必须放行，四类真实缺陷必须逐条被抓到。
+  const good = {
+    clientW: 1440, scrollW: 1440, bodyH: 900, viewportH: 900, slots: 6, filledSlots: 2,
+    candidates: 3, hasStandardBadge: true, hasCandidateBadge: true, hasUnknownPrematch: true,
+    hasFullUniverse: true, hasSixSlotTitle: true, mentionsFixedThree: false, pseudoWinrate: false,
+  };
+  assert.deepEqual(judge(good), [], '合格量测不该报问题');
+  // 反向控制①：横向溢出（390 下最常见的真实缺陷）
+  assert.ok(judge({...good, clientW: 390, scrollW: 480}).some((p) => p.includes('横向溢出')));
+  // 反向控制②：槽位数不是 6（又退回三只）
+  assert.ok(judge({...good, slots: 3}).some((p) => p.includes('槽位数应为 6')));
+  // 反向控制③：少了「候选规则（待实机核对）」徽记 —— 候选规则冒充官方
+  assert.ok(judge({...good, hasCandidateBadge: false}).some((p) => p.includes('候选规则')));
+  // 反向控制④：出现伪精确胜率 / 旧的「已选 3 只」
+  assert.ok(judge({...good, pseudoWinrate: true}).some((p) => p.includes('伪精确胜率')));
+  assert.ok(judge({...good, mentionsFixedThree: true}).some((p) => p.includes('已选 3 只')));
+});
+
+test('六槽 UI mockup：产物必须已落盘且为绿（截图 + 量测）', () => {
+  // 「先出 mockup 再铺开结构改动」这条纪律要可核对：mockup 的量测产物必须在仓库里、必须 pass。
+  const doc = readJson('reports/roco/ui-mockup-six-slot-mockup.json');
+  assert.equal(doc.schema, 'roco-mockup-measurement/v1');
+  assert.equal(doc.passed, true, `mockup 量测没通过：${JSON.stringify(doc.problems)}`);
+  assert.deepEqual(doc.problems, []);
+  const labels = doc.measurements.map((m) => m.viewport);
+  assert.deepEqual(labels, ['1440x900', '390x844'], '两档视口都要量');
+  for (const m of doc.measurements) {
+    assert.equal(m.clientW, m.scrollW, `${m.viewport} 横向溢出`);
+    assert.equal(m.slots, 6);
+    assert.equal(m.candidates >= 3, true);
+  }
+  assert.equal(doc.screenshots.length, 2);
 });

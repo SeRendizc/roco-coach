@@ -1,0 +1,141 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小芽 · 界面 mockup（六槽阵容工坊）</title>
+<style>
+/* 六槽阵容工坊版式定稿（v3 纠偏后）。只定版式与主次，没有真实数据、没有脚本、没有外链。
+   与旧版 mockup 的**差别**就是这次纠偏要落的东西：
+   1) 队伍栏是**六个槽位**（不是「已选 3 只固定栏」）；
+   2) 模式徽记写「标准 PVP · 六宠」+「候选规则（待实机核对）」——社区交叉支持不许冒充官方；
+   3) 首屏明写「匹配前对手未知 · 按版本 Meta prior 评价」；
+   4) 候选池入口是**全量 600+**，不是 48/60 的池子；
+   5) 「推荐下一只」给三个候选，各带取舍标签与置信等级；
+   6) 选满六只后才有「环境价值 / 最差体系 / 容错 / 最小替换」那一块；
+   7) 工程字段（ruleset/support/latency/digest）只在右上角默认折叠的开发者抽屉里。 */
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;color:#e3eaf1;background:#0d1420;font-size:14px;
+--panel:#1a2635;--line:#314154;--accent:#a8e5b0;--muted:#9caebe;--warn:#f0cb77;--bad:#e8a76a}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0}
+.badge{font-size:11.5px;border:1px solid #4a6858;color:var(--accent);border-radius:6px;padding:2px 7px}
+.badge.warn{border-color:#6b5a33;color:var(--warn)}
+.badge.muted{border-color:#3a4a5c;color:var(--muted)}
+.dev{margin-left:auto;font-size:12px;color:var(--muted)}
+main{flex:1;display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:14px;padding:14px 16px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px}
+.card h2{font-size:14px;margin:0 0 8px}
+.slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.slot{border:1px dashed #36495e;border-radius:10px;padding:9px;min-height:74px;display:flex;flex-direction:column;gap:4px}
+.slot.on{border-style:solid;border-color:#8dd49c;background:#17242f}
+.slot .who{font-weight:600}
+.slot .meta{color:var(--muted);font-size:11.5px}
+.slot .lock{margin-left:auto;font-size:11px;color:var(--muted)}
+.slot .row{display:flex;align-items:center;gap:6px}
+.cand{display:grid;gap:8px}
+.candrow{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:#16222f}
+.candrow b{color:var(--accent)}
+.tag{font-size:11px;border:1px solid #4a6858;color:var(--accent);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.tag.stable{border-color:#4a6070;color:#bcd0e0}
+.tag.pref{border-color:#6b5a33;color:var(--warn)}
+.gaps{display:grid;gap:6px;font-size:12.5px}
+.gap{display:flex;gap:8px;align-items:center}
+.gap .lv{margin-left:auto;font-size:11px;color:var(--muted)}
+.bar{height:6px;border-radius:4px;background:#22303f;flex:0 0 70px;overflow:hidden}
+.bar i{display:block;height:100%;background:#8dd49c}
+.search{display:flex;gap:8px;align-items:center;margin-bottom:9px}
+.search input{flex:1;min-height:40px;border-radius:9px;border:1px solid #394a5e;background:#16222f;color:#dfe8ef;padding:8px 10px;font:inherit}
+button{font:inherit;cursor:pointer;color:#dfe8ef;background:#243345;border:1px solid #394a5e;padding:8px 12px;border-radius:9px;min-height:42px}
+button.primary{color:#152c24;background:var(--accent);border-color:var(--accent);font-weight:600}
+button[disabled]{opacity:.5;cursor:not-allowed}
+.muted{color:var(--muted);font-size:12px}
+ul.plain{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:#cfdae5}
+footer{position:sticky;bottom:0;display:flex;gap:10px;align-items:center;padding:10px 16px;border-top:1px solid var(--line);background:#111a26}
+@media (max-width:720px){
+  main{grid-template-columns:minmax(0,1fr);padding:10px 12px}
+  .slots{grid-template-columns:repeat(2,minmax(0,1fr))}
+  h1{font-size:16px}
+  .dev{width:100%;margin-left:0}
+}
+</style></head><body>
+<header>
+  <h1>小芽 · 阵容工坊</h1>
+  <span class="badge">标准 PVP · 六宠</span>
+  <span class="badge warn">候选规则（待实机核对）</span>
+  <span class="badge muted">匹配前对手未知 · 按版本 Meta prior 评价</span>
+  <span class="dev">▸ 开发者证据（默认折叠）</span>
+</header>
+
+<main>
+  <section class="card">
+    <h2>队伍（六个槽位）· 还差 4 只</h2>
+    <div class="slots">
+      <div class="slot on"><div class="row"><span class="who">音速犬</span><span class="lock">🔒 锁定</span></div>
+        <div class="meta">火系 · 先手压迫</div><div class="meta">物攻 116 / 速度 120</div></div>
+      <div class="slot on"><div class="row"><span class="who">雪影娃娃</span></div>
+        <div class="meta">冰系 · 拦截</div><div class="meta">魔防 120 / 速度 88</div></div>
+      <div class="slot"><div class="meta">第 3 槽位（空）</div><div class="meta">建议：补一个能接火系的</div></div>
+      <div class="slot"><div class="meta">第 4 槽位（空）</div></div>
+      <div class="slot"><div class="meta">第 5 槽位（空）</div></div>
+      <div class="slot"><div class="meta">第 6 槽位（空）</div></div>
+    </div>
+
+    <h2 style="margin-top:14px">推荐下一只（第 3 只）</h2>
+    <div class="cand">
+      <div class="candrow"><b>海豹船长</b><span class="tag">强度</span>
+        <span>补上水系直面你现在的两个火系弱点；对主流「毒」体系不掉速。</span>
+        <span class="tag stable">支持置信：中</span></div>
+      <div class="candrow"><b>寂灭骨龙</b><span class="tag stable">稳定</span>
+        <span>不依赖先手：被换入压制时仍能给出一次有效应对，队伍方差更小。</span>
+        <span class="tag stable">支持置信：中</span></div>
+      <div class="candrow"><b>圆号鱼</b><span class="tag pref">偏好保留</span>
+        <span>你标注过「喜欢水系」；它与你锁定的音速犬有共同搭档机制。</span>
+        <span class="tag pref">支持置信：低（含未核实机制）</span></div>
+    </div>
+    <p class="muted" style="margin-top:8px">推荐来自「召回 → Beam 补全六宠 → Completion Value」，
+      不是让模型凭空列举；每个候选都能展开看它的依据与置信等级。</p>
+
+    <h2 style="margin-top:14px">这套东西现在还不知道什么（如实列出）</h2>
+    <ul class="plain">
+      <li>六只是否必须选满 —— <span class="badge muted">未核实</span>（待实机录制）</li>
+      <li>4 点魔力是固定值还是「通常」；力竭扣魔力的准确语义 —— <span class="badge muted">未核实</span></li>
+      <li>能量上限与聚能回复量 —— <span class="badge warn">候选规则</span>（社区交叉支持，非官方）</li>
+      <li>同速时的先后判定 —— <span class="badge muted">未知</span>，系统按 fail closed 处理</li>
+    </ul>
+    <p class="muted" style="margin-top:8px">这些项在证据台账里都有编号与来源；录到实机 microcase 之前，
+      页面只写「未核实 / 候选」，不把它们当成事实。</p>
+  </section>
+
+  <aside style="display:grid;gap:12px">
+    <section class="card">
+      <h2>候选宇宙</h2>
+      <div class="search"><input value="搜索名字 / 系别 / 定位（全量 600+）" aria-label="搜索候选"><button>筛选</button></div>
+      <p class="muted">候选来自「全量 600+」图鉴（可切到「我的盒子」）；48 只只是迁移夹具，不是候选池。</p>
+    </section>
+
+    <section class="card">
+      <h2>这个队伍现在缺什么</h2>
+      <div class="gaps">
+        <div class="gap">接火系能力<span class="bar"><i style="width:25%"></i></span><span class="lv">不足 · 证据：引擎</span></div>
+        <div class="gap">速度层次<span class="bar"><i style="width:60%"></i></span><span class="lv">尚可 · 证据：面板</span></div>
+        <div class="gap">应对手段<span class="bar"><i style="width:40%"></i></span><span class="lv">偏少 · 证据：配招</span></div>
+        <div class="gap">资源/能耗曲线<span class="bar"><i style="width:35%"></i></span><span class="lv">未核实 · 候选规则</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>选满六只后才有</h2>
+      <ul class="plain">
+        <li>环境价值：中上 · <b>置信等级：低</b>（未经实机校准，只给区间不给精确胜率）</li>
+        <li>最差体系：「毒」体系下明显吃亏</li>
+        <li>容错：次优操作下掉约一个小档次</li>
+        <li>最小替换：把第 4 只换成水系拦截，最差体系改善</li>
+      </ul>
+      <p class="muted">没有校准证据之前，这里只给区间与置信等级，不给精确胜率数字。</p>
+    </section>
+  </aside>
+</main>
+
+<footer>
+  <button class="primary" disabled>锁定这 6 只并进入对战</button>
+  <button>先看这套的环境价值</button>
+  <span class="muted">六宠 · 候选规则 · 对手未知</span>
+</footer>
+</body></html>

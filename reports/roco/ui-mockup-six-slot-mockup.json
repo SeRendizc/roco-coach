@@ -1,0 +1,49 @@
+{
+  "schema": "roco-mockup-measurement/v1",
+  "generated_by": "scripts/roco/shot-mockup.mjs",
+  "generated_at": "2026-09-21T13:33:59.102Z",
+  "file": "docs/roco/ui-mockup-six-slot.html",
+  "name": "ui-mockup-six-slot",
+  "screenshots": [
+    "ui-mockup-six-slot-1440x900.png",
+    "ui-mockup-six-slot-390x844.png"
+  ],
+  "measurements": [
+    {
+      "viewport": "1440x900",
+      "clientW": 1440,
+      "scrollW": 1440,
+      "bodyH": 900,
+      "viewportH": 900,
+      "slots": 6,
+      "filledSlots": 2,
+      "candidates": 3,
+      "hasStandardBadge": true,
+      "hasCandidateBadge": true,
+      "hasUnknownPrematch": true,
+      "hasFullUniverse": true,
+      "hasSixSlotTitle": true,
+      "mentionsFixedThree": false,
+      "pseudoWinrate": false
+    },
+    {
+      "viewport": "390x844",
+      "clientW": 390,
+      "scrollW": 390,
+      "bodyH": 1781,
+      "viewportH": 844,
+      "slots": 6,
+      "filledSlots": 2,
+      "candidates": 3,
+      "hasStandardBadge": true,
+      "hasCandidateBadge": true,
+      "hasUnknownPrematch": true,
+      "hasFullUniverse": true,
+      "hasSixSlotTitle": true,
+      "mentionsFixedThree": false,
+      "pseudoWinrate": false
+    }
+  ],
+  "problems": [],
+  "passed": true
+}
