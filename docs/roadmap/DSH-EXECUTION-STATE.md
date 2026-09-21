@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `73e66c7`；v3 纠偏与 RC-101～RC-204 见 §C6.15～§C6.23）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `666593a`；v3 纠偏与 RC-101～RC-205 见 §C6.15～§C6.24）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **17/17 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `73e66c7`（`fix(chain): 把「派生链」写死成一条命令`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `666593a`（`feat(rc205): 精灵盒子 UI`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1560,3 +1560,26 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
 （每步带理由，`--check` 只校验；实测五环全过）。
 
 门禁：串行 **17/17 verdict=pass**。
+
+### C6.24 RC-205 精灵盒子 UI（第 87 轮）
+
+**交付**（提交 `666593a`）：新页面 `src/client/box.{html,js,css}`（`box.html` 进 `PAGE_ALIASES`、三文件进
+`publicAssets`、`box.js` 进模块图 —— 照第 24 轮「第二个页面入口不在图里 → 整页 404」的教训）、
+只读路由 `GET /api/roco/box`（**不经 Python**，规则服务没起来也能查）、11 条单测（6 条必红反证）、
+浏览器验收 `scripts/roco/browser-box-acceptance.mjs`（**22/22 判据 + 5/5 反证**）、7 张截图、`docs/roco/PET-BOX.md`。
+
+**实测**：`kind=catalog` **622**（460 精灵 + 162 形态）、`kind=mine` **80**；真实鼠标切标签 `hit_target=true`；
+真实键盘输入「喵喵」→ 输入框值 `"喵喵"`、total=2；系别=草系页面 total=84 与路由一致；
+**390×844 量 91 个可点元素、不达标 0 个**；`clientW == scrollW`（1440/1440、390/390）；console/page 错误为空。
+`limit=1e3/-1/1.5/abc/61` 全部 400（**不静默取整、不夹紧**）；`compare` 不同种 → 400 并说明理由。
+
+**两层分界**：玩家区只有名字/系别/形态/收藏/锁定/四个有序技能 + 玩家可读的「效果未校准」说明；
+`provenance` / `unknown_fields` / `source_scope` / `state_version` / `coverage` / 许可只在**默认收起的开发者抽屉**。
+反证实测：`["玩家层出现工程键 cards[0].pet_id", …]`、`["静默取整：接受了 limit="1e3" 并返回 limit=1"]`、
+`["catalog 总数必须 == 622，实际 48"]`、`["box.js 的玩家区代码里出现工程词「provenance」"]`。
+
+**如实边界**：622 里只有 48 只能显示种族值与四技能（其余标「本仓库没有这一项」）；面板数值全仓 null
+**绝不补 0**；80 个个体的性格/资质/特长取值全空 → 比较里按未知呈现并逐条解释；图片/向量素材未做；
+`support` 词表暂只有 `KNOWLEDGE_ONLY`（未接 RC-403）；比较只覆盖 8 个字段。
+
+**下一条**：RC-301…306（六槽阵容工坊 + 3 秒 Serving）；Phases 0B 已完成（201/202/203/204/205）。
