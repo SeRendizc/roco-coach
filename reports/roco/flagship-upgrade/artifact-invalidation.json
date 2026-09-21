@@ -1,12 +1,12 @@
 {
   "schema": "roco-artifact-invalidation/v1",
   "generated_by": "scripts/roco/artifact-invalidation.mjs",
-  "generated_at": "2026-09-21T13:18:27.211Z",
+  "generated_at": "2026-09-21T15:23:22.868Z",
   "registry": {
     "path": "data/roco/artifact-registry.json",
-    "sha256": "196f377bad94ec83025a42ba25d82990a5f0617d0d0a2316a710b06d43c2684a",
+    "sha256": "b6ae544cc416e31c34acd8cfd4dd5b6663a19c1613fdabe5161c0a9b762623aa",
     "artifacts": 20,
-    "rule_topics": 17
+    "rule_topics": 19
   },
   "registry_problems": [],
   "requested_topics": [],
@@ -28,7 +28,9 @@
     "leave.semantics",
     "traits.triggers",
     "roster.universe",
-    "pvp.fairness"
+    "pvp.fairness",
+    "turn_order.action_order",
+    "turn_order.speed_tie"
   ],
   "by_topic": {
     "energy.max": [
@@ -834,6 +836,143 @@
         "path": "reports/roco/product-wiring/full-match-wiring.json",
         "rebuild": "node scripts/roco/browser-product-wiring.mjs"
       }
+    ],
+    "turn_order.action_order": [
+      {
+        "id": "playable-48-layer",
+        "kind": "data",
+        "status": "legacy-fixture",
+        "path": "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
+        "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs"
+      },
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      },
+      {
+        "id": "model-error-trajectories-v4",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/roco/model-error-trajectories-v4.jsonl",
+        "rebuild": "npm run roco:model-errors"
+      },
+      {
+        "id": "sft-dataset",
+        "kind": "training-data",
+        "status": "legacy",
+        "path": "reports/roco/sft/dataset-report.json",
+        "rebuild": "npm run roco:sft-data"
+      },
+      {
+        "id": "intervention-windows-roco",
+        "kind": "fixture",
+        "status": "legacy",
+        "path": "tests/evals/roco/intervention-windows-roco.jsonl",
+        "rebuild": "npm run roco:intervention-windows"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "browser-position-matrix",
+        "kind": "report",
+        "status": "legacy-fixture",
+        "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "demo-acceptance-report",
+        "kind": "report",
+        "status": "current",
+        "path": "reports/roco/demo-acceptance/demo-acceptance.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      }
+    ],
+    "turn_order.speed_tie": [
+      {
+        "id": "traj-rule-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories"
+      },
+      {
+        "id": "traj-model-arm-v1",
+        "kind": "trajectory",
+        "status": "legacy",
+        "path": "tests/evals/agent-trajectories-model-v1.jsonl",
+        "rebuild": "npm run roco:agent-trajectories-model"
+      },
+      {
+        "id": "sft-dataset",
+        "kind": "training-data",
+        "status": "legacy",
+        "path": "reports/roco/sft/dataset-report.json",
+        "rebuild": "npm run roco:sft-data"
+      },
+      {
+        "id": "team-model-g02",
+        "kind": "model",
+        "status": "legacy",
+        "path": "reports/roco/g02-team/model.json",
+        "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
+      },
+      {
+        "id": "planner-benchmarks",
+        "kind": "report",
+        "status": "legacy",
+        "path": "reports/roco/planner-benchmark.json",
+        "rebuild": "npm run roco:benchmark-planner"
+      },
+      {
+        "id": "position-fixtures",
+        "kind": "fixture",
+        "status": "legacy-fixture",
+        "path": "tests/evals/roco/coach-positions.test.js",
+        "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）"
+      },
+      {
+        "id": "browser-position-matrix",
+        "kind": "report",
+        "status": "legacy-fixture",
+        "path": "reports/roco/demo-acceptance/coach-positions-browser.json",
+        "rebuild": "npm run roco:demo-acceptance"
+      },
+      {
+        "id": "pet-support-matrix-doc",
+        "kind": "doc",
+        "status": "legacy",
+        "path": "docs/roco/PET-SUPPORT-MATRIX.md",
+        "rebuild": "npm run roco:docs"
+      }
     ]
   },
   "affected": [
@@ -862,7 +1001,8 @@
         "marks.persistence",
         "swift.injection",
         "leave.semantics",
-        "battle_mode.standard_pvp"
+        "battle_mode.standard_pvp",
+        "turn_order.action_order"
       ]
     },
     {
@@ -892,7 +1032,9 @@
         "energy.charge",
         "turn_order.end_turn",
         "swift.injection",
-        "leave.semantics"
+        "leave.semantics",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ]
     },
     {
@@ -908,7 +1050,9 @@
         "turn_order.priority",
         "roster.universe",
         "energy.charge",
-        "turn_order.end_turn"
+        "turn_order.end_turn",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ]
     },
     {
@@ -920,7 +1064,8 @@
       "depends_on": [
         "energy.max",
         "roster.universe",
-        "energy.charge"
+        "energy.charge",
+        "turn_order.action_order"
       ]
     },
     {
@@ -935,7 +1080,9 @@
         "roster.universe",
         "turn_order.priority",
         "energy.charge",
-        "turn_order.end_turn"
+        "turn_order.end_turn",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ]
     },
     {
@@ -950,7 +1097,8 @@
         "type.multiplier",
         "turn_order.speed",
         "energy.charge",
-        "turn_order.end_turn"
+        "turn_order.end_turn",
+        "turn_order.speed_tie"
       ]
     },
     {
@@ -964,7 +1112,8 @@
         "turn_order.priority",
         "roster.universe",
         "turn_order.end_turn",
-        "marks.persistence"
+        "marks.persistence",
+        "turn_order.action_order"
       ]
     },
     {
@@ -992,7 +1141,9 @@
         "type.multiplier",
         "energy.charge",
         "turn_order.end_turn",
-        "marks.persistence"
+        "marks.persistence",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ]
     },
     {
@@ -1010,7 +1161,9 @@
         "marks.persistence",
         "swift.injection",
         "leave.semantics",
-        "battle_mode.standard_pvp"
+        "battle_mode.standard_pvp",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ]
     },
     {
@@ -1025,7 +1178,9 @@
         "turn_order.speed",
         "turn_order.end_turn",
         "marks.persistence",
-        "swift.injection"
+        "swift.injection",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ]
     },
     {
@@ -1041,7 +1196,8 @@
         "battle_mode.standard_pvp",
         "battle_mode.speed_duel",
         "turn_order.priority",
-        "turn_order.speed"
+        "turn_order.speed",
+        "turn_order.action_order"
       ]
     },
     {
@@ -1081,7 +1237,9 @@
         "marks.persistence",
         "swift.injection",
         "leave.semantics",
-        "turn_order.end_turn"
+        "turn_order.end_turn",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ]
     },
     {
@@ -1129,7 +1287,7 @@
     }
   ],
   "summary": {
-    "topics": 17,
+    "topics": 19,
     "affected": 20,
     "artifacts_total": 20,
     "by_status": {

@@ -76,6 +76,14 @@
     {
       "id": "pvp.fairness",
       "why": "线上竞技不给战术分析等公平边界"
+    },
+    {
+      "id": "turn_order.action_order",
+      "why": "行动比较键的维度顺序（应对/先手/速度）：引擎假设，candidate 仍未确认"
+    },
+    {
+      "id": "turn_order.speed_tie",
+      "why": "速度平手：legacy 用随机数（工程权宜），candidate 为 UNKNOWN → fail closed"
     }
   ],
   "artifacts": [
@@ -104,7 +112,8 @@
         "marks.persistence",
         "swift.injection",
         "leave.semantics",
-        "battle_mode.standard_pvp"
+        "battle_mode.standard_pvp",
+        "turn_order.action_order"
       ],
       "rebuild": "node scripts/roco/build-roster-48-engine-inputs.mjs",
       "note": "48 只是**迁移夹具**：它的可玩性以当前引擎规则为准，规则一改资格要重算。"
@@ -135,7 +144,9 @@
         "energy.charge",
         "turn_order.end_turn",
         "swift.injection",
-        "leave.semantics"
+        "leave.semantics",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ],
       "rebuild": "npm run roco:agent-trajectories",
       "note": "规则 candidate 采纳前**禁止重跑**：重跑只会再生产一批绑定旧规则的轨迹。"
@@ -152,7 +163,9 @@
         "turn_order.priority",
         "roster.universe",
         "energy.charge",
-        "turn_order.end_turn"
+        "turn_order.end_turn",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ],
       "rebuild": "npm run roco:agent-trajectories-model"
     },
@@ -164,7 +177,8 @@
       "depends_on": [
         "energy.max",
         "roster.universe",
-        "energy.charge"
+        "energy.charge",
+        "turn_order.action_order"
       ],
       "rebuild": "npm run roco:model-errors"
     },
@@ -179,7 +193,9 @@
         "roster.universe",
         "turn_order.priority",
         "energy.charge",
-        "turn_order.end_turn"
+        "turn_order.end_turn",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ],
       "rebuild": "npm run roco:sft-data",
       "note": "SFT 任务里含「能量够不够 / 这一手合法吗」，基础规则一改这些样本的答案就变了。"
@@ -195,7 +211,8 @@
         "type.multiplier",
         "turn_order.speed",
         "energy.charge",
-        "turn_order.end_turn"
+        "turn_order.end_turn",
+        "turn_order.speed_tie"
       ],
       "rebuild": "python3 scripts/roco/build-team-dataset.py --out reports/roco/g02-team"
     },
@@ -209,7 +226,8 @@
         "turn_order.priority",
         "roster.universe",
         "turn_order.end_turn",
-        "marks.persistence"
+        "marks.persistence",
+        "turn_order.action_order"
       ],
       "rebuild": "npm run roco:intervention-windows"
     },
@@ -238,7 +256,9 @@
         "type.multiplier",
         "energy.charge",
         "turn_order.end_turn",
-        "marks.persistence"
+        "marks.persistence",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ],
       "rebuild": "npm run roco:benchmark-planner"
     },
@@ -256,7 +276,9 @@
         "marks.persistence",
         "swift.injection",
         "leave.semantics",
-        "battle_mode.standard_pvp"
+        "battle_mode.standard_pvp",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ],
       "rebuild": "（期望值由 scripts/roco/coach-position-harness.mjs 重新定位后手写）",
       "note": "第 63 轮已经吃过一次：引擎 fail-closed 修复改变战斗走向，12 个局面全部失配。"
@@ -272,7 +294,9 @@
         "turn_order.speed",
         "turn_order.end_turn",
         "marks.persistence",
-        "swift.injection"
+        "swift.injection",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ],
       "rebuild": "npm run roco:demo-acceptance"
     },
@@ -288,7 +312,8 @@
         "battle_mode.standard_pvp",
         "battle_mode.speed_duel",
         "turn_order.priority",
-        "turn_order.speed"
+        "turn_order.speed",
+        "turn_order.action_order"
       ],
       "rebuild": "npm run roco:demo-acceptance"
     },
@@ -328,7 +353,9 @@
         "marks.persistence",
         "swift.injection",
         "leave.semantics",
-        "turn_order.end_turn"
+        "turn_order.end_turn",
+        "turn_order.action_order",
+        "turn_order.speed_tie"
       ],
       "rebuild": "npm run roco:docs"
     },
