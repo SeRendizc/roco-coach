@@ -885,8 +885,11 @@ test('结构契约：仓库顶层只允许约定俗成的目录与文件', () =>
   // 顶层只允许这些文件。注意：文档一律进 docs/，
   // 所以这里**没有** COACH-ACCEPTANCE.md / DEEPSEEK.md / coach-design-notes.md 等文档（它们都在 docs/）。
   // 曾经允许过它们，结果它们就真的留在根目录了——允许清单必须等于实际想要的形态。
+  // `requirements-train.lock.txt`（2026-09-21 由 Windows 侧加入）：训练环境的**版本记录**，
+  // 与 agent 运行时锁**并列而不合并**（合并会让「谁动了什么」不可查）。
+  // 依据：协作区 `D-20260921-04`（Windows 可以加这份锁；每次变更要在 `WIN_STATUS.md` 带原因与 sha256）。
   const allowedFiles = new Set(['.gitignore', 'package.json', 'README.md',
-    'requirements-agent.lock.txt']);
+    'requirements-agent.lock.txt', 'requirements-train.lock.txt']);
   const entries = readdirSync(join(ROOT), { withFileTypes: true })
     .filter((e) => !e.name.startsWith('.') && e.name !== 'node_modules' && e.name !== 'tmp');
   const unexpected = [];
