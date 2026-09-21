@@ -1961,6 +1961,14 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
  // C02 的验收①：玩家拒绝过（建议／复盘／不想说话）之后，这一段时间里不再推复盘。
  // 判据在 memory.playerWishes（带 until），这里只执行：关掉跨局记录的观察与 record 线程。
  const noReview=f.refused;
+ // ── 「说短一点／多说一点」只有一个来源（第 45 轮补）────────────────────────
+ //
+ // 这里原来有两个坑，都是同一形状（写了但没人读）：
+ //   ① `f.chatStyle`（`memory.stated` 里玩家自己说过的那份）**全库没有一处读**；
+ //   ② `detailed` 与未设置完全等价——玩家说「多说一点」什么都不会变。
+ // 现在收成一个 `style`：玩家自己说过的那份优先，退回旧的 `memory.preference`
+ // （两者本来就由 memory.js 的 syncKinds 同步，这里只是不再各读各的）。
+ const style=['brief','detailed'].includes(f.chatStyle)?f.chatStyle:(['brief','detailed'].includes(f.preference)?f.preference:null);
  const cross=companionLedger(memory,liveGame(context),now);
  const bundle={cross,signals:emptySignals(),context:{goal:f.goal,turn:f.live?.turn||null},now};
  const readings=companionReadings(bundle);
@@ -2035,6 +2043,11 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
   else if(social){text=social;parts=[SENT(social,'chat','本轮消息')];socialOnly=true;}
   else if(register==='R1'){
    reading=pick(CLASSES);
+   // **这里不按 style 收放，是判据决定的，不是漏写**：观察通道有一道「至少两句／两条信息」
+   // 的闸（checkCompanionInformation），`brief` 再往下砍就会整条作废、降成 R0「我在。」
+   // （实测：把这一档砍成一句，brief 直接掉到 R0）。而 R1 的上限（72 字）本来就装不下
+   // 比这条观察更多的东西，所以 `detailed` 在这一档也无处可加。
+   // `brief` 真正能收的地方是 R2——那里有两类观察可以只讲一类（见下面 R2）。
    if(reading){const fit=fitSentences(reading.sentences,limit);text=fit?.text||null;parts=fit?.parts||[];}
   }
  }
@@ -2051,6 +2064,8 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
    text=moodR3.text;parts=moodR3.parts;socialOnly=true;moodUsed=true;
   }else{
    const r=moodR3?null:pick(CLASSES);
+   // R3 也不按 style 收放：这一档是「连败时陪坐」，body 本来就只有处境 + 一句陪着，
+   // 再砍就凑不出「至少两句」，会掉成 R0——那比多一句更糟。
    const body=[...(moodR3?[SENT(moodR3.parts[0].text,'chat','本轮消息')]:[]),lead,...(r?r.sentences:[])].filter(Boolean).slice(0,2);
    const fit=body.length?fitSentences(body,limit,SENT('到这儿也行，先歇会儿。','presence',null)):null;
    if(fit){text=fit.text;parts=fit.parts;reading=r;}
@@ -2059,14 +2074,23 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
  else if(!text&&register==='R2'){
   // R2 是玩家真的问了一句话：给两条观察（各带自己的来源），而不是把 R1 那句重说一遍。
   reading=pick(CLASSES);
-  const first=reading?(f.preference==='brief'?reading.sentences.slice(0,1):reading.sentences.slice(0,2)):[];
+  const first=reading?(style==='brief'?reading.sentences.slice(0,1):(style==='detailed'?reading.sentences.slice(0,3):reading.sentences.slice(0,2))):[];
   // 第二条观察**不能把第一条已经说过的局数再说一遍**：实测输出过
   // 「最近3局里，最先倒下的有2次是烬尾狐……今天你打了3局，1胜2负。」——
   // 同一屏把「3局」念了两遍，正是 C02 验收③要挡的那一种（判据见 repeatedInformation）。
   // 第二条按「加上它以后还不重复」来挑；挑不到就只留第一条，不硬凑两条。
   const firstText=first.map(s=>s.text).join('');
+  // 第二条观察**照旧要有**，`brief` 也不例外：观察通道有「至少两句」的闸，
+  // 只留一条会整条作废（实测直接掉成 R0「我在。」）。所以三档的差别在**第一条说几句**：
+  //   · `brief`   一条观察只讲第一句 → 两句（实测 58 字）；
+  //   · 未设置    一条观察讲两句     → 三句（实测 73 字）；
+  //   · `detailed` 把第一条观察**说完**（最多三句）并再多讲第三类观察一句（上限 4）——
+  //     这是「多说一点」唯一能真的多出来的东西：同一批真实记录里多讲，而不是把同一句拉长。
   const second=reading?readings.find(r=>r!==reading&&CLASSES.includes(r.klass)&&!(noReview&&REVIEW_CLASSES.includes(r.klass))&&r.sentences?.[0]&&!repeatedInformation(firstText+r.sentences[0].text).repeated):null;
-  const body=reading?[...first,...(second?[second.sentences[0]]:[])].slice(0,3):[];
+  const moreText=firstText+(second?second.sentences[0].text:'');
+  const third=style==='detailed'&&second?readings.find(r=>r!==reading&&r!==second&&CLASSES.includes(r.klass)&&!(noReview&&REVIEW_CLASSES.includes(r.klass))&&r.sentences?.[0]&&!repeatedInformation(moreText+r.sentences[0].text).repeated):null;
+  const bodyCap=style==='detailed'?4:3;
+  const body=reading?[...first,...(second?[second.sentences[0]]:[]),...(third?[third.sentences[0]]:[])].slice(0,bodyCap):[];
   const offer=f.live&&!f.live.over&&body.length<2?SENT('这一局哪一步不顺，你说。','presence','context.battle'):null;
   const fit=body.length?fitSentences(body,limit,offer):null;
   if(fit){text=fit.text;parts=fit.parts;}

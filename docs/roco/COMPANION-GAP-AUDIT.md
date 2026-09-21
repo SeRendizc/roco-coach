@@ -21,9 +21,13 @@
 > | §3.2 三张词表不同源 | `EMOTION_WORDS` 只对齐了 `MOOD_WORD_RE`，没有对齐测试 | 情绪字面量归一，模块加载时逐词自检（取不到词/拼不出句即抛错） | 同上 + `companion.js` 的加载期自检 |
 > | §5.1 静默偏好只在主动侧生效 | `context.preference` 在聊天链路上永远是 `undefined`，闸门是死的 | `runCoach` 把档位透传下去，`quiet` 的回话是 R0 | `companion-contract` 的「静默偏好同时管住局内气泡与聊天回话」 |
 >
-> 仍**未修**的（都属于「口径要先定，不能靠加词」，见 §9 末尾）：
+> 同轮还修了 **§4.4 `chatStyle` 死代码**（玩家自己说过的那一份全库没人读）——
+> 现在 `companion()` 只读一个 `style = f.chatStyle ?? f.preference`，
+> 守卫拆开验：只留 `stated`、清空旧字段，效果必须照旧。
+>
+> 仍**未修**的（都属于「口径要先定 / 素材不够，不能靠加词」）：
 > 情绪词表的覆盖范围（§4.1 末尾的 `打得不好`/`心态炸了`、§4.2）、
-> §4.4 `chatStyle` 死代码、§5.2 简短偏好只在一个分支被咨询、
+> §5.2 的 `detailed` 一半（实测与未设置逐字相同，因为真实记录里凑不出第三条观察）、
 > §5.3 语音偏好没有进教练记忆、§5.4 聊天侧没有与主动侧对应的额度机制。
 
 契约原文（逐条拆开审计）：
@@ -290,7 +294,14 @@ moodWord('输了') === null               // MOOD_WORD_RE 里没有它（:1637�
   `deleteMemoryItem` → `preference===null` 且 `stated` 为空。
   这三步也由 `tests/companion.test.js:2228,2256` 覆盖。
 
-### 4.4 长期偏好里的一处死代码：`chatStyle` 没人读
+### 4.4 长期偏好里的一处死代码：`chatStyle` 没人读　✅ 第 45 轮已修
+
+**修后**：`companion()` 里只留一个 `style = f.chatStyle ?? f.preference`，
+各个出口都读这一个。守卫写在 `tests/evals/companion-contract.test.js` 里，
+而且是**拆开验**的：只留 `memory.stated` 的 `chat-style` 条目、把旧的
+`memory.preference` 清成 `null`，效果必须照旧（实测 brief 58 字 vs 未设置 73 字）。
+「旧字段刚好也被 `syncKinds` 同步了」不算修好——那正是这一节描述的静默忽略。
+以下为修复前的记录。
 
 `companionFacts` 同时导出两个字段（`companion.js:472,475`）：
 
@@ -310,6 +321,10 @@ moodWord('输了') === null               // MOOD_WORD_RE 里没有它（:1637�
 
 **最小修复方向**：把 `:2019` 与 `:2093` 的 `f.preference` 换成
 `f.chatStyle ?? f.preference`（或让 `companionFacts` 只暴露一个字段）。
+
+**实际采用的修法（第 45 轮）**：在 `companion()` 里收成一个局部量
+`style=['brief','detailed'].includes(f.chatStyle)?f.chatStyle:(['brief','detailed'].includes(f.preference)?f.preference:null)`，
+`companionFacts` 的字段保持不变（它同时服务页面与运行时，改形状要动的地方更多）。
 
 ---
 
@@ -369,7 +384,19 @@ companion({preference:'quiet'}, m,'你好') → R0，"下午好——一天过�
 （`context.mode` 是**游戏模式** `game.mode`，与教练档位同名不同物，
 很容易被后来的人误当成 `preference`；这一点也值得在 `buildContext` 里写清。）
 
-### 5.2 简短偏好：学了，但只在一个分支被咨询
+### 5.2 简短偏好：学了，但只在一个分支被咨询　🟡 第 45 轮部分修（如实记剩下的那一半）
+
+**修后**：`brief` 仍然只在 R2 那一格能收（一条观察只讲第一句 → 两句 58 字，
+未设置是三条 73 字），并且**改从玩家自己说过的那一份读**（见 §4.4）。
+**没修的是 `detailed`**：R2 的默认已经是「这条观察说完 + 再讲一条别的」共三句、
+带宽 120 字，而真实记录里能凑出的第三条观察在实测的几种账本形状下都不存在，
+所以 `detailed` 与未设置**输出相同**。这是**素材不够，不是代码没写**——
+`detailed` 现在会多讲第三类观察（上限 4 句），只是实测里没有第三类可讲。
+**不许**在文档或页面上说「说多说一点会展开」；要让它真的有效，得先有更多可讲的记录，
+或者改变 R2 默认的取法（那是产品口径，另开一轮）。
+R1/R3 **有意不按偏好收放**：观察通道有一道「至少两句」的信息闸，再砍会整条作废、
+降成 R0「我在。」（实测：把 R1 砍成一句，brief 直接掉到 R0）。
+以下为修复前的记录。
 
 - 学：`statedFromMessage`（`memory.js:275-276`，`BRIEF_LINE` 在 `:216`）→
   `stated:chat-style`，并同步旧字段 `memory.preference`（`syncKinds`，`memory.js:290`）。
@@ -390,6 +417,10 @@ q="随便聊聊"       brief → 19 字    未设置       → 19 字       ← 
 另外 `detailed` 与「未设置」的输出**完全相同**（都是 `slice(0,2)`）——
 `detailed` 目前只是一个不产生任何差别的值。
 结论：`简短`属于**部分满足**——被学习了，但只在 R2 一格与一个外层截断里被咨询。
+
+**第 45 轮实测复核**（同一批账本形状，4 局 / 8 局 / 12 局三种）：
+brief 58—59 字、未设置 71—73 字、`detailed` 与未设置**逐字相同**（71—73 字）。
+即：`brief` 这一半坐实了，`detailed` 这一半仍然是空的。
 
 ### 5.3 语音偏好：只活在浏览器 localStorage，从未进入教练记忆
 

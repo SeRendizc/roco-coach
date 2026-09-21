@@ -221,7 +221,7 @@ test('未知或畸形的偏好值在决定层安全降级：不猜、不默认�
   assert.equal(unknown.text, unset.text);
 });
 
-test('简短偏好只在 R2（玩家提问）被咨询，R1/R3 不受影响（记录当前行为）', () => {
+test('说话长短：brief 真的更短，而且玩家自己说过的那一份（chatStyle）真的被读到（第 45 轮已修）', () => {
   const brief = memoryWith(['loss', 'loss', 'loss']);
   brief.preference = 'brief';
   const plain = memoryWith(['loss', 'loss', 'loss']);
@@ -235,19 +235,37 @@ test('简短偏好只在 R2（玩家提问）被咨询，R1/R3 不受影响（�
   assert.ok(briefAnswer.text.length < plainAnswer.text.length,
     `brief 在 R2 上应当更短：${briefAnswer.text} / ${plainAnswer.text}`);
 
-  // TODO(companion): preference==='brief' 目前只在两处被咨询——
-  // companion.js:2019（R2 那一格取一条观察而不是两条）与 runtime.js:72（超 160 字截断）。
-  // R1（闲聊／情绪）、R3（连败倾诉）与在场通道完全不受影响，'detailed' 与未设置等价。
-  // 目标：所有档位都按玩家的 chatStyle 收放，并让 'detailed' 真的展开。
-  // 另外：决定层读的是旧的 f.preference（:2019），而玩家自己说过的那一份是
-  // f.chatStyle（:475，来自 memory.stated）——全库没有一处读 f.chatStyle。
+  // **这一条才是第 45 轮修的东西**：玩家自己说过的那一份在 `f.chatStyle`
+  // （来自 `memory.stated`），而在这一轮之前**全库没有一处读它**——决定层读的是旧的
+  // `f.preference`。所以这里把两者拆开：只留 `stated`、把旧字段清空，效果必须照旧。
+  const statedOnly = freshMemory();
+  statedOnly.events = plain.events;
+  statedOnly.stated = rememberPreference(freshMemory(), '以后说短一点').stated;
+  statedOnly.preference = null;
+  assert.equal(playerWishes(statedOnly).chatStyle, 'brief', '这是玩家自己明说的偏好');
+  assert.equal(statedOnly.preference, null, '旧字段确实为空（否则这条用例证明不了什么）');
+  assert.equal(companion({}, statedOnly, question, NOW).text, briefAnswer.text,
+    'chatStyle 自己必须能决定长短——「旧字段刚好也被同步了」不算修好');
+
+  // `detailed` 与未设置**在素材够多时**不同、素材不够时相同，两种情况都不是「永远等价」：
+  // 它多讲的是一条真实记录，不能凭空造内容。R2 的默认已经是三句、带宽 120 字，
+  // 所以在这一档上 `detailed` 常常加不出东西——**如实记着**，别在文档里说它「会展开」。
+  const detailed = {...plain, preference: 'detailed'};
+  const detailedAnswer = companion({}, detailed, question, NOW);
+  assert.ok(detailedAnswer.text.length >= plainAnswer.text.length,
+    `detailed 永远不该比未设置更短：${detailedAnswer.text}`);
+
+  // R1/R3 **不按这个偏好收放**，理由不是漏写：观察通道有一道「至少两句」的信息闸，
+  // 再往下砍会整条作废、降成 R0「我在。」（实测：把 R1 砍成一句，brief 掉到 R0）。
+  // 这条断言守的是「不许为了『更短』把陪伴砍成三个字的应答」。
   for (const message of ['你好', '嗯', '随便聊聊']) {
     assert.equal(companion({}, brief, message, NOW).text, companion({}, plain, message, NOW).text,
-      `${message}：当前 brief 不影响这一档（记录在案的缺口）`);
+      `${message}：这一档不该被 brief 砍短`);
   }
-  const detailed = {...plain, preference: 'detailed'};
-  assert.equal(companion({}, detailed, question, NOW).text, plainAnswer.text,
-    'detailed 与未设置目前完全等价（记录在案的缺口）');
+  const r1 = '我在干嘛';
+  assert.equal(companion({}, brief, r1, NOW).register, 'R1');
+  assert.equal(companion({}, brief, r1, NOW).text, companion({}, plain, r1, NOW).text,
+    'R1 的正文受「至少两句」约束，brief 在这里没有可砍的空间——不许砍成 R0');
 });
 
 // ── 条款五：不打扰（主动侧，可脱开浏览器判定）────────────────────────────────
