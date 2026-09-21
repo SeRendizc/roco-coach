@@ -779,11 +779,58 @@ class RocoService:
         每只给：真名、系别、六维、**规范配招的四个技能**（含说明与威力来源状态）。
         配招用 `rs.candidate_moveset()`——那是引擎真正会带上场的那一套，
         所以页面上展示的技能就是这一局实际能用的技能，不是另编一份。
+
+        第 60 轮：候选池扩到 48 只之后名单要能分页/筛选，否则页面一次渲染 48 张卡、
+        也没法按系别找。四个查询参数的语义都写在这里，调用方不必猜：
+
+          · `limit` / `offset`：正整数分页；回执里带 `total`/`offset`/`limit`，
+            所以「拿到第 25—36 只」这件事是可核对的，而不是靠调用方自己记账。
+          · `type`：按系别筛。`草系` 与 `草` 都认（缺后缀时补一次 `系`），
+            但**只做精确匹配**，不做包含/模糊推断——筛不出来就是 0 条，不假装命中。
+          · `role`：按角色筛。role 来自 48 只登记层的**标注**（`roster-48.json`），
+            不是引擎数值；没有标注的精灵 role 是 null，按 role 筛时不会被算进来。
+
+        **不传这四个参数时**，返回与加参数之前**逐字段相同**的结果（同样按 pet_id 升序、
+        同样全量），所以旧页面与旧验收脚本不受影响。
         """
         limit = query.get("limit")
-        pets = []
+        offset = query.get("offset", 0)
+        type_filter = query.get("type")
+        role_filter = query.get("role")
+
+        if type_filter is not None and (not isinstance(type_filter, str) or not type_filter.strip()):
+            return _bad_request("type 必须是非空字符串（例如 草系）")
+        if role_filter is not None and (not isinstance(role_filter, str) or not role_filter.strip()):
+            return _bad_request("role 必须是非空字符串（例如 attacker）")
+        for key, value in (("limit", limit), ("offset", offset)):
+            if value is None:
+                continue
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                return _bad_request(f"{key} 必须是非负整数，实际 {value!r}")
+        if limit is not None and limit == 0:
+            return _bad_request("limit 必须是正整数（limit=0 要不到任何一只）")
+
+        wanted_type = type_filter.strip() if isinstance(type_filter, str) else None
+        wanted_role = role_filter.strip() if isinstance(role_filter, str) else None
+
+        def type_matches(pet: Any) -> bool:
+            if wanted_type is None:
+                return True
+            types = list(getattr(pet, "types", ()) or ())
+            if wanted_type in types:
+                return True
+            return f"{wanted_type}系" in types
+
+        def role_matches(pet: Any) -> bool:
+            if wanted_role is None:
+                return True
+            return getattr(pet, "role", None) == wanted_role
+
+        selected = []
         for pet_id in sorted(rs.pets):
             pet = rs.pets[pet_id]
+            if not type_matches(pet) or not role_matches(pet):
+                continue
             moveset = list(rs.candidate_moveset(pet_id) or ())
             moves = []
             for sid in moveset:
@@ -793,35 +840,52 @@ class RocoService:
                     moves.append({"skill_id": sid, "missing_in_skills_json": True})
                 else:
                     moves.append(self._skill_record(rs, skill))
-            pets.append({
+            selected.append({
                 "pet_id": pet_id,
                 "name": pet.name,
                 "types": list(getattr(pet, "types", []) or []),
                 "stats": dict(getattr(pet, "stats", {}) or {}),
                 "pet_class": getattr(pet, "pet_class", None),
                 "stage": getattr(pet, "stage", None),
+                # role/speed_tier 是登记层的**标注**（不是引擎数值），按 role 筛时界面要能显示它
+                "role": getattr(pet, "role", None),
+                "speed_tier": getattr(pet, "speed_tier", None),
                 # 有没有可用技能是这个名单能不能真上场的硬条件：
                 # 空配招的精灵在引擎里连合法动作都出不来。
                 "moveset_size": len(moves),
                 "moveset": moves,
             })
-        if isinstance(limit, int) and limit > 0:
-            pets = pets[:limit]
+
+        total = len(selected)
+        start = offset if isinstance(offset, int) and not isinstance(offset, bool) else 0
+        if isinstance(limit, int) and not isinstance(limit, bool) and limit > 0:
+            pets = selected[start:start + limit]
+        elif start:
+            pets = selected[start:]
+        else:
+            pets = selected
         usable = [p for p in pets if p["moveset_size"] > 0]
+        result: Dict[str, Any] = {
+            "record": "roster",
+            "ruleset_id": rs.ruleset_id,
+            "count": len(pets),
+            "usable_count": len(usable),
+            # 分页账目：调用方不该自己数「第 25—36 只」到底对应哪一段
+            "total": total,
+            "offset": start,
+            "limit": limit if isinstance(limit, int) and not isinstance(limit, bool) else None,
+            "pets": pets,
+            # 3v3：页面按这个数来限制选择
+            "team_size": 3,
+            "note": "配招是引擎的规范配招（candidate_moveset），即这一局实际能用的技能；"
+                    "威力按来源如实标注，`not_provided_by_source` 表示来源没给，不是 0。",
+        }
+        if wanted_type is not None or wanted_role is not None:
+            result["filters"] = {"type": wanted_type, "role": wanted_role}
         return Answer(
-            result={
-                "record": "roster",
-                "ruleset_id": rs.ruleset_id,
-                "count": len(pets),
-                "usable_count": len(usable),
-                "pets": pets,
-                # 3v3：页面按这个数来限制选择
-                "team_size": 3,
-                "note": "配招是引擎的规范配招（candidate_moveset），即这一局实际能用的技能；"
-                        "威力按来源如实标注，`not_provided_by_source` 表示来源没给，不是 0。",
-            },
+            result=result,
             coverage=1.0,
-            evidence_ids=[ev(rs.ruleset_id, "roster", str(len(pets)))],
+            evidence_ids=[ev(rs.ruleset_id, "roster", f"total={total};offset={start};limit={result['limit']}")],
         )
 
     def _answer_learnset(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:

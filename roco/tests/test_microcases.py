@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import sys
 import unittest
@@ -54,8 +55,40 @@ class TestRulesetLoading(unittest.TestCase):
         self.assertEqual(RS.game, "roco_world_mobile")
         self.assertEqual(RS.ruleset_id, "roco-world-s4-2026-09-10")
 
-    def test_12_target_pets_loaded(self):
-        self.assertEqual(len(RS.pets), 12)
+    def test_playable_pool_is_48_over_the_intact_baseline_12(self):
+        """引擎候选池 = 基线 12 只 + 叠加层 36 只 = 48 只（第 60 轮）。
+
+        两件事都要守住，缺一不可：
+          · **M1 的 12 只基线一只不少**（它们是验收基线，基线文件本身逐字节未动，
+            由 `tests/evals/roco/data-acceptance.test.js` 钉着「恰好 12 只」）；
+          · 池子**正好 48**——多出来的只能是 `layer-playable-48/` 里的登记条目，
+            不是谁绕过叠加层偷偷塞进来的（那条由加载期的重复定义检查兜住）。
+        这里直接从磁盘读基线，**不复制名单**：复制一份名单就会有第二个真相。
+        """
+        baseline_path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "..", "..",
+            "data", "roco", "normalized", "roco-world-s4-2026-09-10", "pets.json",
+        )
+        with open(baseline_path, "r", encoding="utf-8") as fh:
+            baseline = json.load(fh)["pets"]
+        self.assertEqual(len(baseline), 12, "M1 基线应当仍是 12 只")
+        self.assertEqual(len(RS.pets), 48, "引擎候选池应当是 12 + 36 = 48 只")
+        for pid, row in baseline.items():
+            self.assertIn(pid, RS.pets, f"基线精灵 {row['name']} 不在候选池里")
+            self.assertEqual(RS.pets[pid].name, row["name"])
+            self.assertEqual(RS.pets[pid].learnset_id, row["learnset_id"])
+
+    def test_every_pet_has_exactly_four_candidate_moves(self):
+        """每只精灵都必须正好 4 个规范配招技能（3v3 的四个技能位都要有牌可打）。"""
+        sizes = {pid: len(RS.candidate_moveset(pid)) for pid in RS.pets}
+        bad = {pid: size for pid, size in sizes.items() if size != 4}
+        self.assertEqual(bad, {}, f"每只必须正好 4 个规范配招技能，不满足：{bad}")
+
+    def test_layer_files_are_part_of_snapshot_fingerprint(self):
+        """叠加层必须进快照指纹：否则「这一局用的哪份数据」会漏掉 36 只。"""
+        for name in ("layer-playable-48/pets.json", "layer-playable-48/learnsets.json",
+                     "layer-playable-48/support-matrix.json"):
+            self.assertIn(name, RS.files)
 
     def test_no_orphan_skill_references(self):
         # load_ruleset 会在孤儿引用时抛错；能走到这里就说明为 0

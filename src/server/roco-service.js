@@ -379,25 +379,62 @@ export function createRocoService(options={}){
   return parts.join('');
  }
 
- async function roster(){
+ /**
+  * 可选用精灵名单（P0-3 阵容选择）：`kind:"roster"`，不是新端点
+  * （信任域的路径白名单有专门的测试钉着，动它得先想清楚）。
+  *
+  * 第 60 轮：候选池扩到 48 只，名单要能分页/筛选。查询参数**白名单转发**
+  * （`offset`/`limit`/`type`/`role`），别的键一律不带进引擎。
+  * **不传参数时回执形状逐键不变**（`ok/count/usable_count/team_size/note/pets`，
+  * 连 `pets[]` 的元素形状也不动）——旧页面与既有验收脚本靠这个形状；
+  * 传了参数才追加 `total/offset/limit`（以及逐只的 `role/speed_tier`）。
+  */
+ async function roster(query={}){
   const up=await ensure();
   if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
   touch();
-  const envelope=await client.query({kind:'roster'},{});
+  const params={},invalid=[];
+  for(const key of ['offset','limit']){
+   const raw=query?.[key];
+   if(raw===undefined||raw===null||raw==='')continue;
+   // 只认十进制位数：`1e3`/`-1`/`1.5` 都是坏参数，**不静默取整**
+   if(!/^\d+$/.test(String(raw)))invalid.push(`${key} 必须是非负整数（实际 ${JSON.stringify(raw)}）`);
+   else params[key]=Number(raw);
+  }
+  for(const key of ['type','role']){
+   const raw=query?.[key];
+   if(raw===undefined||raw===null||raw==='')continue;
+   if(typeof raw!=='string')invalid.push(`${key} 必须是字符串`);
+   else params[key]=raw;
+  }
+  if(invalid.length)return {ok:false,status:400,error:invalid.join('；')};
+  const paged=Object.keys(params).length>0;
+  const envelope=await client.query({kind:'roster',...params},{});
   const out=unwrap(envelope);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
   const r=out.result||{};
-  return {ok:true,count:r.count??0,usable_count:r.usable_count??0,team_size:r.team_size??3,
-   note:r.note??null,
-   pets:(Array.isArray(r.pets)?r.pets:[]).map((p)=>({
-    pet_id:p.pet_id??null,name:p.name??null,types:Array.isArray(p.types)?p.types:[],
-    stats:p.stats??null,pet_class:p.pet_class??null,stage:p.stage??null,
-    moveset_size:p.moveset_size??0,
-    moveset:(Array.isArray(p.moveset)?p.moveset:[]).map((m)=>({
-     skill_id:m.skill_id??null,name:m.name??null,element:m.element??null,category:m.category??null,
-     energy:m.energy??null,power:m.power??null,power_status:m.power_status??null,
-     damage_class:m.damage_class??null,desc:m.desc??null,is_trait:m.is_trait===true})),
-   }))};
+  const pets=(Array.isArray(r.pets)?r.pets:[]).map((p)=>({
+   pet_id:p.pet_id??null,name:p.name??null,types:Array.isArray(p.types)?p.types:[],
+   stats:p.stats??null,pet_class:p.pet_class??null,stage:p.stage??null,
+   moveset_size:p.moveset_size??0,
+   moveset:(Array.isArray(p.moveset)?p.moveset:[]).map((m)=>({
+    skill_id:m.skill_id??null,name:m.name??null,element:m.element??null,category:m.category??null,
+    energy:m.energy??null,power:m.power??null,power_status:m.power_status??null,
+    damage_class:m.damage_class??null,desc:m.desc??null,is_trait:m.is_trait===true})),
+   // role/speed_tier 是登记层的**标注**（不是引擎数值）：只在带参数时带出去，
+   // 这样默认回执的 pets[] 元素形状与加参数之前逐键相同。
+   ...(paged?{role:p.role??null,speed_tier:p.speed_tier??null}:{}),
+  }));
+  if(!paged){
+   return {ok:true,count:r.count??0,usable_count:r.usable_count??0,team_size:r.team_size??3,
+    note:r.note??null,pets};
+  }
+  return {ok:true,
+   // 分页账目：`total` 是**筛选后**的总数，`count` 是这一页的条数——两者不是一回事
+   total:r.total??pets.length,offset:r.offset??0,limit:r.limit??null,
+   count:r.count??pets.length,usable_count:r.usable_count??0,team_size:r.team_size??3,
+   ...(r.filters?{filters:r.filters}:{}),
+   note:r.note??null,pets};
  }
 
  async function planBattle(body={}){

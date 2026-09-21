@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/roco/verify-playable-48.mjs",
+  "command": "node scripts/roco/verify-playable-48.mjs --matches 36",
+  "elapsed_ms": 5772,
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "roster": {
+    "count": 48,
+    "usable_count": 48,
+    "first_pet_id": "pet_000012",
+    "last_pet_id": "pet_000613"
+  },
+  "page": {
+    "ids": [
+      "pet_000328",
+      "pet_000330",
+      "pet_000417",
+      "pet_000445",
+      "pet_000448",
+      "pet_000450",
+      "pet_000451",
+      "pet_000456",
+      "pet_000458",
+      "pet_000473",
+      "pet_000474",
+      "pet_000479"
+    ]
+  },
+  "filters": {
+    "type=草系": [
+      "pet_000240",
+      "pet_000243",
+      "pet_000248"
+    ],
+    "role=attacker": [
+      "pet_000062",
+      "pet_000118",
+      "pet_000130",
+      "pet_000328",
+      "pet_000448",
+      "pet_000451",
+      "pet_000458",
+      "pet_000473",
+      "pet_000556",
+      "pet_000601",
+      "pet_000608",
+      "pet_000613"
+    ],
+    "role=attacker&type=火系": [
+      "pet_000062",
+      "pet_000448",
+      "pet_000601"
+    ]
+  },
+  "matches": {
+    "total": 36,
+    "completed": 36,
+    "failed": 0,
+    "advances": {
+      "min": 25,
+      "median": 33,
+      "max": 46
+    },
+    "distinct_pets_used": 36,
+    "cross_batch_pets_used": [
+      12,
+      12,
+      12
+    ],
+    "failures": [],
+    "samples": [
+      {
+        "seed": 20260921,
+        "team": [
+          "pet_000012",
+          "pet_000190",
+          "pet_000458"
+        ],
+        "advances": 46,
+        "result": "loss"
+      },
+      {
+        "seed": 5,
+        "team": [
+          "pet_000012",
+          "pet_000190",
+          "pet_000458"
+        ],
+        "advances": 46,
+        "result": "loss"
+      },
+      {
+        "seed": 11,
+        "team": [
+          "pet_000012",
+          "pet_000190",
+          "pet_000458"
+        ],
+        "advances": 46,
+        "result": "loss"
+      },
+      {
+        "seed": 20260921,
+        "team": [
+          "pet_000112",
+          "pet_000243",
+          "pet_000545"
+        ],
+        "advances": 25,
+        "result": "loss"
+      },
+      {
+        "seed": 5,
+        "team": [
+          "pet_000112",
+          "pet_000243",
+          "pet_000545"
+        ],
+        "advances": 25,
+        "result": "loss"
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "GET /api/roco/roster 的顶层键与扩池前逐键相同",
+      "ok": true,
+      "detail": {
+        "got": [
+          "ok",
+          "count",
+          "usable_count",
+          "team_size",
+          "note",
+          "pets"
+        ],
+        "want": [
+          "ok",
+          "count",
+          "usable_count",
+          "team_size",
+          "note",
+          "pets"
+        ]
+      }
+    },
+    {
+      "name": "GET /api/roco/roster 的 pets[] 元素键与扩池前逐键相同",
+      "ok": true,
+      "detail": {
+        "sample": [
+          "pet_id",
+          "name",
+          "types",
+          "stats",
+          "pet_class",
+          "stage",
+          "moveset_size",
+          "moveset"
+        ]
+      }
+    },
+    {
+      "name": "GET /api/roco/roster → count=48 / usable_count=48",
+      "ok": true,
+      "detail": {
+        "count": 48,
+        "usable_count": 48
+      }
+    },
+    {
+      "name": "GET /api/roco/roster 每只都正好 4 个配招技能",
+      "ok": true,
+      "detail": {
+        "sizes": [
+          4
+        ]
+      }
+    },
+    {
+      "name": "?limit=48 → count=48 / total=48 / offset=0 / limit=48",
+      "ok": true,
+      "detail": {
+        "count": 48,
+        "total": 48,
+        "offset": 0,
+        "limit": 48
+      }
+    },
+    {
+      "name": "?limit=48 的 pet_id 顺序与无参回执一致",
+      "ok": true,
+      "detail": {
+        "first": "pet_000012",
+        "last": "pet_000613"
+      }
+    },
+    {
+      "name": "?offset=24&limit=12 → 第 25—36 只（与全量名单切片逐 id 相同）",
+      "ok": true,
+      "detail": {
+        "count": 12,
+        "total": 48,
+        "offset": 24,
+        "limit": 12,
+        "got": [
+          "pet_000328",
+          "pet_000330",
+          "pet_000417",
+          "pet_000445",
+          "pet_000448",
+          "pet_000450",
+          "pet_000451",
+          "pet_000456",
+          "pet_000458",
+          "pet_000473",
+          "pet_000474",
+          "pet_000479"
+        ],
+        "want": [
+          "pet_000328",
+          "pet_000330",
+          "pet_000417",
+          "pet_000445",
+          "pet_000448",
+          "pet_000450",
+          "pet_000451",
+          "pet_000456",
+          "pet_000458",
+          "pet_000473",
+          "pet_000474",
+          "pet_000479"
+        ]
+      }
+    },
+    {
+      "name": "?type=草系 只出草系，且条数与全量名单里的草系一致",
+      "ok": true,
+      "detail": {
+        "count": 3,
+        "total": 3,
+        "want": 3,
+        "got": [
+          "pet_000240",
+          "pet_000243",
+          "pet_000248"
+        ]
+      }
+    },
+    {
+      "name": "?type=草（缺后缀）与 ?type=草系 命中同一批",
+      "ok": true,
+      "detail": {
+        "草": [
+          "pet_000240",
+          "pet_000243",
+          "pet_000248"
+        ]
+      }
+    },
+    {
+      "name": "?role=attacker 全部是 attacker，且与审计产物的名单逐 id 一致",
+      "ok": true,
+      "detail": {
+        "count": 12,
+        "total": 12,
+        "want": 12,
+        "got": [
+          "pet_000062",
+          "pet_000118",
+          "pet_000130",
+          "pet_000328",
+          "pet_000448",
+          "pet_000451",
+          "pet_000458",
+          "pet_000473",
+          "pet_000556",
+          "pet_000601",
+          "pet_000608",
+          "pet_000613"
+        ]
+      }
+    },
+    {
+      "name": "?role=attacker&type=火系 两个筛选同时生效（交集，不是并集）",
+      "ok": true,
+      "detail": {
+        "total": 3,
+        "pets": [
+          "pet_000062",
+          "pet_000448",
+          "pet_000601"
+        ]
+      }
+    },
+    {
+      "name": "?limit=abc → ok:false（fail closed，不静默当默认值）",
+      "ok": true,
+      "detail": {
+        "ok": false,
+        "error": "limit 必须是非负整数（实际 \"abc\"）"
+      }
+    },
+    {
+      "name": "真服务 3v3：36/36 局打到 battle_result",
+      "ok": true,
+      "detail": {
+        "matches": 36,
+        "completed": 36,
+        "failed": 0,
+        "cross_batch_pets_used": [
+          12,
+          12,
+          12
+        ],
+        "advances_min": 25,
+        "advances_median": 33,
+        "advances_max": 46
+      }
+    },
+    {
+      "name": "每个跨批次阵容都用够 3 只、且 3 只互不相同",
+      "ok": true,
+      "detail": {
+        "lineups": 12,
+        "distinct_pets_used": 36
+      }
+    }
+  ],
+  "ok": true
+}
