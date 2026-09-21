@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `a88102d`；v3 纠偏与 RC-101～RC-302 见 §C6.15～§C6.26）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `7ad8844`；v3 纠偏与 RC-101～RC-303 见 §C6.15～§C6.27）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **17/17 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `a88102d`（`feat(rc302): 阵容缺口诊断`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `7ad8844`（`feat(rc303): 候选生成`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1622,3 +1622,21 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
 清点产物时文件消失**不是** claim 违规 → 改成跳过（`try/catch` + 原因注释）。
 
 **下一条**：RC-303 候选生成（召回 20～50 → Beam 补全六宠 → Completion Value / Team Ranker → Top-K；**离线模拟产标签，在线不批量模拟**）。
+
+### C6.27 RC-303 候选生成（第 90 轮）
+
+**交付**（提交 `7ad8844`）：`src/coach/team-candidates.mjs`（召回/Beam/Top-K/渐进推荐；纯函数 + 显式注入）、
+`measure-team-candidates.mjs` → `reports/roco/team-candidates/latency.json` + `rc-303-team-candidates.json`、
+12 条测试（**8 类必红反证**）、`docs/roco/TEAM-CANDIDATES.md`。
+
+**实测**：候选宇宙 **702**（owned 80 ∪ pack 622）；召回 **50**（[20,50]，越界必须解释）；**图鉴物种真的进召回与 Top-K**
+（`pet_000001` 进 Top-K 队伍）⇒ 不是白名单；三段延迟 P95 —— 召回 **21.5ms** / Beam+排序 **24.8ms** /
+首屏四段 **27.8ms**（预算 150/300/800，`over_budget: []`）。
+**在线禁止模拟**用**结构判据**钉住（扫在线导出源码找 `step_joint`/`plan_actions`/`RocoClient`/子进程；94 行命中 0）。
+**排序器缺失如实降级**：`ranker_status: missing` → 规则打分 + `ENGINE_HYPOTHESIS` + `no_win_rate: true`；
+注入版本化 ranker 才 `ready`（有测试）。
+
+**如实边界**：Top-K 是**规则打分的启发式**（**不是强度排序、没有胜率**）；Beam+Ranker 那格是下界；
+574 只图鉴精灵的配招合法性未校验（冻结 learnsets 只有 48 只）；28ms 是进程内纯函数计时，不含 IPC/渲染/网络。
+
+**下一条**：RC-304 未知对手下的队伍比较（环境价值 / 最差体系 / matchup spread / 容错 / 覆盖置信）。
