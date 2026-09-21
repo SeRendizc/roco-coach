@@ -31,12 +31,69 @@ const trajectories = rows.filter((row) => row.record_type === 'agent_trajectory'
 const tasks = readFileSync(TASKS, 'utf8').split('\n').filter((line) => line.trim()).map((line) => JSON.parse(line))
   .filter((row) => row.record_type === 'agent_task');
 
-test('轨迹集存在且规模落在 W4-02 要求的两千到五千条区间', () => {
+test('轨迹集存在，且规模不低于 W4-02 的两千条下限', () => {
   assert.ok(header, '缺少 agent-trajectory header：先跑 npm run roco:agent-trajectories');
   assert.equal(header.format, 'roco-agent-trajectory-v1');
-  assert.ok(trajectories.length >= 2000 && trajectories.length <= 5000,
-    `轨迹条数 ${trajectories.length} 不在 2000—5000 区间内`);
+  // W4-02 写的「2,000—5,000 条」里，2,000 是**下限**（要够当门禁），
+  // 5,000 是当时对体积的估计，不是要卡住的上界。第 37 轮修掉 `worldsFor` 的步长 bug
+  // 之后，每个任务真的能选到 2—9 个世界（那三个条件类目从 1 个变成 3 个），
+  // 条数因此从 4,536 涨到 6,048 —— 多出来的全是**真实世界变体**，不是灌水。
+  // 所以这里保留下限，上界放宽到只防「产物大到不该提交」。
+  assert.ok(trajectories.length >= 2000, `轨迹条数 ${trajectories.length} 低于 2000 条下限`);
+  assert.ok(trajectories.length <= 12000, `轨迹条数 ${trajectories.length} 过大，产物不该这么大`);
   assert.equal(header.totals.cases, new Set(trajectories.map((row) => row.case_id)).size);
+});
+
+test('文档里那行「N 条 / M 个世界 / K 个 arm」必须与产物一致', () => {
+  // 这一条是补上的：`AGENT-TRAJECTORIES.md` 里写死的「4,536 条 / 12 个世界」在
+  // 采样器修好之后**当天就过期了**，而文档不会自己更新，于是台账开始说谎。
+  // 产物才是权威，所以把文档里那个数字钉在产物上。
+  const doc = readFileSync(join(ROOT, 'docs', 'roco', 'AGENT-TRAJECTORIES.md'), 'utf8');
+  const match = doc.match(/\*\*([\d,]+) 条 \/ (\d+) 个世界 \/ (\d+) 个 arm\*\*/);
+  assert.ok(match, '文档里找不到「N 条 / M 个世界 / K 个 arm」这一行，钉不住数字了');
+  assert.equal(Number(match[1].replace(/,/g, '')), header.totals.trajectories,
+    `文档写 ${match[1]} 条，产物是 ${header.totals.trajectories} 条`);
+  assert.equal(Number(match[2]), header.totals.worlds,
+    `文档写 ${match[2]} 个世界，产物是 ${header.totals.worlds} 个`);
+  assert.equal(Number(match[3]), header.arms.length,
+    `文档写 ${match[3]} 个 arm，产物是 ${header.arms.length} 个`);
+});
+
+test('产物必须是**现在这个生成器**产出来的（生产者一致性，含反向对照）', () => {
+  // 只测「产物内部自洽」是不够的：第 37 轮的步长 bug 就是产物内部全自洽、
+  // 但世界选法来自**旧**生成器。这里用一份**真实的**旧选法快照当反例。
+  const module = join(ROOT, 'scripts', 'roco', 'verify-agent-trajectories.mjs');
+  const fixture = join(ROOT, 'tests', 'evals', 'roco', 'producer-drift-v1.json');
+  assert.ok(existsSync(fixture), '缺少 producer-drift-v1.json 反向对照夹具');
+  const script = `
+    import {readFileSync} from 'node:fs';
+    const {producerCheck} = await import(${JSON.stringify(module)});
+    const load = (p) => readFileSync(p, 'utf8').split('\\n').filter((l) => l.trim()).map((l) => JSON.parse(l));
+    const tasks = load(${JSON.stringify(TASKS)}).filter((r) => r.record_type === 'agent_task');
+    const all = load(${JSON.stringify(ARTIFACT)});
+    const header = all.find((r) => r.record_type === 'agent_trajectory_header');
+    const rows = all.filter((r) => r.record_type === 'agent_trajectory');
+    const manifest = JSON.parse(readFileSync(${JSON.stringify(join(ROOT, 'tests', 'evals', 'agent-trajectories-v1.manifest.json'))}, 'utf8'));
+    const good = producerCheck(header, rows, tasks, {manifest});
+    // 反例：拿旧产物里真实的世界选法，合成出「生成器已经改了、产物没重建」的样子。
+    const stale = JSON.parse(readFileSync(${JSON.stringify(fixture)}, 'utf8'));
+    const staleRows = [];
+    for (const [caseId, worlds] of Object.entries(stale.worlds_by_case)) {
+      for (const id of worlds) staleRows.push({record_type: 'agent_trajectory', arm: 'replay', case_id: caseId, input: {world: {id}}});
+    }
+    const staleHeader = {record_type: 'agent_trajectory_header', ...stale};
+    delete staleHeader.worlds_by_case; delete staleHeader.record_type;
+    staleHeader.record_type = 'agent_trajectory_header';
+    const bad = producerCheck(staleHeader, staleRows, tasks, {manifest: null});
+    process.stdout.write(JSON.stringify({good: {passed: good.passed, problems: good.problems, worlds: good.distinct_worlds},
+      bad: {passed: bad.passed, problems: bad.problems.slice(0, 2), mismatched: bad.mismatched}}));
+  `;
+  const raw = execFileSync(process.execPath, ['--input-type=module', '-e', script], {cwd: ROOT, encoding: 'utf8', timeout: 120000});
+  const out = JSON.parse(raw);
+  assert.ok(out.good.passed, `生产者一致性没有通过：${out.good.problems.join('；')}`);
+  assert.ok(out.good.worlds >= 20, `产物只覆盖了 ${out.good.worlds} 个世界，世界池没被用起来`);
+  assert.equal(out.bad.passed, false, '反向对照没被抓住：这个检查等于没在检查');
+  assert.ok(out.bad.mismatched > 0);
 });
 
 test('每条轨迹都有可判定的判据、回执摘要与停止原因', () => {

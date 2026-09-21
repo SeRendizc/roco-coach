@@ -4,7 +4,8 @@
  "source_task_set": "agent-tasks-v1",
  "worlds_per_task": 9,
  "origin": "synthetic/constructed — 不是真人对话，不得据此声称真人效果",
- "split_rule": "SFT 专属切分：留出**表达模板**，每个家族与每个机制都出现在训练侧（家族切分与机制切分都不适合做训练切分：前者让一个家族在训练里缺席，后者让一个机制在训练里缺席——两次都直接导致整类归零。模板切分问的才是「换种说法还认不认得」）",
+ "split_mode": "strict",
+ "split_rule": "留出**机制**（`轮次推进` / `拒绝`）到 test 侧，`追问` 模板到 val 侧；每个家族都出现在训练侧，每个**未留出**的机制在训练侧至少 2 条（两次真事故逼出来的约束：第 33 轮留出家族 → `roster_constraint` 整类归零；第 34 轮留出机制 → `阵容诊断` 24/24 只输出 stop。留出的不能是模型根本没学过的知识，只能是它该泛化的东西）。",
  "counts": {
   "total": 1752,
   "by_side": {
@@ -23,9 +24,21 @@
    "brief_explain": 180
   },
   "families_by_side": {
-   "train": {},
-   "val": {},
-   "test": {}
+   "train": [
+    "A组三人-无锁定",
+    "A组三人-锁定寂灭骨龙",
+    "混编三人-含B组"
+   ],
+   "val": [
+    "A组三人-无锁定",
+    "A组三人-锁定寂灭骨龙",
+    "混编三人-含B组"
+   ],
+   "test": [
+    "A组三人-无锁定",
+    "A组三人-锁定寂灭骨龙",
+    "混编三人-含B组"
+   ]
   }
  },
  "families": {
@@ -45,17 +58,34 @@
    "混编三人-含B组"
   ]
  },
- "missing_families_in_train": [],
- "missing_mechanisms_in_train": [
-  "轮次推进",
-  "拒绝"
- ],
- "held_out_templates": [
-  "追问",
-  "si-refuse"
- ],
- "holdout_leak": [
-  "轮次推进",
-  "拒绝"
- ]
+ "designed_holdout": {
+  "mechanisms": [
+   "轮次推进",
+   "拒绝"
+  ],
+  "templates": [
+   "追问"
+  ]
+ },
+ "unseen_in_train": {
+  "families": [],
+  "mechanisms": [
+   "轮次推进",
+   "拒绝"
+  ],
+  "templates": [
+   "追问",
+   "si-refuse"
+  ]
+ },
+ "leaked_into_train": {
+  "mechanisms": [],
+  "templates": []
+ },
+ "invariants": {
+  "every_family_in_train": true,
+  "no_designed_holdout_in_train": true,
+  "every_taught_mechanism_has_two_train_rows": true,
+  "thin_mechanisms_in_train": []
+ }
 }

@@ -51,6 +51,45 @@ def git(*args: str) -> str:
         return ""
 
 
+def _read_json(rel: str) -> Optional[Dict[str, Any]]:
+    try:
+        with open(os.path.join(_ROOT, rel), encoding="utf-8") as fh:
+            return json.load(fh)
+    except Exception:  # noqa: BLE001
+        return None
+
+
+def trajectory_stats() -> Dict[str, Any]:
+    """轨迹集的**真实**规模，从产物清单与验证报告里读出来。
+
+    为什么要读而不是抄：这段 note 原来写死「4,536 条 / 12 个世界」，写完当天就被
+    第 37 轮的世界采样修复作废了（真值 6,048 条 / 23 个世界）——而文档不会自己更新，
+    于是台账开始说谎。**凡是能从产物读出来的数字就不许抄进文档。**
+    """
+    manifest = _read_json(os.path.join("tests", "evals", "agent-trajectories-v1.manifest.json"))
+    report = _read_json(os.path.join("reports", "roco", "agent-trajectories-verification.json"))
+    if not manifest:
+        return {"ok": False}
+    header = manifest.get("header", {})
+    totals = header.get("totals", {})
+    replay = header.get("arms_summary", {}).get("replay", {})
+    grader = (report or {}).get("grader", {})
+    return {
+        "ok": True,
+        "trajectories": totals.get("trajectories"),
+        "worlds": totals.get("worlds"),
+        "cases": totals.get("cases"),
+        "arms": len(header.get("arms", [])),
+        "replay_passed": replay.get("passed"),
+        "replay_total": replay.get("total"),
+        "negative_total": grader.get("negative", {}).get("total"),
+        "producer_passed": ((report or {}).get("producer") or {}).get("passed"),
+    }
+
+
+TRAJECTORY_STATS = trajectory_stats()
+
+
 #: 30 项 MVP + 旗舰版条目。每一项都写清：证据在哪、缺什么。
 #: `evidence` 里的路径在执行时会被逐个 `os.path.exists` 检查 ——
 #: 写了不存在的路径会在报告里被标红，所以这一栏不能编。
@@ -220,32 +259,76 @@ ITEMS: List[Dict[str, Any]] = [
                   "scripts/roco/verify-agent-tasks.py", "roco/tests/test_agent_tasks.py"],
      "note": "288 条 / 8 类，按**家族、机制、表达模板**三重隔离切分；留出维度不进训练集，"
              "每类在 train/val/test 三侧都有样本。判定器自检两个方向都要对。"},
-    {"id": "W4-02", "title": "构造 2,000—5,000 条工具轨迹", "status": PARTIAL,
+    {"id": "W4-02", "title": "构造工具轨迹（原计划 2,000—5,000 条，实际按真实世界覆盖走）", "status": PARTIAL,
      "evidence": ["tests/evals/agent-trajectories-v1.jsonl",
                   "scripts/roco/agent-trajectories.mjs",
                   "scripts/roco/build-agent-trajectories.mjs",
                   "scripts/roco/verify-agent-trajectories.mjs",
                   "docs/roco/AGENT-TRAJECTORIES.md"],
-     "note": "4,536 条 / 12 个世界 / 7 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，"
-             "判定器两个方向都被测过（正向 648/648、反向 13,656 个变体全挂）。"
-             "缺的一半是**模型候选**：要 DeepSeek key，本机没有。"},
-    {"id": "W4-03", "title": "Qwen3-4B profiling", "status": NEEDS_HARDWARE,
-     "evidence": [], "note": "目标机器是 M5 Pro 48GB；本机不是，且用户不租云 GPU。"
-                             "属于硬件阻塞，不是产品决策阻塞。"},
-    {"id": "W4-04", "title": "Qwen3-4B SFT", "status": NEEDS_HARDWARE,
-     "evidence": [], "note": "同 W4-03；另外它依赖 W4-02 的模型候选那一半。"},
+     "note": "{traj:,} 条 / {worlds} 个世界 / {arms} 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，"
+             "判定器两个方向都被测过（正向 {pos}/{pos}、反向 {neg:,} 个变体全挂）；"
+             "另有**生产者一致性**检查（生成器改了而产物没重建会判红）。"
+             "条数超过当初估计的 5,000：第 37 轮修掉世界采样器之后每个任务真的能选到 2—9 个"
+             "世界（那三个条件类目从 1 个变成 3 个），多出来的全是真实世界变体，不是灌水。"
+             "缺的一半是**模型候选**：要 DeepSeek key，本机没有。".format(
+                 traj=TRAJECTORY_STATS.get("trajectories") or 0,
+                 worlds=TRAJECTORY_STATS.get("worlds") if TRAJECTORY_STATS.get("ok") else "未知",
+                 arms=TRAJECTORY_STATS.get("arms"),
+                 pos=TRAJECTORY_STATS.get("replay_total"),
+                 neg=TRAJECTORY_STATS.get("negative_total") or 0)},
+    # W4-03/W4-04 原来记的是 `NEEDS_HARDWARE`，理由是「本机不是 M5 Pro 48GB」。
+    # 那**是个错的读数**：本机就是 Apple M5 Pro / 15 核 / 48 GB（`sysctl machdep.cpu.brand_string`、
+    # `hw.memsize`），目标机器就是它。已实测跑通 profiling 与四轮 LoRA 微调，
+    # 所以这里改成真实状态；「不租云 GPU」这条边界仍然有效，但它不构成这两项的阻塞。
+    {"id": "W4-03", "title": "Qwen3-4B profiling", "status": DONE,
+     "evidence": ["docs/roco/LOCAL-MODEL.md", "scripts/model/local-gateway.mjs",
+                  "scripts/model/healthcheck-mac.sh", "reports/roco/local-model/bench.json",
+                  "tests/evals/local-model.test.js"],
+     "note": "本机实测（MLX + Metal，Qwen3.5-4B-4bit）：首 token p50 **214.5 ms**、"
+             "总延迟 p50 **~363 ms**、**29.8—32.9 tok/s**、推理峰值内存 **2.51 GB**、"
+             "结构化输出合法 **8/8**。机器是 Apple M5 Pro / 15 核 / 48 GB，"
+             "**就是路线图写的目标机器**（旧版本这里写「本机不是」，是读错了前提）。"},
+    {"id": "W4-04", "title": "Qwen3-4B SFT", "status": PARTIAL,
+     "evidence": ["scripts/roco/build-agent-sft-data.mjs", "scripts/roco/verify-sft-split.mjs",
+                  "scripts/roco/build-agent-trajectories.mjs",
+                  "docs/roco/W4-04-SFT-PREREGISTRATION.md",
+                  "reports/roco/sft/dataset-report.json", "reports/roco/sft/train.jsonl"],
+     "note": "数据/训练/评测闭环已跑通：1,752 条工具选择数据（train 1,395 / val 306 / test 51，"
+             "**逐字节可复现**，由 `verify-sft-split.mjs` 在临时目录重跑后逐字节比对确认）、"
+             "四轮 LoRA 微调、同一把 288 条尺子复测。"
+             "**预注册判据 P1—P8 全部满足**（判据在跑之前写死在 "
+             "`docs/roco/W4-04-SFT-PREREGISTRATION.md`）：v4 **275/288（0.9549）**，"
+             "优于 v2 的 268/288；`roster_constraint` 8→**13/24**，`rules_lookup` 68→**70/72**，"
+             "`invalid-arguments` 0，p50 435 ms / p95 1054 ms，family 外 0.9271；"
+             "相对 v2 逐任务**退化 3、扳回 10**（那 3 条也如实写在报告里）。"
+             "**未完成的是接入那一半**：适配器还没进默认链路（`ROCO_LOCAL_MODEL` 默认 `off`，"
+             "`off` 下本地进程一次都不启动，有测试证明）——下一步是以 `shadow` 档接真实链路。"},
+    {"id": "W5-01", "title": "Model gateway", "status": DONE,
+     "evidence": ["scripts/model/local-gateway.mjs", "scripts/model/setup-mac.sh",
+                  "scripts/model/start-mac.sh", "scripts/model/stop-mac.sh",
+                  "scripts/model/healthcheck-mac.sh", "scripts/model/measure-arms.sh",
+                  "docs/roco/LOCAL-MODEL.md", "tests/evals/local-model.test.js"],
+     "note": "OpenAI 兼容网关已落地并在跑：`/v1/chat/completions`、`/v1/models`、`/healthz`、`/metrics`；"
+             "超时 504 / 忙 429 / 不可用 503、并发上限、取消、回退都有**一处**实现；"
+             "一键 setup/start/healthcheck/stop，权重落在 gitignore 目录。"
+             "第 37 轮修掉一个真缺陷：`stop` 原来找的 pid 文件名从来没被写过，"
+             "所以「停网关」是个空操作——换适配器时会静默沿用旧权重。"},
     {"id": "W4-05", "title": "同 Agent 回放门禁", "status": PARTIAL,
-     "evidence": ["scripts/roco/shadow-replay.mjs", "docs/roco/SHADOW-REPLAY.md",
-                  "reports/roco/shadow-replay.json", "reports/roco/shadow-replay-local_4b.json",
-                  "tests/evals/shadow-replay.test.js"],
-     "note": "门禁本身已建成并自证：同一任务集（288 条 / 8 类）、同一时代、同一判定器，"
-             "只换 provider。**本轮用本机 Qwen3.5-4B-4bit 实跑**：规则臂 288/288，"
-             "模型臂 **226/288（0.7847）**，逐任务对比退化 62、扳回 0；"
-             "退化**全部集中在两类**——`rules_lookup` 41 条、`roster_constraint` 21 条，"
-             "其余六类与规则臂持平。`invalid-arguments` 86 次。缺的那一半是 DeepSeek 臂"
-             "（要 key）。"},
-    {"id": "W5-01", "title": "Model gateway", "status": NOT_STARTED, "evidence": [],
-     "note": "未开工。它要连真实模型，和 W4-02 的模型候选同一前置。"},
+     "evidence": ["scripts/roco/shadow-replay.mjs", "scripts/model/measure-arms.sh",
+                  "docs/roco/SHADOW-REPLAY.md", "docs/roco/W4-04-SFT-PREREGISTRATION.md",
+                  "reports/roco/shadow-replay.json", "reports/roco/shadow-replay-base.json",
+                  "reports/roco/shadow-replay-sft-v4.json",
+                  "tests/evals/shadow-replay.test.js",
+                  "tests/evals/roco/model-arm-identity.test.js"],
+     "note": "门禁已建成并自证：同一任务集（288 条 / 8 类）、同一局面、同一判定器，只换 provider。"
+             "规则臂 288/288；**五个 arm 在一条命令下重测完**（`scripts/model/measure-arms.sh`），"
+             "每份产物都带适配器 sha256：基座 225/288（0.7813）、v1 229（0.7951）、"
+             "v2 268（0.9306）、v3 204（0.7083）、**v4 275（0.9549）**。"
+             "报告新增 family/机制/模板的**留出 vs 见过**切片（v4：family 外 0.9271）。"
+             "第 38 轮查出并修掉**存档错位**：`-sft-v2.json` 里装的其实是 v1 的成绩、"
+             "`-sft-v3.json` 里装的是 v2 的、真正的 v3 没有产物——旧存档已挪进 "
+             "`reports/roco/invalidated/`，并加了「文件名 ↔ 适配器」守卫。"
+             "缺的那一半仍是 DeepSeek 臂（要 key）。"},
     {"id": "W5-02", "title": "Shadow replay", "status": PARTIAL,
      "evidence": ["scripts/roco/shadow-replay.mjs", "docs/roco/SHADOW-REPLAY.md",
                   "tests/evals/shadow-replay.test.js"],
@@ -314,7 +397,7 @@ def main() -> int:
         "important": [
             "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
             "`NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。",
-            "`NEEDS_HARDWARE` 表示缺的是**特定硬件**（M5 Pro 48GB），不是决策。",
+            "`NEEDS_HARDWARE` 表示缺的是**特定硬件**，不是决策。目前**没有条目在用**它——W4-03/W4-04 曾经用它，理由是「本机不是 M5 Pro 48GB」，而那是读错了前提：本机就是 M5 Pro 48GB。",
             "`BLOCKED_BY_BOUNDARY` 只用于仍然有效的硬边界；旧的「不训练模型」在第 7 轮已被用户改写。",
             "这份台账不判「质量好不好」，只判「证据在不在」。",
         ],

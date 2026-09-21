@@ -5,7 +5,8 @@
 
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {writeFileSync, mkdtempSync, rmSync} from 'node:fs';
+import {writeFileSync, readFileSync, mkdtempSync, rmSync} from 'node:fs';
+import {join as pathJoin} from 'node:path';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -63,4 +64,31 @@ test('当前仓库的状态文档必须一致', () => {
   const report = check();
   assert.equal(report.ok, true, `状态文档与现实不一致：\n${report.problems.join('\n')}`);
   assert.ok(report.suites >= 8, `最近验证的套件数太少（${report.suites}）`);
+});
+
+test('自指死锁的回归：最近一次 verify:release 是红的，**不该**让闸门永远卡死', () => {
+  // 第 38 轮实测撞上的死锁：`verify:release` 的清单里有 `unit`，
+  // 而 `unit` 里有一条断言「最近一次 verify:release 必须是 pass」——一次失败之后
+  // 每次跑都会因为上一次红而红，而 latest.json 只能靠一次成功的运行变绿。
+  // 唯一的出路是手改 latest.json，那正是最不该被鼓励的动作。
+  //
+  // 现在的口径：`last-green.json`（只有全绿才写）是硬要求；`latest.json` 红了只报警告。
+  // 这里直接对着**真实的**仓库状态断言：即使 latest.json 是红的，
+  // 只要存在一次全绿记录，检查也必须通过。
+  const latestPath = pathJoin(ROOT, 'reports', 'roco', 'verification', 'latest.json');
+  const greenPath = pathJoin(ROOT, 'reports', 'roco', 'verification', 'last-green.json');
+  const latest = JSON.parse(readFileSync(latestPath, 'utf8'));
+  if (!readFileSync) return;
+  const report = check({root: ROOT});
+  // 不论 latest.json 是什么结论，`warnings` 都要如实说出来（不许悄悄放过）
+  if (latest.verdict !== 'pass') {
+    assert.ok(report.warnings.some((w) => w.includes('最近一次 verify:release')),
+      '最近一次是红的，但报告里连一句警告都没有');
+  }
+  // 而硬判据只看 last-green：它不存在时只警告，存在时不许因为 latest 红而失败
+  const greenExists = (() => { try { readFileSync(greenPath, 'utf8'); return true; } catch { return false; } })();
+  if (greenExists) {
+    assert.equal(report.problems.filter((p) => p.includes('latest.json')).length, 0,
+      'latest.json 红了被算成了硬失败——死锁又回来了');
+  }
 });

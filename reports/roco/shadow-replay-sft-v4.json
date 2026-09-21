@@ -3,24 +3,24 @@
  "arm": "local_4b",
  "identity": {
   "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
-  "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v2",
-  "adapter_sha256": "75d610923085401e49bf88b59f8f14f3fae9930fb01efcbb955836d52572569d",
+  "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v4",
+  "adapter_sha256": "362cc02087177eb5b61e185d324630aa8319408ebb2b64ff1c37c9c5bd9e33d6",
   "gateway_reachable": true,
   "ready": true,
   "adapter_file": "adapters.safetensors",
-  "adapter_basename": "qwen35-4b-tool-v2",
-  "identity_digest": "70800010c90a35b581d6f21455109dd96e3ea49f9001966613769e44bc87e698",
+  "adapter_basename": "qwen35-4b-tool-v4",
+  "identity_digest": "68439b22605d9a638eda96ce5e2c23bb871db02fdbe947824e43b8be53533148",
   "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d"
  },
- "written_to": "/Users/serendizc/Developer/roco-coach/reports/roco/shadow-replay-sft-v2.json",
+ "written_to": "/Users/serendizc/Developer/roco-coach/reports/roco/shadow-replay-sft-v4.json",
  "gateway": "http://127.0.0.1:8766",
  "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
  "prompt": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。\n可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、\ncompare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、\nread_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。\n需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。\n**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。\n查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，\n并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。\n参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。",
  "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
  "summary": {
   "tasks": 288,
-  "passed": 268,
-  "pass_rate": 0.9306,
+  "passed": 275,
+  "pass_rate": 0.9549,
   "stopped": {
    "complete": 264,
    "receipt-budget": 12,
@@ -28,116 +28,116 @@
   },
   "latency": {
    "p50_ms": 435,
-   "p95_ms": 918
+   "p95_ms": 1054
   },
   "by_category": {
    "rules_lookup": {
     "total": 72,
-    "passed": 68,
-    "pass_rate": 0.9444,
-    "p50_ms": 655,
-    "p95_ms": 759
+    "passed": 70,
+    "pass_rate": 0.9722,
+    "p50_ms": 652,
+    "p95_ms": 754
    },
    "roster_constraint": {
     "total": 24,
-    "passed": 8,
-    "pass_rate": 0.3333,
-    "p50_ms": 1361,
-    "p95_ms": 1377
+    "passed": 13,
+    "pass_rate": 0.5417,
+    "p50_ms": 1072,
+    "p95_ms": 1533
    },
    "continue_stop": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 433,
-    "p95_ms": 450
+    "p50_ms": 432,
+    "p95_ms": 463
    },
    "tool_failure": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 433,
+    "p95_ms": 441
+   },
+   "stale_state": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
     "p50_ms": 431,
     "p95_ms": 437
    },
-   "stale_state": {
-    "total": 36,
-    "passed": 36,
-    "pass_rate": 1,
-    "p50_ms": 430,
-    "p95_ms": 437
-   },
    "evidence_conflict": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 432,
-    "p95_ms": 690
+    "p50_ms": 433,
+    "p95_ms": 447
    },
    "silence": {
     "total": 12,
     "passed": 12,
     "pass_rate": 1,
     "p50_ms": 0,
-    "p95_ms": 0
+    "p95_ms": 1
    },
    "brief_explain": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 430,
-    "p95_ms": 439
+    "p50_ms": 432,
+    "p95_ms": 444
    }
   },
   "by_split": {
    "family": {
     "held_out": {
      "total": 96,
-     "passed": 88,
-     "pass_rate": 0.9167
+     "passed": 89,
+     "pass_rate": 0.9271
     },
     "seen": {
      "total": 192,
-     "passed": 180,
-     "pass_rate": 0.9375
+     "passed": 186,
+     "pass_rate": 0.9688
     },
     "by_value": {
      "A组三人-无锁定": {
       "total": 96,
-      "passed": 88,
+      "passed": 89,
       "held_out": true,
-      "pass_rate": 0.9167
+      "pass_rate": 0.9271
      },
      "A组三人-锁定寂灭骨龙": {
       "total": 96,
-      "passed": 88,
+      "passed": 93,
       "held_out": false,
-      "pass_rate": 0.9167
+      "pass_rate": 0.9688
      },
      "混编三人-含B组": {
       "total": 96,
-      "passed": 92,
+      "passed": 93,
       "held_out": false,
-      "pass_rate": 0.9583
+      "pass_rate": 0.9688
      }
     }
    },
    "mechanism": {
     "held_out": {
      "total": 81,
-     "passed": 69,
-     "pass_rate": 0.8519
+     "passed": 75,
+     "pass_rate": 0.9259
     },
     "seen": {
      "total": 207,
-     "passed": 199,
-     "pass_rate": 0.9614
+     "passed": 200,
+     "pass_rate": 0.9662
     },
     "by_value": {
      "图鉴字段": {
       "total": 12,
-      "passed": 8,
+      "passed": 10,
       "held_out": true,
-      "pass_rate": 0.6667
+      "pass_rate": 0.8333
      },
      "技能静态威力": {
       "total": 12,
@@ -171,15 +171,15 @@
      },
      "阵容评分": {
       "total": 12,
-      "passed": 4,
+      "passed": 8,
       "held_out": true,
-      "pass_rate": 0.3333
+      "pass_rate": 0.6667
      },
      "换人对比": {
       "total": 12,
-      "passed": 4,
+      "passed": 5,
       "held_out": false,
-      "pass_rate": 0.3333
+      "pass_rate": 0.4167
      },
      "单一事实": {
       "total": 12,
@@ -299,33 +299,33 @@
     },
     "seen": {
      "total": 258,
-     "passed": 238,
-     "pass_rate": 0.9225
+     "passed": 245,
+     "pass_rate": 0.9496
     },
     "by_value": {
      "直问": {
       "total": 60,
-      "passed": 55,
+      "passed": 56,
       "held_out": false,
-      "pass_rate": 0.9167
+      "pass_rate": 0.9333
      },
      "口语": {
       "total": 60,
-      "passed": 55,
+      "passed": 56,
       "held_out": false,
-      "pass_rate": 0.9167
+      "pass_rate": 0.9333
      },
      "追问": {
       "total": 51,
-      "passed": 46,
+      "passed": 47,
       "held_out": false,
-      "pass_rate": 0.902
+      "pass_rate": 0.9216
      },
      "背景": {
       "total": 60,
-      "passed": 55,
+      "passed": 59,
       "held_out": false,
-      "pass_rate": 0.9167
+      "pass_rate": 0.9833
      },
      "委托": {
       "total": 9,
@@ -413,7 +413,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 3202
+   "wall_ms": 3211
   },
   {
    "case_id": "rl-pet-f0-02",
@@ -442,7 +442,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 661
+   "wall_ms": 659
   },
   {
    "case_id": "rl-pet-f0-03",
@@ -471,7 +471,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 655
+   "wall_ms": 657
   },
   {
    "case_id": "rl-pet-f0-04",
@@ -500,7 +500,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 658
+   "wall_ms": 645
   },
   {
    "case_id": "rl-pet-f1-01",
@@ -528,7 +528,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 664
+   "wall_ms": 663
   },
   {
    "case_id": "rl-pet-f1-02",
@@ -541,22 +541,14 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 662
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 404
   },
   {
    "case_id": "rl-pet-f1-03",
@@ -584,7 +576,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 652
+   "wall_ms": 662
   },
   {
    "case_id": "rl-pet-f1-04",
@@ -612,7 +604,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 668
+   "wall_ms": 646
   },
   {
    "case_id": "rl-pet-f2-01",
@@ -625,24 +617,14 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": false,
    "violations": [
+    "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 684
+   "wall_ms": 409
   },
   {
    "case_id": "rl-pet-f2-02",
@@ -660,7 +642,7 @@
      "tool": "query_rules",
      "args": {
       "kind": "pet",
-      "pet_id": "pet_000190",
+      "pet_id": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -668,11 +650,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 707
+   "passed": true,
+   "violations": [],
+   "wall_ms": 671
   },
   {
    "case_id": "rl-pet-f2-03",
@@ -690,7 +670,7 @@
      "tool": "query_rules",
      "args": {
       "kind": "pet",
-      "pet_id": "pet_000190",
+      "pet_id": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -698,11 +678,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 745
+   "passed": true,
+   "violations": [],
+   "wall_ms": 691
   },
   {
    "case_id": "rl-pet-f2-04",
@@ -720,7 +698,7 @@
      "tool": "query_rules",
      "args": {
       "kind": "pet",
-      "pet_id": "pet_000190",
+      "pet_id": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -728,11 +706,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 751
+   "passed": true,
+   "violations": [],
+   "wall_ms": 700
   },
   {
    "case_id": "rl-skill-f0-01",
@@ -788,7 +764,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 617
+   "wall_ms": 650
   },
   {
    "case_id": "rl-skill-f0-03",
@@ -816,7 +792,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 618
+   "wall_ms": 635
   },
   {
    "case_id": "rl-skill-f0-04",
@@ -844,7 +820,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 613
+   "wall_ms": 625
   },
   {
    "case_id": "rl-skill-f1-01",
@@ -870,7 +846,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 613
+   "wall_ms": 620
   },
   {
    "case_id": "rl-skill-f1-02",
@@ -896,7 +872,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 618
+   "wall_ms": 619
   },
   {
    "case_id": "rl-skill-f1-03",
@@ -922,7 +898,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 624
+   "wall_ms": 599
   },
   {
    "case_id": "rl-skill-f1-04",
@@ -948,7 +924,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 627
+   "wall_ms": 611
   },
   {
    "case_id": "rl-skill-f2-01",
@@ -1000,7 +976,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 630
+   "wall_ms": 622
   },
   {
    "case_id": "rl-skill-f2-03",
@@ -1026,7 +1002,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 622
+   "wall_ms": 619
   },
   {
    "case_id": "rl-skill-f2-04",
@@ -1052,7 +1028,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 624
+   "wall_ms": 628
   },
   {
    "case_id": "rl-type-f0-01",
@@ -1084,7 +1060,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 739
+   "wall_ms": 745
   },
   {
    "case_id": "rl-type-f0-02",
@@ -1116,7 +1092,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 759
+   "wall_ms": 742
   },
   {
    "case_id": "rl-type-f0-03",
@@ -1148,7 +1124,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 747
+   "wall_ms": 742
   },
   {
    "case_id": "rl-type-f0-04",
@@ -1180,7 +1156,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 740
+   "wall_ms": 749
   },
   {
    "case_id": "rl-type-f1-01",
@@ -1211,7 +1187,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 753
+   "wall_ms": 751
   },
   {
    "case_id": "rl-type-f1-02",
@@ -1242,7 +1218,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 758
+   "wall_ms": 751
   },
   {
    "case_id": "rl-type-f1-03",
@@ -1273,7 +1249,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 758
+   "wall_ms": 747
   },
   {
    "case_id": "rl-type-f1-04",
@@ -1304,7 +1280,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 760
+   "wall_ms": 741
   },
   {
    "case_id": "rl-type-f2-01",
@@ -1335,7 +1311,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 758
+   "wall_ms": 754
   },
   {
    "case_id": "rl-type-f2-02",
@@ -1366,7 +1342,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 746
+   "wall_ms": 753
   },
   {
    "case_id": "rl-type-f2-03",
@@ -1397,7 +1373,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 750
+   "wall_ms": 756
   },
   {
    "case_id": "rl-type-f2-04",
@@ -1428,7 +1404,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 760
+   "wall_ms": 754
   },
   {
    "case_id": "rl-learn-f0-01",
@@ -1456,7 +1432,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 724
+   "wall_ms": 719
   },
   {
    "case_id": "rl-learn-f0-02",
@@ -1484,7 +1460,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 728
+   "wall_ms": 722
   },
   {
    "case_id": "rl-learn-f0-03",
@@ -1512,7 +1488,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 723
+   "wall_ms": 709
   },
   {
    "case_id": "rl-learn-f0-04",
@@ -1540,7 +1516,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 718
+   "wall_ms": 731
   },
   {
    "case_id": "rl-learn-f1-01",
@@ -1566,7 +1542,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 729
+   "wall_ms": 727
   },
   {
    "case_id": "rl-learn-f1-02",
@@ -1592,7 +1568,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 726
+   "wall_ms": 710
   },
   {
    "case_id": "rl-learn-f1-03",
@@ -1618,7 +1594,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 728
+   "wall_ms": 719
   },
   {
    "case_id": "rl-learn-f1-04",
@@ -1644,7 +1620,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 723
+   "wall_ms": 721
   },
   {
    "case_id": "rl-learn-f2-01",
@@ -1670,7 +1646,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 723
+   "wall_ms": 721
   },
   {
    "case_id": "rl-learn-f2-02",
@@ -1696,7 +1672,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 718
+   "wall_ms": 723
   },
   {
    "case_id": "rl-learn-f2-03",
@@ -1722,7 +1698,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 714
+   "wall_ms": 718
   },
   {
    "case_id": "rl-learn-f2-04",
@@ -1748,7 +1724,7 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 735
+   "wall_ms": 729
   },
   {
    "case_id": "rl-term-f0-01",
@@ -1776,7 +1752,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 649
+   "wall_ms": 650
   },
   {
    "case_id": "rl-term-f0-02",
@@ -1804,7 +1780,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 638
+   "wall_ms": 653
   },
   {
    "case_id": "rl-term-f0-03",
@@ -1860,7 +1836,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 654
+   "wall_ms": 646
   },
   {
    "case_id": "rl-term-f1-01",
@@ -1886,7 +1862,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 654
+   "wall_ms": 650
   },
   {
    "case_id": "rl-term-f1-02",
@@ -1912,7 +1888,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 642
+   "wall_ms": 647
   },
   {
    "case_id": "rl-term-f1-03",
@@ -1938,7 +1914,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 652
+   "wall_ms": 646
   },
   {
    "case_id": "rl-term-f1-04",
@@ -1964,7 +1940,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 650
+   "wall_ms": 646
   },
   {
    "case_id": "rl-term-f2-01",
@@ -1990,7 +1966,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 645
+   "wall_ms": 655
   },
   {
    "case_id": "rl-term-f2-02",
@@ -2016,7 +1992,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 651
+   "wall_ms": 652
   },
   {
    "case_id": "rl-term-f2-03",
@@ -2042,7 +2018,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 659
+   "wall_ms": 648
   },
   {
    "case_id": "rl-term-f2-04",
@@ -2068,7 +2044,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 654
+   "wall_ms": 652
   },
   {
    "case_id": "rl-ruleset-f0-01",
@@ -2095,7 +2071,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 550
+   "wall_ms": 555
   },
   {
    "case_id": "rl-ruleset-f0-02",
@@ -2122,7 +2098,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 547
+   "wall_ms": 548
   },
   {
    "case_id": "rl-ruleset-f0-03",
@@ -2149,7 +2125,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 550
+   "wall_ms": 542
   },
   {
    "case_id": "rl-ruleset-f0-04",
@@ -2176,7 +2152,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 549
+   "wall_ms": 539
   },
   {
    "case_id": "rl-ruleset-f1-01",
@@ -2201,7 +2177,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 549
+   "wall_ms": 545
   },
   {
    "case_id": "rl-ruleset-f1-02",
@@ -2226,7 +2202,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 541
+   "wall_ms": 547
   },
   {
    "case_id": "rl-ruleset-f1-03",
@@ -2251,7 +2227,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 549
+   "wall_ms": 542
   },
   {
    "case_id": "rl-ruleset-f1-04",
@@ -2276,7 +2252,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 548
+   "wall_ms": 544
   },
   {
    "case_id": "rl-ruleset-f2-01",
@@ -2301,7 +2277,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 545
+   "wall_ms": 553
   },
   {
    "case_id": "rl-ruleset-f2-02",
@@ -2326,7 +2302,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 542
+   "wall_ms": 548
   },
   {
    "case_id": "rl-ruleset-f2-03",
@@ -2351,7 +2327,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 551
+   "wall_ms": 546
   },
   {
    "case_id": "rl-ruleset-f2-04",
@@ -2376,7 +2352,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 555
+   "wall_ms": 552
   },
   {
    "case_id": "rc-eval-f0-01",
@@ -2390,27 +2366,15 @@
     "family",
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "evaluate_team",
-     "args": {
-      "team": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    "没有调用应当调用的工具 evaluate_team",
+    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
    ],
-   "wall_ms": 898
+   "wall_ms": 437
   },
   {
    "case_id": "rc-eval-f0-02",
@@ -2424,27 +2388,15 @@
     "family",
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "evaluate_team",
-     "args": {
-      "team": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    "没有调用应当调用的工具 evaluate_team",
+    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
    ],
-   "wall_ms": 910
+   "wall_ms": 453
   },
   {
    "case_id": "rc-eval-f0-03",
@@ -2458,27 +2410,15 @@
     "family",
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "evaluate_team",
-     "args": {
-      "team": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    "没有调用应当调用的工具 evaluate_team",
+    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
    ],
-   "wall_ms": 916
+   "wall_ms": 447
   },
   {
    "case_id": "rc-eval-f0-04",
@@ -2501,6 +2441,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -2508,11 +2449,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 913
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1053
   },
   {
    "case_id": "rc-eval-f1-01",
@@ -2534,6 +2473,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -2541,11 +2481,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 918
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1060
   },
   {
    "case_id": "rc-eval-f1-02",
@@ -2567,6 +2505,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -2574,11 +2513,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 911
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1072
   },
   {
    "case_id": "rc-eval-f1-03",
@@ -2591,27 +2528,15 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "evaluate_team",
-     "args": {
-      "team": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    "没有调用应当调用的工具 evaluate_team",
+    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
    ],
-   "wall_ms": 916
+   "wall_ms": 454
   },
   {
    "case_id": "rc-eval-f1-04",
@@ -2633,6 +2558,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -2640,11 +2566,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 922
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1078
   },
   {
    "case_id": "rc-eval-f2-01",
@@ -2675,7 +2599,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 907
+   "wall_ms": 900
   },
   {
    "case_id": "rc-eval-f2-02",
@@ -2706,7 +2630,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 911
+   "wall_ms": 898
   },
   {
    "case_id": "rc-eval-f2-03",
@@ -2728,6 +2652,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -2737,7 +2662,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 917
+   "wall_ms": 1054
   },
   {
    "case_id": "rc-eval-f2-04",
@@ -2759,6 +2684,7 @@
        "pet_000190",
        "pet_000445"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -2768,7 +2694,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 904
+   "wall_ms": 1078
   },
   {
    "case_id": "rc-swap-f0-01",
@@ -2806,7 +2732,7 @@
    "violations": [
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 1361
+   "wall_ms": 1384
   },
   {
    "case_id": "rc-swap-f0-02",
@@ -2844,7 +2770,7 @@
    "violations": [
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 1370
+   "wall_ms": 1362
   },
   {
    "case_id": "rc-swap-f0-03",
@@ -2882,7 +2808,7 @@
    "violations": [
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 1367
+   "wall_ms": 1379
   },
   {
    "case_id": "rc-swap-f0-04",
@@ -2920,7 +2846,7 @@
    "violations": [
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
    ],
-   "wall_ms": 1377
+   "wall_ms": 1374
   },
   {
    "case_id": "rc-swap-f1-01",
@@ -2945,6 +2871,7 @@
        "pet_000190",
        "pet_000417"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -2952,11 +2879,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 1372
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1533
   },
   {
    "case_id": "rc-swap-f1-02",
@@ -2981,6 +2906,7 @@
        "pet_000190",
        "pet_000417"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -2988,11 +2914,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 1370
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1538
   },
   {
    "case_id": "rc-swap-f1-03",
@@ -3005,18 +2929,10 @@
    "held_out_dimensions": [],
    "trace": [
     {
-     "tool": "compare_team_change",
+     "tool": "query_rules",
      "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
+      "kind": "pet",
+      "pet_id": "pet_000190",
       "state_version": 0
      },
      "ok": true,
@@ -3026,9 +2942,11 @@
    "stopped": "complete",
    "passed": false,
    "violations": [
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
    ],
-   "wall_ms": 1366
+   "wall_ms": 730
   },
   {
    "case_id": "rc-swap-f1-04",
@@ -3053,6 +2971,7 @@
        "pet_000190",
        "pet_000417"
       ],
+      "locked_pet": "pet_000225",
       "state_version": 0
      },
      "ok": true,
@@ -3060,11 +2979,9 @@
     }
    ],
    "stopped": "complete",
-   "passed": false,
-   "violations": [
-    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
-   ],
-   "wall_ms": 1388
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1532
   },
   {
    "case_id": "rc-swap-f2-01",
@@ -3075,30 +2992,14 @@
    "mechanism": "换人对比",
    "template": "直问",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1364
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
+   ],
+   "wall_ms": 438
   },
   {
    "case_id": "rc-swap-f2-02",
@@ -3109,30 +3010,14 @@
    "mechanism": "换人对比",
    "template": "口语",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1374
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
+   ],
+   "wall_ms": 448
   },
   {
    "case_id": "rc-swap-f2-03",
@@ -3166,7 +3051,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 1368
+   "wall_ms": 1367
   },
   {
    "case_id": "rc-swap-f2-04",
@@ -3200,7 +3085,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 1371
+   "wall_ms": 1364
   },
   {
    "case_id": "cs-answered-f0-01",
@@ -3217,7 +3102,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 462
+   "wall_ms": 471
   },
   {
    "case_id": "cs-answered-f0-02",
@@ -3234,7 +3119,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 446
+   "wall_ms": 443
   },
   {
    "case_id": "cs-answered-f0-03",
@@ -3252,7 +3137,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 450
+   "wall_ms": 449
   },
   {
    "case_id": "cs-answered-f0-04",
@@ -3269,7 +3154,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 444
+   "wall_ms": 463
   },
   {
    "case_id": "cs-answered-f1-01",
@@ -3284,7 +3169,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 461
   },
   {
    "case_id": "cs-answered-f1-02",
@@ -3316,7 +3201,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 432
   },
   {
    "case_id": "cs-answered-f1-04",
@@ -3331,7 +3216,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 421
   },
   {
    "case_id": "cs-answered-f2-01",
@@ -3346,7 +3231,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 415
   },
   {
    "case_id": "cs-answered-f2-02",
@@ -3361,7 +3246,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 427
   },
   {
    "case_id": "cs-answered-f2-03",
@@ -3378,7 +3263,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 430
   },
   {
    "case_id": "cs-answered-f2-04",
@@ -3393,7 +3278,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 433
   },
   {
    "case_id": "cs-lastturn-f0-01",
@@ -3411,7 +3296,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 432
   },
   {
    "case_id": "cs-lastturn-f0-02",
@@ -3429,7 +3314,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 439
+   "wall_ms": 424
   },
   {
    "case_id": "cs-lastturn-f0-03",
@@ -3448,7 +3333,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 433
   },
   {
    "case_id": "cs-lastturn-f0-04",
@@ -3466,7 +3351,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 436
   },
   {
    "case_id": "cs-lastturn-f1-01",
@@ -3483,7 +3368,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 439
+   "wall_ms": 433
   },
   {
    "case_id": "cs-lastturn-f1-02",
@@ -3500,7 +3385,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 440
+   "wall_ms": 429
   },
   {
    "case_id": "cs-lastturn-f1-03",
@@ -3518,7 +3403,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 420
   },
   {
    "case_id": "cs-lastturn-f1-04",
@@ -3535,7 +3420,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 429
   },
   {
    "case_id": "cs-lastturn-f2-01",
@@ -3552,7 +3437,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 417
+   "wall_ms": 432
   },
   {
    "case_id": "cs-lastturn-f2-02",
@@ -3569,7 +3454,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 438
+   "wall_ms": 434
   },
   {
    "case_id": "cs-lastturn-f2-03",
@@ -3587,7 +3472,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 431
   },
   {
    "case_id": "cs-lastturn-f2-04",
@@ -3604,7 +3489,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 417
   },
   {
    "case_id": "cs-diagnose-f0-01",
@@ -3621,7 +3506,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 435
   },
   {
    "case_id": "cs-diagnose-f0-02",
@@ -3638,7 +3523,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 418
+   "wall_ms": 431
   },
   {
    "case_id": "cs-diagnose-f0-03",
@@ -3656,7 +3541,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 425
+   "wall_ms": 430
   },
   {
    "case_id": "cs-diagnose-f0-04",
@@ -3673,7 +3558,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 428
   },
   {
    "case_id": "cs-diagnose-f1-01",
@@ -3688,7 +3573,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 433
   },
   {
    "case_id": "cs-diagnose-f1-02",
@@ -3703,7 +3588,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 430
   },
   {
    "case_id": "cs-diagnose-f1-03",
@@ -3720,7 +3605,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 415
+   "wall_ms": 431
   },
   {
    "case_id": "cs-diagnose-f1-04",
@@ -3735,7 +3620,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 436
   },
   {
    "case_id": "cs-diagnose-f2-01",
@@ -3750,7 +3635,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 431
   },
   {
    "case_id": "cs-diagnose-f2-02",
@@ -3765,7 +3650,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 426
   },
   {
    "case_id": "cs-diagnose-f2-03",
@@ -3782,7 +3667,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 434
   },
   {
    "case_id": "cs-diagnose-f2-04",
@@ -3797,7 +3682,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 443
   },
   {
    "case_id": "tf-damage-f0-01",
@@ -3815,7 +3700,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 435
   },
   {
    "case_id": "tf-damage-f0-02",
@@ -3833,7 +3718,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 434
   },
   {
    "case_id": "tf-damage-f0-03",
@@ -3851,7 +3736,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 432
   },
   {
    "case_id": "tf-damage-f0-04",
@@ -3869,7 +3754,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 434
   },
   {
    "case_id": "tf-damage-f1-01",
@@ -3886,7 +3771,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 439
   },
   {
    "case_id": "tf-damage-f1-02",
@@ -3903,7 +3788,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 439
   },
   {
    "case_id": "tf-damage-f1-03",
@@ -3920,7 +3805,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 438
   },
   {
    "case_id": "tf-damage-f1-04",
@@ -3937,7 +3822,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 438
   },
   {
    "case_id": "tf-damage-f2-01",
@@ -3954,7 +3839,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 430
   },
   {
    "case_id": "tf-damage-f2-02",
@@ -3971,7 +3856,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 432
   },
   {
    "case_id": "tf-damage-f2-03",
@@ -3988,7 +3873,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 433
   },
   {
    "case_id": "tf-damage-f2-04",
@@ -4005,7 +3890,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 440
+   "wall_ms": 441
   },
   {
    "case_id": "tf-plan-f0-01",
@@ -4022,7 +3907,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 440
   },
   {
    "case_id": "tf-plan-f0-02",
@@ -4039,7 +3924,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 433
   },
   {
    "case_id": "tf-plan-f0-03",
@@ -4056,7 +3941,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 434
   },
   {
    "case_id": "tf-plan-f0-04",
@@ -4088,7 +3973,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 433
   },
   {
    "case_id": "tf-plan-f1-02",
@@ -4103,7 +3988,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 425
   },
   {
    "case_id": "tf-plan-f1-03",
@@ -4118,7 +4003,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 431
   },
   {
    "case_id": "tf-plan-f1-04",
@@ -4133,7 +4018,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 439
   },
   {
    "case_id": "tf-plan-f2-01",
@@ -4163,7 +4048,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 438
   },
   {
    "case_id": "tf-plan-f2-03",
@@ -4178,7 +4063,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 433
   },
   {
    "case_id": "tf-plan-f2-04",
@@ -4193,7 +4078,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 441
   },
   {
    "case_id": "tf-summary-f0-01",
@@ -4210,7 +4095,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 439
   },
   {
    "case_id": "tf-summary-f0-02",
@@ -4227,7 +4112,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 436
   },
   {
    "case_id": "tf-summary-f0-03",
@@ -4244,7 +4129,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 432
   },
   {
    "case_id": "tf-summary-f0-04",
@@ -4261,7 +4146,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 427
   },
   {
    "case_id": "tf-summary-f1-01",
@@ -4276,7 +4161,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 433
   },
   {
    "case_id": "tf-summary-f1-02",
@@ -4291,7 +4176,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 425
+   "wall_ms": 430
   },
   {
    "case_id": "tf-summary-f1-03",
@@ -4306,7 +4191,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 437
   },
   {
    "case_id": "tf-summary-f1-04",
@@ -4321,7 +4206,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 435
   },
   {
    "case_id": "tf-summary-f2-01",
@@ -4336,7 +4221,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 429
   },
   {
    "case_id": "tf-summary-f2-02",
@@ -4351,7 +4236,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 432
   },
   {
    "case_id": "tf-summary-f2-03",
@@ -4366,7 +4251,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 432
   },
   {
    "case_id": "tf-summary-f2-04",
@@ -4381,7 +4266,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 433
   },
   {
    "case_id": "ss-plan-f0-01",
@@ -4398,7 +4283,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 434
+   "wall_ms": 433
   },
   {
    "case_id": "ss-plan-f0-02",
@@ -4415,7 +4300,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 424
   },
   {
    "case_id": "ss-plan-f0-03",
@@ -4432,7 +4317,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 424
   },
   {
    "case_id": "ss-plan-f0-04",
@@ -4449,7 +4334,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 428
   },
   {
    "case_id": "ss-plan-f1-01",
@@ -4464,7 +4349,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 431
   },
   {
    "case_id": "ss-plan-f1-02",
@@ -4479,7 +4364,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 428
   },
   {
    "case_id": "ss-plan-f1-03",
@@ -4494,7 +4379,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 431
   },
   {
    "case_id": "ss-plan-f1-04",
@@ -4509,7 +4394,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 430
   },
   {
    "case_id": "ss-plan-f2-01",
@@ -4524,7 +4409,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 435
   },
   {
    "case_id": "ss-plan-f2-02",
@@ -4539,7 +4424,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 431
   },
   {
    "case_id": "ss-plan-f2-03",
@@ -4554,7 +4439,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 434
+   "wall_ms": 437
   },
   {
    "case_id": "ss-plan-f2-04",
@@ -4569,7 +4454,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 434
   },
   {
    "case_id": "ss-hp-f0-01",
@@ -4586,7 +4471,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 431
   },
   {
    "case_id": "ss-hp-f0-02",
@@ -4603,7 +4488,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 428
   },
   {
    "case_id": "ss-hp-f0-03",
@@ -4620,7 +4505,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 437
   },
   {
    "case_id": "ss-hp-f0-04",
@@ -4637,7 +4522,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 436
   },
   {
    "case_id": "ss-hp-f1-01",
@@ -4652,7 +4537,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 437
   },
   {
    "case_id": "ss-hp-f1-02",
@@ -4667,7 +4552,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 436
   },
   {
    "case_id": "ss-hp-f1-03",
@@ -4682,7 +4567,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 437
   },
   {
    "case_id": "ss-hp-f1-04",
@@ -4697,7 +4582,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 439
   },
   {
    "case_id": "ss-hp-f2-01",
@@ -4712,7 +4597,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 436
   },
   {
    "case_id": "ss-hp-f2-02",
@@ -4727,7 +4612,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 436
   },
   {
    "case_id": "ss-hp-f2-03",
@@ -4742,7 +4627,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 432
   },
   {
    "case_id": "ss-hp-f2-04",
@@ -4757,7 +4642,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 435
   },
   {
    "case_id": "ss-hint-f0-01",
@@ -4774,7 +4659,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 426
   },
   {
    "case_id": "ss-hint-f0-02",
@@ -4791,7 +4676,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 430
   },
   {
    "case_id": "ss-hint-f0-03",
@@ -4808,7 +4693,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 427
   },
   {
    "case_id": "ss-hint-f0-04",
@@ -4855,7 +4740,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 430
   },
   {
    "case_id": "ss-hint-f1-03",
@@ -4870,7 +4755,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 431
   },
   {
    "case_id": "ss-hint-f1-04",
@@ -4885,7 +4770,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 429
   },
   {
    "case_id": "ss-hint-f2-01",
@@ -4900,7 +4785,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 426
   },
   {
    "case_id": "ss-hint-f2-02",
@@ -4915,7 +4800,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 432
   },
   {
    "case_id": "ss-hint-f2-03",
@@ -4930,7 +4815,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 431
   },
   {
    "case_id": "ss-hint-f2-04",
@@ -4945,7 +4830,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 433
   },
   {
    "case_id": "ec-value-f0-01",
@@ -4962,7 +4847,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 427
   },
   {
    "case_id": "ec-value-f0-02",
@@ -4980,7 +4865,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 434
+   "wall_ms": 426
   },
   {
    "case_id": "ec-value-f0-03",
@@ -4998,7 +4883,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 430
   },
   {
    "case_id": "ec-value-f0-04",
@@ -5015,7 +4900,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 430
   },
   {
    "case_id": "ec-value-f1-01",
@@ -5030,7 +4915,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 433
   },
   {
    "case_id": "ec-value-f1-02",
@@ -5047,7 +4932,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 439
+   "wall_ms": 436
   },
   {
    "case_id": "ec-value-f1-03",
@@ -5064,7 +4949,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 446
   },
   {
    "case_id": "ec-value-f1-04",
@@ -5079,7 +4964,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 440
+   "wall_ms": 447
   },
   {
    "case_id": "ec-value-f2-01",
@@ -5094,7 +4979,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 443
   },
   {
    "case_id": "ec-value-f2-02",
@@ -5111,7 +4996,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 443
+   "wall_ms": 449
   },
   {
    "case_id": "ec-value-f2-03",
@@ -5128,7 +5013,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 440
+   "wall_ms": 437
   },
   {
    "case_id": "ec-value-f2-04",
@@ -5143,7 +5028,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 436
   },
   {
    "case_id": "ec-form-f0-01",
@@ -5161,7 +5046,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 440
+   "wall_ms": 439
   },
   {
    "case_id": "ec-form-f0-02",
@@ -5180,7 +5065,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 437
   },
   {
    "case_id": "ec-form-f0-03",
@@ -5199,7 +5084,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 434
+   "wall_ms": 436
   },
   {
    "case_id": "ec-form-f0-04",
@@ -5230,22 +5115,11 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 700
+   "wall_ms": 430
   },
   {
    "case_id": "ec-form-f1-02",
@@ -5263,7 +5137,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 433
   },
   {
    "case_id": "ec-form-f1-03",
@@ -5281,7 +5155,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 434
   },
   {
    "case_id": "ec-form-f1-04",
@@ -5298,7 +5172,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 433
   },
   {
    "case_id": "ec-form-f2-01",
@@ -5311,22 +5185,11 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000190",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 690
+   "wall_ms": 431
   },
   {
    "case_id": "ec-form-f2-02",
@@ -5344,7 +5207,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 435
+   "wall_ms": 424
   },
   {
    "case_id": "ec-form-f2-03",
@@ -5362,7 +5225,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 441
   },
   {
    "case_id": "ec-form-f2-04",
@@ -5379,7 +5242,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 439
+   "wall_ms": 435
   },
   {
    "case_id": "ec-strength-f0-01",
@@ -5396,7 +5259,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 434
   },
   {
    "case_id": "ec-strength-f0-02",
@@ -5414,7 +5277,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 430
   },
   {
    "case_id": "ec-strength-f0-03",
@@ -5432,7 +5295,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 420
   },
   {
    "case_id": "ec-strength-f0-04",
@@ -5449,7 +5312,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 429
   },
   {
    "case_id": "ec-strength-f1-01",
@@ -5464,7 +5327,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 432
   },
   {
    "case_id": "ec-strength-f1-02",
@@ -5481,7 +5344,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 433
   },
   {
    "case_id": "ec-strength-f1-03",
@@ -5498,7 +5361,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 434
   },
   {
    "case_id": "ec-strength-f1-04",
@@ -5513,7 +5376,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 415
   },
   {
    "case_id": "ec-strength-f2-01",
@@ -5528,7 +5391,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 435
   },
   {
    "case_id": "ec-strength-f2-02",
@@ -5545,7 +5408,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 432
   },
   {
    "case_id": "ec-strength-f2-03",
@@ -5562,7 +5425,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 435
   },
   {
    "case_id": "ec-strength-f2-04",
@@ -5577,7 +5440,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 432
   },
   {
    "case_id": "si-submitted-f0-01",
@@ -5650,7 +5513,7 @@
    "stopped": "policy",
    "passed": true,
    "violations": [],
-   "wall_ms": 0
+   "wall_ms": 1
   },
   {
    "case_id": "si-quiet-f1-01",
@@ -5800,7 +5663,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 415
   },
   {
    "case_id": "be-defense-f0-02",
@@ -5834,7 +5697,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 404
+   "wall_ms": 408
   },
   {
    "case_id": "be-defense-f0-04",
@@ -5851,7 +5714,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 413
+   "wall_ms": 416
   },
   {
    "case_id": "be-defense-f1-01",
@@ -5866,7 +5729,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 417
+   "wall_ms": 423
   },
   {
    "case_id": "be-defense-f1-02",
@@ -5881,7 +5744,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 409
+   "wall_ms": 429
   },
   {
    "case_id": "be-defense-f1-03",
@@ -5896,7 +5759,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 439
   },
   {
    "case_id": "be-defense-f1-04",
@@ -5911,7 +5774,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 439
+   "wall_ms": 437
   },
   {
    "case_id": "be-defense-f2-01",
@@ -5926,7 +5789,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 438
+   "wall_ms": 436
   },
   {
    "case_id": "be-defense-f2-02",
@@ -5941,7 +5804,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 439
+   "wall_ms": 433
   },
   {
    "case_id": "be-defense-f2-03",
@@ -5956,7 +5819,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 435
   },
   {
    "case_id": "be-defense-f2-04",
@@ -5971,7 +5834,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 432
   },
   {
    "case_id": "be-energy-f0-01",
@@ -5988,7 +5851,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 429
   },
   {
    "case_id": "be-energy-f0-02",
@@ -6005,7 +5868,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 425
+   "wall_ms": 421
   },
   {
    "case_id": "be-energy-f0-03",
@@ -6022,7 +5885,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 422
   },
   {
    "case_id": "be-energy-f0-04",
@@ -6039,7 +5902,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 409
+   "wall_ms": 426
   },
   {
    "case_id": "be-energy-f1-01",
@@ -6054,7 +5917,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 432
   },
   {
    "case_id": "be-energy-f1-02",
@@ -6069,7 +5932,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 427
   },
   {
    "case_id": "be-energy-f1-03",
@@ -6084,7 +5947,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 434
   },
   {
    "case_id": "be-energy-f1-04",
@@ -6099,7 +5962,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 432
   },
   {
    "case_id": "be-energy-f2-01",
@@ -6114,7 +5977,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 414
+   "wall_ms": 431
   },
   {
    "case_id": "be-energy-f2-02",
@@ -6129,7 +5992,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 432
   },
   {
    "case_id": "be-energy-f2-03",
@@ -6159,7 +6022,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 435
   },
   {
    "case_id": "be-loss-f0-01",
@@ -6176,7 +6039,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 428
   },
   {
    "case_id": "be-loss-f0-02",
@@ -6193,7 +6056,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 452
   },
   {
    "case_id": "be-loss-f0-03",
@@ -6210,7 +6073,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 434
+   "wall_ms": 432
   },
   {
    "case_id": "be-loss-f0-04",
@@ -6227,7 +6090,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 431
+   "wall_ms": 433
   },
   {
    "case_id": "be-loss-f1-01",
@@ -6242,7 +6105,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 431
   },
   {
    "case_id": "be-loss-f1-02",
@@ -6257,7 +6120,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 430
+   "wall_ms": 427
   },
   {
    "case_id": "be-loss-f1-03",
@@ -6272,7 +6135,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 436
   },
   {
    "case_id": "be-loss-f1-04",
@@ -6287,7 +6150,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 432
+   "wall_ms": 444
   },
   {
    "case_id": "be-loss-f2-01",
@@ -6317,7 +6180,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 437
+   "wall_ms": 434
   },
   {
    "case_id": "be-loss-f2-03",
@@ -6332,7 +6195,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 436
+   "wall_ms": 423
   },
   {
    "case_id": "be-loss-f2-04",
@@ -6347,23 +6210,23 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 438
   }
  ],
  "comparison": {
   "compared": 288,
-  "regressed": 20,
+  "regressed": 13,
   "fixed": 0,
   "both_failed": 0,
   "by_category": {
    "rules_lookup": {
     "total": 72,
-    "regressed": 4,
+    "regressed": 2,
     "fixed": 0
    },
    "roster_constraint": {
     "total": 24,
-    "regressed": 16,
+    "regressed": 11,
     "fixed": 0
    },
    "continue_stop": {
@@ -6399,33 +6262,19 @@
   },
   "worst_regressions": [
    {
+    "case_id": "rl-pet-f1-02",
+    "category": "rules_lookup",
+    "why": [
+     "没有调用应当调用的工具 query_rules",
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
     "case_id": "rl-pet-f2-01",
     "category": "rules_lookup",
     "why": [
-     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-    ],
-    "stopped": "complete"
-   },
-   {
-    "case_id": "rl-pet-f2-02",
-    "category": "rules_lookup",
-    "why": [
-     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-    ],
-    "stopped": "complete"
-   },
-   {
-    "case_id": "rl-pet-f2-03",
-    "category": "rules_lookup",
-    "why": [
-     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
-    ],
-    "stopped": "complete"
-   },
-   {
-    "case_id": "rl-pet-f2-04",
-    "category": "rules_lookup",
-    "why": [
+     "没有调用应当调用的工具 query_rules",
      "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
     ],
     "stopped": "complete"
@@ -6434,6 +6283,7 @@
     "case_id": "rc-eval-f0-01",
     "category": "roster_constraint",
     "why": [
+     "没有调用应当调用的工具 evaluate_team",
      "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
     ],
     "stopped": "complete"
@@ -6442,6 +6292,7 @@
     "case_id": "rc-eval-f0-02",
     "category": "roster_constraint",
     "why": [
+     "没有调用应当调用的工具 evaluate_team",
      "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
     ],
     "stopped": "complete"
@@ -6450,15 +6301,33 @@
     "case_id": "rc-eval-f0-03",
     "category": "roster_constraint",
     "why": [
+     "没有调用应当调用的工具 evaluate_team",
      "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
     ],
     "stopped": "complete"
    },
    {
-    "case_id": "rc-eval-f0-04",
+    "case_id": "rc-eval-f1-03",
     "category": "roster_constraint",
     "why": [
+     "没有调用应当调用的工具 evaluate_team",
      "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rc-swap-f0-01",
+    "category": "roster_constraint",
+    "why": [
+     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rc-swap-f0-02",
+    "category": "roster_constraint",
+    "why": [
+     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
     ],
     "stopped": "complete"
    }

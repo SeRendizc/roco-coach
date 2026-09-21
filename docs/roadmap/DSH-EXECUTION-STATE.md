@@ -309,8 +309,8 @@ enemy 座位 −0.150（p=0.070）。座位效应成因**未查清**，不得读
 |---|---|---|
 | **W4-01 Agent 任务集**（288 条 / 8 类） | 按**阵容家族、机制、表达模板**三重隔离切分，留出维度不出现在训练集，每类在 train/val/test 三侧都有样本 | `tests/evals/agent-tasks-v1.jsonl`、`scripts/roco/{build,verify}-agent-tasks.py`、`roco/tests/test_agent_tasks.py`（12 项） |
 | **任务集里有一个不可完成的参数**（真缺陷） | `query_rules` 的技能期望写成 `skill_name`，而工具契约只接受 `name`——任何 Agent 照做都会被 `validToolArgs` 判成非法参数。是「照期望重放」这一支 arm 把它撞出来的 | `test_expected_arguments_are_arguments_the_tool_actually_accepts`（从 `toolbox.js` 直接解析契约键） |
-| **W4-02 轨迹格式 + 判定器 + 离线回放** | 4,536 条轨迹 / 12 个世界 / 7 个 arm，全部由**真服务**产出的公开状态驱动，产物字节可复现 | `scripts/roco/agent-trajectories.mjs`、`docs/roco/AGENT-TRAJECTORIES.md` |
-| **判定器两个方向都被测了** | 正向：对照 arm 648/648；反向：**每条通过的记录按自己的判据改坏一次**，13,656 个变体全部判挂；另有漂移检查 | `reports/roco/agent-trajectories-verification.json` |
+| **W4-02 轨迹格式 + 判定器 + 离线回放** | 6,048 条轨迹 / 23 个世界 / 7 个 arm（第 37 轮修掉世界采样器后重建；原为 4,536/12），全部由**真服务**产出的公开状态驱动，产物字节可复现 | `scripts/roco/agent-trajectories.mjs`、`docs/roco/AGENT-TRAJECTORIES.md` |
+| **判定器两个方向都被测了** | 正向：对照 arm 864/864；反向：**每条通过的记录按自己的判据改坏一次**，17,760 个变体全部判挂；另有漂移检查与**生产者一致性**检查 | `reports/roco/agent-trajectories-verification.json` |
 | **反向对照抓出判定器自身三个真缺陷** | ① 胜率判据整段扫描会被前面的否定词骗过；② 冲突判据把「两个来源**一致**」判成「说出了冲突」；③ 过期判据只卡正文、不卡那次被拒的调用 | 同上；`tests/evals/roco/agent-trajectories.test.js`（6 项） |
 | **一个难查的串号 bug** | 构建器换世界时没清工具层的「见过的状态版本」，下一个世界拿自己的版本 0 去查被判成「版本倒退」——回执里写着「state_version 0 与当前状态 0 不一致」，两个数字一样却是过期错误 | `resetRocoTools()`；13 条冲突轨迹因此从「挂」变「过」 |
 
@@ -599,12 +599,12 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `bbd5563`（`fix(coach): the intervention layer was never engaging on the real page`）—— 已推送 |
+| HEAD | `895b871`（`fix(evals): the world sampler was picking the same world every time`）+ 第 38 轮改动（待提交） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
-| 验证 | **一条命令可复现**：`npm run verify:release` → 10 个套件全绿（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / model-manifest / guard-selftest 7-7 / 浏览器 9/9 / demo 16/16），约 75 秒，产物 `reports/roco/verification/latest.json` |
+| 验证 | **一条命令可复现**：`npm run verify:release` → **13 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **sft-split** / model-manifest / provenance / state-doc / guard-selftest / 浏览器 / demo），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
-| 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**（证明登记过的守卫不是空的） |
-| 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**已进 `verify:release` 的清单**（第 31 轮加） |
+| 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**；另有各自带反证的检查：`verify-agent-trajectories --selftest` 3/3、`verify-sft-split --selftest` 7/7、`model-arm-identity` 正反两向 |
+| 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**第 38 轮改掉了它的自指死锁**：原来它要求「最近一次 verify:release 必须是 pass」，而 `verify:release` 里又有 `unit`包含这条断言——一次失败之后每次跑都会因为上一次红而红，唯一出路是手改 `latest.json`。现在硬判据是 `last-green.json`（必须存在一次全绿、且不能落后 >12 个提交），`latest.json` 红了只报**警告** |
 | 本轮**保留**的实验 | 无（本轮交付与实验分离，没有为刷指标改动过搜索或评分） |
 | 本轮**撤回/修正**的 | ① `skill_name` 参数键（工具不接受，任务不可完成）；② 判定器胜率判据整段扫描；③ 判定器冲突判据把「一致」判成「冲突」；④ 过期判据只卡正文；⑤ 换世界不清工具层状态版本导致串号；⑥ 给 `receiptSummary` 加注释时误删 `export`（测试全绿但生成器已不能跑） |
 | **第 14 轮已完成** | **Mac 本地模型部署**：M5 Pro 48GB preflight；`.venv-mlx`（Python 3.12 + mlx-lm 0.31.3，GPU 后端）；`mlx-community/Qwen3.5-4B-4bit`（2.9 GB，revision `0e7ffd5c62`，apache-2.0）已下载到 `.models/mlx/`（gitignore）；manifest 逐文件 SHA256 校验通过；一键 setup/start/healthcheck/stop；OpenAI-compatible 网关；feature flag 真实接入 Agent（默认 off）；21 项失败降级测试 | `docs/roco/LOCAL-MODEL.md`、`models/registry.json`、`reports/roco/verification/round14-mac-local-model.log` |
@@ -613,6 +613,10 @@ active goal 已按此重写（revision 2）。
 | **Windows 3060（明天）** | 用户指令：本轮只做 Mac。3060 那台负责 LightGBM / 小网络 / 环境 profiling / rollout，不与 Mac 拼显存 | — |
 | **第 15 轮（W5-04）** | **主动介入判定层**：预注册（`docs/roco/W5-04-INTERVENTION-GATE.md`）先写判据；窗口集从 30 条扩到 **3,740 条**（按 seed family 切分 + family 外 OOD）；成本敏感分类器（`sklearn`，cost FN:FP = 3:1）；判定层只做**抑制**、默认关闭、可逐位回滚 | `scripts/roco/{build-intervention-windows.mjs,train-intervention-model.py}`、`src/coach/intervention-model.js`、`tests/evals/intervention-layer.test.js`（10 项） |
 | **第 17 轮（W5-04 v2）** | 按「纯决策前观察量」**重新定义问题**后重跑：标签 = 必须补位 / 血量≤35% / 枚举 top1−top2 边际 > 5；特征 7 维全部决策前可得。**离线 G1—G5 全过**（召回 1.0、误报 0.0、ECE 0.0070、family 外同样过、三个固定阈值都过）。**消融臂**（去掉 `planner_margin_norm`，特征与规则同信息）误报率塌成 1.0 → 证明通过来自「特征终于覆盖了标签依赖的量」，不是多塞了特征 | `reports/roco/intervention-model-report.json`、预注册文档 §10 |
+| **第 38 轮（模型臂成绩存档错位：一处「文档说得通、产物对不上」的事故）** | 给轨迹集补「生产者一致性」检查时顺手查了模型臂的存档，发现 **`-sft-v2.json` 里装的其实是 v1 的成绩、`-sft-v3.json` 里装的是 v2 的、真正的 v3 一个产物都没留下**——而文档与台账一直照着这组对不上号的数字往下走。根因三条：① 报告里**没有模型身份**（只有 arm/gateway/prompt_digest），错位看不出来；② 运行器每次写到同一个 `-local_4b.json` 再由人工改名；③ `stop-mac.sh` 找的 pid 文件名（`serve.pid`）**从来没被写过**，所以「停网关」是空操作——换适配器时旧权重还在跑。**根因修复**：报告加 `identity`（模型/适配器/权重 sha256/提示摘要）、`--out` 显式产物路径、`stop` 改认 `gateway.pid` 并按端口兜底、一键重测脚本 `measure-arms.sh`、守卫 `model-arm-identity.test.js`（正反两向）；报告另加 `by_split`（家族/机制/模板的留出 vs 见过切片——原来只有总分，泛化差被盖住）。**重测（判据跑前写死在预注册文档）**：基座 225/288、v1 229、v2 268、v3 **204**、**v4 275/288（0.9549）**；v4 相对 v2 逐任务**退化 3、扳回 10**；`roster_constraint` 8→**13/24**、`rules_lookup` 68→**70/72**、`invalid-arguments` 0、family 外 **0.9271**。**预注册 P1—P8 八条全过**。旧错位存档挪进 `reports/roco/invalidated/` 并写明每一份实际是什么 | `docs/roco/W4-04-SFT-PREREGISTRATION.md`、`docs/roco/SHADOW-REPLAY.md` §7、`reports/roco/invalidated/README.md`、`tests/evals/roco/model-arm-identity.test.js` |
+| **第 38 轮（SFT 数据的自我描述说错了，并补上缺失的验证器）** | `build-agent-sft-data.mjs` 的 `split_rule` 是一句**写死的话**（「留出表达模板，每个家族与每个机制都在训练侧」），而实际用的是 `strict`（**留出机制**）——报告在描述另一种切分，且没有任何检查会发现；`holdout_leak` 字段装的其实是「实际不在训练侧的值」，把**留出成功**报成泄漏，还让脚本在正常配置下返回退出码 1；`counts.families_by_side` 存的是 `Set`，JSON 序列化成 `{}`，那一栏永远像空的。另：文件里引用的 `verify-sft-split.mjs` **根本不存在**（注释声称「独立复核」是假的）。三处都修，并**真的写了**那个验证器：按报告声明的模式重算全部样本、与盘上三份 jsonl 逐项对账、检查目标工具在契约内、三侧无重复，最后在临时目录**重跑生成器并逐字节比对**（1,752 条数据 + 报告全部逐字节可复现）；`--selftest` 7 个注入全被抓住。已进 `verify:release` | `scripts/roco/verify-sft-split.mjs`、`scripts/roco/build-agent-sft-data.mjs`、`reports/roco/sft/dataset-report.json` |
+| **第 38 轮（轨迹集按修好的采样器重建 + 生产者一致性检查）** | 第 37 轮修了 `worldsFor` 的步长 bug，但**轨迹产物没重建**：产物内部完全自洽（结构全过、回放全过、判定器两向都对），却仍是旧采样器选的世界——三个条件类目每个任务只覆盖 **1** 个世界。重建后 **4,536 → 6,048 条**、世界 **12 → 23**，三条反证臂的通过率随之变化（`stubborn` 0.889→0.750 等，原因是那三类的分母从 36 涨到 108）。新增 `producerCheck`：把生成器的世界选法重算一遍与产物逐对比较，并核对 `manifest` 与 `jsonl` 两份产物的头部一致；`--selftest` 3/3 注入判红，另用**真实旧选法快照**（`tests/evals/roco/producer-drift-v1.json`，287/288 个任务不一致）当反例。**顺带修掉一个自伤**：`worldsFor` 返回的是世界对象、产物里记的是 `world.id`，第一版拿对象比字符串，于是 288 个任务全报「不一致」——检查红了，但红的原因是检查自己写错了 | `scripts/roco/verify-agent-trajectories.mjs`、`tests/evals/roco/agent-trajectories.test.js`（9 项）、`docs/roco/AGENT-TRAJECTORIES.md` |
+| **第 38 轮（台账里两条不实陈述）** | ① W4-03/W4-04 记的是 `NEEDS_HARDWARE`，理由是「本机不是 M5 Pro 48GB」——**本机就是 Apple M5 Pro / 15 核 / 48 GB**（`sysctl`）。profiling 与四轮 LoRA 都在本机跑通了，于是改成 DONE / PARTIAL；② W5-01 记的是 `NOT_STARTED`，而 OpenAI 兼容网关早已落地并在跑。两处都按证据改写。台账里凡是能**从产物读出来**的数字（轨迹条数、世界数、反例变体数）已改成运行时读取，不再手抄 | `scripts/roco/build-progress-dashboard.py`、`docs/roco/PROGRESS.md` |
 | **第 37 轮（找到「加不出数据」的真因：取样取模 bug）** | 第 36 轮加世界池后 `tool_failure`/`stale_state` 仍只有 1 个可选世界——原因不在过滤器，在取样：`(seed + i * 3) % eligible.length` 在 `eligible.length` 也是 3 的倍数时（这三个条件世界恰好各有 3 个变体），`i*3` 模 3 **恒为 0**，每个 i 都取同一个世界。改步长为 1 后：普通类别 4→**9**、三个条件类别 1→**3**。**288 条任务可产出窗口 828→1,752**；SFT 训练侧 **552→1,395**。这个 bug **同时影响轨迹集与 SFT 数据**（共用 `worldsFor`），也是前三次切分对比里「留出总要牺牲覆盖率」的一半原因 | `scripts/roco/agent-trajectories.mjs` 的 `worldsFor`、`docs/roco/SHADOW-REPLAY.md` §5.5 |
 | **第 35 轮（v3 模板留出：**更差**，负结论留痕）** | 按「留出维度该选模型能泛化的那个」试了 v3：只留出**表达模板**（`直问`+`背景`，42% 任务），家族与机制在训练侧全部出现；留出集是**穷举**出来的（约束：每个机制在训练侧至少留 2 条）。结果 **205/288（0.7118），比基座还差**：`rules_lookup` 13/72、`roster_constraint` 0/24。两个原因如实写：① 训练样本被砍到 **306**（v2 是 552），**所以 v2/v3 不是干净对照**——同时改了两个变量，不能把差异全归给切分维度；② 留出的 `直问`+`背景` 是最常见的两种问法，最典型句式一次都没练过。**v2 仍是最佳**（0.9306），保留为当前最佳适配器；v3 的产物与负结论都留着。真正的下一步是**把训练数据做大**（现在只有 288 任务 ×4 局面），而不是继续换切分维度 | `reports/roco/shadow-replay-sft-v3.json`、`docs/roco/SHADOW-REPLAY.md` §5.4 |
 | **第 34 轮（换切分重训：0.7813 → 0.9306）** | 按上一轮写好的下一步做了：SFT 改用**专属切分**（留出**机制与模板**，每个家族都进训练）。评测口径一个字没改。数据 828 条中 train **552**/val 177/test 99；600 iters，**val loss 1.214 → 0.005**。结果：通过 **268/288（0.9306）**、`invalid-arguments` **93 → 0**、`rules_lookup` 32→**68**/72、`roster_constraint` 3→8/24、p50 401 ms。**剩余 20 条退化全在两处**：roster 16 条（全落在被留出的 `阵容诊断` 机制，只输出 stop——正是「留出机制」该有的表现）、rules_lookup 4 条（参数仍不对）。即：**上一轮缺一个家族，这一轮缺一个机制**。要可部署需要在机制维度补数据，不是继续调参 | `reports/roco/shadow-replay-sft-v2.json`、`docs/roco/SHADOW-REPLAY.md` §5.2–5.4 |
@@ -845,7 +849,7 @@ active goal 已按此重写（revision 2）。
 | 2026-09-21 | 监工复核后：折算收敛到唯一函数、语义标注为假设、测试改按不变量写 | commit `9085af2`；`TestReplayCarriesLoadouts` |
 | 2026-09-21 | **W4-01 任务集**：288 条 / 8 类，三重维度隔离切分 + 判定器自检（两个方向） | commit `10325dd`；`roco/tests/test_agent_tasks.py` |
 | 2026-09-21 | 修掉任务集里 `skill_name` 这个不存在的参数键（照期望重放撞出来的） | `tools_argument_keys()` 合同比对 |
-| 2026-09-21 | **W4-02 轨迹集**：4,536 条 / 12 世界 / 7 arm + 离线回放 + 双向对照 | `docs/roco/AGENT-TRAJECTORIES.md`、`reports/roco/agent-trajectories-verification.json` |
+| 2026-09-21 | **W4-02 轨迹集**：6,048 条 / 23 世界 / 7 arm + 离线回放 + 双向对照（第 37 轮重建） | `docs/roco/AGENT-TRAJECTORIES.md`、`reports/roco/agent-trajectories-verification.json` |
 | 2026-09-21 | 反向对照抓出判定器三个真缺陷（胜率/冲突/过期各一），全部修掉 | 同上；本轮验证日志 |
 | 2026-09-21 | 第 9 轮验证：Python 195（1 skip）/ Node 430 / bridge 11 / toolbox 17 / plan-e2e 10；demo 16/16、浏览器 9/9；轨迹判定 verdict=true | `reports/roco/verification/round9-agent-trajectories.log` |
 | 2026-09-21 | **第 12 轮（P0）量具修正**：`--swapped` 下基线也打两个座位；主比较改为配对 McNemar 精确二项 + 配对 bootstrap；分层 (opponent × seat) 报告；新增 10 项校准测试（含反证） | `roco/tests/test_benchmark_matches_pairing.py`、`reports/roco/verification/round12-benchmark-pairing.log` |
@@ -860,8 +864,8 @@ active goal 已按此重写（revision 2）。
 | # | 任务 | 依赖 | 现在能不能做 |
 |---|---|---|---|
 | 1 | **W4-01 固定 Agent 任务集**（八类：规则补查 / 阵容约束 / 继续停止 / 工具失败 / 状态过期 / 证据冲突 / 静默 / 简短解释；按**阵容家族、机制、表达模板**三重隔离切分） | 无 | **能**。现有 `tests/evals/*`、`tool-router.json`、`regression-set.json` 是起点 |
-| 2 | **W4-02 构造 2,000—5,000 条工具轨迹** | W4-01 | **一半已完成**：轨迹格式 / 判定器 / 离线回放 / 4,536 条**规则 arms** 轨迹已落地（`docs/roco/AGENT-TRAJECTORIES.md`）。剩下一半是**模型候选**，要 DeepSeek key |
-| 2b | **W4-05 同 Agent 回放门禁** | W4-02 | **能起步**：判定器与回放已经是可复用门禁（4,536 条 + 13,656 个反例变体）。等有 key 时把「固定 pipeline / 模型 / SFT」三条 arm 接进同一套判据即可 |
+| 2 | **W4-02 构造 2,000—5,000 条工具轨迹** | W4-01 | **一半已完成**：轨迹格式 / 判定器 / 离线回放 / 6,048 条**规则 arms** 轨迹已落地（`docs/roco/AGENT-TRAJECTORIES.md`）。剩下一半是**模型候选**，要 DeepSeek key |
+| 2b | **W4-05 同 Agent 回放门禁** | W4-02 | **能起步**：判定器与回放已经是可复用门禁（6,048 条 + 17,760 个反例变体）。等有 key 时把「固定 pipeline / 模型 / SFT」三条 arm 接进同一套判据即可 |
 | 3 | **W5-04 主动介入模型**（成本敏感分类器，替换规则打分的**一部分**，硬门控不变） | 30+ 窗口的标签扩充 | **能起步**：先建标签扩充与评测闭环，再训模型 |
 | 4 | W4-03 / W4-04 Qwen3-4B profiling 与 SFT | **M5 Pro 48GB** | **硬件阻塞**（不租云 GPU） |
 | 5 | W5-05 陪练盲评 | **3—5 位真人** | **外部阻塞** |

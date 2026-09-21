@@ -1,0 +1,48 @@
+
+> verify:release
+> node scripts/roco/verify-release.mjs
+
+… env
+  ✔ env（53s）
+… unit
+  ✖ unit（31s）
+… bridge
+  ✔ bridge（5s）
+… toolbox-roco
+  ✔ toolbox-roco（0s）
+… plan-e2e
+  ✔ plan-e2e（3s）
+… trajectories
+  ✔ trajectories（2s）
+… model-manifest
+  ✔ model-manifest（2s）
+… provenance
+  ✔ provenance（0s）
+… state-doc
+  ✔ state-doc（0s）
+… guard-selftest
+  ✔ guard-selftest（15s）
+… browser-acceptance
+  ✔ browser-acceptance（22s）
+… demo-acceptance
+  ✔ demo-acceptance（7s）
+{
+ "verdict": "failed",
+ "failed": [
+  "unit"
+ ],
+ "ran": [
+  "env",
+  "unit",
+  "bridge",
+  "toolbox-roco",
+  "plan-e2e",
+  "trajectories",
+  "model-manifest",
+  "provenance",
+  "state-doc",
+  "guard-selftest",
+  "browser-acceptance",
+  "demo-acceptance"
+ ]
+}

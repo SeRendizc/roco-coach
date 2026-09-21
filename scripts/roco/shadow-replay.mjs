@@ -21,9 +21,10 @@
 //     node scripts/roco/shadow-replay.mjs --arm local_4b --gateway http://127.0.0.1:8766
 
 import {execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {createServer as createNetServer} from 'node:net';
-import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
-import {dirname, join} from 'node:path';
+import {readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync} from 'node:fs';
+import {dirname, join, basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {RocoClient, RULESET_ID} from '../../src/coach/roco-client.js';
@@ -44,6 +45,51 @@ const PYTHON_BIN = process.env.ROCO_PYTHON || 'python3';
 
 /** 与任务集对齐的默认世界数（与 build 一致，保证同一条任务落在同一个局面上）。 */
 const WORLDS_PER_TASK = 1;
+
+/**
+ * 这份报告**是哪个模型产出的**。
+ *
+ * 为什么必须记（第 37 轮的真实事故）：报告原来只有 `arm` / `gateway` / `prompt_digest`，
+ * **没有模型身份**；而运行器每次把结果写到同一个 `-local_4b.json`。
+ * 于是存档逐次错位——`shadow-replay-sft-v2.json` 里装的其实是 v1 的成绩，
+ * `-sft-v3.json` 里装的是 v2 的，真正的 v3 结果（0.7118）**一个产物都没留下**。
+ * 台账和文档于是都在引用一组对不上号的数字，而没有任何检查会发现。
+ *
+ * 只记路径还不够：同一个路径上的适配器会被重训覆盖。所以同时把权重文件哈希记下来，
+ * 名字对不上、内容对不上，都能被后来的人当场看出来。
+ */
+export function modelIdentity(gatewayUrl, adapterPath = process.env.ROCO_LOCAL_ADAPTER || null) {
+  const identity = {model: null, adapter: adapterPath, adapter_sha256: null, gateway_reachable: false};
+  try {
+    const health = JSON.parse(execFileSync('curl', ['-sS', '-m', '5', `${gatewayUrl}/healthz`],
+      {encoding: 'utf8'}));
+    identity.gateway_reachable = true;
+    identity.model = health.model ?? null;
+    identity.adapter = health.adapter ?? adapterPath;
+    identity.ready = health.ready === true;
+  } catch {
+    // 网关没起时留 null：报告照样写出来，但身份栏为空——不许拿「不知道」当「一样」。
+  }
+  const dir = identity.adapter;
+  if (dir && existsSync(dir)) {
+    // 优先哈希真正的权重文件；只有配置时退回配置，并在字段名上说清楚。
+    const candidates = readdirSync(dir).filter((name) => name.endsWith('.safetensors')).sort();
+    const file = candidates.includes('adapters.safetensors') ? 'adapters.safetensors' : candidates[0];
+    if (file) {
+      identity.adapter_file = file;
+      identity.adapter_sha256 = createHash('sha256').update(readFileSync(join(dir, file))).digest('hex');
+    } else if (existsSync(join(dir, 'adapter_config.json'))) {
+      identity.adapter_file = 'adapter_config.json';
+      identity.adapter_sha256 = createHash('sha256')
+        .update(readFileSync(join(dir, 'adapter_config.json'))).digest('hex');
+    }
+    identity.adapter_basename = basename(dir);
+  }
+  const promptDigest = digest(LOCAL_TOOL_SYSTEM);
+  identity.identity_digest = digest(canonical(identity));
+  identity.prompt_digest = promptDigest;
+  return identity;
+}
 
 async function pickFreePort() {
   const probe = createNetServer();
@@ -108,6 +154,12 @@ export async function replayTask({task, world, state, authority, arm, ask, clien
     category: task.category,
     arm,
     world: world.id,
+    // 切分信息必须随行带出：报告要能自己说出「家族外 / 机制外 / 模板外」的成绩，
+    // 而不是让读的人去任务集里手工 join。少了它，`by_split` 只能给一条空表。
+    family: task.split?.family ?? null,
+    mechanism: task.split?.mechanism ?? null,
+    template: task.split?.template ?? null,
+    held_out_dimensions: task.split?.held_out_dimensions ?? [],
     trace: run.trace.map((item) => ({
       tool: item.tool,
       args: item.args,
@@ -150,7 +202,46 @@ export function summarise(rows) {
     }, {}),
     latency: {p50_ms: decile(all, 0.5), p95_ms: decile(all, 0.95)},
     by_category: byCategory,
+    by_split: bySplit(rows),
   };
+}
+
+/**
+ * 按**切分维度**分解通过率：家族 / 机制 / 表达模板各切一刀，再按
+ * `held_out_dimensions` 把「训练时被留出的」和「见过的」分开算。
+ *
+ * 为什么要单独给这个：总体通过率会把两类完全不同的成绩混在一起——
+ * 「在训练见过的家族上做对」与「换一个家族还做对」。
+ * 前者只说明记住了，后者才说明泛化。之前只有总体数字，
+ * 于是 v1 那次「`roster_constraint` 整类归零」要靠人工去翻 test 家族才发现，
+ * 而这件事本来应该是报告自己说出来的。
+ *
+ * 口径：**只看留出侧**（`held_out_dimensions` 里列了 `family` 的任务），
+ * 因为只有那部分才回答「家族外还灵不灵」。没标留出的任务归入 `seen`。
+ */
+export function bySplit(rows) {
+  const slice = (key) => {
+    const out = {held_out: {total: 0, passed: 0}, seen: {total: 0, passed: 0}, by_value: {}};
+    for (const row of rows) {
+      const value = row[key] ?? '(缺)';
+      const heldOut = Array.isArray(row.held_out_dimensions) && row.held_out_dimensions.includes(key);
+      const bucket = heldOut ? out.held_out : out.seen;
+      bucket.total += 1;
+      if (row.passed) bucket.passed += 1;
+      const per = out.by_value[value] || (out.by_value[value] = {total: 0, passed: 0, held_out: heldOut});
+      per.total += 1;
+      if (row.passed) per.passed += 1;
+    }
+    out.held_out.pass_rate = out.held_out.total
+      ? Number((out.held_out.passed / out.held_out.total).toFixed(4)) : null;
+    out.seen.pass_rate = out.seen.total
+      ? Number((out.seen.passed / out.seen.total).toFixed(4)) : null;
+    for (const per of Object.values(out.by_value)) {
+      per.pass_rate = Number((per.passed / per.total).toFixed(4));
+    }
+    return out;
+  };
+  return {family: slice('family'), mechanism: slice('mechanism'), template: slice('template')};
 }
 
 /** 两臂逐任务对比：谁退化了、谁扳回来了。 */
@@ -186,6 +277,36 @@ export function compare(reference, candidate) {
   };
 }
 
+/**
+ * 存档名与身份是否对得上。返回不一致的理由，一致时返回 `null`。
+ *
+ * 这是「存档错位」那一类事故的守卫：`-sft-v2.json` 里装着 v1 的成绩，
+ * 光看通过率是看不出来的（数字都合理），只有把**文件名**与**报告里记的适配器**
+ * 对上，才能当场发现。约定：
+ *   · `shadow-replay-base.json`    → `adapter === null`
+ *   · `shadow-replay-sft-vN.json`  → `adapter_basename === qwen35-4b-tool-vN`
+ *   · 其它（如 `-local_4b.json`）   → 只要求有身份，不要求名字匹配
+ */
+export function identityMismatch(filename, identity) {
+  const stem = String(filename).replace(/^.*\//, '').replace(/\.json$/, '');
+  if (stem === 'shadow-replay-base') {
+    if (!identity) return '基座报告必须带 identity 对象（里面 adapter 应为 null）';
+    if (identity.adapter !== null) {
+      return `基座报告的 adapter 是 ${identity.adapter}，不是 null——它其实是某个适配器的成绩`;
+    }
+    return null;
+  }
+  const match = stem.match(/^shadow-replay-sft-(v\d+)$/);
+  if (!match) return null;
+  if (!identity) return `${stem} 没有 identity：无法判断它是哪个适配器产出的`;
+  const want = `qwen35-4b-tool-${match[1]}`;
+  if (identity.adapter_basename !== want) {
+    return `${stem} 里记的适配器是 ${identity.adapter_basename || '（无）'}，应当是 ${want}`;
+  }
+  if (!identity.adapter_sha256) return `${stem} 没有记适配器权重哈希，换版之后无法分辨`;
+  return null;
+}
+
 async function main(argv) {
   const arg = (name, fallback = null) => {
     const index = argv.indexOf(name);
@@ -196,6 +317,7 @@ async function main(argv) {
   const gateway = arg('--gateway', `http://127.0.0.1:${process.env.ROCO_LOCAL_PORT || 8766}`);
   const write = !argv.includes('--check');
   const compareWith = arg('--compare');   // 参考臂的 JSON 路径
+  const outPath = arg('--out');           // 显式指定产物路径（存档名不该由 arm 名猜）
 
   const tasks = loadTasks().slice(0, limit || undefined);
   const ask = arm === 'rule' ? null : gatewayAsk(gateway);
@@ -217,11 +339,13 @@ async function main(argv) {
     await client.stopService().catch(() => {});
   }
 
-  const report = buildShadowReport({arm, gateway, rows, compareWith});
+  const identity = arm === 'rule'
+    ? {role: 'rule-arm', note: '规则臂不经过模型，没有模型身份'}
+    : modelIdentity(gateway);
+  const path = outPath || OUT.replace(/\.json$/, arm === 'rule' ? '.json' : `-${arm}.json`);
+  const report = buildShadowReport({arm, gateway, rows, compareWith, identity, outPath: write ? path : null});
   if (write) {
-    mkdirSync(dirname(OUT), {recursive: true});
-    const suffix = arm === 'rule' ? '' : `-${arm}`;
-    const path = OUT.replace(/\.json$/, `${suffix}.json`);
+    mkdirSync(dirname(path), {recursive: true});
     writeFileSync(path, `${JSON.stringify(report, null, 1)}\n`);
     report.written_to = path;
   }
@@ -237,10 +361,14 @@ async function main(argv) {
  * 于是「代码里的组装逻辑被改坏」不会被任何测试发现——守卫自检的注入实验
  * 抓到了这一点（把 prompt_digest 改成恒 null，注入后仍然全绿）。
  */
-export function buildShadowReport({arm, gateway = null, rows, compareWith = null}) {
+export function buildShadowReport({arm, gateway = null, rows, compareWith = null,
+  identity = null, outPath = null}) {
   const report = {
     generated_by: 'scripts/roco/shadow-replay.mjs',
     arm,
+    // 身份栏：这份报告是哪个模型/适配器产出的。**没有它，存档错位不会被发现。**
+    identity: identity || null,
+    written_to: outPath,
     gateway: arm === 'rule' ? null : gateway,
     // 提示版本进产物：两份报告只有提示不同时，光看通过率是分不出差别的，
     // 必须能核对「这两次跑的是不是同一份提示」。没有它，第 22→23 轮那次

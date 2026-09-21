@@ -1,0 +1,498 @@
+=== sft-v4（适配器：/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v4 ===
+已停止网关 pid 17979
+网关就绪：http://127.0.0.1:8766（pid 23626，日志 /Users/serendizc/Developer/roco-coach/reports/roco/local-model/gateway.log）
+  网关自报：ready True | model /Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit | adapter /Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v4
+{
+ "arm": "local_4b",
+ "summary": {
+  "tasks": 288,
+  "passed": 275,
+  "pass_rate": 0.9549,
+  "stopped": {
+   "complete": 264,
+   "receipt-budget": 12,
+   "policy": 12
+  },
+  "latency": {
+   "p50_ms": 435,
+   "p95_ms": 1054
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 72,
+    "passed": 70,
+    "pass_rate": 0.9722,
+    "p50_ms": 652,
+    "p95_ms": 754
+   },
+   "roster_constraint": {
+    "total": 24,
+    "passed": 13,
+    "pass_rate": 0.5417,
+    "p50_ms": 1072,
+    "p95_ms": 1533
+   },
+   "continue_stop": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 432,
+    "p95_ms": 463
+   },
+   "tool_failure": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 433,
+    "p95_ms": 441
+   },
+   "stale_state": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 431,
+    "p95_ms": 437
+   },
+   "evidence_conflict": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 433,
+    "p95_ms": 447
+   },
+   "silence": {
+    "total": 12,
+    "passed": 12,
+    "pass_rate": 1,
+    "p50_ms": 0,
+    "p95_ms": 1
+   },
+   "brief_explain": {
+    "total": 36,
+    "passed": 36,
+    "pass_rate": 1,
+    "p50_ms": 432,
+    "p95_ms": 444
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 96,
+     "passed": 89,
+     "pass_rate": 0.9271
+    },
+    "seen": {
+     "total": 192,
+     "passed": 186,
+     "pass_rate": 0.9688
+    },
+    "by_value": {
+     "A组三人-无锁定": {
+      "total": 96,
+      "passed": 89,
+      "held_out": true,
+      "pass_rate": 0.9271
+     },
+     "A组三人-锁定寂灭骨龙": {
+      "total": 96,
+      "passed": 93,
+      "held_out": false,
+      "pass_rate": 0.9688
+     },
+     "混编三人-含B组": {
+      "total": 96,
+      "passed": 93,
+      "held_out": false,
+      "pass_rate": 0.9688
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 81,
+     "passed": 75,
+     "pass_rate": 0.9259
+    },
+    "seen": {
+     "total": 207,
+     "passed": 200,
+     "pass_rate": 0.9662
+    },
+    "by_value": {
+     "图鉴字段": {
+      "total": 12,
+      "passed": 10,
+      "held_out": true,
+      "pass_rate": 0.8333
+     },
+     "技能静态威力": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "属性相性": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "学习表": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "应对机制": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "版本指纹": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "阵容评分": {
+      "total": 12,
+      "passed": 8,
+      "held_out": true,
+      "pass_rate": 0.6667
+     },
+     "换人对比": {
+      "total": 12,
+      "passed": 5,
+      "held_out": false,
+      "pass_rate": 0.4167
+     },
+     "单一事实": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "回看记录": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "阵容诊断": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "条件化威力": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "推演": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "复盘": {
+      "total": 24,
+      "passed": 24,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "轮次推进": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "面板变化": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "建议失效": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "跨来源数值": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "同名形态": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "强度口径": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "回合已提交": {
+      "total": 3,
+      "passed": 3,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "偏好设置": {
+      "total": 3,
+      "passed": 3,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "局面状态": {
+      "total": 3,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "拒绝": {
+      "total": 3,
+      "passed": 3,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "行动解释": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "能量机制": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 30,
+     "passed": 30,
+     "pass_rate": 1
+    },
+    "seen": {
+     "total": 258,
+     "passed": 245,
+     "pass_rate": 0.9496
+    },
+    "by_value": {
+     "直问": {
+      "total": 60,
+      "passed": 56,
+      "held_out": false,
+      "pass_rate": 0.9333
+     },
+     "口语": {
+      "total": 60,
+      "passed": 56,
+      "held_out": false,
+      "pass_rate": 0.9333
+     },
+     "追问": {
+      "total": 51,
+      "passed": 47,
+      "held_out": false,
+      "pass_rate": 0.9216
+     },
+     "背景": {
+      "total": 60,
+      "passed": 59,
+      "held_out": false,
+      "pass_rate": 0.9833
+     },
+     "委托": {
+      "total": 9,
+      "passed": 9,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "封闭": {
+      "total": 9,
+      "passed": 9,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "确认": {
+      "total": 9,
+      "passed": 9,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "质疑": {
+      "total": 9,
+      "passed": 9,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "对比": {
+      "total": 9,
+      "passed": 9,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "si-submitted": {
+      "total": 3,
+      "passed": 3,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "si-quiet": {
+      "total": 3,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "si-noaction": {
+      "total": 3,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "si-refuse": {
+      "total": 3,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   }
+  }
+ },
+ "comparison": {
+  "compared": 288,
+  "regressed": 13,
+  "fixed": 0,
+  "both_failed": 0,
+  "by_category": {
+   "rules_lookup": {
+    "total": 72,
+    "regressed": 2,
+    "fixed": 0
+   },
+   "roster_constraint": {
+    "total": 24,
+    "regressed": 11,
+    "fixed": 0
+   },
+   "continue_stop": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "tool_failure": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "stale_state": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "evidence_conflict": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "silence": {
+    "total": 12,
+    "regressed": 0,
+    "fixed": 0
+   },
+   "brief_explain": {
+    "total": 36,
+    "regressed": 0,
+    "fixed": 0
+   }
+  },
+  "worst_regressions": [
+   {
+    "case_id": "rl-pet-f1-02",
+    "category": "rules_lookup",
+    "why": [
+     "没有调用应当调用的工具 query_rules",
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rl-pet-f2-01",
+    "category": "rules_lookup",
+    "why": [
+     "没有调用应当调用的工具 query_rules",
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rc-eval-f0-01",
+    "category": "roster_constraint",
+    "why": [
+     "没有调用应当调用的工具 evaluate_team",
+     "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rc-eval-f0-02",
+    "category": "roster_constraint",
+    "why": [
+     "没有调用应当调用的工具 evaluate_team",
+     "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rc-eval-f0-03",
+    "category": "roster_constraint",
+    "why": [
+     "没有调用应当调用的工具 evaluate_team",
+     "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rc-eval-f1-03",
+    "category": "roster_constraint",
+    "why": [
+     "没有调用应当调用的工具 evaluate_team",
+     "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rc-swap-f0-01",
+    "category": "roster_constraint",
+    "why": [
+     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   },
+   {
+    "case_id": "rc-swap-f0-02",
+    "category": "roster_constraint",
+    "why": [
+     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用"
+    ],
+    "stopped": "complete"
+   }
+  ],
+  "against": "/Users/serendizc/Developer/roco-coach/reports/roco/shadow-replay.json"
+ },
+ "written_to": "/Users/serendizc/Developer/roco-coach/reports/roco/shadow-replay-sft-v4.json"
+}
+  产物身份：adapter_basename qwen35-4b-tool-v4 | adapter_sha256 362cc02087177eb5 | prompt_digest a5cb0fbcc53fbecd

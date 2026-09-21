@@ -1,5 +1,116 @@
+[agent-trajectories] 288 条任务 × 3 个世界 × 7 个 arm = 6048 条轨迹
+  200/6048
+  400/6048
+  600/6048
+  800/6048
+  1000/6048
+  1200/6048
+  1400/6048
+  1600/6048
+  1800/6048
+  2000/6048
+  2200/6048
+  2400/6048
+  2600/6048
+  2800/6048
+  3000/6048
+  3200/6048
+  3400/6048
+  3600/6048
+  3800/6048
+  4000/6048
+  4200/6048
+  4400/6048
+  4600/6048
+  4800/6048
+  5000/6048
+  5200/6048
+  5400/6048
+  5600/6048
+  5800/6048
+  6000/6048
 {
- "header": {
+ "summary": {
+  "total": 6048,
+  "passed": 5232,
+  "by_arm": {
+   "replay": {
+    "total": 864,
+    "passed": 864,
+    "violations": {}
+   },
+   "baseline": {
+    "total": 864,
+    "passed": 864,
+    "violations": {}
+   },
+   "stubborn": {
+    "total": 864,
+    "passed": 648,
+    "violations": {
+     "引擎答不了，正文却没有说清「未核验 / 没有端点 / 不支持」这类限制": 108,
+     "拿旧状态版本发起了调用": 108
+    }
+   },
+   "stop_now": {
+    "total": 864,
+    "passed": 576,
+    "violations": {
+     "没有调用应当调用的工具 query_rules": 216,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pe": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"type_mul": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"learnset": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"t": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"": 36,
+     "没有调用应当调用的工具 evaluate_team": 36,
+     "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_0": 36,
+     "换掉了玩家锁定的 pet_000225": 48,
+     "没有调用应当调用的工具 compare_team_change": 36,
+     "compare_team_change 的参数里没有同时满足 {\"team_be": 36
+    }
+   },
+   "no_rules": {
+    "total": 864,
+    "passed": 648,
+    "violations": {
+     "没有调用应当调用的工具 query_rules": 216,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pe": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"type_mul": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"learnset": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"t": 36,
+     "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"": 36
+    }
+   },
+   "drop_args": {
+    "total": 864,
+    "passed": 792,
+    "violations": {
+     "没有调用应当调用的工具 evaluate_team": 36,
+     "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_0": 36,
+     "换掉了玩家锁定的 pet_000225": 48,
+     "没有调用应当调用的工具 compare_team_change": 36,
+     "compare_team_change 的参数里没有同时满足 {\"team_be": 36
+    }
+   },
+   "blind": {
+    "total": 864,
+    "passed": 840,
+    "violations": {
+     "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"": 24
+    }
+   }
+  },
+  "stopped": {
+   "complete": 5508,
+   "receipt-budget": 180,
+   "invalid-arguments": 108,
+   "policy": 252
+  },
+  "engine_refused": 597
+ },
+ "manifest": {
   "format": "roco-agent-trajectory-v1",
   "set_id": "agent-trajectories-v1",
   "built_by": "scripts/roco/build-agent-trajectories.mjs",
@@ -382,6 +493,6 @@
     }
    }
   }
- },
- "rows": 6048
+ }
 }
+[agent-trajectories] 轨迹 6048 条，判定通过 5232/6048

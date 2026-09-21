@@ -73,6 +73,21 @@ test('feature flag 默认关闭：没设置时不会走本地模型', () => {
   assert.equal(localModelMode({ROCO_LOCAL_MODEL: '莫名其妙'}), 'off', '未知取值必须保守地当成关闭');
 });
 
+test('回滚开关：off 模式下本地模型**一次都不被调用**（这是「能退回规则臂」的依据）', async () => {
+  // 光断言 `localModelMode({}) === 'off'` 不够：那只说明标志位的默认值，
+  // 不说明「关掉之后真的没人去碰本地模型」。这里用一个会记账的桩来证明。
+  // 预注册判据 P8 要的就是这一条——没有一个会红的回滚证明，「有开关」只是说法。
+  let spawns = 0;
+  const model = new LocalModel({spawnImpl: () => { spawns += 1; return fakeSpawn({mode: 'ok'}); }});
+  const base = {name: 'deepseek', generate: async () => '云端回答'};
+  const provider = wrapWithLocalModel(base, {model, mode: 'off'});
+  assert.equal(provider, base, 'off 模式必须原样返回 base，不该包一层');
+  assert.equal(provider.name, 'deepseek');
+  assert.equal(await provider.generate({text: '问一句'}), '云端回答');
+  assert.equal(spawns, 0, `off 模式下本地推理进程被启动了 ${spawns} 次`);
+  assert.equal(provider.shadow ?? null, null, 'off 模式不该留下 shadow 记录');
+});
+
 test('超时不是异常：到点必须 reject 并把这次计成 timeout', async () => {
   const model = new LocalModel({spawnImpl: () => fakeSpawn({mode: 'silent'})});
   await model.start();

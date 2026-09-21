@@ -3,16 +3,15 @@
   "important": [
     "`DONE` 的意思是「有证据、且证据是可跑的」——每一行的证据路径都被本脚本检查过存在性。",
     "`NEEDS_HUMAN` 表示缺的是**用户本人**（实测数据 / 录屏 / 决策），不是还缺代码。",
-    "`NEEDS_HARDWARE` 表示缺的是**特定硬件**（M5 Pro 48GB），不是决策。",
+    "`NEEDS_HARDWARE` 表示缺的是**特定硬件**，不是决策。目前**没有条目在用**它——W4-03/W4-04 曾经用它，理由是「本机不是 M5 Pro 48GB」，而那是读错了前提：本机就是 M5 Pro 48GB。",
     "`BLOCKED_BY_BOUNDARY` 只用于仍然有效的硬边界；旧的「不训练模型」在第 7 轮已被用户改写。",
     "这份台账不判「质量好不好」，只判「证据在不在」。"
   ],
   "counts": {
-    "DONE": 35,
-    "PARTIAL": 5,
-    "NEEDS_HARDWARE": 2,
-    "NOT_STARTED": 5,
-    "NEEDS_HUMAN": 1
+    "DONE": 37,
+    "PARTIAL": 6,
+    "NEEDS_HUMAN": 1,
+    "NOT_STARTED": 4
   },
   "mvp_total": 30,
   "mvp_done": 29,
@@ -806,7 +805,7 @@
     },
     {
       "id": "W4-02",
-      "title": "构造 2,000—5,000 条工具轨迹",
+      "title": "构造工具轨迹（原计划 2,000—5,000 条，实际按真实世界覆盖走）",
       "status": "PARTIAL",
       "evidence": [
         "tests/evals/agent-trajectories-v1.jsonl",
@@ -815,7 +814,7 @@
         "scripts/roco/verify-agent-trajectories.mjs",
         "docs/roco/AGENT-TRAJECTORIES.md"
       ],
-      "note": "4,536 条 / 12 个世界 / 7 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，判定器两个方向都被测过（正向 648/648、反向 13,656 个变体全挂）。缺的一半是**模型候选**：要 DeepSeek key，本机没有。",
+      "note": "6,048 条 / 23 个世界 / 7 个 arm，**轨迹格式 + 判定器 + 离线回放**三件已完成，判定器两个方向都被测过（正向 864/864、反向 17,760 个变体全挂）；另有**生产者一致性**检查（生成器改了而产物没重建会判红）。条数超过当初估计的 5,000：第 37 轮修掉世界采样器之后每个任务真的能选到 2—9 个世界（那三个条件类目从 1 个变成 3 个），多出来的全是真实世界变体，不是灌水。缺的一半是**模型候选**：要 DeepSeek key，本机没有。",
       "evidence_checked": [
         {
           "path": "tests/evals/agent-trajectories-v1.jsonl",
@@ -843,52 +842,75 @@
     {
       "id": "W4-03",
       "title": "Qwen3-4B profiling",
-      "status": "NEEDS_HARDWARE",
-      "evidence": [],
-      "note": "目标机器是 M5 Pro 48GB；本机不是，且用户不租云 GPU。属于硬件阻塞，不是产品决策阻塞。",
-      "evidence_checked": [],
+      "status": "DONE",
+      "evidence": [
+        "docs/roco/LOCAL-MODEL.md",
+        "scripts/model/local-gateway.mjs",
+        "scripts/model/healthcheck-mac.sh",
+        "reports/roco/local-model/bench.json",
+        "tests/evals/local-model.test.js"
+      ],
+      "note": "本机实测（MLX + Metal，Qwen3.5-4B-4bit）：首 token p50 **214.5 ms**、总延迟 p50 **~363 ms**、**29.8—32.9 tok/s**、推理峰值内存 **2.51 GB**、结构化输出合法 **8/8**。机器是 Apple M5 Pro / 15 核 / 48 GB，**就是路线图写的目标机器**（旧版本这里写「本机不是」，是读错了前提）。",
+      "evidence_checked": [
+        {
+          "path": "docs/roco/LOCAL-MODEL.md",
+          "exists": true
+        },
+        {
+          "path": "scripts/model/local-gateway.mjs",
+          "exists": true
+        },
+        {
+          "path": "scripts/model/healthcheck-mac.sh",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/local-model/bench.json",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/local-model.test.js",
+          "exists": true
+        }
+      ],
       "evidence_missing": []
     },
     {
       "id": "W4-04",
       "title": "Qwen3-4B SFT",
-      "status": "NEEDS_HARDWARE",
-      "evidence": [],
-      "note": "同 W4-03；另外它依赖 W4-02 的模型候选那一半。",
-      "evidence_checked": [],
-      "evidence_missing": []
-    },
-    {
-      "id": "W4-05",
-      "title": "同 Agent 回放门禁",
       "status": "PARTIAL",
       "evidence": [
-        "scripts/roco/shadow-replay.mjs",
-        "docs/roco/SHADOW-REPLAY.md",
-        "reports/roco/shadow-replay.json",
-        "reports/roco/shadow-replay-local_4b.json",
-        "tests/evals/shadow-replay.test.js"
+        "scripts/roco/build-agent-sft-data.mjs",
+        "scripts/roco/verify-sft-split.mjs",
+        "scripts/roco/build-agent-trajectories.mjs",
+        "docs/roco/W4-04-SFT-PREREGISTRATION.md",
+        "reports/roco/sft/dataset-report.json",
+        "reports/roco/sft/train.jsonl"
       ],
-      "note": "门禁本身已建成并自证：同一任务集（288 条 / 8 类）、同一时代、同一判定器，只换 provider。**本轮用本机 Qwen3.5-4B-4bit 实跑**：规则臂 288/288，模型臂 **226/288（0.7847）**，逐任务对比退化 62、扳回 0；退化**全部集中在两类**——`rules_lookup` 41 条、`roster_constraint` 21 条，其余六类与规则臂持平。`invalid-arguments` 86 次。缺的那一半是 DeepSeek 臂（要 key）。",
+      "note": "数据/训练/评测闭环已跑通：1,752 条工具选择数据（train 1,395 / val 306 / test 51，**逐字节可复现**，由 `verify-sft-split.mjs` 在临时目录重跑后逐字节比对确认）、四轮 LoRA 微调、同一把 288 条尺子复测。**预注册判据 P1—P8 全部满足**（判据在跑之前写死在 `docs/roco/W4-04-SFT-PREREGISTRATION.md`）：v4 **275/288（0.9549）**，优于 v2 的 268/288；`roster_constraint` 8→**13/24**，`rules_lookup` 68→**70/72**，`invalid-arguments` 0，p50 435 ms / p95 1054 ms，family 外 0.9271；相对 v2 逐任务**退化 3、扳回 10**（那 3 条也如实写在报告里）。**未完成的是接入那一半**：适配器还没进默认链路（`ROCO_LOCAL_MODEL` 默认 `off`，`off` 下本地进程一次都不启动，有测试证明）——下一步是以 `shadow` 档接真实链路。",
       "evidence_checked": [
         {
-          "path": "scripts/roco/shadow-replay.mjs",
+          "path": "scripts/roco/build-agent-sft-data.mjs",
           "exists": true
         },
         {
-          "path": "docs/roco/SHADOW-REPLAY.md",
+          "path": "scripts/roco/verify-sft-split.mjs",
           "exists": true
         },
         {
-          "path": "reports/roco/shadow-replay.json",
+          "path": "scripts/roco/build-agent-trajectories.mjs",
           "exists": true
         },
         {
-          "path": "reports/roco/shadow-replay-local_4b.json",
+          "path": "docs/roco/W4-04-SFT-PREREGISTRATION.md",
           "exists": true
         },
         {
-          "path": "tests/evals/shadow-replay.test.js",
+          "path": "reports/roco/sft/dataset-report.json",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/sft/train.jsonl",
           "exists": true
         }
       ],
@@ -897,10 +919,108 @@
     {
       "id": "W5-01",
       "title": "Model gateway",
-      "status": "NOT_STARTED",
-      "evidence": [],
-      "note": "未开工。它要连真实模型，和 W4-02 的模型候选同一前置。",
-      "evidence_checked": [],
+      "status": "DONE",
+      "evidence": [
+        "scripts/model/local-gateway.mjs",
+        "scripts/model/setup-mac.sh",
+        "scripts/model/start-mac.sh",
+        "scripts/model/stop-mac.sh",
+        "scripts/model/healthcheck-mac.sh",
+        "scripts/model/measure-arms.sh",
+        "docs/roco/LOCAL-MODEL.md",
+        "tests/evals/local-model.test.js"
+      ],
+      "note": "OpenAI 兼容网关已落地并在跑：`/v1/chat/completions`、`/v1/models`、`/healthz`、`/metrics`；超时 504 / 忙 429 / 不可用 503、并发上限、取消、回退都有**一处**实现；一键 setup/start/healthcheck/stop，权重落在 gitignore 目录。第 37 轮修掉一个真缺陷：`stop` 原来找的 pid 文件名从来没被写过，所以「停网关」是个空操作——换适配器时会静默沿用旧权重。",
+      "evidence_checked": [
+        {
+          "path": "scripts/model/local-gateway.mjs",
+          "exists": true
+        },
+        {
+          "path": "scripts/model/setup-mac.sh",
+          "exists": true
+        },
+        {
+          "path": "scripts/model/start-mac.sh",
+          "exists": true
+        },
+        {
+          "path": "scripts/model/stop-mac.sh",
+          "exists": true
+        },
+        {
+          "path": "scripts/model/healthcheck-mac.sh",
+          "exists": true
+        },
+        {
+          "path": "scripts/model/measure-arms.sh",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/LOCAL-MODEL.md",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/local-model.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "W4-05",
+      "title": "同 Agent 回放门禁",
+      "status": "PARTIAL",
+      "evidence": [
+        "scripts/roco/shadow-replay.mjs",
+        "scripts/model/measure-arms.sh",
+        "docs/roco/SHADOW-REPLAY.md",
+        "docs/roco/W4-04-SFT-PREREGISTRATION.md",
+        "reports/roco/shadow-replay.json",
+        "reports/roco/shadow-replay-base.json",
+        "reports/roco/shadow-replay-sft-v4.json",
+        "tests/evals/shadow-replay.test.js",
+        "tests/evals/roco/model-arm-identity.test.js"
+      ],
+      "note": "门禁已建成并自证：同一任务集（288 条 / 8 类）、同一局面、同一判定器，只换 provider。规则臂 288/288；**五个 arm 在一条命令下重测完**（`scripts/model/measure-arms.sh`），每份产物都带适配器 sha256：基座 225/288（0.7813）、v1 229（0.7951）、v2 268（0.9306）、v3 204（0.7083）、**v4 275（0.9549）**。报告新增 family/机制/模板的**留出 vs 见过**切片（v4：family 外 0.9271）。第 38 轮查出并修掉**存档错位**：`-sft-v2.json` 里装的其实是 v1 的成绩、`-sft-v3.json` 里装的是 v2 的、真正的 v3 没有产物——旧存档已挪进 `reports/roco/invalidated/`，并加了「文件名 ↔ 适配器」守卫。缺的那一半仍是 DeepSeek 臂（要 key）。",
+      "evidence_checked": [
+        {
+          "path": "scripts/roco/shadow-replay.mjs",
+          "exists": true
+        },
+        {
+          "path": "scripts/model/measure-arms.sh",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/SHADOW-REPLAY.md",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/W4-04-SFT-PREREGISTRATION.md",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/shadow-replay.json",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/shadow-replay-base.json",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/shadow-replay-sft-v4.json",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/shadow-replay.test.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/model-arm-identity.test.js",
+          "exists": true
+        }
+      ],
       "evidence_missing": []
     },
     {

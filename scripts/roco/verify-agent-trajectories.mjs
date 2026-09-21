@@ -22,14 +22,17 @@ import {fileURLToPath} from 'node:url';
 
 import {RocoClient, RULESET_ID} from '../../src/coach/roco-client.js';
 import {configureRocoTools, resetRocoTools, executeTool} from '../../src/coach/toolbox.js';
-import {checkTask, receiptDigest, FORMAT, canonical, CHECKABLE} from './agent-trajectories.mjs';
+import {checkTask, receiptDigest, FORMAT, canonical, CHECKABLE, worldsFor} from './agent-trajectories.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
 const TRAJECTORIES = join(ROOT, 'tests', 'evals', 'agent-trajectories-v1.jsonl');
+const MANIFEST = join(ROOT, 'tests', 'evals', 'agent-trajectories-v1.manifest.json');
 const TASKS = join(ROOT, 'tests', 'evals', 'agent-tasks-v1.jsonl');
 const OUT = join(ROOT, 'reports', 'roco', 'agent-trajectories-verification.json');
 const PYTHON_BIN = process.env.ROCO_PYTHON || 'python3';
+/** 生成器的默认每任务世界数。产物必须是**默认构建**出来的，见 `producerCheck`。 */
+const BUILDER_WORLDS_PER_TASK = Number(process.env.ROCO_TRAJ_WORLDS || 3);
 
 function args(argv) {
   const out = {write: true, quiet: false, selftest: false, limit: 0};
@@ -202,6 +205,88 @@ export function corruptionsFor(row, task) {
   return out;
 }
 
+/**
+ * ④ **生产者一致性**：这份产物是不是**现在这个生成器**产出来的？
+ *
+ * 前三项（结构 / 回放 / 判定器两向）回答的全是「产物**内部**自洽吗」。第 36 轮那个
+ * `worldsFor` 步长 bug 正好绕过了它们：产物内部完全自洽 —— 结构全过、回放全过、
+ * 判定器两个方向都对 —— 但它仍然是**旧采样器**选出来的世界。
+ * 表现是 `tool_failure` / `stale_state` / `evidence_conflict` 三类每个任务只覆盖
+ * **1** 个世界，而生成器现在会说 3 个：一整片世界变体在门禁里根本没出现过。
+ *
+ * 所以这里把生成器的世界选法**重新算一遍**，与产物里实际出现的
+ * `(case_id, world.id)` 集合逐对比较。生成器改了而产物没重建，这里必须红。
+ *
+ * 为什么不是「重新生成一遍整个产物再 diff」：那要再跑 864 次 python 和真服务，
+ * 几分钟起步，没人会在每次提交前跑。这里只需要 `worldsFor` 一个纯函数，
+ * 毫秒级，代价低到可以进常规门禁。
+ */
+export function producerCheck(header, rows, tasks, {manifest = null} = {}) {
+  const problems = [];
+  const declared = header?.worlds_per_task;
+  if (declared !== BUILDER_WORLDS_PER_TASK) {
+    problems.push(`产物头部记的 worlds_per_task=${declared}，生成器默认是 ${BUILDER_WORLDS_PER_TASK}`
+      + '（产物必须是默认构建出来的，否则门禁覆盖的是别的配置）');
+  }
+  // 只用一个 arm 就够：每个 (任务, 世界) 组合在**每个** arm 里都各有一条记录。
+  // 取头部声明的第一个 arm（而不是 `rows[0]`），这样传入子集时也不会选错。
+  const arm = (Array.isArray(header?.arms) && header.arms.length ? header.arms[0] : rows[0]?.arm) || null;
+  const got = new Map();
+  for (const row of rows) {
+    if (row.arm !== arm) continue;
+    const key = row.case_id;
+    if (!got.has(key)) got.set(key, new Set());
+    got.get(key).add(row.input?.world?.id);
+  }
+  const missing = [];
+  const extra = [];
+  for (const task of tasks) {
+    // `worldsFor` 返回的是**世界对象**，产物里记的是 `world.id`。这里必须比 id。
+    // （第一版就是拿对象去比字符串，于是每个任务都「不一致」——检查红了，但红的原因
+    // 是检查自己写错了。所以下面第 ⓪ 步一定要在**已知合格的产物**上验一次是绿的。）
+    const want = worldsFor(task, declared).map((world) => world.id).sort();
+    const have = [...(got.get(task.case_id) || new Set())].sort();
+    if (canonical(want) !== canonical(have)) {
+      (have.length ? extra : missing).push({
+        case_id: task.case_id, category: task.category, want, have,
+      });
+    }
+  }
+  const onlyInArtifact = [...got.keys()].filter((caseId) => !tasks.some((task) => task.case_id === caseId));
+  if (missing.length) {
+    problems.push(`${missing.length} 个任务的世界选法与生成器不一致（产物少）：`
+      + missing.slice(0, 3).map((row) => `${row.case_id} 期望 ${row.want.length} 个实际 ${row.have.length} 个`).join('；'));
+  }
+  if (extra.length) {
+    problems.push(`${extra.length} 个任务的世界选法与生成器不一致（产物多）：`
+      + extra.slice(0, 3).map((row) => `${row.case_id} 期望 ${row.want.join('/')} 实际 ${row.have.join('/')}`).join('；'));
+  }
+  if (onlyInArtifact.length) {
+    problems.push(`${onlyInArtifact.length} 条记录的 case_id 不在任务集里：${onlyInArtifact.slice(0, 3).join('、')}`);
+  }
+  if (header?.totals?.cases !== tasks.length) {
+    problems.push(`头部 totals.cases=${header?.totals?.cases} 与任务集 ${tasks.length} 条不符`);
+  }
+  // manifest 是另一个**已提交**的产物；两份产物头部不一致说明有人只重建了其中一份。
+  if (manifest) {
+    const {record_type: _ignored, ...sansType} = header || {};
+    if (canonical(manifest.header) !== canonical(sansType)) {
+      problems.push('manifest.json 的头部与 jsonl 头部不一致（两份产物没一起重建）');
+    }
+  }
+  const worlds = new Set(rows.flatMap((row) => (row.input?.world?.id ? [row.input.world.id] : [])));
+  return {
+    passed: problems.length === 0,
+    problems,
+    arm,
+    tasks_compared: tasks.length,
+    distinct_worlds: worlds.size,
+    header_worlds: header?.totals?.worlds ?? null,
+    mismatched: missing.length + extra.length,
+    first_mismatches: [...missing, ...extra].slice(0, 5),
+  };
+}
+
 function summarise(rows, extra = {}) {
   const failures = rows.filter((row) => !row.passed);
   return {
@@ -230,6 +315,29 @@ async function main() {
   const rows = all.filter((row) => row.record_type === 'agent_trajectory');
   const tasks = loadTrajectories(TASKS).filter((row) => row.record_type === 'agent_task');
   const taskById = new Map(tasks.map((task) => [task.case_id, task]));
+  const manifest = existsSync(MANIFEST) ? JSON.parse(readFileSync(MANIFEST, 'utf8')) : null;
+
+  // ⓪ 生产者一致性（最便宜的一项，最先跑；它红了后面的回放没有意义）
+  const producer = producerCheck(header, rows, tasks, {manifest});
+  if (options.selftest) {
+    // 反向对照：把世界选法改坏一次，这一项必须红。没有这一步，
+    // 「检查通过」既可能因为产物是对的，也可能因为这个检查根本没在看。
+    const brokenHeader = {...header, worlds_per_task: (header?.worlds_per_task || 3) + 1};
+    const brokenManifest = manifest ? {...manifest, header: {...manifest.header, worlds_per_task: 99}} : null;
+    const cases = {
+      改坏产物头部: producerCheck(brokenHeader, rows, tasks, {manifest: null}),
+      改坏清单头部: producerCheck(header, rows, tasks, {manifest: brokenManifest}),
+      抽掉一个世界: producerCheck(header, rows.filter((row, index) => index > 1), tasks, {manifest: null}),
+    };
+    let red = 0;
+    for (const [name, result] of Object.entries(cases)) {
+      if (!result.passed) red += 1;
+      process.stdout.write(`[selftest] ${result.passed ? '仍然通过（不合格）' : '判红（合格）'}：${name}\n`);
+    }
+    process.stdout.write(`[selftest] ${red}/${Object.keys(cases).length} 个注入被抓住\n`);
+    if (red !== Object.keys(cases).length) process.exitCode = 1;
+    return;
+  }
 
   // ① 结构
   const structural = rows.map((row) => ({traj_id: row.traj_id, arm: row.arm, problems: structuralCheck(row, {taskById})}))
@@ -297,6 +405,7 @@ async function main() {
     trajectory_set: header?.set_id || null,
     format: header?.format || null,
     counts: {rows: rows.length, tasks: tasks.length, arms: header?.arms || null},
+    producer,
     structural: summarise(structural),
     replay: summarise(replay, {skipped: replay.filter((row) => row.skipped).length,
       note: replay.find((row) => row.skipped)?.skipped || null}),
@@ -316,7 +425,8 @@ async function main() {
     },
     verdict: null,
   };
-  report.verdict = report.structural.failed === 0
+  report.verdict = report.producer.passed
+    && report.structural.failed === 0
     && report.replay.failed === 0
     && report.grader.passes;
 
@@ -325,6 +435,8 @@ async function main() {
     writeFileSync(OUT, `${JSON.stringify(report, null, 1)}\n`);
   }
   if (!options.quiet) process.stdout.write(`${JSON.stringify({
+    producer: {passed: report.producer.passed, problems: report.producer.problems,
+      distinct_worlds: report.producer.distinct_worlds, mismatched: report.producer.mismatched},
     structural: {total: report.structural.total, failed: report.structural.failed},
     replay: {total: report.replay.total, failed: report.replay.failed, skipped: report.replay.skipped},
     grader: {positive: report.grader.positive, negative: report.grader.negative, drift: report.grader.drift},

@@ -3,7 +3,7 @@
  "trajectory_set": "agent-trajectories-v1",
  "format": "roco-agent-trajectory-v1",
  "counts": {
-  "rows": 4536,
+  "rows": 6048,
   "tasks": 288,
   "arms": [
    "replay",
@@ -15,74 +15,84 @@
    "blind"
   ]
  },
+ "producer": {
+  "passed": true,
+  "problems": [],
+  "arm": "replay",
+  "tasks_compared": 288,
+  "distinct_worlds": 23,
+  "header_worlds": 23,
+  "mismatched": 0,
+  "first_mismatches": []
+ },
  "structural": {
-  "total": 4536,
-  "passed": 4536,
+  "total": 6048,
+  "passed": 6048,
   "failed": 0,
   "by_arm": {
    "replay": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "baseline": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "stubborn": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "stop_now": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "no_rules": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "drop_args": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "blind": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    }
   },
   "first_failures": []
  },
  "replay": {
-  "total": 4536,
-  "passed": 4536,
+  "total": 6048,
+  "passed": 6048,
   "failed": 0,
   "by_arm": {
    "replay": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "baseline": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "stubborn": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "stop_now": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "no_rules": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "drop_args": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    },
    "blind": {
-    "total": 648,
-    "passed": 648
+    "total": 864,
+    "passed": 864
    }
   },
   "first_failures": [],
@@ -93,12 +103,12 @@
   "positive_expected": "全过（这批轨迹是按任务期望/规则 baseline 生成的）",
   "negative_expected": "全挂（每条记录都被改坏一次）",
   "positive": {
-   "total": 648,
-   "passed": 648
+   "total": 864,
+   "passed": 864
   },
   "negative": {
-   "total": 13656,
-   "passed": 13656
+   "total": 17760,
+   "passed": 17760
   },
   "per_criterion": {
    "tool": {
@@ -112,13 +122,13 @@
     "example": "清空参数"
    },
    "max_tool_calls": {
-    "total": 3864,
-    "caught": 3864,
+    "total": 5232,
+    "caught": 5232,
     "example": "超出工具调用次数上限"
    },
    "must_not_fabricate": {
-    "total": 3000,
-    "caught": 3000,
+    "total": 3864,
+    "caught": 3864,
     "example": "正文里塞数字型结论"
    },
    "must_keep_locked": {
@@ -127,23 +137,23 @@
     "example": "把锁定的伙伴换掉"
    },
    "must_not_claim_winrate": {
-    "total": 612,
-    "caught": 612,
+    "total": 1116,
+    "caught": 1116,
     "example": "把分数说成胜率"
    },
    "must_mention_limitation": {
-    "total": 216,
-    "caught": 216,
+    "total": 648,
+    "caught": 648,
     "example": "抹掉限制说明"
    },
    "must_not_use_stale": {
-    "total": 216,
-    "caught": 216,
+    "total": 648,
+    "caught": 648,
     "example": "拿旧状态版本重算"
    },
    "must_surface_conflict": {
-    "total": 252,
-    "caught": 252,
+    "total": 756,
+    "caught": 756,
     "example": "不提冲突"
    },
    "must_not_speak": {
@@ -159,38 +169,38 @@
   },
   "per_arm": {
    "replay": {
-    "total": 648,
-    "passed": 648,
+    "total": 864,
+    "passed": 864,
     "control": true
    },
    "baseline": {
-    "total": 648,
-    "passed": 648,
+    "total": 864,
+    "passed": 864,
     "control": false
    },
    "stubborn": {
-    "total": 648,
-    "passed": 576,
+    "total": 864,
+    "passed": 648,
     "control": false
    },
    "stop_now": {
-    "total": 648,
-    "passed": 360,
-    "control": false
-   },
-   "no_rules": {
-    "total": 648,
-    "passed": 432,
-    "control": false
-   },
-   "drop_args": {
-    "total": 648,
+    "total": 864,
     "passed": 576,
     "control": false
    },
+   "no_rules": {
+    "total": 864,
+    "passed": 648,
+    "control": false
+   },
+   "drop_args": {
+    "total": 864,
+    "passed": 792,
+    "control": false
+   },
    "blind": {
-    "total": 648,
-    "passed": 624,
+    "total": 864,
+    "passed": 840,
     "control": false
    }
   },

@@ -59,6 +59,8 @@
     "roco:verify-agent-tasks": "python3 scripts/roco/verify-agent-tasks.py",
     "roco:agent-trajectories": "node scripts/roco/build-agent-trajectories.mjs",
     "roco:verify-agent-trajectories": "node scripts/roco/verify-agent-trajectories.mjs",
+    "roco:sft-data": "node scripts/roco/build-agent-sft-data.mjs",
+    "roco:verify-sft-split": "node scripts/roco/verify-sft-split.mjs",
     "roco:intervention-windows": "node scripts/roco/build-intervention-windows.mjs",
     "roco:intervention-model": "python3 scripts/roco/train-intervention-model.py --write",
     "roco:shadow-replay": "node scripts/roco/shadow-replay.mjs",

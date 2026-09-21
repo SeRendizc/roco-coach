@@ -16,6 +16,7 @@
 
 import {execFileSync} from 'node:child_process';
 import {writeFileSync, mkdirSync} from 'node:fs';
+import {execFileSync as gitExec} from 'node:child_process';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -23,6 +24,16 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = join(HERE, '..', '..');
 const OUT_DIR = join(ROOT, 'reports', 'roco', 'verification');
 const OUT = join(OUT_DIR, 'latest.json');
+// 最近一次**通过**的那次运行。只有它能在「套件全绿」时被更新。
+//
+// 为什么需要单独一份：原来只有 `latest.json`，而 `unit` 里有一条断言
+// 「最近一次 verify:release 必须是 pass」。于是**一次失败就把闸门永久卡死**——
+// 之后每次跑的 `unit` 都会因为上一次是红的而红，而 latest.json 只能靠一次成功的
+// 运行变绿，成功的运行又必须先过 `unit`。唯一的出路是手改 latest.json，
+// 那正是这个仓库最不该鼓励的动作。现在：
+//   · `latest.json`   = 最近一次运行（任何结论），用来回答「刚刚跑得怎么样」；
+//   · `last-green.json` = 最近一次**全绿**的运行，用来回答「上一次可信的闸门是什么时候」。
+const LAST_GREEN = join(OUT_DIR, 'last-green.json');
 
 /**
  * 清单：`{id, cmd, args, why, quick}`。
@@ -43,6 +54,10 @@ export const SUITES = [
     why: '真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过'},
   {id: 'trajectories', cmd: 'node', args: ['scripts/roco/verify-agent-trajectories.mjs', '--quiet'],
     why: '轨迹集与判定器的两个方向；判定器写坏了只有这里看得见'},
+  {id: 'sft-split', cmd: 'node', args: ['scripts/roco/verify-sft-split.mjs', '--quiet'],
+    why: 'SFT 训练数据的切分：家族是否都在训练侧、留出有没有泄漏、'
+      + '报告里的自我描述与切分模式是否自洽，以及**逐字节复现**。'
+      + '第 37 轮发现报告把「留出机制」描述成「留出模板」，那一类错误只有这条抓得到'},
   {id: 'model-manifest', cmd: 'node', args: ['scripts/model/verify-manifest.mjs'],
     why: '本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么'},
   {id: 'provenance', cmd: 'node', args: ['scripts/roco/verify-provenance.mjs'],
@@ -110,6 +125,21 @@ function main(argv) {
   };
   mkdirSync(OUT_DIR, {recursive: true});
   writeFileSync(OUT, `${JSON.stringify(report, null, 1)}\n`);
+  if (report.verdict === 'pass') {
+    let head = null;
+    try {
+      head = gitExec('git', ['rev-parse', 'HEAD'], {cwd: ROOT, encoding: 'utf8'}).trim();
+    } catch { /* 没有 git 时留 null，报告里能看出来 */ }
+    writeFileSync(LAST_GREEN, `${JSON.stringify({
+      generated_by: 'scripts/roco/verify-release.mjs',
+      quick,
+      verdict: 'pass',
+      head,
+      suites: rows.map((row) => row.id),
+      ran_at: new Date().toISOString(),
+      note: '只有全部套件通过时才会被写。`latest.json` 可能是红的，这一份一定是绿的。',
+    }, null, 1)}\n`);
+  }
   process.stdout.write(`${JSON.stringify({verdict: report.verdict, failed,
     ran: rows.map((r) => r.id)}, null, 1)}\n`);
   return failed.length ? 1 : 0;

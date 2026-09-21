@@ -92,21 +92,63 @@ export function check({doc = DOC, root = ROOT} = {}) {
     if (!existsSync(join(root, rel))) problems.push(`文档依赖的验证产物不存在：${rel}`);
   }
 
-  // 最新一次 verify:release 必须是 pass，且套件数不为零
+  // 必须存在一次**全绿**的 verify:release，而且它离当前 HEAD 不能太远。
+  //
+  // 这里刻意**不**要求「最近一次一定全绿」。原来要求了，结果是自指死锁：
+  // `verify:release` 的清单里有 `unit`，而 `unit` 里有一条断言「最近一次必须是 pass」
+  // ——于是**一次失败之后，每次跑都会因为上一次红而红**，而 latest.json 只能靠一次
+  // 成功的运行变绿，成功的运行又必须先过 `unit`。唯一的出路是手改 latest.json，
+  // 那正是最不该被鼓励的动作。第 38 轮实测撞上了这个死锁。
+  //
+  // 现在的口径：`last-green.json` = 最近一次**全绿**的运行（只有全绿才会被写），
+  // 它是硬要求；`latest.json` 是最近一次运行（可能红），红的时候报为**警告**
+  // 并写进报告，不阻断。真正的强制性来自 `verify:release` 自己的退出码。
+  const lastGreenPath = join(root, 'reports', 'roco', 'verification', 'last-green.json');
   const latest = join(root, 'reports', 'roco', 'verification', 'latest.json');
-  let latestReport = null;
+  const warnings = [];
+  let lastGreen = null;
+  let latestSuites = null;
+  if (!existsSync(lastGreenPath)) {
+    // **引导期**：这个文件只有「一次全绿运行」才会被写，而这次运行本身还要过
+    // `unit` 里的同一条检查——如果把它当硬失败，第一次就永远绿不了（还是死锁）。
+    // 所以「缺失」只报警告；**一旦存在**就变成硬要求（陈旧、过期、内容坏都判红）。
+    // 它是入库文件，删掉会在 git 里看得见。
+    warnings.push('还没有 last-green.json：从来没有一次全绿的 verify:release（引导期，不阻断）');
+  } else {
+    try {
+      const green = JSON.parse(readFileSync(lastGreenPath, 'utf8'));
+      lastGreen = green;
+      if (green.verdict !== 'pass') problems.push(`last-green.json 的 verdict 是 ${green.verdict}`);
+      if (!Array.isArray(green.suites) || green.suites.length < 8) {
+        problems.push(`最近一次全绿运行的套件数只有 ${green.suites?.length ?? 0} 个，少于清单应有的数量`);
+      }
+      if (green.head) {
+        let behind = null;
+        try {
+          behind = Number(git(['rev-list', '--count', `${green.head}..${head}`]));
+        } catch {
+          // 那次全绿运行的 HEAD 已经不在历史里（rebase / 换分支）：这本身要报。
+          problems.push(`最近一次全绿运行记的 HEAD ${green.head.slice(0, 7)} 不在当前历史里`);
+        }
+        if (behind !== null && behind > 12) {
+          problems.push(`最近一次全绿运行在 ${behind} 个提交之前（HEAD ${head.slice(0, 7)}），`
+            + '闸门已经太久没跑过了');
+        }
+      }
+    } catch (error) {
+      problems.push(`last-green.json 读不出来：${error.message}`);
+    }
+  }
   if (existsSync(latest)) {
     try {
-      latestReport = JSON.parse(readFileSync(latest, 'utf8'));
+      const latestReport = JSON.parse(readFileSync(latest, 'utf8'));
+      latestSuites = Array.isArray(latestReport.suites) ? latestReport.suites.length : null;
       if (latestReport.verdict !== 'pass') {
-        problems.push(`最近一次 verify:release 不是 pass（${latestReport.verdict}）：`
-          + `失败套件 ${JSON.stringify(latestReport.failed)}`);
-      }
-      if (!Array.isArray(latestReport.suites) || latestReport.suites.length < 8) {
-        problems.push(`最近一次的套件数只有 ${latestReport.suites?.length ?? 0} 个，少于清单应有的数量`);
+        warnings.push(`最近一次 verify:release 是 ${latestReport.verdict}：`
+          + `失败套件 ${JSON.stringify(latestReport.failed)}（不阻断，但要说出来）`);
       }
       for (const suite of latestReport.suites || []) {
-        if (!suite.ok) problems.push(`套件 ${suite.id} 最近一次是失败的`);
+        if (!suite.ok) warnings.push(`套件 ${suite.id} 最近一次是失败的`);
       }
     } catch (error) {
       problems.push(`latest.json 读不出来：${error.message}`);
@@ -130,8 +172,13 @@ export function check({doc = DOC, root = ROOT} = {}) {
     ok: problems.length === 0,
     head,
     declared_head: declared,
-    suites: latestReport?.suites?.length ?? null,
+    last_green_head: lastGreen?.head ?? null,
+    // 套件数取**最近一次全绿运行**的；还没有全绿记录时退回最近一次运行的，
+    // 并只作为信息报出（硬判据已经是 last-green 本身）。
+    suites: lastGreen?.suites?.length ?? latestSuites ?? null,
     referenced_artifacts: referenced.size,
+    // 警告不阻断，但必须打出来——「最近一次是红的」这件事不能悄悄过去。
+    warnings,
     problems,
   };
 }
@@ -141,7 +188,8 @@ function main(argv) {
   if (argv.includes('--json')) process.stdout.write(`${JSON.stringify(report, null, 1)}\n`);
   else {
     process.stdout.write(`状态文档：声明 HEAD ${report.declared_head ?? '（缺）'}，当前 ${report.head.slice(0, 7)}，`
-      + `最近验证套件 ${report.suites ?? '（缺）'} 个\n`);
+      + `最近一次全绿运行 ${report.last_green_head ? report.last_green_head.slice(0, 7) : '（缺）'}\n`);
+    for (const warning of report.warnings || []) process.stdout.write(`警告（不阻断）：${warning}\n`);
     if (report.ok) process.stdout.write('一致\n');
     else process.stdout.write(`不一致：\n  ${report.problems.join('\n  ')}\n`);
   }

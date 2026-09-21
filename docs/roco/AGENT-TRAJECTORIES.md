@@ -1,7 +1,14 @@
 # Agent 工具轨迹集 v1（W4-02 / W4-05）
 
-这份文档只讲一件事：**这 4,536 条工具轨迹凭什么能当门禁用**，以及它现在还不能
+这份文档只讲一件事：**这批工具轨迹凭什么能当门禁用**，以及它现在还不能
 声称什么。
+
+> **数字以产物为准，不以本文为准。** 下面引用的是
+> `tests/evals/agent-trajectories-v1.manifest.json`（规模、按 arm/类别的分解）与
+> `reports/roco/agent-trajectories-verification.json`（判定与回放结果）在第 37 轮
+> 的世界采样修复之后的值：**6,048 条 / 23 个世界 / 7 个 arm**。
+> 这份文档里曾经写死「4,536 条 / 12 个世界」，而在采样器修好之后它当场就过期了
+> —— 所以凡是从产物读得出来的数字，都以产物为准。
 
 生成器 `scripts/roco/build-agent-trajectories.mjs`，判定器与回放
 `scripts/roco/verify-agent-trajectories.mjs`，格式与 arm 定义在
@@ -9,9 +16,10 @@
 
 | 文件 | 内容 | 是否入库 |
 |---|---|---|
-| `tests/evals/agent-trajectories-v1.jsonl` | 头部 + 4,536 条轨迹（5.6 MB） | 是（字节可复现） |
+| `tests/evals/agent-trajectories-v1.jsonl` | 头部 + 6,048 条轨迹（7.5 MB） | 是（字节可复现） |
 | `tests/evals/agent-trajectories-v1.manifest.json` | 按 arm / 类别分解的汇总 | 是 |
 | `reports/roco/agent-trajectories-verification.json` | 本轮判定与回放报告 | 是 |
+| `tests/evals/roco/producer-drift-v1.json` | **旧**采样器的世界选法快照，只作反向对照用 | 是 |
 
 ## 1. 一条轨迹长什么样
 
@@ -40,7 +48,7 @@
 
 几个刻意的选择：
 
-- **回执只存摘要，不存全文。** 单条回执上限 10 KB，4,500 条全文就是几十 MB。
+- **回执只存摘要，不存全文。** 单条回执上限 10 KB，几千条全文就是几十 MB。
   摘要是规范化后的哈希（键序无关、**剔除延迟**），回放时逐条比对——
   延迟每次都不同，算进摘要只会让回放永远「变了」。
 - **不存生成时间、不存 HEAD。** 产物要能字节复现；已用两次连跑逐字节比对确认。
@@ -54,18 +62,25 @@
 ## 2. 局面（world）与任务的匹配
 
 世界来自引擎本身（`scripts/roco/gen-plan-state.py <seed> --turns N --version V`），
-不是手抄的 fixture。当前 12 个世界、8 个模板：
+不是手抄的 fixture。当前 **23 个世界、8 个模板**（变体数就是「加局面」的产物，
+局面由 `(seed, turns)` 唯一确定，加变体不引入新的随机性）：
 
-| 世界 | 模式 | 特殊条件 | 变体数 |
-|---|---|---|---|
-| `camp-0/1/2` | 营地 | — | 3 |
-| `camp-locked` | 营地 | 锁定伙伴 | 1 |
-| `camp-conflict` | 营地 | **来源冲突** | 1 |
-| `battle-open-0/1` | 对局 | 伤害未核验 | 2 |
-| `battle-mid-0/1` | 对局 | 伤害未核验，第 3/4 回合 | 2 |
-| `battle-late` | 对局 | 第 8 回合 | 1 |
-| `battle-refuse` | 对局 | 强制失败 + 伤害未核验 | 1 |
-| `battle-stale` | 对局 | 版本推进过 | 1 |
+| 模板 | 变体数 | 模式 | 特殊条件 | 种子 / 回合 |
+|---|---|---|---|---|
+| `camp` | 6 | 营地 | — | 11 19 21 31 33 37 / 0 |
+| `camp-locked` | 3 | 营地 | 锁定伙伴（`locked` 标记，不在 `env` 里） | 12 41 43 / 0 |
+| `camp-conflict` | 3 | 营地 | **来源冲突** | 16 47 53 / 0 |
+| `battle-open` | 2 | 对局 | 伤害未核验 | 13 23 / 0 |
+| `battle-mid` | 2 | 对局 | 第 3/4 回合 | 14 24 / 3 4 |
+| `battle-late` | 1 | 对局 | 第 8 回合 | 18 / 8 |
+| `battle-refuse` | 3 | 对局 | 强制失败 + 伤害未核验 | 15 51 59 / 2 2 3 |
+| `battle-stale` | 3 | 对局 | 版本推进过 | 17 57 61 / 2 2 4 |
+
+**变体数不是装饰，它直接决定数据量。** 第 36 轮量出「训练数据上不去」的原因
+不是任务数（288 条已经不少），而是世界池太小：`tool_failure` / `stale_state` /
+`evidence_conflict` 三类各只有 **1** 个可用局面，加任务加不出数据。
+第 37 轮把步长 bug 修掉之后，这三类各能覆盖到 **3** 个世界
+（每类 36 条任务 × 3 = 108 个窗口，之前是 36）。
 
 两条匹配规则，缺一条测出来的就是运气：
 
@@ -87,38 +102,43 @@
 
 | arm | 类型 | 用途 | 通过率 |
 |---|---|---|---|
-| `replay` | 对照 | 照任务期望重放，验证接线与判定器 | **648/648 = 1.000** |
-| `baseline` | 基线 | 纯规则 baseline（只读消息 + 公开提示） | 648/648 = 1.000 |
-| `blind` | 基线 | **不给期望提示**的规则 baseline，名字→id 自己查 | 624/648 = 0.963 |
-| `stubborn` | 反证 | 永远拿开局那一版状态去算 | 576/648 = 0.889 |
-| `drop_args` | 反证 | 丢掉队伍/状态参数 | 576/648 = 0.889 |
-| `no_rules` | 反证 | 跳过规则查询 | 432/648 = 0.667 |
-| `stop_now` | 反证 | 一次都不查直接答 | 360/648 = 0.556 |
+| `replay` | 对照 | 照任务期望重放，验证接线与判定器 | **864/864 = 1.000** |
+| `baseline` | 基线 | 纯规则 baseline（只读消息 + 公开提示） | 864/864 = 1.000 |
+| `blind` | 基线 | **不给期望提示**的规则 baseline，名字→id 自己查 | 840/864 = 0.972 |
+| `drop_args` | 反证 | 丢掉队伍/状态参数 | 792/864 = 0.917 |
+| `stubborn` | 反证 | 永远拿开局那一版状态去算 | 648/864 = 0.750 |
+| `no_rules` | 反证 | 跳过规则查询 | 648/864 = 0.750 |
+| `stop_now` | 反证 | 一次都不查直接答 | 576/864 = 0.667 |
 
 `replay` 只用来当**接线自检**：连照抄期望动作都判不过，说明判定器或工具接线坏了，
-不是 Agent 有问题。`baseline` 与 `blind` 的差（1.000 vs 0.963）就是
+不是 Agent 有问题。`baseline` 与 `blind` 的差（1.000 vs 0.972）就是
 「提示里给了事实类别」这件事值多少分——全部差在 `rules_lookup`
 （`blind` 只认名字表里的 7 个名字，认不出来的不猜）。
 
 **反证组的通过率必须严格低于对照。** 这条已经写成测试；如果某个反证的判据被写空，
 它会立刻升到 1.000 并与对照持平，测试变红。
 
-### 3.1 基线为什么有 0.889 而不是 0
+### 3.1 基线为什么有 0.750 而不是 0
 
-`stubborn` 在 `stale_state`（0/36）与 `tool_failure`（0/36）上全挂，在别处全过——
+`stubborn` 在 `stale_state`（0/108）与 `tool_failure`（0/108）上全挂，在别处全过——
 这正是它该有的形状：它只在一个维度上做错。
 **不做「全挂」的反证**，因为那种反证证明不了判定器在按判据判，只能证明它总是判挂。
 
+（这两类的分母从 36 涨到 108 之后，`stubborn` 的总通过率从 0.889 掉到 0.750 ——
+它挂掉的绝对条数从 72 变成 216，**变多的原因是这两类终于覆盖了 3 个世界**，
+不是它变笨了。）
+
 ## 4. 判定器怎么保证两个方向都对
 
-`verify-agent-trajectories.mjs` 跑三件事，任何一件不过就 `verdict: false`：
+`verify-agent-trajectories.mjs` 跑**四**件事，任何一件不过就 `verdict: false`：
 
-1. **结构**（4,536/4,536）——每条都有判据、回执摘要、`stopped`、世界标识；
-2. **离线回放**（4,536/4,536）——拿记录里的参数**重新执行**，规范化回执摘要必须
+0. **生产者一致性**（`producerCheck`）——见 §4.2。最便宜的一项，所以最先跑；
+1. **结构**（6,048/6,048）——每条都有判据、回执摘要、`stopped`、世界标识；
+2. **离线回放**（6,048/6,048）——拿记录里的参数**重新执行**，规范化回执摘要必须
    逐字节一致；回放不需要模型，只需要真服务；
 3. **判定器两个方向**：
-   - 正向：对照 arm（`replay`）648/648 必须全过；
-   - 反向：**每条原本通过的记录按自己的判据改坏一次**，13,656 个变体必须
+   - 正向：对照 arm（`replay`）864/864 必须全过；
+   - 反向：**每条原本通过的记录按自己的判据改坏一次**，17,760 个变体必须
      **全部判挂**；
    - 漂移：生成时记录在案的 `checks.passed` 与现在重判的结果必须一致——
      判定器被改过而产物没重建，这一条会红。
@@ -126,12 +146,47 @@
 反向对照按判据分组，11 条判据全部覆盖：
 
 ```
-tool 3408/3408   args_must_match 1704/1704   max_tool_calls 4536/4536
-must_not_fabricate 3504/3504   must_keep_locked 288/288
-must_not_claim_winrate 720/720   must_mention_limitation 252/252
-must_not_use_stale 252/252   must_surface_conflict 288/288
-must_not_speak 288/288   max_reply_chars 864/864
+max_tool_calls 5232/5232      must_not_fabricate 3864/3864   tool 2832/2832
+args_must_match 1416/1416     must_not_claim_winrate 1116/1116
+must_surface_conflict 756/756 max_reply_chars 756/756
+must_mention_limitation 648/648   must_not_use_stale 648/648
+must_not_speak 252/252        must_keep_locked 240/240
 ```
+
+### 4.2 生产者一致性：前三项**都抓不到**的那一类漂移
+
+第 1—3 项回答的全是「产物**内部**自洽吗」。第 37 轮的 `worldsFor` 步长 bug
+（`(seed + i * 3) % eligible.length` 在池子大小也是 3 的倍数时每一步都落在同一个
+世界上）正好从这三项中间穿过去了：产物结构全过、回放全过、判定器两个方向都对，
+但它仍然是**旧采样器**选出来的世界 —— `tool_failure` / `stale_state` /
+`evidence_conflict` 三类每个任务只覆盖 1 个世界，而生成器现在会说 3 个。
+**一整片世界变体在门禁里从来没出现过，而所有检查都是绿的。**
+
+所以加了第 0 项：把生成器的世界选法**重新算一遍**（只调 `worldsFor` 这个纯函数，
+毫秒级），与产物里实际出现的 `(case_id, world.id)` 集合逐对比较，同时核对
+`worlds_per_task`、`totals.cases`、以及 `manifest.json` 与 `jsonl` 两份产物的头部
+是否一致。生成器改了而产物没重建，这里必须红。
+
+它自己也被反向对照过，两个层次：
+
+```bash
+node scripts/roco/verify-agent-trajectories.mjs --selftest
+#  判红（合格）：改坏产物头部
+#  判红（合格）：改坏清单头部
+#  判红（合格）：抽掉一个世界
+#  3/3 个注入被抓住
+```
+
+```bash
+node --test tests/evals/roco/agent-trajectories.test.js
+# 用 tests/evals/roco/producer-drift-v1.json（**真实**的旧选法快照）当反例：
+# 现在的产物 passed=true / 23 个世界；旧快照 passed=false / 287 个任务不一致
+```
+
+写这个检查时**自己先错了一次**：`worldsFor` 返回的是世界**对象**，产物里记的是
+`world.id`，第一版拿对象去比字符串,于是每个任务都「不一致」——检查红了，但红的
+原因是检查自己写错了。所以它的第一条测试是「在**已知合格**的产物上必须是绿的」，
+第二条才是「在真实旧快照上必须是红的」。只有反向对照的检查，等于没有检查。
 
 ### 4.1 反向对照抓出来的三个**真**缺陷（都已修）
 
@@ -150,9 +205,13 @@ must_not_speak 288/288   max_reply_chars 864/864
 
 ## 5. 现在**不能**声称什么
 
-- 这 4,536 条**不是模型生成的**。`baseline` / `blind` 是写在代码里的规则，
+- 这 6,048 条**不是模型生成的**。`baseline` / `blind` 是写在代码里的规则，
   所以它们不构成「模型能力」的任何证据。模型候选生成需要 DeepSeek key
-  （本机无 key），W4-02 的「2,000—5,000 条**候选**」这一半仍未完成。
+  （本机无 key），W4-02 的「**模型候选**轨迹」这一半仍未完成。
+- **条数不是目标。** 6,048 超过路线图当初写的「2,000—5,000」，多出来的全部是
+  真实世界变体（第 37 轮修掉采样器之后每个任务能选到 2—9 个世界），
+  **没有一条是为了凑数造的**。反过来说，条数多也不代表门禁更强 ——
+  门禁的强度来自判据覆盖（§4 的 11 条判据）与反证组，不来自条数。
 - `must_not_fabricate` 只抓「具体数字型结论」（`\d+ 点/威力/伤害`），
   它**不是**完整的事实一致性检查。`checkReceiptConsistency` 才管回执一致性，
   两者都不能替代人工抽查。
@@ -166,7 +225,8 @@ must_not_speak 288/288   max_reply_chars 864/864
 ```bash
 npm run roco:agent-tasks            # 先有任务集
 npm run roco:agent-trajectories     # 生成轨迹（要 python3，约 30 秒）
-npm run roco:verify-agent-trajectories   # 结构 + 回放 + 两个方向
+npm run roco:verify-agent-trajectories   # 生产者一致性 + 结构 + 回放 + 两个方向
+node scripts/roco/verify-agent-trajectories.mjs --selftest   # 生产者检查的反向对照
 node --test tests/evals/roco/agent-trajectories.test.js
 ```
 

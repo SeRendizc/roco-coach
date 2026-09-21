@@ -1,0 +1,1250 @@
+{
+ "record_type": "agent_trajectory_world_map_fixture",
+ "fixture_id": "agent-trajectories-v1-pre-sampler-fix",
+ "why": "第 36 轮 worldsFor 步长 bug 期间的**真实**世界选法快照（每任务 1—5 个世界，tool_failure / stale_state / evidence_conflict 三类各只有 1 个）。用途只有一个：当**反向对照**，证明 verify-agent-trajectories.mjs 的 producerCheck 真的能抓住「生成器改了而产物没重建」。完整产物 5.9 MB，这里只留 (case_id -> world ids) 映射。",
+ "source_artifact_sha256": "00af88c41001ffd561b70ea4618514b7e6ae03151a6666a455ca1a60543e9f76",
+ "source_trajectories": 648,
+ "worlds_per_task": 3,
+ "arms": [
+  "replay",
+  "baseline",
+  "stubborn",
+  "stop_now",
+  "no_rules",
+  "drop_args",
+  "blind"
+ ],
+ "totals": {
+  "trajectories": 4536,
+  "passed": 3864,
+  "engine_refused": 457,
+  "cases": 288,
+  "worlds": 12
+ },
+ "worlds_by_case": {
+  "be-defense-f0-01": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-defense-f0-02": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-defense-f0-03": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-defense-f0-04": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-defense-f1-01": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "be-defense-f1-02": [
+   "battle-late",
+   "battle-mid-1",
+   "battle-open-1"
+  ],
+  "be-defense-f1-03": [
+   "battle-late",
+   "battle-mid-1",
+   "battle-open-1"
+  ],
+  "be-defense-f1-04": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "be-defense-f2-01": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-defense-f2-02": [
+   "battle-late",
+   "battle-mid-1",
+   "battle-open-1"
+  ],
+  "be-defense-f2-03": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-defense-f2-04": [
+   "battle-late",
+   "battle-mid-1",
+   "battle-open-1"
+  ],
+  "be-energy-f0-01": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-energy-f0-02": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "be-energy-f0-03": [
+   "battle-late",
+   "battle-mid-1",
+   "battle-open-1"
+  ],
+  "be-energy-f0-04": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "be-energy-f1-01": [
+   "battle-late",
+   "battle-mid-1",
+   "battle-open-1"
+  ],
+  "be-energy-f1-02": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "be-energy-f1-03": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "be-energy-f1-04": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "be-energy-f2-01": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "be-energy-f2-02": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "be-energy-f2-03": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-energy-f2-04": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "be-loss-f0-01": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "be-loss-f0-02": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "be-loss-f0-03": [
+   "battle-late",
+   "battle-mid-1",
+   "battle-open-1"
+  ],
+  "be-loss-f0-04": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "be-loss-f1-01": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "be-loss-f1-02": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "be-loss-f1-03": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "be-loss-f1-04": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-loss-f2-01": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "be-loss-f2-02": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-loss-f2-03": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "be-loss-f2-04": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "cs-answered-f0-01": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-answered-f0-02": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-answered-f0-03": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-answered-f0-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-answered-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-answered-f1-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-answered-f1-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-answered-f1-04": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-answered-f2-01": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-answered-f2-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-answered-f2-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-answered-f2-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-diagnose-f0-01": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-diagnose-f0-02": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-diagnose-f0-03": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-diagnose-f0-04": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-diagnose-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-diagnose-f1-02": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-diagnose-f1-03": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-diagnose-f1-04": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-diagnose-f2-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-diagnose-f2-02": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-diagnose-f2-03": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-diagnose-f2-04": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-lastturn-f0-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-lastturn-f0-02": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-lastturn-f0-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-lastturn-f0-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-lastturn-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-lastturn-f1-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-lastturn-f1-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-lastturn-f1-04": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-lastturn-f2-01": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "cs-lastturn-f2-02": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "cs-lastturn-f2-03": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "cs-lastturn-f2-04": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "ec-form-f0-01": [
+   "camp-conflict"
+  ],
+  "ec-form-f0-02": [
+   "camp-conflict"
+  ],
+  "ec-form-f0-03": [
+   "camp-conflict"
+  ],
+  "ec-form-f0-04": [
+   "camp-conflict"
+  ],
+  "ec-form-f1-01": [
+   "camp-conflict"
+  ],
+  "ec-form-f1-02": [
+   "camp-conflict"
+  ],
+  "ec-form-f1-03": [
+   "camp-conflict"
+  ],
+  "ec-form-f1-04": [
+   "camp-conflict"
+  ],
+  "ec-form-f2-01": [
+   "camp-conflict"
+  ],
+  "ec-form-f2-02": [
+   "camp-conflict"
+  ],
+  "ec-form-f2-03": [
+   "camp-conflict"
+  ],
+  "ec-form-f2-04": [
+   "camp-conflict"
+  ],
+  "ec-strength-f0-01": [
+   "camp-conflict"
+  ],
+  "ec-strength-f0-02": [
+   "camp-conflict"
+  ],
+  "ec-strength-f0-03": [
+   "camp-conflict"
+  ],
+  "ec-strength-f0-04": [
+   "camp-conflict"
+  ],
+  "ec-strength-f1-01": [
+   "camp-conflict"
+  ],
+  "ec-strength-f1-02": [
+   "camp-conflict"
+  ],
+  "ec-strength-f1-03": [
+   "camp-conflict"
+  ],
+  "ec-strength-f1-04": [
+   "camp-conflict"
+  ],
+  "ec-strength-f2-01": [
+   "camp-conflict"
+  ],
+  "ec-strength-f2-02": [
+   "camp-conflict"
+  ],
+  "ec-strength-f2-03": [
+   "camp-conflict"
+  ],
+  "ec-strength-f2-04": [
+   "camp-conflict"
+  ],
+  "ec-value-f0-01": [
+   "camp-conflict"
+  ],
+  "ec-value-f0-02": [
+   "camp-conflict"
+  ],
+  "ec-value-f0-03": [
+   "camp-conflict"
+  ],
+  "ec-value-f0-04": [
+   "camp-conflict"
+  ],
+  "ec-value-f1-01": [
+   "camp-conflict"
+  ],
+  "ec-value-f1-02": [
+   "camp-conflict"
+  ],
+  "ec-value-f1-03": [
+   "camp-conflict"
+  ],
+  "ec-value-f1-04": [
+   "camp-conflict"
+  ],
+  "ec-value-f2-01": [
+   "camp-conflict"
+  ],
+  "ec-value-f2-02": [
+   "camp-conflict"
+  ],
+  "ec-value-f2-03": [
+   "camp-conflict"
+  ],
+  "ec-value-f2-04": [
+   "camp-conflict"
+  ],
+  "rc-eval-f0-01": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-eval-f0-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-eval-f0-03": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-eval-f0-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-eval-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rc-eval-f1-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-eval-f1-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-eval-f1-04": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-eval-f2-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rc-eval-f2-02": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-eval-f2-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-eval-f2-04": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-swap-f0-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rc-swap-f0-02": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-swap-f0-03": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rc-swap-f0-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-swap-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-swap-f1-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-swap-f1-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-swap-f1-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rc-swap-f2-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-swap-f2-02": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rc-swap-f2-03": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rc-swap-f2-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-learn-f0-01": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-learn-f0-02": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-learn-f0-03": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-learn-f0-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-learn-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-learn-f1-02": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-learn-f1-03": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-learn-f1-04": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-learn-f2-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-learn-f2-02": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-learn-f2-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-learn-f2-04": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-pet-f0-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-pet-f0-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-pet-f0-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-pet-f0-04": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-pet-f1-01": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-pet-f1-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-pet-f1-03": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-pet-f1-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-pet-f2-01": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-pet-f2-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-pet-f2-03": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-pet-f2-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-ruleset-f0-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-ruleset-f0-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-ruleset-f0-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-ruleset-f0-04": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-ruleset-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-ruleset-f1-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-ruleset-f1-03": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-ruleset-f1-04": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-ruleset-f2-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-ruleset-f2-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-ruleset-f2-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-ruleset-f2-04": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-skill-f0-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-skill-f0-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-skill-f0-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-skill-f0-04": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-skill-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-skill-f1-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-skill-f1-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-skill-f1-04": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-skill-f2-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-skill-f2-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-skill-f2-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-skill-f2-04": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f0-01": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f0-02": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f0-03": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f0-04": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f1-01": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-term-f1-02": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f1-03": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-term-f1-04": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f2-01": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f2-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-term-f2-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-term-f2-04": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-type-f0-01": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-type-f0-02": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-type-f0-03": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-type-f0-04": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-type-f1-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-type-f1-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-type-f1-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-type-f1-04": [
+   "camp-0",
+   "camp-1",
+   "camp-2"
+  ],
+  "rl-type-f2-01": [
+   "camp-0",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-type-f2-02": [
+   "camp-0",
+   "camp-1",
+   "camp-locked"
+  ],
+  "rl-type-f2-03": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "rl-type-f2-04": [
+   "camp-1",
+   "camp-2",
+   "camp-locked"
+  ],
+  "si-noaction-f0-01": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "si-noaction-f1-01": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "si-noaction-f2-01": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "si-quiet-f0-01": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "si-quiet-f1-01": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "si-quiet-f2-01": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "si-refuse-f0-01": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "si-refuse-f1-01": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "si-refuse-f2-01": [
+   "battle-mid-1",
+   "battle-open-0",
+   "battle-open-1"
+  ],
+  "si-submitted-f0-01": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-0"
+  ],
+  "si-submitted-f1-01": [
+   "battle-mid-0",
+   "battle-mid-1",
+   "battle-open-0"
+  ],
+  "si-submitted-f2-01": [
+   "battle-late",
+   "battle-mid-0",
+   "battle-open-1"
+  ],
+  "ss-hint-f0-01": [
+   "battle-stale"
+  ],
+  "ss-hint-f0-02": [
+   "battle-stale"
+  ],
+  "ss-hint-f0-03": [
+   "battle-stale"
+  ],
+  "ss-hint-f0-04": [
+   "battle-stale"
+  ],
+  "ss-hint-f1-01": [
+   "battle-stale"
+  ],
+  "ss-hint-f1-02": [
+   "battle-stale"
+  ],
+  "ss-hint-f1-03": [
+   "battle-stale"
+  ],
+  "ss-hint-f1-04": [
+   "battle-stale"
+  ],
+  "ss-hint-f2-01": [
+   "battle-stale"
+  ],
+  "ss-hint-f2-02": [
+   "battle-stale"
+  ],
+  "ss-hint-f2-03": [
+   "battle-stale"
+  ],
+  "ss-hint-f2-04": [
+   "battle-stale"
+  ],
+  "ss-hp-f0-01": [
+   "battle-stale"
+  ],
+  "ss-hp-f0-02": [
+   "battle-stale"
+  ],
+  "ss-hp-f0-03": [
+   "battle-stale"
+  ],
+  "ss-hp-f0-04": [
+   "battle-stale"
+  ],
+  "ss-hp-f1-01": [
+   "battle-stale"
+  ],
+  "ss-hp-f1-02": [
+   "battle-stale"
+  ],
+  "ss-hp-f1-03": [
+   "battle-stale"
+  ],
+  "ss-hp-f1-04": [
+   "battle-stale"
+  ],
+  "ss-hp-f2-01": [
+   "battle-stale"
+  ],
+  "ss-hp-f2-02": [
+   "battle-stale"
+  ],
+  "ss-hp-f2-03": [
+   "battle-stale"
+  ],
+  "ss-hp-f2-04": [
+   "battle-stale"
+  ],
+  "ss-plan-f0-01": [
+   "battle-stale"
+  ],
+  "ss-plan-f0-02": [
+   "battle-stale"
+  ],
+  "ss-plan-f0-03": [
+   "battle-stale"
+  ],
+  "ss-plan-f0-04": [
+   "battle-stale"
+  ],
+  "ss-plan-f1-01": [
+   "battle-stale"
+  ],
+  "ss-plan-f1-02": [
+   "battle-stale"
+  ],
+  "ss-plan-f1-03": [
+   "battle-stale"
+  ],
+  "ss-plan-f1-04": [
+   "battle-stale"
+  ],
+  "ss-plan-f2-01": [
+   "battle-stale"
+  ],
+  "ss-plan-f2-02": [
+   "battle-stale"
+  ],
+  "ss-plan-f2-03": [
+   "battle-stale"
+  ],
+  "ss-plan-f2-04": [
+   "battle-stale"
+  ],
+  "tf-damage-f0-01": [
+   "battle-refuse"
+  ],
+  "tf-damage-f0-02": [
+   "battle-refuse"
+  ],
+  "tf-damage-f0-03": [
+   "battle-refuse"
+  ],
+  "tf-damage-f0-04": [
+   "battle-refuse"
+  ],
+  "tf-damage-f1-01": [
+   "battle-refuse"
+  ],
+  "tf-damage-f1-02": [
+   "battle-refuse"
+  ],
+  "tf-damage-f1-03": [
+   "battle-refuse"
+  ],
+  "tf-damage-f1-04": [
+   "battle-refuse"
+  ],
+  "tf-damage-f2-01": [
+   "battle-refuse"
+  ],
+  "tf-damage-f2-02": [
+   "battle-refuse"
+  ],
+  "tf-damage-f2-03": [
+   "battle-refuse"
+  ],
+  "tf-damage-f2-04": [
+   "battle-refuse"
+  ],
+  "tf-plan-f0-01": [
+   "battle-refuse"
+  ],
+  "tf-plan-f0-02": [
+   "battle-refuse"
+  ],
+  "tf-plan-f0-03": [
+   "battle-refuse"
+  ],
+  "tf-plan-f0-04": [
+   "battle-refuse"
+  ],
+  "tf-plan-f1-01": [
+   "battle-refuse"
+  ],
+  "tf-plan-f1-02": [
+   "battle-refuse"
+  ],
+  "tf-plan-f1-03": [
+   "battle-refuse"
+  ],
+  "tf-plan-f1-04": [
+   "battle-refuse"
+  ],
+  "tf-plan-f2-01": [
+   "battle-refuse"
+  ],
+  "tf-plan-f2-02": [
+   "battle-refuse"
+  ],
+  "tf-plan-f2-03": [
+   "battle-refuse"
+  ],
+  "tf-plan-f2-04": [
+   "battle-refuse"
+  ],
+  "tf-summary-f0-01": [
+   "battle-refuse"
+  ],
+  "tf-summary-f0-02": [
+   "battle-refuse"
+  ],
+  "tf-summary-f0-03": [
+   "battle-refuse"
+  ],
+  "tf-summary-f0-04": [
+   "battle-refuse"
+  ],
+  "tf-summary-f1-01": [
+   "battle-refuse"
+  ],
+  "tf-summary-f1-02": [
+   "battle-refuse"
+  ],
+  "tf-summary-f1-03": [
+   "battle-refuse"
+  ],
+  "tf-summary-f1-04": [
+   "battle-refuse"
+  ],
+  "tf-summary-f2-01": [
+   "battle-refuse"
+  ],
+  "tf-summary-f2-02": [
+   "battle-refuse"
+  ],
+  "tf-summary-f2-03": [
+   "battle-refuse"
+  ],
+  "tf-summary-f2-04": [
+   "battle-refuse"
+  ]
+ }
+}

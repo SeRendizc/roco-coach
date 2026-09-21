@@ -2,8 +2,9 @@
 // W4-02 的另一半：把**模型臂**产生的错误轨迹抽出来，逐条给出可核对的失败分类
 // 与**候选**修复，做成目录。
 //
-// 与 `agent-trajectories-v1.jsonl` 的分工：那份有 4,536 条，但全是**规则臂**的；
-// 这一份是**模型真的自己选工具**时留下的记录（`shadow-replay-local_4b.json`）。
+// 与 `agent-trajectories-v1.jsonl` 的分工：那份有 6,048 条，但全是**规则臂**的；
+// （条数以 `tests/evals/agent-trajectories-v1.manifest.json` 为准，别抄在这里。）
+// 这一份是**模型真的自己选工具**时留下的记录（`shadow-replay-base.json`，基座臂）。
 // 按 W4-02 的要求，错误轨迹与修复理由必须保存——这里保存的是
 // **程序判定的失败分类**与**据此给出的候选修复**。
 //
@@ -16,13 +17,17 @@
 //     node scripts/roco/build-model-error-trajectories.mjs          # 生成
 //     node scripts/roco/build-model-error-trajectories.mjs --check  # 只报统计
 
+import {createHash} from 'node:crypto';
 import {writeFileSync, readFileSync, mkdirSync, existsSync} from 'node:fs';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = join(HERE, '..', '..');
-export const SOURCE = join(ROOT, 'reports', 'roco', 'shadow-replay-local_4b.json');
+// 源报告必须是**带身份的基座产物**。原来指向 `shadow-replay-local_4b.json`，
+// 而那个文件每次跑模型臂都会被覆盖——所以这份目录声称的 `source_pass_rate`
+// 与它指向的路径早就不是同一份东西了。现在指向显式的基座产物，并把摘要记下来。
+export const SOURCE = join(ROOT, 'reports', 'roco', 'shadow-replay-base.json');
 export const OUT = join(ROOT, 'tests', 'evals', 'roco', 'model-error-trajectories-v1.jsonl');
 
 /**
@@ -134,7 +139,7 @@ export function summarise(rows) {
 function main(argv) {
   const check = argv.includes('--check');
   if (!existsSync(SOURCE)) {
-    process.stderr.write(`[model-errors] 找不到 ${SOURCE}；先跑 npm run roco:shadow-replay -- --arm local_4b\n`);
+    process.stderr.write(`[model-errors] 找不到 ${SOURCE}；先跑 bash scripts/model/measure-arms.sh base=\n`);
     return 2;
   }
   const {report, rows} = build();
@@ -143,8 +148,11 @@ function main(argv) {
     record_type: 'model_error_trajectory_header',
     set_id: 'model-error-trajectories-v1',
     built_by: 'scripts/roco/build-model-error-trajectories.mjs',
-    source: 'reports/roco/shadow-replay-local_4b.json',
+    source: 'reports/roco/shadow-replay-base.json',
+    // 源文件的**内容摘要**：只记路径不够——路径上的文件会被换掉，摘要不会。
+    source_sha256: createHash('sha256').update(readFileSync(SOURCE)).digest('hex'),
     source_arm: report.arm,
+    source_identity: report.identity || null,
     source_prompt_digest: report.prompt_digest || null,
     source_pass_rate: report.summary.pass_rate,
     disciplines: [
