@@ -200,6 +200,35 @@ function matchClean() {
   return {events, turns: 6, result: 'win', game: rocoGameView(view, {matchId: 'm-Q'})};
 }
 
+/**
+ * 对局 S：**转折点与这门课的局面不是同一回合**（第 45 轮浏览器实测抓到的那一处）。
+ *
+ * 对面第 3 回合先倒一只（于是 `first-faint` 挑的是第 3 回合），我方第 7 回合才倒下，
+ * 而这门课（用药时机）讲的是**我方**第 7 回合那一幕。
+ * 挂账时如果存转折点回合，下一局的核对就会写成「对比第 3 回合（上一次…）与第 9 回合
+ * （这一次…）」——两个数字量的不是同一件事，读起来却像同一次对比。
+ */
+function matchSplit({playerFaintTurn = 7, enemyFaintTurn = 3} = {}) {
+  const view = viewOf({
+    battle_result: 'loss', phase: 'ended', turn: playerFaintTurn, state_version: 70,
+    self: {active: 0, pets: [{slot: 0, pet_id: 'pet_000225', name: '寂灭骨龙', hp: 0, max_hp: 425, energy: 1, fainted: true}]},
+    opponent: {active: 1, living_count: 1, field: {slot: 1, pet_id: 'pet_000311', name: '潮甲龟', hp: 150, max_hp: 400, energy: 2, fainted: false}, bench: []},
+    legal: [{kind: 'item', item_id: '回复药', label: '使用回复药'}],
+  });
+  const events = [
+    ev(enemyFaintTurn, 'turn_start', {turn: enemyFaintTurn}, `第 ${enemyFaintTurn} 回合开始。`),
+    ev(enemyFaintTurn, 'damage', {side: 'player', skill_id: 'skill_000750', target_slot: 0, damage: 400, type_multiplier: 2, formula_verified: false},
+      '我方的龙血命中，造成约 400 点伤害，属性克制。', ['skill_000750']),
+    ev(enemyFaintTurn, 'faint', {side: 'enemy', slot: 0}, '对方的精灵倒下了。', ['3009']),
+    ev(enemyFaintTurn, 'replacement', {side: 'enemy', slot: 1}, '对方补上了第 2 位精灵。'),
+    ev(playerFaintTurn, 'turn_start', {turn: playerFaintTurn}, `第 ${playerFaintTurn} 回合开始。`),
+    ev(playerFaintTurn, 'damage', {side: 'enemy', skill_id: 'skill_000311', target_slot: 0, damage: 210, type_multiplier: 1, formula_verified: false},
+      '对方的裂空命中，造成约 210 点伤害。', ['skill_000311']),
+    ev(playerFaintTurn, 'faint', {side: 'player', slot: 0}, '我方的精灵倒下了。', ['3009']),
+  ];
+  return {events, turns: playerFaintTurn, result: 'loss', game: rocoGameView(view, {matchId: 'm-S'})};
+}
+
 /** 只有一条伤害、没有减员也没有翻盘的一局：老师说不出话，应当沉默。 */
 function matchQuiet() {
   return {
@@ -378,6 +407,32 @@ test('在后续局验证：局面没再出现 → improved 为 null，并明说�
   assert.match(result.note, /证明不了/, `note 必须明说没出现证明不了什么：${result.note}`);
   assert.match(result.note, /没有再出现/);
   assert.ok(!result.evidence.some((line) => line.includes('这一次是往好的方向变')));
+});
+
+test('挂账的回合必须是「这门课的局面」那一回合，不是转折点那一回合（第 45 轮实测抓到）', () => {
+  const review = reviewMatch(matchSplit({playerFaintTurn: 7, enemyFaintTurn: 3}));
+  assert.ok(review);
+  assert.equal(review.turning_point.turn, 3, '转折点是对方第一次减员');
+  assert.equal(review.check.turn, 7, '这门课的局面是我方第 7 回合倒下');
+  assert.notEqual(review.turning_point.turn, review.check.turn, '这个夹具的意义就在于两个回合不同');
+
+  const row = recordTeacherReview(freshMemory(), {matchId: 'm-S1', review})
+    .journal.filter((e) => e.kind === 'teach').at(-1);
+  assert.equal(row.turn, 7, '挂账要比对的是局面的回合');
+  assert.equal(row.pointTurn, 3, '转折点回合另存，别丢');
+  assert.equal(row.situation, 'our-pet-fainted');
+  assert.equal(row.handling, 'no-heal-before-faint');
+
+  // 下一局同一局面又出现（这次在第 9 回合）：核对句里的两个数字必须都是**局面**回合。
+  const memory = recordTeacherReview(freshMemory(), {matchId: 'm-S1', review});
+  const progress = checkLearningProgress({memory, match: matchSplit({playerFaintTurn: 9, enemyFaintTurn: 4})});
+  assert.equal(progress.checked, true);
+  assert.equal(progress.recurred, true);
+  assert.equal(progress.improved, false, `两次处理方式一样：${progress.note}`);
+  assert.match(progress.note, /第 7 回合（上一次/, `上一次要说局面那一回合：${progress.note}`);
+  assert.match(progress.note, /第 9 回合（这一次/, `这一次要说局面那一回合：${progress.note}`);
+  assert.ok(!/第 3 回合（上一次/.test(progress.note),
+    `不许拿转折点回合当「上一次」：${progress.note}`);
 });
 
 test('在后续局验证：局面重复、处理方式一样 → improved 为 false', () => {

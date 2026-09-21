@@ -808,12 +808,24 @@ export function recordTeacherReview(memory, {matchId = null, review = null, now 
   if (typeof matchId !== 'string' || !matchId) return memory;
   const turn = review?.turning_point?.turn;
   if (!Number.isInteger(turn)) return memory;
+  // ── 挂账的那个回合必须是**这门课的局面**发生在第几回合（第 45 轮的浏览器实测抓到的）──
+  //
+  // `checkLearningProgress` 拿 `record.turn` 和下一局的 `evaluation.turn` 做对比，
+  // 所以两个数字必须是**同一类时刻**。而一局里「转折点」与「这门课的局面」常常不是同一回合：
+  // 实测（19 回合的一局）转折点是**对方**第 10 回合第一次减员，而这门课讲的是**我方**
+  // 第 15 回合才倒下。原来存的是转折点回合，于是下一局的核对写成
+  // 「对比第 10 回合（上一次：倒下之前还有回复药但没有用）与第 15 回合（这一次：…）」——
+  // 两个数字量的不是同一件事，读起来却像同一次对比。
+  // 所以：`turn` 存**局面**那一回合（对比用），转折点回合另存 `pointTurn`（依据用）。
+  const situationTurn = review?.check?.turn;
+  const ledgerTurn = Number.isInteger(situationTurn) ? situationTurn : turn;
   const m = markTaught(memory, {lesson: review.goal});
   return recordCoachEvent(m, {
     id: `${matchId}:teach:${review.goal}`,
     kind: 'teach',
     matchId,
-    turn,
+    turn: ledgerTurn,
+    pointTurn: turn,
     lesson: review.goal,
     goal: review.goal,
     situation: review?.check?.situation ?? null,
