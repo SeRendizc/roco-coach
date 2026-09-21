@@ -1,0 +1,1210 @@
+{
+  "report_version": "roco-rc301-team-request-report/v1",
+  "task": "RC-301 RecommendationRequest 合同（六宠、未知对手、LLM 只出 schema、程序校验）",
+  "generated_by": "src/coach/team-request.js 的 buildRc301Report()，由 tests/roco-team-request.test.js 复跑比对",
+  "clock_fields": [],
+  "artifact": {
+    "module": "src/coach/team-request.js",
+    "tool_entry": "src/coach/toolbox.js 的 request_team_recommendation",
+    "docs": "docs/roco/TEAM-REQUEST.md",
+    "paths": {
+      "ownedPets": "data/roco/owned/owned-pets.json",
+      "pack": "data/roco/game-data-pack/v2/pack.json",
+      "battleModes": "data/roco/battle-modes.json",
+      "rulesets": "data/roco/rulesets"
+    }
+  },
+  "data_basis": {
+    "owned_instances": 80,
+    "owned_species": 48,
+    "pack_pet_entities": 622,
+    "battle_modes": [
+      "demo-training-3v3",
+      "pvp-standard-six-pet",
+      "pvp-speed-duel-3v3",
+      "pvp-territory-trial-2v2",
+      "pve-camp"
+    ],
+    "rulesets": [
+      "legacy_sim_v1",
+      "mobile_s4_candidate_v2"
+    ],
+    "missing": [],
+    "sample_instance_id": "own-0001",
+    "sample_species_id": "pet_000012",
+    "favourite_instance_id": "own-0001",
+    "pack_only_species_id": "pet_000001",
+    "second_owned_species_id": "pet_000118"
+  },
+  "contract": {
+    "allowed_fields": [
+      "mode",
+      "team_size",
+      "visibility",
+      "must_include",
+      "must_exclude",
+      "locked",
+      "selected",
+      "max_replacements",
+      "favourites_only",
+      "preference",
+      "ruleset_config_id",
+      "opponent_roster",
+      "constraints"
+    ],
+    "constraint_keys": [
+      "no_duplicate_instances",
+      "species_unique",
+      "avoid_unknown_mechanics"
+    ],
+    "fields": [
+      {
+        "name": "mode",
+        "kind": "enum-registry-id",
+        "required": true,
+        "enum": null,
+        "enum_source": "data/roco/battle-modes.json 的 modes[].id",
+        "known_keys": null,
+        "default": "pvp-standard-six-pet",
+        "default_reason": "13 号设计文档 §2：核心模式是标准化六宠 PVP 阵容工坊。代入会被记为 DEFAULTED_FIELD，不假装是调用方给的。",
+        "derived_from": null,
+        "semantics": "要按哪套 BattleMode 参数配队。不许自创：注册表里没有的 id 一律拒。标准 PVP 六宠阵容工坊是本阶段核心模式，没给模式时按它代入并在 info/DEFAULTED_FIELD 里写明。"
+      },
+      {
+        "name": "team_size",
+        "kind": "enum-derived-integer",
+        "required": true,
+        "enum": null,
+        "enum_source": "battle-modes.json 的 mode.parameters.team_size",
+        "known_keys": null,
+        "default": null,
+        "default_reason": null,
+        "derived_from": "mode.parameters.team_size（调用方没给时按模式注册表代入，并在 info/DERIVED_FIELD 里写明）",
+        "semantics": "目标队伍槽位数。它**必须**等于 mode 注册表里该模式的 team_size；标准 PVP 是 6，极速对决是 3。注册表没写这个数时判红（不许当 6 用）。"
+      },
+      {
+        "name": "visibility",
+        "kind": "enum",
+        "required": true,
+        "enum": [
+          "UNKNOWN_PREMATCH",
+          "VISIBLE_ROSTER_IN_BATTLE",
+          "KNOWN_SCENARIO"
+        ],
+        "enum_source": null,
+        "known_keys": null,
+        "default": "UNKNOWN_PREMATCH",
+        "default_reason": "匹配前不知道对手是产品场景（13 号设计文档 §1/§4）；标准 PVP 下默认且首选 UNKNOWN_PREMATCH。",
+        "derived_from": null,
+        "semantics": "这次配队能不能看到对手。标准 PVP 匹配前是 UNKNOWN_PREMATCH（只有版本 Meta prior）；VISIBLE_ROSTER_IN_BATTLE 表示入局后看得见对方精灵但配招/策略未知；KNOWN_SCENARIO 表示对手阵容已知——这时**必须**给出 opponent_roster，否则拒。"
+      },
+      {
+        "name": "must_include",
+        "kind": "reference-list",
+        "required": false,
+        "enum": null,
+        "enum_source": "owned-pets.json 的 instance_id 或 pack 的 pet species_id",
+        "known_keys": null,
+        "default": [],
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "必须出现在最终队伍里的条目；每项是 owned 的 instance_id 或 pack 的 pet species_id。"
+      },
+      {
+        "name": "must_exclude",
+        "kind": "reference-list",
+        "required": false,
+        "enum": null,
+        "enum_source": "owned-pets.json 的 instance_id 或 pack 的 pet species_id",
+        "known_keys": null,
+        "default": [],
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "不得出现在最终队伍里的条目；与 must_include 有交集即拒（矛盾约束不许带下去）。"
+      },
+      {
+        "name": "locked",
+        "kind": "instance-id-list",
+        "required": false,
+        "enum": null,
+        "enum_source": "owned-pets.json 的 instance_id",
+        "known_keys": null,
+        "default": [],
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "玩家钉死不许替换的**实例**（只能是 instance_id，且必须在 owned 里）；locked ⊆ must_include ∪ selected——锁定一个既没入选也没进 must_include 的实例是说不通的。"
+      },
+      {
+        "name": "selected",
+        "kind": "instance-id-list",
+        "required": false,
+        "enum": null,
+        "enum_source": "owned-pets.json 的 instance_id",
+        "known_keys": null,
+        "default": [],
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "已经选进队伍槽位的实例（0～team_size 个）。RC-303 的渐进推荐以它为基础补全。"
+      },
+      {
+        "name": "max_replacements",
+        "kind": "non-negative-integer",
+        "required": false,
+        "enum": null,
+        "enum_source": null,
+        "known_keys": null,
+        "default": null,
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "相对 selected 最多允许替换几只。没给就是 null——表示**未指定**，不是 0（0 与「没限制」是两件事）。"
+      },
+      {
+        "name": "favourites_only",
+        "kind": "boolean",
+        "required": false,
+        "enum": null,
+        "enum_source": null,
+        "known_keys": null,
+        "default": false,
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "true 时候选池只含 owned 里 favourite 的实例；与「必须带一只非收藏」的约束不可同时满足时判红。"
+      },
+      {
+        "name": "preference",
+        "kind": "enum-optional",
+        "required": false,
+        "enum": [
+          "gentle",
+          "brief",
+          "detailed"
+        ],
+        "enum_source": null,
+        "known_keys": null,
+        "default": null,
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "解释口吻偏好（温和/简短/详细）。它只影响措辞，不影响候选与排序。"
+      },
+      {
+        "name": "ruleset_config_id",
+        "kind": "registry-id",
+        "required": true,
+        "enum": null,
+        "enum_source": "data/roco/rulesets/*.json 的 ruleset_config_id",
+        "known_keys": null,
+        "default": null,
+        "default_reason": null,
+        "derived_from": "registry.mode_default(mode.ruleset_binding)——只认模式注册表绑定的那一个；注册表里没有那份配置时**拒**，不在调用方静默挑一份。",
+        "semantics": "用哪份版本化规则配置算。候选规则（CANDIDATE_NOT_FOR_DEFAULT）只在显式选择时生效。"
+      },
+      {
+        "name": "opponent_roster",
+        "kind": "reference-list",
+        "required": "conditional:visibility=KNOWN_SCENARIO",
+        "enum": null,
+        "enum_source": "owned-pets.json 的 instance_id 或 pack 的 pet species_id",
+        "known_keys": null,
+        "default": null,
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "已知对手时的对手条目（species_id / instance_id）。只有 KNOWN_SCENARIO 允许非空，且 KNOWN_SCENARIO 必须非空；UNKNOWN_PREMATCH 下给出具体对手即拒（那是把匹配前当成匹配后）。"
+      },
+      {
+        "name": "constraints",
+        "kind": "known-key-boolean-object",
+        "required": false,
+        "enum": null,
+        "enum_source": null,
+        "known_keys": [
+          "no_duplicate_instances",
+          "species_unique",
+          "avoid_unknown_mechanics"
+        ],
+        "default": null,
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "额外的硬约束开关。**键集合固定**，未知键按 UNKNOWN_CONSTRAINT_KEY 拒——否则「约束」会变成模型随手加字段的口袋。"
+      }
+    ],
+    "standard_pvp": {
+      "mode_id": "pvp-standard-six-pet",
+      "team_size_from_registry": 6,
+      "team_size_expected": 6,
+      "registry_status": "CANDIDATE",
+      "registry_confidence": "CROSS_SOURCE_SUPPORTED",
+      "unknown_count": 4,
+      "note": "标准 PVP 六宠的参数只从 battle-modes.json 读；注册表里它有未核实项，报告不替它补事实。"
+    }
+  },
+  "error_codes": [
+    {
+      "code": "INVALID_TYPE",
+      "direction": "请求不是普通对象 / 字段形状不对（team_size 不是整数、列表里有非字符串…）必须判红",
+      "detail": "点名字段与期望形状"
+    },
+    {
+      "code": "UNKNOWN_FIELD",
+      "direction": "传入合同没登记的字段（例如 selected_pets）必须判红，且不许静默丢弃",
+      "detail": "点名是哪个字段"
+    },
+    {
+      "code": "UNKNOWN_CONSTRAINT_KEY",
+      "direction": "constraints 里出现未登记子键必须判红",
+      "detail": "点名是哪个子键"
+    },
+    {
+      "code": "MISSING_FIELD",
+      "direction": "必填字段缺失（且无法由注册表推导）必须判红，不补默认值",
+      "detail": "点名缺哪个字段"
+    },
+    {
+      "code": "INVALID_ENUM",
+      "direction": "visibility / preference 取值不在枚举里必须判红",
+      "detail": "点名字段与实际值"
+    },
+    {
+      "code": "UNKNOWN_MODE",
+      "direction": "mode 不在 battle-modes.json 注册表里（自创模式）必须判红",
+      "detail": "点名 id"
+    },
+    {
+      "code": "MODE_TEAM_SIZE_UNKNOWN",
+      "direction": "所选模式在注册表里没有 team_size（例如 PVE 营地），无法判 team_size 时必须判红",
+      "detail": "不许当 6 处理"
+    },
+    {
+      "code": "MODE_TEAM_SIZE_MISMATCH",
+      "direction": "team_size 与 mode 注册表参数不一致（标准 PVP 传 3）必须判红",
+      "detail": "报出注册表值与实际值"
+    },
+    {
+      "code": "UNKNOWN_RULESET",
+      "direction": "自创 ruleset_config_id 必须判红",
+      "detail": "点名 id"
+    },
+    {
+      "code": "UNKNOWN_INSTANCE_ID",
+      "direction": "引用了 owned-pets.json 里不存在的 instance_id（或把 species_id 塞进 locked/selected）必须判红",
+      "detail": "点名 id"
+    },
+    {
+      "code": "UNKNOWN_SPECIES_ID",
+      "direction": "引用了 pack 里不存在的 species_id 必须判红",
+      "detail": "点名 id"
+    },
+    {
+      "code": "LOCKED_NOT_SELECTED",
+      "direction": "locked 里的实例既不在 selected 也不在 must_include 必须判红",
+      "detail": "locked ⊆ must_include ∪ selected"
+    },
+    {
+      "code": "LOCKED_EXCLUDED_CONFLICT",
+      "direction": "同一项既被锁定又被排除（锁定的必须留下、被排除的不许进队）必须判红",
+      "detail": "不可满足的约束组合"
+    },
+    {
+      "code": "TEAM_CONSTRAINT_WITHOUT_NAMES",
+      "direction": "只给了「不重复」这类**队内**约束却没点名任何一只（无法评估的请求）必须判红",
+      "detail": "不许当成可满足"
+    },
+    {
+      "code": "FAVOURITES_ONLY_EMPTY_POOL",
+      "direction": "favourites_only=true 但 owned 里一只是收藏都没有（空池不可满足）必须判红",
+      "detail": "不许当成可满足"
+    },
+    {
+      "code": "MUST_INCLUDE_EXCLUDE_OVERLAP",
+      "direction": "must_include 与 must_exclude 有交集必须判红",
+      "detail": "报出交集"
+    },
+    {
+      "code": "SELECTED_OVER_TEAM_SIZE",
+      "direction": "selected 超过 team_size 个槽位必须判红",
+      "detail": "报出两个数"
+    },
+    {
+      "code": "SELECTED_HAS_EXCLUDED",
+      "direction": "selected 里出现 must_exclude 条目必须判红",
+      "detail": "报出被排除的那项"
+    },
+    {
+      "code": "MUST_INCLUDE_HAS_UNOWNED_SPECIES",
+      "direction": "favourites_only=true 时 must_include 里出现未拥有/非收藏的 species_id 必须判红",
+      "detail": "报出该项"
+    },
+    {
+      "code": "LOCKED_FAVOURITES_ONLY_CONFLICT",
+      "direction": "favourites_only=true 但 must_include/locked 里一只收藏都没有，约束不可同时满足时必须判红",
+      "detail": "不许当成可满足"
+    },
+    {
+      "code": "UNKNOWN_OPPONENT",
+      "direction": "opponent_roster 引用了不存在或未拥有的条目必须判红",
+      "detail": "点名 id"
+    },
+    {
+      "code": "OPPONENT_INFO_REQUIRED",
+      "direction": "visibility=KNOWN_SCENARIO 却不给对手信息必须判红",
+      "detail": "缺 opponent_roster"
+    },
+    {
+      "code": "OPPONENT_INFO_NOT_ALLOWED",
+      "direction": "visibility=UNKNOWN_PREMATCH 却给出具体对手必须判红",
+      "detail": "那是把匹配前当成匹配后"
+    },
+    {
+      "code": "MODE_SIZE_WITHOUT_MODE",
+      "direction": "自然语言只说了「N 只」却没说模式时必须判红",
+      "detail": "标准 PVP 是 6、极速对决是 3，不许挑一个当默认"
+    },
+    {
+      "code": "UNRESOLVED_MENTION",
+      "direction": "自然语言里点名了宠物/模式，但登记表里查不到必须判红",
+      "detail": "点名原文，不许猜成某一只"
+    },
+    {
+      "code": "NO_REQUEST_INTENT",
+      "direction": "一句话里没有任何能落进 schema 的约束（「随便配一队」）必须判红",
+      "detail": "应说明缺什么，而不是编六只名单"
+    },
+    {
+      "code": "CONTRADICTORY_FLAGS",
+      "direction": "同一份文本里同时给出互斥的信号（既说匹配前又说对面已定）必须判红",
+      "detail": "不许任选一个"
+    }
+  ],
+  "info_codes": [
+    {
+      "code": "DEFAULTED_FIELD",
+      "detail": "某字段是代入的默认值（不是调用方给的），点名并说明来源"
+    },
+    {
+      "code": "MENTION_WITHOUT_FIELD",
+      "detail": "原话点了名，但句子没说拿它做什么（带上/排除/锁定），所以它没落进任何字段——调用方必须回头看原话，不要只看 schema"
+    },
+    {
+      "code": "DERIVED_FIELD",
+      "detail": "某字段由注册表推导（team_size / ruleset_config_id ← mode 注册表）"
+    },
+    {
+      "code": "SORTED_LIST",
+      "detail": "列表被规范化去重排序，改动的是**编码**不是**语义**"
+    },
+    {
+      "code": "EMPTY_LIST",
+      "detail": "某个列表字段给了空数组：等于没给（空数组不算「约束成立」）"
+    },
+    {
+      "code": "VISIBILITY_NOT_DEFAULT",
+      "detail": "标准 PVP 下用了非首选的可见性，调用方应知道这不是匹配前口径"
+    },
+    {
+      "code": "CONSTRAINT_NOTE",
+      "detail": "已采纳的硬约束清单（自然语言里的「不重复」等落在这里）"
+    },
+    {
+      "code": "MODE_NOTE",
+      "detail": "模式注册表里该模式自身的 unknowns，或抽取器映射了哪个说法"
+    }
+  ],
+  "unknown_prematch_is_default": {
+    "claim": "标准 PVP 在调用方没有给出 visibility 时，默认且首选 UNKNOWN_PREMATCH",
+    "input": {
+      "mode": "pvp-standard-six-pet"
+    },
+    "actual_visibility": "UNKNOWN_PREMATCH",
+    "actual_team_size": 6,
+    "from": "没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）",
+    "default_is_preferred": true,
+    "registry_evidence": {
+      "mode_id": "pvp-standard-six-pet",
+      "registry_team_size": 6,
+      "registry_status": "CANDIDATE",
+      "registry_confidence": "CROSS_SOURCE_SUPPORTED"
+    },
+    "scale_evidence": "13 号设计文档 §1「匹配前不知道对手阵容」/§4「匹配前没有具体敌队，评价的是对版本环境分布的表现」",
+    "known_scenario_requires_opponent": {
+      "ok": false,
+      "code": "OPPONENT_INFO_REQUIRED",
+      "detail": "[OPPONENT_INFO_REQUIRED] opponent_roster：visibility=KNOWN_SCENARIO 却没有任何对手信息：已知场景必须给出对手条目，否则请用 UNKNOWN_PREMATCH（实际值 null）"
+    },
+    "unknown_prematch_rejects_named_opponent": {
+      "ok": false,
+      "code": "OPPONENT_INFO_NOT_ALLOWED",
+      "detail": "[OPPONENT_INFO_NOT_ALLOWED] opponent_roster：visibility=UNKNOWN_PREMATCH 下不允许给出具体对手：匹配前不知道对手，不能把匹配前当成匹配后（实际值 [\"pet_000012\"]）"
+    },
+    "non_default_is_recorded_not_silent": {
+      "ok": true,
+      "info_code": "VISIBILITY_NOT_DEFAULT",
+      "detail": "[VISIBILITY_NOT_DEFAULT] visibility：标准 PVP 的首选口径是 UNKNOWN_PREMATCH（匹配前不知道对手）；本次用的是 KNOWN_SCENARIO，下游不得把它当成匹配前口径（实际值 \"KNOWN_SCENARIO\"）"
+    }
+  },
+  "natural_language_mapping": {
+    "extractor": "requestFromNaturalLanguage()：纯规则抽取，只做映射；产出必须再过 validateRecommendationRequest()",
+    "output_fields": [
+      "mode",
+      "team_size",
+      "visibility",
+      "must_include",
+      "must_exclude",
+      "locked",
+      "selected",
+      "max_replacements",
+      "favourites_only",
+      "preference",
+      "ruleset_config_id",
+      "opponent_roster",
+      "constraints"
+    ],
+    "can": [
+      "把原话里出现的 BattleMode 说法映射成注册表 id（标准PVP / 极速对决 / 领地试炼 / 练习局）",
+      "把「N 只」映射成 team_size（阿拉伯数字与中文数词）",
+      "把「匹配前/不知道对面」「入局后看到」「对手是…」映射成三种 visibility",
+      "把「带上/必须有 X」「别带/排除 X」「锁定/不许换 X」映射成 must_include / must_exclude / locked",
+      "把「只要收藏的」「不要重复」「说详细一点」映射成 favourites_only / constraints.species_unique / preference",
+      "把「对手是 X」映射成 opponent_roster（并因此落到 KNOWN_SCENARIO）"
+    ],
+    "cannot": [
+      "不补默认值：没说的字段不写进候选 schema（mode/visibility 的默认由 validate 代入并记进 info，且写明这是代入的）",
+      "不猜名字：认不出的宠物名/别名词进 UNRESOLVED_MENTION，ok:false，不映射成任何一只",
+      "不发明 id：mode / ruleset_config_id 只能来自注册表；抽取器不生产任何登记表以外的 id",
+      "不选一边：同一句话里出现互斥信号（两种模式 / 两种可见性 / 两个队伍规模）时 CONTRADICTORY_FLAGS",
+      "不产出推荐：它只输出候选 schema；队伍名单、排序、解释都不是它的事（RC-303）",
+      "不做同义词消解：断词、简称、错别字、方言说法覆盖有限，覆盖不到就如实报「认不出」",
+      "不做全句语义解析：「铠甲虫还有熔岩巨兽都带上」这种「多个名字 + 连接词 + 后置动词」的句子，后半段可能既没被映射、也报不出 UNRESOLVED_MENTION（于是 ok:true 但 must_include 比人少）——这是已知覆盖缺口：调用方必须把原话与 schema 一起看，不要只信 schema"
+    ],
+    "ok_cases": [
+      {
+        "text": "给铠甲虫配一队标准PVP",
+        "ok": true,
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[MENTION_WITHOUT_FIELD] text：原话点了名，但句子没说拿这些精灵做什么（带上 / 排除 / 锁定），所以它们没落进任何字段：「pet_000012」。schema 仍然有效，但**名字少了**：请回头看原话，或改成「必须带上 X／排除 Y／锁定 Z」（实际值 [\"pet_000012\"]）",
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      },
+      {
+        "text": "标准PVP，队伍里必须有铠甲虫",
+        "ok": true,
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "must_include": [
+            "pet_000012"
+          ],
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[MODE_NOTE] must_include：原话必须包含：pet_000012（实际值 \"pet_000012\"）",
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      },
+      {
+        "text": "标准PVP，队伍里必须有 own-0001 并且锁定 own-0001",
+        "ok": true,
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "must_include": [
+            "own-0001"
+          ],
+          "locked": [
+            "own-0001"
+          ],
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[MODE_NOTE] must_include：原话必须包含：own-0001（实际值 \"own-0001\"）",
+          "[MODE_NOTE] locked：原话锁定：own-0001（实际值 \"own-0001\"）",
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      },
+      {
+        "text": "标准PVP，别带铠甲虫，队伍里必须有音速犬",
+        "ok": true,
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "must_include": [
+            "pet_000062"
+          ],
+          "must_exclude": [
+            "pet_000012"
+          ],
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[MODE_NOTE] must_exclude：原话排除：pet_000012（实际值 \"pet_000012\"）",
+          "[MODE_NOTE] must_include：原话必须包含：pet_000062（实际值 \"pet_000062\"）",
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      },
+      {
+        "text": "帮我配一队，只要收藏的，注意不要重复",
+        "ok": true,
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "max_replacements": null,
+          "favourites_only": true,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2",
+          "constraints": {
+            "species_unique": true
+          }
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[DEFAULTED_FIELD] mode：没给 mode：代入标准 PVP 六宠阵容工坊（pvp-standard-six-pet），这是本阶段核心模式（13 号设计文档 §2）（实际值 \"pvp-standard-six-pet\"）",
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）",
+          "[CONSTRAINT_NOTE] constraints：已采纳的硬约束：species_unique（实际值 {\"species_unique\":true}）"
+        ]
+      },
+      {
+        "text": "极速对决，带上铠甲虫",
+        "ok": true,
+        "request": {
+          "mode": "pvp-speed-duel-3v3",
+          "team_size": 3,
+          "visibility": "UNKNOWN_PREMATCH",
+          "must_include": [
+            "pet_000012"
+          ],
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[MODE_NOTE] must_include：原话必须包含：pet_000012（实际值 \"pet_000012\"）",
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-speed-duel-3v3 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-speed-duel-3v3 的注册表参数代入 3（实际值 3）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-speed-duel-3v3 在注册表里有 1 条未核实项（未实机核对前不得当官方事实）（实际值 1）"
+        ]
+      },
+      {
+        "text": "标准PVP，别带铠甲虫",
+        "ok": true,
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "must_exclude": [
+            "pet_000012"
+          ],
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[MODE_NOTE] must_exclude：原话排除：pet_000012（实际值 \"pet_000012\"）",
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      },
+      {
+        "text": "标准PVP，说详细一点",
+        "ok": true,
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": "detailed",
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      },
+      {
+        "text": "标准PVP，对手是 pet_000012，针对一下",
+        "ok": true,
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "KNOWN_SCENARIO",
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2",
+          "opponent_roster": [
+            "pet_000012"
+          ]
+        },
+        "code": null,
+        "problems": [],
+        "missing": [],
+        "info": [
+          "[MODE_NOTE] opponent_roster：原话点名对手：pet_000012（实际值 \"pet_000012\"）",
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[VISIBILITY_NOT_DEFAULT] visibility：标准 PVP 的首选口径是 UNKNOWN_PREMATCH（匹配前不知道对手）；本次用的是 KNOWN_SCENARIO，下游不得把它当成匹配前口径（实际值 \"KNOWN_SCENARIO\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）",
+          "[VISIBILITY_NOT_DEFAULT] visibility：原话把标准 PVP 的可见性说成 KNOWN_SCENARIO（不是首选的 UNKNOWN_PREMATCH）；下游不得当成匹配前口径（实际值 \"KNOWN_SCENARIO\"）"
+        ]
+      }
+    ],
+    "red_cases": [
+      {
+        "text": "随便配一队",
+        "ok": false,
+        "request": null,
+        "code": "NO_REQUEST_INTENT",
+        "problems": [
+          "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"随便配一队\"）"
+        ],
+        "missing": [
+          "text"
+        ],
+        "info": []
+      },
+      {
+        "text": "帮我配一队",
+        "ok": false,
+        "request": null,
+        "code": "NO_REQUEST_INTENT",
+        "problems": [
+          "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"帮我配一队\"）"
+        ],
+        "missing": [
+          "text"
+        ],
+        "info": []
+      },
+      {
+        "text": "标准PVP，队伍里必须有喷火驼",
+        "ok": false,
+        "request": null,
+        "code": "UNRESOLVED_MENTION",
+        "problems": [
+          "[UNRESOLVED_MENTION] text：原话里这些片段出现在「点名」的位置上，但没能对应到登记表里的精灵：「喷火驼」。别名、简称、错别字一律**不猜**是哪一只：请改成登记表里的完整名字或 instance_id（实际值 [\"喷火驼\"]）"
+        ],
+        "missing": [
+          "text"
+        ],
+        "info": []
+      },
+      {
+        "text": "标准PVP，锁定喷火驼",
+        "ok": false,
+        "request": null,
+        "code": "UNRESOLVED_MENTION",
+        "problems": [
+          "[UNRESOLVED_MENTION] text：原话里这些片段出现在「点名」的位置上，但没能对应到登记表里的精灵：「喷火驼」。别名、简称、错别字一律**不猜**是哪一只：请改成登记表里的完整名字或 instance_id（实际值 [\"喷火驼\"]）"
+        ],
+        "missing": [
+          "text"
+        ],
+        "info": []
+      },
+      {
+        "text": "极速对决，标准PVP，带铠甲虫",
+        "ok": false,
+        "request": null,
+        "code": "CONTRADICTORY_FLAGS",
+        "problems": [
+          "[CONTRADICTORY_FLAGS] mode：同一句话里出现了互斥的模式说法：标准PVP、极速对决——不替你选一个（实际值 [\"pvp-standard-six-pet\",\"pvp-speed-duel-3v3\"]）",
+          "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"极速对决，标准PVP，带铠甲虫\"）"
+        ],
+        "missing": [
+          "mode",
+          "text"
+        ],
+        "info": [
+          "[MENTION_WITHOUT_FIELD] text：原话点了名，但句子没说拿这些精灵做什么（带上 / 排除 / 锁定），所以它们没落进任何字段：「pet_000012」。schema 仍然有效，但**名字少了**：请回头看原话，或改成「必须带上 X／排除 Y／锁定 Z」（实际值 [\"pet_000012\"]）"
+        ]
+      },
+      {
+        "text": "六只，带铠甲虫",
+        "ok": false,
+        "request": null,
+        "code": "MODE_SIZE_WITHOUT_MODE",
+        "problems": [
+          "[MODE_SIZE_WITHOUT_MODE] mode：只说了「6 只」，没说模式：标准 PVP 是 6、极速对决是 3、领地试炼是 2，不许挑一个当默认。请补上模式（例如「标准PVP」）（实际值 6）"
+        ],
+        "missing": [
+          "mode"
+        ],
+        "info": [
+          "[MENTION_WITHOUT_FIELD] text：原话点了名，但句子没说拿这些精灵做什么（带上 / 排除 / 锁定），所以它们没落进任何字段：「pet_000012」。schema 仍然有效，但**名字少了**：请回头看原话，或改成「必须带上 X／排除 Y／锁定 Z」（实际值 [\"pet_000012\"]）"
+        ]
+      },
+      {
+        "text": "标准PVP，不要重复，每只都要不一样，配一队",
+        "ok": false,
+        "request": null,
+        "code": "TEAM_CONSTRAINT_WITHOUT_NAMES",
+        "problems": [
+          "[TEAM_CONSTRAINT_WITHOUT_NAMES] constraints：只给了队内约束（不重复/每只不一样），却没点名任何一只、没有已选槽位、也没有收窄候选池：没有任何可评估的对象，这不是一份可执行的请求。请至少点名一只（或给出 selected / favourites_only）（实际值 {\"species_unique\":true}）"
+        ],
+        "missing": [
+          "constraints"
+        ],
+        "info": [
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）",
+          "[CONSTRAINT_NOTE] constraints：已采纳的硬约束：species_unique（实际值 {\"species_unique\":true}）"
+        ]
+      },
+      {
+        "text": "把对面的精灵都换掉吧",
+        "ok": false,
+        "request": null,
+        "code": "NO_REQUEST_INTENT",
+        "problems": [
+          "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"把对面的精灵都换掉吧\"）"
+        ],
+        "missing": [
+          "text"
+        ],
+        "info": []
+      }
+    ],
+    "coverage_note": "抽取器只认登记表里逐字存在的名字（species_name / species_id / instance_id）与上表列出的固定说法；别名、简称、错别字一律落到 UNRESOLVED_MENTION，不猜。"
+  },
+  "does_not_produce_recommendations": {
+    "statement": "本 RC **不产生**推荐结果。`request_team_recommendation` 的返回值只有「经校验的请求对象 + 校验问题 + 信息」，既没有队伍名单，也没有排序、分值、胜率或解释。",
+    "tool_return_shape": [
+      "ok",
+      "request",
+      "problems",
+      "info",
+      "doesNotRecommend",
+      "needs",
+      "contract"
+    ],
+    "forbidden_in_this_rc": [
+      "六宠候选名单 / Top-K 排序（RC-303）",
+      "缺口诊断 coverage / speed / energy / respond / pivot / synergy / cost（RC-302）",
+      "未知对手下的 expected value / worst archetype / matchup spread（RC-304）",
+      "任何胜率或伪精确数值（本仓在取得校准证据之前一律不给）"
+    ],
+    "enforced_by": "tests/roco-team-request.test.js 有一条判据逐键比对工具回执的键集合，并断言回执里不出现 candidates / ranking / recommendation / win_rate 这类字段。"
+  },
+  "criteria": [
+    {
+      "id": "C01",
+      "text": "合同字段表覆盖 REQUEST_FIELDS 的每一个字段，且每个字段都有 kind / semantics 与可追溯的默认/推导说明",
+      "expected": "13",
+      "actual": "13",
+      "ok": true,
+      "actual_output": [
+        "mode:enum-registry-id（默认来自：13 号设计文档 §2：核心模式是标准化六宠 P…）",
+        "team_size:enum-derived-integer",
+        "visibility:enum（默认来自：匹配前不知道对手是产品场景（13 号设计文档 §…）",
+        "must_include:reference-list",
+        "must_exclude:reference-list",
+        "locked:instance-id-list",
+        "selected:instance-id-list",
+        "max_replacements:non-negative-integer",
+        "favourites_only:boolean",
+        "preference:enum-optional",
+        "ruleset_config_id:registry-id",
+        "opponent_roster:reference-list",
+        "constraints:known-key-boolean-object"
+      ]
+    },
+    {
+      "id": "C02",
+      "text": "① 未知字段（selected_pets）被判 UNKNOWN_FIELD，而不是静默丢弃",
+      "expected": "UNKNOWN_FIELD",
+      "actual": "UNKNOWN_FIELD",
+      "ok": true,
+      "actual_output": [
+        "[UNKNOWN_FIELD] selected_pets：合同没有登记这个字段：它不会被采纳，也不会被忽略——请改用 mode / team_size / visibility / must_include / must_exclude / locked / selected / max_replacements / favourites_only / preference / ruleset_config_id / opponent_roster / constraints 之一（实际值 [\"own-0001\"]）"
+      ]
+    },
+    {
+      "id": "C03",
+      "text": "② must_include 与 must_exclude 有交集时判 MUST_INCLUDE_EXCLUDE_OVERLAP",
+      "expected": "MUST_INCLUDE_EXCLUDE_OVERLAP",
+      "actual": "MUST_INCLUDE_EXCLUDE_OVERLAP",
+      "ok": true,
+      "actual_output": [
+        "[MUST_INCLUDE_EXCLUDE_OVERLAP] must_include/must_exclude：同一条目既必须包含又必须排除：own-0001（矛盾约束不许带到下游）（实际值 [\"own-0001\"]）"
+      ]
+    },
+    {
+      "id": "C04",
+      "text": "③ 不存在的 instance_id 判 UNKNOWN_INSTANCE_ID",
+      "expected": "UNKNOWN_INSTANCE_ID",
+      "actual": "UNKNOWN_INSTANCE_ID",
+      "ok": true,
+      "actual_output": [
+        "[UNKNOWN_INSTANCE_ID] must_include：must_include 里的 \"own-9999\" 在登记表里查不到：instance_id 必须来自 owned-pets.json，species_id 必须来自 pack 的 pet 实体——不许猜（实际值 \"own-9999\"）"
+      ]
+    },
+    {
+      "id": "C05",
+      "text": "③b 不存在的 species_id 判 UNKNOWN_SPECIES_ID",
+      "expected": "UNKNOWN_SPECIES_ID",
+      "actual": "UNKNOWN_SPECIES_ID",
+      "ok": true,
+      "actual_output": [
+        "[UNKNOWN_SPECIES_ID] must_include：must_include 里的 \"pet_999999\" 在登记表里查不到：instance_id 必须来自 owned-pets.json，species_id 必须来自 pack 的 pet 实体——不许猜（实际值 \"pet_999999\"）"
+      ]
+    },
+    {
+      "id": "C06",
+      "text": "④ 自创 mode 判 UNKNOWN_MODE",
+      "expected": "UNKNOWN_MODE",
+      "actual": "UNKNOWN_MODE",
+      "ok": true,
+      "actual_output": [
+        "[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3v3 / pvp-standard-six-pet / pvp-speed-duel-3v3 / pvp-territory-trial-2v2 / pve-camp）（实际值 \"pvp-standard-eight-pet\"）",
+        "[MISSING_FIELD] ruleset_config_id：必须给出规则集 id，且它要出现在 rulesets/*.json 里（模式 pvp-standard-eight-pet 没有 ruleset_binding）（实际值 null）"
+      ]
+    },
+    {
+      "id": "C07",
+      "text": "⑤ 自创 ruleset_config_id 判 UNKNOWN_RULESET",
+      "expected": "UNKNOWN_RULESET",
+      "actual": "UNKNOWN_RULESET",
+      "ok": true,
+      "actual_output": [
+        "[UNKNOWN_RULESET] ruleset_config_id：rulesets/*.json 里没有这份配置：不许自创（现有 legacy_sim_v1 / mobile_s4_candidate_v2）（实际值 \"made_up_ruleset_v9\"）"
+      ]
+    },
+    {
+      "id": "C08",
+      "text": "⑥ 标准 PVP 传 team_size=3 判 MODE_TEAM_SIZE_MISMATCH",
+      "expected": "MODE_TEAM_SIZE_MISMATCH",
+      "actual": "MODE_TEAM_SIZE_MISMATCH",
+      "ok": true,
+      "actual_output": [
+        "[MODE_TEAM_SIZE_MISMATCH] team_size：与模式 pvp-standard-six-pet 的注册表参数不一致：注册表是 6，请求是 3。标准 PVP 是 6 个槽位；要 3 只请用极速对决/练习局这类独立模式（实际值 3）"
+      ]
+    },
+    {
+      "id": "C09",
+      "text": "⑦ KNOWN_SCENARIO 又不给对手信息判 OPPONENT_INFO_REQUIRED",
+      "expected": "OPPONENT_INFO_REQUIRED",
+      "actual": "OPPONENT_INFO_REQUIRED",
+      "ok": true,
+      "actual_output": [
+        "[OPPONENT_INFO_REQUIRED] opponent_roster：visibility=KNOWN_SCENARIO 却没有任何对手信息：已知场景必须给出对手条目，否则请用 UNKNOWN_PREMATCH（实际值 null）"
+      ]
+    },
+    {
+      "id": "C10",
+      "text": "locked 不在 must_include ∪ selected 时判 LOCKED_NOT_SELECTED",
+      "expected": "LOCKED_NOT_SELECTED",
+      "actual": "LOCKED_NOT_SELECTED",
+      "ok": true,
+      "actual_output": [
+        "[LOCKED_NOT_SELECTED] locked：锁定的 own-0001 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 \"own-0001\"）"
+      ]
+    },
+    {
+      "id": "C11",
+      "text": "只给 mode 的请求默认 visibility = UNKNOWN_PREMATCH",
+      "expected": "UNKNOWN_PREMATCH",
+      "actual": "UNKNOWN_PREMATCH",
+      "ok": true,
+      "actual_output": {
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "info": [
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      }
+    },
+    {
+      "id": "C12",
+      "text": "只给 mode 的请求由注册表推导 team_size（标准 PVP = 6）",
+      "expected": "6",
+      "actual": "6",
+      "ok": true,
+      "actual_output": {
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "UNKNOWN_PREMATCH",
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2"
+        },
+        "info": [
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      }
+    },
+    {
+      "id": "C13",
+      "text": "⑧ 「随便配一队」判 NO_REQUEST_INTENT（ok:false，且说明缺什么）",
+      "expected": "NO_REQUEST_INTENT",
+      "actual": "NO_REQUEST_INTENT",
+      "ok": true,
+      "actual_output": {
+        "ok": false,
+        "request": null,
+        "problems": [
+          "[NO_REQUEST_INTENT] text：这句话里没有任何能落进 RecommendationRequest 的约束（既没说模式，也没说必须带谁/排除谁/锁定谁）。它是在要推荐结果（那是 RC-303 的事），不是一份配队请求：请至少给出 mode / must_include / must_exclude / locked / favourites_only / max_replacements 之一（实际值 \"随便配一队\"）"
+        ]
+      }
+    },
+    {
+      "id": "C14",
+      "text": "自然语言里的错别字名字判 UNRESOLVED_MENTION，不猜成某一只",
+      "expected": "UNRESOLVED_MENTION",
+      "actual": "UNRESOLVED_MENTION",
+      "ok": true,
+      "actual_output": {
+        "ok": false,
+        "request": null,
+        "problems": [
+          "[UNRESOLVED_MENTION] text：原话里这些片段出现在「点名」的位置上，但没能对应到登记表里的精灵：「喷火驼」。别名、简称、错别字一律**不猜**是哪一只：请改成登记表里的完整名字或 instance_id（实际值 [\"喷火驼\"]）"
+        ]
+      }
+    },
+    {
+      "id": "C15",
+      "text": "KNOWN_SCENARIO + opponent_roster 通过校验，且被记成「不是首选口径」（不静默）",
+      "expected": "true",
+      "actual": "true",
+      "ok": true,
+      "actual_output": {
+        "request": {
+          "mode": "pvp-standard-six-pet",
+          "team_size": 6,
+          "visibility": "KNOWN_SCENARIO",
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "mobile_s4_candidate_v2",
+          "opponent_roster": [
+            "pet_000012"
+          ]
+        },
+        "info": [
+          "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v2（实际值 \"mobile_s4_candidate_v2\"）",
+          "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
+          "[VISIBILITY_NOT_DEFAULT] visibility：标准 PVP 的首选口径是 UNKNOWN_PREMATCH（匹配前不知道对手）；本次用的是 KNOWN_SCENARIO，下游不得把它当成匹配前口径（实际值 \"KNOWN_SCENARIO\"）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+        ]
+      }
+    },
+    {
+      "id": "C16",
+      "text": "极速对决 3v3 在自身模式下通过（3 只不是标准 PVP 的规模）",
+      "expected": "true",
+      "actual": "true",
+      "ok": true,
+      "actual_output": {
+        "request": {
+          "mode": "pvp-speed-duel-3v3",
+          "team_size": 3,
+          "visibility": "UNKNOWN_PREMATCH",
+          "max_replacements": null,
+          "favourites_only": false,
+          "preference": null,
+          "ruleset_config_id": "legacy_sim_v1"
+        },
+        "problems": []
+      }
+    },
+    {
+      "id": "C17",
+      "text": "UNKNOWN_PREMATCH 下给出具体对手判 OPPONENT_INFO_NOT_ALLOWED",
+      "expected": "OPPONENT_INFO_NOT_ALLOWED",
+      "actual": "OPPONENT_INFO_NOT_ALLOWED",
+      "ok": true,
+      "actual_output": [
+        "[OPPONENT_INFO_NOT_ALLOWED] opponent_roster：visibility=UNKNOWN_PREMATCH 下不允许给出具体对手：匹配前不知道对手，不能把匹配前当成匹配后（实际值 [\"pet_000012\"]）"
+      ]
+    },
+    {
+      "id": "C18",
+      "text": "登记表齐全（owned / pack / modes 三项都在）",
+      "expected": "0",
+      "actual": "0",
+      "ok": true,
+      "actual_output": []
+    },
+    {
+      "id": "C19",
+      "text": "pack 里有 owned 之外的物种（用作「存在但不拥有」的反证材料）",
+      "expected": "true",
+      "actual": "true",
+      "ok": true,
+      "actual_output": {
+        "pack_only_species_id": "pet_000001"
+      }
+    },
+    {
+      "id": "C20",
+      "text": "favourites_only 与不收藏的 must_include 冲突时判红",
+      "expected": "MUST_INCLUDE_HAS_UNOWNED_SPECIES",
+      "actual": "MUST_INCLUDE_HAS_UNOWNED_SPECIES",
+      "ok": true,
+      "actual_output": [
+        "[MUST_INCLUDE_HAS_UNOWNED_SPECIES] must_include：favourites_only=true，但 pet_000118 对应的物种 pet_000118 没有任何一只收藏个体（实际值 \"pet_000118\"）",
+        "[LOCKED_FAVOURITES_ONLY_CONFLICT] favourites_only：favourites_only=true，但 must_include/locked 里 [\"pet_000118\"] 没有一只是收藏：约束不可同时满足（实际值 [\"pet_000118\"]）"
+      ]
+    },
+    {
+      "id": "C21",
+      "text": "空列表被如实记成 EMPTY_LIST（不把空数组当约束成立）",
+      "expected": "true",
+      "actual": "true",
+      "ok": true,
+      "actual_output": [
+        "[EMPTY_LIST] must_include：must_include 是空数组：等于没给，不会被当成「这条约束成立」（实际值 []）"
+      ]
+    },
+    {
+      "id": "C22",
+      "text": "规范化只去重排序，不改语义（同一集合不同顺序 → 同一回执）",
+      "expected": "true",
+      "actual": "true",
+      "ok": true,
+      "actual_output": {
+        "forward": [
+          "own-0001",
+          "pet_000118"
+        ],
+        "backward": [
+          "own-0001",
+          "pet_000118"
+        ]
+      }
+    },
+    {
+      "id": "C23",
+      "text": "自然语言说了「N 只」却没说模式时判 MODE_SIZE_WITHOUT_MODE（不许挑一个模式当默认）",
+      "expected": "MODE_SIZE_WITHOUT_MODE",
+      "actual": "MODE_SIZE_WITHOUT_MODE",
+      "ok": true,
+      "actual_output": [
+        "[MODE_SIZE_WITHOUT_MODE] mode：只说了「6 只」，没说模式：标准 PVP 是 6、极速对决是 3、领地试炼是 2，不许挑一个当默认。请补上模式（例如「标准PVP」）（实际值 6）"
+      ]
+    },
+    {
+      "id": "C24",
+      "text": "自然语言里的模式说法与登记表 id 一致（标准PVP → pvp-standard-six-pet）",
+      "expected": "pvp-standard-six-pet",
+      "actual": "pvp-standard-six-pet",
+      "ok": true,
+      "actual_output": {
+        "mode": "pvp-standard-six-pet",
+        "team_size": 6,
+        "visibility": "UNKNOWN_PREMATCH",
+        "must_include": [
+          "pet_000012"
+        ],
+        "max_replacements": null,
+        "favourites_only": false,
+        "preference": null,
+        "ruleset_config_id": "mobile_s4_candidate_v2"
+      }
+    },
+    {
+      "id": "C25",
+      "text": "`get_team_recommendation` 这类未登记名字不会被当成合同字段",
+      "expected": "false",
+      "actual": "false",
+      "ok": true,
+      "actual_output": [
+        "mode",
+        "team_size",
+        "visibility",
+        "must_include",
+        "must_exclude",
+        "locked",
+        "selected",
+        "max_replacements",
+        "favourites_only",
+        "preference",
+        "ruleset_config_id",
+        "opponent_roster",
+        "constraints"
+      ]
+    }
+  ],
+  "problems": []
+}

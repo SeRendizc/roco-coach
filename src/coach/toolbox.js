@@ -2,6 +2,12 @@ import {isLiveMatch} from './policy.js';
 import {legalActions,resolveTurn,evaluate,actionName,SKILLS,ITEMS} from '../game/engine.js';
 import {strategist,searchKnowledge,RULES_VERSION} from './strategist.js';
 import {teacher} from './teacher.js';
+// RC-301：RecommendationRequest 合同（纯函数，零依赖）。工具入口只做两件事：
+// 把自然语言映射成候选 schema、用同一份判据校验；**它不产生任何推荐结果**。
+import {
+ ALLOWED_FIELDS, CONSTRAINT_KEYS, DATA_PATHS, REQUEST_FIELDS,
+ loadRecommendationInputs, requestFromNaturalLanguage, validateRecommendationRequest, formatProblem,
+} from './team-request.js';
 // 注意：这里**不能**静态 import './roco-client.js'。toolbox.js 属于浏览器模块图
 // （src/client/app.js → coach/runtime.js → toolbox.js），而 roco-client.js 用的是
 // node:child_process / node:http / node:fs：静态引入会让整个页面加载失败
@@ -154,6 +160,141 @@ export const TOOL_CONTRACTS={
  plan_actions:{description:'给定公开 planner state 给出回合行动建议（推荐/主要应对/最坏尾部/搜索覆盖/超时状态）；规划器未接入或搜索未完成时明确说出来，不编计划',arguments:{state:'必填：**公开** planner state（env.public_planner_state() 的产出，≤8000字节；不得含真实随机种子或对手待执行动作）',state_version:'必填：状态版本'}},
  summarize_battle:{description:'对局复盘摘要；没有对应的引擎端点，返回结构化 not_implemented，不生成摘要',arguments:{record:'必填：公开对局记录对象（≤4000字节）',state_version:'必填：状态版本'}}
 };
+// ── RC-301：`request_team_recommendation`（阵容请求合同工具） ──────────────
+//
+// 它**故意不进 `TOOL_CONTRACTS`**。理由是这份合同要保住的既有不变量：
+//   · `src/coach/shadow-tools.js` 的 `TOOL_LABELS` 必须逐个覆盖 `TOOL_CONTRACTS` 的键
+//     （tests/evals/shadow-tools.test.js 逐键核对）；
+//   · 那份已发布评测的 user 提示把 13 个工具名与提示 SHA-256 **钉成了字面量**
+//     （`PROMPT_DIGEST_PIN` / `PROMPT_CHAR_COUNT` / `CAMP_PROMPT`）；
+//   · `runtime.js` 的 `gatherAgentEvidence` 用 `Object.keys(TOOL_CONTRACTS)` 决定
+//     「模型能提议哪些工具」。
+// 把新工具塞进 `TOOL_CONTRACTS` 会同时改动上面三处（其中两处不在本 RC 的允许改动范围内），
+// 于是「加一个工具」会顺手把已发布评测的口径改掉。所以这里把它做成**独立合同**：
+// 参数校验、执行入口、回执形状都齐全，可由上层编排直接调用；
+// 要不要把它接进模型可见的工具列表，是一个独立的决定（见 docs/roco/TEAM-REQUEST.md）。
+//
+// 回执只包含：经校验的请求对象 + 校验问题 + 信息。**没有**候选名单、排序、胜率或解释——
+// 那些属于 RC-302/303/304。
+export const REQUEST_TEAM_RECOMMENDATION_TOOL='request_team_recommendation';
+export const REQUEST_CONTRACT_ARGUMENTS={
+ natural_language:'可选：玩家原话；给出时先映射成候选 schema，再走同一份校验',
+ mode:'可选：BattleMode id，必须来自 data/roco/battle-modes.json',
+ team_size:'可选：整数；必须等于所选模式的注册表参数（标准 PVP = 6）',
+ visibility:'可选：UNKNOWN_PREMATCH / VISIBLE_ROSTER_IN_BATTLE / KNOWN_SCENARIO',
+ must_include:'可选：instance_id 或 species_id 数组',
+ must_exclude:'可选：instance_id 或 species_id 数组',
+ locked:'可选：instance_id 数组（必须是 owned 里的实例）',
+ selected:'可选：已进槽位的 instance_id 数组',
+ max_replacements:'可选：非负整数；不给表示未指定',
+ favourites_only:'可选：布尔',
+ preference:'可选：gentle / brief / detailed',
+ ruleset_config_id:'可选：必须来自 data/roco/rulesets/*.json',
+ opponent_roster:'可选：对手条目；只有 visibility=KNOWN_SCENARIO 允许给出',
+ constraints:'可选：对象；键只能是 '+CONSTRAINT_KEYS.join(' / '),
+};
+export const REQUEST_TEAM_RECOMMENDATION_CONTRACT={
+ description:'把「想要一套怎样的阵容」变成**经校验的请求对象**（六宠/锁定/必须包含-排除/未知对手）。'
+  +'它只做自然语言→schema 的映射与程序校验，**不产生**推荐结果、候选名单或排序（推荐是 RC-303）；'
+  +'说不清或引用不存在时 fail closed，回执里点名缺什么，绝不猜、不补默认值',
+ arguments:REQUEST_CONTRACT_ARGUMENTS,
+ tool_return_shape:Object.freeze(['ok','request','problems','info','doesNotRecommend','needs','contract']),
+};
+
+/** 独立工具的参数校验：未知键一律拒（与 TOOL_CONTRACTS 的既有口径一致，但不动那份表）。 */
+export function validRequestContractArgs(args){
+ if(!args||typeof args!=='object'||Array.isArray(args))return false;
+ const allowed=Object.keys(REQUEST_CONTRACT_ARGUMENTS);
+ if(Object.keys(args).some(key=>!allowed.includes(key)))return false;
+ if(args.natural_language!==undefined&&!(typeof args.natural_language==='string'&&args.natural_language.length>0&&args.natural_language.length<=400))return false;
+ if(args.constraints!==undefined&&(args.constraints===null||typeof args.constraints!=='object'||Array.isArray(args.constraints)))return false;
+ if(args.constraints){
+  for(const [key,value] of Object.entries(args.constraints)){
+   if(!CONSTRAINT_KEYS.includes(key))return false;
+   if(typeof value!=='boolean')return false;
+  }
+ }
+ return true;
+}
+
+/**
+ * 执行阵容请求合同工具。**只**返回经校验的请求与校验问题。
+ *
+ * 数据集来源（按优先级）：
+ *   ① 调用方注入的 provider（`configureRocoTools({recommendationInputs})`），
+ *      适合「一次读盘、多次请求」；
+ *   ② `context.recommendationInputs`；
+ *   ③ 动态 import + 读盘的默认加载（只在 Node 侧可用；浏览器里会失败并返回结构化 unavailable）。
+ * 这一层不做任何业务推断：拿不到数据就说拿不到。
+ */
+export async function executeRequestTeamRecommendation(args,context={}){
+ // 参数护栏与既有工具同一个口径：未知键一律拒，而不是被静默忽略。
+ if(!validRequestContractArgs(args)){
+  return requestReceipt({ok:false,problems:[{code:'INVALID_TYPE',field:'arguments',
+   detail:`参数不合法：它必须是对象，且只能出现 ${Object.keys(REQUEST_CONTRACT_ARGUMENTS).join(' / ')}；constraints 的子键只能是 ${CONSTRAINT_KEYS.join(' / ')}`}],
+   needs:['arguments'],source:'arguments'});
+ }
+ const inputs=await resolveRecommendationInputs(context);
+ if(!inputs.ok){
+  return requestReceipt({ok:false,
+   problems:[{code:inputs.code,field:'registry',detail:inputs.message}],
+   needs:['owned-pets.json','game-data-pack/v2/pack.json','battle-modes.json','rulesets/*.json'],source:'data'});
+ }
+ const datasets=inputs.data;
+ if(args.natural_language!==undefined){
+  const mapped=requestFromNaturalLanguage(args.natural_language,datasets);
+  return requestReceipt({
+   ok:mapped.ok,
+   request:mapped.request,
+   problems:[...mapped.problems],
+   info:mapped.info,
+   needs:mapped.ok?[]:[...new Set(mapped.problems.map(problem=>problem.field))],
+   source:'natural_language',
+  });
+ }
+ const raw={};
+ for(const key of ALLOWED_FIELDS)if(args[key]!==undefined)raw[key]=args[key];
+ const result=validateRecommendationRequest(raw,datasets);
+ return requestReceipt({
+  ok:result.ok,
+  request:result.request,
+  problems:result.problems,
+  info:result.info,
+  needs:result.ok?[]:[...new Set(result.problems.map(problem=>problem.field))],
+  source:'schema',
+ });
+}
+
+/**
+ * 合同工具的**唯一**回执形状：键序固定、`doesNotRecommend` 恒为 true。
+ * 回执里只有「经校验的请求 + 校验问题 + 信息」——候选名单、排序、胜率、解释都不在这里。
+ */
+function requestReceipt({ok,request=null,problems=[],info=[],needs=[],source}){
+ return {
+  ok,
+  request,
+  problems,
+  info,
+  doesNotRecommend:true,
+  needs,
+  contract:{allowed_fields:ALLOWED_FIELDS,constraint_keys:CONSTRAINT_KEYS,paths:DATA_PATHS},
+  ...(source?{source}:{}),
+ };
+}
+
+/** 数据集解析：注入优先，其次动态读盘；两者都拿不到就 fail closed。 */
+async function resolveRecommendationInputs(context){
+ const injected=context?.recommendationInputs??recommendationInputsProvider;
+ if(injected&&injected.owned&&injected.pack&&injected.modes&&Array.isArray(injected.rulesets))return {ok:true,data:injected};
+ try{
+  return {ok:true,data:await loadRecommendationInputs()};
+ }catch(error){
+  return {ok:false,code:ROCO_ERROR.UNAVAILABLE,
+   message:`拿不到阵容请求所需的登记数据（owned / pack / battle-modes / rulesets）：${error?.message||error}。`
+    +'工具不编造候选池，也不在没有登记表的情况下「先放行」'};
+ }
+}
+
 // 手游规则工具的入参护栏。这些工具**不**接受路径、文件名、URL 或代码：
 //   - 字符串参数只允许规则集内的稳定标识或名字：出现 / \\ .. :// 或控制字符即拒绝；
 //   - 对象参数（state / record）有字节上限、深度上限，键名不得是 path/url/code/command 之类，
@@ -394,6 +535,8 @@ let rocoClientFactory=null;      // null = 用动态 import 来的 createRocoCli
 let rocoModule=null;             // import('./roco-client.js') 的结果（成功或失败都只试一次）
 let rocoStateVersionProvider=null;
 let rocoPlanner=null;
+// RC-301：阵容请求合同的数据集（owned / pack / modes / rulesets）。注入式，避免每次调用读盘。
+let recommendationInputsProvider=null;
 const rocoStartups=new WeakMap();
 const rocoSeenStateVersions=new Map();
 
@@ -414,11 +557,12 @@ function loadRocoModule(){
  * @param {number|Function} [options.stateVersion] 当前状态版本，或 (context)=>version
  * @param {Function} [options.planner]   规划器（见 planActionsViaPlanner）
  */
-export function configureRocoTools({client,factory,stateVersion,planner}={}){
+export function configureRocoTools({client,factory,stateVersion,planner,recommendationInputs}={}){
  if(client!==undefined)rocoClient=client;
  if(factory!==undefined)rocoClientFactory=factory;
  if(stateVersion!==undefined)rocoStateVersionProvider=typeof stateVersion==='function'?stateVersion:()=>stateVersion;
  if(planner!==undefined)rocoPlanner=planner;
+ if(recommendationInputs!==undefined)recommendationInputsProvider=recommendationInputs;
 }
 /** 清掉注入与「见过的状态版本」记录（测试用；也用于切换对局时防止串号）。 */
 export function resetRocoTools({keepClient=false}={}){
@@ -426,6 +570,7 @@ export function resetRocoTools({keepClient=false}={}){
  rocoClientFactory=null;
  rocoStateVersionProvider=null;
  rocoPlanner=null;
+ recommendationInputsProvider=null;
  rocoSeenStateVersions.clear();
 }
 /** 当前的桥客户端；没有注入过就动态构造一个（浏览器里这一步会抛，由调用方接住）。 */
