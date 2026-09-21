@@ -1,0 +1,1623 @@
+{
+  "schema_version": 1,
+  "reconciler_version": "rc201-catalog-reconciler/1",
+  "reconciled": true,
+  "reason": "三张页全部 ok；声明计数与解析条数一致；三个比较组的计数差都由 only_in_frozen/only_in_live 逐条解释且条目数核对通过；unresolved 只含已写明原因的诊断项（同名不同 id 的歧义）。",
+  "comparison_groups": [
+    "pet",
+    "battle_skill",
+    "trait"
+  ],
+  "record_kind_vocabulary": {
+    "pet_record": "精灵图鉴条目（基础形态）",
+    "pet_form": "精灵的形态/分支记录（首领形态、地区形态、突变的样子……）",
+    "battle_skill": "战斗技能（攻击/防御/状态）",
+    "trait_record": "特性（技能的 category=特性）",
+    "skill_record": "**未在逐条产物里使用**。它是 `skills.json` 的**文件级**总称，= battle_skill + trait_record（824 = 579 + 245），只在计数表里以 `frozen_skills_file_records` 出现。之所以不拿它当逐条的 record_kind：逐条时它什么也没说清，还会和上面两个值重叠。"
+  },
+  "inputs": {
+    "frozen": {
+      "dir": "data/roco/normalized/roco-world-s4-2026-09-10",
+      "catalog_path": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+      "catalog_sha256": "42f4f748eda256fec65d2fd25a49f71ee65334593e33aa4b78d1ab63e12e85ab",
+      "catalog_count": 622,
+      "skills_path": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "skills_sha256": "9d01a6476a529be750973b4b3e8eb939112773f6a8b685e15e67516092e278e4",
+      "skills_count": 824,
+      "note": "冻结目录是**只读**输入；本脚本不写、不改它。"
+    },
+    "live": {
+      "path": "data/roco/live/2026-09-21/public-index.json",
+      "snapshot_date": "2026-09-21",
+      "extractor_version": "rc201-live-index-extractor/2",
+      "result_sha256": "a6cbea14f4cbf256bd7ffded741c1e45673a0f775a9232b27ab21b81acc5f869",
+      "page_sha256": {
+        "pet-index": {
+          "url": "https://wiki.biligame.com/nrc/%E7%B2%BE%E7%81%B5%E5%9B%BE%E9%89%B4",
+          "http_status": 200,
+          "bytes": 1382704,
+          "sha256": "812f5c7dfe81d55978f89c69ba1667aedb6bb669af0468ab031fd2f00d0af107",
+          "fetched_at": "2026-09-21T14:45:16.671Z"
+        },
+        "skill-index": {
+          "url": "https://wiki.biligame.com/nrc/%E6%8A%80%E8%83%BD%E5%9B%BE%E9%89%B4",
+          "http_status": 200,
+          "bytes": 1575409,
+          "sha256": "171c0d5be2eaf354a06ea00845228a463c9c0ed513b18e3ef0be870f6a7da27a",
+          "fetched_at": "2026-09-21T14:45:16.674Z"
+        },
+        "trait-index": {
+          "url": "https://wiki.biligame.com/nrc/%E7%89%B9%E6%80%A7%E5%9B%BE%E9%89%B4",
+          "http_status": 200,
+          "bytes": 805953,
+          "sha256": "0c19b59d37c62cc6f77d520a03953dbe6a06ddd985f308a39e02ea136d12afae",
+          "fetched_at": "2026-09-21T14:45:16.676Z"
+        }
+      }
+    },
+    "declared_counts": {
+      "frozen": {
+        "pet": 622,
+        "skills_file": 824,
+        "trait": 245,
+        "battle_skill": 579
+      },
+      "live": {
+        "pet": 621,
+        "battle_skill": 579,
+        "trait": 242
+      }
+    },
+    "parsed_counts": {
+      "frozen": {
+        "pet": 622,
+        "skills_file": 824,
+        "battle_skill": 579,
+        "trait": 245
+      },
+      "live": {
+        "pet": 621,
+        "battle_skill": 579,
+        "trait": 242
+      }
+    },
+    "live_page_status": {
+      "pet-index": "ok",
+      "skill-index": "ok",
+      "trait-index": "ok"
+    }
+  },
+  "count_table": [
+    {
+      "layer": "file",
+      "source_scope": "frozen_l1",
+      "artifact": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+      "record_kind": "pet_record + pet_form",
+      "group": "pet",
+      "declared_count": 622,
+      "parsed_count": 622,
+      "declared_at": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json#coverage.pets_total",
+      "note": "full-catalog.json 的精灵记录数（每条形态算一条记录）。"
+    },
+    {
+      "layer": "file",
+      "source_scope": "frozen_l1",
+      "artifact": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record_kind": "frozen_skills_file_records（= battle_skill + trait_record）",
+      "group": null,
+      "declared_count": 824,
+      "parsed_count": 824,
+      "declared_at": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#counts.total",
+      "note": "skills.json 的技能记录总数；这是文件级总称，不作为逐条 record_kind。"
+    },
+    {
+      "layer": "file",
+      "source_scope": "frozen_l1",
+      "artifact": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record_kind": "battle_skill",
+      "group": "battle_skill",
+      "declared_count": 579,
+      "parsed_count": 579,
+      "declared_at": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#counts.total - #counts.traits",
+      "note": "技能记录总数减去特性数。"
+    },
+    {
+      "layer": "file",
+      "source_scope": "frozen_l1",
+      "artifact": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+      "record_kind": "trait_record",
+      "group": "trait",
+      "declared_count": 245,
+      "parsed_count": 245,
+      "declared_at": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#counts.traits",
+      "note": "category=特性 的技能记录数。"
+    },
+    {
+      "layer": "page",
+      "source_scope": "live_bwiki",
+      "artifact": "pet-index",
+      "record_kind": "pet_record + pet_form",
+      "group": "pet",
+      "declared_count": 621,
+      "parsed_count": 621,
+      "declared_at": "pet-index#declared_count（页面自己渲染的计数）",
+      "note": "公网索引页自己声明的计数与该页抽出的卡片数并列。"
+    },
+    {
+      "layer": "page",
+      "source_scope": "live_bwiki",
+      "artifact": "skill-index",
+      "record_kind": "battle_skill",
+      "group": "battle_skill",
+      "declared_count": 579,
+      "parsed_count": 579,
+      "declared_at": "skill-index#declared_count（页面自己渲染的计数）",
+      "note": "公网索引页自己声明的计数与该页抽出的卡片数并列。"
+    },
+    {
+      "layer": "page",
+      "source_scope": "live_bwiki",
+      "artifact": "trait-index",
+      "record_kind": "trait_record",
+      "group": "trait",
+      "declared_count": 242,
+      "parsed_count": 242,
+      "declared_at": "trait-index#declared_count（页面自己渲染的计数）",
+      "note": "公网索引页自己声明的计数与该页抽出的卡片数并列。"
+    }
+  ],
+  "deltas": [
+    {
+      "group": "pet",
+      "frozen_count": 622,
+      "live_count": 621,
+      "delta": 1,
+      "only_in_frozen": 1,
+      "only_in_live": 0,
+      "changed": 0,
+      "explained": true,
+      "unexplained_gap": null,
+      "explanation": "冻结侧多出 1 条，已在 only_in_frozen 逐条列出：pet_000532「幽影树」；差值 = 冻结声明 622 - 公网声明 621 = 1，与桶内条目数（only_in_frozen 1 - only_in_live 0 = 1）一致。"
+    },
+    {
+      "group": "battle_skill",
+      "frozen_count": 579,
+      "live_count": 579,
+      "delta": 0,
+      "only_in_frozen": 0,
+      "only_in_live": 0,
+      "changed": 0,
+      "explained": true,
+      "unexplained_gap": null,
+      "explanation": "计数一致且逐条对齐：两侧都声明 579 条（冻结 579 - 公网 579 = 0），四个桶里这一组没有任何条目。"
+    },
+    {
+      "group": "trait",
+      "frozen_count": 245,
+      "live_count": 242,
+      "delta": 3,
+      "only_in_frozen": 3,
+      "only_in_live": 0,
+      "changed": 0,
+      "explained": true,
+      "unexplained_gap": null,
+      "explanation": "冻结侧多出 3 条，已在 only_in_frozen 逐条列出：skill_000164「腾挪」、skill_000165「保卫」、skill_000166「好象坏象」；差值 = 冻结声明 245 - 公网声明 242 = 3，与桶内条目数（only_in_frozen 3 - only_in_live 0 = 3）一致。"
+    }
+  ],
+  "buckets": {
+    "only_in_frozen": [
+      {
+        "record_kind": "pet_form",
+        "group": "pet",
+        "id": "pet_000532",
+        "name": "幽影树",
+        "title": "幽影树（突变的样子）",
+        "source_scope": "frozen_l1",
+        "attributes": {
+          "number": "035",
+          "game_id": 3777,
+          "stage": 1,
+          "types": [
+            "幽系",
+            "草系"
+          ],
+          "class": "漂浮类精灵",
+          "form_marker": "frozen:title!=name"
+        },
+        "evidence": {
+          "source_scope": "frozen_l1",
+          "kind": "file",
+          "file": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+          "pointer": "pets[531]",
+          "id_field": "pet_id"
+        },
+        "same_name_entity_in_live": [
+          {
+            "id": "pet_000056",
+            "name": "幽影树",
+            "record_kind": "pet_record"
+          }
+        ]
+      },
+      {
+        "record_kind": "trait_record",
+        "group": "trait",
+        "id": "skill_000164",
+        "name": "腾挪",
+        "title": null,
+        "source_scope": "frozen_l1",
+        "attributes": {
+          "game_id": 200281,
+          "category": "特性",
+          "element": "无系别",
+          "energy": 0,
+          "damage_class": null,
+          "power": null,
+          "is_trait": true
+        },
+        "evidence": {
+          "source_scope": "frozen_l1",
+          "kind": "file",
+          "file": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+          "pointer": "skills.skill_000164",
+          "id_field": "skill_id"
+        },
+        "same_name_entity_in_live": [
+          {
+            "id": "skill_000134",
+            "name": "腾挪",
+            "record_kind": "trait_record"
+          }
+        ]
+      },
+      {
+        "record_kind": "trait_record",
+        "group": "trait",
+        "id": "skill_000165",
+        "name": "保卫",
+        "title": null,
+        "source_scope": "frozen_l1",
+        "attributes": {
+          "game_id": 200282,
+          "category": "特性",
+          "element": "无系别",
+          "energy": 0,
+          "damage_class": null,
+          "power": null,
+          "is_trait": true
+        },
+        "evidence": {
+          "source_scope": "frozen_l1",
+          "kind": "file",
+          "file": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+          "pointer": "skills.skill_000165",
+          "id_field": "skill_id"
+        },
+        "same_name_entity_in_live": [
+          {
+            "id": "skill_000135",
+            "name": "保卫",
+            "record_kind": "trait_record"
+          }
+        ]
+      },
+      {
+        "record_kind": "trait_record",
+        "group": "trait",
+        "id": "skill_000166",
+        "name": "好象坏象",
+        "title": null,
+        "source_scope": "frozen_l1",
+        "attributes": {
+          "game_id": 200283,
+          "category": "特性",
+          "element": "无系别",
+          "energy": 0,
+          "damage_class": null,
+          "power": null,
+          "is_trait": true
+        },
+        "evidence": {
+          "source_scope": "frozen_l1",
+          "kind": "file",
+          "file": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+          "pointer": "skills.skill_000166",
+          "id_field": "skill_id"
+        },
+        "same_name_entity_in_live": [
+          {
+            "id": "skill_000136",
+            "name": "好象坏象",
+            "record_kind": "trait_record"
+          }
+        ]
+      }
+    ],
+    "only_in_live": [],
+    "changed": [],
+    "unresolved": [
+      {
+        "record_kind": "pet_form",
+        "group": "pet",
+        "id": "pet_000532",
+        "name": "幽影树",
+        "source_scope": "frozen_l1",
+        "ambiguity": "same_name_different_id",
+        "counterpart_ids": [
+          "pet_000056"
+        ],
+        "reason": "公网侧存在**同名但 id 不同**的实体（pet_000056），因此无法完全排除「公网把 pet_000532 并进了那条」的可能。本报告按 id 严格判定，把它记在 only_in_frozen，同时把这份不确定性显式留在这里；冻结侧本身就有 3 组同名不同 id 的技能记录（腾挪/保卫/好象坏象），所以「同名」不足以当身份。",
+        "evidence": [
+          {
+            "source_scope": "frozen_l1",
+            "kind": "file",
+            "file": "data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json",
+            "pointer": "pets[531]",
+            "id_field": "pet_id"
+          },
+          {
+            "source_scope": "live_bwiki",
+            "kind": "web_page",
+            "page": "pet-index",
+            "page_label": "精灵图鉴",
+            "url": "https://wiki.biligame.com/nrc/%E7%B2%BE%E7%81%B5%E5%9B%BE%E9%89%B4",
+            "html_sha256": "812f5c7dfe81d55978f89c69ba1667aedb6bb669af0468ab031fd2f00d0af107",
+            "selector": "div.npc-card[data-id=\"pet_000056\"]",
+            "index": 77
+          }
+        ]
+      },
+      {
+        "record_kind": "trait_record",
+        "group": "trait",
+        "id": "skill_000164",
+        "name": "腾挪",
+        "source_scope": "frozen_l1",
+        "ambiguity": "same_name_different_id",
+        "counterpart_ids": [
+          "skill_000134"
+        ],
+        "reason": "公网侧存在**同名但 id 不同**的实体（skill_000134），因此无法完全排除「公网把 skill_000164 并进了那条」的可能。本报告按 id 严格判定，把它记在 only_in_frozen，同时把这份不确定性显式留在这里；冻结侧本身就有 3 组同名不同 id 的技能记录（腾挪/保卫/好象坏象），所以「同名」不足以当身份。",
+        "evidence": [
+          {
+            "source_scope": "frozen_l1",
+            "kind": "file",
+            "file": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+            "pointer": "skills.skill_000164",
+            "id_field": "skill_id"
+          },
+          {
+            "source_scope": "live_bwiki",
+            "kind": "web_page",
+            "page": "trait-index",
+            "page_label": "特性图鉴",
+            "url": "https://wiki.biligame.com/nrc/%E7%89%B9%E6%80%A7%E5%9B%BE%E9%89%B4",
+            "html_sha256": "0c19b59d37c62cc6f77d520a03953dbe6a06ddd985f308a39e02ea136d12afae",
+            "selector": "div.nrc-skill-catalog-card[data-skill-catalog-id=\"skill_000134\"]",
+            "index": 103
+          }
+        ]
+      },
+      {
+        "record_kind": "trait_record",
+        "group": "trait",
+        "id": "skill_000165",
+        "name": "保卫",
+        "source_scope": "frozen_l1",
+        "ambiguity": "same_name_different_id",
+        "counterpart_ids": [
+          "skill_000135"
+        ],
+        "reason": "公网侧存在**同名但 id 不同**的实体（skill_000135），因此无法完全排除「公网把 skill_000165 并进了那条」的可能。本报告按 id 严格判定，把它记在 only_in_frozen，同时把这份不确定性显式留在这里；冻结侧本身就有 3 组同名不同 id 的技能记录（腾挪/保卫/好象坏象），所以「同名」不足以当身份。",
+        "evidence": [
+          {
+            "source_scope": "frozen_l1",
+            "kind": "file",
+            "file": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+            "pointer": "skills.skill_000165",
+            "id_field": "skill_id"
+          },
+          {
+            "source_scope": "live_bwiki",
+            "kind": "web_page",
+            "page": "trait-index",
+            "page_label": "特性图鉴",
+            "url": "https://wiki.biligame.com/nrc/%E7%89%B9%E6%80%A7%E5%9B%BE%E9%89%B4",
+            "html_sha256": "0c19b59d37c62cc6f77d520a03953dbe6a06ddd985f308a39e02ea136d12afae",
+            "selector": "div.nrc-skill-catalog-card[data-skill-catalog-id=\"skill_000135\"]",
+            "index": 105
+          }
+        ]
+      },
+      {
+        "record_kind": "trait_record",
+        "group": "trait",
+        "id": "skill_000166",
+        "name": "好象坏象",
+        "source_scope": "frozen_l1",
+        "ambiguity": "same_name_different_id",
+        "counterpart_ids": [
+          "skill_000136"
+        ],
+        "reason": "公网侧存在**同名但 id 不同**的实体（skill_000136），因此无法完全排除「公网把 skill_000166 并进了那条」的可能。本报告按 id 严格判定，把它记在 only_in_frozen，同时把这份不确定性显式留在这里；冻结侧本身就有 3 组同名不同 id 的技能记录（腾挪/保卫/好象坏象），所以「同名」不足以当身份。",
+        "evidence": [
+          {
+            "source_scope": "frozen_l1",
+            "kind": "file",
+            "file": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+            "pointer": "skills.skill_000166",
+            "id_field": "skill_id"
+          },
+          {
+            "source_scope": "live_bwiki",
+            "kind": "web_page",
+            "page": "trait-index",
+            "page_label": "特性图鉴",
+            "url": "https://wiki.biligame.com/nrc/%E7%89%B9%E6%80%A7%E5%9B%BE%E9%89%B4",
+            "html_sha256": "0c19b59d37c62cc6f77d520a03953dbe6a06ddd985f308a39e02ea136d12afae",
+            "selector": "div.nrc-skill-catalog-card[data-skill-catalog-id=\"skill_000136\"]",
+            "index": 106
+          }
+        ]
+      }
+    ]
+  },
+  "bucket_sizes": {
+    "only_in_frozen": 4,
+    "only_in_live": 0,
+    "changed": 0,
+    "unresolved": 4
+  },
+  "name_collision_diagnostics": {
+    "count": 61,
+    "note": "公网侧同组内归一化同名但 id 不同的组。它们按 id 各自对齐，不是 unresolved；这一段用来证明「按名字对齐会把不同形态并起来」。",
+    "groups": [
+      {
+        "group": "pet",
+        "normalized_name": "鸭吉吉",
+        "count": 6,
+        "ids": [
+          "pet_000011",
+          "pet_000033",
+          "pet_000353",
+          "pet_000354",
+          "pet_000393",
+          "pet_000513"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "鸭吉吉国王",
+        "count": 6,
+        "ids": [
+          "pet_000539",
+          "pet_000569",
+          "pet_000570",
+          "pet_000571",
+          "pet_000572",
+          "pet_000585"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "板板壳",
+        "count": 2,
+        "ids": [
+          "pet_000047",
+          "pet_000409"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "咔咔壳",
+        "count": 2,
+        "ids": [
+          "pet_000048",
+          "pet_000410"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "水泡壳",
+        "count": 2,
+        "ids": [
+          "pet_000049",
+          "pet_000411"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "雪绒鸟",
+        "count": 4,
+        "ids": [
+          "pet_000229",
+          "pet_000230",
+          "pet_000231",
+          "pet_000420"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "冬羽雀",
+        "count": 4,
+        "ids": [
+          "pet_000025",
+          "pet_000232",
+          "pet_000233",
+          "pet_000234"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "岚鸟",
+        "count": 4,
+        "ids": [
+          "pet_000034",
+          "pet_000235",
+          "pet_000236",
+          "pet_000237"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "霜翼领主",
+        "count": 4,
+        "ids": [
+          "pet_000563",
+          "pet_000564",
+          "pet_000565",
+          "pet_000547"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "石肤蜥",
+        "count": 2,
+        "ids": [
+          "pet_000095",
+          "pet_000398"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "石刺蜥",
+        "count": 2,
+        "ids": [
+          "pet_000096",
+          "pet_000399"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "石冠王蜥",
+        "count": 2,
+        "ids": [
+          "pet_000097",
+          "pet_000400"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "化蝶",
+        "count": 4,
+        "ids": [
+          "pet_000124",
+          "pet_000371",
+          "pet_000372",
+          "pet_000373"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "晶石蜗",
+        "count": 6,
+        "ids": [
+          "pet_000257",
+          "pet_000349",
+          "pet_000350",
+          "pet_000351",
+          "pet_000352",
+          "pet_000386"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "钻石蜗",
+        "count": 6,
+        "ids": [
+          "pet_000534",
+          "pet_000580",
+          "pet_000581",
+          "pet_000582",
+          "pet_000583",
+          "pet_000584"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "丢丢",
+        "count": 4,
+        "ids": [
+          "pet_000037",
+          "pet_000238",
+          "pet_000239",
+          "pet_000240"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "卡卡虫",
+        "count": 4,
+        "ids": [
+          "pet_000038",
+          "pet_000241",
+          "pet_000242",
+          "pet_000243"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "卡瓦重",
+        "count": 4,
+        "ids": [
+          "pet_000039",
+          "pet_000244",
+          "pet_000245",
+          "pet_000246"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "暗影灵面",
+        "count": 2,
+        "ids": [
+          "pet_000053",
+          "pet_000381"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "幽冥眼",
+        "count": 2,
+        "ids": [
+          "pet_000326",
+          "pet_000382"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "梦游",
+        "count": 2,
+        "ids": [
+          "pet_000342",
+          "pet_000344"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "梦悠悠",
+        "count": 2,
+        "ids": [
+          "pet_000343",
+          "pet_000345"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "蹦蹦种子",
+        "count": 4,
+        "ids": [
+          "pet_000016",
+          "pet_000247",
+          "pet_000248",
+          "pet_000249"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "蹦蹦草",
+        "count": 4,
+        "ids": [
+          "pet_000017",
+          "pet_000250",
+          "pet_000251",
+          "pet_000252"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "蹦蹦花",
+        "count": 4,
+        "ids": [
+          "pet_000018",
+          "pet_000253",
+          "pet_000254",
+          "pet_000255"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "蹦蹦果",
+        "count": 4,
+        "ids": [
+          "pet_000537",
+          "pet_000566",
+          "pet_000567",
+          "pet_000568"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "海盔虫",
+        "count": 2,
+        "ids": [
+          "pet_000269",
+          "pet_000376"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "刺盔虫",
+        "count": 2,
+        "ids": [
+          "pet_000270",
+          "pet_000377"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "千棘盔",
+        "count": 2,
+        "ids": [
+          "pet_000271",
+          "pet_000378"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "千棘海针",
+        "count": 2,
+        "ids": [
+          "pet_000545",
+          "pet_000562"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "小星光",
+        "count": 2,
+        "ids": [
+          "pet_000170",
+          "pet_000346"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "星光狮",
+        "count": 2,
+        "ids": [
+          "pet_000171",
+          "pet_000347"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "旋叶虫",
+        "count": 2,
+        "ids": [
+          "pet_000303",
+          "pet_000394"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "蓬叶虫",
+        "count": 2,
+        "ids": [
+          "pet_000383",
+          "pet_000395"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "风滚暮虫",
+        "count": 2,
+        "ids": [
+          "pet_000304",
+          "pet_000396"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "暮风隐者",
+        "count": 2,
+        "ids": [
+          "pet_000589",
+          "pet_000594"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "小狮鹫",
+        "count": 2,
+        "ids": [
+          "pet_000116",
+          "pet_000368"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "神圣狮鹫",
+        "count": 2,
+        "ids": [
+          "pet_000117",
+          "pet_000369"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "皇家狮鹫",
+        "count": 2,
+        "ids": [
+          "pet_000118",
+          "pet_000370"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "波波螺",
+        "count": 2,
+        "ids": [
+          "pet_000403",
+          "pet_000406"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "消波螺",
+        "count": 2,
+        "ids": [
+          "pet_000404",
+          "pet_000407"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "嗜波螺",
+        "count": 2,
+        "ids": [
+          "pet_000405",
+          "pet_000408"
+        ],
+        "record_kinds": [
+          "pet_record",
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "棋棋",
+        "count": 2,
+        "ids": [
+          "pet_000432",
+          "pet_000437"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "棋骑士",
+        "count": 2,
+        "ids": [
+          "pet_000433",
+          "pet_000438"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "棋契陛下",
+        "count": 8,
+        "ids": [
+          "pet_000556",
+          "pet_000576",
+          "pet_000574",
+          "pet_000578",
+          "pet_000575",
+          "pet_000579",
+          "pet_000573",
+          "pet_000577"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "棋齐垒",
+        "count": 2,
+        "ids": [
+          "pet_000435",
+          "pet_000440"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "棋祈督",
+        "count": 2,
+        "ids": [
+          "pet_000436",
+          "pet_000441"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "棋绮后",
+        "count": 2,
+        "ids": [
+          "pet_000434",
+          "pet_000439"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "海枝枝",
+        "count": 4,
+        "ids": [
+          "pet_000334",
+          "pet_000335",
+          "pet_000336",
+          "pet_000337"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "香草甜甜",
+        "count": 3,
+        "ids": [
+          "pet_000114",
+          "pet_000379",
+          "pet_000380"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "圣代甜甜",
+        "count": 9,
+        "ids": [
+          "pet_000115",
+          "pet_000359",
+          "pet_000360",
+          "pet_000361",
+          "pet_000362",
+          "pet_000363",
+          "pet_000364",
+          "pet_000365",
+          "pet_000366"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "刺轮砣",
+        "count": 2,
+        "ids": [
+          "pet_000452",
+          "pet_000454"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "月亮砣",
+        "count": 2,
+        "ids": [
+          "pet_000453",
+          "pet_000455"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "满月砣",
+        "count": 2,
+        "ids": [
+          "pet_000626",
+          "pet_000627"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "乌达",
+        "count": 2,
+        "ids": [
+          "pet_000423",
+          "pet_000426"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "迷你乌",
+        "count": 2,
+        "ids": [
+          "pet_000424",
+          "pet_000427"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "乌拉塔",
+        "count": 2,
+        "ids": [
+          "pet_000425",
+          "pet_000428"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "地鼠",
+        "count": 2,
+        "ids": [
+          "pet_000019",
+          "pet_000355"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "遁鼠",
+        "count": 2,
+        "ids": [
+          "pet_000020",
+          "pet_000356"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "遁地鼠",
+        "count": 2,
+        "ids": [
+          "pet_000021",
+          "pet_000357"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      },
+      {
+        "group": "pet",
+        "normalized_name": "加油蟹",
+        "count": 2,
+        "ids": [
+          "pet_000487",
+          "pet_000514"
+        ],
+        "record_kinds": [
+          "pet_form"
+        ],
+        "note": "公网侧同组内归一化后同名但 id 不同（多为同一图鉴编号下的多个形态）。身份按 id 走，所以它们各自独立对齐；这一段只用来证明「按名字对齐会出错」。"
+      }
+    ]
+  },
+  "explanations": [
+    {
+      "group": "pet",
+      "explanation": "冻结侧多出 1 条，已在 only_in_frozen 逐条列出：pet_000532「幽影树」；差值 = 冻结声明 622 - 公网声明 621 = 1，与桶内条目数（only_in_frozen 1 - only_in_live 0 = 1）一致。",
+      "explained": true,
+      "unexplained_gap": null
+    },
+    {
+      "group": "battle_skill",
+      "explanation": "计数一致且逐条对齐：两侧都声明 579 条（冻结 579 - 公网 579 = 0），四个桶里这一组没有任何条目。",
+      "explained": true,
+      "unexplained_gap": null
+    },
+    {
+      "group": "trait",
+      "explanation": "冻结侧多出 3 条，已在 only_in_frozen 逐条列出：skill_000164「腾挪」、skill_000165「保卫」、skill_000166「好象坏象」；差值 = 冻结声明 245 - 公网声明 242 = 3，与桶内条目数（only_in_frozen 3 - only_in_live 0 = 3）一致。",
+      "explained": true,
+      "unexplained_gap": null
+    }
+  ],
+  "scope_explanations": [
+    {
+      "topic": "824 条技能记录 vs 公网 579 个技能",
+      "text": "不是矛盾，是**口径不同**：`skills.json` 的 824 = 579 条战斗技能（category 攻击/防御/状态） + 245 条特性（category=特性）。公网「技能图鉴」只列战斗技能（实测 579 张卡），特性在**另一张页**「特性图鉴」里（实测 242 张卡）。所以 824 应当拆成 579 + 245 再比，而不是直接和 579 比。拆开之后，战斗技能这一组 579 = 579 逐条对齐；特性这一组 245 vs 242 差 3 条，差的是哪 3 条在 only_in_frozen 里逐条写明（见 deltas[trait]）。",
+      "check": "count_table 里 frozen battle_skill=579 与 live skill-index=579；frozen trait_record=245 与 live trait-index=242，差值 3 = only_in_frozen 中 trait 组条目数。"
+    },
+    {
+      "topic": "622 条精灵记录 vs 公网 621 个结果",
+      "text": "冻结的 622 是**记录数**（每条形态算一条记录），公网的 621 是**卡片数**。两者只差 1 条，且这一条可以指名到 id：pet_000532（name「幽影树」，title「幽影树（突变的样子）」，game_id 3777，number 035）在公网精灵图鉴里**没有独立卡片**；它的立绘 `PetPortrait_youlingshu.png` 出现在公网编号 035「幽影树」那张卡（pet_000056）的 `data-search` 检索词里，也就是说公网把这张形态并进了基础卡的分组检索，冻结快照把它算成一条独立记录。报告同时在 unresolved 里记下这份不确定性：公网存在同名不同 id 的 pet_000056。",
+      "check": "only_in_frozen 里只有这 1 条 pet；live pet_000056 的 data-search 含 PetPortrait_youlingshu.png，与冻结 pet_000532 的 image.illustration 相同（原始 Lua：data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/Catalog.lua）。"
+    },
+    {
+      "topic": "record_kind 与 source_scope 的用法",
+      "text": "每条产物都带 record_kind（pet_record / pet_form / battle_skill / trait_record）与 source_scope（frozen_l1 / live_bwiki）。计数表同时给文件级与页面级两行、并把「声明数」与「解析数」并列，所以「824 里有 245 条根本不是战斗技能」这种口径差在报告里是显式的，不靠读者猜。`skill_record` 一词只作为**文件级**总称出现在计数表里（frozen_skills_file_records），不作为逐条 record_kind——否则它会和 battle_skill / trait_record 重叠。",
+      "check": "count_table 里 frozen_skills_file_records=824 与 battle_skill+trait_record=579+245 自洽。"
+    }
+  ],
+  "convention_notes": {
+    "count": 34,
+    "note": "两侧对「这条算不算形态」的标注不一致的 id。名字/编号/属性一致，所以不算 changed。",
+    "items": [
+      {
+        "id": "pet_000199",
+        "name": "黑化加尔",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000420",
+        "name": "雪绒鸟",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000535",
+        "name": "彩虹独角兽",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000536",
+        "name": "叶冕魔力猫",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000538",
+        "name": "奇丽果",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000540",
+        "name": "黑猫密探",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000541",
+        "name": "迷嶂布莱克",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000542",
+        "name": "祭礼巨像",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000543",
+        "name": "圣水守护",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000544",
+        "name": "神谕鲨",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000545",
+        "name": "千棘海针",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000546",
+        "name": "雪影冰灵",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000547",
+        "name": "霜翼领主",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000548",
+        "name": "女王蜂",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000549",
+        "name": "恶魔狼王",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000550",
+        "name": "烈火战神",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000551",
+        "name": "风暴战犬",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000552",
+        "name": "幻影荆棘",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000553",
+        "name": "波普鹿",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000554",
+        "name": "圣剑骑士",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000555",
+        "name": "伊兰龙",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000557",
+        "name": "奇梦咪",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000558",
+        "name": "圣光迪莫",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000559",
+        "name": "圣草迪莫",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000560",
+        "name": "圣火迪莫",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000561",
+        "name": "圣水迪莫",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000586",
+        "name": "深渊罗隐",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000587",
+        "name": "高帽鹬者",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000588",
+        "name": "恶魔男爵",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000590",
+        "name": "淤泥乌泽",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000591",
+        "name": "暗夜颅主",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000592",
+        "name": "风暴酷拉",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000593",
+        "name": "武斗酷猫",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      },
+      {
+        "id": "pet_000625",
+        "name": "烈焰狂战士",
+        "frozen_kind": "pet_record",
+        "live_kind": "pet_form",
+        "note": "两侧对「这条算不算形态」的标注不同；名字/编号/属性一致，因此不算 changed。"
+      }
+    ]
+  },
+  "generated_at": "2026-09-21T14:45:16.745Z",
+  "generated_by": "scripts/roco/reconcile-catalog.mjs"
+}
