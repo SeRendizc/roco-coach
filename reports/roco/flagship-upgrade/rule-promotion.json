@@ -1,0 +1,342 @@
+{
+  "schema": "roco-rule-promotion-report/v1",
+  "generated_by": "scripts/roco/evaluate-rule-promotion.mjs",
+  "task": "RC-102 promotion gate：没有实机证据就不许 promotion（本脚本只报告，不写配置）",
+  "writes_config": false,
+  "inputs": {
+    "candidate_config": {
+      "path": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+      "sha256": "b74ea79ae953e62dca8dab753e0cf94d194e5c448a37a67b690af6a3a1aeb8ab"
+    },
+    "ledger": {
+      "path": "data/roco/evidence/rule-evidence-ledger.json",
+      "sha256": "132a4392029d2da7dbe0a87e4db7bd7d6e06a34165a5e13d37d503e73b2545c6"
+    },
+    "recordings": {
+      "path": "data/roco/evidence/microcase-recordings.json",
+      "sha256": "c7bdb430ca0241bd4a588c49ddb050434a8b6642836c79a4cb8e85fda29ab9ce",
+      "count": 0
+    },
+    "case_records": {
+      "path": "data/roco/evidence/rule-evidence-microcase-records.json",
+      "cases": 15
+    },
+    "rc101_impact": {
+      "path": "reports/roco/flagship-upgrade/rc-101-rule-config.json"
+    }
+  },
+  "inputs_valid": true,
+  "input_issues": [],
+  "required_microcases": [
+    "MC-E01",
+    "MC-E02",
+    "MC-E03",
+    "MC-E04",
+    "MC-E05"
+  ],
+  "recorded_microcases": [],
+  "missing_recordings": [
+    {
+      "microcase_id": "MC-E01",
+      "title": "能量上限到底是 6 还是 10（或其它）",
+      "plan_case": "MC-007",
+      "pass_criteria": "录到一次能量读数达到的**最大值本身就是答案**：≥10 则证伪 6、坐实“上限至少 10”；若在 9 点时聚能后停在 10，则“聚能 +5 且不突破上限”成立；若超过 10，则“可突破上限”成立。任一条都必须在同一次录制里能看到执行前读数、执行动作、执行后读数三段。",
+      "required_observations": [
+        "energy_max_observed",
+        "charge_energy_delta"
+      ],
+      "blocks_fields": [
+        "energy.max"
+      ]
+    },
+    {
+      "microcase_id": "MC-E02",
+      "title": "聚能是不是主动行动，是否 +5，是否可突破上限",
+      "plan_case": "MC-007",
+      "pass_criteria": "一次聚能的能量差值就是答案（+5 或其它）；若在上限时聚能读数不变，则“不能突破上限”成立，若读数上升则“可以突破”。“聚能是否占一次行动”以同一回合内是否还能再出一招为准。",
+      "required_observations": [
+        "charge_energy_delta",
+        "charge_beyond_cap"
+      ],
+      "blocks_fields": [
+        "energy.charge"
+      ]
+    },
+    {
+      "microcase_id": "MC-E03",
+      "title": "回合末是否存在默认自然回能",
+      "plan_case": "MC-007",
+      "pass_criteria": "对照组的差值就是答案：无特性组若每回合结束读数不变，则“默认自然回能 +1”被证伪（当前引擎假设作废）；若有稳定增量，该增量就是默认回能值，并需与特性回能区分开。",
+      "required_observations": [
+        "regen_per_turn_delta"
+      ],
+      "blocks_fields": [
+        "energy.regen.per_turn",
+        "turn_order.end_turn.order"
+      ]
+    },
+    {
+      "microcase_id": "MC-E04",
+      "title": "首次入场的初始能量是多少；换入是否也按同一值",
+      "plan_case": "MC-007",
+      "pass_criteria": "四段录像给出四个具体整数；本轮引擎的“入场初始 2”只有在第一段读数确为 2 时才成立，其余三段各自独立成立或作废。“是否继承离场剩余能量”以第二次入场读数与离场时读数是否相同为准。",
+      "required_observations": [
+        "initial_energy_observed",
+        "entry_inherits_leftover"
+      ],
+      "blocks_fields": [
+        "energy.initial"
+      ]
+    },
+    {
+      "microcase_id": "MC-E05",
+      "title": "应对 / 先手 / 换人 / 速度的严格总序与同速平手",
+      "plan_case": "MC-004",
+      "pass_criteria": "“谁先动”的判据：每一段录像只要能指出谁先动，就能在四段里定出两两强弱；当四段互不矛盾时，严格总序成立。同速那一段的判据是“先手方是否固定”：若多次录像总是同一侧先动，则存在确定性规则；若随机，则同速仍属 UNKNOWN，不得写成规则。",
+      "required_observations": [
+        "order_observed",
+        "speed_tie_deterministic"
+      ],
+      "blocks_fields": [
+        "turn_order.end_turn.known_order",
+        "turn_order.end_turn.speed_tie"
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "path": "battle_mode.team_size",
+      "config": "mobile_s4_candidate_v2",
+      "value": 6,
+      "value_kind": "number",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "ledger_confidence": null,
+      "needs_microcase": false,
+      "microcase_id": null,
+      "microcase_from": null,
+      "value_status": null,
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "没有对应的 microcase：这个字段既不在 microcase-records 的 case 里，也没有 unknowns 里的 microcase_id，「录什么才能 promotion」没有落点"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "battle_mode.active_count",
+      "config": "mobile_s4_candidate_v2",
+      "value": 1,
+      "value_kind": "number",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "ledger_confidence": null,
+      "needs_microcase": false,
+      "microcase_id": null,
+      "microcase_from": null,
+      "value_status": null,
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "没有对应的 microcase：这个字段既不在 microcase-records 的 case 里，也没有 unknowns 里的 microcase_id，「录什么才能 promotion」没有落点"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "energy.max",
+      "config": "mobile_s4_candidate_v2",
+      "value": 10,
+      "value_kind": "number",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-ENERGY-MAX",
+      "evidence_role": "supports",
+      "ledger_confidence": "CROSS_SOURCE_SUPPORTED",
+      "needs_microcase": true,
+      "microcase_id": "MC-E01",
+      "microcase_from": "leaf",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "缺 MC-E01 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "energy.regen.per_turn",
+      "config": "mobile_s4_candidate_v2",
+      "value": 0,
+      "value_kind": "number",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": "EV-ENERGY-ENDTURN-REGEN",
+      "evidence_role": "supports",
+      "ledger_confidence": "ENGINE_HYPOTHESIS",
+      "needs_microcase": true,
+      "microcase_id": "MC-E03",
+      "microcase_from": "leaf",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "缺 MC-E03 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "energy.initial",
+      "config": "mobile_s4_candidate_v2",
+      "value": null,
+      "value_kind": "null",
+      "confidence": "UNKNOWN",
+      "evidence_id": null,
+      "evidence_role": null,
+      "ledger_confidence": null,
+      "needs_microcase": false,
+      "microcase_id": "MC-E04",
+      "microcase_from": "config.unknowns",
+      "value_status": null,
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "字段本身还是 UNKNOWN=null：没有候选值可 promotion，先等 MC-E04 录出读数，再由人决定填什么（配置 unknowns 里写的理由：首次入场能量需实机（MC-E04））"
+        },
+        {
+          "gate": "evidence",
+          "text": "缺 MC-E04 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "energy.charge",
+      "config": "mobile_s4_candidate_v2",
+      "value": 5,
+      "value_kind": "number",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-ENERGY-CHARGE",
+      "evidence_role": "supports",
+      "ledger_confidence": "CROSS_SOURCE_SUPPORTED",
+      "needs_microcase": true,
+      "microcase_id": "MC-E02",
+      "microcase_from": "leaf",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "缺 MC-E02 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "turn_order.end_turn.order",
+      "config": "mobile_s4_candidate_v2",
+      "value": [
+        "status_tick",
+        "regen"
+      ],
+      "value_kind": "array",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "ledger_confidence": null,
+      "needs_microcase": false,
+      "microcase_id": "MC-E03",
+      "microcase_from": "config.unknowns",
+      "value_status": null,
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "缺 MC-E03 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "turn_order.end_turn.known_order",
+      "config": "mobile_s4_candidate_v2",
+      "value": [
+        "respond",
+        "switch",
+        "priority",
+        "speed"
+      ],
+      "value_kind": "array",
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": "EV-TURN-ORDER-STRICT",
+      "evidence_role": "supports",
+      "ledger_confidence": "ENGINE_HYPOTHESIS",
+      "needs_microcase": true,
+      "microcase_id": "MC-E05",
+      "microcase_from": "leaf",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "缺 MC-E05 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
+        }
+      ],
+      "deciding_gate": "evidence"
+    },
+    {
+      "path": "turn_order.end_turn.speed_tie",
+      "config": "mobile_s4_candidate_v2",
+      "value": null,
+      "value_kind": "null",
+      "confidence": "UNKNOWN",
+      "evidence_id": null,
+      "evidence_role": null,
+      "ledger_confidence": null,
+      "needs_microcase": false,
+      "microcase_id": "MC-E05",
+      "microcase_from": "config.unknowns",
+      "value_status": null,
+      "promotion_status": "NOT_PROMOTABLE",
+      "pending_ledger_bump": null,
+      "reasons": [
+        {
+          "gate": "evidence",
+          "text": "字段本身还是 UNKNOWN=null：没有候选值可 promotion，先等 MC-E05 录出读数，再由人决定填什么（配置 unknowns 里写的理由：同速平手判据 UNKNOWN）"
+        },
+        {
+          "gate": "evidence",
+          "text": "缺 MC-E05 记录：microcase-recordings.json 里没有这条实机/官方记录（本阶段 recordings 为空）"
+        }
+      ],
+      "deciding_gate": "evidence"
+    }
+  ],
+  "summary": {
+    "fields": 9,
+    "PROMOTABLE": 0,
+    "NOT_PROMOTABLE": 9,
+    "REFUTED": 0,
+    "recordings": 0
+  },
+  "candidate_config_can_be_default": false,
+  "candidate_config_can_be_default_reason": "候选配置在「每个字段都 PROMOTABLE」之前不得作为默认；本脚本不实现自动转默认，当前 0/9 个字段可 promotion（all_promotable=false），且即便全绿也需要人类显式批准，所以恒为 false",
+  "all_fields_promotable": false,
+  "config_unchanged": true
+}

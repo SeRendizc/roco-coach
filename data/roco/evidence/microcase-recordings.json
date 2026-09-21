@@ -1,0 +1,33 @@
+{
+  "schema": "roco-microcase-recordings/v1",
+  "generated_by": "手工登记（录像/观测登记表不是生成物：写不出「录到什么算通过」的人，也没法判断录到的算不算过）",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "game": "roco_world_mobile",
+  "status": "NO_RECORDINGS_YET",
+  "accepted_confidence": {
+    "RECORDED_IN_GAME": "项目自己保存、可复核对（media_ref 指得到）的实机录像/截图/实测读数。",
+    "OFFICIAL_CURRENT": "官方一手材料（官方公告 / 官方账号发布页）的当前版本文字或截图。",
+    "note": "这两级与本仓库证据台账的六选一等级同名，只能用于这两级；社区页面、官方公告转载、仓库内部事实源都**不属于**这里。"
+  },
+  "source_kind_allowed": {
+    "recorded_gameplay": "自己录的实机（录屏 / 截图 / 读数表）。",
+    "official_first_party": "官方一手材料（公告原文 / 官方账号发布页），不是转载。"
+  },
+  "record_shape": {
+    "microcase_id": "形如 MC-E01，必须与本仓库 rule-evidence-microcase-records.json 里的 case 同 id。",
+    "recorded_at": "ISO 日期或日期时间（记录**产生**的时间，不是登记时间）；超过 max_record_age_days 天即视为过期。",
+    "confidence": "只允许 RECORDED_IN_GAME / OFFICIAL_CURRENT。",
+    "source_kind": "recorded_gameplay / official_first_party。",
+    "media_ref": "http(s) 链接，或仓库内相对路径（必须是仓库里真实存在的文件，例如 data/roco/evidence/recordings/…）；两者都不是即「不可核对」。不要填 /tmp 或本机临时路径。",
+    "observations": "字段 → 观测值。键必须覆盖该 microcase 的 pass_criteria 要求的量（见 scripts/roco/evaluate-rule-promotion.mjs 的 REQUIRED_OBSERVATIONS）。",
+    "notes": "这条记录与哪个游戏版本/赛季、录的时候有没有什么干扰因素。"
+  },
+  "max_record_age_days": 548,
+  "why_empty": [
+    "本阶段**没有任何实机录制**：没有录像、没有截图、没有逐帧读数表，所以 recordings 是空数组。",
+    "**不许为了「看起来完整」在这里填一条假记录**：这个文件是 promotion gate 的输入，填假数据等于把「没有证据」伪装成「有证据」，比缺数据更坏。",
+    "演示 / 自检用的假记录只允许存在于测试的内存副本或 os.tmpdir()，不许落进本文件。",
+    "在 recordings 非空之前，scripts/roco/evaluate-rule-promotion.mjs 对候选配置的每一个字段都只能给 NOT_PROMOTABLE。"
+  ],
+  "recordings": []
+}
