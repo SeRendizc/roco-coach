@@ -252,7 +252,13 @@ function walk(dir, ext) {
   if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
-    if (statSync(full).isDirectory()) out.push(...walk(full, ext));
+    // `node --test` **并行跑测试文件**：有的文件会在跑的过程中重写 `reports/roco/*.json`
+    // （例如判定层那一份）。这一趟只是**清点**要检查哪些产物，遇到「列出来了、stat 时已经不在了」
+    // 的正确反应是跳过，而不是把整个 claim-honesty 判成失败 ——
+    // 第 89 轮实测到过这个竞态（`ENOENT: reports/roco/intervention-model-roco.json`）。
+    let stat = null;
+    try { stat = statSync(full); } catch { continue; }
+    if (stat.isDirectory()) out.push(...walk(full, ext));
     else if (entry.endsWith(ext)) out.push(full);
   }
   return out.sort();
