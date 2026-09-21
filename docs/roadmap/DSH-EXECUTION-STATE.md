@@ -1161,3 +1161,28 @@ seed=5 strategy=greedy_damage team=[pet_000112+pet_000611+pet_000124] enemy=[（
 并保留两条守卫：**互不相同 kind ≥8** 与**文案形状最大重复 ≤2**。
 只改一处会一边绿一边红。
 
+
+### C6.11 48 只已通到接口，但**分页/筛选参数被忽略**（第 65 轮实测，不能放过）
+
+实测（对 8899 的真实 HTTP 调用）：
+```
+/api/roco/roster                 → count 48 | pets 48 | total undefined | first 铠甲虫
+/api/roco/roster?limit=48        → count 48 | pets 48 | total undefined | first 铠甲虫
+/api/roco/roster?type=草系        → count 48 | pets 48 | total undefined | first 铠甲虫   ← 参数被忽略
+/api/roco/roster?offset=24&limit=12 → count 48 | pets 48 | total undefined | first 铠甲虫  ← 参数被忽略
+```
+两条结论：
+1. **好消息**：引擎候选池扩到 48 之后，接口**确实**从 12 变成 48（`count:48`），48 只已经能被页面拿到。
+2. **不能放过**：`limit/type/offset` 三个参数**被静默忽略**，返回里也没有 `total`——这正是本仓反复
+   踩过的「接上了但不生效」。监工明确要「搜索＋属性/定位筛选＋分页或虚拟列表」，
+   所以这一项**未完成**；在它完成前，页面只能一次渲染 48 张卡（正是监工嫌丑的那种长卡平铺）。
+
+**另外一条同类的错必须留在记录里**：提交 `f920d2d` 的信息里写了「`npm run test:env` → 全绿」，
+**这句是错的**。当时的命令是 `npm run --silent test:env 2>&1 | tail -3 && git add … && git commit`，
+管道把退出码换成了 `tail` 的 0，于是**在 Python 套件红着的情况下提交了**。真实情况：
+`FAIL: test_12_target_pets_loaded`——一条把「正好 12 只」写死的旧期望。子 agent 已把它替换为
+`test_every_pet_has_exactly_four_candidate_moves`（`roco/tests/test_microcases.py:81`），
+主线程复跑 `npm run test:env` → `OK (skipped=1)`。
+**纪律（写进流程，不再靠记性）：跑测试不许用管道接在 `&&` 前面——退出码一旦被吞，
+红就会被提交成绿。**
+
