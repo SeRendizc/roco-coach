@@ -19,20 +19,15 @@
 //      玩家层那句 `mechanism_line` **不写威力**——页面上的威力缺失是 fail closed 的老约定。
 
 import {createHash} from 'node:crypto';
+import {MECHANISM_FALLBACK, MECHANISM_LINE_MAX, MECHANISM_STATUSES} from '../../src/coach/pet-mechanisms.js';
 
-/** 解析不到机制文字时，玩家层唯一允许出现的句子。 */
-export const MECHANISM_FALLBACK = '机制资料待确认';
+// 句子与上限只在 `src/coach/pet-mechanisms.js` 定义一次：页面、接口、构建器用的是同一条。
+export {MECHANISM_FALLBACK, MECHANISM_LINE_MAX, MECHANISM_STATUSES};
+
+const sha256 = (text) => createHash('sha256').update(text).digest('hex');
 
 /** 机制首层文档的 schema 版本。 */
 export const SCHEMA_VERSION = 1;
-
-/** 玩家层那句机制文字不允许超过的长度（卡片首层，一行放得下）。 */
-export const MECHANISM_LINE_MAX = 60;
-
-/** 允许出现在玩家层的机制状态。 */
-export const MECHANISM_STATUSES = Object.freeze(['FROZEN_DESC', 'MECHANISM_UNCONFIRMED']);
-
-const sha256 = (text) => createHash('sha256').update(text).digest('hex');
 
 /**
  * 玩家层禁词：机制首层是给玩家看的，不许出现工程字段 / id / 裸 JSON。

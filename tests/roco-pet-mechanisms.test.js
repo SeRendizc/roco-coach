@@ -27,6 +27,7 @@ import {fileURLToPath} from 'node:url';
 import {
   MECHANISM_FALLBACK, MECHANISM_LINE_MAX, checkMechanisms, selftest, sha256, toMechanismLine,
 } from '../scripts/roco/pet-mechanisms-lib.mjs';
+import {createMechanismIndex, playerMechanism} from '../src/coach/pet-mechanisms.js';
 import {checkRepo} from '../scripts/roco/verify-pet-mechanisms.mjs';
 
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/tests$/, '');
@@ -196,4 +197,43 @@ test('自带用例（lib 的 --selftest 同一份代码）必须全绿', () => {
   const result = selftest();
   assert.equal(result.ok, true, JSON.stringify(result.cases.filter((row) => !row.passed)));
   assert.ok(result.cases.length >= 9);
+});
+
+// ── 读取层（`src/coach/pet-mechanisms.js`）：页面与接口取的是同一份规则 ──────────────
+
+test('读取层能读真产物，622 只都能取到行', () => {
+  const index = createMechanismIndex({readFile: (rel) => readFileSync(join(ROOT, rel), 'utf8')});
+  assert.equal(index.available, true, index.error ?? '');
+  assert.equal(index.size, 622);
+  const row = index.get('pet_000001');
+  assert.ok(row, 'pet_000001 取不到行');
+  const player = playerMechanism(row);
+  assert.equal(player.mechanism_status, 'FROZEN_DESC');
+  assert.ok(player.mechanism_line.startsWith('特性「'));
+  assert.ok(player.mechanism_desc.length > 0);
+});
+
+test('读取层 fail closed：产物读不动就是 available:false + 取不到行（不许补默认句）', () => {
+  const missing = createMechanismIndex({readFile: () => { throw new Error('ENOENT'); }});
+  assert.equal(missing.available, false);
+  assert.equal(missing.size, 0);
+  assert.equal(missing.get('pet_000001'), null);
+  assert.match(missing.error, /ENOENT/);
+  const broken = createMechanismIndex({readFile: () => '{"pets":'});
+  assert.equal(broken.available, false);
+  assert.equal(broken.get('pet_000001'), null);
+});
+
+test('读取层不把未确认的机制当结论：状态一改，行就必须回落', () => {
+  const index = createMechanismIndex({readFile: (rel) => readFileSync(join(ROOT, rel), 'utf8')});
+  const row = copy(index.get('pet_000001'));
+  assert.equal(playerMechanism(row).mechanism_line.startsWith('特性「'), true);
+  row.mechanism_status = 'MECHANISM_UNCONFIRMED';
+  const downgraded = playerMechanism(row);
+  assert.equal(downgraded.mechanism_line, MECHANISM_FALLBACK);
+  assert.equal(downgraded.mechanism_desc, null);
+  assert.equal(downgraded.mechanism_name, null);
+  // 空行/null 行同样必须回落 —— 「没有」不是「可以编」。
+  assert.equal(playerMechanism({mechanism_status: 'FROZEN_DESC', mechanism_line: '   '}).mechanism_line, MECHANISM_FALLBACK);
+  assert.equal(playerMechanism(null).mechanism_line, MECHANISM_FALLBACK);
 });
