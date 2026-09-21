@@ -101,6 +101,7 @@ Windows 不得开始正式训练。
 
 | 时间（UTC） | 方向 | 协作区 commit | 我改了什么 |
 |---|---|---|---|
+| 2026-09-21T17:10Z | Mac → 协作区 | `7f7109c`（`5b346b1..7f7109c`） | **阶段末同步（RC-202）**：`MAC_STATUS.md` 产品 HEAD → `897238b`；RC-202 索引包（1446 实体 / 2888 条逐实体 provenance / 许可逐条落 / 99 条冲突含 4 未解决）、就绪 **draft 8/9** 与两条 blocking、闸门 **14 → 16 套件**、`test:unit` 750、门禁 **16/16**；`CONTRACTS.md` 的 `GameDataPackV2` 补 schema 版本/产物 sha256/已满足与仍开放项，**状态仍 `draft`**、训练闸门仍 blocked |
 | 2026-09-21T16:20Z | Mac → 协作区 | `5b346b1`（`4365a41..5b346b1`） | **RC-201 闭环同步**：`MAC_STATUS.md` 产品 HEAD → `3c5346e`；许可登记闭环（快照 `metadata.licence` 从 `sources.yaml` 搬运 + 报告 `licence_ok` + 4 条必红反证）、定向验证证据（10/10 判据、`--check --offline` rc=0 且 `result` 逐字节一致、`git diff --check` rc=0、逐路径提交）、**产物哈希表**；Next 明确 **RC-202 未开始**并逐条列出 9 项前置。`CONTRACTS.md` 本轮无需改动 |
 | 2026-09-21T15:35Z | Mac → 协作区 | `4365a41`（`173eddb..4365a41`） | **阶段末同步**：`MAC_STATUS.md` 产品 HEAD 推到 `b6b2b21`，新增 RC-201 条目（真的抓到公网：三张页 http 200、逐页 sha256、计数 621/579/242 与页面声明一致；**824 = 579 战斗技能 + 245 特性**；622 vs 621 = `pet_000532`；245 vs 242 = `skill_000164/165/166`；四桶与注入证据），`test:unit` 723→731；`CONTRACTS.md` 的 `GameDataPackV2.coverage` 改为「已对账 + 结论 + 产物路径」并列出转 `ready` 仍缺的项，**状态仍 `draft`、训练闸门仍 blocked** |
 | 2026-09-21T15:05Z | Mac → 协作区 | `173eddb`（`5c70bcd..173eddb`） | **阶段末同步**：`MAC_STATUS.md` 产品 HEAD 推到 `e4dbd53`，新增 RC-102 promotion 闸门条目（只报告不写配置、空登记表下 9/9 NOT_PROMOTABLE、反证证明判据非恒假）、`test:unit` 715→723、Next 新增「`battle_mode.*` 没有 microcase 落点」这条结构缺口（**不需要 Windows 行动**）；`CONTRACTS.md` 的 BattleModeV2 `validation` 补上闸门结论（状态仍 `draft`，训练闸门仍 blocked） |
