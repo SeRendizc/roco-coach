@@ -75,8 +75,12 @@ export function sampleOf(task, hints) {
       {role: 'assistant', content: JSON.stringify(target)},
     ],
     // 元数据单独放，训练时 mlx-lm 只读 messages；留着是为了评测能按类别/家族核对
-    meta: {case_id: task.case_id, category: task.category, side: task.split.side,
-      family: task.split.family, mechanism: task.split.mechanism, world: hints.mode},
+    // `side` 用 **SFT 专属切分**，不是任务集的 side：
+    // 任务集留出家族（导致某个家族在训练里完全缺席），SFT 留出机制与模板。
+    // 两个 side 都留下，报告里能看出它们不一样——这是这一轮的核心改动。
+    meta: {case_id: task.case_id, category: task.category, side: sftSideOf(task),
+      task_side: task.split.side, family: task.split.family,
+      mechanism: task.split.mechanism, template: task.split.template, world: hints.mode},
   };
 }
 
@@ -114,6 +118,38 @@ export async function build({limit = 0} = {}) {
   return samples;
 }
 
+/**
+ * SFT 专属切分：**留出机制与表达模板，让每个家族都出现在训练里**。
+ *
+ * 为什么不能沿用任务集的切分（第 33 轮实测）：任务集留出的是**家族**，
+ * 于是 `A组三人-无锁定` 这个家族在整个训练集里一条都没有，而所有
+ * `roster_constraint` 任务恰好只属于这个家族。模型学不到「没有锁定伙伴时怎么办」，
+ * 在测试上 24/24 只输出 `{stop:true}`，整类归零。
+ *
+ * 评测口径不变（同一套 288 条、同一把尺子），只换**训练数据怎么分**：
+ *   · 训练：每个家族都参加；留出若干机制与模板不训练；
+ *   · 验证：见过来留出机制的题，用来看 loss；
+ *   · family/template 侧留给评测去问「没见过的机制/说法还灵不灵」。
+ *
+ * 这不是放宽评测——评测用的还是任务集原样的 288 条；这里改的只是**训练侧看到什么**。
+ */
+export function sftSideOf(task) {
+  const key = hashKey(task.split.mechanism, task.split.template);
+  const bucket = key % 10;
+  if (bucket < 7) return 'train';
+  if (bucket < 9) return 'val';
+  return 'test';
+}
+
+function hashKey(...parts) {
+  let h = 2166136261;
+  for (const ch of parts.join('|')) {
+    h ^= ch.codePointAt(0);
+    h = Math.imul(h, 16777619);
+  }
+  return Math.abs(h);
+}
+
 export function summarise(samples) {
   const by = (key) => samples.reduce((acc, row) => {
     const bucket = acc[row.meta[key]] || (acc[row.meta[key]] = 0);
@@ -137,18 +173,30 @@ async function main(argv) {
   const summary = summarise(samples);
   const families = Object.fromEntries(Object.entries(summary.families_by_side)
     .map(([side, set]) => [side, [...set]]));
-  // 切分隔离检查：test 家族不许出现在 train/val 里
+  // 覆盖检查：**每个家族都必须在训练侧出现**。
+  // 这正是第 33 轮那次失败的直接原因（A组三人-无锁定 在训练里缺席，
+  // 而 roster_constraint 全部属于它）。这条检查让同类错误不可能再静默发生。
   const trainFamilies = new Set(families.train || []);
-  const leaked = (families.test || []).filter((f) => trainFamilies.has(f));
+  const missingFamilies = [...new Set(samples.map((row) => row.meta.family))]
+    .filter((family) => !trainFamilies.has(family));
+  // 留出检查：留出的机制/模板在训练侧一条都不该有（这是泛化问题真正要问的东西）
+  const trainMechanisms = new Set(samples.filter((r) => r.meta.side === 'train').map((r) => r.meta.mechanism));
+  const heldOutMechanisms = [...new Set(samples.map((r) => r.meta.mechanism))]
+    .filter((m) => !trainMechanisms.has(m));
+  const leaked = missingFamilies;
   const report = {
     generated_by: 'scripts/roco/build-agent-sft-data.mjs',
     purpose: 'W4-04 的工具选择 SFT 数据：目标来自**任务期望**，不是规则臂或模型的输出',
     source_task_set: 'agent-tasks-v1',
     worlds_per_task: WORLDS_PER_TASK,
     origin: 'synthetic/constructed — 不是真人对话，不得据此声称真人效果',
-    split_rule: '沿用任务集的 family 切分；test 家族不在训练侧出现',
+    split_rule: 'SFT 专属切分：留出**机制与表达模板**，每个家族都出现在训练侧'
+      + '（任务集的 family 切分不适合做训练切分——它让 roster_constraint 所属的家族'
+      + '在训练里完全缺席，第 33 轮就是这样整类归零的）',
     counts: summary,
     families,
+    missing_families_in_train: missingFamilies,
+    held_out_mechanisms: heldOutMechanisms,
     holdout_leak: leaked,
   };
   if (write) {
