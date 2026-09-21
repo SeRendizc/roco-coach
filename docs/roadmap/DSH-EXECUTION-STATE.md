@@ -42,9 +42,9 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `7cbc4d2`；v3 纠偏与 RC-101/RC-201 见 §C6.15／§C6.16／§C6.19）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
-| 最近一次**全绿** gate | `cfe7f63`（时间 2026-09-21T10:17Z，14/14）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
-| 闸门现状 | **14/14 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `42596b0`；v3 纠偏与 RC-101/RC-201/RC-202 见 §C6.15～§C6.20）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
+| 闸门现状 | **16/16 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
 | **跨机器协作区（2026-09-21 建立）** | Mac DSH（我）与 Windows DSH 通过 `SeRendizc/ai-dev-platform` 的 `coord/roco-coach` 分支上 `projects/roco-coach/` 交换**durable facts**：我只改 `MAC_STATUS.md` 与 `CONTRACTS.md`，需要 Windows 的事追加 `BLOCKERS.md`，方向性改变追加 `DECISIONS.md`；**契约只有证据齐全才能标 `ready`**（它是正式训练闸门）。摘要与同步循环见 `docs/roadmap/CROSS-MACHINE-COORDINATION.md`；每个工作阶段开始与结束各同步一次 |
 | **v3 纠偏生效（2026-09-21）** | **标准 PVP 改按六宠设计**（候选规则，`CROSS_SOURCE_SUPPORTED`，禁止写成官方事实）；官方 3v3/2 魔力是**极速对决**独立 BattleMode；**48 只只是迁移夹具**，候选宇宙是全量 600+；匹配前对手未知，按版本 Meta prior 评价；**在线 3 秒内禁止批量模拟**。停止用旧规则（max=6/入场 2/回合末 +1）生成或重训任何产物（13 条已进「禁止重跑」清单）。入口：`docs/roadmap/FLAGSHIP-V3-REDIRECT.md`、`docs/roadmap/FLAGSHIP-V3-CHECKLIST.md`；机器可读：`reports/roco/flagship-upgrade/{baseline,artifact-invalidation}.json`、`data/roco/battle-modes.json`、`data/roco/evidence/rule-evidence-ledger.json` |
@@ -724,9 +724,9 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `7cbc4d2`（`feat(rc201): 快照/对账脚本登记许可并校验它`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `42596b0`（`feat(rc202): 统一 GameDataPackV2 索引包`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
-| 验证 | **一条命令可复现**：`npm run verify:release` → **14 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / state-doc / guard-selftest / 浏览器 9-9 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
+| 验证 | **一条命令可复现**：`npm run verify:release` → **16 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
 | 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**；另有各自带反证的检查：`verify-agent-trajectories --selftest` 3/3、`verify-sft-split --selftest` 7/7、`model-arm-identity` 正反两向 |
 | 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**第 38 轮改掉了它的自指死锁**：原来它要求「最近一次 verify:release 必须是 pass」，而 `verify:release` 里又有 `unit`包含这条断言——一次失败之后每次跑都会因为上一次红而红，唯一出路是手改 `latest.json`。现在硬判据是 `last-green.json`（必须存在一次全绿、verdict=pass、套件数够、它记的 HEAD 仍在当前历史里），`latest.json` 红了只报**警告**。**第 45 轮又拆掉同形状的第二处死锁**：「落后 >12 个提交」原来是硬失败，而这条断言同时长在 `unit` 里——一个阶段提交超过 12 次之后，`last-green` 追不上、`verify:release` 永远绿不了，也永远写不出新的 `last-green`（实测 19 个提交时 14 个套件里只有 `unit` 与 `state-doc` 红，两条红的是同一条断言）。现在落后只报警告，`tests/evals/state-doc.test.js` 有一条正反两向的回归（反证：把警告改回硬失败，立刻红） |
@@ -1469,3 +1469,27 @@ candidate 的上限 10 / 聚能 +5 只进候选，**入场能量是 null（UNKNO
 
 **RC-202 前置未清 → 暂不展开**（已按要求停掉并行子任务）。`GameDataPackV2` 从 `draft` → `ready`
 的 9 项逐条列在 `FLAGSHIP-V3-CHECKLIST.md` 新增小节与 `CATALOG-RECONCILIATION.md` §9。
+
+### C6.20 RC-202 统一 GameDataPackV2（第 83 轮）+ 两条新闸门套件
+
+**RC-202 交付**（提交 `42596b0`）：`data/roco/game-data-pack/v2/{pack.json,schema.json}`
+（**1446 条实体** = 622 精灵 + 824 技能；**2888 条逐实体 provenance**，两侧同一结构）、
+构建器/校验器、`reports/roco/reconciliation/game-data-pack-readiness.json`、
+16 条测试（8 条必红反证）、`docs/roco/GAME-DATA-PACK.md`。
+包**只做索引与出处**（无种族值/学招表/效果文本；值一律 `refs` 指回冻结层），
+`frozen_only = 4` 与 RC-201 的 `only_in_frozen` 逐条对上；许可逐条落（`licence_ref` 1446/1446）；
+冲突 99 条（IDENTITY 65 + GRANULARITY 34 + VALUE 0，**未解决 4**）。
+**就绪判定 `draft` 8/9**：不 ready 的两条是「字段级覆盖证明」（公网索引页没有那些字段，
+需要数据导出）与「4 条未解决冲突」（需要身份仲裁证据）。
+
+**两条新闸门套件**（提交 `ffae367`，套件数 **14 → 16**）：
+- `reconciliation`：快照能由本地 HTML 逐字节重抽 + 报告 `reconciled`/`licence_ok` 为真 +
+  **报告没过期**（与现在重算一致）；自带 6 条反证。
+- `game-data-pack`：17 组判据（schema/provenance 落盘核对/许可/REFERENCE_ONLY 边界/unknown 一致/
+  孤儿引用/冲突拒绝 ready/报告新鲜度）。
+- 第 9 项从「声明」改成**可执行**：`releaseGateSatisfied()` 读闸门 `SUITES` 登记表，
+  把套件删掉这一项立刻 false（反证在 `tests/roco-v3-redirect.test.js`）。
+- 接线后立刻抓到一次真实红（子任务那条「第 9 项必须为 false」的断言），
+  已改成「与登记表一致 + 反向控制」，而不是删断言。
+
+**下一条**：RC-103（回合顺序/回合末登记表，不依赖实机）或先补 RC-202 的第 6 项（需要数据导出）。

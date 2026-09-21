@@ -2,7 +2,7 @@
  "generated_by": "scripts/roco/verify-release.mjs",
  "quick": false,
  "verdict": "pass",
- "head": "3d6390c0400f3fbaa2274b3a062651659d4282a5",
+ "head": "c0b87cc8b72fbe15e6f555cf91e8c9fbe349e78b",
  "suites": [
   "env",
   "unit",
@@ -14,11 +14,13 @@
   "sft-split",
   "model-manifest",
   "provenance",
+  "game-data-pack",
+  "reconciliation",
   "state-doc",
   "guard-selftest",
   "browser-acceptance",
   "demo-acceptance"
  ],
- "ran_at": "2026-09-21T14:51:41.315Z",
+ "ran_at": "2026-09-21T15:21:28.976Z",
  "note": "只有全部套件通过时才会被写。`latest.json` 可能是红的，这一份一定是绿的。"
 }

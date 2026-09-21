@@ -27,7 +27,7 @@
 | RC | 内容 | 状态 |
 |---|---|---|
 | RC-201 | 公网 621/579/242 与仓库 622/824 的对账（不删记录凑数） | **DONE** | `scripts/roco/fetch-live-snapshot.mjs` + `scripts/roco/reconcile-catalog.mjs` + `data/roco/live/2026-09-21/public-index.json` + `reports/roco/reconciliation/catalog-reconciliation.json` + `tests/roco-catalog-reconciliation.test.js`（8 条 / 6 个注入全红）+ `docs/roco/CATALOG-RECONCILIATION.md`。**实测三张页 http 200、计数与页面声明逐一对齐（621/579/242）**；**824 = 579 战斗技能 + 245 特性**（口径，非缺数据）；622 vs 621 = `pet_000532`（公网并进基础卡分组）；245 vs 242 = `skill_000164/165/166`（公网索引侧不存在）。四桶：only_in_frozen 4 / only_in_live 0 / changed 0 / unresolved 4。**边界**：公网页是导航页，无数值 → 未做字段级校验。**许可闭环**（`8162a3b` + `7cbc4d2`）：快照 `metadata.licence` 从 `sources.yaml` 搬运（`CC-BY-NC-SA-4.0` / `DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL` / 证据文件路径 / `fetched_content_committed_to_git: false`），报告顶层 `licence_ok` 且 `inputs.live.licence` 与快照逐字一致；判据 8 → **10** 条，4 条必红反证（抹掉许可 / 再把分发改成 UNLIMITED / 证据指向不存在文件 / HTML 路径挪出忽略目录） |
-| RC-202 | 统一 GameDataPack（catalog/skills/traits/learnsets/…/battle_modes/source manifest） | **前置未清，暂不展开** | 对账已就绪（RC-201）；`docs/roco/CATALOG-RECONCILIATION.md` §9 列出从 `draft` → `ready` 还缺的 9 项：统一 schema、逐实体许可、逐实体 provenance、冲突处理策略、形态口径统一、字段级覆盖证明、ruleset 绑定、不可得字段清单、把对账接进 verify-release |
+| RC-202 | 统一 GameDataPack（catalog/skills/traits/learnsets/…/battle_modes/source manifest） | **DONE（包已出，就绪 draft 8/9）** | `data/roco/game-data-pack/v2/{pack.json,schema.json}`（1446 实体 / 2888 条 provenance / 99 条冲突）、`scripts/roco/{build,verify}-game-data-pack.mjs`（17 组判据、`--selftest` 10/10 与 11/11）、`reports/roco/reconciliation/game-data-pack-readiness.json`、`tests/roco-game-data-pack.test.js`（16 条 / 8 反证）、`docs/roco/GAME-DATA-PACK.md`；已接进闸门（`ffae367`）。**仍差**：第 6 项字段级覆盖证明（需数据导出）+ 4 条未解决冲突 | 对账已就绪（RC-201）；`docs/roco/CATALOG-RECONCILIATION.md` §9 列出从 `draft` → `ready` 还缺的 9 项：统一 schema、逐实体许可、逐实体 provenance、冲突处理策略、形态口径统一、字段级覆盖证明、ruleset 绑定、不可得字段清单、把对账接进 verify-release |
 | RC-203 | OwnedPet / BattleBuild（同种多实例、有序四技能、锁定、约 80 个 Demo 个体） | NOT_STARTED |
 | RC-204 | RAG 索引与 held-out 评测（Recall@K / MRR / 版本命中 / grounding / 冲突弃答） | NOT_STARTED |
 | RC-205 | 精灵盒子 UI（我的/全图鉴、搜索、个体比较） | NOT_STARTED |
@@ -130,7 +130,7 @@
 | 6 | 覆盖证明（只比了名字/编号/属性标签） | 字段级逐字段比对（含「快照没有这个字段」的显式分支）+ 覆盖率与冲突数 |
 | 7 | 版本/新鲜度绑定 | 数据包带 `ruleset_id` 与 `as_of`；跨来源时间一致性守卫（公网快照早于冻结 revision 则标 `STALE`） |
 | 8 | 不可得字段的显式清单 | 契约级 `contains / does_not_contain`，消费侧 fail closed（`FULL-CATALOG.md` 的 `claims.is/is_not` 先例提到契约层） |
-| 9 | 对账自动化进闸门 | `fetch --check --offline` + `reconcile` + 判据进 `verify-release.mjs` 登记表（由主线程串行维护） |
+| 9 | 对账自动化进闸门（**已完成**：`reconciliation` + `game-data-pack` 两条套件已在闸门登记表里，由 `releaseGateSatisfied()` 判定） | `fetch --check --offline` + `reconcile` + 判据进 `verify-release.mjs` 登记表（由主线程串行维护） |
 
 **纪律**：这 9 项没有全部满足之前，`CONTRACTS.md` 里的 `GameDataPackV2` **保持 `draft`**，
 Windows 侧不得据此开始正式训练。

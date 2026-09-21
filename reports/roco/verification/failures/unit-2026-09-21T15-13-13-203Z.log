@@ -1,0 +1,1295 @@
+npm run test:unit
+
+> test:unit
+> node --test tests/engine.test.js tests/rules.test.js tests/offline.test.js tests/mechanics.test.js tests/pvp.test.js tests/features.test.js tests/coach.test.js tests/companion.test.js tests/strategist.test.js tests/intervention.test.js tests/server.test.js tests/opponent.test.js tests/knowledge.test.js tests/evals/agent.test.js tests/evals/regression.test.js tests/evals/slow-model.test.js tests/wiring.test.js tests/copy.test.js tests/evals/player-copy.test.js tests/evals/tool-arguments.test.js tests/evals/roco/data-acceptance.test.js tests/evals/roco/agent-trajectories.test.js tests/evals/roco/browser-position-matrix.test.js tests/evals/local-model.test.js tests/evals/intervention-layer.test.js tests/evals/companion-nonintrusion.test.js tests/evals/shadow-replay.test.js tests/evals/roco/model-error-trajectories.test.js tests/evals/roco/intervention-margin-chain.test.js tests/evals/roco/intervention-agreement.test.js tests/evals/roco/model-arm-identity.test.js tests/evals/roco/model-trajectories.test.js tests/evals/shadow-tools.test.js tests/evals/claim-honesty.test.js tests/evals/teacher-review.test.js tests/evals/companion-contract.test.js tests/evals/subprocess-env.test.js tests/evals/state-doc.test.js tests/evals/provenance.test.js tests/evals/structure-contract.test.js tests/roco-experience.test.js tests/roco-full-catalog.test.js tests/evals/roco/coach-positions.test.js tests/evals/roco/teacher-match-review.test.js tests/evals/roco/game-adapter.test.js tests/evals/roco/mock-host-integration.test.js tests/evals/coach-advice.test.js tests/evals/guard-selftest.test.js tests/evals/roco/roster-evidence.test.js tests/roco-v3-redirect.test.js tests/roco-evidence-ledger.test.js tests/roco-rule-config.test.js tests/roco-rule-promotion.test.js tests/roco-catalog-reconciliation.test.js tests/roco-game-data-pack.test.js
+
+✔ strategist gives a legal action grounded in current state (25.000292ms)
+✔ teacher reads selected pet and resource limits (1.099958ms)
+✔ quiz closes the teaching loop and records success (0.681375ms)
+✔ explicit preference persists and preview results are not remembered (0.572875ms)
+✔ PVP restriction happens before provider calls (0.450125ms)
+✔ context excludes real RNG and invalid provider output is rejected (9.318125ms)
+✔ ordinary play closes observation choice feedback and relevant practice (31.004125ms)
+✔ round survives camp and serialization without leaking into new match (79.245125ms)
+✔ newest rounds first preserves event order; Markdown never executes HTML (0.757458ms)
+✔ runaway model output falls back to grounded packet (8.184292ms)
+✔ seed explanation and follow-up cannot be rewritten as pet resources (0.282625ms)
+✔ quiz waits for an answer, survives reload, handles question mark and cancels (0.518917ms)
+✔ provider receives earlier dialogue and topic instead of an isolated follow-up (0.350125ms)
+✔ attention is bounded, respects silence and cannot fire in background (0.366333ms)
+✔ agent planner can adapt to tool receipts and invalid tools never execute (20.914041ms)
+✔ whole-match archive persists all turns, separates matches and preserves previews (116.870666ms)
+✔ selected review turn returns its evidence rather than the final hit (62.322959ms)
+✔ screenshot endgame flags attack opportunity with guard caveat (0.475791ms)
+✔ current-match selection and missing requested turn never substitute another match or turn (29.4785ms)
+✔ whole-match UI request can review archived evidence without network or model credentials (12.744ms)
+✔ withdrawal is recorded separately from attacks in match summaries (13.925ms)
+✔ roster advice derives shared weaknesses and coverage from the real type chart (0.315542ms)
+✔ goal preference reweights the same enumeration and can flip the recommendation (6199.345333ms)
+✔ hard-requirement detection is programmatic, not left to the planner (0.141917ms)
+✔ tool policy is decided in code, and the model is only consulted when a tool is required (0.5315ms)
+✔ low HP with a potion in the bag is surfaced; without one it is not (23.614ms)
+✔ the countered hint states both directions, because the chart is symmetric (15.769416ms)
+✔ 整局复盘默认只给一个关键决策：当时的信息、两个候选动作、后果在展开区各一句 (107.1915ms)
+✔ 关键决策取的是事前差值最大的那一回合，不是事后结果最惨的那一回合 (138.333625ms)
+✔ 相似练习：参数改了、答案由算术算出，而且变式之间不是同一道题 (102.488167ms)
+✔ 小测的变式表每一档都不同：第 4 次出题不再与第 1 次一模一样 (0.451834ms)
+✔ 独立解出才算一次：有提示的答对不算，一次答对也不是掌握 (0.730208ms)
+✔ 记忆查看：每一条都带来源与时间；情绪只写成假设，且不从沉默与连败推出来 (0.71475ms)
+✔ 记忆纠正：新的值生效，旧值不再被引用；旧值推出来的假设一起失效 (0.725833ms)
+✔ 逐条删除：删掉的记录连同引用它的推断一起消失，摘要里再也读不到 (0.455916ms)
+✔ 全部清空与按组清空：清的是记忆，不是游戏成长 (0.248167ms)
+✔ 拒绝有时效：删掉拒绝那一条、或者等它过期，复盘就重新允许 (0.2105ms)
+✔ the ledger reads real cross-match records: rematch, first-fallen habit, pace, items, stage (228.842208ms)
+✔ the ledger keeps cross-match classes that only the companion can see (68.798833ms)
+✔ every line the companion says carries something the player cannot already see (103.01725ms)
+✔ the cross-match classes really show up in play, not only in the ledger (142.422584ms)
+✔ one loss never becomes comfort, and silence stays a real output (10.420208ms)
+✔ companion facts degrade to null instead of default values (0.686708ms)
+✔ the previous wording fails the same self-check (negative verification) (46.899625ms)
+✔ the information self-check is not vacuous (0.15025ms)
+✔ companion state is derived from real matches, dismissals and dialogue (183.397709ms)
+✔ register table: silence stays first and engagement never raises the ceiling (374.022833ms)
+✔ the register changes the wording and the length ceiling (192.617208ms)
+✔ the passive channel answers with the same cross-match material, not with the live board (212.136459ms)
+✔ every number the companion says is backed by its own evidence (156.304084ms)
+✔ player preferences survive matches and change the reply (133.630208ms)
+✔ each companion event fires once per match, and stops when the facts stop (64.0775ms)
+✔ every reading the trigger proposes can actually be said out loud (238.747083ms)
+✔ the companion budget is its own: the strategist going quiet never silences it, and the other way round (130.6155ms)
+✔ the same fact is never said twice in one match, and the cooldown is real (54.463416ms)
+✔ a line is 2–3 sentences and every one of them carries a fact (39.155459ms)
+✔ cross-match memory is what it leads with, and the live numbers come from real turns (81.711459ms)
+✔ the goal preference changes which observation it leads with, not the facts (20.576041ms)
+✔ restraint scan keeps the hard lines and blocks self-reported feelings (133.293ms)
+✔ runCoach routes to the companion and hands the register to the model (145.164542ms)
+✔ a model reply that breaks the register falls back to the recorded template (10.782583ms)
+✔ the proactive path stays silent when the screen is the only thing to repeat (130.738667ms)
+✔ 陪练一次只说一句，但军师条在场并不阻止它——时间互斥已取消 (0.156417ms)
+✔ the bubble stays as long as the words need, and wears an existing pet portrait (0.227958ms)
+✔ how long since the player last played is spoken from the real timestamp (46.915667ms)
+✔ the same fact never comes back wearing different words in one match (80.908041ms)
+✔ the five stances are all really spoken, and each one lands on a recorded event (1822.840583ms)
+✔ the stance belongs to the event class, and removing it makes the line unsayable (negative verification) (37.680166ms)
+✔ scene 1+2: a real win and a real loss/faint, with the words it actually says (471.414375ms)
+✔ scene 3: coming back after six days, it remembers where you left off (42.595541ms)
+✔ scene 4: the player opens the chat, and the second turn continues the same thread (136.055042ms)
+✔ small talk never hijacks a tactical question, and never invents a chat thread (29.630042ms)
+✔ fresh memory: the three greetings get three different answers, and the second turn continues that thread (125.379666ms)
+✔ negative verification: the old 「一律 R0／一律『我在。』」 chat channel fails this acceptance (0.2625ms)
+✔ 路由只认玩家原话：附加的「回答要求」不能把陪练顶成老师 (1.252416ms)
+✔ the appended 「回答要求」 never changes how the companion reads the player (0.546417ms)
+✔ 页面默认的「自动」角色 + 拼接说明：闲聊仍归陪练，真复盘仍归老师 (1.29875ms)
+✔ 军师/老师在场时陪练照样能说话——内容边界不等于时间互斥 (0.107417ms)
+✔ 空账本闲聊：不播报「我这儿是空的」，不推人走，不念全零，不列菜单 (124.928125ms)
+✔ negative verification: the old 「记录还是空的／去开一局吧」 copy fails this acceptance (0.444167ms)
+✔ moment 1 highlight: a finish off a half-health foe is praised on that exact strike (55.053208ms)
+✔ moment 2a blunder: the kill left standing gets comfort on that hand, not a lecture (7.649167ms)
+✔ moment 2b blunder: the hit that landed exactly on the last HP gets comfort on that hand (17.60625ms)
+✔ moment 3 clutch: surviving on a sliver is reacted to on that turn (8.478709ms)
+✔ moment 4 collapse: partners falling one after another is 憋屈 on those two turns (7.627958ms)
+✔ moment 5 comeback: a win from behind is marvelled at on the turn it turned (121.610916ms)
+✔ moment 6 near-miss: a loss by a sliver is 可惜 and carries no analysis (47.007166ms)
+✔ moment 7 milestone: a first clear is celebrated with the ledger, not with a stat sheet (54.982083ms)
+✔ moment 8 return: coming back after days still remembers where you left off (40.168417ms)
+✔ 久别的天数按**注入的时钟**算：跑测试的时刻不该改变结论（含 22:00 之后） (103.606792ms)
+✔ moment 9 stage again: the same stage is noted gently, on the turn it stopped last time (21.015709ms)
+✔ moment 10 narrow win: it breathes first, then looks back at the last blow (70.903542ms)
+✔ the hard lines hold on every moment line, and a fresh memory never invents a past (83.781041ms)
+✔ negative verification: hang the affect back on an aggregate statistic and the scenes go red (71.03125ms)
+✔ 人味①接词：玩家自己用过的那个词必须被接回来 (241.542459ms)
+✔ 人味②停在心情上：玩家说心情时，回答里不许出现战报 (259.011208ms)
+✔ 人味③不当客服：被动通道不出现客服腔与系统状态 (717.7075ms)
+✔ R0 被搭话时答得住：安静档与线上竞技下的心事不再掉回「我在。」 (233.99775ms)
+✔ R0 仍然不主动开口：门控一条都不动 (242.808666ms)
+✔ negative verification: 把 R0 的上限改回 8，上面两条验收必须变红 (237.682417ms)
+✔ 四个时段各说各的那一句，边界钉在整点上 (0.617125ms)
+✔ 时段问候只在碰面那一轮说，而且是「看见」不是「劝」 (0.510875ms)
+✔ 半夜还在打：引用的是记录里的时间戳，不是钟表 (62.057709ms)
+✔ 打久了给的是许可，不是命令：句子里带着这一波真实的局数 (90.630875ms)
+✔ 凌晨 + 打久了：合并成一句，不重复说时间 (89.662208ms)
+✔ 接住状态①：三种说法 × 两种账本，都是两拍（接词 → 落点），第一轮都不提对局 (991.080833ms)
+✔ 接住状态②：问候让位——「好早啊，今天没睡好」里那个「好」不许把「没睡好」挤掉 (2622.926375ms)
+✔ 接住状态③：状态词族一个都不许漏（漏一个就退回账本或问候） (3130.680125ms)
+✔ 接住状态④：「我是小芽」只在真正的第一次见面（记录为空）说一次 (203.867083ms)
+✔ 接住状态⑤：模型那一侧的约束同步改口径（不再要战报，也不许提对局） (200.987625ms)
+✔ 接住状态⑥：走引擎那条路（runCoach）拿到的是同一段话 (200.227375ms)
+✔ 接住状态⑦：两轮下来仍停在他身上（第二轮是「还…」，不是拐回对局） (409.90425ms)
+✔ negative verification: 把行为改回去（先说问候再拿记录收尾），这一把尺必须变红 (399.647709ms)
+✔ 问候轮①：哈喽／你好／在吗的回答里不许出现回合数、胜负、血线、速度比较与任何战术词 (109.9055ms)
+✔ 问候轮②：模型那一侧的同一条硬线——实测那句整段过不了扫描 (105.2925ms)
+✔ negative verification: 拆掉问候轮的三道约束，上一条验收必须变红 (110.904833ms)
+✔ 显式记忆：称呼、本命、聊天风格、输了要不要复盘、里程碑都记下来，而且带来源与时间 (5.256125ms)
+✔ 纠正偏好：承认新值，一个字都不提旧值 (17.953875ms)
+✔ 拒绝建议与不想说话：只应一声，不劝、不给建议、不推复盘 (17.555667ms)
+✔ 拒绝之后不再推复盘：同一份记录，拒绝前会讲、拒绝后不讲，过期后再讲 (17.668042ms)
+✔ 分享胜利：恭喜落在真实记录上，不复述屏幕，也不空泛打鸡血 (110.40275ms)
+✔ 只聊精灵：他点名哪只就聊哪只，且用他自己说过的本命 (18.339167ms)
+✔ 情绪是假设不是标签：低置信、短时、可覆盖，而且不从沉默与连败推出来 (17.012625ms)
+✔ 三条验收的判据本身不是空的：同一屏说两遍、复述屏幕、拒绝后推复盘都要能被判出来 (34.434292ms)
+✔ 六个场景一张表：每一条都接得住，而且每条都过得了硬线 (200.423375ms)
+✔ 整局回顾里没有 JSON、没有内部 ID、不念为 0 的计数 (1031.237625ms)
+✔ 整局统计：count=0 的类别整类省略，不在文案里换句式列一遍 (0.20525ms)
+✔ 整局统计的负向样本：把所有类别列出来必须被判为违规 (0.102875ms)
+✔ 整局回顾：四类全 0 的那一局整类省略（本地这一侧的回归保护） (241.5025ms)
+✔ 0 值判据本身不是空的：列一遍为违规，提到一个不算 (0.185584ms)
+✔ 整局统计仍然保留真的发生过的事 (0.083875ms)
+✔ 整局回顾的折叠句不会在展开区里再说一遍 (839.041ms)
+✔ 这条重复判据不是空洞的：用户截图里那一对必须被判为重复 (0.1195ms)
+✔ 分支比较的「怎么读」整条回顾只说一次，且不再用内部评分口吻 (583.755083ms)
+✔ 关键回合的文案里不出现回合 ID，比较句也不再复述同一句模板 (12.287584ms)
+✔ 老师的技能讲解依据不是 JSON (0.379875ms)
+✔ 展开区的首段：本地结论不删，与顶部重复才删 (24.366459ms)
+✔ 展开区不复述折叠时那句话 (0.0735ms)
+✔ app.js 里那句话只有一个落脚处：折叠条，展开区只留依据 (0.658208ms)
+✔ 这套判据不是空洞的：修改前的原句贴进来必须报错 (0.1305ms)
+✔ 模型接管顶部条后，展开区不得留下第二套结论（措辞不同也不行） (0.6255ms)
+✔ 本地路径（没有模型回答）下展开区的依据不得被删 (0.064083ms)
+✔ invalid actions leave original state untouched (1.43075ms)
+✔ defense reduces damage, blocks new status and cannot repeat (4.455ms)
+✔ switch sends damage to the new pet and consumes the round (2.551833ms)
+✔ healing occurs before attacks and consumes exactly one item (5.077167ms)
+✔ fainted actor loses attack, replacement is free (5.297458ms)
+✔ status ticks immediately, expires and pauses on bench (19.34075ms)
+✔ simultaneous status knockouts produce draw (0.406292ms)
+✔ escape terminates without enemy damage (0.195625ms)
+✔ seed and actions are reproducible, inputs remain immutable (38.54125ms)
+✔ 100 varied complete games preserve invariants and terminate (10565.05375ms)
+✔ three independent receipts reduce routine coaching; helped actions do not prove mastery (4.296542ms)
+✔ dismissals persist with source and suppress only routine reminders (0.147458ms)
+✔ context assembly trims to an explicit budget, preserves current facts and does not mutate the archive (16.253958ms)
+✔ RAG citations fail closed on deleted IDs and wrong rules version; applicability is explicit (11.460333ms)
+✔ trained policy obeys hard constraints on all state combinations and differs from zero initialization (0.818792ms)
+✔ paired simulator does not credit hints for actions already correct without coaching (1.135292ms)
+✔ unsupported numeric claims and certainty are rejected while grounded comparisons pass (0.836042ms)
+✔ watch registration is bounded, cancelled explicitly, and never crosses matches or PVP (2.300792ms)
+✔ parametric practice includes faster, slower and ties with engine-aligned answers (0.499458ms)
+✔ watch clarification does not inherit previous review topic (0.534875ms)
+✔ corrupt archive fails closed and old rules never receive current-rule counterfactuals (27.3525ms)
+✔ review alternatives use the decision snapshot and never the actual future enemy action (28.774459ms)
+✔ slow results cannot cross an action, match, rules version or expiry boundary (0.151167ms)
+✔ invalid model numbers and network errors fall back with the original state token (47.213666ms)
+✔ direct skill facts use generated engine knowledge and preserve follow-up evidence (0.40475ms)
+✔ colloquial help at replacement sees public state and ranks only living reserves (37.555458ms)
+✔ analysis after a match invokes model with whole-match evidence rather than canned companion reply (46.337041ms)
+✔ context assembly retains the just-finished turn for colloquial battle questions (39.312875ms)
+✔ model length fallback never claims the template was generated by DeepSeek (26.613291ms)
+✔ client sends whole-match requests to connected backend instead of intercepting review topic (31.559792ms)
+✔ automatic and manual requests share a queue rather than forcing a busy fallback (20.066417ms)
+✔ five energy must not be described as full energy (0.465708ms)
+✔ automatic review prompt stays whole-match even when its instructions mention single-turn scores (25.453708ms)
+✔ numeric guard normalizes decimal formatting without dropping sign (0.079916ms)
+✔ match grounding rejects damage assigned to an explicitly cancelled turn (0.240083ms)
+✔ generation instructions are not saved as the player message (23.949042ms)
+✔ state invalidation aborts active work and discards queued old requests (0.203542ms)
+✔ same-state requests merge, cache clones, and epoch clears cache (0.105375ms)
+✔ tool contracts reject unknown parameters and return bounded evidence pages (27.6675ms)
+✔ branch simulation covers both tie orders without mutation or hidden seed dependence (1.236125ms)
+✔ training preserves scarce resources for an explicitly preferred partner (0.501208ms)
+✔ transfer assessment excludes prompted actions and requires different matches and situations (0.577292ms)
+✔ guard binds remaining HP to after snapshot and rejects observing simultaneous opponent action first (0.395ms)
+✔ item-name drift is rejected even when every number is grounded (0.099875ms)
+✔ evidence trimmed out of the prompt is still retrievable from the archive (28.818291ms)
+✔ an action recorded as cancelled cannot be described as having hit (0.341292ms)
+✔ guards do not fire on negated certainty or on numbers quoted from a knowledge card (0.107833ms)
+
+[claim-honesty] 扫描 114 个文件（docs markdown + reports markdown + src/client）
+  docs/CHECKLIST.md  争议=0 放行=0 判红=0
+  docs/COACH-ACCEPTANCE.md  争议=0 放行=0 判红=0
+  docs/COACH-PLAN.md  争议=0 放行=0 判红=0
+  docs/COMPANION-DESIGN.md  争议=0 放行=0 判红=0
+  docs/COMPANION-IMPLEMENTATION.md  争议=0 放行=0 判红=0
+  docs/DEEPSEEK.md  争议=0 放行=0 判红=0
+  docs/DEMO-ACCEPTANCE.md  争议=0 放行=0 判红=0
+  docs/DEMO-WALKTHROUGH.md  争议=0 放行=0 判红=0
+  docs/DIFFICULTY-AND-SOLUTIONS.md  争议=0 放行=0 判红=0
+  docs/DOCS-AUDIT-FIXES.md  争议=0 放行=0 判红=0
+  docs/DOCS-AUDIT.md  争议=0 放行=0 判红=0
+  docs/ENVIRONMENT-NOTES.md  争议=0 放行=0 判红=0
+  docs/EVIDENCE-SCHEMA.md  争议=0 放行=0 判红=0
+  docs/EXPERIMENTS.md  争议=0 放行=0 判红=0
+  docs/G06-LATE-GAME-DESIGN.md  争议=0 放行=0 判红=0
+  docs/G08-RULES-IN-PLACE.md  争议=0 放行=0 判红=0
+  docs/GAME-EXPANSION-PROPOSAL.md  争议=0 放行=0 判红=0
+  docs/IMPLEMENTATION-STATUS.md  争议=0 放行=0 判红=0
+  docs/INTERVIEW-DRILL.md  争议=0 放行=0 判红=0
+  docs/INTERVIEW-GUIDE.md  争议=0 放行=0 判红=0
+  docs/LANGUAGE-REVIEW.md  争议=0 放行=0 判红=0
+  docs/LINGBAO-RESEARCH.md  争议=0 放行=0 判红=0
+  docs/P05-RULES-SOURCE.md  争议=0 放行=0 判红=0
+  docs/RAG-LOCALIZATION.md  争议=0 放行=0 判红=0
+  docs/README.md  争议=0 放行=0 判红=0
+  docs/RELEASE-v0.1.md  争议=0 放行=0 判红=0
+  docs/RESEARCH-NOTES.md  争议=0 放行=0 判红=0
+  docs/S05-W09-SLOW-MODEL.md  争议=0 放行=0 判红=0
+  docs/STRUCTURE.md  争议=0 放行=0 判红=0
+  docs/W10-ACCEPTANCE-MAPPING.md  争议=0 放行=0 判红=0
+  docs/XIAOTIAN-RESEARCH.md  争议=0 放行=0 判红=0
+  docs/coach-design-notes.md  争议=0 放行=0 判红=0
+  docs/reviews/2026-09-17-diagnosis-response.md  争议=0 放行=0 判红=0
+  docs/reviews/2026-09-17-live-acceptance.md  争议=0 放行=0 判红=0
+  docs/roadmap/CROSS-MACHINE-COORDINATION.md  争议=0 放行=0 判红=0
+  docs/roadmap/DSH-EXECUTION-STATE.md  争议=4 放行=4 判红=0
+  docs/roadmap/FLAGSHIP-V3-CHECKLIST.md  争议=0 放行=0 判红=0
+  docs/roadmap/FLAGSHIP-V3-REDIRECT.md  争议=0 放行=0 判红=0
+  docs/roadmap/MORNING-REPORT-2026-09-21-v2.md  争议=0 放行=0 判红=0
+  docs/roadmap/MORNING-REPORT-2026-09-21.md  争议=0 放行=0 判红=0
+  docs/roco/AGENT-TRAJECTORIES.md  争议=1 放行=1 判红=0
+  docs/roco/BENCHMARKS.md  争议=0 放行=0 判红=0
+  docs/roco/BROWSER-POSITION-MATRIX.md  争议=0 放行=0 判红=0
+  docs/roco/CALIBRATION.md  争议=0 放行=0 判红=0
+  docs/roco/CATALOG-RECONCILIATION.md  争议=0 放行=0 判红=0
+  docs/roco/COACH-ADVICE-DESIGN.md  争议=0 放行=0 判红=0
+  docs/roco/COMPANION-GAP-AUDIT.md  争议=0 放行=0 判红=0
+  docs/roco/COMPANION-NONINTRUSION.md  争议=0 放行=0 判红=0
+  docs/roco/COVERAGE-AXES.md  争议=0 放行=0 判红=0
+  docs/roco/COVERAGE-LAYERS.md  争议=0 放行=0 判红=0
+  docs/roco/DATA-CONFLICTS.md  争议=0 放行=0 判红=0
+  docs/roco/DEMO-PERF.md  争议=0 放行=0 判红=0
+  docs/roco/DEMO-PLAN.md  争议=2 放行=2 判红=0
+  docs/roco/EFFECT-PRIMITIVES.md  争议=0 放行=0 判红=0
+  docs/roco/FULL-CATALOG.md  争议=0 放行=0 判红=0
+  docs/roco/GAME-ADAPTER.md  争议=0 放行=0 判红=0
+  docs/roco/GAME-DATA-PACK.md  争议=0 放行=0 判红=0
+  docs/roco/GUARD-SELFTEST.md  争议=0 放行=0 判红=0
+  docs/roco/LICENSE-MATRIX.md  争议=0 放行=0 判红=0
+  docs/roco/LINEUP-LEGALITY.md  争议=0 放行=0 判红=0
+  docs/roco/LOCAL-MODEL.md  争议=0 放行=0 判红=0
+  docs/roco/M0-M1-ACCEPTANCE.md  争议=0 放行=0 判红=0
+  docs/roco/M0-REPO-AUDIT.md  争议=0 放行=0 判红=0
+  docs/roco/MICROCASE-HARNESS.md  争议=0 放行=0 判红=0
+  docs/roco/MICROCASE-PLAN.md  争议=0 放行=0 判红=0
+  docs/roco/PET-SUPPORT-MATRIX.md  争议=0 放行=0 判红=0
+  docs/roco/PROGRESS.md  争议=4 放行=4 判红=0
+  docs/roco/QWEN-27B-USER-RUN-GUIDE.md  争议=0 放行=0 判红=0
+  docs/roco/RELEASE-v0.1.md  争议=0 放行=0 判红=0
+  docs/roco/ROSTER-48.md  争议=0 放行=0 判红=0
+  docs/roco/ROSTER-60.md  争议=0 放行=0 判红=0
+  docs/roco/RULE-CONFIG.md  争议=0 放行=0 判红=0
+  docs/roco/RULE-EVIDENCE-LEDGER.md  争议=0 放行=0 判红=0
+  docs/roco/RULE-PROMOTION.md  争议=0 放行=0 判红=0
+  docs/roco/SHADOW-REPLAY.md  争议=1 放行=1 判红=0
+  docs/roco/STRESS-AND-PLANNING-DESIGN.md  争议=0 放行=0 判红=0
+  docs/roco/TEACHER-REVIEW.md  争议=0 放行=0 判红=0
+  docs/roco/TRAINING-ROADMAP-4B-27B-VALUE.md  争议=0 放行=0 判红=0
+  docs/roco/W4-02-MODEL-CANDIDATES.md  争议=1 放行=1 判红=0
+  docs/roco/W4-04-SFT-PREREGISTRATION.md  争议=2 放行=2 判红=0
+  docs/roco/W5-04-ADJUDICATION.md  争议=0 放行=0 判红=0
+  docs/roco/W5-04-INTERVENTION-GATE-V2.md  争议=0 放行=0 判红=0
+  docs/roco/W5-04-INTERVENTION-GATE.md  争议=0 放行=0 判红=0
+  docs/roco/W5-04-SUPPRESSION-VS-RULE.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/ARCHITECTURE.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/DATA-CARD.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/DEMO-SCRIPT.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/RULE-COVERAGE.md  争议=0 放行=0 判红=0
+  docs/roco/mvp/STATUS-LABELS.md  争议=0 放行=0 判红=0
+  README.md  争议=0 放行=0 判红=0
+  reports/balance-calibration-summary.md  争议=0 放行=0 判红=0
+  reports/balance-matrix-notes.md  争议=0 放行=0 判红=0
+  reports/balance-matrix.md  争议=0 放行=0 判红=0
+  reports/c17-endgame-browser.md  争议=0 放行=0 判红=0
+  reports/live-model-eval-before-after.md  争议=0 放行=0 判红=0
+  reports/live-model-eval-summary.md  争议=0 放行=0 判红=0
+  reports/planner-tuning-log.md  争议=0 放行=0 判红=0
+  reports/retrieval-extended-summary.md  争议=0 放行=0 判红=0
+  reports/roco/g02-team/G02-MODEL-2026-09-21-v1.md  争议=0 放行=0 判红=0
+  reports/roco/g02-team/G02-MODEL-2026-09-21-v2.md  争议=0 放行=0 判红=0
+  reports/roco/intervention/README.md  争议=0 放行=0 判红=0
+  reports/roco/invalidated/README.md  争议=1 放行=1 判红=0
+  reports/roco/pilot-1000/README.md  争议=0 放行=0 判红=0
+  reports/roco/product-wiring/full-match-wiring.md  争议=0 放行=0 判红=0
+  reports/roco/regression/F02-REGRESSION-2026-09-21.md  争议=0 放行=0 判红=0
+  reports/roco/verification/README.md  争议=0 放行=0 判红=0
+  reports/roco/verification/hourly-2026-09-21T1019Z.md  争议=0 放行=0 判红=0
+  reports/roco/verification/hourly-2026-09-21T1055Z.md  争议=0 放行=0 判红=0
+  src/client/app.js  争议=0 放行=0 判红=0
+  src/client/connect.js  争议=0 放行=0 判红=0
+  src/client/roco.js  争议=0 放行=0 判红=0
+  src/client/connect.html  争议=0 放行=0 判红=0
+  src/client/index.html  争议=0 放行=0 判红=0
+  src/client/roco.html  争议=0 放行=0 判红=0
+[claim-honesty] 争议用法逐条：
+  · docs/roadmap/DSH-EXECUTION-STATE.md:754  [275/288] → allowed-window-disclosed
+      | **P0 的 7 条问题（都已定位到代码）** | ① `pet_000225` 占位：`_sim_envelope` 把 `public_planner_state`（Agent 最小协议，**刻意不含 name**）同时当浏览器 UI 状态 → 新增并行的 `ui_public_view`，**不动** `coach_planner_state`；② 事件把 `kind`+JSON 搬给玩家（`roco.js:140`）→ 中文
+  · docs/roadmap/DSH-EXECUTION-STATE.md:759  [275/288, 0.9549] → allowed-window-disclosed
+      | **SFT v4（本机训完、过预注册门槛）** | 数据 1,752 条（train 1,395 / val 306 / test 51，`strict` 机制留出；**逐字节可复现**，由 `verify-sft-split.mjs` 在临时目录重跑比对）。LoRA r=8 / 8 层 / 900 iters / lr 1e-5 / mask-prompt / seed 20260921；train loss **0.001**、
+  · docs/roadmap/DSH-EXECUTION-STATE.md:762  [275/288] → allowed-window-disclosed
+      | **第 41 轮（W4-02 的第二半用本地模型补齐，不再等 key）** | W4-02 的「模型候选轨迹」一直记成「要 DeepSeek key」。第 39 轮之后这个前提不成立了：本机有真的接进链路的工具选择模型（v4 适配器，288 条门禁 275/288）。本轮把 arm 扩成**模型臂**（`ARMS.local_4b`，`makePlanner` 注入 `ask`，没有注入就**抛**——不许安静退化成一个规则臂），用
+  · docs/roadmap/DSH-EXECUTION-STATE.md:769  [275/288, 0.9549] → allowed-window-disclosed
+      | **第 38 轮（模型臂成绩存档错位：一处「文档说得通、产物对不上」的事故）** | 给轨迹集补「生产者一致性」检查时顺手查了模型臂的存档，发现 **`-sft-v2.json` 里装的其实是 v1 的成绩、`-sft-v3.json` 里装的是 v2 的、真正的 v3 一个产物都没留下**——而文档与台账一直照着这组对不上号的数字往下走。根因三条：① 报告里**没有模型身份**（只有 arm/gateway/prompt_dige
+  · docs/roco/AGENT-TRAJECTORIES.md:217  [275/288] → allowed-window-disclosed
+      > 可以引用的能力口径是 **1,752 个窗口 / 92.29%**，不是单世界门禁的 275/288。
+  · docs/roco/DEMO-PLAN.md:21  [275/288, 95.49%] → allowed-window-disclosed
+      | 6 | 1,752 广泛世界的结果可能被单世界数字掩盖 | `docs/roco/W4-02-MODEL-CANDIDATES.md` §5.2 已写明，但容易被 `275/288=95.49%`（单世界 288 窗口）盖住 | Demo 与文档**只用 1,752 口径**：**1,617/1,752 = 92.29%**，共同 864 窗口**退化 42 / 扳回 0**；`ROCO_LOCAL_MODEL` 保持默认 `off
+  · docs/roco/DEMO-PLAN.md:35  [275/288] → allowed-prohibition
+      | P0-6 诚实口径 | Demo 页与文档只用 **1,752 口径（92.29%，配对退化 42/扳回 0）**；`off` 保持默认 | 全局搜索不得出现用 `275/288` 描述"整体能力"的句子；设置项里 `on` 不可从 UI 打开 | 0.5 轮 |
+  · docs/roco/PROGRESS.md:63  [275/288, 0.9549] → allowed-window-disclosed
+      | W4-04 | Qwen3-4B SFT | `PARTIAL` | `scripts/roco/build-agent-sft-data.mjs`、`scripts/roco/verify-sft-split.mjs`、`scripts/roco/build-agent-trajectories.mjs`、`docs/roco/W4-04-SFT-PREREGISTRATION.md`、`reports/roco/sft/data
+  · docs/roco/PROGRESS.md:65  [0.9549] → allowed-window-disclosed
+      | W4-05 | 同 Agent 回放门禁 | `PARTIAL` | `scripts/roco/shadow-replay.mjs`、`scripts/model/measure-arms.sh`、`docs/roco/SHADOW-REPLAY.md`、`docs/roco/W4-04-SFT-PREREGISTRATION.md`、`reports/roco/shadow-replay.json`、`reports/roco/
+  · docs/roco/PROGRESS.md:107  [275/288, 0.9549] → allowed-ruler-written-per-arm
+      **预注册判据 P1—P8 全部满足**（判据在跑之前写死在 `docs/roco/W4-04-SFT-PREREGISTRATION.md`）：v4 **275/288（0.9549）**，优于 v2 的 268/288；`roster_constraint` 8→**13/24**，`rules_lookup` 68→**70/72**，`invalid-arguments` 0，p50 435 ms / p95 1054 ms，f
+  · docs/roco/PROGRESS.md:109  [0.9549] → allowed-ruler-written-per-arm
+      规则臂 288/288；**五个 arm 在一条命令下重测完**（`scripts/model/measure-arms.sh`），每份产物都带适配器 sha256：基座 225/288（0.7813）、v1 229（0.7951）、v2 268（0.9306）、v3 204（0.7083）、**v4 275（0.9549）**。
+  · docs/roco/SHADOW-REPLAY.md:324  [275/288, 0.9549] → allowed-shadow-replay-gate-doc
+      | **v4** | **275/288** | **0.9549** | 435 ms | 1054 ms | 0 | **0.9271** | **0.9259** |
+  · docs/roco/W4-02-MODEL-CANDIDATES.md:10  [275/288] → allowed-window-disclosed
+      `docs/roco/W4-04-SFT-PREREGISTRATION.md`，288 条门禁 **275/288**），
+  · docs/roco/W4-04-SFT-PREREGISTRATION.md:134  [275/288, 0.9549] → allowed-preregistration
+      | **v4** | **275/288** | **0.9549** | 435 ms | 1054 ms | 0 | **0.9271** | **0.9259** | `…-tool-v4` |
+  · docs/roco/W4-04-SFT-PREREGISTRATION.md:183  [0.9549] → allowed-window-disclosed
+      v4 的 0.9549 是「同一把尺子上的横向比较」，
+  · reports/roco/invalidated/README.md:36  [275/288, 0.9549] → allowed-retired-archive
+      | v4 | 275/288 | 0.9549 | `362cc0208717` |
+[claim-honesty] 放行理由分布： {
+  'allowed-window-disclosed': 10,
+  'allowed-prohibition': 1,
+  'allowed-ruler-written-per-arm': 2,
+  'allowed-shadow-replay-gate-doc': 1,
+  'allowed-preregistration': 1,
+  'allowed-retired-archive': 1
+}
+✔ 扫描 docs / reports 的 markdown 与玩家端源码：单世界 288 数字不得被当成整体能力 (88.300166ms)
+✔ 宽口径诚实注记：模型候选文档与台账都必须有 92.29%（或 1,617/1,752）与配对退化 42 / 扳回 0 (0.496209ms)
+✔ 玩家页面不能把本地模型打开：客户端没有写 on 的入口 (1.8255ms)
+✔ local-model 的 feature flag 默认 off，未知取值一律退化成 off (0.467875ms)
+✔ 反向对照：故意违规的输入必须被判红（检查器不能是「总是 true」） (1.461958ms)
+✔ 台账说模型候选那一半已补齐，轨迹文档不得再声称它没做 (0.582209ms)
+✔ 每个检测器在自己那份局面上开口，并报出自己的 kind (0.740667ms)
+✔ 可达的 kind 至少有 6 个（不同局面结构上不同） (0.119541ms)
+✔ 均势局面返回 null（沉默），而不是硬凑一句话 (2.11875ms)
+✔ 提示文案里没有任何工程词 (0.239209ms)
+✔ 每句话都指向一个具体动作/伙伴/技能或明确立场，且 why 与 risk 都不为空 (0.178791ms)
+✔ 句子不说胜率、不说「最优」、不承诺赢 (0.077959ms)
+✔ 每个 kind 的句子形状互不相同，且不靠换数字重复 (0.219375ms)
+✔ 同一句已经说过就不再重复（重复提示本身就是噪声） (0.182084ms)
+✔ 缺少规划回执时，依赖它的检测器不猜（其余照常开口） (0.183083ms)
+✔ 直接递原始公开视图（没有经过 rocoGameView 投影）也能读出同一个局面 (0.171875ms)
+✔ 对手的 active 是它在自己队伍里的位次，不能拿它索引「场上那只」 (0.115791ms)
+✔ 上一手那一招这一轮放不出来时，不猜「换个同系别的招」 (0.094333ms)
+✔ 「更狠一点但决定不了这一轮」的贵招放不出来时不开口 (0.155459ms)
+✔ 本模块在浏览器模块图里安全：没有 node:* / require / import (0.428792ms)
+✔ 情绪意图路由：词表内的情绪词被判成 emotion，并走心情出口而不是观察通道 (6.291292ms)
+✔ 玩家只说了一句心情时，回答不许出现任何战绩读数（词表内的情绪词） (1.577625ms)
+✔ 空账本与有记录时，同一句心情拿到的是同一句陪伴（不由账本决定） (1.96075ms)
+✔ 情绪词一律走心情出口：五个曾经接不住的词，回答里一个战报读数都没有（第 45 轮已修） (1.413833ms)
+✔ 长期偏好往返：记住 → 序列化 → 读回，值、来源与旧字段同步 (0.977041ms)
+✔ 长期偏好可纠正、可逐条删除，删掉之后决定不再引用旧值 (0.495584ms)
+✔ 未知或畸形的偏好值在决定层安全降级：不猜、不默认、不崩 (0.816417ms)
+✔ 说话长短：brief 真的更短，而且玩家自己说过的那一份（chatStyle）真的被读到（第 45 轮已修） (1.409875ms)
+✔ 不打扰（主动侧）：硬边界、额度、冷却、去重都能在没有浏览器的情况下钉住 (0.7085ms)
+✔ 每局额度随近 7 天的主动关闭次数收紧（0 / 1 / 3 → 4 / 1 / 0） (0.170792ms)
+✔ 气泡时序：先判 hold 再判排队过期，超时优先丢弃 (0.095083ms)
+✔ 静默偏好同时管住局内气泡与聊天回话（第 45 轮已修，正向断言） (2.349208ms)
+✔ 情绪与拒绝优先于复盘路由：输了 / 别复盘了 归陪练，分析问法仍归老师（第 45 轮已修） (47.635541ms)
+✔ 验收脚本跑完必须是 pass，且每条判据都过 (2138.885208ms)
+✔ 判据不是恒真：构造「永远不说」与「每回合都说」的陪练，各自会挂 (1653.582958ms)
+✔ 硬边界：四类局面下一句话都不许说，且安静偏好的上限真的归零 (0.221083ms)
+✔ 气泡时序：hold 的判断先于「有没有新消息排队」 (0.084083ms)
+✔ 同一件事一局内不会被说第二遍 (0.1015ms)
+✔ 文档里必须写明这不是真人验收 (0.268833ms)
+✔ 报告落盘后与现场重跑一致（产物不许过期） (3196.32725ms)
+✔ 子进程环境必须清掉测试运行器自己的变量（否则自检永远是假绿） (1.3625ms)
+✔ 登记表非空，且每条都写清「抓的是什么」 (0.134333ms)
+✔ 每个注入点现在就真的存在：找不到就是登记的守卫已经过时 (22.280291ms)
+✔ 注入后文件必须被恢复（否则自检会污染工作区） (984.758959ms)
+✔ 找不到注入点时如实报 skip，而不是假装红 (0.264ms)
+✔ 恢复失败要报错，不能静默留下被改过的文件 (879.75525ms)
+✔ 默认 off：判定层不参与，动作与规则逐位相同 (0.99275ms)
+✔ 模型文件里必须留着本次门槛判定，判据名不许写死 (0.246833ms)
+✔ 判定层只能抑制：on 下动作只可能是「规则的动作」或 silent (0.331833ms)
+✔ 模型不可用（文件缺失）时退回规则结果，而不是变成静默 (1.939958ms)
+✔ 特征表对不上时明确拒绝，而不是按错的系数算 (0.157833ms)
+✔ shadow 模式：照算但不改变结果 (0.349542ms)
+✔ G6 延迟：判定层 P95 远低于 1ms（查表点积，无模型调用） (4.249125ms)
+✔ featureVector 与模型声明的特征顺序严格对应 (0.14325ms)
+✔ planner_margin_norm 只在真的拿到边际量时非零（不编代理值） (0.107459ms)
+✔ 判定层在**真实链路**上真的会触发，而且用的是可解释的边际量刻度 (4.858042ms)
+✔ flag 读法保守：未知取值当作 off (0.096167ms)
+✔ off 路径完全不依赖模型文件：磁盘上那份不在也照常 (0.731958ms)
+✔ feature flag 默认关闭：没设置时不会走本地模型 (0.563083ms)
+✔ 回滚开关：off 模式下本地模型**一次都不被调用**（这是「能退回规则臂」的依据） (0.193416ms)
+✔ 超时不是异常：到点必须 reject 并把这次计成 timeout (116.211541ms)
+✔ 推理进程崩溃时在途请求立刻失败，而不是各自等满超时 (62.699334ms)
+✔ 取消（AbortSignal）也要立刻释放，不等超时 (75.73325ms)
+✔ 上游返回 ok=false 时要如实变成错误，不能返回空字符串冒充成功 (55.310375ms)
+✔ provider 一定会回退，并且把回退原因留在 lastFallback (3056.052625ms)
+✔ provider 在本地可用时返回模型输出，并清掉上一次的回退记录 (59.704125ms)
+✔ 没有 fallback 就不允许构造 provider：降级路径是必填的 (0.22675ms)
+✔ 网关：OpenAI 形状的响应带 x_roco 的延迟与内存字段 (66.083584ms)
+✔ 网关：超时返回 504 且形状是 error.type=timeout，而不是 200 (127.652791ms)
+✔ 网关：并发打满时快速失败为 429，不无限排队 (862.169667ms)
+✔ 网关：stream=true 明确 501，不假装支持 (45.557ms)
+✔ manifest 校验必须真的比 SHA256：改一个字节就要报错 (2773.67975ms)
+✔ manifest 里登记的许可证与来源是必需的，缺了要报错 (1358.341292ms)
+✔ 工具选择：不认识的工具名一律当作「停止」，而不是猜一个 (0.642208ms)
+✔ 工具选择：输出不是 JSON、或模型超时，都退化成停止 (0.401958ms)
+✔ 工具选择：合法输出要真的变成一次调用 (0.1875ms)
+✔ shadow 模式：本地跑一遍，但玩家看到的结果仍然来自云端 (58.530125ms)
+✔ on 模式：本地成功就走本地，失败就回退并且不抛给玩家 (3113.676458ms)
+✔ on 模式：证据包过长时直接不试本地，明确记账而不是截断后假装成功 (51.858875ms)
+✔ 权重目录不进 git：.models/ 与 .venv-mlx/ 都在 .gitignore 里 (7.751708ms)
+✔ no player-facing string uses internal vocabulary (39.871542ms)
+✔ no coach module string literal contains banned vocabulary (3.473541ms)
+✔ 真实数据的溯源必须完整（这条红了就是真问题，不是检查器太严） (337.797958ms)
+✔ 解析器只认真正的来源条目：末尾的 license_summary 不算 (0.294291ms)
+✔ 块标量与带数字的字段名都要能解析（两个已修的解析 bug） (0.259833ms)
+✔ 子文件（part_of）不该被要求自带 revision 与归档哈希 (0.238917ms)
+✔ 反证：缺 source_id 的规范化数据必须被判出来 (0.17225ms)
+✔ 反证：ruleset_id 不对必须被判出来 (0.081375ms)
+✔ regression set covers all four required scenario categories (0.622708ms)
+✔ r01 [silence] 玩家已经出招，旧提示必须消失 (0.232416ms)
+✔ r02 [silence] 安静档下不得主动提示，即便有可行动风险 (0.060333ms)
+✔ r03 [silence] 同一回合不得重复提示 (0.060167ms)
+✔ r04 [silence] 玩家忽略过提示后提高打扰成本，不得连续催促 (0.062792ms)
+✔ r05 [low-confidence] 绝对承诺一律拒绝，无论数字是否可核 (0.383833ms)
+✔ r06 [low-confidence] 否定形式的确定性（不是稳赢）不得被误判为承诺 (1.444292ms)
+✔ r07 [low-confidence] 不得声称看过对手待执行的动作 (0.192959ms)
+✔ r08 [low-confidence] 把已取消的行动说成命中必须拦下 (0.499708ms)
+✔ r09 [missing-evidence] 道具名不得漂移（净化药被叫成解药） (0.119583ms)
+✔ r10 [missing-evidence] 凭空数字必须拦下 (0.068833ms)
+✔ r11 [missing-evidence] 引用不存在的知识卡必须失败关闭 (0.595042ms)
+✔ r12 [missing-evidence] 引用已被删除或规则版本不符的卡片必须失败关闭 (0.095125ms)
+✔ r13 [tied-options] 同分行动不得被描述成明显更优 (18.781625ms)
+✔ r14 [tied-options] 枚举结论必须带边界说明，不能暗示全局最优 (12.832208ms)
+✔ r15 [tied-options] 目标偏好改变后推荐可以变，但依据仍须是同一批枚举 (4931.308083ms)
+✔ r16 [tied-options] 不设偏好时结果必须稳定 (12.592583ms)
+✔ 轨迹集存在，且规模不低于 W4-02 的两千条下限 (1.304542ms)
+✔ 文档里那行「N 条 / M 个世界 / K 个 arm」必须与产物一致 (0.28875ms)
+✔ 产物必须是**现在这个生成器**产出来的（生产者一致性，含反向对照） (116.228041ms)
+✔ 每条轨迹都有可判定的判据、回执摘要与停止原因 (8.692625ms)
+✔ 八个类别与全部 arm 都有轨迹，切分信息随行带出 (3.189084ms)
+✔ 反证 arm 真的被判挂，而不是与基线一模一样 (0.146792ms)
+✔ 生成器与判定器都能被加载：模块导出漂了要在这里断，而不是在产物里 (57.540916ms)
+✔ 判定器两个方向都对，且生成时的判定与现在重判一致 (2371.979875ms)
+✔ 轨迹集覆盖到每条任务，且没有留下重复的 traj_id (2.131792ms)
+✔ 浏览器局面矩阵：产物存在且结构完整 (1.555292ms)
+✔ 浏览器局面矩阵：8—12 个写死的局面，全部真的推进到位 (0.516625ms)
+✔ 浏览器局面矩阵：每个局面的实际 kind === 写死的期望 kind (1.540125ms)
+✔ 浏览器局面矩阵：至少 10 个局面真的有气泡产出，沉默的必须写清原因 (0.5245ms)
+✔ 浏览器局面矩阵：kind 覆盖 ≥8 种，或如实登记不可达清单（11 个 kind 列全） (0.441916ms)
+✔ 浏览器局面矩阵：全量扫描说「可达」而矩阵里没有的 kind，必须被披露（不许当成不可达） (0.882917ms)
+✔ 浏览器局面矩阵：没有任何形状重复超过一次（形状由守卫重算，不看 summary） (0.434792ms)
+✔ 浏览器局面矩阵：DOM 气泡 === Node 侧用同一批公开量重算的文案（逐条） (0.344542ms)
+✔ 浏览器局面矩阵：每条气泡都含「做什么 / 为什么是现在 / 一个关键风险」，且真的渲染给玩家 (0.6545ms)
+✔ 浏览器局面矩阵：玩家可见文案里没有工程术语，产物里没有内部 id / 隐藏信息 / 评分 (1.107208ms)
+✔ 浏览器局面矩阵：同一批写死的输入跑两遍，结果逐字节相同 (0.2655ms)
+
+=== 10 个隔离过的真实局面上的真实建议 =====================================
+局面 → 实际 kind → 形状 → 原句（共 9/10 个局面开口）
+01-ko-now-lethal         对手场上残血、我方可以收掉（lethal available）             kind=ko-now              「◆」估 #，够收对面「◆」这 # 血：这一轮直接收 | 「诡刺」估 130，够收对面「寂灭骨龙」这 35 血：这一轮直接收
+02-energy-short          能量不足：关键技能能耗高于当前能量，而那一招正好能收掉                 kind=energy-short        能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶 | 能量还差 1 才能收掉它：先吃「能量果」补上，这一轮别硬顶
+03-switch-low-hp         我方场上残血、后备有健康精灵（换人是否值得）                      kind=switch-low-hp       你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉 | 你只剩 33% 血，换「雪影娃娃」上来：它还厚，别把「音速犬」白送掉
+04-type-resisted         属性被抗：上一手那一招被抵抗、这一轮还在用它                      kind=type-resisted       「◆」打「◆」只有抵抗（# 伤害）：别再硬用它 | 「气波」打「银月狼王」只有抵抗（3 伤害）：别再硬用它
+05-replace-own-faint     我方场上倒下、需要补位（phase == replace 且我方 fainted）   kind=replace-required    「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打 | 「寂灭骨龙」倒了，换「海豹船长」顶上：对面「黑猫巫师」还在场，补位别一上来就挨打
+06-ko-now-mid            双方都还有余血（52%），但我方这一手刚好够收（收线成立）               kind=ko-now              「◆」估 #，够收对面「◆」这 # 血：这一轮直接收 | 「火云车」估 414，够收对面「音速犬」这 190 血：这一轮直接收
+07-switch-low-hp-low     我方被压到 15%、后备有厚的那只，该不该换                      kind=switch-low-hp       你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉 | 你只剩 26% 血，换「银月狼王」上来：它还厚，别把「海豹船长」白送掉
+08-speed-slower          对手比我方快：同一档对拼是它先出手                           kind=speed-decides       它速度 # 快过你 #：别硬对拼，这一轮先换人躲一下 | 它速度 90 快过你 60：别硬对拼，这一轮先换人躲一下
+09-speed-faster          我方比对手快：这一轮可以先手压上去                           kind=speed-decides       你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉 | 你速度 130 快过它 92：这一轮先手压上去，别把节奏让掉
+10-peaceful              双方都接近满血、局面平稳（没有值得说的局面事实，应当沉默）               kind=（无建议）               （silent：没有文案） | 
+
+--- 形状统计（引号内容/数字/精灵名/技能名 → 占位符）---------------------
+   2 × 「◆」估 #，够收对面「◆」这 # 血：这一轮直接收
+   2 × 你只剩 #% 血，换「◆」上来：它还厚，别把「◆」白送掉
+   1 × 能量还差 # 才能收掉它：先吃「◆」补上，这一轮别硬顶
+   1 × 「◆」打「◆」只有抵抗（# 伤害）：别再硬用它
+   1 × 「◆」倒了，换「◆」顶上：对面「◆」还在场，补位别一上来就挨打
+   1 × 它速度 # 快过你 #：别硬对拼，这一轮先换人躲一下
+   1 × 你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉
+  不同形状 7 种；开口局面 9 个
+
+--- 检测器 kind 统计 ----------------------------------------------------
+   2 × ko-now
+   2 × switch-low-hp
+   2 × speed-decides
+   1 × energy-short
+   1 × type-resisted
+   1 × replace-required
+  不同 kind 6 种
+
+--- 每个局面的取证（真引擎参数）-----------------------------------------
+  01-ko-now-lethal seed=20260921 strategy=greedy_damage team=[pet_000225+pet_000190+pet_000445] enemy=[（缺省＝与我方同队）] | 推进 6 步到 turn 6（phase=battle）
+      证据：对手 寂灭骨龙 35HP；合法招「诡刺」估 130，收得掉
+      期望 kind=ko-now → 实际 kind=ko-now；判定 action_hint；plan 推荐=诡刺
+  02-energy-short seed=20260921 strategy=greedy_damage team=[pet_000225+pet_000190+pet_000445] enemy=[（缺省＝与我方同队）] | 推进 4 步到 turn 4（phase=battle）
+      证据：寂灭骨龙 3 能量；放不出的「坟场搏击」估 411~411 盖得过对面 165 血
+      期望 kind=energy-short → 实际 kind=energy-short；判定 micro_hint；plan 推荐=使用能量果
+  03-switch-low-hp seed=20260921 strategy=greedy_damage team=[pet_000062+pet_000112+pet_000417] enemy=[（缺省＝与我方同队）] | 推进 10 步到 turn 9（phase=battle）
+      证据：我方 120/366；后备 雪影娃娃 442/442、圆号鱼 413/413
+      期望 kind=switch-low-hp → 实际 kind=switch-low-hp；判定 action_hint；plan 推荐=火云车
+  04-type-resisted seed=20260921 strategy=greedy_damage team=[pet_000190+pet_000124+pet_000608] enemy=[pet_000608+pet_000124+pet_000190] | 推进 6 步到 turn 6（phase=battle）
+      证据：上一手那一招被抵抗（倍率 0.25）；这一轮合法招 气波×0.25
+      期望 kind=type-resisted → 实际 kind=type-resisted；判定 micro_hint；plan 推荐=换上第3位
+  05-replace-own-faint seed=20260921 strategy=greedy_damage team=[pet_000225+pet_000190+pet_000445] enemy=[（缺省＝与我方同队）] | 推进 10 步到 turn 8（phase=replace）
+      证据：phase=replace，我方 寂灭骨龙 0/425（已倒下），可选换人 2 个
+      期望 kind=replace-required → 实际 kind=replace-required；判定 action_hint；plan 推荐=换上第2位
+  06-ko-now-mid seed=20260921 strategy=greedy_damage team=[pet_000062+pet_000601+pet_000608] enemy=[（缺省＝与我方同队）] | 推进 4 步到 turn 4（phase=battle）
+      证据：对手 音速犬 190HP（我方还有 52%）；合法招「火云车」估 414，收得掉
+      期望 kind=ko-now → 实际 kind=ko-now；判定 micro_hint；plan 推荐=火云车
+  07-switch-low-hp-low seed=20260921 strategy=greedy_damage team=[pet_000190+pet_000608+pet_000611] enemy=[pet_000062+pet_000445+pet_000417] | 推进 6 步到 turn 6（phase=battle）
+      证据：我方 海豹船长 98/374；后备 银月狼王 416/416、月使鹭纳 362/362
+      期望 kind=switch-low-hp → 实际 kind=switch-low-hp；判定 action_hint；plan 推荐=使用能量果
+  08-speed-slower seed=20260921 strategy=conservative_switch team=[pet_000225+pet_000190+pet_000445] enemy=[pet_000112+pet_000611+pet_000190] | 推进 6 步到 turn 6（phase=battle）
+      证据：我方 寂灭骨龙 速度 60，对手 雪影娃娃 速度 90（它更快）
+      期望 kind=speed-decides → 实际 kind=speed-decides；判定 micro_hint；plan 推荐=换上第3位
+  09-speed-faster seed=20260921 strategy=greedy_damage team=[pet_000451+pet_000601+pet_000112] enemy=[pet_000474+pet_000124+pet_000417] | 推进 7 步到 turn 7（phase=battle）
+      证据：我方 秩序鱿墨 速度 130，对手 画间沉铁兽 速度 92（我更快）
+      期望 kind=speed-decides → 实际 kind=speed-decides；判定 micro_hint；plan 推荐=使用回复药
+  10-peaceful seed=20260921 strategy=greedy_damage team=[pet_000112+pet_000611+pet_000124] enemy=[（缺省＝与我方同队）] | 推进 1 步到 turn 1（phase=battle）
+      证据：我方 442/442，对手 442/442
+      期望 kind=（应当沉默） → 实际 kind=（无建议）；判定 silent；plan 推荐=使用能量果
+
+--- 取不到「隔离窗口」的检测器（覆盖缺口，不是断言失败）-----------------
+  · ko-maybe（估 X~Y 跨过血线）：引擎对**同一个技能**在三个分析种子下的估算是同一个数（min === max），所以「下限 < 血 ≤ 上限」结构上不可能成立；damage_preview 的 min/max 只是「最弱那招 / 最狠那招」两个**不同**技能的包络。
+  · foe-status-ticking（对面中毒/灼烧/寄生掉血）：12 只精灵的规范配招没有一个直接施加这三种状态，而 POST /api/roco/battle/new 不接受 loadouts；取念→复制引燃只在第 44 轮之前的配招序列化缺陷下成立（修好后取念只复制对手真实带的 1–3 个技能）。冻结/萌化还会被 _apply_status_effects 直接跳过。
+  · type-favoured（我方上一手打出克制、这一轮还在用那一招）：45 局 / ~500 个窗口里只命中 1 次，而且那一次我方满血（血量比 1.0）→ 主动提示门控直接沉默（risk 0.2 < 门槛）。**压住它的是门控，不是检测器**；能开口的窗口里它总被更前面的检测器盖过。
+  · foe-energy-high（对面能量 ≥5）：优先级排在第 11 位，所有命中的窗口都先满足了 speed-decides 或属性检测器，所以它从来没有成为那句建议。
+=========================================================================
+
+✔ P1 验收：10 个真实局面各自得到「对路」的建议，且句子在种类上不同 (2268.601208ms)
+✔ M1: 原始快照与规范化数据均已就位（缺失时明确 skip 而不是假装通过） (0.530917ms)
+✔ M1: 每条记录都带 ruleset / game / 来源 / 许可 / 核验状态（不得有无出处数据） (4.848ms)
+✔ M1: 规范化精灵与原始 Lua 逐字段一致（独立重新解析对拍） (28.746542ms)
+✔ M1: 动态/条件威力不得被当成 0 伤害（power 缺失必须为 null 而非 0） (2.506ms)
+✔ M1: 所有技能的效果支持状态必须是 unsupported（本轮未实现任何原语） (3.428916ms)
+✔ M1: 孤儿技能引用为 0（学习表引用的技能必须都存在） (2.56925ms)
+✔ M1: 同名异形态必须显式登记且形态选择有据（化蝶 4 形态） (0.896333ms)
+✔ M1: 冲突台账每条都有处置结论；未解决项不得被降级隐藏 (0.496458ms)
+✔ M1: 支持等级与目标等级必须分开，且不得声称已完成 (0.942458ms)
+✔ M1: 候选配招的技能必须真实存在于该精灵的学习表（禁止拼凑） (2.876875ms)
+✔ M1: microcase 计划必须是「计划」——期望值为 null 且验证未通过 (0.67425ms)
+✔ M1: 来源台账不得含页游数据，且未确认许可必须标 REFERENCE_ONLY (0.604458ms)
+✔ M1: 第三方 Lua 只被文本解析，从未执行（无 eval/Function/require 第三方） (0.269708ms)
+✔ M1: 12 只目标精灵与交接材料清单完全一致（不增不减） (0.286125ms)
+✔ M1: 主快照固定 revision 的 SHA256 与实际文件一致（可复现性） (0.857916ms)
+✔ 契约版本、违规分类、三个白名单都是显式导出的常量 (1.124459ms)
+✔ 合法输入：三份校验全过，且归一化后的字段就是核心要用的那一些 (0.870375ms)
+✔ 公开遥测：对手后备多任何一个字段都拒（隐藏信息边界，白名单式） (0.219791ms)
+✔ 公开遥测：缺字段 / 错类型 / 模式非法 / 越界位次都被逐条报出 (0.430334ms)
+✔ 公开遥测：未核验机制带原因就收，并原样带出原因（fail closed 而不是失败） (0.112583ms)
+✔ 合法动作：威力与出处必须成对；「有数字没出处」和「没数字也没状态」都拒 (0.088875ms)
+✔ 合法动作：未知类别、缺 label、换人缺位次、技能缺 id 都拒 (0.120459ms)
+✔ 合法动作：道具名可以从「使用回复药」这类动作句子里剥出来（可核对的一次剥壳） (0.040083ms)
+✔ 事件流：缺文案 / 缺出处 / 版本回退 / 生命周期乱序都被拒 (0.108625ms)
+✔ 偏好：拒绝必须有 kind / expires_at / 原话，并按时间真的失效 (0.919458ms)
+✔ 未核验机制：必须带 code 与 reason；明确禁止 approximate (1.039625ms)
+✔ 工具提议：只认工具与参数；模型给的事实/结论一律不进提议 (0.109209ms)
+✔ 回执优先：编数字 / 编动作 / 把没有记录的回合当事实讲，都会被丢掉并换回执那一句 (0.362459ms)
+✔ 装配：缺任何一项宿主能力都在装配期拒绝（不是运行期降级） (0.445917ms)
+✔ 会话：状态版本必须严格递增；合法动作不沿用上一回合 (0.30225ms)
+✔ 会话：规则集不一致直接拒（钉住的版本与宿主给的必须相同） (0.110792ms)
+✔ 会话：acceptResult / isStale 是「迟到结果必须丢弃」的唯一判据 (0.106041ms)
+✔ 会话：建议流程在版本未变时接受规划，在版本推进时整条丢弃 (5.769583ms)
+✔ 会话：没有状态就调 advise 会明确报错（不是静默返回空） (0.215ms)
+✔ 会话：记忆写入必须带 kind，并真的落到宿主 (0.096042ms)
+✔ 会话：applyEvent 会拦顺序错误与缺文案的事件 (0.240166ms)
+✔ assertNoViolations：空列表放行，非空抛结构化错误（违规条目可逐条读） (0.056375ms)
+✔ 边际量：引擎发的对象形状必须能被取出来（第 39 轮那个缺陷的反面） (0.56475ms)
+✔ 真服务：margin 取得到，判定层用边际量刻度而不是 sigmoid 兜底 (774.759334ms)
+✔ 真服务：`gap ≡ 0`（三个分析种子给出同一个 expected），所以规则只按血量说话 (1229.899709ms)
+✔ 真服务：仲裁量（risk 分支）必须在真实回执里，而且两边都没用它 (633.506084ms)
+✔ 玩家看到的「期望」那行不许把点估计写成区间 (0.248ms)
+✔ 边际量必须从引擎经**真实路由**到达判定层（第 39 轮：这条以前是假的） (335.738666ms)
+✔ 桥的 plan 响应必须带边际量字段（少传一个字段不会报错，只会静默失效） (0.589208ms)
+✔ 契约版本与违规分类是显式导出的（换宿主时改这里的版本号，不是改代码） (0.670541ms)
+✔ 装配期：宿主少一个能力就拒绝装配（不许运行期降级） (0.43825ms)
+  · ✔ 反证①：对手后备带 hp/pet_id → 必须拒（隐藏信息边界） — 实际：violations=["hidden_field_leaked@telemetry.opponent.bench[0].hp","hidden_field_leaked@telemetry.opponent.bench[0].pet_id"]；判据：hidden_field_leaked
+  · ✔ 反证②：少 state_version → 必须拒（不许静默兜底成 0） — 实际：["bad_type@telemetry.state_version"]；判据：bad_type@telemetry.state_version
+  · ✔ 反证③：有威力数值却没有 power_status → 必须拒（不许当普通伤害） — 实际：["unverified_power_without_status@legal[0].power_status"]；判据：unverified_power_without_status
+  · ✔ 反证④：未核验机制没有 reason → 必须拒；带 reason 才收 — 实际：{"带原因":"accepted","缺原因":"游戏适配契约违规（1 条）：unsupported_without_reason@unsupported.effect_resolution.reason"}；判据：带原因 accepted / 缺原因报 unsupported_without_reason
+  · ✔ 反证⑤：事件缺 text + 版本回退 → 必须拒 — 实际：["missing_field@events[0].text","state_version_not_monotonic@events[1].state_version"]；判据：missing_field@events[0].text + state_version_not_monotonic
+  · ✔ 反证⑥：玩家拒绝没有 expires_at → 必须拒（拒绝不许是永久状态） — 实际：["missing_field@preferences.refusals[0].expires_at"]；判据：missing_field@preferences.refusals[0].expires_at
+  · ✔ 反证⑦：宿主缺 plan/proposeTool 等能力 → 装配期就拒（不许运行期降级） — 实际：游戏适配契约违规（5 条）：kernel_capability_missing@host.plan, kernel_capability_missing@host.proposeTool, kernel_capability_missing@host.readPreference, kernel_capability_missing@host.writeMemory, kernel_capabil；判据：game_adapter_contract_violation … kernel_capability_missing@host.plan
+  · ✔ 反证⑧：模型正文与回执冲突（编数字/编动作）→ 丢弃模型正文，改用回执那一句 — 实际：{"ok":false,"text":"按引擎回执：这一手没有给出这个数字。","conflicts":[{"code":"unsupported-number","value":999,"token":"999"},{"code":"unsupported-action","name":"火云车"}]}；判据：ok=false 且 text 为回退句
+  · ✔ 反证⑨：慢请求 + 状态已变 → 迟到结果被丢弃，并记录原因 — 实际：{"fallback":true,"reason":"等待期间局面已推进（1 → 2）：这条建议属于已经不存在的局面，整条丢弃","discarded":[{"accepted":false,"code":"stale_result_discarded","result_version":1,"current_version":2,"reason":"state-advanced","at_ms":1790003548887,"observed_at_version":2},{"code":"stale_result_discarded","result_version":1,"current_version":2,"reason":"state-advanced-before-return"}]}；判据：fallback=true 且 discarded 里带 state-advanced
+  · ✔ 反证⑩：浏览器里没有 process 全局时，判定层 flag 读取必须不抛（修复前抛 ReferenceError → layer-error） — 实际：{"mode":"off","error":null}
+✔ 反证：必红输入逐条被拒，贴出实际报错 (44.303667ms)
+  · 纯函数检测器：n=83，P50=0.0194ms，P95=0.1052ms，max=0.2609ms
+✔ 硬行为①：局面检测是纯函数（无 DOM），48 只名册 × 多窗口的 P50/P95 毫秒数 (13843.160958ms)
+  · 状态推进：{"reason":"state-advanced","from":1,"to":2,"at_ms":1790003562744}
+  · 丢弃记录：[{"accepted":false,"code":"stale_result_discarded","result_version":1,"current_version":2,"reason":"state-advanced","at_ms":1790003562793,"observed_at_version":2},{"code":"stale_result_discarded","result_version":1,"current_version":2,"reason":"state-advanced-before-return"}]
+  · 反证（版本未变）：fallback=false，丢弃 0 条
+✔ 硬行为②：慢请求 + 状态已变 → 迟到结果被丢弃并记录原因（含超时路径） (61.146542ms)
+  · 正常路径：1ms（规则 0ms + 服务端规划 1ms），fallback=false
+  · 超时路径：3001ms（墙钟 3001ms），timed_out=true，fallback=true，原因：建议总时限 3000ms 内没有拿到规划：回退规则短提示，迟到的规划结果会被丢弃
+  · 回退产物："micro_hint：规则短提示"
+  · 回退发生：true；超时率：1/2
+  · 威力来源状态：未知招:unsupported→来源未给威力（power_status=unsupported），不近似成普通伤害 | 来源没给威力:not_provided_by_source→来源未给威力（power_status=not_provided_by_source），不近似成普通伤害
+  · 必红：unverified_power_without_status@legal[0].power_status — 给了威力数值却没有出处：power=120 必须配 power_status=static_value_present，实际 undefined
+  · pvp-live：action=silent，gate=pvp-live，reason=hard-gate:pvp-live
+  · pve（同局面反证）：action=action_hint，gate=null
+  · 已结束：action=silent，gate=ended
+  · 模型提议（可用）：tool=search_rules，raw={"tool":"search_rules","args":{"query":"能量"}}，latency=0ms
+  · 模型提议（不可用）：error=ask-failed，choice={"stop":true,"reason":"ask-failed"}
+  · 工具提议被收下：{"ok":true,"accepted":true,"stop":false,"tool":"read_state","args":{},"validated_by":"host"}
+  · 不在允许集合里的工具：{"ok":false,"reason":"模型提议了不在允许集合里的工具：drop_database","accepted":false}
+  · 回执优先：ok=false，conflicts=[{"code":"unsupported-number","value":999,"token":"999"},{"code":"unsupported-action","name":"火云车"}]，最终正文=「按引擎回执：没有这个数字。」
+✔ 硬行为③：建议总时限 3s —— 正常路径 / 超时路径耗时 + 是否回退 (3122.263666ms)
+✔ 硬行为④：unknown/unsupported 必须带原因，禁止近似成普通伤害 (0.334333ms)
+✔ 硬行为⑤：线上竞技 PVP 中不得给出战术分析（保留 policy 行为） (0.347167ms)
+✔ 硬行为⑥：LLM 只能提议工具；模型输出与回执不一致时以引擎为准 (0.601792ms)
+  · ✔ ① 军师真的出现了（自动开口 ≥1 次，不是一次都没说） — 实际：9 次产出（其中打断 1 次）；判据：≥1 次
+  · ✔ ① 每局打断上限：micro_hint + action_hint ≤ 2（INTERVENTION_LIMITS.maxHintsPerMatch） — 实际：1 次打断；判据：≤2 次
+  · ✔ ① 额度用尽后不再打断：第 3 次起只能是 silent 或 defer_to_review（留到局后） — 实际：超额度打断 0 次；额度外的产出 0 条（全部为 defer_to_review：true）；判据：0 次超额度打断
+  · ✔ ① 去重：同一句不重复（本条回放把去重开关**关掉**以观察原始产物，只记录不判红） — 实际：2/9 个不同形状（重复 7 次；去重开关关闭，产品形态下由 session.said 拦掉）；判据：仅记录（开关关闭）
+  · ✔ ① 两级档位：产出文案的档位来自 {micro_hint, action_hint, defer_to_review} — 实际：action_hint/defer_to_review；判据：micro_hint/action_hint/defer_to_review
+  · ✔ ① 该沉默就沉默：门控判定 silent 的窗口没有文案 — 实际：0 个窗口既有 silent 又有文案；沉默窗口 15 个；判据：0
+  · ✔ ① 军师真的出现了（自动开口 ≥1 次，不是一次都没说） — 实际：2 次产出（其中打断 1 次）；判据：≥1 次
+  · ✔ ① 每局打断上限：micro_hint + action_hint ≤ 2（INTERVENTION_LIMITS.maxHintsPerMatch） — 实际：1 次打断；判据：≤2 次
+  · ✔ ① 额度用尽后不再打断：第 3 次起只能是 silent 或 defer_to_review（留到局后） — 实际：超额度打断 0 次；额度外的产出 0 条（全部为 defer_to_review：true）；判据：0 次超额度打断
+  · ✔ ① 去重（去重开关打开）：同一句（数字不同也算同一句）不重复出现 — 实际：2/2 个不同形状；判据：形状全不重复
+  · ✔ ① 两级档位：产出文案的档位来自 {micro_hint, action_hint, defer_to_review} — 实际：action_hint/defer_to_review；判据：micro_hint/action_hint/defer_to_review
+  · ✔ ① 该沉默就沉默：门控判定 silent 的窗口没有文案 — 实际：0 个窗口既有 silent 又有文案；沉默窗口 22 个；判据：0
+  · 必红反证：额度={"action":"defer_to_review","gate":null,"reason":"hint-budget"}；冷却={"action":"defer_to_review","gate":null,"reason":"cooldown"}；点掉={"action":"silent","gate":"hint-dismissed","reason":"hard-gate:hint-dismissed"}；陈旧={"action":"silent","gate":"stale-state","reason":"hard-gate:stale-state"}
+  · ✔ ① 必红反证：额度用尽 → 不再打断（动作降为 defer_to_review，reason=hint-budget） — 实际：{"action":"defer_to_review","gate":null,"reason":"hint-budget"}；判据：action=defer_to_review, reason=hint-budget, gate=null
+  · ✔ ① 必红反证：冷却期内 → 不再打断（动作降为 defer_to_review，reason=cooldown） — 实际：{"action":"defer_to_review","gate":null,"reason":"cooldown"}；判据：action=defer_to_review, reason=cooldown, gate=null
+  · ✔ ① 必红反证：玩家点掉之后本局不再主动开口（硬门控 hint-dismissed） — 实际：{"action":"silent","gate":"hint-dismissed","reason":"hard-gate:hint-dismissed"}；判据：gate=hint-dismissed, action=silent
+  · ✔ ① 必红反证：陈旧状态必须被硬门控拦下（stale-state） — 实际：{"action":"silent","gate":"stale-state","reason":"hard-gate:stale-state"}；判据：gate=stale-state, action=silent
+  · 对照（无门控）：{"action":"action_hint","gate":null,"reason":"critical-risk"}
+✔ 场景 a1：军师自动出现且不打扰（两级档位 / 额度 / 冷却 / 去重 / 点掉） (6543.482875ms)
+  · ✔ ② 建议合法且可执行：被当成可执行建议点名的动作都在本回合合法动作表里 — 16 个窗口 / 71 处点名，0 处越界（另有 14 处被文案明说「这一轮做不到」）
+  · ✔ ② 建议合法且可执行：被当成可执行建议点名的动作都在本回合合法动作表里 — 24 个窗口 / 106 处点名，0 处越界（另有 18 处被文案明说「这一轮做不到」）
+  · ✔ ② 建议合法且可执行：被当成可执行建议点名的动作都在本回合合法动作表里 — 24 个窗口 / 110 处点名，0 处越界（另有 18 处被文案明说「这一轮做不到」）
+  · ✔ ③ 可展开的多动作比较：至少并列 2 个合法动作 — 14/16 个窗口并列 ≥2 个动作
+  · ✔ ③ 三档标签齐全：事实 / 估计 / 不确定都真的出现过 — {"事实":55,"估计":56,"不确定":41}
+  · ✔ ③ 未来 2—3 回合后果：比较区给出 ≥2 条后续结论 — 5/5/5/5/5/5/5/5/5/5/5/5/5/5
+  · ✔ ③ 引擎推荐的那一手必须在并列里（不许漏边） — 0 个窗口漏了推荐
+  · ✔ ③ 可展开的多动作比较：至少并列 2 个合法动作 — 24/24 个窗口并列 ≥2 个动作
+  · ✔ ③ 三档标签齐全：事实 / 估计 / 不确定都真的出现过 — {"事实":94,"估计":96,"不确定":70}
+  · ✔ ③ 未来 2—3 回合后果：比较区给出 ≥2 条后续结论 — 5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5
+  · ✔ ③ 引擎推荐的那一手必须在并列里（不许漏边） — 0 个窗口漏了推荐
+  · ✔ ③ 可展开的多动作比较：至少并列 2 个合法动作 — 24/24 个窗口并列 ≥2 个动作
+  · ✔ ③ 三档标签齐全：事实 / 估计 / 不确定都真的出现过 — {"事实":95,"估计":96,"不确定":71}
+  · ✔ ③ 未来 2—3 回合后果：比较区给出 ≥2 条后续结论 — 5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5/5
+  · ✔ ③ 引擎推荐的那一手必须在并列里（不许漏边） — 0 个窗口漏了推荐
+  · ✔ ⑤ 规划回执带真实后续字段：层数 / 分支数 / 固定分析种子 / 对手应对 / 期望值 — {"depth":16,"branches":16,"seeds":16,"counter":16,"expected":16,"damage_preview":16}
+  · ✔ ⑤ 伤害预览标着「公式未核验」（formula_verified=false），不许说成实测 — 16 个可用预览
+  · ✔ ⑤ 规划回执带真实后续字段：层数 / 分支数 / 固定分析种子 / 对手应对 / 期望值 — {"depth":24,"branches":24,"seeds":24,"counter":24,"expected":24,"damage_preview":24}
+  · ✔ ⑤ 伤害预览标着「公式未核验」（formula_verified=false），不许说成实测 — 24 个可用预览
+  · ✔ ⑤ 规划回执带真实后续字段：层数 / 分支数 / 固定分析种子 / 对手应对 / 期望值 — {"depth":24,"branches":24,"seeds":24,"counter":24,"expected":24,"damage_preview":24}
+  · ✔ ⑤ 伤害预览标着「公式未核验」（formula_verified=false），不许说成实测 — 24 个可用预览
+✔ 场景 b1/b2/b3：建议合法可执行 + 多动作比较 + 未来 2—3 回合后果 + 真实规划字段 (8742.322041ms)
+  · ✔ ④ 老师局末闭环：给出**一个**关键转折（不是一份战报） — 实际：{"turn":13,"rule":"first-faint","candidates":["first-faint"],"what":"第 13 回合 我方 铠甲虫 倒下，这是全场第一次减员","evidence":["第 13 回合：我方 铠甲虫 倒下（第一次减员）。"]}；判据：turning_point.turn 为整数且 what 为字符串
+  · ✔ ④ 一条可执行的改法 + 一条 next-match 练习目标 — 实际：{"learning":"对面补上新的一只之后，先确认它是谁、什么系，再决定这一手打谁。","goal":"read-the-replacement-first"}；判据：learning 与 goal 都非空
+  · ✔ ④ 复盘正文可核对：含回合数与结果，且只讲一个点 — 实际：这一局一共 24 个回合，结果没有记下来。第 13 回合 我方 铠甲虫 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。；判据：正文非空且提到回合
+  · ✔ ④ 后续局核对：给出可核对的结论（checked=true），并说清「没出现就证明不了什么」 — 实际：{"checked":true,"recurred":true,"improved":false,"note":"「对面有伙伴倒下」这一局又出现了。对比第 20 回合（上一次：补位之后第一手打在抵抗上）与第 20 回合（这一次：补位之后第一手打在抵抗上）。两次的处理方式一样，所以这一局看不到变化。"}；判据：checked=true 且有 note
+  · ✔ ④ 核对结论不许把「没出现」说成「做到了」 — 实际：{"improved":false,"recurred":true}；判据：improved=true 只在 recurred=true 时出现
+  · 复盘 A：这一局一共 24 个回合，结果没有记下来。第 13 回合 我方 铠甲虫 倒下，这是全场第一次减员。对面补上新的一只之后，我方的下一手打上去还是被抵抗。
+  · 复盘 B 的核对：{"checked":true,"goal":"read-the-replacement-first","recurred":true,"improved":false,"situation":"enemy-pet-fainted","note":"「对面有伙伴倒下」这一局又出现了。对比第 20 回合（上一次：补位之后第一手打在抵抗上）与第 20 回合（这一次：补位之后第一手打在抵抗上）。两次的处理方式一样，所以这一局看不到变化。","evidence":["对比第 20 回合（上一次：补位之后第一手打在抵抗上）与第 20 回合（这一次：补位之后第一手打在抵抗上）。","对方第 1 位 第 20 回合倒下，之后我方第 22 回合那一手倍率 0.5，用的是「魔爪」（打在抵抗上）。"],"turns":[20,20],"plan":{"teach":false,"reason":"这一课已经教过，没有新的反证就不再重复"}}
+  · ✔ ⑤ 显式偏好记忆：玩家自己说过的偏好被真的写进记忆（带原话） — 实际：[{"id":"stated:address","kind":"address","value":"老王","label":"称呼：老王","source":"player-stated","time":"2026-09-21T15:13:08.343Z","evidenceIds":[]},{"id":"stated:goal","kind":"goal","value":"稳健","label；判据：记忆里含「老王」
+  · ✔ ⑤ 拒绝带时效：时效内有效、过期后自动失效（不是永久状态） — 实际：{"内":1,"过期后":0}；判据：{内:1, 过期后:0}
+  · 记忆项：["address","goal"]
+✔ 场景 c1：老师局末闭环（一个转折 + 一条改法 + 下一局目标 + 后续局核对） (7139.650709ms)
+✔ 场景 c2：陪练情绪 + 显式偏好记忆（含拒绝有时效） (1.67175ms)
+  · ✔ ⑥ 事件级 evidence：宿主可见层真的拿到原始出处 — 实际：29/76 条事件带 evidence；判据：≥1 条
+  · ✔ ⑥ 事件级 evidence 指向可核对的**原始出处**（快照行号或 `…json#实体`） — 实际：1015 | 1016 | 1017；判据：至少一条是行号或 json#实体（引擎当前给的是行号，如实记录）
+  · ✔ ⑥ 精灵/技能级 evidence_ids 透到宿主可见层，且逐只/逐招钉到自己的记录（两个分支） — 实际：无参 48 只、分页 2 只，逐招 200 招全部核对通过；例：["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"] / ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]；判据：每只 = ev:<ruleset>:pets.json#<pet_id>，每招 = ev:<ruleset>:skills.json#<skill_id>（两个分支都要）
+  · ✔ ⑥ 抽查：精灵出处形如 `pets.json#<pet_id>`、技能出处形如 `skills.json#<skill_id>` — 实际：["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"] / ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]；判据：ev:<ruleset>:pets.json#pet_000012 / ev:<ruleset>:skills.json#skill_000632
+  · ✔ ⑥ 反证：把 evidence_ids 剥掉，上面那条判据必须变红（判据有牙） — 实际：顶层 evidence_ids 被丢掉 → 无参分支的顶层 evidence_ids 为空（roster 级那条没有出口）；分页分支的顶层 evidence_ids 被丢掉 → 分页分支的顶层 evidence_ids 为空；pets[].evidence_ids 被丢掉（映射层回退成旧形状） → pet_000012 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]；分页分支 pets[].evidence_ids 被丢掉 → pet_000012 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]；moveset[].evidence_ids 被丢掉 → pet_000012/skill_000632 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]；判据：5 种剥法都必须让判据给 ok:false
+  · 事件级 evidence 例：["1015","1016","1017"]
+✔ 场景 c3：RAG 引用透传到宿主可见层（事件级 + 精灵/技能级 evidence_ids） (1911.319167ms)
+  · 网关可用（真提示 + 真提议）：tool=search_rules，raw={"tool":"search_rules","args":{"query":"能量"}}，latency=0ms
+  · 网关挂起：fallback=true，latency=1201ms，reason=建议总时限 1200ms 内没有拿到规划：回退规则短提示，迟到的规划结果会被丢弃，丢弃=0
+  · ✔ ⑦ 网关可用时：模型只提议**工具**，不产出事实或数值 — 实际：{"tool":"search_rules","latency_ms":0,"choice":{"tool":"search_rules","args":{"query":"能量"}}}；判据：tool 为字符串且提议里没有事实字段
+  · ✔ ⑦ 网关不可用（挂起）时：在建议总时限内回退规则短提示，并丢弃迟到的模型结果 — 实际：{"latency_ms":1201,"fallback_reason":"建议总时限 1200ms 内没有拿到规划：回退规则短提示，迟到的规划结果会被丢弃","discarded":1}；判据：fallback=true 且 latency ≤ 1200+200ms 且 discarded ≥1
+  · 迟到结果丢弃账：[{"accepted":false,"code":"stale_result_discarded","result_version":2,"current_version":2,"reason":"after-deadline","after_timeout":true,"at_ms":1790003591953,"note":"总时限 1200ms 已过，这条规划回来得太晚：丢弃，不用它覆盖已经给玩家的规则短提示"}]
+  · 判定层：off={"mode":"off","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":false,"suppress":false,"probability":null,"threshold":null,"reason":"flag-off"}
+  · 判定层：shadow={"mode":"shadow","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":false,"suppress":true,"probability":1,"threshold":0.88,"margin":0.05,"margin_threshold":0.146532,"decided_by":"margin-quantile","reason":"model-suppress"}
+  · 判定层：on={"mode":"on","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":true,"suppress":true,"probability":1,"threshold":0.88,"margin":0.05,"margin_threshold":0.146532,"decided_by":"margin-quantile","reason":"model-suppress"}
+  · 玩家看到的正文：off=「对面「雪影娃娃」只剩 20 血：这一轮先把它补掉，别让它换人喘口气」 shadow=「对面「雪影娃娃」只剩 20 血：这一轮先把它补掉，别让它换人喘口气」
+  · ✔ ⑧ shadow 档：判定层照算（给出概率与 margin），但 active=false — 实际：{"mode":"shadow","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":false,"suppress":false,"probability":0.9498,"threshold":0.88,"margin":null,"margin_threshold":null,"decided_by":"sigmod-threshold","reason":"model-allow"}；判据：active=false 且 reason ≠ layer-error
+  · ✔ ⑧ shadow 档不得改变玩家看到的建议：与 off 档逐字相同 — 实际：{"off_text":"对面「雪影娃娃」只剩 20 血：这一轮先把它补掉，别让它换人喘口气","shadow_text":"对面「雪影娃娃」只剩 20 血：这一轮先把它补掉，别让它换人喘口气"}；判据：两档正文与 kind 相同
+  · ✔ ⑧ flag 解析：off 档下不改结论；报告的 mode 字段如实反映当前档位 — 实际：off；判据：off|shadow|on
+  · 当前 feature flag：off（默认 off；on 需真人审阅，未获准）
+  · layer-error 是否仍存在：否（已修：浏览器无 process 全局也不再抛）
+  · roster coverage：覆盖 48/48
+✔ 场景 d1：Qwen 工具提议 + 受控回退（网关不可用时立刻回退规则短提示并丢弃迟到结果） (2921.044ms)
+✔ 场景 d2：介入 / RL shadow 回执 —— shadow 不得改变玩家看到的建议，并如实标出 layer-error 是否已修 (1.284625ms)
+✔ 名册覆盖：8 个场景的双方阵容必须覆盖登记层全部 48 只 (2.801583ms)
+✔ 反向对照：身份对不上时必须被抓（这是这一组的意义所在） (0.540667ms)
+✔ 报告装配必须写进身份栏，而不是靠文件名猜 (0.340833ms)
+✔ 每个已存档的模型臂报告，文件名与身份必须对得上 (3.853917ms)
+✔ 已作废的错位存档必须留在 invalidated/ 并且写明原因 (0.335334ms)
+✔ 目录来自**模型臂**，不是规则臂，且带上提示版本 (0.535875ms)
+✔ 每条错误都有分类、证据与候选修复，且没有任何一条自称修好 (0.148541ms)
+✔ 分类不许有空桶：声明过的每一类都要能在样本上触发 (0.195375ms)
+✔ 候选修复的措辞不许读成「已修好」 (0.205416ms)
+✔ 重新生成与盘上产物一致（产物不许过期） (2.068917ms)
+✔ 预算/策略类必须单列：它们不是模型能力问题 (0.080458ms)
+✔ 模型候选轨迹集存在、规模够、且每条都带判据与失败原因 (2.48725ms)
+✔ 模型身份必须记全，且与文件名一致（第 38 轮存档错位的教训） (0.2685ms)
+✔ 八类 × 三侧都在，且与规则臂同格式同判定器 (36.405542ms)
+✔ 失败原样保留，不做「重试到成功」 (0.657417ms)
+✔ 两条独立代码路径必须给出同一组数字（轨迹生成器 vs 影子回放） (1.236167ms)
+✔ 清单与 jsonl 头部一致（两份产物要么一起重建，要么都不用） (2.456334ms)
+  · 顶层 evidence_ids=["ev:roco-world-s4-2026-09-10:roster#total=48;offset=0;limit=None"]
+  · 抽样 pet_000012 的出处=["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]；skill_000632 的出处=["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]
+✔ 无参回执：顶层带 roster 级出处，pets[] 逐只、moveset[] 逐招带自己的出处 (374.856458ms)
+✔ 分页分支同样带出处（limit/offset），且分页账目没被挤掉 (383.365125ms)
+  · 反证「顶层 evidence_ids 被丢掉」→ 判据报错：顶层 evidence_ids 为空（Answer 级那条没有出口）
+  · 反证「pets[].evidence_ids 被丢掉（映射层回退成旧形状）」→ 判据报错：pet_000012 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]
+  · 反证「moveset[].evidence_ids 被丢掉」→ 判据报错：pet_000012/skill_000632 的 evidence_ids=null，应为 ["ev:roco-world-s4-2026-09-10:skills.json#skill_000632"]
+  · 反证「出处钉到了别的精灵（形状对、内容错）」→ 判据报错：pet_000012 的 evidence_ids=["ev:roco-world-s4-2026-09-10:pets.json#pet_000062"]，应为 ["ev:roco-world-s4-2026-09-10:pets.json#pet_000012"]
+✔ 反证：把 evidence_ids 剥掉之后，上面那条判据必须变红 (394.51925ms)
+  · ?limit=abc → limit 必须是非负整数（实际 "abc"）
+✔ 坏参数照旧 fail closed（加出处没有放松参数校验） (340.9785ms)
+✔ 局末复盘：整局事件 + 最后一个可行动的局面，缺一个结论就变（真服务） (553.302666ms)
+✔ 反模板（真实对局）：先讲要改的那一处，不是先讲优先级最高的那一门 (3153.423166ms)
+✔ 老师三角色闭环：第一局记下发课，第二局在真实链路上核对有没有改善 (313.532166ms)
+✔ 模型臂在 ask 抛错时必须失败，不许静默回退到规则 (0.877125ms)
+✔ 没有注入 ask 时直接拒绝构造：没有模型就不是模型臂 (0.196417ms)
+✔ 状态版本由运行时覆盖，不采信模型编的那个 (0.125791ms)
+✔ 模型给的未知工具名原样交给引擎层去拒绝，不在这里猜 (0.069583ms)
+✔ 模型输出不是 JSON 时只能停止 (0.072375ms)
+✔ 模型臂只问一次：不给它靠重试蒙对的机会 (0.077834ms)
+✔ 系统提示必须写在代码里，且要求默认停止 (0.090291ms)
+✔ 本地 JSON 提取与产品侧实现不许漂移 (0.123917ms)
+✔ 对比函数如实分出退化 / 扳回 / 都错 (0.156417ms)
+✔ 汇总里的通过率与分位数是可复算的 (0.247542ms)
+✔ 参考臂的报告必须存在且自己是全过的（否则对比没有意义） (0.490167ms)
+✔ 报告必须带提示版本：只比通过率分不出两次跑的是不是同一份提示 (1.334625ms)
+✔ 报告装配本身必须带提示摘要：这条不看落盘产物，只看代码 (0.175208ms)
+✔ 参考臂不带提示：它没有模型提示，带一个空值会让人以为它也有 (0.374084ms)
+✔ 模型臂的报告（如果跑过）必须带真实延迟与失败原因 (0.3345ms)
+✔ 摘要守卫：LOCAL_TOOL_SYSTEM 与已发布产物里的那份一字不差 (1.431875ms)
+✔ 反向对照：改动一个字，摘要守卫必须变红（证明这道守卫有牙） (0.224917ms)
+✔ toolPromptFor 逐字复现评测发出去的那条 user 提示 (0.570583ms)
+✔ locked_pet / team / planner_margin 按评测的条件逻辑进出提示 (0.213625ms)
+✔ 与评测脚本那份拷贝逐字一致（防两份拷贝各自漂） (6.331125ms)
+✔ askGateway 发出网关认的请求体，并如实返回延迟 (1.513292ms)
+✔ askGateway 非 2xx 抛出带 code 的错误（错误语义与 gatewayAsk 相同） (0.388042ms)
+✔ modelToolChoice：正常工具提议 (0.884917ms)
+✔ modelToolChoice：模型的正文里夹着解释和代码块时也能抠出第一个对象 (0.19875ms)
+✔ modelToolChoice：{"stop":true} 是合法决定，不是失败 (0.149542ms)
+✔ modelToolChoice：抠不出 JSON 一律 unparseable，且不抛 (0.186875ms)
+✔ modelToolChoice：编出来的工具名被显式拒绝，且不抛 (0.103ms)
+✔ modelToolChoice：网络失败 / 非 2xx 都记成失败，不抛，也不假装模型说了话 (0.12125ms)
+✔ compareToolChoices：一致与不一致都要说清，且说明里不出现工程词 (0.350334ms)
+✔ compareToolChoices：契约里的每个工具都有中文说法，不会把工具名原样端给玩家 (0.095583ms)
+✔ shadowToolDecision：一步拿到面板要的全部字段（含摘要钉子） (0.313291ms)
+✔ a slow model answer is aborted when the player acts first, so no stale text is delivered (365.250292ms)
+✔ after a fast action only the newest position is delivered (154.600542ms)
+✔ the same position asked twice is merged into one upstream call (no duplicate delivery) (151.190334ms)
+✔ three rapid actions in a row deliver exactly one answer: the last one (137.903875ms)
+✔ the client layer never speaks: no speech call exists on the answer path (1.614583ms)
+✔ a slow answer that arrives after the deadline is not resurrected (811.419333ms)
+✔ 只把像哈希的片段当哈希：纯数字与短标识不算 (0.530666ms)
+✔ 声明的 HEAD 从那一行读出来，读不到就返回 null (0.150375ms)
+✔ 反证：声明一个不在历史里的 HEAD 必须被判不一致 (32.187042ms)
+✔ 反证：引用不存在的产物路径必须被判不一致 (50.291042ms)
+✔ 当前仓库的状态文档必须一致 (45.978167ms)
+✔ 自指死锁的回归：最近一次 verify:release 是红的，**不该**让闸门永远卡死 (47.732542ms)
+✔ 同类死锁的第二处：全绿记录「太久没跑」只能是警告，不能判红（第 45 轮实测） (87.213625ms)
+✔ 结构契约：index.html 引用的每个本地模块都真实存在 (0.810458ms)
+✔ 结构契约：浏览器模块图里不许出现 node:*（静态 import） (28.259833ms)
+✔ 反证：扫描逻辑真的能抓到静态 node:*（否则上面的守卫是空的） (0.463208ms)
+✔ 结构契约：Coach 核心的静态 import 图到不了页面层，也不出现 node:* (8.877375ms)
+✔ 反证：核心图这条判据不是空的（node:* / 页面层 / 动态 import 三种对照） (10.054833ms)
+✔ 结构契约：核心图的 src/coach/** 不读浏览器全局（剥注释与字符串后按标识符扫） (16.380958ms)
+✔ 反证：浏览器全局这条判据不是空的（真使用会红、注释/字符串/属性名不会） (10.692916ms)
+✔ 结构契约：入口模块图里每个相对 import 都解析到真实文件 (3.966208ms)
+✔ 结构契约：能量上限/回能/初始能量的字面量只许住在规则配置里（RC-101） (140.064666ms)
+✔ 结构契约：全仓 js/mjs 的相对 import 都指向真实文件 (104.91725ms)
+✔ 反证：还没 `git add` 的新文件也必须被上面那条规则扫到 (132.190333ms)
+✔ 结构契约：每个 Node 测试文件都必须被某个 npm script 或自检登记表引用 (0.68275ms)
+✔ 结构契约：src/ tests/ tools/ 下没有会被忽略的源文件 (50.502584ms)
+✔ 结构契约：仓库顶层只允许约定俗成的目录与文件 (0.254083ms)
+✔ 结构契约：models/ 里只有登记表，没有任何权重文件 (0.420291ms)
+✔ 结构契约：URL 空间与磁盘空间同构，页面短路径可用 (224.29925ms)
+✔ 结构契约：多页面白名单——每个 HTML 页面的本地入口都在白名单里 (0.653458ms)
+✔ 结构契约：每个页面的模块图闭包都在白名单里且都真实存在 (4.584208ms)
+✔ cleanEnv 清掉测试运行器的变量，但不动别的 (1.06675ms)
+✔ 测试里跑 `node --test` 的地方必须显式清环境 (11.240583ms)
+✔ 这条守卫自己不是空的：违规样例必须被判出来 (0.218125ms)
+✔ guard-selftest 自己的多个入口都不许留下脏文件 (1.041834ms)
+✔ 复盘由事件决定：我方倒下时要点名那一回合与那一只 (1.600375ms)
+✔ 没有值得一提的事件就沉默：返回 null，不编号一个「关键回合」 (0.13025ms)
+✔ 转折点可以不是减员：没有减员时按累计伤害差翻盘挑 (0.525ms)
+✔ 同一局里有「做对的课」也有「做错的课」时，先讲要改的那一处（第 45 轮反模板） (1.330416ms)
+✔ 两局不同的对局 → 不同的复盘与不同的学习点（反模板） (0.301958ms)
+✔ 在后续局验证：没有讲过的课就什么都不说 (0.218708ms)
+✔ 在后续局验证：局面没再出现 → improved 为 null，并明说没出现证明不了什么 (2.431ms)
+✔ 挂账的回合必须是「这门课的局面」那一回合，不是转折点那一回合（第 45 轮实测抓到） (0.359209ms)
+✔ 在后续局验证：局面重复、处理方式一样 → improved 为 false (0.18375ms)
+✔ 在后续局验证：局面重复、处理方式变了 → improved 为 true，且依据点名两个回合 (0.265875ms)
+✔ 在后续局验证：局面重复但这一课的前提不在 → 也不给改善结论 (0.327667ms)
+✔ 禁止词汇：复盘与核对产出的每一句都不许出现承诺或工程术语 (0.838833ms)
+✔ 反向对照 ①：固定问句换汤不换药，反模板判据抓得住 (0.243291ms)
+✔ 反向对照 ②：没有重复出现就宣称「有改善」是抓得住的假结论 (0.282541ms)
+✔ 反向对照 ③：没有转折点就编一个「关键回合」是抓得住的 (0.076417ms)
+✔ 对手倒下那一只：拿不到名字时只写位次，绝不拿场上那一只顶替（含只给投影的入参） (0.177542ms)
+✔ R01 隐式「上一回合」取最近一个已结算回合，而不是被裁空数组的长度 (32.866417ms)
+✔ R01 显式「第 N 回合」与「上一回合」是两条路径，互不覆盖 (47.849583ms)
+✔ R01 没有已结算回合时返回无记录，绝不伪造第 1 回合 (1.421666ms)
+✔ R01 跨局不串：新对局不能取上一局的同号回合，显式问上一局仍可取 (45.305042ms)
+✔ R01 政策第一步真的用上了修好的回合参数 (30.828208ms)
+✔ R02 「防御还是换龟」「守一下和换潮甲龟哪个好」都解析成正确候选 (50.885417ms)
+✔ R02 回执列明实际模拟的行动，两个候选面对同一组对手行动 (17.666375ms)
+✔ R02 非法换宠要说明原因，而不是模拟成别的行动 (38.131ms)
+✔ R02 指代不明时追问，不默认取第一个行动 (39.379542ms)
+✔ R02 主动换宠与倒下后的免费补位成本不同，不能混用 (97.501083ms)
+✔ R02 工具回执真的会送到模型，最终回答与回执一致；不一致就回退本地结论 (39.129084ms)
+✔ R03 分层判分：修复前的回执必须判红，修复后的回执必须判绿 (1.879458ms)
+✔ R03 分层判分覆盖分支候选、跨局拦截与回答一致性 (0.383792ms)
+✔ R03 回答一致性校验器：缺失证据、没模拟过的行动、成本说反都要拦 (0.442958ms)
+✔ R03 评测集里保留 R01/R02 失败用例，且判分层已接入 (0.950083ms)
+✔ R06 README 代码块里的每条命令都真实存在 (0.792292ms)
+✔ 有界循环能走满两个回执：政策首步之后，planner 读到回执再要第二个工具，然后停 (0.558ms)
+✔ 两回执 loop 回归（用生产路径的六参 buildContext，独立复现过） (8.809792ms)
+✔ fox has exclusive burn combo; lion trades recoil for burst (1.101417ms)
+✔ lion recoil and guard penetration are actually resolved (4.096709ms)
+✔ deer drain and turtle guard recover health (0.399291ms)
+✔ preemptive skill acts before a faster ordinary attacker (0.312041ms)
+✔ AI chooses guaranteed knockout instead of healing a scratch (8.483916ms)
+✔ AI heals when it prevents a lethal hit and preserves a winning position (0.490292ms)
+✔ AI decision is pure and independent of any submitted action (23.737625ms)
+✔ training changes next battle, caps allocation, reset refunds (0.981792ms)
+✔ battle rewards are once-only, progress levels and survive serialization (0.615333ms)
+✔ invalid saved growth falls back safely (0.263459ms)
+✔ companion can initiate without a complaint and respects suppression (18.619792ms)
+✔ PVP live blocks unsolicited and queried tactical help (0.264625ms)
+✔ difficulty is saved and changes decision behavior without stat bonuses (85.866458ms)
+✔ old two-point saves remain valid with the expanded cap (0.17575ms)
+✔ stages apply fixed opponent levels and actual training stats (2.658292ms)
+✔ winning clears a stage and old saves receive an empty clear list (0.217167ms)
+✔ all preset scenes are isolated and cannot award progression (0.248375ms)
+✔ swift bonus is once per stage; slower wins keep their base reward (0.194208ms)
+✔ energy recovery belongs to surviving active pet after switching (0.491666ms)
+✔ search reports finite explicit branch scores without inspecting pending actions (12.124916ms)
+✔ six-pet saves gain new pets without losing trained stats or wallet (0.152834ms)
+✔ sparrow slow changes next turn, guard blocks it, reserve timer pauses (0.755791ms)
+✔ badger counter only triggers from attacks while guarding (0.375709ms)
+✔ slow timer pauses while its owner is on the bench (0.441333ms)
+✔ P01 动作输出恰好四个，且任何输入都落在其中 (0.990625ms)
+✔ P01 五个硬门控：评分再强也不能把它们换回来 (0.141208ms)
+✔ P01 宿主门控：后台、动画、聊天、预制、结束、不在对局、每决策一次都不开口 (0.094541ms)
+✔ P01 预算是硬上限：决定性局面转成 defer_to_review，而不是消失也不是打断 (0.079875ms)
+✔ P01 四动作判定：决定性 → action_hint，中等风险 → micro_hint，来不及 → defer，没证据 → silent (0.080333ms)
+✔ P01 技能证据只抬高门槛，压不过真实分差 (0.061541ms)
+✔ P01 仅关键风险档：非关键局面连复盘条目都不生成 (0.056416ms)
+✔ P01 既有克制仍然有效：每局 2 条、45 秒冷却、每决策一次、点掉即静音 (0.468ms)
+✔ P01 陈旧状态由 scheduler 的 epoch 提供，且不影响既有合并/取消语义 (11.662792ms)
+✔ P01 interventionFeatures 把真实对象投影成同一组字段，不碰 DOM (2.416375ms)
+✔ P02 fixture：30 个窗口，15 个该提示 / 15 个不该提示，每个都有溯源与理由 (0.175542ms)
+✔ P02 fixture 可复现：文件的特征与标注就是生成器的输出 (794.786083ms)
+✔ P02 验收：stale hint rate = 0，且相对固定等待规则减少误报、保住关键召回 (0.252166ms)
+✔ retrieves colloquial tactical questions with relevant cards (22.566625ms)
+✔ unknown rules, unrelated queries and insufficient budget return no evidence (5.067584ms)
+✔ foreign mechanics are retrieved as unsupported, not imported as live rules (2.669208ms)
+✔ lower damage is not automatically a mistake when both moves can KO (2.946167ms)
+✔ live calculations exclude unaffordable attacks and restrict PVP/version mismatch (2.410875ms)
+✔ camp knowledge does not invent battle data (2.771458ms)
+✔ switch mind games retrieve counterexamples rather than a certain prediction (5.188333ms)
+✔ live strategist supplies retrieved sources and simulated switch branches (11.933916ms)
+✔ generated browser knowledge stays identical to source (4.654416ms)
+✔ generated reference facts stay tied to the engine rather than copied external game rules (0.917917ms)
+✔ the semantic corpus is generated from the same source as content.js (1.072ms)
+✔ old six-pet saves preserve progress and unlock new loadouts without spending points (1.309375ms)
+✔ buff damage, duration, stack cap and switching use actual turn resolution (3.513042ms)
+✔ guard blocks dispel while ordinary hit removes buffs (0.42525ms)
+✔ held items trigger once and energy seed respects post-action threshold (1.25425ms)
+✔ environment expires on fourth turn, clearwind removes it before slower damage and history preserves it (2.938542ms)
+✔ new default rosters keep all difficulty choices legal and finite (40.258208ms)
+✔ the engine never depends on the coach: rules and settlement are self-contained (1.635459ms)
+✔ a full PVE match completes with no coach module and no network (98.791083ms)
+✔ every number needed to finish a match is explained in place (11.215958ms)
+✔ the rules page can be read without opening the coach, and in-battle cards explain skills in place (0.672042ms)
+✔ turning the coach off does not disable any rule, and the version stays consistent (0.2785ms)
+✔ 没配密钥时教练只用本机引擎，而且一个模型请求都不发 (39.3645ms)
+✔ 模型返回非法结构时退回本机引擎，并说明为什么退回 (106.994208ms)
+✔ 模型悬挂时不会卡死：对手决策与请求调度都自带超时上限 (281.459875ms)
+✔ agent 的候选表就是引擎的合法行动表（去掉撤退），一个不多一个不少 (1.439959ms)
+✔ 每个候选项都带基本信息：技能名、消耗、威力/先制，模型不需要自己编技能 (0.290833ms)
+✔ 难度分级给的信息量不同：easy 没有教练建议也没有评分，normal 有建议没评分，hard 两个都有 (18.718542ms)
+✔ 模型只能回答合法序号；越界、乱码、列表外的行动一律解析为 null (0.370667ms)
+✔ 正常路径：模型选哪个就是哪个，chooseEnemy 不参与决策 (16.739625ms)
+✔ 非法选择：模型给了列表外的行动 → action 为 null、source 标明原因，交给调用方兜底 (48.279041ms)
+✔ 超时兜底：模型调用悬挂时，decideOpponentAction 自己在 timeoutMs 内结束（不悬挂、不抛） (76.276666ms)
+✔ 超时兜底：模型调用抛错（网络/鉴权）→ model-error，action 为 null (14.87625ms)
+✔ 未配置兜底：没有模型调用入口时立刻返回 unconfigured，不做任何计算 (0.180167ms)
+✔ 畸形局面不抛异常：没有合法行动时返回 no-legal-actions (0.277958ms)
+✔ 教练建议真的进了提示词：同一局面下"听教练的模型"给出的选择和"没有建议时"不同 (24.628208ms)
+✔ hard 的评分就是引擎自己的枚举结果：照最高分选的模型与引擎硬档选择一致 (20.118917ms)
+✔ agent 的建议来自它自己那一侧：建议的行动必须落在对手自己的合法列表里 (16.413167ms)
+✔ 闸门：合法选择原样通过，非法选择退回 chooseEnemy (64.617583ms)
+✔ 补位阶段：chooseEnemy 在这个局面会抛，兜底必须改走引擎自己的补位语义 (0.301833ms)
+✔ 兜底永不抛：局面残缺时返回 null 而不是异常 (0.181333ms)
+✔ legalEnemyActions 永远不含撤退，且始终是引擎合法行动的子集 (0.1055ms)
+✔ /api/opponent：模型答合法序号 → 200 且返回引擎认得的行动 (99.6085ms)
+✔ /api/opponent：难度直接决定提示词里带不带教练建议和评分 (77.5195ms)
+✔ /api/opponent：未配置密钥时零上游调用、立刻返回 unconfigured（本地对战照常可玩） (96.6685ms)
+✔ /api/opponent：模型给非法序号 → action 为 null，绝不放行 (110.408208ms)
+✔ /api/opponent：上游超时/网络错 → 有界返回，不把失败抛给浏览器 (4030.014166ms)
+✔ /api/opponent 与 /api/coach 并行：玩家正在问教练时，对手决策不会被 429 挡掉 (56.298166ms)
+✔ /api/opponent：请求体校验（难度、局面、模式）与来源校验都照旧生效 (24.373333ms)
+✔ 对手 agent 的提示词把局面当数据：系统提示里写明"下面是指令以外的数据"且只允许输出序号 (67.929166ms)
+✔ 对手 agent 不碰玩家教练的状态：/api/opponent 不返回对话、记忆或证据包 (49.994167ms)
+✔ 整局跑通：agent（假模型）与引擎兜底交替出现，每一步都是合法行动 (511.8345ms)
+✔ 补位局面下 rankEnemyActions 不许抛：算不出的分支跳过，战斗局面的排序不受影响 (1.442ms)
+✔ 战斗回合的排序保持稳定：枚举器跳过不可结算分支之后，前三名不变 (18.238ms)
+✔ pvp-local game carries its own mode and log line (1.073708ms)
+✔ the submitted opponent action resolves instead of the AI choice (11.394166ms)
+✔ each side enumerates only its own legal actions (1.136875ms)
+✔ a fainted opponent is queued for manual replacement and is not auto-picked (0.636375ms)
+✔ a fainted local player is queued for manual replacement the same way (0.415417ms)
+✔ the replace queue handles two sides needing replacement one after the other (0.293084ms)
+✔ pve replacement behaviour is unchanged when manualReplace is absent (8.487208ms)
+✔ a full hot-seat match terminates and keeps both sides independent (10.840625ms)
+[实际] reconciled = true
+[实际] reason = 三张页全部 ok；声明计数与解析条数一致；三个比较组的计数差都由 only_in_frozen/only_in_live 逐条解释且条目数核对通过；unresolved 只含已写明原因的诊断项（同名不同 id 的歧义）。
+[实际] delta pet: 冻结声明 622 - 公网声明 621 = 1；only_in_frozen=1 only_in_live=0 changed=0 explained=true
+[实际] delta battle_skill: 冻结声明 579 - 公网声明 579 = 0；only_in_frozen=0 only_in_live=0 changed=0 explained=true
+[实际] delta trait: 冻结声明 245 - 公网声明 242 = 3；only_in_frozen=3 only_in_live=0 changed=0 explained=true
+[实际] bucket_sizes = {"only_in_frozen":4,"only_in_live":0,"changed":0,"unresolved":4}
+[实际] only_in_frozen ids = pet_000532「幽影树」 / skill_000164「腾挪」 / skill_000165「保卫」 / skill_000166「好象坏象」
+[实际] only_in_live ids = （空）
+[实际] changed = []
+[实际] unresolved ids = pet_000532[same_name_different_id] / skill_000164[same_name_different_id] / skill_000165[same_name_different_id] / skill_000166[same_name_different_id]
+[实际] 完整快照 only_in_frozen = pet_000532 / skill_000164 / skill_000165 / skill_000166
+[实际] 删两条后 only_in_frozen = pet_000004 / pet_000532 / skill_000164 / skill_000165 / skill_000166 / skill_000246
+[实际] 命中条目： [{"id":"skill_000246","name":"抓挠","kind":"battle_skill"},{"id":"pet_000004","name":"迪莫","kind":"pet_record"}]
+[实际] 声明/解析不一致条目 = live_bwiki 的 pet 组：产物**声明** 621 条，但实际解析出 620 条。声明与解析不一致时不允许拿其中任何一个当结论。
+[实际] 完整快照 reconciled = true
+[实际] blocked 快照 reconciled = false
+[实际] blocked 快照 reason = 公网快照被拦或未解析：trait-index=blocked（HTTP 567；未取到 200 响应，不产出任何计数。）
+[实际] trait delta = {"frozen_count":245,"live_count":null,"delta":null,"only_in_frozen":0,"explanation":"公网页面 trait-index 状态 blocked（HTTP 567；未取到 200 响应，不产出任何计数。）：公网侧计数不可得（记 null，不记 0），因此本组不给差值，也不做逐条比对。见 unresolved 里对应的那一条。"}
+[实际] blocked 时 trait 组 only_in_frozen 条数 = 0
+[实际] 反证：若把 blocked 当成 0 条，trait 组会误报 245 条「公网缺失」；实际记了 0 条
+[实际] 无快照 reconciled = false | reason = 公网快照不可用：没有任何页面结果（public-index.json 缺失或结构不对）。**不把这种情况当成「公网 0 条」**，因此 reconciled=false。
+[实际] normalizeName("幽影树") = "幽影树"
+[实际] normalizeName("幽影树（突变的样子）") = "幽影树(突变的样子)"
+[实际] 坏归一化(剥后缀) => "幽影树" vs "幽影树"
+[实际] normalizeName("迪莫&nbsp;") = "迪莫"
+[实际] normalizeName(" 迪莫 ") = "迪莫"
+[实际] normalizeName("迪莫　") = "迪莫"
+[实际] normalizeName("迪​莫") = "迪莫"
+[实际] entityKey(trait, skill_000134) = trait::skill_000134 | entityKey(trait, skill_000164) = trait::skill_000164
+[实际] 坏身份键(按名字) => trait::name::腾挪 vs trait::name::腾挪
+[实际] 冻结侧两条同名记录：skill_000134「腾挪」(game_id=200236) 与 skill_000164「腾挪」(game_id=200281)
+[实际] 真数据 pet 组 only_in_frozen = [{"id":"pet_000532","name":"幽影树","title":"幽影树（突变的样子）"}]
+[实际] 非零差值组 = pet:1 / trait:3
+[实际] pet 的解释 = 冻结侧多出 1 条，已在 only_in_frozen 逐条列出：pet_000532「幽影树」；差值 = 冻结声明 622 - 公网声明 621 = 1，与桶内条目数（only_in_frozen 1 - only_in_live 0 = 1）一致。
+[实际] pet 解释里提到的 id = pet_000532（桶内 id = pet_000532）
+[实际] trait 的解释 = 冻结侧多出 3 条，已在 only_in_frozen 逐条列出：skill_000164「腾挪」、skill_000165「保卫」、skill_000166「好象坏象」；差值 = 冻结声明 245 - 公网声明 242 = 3，与桶内条目数（only_in_frozen 3 - only_in_live 0 = 3）一致。
+[实际] trait 解释里提到的 id = skill_000164,skill_000165,skill_000166（桶内 id = skill_000164,skill_000165,skill_000166）
+[实际] 声明 623 时的 pet delta = {"frozen_count":623,"live_count":621,"delta":2,"only_in_frozen":1,"explained":false,"unexplained_gap":{"delta":2,"explained_by_buckets":1,"missing":1,"detail":"冻结声明 623 - 公网声明 621 = 2，但 only_in_frozen 1 - only_in_live 0 = 1，还差 1 条没有归属。"},"explanation":""}
+[实际] 声明 623 时 reconciled = false | reason = 声明计数与解析条数不一致：frozen_l1/pet 声明 623 vs 解析 622 有计数差但没有可核对归因的解释：pet 冻结 623 vs 公网 621（冻结声明 623 - 公网声明 621 = 2，但 only_in_frozen 1 - only_in_live 0 = 1，还差 1 条没有归属。）——桶里没有条目能解释它，所以不允许当作已对账。
+[实际] 567 页面 status=blocked declared=null entities=0 reason=HTTP 567；未取到 200 响应，不产出任何计数。
+[实际] 无响应 status=blocked reason=HTTP no-response：fetch failed；未取到 200 响应，不产出任何计数。
+[实际] 声明 5 / 实际 3 张卡 => status=unparsed declared=5 entities=3 reason=卡片数 3 ≠ 页面声明计数 5（不编造数字，按未解析处理）
+[实际] 声明 3 / 实际 3 张卡 => status=ok declared=3 entities=3
+[实际] 无声明计数 => status=unparsed declared=null reason=页面里找不到可解析的声明计数；卡片元素数为 0（不编造数字，按未解析处理）
+[实际] 技能页 unparsed 时 battle_skill delta = {"group":"battle_skill","frozen_count":579,"live_count":null,"delta":null,"only_in_frozen":0,"only_in_live":0,"changed":0,"explained":false,"unexplained_gap":null,"explanation":"公网页面 skill-index 状态 unparsed（页面里找不到可解析的声明计数）：公网侧计数不可得（记 null，不记 0），因此本组不给差值，也不做逐条比对。见 unresolved 里对应的那一条。"}
+✔ 真实对账：reconciled=true，四个桶逐条给出 id (24.067666ms)
+✔ 判据①：删掉一条公网实体，only_in_frozen 必须指名列出它（必红方向） (27.020042ms)
+✔ 判据②：快照被标 blocked，reconciled 必须 false（必红方向 + 反向） (31.963791ms)
+✔ 判据③：名字归一化不许合并不同形态（必红方向） (18.71675ms)
+✔ 判据④：计数差必须给出非空且可核对的解释（必红方向） (23.580583ms)
+✔ fetch fail-closed：非 200 记 blocked 且不产出数字 (0.283292ms)
+✔ fetch fail-closed：声明计数 ≠ 卡片数记 unparsed，不产出数字 (0.683833ms)
+✔ 声明计数为 null 时不许被当成 0 参与差值 (13.601167ms)
+✔ RC-201 许可与再分发：快照必须登记许可，且与 sources.yaml 逐字一致（必红方向） (5.918625ms)
+✔ RC-201 报告：licence_ok 必须为真，且与快照逐字一致；抓到的 HTML 不在 git 里 (18.175917ms)
+  · 台账 schema = roco-rule-evidence-ledger/v1
+  · ruleset_id = roco-world-s4-2026-09-10
+  · 条目数 = 20
+  · 等级分布 = {"OFFICIAL_CURRENT":3,"RECORDED_IN_GAME":0,"COMMUNITY_CURRENT":7,"CROSS_SOURCE_SUPPORTED":7,"ENGINE_HYPOTHESIS":3,"UNKNOWN":0}
+  · 需实机 microcase = 14
+  · 覆盖 topic = battle_mode.speed_duel, battle_mode.standard_pvp, battle_mode.territory_trial, energy.charge, energy.initial, energy.max, energy.regen, leave.semantics, marks.persistence, product.pairing_ai, pvp.fairness, pvp.standard.team_size, swift.injection, traits.triggers, turn_order.priority, type.multiplier
+  · 等级顺序 = OFFICIAL_CURRENT > RECORDED_IN_GAME > COMMUNITY_CURRENT > CROSS_SOURCE_SUPPORTED > ENGINE_HYPOTHESIS > UNKNOWN
+  · OFFICIAL_CURRENT: can_promote_to_current_rule = true
+  · RECORDED_IN_GAME: can_promote_to_current_rule = true
+  · COMMUNITY_CURRENT: can_promote_to_current_rule = false
+  · CROSS_SOURCE_SUPPORTED: can_promote_to_current_rule = false
+  · ENGINE_HYPOTHESIS: can_promote_to_current_rule = false
+  · UNKNOWN: can_promote_to_current_rule = false
+  · 已登记条目 = EV-ENERGY-MAX, EV-ENERGY-CHARGE, EV-ENERGY-ENDTURN-REGEN, EV-ENERGY-INITIAL, EV-ENERGY-COST8-EXISTS, EV-PVP-STANDARD-TEAM-SIZE, EV-PVP-STANDARD-MANA, EV-PVP-FAINT-MANA-LOSS, EV-PVP-SPEED-DUEL-MODE, EV-PVP-UNKNOWN-OPPONENT, EV-PVP-OPPONENT-ROSTER-VISIBLE, EV-SWIFT-INJECTION, EV-MARKS-PERSISTENCE, EV-TYPE-MULTIPLIER, EV-TURN-ORDER-MECHANISMS-EXIST, EV-TURN-ORDER-STRICT, EV-LEAVE-SEMANTICS, EV-TRAITS-TRIGGER-COMPLEXITY, EV-OFFICIAL-PAIRING-AI, EV-BATTLEMODE-PARAMETERIZED
+  · 实际等级 = {"EV-ENERGY-MAX":"CROSS_SOURCE_SUPPORTED","EV-ENERGY-CHARGE":"CROSS_SOURCE_SUPPORTED","EV-ENERGY-ENDTURN-REGEN":"ENGINE_HYPOTHESIS","EV-ENERGY-INITIAL":"CROSS_SOURCE_SUPPORTED","EV-PVP-SPEED-DUEL-MODE":"OFFICIAL_CURRENT","EV-BATTLEMODE-PARAMETERIZED":"OFFICIAL_CURRENT"}
+  · 台账要求的 case = MC-E01, MC-E02, MC-E03, MC-E04, MC-E05, MC-E07, MC-E08, MC-E09, MC-E11, MC-E12, MC-E13, MC-E14, MC-E16, MC-E17
+  · 录屏清单里的 case = MC-E01, MC-E02, MC-E03, MC-E04, MC-E05, MC-E07, MC-E08, MC-E09, MC-E11, MC-E12, MC-E13, MC-E14, MC-E16, MC-E17, MC-E20
+  · EV-ENERGY-MAX ← https://zhuanlan.zhihu.com/p/2040741873246024568（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-MAX ← https://www.douyin.com/video/7489841837251857673（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-CHARGE ← https://zhuanlan.zhihu.com/p/2040741873246024568（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-CHARGE ← https://www.douyin.com/video/7489841837251857673（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-ENDTURN-REGEN ← roco/src/roco_env/env.py#L59（http=false 仓库文件=true marker=repo_internal）
+  · EV-ENERGY-ENDTURN-REGEN ← docs/roco/MICROCASE-PLAN.md（http=false 仓库文件=true marker=repo_internal）
+  · EV-ENERGY-ENDTURN-REGEN ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-ENERGY-INITIAL ← roco/src/roco_env/env.py#L60（http=false 仓库文件=true marker=repo_internal）
+  · EV-ENERGY-INITIAL ← https://www.douyin.com/video/7489841837251857673（http=true 仓库文件=false marker=community）
+  · EV-ENERGY-COST8-EXISTS ← https://wiki.biligame.com/nrc/技能图鉴（http=true 仓库文件=false marker=community）
+  · EV-PVP-STANDARD-TEAM-SIZE ← https://www.taptap.cn/moment/808879358071540062（http=true 仓库文件=false marker=community）
+  · EV-PVP-STANDARD-TEAM-SIZE ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-PVP-STANDARD-MANA ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-PVP-STANDARD-MANA ← https://www.taptap.cn/moment/808879358071540062（http=true 仓库文件=false marker=community）
+  · EV-PVP-FAINT-MANA-LOSS ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-PVP-FAINT-MANA-LOSS ← https://www.gameres.com/forum/t/917446（http=true 仓库文件=false marker=community）
+  · EV-PVP-SPEED-DUEL-MODE ← https://www.taptap.cn/moment/838434682965067210（http=true 仓库文件=false marker=official_first_party）
+  · EV-PVP-UNKNOWN-OPPONENT ← tests/evals/roco/cases/microcases-v1.jsonl（http=false 仓库文件=true marker=product_context）
+  · EV-PVP-OPPONENT-ROSTER-VISIBLE ← https://www.taptap.cn/moment/808879358071540062（http=true 仓库文件=false marker=community）
+  · EV-SWIFT-INJECTION ← https://wiki.biligame.com/nrc/小鹬（http=true 仓库文件=false marker=community）
+  · EV-MARKS-PERSISTENCE ← https://wiki.biligame.com/nrc/印记（http=true 仓库文件=false marker=community）
+  · EV-TYPE-MULTIPLIER ← https://wiki.biligame.com/nrc/深渊罗隐（http=true 仓库文件=false marker=community）
+  · EV-TYPE-MULTIPLIER ← https://wiki.biligame.com/nrc/溯源钟（http=true 仓库文件=false marker=community）
+  · EV-TURN-ORDER-MECHANISMS-EXIST ← https://news.17173.com/content/03182026/104940843.shtml（http=true 仓库文件=false marker=official_reproduction）
+  · EV-TURN-ORDER-MECHANISMS-EXIST ← https://www.taptap.cn/moment/808879358071540062（http=true 仓库文件=false marker=community）
+  · EV-TURN-ORDER-STRICT ← data/roco/evidence/rule-evidence-ledger.json（http=false 仓库文件=true marker=repo_internal）
+  · EV-TURN-ORDER-STRICT ← docs/roco/MICROCASE-PLAN.md（http=false 仓库文件=true marker=repo_internal）
+  · EV-LEAVE-SEMANTICS ← https://wiki.biligame.com/nrc/邪眼巨魔（http=true 仓库文件=false marker=community）
+  · EV-TRAITS-TRIGGER-COMPLEXITY ← https://wiki.biligame.com/nrc/特性列表（http=true 仓库文件=false marker=community）
+  · EV-OFFICIAL-PAIRING-AI ← https://www.bilibili.com/video/BV1iMuh66EiP/（http=true 仓库文件=false marker=official_first_party）
+  · EV-BATTLEMODE-PARAMETERIZED ← https://www.taptap.cn/moment/849700086890891385（http=true 仓库文件=false marker=official_first_party）
+  · EV-BATTLEMODE-PARAMETERIZED ← https://www.taptap.cn/moment/809020453778620585（http=true 仓库文件=false marker=official_first_party）
+  · 来源总条数 = 32
+  · 改写前 confidence = CROSS_SOURCE_SUPPORTED → 改写后 = OFFICIAL_CURRENT
+  · 实际报错原文 = EV-ENERGY-MAX: OFFICIAL_CURRENT 必须至少有一条 official_first_party 来源；实际 marker 集合：["community","community"]
+  · 被抬到 OFFICIAL_CURRENT 的条目数 = 17
+  · 幸存者（抬上去竟然还是绿的） = 0 
+  · 实际报错原文 = EV-PVP-STANDARD-TEAM-SIZE: OFFICIAL_CURRENT 必须至少有一条 official_first_party 来源；实际 marker 集合：["community","official_reproduction"]
+  · 改写前 microcase_id = "MC-E13" → 改写后 = undefined
+  · 实际报错原文 = EV-SWIFT-INJECTION: 缺少字段 microcase_id（实际值：undefined） | EV-SWIFT-INJECTION: needs_microcase=true 时 microcase_id 必须形如 MC-E01，实际：null
+  · 改写前 sources 条数 = 1 → 改写后 = 0
+  · 实际报错原文 = EV-MARKS-PERSISTENCE: sources 为空：等级 COMMUNITY_CURRENT 没有任何来源
+  · 剩余来源 = ["https://news.17173.com/content/03182026/104940843.shtml"]
+  · 实际报错原文 = EV-PVP-STANDARD-MANA: CROSS_SOURCE_SUPPORTED 至少需要两条 URL 不同的来源；实际 1 条：["https://news.17173.com/content/03182026/104940843.shtml"]
+  · 实际报错原文 = EV-TYPE-MULTIPLIER: affected_artifacts 不能为空，实际：[]
+  · 实际报错原文 = EV-ENERGY-MAX: confidence 不在六选一里："VERIFIED_OFFICIAL"
+  · 实际报错原文 = EV-ENERGY-MAX: 来源 https://www.taptap.cn/moment/838434682965067210 的 level=OFFICIAL_CURRENT 强于条目等级 CROSS_SOURCE_SUPPORTED（来源最多只能与条目同级） | EV-ENERGY-MAX: 等级 CROSS_SOURCE_SUPPORTED 的条目带了 official_first_party 来源 ["https://www.taptap.cn/moment/838434682965067210"]：官方一手来源只能出现在 OFFICIAL_CURRENT 条目上（否则这条来源看起来像是在支撑它）
+  · 实际报错原文 = ledger: 台账引用了 MC-E99，但录屏清单里没有这条 case（“要录什么”没有落点）
+✔ 台账文件存在，且是合法 JSON（schema 与 ruleset 对得上） (2.100833ms)
+✔ 真台账逐条合规（这条红了就是真问题，不是判据太严） (2.642166ms)
+✔ 六个等级的定义齐全，且只有前两级能直接成为 current 规则 (0.637875ms)
+✔ 指令点名要覆盖的规则条目一条都不能少 (0.197958ms)
+✔ 工程假设与外部证据不许互相冒充（能量上限/聚能/回能/初始值的等级） (0.189625ms)
+✔ “需要实机”的条目必须真挂着 case，且 case 写清了怎么录、录到什么算通过 (0.162667ms)
+✔ 每条来源都有 http(s) URL，等级不高于它支撑的条目 (0.454166ms)
+✔ 反证①：把一条 CROSS_SOURCE_SUPPORTED 抬成 OFFICIAL_CURRENT → 必须红（来源不够官方） (0.600167ms)
+✔ 反证①-全量：每一条抬到 OFFICIAL_CURRENT 都必须红（不许有幸存者） (6.148959ms)
+✔ 反证①-转载：只有官方公告转载的条目抬成 OFFICIAL_CURRENT → 必须红 (0.5465ms)
+✔ 反证②：删掉需要 microcase 条目的 microcase_id → 必须红 (0.511084ms)
+✔ 反证③：把某条的 sources 清空 → 必须红 (0.362125ms)
+✔ 反证④：CROSS_SOURCE_SUPPORTED 只剩一条来源 → 必须红 (0.302667ms)
+✔ 反证⑤：affected_artifacts 清空 → 必须红（没有“改了谁都不影响”的规则） (0.275625ms)
+✔ 反证⑥：confidence 写成不在六选一里的值 → 必须红 (0.289458ms)
+✔ 反证⑦：把官方一手来源挂到非 OFFICIAL_CURRENT 条目上 → 必须红 (0.586041ms)
+✔ 反证⑧：引用一个清单里不存在的 microcase → 必须红 (0.297042ms)
+✔ 投影：公开字段原样搬运，私有字段一个都不进来 (0.626666ms)
+✔ 投影：局面结束后不可玩（经验层据此闭嘴） (0.087125ms)
+✔ 规划特征：gap 用期望区间宽度，不用 worst 的绝对值 (0.381542ms)
+✔ 陈旧判定：版本对不上就作废，只有一个入口 (0.050917ms)
+✔ 规划回执的陈旧判定：规划自己说属于哪一版，才算哪一版（不许盖当前版本号） (0.150417ms)
+✔ 门控来自真实 experience.js：失焦是硬门控，不是「这次没什么可说」 (1.124708ms)
+✔ 危险局面给的是短提示；健康局面沉默（阈值来自经验层，不是这里拍的） (0.235333ms)
+✔ 频率预算：说过一次就在冷却里，同一手也不重复 (1.596666ms)
+✔ 提示文案：建议由**局面**决定，看不到局面就沉默（第 43 轮改） (0.435458ms)
+✔ 局末教学入口：没有值得拎出来的决策点就说没有 (0.206625ms)
+✔ （已删）风险分支的旧措辞用例 (0.05125ms)
+✔ 伤害预览：说清「估」与「够不够收」，且结论不稳时不许打包票 (0.117167ms)
+✔ 页面局末复盘接的是「整局事件 + 最后一个可行动的局面」（接错了不会报错） (0.910417ms)
+✔ 12 个系别的 emoji 与配色逐键对齐，且不引用任何外链素材（自制形象） (0.996375ms)
+✔ L1 图鉴层：622 只全在，且**只**允许 knowledge_only (1.823375ms)
+✔ L1 图鉴层：每只都必须写清「我不知道什么」（unknown_fields + refused + provenance） (0.329666ms)
+✔ L1 图鉴层：检索可用，且过滤条件不许放过不属于它的条目 (0.595667ms)
+✔ 反证：把 support 改成 simulable、或删掉 unknown_fields，校验器必须报出来 (0.592458ms)
+  · [实际] 实体 = 1446 ；provenance 条目 = 2888
+  · [实际] 分组 = {"battle_skill":579,"pet_form":162,"pet_record":460,"trait_record":245}
+  · [实际] 分节 = {"distributable":1446,"reference_only":0}
+  · [实际] 判据 = schema_compliance:ok schema_file:ok artifacts_on_disk:ok provenance_on_disk:ok provenance_pointers:ok refs_pointers:ok licence_refs:ok distribution_sections:ok unknown_fields:ok orphan_references:ok conflicts_vs_rc201:ok freshness_guard:ok contract_completeness:ok coverage_matrix:ok ruleset_binding:ok entity_identity:ok readiness_declaration:ok
+  · [实际] 问题 = (无)
+  · [实际] 抄进包的值字段 = 0 
+  · [实际] 带 stats ref = 622 ；带 learnable_skills ref = 622
+  · [实际] record_kind_enum = ["pet_record","pet_form","battle_skill","trait_record"]
+  · [实际] required_entity_fields = ["entity_key","record_kind","name","provenance","licence_ref","source_scope"]
+  · [实际] required_provenance_fields = ["source_id","artifact_path","artifact_sha256","pointer"]
+  · [实际] conflicts = {"IDENTITY_CONFLICT":65,"GRANULARITY_CONFLICT":34} ；total = 99 ；unresolved = 4
+  · [实际] 未解决条目 = pet::pet_000532,trait::skill_000164,trait::skill_000165,trait::skill_000166
+  · [实际] VALUE_CONFLICT 说明 = 同一 id 的**字段值**在两侧不一致。本轮**为 0** —— 这不是"没有 …
+  · [实际] form_axis.counts = {"BASE":426,"LORD":64,"REGIONAL":131,"MUTATION":1,"OTHER":0,"UNMAPPED":0} ；divergence = 34
+  · [实际] 可比字段 = pet.id, pet.name, pet.number, pet.type, battle_skill.id, battle_skill.name, battle_skill.element, trait.id, trait.name
+  · [实际] 「公网索引页没有」字段 = pet.class, pet.stats, pet.learnset, pet.release, pet.feature_skill_id, battle_skill.power, battle_skill.energy, battle_skill.damage_class, battle_skill.desc
+  · [实际] pet.type 逐条 = {"group":"pet","field":"type","matched_entities":621,"frozen_present":621,"live_present":621,"equal":621,"unequal":0,"unequal_examples":[],"verdict":"COMPARABLE_PUBLIC_INDEX_HAS_FIELD","comparable":true,"normalization":"剥掉「系」字后按 | 拼接比较（冻结「光系|草系」vs 公网「光|草」）。","reason":"属性标签逐条可比（这是「能比的四个字段」之一）。"}
+  · [实际] status = draft ；satisfied = 8/9
+  · [实际] §9-1 unified_schema: satisfied=true 证据=schema.x-roco-contract.record_kind_enum / required_entity_fields / source_scope_enum
+  · [实际] §9-2 licence_per_entity: satisfied=true 证据=entity.licence_ref + source_registry.redistribution + 分节归属+licence_ref ∈ sources.yaml + 台账逐字一致 + REFERENCE_ONLY 不在 distributable
+  · [实际] §9-3 per_entity_provenance: satisfied=true 证据=逐实体 provenance 的四个必填字段 + 两侧粒度对等+provenance.artifact_sha256 与磁盘逐条一致 + pointer 可解析
+  · [实际] §9-4 conflict_policy: satisfied=true 证据=conflicts.classes / total / unresolved / 逐条证据+冲突条目与 RC-201 报告逐条一致 + 未解决时拒绝 ready
+  · [实际] §9-5 form_axis: satisfied=true 证据=form_axis.assignments 覆盖所有非基础精灵 + divergence 条数与 GRANULARITY_CONFLICT 条数一致
+  · [实际] §9-6 field_level_coverage: satisfied=false 证据=field_level_coverage.static_false
+  · [实际] §9-7 version_freshness: satisfied=true 证据=ruleset_binding 必填 + freshness 守卫+freshness 重算 + ruleset_binding 指纹与磁盘一致
+  · [实际] §9-8 unavailable_fields: satisfied=true 证据=contract.contains / does_not_contain / unknown_fields 允许清单+unknown_fields 按冻结产物重算 + contract.does_not_contain 覆盖覆盖矩阵
+  · [实际] §9-9 reconciliation_in_release_gate: satisfied=true 证据=release_gate.registry
+  · [实际] blocking = field_level_coverage, unresolved_conflicts
+  · [实际] 两次重建 = 逐字节相同 ；磁盘 pack.json 3336468 字节 vs 重建 3336468 字节
+  · [实际] rc = 1 ；原文 = [schema_compliance] battle_skill::skill_000246 没有 provenance —— 说不清这条从哪来
+  · [实际] rc = 1 ；原文 = [artifacts_on_disk] artifacts.data/roco/normalized/roco-world-s4-2026-09-10/skills.json.sha256=0000000000000000000000000000000000000000000000000000000000000000，磁盘实际 9d01a6476a529be750973b4b3e8eb939112773f6a8b685e15e67516092e278e4
+  · [实际] rc = 1 ；原文 = [schema_compliance] battle_skill::skill_000246 的 licence_ref=not-a-registered-source 在 source_registry 里查不到
+  · [实际] rc = 1 ；原文 = [schema_compliance] battle_skill::skill_000246 的来源 nrc-ai-sqlite 是 REFERENCE_ONLY，却出现在 distributable 分节里
+  · [实际] rc = 1 ；原文 = [schema_compliance] pet::pet_000001 的 ref「stats」有指针却被同时标进 unknown_fields —— 有值就不许标 unknown
+  · [实际] 漏报方向 rc = 1 ；原文 = [unknown_fields] pet::pet_000001 的 unknown_fields=["panel_formula","season_strength","skill_timing"]，按冻结产物重算应为 ["panel_formula","season_strength","skill_timing","traits"]（有值却标 unknown / 缺了却漏报，两个方向都算错）
+  · [实际] rc = 1 ；原文 = [schema_compliance] 就绪判定是 ready，但有 4 条未解决冲突 —— 未解决冲突必须**拒绝** ready，不是发警告
+  · [实际] 声明与重算不一致 rc = 1
+  · [实际] 坏指针 rc = 1 ；原文 = [provenance_pointers] battle_skill::skill_000246 provenance[0].pointer=pets[99999] 在 data/roco/normalized/roco-world-s4-2026-09-10/skills.json 里解析不到
+  · [实际] STALE+ready rc = 1 ；原文 = [schema_compliance] freshness.guard 的比较结果与 left/right 对不上
+  · [实际] 契约缺项 rc = 1 ；原文 = [contract_completeness] 覆盖矩阵说 pet.stats 公网索引页没有，但 contract.does_not_contain 没写它
+  · [实际] 台账篡改 rc = 1 ；原文 = [licence_refs] source_registry.wiki-rocom-snapshot.redistribution="UNLIMITED" 与 sources.yaml 的 "DERIVE_WITH_ATTRIBUTION_NONCOMMERCIAL" 不一致
+  · [实际] 报告判据组 = schema_compliance schema_file artifacts_on_disk provenance_on_disk provenance_pointers refs_pointers licence_refs distribution_sections unknown_fields orphan_references conflicts_vs_rc201 freshness_guard contract_completeness coverage_matrix ruleset_binding entity_identity readiness_declaration
+  · [实际] 规模 = {"entities":1446,"provenance_entries":2888,"by_record_kind":{"battle_skill":579,"pet_form":162,"pet_record":460,"trait_record":245},"by_section":{"distributable":1446,"reference_only":0},"conflicts":99,"unresolved_conflicts":4,"form_axis":{"BASE":426,"LORD":64,"REGIONAL":131,"MUTATION":1,"OTHER":0,"UNMAPPED":0},"orphan_references":0}
+✔ 真产物：1446 条实体全部过判据（17 组），逐条给 provenance 与 licence_ref (34.902583ms)
+✔ 真产物：只做索引——大块数值一律只给 refs，不抄进包 (6.525458ms)
+✔ schema：record_kind enum 用 RC-201 那份词表，必填字段齐备 (0.459959ms)
+✔ 冲突：4 条未解决 + 61 组同名不同 id + 34 条形态口径，逐条带证据；未解决即拒绝 ready (0.752334ms)
+✔ 覆盖矩阵：可比字段只许是 id/名字/编号/属性标签，其余逐条给出「公网索引页没有」 (0.166583ms)
+✖ 就绪：9 项逐条 satisfied + 证据；只有全 satisfied 才允许 ready (0.601583ms)
+✔ 可复跑：内存重建两次逐字节相同，并与磁盘上的 pack.json/schema.json 一致 (97.009833ms)
+✔ 反证① 抽掉某实体 provenance ⇒ 红 (26.86925ms)
+✔ 反证② artifact_sha256 对不上磁盘 ⇒ 红（登记表一起改坏，只有磁盘判据能抓） (32.539208ms)
+✔ 反证③ licence_ref 在 sources.yaml 里查不到 ⇒ 红 (32.576542ms)
+✔ 反证④ REFERENCE_ONLY 混进 distributable ⇒ 红 (35.729125ms)
+✔ 反证⑤ 有值的字段被标进 unknown_fields ⇒ 红（缺了却漏报也 ⇒ 红） (55.930416ms)
+✔ 反证⑥ 冲突未解决却把就绪标成 ready ⇒ 红 (53.952917ms)
+✔ 反证⑦ 指针指到不存在的下标 / 快照 STALE 却 ready ⇒ 红 (55.936208ms)
+✔ 反证⑧ sources.yaml 查不到、报告缺项、契约缺项都 ⇒ 红 (50.312792ms)
+✔ 就绪报告：存在、可解析、不含挂钟时间戳（确定性） (0.194625ms)
+✔ RC-101 规则配置：两份都在，且生成逻辑与磁盘一致 (2.614334ms)
+✔ RC-101 规则配置：两份配置本身合规（结构 / 必填 / BattleMode 指向真实模式） (0.969166ms)
+✔ RC-101 规则配置：台账指纹必须对得上（台账改了配置就得重生成） (0.363375ms)
+✔ RC-101 规则配置：每个 evidence_id 在台账里真的存在，且置信等级逐字相等 (0.461583ms)
+✔ RC-101 规则配置：unknown 必须是 null + reason，不许补一个看起来合理的数 (0.216208ms)
+✔ RC-101 规则配置：candidate 带具体值的字段必须标 CANDIDATE_HYPOTHESIS + microcase_id (0.56975ms)
+✔ RC-101 规则配置：两个配置的字段 diff 与台账结论一致（candidate 没有被静默 promotion） (0.414792ms)
+    实际逐字段判决：{"fields":9,"PROMOTABLE":0,"NOT_PROMOTABLE":9,"REFUTED":0,"recordings":0}
+      battle_mode.team_size=NOT_PROMOTABLE
+      battle_mode.active_count=NOT_PROMOTABLE
+      energy.max=NOT_PROMOTABLE
+      energy.regen.per_turn=NOT_PROMOTABLE
+      energy.initial=NOT_PROMOTABLE
+      energy.charge=NOT_PROMOTABLE
+      turn_order.end_turn.order=NOT_PROMOTABLE
+      turn_order.end_turn.known_order=NOT_PROMOTABLE
+      turn_order.end_turn.speed_tie=NOT_PROMOTABLE
+    实际：energy.max=PROMOTABLE；其余 PROMOTABLE 0 条
+    实际（等级不足 COMMUNITY_CURRENT）：energy.max=NOT_PROMOTABLE — MC-E01 记录的 confidence="COMMUNITY_CURRENT" 不是 RECORDED_IN_GAME / OFFICIAL_CURRENT：这一级不足以 promotion
+    实际：energy.max=REFUTED
+      台账 EV-ENERGY-MAX 现在是 CROSS_SOURCE_SUPPORTED；本次记录是 RECORDED_IN_GAME。promotion 时台账那条必须一并改成 RECORDED_IN_GAME/OFFICIAL_CURRENT —— 改台账是人的决定，本脚本不代做
+      观测到的能量读数最大值 energy_max_observed=12 与候选值 10 不一致
+    实际配置 sha256：before=b74ea79ae953e62d… after=b74ea79ae953e62d…
+    实际（过期记录）：记录过期：recorded_at=2020-01-01 距今天 2455 天，超过上限 548 天（旧录像对应的可能是另一个游戏版本，必须重录）
+    实际：变绿字段 ["energy.max","energy.regen.per_turn","energy.charge"]；can_be_default=false
+    实际：12 条，失败 0 条
+    实际反证条数：10
+    实际（/tmp 里的坏副本）登记表问题原文：[record.confidence] MC-E01 — confidence 只允许 RECORDED_IN_GAME / OFFICIAL_CURRENT，实际 "COMMUNITY_CURRENT"（社区页面 / 官方转载 / 仓库内部事实源都不能顶这里）
+    实际 sha256：{"candidate":"b74ea79ae953e62dca8dab753e0cf94d194e5c448a37a67b690af6a3a1aeb8ab","ledger":"aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903","caseRecords":"9a4d3e37df8e93e0ee10248b8b60cb1ef295328b581cda25ad56d43c114f349b","recordings":"e49e6edc9405194b73032238f25f380c0664b58ff28f8016eb1befff345c84c9"}
+✔ RC-102 登记表：真仓库的 recordings 必须是空数组（本阶段没有录到任何实机） (1.009625ms)
+✔ RC-102 判决：空记录表 → 候选配置每个字段都 NOT_PROMOTABLE，且理由点名缺哪条 MC-E (2.254834ms)
+✔ RC-102 判决：伪造一条合法记录（内存）→ 对应字段变 PROMOTABLE（证明判据不是恒假） (1.690125ms)
+✔ RC-102 判决：记录与候选值冲突 → REFUTED，且配置 sha256 前后完全一致（脚本不改配置） (1.011208ms)
+✔ RC-102 判决：media_ref / pass_criteria / 记录过期 / 日期不可解析 各有必红方向 (4.049833ms)
+✔ RC-102 判决：candidate_config_can_be_default 恒为 false（即使字段全绿也不许自动转默认） (0.629125ms)
+✔ RC-102 自检：--selftest 的 12 条用例全部通过（≥6 条反证） (5.812042ms)
+✔ RC-102 边界：报告只写 rule-promotion.json，且 data/ 下的只读输入一个字节都没变 (3.102709ms)
+✔ RC-000 基线：能量常量从源码读，读不到就是 null（不许猜默认值） (1.013667ms)
+✔ RC-101 规则配置：默认配置的能量三件套就是引擎默认行为（改配置就红） (0.5645ms)
+✔ RC-000 基线：机器可读，且如实登记「本次审计不覆盖什么」 (110.81825ms)
+✔ RC-104 失效图：登记表合规（路径真实、每个主题都有人依赖、每条产物都能重建） (1.708208ms)
+✔ RC-104 失效图：反证 —— 规则本体坏掉时必须红（四条） (0.812834ms)
+✔ RC-104 失效图：受影响清单是**算出来**的，不是写死的 (0.356125ms)
+✔ RC-104 失效图：绑定旧规则的产物必须进「禁止重跑」清单（人类指令：先别用旧规则生成轨迹） (0.110875ms)
+✔ BattleMode：标准 PVP 六宠是 CANDIDATE，绝不许写成官方已确认 (0.107958ms)
+✔ BattleMode：极速对决是独立模式（3v3 / 2 魔力），不能拿来当标准模式 (0.066334ms)
+✔ BattleMode：候选模式的 team_size 不得来自「当前 Demo 的 48 只名单」 (0.157083ms)
+✔ 六槽 UI mockup：量测判据必须有牙（横向溢出 / 槽位数 / 徽记 / 伪胜率） (0.126542ms)
+✔ 六槽 UI mockup：产物必须已落盘且为绿（截图 + 量测） (0.221291ms)
+✔ RC-101 接线：规则配置里的 energy_max 必须透到公开视图（读不到就是 null，不猜） (0.24075ms)
+✔ RC-101 接线：教练的「对面能量快满」有上限才说话，没上限就沉默（fail closed） (0.782625ms)
+✔ RC-202 第 9 项是**可执行判据**：闸门登记表里必须真的有那两条套件（必红方向） (0.108875ms)
+✔ the rules page is generated, not hand-written, and covers every skill (16.075667ms)
+✔ type multipliers shown on the rules page match measured engine damage (0.433458ms)
+✔ guard reduction and piercing skills shown on the rules page match measured damage (0.944292ms)
+✔ damage formula coefficients on the rules page reproduce engine damage (1.849084ms)
+✔ status timing and ticks shown on the rules page match a real resolved turn (0.984125ms)
+✔ energy, item and turn-limit numbers shown on the rules page match the engine (1.493792ms)
+✔ environment multipliers and durations shown on the rules page match the engine (0.396916ms)
+✔ reward, xp and training numbers shown on the rules page match a real settle() (5.10425ms)
+✔ swift-win threshold shown on the rules page matches settle() (0.821541ms)
+✔ every skill description states the same numbers as its own data fields (2.376ms)
+✔ a rules-version mismatch blocks advice instead of showing stale numbers (2.879875ms)
+✔ the tool layer quotes the same rule numbers as the engine (6.796417ms)
+✔ the tactics knowledge base states the same numbers as the engine (0.223917ms)
+✔ the difficulty list on the page comes from DIFFICULTIES (0.821125ms)
+✔ legal actions and the rules page agree about what is affordable (0.824792ms)
+✔ species panels quoted in the rules page come from SPECIES (0.143042ms)
+✔ the rules-boundary card does not contradict the engine about types or environments (0.184708ms)
+✔ browser-compatible ciphertext loads a memory-only credential and status never exposes it (42.871167ms)
+✔ encryption nonce is single-use and malformed ciphertext is rejected (46.456166ms)
+✔ cross-origin, missing CSRF, DNS rebinding and server source requests are blocked (37.143167ms)
+✔ verification reaches only official HTTPS endpoint with bearer auth and marks verified (31.625292ms)
+✔ invalid authentication reports safe errors without reflecting upstream response (63.138791ms)
+✔ unconfigured coach runs locally; configured coach uses model and preserves evidence (65.654167ms)
+✔ PVP gating occurs before remote invocation even when configured (22.708458ms)
+✔ disconnect clears configuration; blank output and malformed input fail safely (39.81825ms)
+✔ network errors are sanitized (18.596125ms)
+✔ client disconnect aborts the upstream model request (44.70875ms)
+✔ every local mode the client can send is accepted by the coach endpoint (56.579416ms)
+✔ 整局复盘：给模型的指令写清了 0 值口径，而 0 值数据照给模型 (100.972666ms)
+✔ shadow 档不许改变玩家看到的结果：工具选择也必须是 base 的决定（第 38 轮的回归） (87.414958ms)
+✔ UI 视图与模型协议必须分开：页面拿到真名，规划协议一个字段都不多 (0.5685ms)
+✔ 军师在伙伴倒下时开口，补位理由来自真实血量，且不当成胜率 (1.185583ms)
+✔ 倒下触发不会在没人倒下、或已经说过一次之后重复开口 (0.290417ms)
+✔ 犹豫触发沿用 trackAttention 的悬停记录与 shouldNudge 门槛 (0.421917ms)
+✔ 悬停记录是对象时也要能分出「不同选项」（app.js 现在就存对象） (0.188875ms)
+✔ 犹豫不成立的时候真的不说：只看一个选项、看得太短、安静档、已提示过、已关闭 (0.424916ms)
+✔ 犹豫复用 shouldNudge：45 秒冷却与本局两次上限都算数 (9.207833ms)
+✔ 策略错误必须同时有真实分差和 after 快照上的后果 (56.286083ms)
+✔ 不该说的时候真的不说：分差太小、选了更强的一手、对手已被收掉、整局已结束 (54.201208ms)
+✔ 可救却减员是真实枚举分差 + after 里的倒下，不是「有药就该吃」 (26.79125ms)
+✔ 一局打满也只有这三次开口，理由不重复，且都来自三类之一 (206.710708ms)
+✔ 冷却与每回合一次是硬约束：刚说过就不会连着说 (0.402792ms)
+✔ 每条开口都带可读的理由和行动名，不出现胜率或命令句 (0.338667ms)
+✔ 长停留：停的就是推荐解 → 老师只讲解这一招，军师闭嘴 (6.951458ms)
+✔ 长停留：明显不是最优 → 军师委婉建议换掉（给台阶，不判错） (6.61225ms)
+✔ 来回换不算长停留：犹豫照旧成立，长停留一定为 null (6.910333ms)
+✔ 长停留优先于犹豫：扫过两个选项后又停在同一个上 ≥10 秒，不说「来回看」 (5.928625ms)
+✔ 长停留的门槛与克制：不足 10 秒、安静档、点掉、每局限一次、每局总上限 (5.743875ms)
+✔ 指针离开选项区就不再是长停留（盯着空白处不算盯着技能看） (6.382917ms)
+✔ 学过就不再教：这一课已经教过、又没有新的反证，就不再主动讲 (7.625792ms)
+✔ 没学会就再教（军师联动）：3 次独立行动都不合理 → 标回未掌握，并且能说出为什么 (6.884125ms)
+✔ 再教的边界：证据不够、只是被提示后做错、或者独立做对了，都不重新开课 (0.300167ms)
+✔ 第一层：只叉了一次教学，教学类安静，军师类照常（不该一起哑掉） (0.437709ms)
+✔ 第二层：两类都被叉掉 → 接到 adaptiveGate 上一律静默 (0.10325ms)
+✔ 点掉即静音优先：本局点掉之后，无论教没教过、有没有再教证据都不再开口 (6.379292ms)
+✔ every id app.js looks up is declared in the HTML or created by app.js itself (1.048625ms)
+✔ app.js dead functions are reported, not silently ignored (4.673541ms)
+✔ every capability the interview asks for has an entry point wired (0.283792ms)
+✔ 异常路径不许让 busy 卡住：busy=true 必须紧贴 try，finally 第一句必须放掉它 (0.216875ms)
+✔ 看门狗不许有任何能永远挡住自己的前置条件 (0.166917ms)
+✔ 教练记账绝不允许把一步棋卡死 (0.099958ms)
+ℹ tests 750
+ℹ suites 0
+ℹ pass 749
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 44923.206334
+
+✖ failing tests:
+
+test at tests/roco-game-data-pack.test.js:211:1
+✖ 就绪：9 项逐条 satisfied + 证据；只有全 satisfied 才允许 ready (0.601583ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/serendizc/Developer/roco-coach/tests/roco-game-data-pack.test.js:226:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1397:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:969:18)
+      at Test.postRun (node:internal/test_runner/test:1537:19)
+      at Test.run (node:internal/test_runner/test:1462:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
