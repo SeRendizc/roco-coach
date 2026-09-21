@@ -150,11 +150,30 @@ function render() {
   const actions = view?.legal ?? [];
   $('action-hint').textContent = view ? `${actions.length} 个合法动作` : '开一局后这里会出现可执行的动作';
   $('actions').innerHTML = actions.map((action, index) => {
-    const detail = action.kind === 'skill' ? `技能 · ${action.skill_id ?? ''}`
-      : action.kind === 'switch' ? `换人 → 第 ${(action.target_index ?? 0) + 1} 位`
-        : action.kind === 'item' ? `道具 · ${action.item_id ?? ''}`
-          : action.kind === 'escape' ? '结束这一局' : action.kind;
-    return `<button class="action" data-action="${index}" ${view.battle_result ? 'disabled' : ''}>
+    // 技能按钮上写**玩家看得懂的东西**：系别 · 能耗 · 威力（或来源未给）· 一句说明。
+    // 第 42 轮之前这里写的是 `技能 · skill_000750`——一个内部 id。
+    const skill = action.skill ?? null;
+    let detail;
+    if (action.kind === 'skill' && skill) {
+      const bits = [skill.element, skill.category];
+      if (skill.energy !== null && skill.energy !== undefined) bits.push(`能耗 ${skill.energy}`);
+      if (skill.power !== null && skill.power !== undefined) bits.push(`威力 ${skill.power}`);
+      // **来源没给威力就照实说**，不补数字
+      else bits.push('威力来源未给');
+      detail = `${bits.filter(Boolean).join(' · ')}${skill.desc ? ` — ${skill.desc}` : ''}`;
+    } else if (action.kind === 'skill') {
+      detail = '技能（引擎未给说明）';
+    } else if (action.kind === 'switch') {
+      detail = `换人 → 第 ${(action.target_index ?? 0) + 1} 位`;
+    } else if (action.kind === 'item') {
+      detail = `道具 · ${action.item_id ?? ''}`;
+    } else if (action.kind === 'escape') {
+      detail = '⚠ 结束这一局（逃跑会立刻判负）';
+    } else {
+      detail = String(action.kind ?? '');
+    }
+    return `<button class="action" data-action="${index}" ${view.battle_result ? 'disabled' : ''}
+      title="${String(skill?.desc ?? '').replace(/"/g, '&quot;')}">
       <span>${action.label ?? action.kind}</span><small>${detail}</small></button>`;
   }).join('');
   for (const button of $('actions').querySelectorAll('button[data-action]')) {

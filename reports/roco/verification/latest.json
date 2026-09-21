@@ -6,7 +6,7 @@
    "id": "env",
    "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
    "ok": true,
-   "ms": 24789,
+   "ms": 23703,
    "tail": [
     "> test:env",
     "> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
@@ -16,55 +16,55 @@
    "id": "unit",
    "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
    "ok": true,
-   "ms": 14675,
+   "ms": 14239,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 14546.691875"
+    "ℹ duration_ms 14123.5715"
    ]
   },
   {
    "id": "bridge",
    "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
    "ok": true,
-   "ms": 2954,
+   "ms": 2895,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 2827.339125"
+    "ℹ duration_ms 2763.45"
    ]
   },
   {
    "id": "toolbox-roco",
    "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
    "ok": true,
-   "ms": 179,
+   "ms": 177,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 53.514917"
+    "ℹ duration_ms 53.018542"
    ]
   },
   {
    "id": "plan-e2e",
    "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
    "ok": true,
-   "ms": 1311,
+   "ms": 1284,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 1181.268334"
+    "ℹ duration_ms 1160.749333"
    ]
   },
   {
    "id": "trajectories",
    "why": "轨迹集与判定器的两个方向；判定器写坏了只有这里看得见",
    "ok": true,
-   "ms": 791,
+   "ms": 789,
    "tail": [
     ""
    ]
@@ -82,7 +82,7 @@
    "id": "sft-split",
    "why": "SFT 训练数据的切分：家族是否都在训练侧、留出有没有泄漏、报告里的自我描述与切分模式是否自洽，以及**逐字节复现**。第 37 轮发现报告把「留出机制」描述成「留出模板」，那一类错误只有这条抓得到",
    "ok": true,
-   "ms": 2703,
+   "ms": 2692,
    "tail": [
     "  \"test.jsonl\": true,",
     "  \"dataset-report.json\": true",
@@ -94,7 +94,7 @@
    "id": "model-manifest",
    "why": "本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么",
    "ok": true,
-   "ms": 1169,
+   "ms": 1173,
    "tail": [
     "✔ mlx-community/Qwen3.5-4B-4bit — 校验 11/11 个文件",
     "manifest 校验通过"
@@ -114,9 +114,9 @@
    "id": "state-doc",
    "why": "状态文档与现实一致：声明的 HEAD 还在历史里、验证产物在、没有引用不存在的路径。第 30 轮的教训是文档能漂，而读它的人会在错的前提上继续做事",
    "ok": true,
-   "ms": 60,
+   "ms": 61,
    "tail": [
-    "状态文档：声明 HEAD 054d135，当前 afa4a24，最近一次全绿运行 37f3b40",
+    "状态文档：声明 HEAD 054d135，当前 599ca11，最近一次全绿运行 afa4a24",
     "一致"
    ]
   },
@@ -124,7 +124,7 @@
    "id": "guard-selftest",
    "why": "注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑",
    "ok": true,
-   "ms": 8026,
+   "ms": 8055,
    "tail": [
     "  ✔ 红 generator-artifact-drift",
     "  ✔ 红 companion-sayable-gone",
@@ -136,7 +136,7 @@
    "id": "browser-acceptance",
    "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
    "ok": true,
-   "ms": 19835,
+   "ms": 20601,
    "tail": [
     "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
     "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
@@ -148,12 +148,12 @@
    "id": "demo-acceptance",
    "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
    "ok": true,
-   "ms": 5576,
+   "ms": 5567,
    "tail": [
     "[demo-acceptance] ✔ 面板里精灵显示的是真名（不是 id） — 寂灭骨龙 龙系 幽系 生命 0 / 425 能量 1 生命 120 · 攻击 137 · 防御 104 · 魔攻 50 · 魔防 81 · 速度 60 海豹船长",
     "[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 ",
     "[demo-acceptance] ✔ 控制台没有报错 — []",
-    "[demo-acceptance] 结果：22 通过 / 0 失败；报告见 reports/roco/demo-acceptance/"
+    "[demo-acceptance] 结果：25 通过 / 0 失败；报告见 reports/roco/demo-acceptance/"
    ]
   }
  ],

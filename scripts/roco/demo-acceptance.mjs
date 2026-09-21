@@ -117,6 +117,18 @@ async function main(){
  for(let i=0;i<160;i++){if(await js(`document.body.dataset.rocoView==='ready'`))break;await sleep(250);}
  check('开局后页面拿到公开局面',(await js(`document.body.dataset.rocoView`))==='ready');
  check('合法动作渲染成按钮（不只是文字）',(await js(`document.querySelectorAll('#actions button[data-action]').length`))>0);
+ // ── 产品判据：技能按钮要写清「这是什么技能」 ──────────────────────────
+ // 位置很关键：必须在**对局进行中**检查。放到最后检查的话，局已经打完、
+ // 按钮被清空，`innerText` 是空的——第一版就是这么写的，判红但原因是位置错了。
+ const actionText=await js(`document.getElementById('actions').innerText`);
+ check('动作按钮上有技能信息（系别/能耗/威力或说明）',
+  /系|能耗|威力|换人|道具/.test(actionText), actionText.slice(0,90).replace(/\s+/g,' '));
+ check('动作按钮上不出现技能内部 id',
+  !/skill_\d/.test(await js(`document.getElementById('actions').innerHTML`)),
+  actionText.slice(0,60).replace(/\s+/g,' '));
+ check('威力缺来源时说「来源未给」，不写成 0',
+  !/威力\s*0\b/.test(actionText),
+  (actionText.match(/威力[^·\n]{0,12}/g)||[]).slice(0,3).join(' | '));
  shots.push(await shoot('01-battle-started'));
 
  // ── 场景 2：危险局面主动短提示（risk 由真实血量算出来）─────────────

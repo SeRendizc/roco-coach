@@ -14,6 +14,21 @@
       "ok": true
     },
     {
+      "name": "动作按钮上有技能信息（系别/能耗/威力或说明）",
+      "ok": true,
+      "detail": "龙血 龙系 · 防御 · 能耗 2 · 威力来源未给 — 减伤70%，本技能可以在蓄力状态下使用，应对攻击：下次技能无需蓄力。 集中 电系 · 防御 · 能耗 2 · 威力来源未给"
+    },
+    {
+      "name": "动作按钮上不出现技能内部 id",
+      "ok": true,
+      "detail": "龙血 龙系 · 防御 · 能耗 2 · 威力来源未给 — 减伤70%，本技能可以在蓄力状态下使用，应对攻击：下次技能无需"
+    },
+    {
+      "name": "威力缺来源时说「来源未给」，不写成 0",
+      "ok": true,
+      "detail": "威力来源未给 — 减伤70% | 威力来源未给 — 减伤80% | 威力 40 — 对敌方精灵造"
+    },
+    {
       "name": "打危险了之后出现主动短提示（无聊天入口）",
       "ok": true,
       "detail": "hint=micro_hint action=micro_hint 血量比=0.39 自动推进=2 判定={\"gate\":null,\"action\":\"micro_hint\",\"reason\":\"moderate-risk\",\"value\":1.5,\"floor\":1.2,\"decisive\":false,\"budget\":null,\"layer\":{\"active\":false,\"suppress\":false,\"reason\":\"layer-error\",\"mode\":\"off\",\"model_status\":\"error\",\"probability\":null,\"threshold\":null}}"
@@ -118,6 +133,6 @@
   ],
   "console_errors": [],
   "page_errors": [],
-  "passed": 22,
+  "passed": 25,
   "failed": 0
 }

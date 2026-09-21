@@ -89,7 +89,8 @@
 |---|---|---|
 | P0-1 数据面分离 | ✅ **完成** | `env.ui_public_view` + `_sim_envelope` 的 `result.ui` + 桥 `publicView` ui 优先；守卫 `roco/tests/test_ui_public_view.py`（12 项）与 `tests/server.test.js` 的桥守卫（含「没有 ui 时退回旧路径」反向） |
 | P0-2 事件中文化 | ✅ **完成** | `roco/src/roco_env/events_text.py`（一处实现，23 个 kind）+ `roco/tests/test_event_text.py`（13 项，跑真对局收全集）+ 页面折叠区 + `demo-acceptance` 里 6 条产品判据 |
-| P0-3 … P0-7 | ⏳ 排队中 | 见上表 |
+| P0-3 战斗 Demo UI | 🚧 **部分完成**：真名/系别色块标签/六维/血条/能量/状态、技能说明上按钮（25 条产品判据全过）；**仍缺**：阵容与对手选择、布局重做 | `src/client/roco.js`、`src/client/roco.html`、`reports/roco/demo-acceptance/` |
+| P0-4 … P0-7 | ⏳ 排队中 | 见上表 |
 
 ### P0-1 交付细节（含顺带修掉的两个真问题）
 
