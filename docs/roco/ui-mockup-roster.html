@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>小芽 · 界面 mockup（选阵容页，1440×900）</title>
 <style>
 /* 界面 mockup：选阵容页。只定版式与主次，没有真实数据、没有脚本。
@@ -55,6 +55,30 @@ input[type=search]{width:260px}
 .pager{margin-left:auto;display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--muted)}
 details{position:fixed;right:16px;top:56px;width:300px;background:#16222f;border:1px solid var(--line);border-radius:10px;padding:10px 12px;z-index:9}
 summary{cursor:pointer;font-size:12.5px;color:var(--warn)}
+
+/* ── 手机版式（390×844）：第一版 mockup 在窄屏上是坏的——实测发现四处：
+   ① 三步教程把「跳过」挤出屏幕；② 队伍栏 3 列把伙伴名挤成竖排（"寂灭骨龙"竖着写）；
+   ③ 阵容池 4 列同上，卡片文字竖排不可读；④ 固定底栏把主操作+说明+分页挤成一行。
+   这里按"手机上只保留一列信息"重排：卡片 2 列→1 列、队伍栏横向滚动、底栏分两行、
+   抽屉变成页内折叠而不是右上浮层。 */
+@media (max-width:720px){
+ h1{font-size:16px}
+ .onboard{flex-wrap:wrap;gap:6px;padding:8px 14px;font-size:12.5px}
+ .onboard .skip{margin-left:0}
+ details{position:static;width:auto;margin:8px 14px;order:-1}
+ .teambar{grid-template-columns:1fr;gap:10px;padding:10px 14px}
+ .slots{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .slot{padding:6px 4px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .pool{padding:10px 14px 150px}
+ .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .card{min-height:96px;padding:9px 10px}
+ .card .nm{font-size:15px}
+ input[type=search]{width:100%}
+ .footbar{flex-direction:column;align-items:stretch;gap:8px;padding:10px 14px}
+ .pager{margin-left:0;justify-content:space-between}
+ .coach{left:14px;right:14px;transform:none;bottom:170px}
+ .actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 </style></head><body>
 <header>
  <h1>小芽 · 洛克王国：世界 <small>训练场</small></h1>
