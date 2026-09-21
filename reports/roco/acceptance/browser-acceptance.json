@@ -63,10 +63,13 @@
       "pass": true,
       "detail": {
         "files": [
+          "full-catalog.json",
           "history.json",
           "import-report.json",
+          "layer-playable-48",
           "learnsets.json",
           "pets.json",
+          "roster-48.json",
           "skills.json",
           "support-matrix.json",
           "terms.json",

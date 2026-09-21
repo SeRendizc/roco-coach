@@ -8,13 +8,13 @@
     "这份台账不判「质量好不好」，只判「证据在不在」。"
   ],
   "counts": {
-    "DONE": 37,
-    "PARTIAL": 6,
-    "NEEDS_HUMAN": 1,
+    "DONE": 54,
+    "PARTIAL": 7,
+    "NEEDS_HUMAN": 2,
     "NOT_STARTED": 4
   },
-  "mvp_total": 30,
-  "mvp_done": 29,
+  "mvp_total": 49,
+  "mvp_done": 46,
   "items": [
     {
       "id": "M01",
@@ -1179,6 +1179,424 @@
       "status": "NOT_STARTED",
       "evidence": [],
       "note": "未开工；依赖 W6-01—03。",
+      "evidence_checked": [],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-1",
+      "title": "游戏适配契约（公开遥测/合法动作/生命周期/偏好与记忆/事件流/状态版本与取消）",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/game-adapter.js",
+        "docs/roco/GAME-ADAPTER.md",
+        "tests/evals/roco/game-adapter.test.js",
+        "tests/evals/roco/mock-host-integration.test.js"
+      ],
+      "note": "运行时逐条校验，缺字段/错类型/隐藏信息泄漏/「有威力没出处」一律 fail closed（`GameAdapterContractError`）；宿主缺能力在**装配期**就抛。契约版本 1。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/game-adapter.js",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/GAME-ADAPTER.md",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/game-adapter.test.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-2",
+      "title": "快速检测器：纯函数、无浏览器可跑（P50/P95）",
+      "status": "DONE",
+      "evidence": [
+        "reports/roco/adapter-load/adapter-load.json",
+        "scripts/roco/measure-adapter-load.mjs",
+        "tests/evals/roco/mock-host-integration.test.js"
+      ],
+      "note": "48 只 × 各 5 次：P50 0.021 ms / P95 0.049 ms（n=240）；打完整局含状态异常那一路 P95 0.114 ms。命令 `npm run roco:adapter-load`。",
+      "evidence_checked": [
+        {
+          "path": "reports/roco/adapter-load/adapter-load.json",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/measure-adapter-load.mjs",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-3",
+      "title": "陈旧结果取消（迟到结果丢弃 + 记录原因）",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/game-adapter.js",
+        "tests/evals/roco/game-adapter.test.js"
+      ],
+      "note": "丢弃理由分 `state-advanced` 与 `after-deadline` 两种并进 `lateDiscards()`；反证方向：版本没变时同一份结果**必须**被接受。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/game-adapter.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/game-adapter.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-4",
+      "title": "建议总时限 ≈3 s + 立刻回退规则短提示",
+      "status": "DONE",
+      "evidence": [
+        "reports/roco/adapter-load/adapter-load.json",
+        "src/coach/game-adapter.js"
+      ],
+      "note": "正常路径完整 advice P50 64 ms / P95 76 ms（64 个窗口）；构造的挂起路径 24/24 在时限内回退（时限 1500 ms 时 P50 = 1502 ms）。",
+      "evidence_checked": [
+        {
+          "path": "reports/roco/adapter-load/adapter-load.json",
+          "exists": true
+        },
+        {
+          "path": "src/coach/game-adapter.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-5",
+      "title": "未核验机制 fail closed（带原因，禁止近似成普通伤害）",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/game-adapter.js",
+        "reports/roco/adapter-load/adapter-load.json"
+      ],
+      "note": "`power_status` 与数值必须成对，没数值必须带 `power_reason`。机制探测被引擎明确拒绝率 1.0（2/2，对照探针成功）。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/game-adapter.js",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/adapter-load/adapter-load.json",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-6",
+      "title": "线上竞技 PVP 不给战术分析（含一处静默失效的修复）",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/policy.js",
+        "src/coach/roco-experience.js",
+        "tests/evals/roco/mock-host-integration.test.js"
+      ],
+      "note": "`pvp-live` → silent + gate=pvp-live + 文案 null；同局面 PvE 对照必须能开口。顺带修掉 `rocoGameView` 把模式写死成 pve 导致门控永不命中的问题。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/policy.js",
+          "exists": true
+        },
+        {
+          "path": "src/coach/roco-experience.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-7",
+      "title": "规则引擎压过 LLM（模型只能提议工具）",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/game-adapter.js",
+        "tests/evals/roco/game-adapter.test.js"
+      ],
+      "note": "工具提议只保留 {tool,args,stop}；模型编数字/编动作 → 丢弃模型正文并换回执那一句。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/game-adapter.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/game-adapter.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-8",
+      "title": "mock-host 集成夹具（≥10 个真实场景、跨 48 只名册、不依赖演示页 DOM）",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/roco/mock-host/host.mjs",
+        "tests/evals/roco/mock-host/scenarios.mjs",
+        "tests/evals/roco/mock-host/run.mjs",
+        "tests/evals/roco/mock-host-integration.test.js"
+      ],
+      "note": "8 个对局场景 + 3 个非对局场景；双方阵容合计覆盖登记层 48/48（断言在测试里）。命令 `npm run test:mock-host`。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/roco/mock-host/host.mjs",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/mock-host/scenarios.mjs",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/mock-host/run.mjs",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-9",
+      "title": "每条行为配必红反证（贴实际报错）",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/roco/mock-host/run.mjs",
+        "tests/evals/roco/mock-host-integration.test.js"
+      ],
+      "note": "10 条反证：隐藏信息泄漏、少 state_version、有威力没出处、未核验机制没原因、事件乱序/缺文案、拒绝无时效、宿主缺能力、模型与回执冲突、慢请求+状态已变、浏览器无 process 全局。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/roco/mock-host/run.mjs",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-10",
+      "title": "多动作比较 + 未来 2—3 回合后果结构化（三档标签）",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/compare-model.js",
+        "reports/roco/adapter-acceptance/browser-adapter-acceptance.json"
+      ],
+      "note": "比较模型搬到核心，页面只渲染；mock 宿主与报告拿到的是同一份。浏览器实测 3 个并列动作 / 5 条后续 / 三档标签齐全。",
+      "evidence_checked": [
+        {
+          "path": "src/coach/compare-model.js",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/adapter-acceptance/browser-adapter-acceptance.json",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-11",
+      "title": "RL 判定层浏览器 layer-error（已修 + 判据）",
+      "status": "DONE",
+      "evidence": [
+        "src/coach/intervention-model.js",
+        "tests/evals/roco/mock-host-integration.test.js",
+        "docs/roco/W5-04-INTERVENTION-GATE.md"
+      ],
+      "note": "根因是 `interventionModelMode(env = process.env)` 在浏览器里抛 ReferenceError，被 catch 吞成 layer-error（判定层从来没生效过）。现读 `globalThis.process?.env`，无 process 时返回 off 且不抛。**`on` 档仍需真人审阅，未获准。**",
+      "evidence_checked": [
+        {
+          "path": "src/coach/intervention-model.js",
+          "exists": true
+        },
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/W5-04-INTERVENTION-GATE.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-12",
+      "title": "负载与延迟证据落盘（48 只 + 复杂环境）",
+      "status": "DONE",
+      "evidence": [
+        "reports/roco/adapter-load/adapter-load.json",
+        "docs/roco/GAME-ADAPTER.md"
+      ],
+      "note": "检测器 / 完整 advice / 超时率 / unsupported 率 / 复杂环境逐项分开量，并写明**不声称**什么。",
+      "evidence_checked": [
+        {
+          "path": "reports/roco/adapter-load/adapter-load.json",
+          "exists": true
+        },
+        {
+          "path": "docs/roco/GAME-ADAPTER.md",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-13",
+      "title": "浏览器可见行为验收（真实键鼠 + 截图 + clientW/scrollW）",
+      "status": "DONE",
+      "evidence": [
+        "reports/roco/adapter-acceptance/browser-adapter-acceptance.json",
+        "scripts/roco/browser-adapter-acceptance.mjs"
+      ],
+      "note": "13/13 通过；两档布局 clientW == scrollW（1440/1440、390/390），浮条内部 360/360。",
+      "evidence_checked": [
+        {
+          "path": "reports/roco/adapter-acceptance/browser-adapter-acceptance.json",
+          "exists": true
+        },
+        {
+          "path": "scripts/roco/browser-adapter-acceptance.mjs",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-14",
+      "title": "陪练情绪 + 显式偏好记忆（拒绝有时效）",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/roco/mock-host-integration.test.js"
+      ],
+      "note": "偏好原话进记忆；拒绝的 expires_at 过期前后各判一次（1 → 0）。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-15",
+      "title": "老师局末闭环（转折 + 改法 + 下一局目标 + 后续局核对）",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/roco/mock-host/run.mjs",
+        "src/coach/teacher-review.js"
+      ],
+      "note": "真实对局：转折第 13 回合、改法「补位后先确认是谁再决定打谁」、目标 read-the-replacement-first；后续局核对 checked=true / improved=false（没出现不许说成做到了）。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/roco/mock-host/run.mjs",
+          "exists": true
+        },
+        {
+          "path": "src/coach/teacher-review.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-16",
+      "title": "RAG 引用透传到宿主可见层",
+      "status": "PARTIAL",
+      "evidence": [
+        "tests/evals/roco/mock-host/scenarios.mjs",
+        "reports/roco/product-wiring/full-match-wiring.json"
+      ],
+      "note": "事件级 evidence 真的到（29/76 条，形如行号）；**精灵/技能级 evidence_ids 在 roco-service.js 的 roster 映射层被丢掉**，测试如实记 `has_evidence_ids: false` —— 缺口已登记，没修成绿的。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/roco/mock-host/scenarios.mjs",
+          "exists": true
+        },
+        {
+          "path": "reports/roco/product-wiring/full-match-wiring.json",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-17",
+      "title": "Qwen 工具提议 + 受控回退（网关挂起时立刻回退）",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/roco/mock-host-integration.test.js",
+        "src/coach/shadow-tools.js"
+      ],
+      "note": "网关可用解析出 search_rules；挂起时在总时限内回退规则短提示并记录迟到结果丢弃。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        },
+        {
+          "path": "src/coach/shadow-tools.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-18",
+      "title": "RL shadow 档不得改变玩家看到的建议",
+      "status": "DONE",
+      "evidence": [
+        "tests/evals/roco/mock-host-integration.test.js",
+        "src/coach/intervention-model.js"
+      ],
+      "note": "off 与 shadow 两档正文逐字相同；shadow 照算（active=false、给概率与 margin）；**如实记录默认档位是 off、on 未获准**。",
+      "evidence_checked": [
+        {
+          "path": "tests/evals/roco/mock-host-integration.test.js",
+          "exists": true
+        },
+        {
+          "path": "src/coach/intervention-model.js",
+          "exists": true
+        }
+      ],
+      "evidence_missing": []
+    },
+    {
+      "id": "A65-19",
+      "title": "人工评测与 Qwen 27B 部署/微调（延后，由用户自行恢复）",
+      "status": "NEEDS_HUMAN",
+      "evidence": [],
+      "needs": "用户本人：陪练盲评的真人评分（W5-05），以及按指南跑 27B 的部署/微调",
+      "note": "两件都**不在本轮范围**：真人盲评需要人，27B 需要用户按 `docs/roco/QWEN-27B-USER-RUN-GUIDE.md` 跑。本轮只把「可移植性」做实，**不声称**模型效果或真人体验有任何变化。",
       "evidence_checked": [],
       "evidence_missing": []
     }

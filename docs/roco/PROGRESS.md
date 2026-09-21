@@ -10,14 +10,14 @@
 
 ## 汇总
 
-- MVP 30 项中 `DONE`：**29 / 30**
+- MVP 30 项中 `DONE`：**46 / 49**
 
 | 状态 | 条数 |
 |---|---:|
-| `DONE` | 37 |
-| `NEEDS_HUMAN` | 1 |
+| `DONE` | 54 |
+| `NEEDS_HUMAN` | 2 |
 | `NOT_STARTED` | 4 |
-| `PARTIAL` | 6 |
+| `PARTIAL` | 7 |
 
 ## 逐项
 
@@ -71,6 +71,25 @@
 | W6-02 | Battle PPO | `NOT_STARTED` | — | 未开工；属训练，且需要 W4-04 的底座。 |
 | W6-03 | LLM Agentic RL | `NOT_STARTED` | — | 未开工；属训练，依赖 W5-01 的 gateway。 |
 | W6-04 | 最终交付 | `NOT_STARTED` | — | 未开工；依赖 W6-01—03。 |
+| A65-1 | 游戏适配契约（公开遥测/合法动作/生命周期/偏好与记忆/事件流/状态版本与取消） | `DONE` | `src/coach/game-adapter.js`、`docs/roco/GAME-ADAPTER.md`、`tests/evals/roco/game-adapter.test.js`、`tests/evals/roco/mock-host-integration.test.js` | 运行时逐条校验，缺字段/错类型/隐藏信息泄漏/「有威力没出处」一律 fail closed（`GameAdapterContractError`）；宿主缺能力在**装配期**就抛。契约版本 1。 |
+| A65-2 | 快速检测器：纯函数、无浏览器可跑（P50/P95） | `DONE` | `reports/roco/adapter-load/adapter-load.json`、`scripts/roco/measure-adapter-load.mjs`、`tests/evals/roco/mock-host-integration.test.js` | 48 只 × 各 5 次：P50 0.021 ms / P95 0.049 ms（n=240）；打完整局含状态异常那一路 P95 0.114 ms。命令 `npm run roco:adapter-load`。 |
+| A65-3 | 陈旧结果取消（迟到结果丢弃 + 记录原因） | `DONE` | `src/coach/game-adapter.js`、`tests/evals/roco/game-adapter.test.js` | 丢弃理由分 `state-advanced` 与 `after-deadline` 两种并进 `lateDiscards()`；反证方向：版本没变时同一份结果**必须**被接受。 |
+| A65-4 | 建议总时限 ≈3 s + 立刻回退规则短提示 | `DONE` | `reports/roco/adapter-load/adapter-load.json`、`src/coach/game-adapter.js` | 正常路径完整 advice P50 64 ms / P95 76 ms（64 个窗口）；构造的挂起路径 24/24 在时限内回退（时限 1500 ms 时 P50 = 1502 ms）。 |
+| A65-5 | 未核验机制 fail closed（带原因，禁止近似成普通伤害） | `DONE` | `src/coach/game-adapter.js`、`reports/roco/adapter-load/adapter-load.json` | `power_status` 与数值必须成对，没数值必须带 `power_reason`。机制探测被引擎明确拒绝率 1.0（2/2，对照探针成功）。 |
+| A65-6 | 线上竞技 PVP 不给战术分析（含一处静默失效的修复） | `DONE` | `src/coach/policy.js`、`src/coach/roco-experience.js`、`tests/evals/roco/mock-host-integration.test.js` | `pvp-live` → silent + gate=pvp-live + 文案 null；同局面 PvE 对照必须能开口。顺带修掉 `rocoGameView` 把模式写死成 pve 导致门控永不命中的问题。 |
+| A65-7 | 规则引擎压过 LLM（模型只能提议工具） | `DONE` | `src/coach/game-adapter.js`、`tests/evals/roco/game-adapter.test.js` | 工具提议只保留 {tool,args,stop}；模型编数字/编动作 → 丢弃模型正文并换回执那一句。 |
+| A65-8 | mock-host 集成夹具（≥10 个真实场景、跨 48 只名册、不依赖演示页 DOM） | `DONE` | `tests/evals/roco/mock-host/host.mjs`、`tests/evals/roco/mock-host/scenarios.mjs`、`tests/evals/roco/mock-host/run.mjs`、`tests/evals/roco/mock-host-integration.test.js` | 8 个对局场景 + 3 个非对局场景；双方阵容合计覆盖登记层 48/48（断言在测试里）。命令 `npm run test:mock-host`。 |
+| A65-9 | 每条行为配必红反证（贴实际报错） | `DONE` | `tests/evals/roco/mock-host/run.mjs`、`tests/evals/roco/mock-host-integration.test.js` | 10 条反证：隐藏信息泄漏、少 state_version、有威力没出处、未核验机制没原因、事件乱序/缺文案、拒绝无时效、宿主缺能力、模型与回执冲突、慢请求+状态已变、浏览器无 process 全局。 |
+| A65-10 | 多动作比较 + 未来 2—3 回合后果结构化（三档标签） | `DONE` | `src/coach/compare-model.js`、`reports/roco/adapter-acceptance/browser-adapter-acceptance.json` | 比较模型搬到核心，页面只渲染；mock 宿主与报告拿到的是同一份。浏览器实测 3 个并列动作 / 5 条后续 / 三档标签齐全。 |
+| A65-11 | RL 判定层浏览器 layer-error（已修 + 判据） | `DONE` | `src/coach/intervention-model.js`、`tests/evals/roco/mock-host-integration.test.js`、`docs/roco/W5-04-INTERVENTION-GATE.md` | 根因是 `interventionModelMode(env = process.env)` 在浏览器里抛 ReferenceError，被 catch 吞成 layer-error（判定层从来没生效过）。现读 `globalThis.process?.env`，无 process 时返回 off 且不抛。**`on` 档仍需真人审阅，未获准。** |
+| A65-12 | 负载与延迟证据落盘（48 只 + 复杂环境） | `DONE` | `reports/roco/adapter-load/adapter-load.json`、`docs/roco/GAME-ADAPTER.md` | 检测器 / 完整 advice / 超时率 / unsupported 率 / 复杂环境逐项分开量，并写明**不声称**什么。 |
+| A65-13 | 浏览器可见行为验收（真实键鼠 + 截图 + clientW/scrollW） | `DONE` | `reports/roco/adapter-acceptance/browser-adapter-acceptance.json`、`scripts/roco/browser-adapter-acceptance.mjs` | 13/13 通过；两档布局 clientW == scrollW（1440/1440、390/390），浮条内部 360/360。 |
+| A65-14 | 陪练情绪 + 显式偏好记忆（拒绝有时效） | `DONE` | `tests/evals/roco/mock-host-integration.test.js` | 偏好原话进记忆；拒绝的 expires_at 过期前后各判一次（1 → 0）。 |
+| A65-15 | 老师局末闭环（转折 + 改法 + 下一局目标 + 后续局核对） | `DONE` | `tests/evals/roco/mock-host/run.mjs`、`src/coach/teacher-review.js` | 真实对局：转折第 13 回合、改法「补位后先确认是谁再决定打谁」、目标 read-the-replacement-first；后续局核对 checked=true / improved=false（没出现不许说成做到了）。 |
+| A65-16 | RAG 引用透传到宿主可见层 | `PARTIAL` | `tests/evals/roco/mock-host/scenarios.mjs`、`reports/roco/product-wiring/full-match-wiring.json` | 事件级 evidence 真的到（29/76 条，形如行号）；**精灵/技能级 evidence_ids 在 roco-service.js 的 roster 映射层被丢掉**，测试如实记 `has_evidence_ids: false` —— 缺口已登记，没修成绿的。 |
+| A65-17 | Qwen 工具提议 + 受控回退（网关挂起时立刻回退） | `DONE` | `tests/evals/roco/mock-host-integration.test.js`、`src/coach/shadow-tools.js` | 网关可用解析出 search_rules；挂起时在总时限内回退规则短提示并记录迟到结果丢弃。 |
+| A65-18 | RL shadow 档不得改变玩家看到的建议 | `DONE` | `tests/evals/roco/mock-host-integration.test.js`、`src/coach/intervention-model.js` | off 与 shadow 两档正文逐字相同；shadow 照算（active=false、给概率与 margin）；**如实记录默认档位是 off、on 未获准**。 |
+| A65-19 | 人工评测与 Qwen 27B 部署/微调（延后，由用户自行恢复） | `NEEDS_HUMAN` | — | 两件都**不在本轮范围**：真人盲评需要人，27B 需要用户按 `docs/roco/QWEN-27B-USER-RUN-GUIDE.md` 跑。本轮只把「可移植性」做实，**不声称**模型效果或真人体验有任何变化。 |
 
 ## 证据路径检查
 
@@ -102,6 +121,11 @@
   - 未开工；属训练，依赖 W5-01 的 gateway。
 - **W6-04 最终交付**（`NOT_STARTED`）
   - 未开工；依赖 W6-01—03。
+- **A65-16 RAG 引用透传到宿主可见层**（`PARTIAL`）
+  - 事件级 evidence 真的到（29/76 条，形如行号）；**精灵/技能级 evidence_ids 在 roco-service.js 的 roster 映射层被丢掉**，测试如实记 `has_evidence_ids: false` —— 缺口已登记，没修成绿的。
+- **A65-19 人工评测与 Qwen 27B 部署/微调（延后，由用户自行恢复）**（`NEEDS_HUMAN`）
+  - 两件都**不在本轮范围**：真人盲评需要人，27B 需要用户按 `docs/roco/QWEN-27B-USER-RUN-GUIDE.md` 跑。本轮只把「可移植性」做实，**不声称**模型效果或真人体验有任何变化。
+  - **缺的是谁**：用户本人：陪练盲评的真人评分（W5-05），以及按指南跑 27B 的部署/微调
 
 ## planner 的三个基准（结论见 `docs/roco/BENCHMARKS.md`）
 
