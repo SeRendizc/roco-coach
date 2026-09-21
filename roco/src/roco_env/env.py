@@ -40,7 +40,9 @@ from . import effects as fx
 from . import parse
 from . import traits as tr
 from . import data as _data
+from . import rule_config as _rule_config
 from .data import Ruleset, load_ruleset
+from .rule_config import RuleConfig, RuleConfigError
 from .schema import (
     ACTION_ESCAPE,
     ACTION_ITEM,
@@ -54,9 +56,22 @@ from .schema import (
     observation_for,
 )
 
-# 术语里**没有**给出、但有界实现必须选一个的值。集中在这里，方便整体替换。
-ENERGY_MAX = 6              # 假设：上限 6。数据只给每条技能的能耗，没给上限（MC-007）
-ENERGY_REGEN_PER_TURN = 1   # 假设：存活在场者回合末 +1（MC-007）
+# ── 规则常量：**唯一事实源是 data/roco/rulesets/*.json**（RC-101）──────────
+#
+# 以前这三个值写死在本文件里（`ENERGY_MAX = 6` / `ENERGY_REGEN_PER_TURN = 1` /
+# 「入场初始 2」），JS 侧与页面文案各抄了一份；规则 candidate 一变，没有一个地方
+# 说得清谁跟着变。现在：
+#
+#   · 数值只存在于 `data/roco/rulesets/legacy-sim-v1.json`（默认）与
+#     `data/roco/rulesets/mobile-s4-candidate-v2.json`（候选，未验证，**不得**当默认）；
+#   · 这里只保留**默认配置的视图**，供给本模块内外既有调用点；要换配置走
+#     `ROCO_RULE_CONFIG=mobile_s4_candidate_v2` 或 `reset(..., config=...)`。
+#
+# 下面几行是「读配置」，不是「再抄一份常量」：改 JSON 它们就跟着变，所以默认路径
+# 依旧与当前引擎逐位相同（legacy 的 max/regen/initial 恒为 6/1/2）。
+_RULE_CONFIG: RuleConfig = _rule_config.get_rule_config()
+ENERGY_MAX: int = _RULE_CONFIG.energy_max
+ENERGY_REGEN_PER_TURN: int = _RULE_CONFIG.energy_regen_per_turn
 SWITCH_PRIORITY = 5         # 假设：主动换宠占整回合，且先于技能。数据未定义（MC-005）
 ITEM_PRIORITY = 4           # 假设：道具先于技能
 
@@ -101,6 +116,7 @@ def reset(
     seed: int = 1,
     rs: Optional[Ruleset] = None,
     loadouts: Optional[Dict[str, Sequence[str]]] = None,
+    config: Optional[Any] = None,
 ) -> GameState:
     """开始一局。
 
@@ -111,7 +127,12 @@ def reset(
     （`Ruleset.candidate_moveset`）。这一点很重要：图鉴说「学得到」不等于
     「这场带得上」——对局里一只精灵只带 4 个技能，所以合法动作必须按配招算，
     否则算出来的分支在真实对局里根本不存在。
+
+    `config` 是规则配置（id 字符串或 `RuleConfig`）。省略 = 当前生效配置，
+    默认 `legacy_sim_v1`（`ROCO_RULE_CONFIG` 可改）。这一局用过的配置 id 会写进
+    `state.log` 与序列化结果，这样**旧 replay 才绑得住它当时用的那份规则**。
     """
+    cfg = _rule_config.get_rule_config(config)
     rs = rs or load_ruleset()
     if len(team) != 3:
         raise ValueError("训练场是 3v3，需要恰好 3 只精灵")
@@ -138,6 +159,8 @@ def reset(
         player=SideState(name="player", pets=[_make_pet(rs, p, i, 1) for i, p in enumerate(team)]),
         enemy=SideState(name="enemy", pets=[_make_pet(rs, p, i, 1) for i, p in enumerate(enemy)]),
     )
+    # 这一局绑定的规则配置：写进 state，replay / 序列化 / 报告都读得到。
+    state.ruleset_config_id = cfg.ruleset_config_id
     # 配招：显式给就用，否则用规范配招
     for side, ids in ((state.player, team), (state.enemy, enemy)):
         side.loadouts = {}
@@ -145,10 +168,17 @@ def reset(
             chosen = tuple(loadouts[pid]) if (loadouts and pid in loadouts) else rs.candidate_moveset(pid)
             side.loadouts[pid] = chosen
 
+    # 入场初始能量来自配置。候选配置里它是 **UNKNOWN**（null）：那时**不许**回落到
+    # legacy 的 2 —— 那是编数据。缺值就 fail closed，并指出待录的 microcase。
+    try:
+        initial_energy = cfg.require_energy_initial()
+    except RuleConfigError as exc:
+        raise fx.UnsupportedEffect("入场初始能量", str(exc)) from exc
+
     for side in (state.player, state.enemy):
         side.items = dict(DEFAULT_ITEM_STOCK)
         side.active = 0
-        side.field_pet.energy = 2        # 假设：入场初始能量 2。数据未定义（MC-007）
+        side.field_pet.energy = initial_energy
         side.field_pet.entered_turn = 1
     # 首发入场：入场类特性（专注力/身经百练）在这里结算
     for side in ("player", "enemy"):
@@ -156,7 +186,7 @@ def reset(
         tr.on_enter(rs, state, side, events)
         for e in events:
             _bump(state, e.pop("kind"), e)
-    state.log.append(f"对局开始。规则集 {rs.ruleset_id}，seed {seed}。")
+    state.log.append(f"对局开始。规则集 {rs.ruleset_id}，规则配置 {cfg.ruleset_config_id}，seed {seed}。")
     return state
 
 
@@ -374,6 +404,10 @@ def step_joint(
     if state.phase == "replace":
         raise ValueError("补位局面请用 step_replace")
 
+    # 本回合按**这一局绑定的**规则配置结算（reset 时写进 state）。空串 = 老状态 /
+    # 手工构造的状态，此时回落到当前生效配置（默认仍是 legacy）。
+    cfg = _rule_config.get_rule_config(state.ruleset_config_id or None)
+
     for side, action in (("player", player_action), ("enemy", enemy_action)):
         if action not in legal_actions(state, rs, side):
             raise ValueError(f"{side} 的行动不合法：{action.label(rs)}")
@@ -420,9 +454,9 @@ def step_joint(
                 setattr(p, "_defense_reduction", 0.0)
 
     for side, action in order:
-        _execute(state, rs, side, action)
+        _execute(state, rs, side, action, cfg)
 
-    _end_of_turn(state, rs)
+    _end_of_turn(state, rs, cfg)
 
     state.history.append({
         "turn": state.turn,
@@ -468,7 +502,10 @@ def _both_side_alive(state: GameState) -> bool:
     return bool(state.player.living()) and bool(state.enemy.living())
 
 
-def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
+def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
+             cfg: Optional[RuleConfig] = None) -> None:
+    # `cfg` 省略 = 手工/外部调用点：回落到当前生效配置（默认 legacy）。
+    cfg = cfg or _rule_config.get_rule_config()
     me = getattr(state, side)
     foe_side = "enemy" if side == "player" else "player"
     foe = getattr(state, foe_side)
@@ -502,7 +539,7 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         return
 
     if action.kind == ACTION_ITEM:
-        _use_item(state, rs, side, action)
+        _use_item(state, rs, side, action, cfg)
         return
 
     skill = rs.skill(action.skill_id)
@@ -542,7 +579,7 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         parsed_def = parse.parse_skill(skill)
         if parsed_def.effects or parsed_def.unparsed:
             if succeeded:
-                applied = _apply_effect_batch(state, rs, side, skill, parsed_def)
+                applied = _apply_effect_batch(state, rs, side, skill, parsed_def, cfg)
                 state.log.append(
                     f"应对成功，{parsed_def.skill_name}的应对效果结算 {applied} 条。"
                 )
@@ -561,7 +598,7 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         return
 
     if skill.is_status:
-        applied = _apply_status_effects(state, rs, side, skill)
+        applied = _apply_status_effects(state, rs, side, skill, cfg)
         if not applied:
             # 解析不出来就 fail closed：登记，不假装生效
             _note_unsupported(state, f"状态技能「{skill.name}」", skill.desc or "", skill.skill_id)
@@ -634,7 +671,7 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
     # 要么真的生效，要么如实登记。禁止把 unsupported 效果近似成普通伤害。
     parsed_atk = parse.parse_skill(skill)
     if parsed_atk.effects or parsed_atk.unparsed:
-        applied = _apply_effect_batch(state, rs, side, skill, parsed_atk)
+        applied = _apply_effect_batch(state, rs, side, skill, parsed_atk, cfg)
         if applied:
             state.log.append(f"{skill.name}的附带效果结算 {applied} 条。")
         # 解析不出来的、以及描述里没被任何解析结果认领的机制词，全部登记。
@@ -645,7 +682,9 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         )
 
 
-def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bool:
+def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill,
+                          cfg: Optional[RuleConfig] = None) -> bool:
+    cfg = cfg or _rule_config.get_rule_config()
     """应用一个状态技能被解析出来的效果。返回是否**至少应用了一条**。
 
     纪律：只有描述能被 `parse.py` 机械读出时才应用；解析出未覆盖机制时返回 False，
@@ -656,7 +695,7 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
     if not parsed.effects or parsed.unparsed:
         return False
 
-    applied = _apply_effect_batch(state, rs, side, skill, parsed)
+    applied = _apply_effect_batch(state, rs, side, skill, parsed, cfg)
 
     if applied:
         me = getattr(state, side)
@@ -674,7 +713,8 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill) -> bo
 
 
 def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
-                        parsed) -> int:
+                        parsed, cfg: Optional[RuleConfig] = None) -> int:
+    cfg = cfg or _rule_config.get_rule_config()
     """把 `parse.parse_skill` 解析出的一批效果应用到状态上，返回**应用成功的条数**。
 
     抽出来的理由（第 47 轮批 0）：攻击分支与防御分支以前完全不调用这段逻辑，
@@ -760,7 +800,7 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
         elif eff.kind == "self_energy":
             amount = int(v["amount"])
             before = pet.energy
-            pet.energy = min(ENERGY_MAX, pet.energy + amount)
+            pet.energy = min(cfg.energy_max, pet.energy + amount)
             gained = pet.energy - before
             applied += 1
             # 时序未核验：能量上限 / 回合末回能 / 技能自带回能的先后顺序是 MC-007。
@@ -781,7 +821,7 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
             amount = int(v["amount"])
             taken = min(amount, foe.field_pet.energy)
             foe.field_pet.energy -= taken
-            pet.energy = min(ENERGY_MAX, pet.energy + taken)
+            pet.energy = min(cfg.energy_max, pet.energy + taken)
             applied += 1
             _bump(state, "drain_energy", {"side": side, "taken": taken})
         elif eff.kind == "escape":
@@ -855,7 +895,9 @@ def _opponent_action_of(state: GameState, side: str) -> Optional[Action]:
     return getattr(state, "_pending_" + ("enemy" if side == "player" else "player"), None)
 
 
-def _use_item(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
+def _use_item(state: GameState, rs: Ruleset, side: str, action: Action,
+              cfg: Optional[RuleConfig] = None) -> None:
+    cfg = cfg or _rule_config.get_rule_config()
     me = getattr(state, side)
     item_id = action.item_id or ""
     if me.items.get(item_id, 0) <= 0:
@@ -870,7 +912,7 @@ def _use_item(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         _bump(state, "item", {"side": side, "item": item_id, "healed": healed})
     elif kind == "energy":
         before = target.energy
-        target.energy = min(ENERGY_MAX, target.energy + amount)
+        target.energy = min(cfg.energy_max, target.energy + amount)
         _bump(state, "item", {"side": side, "item": item_id, "energy_gained": target.energy - before})
     elif kind == "cleanse":
         cleared = list(target.statuses)
@@ -880,7 +922,9 @@ def _use_item(state: GameState, rs: Ruleset, side: str, action: Action) -> None:
         _note_unsupported(state, f"道具「{item_id}」", "未实现", item_id)
 
 
-def _end_of_turn(state: GameState, rs: Ruleset) -> None:
+def _end_of_turn(state: GameState, rs: Ruleset,
+                 cfg: Optional[RuleConfig] = None) -> None:
+    cfg = cfg or _rule_config.get_rule_config()
     """回合末结算。
 
     依据：术语 1001/1002/1008 都写「回合结束时」造成百分比伤害；
@@ -917,7 +961,7 @@ def _end_of_turn(state: GameState, rs: Ruleset) -> None:
 
         if pet.alive:
             before = pet.energy
-            pet.energy = min(ENERGY_MAX, pet.energy + ENERGY_REGEN_PER_TURN)
+            pet.energy = min(cfg.energy_max, pet.energy + cfg.energy_regen_per_turn)
             if pet.energy != before:
                 _bump(state, "energy_regen", {"side": side.name, "energy": pet.energy})
 
@@ -985,10 +1029,20 @@ def deserialize(d: Dict[str, Any], rs: Optional[Ruleset] = None) -> GameState:
             f"规则集不匹配：记录是 {d.get('ruleset_id')}，当前是 {rs.ruleset_id}",
             "不同规则集的状态不可混用",
         )
+    # 规则配置也必须是**同一份**：否则存档会在不知不觉间换掉能量上限这类基线。
+    # 老存档没有这个字段（旧引擎没有它），此时按「未绑定」处理，由调用方决定。
+    recorded = d.get("ruleset_config_id", "")
+    current = _rule_config.default_ruleset_config_id()
+    if recorded and recorded != current:
+        raise fx.UnsupportedEffect(
+            f"规则配置不匹配：记录是 {recorded}，当前是 {current}",
+            "不同规则配置的状态不可混用（RC-101）；要重放旧记录请显式选择它当时的那份配置",
+        )
     return GameState.from_dict(d)
 
 
-def replay(record: Dict[str, Any], rs: Optional[Ruleset] = None) -> GameState:
+def replay(record: Dict[str, Any], rs: Optional[Ruleset] = None,
+           config: Optional[Any] = None) -> GameState:
     """按记录重放一局，返回最终状态。
 
     记录格式::
@@ -1008,8 +1062,11 @@ def replay(record: Dict[str, Any], rs: Optional[Ruleset] = None) -> GameState:
        「行动不合法」。这个 bug 是我写「状态技能增减能否重放」的测试时撞出来的。
     """
     rs = rs or load_ruleset()
+    # 规则配置可以来自调用方，也可以来自记录本身（记录里带了就用记录里那份：
+    # 旧 replay 因此**绑死**在它当时的那份规则上，不会被当前默认配置悄悄改写）。
+    chosen = config or record.get("ruleset_config_id") or None
     state = reset(record["team"], record.get("enemy_team"), seed=record["seed"], rs=rs,
-                  loadouts=record.get("loadouts"))
+                  loadouts=record.get("loadouts"), config=chosen)
     for pair in record["actions"]:
         if state.result:
             break
@@ -1214,7 +1271,17 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
         out.update(pet_public(panel.get("pet_id")))
         return out
 
+    # 能量上限：**从当前生效的规则配置里读**，不在这里写死。
+    #
+    # 为什么要放进公开视图：教练层（`src/coach/coach-advice.js` 的「对面能量快满了」）
+    # 需要知道「离满还差多少」才有话可说。它以前自己抄了一份 `ENERGY_MAX = 6`，
+    # 于是规则一改就会漂；现在它只认这个字段，**读不到就沉默**（不猜默认值）。
+    # 这属于「屏幕上看得见的信息」：手游里能量条的上限就画在血条旁边。
+    cfg = _rule_config.get_rule_config(state.ruleset_config_id or None)
+    energy_max = cfg.energy_max
+
     self_panel = dict(view["self"])
+    self_panel["energy_max"] = energy_max
     self_panel["pets"] = [decorate(p) for p in view["self"]["pets"]]
     # 己方当前可用的技能（配招里那一套），UI 的技能面板直接用它
     self_panel["skills"] = [
@@ -1229,6 +1296,8 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     }
 
     foe_panel = dict(view["opponent"])
+    # 对手的能量上限是**规则常量**（不是隐藏信息）：双方用同一份规则配置。
+    foe_panel["energy_max"] = energy_max
     foe_panel["field"] = decorate(view["opponent"]["field"]) if view["opponent"]["field"] else None
     # 后备：**只给位次与是否倒下**，连 `pet_id` 都不给。
     #

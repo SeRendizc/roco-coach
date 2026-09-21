@@ -14,6 +14,7 @@ import { readFileSync, existsSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { parseLuaTable, luaArrayToArray } from './lua-safe-parse.mjs';
+import { engineEnergyMax } from './ruleset-energy.mjs';
 
 const ROOT = new URL('../../', import.meta.url).pathname;
 const RAW = ROOT + 'data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/';
@@ -26,7 +27,8 @@ const ROLE_QUOTA = { attacker: 11, tank: 9, recovery: 11, control: 7, support: 6
 const SPEED_TIER_QUOTA = { '<=50': 5, '51-70': 9, '71-90': 12, '91-110': 11, '>=111': 7 };
 const HARD_MECHS = ['charge', 'mark', 'multi_hit', 'position', 'random', 'escape', 'respond', 'priority'];
 const TYPES_ALL = ['普通系', '草系', '火系', '水系', '电系', '冰系', '武系', '毒系', '地系', '翼系', '虫系', '幽系', '龙系', '恶系', '光系', '萌系', '幻系', '机械系'];
-const ENGINE_ENERGY_MAX = 6;
+// 引擎层面的能耗上限：只从规则配置读（RC-101 的唯一事实源），不在这里抄一份。
+const ENGINE_ENERGY_MAX = engineEnergyMax();
 const EXPECTED_TRAIT_COUNTS = { FULL: 6, PARTIAL: 2, REFUSED: 4 };
 
 const MECHANISM_PATTERNS = [

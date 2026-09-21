@@ -20,6 +20,7 @@
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { parseLuaTable, luaArrayToArray } from './lua-safe-parse.mjs';
+import { DEFAULT_RULESET_CONFIG_ID, readRulesetConfig } from './ruleset-energy.mjs';
 
 const ROOT = new URL('../../', import.meta.url).pathname;
 const RAW = ROOT + 'data/roco/raw/extracted/rocom-wiki-data/wiki_modules/Pets/data/';
@@ -37,14 +38,19 @@ const sha256 = (p) => createHash('sha256').update(readFileSync(p)).digest('hex')
 
 // ── 选择规则常量（**全部写死**，改这里就等于改口径）──────────────────────
 const POOL_MIN = 40;              // 可学习技能数下限（622 只的 p10 是 45，留余量）
-// 能耗上限取自引擎**假设**：roco/src/roco_env/env.py:45 `ENERGY_MAX = 6`，
-// 且 env.py:184 `if skill.energy > pet.energy: continue` 让能耗 >6 的技能**永远不可用**
-// （能量被 min(ENERGY_MAX, ...) 夹住）。数据里有 21 条技能能耗是 7/8/10/30，
+// 能耗上限取自**规则配置**（RC-101 的唯一事实源）：默认 `legacy_sim_v1` 是 6
+// （与当前引擎逐位相同；该值在配置里自注为 ENGINE_HYPOTHESIS）。
+// 引擎的合法性检查 `if skill.energy > pet.energy: continue` 让能耗 > 上限的技能
+// **永远不可用**（能量被 `min(energy_max, …)` 夹住）。数据里有 21 条技能能耗是 7/8/10/30，
 // 所以配招里**排除**它们，并把排除数如实报出来——不是把它们当 0 能耗。
-const ENGINE_ENERGY_MAX = 6;
+//
+// 候选配置 `mobile_s4_candidate_v2` 的上限是 10：那份配置**未经验证**，本脚本默认不用它
+// （要试就显式传 id），否则会生成一批绑定候选规则的名单而没人看得出来。
+const RULE_CONFIG = readRulesetConfig(DEFAULT_RULESET_CONFIG_ID);
+const energy_max = RULE_CONFIG.energy.max;
 const usable = (sid) => {
   const s = skills[sid];
-  return !!s && s.category !== '特性' && s.energy <= ENGINE_ENERGY_MAX;
+  return !!s && s.category !== '特性' && s.energy <= energy_max;
 };
 // 配额是**下限**，合计刻意小于 48（留下若干自由位给机制覆盖与属性均衡）。
 // 为什么不留满：角色与速度档是同一批 48 只的两个正交切分，两轴同时取满会变成
@@ -416,7 +422,7 @@ const out = {
     hard_mechanics: HARD_MECHS,
     role_rules: ROLE_RULES.map((x) => ({ role: x.role, rule: x.rule })),
     greedy_priority: 'lexicographic: [newTypes, roleQuotaGain, tierQuotaGain, newHardMechs, newMechs, pool_size, stat_total]',
-    moveset_rule: `候选必须 energy<=${ENGINE_ENERGY_MAX}（env.py:45/184 的引擎假设）且 category!=特性；free_attack(攻击/能耗0/有静态威力/威力降序) → reactive_defense(防御且描述含「应对」) → main_attack(攻击且有静态威力/未选) → mechanism_support(最大化本只未覆盖机制数，native 优先)`,
+    moveset_rule: `候选必须 energy<=${energy_max}（规则配置 data/roco/rulesets/legacy-sim-v1.json 的 energy.max，ENGINE_HYPOTHESIS）且 category!=特性；free_attack(攻击/能耗0/有静态威力/威力降序) → reactive_defense(防御且描述含「应对」) → main_attack(攻击且有静态威力/未选) → mechanism_support(最大化本只未覆盖机制数，native 优先)`,
     mechanism_patterns: MECHANISM_PATTERNS.map((p) => ({ key: p.key, label: p.label, re: String(p.re) })),
     repairs: REPAIR_REASONS,
     not_claimed: '本名单只声明「数据齐全 + 技能可学 + 机制已标注」；不声明任何技能可被引擎正确结算——那由 reports/roco/coverage/roster-48-support.json 单独判定。',
@@ -432,10 +438,10 @@ const out = {
     skill_categories: categoryHist,
     skill_energy: energyHist,
     all_hard_mechanics_present: HARD_MECHS.every((m) => unionMechs.includes(m)),
-    engine_energy_max: ENGINE_ENERGY_MAX,
+    engine_energy_max: energy_max,
     skills_excluded_energy_over_max: {
-      total_in_skills_json: Object.values(skills).filter((s) => s.energy > ENGINE_ENERGY_MAX).length,
-      among_48_learnable_pools: [...new Set(chosen.flatMap((r) => r.pool))].filter((sid) => skills[sid].energy > ENGINE_ENERGY_MAX).length,
+      total_in_skills_json: Object.values(skills).filter((s) => s.energy > energy_max).length,
+      among_48_learnable_pools: [...new Set(chosen.flatMap((r) => r.pool))].filter((sid) => skills[sid].energy > energy_max).length,
     },
     must_include_all_present: MUST_INCLUDE.every((p) => chosenIds.has(p)),
   },

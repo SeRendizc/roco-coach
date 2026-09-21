@@ -1,0 +1,144 @@
+{
+  "schema": "roco-ruleset-config/v1",
+  "ruleset_config_id": "mobile_s4_candidate_v2",
+  "game": "roco_world_mobile",
+  "source_id": "handoff-10-sources-and-confidence-2026-09-21",
+  "derived_from_ledger_sha256": "aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903",
+  "derived_from_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
+  "status": "CANDIDATE_NOT_FOR_DEFAULT",
+  "promotion_policy": "BLOCKED_UNTIL_MICROCASE",
+  "battle_mode": {
+    "id": "pvp-standard-six-pet",
+    "label": "标准 PVP 六宠阵容工坊（候选模式）",
+    "registry_status": "CANDIDATE",
+    "registry_confidence": "CROSS_SOURCE_SUPPORTED",
+    "team_size": {
+      "value": 6,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "暂时取登记表里的模式参数；本配置只定义能量与时序，不含魔力系统（那是 RC-1xx 的另一件事）"
+    },
+    "active_count": {
+      "value": 1,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "同上：模式参数，不是能量规则；引用留空以免借能量台账条目给模式背书"
+    }
+  },
+  "notes": [
+    "候选规则：只在显式选择时生效（ROCO_RULE_CONFIG / 显式参数）。",
+    "**候选未被实机 microcase 支持前不得作为默认。**",
+    "每个字段的 confidence 都逐字来自台账；没有台账支撑的值一律 null，并带 reason 指向待录 microcase。"
+  ],
+  "is_default": false,
+  "requires_microcase_before_default": true,
+  "energy": {
+    "max": {
+      "value": 10,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-ENERGY-MAX",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E01",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS"
+    },
+    "regen": {
+      "per_turn": {
+        "value": 0,
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": "EV-ENERGY-ENDTURN-REGEN",
+        "evidence_role": "supports",
+        "microcase_id": "MC-E03",
+        "microcase_status": "NOT_RECORDED",
+        "value_status": "CANDIDATE_HYPOTHESIS",
+        "reason": "台账证据倾向「默认无自然回能」（ENGINE_HYPOTHESIS 被多源反驳）；但它仍是假设，不是实机结论，所以值为 0 且不做任何 promotion"
+      },
+      "applies_to": "field_pet_only",
+      "note": "0 = 默认不发生；回能只能来自技能 / 特性 / 道具，等 MC-E03。"
+    },
+    "initial": {
+      "value": null,
+      "confidence": "UNKNOWN",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "10 号文档 §7 原文：「首次入场具体能量：需实机/更强一手证据」。按 RC-101 要求留 unknown，不填一个看起来合理的数；实机判据见 MC-E04。"
+    },
+    "charge": {
+      "value": 5,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-ENERGY-CHARGE",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E02",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "聚能是主动行动、回复 5；是否可突破上限、无合法技能时是否自动聚能 —— 台账明说未定，故不在本配置里断言"
+    }
+  },
+  "turn_order": {
+    "end_turn": {
+      "order": {
+        "value": [
+          "status_tick",
+          "regen"
+        ],
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "候选沿用 legacy 的组内顺序只是「有界占位」，台账与 10 号文档都没确认它；引用留空，不许借 EV-TURN-ORDER-STRICT（那条讲的是应对/先手/换人/速度的总序）"
+      },
+      "known_order": {
+        "value": [
+          "respond",
+          "switch",
+          "priority",
+          "speed"
+        ],
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": "EV-TURN-ORDER-STRICT",
+        "evidence_role": "supports",
+        "microcase_id": "MC-E05",
+        "microcase_status": "NOT_RECORDED",
+        "value_status": "CANDIDATE_HYPOTHESIS",
+        "reason": "社区实测常概括「应对 > 换宠 > 先手 > 速度」，但 10 号文档 §8 明确严格总排序本轮没有同等强度官方文字"
+      },
+      "speed_tie": {
+        "value": null,
+        "confidence": "UNKNOWN",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "10 号文档 §8：speed tie = UNKNOWN，判据见 MC-E05"
+      }
+    }
+  },
+  "unknowns": [
+    {
+      "path": "energy.initial",
+      "value": null,
+      "reason": "首次入场能量需实机（MC-E04）",
+      "microcase_id": "MC-E04"
+    },
+    {
+      "path": "turn_order.end_turn.speed_tie",
+      "value": null,
+      "reason": "同速平手判据 UNKNOWN",
+      "microcase_id": "MC-E05"
+    },
+    {
+      "path": "turn_order.end_turn.order",
+      "value": [
+        "status_tick",
+        "regen"
+      ],
+      "reason": "组内顺序未核验，仅为有界占位",
+      "microcase_id": "MC-E03"
+    },
+    {
+      "path": "energy.charge.breaks_cap",
+      "value": null,
+      "reason": "聚能是否可突破上限未定（MC-E02）",
+      "microcase_id": "MC-E02"
+    }
+  ]
+}

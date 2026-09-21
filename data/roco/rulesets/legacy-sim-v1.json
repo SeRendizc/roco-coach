@@ -1,0 +1,84 @@
+{
+  "schema": "roco-ruleset-config/v1",
+  "ruleset_config_id": "legacy_sim_v1",
+  "game": "roco_world_mobile",
+  "source_id": "handoff-10-sources-and-confidence-2026-09-21",
+  "derived_from_ledger_sha256": "aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903",
+  "derived_from_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
+  "status": "LEGACY_BASELINE_BIT_EXACT",
+  "promotion_policy": "FROZEN_BIT_EXACT_BASELINE",
+  "battle_mode": {
+    "id": "demo-training-3v3",
+    "label": "当前 Demo 练习局（迁移夹具）",
+    "registry_status": "LEGACY_FIXTURE",
+    "registry_confidence": "ENGINE_HYPOTHESIS",
+    "team_size": {
+      "value": 3,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "暂时取登记表里的模式参数；本配置只定义能量与时序，不含魔力系统（那是 RC-1xx 的另一件事）"
+    },
+    "active_count": {
+      "value": 1,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "同上：模式参数，不是能量规则；引用留空以免借能量台账条目给模式背书"
+    }
+  },
+  "notes": [
+    "这是**当前引擎行为**的逐位快照：energy.max=6 / energy.regen.per_turn=1 / energy.initial=2，",
+    "回合末顺序仍是「先状态伤害、再无特性者回能」。它的价值只有一个：让默认路径一个比特都不变，",
+    "从而让所有既有测试、既有 replay、既有产物继续成立。",
+    "**不要**把它当成游戏事实：它的三个能量值在 env.py 里都自注为「假设」（见台账 ENGINE_HYPOTHESIS）。"
+  ],
+  "is_default": true,
+  "energy": {
+    "max": {
+      "value": 6,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": "EV-ENERGY-MAX",
+      "evidence_role": "refutes",
+      "reason": "legacy 基线值：当前引擎的 ENERGY_MAX=6（env.py 自注为假设）。台账 EV-ENERGY-MAX 的结论是「打算按 10 施工」，即该条目对 6 是**反驳**而不是支持 —— evidence_role=refutes 是如实登记，不能拿它给 6 背书"
+    },
+    "regen": {
+      "per_turn": {
+        "value": 1,
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": "EV-ENERGY-ENDTURN-REGEN",
+        "evidence_role": "refutes",
+        "reason": "legacy 基线值：台账把「默认回合末 +1」判为 ENGINE_HYPOTHESIS 且被多源材料反驳；这条证据同样只说明「6/+1 是引擎假设」，不是它的支持者"
+      },
+      "applies_to": "field_pet_only"
+    },
+    "initial": {
+      "value": 2,
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-ENERGY-INITIAL",
+      "evidence_role": "refutes",
+      "reason": "legacy 基线的入场初始能量；台账注记「只当占位值，不写进任何对外文案」，并明确它需要 MC-E04 实机证据 —— 同样按 refutes 登记"
+    },
+    "charge": {
+      "value": null,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "legacy 引擎没有「聚能」这个动作（能量不足即无合法技能），故为 null —— 这是**未知/不适用**，不是「聚能 = 0」；台账 EV-ENERGY-CHARGE 讲的是 candidate 的 +5，不能拿它给 legacy 的 null 背书"
+    }
+  },
+  "turn_order": {
+    "end_turn": {
+      "order": {
+        "value": [
+          "status_tick",
+          "regen"
+        ],
+        "confidence": "ENGINE_HYPOTHESIS",
+        "evidence_id": null,
+        "evidence_role": null,
+        "reason": "台账没有登记「回合末组内顺序」这一条；10 号文档 §7 只说顺序未被一手证据确认。这里如实写成 ENGINE_HYPOTHESIS + reason，引用留空，**不**借别的条目凑引用"
+      }
+    }
+  }
+}

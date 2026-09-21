@@ -514,6 +514,225 @@ test('结构契约：入口模块图里每个相对 import 都解析到真实文
  * 也就是说这条守卫的判定结果取决于「文件提交没提交」，而不是「代码对不对」。
  * `--exclude-standard` 仍然尊重 `.gitignore`，所以数据快照里那些第三方 .js 不会被拖进来。
  */
+/**
+ * RC-101：能量上限 / 回能 / 初始能量这三类**数值**只许出现在规则配置文件里。
+ *
+ * 背景：这三个值原先在仓库里至少有四份（`env.py` 两行、`coach-advice.js` 一份、
+ * 两个脚本各一份、页面文案一份）。规则 candidate 一变，没有一处说得清谁跟着变，
+ * 而「谁跟着变」恰恰是规则引擎最贵的一类缺陷。RC-101 把事实源收敛到
+ * `data/roco/rulesets/*.json`，这条契约就是那次收敛的守卫。
+ *
+ * 扫描范围（刻意与产品的可见文案分开）：
+ *   · **管**：`src/**`、`roco/src/**`、`scripts/**` 里 `.js/.mjs/.py` 的**代码**；
+ *   · **不管**：`src/client/**` 与 `docs/**` 里给人看的句子（「6 能量上限」这类文案），
+ *     以及测试文件（测试需要写死期望值才能测出回归）。UI 文案不在这条判据里，
+ *     它的处理方式是在 RC-101 影响报告里登记成受影响产物，而不是让这条守卫顺手改文案。
+ *
+ * 只认**赋值给能量标识符**的字面量，不认 `energy: 6` 这种局面输入、也不认字符串里的
+ * 示例文本：判据要的是「常量住在哪里」，不是「数字 6 不准出现」——后者会误伤一大片。
+ */
+const ENERGY_LITERAL_SCOPES = ['src', 'roco/src', 'scripts'];
+const ENERGY_CODE_EXT = ['.js', '.mjs', '.py'];
+
+/** 规则值的宿主目录：**只有**这里可以有能量字面量。 */
+const RULESET_CONFIG_DIR = 'data/roco/rulesets/';
+
+/**
+ * 一条「能量值被写死」的判据。
+ *
+ * 覆盖三类标识符：
+ *   ① 上限：`ENERGY_MAX` / `MAX_ENERGY` / `ENERGY_CAP` / `energy_max` / `energyLimit` …
+ *   ② 回能：`ENERGY_REGEN(_PER_TURN)` / `energy_regen` …（`per_turn` 必须与 energy 同现）
+ *   ③ 初始：`ENERGY_INITIAL` / `INITIAL_ENERGY` / `energy_initial` / `initial_energy` …
+ * 右侧必须是**数字字面量**；`= RULE_CONFIG.energy.max` 这种「从配置取」不算。
+ */
+const ENERGY_LITERAL_PATTERNS = [
+  // 前缀词允许下划线（`ENGINE_ENERGY_MAX` / `MOTOR_ENERGY_MAX` 都要抓 —— 它们同样是
+  // 「能量上限的第二份事实」），但不允许点号（`cfg.ENERGY_MAX` 是**取值**，不是定义）。
+  /(?:^|[^A-Za-z0-9.])energy_?max\s*[:=]\s*[0-9]/i,
+  /(?:^|[^A-Za-z0-9.])energy_?max\s*[:=]\s*[0-9]/i,
+  /(?:^|[^A-Za-z0-9.])(?:energy_?cap|max_?energy|energy_?limit)\s*[:=]\s*[0-9]/i,
+  /(?:^|[^A-Za-z0-9.])energy_?regen(?:eration)?(?:_per_turn)?\s*[:=]\s*[0-9]/i,
+  /(?:^|[^A-Za-z0-9.])energy_?initial\s*[:=]\s*[0-9]/i,
+  /(?:^|[^A-Za-z0-9.])initial_?energy\s*[:=]\s*[0-9]/i,
+  /(?:^|[^A-Za-z0-9.])energy_?per_?turn\s*[:=]\s*[0-9]/i,
+  // 规则表里的对象字面量写法：`energy:{start:5,max:6,perTurn:1}`
+  // （`src/game/engine.js` 的 `RULES` 就是这种形状；它是**规则表本身**，
+  //  属于规则表文件的位置，所以同样要被这条判据看见）
+  /energy[a-z_]*\s*:\s*\{[^}]{0,80}?(?:max|cap)\s*:\s*[0-9]/i,
+];
+
+/** 规则配置文件里的能量叶子（键名 + 数字），用来证明这条判据不是空的。 */
+const ENERGY_CONFIG_LEAF = /"(?:max|per_turn|initial|charge)"\s*:\s*\{\s*"value"\s*:\s*-?[0-9]+/gs;
+/** 递归列出某目录下的代码文件（跳过 node_modules / __pycache__）。 */
+function energyScanFiles(dir) {
+  const out = [];
+  const walk = (rel) => {
+    for (const entry of readdirSync(join(ROOT, rel), { withFileTypes: true })) {
+      if (entry.name === 'node_modules' || entry.name === '__pycache__') continue;
+      const next = `${rel}/${entry.name}`;
+      if (entry.isDirectory()) { walk(next); continue; }
+      if (ENERGY_CODE_EXT.some((ext) => entry.name.endsWith(ext))) out.push(next);
+    }
+  };
+  if (existsSync(join(ROOT, dir))) walk(dir);
+  return out;
+}
+
+/**
+ * 把注释与字符串**内容**抹掉（保留换行数与行结构）。
+ *
+ * 为什么必须抹：`env.py` 里那句解释性注释「以前这三个值写死在本文件里
+ * （`ENERGY_MAX = 6` …）」、以及旗舰基线脚本里那份**反证用的示例文本**，
+ * 都含有这些字面量。不抹掉的话这条判据会红在文档上，而文档红掉之后，
+ * 下一个人只会把注释删掉让门禁变绿——真正的守卫就废了。
+ *
+ * 覆盖 `//`、`/* *\/`、`#`、三引号、`'…'`、`"…"`、反引号。
+ * 它是启发式（零依赖就没法完全判准），所以判据同时配了「反向控制必须仍会红」
+ * 与「规则配置里必须仍能扫到这些叶子」两条非空证明。
+ */
+function stripEnergyCommentsAndStrings(source) {
+  const out = [];
+  let i = 0;
+  // 抹掉内容但**逐字符保留换行**：行号必须与原文件一一对应，
+  // 否则「豁免标记写在语句正上方」这条判定会错位（第 66 轮第一次写这条判据时踩过：
+  // 块注释里的换行被吃掉，整个文件的行号往前移了几十行，标记再也对不上号）。
+  const blank = (text) => text.replace(/[^\n]/g, ' ');
+  while (i < source.length) {
+    const c = source[i];
+    if (c === '\\' && (source[i + 1] === '"' || source[i + 1] === "'")) { out.push(' '); i += 2; continue; }
+    if (c === '#' && !(source[i + 1] === '{')) {                  // Python / shell 行注释
+      const start = i;
+      while (i < source.length && source[i] !== '\n') i += 1;
+      out.push(blank(source.slice(start, i)));
+      continue;
+    }
+    if (c === '/' && source[i + 1] === '/') {
+      const start = i;
+      while (i < source.length && source[i] !== '\n') i += 1;
+      out.push(blank(source.slice(start, i)));
+      continue;
+    }
+    if (c === '/' && source[i + 1] === '*') {
+      const start = i;
+      i += 2;
+      while (i < source.length && !(source[i] === '*' && source[i + 1] === '/')) i += 1;
+      i = Math.min(source.length, i + 2);
+      out.push(blank(source.slice(start, i)));
+      continue;
+    }
+    if ((source.startsWith('"""', i) || source.startsWith("'''", i))) {
+      const quote = source.slice(i, i + 3);
+      const start = i;
+      i += 3;
+      while (i < source.length && !source.startsWith(quote, i)) i += 1;
+      i = Math.min(source.length, i + 3);
+      out.push(blank(source.slice(start, i)));
+      continue;
+    }
+    if (c === '"' || c === "'" || c === '`') {
+      const quote = c;
+      const start = i;
+      i += 1;
+      while (i < source.length && source[i] !== quote) {
+        if (source[i] === '\\') i += 1;
+        i += 1;
+      }
+      i = Math.min(source.length, i + 1);
+      out.push(blank(source.slice(start, i)));
+      continue;
+    }
+    out.push(c);
+    i += 1;
+  }
+  return out.join('');
+}
+
+/**
+ * 扫出「把能量值写死在代码里」的位置。返回 `文件:行: 命中片段`。
+ *
+ * 抽成纯函数（输入是 `{rel, source}` 列表）是为了让反证能直接喂一份内存里的坏文本，
+ * 而不是抄一份实现——抄一份就会漂一份。
+ *
+ * 两种**显式豁免**：
+ *   · `data/roco/rulesets/**` —— 这里就是这些字面量该住的地方；
+ *   · 带 `energy-cap-scanner-allow` 标记的行 —— 给「验证这些值本身」的判据用
+ *     （例如旗舰基线脚本里那份冻结基线）。豁免必须写在**代码里且写明理由**，
+ *     不允许在测试里维护一张黑名单文件。
+ */
+function scanEnergyLiterals(sources) {
+  const offenders = [];
+  for (const { rel, source } of sources) {
+    if (rel.startsWith(RULESET_CONFIG_DIR)) continue;
+    const rawLines = source.split('\n');
+    const codeLines = stripEnergyCommentsAndStrings(source).split('\n');
+    codeLines.forEach((line, index) => {
+      // 豁免标记按**注释里那一行**判定：标记写在语句正上方（`// energy-cap-scanner-allow: 理由`）。
+      // 注意不能在剥注释之后判 —— 那时标记本身已经被抹掉了（第 66 轮这条判据自己踩过）。
+      const allowance = `${rawLines[index - 1] ?? ''}\n${line}`;
+      if (allowance.includes('energy-cap-scanner-allow')) return;
+      const hit = ENERGY_LITERAL_PATTERNS.find((re) => re.test(line));
+      if (hit) offenders.push(`${rel}:${index + 1}: ${line.trim().slice(0, 120)}`);
+    });
+  }
+  return offenders;
+}
+
+function energyLiteralScanSources() {
+  return ENERGY_LITERAL_SCOPES.flatMap((dir) => energyScanFiles(dir))
+    .map((rel) => ({ rel, source: readFileSync(join(ROOT, rel), 'utf8') }));
+}
+
+test('结构契约：能量上限/回能/初始能量的字面量只许住在规则配置里（RC-101）', () => {
+  const sources = energyLiteralScanSources();
+  assert.ok(sources.length > 50, `扫描集合太小（${sources.length} 个文件）——选文件的逻辑是不是坏了？`);
+  const offenders = scanEnergyLiterals(sources);
+  assert.deepEqual(offenders, [],
+    '这些位置把能量值写死在代码里了；唯一事实源是 data/roco/rulesets/*.json：\n' + offenders.join('\n'));
+  // 非空证明：判据必须真的能在配置里找到这些值，否则上面的「零命中」可能只是因为正则从不匹配。
+  const configHits = [];
+  for (const rel of ['data/roco/rulesets/legacy-sim-v1.json',
+                     'data/roco/rulesets/mobile-s4-candidate-v2.json']) {
+    const found = readFileSync(join(ROOT, rel), 'utf8').match(ENERGY_CONFIG_LEAF) ?? [];
+    configHits.push(...found);
+  }
+  assert.ok(configHits.length >= 6,
+    `规则配置里应当能扫到至少 6 个能量叶子（max/per_turn/initial × 2 份），实际 ${configHits.length}：`
+    + `${JSON.stringify(configHits)}`);
+  // 反向控制①：内存里造一份「别处硬编码 6」的文本，判据必须红
+  const injected = scanEnergyLiterals([
+    { rel: 'roco/src/roco_env/env.py', source: 'ENERGY_MAX = 6              # 假设\n' },
+    { rel: 'src/coach/coach-advice.js', source: 'const ENERGY_MAX = 6;\n' },
+    { rel: 'scripts/roco/build-roster-48.mjs', source: 'const ENGINE_ENERGY_MAX = 6;\n' },
+    { rel: 'src/coach/runtime.js', source: 'energyLimit:6,\n' },
+    { rel: 'src/server/index.js', source: '    const energy_cap = 6;\n' },
+    { rel: 'scripts/roco/x.mjs', source: '  const energy_regen_per_turn = 1;\n' },
+    { rel: 'scripts/roco/y.py', source: '        ENERGY_INITIAL = 2\n' },
+    { rel: 'scripts/roco/z.py', source: '    energy_initial = 2\n' },
+    { rel: 'src/game/engine.js', source: 'energy:{start:5,max:6,perTurn:1},\n' },
+  ]);
+  assert.equal(injected.length, 9,
+    `九处硬编码都必须被抓到，实际只抓到 ${injected.length} 处：${JSON.stringify(injected)}`);
+  // 反向控制①b：**缩进的赋值**同样要被抓到（判据锚在行首空白之后，不是第 0 列）
+  assert.ok(injected.some((row) => row.includes('energy_cap')),
+    '缩进的赋值漏掉了 —— 真实代码里的缩进写法会整片逃过判据');
+  // 反向控制②：规则配置文件本身不该被误判（它就是这些字面量的合法宿主）
+  assert.deepEqual(scanEnergyLiterals([
+    { rel: 'data/roco/rulesets/legacy-sim-v1.json', source: '"max": 6,\n"per_turn": 1,\n"initial": 2\n' },
+  ]), [], '规则配置文件是唯一允许写这些字面量的地方，不许被判红');
+  // 反向控制③：「从配置取」的写法不许被判红（否则这条判据会逼着人把值抄回去）
+  assert.deepEqual(scanEnergyLiterals([
+    { rel: 'roco/src/roco_env/env.py', source: 'ENERGY_MAX: int = _RULE_CONFIG.energy_max\n' },
+    { rel: 'scripts/roco/build-roster-48.mjs', source: 'const ENGINE_ENERGY_MAX = RULE_CONFIG.energy.max;\n' },
+    { rel: 'scripts/roco/verify-coverage-axes.mjs', source: 'const ENGINE_ENERGY_MAX = engineEnergyMax();\n' },
+  ]), [], '从规则配置读值的写法不该被判红');
+  // 反向控制④：局面输入 `energy: 6` / `energy=1` 不属于「常量住在哪里」，不许误伤
+  assert.deepEqual(scanEnergyLiterals([
+    { rel: 'scripts/roco/build-microcases.mjs', source: "side_a: { pet: '音速犬', energy: 6 },\n" },
+    { rel: 'scripts/roco/audit-roster-48.py', source: 'pet = PetState(pet_id=x, slot=0, hp=100, max_hp=100, energy=6)\n' },
+  ]), [], '局面输入里的 energy 数值不是常量定义，不该被这条判据误伤');
+});
+
 function jsFiles() {
   const list = (args) => git(args).split('\n').filter(Boolean);
   return [...new Set([

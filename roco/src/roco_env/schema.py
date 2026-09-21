@@ -226,10 +226,14 @@ class GameState:
     unsupported: List[Dict[str, Any]] = field(default_factory=list)
     # 存档的最小必要信息，便于 replay 从序列化状态继续
     history: List[Dict[str, Any]] = field(default_factory=list)
+    #: 这一局用的**规则配置 id**（RC-101）。空串 = 由调用方在 reset 前没绑定的旧状态。
+    #: 有它，存档/回放才说得清「当时按哪份规则算的」——规则 candidate 切换后这一点是刚需。
+    ruleset_config_id: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "ruleset_id": self.ruleset_id,
+            "ruleset_config_id": self.ruleset_config_id,
             "seed": self.seed,
             "turn": self.turn,
             "phase": self.phase,
@@ -248,6 +252,7 @@ class GameState:
     def from_dict(d: Dict[str, Any]) -> "GameState":
         return GameState(
             ruleset_id=d["ruleset_id"],
+            ruleset_config_id=d.get("ruleset_config_id", ""),
             seed=d["seed"],
             player=SideState.from_dict(d["player"]),
             enemy=SideState.from_dict(d["enemy"]),

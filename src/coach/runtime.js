@@ -1,4 +1,7 @@
 import {TOOL_CONTRACTS,HARD_TOOLS,validToolArgs,executeTool,evidenceMatchId,resolveMentionedActions} from './toolbox.js';
+// 能量上限只从**规则表**读（`src/game/engine.js` 的 `RULES.energy.max`）：
+// 以前这里写死 `energyLimit:6`，与规则表里的上限是两份事实，改一处就会漂。
+import {RULES} from '../game/engine.js';
 import {isLiveMatch} from './policy.js';
 export const MATCH_REVIEW_REQUEST='总结整局：先说这局的走向，再选一个有证据的亮点或值得复盘的选择。没有突出亮点就不硬夸，获胜不必挑错，失利不把单回合评分当必然败因。说清宠物和具体回合，80字以内。';
 import {strategist,searchKnowledge,RULES_VERSION,cards,resolveCitation} from './strategist.js';
@@ -17,7 +20,7 @@ export function buildContext(game,profile,focus,archive=null,stageId='meadow',me
  evidenceRulesVersion:requested?source?.version:game?.version||archive?.current?.version||'unknown',
  requestedTurn:requested?Number(requested[1]):null,
  lastTurn:requested?selected||null:game?.history.filter(x=>x.type==='turn').at(-1)||(!game?archive?.lastTurn:null)||null,
- battle:game?{environment:structuredClone(game.environment||null),energyLimit:6,id:game.id,version:game.version,mode:game.mode,phase:game.phase,result:game.result,turn:game.turn,seed:0,player:structuredClone(game.player),enemy:structuredClone(game.enemy),history:[],log:[],frames:[]}:null};
+ battle:game?{environment:structuredClone(game.environment||null),energyLimit:RULES.energy.max,id:game.id,version:game.version,mode:game.mode,phase:game.phase,result:game.result,turn:game.turn,seed:0,player:structuredClone(game.player),enemy:structuredClone(game.enemy),history:[],log:[],frames:[]}:null};
 }
 export async function runCoach({message,role='auto',context,memory,conversation=[],provider=localProvider}){
  // 路由只认**玩家原话**。

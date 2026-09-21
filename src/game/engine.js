@@ -3,12 +3,16 @@ export const RULES_VERSION='0.6';
 // 结算函数与界面文案都从这里取数。数值只在本对象里写一次：
 // engine.js 的 damage/resolveTurn 直接引用它，rules.js 生成的规则说明与技能数值行也引用它，
 // 因此改这里不会出现「提示写的数字」与「实际结算的数字」不一致。
+// 这一份 `RULES` 是**宠物教练（pet-coach）游戏引擎自己**的规则表：它自身就是单一事实源
+// （`rules.js` 的说明文案与结算都从这里取数），不是「又抄了一份能量常量」。
+// 手游《洛克王国：世界》引擎的能量上限住在 `data/roco/rulesets/*.json`（RC-101），两者是不同的引擎。
 export const RULES={
  typeAdvantage:1.5,typeResist:.75,
  damage:{atkCoefficient:.6,defCoefficient:.4,min:1},
  buff:{perStack:.15,maxStacks:2,turns:3},
  guard:{reduction:.65,energy:2},
  priority:{switch:5,item:4},
+ // energy-cap-scanner-allow: 上面那段话说的「pet-coach 规则表本体」——能量三件套只在这里写一次
  energy:{start:5,max:6,perTurn:1},
  status:{burn:{tick:6,turns:2},poison:{tick:8,turns:3}},
  slow:{turns:2},

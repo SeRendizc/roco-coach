@@ -250,7 +250,9 @@ add({
   title: '能量的回合内结算顺序：消耗、回复、上限与返还',
   priority: 'P1',
   category: 'energy',
-  why_it_matters: '能量是所有技能的成本基准。旧 Demo 是「上限6、每回合+1」，手游上限可见为 6+（能耗最高 5），顺序未知。',
+  why_it_matters: '能量是所有技能的成本基准。当前 Demo 的上限与回能取自定义配置 '
+    + '`data/roco/rulesets/legacy-sim-v1.json`（上限 6、每回合 +1，均为 ENGINE_HYPOTHESIS）；'
+    + '候选配置 `mobile-s4-candidate-v2.json` 是「上限 10、无自然回能」，顺序未知。',
   initial_state: {
     side_a: { pet: '音速犬', energy: 1 },
     side_b: { pet: '寂灭骨龙', energy: 1 },

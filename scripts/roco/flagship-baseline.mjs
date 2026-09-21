@@ -50,7 +50,11 @@ const sha256 = (rel) => {
  */
 export function readEnergyConstants(source) {
   const num = (name) => {
-    const m = new RegExp(`^${name}\\s*=\\s*(-?\\d+(?:\\.\\d+)?)`, 'm').exec(source);
+    // 允许可选类型注解：RC-101 之后 env.py 里那两行是
+    // `ENERGY_MAX: int = _RULE_CONFIG.energy_max`（从配置读，不是字面量）。
+    // 这里仍然只认**数字字面量**；一旦值的来源变成变量，读出来就是 null ——
+    // 「读不到就 null，不许猜」这条纪律保持原样（补默认值会让审计比实际更确定）。
+    const m = new RegExp(`^${name}\\s*(?::\\s*[A-Za-z_][\\w.\\[\\]]*)?\\s*=\\s*(-?\\d+(?:\\.\\d+)?)`, 'm').exec(source);
     return m ? Number(m[1]) : null;
   };
   const initial = (() => {
@@ -64,6 +68,45 @@ export function readEnergyConstants(source) {
     ENERGY_REGEN_PER_TURN: num('ENERGY_REGEN_PER_TURN'),
     initial_energy_from_source: initial,
     source_file: 'roco/src/roco_env/env.py',
+  };
+}
+
+/**
+ * 从**规则配置**（RC-101 的唯一事实源）读能量三件套。
+ *
+ * 为什么基线审计要有这一节：env.py 里的 `ENERGY_MAX` 现在是「配置的视图」，
+ * 光看源码文本已经答不出「默认规则到底是什么」。真正的答案在
+ * `data/roco/rulesets/<默认配置>.json` 里，读不到就 null（同样不补默认值）。
+ */
+export function readRulesetEnergy(configRelPath) {
+  const rel = configRelPath ?? 'data/roco/rulesets/legacy-sim-v1.json';
+  const abs = join(ROOT, rel);
+  if (!existsSync(abs)) return {config_path: rel, ruleset_config_id: null, energy_max: null,
+    energy_regen_per_turn: null, energy_initial: null, is_default: null};
+  let doc;
+  try {
+    doc = JSON.parse(readFileSync(abs, 'utf8'));
+  } catch {
+    return {config_path: rel, ruleset_config_id: null, energy_max: null,
+      energy_regen_per_turn: null, energy_initial: null, is_default: null, parse_error: true};
+  }
+  const leaf = (path) => {
+    const node = path.split('.').reduce((acc, key) => (acc == null ? acc : acc[key]), doc);
+    return node && typeof node === 'object' && 'value' in node ? node.value : null;
+  };
+  return {
+    config_path: rel,
+    ruleset_config_id: doc.ruleset_config_id ?? null,
+    is_default: doc.is_default ?? null,
+    energy_max: leaf('energy.max'),
+    energy_regen_per_turn: leaf('energy.regen.per_turn'),
+    energy_initial: leaf('energy.initial'),
+    confidence: {
+      energy_max: leaf('energy.max') === null ? null
+        : (doc.energy?.max?.confidence ?? null),
+      energy_regen_per_turn: doc.energy?.regen?.per_turn?.confidence ?? null,
+      energy_initial: doc.energy?.initial?.confidence ?? null,
+    },
   };
 }
 
@@ -156,8 +199,11 @@ export function buildBaseline() {
     rule_baseline: {
       ruleset_id: 'roco-world-s4-2026-09-10',
       engine_energy: readEnergyConstants(envSource),
+      // RC-101：默认规则配置的**真值**在这里，不在 env.py 的源码文本里。
+      ruleset_config: readRulesetEnergy(),
       confidence_note: 'ENERGY_MAX=6 / 回合末 +1 在 env.py 里自注为「假设」；外部多源交叉支持 '
-        + 'max=10 / 聚能 +5。因此当前引擎是 legacy 基线，不得再据此生产新轨迹（见 evidence ledger）。',
+        + 'max=10 / 聚能 +5。因此当前引擎是 legacy 基线，不得再据此生产新轨迹（见 evidence ledger）。'
+        + 'RC-101 起这些值由 data/roco/rulesets/ 的版本化配置给出，默认仍是 legacy_sim_v1。',
       battle_modes_present: ['pve-training-3v3（当前 Demo 练习局）'],
       battle_modes_missing: ['pvp-standard-six-pet（候选）', 'pvp-speed-duel-3v3（极速对决，OFFICIAL_CURRENT）',
         'pvp-territory-trial-2v2（领地试炼，特性共享/首领形态）'],

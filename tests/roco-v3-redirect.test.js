@@ -14,12 +14,14 @@ import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {
-  buildBaseline, readEnergyConstants,
+  buildBaseline, readEnergyConstants, readRulesetEnergy,
 } from '../scripts/roco/flagship-baseline.mjs';
 import {
   invalidate, validateRegistry,
 } from '../scripts/roco/artifact-invalidation.mjs';
 import {judge} from '../scripts/roco/shot-mockup.mjs';
+import {publicView} from '../src/server/roco-service.js';
+import {coachAdvice} from '../src/coach/coach-advice.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8'));
@@ -28,19 +30,48 @@ const registry = readJson('data/roco/artifact-registry.json');
 const modes = readJson('data/roco/battle-modes.json');
 
 test('RC-000 基线：能量常量从源码读，读不到就是 null（不许猜默认值）', () => {
-  // 反向控制①：能读到真实值
+  // RC-101 之后默认值不再写死在 env.py 里，而是来自版本化配置
+  // （`ENERGY_MAX: int = _RULE_CONFIG.energy_max`）。所以这条判据现在的实际值是
+  // **null** —— 这正是「源码里没有可抄的常量」的证据，判据本身一条没放宽：
+  // 读得到字面量就必须读出字面量，读不到就必须是 null（不许补默认值）。
   const real = readEnergyConstants(readFileSync(join(ROOT, 'roco/src/roco_env/env.py'), 'utf8'));
-  assert.equal(real.ENERGY_MAX, 6, `引擎里 ENERGY_MAX 应当是 6（假设值），实际 ${real.ENERGY_MAX}`);
-  assert.equal(real.ENERGY_REGEN_PER_TURN, 1);
+  assert.equal(real.ENERGY_MAX, null,
+    `env.py 里不该再有 ENERGY_MAX 的字面量（RC-101 起唯一事实源是规则配置），实际 ${real.ENERGY_MAX}`);
+  assert.equal(real.ENERGY_REGEN_PER_TURN, null);
   assert.equal(real.source_file, 'roco/src/roco_env/env.py');
-  // 反向控制②：换一段文本必须跟着变（说明不是写死的）
+  // 反向控制①：换一段文本必须跟着变（说明不是写死的）
   const bumped = readEnergyConstants('ENERGY_MAX = 10\nENERGY_REGEN_PER_TURN = 0\n');
   assert.equal(bumped.ENERGY_MAX, 10);
   assert.equal(bumped.ENERGY_REGEN_PER_TURN, 0);
-  // 反向控制③：读不到 → null（补默认值会让审计看起来比实际更确定）
+  // 反向控制②：读不到 → null（补默认值会让审计看起来比实际更确定）
   const empty = readEnergyConstants('// 这里什么常量都没有\n');
   assert.equal(empty.ENERGY_MAX, null);
   assert.equal(empty.ENERGY_REGEN_PER_TURN, null);
+  // 反向控制③：带类型注解的赋值也要能读出字面量（否则「有注解」会变成一条静默失效的盲区）
+  assert.equal(readEnergyConstants('ENERGY_MAX: int = 6\n').ENERGY_MAX, 6);
+  assert.equal(readEnergyConstants('ENERGY_MAX: int = _RULE_CONFIG.energy_max\n').ENERGY_MAX, null);
+});
+
+test('RC-101 规则配置：默认配置的能量三件套就是引擎默认行为（改配置就红）', () => {
+  // 这条替代了「从 env.py 源码文本里读 6」那种做法：源码文本已经不再是事实源，
+  // 真正的事实源是 data/roco/rulesets/<默认配置>.json。判据内容一字未变
+  // （默认 max=6 / 回能 1 / 初始 2），只是读的地方换成了它该在的地方。
+  const legacy = readRulesetEnergy();
+  assert.equal(legacy.ruleset_config_id, 'legacy_sim_v1');
+  assert.equal(legacy.is_default, true);
+  assert.equal(legacy.energy_max, 6, `默认配置的能量上限应当是 6（legacy 基线），实际 ${legacy.energy_max}`);
+  assert.equal(legacy.energy_regen_per_turn, 1);
+  assert.equal(legacy.energy_initial, 2);
+  // 反向控制①：把候选配置按同一个读取器读，值必须跟着变（说明不是写死的）
+  const candidate = readRulesetEnergy('data/roco/rulesets/mobile-s4-candidate-v2.json');
+  assert.equal(candidate.ruleset_config_id, 'mobile_s4_candidate_v2');
+  assert.equal(candidate.energy_max, 10);
+  assert.equal(candidate.energy_regen_per_turn, 0);
+  // ②：候选的入场能量是 unknown（null），不是「看起来合理的 2」
+  assert.equal(candidate.energy_initial, null);
+  assert.equal(candidate.confidence.energy_initial, 'UNKNOWN');
+  // ③：读不到就 null，不补默认值
+  assert.equal(readRulesetEnergy('data/roco/rulesets/does-not-exist.json').energy_max, null);
 });
 
 test('RC-000 基线：机器可读，且如实登记「本次审计不覆盖什么」', () => {
@@ -48,8 +79,13 @@ test('RC-000 基线：机器可读，且如实登记「本次审计不覆盖什�
   assert.match(baseline.head.sha, /^[0-9a-f]{40}$/);
   assert.ok(Array.isArray(baseline.head.dirty_files));
   assert.equal(baseline.schema, 'roco-flagship-baseline/v1');
-  // 规则基线这一节是 v3 的靶心：必须带上「当前引擎是 legacy 基线」这句话与能量常量
-  assert.equal(baseline.rule_baseline.engine_energy.ENERGY_MAX, 6);
+  // 规则基线这一节是 v3 的靶心：必须带上「当前引擎是 legacy 基线」这句话与能量常量。
+  // RC-101 起默认值读自规则配置（源码文本里已经没有字面量了），所以断言落在配置那一节。
+  assert.equal(baseline.rule_baseline.ruleset_config.ruleset_config_id, 'legacy_sim_v1');
+  assert.equal(baseline.rule_baseline.ruleset_config.energy_max, 6);
+  assert.equal(baseline.rule_baseline.ruleset_config.energy_regen_per_turn, 1);
+  // env.py 里不该再有字面量：读不到就是 null（这条同时钉住「别把常量抄回源码」）
+  assert.equal(baseline.rule_baseline.engine_energy.ENERGY_MAX, null);
   assert.match(baseline.rule_baseline.confidence_note, /假设|legacy/);
   assert.ok(baseline.rule_baseline.battle_modes_missing.length >= 3,
     '缺的 BattleMode 至少要列出：标准六宠 / 极速对决 / 领地试炼');
@@ -212,4 +248,54 @@ test('六槽 UI mockup：产物必须已落盘且为绿（截图 + 量测）', (
     assert.equal(m.candidates >= 3, true);
   }
   assert.equal(doc.screenshots.length, 2);
+});
+
+test('RC-101 接线：规则配置里的 energy_max 必须透到公开视图（读不到就是 null，不猜）', () => {
+  // 为什么这条要与 RC-101 一起钉住：`src/coach/coach-advice.js` 把「对面能量快满了」
+  // 改成**只认公开视图里的上限**（不再自己抄一份 6）。如果服务端不透这个字段，
+  // 那一类建议就会**安静地永远不出现** —— 能力被削弱，而所有测试照常绿。
+  const withMax = publicView({
+    state_version: 7, turn: 3, phase: 'battle',
+    ui: {
+      self: {active: 0, energy_max: 6, pets: [{slot: 0, name: '黑猫巫师', hp: 100, max_hp: 100, energy: 2}]},
+      opponent: {active: 0, energy_max: 6, field: {slot: 0, name: '音速犬', hp: 80, max_hp: 90, energy: 5},
+        bench: [{slot: 1, fainted: false}]},
+      legal: {player: [{kind: 'skill', label: '彗星', skill_id: 's1'}]},
+    },
+    legal: {player: [{kind: 'skill', label: '彗星', skill_id: 's1'}]},
+  });
+  assert.equal(withMax.self.energy_max, 6, '己方上限要透出来');
+  assert.equal(withMax.opponent.energy_max, 6, '对手上限是规则常量，也要透出来');
+  // 反向控制：上游没给就必须是 null —— 用 6/10 兜底都会变成「猜规则」
+  const without = publicView({
+    state_version: 8, turn: 4, phase: 'battle',
+    ui: {self: {active: 0, pets: [{slot: 0, name: '黑猫巫师', hp: 100, max_hp: 100, energy: 2}]},
+      opponent: {active: 0, field: {slot: 0, name: '音速犬', hp: 80, max_hp: 90, energy: 5}, bench: []},
+      legal: {player: [{kind: 'skill', label: '彗星', skill_id: 's1'}]}},
+    legal: {player: [{kind: 'skill', label: '彗星', skill_id: 's1'}]},
+  });
+  assert.equal(without.self.energy_max, null);
+  assert.equal(without.opponent.energy_max, null);
+});
+
+test('RC-101 接线：教练的「对面能量快满」有上限才说话，没上限就沉默（fail closed）', () => {
+  const pet = (o) => ({slot: 0, pet_id: 'p1', name: '黑猫巫师', hp: 474, max_hp: 474, energy: 0,
+    fainted: false, statuses: {}, marks: {}, ...o});
+  const action = {kind: 'skill', label: '彗星', skill_id: 's1',
+    skill: {name: '彗星', energy: 3, power: 80, category: '攻击', element: '普通系'}};
+  const game = (withMax) => ({roco: {
+    self: {active: 0, ...(withMax ? {energy_max: 6} : {}),
+      pets: [{...pet({}), slot: 0}, {...pet({name: '寂灭骨龙', hp: 0, fainted: true}), slot: 1}]},
+    opponent: {active: 0, ...(withMax ? {energy_max: 6} : {}),
+      field: {...pet({name: '黑猫巫师', hp: 117, energy: 6}), slot: 0},
+      bench: [{slot: 1, fainted: false}, {slot: 2, fainted: false}]},
+    legal: [action], state_version: 53, turn: 10, phase: 'battle', battle_result: null, ruleset_id: 'r'}});
+  const withMax = coachAdvice({game: game(true), plan: null});
+  assert.equal(withMax?.kind, 'foe-energy-high',
+    `有上限时应当能给出「对面能量快满」，实际：${withMax ? withMax.kind : '（沉默）'}`);
+  assert.match(withMax.text, /上限 6/, '上限要出现在句子里（它来自规则配置，不是抄来的）');
+  // 反向控制：拿掉上限 → 必须沉默（宁可不说，也不猜一个上限）
+  const without = coachAdvice({game: game(false), plan: null});
+  assert.notEqual(without?.kind, 'foe-energy-high',
+    `没有上限时不许说这句话，实际：${without ? without.kind : '（沉默）'}`);
 });

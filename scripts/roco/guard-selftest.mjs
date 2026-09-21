@@ -143,6 +143,18 @@ export const INJECTIONS = [
     catches: '同一事实反复说，最典型的打扰（P5 去重）',
     run: {cmd: 'node', args: ['--test', 'tests/evals/companion-nonintrusion.test.js']},
   },
+  {
+    id: 'energy-literal-outside-ruleset',
+    guard: '能量上限/回能/初始能量的字面量只许住在规则配置里（RC-101）',
+    file: 'src/coach/runtime.js',
+    // 注入点刻意选一个**当前确实从配置读**的位置：把 `RULES.energy.max` 换回写死的
+    // 局面常量，等于把「能量上限有几份事实」这件事重新变回多份 —— 正是 RC-101 要消灭的。
+    // 换的是赋值右侧，不新增 import，避免把这条注入变成「顺带触发别的守卫」。
+    find: 'energyLimit:RULES.energy.max,',
+    replace: 'energyLimit:6,',
+    catches: '引擎能量上限又出现第二份来源：规则配置改了，教练层的上下文仍报旧上限，而所有既有测试照常绿',
+    run: {cmd: 'node', args: ['--test', 'tests/evals/structure-contract.test.js']},
+  },
 ];
 
 /**
