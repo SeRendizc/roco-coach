@@ -280,6 +280,9 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
      if(action==='battle/new')return json(res,200,await rocoService.startBattle(b));
      if(action==='battle/advance')return json(res,200,await rocoService.advanceBattle(b));
      if(action==='plan')return json(res,200,await rocoService.planBattle(b));
+     // shadow 对照（开发者面板用）：同一局面下规则与本地模型各自提议什么。
+     // 它不是玩家路径——玩家正文不经过它。
+     if(action==='shadow')return json(res,200,await rocoService.shadowPlan(b));
      throw fail(404,'接口不存在');
     }
     throw fail(404,'接口不存在');

@@ -140,7 +140,9 @@ export function rocoHintText(plan) { ... }
 | P0-2 事件中文化 | ✅ **完成** | `roco/src/roco_env/events_text.py`（一处实现，23 个 kind）+ `roco/tests/test_event_text.py`（13 项，跑真对局收全集）+ 页面折叠区 + `demo-acceptance` 里 6 条产品判据 |
 | P0-3 战斗 Demo UI | 🚧 **大部完成**：真名/系别色块标签/六维/血条/能量/状态；**阵容与对手选择**（12 只真实精灵、双方各选 3、开局把选好的阵容真的送进引擎）；技能说明上按钮。**仍缺**：布局重做 | `src/client/roco.js`、`src/client/roco.html`、`reports/roco/demo-acceptance/` |
 | P0-4 开发者抽屉 | ✅ **完成** | 导语只留人话；工程说明 / 数据版本 / `data-roco-*` 验收钩子 / 验收清单全部进**默认收起**的 `#about-drawer`；顶部状态与规划状态里的「状态版本 / 覆盖 / 超时」清出玩家区。判据：抽屉默认收起、玩家可见区域（排除两个默认收起的折叠区）无工程话。`demo-acceptance` **43 条判据**全过 |
-| P0-5 … P0-7 | ⏳ 排队中 | 见上表 |
+| P0-5 shadow 对照面板 | ✅ **完成** | 抽屉内「问一次本机小模型」按钮 → `/api/roco/shadow`；面板并列**规则引擎的行动建议**与**本地模型的工具提议**（真实 v4，实测 ~435 ms），显示提示摘要钉子。**口径纪律**：规则侧不是「选工具」，两者不是同一类决定 → `comparable: false`，不判「一致/不一致」（第一版给规则侧硬塞了一个 `tool`，会编出「一致」）。`demo-acceptance` 48 条判据全过 |
+| P0-6 诚实口径 | ✅ **完成（含一处真违规订正）** | `tests/evals/claim-honesty.test.js`：扫 90 个文件，判「数字怎么用」而不是「有没有」；6 类窄放行各注明理由且断言**每条放行至少被用到一次**。宽口径在位断言（`1,617/1,752` + `退化 42` + `扳回 0`）。玩家页面无法打开 `on`（直接执行 `localModelMode()` 验证未知取值退化为 `off`）。**扫出并修好一处过期陈述**：`AGENT-TRAJECTORIES.md` §5 仍说模型候选那半「仍未完成、需要 DeepSeek key」 |
+| P0-7 产品验收 | 🚧 **大部完成** | `demo-acceptance` 已扩到 **48 条产品判据**（真实名字 / 无裸 JSON / 无工程词 / 可完成一局 / 提示自动出现且多样 / 静默与失效 / 局末教学 / 陪练 / 本机模型真实参与 / 阵容选择端到端）+ 8 张截图。**仍缺**：独立的一键产品验收脚本（当前挂在 demo-acceptance 里） |
 | **P1-a~g 建议质量** | ✅ **完成** | `src/coach/coach-advice.js`（11 个局面检测器）+ 接入 `rocoIntervention`；引擎层验收 10 个隔离局面（`tests/evals/roco/coach-positions.test.js`，逐例断言 kind）；**浏览器验收** 6 局 / 23 次气泡 / **6 种形状** / 最大占比 35%（`demo-acceptance`，38 条判据）；`rocoHintText` 旧模板已删除 |
 
 ### P0-1 交付细节（含顺带修掉的两个真问题）

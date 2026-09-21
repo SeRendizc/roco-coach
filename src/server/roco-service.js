@@ -20,6 +20,7 @@
 // 停服务会带走 Python 子进程（RocoClient 自己会 kill 它的 child）。
 
 import {RocoClient,RULESET_ID} from '../coach/roco-client.js';
+import {shadowToolDecision} from '../coach/shadow-tools.js';
 
 /** 空闲多久回收 Python 子进程。演示页关掉后不该一直占着一个 Python。 */
 export const IDLE_STOP_MS=5*60*1000;
@@ -286,6 +287,98 @@ export function createRocoService(options={}){
   * 走 `rules_query` 的 `kind: "roster"`，**不新开端点**：信任域的路径白名单有专门的
   * 测试钉着，动它得先想清楚。这份数据全是公开事实（名字、系别、六维、规范配招）。
   */
+ /**
+  * shadow 对照：同一局面下，**规则引擎的 planner** 与**本机小模型**各自提议什么工具。
+  *
+  * 面板要证明的是「模型真的在参与」，所以两件事必须同时成立：
+  *   · 用的是**发布评测那一份提示**（`shadow-tools.js` 把提示摘要钉死，
+  *     改一个字节就红）——否则面板是另一个实验挂着同一个名字；
+  *   · 模型**只提议工具**：参数照常过引擎校验，结论文本仍由规则与 planner 提供。
+  *
+  * 这是**开发者面板**的功能，不是玩家路径：玩家正文仍然不经过它。
+  * 网关不可用时如实返回 `available: false` 与原因，不假装跑过。
+  */
+ async function shadowPlan(body={}){
+  const session=sessionOf(body.battle_id);
+  if(!session)return {ok:false,status:404,error:'对局不存在或已失效：请重新开一局'};
+  const gateway=String(body.gateway||process.env.ROCO_LOCAL_GATEWAY||`http://127.0.0.1:${process.env.ROCO_LOCAL_PORT||8766}`);
+  // 规则那一侧：先拿到公开面，再问一次 planner（与 /plan 同一条路，保证可比）
+  const stateVersion=session.state?.state_version??0;
+  const legal=await client.battleLegal({state:session.state,strategy:session.strategy,stateVersion});
+  const out=unwrap(legal);
+  if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
+  const pub=plannerPublicOf(out.result);
+  if(!pub)return {ok:false,status:502,error:'服务端没有给出公开 planner state'};
+  const envelope=await client.planActions(pub,{stateVersion:pub.state_version??stateVersion,
+   depth:2,beam:4,analysisSeeds:[...ANALYSIS_SEEDS]});
+  const planned=unwrap(envelope);
+  // ⚠ 规则一侧**不是**「工具选择」，而是 planner 的行动建议——两者不是同一类决策，
+  // 所以**不能**让它们去比「agree」。
+  //
+  // 第一版这里给 ruleChoice 硬塞了一个 `tool: 'query_rules'`，那样一旦模型也选了
+  // query_rules，面板就会显示「一致」——那是一个**编出来的一致**：规则引擎从来
+  // 没有做过「选工具」这件事，它做的是选动作。现在如实标注 kind 不同，
+  // 比较结果由 `comparable:false` 表达，面板不会暗示两边在同一维度上对上了。
+  const ruleSide=planned.ok&&planned.result?{
+   kind:'planner-recommendation',
+   label:planned.result.recommended_label??null,
+   recommendation:planned.result.recommended_label??null,
+   stable:planned.result.recommendation_stable!==false,
+  }:null;
+  // 任务形状：面板是在一局里问「这一步要不要查工具」，所以 message 用当前局面的
+  // 客观描述（公开事实，不含隐藏信息），hints 与评测口径一致。
+  const task={message:describePosition(pub)};
+  const hints={mode:pub.mode??(out.result?.phase==='battle'?'battle':'camp'),
+   state_version:pub.state_version??stateVersion,
+   ...(pub.self?.locked_pet?{locked_pet:pub.self.locked_pet}:{}),
+   ...(Array.isArray(pub.self?.team)?{team:pub.self.team}:{})};
+  let shadow;
+  try{
+   // 只把模型那一侧的**工具提议**交给比较器；规则那一侧单独并列，不参与 agree。
+   shadow=await shadowToolDecision({baseUrl:gateway,task,hints,ruleChoice:null});
+  }catch(error){
+   return {ok:true,available:false,reason:`本地模型网关不可用：${error?.message||error}`,
+    gateway,rules_are_source_of_truth:true};
+  }
+  return {
+   ok:true,available:true,gateway,
+   prompt_digest_pin:shadow.prompt_digest_pin,
+   prompt_char_count:shadow.prompt_char_count,
+   rule:ruleSide,
+   model:{choice:shadow.model.choice,error:shadow.model.error,latency_ms:shadow.model.latency_ms,
+    raw:String(shadow.model.raw??'').slice(0,200)},
+   compare:{
+    // `agree` 在这里**没有意义**：一边选动作、一边选工具。报告里必须说清楚，
+    // 而不是给一个看起来像「一致/不一致」的布尔值。
+    comparable:false,
+    rule_kind:'planner-recommendation',
+    model_kind:'tool-choice',
+    model_tool_label:shadow.compare.model,
+    // 这里**不用** `shadow.compare.note`：那句话是为「两边都是工具提议」写的，
+    // 而我们两边是**不同类**的提议（一边选动作、一边选工具）。
+    // 拿它来用会写出「两边提议一致」这种不成立的句子——真实情况是两边根本不在同一维度上。
+    // 纯文本，不要 Markdown 星号：这段会直接进 DOM。
+    note:'面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」，'
+      + '本地小模型给的是「要不要去查工具」。两者不是同一个决定，所以这里不判「一致 / 不一致」。'
+      + '模型只提议工具，它给的参数仍要由规则引擎逐项校验后才生效，最终结论始终以规则引擎为准。',
+   },
+   // 这一条必须随每次回执一起出去：面板是**观察**，不是决策。
+   rules_are_source_of_truth:true,
+   note:'模型只提议工具；参数照常过引擎校验，玩家看到的正文仍由规则与 planner 提供。',
+  };
+ }
+
+ /** 一句话描述当前公开局面，给模型当题面用。**只用公开事实**，不含隐藏信息。 */
+ function describePosition(pub){
+  const me=pub?.self??{},foe=pub?.opponent??{};
+  const active=(side)=>{const i=side?.active;const p=Array.isArray(side?.pets)?side.pets[i]:null;return p??null;};
+  const mine=active(me),theirs=foe?.field??null;
+  const parts=['现在是我方回合，要不要先查一次工具再决定。'];
+  if(mine)parts.push(`我方场上 ${mine.pet_id}：血量 ${mine.hp}/${mine.max_hp}，能量 ${mine.energy}。`);
+  if(theirs)parts.push(`对手场上 ${theirs.pet_id}：血量 ${theirs.hp}/${theirs.max_hp}，能量 ${theirs.energy}。`);
+  return parts.join('');
+ }
+
  async function roster(){
   const up=await ensure();
   if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
@@ -395,6 +488,6 @@ export function createRocoService(options={}){
   };
  }
 
- return {status,startBattle,advanceBattle,planBattle,roster,ensure,stop,publicView,
+ return {status,startBattle,advanceBattle,planBattle,roster,shadowPlan,ensure,stop,publicView,
   _sessions:sessions,_client:()=>client};
 }

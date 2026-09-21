@@ -436,6 +436,59 @@ async function loadRoster() {
   }
 }
 
+/**
+ * shadow 对照面板（P0-5，开发者抽屉内）。
+ *
+ * 它回答一个问题：**本机那个小模型真的在参与吗？**
+ * 面板并列两类提议：规则引擎这一步的「行动建议」，与本地模型这一步的「要不要查工具」。
+ * 两者不是同一个决定，所以面板**不判一致/不一致**——那样会让人以为它们在同一维度上。
+ *
+ * 纪律：模型只提议工具；参数照过引擎校验；玩家正文不经过这条路径。
+ * 默认不自动跑（要显式点按钮）：它要拉起本地模型，属于开发者工具，不是玩家路径。
+ */
+async function loadShadowPanel() {
+  const box = $('shadow-panel');
+  if (!box) return;
+  box.hidden = false;
+  if (!state.battleId) {
+    // **不静默返回**：静默会让面板看起来「坏了」，而实际只是还没开局。
+    box.innerHTML = '<p class="muted">先开一局，再问本机小模型。</p>';
+    return;
+  }
+  box.innerHTML = '<p class="muted">正在问本机小模型（要拉起本地推理，可能要几秒）…</p>';
+  try {
+    const data = await api('/api/roco/shadow', {battle_id: state.battleId});
+    if (!data.ok) throw new Error(data.error || '取不到对照结果');
+    if (!data.available) {
+      box.innerHTML = `<p class="muted">本地模型这次没跑成：${data.reason}</p>`;
+      return;
+    }
+    const modelText = data.model.error
+      ? `模型出错（${data.model.error}）`
+      : (data.model.choice?.stop === true
+        ? '模型说：不用再查了'
+        : `模型提议查：${data.model.choice?.tool ?? '（没给工具名）'}`);
+    const ruleText = data.rule
+      ? `规则引擎这一步的行动建议：${data.rule.recommendation ?? '（没给建议）'}`
+      : '规则引擎这一步没有给出行动建议';
+    box.innerHTML = `
+      <table class="shadow">
+        <tr><th>规则引擎（真值来源）</th><td>${ruleText}</td></tr>
+        <tr><th>本机小模型（只提议工具）</th><td>${modelText}<br>
+          <span class="muted">耗时 ${data.model.latency_ms ?? '—'} ms · 提示摘要 ${String(data.prompt_digest_pin).slice(0, 12)}…</span></td></tr>
+      </table>
+      <p class="muted">${data.compare.note}</p>
+      <p class="muted">面板只在开发者抽屉里，玩家正文不经过它。默认不自动跑。</p>`;
+  } catch (error) {
+    box.innerHTML = `<p class="muted">对照没跑成：${String(error.message).slice(0, 120)}</p>`;
+  }
+}
+
+function wireShadowPanel() {
+  const button = $('shadow-run');
+  if (button) button.addEventListener('click', () => loadShadowPanel());
+}
+
 function wirePickControls() {
   for (const tab of document.querySelectorAll('.side-tab')) {
     tab.addEventListener('click', () => { state.pick.side = tab.dataset.side; renderRoster(); });
@@ -632,6 +685,7 @@ async function boot() {
   bind();
   // 阵容选择：先接线，再读名单（读名单会顺带给出一个随机的对手阵容）
   wirePickControls();
+  wireShadowPanel();
   render();
   await loadRoster();
   try {
@@ -648,6 +702,7 @@ async function boot() {
 
 // 验收脚本要驱动这些动作：显式挂到一个命名空间上，比让脚本去点按钮里的中文更稳。
 window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, refreshHint, render,
+  loadShadowPanel,
   loadRoster, togglePick, renderRoster};
 
 void boot();

@@ -554,17 +554,18 @@ export function buildLocalToolSystem(contracts = TOOL_CONTRACTS) {
  * 所以默认保留这一版；那份实验的产物留在
  * `reports/roco/shadow-replay-local_4b-promptv2.json`，函数也留着，随时可复跑。
  */
-export const LOCAL_TOOL_SYSTEM = [
-  '你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。',
-  '可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、',
-  'compare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、',
-  'read_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。',
-  '需要查证时输出 {"tool":"工具名","args":{...}}；证据已经足够时输出 {"stop":true}。',
-  '**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。',
-  '查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，',
-  '并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。',
-  '参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。',
-].join('\n');
+// 系统提示**只有一份实现**，在 `src/coach/shadow-tools.js`。
+//
+// 去重的理由：以前这里和 `src/coach/local-model.js` 各有一份，措辞一旦漂了，
+// 「开发者面板里的模型」与「评测里的模型」就不是同一个实验，而**看不出来**。
+// `shadow-tools.js` 把提示的 SHA-256 钉成了 `PROMPT_DIGEST_PIN`，并由测试守卫；
+// 这里 import 再原样 re-export，保持既有 5 个调用点的命名导出不变。
+//
+// 提示内容本身没动过一个字节——它的摘要被已发布的评测产物钉着
+// （`reports/roco/shadow-replay-sft-v4.json` 的 `prompt_digest`）。
+import {LOCAL_TOOL_SYSTEM} from '../../src/coach/shadow-tools.js';
+
+export {LOCAL_TOOL_SYSTEM};
 
 export function localModelPlanner(task, hints, {ask, system = LOCAL_TOOL_SYSTEM, maxTokens = 96, timeoutMs = 8000} = {}) {
   if (typeof ask !== 'function') throw new Error('localModelPlanner 需要注入 ask（没有它就不是模型臂）');

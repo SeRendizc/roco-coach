@@ -362,6 +362,44 @@ async function main(){
   playerText.slice(0,80).replace(/\s+/g,' '));
  shots.push(await shoot('07-dev-drawer-collapsed'));
 
+ // ── P0-5：本机模型**真的在参与**（对照面板，显式触发）────────────────────
+ const shadowBefore=await js(`(()=>{const p=document.getElementById('shadow-panel');
+  return JSON.stringify({hidden:p?p.hidden:null,hasButton:Boolean(document.getElementById('shadow-run'))});})()`);
+ check('对照面板默认不显示（要显式点按钮才跑，不打扰玩家）',
+  JSON.parse(shadowBefore).hidden===true&&JSON.parse(shadowBefore).hasButton===true,shadowBefore);
+
+ // 面板在**收起的抽屉**里，所以要先把抽屉打开才读得到内容。
+ // 这本身也是判据：抽屉必须能正常展开（只断言「默认收起」会漏掉「打不开」）。
+ const opened=await js(`(()=>{const d=document.getElementById('about-drawer');
+  if(d)d.open=true; return JSON.stringify({open:d?d.open:null});})()`);
+ check('开发者抽屉能正常展开',JSON.parse(opened).open===true,opened);
+ // ⚠ 读内容要用 `textContent`：`innerText` 对**被折叠容器里的**元素返回空串
+ // （它按渲染后的可见性算），第一版就是这样明明有 HTML 却读到空文本。
+ // 面板问的是「当前这一手」，所以先开一局：拿一个已结束的对局去问，
+ // 服务端会如实回「对局不存在或已失效」，那不是面板坏了，是没局可问。
+ await js(`(async()=>{await window.rocoDemo.startBattle();})()`);
+ await sleep(500);
+ const shadowRan=await js(`(async()=>{const d=window.rocoDemo;
+  const diag={hasFn:typeof d.loadShadowPanel,battleId:d.state.battleId??null,
+    panelExists:Boolean(document.getElementById('shadow-panel'))};
+  let err=null;
+  try{await d.loadShadowPanel();}catch(e){err=String(e&&e.message||e);}
+  const p=document.getElementById('shadow-panel');
+  return JSON.stringify({...diag,err,hidden:p?p.hidden:null,
+    html:(p?p.innerHTML:'').slice(0,200),text:(p?p.textContent:'').slice(0,400)});})()`);
+ const shadow=JSON.parse(shadowRan);
+ check('点一下能真的问到本机小模型（面板出现内容）',
+  shadow.hidden===false&&shadow.text.length>0,
+  JSON.stringify({hidden:shadow.hidden,hasFn:shadow.hasFn,battleId:shadow.battleId,
+    panelExists:shadow.panelExists,err:shadow.err,html:shadow.html}).slice(0,300));
+ check('面板明确写出「规则引擎是真值来源 / 模型只提议工具」',
+  /真值来源/.test(shadow.text)&&/只提议工具|只提出/.test(shadow.text),
+  shadow.text.slice(0,160).replace(/\s+/g,' '));
+ check('面板不许暗示两边在同一维度上一致',
+  !/一致/.test(shadow.text)||/不判「一致 \/ 不一致」/.test(shadow.text),
+  shadow.text.slice(0,160).replace(/\s+/g,' '));
+ shots.push(await shoot('08-shadow-panel'));
+
  // ── P1 浏览器验收：**多个真实局面下气泡必须长得不一样** ────────────────
  //
  // 用户实测原话：气泡反复只说「某技能这一手不稳…先看区间再定（最坏尾部…）」，

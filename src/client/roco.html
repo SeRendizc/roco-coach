@@ -28,6 +28,9 @@
   <p>本机小模型（Qwen3.5-4B + LoRA 适配器）只作为<strong>对照项</strong>出现在
    下方面板里：它只提议工具，参数照常过引擎校验，<strong>规则引擎仍是唯一真值来源</strong>，
    默认不参与生成玩家看到的正文。</p>
+  <div class="section-title"><h3>本机小模型对照（它真的在参与吗）</h3></div>
+  <p><button id="shadow-run">问一次本机小模型</button>
+   <span class="muted">要拉起本地推理，几秒；只在这一局里对照一次。</span></p>
   <div id="shadow-panel" hidden></div>
   <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
   <ul class="checklist" id="coverage"></ul>
