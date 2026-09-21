@@ -1,0 +1,3008 @@
+{
+ "schema_version": 1,
+ "generated_by": "scripts/roco/audit-roster-48.py",
+ "command": "python3 scripts/roco/audit-roster-48.py",
+ "ruleset_id_audit": "roco-world-s4-2026-09-10+roster48-audit",
+ "note": "分类由**引擎自己的代码路径**判定，不是文本猜测；每条都带 reason_code 与探测结果。",
+ "roster_json_sha256": "9f99e77080c2613e0596445568bf7b9c7909fca2b92082923b2e5c7d9ac0d38d",
+ "catalog_sha256": "17db01004724048972512f4866ddeadf993cd47074fc2d049d2d692444d7c065",
+ "counts": {
+  "pets": 60,
+  "unique_skills": 76,
+  "verdicts": {
+   "computed": 30,
+   "computed_uncorrected": 28,
+   "computed_unverified": 3,
+   "partial_refused_subset": 6,
+   "fail_closed": 9
+  },
+  "reason_codes": {
+   "plain_damage_path": 30,
+   "attack_path_uncorrected": 28,
+   "defense_reduction_unconditional_assumption": 2,
+   "defense_branch_never_applies_respond_clause": 6,
+   "unparsed_markers": 5,
+   "status_effects_applied_with_assumptions": 1,
+   "no_parseable_effect": 2,
+   "effect_kinds_not_implemented": 2
+  },
+  "fail_closed_skills": 9,
+  "computed_skills": 61,
+  "partial_or_registered_skills": 6,
+  "pets_all_four_computed": 0,
+  "pets_with_fail_closed": 31,
+  "pets_no_fail_closed": 29
+ },
+ "team_legality": {
+  "checked_3subsets": 34220,
+  "legal": 34220,
+  "illegal_count": 0,
+  "illegal_examples": []
+ },
+ "skills": [
+  {
+   "skill_id": "skill_000248",
+   "name": "飞踢",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 3,
+   "power": 110,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 110.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000251",
+   "name": "音爆",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 4,
+   "power": 130,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "对敌方精灵造成魔法伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 130.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000265",
+   "name": "魔能爆",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 0,
+   "power": 1,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，使用时消耗所有能量，消耗越高，伤害越高。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 1.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000286",
+   "name": "防御",
+   "category": "防御",
+   "element": "普通系",
+   "energy": 1,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "减伤70%，应对攻击。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "defense_reduction": 0.7,
+    "cooldown": true,
+    "respond_to": "攻击"
+   },
+   "respond_clause": "",
+   "verdict": "computed_unverified",
+   "reason_code": "defense_reduction_unconditional_assumption",
+   "reason": "减伤% 从描述读出并按无条件生效结算（假设 MC-020；术语 1016）"
+  },
+  {
+   "skill_id": "skill_000289",
+   "name": "无畏之心",
+   "category": "防御",
+   "element": "普通系",
+   "energy": 5,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "减伤100%，应对攻击：减免的伤害变为回复自己生命，且本技能能耗永久+2。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "defense_reduction": 1.0,
+    "cooldown": true,
+    "respond_to": "攻击"
+   },
+   "respond_clause": "减免的伤害变为回复自己生命，且本技能能耗永久+2",
+   "engine_probe": {
+    "event_kinds": [
+     "defense"
+    ],
+    "unsupported_count": 0,
+    "buff_after": {}
+   },
+   "verdict": "partial_refused_subset",
+   "reason_code": "defense_branch_never_applies_respond_clause",
+   "reason": "减伤比例会被结算；「应对成功：…」后面那条效果**既不应用也不登记**（防御分支 env.py:510-524 直接 return）"
+  },
+  {
+   "skill_id": "skill_000294",
+   "name": "取念",
+   "category": "状态",
+   "element": "普通系",
+   "energy": 0,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "每回合随机变成敌方任意精灵的技能，且该技能能耗-2。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "随机（出现在：每回合随机变成敌方任意精灵的技能，且该技能能耗-2。）"
+   ],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": []
+   },
+   "verdict": "fail_closed",
+   "reason_code": "unparsed_markers",
+   "reason": "描述里有解析器没覆盖的机制标记（parse.py:46-49）：随机"
+  },
+  {
+   "skill_id": "skill_000298",
+   "name": "复写",
+   "category": "状态",
+   "element": "普通系",
+   "energy": 0,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "每回合随机变成自己未携带的技能，且该技能能耗-2。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "随机（出现在：每回合随机变成自己未携带的技能，且该技能能耗-2。）"
+   ],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": []
+   },
+   "verdict": "fail_closed",
+   "reason_code": "unparsed_markers",
+   "reason": "描述里有解析器没覆盖的机制标记（parse.py:46-49）：随机"
+  },
+  {
+   "skill_id": "skill_000302",
+   "name": "落星",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 0,
+   "power": 45,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 45.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000305",
+   "name": "许愿星",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 3,
+   "power": 110,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "对敌方精灵造成魔法伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 110.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000311",
+   "name": "打鼾",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 6,
+   "power": 165,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "对敌方精灵造成魔法伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 165.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000312",
+   "name": "先发制人",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 2,
+   "power": 55,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物理伤害，先手+1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 55.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000317",
+   "name": "后发制人",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 3,
+   "power": 155,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物理伤害，先手-1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 155.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000321",
+   "name": "彗星",
+   "category": "攻击",
+   "element": "普通系",
+   "energy": 0,
+   "power": 240,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，每失去5%生命，本次技能威力-10，使用后消耗全部生命。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 240.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000340",
+   "name": "仙人掌刺击",
+   "category": "攻击",
+   "element": "草系",
+   "energy": 6,
+   "power": 150,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 150.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000368",
+   "name": "抽枝",
+   "category": "攻击",
+   "element": "草系",
+   "energy": 4,
+   "power": 90,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，应对状态：自己回复50%生命和5能量。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "heal"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 90.0,
+    "conditional": true,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（parsed_effects:heal）",
+   "dropped_effects": [
+    "parsed_effects:heal"
+   ]
+  },
+  {
+   "skill_id": "skill_000378",
+   "name": "火苗",
+   "category": "攻击",
+   "element": "火系",
+   "energy": 0,
+   "power": 30,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，自己回复1能量。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 30.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000392",
+   "name": "火云车",
+   "category": "攻击",
+   "element": "火系",
+   "energy": 5,
+   "power": 140,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 140.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000399",
+   "name": "火焰切割",
+   "category": "攻击",
+   "element": "火系",
+   "energy": 3,
+   "power": 100,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 100.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000401",
+   "name": "炎息",
+   "category": "攻击",
+   "element": "火系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000408",
+   "name": "焚烧烙印",
+   "category": "状态",
+   "element": "火系",
+   "energy": 3,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "驱散双方所有印记，每驱散1层，敌方获得5层灼烧。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "foe_status",
+    "cleanse"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": true,
+    "event_kinds": [
+     "status_added",
+     "cleanse",
+     "status_applied"
+    ],
+    "unsupported": []
+   },
+   "verdict": "computed_unverified",
+   "reason_code": "status_effects_applied_with_assumptions",
+   "reason": "效果被应用；数值口径（基数/取整/回能顺序）是假设（MC-007/011/012）"
+  },
+  {
+   "skill_id": "skill_000415",
+   "name": "焚尽",
+   "category": "状态",
+   "element": "火系",
+   "energy": 1,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "驱散自己所有印记，每驱散1层，获得物攻+50%。巧变：火系攻击技能。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": []
+   },
+   "verdict": "fail_closed",
+   "reason_code": "no_parseable_effect",
+   "reason": "描述里读不出任何被覆盖的效果原语（parse.py:83-93 全不命中）"
+  },
+  {
+   "skill_id": "skill_000418",
+   "name": "甩水",
+   "category": "攻击",
+   "element": "水系",
+   "energy": 0,
+   "power": 30,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，自己回复1能量。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 30.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000422",
+   "name": "水刃",
+   "category": "攻击",
+   "element": "水系",
+   "energy": 4,
+   "power": 115,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，应对状态：本技能能耗永久-3。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 115.0,
+    "conditional": true,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000429",
+   "name": "水泡盾",
+   "category": "防御",
+   "element": "水系",
+   "energy": 2,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "减伤80%，应对攻击：自己获得魔攻+70%。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "self_stat"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "defense_reduction": 0.8,
+    "cooldown": true,
+    "respond_to": "攻击"
+   },
+   "respond_clause": "自己获得魔攻+70%",
+   "engine_probe": {
+    "event_kinds": [
+     "defense"
+    ],
+    "unsupported_count": 0,
+    "buff_after": {}
+   },
+   "verdict": "partial_refused_subset",
+   "reason_code": "defense_branch_never_applies_respond_clause",
+   "reason": "减伤比例会被结算；「应对成功：…」后面那条效果**既不应用也不登记**（防御分支 env.py:510-524 直接 return）"
+  },
+  {
+   "skill_id": "skill_000458",
+   "name": "虹光冲击",
+   "category": "攻击",
+   "element": "光系",
+   "energy": 3,
+   "power": 100,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "对敌方精灵造成魔法伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 100.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000476",
+   "name": "拆卸",
+   "category": "攻击",
+   "element": "机械系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000477",
+   "name": "离子震荡",
+   "category": "攻击",
+   "element": "机械系",
+   "energy": 3,
+   "power": 90,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，本技能位于3号位时威力+40，传动1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "传动（出现在：造成魔伤，本技能位于3号位时威力+40，传动1。）",
+    "号位（出现在：造成魔伤，本技能位于3号位时威力+40，传动1。）"
+   ],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 90.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（unparsed:传动,号位）",
+   "dropped_effects": [
+    "unparsed:传动,号位"
+   ]
+  },
+  {
+   "skill_id": "skill_000481",
+   "name": "齿轮切开",
+   "category": "攻击",
+   "element": "机械系",
+   "energy": 5,
+   "power": 130,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，本技能位于1号或3号位时能耗-2，传动1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "传动（出现在：造成物伤，本技能位于1号或3号位时能耗-2，传动1。）",
+    "号位（出现在：造成物伤，本技能位于1号或3号位时能耗-2，传动1。）"
+   ],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 130.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（unparsed:传动,号位）",
+   "dropped_effects": [
+    "unparsed:传动,号位"
+   ]
+  },
+  {
+   "skill_id": "skill_000483",
+   "name": "啮合传递",
+   "category": "状态",
+   "element": "机械系",
+   "energy": 1,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "传动（出现在：自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。）",
+    "号位（出现在：自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。）"
+   ],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": []
+   },
+   "verdict": "fail_closed",
+   "reason_code": "unparsed_markers",
+   "reason": "描述里有解析器没覆盖的机制标记（parse.py:46-49）：传动,号位"
+  },
+  {
+   "skill_id": "skill_000516",
+   "name": "陨石",
+   "category": "攻击",
+   "element": "地系",
+   "energy": 3,
+   "power": 100,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "对敌方精灵造成魔法伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 100.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000519",
+   "name": "岩脉崩毁",
+   "category": "攻击",
+   "element": "地系",
+   "energy": 4,
+   "power": 120,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，本技能能耗固定为4。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 120.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000525",
+   "name": "不动如山",
+   "category": "防御",
+   "element": "地系",
+   "energy": 2,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "减伤90%，应对攻击：自己获得物攻+50%。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "self_stat"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "defense_reduction": 0.9,
+    "cooldown": true,
+    "respond_to": "攻击"
+   },
+   "respond_clause": "自己获得物攻+50%",
+   "engine_probe": {
+    "event_kinds": [
+     "defense"
+    ],
+    "unsupported_count": 0,
+    "buff_after": {}
+   },
+   "verdict": "partial_refused_subset",
+   "reason_code": "defense_branch_never_applies_respond_clause",
+   "reason": "减伤比例会被结算；「应对成功：…」后面那条效果**既不应用也不登记**（防御分支 env.py:510-524 直接 return）"
+  },
+  {
+   "skill_id": "skill_000529",
+   "name": "风吹雪",
+   "category": "攻击",
+   "element": "冰系",
+   "energy": 0,
+   "power": 30,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，自己回复1能量。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 30.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000532",
+   "name": "冰雹",
+   "category": "攻击",
+   "element": "冰系",
+   "energy": 4,
+   "power": 105,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，应对状态：额外使敌方获得全技能能耗+3。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 105.0,
+    "conditional": true,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000541",
+   "name": "冰锥",
+   "category": "攻击",
+   "element": "冰系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000546",
+   "name": "丢冰块",
+   "category": "攻击",
+   "element": "冰系",
+   "energy": 3,
+   "power": 90,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，敌方获得速度-30。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 90.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000567",
+   "name": "龙之利爪",
+   "category": "攻击",
+   "element": "龙系",
+   "energy": 3,
+   "power": 130,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "蓄力，造成物伤并吸血50%。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 130.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "宽口径判定为动态/条件威力，但 `effective_power` 的四类模式一个都没命中 → 按静态威力算；攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000576",
+   "name": "龙血",
+   "category": "防御",
+   "element": "龙系",
+   "energy": 2,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "减伤70%，本技能可以在蓄力状态下使用，应对攻击：下次技能无需蓄力。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "defense_reduction": 0.7,
+    "cooldown": true,
+    "respond_to": "攻击"
+   },
+   "respond_clause": "下次技能无需蓄力",
+   "engine_probe": {
+    "event_kinds": [
+     "defense"
+    ],
+    "unsupported_count": 0,
+    "buff_after": {}
+   },
+   "verdict": "partial_refused_subset",
+   "reason_code": "defense_branch_never_applies_respond_clause",
+   "reason": "减伤比例会被结算；「应对成功：…」后面那条效果**既不应用也不登记**（防御分支 env.py:510-524 直接 return）"
+  },
+  {
+   "skill_id": "skill_000580",
+   "name": "导电撞击",
+   "category": "攻击",
+   "element": "电系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000591",
+   "name": "集中",
+   "category": "防御",
+   "element": "电系",
+   "energy": 2,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "减伤80%，应对攻击：自己回合结束返场。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "escape"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "defense_reduction": 0.8,
+    "cooldown": true,
+    "respond_to": "攻击"
+   },
+   "respond_clause": "自己回合结束返场",
+   "engine_probe": {
+    "event_kinds": [
+     "defense"
+    ],
+    "unsupported_count": 0,
+    "buff_after": {}
+   },
+   "verdict": "partial_refused_subset",
+   "reason_code": "defense_branch_never_applies_respond_clause",
+   "reason": "减伤比例会被结算；「应对成功：…」后面那条效果**既不应用也不登记**（防御分支 env.py:510-524 直接 return）"
+  },
+  {
+   "skill_id": "skill_000596",
+   "name": "交叉闪电",
+   "category": "攻击",
+   "element": "电系",
+   "energy": 3,
+   "power": 100,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 100.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000599",
+   "name": "过载回路",
+   "category": "状态",
+   "element": "电系",
+   "energy": 1,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "回合结束自己返场，下回合所选技能使用次数+1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "escape"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": [
+     "技能「过载回路」的离场效果"
+    ]
+   },
+   "verdict": "fail_closed",
+   "reason_code": "effect_kinds_not_implemented",
+   "reason": "解析出了效果，但 `_apply_status_effects` 一条都没应用（env.py:612-684）"
+  },
+  {
+   "skill_id": "skill_000602",
+   "name": "强制重启",
+   "category": "攻击",
+   "element": "电系",
+   "energy": 3,
+   "power": 90,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，应对状态：回合结束时使敌方精灵返场。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "escape"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 90.0,
+    "conditional": true,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（parsed_effects:escape）",
+   "dropped_effects": [
+    "parsed_effects:escape"
+   ]
+  },
+  {
+   "skill_id": "skill_000603",
+   "name": "电离爆破",
+   "category": "状态",
+   "element": "电系",
+   "energy": 1,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "敌方获得魔攻-20%，速度-20，2连击。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "foe_stat"
+   ],
+   "parsed_unparsed": [
+    "连击（出现在：敌方获得魔攻-20%，速度-20，2连击。）"
+   ],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": []
+   },
+   "verdict": "fail_closed",
+   "reason_code": "unparsed_markers",
+   "reason": "描述里有解析器没覆盖的机制标记（parse.py:46-49）：连击"
+  },
+  {
+   "skill_id": "skill_000610",
+   "name": "连续毒针",
+   "category": "攻击",
+   "element": "毒系",
+   "energy": 2,
+   "power": 15,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，2连击，每次连击使敌方获得1层中毒。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "foe_status"
+   ],
+   "parsed_unparsed": [
+    "连击（出现在：造成物伤，2连击，每次连击使敌方获得1层中毒。）"
+   ],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 15.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "宽口径判定为动态/条件威力，但 `effective_power` 的四类模式一个都没命中 → 按静态威力算；`env.py:540` 的 `hit_count=1` 是硬编码，连击数不参与结算；攻击分支只结算伤害；这些效果被静默丢弃（parsed_effects:foe_status / unparsed:连击）",
+   "dropped_effects": [
+    "parsed_effects:foe_status",
+    "unparsed:连击"
+   ]
+  },
+  {
+   "skill_id": "skill_000612",
+   "name": "毒液渗透",
+   "category": "攻击",
+   "element": "毒系",
+   "energy": 5,
+   "power": 120,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，敌方每有1层中毒效果，本技能能耗-1，敌方获得1层中毒。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "foe_status"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 120.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（parsed_effects:foe_status）",
+   "dropped_effects": [
+    "parsed_effects:foe_status"
+   ]
+  },
+  {
+   "skill_id": "skill_000626",
+   "name": "不可接触",
+   "category": "防御",
+   "element": "毒系",
+   "energy": 1,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "减伤50%，敌方每有1层中毒效果，本技能减伤+10%，应对攻击。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "defense_reduction": 0.5,
+    "cooldown": true,
+    "respond_to": "攻击"
+   },
+   "respond_clause": "",
+   "verdict": "computed_unverified",
+   "reason_code": "defense_reduction_unconditional_assumption",
+   "reason": "减伤% 从描述读出并按无条件生效结算（假设 MC-020；术语 1016）"
+  },
+  {
+   "skill_id": "skill_000629",
+   "name": "过敏原",
+   "category": "攻击",
+   "element": "毒系",
+   "energy": 3,
+   "power": 35,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，1连击，若敌方有中毒效果，本次技能连击数+2。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "连击（出现在：造成魔伤，1连击，若敌方有中毒效果，本次技能连击数+2。）"
+   ],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 35.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "宽口径判定为动态/条件威力，但 `effective_power` 的四类模式一个都没命中 → 按静态威力算；`env.py:540` 的 `hit_count=1` 是硬编码，连击数不参与结算；攻击分支只结算伤害；这些效果被静默丢弃（unparsed:连击）",
+   "dropped_effects": [
+    "unparsed:连击"
+   ]
+  },
+  {
+   "skill_id": "skill_000632",
+   "name": "啃咬",
+   "category": "攻击",
+   "element": "虫系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "连击（出现在：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。）"
+   ],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "宽口径判定为动态/条件威力，但 `effective_power` 的四类模式一个都没命中 → 按静态威力算；`env.py:540` 的 `hit_count=1` 是硬编码，连击数不参与结算；攻击分支只结算伤害；这些效果被静默丢弃（unparsed:连击）",
+   "dropped_effects": [
+    "unparsed:连击"
+   ]
+  },
+  {
+   "skill_id": "skill_000644",
+   "name": "掩护",
+   "category": "防御",
+   "element": "虫系",
+   "energy": 2,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "减伤70%，紧急脱离，应对攻击：下个入场精灵获得减伤。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "escape"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "defense_reduction": 0.7,
+    "cooldown": true,
+    "respond_to": "攻击"
+   },
+   "respond_clause": "下个入场精灵获得减伤",
+   "engine_probe": {
+    "event_kinds": [
+     "defense"
+    ],
+    "unsupported_count": 0,
+    "buff_after": {}
+   },
+   "verdict": "partial_refused_subset",
+   "reason_code": "defense_branch_never_applies_respond_clause",
+   "reason": "减伤比例会被结算；「应对成功：…」后面那条效果**既不应用也不登记**（防御分支 env.py:510-524 直接 return）"
+  },
+  {
+   "skill_id": "skill_000645",
+   "name": "蛰针",
+   "category": "攻击",
+   "element": "虫系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000650",
+   "name": "翅刃",
+   "category": "攻击",
+   "element": "虫系",
+   "energy": 3,
+   "power": 85,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，驱散敌方所有印记，应对状态：改为偷取印记。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 85.0,
+    "conditional": true,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000673",
+   "name": "气波",
+   "category": "攻击",
+   "element": "武系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "对敌方精灵造成魔法伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000677",
+   "name": "影袭",
+   "category": "攻击",
+   "element": "武系",
+   "energy": 3,
+   "power": 100,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 100.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000678",
+   "name": "一拳",
+   "category": "攻击",
+   "element": "武系",
+   "energy": 5,
+   "power": 140,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 140.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000683",
+   "name": "马步",
+   "category": "状态",
+   "element": "武系",
+   "energy": 3,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%，获得物攻+150%。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "heal"
+   ],
+   "parsed_unparsed": [
+    "选择（出现在：本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%）"
+   ],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": []
+   },
+   "verdict": "fail_closed",
+   "reason_code": "unparsed_markers",
+   "reason": "描述里有解析器没覆盖的机制标记（parse.py:46-49）：选择"
+  },
+  {
+   "skill_id": "skill_000686",
+   "name": "啄击",
+   "category": "攻击",
+   "element": "翼系",
+   "energy": 0,
+   "power": 15,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，2连击。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "连击（出现在：造成物伤，2连击。）"
+   ],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 15.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "宽口径判定为动态/条件威力，但 `effective_power` 的四类模式一个都没命中 → 按静态威力算；`env.py:540` 的 `hit_count=1` 是硬编码，连击数不参与结算；攻击分支只结算伤害；这些效果被静默丢弃（unparsed:连击）",
+   "dropped_effects": [
+    "unparsed:连击"
+   ]
+  },
+  {
+   "skill_id": "skill_000696",
+   "name": "鸣叫",
+   "category": "攻击",
+   "element": "翼系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "对敌方精灵造成魔法伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000698",
+   "name": "羽刃",
+   "category": "攻击",
+   "element": "翼系",
+   "energy": 2,
+   "power": 75,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，应对状态：回合结束使敌方紧急脱离。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "escape"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 75.0,
+    "conditional": true,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（parsed_effects:escape）",
+   "dropped_effects": [
+    "parsed_effects:escape"
+   ]
+  },
+  {
+   "skill_id": "skill_000700",
+   "name": "回旋风暴",
+   "category": "攻击",
+   "element": "翼系",
+   "energy": 3,
+   "power": 100,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "对敌方精灵造成魔法伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 100.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000704",
+   "name": "风隐",
+   "category": "状态",
+   "element": "翼系",
+   "energy": 1,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "敌方和自己均脱离，先手-1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [
+    "escape"
+   ],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": [
+     "技能「风隐」的离场效果"
+    ]
+   },
+   "verdict": "fail_closed",
+   "reason_code": "effect_kinds_not_implemented",
+   "reason": "解析出了效果，但 `_apply_status_effects` 一条都没应用（env.py:612-684）"
+  },
+  {
+   "skill_id": "skill_000717",
+   "name": "超级糖果",
+   "category": "攻击",
+   "element": "萌系",
+   "energy": 3,
+   "power": 100,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，自己获得萌化：本次技能威力+60。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 100.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000725",
+   "name": "鞭打",
+   "category": "攻击",
+   "element": "萌系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000741",
+   "name": "鬼火",
+   "category": "攻击",
+   "element": "幽系",
+   "energy": 0,
+   "power": 30,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，自己回复1能量。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 30.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000744",
+   "name": "坟场搏击",
+   "category": "攻击",
+   "element": "幽系",
+   "energy": 4,
+   "power": 180,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，敌方每有1能量，本次技能威力-10%。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 125.99999999999999,
+    "conditional": true,
+    "reason": "敌方能量 3 → 威力 ×0.70"
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000750",
+   "name": "诡刺",
+   "category": "攻击",
+   "element": "幽系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000766",
+   "name": "魔爪",
+   "category": "攻击",
+   "element": "恶系",
+   "energy": 0,
+   "power": 30,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，自己回复1能量。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 30.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000768",
+   "name": "蝙蝠",
+   "category": "攻击",
+   "element": "恶系",
+   "energy": 2,
+   "power": 65,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，并吸血100%。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 65.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000782",
+   "name": "迫害",
+   "category": "攻击",
+   "element": "恶系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000787",
+   "name": "跌落",
+   "category": "攻击",
+   "element": "恶系",
+   "energy": 3,
+   "power": 120,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成大量物伤，自己获得物攻-50%，应对状态：改为获得物攻+50%。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 120.0,
+    "conditional": true,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000788",
+   "name": "骗局",
+   "category": "攻击",
+   "element": "恶系",
+   "energy": 4,
+   "power": 110,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，能量不足时，消耗5%生命代替1能量。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 110.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000793",
+   "name": "伪造账单",
+   "category": "状态",
+   "element": "恶系",
+   "energy": 1,
+   "power": null,
+   "power_status": "not_provided_by_source",
+   "damage_class": null,
+   "desc": "若敌方本回合回复生命，改为失去2倍（含溢出的回复量）。先手+1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_probe": {
+    "applied": false,
+    "event_kinds": [],
+    "unsupported": []
+   },
+   "verdict": "fail_closed",
+   "reason_code": "no_parseable_effect",
+   "reason": "描述里读不出任何被覆盖的效果原语（parse.py:83-93 全不命中）"
+  },
+  {
+   "skill_id": "skill_000807",
+   "name": "偷师",
+   "category": "攻击",
+   "element": "幻系",
+   "energy": 0,
+   "power": 30,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，自己回复1能量。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 30.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  },
+  {
+   "skill_id": "skill_000808",
+   "name": "多维击打",
+   "category": "攻击",
+   "element": "幻系",
+   "energy": 4,
+   "power": 15,
+   "power_status": "static_value_present",
+   "damage_class": "魔攻",
+   "desc": "造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [
+    "连击（出现在：造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。）"
+   ],
+   "data_dynamic_power_hint": true,
+   "engine_return": {
+    "power": 15.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "宽口径判定为动态/条件威力，但 `effective_power` 的四类模式一个都没命中 → 按静态威力算；`env.py:540` 的 `hit_count=1` 是硬编码，连击数不参与结算；攻击分支只结算伤害；这些效果被静默丢弃（unparsed:连击）",
+   "dropped_effects": [
+    "unparsed:连击"
+   ]
+  },
+  {
+   "skill_id": "skill_000816",
+   "name": "粒子对撞",
+   "category": "攻击",
+   "element": "幻系",
+   "energy": 0,
+   "power": 40,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "对敌方精灵造成物理伤害。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 40.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed",
+   "reason_code": "plain_damage_path",
+   "reason": "描述里没有引擎未覆盖的附加机制，走纯伤害路径",
+   "dropped_effects": []
+  },
+  {
+   "skill_id": "skill_000825",
+   "name": "天体吸积",
+   "category": "攻击",
+   "element": "幻系",
+   "energy": 4,
+   "power": 20,
+   "power_status": "static_value_present",
+   "damage_class": "物攻",
+   "desc": "造成物伤，敌方每有1层印记，本次攻击威力+20。",
+   "data_effect_support": "unsupported",
+   "parsed_effect_kinds": [],
+   "parsed_unparsed": [],
+   "data_dynamic_power_hint": false,
+   "engine_return": {
+    "power": 20.0,
+    "conditional": false,
+    "reason": ""
+   },
+   "verdict": "computed_uncorrected",
+   "reason_code": "attack_path_uncorrected",
+   "reason": "攻击分支只结算伤害；这些效果被静默丢弃（extra_mechanic_marker_unparsed）",
+   "dropped_effects": [
+    "extra_mechanic_marker_unparsed"
+   ]
+  }
+ ],
+ "pets": [
+  {
+   "pet_id": "pet_000062",
+   "name": "音速犬",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "computed_unverified"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000112",
+   "name": "雪影娃娃",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000124",
+   "name": "化蝶",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000294"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000190",
+   "name": "海豹船长",
+   "verdicts": [
+    "computed",
+    "partial_refused_subset",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000294"
+   ],
+   "partial_skills": [
+    "skill_000429"
+   ]
+  },
+  {
+   "pet_id": "pet_000225",
+   "name": "寂灭骨龙",
+   "verdicts": [
+    "computed",
+    "partial_refused_subset",
+    "computed_uncorrected",
+    "partial_refused_subset"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": [
+    "skill_000576",
+    "skill_000591"
+   ]
+  },
+  {
+   "pet_id": "pet_000417",
+   "name": "圆号鱼",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000445",
+   "name": "黑猫巫师",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000451",
+   "name": "秩序鱿墨",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "partial_refused_subset"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": [
+    "skill_000591"
+   ]
+  },
+  {
+   "pet_id": "pet_000474",
+   "name": "画间沉铁兽",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "computed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000601",
+   "name": "圣凯布米龙",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000608",
+   "name": "银月狼王",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000611",
+   "name": "月使鹭纳",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000484",
+   "name": "迷迷箱怪",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000330",
+   "name": "权杖-V",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed_uncorrected",
+    "partial_refused_subset"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": [
+    "skill_000289"
+   ]
+  },
+  {
+   "pet_id": "pet_000167",
+   "name": "电咩咩",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000603"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000172",
+   "name": "闪电环",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000219",
+   "name": "獠牙猪",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000609",
+   "name": "新月鹭",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000243",
+   "name": "卡卡虫",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000218",
+   "name": "呼呼猪",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000240",
+   "name": "丢丢",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000479",
+   "name": "嗜光嗡嗡",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000613",
+   "name": "智辉章脑",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000599"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000450",
+   "name": "混乱鱿彩",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000793"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000248",
+   "name": "蹦蹦种子",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000143",
+   "name": "花魁蜂后",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000308",
+   "name": "深蓝鲸",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "partial_refused_subset"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": [
+    "skill_000591"
+   ]
+  },
+  {
+   "pet_id": "pet_000548",
+   "name": "女王蜂",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000152",
+   "name": "雪蛮人",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000683"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000012",
+   "name": "铠甲虫",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000704"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000542",
+   "name": "祭礼巨像",
+   "verdicts": [
+    "computed_uncorrected",
+    "partial_refused_subset",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": [
+    "skill_000525"
+   ]
+  },
+  {
+   "pet_id": "pet_000153",
+   "name": "雪巨人",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000683"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000545",
+   "name": "千棘海针",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000130",
+   "name": "朔夜伊芙",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000328",
+   "name": "声波缇塔",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000118",
+   "name": "皇家狮鹫",
+   "verdicts": [
+    "computed_uncorrected",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000298"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000458",
+   "name": "深渊蛙",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000683"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000556",
+   "name": "棋契陛下",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000683"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000448",
+   "name": "爆焰喷喷",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000415"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000137",
+   "name": "多多",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "partial_refused_subset"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": [
+    "skill_000591"
+   ]
+  },
+  {
+   "pet_id": "pet_000162",
+   "name": "瑰眼仔",
+   "verdicts": [
+    "computed_uncorrected",
+    "partial_refused_subset",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000793"
+   ],
+   "partial_skills": [
+    "skill_000644"
+   ]
+  },
+  {
+   "pet_id": "pet_000456",
+   "name": "十字蝌蚪",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000683"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000139",
+   "name": "古啦多",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed_uncorrected",
+    "partial_refused_subset"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": [
+    "skill_000591"
+   ]
+  },
+  {
+   "pet_id": "pet_000163",
+   "name": "耳翎瑰魅",
+   "verdicts": [
+    "computed_uncorrected",
+    "partial_refused_subset",
+    "computed_uncorrected",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000793"
+   ],
+   "partial_skills": [
+    "skill_000644"
+   ]
+  },
+  {
+   "pet_id": "pet_000100",
+   "name": "仪式巨像",
+   "verdicts": [
+    "computed_uncorrected",
+    "partial_refused_subset",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": [
+    "skill_000525"
+   ]
+  },
+  {
+   "pet_id": "pet_000485",
+   "name": "学院呱呱",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000473",
+   "name": "画间法师手",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000575",
+   "name": "棋契陛下",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000576",
+   "name": "棋契陛下",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000683"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000573",
+   "name": "棋契陛下",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000577",
+   "name": "棋契陛下",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000436",
+   "name": "棋祈督",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000433",
+   "name": "棋骑士",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000683"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000438",
+   "name": "棋骑士",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000683"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000434",
+   "name": "棋绮后",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000439",
+   "name": "棋绮后",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000579",
+   "name": "棋契陛下",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "fail_closed"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": true,
+   "no_fail_closed": false,
+   "fail_closed_skills": [
+    "skill_000483"
+   ],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000018",
+   "name": "蹦蹦花",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000537",
+   "name": "蹦蹦果",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  },
+  {
+   "pet_id": "pet_000254",
+   "name": "蹦蹦花",
+   "verdicts": [
+    "computed",
+    "computed_unverified",
+    "computed",
+    "computed_uncorrected"
+   ],
+   "all_four_computed": false,
+   "has_fail_closed": false,
+   "no_fail_closed": true,
+   "fail_closed_skills": [],
+   "partial_skills": []
+  }
+ ]
+}

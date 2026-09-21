@@ -1,0 +1,82 @@
+{
+ "schema_version": 1,
+ "generated_by": "scripts/roco/verify-coverage-axes.mjs",
+ "command": "node scripts/roco/verify-coverage-axes.mjs",
+ "roster48_sha256": "6c3bfae1e6c0fff15b0fd07801efd64b740e66d4016dc0bb5a479b51ed44b650",
+ "matrix_doc_sha256": "ac9dc5cafcaa983ef930fce3880a4bbedabe3da2e794f5d31e1eec7c95eac3cb",
+ "checks_passed": 14,
+ "problems": [],
+ "checks": [
+  {
+   "code": "matrix_stale_sentence_absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "code": "matrix_correction_present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "code": "matrix_engine_col_present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "code": "support_current_all_knowledge_only",
+   "ok": true,
+   "detail": "12/12"
+  },
+  {
+   "code": "effect_support_all_unsupported",
+   "ok": true,
+   "detail": "824/824"
+  },
+  {
+   "code": "trait_counts_match",
+   "ok": true,
+   "detail": "{\"FULL\":6,\"PARTIAL\":2,\"REFUSED\":4}"
+  },
+  {
+   "code": "trait_pets_len_12",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "code": "progress_trait_line_present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "code": "trait_summary_vs_engine_equal",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "code": "roster60_prefix_of_48",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "code": "roster-48_all_triples_legal",
+   "ok": true,
+   "detail": "17296/17296"
+  },
+  {
+   "code": "roster-48_completion_1.0",
+   "ok": true,
+   "detail": "1000/1000"
+  },
+  {
+   "code": "roster-60_all_triples_legal",
+   "ok": true,
+   "detail": "34220/34220"
+  },
+  {
+   "code": "roster-60_completion_1.0",
+   "ok": true,
+   "detail": "1000/1000"
+  }
+ ],
+ "selftest": null
+}
