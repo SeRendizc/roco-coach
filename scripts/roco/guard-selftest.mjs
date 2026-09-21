@@ -50,6 +50,45 @@ export const INJECTIONS = [
     run: {cmd: 'node', args: ['--test', 'tests/evals/structure-contract.test.js']},
   },
   {
+    id: 'coach-core-node-import',
+    guard: 'Coach 核心（game-adapter / compare-model 的静态 import 图）到不了页面层、也不依赖 node:*',
+    file: 'src/coach/game-adapter.js',
+    // 为什么这条值得单独登记：`game-adapter.js` **不在** server 的 browserModules() 里
+    // （全仓只有测试与脚本 import 它），所以上面那条「浏览器模块图里不许 node:*」
+    // 对它是**盲区**——同一次语义的退化发生在核心侧，页面测试与 Node 测试都不会红。
+    find: 'export const GAME_ADAPTER_CONTRACT_VERSION = 1;',
+    replace: "import {readFileSync as __injectedFs} from 'node:fs';\n\n"
+      + 'export const GAME_ADAPTER_CONTRACT_VERSION = 1;',
+    catches: '契约核心悄悄绑上 Node 宿主（读盘/读进程）：核心不再只消费契约，「换一个宿主还能不能跑」当场失效，而所有既有测试照常绿',
+    run: {cmd: 'node', args: ['--test', 'tests/evals/structure-contract.test.js']},
+  },
+  {
+    id: 'coach-core-client-import',
+    guard: 'Coach 核心（game-adapter / compare-model 的静态 import 图）到不了页面层、也不依赖 node:*',
+    file: 'src/coach/game-adapter.js',
+    // 注入的说明符刻意用**拼接**写：直写一条相对 import 会留在登记表自己的文本里，
+    // 被上面那条「全仓 js/mjs 的相对 import 都指向真实文件」扫到（它按 `scripts/roco/`
+    // 解析，指向一个不存在的文件，于是全仓永久变红）——browser-node-import 踩过同一个坑。
+    find: 'export const GAME_ADAPTER_CONTRACT_VERSION = 1;',
+    replace: "import {__injectedPage} from '" + '../client/roco.js' + "';\n\n"
+      + 'export const GAME_ADAPTER_CONTRACT_VERSION = 1;',
+    catches: '核心反过来依赖页面层：核心不再是「只吃契约」，而是绑死在某一个具体页面上。coach-advice.test.js 里那条同题检查只看说明符文本里有没有 src/client，换成 ../client/… 就漏过去了',
+    run: {cmd: 'node', args: ['--test', 'tests/evals/structure-contract.test.js']},
+  },
+  {
+    id: 'coach-core-dom-read',
+    guard: 'Coach 核心图的 src/coach/** 不读 document / window 这类浏览器全局',
+    file: 'src/coach/compare-model.js',
+    // 注入的是**真实的 DOM 读取**（`document.title`），但包在箭头函数里：模块顶层不会
+    // 执行它，所以只可能被「静态扫源码」那条规则抓到，不会因为 Node 里 `document is
+    // not defined` 抛错而变成**假红**——假红和空守卫一样会让自检骗人。
+    find: 'export const COMPARE_PICK_LIMIT = 3;',
+    replace: 'const __injectedDomRead = () => document.title;\n\n'
+      + 'export const COMPARE_PICK_LIMIT = 3;',
+    catches: '比较模型偷偷读页面状态就不再是纯函数：mock 宿主、评测脚本、报告拿到的东西会随浏览器环境变，而它在浏览器模块图里，正是「页面只渲染、核心算模型」这条分工的破口',
+    run: {cmd: 'node', args: ['--test', 'tests/evals/structure-contract.test.js']},
+  },
+  {
     id: 'layer-never-active',
     guard: '判定层在 on 模式下必须真的激活',
     file: 'src/coach/intervention-model.js',
