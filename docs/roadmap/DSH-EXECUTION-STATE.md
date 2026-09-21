@@ -697,6 +697,23 @@ active goal 已按此重写（revision 2）。
 
 ---
 
+### C6.6 第 47—49 轮（UI 阶段开头）的断点与两个卡住的 agent
+
+| 项 | 状态 | 说明 |
+|---|---|---|
+| HEAD | `ffa2a2d` | 已提交：`a44563d`（修掉会覆盖文档修正的过时句）、`ffa2a2d`（`roster-48.json` 去掉生成时间戳 → 连跑两次 sha256 相同） |
+| 工具链可复现性 | ✅ 已验证 | `export-full-catalog.mjs` → **pets=622 / learnsets=312**；`build-roster-48.mjs` → **48 只 / 独特技能 76 / 属性 18 / 硬机制 8/8** |
+| **批 0 `6c5a0d07`** | ⛔ **已中断** | 连跑约 2.5 小时、两次清空自己的中间产物，盘上从未留下可复核成品 → L1 图鉴与 48 只落库**改由主线程自己做** |
+| **矩阵重新定位 `edd4b551`** | ⏳ 仍在跑 | 目标：让 12 个局面跟上 `36832d1`（引擎 fail-closed 修复改变了战斗走向）。三轮检查均只见重跑产物，**`scripts/roco/demo-acceptance.mjs` 的期望值尚未落盘** |
+| 我红跑留下的 3 个产物 | 未提交（故意） | `reports/roco/demo-acceptance/{coach-positions-browser,demo-acceptance,demo-dom-snapshots}.json` 是失败那次跑的产物；矩阵回绿时一并提交 |
+| 门禁 | **未全绿** | `latest.json` 仍 `unit` 红；`demo-acceptance` 仍 3 条红（三个局面 kind 失配 + 形状最大重复 3 > 上限 2）。**全绿前不得宣称稳定** |
+
+**下一轮第一件事**（不依赖任何 agent）：把 `tmp/roco-full-catalog.json` 归一成
+`data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json`（新 schema 版本，
+不污染现有 12 只那份；逐字段 provenance + `unknown` 清单 + refused 原因码 R1—R8），
+再让 `/api/roco/roster` 支持分页/筛选并扩到 48 只（旧响应形状向后兼容）；
+两项都要配 `verify`（带必红反证）与真服务抽样（任意合法 3v3 开局并能打完）。
+
 ## 2. 当前 HEAD 与工作区
 
 ### 2.1 第 11 轮结束时的可恢复断点（每次压缩前更新）
