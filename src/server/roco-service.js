@@ -19,8 +19,14 @@
 // 服务按需启动、空闲自动停：演示页不点开就不占进程，点开后 5 分钟没人用就回收。
 // 停服务会带走 Python 子进程（RocoClient 自己会 kill 它的 child）。
 
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {dirname,join} from 'node:path';
 import {RocoClient,RULESET_ID} from '../coach/roco-client.js';
 import {shadowToolDecision} from '../coach/shadow-tools.js';
+// RC-205：同种个体比较**只有一份判据**。盒子路由不另写一套「哪些字段算 same/different/unknown」，
+// 直接复用 RC-203 那个纯函数（它本来就带 `OwnedPetSpeciesMismatchError`：不同种直接抛错，不静默比较）。
+import {compareOwnedPets,OwnedPetSpeciesMismatchError} from '../../scripts/roco/owned-pets-lib.mjs';
 
 /** 空闲多久回收 Python 子进程。演示页关掉后不该一直占着一个 Python。 */
 export const IDLE_STOP_MS=5*60*1000;
@@ -154,6 +160,604 @@ function skillRow(item){
 function plannerPublicOf(result){
  const pub=result?.public;
  return pub&&typeof pub==='object'?pub:null;
+}
+
+// ── RC-205：精灵盒子的数据层 ────────────────────────────────────────────────
+//
+// 四条纪律写在这份代码的入口处，后面每个函数都受它约束：
+//
+//   ① **只读**。这里只 readFileSync 冻结产物，不写任何东西；`data/roco/**` 一个字节都不改。
+//      也因此这一层**不碰 Python**：盒子的数据在磁盘上就有，规则服务没起来也照样能查。
+//   ② **不编数值**。全图鉴 622 条里只有 48 条在迁移层里有配招与种族值。没有的那 574 条
+//      就显示「本仓库没有这一项」，绝不拿别的字段凑一个看起来精确的数字。
+//   ③ **玩家层与工程层分字段**。`player` 只放玩家读得懂的键；`provenance` / `source_scope` /
+//      `unknown_fields` / `state_version` / `coverage` / 许可一律进 `dev`，
+//      页面把它们放进**默认收起**的开发者抽屉。同一份数据在两边的键名刻意不同
+//      （玩家层用 `select` / `group`，不用 `pet_id` / `species_id`），
+//      这样「工程字段漏进玩家层」这件事可以被机械判红。
+//   ④ **fail closed**。参数白名单之外的键、格式不对的数字、不认识的系别/定位/支持等级
+//      一律 `ok:false` + 400，**不静默取整、不静默忽略**。
+
+/** 盒子用到的只读产物（与 RC-201/202/203 的产物一一对应，不新增副本）。 */
+export const BOX_PATHS=Object.freeze({
+ pack:'data/roco/game-data-pack/v2/pack.json',
+ roster:'data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json',
+ skills:'data/roco/normalized/roco-world-s4-2026-09-10/skills.json',
+ owned:'data/roco/owned/owned-pets.json',
+ supportMatrix:'data/roco/normalized/roco-world-s4-2026-09-10/support-matrix.json',
+ supportMatrixLayer:'data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/support-matrix.json',
+});
+
+/** 定位的中文名。顺序就是界面上的顺序（与 `src/client/roco.js` 同一套词表）。 */
+export const BOX_ROLE_LABELS=Object.freeze({attacker:'输出',tank:'坦克',recovery:'回复',control:'控制',support:'辅助'});
+/** 支持等级的中文名。左边是数据里的取值，右边是**玩家读得懂**的说法，不出现工程枚举名。 */
+export const BOX_SUPPORT_LABELS=Object.freeze({
+ FULL_VERIFIED:'已核验可模拟',SIMULATABLE_UNVERIFIED:'可模拟（未核验）',SIM_PARTIAL:'部分可模拟',
+ PARTIAL:'部分支持',KNOWLEDGE_ONLY:'仅图鉴资料',REFUSED:'暂不支持',
+});
+/** 配招槽位的中文名（登记层的标注，不是引擎数值）。 */
+export const BOX_SLOT_LABELS=Object.freeze({free_attack:'自由位',reactive_defense:'应对位',
+ main_attack:'主攻位',mechanism_support:'机制位'});
+/** 六维的中文名与固定顺序。 */
+export const BOX_STAT_FIELDS=Object.freeze([['hp','生命'],['atk','物攻'],['def','物防'],
+ ['spa','魔攻'],['spd','魔防'],['spe','速度']]);
+/** 逐字段比较的三种状态。 */
+export const BOX_STATUS_LABELS=Object.freeze({same:'相同',different:'不同',unknown:'未知'});
+/** 比较字段的中文名（键名沿用 RC-203 比较器的字段名，不多造一套）。 */
+export const BOX_FIELD_LABELS=Object.freeze({level:'等级',nature:'性格',talent:'资质',specialty:'特长',
+ bloodline:'血脉',skills:'四个技能（按顺序）',favourite:'收藏',locked:'锁定'});
+/** 玩家层解释「为什么这一栏是未知」的三句人话。 */
+export const BOX_UNKNOWN_REASON='本仓库没有这一项的取值：数据里没有登记，所以这一栏标「未知」，不猜。';
+export const BOX_EFFECT_REASON='养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。';
+export const BOX_NO_LAYER_REASON='本仓库没有这一项：这只精灵不在有配招与数值的 48 只迁移层里'
+ +'（全图鉴 622 条里只有 48 条配过招）。';
+export const BOX_PANEL_REASON='等级换算后的面板数值：本仓库没有这一项——换算公式未校准，'
+ +'所以盒子里只给迁移层登记过的种族值，不给伪精确的成品数值。';
+
+const BOX_ROOT=dirname(dirname(dirname(fileURLToPath(import.meta.url))));
+const boxReadJson=(rel)=>JSON.parse(readFileSync(join(BOX_ROOT,rel),'utf8'));
+const boxIdAsc=(a,b)=>(a<b?-1:a>b?1:0);
+
+/** 全量索引：读一次，之后复用（只读数据，缓存不会过期）。 */
+let boxIndexCache=null;
+
+/** 测试用：丢掉缓存，强制重读磁盘。 */
+export function resetBoxIndex(){boxIndexCache=null;}
+
+/**
+ * 装配盒子索引。**所有品类都在这里定型**，路由只做筛选与投影。
+ *
+ * 为什么不在这里合并「面板数值」：因为本仓库根本没有面板数值（`panel_stats` 全是 null，
+ * 换算公式未校准）。合并进来就等于编——所以只有迁移层登记过的种族值与四个技能。
+ */
+export function loadBoxIndex(){
+ if(boxIndexCache)return boxIndexCache;
+ const pack=boxReadJson(BOX_PATHS.pack);
+ const roster=boxReadJson(BOX_PATHS.roster);
+ const skillsDoc=boxReadJson(BOX_PATHS.skills);
+ const owned=boxReadJson(BOX_PATHS.owned);
+ const matrix=boxReadJson(BOX_PATHS.supportMatrix);
+ const matrixLayer=boxReadJson(BOX_PATHS.supportMatrixLayer);
+
+ // ① 全图鉴：pack 的 pet 实体（`pet_record` 460 + `pet_form` 162 = 622）。
+ const catalog=(pack.sections?.distributable?.entities??[])
+  .filter((e)=>e.group==='pet')
+  .map((e)=>({
+   id:e.id,record_kind:e.record_kind??null,name:e.name??null,
+   title:e.title??e.name??null,number:e.tags?.number??null,klass:e.tags?.class??null,
+   stage:e.tags?.stage??null,types:Array.isArray(e.tags?.types)?[...e.tags.types]:[],
+   source_scope:e.source_scope??null,licence_ref:e.licence_ref??null,
+   provenance:Array.isArray(e.provenance)?e.provenance:[],
+   unknown_fields:Array.isArray(e.unknown_fields)?[...e.unknown_fields]:[],
+   refs:Array.isArray(e.refs)?e.refs:[],
+  }))
+  .sort((a,b)=>boxIdAsc(a.id,b.id));
+ const catalogById=new Map(catalog.map((e)=>[e.id,e]));
+
+ // ② 迁移层 48 只：配招、种族值、定位、速度档（登记层标注）。
+ const layer=new Map((roster.pets??[]).map((p)=>[p.pet_id,p]));
+
+ // ③ 支持等级：两份 support-matrix 各管一段（12 baseline + 36 overlay），合并成一张表。
+ const support=new Map();
+ for(const list of [matrix.pets??[],matrixLayer.pets??[]]){
+  for(const p of list){
+   const level=p?.support?.current??(typeof p?.support==='string'?p.support:null);
+   if(p?.pet_id&&level)support.set(p.pet_id,{level,reason:p.support?.reason??null});
+  }
+ }
+
+ // ④ 技能表：把四个技能 id 换成玩家读得懂的那几栏。
+ const skills=new Map(Object.entries(skillsDoc.skills??{}));
+
+ // ⑤ 我的盒子：80 个 owned 实例，按 instance_id 排序（顺序稳定，翻页与截图才对得上）。
+ const instances=[...(owned.instances??[])].sort((a,b)=>boxIdAsc(a.instance_id??'',b.instance_id??''));
+ const instanceById=new Map(instances.map((i)=>[i.instance_id,i]));
+ const instancesBySpecies=new Map();
+ for(const i of instances){
+  if(!instancesBySpecies.has(i.species_id))instancesBySpecies.set(i.species_id,[]);
+  instancesBySpecies.get(i.species_id).push(i);
+ }
+
+ // ⑥ 筛选词表：系别按**全图鉴里的出现顺序**（只出现过的才列出来），定位/支持等级按固定词表序。
+ const types=[];
+ for(const e of catalog)for(const t of e.types)if(!types.includes(t))types.push(t);
+ const roleOrder=Object.keys(BOX_ROLE_LABELS);
+ const roles=roleOrder.filter((r)=>[...layer.values()].some((p)=>p.role===r));
+ const supportOrder=Object.keys(BOX_SUPPORT_LABELS);
+ const supports=supportOrder.filter((s)=>[...support.values()].some((x)=>x.level===s));
+
+ boxIndexCache={pack,roster,owned,catalog,catalogById,layer,support,skills,instances,instanceById,
+  instancesBySpecies,types,roles,supports,
+  coverage:{
+   catalog_pets:catalog.length,
+   pet_record:catalog.filter((e)=>e.record_kind==='pet_record').length,
+   pet_form:catalog.filter((e)=>e.record_kind==='pet_form').length,
+   with_moveset_layer:layer.size,
+   owned_instances:instances.length,
+   owned_species:instancesBySpecies.size,
+   panel_stats_non_null:instances.filter((i)=>i.panel_stats&&typeof i.panel_stats==='object').length,
+   base_stats_available:layer.size,
+  },
+  ruleset_id:owned.ruleset_id??RULESET_ID,
+  pack_id:pack.pack_id??null,pack_schema_version:pack.schema_version??null,
+  owned_schema_version:owned.schema_version??null,dataset_hash:owned.dataset_hash??null,
+ };
+ return boxIndexCache;
+}
+
+/** 玩家层能用的筛选词表（带中文标签），给界面直接渲染用。 */
+function boxVocab(index){
+ return {
+  types:[...index.types],
+  roles:index.roles.map((value)=>({value,label:BOX_ROLE_LABELS[value]})),
+  supports:index.supports.map((value)=>({value,label:BOX_SUPPORT_LABELS[value]})),
+  record_kinds:[{value:'pet_record',label:'精灵'},{value:'pet_form',label:'形态'}],
+ };
+}
+
+/** 工程层（只进默认收起的开发者抽屉）：来源、覆盖、未知字段、版本与许可。 */
+function boxDev(index,extra={}){
+ return {
+  state_version:'rc205.1',
+  ruleset_id:index.ruleset_id,pack_id:index.pack_id,
+  pack_schema_version:index.pack_schema_version,owned_schema_version:index.owned_schema_version,
+  dataset_hash:index.dataset_hash,
+  source_scope:'frozen_l1',
+  licence_ref:'wiki-rocom-snapshot',
+  coverage:{...index.coverage},
+  data_paths:{...BOX_PATHS},
+  unknown_fields_allowlist:Array.isArray(index.pack.unknown_fields_allowlist)?[...index.pack.unknown_fields_allowlist]:[],
+  ...extra,
+ };
+}
+
+/** 工程层的筛选回显：原始参数（连 `species_id` 这样的键名一起）只出现在这里。 */
+function boxRawFilters(params){
+ return {kind:params.kind??null,q:params.q??null,type:params.type??null,role:params.role??null,
+  support:params.support??null,record_kind:params.record_kind??null,favourite:params.favourite,
+  locked:params.locked,species_id:params.species_id??null,offset:params.offset??null,limit:params.limit??null};
+}
+
+/** 迁移层的一只精灵 → 玩家层的数值与四个技能（只有 48 只有这一段）。 */
+function boxLayerNumbers(index,petId){
+ const p=index.layer.get(petId);
+ if(!p)return null;
+ const stats=p.stats&&typeof p.stats==='object'?p.stats:null;
+ const moveset=(Array.isArray(p.moveset)?p.moveset:[]).map((m,position)=>({
+  order:position+1,
+  slot_label:BOX_SLOT_LABELS[m.slot]??null,
+  name:m.name??null,element:m.element??null,category:m.category??null,
+  energy:Number.isFinite(m.energy)?m.energy:null,
+  // 没给威力就照实说「本仓库没有这一项」，**绝不补 0**（威力那一栏有 fail-closed 凭据）。
+  power_label:Number.isFinite(m.power)?String(m.power):'本仓库没有这一项',
+  desc:m.desc??null,
+ }));
+ return {
+  role_label:p.role?(BOX_ROLE_LABELS[p.role]??p.role):null,
+  speed_tier:p.speed_tier??null,
+  metric_label:'种族值（迁移层登记，不是等级换算后的面板值）',
+  metrics:stats?BOX_STAT_FIELDS.filter(([key])=>Number.isFinite(stats[key]))
+   .map(([key,label])=>({label,value:stats[key]})):null,
+  metric_total:Number.isFinite(p.stat_total)?p.stat_total:null,
+  moveset,
+  moveset_note:moveset.length?'这四个技能是迁移层登记的配招（不是最优解、不是社区推荐、不是胜率结果）。'
+   :BOX_NO_LAYER_REASON,
+ };
+}
+
+/** 一只全图鉴实体 → 玩家层的卡片（首层只给：名字、系别、形态标记、定位、支持等级）。 */
+function boxCatalogCard(index,e){
+ const layer=index.layer.get(e.id)??null;
+ const sup=index.support.get(e.id)??null;
+ return {
+  select:e.id,
+  name:e.title??e.name,
+  alias:e.title&&e.name&&e.title!==e.name?e.name:null,
+  types:[...e.types],
+  form_label:e.record_kind==='pet_form'?'形态':null,
+  role_label:layer?.role?(BOX_ROLE_LABELS[layer.role]??layer.role):null,
+  support_label:sup?(BOX_SUPPORT_LABELS[sup.level]??sup.level):null,
+  has_moveset:Boolean(layer),
+  has_metrics:Boolean(layer?.stats),
+ };
+}
+
+/** 工程层的卡片投影：玩家层刻意**没有**这些键（`pet_id` / `species_id` / provenance / unknown_fields）。 */
+function boxCatalogCardDev(e){
+ return {pet_id:e.id,record_kind:e.record_kind,name:e.name,title:e.title,
+  source_scope:e.source_scope,licence_ref:e.licence_ref,
+  provenance:e.provenance,unknown_fields:e.unknown_fields,refs:e.refs};
+}
+
+/** 一个 owned 实例 → 玩家层的卡片（首层给：名字、系别、等级、定位、收藏/锁定）。 */
+function boxMineCard(index,i){
+ const e=index.catalogById.get(i.species_id)??null;
+ const layer=index.layer.get(i.species_id)??null;
+ const sup=index.support.get(i.species_id)??null;
+ const badges=[];
+ if(i.favourite===true)badges.push('收藏');
+ if(i.locked===true)badges.push('锁定');
+ return {
+  select:i.instance_id,
+  group:i.species_id,
+  name:i.species_name??e?.name??null,
+  types:e?[...e.types]:(layer?[...layer.types]:[]),
+  level:Number.isFinite(i.level)?i.level:null,
+  badges,
+  favourite:i.favourite===true,
+  locked:i.locked===true,
+  role_label:layer?.role?(BOX_ROLE_LABELS[layer.role]??layer.role):null,
+  support_label:sup?(BOX_SUPPORT_LABELS[sup.level]??sup.level):null,
+  has_moveset:Array.isArray(i.skills)&&i.skills.length>0,
+  has_metrics:Boolean(i.base_stats),
+  effects_calibrated:false,
+ };
+}
+
+/** 工程层的个体投影。 */
+function boxMineCardDev(i){
+ return {instance_id:i.instance_id,species_id:i.species_id,species_tier:i.species_tier??null,
+  level:i.level??null,favourite:i.favourite===true,locked:i.locked===true,
+  source:i.source??null,licence_ref:i.licence_ref??null,
+  provenance:Array.isArray(i.provenance)?i.provenance:[],
+  unknown_fields:Array.isArray(i.unknown_fields)?[...i.unknown_fields]:[],
+  build_hash:i.build_hash??null};
+}
+
+/** 成长属性（性格/资质/特长/血脉）在玩家层的读法：有值就给值，没值就说「本仓库没有这一项」。 */
+function boxGrowthPlayer(attr){
+ const value=attr?.value??null;
+ return {
+  value,
+  status:value===null?'unknown':'known',
+  reason:value===null?BOX_UNKNOWN_REASON:null,
+  effect_label:BOX_EFFECT_REASON,
+ };
+}
+
+/** 四个技能：id → 玩家读得懂的那几栏（技能表里没有就照实说没有）。 */
+function boxSkillsPlayer(index,ids){
+ return (Array.isArray(ids)?ids:[]).map((id,position)=>{
+  const s=index.skills.get(id)??null;
+  return {
+   order:position+1,
+   name:s?.name??null,
+   element:s?.element??null,
+   category:s?.category??null,
+   energy:s&&Number.isFinite(s.energy)?s.energy:null,
+   power_label:s&&Number.isFinite(s.power)?String(s.power):'本仓库没有这一项',
+   desc:s?.desc??null,
+   registered:Boolean(s),
+  };
+ });
+}
+
+// ── 路由参数：白名单 + fail closed ────────────────────────────────────────
+
+export const BOX_PARAM_KEYS=Object.freeze(['kind','q','type','role','support','record_kind',
+ 'favourite','locked','species_id','offset','limit','detail','compare']);
+export const BOX_PAGE_SIZES=Object.freeze({default:24,max:60});
+
+/**
+ * 解析并校验盒子查询。**没有任何一步是「容错」**：
+ *   · 白名单外的键 → 错误（不是静默忽略，否则拼错参数会得到一份看起来对的答案）；
+ *   · 数字只认十进制位数（`1e3` / `-1` / `1.5` / `abc` 都拒绝，**不取整、不夹紧**）；
+ *   · 系别/定位/支持等级必须在词表里，别的取值一律拒绝。
+ * 返回 `{errors,params}`；`errors` 非空时调用方直接 400。
+ */
+export function parseBoxQuery(query={}){
+ const errors=[];
+ const raw={};
+ for(const [key,value] of Object.entries(query??{})){
+  if(!BOX_PARAM_KEYS.includes(key)){errors.push(`未知参数 ${key}（白名单：${BOX_PARAM_KEYS.join('/')}）`);continue;}
+  if(Array.isArray(value)){errors.push(`${key} 只能给一个值`);continue;}
+  raw[key]=value;
+ }
+ const text=(key,max)=>{
+  if(raw[key]===undefined)return null;
+  const value=raw[key];
+  if(typeof value!=='string'||value.trim()===''){errors.push(`${key} 必须是非空字符串`);return null;}
+  const trimmed=value.trim();
+  if(max&&trimmed.length>max){errors.push(`${key} 太长了（最多 ${max} 个字符）`);return null;}
+  return trimmed;
+ };
+ const integer=(key,{min,max})=>{
+  if(raw[key]===undefined)return null;
+  const value=raw[key];
+  if(typeof value!=='string'||!/^\d+$/.test(value)){
+   errors.push(`${key} 必须是非负整数（实际 ${JSON.stringify(value)}；不接受 1e3 / -1 / 1.5 这类写法）`);
+   return null;
+  }
+  const number=Number(value);
+  if(number<min||number>max){errors.push(`${key} 必须在 ${min}..${max} 之间（实际 ${number}）`);return null;}
+  return number;
+ };
+ const bool=(key)=>{
+  if(raw[key]===undefined)return null;
+  const value=raw[key];
+  if(value!=='true'&&value!=='false'){errors.push(`${key} 只能是 true 或 false（实际 ${JSON.stringify(value)}）`);return null;}
+  return value==='true';
+ };
+ const oneOf=(key,allowed)=>{
+  if(raw[key]===undefined)return null;
+  const value=raw[key];
+  if(typeof value!=='string'||!allowed.includes(value)){
+   errors.push(`${key} 必须是 ${allowed.join(' / ')} 之一（实际 ${JSON.stringify(value)}）`);
+   return null;
+  }
+  return value;
+ };
+
+ const index=loadBoxIndex();
+ const params={
+  kind:oneOf('kind',['catalog','mine']),
+  q:text('q',40),
+  type:oneOf('type',index.types),
+  role:oneOf('role',index.roles),
+  support:oneOf('support',index.supports),
+  record_kind:oneOf('record_kind',['pet_record','pet_form']),
+  favourite:bool('favourite'),
+  locked:bool('locked'),
+  species_id:raw.species_id===undefined?null:text('species_id',16),
+  offset:integer('offset',{min:0,max:100000}),
+  limit:integer('limit',{min:1,max:BOX_PAGE_SIZES.max}),
+  detail:raw.detail===undefined?null:text('detail',16),
+  compare:raw.compare===undefined?null:text('compare',40),
+ };
+ if(params.species_id!==null&&!/^pet_\d{6}$/.test(params.species_id)){
+  errors.push(`species_id 必须是 pet_ 加 6 位数字（实际 ${JSON.stringify(params.species_id)}）`);
+ }
+ if(params.detail!==null&&!/^(pet_\d{6}|own-\d{4})$/.test(params.detail)){
+  errors.push(`detail 必须是 pet_000000 或 own-0000 形状的 id（实际 ${JSON.stringify(params.detail)}）`);
+ }
+ if(params.compare!==null){
+  const parts=params.compare.split(',').map((x)=>x.trim());
+  if(parts.length!==2||!parts.every((id)=>/^own-\d{4}$/.test(id))){
+   errors.push(`compare 必须是两个用逗号分开的个体 id（例如 own-0001,own-0002；实际 ${JSON.stringify(params.compare)}）`);
+  }
+ }
+ const modes=['kind','detail','compare'].filter((key)=>params[key]!==null);
+ if(modes.length===0){
+  errors.push('必须给出 kind=catalog 或 kind=mine，或者用 detail=<id> / compare=<a>,<b> 查单个或两个个体');
+ }else if(modes.length>1){
+  errors.push(`kind / detail / compare 只能出现一个（实际同时给了 ${modes.join(' 与 ')}）`);
+ }
+ return {errors,params};
+}
+
+/** 名字/称号/类别/编号的子串匹配。空查询词 = 全都要。 */
+function boxMatchesText(fields,q){
+ if(!q)return true;
+ const needle=q.toLowerCase();
+ return fields.some((field)=>(typeof field==='string'||typeof field==='number')
+  &&String(field).toLowerCase().includes(needle));
+}
+
+function boxPaged(rows,params){
+ const offset=params.offset??0;
+ const limit=params.limit??BOX_PAGE_SIZES.default;
+ return {total:rows.length,offset,limit,count:Math.min(limit,Math.max(0,rows.length-offset)),
+  rows:rows.slice(offset,offset+limit)};
+}
+
+// ── 三个模式：catalog / mine / detail / compare ───────────────────────────
+
+function boxCatalogMode(index,params){
+ const rows=index.catalog.filter((e)=>{
+  if(params.type&&!e.types.includes(params.type))return false;
+  if(params.record_kind&&e.record_kind!==params.record_kind)return false;
+  const layer=index.layer.get(e.id)??null;
+  if(params.role&&layer?.role!==params.role)return false;
+  if(params.support&&(index.support.get(e.id)?.level??null)!==params.support)return false;
+  return boxMatchesText([e.name,e.title,e.klass,e.number],params.q);
+ });
+ const page=boxPaged(rows,params);
+ return {
+  mode:'catalog',
+  player:{
+   kind:'catalog',
+   total:page.total,offset:page.offset,limit:page.limit,count:page.rows.length,
+   filters:{q:params.q??null,type:params.type??null,
+    role_label:params.role?(BOX_ROLE_LABELS[params.role]??params.role):null,
+    support_label:params.support?(BOX_SUPPORT_LABELS[params.support]??params.support):null,
+    record_kind_label:params.record_kind==='pet_form'?'形态':(params.record_kind==='pet_record'?'精灵':null)},
+   filters_available:boxVocab(index),
+   coverage_note:`全图鉴 ${index.coverage.catalog_pets} 条：其中 ${index.coverage.with_moveset_layer} 条配过招、`
+    +`有迁移层登记的种族值；其余只有名字、系别与形态，点开详情会如实说「本仓库没有这一项」。`,
+   cards:page.rows.map((e)=>boxCatalogCard(index,e)),
+  },
+  dev:boxDev(index,{
+   mode:'catalog',
+   filters:boxRawFilters(params),
+   catalog_total:index.coverage.catalog_pets,
+   filtered_total:page.total,
+   cards:page.rows.map((e)=>boxCatalogCardDev(e)),
+  }),
+ };
+}
+
+function boxMineMode(index,params){
+ const rows=index.instances.filter((i)=>{
+  if(params.favourite!==null&&(i.favourite===true)!==params.favourite)return false;
+  if(params.locked!==null&&(i.locked===true)!==params.locked)return false;
+  if(params.species_id&&i.species_id!==params.species_id)return false;
+  const e=index.catalogById.get(i.species_id)??null;
+  const layer=index.layer.get(i.species_id)??null;
+  if(params.type&&!(e?e.types:(layer?.types??[])).includes(params.type))return false;
+  if(params.role&&layer?.role!==params.role)return false;
+  if(params.support&&(index.support.get(i.species_id)?.level??null)!==params.support)return false;
+  return boxMatchesText([i.species_name,e?.name,e?.title,e?.klass,e?.number,i.instance_id],params.q);
+ });
+ const page=boxPaged(rows,params);
+ return {
+  mode:'mine',
+  player:{
+   kind:'mine',
+   total:page.total,offset:page.offset,limit:page.limit,count:page.rows.length,
+   filters:{q:params.q??null,type:params.type??null,
+    role_label:params.role?(BOX_ROLE_LABELS[params.role]??params.role):null,
+    support_label:params.support?(BOX_SUPPORT_LABELS[params.support]??params.support):null,
+    favourite:params.favourite,locked:params.locked,
+    species:params.species_id?{name:(index.catalogById.get(params.species_id)?.name??null)}:null},
+   filters_available:boxVocab(index),
+   coverage_note:`我的盒子 ${index.coverage.owned_instances} 个个体，来自 ${index.coverage.owned_species} 个物种；`
+    +'性格/资质/特长/血脉在本仓库一律只是标签，养成效果未校准。',
+   cards:page.rows.map((i)=>boxMineCard(index,i)),
+  },
+  dev:boxDev(index,{mode:'mine',filters:boxRawFilters(params),
+   owned_total:index.coverage.owned_instances,filtered_total:page.total,
+   cards:page.rows.map((i)=>boxMineCardDev(i))}),
+ };
+}
+
+function boxDetailMode(index,id){
+ const entity=index.catalogById.get(id)??null;
+ if(entity){
+  const layer=index.layer.get(id)??null;
+  const numbers=boxLayerNumbers(index,id);
+  const sup=index.support.get(id)??null;
+  return {
+   mode:'detail',
+   player:{
+    kind:'detail',entity:'species',
+    name:entity.title??entity.name,
+    alias:entity.title&&entity.name&&entity.title!==entity.name?entity.name:null,
+    types:[...entity.types],form_label:entity.record_kind==='pet_form'?'形态':null,
+    role_label:layer?.role?(BOX_ROLE_LABELS[layer.role]??layer.role):null,
+    support_label:sup?(BOX_SUPPORT_LABELS[sup.level]??sup.level):null,
+    metrics:numbers?numbers.metrics:null,
+    metrics_label:numbers?numbers.metric_label:null,
+    metrics_total:numbers?numbers.metric_total:null,
+    metrics_missing_reason:numbers?null:BOX_NO_LAYER_REASON,
+    moveset:numbers&&numbers.moveset.length?numbers.moveset:null,
+    moveset_note:numbers?numbers.moveset_note:BOX_NO_LAYER_REASON,
+    panel:{available:false,reason:BOX_PANEL_REASON},
+    effect_note:BOX_EFFECT_REASON,
+   },
+   dev:boxDev(index,{mode:'detail',entity:'species',pet_id:entity.id,record_kind:entity.record_kind,
+    source_scope:entity.source_scope,licence_ref:entity.licence_ref,
+    provenance:entity.provenance,unknown_fields:entity.unknown_fields,refs:entity.refs,
+    moveset_available:Boolean(numbers&&numbers.moveset.length)}),
+  };
+ }
+ const instance=index.instanceById.get(id)??null;
+ if(!instance)return null;
+ return {
+  mode:'detail',
+  player:{
+   kind:'detail',entity:'instance',
+   name:instance.species_name??null,
+   group:instance.species_id,
+   level:Number.isFinite(instance.level)?instance.level:null,
+   badges:[...(instance.favourite===true?['收藏']:[]),...(instance.locked===true?['锁定']:[])],
+   traits:['nature','talent','specialty','bloodline'].map((field)=>({
+    label:BOX_FIELD_LABELS[field],
+    ...boxGrowthPlayer(instance[field]),
+   })),
+   skills:boxSkillsPlayer(index,instance.skills),
+   metrics:instance.base_stats?BOX_STAT_FIELDS.filter(([key])=>Number.isFinite(instance.base_stats[key]))
+    .map(([key,label])=>({label,value:instance.base_stats[key]})):null,
+   metrics_label:'种族值（静态登记，不是等级换算后的面板值）',
+   panel:{available:false,reason:BOX_PANEL_REASON},
+   effect_note:BOX_EFFECT_REASON,
+  },
+  dev:boxDev(index,{mode:'detail',entity:'instance',...
+   boxMineCardDev(instance),species_name:instance.species_name??null,
+   skills_raw:Array.isArray(instance.skills)?[...instance.skills]:[],
+   skills_source:instance.skills_source??null,
+   panel_stats:instance.panel_stats??null,
+   base_stats:instance.base_stats??null,
+   growth:['nature','talent','specialty','bloodline'].reduce((out,field)=>{
+    out[field]=instance[field]??null;return out;},{})}),
+ };
+}
+
+/** 逐字段比较：值 → 玩家读得懂的一栏；状态 → 相同/不同/未知。 */
+function boxCompareFieldValue(index,field,value){
+ if(field==='skills'){
+  if(!Array.isArray(value))return null;
+  return boxSkillsPlayer(index,value).map((s)=>s.name??'（本仓库没有这一项）');
+ }
+ if(value===null||value===undefined)return null;
+ return value;
+}
+
+function boxCompareMode(index,ids){
+ const [aId,bId]=ids;
+ const a=index.instanceById.get(aId)??null;
+ const b=index.instanceById.get(bId)??null;
+ if(!a||!b)return {missing:[a?null:aId,b?null:bId].filter(Boolean)};
+ // 不同种必须拒绝：判据在 `scripts/roco/owned-pets-lib.mjs` 里，这里只做转译，不另写一遍。
+ let compared;
+ try{
+  compared=compareOwnedPets(a,b);
+ }catch(error){
+  if(error instanceof OwnedPetSpeciesMismatchError){
+   return {mismatch:{a:error.speciesA,b:error.speciesB,
+    error:`这两只不是同一种精灵（${error.speciesA} / ${error.speciesB}），不能逐字段比较：`
+     +'逐字段比较的前提是同一物种的不同个体。'}};
+  }
+  throw error;
+ }
+ const fields=Object.entries(compared.fields).map(([field,row])=>{
+  const label=BOX_FIELD_LABELS[field]??field;
+  const entry={
+   field,label,
+   status:row.status,
+   status_label:BOX_STATUS_LABELS[row.status]??row.status,
+   a:boxCompareFieldValue(index,field,row.a),
+   b:boxCompareFieldValue(index,field,row.b),
+   reason:null,
+  };
+  if(row.status==='unknown'){
+   // 未知要说清为什么：先说是哪一侧没登记，再补上「养成效果未校准」这条更大的原因。
+   const side=row.detail==='双方取值均不可得'?'两边都':(row.detail==='a 取值不可得'?'这一只（A）':'这一只（B）');
+   entry.reason=`${side}没有登记这一项的取值，所以这一栏标「未知」而不是「不同」。`
+    +(row.effect_reason?`另外，${BOX_EFFECT_REASON}`:'');
+  }
+  if(field==='skills'){
+   entry.order_sensitive=true;
+   entry.set_status=row.skills_as_set??null;
+   entry.set_status_label=BOX_STATUS_LABELS[row.skills_as_set]??row.skills_as_set??null;
+   if(row.status==='different'&&row.skills_as_set==='same')entry.note='技能一样，但顺序不同：顺序也算「不同」。';
+  }
+  return entry;
+ });
+ const counts={same:0,different:0,unknown:0};
+ for(const f of fields)counts[f.status]+=1;
+ return {compared,player:{
+  kind:'compare',
+  name:a.species_name??b.species_name??null,
+  group:a.species_id,
+  a:{name:a.species_name??null,level:a.level??null,badges:[...(a.favourite===true?['收藏']:[]),...(a.locked===true?['锁定']:[])]},
+  b:{name:b.species_name??null,level:b.level??null,badges:[...(b.favourite===true?['收藏']:[]),...(b.locked===true?['锁定']:[])]},
+  fields,counts,
+  identical_in_known_attributes:compared.identical_in_known_attributes===true,
+  summary:compared.identical_in_known_attributes
+   ?'这两只在已知字段上一模一样（未知的那几栏不算「相同」）。'
+   :`这两只有 ${counts.different} 栏不同、${counts.unknown} 栏未知。`,
+  unknown_note:`未知 ${counts.unknown} 栏的原因见每一条；本仓库没有登记取值，就不猜。`,
+ }};
 }
 
 export function createRocoService(options={}){
@@ -462,6 +1066,44 @@ export function createRocoService(options={}){
    evidence_ids:answerEvidence};
  }
 
+ /**
+  * 精灵盒子（RC-205）：`GET /api/roco/box`。
+  *
+  * 和 `roster()` 同一条先例：**只读、不需要 CSRF、只出公开数据**，所以挂在 GET 上。
+  * 和 `roster()` 的一处**刻意的不同**：这条路由不经过 Python——
+  * 盒子读的是磁盘上的冻结产物（pack / roster-48 / owned-pets），规则服务没起来也能查。
+  *
+  * 参数白名单与非法参数的处理在 `parseBoxQuery()` 里（不静默取整、不静默忽略未知键）。
+  * 返回 `{ok,status,mode,player,dev}`：`player` 是玩家层，`dev` 是工程层（默认收起的抽屉）。
+  */
+ async function box(query={}){
+  let index;
+  try{
+   index=loadBoxIndex();
+  }catch(error){
+   return {ok:false,status:500,error:`精灵盒子数据读取失败：${error?.message||String(error)}`};
+  }
+  const {errors,params}=parseBoxQuery(query);
+  if(errors.length)return {ok:false,status:400,error:errors.join('；')};
+  if(params.detail!==null){
+   const result=boxDetailMode(index,params.detail);
+   if(!result)return {ok:false,status:404,error:`找不到这个精灵或个体：${params.detail}`};
+   return {ok:true,status:200,...result};
+  }
+  if(params.compare!==null){
+   const ids=params.compare.split(',').map((x)=>x.trim());
+   const result=boxCompareMode(index,ids);
+   if(result.missing)return {ok:false,status:404,error:`找不到这些个体：${result.missing.join('、')}`};
+   if(result.mismatch)return {ok:false,status:400,error:result.mismatch.error,
+    detail:{a:result.mismatch.a,b:result.mismatch.b}};
+   return {ok:true,status:200,mode:'compare',player:result.player,
+    dev:boxDev(index,{mode:'compare',compare_raw:result.compared,
+     instances:[boxMineCardDev(index.instanceById.get(ids[0])),boxMineCardDev(index.instanceById.get(ids[1]))]})};
+  }
+  const mode=params.kind==='mine'?boxMineMode(index,params):boxCatalogMode(index,params);
+  return {ok:true,status:200,...mode};
+ }
+
  async function planBattle(body={}){
   const session=sessionOf(body.battle_id);
   if(!session)return {ok:false,status:404,error:'对局不存在或已失效：请重新开一局'};
@@ -550,6 +1192,6 @@ export function createRocoService(options={}){
   };
  }
 
- return {status,startBattle,advanceBattle,planBattle,roster,shadowPlan,ensure,stop,publicView,
+ return {status,startBattle,advanceBattle,planBattle,roster,box,shadowPlan,ensure,stop,publicView,
   _sessions:sessions,_client:()=>client};
 }

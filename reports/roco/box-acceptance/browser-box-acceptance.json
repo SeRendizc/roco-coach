@@ -1,0 +1,379 @@
+{
+ "generated_by": "scripts/roco/browser-box-acceptance.mjs",
+ "page": "box.html",
+ "judged_at": "2026-09-21T16:50:57.088Z",
+ "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
+ "screenshots": [
+  "reports/roco/box-acceptance/box-01-mine-1440x900.png",
+  "reports/roco/box-acceptance/box-02-catalog-1440x900.png",
+  "reports/roco/box-acceptance/box-03-search-1440x900.png",
+  "reports/roco/box-acceptance/box-04-detail-1440x900.png",
+  "reports/roco/box-acceptance/box-05-compare-1440x900.png",
+  "reports/roco/box-acceptance/box-06-mine-390x844.png",
+  "reports/roco/box-acceptance/box-07-compare-390x844.png"
+ ],
+ "viewport_metrics": [
+  {
+   "viewport": "1440x900",
+   "at": "mine",
+   "clientW": 1440,
+   "scrollW": 1440,
+   "bodyScrollW": 1440,
+   "innerW": 1440
+  },
+  {
+   "viewport": "390x844",
+   "at": "mine",
+   "clientW": 390,
+   "scrollW": 390,
+   "bodyScrollW": 390,
+   "innerW": 390
+  },
+  {
+   "viewport": "390x844",
+   "at": "compare",
+   "clientW": 390,
+   "scrollW": 390,
+   "bodyScrollW": 390,
+   "innerW": 390
+  },
+  {
+   "viewport": "390x844",
+   "at": "detail",
+   "clientW": 390,
+   "scrollW": 390,
+   "bodyScrollW": 390,
+   "innerW": 390
+  }
+ ],
+ "checks": [
+  {
+   "id": "01-路由总数",
+   "judge": "我的盒子 == 80 个个体，全图鉴 == 622 条记录（把 48 只当全量必须红）",
+   "ok": true,
+   "actual": "count-mine=80 count-catalog=622"
+  },
+  {
+   "id": "02-默认视图",
+   "judge": "默认进入「我的盒子」，总数 80，每页 24 张卡",
+   "ok": true,
+   "actual": "kind=mine total=80 cards=24"
+  },
+  {
+   "id": "03-宽屏不溢出",
+   "judge": "1440×900：scrollW == clientW",
+   "ok": true,
+   "actual": "clientW=1440 scrollW=1440 bodyScrollW=1440"
+  },
+  {
+   "id": "04-切标签",
+   "judge": "真实鼠标点「全图鉴」后 kind=catalog，总数 622，卡片里没有工程字段",
+   "ok": true,
+   "actual": "kind=catalog total=622 cards=24 点击命中={\"tag\":\"BUTTON\",\"id\":\"tab-catalog\",\"cls\":\"tab\",\"hit_target\":true}"
+  },
+  {
+   "id": "05-catalog全量",
+   "judge": "kind=catalog 的 total 必须 == 622",
+   "ok": true,
+   "actual": "player.total=622"
+  },
+  {
+   "id": "06-玩家层无工程话",
+   "judge": "展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON",
+   "ok": true,
+   "actual": "扫过 652 字；卡片首层「🌿 喵喵 🌿草系」"
+  },
+  {
+   "id": "07-键盘搜索",
+   "judge": "真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词",
+   "ok": true,
+   "actual": "输入框实际值=\"喵喵\" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系」"
+  },
+  {
+   "id": "08-系别筛选",
+   "judge": "真实鼠标点「系别=草系」后每张卡都含草系，且总数等于路由给的筛选后总数",
+   "ok": true,
+   "actual": "页面 total=84 路由 total=84 每张卡含草系=true；命中={\"tag\":\"BUTTON\",\"id\":null,\"cls\":\"filter-chip\",\"hit_target\":true}"
+  },
+  {
+   "id": "09-个体详情",
+   "judge": "详情抽屉里有等级 / 性格 / 资质 / 特长 / 血脉 / 四个有序技能，并且「效果未校准」与「本仓库没有这一项」都说了",
+   "ok": true,
+   "actual": "traits=4 moves=4 缺词=[] 标题=铠甲虫 · 详情"
+  },
+  {
+   "id": "10-详情也不说工程话",
+   "judge": "详情抽屉（玩家点得到的）同样不出现工程字段",
+   "ok": true,
+   "actual": "扫过 602 字"
+  },
+  {
+   "id": "11-两个体比较",
+   "judge": "选两只同种个体后逐字段比较：相同 / 不同 / 未知 三种状态都出现，未知行都给了原因",
+   "ok": true,
+   "actual": "已选=2 比较按钮可用=true 字段行=8 状态=[\"different\",\"unknown\",\"same\"] 文本=[\"不同\",\"未知\",\"相同\"] 未知行=4 原因「为什么是未知：两边都没有登记这一项的取值，所以这一栏标「未知」而不是「不同」。另外，养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。」"
+  },
+  {
+   "id": "12-比较也不说工程话",
+   "judge": "比较面板里不出现工程字段（未知只说「为什么未知」）",
+   "ok": true,
+   "actual": "铠甲虫：这两只有 2 栏不同、4 栏未知。 相同 2 不同 2 未知 4"
+  },
+  {
+   "id": "13-不同种拒绝",
+   "judge": "compare 两个不同种必须 HTTP 400 + ok:false，并给出「不是同一种」的原因",
+   "ok": true,
+   "actual": "HTTP 400 error=「这两只不是同一种精灵（pet_000012 / pet_000062），不能逐字段比较：逐字段比较的前提是同一物种的不同个体。」"
+  },
+  {
+   "id": "14-工程信息在抽屉里",
+   "judge": "开发者抽屉默认收起；展开后能真的看到 provenance / unknown_fields / state_version / coverage / 许可",
+   "ok": true,
+   "actual": "默认收起=true 展开=true 长度=6124 provenance=true unknown_fields=true state_version=true coverage=true licence=true；样例「 版本：state_version=rc205.1 · ruleset_id=roco-world-s4-2026-09-10 · pack_id=roco-game-data-pack-v2 数据集哈希：4b69a662b4a69b82addd03fba0ef9703d2c3c5f69ab52af7c43c396bc」"
+  },
+  {
+   "id": "15-判据可恢复",
+   "judge": "注入后命中、移除后干净（说明这一条判的是页面本身，不是一次性快照）",
+   "ok": true,
+   "actual": "注入命中=\"pet_id\" 恢复=null"
+  },
+  {
+   "id": "16-非法limit",
+   "judge": "limit=1e3 必须 HTTP 400 + ok:false，且错误点名 limit（不静默取整）",
+   "ok": true,
+   "actual": "HTTP 400 error=「limit 必须是非负整数（实际 \"1e3\"；不接受 1e3 / -1 / 1.5 这类写法）」"
+  },
+  {
+   "id": "17-玩家层载荷",
+   "judge": "玩家层载荷里没有工程键（pet_id / species_id / unknown_fields / provenance…），也没有 id 形状的展示值",
+   "ok": true,
+   "actual": "扫过 6429 字节"
+  },
+  {
+   "id": "18-窄屏不溢出",
+   "judge": "390×844：scrollW == clientW",
+   "ok": true,
+   "actual": "clientW=390 scrollW=390 bodyScrollW=390"
+  },
+  {
+   "id": "19-触控目标",
+   "judge": "390×844：页面上每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44",
+   "ok": true,
+   "actual": "量了 91 个元素；不达标的：[]"
+  },
+  {
+   "id": "20-窄屏比较",
+   "judge": "390×844：比较面板能开出来，且开了之后仍然不横向溢出",
+   "ok": true,
+   "actual": "compare=shown clientW=390 scrollW=390"
+  },
+  {
+   "id": "21-窄屏抽屉",
+   "judge": "390×844：详情抽屉打开时也不横向溢出",
+   "ok": true,
+   "actual": "clientW=390 scrollW=390"
+  },
+  {
+   "id": "22-控制台干净",
+   "judge": "整轮下来没有 console.error，也没有未捕获异常",
+   "ok": true,
+   "actual": "consoleErrors=[] pageErrors=[]"
+  }
+ ],
+ "counterproofs": [
+  {
+   "id": "05-catalog全量",
+   "judge": "把 catalog 总数改成 48（迁移层全量）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "catalog 总数必须 == 622，实际 48",
+   "actual": "{ok:true,player:{total:48}}"
+  },
+  {
+   "id": "13-不同种拒绝",
+   "judge": "把「接受了不同种比较」的样本过同一条判据必须报错",
+   "ok": true,
+   "hit": "不同种比较必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true | 必须给出「不是同一种」的原因，实际 error=undefined",
+   "actual": "{ok:true,player:{fields:[]}} / HTTP 200"
+  },
+  {
+   "id": "06-玩家层无工程话",
+   "judge": "往玩家区注入 pet_id / state_version 后，同一条判据必须命中；移除后必须恢复干净",
+   "ok": true,
+   "hit": "pet_id",
+   "actual": "注入=true 命中=\"pet_id\" 恢复后=null"
+  },
+  {
+   "id": "16-非法limit",
+   "judge": "把「静默取整」的样本（200 + limit=1）过同一条判据必须报错",
+   "ok": true,
+   "hit": "非法 limit=\"1e3\" 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true | 静默取整：接受了 limit=\"1e3\" 并返回 limit=1",
+   "actual": "{ok:true,player:{limit:1}} / HTTP 200"
+  },
+  {
+   "id": "17-玩家层载荷",
+   "judge": "把 pet_id 与 unknown_fields 混进玩家层载荷必须被同一条判据抓住",
+   "ok": true,
+   "hit": "玩家层出现工程键 cards[0].pet_id | 玩家层的 cards[0].pet_id 里出现 id 形状的值：pet_000062 | 玩家层出现工程键 cards[0].unknown_fields | 玩家层的 cards[0].note 里出现 id 形状的值：pet_000062",
+   "actual": "{\"cards\":[{\"name\":\"音速犬\",\"pet_id\":\"pet_000062\",\"unknown_fields\":[\"traits\"]}]}"
+  }
+ ],
+ "console_errors": [],
+ "page_errors": [],
+ "steps": [
+  {
+   "at": "boot",
+   "facts": {
+    "ready": "yes",
+    "kind": "mine",
+    "total": "80",
+    "page": "1",
+    "cards": "24",
+    "selected": "0",
+    "compare": null,
+    "filterType": "all",
+    "error": null,
+    "mineCount": "80",
+    "catalogCount": "622"
+   }
+  },
+  {
+   "at": "catalog",
+   "facts": {
+    "ready": "yes",
+    "kind": "catalog",
+    "total": "622",
+    "page": "1",
+    "cards": "24",
+    "selected": "0",
+    "compare": null,
+    "filterType": "all",
+    "error": null,
+    "mineCount": "80",
+    "catalogCount": "622"
+   },
+   "tabClick": {
+    "x": 1021,
+    "y": 117,
+    "w": 595,
+    "h": 44,
+    "top": {
+     "tag": "BUTTON",
+     "id": "tab-catalog",
+     "cls": "tab",
+     "hit_target": true
+    }
+   }
+  },
+  {
+   "at": "search",
+   "input": "喵喵",
+   "facts": {
+    "ready": "yes",
+    "kind": "catalog",
+    "total": "2",
+    "page": "1",
+    "cards": "2",
+    "selected": "0",
+    "compare": null,
+    "filterType": "all",
+    "error": null,
+    "mineCount": "80",
+    "catalogCount": "622"
+   }
+  },
+  {
+   "at": "filter-type",
+   "facts": {
+    "ready": "yes",
+    "kind": "catalog",
+    "total": "84",
+    "page": "1",
+    "cards": "24",
+    "selected": "0",
+    "compare": null,
+    "filterType": "草系",
+    "error": null,
+    "mineCount": "80",
+    "catalogCount": "622"
+   },
+   "chipClick": {
+    "x": 717,
+    "y": 246,
+    "w": 51,
+    "h": 44,
+    "top": {
+     "tag": "BUTTON",
+     "id": null,
+     "cls": "filter-chip",
+     "hit_target": true
+    }
+   }
+  },
+  {
+   "at": "detail",
+   "select": "own-0001",
+   "facts": {
+    "hidden": false,
+    "entity": "instance",
+    "title": "铠甲虫 · 详情",
+    "traits": 4,
+    "moves": 4
+   },
+   "text": "◇ 铠甲虫 Lv.70 收藏 个体 性格 本仓库没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 资质 本仓库没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 特长 本仓库没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 血脉 本仓库没有这一项 养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。 四个技能（按顺序） 第 1 个 尾后针 虫系 · 攻击 · 耗能 2 · 威力 80 对敌方精灵造成物理伤害。 第 2 个 飞断 虫系 · 攻击 · 耗能 1 · 威力 20 造成物伤，己方队伍获得1次奉献：威力+20。 第 3 个 网缚 虫系 · 攻击 · 耗能 2 · 威力 60 造成物伤，敌方获得物防-30%。 第 4 个 蛰针 虫系 · 攻击 · 耗能 0 · 威力 40 对敌方精灵造成物理伤害。 种"
+  },
+  {
+   "at": "compare-pick",
+   "pair": [
+    "own-0001",
+    "own-0002"
+   ],
+   "names": [
+    "铠甲虫",
+    "铠甲虫"
+   ]
+  },
+  {
+   "at": "compare",
+   "facts": {
+    "ready": "yes",
+    "kind": "mine",
+    "total": "80",
+    "page": "1",
+    "cards": "24",
+    "selected": "2",
+    "compare": null,
+    "filterType": "all",
+    "error": null,
+    "mineCount": "80",
+    "catalogCount": "622"
+   },
+   "panel": {
+    "rows": 8,
+    "labels": [
+     "等级",
+     "性格",
+     "资质",
+     "特长",
+     "血脉",
+     "四个技能（按顺序）",
+     "收藏",
+     "锁定"
+    ],
+    "statuses": [
+     "different",
+     "unknown",
+     "same"
+    ],
+    "statusTexts": [
+     "不同",
+     "未知",
+     "相同"
+    ],
+    "unknownReasons": 4,
+    "reasonText": "为什么是未知：两边都没有登记这一项的取值，所以这一栏标「未知」而不是「不同」。另外，养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。",
+    "summary": "铠甲虫：这两只有 2 栏不同、4 栏未知。 相同 2 不同 2 未知 4"
+   }
+  }
+ ],
+ "ok": true
+}

@@ -1,0 +1,94 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 精灵盒子（我的 / 全图鉴）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/box.css"></head><body>
+<main>
+
+<!-- ── 页头：只放标题、数据快照与「关于这一页」抽屉 ─────────────────────────────
+     工程信息（来源 / 版本 / 覆盖 / 未知字段 / 许可）**全部**在 `#dev-drawer` 里，默认收起。
+     一句话口径：页面上不出现工程字段，抽屉里才出现。 -->
+<header class="topbar">
+ <h1>小芽 · 精灵盒子 <small>我的 / 全图鉴</small></h1>
+ <div class="header-actions">
+  <span id="box-status" class="chip">正在读取…</span>
+  <button id="box-reset">重置筛选</button>
+  <details class="dev" id="dev-drawer">
+   <summary>关于这一页（来源与快照）</summary>
+   <div class="dev-body" id="dev-body">
+    <p class="muted">打开后按当前视图生成。这里放的是工程字段，玩家区域一个都不显示。</p>
+   </div>
+  </details>
+ </div>
+</header>
+
+<!-- ── 两个主标签：我的盒子 / 全图鉴 ─────────────────────────────────────────── -->
+<nav class="tabs" role="tablist" aria-label="精灵盒子的两个视图">
+ <button class="tab selected" id="tab-mine" data-kind="mine" role="tab" aria-selected="true">
+  我的盒子 <span class="tab-count" id="count-mine">—</span></button>
+ <button class="tab" id="tab-catalog" data-kind="catalog" role="tab" aria-selected="false">
+  全图鉴 <span class="tab-count" id="count-catalog">—</span></button>
+</nav>
+
+<!-- ── 搜索 / 筛选 / 分页 ──────────────────────────────────────────────────────
+     筛选用页内折叠菜单而不是原生 `<select>`：原生下拉在无头浏览器里打不开也按不动，
+     那样「筛选」这一条就写不出真实键鼠判据（做法与训练场页一致）。 -->
+<section class="panel box-toolbar">
+ <input type="search" id="box-search" placeholder="搜索名字" aria-label="按名字搜索" autocomplete="off">
+ <details class="fmenu" id="menu-type">
+  <summary>系别：<span id="label-type">全部</span></summary>
+  <div class="fmenu-body" id="filter-type" role="group" aria-label="按系别筛选"></div>
+ </details>
+ <details class="fmenu" id="menu-role">
+  <summary>定位：<span id="label-role">全部</span></summary>
+  <div class="fmenu-body" id="filter-role" role="group" aria-label="按定位筛选"></div>
+ </details>
+ <details class="fmenu" id="menu-support">
+  <summary>支持等级：<span id="label-support">全部</span></summary>
+  <div class="fmenu-body" id="filter-support" role="group" aria-label="按支持等级筛选"></div>
+ </details>
+ <div class="flags" id="mine-flags" role="group" aria-label="按收藏与锁定筛选">
+  <button id="flag-favourite" aria-pressed="false">只看收藏</button>
+  <button id="flag-locked" aria-pressed="false">只看锁定</button>
+ </div>
+ <span class="muted" id="box-count">正在读取…</span>
+</section>
+
+<!-- ── 卡片网格：首层只有头像符号、名字、系别与（有的话）定位 / 支持等级 ───────── -->
+<section class="panel box-main">
+ <div id="box-grid" class="box-grid"></div>
+ <p class="muted box-empty" id="box-empty" hidden>没有符合条件的伙伴：换个系别、清掉搜索词再试。</p>
+ <div class="pager">
+  <button id="page-prev">上一页</button>
+  <span id="page-label">1 / 1</span>
+  <button id="page-next">下一页</button>
+ </div>
+</section>
+
+<!-- ── 比较：先选两只**同种**个体，再逐字段看「相同 / 不同 / 未知」 ────────────── -->
+<section class="panel compare-bar" id="compare-bar" hidden>
+ <p id="compare-hint" role="status" aria-live="polite">选两只同种伙伴，就能逐字段比较。</p>
+ <div class="compare-actions">
+  <button id="compare-go" class="primary" disabled>比较这两只</button>
+  <button id="compare-clear">清空选择</button>
+ </div>
+</section>
+
+<section class="panel compare-panel" id="compare-panel" hidden aria-labelledby="compare-title">
+ <div class="section-title">
+  <h2 id="compare-title">逐字段比较</h2>
+  <button id="compare-close">收起</button>
+ </div>
+ <div id="compare-body"></div>
+</section>
+
+</main>
+
+<!-- ── 个体详情抽屉：等级 / 性格 / 资质 / 特长 / 血脉 / 四个有序技能 ───────────────
+     这里同样只有玩家语言：没有取值的栏目就说「本仓库没有这一项」，不编数字。 -->
+<aside class="drawer" id="detail-drawer" hidden aria-labelledby="detail-title">
+ <div class="drawer-head">
+  <h2 id="detail-title">个体详情</h2>
+  <button id="detail-close">关闭</button>
+ </div>
+ <div id="detail-body" class="drawer-body"></div>
+</aside>
+
+<script type="module" src="/src/client/box.js"></script>
+</body></html>

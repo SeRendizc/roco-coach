@@ -45,6 +45,9 @@ const WEB_ENTRY='src/client/app.js';
 const publicAssets=new Set([
  'src/client/index.html','src/client/connect.html',
  'src/client/roco.html','src/client/roco.css',
+ // RC-205 精灵盒子：HTML/CSS 是页面外壳，JS 由下面的模块图自动收录
+ // （`box.html` 里的 `<script type="module" src="/src/client/box.js">` 是入口）。
+ 'src/client/box.html','src/client/box.css',
  'src/client/style.css','src/client/connect.css','src/client/connect.js',
 ]);
 
@@ -217,6 +220,15 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
     // （参数白名单在 rocoService.roster 里）。第 61 轮起回执多了出处的键
     // （顶层 `evidence_ids` + 逐只/逐招的 `evidence_ids`）——**加性**变更，旧键没动。
     if(path==='/api/roco/roster'&&req.method==='GET')return json(res,200,await rocoService.roster(Object.fromEntries(new URL(req.url,origin).searchParams)));
+    // 精灵盒子（RC-205）：我的盒子 / 全图鉴 / 个体详情 / 两个同种个体比较。
+    // 与上面两条同一条先例——只读、公开数据、不要 CSRF；它读的是磁盘上的冻结产物，
+    // 所以规则服务没起来也能用（盒子不做任何模拟）。
+    // 与 roster 的一处不同：**状态码取自回执**。非法参数必须是 400（ok:false），
+    // 不能像 roster 那样一律 200 —— 盒子这一层的纪律是「参数 fail closed」。
+    if(path==='/api/roco/box'&&req.method==='GET'){
+     const result=await rocoService.box(Object.fromEntries(new URL(req.url,origin).searchParams));
+     return json(res,result.status||200,result);
+    }
     if(req.method!=='POST')throw fail(405,'仅支持 POST');
     if(req.headers.origin!==origin||!req.headers['content-type']?.startsWith('application/json'))throw fail(403,'请求来源或类型不正确');
     const sid=req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1],s=sessions.get(sid);
@@ -299,9 +311,11 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
    // 命中不了白名单，直接 404（已由 evals/structure-contract.test.js 钉住）。
    // 页面 URL 保持稳定短路径：/ 与 /index.html 都给营地页，/connect.html 给连接页。
    // 这两个别名是**对外契约**（README、文档、用户书签都写着 /connect.html），
-   // 所以即使文件搬进 src/client/ 也不改 URL。其余资源一律用真实相对路径，
+   // 所以即使文件搬进 src/client/ 也不改 URL。`/roco.html`（训练场）与
+   // `/box.html`（RC-205 精灵盒子）同理：短路径是对外契约，文件搬家不改 URL。
+   // 其余资源一律用真实相对路径，
    // 这样浏览器按 import 说明符解析出的 URL 与白名单条目是同构的。
-   const PAGE_ALIASES={'':'src/client/index.html','index.html':'src/client/index.html','connect.html':'src/client/connect.html','roco.html':'src/client/roco.html'};
+   const PAGE_ALIASES={'':'src/client/index.html','index.html':'src/client/index.html','connect.html':'src/client/connect.html','roco.html':'src/client/roco.html','box.html':'src/client/box.html'};
    const raw=decodeURIComponent(path.slice(1));
    const asset=Object.hasOwn(PAGE_ALIASES,raw)?PAGE_ALIASES[raw]:raw;
    if(asset.includes('..'))throw fail(404,'文件不存在');

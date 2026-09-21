@@ -1,0 +1,160 @@
+/* 小芽 · 精灵盒子（RC-205）的页面差异样式。
+ *
+ * 这个文件**只放本页差异**：框架在 `style.css` 里（`.panel` / `button` / `input` /
+ * `.type` / `.muted` / `.chip` / `.section-title` 那些），页面两个样式表按顺序加载。
+ * 训练场页的 `roco.css` 刻意不复用：那一条链路是对战页的，盒子是另一条页面。
+ *
+ * 两条硬约束写在这里，验收脚本会量：
+ *   ① 390px 无横向溢出：所有可能变长的东西（名字、系别、原始 JSON）都要能换行；
+ *   ② 触控目标 ≥44px：页面上每一个可点元素（按钮 / summary / 输入框 / 卡片）都到线。
+ */
+
+/* ── 触控目标：页面上每一个可点元素都到 44px 这条线 ─────────────────────── */
+button,summary,input{min-height:44px}
+button{min-width:44px}
+
+/* ── 页头与抽屉 ─────────────────────────────────────────────────────────── */
+.topbar{align-items:center;flex-wrap:wrap;row-gap:6px;height:auto;min-height:44px}
+.header-actions{flex-wrap:wrap;gap:8px}
+.header-actions .chip{font-size:12px}
+/* 开发者抽屉：默认收起；展开后原始工程载荷要能换行（否则窄屏必溢出）。 */
+.dev{position:relative}
+.dev>summary{cursor:pointer;list-style:none;background:#121e2c;border:1px solid var(--line);
+ border-radius:8px;padding:8px 11px;min-height:44px;min-width:44px;display:inline-flex;align-items:center}
+.dev>summary::-webkit-details-marker{display:none}
+.dev>summary::after{content:'▾';color:var(--muted);font-size:11px;margin-left:6px}
+.dev-body{position:absolute;right:0;top:calc(100% + 6px);z-index:24;width:min(680px,92vw);
+ max-height:72vh;overflow:auto;background:#131f2c;border:1px solid #4a6076;border-radius:12px;
+ padding:13px 15px;box-shadow:0 14px 44px #0009;font-size:12.5px;line-height:1.7}
+.dev-body p{margin:7px 0}
+.dev-body code{background:#0d1723;border-radius:4px;padding:1px 5px;overflow-wrap:anywhere}
+.dev-raw-wrap>summary{cursor:pointer;min-height:44px;display:flex;align-items:center}
+.dev-body pre.raw{white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;
+ max-height:38vh;overflow:auto;background:#0d1723;border-radius:8px;padding:9px 11px;font-size:11.5px;margin:6px 0}
+/* iOS 上 details 的三角与我们的 ::after 会重复，收掉默认那个 */
+
+/* ── 两个主标签 ───────────────────────────────────────────────────────── */
+.tabs{display:flex;gap:6px;margin:0 0 12px}
+.tab{flex:1 1 0;min-height:44px;font-size:14px;display:inline-flex;align-items:center;
+ justify-content:center;gap:7px}
+.tab[aria-selected="true"]{background:var(--accent);color:#152c24;border-color:var(--accent);font-weight:700}
+.tab-count{font-size:12px;background:#0f1a26;border-radius:20px;padding:1px 8px;color:#cfe0d6}
+.tab[aria-selected="true"] .tab-count{background:#152c24;color:#d8f3dd}
+
+/* ── 搜索 / 筛选 / 分页 ────────────────────────────────────────────────── */
+.box-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:12px}
+#box-search{flex:1 1 210px;min-width:0;min-height:44px;font-size:14px}
+.flags{display:inline-flex;gap:6px;flex-wrap:wrap}
+.flags button{min-height:44px;min-width:44px;font-size:13px}
+.flags button[aria-pressed="true"]{background:var(--accent);color:#152c24;border-color:var(--accent);font-weight:600}
+#box-count{margin-left:auto}
+/* 折叠筛选菜单：与训练场页同一套形态（原生 select 在无头浏览器里按不动）。 */
+.fmenu{position:relative}
+.fmenu>summary{cursor:pointer;list-style:none;background:#121e2c;border:1px solid var(--line);
+ border-radius:8px;padding:8px 11px;min-height:44px;min-width:44px;font-size:13px;color:#dbe5ef;
+ display:inline-flex;align-items:center;gap:6px}
+.fmenu>summary::-webkit-details-marker{display:none}
+.fmenu>summary::after{content:'▾';color:var(--muted);font-size:11px}
+.fmenu[open]>summary{border-color:#7e9bb8}
+.fmenu-body{position:absolute;left:0;top:calc(100% + 4px);z-index:18;width:max-content;
+ max-width:min(420px,86vw);max-height:52vh;overflow:auto;background:#16222f;border:1px solid var(--line);
+ border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;box-shadow:0 12px 34px #0009}
+.filter-chip{font-size:12.5px;padding:6px 12px;min-height:44px;min-width:44px;background:#121e2c;
+ border:1px solid var(--line)}
+.filter-chip[aria-pressed="true"]{background:var(--accent);color:#152c24;border-color:var(--accent);font-weight:600}
+
+/* ── 卡片网格：首层只有头像符号 / 名字 / 系别 / 标签 ─────────────────────── */
+.box-main{padding:13px 14px}
+.box-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:10px}
+.card{display:flex;flex-direction:column;gap:6px;background:#182635;border:1px solid var(--line);
+ border-radius:12px;padding:9px 10px;min-width:0}
+.card.picked{border-color:var(--accent);background:#1c3128}
+.card-face{display:flex;flex-direction:column;align-items:flex-start;gap:6px;background:transparent;
+ border:0;padding:0;min-height:44px;min-width:44px;text-align:left;color:inherit;font:inherit}
+.card-face:hover:not(:disabled){background:transparent}
+.avatar{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;
+ border:2px solid var(--line);border-radius:10px;font-size:19px;background:#101a26}
+.avatar.big{width:46px;height:46px;font-size:26px}
+.card-name{font-size:15px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.card-types{display:flex;flex-wrap:wrap;gap:4px}
+.card-tags{display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11.5px;background:#26374a;border-radius:5px;padding:2px 7px;color:#c8d5e2}
+.tag-form{background:#4a3f6b;color:#e2dcff}
+.tag-badge{background:#4a4030;color:#f0dda8}
+.card-key{font-size:11.5px;color:#b4c3d1}
+.cmp-toggle{min-height:44px;font-size:12.5px;padding:6px 8px;width:100%}
+.card.picked .cmp-toggle{background:var(--accent);color:#152c24;border-color:var(--accent);font-weight:600}
+.box-empty{margin:12px 0 0}
+.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px;font-size:13px;color:var(--muted)}
+.pager button{min-height:44px;min-width:44px;font-size:13px}
+
+/* ── 比较条与比较面板 ──────────────────────────────────────────────────── */
+.compare-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+#compare-hint{margin:0;font-size:13px;line-height:1.6;flex:1 1 240px}
+.compare-actions{display:flex;gap:8px;flex-wrap:wrap}
+.compare-actions button{min-height:44px;min-width:44px}
+.compare-panel{margin-bottom:12px}
+.cmp-summary p{margin:0 0 8px;font-size:13.5px;line-height:1.6}
+.cmp-counts{display:flex;gap:8px;flex-wrap:wrap}
+.cmp-status{font-size:12px;border-radius:6px;padding:2px 9px;display:inline-flex;align-items:center}
+.s-same{background:#26453a;color:#bfeac3}
+.s-different{background:#4a3a2a;color:#f0d0a8}
+.s-unknown{background:#3a3a4a;color:#cfcfe6}
+.cmp-row{border-top:1px solid #2c3d50;padding:10px 0}
+.cmp-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.cmp-label{font-size:13.5px;font-weight:600}
+.cmp-values{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmp-side{background:#131f2c;border:1px solid #2c3d50;border-radius:8px;padding:7px 9px;min-width:0}
+.cmp-side b{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-bottom:3px}
+.cmp-value{font-size:13px;overflow-wrap:anywhere}
+.cmp-reason,.cmp-note{margin:7px 0 0;font-size:12.5px;line-height:1.6;color:#e8ce88}
+.cmp-note{color:#b4c3d1}
+
+/* ── 个体详情抽屉 ──────────────────────────────────────────────────────── */
+.drawer{position:fixed;right:12px;top:12px;bottom:12px;width:min(430px,calc(100vw - 24px));
+ background:#182635;border:1px solid #4a6076;border-radius:14px;z-index:30;
+ box-shadow:0 18px 60px #000a;display:flex;flex-direction:column;overflow:hidden}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:12px 14px;border-bottom:1px solid var(--line)}
+.drawer-head h2{font-size:15px;margin:0;overflow-wrap:anywhere}
+.drawer-head button{min-height:44px;min-width:44px}
+.drawer-body{padding:12px 14px;overflow:auto;font-size:13px;line-height:1.65}
+.drawer-body h3{font-size:17px;margin:0 0 6px;overflow-wrap:anywhere}
+.drawer-body h4{font-size:13px;color:var(--accent);margin:14px 0 7px}
+.detail-head{display:flex;gap:11px;align-items:flex-start}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0}
+.metric{background:#131f2c;border:1px solid #2c3d50;border-radius:7px;padding:5px 8px;font-size:12.5px}
+.metric b{display:block;font-size:11px;color:var(--muted);font-weight:500}
+.metric-label{font-size:12.5px;color:#b4c3d1;margin:6px 0 0}
+.traits{display:flex;flex-direction:column;gap:6px}
+.trait{background:#131f2c;border:1px solid #2c3d50;border-radius:8px;padding:7px 9px}
+.trait b{font-size:12px;color:var(--muted);font-weight:500;margin-right:8px}
+.trait span{font-size:13px;overflow-wrap:anywhere}
+.trait-effect{display:block;font-size:11.5px;color:#b4c3d1;margin-top:3px}
+.missing{color:#e8ce88;font-size:12.5px;line-height:1.6;margin:6px 0}
+.effect-note{color:#b4c3d1;font-size:12.5px;line-height:1.6;margin:6px 0}
+.moveset{margin:6px 0;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.moveset li{background:#131f2c;border:1px solid #2c3d50;border-radius:8px;padding:8px 10px}
+.move-slot{display:inline-block;font-size:11px;background:#26374a;border-radius:5px;padding:1px 7px;margin-right:7px;color:#c8d5e2}
+.move-meta{display:block;font-size:11.5px;color:#b4c3d1;margin-top:3px;overflow-wrap:anywhere}
+.move-desc{display:block;font-size:12.5px;margin-top:4px;color:#dbe5ef;overflow-wrap:anywhere}
+
+/* ── 窄屏：卡片两列、抽屉占满、所有长文本可换行 ─────────────────────────── */
+@media(max-width:560px){
+ main{padding:10px 12px}
+ .box-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .card{padding:8px}
+ .avatar{width:28px;height:28px;font-size:16px}
+ .card-name{font-size:14px}
+ #box-count{margin-left:0;flex:1 1 100%}
+ .fmenu{flex:1 1 40%}
+ .fmenu>summary{width:100%;justify-content:space-between}
+ .fmenu-body{width:min(330px,88vw)}
+ .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .cmp-values{grid-template-columns:1fr}
+ .drawer{right:0;left:0;top:0;bottom:0;width:100vw;border-radius:0;border-left:0;border-right:0}
+ .dev-body{right:auto;left:0;width:min(360px,94vw)}
+ .tab{font-size:13px}
+ .tab-count{display:none}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
