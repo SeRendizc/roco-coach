@@ -69,6 +69,21 @@ export const SUITES = [
   {id: 'provenance', cmd: 'node', args: ['scripts/roco/verify-provenance.mjs'],
     why: '数据溯源：每条来源有可核对的锚点（归档哈希 / 逐文件清单）、'
       + '逐实体的 provenance 台账完整。「所有数据必须记录来源」这条边界从散文变成检查'},
+  {id: 'game-data-pack', cmd: 'node', args: ['scripts/roco/verify-game-data-pack.mjs'],
+    why: 'RC-202：统一索引包 `data/roco/game-data-pack/v2/pack.json` 必须与 schema 一致、'
+      + '逐实体 provenance 的 artifact_sha256 与磁盘对得上、licence_ref 在 sources.yaml 里找得到、'
+      + '**REFERENCE_ONLY 不得进 distributable 分节**、unknown_fields 与冻结产物重算一致、'
+      + '孤儿引用为 0、冲突未解决时**拒绝 ready**、就绪报告是最新的。'
+      + '判据的牙在 `unit` 里（tests/roco-game-data-pack.test.js 16 条含 8 条必红反证）'
+      + '以及两条脚本的 `--selftest`（10/10 与 11/11）'},
+  {id: 'reconciliation', cmd: 'node', args: ['scripts/roco/verify-reconciliation.mjs', '--gate'],
+    why: 'RC-201 §9 第 9 项：公网快照 + 对账产物接进闸门。判据三条 —— ①快照能由**本地 HTML**'
+      + '逐字节重抽（不打网，确定性）；②报告的 reconciled/licence_ok 为真且四桶与许可登记齐全；'
+      + '③**已提交的报告与"现在重算"一致**（忽略 generated_at），即报告没过期。'
+      + '`--gate` 会先跑判据自检（5 条反证：reconciled=false / licence_ok=false / 离线重抽失败 / '
+      + '报告过期 / 报告缺失），所以这条套件同时证明「现在是对的」与「错了会被发现」。'
+      + '手工触发的对账会静默过期 —— 这条就是防它（本仓库已经吃过一次：'
+      + 'agent-trajectories-verification-model.json 声称 1752/1752、实际 1644/1752）'},
   {id: 'state-doc', cmd: 'node', args: ['scripts/roco/verify-state-doc.mjs'],
     why: '状态文档与现实一致：声明的 HEAD 还在历史里、验证产物在、没有引用不存在的路径。'
       + '第 30 轮的教训是文档能漂，而读它的人会在错的前提上继续做事'},

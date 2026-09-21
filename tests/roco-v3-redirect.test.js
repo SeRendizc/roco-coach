@@ -22,6 +22,8 @@ import {
 import {judge} from '../scripts/roco/shot-mockup.mjs';
 import {publicView} from '../src/server/roco-service.js';
 import {coachAdvice} from '../src/coach/coach-advice.js';
+import {releaseGateSatisfied, READINESS_ITEMS} from '../scripts/roco/build-game-data-pack.mjs';
+import {SUITES as RELEASE_GATE_SUITES} from '../scripts/roco/verify-release.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8'));
@@ -298,4 +300,23 @@ test('RC-101 接线：教练的「对面能量快满」有上限才说话，没�
   const without = coachAdvice({game: game(false), plan: null});
   assert.notEqual(without?.kind, 'foe-energy-high',
     `没有上限时不许说这句话，实际：${without ? without.kind : '（沉默）'}`);
+});
+
+test('RC-202 第 9 项是**可执行判据**：闸门登记表里必须真的有那两条套件（必红方向）', () => {
+  // 「对账自动化进闸门」这一项以前是手写的 static_false（别人声明「主线程会接线」）。
+  // 现在它读 `verify-release.mjs` 的登记表本身 —— 把套件删掉，这一项立刻变 false。
+  const def = READINESS_ITEMS.find((d) => d.key === 'reconciliation_in_release_gate');
+  assert.ok(def, '就绪清单里必须有第 9 项');
+  assert.deepEqual(def.requires_suites, ['reconciliation', 'game-data-pack']);
+  const real = releaseGateSatisfied({suites: RELEASE_GATE_SUITES, requires: def.requires_suites});
+  assert.equal(real.satisfied, true, `闸门缺少套件：${JSON.stringify(real.missing)}（实际套件 ${real.ids.length} 条）`);
+  assert.deepEqual(real.missing, []);
+  // 反向控制①：抽掉 game-data-pack → 必须 false 并指名缺哪一个
+  const missingOne = releaseGateSatisfied({suites: RELEASE_GATE_SUITES.filter((s) => s.id !== 'game-data-pack'),
+    requires: def.requires_suites});
+  assert.equal(missingOne.satisfied, false);
+  assert.deepEqual(missingOne.missing, ['game-data-pack']);
+  // 反向控制②：全空 → 两条都缺
+  assert.deepEqual(releaseGateSatisfied({suites: [], requires: def.requires_suites}).missing,
+    ['reconciliation', 'game-data-pack']);
 });
