@@ -333,8 +333,16 @@ function render() {
     brief.hidden = !running || state.pick.open;
     if (!brief.hidden) {
       const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
-      brief.innerHTML = `<span>我方 <strong>${state.pick.player.map(nameOf).join('、') || '（未选）'}</strong>`
-        + ` ｜ 对手 <strong>${state.pick.enemy.map(nameOf).join('、') || '（未选）'}</strong></span>`
+      // 摘要要用**这一局真正在打的那几只**：玩家用默认阵容开局时 `state.pick` 是空的，
+      // 原来那版就会显示「我方（未选）」——明明在打（监工从截图里看出来的）。
+      const mine = state.pick.player.length
+        ? state.pick.player.map(nameOf)
+        : (view?.self?.pets ?? []).map((p) => p.name).filter(Boolean);
+      const foes = state.pick.enemy.length
+        ? state.pick.enemy.map(nameOf)
+        : [view?.opponent?.field?.name, ...(view?.opponent?.bench ?? []).map(() => null)].filter(Boolean);
+      brief.innerHTML = `<span>我方 <strong>${mine.join('、') || '（未选）'}</strong>`
+        + ` ｜ 对手 <strong>${foes.join('、') || '（未选）'}</strong></span>`
         + '<button id="reopen-pick">重选阵容</button>';
       $('reopen-pick').addEventListener('click', () => { state.pick.open = true; render(); });
     }
