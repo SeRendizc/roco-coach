@@ -133,12 +133,33 @@ export async function build({limit = 0} = {}) {
  *
  * 这不是放宽评测——评测用的还是任务集原样的 288 条；这里改的只是**训练侧看到什么**。
  */
+//: 按**模板名**显式留出，不用哈希分桶。
+//: 分桶看起来「客观」，但它对只有 13 个取值的维度会给出极不均衡的切分
+//: （实测：819/9/0，val 只拿到 9 条、test 一条都没有）。切分要能解释，
+//: 也要真的产生三侧——显式列出留出哪些，比事后解释桶为什么会这样更诚实。
+export const HOLDOUT_TEMPLATES = Object.freeze({
+  // 留出「换一种说法」的问法。
+  //
+  // 选择方式是**穷举后取最大留出集**，约束是「每个机制在训练侧至少留 2 条」：
+  // 留出某个取值时不能连带把另一个维度的取值也抽走。这一条是被两次真事故逼出来的——
+  //   第 33 轮留出家族 → `roster_constraint` 所属家族在训练里缺席，整类归零；
+  //   第 34 轮留出机制 → `阵容诊断` 在训练里缺席，该类 24/24 只输出 stop。
+  // 两次都是「留出的不是模型该泛化的东西，而是它根本没学过的知识」。
+  //
+  // 这一组留出 42% 的任务，且每个机制在训练侧仍有 ≥2 条。
+  // `scripts/roco/verify-sft-split.mjs` 会独立复核这两条性质（不靠这里的注释）。
+  // 留出**两种最常用的问法**（`直问` + `背景`，合计 42% 的任务）。
+  // 再留就一定会抽走某个机制在训练里的最后几条——穷举的边界在这里。
+  test: ['直问', '背景'],
+  // 验证侧留 `追问`（最长的表达，用来看 loss 是否真的在降）
+  val: ['追问'],
+});
+
 export function sftSideOf(task) {
-  const key = hashKey(task.split.mechanism, task.split.template);
-  const bucket = key % 10;
-  if (bucket < 7) return 'train';
-  if (bucket < 9) return 'val';
-  return 'test';
+  const template = task.split.template;
+  if (HOLDOUT_TEMPLATES.test.includes(template)) return 'test';
+  if (HOLDOUT_TEMPLATES.val.includes(template)) return 'val';
+  return 'train';
 }
 
 function hashKey(...parts) {
@@ -181,22 +202,27 @@ async function main(argv) {
     .filter((family) => !trainFamilies.has(family));
   // 留出检查：留出的机制/模板在训练侧一条都不该有（这是泛化问题真正要问的东西）
   const trainMechanisms = new Set(samples.filter((r) => r.meta.side === 'train').map((r) => r.meta.mechanism));
-  const heldOutMechanisms = [...new Set(samples.map((r) => r.meta.mechanism))]
+  const missingMechanisms = [...new Set(samples.map((r) => r.meta.mechanism))]
     .filter((m) => !trainMechanisms.has(m));
-  const leaked = missingFamilies;
+  const trainTemplates = new Set(samples.filter((r) => r.meta.side === 'train').map((r) => r.meta.template));
+  const heldOutTemplates = [...new Set(samples.map((r) => r.meta.template))]
+    .filter((t) => !trainTemplates.has(t));
+  const leaked = [...missingFamilies, ...missingMechanisms];
   const report = {
     generated_by: 'scripts/roco/build-agent-sft-data.mjs',
     purpose: 'W4-04 的工具选择 SFT 数据：目标来自**任务期望**，不是规则臂或模型的输出',
     source_task_set: 'agent-tasks-v1',
     worlds_per_task: WORLDS_PER_TASK,
     origin: 'synthetic/constructed — 不是真人对话，不得据此声称真人效果',
-    split_rule: 'SFT 专属切分：留出**机制与表达模板**，每个家族都出现在训练侧'
-      + '（任务集的 family 切分不适合做训练切分——它让 roster_constraint 所属的家族'
-      + '在训练里完全缺席，第 33 轮就是这样整类归零的）',
+    split_rule: 'SFT 专属切分：留出**表达模板**，每个家族与每个机制都出现在训练侧'
+      + '（家族切分与机制切分都不适合做训练切分：前者让一个家族在训练里缺席，'
+      + '后者让一个机制在训练里缺席——两次都直接导致整类归零。'
+      + '模板切分问的才是「换种说法还认不认得」）',
     counts: summary,
     families,
     missing_families_in_train: missingFamilies,
-    held_out_mechanisms: heldOutMechanisms,
+    missing_mechanisms_in_train: missingMechanisms,
+    held_out_templates: heldOutTemplates,
     holdout_leak: leaked,
   };
   if (write) {

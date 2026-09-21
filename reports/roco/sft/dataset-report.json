@@ -4,13 +4,13 @@
  "source_task_set": "agent-tasks-v1",
  "worlds_per_task": 4,
  "origin": "synthetic/constructed — 不是真人对话，不得据此声称真人效果",
- "split_rule": "SFT 专属切分：留出**机制与表达模板**，每个家族都出现在训练侧（任务集的 family 切分不适合做训练切分——它让 roster_constraint 所属的家族在训练里完全缺席，第 33 轮就是这样整类归零的）",
+ "split_rule": "SFT 专属切分：留出**表达模板**，每个家族与每个机制都出现在训练侧（家族切分与机制切分都不适合做训练切分：前者让一个家族在训练里缺席，后者让一个机制在训练里缺席——两次都直接导致整类归零。模板切分问的才是「换种说法还认不认得」）",
  "counts": {
   "total": 828,
   "by_side": {
-   "val": 177,
-   "test": 99,
-   "train": 552
+   "test": 372,
+   "train": 306,
+   "val": 150
   },
   "by_category": {
    "rules_lookup": 288,
@@ -23,17 +23,12 @@
    "brief_explain": 144
   },
   "families_by_side": {
-   "val": {},
    "test": {},
-   "train": {}
+   "train": {},
+   "val": {}
   }
  },
  "families": {
-  "val": [
-   "A组三人-无锁定",
-   "A组三人-锁定寂灭骨龙",
-   "混编三人-含B组"
-  ],
   "test": [
    "A组三人-无锁定",
    "A组三人-锁定寂灭骨龙",
@@ -43,12 +38,19 @@
    "A组三人-无锁定",
    "A组三人-锁定寂灭骨龙",
    "混编三人-含B组"
+  ],
+  "val": [
+   "A组三人-无锁定",
+   "A组三人-锁定寂灭骨龙",
+   "混编三人-含B组"
   ]
  },
  "missing_families_in_train": [],
- "held_out_mechanisms": [
-  "轮次推进",
-  "拒绝"
+ "missing_mechanisms_in_train": [],
+ "held_out_templates": [
+  "直问",
+  "追问",
+  "背景"
  ],
  "holdout_leak": []
 }
