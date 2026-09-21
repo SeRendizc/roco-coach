@@ -2,23 +2,23 @@
  "generated_by": "scripts/roco/build-agent-sft-data.mjs",
  "purpose": "W4-04 的工具选择 SFT 数据：目标来自**任务期望**，不是规则臂或模型的输出",
  "source_task_set": "agent-tasks-v1",
- "worlds_per_task": 9,
+ "worlds_per_task": 12,
  "origin": "synthetic/constructed — 不是真人对话，不得据此声称真人效果",
  "split_rule": "SFT 专属切分：留出**表达模板**，每个家族与每个机制都出现在训练侧（家族切分与机制切分都不适合做训练切分：前者让一个家族在训练里缺席，后者让一个机制在训练里缺席——两次都直接导致整类归零。模板切分问的才是「换种说法还认不认得」）",
  "counts": {
-  "total": 1752,
+  "total": 876,
   "by_side": {
-   "train": 1395,
-   "val": 306,
-   "test": 51
+   "train": 693,
+   "val": 156,
+   "test": 27
   },
   "by_category": {
-   "rules_lookup": 648,
-   "roster_constraint": 216,
-   "continue_stop": 324,
-   "tool_failure": 108,
-   "stale_state": 108,
-   "evidence_conflict": 108,
+   "rules_lookup": 288,
+   "roster_constraint": 96,
+   "continue_stop": 144,
+   "tool_failure": 36,
+   "stale_state": 36,
+   "evidence_conflict": 36,
    "silence": 60,
    "brief_explain": 180
   },

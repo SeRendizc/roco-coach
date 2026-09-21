@@ -778,8 +778,15 @@ export function worldsFor(task, count = 3) {
   if (!eligible.length) return [];
   const seed = parseInt(digest(task.case_id).slice(0, 8), 16);
   const picked = [];
+  // 步长必须是 **1**。
+  //
+  // 原来是 `(seed + i * 3) % eligible.length`。当 `eligible.length` 也是 3 的倍数时
+  // （而 `battle-refuse` / `battle-stale` / `camp-conflict` 各自恰好有 3 个变体），
+  // `i * 3` 在模 3 下恒等于 0 —— **每个 i 都落在同一个世界上**，`picked` 永远只有一条。
+  // 这就是第 36 轮「加了世界池却加不出数据」的真正原因：不是过滤太严，是这里选了同一个。
+  // 改用步长 1（起点仍然是任务哈希），并把哈希整体用上以分散起点。
   for (let i = 0; i < Math.min(count, eligible.length); i += 1) {
-    const world = eligible[(seed + i * 3) % eligible.length];
+    const world = eligible[(seed + i) % eligible.length];
     if (!picked.includes(world)) picked.push(world);
   }
   return picked;
