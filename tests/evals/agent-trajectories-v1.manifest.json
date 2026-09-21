@@ -5,6 +5,8 @@
   "built_by": "scripts/roco/build-agent-trajectories.mjs",
   "task_set": "agent-tasks-v1",
   "task_set_digest": "f0b5d51a9142b09e43138e4dcf924698880c032bc8f9650cc5db77abc52ef975",
+  "model_identity": null,
+  "prompt_digest": null,
   "ruleset_id": "roco-world-s4-2026-09-10",
   "worlds_per_task": 3,
   "arms": [

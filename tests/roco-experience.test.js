@@ -280,13 +280,22 @@ test('12 个系别的 emoji 与配色逐键对齐，且不引用任何外链素�
   };
   const colors = keysOf('TYPE_COLOR');
   const emoji = keysOf('TYPE_EMOJI');
-  assert.equal(colors.length, 12, `12 只伙伴的系别都要有配色，实际 ${colors.length}`);
+  assert.ok(colors.length >= 18,
+    `候选池扩到 48 只之后系别变多（数据里 18 种），配色表必须全覆盖，实际 ${colors.length}`);
+  // 数据里真的出现过的系别，一个都不许缺（写死 12 守不住 48 只——第 77 轮实测：
+  // 扩池后页面 48 张卡里有 17 张没有形象，正是这张表没跟上）。
+  const petsJson = JSON.parse(readFileSync(new URL('../data/roco/normalized/roco-world-s4-2026-09-10/pets.json', import.meta.url), 'utf8'));
+  const dataTypes = [...new Set(Object.values(petsJson.pets ?? {}).flatMap((p) => p.types ?? []))];
+  assert.deepEqual(dataTypes.filter((t) => !colors.includes(t)), [],
+    '数据里出现的系别必须在配色表里（否则那一类伙伴在页面上没有形象）');
+  assert.deepEqual(dataTypes.filter((t) => !emoji.includes(t)), [],
+    '数据里出现的系别必须在 emoji 表里');
   assert.deepEqual([...emoji].sort(), [...colors].sort(),
     'emoji 表与配色表必须是同一个键集（少一个系别 = 那一系的伙伴没有形象）');
   // 每个 emoji 都必须是真字符（空串会让 `typeChips` 静默退化成一个只有文字的标签）
   const emojiBlock = page.match(/const TYPE_EMOJI = \{([\s\S]*?)\};/)[1];
   const values = [...emojiBlock.matchAll(/[\u4e00-\u9fff]+系\s*:\s*'([^']*)'/g)].map((m) => m[1]);
-  assert.equal(values.length, 12, `emoji 表里要逐条写出 12 个值，实际 ${values.length}`);
+  assert.equal(values.length, emoji.length, `emoji 表里的值数要与键数一致（各 ${emoji.length}），实际 ${values.length}`);
   assert.deepEqual(values.filter((v) => v.trim() === ''), [], '不许有空 emoji');
   assert.ok(!/https?:\/\/[^"' ]+\.(png|jpe?g|webp|svg)/i.test(page),
     '形象一律自制（emoji / 色块），不引用任何外链图片素材');

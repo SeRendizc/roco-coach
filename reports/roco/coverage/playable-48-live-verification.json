@@ -2,7 +2,7 @@
   "schema_version": 1,
   "generated_by": "scripts/roco/verify-playable-48.mjs",
   "command": "node scripts/roco/verify-playable-48.mjs --matches 36",
-  "elapsed_ms": 5772,
+  "elapsed_ms": 6003,
   "ruleset_id": "roco-world-s4-2026-09-10",
   "roster": {
     "count": 48,
