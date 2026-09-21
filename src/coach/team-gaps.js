@@ -1004,7 +1004,7 @@ function energyGaps(ctx) {
 // 维度④：respond
 // ─────────────────────────────────────────────────────────────────────────
 
-const RESPOND_VARIANTS = Object.freeze(['应对攻击', '应对状态', '应对防御']);
+export const RESPOND_VARIANTS = Object.freeze(['应对攻击', '应对状态', '应对防御']);
 
 /** 一个技能的应对种类（描述词条判定，一个技能可能同时命中多类）。 */
 function respondVariants(skill) {
@@ -1012,6 +1012,15 @@ function respondVariants(skill) {
   if (!desc.includes('应对') || skill?.category === '特性') return [];
   return RESPOND_VARIANTS.filter((variant) => desc.includes(variant));
 }
+
+/**
+ * 应对词条判定的**对外别名**。
+ *
+ * 加它的原因是 RC-303（`src/coach/team-candidates.mjs`）也要数「学招池里有哪些应对种类」。
+ * 候选生成**不许另写一套语义**（同一条词条判据出现两份实现，迟早会分叉），所以这里把
+ * RC-302 已有的实现原样导出，而不是复制一份。行为与 `respondVariants()` 完全相同。
+ */
+export const respondVariantsOf = (skill) => respondVariants(skill);
 
 function respondGaps(ctx) {
   const {team, index, ledgerInfo} = ctx;
@@ -1110,8 +1119,13 @@ function respondGaps(ctx) {
 // 维度⑤：pivot
 // ─────────────────────────────────────────────────────────────────────────
 
-/** 换入/离场手段：迅捷（主动换入时自动使用）或自己脱离/立即替换。特性不算技能槽。 */
-function isPivotSkill(skill) {
+/**
+ * 换入/离场手段：迅捷（主动换入时自动使用）或自己脱离/立即替换。特性不算技能槽。
+ *
+ * 导出给 RC-303 复用：候选生成里的 pivot 判据必须与诊断里的**同一条**，
+ * 否则「诊断说缺换入手段、召回的候选却按另一套标准算有」。
+ */
+export function isPivotSkill(skill) {
   if (!skill || skill.category === '特性') return false;
   const desc = String(skill.desc ?? '');
   return desc.includes('迅捷') || desc.includes('自己脱离') || desc.includes('立即替换');
