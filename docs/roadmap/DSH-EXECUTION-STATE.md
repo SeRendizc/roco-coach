@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `e70d1ea`；v3 纠偏与 RC-101～RC-304pre 见 §C6.15～§C6.28）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `d709065`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **17/17 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `e70d1ea`（`fix(structure): 顶层允许清单登记 requirements-train.lock.txt`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
+| HEAD | `d709065`（`feat(rc304): 未知对手下的队伍比较`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
 | 工作区 | **干净**（`git status --porcelain` 为空） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1659,3 +1659,26 @@ HYPOTHESIS 12）→ 每个体系 confidence 实测 `ENGINE_HYPOTHESIS`。
 它触发了 `structure-contract` 的「仓库顶层只允许约定俗成的条目」——那条规则**自己要求**「加进允许清单并说明理由」，
 所以这是**规则要求的那一步**，不是放宽判据；已附 `D-20260921-04` 依据并重跑门禁（`e70d1ea`）。
 **教训**：产品仓现在是两机共写的，**门禁必须在含对方提交的 HEAD 上重跑**（我这次就是这样抓到的）。
+
+### C6.29 RC-304 未知对手下的队伍比较（第 92 轮）
+
+**交付**（提交 `d709065`）：`src/coach/team-compare.mjs`（五轴 + 最小替换）、13 组测试（8 条必红反证 + 1 条反向控制）、
+`rc-304-team-compare.json`（两次跑逐字节相同）、`docs/roco/TEAM-COMPARE.md`。
+
+**五轴当前：1 可用 / 4 unknown**。`coverage_confidence` 真算（0.851852 / 0.899225，三因子 =
+缺口条数比例 / 证据覆盖 / build 数据覆盖；抽掉 build 数据降到 0.518519 证明它真在读 build）。
+`environment_value` / `worst_archetype` / `matchup_spread` / `execution_tolerance` 全部
+`available:false` + `value:null` + 点名缺什么（先验分布 7 条全 `source:"unknown"`、`value:null` → **分母不存在**）；
+**没有 0、没有百分数、没有胜率**。
+
+**本轮最重要的一条判据**：**反向控制证明 fail closed 不是「永远 unknown」** —— 注入构造的 `measured` 分布后
+前四轴必须亮起；实测 `environment_value=0.505` 与独立重算的加权均值**逐位相同**，`worst_archetype=poison_stack`、
+`spread=0.42`、`tolerance=0.745`；改回 unknown/抽空 measured ⇒ `[MEASURED_NOT_WIRED]`。
+
+**如实边界**：四轴在真实对局数据到位前永远 unknown；`relative_score`/`tolerance` 的真实来源不存在
+（接口只查「有没有 url/仓内文件 + 日期」，**不联网核对**）；等权与 0.5 门槛是工程假设；
+**CVaR/robustness 未实现**；最小替换是「RC-302 未承接弱点条数 + 字典序」的简单结构启发式，不是最优搜索。
+
+**下一条**：**RC-305 阵容工坊 UI 与工具合同**（六槽、渐进推荐、工程字段进抽屉；并把 RC-301 的
+`request_team_recommendation` 接进模型可见工具列表 —— 那要同时改 `shadow-tools.js` 标签、已发布评测的
+13 个工具名与提示 SHA-256 钉子）。
