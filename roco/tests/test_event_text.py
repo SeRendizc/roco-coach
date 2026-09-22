@@ -134,6 +134,14 @@ SAMPLE_EVENTS = {
                   "detail": {"side": "player", "faint_cost": 1, "mana": 3}},
     "surrender": {"kind": "surrender", "turn": 12,
                   "detail": {"side": "enemy", "result": "win"}},
+    # C1（第 139 轮）位置子系统：`env._execute` 两处 `_bump` 的 detail 键逐个抄自那里。
+    "slot_condition_applied": {"kind": "slot_condition_applied", "turn": 4,
+                               "detail": {"side": "player", "skill_id": "skill_000468",
+                                          "position": 1, "power_delta": 60, "combo_bonus": 0,
+                                          "evidence": "本技能位于1号位时威力+60"}},
+    "position_shift": {"kind": "position_shift", "turn": 4,
+                       "detail": {"side": "player", "skill_id": "skill_000468", "shift": 1,
+                                  "order": ["skill_000481", "skill_000468", "skill_000482"]}},
 }
 
 

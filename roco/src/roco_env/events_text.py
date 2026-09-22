@@ -188,6 +188,29 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
         # 引擎按「夹到能量上限」处理，这一点必须写在句子里，不许说成规则。
         return body + "（聚能回能上限与自动聚能未核验，本局按夹到能量上限处理）。"
 
+    if kind == "slot_condition_applied":
+        # C1（第 139 轮）位置子系统：`env._execute` 的 detail：
+        # {side, skill_id, position, power_delta, combo_bonus, evidence}
+        pos = _num(detail.get("position"))
+        power = _num(detail.get("power_delta"))
+        combo = _num(detail.get("combo_bonus"))
+        bits = []
+        if power:
+            bits.append(f"威力 +{int(power)}")
+        if combo:
+            bits.append(f"连击 +{int(combo)}")
+        where = f"{side}这一手用的是第 {int(pos)} 号位技能" if pos is not None else f"{side}触发了号位条件"
+        return f"{where}，{'、'.join(bits) if bits else '获得加成'}（号位条件按描述原文结算，未实机核实）。"
+
+    if kind == "position_shift":
+        # C1：传动 —— 用后这个技能在配招里移位（位置变了，号位条件也随之变）。
+        shift = _num(detail.get("shift"))
+        # ⚠ 玩家句子里**不许出现技能 id**（`test_event_text` 有专门的判据）。
+        # 新顺序留在事件的 `detail.order` 里（开发者抽屉读它），句子里只说「顺序变了」。
+        return (f"{side}这一手用完后，技能在配招里传动了 "
+                f"{int(shift) if shift is not None else '?'} 位（顺序已变，新顺序见调试信息）"
+                "（传动语义按描述原文结算，未实机核实）。")
+
     if kind == "mana_loss":
         # `env._settle_faint_mana` 的 detail：{side, faint_cost, mana}
         # 注意这里的 side 是**力竭的那一方**，不是视角方 —— 与 faint 事件同一口径。
@@ -333,4 +356,6 @@ KNOWN_EVENT_KINDS = frozenset({
     # 但模板一直缺席 —— 六宠标准 PVP 局跑起来时它们会以「本页还没有它的中文说法」
     # 出现在玩家面前。补模板的同时把这三个名字登记进来，测试因此才咬得住。
     "charge", "mana_loss", "surrender",
+    # C1（第 139 轮）位置子系统：号位条件 + 传动。
+    "slot_condition_applied", "position_shift",
 })

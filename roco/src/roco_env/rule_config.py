@@ -466,6 +466,15 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
                 bad(f"缺字段 {path}（声明了 mana/actions 的配置必须把这两块写全）")
     # RC-401：`damage.multi_hit` 是**可选**能力声明。存在时必须是布尔（不给「看起来
     # 像真」的字符串）；不存在时不校验——legacy 根本没有这一块。
+    # C1（第 139 轮）：`damage.slot_condition` / `damage.position_shift` 与 multi_hit 同一套形状规则。
+    for _cap in ("slot_condition", "position_shift"):
+        node_cap = _dig(config, f"damage.{_cap}")
+        if node_cap is _MISSING:
+            continue
+        if not isinstance(node_cap, dict) or "value" not in node_cap:
+            bad(f"damage.{_cap} 必须是 {{value, confidence, reason?}} 形状的对象")
+        elif not isinstance(node_cap.get("value"), bool):
+            bad(f"damage.{_cap}.value 必须是 true/false（实际 {node_cap.get('value')!r}）")
     node_multi = _dig(config, "damage.multi_hit")
     if node_multi is not _MISSING:
         if not isinstance(node_multi, dict) or "value" not in node_multi:
@@ -634,6 +643,9 @@ class RuleConfig:
     #: RC-401：是否按描述里的「N 连击」结算伤害（`damage.multi_hit`）。
     #: **没声明就是 False** —— legacy / v2 里这条概念不存在，行为逐位不变。
     damage_multi_hit: bool
+    #: C1（第 139 轮）：号位条件 / 传动（`damage.slot_condition` / `damage.position_shift`）。
+    damage_slot_condition: bool
+    damage_position_shift: bool
     #: 行动排序的**声明维度**（RC-103）。legacy 是引擎现状（respond/priority/speed）；
     #: candidate 声明的是社区口径的总序（respond/switch/priority/speed），引擎只实现了其中一部分。
     action_order: Tuple[str, ...]
@@ -844,6 +856,8 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         # 可选能力：**缺字段就是 False**（legacy / v2 里没有这一块），不能借用
         # `_leaf_value`——它对缺字段是抛错（那条纪律是给必填项用的）。
         damage_multi_hit=_optional_leaf_true(config, "damage.multi_hit"),
+        damage_slot_condition=_optional_leaf_true(config, "damage.slot_condition"),
+        damage_position_shift=_optional_leaf_true(config, "damage.position_shift"),
         action_order=tuple(str(x) for x in action_order),
         speed_tie=None if speed_tie == "unknown" else speed_tie,
         speed_tie_microcase_id=tie_microcase,

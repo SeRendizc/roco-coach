@@ -39,6 +39,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import random
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -882,6 +883,48 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
     # RC-401 连击：判据在 `parse.resolve_hit_count`（见那里的注释）。
     hit_count, parsed_atk = parse.resolve_hit_count(
         skill, declared=bool(getattr(cfg, "damage_multi_hit", False)))
+
+    # ── C1（第 139 轮）：位置子系统 —— 号位条件 + 传动 ─────────────────────────
+    # 位置在构建时已知（`me.loadouts[pet_id]` 是有序元组），所以这是**确定性**条件。
+    # 两条能力**只有配置声明了才生效**：legacy / v2 没声明 → 一个字节都不变。
+    slot_declared = bool(getattr(cfg, "damage_slot_condition", False))
+    shift_declared = bool(getattr(cfg, "damage_position_shift", False))
+    if slot_declared or shift_declared:
+        parsed_pos = parse.resolve_position_mechanics(
+            skill, slot_declared=slot_declared, shift_declared=shift_declared)
+        loadout = list(me.loadouts.get(pet.pet_id) or ())
+        try:
+            position = loadout.index(skill.skill_id) + 1
+        except ValueError:
+            position = None
+        if slot_declared and position is not None:
+            for cond in parsed_pos.slot_conditions:
+                if position not in cond.get("slots", []):
+                    continue
+                if cond.get("power_delta"):
+                    # 加在**威力**上（引擎唯一的伤害公式读 power），不是直接改伤害。
+                    skill = dataclasses.replace(skill, power=(skill.power or 0) + int(cond["power_delta"]))
+                if cond.get("combo_bonus"):
+                    hit_count = (hit_count or 1) + int(cond["combo_bonus"])
+                _bump(state, "slot_condition_applied", {
+                    "side": side, "skill_id": skill.skill_id, "position": position,
+                    "power_delta": int(cond.get("power_delta") or 0),
+                    "combo_bonus": int(cond.get("combo_bonus") or 0),
+                    "evidence": cond.get("evidence"),
+                })
+                break
+        if shift_declared and parsed_pos.position_shift and loadout:
+            # 传动：用后把这个技能移动 N 位（超界就环回），位置变了号位条件也随之变。
+            n = int(parsed_pos.position_shift)
+            if skill.skill_id in loadout:
+                idx = loadout.index(skill.skill_id)
+                loadout.pop(idx)
+                loadout.insert((idx + n) % (len(loadout) + 1), skill.skill_id)
+                me.loadouts[pet.pet_id] = tuple(loadout)
+                _bump(state, "position_shift", {
+                    "side": side, "skill_id": skill.skill_id, "shift": n,
+                    "order": list(loadout),
+                })
 
     outcome = fx.compute_damage(pet, defender, skill, rs,
                                 attacker_species=attacker_pet,

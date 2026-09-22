@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `3e4b9d2`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `47b5d3d`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2442,3 +2442,28 @@ diff `git status`，用来抓「产物里有易变字段」。但同一次 `veri
 **实测**：`test:env` 417 OK；`test:unit` **1003/1003**（比上轮多 1 条）；派生链与轨迹摘要**未变**；门禁 **22/22 pass**。
 
 **下一步（C3-a 的消费侧）**：让需要档位的调用方改用 `skillTier()`（当前只有测试在用）；等确认没有别的消费者依赖旧口径后，再考虑把默认回执也切过去（那一步会改轨迹，必须单独一刀）。
+
+### C6.62 第 139 轮：C1 第一个原语落地 —— **位置子系统（号位条件 + 传动）**
+
+为什么是它（实测选型见清单 C1 小节）：连击的动态部分**片段全有条件**、选择要扩动作协议、
+随机要「奉献」子系统；而**号位条件依赖的位置在构建时已知**，是确定性的 —— 但它与传动**必须一起做**
+（实测带「本技能位于N号位」的 5 条技能**全部同时带传动**，只做一条解锁 0 条）。
+
+**落地内容**：
+- **解析器**（`parse.py`）：`slot_conditions`（位置 + 威力/连击加成 + 出处原文）与 `position_shift`（传动 N）；
+  ⚠ 刻意**不加 `Effect`** —— 加了标记循环就会认为「已覆盖」，未声明能力时也会被当成已解析，
+  能力声明就形同虚设（这是我这一轮自己踩到并修掉的坑）；
+- **能力声明**（`damage.slot_condition` / `damage.position_shift`，与 `damage.multi_hit` 同一套形状规则）：
+  legacy / v2 **缺字段 = False**，v3 = true；`classify_skill` 也按声明摘标记（默认不摘）；
+- **引擎**（`env._execute`）：位置匹配时把 `power_delta` 加在**威力**上（引擎唯一伤害公式读 power，
+  不是直接改伤害）、`combo_bonus` 加在连击数上；用后按 `传动 N` **移动配招顺序**（位置变了号位条件也随之变）；
+- **事件要能读**：新增 `slot_condition_applied` / `position_shift` 两个 kind，各配中文句子；
+  句子**不许出现技能 id**（新顺序留在 `detail.order`，开发者抽屉读）。
+
+**判据**（`roco/tests/test_position_subsystem.py`）：① 1 号位的械斗触发且 `power_delta=60`；
+② 放到 4 号位不触发（必红方向）；③ **能力关掉时两条事件都不出现**（同 v3 配置 replace 掉两个标志）；
+④ 传动后配单顺序真的变了。另外两条**既有守卫**当场抓到我两个错：新 kind 必须有中文句子、
+必须有样例事件（否则等于没测）。
+
+**实测**：覆盖实体 **333 → 341**（+8，诚实的小幅）；`test:env` **423 OK**；`test:unit` 1003/1003；
+派生链 5/5；门禁 **22/22 pass**。

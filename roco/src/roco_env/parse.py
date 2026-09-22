@@ -80,6 +80,15 @@ class Parsed:
     hit_count: Optional[int] = None
     #: 读到 hit_count 的原文片段（出处；没有就是空串）。
     hit_count_evidence: str = ""
+    #: C1（第 139 轮）：**号位条件** —— 描述里「本技能位于N号位时 威力+X / 连击+X」。
+    #: 结构：`[{"slots": [1], "power_delta": 60, "combo_bonus": 0, "evidence": "…"}]`。
+    #: 位置在**构建时已知**（配招有序），所以这是确定性条件，不是猜。
+    slot_conditions: List[Dict[str, Any]] = field(default_factory=list)
+    #: C1：**传动 N** —— 用后把这个技能在配招里往后/往前移动 N 位（位置机制）。
+    #: `None` = 描述里没有这条。
+    position_shift: Optional[int] = None
+    #: 读到上面两条的原文片段（出处）。
+    position_evidence: str = ""
 
     def kinds(self) -> List[str]:
         return [e.kind for e in self.effects]
@@ -106,6 +115,12 @@ _MULTI_HIT = re.compile(r"(\d+)\s*连击")
 #: 动态连击的说法（出现即登记为未实现，绝不当成静态次数）：
 #: 「连击数+1」「连击数永久+1」「连击数翻倍」「变为3连击」。
 _DYNAMIC_MULTI_HIT = re.compile(r"连击数[^。，,]{0,6}(?:[+＋]|翻倍|变为)|变为\s*\d+\s*连击")
+#: C1：号位条件（只认数据里真实出现的两种效果：威力+X / 连击+X）。
+_SLOT_CONDITION = re.compile(
+    r"本技能位于\s*(\d)\s*号位?\s*(?:或\s*(\d)\s*号位?)?\s*时[，,]?\s*"
+    r"(威力\s*[+＋]\s*(\d+)|连击\s*[+＋]\s*(\d+))")
+#: C1：传动 N（用后位移）。
+_POSITION_SHIFT = re.compile(r"传动\s*(\d+)")
 
 
 #: 纯伤害技能描述里**不该**出现的机制词。出现任何一个，它就不是「纯伤害」，
@@ -149,6 +164,28 @@ def unclaimed_mechanic_spans(skill) -> List[str]:
                 spans.append(f"{word}：{desc[lo:hi].strip()}")
             start = idx + 1
     return spans
+
+
+def resolve_position_mechanics(skill, *, slot_declared: bool, shift_declared: bool):
+    """C1：按**配置声明的能力**决定号位条件 / 传动是否结算，并返回解析结果。
+
+    与 `resolve_hit_count` 同一套口径：`declared=False`（legacy / v2 没声明）时，
+    这两条**照旧留在 `unparsed` 里**被登记为未实现 —— legacy 逐位不变就来自这里。
+    声明了才把对应那条标记摘掉（它们已经真的会被结算）。
+    """
+    parsed = parse_skill(skill)
+    drop = []
+    if slot_declared and parsed.slot_conditions:
+        drop.append("号位")
+    if shift_declared and parsed.position_shift is not None:
+        drop.append("传动")
+    if drop:
+        # 按**标记开头**匹配，不要用子串：未认领行的格式是 `{标记}（出现在：…原文…）`，
+        # 而原文里常常同时出现别的机制词（例如「…连击+1，传动1。」）—— 用子串会把
+        # 「连击」那条一起误摘掉。
+        parsed.unparsed = [row for row in parsed.unparsed
+                           if not any(str(row).startswith(f"{marker}（") for marker in drop)]
+    return parsed
 
 
 def resolve_hit_count(skill, *, declared: bool) -> "tuple[int, Parsed]":
@@ -275,6 +312,29 @@ def parse_skill(skill) -> Parsed:
         out.hit_count_evidence = _MULTI_HIT.search(desc).group(0)
     if _DYNAMIC_MULTI_HIT.search(desc):
         out.unparsed.append(f"动态连击数（出现在：{desc[:40]}）")
+
+    # ── C1（第 139 轮）：号位条件 + 传动 ─────────────────────────────────────
+    # 这两条是一对：实测带「本技能位于N号位」的 5 条技能**全部同时带「传动」**，
+    # 所以只做一条解锁 0 条，必须一起做。位置在构建时已知（配招有序），因此是确定性的。
+    m = _SLOT_CONDITION.search(desc)
+    if m:
+        slots = [int(x) for x in (m.group(1), m.group(2)) if x]
+        power_delta = int(m.group(4)) if m.group(4) else 0
+        combo_bonus = int(m.group(5)) if m.group(5) else 0
+        out.slot_conditions.append({
+            "slots": slots,
+            "power_delta": power_delta,
+            "combo_bonus": combo_bonus,
+            "evidence": m.group(0),
+        })
+        # ⚠ **不加 Effect**：加了标记循环就会认为「已覆盖」，未声明能力时也会被当成已解析 ——
+        # 那等于让配置里的能力声名形同虚设。结构化信息记在 `slot_conditions` 里，
+        # 「未认领」仍由标记循环如实登记，声明了能力才由 `resolve_position_mechanics` 摘掉。
+    m = _POSITION_SHIFT.search(desc)
+    if m:
+        out.position_shift = int(m.group(1))
+        out.position_evidence = m.group(0)
+        # 同上：传动也只记结构，不假装已覆盖。
 
     m = _RESPOND.search(desc)
     if m:

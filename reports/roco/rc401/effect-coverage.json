@@ -8,18 +8,20 @@
   "battle_skills": 579,
   "traits": 245,
   "entities": 824,
-  "simulatable_entities": 333,
-  "simulatable_ratio": 0.4041
+  "simulatable_entities": 341,
+  "simulatable_ratio": 0.4138
  },
  "declared_capabilities": {
-  "multi_hit": true
+  "multi_hit": true,
+  "slot_condition": true,
+  "position_shift": true
  },
  "support_levels": {
   "battle_skills": {
    "FULL_VERIFIED": 0,
-   "SIMULATABLE_UNVERIFIED": 325,
+   "SIMULATABLE_UNVERIFIED": 333,
    "PARTIAL": 183,
-   "KNOWLEDGE_ONLY": 71,
+   "KNOWLEDGE_ONLY": 63,
    "REFUSED": 0
   },
   "traits": {
@@ -56,12 +58,6 @@
    "total": 20
   },
   {
-   "primitive": "传动",
-   "skills": 13,
-   "traits": 0,
-   "total": 13
-  },
-  {
    "primitive": "随机",
    "skills": 11,
    "traits": 0,
@@ -69,9 +65,9 @@
   },
   {
    "primitive": "号位",
-   "skills": 9,
+   "skills": 4,
    "traits": 0,
-   "total": 9
+   "total": 4
   },
   {
    "primitive": "天气",
@@ -1848,14 +1844,14 @@
    "claimed_by_capability": []
   },
   "skill_000468": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：2 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（号位条件、传动×1），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "传动（出现在：造成物伤，本技能位于1号位时威力+60，传动1。）",
-    "号位（出现在：造成物伤，本技能位于1号位时威力+60，传动1。）"
-   ],
-   "claimed_by_capability": []
+   "unparsed": [],
+   "claimed_by_capability": [
+    "号位条件",
+    "传动×1"
+   ]
   },
   "skill_000469": {
    "support": "PARTIAL",
@@ -1865,23 +1861,23 @@
    "claimed_by_capability": []
   },
   "skill_000470": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（传动×1），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "传动（出现在：造成物伤，技能威力为两侧技能威力和的三分之一，传动1。）"
-   ],
-   "claimed_by_capability": []
+   "unparsed": [],
+   "claimed_by_capability": [
+    "传动×1"
+   ]
   },
   "skill_000471": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：2 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（号位条件、传动×2），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "传动（出现在：造成物伤，本技能位于1号位时威力+90，传动2。）",
-    "号位（出现在：造成物伤，本技能位于1号位时威力+90，传动2。）"
-   ],
-   "claimed_by_capability": []
+   "unparsed": [],
+   "claimed_by_capability": [
+    "号位条件",
+    "传动×2"
+   ]
   },
   "skill_000472": {
    "support": "SIMULATABLE_UNVERIFIED",
@@ -1893,13 +1889,13 @@
    "claimed_by_capability": []
   },
   "skill_000473": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（传动×1），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "传动（出现在：主动：本技能被动永久额外-1能耗，被动：两侧技能能耗-1，传动1。）"
-   ],
-   "claimed_by_capability": []
+   "unparsed": [],
+   "claimed_by_capability": [
+    "传动×1"
+   ]
   },
   "skill_000474": {
    "support": "PARTIAL",
@@ -1923,21 +1919,23 @@
    "claimed_by_capability": []
   },
   "skill_000477": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：2 段机制没被读出",
-   "effects": [],
-   "unparsed": [
-    "传动（出现在：造成魔伤，本技能位于3号位时威力+40，传动1。）",
-    "号位（出现在：造成魔伤，本技能位于3号位时威力+40，传动1。）"
-   ],
-   "claimed_by_capability": []
-  },
-  "skill_000478": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
+   "why": "描述里的机制由已声明能力认领（号位条件、传动×1），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
+    "号位条件",
+    "传动×1"
+   ]
+  },
+  "skill_000478": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（号位条件、传动×1、连击×2），没有未认领片段",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "号位条件",
+    "传动×1",
     "连击×2"
    ],
    "hit_count": 2
@@ -1950,24 +1948,25 @@
    "claimed_by_capability": []
   },
   "skill_000480": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：2 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（号位条件、传动×1），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "传动（出现在：造成魔伤，本技能位于1号或3号位时威力+30，传动1。）",
-    "号位（出现在：造成魔伤，本技能位于1号或3号位时威力+30，传动1。）"
-   ],
-   "claimed_by_capability": []
+   "unparsed": [],
+   "claimed_by_capability": [
+    "号位条件",
+    "传动×1"
+   ]
   },
   "skill_000481": {
    "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：2 段机制没被读出",
+   "why": "只有资料：1 段机制没被读出",
    "effects": [],
    "unparsed": [
-    "传动（出现在：造成物伤，本技能位于1号或3号位时能耗-2，传动1。）",
     "号位（出现在：造成物伤，本技能位于1号或3号位时能耗-2，传动1。）"
    ],
-   "claimed_by_capability": []
+   "claimed_by_capability": [
+    "传动×1"
+   ]
   },
   "skill_000482": {
    "support": "PARTIAL",
@@ -1978,22 +1977,23 @@
   },
   "skill_000483": {
    "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：2 段机制没被读出",
-   "effects": [],
-   "unparsed": [
-    "传动（出现在：自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。）",
-    "号位（出现在：自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。）"
-   ],
-   "claimed_by_capability": []
-  },
-  "skill_000484": {
-   "support": "KNOWLEDGE_ONLY",
    "why": "只有资料：1 段机制没被读出",
    "effects": [],
    "unparsed": [
-    "传动（出现在：造成魔伤，威力额外增加两侧技能威力差的四分之一，传动1。）"
+    "号位（出现在：自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。）"
    ],
-   "claimed_by_capability": []
+   "claimed_by_capability": [
+    "传动×1"
+   ]
+  },
+  "skill_000484": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（传动×1），没有未认领片段",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "传动×1"
+   ]
   },
   "skill_000485": {
    "support": "KNOWLEDGE_ONLY",
@@ -2006,14 +2006,15 @@
   },
   "skill_000486": {
    "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：3 段机制没被读出",
+   "why": "只有资料：1 段机制没被读出",
    "effects": [],
    "unparsed": [
-    "选择（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）",
-    "传动（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）",
-    "号位（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）"
+    "选择（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）"
    ],
-   "claimed_by_capability": []
+   "claimed_by_capability": [
+    "号位条件",
+    "传动×1"
+   ]
   },
   "skill_000487": {
    "support": "PARTIAL",
@@ -2030,13 +2031,13 @@
    "claimed_by_capability": []
   },
   "skill_000489": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：1 段机制没被读出",
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述里的机制由已声明能力认领（传动×1），没有未认领片段",
    "effects": [],
-   "unparsed": [
-    "传动（出现在：主动：本技能被动永久额外+20威力，被动：两侧技能威力+10，传动1。）"
-   ],
-   "claimed_by_capability": []
+   "unparsed": [],
+   "claimed_by_capability": [
+    "传动×1"
+   ]
   },
   "skill_000490": {
    "support": "KNOWLEDGE_ONLY",
@@ -2049,13 +2050,14 @@
   },
   "skill_000491": {
    "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：2 段机制没被读出",
+   "why": "只有资料：1 段机制没被读出",
    "effects": [],
    "unparsed": [
-    "传动（出现在：减伤50%，本技能位于1号位或3号位时，额外减伤40%，应对攻击，传动1。）",
     "号位（出现在：减伤50%，本技能位于1号位或3号位时，额外减伤40%，应对攻击，传动1。）"
    ],
-   "claimed_by_capability": []
+   "claimed_by_capability": [
+    "传动×1"
+   ]
   },
   "skill_000492": {
    "support": "KNOWLEDGE_ONLY",
@@ -2091,13 +2093,14 @@
   },
   "skill_000496": {
    "support": "KNOWLEDGE_ONLY",
-   "why": "只有资料：2 段机制没被读出",
+   "why": "只有资料：1 段机制没被读出",
    "effects": [],
    "unparsed": [
-    "传动（出现在：造成物伤，位于1号位时，先手+1。传动1。）",
     "号位（出现在：造成物伤，位于1号位时，先手+1。传动1。）"
    ],
-   "claimed_by_capability": []
+   "claimed_by_capability": [
+    "传动×1"
+   ]
   },
   "skill_000497": {
    "support": "SIMULATABLE_UNVERIFIED",

@@ -45,7 +45,9 @@ TRAIT_STATUS_TO_SUPPORT = {
 }
 
 
-def classify_skill(skill: Any, *, multi_hit_declared: bool = False) -> Dict[str, Any]:
+def classify_skill(skill: Any, *, multi_hit_declared: bool = False,
+                   slot_condition_declared: bool = False,
+                   position_shift_declared: bool = False) -> Dict[str, Any]:
     """一条战斗技能的支持等级。判据只看**解析结果 + 已声明的能力**，不看名字或人工名单。
 
     `multi_hit_declared`：当前规则配置有没有声明连击能力（RC-401 的第一条增量）。
@@ -54,6 +56,16 @@ def classify_skill(skill: Any, *, multi_hit_declared: bool = False) -> Dict[str,
     """
     parsed = parse_mod.parse_skill(skill)
     claimed: List[str] = []
+    # C1（第 139 轮）：号位条件 / 传动 与连击同一套口径 —— **配置声明了能力**才摘掉那两条
+    # 未认领标记（默认都不声明，legacy / v2 的档位逐字不变）。
+    if slot_condition_declared or position_shift_declared:
+        parsed = parse_mod.resolve_position_mechanics(
+            skill, slot_declared=slot_condition_declared,
+            shift_declared=position_shift_declared)
+        if slot_condition_declared and parsed.slot_conditions:
+            claimed.append("号位条件")
+        if position_shift_declared and parsed.position_shift is not None:
+            claimed.append(f"传动×{parsed.position_shift}")
     if multi_hit_declared and parsed.hit_count and parsed.hit_count > 1:
         # 只摘静态连击那一条；动态连击仍算未实现（见 parse.resolve_hit_count 的同一处判据）。
         kept = [row for row in parsed.unparsed if "动态" in str(row) or "连击" not in str(row)]
@@ -152,11 +164,27 @@ def build_coverage(rs: Any, *, headline: Optional[List[str]] = None,
     之所以要显式带上它：覆盖率不是数据的属性，而是「**数据 × 已声明的能力**」的属性——
     同一份数据，legacy 口径与候选口径的覆盖率本来就不同，混在一起谈就是自欺。
     """
-    capabilities = dict(declared_capabilities or {"multi_hit": True})
+    # 默认口径 = **当前候选配置声明的能力**（C1 起含号位条件 / 传动，与 `damage.multi_hit` 并列）。
+    # 为什么从配置读而不是写死：能力是**配置声明的**，报告必须跟着它走，
+    # 否则「台账说支持」与「引擎真的会结算」会各说各话。
+    if declared_capabilities is None:
+        try:
+            from . import rule_config as _rc
+            _cfg = _rc.get_rule_config("mobile_s4_candidate_v3")
+            capabilities = {"multi_hit": bool(getattr(_cfg, "damage_multi_hit", False)),
+                            "slot_condition": bool(getattr(_cfg, "damage_slot_condition", False)),
+                            "position_shift": bool(getattr(_cfg, "damage_position_shift", False))}
+        except Exception:      # 配置读不到就退回只认连击（宁可少算，也不假装支持）
+            capabilities = {"multi_hit": True}
+    else:
+        capabilities = dict(declared_capabilities)
     skills = [s for s in rs.skills.values() if not s.is_trait]
     traits = [s for s in rs.skills.values() if s.is_trait]
 
-    skill_rows = {s.skill_id: classify_skill(s, multi_hit_declared=capabilities.get("multi_hit", False))
+    skill_rows = {s.skill_id: classify_skill(
+        s, multi_hit_declared=capabilities.get("multi_hit", False),
+        slot_condition_declared=capabilities.get("slot_condition", False),
+        position_shift_declared=capabilities.get("position_shift", False))
                   for s in skills}
     trait_rows = {t.skill_id: classify_trait(t) for t in traits}
 
