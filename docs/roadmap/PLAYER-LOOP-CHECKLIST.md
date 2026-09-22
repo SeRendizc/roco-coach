@@ -320,12 +320,29 @@
 - 生成器 `build-rule-configs.mjs`：`energy.initial` 从 `UNKNOWN` 改为 `10 / RECORDED_IN_GAME / EV-ENERGY-INITIAL`；
 - 重新生成后配置里确实是 `initial: 10`；服务端那条 `energy.initial` 的**假设覆盖**随之删掉。
 
-**为什么回退**：一改值，`test:env` 立刻 **8 失败 + 50 错误** —— 引擎守卫报
+**为什么回退**：一改值，`test:env` 立刻 **8 失败 + 50 错误**（第 127 轮又试了两次自动化清扫，
+两次都把别处切坏——第一次删到引擎源码里**合法的配置路径引用**（68 个文件，含 `env.py`/`service.py`），
+第二次把 `kwargs` 形式切错、把 `test_rule_config.py` 切出语法错误；两次都已整体回退，
+`test:env` 回到 417 OK。**结论：这一刀不许用 sweeping 脚本，必须逐文件人工改**。
+第 127 轮已经把**精确调用点枚举出来**（下表），下一轮照它改即可。） —— 引擎守卫报
 「`unverified_overrides[0].path='energy.initial'` 在配置里不是 UNKNOWN（当前值 10）——覆盖只用于把 UNKNOWN 显式假设掉，
 不许拿它改一条已登记的值」。**这条守卫是对的**：它逼我们把「假设」与「已登记值」分清楚。
 连带面 **22 个文件**：机械部分是删掉各调用点那条陈旧覆盖；语义部分是**晋升测试**要从
 「期望 UNKNOWN」改成「期望 RECORDED_IN_GAME / 10」。
-**工期 1 轮**（机械改动 + 少量语义断言 + 重生三份配置 + 门禁）。
+**精确调用点（第 127 轮枚举，逐条人工改，不要脚本）**：
+
+| 文件:行 | 现在 | 要改成 |
+|---|---|---|
+| `roco/tests/test_effect_coverage.py:208` | `{"path":"energy.initial","value":2,…}` 覆盖 | 删掉这条（配置已有真值 10） |
+| `roco/tests/test_multi_hit.py:35` | 同上 | 删掉 |
+| `roco/tests/test_on_demand_builds.py:41` | 同上 | 删掉 |
+| `roco/tests/test_mana_actions.py:93` | `_override_energy_initial(value=None)` 返回覆盖 | 改成不再传这条（或整个助手删掉） |
+| `roco/tests/test_six_pet_battle.py:198/242/744` | 三处把覆盖当夹具/坏参数样例 | 198 删；242/744 换一条**仍是 UNKNOWN** 的路径（如 `turn_order.speed_tie`）当样例 |
+| `roco/tests/test_rule_config.py:9/139` | 断言 `candidate.energy_initial is None`（UNKNOWN） | 改成断言 **10 + `RECORDED_IN_GAME` + `EV-ENERGY-INITIAL`** |
+| `tests/roco-standard-pvp-battle.test.js` | 断言只有一条覆盖 | 改成只断言 `turn_order.speed_tie` 那条 |
+| `tests/roco-rule-promotion.test.js` / `tests/roco-rule-config.test.js:149` | 晋升/坏值样例用 `energy.initial` | 换一条仍是 UNKNOWN 的路径；`invented` 那条改路径 |
+
+**工期 1 轮**（上表逐条改 + 语义断言更新 + 重生三份配置 + 门禁）。
 
 ### R2 技能区（4 个技能格）—— **部分已做，剩余 1–2 轮**
 
