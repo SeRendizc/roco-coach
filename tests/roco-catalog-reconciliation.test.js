@@ -42,6 +42,7 @@ import {
 } from '../scripts/roco/reconcile-catalog.mjs';
 
 import {PAGES, analyzePage, checkLiveLicence, licenceFromSources} from '../scripts/roco/fetch-live-snapshot.mjs';
+import {offlineCheckArgs} from '../scripts/roco/verify-reconciliation.mjs';
 
 function log(...args) {
   // node --test 会把 stdout 打出来；报告里要贴实际值，所以显式打印。
@@ -541,4 +542,52 @@ test('RC-201 报告：licence_ok 必须为真，且与快照逐字一致；抓�
   assert.equal(execFileSync('git', ['check-ignore', 'data/roco/raw/extracted/live-bwiki/2026-09-21/pet-index.html'],
     {cwd: ROOT, encoding: 'utf8'}).trim(), 'data/roco/raw/extracted/live-bwiki/2026-09-21/pet-index.html',
   '抓到的 HTML 必须落在被 .gitignore 忽略的路径');
+});
+
+// ── 日期翻转的回归（2026-09-22 实测踩到）─────────────────────────────────────
+//
+// 原来的 bug：`verify-reconciliation.mjs` 调 `fetch-live-snapshot.mjs --check --offline`
+// **不给日期**，而那个脚本的默认日期是**当天**。快照却是按天落盘的——于是每天零点一过，
+// 闸门就会去找一个还不存在的 `data/roco/live/<今天>/public-index.json`，报
+// `offline_check_rc=3`，紧接着在打印环节抛 `TypeError: Cannot convert undefined or null to object`。
+// 判据要回答的是「**在盘上的这份**快照能不能由本地 HTML 逐字节重抽」，所以日期必须取自快照路径。
+test('离线复核的参数必须显式带上**快照自己的**日期（不是「今天」）', () => {
+  const args = offlineCheckArgs('data/roco/live/2026-09-21/public-index.json');
+  assert.deepEqual(args, ['--check', '--offline', '--date', '2026-09-21']);
+  // 反证①：路径里没有日期就返回 null（调用方会按失败处理，不猜今天）。
+  assert.equal(offlineCheckArgs('data/roco/live/public-index.json'), null);
+  assert.equal(offlineCheckArgs(null), null);
+  // 反证②：**不带 --date** 的那一版正是 bug 的形状——把它写出来，证明上面那条判据抓得住它。
+  const buggy = ['--check', '--offline'];
+  assert.ok(!buggy.includes('--date'), '旧调用形状本来就没有 --date');
+  const today = new Date().toISOString().slice(0, 10);
+  assert.notEqual(args[3], today, `快照日期不该被换成今天（${today}）`);
+});
+
+test('真跑一次：对账套件在「快照日期 ≠ 今天」时仍然绿，且用的是快照日期', () => {
+  const livePath = latestLiveSnapshotPath();
+  assert.ok(livePath, '找不到公网快照');
+  const snapshotDate = /(\d{4}-\d{2}-\d{2})/.exec(livePath)?.[1] ?? null;
+  const out = execFileSync('node', ['scripts/roco/verify-reconciliation.mjs', '--gate'],
+    {cwd: ROOT, encoding: 'utf8'});
+  assert.match(out, /offline_check_rc=0/, `离线复核必须 rc=0，实际输出：${out.slice(-400)}`);
+  assert.ok(out.includes(snapshotDate), `输出里应当出现快照日期 ${snapshotDate}`);
+  log(`[实际] 快照日期=${snapshotDate}；离线复核 rc=0`);
+});
+
+test('缺快照时给的是「没有可校验的产物」，不是 TypeError', () => {
+  let rc = 0;
+  let out = '';
+  try {
+    out = execFileSync('node',
+      ['scripts/roco/fetch-live-snapshot.mjs', '--check', '--offline', '--date', '1999-01-01'],
+      {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
+  } catch (error) {
+    rc = error.status ?? 1;
+    out = `${error.stdout || ''}${error.stderr || ''}`;
+  }
+  assert.equal(rc, 1, `缺快照必须 rc=1，实际 ${rc}`);
+  assert.match(out, /没有可校验的产物/, `应当说清缺什么，实际：${out.slice(-300)}`);
+  assert.ok(!/TypeError/.test(out), `不许把 TypeError 当报错信息：${out.slice(-300)}`);
+  log(`[实际] rc=${rc}；${out.trim().split('\n').filter((l) => l.includes('没有可校验')).join(' ')}`);
 });

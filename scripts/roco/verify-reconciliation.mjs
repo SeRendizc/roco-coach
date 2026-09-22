@@ -32,6 +32,24 @@ export function stripVolatile(report) {
   return copy;
 }
 
+/**
+ * 离线确定性重抽要复核的是**在盘上的那份快照**，不是「今天」。
+ *
+ * 为什么必须显式给日期：`fetch-live-snapshot.mjs` 的默认日期是**当天**，
+ * 而快照是按天落盘的。于是每天零点一过，这条判据就会去找一个还不存在的
+ * `data/roco/live/<今天>/public-index.json`，把闸门弄红（2026-09-22 实测踩到：
+ * `offline_check_rc=3`、`[check] target=.../2026-09-22/...`、接着
+ * `TypeError: Cannot convert undefined or null to object`）。
+ *
+ * 判据要回答的是「**这份**快照能不能由本地 HTML 逐字节重抽」，
+ * 所以日期取自快照路径本身。推不出日期就返回 null，调用方按失败处理（不猜今天）。
+ */
+export function offlineCheckArgs(livePath) {
+  const match = /(\d{4}-\d{2}-\d{2})[\\/]public-index\.json$/.exec(String(livePath ?? ''));
+  if (!match) return null;
+  return ['--check', '--offline', '--date', match[1]];
+}
+
 /** 逐条判据（纯函数，便于测试直接反证）。返回问题列表。 */
 export function judgeReconciliation({committed, fresh, offlineCheck}) {
   const problems = [];
@@ -114,11 +132,14 @@ function main() {
   // ① 确定性重抽（用已落地 HTML，不打网）
   let offlineCheck = {rc: 0, tail: ''};
   try {
-    const out = execFileSync('node', ['scripts/roco/fetch-live-snapshot.mjs', '--check', '--offline'],
+    const checkArgs = offlineCheckArgs(live);
+    if (!checkArgs) throw new Error(`从快照路径推不出日期：${relative(ROOT, live)}`);
+    const out = execFileSync('node', ['scripts/roco/fetch-live-snapshot.mjs', ...checkArgs],
       {cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
-    offlineCheck = {rc: 0, tail: out};
+    offlineCheck = {rc: 0, tail: out, args: checkArgs};
   } catch (error) {
-    offlineCheck = {rc: error.status ?? 1, tail: `${error.stdout || ''}\n${error.stderr || ''}`};
+    offlineCheck = {rc: error.status ?? 1, tail: `${error.stdout || ''}\n${error.stderr || ''}`,
+      args: offlineCheckArgs(live)};
   }
   // ② 现状报告 + ③ 重算一遍对比
   const committedPath = REPORT_PATH;

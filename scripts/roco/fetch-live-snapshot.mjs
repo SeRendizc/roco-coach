@@ -737,7 +737,14 @@ async function main(argv) {
     process.stdout.write(`[check] target=${report.target}\n`);
     process.stdout.write(`[check] result_sha256 previous=${report.previous_result_sha256}\n`);
     process.stdout.write(`[check] result_sha256 fresh   =${report.fresh_result_sha256}\n`);
-    for (const [k, v] of Object.entries(report.fresh_page_status)) {
+    // 没有可校验的产物时**不要**去遍历 null：那样只会抛一个 `TypeError`，
+    // 把「哪一天缺快照」这条真正的原因盖掉（2026-09-22 实测踩到）。这里如实说要什么。
+    if (!report.fresh) {
+      process.stdout.write(`[check] 没有可校验的产物：${report.target} 不存在`
+        + `（要复核已有快照就显式给 --date，例如 --date ${report.target.match(/(\d{4}-\d{2}-\d{2})/)?.[1] ?? 'YYYY-MM-DD'}）\n`);
+      return 1;
+    }
+    for (const [k, v] of Object.entries(report.fresh_page_status ?? {})) {
       process.stdout.write(`[check] page ${k}: status=${v}\n`);
     }
     if (args.json) process.stdout.write(JSON.stringify(report.fresh.result, null, 2) + '\n');
