@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `d2ad1cd`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `eac6990`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1820,3 +1820,25 @@ A7 1440/390 无遮挡无横向溢出、A8 页面看不到的能力不得只凭�
 **下一轮入口**：RC-306 的接线（`/api/roco/workshop` 改成先初判后完整解释、超时降级）；
 台账第三条仓内来源；RC-401～505 / 601～605 / 801～802 / P2；`MC-E04/E05/E07/E08/E09` 仍未录制
 （现在是**假设值**在跑，页面上逐条标着）。
+
+### C6.33 第 96 轮：RC-306 接线完成（分段交付有了真实消费者）
+
+**交付（提交 `a459ac1` / `eac6990`）**：
+
+| 层 | 改了什么 | 实测 |
+|---|---|---|
+| 契约 | `serveStages({...,withheldStages})`：把「调用方主动不要某段」与「超时降级」分开记录（`full_withheld:'NOT_REQUESTED'` + `degraded:false`） | 单测 11 → **12** 条 |
+| 服务端 | `GET /api/roco/workshop?stage=first|full`：first **只跑 `plan` 一段**（证据/五轴段根本不跑，`axes=null`、`axes_status=not_requested`）；非法 stage 400 点名；`stage` 是交付参数，已挡在 RC-301 组队 draft 之外 | 路由判据 6 条全绿；初判只跑 `plan`、完整解释两段都跑 |
+| 页面 | `team-workshop.js` 两阶段取数：先 `stage=first` 渲染，再取完整载荷**原地升级**；第二段失败**不清空**已渲染的初判（如实写「这次没回来，上面结论不受影响」） | 中间态实测 `renderedAfterFirst=yes firstMs=98 fullState=loading slots=6` |
+| 判据 | 工坊单测 17→**19**；浏览器验收 **41/41 + 27/27 必红反证**（新增：初判不含证据段、初判先于完整载荷、分段元数据在 dataset） | 标准 PVP 那两条重编号为 34/35，报告不再有重复 id |
+
+**顺手修掉的**：两处漏进玩家文案的 Markdown 标记（`结构分在这几只上是**空**的`、`下面这几只是**候选参考**`）
+——判据不抓 `*` 所以一直是绿的，但玩家会读到星号，属于「检查不到的地方自己长出来」的典型。
+
+**仍未完成（下一轮的入口）**：
+1. 台账第三条仓内来源（冻结 `skills.json` 里 6 条「魔力」特性）+ 连带重跑 `build-rule-configs` 与失效图。
+2. RC-401～505 / 601～605 / 801～802 / P2；**RC-402（按需 Build Compiler）**是目前最大的产品缺口：
+   全量 622 只里只有 48 只有冻结配招，其余 574 只「选得到、上不了场」。
+3. 两阶段取数目前对所有点击生效（每次 2 个请求）；要做成 `opts.stage` 开关需产品点头。
+4. `MC-E04/E05/E07/E08/E09` 仍未录制；现在整局是靠**页面上逐条标出的假设值**在跑。
+5. 跨机协作区仍未同步（等用户允许扩权）。
