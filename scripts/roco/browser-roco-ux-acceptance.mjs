@@ -370,9 +370,11 @@ async function main() {
       return !(cr.right<r.left||cr.left>r.right||cr.bottom<r.top||cr.top>r.bottom);}).length;
     return {hidden:bar.hidden,steps:document.querySelectorAll('#onboard li').length,
       h:Math.round(r.height),overlap,top:Math.round(r.top)};})()`);
-  check('P0-3', '开局引导是常规流里的一条（不浮层），且与候选卡零重叠',
-    onboard.hidden === false && onboard.steps === 3 && onboard.overlap === 0 && onboard.h > 0 && onboard.h <= 80,
-    `三步=${onboard.steps} 高度=${onboard.h}px 与卡片重叠=${onboard.overlap} 张`);
+  // 2026-09-22（人类 P0）：教程从「三步」压成**一句**（首屏只留六槽 + 筛选 + 一句建议）。
+  // 判据跟着新口径：仍然是常规流里的一条、仍然不遮挡卡片，但不再要求三步。
+  check('P0-3', '开局引导是常规流里的一条（不浮层、只占一行），且与候选卡零重叠',
+    onboard.hidden === false && onboard.steps >= 1 && onboard.overlap === 0 && onboard.h > 0 && onboard.h <= 80,
+    `步骤=${onboard.steps}（压成一句）高度=${onboard.h}px 与卡片重叠=${onboard.overlap} 张`);
   // 真实鼠标先点一张卡，再点「跳过」——跳过之后卡片照样点得动。
   // 注意：默认对手已经拿了名单前 3 只，那 3 张卡是**故意点不动**的
   // （点它会得到一句可执行的提示）。这一条要验的是「能选的那种卡」点得动，

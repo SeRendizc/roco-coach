@@ -342,9 +342,11 @@ async function main(){
     imgs:document.querySelectorAll('img').length,externalStyles:document.querySelectorAll('link[href^="http"],script[src^="http"]').length});})()`));
  // 教程那一条量的是**首屏那一刻**的样子（`onboardAtLoad`）：第 64 轮起对局一开
  // 它就自动收起（见文件末尾那一段判据），所以推进到这里它已经不是 shown 了。
- // 判的仍然是原来那件事：第一次来的人看得到三步。
- check('开局引导渲染出三步（少一步这一页就又要先看半天）',
-  onboardAtLoad.hook==='shown'&&onboardAtLoad.steps===3&&onboardAtLoad.h>0&&visual.steps===3,
+ // 2026-09-22（人类 P0）：教程压成**一句**（首屏只留六槽 + 筛选 + 一句建议）。
+ // 判据跟着新口径：第一次来的人仍然看得到引导，且它仍然只占一行（不占首屏）。
+ check('开局引导渲染出来（压成一句，不再占三步的位置）',
+  onboardAtLoad.hook==='shown'&&onboardAtLoad.steps>=1&&onboardAtLoad.h>0
+   &&onboardAtLoad.h<=80&&visual.steps>=1,
   JSON.stringify({开局时:onboardAtLoad,现在:visual.onboard}));
  // 候选池 12 → 48 之后，断言必须跟着池子大小走（写死 12 会在这条上假红）。
  // 真正要守的是：**筛出来的每一张卡都有形象**（empty===0），而不是"刚好 12 只"。
@@ -1412,7 +1414,7 @@ async function main(){
   return JSON.stringify({hook:document.body.dataset.rocoOnboard??null,hidden:bar.hidden,
    h:Math.round(bar.getBoundingClientRect().height),flag:localStorage.getItem('roco-coach-onboard-v1')});})()`));
  check('教程只在首次出现：真实点击「跳过」之后它不再占位（高度归零）',
-  onboardBefore.hook==='shown'&&onboardBefore.steps===3&&onboardBefore.h>0
+  onboardBefore.hook==='shown'&&onboardBefore.steps>=1&&onboardBefore.h>0
   &&onboardAfter.hidden===true&&onboardAfter.h===0&&onboardAfter.hook==='hidden',
   `跳过前 ${onboardBefore.steps} 步 / 高 ${onboardBefore.h}px（${onboardBefore.hook}） → `
   +`跳过后 高 ${onboardAfter.h}px（${onboardAfter.hook}）`);
@@ -1515,7 +1517,7 @@ async function main(){
    flag:localStorage.getItem('roco-coach-onboard-v1'),
    turn:window.rocoDemo.state.view?window.rocoDemo.state.view.turn:null});})()`));
  check('③ 真实鼠标点「开一局」之后教程自动收起（hidden 且高度 0px，不是只靠 CSS 藏）',
-  onboardPre.hook==='shown'&&onboardPre.steps===3&&onboardPre.h>0
+  onboardPre.hook==='shown'&&onboardPre.steps>=1&&onboardPre.h>0
   &&onboardPost.hook==='hidden'&&onboardPost.hidden===true&&onboardPost.h===0,
   `开局前 ${onboardPre.steps} 步 / 高 ${onboardPre.h}px（${onboardPre.hook}）→ `
   +`开局后（第 ${onboardPost.turn} 回合）高 ${onboardPost.h}px / hidden=${onboardPost.hidden}（${onboardPost.hook}）`);

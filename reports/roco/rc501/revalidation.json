@@ -5,7 +5,7 @@
  "why": "v3 红线：不得重写或退化现有 Agent/RAG/Memory/三角色/game adapter/mock host/stale-result guard/release guard。「保留」必须有牙 —— 缺判据、掉出套件清单、产物不再生成、没有必红方向，四样缺一样都要红（守卫不跑等于没有守卫）。",
  "gate": {
   "path": "reports/roco/verification/latest.json",
-  "verdict": "pass",
+  "verdict": "failed",
   "declared_suites": [
    "env",
    "unit",
@@ -24,6 +24,10 @@
    "guard-selftest",
    "browser-acceptance",
    "demo-acceptance",
+   "retained-assets",
+   "mobile-sweep",
+   "box-acceptance",
+   "workshop-acceptance",
    "roco-ux-acceptance"
   ],
   "last_run_suites": [
@@ -44,6 +48,10 @@
    "guard-selftest",
    "browser-acceptance",
    "demo-acceptance",
+   "retained-assets",
+   "mobile-sweep",
+   "box-acceptance",
+   "workshop-acceptance",
    "roco-ux-acceptance"
   ],
   "head_run": null

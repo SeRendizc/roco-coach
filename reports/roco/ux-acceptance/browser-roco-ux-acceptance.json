@@ -1,6 +1,6 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-22T05:52:34.492Z",
+ "generated_at": "2026-09-22T06:27:58.949Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [
@@ -63,9 +63,9 @@
   },
   {
    "id": "P0-3",
-   "name": "开局引导是常规流里的一条（不浮层），且与候选卡零重叠",
+   "name": "开局引导是常规流里的一条（不浮层、只占一行），且与候选卡零重叠",
    "ok": true,
-   "actual": "三步=3 高度=39px 与卡片重叠=0 张"
+   "actual": "步骤=1（压成一句）高度=39px 与卡片重叠=0 张"
   },
   {
    "id": "P0-3-click",
@@ -478,7 +478,7 @@
   "onboard": {
    "height": 39,
    "overlap_with_cards": 0,
-   "steps": 3
+   "steps": 1
   },
   "action_groups": [
    {

@@ -75,6 +75,11 @@ const STYLE = `
 :host{display:block;color:#e3eaf1;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
 *{box-sizing:border-box}
 .tw-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:start}
+/* 两列**等高**（用户：小芽那栏不能拉长吗、非得这么丑？）：网格项拉伸，
+   面板内部再让最后一栏吃满剩余高度。 */
+.tw-grid{align-items:stretch}
+.tw-panel{display:flex;flex-direction:column}
+.tw-panel.tw-coach,.tw-panel.tw-eval{height:100%}
 .tw-panel{background:#1a2635;border:1px solid #314154;border-radius:12px;padding:6px 12px 10px;min-width:0}
 .tw-team{grid-column:span 2}
 .tw-cand{grid-column:span 2}
@@ -134,8 +139,12 @@ const STYLE = `
 .tw-axis-state.off{border-color:#6b5a33;color:#f0cb77;background:#241f16}
 .tw-axis p{margin:5px 0 0;font-size:12.5px;line-height:1.6;overflow-wrap:anywhere}
 .tw-cand-tools{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:8px}
-.tw-cand-tools input{flex:1 1 180px;min-width:0;min-height:44px;font-size:13.5px;background:#121e2c;
- color:#dbe5ef;border:1px solid #314154;border-radius:7px;padding:7px 9px}
+.tw-cand-tools{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;align-items:stretch}
+.tw-cand-tools input{grid-column:1/-1;min-width:0;min-height:44px;font-size:13.5px;background:#121e2c;
+ color:#dbe5ef;border:1px solid #314154;border-radius:8px;padding:7px 10px}
+.tw-cand-tools .tw-btn{min-height:44px;width:100%}
+/* 翻页那一行：两个按钮平分整行、页码居中 —— 不再是「半边空着」（用户：上一页下一页铺平拉长）。 */
+.tw-cand-tools.tw-pager{grid-template-columns:1fr auto 1fr}
 /* 候选区**不再内滚**（2026-09-22 人类 P1）：这一页原来同时有「页码」与「区域内滚动」，
    两套导航叠在一起，玩家既翻页又滚内层。现在只留**一套**：分页器翻页，列表整块摊开，
    这一页有多少条就全露出来；要看评估就整页向下滚（那是跨区浏览，不是区內导航）。 */
@@ -152,6 +161,13 @@ const STYLE = `
 .tw-state-held{color:#8dd49c;border-color:#3f6b4c;background:#16281d}
 .tw-state-trial{color:#f0cb77;border-color:#6b5b3a;background:#2a2318}
 .tw-state-info{color:#9caebe;border-color:#3a4a5c;background:#18232f}
+.tw-about{margin:6px 0 0;border:1px solid #2b3a4a;border-radius:9px;background:#131e2a}
+.tw-about>summary{font-size:11.5px;color:#9caebe;cursor:pointer;min-height:44px;
+ display:flex;align-items:center;gap:6px;padding:0 10px;list-style:none}
+.tw-about>summary::-webkit-details-marker{display:none}
+.tw-about>summary::after{content:'▾';margin-left:auto;color:#6b7f92}
+.tw-about[open]>summary::after{content:'▴'}
+.tw-about>*:not(summary){margin:0 10px 8px}
 .tw-slot .tw-detail{margin-top:auto}
 /* 槽位里的「移除」是拇指要点的（390 实测 43×25 < 44）：给它 44×44。 */
 .tw-slot-remove{margin-left:auto;min-width:44px;min-height:44px;font-size:11px;color:#9caebe;
@@ -276,17 +292,27 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     <section class="tw-panel tw-team" aria-labelledby="tw-team-title">
      <div class="tw-head"><h3 id="tw-team-title">队伍（六个槽位）</h3>
       <span class="tw-sub" id="tw-team-sub">还差 6 只</span></div>
-     <div class="tw-badges">
-      <span class="tw-badge" id="tw-badge-mode">${escapeHtml(TEAM_WORKSHOP_BADGES.mode)}</span>
-      <span class="tw-badge warn" id="tw-badge-rule">${escapeHtml(TEAM_WORKSHOP_BADGES.candidate)}</span>
-      <span class="tw-badge muted" id="tw-badge-unknown">${escapeHtml(TEAM_WORKSHOP_BADGES.unknown_prematch)}</span>
-      <span class="tw-badge muted" id="tw-badge-universe">${escapeHtml(TEAM_WORKSHOP_BADGES.universe)} 600+</span>
-     </div>
+     <details class="tw-about" id="tw-about">
+      <summary>这一局的规则口径（候选 / 未核验 / 候选宇宙）</summary>
+      <div class="tw-badges">
+       <span class="tw-badge" id="tw-badge-mode">${escapeHtml(TEAM_WORKSHOP_BADGES.mode)}</span>
+       <span class="tw-badge warn" id="tw-badge-rule">${escapeHtml(TEAM_WORKSHOP_BADGES.candidate)}</span>
+       <span class="tw-badge muted" id="tw-badge-unknown">${escapeHtml(TEAM_WORKSHOP_BADGES.unknown_prematch)}</span>
+       <span class="tw-badge muted" id="tw-badge-universe">${escapeHtml(TEAM_WORKSHOP_BADGES.universe)} 600+</span>
+      </div>
+     </details>
      <div class="tw-slots" id="tw-slots" role="list"></div>
-     <p class="tw-note" id="tw-analysis-head">理论阵容（全图鉴都能放进来做搭配分析；能不能出战看每格的状态）</p>
-     <div class="tw-slots" id="tw-analysis-slots" role="list" data-tw-analysis></div>
-     <p class="tw-note" id="tw-team-note"></p>
-     <p class="tw-note" id="tw-team-constraints" hidden></p>
+     <!-- 2026-09-22（人类 P0）：队伍面板里**不再**放第二排槽位。
+          理论阵容只在候选人页签里出现（它是「分析用」的清单，不该和出战六槽并排抢首屏）。 -->
+     <details class="tw-about" id="tw-analysis-box" hidden>
+      <summary id="tw-analysis-head">理论阵容（放图鉴物种进来做搭配分析）</summary>
+      <div class="tw-slots" id="tw-analysis-slots" role="list" data-tw-analysis></div>
+     </details>
+     <details class="tw-about" id="tw-why">
+      <summary>为什么是这些 / 有什么约束</summary>
+      <p class="tw-note" id="tw-team-note"></p>
+      <p class="tw-note" id="tw-team-constraints" hidden></p>
+     </details>
      <p class="tw-error" id="tw-team-error" hidden></p>
      <div class="tw-knobs" style="margin-top:9px">
       <button class="tw-btn" id="tw-favourite" aria-pressed="false">只看收藏</button>
@@ -311,7 +337,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       <button class="tw-btn" id="tw-filter-clear">清除筛选</button>
      </div>
      <p class="tw-note" id="tw-cand-result" role="status" aria-live="polite"></p>
-     <div class="tw-cand-tools">
+     <div class="tw-cand-tools tw-pager">
       <button class="tw-btn" id="tw-cand-prev">上一页</button>
       <span class="tw-note" id="tw-cand-page">1 / 1</span>
       <button class="tw-btn" id="tw-cand-next">下一页</button>
@@ -319,7 +345,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      <div class="tw-cand-list" id="tw-cand-list" role="group" aria-label="从全图鉴挑一只"></div>
     </section>
 
-    <section class="tw-panel tw-eval" aria-labelledby="tw-eval-title">
+    <section class="tw-panel tw-eval" id="tw-eval-panel" aria-labelledby="tw-eval-title">
      <div class="tw-head"><h3 id="tw-eval-title">阵容评估</h3>
       <span class="tw-sub" id="tw-eval-sub">—</span></div>
      <div id="tw-eval-body"></div>
@@ -491,6 +517,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       </article>`;
     }).join('');
     const analysis = player?.analysis ?? null;
+    // 有内容就自动展开：玩家放了图鉴物种进去，必须立刻看得到它落在哪一格。
+    const analysisBox = $('tw-analysis-box');
+    if (analysisBox && Number(analysis?.count ?? 0) > 0) analysisBox.open = true;
     const head = $('tw-analysis-head');
     if (head) {
       head.textContent = analysis
@@ -672,7 +701,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const ordered = [...axes].sort((a, b) => AXIS_LABELS.indexOf(a.label) - AXIS_LABELS.indexOf(b.label));
     const replacement = full.replacement;
     return `<p class="tw-lead">${escapeHtml(full.headline ?? '')}</p>
-     <ul class="tw-axes">${ordered.map((axis) => {
+     <ul class="tw-axes" id="tw-axes">${ordered.map((axis) => {
     const value = axisValueText(axis);
     return `<li class="tw-axis" data-tw-axis="${escapeAttr(axis.label)}" data-tw-available="${axis.available}">
       <div class="tw-axis-head"><b>${escapeHtml(axis.label)}</b>
@@ -698,7 +727,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     if (list.length === 0) return '';
     return `<div class="tw-head" style="margin:12px 0 4px"><h3 style="font-size:13.5px">这一页现在还不知道什么</h3>
       <span class="tw-sub">${list.length} 条</span></div>
-     <ul class="tw-unknowns">${list.map((row) => `<li class="tw-unknown">
+     <ul class="tw-unknowns" id="tw-unknowns">${list.map((row) => `<li class="tw-unknown">
       <span>${escapeHtml(row.label ?? '')}</span>
       <span class="tw-state">${escapeHtml(row.state ?? '未核实')}</span>
       <span class="tw-text">${escapeHtml(row.note ?? '')}</span></li>`).join('')}</ul>
@@ -909,6 +938,14 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     rootEl.dataset.twStage = stage;
     renderTeam(player);
     renderAnalysis(player);
+    // 2026-09-22（人类 P0）：**证据段**（五轴 / 最小替换 / 这一页还不知道什么）在没选满六只时收起 ——
+    // 它那时只会印一排「现在算不出来」，是纯噪音。但 **「推荐下一只」必须留着**：
+    // 目标口径第⑤条要求「第 2～5 只时渐进推荐下一只」，藏了它就等于把旗舰功能藏起来。
+    const full = Number(player?.selected_count ?? 0) >= TEAM_SLOTS;
+    for (const id of ['tw-axes', 'tw-replacement', 'tw-unknowns']) {
+      const el = $(id);
+      if (el) el.hidden = !full;
+    }
     stripMarkdownInShadow();
     renderEval(player, stage);
     renderCoach(player, stage);

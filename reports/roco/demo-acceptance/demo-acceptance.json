@@ -79,9 +79,9 @@
       "detail": "换上第2位"
     },
     {
-      "name": "开局引导渲染出三步（少一步这一页就又要先看半天）",
+      "name": "开局引导渲染出来（压成一句，不再占三步的位置）",
       "ok": true,
-      "detail": "{\"开局时\":{\"hook\":\"shown\",\"hidden\":false,\"steps\":3,\"h\":39},\"现在\":\"hidden\"}"
+      "detail": "{\"开局时\":{\"hook\":\"shown\",\"hidden\":false,\"steps\":1,\"h\":39},\"现在\":\"hidden\"}"
     },
     {
       "name": "每个系别都有形象：阵容卡上的 emoji 徽记齐全（12 张卡，没有空的）",
@@ -259,17 +259,17 @@
     {
       "name": "点一下能真的问到本机小模型（面板出现内容）",
       "ok": true,
-      "detail": "{\"hidden\":false,\"hasFn\":\"function\",\"battleId\":\"s2-36sz31gf\",\"panelExists\":true,\"err\":null,\"html\":\"\\n      <table class=\\\"shadow\\\">\\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：换上第2位</td></tr>\\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\\n          <span class=\\\"muted\\\">耗时 504 ms · "
+      "detail": "{\"hidden\":false,\"hasFn\":\"function\",\"battleId\":\"s2-yvjdr1vo\",\"panelExists\":true,\"err\":null,\"html\":\"\\n      <table class=\\\"shadow\\\">\\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：换上第2位</td></tr>\\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\\n          <span class=\\\"muted\\\">耗时 520 ms · "
     },
     {
       "name": "面板明确写出「规则引擎是真值来源 / 模型只提议工具」",
       "ok": true,
-      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 504 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
+      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 520 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
     },
     {
       "name": "面板不许暗示两边在同一维度上一致",
       "ok": true,
-      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 504 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
+      "detail": " 规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 520 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」"
     },
     {
       "name": "局面矩阵：逐局面推进到位（12 个写死的局面，每个跑两遍）",
@@ -469,7 +469,7 @@
     {
       "name": "教程只在首次出现：真实点击「跳过」之后它不再占位（高度归零）",
       "ok": true,
-      "detail": "跳过前 3 步 / 高 39px（shown） → 跳过后 高 0px（hidden）"
+      "detail": "跳过前 1 步 / 高 39px（shown） → 跳过后 高 0px（hidden）"
     },
     {
       "name": "「跳过」写进了 localStorage 的登记键（不是只改这一次的 DOM）",
@@ -494,7 +494,7 @@
     {
       "name": "③ 真实鼠标点「开一局」之后教程自动收起（hidden 且高度 0px，不是只靠 CSS 藏）",
       "ok": true,
-      "detail": "开局前 3 步 / 高 39px（shown）→ 开局后（第 1 回合）高 0px / hidden=true（hidden）"
+      "detail": "开局前 1 步 / 高 39px（shown）→ 开局后（第 1 回合）高 0px / hidden=true（hidden）"
     },
     {
       "name": "③ 自动收起同样写 localStorage 登记键（下次进来不再显示）",
@@ -574,7 +574,7 @@
     {
       "name": "④ 陈旧规划必须整条丢弃并记账（构造竞态：规划属于旧版、回来时已推进）",
       "ok": true,
-      "detail": "规划属于 state_version=30，回来时画面=37；plan 保留=false planAtVersion=null；丢弃账={\"plan_version\":30,\"view_version\":37,\"at\":1790056239748}；状态行「没有采用这份建议：等待期间局面已推进（30 → 37）：这份规划属于已经不存在的局面，整条丢弃」"
+      "detail": "规划属于 state_version=30，回来时画面=37；plan 保留=false planAtVersion=null；丢弃账={\"plan_version\":30,\"view_version\":37,\"at\":1790058364420}；状态行「没有采用这份建议：等待期间局面已推进（30 → 37）：这份规划属于已经不存在的局面，整条丢弃」"
     },
     {
       "name": "④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上",

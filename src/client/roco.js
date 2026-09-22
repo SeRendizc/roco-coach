@@ -1067,8 +1067,10 @@ function applyOnboard() {
   if (!bar) return;
   const shown = !onboardDismissed();
   bar.hidden = !shown;
-  // 验收钩子：`shown` 要求「三步都在」——少一步这一页就又变回「先看半天才知道怎么用」。
-  document.body.dataset.rocoOnboard = shown && onboard && onboard.children.length === 3
+  // 验收钩子（2026-09-22 口径更新）：教程压成**一句**之后，「shown」的含义是
+  // 「引导真的渲染出来且至少有一条」——不再要求恰好三步（那是旧版式的判据）。
+  // 仍然守住原来那件事：**没内容就不许报 shown**（空引导等于没有引导）。
+  document.body.dataset.rocoOnboard = shown && onboard && onboard.children.length >= 1
     ? 'shown'
     : 'hidden';
 }
