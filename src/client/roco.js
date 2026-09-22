@@ -389,11 +389,12 @@ function resourceHtml({mana = null, label = '魔力 / 心'} = {}) {
   if (Number.isFinite(mana)) {
     return `<span class="res-name">${label}</span><span class="res-value">${mana}</span>`;
   }
+  // 2026-09-22（人类视觉规格）：未核验警示**集中在短标签**，解释与来源在一处可展开。
+  // 旧版在**每一侧**都印一整段（两段长文抢走战场），而且把同一句话重复两遍。
+  // 短标签仍然保留「未核验」三个字：不确定性信息不许删，只是不再铺屏。
   return `<span class="res-name">${label}</span>`
     + `<span class="res-value">${MANA_UNVERIFIED}</span>`
-    + '<span class="res-note">本仓库的引擎还没有这个量（未核验）：'
-    + '胜负按打光判定，魔力/心的真实规则要等候选规则落地与实机录制。'
-    + '原始依据在右上角「关于这一页」的开发者抽屉里。</span>';
+    + '<span class="res-note" id="mana-unverified-tag">本仓库引擎暂无此量</span>';
 }
 
 /** 一方队伍状态（哪只在场、倒了没、还有几个能打）。名字只给公开视图真的给的那些。 */
@@ -691,10 +692,25 @@ function render() {
   }
   // 未核验覆盖（RC-106）：引擎给的中文句子照搬，默认隐藏；没有假设就整段不显示。
   const unverified = $('unverified-note');
+  const notes = Array.isArray(view?.unverified_notes)
+    ? view.unverified_notes.filter((line) => typeof line === 'string' && line) : [];
   if (unverified) {
-    const notes = Array.isArray(view?.unverified_notes) ? view.unverified_notes.filter((line) => typeof line === 'string' && line) : [];
+    // 短标签固定一处（人类视觉规格）：默认只写「本局有 N 条未核验」，展开才读得到逐条来源。
     unverified.hidden = notes.length === 0;
-    unverified.textContent = notes.length ? `⚠ ${notes.join('；')}` : '';
+    unverified.textContent = notes.length ? `⚠ 本局有 ${notes.length} 条未核验（展开可读来源）` : '';
+  }
+  const rulesBody = $('rules-note-body');
+  if (rulesBody) {
+    const parts = [];
+    if (notes.length) parts.push(...notes);
+    else parts.push('本局没有使用未核验覆盖：规则值全部来自规则配置本身。');
+    const mode = state.mode;
+    if (mode) {
+      parts.push(`模式：${mode.label ?? mode.id ?? '未知'}`
+        + (mode.status === 'CANDIDATE' ? '（候选规则，待实机核对）' : '')
+        + (mode.unknowns_count ? `；登记未核实 ${mode.unknowns_count} 项` : ''));
+    }
+    rulesBody.textContent = parts.join('\n');
   }
   const selfLine = $('self-roster-line');
   if (selfLine) selfLine.innerHTML = rosterLineHtml(selfPets, {active: activeIndex});
@@ -954,12 +970,21 @@ function renderActions(actions, disabled) {
   for (const button of ($('act-switch-list')?.querySelectorAll('button[data-action]') ?? [])) {
     button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
   }
-  if (grouped.hidden.length) {
-    // 标准 PVP 下被模式隐藏的动作**如实记账**（不假装引擎没给）：报告与开发者抽屉读它。
-    box.insertAdjacentHTML('beforeend', `<p class="act-none">按当前模式（候选规则）隐藏了 `
-      + `${grouped.hidden.length} 个旧引擎动作：`
-      + `${[...new Set(grouped.hidden.map((a) => a.kind))].join('、')}。`
-      + `引擎需按模式裁剪合法行动（RC-306），本页只做显示层。</p>`);
+  // 被模式隐藏的动作**如实记账** —— 但记账进**开发者抽屉**，不印在玩家层。
+  // 2026-09-22（人类视觉规格）：旧版把 `item`、`escape`、`RC-306` 这些工程词印在行动坞下方，
+  // 玩家读到的是内部枚举名与模块编号。玩家只需要知道「这一手有几条动作可用」。
+  const hiddenNote = grouped.hidden.length
+    ? `按当前模式少了 ${grouped.hidden.length} 个动作（标准 PVP 不提供这些）` : '';
+  const hiddenRaw = document.getElementById('hidden-actions-raw');
+  if (hiddenRaw) {
+    hiddenRaw.textContent = grouped.hidden.length
+      ? `本回合被模式隐藏的旧引擎动作（${grouped.hidden.length} 条）：`
+        + `${[...new Set(grouped.hidden.map((a) => a.kind))].join('、')}`
+        + '（RC-306：引擎按模式裁剪合法行动，本页只做显示层）'
+      : '本回合没有被模式隐藏的动作。';
+  }
+  if (hiddenNote) {
+    box.insertAdjacentHTML('beforeend', `<p class="act-none">${hiddenNote}</p>`);
   }
   // 验收钩子：**引擎给的逐 kind 条数**仍然逐字记账（P0-5 判据读它），
   // 另外记下「渲染成什么样」：技能卡数 / 独立入口是否出现 / 换人列表条数。

@@ -48,6 +48,8 @@
     <p class="muted">玩家层不显示没给的威力，也绝不补 0；这一份是引擎给的原始来源状态。</p>
     <pre id="power-status-raw" class="raw">点开这一栏后按当前局面与名单生成。</pre>
     <!-- 模式注册表的**原文**（不是转述）：读自 data/roco/battle-modes.json -->
+    <div class="section-title"><h3>被模式隐藏的动作（工程口径）</h3></div>
+    <pre id="hidden-actions-raw" class="raw">还没有推进过回合。</pre>
     <div class="section-title"><h3>模式注册表（原文，未核验项逐条列出）</h3></div>
     <!-- 注册表口径的内部数字（引擎当前生效规模 vs 登记规模、未核实项数、prematch）：
          它们是排查用的，不是玩家首屏该读的东西（2026-09-22 人类 P0：这类「验收台术语」
@@ -217,6 +219,12 @@
   <!-- 未核验覆盖（RC-106）：这一局用到的**假设值**逐条写在这里，默认隐藏（没有假设就不显示）。
        它是引擎给的中文句子（`ui.notes.unverified_overrides`），页面只做搬运与展示。 -->
   <p class="unverified-note" id="unverified-note" hidden></p>
+  <!-- 规则口径与未核验来源**集中在这一处**（人类视觉规格：候选规则细节合并为一处可展开说明，
+       双方卡片不再重复）。默认收起，需要时展开即可读到来源。 -->
+  <details class="rules-note" id="rules-note">
+   <summary>规则口径与未核验项（来源可核对）</summary>
+   <p class="muted" id="rules-note-body">还没有开局。</p>
+  </details>
  </div>
 
  <div class="stage">

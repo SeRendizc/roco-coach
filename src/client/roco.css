@@ -459,6 +459,14 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 @media (max-width:860px){
  /* 窄屏：小芽回到**贴底整块**（宽屏那套「贴右整列」在手机上会盖住战场）。 */
  .companion{top:auto;max-height:calc(100vh - var(--bottombar,0px) - 28px)}
+ /* 2026-09-22 实测回归：宽屏那套两列网格（标题 | 按钮）在 390 下把标题列压成 0 宽，
+    于是标题**一个字符一行**竖着排（截图可见）。窄屏改成单列、显式排三行：
+    标题 → 徽记 → 按钮，谁都不会被挤没。 */
+ .topbar{grid-template-columns:minmax(0,1fr)}
+ .topbar>h1{grid-column:1;grid-row:1}
+ .topbar>.mode-line{grid-column:1;grid-row:2}
+ .topbar>.header-actions{grid-column:1;grid-row:3;justify-content:flex-start}
+ #about-drawer{grid-column:1;grid-row:4;justify-self:stretch}
 }
 @media (max-width:720px){
  :root{font-size:15px}
@@ -604,4 +612,28 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 .bench-pet{padding:4px 6px;font-size:11px}
 @media (max-width:720px){
  .last-event{font-size:12.5px}
+}
+
+/* ── 2026-09-22 视觉切片（人类规格）：标题不竖排 / 小芽不占屏 / 战场优先 ────────── */
+/* ① 标题**不许竖排**：窄屏中文标题被 `word-break` 拆成一行一个字，实测 390 下
+      「小芽·洛克王国：世界」竖占整屏。分行只能在词边界上，且字号收一档。 */
+.topbar h1,.topbar h1 small{word-break:keep-all;overflow-wrap:normal;white-space:normal}
+@media (max-width:720px){
+ .topbar h1{font-size:20px;line-height:1.25;max-width:100%}
+ .topbar h1 small{font-size:11px}
+ /* ② 小芽默认**不占屏**：收起态不留空白、展开态限高，别把战场挤没。 */
+ .companion{max-height:46vh}
+ .companion-body{max-height:26vh}
+}
+/* ③ 规则口径与未核验来源：集中一处、默认收起。 */
+.rules-note{margin:6px 0 0;border:1px solid #2b3a4a;border-radius:9px;background:#131e2a}
+.rules-note>summary{min-height:36px;display:flex;align-items:center;padding:0 10px;
+ font-size:11.5px;color:#9caebe;cursor:pointer;list-style:none}
+.rules-note>summary::-webkit-details-marker{display:none}
+.rules-note>summary::after{content:'▾';margin-left:auto;color:#6b7f92}
+.rules-note[open]>summary::after{content:'▴'}
+.rules-note-body,.rules-note p{margin:0 10px 8px;white-space:pre-line;font-size:11.5px;line-height:1.6}
+/* ④ 桌面：动作区**在流里**，不再是一条固定全宽底栏盖住战场。 */
+@media (min-width:861px){
+ #action-panel{position:static;margin-top:10px;max-height:none;box-shadow:none;border-color:#314154}
 }
