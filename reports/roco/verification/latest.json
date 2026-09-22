@@ -6,7 +6,7 @@
    "id": "env",
    "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
    "ok": true,
-   "ms": 33837,
+   "ms": 34439,
    "tail": [
     "> test:env",
     "> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests"
@@ -16,55 +16,55 @@
    "id": "unit",
    "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
    "ok": true,
-   "ms": 42351,
+   "ms": 42443,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 42204.969709"
+    "ℹ duration_ms 42295.861375"
    ]
   },
   {
    "id": "bridge",
    "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
    "ok": true,
-   "ms": 3373,
+   "ms": 3368,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 3230.251083"
+    "ℹ duration_ms 3221.666625"
    ]
   },
   {
    "id": "toolbox-roco",
    "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
    "ok": true,
-   "ms": 200,
+   "ms": 206,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 61.886541"
+    "ℹ duration_ms 63.047625"
    ]
   },
   {
    "id": "plan-e2e",
    "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
    "ok": true,
-   "ms": 1925,
+   "ms": 1946,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 1784.984375"
+    "ℹ duration_ms 1805.495417"
    ]
   },
   {
    "id": "trajectories",
    "why": "轨迹集与判定器的两个方向；判定器写坏了只有这里看得见",
    "ok": true,
-   "ms": 1058,
+   "ms": 1067,
    "tail": [
     ""
    ]
@@ -73,7 +73,7 @@
    "id": "trajectories-model",
    "why": "W4-02 的第二半（模型候选轨迹）：同一把尺子、同一个判定器。这一份**不声称字节可复现**（模型重跑会逐条不同），它靠 `model_identity` 钉住；结构与离线回放仍然必须全过——模型臂的产物要是格式漂了，模型与规则就没法横向比",
    "ok": true,
-   "ms": 631,
+   "ms": 626,
    "tail": [
     ""
    ]
@@ -82,7 +82,7 @@
    "id": "sft-split",
    "why": "SFT 训练数据的切分：家族是否都在训练侧、留出有没有泄漏、报告里的自我描述与切分模式是否自洽，以及**逐字节复现**。第 37 轮发现报告把「留出机制」描述成「留出模板」，那一类错误只有这条抓得到",
    "ok": true,
-   "ms": 4433,
+   "ms": 4424,
    "tail": [
     "  \"test.jsonl\": true,",
     "  \"dataset-report.json\": true",
@@ -94,7 +94,7 @@
    "id": "model-manifest",
    "why": "本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么",
    "ok": true,
-   "ms": 1259,
+   "ms": 1260,
    "tail": [
     "✔ mlx-community/Qwen3.5-4B-4bit — 校验 11/11 个文件",
     "manifest 校验通过"
@@ -104,7 +104,7 @@
    "id": "provenance",
    "why": "数据溯源：每条来源有可核对的锚点（归档哈希 / 逐文件清单）、逐实体的 provenance 台账完整。「所有数据必须记录来源」这条边界从散文变成检查",
    "ok": true,
-   "ms": 295,
+   "ms": 307,
    "tail": [
     "规范化文件 10 份，来源 4 个，provenance 18 条，快照校验通过 3 个",
     "溯源完整"
@@ -114,7 +114,7 @@
    "id": "rag-eval",
    "why": "RC-204：RAG 检索的 held-out 评测必须在闸门里跑判据（13 组：覆盖/泄漏/fixture 交集/推导出处/弃答一致性/冲突弃答/grounded/版本命中/证据等级/三套基线都报/清单指纹/探针登记/无挂钟）。**它报告自己的失败**：探针里有 1 条真的没按预期（「冰系被哪些属性克制」按系别标签召回而不是弃答，语料里确实没有克制表），如实登记、不过闸门 —— 保留失败比做过拟合修复更有价值。确定性：两次运行除 metadata.generated_at 外逐字节相同（1.6s）。判据的牙在 `unit`（tests/roco-rag-eval.test.js 21 条含 6 条必红反证）。",
    "ok": true,
-   "ms": 1633,
+   "ms": 1655,
    "tail": [
     "[rag-eval] ok   query_manifest: 清单一致：45 条，sha256=03a600a25048…",
     "[rag-eval] ok   probe_reported: 探针 13 条；未按预期 1 条（失败也登记，不过闸门）",
@@ -126,7 +126,7 @@
    "id": "game-data-pack",
    "why": "RC-202：统一索引包 `data/roco/game-data-pack/v2/pack.json` 必须与 schema 一致、逐实体 provenance 的 artifact_sha256 与磁盘对得上、licence_ref 在 sources.yaml 里找得到、**REFERENCE_ONLY 不得进 distributable 分节**、unknown_fields 与冻结产物重算一致、孤儿引用为 0、冲突未解决时**拒绝 ready**、就绪报告是最新的。判据的牙在 `unit` 里（tests/roco-game-data-pack.test.js 16 条含 8 条必红反证）以及两条脚本的 `--selftest`（10/10 与 11/11）",
    "ok": true,
-   "ms": 96,
+   "ms": 99,
    "tail": [
     "[verify]   §9-7 version_freshness: satisfied",
     "[verify]   §9-8 unavailable_fields: satisfied",
@@ -138,7 +138,7 @@
    "id": "reconciliation",
    "why": "RC-201 §9 第 9 项：公网快照 + 对账产物接进闸门。判据三条 —— ①快照能由**本地 HTML**逐字节重抽（不打网，确定性）；②报告的 reconciled/licence_ok 为真且四桶与许可登记齐全；③**已提交的报告与\"现在重算\"一致**（忽略 generated_at），即报告没过期。`--gate` 会先跑判据自检（5 条反证：reconciled=false / licence_ok=false / 离线重抽失败 / 报告过期 / 报告缺失），所以这条套件同时证明「现在是对的」与「错了会被发现」。手工触发的对账会静默过期 —— 这条就是防它（本仓库已经吃过一次：agent-trajectories-verification-model.json 声称 1752/1752、实际 1644/1752）",
    "ok": true,
-   "ms": 114,
+   "ms": 113,
    "tail": [
     "[reconciliation] live=data/roco/live/2026-09-21/public-index.json",
     "[reconciliation] reconciled=true licence_ok=true offline_check_rc=0 report_is_fresh=true",
@@ -152,7 +152,7 @@
    "ok": true,
    "ms": 66,
    "tail": [
-    "状态文档：声明 HEAD c2add38，当前 4ff21cf，最近一次全绿运行 c2add38",
+    "状态文档：声明 HEAD 4ff21cf，当前 49ea137，最近一次全绿运行 49ea137",
     "一致"
    ]
   },
@@ -160,7 +160,7 @@
    "id": "guard-selftest",
    "why": "注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑",
    "ok": true,
-   "ms": 12185,
+   "ms": 11990,
    "tail": [
     "  ✔ 红 companion-sayable-gone",
     "  ✔ 红 dedup-gone",
@@ -172,7 +172,7 @@
    "id": "browser-acceptance",
    "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
    "ok": true,
-   "ms": 19861,
+   "ms": 20695,
    "tail": [
     "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
     "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
@@ -184,7 +184,7 @@
    "id": "demo-acceptance",
    "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
    "ok": true,
-   "ms": 142888,
+   "ms": 144610,
    "tail": [
     "[demo-acceptance] ✔ ④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上 — 浮条版本=37 / 丢弃时画面=37",
     "[demo-acceptance] ✔ ④ 自然竞态下的不变量：页面上的规划/建议必须属于**当前**局面 — 同时发 plan 与 advance：局面 30 → 31；plan 版本=30 保留=false；浮条版本=31；丢弃账累计=4；（撞上与否由这两个版本号说话，不靠猜）",

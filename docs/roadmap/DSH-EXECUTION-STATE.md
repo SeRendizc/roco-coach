@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `4ff21cf`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `49ea137`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1959,3 +1959,28 @@ agent 轨迹钉着，加字段会让 6048 条轨迹全部对不上（上一轮�
 
 **下一批**：`ready` 剩 2 条（抓到你了 / 贪得无厌，各解锁 1 只）→ `effect_unparsed` 32 条
 （要先补效果解析）→ 197 条 `trigger_unknown`（要先有时点证据或对应钩子）。
+
+### C6.38 第 101 轮：RC-404 代表性回归集
+
+**为什么需要**：镜像对局（greedy vs greedy）只能压出 14 种事件，**印记、天气、应对、持续状态
+根本不会出现** —— 「引擎支持这些机制」这句话在回归集之前是没有证据的。
+
+**交付**：`roco/src/roco_env/regression.py`（`python3 -m roco_env.regression [--check]`）→
+`reports/roco/rc404/regression-set.json`（9 条场景 / 9 个维度）；守卫
+`roco/tests/test_regression_set.py`（8 条，含「篡改摘要/事件分布/删场景」三条必红方向）；
+文档 `docs/roco/RC-404-REGRESSION-SET.md`。
+
+**两条判据（不靠自觉）**：
+1. **空转不算通过**：`expect_kinds` 逐条核对；声明「找一条带某机制的精灵」时那条技能必须**真的
+   用出来过**。第一版跑出 **5 条空转**，正好证明判据不是摆设。自动选首发要按**解析出的效果类型**
+   找（按 desc 里的词会先命中「驱散敌方所有印记」——那是反着的机制），且**能耗低的优先**
+   （8 能耗的技能在 25 回合里可能一次都放不出来）。
+2. **不可达要如实登记**：**天气**就是这一条 —— 数据里没有任何精灵的**规范配招**带 `weather`
+   效果（学得到 ≠ 带得上场），所以它进 `unreachable` 并写明原因，而不是假装通过。
+
+**实测**：damage 30 / faint 7 / mana_loss 7 / replacement 6 / **mark_added 1** /
+**status_added 1 + status_tick 10**；legacy 3v3 场景也在集里（`energy_regen` 34）；
+`--check` 与磁盘指纹一致；`test:env` 397 → **405 条 OK**；门禁 **17/17**。
+
+**边界**：集合还小（9 条），18 属性只覆盖了一部分，角色/速度/迅捷/传动的场景待补；
+指纹绑定当前引擎与配置 —— **引擎一改就该红**，那是用途不是障碍。

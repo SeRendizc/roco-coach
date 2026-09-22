@@ -1,0 +1,864 @@
+{
+ "schema": "roco-regression-set/v1",
+ "rc": "RC-404",
+ "generated_by": "roco/src/roco_env/regression.py",
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "why": "镜像对局只能压出 14 种事件，印记/天气/应对/持续状态根本不会出现。本集用**脚本化**对局逐条驱动机制，并声明每条的期望证据 —— 没出现就算空转，如实报出来。",
+ "totals": {
+  "scenarios": 9,
+  "dimensions": 9,
+  "scenarios_with_problems": 0
+ },
+ "dimensions": [
+  "力竭/魔力",
+  "印记",
+  "天气",
+  "属性/伤害",
+  "持续状态",
+  "换入离场",
+  "资源（能量/聚能）",
+  "迁移夹具（legacy 逐位不变）",
+  "防御"
+ ],
+ "problems": [],
+ "unreachable": [
+  "weather：数据里没有任何精灵的**规范配招**带 ['weather'] 这类效果——这一条不可达"
+ ],
+ "known_limits": [
+  "场景只覆盖**能驱动得了**的机制；驱动不了的要登记进 unreachable，而不是当作通过",
+  "指纹绑定当前引擎与规则配置：引擎一改，这里应当红 —— 那是它的用途，不是障碍",
+  "对局用引擎自己的策略或固定选择器，**不**代表最优打法"
+ ],
+ "scenarios": [
+  {
+   "id": "damage-type-advantage",
+   "dimension": "属性/伤害",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 11,
+   "steps": 30,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000294",
+    "skill_000321",
+    "skill_000576",
+    "skill_000750"
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "damage": 30,
+    "defense": 7,
+    "effects_registered_unsupported": 10,
+    "energy_gain": 10,
+    "faint": 6,
+    "mana_loss": 6,
+    "replacement": 5,
+    "status_unsupported": 11,
+    "turn_start": 25
+   },
+   "state_digest": "62f6c44169b57b97510d7a4cbc2e963c991655c4117a548ec6a381c8194f54cf",
+   "key_events": [
+    {
+     "kind": "turn_start",
+     "turn": 1,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 4,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "defense-branch",
+   "dimension": "防御",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 12,
+   "steps": 30,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000294",
+    "skill_000321",
+    "skill_000576",
+    "skill_000750"
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "damage": 30,
+    "defense": 7,
+    "effects_registered_unsupported": 10,
+    "energy_gain": 10,
+    "faint": 6,
+    "mana_loss": 6,
+    "replacement": 5,
+    "status_unsupported": 11,
+    "turn_start": 25
+   },
+   "state_digest": "dc68fc57c2f534b8df3a1ba3bb30117166b5bfcf84045fbd0c95830aed747c44",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 0.04,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "energy-and-charge",
+   "dimension": "资源（能量/聚能）",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 13,
+   "steps": 20,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 16,
+    "damage": 16,
+    "defense": 2,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "turn_start": 18
+   },
+   "state_digest": "965c94d932668be36092682bc7199ec5afc8c8a9636ea5de495e322e2d2dfb3e",
+   "key_events": [
+    {
+     "kind": "charge",
+     "turn": 1,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 4,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 7,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 8,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 9,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 10,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 11,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 12,
+     "side": null
+    },
+    {
+     "kind": "charge",
+     "turn": 14,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "faint-and-mana",
+   "dimension": "力竭/魔力",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 14,
+   "steps": 40,
+   "result": "loss",
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000286",
+    "skill_000294",
+    "skill_000321",
+    "skill_000418",
+    "skill_000576",
+    "skill_000750"
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "damage": 45,
+    "defense": 10,
+    "effects_registered_unsupported": 16,
+    "energy_gain": 16,
+    "faint": 7,
+    "game_end": 1,
+    "mana_loss": 7,
+    "replacement": 6,
+    "status_unsupported": 11,
+    "turn_start": 34
+   },
+   "state_digest": "f3a28db89958c75972f9c676e8fbd8a374abaecc2f0309dfd37ae75108802cc1",
+   "key_events": [
+    {
+     "kind": "faint",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "mana_loss",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "faint",
+     "turn": 8,
+     "side": null
+    },
+    {
+     "kind": "mana_loss",
+     "turn": 8,
+     "side": null
+    },
+    {
+     "kind": "faint",
+     "turn": 19,
+     "side": null
+    },
+    {
+     "kind": "mana_loss",
+     "turn": 19,
+     "side": null
+    },
+    {
+     "kind": "faint",
+     "turn": 21,
+     "side": null
+    },
+    {
+     "kind": "mana_loss",
+     "turn": 21,
+     "side": null
+    },
+    {
+     "kind": "faint",
+     "turn": 23,
+     "side": null
+    },
+    {
+     "kind": "mana_loss",
+     "turn": 23,
+     "side": null
+    },
+    {
+     "kind": "faint",
+     "turn": 25,
+     "side": null
+    },
+    {
+     "kind": "mana_loss",
+     "turn": 25,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "replacement",
+   "dimension": "换入离场",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 15,
+   "steps": 40,
+   "result": "loss",
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000286",
+    "skill_000294",
+    "skill_000321",
+    "skill_000418",
+    "skill_000576",
+    "skill_000750"
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "damage": 45,
+    "defense": 10,
+    "effects_registered_unsupported": 16,
+    "energy_gain": 16,
+    "faint": 7,
+    "game_end": 1,
+    "mana_loss": 7,
+    "replacement": 6,
+    "status_unsupported": 11,
+    "turn_start": 34
+   },
+   "state_digest": "493723c9b8eb4313c2e35da2b3fd64ccd763527efd484b71647945f6cc307314",
+   "key_events": [
+    {
+     "kind": "replacement",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "replacement",
+     "turn": 8,
+     "side": null
+    },
+    {
+     "kind": "replacement",
+     "turn": 19,
+     "side": null
+    },
+    {
+     "kind": "replacement",
+     "turn": 21,
+     "side": null
+    },
+    {
+     "kind": "replacement",
+     "turn": 23,
+     "side": null
+    },
+    {
+     "kind": "replacement",
+     "turn": 25,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "mark",
+   "dimension": "印记",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 16,
+   "steps": 25,
+   "result": null,
+   "lead_pet": "pet_000296",
+   "lead_skill": "skill_000809",
+   "used_skills": [
+    "skill_000248",
+    "skill_000286",
+    "skill_000741",
+    "skill_000750",
+    "skill_000809"
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 1,
+    "damage": 35,
+    "defense": 6,
+    "effects_registered_unsupported": 10,
+    "energy_gain": 9,
+    "faint": 4,
+    "mana_loss": 4,
+    "mark_added": 1,
+    "replacement": 3,
+    "turn_start": 22
+   },
+   "state_digest": "f459971cfb4a5708e151b88d690b17de011853aca3cb7208ed056a50dcd55877",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 0.9545,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "weather",
+   "dimension": "天气",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 17,
+   "steps": 25,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000286",
+    "skill_000294",
+    "skill_000483",
+    "skill_000529",
+    "skill_000750"
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "damage": 25,
+    "defense": 8,
+    "effects_registered_unsupported": 9,
+    "energy_gain": 9,
+    "faint": 3,
+    "mana_loss": 3,
+    "replacement": 3,
+    "status_unsupported": 9,
+    "turn_start": 22
+   },
+   "state_digest": "adf79c6af70fd0ae226ee45792c07eef2c876c2dfce46dad8b69e96936c7795c",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 10,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 10,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [
+    "数据里没有任何精灵的**规范配招**带 ['weather'] 这类效果——这一条不可达"
+   ],
+   "status": "unreachable"
+  },
+  {
+   "id": "status",
+   "dimension": "持续状态",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 18,
+   "steps": 25,
+   "result": null,
+   "lead_pet": "pet_000143",
+   "lead_skill": "skill_000610",
+   "used_skills": [
+    "skill_000294",
+    "skill_000541",
+    "skill_000610",
+    "skill_000696",
+    "skill_000750"
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "damage": 34,
+    "defense": 5,
+    "effects_registered_unsupported": 7,
+    "energy_gain": 6,
+    "faint": 4,
+    "mana_loss": 4,
+    "replacement": 4,
+    "status_added": 1,
+    "status_tick": 10,
+    "status_unsupported": 1,
+    "turn_start": 21
+   },
+   "state_digest": "e89b04e33e09abb441059ee07e8fc943f45f6ffe64a9224732c7a101180b15a0",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 0.7143,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "legacy-practice-3v3",
+   "dimension": "迁移夹具（legacy 逐位不变）",
+   "config": "legacy_sim_v1",
+   "seed": 19,
+   "steps": 20,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000576",
+    "skill_000744",
+    "skill_000750"
+   ],
+   "event_kinds": {
+    "damage": 19,
+    "defense": 12,
+    "effects_registered_unsupported": 4,
+    "energy_gain": 4,
+    "energy_regen": 34,
+    "faint": 2,
+    "replacement": 2,
+    "status_unsupported": 5,
+    "turn_start": 18
+   },
+   "state_digest": "141aed9b3ed862694830cac6774e4029342bcbafdf1da567b1c089df48e7e7d6",
+   "key_events": [
+    {
+     "kind": "turn_start",
+     "turn": 1,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 4,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": null
+    },
+    {
+     "kind": "turn_start",
+     "turn": 6,
+     "side": null
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  }
+ ]
+}
