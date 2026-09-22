@@ -89,6 +89,11 @@ const STYLE = `
 .tw-slot .tw-row{display:flex;gap:6px;align-items:center;min-width:0}
 .tw-slot .tw-lock{margin-left:auto;color:#9caebe;font-size:11px;white-space:nowrap}
 .tw-types{display:flex;flex-wrap:wrap;gap:3px}
+/* 机制一行：冻结原文逐字照印，**不截断**（宁可折行也不砍半句）；小字、和正文拉开层级。 */
+.tw-mech{display:flex;flex-direction:column;gap:2px;margin-top:2px;min-width:0}
+.tw-mech-line{font-size:11.5px;line-height:1.55;color:#bcd0e0;overflow-wrap:anywhere}
+.tw-mech-tags{font-size:11px;line-height:1.5;color:#8fa4b6;overflow-wrap:anywhere}
+[data-tw-mechanism="pending"] .tw-mech-line{color:#9caebe;font-style:normal}
 .tw-type{font-size:11px;background:#26374a;border-radius:5px;padding:2px 7px;color:#c8d5e2}
 .tw-note{margin:0;color:#9caebe;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
 .tw-lead{margin:0 0 7px;font-size:13.5px;line-height:1.7}
@@ -164,6 +169,46 @@ const STYLE = `
  .tw-pager{justify-content:space-between}
 }
 `;
+
+/**
+ * 机制资料待确认时的替代文案。
+ *
+ * 这份文本的**唯一事实源**是 `src/coach/pet-mechanisms.js` 的 `MECHANISM_FALLBACK`；
+ * 服务端拿不到冻结 `desc` 时会把 `mechanism.line` 直接填成它，所以页面通常压根用不到
+ * 这个常量——留一份只是兜底（字段缺失 / 形状不对时也要说人话）。
+ * 浏览器侧**不** import 那个模块：它是给 Node 读产物用的，拉进页面只会白带一份解析逻辑。
+ */
+const MECHANISM_PENDING = '机制资料待确认';
+
+/** 只有「冻结原文 + 真有一行」才首层显示原文；其余一律「机制资料待确认」。 */
+const isFrozenMechanism = (mechanism) => Boolean(mechanism)
+  && mechanism.status === 'FROZEN_DESC'
+  && typeof mechanism.line === 'string' && mechanism.line.trim() !== '';
+
+/**
+ * 卡片首层的「机制」一行。
+ *
+ * 三条硬规则（第 92 轮追加）：
+ *   ① 冻结原文（`FROZEN_DESC` + 非空 `line`）⇒ 首层显示**逐字**原文（小字、单行优先，
+ *      但**不截断**：宁可折行也不要把一句话砍成半句）；
+ *   ② 取不到 / `MECHANISM_UNCONFIRMED` / 字段形状不对 ⇒ 「机制资料待确认」（这一行仍然给，
+ *      因为「没有资料」本身是信息）；空槽位**什么都不显示**（调用方不渲染这一行）；
+ *   ③ 枚举原文（`FROZEN_DESC` 这类）**永远不印到页面上**——玩家看到的是人话。
+ *
+ * `tags` 是「体系线索」（这一只参与了哪些机制标签），**不是强度排序**，
+ * 所以只印标签名、不印 skills 计数。
+ */
+function mechanismRow(mechanism) {
+  const frozen = isFrozenMechanism(mechanism);
+  const line = frozen ? mechanism.line.trim() : MECHANISM_PENDING;
+  const tags = (Array.isArray(mechanism?.tags) ? mechanism.tags : [])
+    .map((entry) => (typeof entry === 'string' ? entry : entry?.tag))
+    .filter((tag) => typeof tag === 'string' && tag.trim() !== '');
+  return `<div class="tw-mech" data-tw-mechanism="${frozen ? 'frozen' : 'pending'}">
+   <span class="tw-mech-line">${escapeHtml(line)}</span>
+   ${tags.length ? `<span class="tw-mech-tags">机制线索：${escapeHtml(tags.join(' · '))}</span>` : ''}
+  </div>`;
+}
 
 /** 引擎里那一轴的原始值怎么读成人话。**没有值就返回 null**，不拿 0 顶上。 */
 function axisValueText(axis) {
@@ -279,6 +324,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
           ${slot.locked ? '<span class="tw-lock">🔒 锁定</span>' : ''}</div>
          <div class="tw-meta"><span class="tw-types">${teamSlugs(slot.types) || '系别未登记'}</span></div>
          <div class="tw-meta">${escapeHtml(slot.build_tier_label ?? '')}</div>
+         ${mechanismRow(slot.mechanism)}
         </article>`;
       }
       return `<article class="tw-slot" role="listitem" data-tw-slot="${slot.index}" data-tw-state="empty">
@@ -381,6 +427,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
        <div class="tw-card-head"><b>${escapeHtml(row.name ?? NO_ITEM)}</b>
         <span class="tw-types">${teamSlugs(row.types)}</span></div>
        <p class="dim">${escapeHtml(row.owned_note ?? '')} · ${escapeHtml(row.build_note ?? '')}</p>
+       ${mechanismRow(row.mechanism)}
       </div>`).join('')}</div>
      <p class="tw-note" style="margin-top:8px">${escapeHtml(entrance.archetype_note ?? '')}</p>`;
   }
@@ -399,6 +446,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
        <span class="tw-tag ${tagClass}">${escapeHtml(row.tradeoff_label ?? '取舍')}</span>
        <span class="tw-types">${teamSlugs(row.types)}</span></div>
       <p>${escapeHtml(row.tradeoff_intent ?? '')}</p>
+      ${mechanismRow(row.mechanism)}
       ${row.tradeoff_note ? `<p class="dim">代价：${escapeHtml(row.tradeoff_note)}</p>` : ''}
       ${row.fallback_note ? `<p class="dim">${escapeHtml(row.fallback_note)}</p>` : ''}
       ${row.after_this_gap_note ? `<p class="dim">${escapeHtml(row.after_this_gap_note)}</p>` : ''}

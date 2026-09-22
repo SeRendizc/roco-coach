@@ -107,6 +107,7 @@ curl 'http://127.0.0.1:8765/api/roco/workshop?zzz=1'             # → 400，点
 | 缺口**口径名**（属性覆盖 / 速度层次 / 能量曲线 / 应对手段 / 换入换出 / 队内互补 / 资源消耗） | `gaps_by_team`（RC-302 原始诊断，含成员键与系数） |
 | 最小替换的**名字**与结构理由 | 最小替换的原始 `why`（里有 `instance:` / `catalog:` 键）与 `evidence` |
 | 相对分（带上「0～1 的序数标度，不是胜率」的量纲说明） | `ranker_status` / `ruleset_config_id` / `gates` / `provenance` / `coverage` |
+| **机制行** `mechanism.line`（冻结 `desc` 原文，逐字）与 `mechanism.tags` 的标签名 | `mechanism.status` 枚举原文（`FROZEN_DESC` / `MECHANISM_UNCONFIRMED`）、`tags[].skills` 计数 |
 
 判据：
 * `playerLayerProblems()`：遍历 `player` 段，按键名与 id 形状两条抓违规；
@@ -136,6 +137,34 @@ curl 'http://127.0.0.1:8765/api/roco/workshop?zzz=1'             # → 400，点
 
 因此：**选满六只时，工坊能给的完整评估实际只有「覆盖置信 + 结构理由 + 一个最小替换」**，
 其余四轴如实写「现在算不出来」并点名缺什么。**绝不给胜率、绝不给伪精确百分数**。
+
+---
+
+## 4b. 机制原文（冻结 `desc`）怎么上卡
+
+数据源：`data/roco/derived/pet-mechanisms.json`（构建器与读取层共用 `src/coach/pet-mechanisms.js`
+的同一份规则）。服务端在 `player` 段里**加性**给出三处 `mechanism` 字段：
+
+| 位置 | 字段 | 空值形态 |
+|---|---|---|
+| `player.slots[]` | `mechanism: {line, status, name, tags}` | **空槽位是 `null`**（那里没有精灵） |
+| `player.next_candidates[]` | 同上 | —— |
+| `player.entrance.candidates[]` | 同上 | —— |
+
+模块的渲染规则（`.tw-mech`，三条硬规则）：
+
+1. `mechanism.status === 'FROZEN_DESC'` 且 `line` 非空 ⇒ 卡**首层**逐字显示这一行
+   （`.tw-mech-line`，小字；**不截断**——窄屏宁可折成三行也不砍半句）；
+2. 取不到 / `MECHANISM_UNCONFIRMED` / 形状不对 ⇒ 显示「机制资料待确认」；**空槽位什么都不显示**；
+3. **枚举原文永不上页面**（`FROZEN_DESC` / `MECHANISM_UNCONFIRMED` 一个都不出现在可见文本里）。
+
+`mechanism.tags` 渲染成一行「机制线索：应对 · 回能 · 印记」（只印 `tag` 名，不印 `skills` 计数）——
+它是**体系线索**，不是强度排序，页面上也不能被读成排序。
+
+**伪精确判据的豁免**：冻结 `desc` 里本来就可能有百分数（例如「入场首回合，获得物攻+100%」）。
+判据不靠放宽正则，而是把**能追溯回产物**的原文换成占位符再扫：
+`playerCopyProblems(text, {sourcedLines: sourcedMechanismLines(player 载荷)})`。
+核不回产物的一律不豁免——把「胜率 62%」塞进 `mechanism.line` 照样判红（有必红反证）。
 
 ---
 
@@ -174,10 +203,12 @@ node --test tests/roco-workshop.test.js
 
 浏览器验收在**产品页 `roco.html`** 上跑（真实键鼠），产物在 `reports/roco/workshop-acceptance/`：
 `browser-workshop-acceptance.json` + 1440×900 / 390×844 两档截图。
-判据（35 条）覆盖：产品页挂载、六个槽位、三枚徽记、候选池 ≥600（含「我没有的图鉴物种」可点）、
+判据（36 条）覆盖：产品页挂载、六个槽位、三枚徽记、候选池 ≥600（含「我没有的图鉴物种」可点）、
 真实键鼠连续选入 2 / 5 / 6 只、评估随阵容变化、满六只五轴与一个最小替换、
-玩家可见文本无工程词、无胜率与百分数、未知说明在玩家层、非法参数一律 400、
-两档无横向溢出、移动端区块顺序、390px 触控目标 ≥44px、控制台干净；另有 15 条**必红反证**。
+**冻结机制原文逐字上卡（且枚举原文不上卡）**、玩家可见文本无工程词、无胜率与百分数、
+未知说明在玩家层、非法参数一律 400、两档无横向溢出、移动端区块顺序、
+390px 触控目标 ≥44px、控制台干净；另有 18 条**必红反证**
+（含「把机制行从卡上抹掉 ⇒ 红」「把 `FROZEN_DESC` 印上页面 ⇒ 红」「把「胜率 62%」塞进 `mechanism.line` ⇒ 红」）。
 
 ---
 

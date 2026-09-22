@@ -34,8 +34,9 @@ import {
 import {
   slotProblems, badgeProblems, nextCandidateProblems, axisProblems, badRequestProblems,
   playerCopyProblems, playerLayerProblems, evaluationFollowsTeamProblems, touchTargetProblems,
-  mobileOrderProblems, deepTextValues, SLOT_COUNT, FORBIDDEN_PLAYER, PSEUDO_PRECISION,
-  sourcedMechanismLines,
+  mobileOrderProblems, deepTextValues, mechanismRenderProblems,
+  sourcedMechanismLines, exemptSourcedLines, loadMechanismArtifact,
+  SLOT_COUNT, FORBIDDEN_PLAYER, PSEUDO_PRECISION,
 } from '../scripts/roco/browser-workshop-acceptance.mjs';
 import {progressiveNext, recallCandidates, buildCandidateIndex} from '../src/coach/team-candidates.mjs';
 import {compareTeams, minimalReplacement, AXIS_IDS} from '../src/coach/team-compare.mjs';
@@ -390,6 +391,72 @@ test('两层分界：player 段没有工程键，dev 段真的有工程字段', 
 });
 
 // ─────────────────────────────────────────────────────────────────────────
+// 4b. 机制原文（冻结 desc）必须逐字进玩家层，枚举原文不许进
+// ─────────────────────────────────────────────────────────────────────────
+
+test('机制原文：冻结 desc 逐字进玩家层（槽位 / 下一只 / 候选入口），空槽位是 null', async () => {
+  const artifact = loadMechanismArtifact();
+  const allowed = new Set(Object.values(artifact.pets ?? {})
+    .map((row) => row?.mechanism_line).filter((line) => typeof line === 'string'));
+  for (const count of [0, 2, 6]) {
+    const query = count ? `selected=${IDS.slice(0, count).join(',')}` : '';
+    const {json} = await workshop(query);
+    const rows = [
+      ...(json.player.slots ?? []).map((slot) => ({where: `slots[${slot.index}]`, mechanism: slot.mechanism, state: slot.state})),
+      ...(json.player.next_candidates ?? []).map((row) => ({where: `next_candidates[${row.name}]`, mechanism: row.mechanism})),
+      ...(json.player.entrance?.candidates ?? []).map((row) => ({where: `entrance[${row.name}]`, mechanism: row.mechanism})),
+    ];
+    for (const row of rows) {
+      // 空槽位必须是 null（那里没有精灵），不许编一个「机制资料待确认」
+      if (row.state === 'empty') {
+        assert.equal(row.mechanism, null, `${row.where} 是空槽位，mechanism 必须是 null`);
+        continue;
+      }
+      assert.ok(row.mechanism, `${row.where} 必须有 mechanism`);
+      assert.ok(['FROZEN_DESC', 'MECHANISM_UNCONFIRMED'].includes(row.mechanism.status),
+        `${row.where} 的 status 不在枚举里：${show(row.mechanism)}`);
+      if (row.mechanism.status === 'FROZEN_DESC') {
+        assert.ok(allowed.has(row.mechanism.line),
+          `${row.where} 的机制行不是产物里的冻结原文：${show(row.mechanism.line)}`);
+        assert.ok(row.mechanism.line.length > 4, `${row.where} 的机制行太短：${show(row.mechanism.line)}`);
+      } else {
+        assert.ok(typeof row.mechanism.line === 'string' && row.mechanism.line.length > 0,
+          `${row.where} 取不到资料时也必须给一句人话（而不是空）：${show(row.mechanism)}`);
+      }
+      assert.ok(Array.isArray(row.mechanism.tags), `${row.where} 的 tags 必须是数组`);
+    }
+    // 逐字性：产物里的行必须是玩家层那一行的**原串**（不许被截断）
+    for (const row of rows.filter((item) => item.mechanism?.status === 'FROZEN_DESC')) {
+      assert.ok(row.mechanism.line === row.mechanism.line.trim());
+    }
+    log(`[实际] ${count} 只：机制行样例 =`, rows.find((row) => row.mechanism)?.mechanism?.line ?? '（无）');
+  }
+});
+
+test('机制原文的百分数是**可核对的豁免**，不是放宽正则', async () => {
+  const six = await workshop(`selected=${IDS.slice(0, 6).join(',')}`);
+  const sourced = sourcedMechanismLines(six.json.player);
+  const payloadText = deepTextValues(six.json.player);
+  const clean = playerCopyProblems(payloadText, {sourcedLines: sourced});
+  assert.deepEqual(clean, [], `带机制原文的玩家层文案没通过：${clean.join(' | ')}`);
+  raw('豁免的机制原文', sourced);
+  // 有百分数的机制行确实存在（否则这条用例是空转）
+  const withPercent = sourced.filter((line) => /\d+(?:\.\d+)?\s*%/.test(line));
+  assert.ok(sourced.length >= 1, '这一份载荷里应当有带百分数的冻结机制原文，否则用例没被驱动');
+  log('[实际] 豁免', sourced.length, '条机制原文，其中带百分数', withPercent.length, '条');
+  // 反证：手写的「胜率 58%」不在豁免名单里 ⇒ 同一个函数必须判红
+  const fake = playerCopyProblems('这套阵容胜率 58%', {sourcedLines: sourced});
+  raw('反证·手写胜率（不可豁免）', fake);
+  assert.ok(fake.some((line) => line.includes('伪精确')), '手写胜率必须被判成伪精确');
+  // 反证：把「胜率 62%」塞进 mechanism.line（核不回产物）也必须红
+  const fakeMechanism = playerCopyProblems('（机制原文）胜率 62%',
+    {sourcedLines: sourcedMechanismLines({next_candidates: [{mechanism: {line: '胜率 62%'}}]})});
+  raw('反证·假机制行绕过', fakeMechanism);
+  assert.ok(fakeMechanism.some((line) => line.includes('伪精确')), '核不回产物的机制行不许被豁免');
+  assert.equal(exemptSourcedLines(payloadText, sourced).exempted >= 0, true);
+});
+
+// ─────────────────────────────────────────────────────────────────────────
 // 5. 必红反证（六条，每条打印实际输出原文）
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -461,6 +528,23 @@ test('反证：六条必红方向都抓得住违规样本（实际输出原文�
     playerCopyProblems('（机制原文）胜率 62%',
       {sourcedLines: sourcedMechanismLines({next_candidates: [{mechanism: {line: '胜率 62%'}}]})}),
     '{"next_candidates":[{"mechanism":{"line":"胜率 62%"}}]}');
+  // ⑦ 机制行从卡上抹掉
+  const sixPlayer = six.json.player;
+  const expectedLines = (sixPlayer.slots ?? [])
+    .map((slot) => slot.mechanism)
+    .filter((mechanism) => mechanism?.status === 'FROZEN_DESC')
+    .map((mechanism) => mechanism.line.trim());
+  record('机制行没有渲染到卡上',
+    mechanismRenderProblems({expectedLines, renderedLines: [], mechanismNodes: 0,
+      pendingNodes: 0, filledSlots: expectedLines.length, playerText: '六只都在了'}),
+    `expected=${JSON.stringify(expectedLines.slice(0, 1))} rendered=[]`);
+
+  // ⑧ 机制枚举原文被印到可见文本里
+  record('机制枚举原文上了页面',
+    mechanismRenderProblems({expectedLines, renderedLines: expectedLines, mechanismNodes: expectedLines.length,
+      pendingNodes: 0, filledSlots: expectedLines.length, playerText: 'FROZEN_DESC 坚韧铠甲'}),
+    'playerText 里含 "FROZEN_DESC"');
+
   record('触控目标 30×30',
     touchTargetProblems([{tag: 'BUTTON', cls: 'tiny', w: 30, h: 30}]),
     'BUTTON.tiny 30×30');

@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-21T19:25:54.150Z",
+ "judged_at": "2026-09-22T00:19:36.483Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -75,7 +75,7 @@
    "id": "06-只看收藏开关",
    "judge": "真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok",
    "ok": true,
-   "actual": "开了之后 state=ok（selected=0）；关掉之后 state=ok；命中={\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<DIV<SECTION#select-panel<MAIN<BODY<HTML<undefined\"}"
+   "actual": "开了之后 state=ok（selected=0）；关掉之后 state=ok；命中={\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<undefined\"}"
   },
   {
    "id": "07-图鉴物种照实拒绝",
@@ -141,112 +141,118 @@
    "id": "17-玩家层载荷",
    "judge": "路由的 player 段里没有工程键，也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 3408 字节"
+   "actual": "扫过 4958 字节"
   },
   {
-   "id": "18-玩家层无工程话",
+   "id": "18-机制行上卡",
+   "judge": "六个槽位里每一只的**冻结机制原文**都逐字渲染在卡的首层（小字、不截断），枚举原文（FROZEN_DESC / MECHANISM_UNCONFIRMED）一个都不出现在可见文本里",
+   "ok": true,
+   "actual": "；机制行节点=6 已填槽位=6 待确认=0；卡上样例「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」"
+  },
+  {
+   "id": "19-玩家层无工程话",
    "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
    "ok": true,
-   "actual": "扫过 1399 字；样例「 队伍（六个槽位） 六个槽位都满了 标准 PVP · 六宠 候选规则（待实机核对） 匹配前对手未知 · 按版本环境倾向评价 候选来自全图鉴 600+ 铠甲虫 虫系 有具体构建（结构…」"
+   "actual": "扫过 1817 字（豁免机制原文 2 处）；样例「 队伍（六个槽位） 六个槽位都满了 标准 PVP · 六宠 候选规则（待实机核对） 匹配前对手未知 · 按版本环境倾向评价 候选来自全图鉴 600+ 铠甲虫 虫系 有具体构建（结构…」"
   },
   {
-   "id": "19-无胜率与百分数",
-   "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法",
+   "id": "20-无胜率与百分数",
+   "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）",
    "ok": true,
-   "actual": "扫过 1399 字无命中"
+   "actual": "扫过 1817 字无命中（豁免机制原文 2 条）"
   },
   {
-   "id": "20-未知写在玩家层",
+   "id": "21-未知写在玩家层",
    "judge": "「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）",
    "ok": true,
    "actual": "未知条目=6；含「现在算不出来」=true"
   },
   {
-   "id": "21-非法参数(selected)",
+   "id": "22-非法参数(selected)",
    "judge": "「selected=own-0001,own-0002,own-0003,own-0004」必须 HTTP 400 + ok:false 并点名 selected",
    "ok": true,
    "actual": "HTTP 400 error=「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」"
   },
   {
-   "id": "21-非法参数(mode)",
+   "id": "22-非法参数(mode)",
    "judge": "「mode=zzz」必须 HTTP 400 + ok:false 并点名 mode",
    "ok": true,
    "actual": "HTTP 400 error=「[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3v3 / pvp-standard-six-pet / pvp-speed-duel-3」"
   },
   {
-   "id": "21-非法参数(zzz)",
+   "id": "22-非法参数(zzz)",
    "judge": "「zzz=1」必须 HTTP 400 + ok:false 并点名 zzz",
    "ok": true,
    "actual": "HTTP 400 error=「未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/favourites_only/max_replacements）」"
   },
   {
-   "id": "21-非法参数(max_replacements)",
+   "id": "22-非法参数(max_replacements)",
    "judge": "「max_replacements=abc」必须 HTTP 400 + ok:false 并点名 max_replacements",
    "ok": true,
    "actual": "HTTP 400 error=「max_replacements 必须是非负整数（实际 \"abc\"）」"
   },
   {
-   "id": "21-非法参数(favourites_only)",
+   "id": "22-非法参数(favourites_only)",
    "judge": "「favourites_only=yes」必须 HTTP 400 + ok:false 并点名 favourites_only",
    "ok": true,
    "actual": "HTTP 400 error=「favourites_only 只能是 true 或 false（实际 \"yes\"）」"
   },
   {
-   "id": "21-非法参数(selected)",
+   "id": "22-非法参数(selected)",
    "judge": "「selected=pet_000012」必须 HTTP 400 + ok:false 并点名 selected",
    "ok": true,
    "actual": "HTTP 400 error=「selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000012）」"
   },
   {
-   "id": "21-非法参数(locked)",
+   "id": "22-非法参数(locked)",
    "judge": "「locked=own-0007」必须 HTTP 400 + ok:false 并点名 locked",
    "ok": true,
    "actual": "HTTP 400 error=「[LOCKED_NOT_SELECTED] locked：锁定的 own-0007 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 \"own-0007\"）」"
   },
   {
-   "id": "22-六槽上限",
+   "id": "23-六槽上限",
    "judge": "同名参数下 6 只必须 200、7 只必须 400：上限只认六个槽位",
    "ok": true,
    "actual": "6 只 → HTTP 200；7 只 → HTTP 400「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」"
   },
   {
-   "id": "23-开发夹具",
+   "id": "24-开发夹具",
    "judge": "workshop.html 只是单独调试同一模块的薄壳（能挂上、标题写明是夹具，不冒充产品页）",
    "ok": true,
    "actual": "夹具就绪=true 标题=「小芽 · 阵容工坊（RC-305 开发夹具，不是产品页）」"
   },
   {
-   "id": "24-产品页重新选满六只",
+   "id": "25-产品页重新选满六只",
    "judge": "回到产品页后仍能用真实键鼠选满六只（窄屏量测的前提）",
    "ok": true,
    "actual": "selected=6"
   },
   {
-   "id": "25-窄屏不溢出",
+   "id": "26-窄屏不溢出",
    "judge": "390×844：scrollW == clientW",
    "ok": true,
    "actual": "clientW=390 scrollW=390 bodyScrollW=390"
   },
   {
-   "id": "26-触控目标",
+   "id": "27-触控目标",
    "judge": "390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44",
    "ok": true,
    "actual": "量了 12 个元素，全部达标"
   },
   {
-   "id": "27-移动端顺序",
+   "id": "28-移动端顺序",
    "judge": "390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":600},{\"cls\":\"tw-cand\",\"top\":1291},{\"cls\":\"tw-eval\",\"top\":1542},{\"cls\":\"tw-coach\",\"top\":2875}]"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":342},{\"cls\":\"tw-cand\",\"top\":1228},{\"cls\":\"tw-eval\",\"top\":1459},{\"cls\":\"tw-coach\",\"top\":2752}]"
   },
   {
-   "id": "28-窄屏候选区",
+   "id": "29-窄屏候选区",
    "judge": "390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在",
    "ok": true,
    "actual": "clientW=390 scrollW=390 next=3 缺口=10"
   },
   {
-   "id": "29-控制台干净",
+   "id": "30-控制台干净",
    "judge": "整轮下来没有 console.error，也没有未捕获异常",
    "ok": true,
    "actual": "consoleErrors=[] pageErrors=[]"
@@ -317,42 +323,63 @@
    "actual": "{\"slots\":[{\"pet_id\":\"pet_000062\"}],\"next_candidates\":[{\"instance_id\":\"own-0001\"}]}"
   },
   {
-   "id": "18-玩家层无工程话",
+   "id": "18-机制行上卡",
+   "judge": "把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」 | 冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」",
+   "actual": "expected=[\"特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。\"] rendered=[\"特性「专注力」：入场首回合，获得物攻+100%。\"]"
+  },
+  {
+   "id": "18-机制枚举不上面",
+   "judge": "把 FROZEN_DESC 印到可见文本里必须被同一条判据抓住",
+   "ok": true,
+   "hit": "可见文本里出现机制枚举原文「FROZEN_DESC」",
+   "actual": "可见文本追加 \" FROZEN_DESC\""
+  },
+  {
+   "id": "19-玩家层无工程话",
    "judge": "往玩家区注入 pet_id / state_version 后同一条判据必须命中",
    "ok": true,
    "hit": "玩家可见文本里出现工程词「pet_id」 | 玩家可见文本里没有任何「未核实 / 未知」的说明",
    "actual": "「音速犬 pet_id=pet_000062 state_version=roco-workshop/v1」"
   },
   {
-   "id": "19-无胜率与百分数",
+   "id": "20-无胜率与百分数",
    "judge": "把「胜率 58%」写进可见文本必须被同一条判据抓住",
    "ok": true,
    "hit": "玩家可见文本里出现伪精确「胜率 58」 | 玩家可见文本里没有任何「未核实 / 未知」的说明",
    "actual": "「这套阵容胜率 58%」"
   },
   {
-   "id": "21-非法参数(mode)",
+   "id": "20-无胜率与百分数（假机制绕过）",
+   "judge": "把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住",
+   "ok": true,
+   "hit": "玩家可见文本里出现伪精确「胜率 62」 | 玩家可见文本里没有任何「未核实 / 未知」的说明",
+   "actual": "{\"next_candidates\":[{\"mechanism\":{\"line\":\"胜率 62%\"}}]}"
+  },
+  {
+   "id": "22-非法参数(mode)",
    "judge": "把「非法 mode 静默接受」的样本过同一条判据必须报错",
    "ok": true,
    "hit": "mode=zzz 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
    "actual": "{ok:true} / HTTP 200"
   },
   {
-   "id": "21-非法参数(第七个槽位)",
+   "id": "22-非法参数(第七个槽位)",
    "judge": "把「接受第 7 个槽位」的样本过同一条判据必须报错",
    "ok": true,
    "hit": "selected=own-0001,own-0002,own-0003,own-0004,own-0005,own-0006,own-0007 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
    "actual": "{ok:true,player:{selected_count:7}} / HTTP 200"
   },
   {
-   "id": "26-触控目标",
+   "id": "27-触控目标",
    "judge": "一个 30×30 的按钮必须被同一条判据抓住",
    "ok": true,
    "hit": "BUTTON.tiny 只有 30×30",
    "actual": "BUTTON.tiny 30×30"
   },
   {
-   "id": "27-移动端顺序",
+   "id": "28-移动端顺序",
    "judge": "把顺序改成「评估在候选池前面」必须被同一条判据抓住",
    "ok": true,
    "hit": "移动端区块顺序必须是 [\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"]，实际 [\"tw-team\",\"tw-eval\",\"tw-cand\",\"tw-coach\"]",
@@ -388,6 +415,13 @@
     "unknownNodes": 0,
     "entranceNodes": 3,
     "replacementShown": false,
+    "mechanismNodes": 3,
+    "pendingNodes": 0,
+    "mechanismLines": [
+     "特性「向心力」：1号和2号位技能获得传动1和威力+30。",
+     "特性「不朽」：力竭4回合后复活。",
+     "特性「热成像」：若上回合双方有精灵使用火系技能，本回合自己携带的虫系技能威力+100%。"
+    ],
     "hasModeBadge": true,
     "hasCandidateBadge": true,
     "hasUnknownPrematch": true,
@@ -423,6 +457,15 @@
     "unknownNodes": 0,
     "entranceNodes": 0,
     "replacementShown": false,
+    "mechanismNodes": 5,
+    "pendingNodes": 0,
+    "mechanismLines": [
+     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+     "特性「专注力」：入场首回合，获得物攻+100%。",
+     "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
+     "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
+     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。"
+    ],
     "hasModeBadge": true,
     "hasCandidateBadge": true,
     "hasUnknownPrematch": true,
@@ -530,6 +573,18 @@
     "unknownNodes": 0,
     "entranceNodes": 0,
     "replacementShown": false,
+    "mechanismNodes": 8,
+    "pendingNodes": 0,
+    "mechanismLines": [
+     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+     "特性「专注力」：入场首回合，获得物攻+100%。",
+     "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
+     "特性「捉迷藏」：使敌方获得冻结时，也会使其获得全技能能耗+1。",
+     "特性「乘风连击」：使用翼系技能后，获得连击数+1。",
+     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。",
+     "特性「预警」：若敌方技能足够击败自己，回合开始时自己获得速度+50。",
+     "特性「血型吸引」：敌方每携带1种系别的技能，自己攻击时威力+10。"
+    ],
     "hasModeBadge": true,
     "hasCandidateBadge": true,
     "hasUnknownPrematch": true,
@@ -637,6 +692,16 @@
     "unknownNodes": 6,
     "entranceNodes": 0,
     "replacementShown": true,
+    "mechanismNodes": 6,
+    "pendingNodes": 0,
+    "mechanismLines": [
+     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+     "特性「专注力」：入场首回合，获得物攻+100%。",
+     "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
+     "特性「捉迷藏」：使敌方获得冻结时，也会使其获得全技能能耗+1。",
+     "特性「乘风连击」：使用翼系技能后，获得连击数+1。",
+     "特性「化茧」：受到致命伤害时，获得1层萌化，并免疫此次伤害。"
+    ],
     "hasModeBadge": true,
     "hasCandidateBadge": true,
     "hasUnknownPrematch": true,
@@ -753,6 +818,15 @@
     "unknownNodes": 0,
     "entranceNodes": 0,
     "replacementShown": false,
+    "mechanismNodes": 5,
+    "pendingNodes": 0,
+    "mechanismLines": [
+     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+     "特性「专注力」：入场首回合，获得物攻+100%。",
+     "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
+     "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
+     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。"
+    ],
     "hasModeBadge": true,
     "hasCandidateBadge": true,
     "hasUnknownPrematch": true,

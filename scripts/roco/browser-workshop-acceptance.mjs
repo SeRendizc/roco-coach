@@ -208,6 +208,43 @@ export function badRequestProblems(raw, json, status, needle) {
  * 文本**用的，套在 JSON 上会把干净的回执判红。所以文案判据只吃字符串值；
  * 键名层面的禁令由 `playerLayerProblems` 管，两者分工不同。
  */
+/**
+ * 卡片首层的**机制行**必须真的渲染出来（第 92 轮追加）。
+ *
+ * 三条硬规则合成一条机器判据：
+ *   ① 冻结原文（`FROZEN_DESC` + 非空 `line`）⇒ 卡上必须有那一行**逐字**文本（不截断）；
+ *   ② 其余（取不到 / `MECHANISM_UNCONFIRMED` / 形状不对）⇒ 卡上写「机制资料待确认」；
+ *   ③ 枚举原文（`FROZEN_DESC` / `MECHANISM_UNCONFIRMED`）**永远不许**出现在可见文本里。
+ *
+ * `facts` 形状：`{expectedLines, renderedLines, mechanismNodes, filledSlots, pendingNodes, playerText}`。
+ * 反证样本：把 `expectedLines` 里的一行从 `renderedLines` 拿掉 ⇒ 必须红。
+ */
+export function mechanismRenderProblems(facts) {
+  const problems = [];
+  const expected = facts.expectedLines ?? [];
+  const rendered = facts.renderedLines ?? [];
+  if (expected.length === 0) {
+    problems.push('这一份量测里没有任何冻结机制原文可查——判据等于空转（用例本身没被驱动）');
+  }
+  if ((facts.mechanismNodes ?? 0) < (facts.filledSlots ?? 0)) {
+    problems.push(`卡上的机制行节点（${facts.mechanismNodes}）少于已填槽位（${facts.filledSlots}）`);
+  }
+  for (const line of expected) {
+    if (!rendered.some((text) => String(text).includes(line))) {
+      problems.push(`冻结机制原文没有渲染到卡上：「${line}」`);
+    }
+  }
+  for (const enumWord of ['FROZEN_DESC', 'MECHANISM_UNCONFIRMED']) {
+    if (String(facts.playerText ?? '').includes(enumWord)) {
+      problems.push(`可见文本里出现机制枚举原文「${enumWord}」`);
+    }
+  }
+  if ((facts.filledSlots ?? 0) > 0 && rendered.length === 0) {
+    problems.push('已填槽位上一个机制行都没有：冻结原文一条都没上卡');
+  }
+  return problems;
+}
+
 export function deepTextValues(value) {
   const out = [];
   const walk = (node) => {
@@ -478,6 +515,10 @@ async function main() {
       slotNodes: q('.tw-slot'), filledNodes: q('.tw-slot.on'), nextNodes: q('[data-tw-next]'),
       gapNodes: q('.tw-gap'), axisNodes: q('.tw-axis'), unknownNodes: q('.tw-unknown'),
       entranceNodes: q('[data-tw-entrance]'), replacementShown: q('#tw-replacement')>0,
+      mechanismNodes: q('[data-tw-mechanism]'),
+      pendingNodes: q('[data-tw-mechanism="pending"]'),
+      mechanismLines: [...(sr?sr.querySelectorAll('[data-tw-mechanism] .tw-mech-line'):[])]
+        .map((el)=>el.textContent),
       hasModeBadge: text.includes(${JSON.stringify(TEAM_WORKSHOP_BADGES.mode)}),
       hasCandidateBadge: text.includes(${JSON.stringify(TEAM_WORKSHOP_BADGES.candidate)}),
       hasUnknownPrematch: text.includes('匹配前对手未知'),
@@ -748,30 +789,60 @@ async function main() {
       '{"slots":[{"pet_id":"pet_000062"}],"next_candidates":[{"instance_id":"own-0001"}]}');
     shots.push(await shootModule('workshop-03-six-selected-1440x900'));
 
-    // ── ⑥ 玩家可见文本：无工程词、无胜率/百分数、有未知说明 ──────────────
-    const playerNow = await playerText();
+    // ── ⑥ 卡上的机制行（冻结原文逐字上卡；枚举原文不许上卡）────────────
+    // 「期望原文」从**路由回执**里取（`dev` 段里逐候选的 mechanism 也在，这里用 player 段），
+    // 「实际渲染」从 shadow root 里取：两边对不上就是没渲染出来。
+    const expectedMechanisms = [...(sixRoutePlayer?.slots ?? [])
+      .map((slot) => slot.mechanism)
+      .filter((mechanism) => mechanism?.status === 'FROZEN_DESC'
+        && typeof mechanism.line === 'string' && mechanism.line.trim() !== '')
+      .map((mechanism) => mechanism.line.trim())];
+    const mechanismFacts = {
+      expectedLines: expectedMechanisms,
+      renderedLines: sixDom.mechanismLines ?? [],
+      mechanismNodes: sixDom.mechanismNodes ?? 0,
+      pendingNodes: sixDom.pendingNodes ?? 0,
+      filledSlots: sixDom.filledNodes ?? 0,
+      playerText: await playerText(),
+    };
+    const mechanismProblems = mechanismRenderProblems(mechanismFacts);
+    check('18-机制行上卡', '六个槽位里每一只的**冻结机制原文**都逐字渲染在卡的首层（小字、不截断），'
+      + '枚举原文（FROZEN_DESC / MECHANISM_UNCONFIRMED）一个都不出现在可见文本里',
+      mechanismProblems.length === 0,
+      mechanismProblems.join(' | ')
+      + `；机制行节点=${mechanismFacts.mechanismNodes} 已填槽位=${mechanismFacts.filledSlots}`
+      + ` 待确认=${mechanismFacts.pendingNodes}；卡上样例「${String(mechanismFacts.renderedLines[0] ?? '').slice(0, 60)}」`);
+    counter('18-机制行上卡', '把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住',
+      mechanismRenderProblems({...mechanismFacts, renderedLines: (mechanismFacts.renderedLines ?? []).slice(1)}),
+      `expected=${JSON.stringify(mechanismFacts.expectedLines.slice(0, 1))} rendered=${JSON.stringify((mechanismFacts.renderedLines ?? []).slice(1, 2))}`);
+    counter('18-机制枚举不上面', '把 FROZEN_DESC 印到可见文本里必须被同一条判据抓住',
+      mechanismRenderProblems({...mechanismFacts, playerText: `${mechanismFacts.playerText} FROZEN_DESC`}),
+      '可见文本追加 " FROZEN_DESC"');
+
+    // ── ⑦ 玩家可见文本：无工程词、无胜率/百分数、有未知说明 ──────────────
+    const playerNow = mechanismFacts.playerText;
     // 机制原文（逐字冻结 desc）里可能有百分数（「双攻+100%」）；只豁免**能追溯回产物**的那些。
     const sourcedLines = sourcedMechanismLines(sixRoutePlayer);
     const copyProblems = playerCopyProblems(playerNow, {sourcedLines});
-    check('18-玩家层无工程话', '模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON',
+    check('19-玩家层无工程话', '模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON',
       copyProblems.length === 0,
       copyProblems.join(' | ') || `扫过 ${playerNow.length} 字（豁免机制原文 ${copyProblems.sourced_exempted} 处）；样例「${playerNow.slice(0, 90)}…」`);
-    counter('18-玩家层无工程话', '往玩家区注入 pet_id / state_version 后同一条判据必须命中',
+    counter('19-玩家层无工程话', '往玩家区注入 pet_id / state_version 后同一条判据必须命中',
       playerCopyProblems('音速犬 pet_id=pet_000062 state_version=roco-workshop/v1'),
       '「音速犬 pet_id=pet_000062 state_version=roco-workshop/v1」');
     const pseudoNow = exemptSourcedLines(playerNow, sourcedLines).text.match(PSEUDO_PRECISION);
-    check('19-无胜率与百分数', '可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）',
+    check('20-无胜率与百分数', '可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）',
       pseudoNow === null, pseudoNow ? `命中「${pseudoNow[0]}」` : `扫过 ${playerNow.length} 字无命中（豁免机制原文 ${sourcedLines.length} 条）`);
-    counter('19-无胜率与百分数', '把「胜率 58%」写进可见文本必须被同一条判据抓住',
+    counter('20-无胜率与百分数', '把「胜率 58%」写进可见文本必须被同一条判据抓住',
       playerCopyProblems('这套阵容胜率 58%'), '「这套阵容胜率 58%」');
-    counter('19-无胜率与百分数（假机制绕过）', '把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住',
+    counter('20-无胜率与百分数（假机制绕过）', '把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住',
       playerCopyProblems('（机制原文）胜率 62%', {sourcedLines: sourcedMechanismLines({next_candidates: [{mechanism: {line: '胜率 62%'}}]})}),
       '{"next_candidates":[{"mechanism":{"line":"胜率 62%"}}]}');
-    check('20-未知写在玩家层', '「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）',
+    check('21-未知写在玩家层', '「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）',
       sixDom.unknownNodes >= 4 && /现在算不出来/.test(playerNow) && /未核实|未知/.test(playerNow),
       `未知条目=${sixDom.unknownNodes}；含「现在算不出来」=${/现在算不出来/.test(playerNow)}`);
 
-    // ── ⑦ 路由层非法参数：一律 400 + 点名（不受页面影响）────────────────
+    // ── ⑧ 路由层非法参数：一律 400 + 点名（不受页面影响）────────────────
     const badCases = [
       [`selected=${ids.slice(0, 7).join(',')}`, 'selected'],
       ['mode=zzz', 'mode'],
@@ -786,26 +857,26 @@ async function main() {
       const result = await route(query);
       rows.push(`${query.slice(0, 60)} → HTTP ${result.status} ${result.raw.slice(0, 110)}`);
       const problems = badRequestProblems(query, result.json, result.status, needle);
-      check(`21-非法参数(${needle})`, `「${query.slice(0, 44)}」必须 HTTP 400 + ok:false 并点名 ${needle}`,
+      check(`22-非法参数(${needle})`, `「${query.slice(0, 44)}」必须 HTTP 400 + ok:false 并点名 ${needle}`,
         problems.length === 0, problems.join(' | ') || `HTTP ${result.status} error=「${String(result.json.error).slice(0, 120)}」`);
     }
     steps.push({at: 'bad-params', rows});
-    counter('21-非法参数(mode)', '把「非法 mode 静默接受」的样本过同一条判据必须报错',
+    counter('22-非法参数(mode)', '把「非法 mode 静默接受」的样本过同一条判据必须报错',
       badRequestProblems('mode=zzz', {ok: true, player: {}}, 200, 'mode'), '{ok:true} / HTTP 200');
-    counter('21-非法参数(第七个槽位)', '把「接受第 7 个槽位」的样本过同一条判据必须报错',
+    counter('22-非法参数(第七个槽位)', '把「接受第 7 个槽位」的样本过同一条判据必须报错',
       badRequestProblems(`selected=${ids.slice(0, 7).join(',')}`, {ok: true, player: {selected_count: 7}}, 200, 'selected'),
       '{ok:true,player:{selected_count:7}} / HTTP 200');
     const okSix = await route(`selected=${ids.slice(0, 6).join(',')}`);
     const overSeven = await route(`selected=${ids.slice(0, 7).join(',')}`);
-    check('22-六槽上限', '同名参数下 6 只必须 200、7 只必须 400：上限只认六个槽位',
+    check('23-六槽上限', '同名参数下 6 只必须 200、7 只必须 400：上限只认六个槽位',
       okSix.status === 200 && okSix.json.ok === true && overSeven.status === 400 && overSeven.json.ok === false,
       `6 只 → HTTP ${okSix.status}；7 只 → HTTP ${overSeven.status}「${String(overSeven.json.error).slice(0, 90)}」`);
 
-    // ── ⑧ 开发夹具：同一模块也能单独挂（薄壳不是产品页）──────────────────
+    // ── ⑨ 开发夹具：同一模块也能单独挂（薄壳不是产品页）──────────────────
     await cdp.send('Page.navigate', {url: base + 'workshop.html'});
     const fixtureReady = await waitFor(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twState==='ok'`);
     const fixtureTitle = await js(`document.title`);
-    check('23-开发夹具', 'workshop.html 只是单独调试同一模块的薄壳（能挂上、标题写明是夹具，不冒充产品页）',
+    check('24-开发夹具', 'workshop.html 只是单独调试同一模块的薄壳（能挂上、标题写明是夹具，不冒充产品页）',
       fixtureReady && /夹具/.test(fixtureTitle),
       `夹具就绪=${fixtureReady} 标题=「${fixtureTitle}」`);
     shots.push(await shootModule('workshop-04-fixture-1440x900'));
@@ -816,16 +887,16 @@ async function main() {
       if (Number((await facts()).selected ?? 0) >= 6) break;
       await addByName(name);
     }
-    check('24-产品页重新选满六只', '回到产品页后仍能用真实键鼠选满六只（窄屏量测的前提）',
+    check('25-产品页重新选满六只', '回到产品页后仍能用真实键鼠选满六只（窄屏量测的前提）',
       Number((await facts()).selected) === 6, `selected=${(await facts()).selected}`);
 
-    // ── ⑨ 窄屏 390×844：不溢出 + 顺序 + 触控 ≥44px ─────────────────────
+    // ── ⑩ 窄屏 390×844：不溢出 + 顺序 + 触控 ≥44px ─────────────────────
     await cdp.send('Emulation.setDeviceMetricsOverride', {width: 390, height: 844, deviceScaleFactor: 1, mobile: true});
 
     await sleep(620);
     const narrow = await metrics();
     screens.push({viewport: '390x844', at: 'six-selected', ...narrow});
-    check('25-窄屏不溢出', '390×844：scrollW == clientW',
+    check('26-窄屏不溢出', '390×844：scrollW == clientW',
       narrow.scrollW === narrow.clientW,
       `clientW=${narrow.clientW} scrollW=${narrow.scrollW} bodyScrollW=${narrow.bodyScrollW}`);
     const targets = JSON.parse(await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
@@ -838,10 +909,10 @@ async function main() {
         out.push({tag:el.tagName,cls:String(el.className||'').slice(0,26),w:Math.round(r.width),h:Math.round(r.height)});}
       return JSON.stringify({count:out.length,small:out.filter((x)=>x.w<44||x.h<44)});})()`));
     const touchProblems = touchTargetProblems(targets.small);
-    check('26-触控目标', '390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44',
+    check('27-触控目标', '390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44',
       touchProblems.length === 0,
       touchProblems.join(' | ') || `量了 ${targets.count} 个元素，全部达标`);
-    counter('26-触控目标', '一个 30×30 的按钮必须被同一条判据抓住',
+    counter('27-触控目标', '一个 30×30 的按钮必须被同一条判据抓住',
       touchTargetProblems([{tag: 'BUTTON', cls: 'tiny', w: 30, h: 30}]), 'BUTTON.tiny 30×30');
     const order = JSON.parse(await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
       const sr=root?.shadowRoot??null;
@@ -851,10 +922,10 @@ async function main() {
       const tops=order.map((cls)=>({cls,top:Math.round(sr.querySelector('.'+cls).getBoundingClientRect().top)}));
       return JSON.stringify({order,tops});})()`));
     const orderProblems = mobileOrderProblems(order.order, order.tops);
-    check('27-移动端顺序', '390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」',
+    check('28-移动端顺序', '390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」',
       orderProblems.length === 0,
       orderProblems.join(' | ') || `顺序=${JSON.stringify(order.order)} 顶部位置=${JSON.stringify(order.tops)}`);
-    counter('27-移动端顺序', '把顺序改成「评估在候选池前面」必须被同一条判据抓住',
+    counter('28-移动端顺序', '把顺序改成「评估在候选池前面」必须被同一条判据抓住',
       mobileOrderProblems(['tw-team', 'tw-eval', 'tw-cand', 'tw-coach'],
         [{cls: 'tw-team', top: 0}, {cls: 'tw-eval', top: 100}, {cls: 'tw-cand', top: 200}, {cls: 'tw-coach', top: 300}]),
       'order=[tw-team,tw-eval,tw-cand,tw-coach]');
@@ -870,12 +941,12 @@ async function main() {
     const narrowMetrics = await metrics();
     steps.push({at: 'narrow-two', facts: narrowTwo, dom: narrowDom, metrics: narrowMetrics});
     screens.push({viewport: '390x844', at: 'two-selected', ...narrowMetrics});
-    check('28-窄屏候选区', '390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在',
+    check('29-窄屏候选区', '390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在',
       narrowMetrics.scrollW === narrowMetrics.clientW && Number(narrowTwo.next) === 3 && narrowDom.gapNodes >= 1,
       `clientW=${narrowMetrics.clientW} scrollW=${narrowMetrics.scrollW} next=${narrowTwo.next} 缺口=${narrowDom.gapNodes}`);
     shots.push(await shootModule('workshop-06-two-selected-390x844'));
 
-    check('29-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
+    check('30-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,
       `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 2))} pageErrors=${JSON.stringify(pageErrors.slice(0, 2))}`);
   } catch (error) {
