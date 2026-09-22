@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `830f632`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `7cfcc1b`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1878,3 +1878,32 @@ A7 1440/390 无遮挡无横向溢出、A8 页面看不到的能力不得只凭�
 **下一轮入口**：RC-401（Effect/Trigger IR 增量迁移）与 RC-403（Support Classifier v2：把
 `FULL_VERIFIED` / `SIMULATABLE_UNVERIFIED` / `PARTIAL` / `KNOWLEDGE_ONLY` / `REFUSED` 做成
 可执行分类）；页面与训练数据生成器要按 `build_support` 分档显示；台账第三条仓内来源仍待补。
+
+### C6.35 第 98 轮：RC-401 覆盖台账 + 第一条原语（连击）
+
+**为什么先做尺子**：RC-401 的施工口径是「按覆盖收益增量迁移效果原语」，而在这之前仓库里
+没有任何地方回答「现在能跑多少、下一条该实现哪个」（`skills.json` 的 `effect_support` 一律
+`unsupported`，`traits.py` 只登记 12 条）。
+
+**交付**：
+| 项 | 内容 |
+|---|---|
+| 台账 | `roco/src/roco_env/coverage.py` → `reports/roco/rc401/effect-coverage.json`：579 技能 + 245 特性按四档定档，未实现原因按频次排序 |
+| 口径 | 覆盖率 = 「数据 × **已声明能力**」：未声明连击 473/824（57.4%）；声明连击 **507/824（61.5%）** |
+| 第一条原语 | **连击**（67 条技能）：静态「N连击」→ `Parsed.hit_count`；动态写法（连击数+1/永久+1/翻倍/变为3连击）一律 `unparsed` 如实登记；`damage.multi_hit` 只在 v3 声明，legacy/v2 恒定 1 次 |
+| 判据 | `roco/tests/test_effect_coverage.py`（5）+ `roco/tests/test_multi_hit.py`（7）；3 连击伤害 19 → **57**（3 倍）；46 条静态连击技能被结算 |
+| 文档 | `docs/roco/RC-401-EFFECT-COVERAGE.md` |
+
+**这一轮踩到的两个细节**（都写进注释）：
+1. 解析器**不能**替配置做决定：`连击` 那条未实现登记必须留给引擎按「当前配置有没有声明能力」
+   处理——一开始在解析器里就把它算作已认领，于是 legacy 的 golden 指纹当场变了。
+2. 「静态连击」与「动态连击」是**两条**登记：摘掉前者时不许顺手把后者也摘掉
+   （否则「连击数+1」就变成静默错算）。判据在两个地方各钉了一次。
+
+**连锁**：v3 配置新增 `damage.multi_hit` 块 → RAG 语料含规则配置 → `rag-eval` 报告需重算；
+`node scripts/roco/rebuild-derived-chain.mjs` 5 环全过。
+
+**实测**：`test:env` 371 → **383 条 OK**；门禁 **17/17**。
+
+**下一批**（按同一把尺子）：未被登记的 233 条特性 → 选择（20）→ 传动（13）→ 随机（11）；
+RC-403 要把四档分类做成可执行产物；页面与训练数据生成器按 `build_support` / 能力声明分档显示。
