@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T00:19:36.483Z",
+ "judged_at": "2026-09-22T01:10:22.929Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -12,7 +12,8 @@
   "reports/roco/workshop-acceptance/workshop-03-six-selected-1440x900.png",
   "reports/roco/workshop-acceptance/workshop-04-fixture-1440x900.png",
   "reports/roco/workshop-acceptance/workshop-05-six-selected-390x844.png",
-  "reports/roco/workshop-acceptance/workshop-06-two-selected-390x844.png"
+  "reports/roco/workshop-acceptance/workshop-06-two-selected-390x844.png",
+  "reports/roco/workshop-acceptance/workshop-07-standard-pvp-1440x900.png"
  ],
  "viewport_metrics": [
   {
@@ -252,6 +253,18 @@
    "actual": "clientW=390 scrollW=390 next=3 缺口=10"
   },
   {
+   "id": "31-标准 PVP 开局按钮",
+   "judge": "六槽选满后「开一局（标准 PVP · 六宠）」按钮可用，且它读的是页面选出的六只",
+   "ok": true,
+   "actual": "{\"disabled\":false,\"team\":\"6\",\"fieldable\":\"6\"}"
+  },
+  {
+   "id": "32-标准 PVP 战斗页",
+   "judge": "按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出",
+   "ok": true,
+   "actual": "mode=pvp-standard-six-pet mana=4/4 groups=skill:3,charge:1,switch:5,surrender:1 hidden=0；页面状态栏=「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
+  },
+  {
    "id": "30-控制台干净",
    "judge": "整轮下来没有 console.error，也没有未捕获异常",
    "ok": true,
@@ -384,6 +397,41 @@
    "ok": true,
    "hit": "移动端区块顺序必须是 [\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"]，实际 [\"tw-team\",\"tw-eval\",\"tw-cand\",\"tw-coach\"]",
    "actual": "order=[tw-team,tw-eval,tw-cand,tw-coach]"
+  },
+  {
+   "id": "31-标准 PVP 开局按钮",
+   "judge": "队伍不满六只（或按钮把规模读错）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "按钮读到的队伍规模必须是 6，实际 \"5\"",
+   "actual": "{\"disabled\":false,\"team\":\"5\"}"
+  },
+  {
+   "id": "32-标准 PVP 战斗页(模式)",
+   "judge": "开局后模式被换成练习局必须被同一条判据抓住",
+   "ok": true,
+   "hit": "开局后的模式必须是 pvp-standard-six-pet，实际 \"demo-training-3v3\"",
+   "actual": "{\"mode\":\"demo-training-3v3\"}"
+  },
+  {
+   "id": "32-标准 PVP 战斗页(魔力)",
+   "judge": "资源条还写「未核验」必须被同一条判据抓住",
+   "ok": true,
+   "hit": "引擎已经给了魔力，资源条却还写「未核验」",
+   "actual": "{\"selfText\":\"魔力 / 心未核验\"}"
+  },
+  {
+   "id": "32-标准 PVP 战斗页(动作)",
+   "judge": "物品组混进 1 条必须被同一条判据抓住",
+   "ok": true,
+   "hit": "标准 PVP 下物品组必须为空，实际 skill:2,charge:0,switch:1,surrender:0,item:1,escape:0",
+   "actual": "{\"groups\":\"…,item:1,escape:0\"}"
+  },
+  {
+   "id": "32-标准 PVP 战斗页(覆盖)",
+   "judge": "把未核验覆盖藏起来必须被同一条判据抓住",
+   "ok": true,
+   "hit": "未核验覆盖必须如实显示（hidden=true 文案=\"⚠ 候选规则：energy.initial 按假设值 2（ENGINE_HYPOTHESIS，待录 MC-E04）开局 —— 不是实机结论，界面须标「未核验」；候选规则：turn_order.speed_tie 按假设值 random_seeded（ENGINE_HYPOTHESIS，待录 MC-E05）开局 —— 不是实机结论，界面须标「未核验」\"）",
+   "actual": "{\"noteHidden\":true}"
   }
  ],
  "console_errors": [],
@@ -844,6 +892,22 @@
     "scrollW": 390,
     "bodyScrollW": 390,
     "innerW": 390
+   }
+  },
+  {
+   "at": "standard-pvp-battle",
+   "facts": {
+    "mode": "pvp-standard-six-pet",
+    "standardPvp": "yes",
+    "groups": "skill:3,charge:1,switch:5,surrender:1",
+    "hidden": "0",
+    "selfText": "魔力 / 心4",
+    "foeText": "魔力 / 心4",
+    "selfMana": 4,
+    "foeMana": 4,
+    "noteHidden": false,
+    "noteText": "⚠ 候选规则：energy.initial 按假设值 2（ENGINE_HYPOTHESIS，待录 MC-E04）开局 —— 不是实机结论，界面须标「未核验」；候选规则：turn_order.speed_tie 按假设值 random_seeded（ENGINE_HYPOTHESIS，待录 MC-E05）开局 —— 不是实机结论，界面须标「未核验」",
+    "battleVisible": true
    }
   }
  ],

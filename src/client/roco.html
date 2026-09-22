@@ -77,6 +77,14 @@
      它与 `#select-panel` 的先后（只要求两者都在常规流里、互不重叠）。 -->
 <section id="team-workshop" aria-label="六槽阵容工作台"></section>
 
+<!-- ── 标准 PVP 开局（RC-106）：六槽选满之后，用**这一页的六只**按 v3 候选规则开一局。
+     为什么按钮在页面层而不是模块里：开局是「把模块选出的队伍交给对局域」这一步，
+     模块只负责选人与评估（它连合法动作表都不该知道）。 -->
+<div class="standard-pvp-bar" id="standard-pvp-bar">
+ <button id="start-standard-pvp" class="primary" disabled>开一局（标准 PVP · 六宠）</button>
+ <span class="muted" id="standard-pvp-note">选满六只才能开局；这一局按候选规则（未核验的假设值会逐条标出来）</span>
+</div>
+
 <!-- ── 选阵容页（`#select-panel`）：固定队伍栏 + 阵容池 ───────────────────────
      这一页只有「已选的 3 只」与「48 只池子」。搜索 / 属性·定位筛选 / 分页全部走
      `/api/roco/roster` 的 `offset/limit/type/role`（服务端分页，页面不自建第二份数据）。 -->
@@ -189,6 +197,9 @@
    <div class="resource" id="foe-resource"></div>
    <div class="roster-line" id="foe-roster-line"></div>
   </div>
+  <!-- 未核验覆盖（RC-106）：这一局用到的**假设值**逐条写在这里，默认隐藏（没有假设就不显示）。
+       它是引擎给的中文句子（`ui.notes.unverified_overrides`），页面只做搬运与展示。 -->
+  <p class="unverified-note" id="unverified-note" hidden></p>
  </div>
 
  <div class="stage">

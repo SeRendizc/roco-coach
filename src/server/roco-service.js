@@ -60,6 +60,44 @@ export const ANALYSIS_SEEDS=Object.freeze([11,29,47]);
 export const DEFAULT_TEAM=Object.freeze(['pet_000225','pet_000190','pet_000445']);
 /** 默认对手策略：有侵略性但不乱来，适合当练习对手。 */
 export const DEFAULT_STRATEGY='greedy_damage';
+
+/**
+ * BattleMode 登记表（`data/roco/battle-modes.json`）。
+ *
+ * 为什么服务端要读它：这一局的规则配置与队伍规模**由模式决定**，不是 Node 里写死的 3。
+ * 「抄一个字符串」是这一轮最容易犯的错——登记表改了绑定、Node 还照旧抄 v2，
+ * 就会变成「标准 PVP 跑在没有魔力系统的配置上」。
+ */
+let battleModesCache=null;
+export function battleModes(){
+ if(!battleModesCache){
+  battleModesCache=JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)),'..','..',
+   'data','roco','battle-modes.json'),'utf8'));
+ }
+ return battleModesCache;
+}
+/** 按 id 取一个模式；取不到就是 null（调用方按 400 处理，不猜一个默认模式）。 */
+export function battleModeOf(modeId){
+ if(typeof modeId!=='string'||!modeId)return null;
+ return (battleModes().modes??[]).find((mode)=>mode?.id===modeId)??null;
+}
+
+/**
+ * 标准 PVP 必须显式给出的「未核验覆盖」——**只在这里定义一次**。
+ *
+ * 为什么由服务端给、而不是页面给：v3 的 `energy.initial` 在配置里是 `UNKNOWN`（判据 `MC-E04`
+ * 尚未录制），引擎按纪律 fail closed；页面**不许**自己编一个数，否则「未核验」就会被一个
+ * 看起来合理的默认值盖掉。值取练习局口径的 2，它只是**假设**，并带着 confidence/reason/microcase
+ * 一起进载荷；界面照 `ui.notes.unverified_overrides` 如实标「未核验」。
+ */
+export const STANDARD_PVP_UNVERIFIED_OVERRIDES=Object.freeze([Object.freeze({
+ path:'energy.initial',value:2,confidence:'ENGINE_HYPOTHESIS',
+ reason:'标准 PVP 的首次入场能量没有实机证据（MC-E04 未录制）；这里沿用练习局口径的值，界面必须标未核验',
+ microcase_id:'MC-E04'}),Object.freeze({
+ path:'turn_order.speed_tie',value:'random_seeded',confidence:'ENGINE_HYPOTHESIS',
+ reason:'同速平手裁决在候选配置里是 UNKNOWN（MC-E05 未录制）。不声明它就打不下去（引擎按纪律抛错）；'
+  + '这里显式按 legacy 那份**已登记的工程权宜** random_seeded 走，界面同样要标未核验',
+ microcase_id:'MC-E05'})]);
 /**
  * 演示页的默认对局 seed。
  *
@@ -98,7 +136,7 @@ export const STRATEGIES=Object.freeze(['random_legal','greedy_damage','conservat
  * 白名单式：只有这里列出的字段会出去。私有状态（`state`）、seed、对手后备明细
  * 都不在列表里——不是「过滤掉」，是**从来没有**被复制出来。
  */
-export function publicView(result){
+export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
  if(!result||typeof result!=='object')return null;
  const ui=result.ui&&typeof result.ui==='object'?result.ui:null;
  if(!result||typeof result!=='object')return null;
@@ -166,6 +204,25 @@ export function publicView(result){
   strategy:result.strategy?{name:result.strategy.name??null,version:result.strategy.version??null}:null,
   assumptions:publicState?.assumptions??null,
   unsupported_count:Array.isArray(result.unsupported_seen)?result.unsupported_seen.length:0,
+  // ── RC-105/106：魔力与「未核验覆盖」（都是**公开**信息）────────────────────────
+  // 魔力是画在屏幕上的资源条，不是隐藏信息；`mana` 只有声明了 mana 的配置才存在，
+  // 没有就是 null —— 界面据此写「未核验」，**不许**补一个 4（那是编规则）。
+  mana:(()=>{
+   const raw=publicState?.mana??ui?.mana??null;
+   if(!raw||typeof raw!=='object')return null;
+   const one=(value)=>Number.isInteger(value)?value:null;
+   return {self:one(raw.self),opponent:one(raw.opponent)};
+  })(),
+  // 未核验覆盖：引擎已经带着 confidence/reason/microcase 吐出来了，Node 只做白名单搬运，
+  // 每条都标 `unverified:true`，让界面无法把它当成实机结论。
+  unverified_overrides:(Array.isArray(publicState?.unverified_overrides)?publicState.unverified_overrides:[]
+   ).map((entry)=>({path:entry?.path??null,value:entry?.value??null,confidence:entry?.confidence??null,
+    reason:entry?.reason??null,microcase_id:entry?.microcase_id??null,unverified:true})),
+  unverified_notes:(Array.isArray(ui?.notes?.unverified_overrides)?ui.notes.unverified_overrides:[]
+   ).filter((line)=>typeof line==='string').slice(),
+  // 这一局是按哪个模式/配置开的（Node 侧记录，引擎不回吐）。取不到就是 null，界面写「未读取」。
+  mode_id:modeId??null,
+  ruleset_config_id:rulesetConfigId??publicState?.ruleset_config_id??null,
  };
 }
 
@@ -1576,21 +1633,109 @@ function prematchContract(){
  }catch{return null}
 }
 
+/**
+ * 把「owned 个体 id」换算成引擎能上场的**物种 id**。
+ *
+ * 工作台选的是 owned 个体（`own-0001` 形状），而引擎的名单是物种级（`pet_XXXXXX`）。
+ * 这层换算必须留在服务端：页面既不该知道映射规则，也不该维护它。
+ * 不在 `owned-pets.json` 里的 id 一律**不猜**——原样报给调用方（400），
+ * 因为「把图鉴条目当成能上场」正是这一轮最容易犯的错。
+ */
+function resolveBattleTeamIds(team){
+ const list=Array.isArray(team)?team:[];
+ if(!list.some((id)=>typeof id==='string'&&id.startsWith('own-')))return {ids:list,unknown:[]};
+ const index=loadBoxIndex();
+ const unknown=[];const ids=[];
+ for(const id of list){
+  if(typeof id!=='string'||!id.startsWith('own-')){ids.push(id);continue;}
+  const instance=index.instanceById.get(id)??null;
+  if(!instance?.species_id){unknown.push(id);continue;}
+  ids.push(instance.species_id);
+ }
+ return {ids,unknown};
+}
+
+ /**
+  * 开一局（本地对局域）。
+  *
+  * RC-106 起支持按 **BattleMode** 开局：`body.mode` 给模式 id（登记表里的），
+  * 这一局的规则配置取该模式的 `ruleset_binding`、队伍规模取它的 `parameters.team_size`。
+  *
+  * 三条纪律：
+  *   · **不给 mode** ⇒ 完全走旧路径（3 只、当前生效配置、缺省队伍），逐位不变；
+  *   · **给了 mode** ⇒ 队伍长度必须等于该模式登记的规模，**不静默补默认队伍**（那是「假装开成了」）；
+  *   · 需要未核验覆盖的模式（v3 的 `energy.initial`）⇒ 由**服务端**补上唯一的常量
+  *     （`STANDARD_PVP_UNVERIFIED_OVERRIDES`），并原样带到载荷里让界面标「未核验」。
+  */
  async function startBattle(body={}){
   const up=await ensure();
   if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
   touch();
-  const team=Array.isArray(body.team)&&body.team.length===3?body.team:[...DEFAULT_TEAM];
   const strategy=STRATEGIES.includes(body.strategy)?body.strategy:DEFAULT_STRATEGY;
   const seed=Number.isInteger(body.seed)&&body.seed>=0?body.seed:DEMO_SEED;
-  const enemyTeam=Array.isArray(body.enemy_team)&&body.enemy_team.length===3?body.enemy_team:undefined;
-  const envelope=await client.battleNew({team,enemyTeam,seed,strategy,stateVersion:0});
+
+  const modeId=typeof body.mode==='string'&&body.mode?body.mode:null;
+  let mode=null;
+  let teamSize=3;
+  let rulesetConfigId=null;
+  let unverifiedOverrides=null;
+  if(modeId){
+   mode=battleModeOf(modeId);
+   if(!mode)return {ok:false,status:400,
+    error:`不认得的模式 ${JSON.stringify(modeId)}：模式不许自创（登记表里现有 ${(battleModes().modes??[]).map((m)=>m.id).join(' / ')}）`};
+   rulesetConfigId=typeof mode.ruleset_binding==='string'?mode.ruleset_binding:null;
+   const declared=mode.parameters?.team_size;
+   if(!Number.isInteger(declared)||declared<1){
+    return {ok:false,status:400,error:`模式 ${modeId} 没有登记队伍规模（parameters.team_size），不能开局`};
+   }
+   teamSize=declared;
+   // 哪些模式需要未核验覆盖：目前只有标准 PVP 六宠（v3 的 energy.initial 是 UNKNOWN）。
+   // 判据写在**模式**上而不是写死 id 比较：绑定的配置真的声明了 mana/actions 才需要它。
+   if(rulesetConfigId==='mobile_s4_candidate_v3')unverifiedOverrides=[...STANDARD_PVP_UNVERIFIED_OVERRIDES];
+  }
+
+  const team=Array.isArray(body.team)?body.team:null;
+  if(modeId){
+   if(!team||team.length!==teamSize){
+    return {ok:false,status:400,
+     error:`模式 ${modeId} 每方需要 ${teamSize} 只精灵（登记表），实际 ${team?team.length:0} 只`};
+   }
+  }
+  const resolvedTeam=(!modeId&&(!team||team.length!==3))?[...DEFAULT_TEAM]:team;
+  const enemyRaw=Array.isArray(body.enemy_team)?body.enemy_team:null;
+  if(modeId&&enemyRaw&&enemyRaw.length!==teamSize){
+   return {ok:false,status:400,
+    error:`模式 ${modeId} 的对手也必须是 ${teamSize} 只（登记表），实际 ${enemyRaw.length} 只`};
+  }
+  const enemyTeam=modeId?(enemyRaw??undefined):((enemyRaw&&enemyRaw.length===3)?enemyRaw:undefined);
+
+  // owned 个体 → 物种 id（引擎的名单是物种级）。不在 owned 里的 id 照实报错，不猜。
+  const resolved=resolveBattleTeamIds(resolvedTeam);
+  if(resolved.unknown.length){
+   return {ok:false,status:400,
+    error:`这些个体不在 owned-pets.json 里，不能上场：${resolved.unknown.join('、')}`
+     + '（工作台里「图鉴条目」是还没有可用构建的物种，换一只你已经拥有的）'};
+  }
+  const resolvedEnemy=enemyTeam?resolveBattleTeamIds(enemyTeam):null;
+  if(resolvedEnemy&&resolvedEnemy.unknown.length){
+   return {ok:false,status:400,error:`对手队伍里有不在 owned-pets.json 的个体：${resolvedEnemy.unknown.join('、')}`};
+  }
+
+  const envelope=await client.battleNew({team:resolved.ids,enemyTeam:resolvedEnemy?resolvedEnemy.ids:undefined,
+   seed,strategy,stateVersion:0,rulesetConfigId,unverifiedOverrides});
   const out=unwrap(envelope);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
   const id=newSessionId();
-  sessions.set(id,{state:out.result.state,strategy,seed,turn:out.result.turn});
-  return {ok:true,battle_id:id,view:publicView(out.result),
-   note:'这是本地练习对局：用 Python 规则引擎按手游子集结算。未核验的机制一律不猜（fail closed）。'};
+  sessions.set(id,{state:out.result.state,strategy,seed,turn:out.result.turn,
+   mode_id:modeId,ruleset_config_id:rulesetConfigId});
+  const base=publicView(out.result,{modeId,rulesetConfigId});
+  return {ok:true,battle_id:id,view:base,
+   mode:mode?{id:mode.id,label:mode.label,status:mode.status,confidence:mode.confidence,
+    team_size:teamSize,ruleset_config_id:rulesetConfigId}:null,
+   note:modeId
+    ? `按模式 ${modeId} 开局：规则配置 ${rulesetConfigId}（候选），每方 ${teamSize} 只。`
+      + '未核验的机制一律不猜：这一局的假设值逐条写在 view.unverified_overrides 里，界面须标「未核验」。'
+    : '这是本地练习对局：用 Python 规则引擎按手游子集结算。未核验的机制一律不猜（fail closed）。'};
  }
 
  async function advanceBattle(body={}){

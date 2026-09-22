@@ -300,12 +300,16 @@ function mechanismSourceNote(pet) {
  * 属于 RC-306，本页不动）。
  */
 const ACTION_GROUPS = Object.freeze([
+  // 顺序 = 展示顺序。标准 PVP 的主入口是「技能 / 聚能 / 换精灵」，投降进次级；
+  // 物品与逃跑只属于练习局（迁移夹具），按模式隐藏，所以排在最后。
   {id: 'skill', title: '技能', note: '引擎给出的合法技能'},
-  {id: 'item', title: '物品', note: '引擎给出的可用物品（名字来自引擎）'},
+  {id: 'charge', title: '聚能', note: '独立动作：回复能量（不是技能的子类）'},
   {id: 'switch', title: '换精灵', note: '换人 / 补位'},
+  {id: 'surrender', title: '投降', note: '次级入口：认输判负'},
+  {id: 'item', title: '物品', note: '引擎给出的可用物品（名字来自引擎）；标准 PVP 下不该出现'},
   {id: 'escape', title: '更多', note: '撤退一类；标准 PVP 下不该出现'},
 ]);
-const KNOWN_ACTION_KINDS = new Set(['skill', 'item', 'switch', 'escape', 'struggle']);
+const KNOWN_ACTION_KINDS = new Set(['skill', 'charge', 'switch', 'surrender', 'item', 'escape', 'struggle']);
 //: 标准 PVP 下按模式隐藏的动作类型（P0-5）。**只隐藏、不假装引擎没给**：
 //: 被隐藏的条数会写进 `data-roco-actions-hidden`，报告里也要说明。
 const UI_HIDDEN_IN_STANDARD_PVP = Object.freeze(['item', 'escape', 'struggle']);
@@ -536,13 +540,22 @@ function render() {
   if (selfRes) {
     // 引擎的公开视图里**没有** mana/hearts 这两个量，所以这里只能是 null；
     // 真给了就显示真值（见 resourceHtml 的注释与反证测试）。
-    selfRes.innerHTML = resourceHtml({mana: Number.isFinite(view?.self?.mana) ? view.self.mana : null});
-    selfRes.classList.toggle('unknown', !Number.isFinite(view?.self?.mana));
+    // 魔力的唯一来源是服务端公开视图顶层的 `mana`（引擎 `ui.mana` 的同名搬运）。
+    // 引擎没这个量时它是 null ⇒ 显示「未核验」；**绝不**在这里补一个 4。
+    selfRes.innerHTML = resourceHtml({mana: Number.isFinite(view?.mana?.self) ? view.mana.self : null});
+    selfRes.classList.toggle('unknown', !Number.isFinite(view?.mana?.self));
   }
   const foeRes = $('foe-resource');
   if (foeRes) {
-    foeRes.innerHTML = resourceHtml({mana: Number.isFinite(view?.opponent?.mana) ? view.opponent.mana : null});
-    foeRes.classList.toggle('unknown', !Number.isFinite(view?.opponent?.mana));
+    foeRes.innerHTML = resourceHtml({mana: Number.isFinite(view?.mana?.opponent) ? view.mana.opponent : null});
+    foeRes.classList.toggle('unknown', !Number.isFinite(view?.mana?.opponent));
+  }
+  // 未核验覆盖（RC-106）：引擎给的中文句子照搬，默认隐藏；没有假设就整段不显示。
+  const unverified = $('unverified-note');
+  if (unverified) {
+    const notes = Array.isArray(view?.unverified_notes) ? view.unverified_notes.filter((line) => typeof line === 'string' && line) : [];
+    unverified.hidden = notes.length === 0;
+    unverified.textContent = notes.length ? `⚠ ${notes.join('；')}` : '';
   }
   const selfLine = $('self-roster-line');
   if (selfLine) selfLine.innerHTML = rosterLineHtml(selfPets, {active: activeIndex});
@@ -1847,6 +1860,8 @@ function renderCoverage() {
 // ── 绑定与启动 ──────────────────────────────────────────────────────────────
 function bind() {
   $('start-battle').addEventListener('click', () => void startBattle());
+  const standardButton = $('start-standard-pvp');
+  if (standardButton) standardButton.addEventListener('click', () => void startStandardPvp());
   $('reset-battle').addEventListener('click', () => void startBattle());
   $('plan').addEventListener('click', () => void requestPlan({reason: 'manual', explicit: true}));
   $('auto-turn').addEventListener('click', () => void autoTurn());
@@ -1897,11 +1912,89 @@ function mountWorkshop() {
   if (!root) return;
   try {
     window.rocoTeamWorkshop = mountTeamWorkshop(root, {
-      onTeamChange: (detail) => { state.teamWorkshop = detail; },
+      onTeamChange: (detail) => {
+        state.teamWorkshop = detail;
+        // 六槽一变，开局按钮的可用性就跟着变（判据在 updateStandardPvpBar 里）。
+        updateStandardPvpBar();
+      },
     });
   } catch (error) {
     root.dataset.twState = 'failed';
     root.dataset.twError = String(error?.message ?? error);
+  }
+}
+
+/**
+ * 标准 PVP 开局按钮（RC-106）。
+ *
+ * 这里只做两件事：① 六只在不在（不在就禁用并说明还差几只）；② 点下去把**这一页选出的六只**
+ * 连同模式 id 交给 `/api/roco/battle/new` —— 队伍规模与规则配置由**服务端读登记表**决定，
+ * 页面不抄 `mobile_s4_candidate_v3` 这个字符串，也不自己算队伍长度。
+ *
+ * 送上去的是 owned 个体 id（`own-0001` 形状，工作台的候选就是这些）；服务端负责把它换算成
+ * 上场用的物种 id —— 页面不该知道、也不该维护那层映射。
+ */
+function updateStandardPvpBar() {
+  const button = $('start-standard-pvp');
+  if (!button) return;
+  const team = Array.isArray(state.teamWorkshop?.team) ? state.teamWorkshop.team : [];
+  // 能上场的只有**你拥有的个体**（`own-XXXX`）：图鉴里另外那 574 只没有冻结配招，
+  // 引擎不能凭空给它们一套招（RC-203 的 `buildability_ceiling`）。
+  // 页面在这里如实拦住，而不是让玩家点下去之后吃一个 400。
+  const fieldable = team.filter((id) => typeof id === 'string' && id.startsWith('own-')).length;
+  const ready = team.length === 6 && fieldable === 6;
+  button.disabled = !ready;
+  const note = $('standard-pvp-note');
+  if (note) {
+    if (ready) {
+      note.textContent = '这一局按候选规则（六宠 / 4 点魔力 / 力竭扣 1）；未核验的假设值会在战斗页逐条标出来。';
+    } else if (team.length < 6) {
+      note.textContent = `选满六只才能开局（当前 ${team.length} 只）。`;
+    } else {
+      note.textContent = `有 ${6 - fieldable} 只是图鉴条目（你还没有、也没有可用构建），换掉它们才能开局。`;
+    }
+  }
+  button.dataset.rocoStandardTeam = String(team.length);
+  button.dataset.rocoStandardFieldable = String(fieldable);
+}
+
+/**
+ * 用工作台选出的六只开一局标准 PVP。
+ *
+ * 失败时**照实说**（例如某一只没有冻结配招、或队伍规模对不上）：把服务端的原文写进状态栏，
+ * 不吞掉、也不换一句「稍后再试」。
+ */
+async function startStandardPvp() {
+  const team = Array.isArray(state.teamWorkshop?.team) ? state.teamWorkshop.team.slice() : [];
+  if (team.length !== 6) return;
+  const button = $('start-standard-pvp');
+  button.disabled = true;
+  try {
+    state.session = {hints: 0, lastAt: -Infinity, said: new Set(), dismissed: false};
+    state.hint = null;
+    state.plan = null;
+    state.planAtVersion = null;
+    state.planStaleDiscards = [];
+    state.events = [];
+    state.matchEvents = [];
+    state.lastLiveView = null;
+    state.pick.open = false;
+    $('lesson').textContent = '';
+    $('lesson-card').hidden = true;
+    closePetDetail();
+    hideHint();
+    const body = {mode: 'pvp-standard-six-pet', team, strategy: 'greedy_damage'};
+    if (Number.isInteger(state.seedOverride) && state.seedOverride >= 0) body.seed = state.seedOverride;
+    const data = await api('/api/roco/battle/new', body);
+    state.battleId = data.battle_id;
+    state.mode = data.mode ? {...data.mode, contract_id: data.mode.id} : state.mode;
+    applyResult(data);
+    dismissOnboard();
+    await requestPlan({reason: 'match-start'});
+  } catch (error) {
+    $('plan-status').textContent = `标准 PVP 开局失败：${error.message}`;
+  } finally {
+    updateStandardPvpBar();
   }
 }
 
@@ -1956,6 +2049,7 @@ async function boot() {
   await bootData();
   applyOnboard();
   mountWorkshop();
+  updateStandardPvpBar();
   document.body.dataset.rocoReady = 'yes';
 }
 

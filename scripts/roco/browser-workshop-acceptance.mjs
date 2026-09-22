@@ -325,6 +325,60 @@ export function playerCopyProblems(text, {sourcedLines = []} = {}) {
   return problems;
 }
 
+/**
+ * RC-106：六宠标准 PVP **真的开起来之后**，战斗页该是什么样。
+ *
+ * 事实从页面读（`data-roco-*` 钩子 + 资源条文案 + 未核验提示），判据在这里：
+ *   · 模式必须是登记表里的标准 PVP（`pvp-standard-six-pet`）；
+ *   · 资源条必须是**引擎给的魔力**（`4`），不能还写着「未核验」——引擎已经给了；
+ *   · **未核验覆盖必须如实标出来**（这一局用了一个假设值：初始能量按 2 开）；
+ *   · 行动坞里物品 / 逃跑两组必须为空（标准 PVP 的合法动作里没有它们）。
+ *
+ * 反证样本（必须在同一判据下变红）：模式换掉 / 资源条写「未核验」/ 物品组出现 1 条 /
+ * 覆盖提示被藏起来。
+ */
+/** 开局按钮：六槽选满才允许点。返回问题列表（空 = 合规）。 */
+export function standardStartButtonProblems({disabled, team, fieldable = null} = {}) {
+  const problems = [];
+  if (disabled !== false) problems.push(`六槽选满后按钮必须可用，实际 disabled=${JSON.stringify(disabled)}`);
+  if (String(team) !== '6') problems.push(`按钮读到的队伍规模必须是 6，实际 ${JSON.stringify(team)}`);
+  // 能上场的只有 owned 个体：图鉴条目没有冻结配招，引擎不能凭空给它们一套招。
+  if (fieldable !== null && String(fieldable) !== '6') {
+    problems.push(`六只都要是「能上场」的个体，实际 fieldable=${JSON.stringify(fieldable)}`);
+  }
+  return problems;
+}
+
+export function sixPetBattleProblems(facts) {
+  const problems = [];
+  if (facts?.mode !== 'pvp-standard-six-pet') {
+    problems.push(`开局后的模式必须是 pvp-standard-six-pet，实际 ${JSON.stringify(facts?.mode)}`);
+  }
+  if (facts?.standardPvp !== 'yes') {
+    problems.push(`data-roco-standard-pvp 必须是 yes，实际 ${JSON.stringify(facts?.standardPvp)}`);
+  }
+  // `data-roco-action-groups` 只列**有条目的组**（空组不出现），所以「没有 item」与「item:0」等价。
+  const counts = Object.fromEntries(String(facts?.groups ?? '').split(',')
+    .map((chunk) => chunk.split(':'))
+    .filter((pair) => pair.length === 2)
+    .map(([id, n]) => [id, Number(n)]));
+  const shown = Object.values(counts).reduce((sum, n) => sum + (Number.isFinite(n) ? n : 0), 0);
+  if (shown === 0) problems.push(`行动坞里一条动作都没有，实际 ${JSON.stringify(facts?.groups)}`);
+  if ((counts.item ?? 0) !== 0) problems.push(`标准 PVP 下物品组必须为空，实际 ${facts?.groups}`);
+  if ((counts.escape ?? 0) !== 0) problems.push(`标准 PVP 下逃跑组必须为空，实际 ${facts?.groups}`);
+  if (!Number.isInteger(facts?.selfMana) || !Number.isInteger(facts?.foeMana)) {
+    problems.push(`资源条必须显示引擎给的魔力（读到 self=${JSON.stringify(facts?.selfMana)} foe=${JSON.stringify(facts?.foeMana)}）`);
+  }
+  if (/未核验/.test(String(facts?.selfText ?? '')) || /未核验/.test(String(facts?.foeText ?? ''))) {
+    problems.push('引擎已经给了魔力，资源条却还写「未核验」');
+  }
+  if (facts?.noteHidden !== false || !/未核验/.test(String(facts?.noteText ?? ''))) {
+    problems.push(`未核验覆盖必须如实显示（hidden=${JSON.stringify(facts?.noteHidden)} 文案=${JSON.stringify(facts?.noteText)}）`);
+  }
+  if (!(facts?.battleVisible === true)) problems.push('战斗区必须是可见的（开局没真的进去）');
+  return problems;
+}
+
 /** 触控目标：390px 下模块里每个可见可点元素都 ≥44×44。 */
 export function touchTargetProblems(small) {
   return (small ?? []).map((row) => `${row.tag}.${row.cls ?? ''} 只有 ${row.w}×${row.h}`);
@@ -443,7 +497,7 @@ async function main() {
     const [host, inner] = String(sel).split('>>>').map((part) => part.trim());
     const raw = await js(`(()=>{const host=document.querySelector(${JSON.stringify(host)});
       const scope=${JSON.stringify(inner)}?(host?.shadowRoot??null):host;
-      const el=scope?scope.querySelector(${JSON.stringify(inner || ':scope')}):null;
+      const el=scope?(${JSON.stringify(inner)}?scope.querySelector(${JSON.stringify(inner ?? '')}):scope):null;
       if(!el)return 'null';
       const r=el.getBoundingClientRect();
       return JSON.stringify({x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2),w:Math.round(r.width),h:Math.round(r.height)});})()`);
@@ -454,7 +508,7 @@ async function main() {
     const [host, inner] = String(sel).split('>>>').map((part) => part.trim());
     await js(`(()=>{const host=document.querySelector(${JSON.stringify(host)});
       const scope=${JSON.stringify(inner)}?(host?.shadowRoot??null):host;
-      const el=scope?scope.querySelector(${JSON.stringify(inner || ':scope')}):null;
+      const el=scope?(${JSON.stringify(inner)}?scope.querySelector(${JSON.stringify(inner ?? '')}):scope):null;
       if(el)el.scrollIntoView({block:'center'});})()`);
     await sleep(140);
     const r = await rectOf(sel);
@@ -474,7 +528,7 @@ async function main() {
     const [host, inner] = String(sel).split('>>>').map((part) => part.trim());
     await js(`(()=>{const host=document.querySelector(${JSON.stringify(host)});
       const scope=${JSON.stringify(inner)}?(host?.shadowRoot??null):host;
-      const el=scope?scope.querySelector(${JSON.stringify(inner || ':scope')}):null;
+      const el=scope?(${JSON.stringify(inner)}?scope.querySelector(${JSON.stringify(inner ?? '')}):scope):null;
       if(el){el.focus();el.select();}})()`);
     for (const ch of text) {
       await cdp.send('Input.dispatchKeyEvent', {type: 'keyDown', key: ch, text: ch, unmodifiedText: ch});
@@ -484,7 +538,7 @@ async function main() {
     await sleep(380);
     return js(`(()=>{const host=document.querySelector(${JSON.stringify(host)});
       const scope=${JSON.stringify(inner)}?(host?.shadowRoot??null):host;
-      const el=scope?scope.querySelector(${JSON.stringify(inner || ':scope')}):null;
+      const el=scope?(${JSON.stringify(inner)}?scope.querySelector(${JSON.stringify(inner ?? '')}):scope):null;
       return el?el.value:null;})()`);
   };
   const metrics = async () => JSON.parse(await js(`JSON.stringify({
@@ -945,6 +999,79 @@ async function main() {
       narrowMetrics.scrollW === narrowMetrics.clientW && Number(narrowTwo.next) === 3 && narrowDom.gapNodes >= 1,
       `clientW=${narrowMetrics.clientW} scrollW=${narrowMetrics.scrollW} next=${narrowTwo.next} 缺口=${narrowDom.gapNodes}`);
     shots.push(await shootModule('workshop-06-two-selected-390x844'));
+
+    // ── ⑫ 标准 PVP 真的能开局（RC-106）：六槽选满 → 点按钮 → 战斗页拿到引擎的魔力 ──
+    // 回到宽屏并把六只重新选上（上一节把视口压到 390 且只选了两只）。
+    // **必须选「你拥有的、且六只是不同物种」的六只**：引擎只模拟有冻结配招的个体，
+    // 同种重复也会被拒（`同一只精灵不能重复上场`）。所以这里按 owned 名单里的物种名去搜。
+    await cdp.send('Emulation.setDeviceMetricsOverride', {width: 1440, height: 900, deviceScaleFactor: 1, mobile: false});
+    await cdp.send('Page.navigate', {url: base + 'roco.html'});
+    await waitFor(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twState==='ok'`);
+    // 名字要用**页面显示的那个名字**（`nameOfInstance` 走盒子详情，形态名与 species_name 可能不同），
+    // 否则按名字搜不到、六只会选不满——上一版就是这么差的 2 只。
+    const ownedIds = (() => {
+      const doc = JSON.parse(readFileSync(join(ROOT, 'data/roco/owned/owned-pets.json'), 'utf8'));
+      const rows = Array.isArray(doc.instances) ? doc.instances : [];
+      const seen = new Set(); const out = [];
+      for (const row of rows) {
+        if (seen.has(row.species_id)) continue;   // 同种重复会被引擎拒（「同一只精灵不能重复上场」）
+        seen.add(row.species_id);
+        out.push(row.instance_id);
+        if (out.length === 6) break;
+      }
+      return out;
+    })();
+    const ownedNames = [];
+    for (const id of ownedIds) {
+      const name = await nameOfInstance(id);
+      if (name && !ownedNames.includes(name)) ownedNames.push(name);
+    }
+    log('[标准 PVP] 用这六只不同物种的 owned 精灵开局：', ownedNames.join('、'));
+    for (const name of ownedNames) {
+      if (Number((await facts()).selected ?? 0) >= 6) break;
+      await addByName(name);
+    }
+    const startState = JSON.parse(await js(`(()=>{const b=document.getElementById('start-standard-pvp');
+      return b?JSON.stringify({disabled:b.disabled,team:b.dataset.rocoStandardTeam,fieldable:b.dataset.rocoStandardFieldable}):'null';})()`));
+    const startProblems = standardStartButtonProblems(startState);
+    check('31-标准 PVP 开局按钮', '六槽选满后「开一局（标准 PVP · 六宠）」按钮可用，且它读的是页面选出的六只',
+      startProblems.length === 0, startProblems.join(' | ') || JSON.stringify(startState));
+    counter('31-标准 PVP 开局按钮', '队伍不满六只（或按钮把规模读错）必须被同一条判据抓住',
+      standardStartButtonProblems({disabled: false, team: '5'}), '{"disabled":false,"team":"5"}');
+    await mouseClick('#start-standard-pvp');
+    const battleStarted = await waitFor(`document.body.dataset.rocoView==='ready'`
+      + ` && document.getElementById('battle-panel') && !document.getElementById('battle-panel').hidden`);
+    await sleep(420);
+    const battleFacts = JSON.parse(await js(`(()=>{const b=document.body.dataset;
+      const self=document.getElementById('self-resource'), foe=document.getElementById('foe-resource');
+      const note=document.getElementById('unverified-note'), panel=document.getElementById('battle-panel');
+      const manaOf=(el)=>{const m=/(\\d+)/.exec(el?el.textContent:'');return m?Number(m[1]):null;};
+      return JSON.stringify({mode:b.rocoMode??null,standardPvp:b.rocoStandardPvp??null,
+        groups:b.rocoActionGroups??null,hidden:b.rocoActionsHidden??null,
+        selfText:self?self.textContent.trim():null,foeText:foe?foe.textContent.trim():null,
+        selfMana:manaOf(self),foeMana:manaOf(foe),
+        noteHidden:note?note.hidden:null,noteText:note?note.textContent.trim():null,
+        battleVisible:Boolean(panel)&&!panel.hidden});})()`));
+    const battleProblems = sixPetBattleProblems(battleFacts);
+    // 开局失败时页面会把服务端原文写进 `#plan-status`——把它带进断言信息里（报错原文就是证据）。
+    const planStatus = await js(`document.getElementById('plan-status')?.textContent ?? null`);
+    check('32-标准 PVP 战斗页', '按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出',
+      battleProblems.length === 0 && battleStarted,
+      (battleProblems.join(' | ') || `mode=${battleFacts.mode} mana=${battleFacts.selfMana}/${battleFacts.foeMana} `
+        + `groups=${battleFacts.groups} hidden=${battleFacts.hidden}`)
+      + `；页面状态栏=「${String(planStatus ?? '').slice(0, 160)}」`);
+    steps.push({at: 'standard-pvp-battle', facts: battleFacts});
+    counter('32-标准 PVP 战斗页(模式)', '开局后模式被换成练习局必须被同一条判据抓住',
+      sixPetBattleProblems({...battleFacts, mode: 'demo-training-3v3'}), '{"mode":"demo-training-3v3"}');
+    counter('32-标准 PVP 战斗页(魔力)', '资源条还写「未核验」必须被同一条判据抓住',
+      sixPetBattleProblems({...battleFacts, selfText: '魔力 / 心未核验'}),
+      '{"selfText":"魔力 / 心未核验"}');
+    counter('32-标准 PVP 战斗页(动作)', '物品组混进 1 条必须被同一条判据抓住',
+      sixPetBattleProblems({...battleFacts, groups: 'skill:2,charge:0,switch:1,surrender:0,item:1,escape:0'}),
+      '{"groups":"…,item:1,escape:0"}');
+    counter('32-标准 PVP 战斗页(覆盖)', '把未核验覆盖藏起来必须被同一条判据抓住',
+      sixPetBattleProblems({...battleFacts, noteHidden: true}), '{"noteHidden":true}');
+    shots.push(await shoot('workshop-07-standard-pvp-1440x900'));
 
     check('30-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,

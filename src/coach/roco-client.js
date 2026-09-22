@@ -908,10 +908,22 @@ export class RocoClient {
    * 服务端会在这两个域的请求上分别打标记（`trust_domain`），所以这里的私有状态
    * 不会被误当成教练输入；反过来，教练输入也不允许走这几个方法。
    */
-  async battleNew({ team, enemyTeam, seed = 1, strategy = 'greedy_damage', loadouts = null, stateVersion = 0 } = {}) {
+  /**
+   * 开一局（本地对局域）。
+   *
+   * RC-106 起多两个参数，语义都来自引擎侧（Node 只是转发，不自己解释）：
+   *   · `rulesetConfigId`：这一局用哪份规则配置（**由 BattleMode 登记表的 `ruleset_binding` 决定**，
+   *     调用方不许抄字符串）；省略 = 引擎当前生效配置（legacy 的逐位不变路径）。
+   *   · `unverifiedOverrides`：显式的、带出处的未核验覆盖（例如 v3 的 `energy.initial`）。
+   *     形状不合法/覆盖了已核验的路径 ⇒ 引擎 400；缺覆盖而配置里是 UNKNOWN ⇒ 引擎 422。
+   */
+  async battleNew({ team, enemyTeam, seed = 1, strategy = 'greedy_damage', loadouts = null, stateVersion = 0,
+    rulesetConfigId = null, unverifiedOverrides = null } = {}) {
     const body = { team, seed, strategy };
     if (enemyTeam) body.enemy_team = enemyTeam;
     if (loadouts) body.loadouts = loadouts;
+    if (rulesetConfigId) body.ruleset_config_id = rulesetConfigId;
+    if (Array.isArray(unverifiedOverrides) && unverifiedOverrides.length) body.unverified_overrides = unverifiedOverrides;
     return this._request('POST', '/battle/new', this._payload(body, { stateVersion }), { stateVersion });
   }
 

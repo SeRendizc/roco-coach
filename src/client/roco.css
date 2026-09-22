@@ -490,3 +490,16 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  .events{line-height:1.8}
  .detail-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
+
+/* ── 标准 PVP 开局条与「未核验覆盖」提示（RC-106）─────────────────────────────
+   开局条就挂在工作台下方：六槽选满才可点；未核验的假设值在战斗页顶部单独一行，
+   用警示色而不是普通说明色——它不是「补充说明」，是「这一局的数字是假设」。 */
+.standard-pvp-bar{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:.6rem 0 .2rem}
+.standard-pvp-bar .muted{font-size:.82rem;line-height:1.35}
+#start-standard-pvp:disabled{opacity:.55;cursor:not-allowed}
+.unverified-note{margin:.4rem 0 .2rem;padding:.4rem .6rem;border-left:3px solid var(--warn,#d9822b);
+ background:rgba(217,130,43,.08);font-size:.82rem;line-height:1.4;border-radius:2px}
+@media (max-width:480px){
+ .standard-pvp-bar{flex-direction:column;align-items:stretch}
+ .standard-pvp-bar button{width:100%;min-height:44px}
+}

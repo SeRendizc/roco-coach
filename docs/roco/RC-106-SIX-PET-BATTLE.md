@@ -413,3 +413,69 @@ AssertionError: 400 != 200 : {…
 
 **没动**：`data/roco/evidence/rule-evidence-ledger.json`、`docs/roadmap/**`、
 `src/client/**`、`src/server/**`、`src/coach/**`。
+
+---
+
+# 附录（第 95 轮）：服务端/页面接线 —— 「魔力 / 心」从「未核验」变成引擎真值
+
+RC-106 交付时只做了引擎侧；接完线之后，页面上那条资源条才第一次显示**引擎给的**魔力。
+
+## 接线做了三件事（每一件都有浏览器证据）
+
+1. **开局按 BattleMode**：`POST /api/roco/battle/new` 接受 `mode`；规则配置取登记表的
+   `ruleset_binding`、队伍规模取 `parameters.team_size`（**不抄字符串、不写死 3**）。
+   不给 `mode` 时完全走旧路径（3 只练习局、逐位不变）。给了 `mode` 但队伍长度不对 ⇒
+   400 并点名「需要 6 只」——**不静默补默认队伍**。
+2. **owned 个体 → 物种 id**：工作台选的是 `own-XXXX`，引擎的名单是物种级；
+   换算留在服务端（页面不该知道映射），不在 `owned-pets.json` 里的 id 一律 400，不猜。
+3. **未核验覆盖由服务端给，只有一份**（`STANDARD_PVP_UNVERIFIED_OVERRIDES`）：
+
+   | path | value | 等级 | microcase | 为什么必须有 |
+   |---|---|---|---|---|
+   | `energy.initial` | 2 | `ENGINE_HYPOTHESIS` | MC-E04 | v3 里是 `null`，不给就开不了局 |
+   | `turn_order.speed_tie` | `random_seeded` | `ENGINE_HYPOTHESIS` | MC-E05 | 撞上同速时引擎按纪律抛错，不给就走不下去 |
+
+   两条都**不写回配置文件**（v3 磁盘上仍是 `null`），并且原样进公开面，页面渲染成
+   「⚠ 候选规则：… 不是实机结论，界面须标未核验」。
+
+## 同速平手（这一轮新发现的产品级阻断）
+
+引擎原本在 v3 上撞到同速就抛 `UnsupportedEffect`（MC-E05 未录制，纪律是对的）。
+实测：六宠对局打到中途就会撞上 —— 于是**永远跑不到力竭/扣魔力那一步**。
+修法沿用同一条纪律：`overrides.py` 的 `OVERRIDABLE_PATHS` 增加 `turn_order.speed_tie`，
+值域**只允许** `SPEED_TIE_POLICIES`（现场发明 `coin_flip` 会被拒），
+而且只在配置里是 `null` 时才接受覆盖（legacy 已写着 `random_seeded`，覆盖它 = 篡改 = 拒）。
+判据落在 `env.order_actions`：配置有值用配置，没有则**只**用本局显式覆盖，否则照旧抛。
+
+## 竞技结果（引擎真跑，四种子）
+
+| seed | 回合 | 结果 | 终局魔力 | 判负依据 |
+|---|---|---|---|---|
+| 11 | 52 | loss | 0 : 2 | 己方魔力归零 |
+| 12 | 49 | win | 3 : 0 | 对方魔力归零 |
+| 13 | 49 | loss | 0 : 3 | 己方魔力归零 |
+| 21 | 49 | win | 3 : 0 | 对方魔力归零 |
+
+**「心没了就输 PVP」现在是一条真的能跑出来的规则**（候选口径，未核验假设逐条标出）。
+
+## 顺带修掉的集成 bug（浏览器证据抓到的）
+
+点完「开一局（标准 PVP）」之后，规划接口直接 502：
+
+```
+UnsupportedEffect: 规则配置不匹配：记录是 mobile_s4_candidate_v3，当前是 legacy_sim_v1
+```
+
+原因是**规则配置没有被一路带着走**：`env.deserialize()` 拿记录去和「当前默认配置」比；
+`state_from_public_planner()` 也没把 `ruleset_config_id` 还给 `GameState`；公开面里更没有它。
+修法：公开面（规划协议 + UI 视图）带上 `ruleset_config_id`；`deserialize()` 接受显式
+`config=`；`_private_state()` 按记录里的 id 取配置再还原。**没有放宽任何判据**——
+不同配置的状态照样不能混用，只是「这一份记录属于哪份配置」现在有地方读了。
+
+## 验收
+
+- `node scripts/roco/browser-workshop-acceptance.mjs`：**38/38 判据 + 23/23 必红反证**，
+  战斗页实测 `mode=pvp-standard-six-pet mana=4/4 groups=skill:3,charge:1,switch:5,surrender:1 hidden=0`，
+  两条未核验假设都写在页面上；截图 `workshop-07-standard-pvp-1440x900.png`。
+- `node --test tests/roco-standard-pvp-battle.test.js`：8 条（含端到端「打到终局、魔力归零判负」）。
+- `cd roco && python3 -m unittest`：**362 条 OK**（新增 5 条同速覆盖判据）。

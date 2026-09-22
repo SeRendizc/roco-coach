@@ -183,15 +183,25 @@ test('P0-5 分组逐条等于引擎动作表（条数、kind 顺序、未知 kin
   const grouped = box.actionGroupsOf(actions, {mode: {id: 'demo-training-3v3'}});
   const counts = grouped.groups.map((g) => `${g.id}:${g.actions.length}`).join(',');
   assert.equal(grouped.known, true, `分组失败：${grouped.reason}`);
-  assert.equal(counts, 'skill:2,item:1,switch:1,escape:1',
+  // 2026-09-22：分组多了两个**一级**动作类（聚能 / 投降，RC-106 把它们变成引擎真会发的 kind），
+  // 顺序也按「技能 → 聚能 → 换精灵 → 投降 → 物品 → 更多」重排。所以签名跟着变——
+  // 变的是分组表，不是判据本身（条数与 kind 仍然逐项等于引擎动作表）。
+  assert.equal(counts, 'skill:2,charge:0,switch:1,surrender:0,item:1,escape:1',
     `分组条数与引擎动作表不一致${report('分组', counts)}`);
   const total = grouped.groups.reduce((sum, g) => sum + g.actions.length, 0) + grouped.hidden.length;
   assert.equal(total, actions.length,
     `分组把动作弄丢了：分组后 ${total} 条，引擎给了 ${actions.length} 条`);
   // 未知 kind 必须**抛出来**，不许静默丢掉
-  const unknown = box.actionGroupsOf([{kind: '聚能'}], {mode: {id: 'demo-training-3v3'}});
+  // 未知 kind 必须**抛出来**。这里用一个引擎真的不会发的 kind（`聚能` 现在是合法 kind 了，
+  // 所以换成 `telekinesis`）——否则这条反证会因为「聚能已经进了分组表」而恒绿。
+  const unknown = box.actionGroupsOf([{kind: 'telekinesis'}], {mode: {id: 'demo-training-3v3'}});
   assert.equal(unknown.known, false, '引擎给了没见过的 kind，分组必须判红而不是忽略');
-  assert.match(String(unknown.reason), /聚能/, `判红理由里应点名那个 kind${report('reason', unknown.reason)}`);
+  assert.match(String(unknown.reason), /telekinesis/, `判红理由里应点名那个 kind${report('reason', unknown.reason)}`);
+  // 聚能/投降现在是**认识的** kind，必须落进各自的组（而不是当成未知）。
+  const knownNow = box.actionGroupsOf([{kind: 'charge'}, {kind: 'surrender'}], {mode: {id: 'pvp-standard-six-pet'}});
+  assert.equal(knownNow.known, true);
+  assert.equal(knownNow.groups.map((g) => `${g.id}:${g.actions.length}`).join(','),
+    'skill:0,charge:1,switch:0,surrender:1,item:0,escape:0');
 });
 
 test('P0-5 反证：把 item 重新分类成 skill（页面自己下结论）必须被抓住', () => {
@@ -201,7 +211,7 @@ test('P0-5 反证：把 item 重新分类成 skill（页面自己下结论）必
   const counts = grouped.groups.map((g) => `${g.id}:${g.actions.length}`).join(',');
   // 坏实现会给出 item:1；正确实现把这一条记在 skill 组里。
   assert.ok(!counts.includes('item:1'), `反证失败：坏输入居然得到正确的分组 ${counts}`);
-  assert.equal(counts, 'skill:1,item:0,switch:0,escape:0',
+  assert.equal(counts, 'skill:1,charge:0,switch:0,surrender:0,item:0,escape:0',
     `反证的实际输出原文：把 item 改写成 skill 后分组 = ${counts}（所以「分组真的按 kind 走」这件事是量的）`);
 });
 
@@ -214,7 +224,7 @@ test('P0-5 标准 PVP 下按 BattleMode 隐藏旧引擎动作，并如实记账�
   ];
   const pvp = box.actionGroupsOf(actions, {mode: {id: 'pvp-standard-six-pet'}});
   const counts = pvp.groups.map((g) => `${g.id}:${g.actions.length}`).join(',');
-  assert.equal(counts, 'skill:1,item:0,switch:1,escape:0',
+  assert.equal(counts, 'skill:1,charge:0,switch:1,surrender:0,item:0,escape:0',
     `标准 PVP 下不该出现物品/逃跑${report('标准 PVP 分组', counts)}`);
   assert.equal(pvp.hidden.length, 2,
     `被隐藏的动作必须如实记账（实际 ${pvp.hidden.length} 条：${JSON.stringify(pvp.hidden.map((a) => a.kind))}）`);
