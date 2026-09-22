@@ -1317,6 +1317,8 @@ function boxDetailMode(index,id){
     moveset_note:numbers?numbers.moveset_note:BOX_NO_LAYER_REASON,
     panel:{available:false,reason:BOX_PANEL_REASON},
     effect_note:BOX_EFFECT_REASON,
+    // 机制首层：与选宠卡/工作台候选卡**同一句话**（逐字冻结 desc），详情页不该另写一套说法。
+    mechanism:rosterMechanism(mechanismIndex().get(entity.id)),
    },
    dev:boxDev(index,{mode:'detail',entity:'species',pet_id:entity.id,record_kind:entity.record_kind,
     source_scope:entity.source_scope,licence_ref:entity.licence_ref,
@@ -1344,6 +1346,8 @@ function boxDetailMode(index,id){
    metrics_label:'种族值（静态登记，不是等级换算后的面板值）',
    panel:{available:false,reason:BOX_PANEL_REASON},
    effect_note:BOX_EFFECT_REASON,
+   // 个体详情按**物种**取机制（同种个体共享特性文字），与列表卡同一来源。
+   mechanism:rosterMechanism(mechanismIndex().get(instance.species_id)),
   },
   dev:boxDev(index,{mode:'detail',entity:'instance',...
    boxMineCardDev(instance),species_name:instance.species_name??null,
