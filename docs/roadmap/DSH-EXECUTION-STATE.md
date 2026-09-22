@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `e438c9c`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `db72480`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2216,6 +2216,26 @@ URL `team=own-0001,own-0002`、工作台 `selected=2 handoff=2`、开局按钮�
 **还差**（下一步）：`locked` 标记目前只是筛选条件、还没进交接；局末教学段在这条链路上缺端到端证据；
 「五分钟」这条**时间预算**还没有判据（现在只判步骤到位、不判耗时）。
 
+
+
+### C6.47 第 110 轮：**玩家闭环清单**建档（人类 2026-09-22 补充计划，P0-A…P2）
+
+人类指出一件必须记下来的事：**局部合同 DONE ≠ 玩家闭环 DONE** —— 这一页曾在
+「工坊 42/42、UX 39/39、门禁 22/22」全绿时，玩家仍然选不了宠、点不动、看不懂（有截图）。
+所以新建 `docs/roadmap/PLAYER-LOOP-CHECKLIST.md`：把补充计划（P0-A 主线 E2E / P0-B 培养与配招 /
+P0-C 机制覆盖 / P0-D Agent / P0-E UI / P1 算法与 Coach / P2 训练与交付）落成**可勾选**清单，
+每项带 状态 / 依赖 / 验收证据 / 负向测试，并明写打勾规则：
+
+> 只有 **代码 + 真实页面操作（1440×900 与 390×844，留截图/录屏）+ 负向测试（反证必须红）+
+> 更新后的 release gate 全绿** 四条同时成立，才允许打勾。门禁条数与覆盖百分比不是完成标准。
+
+同时把三条纪律写进文件：缺官方证据的规则只标「候选/阻塞」，**不许编洛手规则**；
+`622 图鉴 ≠ 622 完整可模拟`，未支持效果不得暗中按普通伤害结算；
+「自动测试全绿」不得替代人工视觉验收（P0-E 单列一条）。
+
+本轮同时落地的代码（接续 §C6.46）：`say()` 接上 `/api/coach`（真 Agent），离线模板降级为兜底，
+**没有模型时明说能力边界**并给出接模型入口（`data-roco-companion-boundary=no-model`）。
+真机判据 13/13 + 11/11；已知断点：已配置模型那条分支只有单测（清单 D7）。
 
 ### C6.46 第 107 轮：**下一轮的唯一焦点 = 战斗页 UI 规格**（人类 2026-09-22 给的可执行规格）
 

@@ -1,4 +1,6 @@
 # 旗舰 v3 checklist（RC 台账）
+> **玩家闭环另有一份清单**：`docs/roadmap/PLAYER-LOOP-CHECKLIST.md`（P0-A…P2，每项带状态/依赖/验收证据/负向测试）。它记的是人类 2026-09-22 补充计划里的**玩家闭环**口径——本文件的 RC 状态是**局部合同**口径，**局部 DONE ≠ 玩家闭环 DONE**（曾经 42/42 + 39/39 + 门禁 22/22 全绿而玩家仍然选不了宠）。
+
 
 > 单一事实源：`08-IMPLEMENTATION-ROADMAP.md`（施工顺序）+ `09-CODING-AGENT-MASTER-PROMPT.md`（总合同）。
 > 本文件只记**状态与证据**，不重复路线图里的验收标准。一次只做一个 RC。
