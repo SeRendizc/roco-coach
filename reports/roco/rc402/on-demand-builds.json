@@ -1,0 +1,52 @@
+{
+ "schema": "roco-rc402-on-demand-builds/v1",
+ "rc": "RC-402",
+ "generated_by": "scripts/roco/build-on-demand-builds.mjs --report",
+ "why": "冻结 learnsets.json 只覆盖 48 只，另外 574 只「选得到、上不了场」；全量图鉴每只都带 learnable_skills（622/622、8787 条引用全部可解析），本产物把它编成确定、可复核、可替换的四个技能。",
+ "coverage": {
+  "catalog_pets": 622,
+  "built": 622,
+  "skipped": 0,
+  "full_verified": 48,
+  "simulatable_unverified": 574,
+  "compiled_matches_frozen": 0
+ },
+ "skill_reference_audit": {
+  "total_slots": 2488,
+  "missing_in_skills_json": 0,
+  "traits": 0,
+  "power_not_provided_slots": 1,
+  "note": "每个技能都同时满足「在该物种 learnable_skills 里」与「冻结 skills.json 可解析」"
+ },
+ "learnable_pool_sizes": {
+  "8": 2,
+  "9": 2,
+  "10": 2,
+  "11": 6,
+  "12": 17,
+  "13": 252,
+  "14": 39,
+  "15": 163,
+  "16": 67,
+  "17": 14,
+  "18": 3,
+  "19": 5,
+  "21": 2
+ },
+ "engine_consumption": {
+  "ruleset_pets": 622,
+  "note": "data.py 以叠加方式载入；冻结 48 只一个字节都没动（build_support=FULL_VERIFIED），推算的 574 只标 SIMULATABLE_UNVERIFIED"
+ },
+ "reproduction": [
+  "node scripts/roco/build-on-demand-builds.mjs --check",
+  "node scripts/roco/verify-on-demand-builds.mjs",
+  "node --test tests/roco-on-demand-builds.test.js",
+  "cd roco && PYTHONPATH=src python3 -m unittest tests.test_on_demand_builds"
+ ],
+ "known_limits": [
+  "选择规则（威力降序 → 能耗升序 → skill_id）是 ENGINE_HYPOTHESIS，不是最优解、不是社区推荐",
+  "这份学招表是否是该物种的全部可学技能（有无等级/道具前置）仓库里没有证据",
+  "按需推算的配招**没有**实机核验；页面与训练数据生成器必须按 build_support 分档",
+  "静态种族值来自全量图鉴的登记值，等级/性格换算公式仍未校准（与 RC-203 同一条边界）"
+ ]
+}
