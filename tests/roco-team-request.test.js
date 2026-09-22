@@ -50,7 +50,17 @@ const rulesetId = [...registry.rulesetById.keys()][0] ?? null;
 const sampleInstance = [...registry.instances.keys()].sort()[0];
 const sampleSpecies = registry.instances.get(sampleInstance).species_id;
 const ownedSpeciesWithName = (name) => [...registry.species.values()].find((entry) => entry.name === name);
-const mustIncludeTwo = [...registry.instances.values()].slice(0, 2).map((i) => i.instance_id);
+// A3：两只 must_include 必须**物种不同**（同种两只现在一律判红）。
+const mustIncludeTwo = (() => {
+  const out = []; const seen = new Set();
+  for (const info of [...registry.instances.values()]
+    .sort((a, b) => String(a.instance_id).localeCompare(String(b.instance_id)))) {
+    if (seen.has(info.species_id)) continue;
+    seen.add(info.species_id); out.push(info.instance_id);
+    if (out.length === 2) break;
+  }
+  return out;
+})();
 
 const base = () => ({mode: STANDARD_PVP_MODE, ruleset_config_id: rulesetId});
 const codeOf = (result) => result.problems[0]?.code ?? null;
@@ -190,7 +200,17 @@ test('RC-301 合同：锁定/已选/替换预算的约束逐条成立', () => {
   raw('selected 含锁定项', lockedInside.request);
   assert.equal(lockedInside.ok, true, 'selected ∪ must_include 覆盖 locked 时必须能过');
   const tooMany = validateRecommendationRequest({
-    ...base(), selected: [...registry.instances.keys()].slice(0, STANDARD_PVP_TEAM_SIZE + 1),
+    // A3：超员样例要**物种互不相同**，否则「同种两只」会抢到首条问题码，这条判据就量错东西。
+    ...base(), selected: (() => {
+      const out = []; const seen = new Set();
+      for (const [id, info] of [...registry.instances.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))) {
+        if (seen.has(info.species_id)) continue;
+        seen.add(info.species_id); out.push(id);
+        if (out.length > STANDARD_PVP_TEAM_SIZE) break;
+      }
+      return out;
+    })(),
   }, inputs);
   expectCode(tooMany, 'SELECTED_OVER_TEAM_SIZE', 'selected 超过 team_size');
   const badReplacement = validateRecommendationRequest({...base(), max_replacements: -1}, inputs);

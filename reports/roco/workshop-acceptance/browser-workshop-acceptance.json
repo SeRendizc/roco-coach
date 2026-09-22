@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T11:08:26.441Z",
+ "judged_at": "2026-09-22T11:35:55.907Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -77,13 +77,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=99 full_ms=24 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=96 full_ms=22 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=21 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=19 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -155,13 +155,13 @@
    "id": "19-最大短板与替换建议",
    "judge": "完整诊断里有主短板（缺口/未知清单）与**一个**最小替换：换出/换入各一只，并说清是结构理由",
    "ok": true,
-   "actual": "缺口=0 未知=6 替换显示=true 换出=音速犬 换入=卷毛鸭"
+   "actual": "缺口=0 未知=6 替换显示=true 换出=雪影娃娃 换入=动力猿"
   },
   {
    "id": "20-玩家层载荷",
    "judge": "路由的 player 段里没有工程键，也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 6142 字节"
+   "actual": "扫过 6238 字节"
   },
   {
    "id": "21-机制行上卡",
@@ -189,7 +189,7 @@
   },
   {
    "id": "25-非法参数(selected)",
-   "judge": "「selected=own-0001,own-0002,own-0003,own-0004」必须 HTTP 400 + ok:false 并点名 selected",
+   "judge": "「selected=own-0001,own-0003,own-0005,own-0007」必须 HTTP 400 + ok:false 并点名 selected",
    "ok": true,
    "actual": "HTTP 400 error=「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」"
   },
@@ -225,9 +225,9 @@
   },
   {
    "id": "25-非法参数(locked)",
-   "judge": "「locked=own-0007」必须 HTTP 400 + ok:false 并点名 locked",
+   "judge": "「locked=own-0013」必须 HTTP 400 + ok:false 并点名 locked",
    "ok": true,
-   "actual": "HTTP 400 error=「[LOCKED_NOT_SELECTED] locked：锁定的 own-0007 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 \"own-0007\"）」"
+   "actual": "HTTP 400 error=「[LOCKED_NOT_SELECTED] locked：锁定的 own-0013 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 \"own-0013\"）」"
   },
   {
    "id": "26-六槽上限",
@@ -399,7 +399,7 @@
    "id": "21-机制行上卡",
    "judge": "把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住",
    "ok": true,
-   "hit": "冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」 | 冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」",
+   "hit": "冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」",
    "actual": "expected=[\"特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。\"] rendered=[\"特性「专注力」：入场首回合，获得物攻+100%。\"]"
   },
   {
@@ -441,7 +441,7 @@
    "id": "25-非法参数(第七个槽位)",
    "judge": "把「接受第 7 个槽位」的样本过同一条判据必须报错",
    "ok": true,
-   "hit": "selected=own-0001,own-0002,own-0003,own-0004,own-0005,own-0006,own-0007 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
+   "hit": "selected=own-0001,own-0003,own-0005,own-0007,own-0009,own-0011,own-0013 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
    "actual": "{ok:true,player:{selected_count:7}} / HTTP 200"
   },
   {
@@ -530,14 +530,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "99",
-    "fullMs": "24",
+    "firstMs": "96",
+    "fullMs": "22",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "21"
+    "elapsedMs": "19"
    },
    "dom": {
     "slotNodes": 6,
@@ -587,14 +587,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "27",
-    "fullMs": "23",
+    "firstMs": "31",
+    "fullMs": "24",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "18"
+    "elapsedMs": "20"
    },
    "dom": {
     "slotNodes": 6,
@@ -718,8 +718,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "18",
-    "fullMs": "12",
+    "firstMs": "14",
+    "fullMs": "13",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -852,8 +852,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "16",
+    "firstMs": "18",
+    "fullMs": "19",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -965,13 +965,13 @@
   {
    "at": "bad-params",
    "rows": [
-    "selected=own-0001,own-0002,own-0003,own-0004,own-0005,own-00 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）\",\"problems\":",
+    "selected=own-0001,own-0003,own-0005,own-0007,own-0009,own-00 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）\",\"problems\":",
     "mode=zzz → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3",
     "zzz=1 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/analysis_species",
     "max_replacements=abc → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"max_replacements 必须是非负整数（实际 \\\"abc\\\"）\",\"problems\":[\"max_replacements 必须是非负整数（",
     "favourites_only=yes → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"favourites_only 只能是 true 或 false（实际 \\\"yes\\\"）\",\"problems\":[\"favourites_only 只",
     "selected=pet_000012 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000012）\",\"problems\":[\"selected ",
-    "locked=own-0007 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[LOCKED_NOT_SELECTED] locked：锁定的 own-0007 既不在 selected 也不在 must_include：lock"
+    "locked=own-0013 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[LOCKED_NOT_SELECTED] locked：锁定的 own-0013 既不在 selected 也不在 must_include：lock"
    ]
   },
   {
@@ -993,14 +993,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "21",
-    "fullMs": "19",
+    "firstMs": "28",
+    "fullMs": "25",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "15"
+    "elapsedMs": "20"
    },
    "dom": {
     "slotNodes": 6,

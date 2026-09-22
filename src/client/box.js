@@ -481,7 +481,19 @@ function wire() {
     window.location.href = `roco.html?team=${encodeURIComponent(id)}&lock=${encodeURIComponent(id)}`;
   });
   $('compare-to-team').addEventListener('click', () => {
-    const ids = state.selected.map((row) => row.select).filter(Boolean);
+    // A3（2026-09-22）：队伍**同物种最多一只**。盒子的比较流程天生会同种两只
+    // （比较的就是同种不同练度），所以交接时按物种去重：**每个物种只带一只**过去，
+    // 另一只是「比较候选」，不是队员。服务端也会拦（DUPLICATE_SPECIES_IN_TEAM），
+    // 这里先按规则做对，别让玩家点了按钮才吃到 400。
+    const picked = state.selected.map((row) => row.select).filter(Boolean);
+    const seen = new Set();
+    const ids = [];
+    for (const id of picked) {
+      const species = state.rows?.find?.((row) => row.select === id)?.group ?? id;
+      if (seen.has(species)) continue;
+      seen.add(species);
+      ids.push(id);
+    }
     if (!ids.length) return;
     window.location.href = `roco.html?team=${encodeURIComponent(ids.join(','))}`;
   });

@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-22T11:07:38.231Z",
+ "judged_at": "2026-09-22T11:35:07.830Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -182,9 +182,9 @@
   },
   {
    "id": "24-盒子→配队交接",
-   "judge": "真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按带过来的个体预填，开局按钮读到的规模一致，且如实说「还差几只」",
+   "judge": "真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按 URL 带过去的个体预填（同物种最多一只，故同种两只只带一只），开局按钮与交接钩子读到的规模三者一致，且如实说「还差几只」",
    "ok": true,
-   "actual": "（带过来 2 只；URL \"own-0001,own-0002\"；工作台 selected=2 handoff=2 按钮规模=2；文案「正式开局要六只**持有**个体（当前 2）；试玩要有六只理论阵容物种（当前 0）。」）"
+   "actual": "（带过来 2 只；URL \"own-0001\"；工作台 selected=1 handoff=1 按钮规模=1；文案「正式开局要六只**持有**个体（当前 1）；试玩要有六只理论阵容物种（当前 0）。」）"
   },
   {
    "id": "22-控制台干净",
@@ -240,7 +240,7 @@
    "id": "24-盒子→配队交接",
    "judge": "把交接数量改成 0（没预填）必须被同一条判据抓住",
    "ok": true,
-   "hit": "带过来 2 只，工作台只认了 0 | 交接钩子 data-tw-handoff=null | 开局按钮读到的队伍规模是 0",
+   "hit": "URL 带了 1 只，工作台认了 0 | 交接钩子 data-tw-handoff=null | 开局按钮读到的队伍规模是 0",
    "actual": "{\"selected\":\"0\"}"
   }
  ],

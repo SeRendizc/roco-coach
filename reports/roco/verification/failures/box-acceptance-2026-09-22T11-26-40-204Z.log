@@ -1,0 +1,69 @@
+node scripts/roco/browser-box-acceptance.mjs
+
+[box-acceptance] ✔ [01-路由总数] 我的盒子 == 80 个个体，全图鉴 == 622 条记录（把 48 只当全量必须红） —实际： count-mine=80 count-catalog=622
+[box-acceptance] ✔ [02-默认视图] 默认进入「我的盒子」，总数 80，每页 24 张卡 —实际： kind=mine total=80 cards=24
+[box-acceptance] ✔ [03-宽屏不溢出] 1440×900：scrollW == clientW —实际： clientW=1440 scrollW=1440 bodyScrollW=1440
+[box-acceptance] ✔ [04-切标签] 真实鼠标点「全图鉴」后 kind=catalog，总数 622，卡片里没有工程字段 —实际： kind=catalog total=622 cards=24 点击命中={"tag":"BUTTON","id":"tab-catalog","cls":"tab","hit_target":true}
+[box-acceptance] ✔ [05-catalog全量] kind=catalog 的 total 必须 == 622 —实际： player.total=622
+[box-acceptance] ✔ [反证 05-catalog全量] 把 catalog 总数改成 48（迁移层全量）必须被同一条判据抓住 —实际命中： catalog 总数必须 == 622，实际 48
+[box-acceptance] ✔ [06-玩家层无工程话] 展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON —实际： 扫过 670 字；卡片首层「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ [07-键盘搜索] 真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词 —实际： 输入框实际值="喵喵" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ [08-系别筛选] 真实鼠标点「系别=草系」后每张卡都含草系，且总数等于路由给的筛选后总数 —实际： 页面 total=84 路由 total=84 每张卡含草系=true；命中={"tag":"BUTTON","id":null,"cls":"filter-chip","hit_target":true}
+[box-acceptance] ✔ [09-个体详情] 详情抽屉里有等级 / 性格 / 资质 / 特长 / 血脉 / 四个有序技能，并且「效果未校准」与「本仓库没有这一项」都说了 —实际： traits=4 moves=4 缺词=[] 标题=铠甲虫 · 详情
+[box-acceptance] ✔ [10-详情也不说工程话] 详情抽屉（玩家点得到的）同样不出现工程字段 —实际： 扫过 602 字
+[box-acceptance] ✔ [11-两个体比较] 选两只同种个体后逐字段比较：相同 / 不同 / 未知 三种状态都出现，未知行都给了原因 —实际： 已选=2 比较按钮可用=true 字段行=8 状态=["different","unknown","same"] 文本=["不同","未知","相同"] 未知行=4 原因「为什么是未知：两边都没有登记这一项的取值，所以这一栏标「未知」而不是「不同」。另外，养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。」
+[box-acceptance] ✔ [12-比较也不说工程话] 比较面板里不出现工程字段（未知只说「为什么未知」） —实际： 铠甲虫：这两只有 2 栏不同、4 栏未知。 相同 2 不同 2 未知 4
+[box-acceptance] ✔ [13-不同种拒绝] compare 两个不同种必须 HTTP 400 + ok:false，并给出「不是同一种」的原因 —实际： HTTP 400 error=「这两只不是同一种精灵（pet_000012 / pet_000062），不能逐字段比较：逐字段比较的前提是同一物种的不同个体。」
+[box-acceptance] ✔ [反证 13-不同种拒绝] 把「接受了不同种比较」的样本过同一条判据必须报错 —实际命中： 不同种比较必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true | 必须给出「不是同一种」的原因，实际 error=undefined
+[box-acceptance] ✔ [14-工程信息在抽屉里] 开发者抽屉默认收起；展开后能真的看到 provenance / unknown_fields / state_version / coverage / 许可 —实际： 默认收起=true 展开=true 长度=6124 provenance=true unknown_fields=true state_version=true coverage=true licence=true；样例「 版本：state_version=rc205.1 · ruleset_id=roco-world-s4-2026-09-10 · pack_id=roco-game-data-
+[box-acceptance] ✔ [反证 06-玩家层无工程话] 往玩家区注入 pet_id / state_version 后，同一条判据必须命中；移除后必须恢复干净 —实际命中： pet_id
+[box-acceptance] ✔ [15-判据可恢复] 注入后命中、移除后干净（说明这一条判的是页面本身，不是一次性快照） —实际： 注入命中="pet_id" 恢复=null
+[box-acceptance] ✔ [16-非法limit] limit=1e3 必须 HTTP 400 + ok:false，且错误点名 limit（不静默取整） —实际： HTTP 400 error=「limit 必须是非负整数（实际 "1e3"；不接受 1e3 / -1 / 1.5 这类写法）」
+[box-acceptance] ✔ [反证 16-非法limit] 把「静默取整」的样本（200 + limit=1）过同一条判据必须报错 —实际命中： 非法 limit="1e3" 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true | 静默取整：接受了 limit="1e3" 并返回 limit=1
+[box-acceptance] ✔ [17-玩家层载荷] 玩家层载荷里没有工程键（pet_id / species_id / unknown_fields / provenance…），也没有 id 形状的展示值 —实际： 扫过 12881 字节
+[box-acceptance] ✔ [反证 17-玩家层载荷] 把 pet_id 与 unknown_fields 混进玩家层载荷必须被同一条判据抓住 —实际命中： 玩家层出现工程键 cards[0].pet_id | 玩家层的 cards[0].pet_id 里出现 id 形状的值：pet_000062 | 玩家层出现工程键 cards[0].unknown_fields | 玩家层的 cards[0].note 里出现 id 形状的值：pet_000062
+[box-acceptance] ✔ [18-窄屏不溢出] 390×844：scrollW == clientW —实际： clientW=390 scrollW=390 bodyScrollW=390
+[box-acceptance] ✔ [19-触控目标] 390×844：页面上每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44 —实际： 量了 93 个元素；不达标的：[]
+[box-acceptance] ✔ [20-窄屏比较] 390×844：比较面板能开出来，且开了之后仍然不横向溢出 —实际： compare=shown clientW=390 scrollW=390
+[box-acceptance] ✔ [21-窄屏抽屉] 390×844：详情抽屉打开时也不横向溢出 —实际： clientW=390 scrollW=390
+[box-acceptance] ✔ [23-带去配队的入口] 比完两只之后「带上这两只去配队」可用（触控目标 ≥44px） —实际： 按钮 {"disabled":false,"w":138,"h":44}；选中的个体 ["own-0001","own-0002"]
+[box-acceptance] ✔ [反证 23-带去配队的入口] 一个 disabled 的入口等于没有入口，必须被同一条判据抓住 —实际命中： 入口是禁用的（等于没有入口）
+[box-acceptance] ✖ [24-盒子→配队交接] 真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按带过来的个体预填，开局按钮读到的规模一致，且如实说「还差几只」 —实际： 工作台状态 "bad-request" | 带过来 2 只，工作台只认了 undefined | 交接钩子 data-tw-handoff=undefined（带过来 2 只；URL "own-0001,own-0002"；工作台 selected=undefined handoff=undefined 按钮规模=2；文案「正式开局要六只**持有**个体（当前 2）；试玩要有六只理论阵容物种（当前
+[box-acceptance] ✔ [反证 24-盒子→配队交接] 把交接数量改成 0（没预填）必须被同一条判据抓住 —实际命中： 工作台状态 "bad-request" | 带过来 2 只，工作台只认了 0 | 交接钩子 data-tw-handoff=null | 开局按钮读到的队伍规模是 0
+[box-acceptance] ✔ [22-控制台干净] 整轮下来没有 console.error，也没有未捕获异常 —实际： consoleErrors=[] pageErrors=[]
+[box-acceptance] ────────────────────────────────────────────────────────────────────────────
+[box-acceptance] ✔ 01-路由总数 我的盒子 == 80 个个体，全图鉴 == 622 条记录（把 48 只当全量必须红） → count-mine=80 count-catalog=622
+[box-acceptance] ✔ 02-默认视图 默认进入「我的盒子」，总数 80，每页 24 张卡 → kind=mine total=80 cards=24
+[box-acceptance] ✔ 03-宽屏不溢出 1440×900：scrollW == clientW → clientW=1440 scrollW=1440 bodyScrollW=1440
+[box-acceptance] ✔ 04-切标签 真实鼠标点「全图鉴」后 kind=catalog，总数 622，卡片里没有工程字段 → kind=catalog total=622 cards=24 点击命中={"tag":"BUTTON","id":"tab-catalog","cls":"tab","hit_target":true}
+[box-acceptance] ✔ 05-catalog全量 kind=catalog 的 total 必须 == 622 → player.total=622
+[box-acceptance] ✔ 06-玩家层无工程话 展开的玩家可见文本里不出现 pet_id / state_version / coverage / provenance / unknown_fields / 裸 JSON → 扫过 670 字；卡片首层「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ 07-键盘搜索 真实键盘输入「喵喵」后结果数 0<total<622，且每张卡的名字都含搜索词 → 输入框实际值="喵喵" total=2 每张卡都含喵=true；样例「🌿 喵喵 🌿草系」
+[box-acceptance] ✔ 08-系别筛选 真实鼠标点「系别=草系」后每张卡都含草系，且总数等于路由给的筛选后总数 → 页面 total=84 路由 total=84 每张卡含草系=true；命中={"tag":"BUTTON","id":null,"cls":"filter-chip","hit_target":true}
+[box-acceptance] ✔ 09-个体详情 详情抽屉里有等级 / 性格 / 资质 / 特长 / 血脉 / 四个有序技能，并且「效果未校准」与「本仓库没有这一项」都说了 → traits=4 moves=4 缺词=[] 标题=铠甲虫 · 详情
+[box-acceptance] ✔ 10-详情也不说工程话 详情抽屉（玩家点得到的）同样不出现工程字段 → 扫过 602 字
+[box-acceptance] ✔ 11-两个体比较 选两只同种个体后逐字段比较：相同 / 不同 / 未知 三种状态都出现，未知行都给了原因 → 已选=2 比较按钮可用=true 字段行=8 状态=["different","unknown","same"] 文本=["不同","未知","相同"] 未知行=4 原因「为什么是未知：两边都没有登记这一项的取值，所以这一栏标「未知」而不是「不同」。另外，养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。」
+[box-acceptance] ✔ 12-比较也不说工程话 比较面板里不出现工程字段（未知只说「为什么未知」） → 铠甲虫：这两只有 2 栏不同、4 栏未知。 相同 2 不同 2 未知 4
+[box-acceptance] ✔ 13-不同种拒绝 compare 两个不同种必须 HTTP 400 + ok:false，并给出「不是同一种」的原因 → HTTP 400 error=「这两只不是同一种精灵（pet_000012 / pet_000062），不能逐字段比较：逐字段比较的前提是同一物种的不同个体。」
+[box-acceptance] ✔ 14-工程信息在抽屉里 开发者抽屉默认收起；展开后能真的看到 provenance / unknown_fields / state_version / coverage / 许可 → 默认收起=true 展开=true 长度=6124 provenance=true unknown_fields=true state_version=true coverage=true licence=true；样例「 版本：state_version=rc205.1 · ruleset_id=roco-world
+[box-acceptance] ✔ 15-判据可恢复 注入后命中、移除后干净（说明这一条判的是页面本身，不是一次性快照） → 注入命中="pet_id" 恢复=null
+[box-acceptance] ✔ 16-非法limit limit=1e3 必须 HTTP 400 + ok:false，且错误点名 limit（不静默取整） → HTTP 400 error=「limit 必须是非负整数（实际 "1e3"；不接受 1e3 / -1 / 1.5 这类写法）」
+[box-acceptance] ✔ 17-玩家层载荷 玩家层载荷里没有工程键（pet_id / species_id / unknown_fields / provenance…），也没有 id 形状的展示值 → 扫过 12881 字节
+[box-acceptance] ✔ 18-窄屏不溢出 390×844：scrollW == clientW → clientW=390 scrollW=390 bodyScrollW=390
+[box-acceptance] ✔ 19-触控目标 390×844：页面上每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44 → 量了 93 个元素；不达标的：[]
+[box-acceptance] ✔ 20-窄屏比较 390×844：比较面板能开出来，且开了之后仍然不横向溢出 → compare=shown clientW=390 scrollW=390
+[box-acceptance] ✔ 21-窄屏抽屉 390×844：详情抽屉打开时也不横向溢出 → clientW=390 scrollW=390
+[box-acceptance] ✔ 23-带去配队的入口 比完两只之后「带上这两只去配队」可用（触控目标 ≥44px） → 按钮 {"disabled":false,"w":138,"h":44}；选中的个体 ["own-0001","own-0002"]
+[box-acceptance] ✖ 24-盒子→配队交接 真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按带过来的个体预填，开局按钮读到的规模一致，且如实说「还差几只」 → 工作台状态 "bad-request" | 带过来 2 只，工作台只认了 undefined | 交接钩子 data-tw-handoff=undefined（带过来 2 只；URL "own-0001,own-0002"；工作台 selected=undefined handoff=undefined 按钮规模=2；
+[box-acceptance] ✔ 22-控制台干净 整轮下来没有 console.error，也没有未捕获异常 → consoleErrors=[] pageErrors=[]
+[box-acceptance] ✔ 05-catalog全量 [反证] 把 catalog 总数改成 48（迁移层全量）必须被同一条判据抓住 → catalog 总数必须 == 622，实际 48
+[box-acceptance] ✔ 13-不同种拒绝 [反证] 把「接受了不同种比较」的样本过同一条判据必须报错 → 不同种比较必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true | 必须给出「不是同一种」的原因，实际 error=undefined
+[box-acceptance] ✔ 06-玩家层无工程话 [反证] 往玩家区注入 pet_id / state_version 后，同一条判据必须命中；移除后必须恢复干净 → pet_id
+[box-acceptance] ✔ 16-非法limit [反证] 把「静默取整」的样本（200 + limit=1）过同一条判据必须报错 → 非法 limit="1e3" 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true | 静默取整：接受了 limit="1e3" 并返回 limit=1
+[box-acceptance] ✔ 17-玩家层载荷 [反证] 把 pet_id 与 unknown_fields 混进玩家层载荷必须被同一条判据抓住 → 玩家层出现工程键 cards[0].pet_id | 玩家层的 cards[0].pet_id 里出现 id 形状的值：pet_000062 | 玩家层出现工程键 cards[0].unknown_fields | 玩家层的 cards[0].note 里出现 id 形状的值：pet_000062
+[box-acceptance] ✔ 23-带去配队的入口 [反证] 一个 disabled 的入口等于没有入口，必须被同一条判据抓住 → 入口是禁用的（等于没有入口）
+[box-acceptance] ✔ 24-盒子→配队交接 [反证] 把交接数量改成 0（没预填）必须被同一条判据抓住 → 工作台状态 "bad-request" | 带过来 2 只，工作台只认了 0 | 交接钩子 data-tw-handoff=null | 开局按钮读到的队伍规模是 0
+[box-acceptance] 截图 8 张 → reports/roco/box-acceptance/
+[box-acceptance] 判据 23/24 通过；反证 7/7 命中
+[box-acceptance] 报告 → reports/roco/box-acceptance/browser-box-acceptance.json
+[box-acceptance] 有 1 条不通过

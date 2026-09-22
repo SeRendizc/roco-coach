@@ -338,6 +338,11 @@
       "detail": "报出两个数"
     },
     {
+      "code": "DUPLICATE_SPECIES_IN_TEAM",
+      "direction": "队伍里同一物种出现两次必须判红（同物种最多一只：手选/URL/自动补队/锁定共用同一条）",
+      "detail": "点名那个物种与冲突的实例"
+    },
+    {
       "code": "DUPLICATE_ANALYSIS_SPECIES",
       "direction": "理论阵容里同一个物种出现两次必须判红（同一只不能占两个槽位）",
       "detail": "点名那个物种"

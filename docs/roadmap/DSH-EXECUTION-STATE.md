@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `76a69fd`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `1859540`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2293,3 +2293,13 @@ P0-C 机制覆盖 / P0-D Agent / P0-E UI / P1 算法与 Coach / P2 训练与交�
 修法：该分支现在只认三种可结算来源 —— 解析出的效果、`plain_attack` 为真、或**已声明能力认领**（如候选口径声明的连击）；否则一律 PARTIAL（fail closed）。
 
 **实测**：176 条技能降档，可结算实体 507 → **333**（比例 0.4041）；抽样确认都是该降的（条件化威力：每次使用后+45 / 回合结束能耗-1 / 若上回合用状态技能+55 / 若能量耗尽+120 / 应对状态×3）。判据同步：不变量改三分法、探针句换成真读不出的机制、两条合成 fixture 补 `is_attack`/`power`，绊线响过后转正。`test:env` 417、门禁 22/22。
+
+
+### C6.50 第 124 轮：A3 同物种最多一只 —— 服务端硬约束落地（把「先改样例池再动校验器」做对了）
+
+上一轮记的教训这次照做：**先把 5 个测试文件 + 2 处产品样例池（`SAMPLE_SHAPES`）改成物种互不相同，再动校验器**，一次过。
+
+- 服务端：`DUPLICATE_SPECIES_IN_TEAM`，按 `resolved.species_id` 比对（不是实例 id）。真机：同种两只 → 400 并点名物种与冲突实例；不同种 ok；`must_include` 同路被拦。
+- 盒子入口：比较流程天生同种，交接时**按物种去重**（每个物种只带一只），URL / 工作台 / 开局按钮三者一致（实测 `own-0001`）。
+- 连带修好的样例点：`tests/roco-{workshop,team-candidates,team-request,team-compare,team-gaps}`、`scripts/roco/browser-{box,workshop}-acceptance`、`src/coach/team-{candidates,gaps}.js` 的样例形状、以及 RC-302/303/304 三份报告的重生成。
+- 判据：`test:unit` **1001/1001**；盒子 24/24 + 7/7；工坊 42/42 + 30/30；门禁 **22/22**。

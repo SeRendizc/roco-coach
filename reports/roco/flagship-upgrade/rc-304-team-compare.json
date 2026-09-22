@@ -220,7 +220,7 @@
       "mutation": "把成员的 build 数据整体抽掉（cost.build_support 与 energy.build_curve 一起清空）",
       "criterion": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。",
       "expect_code": "覆盖置信必须变低（否则它没读 build 数据）",
-      "actual": "{\"before\":0.851852,\"after\":0.518519}"
+      "actual": "{\"before\":0.84,\"after\":0.506667}"
     },
     {
       "where": "compare.axes.coverage_confidence.value_parts",
@@ -276,7 +276,7 @@
       "mutation": "把第二次运行的结果改掉一个值",
       "criterion": "同一份输入连续两次调用，五个口径 + 最小替换 + 渲染文本的 `JSON.stringify` 结果必须逐字节相同（含 tie-break），否则 `NONDETERMINISTIC`（红）。",
       "expect_code": "NONDETERMINISTIC",
-      "actual": "[\"[NONDETERMINISTIC] compareTeams/minimalReplacement:compare：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版 vs {\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版\",\"[NONDETERMINISTIC] compareTeams/minimalReplacement:replacement：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-minimal-replacement/v1\\\",\\\"team_id\\\":\\\"rc304-six-a\\\",\\\"candidate_universe_size\\\":4,\\\"replacement\\\":{\\\"out\\\":{\\\"key\\\":\\\"instance:own-0003\\\",\\\"unanswered_weakness vs null\"]"
+      "actual": "[\"[NONDETERMINISTIC] compareTeams/minimalReplacement:compare：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版 vs {\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版\",\"[NONDETERMINISTIC] compareTeams/minimalReplacement:replacement：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-minimal-replacement/v1\\\",\\\"team_id\\\":\\\"rc304-six-a\\\",\\\"candidate_universe_size\\\":4,\\\"replacement\\\":{\\\"out\\\":{\\\"key\\\":\\\"instance:own-0007\\\",\\\"unanswered_weakness vs null\"]"
     }
   ],
   "measured_control_sample": {
@@ -330,21 +330,21 @@
       },
       "matchup_spread": 0.42,
       "execution_tolerance": 0.745,
-      "coverage_confidence": 0.851852
+      "coverage_confidence": 0.855072
     },
     "environment_value_recomputed_from_injected_distribution": 0.505,
     "environment_value_matches_weighted_mean": true,
     "coverage_confidence_unchanged": true,
     "minimal_replacement": {
       "out": {
-        "key": "instance:own-0003",
+        "key": "instance:own-0007",
         "unanswered_weaknesses": 2
       },
       "in": {
         "key": "cand:aaa",
         "covers_types": [
-          "光系",
-          "地系"
+          "地系",
+          "幽系"
         ],
         "has_build": true
       }
@@ -352,7 +352,7 @@
     "minimal_replacement_confirmed_by_distribution": true,
     "audit_ok": true,
     "audit_problems": [],
-    "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：两队在这一份注入分布上相同（不排名）\nworst_archetype：两队在这一份注入分布上相同（不排名）\nmatchup_spread：两队在这一份注入分布上相同（不排名）\nexecution_tolerance：两队在这一份注入分布上相同（不排名）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0003，换上 cand:aaa"
+    "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：两队在这一份注入分布上相同（不排名）\nworst_archetype：两队在这一份注入分布上相同（不排名）\nmatchup_spread：两队在这一份注入分布上相同（不排名）\nexecution_tolerance：两队在这一份注入分布上相同（不排名）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
   },
   "criteria": [
     {
@@ -371,8 +371,8 @@
       "label": "五轴里**恰好一轴**现在可用（coverage_confidence），它真算而不是报 0",
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。",
       "actual": [
-        "available=1/5 coverage=0.851852/COMMUNITY_CURRENT parts={\"rc304-six-a\":{\"criterion\":0.555556,\"evidence\":1,\"build_data\":1},\"rc304-six-b\":{\"criterion\":0.64,\"evidence\":1,\"build_data\":1}}",
-        "available=1/5 coverage=0.851852/COMMUNITY_CURRENT parts={\"rc304-six-a\":{\"criterion\":0.555556,\"evidence\":1,\"build_data\":1},\"rc304-six-c\":{\"criterion\":0.697674,\"evidence\":1,\"build_data\":1}}"
+        "available=1/5 coverage=0.855072/COMMUNITY_CURRENT parts={\"rc304-six-a\":{\"criterion\":0.565217,\"evidence\":1,\"build_data\":1},\"rc304-six-b\":{\"criterion\":0.677419,\"evidence\":1,\"build_data\":1}}",
+        "available=1/5 coverage=0.84/COMMUNITY_CURRENT parts={\"rc304-six-a\":{\"criterion\":0.565217,\"evidence\":1,\"build_data\":1},\"rc304-six-c\":{\"criterion\":0.52,\"evidence\":1,\"build_data\":1}}"
       ],
       "ok": true
     },
@@ -404,12 +404,12 @@
       "label": "最小替换恰好一个方案且带 why；分布 unknown 时只给结构理由",
       "criteria": "`minimalReplacement()` 必须给**恰好一个**方案（`replacement.out` + `replacement.in` 各恰好一个），且必须带非空的 `why` 与 `evidence[]`；返回数组 / 多方案 / 没有 `why` ⇒ `REPLACEMENT_SHAPE`（红）。",
       "actual": [
-        "rc304-six-a vs rc304-six-b: instance:own-0003 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-a vs rc304-six-c: instance:own-0003 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-b vs rc304-six-c: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-b: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-c: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-b vs rc304-six-c: instance:own-0015 → cand:aaa confirmed_by_distribution=false",
         "rc304-six-d vs rc304-six-e: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-a vs rc304-six-e: instance:own-0003 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-c vs rc304-six-f: instance:own-0015 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-e: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-c vs rc304-six-f: 给不出（why 已写） confirmed_by_distribution=false",
         "rc304-six-e vs rc304-six-f: instance:own-0007 → cand:aaa confirmed_by_distribution=false"
       ],
       "ok": true
@@ -443,17 +443,17 @@
       "team_id": "rc304-six-a",
       "members": [
         "instance:own-0001",
-        "instance:own-0002",
         "instance:own-0003",
-        "instance:own-0004",
         "instance:own-0005",
-        "instance:own-0006"
+        "instance:own-0007",
+        "instance:own-0009",
+        "instance:own-0011"
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 27,
+      "gap_count": 23,
       "dimension_unknown_counts": {
-        "coverage": 6,
+        "coverage": 4,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -463,11 +463,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.851852,
+        "value": 0.855072,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.555556,
+          "criterion": 0.565217,
           "evidence": 1,
           "build_data": 1
         },
@@ -477,7 +477,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-a].gaps",
             "field": "length",
-            "value": 27,
+            "value": 23,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -498,7 +498,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-a].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 27,
+            "value": 23,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -507,11 +507,11 @@
             "field": "members_with_build",
             "value": [
               "instance:own-0001",
-              "instance:own-0002",
               "instance:own-0003",
-              "instance:own-0004",
               "instance:own-0005",
-              "instance:own-0006"
+              "instance:own-0007",
+              "instance:own-0009",
+              "instance:own-0011"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -519,50 +519,48 @@
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 27 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 23 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 6,
+        "coverage": 4,
         "energy": 2,
         "pivot": 2,
         "respond": 2,
         "speed": 3,
-        "synergy": 10
+        "synergy": 8
       },
       "uncovered_attack_types": [
-        "光系",
         "地系",
         "幽系",
         "恶系",
-        "水系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0003": 2,
-        "instance:own-0004": 2,
-        "instance:own-0005": 2,
-        "instance:own-0006": 2
+        "instance:own-0003": 1,
+        "instance:own-0005": 1,
+        "instance:own-0007": 2,
+        "instance:own-0011": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
     {
       "team_id": "rc304-six-b",
       "members": [
-        "instance:own-0007",
-        "instance:own-0008",
-        "instance:own-0009",
-        "instance:own-0010",
-        "instance:own-0011",
-        "instance:own-0012"
+        "instance:own-0013",
+        "instance:own-0015",
+        "instance:own-0017",
+        "instance:own-0018",
+        "instance:own-0019",
+        "instance:own-0021"
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 50,
+      "gap_count": 31,
       "dimension_unknown_counts": {
-        "coverage": 12,
+        "coverage": 4,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -572,11 +570,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.88,
+        "value": 0.892473,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.64,
+          "criterion": 0.677419,
           "evidence": 1,
           "build_data": 1
         },
@@ -586,7 +584,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-b].gaps",
             "field": "length",
-            "value": 50,
+            "value": 31,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -607,7 +605,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-b].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 50,
+            "value": 31,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -615,12 +613,12 @@
             "pointer": "gapsByTeam[rc304-six-b].energy.build_curve",
             "field": "members_with_build",
             "value": [
-              "instance:own-0007",
-              "instance:own-0008",
-              "instance:own-0009",
-              "instance:own-0010",
-              "instance:own-0011",
-              "instance:own-0012"
+              "instance:own-0013",
+              "instance:own-0015",
+              "instance:own-0017",
+              "instance:own-0018",
+              "instance:own-0019",
+              "instance:own-0021"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -628,58 +626,48 @@
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 18 / 50 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 31 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 12,
+        "coverage": 4,
         "energy": 2,
         "pivot": 2,
         "respond": 2,
         "speed": 3,
-        "synergy": 27
+        "synergy": 16
       },
       "uncovered_attack_types": [
         "地系",
         "幻系",
-        "幽系",
-        "恶系",
-        "普通系",
         "机械系",
-        "毒系",
-        "火系",
-        "电系",
-        "翼系",
-        "萌系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0007": 5,
-        "instance:own-0008": 5,
-        "instance:own-0009": 1,
-        "instance:own-0010": 1,
-        "instance:own-0011": 5,
-        "instance:own-0012": 5
+        "instance:own-0015": 3,
+        "instance:own-0017": 3,
+        "instance:own-0019": 2,
+        "instance:own-0021": 2
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
     {
       "team_id": "rc304-six-c",
       "members": [
-        "instance:own-0013",
-        "instance:own-0014",
-        "instance:own-0015",
-        "instance:own-0016",
-        "instance:own-0017",
-        "instance:own-0018"
+        "instance:own-0022",
+        "instance:own-0023",
+        "instance:own-0025",
+        "instance:own-0027",
+        "instance:own-0029",
+        "instance:own-0031"
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 43,
+      "gap_count": 25,
       "dimension_unknown_counts": {
-        "coverage": 7,
+        "coverage": 6,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -689,11 +677,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.899225,
+        "value": 0.84,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.697674,
+          "criterion": 0.52,
           "evidence": 1,
           "build_data": 1
         },
@@ -703,7 +691,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-c].gaps",
             "field": "length",
-            "value": 43,
+            "value": 25,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -724,7 +712,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-c].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 43,
+            "value": 25,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -732,12 +720,12 @@
             "pointer": "gapsByTeam[rc304-six-c].energy.build_curve",
             "field": "members_with_build",
             "value": [
-              "instance:own-0013",
-              "instance:own-0014",
-              "instance:own-0015",
-              "instance:own-0016",
-              "instance:own-0017",
-              "instance:own-0018"
+              "instance:own-0022",
+              "instance:own-0023",
+              "instance:own-0025",
+              "instance:own-0027",
+              "instance:own-0029",
+              "instance:own-0031"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -745,35 +733,32 @@
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 13 / 43 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 12 / 25 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 7,
+        "coverage": 6,
         "energy": 2,
         "pivot": 2,
-        "respond": 2,
+        "respond": 1,
         "speed": 3,
-        "synergy": 25
+        "synergy": 9
       },
       "uncovered_attack_types": [
-        "光系",
         "冰系",
-        "地系",
         "幻系",
-        "机械系",
+        "武系",
         "水系",
+        "萌系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0013": 1,
-        "instance:own-0014": 1,
-        "instance:own-0015": 5,
-        "instance:own-0016": 5,
-        "instance:own-0017": 5,
-        "instance:own-0018": 1
+        "instance:own-0022": 1,
+        "instance:own-0023": 1,
+        "instance:own-0029": 2,
+        "instance:own-0031": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
@@ -781,11 +766,11 @@
       "team_id": "rc304-six-d",
       "members": [
         "instance:own-0001",
-        "instance:own-0002",
         "instance:own-0003",
-        "instance:own-0004",
         "instance:own-0006",
-        "instance:own-0007"
+        "instance:own-0007",
+        "instance:own-0012",
+        "instance:own-0018"
       ],
       "member_count": 6,
       "ok": true,
@@ -845,11 +830,11 @@
             "field": "members_with_build",
             "value": [
               "instance:own-0001",
-              "instance:own-0002",
               "instance:own-0003",
-              "instance:own-0004",
               "instance:own-0006",
-              "instance:own-0007"
+              "instance:own-0007",
+              "instance:own-0012",
+              "instance:own-0018"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -878,9 +863,9 @@
       ],
       "unanswered_weaknesses": {
         "instance:own-0003": 1,
-        "instance:own-0004": 1,
         "instance:own-0006": 1,
-        "instance:own-0007": 2
+        "instance:own-0007": 2,
+        "instance:own-0012": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
@@ -1123,7 +1108,7 @@
         "worst_archetype": null,
         "matchup_spread": null,
         "execution_tolerance": null,
-        "coverage_confidence": 0.851852
+        "coverage_confidence": 0.855072
       },
       "comparison_winners": {
         "environment_value": null,
@@ -1134,23 +1119,23 @@
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0003",
+          "key": "instance:own-0007",
           "unanswered_weaknesses": 2
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "光系",
-            "地系"
+            "地系",
+            "幽系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0003 换成 cand:aaa，它声明能接住队里现在**没有人接**的 光系 / 地系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0003，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1175,7 +1160,7 @@
         "worst_archetype": null,
         "matchup_spread": null,
         "execution_tolerance": null,
-        "coverage_confidence": 0.851852
+        "coverage_confidence": 0.84
       },
       "comparison_winners": {
         "environment_value": null,
@@ -1186,23 +1171,23 @@
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0003",
+          "key": "instance:own-0007",
           "unanswered_weaknesses": 2
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "光系",
-            "地系"
+            "地系",
+            "幽系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0003 换成 cand:aaa，它声明能接住队里现在**没有人接**的 光系 / 地系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0003，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1227,7 +1212,7 @@
         "worst_archetype": null,
         "matchup_spread": null,
         "execution_tolerance": null,
-        "coverage_confidence": 0.88
+        "coverage_confidence": 0.84
       },
       "comparison_winners": {
         "environment_value": null,
@@ -1238,8 +1223,8 @@
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0007",
-          "unanswered_weaknesses": 5
+          "key": "instance:own-0015",
+          "unanswered_weaknesses": 3
         },
         "in": {
           "key": "cand:aaa",
@@ -1249,11 +1234,11 @@
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0015 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0015，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1295,12 +1280,13 @@
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系"
+            "地系",
+            "幽系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
@@ -1310,58 +1296,6 @@
       "teams": [
         "rc304-six-a",
         "rc304-six-e"
-      ],
-      "availability": {
-        "environment_value": false,
-        "worst_archetype": false,
-        "matchup_spread": false,
-        "execution_tolerance": false,
-        "coverage_confidence": true
-      },
-      "unknown_reasons": {
-        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
-      },
-      "values": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
-        "coverage_confidence": 0.851852
-      },
-      "comparison_winners": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
-        "coverage_confidence": null
-      },
-      "minimal_replacement": {
-        "out": {
-          "key": "instance:own-0003",
-          "unanswered_weaknesses": 2
-        },
-        "in": {
-          "key": "cand:aaa",
-          "covers_types": [
-            "光系",
-            "地系"
-          ],
-          "has_build": true
-        }
-      },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0003 换成 cand:aaa，它声明能接住队里现在**没有人接**的 光系 / 地系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
-      "minimal_replacement_confirmed_by_distribution": false,
-      "audit_ok": true,
-      "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0003，换上 cand:aaa"
-    },
-    {
-      "teams": [
-        "rc304-six-c",
-        "rc304-six-f"
       ],
       "availability": {
         "environment_value": false,
@@ -1392,23 +1326,62 @@
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0015",
-          "unanswered_weaknesses": 5
+          "key": "instance:own-0007",
+          "unanswered_weaknesses": 2
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "光系",
-            "地系"
+            "地系",
+            "幽系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0015 换成 cand:aaa，它声明能接住队里现在**没有人接**的 光系 / 地系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0015，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
+    },
+    {
+      "teams": [
+        "rc304-six-c",
+        "rc304-six-f"
+      ],
+      "availability": {
+        "environment_value": false,
+        "worst_archetype": false,
+        "matchup_spread": false,
+        "execution_tolerance": false,
+        "coverage_confidence": true
+      },
+      "unknown_reasons": {
+        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
+        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
+        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
+        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
+      },
+      "values": {
+        "environment_value": null,
+        "worst_archetype": null,
+        "matchup_spread": null,
+        "execution_tolerance": null,
+        "coverage_confidence": 0.84
+      },
+      "comparison_winners": {
+        "environment_value": null,
+        "worst_archetype": null,
+        "matchup_spread": null,
+        "execution_tolerance": null,
+        "coverage_confidence": null
+      },
+      "minimal_replacement": null,
+      "minimal_replacement_why": "注入的候选里没有一只声明能接住队里无人承接的 冰系 / 幻系 / 武系 / 水系 / 萌系 / 龙系：给不出一个能改结构的最小替换。结构理由之外的结论（换谁更强）现在**没有**依据：版本对手分布是 unknown，所以这里明确说不知道，不编一个「更优」结论",
+      "minimal_replacement_confirmed_by_distribution": false,
+      "audit_ok": true,
+      "audit_problems": [],
+      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换：给不出（见 why）"
     },
     {
       "teams": [
@@ -1450,12 +1423,13 @@
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系"
+            "地系",
+            "幽系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],

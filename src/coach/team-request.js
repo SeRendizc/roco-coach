@@ -215,6 +215,7 @@ export const ERROR_CODES = Object.freeze([
   Object.freeze({code: 'FAVOURITES_ONLY_EMPTY_POOL', direction: 'favourites_only=true 但 owned 里一只是收藏都没有（空池不可满足）必须判红', detail: '不许当成可满足'}),
   Object.freeze({code: 'MUST_INCLUDE_EXCLUDE_OVERLAP', direction: 'must_include 与 must_exclude 有交集必须判红', detail: '报出交集'}),
   Object.freeze({code: 'SELECTED_OVER_TEAM_SIZE', direction: 'selected 超过 team_size 个槽位必须判红', detail: '报出两个数'}),
+  Object.freeze({code: 'DUPLICATE_SPECIES_IN_TEAM', direction: '队伍里同一物种出现两次必须判红（同物种最多一只：手选/URL/自动补队/锁定共用同一条）', detail: '点名那个物种与冲突的实例'}),
   Object.freeze({code: 'DUPLICATE_ANALYSIS_SPECIES', direction: '理论阵容里同一个物种出现两次必须判红（同一只不能占两个槽位）', detail: '点名那个物种'}),
   Object.freeze({code: 'ANALYSIS_OVER_TEAM_SIZE', direction: '理论阵容超过 team_size 必须判红', detail: '报出两个数'}),
   Object.freeze({code: 'SELECTED_HAS_EXCLUDED', direction: 'selected 里出现 must_exclude 条目必须判红', detail: '报出被排除的那项'}),
@@ -543,6 +544,30 @@ export function validateRecommendationRequest(raw, {owned, pack, modes, rulesets
       return resolved;
     });
   }
+  // ⑧a 同物种最多一只（人类要求 2026-09-22）：**服务端硬约束**，手选 / URL 交接 /
+  // 自动补队 / 锁定四条路共用同一条。此前只校验「实例存在」，两只同种（own-0001 +
+  // own-0002 都是 pet_000012）能一起进队 —— 实测服务端当时是放行的。
+  // 比的是 **resolved 的物种**，不是实例 id：比实例 id 会让「同种不同个体」漏过去。
+  {
+    const bySpecies = new Map();
+    for (const field of ['selected', 'must_include']) {
+      const list = Array.isArray(references[field]) ? references[field] : [];
+      for (const item of list) {
+        const speciesId = item?.kind === 'instance' ? item.species_id ?? null : item?.species_id ?? null;
+        if (!speciesId) continue;
+        if (!bySpecies.has(speciesId)) bySpecies.set(speciesId, []);
+        bySpecies.get(speciesId).push({field, raw: item.raw ?? item.instance_id ?? speciesId});
+      }
+    }
+    for (const [speciesId, rows] of bySpecies) {
+      if (rows.length < 2) continue;
+      problems.push(problem('DUPLICATE_SPECIES_IN_TEAM', rows[0].field,
+        `队伍里 ${speciesId} 出现了 ${rows.length} 次（${rows.map((r) => r.raw).join('、')}）：`
+        + '同一物种最多只能占一个槽位——同种多只个体是不同练度的选择，不是两个队员',
+        speciesId));
+    }
+  }
+
   // ⑧b 理论阵容（analysis_species）：物种级、**不要求拥有**，但必须真实存在且不重复。
   // 这一条的失败信息要能告诉玩家「缺的是这一只的资料」而不是「你不该选它」。
   if (Array.isArray(clean.analysis_species)) {

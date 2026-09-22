@@ -57,9 +57,26 @@ const inputs = await loadTeamCandidatesInputs({root: ROOT});
 const rc301Inputs = await loadRecommendationInputs({root: ROOT});
 const index = buildCandidateIndex(inputs);
 const SOURCE = readFileSync(join(ROOT, 'src', 'coach', 'team-candidates.mjs'), 'utf8');
-const ids = [...inputs.owned.instances].map((i) => i.instance_id).sort();
-const favouriteIds = [...inputs.owned.instances].filter((i) => i.favourite === true)
-  .map((i) => i.instance_id).sort();
+// A3（2026-09-22）：样例池按**物种**去重 —— 队伍「同物种最多一只」，
+// 而池子前几个实例（own-0001/own-0002…）天生同种，任何 slice(0,N) 都会踩新约束。
+const ids = (() => {
+  const seen = new Set(); const out = [];
+  for (const row of [...inputs.owned.instances].sort((a, b) => a.instance_id.localeCompare(b.instance_id))) {
+    if (seen.has(row.species_id)) continue;
+    seen.add(row.species_id); out.push(row.instance_id);
+  }
+  return out;
+})();
+// A3：收藏池里也有同种多只（own-0001/own-0002 同为 pet_000012），同样按物种去重。
+const favouriteIds = (() => {
+  const seen = new Set(); const out = [];
+  for (const row of [...inputs.owned.instances].filter((i) => i.favourite === true)
+    .sort((a, b) => a.instance_id.localeCompare(b.instance_id))) {
+    if (seen.has(row.species_id)) continue;
+    seen.add(row.species_id); out.push(row.instance_id);
+  }
+  return out;
+})();
 const ownedInstanceIds = [...inputs.owned.instances].map((i) => i.instance_id);
 const catalogSpeciesIds = index.packPetEntities.map((row) => row.entity.id).sort();
 
@@ -220,7 +237,15 @@ test('RC-303 判据①：召回数越界却不解释必须判红', () => {
   expectRed(mismatch, 'RECALL_SHAPE', '①-6 count 与 candidates.length 不一致');
 
   // ①-e：真·空池（owned 全被排除）必须 fail closed 并解释
-  const emptyPool = request({selected: ids.slice(0, 3), must_exclude: ids.slice(3, 80)});
+  // A3：原来写死 slice(3, 80)（硬编码池大小）。而样例池 `ids` 是**每物种一只**，
+  // `must_exclude` 又按 **id** 排除 —— 同种的另一只（如 own-0002）没被排掉，
+  // 于是「空池」还剩 3 只，名不副实。这里用**全量实例**构造排除：除已选之外全排掉。
+  const allOwnedIds = [...inputs.owned.instances].map((i) => i.instance_id).sort();
+  const selectedThree = ids.slice(0, 3);
+  const emptyPool = request({
+    selected: selectedThree,
+    must_exclude: allOwnedIds.filter((id) => !selectedThree.includes(id)),
+  });
   const emptyPlan = buildTeamCandidatePlan(emptyPool, {...inputs, __index: index, policy: {candidate_universe: 'owned', include_catalog_species: false}});
   raw('①-7 owned 全被排除后的召回', {count: emptyPlan.recall_count, shortfall_reason: emptyPlan.recall.shortfall_reason,
     problems: emptyPlan.problems.map((p) => `[${p.code}] ${p.detail}`)});
@@ -742,9 +767,18 @@ test('RC-303 与 RC-302 的边界：候选生成不做缺口诊断，缺口诊�
 // ─────────────────────────────────────────────────────────────────────────
 test('A2 锁定：补全计划必须包含被锁成员，且不许把它当替换候选换掉', () => {
   const ownedDoc = JSON.parse(readFileSync(join(ROOT, 'data/roco/owned/owned-pets.json'), 'utf8'));
-  const ownedIds = (ownedDoc.instances ?? []).map((i) => i.instance_id).sort();
-  const keep = ownedIds[0];
-  const other = ownedIds[1];
+  // A3：样例两只必须**物种不同**（ownedIds[0]/[1] 是 own-0001/own-0002，同为 pet_000012）。
+  const distinctOwned = (() => {
+    const seen = new Set(); const out = [];
+    for (const row of [...(ownedDoc.instances ?? [])]
+      .sort((a, b) => a.instance_id.localeCompare(b.instance_id))) {
+      if (seen.has(row.species_id)) continue;
+      seen.add(row.species_id); out.push(row.instance_id);
+    }
+    return out;
+  })();
+  const keep = distinctOwned[0];
+  const other = distinctOwned[1];
   const withLock = validateRecommendationRequest(
     {mode: STANDARD_PVP_MODE, team_size: STANDARD_PVP_TEAM_SIZE, selected: [keep, other], locked: [keep]},
     rc301Inputs);

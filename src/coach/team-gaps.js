@@ -1865,16 +1865,25 @@ export function buildGapDistribution(inputs) {
 // ─────────────────────────────────────────────────────────────────────────
 
 /** 报告用的样例队伍形态：每种形态一个**经 RC-301 校验过**的真实请求。 */
+const distinctOwned = (rows) => {
+  const seen = new Set(); const out = [];
+  for (const row of [...rows].sort((a, b) => String(a.instance_id).localeCompare(String(b.instance_id)))) {
+    if (seen.has(row.species_id)) continue;
+    seen.add(row.species_id); out.push(row.instance_id);
+  }
+  return out;
+};
+
 export const SAMPLE_SHAPES = Object.freeze([
   Object.freeze({id: 'empty-team', note: '一只都没选：只能报域与未知量', pick: () => ({})}),
-  Object.freeze({id: 'single-locked', note: '锁定一只：单点缺口', pick: (ids) => ({locked: [ids[0]], selected: [ids[0]]})}),
-  Object.freeze({id: 'three-selected', note: '已选三只：部分阵容', pick: (ids) => ({selected: ids.slice(0, 3)})}),
-  Object.freeze({id: 'full-six', note: '六只完整队伍', pick: (ids) => ({selected: ids.slice(0, 6)})}),
+  Object.freeze({id: 'single-locked', note: '锁定一只：单点缺口', pick: (ids, inputs) => ({locked: [distinctOwned(inputs.owned.instances)[0]],
+      selected: [distinctOwned(inputs.owned.instances)[0]]})}),
+  Object.freeze({id: 'three-selected', note: '已选三只：部分阵容', pick: (ids, inputs) => ({selected: distinctOwned(inputs.owned.instances).slice(0, 3)})}),
+  Object.freeze({id: 'full-six', note: '六只完整队伍', pick: (ids, inputs) => ({selected: distinctOwned(inputs.owned.instances).slice(0, 6)})}),
   Object.freeze({
     id: 'six-favourites-only', note: '只从收藏池里选六只（收窄候选宇宙）',
     pick: (ids, inputs) => ({
-      selected: [...inputs.owned.instances].filter((i) => i.favourite === true)
-        .map((i) => i.instance_id).sort().slice(0, 6),
+      selected: distinctOwned(inputs.owned.instances.filter((i) => i.favourite === true)).slice(0, 6),
       favourites_only: true,
     }),
   }),

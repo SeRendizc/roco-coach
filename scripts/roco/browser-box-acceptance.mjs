@@ -579,21 +579,31 @@ async function main() {
         handoff:root?root.dataset.twHandoff:null,
         teamButton:document.getElementById('start-standard-pvp')?.dataset.rocoStandardTeam??null,
         note:(document.getElementById('standard-pvp-note')||{}).textContent||''};})()`);
+    // 2026-09-22（A3 同物种最多一只）：盒子比较的常常是**同种两只个体**，而队伍里
+    // 同物种只能有一只 —— 所以交接时按物种去重，**URL 带过去的条数**才是权威口径。
+    // 这条判据改成量「三者一致」（URL / 工作台 / 开局按钮）且不超过比较选中的数量，
+    // 不再写死「必须等于 2」。
+    const carried = String(handed.teamParam ?? '').split(',').filter(Boolean);
     const handedProblems = (f) => {
       const bad = [];
       if (f?.path !== 'roco.html') bad.push(`没有跳到产品页（现在在 ${f?.path}）`);
       if (f?.twState !== 'ok') bad.push(`工作台状态 ${JSON.stringify(f?.twState)}`);
-      if (Number(f?.selected) !== parsedHandoff.length) {
-        bad.push(`带过来 ${parsedHandoff.length} 只，工作台只认了 ${f?.selected}`);
+      if (!carried.length) bad.push('URL 里一个个体都没带过来');
+      if (carried.length > parsedHandoff.length) {
+        bad.push(`带过来的比选中的还多（选中 ${parsedHandoff.length}，URL ${carried.length}）`);
       }
-      if (Number(f?.handoff) !== parsedHandoff.length) bad.push(`交接钩子 data-tw-handoff=${f?.handoff}`);
-      if (Number(f?.teamButton) !== parsedHandoff.length) {
+      if (new Set(carried).size !== carried.length) bad.push('URL 里有重复的个体');
+      if (Number(f?.selected) !== carried.length) {
+        bad.push(`URL 带了 ${carried.length} 只，工作台认了 ${f?.selected}`);
+      }
+      if (Number(f?.handoff) !== carried.length) bad.push(`交接钩子 data-tw-handoff=${f?.handoff}`);
+      if (Number(f?.teamButton) !== carried.length) {
         bad.push(`开局按钮读到的队伍规模是 ${f?.teamButton}`);
       }
       return bad;
     };
-    check('24-盒子→配队交接', '真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按带过来的个体预填，'
-      + '开局按钮读到的规模一致，且如实说「还差几只」',
+    check('24-盒子→配队交接', '真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按 URL 带过去的个体预填'
+      + '（同物种最多一只，故同种两只只带一只），开局按钮与交接钩子读到的规模三者一致，且如实说「还差几只」',
       handedProblems(handedNow).length === 0,
       handedProblems(handedNow).join(' | ')
       + `（带过来 ${parsedHandoff.length} 只；URL ${JSON.stringify(handed.teamParam)}；`

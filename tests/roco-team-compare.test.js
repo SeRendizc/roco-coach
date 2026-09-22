@@ -77,17 +77,31 @@ const owned = [...registry.instances.values()];
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
+/**
+ * A3（2026-09-22）：样例队伍必须**同物种最多一只**。
+ * 原来直接 `list.slice(0, 6)` —— 箱子前几个实例（own-0001/own-0002…）天生同种，
+ * 六支样例队伍全都违反新硬约束。这里统一在 pick 里按物种去重，形状语义不变。
+ */
+const distinctSpecies = (list) => {
+  const seen = new Set(); const out = [];
+  for (const row of list) {
+    if (seen.has(row.species_id)) continue;
+    seen.add(row.species_id); out.push(row);
+  }
+  return out;
+};
+
 /** 六支真实队伍：从箱子里按确定性形状取，形状之间不重复。 */
 const TEAM_SHAPES = Object.freeze([
-  Object.freeze({id: 'rc304-six-a', pick: (list) => list.slice(0, 6)}),
-  Object.freeze({id: 'rc304-six-b', pick: (list) => list.slice(6, 12)}),
-  Object.freeze({id: 'rc304-six-c', pick: (list) => list.slice(12, 18)}),
+  Object.freeze({id: 'rc304-six-a', pick: (list) => distinctSpecies(list).slice(0, 6)}),
+  Object.freeze({id: 'rc304-six-b', pick: (list) => distinctSpecies(list).slice(6, 12)}),
+  Object.freeze({id: 'rc304-six-c', pick: (list) => distinctSpecies(list).slice(12, 18)}),
   Object.freeze({
     id: 'rc304-six-d',
-    pick: (list) => [...list.filter((row) => row.favourite === true)].slice(0, 6),
+    pick: (list) => distinctSpecies(list.filter((row) => row.favourite === true)).slice(0, 6),
   }),
-  Object.freeze({id: 'rc304-six-e', pick: (list) => list.filter((_, index) => index % 2 === 0).slice(0, 6)}),
-  Object.freeze({id: 'rc304-six-f', pick: (list) => list.filter((_, index) => index % 2 === 1).slice(0, 6)}),
+  Object.freeze({id: 'rc304-six-e', pick: (list) => distinctSpecies(list.filter((_, index) => index % 2 === 0)).slice(0, 6)}),
+  Object.freeze({id: 'rc304-six-f', pick: (list) => distinctSpecies(list.filter((_, index) => index % 2 === 1)).slice(0, 6)}),
 ]);
 
 const teamRows = [];

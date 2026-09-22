@@ -534,7 +534,16 @@ async function main() {
   await new Promise((res, rej) => { server.once('error', rej); server.listen(0, '127.0.0.1', res); });
   const base = `http://127.0.0.1:${server.address().port}/`;
   const owned = JSON.parse(readFileSync(join(ROOT, 'data/roco/owned/owned-pets.json'), 'utf8'));
-  const ids = owned.instances.map((i) => i.instance_id).sort();
+  // A3（2026-09-22）：样例池按**物种**去重 —— 队伍「同物种最多一只」，
+  // 而箱子前几个实例（own-0001/own-0002…）天生同种，slice(0, N) 会被服务端判 400。
+  const ids = (() => {
+    const seen = new Set(); const out = [];
+    for (const row of [...owned.instances].sort((a, b) => a.instance_id.localeCompare(b.instance_id))) {
+      if (seen.has(row.species_id)) continue;
+      seen.add(row.species_id); out.push(row.instance_id);
+    }
+    return out;
+  })();
   const {kill, wsUrl} = await launchChrome();
   const ws = new WebSocket(wsUrl);
   await new Promise((res, rej) => { ws.addEventListener('open', res); ws.addEventListener('error', rej); });

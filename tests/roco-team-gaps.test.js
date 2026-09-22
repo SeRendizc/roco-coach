@@ -47,7 +47,17 @@ const raw = (label, value) => {
 const inputs = await loadTeamGapsInputs({root: ROOT});
 const rc301Inputs = await loadRecommendationInputs({root: ROOT});
 const registry = validateRecommendationRequest({mode: STANDARD_PVP_MODE}, rc301Inputs).registry;
-const ids = [...registry.instances.keys()].sort();
+// A3（2026-09-22）：样例池按**物种**去重 —— 队伍「同物种最多一只」，
+// 而箱子前几个实例（own-0001/own-0002…）天生同种，slice(0, N) 会踩新约束。
+const ids = (() => {
+  const seen = new Set(); const out = [];
+  for (const id of [...registry.instances.keys()].sort()) {
+    const speciesId = registry.instances.get(id)?.species_id;
+    if (seen.has(speciesId)) continue;
+    seen.add(speciesId); out.push(id);
+  }
+  return out;
+})();
 const favouriteIds = [...registry.instances.values()].filter((i) => i.favourite === true)
   .map((i) => i.instance_id).sort();
 

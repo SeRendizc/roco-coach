@@ -2178,14 +2178,31 @@ export function resetTeamCandidatesInputsCache() {
 // ─────────────────────────────────────────────────────────────────────────
 
 /** 报告用的样例形态：每种一个**经 RC-301 校验过**的真实请求。 */
+/**
+ * A3（2026-09-22）：样例队**同物种最多一只**。
+ * 这些形状原来直接 `ids.slice(0, N)`，而箱子前几个实例（own-0001/own-0002…）天生同种 ——
+ * 加同种硬约束之后，样例请求自己就会被 RC-301 判红（报告也就生成不出来）。
+ * 所以形状统一走 `distinctOwned()`（按物种去重），形状语义不变。
+ */
+const distinctOwned = (rows) => {
+  const seen = new Set(); const out = [];
+  for (const row of [...rows].sort((a, b) => String(a.instance_id).localeCompare(String(b.instance_id)))) {
+    if (seen.has(row.species_id)) continue;
+    seen.add(row.species_id); out.push(row.instance_id);
+  }
+  return out;
+};
+
 export const SAMPLE_SHAPES = Object.freeze([
   Object.freeze({id: 'empty-team', note: '一只都没选：按目标给体系入口式的候选', pick: () => ({})}),
-  Object.freeze({id: 'two-selected', note: '已选 2 只：渐进推荐三个下一只', pick: (ids) => ({selected: ids.slice(0, 2)})}),
-  Object.freeze({id: 'five-selected', note: '已选 5 只：只差第六只', pick: (ids) => ({selected: ids.slice(0, 5)})}),
+  Object.freeze({id: 'two-selected', note: '已选 2 只：渐进推荐三个下一只',
+    pick: (ids, inputs) => ({selected: distinctOwned(inputs.owned.instances).slice(0, 2)})}),
+  Object.freeze({id: 'five-selected', note: '已选 5 只：只差第六只',
+    pick: (ids, inputs) => ({selected: distinctOwned(inputs.owned.instances).slice(0, 5)})}),
   Object.freeze({
     id: 'favours-only-three', note: '已选 3 只收藏：候选池收窄到收藏',
     pick: (ids, inputs) => ({
-      selected: [...inputs.owned.instances].filter((i) => i.favourite === true).map((i) => i.instance_id).sort().slice(0, 3),
+      selected: distinctOwned(inputs.owned.instances.filter((i) => i.favourite === true)).slice(0, 3),
       favourites_only: true,
     }),
   }),
@@ -2194,17 +2211,19 @@ export const SAMPLE_SHAPES = Object.freeze([
     // 注意：这里给的只是「请求的补丁」，**渐进推荐的只数按这个补丁算**（selected 是它自己的字段）。
     // 所以要凑出「已选 2 只 ⇒ 渐进推荐生效」的形状，就得把两只都写进 selected。
     pick: (ids, inputs, index) => ({
-      locked: [ids[0]], selected: ids.slice(0, 2),
+      locked: [distinctOwned(inputs.owned.instances)[0]],
+      selected: distinctOwned(inputs.owned.instances).slice(0, 2),
       must_include: [[...index.packPetEntities].map((row) => row.entity.id).sort()[0]],
     }),
   }),
   Object.freeze({
     id: 'must-exclude-three', note: '已选 3 只并排除两只：候选池被硬约束收窄',
-    pick: (ids) => ({selected: ids.slice(0, 3), must_exclude: ids.slice(6, 8)}),
+    pick: (ids, inputs) => ({selected: distinctOwned(inputs.owned.instances).slice(0, 3),
+      must_exclude: distinctOwned(inputs.owned.instances).slice(6, 8)}),
   }),
   Object.freeze({
     id: 'full-six', note: '六只完整队伍：召回只剩 0 个槽位，如实报告',
-    pick: (ids) => ({selected: ids.slice(0, 6)}),
+    pick: (ids, inputs) => ({selected: distinctOwned(inputs.owned.instances).slice(0, 6)}),
   }),
 ]);
 

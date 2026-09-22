@@ -1,0 +1,62 @@
+node scripts/roco/browser-workshop-acceptance.mjs
+
+[workshop-acceptance] ✔ [01-产品页挂载] 产品页 roco.html 上有 #team-workshop，模块在自己的 shadow root 里渲染（不是另起一套临时页面） —实际： shadow root=true dataset.twSlots=6 槽位节点=6
+[workshop-acceptance] ✔ [02-六个槽位] 第一次打开就画出 6 个槽位（不是「已选 3 只固定栏」），filled == 已选数 —实际： slots=6 节点=6 filled=0 selected=0
+[workshop-acceptance] ✔ [反证 02-六个槽位] 把槽位数改成 3（退回「已选 3 只固定栏」）必须被同一条判据抓住 —实际命中： 槽位数必须是 6，实际 3 | 页面上必须画出 6 个槽位节点，实际 3
+[workshop-acceptance] ✔ [03-徽记与候选池] 三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账） —实际： 页头出现次数 {"mode":1,"candidate":1,"prematch":1,"poolTotal":622}
+[workshop-acceptance] ✔ [反证 03-候选规则徽记] 把「候选规则（待实机核对）」徽记去掉必须被同一条判据抓住 —实际命中： 缺徽记「候选规则（待实机核对）」
+[workshop-acceptance] ✔ [反证 03-候选池 600+] 把候选池写成 48/60（迁移夹具）必须被同一条判据抓住 —实际命中： 候选池总量必须 ≥600（全量图鉴），实际 60
+[workshop-acceptance] ✔ [04-宽屏不溢出] 1440×900：产品页与模块都没有横向溢出（scrollW == clientW） —实际： clientW=1440 scrollW=1440 bodyScrollW=1440
+[workshop-acceptance] ✖ [05-初判不含证据段] `stage=first` 的回执：axes === null、axes_status === not_requested、serving.full_withheld === NOT_REQUESTED（主动不要证据段，不是降级），且真的产出了结构化初判 —实际： stage=first 的回执里没有 serving 信封（HTTP 400；serving.first=undefined withheld=undefined missing=undefined）
+[workshop-acceptance] ✔ [反证 05-初判不含证据段] 让 first 那一次也带上五轴（把「初判不跑证据段」破掉）必须被同一条判据抓住 —实际命中： stage=first 的回执里没有 serving 信封
+[workshop-acceptance] ✔ [反证 05-初判不含证据段（降级混淆）] 把「超时降级」混成「主动只要初判」必须被同一条判据抓住 —实际命中： stage=first 的 axes 必须是 null，实际 undefined | axes_status 必须是 not_requested，实际 undefined | full_withheld 必须是 NOT_REQUESTED（主动不要证据段），实际 undefined | stage=first 不许产出完整段，实际 full={"kind":"full_answer"} | stage=first 是「调用方主动只要初判」，不是降级：degraded 必须是 
+[workshop-acceptance] ✔ [06-初判先于完整载荷] 页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms） —实际： ；fetches=first|full rendered_after_first=yes first_ms=99 full_ms=24 stage=full full_state=ok
+[workshop-acceptance] ✔ [反证 06-初判先于完整载荷] 把两阶段退化成一次性请求（fetches=full、没有初判耗时）必须被同一条判据抓住 —实际命中： 请求顺序必须是 first|full（初判先发、完整载荷后发），实际 "full" | 完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画） | 没有量到初判渲染耗时（data-tw-first-ms=null）
+[workshop-acceptance] ✔ [反证 06-初判先于完整载荷（初判被挡住）] 让「完整载荷到达之前」什么都不画（rendered_after_first=no）也必须被抓住 —实际命中： 完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画）
+[workshop-acceptance] ✔ [07-分段元数据在 dataset] 分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有 —实际： serving=roco-serving/v1 degraded=no elapsed_ms=20 withheld=""
+[workshop-acceptance] ✔ [08-候选含图鉴物种] 候选池里能点到「我没有的图鉴物种」（证明候选宇宙是 600+，不是 48 只） —实际： 命中 千棘海针（磨损的样子）
+[workshop-acceptance] ✔ [09-只看收藏开关] 真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok —实际： 开了之后 state=ok（selected=0）；关掉之后 state=ok；命中={"tag":"SECTION","cls":"","path":"SECTION#team-workshop<MAIN<BODY<HTML<undefined"}
+[workshop-acceptance] ✔ [10-图鉴物种照实拒绝] 点一只自己没有的图鉴物种：它进**理论阵容**并带「按需推算（未核验）/仅试玩」标，页面不进错误态、玩家层不出现内部串 —实际： state=ok；理论阵容 1 只；格子 [{"status":"on_demand","canBattle":"trial"}]
+[workshop-acceptance] ✔ [反证 10-图鉴物种照实拒绝] 把服务端原话（含 selected / own-0001）直接印到玩家层必须被同一条判据抓住 —实际命中： 玩家那一行没说清「进不了队伍」 | 没说清为什么（要放你拥有的个体） | 没给出下一步怎么做 | 玩家层泄漏了内部串「服务端原话」 | 玩家层泄漏了内部串「selected」 | 玩家层泄漏了内部串「own-0001」 | 服务端原文没有留在 data-tw-error-raw（排查要用）
+[workshop-acceptance] ✔ [反证 10-图鉴物种照实拒绝] 把「静默接受」的样本过同一条判据必须报错 —实际命中： selected=pet_000562 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true
+[workshop-acceptance] ✔ [11-错误态可恢复] 错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里 —实际： 加点={"added":true,"probe":{"rows":2,"match":1,"species":"pet_000012"},"beforeCount":0,"after":1} state=ok selected=1
+[workshop-acceptance] ✔ [12-真实键鼠选到第 2 只] 真实键盘搜名字 + 真实鼠标点候选：已选 == 2，六个槽位里两个填上了 —实际： state=ok selected=2 填了 2/6 槽
+[workshop-acceptance] ✔ [13-恰好三个候选] 已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径（偏好保留池空时 RC-303 会如实回落，第三个位置由召回的参考候选补上并标「候选参考」） —实际： 标签=强度|稳定|候选参考 候选节点=3 缺口节点=10
+[workshop-acceptance] ✔ [反证 13-恰好三个候选] 把三个候选改成两个必须被同一条判据抓住 —实际命中： 下一只候选必须恰好 3 个，实际 2 | 页面上必须画出 3 个候选节点，实际 2
+[workshop-acceptance] ✔ [反证 13-候选标签去重] 三个候选里有两个是同一个取舍标签（等于只有两个选择）必须被抓住 —实际命中： 三个候选的取舍标签必须两两不同，实际 ["强度","强度","候选参考"]
+[workshop-acceptance] ✖ 流程异常： TypeError: Cannot read properties of undefined (reading 'map')
+    at main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-workshop-acceptance.mjs:963:52)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-workshop-acceptance.mjs:1352:14
+[workshop-acceptance] ────────────────────────────────────────────────────────────────────────────
+[workshop-acceptance] ✔ 01-产品页挂载 产品页 roco.html 上有 #team-workshop，模块在自己的 shadow root 里渲染（不是另起一套临时页面） → shadow root=true dataset.twSlots=6 槽位节点=6
+[workshop-acceptance] ✔ 02-六个槽位 第一次打开就画出 6 个槽位（不是「已选 3 只固定栏」），filled == 已选数 → slots=6 节点=6 filled=0 selected=0
+[workshop-acceptance] ✔ 03-徽记与候选池 三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账） → 页头出现次数 {"mode":1,"candidate":1,"prematch":1,"poolTotal":622}
+[workshop-acceptance] ✔ 04-宽屏不溢出 1440×900：产品页与模块都没有横向溢出（scrollW == clientW） → clientW=1440 scrollW=1440 bodyScrollW=1440
+[workshop-acceptance] ✖ 05-初判不含证据段 `stage=first` 的回执：axes === null、axes_status === not_requested、serving.full_withheld === NOT_REQUESTED（主动不要证据段，不是降级），且真的产出了结构化初判 → stage=first 的回执里没有 serving 信封（HTTP 400；serving.first=undefined withheld=undefined missing=undefined）
+[workshop-acceptance] ✔ 06-初判先于完整载荷 页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms） → ；fetches=first|full rendered_after_first=yes first_ms=99 full_ms=24 stage=full full_state=ok
+[workshop-acceptance] ✔ 07-分段元数据在 dataset 分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有 → serving=roco-serving/v1 degraded=no elapsed_ms=20 withheld=""
+[workshop-acceptance] ✔ 08-候选含图鉴物种 候选池里能点到「我没有的图鉴物种」（证明候选宇宙是 600+，不是 48 只） → 命中 千棘海针（磨损的样子）
+[workshop-acceptance] ✔ 09-只看收藏开关 真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok → 开了之后 state=ok（selected=0）；关掉之后 state=ok；命中={"tag":"SECTION","cls":"","path":"SECTION#team-workshop<MAIN<BODY<HTML<undefined"}
+[workshop-acceptance] ✔ 10-图鉴物种照实拒绝 点一只自己没有的图鉴物种：它进**理论阵容**并带「按需推算（未核验）/仅试玩」标，页面不进错误态、玩家层不出现内部串 → state=ok；理论阵容 1 只；格子 [{"status":"on_demand","canBattle":"trial"}]
+[workshop-acceptance] ✔ 11-错误态可恢复 错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里 → 加点={"added":true,"probe":{"rows":2,"match":1,"species":"pet_000012"},"beforeCount":0,"after":1} state=ok selected=1
+[workshop-acceptance] ✔ 12-真实键鼠选到第 2 只 真实键盘搜名字 + 真实鼠标点候选：已选 == 2，六个槽位里两个填上了 → state=ok selected=2 填了 2/6 槽
+[workshop-acceptance] ✔ 13-恰好三个候选 已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径（偏好保留池空时 RC-303 会如实回落，第三个位置由召回的参考候选补上并标「候选参考」） → 标签=强度|稳定|候选参考 候选节点=3 缺口节点=10
+[workshop-acceptance] ✖ fatal 整个流程必须跑完 → 异常：TypeError: Cannot read properties of undefined (reading 'map')
+    at main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-workshop-acceptance.mjs:963:52)
+   
+[workshop-acceptance] ✔ 02-六个槽位 [反证] 把槽位数改成 3（退回「已选 3 只固定栏」）必须被同一条判据抓住 → 槽位数必须是 6，实际 3 | 页面上必须画出 6 个槽位节点，实际 3
+[workshop-acceptance] ✔ 03-候选规则徽记 [反证] 把「候选规则（待实机核对）」徽记去掉必须被同一条判据抓住 → 缺徽记「候选规则（待实机核对）」
+[workshop-acceptance] ✔ 03-候选池 600+ [反证] 把候选池写成 48/60（迁移夹具）必须被同一条判据抓住 → 候选池总量必须 ≥600（全量图鉴），实际 60
+[workshop-acceptance] ✔ 05-初判不含证据段 [反证] 让 first 那一次也带上五轴（把「初判不跑证据段」破掉）必须被同一条判据抓住 → stage=first 的回执里没有 serving 信封
+[workshop-acceptance] ✔ 05-初判不含证据段（降级混淆） [反证] 把「超时降级」混成「主动只要初判」必须被同一条判据抓住 → stage=first 的 axes 必须是 null，实际 undefined | axes_status 必须是 not_requested，实际 undefined | full_withheld 必须是 NOT_REQUESTED（主动不要证据段），实际 undefined | stage=first 不许产出完整段，实际 full={"kind":
+[workshop-acceptance] ✔ 06-初判先于完整载荷 [反证] 把两阶段退化成一次性请求（fetches=full、没有初判耗时）必须被同一条判据抓住 → 请求顺序必须是 first|full（初判先发、完整载荷后发），实际 "full" | 完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画） | 没有量到初判渲染耗时（data-tw-first-ms=null）
+[workshop-acceptance] ✔ 06-初判先于完整载荷（初判被挡住） [反证] 让「完整载荷到达之前」什么都不画（rendered_after_first=no）也必须被抓住 → 完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画）
+[workshop-acceptance] ✔ 10-图鉴物种照实拒绝 [反证] 把服务端原话（含 selected / own-0001）直接印到玩家层必须被同一条判据抓住 → 玩家那一行没说清「进不了队伍」 | 没说清为什么（要放你拥有的个体） | 没给出下一步怎么做 | 玩家层泄漏了内部串「服务端原话」 | 玩家层泄漏了内部串「selected」 | 玩家层泄漏了内部串「own-0001」 | 服务端原文没有留在 data-tw-error-raw（排查要用）
+[workshop-acceptance] ✔ 10-图鉴物种照实拒绝 [反证] 把「静默接受」的样本过同一条判据必须报错 → selected=pet_000562 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true
+[workshop-acceptance] ✔ 13-恰好三个候选 [反证] 把三个候选改成两个必须被同一条判据抓住 → 下一只候选必须恰好 3 个，实际 2 | 页面上必须画出 3 个候选节点，实际 2
+[workshop-acceptance] ✔ 13-候选标签去重 [反证] 三个候选里有两个是同一个取舍标签（等于只有两个选择）必须被抓住 → 三个候选的取舍标签必须两两不同，实际 ["强度","强度","候选参考"]
+[workshop-acceptance] 截图 1 张 → reports/roco/workshop-acceptance/
+[workshop-acceptance] 判据 12/14 通过；反证 11/11 命中
+[workshop-acceptance] 报告 → reports/roco/workshop-acceptance/browser-workshop-acceptance.json
+[workshop-acceptance] 有 2 条不通过

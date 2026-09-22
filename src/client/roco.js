@@ -802,7 +802,7 @@ function render() {
   if (pickPanel) pickPanel.hidden = legacyPracticeEnabled() ? (busy && !state.pick.open) : true;
   const brief = $('lineup-brief');
   if (brief) {
-    brief.hidden = !(busy && !state.pick.open);
+    brief.hidden = !busy;
     if (!brief.hidden) {
       const nameOf = petNameOf;
       const mine = state.pick.player.length
@@ -813,8 +813,8 @@ function render() {
         : [view?.opponent?.field?.name, ...(view?.opponent?.bench ?? []).map(() => null)].filter(Boolean);
       brief.innerHTML = `<span>我方 <strong>${mine.join('、') || '（未选）'}</strong>`
         + ` ｜ 对手 <strong>${foes.join('、') || '（未选）'}</strong></span>`
-        + '<button id="reopen-pick">重选阵容</button>';
-      $('reopen-pick').addEventListener('click', () => { state.pick.open = true; render(); });
+        + `<button id="reopen-pick">${state.pick.open ? '收起阵容，继续战斗' : '查看或调整下局阵容'}</button>`;
+      $('reopen-pick').addEventListener('click', () => { state.pick.open = !state.pick.open; render(); });
     }
   }
   $('battle-panel').hidden = !busy;
@@ -825,7 +825,7 @@ function render() {
   // 战斗优先（2026-09-22 人类 P0 战斗页规格）：一局进行中，**选阵容面**（六槽工作台）
   // 整块收起 —— 它占的高度比战场还大。要看阵容时用「重选阵容」那一行把它叫回来。
   const workshop = $('team-workshop');
-  if (workshop) workshop.hidden = busy;
+  if (workshop) workshop.hidden = busy && !state.pick.open;
   // 战斗页顶部的规则/置信度徽记仍在页头（那是「这一局的规则口径」），
   // 但**大段规则与证据**在战斗时不该占主视线：它们本来就在开发者抽屉里。
   const modeLine = $('mode-line');
