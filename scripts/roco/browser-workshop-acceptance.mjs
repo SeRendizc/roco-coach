@@ -842,9 +842,30 @@ async function main() {
         {tries: 30, ms: 120});
       const rejectedText = String(await playerText());
       const rejected = await facts();
-      check('10-图鉴物种照实拒绝', '点一只自己没有的图鉴物种：服务端照实说明为什么不能进队，页面把它显示出来（不静默忽略）',
-        rejected.state === 'bad-request' && /服务端原话/.test(rejectedText) && /selected/.test(rejectedText),
-        `state=${rejected.state} 错误=${JSON.stringify(rejected.error)}`);
+      // 2026-09-22 人类 P0：玩家那一行**不许**出现 `selected` / `own-0001` / 「服务端原话」
+      // 这类内部串；但「为什么进不了队 + 现在能做什么」必须照实说，原文要留在
+      // `data-tw-error-raw` 里（开发者抽屉与排查读它）。判据按这个新口径拆成三条。
+      const rawError = await js(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twErrorRaw ?? null`);
+      const refuseProblems = (text, raw, state) => {
+        const bad = [];
+        if (state !== 'bad-request') bad.push(`state=${state}`);
+        if (!/进不了队伍/.test(String(text))) bad.push('玩家那一行没说清「进不了队伍」');
+        if (!/拥有的个体|你的盒子|正式队伍/.test(String(text))) bad.push('没说清为什么（要放你拥有的个体）');
+        if (!/我的精灵|理论搭配|换一只/.test(String(text))) bad.push('没给出下一步怎么做');
+        for (const leak of ['服务端原话', 'selected', 'own-0001', 'pet_']) {
+          if (String(text).includes(leak)) bad.push(`玩家层泄漏了内部串「${leak}」`);
+        }
+        if (!raw) bad.push('服务端原文没有留在 data-tw-error-raw（排查要用）');
+        return bad;
+      };
+      check('10-图鉴物种照实拒绝', '点一只自己没有的图鉴物种：玩家那一行说清「进不了队伍 + 为什么 + 下一步」，'
+        + '内部串不出现在玩家层（原文留在 data-tw-error-raw）',
+        refuseProblems(rejectedText, rawError, rejected.state).length === 0,
+        refuseProblems(rejectedText, rawError, rejected.state).join(' | ')
+        || `state=${rejected.state}；玩家那一行「${String(rejectedText).slice(0, 120)}」`);
+      counter('10-图鉴物种照实拒绝', '把服务端原话（含 selected / own-0001）直接印到玩家层必须被同一条判据抓住',
+        refuseProblems('服务端原话：selected 的每一项都必须是 own-0001 形状的个体的 id', null, 'bad-request'),
+        '{"text":"服务端原话：selected …"}');
       counter('10-图鉴物种照实拒绝', '把「静默接受」的样本过同一条判据必须报错',
         badRequestProblems(`selected=${catalogSpecies}`, {ok: true, player: {}}, 200, 'selected'),
         '{ok:true} / HTTP 200');

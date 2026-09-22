@@ -6,7 +6,7 @@
 // 这些在 Node 里量不到；只在页面上点几下也留不下证据。
 //
 // 做法：进程内起一个不配密钥的服务（模型调用一律失败），它按需拉起真的 Python
-// 规则服务；再用 CDP 驱动无头 Chrome 打开 `roco.html`，**真实鼠标 / 真实键盘**
+// 规则服务；再用 CDP 驱动无头 Chrome 打开 `roco.html?legacy3v3=1`，**真实鼠标 / 真实键盘**
 // （`Input.dispatchMouseEvent` / `Input.dispatchKeyEvent` / `Input.insertText`）
 // 走 D1—D4，并在 1440×900 与 390×844 两档量 `clientW === scrollW`、可点目标尺寸、
 // 小芽首屏可见性（`getBoundingClientRect`），最后写一份机器可读报告。
@@ -18,6 +18,9 @@
 //   reports/roco/ux-acceptance/browser-roco-ux-acceptance.json
 //   reports/roco/ux-acceptance/*.png
 
+// 2026-09-22：产品页**默认只给六宠主流程**（旧的 3v3 迁移区整块隐藏）。这条脚本量的是
+// legacy 逐位不变那条链路，所以显式带上 `?legacy3v3=1` —— 那个参数就是为它留的开关，
+// 而且反过来钉住了「玩家默认看不见旧入口」这件事。
 import {spawn} from 'node:child_process';
 import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -225,7 +228,7 @@ async function main() {
   };
 
   // 页面准备好（`data-roco-ready=yes` 由 boot() 末尾写）
-  await send('Page.navigate', {url: `${base}roco.html`});
+  await send('Page.navigate', {url: `${base}roco.html?legacy3v3=1`});
   for (let i = 0; i < 120; i += 1) {
     if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
     await sleep(250);
@@ -592,10 +595,37 @@ async function main() {
       text:line.textContent.replace(/\\s+/g,' ').trim(),hidden:line.getBoundingClientRect().height===0,
       top:Math.round(line.getBoundingClientRect().top),vh:window.innerHeight};})()`);
   const statusMode = await fetch(`${base}api/roco/status`).then((r) => r.json()).then((d) => d.mode);
-  check('D5-mode-badge', '模式徽记来自注册表（含「候选规则（待实机核对）」与匹配前对手未知），且首屏可见',
-    modeFacts.mode === 'pvp-standard-six-pet' && /候选规则（待实机核对）/.test(modeFacts.text)
-    && /UNKNOWN_PREMATCH/.test(modeFacts.text) && modeFacts.hidden === false && modeFacts.top < modeFacts.vh,
-    `data-roco-mode=${modeFacts.mode}；徽记「${modeFacts.text}」；注册表 label「${statusMode?.label ?? '(服务端没转发 mode)'}」`);
+  // 2026-09-22 人类 P0：玩家那一行**不再印注册表枚举**（`UNKNOWN_PREMATCH` 属于验收台术语），
+  // 于是判据拆成两层，各自钉该钉的：
+  //   · **玩家层**必须是中文结论「候选规则（待实机核对）」「匹配前对手未知」；
+  //   · **数据层**（`document.body.dataset.rocoPrematch`）仍然逐字带枚举，机器可核对；
+  //   · **注册表原文**必须还在开发者抽屉里（`#mode-raw` / `#mode-probe`），不能连原文都丢掉。
+  const modeProblems = (f, rawText) => {
+    const bad = [];
+    if (f?.mode !== 'pvp-standard-six-pet') bad.push(`模式 id 实际 ${JSON.stringify(f?.mode)}`);
+    if (!/候选规则（待实机核对）/.test(String(f?.text ?? ''))) bad.push('玩家层没有「候选规则（待实机核对）」');
+    if (!/匹配前对手未知/.test(String(f?.text ?? ''))) bad.push('玩家层没有「匹配前对手未知」');
+    if (/UNKNOWN_PREMATCH|注册表|引擎实际/.test(String(f?.text ?? ''))) {
+      bad.push('玩家层出现了注册表/验收台术语（枚举名、注册表字样、引擎实际规模）');
+    }
+    if (f?.prematch !== 'UNKNOWN_PREMATCH') bad.push(`数据层没带枚举（dataset.rocoPrematch=${JSON.stringify(f?.prematch)}）`);
+    if (f?.hidden !== false || !(f?.top < f?.vh)) bad.push('徽记不在首屏');
+    if (!/pvp-standard-six-pet|标准 PVP/.test(String(rawText ?? ''))) bad.push('开发者抽屉里没有注册表原文');
+    return bad;
+  };
+  const modeRawText = await js(`(()=>{const a=document.getElementById('mode-raw');
+    const b=document.getElementById('mode-probe');
+    return [a?a.textContent:'',b?b.textContent:''].join(' | ');})()`);
+  check('D5-mode-badge', '模式徽记：玩家层是中文结论（候选规则（待实机核对）+ 匹配前对手未知），'
+    + '枚举与注册表原文留在数据层与开发者抽屉里，且首屏可见',
+    modeProblems(modeFacts, modeRawText).length === 0,
+    modeProblems(modeFacts, modeRawText).join(' | ')
+    + `；徽记「${modeFacts.text}」；注册表 label「${statusMode?.label ?? '(服务端没转发 mode)'}」`);
+  counter('D5-mode-badge', '把注册表枚举名印回玩家层（`UNKNOWN_PREMATCH` 直接写进徽记）必须被同一条判据抓住',
+    modeProblems({...modeFacts, text: `${modeFacts.text} UNKNOWN_PREMATCH`, prematch: 'UNKNOWN_PREMATCH'}, modeRawText),
+    '{"text":"…UNKNOWN_PREMATCH"}');
+  counter('D5-mode-badge(枚举丢了)', '数据层把 prematch 枚举丢掉必须被同一条判据抓住',
+    modeProblems({...modeFacts, prematch: null}, modeRawText), '{"prematch":null}');
   check('D5-no-fake-hearts', '页面上没有心形计数器（魔力/心只显示引擎给的数，没有就写未核验）',
     (await js(`!/[♥❤]/.test(document.body.innerText)`)) === true
     && (await js(`/未核验/.test(document.getElementById('self-resource').textContent)`)) === true,
@@ -611,7 +641,7 @@ async function main() {
   //   · 能量那一行带**引擎给的上限**（legacy=6），不是页面写死的数；
   //   · 真鼠标点「防御」→ 下一回合自己卡上出现**防御冷却**行。
   // 每一条都配一条反证：把 DOM 改成「少一行 / 少个标记」，判据必须红。
-  await send('Page.navigate', {url: `${base}roco.html`});
+  await send('Page.navigate', {url: `${base}roco.html?legacy3v3=1`});
   for (let i = 0; i < 120; i += 1) {
     if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
     await sleep(250);

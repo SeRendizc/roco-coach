@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T04:10:25.101Z",
+ "judged_at": "2026-09-22T04:56:02.160Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -77,13 +77,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=97 full_ms=28 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=100 full_ms=27 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=24 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=23 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -99,9 +99,9 @@
   },
   {
    "id": "10-图鉴物种照实拒绝",
-   "judge": "点一只自己没有的图鉴物种：服务端照实说明为什么不能进队，页面把它显示出来（不静默忽略）",
+   "judge": "点一只自己没有的图鉴物种：玩家那一行说清「进不了队伍 + 为什么 + 下一步」，内部串不出现在玩家层（原文留在 data-tw-error-raw）",
    "ok": true,
-   "actual": "state=bad-request 错误=\"selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000562）\""
+   "actual": "state=bad-request；玩家那一行「 队伍（六个槽位） 还差 6 只 标准 PVP · 六宠 候选规则（待实机核对） 匹配前对手未知 · 按版本环境倾向评价 候选来自全图鉴 600+ 第 1 槽位（空） 先挑一只你信得过的 第 2 槽位（空） 先挑一只你信得过的 第 3 槽位」"
   },
   {
    "id": "11-错误态可恢复",
@@ -173,13 +173,13 @@
    "id": "22-玩家层无工程话",
    "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
    "ok": true,
-   "actual": "扫过 1817 字（豁免机制原文 2 处）；样例「 队伍（六个槽位） 六个槽位都满了 标准 PVP · 六宠 候选规则（待实机核对） 匹配前对手未知 · 按版本环境倾向评价 候选来自全图鉴 600+ 铠甲虫 虫系 有具体构建（结构…」"
+   "actual": "扫过 2415 字（豁免机制原文 4 处）；样例「 队伍（六个槽位） 六个槽位都满了 标准 PVP · 六宠 候选规则（待实机核对） 匹配前对手未知 · 按版本环境倾向评价 候选来自全图鉴 600+ 铠甲虫 虫系 图鉴 · 按需推…」"
   },
   {
    "id": "23-无胜率与百分数",
    "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）",
    "ok": true,
-   "actual": "扫过 1817 字无命中（豁免机制原文 2 条）"
+   "actual": "扫过 2415 字无命中（豁免机制原文 2 条）"
   },
   {
    "id": "24-未知写在玩家层",
@@ -257,13 +257,13 @@
    "id": "30-触控目标",
    "judge": "390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44",
    "ok": true,
-   "actual": "量了 12 个元素，全部达标"
+   "actual": "量了 23 个元素，全部达标"
   },
   {
    "id": "31-移动端顺序",
    "judge": "390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":351},{\"cls\":\"tw-cand\",\"top\":1237},{\"cls\":\"tw-eval\",\"top\":1468},{\"cls\":\"tw-coach\",\"top\":2761}]"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":311},{\"cls\":\"tw-cand\",\"top\":1300},{\"cls\":\"tw-eval\",\"top\":1689},{\"cls\":\"tw-coach\",\"top\":2982}]"
   },
   {
    "id": "32-窄屏候选区",
@@ -345,6 +345,13 @@
    "ok": true,
    "hit": "完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画）",
    "actual": "{\"fetches\":\"first|full\",\"renderedAfterFirst\":\"no\"}"
+  },
+  {
+   "id": "10-图鉴物种照实拒绝",
+   "judge": "把服务端原话（含 selected / own-0001）直接印到玩家层必须被同一条判据抓住",
+   "ok": true,
+   "hit": "玩家那一行没说清「进不了队伍」 | 没说清为什么（要放你拥有的个体） | 没给出下一步怎么做 | 玩家层泄漏了内部串「服务端原话」 | 玩家层泄漏了内部串「selected」 | 玩家层泄漏了内部串「own-0001」 | 服务端原文没有留在 data-tw-error-raw（排查要用）",
+   "actual": "{\"text\":\"服务端原话：selected …\"}"
   },
   {
    "id": "10-图鉴物种照实拒绝",
@@ -523,14 +530,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "97",
-    "fullMs": "28",
+    "firstMs": "100",
+    "fullMs": "27",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "24"
+    "elapsedMs": "23"
    },
    "dom": {
     "slotNodes": 6,
@@ -576,14 +583,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "22",
-    "fullMs": "21",
+    "firstMs": "24",
+    "fullMs": "20",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "17"
+    "elapsedMs": "16"
    },
    "dom": {
     "slotNodes": 6,
@@ -703,14 +710,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "15",
-    "fullMs": "13",
+    "firstMs": "17",
+    "fullMs": "12",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "9"
+    "elapsedMs": "7"
    },
    "dom": {
     "slotNodes": 6,
@@ -833,14 +840,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "15",
-    "fullMs": "14",
+    "firstMs": "16",
+    "fullMs": "13",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "10"
+    "elapsedMs": "8"
    },
    "dom": {
     "slotNodes": 6,

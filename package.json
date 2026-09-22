@@ -100,6 +100,7 @@
     "train:prereqs": "node scripts/train/check-27b-prereqs.mjs",
     "train:plan": "node scripts/train/plan-27b-steps.mjs",
     "train:verify-artifacts": "node scripts/train/verify-training-artifacts.mjs",
-    "roco:mobile-sweep": "node scripts/roco/browser-mobile-sweep.mjs"
+    "roco:mobile-sweep": "node scripts/roco/browser-mobile-sweep.mjs",
+    "roco:live-acceptance": "node scripts/roco/browser-live-acceptance.mjs"
   }
 }

@@ -104,8 +104,44 @@ function browserModules(){
 }
 for(const file of browserModules())publicAssets.add(file);
 
+//: 进程启动时间与「资源清单版本」——页面与验收拿它分辨「进程是旧的」。
+const STARTED_AT=new Date().toISOString();
+let assetRefreshes=0;
+
+/**
+ * 白名单**自愈**：请求 miss 时按磁盘重算一次模块图（同一条推导规则）。
+ *
+ * 为什么必须这么做（这个仓库已经栽过三次）：
+ *   · `rules.js` 加进手写白名单，运行中的进程启动早于那次修改 → 404 → `app.js` 的
+ *     import 失败 → 整张模块图崩溃 → **一行 JS 都不执行**（白屏），而 `npm test` 全绿
+ *     —— 测试查的是磁盘上的白名单，查不了运行进程的行为；
+ *   · `roco.html` 自己的入口脚本没进图 → 同样 404 → 同样白屏；
+ *   · 2026-09-22 实测：`src/client/team-workshop.js`（RC-305 新增）在磁盘上有、在跑了
+ *     几天的进程里没有 → 产品页卡在「正在读取精灵名单…」，用户以为引擎坏了。
+ *
+ * 手工维护清单的失效模式就是「漏改一边」，而**重启**这件事没有任何东西提醒你。
+ * 所以：miss 时重算一次（只在 miss 时算，热路径不受影响）。这**不削弱**安全边界 ——
+ * 重算用的还是同一份推导规则：只从声明过的页面外壳出发、按真实的 import 图走，
+ * 拿到的仍是仓库相对路径，仍然要 `readFile(join(root, asset))`，没有路径穿越空间。
+ */
+function refreshAssetsOnce(){
+ assetRefreshes+=1;
+ let added=0;
+ for(const file of browserModules())if(!publicAssets.has(file)){publicAssets.add(file);added+=1;}
+ return added;
+}
+/** 请求 miss 时调用：磁盘上现在有、而且**在推导规则之内**才放行。 */
+export function resolveAssetOnMiss(asset){
+ if(publicAssets.has(asset))return true;
+ const before=new Set(publicAssets);
+ refreshAssetsOnce();
+ const ok=publicAssets.has(asset);
+ if(!ok)for(const f of publicAssets)if(!before.has(f))publicAssets.delete(f);   // 没命中就还原，不留半份
+ return ok;
+}
+
 /** 供结构契约测试使用：白名单与模块图必须能被独立核对（见 tests/evals/structure-contract.test.js）。 */
-export {publicAssets,browserModules,moduleSpecifiers};
+export {publicAssets,browserModules,moduleSpecifiers,STARTED_AT};
 
 const json=(res,status,value)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(value));};
 const fail=(status,message)=>Object.assign(new Error(message),{status});
@@ -216,12 +252,16 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
     let sid=req.headers.cookie?.match(/(?:^|;\s*)coach_session=([a-f0-9]{48})(?:;|$)/)?.[1],s=sessions.get(sid);
     if(!s){if(sessions.size>=100)throw fail(429,'本机会话过多，请重启服务');sid=randomBytes(24).toString('hex');s={csrf:randomBytes(24).toString('hex'),expires:now+8*3600000};sessions.set(sid,s);res.setHeader('Set-Cookie',`coach_session=${sid}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800`);}
     s.nonce=randomBytes(16).toString('hex');s.nonceExpires=now+300000;
-    return json(res,200,{...status(),csrf:s.csrf,nonce:s.nonce,publicKey:spki});
+    return json(res,200,{...status(),csrf:s.csrf,nonce:s.nonce,publicKey:spki,
+     server:{started_at:STARTED_AT,assets:publicAssets.size,asset_refreshes:assetRefreshes,
+      asset_refreshable:false,note:'静态资源清单来自磁盘的模块图；miss 时会自愈重算一次'}});
    }
    if(path.startsWith('/api/')){
     // GET /api/roco/status 是唯一的只读接口：演示页打开时先问一次「规则服务在不在」，
     // 它不改状态、不需要 CSRF，也不碰密钥。其余 /api/ 一律 POST + CSRF。
-    if(path==='/api/roco/status'&&req.method==='GET')return json(res,200,await rocoService.status());
+    // RC-50x（人类 P0 实测）：状态接口**主动探一次**（引擎是惰性启动的，被动探针会
+    // 在页面刚打开时谎报 available:false）。它仍然只读、不要 CSRF、不改任何对局状态。
+    if(path==='/api/roco/status'&&req.method==='GET')return json(res,200,await rocoService.status({probe:true}));
     // 可选用精灵名单（P0-3）：只读、全公开事实。放在 GET 上是刻意的——
     // 它不改任何状态，也没有 CSRF 风险。
     // 第 60 轮：名单扩到 48 只后要能分页/筛选，所以查询串原样交给 roster()
@@ -335,7 +375,7 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
    const raw=decodeURIComponent(path.slice(1));
    const asset=Object.hasOwn(PAGE_ALIASES,raw)?PAGE_ALIASES[raw]:raw;
    if(asset.includes('..'))throw fail(404,'文件不存在');
-   if(!publicAssets.has(asset))throw fail(404,'文件不存在');
+   if(!publicAssets.has(asset)&&!resolveAssetOnMiss(asset))throw fail(404,'文件不存在');
    const data=await readFile(join(root,asset));res.writeHead(200,{'Content-Type':asset.endsWith('.html')?'text/html; charset=utf-8':asset.endsWith('.css')?'text/css; charset=utf-8':'text/javascript; charset=utf-8'});res.end(req.method==='HEAD'?undefined:data);
   }catch(e){if(!res.headersSent)json(res,e.status||500,{error:e.status?e.message:'本地服务无法完成请求'});else res.end();}
  });

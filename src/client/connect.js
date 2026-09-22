@@ -13,3 +13,6 @@ $('connect-form').onsubmit=async e=>{e.preventDefault();if(busy)return;lock(true
 $('verify').onclick=async()=>{if(busy)return;lock(true);$('message').textContent='正在通过 HTTPS 验证模型，请稍等…';try{await post('/api/verify',{});$('message').textContent='连接验证通过。返回训练场刷新页面，即可向小芽提问。';}catch(e){$('message').textContent=e.message;try{await bootstrap();}catch{}}finally{lock(false);}};
 $('disconnect').onclick=async()=>{if(busy)return;lock(true);try{await post('/api/disconnect',{});$('message').textContent='已从当前后端进程移除密钥，恢复本地模式。';}catch(e){$('message').textContent=e.message;}finally{lock(false);}};
 bootstrap().catch(e=>{$('status').textContent=e.message;$('save').disabled=true;});
+
+// 模块图完整才跑得到这里：撤掉「脚本没加载成功」的兜底横幅。
+document.getElementById('boot-fallback')?.remove();

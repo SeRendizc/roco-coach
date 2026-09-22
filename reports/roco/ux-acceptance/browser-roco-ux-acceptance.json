@@ -1,6 +1,6 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-22T04:10:57.874Z",
+ "generated_at": "2026-09-22T04:51:16.423Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [
@@ -143,7 +143,7 @@
    "id": "P0-2-390-same-screen",
    "name": "390×844 下输入框与最近一句回复仍在首屏",
    "ok": true,
-   "actual": "输入 {\"top\":528,\"bottom\":566,\"left\":23,\"right\":288} / 回复 {\"top\":378,\"bottom\":413,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 253px 动作坞 {\"top\":591,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
+   "actual": "输入 {\"top\":522,\"bottom\":566,\"left\":23,\"right\":288} / 回复 {\"top\":373,\"bottom\":408,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 253px 动作坞 {\"top\":591,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
   },
   {
    "id": "P0-6-top",
@@ -165,9 +165,9 @@
   },
   {
    "id": "D5-mode-badge",
-   "name": "模式徽记来自注册表（含「候选规则（待实机核对）」与匹配前对手未知），且首屏可见",
+   "name": "模式徽记：玩家层是中文结论（候选规则（待实机核对）+ 匹配前对手未知），枚举与注册表原文留在数据层与开发者抽屉里，且首屏可见",
    "ok": true,
-   "actual": "data-roco-mode=pvp-standard-six-pet；徽记「标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）引擎实际 3 只 · 注册表 6 只注册表里登记了 4 项未核实（原文在开发者抽屉）匹配前对手未知 · 按版本环境倾向评价（UNKNOWN_PREMATCH）」；注册表 label「标准 PVP 六宠阵容工坊（候选模式）」"
+   "actual": "；徽记「标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）本局有 4 条规则未核实，界面上会逐条标出来（原文在开发者抽屉）匹配前对手未知 · 按版本环境倾向评价」；注册表 label「标准 PVP 六宠阵容工坊（候选模式）」"
   },
   {
    "id": "D5-no-fake-hearts",
@@ -250,6 +250,20 @@
  ],
  "counterproofs": [
   {
+   "id": "D5-mode-badge",
+   "name": "把注册表枚举名印回玩家层（`UNKNOWN_PREMATCH` 直接写进徽记）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "玩家层出现了注册表/验收台术语（枚举名、注册表字样、引擎实际规模）",
+   "actual": "{\"text\":\"…UNKNOWN_PREMATCH\"}"
+  },
+  {
+   "id": "D5-mode-badge(枚举丢了)",
+   "name": "数据层把 prematch 枚举丢掉必须被同一条判据抓住",
+   "ok": true,
+   "hit": "数据层没带枚举（dataset.rocoPrematch=null）",
+   "actual": "{\"prematch\":null}"
+  },
+  {
    "id": "RC502-按需推算的卡如实标记",
    "name": "把「未核验」标记去掉（卡上不写配招来源）必须被同一条判据抓住",
    "ok": true,
@@ -265,8 +279,8 @@
   }
  ],
  "totals_counterproofs": {
-  "checks": 2,
-  "hit": 2,
+  "checks": 4,
+  "hit": 4,
   "missed": 0
  },
  "measurements": {
@@ -423,26 +437,26 @@
      "height": 844
     },
     "card": {
-     "top": 337,
+     "top": 332,
      "bottom": 577,
      "left": 10,
      "right": 380
     },
     "form": {
-     "top": 527,
+     "top": 522,
      "bottom": 566,
      "left": 23,
      "right": 367
     },
     "input": {
-     "top": 528,
+     "top": 522,
      "bottom": 566,
      "left": 23,
      "right": 288
     },
     "reply": {
-     "top": 378,
-     "bottom": 413,
+     "top": 373,
+     "bottom": 408,
      "left": 23,
      "right": 367
     },
@@ -482,7 +496,7 @@
    "mode": "pvp-standard-six-pet",
    "prematch": "UNKNOWN_PREMATCH",
    "standardPvp": "yes",
-   "text": "标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）引擎实际 3 只 · 注册表 6 只注册表里登记了 4 项未核实（原文在开发者抽屉）匹配前对手未知 · 按版本环境倾向评价（UNKNOWN_PREMATCH）",
+   "text": "标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）本局有 4 条规则未核实，界面上会逐条标出来（原文在开发者抽屉）匹配前对手未知 · 按版本环境倾向评价",
    "hidden": false,
    "top": 12,
    "vh": 844

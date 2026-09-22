@@ -1,4 +1,6 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 洛克王国：世界（训练场）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/roco.css"></head><body>
+<div id="boot-fallback" class="boot-fallback" role="alert">页面脚本没有加载成功：本机服务可能还是**旧版本**（静态资源清单在进程启动时就定下了）。请在仓库根目录重启 <code>npm start</code>，然后刷新这一页；开发者抽屉里能看到服务进程的启动时间与资源清单规模。</div>
+
 <main>
 
 <!-- ── 页头：游戏标题 + **模式徽记** + 小芽入口 + 抽屉 ──────────────────────
@@ -47,6 +49,10 @@
     <pre id="power-status-raw" class="raw">点开这一栏后按当前局面与名单生成。</pre>
     <!-- 模式注册表的**原文**（不是转述）：读自 data/roco/battle-modes.json -->
     <div class="section-title"><h3>模式注册表（原文，未核验项逐条列出）</h3></div>
+    <!-- 注册表口径的内部数字（引擎当前生效规模 vs 登记规模、未核实项数、prematch）：
+         它们是排查用的，不是玩家首屏该读的东西（2026-09-22 人类 P0：这类「验收台术语」
+         不许出现在玩家那一行）。玩家那一行只保留等价结论：「本局有 N 条规则未核实」。 -->
+    <p class="muted" id="mode-probe">模式注册表还没读到。</p>
     <pre id="mode-raw" class="raw">正在读取模式注册表…</pre>
     <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
     <ul class="checklist" id="coverage"></ul>
@@ -60,8 +66,8 @@
      可以跳过，跳过之后不再占位。 -->
 <div class="onboard-bar" id="onboard-bar">
  <ol class="onboard" id="onboard">
-  <li><strong>选我方 3 只</strong><span>点一下加入，再点一下移出</span></li>
-  <li><strong>选对手 3 只</strong><span>切到「对手」那一侧再点</span></li>
+  <li><strong>选满六只</strong><span>在下面的工作台里点候选，选到六只为止</span></li>
+  <li><strong>看评估</strong><span>还差什么、下一只建议谁，它会随阵容变</span></li>
   <li><strong>开一局</strong><span>该说话时小芽自己会出来</span></li>
  </ol>
  <button id="onboard-skip" class="onboard-skip">跳过</button>
@@ -88,7 +94,14 @@
 <!-- ── 选阵容页（`#select-panel`）：固定队伍栏 + 阵容池 ───────────────────────
      这一页只有「已选的 3 只」与「48 只池子」。搜索 / 属性·定位筛选 / 分页全部走
      `/api/roco/roster` 的 `offset/limit/type/role`（服务端分页，页面不自建第二份数据）。 -->
-<section class="panel select-panel" id="select-panel" data-roco-pick-side="player">
+<section class="panel select-panel" id="select-panel" data-roco-pick-side="player" hidden>
+ <!-- ⚠ 这是**旧的 3v3 迁移练习区**（48 只夹具 + 双方各 3 只）。2026-09-22 起它**不再是
+      玩家主流程**：标准 PVP 六宠才是。原因有两条，都是用户当面指出的：
+        ① 页面上同时挂着「双方各 3 只」与「标准 PVP · 六宠」两个主入口 = **路线冲突**，
+           玩家不知道该点哪个；三步教程也在教「各选 3 只」。
+        ② v3 口径里标准 PVP 是六宠，3v3 只属于历史/迁移夹具。
+      它仍然保留，因为 legacy 逐位不变（8 条金标指纹）与 119 条演示判据都跑在这条链路上，
+      但必须**显式**打开：`roco.html?legacy3v3=1`（验收脚本与迁移对照用，玩家默认看不见）。 -->
 
  <!-- 固定队伍栏：已选 3 只始终可见，我方/对手共用同一套「这一局带谁」 -->
  <div class="teambar">

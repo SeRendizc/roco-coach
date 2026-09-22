@@ -2,6 +2,7 @@
   {
     "step": "01-开局前",
     "datasets": {
+      "rocoRoute": "legacy-3v3",
       "rocoOnboard": "hidden",
       "rocoMode": "pvp-standard-six-pet",
       "rocoPrematch": "UNKNOWN_PREMATCH",
@@ -52,6 +53,7 @@
   {
     "step": "02-危险提示",
     "datasets": {
+      "rocoRoute": "legacy-3v3",
       "rocoOnboard": "hidden",
       "rocoMode": "pvp-standard-six-pet",
       "rocoPrematch": "UNKNOWN_PREMATCH",
@@ -103,6 +105,7 @@
   {
     "step": "03-点掉后沉默",
     "datasets": {
+      "rocoRoute": "legacy-3v3",
       "rocoOnboard": "hidden",
       "rocoMode": "pvp-standard-six-pet",
       "rocoPrematch": "UNKNOWN_PREMATCH",

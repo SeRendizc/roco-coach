@@ -49,6 +49,13 @@ export const TEAM_WORKSHOP_BADGES = Object.freeze({
 /** 队伍六个槽位。**不是「已选 3 只固定栏」**：v3 已废止那个口径。 */
 export const TEAM_SLOTS = 6;
 
+//: 筛选词表是**闭集**（与登记层同一套）：属性取数据里真的出现过的 18 个系别，定位取 5 个。
+//: 循环选项而不是让玩家打字 —— 打字会搜出一堆零结果，还会把拼错的词当成「没有这只」。
+const TYPE_CYCLE = ['', '普通系', '火系', '水系', '武系', '翼系', '冰系', '龙系', '幽系', '萌系',
+  '虫系', '幻系', '草系', '地系', '毒系', '光系', '恶系', '机械系', '电系'];
+const ROLE_CYCLE = ['', 'attacker', 'tank', 'recovery', 'control', 'support'];
+const ROLE_CN = {attacker: '输出', tank: '坦克', recovery: '回复', control: '控制', support: '辅助'};
+
 /** 五个口径的显示顺序与玩家说明（与路由的 `axis_order` 同源，只是翻译成人话）。 */
 export const AXIS_LABELS = Object.freeze(['环境价值', '最怕的体系', '对局离散度', '操作容错', '覆盖置信']);
 export const AXIS_LEGEND = Object.freeze({
@@ -80,18 +87,24 @@ const STYLE = `
 .tw-badge{font-size:11.5px;border:1px solid #4a6858;color:#a8e5b0;border-radius:6px;padding:3px 8px}
 .tw-badge.warn{border-color:#6b5a33;color:#f0cb77}
 .tw-badge.muted{border-color:#3a4a5c;color:#9caebe}
-.tw-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.tw-slot{border:1px dashed #36495e;border-radius:10px;padding:8px 9px;min-height:84px;
- display:flex;flex-direction:column;gap:4px;min-width:0}
+/* 六个槽位**等高**：grid-auto-rows:1fr 让同一行的槽位一样高，空槽与已选槽也一样高。
+   2026-09-22 人类 P0 实测：选中之后往卡里塞了整段机制原文，卡片当场长高，
+   空槽/已选槽高度参差、网格跳动 —— 选前选后必须是同一张版式。 */
+.tw-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;grid-auto-rows:1fr}
+.tw-slot{border:1px dashed #36495e;border-radius:10px;padding:8px 9px;
+ display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
 .tw-slot.on{border-style:solid;border-color:#8dd49c;background:#17242f}
 .tw-slot .tw-who{font-weight:600;font-size:14px;overflow-wrap:anywhere}
 .tw-slot .tw-meta{color:#9caebe;font-size:11.5px;line-height:1.5;overflow-wrap:anywhere}
 .tw-slot .tw-row{display:flex;gap:6px;align-items:center;min-width:0}
 .tw-slot .tw-lock{margin-left:auto;color:#9caebe;font-size:11px;white-space:nowrap}
 .tw-types{display:flex;flex-wrap:wrap;gap:3px}
-/* 机制一行：冻结原文逐字照印，**不截断**（宁可折行也不砍半句）；小字、和正文拉开层级。 */
+/* 机制一行：首层**只留一行**（超出用省略号），完整原文与四个技能进槽位里的详情抽屉。
+   为什么改：把整段机制原文塞进卡片会让选中后的卡比空卡高出一截（同一个网格里参差不齐），
+   而卡片首层的任务是「认得出这只 + 有一个区分点」，不是把资料读完。 */
 .tw-mech{display:flex;flex-direction:column;gap:2px;margin-top:2px;min-width:0}
-.tw-mech-line{font-size:11.5px;line-height:1.55;color:#bcd0e0;overflow-wrap:anywhere}
+.tw-mech-line{font-size:11.5px;line-height:1.5;color:#bcd0e0;overflow-wrap:anywhere;
+ display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
 .tw-mech-tags{font-size:11px;line-height:1.5;color:#8fa4b6;overflow-wrap:anywhere}
 [data-tw-mechanism="pending"] .tw-mech-line{color:#9caebe;font-style:normal}
 .tw-type{font-size:11px;background:#26374a;border-radius:5px;padding:2px 7px;color:#c8d5e2}
@@ -123,13 +136,28 @@ const STYLE = `
 .tw-cand-tools{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:8px}
 .tw-cand-tools input{flex:1 1 180px;min-width:0;min-height:44px;font-size:13.5px;background:#121e2c;
  color:#dbe5ef;border:1px solid #314154;border-radius:7px;padding:7px 9px}
-.tw-cand-list{display:grid;gap:6px;max-height:290px;overflow:auto}
+/* 候选区**不再内滚**（2026-09-22 人类 P1）：这一页原来同时有「页码」与「区域内滚动」，
+   两套导航叠在一起，玩家既翻页又滚内层。现在只留**一套**：分页器翻页，列表整块摊开，
+   这一页有多少条就全露出来；要看评估就整页向下滚（那是跨区浏览，不是区內导航）。 */
+.tw-cand-list{display:grid;gap:6px}
 .tw-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;text-align:left;min-height:44px;
  background:#16222f;border:1px solid #314154;border-radius:9px;padding:7px 10px;color:#dfe8ef;
  font:inherit;cursor:pointer}
 .tw-row:hover{background:#1e3043;border-color:#7e9bb8}
 .tw-row .tw-name{font-size:13.5px;font-weight:600;overflow-wrap:anywhere}
 .tw-row .tw-rowtag{margin-left:auto;font-size:11px;color:#9caebe;white-space:nowrap}
+/* 状态标：**点击之前**就要看得出这一只能不能上场（人类 P0：别等选到第六槽才弹内部错误）。 */
+.tw-row .tw-state-tag{font-size:11px;padding:2px 7px;border-radius:999px;border:1px solid #3a4a5c;
+ white-space:nowrap}
+.tw-state-held{color:#8dd49c;border-color:#3f6b4c;background:#16281d}
+.tw-state-trial{color:#f0cb77;border-color:#6b5b3a;background:#2a2318}
+.tw-state-info{color:#9caebe;border-color:#3a4a5c;background:#18232f}
+.tw-slot .tw-detail{margin-top:auto}
+.tw-slot .tw-detail>summary{font-size:11.5px;color:#9caebe;cursor:pointer;min-height:44px;
+ display:flex;align-items:center;list-style:none}
+.tw-slot .tw-detail>summary::-webkit-details-marker{display:none}
+.tw-slot .tw-detail[open]>summary{color:#dfe8ef}
+.tw-slot .tw-detail-body{font-size:11.5px;line-height:1.6;color:#bcd0e0;overflow-wrap:anywhere;margin-top:4px}
 .tw-pager{display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:flex-end;margin-top:8px;font-size:12px;color:#9caebe}
 .tw-knobs{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
 .tw-btn{font:inherit;cursor:pointer;color:#dfe8ef;background:#243345;border:1px solid #394a5e;
@@ -270,7 +298,15 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       <span class="tw-sub" id="tw-cand-sub">—</span></div>
      <p class="tw-note" id="tw-cand-note"></p>
      <div class="tw-cand-tools">
-      <input type="search" id="tw-search" placeholder="搜索全图鉴（名字）" aria-label="搜索全图鉴候选" autocomplete="off">
+      <input type="search" id="tw-search" placeholder="搜索名字（全图鉴）" aria-label="搜索候选" autocomplete="off">
+      <button class="tw-btn" id="tw-scope-all" aria-pressed="true">全图鉴参考</button>
+      <button class="tw-btn" id="tw-scope-mine" aria-pressed="false">我的精灵（能出战）</button>
+      <button class="tw-btn" id="tw-filter-type">属性：全部</button>
+      <button class="tw-btn" id="tw-filter-role">定位：全部</button>
+      <button class="tw-btn" id="tw-filter-clear">清除筛选</button>
+     </div>
+     <p class="tw-note" id="tw-cand-result" role="status" aria-live="polite"></p>
+     <div class="tw-cand-tools">
       <button class="tw-btn" id="tw-cand-prev">上一页</button>
       <span class="tw-note" id="tw-cand-page">1 / 1</span>
       <button class="tw-btn" id="tw-cand-next">下一页</button>
@@ -306,7 +342,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     payload: null,
     error: null,
     seq: 0,
-    pool: {offset: 0, total: 0, pageSize: 12, q: '', rows: []},
+    // 候选区**只有一套导航**：分页器（页码），列表整块摊开不内滚（人类 P1）。
+    // 筛选走服务端（`/api/roco/box` 的 kind/q/type/role 白名单），换条件一律回第一页。
+    pool: {offset: 0, total: 0, pageSize: 12, q: '', kind: 'catalog', type: '', role: '', rows: []},
     poolSeq: 0,
     ownedBySpecies: new Map(),
   };
@@ -319,17 +357,70 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     return data;
   };
 
+  /** 详情抽屉里的机制原文：**逐字**照印（首层只留一行，全文在这里）。 */
+  function mechanismDetailHtml(mechanism) {
+    const line = typeof mechanism?.line === 'string' && mechanism.line ? mechanism.line : null;
+    if (!line) return '<div>机制：机制资料待确认（登记层没有这一只的冻结原文）</div>';
+    return `<div>机制原文：${escapeHtml(line)}</div>`;
+  }
+
+  /** 详情抽屉里的四个技能（名字 + 系别/类别/能耗/威力；引擎没给威力就不写）。 */
+  function skillsHtml(slot) {
+    const skills = Array.isArray(slot.skills) ? slot.skills : [];
+    if (!skills.length) return '';
+    const rows = skills.map((s) => {
+      const bits = [s.element, s.category, Number.isFinite(s.energy) ? `能耗 ${s.energy}` : null,
+        Number.isFinite(s.power) ? `威力 ${s.power}` : null].filter(Boolean).join(' · ');
+      return `<div>· ${escapeHtml(s.name ?? '（未登记）')}${bits ? `<span class="tw-meta"> ${escapeHtml(bits)}</span>` : ''}`
+        + `${s.desc ? `<div class="tw-meta">${escapeHtml(s.desc)}</div>` : ''}</div>`;
+    }).join('');
+    return `<div>四个技能（${skills.length}）：</div>${rows}`;
+  }
+
+  /**
+   * 服务端拒绝原因 → **玩家读法**。
+   *
+   * 服务端那一句是给排查用的（「selected 的每一项都必须是 own-0001 形状的个体的 id」），
+   * 玩家要的是「哪一只不行 + 现在能做什么」。映射是**闭集**：认不出的原因一律给
+   * 一句通用话 + 把原文留在 data-tw-error-raw（不许把内部 id 形状印到玩家层）。
+   */
+  function playerReasonOf(raw) {
+    const text = String(raw ?? '');
+    if (/own-\d{4}|selected 的每一项/.test(text)) {
+      return '正式队伍只能放你拥有的个体（这一只不在你的盒子里）。'
+        + '想让它出场，请在「候选池」里切到「我的精灵」，或者只把它放进理论搭配里比较。';
+    }
+    if (/最多\s*6|超过.*槽位|TEAM_SIZE/.test(text)) return '队伍最多六只：先拿掉一只再加。';
+    if (/同一只.*重复|duplicate/i.test(text)) return '同一只精灵不能重复上场。';
+    if (/不在.*owned|未知实例|UNKNOWN_INSTANCE/.test(text)) return '这一只不在你的盒子里，换个你拥有的个体。';
+    return '这一只现在不能进队伍（具体原因在开发者抽屉里）。换一只，或者点「清空阵容」重来。';
+  }
+
   // ── 队伍六个槽位 ───────────────────────────────────────────────────────
   function renderTeam(player) {
     const slots = Array.isArray(player?.slots) ? player.slots : [];
     $('tw-slots').innerHTML = slots.map((slot) => {
       if (slot.state === 'filled') {
-        return `<article class="tw-slot on" role="listitem" data-tw-slot="${slot.index}" data-tw-state="filled">
+        // 首层：名字 / 系别 / 构建档 / **一行**机制（超出省略，全文在「详情」里）。
+        // 六张卡等高（CSS 的 grid-auto-rows:1fr），选前选后不跳。
+        const held = state.ownedBySpecies.has(slot.species_id ?? '');
+        const tag = held
+          ? '<span class="tw-state-tag tw-state-held">持有 · 可正式上场</span>'
+          : '<span class="tw-state-tag tw-state-trial">图鉴 · 按需推算（未核验）</span>';
+        return `<article class="tw-slot on" role="listitem" data-tw-slot="${slot.index}"
+          data-tw-state="filled" data-tw-fieldable="${held ? 'yes' : 'no'}">
          <div class="tw-row"><span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
-          ${slot.locked ? '<span class="tw-lock">🔒 锁定</span>' : ''}</div>
-         <div class="tw-meta"><span class="tw-types">${teamSlugs(slot.types) || '系别未登记'}</span></div>
+          ${slot.locked ? '<span class="tw-lock">锁定</span>' : ''}</div>
+         <div class="tw-meta"><span class="tw-types">${teamSlugs(slot.types) || '系别未登记'}</span>
+          ${tag}</div>
          <div class="tw-meta">${escapeHtml(slot.build_tier_label ?? '')}</div>
          ${mechanismRow(slot.mechanism)}
+         <details class="tw-detail"><summary>详情（技能 / 机制原文 / 来源）</summary>
+          <div class="tw-detail-body">
+           ${slot.source_note ? `<div>来源：${escapeHtml(slot.source_note)}</div>` : ''}
+           ${mechanismDetailHtml(slot.mechanism)}
+           ${skillsHtml(slot)}
+          </div></details>
         </article>`;
       }
       return `<article class="tw-slot" role="listitem" data-tw-slot="${slot.index}" data-tw-state="empty">
@@ -348,7 +439,15 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     $('tw-badge-unknown').textContent = player?.unknown_prematch_note ?? TEAM_WORKSHOP_BADGES.unknown_prematch;
     $('tw-badge-universe').textContent = player?.candidates_universe?.pool_label ?? `${TEAM_WORKSHOP_BADGES.universe} 600+`;
     $('tw-team-error').hidden = !state.error;
-    $('tw-team-error').textContent = state.error ? `服务端原话：${state.error}` : '';
+    // 玩家那一行只说「这一只现在进不了队伍 + 能做什么」；服务端原文进 data-tw-error-raw，
+    // 开发者抽屉与验收脚本读它（人类 P0：`selected` / `own-0001` / 「服务端原话」不许上玩家层）。
+    if (state.error) {
+      $('tw-team-error').textContent = `这一只现在进不了队伍：${playerReasonOf(state.error)}`;
+      rootEl.dataset.twErrorRaw = state.error;
+    } else {
+      $('tw-team-error').textContent = '';
+      delete rootEl.dataset.twErrorRaw;
+    }
   }
 
   // ── 候选池（全量图鉴，可翻页 + 搜索）─────────────────────────────────
@@ -368,13 +467,24 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
 
   function renderPool() {
     const rows = state.pool.rows;
-    $('tw-cand-list').innerHTML = rows.map((card) => {
+    if (!rows.length) {
+      // 空态要**说出下一步**，不是留一片空白。
+      $('tw-cand-list').innerHTML = `<p class="tw-note" data-tw-empty="yes">`
+        + `没有符合条件的精灵：换个属性/定位，或者点「清除筛选」看全量。</p>`;
+    } else $('tw-cand-list').innerHTML = rows.map((card) => {
       const owned = state.ownedBySpecies.get(card.select) ?? null;
+      // 状态标在**点击之前**就写清楚（人类 P0：别让玩家选到第六槽才吃一个内部错误）：
+      //   持有 · 可正式上场 / 图鉴 · 按需推算（可试玩，未核验）/ 图鉴 · 仅资料
+      const status = owned
+        ? '<span class="tw-state-tag tw-state-held">持有 · 可正式上场</span>'
+        : '<span class="tw-state-tag tw-state-trial">图鉴 · 按需推算（未核验）</span>';
       return `<button class="tw-row" data-tw-species="${escapeAttr(card.select)}"
-        data-tw-owned="${owned ? escapeAttr(owned.select) : ''}">
+        data-tw-owned="${owned ? escapeAttr(owned.select) : ''}"
+        data-tw-status="${owned ? 'held' : 'on_demand'}">
        <span class="tw-name">${escapeHtml(card.name ?? NO_ITEM)}</span>
        <span class="tw-types">${teamSlugs(card.types)}</span>
-       <span class="tw-rowtag">${owned ? '已拥有' : '图鉴条目'}</span>
+       ${status}
+       <span class="tw-rowtag">${owned ? '已在你的盒子里' : '你还没有这一只'}</span>
       </button>`;
     }).join('');
     const pages = Math.max(1, Math.ceil(state.pool.total / state.pool.pageSize));
@@ -382,9 +492,16 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     $('tw-cand-page').textContent = `${page} / ${pages}`;
     $('tw-cand-prev').disabled = state.pool.offset <= 0;
     $('tw-cand-next').disabled = state.pool.offset + state.pool.pageSize >= state.pool.total;
-    $('tw-cand-sub').textContent = `全图鉴 ${state.pool.total} 条`;
-    $('tw-cand-note').textContent = state.payload?.player?.candidates_universe?.note
-      ?? '候选池是整本图鉴（含你还没有的），不是那 48 只迁移样例。';
+    $('tw-cand-sub').textContent = state.pool.kind === 'mine'
+      ? `我的精灵 ${state.pool.total} 只（能出战）`
+      : `全图鉴 ${state.pool.total} 条（含参考，不一定能出战）`;
+    const filters = [state.pool.type, state.pool.role].filter(Boolean).join(' / ');
+    $('tw-cand-result').textContent = state.pool.total
+      ? `筛出 ${state.pool.total} 条${filters ? `（条件：${filters}）` : ''}，这一页 ${rows.length} 条`
+      : '没有符合条件的精灵：换个属性/定位，或点「清除筛选」。';
+    $('tw-cand-note').textContent = state.pool.kind === 'mine'
+      ? '这些是你**拥有**的个体：可以直接进正式队伍并开局。'
+      : '全图鉴是**参考**：可以配队与比较；能不能出战要看每一只卡片上的状态标。';
     rootEl.dataset.twPoolTotal = String(state.pool.total);
     rootEl.dataset.twPoolRows = String(rows.length);
   }
@@ -393,10 +510,12 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     if (reset) state.pool.offset = 0;
     const seq = (state.poolSeq += 1);
     const query = new URLSearchParams();
-    query.set('kind', 'catalog');
+    query.set('kind', state.pool.kind === 'mine' ? 'mine' : 'catalog');
     query.set('limit', String(state.pool.pageSize));
     query.set('offset', String(state.pool.offset));
     if (state.pool.q) query.set('q', state.pool.q);
+    if (state.pool.type) query.set('type', state.pool.type);
+    if (state.pool.role) query.set('role', state.pool.role);
     try {
       const data = await getJson(`${apiBase}/box?${query.toString()}`);
       if (seq !== state.poolSeq) return;
@@ -807,6 +926,34 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       state.pool.q = $('tw-search').value.trim();
       void loadPool({reset: true});
     }, 150);
+  });
+  // 范围与筛选（人类 P1：622 条候选必须有**真实可用**的搜索与筛选，换条件回第一页）
+  const setScope = (kind) => {
+    state.pool.kind = kind;
+    $('tw-scope-all').setAttribute('aria-pressed', kind === 'catalog' ? 'true' : 'false');
+    $('tw-scope-mine').setAttribute('aria-pressed', kind === 'mine' ? 'true' : 'false');
+    rootEl.dataset.twScope = kind;
+    void loadPool({reset: true});
+  };
+  $('tw-scope-all').addEventListener('click', () => setScope('catalog'));
+  $('tw-scope-mine').addEventListener('click', () => setScope('mine'));
+  // 属性/定位：用**闭集文本**循环（选项来自数据里真实出现过的值，不编）
+  const cycle = (key, labelEl, options) => {
+    const current = state.pool[key] ?? '';
+    const at = options.indexOf(current);
+    state.pool[key] = options[(at + 1) % options.length];
+    const label = state.pool[key] || '全部';
+    labelEl.textContent = `${key === 'type' ? '属性' : '定位'}：${key === 'role' ? (ROLE_CN[label] ?? label) : label}`;
+    void loadPool({reset: true});
+  };
+  $('tw-filter-type').addEventListener('click', () => cycle('type', $('tw-filter-type'), TYPE_CYCLE));
+  $('tw-filter-role').addEventListener('click', () => cycle('role', $('tw-filter-role'), ROLE_CYCLE));
+  $('tw-filter-clear').addEventListener('click', () => {
+    state.pool.q = ''; state.pool.type = ''; state.pool.role = '';
+    $('tw-search').value = '';
+    $('tw-filter-type').textContent = '属性：全部';
+    $('tw-filter-role').textContent = '定位：全部';
+    void loadPool({reset: true});
   });
   $('tw-cand-prev').addEventListener('click', () => {
     state.pool.offset = Math.max(0, state.pool.offset - state.pool.pageSize);

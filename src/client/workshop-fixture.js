@@ -7,3 +7,6 @@ import {mountTeamWorkshop} from './team-workshop.js';
 
 const workshop = mountTeamWorkshop(document.getElementById('team-workshop'));
 window.teamWorkshopFixture = workshop;
+
+// 模块图完整才跑得到这里：撤掉兜底横幅。
+document.getElementById('boot-fallback')?.remove();

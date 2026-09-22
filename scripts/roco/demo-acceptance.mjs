@@ -4,7 +4,7 @@
 // 单元测试证明不了这件事：它们跑在 Node 里，看不到 DOM，也没有 Python 子进程。
 //
 // 做法：进程内起一个不配密钥的服务（模型调用一律失败），它按需拉起真的 Python
-// 规则服务；再用 CDP 驱动无头 Chrome 打开 `roco.html`，通过页面上的
+// 规则服务；再用 CDP 驱动无头 Chrome 打开 `roco.html?legacy3v3=1`，通过页面上的
 // `window.rocoDemo` 与 `document.body.dataset.roco*` 读数。
 //
 // 读数为什么用 dataset 而不是点按钮：按钮上写的是中文文案，改一次文案就会假红；
@@ -16,6 +16,9 @@
 //   reports/roco/demo-acceptance/demo-acceptance.json
 //   reports/roco/demo-acceptance/*.png
 
+// 2026-09-22：产品页**默认只给六宠主流程**（旧的 3v3 迁移区整块隐藏）。这条脚本量的是
+// legacy 逐位不变那条链路，所以显式带上 `?legacy3v3=1` —— 那个参数就是为它留的开关，
+// 而且反过来钉住了「玩家默认看不见旧入口」这件事。
 import {spawn} from 'node:child_process';
 import {existsSync,mkdirSync,mkdtempSync,readdirSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -180,7 +183,7 @@ async function main(){
  // 所以这里显式激活页面，而不是去改门控。
  await cdp.send('Page.bringToFront');
  await cdp.send('Emulation.setFocusEmulationEnabled',{enabled:true});
- await cdp.send('Page.navigate',{url:base+'roco.html'});
+ await cdp.send('Page.navigate',{url:base+'roco.html?legacy3v3=1'});
  for(let i=0;i<80;i++){await sleep(250);if(await js('document.readyState')==='complete')break;}
  for(let i=0;i<80;i++){if(await js(`document.body.dataset.rocoReady==='yes'`))break;await sleep(250);}
  shots.push(await shoot('01-loaded'));
@@ -1800,7 +1803,7 @@ async function main(){
  const checksOut={checks,screenshots:shots,dom_snapshots:snapshots.length,
   console_errors:consoleErrors,page_errors:pageErrors,
   passed:checks.filter((c)=>c.ok).length,failed:checks.filter((c)=>!c.ok).length};
- const runOut={started_at:new Date().toISOString(),url:base+'roco.html'};
+ const runOut={started_at:new Date().toISOString(),url:base+'roco.html?legacy3v3=1'};
  writeFileSync(join(OUT,'demo-acceptance.json'),JSON.stringify(checksOut,null,2)+'\n');
  // 快照单独一份：它比结论大得多，混在一起会让结论那份没法读。
  writeFileSync(join(OUT,'demo-dom-snapshots.json'),JSON.stringify(snapshots,null,2)+'\n');

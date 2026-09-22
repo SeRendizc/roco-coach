@@ -50,12 +50,15 @@ const PAGES = [
     legacy: true, tapScope: null, primary: null},
   {id: 'connect.html', name: '加密配置页', ready: 'document.body', minText: 40,
     legacy: true, tapScope: null, primary: null},
-  {id: 'roco.html', name: '训练场（选宠 / 对战 / 小芽 / 工坊）',
+  // 2026-09-22 起产品页**默认只给六宠主流程**：旧的 3v3 选人区（`#select-panel` + 底栏）
+  // 整块隐藏。所以这里声明的可点范围改成**默认路线上真的可见**的那些控件 ——
+  // 工坊内部的按钮在 shadow root 里（`querySelectorAll` 到不了），由工坊验收那一条量。
+  // `minRequired` 是**下限**：范围一个元素都没匹配到（区域被删/被改名/被藏）必须判红，
+  // 否则「声明的范围」会静默变成空集合 —— 空判据比没有判据更坏。
+  {id: 'roco.html', name: '训练场（六宠工作台 / 小芽 / 六宠开局）',
     ready: `document.body.dataset.rocoReady==='yes'`, minText: 200, legacy: false,
-    tapScope: ['.footbar button', '#actions button', '.side-tab', '.pool-scope', '.filter-reset',
-      '.filter-chip', '#coach-entry', '#say-form button', '.tw-slot', '.tw-cand', '.tw-tabs button',
-      '.tw-coach-ask', '#start-standard-pvp'],
-    primary: '#start-battle'},
+    tapScope: ['#coach-entry', '#say-form button', '#start-standard-pvp', 'summary'],
+    minRequired: 4, primary: '#start-standard-pvp', expectRoute: 'six-pet', openCoach: true},
   {id: 'box.html', name: '精灵盒子（我的 / 全图鉴）', ready: 'document.body', minText: 100,
     legacy: false, tapScope: ['.box-tab', '.box-filters button', '.box-card', '.box-search'],
     primary: null},
@@ -166,6 +169,16 @@ function narrowProblems(metrics) {
     problems.push(`${smallRequired.length} 个**声明的**可点控件小于 44×44：`
       + smallRequired.slice(0, 4).map((t) => `${t.tag}${t.cls ? `.${t.cls}` : ''} ${t.w}×${t.h}`).join('、'));
   }
+  if (Number.isFinite(metrics.minRequired) && (metrics.required ?? []).length < metrics.minRequired) {
+    problems.push(`声明的可点范围只匹配到 ${(metrics.required ?? []).length} 个元素（下限 ${metrics.minRequired}）`
+      + '——区域被删/改名/藏起来了，这条判据会静默变成空集合');
+  }
+  if (metrics.expectCoach && (!metrics.coach || metrics.coach.open !== true || metrics.coach.inputInView !== true)) {
+    problems.push(`小芽那一栏必须能打开且输入框在首屏，实际 ${JSON.stringify(metrics.coach)}`);
+  }
+  if (metrics.expectRoute && metrics.route !== metrics.expectRoute) {
+    problems.push(`主流程应当是 ${metrics.expectRoute}，实际 ${JSON.stringify(metrics.route)}（旧入口没藏住？）`);
+  }
   if (metrics.primary && metrics.primary.top > metrics.clientH) {
     problems.push(`主操作「${metrics.primary.label}」不在首屏（top=${metrics.primary.top} > ${metrics.clientH}）`);
   }
@@ -205,6 +218,19 @@ async function main() {
     writeFileSync(join(OUT, `${name}.png`), Buffer.from(data, 'base64'));
     return `${name}.png`;
   };
+  /** 真实鼠标点一下（移到 → 按下 → 松开；少了移动这一步，`:hover` 与指针位置相关的实现拿到的状态与真人不同）。 */
+  const mouseClick = async (selector) => {
+    const rect = await js(`(()=>{const el=document.querySelector(${JSON.stringify(selector)});
+      if(!el)return null;el.scrollIntoView({block:'center'});const r=el.getBoundingClientRect();
+      return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
+    if (!rect) throw new Error(`找不到可点的元素：${selector}`);
+    await sleep(160);
+    await cdp.send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: rect.x, y: rect.y});
+    for (const type of ['mousePressed', 'mouseReleased']) {
+      await cdp.send('Input.dispatchMouseEvent', {type, x: rect.x, y: rect.y, button: 'left', clickCount: 1});
+    }
+    await sleep(200);
+  };
   const setViewport = async (w, h) => {
     await cdp.send('Emulation.setDeviceMetricsOverride', {width: w, height: h, deviceScaleFactor: 1, mobile: true});
     await sleep(320);
@@ -225,6 +251,13 @@ async function main() {
       await sleep(500);
       // 筛选菜单**打开着**量：实测这里藏着一个真缺陷（浮层贴左会让右边出屏，
       // 360px 上 scrollWidth 471 > 360）。不打开就永远量不到。
+      // ① 真鼠标点开小芽那一栏（用户点名要检查它的可见性），再量版式：
+      //    「小芽可见」与「页面不溢出」这两件事必须在**同一个状态**下量。
+      if (page.openCoach) {
+        await mouseClick('#coach-entry');
+        await sleep(400);
+      }
+      // ② 筛选菜单**打开着**量：实测这里藏着一个真缺陷（浮层贴左会让右边出屏）。
       await js(`(()=>{for(const d of document.querySelectorAll('.fmenu'))d.open=true;return true;})()`);
       await sleep(250);
       const metrics = await js(`(()=>{
@@ -267,7 +300,15 @@ async function main() {
           visibleText, required,
           small_all:all.filter((el)=>{const r=el.getBoundingClientRect();return r.width<44||r.height<44;}).length,
           tappables_all:all.length,
-          primary,minText:${page.minText}};})()`);
+          primary,minText:${page.minText},
+          route:document.body.dataset.rocoRoute||null,
+          coach:(()=>{const vis=window.rocoDemo&&window.rocoDemo.companionVisibility?window.rocoDemo.companionVisibility():null;
+            return vis?{open:vis.open,inputInView:vis.inputInView,replyInView:vis.replyInView}:null;})(),
+          legacyPanelVisible:(()=>{const el=document.getElementById('select-panel');
+            if(!el)return null;const r=el.getBoundingClientRect();return !el.hidden&&r.width>0&&r.height>0;})()};})()`);
+      metrics.minRequired = page.minRequired ?? 0;
+      metrics.expectRoute = page.expectRoute ?? null;
+      metrics.expectCoach = page.openCoach === true;
       metrics.consoleErrors = consoleErrors.length;
       metrics.page = page.id;
       metrics.legacy_page = page.legacy === true;
@@ -292,11 +333,18 @@ async function main() {
 
   // ── 必红方向：同一把尺子喂坏数据必须报问题 ─────────────────────────────────
   const healthy = {clientW: 390, clientH: 844, scrollW: 390, visibleText: 500, minText: 40,
-    required: [{tag: 'button', cls: 'ok', w: 120, h: 44}], primary: {label: '开一局', top: 400}, consoleErrors: 0};
+    required: [{tag: 'button', cls: 'ok', w: 120, h: 44}, {tag: 'button', cls: 'b', w: 60, h: 44},
+      {tag: 'button', cls: 'c', w: 60, h: 44}, {tag: 'button', cls: 'd', w: 60, h: 44}],
+    minRequired: 4, route: 'six-pet', expectRoute: 'six-pet',
+    primary: {label: '开一局', top: 400}, consoleErrors: 0};
   counter('横向溢出', '把 scrollWidth 撑大 20px（真的横向溢出）必须被同一条判据抓住',
     narrowProblems({...healthy, scrollW: 410}), 'scrollW=410');
   counter('触控目标', '把**声明的**可点控件缩到 30×30 必须被同一条判据抓住',
     narrowProblems({...healthy, required: [{tag: 'button', cls: 'tiny', w: 30, h: 30}]}), '30×30');
+  counter('声明范围不能是空的', '声明的可点范围一个都没匹配到（区域被藏/改名）必须被同一条判据抓住',
+    narrowProblems({...healthy, required: [], minRequired: 4}), 'required=[] minRequired=4');
+  counter('主流程不能是旧的', '产品页默认露出旧的 3v3 迁移区必须被同一条判据抓住',
+    narrowProblems({...healthy, route: 'legacy-3v3', expectRoute: 'six-pet'}), '{"route":"legacy-3v3"}');
   counter('首屏主操作', '把主操作推到视口下方 1500px 必须被同一条判据抓住',
     narrowProblems({...healthy, primary: {label: '开一局', top: 1500}}), 'top=1500');
   counter('白屏', '可见文本只剩 5 个字（白屏）必须被同一条判据抓住',

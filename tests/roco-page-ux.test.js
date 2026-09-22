@@ -131,7 +131,8 @@ function sandbox({functions = [], constants = [], extra = {}}) {
 const box = sandbox({
   functions: ['offsetOfPage', 'standardPvpActive', 'actionGroupsOf', 'actionCardHtml', 'resourceHtml',
     'statBlockHtml', 'mechanismOf', 'rosterLineHtml', 'modeChipHtml', 'mechanismSourceNote',
-    'fieldFactsHtml', 'poolQueryOf', 'buffLabel'],
+    'fieldFactsHtml', 'poolQueryOf', 'buffLabel', 'modeProbeText', 'legacyPracticeEnabled',
+    'applyRouteMode'],
   constants: ['ACTION_GROUPS', 'KNOWN_ACTION_KINDS', 'UI_HIDDEN_IN_STANDARD_PVP',
     'STAT_FIELDS', 'STAT_MISSING', 'MANA_UNVERIFIED', 'MECHANISM_UNKNOWN',
     'BUFF_LABEL', 'BUFF_ELEMENT_POWER', 'BUFF_UNKNOWN', 'STATUS_LABEL'],
@@ -368,8 +369,22 @@ test('D5 模式徽记：读注册表原文；候选才标「候选规则（待�
     confidence: 'CROSS_SOURCE_SUPPORTED', parameters: {team_size: 6}, engine: {team_size: 3},
     unknowns_count: 4, prematch: {visibility: 'UNKNOWN_PREMATCH'},
   });
-  for (const bit of ['标准 PVP 六宠阵容工坊（候选模式）', '候选规则（待实机核对）', 'UNKNOWN_PREMATCH']) {
+  // 玩家那一行只给**中文结论**；枚举名与注册表口径的内部数字搬进开发者抽屉
+  // （2026-09-22 人类 P0：「UNKNOWN_PREMATCH」「引擎实际 3 只 · 注册表 6 只」是验收台术语）。
+  for (const bit of ['标准 PVP 六宠阵容工坊（候选模式）', '候选规则（待实机核对）', '匹配前对手未知']) {
     assert.ok(candidate.includes(bit), `模式徽记缺少「${bit}」${report('modeChipHtml(候选)', candidate)}`);
+  }
+  for (const banned of ['UNKNOWN_PREMATCH', '注册表', '引擎实际']) {
+    assert.ok(!candidate.includes(banned),
+      `玩家徽记里不许出现「${banned}」（验收台/注册表术语）${report('modeChipHtml(候选)', candidate)}`);
+  }
+  // 同一条数据在**抽屉那一份**里必须逐字保留：机器仍要能核对，原文不许跟着术语一起删。
+  const probe = box.modeProbeText({
+    id: 'pvp-standard-six-pet', status: 'CANDIDATE', parameters: {team_size: 6}, engine: {team_size: 3},
+    unknowns_count: 4, prematch: {visibility: 'UNKNOWN_PREMATCH'},
+  });
+  for (const bit of ['引擎当前生效规模 3 只', '注册表登记规模 6 只', '未核实项：4 条', 'UNKNOWN_PREMATCH']) {
+    assert.ok(probe.includes(bit), `抽屉那一份缺少「${bit}」${report('modeProbeText', probe)}`);
   }
   // 官方模式（OFFICIAL_CURRENT）**不许**被标成候选
   const official = box.modeChipHtml({id: 'pvp-speed-duel-3v3', label: '极速对决（限时活动）',
@@ -563,6 +578,69 @@ test('RC-502 换人卡写清「换上谁」（只写位次等于让玩家凭记�
   const noName = box.actionCardHtml({kind: 'switch', target_index: 1, label: '换上第2位'}, 0);
   assert.ok(!/雪影|第\s*2\s*位\s*·/.test(noName), `没名字就不许编${report('actionCardHtml(switch,无名字)', noName)}`);
   assert.match(noName, /换上第2位/);
+});
+
+// ── 2026-09-22 人类 P0：主流程只许是**六宠** ──────────────────────────────────
+//
+// 现场：产品页同时挂着「开一局（双方各 3 只）」与「开一局（标准 PVP · 六宠）」两个主入口，
+// 三步引导也在教「各选 3 只」——玩家不知道该点哪个（路线冲突），而且 3v3 那套是
+// **legacy 迁移夹具**，不是 v3 口径下的标准 PVP。
+//
+// 修法：默认只给六宠主流程（`applyRouteMode()` 把旧 3v3 区整块隐藏），
+// 旧流程留给迁移判据，用**显式**参数 `?legacy3v3=1` 打开（8 条金标指纹 + 119 条演示判据
+// 仍然跑在那条链路上）。这两条判据钉的就是「默认藏住了」与「显式能打开」。
+
+test('P0 主流程默认是六宠：旧的 3v3 迁移区与它的主入口都不许露出来', () => {
+  const html = readFileSync(new URL('src/client/roco.html', ROOT), 'utf8');
+  // ① 旧 3v3 选人区在 HTML 里就是 hidden（不是靠 JS 后补 —— 补的中间态会闪一下）
+  const panel = /<section class="panel select-panel" id="select-panel"[^>]*>/.exec(html);
+  assert.ok(panel, '找不到 #select-panel');
+  assert.match(panel[0], /\shidden(\s|>)/, `#select-panel 必须在 HTML 里就 hidden${report('panel', panel[0])}`);
+  // ② 页面按 URL 参数决定露出哪一套，且默认是六宠
+  assert.match(PAGE, /function legacyPracticeEnabled\(/, '页面里必须有主流程开关');
+  assert.match(PAGE, /get\('legacy3v3'\) === '1'/, '开关只认 ?legacy3v3=1（不认别的写法）');
+  assert.match(PAGE, /document\.body\.dataset\.rocoRoute = legacy \? 'legacy-3v3' : 'six-pet'/,
+    '主流程要写进 dataset.rocoRoute（验收脚本按它核对）');
+  // ③ 教程三步必须是六宠口径（旧的三步在教「各选 3 只」）
+  const onboard = /<ol class="onboard" id="onboard">([\s\S]*?)<\/ol>/.exec(html);
+  assert.ok(onboard, '找不到教程三步');
+  assert.ok(!/3 只|双方各/.test(onboard[1]), `教程里不许再教「各选 3 只」${report('onboard', onboard[1])}`);
+  assert.match(onboard[1], /选满六只/, '教程第一步要说「选满六只」');
+});
+
+test('P0 反证：没有开关函数 / 旧区没 hidden，同一条判据必须红', () => {
+  const html = readFileSync(new URL('src/client/roco.html', ROOT), 'utf8');
+  const panelStrip = html.replace('<section class="panel select-panel" id="select-panel" data-roco-pick-side="player" hidden>',
+    '<section class="panel select-panel" id="select-panel" data-roco-pick-side="player">');
+  const panel = /<section class="panel select-panel" id="select-panel"[^>]*>/.exec(panelStrip);
+  assert.ok(!/\shidden(\s|>)/.test(panel[0]), '反证构造失败：伪造的 html 里居然还有 hidden');
+  const noSwitch = PAGE.replace(/function legacyPracticeEnabled\(/, 'function legacyPracticeEnabledRenamed(');
+  assert.ok(!/function legacyPracticeEnabled\(/.test(noSwitch), '反证构造失败');
+});
+
+test('P0 玩家那一行不许出现注册表/验收台术语（枚举名留数据层，原文留抽屉）', () => {
+  // 玩家可见的模式那一行只许有中文结论；`UNKNOWN_PREMATCH` 这类枚举名进 dataset，
+  // 注册表原文进开发者抽屉（`#mode-raw` / `#mode-probe`）。
+  // 判据量**渲染出来的那一段文本**，不量源码 —— 源码注释里正好解释了这些术语被搬走了，
+  // 拿源码当判据会把注释也算成「玩家看得见」（第一版就是这么误报的）。
+  const chip = box.modeChipHtml({
+    id: 'pvp-standard-six-pet', label: '标准 PVP 六宠阵容工坊（候选模式）', status: 'CANDIDATE',
+    confidence: 'CROSS_SOURCE_SUPPORTED', parameters: {team_size: 6}, engine: {team_size: 3},
+    unknowns_count: 4, prematch: {visibility: 'UNKNOWN_PREMATCH'},
+  });
+  for (const banned of ['UNKNOWN_PREMATCH', '注册表', '引擎实际']) {
+    assert.ok(!chip.includes(banned),
+      `玩家徽记里不许出现「${banned}」（验收台/注册表术语）${report('modeChipHtml', chip)}`);
+  }
+  assert.match(chip, /匹配前对手未知/, '中文结论必须留着（诚实性不能跟着术语一起删）');
+  assert.match(chip, /本局有 4 条规则未核实/, '未核实的**结论**要留在玩家那一行');
+  // 内部数字搬到 `modeProbeText()`，并且真的接到抽屉里那个节点上
+  assert.match(PAGE, /function modeProbeText\(/, '内部数字要有一个专门的出口（modeProbeText）');
+  // 接线判据按**真实代码形状**写：`const probe = $('mode-probe'); if (probe) probe.textContent = modeProbeText(state.mode);`
+  assert.match(PAGE, /const probe = \$\('mode-probe'\);[\s\S]{0,80}probe\.textContent = modeProbeText\(state\.mode\)/,
+    'modeProbeText 必须真的写进开发者抽屉的 #mode-probe');
+  const html = readFileSync(new URL('src/client/roco.html', ROOT), 'utf8');
+  assert.match(html, /id="mode-probe"/, '开发者抽屉里要有 #mode-probe 这个节点');
 });
 
 // ── 交付纪律：单元测试真的被 test:unit 收进去了 ─────────────────────────────

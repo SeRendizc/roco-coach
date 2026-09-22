@@ -595,18 +595,38 @@ function modeChipHtml(mode) {
   if (status === 'CANDIDATE' || confidence === 'CROSS_SOURCE_SUPPORTED' || confidence === 'ENGINE_HYPOTHESIS') {
     parts.push('<span class="chip mode-chip-candidate">候选规则（待实机核对）</span>');
   }
-  if (mode.engine?.team_size != null && mode.parameters?.team_size != null
-    && mode.engine.team_size !== mode.parameters.team_size) {
-    parts.push(`<span class="chip mode-chip-muted">引擎实际 ${mode.engine.team_size} 只 · 注册表 ${mode.parameters.team_size} 只</span>`);
-  }
+  // 2026-09-22 人类 P0：「引擎实际 3 只 · 注册表 6 只」这类**注册表口径的内部数字**与
+  // 「注册表里登记了 N 项未核实（原文在开发者抽屉）」都是验收台术语，玩家不该在首屏读它们。
+  // 它们没有被删掉，只是搬进开发者抽屉（`#mode-probe`），并且**玩家那一行要给出等价的诚实结论**：
+  // 「本局有几条规则未核实、界面会逐条标出来」。
   if (mode.unknowns_count) {
-    parts.push(`<span class="mode-unknown">注册表里登记了 ${mode.unknowns_count} 项未核实（原文在开发者抽屉）</span>`);
+    parts.push(`<span class="mode-unknown" id="mode-unknown-note">`
+      + `本局有 ${mode.unknowns_count} 条规则未核实，界面上会逐条标出来（原文在开发者抽屉）</span>`);
   }
   // 「匹配前对手未知」：注册表/台账给了 `prematch` 才写这一句（首屏可见）。
   if (mode.prematch?.visibility === 'UNKNOWN_PREMATCH') {
-    parts.push('<span class="chip mode-chip-muted" id="prematch-chip">匹配前对手未知 · 按版本环境倾向评价（UNKNOWN_PREMATCH）</span>');
+    parts.push('<span class="chip mode-chip-muted" id="prematch-chip">匹配前对手未知 · 按版本环境倾向评价</span>');
   }
   return parts.join('');
+}
+
+/**
+ * 注册表口径的**内部数字**：引擎当前实际生效的规模 vs 注册表登记的规模。
+ *
+ * 为什么单独放一处：它是**排查**用的（「为什么开局是 3 只而不是 6 只」这种问题一读就知道），
+ * 但它是验收台/注册表术语，不该占玩家首屏。位置在开发者抽屉里。
+ */
+function modeProbeText(mode) {
+  if (!mode || typeof mode !== 'object') return '模式注册表未读取';
+  const lines = [];
+  if (mode.engine?.team_size != null && mode.parameters?.team_size != null) {
+    lines.push(`引擎当前生效规模 ${mode.engine.team_size} 只 · 注册表登记规模 ${mode.parameters.team_size} 只`
+      + (mode.engine.team_size === mode.parameters.team_size ? '' : '（不一致：对局开始前引擎是练习局配置，'
+        + '标准 PVP 会按注册表的六只开）'));
+  }
+  if (mode.unknowns_count) lines.push(`注册表登记的未核实项：${mode.unknowns_count} 条`);
+  if (mode.prematch?.visibility) lines.push(`prematch.visibility = ${mode.prematch.visibility}`);
+  return lines.join('；') || '模式注册表没有需要额外说明的项';
 }
 
 function renderMode() {
@@ -617,6 +637,8 @@ function renderMode() {
   document.body.dataset.rocoMode = state.mode?.id ?? 'none';
   document.body.dataset.rocoPrematch = state.mode?.prematch?.visibility ?? 'none';
   document.body.dataset.rocoStandardPvp = standardPvpActive() ? 'yes' : 'no';
+  const probe = $('mode-probe');
+  if (probe) probe.textContent = modeProbeText(state.mode);
   const raw = $('mode-raw');
   if (raw) {
     raw.textContent = state.mode
@@ -733,7 +755,9 @@ function render() {
   // ── 三页的切换（同一个文档，靠 hidden 与 body 上的标记）─────────────────
   const busy = Boolean(view);
   const pickPanel = $('select-panel');
-  if (pickPanel) pickPanel.hidden = busy && !state.pick.open;
+  // 主流程裁剪（2026-09-22）：六宠路线下旧的 3v3 选人区**永远**不显示，
+  // 不能被这一步的动画状态重新翻出来（第一版就是这里把它翻回来了）。
+  if (pickPanel) pickPanel.hidden = legacyPracticeEnabled() ? (busy && !state.pick.open) : true;
   const brief = $('lineup-brief');
   if (brief) {
     brief.hidden = !(busy && !state.pick.open);
@@ -752,6 +776,10 @@ function render() {
     }
   }
   $('battle-panel').hidden = !busy;
+  // 开局栏只在**还没开局**时露脸：一局进行中它的任务已经完成，玩家这时候的主操作是行动坞。
+  // （窄屏上它是贴底的，不收起会与动作坞抢同一条底边。）
+  const pvpBar = $('standard-pvp-bar');
+  if (pvpBar) pvpBar.hidden = busy && !view?.battle_result;
   $('log-panel').hidden = !busy;
   $('action-panel').hidden = !busy;
   $('result-panel').hidden = !view?.battle_result;
@@ -2092,6 +2120,43 @@ function bind() {
  *   · 把**同一份**阵容评估交给小芽那一层：模块每次队伍变化都派发 `team-workshop:change`，
  *     这里只把它记到 `state.teamWorkshop` 上，供军师/复盘读取——不重算、不另写一套模板。
  */
+/**
+ * 这一页的**主流程**是什么（2026-09-22 人类 P0：页面同时挂着两个主入口 = 路线冲突）。
+ *
+ *   默认（没有参数）→ 六宠：六槽工作台是唯一的选人面，`#start-standard-pvp` 是唯一的主操作，
+ *                     旧的 3v3 迁移区（`#select-panel`）**整块隐藏**；
+ *   `?legacy3v3=1`   → 露出旧 3v3 迁移区（legacy 逐位不变的对照与迁移判据跑这条链路）。
+ *
+ * 为什么用查询参数而不是「永远显示」：那个 3v3 区是 **legacy 迁移夹具**，
+ * 它必须可复跑（8 条金标指纹 + 119 条演示判据），但**不该**是玩家进来看到的东西。
+ * 参数是显式的、可核对的；判据钉的是「没参数时它一定看不见」。
+ */
+function legacyPracticeEnabled(search = window.location.search) {
+  try {
+    return new URLSearchParams(search).get('legacy3v3') === '1';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 按主流程裁剪页面（六宠默认 / legacy 3v3 显式打开）。
+ *
+ * 这一处**只做显示层裁剪**：不改任何数据、不改任何判据的输入 ——
+ * 两条流程仍然共用同一份名单与同一套动作表。
+ */
+function applyRouteMode() {
+  const legacy = legacyPracticeEnabled();
+  const panel = $('select-panel');
+  if (panel) panel.hidden = !legacy;
+  const startLegacy = $('start-battle');
+  if (startLegacy) startLegacy.hidden = !legacy;
+  const footbar = $('pool-footbar');
+  if (footbar) footbar.hidden = !legacy;
+  document.body.dataset.rocoRoute = legacy ? 'legacy-3v3' : 'six-pet';
+  return legacy;
+}
+
 function mountWorkshop() {
   const root = $('team-workshop');
   if (!root) return;
@@ -2186,9 +2251,16 @@ async function startStandardPvp() {
   }
 }
 
+/** 撤掉「脚本没加载成功」的兜底横幅：能跑到这里，就说明这一页的模块图是完整的。 */
+function clearBootFallback() {
+  document.getElementById('boot-fallback')?.remove();
+}
+
 async function boot() {
+  clearBootFallback();
   state.memory = loadMemory();
   renderCoverage();
+  applyRouteMode();
   bind();
   applyOnboard();
   // 阵容选择：先接线，再读名单（读名单会顺带给出一个默认对手阵容与第一页池子）。

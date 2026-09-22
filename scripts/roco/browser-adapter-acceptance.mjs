@@ -20,6 +20,9 @@
 //   browser-adapter-acceptance.json
 //   adapter-01-lineup-1440x900.png … adapter-06-compare-390x844.png
 
+// 2026-09-22：产品页**默认只给六宠主流程**（旧的 3v3 迁移区整块隐藏）。这条脚本量的是
+// legacy 逐位不变那条链路，所以显式带上 `?legacy3v3=1` —— 那个参数就是为它留的开关，
+// 而且反过来钉住了「玩家默认看不见旧入口」这件事。
 import {spawn} from 'node:child_process';
 import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -147,7 +150,7 @@ async function main() {
     await cdp.send('Page.bringToFront');
     await cdp.send('Emulation.setFocusEmulationEnabled', {enabled: true});
     await cdp.send('Emulation.setDeviceMetricsOverride', {width: 1440, height: 900, deviceScaleFactor: 1, mobile: false});
-    await cdp.send('Page.navigate', {url: base + 'roco.html'});
+    await cdp.send('Page.navigate', {url: base + 'roco.html?legacy3v3=1'});
     for (let i = 0; i < 80; i++) { await sleep(250); if (await js(`document.body.dataset.rocoReady==='yes'`)) break; }
     await js(`localStorage.removeItem('roco-coach-memory-v1');localStorage.removeItem('roco-coach-onboard-v1')`);
     // 页面侧的网络账：只记 `/api/roco/*` 的状态码与耗时。
@@ -323,7 +326,7 @@ async function main() {
       schema: 'roco-adapter-browser-acceptance/v1',
       generated_by: 'scripts/roco/browser-adapter-acceptance.mjs',
       generated_at: new Date().toISOString(),
-      url: base + 'roco.html',
+      url: base + 'roco.html?legacy3v3=1',
       checks,
       steps,
       console_errors: consoleErrors,

@@ -1193,3 +1193,6 @@ document.querySelectorAll('[data-style]').forEach(button=>button.onclick=()=>{
 try{if(!localStorage.getItem('xiaoya-style-chosen'))$('coach-welcome').showModal();}catch{}
 // 首次打开也换一个新编号：固定 17 会让每次刷新看到同一批对手。
 rerollSeed();
+
+// 模块图完整才跑得到这里：撤掉「脚本没加载成功」的兜底横幅。
+document.getElementById('boot-fallback')?.remove();

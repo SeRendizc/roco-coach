@@ -1,0 +1,380 @@
+{
+ "schema": "roco-live-acceptance/v1",
+ "generated_by": "scripts/roco/browser-live-acceptance.mjs",
+ "base": "http://127.0.0.1:8899/",
+ "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
+ "judged_at": "2026-09-22T04:43:08.322Z",
+ "totals": {
+  "checks": 7,
+  "passed": 7,
+  "failed": 0,
+  "counterproofs": 6,
+  "counterproofs_hit": 6
+ },
+ "checks": [
+  {
+   "id": "live-status",
+   "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
+   "ok": true,
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=2"
+  },
+  {
+   "id": "live-boot",
+   "judge": "真实页面在 8899 上真的启动：兜底横幅撤掉、名单与模式读到、主流程是六宠（旧 3v3 入口隐藏）",
+   "ok": true,
+   "actual": "ready=yes route=six-pet 卡片 12 张 工坊 ok；规则服务：已就绪"
+  },
+  {
+   "id": "live-pick-six",
+   "judge": "真鼠标在工坊里选满六只（服务端回执、页面队伍、六个槽位三处一致），且队伍就是点的那六个个体，开局按钮真的可用",
+   "ok": true,
+   "actual": "已选 6/6，页面队伍 6 只=[\"own-0001\",\"own-0003\",\"own-0005\",\"own-0007\",\"own-0013\",\"own-0015\"]，槽位 [\"铠甲虫\",\"音速犬\",\"仪式巨像\",\"雪影娃娃\",\"朔夜伊芙\",\"多多\"]（依次点的：铠甲虫、音速犬、仪式巨像、雪影娃娃、朔夜伊芙、多多）"
+  },
+  {
+   "id": "live-start",
+   "judge": "真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的魔力）",
+   "ok": true,
+   "actual": "mode=pvp-standard-six-pet 魔力=4/4 动作分组=skill:3,charge:1,switch:5,surrender:1 开局按钮 195×38；状态行「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
+  },
+  {
+   "id": "live-settle",
+   "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现）",
+   "ok": true,
+   "actual": "result=loss 回合=46 结算区可见=true 教学=shown；点了 50 次自动推进（最后回合 46，停滞 0 次）；当时 {\"turn\":46,\"mana\":{\"self\":0,\"opponent\":3},\"selfLiving\":2,\"foeLiving\":5,\"status\":\"\"}；正文「关键转折在第 13 回合（这一局 46 个回合）。」"
+  },
+  {
+   "id": "live-narrow-390",
+   "judge": "390×844：不横向溢出、六宠主操作在首屏可点（≥44px）、小芽那一栏能打开且输入框在首屏",
+   "ok": true,
+   "actual": "clientW/scrollW=390/390 route=six-pet 主操作 top=767 h=44；小芽 {\"open\":true,\"viewport\":{\"width\":390,\"height\":844},\"card\":{\"top\":626,\"bottom\":830,\"left\":10,\"right\":380},\"form\":{\"top\":775,\"bottom\":819,\"left\":23,\"right\":367},\"input\":{\"top\":775,\"bottom\":819,\"left\":23,\"right\":288},\"reply\":null,\"replyHidden\":true,\"inputInView\":true,\"replyInView\":null,\"formInView\":true,\"bottombar\":0,\"actionCap\":253,\"actionPanel\":null,\"bothOnScreen\":true}"
+  },
+  {
+   "id": "live-console",
+   "judge": "整个过程没有 console.error / 未捕获异常",
+   "ok": true,
+   "actual": "consoleErrors=[]"
+  }
+ ],
+ "counterproofs": [
+  {
+   "id": "live-status",
+   "judge": "把 available 改成 false（引擎活着却说不可用）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "available=false（引擎活着就必须是 true） | health=null",
+   "actual": "{\"available\":false,\"health\":null}"
+  },
+  {
+   "id": "live-boot",
+   "judge": "把兜底横幅翻出来 / 把主流程换成旧的 3v3 必须被同一条判据抓住",
+   "ok": true,
+   "hit": "「脚本没加载成功」兜底横幅还在（模块没跑起来） | 主流程 dataset.rocoRoute=\"legacy-3v3\" | 「双方各 3 只」旧主入口默认可见（路线冲突）",
+   "actual": "{\"fallbackVisible\":true,\"route\":\"legacy-3v3\"}"
+  },
+  {
+   "id": "live-pick-six",
+   "judge": "只选到 4 只（或开局按钮还禁用）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "服务端回执的已选数 4（钩子 data-tw-selected） | 页面记的队伍 4 只（开局要发的是这一份） | 开局按钮还是禁用（team=6） | 槽位上有名字的只有 4/6 个",
+   "actual": "{\"hook\":4,\"team\":4}"
+  },
+  {
+   "id": "live-start",
+   "judge": "开局后模式被换成练习局、或动作表里混进道具必须被同一条判据抓住",
+   "ok": true,
+   "hit": "模式 \"demo-training-3v3\" | 动作表里出现了道具",
+   "actual": "{\"mode\":\"demo-training-3v3\",\"groups\":\"skill:2,item:1\"}"
+  },
+  {
+   "id": "live-settle",
+   "judge": "没打到结算（没有结果 / 结算区没出现 / 教学入口没出现）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "引擎没给出对局结果 | 结算区没出现 | 局末教学入口没出现",
+   "actual": "{\"result\":null}"
+  },
+  {
+   "id": "live-narrow-390",
+   "judge": "把六宠主操作推到视口外、或让页面横向溢出，必须被同一条判据抓住",
+   "ok": true,
+   "hit": "横向溢出（420 > 390） | 六宠主操作不在首屏（top=1500） | 小芽的输入框不在首屏",
+   "actual": "{\"startTop\":1500,\"scrollW\":+30,\"inputInView\":false}"
+  }
+ ],
+ "steps": [
+  {
+   "at": "boot",
+   "boot": {
+    "ready": "yes",
+    "route": "six-pet",
+    "fallbackVisible": false,
+    "cards": 12,
+    "modeText": "标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）本局有 4 条规则未核实，界面上会逐条标出来（原文在开发者抽屉）匹配前对手未知 · 按版本环境倾向评价",
+    "legacyPanelVisible": false,
+    "legacyEntryVisible": false,
+    "twState": "ok",
+    "engineText": "规则服务：已就绪",
+    "consoleErrors": 0
+   }
+  },
+  {
+   "at": "pick-six",
+   "picked": [
+    "铠甲虫",
+    "音速犬",
+    "仪式巨像",
+    "雪影娃娃",
+    "朔夜伊芙",
+    "多多"
+   ],
+   "afterPick": {
+    "state": "ok",
+    "hook": 6,
+    "team": 6,
+    "slots": 6,
+    "slotNames": [
+     "铠甲虫",
+     "音速犬",
+     "仪式巨像",
+     "雪影娃娃",
+     "朔夜伊芙",
+     "多多"
+    ],
+    "startDisabled": false,
+    "startTeam": "6"
+   }
+  },
+  {
+   "at": "team-ids",
+   "teamIds": [
+    "own-0001",
+    "own-0003",
+    "own-0005",
+    "own-0007",
+    "own-0013",
+    "own-0015"
+   ],
+   "wanted": [
+    {
+     "name": "铠甲虫",
+     "select": "own-0001"
+    },
+    {
+     "name": "音速犬",
+     "select": "own-0003"
+    },
+    {
+     "name": "仪式巨像",
+     "select": "own-0005"
+    },
+    {
+     "name": "雪影娃娃",
+     "select": "own-0007"
+    },
+    {
+     "name": "皇家狮鹫",
+     "select": "own-0009"
+    },
+    {
+     "name": "化蝶",
+     "select": "own-0011"
+    },
+    {
+     "name": "朔夜伊芙",
+     "select": "own-0013"
+    },
+    {
+     "name": "多多",
+     "select": "own-0015"
+    },
+    {
+     "name": "古啦多",
+     "select": "own-0017"
+    },
+    {
+     "name": "花魁蜂后",
+     "select": "own-0018"
+    },
+    {
+     "name": "雪蛮人",
+     "select": "own-0019"
+    },
+    {
+     "name": "雪巨人",
+     "select": "own-0021"
+    },
+    {
+     "name": "瑰眼仔",
+     "select": "own-0022"
+    },
+    {
+     "name": "耳翎瑰魅",
+     "select": "own-0023"
+    },
+    {
+     "name": "电咩咩",
+     "select": "own-0025"
+    },
+    {
+     "name": "闪电环",
+     "select": "own-0027"
+    },
+    {
+     "name": "海豹船长",
+     "select": "own-0029"
+    },
+    {
+     "name": "呼呼猪",
+     "select": "own-0031"
+    },
+    {
+     "name": "獠牙猪",
+     "select": "own-0033"
+    },
+    {
+     "name": "寂灭骨龙",
+     "select": "own-0035"
+    },
+    {
+     "name": "丢丢",
+     "select": "own-0037"
+    },
+    {
+     "name": "卡卡虫",
+     "select": "own-0039"
+    },
+    {
+     "name": "蹦蹦种子",
+     "select": "own-0041"
+    },
+    {
+     "name": "深蓝鲸",
+     "select": "own-0042"
+    },
+    {
+     "name": "声波缇塔",
+     "select": "own-0044"
+    },
+    {
+     "name": "权杖-V",
+     "select": "own-0046"
+    },
+    {
+     "name": "圆号鱼",
+     "select": "own-0048"
+    },
+    {
+     "name": "黑猫巫师",
+     "select": "own-0050"
+    },
+    {
+     "name": "爆焰喷喷",
+     "select": "own-0052"
+    },
+    {
+     "name": "混乱鱿彩",
+     "select": "own-0053"
+    },
+    {
+     "name": "秩序鱿墨",
+     "select": "own-0055"
+    },
+    {
+     "name": "十字蝌蚪",
+     "select": "own-0057"
+    },
+    {
+     "name": "深渊蛙",
+     "select": "own-0059"
+    },
+    {
+     "name": "画间法师手",
+     "select": "own-0060"
+    }
+   ]
+  },
+  {
+   "at": "battle-start",
+   "battle": {
+    "mode": "pvp-standard-six-pet",
+    "standard": "yes",
+    "groups": "skill:3,charge:1,switch:5,surrender:1",
+    "mana": 4,
+    "cap": 10,
+    "turn": 1
+   }
+  },
+  {
+   "at": "auto-play",
+   "clicks": 50,
+   "lastTurn": 46,
+   "stalled": 0
+  },
+  {
+   "at": "settled",
+   "settled": {
+    "result": "loss",
+    "turn": 46,
+    "resultVisible": true,
+    "lessonShown": "shown",
+    "lessonText": "关键转折在第 13 回合（这一局 46 个回合）。"
+   }
+  },
+  {
+   "at": "narrow",
+   "narrow": {
+    "clientW": 390,
+    "scrollW": 390,
+    "startTop": 767,
+    "startH": 44,
+    "route": "six-pet",
+    "coach": {
+     "open": true,
+     "viewport": {
+      "width": 390,
+      "height": 844
+     },
+     "card": {
+      "top": 626,
+      "bottom": 830,
+      "left": 10,
+      "right": 380
+     },
+     "form": {
+      "top": 775,
+      "bottom": 819,
+      "left": 23,
+      "right": 367
+     },
+     "input": {
+      "top": 775,
+      "bottom": 819,
+      "left": 23,
+      "right": 288
+     },
+     "reply": null,
+     "replyHidden": true,
+     "inputInView": true,
+     "replyInView": null,
+     "formInView": true,
+     "bottombar": 0,
+     "actionCap": 253,
+     "actionPanel": null,
+     "bothOnScreen": true
+    }
+   }
+  }
+ ],
+ "screenshots": [
+  "live-01-1440-selection.png",
+  "live-02-1440-six-picked.png",
+  "live-03-1440-battle.png",
+  "live-04-1440-settled.png",
+  "live-05-390-coach.png"
+ ],
+ "console_errors": [],
+ "known_limits": [
+  "这一条**需要**一个正在跑的本机服务（默认 8899），所以它不进 `verify:release` —— 门禁必须能自起自跑；它是「真机验收」那一步的脚本",
+  "它只走到「结算 + 局末教学入口出现」；复盘正文与三角色的其余判据在 demo-acceptance 里",
+  "选六只走的是 owned 名单前六个**不同物种**（与工坊验收同一条先例：同种重复会被引擎拒）"
+ ],
+ "ok": true
+}

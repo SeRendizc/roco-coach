@@ -496,6 +496,18 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
     `.filter-reset` 29 实测都不够）。这三处都是**玩家每一步都要碰**的东西：
     叫小芽、切我方/对手、清除筛选。 */
  #coach-entry,.filter-reset,.footbar button{min-height:44px}
+ /* 小芽入口与开发者抽屉的 summary 都是拇指要点的东西（实测 summary 只有 17/34px 高）。 */
+ summary{min-height:44px;display:flex;align-items:center}
+ /* 2026-09-22 人类 P0 实测：默认六宠路线上，「开一局（标准 PVP · 六宠）」在三屏之外
+    （390px 下 top=2474）——主操作够不到等于没有主操作。窄屏把它**贴在底边**，
+    和其他贴底元素一样为动作坞/小芽让位（`--bottombar` / `--coach-under` 已在用）。
+    宽屏不动：那里的工作台与它同屏。 */
+ .standard-pvp-bar{position:sticky;bottom:0;z-index:14;margin:10px 0 0;
+  background:#16222f;border-top:1px solid var(--line);padding:8px 12px;
+  box-shadow:0 -10px 24px #0007}
+ .standard-pvp-bar{flex-wrap:wrap;gap:6px}
+ #start-standard-pvp{flex:1 1 100%;min-height:44px}
+ #standard-pvp-note{flex:1 1 100%;font-size:11.5px;margin:0}
  /* 注意：基础规则是 `.seg .side-tab`（两个类），单写 `.side-tab` 会被它压住 ——
     第一版就是这么写的，实测仍然是 38px。 */
  .seg .side-tab{min-height:44px}
@@ -517,7 +529,8 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
   max-height:calc(100vh - var(--bottombar,0px) - 24px)}
  .companion-body{max-height:24vh}
  .companion-line,.reply{margin-bottom:6px;padding:7px 10px;font-size:12.5px}
- #say-input,.say-form button{min-height:38px}
+ /* 窄屏：小芽的输入行是拇指要点的（输入框与「说一句」），实测按钮 39px < 44。 */
+ #say-input,.say-form button{min-height:44px}
  .companion .section-title{margin-bottom:2px}
  .companion-head{flex-wrap:wrap;row-gap:2px}
  .pet-detail{left:14px;right:14px;width:auto;top:auto;max-height:52vh}
@@ -539,3 +552,10 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  .standard-pvp-bar{flex-direction:column;align-items:stretch}
  .standard-pvp-bar button{width:100%;min-height:44px}
 }
+
+/* 「脚本没加载成功」的兜底横幅（2026-09-22 实测故障）：HTML 里默认就在，
+   模块跑起来的第一件事是把它删掉。**不能**用 CSS 藏它 —— CSS 自己的加载
+   与 JS 的加载是两条独立的失败路径，用 CSS 藏等于把这一类故障又藏回去了。 */
+.boot-fallback{margin:10px 14px;padding:10px 12px;border:1px solid #7a4a3a;border-radius:10px;
+ background:#2a1c18;color:#ffd7c2;font-size:13px;line-height:1.6}
+.boot-fallback code{background:#3a2a22;padding:1px 5px;border-radius:5px}

@@ -490,7 +490,13 @@ function wire() {
   });
 }
 
+/** 撤掉「脚本没加载成功」的兜底横幅：能跑到这里，就说明这一页的模块图是完整的。 */
+function clearBootFallback() {
+  document.getElementById('boot-fallback')?.remove();
+}
+
 async function boot() {
+  clearBootFallback();
   wire();
   renderCompareBar();
   await loadTotals();

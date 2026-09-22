@@ -162,3 +162,10 @@ button{min-width:44px}
  .tab-count{display:none}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* 「脚本没加载成功」的兜底横幅（2026-09-22 实测故障）：HTML 里默认就在，
+   模块跑起来的第一件事是把它删掉。**不能**用 CSS 藏它 —— CSS 自己的加载
+   与 JS 的加载是两条独立的失败路径，用 CSS 藏等于把这一类故障又藏回去了。 */
+.boot-fallback{margin:10px 14px;padding:10px 12px;border:1px solid #7a4a3a;border-radius:10px;
+ background:#2a1c18;color:#ffd7c2;font-size:13px;line-height:1.6}
+.boot-fallback code{background:#3a2a22;padding:1px 5px;border-radius:5px}

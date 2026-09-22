@@ -970,6 +970,106 @@ test('结构契约：URL 空间与磁盘空间同构，页面短路径可用', a
   }
 });
 
+// ── 运行进程的陈旧白名单（2026-09-22 人类 P0 实测）──────────────────────────
+//
+// 现场：用户在 http://127.0.0.1:8899/roco.html 看到「模式：正在读取 / 正在读取精灵名单」，
+// 永远选不了宠；同机 `/api/roco/status` 说 available:false（引擎其实活着，roster 能出 48 只）。
+//
+// 根因不是引擎：8899 上那个 node 进程**跑了好几天**，它的静态资源白名单是启动时从磁盘
+// 模块图快照的，而 `src/client/team-workshop.js`（RC-305 新增）在磁盘上有、在那个进程里没有
+// → 模块图 404 → `roco.js` 的 import 失败 → **整页一行 JS 都不执行** → 卡在「正在读取」。
+// `npm test` 全绿，因为它查的是磁盘上的白名单，查不了运行进程的行为。
+//
+// 这是同一类缺陷的第三次（前两次分别是 rules.js 与 roco.js）。所以修法不是「记得重启」：
+// ① 服务器在 miss 时**按磁盘自愈重算一次**（同一条推导规则，安全边界不变）；
+// ② 页面 HTML 里放一条**默认可见**的兜底横幅，模块跑起来才撤掉 —— 脚本没下发就看得见原因；
+// ③ 状态接口主动探一次引擎，不在页面刚打开时谎报「不可用」。
+
+test('结构契约：资源白名单 miss 时会自愈重算（陈旧进程不再是白屏）', async () => {
+  const mod = await import('../../src/server/index.js');
+  const { publicAssets, resolveAssetOnMiss } = mod;
+  const victim = 'src/client/team-workshop.js';
+  assert.ok(publicAssets.has(victim), `前提不成立：${victim} 本来应当在白名单里`);
+  // 模拟「进程启动时的旧集合」：把它从内存集合里拿掉，再从 HTTP 取一次。
+  publicAssets.delete(victim);
+  assert.ok(!publicAssets.has(victim), '构造失败：没把它从内存集合里去掉');
+  try {
+    assert.equal(resolveAssetOnMiss(victim), true, `${victim} 在磁盘的模块图里，自愈必须放行它`);
+    assert.ok(publicAssets.has(victim), '自愈之后应当把它补回内存集合（否则下一次又要重算）');
+  } finally {
+    publicAssets.add(victim);
+  }
+});
+
+test('结构契约：自愈之后的服务器真的能把那个模块发出来（端到端）', async () => {
+  const mod = await import('../../src/server/index.js');
+  const { createCoachServer, publicAssets } = mod;
+  const victim = 'src/client/team-workshop.js';
+  const server = createCoachServer({ semantic: false, fetchImpl: async () => { throw Error('测试环境不允许联网'); } });
+  await new Promise((res, rej) => { server.once('error', rej); server.listen(0, '127.0.0.1', res); });
+  const base = `http://127.0.0.1:${server.address().port}/`;
+  try {
+    publicAssets.delete(victim);           // 伪造「旧进程」
+    const r = await fetch(base + victim);
+    assert.equal(r.status, 200, `陈旧白名单下 ${victim} 应当被自愈放行，实际 HTTP ${r.status}（这正是用户那次白屏）`);
+    const body = await r.text();
+    assert.ok(body.includes('mountTeamWorkshop'), '自愈发出来的内容要是那个模块本身');
+  } finally {
+    publicAssets.add(victim);
+    server.closeAllConnections?.();
+    await new Promise((r) => server.close(r));
+  }
+});
+
+test('反证/安全边界：自愈**只**放行推导图里的东西，图外一律 404', async () => {
+  const { resolveAssetOnMiss } = await import('../../src/server/index.js');
+  for (const bad of ['package.json', 'src/server/index.js', '.git/config',
+    'src/../../package.json', 'src/client/不存在的模块.js', 'data/roco/battle-modes.json']) {
+    assert.equal(resolveAssetOnMiss(bad), false,
+      `${bad} 不在推导图里，自愈**不许**放行它（白名单仍然是唯一边界）`);
+  }
+});
+
+test('结构契约：每个页面都有「脚本没加载成功」的兜底横幅，且入口模块会撤掉它', () => {
+  const pages = [...publicAssets].filter((rel) => rel.endsWith('.html'));
+  const problems = [];
+  for (const page of pages) {
+    const html = readFileSync(join(ROOT, page), 'utf8');
+    if (!html.includes('id="boot-fallback"')) problems.push(`${page} 没有兜底横幅：脚本没下发时页面只会一直「正在读取」`);
+    // 横幅必须**默认可见**（不许被 CSS 藏起来）：CSS 与 JS 是两条独立的失败路径。
+    for (const css of ['src/client/style.css', 'src/client/roco.css', 'src/client/box.css', 'src/client/connect.css']) {
+      const text = readFileSync(join(ROOT, css), 'utf8');
+      const block = /\.boot-fallback\s*\{([^}]*)\}/.exec(text);
+      if (block && /display\s*:\s*none/.test(block[1])) problems.push(`${css} 把兜底横幅藏起来了（等于把这类故障又藏回去）`);
+    }
+    // 入口模块必须撤掉它（否则正常页面永远挂着一条故障横幅）
+    for (const spec of moduleSpecifiers(html)) {
+      const rel = spec.startsWith('/') ? spec.slice(1)
+        : relative(ROOT, resolve(ROOT, dirname(page), spec)).replace(/\\/g, '/');
+      if (!existsSync(join(ROOT, rel))) continue;
+      const src = readFileSync(join(ROOT, rel), 'utf8');
+      if (!/boot-fallback/.test(src)) problems.push(`${rel} 不会撤掉兜底横幅（${page} 上会一直挂着它）`);
+      break;   // 每个页面看第一个入口模块就够了
+    }
+  }
+  assert.deepEqual(problems, [], `兜底横幅这条守卫不成立：\n${problems.join('\n')}`);
+});
+
+test('反证：兜底横幅这条守卫不是空的（把撤除代码去掉必须红）', () => {
+  const page = 'src/client/roco.html';
+  const html = readFileSync(join(ROOT, page), 'utf8');
+  const stripped = html.replace('id="boot-fallback"', 'id="nope"');
+  assert.ok(!stripped.includes('id="boot-fallback"'), '构造失败');
+  const src = readFileSync(join(ROOT, 'src/client/roco.js'), 'utf8');
+  const strippedSrc = src.replace(/boot-fallback/g, 'nope');
+  assert.ok(!/boot-fallback/.test(strippedSrc), '构造失败');
+  // 同一条判据用在坏输入上必须报出问题
+  const problems = [];
+  if (!stripped.includes('id="boot-fallback"')) problems.push('缺横幅');
+  if (!/boot-fallback/.test(strippedSrc)) problems.push('不会撤横幅');
+  assert.equal(problems.length, 2, `反证应当同时命中两条，实际 ${JSON.stringify(problems)}`);
+});
+
 // ── 多页面的资源白名单（2026-09-21 加）────────────────────────────────────────
 //
 // 起因是一个**真实的白屏**：加了第二个页面 roco.html 之后，服务器确实把

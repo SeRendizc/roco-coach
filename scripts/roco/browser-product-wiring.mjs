@@ -27,6 +27,9 @@
 // 这一份**不是**取代 demo-acceptance 的准入：它跑一局，慢（几十秒），
 // 而且依赖本机模型网关（不在线时第 ④ 项如实记「没跑成」，其余项照跑）。
 
+// 2026-09-22：产品页**默认只给六宠主流程**（旧的 3v3 迁移区整块隐藏）。这条脚本量的是
+// legacy 逐位不变那条链路，所以显式带上 `?legacy3v3=1` —— 那个参数就是为它留的开关，
+// 而且反过来钉住了「玩家默认看不见旧入口」这件事。
 import {spawn} from 'node:child_process';
 import {existsSync,mkdirSync,mkdtempSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
@@ -139,7 +142,7 @@ async function main(){
  await cdp.send('Page.bringToFront');
  await cdp.send('Emulation.setFocusEmulationEnabled',{enabled:true});
  await cdp.send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
- await cdp.send('Page.navigate',{url:base+'roco.html'});
+ await cdp.send('Page.navigate',{url:base+'roco.html?legacy3v3=1'});
  for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}
  await js(`localStorage.removeItem('roco-coach-memory-v1');localStorage.removeItem('roco-coach-onboard-v1')`);
  await js(`(()=>{const d=window.rocoDemo;
@@ -484,7 +487,7 @@ async function main(){
  const report={generated_by:'scripts/roco/browser-product-wiring.mjs',
   schema:'roco-product-wiring/v1',
   generated_at:new Date().toISOString(),
-  url:base+'roco.html',
+  url:base+'roco.html?legacy3v3=1',
   match:{battle_id:startInfo.battleId,seed:20260921,result:matchEnd.result,turn:matchEnd.turn,
    events:matchEnd.events,mine:startInfo.mine,foe:startInfo.foe,bubbles_auto:bubbles.length},
   coach:{auto_bubbles:bubbles,manual_compare:manualProbe,quiet_position_fallback:fallbackProbe},

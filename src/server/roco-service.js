@@ -1578,7 +1578,17 @@ export function createRocoService(options={}){
   return {ok:true,result:envelope.result};
  }
 
- async function status(){
+ /**
+  * 规则服务状态。`opts.probe=true` 时**主动把引擎拉起来**再报（HTTP 那一层用它）。
+  *
+  * 为什么要有这个开关：原来 status 是纯被动探针 —— 引擎是**惰性启动**的（第一次查询才拉），
+  * 所以「刚打开页面」那一刻 status 一定是 `available:false`，而实际几秒后就能用。
+  * 用户实测就是这么读到的（`available:false` / `health:null`，但 roster 同时能出 48 只）——
+  * 那不是引擎坏了，是**探针在撒谎**。健康探针要么自己把引擎拉起来，要么别报「不可用」。
+  * 拉起失败也**不抛**：status 永远回 200，把原因放进 `last_error`。
+  */
+ async function status(opts={}){
+  if(opts.probe===true){try{await ensure();}catch{/* 失败照实报，不吞成异常 */}}
   const ready=Boolean(client.baseUrl&&client.child&&client.child.exitCode===null);
   let health=null;
   if(ready){

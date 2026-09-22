@@ -18,7 +18,7 @@
   },
   {
    "id": "roco.html",
-   "name": "训练场（选宠 / 对战 / 小芽 / 工坊）"
+   "name": "训练场（六宠工作台 / 小芽 / 六宠开局）"
   },
   {
    "id": "box.html",
@@ -33,8 +33,8 @@
   "checks": 10,
   "passed": 10,
   "failed": 0,
-  "counterproofs": 5,
-  "counterproofs_hit": 5
+  "counterproofs": 7,
+  "counterproofs_hit": 7
  },
  "checks": [
   {
@@ -63,15 +63,15 @@
   },
   {
    "id": "mobile-roco.html-390",
-   "judge": "390×844：训练场（选宠 / 对战 / 小芽 / 工坊） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
+   "judge": "390×844：训练场（六宠工作台 / 小芽 / 六宠开局） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
    "ok": true,
-   "actual": "scrollW 390 = clientW 390；声明的可点控件 35 个都 ≥44；整页其它小于 44 的有 21 个（只记账，见 known_limits）"
+   "actual": "scrollW 390 = clientW 390；声明的可点控件 4 个都 ≥44；整页其它小于 44 的有 5 个（只记账，见 known_limits）"
   },
   {
    "id": "mobile-roco.html-360",
-   "judge": "360×640：训练场（选宠 / 对战 / 小芽 / 工坊） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
+   "judge": "360×640：训练场（六宠工作台 / 小芽 / 六宠开局） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
    "ok": true,
-   "actual": "scrollW 360 = clientW 360；声明的可点控件 35 个都 ≥44；整页其它小于 44 的有 21 个（只记账，见 known_limits）"
+   "actual": "scrollW 360 = clientW 360；声明的可点控件 4 个都 ≥44；整页其它小于 44 的有 5 个（只记账，见 known_limits）"
   },
   {
    "id": "mobile-box.html-390",
@@ -110,8 +110,22 @@
    "id": "触控目标",
    "judge": "把**声明的**可点控件缩到 30×30 必须被同一条判据抓住",
    "ok": true,
-   "hit": "1 个**声明的**可点控件小于 44×44：button.tiny 30×30",
+   "hit": "1 个**声明的**可点控件小于 44×44：button.tiny 30×30 | 声明的可点范围只匹配到 1 个元素（下限 4）——区域被删/改名/藏起来了，这条判据会静默变成空集合",
    "actual": "30×30"
+  },
+  {
+   "id": "声明范围不能是空的",
+   "judge": "声明的可点范围一个都没匹配到（区域被藏/改名）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "声明的可点范围只匹配到 0 个元素（下限 4）——区域被删/改名/藏起来了，这条判据会静默变成空集合",
+   "actual": "required=[] minRequired=4"
+  },
+  {
+   "id": "主流程不能是旧的",
+   "judge": "产品页默认露出旧的 3v3 迁移区必须被同一条判据抓住",
+   "ok": true,
+   "hit": "主流程应当是 six-pet，实际 \"legacy-3v3\"（旧入口没藏住？）",
+   "actual": "{\"route\":\"legacy-3v3\"}"
   },
   {
    "id": "首屏主操作",
@@ -146,6 +160,12 @@
    "tappables_all": 41,
    "primary": null,
    "minText": 40,
+   "route": null,
+   "coach": null,
+   "legacyPanelVisible": null,
+   "minRequired": 0,
+   "expectRoute": null,
+   "expectCoach": false,
    "consoleErrors": 0,
    "page": "index.html",
    "legacy_page": true,
@@ -163,6 +183,12 @@
    "tappables_all": 41,
    "primary": null,
    "minText": 40,
+   "route": null,
+   "coach": null,
+   "legacyPanelVisible": null,
+   "minRequired": 0,
+   "expectRoute": null,
+   "expectCoach": false,
    "consoleErrors": 0,
    "page": "index.html",
    "legacy_page": true,
@@ -180,6 +206,12 @@
    "tappables_all": 7,
    "primary": null,
    "minText": 40,
+   "route": null,
+   "coach": null,
+   "legacyPanelVisible": null,
+   "minRequired": 0,
+   "expectRoute": null,
+   "expectCoach": false,
    "consoleErrors": 0,
    "page": "connect.html",
    "legacy_page": true,
@@ -197,6 +229,12 @@
    "tappables_all": 7,
    "primary": null,
    "minText": 40,
+   "route": null,
+   "coach": null,
+   "legacyPanelVisible": null,
+   "minRequired": 0,
+   "expectRoute": null,
+   "expectCoach": false,
    "consoleErrors": 0,
    "page": "connect.html",
    "legacy_page": true,
@@ -208,206 +246,8 @@
    "clientW": 390,
    "scrollW": 390,
    "clientH": 844,
-   "visibleText": 15151,
+   "visibleText": 12908,
    "required": [
-    {
-     "tag": "button",
-     "cls": "",
-     "w": 74,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "",
-     "w": 74,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "primary",
-     "w": 366,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "",
-     "w": 70,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "",
-     "w": 46,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "side-tab selected",
-     "w": 62,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "side-tab",
-     "w": 62,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-reset",
-     "w": 70,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 74,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 62,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 62,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 74,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
     {
      "tag": "button",
      "cls": "",
@@ -417,17 +257,39 @@
     {
      "tag": "button",
      "cls": "primary",
-     "w": 366,
+     "w": 71,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "primary",
+     "w": 342,
+     "h": 44
+    },
+    {
+     "tag": "summary",
+     "cls": "",
+     "w": 320,
      "h": 44
     }
    ],
-   "small_all": 21,
-   "tappables_all": 68,
+   "small_all": 5,
+   "tappables_all": 10,
    "primary": {
-    "label": "开一局（双方各 3 只）",
-    "top": 720
+    "label": "开一局（标准 PVP · 六宠）",
+    "top": 767
    },
    "minText": 200,
+   "route": "six-pet",
+   "coach": {
+    "open": true,
+    "inputInView": true,
+    "replyInView": null
+   },
+   "legacyPanelVisible": false,
+   "minRequired": 4,
+   "expectRoute": "six-pet",
+   "expectCoach": true,
    "consoleErrors": 0,
    "page": "roco.html",
    "legacy_page": false,
@@ -439,206 +301,8 @@
    "clientW": 360,
    "scrollW": 360,
    "clientH": 640,
-   "visibleText": 15151,
+   "visibleText": 12908,
    "required": [
-    {
-     "tag": "button",
-     "cls": "",
-     "w": 74,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "",
-     "w": 74,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "primary",
-     "w": 336,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "",
-     "w": 70,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "",
-     "w": 46,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "side-tab selected",
-     "w": 62,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "side-tab",
-     "w": 62,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-reset",
-     "w": 70,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 74,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 62,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 62,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 74,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
-    {
-     "tag": "button",
-     "cls": "filter-chip",
-     "w": 50,
-     "h": 44
-    },
     {
      "tag": "button",
      "cls": "",
@@ -648,17 +312,39 @@
     {
      "tag": "button",
      "cls": "primary",
-     "w": 336,
+     "w": 71,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "primary",
+     "w": 312,
+     "h": 44
+    },
+    {
+     "tag": "summary",
+     "cls": "",
+     "w": 310,
      "h": 44
     }
    ],
-   "small_all": 21,
-   "tappables_all": 68,
+   "small_all": 5,
+   "tappables_all": 10,
    "primary": {
-    "label": "开一局（双方各 3 只）",
-    "top": 516
+    "label": "开一局（标准 PVP · 六宠）",
+    "top": 563
    },
    "minText": 200,
+   "route": "six-pet",
+   "coach": {
+    "open": true,
+    "inputInView": true,
+    "replyInView": null
+   },
+   "legacyPanelVisible": false,
+   "minRequired": 4,
+   "expectRoute": "six-pet",
+   "expectCoach": true,
    "consoleErrors": 0,
    "page": "roco.html",
    "legacy_page": false,
@@ -676,6 +362,12 @@
    "tappables_all": 91,
    "primary": null,
    "minText": 100,
+   "route": null,
+   "coach": null,
+   "legacyPanelVisible": null,
+   "minRequired": 0,
+   "expectRoute": null,
+   "expectCoach": false,
    "consoleErrors": 0,
    "page": "box.html",
    "legacy_page": false,
@@ -693,6 +385,12 @@
    "tappables_all": 91,
    "primary": null,
    "minText": 100,
+   "route": null,
+   "coach": null,
+   "legacyPanelVisible": null,
+   "minRequired": 0,
+   "expectRoute": null,
+   "expectCoach": false,
    "consoleErrors": 0,
    "page": "box.html",
    "legacy_page": false,
@@ -710,6 +408,12 @@
    "tappables_all": 0,
    "primary": null,
    "minText": 80,
+   "route": null,
+   "coach": null,
+   "legacyPanelVisible": null,
+   "minRequired": 0,
+   "expectRoute": null,
+   "expectCoach": false,
    "consoleErrors": 0,
    "page": "workshop.html",
    "legacy_page": false,
@@ -727,6 +431,12 @@
    "tappables_all": 0,
    "primary": null,
    "minText": 80,
+   "route": null,
+   "coach": null,
+   "legacyPanelVisible": null,
+   "minRequired": 0,
+   "expectRoute": null,
+   "expectCoach": false,
    "consoleErrors": 0,
    "page": "workshop.html",
    "legacy_page": false,
