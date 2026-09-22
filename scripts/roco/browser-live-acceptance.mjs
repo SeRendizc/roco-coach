@@ -797,6 +797,53 @@ async function main() {
       || `选项 ${JSON.stringify(r3.tabs.map((t) => `${t.tab}${t.on ? '*' : ''}`))}；`
         + `聚能「${r3.charge}」；更换页 ${switchRows.length} 行 ${JSON.stringify(switchRows[0] ?? null)}；`
         + `物品 ${itemFacts.rows} 行 / 空态 ${itemFacts.noItem}；逃跑确认 ${escapeFacts.confirm}`);
+    // ── R4：双方出战信息 —— 名字/属性/血量百分比 + 每方剩余只数 ──
+    const r4 = await js(`(()=>{const v=window.rocoDemo.state.view;
+      const read=(sel)=>{const el=document.querySelector(sel);if(!el)return null;
+        return {pct:el.dataset.rocoHpPct??null,hp:el.dataset.rocoHp??null,max:el.dataset.rocoMaxHp??null,
+          text:(el.textContent||'').replace(/\\s+/g,' ').trim()};};
+      const rl=[...document.querySelectorAll('.rl-self')].map((el)=>({
+        living:el.dataset.rocoLiving??null,size:el.dataset.rocoTeamSize??null,
+        text:(el.textContent||'').trim()}));
+      const selfPets=(v?.self?.pets??[]).filter((p)=>p.fainted!==true).length;
+      return {self:read('#self-panel .hp-line span:last-child'),
+        foe:read('#foe-panel .hp-line span:last-child'),rl,
+        selfLiving:Number.isFinite(selfPets)?selfPets:null,
+        foeLiving:Number.isFinite(v?.opponent?.living_count)?v.opponent.living_count:null,
+        types:[...document.querySelectorAll('#self-panel .pet-types, #foe-panel .pet-types')].length,
+        names:[...document.querySelectorAll('#self-panel h3, #foe-panel h3')].map((h)=>h.textContent.trim())};})()`);
+    const r4Problems = (f) => {
+      const bad = [];
+      for (const [who, side] of [['我方', f?.self], ['对手', f?.foe]]) {
+        if (!side) { bad.push(`${who}那张卡没有血量行`); continue; }
+        const pct = Number(side.pct);
+        if (!Number.isFinite(pct)) { bad.push(`${who}没有血量百分比`); continue; }
+        const expect = Number(side.max) > 0 ? Math.round(Number(side.hp) / Number(side.max) * 100) : null;
+        if (expect !== null && pct !== expect) bad.push(`${who}百分比 ${pct}% 与 ${side.hp}/${side.max} 不一致`);
+        if (!/%/.test(String(side.text))) bad.push(`${who}血量的可见文本里没有百分号`);
+      }
+      if ((f?.names ?? []).length < 2) bad.push('双方出战精灵的名字没都画出来');
+      if ((f?.types ?? 0) < 2) bad.push('双方出战精灵的属性没都画出来');
+      if ((f?.rl ?? []).length < 2) bad.push('没有「每方剩余只数」这一行（双方各一条）');
+      const mine = (f?.rl ?? [])[0];
+      const theirs = (f?.rl ?? [])[1];
+      if (mine && Number(mine.living) !== Number(f?.selfLiving)) {
+        bad.push(`我方剩余 ${mine.living} 与公开视图 ${f?.selfLiving} 不一致`);
+      }
+      if (theirs && Number(theirs.living) !== Number(f?.foeLiving)) {
+        bad.push(`对手剩余 ${theirs.living} 与公开视图 ${f?.foeLiving} 不一致`);
+      }
+      return bad;
+    };
+    check('live-battle-info', '双方出战信息：名字/属性/血量（**带百分比**）+ 每方剩余只数（与公开视图一致）',
+      r4Problems(r4).length === 0,
+      r4Problems(r4).join(' | ')
+      || `我方「${r4.self?.text}」对手「${r4.foe?.text}」；剩余行 ${JSON.stringify(r4.rl)}；`
+        + `视图 self=${r4.selfLiving} foe=${r4.foeLiving}`);
+    counter('live-battle-info', '百分比与血量不一致（例如写死 100%）必须被同一条判据抓住',
+      r4Problems({...r4, self: {pct: '100', hp: '100', max: '445', text: '100 / 445（100%）'}}),
+      '{"pct":"100","hp":"100","max":"445"}');
+
     counter('live-act-tabs', '逃跑没有二次确认（首层直接摆投降）必须被同一条判据抓住',
       r3Problems({...r3, tabs: []}, [], {shown: true, confirm: false, cancel: false, direct: true, rowsCount: 0},
         {shown: true, rows: 0, noItem: false}), '{"confirm":false,"direct":true}');

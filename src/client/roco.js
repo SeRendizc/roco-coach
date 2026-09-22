@@ -414,7 +414,8 @@ function rosterLineHtml(pets, {active = null, foe = false} = {}) {
     : (foe
       ? '<span class="rl foe">对手后备在公开视图里只给位次与是否倒下</span>'
       : '<span class="rl">还没有上场</span>');
-  return `<span class="rl-self">还能打 ${living}/${list.length || 0}</span>${chips}`;
+  return `<span class="rl-self" data-roco-living="${living}" data-roco-team-size="${list.length || 0}"
+    >还能打 ${living}/${list.length || 0}</span>${chips}`;
 }
 
 /**
@@ -515,7 +516,13 @@ function petCard(pet, {active = false, energyMax = null} = {}) {
     <div class="pet-heading">${petAvatar(pet)}
       <div>${name ? `<h3>${name}</h3>` : ''}${statuses ? `<small class="pet-status">异常：${statuses}</small>` : ''}</div>
       <span class="pet-types">${typeChips(pet.types)}</span></div>
-    <div class="hp-line"><span>生命</span><span>${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span></div>
+    <div class="hp-line"><span>生命</span>
+      <span data-roco-hp-pct="${Math.round(ratio * 100)}"
+        data-roco-hp="${Number.isFinite(pet.hp) ? pet.hp : ''}"
+        data-roco-max-hp="${Number.isFinite(pet.max_hp) ? pet.max_hp : ''}"
+        >${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}${
+        Number.isFinite(pet.hp) && Number.isFinite(pet.max_hp)
+          ? `（${Math.round(ratio * 100)}%）` : ''}</span></div>
     <div class="hp-track"><div class="hp-fill ${hpClass(ratio)}" style="width:${pct(pet.hp, pet.max_hp)}%"></div></div>
     ${facts.html}
   </div>`;
@@ -973,10 +980,14 @@ function skillSlots(view, legalSkills) {
     const cost = Number.isFinite(Number(move.energy)) ? Number(move.energy) : null;
     const enough = cost === null || energy === null ? null : energy >= cost;
     const sample = samples.find((x) => x?.label === move.name) ?? null;
+    // 引擎没给样本时把它的**原因**原样带下去（R4 补：别让「算不出」看起来像页面坏了）。
+    const previewReason = typeof view?.damage_preview?.reason === 'string' && view.damage_preview.reason
+      ? view.damage_preview.reason : null;
     return {
       move, action, cost, enough,
       legal: action !== null,
       damage: sample && Number.isFinite(sample.damage) ? sample.damage : null,
+      damageReason: previewReason,
       damageVerified: sample ? sample.formula_verified === true : false,
       reason: action !== null ? null
         : (enough === false ? `星不够：要 ${cost}，现在 ${energy}`
@@ -1013,8 +1024,13 @@ function skillSlotHtml(slot, actions, disabled) {
         damage !== null ? `预计 ${damage}${slot.damageVerified ? '' : '（未核验）'}` : '预计伤害：算不出'}</span>
       ${reason ? `<small class="act-none" data-roco-skill-reason="yes">${escapeHtml(reason)}</small>` : ''}
     </button>
-    ${move.desc ? `<details class="skill-detail"><summary>详情</summary>
-      <small>${escapeHtml(move.desc)}</small></details>` : ''}
+    <details class="skill-detail"><summary>详情</summary>
+      ${move.desc ? `<small>${escapeHtml(move.desc)}</small>` : ''}
+      <small class="skill-why" data-roco-damage-why="yes">${
+        damage !== null
+          ? (slot.damageVerified ? '伤害来自引擎（已核验公式）' : '伤害来自引擎（公式未核验）')
+          : escapeHtml(slot.damageReason ?? '引擎这一手没有给出伤害样本')}</small>
+    </details>
   </div>`;
 }
 

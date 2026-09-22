@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `d940223`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `c27b2c6`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2398,3 +2398,15 @@ diff `git status`，用来抓「产物里有易变字段」。但同一次 `veri
 **截图**：`reports/roco/ui-slice/battle-decision-{1440x900,390x844}.png`（存盘前断言：真在战斗、双方 HP、有合法动作、回合推进、小芽真打开）——人工核对确认四选项行与「聚能 → 10 / 10」都在。
 
 **已知小缺口**：技能格的「预计伤害」这一局显示「算不出」（引擎 `damage_preview.available=false`），页面照实说，但**没把引擎的 reason 显示出来** → 下一轮补到详情层。
+
+### C6.58 第 134 轮：战斗页 v2 R4 —— 双方血量百分比 + 每方剩余只数 + 「算不出」的原因
+
+- **血量百分比**：双方出战卡的生命行现在是「379 / 445（85%）」，并带 `data-roco-hp-pct/hp/max-hp` 钩子；
+- **每方剩余只数**：双方各一条「还能打 6/6」（`data-roco-living` / `data-roco-team-size`），判据与公开视图逐个数比对（`self.pets` 未倒下的只数 vs `opponent.living_count`）；
+- **补掉上一轮的小缺口**：技能详情层现在会写「引擎这一手没有给出伤害样本」或引擎的 `reason`，不再让「预计伤害：算不出」看起来像页面坏了；
+
+**判据**：真机 `live-battle-info` **24/24 + 24/24** —— 双方名字/属性/百分比（且百分比与 hp/max 一致）/剩余只数与视图一致；反证：百分比与血量不一致（写死 100%）必须红。`test:env` 417 OK（本轮没动 Python）；门禁 **22/22 pass**。
+
+**截图**（存盘前断言 + 人工核对）：`reports/roco/ui-slice/battle-after-turn-1440x900.png` —— 可见「379 / 445（85%）」「还能打 6/6」、四选项行与「聚能 → 10 / 10」、战报里的第 1 回合事件。
+
+**仍然开着的视觉项**（E2/E4）：战场区还留着「本局有 N 条未核验」「规则口径与未核验项」两行，占掉主视线；技能格的「预计伤害」在本局仍是「算不出」（引擎不给样本，已如实说明原因）。
