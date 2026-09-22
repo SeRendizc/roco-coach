@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T10:58:18.965Z",
+ "judged_at": "2026-09-22T11:08:26.441Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -77,13 +77,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=100 full_ms=23 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=99 full_ms=24 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=20 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=21 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -530,14 +530,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "100",
-    "fullMs": "23",
+    "firstMs": "99",
+    "fullMs": "24",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "20"
+    "elapsedMs": "21"
    },
    "dom": {
     "slotNodes": 6,
@@ -587,8 +587,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "25",
-    "fullMs": "22",
+    "firstMs": "27",
+    "fullMs": "23",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -718,7 +718,7 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "17",
+    "firstMs": "18",
     "fullMs": "12",
     "fullState": "ok",
     "ready": "yes",
@@ -852,7 +852,7 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "17",
+    "firstMs": "16",
     "fullMs": "16",
     "fullState": "ok",
     "ready": "yes",
@@ -993,14 +993,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "20",
-    "fullMs": "20",
+    "firstMs": "21",
+    "fullMs": "19",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "16"
+    "elapsedMs": "15"
    },
    "dom": {
     "slotNodes": 6,
