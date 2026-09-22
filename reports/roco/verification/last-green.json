@@ -2,7 +2,7 @@
  "generated_by": "scripts/roco/verify-release.mjs",
  "quick": false,
  "verdict": "pass",
- "head": "76a69fd5cb6c57052a392caca02cf7f05985de99",
+ "head": "1bccd9270962bab41988a99064f54ec1baa295d5",
  "suites": [
   "env",
   "unit",
@@ -27,6 +27,6 @@
   "workshop-acceptance",
   "roco-ux-acceptance"
  ],
- "ran_at": "2026-09-22T10:47:21.538Z",
+ "ran_at": "2026-09-22T10:59:55.028Z",
  "note": "只有全部套件通过时才会被写。`latest.json` 可能是红的，这一份一定是绿的。"
 }
