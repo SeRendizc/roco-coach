@@ -732,3 +732,41 @@ test('RC-303 与 RC-302 的边界：候选生成不做缺口诊断，缺口诊�
   assert.equal(/RESPOND_VARIANTS\s*=\s*Object\.freeze/.test(SOURCE), false, '应对词条不许在 RC-303 里重写一份');
   assert.equal(/desc\.includes\('迅捷'\)/.test(SOURCE), false, '换入/离场词条不许在 RC-303 里重写一份');
 });
+
+// ─────────────────────────────────────────────────────────────────────────
+// A2 尾部（2026-09-22 人类 P0）：**锁定是硬要求** —— 自动补队不许把被锁的成员挤掉。
+//
+// 为什么单独钉：`locked` 在 RC-301 那一层只被校验「必须在 selected/must_include 里」，
+// 而**补全算法**是不是真的不拿它换人，之前没有任何判据（只有代码注释说「永远不因为占比被挤掉」）。
+// 注释不是证据。
+// ─────────────────────────────────────────────────────────────────────────
+test('A2 锁定：补全计划必须包含被锁成员，且不许把它当替换候选换掉', () => {
+  const ownedDoc = JSON.parse(readFileSync(join(ROOT, 'data/roco/owned/owned-pets.json'), 'utf8'));
+  const ownedIds = (ownedDoc.instances ?? []).map((i) => i.instance_id).sort();
+  const keep = ownedIds[0];
+  const other = ownedIds[1];
+  const withLock = validateRecommendationRequest(
+    {mode: STANDARD_PVP_MODE, team_size: STANDARD_PVP_TEAM_SIZE, selected: [keep, other], locked: [keep]},
+    rc301Inputs);
+  assert.equal(withLock.ok, true, `样例请求必须通过 RC-301：${withLock.problems.map((p) => p.code).join('/')}`);
+  const plan = buildTeamCandidatePlan(withLock.request, inputs);
+  const required = (plan?.beam?.teams ?? plan?.teams ?? [])
+    .flatMap((t) => (t.members ?? t.team ?? []))
+    .map((m) => (typeof m === 'string' ? m : (m.instance_id ?? m.id ?? m.raw)));
+  const lockedInEveryTeam = (plan?.beam?.teams ?? []).every((t) => {
+    const ids = (t.members ?? t.team ?? []).map((m) => (typeof m === 'string' ? m : (m.instance_id ?? m.id ?? m.raw)));
+    return ids.includes(keep);
+  });
+  assert.ok(required.includes(keep),
+    `补全结果里必须始终带着被锁的 ${keep}（实际成员：${JSON.stringify([...new Set(required)].slice(0, 12))}）`);
+  assert.ok(lockedInEveryTeam,
+    '每一个候选完整队伍都必须包含被锁成员（不许有队伍把它换掉）');
+  // 反证：把 locked 拿掉、只留 selected 时，这条「必须包含」不再是引擎的承诺 ——
+  // 判据要量的正是「locked 与 selected 是两件事」，混为一谈就会让这条判据失去牙齿。
+  const noLock = validateRecommendationRequest(
+    {mode: STANDARD_PVP_MODE, team_size: STANDARD_PVP_TEAM_SIZE, selected: [keep, other]},
+    rc301Inputs);
+  assert.equal(noLock.ok, true, '不带 locked 的同形请求也必须合法（否则上面的对比不成立）');
+  assert.deepEqual(noLock.request.locked ?? [], [],
+    '不带 locked 时请求里不该冒出锁定 —— 否则「locked 是不是生效」这条判据就说不清');
+});
