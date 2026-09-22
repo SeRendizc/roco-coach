@@ -332,7 +332,7 @@ const ACTION_GROUPS = Object.freeze([
   // 顺序 = 展示顺序。标准 PVP 的主入口是「技能 / 聚能 / 换精灵」，投降进次级；
   // 物品与逃跑只属于练习局（迁移夹具），按模式隐藏，所以排在最后。
   {id: 'skill', title: '技能', note: '引擎给出的合法技能'},
-  {id: 'charge', title: '聚能', note: '独立动作：回复能量（不是技能的子类）'},
+  {id: 'charge', title: '聚能', note: '独立动作：回复星（不是技能的子类）'},
   {id: 'switch', title: '换精灵', note: '换人 / 补位'},
   {id: 'surrender', title: '投降', note: '次级入口：认输判负'},
   {id: 'item', title: '物品', note: '引擎给出的可用物品（名字来自引擎）；标准 PVP 下不该出现'},
@@ -449,10 +449,10 @@ function fieldFactsHtml(pet, {energyMax = null} = {}) {
   const energy = Number.isFinite(pet?.energy) ? pet.energy : null;
   if (energy !== null) {
     // 上限来自**这一局生效的规则配置**（引擎的 `energy_max`），不在这里写死 6/10。
-    // 能量点只在**上限已知**时画：上限不知道还画一串点，等于暗示了一个我们没核验的数字。
+    // 星点只在**上限已知**时画：上限不知道还画一串点，等于暗示了一个我们没核验的数字。
     const cap = Number.isFinite(energyMax) ? energyMax : null;
     const dots = cap === null ? '' : `${'●'.repeat(Math.max(0, Math.min(12, energy)))}`;
-    rows.push(`<span class="ff ff-energy" data-ff="energy">能量 ${dots}<b>${energy}${cap === null ? '' : ` / ${cap}`}</b></span>`);
+    rows.push(`<span class="ff ff-energy" data-ff="energy">⭐ ${dots}<b>${energy}${cap === null ? '' : ` / ${cap}`}</b></span>`);
     rendered.push(`energy=${energy}${cap === null ? '' : `/${cap}`}`);
   }
   const marks = pet?.marks && typeof pet.marks === 'object' ? Object.entries(pet.marks) : [];
@@ -528,7 +528,7 @@ function benchStrip(pet, index) {
   if (Number.isFinite(pet.hp) && Number.isFinite(pet.max_hp)) bits.push(`${pet.hp}/${pet.max_hp}`);
   // 2026-09-22（人类 P0）：我们跑的是洛克手游的**能量**机制，就不该再叫「豆」（那是旧页游口径）。
   // 能量值一律带上限（上限来自引擎的 `energy_max`；拿不到就只写当前值）。
-  if (Number.isFinite(pet.energy)) bits.push(`能量 ${pet.energy}`);
+  if (Number.isFinite(pet.energy)) bits.push(`⭐ ${pet.energy}`);
   const line = pet.fainted ? '已倒下' : bits.join(' · ');
   return `<div class="bench-pet ${pet.fainted ? 'fainted' : ''}">
     <strong>第 ${index + 1} 位</strong>${line ? `
@@ -543,7 +543,7 @@ const ADVICE_FACT_LABEL = {
   myHp: '我方血量', myMaxHp: '我方血量上限', ratio: '我方血量比例',
   move: '技能', element: '技能系别', multiplier: '属性倍率', damage: '估算伤害',
   foeSpe: '对手速度', mySpe: '我方速度', foeActsFirst: '对手先手', defendLegal: '可防御',
-  energy: '当前能量', needEnergy: '需要能量', status: '异常',
+  energy: '当前星', needEnergy: '需要星', status: '异常',
   estimate: '估算伤害', formulaVerified: '伤害公式已核验', seeds: '分析种子数',
 };
 
@@ -739,7 +739,7 @@ function render() {
   if (foeNote) {
     const field = view?.opponent?.field ?? null;
     foeNote.textContent = field && !('buffs' in field)
-      ? '对手的增益不在公开视图里：引擎只给血/能量/异常/印记/冷却'
+      ? '对手的增益不在公开视图里：引擎只给血/星/异常/印记/冷却'
       : '';
   }
   // 对手后备：公开视图**只给位次与是否倒下**（手游里上场前不亮明）。
@@ -924,11 +924,11 @@ function greyedMoveset(view) {
     const costs = moves.map((m) => Number(m.energy)).filter((n) => Number.isFinite(n));
     const cheapest = costs.length ? Math.min(...costs) : null;
     const shortfall = cheapest !== null && energy !== null
-      ? `这一手引擎没给合法技能：能量 ${energy}${max !== null ? ` / ${max}` : ''}，`
-        + `最便宜的技能要 ${cheapest} 点 —— 还差 ${Math.max(0, cheapest - energy)} 点。`
+      ? `这一手引擎没给合法技能：⭐ ${energy}${max !== null ? ` / ${max}` : ''}，`
+        + `最便宜的技能要 ${cheapest} 颗星 —— 还差 ${Math.max(0, cheapest - energy)} 颗星。`
         + '先点下面的「聚能」（它是本回合的合法动作，不占技能位），攒够就能放技能。'
-      : '这一手引擎没给合法技能：先用「聚能」攒能量，够费用时技能会出现。';
-    return {moves, reason: '灰色 = 本回合不可用（能量不够）', shortfall};
+      : '这一手引擎没给合法技能：先用「聚能」攒星，够费用时技能会出现。';
+    return {moves, reason: '灰色 = 本回合不可用（星不够）', shortfall};
   } catch {
     return null;
   }
@@ -1020,7 +1020,7 @@ function renderActions(actions, disabled) {
         const hp = Number.isFinite(pet?.hp) && Number.isFinite(pet?.max_hp) ? `${pet.hp}/${pet.max_hp}` : null;
         const statuses = pet?.statuses && Object.keys(pet.statuses).length
           ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : null;
-        const energy = Number.isFinite(pet?.energy) ? `能量 ${pet.energy}` : null;
+        const energy = Number.isFinite(pet?.energy) ? `星 ${pet.energy}` : null;
         const bits = [hp ? `HP ${hp}` : null, energy, statuses ? `异常 ${statuses}` : null].filter(Boolean);
         return `<button data-action="${actions.indexOf(action)}" data-switch-to="${action.target_index}">
           <strong>${escapeHtml(name)}</strong>
@@ -2510,12 +2510,17 @@ function updateStandardPvpBar() {
   const trial = !formal && analysis.length === 6 && trialReady;
   button.disabled = !formal && !trial;
   button.dataset.rocoStartMode = formal ? 'formal' : (trial ? 'trial' : 'none');
+  // 2026-09-22（人类实测 Q2 补）：**按钮本身必须写清这是试玩**。
+  // 之前只有下面的说明行写了「试玩一局」，按钮仍写「开一局（标准 PVP · 六宠）」——
+  // 玩家点下去才知道这六只是图鉴物种、不是自己的队伍。
+  button.textContent = trial ? '试玩一局（理论阵容 · 含未核验按需推算）'
+    : '开一局（标准 PVP · 六宠）';
   const note = $('standard-pvp-note');
   if (note) {
     if (formal) {
       note.textContent = '这一局按候选规则（六宠 / 4 点魔力 / 力竭扣 1）；未核验的假设值会在战斗页逐条标出来。';
     } else if (trial) {
-      note.textContent = '试玩一局：这六只里有些你还没有，引擎用**按需推算**的配招跑（未核验）。'
+      note.textContent = '试玩一局：这六只里有些你还没有，引擎用按需推算的配招跑（未核验）。'
         + '正式队伍仍然是「持有六只」那条路。';
     } else if (analysis.length === 6 && !trialReady) {
       note.textContent = '理论阵容这六只里有跑不起来的：看每格的状态标（仅资料的那只不能进对局）。';

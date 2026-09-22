@@ -1122,6 +1122,38 @@ async function main() {
       return {analysis:Number(root?.dataset.twAnalysis||'0'),
         trialReady:root?.dataset.twAnalysisTrialReady??null,disabled:b?b.disabled:null,
         mode:b?b.dataset.rocoStartMode:null};})()`);
+    // Q2 补：试玩时**按钮本身**必须写清是试玩；六个槽位逐只带状态标；说明行不许漏 markdown。
+    const trialLabels = await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)})?.shadowRoot;
+      const slots=sr?[...sr.querySelectorAll('#tw-analysis-slots .tw-slot.on')]:[];
+      const btn=document.getElementById('start-standard-pvp');
+      const note=(document.getElementById('standard-pvp-note')||{}).textContent||'';
+      return {slots:slots.map((el)=>({status:el.dataset.twStatus,trial:el.dataset.twCanBattle,
+        label:(el.querySelector('.tw-state-tag')||{}).textContent||''})),
+        buttonText:btn?btn.textContent.trim():null,mode:btn?btn.dataset.rocoStartMode:null,note};})()`);
+    const labelProblems = (f) => {
+      const bad = [];
+      if ((f?.slots ?? []).length !== 6) bad.push(`槽位只有 ${(f?.slots ?? []).length} 个`);
+      const noLabel = (f?.slots ?? []).filter((x) => !x.label);
+      if (noLabel.length) bad.push(`${noLabel.length} 个槽位没有状态标`);
+      const notTrial = (f?.slots ?? []).filter((x) => x.trial !== 'trial');
+      if (notTrial.length) bad.push(`${notTrial.length} 个图鉴槽位没标「只能试玩」`);
+      if (!/试玩/.test(String(f?.buttonText ?? ''))) {
+        bad.push(`试玩时按钮没写「试玩」：「${f?.buttonText}」`);
+      }
+      if (f?.mode !== 'trial') bad.push(`按钮模式是 ${f?.mode}（应为 trial）`);
+      if (/\*\*/.test(String(f?.note ?? ''))) bad.push('说明行漏出了 markdown 星号');
+      return bad;
+    };
+    check('live-trial-labels', '试玩时按钮写「试玩一局（理论阵容…）」、六个槽位逐只标「图鉴 · 按需推算（可试玩，未核验）」、'
+      + '说明行没有 markdown 星号（人类实测 Q2 补）',
+      labelProblems(trialLabels).length === 0,
+      labelProblems(trialLabels).join(' | ')
+      || `按钮「${trialLabels.buttonText}」（mode=${trialLabels.mode}）；`
+        + `槽位标样例「${trialLabels.slots[0]?.label}」×${trialLabels.slots.length}；说明无星号`);
+    counter('live-trial-labels', '试玩却把按钮写成「开一局（标准 PVP · 六宠）」必须被同一条判据抓住',
+      labelProblems({slots: [{status: 'on_demand', trial: 'trial', label: '图鉴 · 按需推算（可试玩，未核验）'}],
+        buttonText: '开一局（标准 PVP · 六宠）', mode: 'trial', note: '**按需推算**'}), '{"buttonText":"开一局"}');
+
     if (trialFacts.disabled === false) {
       await mouseClick('#start-standard-pvp');
       await waitFor(`document.body.dataset.rocoView==='ready'`, 100, 250);
