@@ -435,6 +435,32 @@ export function sixPetBattleProblems(facts) {
   return problems;
 }
 
+/**
+ * RC-503：候选规则下的 Coach 取舍（并列比较 + 未来 2—3 回合 + 规则置信，且不给伪精确胜率）。
+ *
+ * 这一条回答的是「v3 候选规则下，教练层给的东西还是不是那四样」。三个硬要求：
+ *   ① 并列比较里的每个动作**逐字都在引擎的合法动作表里**（建议不许凭空造动作）；
+ *   ② 至少两条未来后果 + 至少两条并列；
+ *   ③ 可见文本里不出现胜率 / 百分数这类伪精确说法。
+ */
+export function coachCompareProblems(facts) {
+  const problems = [];
+  if (!(Number(facts?.actions) >= 2)) problems.push(`并列比较只有 ${facts?.actions} 条（至少 2 条）`);
+  if (!(Number(facts?.futures) >= 2)) problems.push(`未来后果只有 ${facts?.futures} 条（至少 2 条）`);
+  const labels = Array.isArray(facts?.labels) ? facts.labels : [];
+  const legal = new Set(Array.isArray(facts?.legalLabels) ? facts.legalLabels : []);
+  const invented = labels.filter((l) => !legal.has(l));
+  if (labels.length === 0) problems.push('并列比较里一个动作名都没读到');
+  if (invented.length) problems.push(`建议里有引擎没给的动作：${JSON.stringify(invented)}`);
+  if (!/未核验|置信|不确定/.test(String(facts?.text ?? ''))) {
+    problems.push('取舍区必须如实标出置信/未核验，没读到');
+  }
+  if (/[0-9]+\s*%|胜率|胜算/.test(String(facts?.text ?? ''))) {
+    problems.push('可见文本里出现伪精确（胜率 / 百分数）');
+  }
+  return problems;
+}
+
 /** 触控目标：390px 下模块里每个可见可点元素都 ≥44×44。 */
 export function touchTargetProblems(small) {
   return (small ?? []).map((row) => `${row.tag}.${row.cls ?? ''} 只有 ${row.w}×${row.h}`);
@@ -1174,6 +1200,36 @@ async function main() {
     counter('35-标准 PVP 战斗页(覆盖)', '把未核验覆盖藏起来必须被同一条判据抓住',
       sixPetBattleProblems({...battleFacts, noteHidden: true}), '{"noteHidden":true}');
     shots.push(await shoot('workshop-07-standard-pvp-1440x900'));
+
+    // ── ⑬ RC-503：候选规则下的 Coach 取舍（真鼠标点「让小芽看一眼」）────────────
+    // 这一条量的是**教练层在 v3 候选规则下**给不给那四样，以及建议是不是引擎真给的动作。
+    await mouseClick('#plan');
+    await waitFor(`document.getElementById('hint') && !document.getElementById('hint').hidden
+      && document.querySelectorAll('#hint-body [data-cmp-action]').length>=2`, {tries: 80, ms: 250});
+    await sleep(400);
+    const coachFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('hint-body');
+      const acts=[...body.querySelectorAll('[data-cmp-action]')];
+      const legal=(window.rocoDemo.state.view?.legal)||[];
+      const nameOf=(a)=>a.label||a.skill_name||a.item_id||null;
+      return JSON.stringify({
+        actions:acts.length,
+        futures:body.querySelectorAll('[data-cmp-future]').length,
+        labels:acts.map((li)=>li.dataset.cmpLabel||''),
+        legalLabels:legal.map(nameOf).filter(Boolean),
+        text:body.innerText.replace(/\s+/g,' ').slice(0,400),
+        planMode:window.rocoDemo.state.view?.ruleset_config_id??null,
+        status:(document.getElementById('plan-status')||{}).textContent||''});})()`));
+    const coachProblems = coachCompareProblems(coachFacts);
+    check('36-候选规则下的 Coach 取舍', 'v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、'
+      + '未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数',
+      coachProblems.length === 0,
+      coachProblems.join(' | ') || `并列 ${coachFacts.actions} 条（${JSON.stringify(coachFacts.labels)}）`
+        + `；未来 ${coachFacts.futures} 条；规则配置 ${coachFacts.planMode}`);
+    counter('36-候选规则下的 Coach 取舍(编动作)', '建议里混进一个引擎没给的动作必须被同一条判据抓住',
+      coachCompareProblems({...coachFacts, labels: [...coachFacts.labels, '旋风无敌斩']}), '{"labels":[…,"旋风无敌斩"]}');
+    counter('36-候选规则下的 Coach 取舍(胜率)', '把「胜率 58%」写进取舍区必须被同一条判据抓住',
+      coachCompareProblems({...coachFacts, text: `${coachFacts.text} 胜率 58%`}), '{"text":"…胜率 58%"}');
+    shots.push(await shoot('workshop-08-coach-compare-1440x900'));
 
     check('33-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,

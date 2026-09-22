@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T03:46:38.560Z",
+ "judged_at": "2026-09-22T04:00:42.916Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -13,7 +13,8 @@
   "reports/roco/workshop-acceptance/workshop-04-fixture-1440x900.png",
   "reports/roco/workshop-acceptance/workshop-05-six-selected-390x844.png",
   "reports/roco/workshop-acceptance/workshop-06-two-selected-390x844.png",
-  "reports/roco/workshop-acceptance/workshop-07-standard-pvp-1440x900.png"
+  "reports/roco/workshop-acceptance/workshop-07-standard-pvp-1440x900.png",
+  "reports/roco/workshop-acceptance/workshop-08-coach-compare-1440x900.png"
  ],
  "viewport_metrics": [
   {
@@ -76,13 +77,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=100 full_ms=29 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=97 full_ms=36 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=24 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=32 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -283,6 +284,12 @@
    "actual": "mode=pvp-standard-six-pet mana=4/4 groups=skill:3,charge:1,switch:5,surrender:1 hidden=0；页面状态栏=「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
   },
   {
+   "id": "36-候选规则下的 Coach 取舍",
+   "judge": "v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数",
+   "ok": true,
+   "actual": "并列 3 条（[\"防御\",\"啃咬\",\"换上第2位\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3"
+  },
+  {
    "id": "33-控制台干净",
    "judge": "整轮下来没有 console.error，也没有未捕获异常",
    "ok": true,
@@ -478,6 +485,20 @@
    "ok": true,
    "hit": "未核验覆盖必须如实显示（hidden=true 文案=\"⚠ 候选规则：energy.initial 按假设值 2（ENGINE_HYPOTHESIS，待录 MC-E04）开局 —— 不是实机结论，界面须标「未核验」；候选规则：turn_order.speed_tie 按假设值 random_seeded（ENGINE_HYPOTHESIS，待录 MC-E05）开局 —— 不是实机结论，界面须标「未核验」\"）",
    "actual": "{\"noteHidden\":true}"
+  },
+  {
+   "id": "36-候选规则下的 Coach 取舍(编动作)",
+   "judge": "建议里混进一个引擎没给的动作必须被同一条判据抓住",
+   "ok": true,
+   "hit": "建议里有引擎没给的动作：[\"旋风无敌斩\"]",
+   "actual": "{\"labels\":[…,\"旋风无敌斩\"]}"
+  },
+  {
+   "id": "36-候选规则下的 Coach 取舍(胜率)",
+   "judge": "把「胜率 58%」写进取舍区必须被同一条判据抓住",
+   "ok": true,
+   "hit": "可见文本里出现伪精确（胜率 / 百分数）",
+   "actual": "{\"text\":\"…胜率 58%\"}"
   }
  ],
  "console_errors": [],
@@ -502,14 +523,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "100",
-    "fullMs": "29",
+    "firstMs": "97",
+    "fullMs": "36",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "24"
+    "elapsedMs": "32"
    },
    "dom": {
     "slotNodes": 6,
@@ -555,14 +576,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "30",
-    "fullMs": "24",
+    "firstMs": "23",
+    "fullMs": "21",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "20"
+    "elapsedMs": "17"
    },
    "dom": {
     "slotNodes": 6,
@@ -682,14 +703,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "17",
-    "fullMs": "15",
+    "firstMs": "16",
+    "fullMs": "12",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "10"
+    "elapsedMs": "8"
    },
    "dom": {
     "slotNodes": 6,
@@ -812,14 +833,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "19",
+    "firstMs": "18",
+    "fullMs": "13",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "12"
+    "elapsedMs": "9"
    },
    "dom": {
     "slotNodes": 6,
@@ -949,7 +970,7 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "25",
+    "firstMs": "22",
     "fullMs": "20",
     "fullState": "ok",
     "ready": "yes",

@@ -44,7 +44,7 @@
 |---|---|
 | 已提交的 HEAD | 见下面 git log（本节写下时是 `817fdec`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29，第 93 轮的三路 P0/RC-105 见 §C6.30，第 94 轮的 RC-306/机制渲染/RC-106 见 §C6.31）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
-| 闸门现状 | **20/20 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
+| 闸门现状 | **21/21 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
 | **跨机器协作区（2026-09-21 建立）** | Mac DSH（我）与 Windows DSH 通过 `SeRendizc/ai-dev-platform` 的 `coord/roco-coach` 分支上 `projects/roco-coach/` 交换**durable facts**：我只改 `MAC_STATUS.md` 与 `CONTRACTS.md`，需要 Windows 的事追加 `BLOCKERS.md`，方向性改变追加 `DECISIONS.md`；**契约只有证据齐全才能标 `ready`**（它是正式训练闸门）。摘要与同步循环见 `docs/roadmap/CROSS-MACHINE-COORDINATION.md`；每个工作阶段开始与结束各同步一次 |
 | **v3 纠偏生效（2026-09-21）** | **标准 PVP 改按六宠设计**（候选规则，`CROSS_SOURCE_SUPPORTED`，禁止写成官方事实）；官方 3v3/2 魔力是**极速对决**独立 BattleMode；**48 只只是迁移夹具**，候选宇宙是全量 600+；匹配前对手未知，按版本 Meta prior 评价；**在线 3 秒内禁止批量模拟**。停止用旧规则（max=6/入场 2/回合末 +1）生成或重训任何产物（13 条已进「禁止重跑」清单）。入口：`docs/roadmap/FLAGSHIP-V3-REDIRECT.md`、`docs/roadmap/FLAGSHIP-V3-CHECKLIST.md`；机器可读：`reports/roco/flagship-upgrade/{baseline,artifact-invalidation}.json`、`data/roco/battle-modes.json`、`data/roco/evidence/rule-evidence-ledger.json` |
@@ -726,7 +726,7 @@ active goal 已按此重写（revision 2）。
 |---|---|
 | HEAD | `8855195`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
-| 验证 | **一条命令可复现**：`npm run verify:release` → **20 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
+| 验证 | **一条命令可复现**：`npm run verify:release` → **21 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
 | 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**；另有各自带反证的检查：`verify-agent-trajectories --selftest` 3/3、`verify-sft-split --selftest` 7/7、`model-arm-identity` 正反两向 |
 | 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**第 38 轮改掉了它的自指死锁**：原来它要求「最近一次 verify:release 必须是 pass」，而 `verify:release` 里又有 `unit`包含这条断言——一次失败之后每次跑都会因为上一次红而红，唯一出路是手改 `latest.json`。现在硬判据是 `last-green.json`（必须存在一次全绿、verdict=pass、套件数够、它记的 HEAD 仍在当前历史里），`latest.json` 红了只报**警告**。**第 45 轮又拆掉同形状的第二处死锁**：「落后 >12 个提交」原来是硬失败，而这条断言同时长在 `unit` 里——一个阶段提交超过 12 次之后，`last-green` 追不上、`verify:release` 永远绿不了，也永远写不出新的 `last-green`（实测 19 个提交时 14 个套件里只有 `unit` 与 `state-doc` 红，两条红的是同一条断言）。现在落后只报警告，`tests/evals/state-doc.test.js` 有一条正反两向的回归（反证：把警告改回硬失败，立刻红） |
@@ -2164,3 +2164,28 @@ replay / grader.positive）零失败，且 **17760 条负数样本全被抓到**
 整页其它小于 44px 的**只记账**（营地页 36 个、加密配置页 2 个 —— 这两个是 KEEP 老页面，
 红线不许重写，本轮不为它们改版式；`roco.html` 上还有 21 个，主要是开发者抽屉与默认收起的折叠区）；
 主操作是逐页**显式声明**的，不是自动猜的；局部 `overflow:auto` 滚动区里的横向溢出不在判据里。
+
+### C6.44 第 107 轮：RC-503 在 v3 候选规则下的 Coach 取舍（有真实键鼠证据了）
+
+**RC-503 那条一直挂着「待接候选规则」**：教练层的取舍区（并列比较 + 未来 2—3 回合 + 规则置信 +
+不展示伪精确胜率）此前没有在 **v3 六宠局**里被量过。本轮把它落地成一条真实键鼠判据。
+
+**新增判据**（工坊验收 `36-候选规则下的 Coach 取舍`，真实鼠标点「让小芽看一眼」）：
+
+- **并列比较 ≥2 条，且逐条都是引擎给的合法动作** —— `data-cmp-action` 的标签必须逐字出现在
+  `state.view.legal` 的 label 里。这一条是**反「凭空造动作」**的：教练可以排序、可以解释，
+  但不能推荐一个引擎这一手根本给不出的动作；
+- 未来 2—3 回合 ≥2 条；
+- 如实标出置信 / 未核验；
+- 可见文本里**不出现胜率或百分数**。
+
+**实测**（`mobile_s4_candidate_v3` 六宠局）：并列 **3** 条（`防御` / `啃咬` / `换上第2位`，三条都在引擎
+当时的动作表里）、未来 **5** 条、规则配置 `mobile_s4_candidate_v3`、控制台零报错。
+
+**反证 2 条**：建议里混进一个引擎没给的动作（`旋风无敌斩`）必须被抓住；把「胜率 58%」写进取舍区必须被抓住。
+
+**接进门禁**：工坊验收成为第 **21** 个套件（48 秒）。它同时兜着 RC-305 的六槽工作台与 RC-503 的取舍。
+门禁 **21/21**。
+
+**边界**：「最大下行」是启发式估值（伤害公式未核验），页面照实标「未核验」而不是给一个像胜率的数字；
+非标准模式（练习局）沿用同一套口径，但本轮只对 v3 六宠局留了证据。
