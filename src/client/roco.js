@@ -448,7 +448,7 @@ function fieldFactsHtml(pet, {energyMax = null} = {}) {
   const energy = Number.isFinite(pet?.energy) ? pet.energy : null;
   if (energy !== null) {
     // 上限来自**这一局生效的规则配置**（引擎的 `energy_max`），不在这里写死 6/10。
-    // 豆子只在**上限已知**时画：上限不知道还画一串点，等于暗示了一个我们没核验的数字。
+    // 能量点只在**上限已知**时画：上限不知道还画一串点，等于暗示了一个我们没核验的数字。
     const cap = Number.isFinite(energyMax) ? energyMax : null;
     const dots = cap === null ? '' : `${'●'.repeat(Math.max(0, Math.min(12, energy)))}`;
     rows.push(`<span class="ff ff-energy" data-ff="energy">能量 ${dots}<b>${energy}${cap === null ? '' : ` / ${cap}`}</b></span>`);
@@ -525,7 +525,9 @@ function benchStrip(pet, index) {
   const bits = [];
   if (typeof pet.name === 'string' && pet.name) bits.push(pet.name);
   if (Number.isFinite(pet.hp) && Number.isFinite(pet.max_hp)) bits.push(`${pet.hp}/${pet.max_hp}`);
-  if (Number.isFinite(pet.energy)) bits.push(`${pet.energy} 豆`);
+  // 2026-09-22（人类 P0）：我们跑的是洛克手游的**能量**机制，就不该再叫「豆」（那是旧页游口径）。
+  // 能量值一律带上限（上限来自引擎的 `energy_max`；拿不到就只写当前值）。
+  if (Number.isFinite(pet.energy)) bits.push(`能量 ${pet.energy}`);
   const line = pet.fainted ? '已倒下' : bits.join(' · ');
   return `<div class="bench-pet ${pet.fainted ? 'fainted' : ''}">
     <strong>第 ${index + 1} 位</strong>${line ? `
@@ -657,7 +659,14 @@ function render() {
     aboutVersion.textContent = `${view.ruleset_id} · 本局状态版本 ${view.state_version}`;
   }
   // 结算结果是引擎给的英文（win/loss/draw/escaped）。玩家不该在界面上看到 `win`。
-  $('turn-chip').textContent = view ? `第 ${view.turn} 回合 · ${view.phase === 'replace' ? '补位' : '对战'}` : '未开局';
+  // 2026-09-22（人类 P0）：补位阶段必须说清**谁**要补位 —— 用户实测「我把对面打倒，自己也被
+  // 要求换人」。引擎侧是对的（trace：敌倒只排 enemy、我倒只排 player），问题在页面：
+  // 只要 phase==replace 就把换人卡摆给玩家，看起来像「我也被强制换」。
+  const needsMe = Array.isArray(view?.needs_replacement) ? view.needs_replacement.includes('player') : null;
+  const replacingLabel = view?.phase === 'replace'
+    ? (needsMe === true ? '我方补位（不占回合）' : (needsMe === false ? '对手补位中…' : '补位'))
+    : '对战';
+  $('turn-chip').textContent = view ? `第 ${view.turn} 回合 · ${replacingLabel}` : '未开局';
   $('phase-chip').textContent = view?.battle_result
     ? `对局结束：${RESULT_CN[view.battle_result] ?? view.battle_result}`
     : '';
@@ -726,10 +735,17 @@ function render() {
 
   // ── 行动坞：按引擎 kind 分组 ────────────────────────────────────────────
   const actions = view?.legal ?? [];
+  const onlyOpponentReplacing = view?.phase === 'replace' && needsMe === false;
   $('action-hint').textContent = view
-    ? (view.battle_result ? '这一局已经结束：重开一局继续练' : `${actions.length} 个合法动作，按类型分组，点一下就走这一手`)
+    ? (view.battle_result ? '这一局已经结束：重开一局继续练'
+      : (onlyOpponentReplacing
+        ? '对手正在补位：这一步不需要你操作，点「让双方各走一步」继续'
+        : (needsMe === true
+          ? '你的精灵倒下了：先选一只补位（补位不占回合），再决定这一手'
+          : `${actions.length} 个合法动作，按类型分组，点一下就走这一手`)))
     : '开一局后这里会出现可执行的动作';
-  renderActions(actions, Boolean(view?.battle_result));
+  // 对手补位时**不渲染行动卡**：摆出换人卡会让人以为「我也被强制换人」。
+  renderActions(onlyOpponentReplacing ? [] : actions, Boolean(view?.battle_result));
 
   // 事件区**只渲染中文句子**（`event.text`，引擎侧生成）。
   const logs = [];

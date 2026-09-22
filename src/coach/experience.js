@@ -114,9 +114,9 @@ export function attentionText(game,action){
  if(!game||!['pve','pvp-local'].includes(game.mode)||game.result)return null;
  const p=active(game,'player');
  if(action?.kind==='switch')return game.phase==='replace'?'这次是免费补位，不占回合。选好后再决定下一步。':'换宠会用掉这回合，新伙伴还可能挨一下；先看看它的血量。';
- if(action?.id==='guard')return '防御能减伤、额外回2豆，但挡不住已有中毒或灼烧，也不能连用。';
+ if(action?.id==='guard')return '防御能减伤、额外回 2 点能量，但挡不住已有中毒或灼烧，也不能连用。';
  if(action?.kind==='item')return '吃药也占一回合，随后不能再出招；先确认恢复后能扛住这一下。';
- if(p.energy<=1)return '豆不多了。零消耗技能也能输出并等回合末回1豆，不一定要停下来吃果。';
+ if(p.energy<=1)return '能量不多了。零消耗技能也能输出，不一定要停下来吃果。';
  const q=active(game,'enemy');
  if(q.status?.kind==='burn'&&p.skills.includes('pursuit'))return '对面已经灼烧，追猎会增伤；不过如果两招都能收掉，就不必只看谁数字大。';
  return '拿不准时，先看对方留场和换宠两种情况。回合回顾里可以展开比较，由你决定。';
@@ -356,7 +356,7 @@ export function watchCandidate(game,watches=[]){
  if(!game||!['pve','pvp-local'].includes(game.mode)||game.result||game.phase!=='battle')return null;
  const p=active(game,'player'),q=active(game,'enemy');
  for(const w of watches){if(w.matchId!==game.id||w.expiresTurn<game.turn)continue;
-  if(w.kind==='energy'&&p.energy<=1)return {id:w.id,text:`你让我留意豆数：${p.name}现在${p.energy}豆。零消耗招式也能行动，防御可额外回能，但不能连用。`};
+  if(w.kind==='energy'&&p.energy<=1)return {id:w.id,text:`你让我留意能量：${p.name}现在有 ${p.energy} 点能量。零消耗招式也能行动，防御可额外回能，但不能连用。`};
   if(w.kind==='finish'){
    const a=legalActions(game).find(a=>a.kind==='skill'&&SKILLS[a.id].power&&damage(p,q,SKILLS[a.id])>=q.hp);
    if(a)return {id:w.id,text:`你让我留意收尾：${SKILLS[a.id].name}对当前目标算${damage(p,q,SKILLS[a.id])}伤害，对方${q.hp}HP；换宠、防御或治疗会改变这个条件。`};
@@ -606,8 +606,8 @@ export function hoverLabel(game,record){
  const best=listed[0]||null;   // scored 时是分支评分第一，否则已按 HP/能量排好
  const others=byState.filter(x=>x.pet.id!==best?.pet?.id);
  const basis=scored.length?'这是把下一回合双方可能的选择都算过一遍后排的，不是胜率。':'这是按剩余生命与能量排的，不是胜率。';
- return `${fallen.name}倒下了。${best?`先让${best.pet.name}补位（还剩 ${best.pet.hp}HP、${best.pet.energy}豆）`:'现在没有健康的伙伴可以补位'}；补位不占回合，选好再决定出招。`
-  +(others.length?`另外${others.map(x=>`${x.pet.name}（${x.pet.hp}HP、${x.pet.energy}豆）`).join('、')}也可以比较。`:'')
+ return `${fallen.name}倒下了。${best?`先让${best.pet.name}补位（还剩 ${best.pet.hp}HP、${best.pet.energy} 点能量）`:'现在没有健康的伙伴可以补位'}；补位不占回合，选好再决定出招。`
+  +(others.length?`另外${others.map(x=>`${x.pet.name}（${x.pet.hp}HP、${x.pet.energy} 点能量）`).join('、')}也可以比较。`:'')
   +basis;
 }
 function mistakeText(game,incident){
