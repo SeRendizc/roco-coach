@@ -626,7 +626,10 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  .companion-body{max-height:26vh}
 }
 /* ③ 规则口径与未核验来源：集中一处、默认收起。 */
-.rules-note{margin:6px 0 0;border:1px solid #2b3a4a;border-radius:9px;background:#131e2a}
+.rules-note{margin:6px 0 0;border:1px solid #2b3a4a;border-radius:9px;background:#131e2a;
+ /* 实测 bug：它被放进了一个窄网格列，summary 里的中文被压成**一个字一行**（竖排）。
+    给它一个最小宽度并允许跨列，文字就不再竖排。 */
+ min-width:min(280px,100%);grid-column:1/-1}
 .rules-note>summary{min-height:36px;display:flex;align-items:center;padding:0 10px;
  font-size:11.5px;color:#9caebe;cursor:pointer;list-style:none}
 .rules-note>summary::-webkit-details-marker{display:none}
@@ -638,3 +641,12 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
    而视口只有 900px —— 动作**反而看不见了**（比改之前更糟，demo 判据当场抓住）。
    真正要做的是**两列布局**（左：战场；右：动作 + 战报），那是下一刀，不该用半步蒙过去。 */
 
+
+/* 2026-09-22 人工核对 390 战斗页时抓到：窄屏下「重选阵容」被压成**一个字一行**（竖排）。
+   同一个坑这一轮已经踩过两次（标题、规则口径），统一给这类小按钮禁止断词。 */
+#reopen-pick,#plan,#auto-turn,.battle-tools button{white-space:nowrap;min-height:44px}
+/**
+ * 390 规格偏差（人类规格④：「先看对手简版 → 我方状态 → ≤2 行提示 → 四技能」）：
+ * 现在的顺序是**我方在前**，对手卡被挤到折叠线以下（证据 `battle-decision-390x844.png`）。
+ * 这一条记在 PLAYER-LOOP-CHECKLIST 的 E2，未改（改的是信息顺序，要连同小芽提示一起排）。
+ */
