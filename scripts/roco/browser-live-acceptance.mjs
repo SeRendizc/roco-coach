@@ -282,6 +282,54 @@ async function main() {
       '{"fallbackVisible":true,"route":"legacy-3v3"}');
     await shoot('live-01-1440-selection');
 
+    // ── ①a A2 盒子入口：**在盒子里选一只 → 锁定 → 去配队**（真实鼠标，不是手打 URL）──
+    // 这是 A2 的玩家入口。手打 URL 那条（下面 ①b）证明服务端半条；这一条证明**盒子真的能点**。
+    await cdp.send('Page.navigate', {url: `${BASE}box.html`});
+    for (let i = 0; i < 120; i += 1) {
+      if (await js(`document.body.dataset.boxKind==='mine'`)) break;
+      await sleep(250);
+    }
+    await sleep(900);
+    const boxPick = await js(`(()=>{const b=document.querySelector('#box-grid .card .cmp-toggle');
+      return b?b.dataset.cmp:null;})()`);
+    if (boxPick) {
+      await mouseClick(`#box-grid .card[data-select="${boxPick}"] .cmp-toggle`);
+      await sleep(400);
+    }
+    const lockBtn = await js(`(()=>{const b=document.getElementById('compare-lock-team');
+      if(!b)return null;const r=b.getBoundingClientRect();
+      return {disabled:b.disabled,w:Math.round(r.width),h:Math.round(r.height)};})()`);
+    await mouseClick('#compare-lock-team');
+    await sleep(1200);
+    for (let i = 0; i < 120; i += 1) {
+      if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+      await sleep(250);
+    }
+    await sleep(1200);
+    const boxLocked = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=root?.shadowRoot;
+      const slots=sr?[...sr.querySelectorAll('#tw-slots .tw-slot')]:[];
+      return {url:window.location.search,selected:Number(root?.dataset.twSelected||'0'),
+        lock1:/锁定/.test(slots[0]?(slots[0].textContent||''):'')};})()`);
+    const boxLockProblems = (facts, btn) => {
+      const bad = [];
+      if (btn === null) bad.push('盒子上没有「锁定这一只去配队」按钮');
+      else if (btn.disabled !== false) bad.push('选了一只之后按钮还是禁用');
+      else if (btn.h < 44) bad.push(`按钮只有 ${btn.h}px 高（摸不到）`);
+      if (!/team=own-\d+/.test(String(facts?.url ?? ''))) bad.push(`URL 没带 team：${facts?.url}`);
+      if (!/lock=own-\d+/.test(String(facts?.url ?? ''))) bad.push(`URL 没带 lock：${facts?.url}`);
+      if (Number(facts?.selected) !== 1) bad.push(`产品页只认了 ${facts?.selected} 只`);
+      if (facts?.lock1 !== true) bad.push('带过去的那一只没有显示「锁定」');
+      return bad;
+    };
+    check('live-box-lock-entry', '盒子里选**一只** → 「锁定这一只去配队」：URL 同时带 team 与 lock，'
+      + '产品页那一格显示「锁定」（玩家入口，不是手打 URL）',
+      boxLockProblems(boxLocked, lockBtn).length === 0,
+      boxLockProblems(boxLocked, lockBtn).join(' | ')
+      || `按钮 ${JSON.stringify(lockBtn)}；URL ${boxLocked.url}；已选 ${boxLocked.selected}；锁=${boxLocked.lock1}`);
+    counter('live-box-lock-entry', '按钮把 lock 漏掉（只带 team）必须被同一条判据抓住',
+      boxLockProblems({url: '?team=own-0001', selected: 1, lock1: false}, lockBtn), '{"url":"?team=own-0001"}');
+
     // ── ①b A2 锁定：URL 交接带 `?lock=` 时，那一格必须真的锁上（服务端接受的锁要回传）──
     // 用户实测过这一类漏：服务端**校验**了 locked 但**丢掉**了它，页面上看不到锁。
     await cdp.send('Page.navigate', {url: `${BASE}roco.html?team=own-0001,own-0003&lock=own-0001`});

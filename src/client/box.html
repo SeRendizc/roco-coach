@@ -71,6 +71,9 @@
   <!-- RC-801 的第一步交接：比完就该去配队，而不是让玩家回产品页再按名字找一遍。
        带上的是**选中的个体 id**（`own-XXXX`），产品页的六槽工作台直接按它们预填。 -->
   <button id="compare-to-team" disabled>带上这两只去配队</button>
+  <!-- A2：**选其中一只并锁定**。锁定与选人是两条信息：URL 里分开带（`?team=` / `?lock=`），
+       服务端也分开校验（RC-301 规则⑨：锁一个没入选的实例整条请求被拒）。 -->
+  <button id="compare-lock-team" disabled>锁定这一只去配队</button>
   <button id="compare-clear">清空选择</button>
  </div>
 </section>

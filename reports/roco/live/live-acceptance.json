@@ -3,13 +3,13 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-22T07:56:22.339Z",
+ "judged_at": "2026-09-22T08:13:40.360Z",
  "totals": {
-  "checks": 14,
-  "passed": 14,
+  "checks": 15,
+  "passed": 15,
   "failed": 0,
-  "counterproofs": 12,
-  "counterproofs_hit": 12
+  "counterproofs": 13,
+  "counterproofs_hit": 13
  },
  "checks": [
   {
@@ -23,6 +23,12 @@
    "judge": "真实页面在 8899 上真的启动：兜底横幅撤掉、名单与模式读到、主流程是六宠（旧 3v3 入口隐藏）",
    "ok": true,
    "actual": "ready=yes route=six-pet 卡片 12 张 工坊 ok；规则服务：已就绪"
+  },
+  {
+   "id": "live-box-lock-entry",
+   "judge": "盒子里选**一只** → 「锁定这一只去配队」：URL 同时带 team 与 lock，产品页那一格显示「锁定」（玩家入口，不是手打 URL）",
+   "ok": true,
+   "actual": "按钮 {\"disabled\":false,\"w\":138,\"h\":44}；URL ?team=own-0001&lock=own-0001；已选 1；锁=true"
   },
   {
    "id": "live-lock-handoff",
@@ -111,6 +117,13 @@
    "ok": true,
    "hit": "「脚本没加载成功」兜底横幅还在（模块没跑起来） | 主流程 dataset.rocoRoute=\"legacy-3v3\" | 「双方各 3 只」旧主入口默认可见（路线冲突）",
    "actual": "{\"fallbackVisible\":true,\"route\":\"legacy-3v3\"}"
+  },
+  {
+   "id": "live-box-lock-entry",
+   "judge": "按钮把 lock 漏掉（只带 team）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "URL 没带 lock：?team=own-0001 | 带过去的那一只没有显示「锁定」",
+   "actual": "{\"url\":\"?team=own-0001\"}"
   },
   {
    "id": "live-lock-handoff",

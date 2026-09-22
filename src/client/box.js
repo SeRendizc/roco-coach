@@ -307,6 +307,9 @@ function renderCompareBar() {
   // 不是同种个体的差异。同种比较那条判据（`compare-go`）仍然只对同种开放。
   const toTeam = $('compare-to-team');
   if (toTeam) toTeam.disabled = selected.length === 0;
+  // 「锁定这一只」只在**恰好选了一只**时可用：锁的是那一只，语义必须明确。
+  const lockTeam = $('compare-lock-team');
+  if (lockTeam) lockTeam.disabled = selected.length !== 1;
   if (selected.length === 0) {
     $('compare-hint').textContent = '选两只同种伙伴，就能逐字段比较。';
   } else if (selected.length === 1) {
@@ -470,6 +473,13 @@ function wire() {
   $('compare-go').addEventListener('click', () => void compareSelected());
   // RC-801：把选中的个体**带去产品页的六槽工作台**（`?team=own-…,own-…`）。
   // 只带 id，不带任何结论 —— 配队口径仍然由产品页那一套（RC-301…305）现算。
+  // A2：把**这一只**带过去并锁定（`?team=own-X&lock=own-X`）。
+  $('compare-lock-team').addEventListener('click', () => {
+    const ids = state.selected.map((row) => row.select).filter(Boolean);
+    if (ids.length !== 1) return;
+    const id = ids[0];
+    window.location.href = `roco.html?team=${encodeURIComponent(id)}&lock=${encodeURIComponent(id)}`;
+  });
   $('compare-to-team').addEventListener('click', () => {
     const ids = state.selected.map((row) => row.select).filter(Boolean);
     if (!ids.length) return;
