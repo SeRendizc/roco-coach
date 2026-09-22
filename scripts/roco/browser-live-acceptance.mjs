@@ -282,6 +282,43 @@ async function main() {
       '{"fallbackVisible":true,"route":"legacy-3v3"}');
     await shoot('live-01-1440-selection');
 
+    // ── ①b A2 锁定：URL 交接带 `?lock=` 时，那一格必须真的锁上（服务端接受的锁要回传）──
+    // 用户实测过这一类漏：服务端**校验**了 locked 但**丢掉**了它，页面上看不到锁。
+    await cdp.send('Page.navigate', {url: `${BASE}roco.html?team=own-0001,own-0003&lock=own-0001`});
+    for (let i = 0; i < 120; i += 1) {
+      if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+      await sleep(250);
+    }
+    await sleep(1200);
+    const lockFacts = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=root?.shadowRoot;
+      const slots=sr?[...sr.querySelectorAll('#tw-slots .tw-slot')]:[];
+      return {url:window.location.search,
+        slot1:(slots[0]?(slots[0].textContent||''):''),lock1:/锁定/.test(slots[0]?(slots[0].textContent||''):''),
+        lock2:/锁定/.test(slots[1]?(slots[1].textContent||''):''),
+        selected:Number(root?.dataset.twSelected||'0')};})()`);
+    const lockProblems = (f) => {
+      const bad = [];
+      if (Number(f?.selected) !== 2) bad.push(`URL 交接没生效（已选 ${f?.selected}）`);
+      if (f?.lock1 !== true) bad.push('第 1 格没有显示「锁定」（服务端回传的锁定丢了？）');
+      if (f?.lock2 === true) bad.push('第 2 格**不该**是锁的');
+      return bad;
+    };
+    check('live-lock-handoff', 'URL 交接 `?team=…&lock=…`：选人进去、**锁定的那一格显示锁定**、没锁的不显示',
+      lockProblems(lockFacts).length === 0,
+      lockProblems(lockFacts).join(' | ')
+      || `URL ${lockFacts.url}；已选 ${lockFacts.selected}；第1格「${String(lockFacts.slot1).slice(0, 30)}」`);
+    counter('live-lock-handoff', '服务端接受了锁定却不回传（页面看不到锁）必须被同一条判据抓住',
+      lockProblems({...lockFacts, lock1: false}), '{"lock1":false}');
+
+    // 回到干净的选人状态继续后面的流程
+    await cdp.send('Page.navigate', {url: `${BASE}roco.html`});
+    for (let i = 0; i < 120; i += 1) {
+      if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+      await sleep(250);
+    }
+    await sleep(900);
+
     // ── ② 真鼠标选满六只（工坊在 shadow root 里）──────────────────────────
     // 名字必须用**页面显示的那个名字**：登记表里的 `species_name` 与盒子/工作台显示的名字
     // 可能不同（工坊验收里已经踩过一次），按错名字搜 = 搜不到 = 六只选不满。

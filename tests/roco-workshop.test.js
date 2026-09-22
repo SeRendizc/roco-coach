@@ -140,6 +140,28 @@ test('接线：mountTeamWorkshop 的导出签名与徽记常量是稳定契约',
 // 1. 路由契约：0 / 1 / 2 / 5 / 6 只五种形态
 // ─────────────────────────────────────────────────────────────────────────
 
+test('锁定：请求里带 locked 必须被接受、回传、并计入 locked_count（A2 的服务端半条）', async () => {
+  const selected = ['own-0001', 'own-0003'].join(',');
+  const res = await workshop(`selected=${selected}&locked=own-0001`);
+  assert.equal(res.status, 200, `带合法 locked 的请求必须 200，实际 ${res.status}：${res.raw.slice(0, 200)}`);
+  const r = res.json;
+  const lockedSlots = r.player.slots.filter((x) => x.locked === true).map((x) => x.index);
+  assert.deepEqual(lockedSlots, [1], `锁定的槽位必须是第 1 格，实际 ${JSON.stringify(lockedSlots)}`);
+  assert.equal(r.player.locked_count, 1, `locked_count 必须是 1，实际 ${r.player.locked_count}`);
+  // 反证：不带 locked 时同一个槽位**不许**是锁的
+  // （把「锁定」退回「只读冻结产物那个标记」的旧行为必须红 —— 第一版就是这么漏的）
+  const plain = await workshop(`selected=${selected}`);
+  assert.equal(plain.json.player.locked_count, 0,
+    `没带 locked 时不许报锁定，实际 ${plain.json.player.locked_count}`);
+});
+
+test('锁定：锁一个没入选的实例必须被服务端拒（RC-301 规则⑨，三条入口共用同一条）', async () => {
+  const res = await workshop('selected=own-0001&locked=own-0003');
+  assert.equal(res.status, 400, `锁一个不在 selected/must_include 里的实例必须 400，实际 ${res.status}`);
+  assert.match(String(res.json.error ?? ''), /LOCKED_NOT_SELECTED|locked/,
+    `错误要能看出是锁定规则，实际 ${JSON.stringify(res.json.error)}`);
+});
+
 test('路由契约：0 只给体系入口（不假装存在唯一答案），1 只给入口说明', async () => {
   const zero = await workshop();
   assert.equal(zero.status, 200, `空队伍应当 200，实际 ${zero.status}：${show(zero.json)}`);

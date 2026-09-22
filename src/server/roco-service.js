@@ -1079,11 +1079,20 @@ function workshopNameOf(index,key){
 function workshopPlayerView(indexRef,computed){
  const {facts,selectedCount,candidates,nextCandidates,entranceCandidates,axes,replacement,
   constraints,structureNote}=computed;
+ // 锁定的**两个来源**都必须认（2026-09-22 人类 P0 · A2）：
+ //   ① 冻结产物里那个 `locked` 标记（玩家的长期收藏夹口径）；
+ //   ② **这一次请求**里带的 `locked`（从盒子「锁定这一只去配队」带过来的）。
+ // 第一版只读 ①，于是从盒子锁定过来的那只**页面上看不到锁**（实测 `locked=[]`），
+ // 玩家以为自己锁了、其实只被服务端校验了一遍又被丢掉。
+ const requestLocked=new Set(
+  (Array.isArray(computed?.request?.locked)?computed.request.locked:[])
+   .map((item)=>(typeof item==='string'?item:item?.instance_id)).filter(Boolean));
  const members=computed.teamMembers.map((member)=>workshopPlayerMembers({
   species_name:member.species_id?indexRef.featureFor(member.species_id)?.species_name:null,
   types:member.species_id?indexRef.featureFor(member.species_id)?.types??[]:[],
   has_build:member.species_id?indexRef.featureFor(member.species_id)?.has_frozen_learnset===true:false,
-  locked:indexRef.instances.get(member.key.slice('instance:'.length))?.locked===true,
+  locked:requestLocked.has(member.key.slice('instance:'.length))
+   ||indexRef.instances.get(member.key.slice('instance:'.length))?.locked===true,
   favourite:indexRef.instances.get(member.key.slice('instance:'.length))?.favourite===true,
  }));
  const slots=[];
@@ -1109,6 +1118,7 @@ function workshopPlayerView(indexRef,computed){
   selected_count:selectedCount,
   remaining_slots:facts.remaining_slots,
   ready:selectedCount===WORKSHOP_TEAM_SIZE,
+  locked_count:members.filter((m)=>m.locked===true).length,
   slots,
   candidates_universe:{pool_label:`${WORKSHOP_BADGES.universe} 600+`,
    total:facts.universe_size,owned_instances:facts.universe_owned_instances,

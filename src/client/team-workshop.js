@@ -368,13 +368,19 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   const initialSelected = Array.isArray(opts.initialSelected)
     ? opts.initialSelected.filter((id) => typeof id === 'string' && /^own-\d+$/.test(id)).slice(0, TEAM_SLOTS)
     : [];
+  // 从 URL 带过来的**锁定**（`?lock=own-…`）：只认形状对的 id，且**必须在选人里**
+  // （服务端会按 RC-301 规则⑨再校验一次：锁一个没入选的实例整条请求会被拒）。
+  const initialLocked = Array.isArray(opts.initialLocked)
+    ? opts.initialLocked.filter((id) => typeof id === 'string' && /^own-\d+$/.test(id))
+      .filter((id) => initialSelected.includes(id))
+    : [];
   const state = {
     selected: initialSelected.slice(),
+    locked: initialLocked.slice(),
     // 理论阵容（2026-09-22 人类 P0）：**物种级**，用来做搭配分析；不要求拥有、不出战。
     // 与 `selected`（持有实例）分开，是因为这两件事的失败方向完全不同：
     // 持有清单满了才能开局，理论阵容满了才能比较与试玩。
     analysis: [],
-    locked: [],
     favourite: false,
     maxReplacements: null,
     payload: null,
