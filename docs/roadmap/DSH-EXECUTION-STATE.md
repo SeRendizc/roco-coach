@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `817fdec`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `d2ad1cd`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1796,3 +1796,27 @@ A7 1440/390 无遮挡无横向溢出、A8 页面看不到的能力不得只凭�
 4. RC-401～505 / 601～605 / 801～802 / P2 未开始；`MC-E04/E07/E08/E09` 仍未录制；
    六宠局面下的特性（`traits.py` 仅 12 条）、印记叠加（MC-009）、`switch` 折算固定先手度均未实现。
 5. 跨机协作区仍未同步（等用户允许扩权；备好内容见 `CROSS-MACHINE-COORDINATION.md` §9）。
+
+### C6.32 第 95 轮：RC-106 接线完成 —— 页面上第一次显示**引擎给的**魔力
+
+**交付（提交 `70e05af` / `d2ad1cd`）**：把上一轮的「引擎能跑」接到「页面能玩」。
+
+| 层 | 改了什么 | 实测 |
+|---|---|---|
+| 服务端 | `POST /api/roco/battle/new` 按 `mode` 从登记表取 `ruleset_binding` 与 `parameters.team_size`（不抄字符串、不写死 3）；owned 个体→物种 id 换算；`STANDARD_PVP_UNVERIFIED_OVERRIDES`（energy.initial=2/MC-E04、turn_order.speed_tie=random_seeded/MC-E05）；`publicView` 暴露 `mana`/`unverified_overrides`/`unverified_notes`/`mode_id` | 六宠开局 `mana={self:4,opponent:4}`；legacy 仍是 `mana=null` + 有 item/escape |
+| 页面 | 「开一局（标准 PVP · 六宠）」条（六只都必须是可上场的 owned 个体才可点）；资源条读 `view.mana`；行动坞补「聚能/投降」一级类；未核验假设在战斗页顶部单独一行 | 浏览器验收 `mana=4/4 groups=skill:3,charge:1,switch:5,surrender:1 hidden=0` |
+| 引擎 | 同速平手可**显式覆盖**（值域只允许 `SPEED_TIE_POLICIES`，只在配置是 null 时接受）；`ruleset_config_id` 进公开面并在 `deserialize`/`state_from_public_planner`/`_private_state` 一路带着走 | 六宠四种子跑完整局：52/49/49/49 回合，终局 **0:2 / 3:0 / 0:3 / 3:0 —— 魔力归零判负** |
+
+**这一轮抓到并修掉的两个集成 bug**（都是浏览器/端到端实测逼出来的，不是计划里的）：
+1. **同速平手让六宠对局走不下去**：v3 的 `speed_tie` 是 `null`（MC-E05 未录制），撞上同速就抛错。
+   修法不是放宽纪律，而是把它并入既有的「显式未核验覆盖」机制（不写回配置、页面上标未核验）。
+2. **规则配置没被一路带着走**：点完「开一局（标准 PVP）」后规划接口 502
+   （`记录是 mobile_s4_candidate_v3，当前是 legacy_sim_v1`）。公开面现在带 `ruleset_config_id`，
+   还原/规划两条路径都按记录那份配置走。**没有任何判据被放宽**——不同配置的状态照样不能混用。
+
+**验收**：`test:env` **362 OK**；`tests/roco-standard-pvp-battle.test.js` 8 条（含端到端到终局）；
+`browser-workshop-acceptance` **38/38 + 23/23 反证**；整套 release gate **17/17 全绿**。
+
+**下一轮入口**：RC-306 的接线（`/api/roco/workshop` 改成先初判后完整解释、超时降级）；
+台账第三条仓内来源；RC-401～505 / 601～605 / 801～802 / P2；`MC-E04/E05/E07/E08/E09` 仍未录制
+（现在是**假设值**在跑，页面上逐条标着）。
