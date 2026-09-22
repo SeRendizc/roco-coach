@@ -1,0 +1,20 @@
+node scripts/roco/verify-reconciliation.mjs --gate
+
+✔ 健康报告必须放行
+✔ 反证①：reconciled=false 必须红
+✔ 反证②：licence_ok=false 必须红
+✔ 反证③：离线重抽失败必须红
+✔ 反证④：报告过期（重算不一致）必须红
+✔ 反证⑤：报告不存在必须红
+[reconciliation] live=data/roco/live/2026-09-21/public-index.json
+[reconciliation] reconciled=true licence_ok=true offline_check_rc=3 report_is_fresh=true
+[reconciliation] buckets={"only_in_frozen":4,"only_in_live":0,"changed":0,"unresolved":4}
+✖ 快照不能由本地 HTML 确定性重抽（fetch --check --offline rc=3）：[check] mode=undefined
+[check] 没有可校验的产物：data/roco/live/2026-09-22/public-index.json 不存在
+[check] target=/Users/serendizc/Developer/roco-coach/data/roco/live/2026-09-22/public-index.json
+[check] result_sha256 previous=undefined
+[check] result_sha256 fresh   =undefined
+
+[fetch] 运行失败：TypeError: Cannot convert undefined or null to object
+    at Object.entries (<anonymous>)
+    at main (file:///Users/se
