@@ -734,6 +734,73 @@ async function main() {
         + `聚能=${spec.charge} 换精灵=${spec.switchEntry} 投降=${spec.surrender}；`
         + `最新事件「${String(spec.lastEvent).slice(0, 40)}」；对手后备「${spec.foeBench}」；`
         + `行动区底 ${spec.actions?.bottom} / 视口 ${spec.vh}`);
+    // ── R3：四个大选项 + 高亮 + 聚能预览 + 更换页字段 + 物品空态 + 逃跑二次确认 ──
+    const r3 = await js(`(()=>{const tabs=[...document.querySelectorAll('#act-tabs .act-tab')]
+      .map((b)=>({tab:b.dataset.actTab,on:b.getAttribute('aria-selected')==='true',
+        text:(b.textContent||'').trim(),h:Math.round(b.getBoundingClientRect().height)}));
+      return {tabs,active:document.body.dataset.rocoActTab??null,
+        charge:(document.getElementById('act-charge')||{}).textContent||'',
+        chargeHidden:Boolean(document.getElementById('act-charge')?.hidden),
+        report:Boolean(document.getElementById('act-report'))};})()`);
+    // 真鼠标切到「更换」：每行必须给 名字/属性/⭐/血量
+    let switchRows = [];
+    if (r3.tabs.some((t) => t.tab === 'switch')) {
+      await mouseClick('#act-tabs .act-tab[data-act-tab="switch"]');
+      await sleep(500);
+      switchRows = await js(`(()=>[...document.querySelectorAll('#act-switch-list [data-roco-switch-row]')]
+        .map((b)=>({types:b.dataset.switchTypes||'',energy:b.dataset.switchEnergy||'',
+          hp:b.dataset.switchHp||'',text:(b.textContent||'').replace(/\\s+/g,' ').trim().slice(0,40)})))()`);
+      await mouseClick('#act-tabs .act-tab[data-act-tab="escape"]');
+      await sleep(400);
+    }
+    const escapeFacts = await js(`(()=>({shown:!document.getElementById('act-escape').hidden,
+      confirm:Boolean(document.getElementById('act-surrender-confirm')),
+      cancel:Boolean(document.getElementById('act-escape-cancel')),
+      // 直接点「确认投降」的入口**不在**首层 —— 必须先选逃跑页（二次确认）
+      direct:Boolean(document.querySelector('#actions [data-kind="surrender"]'))}))()`);
+    await mouseClick('#act-tabs .act-tab[data-act-tab="item"]');
+    await sleep(400);
+    const itemFacts = await js(`(()=>({shown:!document.getElementById('act-item-list').hidden,
+      rows:document.querySelectorAll('#act-item-list [data-item-row]').length,
+      noItem:Boolean(document.querySelector('[data-roco-no-item]')),
+      emptyNote:(document.querySelector('[data-roco-no-item]')||{}).textContent||''}))()`);
+    await mouseClick('#act-tabs .act-tab[data-act-tab="skill"]');
+    await sleep(400);
+    const r3Problems = (f, rows, esc, items) => {
+      const bad = [];
+      const want = ['skill', 'item', 'switch', 'escape'];
+      if ((f?.tabs ?? []).length !== 4) bad.push(`大选项 ${(f?.tabs ?? []).length} 个（规格是 4 个）`);
+      for (const t of want) if (!(f?.tabs ?? []).some((x) => x.tab === t)) bad.push(`缺「${t}」选项`);
+      if ((f?.tabs ?? []).filter((x) => x.on).length !== 1) bad.push('高亮的选项不是恰好一个');
+      if ((f?.tabs ?? []).some((x) => x.h < 44)) bad.push('有选项高度 <44px');
+      if (!/聚能/.test(String(f?.charge ?? ''))) bad.push('聚能按钮上没有文字');
+      if (Number(esc?.rowsCount) === 0 && esc?.shown !== true) bad.push('逃跑页没打开');
+      if (!esc?.confirm || !esc?.cancel) bad.push('逃跑没有二次确认（确认 + 取消两个入口）');
+      if (esc?.direct) bad.push('首层直接摆了「投降」动作（应当走逃跑页二次确认）');
+      // 更换页：每行都要有 属性 / ⭐ / 血量
+      if (f?.tabs?.some((t) => t.tab === 'switch')) {
+        if (!rows.length) bad.push('更换页一行都没有');
+        for (const row of rows) {
+          if (!row.types) bad.push(`更换页「${row.text}」没给属性`);
+          if (row.energy === '') bad.push(`更换页「${row.text}」没给 ⭐`);
+          if (!row.hp) bad.push(`更换页「${row.text}」没给血量`);
+        }
+      }
+      if (!items?.shown) bad.push('物品页没打开');
+      if (items?.rows === 0 && !items?.noItem) bad.push('这一手没有物品动作，却没写清为什么（会看起来像坏了）');
+      return bad;
+    };
+    check('live-act-tabs', '四个大选项（技能/物品/更换/逃跑）都在、恰好一个高亮、≥44px；'
+      + '聚能/战报在位；更换页每行给名字/属性/⭐/血量；物品页没有就写清原因；逃跑是二次确认',
+      r3Problems(r3, switchRows, {...escapeFacts, rowsCount: switchRows.length}, itemFacts).length === 0,
+      r3Problems(r3, switchRows, {...escapeFacts, rowsCount: switchRows.length}, itemFacts).join(' | ')
+      || `选项 ${JSON.stringify(r3.tabs.map((t) => `${t.tab}${t.on ? '*' : ''}`))}；`
+        + `聚能「${r3.charge}」；更换页 ${switchRows.length} 行 ${JSON.stringify(switchRows[0] ?? null)}；`
+        + `物品 ${itemFacts.rows} 行 / 空态 ${itemFacts.noItem}；逃跑确认 ${escapeFacts.confirm}`);
+    counter('live-act-tabs', '逃跑没有二次确认（首层直接摆投降）必须被同一条判据抓住',
+      r3Problems({...r3, tabs: []}, [], {shown: true, confirm: false, cancel: false, direct: true, rowsCount: 0},
+        {shown: true, rows: 0, noItem: false}), '{"confirm":false,"direct":true}');
+
     counter('live-battle-spec(星不够不标红)', '星不够却标成不红（或星够却标红）必须被同一条判据抓住',
       specProblems({...spec, skillCards: [{w: 120, h: 113, legal: false, cost: '6', short: 'no',
         damage: '40', chip: true, dmgChip: true, meta: '草系 · 攻击', detail: true, energy: 2}]}),

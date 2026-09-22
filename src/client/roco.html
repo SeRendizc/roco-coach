@@ -276,14 +276,26 @@
  <span class="muted" id="action-hint">开一局后这里会出现可执行的动作</span>
  <!-- 2026-09-22 战斗页规格（人类）：技能是**主区**（最多四张卡一屏完整显示名字/类型/消耗/关键效果）；
       聚能 / 换精灵 / 投降各自**独立入口**（聚能不归入技能）；只渲染引擎本回合给的合法动作。 -->
- <div id="actions" class="actions"></div>
- <div class="act-side" id="act-side">
+ <!-- 2026-09-22 人类规格 R3：**四个大选项**（技能 / 物品 / 更换 / 逃跑），高亮当前那个；
+      聚能与战报放在选项行右侧（聚能显示「恢复到多少 🌟」）。 -->
+ <div class="act-tabs" id="act-tabs" role="tablist">
+  <button class="act-tab" role="tab" data-act-tab="skill" aria-selected="true">技能</button>
+  <button class="act-tab" role="tab" data-act-tab="item" aria-selected="false">物品</button>
+  <button class="act-tab" role="tab" data-act-tab="switch" aria-selected="false">更换</button>
+  <button class="act-tab" role="tab" data-act-tab="escape" aria-selected="false">逃跑</button>
+  <span class="act-tabs-gap"></span>
   <button class="act-side-btn" id="act-charge" data-side-action="charge" hidden>聚能</button>
-  <button class="act-side-btn" id="act-switch" data-side-action="switch" hidden
-    aria-expanded="false">换精灵</button>
-  <button class="act-side-btn secondary" id="act-surrender" data-side-action="surrender" hidden>投降</button>
+  <button class="act-side-btn secondary" id="act-report" data-act-tab-jump="report" hidden>战报</button>
  </div>
+ <div id="actions" class="actions"></div>
+ <div class="act-side" id="act-side" hidden></div>
  <div class="act-switch-list" id="act-switch-list" hidden></div>
+ <div class="act-item-list" id="act-item-list" hidden></div>
+ <div class="act-escape" id="act-escape" hidden>
+  <p class="muted">投降会立刻结束这一局（这一局按失败记）。</p>
+  <button class="act-side-btn secondary" id="act-surrender-confirm" data-side-action="surrender">确认投降</button>
+  <button class="act-side-btn" id="act-escape-cancel">再想想</button>
+ </div>
 </section>
 
 <!-- ── 小芽（陪练 / 军师）：重排后的浮条；输入与最近一句回复**同屏可见** ───────

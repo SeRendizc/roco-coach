@@ -1768,6 +1768,9 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
 
     self_panel = dict(view["self"])
     self_panel["energy_max"] = energy_max
+    # 2026-09-22（人类战斗页 v2 R3）：聚能**回复多少**也是屏幕上的规则常量
+    # （「聚能 → 10 / 10」要算得出来）。同样只给配置里的登记值，读不到就不写。
+    self_panel["energy_charge"] = getattr(cfg, "energy_charge", None)
     self_panel["pets"] = [decorate(p) for p in view["self"]["pets"]]
     # 己方当前可用的技能（配招里那一套），UI 的技能面板直接用它
     self_panel["skills"] = [
@@ -1784,6 +1787,7 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     foe_panel = dict(view["opponent"])
     # 对手的能量上限是**规则常量**（不是隐藏信息）：双方用同一份规则配置。
     foe_panel["energy_max"] = energy_max
+    foe_panel["energy_charge"] = getattr(cfg, "energy_charge", None)
     foe_panel["field"] = decorate(view["opponent"]["field"]) if view["opponent"]["field"] else None
     # 后备：**只给位次与是否倒下**，连 `pet_id` 都不给。
     #

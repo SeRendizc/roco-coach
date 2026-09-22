@@ -669,3 +669,12 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 .skill-detail{margin-top:2px}
 .skill-detail>summary{font-size:11px;color:#9caebe;cursor:pointer;min-height:32px;display:flex;align-items:center}
 .skill-detail small{font-size:11px;color:#b9c7d4;line-height:1.5}
+
+/* 战斗页 v2 R3：四个大选项 + 高亮当前 + 聚能/战报在右侧。 */
+.act-tabs{display:flex;gap:6px;align-items:center;margin:0 0 6px;flex-wrap:wrap}
+.act-tabs-gap{flex:1 1 auto}
+.act-tab{min-height:44px;padding:0 14px;font-size:13.5px;font-weight:600;border-radius:10px;
+ background:#16222f;border:1px solid #314154;color:#c9d6e2}
+.act-tab[aria-selected="true"]{background:#1f3a55;border-color:#5b86ad;color:#ffffff}
+.act-item-list{display:grid;gap:6px;margin-top:6px}
+.act-escape{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}

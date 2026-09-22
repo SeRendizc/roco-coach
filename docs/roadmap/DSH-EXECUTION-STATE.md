@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `396e302`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `d940223`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2384,3 +2384,17 @@ diff `git status`，用来抓「产物里有易变字段」。但同一次 `veri
 **判据**：真机 `live-battle-spec`（四格 / 消耗徽记 / 红标与能量一致 / 属性 / 预计伤害 / 详情层 + 两条必红反证：星不够不标红、聚能混进技能区）；UX `D4-skill-info` 按新信息架构量；demo 里「按钮上不出现技能内部 id」改成只扫**玩家可见文本**（`skill_id` 只留在 `data-*` 钩子）。
 
 **实测**：真机 **22/22 + 21/21**；UX **39/39 + 4/4**；demo **120/0**；`test:unit` **1002/1002**；门禁 **22/22 pass**。
+
+### C6.57 第 133 轮：战斗页 v2 R3 —— 四个大选项 + 聚能预览 + 战报 + 更换页 + 逃跑确认
+
+- **四个大选项**（技能 / 物品 / 更换 / 逃跑）：恰好一个高亮（`aria-selected` + 底色）、≥44px；
+- **聚能 → 10 / 10**：引擎侧新透出规则常量 `energy_charge`（`env.ui_public_view` 里与 `energy_max` 并列，Node 侧同处透出），页面用它算「聚能后恢复到多少」；**读不到就不写数**（不猜 +5）；
+- **战报**按钮：跳到战报面板（回合细节）；
+- **更换页**：每行给 名字 / 属性 / ⭐ / 血量（属性取名单数据，取不到留空不编）；
+- **物品页**：引擎没给就写清「候选规则不提供道具；规则来源未核验，页面不补一个」；
+- **逃跑**：二次确认（确认投降 + 再想想），首层不再直接摆投降。
+
+**判据**：真机 `live-act-tabs` **23/23 + 23/23**（含反证：逃跑没确认 / 首层直接摆投降 / 物品空态不写原因）；`test:env` 417 OK（引擎侧新增字段后）。门禁 **22/22 pass**。
+**截图**：`reports/roco/ui-slice/battle-decision-{1440x900,390x844}.png`（存盘前断言：真在战斗、双方 HP、有合法动作、回合推进、小芽真打开）——人工核对确认四选项行与「聚能 → 10 / 10」都在。
+
+**已知小缺口**：技能格的「预计伤害」这一局显示「算不出」（引擎 `damage_preview.available=false`），页面照实说，但**没把引擎的 reason 显示出来** → 下一轮补到详情层。

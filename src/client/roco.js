@@ -1018,6 +1018,32 @@ function skillSlotHtml(slot, actions, disabled) {
   </div>`;
 }
 
+/**
+ * 四个大选项（战斗页 v2 R3）：技能 / 物品 / 更换 / 逃跑，**高亮当前那个**。
+ * 切换只影响展示；**可点性仍完全由引擎给的合法动作决定**（这里不裁也不造动作）。
+ */
+function setActTab(tab) {
+  state.actTab = tab;
+  render();
+}
+
+/** 聚能按钮上的预览：聚能后能恢复到多少 🌟（引擎给 charge 动作时才算，拿不到就不写）。 */
+function chargePreviewHtml(chargeActions) {
+  if (!chargeActions.length) return '聚能';
+  const pet = state.view?.self?.pets?.[state.view?.self?.active ?? 0] ?? null;
+  const cap = Number.isFinite(state.view?.self?.energy_max) ? state.view.self.energy_max : null;
+  const now = Number.isFinite(pet?.energy) ? pet.energy : null;
+  // 引擎把「聚能回复多少」写在动作里就用它；没有就不猜（不编一个 +5）。
+  // 回复量优先取动作自带的，其次取公开视图里的**规则常量**（`energy_charge`，引擎登记值）。
+  const gain = Number.isFinite(Number(chargeActions[0]?.energy_gain))
+    ? Number(chargeActions[0].energy_gain)
+    : (Number.isFinite(Number(state.view?.self?.energy_charge))
+      ? Number(state.view.self.energy_charge) : null);
+  if (cap === null) return '聚能';
+  const after = gain !== null && now !== null ? Math.min(cap, now + gain) : null;
+  return after === null ? `聚能（上限 ${cap}）` : `聚能 → ${after} / ${cap}`;
+}
+
 function renderActions(actions, disabled) {
   const box = $('actions');
   if (!box) return;
@@ -1029,6 +1055,28 @@ function renderActions(actions, disabled) {
     return;
   }
   const byKind = (kind) => grouped.groups.find((g) => g.id === kind)?.actions ?? [];
+  // ── R3：四个大选项 + 高亮当前；聚能预览；更换页字段；物品页；逃跑二次确认 ──
+  const tab = state.actTab ?? 'skill';
+  for (const btn of document.querySelectorAll('#act-tabs .act-tab')) {
+    const on = btn.dataset.actTab === tab;
+    btn.setAttribute('aria-selected', on ? 'true' : 'false');
+    if (!btn.dataset.bound) {
+      btn.dataset.bound = 'yes';
+      btn.addEventListener('click', () => setActTab(btn.dataset.actTab));
+    }
+  }
+  const reportBtn = $('act-report');
+  if (reportBtn && !reportBtn.dataset.bound) {
+    reportBtn.dataset.bound = 'yes';
+    reportBtn.addEventListener('click', () => {
+      const panel = $('log-panel');
+      if (panel) { panel.hidden = false; panel.scrollIntoView({block: 'nearest'}); }
+      setActTab('skill');
+    });
+  }
+  document.body.dataset.rocoActTab = tab;
+  const chargeBtnEl = $('act-charge');
+  if (chargeBtnEl) chargeBtnEl.textContent = chargePreviewHtml(byKind('charge'));
   const skills = byKind('skill').slice(0, 4);
   const charge = byKind('charge');
   const switches = byKind('switch');
@@ -1112,9 +1160,17 @@ function renderActions(actions, disabled) {
         const hp = Number.isFinite(pet?.hp) && Number.isFinite(pet?.max_hp) ? `${pet.hp}/${pet.max_hp}` : null;
         const statuses = pet?.statuses && Object.keys(pet.statuses).length
           ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : null;
-        const energy = Number.isFinite(pet?.energy) ? `星 ${pet.energy}` : null;
-        const bits = [hp ? `HP ${hp}` : null, energy, statuses ? `异常 ${statuses}` : null].filter(Boolean);
-        return `<button data-action="${actions.indexOf(action)}" data-switch-to="${action.target_index}">
+        const energy = Number.isFinite(pet?.energy) ? `🌟 ${pet.energy}` : null;
+        // R3：更换页每只要给**名字 / 属性 / ⭐ / 血量**（属性从名单数据取，取不到就留空不编）。
+        const moveRow = (state.roster ?? []).concat(state.rosterAll ?? [])
+          .find((p) => p.pet_id === (pet?.species_id ?? pet?.pet_id)) ?? null;
+        const types = Array.isArray(moveRow?.types) ? moveRow.types.join('·') : null;
+        const bits = [types, hp ? `HP ${hp}` : null, energy,
+          statuses ? `异常 ${statuses}` : null].filter(Boolean);
+        return `<button data-action="${actions.indexOf(action)}" data-switch-to="${action.target_index}"
+          data-roco-switch-row="yes" data-switch-types="${escapeAttr(types ?? '')}"
+          data-switch-energy="${Number.isFinite(pet?.energy) ? pet.energy : ''}"
+          data-switch-hp="${escapeAttr(hp ?? '')}">
           <strong>${escapeHtml(name)}</strong>
           ${bits.length ? `<span class="sw-hp">${escapeHtml(bits.join(' · '))}</span>` : ''}
         </button>`;
@@ -1122,7 +1178,35 @@ function renderActions(actions, disabled) {
     }
   }
 
+  // ── 按当前选项显示对应面板；**可点性仍由引擎决定** ──
+  if (box) box.hidden = tab !== 'skill';
+  if (switchList) switchList.hidden = !(tab === 'switch' && switches.length > 0);
+  const itemList = $('act-item-list');
+  if (itemList) {
+    const items = byKind('item');
+    if (tab !== 'item') itemList.hidden = true;
+    else {
+      itemList.hidden = false;
+      itemList.innerHTML = items.length
+        ? items.map((action) => `<button data-action="${actions.indexOf(action)}" data-item-row="yes">
+            <strong>${escapeHtml(action.item_id ?? action.label ?? '物品')}</strong>
+            <span class="sw-hp">占用本回合行动</span></button>`).join('')
+        // 引擎没给物品就不编：说清「本模式不提供」以及为什么看不到。
+        : '<p class="act-none" data-roco-no-item="yes">这一手引擎没有给物品动作'
+          + '（标准 PVP 候选规则不提供道具；规则来源未核验，页面不补一个）。</p>';
+    }
+  }
+  const escapeBox = $('act-escape');
+  if (escapeBox) escapeBox.hidden = !(tab === 'escape' && surrender.length > 0);
+  const escapeCancel = $('act-escape-cancel');
+  if (escapeCancel && !escapeCancel.dataset.bound) {
+    escapeCancel.dataset.bound = 'yes';
+    escapeCancel.addEventListener('click', () => setActTab('skill'));
+  }
   for (const button of box.querySelectorAll('button[data-action]')) {
+    button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
+  }
+  for (const button of ($('act-item-list')?.querySelectorAll('button[data-action]') ?? [])) {
     button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
   }
   for (const button of ($('act-switch-list')?.querySelectorAll('button[data-action]') ?? [])) {

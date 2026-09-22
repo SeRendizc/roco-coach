@@ -174,6 +174,8 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
    // 教练层用它判断「对面离满还差多少」；这里不透出去，那一类建议就只能沉默。
    // 读不到就是 null（界面与教练层都不许拿一个抄来的默认值兜底）。
    energy_max:Number.isInteger(selfState?.energy_max)?selfState.energy_max:null,
+   // R3：聚能回复量（规则常量）—— 页面用它算「聚能 → N / 上限」；读不到就是 null，不猜。
+   energy_charge:Number.isInteger(selfState?.energy_charge)?selfState.energy_charge:null,
    pets:pets(selfState?.pets),
    // 己方可用技能（配招那一套）：UI 的技能面板直接用它
    skills:Array.isArray(ui?.self?.skills)?ui.self.skills.map(skillRow):[]},

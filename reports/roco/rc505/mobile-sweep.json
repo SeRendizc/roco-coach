@@ -246,7 +246,7 @@
    "clientW": 390,
    "scrollW": 390,
    "clientH": 844,
-   "visibleText": 15959,
+   "visibleText": 15991,
    "required": [
     {
      "tag": "button",
@@ -301,7 +301,7 @@
    "clientW": 360,
    "scrollW": 360,
    "clientH": 640,
-   "visibleText": 15959,
+   "visibleText": 15991,
    "required": [
     {
      "tag": "button",
