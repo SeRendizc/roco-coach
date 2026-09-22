@@ -780,6 +780,14 @@ function render() {
   // （窄屏上它是贴底的，不收起会与动作坞抢同一条底边。）
   const pvpBar = $('standard-pvp-bar');
   if (pvpBar) pvpBar.hidden = busy && !view?.battle_result;
+  // 战斗优先（2026-09-22 人类 P0 战斗页规格）：一局进行中，**选阵容面**（六槽工作台）
+  // 整块收起 —— 它占的高度比战场还大。要看阵容时用「重选阵容」那一行把它叫回来。
+  const workshop = $('team-workshop');
+  if (workshop) workshop.hidden = busy;
+  // 战斗页顶部的规则/置信度徽记仍在页头（那是「这一局的规则口径」），
+  // 但**大段规则与证据**在战斗时不该占主视线：它们本来就在开发者抽屉里。
+  const modeLine = $('mode-line');
+  if (modeLine) modeLine.dataset.rocoCompact = busy ? 'yes' : 'no';
   $('log-panel').hidden = !busy;
   $('action-panel').hidden = !busy;
   $('result-panel').hidden = !view?.battle_result;
