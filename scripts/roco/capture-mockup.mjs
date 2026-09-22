@@ -56,6 +56,7 @@ const shot = async (name, {w, h, frame}) => {
 
 await shot('battle-v3-default-1440x900.png', {w: 1440, h: 900, frame: 'default'});
 await shot('battle-v3-heart-1440x900.png', {w: 1440, h: 900, frame: 'heart'});
+await shot('battle-v3-element-1440x900.png', {w: 1440, h: 900, frame: 'element'});
 await shot('battle-v3-switch-1440x900.png', {w: 1440, h: 900, frame: 'switch'});
 await shot('battle-v3-log-1440x900.png', {w: 1440, h: 900, frame: 'log'});
 await shot('battle-v3-xiaoya-1440x900.png', {w: 1440, h: 900, frame: 'xiaoya'});
