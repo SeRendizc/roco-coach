@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import os
 import sys
+import dataclasses
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
@@ -88,3 +89,58 @@ class CoverageLedgerTest(unittest.TestCase):
         from roco_env import traits as traits_mod
         self.assertEqual(ranking["未被登记"]["traits"], 245 - len(traits_mod.TRAITS),
                          "「未被登记」的条数必须等于 245 减去已登记条数")
+
+
+class SupportSourceOfTruthTest(unittest.TestCase):
+    """C3-a（2026-09-22）：支持度的**唯一事实源**是 classify_skill 的计算档位。
+
+    现场：冻结数据 `skills.json` 的 `effect_support` 是一刀切旧标记 —— 实测 579 个进覆盖
+    统计的技能**全部**是 `unsupported`（连「对敌方精灵造成物理伤害」这种纯伤害技能也是），
+    而 `service.py` 的技能闸门读的正是它，于是一律报「效果原语尚未核验/实现」，
+    说不清是「引擎算不了」还是「只是没登记」。
+    """
+
+    def test_service_tier_equals_computed_tier(self):
+        from roco_env import data as data_mod, service as service_mod
+        rs = data_mod.load_ruleset()
+        svc = service_mod.RocoService()
+        # 取两条对照：一条描述被完整读出（应当可结算），一条有未认领片段（应当拒绝）
+        sim = partial = None
+        for sid, skill in rs.skills.items():
+            tier = cov.classify_skill(skill, multi_hit_declared=True)
+            if sim is None and tier["support"] == cov.SUPPORT_SIMULATABLE_UNVERIFIED:
+                sim = (sid, skill, tier)
+            if partial is None and tier["support"] in (
+                    cov.SUPPORT_PARTIAL, cov.SUPPORT_KNOWLEDGE_ONLY):
+                partial = (sid, skill, tier)
+            if sim and partial:
+                break
+        self.assertIsNotNone(sim, "至少要有一条「描述被完整读出」的技能")
+        self.assertIsNotNone(partial, "至少要有一条「有未认领片段」的技能")
+        for sid, skill, tier in (sim, partial):
+            record = svc._skill_record(rs, skill)
+            self.assertEqual(
+                record.get("support_tier", tier["support"]), tier["support"],
+                f"{skill.name} 的服务端档位必须等于计算档位")
+
+    def test_blanket_frozen_field_no_longer_decides(self):
+        """反证方向：把冻结字段改成 supported，服务端**不许**因此放行。"""
+        from roco_env import data as data_mod, service as service_mod
+        rs = data_mod.load_ruleset()
+        svc = service_mod.RocoService()
+        target = None
+        for sid, skill in rs.skills.items():
+            tier = cov.classify_skill(skill, multi_hit_declared=True)
+            if tier["support"] == cov.SUPPORT_KNOWLEDGE_ONLY:
+                target = skill
+                break
+        self.assertIsNotNone(target, "至少要有一条 KNOWLEDGE_ONLY 技能来做反证")
+        # `Skill` 是 frozen dataclass —— 不能原地改字段，用 dataclasses.replace 造一份
+        # 「冻结字段被写成 supported」的副本（第一版直接赋值，finally 里炸了 FrozenInstanceError）。
+        flipped = dataclasses.replace(target, effect_support="supported")
+        self.assertEqual(flipped.effect_support, "supported", "反证构造失败：副本没改到字段")
+        record = svc._skill_record(rs, flipped)
+        self.assertEqual(record.get("support_tier"), cov.SUPPORT_KNOWLEDGE_ONLY,
+                         "冻结字段改成 supported 之后，档位仍必须是计算出来的 KNOWLEDGE_ONLY")
+        self.assertFalse(record.get("resolved", False),
+                         "描述没读全的技能不许因为冻结字段被放行")
