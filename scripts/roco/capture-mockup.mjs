@@ -11,7 +11,7 @@ import {join, resolve} from 'node:path';
 
 const OUT = resolve(process.argv.includes('--out')
   ? process.argv[process.argv.indexOf('--out') + 1] : 'docs/roco/mockups');
-const PAGE = `file://${resolve('docs/roco/mockups/battle-v3.html')}`;
+const PAGE = `file://${resolve(process.env.MOCKUP || 'docs/roco/mockups/battle-v3b.html')}`;
 const CHROME = process.env.CHROME_PATH
   || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -59,6 +59,7 @@ await shot('battle-v3-heart-1440x900.png', {w: 1440, h: 900, frame: 'heart'});
 await shot('battle-v3-switch-1440x900.png', {w: 1440, h: 900, frame: 'switch'});
 await shot('battle-v3-log-1440x900.png', {w: 1440, h: 900, frame: 'log'});
 await shot('battle-v3-xiaoya-1440x900.png', {w: 1440, h: 900, frame: 'xiaoya'});
+await shot('battle-v3-items-1440x900.png', {w: 1440, h: 900, frame: 'items'});
 await shot('battle-v3-default-390x844.png', {w: 390, h: 844, frame: 'default'});
 
 ws.close(); chrome.kill('SIGKILL');

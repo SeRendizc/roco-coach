@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>战斗页 v3 示意图（第二版）</title>
+<style>
+:root{--bg:#0b1218;--panel:#111c26;--panel2:#0e1822;--line:#243444;--line2:#2f465c;
+ --ink:#e8f0f7;--dim:#93a7b8;--brand:#67c9a8;--red:#ff9a9a;--grn:#8fe0a2}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+ font:13.5px/1.45 -apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+body{padding:12px 16px 14px}
+.wrap{max-width:1408px;margin:0 auto;height:calc(100vh - 26px);display:flex;flex-direction:column}
+/* 页眉 */
+header{display:flex;align-items:center;height:40px;flex:none}
+.brand{font-size:18px;font-weight:700}
+.brand small{font-weight:600;font-size:11.5px;color:var(--brand);border:1px solid #2c5a4c;
+ background:#12241f;border-radius:999px;padding:1px 8px;margin-left:8px;vertical-align:2px}
+.spacer{flex:1}
+.xiaoya{width:40px;height:40px;border-radius:12px;border:1px solid var(--line2);background:#16242f;
+ display:grid;place-items:center;font-size:18px;cursor:pointer}
+/* 顶部信息栏 */
+.topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;flex:none;
+ margin:9px 0 11px;padding:8px 14px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);position:relative}
+.side{display:flex;align-items:center;gap:12px}
+.side.right{justify-content:flex-end}
+.dots{letter-spacing:3px;font-size:17px;line-height:1}
+.dots .alive{color:var(--brand)} .dots .down{color:#4a5b6b}
+.hearts{font-size:16px;letter-spacing:2px;color:#ffb4c0}
+.hearts .lost{color:#3d4a57}
+.hearts.hidden{opacity:0}
+.turn{font-size:14.5px;font-weight:650}
+.turn em{font-style:normal;color:var(--dim);font-weight:500}
+/* 主区 */
+main{display:grid;grid-template-columns:232px 1fr 188px;gap:14px;flex:1;min-height:0}
+.col{display:flex;flex-direction:column;min-height:0}
+.skills{display:flex;flex-direction:column;gap:8px;height:100%}
+.slot{flex:1;border:1px solid var(--line2);border-radius:11px;background:var(--panel);
+ padding:8px 11px;display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:0}
+.slot .row1{display:flex;align-items:center;gap:7px}
+.star{font-weight:700;font-size:12.5px;color:#ffd479;white-space:nowrap}
+.star.short{color:var(--red)}
+.slot .name{font-weight:650;font-size:14px}
+.slot .meta{font-size:11.5px;color:var(--dim)}
+.slot .dmg{font-size:12px;font-weight:600}
+.dmg.plain{color:var(--ink)} .dmg.up{color:var(--grn)} .dmg.down{color:var(--red)} .dmg.none{color:var(--dim)}
+.slot.grey{opacity:.6}
+.lefthint{font-size:11.5px;color:var(--dim);margin:0 2px 7px}
+/* 中间两张卡 */
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:14px;height:100%;min-height:0;align-items:stretch}
+.fighter{border:1px solid var(--line2);border-radius:13px;background:var(--panel);padding:13px 15px;
+ display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
+.fighter.foe{background:#131a24}
+.f-top{display:flex;align-items:center;gap:8px}
+.f-name{font-size:16.5px;font-weight:700}
+.chip{font-size:11px;padding:1px 8px;border-radius:999px;border:1px solid #2d4a63;background:#12202c;color:#bfe3ff}
+.f-lv{font-size:11.5px;color:var(--dim);margin-left:auto}
+.f-mid{display:flex;align-items:center;gap:10px}
+.f-star{font-size:12.5px;font-weight:700;color:#ffd479;border:1px solid #4a3f22;background:#221d10;
+ border-radius:9px;padding:2px 8px;white-space:nowrap}
+.hp{flex:1;min-width:0}
+.hp .num{display:flex;justify-content:space-between;font-size:11.5px;color:var(--dim);margin-bottom:3px}
+.hp .bar{height:8px;border-radius:999px;background:#1d2833;overflow:hidden}
+.hp .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#4fbf8f,#67c9a8)}
+.hp .fill.mid{background:linear-gradient(90deg,#c9b45a,#e0c96a)}
+.free{flex:1;border:1px dashed #26374a;border-radius:11px;min-height:56px}
+.buffs{display:flex;gap:6px;align-items:center;min-height:22px}
+.buffs .b{font-size:10.5px;color:#cfe0f0;border:1px dashed #33485c;border-radius:7px;padding:1px 7px}
+.buffs .b.ghost{opacity:.32}
+/* 右侧预留（底边与主区对齐；字号小一号） */
+.right{border:1px dashed #2b3d4e;border-radius:13px;display:flex;flex-direction:column;
+ align-items:center;justify-content:flex-end;gap:8px;padding:12px;color:#5f7385;font-size:11.5px;text-align:center}
+.logbtn{height:36px;padding:0 13px;border-radius:10px;border:1px solid var(--line2);background:#141f2a;color:#b9c7d4;font-size:12.5px}
+/* 底部 */
+footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;flex:none;margin-top:12px}
+.charge{height:44px;padding:0 18px;border-radius:11px;border:1px solid #3c5a4a;background:#12231d;
+ color:#cdeadd;font-weight:650;display:flex;align-items:center;gap:8px;font-size:13.5px}
+.charge .sub{font-size:12px;color:#8fbfa9;font-weight:500}
+.tabs{display:flex;gap:9px;justify-content:flex-end}
+.tab{height:44px;min-width:98px;border-radius:11px;border:1px solid var(--line2);background:#152230;
+ color:#c9d6e2;font-weight:650;font-size:14px}
+.tab.on{background:#1e3b55;border-color:#5b86ad;color:#fff}
+/* 弹窗（战报 / 小芽） */
+.pop{position:absolute;border:1px solid var(--line2);border-radius:13px;background:#0f1a23;
+ box-shadow:0 18px 48px rgba(0,0,0,.55);padding:12px;z-index:9}
+#f-log{right:26px;bottom:96px;width:min(430px,42vw);max-height:50vh;overflow:auto}
+.pop h3{margin:0 0 8px;font-size:13px;color:#dfe8ef;display:flex;justify-content:space-between}
+.pop h3 span{color:var(--dim);font-weight:500}
+.lt{border:1px solid #253546;border-radius:9px;padding:6px 9px;margin-bottom:6px;font-size:12px;color:#c9d6e2}
+.lt b{display:block;font-size:11px;color:#9caebe;font-weight:600;margin-bottom:2px}
+#f-xiaoya{right:22px;top:54px;width:min(432px,44vw);padding:11px}
+.models{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.model{border:1px solid #2b3d4e;border-radius:10px;padding:7px 8px;background:#111d27}
+.model .n{font-size:11.5px;font-weight:650;color:#dfe8ef}
+.model .s{font-size:11px;margin-top:3px}
+.model .s.ok{color:var(--grn)} .model .s.no{color:var(--red)} .model .s.wait{color:var(--warn)}
+.model .u{font-size:10.5px;color:#7f93a5;margin-top:2px}
+.foldrow{display:flex;justify-content:flex-end;margin:7px 0 8px}
+.fold{font-size:11.5px;color:#9caebe;border:1px solid #2b3d4e;border-radius:8px;background:#111d27;padding:3px 9px}
+.chat{border:1px solid #253546;border-radius:10px;background:#0d161e;padding:9px}
+.chat .msg{font-size:12px;color:#c9d6e2;margin-bottom:7px}
+.chat .msg.me{color:#9fc4dd}
+.chat .input{display:flex;gap:7px;margin-top:7px}
+.chat .input input{flex:1;height:34px;border-radius:9px;border:1px solid #2b3d4e;background:#0b141b;color:#dfe8ef;padding:0 10px;font-size:12.5px}
+.chat .input button{height:34px;padding:0 13px;border-radius:9px;border:1px solid #3c5a4a;background:#12231d;color:#cdeadd;font-weight:600;font-size:12.5px}
+.note{font-size:11px;color:#7f93a5;margin-top:7px}
+/* 掉心动效 */
+.heartpop{position:absolute;left:50%;transform:translateX(-50%);top:52px;padding:6px 13px;border-radius:999px;
+ border:1px solid #6a3a44;background:#2a161c;color:#ffb4c0;font-size:12.5px;font-weight:650;
+ box-shadow:0 10px 24px rgba(0,0,0,.5);animation:pop 2.6s ease-out infinite;z-index:8}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,6px) scale(.95)}16%{opacity:1;transform:translate(-50%,0) scale(1)}
+ 78%{opacity:1}100%{opacity:0;transform:translate(-50%,-6px)}}
+.frame{display:none} .frame.on{display:block}
+@media (max-width:760px){
+ body{padding:10px}.wrap{height:auto}
+ main{grid-template-columns:1fr;gap:11px}
+ .stage{grid-template-columns:1fr}
+ .right{display:none}
+ footer{grid-template-columns:1fr;gap:9px}
+ .tabs{justify-content:space-between}.tab{flex:1;min-width:0}
+ .skills .slot{min-height:58px}
+ #f-xiaoya{right:10px;left:10px;width:auto}
+}
+</style></head><body><div class="wrap">
+
+<header>
+  <div class="brand">小芽 · 洛克王国：世界<small>训练场</small></div>
+  <div class="spacer"></div>
+  <button class="xiaoya" title="小芽（模型连接 + 对话）">✦</button>
+</header>
+
+<div class="topbar">
+  <div class="side"><span class="dots" id="dots-l"><i class="alive">●●●●</i><i class="down">○○</i></span>
+    <span class="hearts hidden" id="hearts-l"><i>♥♥</i><i class="lost">♡♡</i></span></div>
+  <div class="turn">第 1 回合 <em>· AI模拟PVP</em></div>
+  <div class="side right"><span class="hearts hidden" id="hearts-r"><i class="lost">♡♡♡</i><i>♥</i></span>
+    <span class="dots" id="dots-r"><i class="down">○○○</i><i class="alive">●●●</i></span></div>
+</div>
+
+<main>
+  <div class="col">
+    <div class="lefthint" id="lefthint">技能 · <span style="color:#8fe0a2">4 / 4 可用</span></div>
+    <div class="skills" id="skills"></div>
+  </div>
+
+  <div class="stage">
+    <div class="fighter">
+      <div class="f-top"><span class="f-name">音速犬</span><span class="chip">火</span><span class="f-lv">60 级</span></div>
+      <div class="f-mid"><span class="f-star">⭐ 10</span>
+        <div class="hp"><div class="num"><span>生命 445 / 445</span><span>100%</span></div>
+          <div class="bar"><div class="fill" style="width:100%"></div></div></div></div>
+      <div class="free"></div>
+      <div class="buffs"><span class="b ghost">状态</span><span class="b ghost">增益</span><span class="b ghost">印记</span></div>
+    </div>
+    <div class="fighter foe">
+      <div class="f-top"><span class="f-name">水灵</span><span class="chip">水</span><span class="f-lv">60 级</span></div>
+      <div class="f-mid"><span class="f-star">⭐ 3</span>
+        <div class="hp"><div class="num"><span>生命 212 / 332</span><span>64%</span></div>
+          <div class="bar"><div class="fill mid" style="width:64%"></div></div></div></div>
+      <div class="free"></div>
+      <div class="buffs"><span class="b ghost">状态</span><span class="b ghost">增益</span><span class="b ghost">印记</span></div>
+    </div>
+  </div>
+
+  <div class="right">
+    <div>右侧预留 · PVP 第二人</div>
+    <button class="logbtn" id="openlog">战报</button>
+  </div>
+</main>
+
+<footer>
+  <button class="charge">聚能 <span class="sub">→ ⭐ 10 / 10</span></button>
+  <div></div>
+  <div class="tabs">
+    <button class="tab on" data-tab="skill">技能</button><button class="tab" data-tab="switch">更换</button>
+    <button class="tab" data-tab="item">物品</button><button class="tab" data-tab="escape">逃跑</button>
+  </div>
+</footer>
+
+<div class="pop frame" id="f-log">
+  <h3>战报（整局）<span>✕</span></h3>
+  <div class="lt"><b>第 1 回合</b>音速犬使用强制重启，对水灵造成 214 伤害（属性克制）。</div>
+  <div class="lt"><b>第 1 回合</b>水灵使用水枪，对音速犬造成 66 伤害。</div>
+</div>
+
+<div class="pop frame" id="f-xiaoya">
+  <h3>小芽<span>✕</span></h3>
+  <div class="models">
+    <div class="model"><div class="n">云端 · DeepSeek</div><div class="s ok">● 已连接</div><div class="u">长对话 / 解释</div></div>
+    <div class="model"><div class="n">本地 · Qwen3.5-4B</div><div class="s ok">● 已连接</div><div class="u">局势化短提示</div></div>
+    <div class="model"><div class="n">本地 · Qwen3.8-27B</div><div class="s no">● 未连接</div><div class="u">整局复盘</div></div>
+  </div>
+  <div class="foldrow"><button class="fold" id="foldmodels">收起模型状态 ▲</button></div>
+  <div class="chat">
+    <div class="msg">小芽：这一手你可以先用「强制重启」压血线，它带属性克制。</div>
+    <div class="msg me">我：那它要是换上水灵怎么办？</div>
+    <div class="msg">小芽：那就换「防御」顶一手，等它交出技能再上电系。</div>
+    <div class="input"><input value="问问小芽…"><button>发送</button></div>
+  </div>
+  <div class="note">三只模型只做「解释与表达」；伤害、合法动作、胜率一律由规则引擎给。没连上时照实说「离线：只给规则事实」。</div>
+</div>
+
+</div>
+<script>
+const frame = (location.hash.match(/frame=(\w+)/) || [,'default'])[1];
+const SKILLS = [
+  ['⭐ 0','魔能爆','普通系 · 攻击','预期伤害 128','plain'],
+  ['⭐ 1','防御','普通系 · 防御','预期伤害 --','none'],
+  ['⭐ 3','强制重启','电系 · 攻击','预期伤害 214 ▲','up'],
+  ['⭐ 5','电离爆破','电系 · 状态','预期伤害 0 ▼ ⭐不足','down','grey'],
+];
+const SWITCH = [
+  ['⭐ 0','铠甲虫','虫系 · 攻击','预期伤害 86','plain','雪影娃娃 · 442/442'],
+  ['⭐ 1','雪影娃娃','冰系 · 状态','预期伤害 --','none','皇家狮鹫 · 403/403'],
+  ['⭐ 2','皇家狮鹫','翼系 · 攻击','预期伤害 131 ▲','up','化蝶 · 311/311'],
+  ['⭐ 1','化蝶','虫系 · 攻击','预期伤害 0 ▼','down','仪式巨像 · 401/401'],
+  ['⭐ 3','仪式巨像','地系 · 防御','预期伤害 --','none','铠甲虫 · 445/445'],
+];
+const render = (rows) => rows.map(([s, n, m, d, c, cls]) => `<div class="slot ${cls || ''}">
+  <div class="row1"><span class="star${s.includes('5') ? ' short' : ''}">${s}</span><span class="name">${n}</span></div>
+  <div class="meta">${m}</div><div class="dmg ${c}">${d}</div>
+  ${cls === 'grey' ? '' : (rows.length === 5 ? '' : '')}</div>`).join('');
+document.getElementById('skills').innerHTML = render(SKILLS);
+if (frame === 'switch') {
+  // 更换：5 只压在同一列里，**底边与 4 技能那版对齐**（聚能仍在列外，不被覆盖）。
+  document.getElementById('lefthint').innerHTML = '更换 · <span style="color:#8fe0a2">5 只可换</span>';
+  document.getElementById('skills').innerHTML = SWITCH.map(([s, n, m, d, c, hp]) => `<div class="slot">
+    <div class="row1"><span class="star">${s}</span><span class="name">${n}</span></div>
+    <div class="meta">${m}</div><div class="dmg ${c}">${d}</div>
+    <div class="meta">${hp}</div></div>`).join('');
+  document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === 'switch'));
+}
+if (frame === 'heart') document.querySelectorAll('.hearts').forEach((el) => el.classList.remove('hidden'));
+if (frame === 'heart') {
+  const pop = document.createElement('div');
+  pop.className = 'heartpop';
+  pop.textContent = '♥♥ → ♡♡  水灵被击败，对手掉 2 颗心';
+  document.querySelector('.topbar').appendChild(pop);
+}
+if (frame === 'log') document.getElementById('f-log').classList.add('on');
+if (frame === 'xiaoya') document.getElementById('f-xiaoya').classList.add('on');
+</script></body></html>
