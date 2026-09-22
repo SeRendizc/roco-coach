@@ -925,6 +925,91 @@ async function main() {
     await setViewport(1440, 900);
     await sleep(300);
 
+    // ── ⑥ A10：手机 390×844 走通**整条** E2E（URL 交接带锁定 → 补满六只 → 开局 → 结算）──
+    await setViewport(390, 844, true);
+    await cdp.send('Page.navigate', {url: `${BASE}roco.html?team=own-0001,own-0003,own-0005&lock=own-0001`});
+    for (let i = 0; i < 120; i += 1) {
+      if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+      await sleep(250);
+    }
+    await sleep(1200);
+    const mobileTrace = [];
+    const overflowAt = async (stage) => {
+      // `stage` 是**页面外**的变量，不能直接写进页面表达式里（第一版就是这么炸的）。
+      const m = await js(`JSON.stringify({stage:${JSON.stringify('__STAGE__')},
+        clientW:document.documentElement.clientWidth,
+        scrollW:document.documentElement.scrollWidth,
+        selected:Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0')})`
+        .replace('__STAGE__', String(stage)));
+      mobileTrace.push(JSON.parse(m));
+      return JSON.parse(m);
+    };
+    await overflowAt('m-url-handoff');
+    // 先切到「我的精灵（能出战）」范围：默认范围是**全图鉴参考**，那里的行状态是
+    // 「按需推算」而不是「持有」，我的选取器找不到可加的持有行（第一版就卡在 3 只）。
+    await mouseClick(`${ROOT_SEL} >>> #tw-scope-mine`);
+    await sleep(900);
+    // 补满六只：按**工作台内部的**下一只候选点（手机上不依赖搜索框）
+    for (let i = 0; i < 24; i += 1) {
+      const cur = Number(await js(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0'`));
+      if (cur >= 6) break;
+      // 必须**跳过已在队里的那一只**：现在点已选中的候选只给一句提示、不再切换
+      //（第一版循环就一直点它，永远停在 3 只）。
+      const hit = await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)})?.shadowRoot;
+        if(!sr)return null;
+        const inTeam=new Set(window.rocoDemo?.state?.teamWorkshop?.team ?? []);
+        const row=[...sr.querySelectorAll('#tw-cand-list .tw-row')]
+          .find((r)=>(r.dataset.twStatus||'')==='held'&&!inTeam.has(r.dataset.twInstance));
+        return row?row.dataset.twInstance:null;})()`);
+      if (!hit) break;
+      await mouseClick(`${ROOT_SEL} >>> #tw-cand-list .tw-row[data-tw-instance="${hit}"]`);
+      await sleep(350);
+    }
+    await waitFor(`(()=>{const d=window.rocoDemo;
+      return (d?.state?.teamWorkshop?.team?.length||0)===6;})()`, 60, 250);
+    await overflowAt('m-six-picked');
+    await mouseClick('#start-standard-pvp');
+    const mStarted = await waitFor(`document.body.dataset.rocoView==='ready'
+      && !document.getElementById('battle-panel').hidden`, 100, 250);
+    await sleep(700);
+    const mBattle = await overflowAt('m-battle');
+    for (let i = 0; i < 150; i += 1) {
+      const done = await js(`(()=>{const v=window.rocoDemo.state.view;
+        return Boolean(v&&v.battle_result);})()`);
+      if (done) break;
+      try { await mouseClick('#auto-turn'); } catch { break; }
+      await sleep(200);
+    }
+    const mSettled = await js(`(()=>{const v=window.rocoDemo.state.view;
+      const b=document.body.dataset;
+      return JSON.stringify({result:v?v.battle_result:null,lesson:b.rocoLesson??null,
+        clientW:document.documentElement.clientWidth,scrollW:document.documentElement.scrollWidth,
+        turn:v?v.turn:null});})()`).then(JSON.parse);
+    steps.push({at: 'mobile-e2e', trace: mobileTrace, settled: mSettled});
+    const mobileProblems = (trace, started, settled) => {
+      const bad = [];
+      for (const row of trace) {
+        if (row.clientW !== row.scrollW) bad.push(`${row.stage} 横向溢出（${row.scrollW} > ${row.clientW}）`);
+      }
+      const picked = trace.find((r) => r.stage === 'm-six-picked');
+      if (!picked || picked.selected < 6) bad.push(`手机上没选满六只（${picked?.selected}）`);
+      if (!started) bad.push('手机上没能开局');
+      if (!settled?.result) bad.push('手机上没打到结算');
+      if (settled?.lesson !== 'shown') bad.push('手机上局末教学入口没出现');
+      if (settled && settled.clientW !== settled.scrollW) bad.push('结算时横向溢出');
+      return bad;
+    };
+    check('live-mobile-e2e', '手机 390×844 整条 E2E：URL 带锁定进来 → 补满六只 → 开局 → 打到结算 → 教学入口，'
+      + '且每一步都不横向溢出',
+      mobileProblems(mobileTrace, mStarted, mSettled).length === 0,
+      mobileProblems(mobileTrace, mStarted, mSettled).join(' | ')
+      || `轨迹 ${mobileTrace.map((r) => `${r.stage}:${r.selected}只/${r.clientW}`).join(' → ')}；`
+        + `结算 result=${mSettled.result} 回合=${mSettled.turn} 教学=${mSettled.lesson}`);
+    counter('live-mobile-e2e', '手机上没选满六只（只选到 4 只）必须被同一条判据抓住',
+      mobileProblems([{stage: 'm-six-picked', selected: 4, clientW: 390, scrollW: 390}], true,
+        {result: 'loss', lesson: 'shown', clientW: 390, scrollW: 390}),
+      '{"selected":4}');
+
     check('live-console', '整个过程没有 console.error / 未捕获异常',
       consoleErrors.length === 0, `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 3))}`);
   } catch (error) {

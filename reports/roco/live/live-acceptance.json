@@ -3,20 +3,20 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-22T09:23:58.244Z",
+ "judged_at": "2026-09-22T09:51:01.659Z",
  "totals": {
-  "checks": 17,
-  "passed": 17,
+  "checks": 18,
+  "passed": 18,
   "failed": 0,
-  "counterproofs": 16,
-  "counterproofs_hit": 16
+  "counterproofs": 17,
+  "counterproofs_hit": 17
  },
  "checks": [
   {
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=0"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=10"
   },
   {
    "id": "live-boot",
@@ -107,6 +107,12 @@
    "judge": "视觉规格：标题不竖排、无横向溢出、玩家层零工程词、同屏不重复徽记、小芽/底栏与技能和 HP 不相交、桌面技能区在视口内",
    "ok": true,
    "actual": "视口 1440×900；标题 1 行；技能 0 张（底 null）；工程词 []；重复徽记 1"
+  },
+  {
+   "id": "live-mobile-e2e",
+   "judge": "手机 390×844 整条 E2E：URL 带锁定进来 → 补满六只 → 开局 → 打到结算 → 教学入口，且每一步都不横向溢出",
+   "ok": true,
+   "actual": "轨迹 m-url-handoff:3只/390 → m-six-picked:6只/390 → m-battle:6只/390；结算 result=loss 回合=45 教学=shown"
   },
   {
    "id": "live-console",
@@ -227,6 +233,13 @@
    "ok": true,
    "hit": "同屏重复徽记「候选规则（待实机核对）」×2 | 小芽那一栏压住了技能",
    "actual": "{\"hitCoachSkill\":true,\"dupBadge\":2}"
+  },
+  {
+   "id": "live-mobile-e2e",
+   "judge": "手机上没选满六只（只选到 4 只）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "手机上没选满六只（4）",
+   "actual": "{\"selected\":4}"
   }
  ],
  "steps": [
@@ -589,6 +602,36 @@
      "actionPanel": null,
      "bothOnScreen": true
     }
+   }
+  },
+  {
+   "at": "mobile-e2e",
+   "trace": [
+    {
+     "stage": "m-url-handoff",
+     "clientW": 390,
+     "scrollW": 390,
+     "selected": 3
+    },
+    {
+     "stage": "m-six-picked",
+     "clientW": 390,
+     "scrollW": 390,
+     "selected": 6
+    },
+    {
+     "stage": "m-battle",
+     "clientW": 390,
+     "scrollW": 390,
+     "selected": 6
+    }
+   ],
+   "settled": {
+    "result": "loss",
+    "lesson": "shown",
+    "clientW": 390,
+    "scrollW": 390,
+    "turn": 45
    }
   }
  ],
