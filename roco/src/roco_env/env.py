@@ -548,7 +548,12 @@ def order_actions(
             "tie": None,
         })
     if _tie_is_decisive(entries):
-        policy = cfg.speed_tie
+        # 同速裁决策略：配置里的值优先；配置是 `null`（UNKNOWN，MC-E05 未录制）时
+        # **只**接受本局显式声明的覆盖（`state.unverified_overrides`）——
+        # 覆盖是带出处的引擎假设，会被一路带到公开面上让界面标「未核验」。
+        # 没有覆盖就照旧抛错：这条 fail-closed 纪律一个字节都没放宽。
+        from . import overrides as _ov_mod
+        policy = _ov_mod.resolve_speed_tie(cfg, getattr(state, "unverified_overrides", None) or [])
         if policy in (None, "unknown"):
             raise fx.UnsupportedEffect(
                 "速度平手裁决(speed_tie)",
@@ -974,6 +979,8 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
     """
     me = getattr(state, side)
     foe = getattr(state, "enemy" if side == "player" else "player")
+    # RC-106：这一局用的是哪一份规则配置是**公开事实**（页面上就写着模式徽记），
+    # 而且规划侧必须知道它——否则会拿 legacy 的口径去分析一份 v3 的局面。
     pet = me.field_pet
     applied = 0
 
@@ -1470,7 +1477,16 @@ def serialize(state: GameState) -> Dict[str, Any]:
     return state.to_dict()
 
 
-def deserialize(d: Dict[str, Any], rs: Optional[Ruleset] = None) -> GameState:
+def deserialize(d: Dict[str, Any], rs: Optional[Ruleset] = None,
+                config: Optional[Any] = None) -> GameState:
+    """把私有序列化状态还原成 `GameState`。
+
+    `config`：**这一份记录当时用的规则配置**。RC-106 起必须由调用方按记录里的
+    `ruleset_config_id` 显式传入（`service._private_state` 就是这么做的）——
+    否则标准 PVP 的存档会被拿去跟「当前默认的 legacy」比，然后被判成「不同配置不可混用」
+    （真实的集成 bug：浏览器里点「开一局（标准 PVP）」之后，规划接口直接 502）。
+    不传时退回旧口径（与当前默认配置比），legacy 行为逐位不变。
+    """
     rs = rs or load_ruleset()
     if d.get("ruleset_id") != rs.ruleset_id:
         raise fx.UnsupportedEffect(
@@ -1480,7 +1496,7 @@ def deserialize(d: Dict[str, Any], rs: Optional[Ruleset] = None) -> GameState:
     # 规则配置也必须是**同一份**：否则存档会在不知不觉间换掉能量上限这类基线。
     # 老存档没有这个字段（旧引擎没有它），此时按「未绑定」处理，由调用方决定。
     recorded = d.get("ruleset_config_id", "")
-    current = _rule_config.default_ruleset_config_id()
+    current = getattr(config, "ruleset_config_id", None) or _rule_config.default_ruleset_config_id()
     if recorded and recorded != current:
         raise fx.UnsupportedEffect(
             f"规则配置不匹配：记录是 {recorded}，当前是 {current}",
@@ -1601,6 +1617,8 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
     return {
         "schema_version": PUBLIC_PLANNER_SCHEMA_VERSION,
         "ruleset_id": state.ruleset_id,
+        # RC-106：这一局的规则配置也是公开事实（页面渲染模式徽记要用，规划侧要靠它选口径）。
+        "ruleset_config_id": state.ruleset_config_id or None,
         "state_version": state.state_version,
         "side": side,
         "turn": state.turn,
@@ -1783,6 +1801,8 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     return {
         "schema_version": UI_PUBLIC_VIEW_SCHEMA_VERSION,
         "ruleset_id": view["ruleset_id"],
+        # RC-106：模式徽记与规划口径都要它（与规划协议那一份逐字相同）。
+        "ruleset_config_id": view.get("ruleset_config_id"),
         # 与规划协议同一时刻的同一局：这三个字段必须逐字相同
         "state_version": view["state_version"],
         "turn": view["turn"],
@@ -1888,6 +1908,8 @@ def state_from_public_planner(
 
     state = GameState(
         ruleset_id=rs.ruleset_id,
+        # 规则配置与未核验覆盖一样，属于「这一局的公开事实」：规划侧要靠它选对口径。
+        ruleset_config_id=str(public.get("ruleset_config_id", "") or ""),
         seed=int(analysis_seed),          # 分析用的种子，与真实对局无关
         player=SideState(name=side, pets=own_pets, active=own_active,
                          items=dict(own.get("items") or {})),

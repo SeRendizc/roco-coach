@@ -63,10 +63,22 @@ REQUIRED_KEYS: Tuple[str, ...] = ("path", "value", "confidence", "reason", "micr
 #: 覆盖它们意味着要回头改那些字段的语义；而 `energy.initial` 是**唯一**一个
 #: 「读的时候才要求非空」的未知字段，所以它是唯一一个能被安全地外部补齐的。
 #: 加新路径时必须同时加一条测试说明「它为什么不会影响 legacy」。
-OVERRIDABLE_PATHS: Tuple[str, ...] = ("energy.initial",)
+OVERRIDABLE_PATHS: Tuple[str, ...] = ("energy.initial", "turn_order.speed_tie")
 
 #: 覆盖值必须是非负整数（`energy.initial` 的取值域，与配置校验器同一条）。
 _INT_PATHS: Tuple[str, ...] = ("energy.initial",)
+
+#: 覆盖值必须落在 `SPEED_TIE_POLICIES` 里的路径（`turn_order.speed_tie`）。
+#:
+#: 为什么它也能被覆盖（RC-106 补）：候选配置 `mobile_s4_candidate_v3` 把 `speed_tie`
+#: 如实登记成 `null`（MC-E05 未录制）——按 RC-103 的纪律，真撞上同速时**必须抛错**。
+#: 那条纪律不改：`null` 仍然是 `null`，没有覆盖时照样抛。但「撞上同速就打不下去」意味着
+#: 六宠标准 PVP 还是没法跑到力竭/扣魔力那一步。所以这里给调用方一个**显式**的、
+#: 带出处的旁路：声明「这一步我按 `random_seeded` 这条**已登记的工程权宜**走」。
+#: 它不改变配置文件里的 `null`，也不升级任何证据等级，并且会如实出现在对外载荷里
+#: （页面因此能标「未核验」）。legacy 不受影响：它的配置本来就写着 `random_seeded`，
+#: 覆盖只在 `is_unknown()` 为真（即 `null`）的路径上才被接受。
+_SPEED_TIE_PATHS: Tuple[str, ...] = ("turn_order.speed_tie",)
 
 
 @dataclass(frozen=True)
@@ -205,6 +217,14 @@ def normalize_unverified_overrides(
                 f"（当前值 {_dig(config.raw, entry.path).get('value')!r}）——"
                 "覆盖只用于把 UNKNOWN 显式假设掉，不许拿它改一条已登记的值"
             )
+        if entry.path in _SPEED_TIE_PATHS:
+            from . import rule_config as _rc
+            if entry.value not in _rc.SPEED_TIE_POLICIES:
+                raise RuleConfigError(
+                    f"{where}.value={entry.value!r} 不是已知的同速裁决策略"
+                    f"（允许 {list(_rc.SPEED_TIE_POLICIES)}）——"
+                    "覆盖只能选一条**已登记**的工程权宜，不许现场发明一个策略名"
+                )
         if entry.path in _INT_PATHS:
             value = entry.value
             if not isinstance(value, int) or isinstance(value, bool) or value < 0:
@@ -331,3 +351,35 @@ if __name__ == "__main__":  # pragma: no cover - 手工自检入口
     import sys
 
     sys.exit(selftest())
+
+
+def resolve_speed_tie(
+    config: RuleConfig,
+    overrides: Optional[Sequence[Any]] = None,
+) -> Optional[str]:
+    """取同速裁决策略：配置里有值就用它；配置是 `null` 时**只**接受显式覆盖。
+
+    与 `resolve_int` 同一套三条分支（配置值 / 显式覆盖 / 抛错），只是这里返回
+    `Optional[str]`：`None` 表示「没有任何依据」，调用方**必须** fail closed
+    （`env.order_actions` 只在真的需要这一维时才抛，见 `_tie_is_decisive`）。
+
+    覆盖项既接受 `UnverifiedOverride`，也接受**载荷里的 dict**（状态经
+    `serialize()` / `public_planner_state()` 往返之后就是 dict）——两种形状都要认，
+    否则「同一局在开新局与推进回合两条路径上行为不同」，那是最难查的一类不一致。
+    """
+    # 先读**字段**（不是 `.raw`）：`dataclasses.replace(cfg, speed_tie=...)` 只改字段、
+    # 不改 `.raw`，读 raw 会让「显式构造一份 speed_tie=None 的配置」被误判成有策略
+    # （RC-103 的 fail-closed 测试就是这么构造的，实测把它弄红了）。
+    policy = getattr(config, "speed_tie", None)
+    if policy is not None:
+        return policy
+    for raw in overrides or ():
+        if isinstance(raw, UnverifiedOverride):
+            path, value = raw.path, raw.value
+        elif isinstance(raw, dict):
+            path, value = raw.get("path"), raw.get("value")
+        else:
+            continue
+        if path == "turn_order.speed_tie":
+            return value
+    return None

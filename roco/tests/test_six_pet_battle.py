@@ -43,6 +43,7 @@ from roco_env import rule_config as rc        # noqa: E402
 from roco_env import effects as fx            # noqa: E402
 from roco_env.schema import (                 # noqa: E402
     ACTION_CHARGE,
+    ACTION_SKILL,
     ACTION_ESCAPE,
     ACTION_ITEM,
     ACTION_SURRENDER,
@@ -757,3 +758,81 @@ class BattleNewEndpointWiringTest(unittest.TestCase):
 
 if __name__ == "__main__":       # pragma: no cover - 手工跑
     unittest.main()
+
+
+class SpeedTieOverrideTest(unittest.TestCase):
+    """同速平手裁决：配置是 UNKNOWN 时**只**接受显式覆盖（RC-106 补的第二个旁路）。
+
+    为什么补它：v3 把 `turn_order.speed_tie` 如实登记成 `null`（MC-E05 未录制），
+    于是真撞上同速（双方当前精灵种类相同、出的招先手度也相同）时 `order_actions`
+    按 RC-103 的纪律抛错 —— 那条纪律**不改**。但「撞上同速就打不下去」意味着六宠
+    标准 PVP 永远跑不到力竭/扣魔力那一步，所以给调用方一个显式、带出处的旁路，
+    与 `energy.initial` 同一套语义：没有覆盖仍然抛，有覆盖才走，且覆盖照样出现在载荷里。
+    """
+
+    #: 双方**先手都用同一只**：这样当前精灵的 (应对, 先手度, 速度) 三项天然相同，
+    #: 同速平手一定成立（不需要靠运气找局面）。
+    TIE_SPECIES = "音速犬"
+
+    def _tie_state(self, overrides):
+        lead = self.TIE_SPECIES
+        others_a = ["寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃"]
+        others_b = ["秩序鱿墨", "画间沉铁兽", "月使鹭纳", "迷迷箱怪", "权杖-V"]
+        ids_a = [RS.pets_by_name(lead)[0].pet_id] + [RS.pets_by_name(n)[0].pet_id for n in others_a]
+        ids_b = [RS.pets_by_name(lead)[0].pet_id] + [RS.pets_by_name(n)[0].pet_id for n in others_b]
+        return renv.reset(ids_a, ids_b, seed=7, rs=RS, config=V3,
+                          unverified_overrides=[_override(), *overrides]), ids_a, ids_b
+
+    def _skill_action(self, state, side):
+        """取该侧当前精灵的第一个合法技能（`Action` 不带 pet_id：行动者就是场上那一只）。"""
+        legal = renv.legal_actions(state, RS, side)
+        return next(a for a in legal if a.kind == ACTION_SKILL)
+
+    def test_tie_without_override_still_fails_closed(self):
+        """没有覆盖 ⇒ 照样抛（这条纪律一个字节都没放宽）。"""
+        state, _, _ = self._tie_state([])
+        player = self._skill_action(state, "player")
+        enemy = self._skill_action(state, "enemy")
+        with self.assertRaises(fx.UnsupportedEffect) as ctx:
+            renv.order_actions(state, RS, player, enemy, rng=__import__("random").Random(1),
+                               cfg=rc.load_config(V3))
+        self.assertIn("speed_tie", str(ctx.exception))
+
+    def test_tie_with_explicit_override_is_ordered(self):
+        """有覆盖（且写明出处）⇒ 能排出顺序，且覆盖仍在公开面里。"""
+        import random as _random
+        state, _, _ = self._tie_state([{
+            "path": "turn_order.speed_tie", "value": "random_seeded",
+            "confidence": "ENGINE_HYPOTHESIS",
+            "reason": "同速裁决在候选配置里是 UNKNOWN（MC-E05 未录制）；这一局按已登记的工程权宜走",
+            "microcase_id": "MC-E05",
+        }])
+        player = self._skill_action(state, "player")
+        enemy = self._skill_action(state, "enemy")
+        order = renv.order_actions(state, RS, player, enemy, rng=_random.Random(1),
+                                   cfg=rc.load_config(V3))
+        self.assertEqual([side for side, _ in order], ["player", "enemy"])
+        public = renv.public_planner_state(state, RS)
+        self.assertIn("turn_order.speed_tie", [e["path"] for e in public["unverified_overrides"]])
+
+    def test_override_rejects_an_invented_policy_name(self):
+        """现场发明一个策略名（`coin_flip`）必须被拒 —— 覆盖只能选已登记的权宜。"""
+        with self.assertRaises(rc.RuleConfigError) as ctx:
+            ov.normalize_unverified_overrides(rc.load_config(V3), [{
+                "path": "turn_order.speed_tie", "value": "coin_flip",
+                "confidence": "ENGINE_HYPOTHESIS", "reason": "随便挑一个", "microcase_id": "MC-E05",
+            }])
+        self.assertIn("不是已知的同速裁决策略", str(ctx.exception))
+
+    def test_override_is_refused_when_the_config_already_has_a_value(self):
+        """legacy 本来就写着 `random_seeded` ⇒ 覆盖它等于篡改已登记的规则，必须拒。"""
+        with self.assertRaises(rc.RuleConfigError) as ctx:
+            ov.normalize_unverified_overrides(rc.load_config(LEGACY), [{
+                "path": "turn_order.speed_tie", "value": "random_seeded",
+                "confidence": "ENGINE_HYPOTHESIS", "reason": "想改一条已知规则", "microcase_id": "MC-E05",
+            }])
+        self.assertIn("不是 UNKNOWN", str(ctx.exception))
+
+    def test_config_file_value_is_still_null(self):
+        """覆盖不写回文件：v3 的 `speed_tie` 在磁盘上必须还是 `None`。"""
+        self.assertIsNone(rc.load_config(V3).speed_tie)

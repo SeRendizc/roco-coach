@@ -773,6 +773,17 @@ class RocoService:
             ]
         return answer
 
+    @staticmethod
+    def _active_team_size() -> int:
+        """当前生效配置每方几只（RC-106）。
+
+        读的是**配置**（`battle_mode.team_size`，经登记表校验），不是字面量：
+        `ROCO_RULE_CONFIG` 一改，这份名单的 `team_size` 就跟着改，页面不会按 3 只去限制
+        一个 6 只的模式。配置缺失/非法时抛 `RuleConfigError`——宁可 500 也不要给一个错的规模。
+        """
+        from . import rule_config as rc_mod
+        return rc_mod.get_rule_config(None).require_team_size()
+
     def _answer_roster(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
         """可选用精灵名单（第 42 轮 P0-3：阵容选择要真数据）。
 
@@ -901,8 +912,10 @@ class RocoService:
             "offset": start,
             "limit": limit if isinstance(limit, int) and not isinstance(limit, bool) else None,
             "pets": pets,
-            # 3v3：页面按这个数来限制选择
-            "team_size": 3,
+            # 每方几只**由当前生效的规则配置决定**（RC-106）：默认 legacy 是 3，
+            # 换成标准 PVP 的候选配置就是 6。页面按这个数限制选择——写死 3 的那一版
+            # 正是「标准 PVP 被静默按训练场跑」的成因。
+            "team_size": self._active_team_size(),
             "note": "配招是引擎的规范配招（candidate_moveset），即这一局实际能用的技能；"
                     "威力按来源如实标注，`not_provided_by_source` 表示来源没给，不是 0。",
         }
@@ -1945,8 +1958,17 @@ class RocoService:
         if not isinstance(raw, dict):
             return None, None, self._answer_envelope(_bad_request(
                 "state 必须是 env.serialize() 产出的私有状态（本地对局域专用）"), body, started)
+        # RC-106：这份记录**自己带着**它是用哪份规则配置跑的（`ruleset_config_id`）。
+        # 必须按记录那份还原：否则标准 PVP 的存档会被拿去跟「当前默认的 legacy」比，
+        # 于是点完「开一局（标准 PVP）」再取合法动作就直接 502（浏览器里实测踩到）。
+        from . import rule_config as rc_mod
         try:
-            state = env_mod.deserialize(raw, rs)
+            recorded_cfg = rc_mod.get_rule_config(raw.get("ruleset_config_id") or None)
+        except rc_mod.RuleConfigError as exc:
+            return None, None, self._answer_envelope(_bad_request(
+                f"记录里的 ruleset_config_id 不可用：{exc}"), body, started)
+        try:
+            state = env_mod.deserialize(raw, rs, config=recorded_cfg)
         except (ValueError, KeyError, TypeError) as exc:
             return None, None, self._answer_envelope(_bad_request(
                 f"state 无法还原：{type(exc).__name__}: {exc}"), body, started)
