@@ -2187,28 +2187,48 @@ function mountWorkshop() {
  * 送上去的是 owned 个体 id（`own-0001` 形状，工作台的候选就是这些）；服务端负责把它换算成
  * 上场用的物种 id —— 页面不该知道、也不该维护那层映射。
  */
+/**
+ * 开局栏（2026-09-22 人类 P0）：**正式**与**试玩**是两条路，语义必须在按钮上写清。
+ *
+ *   · 六只**持有**个体 → 「开一局（标准 PVP · 六宠）」：正式对局。
+ *   · 六只**理论阵容**物种、且每一只都跑得起来 → 「试玩一局（理论阵容 · 含未核验按需推算）」：
+ *     引擎会按需推算的配招跑，界面逐条标未核验；用户没有这些个体，**不写进任何"拥有"的语义**。
+ *   · 都不满足 → 按钮禁用 + 说清还差什么。
+ */
 function updateStandardPvpBar() {
   const button = $('start-standard-pvp');
   if (!button) return;
   const team = Array.isArray(state.teamWorkshop?.team) ? state.teamWorkshop.team : [];
+  const analysis = Array.isArray(state.teamWorkshop?.analysisTeam) ? state.teamWorkshop.analysisTeam : [];
+  const trialReady = state.teamWorkshop?.analysisTrialReady === true;
   // 能上场的只有**你拥有的个体**（`own-XXXX`）：图鉴里另外那 574 只没有冻结配招，
   // 引擎不能凭空给它们一套招（RC-203 的 `buildability_ceiling`）。
   // 页面在这里如实拦住，而不是让玩家点下去之后吃一个 400。
   const fieldable = team.filter((id) => typeof id === 'string' && id.startsWith('own-')).length;
-  const ready = team.length === 6 && fieldable === 6;
-  button.disabled = !ready;
+  const formal = team.length === 6 && fieldable === 6;
+  // 试玩：理论阵容满六只、且每一只都跑得起来（持有或按需推算）——服务端已经逐只判过。
+  const trial = !formal && analysis.length === 6 && trialReady;
+  button.disabled = !formal && !trial;
+  button.dataset.rocoStartMode = formal ? 'formal' : (trial ? 'trial' : 'none');
   const note = $('standard-pvp-note');
   if (note) {
-    if (ready) {
+    if (formal) {
       note.textContent = '这一局按候选规则（六宠 / 4 点魔力 / 力竭扣 1）；未核验的假设值会在战斗页逐条标出来。';
-    } else if (team.length < 6) {
-      note.textContent = `选满六只才能开局（当前 ${team.length} 只）。`;
+    } else if (trial) {
+      note.textContent = '试玩一局：这六只里有些你还没有，引擎用**按需推算**的配招跑（未核验）。'
+        + '正式队伍仍然是「持有六只」那条路。';
+    } else if (analysis.length === 6 && !trialReady) {
+      note.textContent = '理论阵容这六只里有跑不起来的：看每格的状态标（仅资料的那只不能进对局）。';
+    } else if (team.length || analysis.length) {
+      note.textContent = `正式开局要六只**持有**个体（当前 ${team.length}）；`
+        + `试玩要有六只理论阵容物种（当前 ${analysis.length}）。`;
     } else {
-      note.textContent = `有 ${6 - fieldable} 只是图鉴条目（你还没有、也没有可用构建），换掉它们才能开局。`;
+      note.textContent = '选满六只才能开局：持有六只走正式，图鉴六只走试玩。';
     }
   }
   button.dataset.rocoStandardTeam = String(team.length);
   button.dataset.rocoStandardFieldable = String(fieldable);
+  button.dataset.rocoStandardAnalysis = String(analysis.length);
 }
 
 /**
@@ -2218,7 +2238,12 @@ function updateStandardPvpBar() {
  * 不吞掉、也不换一句「稍后再试」。
  */
 async function startStandardPvp() {
-  const team = Array.isArray(state.teamWorkshop?.team) ? state.teamWorkshop.team.slice() : [];
+  const owned = Array.isArray(state.teamWorkshop?.team) ? state.teamWorkshop.team.slice() : [];
+  const analysis = Array.isArray(state.teamWorkshop?.analysisTeam) ? state.teamWorkshop.analysisTeam.slice() : [];
+  // 正式优先：六只持有就是正式对局；否则看理论阵容能不能试玩（服务端逐只判过 can_trial）。
+  const formal = owned.length === 6;
+  const trial = !formal && analysis.length === 6 && state.teamWorkshop?.analysisTrialReady === true;
+  const team = formal ? owned : (trial ? analysis : []);
   if (team.length !== 6) return;
   const button = $('start-standard-pvp');
   button.disabled = true;
@@ -2236,7 +2261,12 @@ async function startStandardPvp() {
     $('lesson-card').hidden = true;
     closePetDetail();
     hideHint();
+    // `team` 里可以是持有实例（`own-XXXX`），也可以是物种 id（试玩）：服务端两样都收，
+    // 物种 id 走的是**按需推算的配招**（未核验），所以这一局必须标明是试玩。
     const body = {mode: 'pvp-standard-six-pet', team, strategy: 'greedy_damage'};
+    // 试玩只体现在**界面与数据**上：`team` 里是物种 id 就说明引擎要用按需推算的配招，
+    // 不额外给服务端发明字段（那一层没有「试玩」这个参数，硬塞一个就是第二个事实源）。
+    document.body.dataset.rocoTrial = trial ? 'yes' : 'no';
     if (Number.isInteger(state.seedOverride) && state.seedOverride >= 0) body.seed = state.seedOverride;
     const data = await api('/api/roco/battle/new', body);
     state.battleId = data.battle_id;
@@ -2245,7 +2275,7 @@ async function startStandardPvp() {
     dismissOnboard();
     await requestPlan({reason: 'match-start'});
   } catch (error) {
-    $('plan-status').textContent = `标准 PVP 开局失败：${error.message}`;
+    $('plan-status').textContent = `${trial ? '试玩' : '标准 PVP'}开局失败：${error.message}`;
   } finally {
     updateStandardPvpBar();
   }

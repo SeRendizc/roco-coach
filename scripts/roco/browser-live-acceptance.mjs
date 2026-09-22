@@ -349,6 +349,65 @@ async function main() {
       '{"hook":4,"team":4}');
     await shoot('live-02-1440-six-picked');
 
+    // ── ②b 图鉴未拥有项：进**理论阵容**（不是报错），并给出状态与原因 ──────────
+    // 用户实测的故障就是这一步：从 622 图鉴挑一只，选到第六槽才吃内部错误。
+    const catalogPick = await (async () => {
+      const mine = await fetch(`${BASE}api/roco/box?kind=mine&limit=60`).then((r) => r.json());
+      const ownedGroups = new Set((mine?.player?.cards ?? []).map((c) => c.group ?? c.select));
+      const cat = await fetch(`${BASE}api/roco/box?kind=catalog&limit=12&offset=0`).then((r) => r.json());
+      const pick = (cat?.player?.cards ?? []).find((c) => !ownedGroups.has(c.group ?? c.select));
+      if (!pick) return {skipped: true};
+      await typeInto(`${ROOT_SEL} >>> #tw-search`, pick.name);
+      await sleep(520);
+      const row = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+        const sr=root?.shadowRoot;if(!sr)return null;
+        const rows=[...sr.querySelectorAll('#tw-cand-list .tw-row')];
+        const hit=rows.find((r)=>(r.querySelector('.tw-name')?.textContent||'').trim()===${JSON.stringify('')}||true);
+        const tagged=rows.find((r)=>(r.dataset.twStatus||'')==='on_demand');
+        return {status:tagged?tagged.dataset.twStatus:null,
+          tag:(tagged?.querySelector('.tw-state-tag')||{}).textContent||null,
+          name:(tagged?.querySelector('.tw-name')||{}).textContent||null};})()`);
+      if (!row || row.status !== 'on_demand') return {skipped: true, row};
+      await mouseClick(`${ROOT_SEL} >>> #tw-cand-list .tw-row[data-tw-status="on_demand"]`);
+      await sleep(900);
+      const after = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+        const sr=root?.shadowRoot;
+        const box=sr?sr.querySelector('#tw-analysis-slots'):null;
+        const filled=box?[...box.querySelectorAll('[data-tw-state="filled"]')].map((el)=>({
+          status:el.dataset.twStatus,canBattle:el.dataset.twCanBattle,
+          name:(el.querySelector('.tw-who')||{}).textContent||''})):[];
+        return {state:root?.dataset.twState??null,errorRaw:root?.dataset.twErrorRaw??null,
+          analysis:Number(root?.dataset.twAnalysis||'0'),analysisSlots:filled,
+          head:(sr?(sr.querySelector('#tw-analysis-head')||{}).textContent:'')||''};})()`);
+      return {pick: pick.name, row, after};
+    })();
+    steps.push({at: 'catalog-to-analysis', catalogPick});
+    const catalogProblems = (facts) => {
+      const bad = [];
+      if (facts?.skipped) { bad.push('图鉴里找不到一只「你没有」的物种（这一条自己空转了）'); return bad; }
+      if (facts?.row?.status !== 'on_demand') bad.push('候选卡上没有「图鉴·按需推算」的状态标（点击前看不出能不能用）');
+      if (!/未核验/.test(String(facts?.row?.tag ?? ''))) bad.push('状态标没写「未核验」');
+      if (Number(facts?.after?.analysis) < 1) bad.push('点了图鉴条目之后理论阵容还是空的（没接住）');
+      if (facts?.after?.errorRaw) bad.push(`点图鉴条目仍然被服务端拒绝：${facts.after.errorRaw}`);
+      const slot = (facts?.after?.analysisSlots ?? [])[0];
+      if (!slot) bad.push('理论阵容里没有那一格');
+      else {
+        if (slot.status !== 'on_demand') bad.push(`格子状态 ${slot.status}`);
+        if (slot.canBattle !== 'trial') bad.push(`格子出战判定 ${slot.canBattle}（按需推算应当只能试玩）`);
+      }
+      return bad;
+    };
+    check('live-catalog-to-analysis', '真鼠标点一只**你没有的**图鉴物种：它进**理论阵容**并带「按需推算（未核验）/仅试玩」标，'
+      + '不再被当成「塞进持有队伍」而报错',
+      catalogProblems(catalogPick).length === 0,
+      catalogProblems(catalogPick).join(' | ')
+      || `点了「${catalogPick.pick}」；卡上状态标「${catalogPick.row?.tag}」；理论阵容 ${catalogPick.after?.analysis} 只；`
+        + `那一格 ${JSON.stringify((catalogPick.after?.analysisSlots ?? [])[0])}；标题「${catalogPick.after?.head}」`);
+    counter('live-catalog-to-analysis', '把图鉴条目当成持有队伍（状态标写成 held）必须被同一条判据抓住',
+      catalogProblems({...catalogPick, row: {...catalogPick.row, status: 'held'},
+        after: {...catalogPick.after, analysisSlots: [{status: 'held', canBattle: 'field'}]}}),
+      '{"row":{"status":"held"}}');
+
     // ── ③ 真鼠标开局 → 打到结算 ────────────────────────────────────────────
     const startReady = await waitFor(`document.getElementById('start-standard-pvp')
       && document.getElementById('start-standard-pvp').disabled===false`, 60, 250);

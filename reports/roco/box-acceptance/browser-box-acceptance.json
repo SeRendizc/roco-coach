@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-22T04:49:55.737Z",
+ "judged_at": "2026-09-22T05:12:56.443Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -184,7 +184,7 @@
    "id": "24-盒子→配队交接",
    "judge": "真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按带过来的个体预填，开局按钮读到的规模一致，且如实说「还差几只」",
    "ok": true,
-   "actual": "（带过来 2 只；URL \"own-0001,own-0002\"；工作台 selected=2 handoff=2 按钮规模=2；文案「选满六只才能开局（当前 2 只）。」）"
+   "actual": "（带过来 2 只；URL \"own-0001,own-0002\"；工作台 selected=2 handoff=2 按钮规模=2；文案「正式开局要六只**持有**个体（当前 2）；试玩要有六只理论阵容物种（当前 0）。」）"
   },
   {
    "id": "22-控制台干净",

@@ -280,6 +280,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       <span class="tw-badge muted" id="tw-badge-universe">${escapeHtml(TEAM_WORKSHOP_BADGES.universe)} 600+</span>
      </div>
      <div class="tw-slots" id="tw-slots" role="list"></div>
+     <p class="tw-note" id="tw-analysis-head">理论阵容（全图鉴都能放进来做搭配分析；能不能出战看每格的状态）</p>
+     <div class="tw-slots" id="tw-analysis-slots" role="list" data-tw-analysis></div>
      <p class="tw-note" id="tw-team-note"></p>
      <p class="tw-note" id="tw-team-constraints" hidden></p>
      <p class="tw-error" id="tw-team-error" hidden></p>
@@ -336,6 +338,10 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     : [];
   const state = {
     selected: initialSelected.slice(),
+    // 理论阵容（2026-09-22 人类 P0）：**物种级**，用来做搭配分析；不要求拥有、不出战。
+    // 与 `selected`（持有实例）分开，是因为这两件事的失败方向完全不同：
+    // 持有清单满了才能开局，理论阵容满了才能比较与试玩。
+    analysis: [],
     locked: [],
     favourite: false,
     maxReplacements: null,
@@ -448,6 +454,46 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       $('tw-team-error').textContent = '';
       delete rootEl.dataset.twErrorRaw;
     }
+  }
+
+  /** 理论阵容那六格：来源是服务端的 `player.analysis_slots`（每格带 held/on_demand/knowledge_only）。 */
+  function renderAnalysis(player) {
+    const slots = Array.isArray(player?.analysis_slots) ? player.analysis_slots : [];
+    const box = $('tw-analysis-slots');
+    if (!box) return;
+    box.innerHTML = slots.map((slot) => {
+      if (slot.state !== 'filled') {
+        return `<article class="tw-slot" role="listitem" data-tw-analysis-slot="${slot.index}"
+          data-tw-state="empty"><div class="tw-meta">第 ${slot.index} 格（空）</div>
+          <div class="tw-meta">${escapeHtml(slot.empty_hint ?? '')}</div></article>`;
+      }
+      const cls = slot.status === 'held' ? 'tw-state-held'
+        : (slot.status === 'on_demand' ? 'tw-state-trial' : 'tw-state-info');
+      const canBattle = slot.can_field === true ? '可正式出战'
+        : (slot.can_trial === true ? '仅试玩（未核验）' : '暂不能出战');
+      return `<article class="tw-slot on" role="listitem" data-tw-analysis-slot="${slot.index}"
+        data-tw-state="filled" data-tw-status="${escapeAttr(slot.status ?? '')}"
+        data-tw-can-battle="${slot.can_field === true ? 'field' : (slot.can_trial === true ? 'trial' : 'no')}">
+       <div class="tw-row"><span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
+        <span class="tw-lock">${canBattle}</span></div>
+       <div class="tw-meta"><span class="tw-types">${teamSlugs(slot.types) || '系别未登记'}</span>
+        <span class="tw-state-tag ${cls}">${escapeHtml(slot.status_label ?? '')}</span></div>
+       ${mechanismRow(slot.mechanism)}
+       <details class="tw-detail"><summary>详情（为什么）</summary>
+        <div class="tw-detail-body">${escapeHtml(slot.reason ?? '')}</div></details>
+      </article>`;
+    }).join('');
+    const analysis = player?.analysis ?? null;
+    const head = $('tw-analysis-head');
+    if (head) {
+      head.textContent = analysis
+        ? `理论阵容 ${analysis.count} / ${TEAM_SLOTS}`
+          + `（其中可正式出战 ${analysis.fieldable} 只；${analysis.trial_ready
+            ? '六只都跑得起来 → 可以试玩一局' : '还差 ' + analysis.remaining_slots + ' 只'}）`
+        : '理论阵容（全图鉴都能放进来做搭配分析；能不能出战看每格的状态）';
+    }
+    rootEl.dataset.twAnalysis = String(analysis?.count ?? 0);
+    rootEl.dataset.twAnalysisTrialReady = analysis?.trial_ready === true ? 'yes' : 'no';
   }
 
   // ── 候选池（全量图鉴，可翻页 + 搜索）─────────────────────────────────
@@ -755,6 +801,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   function workshopQuery(extra = {}) {
     const query = new URLSearchParams();
     if (state.selected.length) query.set('selected', state.selected.join(','));
+    if (state.analysis.length) query.set('analysis_species', state.analysis.join(','));
     if (state.locked.length) query.set('locked', state.locked.join(','));
     if (state.favourite) query.set('favourites_only', 'true');
     if (Number.isInteger(state.maxReplacements)) query.set('max_replacements', String(state.maxReplacements));
@@ -765,6 +812,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   function emit() {
     const detail = {
       team: state.selected.slice(),
+      // 理论阵容与它能不能试玩：主线程靠这两项决定开局栏显示「正式」还是「试玩」。
+      analysisTeam: state.analysis.slice(),
+      analysisTrialReady: state.payload?.player?.analysis?.trial_ready === true,
       locks: state.locked.slice(),
       favourite: state.favourite,
       maxReplacements: state.maxReplacements,
@@ -792,6 +842,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const player = payload.player ?? {};
     rootEl.dataset.twStage = stage;
     renderTeam(player);
+    renderAnalysis(player);
     renderEval(player, stage);
     renderCoach(player, stage);
     renderPool();
@@ -862,7 +913,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       rootEl.dataset.twState = firstData === null ? 'failed' : 'bad-request';
       rootEl.dataset.twError = String(state.error);
       rootEl.dataset.twSeq = String(state.seq);
-      if (state.payload) renderTeam(state.payload.player ?? {}); else renderTeam({});
+      if (state.payload) { renderTeam(state.payload.player ?? {}); renderAnalysis(state.payload.player ?? {}); }
+      else { renderTeam({}); renderAnalysis({}); }
       emit();
       return;
     }
@@ -896,21 +948,33 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
 
   /** 加一只：优先用「你已经拥有的那一只」；没有就按图鉴条目加，路由会照实拒绝。 */
   async function addCandidate({instance, species}) {
-    if (state.selected.length >= TEAM_SLOTS) {
-      state.error = `最多 ${TEAM_SLOTS} 个槽位：先拿掉一只再加。`;
-      renderTeam(state.payload?.player ?? {});
-      return;
+    // 你拥有的 → 进**持有队伍**（能正式开局）；你没有的 → 进**理论阵容**（分析/试玩）。
+    // 这一条就是用户那次「从图鉴挑一只、选到第六槽才被告知不能开局」的修法：
+    // 图鉴条目**本来就不该**往持有队伍里塞，它有自己的清单。
+    const owned = state.ownedBySpecies.get(species) ?? (instance ? {select: instance} : null);
+    if (owned?.select) {
+      if (state.selected.includes(owned.select)) return;
+      if (state.selected.length >= TEAM_SLOTS) {
+        state.error = `持有队伍最多 ${TEAM_SLOTS} 只：先拿掉一只再加。`;
+        renderTeam(state.payload?.player ?? {});
+    renderAnalysis(state.payload?.player ?? {});
+      renderAnalysis(state.payload?.player ?? {});
+        return;
+      }
+      state.selected = [...state.selected, owned.select];
+    } else {
+      if (!species || !/^pet_\d{6}$/.test(species)) return;
+      if (state.analysis.includes(species)) return;
+      if (state.analysis.length >= TEAM_SLOTS) {
+        state.error = `理论阵容最多 ${TEAM_SLOTS} 只：先拿掉一只再加。`;
+        renderTeam(state.payload?.player ?? {});
+    renderAnalysis(state.payload?.player ?? {});
+      renderAnalysis(state.payload?.player ?? {});
+        return;
+      }
+      state.analysis = [...state.analysis, species];
     }
-    let select = instance;
-    if (!select && species) select = state.ownedBySpecies.get(species)?.select ?? null;
-    const value = select ?? species;
-    if (!value || state.selected.includes(value)) return;
-    // 上一次被拒的图鉴条目还留在队伍里：先摘掉，否则永远加不进新的一只。
-    if (rootEl.dataset.twState === 'bad-request' && /^pet_\d{6}$/.test(state.selected.at(-1) ?? '')) {
-      state.selected = state.selected.filter((item) => !/^pet_\d{6}$/.test(item));
-      await reload();
-    }
-    state.selected = [...state.selected, value];
+    state.error = null;
     await reload();
   }
 

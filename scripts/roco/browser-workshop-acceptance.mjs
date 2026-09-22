@@ -654,7 +654,14 @@ async function main() {
       text=wrap.textContent||'';}
     const q=(sel)=>sr?sr.querySelectorAll(sel).length:0;
     return JSON.stringify({
-      slotNodes: q('.tw-slot'), filledNodes: q('.tw-slot.on'), nextNodes: q('[data-tw-next]'),
+      // 2026-09-22：模块现在有**两排**槽位 —— 持有队伍（#tw-slots）与理论阵容（#tw-analysis-slots）。
+      // 「六个槽位」这条判据量的是**持有队伍**那一排；把两排加在一起量会得到 12（判据自己错了）。
+      slotNodes: q('#tw-slots .tw-slot'), filledNodes: q('#tw-slots .tw-slot.on'),
+      analysisSlotNodes: q('#tw-analysis-slots .tw-slot'),
+      analysisFilledNodes: q('#tw-analysis-slots .tw-slot.on'),
+      analysisCount: root?.dataset.twAnalysis ?? null,
+      analysisTrialReady: root?.dataset.twAnalysisTrialReady ?? null,
+      nextNodes: q('[data-tw-next]'),
       gapNodes: q('.tw-gap'), axisNodes: q('.tw-axis'), unknownNodes: q('.tw-unknown'),
       entranceNodes: q('[data-tw-entrance]'), replacementShown: q('#tw-replacement')>0,
       mechanismNodes: q('[data-tw-mechanism]'),
@@ -858,11 +865,35 @@ async function main() {
         if (!raw) bad.push('服务端原文没有留在 data-tw-error-raw（排查要用）');
         return bad;
       };
-      check('10-图鉴物种照实拒绝', '点一只自己没有的图鉴物种：玩家那一行说清「进不了队伍 + 为什么 + 下一步」，'
-        + '内部串不出现在玩家层（原文留在 data-tw-error-raw）',
-        refuseProblems(rejectedText, rawError, rejected.state).length === 0,
-        refuseProblems(rejectedText, rawError, rejected.state).join(' | ')
-        || `state=${rejected.state}；玩家那一行「${String(rejectedText).slice(0, 120)}」`);
+      // 2026-09-22（人类 P0）：口径变了 —— 图鉴条目**不再被当成「塞进持有队伍」而报错**，
+      // 它进**理论阵容**（物种级清单），并在卡上提前标「图鉴 · 按需推算（未核验）」。
+      // 所以这一条改成量新口径；「玩家层不许出现内部串」那条纪律仍然量（它没变）。
+      const analysisAfterCatalog = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+        const sr=root?.shadowRoot;
+        const box=sr?sr.querySelector('#tw-analysis-slots'):null;
+        const filled=box?[...box.querySelectorAll('[data-tw-state="filled"]')].map((el)=>({
+          status:el.dataset.twStatus,canBattle:el.dataset.twCanBattle})):[];
+        return {count:Number(root?.dataset.twAnalysis||'0'),slots:filled,
+          text:((root?.textContent||'')).replace(/\\s+/g,' ')};})()`);
+      const catalogProblems = (facts) => {
+        const bad = [];
+        if (facts?.state !== 'ok') bad.push(`state=${facts?.state}（图鉴条目不该让整页进错误态）`);
+        if (Number(facts?.analysis?.count) < 1) bad.push('理论阵容里没有接住这只图鉴物种');
+        const slot = (facts?.analysis?.slots ?? [])[0];
+        if (slot && slot.status !== 'on_demand') bad.push(`格子状态 ${slot.status}`);
+        if (slot && slot.canBattle !== 'trial') bad.push(`出战判定 ${slot.canBattle}（按需推算只能试玩）`);
+        for (const leak of ['服务端原话', 'own-0001', 'pet_']) {
+          if (String(facts?.playerText ?? '').includes(leak)) bad.push(`玩家层泄漏了内部串「${leak}」`);
+        }
+        return bad;
+      };
+      check('10-图鉴物种照实拒绝', '点一只自己没有的图鉴物种：它进**理论阵容**并带「按需推算（未核验）/仅试玩」标，'
+        + '页面不进错误态、玩家层不出现内部串',
+        catalogProblems({state: rejected.state, analysis: analysisAfterCatalog,
+          playerText: await playerText()}).length === 0,
+        catalogProblems({state: rejected.state, analysis: analysisAfterCatalog,
+          playerText: await playerText()}).join(' | ')
+        || `state=${rejected.state}；理论阵容 ${analysisAfterCatalog.count} 只；格子 ${JSON.stringify(analysisAfterCatalog.slots)}`);
       counter('10-图鉴物种照实拒绝', '把服务端原话（含 selected / own-0001）直接印到玩家层必须被同一条判据抓住',
         refuseProblems('服务端原话：selected 的每一项都必须是 own-0001 形状的个体的 id', null, 'bad-request'),
         '{"text":"服务端原话：selected …"}');
