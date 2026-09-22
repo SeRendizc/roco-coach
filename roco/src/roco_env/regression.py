@@ -134,6 +134,10 @@ SCENARIOS: List[Dict[str, Any]] = [
 ]
 
 
+#: 属性扫描的对手队伍 id（生成场景时用来避让；在 `build_regression_set` 里惰性填充）。
+SWEEP_IDS: "set[str]" = set()
+
+
 def _select_action(state, rs, side: str, pick: Optional[Dict[str, Any]]):
     """按选择器挑一个**合法**动作；挑不到就用第一个合法动作（并由调用方统计命中率）。"""
     legal = env_mod.legal_actions(state, rs, side)
@@ -145,6 +149,7 @@ def _select_action(state, rs, side: str, pick: Optional[Dict[str, Any]]):
     contains = pick.get("contains")
     skill_id = pick.get("skill_id")
     category = pick.get("category")
+    element = pick.get("element")
     for action in legal:
         if kind and action.kind == kind:
             return action, True
@@ -153,6 +158,10 @@ def _select_action(state, rs, side: str, pick: Optional[Dict[str, Any]]):
         if category and action.kind == "skill":
             skill = rs.skills.get(action.skill_id or "")
             if skill is not None and skill.category == category:
+                return action, True
+        if element and action.kind == "skill":
+            skill = rs.skills.get(action.skill_id or "")
+            if skill is not None and skill.element == element:
                 return action, True
         if contains and action.kind == "skill":
             skill = rs.skills.get(action.skill_id or "")
@@ -180,6 +189,7 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
     state = env_mod.reset(team_a, team_b, seed=int(scenario["seed"]), rs=rs,
                           config=cfg, unverified_overrides=overrides)
     kinds: Dict[str, int] = {}
+    type_multipliers: List[float] = []
     used_skills: List[str] = []
     key_events: List[Dict[str, Any]] = []
     picks_hit = 0
@@ -211,9 +221,17 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
     for event in state.events:
         kind = getattr(event, "kind", None)
         kinds[kind] = kinds.get(kind, 0) + 1
+        # 属性扫描的证据：玩家这一侧每次伤害的相性倍率（1.0 = 中性；缺字段就不记）
+        # 注意：`Event` 只有 kind/turn/detail/evidence —— 侧别与倍率都在 `detail` 里
+        # （`_bump(state, "damage", {"side": …, "type_multiplier": …})`）。
+        detail = getattr(event, "detail", None) or {}
+        if kind == "damage" and isinstance(detail, dict) and detail.get("side") == "player":
+            value = detail.get("type_multiplier")
+            if isinstance(value, (int, float)):
+                type_multipliers.append(round(float(value), 4))
         if len(key_events) < 12 and kind in set(scenario.get("expect_kinds", [])):
             key_events.append({"kind": kind, "turn": getattr(event, "turn", None),
-                               "side": getattr(event, "side", None)})
+                               "side": (detail.get("side") if isinstance(detail, dict) else None)})
     problems = [] if unresolved and len(unresolved) == 1 and unresolved[0].startswith("数据里没有任何精灵") \
         else list(unresolved)
     for want in scenario.get("expect_kinds", []):
@@ -224,12 +242,16 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
     if wanted_skill_desc and lead_skill:
         if lead_skill not in used_skills:
             problems.append(f"首发那条技能（{lead_skill}）一次都没用出来：场景没驱动到「{wanted_skill_desc}」")
-    if scenario.get("pick_a") and picks_hit == 0:
+    # 「选择器必须命中」只对**声明了 find_lead 或显式要求**的场景成立：
+    # 属性扫描的期望是「这种属性的伤害真的算过」（由 `type_multipliers` 核实），
+    # 不是「每一手都命中」——一条高能耗的龙系技能可能整局都没轮上（实测）。
+    if (scenario.get("find_lead") or scenario.get("require_pick_hit")) and picks_hit == 0:
         problems.append("选择器一次都没命中：这条场景没有真的驱动到它想驱动的机制")
     return {
         "id": scenario["id"], "dimension": scenario["dimension"], "config": cfg,
         "seed": scenario["seed"], "steps": steps, "result": state.result,
         "lead_pet": lead_pet, "lead_skill": lead_skill, "used_skills": sorted(set(used_skills)),
+        "type_multipliers": type_multipliers,
         "event_kinds": dict(sorted(kinds.items())),
         "state_digest": hashlib.sha256(
             json.dumps(env_mod.serialize(state), ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest(),
@@ -242,9 +264,67 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+#: 全量数据里登记的 18 个单属性。扫描对每一种都跑一条场景 —— 证明「这种属性的伤害真的会结算」。
+TYPE_SWEEP_TYPES = ("光系", "冰系", "地系", "幻系", "幽系", "恶系", "普通系", "机械系",
+                    "武系", "毒系", "水系", "火系", "电系", "翼系", "草系", "萌系", "虫系", "龙系")
+
+#: 属性扫描的统一对手（固定队伍，避免每次换对手导致指纹无法比较）。
+SWEEP_OPPONENT = ["秩序鱿墨", "画间沉铁兽", "月使鹭纳", "迷迷箱怪", "权杖-V", "卡卡虫"]
+
+
+def _find_element_lead(rs: Any, element: str) -> "tuple[Optional[str], Optional[str]]":
+    """找一个**规范配招里有该属性技能**的精灵（学得到 ≠ 带得上场，与 `_find_lead` 同一条理由）。"""
+    candidates = []
+    for tier_rank, tier in enumerate(("FULL_VERIFIED", "SIMULATABLE_UNVERIFIED")):
+        for pet in sorted(rs.pets.values(), key=lambda p: p.pet_id):
+            if rs.build_support_of(pet.pet_id) != tier or pet.pet_id in SWEEP_IDS:
+                continue
+            for sid in rs.candidate_moveset(pet.pet_id) or ():
+                skill = rs.skills.get(sid)
+                # 必须挑**攻击类**技能：普通系那里曾挑到一条状态技，整条场景一次玩家伤害都没有
+                # （倍率证据为空）——扫描要的是「这种属性的伤害真的算过」。
+                if skill is not None and skill.element == element and getattr(skill, "is_attack", False):
+                    candidates.append(((tier_rank, int(skill.energy or 0), pet.pet_id), pet.pet_id, sid))
+    if not candidates:
+        return None, None
+    _, pet_id, sid = min(candidates, key=lambda row: row[0])
+    return pet_id, sid
+
+
+def build_type_sweep_scenarios(rs: Any) -> List[Dict[str, Any]]:
+    """18 个属性各一条场景。找不到可驱动的精灵时**不生成**该条（由报告登记为不可达）。"""
+    out = []
+    for index, element in enumerate(TYPE_SWEEP_TYPES):
+        lead, _ = _find_element_lead(rs, element)
+        if lead is None:
+            continue
+        # 六宠模式要求每方 6 只：首发是扫描目标，其余用固定顺序的替补补齐（确定性）。
+        bench = []
+        for pet in sorted(rs.pets.values(), key=lambda p: p.pet_id):
+            if pet.pet_id in SWEEP_IDS or pet.pet_id == lead or pet.name in bench:
+                continue
+            if rs.build_support_of(pet.pet_id) not in ("FULL_VERIFIED", "SIMULATABLE_UNVERIFIED"):
+                continue
+            bench.append(pet.name)
+            if len(bench) >= 5:
+                break
+        if len(bench) < 5:
+            continue          # 凑不齐六只 ⇒ 这个属性这一轮不生成（由报告如实登记）
+        out.append({
+            "id": f"type-sweep-{element}", "dimension": f"属性·{element}",
+            "team_a": [rs.pets[lead].name] + bench, "team_b": list(SWEEP_OPPONENT),
+            "seed": 40 + index, "config": V3, "overrides": True, "turns": 12,
+            "pick_a": {"element": element}, "expect_kinds": ["damage"],
+        })
+    return out
+
+
 def build_regression_set(rs: Any, scenarios: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """跑整套场景，产出可复核的回归集（确定性：同样的输入 ⇒ 同样的指纹）。"""
-    scenarios = scenarios if scenarios is not None else SCENARIOS
+    SWEEP_IDS.clear()
+    SWEEP_IDS.update(_ids(rs, SWEEP_OPPONENT))
+    if scenarios is None:
+        scenarios = list(SCENARIOS) + build_type_sweep_scenarios(rs)
     results = [run_scenario(rs, scenario) for scenario in scenarios]
     dimensions = sorted({row["dimension"] for row in results})
     problems = [f"{row['id']}：{p}" for row in results for p in row["problems"]]

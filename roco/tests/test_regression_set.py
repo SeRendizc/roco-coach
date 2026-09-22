@@ -52,6 +52,17 @@ class RegressionSetTest(unittest.TestCase):
         self.assertEqual(json.dumps(again, ensure_ascii=False, sort_keys=True),
                          json.dumps(self.report, ensure_ascii=False, sort_keys=True))
 
+    def test_type_sweep_covers_every_registered_type(self):
+        """18 个单属性各一条场景，且**相性倍率真的被算过**（否则属性表是没用的）。"""
+        sweep = [row for row in self.report["scenarios"] if row["id"].startswith("type-sweep-")]
+        self.assertEqual(len(sweep), 18, f"18 个属性应当各有一条扫描场景，实际 {len(sweep)}")
+        multipliers = {value for row in sweep for value in row.get("type_multipliers", [])}
+        self.assertTrue(any(v > 1.0 for v in multipliers), f"没有出现克制倍率：{sorted(multipliers)}")
+        self.assertTrue(any(v < 1.0 for v in multipliers), f"没有出现抵抗倍率：{sorted(multipliers)}")
+        self.assertIn(1.0, multipliers, "没有中性倍率，说明扫描没真的打到过")
+        for row in sweep:
+            self.assertTrue(row["type_multipliers"], f"{row['id']} 一次伤害都没记到")
+
     def test_legacy_scenario_is_in_the_set(self):
         """迁移夹具那条必须在：legacy 的行为也要有代表性场景兜着。"""
         legacy = [row for row in self.report["scenarios"] if row["config"] == reg.LEGACY]

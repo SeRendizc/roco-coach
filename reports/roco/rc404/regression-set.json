@@ -5,8 +5,8 @@
  "ruleset_id": "roco-world-s4-2026-09-10",
  "why": "镜像对局只能压出 14 种事件，印记/天气/应对/持续状态根本不会出现。本集用**脚本化**对局逐条驱动机制，并声明每条的期望证据 —— 没出现就算空转，如实报出来。",
  "totals": {
-  "scenarios": 9,
-  "dimensions": 9,
+  "scenarios": 27,
+  "dimensions": 27,
   "scenarios_with_problems": 0
  },
  "dimensions": [
@@ -14,6 +14,24 @@
   "印记",
   "天气",
   "属性/伤害",
+  "属性·光系",
+  "属性·冰系",
+  "属性·地系",
+  "属性·幻系",
+  "属性·幽系",
+  "属性·恶系",
+  "属性·普通系",
+  "属性·机械系",
+  "属性·武系",
+  "属性·毒系",
+  "属性·水系",
+  "属性·火系",
+  "属性·电系",
+  "属性·翼系",
+  "属性·草系",
+  "属性·萌系",
+  "属性·虫系",
+  "属性·龙系",
   "持续状态",
   "换入离场",
   "资源（能量/聚能）",
@@ -45,6 +63,19 @@
     "skill_000576",
     "skill_000750"
    ],
+   "type_multipliers": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    0.5,
+    0.5,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.5
+   ],
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 30,
@@ -72,12 +103,12 @@
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "turn_start",
@@ -87,12 +118,12 @@
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "turn_start",
@@ -102,7 +133,7 @@
     {
      "kind": "damage",
      "turn": 4,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "turn_start",
@@ -112,12 +143,12 @@
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "player"
     }
    ],
    "pick_hit_rate": 1.0,
@@ -140,6 +171,19 @@
     "skill_000576",
     "skill_000750"
    ],
+   "type_multipliers": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    0.5,
+    0.5,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.5
+   ],
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 30,
@@ -157,62 +201,62 @@
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 4,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 6,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 6,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 7,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 8,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 9,
-     "side": null
+     "side": "enemy"
     }
    ],
    "pick_hit_rate": 0.04,
@@ -230,6 +274,7 @@
    "lead_pet": null,
    "lead_skill": null,
    "used_skills": [],
+   "type_multipliers": [],
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 16,
@@ -245,62 +290,62 @@
     {
      "kind": "charge",
      "turn": 1,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 2,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 3,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 4,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 5,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 7,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 8,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 9,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 10,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 11,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 12,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "charge",
      "turn": 14,
-     "side": null
+     "side": "player"
     }
    ],
    "pick_hit_rate": 1.0,
@@ -325,6 +370,25 @@
     "skill_000576",
     "skill_000750"
    ],
+   "type_multipliers": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    0.5,
+    0.5,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.5,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+   ],
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 45,
@@ -343,62 +407,62 @@
     {
      "kind": "faint",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "mana_loss",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "faint",
      "turn": 8,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "mana_loss",
      "turn": 8,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "faint",
      "turn": 19,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "mana_loss",
      "turn": 19,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "faint",
      "turn": 21,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "mana_loss",
      "turn": 21,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "faint",
      "turn": 23,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "mana_loss",
      "turn": 23,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "faint",
      "turn": 25,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "mana_loss",
      "turn": 25,
-     "side": null
+     "side": "player"
     }
    ],
    "pick_hit_rate": 1.0,
@@ -423,6 +487,25 @@
     "skill_000576",
     "skill_000750"
    ],
+   "type_multipliers": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    0.5,
+    0.5,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.5,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+   ],
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 45,
@@ -441,32 +524,32 @@
     {
      "kind": "replacement",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "replacement",
      "turn": 8,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "replacement",
      "turn": 19,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "replacement",
      "turn": 21,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "replacement",
      "turn": 23,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "replacement",
      "turn": 25,
-     "side": null
+     "side": "player"
     }
    ],
    "pick_hit_rate": 1.0,
@@ -490,6 +573,23 @@
     "skill_000750",
     "skill_000809"
    ],
+   "type_multipliers": [
+    1.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    0.5,
+    2.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 1,
@@ -508,62 +608,62 @@
     {
      "kind": "damage",
      "turn": 1,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 4,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 6,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 6,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 7,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 7,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 8,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 9,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 9,
-     "side": null
+     "side": "player"
     }
    ],
    "pick_hit_rate": 0.9545,
@@ -587,6 +687,16 @@
     "skill_000529",
     "skill_000750"
    ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    2.0,
+    2.0,
+    2.0,
+    0.5,
+    0.5
+   ],
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 25,
@@ -604,62 +714,62 @@
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 6,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 7,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 7,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 8,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 9,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 10,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 10,
-     "side": null
+     "side": "player"
     }
    ],
    "pick_hit_rate": 1.0,
@@ -685,6 +795,26 @@
     "skill_000696",
     "skill_000750"
    ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 34,
@@ -704,62 +834,62 @@
     {
      "kind": "damage",
      "turn": 1,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 4,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 6,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 6,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "damage",
      "turn": 7,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 8,
-     "side": null
+     "side": "enemy"
     }
    ],
    "pick_hit_rate": 0.7143,
@@ -780,6 +910,20 @@
     "skill_000576",
     "skill_000744",
     "skill_000750"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
    ],
    "event_kinds": {
     "damage": 19,
@@ -807,12 +951,12 @@
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 2,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "turn_start",
@@ -822,12 +966,12 @@
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 3,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "turn_start",
@@ -842,12 +986,12 @@
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "enemy"
     },
     {
      "kind": "damage",
      "turn": 5,
-     "side": null
+     "side": "player"
     },
     {
      "kind": "turn_start",
@@ -856,6 +1000,1842 @@
     }
    ],
    "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-光系",
+   "dimension": "属性·光系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 40,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000286",
+    "skill_000340",
+    "skill_000359",
+    "skill_000418",
+    "skill_000458"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    2.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 1,
+    "charge": 2,
+    "damage": 13,
+    "defense": 4,
+    "effects_registered_unsupported": 3,
+    "energy_gain": 3,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "turn_start": 10
+   },
+   "state_digest": "d76574701a03b91be3dde2db7e6607a58a307e0ff8e3da69a2671b32cfdd89db",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": "enemy"
+    }
+   ],
+   "pick_hit_rate": 0.1,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-冰系",
+   "dimension": "属性·冰系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 41,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000359",
+    "skill_000529"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 1,
+    "charge": 2,
+    "damage": 17,
+    "defense": 2,
+    "effects_registered_unsupported": 7,
+    "energy_gain": 7,
+    "faint": 1,
+    "mana_loss": 1,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "bf8ba9824c4b53314f5cca3074674c25491b89ae8e4a3da8964136c1a1991713",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 0.7273,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-地系",
+   "dimension": "属性·地系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 42,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000340",
+    "skill_000359",
+    "skill_000525",
+    "skill_000807"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 2,
+    "damage": 12,
+    "defense": 4,
+    "effects_registered_unsupported": 5,
+    "energy_gain": 3,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "turn_start": 10
+   },
+   "state_digest": "5b458104a7029b264f94501b1a04b56496c14121fba051126c4dc64ad13631fc",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 10,
+     "side": "enemy"
+    }
+   ],
+   "pick_hit_rate": 0.2,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-幻系",
+   "dimension": "属性·幻系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 43,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000340",
+    "skill_000359",
+    "skill_000807"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 2,
+    "damage": 14,
+    "defense": 2,
+    "effects_registered_unsupported": 5,
+    "energy_gain": 5,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "turn_start": 10
+   },
+   "state_digest": "1f130e02bf84f6c2473bd63feac7cb933f969cfb3cc3613c77ff3de01a848991",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 0.6,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-幽系",
+   "dimension": "属性·幽系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 44,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000359",
+    "skill_000750"
+   ],
+   "type_multipliers": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    0.5,
+    0.5,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 1,
+    "charge": 1,
+    "damage": 14,
+    "defense": 4,
+    "effects_registered_unsupported": 3,
+    "energy_gain": 3,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "turn_start": 10
+   },
+   "state_digest": "7a7b49ae401f0cc07915b0e65f20b6d2af9829e1cc2e24ea4302bd0a1a169544",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    }
+   ],
+   "pick_hit_rate": 0.8,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-恶系",
+   "dimension": "属性·恶系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 45,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000766"
+   ],
+   "type_multipliers": [
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    3.0,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5
+   ],
+   "event_kinds": {
+    "damage": 18,
+    "defense": 4,
+    "effects_registered_unsupported": 15,
+    "energy_gain": 15,
+    "faint": 1,
+    "mana_loss": 1,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "8d8e5bd279333370830a4f262940ed08690a3f1e877dce1c3bafcabddf731c6a",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-普通系",
+   "dimension": "属性·普通系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 46,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000265",
+    "skill_000340",
+    "skill_000359"
+   ],
+   "type_multipliers": [
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    0.5,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 2,
+    "damage": 14,
+    "defense": 2,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "turn_start": 10
+   },
+   "state_digest": "08197b5771b562e30bca96bdd7f09586250756d02c95c6dcda81c3d7b226ccd9",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 0.6,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-机械系",
+   "dimension": "属性·机械系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 47,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000476"
+   ],
+   "type_multipliers": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "damage": 18,
+    "defense": 4,
+    "effects_registered_unsupported": 4,
+    "energy_gain": 4,
+    "faint": 1,
+    "mana_loss": 1,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "7eebce7e928a08fe6d2cba023f94c59819bd9dde4ace4c266cd517a6d4f76f6f",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-武系",
+   "dimension": "属性·武系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 48,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000359",
+    "skill_000673"
+   ],
+   "type_multipliers": [
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 1,
+    "charge": 1,
+    "damage": 18,
+    "defense": 2,
+    "faint": 1,
+    "mana_loss": 1,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "98d47ba7f65808f9c36ca575e9878d4b4f3945ab9a3bbbb756fa6508bdc6fe72",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 0.8182,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-毒系",
+   "dimension": "属性·毒系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 49,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000340",
+    "skill_000359",
+    "skill_000610",
+    "skill_000696"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 2,
+    "damage": 16,
+    "defense": 2,
+    "effects_registered_unsupported": 1,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 1,
+    "status_added": 1,
+    "status_tick": 11,
+    "turn_start": 11
+   },
+   "state_digest": "cd25385023d8f11323e790cc33db01c624e9b2dc6b347502fa0631e8c232c3bb",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    }
+   ],
+   "pick_hit_rate": 0.0909,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-水系",
+   "dimension": "属性·水系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 50,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000418"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 1,
+    "damage": 19,
+    "defense": 2,
+    "effects_registered_unsupported": 10,
+    "energy_gain": 10,
+    "faint": 1,
+    "mana_loss": 1,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "4ae97c20a26eba4653f64fba4543107391242233ec8a28b7134284e6acb2f289",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-火系",
+   "dimension": "属性·火系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 51,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000378"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "damage": 17,
+    "defense": 3,
+    "effects_registered_unsupported": 13,
+    "energy_gain": 13,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "trait": 5,
+    "turn_start": 10
+   },
+   "state_digest": "257ad6a8b7490c24ba8268e099ed7e4aa8094dcccc406f5d2fe608a4ebaadba5",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-电系",
+   "dimension": "属性·电系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 52,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000340",
+    "skill_000359",
+    "skill_000580"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 2,
+    "damage": 14,
+    "defense": 2,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "turn_start": 10
+   },
+   "state_digest": "cbfa2e71cd75dbd3324d5877d8cb43ce2a5ed8132f50464c9c3010d5926d9566",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 0.6,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-翼系",
+   "dimension": "属性·翼系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 53,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000686"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 1,
+    "charge": 1,
+    "damage": 18,
+    "defense": 2,
+    "faint": 1,
+    "mana_loss": 1,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "1fdfae8dc6c079411a698c1cf149288b9c31e3fa32a85dc7ac8a3346f8250cd4",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 0.9091,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-草系",
+   "dimension": "属性·草系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 54,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000286",
+    "skill_000340",
+    "skill_000359",
+    "skill_000541"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 2,
+    "damage": 12,
+    "defense": 4,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 2,
+    "turn_start": 10
+   },
+   "state_digest": "1273a0dc1e0ca4750d131a718f4a5bd50bbdb94e51774b6ede4bccee70407a04",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 10,
+     "side": "enemy"
+    }
+   ],
+   "pick_hit_rate": 0.2,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-萌系",
+   "dimension": "属性·萌系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 55,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000340",
+    "skill_000359",
+    "skill_000725"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "action_cancelled": 2,
+    "charge": 2,
+    "damage": 16,
+    "defense": 2,
+    "faint": 2,
+    "mana_loss": 2,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "4e08d25eb557b315adad8a7ca8a82b9825ec58a527306b4483ab8ace9bdad5e6",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    }
+   ],
+   "pick_hit_rate": 0.6364,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-虫系",
+   "dimension": "属性·虫系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 56,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000632"
+   ],
+   "type_multipliers": [
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25,
+    0.25
+   ],
+   "event_kinds": {
+    "action_cancelled": 1,
+    "damage": 19,
+    "defense": 2,
+    "effects_registered_unsupported": 10,
+    "faint": 1,
+    "mana_loss": 1,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "045e3a92183e9e819570c92439ac4a292fe96d54c6dd4ff294a77d1f0631d483",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 1,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "type-sweep-龙系",
+   "dimension": "属性·龙系",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 57,
+   "steps": 12,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000286",
+    "skill_000401"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "event_kinds": {
+    "damage": 17,
+    "defense": 5,
+    "effects_registered_unsupported": 1,
+    "energy_gain": 1,
+    "faint": 1,
+    "mana_loss": 1,
+    "replacement": 1,
+    "turn_start": 11
+   },
+   "state_digest": "fbb9b3e1c9ffa1be93580fe97b7711e2af4d96b835a119f5934637fdc2d1f891",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 0.0,
    "problems": [],
    "unreachable": [],
    "status": "reachable"
