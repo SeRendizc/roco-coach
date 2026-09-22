@@ -207,6 +207,10 @@
 <section class="panel battle" id="battle-panel" hidden>
  <!-- 对局进行中的一行阵容摘要（阵容池收起来之后，玩家仍看得见自己选了什么） -->
  <div id="lineup-brief" class="lineup-brief" hidden></div>
+ <!-- R5：开局前的**短暂**阵容展示（人类规格：选完宠、开局前给一眼对峙画面）。
+      ⚠ 严格按公开视图：我方六只给名字/属性；对手只给「上场才亮明」与后备数量 ——
+      把对手整队亮出来会违反「未上场不揭示」的公开信息边界。 -->
+ <div id="lineup-reveal" class="lineup-reveal" role="status" aria-live="polite" hidden></div>
 
  <!-- 顶部对称：双方资源条（魔力/心）+ 当前精灵 + 队伍状态。
       **资源条的数字只能来自引擎**：引擎没给（mana/hearts 都是 null）就写「未核验」

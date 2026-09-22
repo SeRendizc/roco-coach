@@ -835,6 +835,44 @@ async function main() {
       }
       return bad;
     };
+    // ── R5/R6：开局前阵容展示（短暂、不挡行动）+ 战报按回合分组 ──
+    // 战报那一刻可能还没有事件（刚开局）—— 推一手再量，判据才有东西可看。
+    if (Number(await js(`document.body.dataset.rocoLogTurns||'0'`)) === 0) {
+      try { await mouseClick('#auto-turn'); await sleep(1200); } catch {}
+    }
+    const r56 = await js(`(()=>{const box=document.getElementById('lineup-reveal');
+      const ev=document.getElementById('events');
+      const turns=[...document.querySelectorAll('#events [data-roco-log-turn]')].map((d)=>({
+        turn:d.dataset.rocoLogTurn,open:d.open===true,
+        rows:d.querySelectorAll('p').length}));
+      return {reveal:document.body.dataset.rocoLineupReveal??null,
+        revealText:box?(box.textContent||'').replace(/\\s+/g,' ').trim():null,
+        // 展示块必须**在流里**：不能盖住行动区（矩形不相交即视为不挡）
+        overlap:(()=>{if(!box||box.hidden)return false;const a=box.getBoundingClientRect();
+          const b=document.getElementById('action-panel').getBoundingClientRect();
+          return !(a.right<=b.left||a.left>=b.right||a.bottom<=b.top||a.top>=b.bottom);})(),
+        turns,logTurns:Number(document.body.dataset.rocoLogTurns||'0')};})()`);
+    const r56Problems = (f) => {
+      const bad = [];
+      if (!f?.revealText || !/我方阵容/.test(String(f.revealText))) bad.push('开局前没有给出双方阵容展示');
+      if (!/上场才亮明|未公开/.test(String(f.revealText ?? ''))) {
+        bad.push('对手那侧没有写明「未上场不揭示」（公开信息边界）');
+      }
+      if (f?.overlap) bad.push('阵容展示盖住了行动区');
+      if (!(f?.turns ?? []).length) bad.push('战报没有按回合分组');
+      if ((f?.turns ?? []).some((t) => !/^\d+$/.test(String(t.turn)))) bad.push('战报分组里有非数字回合号');
+      if ((f?.turns ?? []).filter((t) => t.open).length > 1) bad.push('战报同时展开了多个回合（应当只默认展开最近一回合）');
+      return bad;
+    };
+    check('live-lineup-and-log', '开局前给出双方阵容展示（我方六只 + 对手「上场才亮明」，且在流里不挡行动）；'
+      + '战报按回合分组、默认只展开最近一回合',
+      r56Problems(r56).length === 0,
+      r56Problems(r56).join(' | ')
+      || `展示「${String(r56.revealText).slice(0, 60)}…」；战报回合 ${JSON.stringify(r56.turns)}`);
+    counter('live-lineup-and-log', '把对手整队也亮出来（违反公开信息边界）必须被同一条判据抓住',
+      r56Problems({...r56, revealText: '我方阵容（6 只）…… 对手阵容（6 只）甲、乙、丙'}),
+      '{"revealText":"对手阵容（6 只）"}');
+
     check('live-battle-info', '双方出战信息：名字/属性/血量（**带百分比**）+ 每方剩余只数（与公开视图一致）',
       r4Problems(r4).length === 0,
       r4Problems(r4).join(' | ')

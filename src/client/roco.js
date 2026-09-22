@@ -781,19 +781,37 @@ function render() {
   renderActions(onlyOpponentReplacing ? [] : actions, Boolean(view?.battle_result));
 
   // 事件区**只渲染中文句子**（`event.text`，引擎侧生成）。
-  const logs = [];
+  // R6（2026-09-22 人类规格）：战报**按回合分组** —— 每回合一个折叠块，最近一回合默认展开，
+  // 整块独立滚动（CSS `.events` 已有 max-height/overflow）。分组只用引擎事件自带的 `turn`。
   const raw = [];
-  for (const event of state.events) {
+  const byTurn = new Map();
+  // 战报是**整局**的：优先用累计事件流（`matchEvents`），它才是「整局事件，独立滚动」那份。
+  // 只看 `state.events` 时，结算那一份回执没有新事件 → 战报会空（判据实测就是这么红的）。
+  const logSource = (state.matchEvents?.length ? state.matchEvents : state.events) ?? [];
+  for (const event of logSource) {
     const text = typeof event.text === 'string' && event.text ? event.text : null;
-    const cls = event.kind === 'turn_start' ? 'turn' : (event.kind === 'unsupported' ? 'miss' : '');
-    if (event.kind === 'turn_start' && text) logs.push(`<p class="turn">${text}</p>`);
-    else if (text) logs.push(`<p${cls ? ` class="${cls}"` : ''}>${text}</p>`);
-    else logs.push('<p class="muted">这一条还没有中文说法（请把调试信息里的原始事件报上来）。</p>');
+    const turn = Number.isInteger(event.turn) ? event.turn : null;
+    const key = turn ?? 0;
+    if (!byTurn.has(key)) byTurn.set(key, []);
+    byTurn.get(key).push({event, text});
     raw.push({turn: event.turn, kind: event.kind, side: event.side,
       ...(event.extra && Object.keys(event.extra).length ? {extra: event.extra} : {}),
       detail: event.detail ?? null, evidence: event.evidence ?? []});
   }
-  $('events').innerHTML = logs.length ? logs.join('') : '<p class="muted">还没推进。</p>';
+  const turnKeys = [...byTurn.keys()].sort((a, b) => a - b);
+  const lastKey = turnKeys.length ? turnKeys[turnKeys.length - 1] : null;
+  const groups = turnKeys.map((key) => {
+    const rows = byTurn.get(key).map(({event, text}) => {
+      const cls = event.kind === 'unsupported' ? 'miss' : '';
+      return text ? `<p${cls ? ` class="${cls}"` : ''}>${text}</p>`
+        : '<p class="muted">这一条还没有中文说法（请把调试信息里的原始事件报上来）。</p>';
+    }).join('');
+    const open = key === lastKey ? ' open' : '';
+    return `<details class="log-turn" data-roco-log-turn="${key}"${open}>
+      <summary>第 ${key || '—'} 回合（${byTurn.get(key).length} 条）</summary>${rows}</details>`;
+  });
+  $('events').innerHTML = groups.length ? groups.join('') : '<p class="muted">还没推进。</p>';
+  document.body.dataset.rocoLogTurns = String(turnKeys.length);
   const rawBox = $('events-raw');
   if (rawBox) rawBox.textContent = raw.length ? JSON.stringify(raw, null, 1) : '（还没有事件）';
   $('plan-status').textContent = state.plan && state.plan.timed_out ? '这一手算得慢了点，先用规则提示' : '';
@@ -1058,6 +1076,45 @@ function chargePreviewHtml(chargeActions) {
   if (cap === null) return '聚能';
   const after = gain !== null && now !== null ? Math.min(cap, now + gain) : null;
   return after === null ? `聚能（上限 ${cap}）` : `聚能 → ${after} / ${cap}`;
+}
+
+/**
+ * R5：开局前的**短暂**双方阵容展示（人类 2026-09-22 规格）。
+ *
+ * 公开信息边界：我方六只给名字 + 属性（名单数据）；**对手只给「上场才亮明」与后备数量** ——
+ * 把对手整队亮出来会违反「未上场不揭示」。展示是**在流里**的一块（不是浮层），
+ * 所以不挡行动坞；几秒后自动收起，点一下也能立刻收起。
+ */
+let lineupTimer = null;
+function showLineupReveal(view) {
+  const box = $('lineup-reveal');
+  if (!box || !view) return;
+  const mine = (view.self?.pets ?? []).map((pet) => {
+    const row = [...(state.roster ?? []), ...(state.rosterAll ?? [])]
+      .find((p) => p.pet_id === (pet.species_id ?? pet.pet_id)) ?? null;
+    const types = Array.isArray(row?.types) ? row.types.join('·') : '';
+    return `<div class="lr-row">${escapeHtml(pet.name ?? '（名字未登记）')}`
+      + `${types ? ` <span class="muted">${escapeHtml(types)}</span>` : ''}</div>`;
+  }).join('');
+  const foeField = view.opponent?.field?.name ?? null;
+  const foeBench = Array.isArray(view.opponent?.bench)
+    ? view.opponent.bench.filter((b) => b.fainted !== true).length : null;
+  box.innerHTML = `<div><h4>我方阵容（${(view.self?.pets ?? []).length} 只）</h4>${mine}</div>
+    <div><h4>对手</h4><div class="lr-row lr-foe">${
+      foeField ? `上场的是「${escapeHtml(foeField)}」` : '还没亮明'}</div>
+      <div class="lr-row lr-foe">后备 ${foeBench === null ? '未公开' : foeBench} 只 · 上场才亮明</div>
+      <div class="lr-row lr-foe">对手的招式与后备名单不在公开视图里</div></div>`;
+  box.hidden = false;
+  document.body.dataset.rocoLineupReveal = 'shown';
+  if (lineupTimer) clearTimeout(lineupTimer);
+  lineupTimer = setTimeout(() => { box.hidden = true; document.body.dataset.rocoLineupReveal = 'hidden'; }, 3200);
+  if (!box.dataset.bound) {
+    box.dataset.bound = 'yes';
+    box.addEventListener('click', () => {
+      box.hidden = true;
+      document.body.dataset.rocoLineupReveal = 'hidden';
+    });
+  }
 }
 
 function renderActions(actions, disabled) {
@@ -2268,6 +2325,8 @@ async function startBattle() {
 }
 
 async function playAction(action) {
+  const reveal = $('lineup-reveal');
+  if (reveal && !reveal.hidden) { reveal.hidden = true; document.body.dataset.rocoLineupReveal = 'hidden'; }
   if (!state.battleId || !action) return;
   const before = state.view?.state_version ?? null;
   try {
@@ -2772,6 +2831,8 @@ async function startStandardPvp() {
     state.mode = data.mode ? {...data.mode, contract_id: data.mode.id} : state.mode;
     applyResult(data);
     dismissOnboard();
+    // R5：开局前给一眼双方阵容（短暂、在流里、不挡行动）。
+    showLineupReveal(state.view);
     // 试玩/按需推算的配招不在默认名单里：开局后补一次全量名单（只取一次），
     // 取回来再重画，让「灰置配招」有真实数据可摆（拿不到就不画）。
     if (!state.rosterAll && !state.rosterAllLoading) {
