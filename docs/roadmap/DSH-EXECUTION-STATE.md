@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `369fa3d`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `3e4b9d2`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2428,3 +2428,17 @@ diff `git status`，用来抓「产物里有易变字段」。但同一次 `veri
 
 **判据**：真机 `live-battle-hierarchy` **26/26 + 26/26**（战场必须在规则折叠之上、未核验必须是折叠行内的短标签、战场上方不许再出现这类文本）；反证：把规则挪回上方必须红。门禁 **22/22 pass**。
 截图：`reports/roco/ui-slice/battle-decision-1440x900.png`（可见 R5 阵容展示在最上、双方卡片紧随，规则两行已从主视线消失）。
+
+### C6.61 第 137 轮：C3-a **附加式重做**成功 —— 档位 opt-in，默认回执逐字不变
+
+第 118 轮我直接改 `resolved`/`coverage` → 五套件红（连**钉死的 Agent 轨迹摘要**都变了）。这次按记录下来的办法做**附加式**：
+
+- `_skill_record(..., with_tier=False)`：**默认一个键都不加**；只有查询里显式写 `with_tier: true` 时才附上 `support_tier` / `support_why` / `support_unparsed`（来自唯一分类器 `coverage.classify_skill`）；
+- 客户端入口：`RocoClient.skillTier()`（显式索要）；普通 `skill()` / `skillById()` **不带**这个标志；
+- 为什么必须 opt-in：默认技能回执被钉死的轨迹摘要比着，多一个键就等于**悄悄改了模型看到的内容**。
+
+**判据**：Python `SkillTierOptInTest` 两条 —— ① 默认回执不含那三个键；② 索要时档位/未认领片段**逐条等于唯一分类器**（抽查 ≥40 条技能）。JS `roco-rule-config` 一条：只有 `skillTier()` 带 `with_tier`，普通 `skill()` 不带。
+
+**实测**：`test:env` 417 OK；`test:unit` **1003/1003**（比上轮多 1 条）；派生链与轨迹摘要**未变**；门禁 **22/22 pass**。
+
+**下一步（C3-a 的消费侧）**：让需要档位的调用方改用 `skillTier()`（当前只有测试在用）；等确认没有别的消费者依赖旧口径后，再考虑把默认回执也切过去（那一步会改轨迹，必须单独一刀）。

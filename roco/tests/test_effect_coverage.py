@@ -224,3 +224,41 @@ class SupportTierMatchesEngineTest(unittest.TestCase):
         after = (after_state.turn, after_state.player.field_pet.hp, after_state.enemy.field_pet.hp)
         self.assertNotEqual(before, after,
                             f"用「{skill.name}」打了一手，局面却没有任何变化（引擎没结算）")
+
+
+class SkillTierOptInTest(unittest.TestCase):
+    """C3-a（附加式）：档位**只在显式索要时**才进技能回执。
+
+    为什么必须是 opt-in：默认回执被钉死的 Agent 轨迹摘要比着，多一个键就等于悄悄改了
+    模型看到的东西。所以这里两条一起量 —— 默认**不多键**、索要时**档位等于唯一分类器**。
+    """
+
+    def _service(self):
+        from roco_env import service as service_mod
+        return service_mod.RocoService()
+
+    def test_default_skill_record_has_no_tier_keys(self):
+        from roco_env import data as data_mod
+        rs = data_mod.load_ruleset()
+        svc = self._service()
+        skill = next(iter(rs.skills.values()))
+        record = svc._skill_record(rs, skill)
+        for key in ("support_tier", "support_why", "support_unparsed"):
+            self.assertNotIn(key, record, f"默认回执不许带 {key}（会改到 Agent 看到的内容）")
+
+    def test_with_tier_matches_the_single_classifier(self):
+        from roco_env import data as data_mod
+        rs = data_mod.load_ruleset()
+        svc = self._service()
+        checked = 0
+        for skill in rs.skills.values():
+            if getattr(skill, "is_trait", False):
+                continue
+            record = svc._skill_record(rs, skill, with_tier=True)
+            tier = cov.classify_skill(skill, multi_hit_declared=True)
+            self.assertEqual(record["support_tier"], tier["support"], skill.name)
+            self.assertEqual(record["support_unparsed"], list(tier.get("unparsed") or []), skill.name)
+            checked += 1
+            if checked >= 40:
+                break
+        self.assertGreaterEqual(checked, 40, "至少要抽查 40 条技能")

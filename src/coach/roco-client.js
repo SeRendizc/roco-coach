@@ -808,6 +808,18 @@ export class RocoClient {
     return this.query(key.startsWith('skill_') ? { kind: 'skill', skill_id: key } : { kind: 'skill', name: key }, options);
   }
 
+  /**
+   * C3-a：**显式索要**逐技能的支持档位（唯一分类器 `coverage.classify_skill`）。
+   *
+   * 为什么不并进 `skill()`：默认技能回执被钉死的 Agent 轨迹摘要比着，多一个键就变，
+   * 那等于悄悄改了模型看到的内容。要档位的调用方显式要这一份。
+   */
+  async skillTier(reference, options = {}) {
+    const key = String(reference || '');
+    const base = key.startsWith('skill_') ? {kind: 'skill', skill_id: key} : {kind: 'skill', name: key};
+    return this.query({...base, with_tier: true}, options);
+  }
+
   async skillById(skillId, options = {}) {
     return this.query({ kind: 'skill', skill_id: skillId }, options);
   }

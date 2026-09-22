@@ -103,6 +103,7 @@ import time
 import traceback
 
 from . import events_text
+from .coverage import classify_skill
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, List, Optional, Tuple
@@ -721,9 +722,20 @@ class RocoService:
             return Answer(result=self._pet_record(rs, hits[0]), evidence_ids=evidence)
         return _bad_request("查精灵需要 pet_id / id 或 name")
 
-    def _skill_record(self, rs: Ruleset, skill: Any) -> Dict[str, Any]:
+    def _skill_record(self, rs: Ruleset, skill: Any,
+                      *, with_tier: bool = False) -> Dict[str, Any]:
+        """技能记录。
+
+        2026-09-22（C3-a：第 118 轮回退之后的**附加式**重做）：
+        冻结数据里的 `effect_support` 是一刀切旧标记（实测 579 个进覆盖统计的技能全是
+        `unsupported`，连纯伤害技能也是），拿它当判据会一律报「未核验/未实现」；
+        逐技能的真实档位来自唯一分类器 `coverage.classify_skill`。
+
+        **但默认回执一个键都不加**：Agent 的工具回执被钉死的轨迹摘要比着，多一个键就变，
+        那等于悄悄改了模型看到的东西。所以档位只在调用方**显式索要**（`with_tier=True`）时才带出来。
+        """
         resolved = skill.effect_support == "supported"
-        return {
+        out = {
             "record": "skill",
             "skill_id": skill.skill_id,
             "name": skill.name,
@@ -749,6 +761,13 @@ class RocoService:
                 else "效果原语尚未核验/实现（skills.json 的 effect_support = unsupported）",
             },
         }
+        if with_tier:
+            # 逐技能的真实档位（唯一分类器）；只在显式索要时附加，默认回执不含这三个键。
+            tier = classify_skill(skill, multi_hit_declared=True)
+            out["support_tier"] = tier["support"]
+            out["support_why"] = tier["why"]
+            out["support_unparsed"] = list(tier.get("unparsed") or [])
+        return out
 
     def _answer_skill(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
         ref = query.get("skill_id") or query.get("id")
@@ -766,7 +785,8 @@ class RocoService:
         else:
             return _bad_request("查技能需要 skill_id / id 或 name")
 
-        record = self._skill_record(rs, skill)
+        # 只有显式 `with_tier: true` 才带档位；默认回执保持逐字不变（轨迹摘要钉着它）。
+        record = self._skill_record(rs, skill, with_tier=query.get("with_tier") is True)
         answer = Answer(
             result=record,
             evidence_ids=[ev(rs.ruleset_id, "skills.json", skill.skill_id)],

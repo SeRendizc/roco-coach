@@ -218,3 +218,23 @@ test('RC-101 规则配置：两个配置的字段 diff 与台账结论一致（c
     }
   }
 });
+
+// ─────────────────────────────────────────────────────────────────────────
+// C3-a（附加式）：技能档位**只在显式索要时**出现。
+//
+// 行为由 Python 侧两条判据覆盖（`roco/tests/test_effect_coverage.py` 的
+// `SkillTierOptInTest`：默认回执不带档位键、索要时档位等于唯一分类器）。
+// 这一条只钉**客户端入口**：要档位必须走 `skillTier()`，普通 `skill()` 不许偷偷带上 ——
+// 默认技能回执被钉死的 Agent 轨迹摘要比着，多一个键就等于改了模型看到的东西。
+// （第一版这里连的是 Node 服务、而 `RocoClient` 连的是 Python 服务，于是拿到了契约错误；
+//   真正跑一次要起 Python 服务，那个成本不值得 —— 行为已经在 Python 侧量过了。）
+// ─────────────────────────────────────────────────────────────────────────
+test('C3-a 技能档位是 opt-in：只有 skillTier() 带 with_tier，普通 skill() 不带', () => {
+  const src = readFileSync(join(ROOT, 'src', 'coach', 'roco-client.js'), 'utf8');
+  assert.match(src, /async skillTier\(/, '要有显式索要档位的入口 skillTier()');
+  assert.match(src, /with_tier: true/, 'skillTier() 必须显式带 with_tier: true');
+  // 切到**下一个方法**为止（`skillTier` 就在 `skill()` 后面，别把它一起切进来）。
+  const skillBody = src.slice(src.indexOf('async skill('), src.indexOf('async skillTier('));
+  assert.ok(!/with_tier/.test(skillBody),
+    '普通 skill() 不许带 with_tier（默认回执的键集被钉死的轨迹摘要比着）');
+});
