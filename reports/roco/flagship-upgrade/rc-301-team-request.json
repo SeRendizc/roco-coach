@@ -46,6 +46,7 @@
       "must_exclude",
       "locked",
       "selected",
+      "analysis_species",
       "max_replacements",
       "favourites_only",
       "preference",
@@ -146,6 +147,18 @@
         "default_reason": null,
         "derived_from": null,
         "semantics": "已经选进队伍槽位的实例（0～team_size 个）。RC-303 的渐进推荐以它为基础补全。"
+      },
+      {
+        "name": "analysis_species",
+        "kind": "species-id-list",
+        "required": false,
+        "enum": null,
+        "enum_source": "pack 的 pet species_id（**不要求拥有**）",
+        "known_keys": null,
+        "default": [],
+        "default_reason": null,
+        "derived_from": null,
+        "semantics": "理论阵容：用来做搭配分析与比较的**物种**列表（0～team_size 个，不重复）。与 selected 的区别是**能不能出战**：selected 只收你拥有的个体，这一份可以放整本图鉴里的物种。它不出战、不参与开局队伍，只喂给缺口诊断与搭配分析——「我想看看这套搭起来怎么样」与「我要带这六只打」是两件不同的事，混在一个列表里会让「我把图鉴条目塞进 selected」变成一次静默的语义替换。"
       },
       {
         "name": "max_replacements",
@@ -325,6 +338,16 @@
       "detail": "报出两个数"
     },
     {
+      "code": "DUPLICATE_ANALYSIS_SPECIES",
+      "direction": "理论阵容里同一个物种出现两次必须判红（同一只不能占两个槽位）",
+      "detail": "点名那个物种"
+    },
+    {
+      "code": "ANALYSIS_OVER_TEAM_SIZE",
+      "direction": "理论阵容超过 team_size 必须判红",
+      "detail": "报出两个数"
+    },
+    {
       "code": "SELECTED_HAS_EXCLUDED",
       "direction": "selected 里出现 must_exclude 条目必须判红",
       "detail": "报出被排除的那项"
@@ -451,6 +474,7 @@
       "must_exclude",
       "locked",
       "selected",
+      "analysis_species",
       "max_replacements",
       "favourites_only",
       "preference",
@@ -857,8 +881,8 @@
     {
       "id": "C01",
       "text": "合同字段表覆盖 REQUEST_FIELDS 的每一个字段，且每个字段都有 kind / semantics 与可追溯的默认/推导说明",
-      "expected": "13",
-      "actual": "13",
+      "expected": "14",
+      "actual": "14",
       "ok": true,
       "actual_output": [
         "mode:enum-registry-id（默认来自：13 号设计文档 §2：核心模式是标准化六宠 P…）",
@@ -868,6 +892,7 @@
         "must_exclude:reference-list",
         "locked:instance-id-list",
         "selected:instance-id-list",
+        "analysis_species:species-id-list",
         "max_replacements:non-negative-integer",
         "favourites_only:boolean",
         "preference:enum-optional",
@@ -883,7 +908,7 @@
       "actual": "UNKNOWN_FIELD",
       "ok": true,
       "actual_output": [
-        "[UNKNOWN_FIELD] selected_pets：合同没有登记这个字段：它不会被采纳，也不会被忽略——请改用 mode / team_size / visibility / must_include / must_exclude / locked / selected / max_replacements / favourites_only / preference / ruleset_config_id / opponent_roster / constraints 之一（实际值 [\"own-0001\"]）"
+        "[UNKNOWN_FIELD] selected_pets：合同没有登记这个字段：它不会被采纳，也不会被忽略——请改用 mode / team_size / visibility / must_include / must_exclude / locked / selected / analysis_species / max_replacements / favourites_only / preference / ruleset_config_id / opponent_roster / constraints 之一（实际值 [\"own-0001\"]）"
       ]
     },
     {
@@ -1198,6 +1223,7 @@
         "must_exclude",
         "locked",
         "selected",
+        "analysis_species",
         "max_replacements",
         "favourites_only",
         "preference",

@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T04:56:02.160Z",
+ "judged_at": "2026-09-22T05:00:05.854Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -77,13 +77,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=100 full_ms=27 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=98 full_ms=24 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=23 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=21 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -161,7 +161,7 @@
    "id": "20-玩家层载荷",
    "judge": "路由的 player 段里没有工程键，也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 4958 字节"
+   "actual": "扫过 6126 字节"
   },
   {
    "id": "21-机制行上卡",
@@ -203,7 +203,7 @@
    "id": "25-非法参数(zzz)",
    "judge": "「zzz=1」必须 HTTP 400 + ok:false 并点名 zzz",
    "ok": true,
-   "actual": "HTTP 400 error=「未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/favourites_only/max_replacements/stage）」"
+   "actual": "HTTP 400 error=「未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/analysis_species/favourites_only/max_replacements/stage）」"
   },
   {
    "id": "25-非法参数(max_replacements)",
@@ -530,14 +530,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "100",
-    "fullMs": "27",
+    "firstMs": "98",
+    "fullMs": "24",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "23"
+    "elapsedMs": "21"
    },
    "dom": {
     "slotNodes": 6,
@@ -584,13 +584,13 @@
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
     "firstMs": "24",
-    "fullMs": "20",
+    "fullMs": "22",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "16"
+    "elapsedMs": "18"
    },
    "dom": {
     "slotNodes": 6,
@@ -840,14 +840,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "13",
+    "firstMs": "15",
+    "fullMs": "14",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "8"
+    "elapsedMs": "9"
    },
    "dom": {
     "slotNodes": 6,
@@ -951,7 +951,7 @@
    "rows": [
     "selected=own-0001,own-0002,own-0003,own-0004,own-0005,own-00 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）\",\"problems\":",
     "mode=zzz → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3",
-    "zzz=1 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/favourites_only/",
+    "zzz=1 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/analysis_species",
     "max_replacements=abc → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"max_replacements 必须是非负整数（实际 \\\"abc\\\"）\",\"problems\":[\"max_replacements 必须是非负整数（",
     "favourites_only=yes → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"favourites_only 只能是 true 或 false（实际 \\\"yes\\\"）\",\"problems\":[\"favourites_only 只",
     "selected=pet_000012 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000012）\",\"problems\":[\"selected ",
@@ -977,14 +977,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "23",
-    "fullMs": "19",
+    "firstMs": "22",
+    "fullMs": "20",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "15"
+    "elapsedMs": "16"
    },
    "dom": {
     "slotNodes": 6,

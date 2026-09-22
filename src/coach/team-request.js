@@ -123,6 +123,18 @@ export const REQUEST_FIELDS = Object.freeze([
     default: [],
   }),
   Object.freeze({
+    name: 'analysis_species',
+    kind: 'species-id-list',
+    required: false,
+    enumSource: 'pack 的 pet species_id（**不要求拥有**）',
+    semantics: '理论阵容：用来做搭配分析与比较的**物种**列表（0～team_size 个，不重复）。'
+      + '与 selected 的区别是**能不能出战**：selected 只收你拥有的个体，这一份可以放整本图鉴里的物种。'
+      + '它不出战、不参与开局队伍，只喂给缺口诊断与搭配分析——'
+      + '「我想看看这套搭起来怎么样」与「我要带这六只打」是两件不同的事，混在一个列表里会让'
+      + '「我把图鉴条目塞进 selected」变成一次静默的语义替换。',
+    default: [],
+  }),
+  Object.freeze({
     name: 'max_replacements',
     kind: 'non-negative-integer',
     required: false,
@@ -203,6 +215,8 @@ export const ERROR_CODES = Object.freeze([
   Object.freeze({code: 'FAVOURITES_ONLY_EMPTY_POOL', direction: 'favourites_only=true 但 owned 里一只是收藏都没有（空池不可满足）必须判红', detail: '不许当成可满足'}),
   Object.freeze({code: 'MUST_INCLUDE_EXCLUDE_OVERLAP', direction: 'must_include 与 must_exclude 有交集必须判红', detail: '报出交集'}),
   Object.freeze({code: 'SELECTED_OVER_TEAM_SIZE', direction: 'selected 超过 team_size 个槽位必须判红', detail: '报出两个数'}),
+  Object.freeze({code: 'DUPLICATE_ANALYSIS_SPECIES', direction: '理论阵容里同一个物种出现两次必须判红（同一只不能占两个槽位）', detail: '点名那个物种'}),
+  Object.freeze({code: 'ANALYSIS_OVER_TEAM_SIZE', direction: '理论阵容超过 team_size 必须判红', detail: '报出两个数'}),
   Object.freeze({code: 'SELECTED_HAS_EXCLUDED', direction: 'selected 里出现 must_exclude 条目必须判红', detail: '报出被排除的那项'}),
   Object.freeze({code: 'MUST_INCLUDE_HAS_UNOWNED_SPECIES', direction: 'favourites_only=true 时 must_include 里出现未拥有/非收藏的 species_id 必须判红', detail: '报出该项'}),
   Object.freeze({code: 'LOCKED_FAVOURITES_ONLY_CONFLICT', direction: 'favourites_only=true 但 must_include/locked 里一只收藏都没有，约束不可同时满足时必须判红', detail: '不许当成可满足'}),
@@ -529,6 +543,32 @@ export function validateRecommendationRequest(raw, {owned, pack, modes, rulesets
       return resolved;
     });
   }
+  // ⑧b 理论阵容（analysis_species）：物种级、**不要求拥有**，但必须真实存在且不重复。
+  // 这一条的失败信息要能告诉玩家「缺的是这一只的资料」而不是「你不该选它」。
+  if (Array.isArray(clean.analysis_species)) {
+    const seenSpecies = new Set();
+    references.analysis_species = clean.analysis_species.map((value) => {
+      const resolved = resolveReference(registry, value);
+      if (!resolved) {
+        problems.push(problem('UNKNOWN_SPECIES_ID', 'analysis_species',
+          `理论阵容里的 ${JSON.stringify(value)} 在图鉴里查不到——不许猜`, value));
+      } else if (resolved.kind !== 'species') {
+        problems.push(problem('UNKNOWN_SPECIES_ID', 'analysis_species',
+          `理论阵容要的是物种（species_id），${JSON.stringify(value)} 是个体实例`, value));
+      } else if (seenSpecies.has(resolved.species_id)) {
+        problems.push(problem('DUPLICATE_ANALYSIS_SPECIES', 'analysis_species',
+          `理论阵容里 ${JSON.stringify(resolved.species_id)} 出现了两次：同一只不能占两个槽位`, value));
+      } else {
+        seenSpecies.add(resolved.species_id);
+      }
+      return resolved;
+    });
+    if (Number.isInteger(clean.team_size) && clean.analysis_species.length > clean.team_size) {
+      problems.push(problem('ANALYSIS_OVER_TEAM_SIZE', 'analysis_species',
+        `理论阵容最多 ${clean.team_size} 只，给了 ${clean.analysis_species.length} 只`));
+    }
+  }
+
   // ⑨ locked ⊆ must_include ∪ selected
   if (Array.isArray(clean.locked)) {
     const allows = new Set([...(clean.must_include ?? []), ...(clean.selected ?? [])]);

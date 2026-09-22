@@ -126,8 +126,11 @@ test('接线：mountTeamWorkshop 的导出签名与徽记常量是稳定契约',
   // 参数白名单：多一个键就是 400，所以这份清单是契约。
   // RC-306 接线加了 `stage`（`first` 只给初判、`full` 给完整解释）——它是**交付参数**，
   // 不是 RC-301 的组队字段，所以它单独落在白名单里、并且**不许**进组队 draft（有专门判据）。
+  // 2026-09-22（人类 P0）：新增 `analysis_species` —— **理论阵容**（物种级、不要求拥有）。
+  // 它与 `selected`（持有实例、能正式开局）是两份清单，语义不同，所以是两个键。
   assert.deepEqual([...WORKSHOP_PARAM_KEYS],
-    ['mode', 'selected', 'locked', 'must_include', 'must_exclude', 'favourites_only', 'max_replacements', 'stage']);
+    ['mode', 'selected', 'locked', 'must_include', 'must_exclude', 'analysis_species',
+      'favourites_only', 'max_replacements', 'stage']);
   assert.deepEqual([...WORKSHOP_STAGES], ['first', 'full']);
   log('[实际] 徽记 =', JSON.stringify(TEAM_WORKSHOP_BADGES));
   log('[实际] 参数白名单 =', WORKSHOP_PARAM_KEYS.join('/'));

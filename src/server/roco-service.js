@@ -675,7 +675,7 @@ export const WORKSHOP_BADGES=Object.freeze({
 
 /** 工坊的查询参数白名单。多一个键就是 400（不静默忽略拼错的参数）。 */
 export const WORKSHOP_PARAM_KEYS=Object.freeze(['mode','selected','locked','must_include',
- 'must_exclude','favourites_only','max_replacements','stage']);
+ 'must_exclude','analysis_species','favourites_only','max_replacements','stage']);
 
 /**
  * 分段交付（RC-306 接线）：`stage=first` 只算「初判」要的那几段，`stage=full`（默认）算完整解释。
@@ -699,6 +699,10 @@ const WORKSHOP_TRADEOFF_LABELS=Object.freeze({strength:'强度',stability:'稳�
 /** 参数值 → RC-301 请求字段的形状。`selected` / `locked` 只认 owned 的实例 id。 */
 const WORKSHOP_LIST_KEYS=Object.freeze({
  selected:{pattern:/^own-\d{4}$/,hint:'own-0001 形状的个体'},
+ // 理论阵容（2026-09-22 人类 P0）：**物种级、不要求拥有** —— 全图鉴都能进来说搭配。
+ // 与 `selected` 分开是刻意的：一个是「我要带这六只打」，一个是「我想看看这套配起来怎么样」。
+ // 混成一个列表会让「把图鉴条目塞进 selected」变成一次静默的语义替换（用户实测就是这么被拒的）。
+ analysis_species:{pattern:/^pet_\d{6}$/,hint:'pet_000000 形状的物种'},
  locked:{pattern:/^own-\d{4}$/,hint:'own-0001 形状的个体'},
  must_include:{pattern:/^(own-\d{4}|pet_\d{6})$/,hint:'own-0001 或 pet_000000 形状'},
  must_exclude:{pattern:/^(own-\d{4}|pet_\d{6})$/,hint:'own-0001 或 pet_000000 形状'},
@@ -1035,6 +1039,9 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
  }
 
  return {index,selectedCount,teamId,gapsByTeam,gapsError,facts,teamMembers,
+  // `request` 也带上：理论阵容（analysis_species）要按 RC-301 校验后的**标准化**请求读，
+  // 而不是各处自己再解析一遍原始查询串（那会有第二个事实源）。
+  request,
   gapDimensionNotes:gapNotes.notes,unknownDimensionNotes:gapNotes.unknowns,
   candidates,nextCandidates,
   entranceCandidates,axes,axesStatus,replacement,constraints,structureNote,selectionMode};
@@ -1199,6 +1206,58 @@ function workshopPlayerView(indexRef,computed){
    replacement_unavailable_note:replacement&&!replacement.replacement?(replacement.why??null):null,
   };
  }
+  // ── 理论阵容（2026-09-22 人类 P0）：物种级，**不出战**，喂给搭配分析 ──────────────
+  // 为什么单独一块：用户实测「从 622 图鉴挑了一只，选到第六槽才被告知不能开局」。
+  // 根因不是引擎（RC-402：622 = 48 冻结 + 574 按需推算，**引擎两种都收**），
+  // 而是把「想看看这套搭起来怎么样」塞进了「我要带这六只打」那一个列表里。
+  // 现在两份清单并存，语义各自写在标签上：
+  //   · `slots`（selected）        = 你**拥有**的个体 → 能正式开局；
+  //   · `analysis_slots`（新增）    = 任意物种        → 能配队/比较/分析，**不出战**。
+  // RC-301 校验后的 `analysis_species` 元素是 `{kind:'species', species_id}`（见 normalise 的 references）。
+  // 兼容两种形状（已解析的引用 / 原始字符串），因为这条路径同时被 `first` 与 `full` 两段用到。
+  const rawAnalysis=computed?.request?.analysis_species;
+  const analysisSpecies=(Array.isArray(rawAnalysis)?rawAnalysis:[])
+   .map((item)=>(typeof item==='string'?item:(item?.species_id??null)))
+   .filter(Boolean);
+  const analysisSlots=[];
+  for(let i=0;i<WORKSHOP_TEAM_SIZE;i+=1){
+   const speciesId=analysisSpecies[i]??null;
+   if(!speciesId){
+    analysisSlots.push({index:i+1,state:'empty',name:null,types:[],
+     status:null,status_label:null,can_field:false,can_trial:false,reason:null,empty_hint:'放一只图鉴物种进来说搭配'});
+    continue;
+   }
+   const feature=indexRef.featureFor(speciesId)??null;
+   const ownedInstance=[...indexRef.instances.values()].find((row)=>row.species_id===speciesId)??null;
+   const hasFrozen=feature?.has_frozen_learnset===true;
+   // 三档状态：持有（可正式上场）/ 按需推算（可试玩，未核验）/ 仅资料（不出战）
+   const status=ownedInstance?'held':(hasFrozen||feature?'on_demand':'knowledge_only');
+   const statusLabel=status==='held'?'持有 · 可正式上场'
+    :(status==='on_demand'?'图鉴 · 按需推算（可试玩，未核验）':'图鉴 · 仅资料（暂不能出战）');
+   analysisSlots.push({index:i+1,state:'filled',name:feature?.species_name??null,
+    types:Array.isArray(feature?.types)?feature.types:[],
+    status,status_label:statusLabel,
+    // 出战与试玩是**两个**判断：持有→能正式开局；按需推算→只能试玩（且必须标未核验）。
+    can_field:status==='held',can_trial:status==='held'||status==='on_demand',
+    reason:status==='knowledge_only'
+     ?'这一只连按需推算的配招都没有（RC-402 的构建表里查不到）：只能当资料参考，不能进对局。'
+     :(status==='on_demand'
+      ?'你没有这一只，引擎会用**按需推算**的配招跑它（ENGINE_HYPOTHESIS，未核验）：可以试玩，不写进正式持有队伍。'
+      :'你拥有这一只：可以进正式队伍并开局。'),
+    mechanism:rosterMechanism(mechanismIndex().get(speciesId)),
+   });
+  }
+  const filledAnalysis=analysisSlots.filter((row)=>row.state==='filled');
+  player.analysis_slots=analysisSlots;
+  player.analysis={
+   count:filledAnalysis.length,
+   remaining_slots:WORKSHOP_TEAM_SIZE-filledAnalysis.length,
+   // 能不能按理论阵容**试玩**：每只都得有可跑的东西（持有或按需推算）。
+   trial_ready:filledAnalysis.length===WORKSHOP_TEAM_SIZE&&filledAnalysis.every((row)=>row.can_trial===true),
+   fieldable:filledAnalysis.filter((row)=>row.can_field===true).length,
+   note:'理论阵容只用于**搭配分析与比较**（列在这里的物种不要求你拥有）。'
+    +'能不能出战按每一只的状态单独判断：持有 → 可正式开局；图鉴按需推算 → 只能试玩，且逐条标未核验。',
+  };
  return player;
 }
 
