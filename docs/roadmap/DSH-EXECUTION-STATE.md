@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `054b51e`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `d9f8188`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2364,3 +2364,11 @@ diff `git status`，用来抓「产物里有易变字段」。但同一次 `veri
 **这正是我前几轮多次记为「满载偶发」的现象的真实根因** —— 不是负载，是**套件间产物互相踩**。
 **下一步修法**：那条确定性判据只 diff **它自己产出的文件**（或用白名单排除其它套件的报告），
 而不是 diff 整个 `git status`。修完再跑门禁应当稳定全绿。
+
+### C6.55 第 131 轮：那条「偶发红」修掉了 —— 门禁 22/22 稳定全绿
+
+根因（第 130 轮定位、本轮修）：`roco/tests/test_microcase_harness.py` 的确定性判据除了逐字节比对**自己的产物**（对），还 diff 了**整棵工作树**；而 `verify-release` 在同一时间窗口里还会跑别的套件（浏览器验收会改写自己的报告），那些正常更新被算成了「本套件产物里有易变字段」。
+
+修法：把「新增脏文件」这条收窄到**本套件产出目录**（`reports/roco/microcases/` 等），`produced` 的 sha256 逐字节比对**一字未放松**（那才是真正抓易变字段的判据）。
+
+结果：`node scripts/roco/verify-release.mjs` → **pass（22 套件）**；`test:env` 417 OK；`test:unit` 1002/1002；派生链 5/5。开局 10 星（用户实机核对）随之全链落地。

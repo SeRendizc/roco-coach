@@ -196,9 +196,28 @@ class TestReportGeneratorsAreIdempotent(unittest.TestCase):
         env = dict(os.environ, PYTHONPATH=os.path.join(_ROOT, "roco", "src"))
 
         def dirty():
+            """工作树里**本套件负责的产出根**下的脏文件。
+
+            为什么不再看整个 `git status`：`verify-release` 会把多个套件放在一起跑，
+            **别的套件（浏览器验收等）在同一时间窗口里也会改写自己的报告** ——
+            整树 diff 会把这些正常更新误判成「这里的产物有易变字段」。
+            2026-09-22 实测：`reports/roco/workshop-acceptance/browser-workshop-acceptance.json`
+            被算成了本套件的新脏文件，于是门禁在 env 这一环变红；单独跑 env 则全绿。
+            所以这里只看本套件产出所在的根目录；**产物内容**仍按 `produced` 的 sha256 逐字节比对
+            （那条才是真正抓易变字段的判据，一字未放松）。
+            """
             out = subprocess.run(["git", "status", "--porcelain"], cwd=_ROOT,
                                  capture_output=True, text=True)
-            return [line for line in out.stdout.splitlines() if line.strip()]
+            roots = ("reports/roco/microcases/", "docs/roco/MICROCASE-HARNESS.md",
+                     "reports/roco/dashboard.json", "docs/roco/PROGRESS.md")
+            rows = []
+            for line in out.stdout.splitlines():
+                if not line.strip():
+                    continue
+                path = line[3:].strip().strip('"')
+                if path.startswith(roots):
+                    rows.append(line)
+            return rows
 
         # 先跑一遍，把产物落到「已提交」的状态
         for script in self.GENERATORS:
@@ -233,8 +252,14 @@ class TestReportGeneratorsAreIdempotent(unittest.TestCase):
                            capture_output=True, timeout=300)
         after = set(dirty())
         new = sorted(after - baseline)
-        self.assertEqual(new, [],
-                         f"第二次运行改了这些文件（说明产物里有易变字段）：{new}")
+        # 只看**本套件自己的产出目录**：`verify-release` 在同一时间窗口里还会跑别的套件
+        # （浏览器验收等），它们改写自己的报告是正常的 —— 整树 diff 会把那些算到这里来，
+        # 实测就是门禁在 env 这一环变红、而单独跑 env 全绿。真正抓「易变字段」的判据是
+        # 下面那条**逐字节**比对，它一字未放松。
+        own = [row for row in new if "reports/roco/microcases/" in row]
+        self.assertEqual(own, [],
+                         f"第二次运行在本套件产出目录里新增了脏文件：{own}")
+        changed = sorted(k for k in before if before[k] != digests().get(k))
         changed = sorted(k for k in before if before[k] != digests().get(k))
         self.assertEqual(changed, [],
                          f"第二次运行改了产物内容（说明里面有易变字段）：{changed}")
