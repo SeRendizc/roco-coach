@@ -1,6 +1,6 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-22T06:39:09.661Z",
+ "generated_at": "2026-09-22T07:18:04.737Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [
@@ -99,9 +99,9 @@
   },
   {
    "id": "D4-groups",
-   "name": "行动坞分组逐项等于引擎动作表（该 kind 的可见条数 + 被模式隐藏的条数 === 引擎条数）",
+   "name": "行动区结构等于规格：技能为主区（≤4 张卡）、聚能/换精灵/投降各自独立入口、换人列表条数等于引擎给的换人数、道具与逃跑不渲染、被模式隐藏的仍如实记账",
    "ok": true,
-   "actual": "引擎 8 个动作 {\"skill\":2,\"switch\":2,\"item\":3,\"escape\":1}；页面分组 skill:2,switch:2（可见 4 + 隐藏 4）；逐 kind：skill 引擎2/页面2，item 引擎3/页面0，switch 引擎2/页面2，escape 引擎1/页面0；隐藏说明「按当前模式（候选规则）隐藏了 4 个旧引擎动作：item、escape。引擎需按」"
+   "actual": "引擎账 {\"skill\":2,\"switch\":2,\"item\":3,\"escape\":1}；页面渲染 [\"skill\",\"switch\"]；技能卡 2 聚能 no 换精灵 yes（列表 2）投降 no；隐藏 4 条"
   },
   {
    "id": "D4-skill-info",
@@ -119,7 +119,7 @@
    "id": "D4-clickable",
    "name": "每个可点动作条的高度 ≥44px（触屏点得到）",
    "ok": true,
-   "actual": "4 个动作条，最矮 53px；<44px 的有 0 个"
+   "actual": "2 个动作条，最矮 71px；<44px 的有 0 个"
   },
   {
    "id": "D4-narrow-safe-1440",
@@ -137,13 +137,13 @@
    "id": "P0-7-390-tap",
    "name": "390×844 下每个动作条高度 ≥44px",
    "ok": true,
-   "actual": "4 个动作条，最矮 56px"
+   "actual": "2 个动作条，最矮 71px"
   },
   {
    "id": "P0-2-390-same-screen",
    "name": "390×844 下输入框与最近一句回复仍在首屏",
    "ok": true,
-   "actual": "输入 {\"top\":522,\"bottom\":566,\"left\":23,\"right\":288} / 回复 {\"top\":373,\"bottom\":408,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 253px 动作坞 {\"top\":591,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
+   "actual": "输入 {\"top\":528,\"bottom\":572,\"left\":23,\"right\":288} / 回复 {\"top\":379,\"bottom\":414,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 247px 动作坞 {\"top\":597,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
   },
   {
    "id": "P0-6-top",
@@ -233,7 +233,7 @@
    "id": "RC502-防御冷却画在自己卡上",
    "name": "真鼠标点「防御」（必要时先换上带防御的那只）：自己卡上出现防御冷却，数字与引擎一致",
    "ok": true,
-   "actual": "引擎 {\"turn\":4,\"active\":1,\"present\":true,\"name\":\"雪影娃娃\",\"value\":2}；页面那一行「防御冷却 2」；过程 [{\"attempt\":0,\"act\":\"swap\",\"turn\":2,\"active\":\"幽星光\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"换上第2位 · 雪影娃娃\",\"换上第3位 · 喵喵\"]},{\"attempt\":1,\"act\":\"defend\",\"turn\":3,\"active\":\"雪影娃娃\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"防御\",\"啮合传递\",\"风吹雪\",\"换上第1位 · 幽星光\",\"换上第3位 · 喵喵\"]}]"
+   "actual": "引擎 {\"turn\":4,\"active\":1,\"present\":true,\"name\":\"雪影娃娃\",\"value\":2}；页面那一行「防御冷却 2」；过程 [{\"attempt\":0,\"act\":\"no-cards\",\"turn\":2,\"active\":\"幽星光\",\"defenders\":[],\"labels\":[]},{\"attempt\":1,\"act\":\"defend\",\"turn\":3,\"active\":\"雪影娃娃\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"防御\",\"啮合传递\",\"风吹雪\"]}]"
   },
   {
    "id": "RC502-场上事实不撑破版面",
@@ -355,16 +355,6 @@
      "k": "skill",
      "w": 420,
      "h": 71
-    },
-    {
-     "k": "switch",
-     "w": 420,
-     "h": 53
-    },
-    {
-     "k": "switch",
-     "w": 420,
-     "h": 53
     }
    ],
    "narrow": [
@@ -377,16 +367,6 @@
      "k": "skill",
      "w": 179,
      "h": 71
-    },
-    {
-     "k": "switch",
-     "w": 179,
-     "h": 56
-    },
-    {
-     "k": "switch",
-     "w": 179,
-     "h": 56
     }
    ]
   },
@@ -437,26 +417,26 @@
      "height": 844
     },
     "card": {
-     "top": 332,
-     "bottom": 577,
+     "top": 338,
+     "bottom": 583,
      "left": 10,
      "right": 380
     },
     "form": {
-     "top": 522,
-     "bottom": 566,
+     "top": 528,
+     "bottom": 572,
      "left": 23,
      "right": 367
     },
     "input": {
-     "top": 522,
-     "bottom": 566,
+     "top": 528,
+     "bottom": 572,
      "left": 23,
      "right": 288
     },
     "reply": {
-     "top": 373,
-     "bottom": 408,
+     "top": 379,
+     "bottom": 414,
      "left": 23,
      "right": 367
     },
@@ -464,10 +444,10 @@
     "inputInView": true,
     "replyInView": true,
     "formInView": true,
-    "bottombar": 253,
+    "bottombar": 247,
     "actionCap": 253,
     "actionPanel": {
-     "top": 591,
+     "top": 597,
      "bottom": 844,
      "left": 0,
      "right": 390
@@ -484,11 +464,6 @@
    {
     "id": "skill",
     "title": "技能",
-    "count": 2
-   },
-   {
-    "id": "switch",
-    "title": "换精灵",
     "count": 2
    }
   ],

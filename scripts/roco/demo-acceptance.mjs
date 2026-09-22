@@ -1383,8 +1383,10 @@ async function main(){
   startDisabled===false&&battlefield.battleVisible&&battlefield.selectHidden===true
   &&battlefield.briefHidden===false&&battlefield.reopen===true,
   `开局按钮可用=${startDisabled===false}；阵容池收起=${battlefield.selectHidden}；摘要「${battlefield.brief}」`);
- check('对战页中央是双方当前宠物的战斗舞台，后备压成小条',
-  battlefield.stageActive===2&&battlefield.selfBench===2&&battlefield.foeBench===2,
+ // 2026-09-22（人类规格 · 对手信息按 public view）：对手后备**不放一串「第 N 位」占位**，
+ // 只写还剩几只（上场才亮明）。所以这里量「我方后备是小条」+「对手后备是一条说明」。
+ check('对战页中央是双方当前宠物的战斗舞台，后备压成小条（对手只写还剩几只）',
+  battlefield.stageActive===2&&battlefield.selfBench===2&&battlefield.foeBench>=1,
   `舞台上 ${battlefield.stageActive} 只 / 我方后备 ${battlefield.selfBench} 条 / 对手后备 ${battlefield.foeBench} 条`);
  check('合法动作固定在底部且一屏可点（动作栏底边贴着视口底）',
   battlefield.actions>0&&battlefield.actionFixed==='fixed'
@@ -1545,7 +1547,9 @@ async function main(){
  await js('window.rocoDemo.render()');
  const battleRestored=await battleCardScan();
  check('① 对战页的宠物卡与后备条上也没有占位文案（这是「未知」原来反复出现的地方）',
-  battleCards.cards===6&&battleCards.hit===null,
+  // 2026-09-22：对手后备由「N 条占位」改成**一条**说明，卡片总数从 6 变 5；
+  // 这条判据真正要守的是「卡片上不出现占位文案」（`hit===null`），数量只要够覆盖舞台+后备。
+  battleCards.cards>=5&&battleCards.hit===null,
   battleCards.hit?`命中 ${JSON.stringify(battleCards)}`
    :`扫过 ${battleCards.cards} 张卡；片段「${battleCards.sample}」`);
  check('① 反证：把「状态未知」塞回一条后备，同一个检查器必须抓住',

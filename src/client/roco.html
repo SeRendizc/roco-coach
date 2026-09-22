@@ -230,6 +230,9 @@
   </article>
  </div>
 
+ <!-- 最新一条战斗事件（战斗主视线只留这一条；完整战报在下面的折叠里独立滚动） -->
+ <p class="last-event" id="last-event" aria-live="polite"></p>
+
  <div class="bench-row">
   <div class="bench-col"><span class="muted bench-label">我方后备</span><div id="self-bench" class="bench"></div></div>
   <div class="bench-col"><span class="muted bench-label">对手后备</span><div id="foe-bench" class="bench"></div></div>
@@ -244,7 +247,7 @@
 
 <!-- 战斗记录：不抢主视线（最多 6 行、可滚动）；原始 JSON 收在默认折叠区里。 -->
 <section class="panel log-panel" id="log-panel" hidden>
- <div class="section-title"><h2>这一回合发生了什么</h2></div>
+ <div class="section-title"><h2>战报（整局事件，独立滚动）</h2></div>
  <div id="events" class="events"></div>
  <details class="dev">
   <summary>调试信息（引擎原始事件，默认收起）</summary>
@@ -255,7 +258,16 @@
 <!-- ── 底栏：合法动作**按引擎 kind 分组**固定在这里，一屏可点 ──────────────── -->
 <section class="panel action-panel" id="action-panel" hidden>
  <span class="muted" id="action-hint">开一局后这里会出现可执行的动作</span>
+ <!-- 2026-09-22 战斗页规格（人类）：技能是**主区**（最多四张卡一屏完整显示名字/类型/消耗/关键效果）；
+      聚能 / 换精灵 / 投降各自**独立入口**（聚能不归入技能）；只渲染引擎本回合给的合法动作。 -->
  <div id="actions" class="actions"></div>
+ <div class="act-side" id="act-side">
+  <button class="act-side-btn" id="act-charge" data-side-action="charge" hidden>聚能</button>
+  <button class="act-side-btn" id="act-switch" data-side-action="switch" hidden
+    aria-expanded="false">换精灵</button>
+  <button class="act-side-btn secondary" id="act-surrender" data-side-action="surrender" hidden>投降</button>
+ </div>
+ <div class="act-switch-list" id="act-switch-list" hidden></div>
 </section>
 
 <!-- ── 小芽（陪练 / 军师）：重排后的浮条；输入与最近一句回复**同屏可见** ───────

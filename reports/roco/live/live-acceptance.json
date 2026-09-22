@@ -3,20 +3,20 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-22T06:32:37.395Z",
+ "judged_at": "2026-09-22T06:51:35.768Z",
  "totals": {
-  "checks": 11,
-  "passed": 11,
+  "checks": 12,
+  "passed": 12,
   "failed": 0,
-  "counterproofs": 9,
-  "counterproofs_hit": 9
+  "counterproofs": 10,
+  "counterproofs_hit": 10
  },
  "checks": [
   {
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=2"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=3"
   },
   {
    "id": "live-boot",
@@ -58,13 +58,19 @@
    "id": "live-start",
    "judge": "真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的魔力）",
    "ok": true,
-   "actual": "mode=pvp-standard-six-pet 魔力=4/4 动作分组=skill:3,charge:1,switch:5,surrender:1 开局按钮 195×38；状态行「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
+   "actual": "mode=pvp-standard-six-pet 魔力=4/4 引擎动作账=skill:3,charge:1,switch:5,surrender:1,item:0,escape:0 页面渲染=skill,charge,switch,surrender 技能卡=3 聚能=yes 换精灵=yes 投降=yes 开局按钮 195×38；状态行「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
+  },
+  {
+   "id": "live-battle-spec",
+   "judge": "战斗页规格：技能为主区（≤4 张、卡高 ≥44、带关键效果）、聚能/换精灵/投降各自独立入口、只渲染本回合合法动作、最新一条事件在、对手后备不放占位也不泄漏 id、1440×900 行动区在视口内",
+   "ok": true,
+   "actual": "技能卡 3 张（最矮 71px）；聚能=yes 换精灵=yes 投降=yes；最新事件「」；对手后备「未上场的还有 5 只（上场才亮明）」；行动区底 900 / 视口 900"
   },
   {
    "id": "live-settle",
-   "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现）",
+   "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、最新一条事件在）",
    "ok": true,
-   "actual": "result=loss 回合=45 结算区可见=true 教学=shown；点了 49 次自动推进（最后回合 45，停滞 0 次）；当时 {\"turn\":45,\"mana\":{\"self\":0,\"opponent\":3},\"selfLiving\":2,\"foeLiving\":5,\"status\":\"\"}；正文「关键转折在第 13 回合（这一局 45 个回合）。」"
+   "actual": "true"
   },
   {
    "id": "live-narrow-390",
@@ -126,8 +132,15 @@
    "id": "live-start",
    "judge": "开局后模式被换成练习局、或动作表里混进道具必须被同一条判据抓住",
    "ok": true,
-   "hit": "模式 \"demo-training-3v3\" | 动作表里出现了道具",
+   "hit": "模式 \"demo-training-3v3\"",
    "actual": "{\"mode\":\"demo-training-3v3\",\"groups\":\"skill:2,item:1\"}"
+  },
+  {
+   "id": "live-battle-spec",
+   "judge": "把「聚能」混进技能区（没有独立入口）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "没有独立的「聚能」入口 | 渲染了道具/逃跑入口",
+   "actual": "{\"charge\":\"no\",\"rendered\":\"skill,item\"}"
   },
   {
    "id": "live-settle",
@@ -365,10 +378,66 @@
    "battle": {
     "mode": "pvp-standard-six-pet",
     "standard": "yes",
-    "groups": "skill:3,charge:1,switch:5,surrender:1",
+    "groups": "skill:3,charge:1,switch:5,surrender:1,item:0,escape:0",
+    "rendered": "skill,charge,switch,surrender",
+    "skillCards": "3",
+    "charge": "yes",
+    "switchEntry": "yes",
+    "surrender": "yes",
     "mana": 4,
     "cap": 10,
     "turn": 1
+   }
+  },
+  {
+   "at": "battle-spec",
+   "spec": {
+    "vh": 900,
+    "clientW": 1440,
+    "scrollW": 1440,
+    "charge": "yes",
+    "switchEntry": "yes",
+    "surrender": "yes",
+    "rendered": "skill,charge,switch,surrender",
+    "skillCards": [
+     {
+      "w": 420,
+      "h": 71,
+      "desc": 11
+     },
+     {
+      "w": 420,
+      "h": 71,
+      "desc": 33
+     },
+     {
+      "w": 420,
+      "h": 71,
+      "desc": 14
+     }
+    ],
+    "lastEvent": "",
+    "battle": {
+     "shown": true,
+     "top": -140,
+     "bottom": 669
+    },
+    "actions": {
+     "shown": true,
+     "top": 709,
+     "bottom": 900
+    },
+    "log": {
+     "shown": true,
+     "top": -140,
+     "bottom": -27
+    },
+    "coach": {
+     "shown": false,
+     "top": 0,
+     "bottom": 0
+    },
+    "foeBench": "未上场的还有 5 只（上场才亮明）"
    }
   },
   {

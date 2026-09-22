@@ -485,20 +485,37 @@ async function main() {
     return row ? row.count : 0;
   };
   const pageVisible = actionFacts.groups.reduce((sum, g) => sum + g.count, 0);
-  const perKind = ['skill', 'item', 'switch', 'escape'].map((kind) => {
-    const engine = (actionFacts.byKind[kind] ?? 0) + (kind === 'escape' ? (actionFacts.byKind.struggle ?? 0) : 0);
-    const shown = groupCount(kind);
-    return {kind, engine, shown, diff: engine - shown};
-  });
-  const hiddenByKindOk = actionFacts.hidden === perKind.reduce((sum, r) => sum + r.diff, 0);
-  check('D4-groups', '行动坞分组逐项等于引擎动作表（该 kind 的可见条数 + 被模式隐藏的条数 === 引擎条数）',
-    perKind.every((r) => r.diff >= 0) && hiddenByKindOk
-    && pageVisible + actionFacts.hidden === actionFacts.legalCount
-    && actionFacts.groups.length > 0,
-    `引擎 ${actionFacts.legalCount} 个动作 ${JSON.stringify(actionFacts.byKind)}；`
-    + `页面分组 ${actionFacts.hook}（可见 ${pageVisible} + 隐藏 ${actionFacts.hidden}）；`
-    + `逐 kind：${perKind.map((r) => `${r.kind} 引擎${r.engine}/页面${r.shown}`).join('，')}`
-    + `；隐藏说明「${actionFacts.hiddenNote.trim().slice(0, 40)}」`);
+  // 2026-09-22（人类规格）：行动区结构变了 —— 技能是主区（≤4 张卡）、
+  // **聚能 / 换精灵 / 投降各自独立入口**（换精灵是按钮 + 列表）。所以这条判据改成
+  // 「引擎的账 vs 页面真的渲染了什么」两边对齐，而不是逐组数字面相等。
+  const rendered = String(await js(`document.body.dataset.rocoActionsRendered ?? 'none'`)).split(',').filter(Boolean);
+  const hooks = {
+    skillCards: Number(await js(`document.body.dataset.rocoActSkillCards ?? '0'`)),
+    charge: await js(`document.body.dataset.rocoActCharge ?? 'no'`),
+    switchEntry: await js(`document.body.dataset.rocoActSwitch ?? 'no'`),
+    switchList: Number(await js(`document.body.dataset.rocoActSwitchList ?? '0'`)),
+    surrender: await js(`document.body.dataset.rocoActSurrender ?? 'no'`),
+  };
+  const engineKinds = Object.keys(actionFacts.byKind).filter((k) => actionFacts.byKind[k] > 0);
+  const groupProblems = [];
+  if (!engineKinds.includes('skill') && hooks.skillCards > 0) groupProblems.push('引擎没给技能，页面却画了技能卡');
+  if (engineKinds.includes('skill') && hooks.skillCards === 0) groupProblems.push('引擎给了技能，技能主区却是空的');
+  if (hooks.skillCards > 4) groupProblems.push(`技能卡 ${hooks.skillCards} 张（最多四张）`);
+  if (hooks.charge === 'yes' && !engineKinds.includes('charge')) groupProblems.push('引擎没给聚能，页面却画了聚能入口');
+  if (engineKinds.includes('switch') && hooks.switchEntry !== 'yes') groupProblems.push('引擎给了换人，却没有独立的换精灵入口');
+  if (hooks.switchList !== (actionFacts.byKind.switch ?? 0)) {
+    groupProblems.push(`换精灵列表 ${hooks.switchList} 条，引擎换人 ${actionFacts.byKind.switch ?? 0} 个`);
+  }
+  if (rendered.includes('item') || rendered.includes('escape')) groupProblems.push('渲染了道具/逃跑入口');
+  // 模式隐藏的旧动作仍要如实记账（这条没变）
+  if (actionFacts.hidden > 0 && !/隐藏了/.test(actionFacts.hiddenNote)) groupProblems.push('被模式隐藏的动作没有如实记账');
+  check('D4-groups', '行动区结构等于规格：技能为主区（≤4 张卡）、聚能/换精灵/投降各自独立入口、'
+    + '换人列表条数等于引擎给的换人数、道具与逃跑不渲染、被模式隐藏的仍如实记账',
+    groupProblems.length === 0,
+    groupProblems.join(' | ')
+    || `引擎账 ${JSON.stringify(actionFacts.byKind)}；页面渲染 ${JSON.stringify(rendered)}；`
+      + `技能卡 ${hooks.skillCards} 聚能 ${hooks.charge} 换精灵 ${hooks.switchEntry}（列表 ${hooks.switchList}）投降 ${hooks.surrender}；`
+      + `隐藏 ${actionFacts.hidden} 条`);
   const skillCardsMissingDesc = actionFacts.cards.filter((c) => c.kind === 'skill' && c.desc.length === 0);
   check('D4-skill-info', '每个技能条都带说明文字；系别/类别/能耗/威力按引擎给的一起显示',
     actionFacts.cards.filter((c) => c.kind === 'skill').length > 0 && skillCardsMissingDesc.length === 0,
@@ -857,6 +874,8 @@ async function main() {
     // 一次扫清楚：这一手有没有防御招；没有就找一只**配招里带防御**的后备换上去。
     // 配招从公开视图自己的 `self.loadouts` 读（那是自己的信息，不是猜的）。
     const scan = await js(`(()=>{const v=window.rocoDemo.state.view;
+      // 对手补位的那一手页面**故意不渲染任何动作卡**（人类规格：那一刻不需要玩家操作），
+      // 所以扫到 0 张卡时这条判据应当等下一手，而不是判红。
       const rows=[...document.querySelectorAll('#actions button[data-action]')];
       rows.forEach((b)=>delete b.dataset.rc502);
       const labels=rows.map((b)=>({kind:b.dataset.kind,label:((b.querySelector('span')||{}).textContent||'').trim()}));
@@ -878,6 +897,14 @@ async function main() {
       if(idx>=0){rows[idx].dataset.rc502='swap';
         return {kind:'swap',labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,defenders};}
       return {kind:null,labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,defenders};})()`);
+    if (!scan.labels.length && scan.turn !== null) {
+      // 没有动作卡：先推进一手再来（这一手不需要玩家操作）
+      defendTrace.push({attempt, act: 'no-cards', turn: scan.turn, active: scan.active,
+        defenders: [], labels: []});
+      try { await mouseClick('#auto-turn'); } catch { break; }
+      await sleep(700);
+      continue;
+    }
     defendTrace.push({attempt, act: scan.kind, turn: scan.turn, active: scan.active,
       defenders: (scan.defenders || []).filter((d) => d.hasDefense).map((d) => d.name),
       labels: scan.labels.map((l) => l.label)});

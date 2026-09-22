@@ -726,12 +726,22 @@ function render() {
       ? '对手的增益不在公开视图里：引擎只给血/能量/异常/印记/冷却'
       : '';
   }
-  $('foe-bench').innerHTML = (view?.opponent?.bench ?? [])
-    .map((b) => `<div class="bench-pet ${b.fainted ? 'fainted' : ''}">`
-      + `<strong>第 ${(b.slot ?? 0) + 1} 位</strong>`
-      + (b.fainted ? '<div class="stats">已倒下</div>' : '')
-      + '</div>')
-    .join('');
+  // 对手后备：公开视图**只给位次与是否倒下**（手游里上场前不亮明）。
+  // 2026-09-22 规格：不要放一串「第 N 位」占位（那不是信息，是噪音）——只写还剩几只。
+  const foeBenchBox = $('foe-bench');
+  if (foeBenchBox) {
+    const bench = Array.isArray(view?.opponent?.bench) ? view.opponent.bench : [];
+    const alive = bench.filter((b) => b.fainted !== true).length;
+    foeBenchBox.innerHTML = view?.opponent?.field
+      ? `<div class="bench-pet">对手后备 ${alive} 只 · 上场时亮明</div>`
+      : '';
+  }
+  // 最新一条战斗事件：只留最后一条中文句子（完整战报在下面的折叠区）。
+  const lastEvent = $('last-event');
+  if (lastEvent) {
+    const texts = (state.events ?? []).filter((e) => typeof e.text === 'string' && e.text);
+    lastEvent.textContent = texts.length ? texts[texts.length - 1].text : '';
+  }
 
   // ── 行动坞：按引擎 kind 分组 ────────────────────────────────────────────
   const actions = view?.legal ?? [];
@@ -872,19 +882,76 @@ function renderActions(actions, disabled) {
     document.body.dataset.rocoActionGroups = 'error';
     return;
   }
-  const visible = grouped.groups.filter((group) => group.actions.length > 0);
-  box.innerHTML = visible.map((group) => `<section class="act-group" data-act-group="${group.id}">
-    <div class="act-group-head"><b>${group.title}</b>
-      <span class="muted">${group.actions.length} 个 · ${group.note}</span></div>
-    <div class="act-row">${group.actions.map((action) => {
-      const index = actions.indexOf(action);
-      // 换人卡补上「换上谁」：名字只从公开视图里取（没有就留空，不编）。
-      const slotName = action.kind === 'switch'
-        ? (state.view?.self?.pets?.[action.target_index]?.name ?? null) : null;
-      return actionCardHtml(action, index, {disabled, slotName});
-    }).join('')}</div>
-  </section>`).join('') || '<p class="act-none">这一手引擎没有给任何合法动作。</p>';
+  const byKind = (kind) => grouped.groups.find((g) => g.id === kind)?.actions ?? [];
+  const skills = byKind('skill').slice(0, 4);
+  const charge = byKind('charge');
+  const switches = byKind('switch');
+  const surrender = byKind('surrender');
+  const others = [...byKind('item'), ...byKind('escape')];
+
+  // 技能是**主区**：最多四张卡（引擎本回合给的技能数；超过四张时如实记下截断）。
+  box.innerHTML = skills.length
+    ? `<section class="act-group" data-act-group="skill">
+    <div class="act-group-head"><b>技能</b>
+      <span class="muted">${skills.length} 个${byKind('skill').length > 4
+        ? `（本回合引擎给了 ${byKind('skill').length} 个，先显示前 4 个）` : ''}</span></div>
+    <div class="act-row">${skills.map((action) => actionCardHtml(action, actions.indexOf(action), {disabled})).join('')}</div>
+  </section>`
+    : '<p class="act-none">这一手引擎没有给技能动作。</p>';
+  // 其余被模式允许的动作（本仓库的候选配置里只有技能/聚能/换人/投降，这里留兜底）
+  if (others.length) {
+    box.insertAdjacentHTML('beforeend', `<section class="act-group" data-act-group="other">
+      <div class="act-group-head"><b>其他动作</b></div>
+      <div class="act-row">${others.map((a) => actionCardHtml(a, actions.indexOf(a), {disabled})).join('')}</div>
+    </section>`);
+  }
+
+  // ── 独立入口（2026-09-22 人类规格）：聚能**不归入技能**；换精灵是单独的按钮 + 列表 ──
+  const chargeBtn = $('act-charge');
+  const switchBtn = $('act-switch');
+  const surrenderBtn = $('act-surrender');
+  const switchList = $('act-switch-list');
+  const setBtn = (btn, list, onClick) => {
+    if (!btn) return;
+    btn.hidden = list.length === 0;
+    btn.disabled = disabled || list.length === 0;
+    btn.onclick = list.length ? onClick : null;
+  };
+  setBtn(chargeBtn, charge, () => playAction(charge[0]));
+  setBtn(surrenderBtn, surrender, () => playAction(surrender[0]));
+  setBtn(switchBtn, switches, () => {
+    if (!switchList) return;
+    const open = switchList.hidden;
+    switchList.hidden = !open;
+    switchBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+  if (switchList) {
+    if (!switches.length) {
+      switchList.hidden = true;
+      switchList.innerHTML = '';
+    } else {
+      // 列表按**真实精灵名 + HP/状态**列存活队友（不写「第 N 位」——那是内部位次，对玩家没意义）。
+      const pets = Array.isArray(state.view?.self?.pets) ? state.view.self.pets : [];
+      switchList.innerHTML = switches.map((action) => {
+        const pet = pets[action.target_index] ?? null;
+        const name = pet?.name ?? '（名字未登记）';
+        const hp = Number.isFinite(pet?.hp) && Number.isFinite(pet?.max_hp) ? `${pet.hp}/${pet.max_hp}` : null;
+        const statuses = pet?.statuses && Object.keys(pet.statuses).length
+          ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : null;
+        const energy = Number.isFinite(pet?.energy) ? `能量 ${pet.energy}` : null;
+        const bits = [hp ? `HP ${hp}` : null, energy, statuses ? `异常 ${statuses}` : null].filter(Boolean);
+        return `<button data-action="${actions.indexOf(action)}" data-switch-to="${action.target_index}">
+          <strong>${escapeHtml(name)}</strong>
+          ${bits.length ? `<span class="sw-hp">${escapeHtml(bits.join(' · '))}</span>` : ''}
+        </button>`;
+      }).join('');
+    }
+  }
+
   for (const button of box.querySelectorAll('button[data-action]')) {
+    button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
+  }
+  for (const button of ($('act-switch-list')?.querySelectorAll('button[data-action]') ?? [])) {
     button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
   }
   if (grouped.hidden.length) {
@@ -894,9 +961,23 @@ function renderActions(actions, disabled) {
       + `${[...new Set(grouped.hidden.map((a) => a.kind))].join('、')}。`
       + `引擎需按模式裁剪合法行动（RC-306），本页只做显示层。</p>`);
   }
-  // 验收钩子：**逐组条数**，与引擎动作表逐项对齐（P0-5 的判据读它）。
-  document.body.dataset.rocoActionGroups = visible.map((g) => `${g.id}:${g.actions.length}`).join(',') || 'none';
+  // 验收钩子：**引擎给的逐 kind 条数**仍然逐字记账（P0-5 判据读它），
+  // 另外记下「渲染成什么样」：技能卡数 / 独立入口是否出现 / 换人列表条数。
+  document.body.dataset.rocoActionGroups = grouped.groups
+    .map((g) => `${g.id}:${g.actions.length}`).join(',') || 'none';
   document.body.dataset.rocoActionsHidden = String(grouped.hidden.length);
+  // **页面上真的渲染出来的** kind（与上面那份「引擎给的」分开记）：
+  // 「标准 PVP 不出现道具/逃跑」这条判据量的是**渲染**，不是引擎的账。
+  document.body.dataset.rocoActionsRendered = [
+    skills.length ? 'skill' : null, charge.length ? 'charge' : null,
+    switches.length ? 'switch' : null, surrender.length ? 'surrender' : null,
+    others.length ? 'other' : null,
+  ].filter(Boolean).join(',') || 'none';
+  document.body.dataset.rocoActSkillCards = String(skills.length);
+  document.body.dataset.rocoActCharge = charge.length ? 'yes' : 'no';
+  document.body.dataset.rocoActSwitch = switches.length ? 'yes' : 'no';
+  document.body.dataset.rocoActSwitchList = String(switches.length);
+  document.body.dataset.rocoActSurrender = surrender.length ? 'yes' : 'no';
 }
 
 // ── 伤害数字浮层（P1-1）─────────────────────────────────────────────────────

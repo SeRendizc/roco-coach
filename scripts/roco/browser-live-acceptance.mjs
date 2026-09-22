@@ -506,6 +506,8 @@ async function main() {
       const self=document.getElementById('self-resource');
       const mana=(self?self.textContent:'').match(/\\d+/);
       return {mode:b.rocoMode,standard:b.rocoStandardPvp,groups:b.rocoActionGroups,
+        rendered:b.rocoActionsRendered,skillCards:b.rocoActSkillCards,
+        charge:b.rocoActCharge,switchEntry:b.rocoActSwitch,surrender:b.rocoActSurrender,
         mana:mana?Number(mana[0]):null,cap:v?v.self.energy_max:null,turn:v?v.turn:null};})()`);
     steps.push({at: 'battle-start', battle});
     const planStatus = await js(`document.getElementById('plan-status')?.textContent ?? null`);
@@ -515,19 +517,77 @@ async function main() {
       if (!ok) bad.push('点下去之后没有进入对局（战斗区没出现）');
       if (f?.mode !== 'pvp-standard-six-pet') bad.push(`模式 ${JSON.stringify(f?.mode)}`);
       if (f?.standard !== 'yes') bad.push(`data-roco-standard-pvp=${JSON.stringify(f?.standard)}`);
-      if (/(^|,)item:/.test(String(f?.groups))) bad.push('动作表里出现了道具');
-      if (/(^|,)escape:/.test(String(f?.groups))) bad.push('动作表里出现了逃跑');
+      // 「标准 PVP 不出现道具/逃跑」量的是**页面上真的渲染出来的入口**（`rendered`），
+      // 不是引擎的动作账（引擎本回合确实还会给 item/escape，页面按模式不渲染它们）。
+      if (/(^|,)item/.test(String(f?.rendered ?? ''))) bad.push('页面上渲染了道具入口');
+      if (/(^|,)escape/.test(String(f?.rendered ?? ''))) bad.push('页面上渲染了逃跑入口');
       return bad;
     };
     check('live-start', '真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的魔力）',
       startProblems(battle, started, startReady).length === 0,
       startProblems(battle, started, startReady).join(' | ')
-      || `mode=${battle.mode} 魔力=${battle.mana}/4 动作分组=${battle.groups} `
+      || `mode=${battle.mode} 魔力=${battle.mana}/4 引擎动作账=${battle.groups} 页面渲染=${battle.rendered} `
+        + `技能卡=${battle.skillCards} 聚能=${battle.charge} 换精灵=${battle.switchEntry} 投降=${battle.surrender} `
         + `开局按钮 ${startRect.w}×${startRect.h}；状态行「${String(planStatus ?? '').slice(0, 120)}」`);
     counter('live-start', '开局后模式被换成练习局、或动作表里混进道具必须被同一条判据抓住',
       startProblems({...battle, mode: 'demo-training-3v3', groups: 'skill:2,item:1'}, true, true),
       '{"mode":"demo-training-3v3","groups":"skill:2,item:1"}');
     await shoot('live-03-1440-battle');
+
+    // ── ③a 战斗页规格：一屏可见 + 四张技能卡为主区 + 聚能/换精灵独立入口 + 对手隐藏信息 ──
+    const spec = await js(`(()=>{const b=document.body.dataset;
+      const vis=(id)=>{const el=document.getElementById(id);if(!el)return null;
+        const r=el.getBoundingClientRect();
+        return {shown:!el.hidden&&r.width>0&&r.height>0,top:Math.round(r.top),bottom:Math.round(r.bottom)};};
+      const skills=[...document.querySelectorAll('#actions .act-group[data-act-group="skill"] button[data-action]')]
+        .map((x)=>({w:Math.round(x.getBoundingClientRect().width),h:Math.round(x.getBoundingClientRect().height),
+          desc:((x.querySelector('.act-desc')||{}).textContent||'').length}));
+      const foeBench=(document.getElementById('foe-bench')||{}).textContent||'';
+      return {vh:window.innerHeight,clientW:document.documentElement.clientWidth,
+        scrollW:document.documentElement.scrollWidth,
+        charge:b.rocoActCharge,switchEntry:b.rocoActSwitch,surrender:b.rocoActSurrender,
+        rendered:b.rocoActionsRendered,skillCards:skills,
+        lastEvent:(document.getElementById('last-event')||{}).textContent||'',
+        battle:vis('battle-panel'),actions:vis('action-panel'),log:vis('log-panel'),coach:vis('companion-card'),
+        foeBench};})()`);
+    steps.push({at: 'battle-spec', spec});
+    const specProblems = (f) => {
+      const bad = [];
+      if (f?.clientW !== f?.scrollW) bad.push(`横向溢出（${f?.scrollW} > ${f?.clientW}）`);
+      if (!(f?.skillCards ?? []).length) bad.push('技能主区一张卡都没有');
+      if ((f?.skillCards ?? []).length > 4) bad.push(`技能卡 ${f.skillCards.length} 张（最多四张）`);
+      for (const card of f?.skillCards ?? []) {
+        if (card.h < 44) bad.push(`技能卡只有 ${card.h}px 高（<44）`);
+        if (!card.desc) bad.push('技能卡上没有关键效果说明');
+      }
+      if (f?.charge !== 'yes') bad.push('没有独立的「聚能」入口');
+      if (f?.switchEntry !== 'yes') bad.push('没有独立的「换精灵」入口');
+      if (f?.surrender !== 'yes') bad.push('没有次级「投降」入口');
+      if (/(^|,)item|(^|,)escape/.test(String(f?.rendered ?? ''))) bad.push('渲染了道具/逃跑入口');
+      // 开局那一手引擎还没产生事件（第一份视图的 events 是空的），所以只在**打过一手之后**
+      // 要求「最新一条事件」非空 —— 这不是放过，而是这条判据真正的适用范围。
+      if (Number(f?.turn ?? 1) > 1 && !f?.lastEvent) bad.push('没有「最新一条事件」');
+      if (/第\s*\d+\s*位/.test(String(f?.foeBench ?? ''))) bad.push('对手后备放着「第 N 位」占位（那不是信息）');
+      if (/pet_\d|own-\d/.test(String(f?.foeBench ?? ''))) bad.push('对手后备泄漏了内部 id');
+      if (!f?.battle?.shown) bad.push('战斗区不可见');
+      if (!f?.actions?.shown) bad.push('行动区不可见');
+      // 一屏可见：战斗区 + 行动区都必须落在视口内（1440 档判据；390 另有一条）
+      if (f?.vh >= 800 && f?.actions?.bottom > f?.vh) {
+        bad.push(`行动区底部 ${f.actions.bottom} 超出视口 ${f.vh}（一屏看不到行动）`);
+      }
+      return bad;
+    };
+    check('live-battle-spec', '战斗页规格：技能为主区（≤4 张、卡高 ≥44、带关键效果）、'
+      + '聚能/换精灵/投降各自独立入口、只渲染本回合合法动作、最新一条事件在、对手后备不放占位也不泄漏 id、'
+      + '1440×900 行动区在视口内',
+      specProblems(spec).length === 0,
+      specProblems(spec).join(' | ')
+      || `技能卡 ${spec.skillCards.length} 张（最矮 ${Math.min(...spec.skillCards.map((c) => c.h))}px）；`
+        + `聚能=${spec.charge} 换精灵=${spec.switchEntry} 投降=${spec.surrender}；`
+        + `最新事件「${String(spec.lastEvent).slice(0, 40)}」；对手后备「${spec.foeBench}」；`
+        + `行动区底 ${spec.actions?.bottom} / 视口 ${spec.vh}`);
+    counter('live-battle-spec', '把「聚能」混进技能区（没有独立入口）必须被同一条判据抓住',
+      specProblems({...spec, charge: 'no', rendered: 'skill,item'}), '{"charge":"no","rendered":"skill,item"}');
 
     // 打到结算：真鼠标点「让双方各走一步（自动演示）」
     let result = null;
@@ -571,8 +631,10 @@ async function main() {
       if (f?.lessonShown !== 'shown') bad.push('局末教学入口没出现');
       return bad;
     };
-    check('live-settle', '从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现）',
-      settleProblems(settled).length === 0,
+    const lastEventAfter = await js(`document.getElementById('last-event')?.textContent ?? ''`);
+    check('live-settle', '从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、最新一条事件在）',
+      Boolean(String(lastEventAfter).trim()),
+      settleProblems(settled).length === 0 && Boolean(String(lastEventAfter).trim()),
       `result=${settled.result} 回合=${settled.turn} 结算区可见=${settled.resultVisible} 教学=${settled.lessonShown}`
       + `；点了 ${clicks} 次自动推进（最后回合 ${lastTurn}，停滞 ${stalled} 次）；`
       + `当时 ${JSON.stringify(lastProbe)}；正文「${settled.lessonText}」`);
