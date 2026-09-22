@@ -349,14 +349,101 @@ async function main() {
       '{"hook":4,"team":4}');
     await shoot('live-02-1440-six-picked');
 
+    // ── ②a 「我的精灵（能出战）」：每张卡的持有状态必须与服务端一致，且**真的能点进去** ──
+    // 用户实测的真错：切到 mine 之后标题写 80 只，但每张卡都标「图鉴·按需推算/你还没有这一只」，
+    // 点「圣凯布米龙」队伍 0/6 不变 —— 根因是拿 mine 卡的**个体 id** 去查**物种**键。
+    // 这一条把「状态一致」「0/6→1/6」「还能移除」三件事一起量。
+    // 先把持有队伍清空：上面那条已经选满六只，不清空的话「0/6→1/6」根本无从发生
+    // （第一版就是这么误报的：点之前 6、点之后 6，看着像产品没反应，其实是队伍满了）。
+    await mouseClick(`${ROOT_SEL} >>> #tw-reset`);
+    await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0')===0`, 40, 200);
+    await mouseClick(`${ROOT_SEL} >>> #tw-scope-mine`);
+    await sleep(900);
+    const mineFacts = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=root?.shadowRoot;
+      const rows=[...(sr?sr.querySelectorAll('#tw-cand-list .tw-row'):[])];
+      return {kind:(sr?(sr.querySelector('#tw-scope-mine')||{}).getAttribute('aria-pressed'):null),
+        total:(sr?(sr.querySelector('#tw-cand-sub')||{}).textContent:'')||'',
+        rows:rows.slice(0,12).map((r)=>({status:r.dataset.twStatus,kind:r.dataset.twKind,
+          instance:r.dataset.twInstance,species:r.dataset.twSpecies,
+          tag:(r.querySelector('.tw-state-tag')||{}).textContent||'',
+          name:(r.querySelector('.tw-name')||{}).textContent||''})),
+        selected:Number(root?.dataset.twSelected||'0')};})()`);
+    const mineProblems = (facts) => {
+      const bad = [];
+      if (facts?.kind !== 'true') bad.push('没有切到「我的精灵」范围');
+      if (!/我的精灵\s*\d+/.test(String(facts?.total))) bad.push(`标题没写「我的精灵 N 只」：${facts?.total}`);
+      if (!(facts?.rows ?? []).length) bad.push('mine 列表一条都没有');
+      const wrong = (facts?.rows ?? []).filter((r) => r.status !== 'held' || r.kind !== 'mine');
+      if (wrong.length) bad.push(`${wrong.length}/${facts.rows.length} 张卡不是「持有」：`
+        + wrong.slice(0, 2).map((r) => `${r.name}|${r.status}|${r.kind}`).join('、'));
+      const noInstance = (facts?.rows ?? []).filter((r) => !/^own-\d+$/.test(String(r.instance ?? '')));
+      if (noInstance.length) bad.push(`${noInstance.length} 张卡没带个体 id（点进去会没反应）`);
+      const noSpecies = (facts?.rows ?? []).filter((r) => !/^pet_\d{6}$/.test(String(r.species ?? '')));
+      if (noSpecies.length) bad.push(`${noSpecies.length} 张卡没带物种 id`);
+      if (!(facts?.rows ?? []).some((r) => /未核验/.test(r.tag) === false)) bad.push('状态标里没有「持有」这一档');
+      return bad;
+    };
+    check('live-mine-owned', '「我的精灵（能出战）」：标题是「我的精灵 N 只」，每张卡都是「持有·可正式上场」，'
+      + '并且带个体 id（可点进去）',
+      mineProblems(mineFacts).length === 0,
+      mineProblems(mineFacts).join(' | ')
+      || `${mineFacts.total}；前几张 ${JSON.stringify(mineFacts.rows.slice(0, 3))}`);
+    counter('live-mine-owned', '把 mine 卡的状态标成「图鉴·按需推算」（用户实测的那个错）必须被同一条判据抓住',
+      mineProblems({...mineFacts, rows: [{status: 'on_demand', kind: 'mine', instance: '', species: 'pet_000012',
+        tag: '图鉴 · 按需推算（未核验）', name: '圣凯布米龙'}]}), '{"status":"on_demand"}');
+
+    const beforeAdd = Number(await js(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0'`));
+    await mouseClick(`${ROOT_SEL} >>> #tw-cand-list .tw-row[data-tw-status="held"]`);
+    await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0')>${beforeAdd}`, 40, 200);
+    const afterAdd = Number(await js(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0'`));
+    check('live-mine-add', '真鼠标点一只「我的精灵」：队伍 0/6 → 1/6（用户实测：点了不变）',
+      afterAdd === beforeAdd + 1, `点之前 ${beforeAdd}，点之后 ${afterAdd}`);
+    const addProblems = (before, after) => (after === before + 1 ? [] : [`${before}→${after}（点了没加上）`]);
+    counter('live-mine-add', '点了不变（用户实测的那个错）必须被同一条判据抓住',
+      addProblems(0, 0), '0→0');
+    // 再点一次同一张卡 → 移除（前后仍可移除）
+    await mouseClick(`${ROOT_SEL} >>> #tw-cand-list .tw-row[data-tw-status="held"]`);
+    await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0')<${afterAdd}`, 40, 200);
+    const afterRemove = Number(await js(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0'`));
+    check('live-mine-remove', '再点同一只：1/6 → 0/6（能加也要能拿走，否则「选不上」会变成「拿不掉」）',
+      afterRemove === afterAdd - 1, `${afterAdd}→${afterRemove}`);
+
+    // 上面的 mine 测试清空过持有队伍 —— 开局那一段要重新选满六只（不然它量不到东西）。
+    for (const name of names) {
+      if (Number(await js(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0'`)) >= 6) break;
+      await mouseClick(`${ROOT_SEL} >>> #tw-scope-catalog`).catch(() => {});
+      await mouseClick(`${ROOT_SEL} >>> #tw-scope-mine`).catch(() => {});
+      await typeInto(`${ROOT_SEL} >>> #tw-search`, name);
+      await sleep(420);
+      const species = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+        const sr=root?.shadowRoot;if(!sr)return null;
+        const rows=[...sr.querySelectorAll('#tw-cand-list .tw-row[data-tw-status="held"]')];
+        return rows[0]?rows[0].dataset.twInstance:null;})()`);
+      if (species) { await mouseClick(`${ROOT_SEL} >>> #tw-cand-list .tw-row[data-tw-instance="${species}"]`); await sleep(350); }
+    }
+    await waitFor(`(()=>{const d=window.rocoDemo;
+      return (d?.state?.teamWorkshop?.team?.length||0)===6;})()`, 60, 250);
+
     // ── ②b 图鉴未拥有项：进**理论阵容**（不是报错），并给出状态与原因 ──────────
     // 用户实测的故障就是这一步：从 622 图鉴挑一只，选到第六槽才吃内部错误。
     const catalogPick = await (async () => {
       const mine = await fetch(`${BASE}api/roco/box?kind=mine&limit=60`).then((r) => r.json());
       const ownedGroups = new Set((mine?.player?.cards ?? []).map((c) => c.group ?? c.select));
-      const cat = await fetch(`${BASE}api/roco/box?kind=catalog&limit=12&offset=0`).then((r) => r.json());
-      const pick = (cat?.player?.cards ?? []).find((c) => !ownedGroups.has(c.group ?? c.select));
-      if (!pick) return {skipped: true};
+      let pick = null;
+      let scanned = 0;
+      for (let offset = 0; offset < 300 && !pick; offset += 60) {
+        const cat = await fetch(`${BASE}api/roco/box?kind=catalog&limit=60&offset=${offset}`).then((r) => r.json());
+        const cards = cat?.player?.cards ?? [];
+        scanned += cards.length;
+        pick = cards.find((c) => !ownedGroups.has(c.group ?? c.select));
+        if (!cards.length) break;
+      }
+      if (!pick) return {skipped: true, scanned, ownedSpecies: ownedGroups.size};
+      // 页面范围要切回「全图鉴参考」：上一段把它留在了「我的精灵」，
+      // 在 mine 范围里搜一个图鉴物种当然搜不到（第一版就是这么空转的）。
+      await mouseClick(`${ROOT_SEL} >>> #tw-scope-all`);
+      await sleep(600);
       await typeInto(`${ROOT_SEL} >>> #tw-search`, pick.name);
       await sleep(520);
       const row = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});

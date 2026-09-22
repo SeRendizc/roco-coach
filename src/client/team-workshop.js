@@ -352,7 +352,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     // 筛选走服务端（`/api/roco/box` 的 kind/q/type/role 白名单），换条件一律回第一页。
     pool: {offset: 0, total: 0, pageSize: 12, q: '', kind: 'catalog', type: '', role: '', rows: []},
     poolSeq: 0,
-    ownedBySpecies: new Map(),
+    ownedBySpecies: new Map(),      // 物种 → [{select: 个体, name, ...}]
+    ownedByInstance: new Map(),     // 个体 → {speciesId, name}
   };
 
   const getJson = async (path) => {
@@ -497,18 +498,40 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   }
 
   // ── 候选池（全量图鉴，可翻页 + 搜索）─────────────────────────────────
+  /**
+   * 「我拥有什么」的两张索引（2026-09-22 人类 P0 实测的真错）。
+   *
+   * 盒子接口两种列表的字段含义**不一样**，第一版把它们当成一样的，于是「我的精灵」整页失真：
+   *   · `kind=mine`    → `select` = **个体** id（`own-0001`）、`group` = **物种** id（`pet_000012`）
+   *   · `kind=catalog` → `select` = **物种** id（`pet_000012`）、没有 `group`
+   * 第一版用 `ownedBySpecies.get(card.select)` 查表：mine 卡拿个体 id 去查物种键，**必然全落空** →
+   * 每张卡都被标成「图鉴 · 按需推算 / 你还没有这一只」，`data-tw-species` 还被塞了个体 id，
+   * `addCandidate()` 的 `pet_` 正则直接 return —— 点了没反应。
+   *
+   * 现在两张索引都建：物种 → 个体列表（同种多只**都能区分**），个体 → 物种。
+   */
   async function loadOwnedIndex() {
-    // 两套键：图鉴卡的 `select` 是物种 id，盒子卡的 `group` 才是物种 id、`select` 是个体 id。
     try {
       const data = await getJson(`${apiBase}/box?kind=mine&limit=60&offset=0`);
-      const map = new Map();
+      const bySpecies = new Map();
+      const byInstance = new Map();
       for (const card of data?.player?.cards ?? []) {
-        const species = card.group ?? card.select;
-        if (!species || map.has(species)) continue;
-        map.set(species, {select: card.select, name: card.name});
+        const instanceId = String(card.select ?? '');
+        const speciesId = String(card.group ?? '');
+        if (!/^own-\d+$/.test(instanceId) || !/^pet_\d{6}$/.test(speciesId)) continue;
+        if (!bySpecies.has(speciesId)) bySpecies.set(speciesId, []);
+        bySpecies.get(speciesId).push({select: instanceId, name: card.name ?? null,
+          level: card.level ?? null, note: card.note ?? null});
+        byInstance.set(instanceId, {speciesId, name: card.name ?? null});
       }
-      state.ownedBySpecies = map;
-    } catch { state.ownedBySpecies = new Map(); }
+      state.ownedBySpecies = bySpecies;
+      state.ownedByInstance = byInstance;
+      rootEl.dataset.twOwnedSpecies = String(bySpecies.size);
+      rootEl.dataset.twOwnedInstances = String(byInstance.size);
+    } catch {
+      state.ownedBySpecies = new Map();
+      state.ownedByInstance = new Map();
+    }
   }
 
   function renderPool() {
@@ -518,19 +541,28 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       $('tw-cand-list').innerHTML = `<p class="tw-note" data-tw-empty="yes">`
         + `没有符合条件的精灵：换个属性/定位，或者点「清除筛选」看全量。</p>`;
     } else $('tw-cand-list').innerHTML = rows.map((card) => {
-      const owned = state.ownedBySpecies.get(card.select) ?? null;
-      // 状态标在**点击之前**就写清楚（人类 P0：别让玩家选到第六槽才吃一个内部错误）：
-      //   持有 · 可正式上场 / 图鉴 · 按需推算（可试玩，未核验）/ 图鉴 · 仅资料
-      const status = owned
+      // 两种列表的 id 语义不同（见 loadOwnedIndex 的注释），这里按 `kind` 分支取，
+      // **不再**拿一种卡的 id 去查另一种卡的键。
+      const isMine = state.pool.kind === 'mine';
+      const instanceId = isMine ? String(card.select ?? '') : '';
+      const speciesId = isMine ? String(card.group ?? '') : String(card.select ?? '');
+      const held = isMine ? /^own-\d+$/.test(instanceId) : state.ownedBySpecies.has(speciesId);
+      const status = held
         ? '<span class="tw-state-tag tw-state-held">持有 · 可正式上场</span>'
         : '<span class="tw-state-tag tw-state-trial">图鉴 · 按需推算（未核验）</span>';
-      return `<button class="tw-row" data-tw-species="${escapeAttr(card.select)}"
-        data-tw-owned="${owned ? escapeAttr(owned.select) : ''}"
-        data-tw-status="${owned ? 'held' : 'on_demand'}">
-       <span class="tw-name">${escapeHtml(card.name ?? NO_ITEM)}</span>
+      // 同物种多个个体要能区分：mine 列表把**个体**写在名字旁（名字相同也要看得出是两只）。
+      const who = isMine && instanceId
+        ? `${escapeHtml(card.name ?? NO_ITEM)} <span class="tw-rowtag">${escapeHtml(instanceId)}</span>`
+        : escapeHtml(card.name ?? NO_ITEM);
+      return `<button class="tw-row" data-tw-species="${escapeAttr(speciesId)}"
+        data-tw-instance="${escapeAttr(instanceId)}"
+        data-tw-owned="${escapeAttr(instanceId)}"
+        data-tw-status="${held ? 'held' : 'on_demand'}"
+        data-tw-kind="${isMine ? 'mine' : 'catalog'}">
+       <span class="tw-name">${who}</span>
        <span class="tw-types">${teamSlugs(card.types)}</span>
        ${status}
-       <span class="tw-rowtag">${owned ? '已在你的盒子里' : '你还没有这一只'}</span>
+       <span class="tw-rowtag">${held ? '在你的盒子里' : '你还没有这一只'}</span>
       </button>`;
     }).join('');
     const pages = Math.max(1, Math.ceil(state.pool.total / state.pool.pageSize));
@@ -809,6 +841,28 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     return query.toString();
   }
 
+  /**
+   * 把 shadow root 里所有**文本节点**的 markdown 记号剥掉。
+   *
+   * 为什么要出口统一处理：玩家可见文本有两个来源 —— 本模块模板 + 服务端给的
+   * `note` / `honesty_note` / `structure_note` / `reason`。逐个字符串改一定会漏，
+   * 以后新加的字段又会漏一次。这里是**唯一**的渲染出口，剥一次就够。
+   * 只动文本节点，不碰属性（`data-*` 里的原文必须保持逐字可核对）。
+   */
+  function stripMarkdownInShadow() {
+    const walk = (root) => {
+      for (const el of root.querySelectorAll('*')) {
+        if (el.shadowRoot) walk(el.shadowRoot);
+        for (const node of el.childNodes) {
+          if (node.nodeType === 3 && /[*`]/.test(node.nodeValue)) {
+            node.nodeValue = node.nodeValue.split('**').join('').split('`').join('');
+          }
+        }
+      }
+    };
+    walk(shadow);
+  }
+
   function emit() {
     const detail = {
       team: state.selected.slice(),
@@ -843,6 +897,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     rootEl.dataset.twStage = stage;
     renderTeam(player);
     renderAnalysis(player);
+    stripMarkdownInShadow();
     renderEval(player, stage);
     renderCoach(player, stage);
     renderPool();
@@ -915,6 +970,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       rootEl.dataset.twSeq = String(state.seq);
       if (state.payload) { renderTeam(state.payload.player ?? {}); renderAnalysis(state.payload.player ?? {}); }
       else { renderTeam({}); renderAnalysis({}); }
+      stripMarkdownInShadow();
       emit();
       return;
     }
@@ -948,12 +1004,25 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
 
   /** 加一只：优先用「你已经拥有的那一只」；没有就按图鉴条目加，路由会照实拒绝。 */
   async function addCandidate({instance, species}) {
+    // `instance` 来自 **mine** 列表（个体 id），`species` 来自**任意**列表（物种 id）。
     // 你拥有的 → 进**持有队伍**（能正式开局）；你没有的 → 进**理论阵容**（分析/试玩）。
     // 这一条就是用户那次「从图鉴挑一只、选到第六槽才被告知不能开局」的修法：
     // 图鉴条目**本来就不该**往持有队伍里塞，它有自己的清单。
-    const owned = state.ownedBySpecies.get(species) ?? (instance ? {select: instance} : null);
+    // mine 卡点进来：`instance` 有值 → 直接进持有队伍（它就是你的个体）。
+    // catalog 卡点进来：只有 `species` → 你拥有就换成你的那一只，否则进理论阵容。
+    const ownedSelect = (instance && /^own-\d+$/.test(instance))
+      ? instance
+      : (state.ownedBySpecies.get(species)?.[0]?.select ?? null);
+    const owned = ownedSelect ? {select: ownedSelect} : null;
     if (owned?.select) {
-      if (state.selected.includes(owned.select)) return;
+      // 点已经在队里的那一只 = **移除**（开关语义）。第一版把这里写成 `return`，
+      // 于是「能加不能拿」——用户点第二下没反应。
+      if (state.selected.includes(owned.select)) {
+        state.selected = state.selected.filter((id) => id !== owned.select);
+        state.error = null;
+        await reload();
+        return;
+      }
       if (state.selected.length >= TEAM_SLOTS) {
         state.error = `持有队伍最多 ${TEAM_SLOTS} 只：先拿掉一只再加。`;
         renderTeam(state.payload?.player ?? {});
@@ -964,7 +1033,12 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       state.selected = [...state.selected, owned.select];
     } else {
       if (!species || !/^pet_\d{6}$/.test(species)) return;
-      if (state.analysis.includes(species)) return;
+      if (state.analysis.includes(species)) {
+        state.analysis = state.analysis.filter((id) => id !== species);
+        state.error = null;
+        await reload();
+        return;
+      }
       if (state.analysis.length >= TEAM_SLOTS) {
         state.error = `理论阵容最多 ${TEAM_SLOTS} 只：先拿掉一只再加。`;
         renderTeam(state.payload?.player ?? {});
@@ -982,7 +1056,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   $('tw-cand-list').addEventListener('click', (event) => {
     const row = event.target.closest?.('.tw-row');
     if (!row) return;
-    void addCandidate({instance: row.dataset.twOwned || null, species: row.dataset.twSpecies});
+    void addCandidate({instance: row.dataset.twInstance || row.dataset.twOwned || null,
+      species: row.dataset.twSpecies});
   });
   $('tw-search').addEventListener('input', () => {
     clearTimeout(state.searchTimer);

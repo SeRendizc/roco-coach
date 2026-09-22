@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T05:13:44.565Z",
+ "judged_at": "2026-09-22T05:29:12.962Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -77,13 +77,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=97 full_ms=27 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=96 full_ms=26 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=24 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=23 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -119,7 +119,7 @@
    "id": "13-恰好三个候选",
    "judge": "已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径（偏好保留池空时 RC-303 会如实回落，第三个位置由召回的参考候选补上并标「候选参考」）",
    "ok": true,
-   "actual": "标签=强度|稳定|候选参考 候选节点=3 缺口节点=10"
+   "actual": "标签=强度|稳定|偏好保留 候选节点=3 缺口节点=10"
   },
   {
    "id": "14-候选与核心同源",
@@ -137,25 +137,25 @@
    "id": "16-评估随阵容变化",
    "judge": "从 2 只加到 5 只之后：下一只候选换了人、缺口清单还在、仍然恰好三个候选",
    "ok": true,
-   "actual": "2 只时候选=[\"仪式巨像\",\"伊兰亚龙\",\"画间沉铁兽\"]；5 只时=[\"画间沉铁兽\",\"黑猫巫师\",\"嗜光嗡嗡\"]"
+   "actual": "2 只时候选=[\"松仔\",\"小草虫\",\"花魁蜂后\"]；5 只时=[\"动力猿\",\"画间沉铁兽\",\"黑猫巫师\"]"
   },
   {
    "id": "17-连续选入六只",
    "judge": "连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体",
-   "ok": true,
-   "actual": "selected=6 填了 6/6 槽；加点记录=[{\"name\":\"铠甲虫\",\"added\":false,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":1,\"after\":1},{\"name\":\"音速犬\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000062\"},\"beforeCount\":1,\"after\":2},{\"name\":\"仪式巨像\",\"added\":true,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000100\"},\"beforeCount\":2,\"after\":3},{\"name\":\"雪影娃娃\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000112\"},\"beforeCount\":3,\"after\":4},{\"name\":\"皇家狮鹫（崖间地的样子）\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000118\"},\"beforeCount\":4,\"after\":5},{\"name\":\"化蝶（平常的样子）\",\"added\":true,\"probe\":{\"rows\":7,\"match\":1,\"species\":\"pet_000124\"},\"beforeCount\":5,\"after\":6}]"
+   "ok": false,
+   "actual": "selected=5 填了 5/6 槽；加点记录=[{\"name\":\"铠甲虫\",\"added\":false,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":1,\"after\":0},{\"name\":\"音速犬\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000062\"},\"beforeCount\":0,\"after\":1},{\"name\":\"仪式巨像\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000100\"},\"beforeCount\":1,\"after\":2},{\"name\":\"雪影娃娃\",\"added\":true,\"probe\":{\"rows\":5,\"match\":1,\"species\":\"pet_000112\"},\"beforeCount\":2,\"after\":3},{\"name\":\"皇家狮鹫（崖间地的样子）\",\"added\":true,\"probe\":{\"rows\":5,\"match\":1,\"species\":\"pet_000118\"},\"beforeCount\":3,\"after\":4},{\"name\":\"化蝶（平常的样子）\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000124\"},\"beforeCount\":4,\"after\":5}]"
   },
   {
    "id": "18-满六只五轴",
    "judge": "选满六只后出现完整诊断：五轴都在；能算的给值，算不出的给原因且不带值（不补 0）",
-   "ok": true,
-   "actual": "轴节点=5；环境价值:算不出 / 最怕的体系:算不出 / 对局离散度:算不出 / 操作容错:算不出 / 覆盖置信:能算"
+   "ok": false,
+   "actual": "轴节点=0；环境价值:算不出 / 最怕的体系:算不出 / 对局离散度:算不出 / 操作容错:算不出 / 覆盖置信:能算"
   },
   {
    "id": "19-最大短板与替换建议",
    "judge": "完整诊断里有主短板（缺口/未知清单）与**一个**最小替换：换出/换入各一只，并说清是结构理由",
-   "ok": true,
-   "actual": "缺口=0 未知=6 替换显示=true 换出=音速犬 换入=卷毛鸭"
+   "ok": false,
+   "actual": "缺口=10 未知=0 替换显示=false 换出=音速犬 换入=卷毛鸭"
   },
   {
    "id": "20-玩家层载荷",
@@ -166,26 +166,26 @@
   {
    "id": "21-机制行上卡",
    "judge": "六个槽位里每一只的**冻结机制原文**都逐字渲染在卡的首层（小字、不截断），枚举原文（FROZEN_DESC / MECHANISM_UNCONFIRMED）一个都不出现在可见文本里",
-   "ok": true,
-   "actual": "；机制行节点=7 已填槽位=6 待确认=0；卡上样例「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」"
+   "ok": false,
+   "actual": "冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」 | 冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」；机制行节点=9 已填槽位=5 待确认=0；卡上样例「特性「专注力」：入场首回合，获得物攻+100%。」"
   },
   {
    "id": "22-玩家层无工程话",
    "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
-   "ok": true,
-   "actual": "扫过 2733 字（豁免机制原文 4 处）；样例「 队伍（六个槽位） 六个槽位都满了 标准 PVP · 六宠 候选规则（待实机核对） 匹配前对手未知 · 按版本环境倾向评价 候选来自全图鉴 600+ 铠甲虫 虫系 图鉴 · 按需推…」"
+   "ok": false,
+   "actual": "玩家可见文本里出现伪精确「10%」"
   },
   {
    "id": "23-无胜率与百分数",
    "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）",
-   "ok": true,
-   "actual": "扫过 2733 字无命中（豁免机制原文 2 条）"
+   "ok": false,
+   "actual": "命中「10%」"
   },
   {
    "id": "24-未知写在玩家层",
    "judge": "「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）",
-   "ok": true,
-   "actual": "未知条目=6；含「现在算不出来」=true"
+   "ok": false,
+   "actual": "未知条目=0；含「现在算不出来」=false"
   },
   {
    "id": "25-非法参数(selected)",
@@ -399,14 +399,14 @@
    "id": "21-机制行上卡",
    "judge": "把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住",
    "ok": true,
-   "hit": "冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」 | 冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」",
-   "actual": "expected=[\"特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。\"] rendered=[\"特性「专注力」：入场首回合，获得物攻+100%。\"]"
+   "hit": "冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」 | 冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」 | 冻结机制原文没有渲染到卡上：「特性「专注力」：入场首回合，获得物攻+100%。」 | 冻结机制原文没有渲染到卡上：「特性「专注力」：入场首回合，获得物攻+100%。」",
+   "actual": "expected=[\"特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。\"] rendered=[\"特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。\"]"
   },
   {
    "id": "21-机制枚举不上面",
    "judge": "把 FROZEN_DESC 印到可见文本里必须被同一条判据抓住",
    "ok": true,
-   "hit": "可见文本里出现机制枚举原文「FROZEN_DESC」",
+   "hit": "冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」 | 冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」 | 可见文本里出现机制枚举原文「FROZEN_DESC」",
    "actual": "可见文本追加 \" FROZEN_DESC\""
   },
   {
@@ -530,14 +530,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "97",
-    "fullMs": "27",
+    "firstMs": "96",
+    "fullMs": "26",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "24"
+    "elapsedMs": "23"
    },
    "dom": {
     "slotNodes": 6,
@@ -577,7 +577,7 @@
     "slots": "6",
     "filled": "2",
     "next": "3",
-    "nextLabels": "强度|稳定|候选参考",
+    "nextLabels": "强度|稳定|偏好保留",
     "axes": "",
     "axesAvailable": "",
     "poolTotal": "1",
@@ -587,14 +587,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "22",
-    "fullMs": "21",
+    "firstMs": "27",
+    "fullMs": "22",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "17"
+    "elapsedMs": "18"
    },
    "dom": {
     "slotNodes": 6,
@@ -612,12 +612,12 @@
     "mechanismNodes": 6,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
      "特性「专注力」：入场首回合，获得物攻+100%。",
-     "特性「溶解腐蚀」：每携带1个毒系技能进入战斗，水系技能使敌方获得2层中毒。",
      "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
-     "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
-     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。"
+     "特性「溶解腐蚀」：每携带1个毒系技能进入战斗，水系技能使敌方获得2层中毒。",
+     "特性「野性感官」：应对成功后，下次行动先手+1。",
+     "特性「花精灵」：回合结束时，己方队伍获得1次随机奉献。",
+     "特性「虫群鼓舞」：队伍中每有1只其他的虫系精灵，自己入场时获得攻防速+10%。"
     ],
     "hasModeBadge": true,
     "hasCandidateBadge": true,
@@ -625,9 +625,9 @@
     "hasFullUniverse": true,
     "mentionsLegacySlots": false,
     "nextNames": [
-     "仪式巨像",
-     "伊兰亚龙",
-     "画间沉铁兽"
+     "松仔",
+     "小草虫",
+     "花魁蜂后"
     ],
     "shadowPresent": true
    },
@@ -641,62 +641,62 @@
       "species": "pet_000012"
      },
      "beforeCount": 1,
-     "after": 1
+     "after": 0
     },
     {
      "name": "音速犬",
      "added": true,
      "probe": {
-      "rows": 3,
+      "rows": 2,
       "match": 1,
       "species": "pet_000062"
      },
-     "beforeCount": 1,
-     "after": 2
+     "beforeCount": 0,
+     "after": 1
     },
     {
      "name": "仪式巨像",
      "added": true,
      "probe": {
-      "rows": 4,
+      "rows": 3,
       "match": 1,
       "species": "pet_000100"
      },
-     "beforeCount": 2,
-     "after": 3
+     "beforeCount": 1,
+     "after": 2
     },
     {
      "name": "雪影娃娃",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 5,
       "match": 1,
       "species": "pet_000112"
      },
-     "beforeCount": 3,
-     "after": 4
+     "beforeCount": 2,
+     "after": 3
     },
     {
      "name": "皇家狮鹫（崖间地的样子）",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 5,
       "match": 1,
       "species": "pet_000118"
      },
-     "beforeCount": 4,
-     "after": 5
+     "beforeCount": 3,
+     "after": 4
     },
     {
      "name": "化蝶（平常的样子）",
      "added": true,
      "probe": {
-      "rows": 7,
+      "rows": 6,
       "match": 1,
       "species": "pet_000124"
      },
-     "beforeCount": 5,
-     "after": 6
+     "beforeCount": 4,
+     "after": 5
     }
    ]
   },
@@ -709,7 +709,7 @@
     "slots": "6",
     "filled": "5",
     "next": "3",
-    "nextLabels": "强度|候选参考|候选参考",
+    "nextLabels": "强度|偏好保留|候选参考",
     "axes": "",
     "axesAvailable": "",
     "poolTotal": "1",
@@ -744,15 +744,15 @@
     "mechanismNodes": 9,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
      "特性「专注力」：入场首回合，获得物攻+100%。",
      "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
      "特性「捉迷藏」：使敌方获得冻结时，也会使其获得全技能能耗+1。",
      "特性「乘风连击」：使用翼系技能后，获得连击数+1。",
+     "特性「化茧」：受到致命伤害时，获得1层萌化，并免疫此次伤害。",
      "特性「溶解腐蚀」：每携带1个毒系技能进入战斗，水系技能使敌方获得2层中毒。",
+     "特性「慢热型」：初始能量为0，入场前己方精灵每成功应对1次，回复5能量。",
      "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。",
-     "特性「预警」：若敌方技能足够击败自己，回合开始时自己获得速度+50。",
-     "特性「血型吸引」：敌方每携带1种系别的技能，自己攻击时威力+10。"
+     "特性「预警」：若敌方技能足够击败自己，回合开始时自己获得速度+50。"
     ],
     "hasModeBadge": true,
     "hasCandidateBadge": true,
@@ -760,9 +760,9 @@
     "hasFullUniverse": true,
     "mentionsLegacySlots": false,
     "nextNames": [
+     "动力猿",
      "画间沉铁兽",
-     "黑猫巫师",
-     "嗜光嗡嗡"
+     "黑猫巫师"
     ],
     "shadowPresent": true
    },
@@ -776,62 +776,62 @@
       "species": "pet_000012"
      },
      "beforeCount": 1,
-     "after": 1
+     "after": 0
     },
     {
      "name": "音速犬",
      "added": true,
      "probe": {
-      "rows": 3,
+      "rows": 2,
       "match": 1,
       "species": "pet_000062"
      },
-     "beforeCount": 1,
-     "after": 2
+     "beforeCount": 0,
+     "after": 1
     },
     {
      "name": "仪式巨像",
      "added": true,
      "probe": {
-      "rows": 4,
+      "rows": 3,
       "match": 1,
       "species": "pet_000100"
      },
-     "beforeCount": 2,
-     "after": 3
+     "beforeCount": 1,
+     "after": 2
     },
     {
      "name": "雪影娃娃",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 5,
       "match": 1,
       "species": "pet_000112"
      },
-     "beforeCount": 3,
-     "after": 4
+     "beforeCount": 2,
+     "after": 3
     },
     {
      "name": "皇家狮鹫（崖间地的样子）",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 5,
       "match": 1,
       "species": "pet_000118"
      },
-     "beforeCount": 4,
-     "after": 5
+     "beforeCount": 3,
+     "after": 4
     },
     {
      "name": "化蝶（平常的样子）",
      "added": true,
      "probe": {
-      "rows": 7,
+      "rows": 6,
       "match": 1,
       "species": "pet_000124"
      },
-     "beforeCount": 5,
-     "after": 6
+     "beforeCount": 4,
+     "after": 5
     }
    ]
   },
@@ -839,14 +839,14 @@
    "at": "six-selected",
    "facts": {
     "state": "ok",
-    "selected": "6",
-    "remaining": "0",
+    "selected": "5",
+    "remaining": "1",
     "slots": "6",
-    "filled": "6",
-    "next": "0",
-    "nextLabels": "",
-    "axes": "环境价值|最怕的体系|对局离散度|操作容错|覆盖置信",
-    "axesAvailable": "覆盖置信",
+    "filled": "5",
+    "next": "3",
+    "nextLabels": "强度|偏好保留|候选参考",
+    "axes": "",
+    "axesAvailable": "",
     "poolTotal": "1",
     "poolRows": "1",
     "error": null,
@@ -854,8 +854,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "14",
+    "firstMs": "17",
+    "fullMs": "13",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -865,34 +865,40 @@
    },
    "dom": {
     "slotNodes": 6,
-    "filledNodes": 6,
+    "filledNodes": 5,
     "analysisSlotNodes": 6,
     "analysisFilledNodes": 1,
     "analysisCount": "1",
     "analysisTrialReady": "no",
-    "nextNodes": 0,
-    "gapNodes": 0,
-    "axisNodes": 5,
-    "unknownNodes": 6,
+    "nextNodes": 3,
+    "gapNodes": 10,
+    "axisNodes": 0,
+    "unknownNodes": 0,
     "entranceNodes": 0,
-    "replacementShown": true,
-    "mechanismNodes": 7,
+    "replacementShown": false,
+    "mechanismNodes": 9,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
      "特性「专注力」：入场首回合，获得物攻+100%。",
      "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
      "特性「捉迷藏」：使敌方获得冻结时，也会使其获得全技能能耗+1。",
      "特性「乘风连击」：使用翼系技能后，获得连击数+1。",
      "特性「化茧」：受到致命伤害时，获得1层萌化，并免疫此次伤害。",
-     "特性「溶解腐蚀」：每携带1个毒系技能进入战斗，水系技能使敌方获得2层中毒。"
+     "特性「溶解腐蚀」：每携带1个毒系技能进入战斗，水系技能使敌方获得2层中毒。",
+     "特性「慢热型」：初始能量为0，入场前己方精灵每成功应对1次，回复5能量。",
+     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。",
+     "特性「预警」：若敌方技能足够击败自己，回合开始时自己获得速度+50。"
     ],
     "hasModeBadge": true,
     "hasCandidateBadge": true,
     "hasUnknownPrematch": true,
     "hasFullUniverse": true,
     "mentionsLegacySlots": false,
-    "nextNames": [],
+    "nextNames": [
+     "动力猿",
+     "画间沉铁兽",
+     "黑猫巫师"
+    ],
     "shadowPresent": true
    },
    "addResults": [
@@ -905,65 +911,65 @@
       "species": "pet_000012"
      },
      "beforeCount": 1,
-     "after": 1
+     "after": 0
     },
     {
      "name": "音速犬",
      "added": true,
      "probe": {
-      "rows": 3,
+      "rows": 2,
       "match": 1,
       "species": "pet_000062"
      },
-     "beforeCount": 1,
-     "after": 2
+     "beforeCount": 0,
+     "after": 1
     },
     {
      "name": "仪式巨像",
      "added": true,
      "probe": {
-      "rows": 4,
+      "rows": 3,
       "match": 1,
       "species": "pet_000100"
      },
-     "beforeCount": 2,
-     "after": 3
+     "beforeCount": 1,
+     "after": 2
     },
     {
      "name": "雪影娃娃",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 5,
       "match": 1,
       "species": "pet_000112"
      },
-     "beforeCount": 3,
-     "after": 4
+     "beforeCount": 2,
+     "after": 3
     },
     {
      "name": "皇家狮鹫（崖间地的样子）",
      "added": true,
      "probe": {
-      "rows": 6,
+      "rows": 5,
       "match": 1,
       "species": "pet_000118"
      },
-     "beforeCount": 4,
-     "after": 5
+     "beforeCount": 3,
+     "after": 4
     },
     {
      "name": "化蝶（平常的样子）",
      "added": true,
      "probe": {
-      "rows": 7,
+      "rows": 6,
       "match": 1,
       "species": "pet_000124"
      },
-     "beforeCount": 5,
-     "after": 6
+     "beforeCount": 4,
+     "after": 5
     }
    ],
-   "selected_keys": "6"
+   "selected_keys": "5"
   },
   {
    "at": "bad-params",
@@ -996,8 +1002,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "21",
-    "fullMs": "19",
+    "firstMs": "23",
+    "fullMs": "20",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -1063,5 +1069,5 @@
    }
   }
  ],
- "ok": true
+ "ok": false
 }

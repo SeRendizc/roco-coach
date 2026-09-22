@@ -3,20 +3,20 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-22T05:06:53.496Z",
+ "judged_at": "2026-09-22T05:22:55.480Z",
  "totals": {
-  "checks": 8,
-  "passed": 8,
+  "checks": 11,
+  "passed": 11,
   "failed": 0,
-  "counterproofs": 7,
-  "counterproofs_hit": 7
+  "counterproofs": 9,
+  "counterproofs_hit": 9
  },
  "checks": [
   {
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=2"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=3"
   },
   {
    "id": "live-boot",
@@ -29,6 +29,24 @@
    "judge": "真鼠标在工坊里选满六只（服务端回执、页面队伍、六个槽位三处一致），且队伍就是点的那六个个体，开局按钮真的可用",
    "ok": true,
    "actual": "已选 6/6，页面队伍 6 只=[\"own-0001\",\"own-0003\",\"own-0005\",\"own-0007\",\"own-0013\",\"own-0015\"]，槽位 [\"铠甲虫\",\"音速犬\",\"仪式巨像\",\"雪影娃娃\",\"朔夜伊芙\",\"多多\"]（依次点的：铠甲虫、音速犬、仪式巨像、雪影娃娃、朔夜伊芙、多多）"
+  },
+  {
+   "id": "live-mine-owned",
+   "judge": "「我的精灵（能出战）」：标题是「我的精灵 N 只」，每张卡都是「持有·可正式上场」，并且带个体 id（可点进去）",
+   "ok": true,
+   "actual": "我的精灵 2 只（能出战）；前几张 [{\"status\":\"held\",\"kind\":\"mine\",\"instance\":\"own-0015\",\"species\":\"pet_000137\",\"tag\":\"持有 · 可正式上场\",\"name\":\"多多 own-0015\"},{\"status\":\"held\",\"kind\":\"mine\",\"instance\":\"own-0016\",\"species\":\"pet_000137\",\"tag\":\"持有 · 可正式上场\",\"name\":\"多多 own-0016\"}]"
+  },
+  {
+   "id": "live-mine-add",
+   "judge": "真鼠标点一只「我的精灵」：队伍 0/6 → 1/6（用户实测：点了不变）",
+   "ok": true,
+   "actual": "点之前 0，点之后 1"
+  },
+  {
+   "id": "live-mine-remove",
+   "judge": "再点同一只：1/6 → 0/6（能加也要能拿走，否则「选不上」会变成「拿不掉」）",
+   "ok": true,
+   "actual": "1→0"
   },
   {
    "id": "live-catalog-to-analysis",
@@ -46,7 +64,7 @@
    "id": "live-settle",
    "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现）",
    "ok": true,
-   "actual": "result=loss 回合=46 结算区可见=true 教学=shown；点了 50 次自动推进（最后回合 46，停滞 0 次）；当时 {\"turn\":46,\"mana\":{\"self\":0,\"opponent\":3},\"selfLiving\":2,\"foeLiving\":5,\"status\":\"\"}；正文「关键转折在第 13 回合（这一局 46 个回合）。」"
+   "actual": "result=loss 回合=45 结算区可见=true 教学=shown；点了 49 次自动推进（最后回合 45，停滞 0 次）；当时 {\"turn\":45,\"mana\":{\"self\":0,\"opponent\":3},\"selfLiving\":2,\"foeLiving\":5,\"status\":\"\"}；正文「关键转折在第 13 回合（这一局 45 个回合）。」"
   },
   {
    "id": "live-narrow-390",
@@ -82,6 +100,20 @@
    "ok": true,
    "hit": "服务端回执的已选数 4（钩子 data-tw-selected） | 页面记的队伍 4 只（开局要发的是这一份） | 开局按钮还是禁用（team=6） | 槽位上有名字的只有 4/6 个",
    "actual": "{\"hook\":4,\"team\":4}"
+  },
+  {
+   "id": "live-mine-owned",
+   "judge": "把 mine 卡的状态标成「图鉴·按需推算」（用户实测的那个错）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "1/1 张卡不是「持有」：圣凯布米龙|on_demand|mine | 1 张卡没带个体 id（点进去会没反应） | 状态标里没有「持有」这一档",
+   "actual": "{\"status\":\"on_demand\"}"
+  },
+  {
+   "id": "live-mine-add",
+   "judge": "点了不变（用户实测的那个错）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "0→0（点了没加上）",
+   "actual": "0→0"
   },
   {
    "id": "live-catalog-to-analysis",
@@ -341,18 +373,18 @@
   },
   {
    "at": "auto-play",
-   "clicks": 50,
-   "lastTurn": 46,
+   "clicks": 49,
+   "lastTurn": 45,
    "stalled": 0
   },
   {
    "at": "settled",
    "settled": {
     "result": "loss",
-    "turn": 46,
+    "turn": 45,
     "resultVisible": true,
     "lessonShown": "shown",
-    "lessonText": "关键转折在第 13 回合（这一局 46 个回合）。"
+    "lessonText": "关键转折在第 13 回合（这一局 45 个回合）。"
    }
   },
   {
