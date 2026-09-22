@@ -143,8 +143,11 @@ const STYLE = `
 .tw-cand-tools input{grid-column:1/-1;min-width:0;min-height:44px;font-size:13.5px;background:#121e2c;
  color:#dbe5ef;border:1px solid #314154;border-radius:8px;padding:7px 10px}
 .tw-cand-tools .tw-btn{min-height:44px;width:100%}
-/* 翻页那一行：两个按钮平分整行、页码居中 —— 不再是「半边空着」（用户：上一页下一页铺平拉长）。 */
-.tw-cand-tools.tw-pager{grid-template-columns:1fr auto 1fr}
+/* 翻页那一行：用 flex 让两个按钮**平分整行**、页码居中（grid 三列在实测里没生效，
+   这里换成 flex：flex:1 1 0 一定平分，不给浏览器留下别的解释）。 */
+.tw-cand-tools.tw-pager{display:flex;gap:6px;align-items:center}
+.tw-cand-tools.tw-pager .tw-btn{flex:1 1 0;width:auto;min-width:0}
+.tw-cand-tools.tw-pager .tw-note{flex:0 0 auto;white-space:nowrap}
 /* 候选区**不再内滚**（2026-09-22 人类 P1）：这一页原来同时有「页码」与「区域内滚动」，
    两套导航叠在一起，玩家既翻页又滚内层。现在只留**一套**：分页器翻页，列表整块摊开，
    这一页有多少条就全露出来；要看评估就整页向下滚（那是跨区浏览，不是区內导航）。 */
@@ -569,13 +572,52 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     }
   }
 
+  /**
+   * mine 列表按**物种**合并（2026-09-22 人类 P0：截图里同一只出现两次，用户问「为啥会有重复的精灵」）。
+   *
+   * 同物种的多个个体在**配队**这件事上是同一个选择（我们选的是物种/构建），
+   * 铺成多行既占地方又像 bug。合并成一行并在名字后标 `×N`；
+   * 默认用第一个个体，玩家想换具体个体可以之后再做「选个体」入口。
+   */
+  function mergeMineRows(rows) {
+    const bySpecies = new Map();
+    for (const card of rows) {
+      const speciesId = String(card.group ?? '');
+      const instanceId = String(card.select ?? '');
+      if (!/^pet_\d{6}$/.test(speciesId) || !/^own-\d+$/.test(instanceId)) continue;
+      if (!bySpecies.has(speciesId)) {
+        bySpecies.set(speciesId, {speciesId, name: card.name ?? null, types: card.types ?? [],
+          variants: []});
+      }
+      bySpecies.get(speciesId).variants.push({select: instanceId, name: card.name ?? null});
+    }
+    return [...bySpecies.values()];
+  }
+
   function renderPool() {
     const rows = state.pool.rows;
     if (!rows.length) {
       // 空态要**说出下一步**，不是留一片空白。
       $('tw-cand-list').innerHTML = `<p class="tw-note" data-tw-empty="yes">`
         + `没有符合条件的精灵：换个属性/定位，或者点「清除筛选」看全量。</p>`;
-    } else $('tw-cand-list').innerHTML = rows.map((card) => {
+    } else $('tw-cand-list').innerHTML = (state.pool.kind === 'mine'
+      ? mergeMineRows(rows).map((card) => {
+        // mine 视角按**物种**合并：同一个物种的多个个体在配队时是同一个选择，
+        // 铺成多行只会让人以为「重复了」（用户实测就是这么问的）。
+        const status = '<span class="tw-state-tag tw-state-held">持有 · 可正式上场</span>';
+        const count = card.variants.length > 1
+          ? `<span class="tw-rowtag">×${card.variants.length}</span>` : '';
+        return `<button class="tw-row" data-tw-species="${escapeAttr(card.speciesId)}"
+          data-tw-instance="${escapeAttr(card.variants[0].select)}"
+          data-tw-owned="${escapeAttr(card.variants[0].select)}"
+          data-tw-status="held" data-tw-kind="mine" data-tw-variants="${card.variants.length}">
+         <span class="tw-name">${escapeHtml(card.name ?? NO_ITEM)}${count}</span>
+         <span class="tw-types">${teamSlugs(card.types)}</span>
+         ${status}
+         <span class="tw-rowtag">在你的盒子里</span>
+        </button>`;
+      }).join('')
+      : rows.map((card) => {
       // 两种列表的 id 语义不同（见 loadOwnedIndex 的注释），这里按 `kind` 分支取，
       // **不再**拿一种卡的 id 去查另一种卡的键。
       const isMine = state.pool.kind === 'mine';
@@ -599,7 +641,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
        ${status}
        <span class="tw-rowtag">${held ? '在你的盒子里' : '你还没有这一只'}</span>
       </button>`;
-    }).join('');
+      }).join(''));
     const pages = Math.max(1, Math.ceil(state.pool.total / state.pool.pageSize));
     const page = Math.min(pages, Math.floor(state.pool.offset / state.pool.pageSize) + 1);
     $('tw-cand-page').textContent = `${page} / ${pages}`;

@@ -23,7 +23,16 @@
    规则版本、服务状态、验收钩子、工程说明全部在抽屉里（默认收起）。 */
 .topbar{align-items:center;flex-wrap:wrap;row-gap:6px;height:auto;min-height:44px}
 .topbar h1 small{font-size:11px;padding:2px 6px}
-.header-actions{gap:8px;flex-wrap:wrap}
+.header-actions{gap:8px;flex-wrap:wrap;align-items:center}
+/* 页头三行（标题 / 徽记 / 按钮）各自成行、行内元素**等高**：
+   用户实测「上面俩框上下就没对齐」——开发者抽屉按钮比旁边几个按钮高，整行就歪了。 */
+.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:8px}
+.topbar>h1{grid-column:1}
+.topbar>.header-actions{grid-column:2;justify-content:flex-end}
+.mode-line{grid-column:1/-1}
+#about-drawer{grid-column:1/-1;justify-self:end}
+.topbar button,.topbar .chip{min-height:44px;display:inline-flex;align-items:center}
+#about-drawer>summary{min-height:44px;display:flex;align-items:center;justify-content:flex-end}
 .chip{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:999px;
  padding:3px 10px;background:#16222f;white-space:nowrap;color:#cfe0d4}
 #turn-chip{color:#f0cb77}
@@ -291,11 +300,16 @@ body[data-roco-picking="yes"] #action-panel{display:none}
    都在面板底部固定可见——中间那段（记忆）才是滚动区。 */
 .companion{position:fixed;right:14px;z-index:27;width:min(340px,calc(100vw - 28px));
  bottom:calc(var(--bottombar,0px) + 14px);
+ /* 宽屏：贴右整列（上到页头下方、下到动作坞上方）——用户要求「小芽那栏能不能拉长」，
+    整列比中间一块浮窗好看，也让输入与最近回复固定在同一个位置。 */
+ top:96px;
  /* ⚠ 上界必须**同时**减掉动作坞与一点边距：窄屏下贴底两条固定浮层相加时，
     40vh 会算出比可用高度更大的值，于是这一栏的底边被顶出视口——
     实测 390×844 下 `#say-input` 的 bottom=868 > 844，输入框根本看不到。
     这里是「输入与最近一句回复都在首屏」那条判据的护城河。 */
- max-height:calc(100vh - var(--bottombar,0px) - 28px);
+ /* 宽屏贴右整列：高度由 top/bottom 夹出来，不用 max-height（拉满才像一栏）。
+    窄屏在下面的媒体查询里把 top 收回、恢复 max-height（那条「输入与回复同屏」的护城河还在）。 */
+ max-height:none;
  display:flex;flex-direction:column;gap:8px;background:#16222f;border:1px solid #4d6b5c;
  border-radius:12px;padding:10px 12px;box-shadow:0 12px 40px #0009}
 .companion[hidden]{display:none}
@@ -442,6 +456,10 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
    ③ 阵容池 4 列同上，卡片文字竖排不可读；④ 固定底栏把主操作+说明+分页挤成一行。
    这一轮（P0）再修四处：⑤ 引导条只占一行、不遮挡卡片；⑥ 翻页按钮放进底栏第一行；
    ⑦ 行动坞按分组纵向排，卡片不横向溢出；⑧ 小芽贴底整块，输入与回复都在首屏。 */
+@media (max-width:860px){
+ /* 窄屏：小芽回到**贴底整块**（宽屏那套「贴右整列」在手机上会盖住战场）。 */
+ .companion{top:auto;max-height:calc(100vh - var(--bottombar,0px) - 28px)}
+}
 @media (max-width:720px){
  :root{font-size:15px}
  .topbar h1{font-size:17px}

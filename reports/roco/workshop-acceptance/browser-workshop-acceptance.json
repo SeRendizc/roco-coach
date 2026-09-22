@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T07:17:32.319Z",
+ "judged_at": "2026-09-22T07:29:48.995Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -77,13 +77,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=102 full_ms=25 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=96 full_ms=25 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=21 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=22 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -263,7 +263,7 @@
    "id": "31-移动端顺序",
    "judge": "390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":61},{\"cls\":\"tw-cand\",\"top\":1090},{\"cls\":\"tw-eval\",\"top\":1615},{\"cls\":\"tw-coach\",\"top\":2908}]"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":208},{\"cls\":\"tw-cand\",\"top\":1237},{\"cls\":\"tw-eval\",\"top\":1685},{\"cls\":\"tw-coach\",\"top\":2978}]"
   },
   {
    "id": "32-窄屏候选区",
@@ -530,14 +530,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "102",
+    "firstMs": "96",
     "fullMs": "25",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "21"
+    "elapsedMs": "22"
    },
    "dom": {
     "slotNodes": 6,
@@ -587,14 +587,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "22",
-    "fullMs": "23",
+    "firstMs": "23",
+    "fullMs": "31",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "18"
+    "elapsedMs": "26"
    },
    "dom": {
     "slotNodes": 6,
@@ -718,14 +718,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
+    "firstMs": "15",
     "fullMs": "14",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "10"
+    "elapsedMs": "9"
    },
    "dom": {
     "slotNodes": 6,
@@ -852,8 +852,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "15",
+    "firstMs": "15",
+    "fullMs": "16",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -993,14 +993,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "21",
-    "fullMs": "19",
+    "firstMs": "23",
+    "fullMs": "21",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "15"
+    "elapsedMs": "17"
    },
    "dom": {
     "slotNodes": 6,
