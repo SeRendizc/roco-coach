@@ -224,7 +224,29 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
  // 这不改变「不落盘」的性质——应用从不写密钥，是否用环境变量由使用者自己决定。
  // 不设这个变量时行为与以前完全一致，仍然走 /connect.html 加密录入。
  if(process.env.DEEPSEEK_API_KEY&&/^sk-[A-Za-z0-9_-]{16,}$/.test(process.env.DEEPSEEK_API_KEY)){credential=process.env.DEEPSEEK_API_KEY;verified=true;}
- const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,provider:credential?'deepseek':'local'});
+ /**
+ * 三只模型里的两只本地模型（Qwen3.5-4B / Qwen3.8-27B）的**真实状态**。
+ *
+ * 只报探测到的事实：feature flag 开没开、权重目录在不在。**不去 ping 模型** ——
+ * 那会拉起一次推理（几秒 + 占内存），点一下面板就付这个代价不合适；
+ * 所以「已连接」的含义是「可用配置齐了」，界面上会如实写这一句。
+ */
+function localModelReport(env=process.env){
+  const mode=String(env.ROCO_LOCAL_MODEL||'off').toLowerCase();
+  const on=mode==='on'||mode==='shadow';
+  const specs=[['local-qwen35-4b','本地 · Qwen3.5-4B','局势化短提示','ROCO_LOCAL_MODEL_4B_PATH'],
+               ['local-qwen38-27b','本地 · Qwen3.8-27B','整局复盘','ROCO_LOCAL_MODEL_27B_PATH']];
+  return specs.map(([id,label,role,key])=>{
+    const dir=String(env[key]||'').trim();
+    let exists=false;
+    if(dir){try{exists=require('node:fs').statSync(dir).isDirectory();}catch{exists=false;}}
+    return {id,label,role,connected:Boolean(on&&dir&&exists),model:dir||null,
+      reason:!on?'本地模型开关是 off（ROCO_LOCAL_MODEL=on 才启用）'
+        :(!dir?`没设 ${key}（权重目录）`:(exists?'':'权重目录不存在')),
+      action:'/connect.html'};
+  });
+}
+const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,provider:credential?'deepseek':'local'});
  async function complete(messages,maxTokens=320,callTimeout=timeoutMs,signal){
   const currentKey=credential,currentModel=model,epoch=generation;
   if(!currentKey)throw fail(409,'尚未配置 DeepSeek');
@@ -257,6 +279,16 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
       asset_refreshable:false,note:'静态资源清单来自磁盘的模块图；miss 时会自愈重算一次'}});
    }
    if(path.startsWith('/api/')){
+    // 2026-09-22：小芽面板要如实报**三只模型**的状态（人类：ds api + qwen3.5-4b + qwen3.8-27b）。
+    // 纪律：这里只报**探测得到的事实**，不画绿点骗人 ——
+    //   · 云端：有没有通过 /connect.html（或环境变量）配置好 key；
+    //   · 本地：feature flag 是否开、模型目录是否存在（`localModelReport` 真去 stat）。
+    if(path==='/api/models'&&req.method==='GET'){
+      const report=[{id:'cloud-deepseek',label:'云端 · DeepSeek',role:'长对话与解释',
+        connected:!!credential,verified:!!verified,model:credential?model:null,
+        reason:credential?null:'还没有配置 API key',action:'/connect.html'},...localModelReport()];
+      return json(res,200,{models:report,connectUrl:'/connect.html'});
+    }
     // GET /api/roco/status 是唯一的只读接口：演示页打开时先问一次「规则服务在不在」，
     // 它不改状态、不需要 CSRF，也不碰密钥。其余 /api/ 一律 POST + CSRF。
     // RC-50x（人类 P0 实测）：状态接口**主动探一次**（引擎是惰性启动的，被动探针会

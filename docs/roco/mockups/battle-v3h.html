@@ -252,7 +252,7 @@ footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:1
     <div class="msg me">我：那它要是换上水灵怎么办？</div>
     <div class="msg">小芽：那就换「防御」顶一手，等它交出技能再上电系。</div>
     <div class="msg me">我：那我这回合用愿力强化呢？</div>
-    <div class="msg">小芽：可以——它立即生效、不占行动，把你当前精灵第一个技能换成「愿力冲击」。</div>
+    <div class="msg">小芽：仓内只有一条 bwiki 特性文案提到它会替换首个技能；次数 / 冷却 / 是否占行动都还没实机核对，我不给确定结论。</div>
    </div>
     <div class="input"><input value="问问小芽…"><button>发送</button></div>
   </div>
@@ -291,17 +291,12 @@ const REL = {
 };
 // 背包两件（互斥：本局只能选一件，选了另一件自动变灰）
 const ITEMS = [
-  ['愿力强化','对任意系别的精灵使用：立即生效、不占行动，当前精灵技能栏首个技能替换为「愿力冲击」。'
-   + '**再用一次可解除**该替换状态（解除即进冷却，不消耗使用次数）。',
-   '每场 2 次 · 冷却 3 回合','2 / 2','ok'],
-  ['首领化','对首领血脉的精灵使用：该精灵本场战斗进化，部分精灵会激活远古血脉。',
-   '需要「首领血脉」——本版未实现','不可用','no'],
+  ['愿力强化','对任意精灵使用，是否占行动未核验。\n把当前精灵的第一个技能换成「愿力冲击」。\n再用一次可解除（解除后进冷却，不减次数）。',
+   '次数与冷却均未登记','2 / 2','ok'],
+  ['首领化','候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。',
+   '需要「首领血脉」，本版未做','不可用','no'],
 ];
 // 愿力冲击的真实出处（本仓可查到的只有这一条 live bwiki 特性文案；冻结 622 技能表里**没有**它）
-const YUANLI_NOTE = '愿力冲击（人类 2026-09-22 口述）：消耗 ⭐2 · 威力 80 · 分类按**该精灵物攻/魔攻较高的一侧**'
-  + '（培养系统未做 → 先留接口）· 应对成功时本次威力 +150% · 属性随「愿力属性」（默认=精灵属性，培养页可改）。'
-  + '系别与文案另有仓内佐证：live bwiki 特性文案「…首个技能替换为光系愿力冲击」（圣光迪莫/圣草迪莫）；'
-  + '冻结 622 技能表里查不到这条 → 落地前先入台账。';
 // 属性行：徽章（emoji，可点变汉字）+ 系别名 + 其余信息 + **2 个预留位**（多属性精灵用）
 const EL_OF = (m) => { const x = (m || '').match(/^\S+?系/); return x ? x[0] : null; };
 const elRow = (m, tail, mirror) => {
@@ -334,8 +329,8 @@ if (frame === 'switch') {
 if (frame === 'items') {
   document.getElementById('skills').innerHTML = ITEMS.map(([n, d, note, cnt, st]) => `<div class="slot ${st === 'no' ? 'grey' : ''}" style="flex:1">
     <div class="row1"><span class="name">${n}</span><span class="star" style="margin-left:auto">${cnt}</span></div>
-    <div class="meta">${d}</div><div class="meta">${note}</div>
-    ${n === '愿力强化' ? `<div class="meta" style="color:#e2b48c">${YUANLI_NOTE}</div>` : ''}</div>`).join('');
+    <div class="meta" style="white-space:pre-line;line-height:1.6">${d}</div><div class="meta">${note}</div>
+    </div>`).join('');
   document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.dataset.tab === 'item'));
 }
 // 属性符号注入 + 点击切换成汉字（3 秒后自动变回）

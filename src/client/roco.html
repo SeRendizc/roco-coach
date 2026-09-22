@@ -10,22 +10,59 @@
      规则版本 / 服务状态 / 验收钩子 / 工程说明**全部**在 `#about-drawer` 里，默认收起。 -->
 <header class="topbar">
  <h1>小芽 · 洛克王国：世界 <small>训练场</small></h1>
- <div class="mode-line" id="mode-line" aria-live="polite">
+ <!-- 掉心提示：**最顶居中**（人类规格）。平时不出现，扣心时闪几秒。 -->
+ <div class="heart-pop" id="heart-pop" role="status" aria-live="polite" hidden></div>
+ <!-- 模型状态：**一行、不用打开面板就能看见**（判据 `live-model-status` 量它），点它去连接页 -->
+ <a class="chip model-line" id="model-chip" href="connect.html" data-roco-model="offline">模型：正在读取…</a>
+ <button id="coach-entry" class="xiaoya-btn" title="小芽：模型连接 / 对话" aria-expanded="false"><span class="xy-ico" aria-hidden="true">✦</span><span class="xy-label">小芽</span></button>
+</header>
+
+<!-- 小芽面板（人类 2026-09-22 规格）：三只模型状态一行 + 可收起；下面是正式对话框。
+     模型状态来自 `/api/models` 的**真实探针**（没配 key / 没开本地开关就如实说，不画绿点）。 -->
+<section class="panel xiaoya-panel" id="xiaoya-panel" hidden aria-label="小芽">
+ <div class="xy-head">
+  <strong>小芽</strong>
+  <span class="muted" id="companion-sub">她该说话时自己会出来</span>
+  <button id="companion-close" class="xy-fold" aria-label="收起小芽">收起</button>
+ </div>
+ <!-- 只留**一行**简短连接状态 + 设置入口（人类 2026-09-22：三张模型卡、规则快照、
+      未核验长文、重开重试都不许占聊天弹窗的地方）。 -->
+ <div class="xy-status">
+  <button class="xy-fold" id="xy-settings-toggle" aria-expanded="false">设置（模型 / 记忆 / 规则台账）</button>
+ </div>
+ <!-- 可滚动的最近对话 + **固定在底部的输入框** -->
+ <aside class="companion" id="companion-card" aria-label="小芽对话">
+  <div class="companion-body" id="companion-body">
+   <p id="companion-line" class="companion-line" hidden></p>
+   <div id="say-reply" class="reply" hidden></div>
+  </div>
+  <form id="say-form" class="say-form">
+   <input id="say-input" maxlength="80" placeholder="想问什么就问（例如「这回合怎么打」）" aria-label="对小芽说一句">
+   <button class="primary">说一句</button>
+  </form>
+ </aside>
+ <!-- 设置：三张模型卡 / 记忆 / 模式条 / 重开重试 / 工程抽屉，全部收在这里 -->
+ <details class="xy-settings" id="xy-settings">
+  <summary>设置（模型 / 记忆 / 规则台账 / 工程信息）</summary>
+  <div class="xy-models" id="model-list">
+   <div class="model-cell"><div class="mc-name">正在读取模型状态…</div></div>
+  </div>
+  <div class="mode-line" id="mode-line" aria-live="polite">
   <span class="chip" id="mode-label">模式：正在读取…</span>
   <!-- 2026-09-22（人类实测 configured=false）：**连接状态要明显呈现**，别让玩家以为
        小芽在自由对话。拿不到模型时写「未连接模型 · 只给规则事实」，并指向连接入口；
        连上之后写「已连接模型」，不夸口它做了什么。 -->
 
  </div>
- <div class="header-actions">
-  <!-- 连接状态放在**按钮行**：`#mode-line` 每次渲染都会被 `innerHTML` 重建，
-       放里面会被冲掉（第一版就是这么「页头没有连接状态」的）。 -->
-  <a class="chip" id="model-chip" href="connect.html">模型：正在读取…</a>
-  <span id="turn-chip" class="chip">未开局</span>
-  <span id="phase-chip" class="muted"></span>
-  <button id="coach-entry" title="叫小芽出来说一句">✦ 小芽</button>
-  <button id="reset-battle">重开</button>
-  <button id="engine-retry" hidden>重试</button>
+
+  <div class="xy-actions">
+   <button id="reset-battle" class="xy-fold">重开</button>
+   <button id="engine-retry" class="xy-fold" hidden>重试</button>
+  </div>
+  <div class="section-title" id="memory-head"><h3>小芽记住的（都是你说过的）</h3>
+   <span class="muted">说错了？直接再说一句就能改，或者点「忘掉」</span></div>
+  <ul id="memory-list" class="memory"></ul>
+  <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>
   <!-- 开发者抽屉：默认收起。工程信息只在这里出现。 -->
   <details class="dev" id="about-drawer">
    <summary>关于这一页（规则快照 / 服务状态 / 验收钩子 / 工程说明）</summary>
@@ -67,8 +104,9 @@
     <ul class="checklist" id="coverage"></ul>
    </div>
   </details>
- </div>
-</header>
+ </details>
+</section>
+
 
 <!-- ── 开局引导（P0-3）：**不遮挡、不拦截**候选卡的点击 ─────────────────────
      它是选阵容页上方的一条轻提示（在流里、不覆盖任何卡片、高度只有一行），
@@ -303,26 +341,7 @@
 <!-- ── 小芽（陪练 / 军师）：重排后的浮条；输入与最近一句回复**同屏可见** ───────
      宽屏它是右侧 Coach 栏（固定定位），窄屏它是贴底的一整块；
      两种版式下 `#say-form` 与 `#say-reply` 都在首屏（判据量 `getBoundingClientRect`）。 -->
-<aside class="companion" id="companion-card" aria-label="小芽">
- <div class="companion-head">
-  <strong>✦ 小芽</strong>
-  <span class="muted" id="companion-sub">她该说话时自己会出来</span>
-  <button id="companion-close" aria-label="收起小芽这一栏">收起</button>
- </div>
- <div class="companion-body" id="companion-body">
-  <p id="companion-line" class="companion-line" hidden></p>
-  <div id="say-reply" class="reply" hidden></div>
-  <!-- 记忆（P1-3）：**玩家可见、可逐条忘掉**。只列「他自己说过的」，不列对局记录。 -->
-  <div class="section-title" id="memory-head"><h3>小芽记住的（都是你说过的）</h3>
-   <span class="muted">说错了？直接再说一句就能改，或者点「忘掉」</span></div>
-  <ul id="memory-list" class="memory"></ul>
-  <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>
- </div>
- <form id="say-form" class="say-form">
-  <input id="say-input" maxlength="80" placeholder="想说点什么（例如「好烦，又输了」）" aria-label="对小芽说一句">
-  <button class="primary">说一句</button>
- </form>
-</aside>
+
 
 </main>
 

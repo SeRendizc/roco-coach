@@ -109,6 +109,15 @@ const ONBOARD_KEY = 'roco-coach-onboard-v1';
 const $ = (id) => document.getElementById(id);
 
 /**
+ * null-safe 的事件绑定（2026-09-22）。
+ *
+ * 页眉按人类规格精简之后，`重开` / `重试` 这类按钮**可能根本不在页面上**；
+ * 直接 `$('x').addEventListener` 会在缺元素时把整个 boot 打断 —— 那正是「页面一片空白」
+ * 的根因。所以统一走这里：元素不在就安静跳过。
+ */
+const on = (id, event, handler) => { const el = $(id); if (el) el.addEventListener(event, handler); };
+
+/**
  * `pet_id → 名字`（RC-502）。名字的**唯一**来源是服务端回执：
  *   · 名单那一次（`/api/roco/roster`，默认 48 只）——`state.roster` 与 `state.petNames`；
  *   · 阵容池每一页（勾了「包含按需推算的精灵」之后会有全量视野里的名字）。
@@ -674,8 +683,11 @@ function render() {
   const replacingLabel = view?.phase === 'replace'
     ? (needsMe === true ? '我方补位（不占回合）' : (needsMe === false ? '对手补位中…' : '补位'))
     : '对战';
-  $('turn-chip').textContent = view ? `第 ${view.turn} 回合 · ${replacingLabel}` : '未开局';
-  $('phase-chip').textContent = view?.battle_result
+  // 回合条已收进小芽面板；取不到就跳过（页眉只剩标题 + 小芽按钮）。
+  const turnChip = $('turn-chip');
+  if (turnChip) turnChip.textContent = view ? `第 ${view.turn} 回合 · ${replacingLabel}` : '未开局';
+  const phaseChip = $('phase-chip');
+  if (phaseChip) phaseChip.textContent = view?.battle_result
     ? `对局结束：${RESULT_CN[view.battle_result] ?? view.battle_result}`
     : '';
   $('self-active').textContent = view?.self?.active != null ? `场上：第 ${view.self.active + 1} 位` : '';
@@ -1442,6 +1454,15 @@ function renderCompanion() {
   const card = $('companion-card');
   if (!card) return;
   card.hidden = !state.coach.open;
+  // 2026-09-22（人类规格）：对话卡现在住在「小芽面板」里 —— 只要小芽是开着的状态，
+  // 面板就必须跟着打开，否则卡在 DOM 里但被 `hidden` 的面板罩住（点和读都够不到）。
+  // 小芽开着 ⇒ 面板必须跟着开（否则卡在 hidden 的面板里，点和读都够不到）；
+  // 小芽关掉 ⇒ 面板一起收（否则留一个空壳在屏幕上，第一版就是这样「关不掉」的）。
+  const panel = $('xiaoya-panel');
+  if (panel) {
+    if (state.coach.open && panel.hidden) toggleXiaoya(true);
+    if (!state.coach.open && !panel.hidden) toggleXiaoya(false);
+  }
   const close = $('companion-close');
   if (close) close.setAttribute('aria-expanded', state.coach.open ? 'true' : 'false');
   document.body.dataset.rocoCoach = state.coach.open ? 'open' : 'closed';
@@ -1515,6 +1536,74 @@ function onboardDismissed() {
  * 页面必须**明显**说清「模型没接上、小芽只给规则事实」，并给一个连接入口 ——
  * 不能让玩家以为它在自由对话。连上之后也只说「已连接」，不夸口。
  */
+/**
+ * 三只模型的**真实状态**（人类 2026-09-22：ds api + qwen3.5-4b + qwen3.8-27b 一起用）。
+ *
+ * 数据来自 `/api/models`：它只报探测得到的事实（有没有配 key、本地开关与权重目录），
+ * **不 ping 模型**（那要拉起一次推理）。所以「已连接」= 可用配置齐了 —— 界面上照实写这一句。
+ * 读不到接口时**不编**：显示「状态未知」并保留连接入口。
+ */
+async function renderModelList() {
+  const box = $('model-list');
+  if (!box) return;
+  let data = null;
+  try {
+    const res = await fetch('/api/models', {headers: {'Accept': 'application/json'}});
+    if (res.ok) data = await res.json();
+  } catch { data = null; }
+  const rows = Array.isArray(data?.models) ? data.models : [];
+  if (!rows.length) {
+    box.innerHTML = `<div class="model-cell"><div class="mc-name">模型状态读不到</div>
+      <div class="mc-state no">● 未知</div>
+      <div class="mc-why">接口没回应；这不代表没连上，也不代表连上了。</div>
+      <a class="chip" href="${escapeAttr(data?.connectUrl || 'connect.html')}">去连接页配置</a></div>`;
+    document.body.dataset.rocoModels = 'unknown';
+    return;
+  }
+  box.innerHTML = rows.map((m) => `<div class="model-cell" data-model-id="${escapeAttr(m.id ?? '')}">
+    <div class="mc-name">${escapeHtml(m.label ?? m.id ?? '模型')}</div>
+    <div class="mc-state ${m.connected ? 'ok' : 'no'}">● ${m.connected ? '已连接' : '未连接'}</div>
+    <div class="mc-role">${escapeHtml(m.role ?? '')}</div>
+    ${m.reason ? `<div class="mc-why">${escapeHtml(m.reason)}</div>` : ''}
+    ${m.connected ? '' : `<a class="chip" href="${escapeAttr(m.action || 'connect.html')}">配置</a>`}</div>`).join('');
+  const ok = rows.filter((m) => m.connected).length;
+  document.body.dataset.rocoModels = `${ok}/${rows.length}`;
+  // 聊天弹窗里只留**一行**：哪几只连上、没连上的原因（一句）。
+  const chip = $('model-chip');
+  if (chip) {
+    const down = rows.filter((m) => !m.connected);
+    chip.textContent = ok === rows.length ? `模型：${ok} 只已连接`
+      : `模型：${ok}/${rows.length} 已连接${down[0] ? `（${down[0].label} 未连：${down[0].reason}）` : ''}`;
+  }
+}
+
+/** 小芽面板开关（页眉那个按钮）。 */
+function toggleXiaoya(force) {
+  const panel = $('xiaoya-panel');
+  const btn = $('coach-entry');
+  if (!panel) return;
+  const open = force === undefined ? panel.hidden : Boolean(force);
+  panel.hidden = !open;
+  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  if (open) {
+    renderModelList();
+    panel.scrollIntoView({block: 'nearest'});
+  }
+}
+
+/**
+ * 掉心提示（人类规格）：**只在扣心时出现几秒**，位置在最顶居中。
+ * 数字只来自引擎给的公开事实（`mana` 与力竭事件），页面不自己算。
+ */
+function showHeartPop(text) {
+  const el = $('heart-pop');
+  if (!el || !text) return;
+  el.textContent = text;
+  el.hidden = false;
+  if (state.heartTimer) clearTimeout(state.heartTimer);
+  state.heartTimer = setTimeout(() => { el.hidden = true; }, 3200);
+}
+
 function renderModelChip() {
   const chip = $('model-chip');
   if (!chip) return;
@@ -1695,6 +1784,14 @@ function applyResult(data) {
   if (Array.isArray(state.view?.legal) && state.view.legal.length) state.lastLiveView = state.view;
   const fresh = Array.isArray(data.view?.events) ? data.view.events : null;
   if (fresh) state.matchEvents = [...state.matchEvents, ...fresh];
+  // 掉心提示：比对**引擎给的魔力**（我方的变化）——只在减少时出现几秒，页面不自己算。
+  const beforeMana = state.lastMana ?? null;
+  const nowMana = Number.isFinite(data?.view?.mana?.self) ? data.view.mana.self : null;
+  if (beforeMana !== null && nowMana !== null && nowMana < beforeMana) {
+    const lost = beforeMana - nowMana;
+    showHeartPop(`我方掉了 ${lost} 颗心（${beforeMana} → ${nowMana}）`);
+  }
+  if (nowMana !== null) state.lastMana = nowMana;
   state.view = data.view;
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();
@@ -2021,7 +2118,7 @@ function openPetDetail(petId) {
      <div class="section-title"><h3>四个技能</h3></div>
      <ul class="detail-moves">${moves || '<li class="muted">引擎未给配招</li>'}</ul>
      <p class="muted">面板数值与配招来自规则引擎。引擎没给威力的技能**不显示威力**，也不当成 0；
-     原始来源状态在右上角「关于这一页」的开发者抽屉里逐条可核对。</p>`;
+     原始来源状态在小芽面板的「设置 → 关于这一页」里逐条可核对。</p>`;
   box.hidden = false;
   document.body.dataset.rocoDetail = petId;
 }
@@ -2563,7 +2660,7 @@ async function say(text) {
   if (!configured) {
     $('say-reply').textContent = `${reply}`
       + '（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——'
-      + '请到右上角「关于这一页 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）';
+      + '请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）';
     document.body.dataset.rocoCompanionBoundary = 'no-model';
     return {register, reason, reply, source: 'offline'};
   }
@@ -2626,7 +2723,7 @@ function bind() {
   $('start-battle').addEventListener('click', () => void startBattle());
   const standardButton = $('start-standard-pvp');
   if (standardButton) standardButton.addEventListener('click', () => void startStandardPvp());
-  $('reset-battle').addEventListener('click', () => void startBattle());
+  on('reset-battle', 'click', () => void startBattle());
   $('plan').addEventListener('click', () => void requestPlan({reason: 'manual', explicit: true}));
   $('auto-turn').addEventListener('click', () => void autoTurn());
   $('hint-close').addEventListener('click', () => {
@@ -2645,14 +2742,31 @@ function bind() {
     $('lesson-card').hidden = true;
   });
   // 轻量小芽入口（P0-2）：点一下**有可见反应**——这一栏展开、焦点落到输入框。
-  $('coach-entry').addEventListener('click', () => openCompanion());
-  $('companion-close').addEventListener('click', () => {
+  $('coach-entry').addEventListener('click', () => { toggleXiaoya(); openCompanion(); });
+  on('xy-settings-toggle', 'click', () => {
+    const box = $('xy-settings');
+    if (!box) return;
+    box.open = !box.open;
+    const btn = $('xy-settings-toggle');
+    if (btn) btn.setAttribute('aria-expanded', box.open ? 'true' : 'false');
+  });
+  const xyFold = $('xy-fold-models');
+  if (xyFold) xyFold.addEventListener('click', () => {
+    const box = $('model-list');
+    if (!box) return;
+    const folded = box.classList.toggle('folded');
+    xyFold.textContent = folded ? '展开模型状态 ▼' : '收起模型状态 ▲';
+    xyFold.setAttribute('aria-expanded', folded ? 'false' : 'true');
+  });
+  // 2026-09-22（人类规格）：页眉只剩标题 + 小芽按钮，部分按钮**可能不存在** ——
+  // 绑定一律走模块级的 `on()`（null-safe），缺元素不许把 boot 打断。
+  on('companion-close', 'click', () => {
     state.coach.open = false;
     renderCompanion();
     syncBottomBars();
   });
-  $('onboard-skip').addEventListener('click', dismissOnboard);
-  $('say-form').addEventListener('submit', (event) => {
+  on('onboard-skip', 'click', dismissOnboard);
+  on('say-form', 'submit', (event) => {
     event.preventDefault();
     void say($('say-input').value);
     $('say-input').value = '';

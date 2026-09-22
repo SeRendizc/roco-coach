@@ -700,3 +700,64 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 .unverified-chip{display:inline-block;margin-right:6px;padding:1px 6px;border-radius:6px;
  background:#3a2f2a;color:#e2b48c;font-size:11.5px;font-weight:600}
 .unverified-chip[hidden]{display:none}
+
+/* ── 2026-09-22 人类规格：页眉只剩标题 + 小芽按钮；模型/回合/关于都收进小芽面板 ── */
+header.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;
+ gap:10px;margin:0 0 8px}
+.model-line{justify-self:end;font-size:12px;min-height:26px;display:inline-flex;align-items:center;gap:6px;
+ max-width:min(46vw,360px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header.topbar h1{margin:0;font-size:19px}
+.xiaoya-btn{justify-self:end;width:44px;height:44px;border-radius:14px;border:1px solid #2f465c;
+ background:#16242f;color:#dfe8ef;font-size:19px;cursor:pointer}
+.xiaoya-btn:hover{background:#1c2f3d}
+.heart-pop{justify-self:center;padding:5px 13px;border-radius:999px;border:1px solid #6a3a44;
+ background:#2a161c;color:#ffb4c0;font-size:12.5px;font-weight:650;white-space:nowrap}
+.heart-pop[hidden]{display:none}
+.xiaoya-panel{position:fixed;top:56px;right:14px;width:min(460px,calc(100vw - 28px));
+ max-height:calc(100vh - 84px);overflow:auto;z-index:60;display:flex;flex-direction:column;gap:10px;
+ box-shadow:0 22px 60px rgba(0,0,0,.55)}
+.xy-head{display:flex;align-items:center;gap:10px}
+.xy-head strong{font-size:15px}
+.xy-head .muted{flex:1;font-size:12px}
+.xy-models{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.xy-models.folded{display:none}
+.model-cell{border:1px solid #2b3d4e;border-radius:11px;background:#111d27;padding:8px 10px;min-height:62px}
+.model-cell .mc-name{font-size:12.5px;font-weight:650;color:#dfe8ef}
+.model-cell .mc-state{font-size:11.5px;margin-top:3px}
+.model-cell .mc-state.ok{color:#8fe0a2} .model-cell .mc-state.no{color:#ff9a9a}
+.model-cell .mc-role{font-size:11px;color:#7f93a5;margin-top:2px}
+.model-cell .mc-why{font-size:11px;color:#e2b48c;margin-top:3px;line-height:1.45}
+.xy-foldrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.xy-fold{height:30px;padding:0 10px;border-radius:9px;border:1px solid #2b3d4e;background:#111d27;
+ color:#9caebe;font-size:11.5px;cursor:pointer}
+
+@media (max-width:520px){
+ .xiaoya-panel{top:52px;right:8px;left:8px;width:auto;max-height:calc(100vh - 70px)}
+ .xy-models{grid-template-columns:1fr}
+}
+
+/* ── 2026-09-22 人类规格：小芽入口 = **白色图标 + 「小芽」**，始终右上角 ── */
+.xiaoya-btn{display:inline-flex;align-items:center;gap:7px;width:auto;padding:0 14px;height:44px;
+ border-radius:14px;border:1px solid #2f465c;background:#16242f;color:#fff;font-size:15px;font-weight:650}
+.xiaoya-btn .xy-ico{color:#ffffff;font-size:17px;line-height:1}
+.xiaoya-btn .xy-label{color:#ffffff}
+/* 小芽面板：标题 + 可滚动最近对话 + 固定输入；设置收在 details 里 */
+.xiaoya-panel .companion{display:flex;flex-direction:column;min-height:0;flex:1;gap:8px}
+.xiaoya-panel .companion-body{overflow:auto;max-height:min(46vh,420px);display:flex;flex-direction:column;gap:8px}
+.xiaoya-panel .say-form{position:sticky;bottom:0;background:var(--panel,#111c26);padding-top:6px}
+.xy-status{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.xy-settings{border-top:1px solid #243444;padding-top:9px}
+.xy-settings>summary{cursor:pointer;font-size:12.5px;color:#9caebe;min-height:32px;display:flex;align-items:center}
+.xy-actions{display:flex;gap:8px;margin:8px 0}
+/* 「开一局」始终贴在页面底部（人类规格） */
+.standard-pvp-bar{position:sticky;bottom:0;z-index:30;display:flex;align-items:center;gap:12px;
+ padding:10px 12px;margin-top:10px;border-top:1px solid #243444;background:rgba(11,18,24,.96);
+ backdrop-filter:blur(6px)}
+
+/* 窄屏：状态行让位（换到第二行、可截断），否则 nowrap 会把页头撑宽 → 整页横向溢出 */
+@media (max-width:560px){
+ header.topbar{grid-template-columns:minmax(0,1fr) auto}
+ .model-line{grid-column:1 / -1;justify-self:start;max-width:100%;white-space:nowrap;overflow:hidden;
+  text-overflow:ellipsis}
+ .xiaoya-btn{grid-row:1;grid-column:2}
+}
