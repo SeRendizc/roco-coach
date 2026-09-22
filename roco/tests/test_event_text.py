@@ -125,6 +125,15 @@ SAMPLE_EVENTS = {
     # 效果层/特性层直接塞进列表的那一类：**扁平形状**，没有 `detail` 包裹
     "trait": {"kind": "trait", "trait": "专注力", "side": "player", "effect": "atk +100%",
               "evidence": "feature_skill"},
+    # RC-106 补的三类：六宠标准 PVP 局里真的会出现（`env._use_charge` /
+    # `env._settle_faint_mana` / `env._surrender` 三处 `_bump`），模板此前缺席。
+    # 下面每个 `detail` 键都逐个抄自那三处，不是编的。
+    "charge": {"kind": "charge", "turn": 3,
+               "detail": {"side": "enemy", "energy_gained": 5, "energy": 5}},
+    "mana_loss": {"kind": "mana_loss", "turn": 7,
+                  "detail": {"side": "player", "faint_cost": 1, "mana": 3}},
+    "surrender": {"kind": "surrender", "turn": 12,
+                  "detail": {"side": "enemy", "result": "win"}},
 }
 
 

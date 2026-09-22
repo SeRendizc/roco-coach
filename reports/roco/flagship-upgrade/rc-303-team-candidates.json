@@ -130,9 +130,6 @@
   "latency": {
     "available": true,
     "report_path": "reports/roco/team-candidates/latency.json",
-    "report_version": "roco-rc303-team-candidates-latency/v1",
-    "measured_at": "2026-09-21T18:01:00.415Z",
-    "runs_per_shape": 20,
     "segment_stats": {
       "recall": {
         "n": 180,

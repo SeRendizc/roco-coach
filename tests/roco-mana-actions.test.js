@@ -226,12 +226,18 @@ test('RC-105 纪律：候选仍被 promotion gate 挡住，且本文件的判据
   // 必红方向：把清单里的这一项删掉，同一条判据必须不再成立
   const stripped = pkg.scripts['test:unit'].replace('tests/roco-mana-actions.test.js ', '');
   assert.ok(!/tests\/roco-mana-actions\.test\.js/.test(stripped));
-  // 候选不得转默认：gate 的输入仍然把它绑在 v2 上、并且 v3 自己 is_default=false
+  // 候选不得转默认：gate 的输入仍然把模式绑在候选上、并且 v3 自己 is_default=false
   assert.equal(onDisk(V3_CANDIDATE_ID).is_default, false);
   const modeRegistry = readJson(BATTLE_MODES_PATH);
   const mode = modeRegistry.modes.find((m) => m.id === 'pvp-standard-six-pet');
-  assert.equal(mode.ruleset_binding, 'mobile_s4_candidate_v2',
-    'BattleMode 登记表的 binding 不归本活改 —— 本活不动 battle-modes.json');
+  // RC-106：绑定的**期望值不再是这里抄的一个字面量**，而是「登记表指向哪份配置，
+  // 那份配置就必须是带 mana/actions 的那一份」。改回 v2 会让 `boundConfig` 变成
+  // 没有 mana 的 v2，下面两条断言当场红 —— 这正是「绑定不许落后于能力」的牙齿。
+  assert.equal(mode.ruleset_binding, V3_CANDIDATE_ID,
+    `标准 PVP 必须绑定带 mana/actions 的 ${V3_CANDIDATE_ID}，实际 ${mode.ruleset_binding}`);
+  const boundConfig = onDisk(mode.ruleset_binding);
+  assert.ok(boundConfig.mana, `被绑定的配置 ${mode.ruleset_binding} 必须声明 mana`);
+  assert.ok(boundConfig.actions, `被绑定的配置 ${mode.ruleset_binding} 必须声明 actions`);
   assert.equal(mode.parameters.mana_pool, 4);
   assert.equal(mode.parameters.faint_mana_cost, 1);
 });

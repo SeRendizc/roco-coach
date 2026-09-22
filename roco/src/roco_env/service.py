@@ -1586,20 +1586,63 @@ class RocoService:
     # 并且它们的输出**不允许**直接塞进教练请求（教练请求由 public_planner_state 产出）。
 
     def battle_new(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
-        """开一局本地练习对局，返回初始私有状态 + 公开面 + 双方合法动作。"""
+        """开一局本地练习对局，返回初始私有状态 + 公开面 + 双方合法动作。
+
+        RC-106：**每方上场几只、按哪份规则结算、哪些未知值按假设走**，都由请求显式给出：
+
+          · `ruleset_config_id`（可选）：这一局用的规则配置。省略 = 当前生效配置
+            （默认仍是 legacy）。标准 PVP 六宠要传 `mobile_s4_candidate_v3`；
+            `data/roco/battle-modes.json` 里 `pvp-standard-six-pet.ruleset_binding`
+            就是它 —— 调用方应当读登记表，而不是在自己那里抄一个字符串。
+          · `team` / `enemy_team`：长度 = **该配置的 `battle_mode.team_size`**（v3 ⇒ 6）。
+            这里不再写死 3：长度不对时 `env.reset` 会按配置给出可读的错误。
+          · `unverified_overrides`（可选）：显式的、带出处的未核验覆盖
+            （v3 的 `energy.initial` 是 UNKNOWN，不给覆盖就 fail closed ⇒ 422）。
+
+        错误分类沿用既有口径：**请求形状**不对是 400；**机制未核验**（缺覆盖、配置里
+        是 UNKNOWN）是 422 `unsupported_effect` —— 那不是调用方写错了请求，
+        而是引擎没有依据。
+        """
         started = time.perf_counter()
         from . import env as env_mod
+        from . import overrides as ov_mod
+        from . import rule_config as rc_mod
 
         rs, early = self._ruleset_ok(body, PRIVATE_TRUST_DOMAIN)
         if early is not None:
             return early
 
+        # 规则配置：显式给就从这里选；不给就沿用当前生效配置（逐位不变的默认路径）。
+        raw_config_id = body.get("ruleset_config_id")
+        if raw_config_id is not None and (not isinstance(raw_config_id, str) or not raw_config_id):
+            return self._answer_envelope(
+                _bad_request("ruleset_config_id 必须是非空字符串（或省略 = 当前生效配置）"),
+                body, started)
+        try:
+            cfg = rc_mod.get_rule_config(raw_config_id)
+        except rc_mod.RuleConfigError as exc:
+            return self._answer_envelope(_bad_request(f"规则配置不可用：{exc}"), body, started)
+
         team = body.get("team")
-        if not isinstance(team, list) or len(team) != 3 or not all(isinstance(x, str) for x in team):
-            return self._answer_envelope(_bad_request("team 必须是 3 个精灵 id 的数组"), body, started)
+        if not isinstance(team, list) or not all(isinstance(x, str) and x for x in team):
+            return self._answer_envelope(
+                _bad_request("team 必须是精灵 id 的数组"), body, started)
         enemy_team = body.get("enemy_team", team)
-        if not isinstance(enemy_team, list) or len(enemy_team) != 3 or not all(isinstance(x, str) for x in enemy_team):
-            return self._answer_envelope(_bad_request("enemy_team 必须是 3 个精灵 id 的数组"), body, started)
+        if not isinstance(enemy_team, list) or not all(isinstance(x, str) and x for x in enemy_team):
+            return self._answer_envelope(
+                _bad_request("enemy_team 必须是精灵 id 的数组"), body, started)
+        # 队伍规模来自**配置**（不是这里的字面量）：长度不对时给出可读的 400，
+        # 而不是让 reset 抛一个没上下文的异常。
+        try:
+            team_size = cfg.require_team_size()
+        except rc_mod.RuleConfigError as exc:
+            return self._answer_envelope(_unsupported("ruleset_config_error", str(exc)), body, started)
+        if len(team) != team_size or len(enemy_team) != team_size:
+            return self._answer_envelope(_bad_request(
+                f"规则配置 {cfg.ruleset_config_id}（模式 {cfg.battle_mode_id}）每方需要 "
+                f"{team_size} 只精灵，实际 team={len(team)} / enemy_team={len(enemy_team)}"),
+                body, started)
+
         seed = body.get("seed", 1)
         if not isinstance(seed, int) or isinstance(seed, bool) or seed < 0:
             return self._answer_envelope(_bad_request("seed 必须是非负整数"), body, started)
@@ -1607,10 +1650,24 @@ class RocoService:
         if loadouts is not None and not isinstance(loadouts, dict):
             return self._answer_envelope(_bad_request("loadouts 必须是 {pet_id: [skill_id...]}"), body, started)
 
+        overrides = body.get("unverified_overrides")
+        if overrides is not None:
+            try:
+                ov_mod.normalize_unverified_overrides(cfg, overrides)
+            except rc_mod.RuleConfigError as exc:
+                return self._answer_envelope(_bad_request(f"unverified_overrides 不合法：{exc}"),
+                                             body, started)
+
         try:
-            state = env_mod.reset(list(team), list(enemy_team), seed=seed, rs=rs, loadouts=loadouts)
+            state = env_mod.reset(list(team), list(enemy_team), seed=seed, rs=rs, loadouts=loadouts,
+                                  config=cfg, unverified_overrides=overrides)
         except (ValueError, KeyError) as exc:
-            return self._answer_envelope(_bad_request(f"无法开局：{type(exc).__name__}: {exc}"), body, started)
+            return self._answer_envelope(_bad_request(f"无法开局：{type(exc).__name__}: {exc}"),
+                                         body, started)
+        except env_mod.fx.UnsupportedEffect as exc:
+            # 机制未核验（例如 v3 的 energy.initial 是 UNKNOWN 且没给覆盖）：
+            # 这不是请求写错了，而是引擎没有依据 —— 422，不是 400。
+            return self._answer_envelope(_unsupported("unverified_rule_value", str(exc)), body, started)
 
         strategy, why = self._sim_strategy(body, started)
         if why is not None:

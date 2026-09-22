@@ -32,10 +32,16 @@ def _any_skill_id(rs):
     raise AssertionError("规则集里一条技能都没有")       # pragma: no cover
 
 
-def _pets(rs, count=3):
-    """取前 count 只精灵 id（与具体名单无关，避免把某只精灵写死进配置测试）。"""
+def _pets(rs, count=6):
+    """取前 count 只精灵 id（与具体名单无关，避免把某只精灵写死进配置测试）。
+
+    RC-106 起默认是 **6**：`mobile_s4_candidate_v2/v3` 绑的 `pvp-standard-six-pet`
+    登记的 `team_size` 就是 6，而 `env.reset` 从这一版起按**配置里的模式规模**校验队伍。
+    拿 3 只去试候选配置会在「队伍规模」那一步就抛，测不到本文件真正要测的
+    「入场能量 UNKNOWN ⇒ fail closed」。
+    """
     ids = []
-    for name in ("寂灭骨龙", "海豹船长", "黑猫巫师", "音速犬", "圆号鱼"):
+    for name in ("寂灭骨龙", "海豹船长", "黑猫巫师", "音速犬", "圆号鱼", "雪影娃娃"):
         try:
             found = rs.pets_by_name(name)
         except Exception:                                   # pragma: no cover - 名单变了
@@ -160,7 +166,10 @@ class EngineUsesConfigTest(unittest.TestCase):
     def setUpClass(cls):
         from roco_env.data import load_ruleset
         cls.rs = load_ruleset()
-        cls.team = _pets(cls.rs)
+        # RC-106：候选配置绑的模式是六宠，所以「按候选开局」要用 6 只；
+        # 而 legacy 绑的 `demo-training-3v3` 仍然是 3 只（默认路径逐位不变）。
+        cls.team = _pets(cls.rs, 6)
+        cls.legacy_team = cls.team[:3]
 
     def setUp(self):
         rc.clear_cache()
@@ -175,7 +184,7 @@ class EngineUsesConfigTest(unittest.TestCase):
 
     def test_default_reset_is_bit_identical(self):
         """默认（legacy）下：入场能量 2、上限 6、回合末回 1 —— 与改动前逐位相同。"""
-        state = renv.reset(self.team, self.team, seed=3, rs=self.rs)
+        state = renv.reset(self.legacy_team, self.legacy_team, seed=3, rs=self.rs)
         self.assertEqual(state.player.field_pet.energy, 2)
         self.assertEqual(state.enemy.field_pet.energy, 2)
         self.assertEqual(state.ruleset_config_id, "legacy_sim_v1")
@@ -269,7 +278,13 @@ class EngineUsesConfigTest(unittest.TestCase):
         self.assertNotEqual(renv.ENERGY_REGEN_PER_TURN, candidate.energy_regen_per_turn)
 
     def test_candidate_unknown_initial_energy_fails_closed(self):
-        """candidate 的入场能量是 unknown：引擎必须报错，**不许**回落到 legacy 的 2。"""
+        """candidate 的入场能量是 unknown：引擎必须报错，**不许**回落到 legacy 的 2。
+
+        RC-106：候选绑的是六宠模式，所以要给 6 只 —— 不然队伍规模那一关先抛，
+        这条判据就被一个不相干的错误挡住了（那样它其实什么都没测）。
+        覆盖机制（`unverified_overrides`）是**显式**的旁路，默认不存在；
+        这里刻意不给，验证的就是「不给就抛」。
+        """
         from roco_env import effects as fx
         with self.assertRaises(fx.UnsupportedEffect) as ctx:
             renv.reset(self.team, self.team, seed=3, rs=self.rs, config="mobile_s4_candidate_v2")
@@ -279,10 +294,10 @@ class EngineUsesConfigTest(unittest.TestCase):
 
     def test_replay_binds_the_recorded_config(self):
         """记录里带了 ruleset_config_id 就按它重放（旧 replay 绑死旧规则）。"""
-        state = renv.reset(self.team, self.team, seed=3, rs=self.rs)
+        state = renv.reset(self.legacy_team, self.legacy_team, seed=3, rs=self.rs)
         record = {
-            "team": list(self.team),
-            "enemy_team": list(self.team),
+            "team": list(self.legacy_team),
+            "enemy_team": list(self.legacy_team),
             "seed": 3,
             "ruleset_config_id": "legacy_sim_v1",
             "actions": [],

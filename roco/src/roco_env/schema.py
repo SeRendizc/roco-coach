@@ -273,6 +273,13 @@ class GameState:
     #: 这一局用的**规则配置 id**（RC-101）。空串 = 由调用方在 reset 前没绑定的旧状态。
     #: 有它，存档/回放才说得清「当时按哪份规则算的」——规则 candidate 切换后这一点是刚需。
     ruleset_config_id: str = ""
+    #: RC-106：这一局**显式声明过的未核验覆盖**（见 `overrides.py`）。
+    #:
+    #: 为什么它必须住在状态里、而不是只活在 `reset` 的参数里：覆盖改变的是这一局
+    #: 实际用的规则值（例如入场初始能量）。存档、回放、公开面、UI 都必须说得清
+    #: 「这一局哪些数是按假设走的」——否则页面只能假装自己知道标准 PVP 的入场能量。
+    #: **空列表时序列化里不出现这个键**，legacy / 无覆盖的对局因此逐位不变。
+    unverified_overrides: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -289,6 +296,10 @@ class GameState:
             "events": [e.to_dict() for e in self.events],
             "log": list(self.log),
             "unsupported": copy.deepcopy(self.unsupported),
+            # RC-106：**只有真的用了覆盖才写这个键**。没有覆盖的对局（含全部 legacy
+            # 调用点）序列化一个字节都不变 —— 8 条 golden 指纹仍然成立。
+            **({"unverified_overrides": copy.deepcopy(self.unverified_overrides)}
+               if self.unverified_overrides else {}),
             "history": copy.deepcopy(self.history),
         }
 
@@ -310,6 +321,8 @@ class GameState:
                     for e in d.get("events", [])],
             log=list(d.get("log") or []),
             unsupported=copy.deepcopy(d.get("unsupported") or []),
+            # 老存档没有这个键 → 空列表（= 当时没有用任何覆盖），不是「覆盖未知」。
+            unverified_overrides=copy.deepcopy(list(d.get("unverified_overrides") or [])),
             history=copy.deepcopy(d.get("history") or []),
         )
 

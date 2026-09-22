@@ -48,7 +48,7 @@
       "label": "标准 PVP 六宠阵容工坊（候选模式）",
       "status": "CANDIDATE",
       "confidence": "CROSS_SOURCE_SUPPORTED",
-      "ruleset_binding": "mobile_s4_candidate_v2",
+      "ruleset_binding": "mobile_s4_candidate_v3",
       "parameters": {
         "team_size": 6,
         "active_count": 1,

@@ -2960,7 +2960,7 @@
             ],
             "min_energy": 0,
             "max_energy": 2,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -3003,11 +3003,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -4854,7 +4854,7 @@
             ],
             "min_energy": 0,
             "max_energy": 4,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -4953,11 +4953,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -7140,7 +7140,7 @@
             ],
             "min_energy": 0,
             "max_energy": 4,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -7323,11 +7323,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -9719,7 +9719,7 @@
             ],
             "min_energy": 0,
             "max_energy": 7,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -9902,11 +9902,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -12494,7 +12494,7 @@
             ],
             "min_energy": 0,
             "max_energy": 4,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -12593,11 +12593,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -15696,7 +15696,7 @@
             ],
             "min_energy": 0,
             "max_energy": 7,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -15879,11 +15879,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -20808,7 +20808,7 @@
             ],
             "min_energy": 1,
             "max_energy": 7,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -20991,11 +20991,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -23892,7 +23892,7 @@
             ],
             "min_energy": 0,
             "max_energy": 7,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -24103,11 +24103,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -26780,7 +26780,7 @@
             ],
             "min_energy": 0,
             "max_energy": 7,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -26991,11 +26991,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [
@@ -32782,7 +32782,7 @@
             ],
             "min_energy": 0,
             "max_energy": 4,
-            "ruleset_config_id": "mobile_s4_candidate_v2",
+            "ruleset_config_id": "mobile_s4_candidate_v3",
             "ruleset_energy_cap": 10,
             "ruleset_energy_cap_confidence": "CROSS_SOURCE_SUPPORTED"
           },
@@ -32881,11 +32881,11 @@
               "note": "队内全部技能槽的能耗值（逐条来自 skills.json）"
             },
             {
-              "source_file": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+              "source_file": "data/roco/rulesets/mobile-s4-candidate-v3.json",
               "pointer": "energy.max.value",
               "field": "value",
               "value": 10,
-              "note": "本次请求所用规则配置（mobile_s4_candidate_v2）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
+              "note": "本次请求所用规则配置（mobile_s4_candidate_v3）里的能量上限；它自注 confidence=CROSS_SOURCE_SUPPORTED、value_status=CANDIDATE_HYPOTHESIS，台账 energy.max 记 ENGINE_HYPOTHESIS/CROSS_SOURCE_SUPPORTED 两说"
             }
           ],
           "unverified": [

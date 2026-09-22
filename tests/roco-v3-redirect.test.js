@@ -200,7 +200,21 @@ test('BattleMode：候选模式的 team_size 不得来自「当前 Demo 的 48 �
   const standard = modes.modes.find((m) => m.id === 'pvp-standard-six-pet');
   assert.equal(demo.status, 'LEGACY_FIXTURE');
   assert.equal(demo.ruleset_binding, 'legacy_sim_v1');
-  assert.equal(standard.ruleset_binding, 'mobile_s4_candidate_v2');
+  // RC-106：标准 PVP 的绑定从 v2 换成 v3（真正带 mana/actions 的那份）。
+  // 判据不写死 id，而是**读登记表**：绑定指向哪份配置，那份配置就必须存在、
+  // 且必须声明 mana/actions —— 「绑定落后于能力」是这一轮真正修掉的坑。
+  const boundPath = `data/roco/rulesets/${standard.ruleset_binding.replace(/_/g, '-')}.json`;
+  const bound = readJson(boundPath);
+  assert.equal(bound.ruleset_config_id, standard.ruleset_binding,
+    `${standard.id} 绑的 ${standard.ruleset_binding} 与 ${boundPath} 不一致`);
+  assert.ok(bound.mana, `被绑定的配置 ${standard.ruleset_binding} 必须声明 mana`);
+  assert.ok(bound.actions, `被绑定的配置 ${standard.ruleset_binding} 必须声明 actions`);
+  assert.equal(bound.is_default, false, '被绑定的候选不得是默认配置');
+  // v2 仍然在磁盘上（历史候选：能开局但没有 mana/actions），只作对照
+  const v2 = readJson('data/roco/rulesets/mobile-s4-candidate-v2.json');
+  assert.equal(v2.ruleset_config_id, 'mobile_s4_candidate_v2');
+  assert.equal(v2.mana, undefined, 'v2 是「没有 mana 系统」的那一半对照');
+  assert.equal(v2.actions, undefined);
   for (const mode of modes.modes) {
     for (const [key, value] of Object.entries(mode.parameters ?? {})) {
       assert.notEqual(value, 48,

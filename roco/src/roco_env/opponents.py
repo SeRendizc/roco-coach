@@ -831,6 +831,14 @@ class MatchRecord:
     actions: List[Any] = field(default_factory=list)
     observation_trace: List[Dict[str, Any]] = field(default_factory=list)
     unsupported: List[Dict[str, Any]] = field(default_factory=list)
+    #: RC-106：这一局绑的规则配置 id 与用过的未核验覆盖。
+    #:
+    #: 为什么必须进记录：六宠候选局的 `energy.initial` 是 UNKNOWN，靠一条显式覆盖
+    #: 才开得了局。回放时不带上同一份配置 + 同一条覆盖，`reset()` 会 fail closed，
+    #: 那份记录就永远重放不了 —— 而「可回放」正是这份记录存在的理由。
+    #: 两者都有默认值（空），所以既有的 MatchRecord 构造点与旧记录逐字不变。
+    ruleset_config_id: str = ""
+    unverified_overrides: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -850,6 +858,12 @@ class MatchRecord:
             "actions": copy.deepcopy(self.actions),
             "observation_trace": copy.deepcopy(self.observation_trace),
             "unsupported": copy.deepcopy(self.unsupported),
+            # RC-106：**只在非默认配置时才写**（legacy 记录的 to_dict 逐字不变）。
+            **({"ruleset_config_id": self.ruleset_config_id}
+               if self.ruleset_config_id
+               and self.ruleset_config_id != renv._rule_config.DEFAULT_RULE_CONFIG_ID else {}),
+            **({"unverified_overrides": copy.deepcopy(self.unverified_overrides)}
+               if self.unverified_overrides else {}),
         }
 
     @staticmethod
@@ -873,6 +887,8 @@ class MatchRecord:
             actions=copy.deepcopy(d.get("actions") or []),
             observation_trace=copy.deepcopy(d.get("observation_trace") or []),
             unsupported=copy.deepcopy(d.get("unsupported") or []),
+            ruleset_config_id=d.get("ruleset_config_id") or "",
+            unverified_overrides=copy.deepcopy(list(d.get("unverified_overrides") or [])),
         )
 
     def replay_plan(self) -> Dict[str, Any]:
@@ -881,18 +897,28 @@ class MatchRecord:
         **必须带上 `loadouts`。** 合法动作按配招枚举，缺了它回放会退回规范配招，
         非规范配招的技能就不再合法（实测抛「行动不合法」）。
         记录里已经存了 `self.loadouts`，直接用。
+
+        RC-106：**也必须带上 `ruleset_config_id` 与 `unverified_overrides`。**
+        只带 loadouts 的记录在候选配置下会退回到「当前生效配置」（默认 legacy），
+        于是 6 只队伍对不上 3 只的场地、`energy.initial` 又是 UNKNOWN ——
+        两处都会抛。**默认配置那一份不写这个键**（legacy 记录的 replay_plan 逐字不变）。
         """
-        return {
+        plan = {
             "team": list(self.team_a),
             "enemy_team": list(self.team_b),
             "seed": self.seed,
             # 这一局双方**各自队伍**的配招。`reset()` 会把这份 dict 分别对
-            # team_a 与 team_b 校验（每边只认自己那三只），所以两边都要在，
+            # team_a 与 team_b 校验（每边只认自己那几只），所以两边都要在，
             # 但不属于任何一边的 id 会让它直接判「配招提到了不在队伍里的 pet」。
             "loadouts": {k: list(v) for k, v in (self.loadouts or {}).items()
                          if k in set(self.team_a) or k in set(self.team_b)},
             "actions": copy.deepcopy(self.actions),
         }
+        if self.ruleset_config_id and self.ruleset_config_id != renv._rule_config.DEFAULT_RULE_CONFIG_ID:
+            plan["ruleset_config_id"] = self.ruleset_config_id
+        if self.unverified_overrides:
+            plan["unverified_overrides"] = copy.deepcopy(self.unverified_overrides)
+        return plan
 
 
 def _winner_of(state) -> str:
@@ -936,6 +962,8 @@ def play_match(
     *,
     loadouts: Optional[Dict[str, Sequence[str]]] = None,
     turn_limit: int = 300,
+    config: Optional[Any] = None,
+    unverified_overrides: Optional[Sequence[Any]] = None,
 ) -> MatchRecord:
     """让两个策略打完整一局，返回结构化记录。
 
@@ -943,12 +971,20 @@ def play_match(
     - `turn_limit` 是回合上限；撞上上限记为 `truncated=True`（不是错误）。
     - 记录里带双方策略的**名字与版本**、规则集 id 与快照指纹、实际配招、
       每回合的行动，以及每个战斗回合**决策前**的观察哈希。
+
+    RC-106：`config` / `unverified_overrides` 原样透给 `env.reset`。
+    六宠标准 PVP 局必须显式给这两样（v3 的 `energy.initial` 是 UNKNOWN，不给覆盖
+    就 fail closed），两项都省略时行为与改动前**逐位相同**（legacy 3v3 默认路径）。
+    策略侧**一个字节都没改**：它们从来只按观察 + 合法动作决策，而合法动作在
+    6 只队伍下同样是引擎枚举出来的（`env.legal_actions`），所以「6 只是否合法」
+    不需要策略知道任何新模式概念。
     """
     a = get_strategy(strat_a) if isinstance(strat_a, str) else strat_a
     b = get_strategy(strat_b) if isinstance(strat_b, str) else strat_b
     bind_ruleset(rs)
 
-    state = renv.reset(list(team_a), list(team_b), seed=seed, rs=rs, loadouts=loadouts)
+    state = renv.reset(list(team_a), list(team_b), seed=seed, rs=rs, loadouts=loadouts,
+                       config=config, unverified_overrides=unverified_overrides)
     fingerprint = rs.snapshot_fingerprint()
     record = MatchRecord(
         seed=seed,
@@ -965,6 +1001,8 @@ def play_match(
         battle_turns=0,
         total_turns=0,
     )
+    record.ruleset_config_id = getattr(state, "ruleset_config_id", "") or ""
+    record.unverified_overrides = [dict(e) for e in (state.unverified_overrides or [])]
 
     strategies = {"player": a, "enemy": b}
     battle_turns = 0

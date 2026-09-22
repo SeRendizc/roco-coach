@@ -169,6 +169,49 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
             return f"{side}用{skill_name()}回收了 {amount} 点能量{tail}。"
         return f"{side}用{skill_name()}回收能量，但已达上限{tail}。"
 
+    # ── RC-106 补的三类：六宠标准 PVP 局里真的会出现，但一直没有句子 ──────────
+    #
+    # 口径与全文一致：只陈述**事实**（做了哪个动作、数值是多少、哪一条还没核验），
+    # 不写「好/坏/该不该」—— 引擎没有依据判断一个动作好不好，页面也不该替它判断。
+
+    if kind == "charge":
+        # `env._use_charge` 的 detail：{side, energy_gained, energy}
+        gained = _num(detail.get("energy_gained"))
+        now = _num(detail.get("energy"))
+        if gained is not None and now is not None:
+            body = f"{side}选择聚能，回复 {gained} 点能量（当前 {now} 点）"
+        elif now is not None:
+            body = f"{side}选择聚能（当前 {now} 点能量）"
+        else:
+            body = f"{side}选择聚能"
+        # 「聚能是否可突破上限 / 无合法技能时是否自动聚能」是 MC-E02 未解项：
+        # 引擎按「夹到能量上限」处理，这一点必须写在句子里，不许说成规则。
+        return body + "（聚能回能上限与自动聚能未核验，本局按夹到能量上限处理）。"
+
+    if kind == "mana_loss":
+        # `env._settle_faint_mana` 的 detail：{side, faint_cost, mana}
+        # 注意这里的 side 是**力竭的那一方**，不是视角方 —— 与 faint 事件同一口径。
+        cost = _num(detail.get("faint_cost"))
+        left = _num(detail.get("mana"))
+        if cost is not None and left is not None:
+            head = f"{side}的精灵力竭，失去 {cost} 点魔力（剩余 {left} 点）"
+        elif cost is not None:
+            head = f"{side}的精灵力竭，失去 {cost} 点魔力"
+        elif left is not None:
+            head = f"{side}的精灵力竭，魔力剩余 {left} 点"
+        else:
+            head = f"{side}的精灵力竭，魔力发生变化"
+        # 台账等级是 CROSS_SOURCE_SUPPORTED（不是官方原文），所以句子标出来。
+        return head + "（力竭扣魔力未实机核实，本条为候选口径）。"
+
+    if kind == "surrender":
+        # `env._surrender` 的 detail：{side, result}
+        # 句子只说「哪一方投降、对局结束」——**不**把 result 翻成「我方获胜/落败」：
+        # 那是视角相关的话，而这个模板拿不到安全的视角（side 是投降的那一方）。
+        # 「投降方判负」这条语义本身是 ENGINE_HYPOTHESIS（台账没有条目），
+        # 所以也不在这里把它说成规则。
+        return f"{side}投降，对局结束（投降的结算语义未核验，本局按投降方判负处理）。"
+
     if kind == "effects_registered_unsupported":
         effect_count = detail.get("parsed_effects")
         span_count = detail.get("unclaimed_spans")
@@ -286,4 +329,8 @@ KNOWN_EVENT_KINDS = frozenset({
     "energy_gain", "effects_registered_unsupported",
     # 效果层/特性层直接塞进事件列表的那一类（扁平形状，没有 `detail`）
     "trait",
+    # RC-106 补：`env.py` 在 RC-105 就产出了这三个 kind（聚能 / 力竭扣魔力 / 投降），
+    # 但模板一直缺席 —— 六宠标准 PVP 局跑起来时它们会以「本页还没有它的中文说法」
+    # 出现在玩家面前。补模板的同时把这三个名字登记进来，测试因此才咬得住。
+    "charge", "mana_loss", "surrender",
 })

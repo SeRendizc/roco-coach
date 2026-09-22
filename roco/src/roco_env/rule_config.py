@@ -8,12 +8,11 @@
 纪律：
 
   · **默认必须是 `legacy_sim_v1`**：默认路径要跟当前引擎逐位相同，否则所有既有
-    replay / 夹具 / 产物当场失效。（`env.py` 的默认行为由 `ROCO_RULE_CONFIG` 或显式
-    参数改动，**不做**自动探测。）
+    replay / 夹具 / 产物当场失效。
   · **fail closed**：缺字段、未知配置 id、台账指纹不符、confidence 与台账不一致、
     UNKNOWN 字段却带一个「看起来合理」的值 —— 全部抛 `RuleConfigError`，不猜默认值。
-  · **unknown 就是 unknown**：`null` 不会被替换成任何数字；真要用到它的调用方
-    必须显式处理（例如 `require_energy_initial()` 会抛错并指向待录 microcase）。
+  · **unknown 就是 unknown**：`null` 不会被替换成任何数字；真要用到它的调用方必须显式
+    处理（`require_energy_initial()` 会抛错，`require_team_size()` 会按模式参数校验）。
 
 纯 stdlib，Python 3.9 兼容。
 """
@@ -36,12 +35,9 @@ CANDIDATE_RULE_CONFIG_ID = "mobile_s4_candidate_v2"
 #: RC-105 的候选配置 id：第一个声明「魔力系统 + 合法动作裁剪」的配置。同样是候选。
 MANA_ACTIONS_CANDIDATE_ID = "mobile_s4_candidate_v3"
 
-#: 声明 `mana` / `actions` 的配置白名单（RC-105）。
-#:
-#: 只有名单里的配置**必须**写全这两块；legacy 与 v2 显式登记为「没有魔力系统、不裁剪
-#: 合法动作」。把新字段直接塞进 `REQUIRED_PATHS` 会让两份既有配置当场加载失败（等于改掉
-#: 默认行为）或逼人给 legacy 补一个假 0 —— 所以「谁必须有」是一份显式名单。
-#: 名单之外的配置**如果**写了这两块，一样会被逐字段校验。
+#: 声明 `mana` / `actions` 的配置白名单（RC-105）。只有名单里的配置**必须**写全这两块；
+#: legacy 与 v2 显式登记为「没有魔力系统、不裁剪合法动作」。把新字段塞进 `REQUIRED_PATHS`
+#: 会让两份既有配置当场加载失败（等于改掉默认行为）或逼人给 legacy 补一个假 0。
 MANA_ACTIONS_CONFIG_IDS = (MANA_ACTIONS_CANDIDATE_ID,)
 
 #: RC-105：`mana` / `actions` 里每个字段都必须写全的路径。
@@ -190,7 +186,7 @@ def _ledger_index(ledger: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     return index
 
 
-def _battle_mode_ids() -> set:
+def _read_battle_modes() -> Dict[str, Any]:
     path = os.path.join(_repo_root(), BATTLE_MODES_REL)
     try:
         with open(path, "r", encoding="utf-8") as fh:
@@ -199,10 +195,61 @@ def _battle_mode_ids() -> set:
         raise RuleConfigError(f"读不到 BattleMode 登记表 {BATTLE_MODES_REL}：{exc}") from exc
     except ValueError as exc:
         raise RuleConfigError(f"BattleMode 登记表不是合法 JSON：{exc}") from exc
-    ids = {mode.get("id") for mode in registry.get("modes", []) if mode.get("id")}
-    if not ids:
+    if not registry.get("modes"):
         raise RuleConfigError("BattleMode 登记表里一个模式都没有")
-    return ids
+    return registry
+
+
+#: 登记表的进程内缓存：它是仓库里的静态事实，而 RC-106 起 `validate_config` 每次都要问
+#: 它模式的 team_size —— 不缓存的话审计路径会退化成 N 次文件读。
+_BATTLE_MODES_CACHE: Dict[str, Any] = {}
+
+
+def battle_mode_registry() -> Dict[str, Any]:
+    """BattleMode 登记表原文（只读）。"""
+    if "registry" not in _BATTLE_MODES_CACHE:
+        _BATTLE_MODES_CACHE["registry"] = _read_battle_modes()
+    return _BATTLE_MODES_CACHE["registry"]
+
+
+def _battle_mode_ids() -> set:
+    modes = battle_mode_registry().get("modes", []) or []
+    return {mode.get("id") for mode in modes if mode.get("id")}
+
+
+def battle_mode_entry(mode_id: str) -> Dict[str, Any]:
+    """按 id 取一条模式登记；不存在就抛错（不返回 None 让调用方自己猜）。"""
+    for mode in battle_mode_registry().get("modes", []) or []:
+        if mode.get("id") == mode_id:
+            return mode
+    raise RuleConfigError(f"BattleMode {mode_id!r} 不在登记表 {BATTLE_MODES_REL} 里")
+
+
+def bound_config_id_for_mode(mode_id: str) -> Optional[str]:
+    """登记表给这个模式登记的 `ruleset_binding`（这个模式按哪份规则配置结算）。
+
+    **为什么引擎要读它**：带 mana/actions 的是 v3 —— 绑定一旦落后（RC-105 时它指向
+    v2），服务端与页面就会按「能开局但没有魔力系统」的口径去开标准 PVP 的局。
+    读成**唯一可核对的那一处**，两侧测试因此断言同一个事实，而不是各抄一份字面量。
+
+    它**不**参与 `reset()` 的配置选择：显式传入的 `config` 永远优先。
+    """
+    entry = battle_mode_entry(mode_id)
+    binding = entry.get("ruleset_binding")
+    return str(binding) if binding else None
+
+
+def mode_team_size(mode_id: str) -> Optional[int]:
+    """登记表里这个模式的 `team_size`（`None` = 登记为「不适用」，例如 PVE）。"""
+    entry = battle_mode_entry(mode_id)
+    value = (entry.get("parameters") or {}).get("team_size")
+    if value is None:
+        return None
+    if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+        raise RuleConfigError(
+            f"BattleMode {mode_id} 的 parameters.team_size 不是正整数（实际 {value!r}）"
+        )
+    return value
 
 
 # ── 叶子 / 值 ───────────────────────────────────────────────────────────
@@ -406,10 +453,19 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
     _validate_mana(config, bad)
     _validate_actions(config, bad)
 
-    # BattleMode 必须是登记表里真实存在的模式
+    # BattleMode 必须是登记表里真实存在的模式；模式规模也以登记表为唯一事实源
     mode_id = _dig(config, "battle_mode.id")
     if mode_id is not _MISSING and mode_id not in _battle_mode_ids():
         bad(f"battle_mode.id={mode_id!r} 不在 BattleMode 登记表里")
+    elif mode_id is not _MISSING:
+        # RC-106：配置里的模式规模必须与登记表一致 —— 这条判据放在校验器里（生成器与
+        # 测试共用那一份），坏值因此根本落不了盘。
+        declared = _dig(config, "battle_mode.team_size")
+        expected = mode_team_size(str(mode_id)) if isinstance(declared, dict) else None
+        if expected is not None and declared.get("value") != expected:
+            bad(f"battle_mode.team_size={declared.get('value')!r} 与 BattleMode 登记表里 "
+                f"{mode_id} 的 parameters.team_size={expected} 不一致 —— 模式规模只有一个"
+                "事实源（登记表），配置必须跟着它生成")
 
     # 逐叶子核对台账引用
     index = _ledger_index(ledger)
@@ -543,6 +599,10 @@ class RuleConfig:
     derived_from_ledger_sha256: str
     status: str
     battle_mode_id: str
+    #: RC-106：这个模式**每方上场的精灵数**（生成器从 `battle-modes.json` 抄进来）。
+    #: 于是「引擎按几宠开局」是**模式参数**：v3 / `pvp-standard-six-pet` ⇒ 6，
+    #: `legacy_sim_v1` / `demo-training-3v3` ⇒ 3。`None` = 配置没声明（不该发生）。
+    battle_mode_team_size: Optional[int]
     energy_max: int
     energy_regen_per_turn: int
     #: `None` = **未知**（不是 0）。要用的调用方必须显式处理。
@@ -623,6 +683,20 @@ class RuleConfig:
             )
         return self.energy_initial
 
+    def require_team_size(self) -> int:
+        """这个模式每方上场几只（RC-106）：来自配置的 `battle_mode.team_size`。
+
+        缺失或非正整数一律抛错 —— 「这个模式打几 v 几」不能靠猜，否则标准 PVP 会被
+        静默地按训练场的 3v3 跑（那正是 RC-106 要修的阻断③）。
+        """
+        value = self.battle_mode_team_size
+        if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+            raise RuleConfigError(
+                f"规则配置 {self.ruleset_config_id} 的 battle_mode.team_size 不是正整数"
+                f"（实际 {value!r}）—— 引擎不能靠猜「这个模式打几 v 几」"
+            )
+        return value
+
     def require_speed_tie(self) -> str:
         """拿同速平手策略；**UNKNOWN 就抛错**，绝不回落到随机数。
 
@@ -699,6 +773,15 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
             "不被本引擎支持：那等于允许回合末存在未声明阶段（RC-103 fail closed）"
         )
 
+    # ── RC-106：模式规模（team_size）必须是正整数 ─────────────────────────
+    # 「引擎按几宠开局」从这一版起由**模式参数**决定。与登记表的一致性由
+    # `validate_config` 判（生成器与测试共用的那份判据），这里只判形状。
+    team_size = _leaf_value(config, "battle_mode.team_size")
+    if not isinstance(team_size, int) or isinstance(team_size, bool) or team_size <= 0:
+        raise RuleConfigError(
+            f"规则配置 {ruleset_config_id} 的 battle_mode.team_size 必须是正整数，实际 {team_size!r}"
+        )
+
     # ── RC-105：mana / actions（只有声明了它们的配置才有值，其余一律 None）──
     # 取值域判据上面已经把关过；这一段只管读成字段，尤其要保住 None 与 0 的区别。
     raw_mana = config.get("mana")
@@ -727,6 +810,7 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         derived_from_ledger_sha256=config["derived_from_ledger_sha256"],
         status=str(config.get("status", "")),
         battle_mode_id=config["battle_mode"]["id"],
+        battle_mode_team_size=_leaf_value(config, "battle_mode.team_size"),
         energy_max=_leaf_value(config, "energy.max"),
         energy_regen_per_turn=_leaf_value(config, "energy.regen.per_turn"),
         energy_initial=_leaf_value(config, "energy.initial"),
@@ -796,8 +880,9 @@ def get_rule_config(override: Optional[Any] = None) -> RuleConfig:
 
 
 def clear_cache() -> None:
-    """清掉进程内缓存（测试与切换配置时用）。"""
+    """清掉进程内缓存（测试与切换配置时用；登记表缓存一起清）。"""
     _CACHE.clear()
+    _BATTLE_MODES_CACHE.clear()
 
 
 def summarize(config: RuleConfig) -> Dict[str, Any]:
@@ -808,6 +893,7 @@ def summarize(config: RuleConfig) -> Dict[str, Any]:
         "path": config.path,
         "status": config.status,
         "battle_mode_id": config.battle_mode_id,
+        "battle_mode_team_size": config.battle_mode_team_size,
         "energy_max": config.energy_max,
         "energy_regen_per_turn": config.energy_regen_per_turn,
         "energy_initial": config.energy_initial,

@@ -46,6 +46,7 @@ from . import effects as fx
 from . import parse
 from . import traits as tr
 from . import data as _data
+from . import overrides as _overrides
 from . import rule_config as _rule_config
 from .data import Ruleset, load_ruleset
 from .rule_config import RuleConfig, RuleConfigError
@@ -66,9 +67,8 @@ from .schema import (
 
 # ── 规则常量：**唯一事实源是 data/roco/rulesets/*.json**（RC-101）──────────
 #
-# 以前这三个值写死在本文件里（`ENERGY_MAX = 6` / `ENERGY_REGEN_PER_TURN = 1` /
-# 「入场初始 2」），JS 侧与页面文案各抄了一份；规则 candidate 一变，没有一个地方
-# 说得清谁跟着变。现在：
+# 以前这三个值写死在本文件里（能量上限 6 / 回合末回能 1 / 入场初始 2），
+# JS 侧与页面文案各抄了一份；规则 candidate 一变，没有一个地方说得清谁跟着变。现在：
 #
 #   · 数值只存在于 `data/roco/rulesets/legacy-sim-v1.json`（默认）与
 #     `data/roco/rulesets/mobile-s4-candidate-v2.json`（候选，未验证，**不得**当默认）；
@@ -149,39 +149,58 @@ def reset(
     rs: Optional[Ruleset] = None,
     loadouts: Optional[Dict[str, Sequence[str]]] = None,
     config: Optional[Any] = None,
+    unverified_overrides: Optional[Sequence[Any]] = None,
 ) -> GameState:
     """开始一局。
 
-    `team` 是 3 只精灵的 id（手游完整阵容是 6 只，但训练场用 3v3，见实施书 §4.4）。
-    队伍与配招的合法性在 `validate_team` 里统一检查。
+    **队伍规模由规则配置决定**（RC-106）：`config.battle_mode.team_size`（v3 /
+    `pvp-standard-six-pet` ⇒ 6；`legacy_sim_v1` / `demo-training-3v3` ⇒ 3，默认路径
+    逐位不变）。以前这里写死 3 —— 那让「标准 PVP 六宠」永远开不了局。
 
     `loadouts` 是每只精灵**实际带上场的配招**。省略时用 M1 选定的规范配招
-    （`Ruleset.candidate_moveset`）。这一点很重要：图鉴说「学得到」不等于
-    「这场带得上」——对局里一只精灵只带 4 个技能，所以合法动作必须按配招算，
-    否则算出来的分支在真实对局里根本不存在。
+    （`Ruleset.candidate_moveset`）。图鉴说「学得到」不等于「这场带得上」：
+    合法动作必须按配招算，否则分支在真实对局里根本不存在。
 
-    `config` 是规则配置（id 字符串或 `RuleConfig`）。省略 = 当前生效配置，
-    默认 `legacy_sim_v1`（`ROCO_RULE_CONFIG` 可改）。这一局用过的配置 id 会写进
+    `config` 是规则配置（id 字符串或 `RuleConfig`）。省略 = 当前生效配置，默认
+    `legacy_sim_v1`（`ROCO_RULE_CONFIG` 可改）。这一局用过的配置 id 会写进
     `state.log` 与序列化结果，这样**旧 replay 才绑得住它当时用的那份规则**。
+
+    `unverified_overrides` 是**显式的、带出处的未核验覆盖**（RC-106，见
+    `overrides.py`）：候选配置里 `energy.initial` 是 `null`（UNKNOWN，MC-E04 未录制）。
+    它**不写回配置**、**不改变 legacy 的回退链** —— 没有覆盖时这里依旧 fail closed。
     """
     cfg = _rule_config.get_rule_config(config)
     rs = rs or load_ruleset()
-    if len(team) != 3:
-        raise ValueError("训练场是 3v3，需要恰好 3 只精灵")
-    if len(set(team)) != 3:
-        raise ValueError("同一只精灵不能重复上场")
+    # ── RC-106：模式规模来自配置（不再写死 3）；未核验覆盖开局前一次性校验 ──
+    # `require_team_size()` 在配置缺这个值/不是正整数时抛错（不猜）；覆盖的判据在
+    # `overrides.py`（必须带 {path, value, confidence:'ENGINE_HYPOTHESIS', reason,
+    # microcase_id}，且只能落在配置声明为 UNKNOWN 的字段上）。
+    team_size = cfg.require_team_size()
+    resolved_overrides = _overrides.normalize_unverified_overrides(cfg, unverified_overrides)
+    overrides_payload = _overrides.describe(resolved_overrides)
+    # 上面那两行把「队伍规模」与「覆盖」都在开局前定死：模式规模来自配置，覆盖只能
+    # 落在配置声明为 UNKNOWN 的字段上。下面的校验与建队因此只读这两个结果。
+
+    if len(team) != team_size:
+        raise ValueError(
+            f"规则配置 {cfg.ruleset_config_id}（模式 {cfg.battle_mode_id}）每方需要恰好 "
+            f"{team_size} 只精灵，实际 {len(team)} 只"
+        )
+    if len(set(team)) != team_size:
+        raise ValueError(f"同一只精灵不能重复上场（每方 {team_size} 只，不许重复）")
     for pid in team:
         rs.pet(pid)                      # 不存在就抛 RulesetError
 
     enemy = list(enemy_team) if enemy_team else list(team)
-    if len(enemy) != 3:
-        raise ValueError("对手也必须是 3 只")
+    if len(enemy) != team_size:
+        raise ValueError(
+            f"对手也必须是 {team_size} 只（模式 {cfg.battle_mode_id}），实际 {len(enemy)} 只"
+        )
 
     # 配招要**同时**对双方校验：`loadouts` 是一份合并的 {pet_id: [...]}，
-    # 里面有对手那三只的配招。只按我方队伍校验会把它报成
-    # 「配招提到了不在队伍里的 pet_xxx」——记录里带着两边配招时就会炸
-    # （做 E04 的回放测试时撞出来的）。
-    problems = validate_team(rs, team, loadouts, also_in=list(enemy))
+    # 里面有对手那几只的配招。只按我方队伍校验会把它报成
+    # 「配招提到了不在队伍里的 pet_xxx」——记录里带着两边配招时就会炸。
+    problems = validate_team(rs, team, loadouts, also_in=list(enemy), team_size=team_size)
     if problems:
         raise ValueError("队伍不合法：" + "；".join(problems))
 
@@ -193,6 +212,9 @@ def reset(
     )
     # 这一局绑定的规则配置：写进 state，replay / 序列化 / 报告都读得到。
     state.ruleset_config_id = cfg.ruleset_config_id
+    # 这一局用过的未核验覆盖：**如实带进状态**，公开面与 UI 都读它。
+    # 空列表时序列化里不会出现这个键（legacy 逐位不变）。
+    state.unverified_overrides = overrides_payload
     # 配招：显式给就用，否则用规范配招
     for side, ids in ((state.player, team), (state.enemy, enemy)):
         side.loadouts = {}
@@ -201,9 +223,10 @@ def reset(
             side.loadouts[pid] = chosen
 
     # 入场初始能量来自配置。候选配置里它是 **UNKNOWN**（null）：那时**不许**回落到
-    # legacy 的 2 —— 那是编数据。缺值就 fail closed，并指出待录的 microcase。
+    # legacy 的 2 —— 那是编数据。缺值就 fail closed，并指出待录的 microcase；
+    # RC-106：除非调用方**显式**给了一条带出处的覆盖（它只覆盖这一个数）。
     try:
-        initial_energy = cfg.require_energy_initial()
+        initial_energy = _overrides.resolve_int(cfg, "energy.initial", resolved_overrides)
     except RuleConfigError as exc:
         raise fx.UnsupportedEffect("入场初始能量", str(exc)) from exc
 
@@ -331,9 +354,8 @@ def legal_actions(state: GameState, rs: Ruleset, side: str,
             continue          # 术语 1016
         emit(Action(kind=ACTION_SKILL, skill_id=sid))
 
-    # RC-105：聚能只在这份配置**声明**它是合法动作类时出现。
-    # 不声明（legacy / v2）时连尝试都不尝试 —— 否则 `emit` 会在 legacy 下把聚能加进去，
-    # 那就是凭空给默认路径加了一个动作。
+    # RC-105：聚能只在这份配置**声明**它是合法动作类时出现。不声明（legacy / v2）时
+    # 连尝试都不尝试 —— 否则 `emit` 会在 legacy 下把聚能加进去（凭空多一个动作）。
     if allowed is not None and ACTION_CHARGE in allowed:
         emit(Action(kind=ACTION_CHARGE))
 
@@ -366,20 +388,27 @@ _EMPTY = _EmptyLearnset()
 
 def validate_team(rs: Ruleset, team: Sequence[str],
                   loadouts: Optional[Dict[str, Sequence[str]]] = None,
-                  also_in: Optional[Sequence[str]] = None) -> List[str]:
+                  also_in: Optional[Sequence[str]] = None,
+                  team_size: int = 3) -> List[str]:
     """校验队伍与配招，返回问题列表（空 = 合法）。
 
     配招规则来自 M1 的数据：技能必须在该精灵的学习表里。
     「6 选 4」的形态属于 UI 约定，本函数只查**可学性**。
 
-    `also_in` 是「不在 team 里、但配招合法」的精灵 id（典型是**对手**那三只）：
+    `team_size` 是**这个模式每方上场几只**（RC-106）。默认 3 是给不经过 `reset()`
+    的调用点（`service.team_evaluate` 的阵容评估、审计脚本）保持既有行为的：
+    它们手上没有模式参数。正式开局路径上 `reset()` 一定传 `cfg.require_team_size()`。
+
+    `also_in` 是「不在 team 里、但配招合法」的精灵 id（典型是**对手**那几只）：
     `loadouts` 常是一份合并了双方的 dict，只按我方队伍校验会把对手配招
     误报成「提到了不在队伍里的 pet」。
     """
     problems: List[str] = []
-    if len(team) != 3:
-        problems.append(f"队伍必须是 3 只，实际 {len(team)}")
-    if len(set(team)) != 3:
+    if not isinstance(team_size, int) or isinstance(team_size, bool) or team_size <= 0:
+        raise ValueError(f"team_size 必须是正整数，实际 {team_size!r}")
+    if len(team) != team_size:
+        problems.append(f"队伍必须是 {team_size} 只，实际 {len(team)}")
+    if len(set(team)) != len(team):
         problems.append("队伍里有重复精灵")
     for pid in team:
         if pid not in rs.pets:
@@ -646,12 +675,9 @@ def step_joint(
 def _advance_after_turn(state: GameState, cfg: RuleConfig) -> None:
     """回合收尾：判胜负 / 进补位 / 推进回合（RC-105 抽出来的**同一个实现**）。
 
-    抽出成函数只是为了「两条路径不许各写一份」；语义与改动前**逐字相同**，除了
-    下面这一条新增的分支：
-
-      RC-105：在**声明了 `mana` 或 `actions` 的配置**下，结算过程中可能已经判出胜负
-      （魔力归零、投降）——那时**不再覆盖**它。legacy / v2 没有这两块，`state.result`
-      只可能是结算途中的逃跑结果，走的仍然是原来那条路径，逐位不变。
+    语义与改动前**逐字相同**，只有一条新增分支：在**声明了 `mana` 或 `actions` 的配置**下，
+    结算途中可能已经判出胜负（魔力归零、投降）——那时**不再覆盖**它。legacy / v2 没有这两块，
+    `state.result` 只可能是结算途中的逃跑结果，走的仍然是原来那条路径，逐位不变。
     """
     if state.result is not None and (cfg.has_mana or cfg.allowed_kinds is not None):
         return
@@ -1117,9 +1143,8 @@ def _opponent_action_of(state: GameState, side: str) -> Optional[Action]:
 
 # ── RC-105：魔力（心）结算 + 聚能 / 投降 ────────────────────────────────
 #
-# 只在**声明了 `mana`** 的配置下生效（`cfg.has_mana`）。legacy / v2 走这里每一处
-# 都会立刻返回：那些模式里根本没有「魔力」这条概念，引擎也就不该凭空造出一个 0
-# （0 的意思是「魔力归零、已经判负」）。
+# 只在**声明了 `mana`** 的配置下生效（`cfg.has_mana`）。legacy / v2 走这里每一处都会
+# 立刻返回：那些模式里没有「魔力」这条概念，引擎不该凭空造出一个 0（0 = 已经判负）。
 
 
 def _settle_faint_mana(state: GameState, rs: Ruleset, cfg: RuleConfig, fainted_side: str) -> None:
@@ -1472,6 +1497,7 @@ def replay(record: Dict[str, Any], rs: Optional[Ruleset] = None,
 
         {"team": [...], "enemy_team": [...], "seed": int,
          "loadouts": {"pet_id": ["skill_id", ...]},   # 可选，但**必须**带上才能回放非规范配招
+         "unverified_overrides": [...],               # 可选：这一局用过的未核验覆盖（RC-106）
          "actions": [[a, b], ...]}
 
     每一对是双方同一回合的联合动作。
@@ -1483,13 +1509,17 @@ def replay(record: Dict[str, Any], rs: Optional[Ruleset] = None,
        所以用非规范配招打出来的记录，若回放时不传 `loadouts`，
        `reset()` 会退回规范配招，那个技能就不再合法，回放直接抛
        「行动不合法」。这个 bug 是我写「状态技能增减能否重放」的测试时撞出来的。
+
+    RC-106 补第 3 条：**覆盖也要一起带上**。六宠候选局的 `energy.initial` 是
+    UNKNOWN，不带上那条覆盖，`reset()` 会 fail closed —— 那份记录就永远重放不了。
     """
     rs = rs or load_ruleset()
     # 规则配置可以来自调用方，也可以来自记录本身（记录里带了就用记录里那份：
     # 旧 replay 因此**绑死**在它当时的那份规则上，不会被当前默认配置悄悄改写）。
     chosen = config or record.get("ruleset_config_id") or None
     state = reset(record["team"], record.get("enemy_team"), seed=record["seed"], rs=rs,
-                  loadouts=record.get("loadouts"), config=chosen)
+                  loadouts=record.get("loadouts"), config=chosen,
+                  unverified_overrides=record.get("unverified_overrides"))
     for pair in record["actions"]:
         if state.result:
             break
@@ -1581,6 +1611,11 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
         # 补一个 0 会被读成「已经判负」。
         **({"mana": {"self": me.mana, "opponent": foe.mana}}
            if (me.mana is not None or foe.mana is not None) else {}),
+        # RC-106：这一局用过的**未核验覆盖**必须如实出现在公开面里 —— 它改变的是
+        # **规则值本身**（例如入场初始能量），而规则值对双方一样、页面上也写着。
+        # 藏起来会更坏：页面把「候选口径下的 2」显示成「标准 PVP 的入场能量」，
+        # 也就是把一个假设说成事实。没有覆盖时这里是空数组（键始终在）。
+        "unverified_overrides": list(state.unverified_overrides),
         "self": {
             "active": me.active,
             "items": dict(me.items),
@@ -1600,10 +1635,8 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
         },
         "assumptions": {
             "opponent_bench": OPPONENT_BENCH_ASSUMPTION,
-            "note": (
-                "对手后备的血量与配招不在公开信息里，重建搜索状态时按满血 + "
-                "规范配招建模。任何依赖对手后备精确血量的结论都会因此偏乐观。"
-            ),
+            "note": "对手后备的血量与配招不在公开信息里，重建搜索状态时按满血 + 规范配招建模；"
+                    "任何依赖对手后备精确血量的结论都会因此偏乐观。",
         },
     }
 
@@ -1702,7 +1735,7 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     # 能量上限：**从当前生效的规则配置里读**，不在这里写死。
     #
     # 为什么要放进公开视图：教练层（`src/coach/coach-advice.js` 的「对面能量快满了」）
-    # 需要知道「离满还差多少」才有话可说。它以前自己抄了一份 `ENERGY_MAX = 6`，
+    # 需要知道「离满还差多少」才有话可说。它以前自己抄了一份能量上限常量，
     # 于是规则一改就会漂；现在它只认这个字段，**读不到就沉默**（不猜默认值）。
     # 这属于「屏幕上看得见的信息」：手游里能量条的上限就画在血条旁边。
     cfg = _rule_config.get_rule_config(state.ruleset_config_id or None)
@@ -1737,6 +1770,16 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
     foe_panel["bench"] = [{"slot": b.get("slot"), "fainted": b.get("fainted")}
                           for b in view["opponent"]["bench"]]
 
+    # RC-106：未核验覆盖在 UI 面里**两处都写**：机器可读的那份（与规划协议逐字相同）
+    # 与一句可直接渲染的话（`notes.unverified_overrides`），后者让页面不必自己拼
+    # 「哪个字段被假设成了多少」。句子只陈述事实（路径 / 值 / 不是实机结论）。
+    unverified = [dict(entry) for entry in (view.get("unverified_overrides") or [])]
+    notes_overrides = [
+        f"候选规则：{e.get('path')} 按假设值 {e.get('value')}（{e.get('confidence')}，"
+        f"待录 {e.get('microcase_id') or '未登记'}）开局 —— 不是实机结论，界面须标「未核验」"
+        for e in unverified
+    ] or ["本局没有使用任何未核验覆盖：规则值全部来自规则配置本身"]
+
     return {
         "schema_version": UI_PUBLIC_VIEW_SCHEMA_VERSION,
         "ruleset_id": view["ruleset_id"],
@@ -1749,6 +1792,8 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
         # RC-105：魔力（若这份配置声明了它）。两个视图描述同一时刻的同一局，
         # 所以这一块照抄规划协议那一份，不另算一遍。
         **({"mana": view["mana"]} if "mana" in view else {}),
+        # RC-106：未核验覆盖同上，照抄规划协议那一份。
+        "unverified_overrides": unverified,
         "self": self_panel,
         "opponent": foe_panel,
         "legal": ui_legal,
@@ -1756,6 +1801,7 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
             "opponent_bench": "后备只给位次与是否倒下：手游里后备直到上场才亮明",
             "coach_protocol": "教练/规划用的是另一份最小协议（public_planner_state），"
                               "两者描述同一时刻，字段各自独立",
+            "unverified_overrides": notes_overrides,
         },
     }
 
@@ -1854,6 +1900,9 @@ def state_from_public_planner(
     )
     # 己方配招来自公开信息；对手配招是假设值
     state.player.loadouts = {k: tuple(v) for k, v in (own.get("loadouts") or {}).items()}
+    # RC-106：未核验覆盖是**公开事实**，重建时一并带过去（否则差分分析会以为
+    # 这一局的入场能量来自配置，而配置里它是 UNKNOWN）。
+    state.unverified_overrides = [dict(entry) for entry in (public.get("unverified_overrides") or [])]
     # RC-105：魔力（若公开面里带了）。缺键 → None（= 那份配置没有魔力系统），**不是 0**。
     mana_public = public.get("mana")
     if isinstance(mana_public, dict):

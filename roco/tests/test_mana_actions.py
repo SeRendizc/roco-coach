@@ -49,13 +49,24 @@ from roco_env.schema import (                 # noqa: E402
 
 RS = rdata.load_ruleset()
 
-#: 我方的三只 / 对方的三只（速度刻意不同：v3 沿用 v2 的 `speed_tie=null`，
-#: 同速平手会让 `order_actions` 按纪律抛错 —— 那是 RC-103 的判据，不是本活的缺陷）。
-#: 这里取「最快 + 最慢 + 中间」两组，并在用例里自检速度确实不同。
-TEAM_A = ["寂灭骨龙", "海豹船长", "黑猫巫师"]
-TEAM_B = ["圆号鱼", "雪影娃娃", "音速犬"]
+#: 标准 PVP 是**六宠**（v3 的 `battle_mode.team_size = 6`）。RC-105 时引擎的
+#: `reset` / `validate_team` 只收 3 只，所以那一轮的夹具是「3 只队伍 +
+#: `dataclasses.replace(energy_initial=…)`」；RC-106 把模式规模接进引擎之后，
+#: 夹具就是**真的六宠队伍**，而入场能量走**显式未核验覆盖**（见 `_override_energy_initial`）。
+#:
+#: 12 只的速度**两两不同**（快照种族值：60/100/70/105/90/120 与 130/92/115/80/75/108）：
+#: v3 沿用 v2 的 `speed_tie = null`，同速平手会让 `order_actions` 按 RC-103 的纪律抛错
+#: —— 那是判据，不是本活的缺陷，所以夹具刻意避开它。
+TEAM_A = ["寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃", "音速犬"]
+TEAM_B = ["秩序鱿墨", "画间沉铁兽", "月使鹭纳", "迷迷箱怪", "权杖-V", "卡卡虫"]
 IDS_A = [RS.pets_by_name(n)[0].pet_id for n in TEAM_A]
 IDS_B = [RS.pets_by_name(n)[0].pet_id for n in TEAM_B]
+
+#: legacy 的**训练场**队伍：`legacy_sim_v1` 绑的 `demo-training-3v3` 登记的
+#: `team_size` 是 3，所以 legacy 的对照局只收 3 只 —— 这本身就是「模式规模真的
+#: 按配置走」的另一半证据（同一份引擎，两份配置，两种场地规模）。
+LEGACY_IDS_A = IDS_A[:3]
+LEGACY_IDS_B = IDS_B[:3]
 
 V3 = rc.MANA_ACTIONS_CANDIDATE_ID
 
@@ -70,6 +81,8 @@ def _legacy_initial_energy() -> int:
 
     结构契约的纪律是「能量值的唯一事实源是 data/roco/rulesets/*.json」；测试不是那份
     事实源，所以这里也不抄一个数。
+
+    **它是练习局口径，不是标准 PVP 的实机结论**（MC-E04 未录制）——报告里写着同一句话。
     """
     value = rc.load_config(rc.DEFAULT_RULE_CONFIG_ID).energy_initial
     if value is None:                                   # pragma: no cover - 默认配置不会是这样
@@ -77,21 +90,25 @@ def _legacy_initial_energy() -> int:
     return int(value)
 
 
-def _playable(cfg: rc.RuleConfig) -> rc.RuleConfig:
-    """把候选配置变成一个**能真的开局**的夹具。
+def _override_energy_initial(value=None) -> list:
+    """v3 开局用的**显式未核验覆盖**（RC-106 的机制本体，见 `roco_env.overrides`）。
 
-    v3 的 `energy.initial` 是从 v2 **逐字复制**来的 `null`（UNKNOWN，MC-E04 未录制），
-    所以 `reset(config=v3)` 会按 RC-101 的纪律 fail closed（「未知就抛」）。
-    本活的纪律是**不改** v2/v3 的 energy 值，所以测试用 `dataclasses.replace` 显式给出
-    一个**夹具值**（借 legacy 的 2），只影响 `reset` 这一步；`step_joint` / `legal_actions`
-    仍然按磁盘上那份真配置结算（state.ruleset_config_id 就是 v3）。
-    见报告 `docs/roco/RC-105-MANA-AND-ACTIONS.md` 的阻断点一节。
+    为什么不再用 `dataclasses.replace(cfg, energy_initial=…)`：那个夹具同时绕开了
+    「覆盖必须带出处」与「覆盖必须进载荷」两条纪律，而这两条正是这个机制存在的理由。
+    这里走的是**产品路径**：`reset(unverified_overrides=[...])`。
     """
-    return replace(cfg, energy_initial=_legacy_initial_energy())
+    return [{
+        "path": "energy.initial",
+        "value": _legacy_initial_energy() if value is None else value,
+        "confidence": "ENGINE_HYPOTHESIS",
+        "reason": "练习局口径（legacy 的入场能量），不是标准 PVP 的实机结论；MC-E04 未录制",
+        "microcase_id": "MC-E04",
+    }]
 
 
 def _new_state(cfg: rc.RuleConfig | None = None):
-    return renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=cfg or _playable(_v3()))
+    return renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=cfg or _v3(),
+                      unverified_overrides=_override_energy_initial())
 
 
 def _attack_actions(state, side: str):
@@ -318,9 +335,12 @@ class ManaSettlementTest(unittest.TestCase):
         serialized = renv.serialize(state)
         self.assertEqual(serialized["player"]["mana"], 4)
         self.assertEqual(serialized["enemy"]["mana"], 4)
-        # **如实登记的差距**：引擎的场地目前仍然只接受 3v3 —— 模式规模与场地规模没打通。
-        # 这条断言的意义是「这个差距是被测出来的，不是被忘掉的」。
-        self.assertEqual(len(state.player.pets), 3)
+        # RC-105 时这里断言的是「引擎仍然只收 3 只」（模式规模与场地规模没打通）。
+        # RC-106 把那条差距接上了：**六宠真的能开局**，所以判据从「3」翻成「6」。
+        # 必红方向：把 `reset` 里的 team_size 硬编码回 3，这一条会以
+        # 「每方需要恰好 3 只精灵，实际 6 只」变红（反证原文见报告 checks[]）。
+        self.assertEqual(len(state.player.pets), 6)
+        self.assertEqual(len(state.enemy.pets), 6)
         self.assertEqual(cfg.battle_mode_id, "pvp-standard-six-pet")
 
     def test_one_faint_costs_exactly_one_mana(self):
@@ -465,7 +485,7 @@ class ManaSettlementTest(unittest.TestCase):
         # 语义没有台账支撑 → 必须留一条 unsupported 记录（不许当成已确认规则）
         self.assertTrue(any("投降" in row["what"] for row in state.unsupported), state.unsupported)
         # 反证：legacy 没声明 actions，因而没有这个动作类 —— 直接执行必须抛
-        legacy_state = renv.reset(IDS_A, IDS_B, seed=3, rs=RS)
+        legacy_state = renv.reset(LEGACY_IDS_A, LEGACY_IDS_B, seed=3, rs=RS)
         with self.assertRaises(fx.UnsupportedEffect) as ctx:
             renv._execute(legacy_state, RS, "player", surrender)
         self.assertIn("没有声明 actions", str(ctx.exception))
@@ -564,7 +584,7 @@ class ActionClippingTest(unittest.TestCase):
 
     def test_legacy_keeps_items_and_escape(self):
         """legacy 是 PVE/练习局：它没有声明 actions，因此**不裁剪**（道具与逃跑继续存在）。"""
-        state = renv.reset(IDS_A, IDS_B, seed=3, rs=RS)
+        state = renv.reset(LEGACY_IDS_A, LEGACY_IDS_B, seed=3, rs=RS)
         kinds = [a.kind for a in renv.legal_actions(state, RS, "player")]
         self.assertIn(ACTION_ITEM, kinds)
         self.assertIn(ACTION_ESCAPE, kinds)
@@ -612,7 +632,7 @@ class LegacyManaAbsenceTest(unittest.TestCase):
             os.environ.pop(rc.ENV_VAR, None)
 
     def test_legacy_state_has_no_mana_field_anywhere(self):
-        state = renv.reset(IDS_A, IDS_B, seed=3, rs=RS)
+        state = renv.reset(LEGACY_IDS_A, LEGACY_IDS_B, seed=3, rs=RS)
         self.assertIsNone(state.player.mana)
         self.assertIsNone(state.enemy.mana)
         dumped = json.dumps(renv.serialize(state), ensure_ascii=False, sort_keys=True)
@@ -625,7 +645,7 @@ class LegacyManaAbsenceTest(unittest.TestCase):
 
     def test_legacy_victory_is_still_decided_by_team_wipe(self):
         """legacy 的胜负判据仍然是「打光整队」，而且**没有**任何 mana 事件。"""
-        state = renv.reset(IDS_A, IDS_B, seed=3, rs=RS)
+        state = renv.reset(LEGACY_IDS_A, LEGACY_IDS_B, seed=3, rs=RS)
         for pet in state.player.pets:
             pet.hp = 0
             pet.fainted = True
@@ -647,7 +667,7 @@ class LegacyManaAbsenceTest(unittest.TestCase):
         （`test_turn_order_fail_closed.LegacyBitExactGoldenTest`），
         任何多写出来的键都会让它当场变红。
         """
-        state = renv.reset(IDS_A, IDS_B, seed=3, rs=RS)
+        state = renv.reset(LEGACY_IDS_A, LEGACY_IDS_B, seed=3, rs=RS)
         clean = renv.serialize(state)
         before = _digest(clean)
         faked = json.loads(json.dumps(clean))
