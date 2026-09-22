@@ -1394,9 +1394,14 @@ async function main(){
  check('对战页中央是双方当前宠物的战斗舞台，后备压成小条（对手只写还剩几只）',
   battlefield.stageActive===2&&battlefield.selfBench===2&&battlefield.foeBench>=1,
   `舞台上 ${battlefield.stageActive} 只 / 我方后备 ${battlefield.selfBench} 条 / 对手后备 ${battlefield.foeBench} 条`);
- check('合法动作固定在底部且一屏可点（动作栏底边贴着视口底）',
-  battlefield.actions>0&&battlefield.actionFixed==='fixed'
-  &&Math.abs(battlefield.actionBottom-battlefield.viewportH)<=2,
+ // 2026-09-22（人类视觉规格）：桌面动作区改成**在流里**（不再是一条固定全宽底栏盖住战场），
+ // 所以「底边贴视口底」这条旧等式不再成立。真正要守的是：**动作一屏可点** ——
+ // 要么固定贴底（窄屏那条路），要么在流里且底部不超出视口。
+ check('合法动作一屏可点（窄屏贴底 / 桌面在流里且不出视口）',
+  battlefield.actions>0
+  &&(battlefield.actionFixed==='fixed'
+    ?Math.abs(battlefield.actionBottom-battlefield.viewportH)<=2
+    :battlefield.actionBottom<=battlefield.viewportH+1),
   `动作 ${battlefield.actions} 个；position=${battlefield.actionFixed} 底边=${battlefield.actionBottom} 视口高=${battlefield.viewportH}`);
  const mBattle=await overflowOf();
  const shotBattle=await uiShoot('battle-1440x900');

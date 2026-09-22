@@ -298,9 +298,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      <details class="tw-about" id="tw-about">
       <summary>这一局的规则口径（候选 / 未核验 / 候选宇宙）</summary>
       <div class="tw-badges">
-       <span class="tw-badge" id="tw-badge-mode">${escapeHtml(TEAM_WORKSHOP_BADGES.mode)}</span>
-       <span class="tw-badge warn" id="tw-badge-rule">${escapeHtml(TEAM_WORKSHOP_BADGES.candidate)}</span>
-       <span class="tw-badge muted" id="tw-badge-unknown">${escapeHtml(TEAM_WORKSHOP_BADGES.unknown_prematch)}</span>
+       <!-- 2026-09-22（人类视觉规格）：模式/候选规则/对手未知这三枚徽记**页头已经写着**，
+            这里再放一份就是「同屏重复」。这一块只留「候选宇宙」这一条模块自己才知道的信息。 -->
        <span class="tw-badge muted" id="tw-badge-universe">${escapeHtml(TEAM_WORKSHOP_BADGES.universe)} 600+</span>
       </div>
      </details>
@@ -481,9 +480,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const constraints = Array.isArray(player?.constraints) ? player.constraints : [];
     $('tw-team-constraints').hidden = constraints.length === 0;
     $('tw-team-constraints').textContent = constraints.length ? `当前约束：${constraints.join('；')}` : '';
-    $('tw-badge-mode').textContent = player?.mode_label ?? TEAM_WORKSHOP_BADGES.mode;
-    $('tw-badge-rule').textContent = player?.candidate_rule_label ?? TEAM_WORKSHOP_BADGES.candidate;
-    $('tw-badge-unknown').textContent = player?.unknown_prematch_note ?? TEAM_WORKSHOP_BADGES.unknown_prematch;
+    // 模式/候选规则/对手未知的徽记已挪回页头那一处（同屏只出现一次）。
     $('tw-badge-universe').textContent = player?.candidates_universe?.pool_label ?? `${TEAM_WORKSHOP_BADGES.universe} 600+`;
     $('tw-team-error').hidden = !state.error;
     // 玩家那一行只说「这一只现在进不了队伍 + 能做什么」；服务端原文进 data-tw-error-raw，

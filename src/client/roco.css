@@ -633,7 +633,8 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 .rules-note>summary::after{content:'▾';margin-left:auto;color:#6b7f92}
 .rules-note[open]>summary::after{content:'▴'}
 .rules-note-body,.rules-note p{margin:0 10px 8px;white-space:pre-line;font-size:11.5px;line-height:1.6}
-/* ④ 桌面：动作区**在流里**，不再是一条固定全宽底栏盖住战场。 */
-@media (min-width:861px){
- #action-panel{position:static;margin-top:10px;max-height:none;box-shadow:none;border-color:#314154}
-}
+/* ④ 桌面：动作区**暂时保持贴底**。
+   2026-09-22 回退记录：我先把它改成「在流里」（`position:static`），实测桌面底边跑到 **1394px**，
+   而视口只有 900px —— 动作**反而看不见了**（比改之前更糟，demo 判据当场抓住）。
+   真正要做的是**两列布局**（左：战场；右：动作 + 战报），那是下一刀，不该用半步蒙过去。 */
+

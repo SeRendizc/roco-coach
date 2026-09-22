@@ -1,6 +1,6 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-22T08:20:39.936Z",
+ "generated_at": "2026-09-22T09:12:08.330Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [
@@ -143,13 +143,13 @@
    "id": "P0-2-390-same-screen",
    "name": "390×844 下输入框与最近一句回复仍在首屏",
    "ok": true,
-   "actual": "输入 {\"top\":528,\"bottom\":572,\"left\":23,\"right\":288} / 回复 {\"top\":294,\"bottom\":415,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 247px 动作坞 {\"top\":597,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
+   "actual": "输入 {\"top\":545,\"bottom\":589,\"left\":23,\"right\":288} / 回复 {\"top\":311,\"bottom\":431,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 230px 动作坞 {\"top\":614,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
   },
   {
    "id": "P0-6-top",
    "name": "战斗页顶部对称给出双方资源（未核验就如实写）与队伍状态",
    "ok": true,
-   "actual": "我方「魔力 / 心未核验本仓库的引擎还没有这个量（未核…」对手「魔力 / 心未核验本仓库的引擎还没有这个量（未核…」；队伍状态「还能打 3/3铠甲虫 261/445音速犬 36」"
+   "actual": "我方「魔力 / 心未核验本仓库引擎暂无此量…」对手「魔力 / 心未核验本仓库引擎暂无此量…」；队伍状态「还能打 3/3铠甲虫 261/445音速犬 36」"
   },
   {
    "id": "D2-cards",
@@ -417,26 +417,26 @@
      "height": 844
     },
     "card": {
-     "top": 276,
-     "bottom": 583,
+     "top": 277,
+     "bottom": 600,
      "left": 10,
      "right": 380
     },
     "form": {
-     "top": 528,
-     "bottom": 572,
+     "top": 545,
+     "bottom": 589,
      "left": 23,
      "right": 367
     },
     "input": {
-     "top": 528,
-     "bottom": 572,
+     "top": 545,
+     "bottom": 589,
      "left": 23,
      "right": 288
     },
     "reply": {
-     "top": 294,
-     "bottom": 415,
+     "top": 311,
+     "bottom": 431,
      "left": 23,
      "right": 367
     },
@@ -444,10 +444,10 @@
     "inputInView": true,
     "replyInView": true,
     "formInView": true,
-    "bottombar": 247,
+    "bottombar": 230,
     "actionCap": 253,
     "actionPanel": {
-     "top": 597,
+     "top": 614,
      "bottom": 844,
      "left": 0,
      "right": 390
@@ -473,7 +473,7 @@
    "standardPvp": "yes",
    "text": "标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）本局有 4 条规则未核实，界面上会逐条标出来（原文在开发者抽屉）匹配前对手未知 · 按版本环境倾向评价",
    "hidden": false,
-   "top": 12,
+   "top": 45,
    "vh": 844
   }
  },

@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T08:20:07.243Z",
+ "judged_at": "2026-09-22T09:11:35.910Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -57,9 +57,9 @@
   },
   {
    "id": "03-徽记与候选池",
-   "judge": "逐字在：「标准 PVP · 六宠」「候选规则（待实机核对）」「匹配前对手未知」「候选来自全图鉴」，候选池 ≥600",
+   "judge": "三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账）",
    "ok": true,
-   "actual": "池总量=622 徽记全在=yes"
+   "actual": "页头出现次数 {\"mode\":1,\"candidate\":1,\"prematch\":1,\"poolTotal\":622}"
   },
   {
    "id": "04-宽屏不溢出",
@@ -77,13 +77,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=100 full_ms=25 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=94 full_ms=23 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=21 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=20 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -173,13 +173,13 @@
    "id": "22-玩家层无工程话",
    "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
    "ok": true,
-   "actual": "扫过 2715 字（豁免机制原文 4 处）；样例「 队伍（六个槽位） 六个槽位都满了 这一局的规则口径（候选 / 未核验 / 候选宇宙） 标准 PVP · 六宠 候选规则（待实机核对） 匹配前对手未知 · 按版本环境倾向评价 候选…」"
+   "actual": "扫过 2671 字（豁免机制原文 4 处）；样例「 队伍（六个槽位） 六个槽位都满了 这一局的规则口径（候选 / 未核验 / 候选宇宙） 候选来自全图鉴 600+ 铠甲虫 移除 虫系 图鉴 · 按需推算（未核验） 有具体构建（结构…」"
   },
   {
    "id": "23-无胜率与百分数",
    "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）",
    "ok": true,
-   "actual": "扫过 2715 字无命中（豁免机制原文 2 条）"
+   "actual": "扫过 2671 字无命中（豁免机制原文 2 条）"
   },
   {
    "id": "24-未知写在玩家层",
@@ -263,7 +263,7 @@
    "id": "31-移动端顺序",
    "judge": "390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":208},{\"cls\":\"tw-cand\",\"top\":1237},{\"cls\":\"tw-eval\",\"top\":1685},{\"cls\":\"tw-coach\",\"top\":2978}]"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":135},{\"cls\":\"tw-cand\",\"top\":1164},{\"cls\":\"tw-eval\",\"top\":1612},{\"cls\":\"tw-coach\",\"top\":2905}]"
   },
   {
    "id": "32-窄屏候选区",
@@ -490,7 +490,7 @@
    "id": "35-标准 PVP 战斗页(覆盖)",
    "judge": "把未核验覆盖藏起来必须被同一条判据抓住",
    "ok": true,
-   "hit": "未核验覆盖必须如实显示（hidden=true 文案=\"⚠ 候选规则：energy.initial 按假设值 2（ENGINE_HYPOTHESIS，待录 MC-E04）开局 —— 不是实机结论，界面须标「未核验」；候选规则：turn_order.speed_tie 按假设值 random_seeded（ENGINE_HYPOTHESIS，待录 MC-E05）开局 —— 不是实机结论，界面须标「未核验」\"）",
+   "hit": "未核验覆盖必须如实显示（hidden=true 文案=\"⚠ 本局有 2 条未核验（展开可读来源）\"）",
    "actual": "{\"noteHidden\":true}"
   },
   {
@@ -530,14 +530,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "100",
-    "fullMs": "25",
+    "firstMs": "94",
+    "fullMs": "23",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "21"
+    "elapsedMs": "20"
    },
    "dom": {
     "slotNodes": 6,
@@ -559,9 +559,9 @@
      "特性「不朽」：力竭4回合后复活。",
      "特性「热成像」：若上回合双方有精灵使用火系技能，本回合自己携带的虫系技能威力+100%。"
     ],
-    "hasModeBadge": true,
-    "hasCandidateBadge": true,
-    "hasUnknownPrematch": true,
+    "hasModeBadge": false,
+    "hasCandidateBadge": false,
+    "hasUnknownPrematch": false,
     "hasFullUniverse": true,
     "mentionsLegacySlots": false,
     "nextNames": [],
@@ -587,14 +587,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "24",
-    "fullMs": "33",
+    "firstMs": "23",
+    "fullMs": "29",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "29"
+    "elapsedMs": "24"
    },
    "dom": {
     "slotNodes": 6,
@@ -618,9 +618,9 @@
      "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
      "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。"
     ],
-    "hasModeBadge": true,
-    "hasCandidateBadge": true,
-    "hasUnknownPrematch": true,
+    "hasModeBadge": false,
+    "hasCandidateBadge": false,
+    "hasUnknownPrematch": false,
     "hasFullUniverse": true,
     "mentionsLegacySlots": false,
     "nextNames": [
@@ -718,14 +718,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "14",
+    "firstMs": "14",
+    "fullMs": "12",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "10"
+    "elapsedMs": "8"
    },
    "dom": {
     "slotNodes": 6,
@@ -752,9 +752,9 @@
      "特性「预警」：若敌方技能足够击败自己，回合开始时自己获得速度+50。",
      "特性「血型吸引」：敌方每携带1种系别的技能，自己攻击时威力+10。"
     ],
-    "hasModeBadge": true,
-    "hasCandidateBadge": true,
-    "hasUnknownPrematch": true,
+    "hasModeBadge": false,
+    "hasCandidateBadge": false,
+    "hasUnknownPrematch": false,
     "hasFullUniverse": true,
     "mentionsLegacySlots": false,
     "nextNames": [
@@ -852,8 +852,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "18",
-    "fullMs": "15",
+    "firstMs": "14",
+    "fullMs": "14",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -884,9 +884,9 @@
      "特性「乘风连击」：使用翼系技能后，获得连击数+1。",
      "特性「化茧」：受到致命伤害时，获得1层萌化，并免疫此次伤害。"
     ],
-    "hasModeBadge": true,
-    "hasCandidateBadge": true,
-    "hasUnknownPrematch": true,
+    "hasModeBadge": false,
+    "hasCandidateBadge": false,
+    "hasUnknownPrematch": false,
     "hasFullUniverse": true,
     "mentionsLegacySlots": false,
     "nextNames": [],
@@ -993,14 +993,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "25",
-    "fullMs": "22",
+    "firstMs": "22",
+    "fullMs": "20",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "18"
+    "elapsedMs": "16"
    },
    "dom": {
     "slotNodes": 6,
@@ -1024,9 +1024,9 @@
      "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
      "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。"
     ],
-    "hasModeBadge": true,
-    "hasCandidateBadge": true,
-    "hasUnknownPrematch": true,
+    "hasModeBadge": false,
+    "hasCandidateBadge": false,
+    "hasUnknownPrematch": false,
     "hasFullUniverse": true,
     "mentionsLegacySlots": false,
     "nextNames": [
@@ -1055,7 +1055,7 @@
     "selfMana": 4,
     "foeMana": 4,
     "noteHidden": false,
-    "noteText": "⚠ 候选规则：energy.initial 按假设值 2（ENGINE_HYPOTHESIS，待录 MC-E04）开局 —— 不是实机结论，界面须标「未核验」；候选规则：turn_order.speed_tie 按假设值 random_seeded（ENGINE_HYPOTHESIS，待录 MC-E05）开局 —— 不是实机结论，界面须标「未核验」",
+    "noteText": "⚠ 本局有 2 条未核验（展开可读来源）",
     "battleVisible": true
    }
   }

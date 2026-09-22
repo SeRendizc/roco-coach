@@ -796,6 +796,82 @@ async function main() {
     counter('live-chat', '没有模型却装作自由聊天（不给边界说明）必须被同一条判据抓住',
       chatProblems({source: 'offline', boundary: null, reply: '好的，我们聊聊吧。'}), '{"boundary":null}');
 
+    // ── ⑤b 视觉规格判据（人类 2026-09-22）：标题不竖排 / 不遮挡 / 无工程词 / 无同屏重复 ──
+    // 这些是「肉眼看到的问题」的可复核版本：把坏情况注入进去，同一条判据必须红。
+    const visual = await js(`(()=>{const vh=window.innerHeight,vw=window.innerWidth;
+      const rect=(sel)=>{const el=document.querySelector(sel);if(!el)return null;
+        const r=el.getBoundingClientRect();
+        return el.hidden||r.width===0||r.height===0?null:{top:Math.round(r.top),bottom:Math.round(r.bottom),
+          left:Math.round(r.left),right:Math.round(r.right),w:Math.round(r.width),h:Math.round(r.height)};};
+      const overlap=(a,b)=>{if(!a||!b)return false;
+        return !(a.right<=b.left||a.left>=b.right||a.bottom<=b.top||a.top>=b.bottom);};
+      const h1=document.querySelector('.topbar h1');
+      const h1r=h1?h1.getBoundingClientRect():null;
+      const lh=h1?parseFloat(getComputedStyle(h1).lineHeight)||24:24;
+      // 玩家层文本：**排除**开发者抽屉。用「整页文本 − 抽屉文本」的算术，不 clone：
+      // clone 版在模板字符串里嵌套 innerText 求值时炸过一次（判据自己的事故，不是页面的）。
+      const allText=(document.body.innerText||'');
+      const drawer=document.getElementById('about-drawer');
+      const drawerText=drawer?(drawer.innerText||''):'';
+      const playerText=allText;
+      const countOutside=(text,needle)=>{
+        const total=text.split(needle).length-1;
+        const inside=drawerText.split(needle).length-1;
+        return Math.max(0,total-inside);
+      };
+      const banned=['item','escape','RC-306','selected','own-','pet_','state_version','coverage','provenance'];
+      const bannedHits=banned.filter((w)=>countOutside(playerText,w)>0);
+      const badge='候选规则（待实机核对）';
+      const dupBadge=countOutside(playerText,badge);
+      const skills=[...document.querySelectorAll('#actions button[data-action]')].map((b)=>b.getBoundingClientRect());
+      const skillBox=skills.length?{top:Math.min(...skills.map((r)=>r.top)),bottom:Math.max(...skills.map((r)=>r.bottom)),
+        left:Math.min(...skills.map((r)=>r.left)),right:Math.max(...skills.map((r)=>r.right))}:null;
+      const hp=rect('#self-pets .hp-line')||rect('#self-pets .pet');
+      const hint=rect('#hint'), coach=rect('#companion-card'), actions=rect('#action-panel');
+      return {vw,vh,h1Lines:h1r?Math.round(h1r.height/lh):null,
+        titleVertical:Boolean(h1r&&h1r.height>lh*2.2),
+        scrollW:document.documentElement.scrollWidth,clientW:document.documentElement.clientWidth,
+        bannedHits,dupBadge,
+        skillCount:skills.length,
+        skillTop:skillBox?Math.round(skillBox.top):null,skillBottom:skillBox?Math.round(skillBox.bottom):null,
+        hitHintSkill:overlap(hint,skillBox),hitCoachSkill:overlap(coach,skillBox),
+        hitBarSkill:overlap(actions,skillBox),hitHintHp:overlap(hint,hp),hitCoachHp:overlap(coach,hp)};})()`);
+    const visualProblems = (f) => {
+      const bad = [];
+      if (f?.titleVertical) bad.push(`标题竖排（${f?.h1Lines} 行高度）`);
+      if (f?.clientW !== f?.scrollW) bad.push(`横向溢出（${f?.scrollW} > ${f?.clientW}）`);
+      if ((f?.bannedHits ?? []).length) bad.push(`玩家层出现工程词：${f.bannedHits.join('、')}`);
+      if (Number(f?.dupBadge) > 1) bad.push(`同屏重复徽记「候选规则（待实机核对）」×${f.dupBadge}`);
+      if (f?.hitHintSkill) bad.push('小芽提示压住了技能');
+      if (f?.hitCoachSkill) bad.push('小芽那一栏压住了技能');
+      if (f?.hitBarSkill) bad.push('底栏压住了技能');
+      if (f?.hitCoachHp) bad.push('小芽那一栏压住了 HP');
+      if (f?.vh >= 800 && Number(f?.skillBottom) > f?.vh) bad.push(`技能区底部 ${f?.skillBottom} 超出视口 ${f?.vh}`);
+      return bad;
+    };
+    check('live-visual-spec', '视觉规格：标题不竖排、无横向溢出、玩家层零工程词、同屏不重复徽记、'
+      + '小芽/底栏与技能和 HP 不相交、桌面技能区在视口内',
+      visualProblems(visual).length === 0,
+      visualProblems(visual).join(' | ')
+      || `视口 ${visual.vw}×${visual.vh}；标题 ${visual.h1Lines} 行；技能 ${visual.skillCount} 张`
+        + `（底 ${visual.skillBottom}）；工程词 ${JSON.stringify(visual.bannedHits)}；重复徽记 ${visual.dupBadge}`);
+    counter('live-visual-spec(竖排+工程词)', '标题竖排 + 玩家层出现 item/escape/RC-306 必须被同一条判据抓住',
+      visualProblems({...visual, titleVertical: true, bannedHits: ['item', 'escape', 'RC-306']}),
+      '{"titleVertical":true,"bannedHits":["item","escape","RC-306"]}');
+    counter('live-visual-spec(遮挡+重复)', '小芽压住技能、且徽记重复两次必须被同一条判据抓住',
+      visualProblems({...visual, hitCoachSkill: true, dupBadge: 2}), '{"hitCoachSkill":true,"dupBadge":2}');
+
+    // 补齐视觉切片要的两态截图：回合后提示 / 小芽打开与收起
+    shots.push(await shoot('live-06-battle-after-turn-1440x900'));
+    await mouseClick('#coach-entry');
+    await sleep(500);
+    shots.push(await shoot('live-07-battle-coach-open-1440x900'));
+    await setViewport(390, 844, true);
+    await sleep(400);
+    shots.push(await shoot('live-08-battle-coach-390x844'));
+    await setViewport(1440, 900);
+    await sleep(300);
+
     check('live-console', '整个过程没有 console.error / 未捕获异常',
       consoleErrors.length === 0, `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 3))}`);
   } catch (error) {

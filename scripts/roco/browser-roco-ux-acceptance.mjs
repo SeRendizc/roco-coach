@@ -507,8 +507,15 @@ async function main() {
     groupProblems.push(`换精灵列表 ${hooks.switchList} 条，引擎换人 ${actionFacts.byKind.switch ?? 0} 个`);
   }
   if (rendered.includes('item') || rendered.includes('escape')) groupProblems.push('渲染了道具/逃跑入口');
-  // 模式隐藏的旧动作仍要如实记账（这条没变）
-  if (actionFacts.hidden > 0 && !/隐藏了/.test(actionFacts.hiddenNote)) groupProblems.push('被模式隐藏的动作没有如实记账');
+  // 模式隐藏的旧动作仍要如实记账 —— 但按人类视觉规格，它记账在**开发者抽屉**里
+  //（`#hidden-actions-raw`），玩家层只说「按当前模式少了 N 个动作」（不再出现 item/escape/RC-306）。
+  const hiddenRaw = await js(`document.getElementById('hidden-actions-raw')?.textContent ?? ''`);
+  if (actionFacts.hidden > 0 && !/隐藏的旧引擎动作/.test(String(hiddenRaw))) {
+    groupProblems.push('被模式隐藏的动作没有在开发者抽屉里如实记账');
+  }
+  if (actionFacts.hidden > 0 && /item|escape|RC-306/.test(String(actionFacts.hiddenNote))) {
+    groupProblems.push('玩家层出现了被隐藏动作的工程名（item/escape/RC-306）');
+  }
   check('D4-groups', '行动区结构等于规格：技能为主区（≤4 张卡）、聚能/换精灵/投降各自独立入口、'
     + '换人列表条数等于引擎给的换人数、道具与逃跑不渲染、被模式隐藏的仍如实记账',
     groupProblems.length === 0,

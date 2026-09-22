@@ -760,9 +760,25 @@ async function main() {
     counter('02-六个槽位', '把槽位数改成 3（退回「已选 3 只固定栏」）必须被同一条判据抓住',
       slotProblems({slots: 3, slotNodes: 3, filled: 3}), 'slots=3 / slotNodes=3 / filled=3');
     const bootBadgeProblems = badgeProblems({...bootDom, poolTotal: boot.poolTotal});
-    check('03-徽记与候选池', '逐字在：「标准 PVP · 六宠」「候选规则（待实机核对）」「匹配前对手未知」「候选来自全图鉴」，候选池 ≥600',
-      bootBadgeProblems.length === 0,
-      bootBadgeProblems.join(' | ') || `池总量=${boot.poolTotal} 徽记全在=yes`);
+    // 2026-09-22（人类视觉规格）：模式/候选规则/对手未知这三枚徽记**页头已经写着**，
+    // 模块里再放一份就是「同屏重复」，所以从模块撤掉了。判据改成：
+    //   ① 这三条信息在**页面上**（页头）恰好出现一次；
+    //   ② 模块自己只留「候选来自全图鉴 600+」这条它才知道的信息。
+    // 页头那三条口径用 `body.innerText` 数（模块在 shadow root 里，body.innerText 看不到它，
+    // 正好用来数「页面上出现几次」）；模块自己那条从 dataset 读（`twPoolTotal`）。
+    const headerBadges = await js(`(()=>{const t=document.body.innerText||'';
+      const d=document.getElementById('about-drawer');
+      const dt=d?(d.innerText||''):'';
+      const count=(needle)=>(t.split(needle).length-1)-(dt.split(needle).length-1);
+      const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      return JSON.stringify({mode:count('标准 PVP 六宠阵容工坊'),candidate:count('候选规则（待实机核对）'),
+        prematch:count('匹配前对手未知'),poolTotal:Number(root?.dataset.twPoolTotal||'0')});})()`).then(JSON.parse);
+    check('03-徽记与候选池', '三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），'
+      + '模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账）',
+      headerBadges.mode===1&&headerBadges.candidate===1&&headerBadges.prematch===1
+      &&Number(headerBadges.poolTotal)>=600,
+      `页头出现次数 ${JSON.stringify(headerBadges)}`);
+
     counter('03-候选规则徽记', '把「候选规则（待实机核对）」徽记去掉必须被同一条判据抓住',
       badgeProblems({hasModeBadge: true, hasCandidateBadge: false, hasUnknownPrematch: true,
         hasFullUniverse: true, poolTotal: 622, mentionsLegacySlots: false}),
