@@ -3,7 +3,7 @@
 > 客户端：`src/client/roco.js`（`fieldFactsHtml` / `petCard` / `actionCardHtml` / `poolQueryOf`）
 > 服务端：`src/server/roco-service.js`（`publicView()` 补两个引擎已经给了的字段；`roster` 支持 `support=all`）
 > 单元判据：`tests/roco-page-ux.test.js`（10 条 RC-502，含 4 条必红）
-> 浏览器判据：`scripts/roco/browser-roco-ux-acceptance.mjs`（7 条 + 2 条反证，真实键鼠）
+> 浏览器判据：`scripts/roco/browser-roco-ux-acceptance.mjs`（8 条 + 2 条反证，真实键鼠；整个脚本 39/39）
 
 ## 为什么需要它
 
@@ -74,6 +74,7 @@
 | 能量上限来自引擎 | `self=6 foe=6`，卡上「能量 ●●2 / 6」 |
 | 印记逐条画在对手卡上 | 真鼠标点「错乱」→ 引擎 `{星陨印记:3}`，页面「印记 星陨印记 ×3」，钩子 `marks=星陨印记:3` |
 | 防御冷却画在自己卡上 | 真鼠标「换上第2位 · 雪影娃娃」→ 再点「防御」→ 引擎 `defense_cooldown=2`，页面「防御冷却 2」 |
+| 窄屏候选宇宙开关 | 390×844：开关整行在屏内（`right=301 ≤ 390`）、高 44px 可点、页面不横向溢出 |
 
 两条反证（把 DOM 改坏，同一条判据必须红）：去掉「未核验」标记 → 命中；删掉印记那一行 → 命中。
 

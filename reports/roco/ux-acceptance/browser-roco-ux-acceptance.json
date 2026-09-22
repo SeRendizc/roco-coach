@@ -1,6 +1,6 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-22T03:30:18.413Z",
+ "generated_at": "2026-09-22T03:31:37.768Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [
@@ -8,8 +8,8 @@
   "390x844"
  ],
  "totals": {
-  "checks": 38,
-  "passed": 38,
+  "checks": 39,
+  "passed": 39,
   "failed": 0
  },
  "checks": [
@@ -156,6 +156,12 @@
    "name": "卡片首层给「定位 + 机制 + 基础面板」，且没有模板句",
    "ok": true,
    "actual": "12 张卡：定位 12 / 机制 12 / 基础面板 12 / 模板句命中 0"
+  },
+  {
+   "id": "RC502-窄屏候选宇宙开关",
+   "name": "390×844：候选宇宙开关整行都在屏内、可点（≥44px 高），且页面不横向溢出",
+   "ok": true,
+   "actual": "开关 {\"w\":197,\"h\":44,\"boxW\":16,\"boxH\":16,\"text\":\"包含按需推算的精灵（未核验）\",\"right\":301,\"vw\":390}；clientW/scrollW=390/390"
   },
   {
    "id": "D5-mode-badge",

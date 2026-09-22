@@ -571,6 +571,19 @@ async function main() {
     && narrowCards.stats === narrowCards.cards && narrowCards.templates === 0,
     `${narrowCards.cards} 张卡：定位 ${narrowCards.role} / 机制 ${narrowCards.mech} / 基础面板 ${narrowCards.stats} / 模板句命中 ${narrowCards.templates}`);
   const shotRoster390 = await shoot('roster-390x844');
+  // RC-502/RC-505：窄屏选择页上**新加的候选宇宙开关**也要量一次 ——
+  // 它是一行长中文标签，最容易被挤成横向溢出或压成一个点不动的小方块。
+  const scopeToggle390 = await js(`(()=>{const el=document.getElementById('pool-support-all');
+    if(!el)return null;const label=el.closest('label');const r=label.getBoundingClientRect();
+    const box=el.getBoundingClientRect();
+    return {w:Math.round(r.width),h:Math.round(r.height),boxW:Math.round(box.width),boxH:Math.round(box.height),
+      text:label.textContent.trim(),right:Math.round(r.right),vw:window.innerWidth};})()`);
+  const scopeOverflow390 = await overflowOf();
+  check('RC502-窄屏候选宇宙开关', '390×844：候选宇宙开关整行都在屏内、可点（≥44px 高），且页面不横向溢出',
+    scopeToggle390 !== null && scopeOverflow390.clientW === scopeOverflow390.scrollW
+    && scopeToggle390.right <= scopeToggle390.vw + 1 && scopeToggle390.h >= 44
+    && /按需推算/.test(scopeToggle390.text),
+    `开关 ${JSON.stringify(scopeToggle390)}；clientW/scrollW=${scopeOverflow390.clientW}/${scopeOverflow390.scrollW}`);
 
   // 模式徽记（D5）：读注册表，候选徽记与「匹配前对手未知」在首屏
   const modeFacts = await js(`(()=>{const d=document.body.dataset;
