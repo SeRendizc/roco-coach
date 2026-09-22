@@ -259,7 +259,7 @@
     {
       "name": "点一下能真的问到本机小模型（面板出现内容）",
       "ok": true,
-      "detail": "{\"hidden\":false,\"hasFn\":\"function\",\"battleId\":\"s2-tazifrir\",\"panelExists\":true,\"err\":null,\"html\":\"\\n      <table class=\\\"shadow\\\">\\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：换上第2位</td></tr>\\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\\n          <span class=\\\"muted\\\">耗时 490 ms · "
+      "detail": "{\"hidden\":false,\"hasFn\":\"function\",\"battleId\":\"s2-fogg8uc4\",\"panelExists\":true,\"err\":null,\"html\":\"\\n      <table class=\\\"shadow\\\">\\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：换上第2位</td></tr>\\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\\n          <span class=\\\"muted\\\">耗时 490 ms · "
     },
     {
       "name": "面板明确写出「规则引擎是真值来源 / 模型只提议工具」",
@@ -579,7 +579,7 @@
     {
       "name": "④ 陈旧规划必须整条丢弃并记账（构造竞态：规划属于旧版、回来时已推进）",
       "ok": true,
-      "detail": "规划属于 state_version=30，回来时画面=37；plan 保留=false planAtVersion=null；丢弃账={\"plan_version\":30,\"view_version\":37,\"at\":1790089816611}；状态行「没有采用这份建议：等待期间局面已推进（30 → 37）：这份规划属于已经不存在的局面，整条丢弃」"
+      "detail": "规划属于 state_version=30，回来时画面=37；plan 保留=false planAtVersion=null；丢弃账={\"plan_version\":30,\"view_version\":37,\"at\":1790090145205}；状态行「没有采用这份建议：等待期间局面已推进（30 → 37）：这份规划属于已经不存在的局面，整条丢弃」"
     },
     {
       "name": "④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上",
@@ -589,7 +589,7 @@
     {
       "name": "④ 自然竞态下的不变量：页面上的规划/建议必须属于**当前**局面",
       "ok": true,
-      "detail": "同时发 plan 与 advance：局面 30 → 31；plan 版本=30 保留=false；浮条版本=null；丢弃账累计=4；（撞上与否由这两个版本号说话，不靠猜）"
+      "detail": "同时发 plan 与 advance：局面 30 → 31；plan 版本=30 保留=false；浮条版本=31；丢弃账累计=4；（撞上与否由这两个版本号说话，不靠猜）"
     },
     {
       "name": "③ 自动收起之后再进来也不再显示（刷新后 hidden / 高 0px / 登记键仍在）",

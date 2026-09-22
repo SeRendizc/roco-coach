@@ -1,0 +1,32 @@
+npm run test:env
+
+> test:env
+> cd roco && PYTHONPATH=src python3 -m unittest discover -s tests
+
+
+../Users/serendizc/Developer/roco-coach/roco/tests/test_agent_tasks.py:141: ResourceWarning: unclosed file <_io.TextIOWrapper name='/Users/serendizc/Developer/roco-coach/tests/evals/agent-tasks-v1.jsonl' mode='r' encoding='utf-8'>
+  committed = [
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+..............................................................................................F..............................................s................................................................................................................................................................................................................................................/Users/serendizc/Developer/roco-coach/roco/tests/test_trait_worklist.py:55: ResourceWarning: unclosed file <_io.TextIOWrapper name='/Users/serendizc/Developer/roco-coach/roco/tests/../src/roco_env/traits.py' mode='r' encoding='utf-8'>
+  source = open(tr.__file__, "r", encoding="utf-8").read()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.................................
+======================================================================
+FAIL: test_second_run_produces_no_diff (test_microcase_harness.TestReportGeneratorsAreIdempotent)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/serendizc/Developer/roco-coach/roco/tests/test_microcase_harness.py", line 236, in test_second_run_produces_no_diff
+    self.assertEqual(new, [],
+AssertionError: Lists differ: [' M reports/roco/workshop-acceptance/browser-workshop-acceptance.json'] != []
+
+First list contains 1 additional elements.
+First extra element 0:
+' M reports/roco/workshop-acceptance/browser-workshop-acceptance.json'
+
+- [' M reports/roco/workshop-acceptance/browser-workshop-acceptance.json']
++ [] : 第二次运行改了这些文件（说明产物里有易变字段）：[' M reports/roco/workshop-acceptance/browser-workshop-acceptance.json']
+
+----------------------------------------------------------------------
+Ran 417 tests in 35.947s
+
+FAILED (failures=1, skipped=1)
