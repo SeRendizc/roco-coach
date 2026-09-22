@@ -402,11 +402,11 @@ async function main() {
     const addProblems = (before, after) => (after === before + 1 ? [] : [`${before}→${after}（点了没加上）`]);
     counter('live-mine-add', '点了不变（用户实测的那个错）必须被同一条判据抓住',
       addProblems(0, 0), '0→0');
-    // 再点一次同一张卡 → 移除（前后仍可移除）
-    await mouseClick(`${ROOT_SEL} >>> #tw-cand-list .tw-row[data-tw-status="held"]`);
+    // 移除：点**那一格右上角的「移除」**（候选行再点一次不再做开关：那会让「加人」误触成摘人）
+    await mouseClick(`${ROOT_SEL} >>> #tw-slots .tw-slot-remove`);
     await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0')<${afterAdd}`, 40, 200);
     const afterRemove = Number(await js(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0'`));
-    check('live-mine-remove', '再点同一只：1/6 → 0/6（能加也要能拿走，否则「选不上」会变成「拿不掉」）',
+    check('live-mine-remove', '点那一格的「移除」：1/6 → 0/6（能加也要能拿走，否则「选不上」会变成「拿不掉」）',
       afterRemove === afterAdd - 1, `${afterAdd}→${afterRemove}`);
 
     // 上面的 mine 测试清空过持有队伍 —— 开局那一段要重新选满六只（不然它量不到东西）。

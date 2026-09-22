@@ -153,6 +153,9 @@ const STYLE = `
 .tw-state-trial{color:#f0cb77;border-color:#6b5b3a;background:#2a2318}
 .tw-state-info{color:#9caebe;border-color:#3a4a5c;background:#18232f}
 .tw-slot .tw-detail{margin-top:auto}
+/* 槽位里的「移除」是拇指要点的（390 实测 43×25 < 44）：给它 44×44。 */
+.tw-slot-remove{margin-left:auto;min-width:44px;min-height:44px;font-size:11px;color:#9caebe;
+ background:#121e2c;border:1px solid #314154;border-radius:8px;padding:0 8px;cursor:pointer}
 .tw-slot .tw-detail>summary{font-size:11.5px;color:#9caebe;cursor:pointer;min-height:44px;
  display:flex;align-items:center;list-style:none}
 .tw-slot .tw-detail>summary::-webkit-details-marker{display:none}
@@ -417,7 +420,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         return `<article class="tw-slot on" role="listitem" data-tw-slot="${slot.index}"
           data-tw-state="filled" data-tw-fieldable="${held ? 'yes' : 'no'}">
          <div class="tw-row"><span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
-          ${slot.locked ? '<span class="tw-lock">锁定</span>' : ''}</div>
+          ${slot.locked ? '<span class="tw-lock">锁定</span>' : ''}
+          <button class="tw-slot-remove" data-tw-remove-slot="${slot.index - 1}"
+            aria-label="把这一只从队伍里移除">移除</button></div>
          <div class="tw-meta"><span class="tw-types">${teamSlugs(slot.types) || '系别未登记'}</span>
           ${tag}</div>
          <div class="tw-meta">${escapeHtml(slot.build_tier_label ?? '')}</div>
@@ -476,10 +481,11 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         data-tw-state="filled" data-tw-status="${escapeAttr(slot.status ?? '')}"
         data-tw-can-battle="${slot.can_field === true ? 'field' : (slot.can_trial === true ? 'trial' : 'no')}">
        <div class="tw-row"><span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
-        <span class="tw-lock">${canBattle}</span></div>
+        <span class="tw-lock">${canBattle}</span>
+        <button class="tw-slot-remove" data-tw-remove-analysis="${slot.index - 1}"
+          aria-label="把这一只从理论阵容里移除">移除</button></div>
        <div class="tw-meta"><span class="tw-types">${teamSlugs(slot.types) || '系别未登记'}</span>
         <span class="tw-state-tag ${cls}">${escapeHtml(slot.status_label ?? '')}</span></div>
-       ${mechanismRow(slot.mechanism)}
        <details class="tw-detail"><summary>详情（为什么）</summary>
         <div class="tw-detail-body">${escapeHtml(slot.reason ?? '')}</div></details>
       </article>`;
@@ -863,6 +869,12 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     walk(shadow);
   }
 
+  /** 一行即时反馈（不抢正文）：说清「为什么这一下没动作」以及下一步怎么做。 */
+  function setPickNote(text) {
+    const el = $('tw-cand-result');
+    if (el) el.textContent = text;
+  }
+
   function emit() {
     const detail = {
       team: state.selected.slice(),
@@ -1018,9 +1030,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       // 点已经在队里的那一只 = **移除**（开关语义）。第一版把这里写成 `return`，
       // 于是「能加不能拿」——用户点第二下没反应。
       if (state.selected.includes(owned.select)) {
-        state.selected = state.selected.filter((id) => id !== owned.select);
         state.error = null;
-        await reload();
+        setPickNote(`${state.ownedByInstance.get(owned.select)?.name ?? '这一只'}已经在队里了：`
+          + '想拿掉就点它那一格右上角的「移除」。');
         return;
       }
       if (state.selected.length >= TEAM_SLOTS) {
@@ -1034,9 +1046,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     } else {
       if (!species || !/^pet_\d{6}$/.test(species)) return;
       if (state.analysis.includes(species)) {
-        state.analysis = state.analysis.filter((id) => id !== species);
         state.error = null;
-        await reload();
+        setPickNote('这一只已经在理论阵容里了：想拿掉就点它那一格右上角的「移除」。');
         return;
       }
       if (state.analysis.length >= TEAM_SLOTS) {
@@ -1093,6 +1104,28 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     $('tw-filter-type').textContent = '属性：全部';
     $('tw-filter-role').textContent = '定位：全部';
     void loadPool({reset: true});
+  });
+  // 槽位里的「移除」：持有成员按实例 id 摘，理论阵容按物种 id 摘。
+  shadow.addEventListener('click', (event) => {
+    const held = event.target?.closest?.('[data-tw-remove-slot]');
+    if (held) {
+      const at = Number(held.dataset.twRemoveSlot);
+      if (Number.isInteger(at) && at >= 0 && at < state.selected.length) {
+        state.selected = state.selected.filter((_, i) => i !== at);
+        state.error = null;
+        void reload();
+      }
+      return;
+    }
+    const ana = event.target?.closest?.('[data-tw-remove-analysis]');
+    if (ana) {
+      const at = Number(ana.dataset.twRemoveAnalysis);
+      if (Number.isInteger(at) && at >= 0 && at < state.analysis.length) {
+        state.analysis = state.analysis.filter((_, i) => i !== at);
+        state.error = null;
+        void reload();
+      }
+    }
   });
   $('tw-cand-prev').addEventListener('click', () => {
     state.pool.offset = Math.max(0, state.pool.offset - state.pool.pageSize);

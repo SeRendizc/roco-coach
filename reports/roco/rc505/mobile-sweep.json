@@ -246,7 +246,7 @@
    "clientW": 390,
    "scrollW": 390,
    "clientH": 844,
-   "visibleText": 14523,
+   "visibleText": 14755,
    "required": [
     {
      "tag": "button",
@@ -301,7 +301,7 @@
    "clientW": 360,
    "scrollW": 360,
    "clientH": 640,
-   "visibleText": 14523,
+   "visibleText": 14755,
    "required": [
     {
      "tag": "button",
@@ -402,7 +402,7 @@
    "clientW": 390,
    "scrollW": 390,
    "clientH": 844,
-   "visibleText": 9681,
+   "visibleText": 9913,
    "required": [],
    "small_all": 0,
    "tappables_all": 0,
@@ -425,7 +425,7 @@
    "clientW": 360,
    "scrollW": 360,
    "clientH": 640,
-   "visibleText": 9681,
+   "visibleText": 9913,
    "required": [],
    "small_all": 0,
    "tappables_all": 0,
