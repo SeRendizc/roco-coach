@@ -53,9 +53,11 @@ RC-301 合同 → RC-302 七维缺口 → RC-303 候选生成 → RC-304 环境�
 
 ## 2. 路由契约
 
-`GET /api/roco/workshop?mode=&selected=&locked=&must_include=&must_exclude=&favourites_only=&max_replacements=`
+`GET /api/roco/workshop?mode=&selected=&locked=&must_include=&must_exclude=&favourites_only=&max_replacements=&stage=`
 
-* 白名单外的键、形状不对的 id、非十进制整数的 `max_replacements` → **400 + 点名**（`ok:false`）；
+* `stage=first` 只跑**初判**那一段（召回 + 缺口 + 槽位/候选/Coach 摘要），
+  `axes` 是 `null`、`axes_status` 是 `'not_requested'`；省略或 `stage=full` 是今天的完整载荷；
+* 白名单外的键、形状不对的 id、非十进制整数的 `max_replacements`、`stage` 取别的值 → **400 + 点名**（`ok:false`）；
 * 再把参数交给 RC-301 `validateRecommendationRequest()` 做**合同层**校验（模式 / 槽位数 / 约束矛盾），
   失败同样 400，错误文本就是 RC-301 的 `[CODE] field：detail` 原话；
 * 状态码取自回执（与 RC-205 盒子同一条先例）。
@@ -168,6 +170,43 @@ curl 'http://127.0.0.1:8765/api/roco/workshop?zzz=1'             # → 400，点
 
 ---
 
+## 4c. 两阶段交付（RC-306）：初判先到，依据后补
+
+模块**分两次问同一份数据**（不改服务端）：
+
+```text
+① GET /api/roco/workshop?...&stage=first    ← 服务端**不跑**证据段
+   立刻渲染：槽位 / 下一只候选 / 缺口口径 / Coach 短结论
+   （`axes:null`、`axes_status:'not_requested'`、`serving.full_withheld:'NOT_REQUESTED'`）
+② GET /api/roco/workshop?...                ← 完整载荷，无条件再取一次
+   **原地升级**：补上五轴 / 最小替换 / 完整依据；初判画出来的东西位置不变
+```
+
+失败方向：
+
+* 第一次失败（400/500）⇒ 进错误态，与以前一样（`data-tw-state='bad-request'|'failed'`）；
+* 第二次失败 ⇒ **只影响「依据」那一块**：`data-tw-full-state='failed'`，
+  评估区如实写「这一次五个口径与最小替换没有回来；上面那些结论不受影响」，
+  **已经渲染好的初判一个字都不清空**。
+
+`serving` 信封（契约 `roco-serving/v1`）里 `full === null` + `full_withheld === 'NOT_REQUESTED'`
+= **调用方主动不要证据段**；`degraded === true` 才是真的降级（超时/失败）。两者在
+`data-tw-withheld` 与 `data-tw-degraded` 上分开记，页面上不混为一谈。
+
+### dataset 钩子（全在 `#team-workshop` 的属性上，可见文本里一个都不出现）
+
+| 属性 | 含义 |
+|---|---|
+| `data-tw-stage` | 最近一次渲染的阶段：`first` / `full` |
+| `data-tw-fetches` | 这一轮的取数顺序，两阶段就是 `first|full`（少一个就说明初判没发） |
+| `data-tw-first-ms` / `data-tw-full-ms` | 两段各自的**外部渲染耗时**（ms） |
+| `data-tw-rendered-after-first` | 完整载荷到达之前槽位是否已经画出来（`yes`/`no`） |
+| `data-tw-full-state` | `loading` / `ok` / `failed`（第二次请求的结局） |
+| `data-tw-ready` | 两阶段都回来了（`yes`）；与 `data-tw-state` 分开，便于量测中间态 |
+| `data-tw-serving` / `data-tw-degraded` / `data-tw-withheld` / `data-tw-elapsed-ms` | 服务端 `serving` 信封的可核对投影 |
+
+---
+
 ## 5. 与主线程的挂载契约
 
 ```js
@@ -203,12 +242,14 @@ node --test tests/roco-workshop.test.js
 
 浏览器验收在**产品页 `roco.html`** 上跑（真实键鼠），产物在 `reports/roco/workshop-acceptance/`：
 `browser-workshop-acceptance.json` + 1440×900 / 390×844 两档截图。
-判据（36 条）覆盖：产品页挂载、六个槽位、三枚徽记、候选池 ≥600（含「我没有的图鉴物种」可点）、
+判据（41 条）覆盖：产品页挂载、六个槽位、三枚徽记、候选池 ≥600（含「我没有的图鉴物种」可点）、
+**两阶段交付（初判不含证据段 + 初判先于完整载荷渲染）**、
 真实键鼠连续选入 2 / 5 / 6 只、评估随阵容变化、满六只五轴与一个最小替换、
 **冻结机制原文逐字上卡（且枚举原文不上卡）**、玩家可见文本无工程词、无胜率与百分数、
 未知说明在玩家层、非法参数一律 400、两档无横向溢出、移动端区块顺序、
-390px 触控目标 ≥44px、控制台干净；另有 18 条**必红反证**
-（含「把机制行从卡上抹掉 ⇒ 红」「把 `FROZEN_DESC` 印上页面 ⇒ 红」「把「胜率 62%」塞进 `mechanism.line` ⇒ 红」）。
+390px 触控目标 ≥44px、控制台干净；另有 27 条**必红反证**
+（含「把机制行从卡上抹掉 ⇒ 红」「把 `FROZEN_DESC` 印上页面 ⇒ 红」「把「胜率 62%」塞进 `mechanism.line` ⇒ 红」
+「让 first 那一次也带上五轴 ⇒ 红」「把两阶段退化成一次性请求 ⇒ 红」）。
 
 ---
 

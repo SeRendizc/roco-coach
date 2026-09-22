@@ -245,6 +245,62 @@ export function mechanismRenderProblems(facts) {
   return problems;
 }
 
+/**
+ * 两阶段交付（RC-306）的**机器判据**。
+ *
+ * 两条互相独立的事实：
+ *   · `serving` 契约：`stage=first` 的回执必须 `axes === null`、`axes_status === 'not_requested'`、
+ *     `serving.full_withheld === 'NOT_REQUESTED'`（主动不要证据段 ≠ 超时降级）；
+ *     而且它真的**产出了初判**（`full === null`、`degraded === false`）。
+ *   · 页面真的**分两次要**：`fetches` 顺序必须是 `first|full`，并且**在完整载荷到达之前**
+ *     槽位就已经画出来了（`renderedAfterFirst === 'yes'`），两次渲染的耗时也都量到了。
+ *
+ * 反证样本：① 让 first 那一次也带上五轴（`axes` 不是 null）⇒ 红；
+ *          ② 退化成一次请求（`fetches === 'full'` / `first_ms` 缺失）⇒ 红。
+ */
+export function stageFirstProblems(json) {
+  const problems = [];
+  const serving = json?.serving ?? null;
+  if (!serving) { problems.push('stage=first 的回执里没有 serving 信封'); return problems; }
+  if (json.axes !== null) problems.push(`stage=first 的 axes 必须是 null，实际 ${JSON.stringify(json.axes)?.slice(0, 40)}`);
+  if (json.axes_status !== 'not_requested') problems.push(`axes_status 必须是 not_requested，实际 ${JSON.stringify(json.axes_status)}`);
+  if (serving.full_withheld !== 'NOT_REQUESTED') {
+    problems.push(`full_withheld 必须是 NOT_REQUESTED（主动不要证据段），实际 ${JSON.stringify(serving.full_withheld)}`);
+  }
+  if (serving.full !== null) problems.push(`stage=first 不许产出完整段，实际 full=${JSON.stringify(serving.full)?.slice(0, 40)}`);
+  if (serving.degraded === true) problems.push('stage=first 是「调用方主动只要初判」，不是降级：degraded 必须是 false');
+  if (serving.first?.kind !== 'structured_first') {
+    problems.push(`serving.first.kind 必须是 structured_first，实际 ${JSON.stringify(serving.first?.kind)}`);
+  }
+  if (!(Array.isArray(serving.withheld_stages) && serving.withheld_stages.includes('evidence_and_counterfactual'))) {
+    problems.push(`withheld_stages 必须点名证据段，实际 ${JSON.stringify(serving.withheld_stages)}`);
+  }
+  return problems;
+}
+
+/**
+ * 页面把「两阶段」真的做出来了：请求顺序 + 初判先于完整载荷渲染 + 两次耗时都量到。
+ * `facts` 形状：`{fetches, renderedAfterFirst, firstMs, fullMs, degraded}`。
+ */
+export function stageSequenceProblems(facts) {
+  const problems = [];
+  if (facts.fetches !== 'first|full') {
+    problems.push(`请求顺序必须是 first|full（初判先发、完整载荷后发），实际 ${JSON.stringify(facts.fetches)}`);
+  }
+  if (facts.renderedAfterFirst !== 'yes') {
+    problems.push('完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画）');
+  }
+  const firstMs = Number(facts.firstMs);
+  const fullMs = Number(facts.fullMs);
+  if (!Number.isFinite(firstMs) || firstMs <= 0) {
+    problems.push(`没有量到初判渲染耗时（data-tw-first-ms=${JSON.stringify(facts.firstMs)}）`);
+  }
+  if (!Number.isFinite(fullMs) || fullMs <= 0) {
+    problems.push(`没有量到完整载荷渲染耗时（data-tw-full-ms=${JSON.stringify(facts.fullMs)}）`);
+  }
+  return problems;
+}
+
 export function deepTextValues(value) {
   const out = [];
   const walk = (node) => {
@@ -556,6 +612,12 @@ async function main() {
       nextLabels: d.twNextLabels ?? null, axes: d.twAxes ?? null, axesAvailable: d.twAxesAvailable ?? null,
       poolTotal: d.twPoolTotal ?? null, poolRows: d.twPoolRows ?? null,
       error: d.twError ?? null, hasPayload: Boolean(d.twPayload),
+      stage: d.twStage ?? null, fetches: d.twFetches ?? null,
+      renderedAfterFirst: d.twRenderedAfterFirst ?? null,
+      firstMs: d.twFirstMs ?? null, fullMs: d.twFullMs ?? null,
+      fullState: d.twFullState ?? null, ready: d.twReady ?? null,
+      serving: d.twServing ?? null, withheld: d.twWithheld ?? null,
+      degraded: d.twDegraded ?? null, elapsedMs: d.twElapsedMs ?? null,
     });})()`));
   const domFacts = async () => JSON.parse(await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
     const sr=root?.shadowRoot??null;
@@ -646,7 +708,9 @@ async function main() {
     await cdp.send('Emulation.setDeviceMetricsOverride', {width: 1440, height: 900, deviceScaleFactor: 1, mobile: false});
     // ── 产品页：`roco.html`（模块由 roco.js 的 mountWorkshop() 挂上）──────────
     await cdp.send('Page.navigate', {url: base + 'roco.html'});
-    const ready = await waitFor(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twState==='ok'`);
+    // 等**两阶段都回来**（`twReady`），而不是只等第一次 ok：
+    // 只等 ok 会在「初判刚画完」的那一刻就往下走，那正是要量测的中间态。
+    const ready = await waitFor(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twReady==='yes'`);
     if (!ready) throw new Error('产品页上的 #team-workshop 没有进入就绪状态（模块没挂上或路由失败）');
 
     // ── ① 挂载点、六槽、徽记、候选池 ≥600 ───────────────────────────────
@@ -682,11 +746,49 @@ async function main() {
       wide.scrollW === wide.clientW,
       `clientW=${wide.clientW} scrollW=${wide.scrollW} bodyScrollW=${wide.bodyScrollW}`);
 
+    // ── ①b 两阶段交付：初判先到、完整载荷后到，且初判真的不含证据段 ────────
+    const stageFirstRoute = await route(`stage=first&selected=${ids.slice(0, 2).join(',')}`);
+    const stageFirstJudged = stageFirstProblems(stageFirstRoute.json);
+    check('05-初判不含证据段', '`stage=first` 的回执：axes === null、axes_status === not_requested、'
+      + 'serving.full_withheld === NOT_REQUESTED（主动不要证据段，不是降级），且真的产出了结构化初判',
+      stageFirstRoute.status === 200 && stageFirstJudged.length === 0,
+      stageFirstJudged.join(' | ')
+      + `（HTTP ${stageFirstRoute.status}；serving.first=${JSON.stringify(stageFirstRoute.json.serving?.first?.kind)}`
+      + ` withheld=${JSON.stringify(stageFirstRoute.json.serving?.withheld_stages)}`
+      + ` missing=${JSON.stringify(stageFirstRoute.json.serving?.short?.missing_stages)}）`);
+    counter('05-初判不含证据段', '让 first 那一次也带上五轴（把「初判不跑证据段」破掉）必须被同一条判据抓住',
+      stageFirstProblems({...stageFirstRoute.json, axes: stageFirstRoute.json.axes ?? []}),
+      '把 axes 从 null 换成数组');
+    counter('05-初判不含证据段（降级混淆）', '把「超时降级」混成「主动只要初判」必须被同一条判据抓住',
+      stageFirstProblems({...stageFirstRoute.json,
+        serving: {...stageFirstRoute.json.serving, degraded: true, full: {kind: 'full_answer'}}}),
+      'serving.degraded=true 且 full 非 null');
+
+    const stageSeqJudged = stageSequenceProblems(boot);
+    check('06-初判先于完整载荷', '页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了'
+      + '（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）',
+      stageSeqJudged.length === 0,
+      stageSeqJudged.join(' | ')
+      + `；fetches=${boot.fetches} rendered_after_first=${boot.renderedAfterFirst}`
+      + ` first_ms=${boot.firstMs} full_ms=${boot.fullMs} stage=${boot.stage} full_state=${boot.fullState}`);
+    counter('06-初判先于完整载荷', '把两阶段退化成一次性请求（fetches=full、没有初判耗时）必须被同一条判据抓住',
+      stageSequenceProblems({fetches: 'full', renderedAfterFirst: 'no', firstMs: null, fullMs: '12'}),
+      '{fetches:"full", renderedAfterFirst:"no", firstMs:null}');
+    counter('06-初判先于完整载荷（初判被挡住）', '让「完整载荷到达之前」什么都不画（rendered_after_first=no）也必须被抓住',
+      stageSequenceProblems({...boot, renderedAfterFirst: 'no'}),
+      `${JSON.stringify({fetches: boot.fetches, renderedAfterFirst: 'no'})}`);
+    check('07-分段元数据在 dataset', '分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），'
+      + '可见文本里一个工程词都没有',
+      boot.serving === 'roco-serving/v1' && boot.degraded === 'no' && Number(boot.elapsedMs) >= 0
+      && !String(await playerText()).includes('roco-serving'),
+      `serving=${boot.serving} degraded=${boot.degraded} elapsed_ms=${boot.elapsedMs}`
+      + ` withheld=${JSON.stringify(boot.withheld)}`);
+
     // ── ② 候选池真的能翻到「我没有的图鉴物种」────────────────────────────
     const anyPage = await (await fetch(`${base}api/roco/box?kind=catalog&limit=60&offset=560`)).json();
     const ownedSpecies = new Set(owned.instances.map((i) => i.species_id));
     const catalogOnly = (anyPage.player.cards ?? []).filter((card) => !ownedSpecies.has(card.group ?? card.select));
-    check('05-候选含图鉴物种', '候选池里能点到「我没有的图鉴物种」（证明候选宇宙是 600+，不是 48 只）',
+    check('08-候选含图鉴物种', '候选池里能点到「我没有的图鉴物种」（证明候选宇宙是 600+，不是 48 只）',
       catalogOnly.length > 0, catalogOnly.length ? `命中 ${catalogOnly[0].name}` : '第 11 页 60 条里没有非拥有物种');
 
     // 真实鼠标点开「只看收藏」→ 再关掉
@@ -696,7 +798,7 @@ async function main() {
     const favOn = await facts();
     await mouseClick(`${ROOT_SEL} >>> #tw-favourite`);
     await sleep(320);
-    check('06-只看收藏开关', '真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok',
+    check('09-只看收藏开关', '真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok',
       favOn.state === 'ok' && (await facts()).state === 'ok',
       `开了之后 state=${favOn.state}（selected=${favOn.selected}）；关掉之后 state=${(await facts()).state}；命中=${JSON.stringify(favClick.top)}`);
 
@@ -714,10 +816,10 @@ async function main() {
         {tries: 30, ms: 120});
       const rejectedText = String(await playerText());
       const rejected = await facts();
-      check('07-图鉴物种照实拒绝', '点一只自己没有的图鉴物种：服务端照实说明为什么不能进队，页面把它显示出来（不静默忽略）',
+      check('10-图鉴物种照实拒绝', '点一只自己没有的图鉴物种：服务端照实说明为什么不能进队，页面把它显示出来（不静默忽略）',
         rejected.state === 'bad-request' && /服务端原话/.test(rejectedText) && /selected/.test(rejectedText),
         `state=${rejected.state} 错误=${JSON.stringify(rejected.error)}`);
-      counter('07-图鉴物种照实拒绝', '把「静默接受」的样本过同一条判据必须报错',
+      counter('10-图鉴物种照实拒绝', '把「静默接受」的样本过同一条判据必须报错',
         badRequestProblems(`selected=${catalogSpecies}`, {ok: true, player: {}}, 200, 'selected'),
         '{ok:true} / HTTP 200');
     }
@@ -733,7 +835,7 @@ async function main() {
     const recovered = await addByName(pickNames[0]);
     await sleep(200);
     const afterRecover = await facts();
-    check('08-错误态可恢复', '错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里',
+    check('11-错误态可恢复', '错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里',
       recovered.added && afterRecover.state === 'ok' && Number(afterRecover.selected) === 1,
       `加点=${JSON.stringify(recovered)} state=${afterRecover.state} selected=${afterRecover.selected}`);
 
@@ -747,19 +849,19 @@ async function main() {
     const two = await facts();
     const twoDom = await domFacts();
     steps.push({at: 'two-selected', facts: two, dom: twoDom, addResults});
-    check('09-真实键鼠选到第 2 只', '真实键盘搜名字 + 真实鼠标点候选：已选 == 2，六个槽位里两个填上了',
+    check('12-真实键鼠选到第 2 只', '真实键盘搜名字 + 真实鼠标点候选：已选 == 2，六个槽位里两个填上了',
       two.state === 'ok' && Number(two.selected) === 2 && twoDom.filledNodes === 2 && twoDom.slotNodes === 6,
       `state=${two.state} selected=${two.selected} 填了 ${twoDom.filledNodes}/${twoDom.slotNodes} 槽`);
     const nextProblems = nextCandidateProblems({count: Number(two.next), cardNodes: twoDom.nextNodes,
       labels: String(two.nextLabels ?? '').split('|').filter(Boolean)});
-    check('10-恰好三个候选', '已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径'
+    check('13-恰好三个候选', '已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径'
       + '（偏好保留池空时 RC-303 会如实回落，第三个位置由召回的参考候选补上并标「候选参考」）',
       nextProblems.length === 0,
       nextProblems.join(' | ') || `标签=${two.nextLabels} 候选节点=${twoDom.nextNodes} 缺口节点=${twoDom.gapNodes}`);
-    counter('10-恰好三个候选', '把三个候选改成两个必须被同一条判据抓住',
+    counter('13-恰好三个候选', '把三个候选改成两个必须被同一条判据抓住',
       nextCandidateProblems({count: 2, cardNodes: 2, labels: ['强度', '稳定']}),
       'count=2 / labels=[强度,稳定]');
-    counter('10-候选标签去重', '三个候选里有两个是同一个取舍标签（等于只有两个选择）必须被抓住',
+    counter('13-候选标签去重', '三个候选里有两个是同一个取舍标签（等于只有两个选择）必须被抓住',
       nextCandidateProblems({count: 3, cardNodes: 3, labels: ['强度', '强度', '候选参考']}),
       'labels=[强度,强度,候选参考]');
     // 路由与 RC-303 同源：三个取舍标签顺序必须是 strength / stability / preference
@@ -768,12 +870,12 @@ async function main() {
     const okOrder = routeIds.slice(0, Math.min(routeIds.length, 2)).join('|') === 'strength|stability';
     const okTail = routeIds.every((id) => ['strength', 'stability', 'preference', 'recall_tail'].includes(id))
       && routeIds.filter((id) => id !== 'recall_tail').length >= 2;
-    check('11-候选与核心同源', '路由的 next_candidates 逐条带 RC-303 的口径 id（strength / stability / preference），'
+    check('14-候选与核心同源', '路由的 next_candidates 逐条带 RC-303 的口径 id（strength / stability / preference），'
       + '去重或回落时如实标 recall_tail，而不是页面层另编一个候选',
       routeTwo.json.ok === true && routeTwo.json.next_candidates.length === 3 && okOrder && okTail,
       `tradeoff_id=${JSON.stringify(routeIds)}（source=${JSON.stringify(routeTwo.json.next_candidates.map((row) => row.source))}）`);
     // 缺口清单（RC-302 七维）必须呈现在评估区里
-    check('12-缺口清单在评估区', '评估区呈现 RC-302 的缺口口径（缺什么 / 台账里标未核实），且没有工程键名',
+    check('15-缺口清单在评估区', '评估区呈现 RC-302 的缺口口径（缺什么 / 台账里标未核实），且没有工程键名',
       twoDom.gapNodes >= 1 && Array.isArray(routeTwo.json.player.gap_dimension_notes)
       && routeTwo.json.player.gap_dimension_notes.length >= 1,
       `缺口节点=${twoDom.gapNodes} 路由口径=${JSON.stringify(routeTwo.json.player.gap_dimension_notes)}`);
@@ -792,10 +894,10 @@ async function main() {
     const followProblems = evaluationFollowsTeamProblems(
       {selected: Number(two.selected), nextNames: twoDom.nextNames, nextNodes: twoDom.nextNodes, gapNodes: twoDom.gapNodes},
       {selected: Number(five.selected), nextNames: fiveDom.nextNames, nextNodes: fiveDom.nextNodes, gapNodes: fiveDom.gapNodes});
-    check('13-评估随阵容变化', '从 2 只加到 5 只之后：下一只候选换了人、缺口清单还在、仍然恰好三个候选',
+    check('16-评估随阵容变化', '从 2 只加到 5 只之后：下一只候选换了人、缺口清单还在、仍然恰好三个候选',
       Number(five.selected) === 5 && followProblems.length === 0,
       followProblems.join(' | ') || `2 只时候选=${JSON.stringify(twoDom.nextNames)}；5 只时=${JSON.stringify(fiveDom.nextNames)}`);
-    counter('13-评估随阵容变化', '把「阵容变了候选一字未变」的样本过同一条判据必须报错',
+    counter('16-评估随阵容变化', '把「阵容变了候选一字未变」的样本过同一条判据必须报错',
       evaluationFollowsTeamProblems(
         {selected: 2, nextNames: ['甲', '乙', '丙'], nextNodes: 3, gapNodes: 2},
         {selected: 5, nextNames: ['甲', '乙', '丙'], nextNodes: 3, gapNodes: 2}),
@@ -812,22 +914,22 @@ async function main() {
     const sixDom = await domFacts();
     const sixKeys = await js(`document.querySelector(${JSON.stringify(ROOT_SEL)}).dataset.twSelected ?? ''`);
     steps.push({at: 'six-selected', facts: six, dom: sixDom, addResults, selected_keys: sixKeys});
-    check('14-连续选入六只', '连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体',
+    check('17-连续选入六只', '连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体',
       Number(six.selected) === 6 && sixDom.filledNodes === 6 && sixDom.slotNodes === 6,
       `selected=${six.selected} 填了 ${sixDom.filledNodes}/${sixDom.slotNodes} 槽；加点记录=${JSON.stringify(addResults)}`);
     const sixRoute = await route(`selected=${ids.slice(0, 6).join(',')}&locked=${ids[0]}`);
     const sixRoutePlayer = sixRoute.json.player;
     const axisProblemsFound = axisProblems(sixRoute.json.axes);
-    check('15-满六只五轴', '选满六只后出现完整诊断：五轴都在；能算的给值，算不出的给原因且不带值（不补 0）',
+    check('18-满六只五轴', '选满六只后出现完整诊断：五轴都在；能算的给值，算不出的给原因且不带值（不补 0）',
       axisProblemsFound.length === 0 && sixDom.axisNodes === 5,
       axisProblemsFound.join(' | ') || `轴节点=${sixDom.axisNodes}；` + (sixRoute.json.axes ?? [])
         .map((axis) => `${axis.label}:${axis.available ? '能算' : '算不出'}`).join(' / '));
-    counter('15-满六只五轴', '把「算不出来」的轴填成 0 必须被同一条判据抓住',
+    counter('18-满六只五轴', '把「算不出来」的轴填成 0 必须被同一条判据抓住',
       axisProblems([{label: '环境价值', available: false, value: 0, unknown_reason: null},
         ...(sixRoute.json.axes ?? []).slice(1).map((axis) => ({label: axis.label, available: axis.available,
           value: axis.available ? axis.value : null, unknown_reason: axis.unknown_reason}))]),
       '{环境价值: available:false, value:0}');
-    check('16-最大短板与替换建议', '完整诊断里有主短板（缺口/未知清单）与**一个**最小替换：换出/换入各一只，并说清是结构理由',
+    check('19-最大短板与替换建议', '完整诊断里有主短板（缺口/未知清单）与**一个**最小替换：换出/换入各一只，并说清是结构理由',
       sixDom.gapNodes + sixDom.unknownNodes >= 2 && sixDom.replacementShown
       && Boolean(sixRoutePlayer?.full_team?.replacement?.out_name)
       && Boolean(sixRoutePlayer?.full_team?.replacement?.in_name),
@@ -835,10 +937,10 @@ async function main() {
       + ` 换出=${sixRoutePlayer?.full_team?.replacement?.out_name ?? null}`
       + ` 换入=${sixRoutePlayer?.full_team?.replacement?.in_name ?? null}`);
     const layerProblems = playerLayerProblems(sixRoutePlayer);
-    check('17-玩家层载荷', '路由的 player 段里没有工程键，也没有 id 形状的展示值',
+    check('20-玩家层载荷', '路由的 player 段里没有工程键，也没有 id 形状的展示值',
       layerProblems.length === 0,
       layerProblems.join(' | ') || `扫过 ${JSON.stringify(sixRoutePlayer).length} 字节`);
-    counter('17-玩家层载荷', '把 pet_id / instance_id 混进 player 段必须被同一条判据抓住',
+    counter('20-玩家层载荷', '把 pet_id / instance_id 混进 player 段必须被同一条判据抓住',
       playerLayerProblems({slots: [{name: '音速犬', pet_id: 'pet_000062'}], next_candidates: [{name: '喵喵', instance_id: 'own-0001'}]}),
       '{"slots":[{"pet_id":"pet_000062"}],"next_candidates":[{"instance_id":"own-0001"}]}');
     shots.push(await shootModule('workshop-03-six-selected-1440x900'));
@@ -860,16 +962,16 @@ async function main() {
       playerText: await playerText(),
     };
     const mechanismProblems = mechanismRenderProblems(mechanismFacts);
-    check('18-机制行上卡', '六个槽位里每一只的**冻结机制原文**都逐字渲染在卡的首层（小字、不截断），'
+    check('21-机制行上卡', '六个槽位里每一只的**冻结机制原文**都逐字渲染在卡的首层（小字、不截断），'
       + '枚举原文（FROZEN_DESC / MECHANISM_UNCONFIRMED）一个都不出现在可见文本里',
       mechanismProblems.length === 0,
       mechanismProblems.join(' | ')
       + `；机制行节点=${mechanismFacts.mechanismNodes} 已填槽位=${mechanismFacts.filledSlots}`
       + ` 待确认=${mechanismFacts.pendingNodes}；卡上样例「${String(mechanismFacts.renderedLines[0] ?? '').slice(0, 60)}」`);
-    counter('18-机制行上卡', '把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住',
+    counter('21-机制行上卡', '把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住',
       mechanismRenderProblems({...mechanismFacts, renderedLines: (mechanismFacts.renderedLines ?? []).slice(1)}),
       `expected=${JSON.stringify(mechanismFacts.expectedLines.slice(0, 1))} rendered=${JSON.stringify((mechanismFacts.renderedLines ?? []).slice(1, 2))}`);
-    counter('18-机制枚举不上面', '把 FROZEN_DESC 印到可见文本里必须被同一条判据抓住',
+    counter('21-机制枚举不上面', '把 FROZEN_DESC 印到可见文本里必须被同一条判据抓住',
       mechanismRenderProblems({...mechanismFacts, playerText: `${mechanismFacts.playerText} FROZEN_DESC`}),
       '可见文本追加 " FROZEN_DESC"');
 
@@ -878,21 +980,21 @@ async function main() {
     // 机制原文（逐字冻结 desc）里可能有百分数（「双攻+100%」）；只豁免**能追溯回产物**的那些。
     const sourcedLines = sourcedMechanismLines(sixRoutePlayer);
     const copyProblems = playerCopyProblems(playerNow, {sourcedLines});
-    check('19-玩家层无工程话', '模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON',
+    check('22-玩家层无工程话', '模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON',
       copyProblems.length === 0,
       copyProblems.join(' | ') || `扫过 ${playerNow.length} 字（豁免机制原文 ${copyProblems.sourced_exempted} 处）；样例「${playerNow.slice(0, 90)}…」`);
-    counter('19-玩家层无工程话', '往玩家区注入 pet_id / state_version 后同一条判据必须命中',
+    counter('22-玩家层无工程话', '往玩家区注入 pet_id / state_version 后同一条判据必须命中',
       playerCopyProblems('音速犬 pet_id=pet_000062 state_version=roco-workshop/v1'),
       '「音速犬 pet_id=pet_000062 state_version=roco-workshop/v1」');
     const pseudoNow = exemptSourcedLines(playerNow, sourcedLines).text.match(PSEUDO_PRECISION);
-    check('20-无胜率与百分数', '可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）',
+    check('23-无胜率与百分数', '可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）',
       pseudoNow === null, pseudoNow ? `命中「${pseudoNow[0]}」` : `扫过 ${playerNow.length} 字无命中（豁免机制原文 ${sourcedLines.length} 条）`);
-    counter('20-无胜率与百分数', '把「胜率 58%」写进可见文本必须被同一条判据抓住',
+    counter('23-无胜率与百分数', '把「胜率 58%」写进可见文本必须被同一条判据抓住',
       playerCopyProblems('这套阵容胜率 58%'), '「这套阵容胜率 58%」');
-    counter('20-无胜率与百分数（假机制绕过）', '把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住',
+    counter('23-无胜率与百分数（假机制绕过）', '把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住',
       playerCopyProblems('（机制原文）胜率 62%', {sourcedLines: sourcedMechanismLines({next_candidates: [{mechanism: {line: '胜率 62%'}}]})}),
       '{"next_candidates":[{"mechanism":{"line":"胜率 62%"}}]}');
-    check('21-未知写在玩家层', '「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）',
+    check('24-未知写在玩家层', '「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）',
       sixDom.unknownNodes >= 4 && /现在算不出来/.test(playerNow) && /未核实|未知/.test(playerNow),
       `未知条目=${sixDom.unknownNodes}；含「现在算不出来」=${/现在算不出来/.test(playerNow)}`);
 
@@ -911,18 +1013,18 @@ async function main() {
       const result = await route(query);
       rows.push(`${query.slice(0, 60)} → HTTP ${result.status} ${result.raw.slice(0, 110)}`);
       const problems = badRequestProblems(query, result.json, result.status, needle);
-      check(`22-非法参数(${needle})`, `「${query.slice(0, 44)}」必须 HTTP 400 + ok:false 并点名 ${needle}`,
+      check(`25-非法参数(${needle})`, `「${query.slice(0, 44)}」必须 HTTP 400 + ok:false 并点名 ${needle}`,
         problems.length === 0, problems.join(' | ') || `HTTP ${result.status} error=「${String(result.json.error).slice(0, 120)}」`);
     }
     steps.push({at: 'bad-params', rows});
-    counter('22-非法参数(mode)', '把「非法 mode 静默接受」的样本过同一条判据必须报错',
+    counter('25-非法参数(mode)', '把「非法 mode 静默接受」的样本过同一条判据必须报错',
       badRequestProblems('mode=zzz', {ok: true, player: {}}, 200, 'mode'), '{ok:true} / HTTP 200');
-    counter('22-非法参数(第七个槽位)', '把「接受第 7 个槽位」的样本过同一条判据必须报错',
+    counter('25-非法参数(第七个槽位)', '把「接受第 7 个槽位」的样本过同一条判据必须报错',
       badRequestProblems(`selected=${ids.slice(0, 7).join(',')}`, {ok: true, player: {selected_count: 7}}, 200, 'selected'),
       '{ok:true,player:{selected_count:7}} / HTTP 200');
     const okSix = await route(`selected=${ids.slice(0, 6).join(',')}`);
     const overSeven = await route(`selected=${ids.slice(0, 7).join(',')}`);
-    check('23-六槽上限', '同名参数下 6 只必须 200、7 只必须 400：上限只认六个槽位',
+    check('26-六槽上限', '同名参数下 6 只必须 200、7 只必须 400：上限只认六个槽位',
       okSix.status === 200 && okSix.json.ok === true && overSeven.status === 400 && overSeven.json.ok === false,
       `6 只 → HTTP ${okSix.status}；7 只 → HTTP ${overSeven.status}「${String(overSeven.json.error).slice(0, 90)}」`);
 
@@ -930,7 +1032,7 @@ async function main() {
     await cdp.send('Page.navigate', {url: base + 'workshop.html'});
     const fixtureReady = await waitFor(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twState==='ok'`);
     const fixtureTitle = await js(`document.title`);
-    check('24-开发夹具', 'workshop.html 只是单独调试同一模块的薄壳（能挂上、标题写明是夹具，不冒充产品页）',
+    check('27-开发夹具', 'workshop.html 只是单独调试同一模块的薄壳（能挂上、标题写明是夹具，不冒充产品页）',
       fixtureReady && /夹具/.test(fixtureTitle),
       `夹具就绪=${fixtureReady} 标题=「${fixtureTitle}」`);
     shots.push(await shootModule('workshop-04-fixture-1440x900'));
@@ -941,7 +1043,7 @@ async function main() {
       if (Number((await facts()).selected ?? 0) >= 6) break;
       await addByName(name);
     }
-    check('25-产品页重新选满六只', '回到产品页后仍能用真实键鼠选满六只（窄屏量测的前提）',
+    check('28-产品页重新选满六只', '回到产品页后仍能用真实键鼠选满六只（窄屏量测的前提）',
       Number((await facts()).selected) === 6, `selected=${(await facts()).selected}`);
 
     // ── ⑩ 窄屏 390×844：不溢出 + 顺序 + 触控 ≥44px ─────────────────────
@@ -950,7 +1052,7 @@ async function main() {
     await sleep(620);
     const narrow = await metrics();
     screens.push({viewport: '390x844', at: 'six-selected', ...narrow});
-    check('26-窄屏不溢出', '390×844：scrollW == clientW',
+    check('29-窄屏不溢出', '390×844：scrollW == clientW',
       narrow.scrollW === narrow.clientW,
       `clientW=${narrow.clientW} scrollW=${narrow.scrollW} bodyScrollW=${narrow.bodyScrollW}`);
     const targets = JSON.parse(await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
@@ -963,10 +1065,10 @@ async function main() {
         out.push({tag:el.tagName,cls:String(el.className||'').slice(0,26),w:Math.round(r.width),h:Math.round(r.height)});}
       return JSON.stringify({count:out.length,small:out.filter((x)=>x.w<44||x.h<44)});})()`));
     const touchProblems = touchTargetProblems(targets.small);
-    check('27-触控目标', '390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44',
+    check('30-触控目标', '390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44',
       touchProblems.length === 0,
       touchProblems.join(' | ') || `量了 ${targets.count} 个元素，全部达标`);
-    counter('27-触控目标', '一个 30×30 的按钮必须被同一条判据抓住',
+    counter('30-触控目标', '一个 30×30 的按钮必须被同一条判据抓住',
       touchTargetProblems([{tag: 'BUTTON', cls: 'tiny', w: 30, h: 30}]), 'BUTTON.tiny 30×30');
     const order = JSON.parse(await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
       const sr=root?.shadowRoot??null;
@@ -976,10 +1078,10 @@ async function main() {
       const tops=order.map((cls)=>({cls,top:Math.round(sr.querySelector('.'+cls).getBoundingClientRect().top)}));
       return JSON.stringify({order,tops});})()`));
     const orderProblems = mobileOrderProblems(order.order, order.tops);
-    check('28-移动端顺序', '390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」',
+    check('31-移动端顺序', '390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」',
       orderProblems.length === 0,
       orderProblems.join(' | ') || `顺序=${JSON.stringify(order.order)} 顶部位置=${JSON.stringify(order.tops)}`);
-    counter('28-移动端顺序', '把顺序改成「评估在候选池前面」必须被同一条判据抓住',
+    counter('31-移动端顺序', '把顺序改成「评估在候选池前面」必须被同一条判据抓住',
       mobileOrderProblems(['tw-team', 'tw-eval', 'tw-cand', 'tw-coach'],
         [{cls: 'tw-team', top: 0}, {cls: 'tw-eval', top: 100}, {cls: 'tw-cand', top: 200}, {cls: 'tw-coach', top: 300}]),
       'order=[tw-team,tw-eval,tw-cand,tw-coach]');
@@ -995,7 +1097,7 @@ async function main() {
     const narrowMetrics = await metrics();
     steps.push({at: 'narrow-two', facts: narrowTwo, dom: narrowDom, metrics: narrowMetrics});
     screens.push({viewport: '390x844', at: 'two-selected', ...narrowMetrics});
-    check('29-窄屏候选区', '390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在',
+    check('32-窄屏候选区', '390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在',
       narrowMetrics.scrollW === narrowMetrics.clientW && Number(narrowTwo.next) === 3 && narrowDom.gapNodes >= 1,
       `clientW=${narrowMetrics.clientW} scrollW=${narrowMetrics.scrollW} next=${narrowTwo.next} 缺口=${narrowDom.gapNodes}`);
     shots.push(await shootModule('workshop-06-two-selected-390x844'));
@@ -1034,9 +1136,9 @@ async function main() {
     const startState = JSON.parse(await js(`(()=>{const b=document.getElementById('start-standard-pvp');
       return b?JSON.stringify({disabled:b.disabled,team:b.dataset.rocoStandardTeam,fieldable:b.dataset.rocoStandardFieldable}):'null';})()`));
     const startProblems = standardStartButtonProblems(startState);
-    check('31-标准 PVP 开局按钮', '六槽选满后「开一局（标准 PVP · 六宠）」按钮可用，且它读的是页面选出的六只',
+    check('34-标准 PVP 开局按钮', '六槽选满后「开一局（标准 PVP · 六宠）」按钮可用，且它读的是页面选出的六只',
       startProblems.length === 0, startProblems.join(' | ') || JSON.stringify(startState));
-    counter('31-标准 PVP 开局按钮', '队伍不满六只（或按钮把规模读错）必须被同一条判据抓住',
+    counter('34-标准 PVP 开局按钮', '队伍不满六只（或按钮把规模读错）必须被同一条判据抓住',
       standardStartButtonProblems({disabled: false, team: '5'}), '{"disabled":false,"team":"5"}');
     await mouseClick('#start-standard-pvp');
     const battleStarted = await waitFor(`document.body.dataset.rocoView==='ready'`
@@ -1055,25 +1157,25 @@ async function main() {
     const battleProblems = sixPetBattleProblems(battleFacts);
     // 开局失败时页面会把服务端原文写进 `#plan-status`——把它带进断言信息里（报错原文就是证据）。
     const planStatus = await js(`document.getElementById('plan-status')?.textContent ?? null`);
-    check('32-标准 PVP 战斗页', '按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出',
+    check('35-标准 PVP 战斗页', '按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出',
       battleProblems.length === 0 && battleStarted,
       (battleProblems.join(' | ') || `mode=${battleFacts.mode} mana=${battleFacts.selfMana}/${battleFacts.foeMana} `
         + `groups=${battleFacts.groups} hidden=${battleFacts.hidden}`)
       + `；页面状态栏=「${String(planStatus ?? '').slice(0, 160)}」`);
     steps.push({at: 'standard-pvp-battle', facts: battleFacts});
-    counter('32-标准 PVP 战斗页(模式)', '开局后模式被换成练习局必须被同一条判据抓住',
+    counter('35-标准 PVP 战斗页(模式)', '开局后模式被换成练习局必须被同一条判据抓住',
       sixPetBattleProblems({...battleFacts, mode: 'demo-training-3v3'}), '{"mode":"demo-training-3v3"}');
-    counter('32-标准 PVP 战斗页(魔力)', '资源条还写「未核验」必须被同一条判据抓住',
+    counter('35-标准 PVP 战斗页(魔力)', '资源条还写「未核验」必须被同一条判据抓住',
       sixPetBattleProblems({...battleFacts, selfText: '魔力 / 心未核验'}),
       '{"selfText":"魔力 / 心未核验"}');
-    counter('32-标准 PVP 战斗页(动作)', '物品组混进 1 条必须被同一条判据抓住',
+    counter('35-标准 PVP 战斗页(动作)', '物品组混进 1 条必须被同一条判据抓住',
       sixPetBattleProblems({...battleFacts, groups: 'skill:2,charge:0,switch:1,surrender:0,item:1,escape:0'}),
       '{"groups":"…,item:1,escape:0"}');
-    counter('32-标准 PVP 战斗页(覆盖)', '把未核验覆盖藏起来必须被同一条判据抓住',
+    counter('35-标准 PVP 战斗页(覆盖)', '把未核验覆盖藏起来必须被同一条判据抓住',
       sixPetBattleProblems({...battleFacts, noteHidden: true}), '{"noteHidden":true}');
     shots.push(await shoot('workshop-07-standard-pvp-1440x900'));
 
-    check('30-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
+    check('33-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,
       `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 2))} pageErrors=${JSON.stringify(pageErrors.slice(0, 2))}`);
   } catch (error) {

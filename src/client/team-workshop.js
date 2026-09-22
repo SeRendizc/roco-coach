@@ -497,9 +497,21 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      <p class="tw-note" style="margin-top:8px">${escapeHtml(player?.honesty_note ?? '')}</p>`;
   }
 
-  function renderEval(player) {
+  function renderEval(player, stage = 'full') {
     const selected = player?.selected_count ?? 0;
     if (!player) { $('tw-eval-body').innerHTML = ''; $('tw-eval-sub').textContent = '—'; return; }
+    // 初判阶段（`stage='first'`）：证据段服务端根本没跑，`player.full_team` 是 null。
+    // 这里**如实说「正在补依据」**，而不是显示「五轴算不出来」——后者会把
+    // 「还没到」说成「算不出」，是两种不同的诚实。
+    if (selected >= TEAM_SLOTS && !player.full_team) {
+      $('tw-eval-sub').textContent = stage === 'first' ? '满编六只 · 正在补依据' : '满编六只 · 依据没回来';
+      $('tw-eval-body').innerHTML = `<p class="tw-lead">六只都在了。缺口与候选已经在上面给出了。</p>
+       <p class="tw-note">${stage === 'first'
+    ? '五个口径与最小替换正在算（这一段最贵），回来之后原地补在这里。'
+    : '五个口径与最小替换这次没有回来：只缺这一块，上面那些结论照旧。'}</p>
+       ${renderUnknowns(player)}`;
+      return;
+    }
     if (selected >= TEAM_SLOTS && player.full_team) {
       $('tw-eval-sub').textContent = `满编六只 · 六个口径`;
       $('tw-eval-body').innerHTML = renderFullTeam(player);
@@ -565,11 +577,19 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       note: '选满六只再给完整评估；现在信息太少，我不会假装有唯一答案。'};
   }
 
-  function renderCoach(player) {
+  function renderCoach(player, stage = 'full') {
     const body = $('tw-coach-body');
     if (!player) { body.innerHTML = '<p class="tw-note">正在读取…</p>'; return; }
     const selected = player.selected_count ?? 0;
     const next = Array.isArray(player.next_candidates) ? player.next_candidates : [];
+    // 满编但证据段还没回来（初判阶段）：短结论照旧给，只说依据在补。
+    if (selected >= TEAM_SLOTS && !player.full_team) {
+      body.innerHTML = `<p>六只都在了。短结论已经成立：缺口与下一只候选在上面的评估区。</p>
+       <p>${stage === 'first'
+    ? '五个口径与最小替换还在算，回来之后补在左边；不用你再点一次。'
+    : '这一次五个口径与最小替换没有回来；上面那些结论不受影响。'}</p>`;
+      return;
+    }
     if (selected >= TEAM_SLOTS && player.full_team) {
       const axes = Array.isArray(player.full_team.axes) ? player.full_team.axes : [];
       const can = axes.filter((axis) => axis.available).map((axis) => axis.label);
@@ -594,13 +614,25 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      <p>选满六只再给完整评估。现在信息太少，我不会假装有唯一答案。</p>`;
   }
 
-  // ── 取数 ──────────────────────────────────────────────────────────────
-  function workshopQuery() {
+  // ── 取数：**两阶段交付**（RC-306）───────────────────────────────────────
+  //
+  // 为什么分两次问同一份数据：完整载荷里最贵的是「证据与反事实」那一段（五轴 + 最小替换），
+  // 而玩家点完一只精灵首先要知道的是「队伍状态 / 下一只候选 / 缺口 / 小芽的短结论」。
+  // 所以：
+  //   ① 先要 `stage=first`：服务端**不跑**证据段（`axes:null`、`axes_status:'not_requested'`、
+  //      `serving.full_withheld:'NOT_REQUESTED'`——「调用方主动不要」与「超时降级」是两件事）；
+  //   ② 紧接着无条件再要一次完整载荷，拿到后**原地升级**（补五轴 / 最小替换 / 完整依据），
+  //      不整块重排：初判画出来的东西在升级时位置不变。
+  //
+  // 失败方向：第一次失败 ⇒ 进错误态（与以前一样）；**第二次失败只影响「依据」那一块**，
+  // 已经渲染好的初判一个字都不清空（`data-tw-full-state` 记下 'failed' 供验收看）。
+  function workshopQuery(extra = {}) {
     const query = new URLSearchParams();
     if (state.selected.length) query.set('selected', state.selected.join(','));
     if (state.locked.length) query.set('locked', state.locked.join(','));
     if (state.favourite) query.set('favourites_only', 'true');
     if (Number.isInteger(state.maxReplacements)) query.set('max_replacements', String(state.maxReplacements));
+    for (const [key, value] of Object.entries(extra)) query.set(key, value);
     return query.toString();
   }
 
@@ -619,13 +651,23 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     if (onTeamChange) onTeamChange(detail);
   }
 
-  function applyPayload(payload) {
+  /**
+   * 把一份回执画到页面上。
+   *
+   * `stage` 只有两个取值：
+   *   · `'first'` = 初判（`axes:null`）：评估区画「正在补依据」，五轴 / 最小替换先不出现；
+   *   · `'full'`  = 完整载荷：原地把依据那块补上（**不整块重排**：初判画出的槽位、候选、
+   *     缺口、Coach 短结论位置不变）。
+   * 两个阶段共用同一份渲染函数——所以「升级」不会换掉任何一条已经给玩家的结论。
+   */
+  function applyPayload(payload, stage = 'full') {
     state.payload = payload;
     state.error = null;
     const player = payload.player ?? {};
+    rootEl.dataset.twStage = stage;
     renderTeam(player);
-    renderEval(player);
-    renderCoach(player);
+    renderEval(player, stage);
+    renderCoach(player, stage);
     renderPool();
     // 完整回执挂在一个**属性**上：本机测试读它，页面上永远不渲染它。
     rootEl.dataset.twPayload = JSON.stringify(payload);
@@ -638,33 +680,92 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     rootEl.dataset.twAxes = (player.full_team?.axes ?? []).map((axis) => axis.label).join('|');
     rootEl.dataset.twAxesAvailable = (player.full_team?.axes ?? []).filter((axis) => axis.available)
       .map((axis) => axis.label).join('|');
+    // ── 分段交付的**可量测事实**（契约 `roco-serving/v1`）──────────────────
+    // 工程字段（stages / elapsed / withheld）全在 dataset 属性上，可见文本里一个都不出现。
+    const serving = payload.serving ?? null;
+    if (serving) {
+      rootEl.dataset.twServing = String(serving.contract ?? 'roco-serving/v1');
+      rootEl.dataset.twDegraded = serving.degraded === true ? 'yes' : 'no';
+      // 「调用方主动不要证据段」与「超时降级跳过」是两件事：这里分开记。
+      rootEl.dataset.twWithheld = serving.full_withheld ?? '';
+      rootEl.dataset.twElapsedMs = String(Math.round(serving.elapsed_ms ?? 0));
+    }
     rootEl.dataset.twState = 'ok';
     rootEl.dataset.twSeq = String(state.seq);
     emit();
   }
 
+  /**
+   * 记一次「这个阶段画完了」。
+   *
+   * 除了 `stage` 与耗时，还留两样**可核对的事实**（验收要区分「两阶段」与「一次请求」）：
+   *   · `twFetches`：这一轮按顺序发出去的请求里的 `stage` 值（`first|full`）——
+   *     少一个 `first` 就说明初判那一次根本没发，判据当场红；
+   *   · `twRenderedAfterFirst`：**初判之后、完整载荷之前**这一段里页面是不是真的
+   *     已经把槽位（六个格子，空队伍也算）与候选画出来了——不是等两次都回来才画。
+   */
+  function markStage(stage, elapsedMs) {
+    rootEl.dataset.twStage = stage;
+    const rounded = Math.round(Math.max(0, elapsedMs));
+    if (stage === 'first') {
+      rootEl.dataset.twFirstMs = String(rounded);
+      rootEl.dataset.twRenderedAfterFirst = Number(rootEl.dataset.twSlots || '0') > 0 ? 'yes' : 'no';
+    } else {
+      rootEl.dataset.twFullMs = String(rounded);
+    }
+  }
+
   async function reload() {
     const seq = (state.seq += 1);
+    // 这一轮的取数顺序：两阶段就是 `first|full`（验收直接读这个属性）。
+    const fetches = [];
+    // ① 初判：服务端**不跑**证据段（`axes:null` / `axes_status:'not_requested'`）。
+    const firstStarted = performance.now();
+    let firstData = null;
     try {
-      const data = await getJson(`${apiBase}/workshop?${workshopQuery()}`);
-      if (seq !== state.seq) return;
-      if (!data.ok) {
-        state.error = data.error ?? '服务端拒绝了这次请求';
-        rootEl.dataset.twState = 'bad-request';
-        rootEl.dataset.twError = String(state.error);
-        rootEl.dataset.twSeq = String(state.seq);
-        if (state.payload) renderTeam(state.payload.player ?? {}); else renderTeam({});
-        emit();
-        return;
-      }
-      applyPayload(data);
+      fetches.push('first');
+      rootEl.dataset.twFetches = fetches.join('|');
+      firstData = await getJson(`${apiBase}/workshop?${workshopQuery({stage: 'first'})}`);
     } catch (error) {
-      state.error = error.message;
-      rootEl.dataset.twState = 'failed';
-      rootEl.dataset.twError = String(error.message);
-      rootEl.dataset.twSeq = String(state.seq);
-      emit();
+      firstData = {ok: false, error: error.message};
     }
+    if (seq !== state.seq) return;
+    if (!firstData || firstData.ok !== true) {
+      // 第一次就失败：与以前一样进错误态（不做第二次请求，那时也没有可升级的东西）。
+      state.error = firstData?.error ?? '服务端拒绝了这次请求';
+      rootEl.dataset.twState = firstData === null ? 'failed' : 'bad-request';
+      rootEl.dataset.twError = String(state.error);
+      rootEl.dataset.twSeq = String(state.seq);
+      if (state.payload) renderTeam(state.payload.player ?? {}); else renderTeam({});
+      emit();
+      return;
+    }
+    applyPayload(firstData, 'first');
+    markStage('first', performance.now() - firstStarted);
+
+    // ② 完整载荷：无条件再取一次；拿到就地升级，失败只影响「依据」那一块。
+    const fullStarted = performance.now();
+    rootEl.dataset.twFullState = 'loading';
+    let fullData = null;
+    try {
+      fetches.push('full');
+      rootEl.dataset.twFetches = fetches.join('|');
+      fullData = await getJson(`${apiBase}/workshop?${workshopQuery()}`);
+    } catch (error) {
+      fullData = {ok: false, error: error.message};
+    }
+    if (seq !== state.seq) return;
+    if (!fullData || fullData.ok !== true) {
+      // **不清空初判**：只把「依据那一段没来」如实记下来。
+      rootEl.dataset.twFullState = 'failed';
+      state.fullError = fullData?.error ?? '完整载荷没有回来';
+      renderEval(state.payload.player ?? {}, 'first');
+      emit();
+      return;
+    }
+    applyPayload(fullData, 'full');
+    markStage('full', performance.now() - fullStarted);
+    rootEl.dataset.twFullState = 'ok';
   }
 
   /** 加一只：优先用「你已经拥有的那一只」；没有就按图鉴条目加，路由会照实拒绝。 */
@@ -762,6 +863,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     await loadOwnedIndex();
     await loadPool({reset: true});
     await reload();
+    // 「两阶段都回来了」是一个**独立**的事实：验收脚本用它区分「初判已经画好了」
+    // 与「完整载荷也到了」，所以不让 `twState` 兼职。
+    rootEl.dataset.twReady = 'yes';
   })();
   return api;
 }
