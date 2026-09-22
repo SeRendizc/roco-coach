@@ -51,10 +51,13 @@ const isFn = (value) => typeof value === 'function';
  * @param {{now: () => number}} input.clock 单调时钟（毫秒）。必须注入：**真实耗时与假时钟用同一份代码**，
  *        否则超时分支永远测不到。
  * @param {{first_answer_ms?: number, full_answer_ms?: number}} [input.budgets]
+ * @param {string[]} [input.withheldStages] 调用方**主动不要**的段（例如客户端只要初判）。
+ *        与「超时跳过」必须区分开：那一种是 `degraded`，这一种是**请求的子集**，
+ *        所以 `full` 同样是 null，但要带 `full_withheld:'NOT_REQUESTED'` 且 `degraded` 保持 false。
  * @returns {{ok: boolean, serving_version: number, degraded: boolean, budgets: object, elapsed_ms: number,
  *            stages: Array<object>, first: object|null, full: object|null, short: object, problems: string[]}}
  */
-export function serveStages({stages, clock, budgets = {}}) {
+export function serveStages({stages, clock, budgets = {}, withheldStages = []}) {
   if (!Array.isArray(stages) || stages.length === 0) {
     throw new ServingContractError('serveStages：stages 必须是非空数组（没有分段就没有 serving 契约）');
   }
@@ -62,6 +65,9 @@ export function serveStages({stages, clock, budgets = {}}) {
   const firstBudget = Number.isFinite(budgets.first_answer_ms) ? budgets.first_answer_ms : SERVING_BUDGETS.first_answer_ms;
   const fullBudget = Number.isFinite(budgets.full_answer_ms) ? budgets.full_answer_ms : SERVING_BUDGETS.full_answer_ms;
   if (!(fullBudget > 0) || !(firstBudget > 0)) throw new ServingContractError('serveStages：预算必须是正数');
+  if (!Array.isArray(withheldStages) || withheldStages.some((id) => typeof id !== 'string' || !id)) {
+    throw new ServingContractError('serveStages：withheldStages 必须是段 id 的数组（字符串）');
+  }
 
   const seen = new Set();
   for (const stage of stages) {
@@ -141,8 +147,9 @@ export function serveStages({stages, clock, budgets = {}}) {
     };
   }
 
-  // ── 完整解释：所有段都在预算内 ok 才算完整；否则 null + 逐段点名 ──────────────
-  const full = skipped.length === 0 && failed.length === 0 && late.length === 0
+  // ── 完整解释：所有段都在预算内 ok、且调用方没有主动不要某一段，才算完整 ────────────
+  const withheld = [...new Set(withheldStages)];
+  const full = (skipped.length === 0 && failed.length === 0 && late.length === 0 && withheld.length === 0)
     ? {kind: 'full_answer', elapsed_ms: clock.now() - startedAt, values: {...values}}
     : null;
 
@@ -173,6 +180,9 @@ export function serveStages({stages, clock, budgets = {}}) {
     stages: rows,
     first,
     full,
+    // 只有「主动不要」才写这个键：超时/失败走 `degraded`，两者不能混为一谈
+    // （前者不是降级，是调用方要的子集）。
+    ...(withheld.length ? {full_withheld: 'NOT_REQUESTED', withheld_stages: withheld} : {}),
     short,
     problems,
   };

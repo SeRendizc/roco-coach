@@ -32,6 +32,9 @@ import {compareOwnedPets,OwnedPetSpeciesMismatchError} from '../../scripts/roco/
 // 读取层与构建器/检查器共用同一份规则（句子只在 `src/coach/pet-mechanisms.js` 定义一次）。
 // **读不动就 `line` 是「机制资料待确认」**：这里绝不补一个看起来合理的默认句。
 import {createMechanismIndex,rosterMechanism} from '../coach/pet-mechanisms.js';
+// RC-306：分段交付契约（300ms 初判 / 3s 完整解释 / 超时保短结论）。
+// 工坊路由是这条契约的**第一个真实消费者**：服务端用自己的单调时钟量每一段。
+import {SERVING_BUDGETS,serveStages} from '../coach/team-serving.mjs';
 
 /**
  * 机制首层索引（模块级、懒建一次）。
@@ -665,7 +668,16 @@ export const WORKSHOP_BADGES=Object.freeze({
 
 /** 工坊的查询参数白名单。多一个键就是 400（不静默忽略拼错的参数）。 */
 export const WORKSHOP_PARAM_KEYS=Object.freeze(['mode','selected','locked','must_include',
- 'must_exclude','favourites_only','max_replacements']);
+ 'must_exclude','favourites_only','max_replacements','stage']);
+
+/**
+ * 分段交付（RC-306 接线）：`stage=first` 只算「初判」要的那几段，`stage=full`（默认）算完整解释。
+ *
+ * 为什么要分成两次请求而不是一次返回：契约要求「300ms 内先给结构化初判、3s 内给完整解释」，
+ * 而证据/五轴那一段（`compareTeams` + 缺口装配）正是最贵的一段。页面先拿初判就能立刻渲染，
+ * 再取完整解释升级——而不是让玩家盯着空白等最慢的那一步。
+ */
+export const WORKSHOP_STAGES=Object.freeze(['first','full']);
 
 /** 工坊默认走标准六宠模式（与 RC-301 的默认值同一件事，调用方没给就代入并记录）。 */
 const WORKSHOP_MODE_DEFAULT='pvp-standard-six-pet';
@@ -707,6 +719,11 @@ export function parseWorkshopQuery(query={}){
   return trimmed;
  };
  const out={};
+ const stage=text('stage',8);
+ if(stage!==null){
+  if(!WORKSHOP_STAGES.includes(stage))errors.push(`stage 只能是 ${WORKSHOP_STAGES.join(' 或 ')}（实际 ${JSON.stringify(stage)}）`);
+  else out.stage=stage;
+ }
  const mode=text('mode',64);
  if(mode!==null)out.mode=mode;
  for(const [key,spec] of Object.entries(WORKSHOP_LIST_KEYS)){
@@ -887,7 +904,7 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
    +'不会假装存在唯一的最优六宠。先挑 1～2 只你信得过的，候选才会收窄。'
   :(catalogOnlyMembers===0
    ?'选中的这几只在冻结迁移层里都有具体构建，结构分能整队算。'
-   :`有 ${catalogOnlyMembers} 只只有图鉴口径的资料、没有具体构建：结构分在这几只上是**空**的，`
+   :`有 ${catalogOnlyMembers} 只只有图鉴口径的资料、没有具体构建：结构分在这几只上是空的，`
     +'所以这里的结论会比它们实际能提供的弱。');
 
  const candidates=(recall?.candidates??[]).map((row)=>({
@@ -981,10 +998,12 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
  }));
 
  // ── 选满六只：五轴 + 一个最小替换 ────────────────────────────────────────
+ // `fastFirst`（RC-306 接线）：客户端**只要初判**时，这一段（缺口装配 + `compareTeams`）
+ // 是整条链路里最贵的一段，必须**不跑**——跑了再丢掉的话「300ms 出初判」就是假的。
  let axes=null;
- let axesStatus='not_full_team';
+ let axesStatus=modules.fastFirst===true?'not_requested':'not_full_team';
  let replacement=null;
- if(selectedCount===request.team_size&&selectedCount>0){
+ if(modules.fastFirst!==true&&selectedCount===request.team_size&&selectedCount>0){
   const members=teamMembers;
   if(typeof compareTeams==='function'){
    const compareResult=compareTeams({teamA:{team_id:teamId,members},
@@ -1122,7 +1141,7 @@ function workshopPlayerView(indexRef,computed){
    headline:selectedCount===0
     ?'一只都没选：这一页现在只能告诉你候选池有多大、你的盒子里有什么。'
     :'只选了一只：它可以承担不止一个职能，所以现在还不该锁死答案。',
-   note:'下面这几只是**候选参考**（按结构相似度召回的前几只），不是唯一答案，也不是强度排名。',
+   note:'下面这几只是「候选参考」（按结构相似度召回的前几只），不是唯一答案，也不是强度排名。',
    candidates:entranceCandidates.map((row)=>({
     name:row.species_name??'（名字未登记）',types:Array.isArray(row.types)?row.types:[],
     owned_note:row.kind==='owned'?'你已经拥有':'图鉴条目（你还没有）',
@@ -2005,7 +2024,10 @@ function resolveBattleTeamIds(team){
   }
   const {rc301Inputs,candidateInputs,index,metaPrior,validateRecommendationRequest,formatProblem,
    buildTeamCandidatePlan,diagnoseTeamGaps,compareTeams,minimalReplacement,defenceScale,gapsInputs}=modules;
-  const draft={mode:WORKSHOP_MODE_DEFAULT,team_size:WORKSHOP_TEAM_SIZE,...parsed.raw};
+  // `stage` 是**交付参数**，不是 RC-301 的组队字段：不能顺手塞进 draft，
+  // 否则合同会按 UNKNOWN_FIELD 拒掉（那条判据是对的，错的是把两者混在一起）。
+  const {stage:_stage,...requestFields}=parsed.raw;
+  const draft={mode:WORKSHOP_MODE_DEFAULT,team_size:WORKSHOP_TEAM_SIZE,...requestFields};
   const validation=validateRecommendationRequest(draft,rc301Inputs);
   if(!validation.ok){
    return {ok:false,status:400,
@@ -2013,19 +2035,56 @@ function resolveBattleTeamIds(team){
     problems:validation.problems.map((problem)=>({code:problem.code,field:problem.field,detail:problem.detail}))};
   }
   const request=validation.request;
-  const plan=buildTeamCandidatePlan(request,{...candidateInputs,__index:index});
-  const computed=workshopPayload(index,metaPrior,request,parsed,plan,{
-   diagnoseTeamGaps,compareTeams,minimalReplacement,defenceScale,gapsInputs,
+  // 注意取的是 `parsed.raw.stage`：`parseWorkshopQuery` 返回 `{errors, raw}`，不是平铺的字段。
+  const requestedStage=parsed.raw.stage??'full';
+  // 服务端自己的单调时钟：契约要的是「这一段花了多久」，不是墙钟时间。
+  const clock={now:()=>Number(process.hrtime.bigint())/1e6};
+  const box={plan:null,computed:null};
+  const buildPayload=(extra)=>workshopPayload(index,metaPrior,request,parsed,box.plan,{
+   diagnoseTeamGaps,compareTeams,minimalReplacement,defenceScale,gapsInputs,...extra,
   });
+  const planStage={
+   id:'plan',required_for_first:true,
+   short:(value)=>`候选已生成：召回 ${value?.candidates??0} 个。`,
+   run:()=>{
+    box.plan=buildTeamCandidatePlan(request,{...candidateInputs,__index:index});
+    // 只要初判时，玩家层的初判载荷在**这一段里**就装好（它只依赖召回 + 缺口，
+    // 不碰最贵的证据/五轴段）；完整路径留给下一段。
+    if(requestedStage!=='full')box.computed=buildPayload({fastFirst:true});
+    return {candidates:box.plan?.recall?.candidates?.length??0};
+   },
+  };
+  const stages=[planStage];
+  const withheld=[];
+  if(requestedStage==='full'){
+   stages.push({
+    id:'evidence_and_counterfactual',
+    short:()=>'缺口与五轴已装配。',
+    run:()=>{
+     box.computed=buildPayload({});
+     return {axes:Array.isArray(box.computed?.axes)?box.computed.axes.length:0};
+    },
+   });
+  }else{
+   // 只要初判：证据段**不跑**（见 `workshopPayload` 的 `fastFirst`），并在契约里如实登记
+   // 「这一段是调用方主动不要的」，与「超时跳过」区分开。
+   withheld.push('evidence_and_counterfactual');
+  }
+  const serving=serveStages({stages,clock,budgets:SERVING_BUDGETS,withheldStages:withheld});
+  if(!serving.first&&!serving.degraded){
+   return {ok:false,status:500,error:'分段交付没有产出初判（契约问题，不是请求问题）',serving};
+  }
+  const computed=box.computed;
   return {
    ok:true,
    status:200,
    schema:'roco-workshop/v1',
-   mode_id:request.mode,
+   requested_stage:requestedStage,
+   serving:{...serving,contract:'roco-serving/v1'},
    badges:{...WORKSHOP_BADGES},
    request,
    player:workshopPlayerView(index,computed),
-   dev:workshopDevView(index,computed,plan,validation),
+   dev:workshopDevView(index,computed,box.plan,validation),
    candidates:computed.candidates,
    next_candidates:computed.nextCandidates,
    entrance_candidates:computed.entranceCandidates,

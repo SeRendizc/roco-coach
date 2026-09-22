@@ -195,6 +195,28 @@ test('只发模式合法动作：声明缺失/自相矛盾都必须 fail closed'
   assert.throws(() => assertModeActionCompliance([{kind: 'item'}], {allowed_kinds: ['skill'], forbidden_kinds: ['item']}), ServingContractError);
 });
 
+test('主动不要的段：full 为 null 但不是降级（与「超时」必须区分开）', () => {
+  const makeStages = (clock) => [stage('plan', 10, {candidates: 20}, {clock, required_for_first: true})];
+  const subsetClock = fakeClock();
+  const subset = serveStages({clock: subsetClock, stages: makeStages(subsetClock),
+    withheldStages: ['evidence_and_counterfactual']});
+  raw('只要初判', {full: subset.full, withheld: subset.full_withheld, degraded: subset.degraded, first: subset.first?.kind, ok: subset.ok});
+  assert.equal(subset.full, null, '主动不要证据段时不该声称有完整解释');
+  assert.equal(subset.full_withheld, 'NOT_REQUESTED');
+  assert.deepEqual(subset.withheld_stages, ['evidence_and_counterfactual']);
+  assert.equal(subset.degraded, false, '「不要」不是「降级」——degraded 必须保持 false');
+  assert.equal(subset.first.kind, 'structured_first');
+  assert.equal(subset.ok, true, '只要初判也算正常交付');
+  // 反证：不声明 withheld 时同一份输入必须给出完整解释——否则上面那条判据恒真。
+  const wholeClock = fakeClock();
+  const whole = serveStages({clock: wholeClock, stages: makeStages(wholeClock)});
+  assert.equal(whole.full.kind, 'full_answer');
+  assert.equal(whole.full_withheld ?? null, null);
+  // 契约 fail closed：withheldStages 形状不对就抛。
+  assert.throws(() => serveStages({clock: fakeClock(), stages: makeStages(fakeClock()), withheldStages: [42]}),
+    ServingContractError);
+});
+
 test('预算常量就是口径本身（300 / 3000），改口径必须改这里', () => {
   assert.deepEqual(SERVING_BUDGETS, {first_answer_ms: 300, full_answer_ms: 3000});
   const clock = fakeClock();

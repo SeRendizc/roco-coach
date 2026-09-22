@@ -1,8 +1,8 @@
 {
  "report_version": "roco-rc306-serving/v1",
  "rc": "RC-306",
- "generated_at": "2026-09-22T00:14:11.968Z",
- "command": "node scripts/roco/measure-team-serving.mjs --runs=20",
+ "generated_at": "2026-09-22T01:17:49.973Z",
+ "command": "node scripts/roco/measure-team-serving.mjs --runs=8",
  "environment": {
   "node": "v24.20.0",
   "platform": "darwin",
@@ -22,14 +22,14 @@
   "first_answer_ms": 300,
   "full_answer_ms": 3000
  },
- "runs_per_shape": 20,
+ "runs_per_shape": 8,
  "checks": [
   {
    "id": "first_answer_within_budget",
    "what": "初判 P95 ≤ 300ms",
    "result": true,
    "actual": {
-    "p95_ms": 18.834,
+    "p95_ms": 13.405,
     "budget_ms": 300
    }
   },
@@ -38,7 +38,7 @@
    "what": "完整解释 P95 ≤ 3000ms",
    "result": true,
    "actual": {
-    "p95_ms": 37.512,
+    "p95_ms": 33.405,
     "budget_ms": 3000
    }
   },
@@ -47,7 +47,7 @@
    "what": "正常路径每次都给出初判与完整解释（四个真实段都没超预算）",
    "result": true,
    "actual": {
-    "runs": 20,
+    "runs": 8,
     "degraded_runs": 0
    }
   },
@@ -89,57 +89,233 @@
     "[FORBIDDEN_KIND_LEAKED] 第 1 个动作是 item（模式明令禁止，页面不该收到它）",
     "[FORBIDDEN_KIND_LEAKED] 第 2 个动作是 escape（模式明令禁止，页面不该收到它）"
    ]
+  },
+  {
+   "id": "route/stage-first-skips-evidence",
+   "what": "stage=first 不跑证据段：axes 为 null、axes_status=not_requested、只跑了 plan 一段",
+   "result": true,
+   "actual": {
+    "axes": null,
+    "axes_status": "not_requested",
+    "stages": [
+     "plan"
+    ]
+   }
+  },
+  {
+   "id": "route/withheld-is-not-degraded",
+   "what": "「主动只要初判」记成 full_withheld=NOT_REQUESTED 且 degraded=false（与超时降级分开）",
+   "result": true,
+   "actual": {
+    "full": null,
+    "full_withheld": "NOT_REQUESTED",
+    "degraded": false
+   }
+  },
+  {
+   "id": "route/full-stage-has-axes",
+   "what": "stage=full 才给五轴与完整解释（两段都跑）",
+   "result": true,
+   "actual": {
+    "axes": 5,
+    "full": "full_answer",
+    "stages": [
+     "plan",
+     "evidence_and_counterfactual"
+    ]
+   }
+  },
+  {
+   "id": "route/first-within-budget",
+   "what": "真实路由的初判 ≤ 300ms",
+   "result": true,
+   "actual": {
+    "first_elapsed_ms": 8.382416009902954
+   }
+  },
+  {
+   "id": "route/full-within-budget",
+   "what": "真实路由的完整解释 ≤ 3000ms",
+   "result": true,
+   "actual": {
+    "full_elapsed_ms": 8.72158396244049
+   }
+  },
+  {
+   "id": "route/bad-stage-is-400",
+   "what": "非法 stage 一律 400 点名（不许静默当 full）",
+   "result": true,
+   "actual": "见上面 `route/bad-stage-is-400` 的判定（400 + 点名）"
   }
  ],
+ "route_stages": {
+  "first": {
+   "ok": true,
+   "serving_version": 1,
+   "degraded": false,
+   "budgets": {
+    "first_answer_ms": 300,
+    "full_answer_ms": 3000
+   },
+   "elapsed_ms": 8.405875086784363,
+   "stages": [
+    {
+     "id": "plan",
+     "status": "ok",
+     "took_ms": 8.378082990646362,
+     "finished_at_ms": 8.382416009902954,
+     "required_for_first": true
+    }
+   ],
+   "first": {
+    "kind": "structured_first",
+    "elapsed_ms": 8.382416009902954,
+    "stages": [
+     "plan"
+    ],
+    "values": {
+     "plan": {
+      "candidates": 50
+     }
+    }
+   },
+   "full": null,
+   "full_withheld": "NOT_REQUESTED",
+   "withheld_stages": [
+    "evidence_and_counterfactual"
+   ],
+   "short": {
+    "kind": "short_conclusion",
+    "conclusion": "候选已生成：召回 50 个。",
+    "from_stages": [
+     "plan"
+    ],
+    "missing_stages": [],
+    "unavailable_stages": []
+   },
+   "problems": [],
+   "contract": "roco-serving/v1"
+  },
+  "full": {
+   "ok": true,
+   "serving_version": 1,
+   "degraded": false,
+   "budgets": {
+    "first_answer_ms": 300,
+    "full_answer_ms": 3000
+   },
+   "elapsed_ms": 8.72158396244049,
+   "stages": [
+    {
+     "id": "plan",
+     "status": "ok",
+     "took_ms": 5.300999999046326,
+     "finished_at_ms": 5.304958939552307,
+     "required_for_first": true
+    },
+    {
+     "id": "evidence_and_counterfactual",
+     "status": "ok",
+     "took_ms": 3.39329195022583,
+     "finished_at_ms": 8.704458951950073,
+     "required_for_first": false
+    }
+   ],
+   "first": {
+    "kind": "structured_first",
+    "elapsed_ms": 5.304958939552307,
+    "stages": [
+     "plan"
+    ],
+    "values": {
+     "plan": {
+      "candidates": 50
+     }
+    }
+   },
+   "full": {
+    "kind": "full_answer",
+    "elapsed_ms": 8.717958927154541,
+    "values": {
+     "plan": {
+      "candidates": 50
+     },
+     "evidence_and_counterfactual": {
+      "axes": 5
+     }
+    }
+   },
+   "short": {
+    "kind": "short_conclusion",
+    "conclusion": "候选已生成：召回 50 个。 缺口与五轴已装配。",
+    "from_stages": [
+     "plan",
+     "evidence_and_counterfactual"
+    ],
+    "missing_stages": [],
+    "unavailable_stages": []
+   },
+   "problems": [],
+   "contract": "roco-serving/v1"
+  },
+  "selection": [
+   "own-0001",
+   "own-0003",
+   "own-0005",
+   "own-0007",
+   "own-0009",
+   "own-0011"
+  ]
+ },
  "stage_stats": {
   "state_and_version": {
-   "n": 20,
-   "min_ms": 1.111,
-   "p50_ms": 1.337,
-   "p95_ms": 3.225,
-   "max_ms": 3.225,
-   "mean_ms": 1.482
+   "n": 8,
+   "min_ms": 1.19,
+   "p50_ms": 1.473,
+   "p95_ms": 3.193,
+   "max_ms": 3.193,
+   "mean_ms": 1.772
   },
   "recall": {
-   "n": 20,
-   "min_ms": 3.933,
-   "p50_ms": 4.735,
-   "p95_ms": 15.574,
-   "max_ms": 15.574,
-   "mean_ms": 5.278
+   "n": 8,
+   "min_ms": 4.155,
+   "p50_ms": 5.053,
+   "p95_ms": 10.174,
+   "max_ms": 10.174,
+   "mean_ms": 6.033
   },
   "beam_and_ranker": {
-   "n": 20,
-   "min_ms": 8.569,
-   "p50_ms": 10.406,
-   "p95_ms": 14.812,
-   "max_ms": 14.812,
-   "mean_ms": 10.559
+   "n": 8,
+   "min_ms": 9.586,
+   "p50_ms": 11.086,
+   "p95_ms": 15.601,
+   "max_ms": 15.601,
+   "mean_ms": 11.413
   },
   "evidence_and_counterfactual": {
-   "n": 20,
-   "min_ms": 1.149,
-   "p50_ms": 1.369,
-   "p95_ms": 3.767,
-   "max_ms": 3.767,
-   "mean_ms": 1.528
+   "n": 8,
+   "min_ms": 1.299,
+   "p50_ms": 1.558,
+   "p95_ms": 4.297,
+   "max_ms": 4.297,
+   "mean_ms": 2.004
   }
  },
  "first_answer": {
-  "n": 20,
-  "min_ms": 5.07,
-  "p50_ms": 6.041,
-  "p95_ms": 18.834,
-  "max_ms": 18.834,
-  "mean_ms": 6.77
+  "n": 8,
+  "min_ms": 5.391,
+  "p50_ms": 7.165,
+  "p95_ms": 13.405,
+  "max_ms": 13.405,
+  "mean_ms": 7.826
  },
  "total": {
-  "n": 20,
-  "min_ms": 15.314,
-  "p50_ms": 18.066,
-  "p95_ms": 37.512,
-  "max_ms": 37.512,
-  "mean_ms": 18.89
+  "n": 8,
+  "min_ms": 16.461,
+  "p50_ms": 21.013,
+  "p95_ms": 33.405,
+  "max_ms": 33.405,
+  "mean_ms": 21.291
  },
  "negative_controls": {
   "over_first_budget": {
@@ -149,7 +325,7 @@
    },
    "first": null,
    "problems": [],
-   "elapsed_ms": 349.48129200935364
+   "elapsed_ms": 350.12687504291534
   },
   "over_full_budget": {
    "budgets": {
@@ -162,15 +338,15 @@
     {
      "id": "first",
      "status": "ok",
-     "took_ms": 0.006665945053100586,
-     "finished_at_ms": 0.006999969482421875,
+     "took_ms": 0.007624983787536621,
+     "finished_at_ms": 0.007917046546936035,
      "required_for_first": true
     },
     {
      "id": "slow_evidence",
      "status": "late",
-     "took_ms": 599.8557500839233,
-     "finished_at_ms": 599.8727079629898,
+     "took_ms": 599.8587909936905,
+     "finished_at_ms": 599.875,
      "required_for_first": false,
      "budget_ms": 400
     },
@@ -178,7 +354,7 @@
      "id": "never_runs",
      "status": "skipped",
      "reason": "DEADLINE_EXCEEDED",
-     "elapsed_ms": 599.9008330106735,
+     "elapsed_ms": 599.9021669626236,
      "took_ms": 0,
      "required_for_first": false
     }

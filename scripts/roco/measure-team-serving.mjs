@@ -31,6 +31,9 @@ import {diagnoseTeamGaps, loadTeamGapsInputs} from '../../src/coach/team-gaps.js
 import {
   STANDARD_PVP_MODE, STANDARD_PVP_TEAM_SIZE, loadRecommendationInputs, validateRecommendationRequest,
 } from '../../src/coach/team-request.js';
+// RC-306 接线的**真实消费者**：工坊路由。上面那四段是契约的单元级证据，
+// 这一段是「它在真路由上确实按分段交付」的证据（`stage=first` 不跑证据段）。
+import {createRocoService} from '../../src/server/roco-service.js';
 
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const OUT_DIR = join(ROOT, 'reports', 'roco', 'team-serving');
@@ -155,6 +158,63 @@ const leakSample = [{kind: 'skill'}, {kind: 'item', label: '使用回复药'}, {
 const guardClean = modeActionProblems(legalSample, declaration);
 const guardLeak = modeActionProblems(leakSample, declaration);
 
+// ── 真实路由：工坊的分段交付（`stage=first` 必须**不跑**证据段）──────────────
+//
+// 为什么单列：契约在单元级过了，不等于路由真按它交付。这里用同一个服务实例打两次，
+// 并把「初判里没有五轴」当成判据——它是这条接线唯一不能含糊的地方。
+
+const service = createRocoService({repoRoot: ROOT});
+const routeTeam = (await service.box({kind: 'mine', limit: '24'}))?.player?.cards ?? [];
+// `/api/roco/box` 的 mine 视图给的是 owned 个体；取六只**不同物种**的（同种重复引擎会拒）。
+const routeSel = (() => {
+  const seen = new Set(); const out = [];
+  for (const card of routeTeam) {
+    const group = card.group ?? card.select;
+    if (seen.has(group)) continue;
+    seen.add(group); out.push(card.select);
+    if (out.length === 6) break;
+  }
+  return out;
+})();
+const routeQuery = {selected: routeSel.join(',')};
+const routeFirst = await service.workshop({...routeQuery, stage: 'first'});
+const routeFull = await service.workshop({...routeQuery});
+await service.stop();
+
+const routeChecks = [
+  {id: 'route/stage-first-skips-evidence', what: 'stage=first 不跑证据段：axes 为 null、axes_status=not_requested、只跑了 plan 一段',
+    result: routeFirst.ok === true && routeFirst.axes === null && routeFirst.axes_status === 'not_requested'
+      && JSON.stringify((routeFirst.serving?.stages ?? []).map((row) => row.id)) === '["plan"]',
+    actual: {axes: routeFirst.axes, axes_status: routeFirst.axes_status,
+      stages: (routeFirst.serving?.stages ?? []).map((row) => row.id)}},
+  {id: 'route/withheld-is-not-degraded', what: '「主动只要初判」记成 full_withheld=NOT_REQUESTED 且 degraded=false（与超时降级分开）',
+    result: routeFirst.serving?.full === null && routeFirst.serving?.full_withheld === 'NOT_REQUESTED'
+      && routeFirst.serving?.degraded === false,
+    actual: {full: routeFirst.serving?.full, full_withheld: routeFirst.serving?.full_withheld,
+      degraded: routeFirst.serving?.degraded}},
+  {id: 'route/full-stage-has-axes', what: 'stage=full 才给五轴与完整解释（两段都跑）',
+    result: routeFull.ok === true && Array.isArray(routeFull.axes) && routeFull.axes.length === 5
+      && routeFull.serving?.full?.kind === 'full_answer',
+    actual: {axes: Array.isArray(routeFull.axes) ? routeFull.axes.length : routeFull.axes,
+      full: routeFull.serving?.full?.kind, stages: (routeFull.serving?.stages ?? []).map((row) => row.id)}},
+  {id: 'route/first-within-budget', what: `真实路由的初判 ≤ ${SERVING_BUDGETS.first_answer_ms}ms`,
+    result: Number.isFinite(routeFirst.serving?.first?.elapsed_ms)
+      && routeFirst.serving.first.elapsed_ms <= SERVING_BUDGETS.first_answer_ms,
+    actual: {first_elapsed_ms: routeFirst.serving?.first?.elapsed_ms ?? null}},
+  {id: 'route/full-within-budget', what: `真实路由的完整解释 ≤ ${SERVING_BUDGETS.full_answer_ms}ms`,
+    result: Number.isFinite(routeFull.serving?.elapsed_ms)
+      && routeFull.serving.elapsed_ms <= SERVING_BUDGETS.full_answer_ms,
+    actual: {full_elapsed_ms: routeFull.serving?.elapsed_ms ?? null}},
+  {id: 'route/bad-stage-is-400', what: '非法 stage 一律 400 点名（不许静默当 full）',
+    result: (await (async () => {
+      const svc2 = createRocoService({repoRoot: ROOT});
+      const bad = await svc2.workshop({stage: 'zzz'});
+      await svc2.stop();
+      return bad.ok === false && bad.status === 400 && /stage 只能是/.test(String(bad.error));
+    })()) === true,
+    actual: '见上面 `route/bad-stage-is-400` 的判定（400 + 点名）'},
+];
+
 // ── 判定 ────────────────────────────────────────────────────────────────────
 
 const checks = [
@@ -167,7 +227,8 @@ const checks = [
   {id: 'mode_guard_catches_leak', what: '载荷里混进 item/escape 必须被抓到（反证：闸不是空的）', result: guardLeak.length === 2 && guardLeak.every((line) => line.includes('FORBIDDEN_KIND_LEAKED')), actual: guardLeak},
 ];
 
-const failed = checks.filter((row) => row.result !== true);
+const allChecks = [...checks, ...routeChecks];
+const failed = allChecks.filter((row) => row.result !== true);
 const report = {
   report_version: 'roco-rc306-serving/v1',
   rc: 'RC-306',
@@ -183,7 +244,9 @@ const report = {
   },
   budgets: SERVING_BUDGETS,
   runs_per_shape: RUNS,
-  checks,
+  checks: allChecks,
+  route_stages: {first: routeFirst.serving ?? null, full: routeFull.serving ?? null,
+    selection: routeSel},
   stage_stats: stageStats,
   first_answer: stats(firstSamples),
   total: stats(totalSamples),
@@ -204,7 +267,8 @@ else {
   console.log(`[team-serving] 正常路径 ${RUNS} 次全部 degraded=false = ${allComplete}`);
   console.log(`[team-serving] 负向控制：超初判预算 ⇒ first=${overFirst.first === null ? 'null ✔' : '有值 ✘'}；超总预算 ⇒ full=${overFull.full === null ? 'null ✔' : '有值 ✘'}，skipped=${overFull.stages.at(-1).status}`);
   console.log(`[team-serving] 模式闸：合法样本 ${guardClean.length} 条问题；泄漏样本 ${guardLeak.length} 条问题`);
-  for (const check of checks) console.log(`[team-serving] ${check.result ? '✔' : '✘'} ${check.id} ${check.what}`);
+  console.log(`[team-serving] 真实路由：stage=first ${Math.round((routeFirst.serving?.first?.elapsed_ms ?? 0) * 100) / 100}ms（只跑 plan）；stage=full ${Math.round((routeFull.serving?.elapsed_ms ?? 0) * 100) / 100}ms（含五轴）`);
+  for (const check of allChecks) console.log(`[team-serving] ${check.result ? '✔' : '✘'} ${check.id} ${check.what}`);
   console.log(`[team-serving] 报告：${OUT.replace(`${ROOT}/`, '')}`);
 }
 process.exit(report.ok ? 0 : 1);

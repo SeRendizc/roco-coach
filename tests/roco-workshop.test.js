@@ -26,7 +26,7 @@ import {fileURLToPath} from 'node:url';
 
 import {createCoachServer, publicAssets, browserModules} from '../src/server/index.js';
 import {
-  WORKSHOP_PARAM_KEYS, parseWorkshopQuery, WORKSHOP_BADGES, loadWorkshopModules,
+  WORKSHOP_PARAM_KEYS, WORKSHOP_STAGES, parseWorkshopQuery, WORKSHOP_BADGES, loadWorkshopModules,
 } from '../src/server/roco-service.js';
 import {
   TEAM_WORKSHOP_BADGES, TEAM_SLOTS, AXIS_LABELS, mountTeamWorkshop,
@@ -35,6 +35,7 @@ import {
   slotProblems, badgeProblems, nextCandidateProblems, axisProblems, badRequestProblems,
   playerCopyProblems, playerLayerProblems, evaluationFollowsTeamProblems, touchTargetProblems,
   mobileOrderProblems, deepTextValues, mechanismRenderProblems,
+  stageFirstProblems, stageSequenceProblems,
   sourcedMechanismLines, exemptSourcedLines, loadMechanismArtifact,
   SLOT_COUNT, FORBIDDEN_PLAYER, PSEUDO_PRECISION,
 } from '../scripts/roco/browser-workshop-acceptance.mjs';
@@ -123,8 +124,11 @@ test('接线：mountTeamWorkshop 的导出签名与徽记常量是稳定契约',
   assert.equal(TEAM_WORKSHOP_BADGES.candidate, '候选规则（待实机核对）');
   assert.deepEqual(AXIS_LABELS, ['环境价值', '最怕的体系', '对局离散度', '操作容错', '覆盖置信']);
   // 参数白名单：多一个键就是 400，所以这份清单是契约。
+  // RC-306 接线加了 `stage`（`first` 只给初判、`full` 给完整解释）——它是**交付参数**，
+  // 不是 RC-301 的组队字段，所以它单独落在白名单里、并且**不许**进组队 draft（有专门判据）。
   assert.deepEqual([...WORKSHOP_PARAM_KEYS],
-    ['mode', 'selected', 'locked', 'must_include', 'must_exclude', 'favourites_only', 'max_replacements']);
+    ['mode', 'selected', 'locked', 'must_include', 'must_exclude', 'favourites_only', 'max_replacements', 'stage']);
+  assert.deepEqual([...WORKSHOP_STAGES], ['first', 'full']);
   log('[实际] 徽记 =', JSON.stringify(TEAM_WORKSHOP_BADGES));
   log('[实际] 参数白名单 =', WORKSHOP_PARAM_KEYS.join('/'));
 });
@@ -391,6 +395,63 @@ test('两层分界：player 段没有工程键，dev 段真的有工程字段', 
 });
 
 // ─────────────────────────────────────────────────────────────────────────
+// 4a. 两阶段交付（RC-306）：stage=first 只算初判，不跑证据段
+// ─────────────────────────────────────────────────────────────────────────
+
+test('分段交付：stage=first 只跑初判（axes:null / not_requested / full_withheld=NOT_REQUESTED）', async () => {
+  const first = await workshop(`stage=first&selected=${IDS.slice(0, 6).join(',')}`);
+  assert.equal(first.status, 200, `stage=first 应当 200，实际 ${first.status}：${show(first.json)}`);
+  const problems = stageFirstProblems(first.json);
+  assert.deepEqual(problems, [], `stage=first 的契约判据没通过：${problems.join(' | ')}`);
+  assert.equal(first.json.requested_stage, 'first');
+  assert.equal(first.json.serving.contract, 'roco-serving/v1');
+  assert.equal(first.json.serving.degraded, false, '主动只要初判不算降级');
+  // 初判要的那几样必须在（否则「先渲染」没有东西可渲染）
+  assert.equal(first.json.player.slots.length, 6);
+  assert.ok(Array.isArray(first.json.player.next_candidates));
+  assert.ok(first.json.dev, '初判也要带 dev 段（错误排查不能等完整载荷）');
+  raw('stage=first 的 serving', {
+    first: first.json.serving.first?.kind, full: first.json.serving.full,
+    full_withheld: first.json.serving.full_withheld, withheld_stages: first.json.serving.withheld_stages,
+    short: first.json.serving.short?.conclusion });
+  log('[实际] stage=first：axes =', first.json.axes, '；axes_status =', first.json.axes_status,
+    '；replacement =', first.json.replacement);
+  // 反证①：让 first 也带上五轴 ⇒ 红
+  const withAxes = stageFirstProblems({...first.json, axes: first.json.axes ?? [{axis: 'x'}]});
+  raw('反证·first 也跑证据段', withAxes);
+  assert.ok(withAxes.length > 0, 'first 带上五轴必须被判红');
+  // 反证②：把降级混成「主动不要」⇒ 红
+  const degraded = stageFirstProblems({...first.json,
+    serving: {...first.json.serving, degraded: true, full: {kind: 'full_answer'}}});
+  raw('反证·降级与主动扣下混淆', degraded);
+  assert.ok(degraded.length > 0, 'degraded=true 又给出 full 必须被判红');
+});
+
+test('分段交付：默认（stage=full）仍然是完整载荷（五轴 + 最小替换都在）', async () => {
+  const full = await workshop(`selected=${IDS.slice(0, 6).join(',')}`);
+  assert.equal(full.status, 200);
+  assert.equal(full.json.requested_stage, 'full');
+  assert.equal(full.json.axes_status, 'computed');
+  assert.deepEqual(axisProblems(full.json.axes), [], '默认路径的五轴判据必须照样过');
+  assert.equal(full.json.serving.degraded, false);
+  assert.equal(full.json.serving.full?.kind, 'full_answer', '默认路径必须产出完整段');
+  assert.equal(full.json.serving.full_withheld, undefined,
+    '默认路径是「要了完整载荷」，不该出现 full_withheld（那是主动扣下的标记）');
+  // stage 取值只有一个字面量白名单：别的值必须 400
+  const bad = await workshop('stage=half');
+  assert.equal(bad.status, 400, `stage=half 应当 400，实际 ${bad.status}`);
+  assert.ok(String(bad.json.error).includes('stage'), `错误必须点名 stage：${show(bad.json.error)}`);
+  raw('默认路径的 serving', {first: full.json.serving.first?.kind, full: full.json.serving.full?.kind,
+    withheld: full.json.serving.full_withheld ?? null, stages: full.json.serving.stages?.map((s) => s.id)});
+  log('[实际] stage=full：axes =', full.json.axes.length, '条；axes_status =', full.json.axes_status,
+    '；stage=half →', bad.status, String(bad.json.error));
+  // 反证：页面层把两阶段退化成一次请求 ⇒ 判据红
+  const collapsed = stageSequenceProblems({fetches: 'full', renderedAfterFirst: 'no', firstMs: null, fullMs: 12});
+  raw('反证·两阶段退化成一次请求', collapsed);
+  assert.ok(collapsed.length > 0, '退化样本必须被判红');
+});
+
+// ─────────────────────────────────────────────────────────────────────────
 // 4b. 机制原文（冻结 desc）必须逐字进玩家层，枚举原文不许进
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -528,6 +589,18 @@ test('反证：六条必红方向都抓得住违规样本（实际输出原文�
     playerCopyProblems('（机制原文）胜率 62%',
       {sourcedLines: sourcedMechanismLines({next_candidates: [{mechanism: {line: '胜率 62%'}}]})}),
     '{"next_candidates":[{"mechanism":{"line":"胜率 62%"}}]}');
+  // ⑥b 两阶段退化成一次性请求
+  const stageFirst = await workshop(`stage=first&selected=${IDS.slice(0, 6).join(',')}`);
+  record('first 也跑证据段（初判不再是初判）',
+    stageFirstProblems({...stageFirst.json, axes: stageFirst.json.axes ?? [{axis: 'x'}]}),
+    'axes: null → [{axis:"x"}]');
+  record('两阶段退化成一次请求',
+    stageSequenceProblems({fetches: 'full', renderedAfterFirst: 'no', firstMs: null, fullMs: 9}),
+    '{fetches:"full", renderedAfterFirst:"no", firstMs:null}');
+  record('初判被挡到完整载荷之后才画',
+    stageSequenceProblems({fetches: 'first|full', renderedAfterFirst: 'no', firstMs: 12, fullMs: 9}),
+    '{renderedAfterFirst:"no"}');
+
   // ⑦ 机制行从卡上抹掉
   const sixPlayer = six.json.player;
   const expectedLines = (sixPlayer.slots ?? [])
@@ -570,4 +643,61 @@ test('反证：判据本身不是恒真的（干净样本必须过，坏样本�
   assert.notDeepEqual(playerLayerProblems({slots: [{name: '音速犬', instance_id: 'own-0001'}]}), []);
   raw('干净样本的判据结果', {axes: [], player_layer: [], copy: []});
   log('[实际] 干净样本全过、坏样本翻红（判据不是恒真的）');
+});
+
+// ── RC-306 接线：分段交付（300ms 初判 / 3s 完整解释）────────────────────────────
+//
+// 工坊路由是分段契约的第一个真实消费者。这一组钉的是「**分段是真的**」：
+// `stage=first` 必须**不跑**最贵的证据/五轴段（不是跑完再丢掉），并把这件事
+// 如实登记成 `full_withheld='NOT_REQUESTED'`——它与「超时降级」是两件事。
+test('分段交付：stage=first 不跑证据段，stage=full 才给五轴', async () => {
+  const query = `selected=${IDS.slice(0, 6).join(',')}`;
+  const first = await workshop(`${query}&stage=first`);
+  const full = await workshop(query);
+  assert.equal(first.status, 200, `stage=first 必须 200，实际 ${first.status} ${first.raw.slice(0, 120)}`);
+  assert.equal(first.json.requested_stage, 'first');
+  // ① 初判必须有内容（否则「先给初判」是空话）
+  assert.equal(first.json.serving.first?.kind, 'structured_first');
+  assert.ok(first.json.player.slots.length === 6, '初判里六个槽位就该在');
+  assert.ok(first.json.next_candidates !== null, '初判里下一只候选就该在');
+  // ② 证据段必须**没跑**：五轴为 null、状态如实写成 not_requested
+  assert.equal(first.json.axes, null, `stage=first 不该有五轴，实际 ${JSON.stringify(first.json.axes)}`);
+  assert.equal(first.json.axes_status, 'not_requested');
+  assert.deepEqual(first.json.serving.stages.map((row) => row.id), ['plan']);
+  // ③ 「主动不要」与「超时降级」必须分开记录
+  assert.equal(first.json.serving.full, null);
+  assert.equal(first.json.serving.full_withheld, 'NOT_REQUESTED');
+  assert.equal(first.json.serving.degraded, false, '主动只要初判不是降级');
+  assert.deepEqual(first.json.serving.withheld_stages, ['evidence_and_counterfactual']);
+  // ④ 完整路径才给五轴与完整解释
+  assert.ok(Array.isArray(full.json.axes) && full.json.axes.length === 5,
+    `stage=full 必须给五轴，实际 ${JSON.stringify(full.json.axes)}`);
+  assert.equal(full.json.serving.full?.kind, 'full_answer');
+  assert.deepEqual(full.json.serving.stages.map((row) => row.id), ['plan', 'evidence_and_counterfactual']);
+  // ⑤ 预算与耗时都如实写出来（契约里的 300ms / 3s 不是一句口号）
+  assert.deepEqual(first.json.serving.budgets, {first_answer_ms: 300, full_answer_ms: 3000});
+  assert.ok(Number.isFinite(first.json.serving.first.elapsed_ms));
+  raw('stage=first 的 serving', {
+    stages: first.json.serving.stages.map((row) => row.id), full_withheld: first.json.serving.full_withheld,
+    degraded: first.json.serving.degraded, first_ms: Math.round(first.json.serving.first.elapsed_ms * 100) / 100,
+    axes: first.json.axes, axes_status: first.json.axes_status,
+  });
+  raw('stage=full 的 serving', {
+    stages: full.json.serving.stages.map((row) => row.id), axes: full.json.axes.length,
+    elapsed_ms: Math.round(full.json.serving.elapsed_ms * 100) / 100,
+  });
+  // 反证：把「不要证据段」这一事实抹掉（`full` 补一个假值）必须被同一条判据抓住。
+  const tampered = {...first.json, serving: {...first.json.serving, full: {kind: 'full_answer'}, full_withheld: undefined}};
+  assert.notEqual(tampered.serving.full, null, '反证样本：给一个假的完整解释');
+  assert.equal(tampered.serving.full_withheld, undefined);
+  assert.ok(tampered.serving.full !== null && tampered.serving.full_withheld === undefined,
+    '这两个键只要同时成立，上面 ③ 那两条断言就必须红——所以那两条不是恒真的');
+});
+
+test('分段交付：非法 stage 必须 400 点名（不许静默当成 full）', async () => {
+  const bad = await workshop('stage=zzz');
+  assert.equal(bad.status, 400, `非法 stage 必须 400，实际 ${bad.status}`);
+  assert.equal(bad.json.ok, false);
+  assert.match(String(bad.json.error), /stage 只能是/);
+  raw('非法 stage 的报错原文', String(bad.json.error).slice(0, 120));
 });

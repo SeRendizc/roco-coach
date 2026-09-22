@@ -51,6 +51,25 @@ v3 纠偏口径：**在线 3 秒内禁止批量模拟；线上做召回 → Beam
 度量脚本的声明**取自真配置** `data/roco/rulesets/mobile-s4-candidate-v3.json` 的 `actions` 块
 （不是手写样例）：合法样本 0 条问题，混进 `item`/`escape` 的样本 2 条问题。
 
+## 接线（第 96 轮）：工坊路由是第一个真实消费者
+
+`GET /api/roco/workshop` 多了 `stage` 参数（白名单里的**交付参数**，不是组队字段）：
+
+| 请求 | 跑哪几段 | 回执 |
+|---|---|---|
+| `stage=first` | 只跑 `plan`（召回 → 渐进候选 → 缺口 → 槽位/候选/Coach 摘要） | `axes=null`、`axes_status='not_requested'`、`serving.first.kind='structured_first'`、`serving.full=null` + `full_withheld='NOT_REQUESTED'`、`degraded=false` |
+| 省略 / `stage=full` | `plan` + `evidence_and_counterfactual`（缺口装配 + 五轴 + 最小替换） | 与接线前同形状，外加 `serving.full.kind='full_answer'` |
+| 别的值 | —— | `400` 点名「stage 只能是 first 或 full」（**不静默当 full**） |
+
+两条语义**必须分开**，这是这一节最重要的约定：
+
+- `full_withheld='NOT_REQUESTED'` = 调用方**主动只要初判**（不是降级）；
+- `degraded=true` = 超时/失败真的丢了段（`skipped`/`failed`/`late` 逐段点名）。
+
+真实路由实测（`reports/roco/team-serving/serving.json` 的 `route_stages`）：
+初判只跑 `plan` 一段、`axes` 确实是 `null`；完整解释两段都跑、五轴 5 条；
+两次都在 300ms / 3s 预算内（本地 P95 两位数毫秒）。
+
 ## 如实边界
 
 - 度量里的四段都是**规则与统计计算**，没有 LLM；`3s` 那一格目前是**上界**而不是实测瓶颈
