@@ -8,8 +8,8 @@
   "battle_skills": 579,
   "traits": 245,
   "entities": 824,
-  "simulatable_entities": 507,
-  "simulatable_ratio": 0.6153
+  "simulatable_entities": 509,
+  "simulatable_ratio": 0.6177
  },
  "declared_capabilities": {
   "multi_hit": true
@@ -23,10 +23,10 @@
    "REFUSED": 0
   },
   "traits": {
-   "FULL_VERIFIED": 6,
+   "FULL_VERIFIED": 8,
    "SIMULATABLE_UNVERIFIED": 0,
    "PARTIAL": 2,
-   "KNOWLEDGE_ONLY": 233,
+   "KNOWLEDGE_ONLY": 231,
    "REFUSED": 4
   }
  },
@@ -34,8 +34,8 @@
   {
    "primitive": "未被登记",
    "skills": 0,
-   "traits": 233,
-   "total": 233
+   "traits": 231,
+   "total": 231
   },
   {
    "primitive": "连击",
@@ -5691,16 +5691,16 @@
    "reason": "「敌方的增益层数」在引擎里是可数的：对手场上精灵的 `buffs` 有多少个键就有多少层（`_apply_status_effects` 每加一项写一个键）。假设（MC-020）：把 `buffs` 的**键个数**当作「层数」，同一属性的两层合并成一个键时会被算成一层——数据没有定义层数的计数方式。速度部分在 `order_actions` 之前生效，实现为 `spe` 增益。"
   },
   "skill_000142": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "未被 traits.py 登记（引擎不会结算）",
-   "hook": null,
-   "reason": null
+   "support": "FULL_VERIFIED",
+   "why": "登记状态 FULL",
+   "hook": "on_enter",
+   "reason": "触发时点明确（入场时），效果明确（双攻 +100%），条件也**可判**：「自己的魔力值是否为 1」。RC-401 批次二：只有声明了魔力的配置才判得了这个条件，legacy 没有「魔力」这条概念 ⇒ 条件不可判 ⇒ 不结算（行为逐位不变）。假设：双攻 = 物攻与魔攻各 +100%（与「专注力」同一种 buff 落法）。"
   },
   "skill_000143": {
-   "support": "KNOWLEDGE_ONLY",
-   "why": "未被 traits.py 登记（引擎不会结算）",
-   "hook": null,
-   "reason": null
+   "support": "FULL_VERIFIED",
+   "why": "登记状态 FULL",
+   "hook": "on_enter",
+   "reason": "同「图书守卫者」，只是条件看**敌方**魔力值、效果换双防。同样只在声明了魔力的配置下可判；假设：双防 = 物防与魔防各 +100%。"
   },
   "skill_000144": {
    "support": "KNOWLEDGE_ONLY",

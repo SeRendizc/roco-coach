@@ -525,12 +525,14 @@ class TestTraits(unittest.TestCase):
     def test_implementation_status_is_honest(self):
         from roco_env import traits as tr
         summary = tr.implementation_summary()
-        self.assertEqual(summary["FULL"] + summary["PARTIAL"] + summary["REFUSED"], 12,
-                         "A 组 6 只 + B/C 组 6 只 = 12 只特性")
+        # RC-401 批次二：入库了两条**条件可判**的入场特性（图书守卫者 / 构装契约者，
+        # 条件是「魔力值是否为 1」——只有声明了魔力的配置才判得了）。所以是 12 + 2 = 14。
+        self.assertEqual(summary["FULL"] + summary["PARTIAL"] + summary["REFUSED"], 14,
+                         "A 组 6 只 + B/C 组 6 只 + RC-401 批次二 2 只 = 14 只特性")
         self.assertGreater(summary["FULL"], 0)
         self.assertGreater(summary["REFUSED"], 0,
                            "至少有一条应当被明确拒绝——做不到和没做是两件事")
-        # 12 只里的每一只都要能在规则集里查到，且特性名与数据一致
+        # 登记表里的每一条都要能在规则集里查到，且特性名与数据一致
         for name, spec in tr.TRAITS.items():
             pets = RS.pets_by_name(spec.pet_name)
             self.assertTrue(pets, f"特性 {name} 写的精灵 {spec.pet_name} 不在规则集里")

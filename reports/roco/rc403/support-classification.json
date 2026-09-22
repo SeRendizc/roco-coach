@@ -10,13 +10,13 @@
  "totals": {
   "pets": 622,
   "FULL_VERIFIED": 0,
-  "SIMULATABLE_UNVERIFIED": 8,
-  "PARTIAL": 614,
+  "SIMULATABLE_UNVERIFIED": 12,
+  "PARTIAL": 610,
   "KNOWLEDGE_ONLY": 0,
   "REFUSED": 0
  },
  "blockers": {
-  "trait": 609,
+  "trait": 605,
   "moveset": 150
  },
  "severity_order": [
@@ -29713,7 +29713,7 @@
   "pet_000475": {
    "pet_id": "pet_000475",
    "name": "书魔虫",
-   "support": "PARTIAL",
+   "support": "SIMULATABLE_UNVERIFIED",
    "fieldable": true,
    "refused_pieces": [],
    "unverified_pieces": [
@@ -29722,9 +29722,7 @@
     "skill:skill_000267",
     "skill:skill_000266"
    ],
-   "unsimulated_pieces": [
-    "trait:skill_000142"
-   ],
+   "unsimulated_pieces": [],
    "pieces": {
     "build": {
      "support": "SIMULATABLE_UNVERIFIED",
@@ -29733,8 +29731,8 @@
     "trait": {
      "skill_id": "skill_000142",
      "name": "图书守卫者",
-     "support": "KNOWLEDGE_ONLY",
-     "why": "未被 traits.py 登记（引擎不会结算）"
+     "support": "FULL_VERIFIED",
+     "why": "登记状态 FULL"
     },
     "moveset": [
      {
@@ -29765,7 +29763,7 @@
    },
    "reasons": [
     "配招：SIMULATABLE_UNVERIFIED（配招由全量图鉴的 learnable_skills 按需推算（RC-402））",
-    "特性：KNOWLEDGE_ONLY（未被 traits.py 登记（引擎不会结算））",
+    "特性：FULL_VERIFIED（登记状态 FULL）",
     "技能「吞噬」：SIMULATABLE_UNVERIFIED",
     "技能「许愿星」：SIMULATABLE_UNVERIFIED",
     "技能「能量刃」：SIMULATABLE_UNVERIFIED",
@@ -29775,7 +29773,7 @@
   "pet_000476": {
    "pet_id": "pet_000476",
    "name": "书卷守护",
-   "support": "PARTIAL",
+   "support": "SIMULATABLE_UNVERIFIED",
    "fieldable": true,
    "refused_pieces": [],
    "unverified_pieces": [
@@ -29784,9 +29782,7 @@
     "skill:skill_000267",
     "skill:skill_000266"
    ],
-   "unsimulated_pieces": [
-    "trait:skill_000142"
-   ],
+   "unsimulated_pieces": [],
    "pieces": {
     "build": {
      "support": "SIMULATABLE_UNVERIFIED",
@@ -29795,8 +29791,8 @@
     "trait": {
      "skill_id": "skill_000142",
      "name": "图书守卫者",
-     "support": "KNOWLEDGE_ONLY",
-     "why": "未被 traits.py 登记（引擎不会结算）"
+     "support": "FULL_VERIFIED",
+     "why": "登记状态 FULL"
     },
     "moveset": [
      {
@@ -29827,7 +29823,7 @@
    },
    "reasons": [
     "配招：SIMULATABLE_UNVERIFIED（配招由全量图鉴的 learnable_skills 按需推算（RC-402））",
-    "特性：KNOWLEDGE_ONLY（未被 traits.py 登记（引擎不会结算））",
+    "特性：FULL_VERIFIED（登记状态 FULL）",
     "技能「吞噬」：SIMULATABLE_UNVERIFIED",
     "技能「许愿星」：SIMULATABLE_UNVERIFIED",
     "技能「能量刃」：SIMULATABLE_UNVERIFIED",
@@ -29837,7 +29833,7 @@
   "pet_000477": {
    "pet_id": "pet_000477",
    "name": "古卷执政官",
-   "support": "PARTIAL",
+   "support": "SIMULATABLE_UNVERIFIED",
    "fieldable": true,
    "refused_pieces": [],
    "unverified_pieces": [
@@ -29846,9 +29842,7 @@
     "skill:skill_000267",
     "skill:skill_000266"
    ],
-   "unsimulated_pieces": [
-    "trait:skill_000142"
-   ],
+   "unsimulated_pieces": [],
    "pieces": {
     "build": {
      "support": "SIMULATABLE_UNVERIFIED",
@@ -29857,8 +29851,8 @@
     "trait": {
      "skill_id": "skill_000142",
      "name": "图书守卫者",
-     "support": "KNOWLEDGE_ONLY",
-     "why": "未被 traits.py 登记（引擎不会结算）"
+     "support": "FULL_VERIFIED",
+     "why": "登记状态 FULL"
     },
     "moveset": [
      {
@@ -29889,7 +29883,7 @@
    },
    "reasons": [
     "配招：SIMULATABLE_UNVERIFIED（配招由全量图鉴的 learnable_skills 按需推算（RC-402））",
-    "特性：KNOWLEDGE_ONLY（未被 traits.py 登记（引擎不会结算））",
+    "特性：FULL_VERIFIED（登记状态 FULL）",
     "技能「吞噬」：SIMULATABLE_UNVERIFIED",
     "技能「许愿星」：SIMULATABLE_UNVERIFIED",
     "技能「能量刃」：SIMULATABLE_UNVERIFIED",
@@ -29899,7 +29893,7 @@
   "pet_000478": {
    "pet_id": "pet_000478",
    "name": "古卷匣魔像",
-   "support": "PARTIAL",
+   "support": "SIMULATABLE_UNVERIFIED",
    "fieldable": true,
    "refused_pieces": [],
    "unverified_pieces": [
@@ -29908,9 +29902,7 @@
     "skill:skill_000677",
     "skill:skill_000267"
    ],
-   "unsimulated_pieces": [
-    "trait:skill_000143"
-   ],
+   "unsimulated_pieces": [],
    "pieces": {
     "build": {
      "support": "SIMULATABLE_UNVERIFIED",
@@ -29919,8 +29911,8 @@
     "trait": {
      "skill_id": "skill_000143",
      "name": "构装契约者",
-     "support": "KNOWLEDGE_ONLY",
-     "why": "未被 traits.py 登记（引擎不会结算）"
+     "support": "FULL_VERIFIED",
+     "why": "登记状态 FULL"
     },
     "moveset": [
      {
@@ -29951,7 +29943,7 @@
    },
    "reasons": [
     "配招：SIMULATABLE_UNVERIFIED（配招由全量图鉴的 learnable_skills 按需推算（RC-402））",
-    "特性：KNOWLEDGE_ONLY（未被 traits.py 登记（引擎不会结算））",
+    "特性：FULL_VERIFIED（登记状态 FULL）",
     "技能「吞噬」：SIMULATABLE_UNVERIFIED",
     "技能「许愿星」：SIMULATABLE_UNVERIFIED",
     "技能「影袭」：SIMULATABLE_UNVERIFIED",

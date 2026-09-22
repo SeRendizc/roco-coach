@@ -63,6 +63,26 @@ TRAITS: Dict[str, TraitSpec] = {
         ),
         hook="on_enter",
     ),
+    "图书守卫者": TraitSpec(
+        pet_name="书魔虫", trait_name="图书守卫者", status=FULL,
+        desc="入场时，若自己魔力值为1，自己获得双攻+100%。",
+        reason=(
+            "触发时点明确（入场时），效果明确（双攻 +100%），条件也**可判**："
+            "「自己的魔力值是否为 1」。RC-401 批次二：只有声明了魔力的配置才判得了这个条件，"
+            "legacy 没有「魔力」这条概念 ⇒ 条件不可判 ⇒ 不结算（行为逐位不变）。"
+            "假设：双攻 = 物攻与魔攻各 +100%（与「专注力」同一种 buff 落法）。"
+        ),
+        hook="on_enter",
+    ),
+    "构装契约者": TraitSpec(
+        pet_name="古卷匣魔像", trait_name="构装契约者", status=FULL,
+        desc="入场时，若敌方魔力值为1，自己获得双防+100%。",
+        reason=(
+            "同「图书守卫者」，只是条件看**敌方**魔力值、效果换双防。"
+            "同样只在声明了魔力的配置下可判；假设：双防 = 物防与魔防各 +100%。"
+        ),
+        hook="on_enter",
+    ),
     "预警": TraitSpec(
         pet_name="黑猫巫师", trait_name="预警", status=PARTIAL,
         desc="若敌方技能足够击败自己，回合开始时自己获得速度+50。",
@@ -214,6 +234,23 @@ def on_enter(rs, state, side: str, events: list) -> None:
             "kind": "trait", "trait": "专注力", "side": side,
             "effect": "atk +100%", "evidence": "feature_skill",
         })
+    elif spec.trait_name in ("图书守卫者", "构装契约者"):
+        # RC-401 批次二：条件是「魔力值是否为 1」。**只有声明了魔力的配置才判得了**——
+        # legacy 里 `mana` 是 None（没有这条概念），条件不可判 ⇒ 不结算，行为逐位不变。
+        own_mana = getattr(state.player, "mana", None)
+        foe_mana = getattr(state.enemy, "mana", None)
+        if spec.trait_name == "图书守卫者":
+            triggered, keys, label = own_mana == 1, ("atk", "spa"), "双攻 +100%"
+        else:
+            triggered, keys, label = foe_mana == 1, ("def", "spd"), "双防 +100%"
+        if triggered:
+            for key in keys:
+                pet.buffs[key] = pet.buffs.get(key, 0) + 100
+            events.append({
+                "kind": "trait", "trait": spec.trait_name, "side": side,
+                "effect": label, "condition": "mana==1",
+                "evidence": "feature_skill",
+            })
     elif spec.trait_name == "身经百练":
         # 己方每应对 1 次 → 水系/武系技能威力 +20%（按层数累计）
         stacks = int(getattr(me, "_respond_count", 0) or 0)

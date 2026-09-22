@@ -84,4 +84,7 @@ class CoverageLedgerTest(unittest.TestCase):
         ranking = {row["primitive"]: row for row in self.report["coverage_ranking"]}
         self.assertIn("连击", ranking)
         self.assertGreater(ranking["连击"]["skills"], 0, "统计口径里的连击应当还有剩余（动态那批）")
-        self.assertEqual(ranking["未被登记"]["traits"], 233)
+        # 这条**从登记表长度推导**，不写死数字：每入库一批特性，未登记数就应当自动跟着降。
+        from roco_env import traits as traits_mod
+        self.assertEqual(ranking["未被登记"]["traits"], 245 - len(traits_mod.TRAITS),
+                         "「未被登记」的条数必须等于 245 减去已登记条数")

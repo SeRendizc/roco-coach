@@ -92,6 +92,34 @@ def classify_trait(trait: Any) -> Dict[str, Any]:
     return {"support": level, "why": f"登记状态 {spec.status}", "hook": spec.hook, "reason": spec.reason}
 
 
+#: 触发词 → 引擎**真的有**的钩子。只登记我们真能挂上的那些；其余一律 `unknown`，
+#: 因为「效果读得出来」不等于「知道它什么时候触发」——猜触发时点就是编规则。
+TRIGGER_HOOKS: "dict[str, str]" = {
+    "入场时": "on_enter",
+    "登场时": "on_enter",
+    "换上时": "on_enter",
+    "入场后": "on_enter",
+    "攻击时": "on_action",
+    "使用技能时": "on_action",
+}
+
+#: 触发词的识别顺序（长词优先，避免「入场时」被「场时」抢先）。
+_TRIGGER_ORDER = ("入场时", "登场时", "换上时", "入场后", "攻击时", "使用技能时")
+
+
+def trigger_hook_of(desc: str) -> "dict[str, object]":
+    """这条描述里的触发词映射到哪个钩子（没有 = 未知触发）。
+
+    **只认闭集里的词**。识别不到触发时就如实返回 `unknown` —— 效果能被读出来 ≠ 我们知道
+    它什么时候触发，而按错时点结算比不结算更糟（那是静默错算）。
+    """
+    text = str(desc or "")
+    for word in _TRIGGER_ORDER:
+        if word in text:
+            return {"trigger": word, "hook": TRIGGER_HOOKS[word], "known": True}
+    return {"trigger": None, "hook": None, "known": False}
+
+
 def _primitive_bucket(reason: str) -> str:
     """把「没认领的片段」归成一个原语名（台账里按它排序）。"""
     head = str(reason).split("（")[0].strip()
@@ -180,6 +208,88 @@ def build_coverage(rs: Any, *, headline: Optional[List[str]] = None,
     }
 
 
+def build_trait_worklist(rs: Any) -> Dict[str, Any]:
+    """**特性层的工作清单**：按「实现它能让多少只精灵变成可模拟」排序。
+
+    为什么单独做这一份：RC-403 的分类显示 609 只精灵卡在特性那一件上，但特性有 245 条，
+    不能一起上。排序依据是**覆盖收益**，而不是「哪条看起来简单」：
+
+      · `pets_blocked`：把这条特性实现掉，能让多少只精灵从 `PARTIAL` 变成「全可模拟」；
+      · `readiness`：`ready`（触发钩子已知 **且** 描述能被完整读出）/ `effect_unparsed`
+        （知道什么时候触发，但效果读不出来）/ `trigger_unknown`（效果也许读得出，
+        但不知道什么时候触发 —— 这一类比前一类更危险，按错时点就是静默错算）/
+        `registered`（已在 `traits.py` 里登记）。
+
+    数据来源全部可复跑：`rs` 的冻结数据 + `parse.parse_skill` + `traits.TRAITS`。
+    """
+    from . import traits as traits_mod
+
+    # 按 **skill_id** 索引：冻结数据里有同名特性（不同形态/不同系别），按名字索引会把它们合并掉
+    # （实测 245 条会被压成 242 条）。名字只当标签用。
+    trait_skills = {t.skill_id: t for t in rs.skills.values() if t.is_trait}
+    # 每只精灵卡在哪条特性上（只有「唯一没实现的部件是特性」才算能被它解锁）
+    blocked: "dict[str, list[str]]" = {}
+    for pet_id in rs.pets:
+        pet = rs.pets[pet_id]
+        trait = rs.skills.get(pet.feature_skill_id) if pet.feature_skill_id else None
+        if trait is None or not getattr(trait, "is_trait", False):
+            continue
+        moves_ok = all(
+            classify_skill(rs.skills[sid], multi_hit_declared=True)["support"]
+            in (SUPPORT_SIMULATABLE_UNVERIFIED, SUPPORT_FULL_VERIFIED)
+            for sid in (rs.candidate_moveset(pet_id) or ()) if sid in rs.skills)
+        trait_row = classify_trait(trait)
+        trait_ok = trait_row["support"] in (SUPPORT_SIMULATABLE_UNVERIFIED, SUPPORT_FULL_VERIFIED)
+        if moves_ok and not trait_ok:
+            blocked.setdefault(trait.name, []).append(pet_id)
+
+    rows = []
+    for skill_id, skill in sorted(trait_skills.items()):
+        hook = trigger_hook_of(skill.desc)
+        parsed = parse_mod.parse_skill(skill)
+        effect_clean = bool(parsed.effects) and not parsed.unparsed
+        registered = skill.name in traits_mod.TRAITS
+        if registered:
+            readiness = "registered"
+        elif hook["known"] and effect_clean:
+            readiness = "ready"
+        elif hook["known"]:
+            readiness = "effect_unparsed"
+        else:
+            readiness = "trigger_unknown"
+        rows.append({
+            "trait": skill.name, "skill_id": skill.skill_id,
+            "trigger": hook["trigger"], "hook": hook["hook"], "trigger_known": hook["known"],
+            "effect_clean": effect_clean, "parsed_effects": [e.kind for e in parsed.effects],
+            "unparsed": list(parsed.unparsed),
+            "readiness": readiness,
+            "pets_blocked": len(blocked.get(skill.name, [])),
+            "blocked_pets": sorted(blocked.get(skill.name, []))[:8],
+            "desc": (skill.desc or "")[:80],
+        })
+    # 覆盖收益排序：唯它能解锁的精灵数 → 就绪度（ready 优先）→ 名字（确定性）
+    order = {"ready": 0, "registered": 1, "effect_unparsed": 2, "trigger_unknown": 3}
+    rows.sort(key=lambda r: (-r["pets_blocked"], order.get(r["readiness"], 9), r["trait"], r["skill_id"]))
+    tally = collections.Counter(r["readiness"] for r in rows)
+    return {
+        "schema": "roco-trait-worklist/v1",
+        "rc": "RC-401 / RC-403",
+        "generated_by": "roco/src/roco_env/coverage.py",
+        "ruleset_id": rs.ruleset_id,
+        "why": "609 只精灵卡在特性那一件上。245 条特性不能一起上，所以按**覆盖收益**排序："
+               "先做「触发钩子已知 + 描述能被完整读出」的那批。",
+        "totals": {"traits": len(rows), **dict(tally)},
+        "trigger_vocabulary": dict(TRIGGER_HOOKS),
+        "pets_blocked_by_traits": sum(len(v) for v in blocked.values()),
+        "known_limits": [
+            "`pets_blocked` 只统计「**唯一**没实现的部件是特性」的精灵；还有别的部件没实现的精灵不计入",
+            "`trigger_unknown` 不等于「不能做」，而是「不知道什么时候触发」——按错时点结算比不结算更糟",
+            "本清单是**排序依据**，不是实现：任何一条特性落地都要有自己的判据与反证",
+        ],
+        "worklist": rows,
+    }
+
+
 def write_report(rs: Any, path: str, *, headline: Optional[List[str]] = None) -> Dict[str, Any]:
     report = build_coverage(rs, headline=headline)
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -196,10 +306,16 @@ def _main() -> int:  # pragma: no cover - CLI 入口
 
     parser = argparse.ArgumentParser(description="RC-401/403 效果覆盖台账")
     parser.add_argument("--out", default=os.path.join("reports", "roco", "rc401", "effect-coverage.json"))
+    parser.add_argument("--traits-out", default=os.path.join("reports", "roco", "rc401", "trait-worklist.json"))
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
     rs = data_mod.load_ruleset()
     report = write_report(rs, args.out)
+    worklist = build_trait_worklist(rs)
+    os.makedirs(os.path.dirname(args.traits_out), exist_ok=True)
+    with open(args.traits_out, "w", encoding="utf-8") as fh:
+        json.dump(worklist, fh, ensure_ascii=False, indent=1)
+        fh.write("\n")
     if args.json:
         print(json.dumps({k: report[k] for k in ("totals", "support_levels")}, ensure_ascii=False, indent=1))
     else:
@@ -208,7 +324,11 @@ def _main() -> int:  # pragma: no cover - CLI 入口
               f"可模拟 {t['simulatable_entities']}（{t['simulatable_ratio']}）")
         for row in report["coverage_ranking"][:8]:
             print(f"  {row['total']:>4} 条 → {row['primitive']}（技能 {row['skills']} / 特性 {row['traits']}）")
-        print(f"报告 → {args.out}")
+        top = [r for r in worklist["worklist"] if r["readiness"] == "ready"][:5]
+        print(f"特性清单：{worklist['totals']}；唯特性阻塞的精灵 {worklist['pets_blocked_by_traits']} 只")
+        for row in top:
+            print(f"  ready: {row['trait']}（触发 {row['trigger']}→{row['hook']}，解锁 {row['pets_blocked']} 只）")
+        print(f"报告 → {args.out} / {args.traits_out}")
     return 0
 
 
