@@ -879,15 +879,21 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
     # （结果是 planner 的启发式里根本没有伤害项，会把 40 威力排在 180 威力前面）。
     attacker_pet = rs.pet(pet.pet_id)
     defender_pet = rs.pet(defender.pet_id)
+    # RC-401 连击：判据在 `parse.resolve_hit_count`（见那里的注释）。
+    hit_count, parsed_atk = parse.resolve_hit_count(
+        skill, declared=bool(getattr(cfg, "damage_multi_hit", False)))
+
     outcome = fx.compute_damage(pet, defender, skill, rs,
                                 attacker_species=attacker_pet,
-                                defender_species=defender_pet)
+                                defender_species=defender_pet,
+                                hit_count=hit_count)
     damage = outcome.damage
     actual = min(defender.hp, damage)
     defender.hp -= actual
 
     state.log.append(
-        f"{label}的{attacker_pet.name}使用{skill.name}，对{defender_pet.name}造成 {actual} 伤害"
+        f"{label}的{attacker_pet.name}使用{skill.name}"
+        f"{'（' + str(hit_count) + ' 连击）' if hit_count > 1 else ''}，对{defender_pet.name}造成 {actual} 伤害"
         f"{'（属性克制）' if outcome.type_multiplier > 1 else '（属性抵抗）' if outcome.type_multiplier < 1 else ''}"
         f"{'（防御减伤）' if outcome.defense_reduction else ''}。"
     )
@@ -905,6 +911,8 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         "power_multiplier": outcome.power_multiplier,
         "damage_model": outcome.model,
         "formula_verified": outcome.verified,
+        # RC-401：只在这一手真的按连击结算时才带 `hits`——legacy 的事件一个字节都不动。
+        **({"hits": hit_count} if hit_count > 1 else {}),
     }, evidence=(skill.skill_id,))
 
     if defender.hp <= 0:
@@ -920,7 +928,6 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
     # 以前这里什么都没有 —— 「造成魔伤，自己回复1能量」被整条静默丢弃
     # （实测 energy 不变、events=['damage']、unsupported=[]）。纪律不允许：
     # 要么真的生效，要么如实登记。禁止把 unsupported 效果近似成普通伤害。
-    parsed_atk = parse.parse_skill(skill)
     if parsed_atk.effects or parsed_atk.unparsed:
         applied = _apply_effect_batch(state, rs, side, skill, parsed_atk, cfg)
         if applied:

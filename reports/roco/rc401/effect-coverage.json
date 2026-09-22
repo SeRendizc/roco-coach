@@ -1,0 +1,6318 @@
+{
+ "schema": "roco-effect-coverage/v1",
+ "rc": "RC-401 / RC-403",
+ "generated_by": "roco/src/roco_env/coverage.py",
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "why": "「按覆盖收益增量迁移」需要一个能量出来的尺子：每条未实现原语能解锁多少实体。本报告只回答「我们现在站在哪里」，不判断机制对不对。",
+ "totals": {
+  "battle_skills": 579,
+  "traits": 245,
+  "entities": 824,
+  "simulatable_entities": 507,
+  "simulatable_ratio": 0.6153
+ },
+ "declared_capabilities": {
+  "multi_hit": true
+ },
+ "support_levels": {
+  "battle_skills": {
+   "FULL_VERIFIED": 0,
+   "SIMULATABLE_UNVERIFIED": 501,
+   "PARTIAL": 7,
+   "KNOWLEDGE_ONLY": 71,
+   "REFUSED": 0
+  },
+  "traits": {
+   "FULL_VERIFIED": 6,
+   "SIMULATABLE_UNVERIFIED": 0,
+   "PARTIAL": 2,
+   "KNOWLEDGE_ONLY": 233,
+   "REFUSED": 4
+  }
+ },
+ "coverage_ranking": [
+  {
+   "primitive": "未被登记",
+   "skills": 0,
+   "traits": 233,
+   "total": 233
+  },
+  {
+   "primitive": "连击",
+   "skills": 43,
+   "traits": 0,
+   "total": 43
+  },
+  {
+   "primitive": "选择",
+   "skills": 20,
+   "traits": 0,
+   "total": 20
+  },
+  {
+   "primitive": "传动",
+   "skills": 13,
+   "traits": 0,
+   "total": 13
+  },
+  {
+   "primitive": "随机",
+   "skills": 11,
+   "traits": 0,
+   "total": 11
+  },
+  {
+   "primitive": "号位",
+   "skills": 9,
+   "traits": 0,
+   "total": 9
+  },
+  {
+   "primitive": "天气",
+   "skills": 4,
+   "traits": 0,
+   "total": 4
+  },
+  {
+   "primitive": "眩晕",
+   "skills": 4,
+   "traits": 0,
+   "total": 4
+  },
+  {
+   "primitive": "「给敌方挂全技能能耗+1」已实现为能耗修正标记。",
+   "skills": 0,
+   "traits": 1,
+   "total": 1
+  },
+  {
+   "primitive": "「获得对手的特性」要求引擎在**运行时**把另一",
+   "skills": 0,
+   "traits": 1,
+   "total": 1
+  },
+  {
+   "primitive": "「速度+50」已实现为速度属性增益。未实现的是*",
+   "skills": 0,
+   "traits": 1,
+   "total": 1
+  },
+  {
+   "primitive": "复活需要「力竭后仍占用一个回合计数位」这一状态，",
+   "skills": 0,
+   "traits": 1,
+   "total": 1
+  },
+  {
+   "primitive": "字面读法有两个都可疑：① 「技能系别不在敌方精灵",
+   "skills": 0,
+   "traits": 1,
+   "total": 1
+  },
+  {
+   "primitive": "需要三件引擎目前没有确认的东西：①「萌化」这个状",
+   "skills": 0,
+   "traits": 1,
+   "total": 1
+  }
+ ],
+ "headline": [],
+ "known_limits": [
+  "`SIMULATABLE_UNVERIFIED` 只表示「描述被完整读出且引擎会结算」，**不是**实机核验过",
+  "解析器读不出的**条件化**机制（条件化回能、动态连击数…）一律进 PARTIAL/KNOWLEDGE_ONLY，不做近似",
+  "特性的收益排序用的是它与实现状态，粒度到「原语」而不是到具体句子"
+ ],
+ "skills": {
+  "skill_000246": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000247": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000248": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000249": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000250": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000251": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000252": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000253": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000254": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000255": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000256": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成物伤，2连击，应对状态：本次技能连击数翻倍。）"
+   ],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000257": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成魔伤，1连击，应对状态：本技能变为3连击。）"
+   ],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000258": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000259": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000260": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×5"
+   ],
+   "hit_count": 5
+  },
+  "skill_000261": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成物伤，1连击，每次使用后，本技能连击数永久+1。）",
+    "连击（出现在：造成物伤，1连击，每次使用后，本技能连击数永久+1。）"
+   ],
+   "claimed_by_capability": [],
+   "hit_count": 1
+  },
+  "skill_000262": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000263": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000264": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000265": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000266": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000267": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000268": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000269": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000270": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000271": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000272": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000273": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000274": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000275": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000276": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000277": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000278": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000279": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000280": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000281": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000282": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000283": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000284": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000285": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000286": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000287": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat",
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000288": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000289": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000290": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：每回合随机变成己方队伍中其他精灵的技能。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000294": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：每回合随机变成敌方任意精灵的技能，且该技能能耗-2。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000298": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：每回合随机变成自己未携带的技能，且该技能能耗-2。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000302": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000303": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000304": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：造成魔伤，1连击。）"
+   ],
+   "claimed_by_capability": [],
+   "hit_count": 1
+  },
+  "skill_000305": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000306": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000307": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000308": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000309": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000310": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000311": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000312": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000313": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000314": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000315": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000316": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000317": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000318": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000319": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000320": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：敌方获得连击数-4。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000321": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000322": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000323": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000324": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：自己获得连击数+3。）",
+    "连击（出现在：自己获得连击数+3。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000325": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000326": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000327": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000328": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000329": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成魔伤，3连击，若敌方本回合更换精灵，本次技能连击数+3。）"
+   ],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000330": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000331": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "眩晕（出现在：敌方获得全技能能耗+3，应对防御：额外造成打断，且敌方下回合获得眩晕。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000332": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "cleanse"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000333": {
+   "support": "PARTIAL",
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "cleanse"
+   ],
+   "unparsed": [
+    "选择（出现在：造成魔伤，选择：驱散敌方所有增益或驱散双方1层印记。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000334": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000335": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000336": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：造成魔伤，选择：每次使用后威力永久+20或应对状态时本次技能威力+100%。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000337": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000338": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000339": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000340": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000341": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000342": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000343": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000344": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000345": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000346": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000347": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000348": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000349": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：3 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）",
+    "连击（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）",
+    "眩晕（出现在：自己获得连击数+2，应对防御：额外造成打断，且敌方下回合获得眩晕。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000350": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat",
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000351": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "heal",
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000352": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000353": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000354": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000355": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000356": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000357": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000358": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000359": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000360": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成物伤，2连击，每次使用后，本技能连击数永久+2。）"
+   ],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000361": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000362": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000363": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000364": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000365": {
+   "support": "PARTIAL",
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [
+    "动态连击数（出现在：2连击，每次连击自己回复8%生命，使用后本技能连击数永久+1。）"
+   ],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000366": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000367": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000368": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000369": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000370": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000371": {
+   "support": "PARTIAL",
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [
+    "选择（出现在：造成魔伤，选择：自己生命大于80%时威力+50或应对状态时自己回复35%生命。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000372": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000373": {
+   "support": "PARTIAL",
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [
+    "选择（出现在：选择：自己回复25%生命或回复8能量。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000374": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000375": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000376": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000377": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000378": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000379": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000380": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000381": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000382": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000383": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000384": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000385": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000386": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000387": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000388": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000389": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000390": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000391": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000392": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000393": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000394": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000395": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000396": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000397": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000398": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000399": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000400": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000401": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000402": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000403": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000404": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat",
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000405": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000406": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000407": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000408": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status",
+    "cleanse"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000409": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000410": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000411": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000412": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000413": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "眩晕（出现在：造成高额物理伤害，自己下回合获得眩晕。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000414": {
+   "support": "PARTIAL",
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [
+    "选择（出现在：选择：敌方获得7层灼烧或物防-90%。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000415": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000416": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000417": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000418": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000419": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000420": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000421": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000422": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000423": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000424": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000425": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000426": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000427": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "weather"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000428": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000429": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000430": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000431": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000432": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000433": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000434": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000435": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000436": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×4"
+   ],
+   "hit_count": 4
+  },
+  "skill_000437": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000438": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000439": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000440": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000441": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000442": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000443": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000444": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000445": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "天气（出现在：造成物伤，天气为雨天时，本技能能耗-2。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000446": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000447": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000448": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000449": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000450": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000451": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000452": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000453": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000454": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000455": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000456": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000457": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000458": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000459": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000460": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "天气（出现在：造成魔伤，本技能系别和天气系别相同。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000461": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000462": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000463": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000464": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：造成物伤，选择：敌方携带光系技能时威力+50或应对状态时被应对的技能变为透射。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000465": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000466": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000467": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000468": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：造成物伤，本技能位于1号位时威力+60，传动1。）",
+    "号位（出现在：造成物伤，本技能位于1号位时威力+60，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000469": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000470": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：造成物伤，技能威力为两侧技能威力和的三分之一，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000471": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：造成物伤，本技能位于1号位时威力+90，传动2。）",
+    "号位（出现在：造成物伤，本技能位于1号位时威力+90，传动2。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000472": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000473": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：主动：本技能被动永久额外-1能耗，被动：两侧技能能耗-1，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000474": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000475": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000476": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000477": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：造成魔伤，本技能位于3号位时威力+40，传动1。）",
+    "号位（出现在：造成魔伤，本技能位于3号位时威力+40，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000478": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000479": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000480": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：造成魔伤，本技能位于1号或3号位时威力+30，传动1。）",
+    "号位（出现在：造成魔伤，本技能位于1号或3号位时威力+30，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000481": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：造成物伤，本技能位于1号或3号位时能耗-2，传动1。）",
+    "号位（出现在：造成物伤，本技能位于1号或3号位时能耗-2，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000482": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000483": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。）",
+    "号位（出现在：自己获得速度+30，本技能位于1号或3号位时额外获得物攻+80%，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000484": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：造成魔伤，威力额外增加两侧技能威力差的四分之一，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000485": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：选择：自己获得速度+60或物攻+90%。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000486": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：3 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）",
+    "传动（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）",
+    "号位（出现在：造成物伤，传动1，选择：本技能位于1号位时威力+65或本回合额外传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000487": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000488": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000489": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：主动：本技能被动永久额外+20威力，被动：两侧技能威力+10，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000490": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：敌方获得威力-20，自己每受到1次抵抗伤害（不含连击），敌方额外获得威力-20，）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000491": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：减伤50%，本技能位于1号位或3号位时，额外减伤40%，应对攻击，传动1。）",
+    "号位（出现在：减伤50%，本技能位于1号位或3号位时，额外减伤40%，应对攻击，传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000492": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：造成魔伤，每受到1次抵抗的技能攻击（不含连击），本技能威力永久+20。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000493": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000494": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：造成物伤，每受到1次抵抗的技能攻击（不含连击），本技能能耗永久-1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000495": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000496": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "传动（出现在：造成物伤，位于1号位时，先手+1。传动1。）",
+    "号位（出现在：造成物伤，位于1号位时，先手+1。传动1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000497": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000498": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000499": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000500": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000501": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000502": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000503": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000504": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000505": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat",
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000506": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat",
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000507": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "weather"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000508": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000509": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000510": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000511": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000512": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000513": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000514": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：造成物伤，1连击。）"
+   ],
+   "claimed_by_capability": [],
+   "hit_count": 1
+  },
+  "skill_000515": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000516": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000517": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000518": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000519": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000520": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：造成物伤，敌方获得连击数-3。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000521": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000522": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000523": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000524": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：减伤80%，应对攻击：敌方获得连击数-3。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000525": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000526": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "天气（出现在：造成魔伤，天气为沙暴时，先手+1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000527": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：自己获得速度-20，选择：且额外获得物防+90%或魔防+90%。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000528": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000529": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000530": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000531": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000532": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000533": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000534": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000535": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000536": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000537": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000538": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000539": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000540": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000541": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000542": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000543": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000544": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000545": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000546": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000547": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000548": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000549": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000550": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000551": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000552": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000553": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000554": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000555": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "weather"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000556": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000557": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000558": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000559": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000560": {
+   "support": "PARTIAL",
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [
+    "选择（出现在：造成物伤，选择：敌方获得物防-30%或敌方获得速度-20。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000561": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "天气（出现在：造成物伤，天气为暴风雪时，本次技能威力+50）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000562": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000563": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000564": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000565": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000566": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000567": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000568": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat",
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000569": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000570": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000571": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000572": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000573": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000574": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000575": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000576": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000577": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000578": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：下次技能无需蓄力，本技能可在蓄力状态下使用。选择：本次能耗-1或应对防御时打断，）",
+    "眩晕（出现在：下次技能无需蓄力，本技能可在蓄力状态下使用。选择：本次能耗-1或应对防御时打断，）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000579": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000580": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000581": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000582": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000583": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000584": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000585": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000586": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000587": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000588": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat",
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000589": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000590": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000591": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000592": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000593": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000594": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000595": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000596": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000597": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000598": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000599": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000600": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000601": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000602": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000603": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000604": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000605": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "weather"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000606": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000607": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000608": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000609": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000610": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000611": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000612": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000613": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000614": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000615": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000616": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000617": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000618": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000619": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000620": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000621": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000622": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000623": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000624": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat",
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000625": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark",
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000626": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000627": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000628": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000629": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成魔伤，1连击，若敌方有中毒效果，本次技能连击数+2。）",
+    "连击（出现在：造成魔伤，1连击，若敌方有中毒效果，本次技能连击数+2。）"
+   ],
+   "claimed_by_capability": [],
+   "hit_count": 1
+  },
+  "skill_000630": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000631": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000632": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：造成物伤，1连击，本技能会受奉献影响，每被影响1次，能耗永久+1。）"
+   ],
+   "claimed_by_capability": [],
+   "hit_count": 1
+  },
+  "skill_000633": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000634": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成物伤，2连击。己方队伍获得1次奉献：获得连击数+1。）"
+   ],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000635": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "连击（出现在：造成物伤，1连击，本技能会受奉献影响。）"
+   ],
+   "claimed_by_capability": [],
+   "hit_count": 1
+  },
+  "skill_000636": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000637": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000638": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成魔伤，队伍中的精灵每携带1个虫鸣，本次技能连击数+1。）",
+    "连击（出现在：造成魔伤，队伍中的精灵每携带1个虫鸣，本次技能连击数+1。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000639": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status",
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000640": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000641": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000642": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：己方队伍获得2次随机奉献。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000643": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat",
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000644": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000645": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000646": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000647": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000648": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000649": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000650": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000651": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000652": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000653": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：减伤80%，应对攻击：己方队伍获得1次随机奉献。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000654": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：选择：己方队伍获得1次奉献：连击+1或威力+20。）",
+    "连击（出现在：选择：己方队伍获得1次奉献：连击+1或威力+20。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000655": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000656": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000657": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：己方队伍获得1次随机奉献，若上回合双方有精灵使用地系技能，额外获得3次随机奉献。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000658": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：造成物伤，若敌方本回合更换精灵，己方队伍获得3次随机奉献。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000659": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000660": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000661": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×6"
+   ],
+   "hit_count": 6
+  },
+  "skill_000662": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000663": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000664": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000665": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000666": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000667": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000668": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat",
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000669": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat",
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000670": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000671": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000672": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000673": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000674": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000675": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000676": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000677": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000678": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000679": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成魔伤，2连击，每成功应对1次，本技能连击数永久+2。）"
+   ],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000680": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000681": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat",
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000682": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000683": {
+   "support": "PARTIAL",
+   "why": "读出一部分（1 条），另有 1 段没认领",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [
+    "选择（出现在：本技能先手-1，选择：若自己生命低于20%，回复60%生命或若自己生命高于80%）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000684": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：造成魔伤，选择：本次技能威力+20或应对状态时本次技能威力+140。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000685": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000686": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000687": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000688": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000689": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000690": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000691": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000692": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000693": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：获得连击数+100%。）",
+    "连击（出现在：获得连击数+100%。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000694": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000695": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000696": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000697": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000698": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000699": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000700": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000701": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000702": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000703": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000704": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000705": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000706": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：减伤70%，应对攻击：自己获得连击数+2。）",
+    "连击（出现在：减伤70%，应对攻击：自己获得连击数+2。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000707": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000708": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000709": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成物伤，2连击。选择：每次使用后本技能威力永久+10或连击数永久+1。）"
+   ],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000710": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：自己获得全技能威力+20，选择：本次能耗-1或应对防御时改为全技能威力永久+20）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000711": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000712": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000713": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000714": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：自己获得连击数+1，迅捷。）",
+    "连击（出现在：自己获得连击数+1，迅捷。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000715": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000716": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000717": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000718": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000719": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000720": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000721": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000722": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000723": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "heal"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000724": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000725": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000726": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000727": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000728": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000729": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000730": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000731": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成物伤，1连击，双方携带的所有精灵每有1层萌化，本次技能连击数+1。）",
+    "连击（出现在：造成物伤，1连击，双方携带的所有精灵每有1层萌化，本次技能连击数+1。）"
+   ],
+   "claimed_by_capability": [],
+   "hit_count": 1
+  },
+  "skill_000732": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000733": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000734": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000735": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000736": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000737": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：造成魔伤，自己有减益时本技能能耗-1，选择：自己获得萌化或解除萌化。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000738": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000739": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：自己获得双攻永久+10%，2连击。自己有减益时，本次技能连击数+1。）"
+   ],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000740": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：造成魔伤，自己每使用过1次选择技能，自己获得3层随机永久属性增益，使用后重置。）",
+    "选择（出现在：造成魔伤，自己每使用过1次选择技能，自己获得3层随机永久属性增益，使用后重置。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000741": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000742": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000743": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000744": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000745": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000746": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000747": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000748": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000749": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000750": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000751": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000752": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×5"
+   ],
+   "hit_count": 5
+  },
+  "skill_000753": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000754": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成魔伤，3连击，若敌方本回合更换精灵，本次技能连击数翻倍。）"
+   ],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000755": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000756": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "drain_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000757": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000758": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000759": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000760": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000761": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：造成魔伤，自己每使用过1次选择技能，敌方获得3层随机永久属性减益，使用后重置。）",
+    "选择（出现在：造成魔伤，自己每使用过1次选择技能，敌方获得3层随机永久属性减益，使用后重置。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000762": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000763": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000764": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "drain_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000765": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "drain_energy",
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000766": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000767": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000768": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000769": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000770": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成物伤，3连击，若自己的生命低于50%，本次技能连击数+2。）"
+   ],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000771": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000772": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000773": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000774": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000775": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000776": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000777": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000778": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000779": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000780": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000781": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000782": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000783": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000784": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000785": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000786": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000787": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000788": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000789": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000790": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000791": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000792": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成物伤，2连击，若击败敌方，本技能连击数永久+2。）"
+   ],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000793": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000794": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000795": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000796": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000797": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000798": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "选择（出现在：造成物伤，选择：本次技能威力+40，使用后自己生命-10%或自己生命低于50%时）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000799": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000800": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000801": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000802": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000803": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000804": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000805": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000806": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000807": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "self_energy"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000808": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "动态连击数（出现在：造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。）",
+    "连击（出现在：造成魔伤，1连击，敌方每有1层星陨印记，本次技能连击数+1。）"
+   ],
+   "claimed_by_capability": [],
+   "hit_count": 1
+  },
+  "skill_000809": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000810": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000811": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000812": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×2"
+   ],
+   "hit_count": 2
+  },
+  "skill_000813": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000814": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000815": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000816": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000817": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000818": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000819": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": [
+    "连击×3"
+   ],
+   "hit_count": 3
+  },
+  "skill_000820": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000821": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000822": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000823": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000824": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：1 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：自己获得随机16层属性增益，巧变：幻系攻击技能。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000825": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000826": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "只有资料：2 段机制没被读出",
+   "effects": [],
+   "unparsed": [
+    "随机（出现在：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记。）",
+    "选择（出现在：选择：敌方随机获得1种负面印记或自己随机获得1种正面印记。）"
+   ],
+   "claimed_by_capability": []
+  },
+  "skill_000827": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000828": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000829": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（2 条效果），且没有未认领片段",
+   "effects": [
+    "self_stat",
+    "self_stat"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000830": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000831": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000832": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "描述被完整读出（1 条效果），且没有未认领片段",
+   "effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "claimed_by_capability": []
+  },
+  "skill_000833": {
+   "support": "SIMULATABLE_UNVERIFIED",
+   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "effects": [],
+   "unparsed": [],
+   "claimed_by_capability": []
+  }
+ },
+ "traits": {
+  "skill_000001": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000002": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000003": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000004": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000005": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000006": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000007": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000008": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000009": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000010": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000011": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000012": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000013": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000014": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000015": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000016": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000017": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000018": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000019": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000020": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000021": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000022": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000023": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000024": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000025": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000026": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000027": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000028": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000029": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000030": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000031": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000032": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000033": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000034": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000035": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000036": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000037": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000038": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000039": {
+   "support": "PARTIAL",
+   "why": "登记状态 PARTIAL",
+   "hook": "after_freeze_applied",
+   "reason": "「给敌方挂全技能能耗+1」已实现为能耗修正标记。未实现的是它与**其他能耗修改**（湿润印记 -1、聒噪 +2）的复合顺序与下限——术语没有定义，属 MC-018 待验项，因此只登记标记、不在此处结算复合。"
+  },
+  "skill_000040": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000041": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000042": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000043": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000044": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000045": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000046": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000047": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000048": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000049": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000050": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000051": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000052": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000053": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000054": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000055": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000056": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000057": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000058": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000059": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000060": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000061": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000062": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000063": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000064": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000065": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000066": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000067": {
+   "support": "FULL_VERIFIED",
+   "why": "登记状态 FULL",
+   "hook": "on_enter",
+   "reason": "触发时机用 `entered_turn` 判定（换入即记录回合号），与术语 1010「迸发」所依据的字段是同一个。「首回合」判定为 entered_turn == 当前回合。"
+  },
+  "skill_000068": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000069": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000070": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000071": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000072": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000073": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000074": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000075": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000076": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000077": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000078": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000079": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000080": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000081": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000082": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000083": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000084": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000085": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000086": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000087": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000088": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000089": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000090": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000091": {
+   "support": "FULL_VERIFIED",
+   "why": "登记状态 FULL",
+   "hook": "on_enter",
+   "reason": "计数源明确（术语 1015/1016/1017 的「应对成功」），加成对象明确（水系与武系技能，入场时生效）。假设：每层 +20% 且可叠加；「入场时」= 换上该精灵的那个回合。"
+  },
+  "skill_000092": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000093": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000094": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000095": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000096": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000097": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000098": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000099": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000100": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000101": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000102": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000103": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000104": {
+   "support": "REFUSED",
+   "why": "登记状态 REFUSED",
+   "hook": null,
+   "reason": "需要三件引擎目前没有确认的东西：①「萌化」这个状态在数据里出现在状态技能描述里，但它的**效果**没有定义；②「免疫此次伤害」发生在伤害结算的哪一步（扣血前还是扣血后、是否触发倒下判定）；③ 触发次数的计数是每局还是每次入场。三条都没证据（MC-021）。"
+  },
+  "skill_000105": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000106": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000107": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000108": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000109": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000110": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000111": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000112": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000113": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000114": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000115": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000116": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000117": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000118": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000119": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000120": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000121": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000122": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000123": {
+   "support": "PARTIAL",
+   "why": "登记状态 PARTIAL",
+   "hook": "on_turn_start",
+   "reason": "「速度+50」已实现为速度属性增益。未实现的是**触发条件**「敌方技能足够击败自己」——它要求对每个合法敌方技能算一遍伤害并比较当前生命，而这依赖尚未核验的官方伤害公式（MC-010/011）；用未核验的公式去决定「会不会死」，会让一条被动特性建立在假设上。因此条件未实现，特性只在测试里被显式驱动。"
+  },
+  "skill_000124": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000125": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000126": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000127": {
+   "support": "FULL_VERIFIED",
+   "why": "登记状态 FULL",
+   "hook": "after_status_skill",
+   "reason": "「聒噪」的效果在数据里查得到（`聒噪` skill_000274：敌方获得全攻击技能能耗+2，持续3回合），所以不需要猜。实现为给对手挂一个能耗修正标记。"
+  },
+  "skill_000128": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000129": {
+   "support": "REFUSED",
+   "why": "登记状态 REFUSED",
+   "hook": null,
+   "reason": "复活需要「力竭后仍占用一个回合计数位」这一状态，而本引擎在精灵力竭时立刻把它移出可行动集合（术语 3009 把力竭下场与主动离场分开）。要实现它必须先确认：4 回合从哪一刻开始计、复活后生命/能量/状态/印记如何初始化、能否被再次触发。四条都没有一手证据（MC-014），所以拒绝而不是近似。"
+  },
+  "skill_000130": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000131": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000132": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000133": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000134": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000135": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000136": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000137": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000138": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000139": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000140": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000141": {
+   "support": "FULL_VERIFIED",
+   "why": "登记状态 FULL",
+   "hook": "on_action",
+   "reason": "「敌方的增益层数」在引擎里是可数的：对手场上精灵的 `buffs` 有多少个键就有多少层（`_apply_status_effects` 每加一项写一个键）。假设（MC-020）：把 `buffs` 的**键个数**当作「层数」，同一属性的两层合并成一个键时会被算成一层——数据没有定义层数的计数方式。速度部分在 `order_actions` 之前生效，实现为 `spe` 增益。"
+  },
+  "skill_000142": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000143": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000144": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000145": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000146": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000147": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000148": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000149": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000150": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000151": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000152": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000153": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000154": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000155": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000156": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000157": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000158": {
+   "support": "REFUSED",
+   "why": "登记状态 REFUSED",
+   "hook": null,
+   "reason": "字面读法有两个都可疑：① 「技能系别不在敌方精灵的系别里」——那要先确认 `types.json` 的系别名与技能 `element` 是同一套词表（是同一套），但「非敌方系别」是否指「不属于对手任一属性」没有一手证据；② 若读成「与我方系别不同的技能」，那所有非本系技能都减半，量级完全不同。两种读法的结论差一倍，术语表里没有这一条，所以拒绝而不是任选一种。"
+  },
+  "skill_000159": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000160": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000161": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000162": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000163": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000164": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000165": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000166": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000167": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000168": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000169": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000170": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000171": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000172": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000173": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000174": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000175": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000176": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000177": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000178": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000179": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000180": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000181": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000182": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000183": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000184": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000185": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000186": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000187": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000188": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000189": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000190": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000191": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000192": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000193": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000194": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000195": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000196": {
+   "support": "REFUSED",
+   "why": "登记状态 REFUSED",
+   "hook": null,
+   "reason": "「获得对手的特性」要求引擎在**运行时**把另一只精灵的特性实现挂到自己身上。本引擎的特性是「按精灵 id 查表 + 固定钩子」，没有动态换表的机制；而其余 11 只里已经有 4 只是 REFUSED（拿到它们也没有意义）。要做它得先有一套「特性作为可组合对象」的重构，属于独立工作。"
+  },
+  "skill_000197": {
+   "support": "FULL_VERIFIED",
+   "why": "登记状态 FULL",
+   "hook": "on_turn_start",
+   "reason": "「上回合」用 `state.history` 的上一回合记录判定（引擎每回合都写player_action / enemy_action，能查出技能 id 与系别），不需要猜时序。加成对象明确（自己携带的虫系技能），实现为`buffs['power_bug']`，只有该系技能吃到。"
+  },
+  "skill_000198": {
+   "support": "FULL_VERIFIED",
+   "why": "登记状态 FULL",
+   "hook": "on_turn_start",
+   "reason": "与「热成像」同一机制，只是系别换成翼系触发 / 冰系受益。两条都用同一个读取上回合记录的辅助函数，避免各写一份。"
+  },
+  "skill_000199": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000200": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000201": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000202": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000203": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000204": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000205": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000206": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000207": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000208": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000209": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000210": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000211": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000212": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000213": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000214": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000215": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000216": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000217": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000218": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000219": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000220": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000221": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000222": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000223": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000224": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000225": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000226": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000227": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000228": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000229": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000230": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000231": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000232": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000233": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000234": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000235": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000236": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000237": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000238": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000239": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000240": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000241": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000242": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000243": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000244": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  },
+  "skill_000245": {
+   "support": "KNOWLEDGE_ONLY",
+   "why": "未被 traits.py 登记（引擎不会结算）",
+   "hook": null,
+   "reason": null
+  }
+ }
+}

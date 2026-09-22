@@ -75,6 +75,11 @@ class Parsed:
     #: 属于「完全支持」但不产生 effects。单独标出来是为了让报告能区分
     #: 「靠解析器支持」与「靠伤害路径支持」。
     plain_attack: bool = False
+    #: 「N 连击」里静态读到的 N（RC-401）。`None` = 描述里没有静态写法；
+    #: 结算时按 1 次处理**只是因为伤害公式的默认值是 1**，绝不当成「已解析出 1 连击」。
+    hit_count: Optional[int] = None
+    #: 读到 hit_count 的原文片段（出处；没有就是空串）。
+    hit_count_evidence: str = ""
 
     def kinds(self) -> List[str]:
         return [e.kind for e in self.effects]
@@ -93,6 +98,14 @@ _DRAIN_ENERGY = re.compile(r"偷取敌方\s*(\d+)\s*能量")
 _ESCAPE = re.compile(r"(脱离|返场)")
 _WEATHER = re.compile(r"将天气改为([\u4e00-\u9fa5]+)")
 _RESPOND = re.compile(r"(应对(?:攻击|状态|防御))[：:](.+?)(?=。|$)")
+#: 「N 连击」——**静态**连击数（RC-401 第一条按覆盖收益迁移的原语：67 条技能）。
+#: 只认紧挨着的「数字 + 连击」；「连击数+1」「变为3连击」「翻倍」「永久+1」这类**动态**说法
+#: 一律进 `unparsed`（见 `parse_skill`），因为它们的取值依赖局面，引擎不能靠猜。
+_MULTI_HIT = re.compile(r"(\d+)\s*连击")
+#: 动态连击的说法（出现即登记为未实现，绝不当成 1）。
+#: 动态连击的说法（出现即登记为未实现，绝不当成静态次数）：
+#: 「连击数+1」「连击数永久+1」「连击数翻倍」「变为3连击」。
+_DYNAMIC_MULTI_HIT = re.compile(r"连击数[^。，,]{0,6}(?:[+＋]|翻倍|变为)|变为\s*\d+\s*连击")
 
 
 #: 纯伤害技能描述里**不该**出现的机制词。出现任何一个，它就不是「纯伤害」，
@@ -136,6 +149,29 @@ def unclaimed_mechanic_spans(skill) -> List[str]:
                 spans.append(f"{word}：{desc[lo:hi].strip()}")
             start = idx + 1
     return spans
+
+
+def resolve_hit_count(skill, *, declared: bool) -> "tuple[int, Parsed]":
+    """按**配置是否声明了连击能力**决定这一手结算几次，并返回解析结果（RC-401）。
+
+    在 `parse.py` 而不是 `env.py` 里做这件事，有两个理由：
+      · 判据只依赖「描述文本 + 一个布尔能力位」，属于解析层的职责；
+      · `env.py` 有一道**加载器体积**守卫（防止把配置值内联进去），逻辑留在那边只会
+        把守卫逼着往上抬——那是错的方向。
+
+    语义：`declared=False`（legacy / v2 没声明）⇒ 恒定 1 次，且「连击」**照旧留在
+    `unparsed` 里**被登记为未实现（legacy 逐位不变就来自这里）；`declared=True` 且描述里
+    静态写了 `N连击`（N>1）⇒ 按 N 次结算，并把那一条未实现登记摘掉。动态连击
+    （连击数+1 / 变为3连击 / 翻倍）无论声明与否都不结算，仍在 `unparsed` 里。
+    """
+    parsed = parse_skill(skill)
+    if not declared or not parsed.hit_count or parsed.hit_count <= 1:
+        return 1, parsed
+    # 只摘掉**静态连击**那一条标记；「动态连击数」那一条是**另一件事**（取值依赖局面），
+    # 必须继续留在 `unparsed` 里被登记——否则它就变成静默错算了。
+    parsed.unparsed = [row for row in parsed.unparsed
+                       if "动态" in str(row) or "连击" not in str(row)]
+    return int(parsed.hit_count), parsed
 
 
 def parse_skill(skill) -> Parsed:
@@ -230,6 +266,16 @@ def parse_skill(skill) -> Parsed:
         out.effects.append(Effect(kind="weather", target="foe",   # 天气是场地级
                                   value={"weather": m.group(1)}, evidence=m.group(0)))
 
+    # ── 连击（RC-401 第一条按覆盖收益迁移的原语）─────────────────────────────
+    # 静态写法（「2连击」）直接读出来；动态写法（「连击数+1」「变为3连击」「翻倍」）**不猜**，
+    # 登记成未实现——它们的取值依赖印记层数/应对结果/使用次数，用默认值近似就是静默错算。
+    static_hits = _MULTI_HIT.findall(desc)
+    if static_hits:
+        out.hit_count = max(int(v) for v in static_hits)
+        out.hit_count_evidence = _MULTI_HIT.search(desc).group(0)
+    if _DYNAMIC_MULTI_HIT.search(desc):
+        out.unparsed.append(f"动态连击数（出现在：{desc[:40]}）")
+
     m = _RESPOND.search(desc)
     if m:
         out.respond_clause = m.group(2)
@@ -237,6 +283,10 @@ def parse_skill(skill) -> Parsed:
     # 找出没覆盖的机制标记
     for marker in UNPARSED_MARKERS:
         if marker in desc and not any(marker in e.evidence for e in out.effects):
+            # 注意：**这里刻意不给「连击」开口子**。`hit_count` 是解析结果，但
+            # 「这次的连击能不能结算」取决于**当前配置有没有声明这个能力**（RC-401 的
+            # 增量迁移一律走配置声明）。所以未声明时它仍然要出现在 `unparsed` 里、
+            # 由引擎如实登记为未实现——那正是 legacy 的逐位不变所依赖的行为。
             out.unparsed.append(f"{marker}（出现在：{desc[:40]}）")
 
     # 「完全支持」有两种来源，以前只认第一种，把第二种整类算成「未覆盖」：

@@ -243,6 +243,15 @@
       }
     }
   },
+  "damage": {
+    "multi_hit": {
+      "value": true,
+      "confidence": "ENGINE_HYPOTHESIS",
+      "evidence_id": null,
+      "evidence_role": null,
+      "reason": "连击（multi-hit）：按描述里**静态**写明的「N连击」把伤害按 N 次结算。证据只有两处仓内材料：冻结 skills.json 的 desc 原文（例如「造成物伤，3连击。」）与社区实现公式里的 `连击` 因子（effects.py::_community_v1，非官方、未核验）。动态连击（「连击数+1」「变为3连击」「翻倍」）一律**不结算**并如实登记为未实现 —— 它们的取值依赖印记层数/应对结果/使用次数，没有一手证据"
+    }
+  },
   "repo_internal_evidence": [
     {
       "kind": "repo_internal",

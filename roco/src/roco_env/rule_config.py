@@ -289,6 +289,20 @@ class _Missing:
 _MISSING = _Missing()
 
 
+def _optional_leaf_true(config: Dict[str, Any], path: str) -> bool:
+    """可选布尔能力：**缺字段 = False**；存在时必须是 `{value: true/false, ...}`。
+
+    与 `_leaf_value` 的区别是「缺字段」的语义：必填项缺了要炸（那是纪律），
+    而 RC-401 的能力声明是**增量**的——legacy 里根本没有这一块，缺了就是「没这个能力」。
+    """
+    node = _dig(config, path)
+    if node is _MISSING:
+        return False
+    if not isinstance(node, dict):
+        raise RuleConfigError(f"规则配置 {config.get('ruleset_config_id')} 的 {path} 必须是对象")
+    return node.get("value") is True
+
+
 def _leaf_value(config: Dict[str, Any], path: str) -> Any:
     """取叶子路径的 `value`；路径不存在或不是叶子就抛错（fail closed）。"""
     node = _dig(config, path)
@@ -450,6 +464,15 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
         for path in MANA_REQUIRED_PATHS + ACTIONS_REQUIRED_PATHS:
             if _dig(config, path) is _MISSING:
                 bad(f"缺字段 {path}（声明了 mana/actions 的配置必须把这两块写全）")
+    # RC-401：`damage.multi_hit` 是**可选**能力声明。存在时必须是布尔（不给「看起来
+    # 像真」的字符串）；不存在时不校验——legacy 根本没有这一块。
+    node_multi = _dig(config, "damage.multi_hit")
+    if node_multi is not _MISSING:
+        if not isinstance(node_multi, dict) or "value" not in node_multi:
+            bad("damage.multi_hit 必须是 {value, confidence, reason?} 形状的对象")
+        elif not isinstance(node_multi.get("value"), bool):
+            bad(f"damage.multi_hit.value 必须是 true/false（实际 {node_multi.get('value')!r}）")
+
     _validate_mana(config, bad)
     _validate_actions(config, bad)
 
@@ -608,6 +631,9 @@ class RuleConfig:
     #: `None` = **未知**（不是 0）。要用的调用方必须显式处理。
     energy_initial: Optional[int]
     energy_charge: Optional[int]
+    #: RC-401：是否按描述里的「N 连击」结算伤害（`damage.multi_hit`）。
+    #: **没声明就是 False** —— legacy / v2 里这条概念不存在，行为逐位不变。
+    damage_multi_hit: bool
     #: 行动排序的**声明维度**（RC-103）。legacy 是引擎现状（respond/priority/speed）；
     #: candidate 声明的是社区口径的总序（respond/switch/priority/speed），引擎只实现了其中一部分。
     action_order: Tuple[str, ...]
@@ -815,6 +841,9 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         energy_regen_per_turn=_leaf_value(config, "energy.regen.per_turn"),
         energy_initial=_leaf_value(config, "energy.initial"),
         energy_charge=_leaf_value(config, "energy.charge"),
+        # 可选能力：**缺字段就是 False**（legacy / v2 里没有这一块），不能借用
+        # `_leaf_value`——它对缺字段是抛错（那条纪律是给必填项用的）。
+        damage_multi_hit=_optional_leaf_true(config, "damage.multi_hit"),
         action_order=tuple(str(x) for x in action_order),
         speed_tie=None if speed_tie == "unknown" else speed_tie,
         speed_tie_microcase_id=tie_microcase,

@@ -341,8 +341,11 @@ class ConfigFileIndependenceTest(unittest.TestCase):
                 f"加载器把 {name} 内联成了字面量 —— 事实源只能是 data/roco/rulesets/*.json")
         # 这条上限是「加载器别长成第二份事实源」的**粗粒度代理**：精确判据是上面那几条
         # token / 正则。RC-105 为 mana/actions 加了两组加载期校验（纯声明式判断，没有内联
-        # 任何规则值），文件从 ~29.7k 字符长到 ~42k，所以上限随之上调。
-        self.assertLess(len(source), 46000)
+        # 任何规则值），文件从 ~29.7k 字符长到 ~42k；RC-401 又加了一条**可选能力**声明
+        # （`damage.multi_hit`：缺字段 = False，存在时只校验形状），再长到 ~46.8k。
+        # 两次都只多了声明式校验、没有内联任何规则值（上面那几条 regex 才是真判据），
+        # 所以上限随之上调 —— 但**不许**用它掩盖内联：谁往里写数字，上面的 token 判据先红。
+        self.assertLess(len(source), 50000)
 
 
 if __name__ == "__main__":  # pragma: no cover

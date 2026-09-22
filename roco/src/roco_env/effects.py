@@ -331,7 +331,8 @@ class DamageOutcome:
 
 
 def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
-                   *, attacker_species: Any = None, defender_species: Any = None) -> DamageOutcome:
+                   *, attacker_species: Any = None, defender_species: Any = None,
+                   hit_count: int = 1) -> DamageOutcome:
     """一次伤害的完整计算。**唯一实现。**
 
     `attacker` / `defender` 是 `PetState`（要有 `buffs`、`energy`、`hp`）；
@@ -368,7 +369,7 @@ def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
         power=float(pr.power),
         type_multiplier=float(type_mult),
         stab=float(stab),
-        hit_count=1,
+        hit_count=max(1, int(hit_count)),
         power_multiplier=float(power_buff),
         ability_level=float(ability),
     )
