@@ -42,7 +42,7 @@
 
 | 项 | 值 |
 |---|---|
-| 已提交的 HEAD | 见下面 git log（本节写下时是 `d45b31d`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29，第 93 轮的三路 P0/RC-105 见 §C6.30）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
+| 已提交的 HEAD | 见下面 git log（本节写下时是 `817fdec`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29，第 93 轮的三路 P0/RC-105 见 §C6.30，第 94 轮的 RC-306/机制渲染/RC-106 见 §C6.31）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
 | 闸门现状 | **17/17 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
@@ -724,8 +724,8 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `d709065`（`feat(rc304): 未知对手下的队伍比较`，其后是本轮的陈旧规划修复）。（写下时上一处 `0ee326d` 见 git log；: 给「Coach 核心不读 DOM / 不依赖页面」装上会红的判据，并修掉两处空绿`）。（按本文件 §2.1 的口径，文档声明的 HEAD 落后一两个提交是正常的：写文档本身也要一次提交。**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。） |
-| 工作区 | **干净**（`git status --porcelain` 为空） |
+| HEAD | `817fdec`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
 | 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**；另有各自带反证的检查：`verify-agent-trajectories --selftest` 3/3、`verify-sft-split --selftest` 7/7、`model-arm-identity` 正反两向 |
@@ -1769,3 +1769,30 @@ A7 1440/390 无遮挡无横向溢出、A8 页面看不到的能力不得只凭�
 3. 台账第三条仓内来源（见上「待办」）尚未补；补时必须连带重跑 `build-rule-configs.mjs` 与失效图。
 4. `MC-E08` 仍未录制；跨机协作区本轮**未同步**（本地 clone 落后 origin、工作区外写入需扩权，阶段末一次性同步）。
 5. `src/coach/team-gaps.js` 的 `mana_per_side: 4` 仍是写死的，但已有 ⑰ 号漂移守卫钉住它与配置一致（改成配置直读是下一轮的小改）。
+
+### C6.31 第 94 轮：RC-306 分段 Serving 契约 + 机制原文上卡 + RC-106 六宠开局（引擎侧）
+
+**三件交付（提交 `696a777` / `ed65706` / `817fdec`，另有 `cdffaaa` / `a1edca5` 两条接线）**：
+
+| 交付 | 关键实测 |
+|---|---|
+| **RC-306 分段 Serving 契约**（`src/coach/team-serving.mjs`） | 初判只在**必需段全部成功且未踩过 300ms** 时给出，否则 null + 逐条 reason；超时后不再开始新段；跑过头的段记 `late`；短结论只用预算内成功的段拼。真实四段跑 20 次：初判 P95 **18.8ms** / 完整解释 P95 **37.5ms** / degraded 0。**负向控制用真实时钟**注入 350ms 与 600ms 忙等，证明超时分支可达。`modeActionProblems()` 是 serving 边界第二道闸（声明取自真配置 v3）。11 条单测 / 6 条必红 |
+| **机制原文上卡**（RC-305 补条） | 服务端在 `slots[]`/`next_candidates[]`/`entrance.candidates[]`（外加盒子列表卡与详情）加 `mechanism{line,status,name,tags}`；模块把逐字冻结 desc 渲染到卡首层（**空槽位是 null，不写「资料待确认」**）。判据 36/36 + 反证 18/18；1440/390 无溢出；机制行折 2–3 行不截断 |
+| **RC-106 六宠开局（引擎侧）** | `reset(..., unverified_overrides=[...])`：只在配置声明 UNKNOWN 的路径生效、**不给覆盖仍 fail closed**、不写回配置；team_size 按 BattleMode 配置（v3 ⇒ 6，legacy 仍 3 且 8 条 golden 指纹不变）；`battle-modes.json` 绑定 v2 → **v3**；六宠真对局 seed 11/12/13/21 全部打到 `mana_depleted`、重放逐位相同。`test:env` 324 → **357**；三条必红反证原文进报告 |
+
+**这一轮修掉的两个「假失败」**（都写在提交信息里）：
+1. `tests/roco-page-ux.test.js` 原来断言「本文件必须是 `test:unit` 的**最后一项**」——那条判据真正要回答的是
+   「有没有被收进清单」，而「排在末尾」只是当时的偶然事实；结果**每个后来者**往清单尾部追加自己的测试文件都会把它弄红
+   （当天发生两次）。已改成「按独立参数出现 + 清单条目数不少于 60」。
+2. 状态文档声明的 HEAD 落后 16 个提交（`state-doc` 判据会红）——已随本轮更新到 `817fdec`。
+
+**仍未完成（下一轮的入口）**：
+1. **RC-106 的服务端/页面接线**：`POST /battle/new` 要带 `ruleset_config_id`（**读登记表**，别抄字符串）与
+   `unverified_overrides`；队伍长度按配置；`src/server/roco-service.js` 与 `roco/src/roco_env/service.py`
+   各有一处写死的 3 要改。接完线，页面上的「魔力 / 心」才会从「未核验」变成引擎真值（A4 才算真的做到）。
+2. RC-306 的接线：`GET /api/roco/workshop` 仍是一次性同步返回，改成「先初判、后完整解释、超时降级」。
+3. 台账第三条仓内来源（冻结 `skills.json` 里 6 条「魔力」特性）仍未补；补时必须连带
+   `build-rule-configs.mjs` 重跑与失效图。
+4. RC-401～505 / 601～605 / 801～802 / P2 未开始；`MC-E04/E07/E08/E09` 仍未录制；
+   六宠局面下的特性（`traits.py` 仅 12 条）、印记叠加（MC-009）、`switch` 折算固定先手度均未实现。
+5. 跨机协作区仍未同步（等用户允许扩权；备好内容见 `CROSS-MACHINE-COORDINATION.md` §9）。

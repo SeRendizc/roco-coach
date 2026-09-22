@@ -419,8 +419,15 @@ test('P0-3 开局引导不遮挡候选卡：它不是浮层，且可跳过', () 
 });
 
 // ── 交付纪律：单元测试真的被 test:unit 收进去了 ─────────────────────────────
-test('本文件被 package.json 的 test:unit 收在末尾（否则它是死的）', () => {
+// 2026-09-22 修：原来这条断言「本文件必须是 test:unit 的**最后一项**」。那条判据真正要回答的是
+// 「这个文件有没有被收进清单（否则它是死的）」，而「排在末尾」只是当时写它时的一个偶然事实——
+// 结果任何一个后来者往清单尾部追加自己的测试文件都会把这条判据弄红（当天就发生了两次：
+// `roco-team-serving.test.js` 与 `roco-six-pet-battle.test.js`）。
+// 判据改成「按**独立参数**出现」：既保留牙齿（文件被删掉/写错路径就红），又不再惩罚后来者。
+test('本文件被 package.json 的 test:unit 收进去了（否则它是死的）', () => {
   const script = String(PACKAGE.scripts?.['test:unit'] ?? '');
-  assert.ok(script.trim().endsWith('tests/roco-page-ux.test.js'),
-    `test:unit 的最后一项应当是 tests/roco-page-ux.test.js，实际结尾：…${script.slice(-80)}`);
+  const entries = script.split(/\s+/).filter((token) => token.startsWith('tests/'));
+  assert.ok(entries.includes('tests/roco-page-ux.test.js'),
+    `test:unit 的清单里没有 tests/roco-page-ux.test.js，实际结尾：…${script.slice(-80)}`);
+  assert.ok(entries.length >= 60, `test:unit 收录的文件数只有 ${entries.length} 个，疑似清单被截断`);
 });
