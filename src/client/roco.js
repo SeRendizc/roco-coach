@@ -837,6 +837,7 @@ function render() {
   document.body.dataset.rocoPicking = state.pick.open ? 'yes' : 'no';
   document.body.dataset.rocoView = view ? 'ready' : 'empty';
   renderMode();
+  renderModelChip();
   renderMemory();
   renderCompanion();
   syncBottomBars();
@@ -888,6 +889,44 @@ function actionCardHtml(action, index, {disabled = false, slotName = null} = {})
     ${desc ? `<small class="act-desc">${escapeHtml(desc)}</small>` : ''}</button>`;
 }
 
+/**
+ * 「这一手引擎没给技能」时，把**这一只的配招**灰置列出来，并算清差额（2026-09-22 人类实测）。
+ *
+ * 现场：试玩的按需推算精灵首回合能量 2、最便宜技能耗 3 → 引擎合法技能 0 个；
+ * 页面却只写「引擎没有给技能动作」，玩家以为坏了。四招其实都在，只是**买不起**。
+ *
+ * 数据来源：`state.roster`（`/api/roco/roster` 回执里每只的 `moveset`，含 energy/power/desc）
+ * × 公开视图里当前上场那只的 `species_id`。取不到就返回 null（宁可不画，也不编配招）。
+ */
+function greyedMoveset(view) {
+  try {
+    const self = view?.self;
+    if (!self || !Array.isArray(self.pets)) return null;
+    const active = self.pets[self.active ?? 0];
+    if (!active) return null;
+    const speciesId = active.species_id ?? active.pet_id ?? null;
+    // 默认名单只给**冻结已核验的 48 只**；试玩用的按需推算物种要另取一次全量名单
+    // （`support=all`）。取不到就返回 null —— 宁可不画，也不编配招。
+    const pool = [...(state.roster ?? []), ...(state.rosterAll ?? [])];
+    const row = pool.find((p) => p.pet_id === speciesId)
+      ?? pool.find((p) => p.name === active.name);
+    const moves = (row?.moveset ?? []).filter((m) => m.is_trait !== true);
+    if (!moves.length) return null;
+    const energy = Number.isFinite(active.energy) ? active.energy : null;
+    const max = Number.isFinite(active.energy_max) ? active.energy_max : null;
+    const costs = moves.map((m) => Number(m.energy)).filter((n) => Number.isFinite(n));
+    const cheapest = costs.length ? Math.min(...costs) : null;
+    const shortfall = cheapest !== null && energy !== null
+      ? `这一手引擎没给合法技能：能量 ${energy}${max !== null ? ` / ${max}` : ''}，`
+        + `最便宜的技能要 ${cheapest} 点 —— 还差 ${Math.max(0, cheapest - energy)} 点。`
+        + '先点下面的「聚能」（它是本回合的合法动作，不占技能位），攒够就能放技能。'
+      : '这一手引擎没给合法技能：先用「聚能」攒能量，够费用时技能会出现。';
+    return {moves, reason: '灰色 = 本回合不可用（能量不够）', shortfall};
+  } catch {
+    return null;
+  }
+}
+
 function renderActions(actions, disabled) {
   const box = $('actions');
   if (!box) return;
@@ -906,6 +945,25 @@ function renderActions(actions, disabled) {
   const others = [...byKind('item'), ...byKind('escape')];
 
   // 技能是**主区**：最多四张卡（引擎本回合给的技能数；超过四张时如实记下截断）。
+  // 2026-09-22（人类实测）：试玩六只按需推算精灵时，**首回合能量 2、最便宜技能要 3**，
+  // 引擎合法技能确实是 0 —— 但页面原来只写「引擎没有给技能动作」，把配招全藏了，
+  // 玩家会以为坏了。现在：**灰置展示这只精灵的配招与费用**，写清差额，并明确提示先聚能。
+  // 纪律没变：**只有引擎给的合法动作可点**，灰置卡一律 disabled。
+  const greyed = skills.length ? null : greyedMoveset(state.view);
+  const greyedHtml = greyed ? `<section class="act-group" data-act-group="skill-greyed">
+    <div class="act-group-head"><b>配招（这一手都不可用）</b>
+      <span class="muted">${greyed.reason}</span></div>
+    <div class="act-row">${greyed.moves.map((move) => `
+      <button class="skill-card greyed" type="button" disabled
+        data-roco-greyed-skill="${escapeAttr(move.skill_id ?? '')}"
+        data-roco-greyed-cost="${move.energy ?? ''}">
+        <span class="skill-top"><strong>${escapeHtml(move.name ?? '(未登记)')}</strong>
+          <em class="tag">能耗 ${move.energy ?? '?'}</em></span>
+        <span class="skill-meta">${escapeHtml(move.category ?? '')}${move.power ? ` · 威力 ${move.power}` : ''}</span>
+        <small>${escapeHtml(move.desc ?? '')}</small>
+      </button>`).join('')}</div>
+    <p class="act-none" data-roco-skill-shortfall="yes">${greyed.shortfall}</p>
+  </section>` : '';
   box.innerHTML = skills.length
     ? `<section class="act-group" data-act-group="skill">
     <div class="act-group-head"><b>技能</b>
@@ -914,6 +972,7 @@ function renderActions(actions, disabled) {
     <div class="act-row">${skills.map((action) => actionCardHtml(action, actions.indexOf(action), {disabled})).join('')}</div>
   </section>`
     : '<p class="act-none">这一手引擎没有给技能动作。</p>';
+  if (greyedHtml) box.insertAdjacentHTML('afterbegin', greyedHtml);
   // 其余被模式允许的动作（本仓库的候选配置里只有技能/聚能/换人/投降，这里留兜底）
   if (others.length) {
     box.insertAdjacentHTML('beforeend', `<section class="act-group" data-act-group="other">
@@ -999,6 +1058,8 @@ function renderActions(actions, disabled) {
     others.length ? 'other' : null,
   ].filter(Boolean).join(',') || 'none';
   document.body.dataset.rocoActSkillCards = String(skills.length);
+  document.body.dataset.rocoGreyedSkills = String(greyed ? greyed.moves.length : 0);
+  document.body.dataset.rocoSkillShortfall = greyed ? 'yes' : 'no';
   document.body.dataset.rocoActCharge = charge.length ? 'yes' : 'no';
   document.body.dataset.rocoActSwitch = switches.length ? 'yes' : 'no';
   document.body.dataset.rocoActSwitchList = String(switches.length);
@@ -1191,6 +1252,23 @@ function openCompanion({focus = true} = {}) {
 function onboardDismissed() {
   try { return localStorage.getItem(ONBOARD_KEY) === '1'; } catch { return false; }
 }
+/**
+ * 连接状态（2026-09-22 人类实测）：`/api/bootstrap` 的 `configured=false` 时，
+ * 页面必须**明显**说清「模型没接上、小芽只给规则事实」，并给一个连接入口 ——
+ * 不能让玩家以为它在自由对话。连上之后也只说「已连接」，不夸口。
+ */
+function renderModelChip() {
+  const chip = $('model-chip');
+  if (!chip) return;
+  const configured = session?.configured === true;
+  chip.textContent = configured ? '模型：已连接' : '模型：未连接（只给规则事实）';
+  chip.dataset.rocoModel = configured ? 'connected' : 'offline';
+  chip.title = configured
+    ? '小芽的问题会交给模型回答，并用本局只读证据核对；模型不可用时自动回落到规则事实。'
+    : '现在没有连接模型：小芽只能给规则事实与主动提示。点这里去连接模型，之后就能自由问答。';
+  document.body.dataset.rocoModelConfigured = configured ? 'yes' : 'no';
+}
+
 function applyOnboard() {
   const bar = $('onboard-bar');
   const onboard = $('onboard');
@@ -2488,6 +2566,19 @@ async function startStandardPvp() {
     state.mode = data.mode ? {...data.mode, contract_id: data.mode.id} : state.mode;
     applyResult(data);
     dismissOnboard();
+    // 试玩/按需推算的配招不在默认名单里：开局后补一次全量名单（只取一次），
+    // 取回来再重画，让「灰置配招」有真实数据可摆（拿不到就不画）。
+    if (!state.rosterAll && !state.rosterAllLoading) {
+      state.rosterAllLoading = true;
+      try {
+        // ⚠ 名单路由是 **GET**；`api()` 一律 POST（它带 CSRF 头），拿它取名单必然失败
+        // （第一版就是这么静默 catch 成 null 的）。这里用普通 fetch。
+        const response = await fetch('/api/roco/roster?support=all&limit=700&offset=0');
+        const all = response.ok ? await response.json() : null;
+        state.rosterAll = (all?.pets ?? []).filter((p) => Array.isArray(p.moveset) && p.moveset.length);
+      } catch { state.rosterAll = null; } finally { state.rosterAllLoading = false; }
+      render();
+    }
     await requestPlan({reason: 'match-start'});
   } catch (error) {
     $('plan-status').textContent = `${trial ? '试玩' : '标准 PVP'}开局失败：${error.message}`;

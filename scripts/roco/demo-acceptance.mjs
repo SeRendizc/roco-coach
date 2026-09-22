@@ -1223,13 +1223,49 @@ async function main(){
   const el=document.getElementById(id);if(el)el.hidden=true;}
   const drawer=document.getElementById('about-drawer');if(drawer)drawer.open=false;return true;})()`);
 
- // ① 阵容池：对局进行中它是收起的，真实鼠标点「重选阵容」把它放回来
- const pickHiddenBefore=await js(`document.getElementById('select-panel').hidden`);
+ // ① 六宠工作台：对局进行中它是收起的；真实鼠标点「查看或调整下局阵容」把它放回来，
+ //    再点一次收起时**行动坞必须恢复**（2026-09-22 人类实测的卡死：查看阵容→收起→行动坞不回来）。
+ //
+ // 为什么改掉旧断言：`#select-panel` 是**已废弃**的 3v3 选人面（现在只有 `?legacy3v3=1`
+ // 才会渲染），拿它的 `hidden` 当「阵容池收放」的证据是在量一个玩家看不到的元素。
+ const readBattleUi = () => js(`(()=>{const w=document.getElementById('team-workshop');
+   const a=document.getElementById('action-panel');
+   const vis=(el)=>{if(!el)return null;const r=el.getBoundingClientRect();
+     return !el.hidden&&r.width>0&&r.height>0;};
+   return JSON.stringify({workshopHidden:Boolean(w&&w.hidden),workshopVisible:vis(w),
+     actionVisible:vis(a),picking:document.body.dataset.rocoPicking??null});})()`).then(JSON.parse);
+ const beforeOpen = await readBattleUi();
  await mouseClick('#reopen-pick');
- const pickHiddenAfter=await js(`document.getElementById('select-panel').hidden`);
- check('真实鼠标点「重选阵容」能把收起的阵容池放回来',
-  pickHiddenBefore===true&&pickHiddenAfter===false,
-  `点之前收起=${pickHiddenBefore}；点之后收起=${pickHiddenAfter}`);
+ await sleep(500);
+ const whileOpen = await readBattleUi();
+ await mouseClick('#reopen-pick');
+ await sleep(500);
+ const afterClose = await readBattleUi();
+ const recoveryProblems = (before, open, after) => {
+   const bad = [];
+   if (before.workshopVisible !== false) bad.push('对局中工作台本来是收起的，实测却可见');
+   if (open.workshopVisible !== true) bad.push('点了「查看阵容」工作台没出现');
+   if (open.picking !== 'yes') bad.push(`打开阵容时 data-roco-picking=${open.picking}（应为 yes）`);
+   if (after.workshopVisible !== false) bad.push('收起之后工作台还占着屏幕');
+   if (after.picking !== 'no') bad.push(`收起后 data-roco-picking=${after.picking}（应为 no）`);
+   if (after.actionVisible !== true) bad.push('收起之后**行动坞没有恢复**（玩家会卡在看不到动作的状态）');
+   return bad;
+ };
+ check('真实鼠标「查看阵容 → 收起」之后行动坞恢复（六宠工作台，不再是废弃的 #select-panel）',
+  recoveryProblems(beforeOpen, whileOpen, afterClose).length === 0,
+  recoveryProblems(beforeOpen, whileOpen, afterClose).join(' | ')
+   || `收起→打开→收起：workshop ${beforeOpen.workshopVisible}/${whileOpen.workshopVisible}/${afterClose.workshopVisible}；`
+     + `picking ${whileOpen.picking}→${afterClose.picking}；行动坞恢复=${afterClose.actionVisible}`);
+ // 必红反证：把「收起后行动坞不恢复」这个坏状态喂给**同一个检查器**，它必须报错。
+ const poisoned = recoveryProblems({workshopVisible: false}, {workshopVisible: true, picking: 'yes'},
+   {workshopVisible: false, picking: 'no', actionVisible: false});
+ check('真实鼠标「查看阵容 → 收起」之后行动坞恢复（反证：收起后不恢复必须被抓）',
+  poisoned.length > 0 && poisoned.some((line) => /行动坞/.test(line)),
+  `喂进去的坏状态被判：${JSON.stringify(poisoned)}`);
+ // 我的检查把阵容池「打开→收起」走了一遍，而下面这几条（分页/搜索）**默认它开着** ——
+ // 这里把它恢复成开着的状态，别让后面几条因为我的用例而假红。
+ await mouseClick('#reopen-pick');
+ await sleep(500);
  await hideFloats();
  await setViewport(1440,900);
 

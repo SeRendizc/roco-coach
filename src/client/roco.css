@@ -650,3 +650,9 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  * 现在的顺序是**我方在前**，对手卡被挤到折叠线以下（证据 `battle-decision-390x844.png`）。
  * 这一条记在 PLAYER-LOOP-CHECKLIST 的 E2，未改（改的是信息顺序，要连同小芽提示一起排）。
  */
+
+/* 灰置配招（2026-09-22 人类实测）：技能因为**能量不够**而不可用时，仍然把配招与费用摆出来，
+   写清差额并提示先聚能 —— 只藏起来会让玩家以为坏了。灰置卡一律 disabled，不可点。 */
+.skill-card.greyed{opacity:.55;cursor:not-allowed;border-style:dashed}
+.skill-card.greyed .tag{background:#3a2f2a;color:#e2b48c}
+.act-group[data-act-group="skill-greyed"] .act-group-head b{color:#c9b28a}

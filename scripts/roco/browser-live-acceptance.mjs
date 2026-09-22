@@ -619,6 +619,51 @@ async function main() {
       '{"mode":"demo-training-3v3","groups":"skill:2,item:1"}');
     await shoot('live-03-1440-battle');
 
+    // ── ⑦ 能量门：引擎没给技能时，页面必须**灰置配招 + 说清差额 + 提示先聚能**（正反两条）──
+    // 现场（人类实测）：试玩的按需推算精灵首回合能量 2、最便宜技能要 3 → 合法技能 0 个；
+    // 旧页面只写「引擎没有给技能动作」把配招全藏了，玩家以为坏了。
+    const energyGate = await js(`(()=>{const b=document.body.dataset;
+      const greyed=[...document.querySelectorAll('#actions [data-roco-greyed-skill]')]
+        .map((el)=>({id:el.dataset.rocoGreyedSkill,cost:el.dataset.rocoGreyedCost,
+          disabled:el.disabled===true,text:(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,40)}));
+      const legalSkills=[...document.querySelectorAll('#actions .act-group[data-act-group="skill"] button[data-action]')].length;
+      const shortfall=document.querySelector('[data-roco-skill-shortfall]');
+      const view=window.rocoDemo.state.view;
+      return {legalSkills,greyed,shortfall:shortfall?(shortfall.textContent||'').trim():null,
+        result:view?view.battle_result:null,
+        charge:document.body.dataset.rocoActCharge??'no',
+        energy:view&&view.self?view.self.pets[view.self.active??0]?.energy:null,
+        max:view&&view.self?view.self.pets[view.self.active??0]?.energy_max:null,
+        turn:view?view.turn:null};})()`);
+    const gateProblems = (f) => {
+      const bad = [];
+      if (Number(f?.legalSkills) > 0) {
+        // 有合法技能时不该出现灰置块（否则是「藏起来又摆出来」的自相矛盾）
+        if ((f?.greyed ?? []).length) bad.push('有合法技能却还画着灰置块');
+        return bad;
+      }
+      // 合法技能为 0 时：必须把配招摆出来（灰置）、说清差额、并提到聚能
+      if (!(f?.greyed ?? []).length) bad.push('没有合法技能，却没把配招灰置出来（玩家会以为坏了）');
+      if ((f?.greyed ?? []).some((row) => row.disabled !== true)) bad.push('灰置卡居然可点（只许引擎合法动作可点）');
+      if ((f?.greyed ?? []).some((row) => !row.cost)) bad.push('灰置卡上没写费用');
+      if (!f?.shortfall) bad.push('没有「还差几点能量」的说明');
+      else if (!/聚能/.test(String(f.shortfall))) bad.push('说明里没有提示先聚能');
+      // 对局**已结束**时没有合法动作是正常的：这时只要求「不藏配招」，不要求聚能入口。
+      if (f?.result) return bad;
+      if (f?.charge !== 'yes') bad.push('这一手没有聚能入口（那就真的没路可走了）');
+      return bad;
+    };
+    // 量在**开局那一手**（首回合能量 2、最便宜技能 3 —— 人类实测的场景就在这一刻）。
+    check('live-energy-gate', '开局那一手若引擎没给合法技能：配招**灰置**列出（带费用、不可点）+ 写清差额 + 提示先聚能；'
+      + '有合法技能时灰置块必须消失',
+      gateProblems(energyGate).length === 0,
+      gateProblems(energyGate).join(' | ')
+      || `回合 ${energyGate.turn}：合法技能 ${energyGate.legalSkills}、能量 ${energyGate.energy}/${energyGate.max}；`
+        + `灰置 ${energyGate.greyed.length} 张 ${JSON.stringify(energyGate.greyed.slice(0, 2))}；`
+        + `聚能=${energyGate.charge}；说明「${String(energyGate.shortfall).slice(0, 80)}」`);
+    counter('live-energy-gate', '把配招全藏起来（没有灰置块也没有说明）必须被同一条判据抓住',
+      gateProblems({legalSkills: 0, greyed: [], shortfall: null, charge: 'yes'}), '{"greyed":[]}');
+
     // ── ③a 战斗页规格：一屏可见 + 四张技能卡为主区 + 聚能/换精灵独立入口 + 对手隐藏信息 ──
     const spec = await js(`(()=>{const b=document.body.dataset;
       const vis=(id)=>{const el=document.getElementById(id);if(!el)return null;
@@ -841,6 +886,40 @@ async function main() {
       }
       return bad;
     };
+    // 连接状态必须**明显**（人类实测 configured=false）：页头有状态 chip，且与实际一致。
+    // 先回到产品页 —— 这一段之前跑过盒子的导航，探针会落空（第一版就是这么红的）。
+    await setViewport(1440, 900);
+    await cdp.send('Page.navigate', {url: `${BASE}roco.html`});
+    for (let i = 0; i < 120; i += 1) {
+      if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+      await sleep(250);
+    }
+    await sleep(900);
+    const modelChip = await js(`(()=>{const el=document.getElementById('model-chip');
+      if(!el)return null;const r=el.getBoundingClientRect();
+      return {text:(el.textContent||'').trim(),hook:el.dataset.rocoModel??null,
+        href:el.getAttribute('href'),h:Math.round(r.height),
+        configured:document.body.dataset.rocoModelConfigured??null};})()`);
+    const chipProblems = (c, configured) => {
+      const bad = [];
+      if (!c) { bad.push('页头没有连接状态'); return bad; }
+      if (!c.text) bad.push('连接状态没有文字');
+      if (configured && c.hook !== 'connected') bad.push(`已连接模型却标 ${c.hook}`);
+      if (!configured && c.hook !== 'offline') bad.push(`没连模型却标 ${c.hook}`);
+      if (!configured && !/未连接|没连/.test(c.text)) bad.push('未连接时没有明说');
+      if (!c.href) bad.push('状态 chip 没有连接入口');
+      if (c.h < 24) bad.push(`状态行只有 ${c.h}px 高（太小，看不见）`);
+      return bad;
+    };
+    const modelConfigured = await js(`document.body.dataset.rocoModelConfigured==='yes'`);
+    check('live-model-status', '页头的「模型连接状态」与实际一致（未连接时明说 + 给连接入口），不冒充模型',
+      chipProblems(modelChip, modelConfigured).length === 0,
+      chipProblems(modelChip, modelConfigured).join(' | ')
+      || `chip「${modelChip.text}」hook=${modelChip.hook} 入口=${modelChip.href} 高=${modelChip.h}px`);
+    counter('live-model-status', '没连模型却标成 connected 必须被同一条判据抓住',
+      chipProblems({text: '模型：已连接', hook: 'connected', href: 'connect.html', h: 28}, false),
+      '{"hook":"connected"}');
+
     check('live-chat', '主动问一句非预设问题：有模型就走真 Agent 并标出来源；没有模型就明说能力边界'
       + '（不装成自由聊天），且给出接模型的入口',
       chatProblems(chat).length === 0,
@@ -1009,6 +1088,98 @@ async function main() {
       mobileProblems([{stage: 'm-six-picked', selected: 4, clientW: 390, scrollW: 390}], true,
         {result: 'loss', lesson: 'shown', clientW: 390, scrollW: 390}),
       '{"selected":4}');
+
+    // ── ⑧ 试玩（按需推算六只）的能量门：人类实测的场景 —— 首回合能量 2 / 最便宜技能 3 ──
+    // 上面那条用的是**持有六只**（配招里有 0 消耗技能，首回合就有合法技能），
+    // 所以它压根没走到「0 合法技能」那一支。这一段走真实试玩路径，把那一支量到。
+    await setViewport(1440, 900);
+    await cdp.send('Page.navigate', {url: `${BASE}roco.html`});
+    for (let i = 0; i < 120; i += 1) {
+      if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+      await sleep(250);
+    }
+    await sleep(1200);
+    // 六只**按需推算**的物种进「理论阵容」（图鉴范围，逐只不同物种）
+    const analysisPicks = [];
+    for (let i = 0; i < 40 && analysisPicks.length < 6; i += 1) {
+      const next = await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)})?.shadowRoot;
+        if(!sr)return null;
+        // 已进理论阵容的物种从**客户端状态**读（分析槽没有 data-tw-species 属性，
+        // 第一版读 DOM 读到空集合 → 反复点同一只、阵容永远 1 只）。
+        const taken=new Set(window.rocoDemo?.state?.teamWorkshop?.analysisTeam ?? []);
+        const row=[...sr.querySelectorAll('#tw-cand-list .tw-row')]
+          .find((r)=>(r.dataset.twStatus||'')==='on_demand'&&!taken.has(r.dataset.twSpecies));
+        return row?row.dataset.twSpecies:null;})()`);
+      if (!next) break;
+      await mouseClick(`${ROOT_SEL} >>> #tw-cand-list .tw-row[data-tw-species="${next}"]`);
+      await sleep(420);
+      analysisPicks.push(next);
+    }
+    const trialReady = await waitFor(
+      `Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twAnalysis||'0')===6`, 40, 250);
+    const trialFacts = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const b=document.getElementById('start-standard-pvp');
+      return {analysis:Number(root?.dataset.twAnalysis||'0'),
+        trialReady:root?.dataset.twAnalysisTrialReady??null,disabled:b?b.disabled:null,
+        mode:b?b.dataset.rocoStartMode:null};})()`);
+    if (trialFacts.disabled === false) {
+      await mouseClick('#start-standard-pvp');
+      await waitFor(`document.body.dataset.rocoView==='ready'`, 100, 250);
+      await sleep(700);
+    }
+    const trialGate = await js(`(()=>{const b=document.body.dataset;const v=window.rocoDemo.state.view;
+      const legal=[...document.querySelectorAll('#actions .act-group[data-act-group="skill"] button[data-action]')].length;
+      const greyed=[...document.querySelectorAll('#actions [data-roco-greyed-skill]')];
+      const sf=document.querySelector('[data-roco-skill-shortfall]');
+      return {legal,greyed:greyed.length,greyedDisabled:greyed.every((el)=>el.disabled===true),
+        costs:greyed.map((el)=>el.dataset.rocoGreyedCost),shortfall:sf?(sf.textContent||'').trim():null,
+        charge:b.rocoActCharge??'no',energy:v&&v.self?v.self.pets[v.self.active??0]?.energy:null,
+        mode:b.rocoMode??null,turn:v?v.turn:null};})()`);
+    // 聚能推进：每次 +5（候选规则），攒够最便宜技能的能耗之后技能必须出现
+    let charged = trialGate;
+    for (let i = 0; i < 3 && Number(charged.legal) === 0; i += 1) {
+      if (charged.charge !== 'yes') break;
+      await mouseClick('#act-charge');
+      await sleep(1100);
+      charged = await js(`(()=>{const b=document.body.dataset;const v=window.rocoDemo.state.view;
+        const legal=[...document.querySelectorAll('#actions .act-group[data-act-group="skill"] button[data-action]')].length;
+        const greyed=[...document.querySelectorAll('#actions [data-roco-greyed-skill]')].length;
+        return {legal,greyed,charge:b.rocoActCharge??'no',
+          energy:v&&v.self?v.self.pets[v.self.active??0]?.energy:null,turn:v?v.turn:null,
+          shortfall:(document.querySelector('[data-roco-skill-shortfall]')||{}).textContent||null};})()`);
+    }
+    const trialProblems = (first, after, ready) => {
+      const bad = [];
+      if (Number(ready?.analysis) !== 6) bad.push(`理论阵容只有 ${ready?.analysis} 只（没凑够试玩）`);
+      if (ready?.trialReady !== 'yes') bad.push(`trialReady=${ready?.trialReady}`);
+      if (!first?.mode || !/six-pet/.test(String(first.mode))) bad.push(`模式 ${first?.mode}`);
+      if (Number(first?.legal) === 0) {
+        if (!(Number(first.greyed) > 0)) bad.push('首回合 0 合法技能，却没灰置配招');
+        if (first.greyedDisabled !== true) bad.push('灰置卡可点（只许引擎合法动作可点）');
+        if (!first.shortfall || !/聚能/.test(String(first.shortfall))) bad.push('没提示先聚能');
+        if (first.charge !== 'yes') bad.push('首回合没有聚能入口');
+        if (!(Number(after?.legal) > 0)) {
+          bad.push(`聚能 ${first.energy} → ${after?.energy} 之后技能仍没出现`);
+        } else if (Number(after?.greyed) > 0) {
+          bad.push('技能已可用，灰置块却没消失');
+        }
+      } else {
+        // 这一场的配招里有 0 消耗技能：那就要求「有合法技能时不许有灰置块」
+        if (Number(first.greyed) > 0) bad.push('有合法技能却还画着灰置块');
+      }
+      return bad;
+    };
+    steps.push({at: 'trial-energy-gate', trialFacts, first: trialGate, after: charged});
+    check('live-trial-energy-gate', '真实试玩（六只按需推算）：首回合 0 合法技能时灰置配招 + 差额 + 先聚能提示，'
+      + '聚能攒够之后四技能出现且灰置块消失；有合法技能时不得出现灰置块',
+      trialProblems(trialGate, charged, trialFacts).length === 0,
+      trialProblems(trialGate, charged, trialFacts).join(' | ')
+      || `试玩 ${trialFacts.analysis} 只 / trialReady=${trialFacts.trialReady} / mode=${trialFacts.mode}；`
+        + `首回合能量 ${trialGate.energy} 合法技能 ${trialGate.legal} 灰置 ${trialGate.greyed} 费用 ${JSON.stringify(trialGate.costs)}；`
+        + `聚能后能量 ${charged.energy} 合法技能 ${charged.legal} 灰置 ${charged.greyed}`);
+    counter('live-trial-energy-gate', '首回合把配招藏起来（0 合法技能却没有灰置块）必须被同一条判据抓住',
+      trialProblems({mode: 'pvp-standard-six-pet', legal: 0, greyed: 0, charge: 'yes', energy: 2},
+        {legal: 0, energy: 2, greyed: 0}, {analysis: 6, trialReady: 'yes'}), '{"greyed":0}');
 
     check('live-console', '整个过程没有 console.error / 未捕获异常',
       consoleErrors.length === 0, `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 3))}`);

@@ -12,8 +12,15 @@
  <h1>小芽 · 洛克王国：世界 <small>训练场</small></h1>
  <div class="mode-line" id="mode-line" aria-live="polite">
   <span class="chip" id="mode-label">模式：正在读取…</span>
+  <!-- 2026-09-22（人类实测 configured=false）：**连接状态要明显呈现**，别让玩家以为
+       小芽在自由对话。拿不到模型时写「未连接模型 · 只给规则事实」，并指向连接入口；
+       连上之后写「已连接模型」，不夸口它做了什么。 -->
+
  </div>
  <div class="header-actions">
+  <!-- 连接状态放在**按钮行**：`#mode-line` 每次渲染都会被 `innerHTML` 重建，
+       放里面会被冲掉（第一版就是这么「页头没有连接状态」的）。 -->
+  <a class="chip" id="model-chip" href="connect.html">模型：正在读取…</a>
   <span id="turn-chip" class="chip">未开局</span>
   <span id="phase-chip" class="muted"></span>
   <button id="coach-entry" title="叫小芽出来说一句">✦ 小芽</button>

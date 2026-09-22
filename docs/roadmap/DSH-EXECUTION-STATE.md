@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `1859540`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `4b6e04e`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2303,3 +2303,16 @@ P0-C 机制覆盖 / P0-D Agent / P0-E UI / P1 算法与 Coach / P2 训练与交�
 - 盒子入口：比较流程天生同种，交接时**按物种去重**（每个物种只带一只），URL / 工作台 / 开局按钮三者一致（实测 `own-0001`）。
 - 连带修好的样例点：`tests/roco-{workshop,team-candidates,team-request,team-compare,team-gaps}`、`scripts/roco/browser-{box,workshop}-acceptance`、`src/coach/team-{candidates,gaps}.js` 的样例形状、以及 RC-302/303/304 三份报告的重生成。
 - 判据：`test:unit` **1001/1001**；盒子 24/24 + 7/7；工坊 42/42 + 30/30；门禁 **22/22**。
+
+
+### C6.51 第 125 轮：人类实测的三条 —— 行动坞恢复回归、能量门灰置配招、连接状态
+
+① **查看阵容 → 收起 → 行动坞恢复**：`demo-acceptance` 里那条**已废弃**的 `#select-panel.hidden` 断言（量的是玩家看不到的 3v3 旧选人面）换成六宠工作台的收放断言 —— 量 `#team-workshop` 可见性、`data-roco-picking` 与 **`#action-panel` 恢复可见**，并配必红反证；`120 通过 / 0 失败`，**已进门禁**。
+
+② **首回合 0 合法技能**（人类查清：按需推算精灵首回合能量 2、最低技能耗 3，故合法技能 0）：页面新增**灰置配招**（带费用、全部 disabled）+ 差额说明 + 先聚能提示。真机 `live-trial-energy-gate`：能量 2 / 合法 0 → 灰置 4 张（6、4、3、7）→ 聚能到 **7** → 合法 4 张、灰置消失。只允许引擎合法动作可点的纪律没变。
+
+③ **连接状态**：`/api/bootstrap configured=false` 时页头明显标「模型：未连接（只给规则事实）」+ 连接入口；`live-model-status` 正反两条。
+
+三个实现坑（都是判据抓出来的）：`api()` 只发 **POST**（名单是 GET → 必须用 fetch）；`renderMode()` 会 `innerHTML` 重建 `#mode-line`（chip 放里面会被冲掉 → 移到按钮行）；按需推算的配招不在默认 48 只名单里（开局后懒加载一次 `support=all`）。
+
+判据：真机 **21/21 + 20/20**；demo **120/0**；`test:unit` 1001/1001；门禁 **22/22**。
