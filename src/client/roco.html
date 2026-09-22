@@ -130,6 +130,12 @@
     <div class="fmenu-body" id="filter-role" role="group" aria-label="按定位筛选"></div>
    </details>
    <button id="filter-reset" class="filter-reset">清除筛选</button>
+   <!-- 候选宇宙开关（RC-502）：默认只列**冻结已核验**的 48 只（练习局/迁移夹具口径）。
+        勾上之后向服务端要 `support=all`，把「按需推算」的那 574 只也列出来 ——
+        它们是**未核验**的推算配招（RC-402），所以每张卡都如实标出来。
+        默认关闭：不勾时请求与结果逐字节不变。 -->
+   <label class="pool-scope"><input type="checkbox" id="pool-support-all">
+    <span>包含按需推算的精灵（未核验）</span></label>
    <span class="muted" id="pool-count">正在读取…</span>
   </div>
   <p id="pick-summary" class="muted pick-summary"></p>

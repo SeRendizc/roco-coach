@@ -90,6 +90,12 @@
 .seg .side-tab[data-side="enemy"][aria-pressed="true"]{background:#e8a76a;color:#2a1c10}
 #pool-search{width:220px;min-height:38px}
 .filter-reset{font-size:12px;padding:5px 10px;min-height:0}
+/* 候选宇宙开关（RC-502）：默认只看冻结已核验的 48 只，勾上才列按需推算的那一批。 */
+.pool-scope{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
+ cursor:pointer;min-height:44px}
+.pool-scope input{width:16px;height:16px;accent-color:#8dd49c}
+/* 按需推算的卡：**必须**看得出来它未核验，色不能只是装饰。 */
+.card-unverified{display:block;margin-top:3px;font-size:10.5px;color:#ffb492}
 /* 属性/定位筛选：折叠菜单，样式与框架的输入框同一条。 */
 .fmenu{position:relative}
 .fmenu>summary{cursor:pointer;list-style:none;background:#121e2c;border:1px solid var(--line);
@@ -217,8 +223,18 @@
 .pet .hp-track{background:#111d28;overflow:hidden;border-radius:8px;height:11px}
 .pet .hp-fill{background:#90d5a8;height:100%;transition:width .35s}
 .pet .hp-fill.low{background:#ee8e76}
-.pet .energy{font-size:15px;color:#f0cb77;letter-spacing:3px;margin:8px 0 0}
-.pet .energy small{font-size:12px;letter-spacing:0;color:var(--muted)}
+/* 场上事实（RC-502）：能量（带上限）/ 印记 / 增益 / 蓄力 / 防御冷却。
+   一条一行、不截断（`overflow-wrap:anywhere` 让长印记名不至于把卡片撑破）。 */
+.pet-facts{display:flex;flex-direction:column;gap:3px;margin:8px 0 0;min-width:0}
+.pet-facts:empty{display:none}
+.pet-facts .ff{font-size:12.5px;color:#cfe0ee;overflow-wrap:anywhere;min-width:0}
+.pet-facts .ff b{font-weight:600}
+.pet-facts .ff-energy{color:#f0cb77;letter-spacing:1px}
+.pet-facts .ff-energy b{letter-spacing:0}
+.pet-facts .ff-mark{color:#c8a6ff}
+.pet-facts .ff-buff{color:#8dd49c}
+.pet-facts .ff-charging{color:#ffd479}
+.pet-facts .ff-cooldown{color:#9fc3e0}
 .bench-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .bench-col{min-width:0}
 .bench-label{display:block;margin-bottom:5px}

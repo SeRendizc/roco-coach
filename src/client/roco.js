@@ -77,6 +77,10 @@ const state = {
   // 筛选下拉的选项表、以及「同一只不能同时在两边」的判断都要它。
   // 屏幕上渲染的是 `pool.rows`（当前页最多 12 只）——48 张长卡平铺是这一轮要拆掉的东西。
   roster: [],
+  //: `pet_id → 名字` 的**现场字典**（RC-502）。名字的权威来源只有服务端回执；
+  //: 这一份只是把「见过的」记下来，让阵容栏 / 阵容摘要能显示全量视野里的名字。
+  //: 查不到就**原样回 id**（绝不编名字）——那正是「这只还没从服务端读到」的可见信号。
+  petNames: {},
   //: 引擎/登记层报的候选宇宙总数（`/api/roco/roster` 的 `total`）。文案里**不写死 48**：
   //: 48 只是迁移夹具，候选宇宙按 v3 是全量图鉴（catalog=622）。
   rosterTotal: null,
@@ -87,7 +91,10 @@ const state = {
   // `idsByPage` 记下**每一页真的渲染过哪些 pet_id**，验收脚本拿它与
   // 「直接按 offset 问服务端」的结果逐一对齐——同一份数据、两条路径。
   pool: {keyword: '', type: '', role: '', page: 1, pageSize: 12, total: 0, pages: 1,
-    rows: [], idsByPage: {}, source: null, seq: 0},
+    rows: [], idsByPage: {}, source: null, seq: 0,
+    // RC-502：候选宇宙开关（默认关）。关着时请求与结果**逐字节不变**（48 只 / 4 页）；
+    // 打开时向服务端要 `support=all`，把按需推算的 574 只也列进来（每张卡标「未核验」）。
+    allSupport: false},
   detail: null,        // 详情抽屉里正在看的那一只
   coach: {open: false}, // 小芽那一栏是否展开（默认收起，避免一进来就盖住战况）
   mode: null,          // `/api/roco/status` 的 mode（注册表原文），页面只渲染不写死
@@ -100,6 +107,28 @@ const MEMORY_KEY = 'roco-coach-memory-v1';
 const ONBOARD_KEY = 'roco-coach-onboard-v1';
 
 const $ = (id) => document.getElementById(id);
+
+/**
+ * `pet_id → 名字`（RC-502）。名字的**唯一**来源是服务端回执：
+ *   · 名单那一次（`/api/roco/roster`，默认 48 只）——`state.roster` 与 `state.petNames`；
+ *   · 阵容池每一页（勾了「包含按需推算的精灵」之后会有全量视野里的名字）。
+ * 查不到就**原样回 id**，绝不编一个名字出来 —— 屏幕上出现 `pet_000296` 就是
+ * 「这一只还没从服务端读到」，那是可见、可排查的信号。
+ */
+function petNameOf(petId) {
+  if (!petId) return '';
+  const known = state.petNames[petId];
+  if (known) return known;
+  const row = state.roster.find((p) => p.pet_id === petId) ?? state.pool.rows.find((p) => p.pet_id === petId);
+  return row?.name ?? petId;
+}
+
+/** 把服务端给过的名字记下来（只记真名，空名字跳过）。 */
+function rememberPetNames(rows) {
+  for (const pet of rows ?? []) {
+    if (pet?.pet_id && typeof pet.name === 'string' && pet.name) state.petNames[pet.pet_id] = pet.name;
+  }
+}
 
 // ── 与后端说话 ──────────────────────────────────────────────────────────────
 let session = null;
@@ -388,27 +417,106 @@ function rosterLineHtml(pets, {active = null, foe = false} = {}) {
 }
 
 /**
+ * 场上增益的中文名（RC-502）。**闭集**，来源就是引擎真的会写的那些键：
+ *   · `atk/def/spa/spd/spe` —— 六维百分比（`traits.py` 直接写 `buffs["atk"] += 100`）；
+ *   · `power` —— 全技能威力（`traits.py` 的虫群类特性）；
+ *   · `power_water/power_fight/power_bug/power_ice` —— 只对该系技能生效
+ *     （`effects.py` 里只有这四条属性威力键）。
+ * 认不出的键**不编中文名**：显示成「未知增益」，原始键只进 `data-*` 钩子（给排查用），
+ * 不进玩家可见文本 —— 这就是「认不出就说认不出」。
+ */
+const BUFF_LABEL = {atk: '物攻', def: '物防', spa: '魔攻', spd: '魔防', spe: '速度', power: '全技能威力'};
+const BUFF_ELEMENT_POWER = {power_water: '水系技能威力', power_fight: '武系技能威力',
+  power_bug: '虫系技能威力', power_ice: '冰系技能威力'};
+const BUFF_UNKNOWN = '未知增益';
+const buffLabel = (key) => BUFF_LABEL[key] ?? BUFF_ELEMENT_POWER[key] ?? null;
+
+/**
+ * 战斗舞台卡上那一段「场上事实」（RC-502）：能量（带**上限**）、异常、印记、增益、
+ * 蓄力、防御冷却。**每一项都只在引擎给了的时候才出现**：
+ *   · 引擎的公开视图里没有这个量（例如 legacy 配置没有 `energy_max`）⇒ 整条不写，
+ *     而不是补一个 0 或一个看似合理的默认值；
+ *   · 印记/增益是**空集合**时也不写「无」——空与「引擎没给这一项」在视图里是两件事，
+ *     UI 不替它把这两件事说成同一件。
+ *
+ * `data-roco-field-facts` 把**这一张卡上真的渲染了哪些事实**写在属性里，
+ * 验收脚本用它逐字对齐 DOM 与 `state.view`（与行动坞的 `data-roco-action-groups` 同一手法）。
+ */
+function fieldFactsHtml(pet, {energyMax = null} = {}) {
+  const rows = [];
+  const rendered = [];
+  const energy = Number.isFinite(pet?.energy) ? pet.energy : null;
+  if (energy !== null) {
+    // 上限来自**这一局生效的规则配置**（引擎的 `energy_max`），不在这里写死 6/10。
+    // 豆子只在**上限已知**时画：上限不知道还画一串点，等于暗示了一个我们没核验的数字。
+    const cap = Number.isFinite(energyMax) ? energyMax : null;
+    const dots = cap === null ? '' : `${'●'.repeat(Math.max(0, Math.min(12, energy)))}`;
+    rows.push(`<span class="ff ff-energy" data-ff="energy">能量 ${dots}<b>${energy}${cap === null ? '' : ` / ${cap}`}</b></span>`);
+    rendered.push(`energy=${energy}${cap === null ? '' : `/${cap}`}`);
+  }
+  const marks = pet?.marks && typeof pet.marks === 'object' ? Object.entries(pet.marks) : [];
+  if (marks.length) {
+    // 印记名是引擎自己的中文名（技能描述里那一套），层数是引擎给的整数。
+    const text = marks.map(([name, layers]) => (Number.isFinite(layers) && layers > 1 ? `${name} ×${layers}` : `${name}`)).join('、');
+    rows.push(`<span class="ff ff-mark" data-ff="marks">印记 <b>${escapeHtml(text)}</b></span>`);
+    rendered.push(`marks=${marks.map(([n, l]) => `${n}:${l}`).join(',')}`);
+  }
+  const buffs = pet?.buffs && typeof pet.buffs === 'object' ? Object.entries(pet.buffs) : [];
+  const known = [];
+  const unknownKeys = [];
+  for (const [key, value] of buffs) {
+    if (!Number.isFinite(value) || value === 0) continue;
+    const label = buffLabel(key);
+    if (label) known.push(`${label} ${value > 0 ? '+' : ''}${value}%`);
+    else unknownKeys.push(key);
+  }
+  if (known.length || unknownKeys.length) {
+    const parts = [...known];
+    // 认不出的键：条数照实说，键名进钩子。**不猜**它是物攻还是速度。
+    for (const key of unknownKeys) parts.push(`${BUFF_UNKNOWN}（${buffs.find(([k]) => k === key)?.[1] > 0 ? '+' : ''}${buffs.find(([k]) => k === key)?.[1]}%）`);
+    rows.push(`<span class="ff ff-buff" data-ff="buffs" data-ff-unknown-keys="${escapeAttr(unknownKeys.join(','))}">增益 <b>${escapeHtml(parts.join('、'))}</b></span>`);
+    rendered.push(`buffs=${buffs.map(([k, v]) => `${k}:${v}`).join(',')}`);
+  }
+  if (pet?.charging === true) {
+    // 蓄力中（术语 1007）：公开视图只给「在不在蓄力」，**没给是哪一招** —— 所以不写招名。
+    rows.push('<span class="ff ff-charging" data-ff="charging">蓄力中（这一手在蓄力）</span>');
+    rendered.push('charging=1');
+  }
+  const cooldown = Number.isFinite(pet?.defense_cooldown) ? pet.defense_cooldown : 0;
+  if (cooldown > 0) {
+    rows.push(`<span class="ff ff-cooldown" data-ff="defense_cooldown">防御冷却 <b>${cooldown}</b></span>`);
+    rendered.push(`defense_cooldown=${cooldown}`);
+  }
+  const statuses = pet?.statuses && typeof pet.statuses === 'object' ? Object.keys(pet.statuses) : [];
+  if (statuses.length) {
+    rendered.push(`statuses=${statuses.join(',')}`);
+  }
+  const hook = ` data-roco-field-facts="${escapeAttr(rendered.join(';'))}"`;
+  if (!rows.length) return {html: `<div class="pet-facts"${hook}></div>`, rendered};
+  return {html: `<div class="pet-facts"${hook}>${rows.join('')}</div>`, rendered};
+}
+
+/**
  * 一只伙伴在**战斗舞台**上的卡（对战页中央那一块）。
  *
- * 血量、能量、异常三项一眼看得清，别的都进详情抽屉。
+ * 血量、能量（带上限）、异常、印记、增益、蓄力、防御冷却 —— 都是引擎公开视图真的给了的字段；
+ * 没给的整条不写（见 `fieldFactsHtml`）。别的都进详情抽屉。
  */
-function petCard(pet, {active = false} = {}) {
+function petCard(pet, {active = false, energyMax = null} = {}) {
   if (!pet) return '';
   const ratio = pet.max_hp > 0 ? pet.hp / pet.max_hp : 0;
   const statuses = pet.statuses && Object.keys(pet.statuses).length
     ? Object.keys(pet.statuses).map((k) => STATUS_LABEL[k] ?? k).join('、') : '';
   const name = typeof pet.name === 'string' && pet.name ? pet.name : '';
   const slot = Number.isInteger(pet.slot) ? ` data-slot="${pet.slot}"` : '';
-  const energyDots = Number.isFinite(pet.energy)
-    ? `${'●'.repeat(Math.max(0, Math.min(10, pet.energy)))}<small> ${pet.energy} 豆</small>`
-    : '';
+  const facts = fieldFactsHtml(pet, {energyMax});
   return `<div class="pet ${pet.fainted ? 'fainted' : ''}${active ? ' active' : ''}"${slot}>
     <div class="pet-heading">${petAvatar(pet)}
       <div>${name ? `<h3>${name}</h3>` : ''}${statuses ? `<small class="pet-status">异常：${statuses}</small>` : ''}</div>
       <span class="pet-types">${typeChips(pet.types)}</span></div>
     <div class="hp-line"><span>生命</span><span>${pet.hp ?? '—'} / ${pet.max_hp ?? '—'}</span></div>
     <div class="hp-track"><div class="hp-fill ${hpClass(ratio)}" style="width:${pct(pet.hp, pet.max_hp)}%"></div></div>
-    <div class="energy">${energyDots}</div>
+    ${facts.html}
   </div>`;
 }
 
@@ -568,10 +676,25 @@ function render() {
   }
 
   // ── 战斗舞台：双方**当前**那一只 + 后备小条 ──────────────────────────────
-  $('self-pets').innerHTML = view ? petCard(selfPets[activeIndex] ?? selfPets[0] ?? null, {active: true}) : '';
+  //
+  // 能量上限来自**引擎的公开视图**（`self.energy_max` / `opponent.energy_max`，RC-502）：
+  // legacy 与候选配置的上限不同，页面写死一个就是在编规则数值。拿不到就不画上限。
+  const energyMax = Number.isFinite(view?.self?.energy_max) ? view.self.energy_max : null;
+  const foeEnergyMax = Number.isFinite(view?.opponent?.energy_max) ? view.opponent.energy_max : null;
+  $('self-pets').innerHTML = view ? petCard(selfPets[activeIndex] ?? selfPets[0] ?? null, {active: true, energyMax}) : '';
   $('self-bench').innerHTML = selfPets
     .map((pet, index) => (index === activeIndex ? '' : benchStrip(pet, index))).join('');
-  $('foe-field').innerHTML = view?.opponent?.field ? petCard(view.opponent.field, {active: true}) : '';
+  $('foe-field').innerHTML = view?.opponent?.field
+    ? petCard(view.opponent.field, {active: true, energyMax: foeEnergyMax}) : '';
+  // 对手的**增益**不在公开视图里（引擎只给对手场上的血/能量/异常/印记/冷却），
+  // 我方那一侧却会给。不写这一句，玩家会把我方「增益」那一行读成「双方都标了」。
+  const foeNote = $('foe-field-note');
+  if (foeNote) {
+    const field = view?.opponent?.field ?? null;
+    foeNote.textContent = field && !('buffs' in field)
+      ? '对手的增益不在公开视图里：引擎只给血/能量/异常/印记/冷却'
+      : '';
+  }
   $('foe-bench').innerHTML = (view?.opponent?.bench ?? [])
     .map((b) => `<div class="bench-pet ${b.fainted ? 'fainted' : ''}">`
       + `<strong>第 ${(b.slot ?? 0) + 1} 位</strong>`
@@ -615,7 +738,7 @@ function render() {
   if (brief) {
     brief.hidden = !(busy && !state.pick.open);
     if (!brief.hidden) {
-      const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
+      const nameOf = petNameOf;
       const mine = state.pick.player.length
         ? state.pick.player.map(nameOf)
         : (view?.self?.pets ?? []).map((p) => p.name).filter(Boolean);
@@ -648,7 +771,7 @@ function render() {
  * 引擎没给威力时**整段不写**（第 64 轮口径：不写「来源未给」这种工程话，也绝不补 0），
  * 原始 `power_status` 逐条在开发者抽屉里可核对（见 `renderPowerEvidence`）。
  */
-function actionCardHtml(action, index, {disabled = false} = {}) {
+function actionCardHtml(action, index, {disabled = false, slotName = null} = {}) {
   const skill = action?.skill ?? null;
   const kind = action?.kind ?? null;
   let title = action?.label ?? kind ?? '动作';
@@ -666,8 +789,13 @@ function actionCardHtml(action, index, {disabled = false} = {}) {
     title = action?.item_id ?? title;
     meta = '物品 · 占用本回合行动';
   } else if (kind === 'switch') {
-    title = action?.label ?? `换上第 ${(action?.target_index ?? 0) + 1} 位`;
+    // 换人卡必须写清**换上谁**（RC-502）：引擎给的 label 只有位次（「换上第2位」），
+    // 而「第 2 位是谁」是公开视图自己就有的信息（`self.pets[target_index].name`）。
+    // 只写位次等于让玩家凭记忆换人 —— 这是 P0 里「页面看不到等于没有」的一条。
+    const base = action?.label ?? `换上第 ${(action?.target_index ?? 0) + 1} 位`;
+    title = slotName ? `${base} · ${slotName}` : base;
     meta = `换精灵 → 第 ${(action?.target_index ?? 0) + 1} 位`;
+    if (slotName) meta += ` · ${slotName}`;
   } else if (kind === 'escape') {
     meta = '撤退：结束这一局';
   } else if (kind === 'struggle') {
@@ -698,7 +826,10 @@ function renderActions(actions, disabled) {
       <span class="muted">${group.actions.length} 个 · ${group.note}</span></div>
     <div class="act-row">${group.actions.map((action) => {
       const index = actions.indexOf(action);
-      return actionCardHtml(action, index, {disabled});
+      // 换人卡补上「换上谁」：名字只从公开视图里取（没有就留空，不编）。
+      const slotName = action.kind === 'switch'
+        ? (state.view?.self?.pets?.[action.target_index]?.name ?? null) : null;
+      return actionCardHtml(action, index, {disabled, slotName});
     }).join('')}</div>
   </section>`).join('') || '<p class="act-none">这一手引擎没有给任何合法动作。</p>';
   for (const button of box.querySelectorAll('button[data-action]')) {
@@ -1102,22 +1233,36 @@ function offsetOfPage(page, pageSize) {
  *
  * 三条路径都返回**同一个形状**：`{rows, total, offset, source}`，调用方不关心数据是怎么来的。
  */
-async function fetchPoolPage() {
-  const pool = state.pool;
-  const keyword = pool.keyword;
+/**
+ * 阵容池视图状态 → 查询串（RC-502 抽出来的**纯函数**：判据要能直接问它，
+ * 而不是靠读源码字符串猜请求长什么样）。
+ *
+ * 三条纪律：
+ *   ① 默认**不发** `support` —— 无参回执的键集与「48 只 / 4 页」被既有判据钉着；
+ *   ② 勾了「包含按需推算的精灵」才发 `support=all`（候选宇宙口径）；
+ *   ③ 搜索那条路要一次取回全部匹配项，所以上限跟着视野走（否则全量视野下只搜到前 200 只）。
+ */
+function poolQueryOf(pool) {
   const query = new URLSearchParams();
   if (pool.type) query.set('type', pool.type);
   if (pool.role) query.set('role', pool.role);
+  if (pool.allSupport) query.set('support', 'all');
   const offset = offsetOfPage(pool.page, pool.pageSize);
-  if (keyword) {
-    // 搜索：先按属性/定位取回全部匹配项，再在本地按名字过滤 + 分页。
+  if (pool.keyword) {
     query.set('offset', '0');
-    query.set('limit', '200');
+    query.set('limit', pool.allSupport ? '700' : '200');
   } else {
     query.set('offset', String(offset));
     query.set('limit', String(pool.pageSize));
   }
-  const data = await getJson(`/api/roco/roster?${query.toString()}`);
+  return query.toString();
+}
+
+async function fetchPoolPage() {
+  const pool = state.pool;
+  const keyword = pool.keyword;
+  const offset = offsetOfPage(pool.page, pool.pageSize);
+  const data = await getJson(`/api/roco/roster?${poolQueryOf(pool)}`);
   if (!data.ok) throw new Error(data.error || '名单读取失败');
   const pets = Array.isArray(data.pets) ? data.pets : [];
   if (!keyword) {
@@ -1160,6 +1305,8 @@ async function loadPool({reset = false} = {}) {
     const offset = offsetOfPage(pool.page, pool.pageSize);
     pool.source = page.source;
     pool.idsByPage[pool.page] = pool.rows.map((pet) => pet.pet_id);
+    // 这一页见到的名字记下来：阵容栏与阵容摘要要用（全量视野下那些精灵可能不在 `state.roster` 里）。
+    rememberPetNames(pool.rows);
     document.body.dataset.rocoPool = String(pool.rows.length);
     document.body.dataset.rocoPoolTotal = String(pool.total);
     document.body.dataset.rocoPoolPage = String(pool.page);
@@ -1232,11 +1379,13 @@ function renderPoolMeta() {
   $('page-next').disabled = page >= pages;
   document.body.dataset.rocoPagePrevDisabled = $('page-prev').disabled ? 'yes' : 'no';
   document.body.dataset.rocoPageNextDisabled = $('page-next').disabled ? 'yes' : 'no';
+  // RC-502：候选宇宙开关的状态写在页面上，验收脚本按它核对「真的换了视野」。
+  document.body.dataset.rocoPoolScope = pool.allSupport ? 'all' : 'frozen';
 }
 
 /** 固定队伍栏：已选 3 只始终可见（这一页的「这一局带谁」）。 */
 function renderTeambar() {
-  const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
+  const nameOf = petNameOf;
   for (const side of ['player', 'enemy']) {
     const ids = state.pick[side];
     for (let i = 0; i < 3; i += 1) {
@@ -1282,8 +1431,12 @@ function renderPoolCards() {
     const mech = mechanismOf(pet);
     const mechIsNone = mech === MECHANISM_UNKNOWN;
     const mechNote = mechanismSourceNote(pet);
+    // RC-402/RC-502：按需推算的那 574 只，配招是**推算**出来的（`SIMULATABLE_UNVERIFIED`）。
+    // 卡上必须写出来 —— 不写就等于把推算结果当成冻结事实卖给玩家。
+    const onDemand = pet.build_support === 'SIMULATABLE_UNVERIFIED';
     return `<div class="card-wrap">
       <button class="${classes.join(' ')}" data-pet="${pet.pet_id}"
+        data-build-support="${escapeAttr(pet.build_support ?? '')}"
         aria-disabled="${blocked ? 'true' : 'false'}" title="${escapeAttr(why)}">
         ${badge}
         <span class="card-top">${petAvatar(pet)}<strong class="nm">${pet.name ?? ''}</strong></span>
@@ -1291,6 +1444,7 @@ function renderPoolCards() {
         ${roleLabel ? `<span class="card-role">定位：${roleLabel}</span>` : ''}
         <span class="card-mech${mechIsNone ? ' none' : ''}">机制：${escapeHtml(mech)}</span>
         ${mechNote ? `<span class="card-mech-source">${escapeHtml(mechNote)}</span>` : ''}
+        ${onDemand ? '<span class="card-unverified">按需推算的配招 · 未核验</span>' : ''}
         <span class="card-key">${statBlockHtml(pet.stats)}</span>
       </button>
       <button class="card-more" data-detail="${pet.pet_id}"
@@ -1320,7 +1474,7 @@ function renderRoster() {
     tab.classList.toggle('selected', active);
     tab.setAttribute('aria-pressed', active ? 'true' : 'false');
   }
-  const nameOf = (id) => (state.roster.find((p) => p.pet_id === id)?.name) ?? id;
+  const nameOf = petNameOf;
   $('pick-summary').textContent = `我方：${player.map(nameOf).join('、') || '（未选）'} ｜ `
     + `对手：${enemy.map(nameOf).join('、') || '（未选）'}`;
   const enough = player.length === 3 && enemy.length === 3;
@@ -1389,7 +1543,7 @@ function togglePick(petId) {
   const list = pick[side];
   const other = side === 'player' ? pick.enemy : pick.player;
   const at = list.indexOf(petId);
-  const nameOf = (id) => state.roster.find((p) => p.pet_id === id)?.name ?? id;
+  const nameOf = petNameOf;
   if (at >= 0) {
     list.splice(at, 1);
     setPickHint(`${nameOf(petId)} 已从${sideName(side)}移出。`);
@@ -1428,6 +1582,7 @@ async function loadRoster() {
     const data = await getJson('/api/roco/roster?limit=200&offset=0');
     if (!data.ok) throw new Error(data.error || '名单读取失败');
     state.roster = data.pets.filter((p) => p.moveset_size > 0);
+    rememberPetNames(state.roster);
     state.rosterTotal = Number.isFinite(Number(data.total)) ? Number(data.total) : null;
     $('roster-status').textContent = `${state.roster.length} 只可选（配招来自引擎规范配招）`;
     const search = $('pool-search');
@@ -1565,6 +1720,19 @@ function wirePickControls() {
     renderFilterMenus();
     void loadPool({reset: true});
   });
+  // 候选宇宙开关（RC-502）：勾上 = 向服务端要 `support=all`（冻结已核验 48 + 按需推算 574）。
+  // 换视野等同于换结果集，所以**回到第 1 页**——与「筛选一变就回第 1 页」同一条道理。
+  const scope = $('pool-support-all');
+  if (scope) {
+    scope.checked = state.pool.allSupport === true;
+    scope.addEventListener('change', () => {
+      state.pool.allSupport = scope.checked === true;
+      setPickHint(scope.checked
+        ? '视野换成全量图鉴了：按需推算的精灵是**未核验**的推算配招，卡片上都标着。'
+        : '视野换回冻结已核验的那一批了。');
+      void loadPool({reset: true});
+    });
+  }
   // 搜索 / 属性 / 定位 / 翻页：四个入口都直接改 `pool` 的视图状态，再拉一页。
   const search = $('pool-search');
   if (search) {

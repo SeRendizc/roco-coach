@@ -44,7 +44,7 @@
 |---|---|
 | 已提交的 HEAD | 见下面 git log（本节写下时是 `817fdec`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29，第 93 轮的三路 P0/RC-105 见 §C6.30，第 94 轮的 RC-306/机制渲染/RC-106 见 §C6.31）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
-| 闸门现状 | **17/17 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
+| 闸门现状 | **18/18 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
 | **跨机器协作区（2026-09-21 建立）** | Mac DSH（我）与 Windows DSH 通过 `SeRendizc/ai-dev-platform` 的 `coord/roco-coach` 分支上 `projects/roco-coach/` 交换**durable facts**：我只改 `MAC_STATUS.md` 与 `CONTRACTS.md`，需要 Windows 的事追加 `BLOCKERS.md`，方向性改变追加 `DECISIONS.md`；**契约只有证据齐全才能标 `ready`**（它是正式训练闸门）。摘要与同步循环见 `docs/roadmap/CROSS-MACHINE-COORDINATION.md`；每个工作阶段开始与结束各同步一次 |
 | **v3 纠偏生效（2026-09-21）** | **标准 PVP 改按六宠设计**（候选规则，`CROSS_SOURCE_SUPPORTED`，禁止写成官方事实）；官方 3v3/2 魔力是**极速对决**独立 BattleMode；**48 只只是迁移夹具**，候选宇宙是全量 600+；匹配前对手未知，按版本 Meta prior 评价；**在线 3 秒内禁止批量模拟**。停止用旧规则（max=6/入场 2/回合末 +1）生成或重训任何产物（13 条已进「禁止重跑」清单）。入口：`docs/roadmap/FLAGSHIP-V3-REDIRECT.md`、`docs/roadmap/FLAGSHIP-V3-CHECKLIST.md`；机器可读：`reports/roco/flagship-upgrade/{baseline,artifact-invalidation}.json`、`data/roco/battle-modes.json`、`data/roco/evidence/rule-evidence-ledger.json` |
@@ -726,7 +726,7 @@ active goal 已按此重写（revision 2）。
 |---|---|
 | HEAD | `f707a03`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
-| 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
+| 验证 | **一条命令可复现**：`npm run verify:release` → **18 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
 | 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**；另有各自带反证的检查：`verify-agent-trajectories --selftest` 3/3、`verify-sft-split --selftest` 7/7、`model-arm-identity` 正反两向 |
 | 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**第 38 轮改掉了它的自指死锁**：原来它要求「最近一次 verify:release 必须是 pass」，而 `verify:release` 里又有 `unit`包含这条断言——一次失败之后每次跑都会因为上一次红而红，唯一出路是手改 `latest.json`。现在硬判据是 `last-green.json`（必须存在一次全绿、verdict=pass、套件数够、它记的 HEAD 仍在当前历史里），`latest.json` 红了只报**警告**。**第 45 轮又拆掉同形状的第二处死锁**：「落后 >12 个提交」原来是硬失败，而这条断言同时长在 `unit` 里——一个阶段提交超过 12 次之后，`last-green` 追不上、`verify:release` 永远绿不了，也永远写不出新的 `last-green`（实测 19 个提交时 14 个套件里只有 `unit` 与 `state-doc` 红，两条红的是同一条断言）。现在落后只报警告，`tests/evals/state-doc.test.js` 有一条正反两向的回归（反证：把警告改回硬失败，立刻红） |
@@ -2040,3 +2040,57 @@ agent 轨迹钉着，加字段会让 6048 条轨迹全部对不上（上一轮�
 
 **边界**：速度只覆盖「最快对最慢」这一对极端；中间档位、先手度（`先手±1`）、换人后的顺序变化
 还没有专门场景。同速平手的裁决口径等实机录制（MC-E05）后要重判。引擎一改指纹就该红。
+
+### C6.41 第 104 轮：RC-502 战斗信息架构（场上事实 + 全量视野 + 接进门禁）
+
+**用户 P0 的第 8 条**：「页面看不到或点不动的能力，不得仅凭单元测试标记完成」。这一轮就是照它做的。
+
+**两个真缺口（都不是「引擎没给」，是没人接）**：
+
+1. 引擎的公开视图**一直在给**印记、增益、防御冷却、能量上限，页面一个都没画 ——
+   战斗页上只有血条、能量豆、异常；
+2. 引擎按需推算的那 574 只（RC-402）在页面上**根本够不到**（选宠页只列冻结 48 只），
+   而 v3 的口径是「候选宇宙全量 600+，48 只只是迁移夹具」。
+
+**做了什么**：
+
+- `fieldFactsHtml()`：逐项**只在引擎给了的时候**才画 —— 能量「当前 / 上限」（上限读
+  `energy_max`，拿不到就只写当前值、**不画豆子**，因为豆子的个数就是上限的暗示）、异常、
+  印记（中文名 + 层数；空集合不写「无」）、增益、蓄力中、防御冷却。
+  增益的中文名是**闭集**（`atk/def/spa/spd/spe/power` + `power_water|fight|bug|ice` 四条属性威力键，
+  来源就是 `traits.py`/`effects.py` 真的会写的那些）；闭集外的键显示「未知增益」，
+  原始键只进 `data-ff-unknown-keys`。
+- `data-roco-field-facts` 把「这一张卡真的渲染了哪些事实」写成属性，验收脚本拿它把 DOM 与
+  `state.view` **逐字**对齐。
+- 换人卡补上**换上谁**（`self.pets[target_index].name`）——引擎的 label 只有位次，
+  只写位次等于让玩家凭记忆换人。
+- 对手那一栏写明「对手的增益不在公开视图里」：不写的话，玩家会把我方那一行读成双方都标了。
+- 服务端 `publicView()` 原来把引擎已经给的 `defense_cooldown` / `charging` **丢了** →
+  现在只在引擎给了的时候带出去（旧 fixture 形状不变，`tests/server.test.js` 照旧）。
+- 选宠页多一个「包含按需推算的精灵（未核验）」（**默认关**）：勾上才发 `support=all`
+  （服务端白名单新增这一个取值，别的取值 400），48 → 622 只；按需推算的卡写明
+  「按需推算的配招 · 未核验」；全量视野下搜索的取数上限 200 → 700（否则只搜到前 200 只）。
+
+**浏览器实测（真实键鼠，7 条判据 + 2 条必红反证，全部命中）**：
+
+默认 `frozen / 48 只 / 4 页`、搜不到幽星光 → 真鼠标勾开关 → `all / 622 只 / 52 页` →
+真键盘搜「幽星光」→ 卡上「按需推算的配招 · 未核验」→ 真鼠标选它进队、再点满 3v3 并开局 →
+能量行「能量 ●●2 / 6」与引擎 `self=6 foe=6` 一致 → 真鼠标点「错乱」→ 引擎 `{星陨印记:3}`、
+页面「印记 星陨印记 ×3」、钩子 `marks=星陨印记:3` → 真鼠标「换上第2位 · 雪影娃娃」再点「防御」→
+引擎 `defense_cooldown=2`、页面「防御冷却 2」。反证：去掉「未核验」标记 / 删掉印记那一行，
+同一条判据必须红（反证没命中也算失败）。
+
+**接进门禁**：`roco-ux-acceptance` 成为第 **18** 个套件 —— 这一组判据从此每次发版都要真的跑一遍，
+而不是躺在某个手动脚本里。
+
+**实测**：门禁 **18/18**；`test:unit` 988 条 OK；`test:env` 414 条 OK。
+
+**边界**：
+- 蓄力中（术语 1007）引擎里**没有任何技能**会置位 ⇒ 浏览器里驱动不出来；代码留着（拿到 `true` 才画），
+  但**不声称它被验过**；
+- 印记只覆盖「技能直接加印记」这一路：由特性/回合末结算加的那 31 条里的多数，在冻结 48 只里
+  一条都驱动不出来，本轮没数；
+- 增益只有己方（对手的不在公开视图里，页面照实说明，不补）；
+- 全量视野里 574 只的配招是**推算**的，「未核验」只表示能进引擎跑，不等于按规则结算过；
+- 天气这一项**不做假的**：引擎里没有天气层（登记为 `unsupported`），公开视图里也没这个字段，
+  页面整条不画、不补「无天气」。

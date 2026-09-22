@@ -121,12 +121,24 @@ const checks = [];
 const shots = [];
 const consoleErrors = [];
 const pageErrors = [];
+//: 反向证明：把判据套在**故意改坏**的输入上，必须报出问题。空判据比没有判据更坏。
+const counterproofs = [];
 
 function check(id, name, ok, actual, extra = {}) {
   const row = {id, name, ok: Boolean(ok), actual: String(actual), ...extra};
   checks.push(row);
   log(ok ? '✔' : '✖', `${id} ${name}`, `— ${row.actual}`);
   return row.ok;
+}
+
+/** 反证：`problems` 由**同一条判据**算出，非空才算命中（否则这条反证自己是空的）。 */
+function counter(id, name, problems, actual) {
+  const hit = Array.isArray(problems) ? problems : [];
+  counterproofs.push({id, name, ok: hit.length > 0,
+    hit: hit.join(' | ') || '（没命中——判据是空的！）', actual: String(actual)});
+  log(hit.length ? '✔' : '✖', `[反证 ${id}] ${name}`,
+    `— 命中：${(hit.join(' | ') || '（没命中）').slice(0, 200)}`);
+  return hit.length > 0;
 }
 
 async function main() {
@@ -203,6 +215,14 @@ async function main() {
   const overflowOf = async () => js(`JSON.stringify({clientW:document.documentElement.clientWidth,
     scrollW:document.documentElement.scrollWidth,clientH:document.documentElement.clientHeight})`).then(JSON.parse);
   const cardsNow = async () => js(`JSON.stringify([...document.querySelectorAll('#roster button[data-pet]')].map((b)=>b.dataset.pet))`).then(JSON.parse);
+  /** 等一个页面侧条件成立（超时返回 false，由调用方的判据负责红）。 */
+  const waitFor = async (expr, tries = 100, ms = 150) => {
+    for (let i = 0; i < tries; i += 1) {
+      if (await js(expr)) return true;
+      await sleep(ms);
+    }
+    return false;
+  };
 
   // 页面准备好（`data-roco-ready=yes` 由 boot() 末尾写）
   await send('Page.navigate', {url: `${base}roco.html`});
@@ -568,6 +588,278 @@ async function main() {
     && (await js(`/未核验/.test(document.getElementById('self-resource').textContent)`)) === true,
     '页面正文无心形字符，资源条写的是「未核验」');
 
+  // ── RC-502 战斗信息架构：场上事实（能量上限 / 印记 / 防御冷却）────────────
+  //
+  // 用户 P0 的第 8 条是「页面看不到或点不动的能力不得仅凭单元测试标记完成」。
+  // 所以这一段每一项都要在**真浏览器**里被点到，并与 `state.view` 逐字对齐：
+  //   · 默认视野**不含**按需推算的精灵（勾上开关才有）—— 先证默认没变；
+  //   · 勾上开关 → 真键盘搜「幽星光」→ 卡上写着「按需推算的配招 · 未核验」；
+  //   · 真鼠标点它、点满 3v3、真鼠标点「错乱」→ 对面卡上出现**印记**；
+  //   · 能量那一行带**引擎给的上限**（legacy=6），不是页面写死的数；
+  //   · 真鼠标点「防御」→ 下一回合自己卡上出现**防御冷却**行。
+  // 每一条都配一条反证：把 DOM 改成「少一行 / 少个标记」，判据必须红。
+  await send('Page.navigate', {url: `${base}roco.html`});
+  for (let i = 0; i < 120; i += 1) {
+    if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+    await sleep(250);
+  }
+  await setViewport(1440, 900);
+  await js(`localStorage.setItem('roco-coach-onboard-v1','1')`);
+  await send('Page.reload');
+  for (let i = 0; i < 120; i += 1) {
+    if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+    await sleep(250);
+  }
+  await setViewport(1440, 900);
+
+  const scopeState = async () => js(`(()=>{const d=document.body.dataset;
+    const rows=window.rocoDemo.state.pool.rows||[];
+    return {scope:d.rocoPoolScope,total:Number(d.rocoPoolTotal||'0'),pages:Number(d.rocoPoolPages||'0'),
+      checked:document.getElementById('pool-support-all').checked,
+      hasLeader:rows.some((p)=>p.name==='幽星光'),
+      supports:[...new Set(rows.map((p)=>p.build_support||''))].sort()};})()`);
+  const frozenScope = await scopeState();
+  check('RC502-默认视野冻结', '默认（开关没勾）：候选宇宙仍是冻结已核验的那一批，没有按需推算的精灵',
+    frozenScope.scope === 'frozen' && frozenScope.checked === false && frozenScope.hasLeader === false
+    && !frozenScope.supports.includes('SIMULATABLE_UNVERIFIED'),
+    `scope=${frozenScope.scope} total=${frozenScope.total} pages=${frozenScope.pages} 卡上支持等级=${JSON.stringify(frozenScope.supports)}`);
+
+  await mouseClick('#pool-support-all');
+  await waitFor(`document.body.dataset.rocoPoolScope==='all' && Number(document.body.dataset.rocoPoolTotal||'0')>600`);
+  await sleep(400);
+  const allScope = await scopeState();
+  check('RC502-勾上开关换视野', '真鼠标勾上「包含按需推算的精灵（未核验）」：候选宇宙换成全量图鉴（>600 只）',
+    allScope.scope === 'all' && allScope.checked === true && allScope.total > 600,
+    `scope=${allScope.scope} total=${allScope.total} pages=${allScope.pages}（默认时 ${frozenScope.total} 只）`);
+
+  // 真键盘搜「幽星光」：它**不在**冻结 48 只里（配招是按需推算的），只有全量视野才找得到。
+  // 等那张卡真的出现再量（搜索是异步的，睡固定时间会偶发扑空）。
+  await typeText('#pool-search', '幽星光');
+  await waitFor(`[...document.querySelectorAll('#roster .nm')].some((el)=>el.textContent.trim()==='幽星光')`, 60, 150);
+  const leaderCard = await js(`(()=>{const b=document.querySelector('#roster button[data-pet]');
+    if(!b)return null;const r=b.getBoundingClientRect();
+    return {pet:b.dataset.pet,name:(b.querySelector('.nm')||{}).textContent||'',
+      support:b.dataset.buildSupport,
+      unverified:(b.querySelector('.card-unverified')||{}).textContent||'',
+      w:Math.round(r.width),h:Math.round(r.height)};})()`);
+  const cardUnverifiedProblems = (c) => {
+    const bad = [];
+    if (c === null) bad.push('找不到这张卡');
+    else {
+      if (c.name !== '幽星光') bad.push(`卡上的名字不是幽星光（${c.name}）`);
+      if (c.support !== 'SIMULATABLE_UNVERIFIED') bad.push(`没标出配招来源档（${c.support}）`);
+      if (!/未核验/.test(c.unverified)) bad.push('卡上没写「未核验」');
+    }
+    return bad;
+  };
+  check('RC502-按需推算的卡如实标记', '全量视野里这只按需推算的精灵，卡上写着「按需推算的配招 · 未核验」（不冒充已核验）',
+    cardUnverifiedProblems(leaderCard).length === 0,
+    `卡 ${JSON.stringify(leaderCard)}；问题 ${cardUnverifiedProblems(leaderCard).join(' | ') || '无'}`);
+  counter('RC502-按需推算的卡如实标记', '把「未核验」标记去掉（卡上不写配招来源）必须被同一条判据抓住',
+    cardUnverifiedProblems({...leaderCard, unverified: ''}), '{"unverified":""}');
+
+  // 真鼠标点它 → 进我方；再补两只；我方满三只后自动切到对手 → 再点三只。
+  await mouseClick('#roster button[data-pet]');
+  await sleep(250);
+  const afterLeader = await js(`(()=>{const d=window.rocoDemo;
+    return {player:d.state.pick.player.slice(),side:d.state.pick.side};})()`);
+  check('RC502-全量视野的精灵能真的选上', '真鼠标点这张卡：它进了我方队伍（不是只能看、点不动）',
+    afterLeader.player.length === 1 && afterLeader.player[0] === leaderCard.pet,
+    `我方=${JSON.stringify(afterLeader.player)} 现在在选「${afterLeader.side}」`);
+
+  const clearSearch = async () => {
+    await js(`(()=>{const s=document.getElementById('pool-search');s.value='';
+      s.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);
+    await waitFor(`window.rocoDemo.state.pool.rows.length>=12`);
+    await sleep(400);
+  };
+  const pickFirstCard = async () => {
+    const next = await js(`(()=>{const b=[...document.querySelectorAll('#roster button[data-pet]')]
+      .find((x)=>!x.classList.contains('blocked')&&!x.classList.contains('chosen'));
+      return b?b.dataset.pet:null;})()`);
+    if (!next) return null;
+    await mouseClick(`#roster button[data-pet="${next}"]`);
+    await sleep(200);
+    return next;
+  };
+  /** 按名字选一只：先等那张卡**真的出现**再点（搜索是异步的，睡固定时间会偶发扑空）。 */
+  const pickByName = async (name) => {
+    const petId = await js(`(()=>{const b=[...document.querySelectorAll('#roster button[data-pet]')]
+      .find((x)=>((x.querySelector('.nm')||{}).textContent||'').trim()===${JSON.stringify(name)}
+        &&!x.classList.contains('blocked')&&!x.classList.contains('chosen'));
+      return b?b.dataset.pet:null;})()`);
+    if (!petId) return null;
+    await mouseClick(`#roster button[data-pet="${petId}"]`);
+    await sleep(220);
+    return petId;
+  };
+  const searchFor = async (name) => {
+    await typeText('#pool-search', name);
+    return waitFor(`[...document.querySelectorAll('#roster .nm')]
+      .some((el)=>el.textContent.trim()===${JSON.stringify(name)})`, 60, 150);
+  };
+  // 我方第二位选一只**带「应对攻击」防御**的（术语 1016 的冷却只在那种防御上生效）。
+  // 为什么是一张候选名单而不是写死一只：默认对手是名单前三位（实测铠甲虫/音速犬/仪式巨像），
+  // 写死的那只很可能已经被分给对手 → 卡是 blocked，点不动。这里一只只试，跳过被占的。
+  const DEFENDER_CANDIDATES = ['雪影娃娃', '皇家狮鹫', '化蝶', '朔夜伊芙', '多多', '花魁蜂后', '雪蛮人', '雪巨人'];
+  let defenderCard = null;
+  let defenderName = null;
+  const defenderTried = [];
+  for (const name of DEFENDER_CANDIDATES) {
+    await clearSearch();
+    const shown = await searchFor(name);
+    const blocked = shown
+      ? await js(`(()=>{const b=[...document.querySelectorAll('#roster button[data-pet]')]
+          .find((x)=>((x.querySelector('.nm')||{}).textContent||'').trim()===${JSON.stringify(name)});
+          return b?b.classList.contains('blocked'):null;})()`)
+      : null;
+    defenderTried.push({name, shown, blocked});
+    if (!shown || blocked !== false) continue;
+    defenderCard = await pickByName(name);
+    if (defenderCard) { defenderName = name; break; }
+  }
+  const afterDefender = await js(`(()=>{const d=window.rocoDemo;
+    return {player:d.state.pick.player.length,enemy:d.state.pick.enemy.length,side:d.state.pick.side};})()`);
+  await clearSearch();
+  for (let i = 0; i < 24; i += 1) {
+    const counts = await js(`(()=>{const d=window.rocoDemo;
+      return {player:d.state.pick.player.length,enemy:d.state.pick.enemy.length};})()`);
+    if (counts.player >= 3 && counts.enemy >= 3) break;
+    if (!(await pickFirstCard())) break;
+  }
+  const filled = await js(`(()=>{const d=window.rocoDemo;
+    return {player:d.state.pick.player.length,enemy:d.state.pick.enemy.length,side:d.state.pick.side};})()`);
+  const ready = await js(`(()=>{const d=window.rocoDemo;
+    const b=document.getElementById('start-battle');
+    const nameOf=(id)=>{const row=(d.state.roster||[]).concat(d.state.pool.rows||[])
+      .find((p)=>p.pet_id===id);return row?row.name:id;};
+    return {player:d.state.pick.player.length,enemy:d.state.pick.enemy.length,startDisabled:b.disabled,
+      names:d.state.pick.player.map(nameOf),foes:d.state.pick.enemy.map(nameOf)};})()`);
+  check('RC502-全量视野组队开局', '全量视野下真鼠标点满双方各 3 只并开局（这条能力本身能点通）',
+    filled.player === 3 && ready.enemy === 3 && ready.startDisabled === false && defenderCard !== null,
+    `我方 ${filled.player}（${JSON.stringify(ready.names)}）／对手 ${ready.enemy}（${JSON.stringify(ready.foes)}）；`
+    + `防御手=${defenderName ?? '(没选到)'}；开局按钮 disabled=${ready.startDisabled}；`
+    + `试过的防御手 ${JSON.stringify(defenderTried)}`);
+
+  await mouseClick('#start-battle');
+  await waitFor(`document.body.dataset.rocoView==='ready' && !document.getElementById('battle-panel').hidden`);
+  await sleep(600);
+  const battleStart = await js(`(()=>{const v=window.rocoDemo.state.view;
+    return {turn:v?.turn,selfEnergy:v?.self?.pets?.[v.self.active]?.energy??null,
+      cap:v?.self?.energy_max??null,foeCap:v?.opponent?.energy_max??null,
+      foeNote:(document.getElementById('foe-field-note')||{}).textContent||''};})()`);
+  check('RC502-能量上限来自引擎', '战斗卡的能量写成「当前 / 上限」，上限是引擎这一局的规则配置（legacy=6）给的',
+    Number.isFinite(battleStart.cap) && battleStart.cap > 0 && battleStart.cap === battleStart.foeCap,
+    `引擎上限 self=${battleStart.cap} foe=${battleStart.foeCap}，当前能量 ${battleStart.selfEnergy}`);
+  const energyRow = await js(`(()=>{const el=document.querySelector('#self-pets .ff-energy');
+    return el?el.textContent.replace(/\\s+/g,' ').trim():null;})()`);
+  check('RC502-能量行真的画在卡上', '自己那张卡上真的出现带上限的能量行（DOM 与引擎数值一致）',
+    energyRow !== null && energyRow.includes(String(battleStart.cap)) && energyRow.includes(String(battleStart.selfEnergy)),
+    `能量行「${energyRow}」；引擎 self=${battleStart.selfEnergy}/${battleStart.cap}`);
+  check('RC502-对手增益口径写在页面上', '对手那一侧的场上事实缺口有说明（引擎不给对手增益，页面照实说）',
+    /增益/.test(battleStart.foeNote),
+    `对手侧说明「${battleStart.foeNote}」`);
+
+  // 真鼠标点「错乱」（描述里带 星陨印记 的那一招）→ 对面获得 3 层印记。
+  const markIdx = await js(`(()=>{const rows=[...document.querySelectorAll('#actions button[data-action]')];
+    const hit=rows.findIndex((b)=>((b.querySelector('.act-desc')||{}).textContent||'').includes('星陨印记'));
+    if(hit<0)return -1;rows[hit].dataset.rc502='mark';return hit;})()`);
+  if (markIdx >= 0) {
+    await mouseClick('#actions button[data-action][data-rc502="mark"]');
+    await waitFor(`(()=>{const v=window.rocoDemo.state.view;
+      const m=v&&v.opponent&&v.opponent.field&&v.opponent.field.marks;
+      return Boolean(m&&Object.keys(m).length);})()`, 20000);
+    await sleep(350);
+  }
+  const markFacts = await js(`(()=>{const v=window.rocoDemo.state.view;
+    const engine=(v&&v.opponent&&v.opponent.field&&v.opponent.field.marks)||null;
+    const facts=document.querySelector('#foe-field .pet-facts');
+    const row=document.querySelector('#foe-field .ff-mark');
+    return {engine,hook:facts?facts.dataset.rocoFieldFacts:null,
+      row:row?row.textContent.replace(/\\s+/g,' ').trim():null};})()`);
+  const engineMarks = markFacts.engine ? Object.entries(markFacts.engine) : [];
+  const markProblems = ({engine, row, hook}) => {
+    const entries = engine ? Object.entries(engine) : [];
+    const bad = [];
+    if (entries.length === 0) bad.push('引擎这一手没给印记（场景没驱动到）');
+    if (row === null) bad.push('页面上没有印记那一行');
+    for (const [name, layers] of entries) {
+      if (row !== null && !row.includes(name)) bad.push(`印记行里没有「${name}」`);
+      if (row !== null && !row.includes(String(layers))) bad.push(`印记行里没有层数 ${layers}`);
+      if (!String(hook ?? '').includes(`marks=${name}:${layers}`)) bad.push(`钩子里没有 marks=${name}:${layers}`);
+    }
+    return bad;
+  };
+  check('RC502-印记逐条画在对手卡上', '真鼠标打出一手带印记的技能：对面卡上出现印记，名字与层数与引擎逐字一致',
+    markProblems(markFacts).length === 0,
+    `引擎 ${JSON.stringify(markFacts.engine)}；页面那一行「${markFacts.row}」；钩子「${markFacts.hook}」`
+    + `；问题 ${markProblems(markFacts).join(' | ') || '无'}`);
+  counter('RC502-印记逐条画在对手卡上', '把印记那一行删掉（页面少画一行）必须被同一条判据抓住',
+    markProblems({...markFacts, row: null}), 'row=null');
+
+  // 真鼠标点「防御」→ 自己卡上出现防御冷却行（术语 1016）。
+  //
+  // 陷阱（实测踩到）：首发的幽星光配招里**没有**防御招，而且打完印记那一手之后场上
+  // 随时可能进入补位。所以这一段的做法是**像玩家一样打**：先看这一手的技能里有没有
+  // 防御（`应对攻击` 那类才有冷却），没有就真鼠标点「换上」把带防御的那只换上来，
+  // 再点防御。找不到防御招时 `actual` 里直接列出当时可选的动作 ——
+  // 「点不到」与「点了但没生效」是两件事，报告必须能分清。
+  let cooldownRow = null;
+  let cooldownEngine = null;
+  let cooldownAfter = null;
+  const defendTrace = [];
+  for (let attempt = 0; attempt < 6 && cooldownEngine === null; attempt += 1) {
+    // 一次扫清楚：这一手有没有防御招；没有就找一只**配招里带防御**的后备换上去。
+    // 配招从公开视图自己的 `self.loadouts` 读（那是自己的信息，不是猜的）。
+    const scan = await js(`(()=>{const v=window.rocoDemo.state.view;
+      const rows=[...document.querySelectorAll('#actions button[data-action]')];
+      rows.forEach((b)=>delete b.dataset.rc502);
+      const labels=rows.map((b)=>({kind:b.dataset.kind,label:((b.querySelector('span')||{}).textContent||'').trim()}));
+      if(!v)return {kind:null,labels,turn:null,active:null,defenders:[]};
+      const legal=v.legal||[];
+      // 「谁带防御」从**页面自己已经拿到的名单**里读：名单那一次回执（state.roster）
+      // 与阵容池每一页（pool.rows）都带 four-skill moveset —— 换人卡上的名字也是同一来源。
+      // （服务端的 UI 公开面**没有**逐只 loadouts，所以这里不许假装有。）
+      const roster=(window.rocoDemo.state.roster||[]).concat(window.rocoDemo.state.pool.rows||[]);
+      const movesOf=(petId)=>{const r=roster.find((p)=>p.pet_id===petId);return (r&&r.moveset)||[];};
+      const defenders=(v.self.pets||[]).map((p,i)=>({slot:i,name:p.name,petId:p.pet_id,
+        hasDefense:movesOf(p.pet_id).some((m)=>String(m.name||'').includes('防御'))}));
+      let idx=rows.findIndex((b)=>b.dataset.kind==='skill'
+        &&((b.querySelector('span')||{}).textContent||'').trim().includes('防御'));
+      if(idx>=0){rows[idx].dataset.rc502='defend';
+        return {kind:'defend',labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,defenders};}
+      idx=rows.findIndex((b)=>{const a=legal[Number(b.dataset.action)];
+        return b.dataset.kind==='switch'&&a&&(defenders[a.target_index]||{}).hasDefense;});
+      if(idx>=0){rows[idx].dataset.rc502='swap';
+        return {kind:'swap',labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,defenders};}
+      return {kind:null,labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,defenders};})()`);
+    defendTrace.push({attempt, act: scan.kind, turn: scan.turn, active: scan.active,
+      defenders: (scan.defenders || []).filter((d) => d.hasDefense).map((d) => d.name),
+      labels: scan.labels.map((l) => l.label)});
+    if (scan.kind === null) break;
+    await mouseClick(`#actions button[data-action][data-rc502="${scan.kind === 'defend' ? 'defend' : 'swap'}"]`);
+    await sleep(1100);
+    if (scan.kind !== 'defend') continue;
+    cooldownAfter = await js(`(()=>{const v=window.rocoDemo.state.view;
+      const p=v&&v.self&&v.self.pets&&v.self.pets[v.self.active];
+      return {turn:v?v.turn:null,active:v?v.self.active:null,present:Boolean(p),
+        name:p?p.name:null,value:p?p.defense_cooldown:null};})()`);
+    cooldownEngine = cooldownAfter?.value ?? null;
+    cooldownRow = await js(`(()=>{const el=document.querySelector('#self-pets .ff-cooldown');
+      return el?el.textContent.replace(/\\s+/g,' ').trim():null;})()`);
+    break;
+  }
+  check('RC502-防御冷却画在自己卡上', '真鼠标点「防御」（必要时先换上带防御的那只）：自己卡上出现防御冷却，数字与引擎一致',
+    Number.isFinite(cooldownEngine) && cooldownEngine > 0 && cooldownRow !== null
+    && cooldownRow.includes(String(cooldownEngine)),
+    `引擎 ${JSON.stringify(cooldownAfter)}；页面那一行「${cooldownRow}」；`
+    + `过程 ${JSON.stringify(defendTrace)}`);
+  const markShot = await shoot('battle-field-facts-1440x900');
+  const factsOverflow = await overflowOf();
+  check('RC502-场上事实不撑破版面', '加上这几行之后 1440×900 仍然没有横向溢出',
+    factsOverflow.clientW === factsOverflow.scrollW,
+    `clientW/scrollW=${factsOverflow.clientW}/${factsOverflow.scrollW}`);
+
   check('errors', '整个过程没有 console error / page exception',
     consoleErrors.length === 0 && pageErrors.length === 0,
     `console error ${consoleErrors.length} 条、page exception ${pageErrors.length} 条`
@@ -578,9 +870,14 @@ async function main() {
     schema: 'roco-ux-acceptance/v1',
     generated_at: new Date().toISOString(),
     fault_injected: FAULT,
+    // 顺带证明这条反证会红（`--fault` 时也检查反证没命中）。
+    counterproofs_all_hit: counterproofs.every((c) => c.ok),
     viewports: ['1440x900', '390x844'],
     totals: {checks: checks.length, passed: checks.length - failed.length, failed: failed.length},
     checks,
+    counterproofs,
+    totals_counterproofs: {checks: counterproofs.length, hit: counterproofs.filter((c) => c.ok).length,
+      missed: counterproofs.filter((c) => !c.ok).length},
     measurements: {
       overflow: {'1440x900': overflow1440, '390x844': overflow390},
       pages_walk: walk.map((r) => ({page: r.page, offset: r.hooks.offset, ids: r.ids.length, label: r.label})),
@@ -596,9 +893,18 @@ async function main() {
     page_errors: pageErrors,
   };
   writeFileSync(join(OUT, 'browser-roco-ux-acceptance.json'), `${JSON.stringify(report, null, 1)}\n`);
-  log(`报告：reports/roco/ux-acceptance/browser-roco-ux-acceptance.json（${checks.length - failed.length}/${checks.length} 通过）`);
+  log(`报告：reports/roco/ux-acceptance/browser-roco-ux-acceptance.json`
+    + `（判据 ${checks.length - failed.length}/${checks.length} 通过；`
+    + `反证 ${counterproofs.filter((c) => c.ok).length}/${counterproofs.length} 命中）`);
   await browser.close();
   await close();
+  // 反证没命中 = 那条判据是空的，比判据红了更坏。
+  const missedCounters = counterproofs.filter((c) => !c.ok);
+  if (missedCounters.length) {
+    console.error(`[roco-ux] ${missedCounters.length} 条**反证**没命中（判据可能是空的）：`
+      + missedCounters.map((c) => c.id).join(', '));
+    process.exitCode = 1;
+  }
   if (failed.length) {
     console.error(`[roco-ux] ${failed.length} 条判据失败：${failed.map((c) => c.id).join(', ')}`);
     process.exitCode = 1;

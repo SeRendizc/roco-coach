@@ -102,6 +102,10 @@ export const SUITES = [
     why: '**页面真的能开**。第 24 轮的回归只有这条抓得到', quick: true},
   {id: 'demo-acceptance', cmd: 'npm', args: ['run', 'roco:demo-acceptance'],
     why: '无聊天入口的完整演示链路；页面能开但演示链路断了也在这里', quick: true},
+  {id: 'roco-ux-acceptance', cmd: 'node', args: ['scripts/roco/browser-roco-ux-acceptance.mjs'],
+    why: '用户 P0 的第 8 条：**页面看不到或点不动的能力不得仅凭单元测试标记完成**。'
+      + '这一条用真实键鼠走一遍翻页 / 筛选 / 选宠 / 行动坞 / 小芽 / 场上事实（印记·能量上限·防御冷却），'
+      + '并把 DOM 与引擎的公开视图逐字对齐；每条判据都配一条**必红反证**（反证没命中也算失败）'},
 ];
 
 /** 清净的子进程环境：清掉测试运行器自己的变量（见 tests/helpers/subprocess.mjs 的说明）。 */

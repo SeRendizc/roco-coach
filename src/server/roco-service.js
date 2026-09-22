@@ -147,6 +147,13 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
   slot:p?.slot??null,pet_id:p?.pet_id??null,name:p?.name??null,hp:p?.hp??null,max_hp:p?.max_hp??null,
   energy:p?.energy??null,fainted:p?.fainted===true,statuses:p?.statuses??{},marks:p?.marks??{},
   ...(p?.buffs?{buffs:p.buffs}:{}),
+  // RC-502：场上的**可见事实**（引擎的公开视图里本来就有，这里只是别把它们丢掉）。
+  //   · `defense_cooldown`：术语 1016「防御技能进入 1 回合冷却」——玩家点过防御之后
+  //     屏幕上必须看得见「下回合不能再用」，否则那一下为什么点不动就说不清；
+  //   · `charging`：术语 1007 的蓄力中（引擎目前还没有会置位的技能，页面对它 fail closed：
+  //     拿到 true 才画那一行）。两处都**只在引擎给了的时候**带出去 —— 旧 fixture 的形状不变。
+  ...(p?.defense_cooldown!==undefined?{defense_cooldown:p.defense_cooldown}:{}),
+  ...(p?.charging!==undefined?{charging:p.charging}:{}),
   // 展示字段（只有 `result.ui` 才带；没有就是 null，界面据 null 显示「未知」而不是编一个）
   name:p?.name??null,types:Array.isArray(p?.types)?p.types:[],stats:p?.stats??null,
   class:p?.class??null,stage:p?.stage??null,
@@ -1918,8 +1925,18 @@ function resolveBattleTeamIds(team){
    if(typeof raw!=='string')invalid.push(`${key} 必须是字符串`);
    else params[key]=raw;
   }
+  // RC-502：候选宇宙口径。**默认视野不变**（冻结已核验的 48 只，练习局/迁移夹具）；
+  // 显式要 `support=all` 才给全量 622（配队与检索口径）。取值只有 `all` 一个，
+  // 别的取值一律 400 —— 与引擎侧同一条纪律，**不静默当默认**。
+  if(!(query?.support===undefined||query?.support===null||query?.support==='')){
+   if(query.support!=='all')return {ok:false,status:400,
+     error:`support 只能是 all（实际 ${JSON.stringify(query.support)}）：默认名单只给冻结已核验的那 48 只`};
+   params.support='all';
+  }
   if(invalid.length)return {ok:false,status:400,error:invalid.join('；')};
-  const paged=Object.keys(params).length>0;
+  // `paged` 只由**分页/筛选**参数决定：`support=all` 是视野开关，不是分页参数
+  // （否则单给 support 会把无参回执的形状换掉）。
+  const paged=['offset','limit','type','role'].some((key)=>key in params);
   const envelope=await client.query({kind:'roster',...params},{});
   const out=unwrap(envelope);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
@@ -1943,7 +1960,11 @@ function resolveBattleTeamIds(team){
     evidence_ids:Array.isArray(m.evidence_ids)?m.evidence_ids:[]})),
    // role/speed_tier 是登记层的**标注**（不是引擎数值）：只在带参数时带出去，
    // 默认回执的 pets[] 元素只多 `evidence_ids`（加性），原有键一个没动。
-   ...(paged?{role:p.role??null,speed_tier:p.speed_tier??null}:{}),
+   //
+   // `build_support`（RC-502）同理：它说明这一只是**冻结已核验**还是**按需推算**，
+   // 页面要靠它把「未核验」如实写在卡上。默认回执里**不加**这个键 ——
+   // 那份回执被禁止重跑的轨迹摘要钉着（`trajectories` 6048/6048），多一个键就全变。
+   ...(paged?{role:p.role??null,speed_tier:p.speed_tier??null,build_support:p.build_support??null}:{}),
    // 每只精灵自己的出处：`ev:<ruleset>:pets.json#<pet_id>`。
    evidence_ids:Array.isArray(p.evidence_ids)?p.evidence_ids:[],
   }));

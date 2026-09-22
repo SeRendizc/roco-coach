@@ -130,9 +130,11 @@ function sandbox({functions = [], constants = [], extra = {}}) {
 
 const box = sandbox({
   functions: ['offsetOfPage', 'standardPvpActive', 'actionGroupsOf', 'actionCardHtml', 'resourceHtml',
-    'statBlockHtml', 'mechanismOf', 'rosterLineHtml', 'modeChipHtml', 'mechanismSourceNote'],
+    'statBlockHtml', 'mechanismOf', 'rosterLineHtml', 'modeChipHtml', 'mechanismSourceNote',
+    'fieldFactsHtml', 'poolQueryOf', 'buffLabel'],
   constants: ['ACTION_GROUPS', 'KNOWN_ACTION_KINDS', 'UI_HIDDEN_IN_STANDARD_PVP',
-    'STAT_FIELDS', 'STAT_MISSING', 'MANA_UNVERIFIED', 'MECHANISM_UNKNOWN'],
+    'STAT_FIELDS', 'STAT_MISSING', 'MANA_UNVERIFIED', 'MECHANISM_UNKNOWN',
+    'BUFF_LABEL', 'BUFF_ELEMENT_POWER', 'BUFF_UNKNOWN', 'STATUS_LABEL'],
 });
 
 const report = (label, actual) => `\n  ${label} 实际输出：${typeof actual === 'string' ? actual : JSON.stringify(actual)}`;
@@ -426,6 +428,141 @@ test('P0-3 开局引导不遮挡候选卡：它不是浮层，且可跳过', () 
   assert.match(PAGE, /\$\('onboard-skip'\)\.addEventListener/, '教程必须能跳过');
   // 跳过之后刷新仍不出现（localStorage 契约）
   assert.match(PAGE, /localStorage\.setItem\(ONBOARD_KEY, '1'\)/, '跳过要写进 localStorage');
+});
+
+// ── RC-502：战斗信息架构（场上事实）─────────────────────────────────────────
+//
+// 这一组钉的是「页面有没有资格把这一行画出来」。三条纪律：
+//   ① **上限来自引擎**：`energy_max` 是这一局生效的规则配置给的（legacy 6 / 候选 10），
+//      页面写死一个数就是在编规则数值；
+//   ② **空与「没给」不是一回事**：印记为空不写「无」，引擎没给这一项就整条不写；
+//   ③ **认不出就说认不出**：增益键不在闭集里时显示「未知增益」，原始键只进 `data-*`。
+const MARK_VIEW = {
+  energy: 3, energy_max: 10, hp: 60, max_hp: 78, fainted: false,
+  statuses: {burn: {layers: 2}}, marks: {星陨印记: 3, 棘刺印记: 1},
+  buffs: {atk: 60, spe: -20, power_bug: 20}, defense_cooldown: 0, charging: false,
+};
+
+test('RC-502 能量带上限（上限读引擎的 energy_max，不是写死的 6/10）', () => {
+  const capped = box.fieldFactsHtml(MARK_VIEW, {energyMax: 10}).html;
+  assert.match(capped, /能量[\s\S]*?3\s*\/\s*10/, `能量要写成「x / 上限」${report('fieldFactsHtml', capped)}`);
+  const legacy = box.fieldFactsHtml({energy: 2}, {energyMax: 6}).html;
+  assert.match(legacy, /2\s*\/\s*6/, `上限换了页面就得跟着换${report('fieldFactsHtml(legacy)', legacy)}`);
+  // 引擎没给上限（这一局没有这个量）⇒ 只写当前值，**不画豆子、不补一个上限**
+  const noCap = box.fieldFactsHtml({energy: 3}, {energyMax: null}).html;
+  assert.match(noCap, /能量[\s\S]*?3/, `没上限时当前值仍要给${report('fieldFactsHtml(no cap)', noCap)}`);
+  assert.ok(!/\/\s*\d/.test(noCap), `上限不知道就不许写出一个「/ 10」${report('fieldFactsHtml(no cap)', noCap)}`);
+  assert.ok(!/●/.test(noCap), `上限不知道就不许画豆子（那是暗示了一个没核验的上限）${report('fieldFactsHtml(no cap)', noCap)}`);
+});
+
+test('RC-502 印记逐条给层数，名字用引擎自己的中文名', () => {
+  const {html} = box.fieldFactsHtml(MARK_VIEW, {energyMax: 10});
+  assert.match(html, /印记/);
+  assert.ok(html.includes('星陨印记 ×3'), `层数要写出来${report('fieldFactsHtml', html)}`);
+  assert.ok(html.includes('棘刺印记'), `1 层的那条也要给${report('fieldFactsHtml', html)}`);
+  assert.ok(!/棘刺印记\s*×1/.test(html), `1 层不必写 ×1（但必须出现名字）${report('fieldFactsHtml', html)}`);
+  // 空印记：**不写「无」** —— 空集合与「引擎没给这一项」在两处视图里是两件事
+  const empty = box.fieldFactsHtml({energy: 1, marks: {}}, {energyMax: 10}).html;
+  assert.ok(!/印记/.test(empty), `印记为空时不该画这一行${report('fieldFactsHtml(空印记)', empty)}`);
+  const absent = box.fieldFactsHtml({energy: 1}, {energyMax: 10}).html;
+  assert.strictEqual(empty, absent, '「marks 给了个空对象」与「没有 marks 这个键」不该显示成两样');
+});
+
+test('RC-502 增益：闭集里的键给中文名，闭集外的键只写「未知增益」+ 原始键进钩子', () => {
+  const {html} = box.fieldFactsHtml(MARK_VIEW, {energyMax: 10});
+  assert.ok(html.includes('物攻 +60%'), `物攻增益要给出来${report('fieldFactsHtml', html)}`);
+  assert.ok(html.includes('速度 -20%'), `负增益也要给（带方向）${report('fieldFactsHtml', html)}`);
+  assert.ok(html.includes('虫系技能威力 +20%'), `属性威力键要认出来${report('fieldFactsHtml', html)}`);
+  const weird = box.fieldFactsHtml({buffs: {crit_rate_up: 30, atk: 10}}, {energyMax: null}).html;
+  const visible = weird.replace(/<[^>]*>/g, '');
+  assert.ok(visible.includes(box.BUFF_UNKNOWN), `认不出的键必须说「${box.BUFF_UNKNOWN}」${report('fieldFactsHtml', weird)}`);
+  assert.ok(!visible.includes('crit_rate_up'), `工程键名不许进可见文本${report('可见文本', visible)}`);
+  assert.ok(weird.includes('data-ff-unknown-keys="crit_rate_up"'),
+    `但原始键要留在钩子里（排查要用）${report('fieldFactsHtml', weird)}`);
+  assert.ok(visible.includes('物攻 +10%'), `认得出的那条照样要给${report('可见文本', visible)}`);
+});
+
+test('RC-502 防御冷却 / 蓄力：只在该出现的时候出现，且不编招名', () => {
+  const cd = box.fieldFactsHtml({defense_cooldown: 2}, {energyMax: null}).html;
+  assert.match(cd, /防御冷却[\s\S]*?2/, `冷却要给出来${report('fieldFactsHtml(冷却)', cd)}`);
+  const noCd = box.fieldFactsHtml({defense_cooldown: 0}, {energyMax: null}).html;
+  assert.ok(!/防御冷却/.test(noCd), `冷却为 0 时不该画这一行${report('fieldFactsHtml(冷却 0)', noCd)}`);
+  const charging = box.fieldFactsHtml({charging: true}, {energyMax: null}).html;
+  assert.match(charging, /蓄力/, `蓄力中要给出来${report('fieldFactsHtml(蓄力)', charging)}`);
+  // 公开视图只给「在不在蓄力」，**没给是哪一招** —— 不许编一个招名出来：
+  // 这一行里除了那句固定文案之外，不该出现任何别的字（尤其 `skill_xxxx` 这种 id）。
+  const visible = charging.replace(/<[^>]*>/g, '').replace('蓄力中（这一手在蓄力）', '');
+  assert.strictEqual(visible.trim(), '', `蓄力行不许编招名${report('蓄力行的可见文本', visible)}`);
+  assert.ok(!/skill_\d/.test(charging), `蓄力行不许出现技能 id${report('fieldFactsHtml(蓄力)', charging)}`);
+});
+
+test('RC-502 反证：写死一个上限（或凭空画一串豆子）必须被同一条判据抓住', () => {
+  // 判据本身抽出来：当前实现在「引擎没给上限」时**不许**出现 `/ 数字`，也不许画豆子。
+  const capProblems = (html) => {
+    const bad = [];
+    if (/\/\s*\d/.test(html)) bad.push('写出了上限');
+    if (/●/.test(html)) bad.push('画了豆子');
+    return bad;
+  };
+  const real = box.fieldFactsHtml({energy: 3}, {energyMax: null}).html;
+  assert.deepStrictEqual(capProblems(real), [], `当前实现必须干净${report('fieldFactsHtml(no cap)', real)}`);
+  const faked = real.replace('能量', '能量 ●●●<b>3 / 10</b>');
+  assert.ok(capProblems(faked).length === 2,
+    `反证构造失败：伪造的「写死上限 + 豆子」没被判据抓住${report('伪造的 html', faked)}`);
+});
+
+test('RC-502 场上事实的钩子逐项列出真的渲染了哪些（DOM 与 state.view 靠它对齐）', () => {
+  const {rendered} = box.fieldFactsHtml(MARK_VIEW, {energyMax: 10});
+  assert.ok(rendered.includes('energy=3/10'), `钩子要有能量：${report('rendered', rendered)}`);
+  assert.ok(rendered.includes('marks=星陨印记:3,棘刺印记:1'), `钩子要有印记：${report('rendered', rendered)}`);
+  assert.ok(rendered.includes('buffs=atk:60,spe:-20,power_bug:20'), `钩子要有增益：${report('rendered', rendered)}`);
+  assert.ok(rendered.includes('statuses=burn'), `钩子要有异常：${report('rendered', rendered)}`);
+  const none = box.fieldFactsHtml({}, {energyMax: null});
+  assert.deepStrictEqual(none.rendered, [], `什么都没给时钩子必须是空的${report('rendered', none.rendered)}`);
+  assert.ok(!/无|—/.test(none.html.replace(/<[^>]*>/g, '')), `什么都没有时不许画一行「无」${report('html', none.html)}`);
+});
+
+// ── RC-502：候选宇宙开关（默认视野逐字节不变）────────────────────────────────
+test('RC-502 阵容池请求：默认不发 support，勾了才发 support=all', () => {
+  const base = {keyword: '', type: '', role: '', page: 2, pageSize: 12, allSupport: false};
+  const def = box.poolQueryOf(base);
+  assert.ok(!/support/.test(def), `默认请求里不许出现 support${report('poolQueryOf(默认)', def)}`);
+  assert.strictEqual(def, 'offset=12&limit=12', `默认请求逐字不变${report('poolQueryOf(默认)', def)}`);
+  const all = box.poolQueryOf({...base, allSupport: true});
+  assert.match(all, /support=all/, `勾了要给 support=all${report('poolQueryOf(all)', all)}`);
+  // 全量视野 + 搜索：一次取回全部匹配项的上限要跟着视野走（否则只搜到前 200 只）
+  const searchFrozen = box.poolQueryOf({...base, keyword: '幽星光'});
+  const searchAll = box.poolQueryOf({...base, keyword: '幽星光', allSupport: true});
+  assert.match(searchFrozen, /limit=200&?|limit=200/, `默认搜索的取数上限是 200${report('poolQueryOf(搜索)', searchFrozen)}`);
+  assert.match(searchAll, /limit=700/, `全量视野下搜索要取全（622 > 200）${report('poolQueryOf(搜索, all)', searchAll)}`);
+  assert.ok(searchFrozen.includes('offset=0') && searchAll.includes('offset=0'),
+    '搜索永远从 0 取（本地再分页）');
+});
+
+test('RC-502 反证：默认请求里混进 support（视野被悄悄换掉）必须被抓住', () => {
+  const leaked = (pool) => box.poolQueryOf({...pool, allSupport: true});
+  assert.match(leaked({keyword: '', type: '', role: '', page: 1, pageSize: 12}), /support=all/,
+    '反证构造失败：allSupport=true 时本该带 support');
+  assert.ok(!/support/.test(box.poolQueryOf({keyword: '', type: '', role: '', page: 1, pageSize: 12, allSupport: false})),
+    '当前实现的默认请求必须不带 support');
+});
+
+test('RC-502 页面说清「对手的增益不在公开视图里」（否则读成双方都标了）', () => {
+  assert.match(PAGE, /对手的增益不在公开视图里/,
+    '战斗页必须有一句说明：对手那一侧不给增益（引擎的公开性口径）');
+  assert.match(PAGE, /!\(?'buffs' in field\)|!\('buffs' in field\)/,
+    '那句话要**按视图真的有没有这个键**决定显不显示，不是永远挂着');
+});
+
+test('RC-502 换人卡写清「换上谁」（只写位次等于让玩家凭记忆换人）', () => {
+  const withName = box.actionCardHtml({kind: 'switch', target_index: 1, label: '换上第2位'}, 0,
+    {slotName: '雪影娃娃'});
+  assert.ok(withName.includes('雪影娃娃'), `换人卡必须写换上谁${report('actionCardHtml(switch)', withName)}`);
+  assert.ok(/换上第2位/.test(withName), `引擎给的位次也要留着${report('actionCardHtml(switch)', withName)}`);
+  // 没有名字时（公开视图没给）**不许编**：只保留引擎的位次说法。
+  const noName = box.actionCardHtml({kind: 'switch', target_index: 1, label: '换上第2位'}, 0);
+  assert.ok(!/雪影|第\s*2\s*位\s*·/.test(noName), `没名字就不许编${report('actionCardHtml(switch,无名字)', noName)}`);
+  assert.match(noName, /换上第2位/);
 });
 
 // ── 交付纪律：单元测试真的被 test:unit 收进去了 ─────────────────────────────

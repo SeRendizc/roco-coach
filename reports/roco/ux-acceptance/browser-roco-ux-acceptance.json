@@ -1,14 +1,15 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-21T20:19:41.088Z",
+ "generated_at": "2026-09-22T03:30:18.413Z",
  "fault_injected": false,
+ "counterproofs_all_hit": true,
  "viewports": [
   "1440x900",
   "390x844"
  ],
  "totals": {
-  "checks": 27,
-  "passed": 27,
+  "checks": 38,
+  "passed": 38,
   "failed": 0
  },
  "checks": [
@@ -169,12 +170,99 @@
    "actual": "页面正文无心形字符，资源条写的是「未核验」"
   },
   {
+   "id": "RC502-默认视野冻结",
+   "name": "默认（开关没勾）：候选宇宙仍是冻结已核验的那一批，没有按需推算的精灵",
+   "ok": true,
+   "actual": "scope=frozen total=48 pages=4 卡上支持等级=[\"FULL_VERIFIED\"]"
+  },
+  {
+   "id": "RC502-勾上开关换视野",
+   "name": "真鼠标勾上「包含按需推算的精灵（未核验）」：候选宇宙换成全量图鉴（>600 只）",
+   "ok": true,
+   "actual": "scope=all total=622 pages=52（默认时 48 只）"
+  },
+  {
+   "id": "RC502-按需推算的卡如实标记",
+   "name": "全量视野里这只按需推算的精灵，卡上写着「按需推算的配招 · 未核验」（不冒充已核验）",
+   "ok": true,
+   "actual": "卡 {\"pet\":\"pet_000296\",\"name\":\"幽星光\",\"support\":\"SIMULATABLE_UNVERIFIED\",\"unverified\":\"按需推算的配招 · 未核验\",\"w\":283,\"h\":219}；问题 无"
+  },
+  {
+   "id": "RC502-全量视野的精灵能真的选上",
+   "name": "真鼠标点这张卡：它进了我方队伍（不是只能看、点不动）",
+   "ok": true,
+   "actual": "我方=[\"pet_000296\"] 现在在选「player」"
+  },
+  {
+   "id": "RC502-全量视野组队开局",
+   "name": "全量视野下真鼠标点满双方各 3 只并开局（这条能力本身能点通）",
+   "ok": true,
+   "actual": "我方 3（[\"pet_000296\",\"雪影娃娃\",\"喵喵\"]）／对手 3（[\"铠甲虫\",\"音速犬\",\"仪式巨像\"]）；防御手=雪影娃娃；开局按钮 disabled=false；试过的防御手 [{\"name\":\"雪影娃娃\",\"shown\":true,\"blocked\":false}]"
+  },
+  {
+   "id": "RC502-能量上限来自引擎",
+   "name": "战斗卡的能量写成「当前 / 上限」，上限是引擎这一局的规则配置（legacy=6）给的",
+   "ok": true,
+   "actual": "引擎上限 self=6 foe=6，当前能量 2"
+  },
+  {
+   "id": "RC502-能量行真的画在卡上",
+   "name": "自己那张卡上真的出现带上限的能量行（DOM 与引擎数值一致）",
+   "ok": true,
+   "actual": "能量行「能量 ●●2 / 6」；引擎 self=2/6"
+  },
+  {
+   "id": "RC502-对手增益口径写在页面上",
+   "name": "对手那一侧的场上事实缺口有说明（引擎不给对手增益，页面照实说）",
+   "ok": true,
+   "actual": "对手侧说明「对手的增益不在公开视图里：引擎只给血/能量/异常/印记/冷却」"
+  },
+  {
+   "id": "RC502-印记逐条画在对手卡上",
+   "name": "真鼠标打出一手带印记的技能：对面卡上出现印记，名字与层数与引擎逐字一致",
+   "ok": true,
+   "actual": "引擎 {\"星陨印记\":3}；页面那一行「印记 星陨印记 ×3」；钩子「energy=2/6;marks=星陨印记:3;defense_cooldown=2」；问题 无"
+  },
+  {
+   "id": "RC502-防御冷却画在自己卡上",
+   "name": "真鼠标点「防御」（必要时先换上带防御的那只）：自己卡上出现防御冷却，数字与引擎一致",
+   "ok": true,
+   "actual": "引擎 {\"turn\":4,\"active\":1,\"present\":true,\"name\":\"雪影娃娃\",\"value\":2}；页面那一行「防御冷却 2」；过程 [{\"attempt\":0,\"act\":\"swap\",\"turn\":2,\"active\":\"幽星光\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"换上第2位 · 雪影娃娃\",\"换上第3位 · 喵喵\"]},{\"attempt\":1,\"act\":\"defend\",\"turn\":3,\"active\":\"雪影娃娃\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"防御\",\"啮合传递\",\"风吹雪\",\"换上第1位 · 幽星光\",\"换上第3位 · 喵喵\"]}]"
+  },
+  {
+   "id": "RC502-场上事实不撑破版面",
+   "name": "加上这几行之后 1440×900 仍然没有横向溢出",
+   "ok": true,
+   "actual": "clientW/scrollW=1440/1440"
+  },
+  {
    "id": "errors",
    "name": "整个过程没有 console error / page exception",
    "ok": true,
    "actual": "console error 0 条、page exception 0 条"
   }
  ],
+ "counterproofs": [
+  {
+   "id": "RC502-按需推算的卡如实标记",
+   "name": "把「未核验」标记去掉（卡上不写配招来源）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "卡上没写「未核验」",
+   "actual": "{\"unverified\":\"\"}"
+  },
+  {
+   "id": "RC502-印记逐条画在对手卡上",
+   "name": "把印记那一行删掉（页面少画一行）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "页面上没有印记那一行",
+   "actual": "row=null"
+  }
+ ],
+ "totals_counterproofs": {
+  "checks": 2,
+  "hit": 2,
+  "missed": 0
+ },
  "measurements": {
   "overflow": {
    "1440x900": {
@@ -399,7 +487,8 @@
   "coach-1440x900.png",
   "battle-1440x900.png",
   "battle-390x844.png",
-  "roster-390x844.png"
+  "roster-390x844.png",
+  "battle-field-facts-1440x900.png"
  ],
  "console_errors": [],
  "page_errors": []
