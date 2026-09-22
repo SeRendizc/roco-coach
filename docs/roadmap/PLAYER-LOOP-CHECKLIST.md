@@ -413,3 +413,41 @@ R2 1–2 轮 + R3 1 轮 + R4 1 轮 + R5 0.5 + R6 0.5 + R1 1 轮 ≈ **5–6 轮*
 **为什么回退**：这一步没做完时门禁会红（JS 台账 5 条）。按纪律**不留半破状态**：
 已 `git checkout` 回退，`test:env` 417 OK、门禁 22/22（上一轮状态）。
 Python 侧的完整改法已在本节写清，下一轮照它做即可。
+
+### R1 第 129 轮：Python 侧 + 派生链**已全线打通**，JS 产物尾清单如下（回退保树干净）
+
+第 129 轮把 R1 推到了**可验证的深处**，逐项证据：
+
+| 步骤 | 结果 |
+|---|---|
+| 仓内证据文件 | 新建 `data/roco/evidence/user-in-game-reports.json`（记录「用户实机核对：开局双方各 10 星」） |
+| 台账 | `EV-ENERGY-INITIAL` → `RECORDED_IN_GAME`，来源 marker 必须是 **`recorded_gameplay`**（校验器要求的词表） |
+| Python 测试 | **`test:env` 417 OK**（`test_six_pet_battle` / `test_rule_config` / `test_mana_actions` / `test_multi_hit` / `test_on_demand_builds` / `test_effect_coverage` 全过） |
+| 派生链 | `rebuild-derived-chain.mjs` **5 环全通**（owned-pets → game-data-pack → readiness → rag-eval） |
+| RAG | `heldout-queries.json`：R05 期望等级改 `RECORDED_IN_GAME`；C02 从「开局几点能量」改成**仍无证据的子问题**（换入/补位/第二次入场），`why` 写明出处；`query_manifest` 哈希重算 → `roco-rag-eval` **21/21** |
+| JS 台账 | `roco-evidence-ledger.test.js` **17/17**（等级断言从「一律禁止 RECORDED_IN_GAME」改成「等级 = RECORDED_IN_GAME 但不得是 OFFICIAL_CURRENT」） |
+
+**JS 侧剩下的尾（下一轮按此顺序做，约 1–2 轮）**：
+
+1. **先重生成，再改期望**（顺序不能反，否则互相打架）：
+   `build-rule-configs` → `build-owned-pets` → `verify-game-data-pack --write` →
+   `build-meta-prior` → `RC302_WRITE_REPORT=1 node --test tests/roco-team-gaps.test.js` →
+   `RC303_WRITE_REPORT=1 …` → `RC304_WRITE_REPORT=1 …`（meta prior 与 team-compare 各一份）→
+   `report-rc101-rule-config.mjs`。
+2. **`report-rc105-mana-actions.py` 会失败**：它给六宠模式只传 3 只
+   （`每方需要恰好 6 只精灵，实际 3 只`）—— 脚本本身要改成 6 只，再重生成报告。
+3. **仍写着旧事实的期望（逐个改成新事实，不是改松）**：
+   - `tests/roco-mana-actions.test.js`：一律禁止 current 两级 → **配置等级 ≤ 台账等级**（已在本轮改好，重做时照抄）；
+   - `tests/roco-rule-config.test.js`：`energy.initial` 断言改 10 + `RECORDED_IN_GAME` + `EV-ENERGY-INITIAL`；
+     「UNKNOWN 不许带值」的样例换 `turn_order.speed_tie`；
+   - `tests/roco-six-pet-battle.test.js`：v2/v3 差异那条改成两侧都是 10；
+   - `tests/roco-standard-pvp-battle.test.js`：覆盖常量**只剩一条**（`turn_order.speed_tie` / `MC-E05` / `random_seeded`），
+     开局那条断言 `self.pets[0].energy === 10`；
+   - `tests/roco-team-gaps.test.js` 的 RC-302 期望（判据②⑨⑫⑬⑭）与 RC-502 的能量上限期望：
+     重生成报告后若仍红，多半也是「拿 `energy.initial` 当 UNKNOWN 样例」或「一律禁止 current 两级」这两类，
+     逐个换成 `speed_tie` / 「≤ 台账等级」即可。
+4. 全部绿了再跑 `npm run verify:release`。
+
+**回退原因**：这批产物**互相牵动**（重生成 A 会动到 B 的期望），本轮预算内没收敛；
+按纪律不留半破状态 —— 已 `git checkout` 回退，`test:env` 417 OK。
+**下一轮照上表逐条做，即可把 R1 真正打勾。**
