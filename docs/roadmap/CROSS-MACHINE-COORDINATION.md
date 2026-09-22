@@ -121,3 +121,35 @@ Windows 不得开始正式训练。
 
 **没做的事（诚实记录）**：本次**没有**把任何契约标成 `ready`（证据不足）；
 没有改 `WIN_STATUS.md`（不属于我）；没有在产品仓里为协作改动任何产品代码。
+
+## §9 待执行的阶段末同步（2026-09-22，**被审批拦下，内容已备好**）
+
+**状态**：本轮阶段末同步**未执行**。原因：协作区工作副本在会话工作区之外
+（`/Users/serendizc/Developer/Reliable Agentic LLM Systems/ai-dev-platform`），
+`git fetch` 被文件沙箱拒绝（`cannot open '.git/FETCH_HEAD': Operation not permitted`），
+按沙箱规则申请一次扩权（`danger-full-access`）被**用户拒绝**——拒绝即为终局，**不绕路**。
+
+**因此这几件事仍然是待办**（不是「已同步」）：
+1. `git fetch origin coord/roco-coach` + `git pull --ff-only`（本地 HEAD `f839dcf`，落后 origin **17 个提交**；
+   origin 上已有我前几轮的 RC-301/302/303/304 同步）；
+2. 更新 `projects/roco-coach/MAC_STATUS.md`（产品 HEAD → 本轮 `bd4e6a4`）；
+3. 追加 `DECISIONS.md`（append-only）与 `BLOCKERS.md`；
+4. commit + push（只碰我自己的两个文件）。
+
+**备好的内容（下次一次性写入，不重新调研）**：
+
+- **产品 HEAD**：`db3f3fd`→`bd4e6a4` 这一段（RC-105 / RC-305 / P0 玩家层重排 / 机制首层）。
+- **`MAC_STATUS.md` 要点**：门禁 **17/17**；`test:env` 295 → **324**；`test:unit` 878 → **936**；
+  新增 `mobile-s4-candidate-v3`（候选，`BLOCKED_UNTIL_MICROCASE`，六宠/4 魔力/力竭 -1/合法动作
+  `skill→charge→switch→surrender`，禁 `item`/`escape`）；`legacy_sim_v1` 逐位不变（8 条 golden 指纹）；
+  六槽工作台 `/api/roco/workshop` 落地（35/35 + 15/15）；P0 玩家层（翻页真实生效 `--fault` 变红、
+  小芽三条判据、卡片模板句 0、行动坞按 kind、魔力只显示引擎给的数）；**六宠暂时开不了局**
+  （`energy.initial` 仍 UNKNOWN，MC-E04）⇒ 下一 RC-106。
+- **`DECISIONS.md` 追加**：`D-20260922-01` —— 标准 PVP 口径（六宠 / 每方 4 点魔力 / 力竭扣 1 / 归零判负 /
+  合法动作四类）**来自项目所有者的试玩断言 + 台账 `CROSS_SOURCE_SUPPORTED` 条目 + 冻结 `skills.json`
+  里 6 条特性原文**，仍**不是**官方一手；`MC-E07/E08/E09` 未录制前不得 promotion，
+  也不得把它写成官方事实。所有者指令**不构成**独立来源（一次尝试加台账条目因只有 1 条 URL 被检查器拒绝）。
+- **`BLOCKERS.md` 追加**：`B-20260922-01`（owner: 人类）——**需要一段标准 PVP 实机录制**（`MC-E08` 最高优先：
+  每方魔力上限/初始值、力竭扣减、归零判负、投降语义；顺带 `MC-E04` 初始能量），
+  它是把 `BattleModeV2` / v3 配置从 candidate 推向可用的唯一外部输入；在它到位前
+  Windows **不得**用标准 PVP 口径生成训练数据（`TeamDatasetV2` 仍是 `invalidated`）。
