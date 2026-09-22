@@ -145,6 +145,8 @@ const STYLE = `
 .tw-cand-tools .tw-btn{min-height:44px;width:100%}
 /* 翻页那一行：用 flex 让两个按钮**平分整行**、页码居中（grid 三列在实测里没生效，
    这里换成 flex：flex:1 1 0 一定平分，不给浏览器留下别的解释）。 */
+/* 候选列表的分组说明条（人类实测 Q2：约一半候选是我不拥有的物种） */
+.tw-group-note{margin:6px 0 2px;font-size:11.5px;color:#9caebe}
 .tw-cand-tools.tw-pager{display:flex;gap:6px;align-items:center}
 .tw-cand-tools.tw-pager .tw-btn{flex:1 1 0;width:auto;min-width:0}
 .tw-cand-tools.tw-pager .tw-note{flex:0 0 auto;white-space:nowrap}
@@ -597,6 +599,33 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     return [...bySpecies.values()];
   }
 
+  /**
+   * 给候选列表按**拥有与否**分组（人类实测 Q2）：在两组之间插一条说明行，并写清各几条。
+   * 只动玩家看得见的呈现，不动服务端的召回口径（候选宇宙仍是 600+）。
+   */
+  function groupPoolRows() {
+    const list = $('tw-cand-list');
+    if (!list) return;
+    list.querySelectorAll('[data-tw-group]').forEach((el) => el.remove());
+    const rows = [...list.querySelectorAll('.tw-row')];
+    if (!rows.length) return;
+    const held = rows.filter((r) => (r.dataset.twStatus || '') === 'held');
+    const ref = rows.filter((r) => (r.dataset.twStatus || '') !== 'held');
+    if (!held.length || !ref.length) {
+      // 只有一类时不加分组条，但把计数写在结果行上（玩家仍知道自己在看什么）
+      rootEl.dataset.twPoolHeld = String(held.length);
+      rootEl.dataset.twPoolRef = String(ref.length);
+      return;
+    }
+    const note = (text) => `<p class="tw-group-note" data-tw-group="yes">${text}</p>`;
+    const firstRef = ref[0];
+    firstRef.insertAdjacentHTML('beforebegin',
+      note(`你拥有的可选（${held.length} 只，能正式出战）`)
+      + note(`图鉴参考（${ref.length} 只：还不能正式出战，放进理论阵容后只能试玩）`));
+    rootEl.dataset.twPoolHeld = String(held.length);
+    rootEl.dataset.twPoolRef = String(ref.length);
+  }
+
   function renderPool() {
     const rows = state.pool.rows;
     if (!rows.length) {
@@ -645,6 +674,11 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
        <span class="tw-rowtag">${held ? '在你的盒子里' : '你还没有这一只'}</span>
       </button>`;
       }).join(''));
+    // 2026-09-22（人类实测 Q2）：召回/候选里**约一半是我不拥有的物种**（实测 50 个候选里 25 个：
+    // 喵喵 / 水蓝蓝 / 火花 / 迪莫…）。它们按 v3 口径是合法的**候选宇宙**，但页面原来把它们和
+    // 「我拥有的」混在一列里，看起来像「不存在的精灵进了我的队伍」。这里按**拥有与否**分组显示并给计数，
+    // 让玩家一眼看出哪些能正式出战、哪些只是图鉴参考（只能试玩）。
+    groupPoolRows();
     const pages = Math.max(1, Math.ceil(state.pool.total / state.pool.pageSize));
     const page = Math.min(pages, Math.floor(state.pool.offset / state.pool.pageSize) + 1);
     $('tw-cand-page').textContent = `${page} / ${pages}`;

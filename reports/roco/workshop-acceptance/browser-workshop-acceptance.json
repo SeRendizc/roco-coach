@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T12:48:47.247Z",
+ "judged_at": "2026-09-22T13:16:04.368Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -56,6 +56,12 @@
    "actual": "slots=6 节点=6 filled=0 selected=0"
   },
   {
+   "id": "候选按拥有与否分组",
+   "judge": "人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有），页面必须按**拥有与否**分组说明，并写清图鉴参考只能试玩",
+   "ok": true,
+   "actual": "拥有 1 / 图鉴参考 11；说明 [\"你拥有的可选（1 只，能正式出战）\",\"图鉴参考（11 只：还不能正式出战，放进理论阵容后只能试玩）\"]"
+  },
+  {
    "id": "03-徽记与候选池",
    "judge": "三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账）",
    "ok": true,
@@ -77,13 +83,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=147 full_ms=36 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=118 full_ms=29 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=32 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=25 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -287,7 +293,7 @@
    "id": "36-候选规则下的 Coach 取舍",
    "judge": "v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数",
    "ok": true,
-   "actual": "并列 3 条（[\"防御\",\"啃咬\",\"换上第2位\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3"
+   "actual": "并列 3 条（[\"防御\",\"啃咬\",\"聚能\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3"
   },
   {
    "id": "33-控制台干净",
@@ -303,6 +309,13 @@
    "ok": true,
    "hit": "槽位数必须是 6，实际 3 | 页面上必须画出 6 个槽位节点，实际 3",
    "actual": "slots=3 / slotNodes=3 / filled=3"
+  },
+  {
+   "id": "候选按拥有与否分组",
+   "judge": "把两类混成一列（不给分组说明）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "同时有「我的」与「图鉴参考」却没分组说明 | 没有「你拥有的可选」这组 | 没有「图鉴参考」这组 | 没说清图鉴参考不能正式出战",
+   "actual": "{\"notes\":[]}"
   },
   {
    "id": "03-候选规则徽记",
@@ -530,14 +543,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "147",
-    "fullMs": "36",
+    "firstMs": "118",
+    "fullMs": "29",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "32"
+    "elapsedMs": "25"
    },
    "dom": {
     "slotNodes": 6,
@@ -587,14 +600,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "27",
-    "fullMs": "29",
+    "firstMs": "28",
+    "fullMs": "25",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "24"
+    "elapsedMs": "20"
    },
    "dom": {
     "slotNodes": 6,
@@ -718,7 +731,7 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
+    "firstMs": "17",
     "fullMs": "15",
     "fullState": "ok",
     "ready": "yes",
@@ -852,14 +865,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "18",
+    "firstMs": "14",
+    "fullMs": "17",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "13"
+    "elapsedMs": "12"
    },
    "dom": {
     "slotNodes": 6,
@@ -994,13 +1007,13 @@
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
     "firstMs": "22",
-    "fullMs": "23",
+    "fullMs": "22",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "19"
+    "elapsedMs": "18"
    },
    "dom": {
     "slotNodes": 6,

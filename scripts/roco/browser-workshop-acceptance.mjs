@@ -782,6 +782,36 @@ async function main() {
       const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
       return JSON.stringify({mode:count('标准 PVP 六宠阵容工坊'),candidate:count('候选规则（待实机核对）'),
         prematch:count('匹配前对手未知'),poolTotal:Number(root?.dataset.twPoolTotal||'0')});})()`).then(JSON.parse);
+    // 2026-09-22（人类实测 Q2）：候选里约一半是**我不拥有的物种**（实测 50 个候选 25 个非我拥有），
+    // 页面必须按**拥有与否**分组说明 —— 否则玩家会以为「不存在的精灵进了我的队伍」。
+    // 先切到**全图鉴参考**范围：只有在那一档，列表里才会同时出现「我拥有的」与「图鉴参考」，
+    // 分组那条判据的真分支才被量到（「我的」范围里 ref=0，量它是空转）。
+    await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)})?.shadowRoot;
+      const b=sr&&sr.querySelector('#tw-scope-all');if(b)b.click();return true;})()`);
+    await sleep(900);
+    const poolGroups = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=root?.shadowRoot;
+      const notes=sr?[...sr.querySelectorAll('#tw-cand-list [data-tw-group]')].map((el)=>el.textContent.trim()):[];
+      return {notes,held:Number(root?.dataset.twPoolHeld||'0'),ref:Number(root?.dataset.twPoolRef||'0')};})()`);
+    const groupProblems = (f) => {
+      const bad = [];
+      if (!(f?.held >= 1)) bad.push(`一类候选都没有（held=${f?.held}）`);
+      if (f?.ref > 0) {
+        if ((f?.notes ?? []).length < 2) bad.push('同时有「我的」与「图鉴参考」却没分组说明');
+        if (!(f?.notes ?? []).some((n) => /你拥有的/.test(n))) bad.push('没有「你拥有的可选」这组');
+        if (!(f?.notes ?? []).some((n) => /图鉴参考/.test(n))) bad.push('没有「图鉴参考」这组');
+        if (!(f?.notes ?? []).some((n) => /试玩|不能正式出战/.test(n))) bad.push('没说清图鉴参考不能正式出战');
+      }
+      return bad;
+    };
+    check('候选按拥有与否分组', '人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有），'
+      + '页面必须按**拥有与否**分组说明，并写清图鉴参考只能试玩',
+      groupProblems(poolGroups).length === 0,
+      groupProblems(poolGroups).join(' | ')
+      || `拥有 ${poolGroups.held} / 图鉴参考 ${poolGroups.ref}；说明 ${JSON.stringify(poolGroups.notes)}`);
+    counter('候选按拥有与否分组', '把两类混成一列（不给分组说明）必须被同一条判据抓住',
+      groupProblems({held: 5, ref: 7, notes: []}), '{"notes":[]}');
+
     check('03-徽记与候选池', '三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），'
       + '模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账）',
       headerBadges.mode===1&&headerBadges.candidate===1&&headerBadges.prematch===1
