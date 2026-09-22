@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>战斗页 v3 示意图</title>
+<style>
+:root{
+ --bg:#0b1218; --panel:#111c26; --panel2:#0e1822; --line:#243444; --line2:#2f465c;
+ --ink:#e8f0f7; --dim:#93a7b8; --brand:#67c9a8; --warn:#e2b48c; --red:#ff9a9a; --grn:#8fe0a2;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+ font:14px/1.5 -apple-system,"PingFang SC","Microsoft YaHei",system-ui,sans-serif}
+body{padding:14px 18px 18px}
+.wrap{max-width:1404px;margin:0 auto}
+/* ── 页眉：一横排、同高，右侧只有一个小芽按钮 ─────────────────────────── */
+header{display:flex;align-items:center;gap:12px;height:44px}
+.brand{font-size:19px;font-weight:700;letter-spacing:.3px}
+.brand small{font-weight:600;font-size:12px;color:var(--brand);border:1px solid #2c5a4c;
+ background:#12241f;border-radius:999px;padding:2px 9px;margin-left:9px;vertical-align:2px}
+.spacer{flex:1}
+.xiaoya{width:44px;height:44px;border-radius:14px;border:1px solid var(--line2);background:#16242f;
+ display:grid;place-items:center;font-size:19px;cursor:pointer}
+/* ── 顶部信息栏：左端我方、居中回合、右端对手 ─────────────────────────── */
+.topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:14px;
+ margin:12px 0 14px;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+.side{display:flex;align-items:center;gap:10px}
+.side.right{justify-content:flex-end}
+.dots{letter-spacing:2px;font-size:15px}
+.dots .alive{color:var(--brand)} .dots .down{color:#4a5b6b}
+.hearts{font-size:15px;letter-spacing:1px;color:#ffb4c0}
+.hearts .lost{color:#3d4a57}
+.hearts.hidden{opacity:0;pointer-events:none}
+.turn{font-size:15px;font-weight:600}
+.turn em{font-style:normal;color:var(--dim);font-weight:500}
+/* ── 主区：左竖排技能 / 中出战 / 右预留 ─────────────────────────────── */
+main{display:grid;grid-template-columns:244px 1fr 214px;gap:16px;align-items:stretch;
+ height:calc(100vh - 272px);min-height:420px}
+.col{display:flex;flex-direction:column;gap:12px}
+.slot{position:relative;border:1px solid var(--line2);border-radius:12px;background:var(--panel);
+ padding:10px 12px;display:flex;flex-direction:column;gap:6px;justify-content:center}
+.slot .row1{display:flex;align-items:center;gap:8px}
+.star{font-weight:700;font-size:13px;color:#ffd479}
+.slot .name{font-weight:650;font-size:15px}
+.slot .meta{font-size:12px;color:var(--dim)}
+.dmg{font-size:12.5px;font-weight:600}
+.dmg.plain{color:var(--ink)} .dmg.up{color:var(--grn)} .dmg.down{color:var(--red)} .dmg.none{color:var(--dim)}
+.slot.grey{opacity:.62}
+.slot.on{border-color:#5b86ad;background:#152434}
+.skills{display:flex;flex-direction:column;gap:10px;height:100%}
+.skills .slot{flex:1}
+.skills.spread .slot{flex:1}
+.hint{font-size:11.5px;color:var(--dim);margin:2px 2px 0}
+/* 中间：双方出战卡 */
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:16px;flex:1}
+.fighter{border:1px solid var(--line2);border-radius:14px;background:var(--panel);padding:15px 16px;
+ display:flex;flex-direction:column;gap:11px;height:100%}
+.fighter .f-spacer{flex:1}
+.fighter.foe{background:#131a24}
+.f-line1{display:flex;align-items:baseline;gap:9px}
+.f-name{font-size:17px;font-weight:700}
+.chip{font-size:11.5px;padding:2px 8px;border-radius:999px;border:1px solid var(--line2);color:var(--dim)}
+.chip.type{color:#bfe3ff;border-color:#2d4a63;background:#12202c}
+.f-lv{font-size:12px;color:var(--dim);margin-left:auto}
+.f-line2{display:flex;align-items:center;gap:10px}
+.f-star{font-size:13px;font-weight:700;color:#ffd479;border:1px solid #4a3f22;background:#221d10;
+ border-radius:10px;padding:3px 9px}
+.hp{flex:1}
+.hp .num{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-bottom:4px}
+.hp .bar{height:9px;border-radius:999px;background:#1d2833;overflow:hidden}
+.hp .fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#4fbf8f,#67c9a8)}
+.hp .fill.low{background:linear-gradient(90deg,#d2785c,#e8a06a)}
+.hp .fill.mid{background:linear-gradient(90deg,#c9b45a,#e0c96a)}
+.portrait{flex:1;border:1px dashed #2b3d4e;border-radius:12px;display:flex;align-items:center;
+ justify-content:center;color:#54697c;font-size:12.5px;text-align:center;padding:8px;min-height:120px}
+.buffs{display:flex;gap:6px;min-height:26px;align-items:center}
+.buffs .b{font-size:11px;color:#cfe0f0;border:1px dashed #33485c;border-radius:8px;padding:2px 7px}
+.buffs .b.ghost{opacity:.35}
+.right{padding:14px;border:1px dashed #2b3d4e;border-radius:14px;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;color:#5f7385;font-size:12.5px;text-align:center;gap:8px}
+/* ── 底部：左聚能 / 右四功能 ───────────────────────────────────────── */
+footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;margin-top:16px}
+.charge{height:48px;padding:0 18px;border-radius:12px;border:1px solid #3c5a4a;background:#12231d;
+ color:#cdeadd;font-weight:650;display:flex;align-items:center;gap:10px}
+.charge .sub{font-size:12px;color:#8fbfa9;font-weight:500}
+.tabs{display:flex;gap:10px;justify-content:flex-end}
+.tab{height:48px;min-width:104px;border-radius:12px;border:1px solid var(--line2);background:#152230;
+ color:#c9d6e2;font-weight:650;font-size:14.5px}
+.tab.on{background:#1e3b55;border-color:#5b86ad;color:#fff;box-shadow:0 0 0 1px #2a5a7d inset}
+.logbtn{height:40px;padding:0 14px;border-radius:11px;border:1px solid var(--line2);background:#141f2a;color:#b9c7d4}
+.logbox{position:absolute;right:28px;bottom:104px;width:min(430px,42vw);max-height:52vh;overflow:auto;
+ border:1px solid var(--line2);border-radius:14px;background:#0f1a23;box-shadow:0 18px 50px rgba(0,0,0,.55);padding:12px}
+.logbox h3{margin:0 0 8px;font-size:13.5px;color:#dfe8ef;display:flex;justify-content:space-between}
+.logbox h3 span{color:var(--dim);font-weight:500}
+.lt{border:1px solid #253546;border-radius:9px;padding:7px 9px;margin-bottom:6px;font-size:12.5px;color:#c9d6e2}
+.lt b{color:#9caebe;font-weight:600;font-size:11.5px;display:block;margin-bottom:3px}
+/* 掉心动效 */
+.heartpop{position:absolute;left:50%;transform:translateX(-50%);top:104px;padding:7px 13px;border-radius:999px;
+ border:1px solid #6a3a44;background:#2a161c;color:#ffb4c0;font-size:13px;font-weight:650;
+ box-shadow:0 10px 26px rgba(0,0,0,.5);animation:pop 2.6s ease-out infinite}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,6px) scale(.94)}18%{opacity:1;transform:translate(-50%,0) scale(1)}
+ 78%{opacity:1}100%{opacity:0;transform:translate(-50%,-6px)}}
+.frame{display:none} .frame.on{display:block}
+@media (max-width:720px){
+ body{padding:10px}
+ main{grid-template-columns:1fr;gap:12px}
+ .stage{grid-template-columns:1fr}
+ .right{display:none}
+ footer{grid-template-columns:1fr;gap:10px}
+ .tabs{justify-content:space-between}
+ .tab{flex:1;min-width:0}
+ .logbox{right:12px;left:12px;bottom:118px;width:auto}
+ .skills .slot{min-height:64px}
+}
+</style></head><body><div class="wrap">
+
+<header>
+  <div class="brand">小芽 · 洛克王国：世界<small>训练场</small></div>
+  <div class="spacer"></div>
+  <button class="xiaoya" title="小芽（点开看模型连接）">✦</button>
+</header>
+
+<div class="topbar">
+  <div class="side">
+    <span class="dots" title="我方存活 4 / 6"><i class="alive">●●●●</i><i class="down">○○</i></span>
+    <span class="hearts hidden" id="hearts-l"><i>♥♥</i><i class="lost">♡♡</i></span>
+  </div>
+  <div class="turn">第 1 回合 <em>· AI模拟PVP</em></div>
+  <div class="side right">
+    <span class="hearts hidden" id="hearts-r"><i class="lost">♡♡♡</i><i>♥</i></span>
+    <span class="dots" title="对手存活 3 / 6"><i class="down">○○○</i><i class="alive">●●●</i></span>
+  </div>
+</div>
+
+<main>
+  <div class="col">
+    <div class="hint" id="lefthint">技能 <span style="color:#8fe0a2">4 / 4 可用</span></div>
+    <div class="skills" id="skills">
+      <div class="slot"><div class="row1"><span class="star">⭐ 0</span><span class="name">魔能爆</span></div>
+        <div class="meta">普通系 · 攻击</div><div class="dmg plain">预期伤害 128</div></div>
+      <div class="slot"><div class="row1"><span class="star">⭐ 1</span><span class="name">防御</span></div>
+        <div class="meta">普通系 · 防御</div><div class="dmg none">预期伤害 --</div></div>
+      <div class="slot"><div class="row1"><span class="star">⭐ 3</span><span class="name">强制重启</span></div>
+        <div class="meta">电系 · 攻击</div><div class="dmg up">预期伤害 214 ▲</div></div>
+      <div class="slot grey"><div class="row1"><span class="star" style="color:#ff9a9a">⭐ 5</span><span class="name">电离爆破</span></div>
+        <div class="meta">电系 · 状态</div><div class="dmg down">预期伤害 0 ▼（⭐不足）</div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="stage">
+      <div class="fighter">
+        <div class="f-line1"><span class="f-name">音速犬</span><span class="chip type">火</span><span class="f-lv">60 级</span></div>
+        <div class="f-line2"><span class="f-star">⭐ 10</span>
+          <div class="hp"><div class="num"><span>生命</span><span>445 / 445 · 100%</span></div>
+            <div class="bar"><div class="fill" style="width:100%"></div></div></div></div>
+        <div class="portrait">立绘 / 状态预留区<br>（之后放宠物形象或场上状态，不会撑开卡片）</div>
+        <div class="buffs"><span class="b ghost">状态位</span><span class="b ghost">增益位</span><span class="b ghost">印记位</span></div>
+      </div>
+      <div class="fighter foe">
+        <div class="f-line1"><span class="f-lv">60 级</span><span class="chip type">水</span><span class="f-name">水灵</span></div>
+        <div class="f-line2">
+          <div class="hp"><div class="num"><span>332 / 332 · 100%</span><span>生命</span></div>
+            <div class="bar"><div class="fill mid" style="width:64%"></div></div></div>
+          <span class="f-star">⭐ 3</span></div>
+        <div class="portrait">立绘 / 状态预留区</div>
+        <div class="buffs"><span class="b ghost">状态位</span><span class="b ghost">增益位</span><span class="b ghost">印记位</span></div>
+      </div>
+    </div>
+    <div class="hint">中间：双方出战精灵（名称/属性/等级 + ⭐ + 血量百分比；状态与增益用虚线位预留，之后填内容不会撑开）</div>
+  </div>
+
+  <div class="right">
+    <div>右侧预留</div><div>（PVP 第二人视图）</div>
+    <button class="logbtn" style="margin-top:6px">战报</button>
+  </div>
+</main>
+
+<footer>
+  <button class="charge">聚能 <span class="sub">→ ⭐ 10 / 10</span></button>
+  <div></div>
+  <div class="tabs">
+    <button class="tab on">技能</button><button class="tab">更换</button>
+    <button class="tab">物品</button><button class="tab">逃跑</button>
+  </div>
+</footer>
+
+<!-- 小芽面板：页眉那个按钮点开（模型连接状态都收在这里，页眉不再摆模型条） -->
+<div class="logbox frame" id="f-xiaoya" style="right:28px;top:60px;bottom:auto;width:min(392px,42vw)">
+  <h3>小芽<span>✕</span></h3>
+  <div class="lt"><b>云端 · DeepSeek API</b>已连接 · 用于长对话与解释（延迟 ~1.2s）</div>
+  <div class="lt"><b>本地 · Qwen3.5-4B</b>已连接 · 用于局势化短提示（延迟 ~0.3s）</div>
+  <div class="lt"><b>本地 · Qwen3.8-27B</b>未连接 · 用于整局复盘（点这里可重试）</div>
+  <div class="lt" style="color:#93a7b8">纪律：三只都只做「解释与表达」；伤害、合法动作、胜率一律由规则引擎给。
+    没连上时页面照实说「离线：只给规则事实」。</div>
+</div>
+
+<!-- 战报弹窗（按下才出现；不贴角，留足边距） -->
+<div class="logbox frame" id="f-log">
+  <h3>战报（整局）<span>✕</span></h3>
+  <div class="lt"><b>第 1 回合</b>音速犬使用强制重启，对水灵造成 214 伤害（属性克制）。</div>
+  <div class="lt"><b>第 1 回合</b>水灵使用水枪，对音速犬造成 66 伤害。</div>
+  <div class="lt"><b>第 2 回合</b>你换上雪影娃娃；对手换上喵喵。</div>
+</div>
+
+</div>
+<script>
+// 三个「帧」用来拍不同状态：default（默认）/ switch（更换态）/ heart（掉心动效）
+const frame = (location.hash.match(/frame=(\w+)/) || [,'default'])[1];
+if (frame === 'switch') {
+  document.getElementById('lefthint').innerHTML = '更换 <span style="color:#8fe0a2">5 只可换</span>';
+  document.getElementById('skills').innerHTML = [
+    ['铠甲虫','虫系 · 攻击','⭐ 0','86','plain','雪影娃娃 · 442/442'],
+    ['雪影娃娃','冰系 · 状态','⭐ 1','--','none','皇家狮鹫 · 403/403'],
+    ['皇家狮鹫','翼系 · 攻击','⭐ 2','131','up','化蝶 · 311/311'],
+    ['化蝶','虫系 · 攻击','⭐ 1','0','down','仪式巨像 · 401/401'],
+    ['仪式巨像','地系 · 防御','⭐ 3','--','none','铠甲虫 · 445/445'],
+  ].map(([n,m,s,d,c,extra]) => `<div class="slot" style="flex:1">
+      <div class="row1"><span class="star">${s}</span><span class="name">${n}</span></div>
+      <div class="meta">${m}</div>
+      <div class="dmg ${c}">预期伤害 ${d}</div>
+      <div class="meta">${extra}</div></div>`).join('');
+  document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('on', b.textContent === '更换'));
+}
+// 心只在掉心那一帧出现（人类规格：平时只出现精灵状态，扣心时闪几秒）。
+if (frame === 'heart') {
+  document.querySelectorAll('.hearts').forEach((el) => el.classList.remove('hidden'));
+}
+if (frame === 'heart' || frame === 'log') {
+  const pop = document.createElement('div');
+  pop.className = 'heartpop';
+  pop.textContent = '♥♥ → ♡♡   水灵被击败，对手掉 2 颗心';
+  document.querySelector('.topbar').appendChild(pop);
+}
+if (frame === 'log') document.getElementById('f-log').classList.add('on');
+if (frame === 'xiaoya') document.getElementById('f-xiaoya').classList.add('on');
+</script></body></html>
