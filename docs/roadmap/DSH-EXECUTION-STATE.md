@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `7cfcc1b`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `c2add38`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1907,3 +1907,28 @@ A7 1440/390 无遮挡无横向溢出、A8 页面看不到的能力不得只凭�
 
 **下一批**（按同一把尺子）：未被登记的 233 条特性 → 选择（20）→ 传动（13）→ 随机（11）；
 RC-403 要把四档分类做成可执行产物；页面与训练数据生成器按 `build_support` / 能力声明分档显示。
+
+### C6.36 第 99 轮：RC-403 支持等级分类（「能上场」≠「能模拟」）
+
+**交付**：`roco/src/roco_env/support.py` → `reports/roco/rc403/support-classification.json`
+（622 只逐只给部件明细）；守卫 `roco/tests/test_support_classifier.py`（7 条）；
+文档 `docs/roco/RC-403-SUPPORT-CLASSIFIER.md`。
+
+**判据**：按**部件**（配招来源 + 特性 + 四个技能）定档；精灵档描述「作为一只可上场的单位，
+有多少行为真的按规则走」。**刻意不用最坏件规则** —— 239/245 条特性没登记，最坏件会把
+599 只明明能上场、四个技能也都能结算的精灵判成 `KNOWLEDGE_ONLY`（那句话是错的）。
+两个清单必须分开：`unverified_pieces`（结算了但没证据）与 `unsimulated_pieces`（根本没在按规则走）。
+
+**实测 622 只**：FULL_VERIFIED **0** / SIMULATABLE_UNVERIFIED **8**（护主犬、音速犬、海豹战士、
+号儿鱼、画间沉铁兽、热团团、焰米龙、月辉鹭）/ PARTIAL **614** / KNOWLEDGE_ONLY 0；
+卡点：特性 **609 只**、配招里的技能 150 只；12 只带 `refused_pieces`（如「不朽」落在寂灭骨龙/大头骨龙）。
+⇒ **下一批实现顺序由它决定：特性层登记覆盖收益最高**（609 只卡在那一件上）。
+
+**刻意的边界**：接口（`/rules/query` 的 roster）本轮**没动** —— 那条回执被已录制、禁止重跑的
+agent 轨迹钉着，加字段会让 6048 条轨迹全部对不上（上一轮刚踩过同类坑）。要给页面用，
+走本报告或新端点。
+
+**实测**：`test:env` 383 → **390 条 OK**；门禁 **17/17**。
+
+**下一轮入口**：按 `unverified`/`unsimulated` 卡点做特性层登记（RC-401 下一批）；
+把支持等级接进页面与训练数据生成器的 manifest 口径；RC-404 代表性回归集。
