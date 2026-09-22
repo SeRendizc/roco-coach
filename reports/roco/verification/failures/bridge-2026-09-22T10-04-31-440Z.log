@@ -1,0 +1,46 @@
+npm run test:bridge
+
+> test:bridge
+> node --test tests/evals/roco/bridge.test.js
+
+✔ 桥：能起停 Python 服务；/health 往返并报告规则集 id 与快照指纹 (340.033792ms)
+✖ 桥：静态事实带 ruleset/state_version/coverage/evidence_ids/延迟 (337.484333ms)
+✔ 桥：未知规则集 id → 可区分的 version_mismatch (334.351458ms)
+✔ 桥：机制不支持时返回 unsupported，而不是一个数字 (331.019042ms)
+✔ 桥：阵容评估已接规则 baseline，且明确不输出胜率 (329.679834ms)
+✔ 桥：本引擎持有的规则集加载不了 → ruleset_unsupported (309.134708ms)
+✔ 桥：服务超时是独立的一类（service） (205.887292ms)
+✔ 桥：拒绝携带隐藏信息，连发都不发 (334.262958ms)
+✔ 桥：双属性相性只用快照显式行（缺行时 unsupported，不相乘） (330.911042ms)
+✔ 桥：工具层声明了 5 个工具且必填项明确（get_visible_state 之外） (0.299334ms)
+✔ 桥：assertOk 能把结构化拒绝变成四类可区分的异常 (330.727875ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 10
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3250.128583
+
+✖ failing tests:
+
+test at tests/evals/roco/bridge.test.js:146:1
+✖ 桥：静态事实带 ruleset/state_version/coverage/evidence_ids/延迟 (337.484333ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  false !== true
+  
+      at file:///Users/serendizc/Developer/roco-coach/tests/evals/roco/bridge.test.js:169:12
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async withService (file:///Users/serendizc/Developer/roco-coach/tests/evals/roco/bridge.test.js:98:12)
+      at async TestContext.<anonymous> (file:///Users/serendizc/Developer/roco-coach/tests/evals/roco/bridge.test.js:147:3)
+      at async Test.run (node:internal/test_runner/test:1404:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:969:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

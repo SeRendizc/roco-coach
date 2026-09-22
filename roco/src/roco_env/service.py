@@ -103,7 +103,6 @@ import time
 import traceback
 
 from . import events_text
-from .coverage import classify_skill, SUPPORT_SIMULATABLE_UNVERIFIED, SUPPORT_FULL_VERIFIED
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, List, Optional, Tuple
@@ -723,11 +722,7 @@ class RocoService:
         return _bad_request("查精灵需要 pet_id / id 或 name")
 
     def _skill_record(self, rs: Ruleset, skill: Any) -> Dict[str, Any]:
-        # C3-a（2026-09-22）：支持度的**唯一事实源**是 classify_skill 的计算结果。
-        # 冻结数据里的 effect_support 是一刀切旧标记（实测 579 个进覆盖统计的技能全是
-        # unsupported，连纯伤害技能也是），拿它当判据会一律报「未核验/未实现」。
-        tier = classify_skill(skill, multi_hit_declared=True)
-        resolved = tier["support"] in (SUPPORT_SIMULATABLE_UNVERIFIED, SUPPORT_FULL_VERIFIED)
+        resolved = skill.effect_support == "supported"
         return {
             "record": "skill",
             "skill_id": skill.skill_id,
@@ -742,9 +737,6 @@ class RocoService:
             "has_static_power": skill.has_static_power,
             "is_trait": skill.is_trait,
             "effect_support": skill.effect_support,
-            # C3-a：给调用方**计算出来的**档位与原因（唯一事实源），冻结字段仅作历史参考。
-            "support_tier": tier["support"],
-            "support_why": tier["why"],
             "desc": skill.desc,
             # 这两个键永远为 null：引擎没有实现效果原语前，不许出现「最终数值」。
             "effective_power": None,
@@ -779,13 +771,12 @@ class RocoService:
             result=record,
             evidence_ids=[ev(rs.ruleset_id, "skills.json", skill.skill_id)],
         )
-        if tier["support"] not in (SUPPORT_SIMULATABLE_UNVERIFIED, SUPPORT_FULL_VERIFIED):
+        if skill.effect_support != "supported":
             answer.unsupported = [
                 {
                     "code": "effect_resolution",
                     "skill_id": skill.skill_id,
-                    "reason": (f"效果原语没有全部读出（{tier['support']}）：{tier['why']}；"
-                               "静态 power 只登记来源字段，不能当最终伤害"),
+                    "reason": "该技能的效果原语未实现；静态 power 只登记来源字段，不能当最终伤害",
                 }
             ]
         return answer
@@ -1247,9 +1238,7 @@ class RocoService:
             skill = rs.skills.get(skill_ref)
             if skill is None:
                 return _not_found(f"未知技能 id：{skill_ref}")
-            _tier = classify_skill(skill, multi_hit_declared=True)
-            detail = (f"技能「{skill.name}」的支持档位 = {_tier['support']}（{_tier['why']}）"
-                      f"；冻结层的 effect_support={skill.effect_support} 不是逐技能判定")
+            detail = f"技能「{skill.name}」的 effect_support = {skill.effect_support}"
         return _unsupported(
             "effect_resolution",
             (

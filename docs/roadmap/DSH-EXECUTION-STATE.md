@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `52cb37e`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `9b2b8b0`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2265,3 +2265,22 @@ P0-C 机制覆盖 / P0-D Agent / P0-E UI / P1 算法与 Coach / P2 训练与交�
 **验收**：真实六宠对局走 开局 → 选技能 → 聚能 → 换宠 → 倒下补位 → 结算，
 留 1440×900 / 390×844 截图 + DOM 越界检查 + 行动合法性 + 隐藏信息测试；
 规则仍是候选/未核验时，**用规则文件的状态原样标注在「规则说明」里**，不擅自宣称官方规则。
+
+
+### C6.48 第 119 轮：C3 判据落地 + **一次有据回退**（人类 2026-09-22）
+
+- **C3-b 打勾**：新增 `SupportTierMatchesEngineTest` —— 全量不变量「`SIMULATABLE` ⟺ 分类器自己报的
+  `unparsed` 为空」（0 反例，含敏感性下限，避免空转）+ 一条**真对局**检查（拿可结算技能打一手，
+  局面必须变化）。这就是「未支持的效果不得暗中按普通伤害结算」的可执行形式。
+- **C3-c 真缺口（绊线就位）**：把描述换成「造成伤害，应对防御时额外施加一个本仓库尚未实现的效果。」
+  之后，分类器**仍判可结算** —— 解析器既没读出效果、也没把不认识的尾巴记成 `unparsed`，
+  于是落到「纯伤害」档。修法方向：**没被任何已实现模式吃掉的残句必须记 unparsed**。
+  绊线用 `expectedFailure`：修好会变 unexpected success，逼着下一轮把它改成正式判据。
+- **C3-a 回退（重要教训）**：第 118 轮把 `service.py` 三处改读 `classify_skill` 并加了
+  `support_tier`/`support_why`。第 119 轮门禁实测**五套件连环红**
+  （unit / bridge / trajectories / trajectories-model / retained-assets），
+  其中 `reports/roco/agent-trajectories-verification*.json` **内容变了** ——
+  那是**钉死的产物摘要**（红线：不得改）。**向前回退**该改（`service.py` 回到 `09dc38b`），
+  门禁回 22/22、`test:env` 419（skipped=1, expected failures=1）。
+  重做方式写进清单：**附加式**（新增字段、不动 `resolved`/`coverage` 语义与任何轨迹输出），
+  或先改轨迹消费者再切 —— 不能一把切。
