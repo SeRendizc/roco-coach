@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `216dd13`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `76a69fd`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2284,3 +2284,12 @@ P0-C 机制覆盖 / P0-D Agent / P0-E UI / P1 算法与 Coach / P2 训练与交�
   门禁回 22/22、`test:env` 419（skipped=1, expected failures=1）。
   重做方式写进清单：**附加式**（新增字段、不动 `resolved`/`coverage` 语义与任何轨迹输出），
   或先改轨迹消费者再切 —— 不能一把切。
+
+
+### C6.49 第 121 轮：C3-c 交付 —— 读不出的机制不再按纯伤害算（176 条降档）
+
+`coverage.classify_skill` 的「没读出效果」分支过去不看 `parse.py` 的 `plain_attack`，于是「描述里有机制、但既没被读出、也没被登记为未认领」被算成「纯伤害/纯状态」→ 引擎**静默按静态威力结算**。
+
+修法：该分支现在只认三种可结算来源 —— 解析出的效果、`plain_attack` 为真、或**已声明能力认领**（如候选口径声明的连击）；否则一律 PARTIAL（fail closed）。
+
+**实测**：176 条技能降档，可结算实体 507 → **333**（比例 0.4041）；抽样确认都是该降的（条件化威力：每次使用后+45 / 回合结束能耗-1 / 若上回合用状态技能+55 / 若能量耗尽+120 / 应对状态×3）。判据同步：不变量改三分法、探针句换成真读不出的机制、两条合成 fixture 补 `is_attack`/`power`，绊线响过后转正。`test:env` 417、门禁 22/22。

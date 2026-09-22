@@ -67,8 +67,23 @@ def classify_skill(skill: Any, *, multi_hit_declared: bool = False) -> Dict[str,
         level = SUPPORT_PARTIAL
         why = f"读出一部分（{len(parsed.effects)} 条），另有 {len(parsed.unparsed)} 段没认领"
     elif not parsed.effects and not parsed.unparsed:
-        level = SUPPORT_SIMULATABLE_UNVERIFIED
-        why = "没有附带效果（纯伤害/纯状态），引擎按基础结算处理"
+        # C3-c（2026-09-22，人类红线「未支持的效果不得暗中按普通伤害结算」）：
+        # 「没读出效果」**不等于**「没有机制」。`parse.py` 自己有更严的判定
+        # （`plain_attack` = 描述里没有机制词、且是带威力的攻击）——只有它为真时，
+        # 才能落「纯伤害」这一档；否则说明描述里有机制而它既没被读出、
+        # 也没被登记为未认领片段 —— 过去这种情况被判成纯伤害，引擎会**默默只算伤害**。
+        if getattr(parsed, "plain_attack", False):
+            level = SUPPORT_SIMULATABLE_UNVERIFIED
+            why = "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理"
+        elif claimed:
+            # 描述里的机制被**已声明能力**认领了（例如候选口径声明了连击，
+            # 静态「3连击」就不算未实现）——这时它同样没有未认领片段，可结算。
+            level = SUPPORT_SIMULATABLE_UNVERIFIED
+            why = f"描述里的机制由已声明能力认领（{'、'.join(claimed)}），没有未认领片段"
+        else:
+            level = SUPPORT_PARTIAL
+            why = ("描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段："
+                   "不能按普通伤害结算（fail closed）")
     else:
         level = SUPPORT_KNOWLEDGE_ONLY
         why = f"只有资料：{len(parsed.unparsed)} 段机制没被读出"

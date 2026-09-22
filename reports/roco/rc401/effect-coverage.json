@@ -8,8 +8,8 @@
   "battle_skills": 579,
   "traits": 245,
   "entities": 824,
-  "simulatable_entities": 509,
-  "simulatable_ratio": 0.6177
+  "simulatable_entities": 333,
+  "simulatable_ratio": 0.4041
  },
  "declared_capabilities": {
   "multi_hit": true
@@ -17,8 +17,8 @@
  "support_levels": {
   "battle_skills": {
    "FULL_VERIFIED": 0,
-   "SIMULATABLE_UNVERIFIED": 501,
-   "PARTIAL": 7,
+   "SIMULATABLE_UNVERIFIED": 325,
+   "PARTIAL": 183,
    "KNOWLEDGE_ONLY": 71,
    "REFUSED": 0
   },
@@ -36,6 +36,12 @@
    "skills": 0,
    "traits": 231,
    "total": 231
+  },
+  {
+   "primitive": "（未命名）",
+   "skills": 176,
+   "traits": 0,
+   "total": 176
   },
   {
    "primitive": "连击",
@@ -134,63 +140,63 @@
   },
   "skill_000247": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000248": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000249": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000250": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000251": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000252": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000253": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000254": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000255": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -221,7 +227,7 @@
   },
   "skill_000258": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -230,15 +236,15 @@
    "hit_count": 3
   },
   "skill_000259": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000260": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×5），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -259,63 +265,63 @@
   },
   "skill_000262": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000263": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000264": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000265": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000266": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000267": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000268": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000269": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000270": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -348,15 +354,15 @@
    "claimed_by_capability": []
   },
   "skill_000274": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000275": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -371,22 +377,22 @@
    "claimed_by_capability": []
   },
   "skill_000277": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000278": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000279": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -401,8 +407,8 @@
    "claimed_by_capability": []
   },
   "skill_000281": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -426,8 +432,8 @@
    "claimed_by_capability": []
   },
   "skill_000284": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -442,8 +448,8 @@
    "claimed_by_capability": []
   },
   "skill_000286": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -459,15 +465,15 @@
    "claimed_by_capability": []
   },
   "skill_000288": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000289": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -501,14 +507,14 @@
   },
   "skill_000302": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000303": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -525,21 +531,21 @@
   },
   "skill_000305": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000306": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000307": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -549,70 +555,70 @@
   },
   "skill_000308": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000309": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000310": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000311": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000312": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000313": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000314": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000315": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000316": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000317": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -645,15 +651,15 @@
    "claimed_by_capability": []
   },
   "skill_000321": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000322": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -690,15 +696,15 @@
    "claimed_by_capability": []
   },
   "skill_000326": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000327": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -725,8 +731,8 @@
    "hit_count": 3
   },
   "skill_000330": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -762,14 +768,14 @@
   },
   "skill_000334": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000335": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -803,21 +809,21 @@
   },
   "skill_000339": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000340": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000341": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -835,8 +841,8 @@
    "claimed_by_capability": []
   },
   "skill_000343": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -851,8 +857,8 @@
    "claimed_by_capability": []
   },
   "skill_000345": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -934,29 +940,29 @@
    "claimed_by_capability": []
   },
   "skill_000354": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000355": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000356": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000357": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -966,14 +972,14 @@
   },
   "skill_000358": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000359": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -992,21 +998,21 @@
   },
   "skill_000361": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000362": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000363": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1038,8 +1044,8 @@
    "hit_count": 2
   },
   "skill_000366": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1063,15 +1069,15 @@
    "claimed_by_capability": []
   },
   "skill_000369": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000370": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1108,8 +1114,8 @@
    "claimed_by_capability": []
   },
   "skill_000374": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1125,14 +1131,14 @@
   },
   "skill_000376": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000377": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1147,15 +1153,15 @@
    "claimed_by_capability": []
   },
   "skill_000379": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000380": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -1164,22 +1170,22 @@
    "hit_count": 2
   },
   "skill_000381": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000382": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000383": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1206,8 +1212,8 @@
    "claimed_by_capability": []
   },
   "skill_000386": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1222,15 +1228,15 @@
    "claimed_by_capability": []
   },
   "skill_000388": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000389": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1255,28 +1261,28 @@
   },
   "skill_000392": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000393": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000394": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000395": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -1286,14 +1292,14 @@
   },
   "skill_000396": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000397": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1309,7 +1315,7 @@
   },
   "skill_000399": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1325,21 +1331,21 @@
   },
   "skill_000401": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000402": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000403": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1355,22 +1361,22 @@
    "claimed_by_capability": []
   },
   "skill_000405": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000406": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000407": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1386,15 +1392,15 @@
    "claimed_by_capability": []
   },
   "skill_000409": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000410": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1409,8 +1415,8 @@
    "claimed_by_capability": []
   },
   "skill_000412": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1436,15 +1442,15 @@
    "claimed_by_capability": []
   },
   "skill_000415": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000416": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1469,35 +1475,35 @@
   },
   "skill_000419": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000420": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000421": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000422": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000423": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1512,8 +1518,8 @@
    "claimed_by_capability": []
   },
   "skill_000425": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1555,50 +1561,50 @@
    "claimed_by_capability": []
   },
   "skill_000430": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000431": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000432": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000433": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000434": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000435": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000436": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×4），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -1608,42 +1614,42 @@
   },
   "skill_000437": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000438": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000439": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000440": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000441": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000442": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1659,7 +1665,7 @@
   },
   "skill_000444": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -1677,71 +1683,71 @@
    "claimed_by_capability": []
   },
   "skill_000446": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000447": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000448": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000449": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000450": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000451": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000452": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000453": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000454": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000455": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -1751,28 +1757,28 @@
   },
   "skill_000456": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000457": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000458": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000459": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1788,21 +1794,21 @@
   },
   "skill_000461": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000462": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000463": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1818,7 +1824,7 @@
   },
   "skill_000465": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1852,8 +1858,8 @@
    "claimed_by_capability": []
   },
   "skill_000469": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1896,22 +1902,22 @@
    "claimed_by_capability": []
   },
   "skill_000474": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000475": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000476": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1928,7 +1934,7 @@
   },
   "skill_000478": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -1938,7 +1944,7 @@
   },
   "skill_000479": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -1964,8 +1970,8 @@
    "claimed_by_capability": []
   },
   "skill_000482": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2010,15 +2016,15 @@
    "claimed_by_capability": []
   },
   "skill_000487": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000488": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2061,8 +2067,8 @@
    "claimed_by_capability": []
   },
   "skill_000493": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2078,7 +2084,7 @@
   },
   "skill_000495": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2095,35 +2101,35 @@
   },
   "skill_000497": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000498": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000499": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000500": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000501": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2138,15 +2144,15 @@
    "claimed_by_capability": []
   },
   "skill_000503": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000504": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2190,15 +2196,15 @@
    "claimed_by_capability": []
   },
   "skill_000509": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000510": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2214,14 +2220,14 @@
   },
   "skill_000512": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000513": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2238,21 +2244,21 @@
   },
   "skill_000515": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000516": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000517": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2268,7 +2274,7 @@
   },
   "skill_000519": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2373,29 +2379,29 @@
    "claimed_by_capability": []
   },
   "skill_000531": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000532": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000533": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000534": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2410,15 +2416,15 @@
    "claimed_by_capability": []
   },
   "skill_000536": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000537": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2433,8 +2439,8 @@
    "claimed_by_capability": []
   },
   "skill_000539": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2450,28 +2456,28 @@
   },
   "skill_000541": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000542": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000543": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000544": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -2489,8 +2495,8 @@
    "claimed_by_capability": []
   },
   "skill_000546": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2505,22 +2511,22 @@
    "claimed_by_capability": []
   },
   "skill_000548": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000549": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000550": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -2547,15 +2553,15 @@
    "claimed_by_capability": []
   },
   "skill_000553": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000554": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2639,35 +2645,35 @@
   },
   "skill_000563": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000564": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000565": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000566": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000567": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2693,35 +2699,35 @@
   },
   "skill_000570": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000571": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000572": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000573": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000574": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2736,15 +2742,15 @@
    "claimed_by_capability": []
   },
   "skill_000576": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000577": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2760,43 +2766,43 @@
    "claimed_by_capability": []
   },
   "skill_000579": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000580": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000581": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000582": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000583": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000584": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -2817,15 +2823,15 @@
    "hit_count": 2
   },
   "skill_000586": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000587": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2869,49 +2875,49 @@
   },
   "skill_000592": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000593": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000594": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000595": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000596": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000597": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000598": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2935,8 +2941,8 @@
    "claimed_by_capability": []
   },
   "skill_000601": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -2963,8 +2969,8 @@
    "hit_count": 2
   },
   "skill_000604": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3045,8 +3051,8 @@
    "claimed_by_capability": []
   },
   "skill_000613": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3061,8 +3067,8 @@
    "claimed_by_capability": []
   },
   "skill_000615": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3086,43 +3092,43 @@
    "claimed_by_capability": []
   },
   "skill_000618": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000619": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000620": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000621": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000622": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000623": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3148,22 +3154,22 @@
    "claimed_by_capability": []
   },
   "skill_000626": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000627": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000628": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3180,15 +3186,15 @@
    "hit_count": 1
   },
   "skill_000630": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000631": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3204,8 +3210,8 @@
    "hit_count": 1
   },
   "skill_000633": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3242,8 +3248,8 @@
    "claimed_by_capability": []
   },
   "skill_000637": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3316,14 +3322,14 @@
   },
   "skill_000645": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000646": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3333,28 +3339,28 @@
   },
   "skill_000647": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000648": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000649": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000650": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3369,8 +3375,8 @@
    "claimed_by_capability": []
   },
   "skill_000652": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3395,15 +3401,15 @@
    "claimed_by_capability": []
   },
   "skill_000655": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000656": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3446,7 +3452,7 @@
   },
   "skill_000661": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×6），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3455,22 +3461,22 @@
    "hit_count": 6
   },
   "skill_000662": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000663": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000664": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3479,22 +3485,22 @@
    "hit_count": 3
   },
   "skill_000665": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000666": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000667": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3529,36 +3535,36 @@
    "claimed_by_capability": []
   },
   "skill_000671": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000672": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000673": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000674": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000675": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3568,21 +3574,21 @@
   },
   "skill_000676": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000677": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000678": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3600,8 +3606,8 @@
    "hit_count": 2
   },
   "skill_000680": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3617,8 +3623,8 @@
    "claimed_by_capability": []
   },
   "skill_000682": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3644,15 +3650,15 @@
    "claimed_by_capability": []
   },
   "skill_000685": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000686": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3661,22 +3667,22 @@
    "hit_count": 2
   },
   "skill_000687": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000688": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000689": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3685,15 +3691,15 @@
    "hit_count": 3
   },
   "skill_000690": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000691": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3718,29 +3724,29 @@
    "claimed_by_capability": []
   },
   "skill_000694": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000695": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000696": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000697": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3756,35 +3762,35 @@
   },
   "skill_000699": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000700": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000701": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000702": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000703": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3799,8 +3805,8 @@
    "claimed_by_capability": []
   },
   "skill_000705": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3816,15 +3822,15 @@
    "claimed_by_capability": []
   },
   "skill_000707": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000708": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3852,7 +3858,7 @@
   },
   "skill_000711": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3862,14 +3868,14 @@
   },
   "skill_000712": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000713": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3898,49 +3904,49 @@
   },
   "skill_000716": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000717": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000718": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000719": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000720": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000721": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000722": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -3956,35 +3962,35 @@
   },
   "skill_000724": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000725": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000726": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000727": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000728": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -3994,7 +4000,7 @@
   },
   "skill_000729": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4029,8 +4035,8 @@
    "claimed_by_capability": []
   },
   "skill_000733": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4046,14 +4052,14 @@
   },
   "skill_000735": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000736": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4109,28 +4115,28 @@
   },
   "skill_000742": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000743": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000744": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000745": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4145,43 +4151,43 @@
    "claimed_by_capability": []
   },
   "skill_000747": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000748": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000749": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000750": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000751": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000752": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×5），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -4191,7 +4197,7 @@
   },
   "skill_000753": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4246,14 +4252,14 @@
   },
   "skill_000759": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000760": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4269,15 +4275,15 @@
    "claimed_by_capability": []
   },
   "skill_000762": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000763": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4312,21 +4318,21 @@
   },
   "skill_000767": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000768": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000769": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4345,49 +4351,49 @@
   },
   "skill_000771": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000772": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000773": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000774": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000775": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000776": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000777": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4402,43 +4408,43 @@
    "claimed_by_capability": []
   },
   "skill_000779": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000780": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000781": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000782": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000783": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000784": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×2），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -4448,49 +4454,49 @@
   },
   "skill_000785": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000786": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000787": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000788": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000789": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000790": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000791": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4508,15 +4514,15 @@
    "hit_count": 2
   },
   "skill_000793": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000794": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4531,15 +4537,15 @@
    "claimed_by_capability": []
   },
   "skill_000796": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000797": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4554,36 +4560,36 @@
    "claimed_by_capability": []
   },
   "skill_000799": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000800": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000801": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000802": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000803": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4607,8 +4613,8 @@
    "claimed_by_capability": []
   },
   "skill_000806": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4682,8 +4688,8 @@
    "claimed_by_capability": []
   },
   "skill_000814": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4699,28 +4705,28 @@
   },
   "skill_000816": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000817": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000818": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000819": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "描述里的机制由已声明能力认领（连击×3），没有未认领片段",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": [
@@ -4730,7 +4736,7 @@
   },
   "skill_000820": {
    "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "why": "纯伤害技能（解析器确认描述里没有机制词），引擎按基础结算处理",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4745,15 +4751,15 @@
    "claimed_by_capability": []
   },
   "skill_000822": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000823": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4768,8 +4774,8 @@
    "claimed_by_capability": []
   },
   "skill_000825": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4785,15 +4791,15 @@
    "claimed_by_capability": []
   },
   "skill_000827": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
   },
   "skill_000828": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []
@@ -4836,8 +4842,8 @@
    "claimed_by_capability": []
   },
   "skill_000833": {
-   "support": "SIMULATABLE_UNVERIFIED",
-   "why": "没有附带效果（纯伤害/纯状态），引擎按基础结算处理",
+   "support": "PARTIAL",
+   "why": "描述里有解析器认不出的机制，而且它既没被读出、也没被登记为未认领片段：不能按普通伤害结算（fail closed）",
    "effects": [],
    "unparsed": [],
    "claimed_by_capability": []

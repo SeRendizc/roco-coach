@@ -68,6 +68,10 @@ class CoverageLedgerTest(unittest.TestCase):
             skill_id = "skill_test"
             name = "测试技能"
             is_trait = False
+            # 真实字段：`plain_attack`（纯伤害判定）要求是攻击且带威力 —— 少了它们，
+            # 「造成物伤。」会被 fail-closed 判成 PARTIAL，那是 fixture 不真实而不是判据错。
+            is_attack = True
+            power = 40
             desc = "造成物伤，2连击。"
 
         without = cov.classify_skill(_Skill(), multi_hit_declared=False)
@@ -116,10 +120,23 @@ class SupportTierMatchesEngineTest(unittest.TestCase):
             # 用**分类器自己**输出的 `unparsed`（它按声明的能力摘掉静态连击那一条），
             # 而不是裸解析器 —— 第一版拿 `parse_skill` 直接比，把「声明了连击」算成不一致（判据自己错）。
             unparsed = list(tier.get("unparsed") or [])
-            if tier["support"] == cov.SUPPORT_SIMULATABLE_UNVERIFIED and unparsed:
-                offenders.append((skill.name, unparsed[:1]))
-            if tier["support"] in (cov.SUPPORT_PARTIAL, cov.SUPPORT_KNOWLEDGE_ONLY) and not unparsed:
-                offenders.append((skill.name, "档位说读不全，但分类器没给出未认领片段"))
+            plain = bool(getattr(parse_mod.parse_skill(skill), "plain_attack", False))
+            has_effects = bool(tier.get("effects"))
+            if tier["support"] == cov.SUPPORT_SIMULATABLE_UNVERIFIED:
+                # 可结算 ⟹ 没有未认领片段，且「纯伤害」这个结论必须由解析器的 plain_attack 背书
+                if unparsed:
+                    offenders.append((skill.name, unparsed[:1]))
+                claimed = list(tier.get("claimed_by_capability") or [])
+                if not has_effects and not plain and not claimed:
+                    offenders.append((skill.name,
+                        "判了可结算，但既没有解析出的效果、也不是纯伤害、也没有能力声明认领"))
+            elif tier["support"] == cov.SUPPORT_PARTIAL:
+                # PARTIAL 有两种来源：有未认领片段，**或**「有机制但读不出、也没登记片段」（fail closed）
+                if not unparsed and (has_effects or plain):
+                    offenders.append((skill.name, "判了读不全，但既没有未认领片段、也不是纯伤害"))
+            elif tier["support"] == cov.SUPPORT_KNOWLEDGE_ONLY:
+                if not unparsed:
+                    offenders.append((skill.name, "只有资料的档位却没给出未认领片段"))
         self.assertEqual(
             offenders, [],
             f"档位与解析结果不一致（前 5 条）：{offenders[:5]}")
@@ -130,8 +147,8 @@ class SupportTierMatchesEngineTest(unittest.TestCase):
             counts.get(cov.SUPPORT_PARTIAL, 0) + counts.get(cov.SUPPORT_KNOWLEDGE_ONLY, 0), 10,
             f"读不全的技能太少，判据可能空转：{counts}")
 
-    @unittest.expectedFailure
     def test_classifier_reads_unparsed_segments_from_the_description(self):
+        """C3-c 转正：绊线响过之后（unexpected success）正式成为判据。"""
         """**绊线（2026-09-22 实测缺口）**：不认识的机制句子没有被记成 unparsed。
 
         把一条技能的描述换成「造成伤害，应对防御时额外施加一个本仓库尚未实现的效果。」，
@@ -158,8 +175,11 @@ class SupportTierMatchesEngineTest(unittest.TestCase):
                 break
         self.assertIsNotNone(target, "至少要有一条读不全的技能")
         rewritten = dataclasses.replace(
-            target, desc="造成伤害，应对防御时额外施加一个本仓库尚未实现的效果。")
+            target, desc="造成物伤，附带一个本仓库尚未实现的效果。")
+        parsed = parse_mod.parse_skill(rewritten)
         tier = cov.classify_skill(rewritten, multi_hit_declared=True)
+        self.assertFalse(parsed.plain_attack,
+                         "探针句必须让解析器**否认**它是纯伤害，否则这条判据没测到新分支")
         self.assertNotEqual(tier["support"], cov.SUPPORT_SIMULATABLE_UNVERIFIED,
                             "描述里带未实现机制却被判成可结算 —— 分类器没在读描述")
 
