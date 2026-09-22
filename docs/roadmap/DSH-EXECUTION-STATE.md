@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `c2add38`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `4ff21cf`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1932,3 +1932,30 @@ agent 轨迹钉着，加字段会让 6048 条轨迹全部对不上（上一轮�
 
 **下一轮入口**：按 `unverified`/`unsimulated` 卡点做特性层登记（RC-401 下一批）；
 把支持等级接进页面与训练数据生成器的 manifest 口径；RC-404 代表性回归集。
+
+### C6.37 第 100 轮：RC-401 批次二 —— 特性层工作清单 + 两条条件特性
+
+**为什么先做清单**：RC-403 显示 **609 只精灵卡在特性那一件上**，而特性有 245 条，不能一起上。
+所以先把特性层也做成「按覆盖收益排序」的清单：`reports/roco/rc401/trait-worklist.json`
+（`python3 -m roco_env.coverage` 现在同产两份报告）。
+
+| 就绪度 | 条数 | 含义 |
+|---|---|---|
+| `registered` | **14** | 已登记 |
+| `ready` | **2** | 触发钩子已知 **且** 描述能完整读出 |
+| `effect_unparsed` | **32** | 知道何时触发，效果读不出 |
+| `trigger_unknown` | **197** | 效果也许读得出，但不知道何时触发 |
+
+**排序依据**：`pets_blocked`（实现它能让多少只精灵变成「全可模拟」）。触发词**只认闭集**
+（映射到引擎真的有的钩子）；识别不到就是 `trigger_unknown` —— 按错时点结算比不结算更糟。
+
+**本轮入库两条**（`traits.py`）：图书守卫者（书魔虫/书卷守护/古卷执政官，条件=自己魔力为 1，
+双攻 +100%）、构装契约者（古卷匣魔像，条件=敌方魔力为 1，双防 +100%）。
+**为什么可以入库**：时点明确、效果明确、**条件可判**；legacy 里 `mana` 是 `None` ⇒ 条件不可判
+⇒ 不结算 ⇒ 8 条 golden 指纹全绿。
+
+**实测**：可模拟精灵 **8 → 12 只**；PARTIAL 614 → **610**；唯特性阻塞 485 → **481 只**；
+`test:env` 390 → **397 条 OK**；门禁 **17/17**。
+
+**下一批**：`ready` 剩 2 条（抓到你了 / 贪得无厌，各解锁 1 只）→ `effect_unparsed` 32 条
+（要先补效果解析）→ 197 条 `trigger_unknown`（要先有时点证据或对应钩子）。
