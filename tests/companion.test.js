@@ -2372,7 +2372,9 @@ test('只聊精灵：他点名哪只就聊哪只，且用他自己说过的本�
 });
 test('情绪是假设不是标签：低置信、短时、可覆盖，而且不从沉默与连败推出来',()=>{
  const now=Date.now();
- let memory=rememberPreference(freshMemory(),'今天有点烦');
+ // 时钟**显式注入**：这条判据比的是「过期时间 - 基准」，两次分别取 `Date.now()`
+ // 会有一个 1ms 竞态（实测随机变红）。判据本身不动，只把时钟钉死。
+ let memory=rememberPreference(freshMemory(),'今天有点烦',{now});
  const mood=moodHypothesis(memory,{now});
  assert(mood&&mood.confidence<=0.4&&mood.expiresAt-now<=MOOD_TTL_MS);
  assert.equal(mood.overwritable,true);

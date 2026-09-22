@@ -6,7 +6,17 @@ const factNames=v=>Array.isArray(v)?v.filter(x=>typeof x==='string'&&x.length<=1
 const factCount=v=>Number.isInteger(v)&&v>=0&&v<=9?v:null;
 const readEventFacts=e=>({enemy:factNames(e.enemy),faints:factNames(e.faints),...(Number.isInteger(e.firstLossTurn)&&e.firstLossTurn>0?{firstLossTurn:e.firstLossTurn}:{}),...(typeof e.firstFallen==='string'&&e.firstFallen.length<=12?{firstFallen:e.firstFallen}:{}),survivors:Number.isInteger(e.survivors)&&e.survivors>=0&&e.survivors<=3?e.survivors:null,items:e.items&&typeof e.items==='object'?{potion:factCount(e.items.potion),cleanse:factCount(e.items.cleanse),ether:factCount(e.items.ether)}:null});
 export function readMemory(raw){try{const m=JSON.parse(raw);if(m?.version!==1)return freshMemory();return {version:1,preference:['brief','detailed'].includes(m.preference)?m.preference:null,lessons:Array.isArray(m.lessons)?m.lessons.filter(x=>typeof x==='string').slice(-12):[],events:Array.isArray(m.events)?m.events.filter(x=>x&&typeof x.result==='string').slice(-12).map(e=>({...e,...readEventFacts(e)})):[],pendingQuiz:m.pendingQuiz&&typeof m.pendingQuiz.explanation==='string'&&typeof m.pendingQuiz.question==='string'&&['先','后','不确定'].includes(m.pendingQuiz.answer)?m.pendingQuiz:null,dialogue:Array.isArray(m.dialogue)?m.dialogue.filter(x=>x&&['user','assistant'].includes(x.role)&&typeof x.content==='string').slice(-8).map(x=>({...x,content:(x.role==='user'?x.content.split('\n回答要求：不要向玩家报内部局面评分')[0]:x.content).slice(0,600)})):[],lastTopic:typeof m.lastTopic==='string'?m.lastTopic:null,journal:Array.isArray(m.journal)?m.journal.filter(e=>e&&typeof e.id==='string'&&typeof e.time==='string').slice(-240):[],reflections:m.reflections&&typeof m.reflections==='object'?Object.fromEntries(Object.entries(m.reflections).filter(([k,v])=>v&&Array.isArray(v.evidenceIds))):{},watches:Array.isArray(m.watches)?m.watches.filter(w=>w&&['energy','finish'].includes(w.kind)&&typeof w.matchId==='string'&&Number.isInteger(w.expiresTurn)).slice(0,1):[],quizCount:Number.isInteger(m.quizCount)&&m.quizCount>=0?m.quizCount:0,goal:['稳健','速攻'].includes(m.goal)?m.goal:null,ruleReferenceId:typeof m.ruleReferenceId==='string'?m.ruleReferenceId:null,favorite:typeof m.favorite==='string'?m.favorite:null,stated:readStated(m.stated),mood:readMood(m.mood),quizLog:readQuizLog(m.quizLog)};}catch{return freshMemory();}}
-export function rememberPreference(memory,message){
+/**
+ * 记一条玩家明说的偏好 / 拒绝 / 情绪。
+ *
+ * `{now}` 是**可注入的时钟**（默认 `Date.now()`）。加它是因为一处真实的**1 毫秒竞态**：
+ * 情绪假设的过期时间是 `now + MOOD_TTL_MS`，而测试常常先取一次 `Date.now()` 当基准、
+ * 再调用这里——两次取时钟之间只要跨了 1ms，`expiresAt - 基准` 就比 TTL 大一点点，
+ * 「假设是短时的」那条判据就会随机变红（2026-09-22 实测踩到）。判据本身是对的，
+ * 错的是**拿两个不同时刻的时钟去比**；可注入时钟才是这条判据的确定性前提。
+ * 不传 `now` 的老调用方行为一个字都没变。
+ */
+export function rememberPreference(memory,message,{now=Date.now()}={}){
  let next=structuredClone(memory);
  if(/本命|最喜欢|主养/.test(message)){const favorite=SPECIES.find(p=>message.includes(p.name));if(favorite)next.favorite=favorite.id;}
  if(/记住|以后|我想/.test(message)){if(/稳一点|稳健|打得稳/.test(message))next.goal='稳健';else if(/速攻|主动些|快攻/.test(message))next.goal='速攻';}
@@ -24,7 +34,7 @@ export function rememberPreference(memory,message){
  if(attempt&&attempt.memory)next=attempt.memory;
  const hint=hintPendingQuiz(next,message);
  if(hint&&hint.memory)next=hint.memory;
- next.mood=rememberMood(next,message,{});
+ next.mood=rememberMood(next,message,{now});
  return next;
 }
 // 记住一局真实对战。除结果与回合数外，一并记住对手阵容、我方倒下顺序、
