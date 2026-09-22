@@ -3,7 +3,7 @@
   "ruleset_config_id": "mobile_s4_candidate_v3",
   "game": "roco_world_mobile",
   "source_id": "handoff-10-sources-and-confidence-2026-09-21",
-  "derived_from_ledger_sha256": "aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903",
+  "derived_from_ledger_sha256": "f571c0a801e15ff019cfbc2c079bc23ab57a474c6d502fcf1df2516d0beae674",
   "derived_from_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
   "status": "CANDIDATE_NOT_FOR_DEFAULT",
   "promotion_policy": "BLOCKED_UNTIL_MICROCASE",
@@ -63,11 +63,14 @@
       "note": "0 = 默认不发生；回能只能来自技能 / 特性 / 道具，等 MC-E03。"
     },
     "initial": {
-      "value": null,
-      "confidence": "UNKNOWN",
-      "evidence_id": null,
-      "evidence_role": null,
-      "reason": "10 号文档 §7 原文：「首次入场具体能量：需实机/更强一手证据」。按 RC-101 要求留 unknown，不填一个看起来合理的数；实机判据见 MC-E04。"
+      "value": 10,
+      "confidence": "RECORDED_IN_GAME",
+      "evidence_id": "EV-ENERGY-INITIAL",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E04",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "用户实机核对：开局双方各 10 星（🌟）。这是**实机记录**（持有者核对），不是官方文案；换入 / 补位 / 第二次入场的读数仍待录（MC-E04 其余子问题）。"
     },
     "charge": {
       "value": 5,

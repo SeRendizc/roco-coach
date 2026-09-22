@@ -1,0 +1,4 @@
+node scripts/roco/revalidate-retained-assets.mjs --check --selftest
+
+[rc501-selftest] 自检失败：
+  - 现状本身就有问题，自检没法进行：["pvp-gate"]

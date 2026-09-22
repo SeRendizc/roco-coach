@@ -585,17 +585,17 @@
     {
       "path": "data/roco/evidence/rule-evidence-ledger.json",
       "role": "rule_evidence_ledger",
-      "sha256": "aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903"
+      "sha256": "f571c0a801e15ff019cfbc2c079bc23ab57a474c6d502fcf1df2516d0beae674"
     },
     {
       "path": "data/roco/game-data-pack/v2/pack.json",
       "role": "game_data_pack",
-      "sha256": "629eef2731464808dc3f4bca55e73c4a69ce1598d1cc0689bb3a70a679164505"
+      "sha256": "da190b43807e4f34b3ba0b6b36daad568f9dee8ed69b5b7fad26a78851c479f9"
     },
     {
       "path": "data/roco/rulesets/legacy-sim-v1.json",
       "role": "ruleset_config",
-      "sha256": "f66f760304f1459ab6b62ea2491d8b89a47279b8766b887149622e4e2705cc46"
+      "sha256": "613151c97ead53c9628addb0d2b942e1d5d428462425e42c559a62ae07a331e8"
     },
     {
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
@@ -673,7 +673,7 @@
       "value": null
     }
   ],
-  "meta_prior_id": "roco-meta-prior/v1#7c077248f9436238",
+  "meta_prior_id": "roco-meta-prior/v1#bbb7eee31f51663d",
   "schema": "roco-meta-prior/v1",
   "usage": {
     "consumer": "RC-304（对未知对手的队伍强度口径）。本先验是它的**唯一**版本化环境输入：没有先验就无法把「队伍强不强」写成对环境的期望，只能退化成对单只精灵的描述。",

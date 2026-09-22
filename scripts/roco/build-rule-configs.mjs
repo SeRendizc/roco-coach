@@ -238,9 +238,11 @@ export function buildConfigs({ledger, battleModes}) {
         applies_to: 'field_pet_only',
         note: '0 = 默认不发生；回能只能来自技能 / 特性 / 道具，等 MC-E03。',
       },
-      initial: field(null, 'UNKNOWN', null,
-        '10 号文档 §7 原文：「首次入场具体能量：需实机/更强一手证据」。'
-        + '按 RC-101 要求留 unknown，不填一个看起来合理的数；实机判据见 MC-E04。'),
+      // 2026-09-22：**开局资源是「星星」（🌟），不是「能量」；双方各 10 星。**
+      // 来源：用户（实机持有者）实机核对 → 台账 EV-ENERGY-INITIAL 记 RECORDED_IN_GAME。
+      initial: field(10, 'RECORDED_IN_GAME', 'EV-ENERGY-INITIAL',
+        '用户实机核对：开局双方各 10 星（🌟）。这是**实机记录**（持有者核对），不是官方文案；'
+        + '换入 / 补位 / 第二次入场的读数仍待录（MC-E04 其余子问题）。'),
       charge: field(5, 'CROSS_SOURCE_SUPPORTED', 'EV-ENERGY-CHARGE',
         '聚能是主动行动、回复 5；是否可突破上限、无合法技能时是否自动聚能 —— 台账明说未定，故不在本配置里断言'),
     },

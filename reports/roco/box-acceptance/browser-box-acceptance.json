@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-22T13:29:22.579Z",
+ "judged_at": "2026-09-22T15:10:49.796Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -130,7 +130,7 @@
    "id": "14-工程信息在抽屉里",
    "judge": "开发者抽屉默认收起；展开后能真的看到 provenance / unknown_fields / state_version / coverage / 许可",
    "ok": true,
-   "actual": "默认收起=true 展开=true 长度=6124 provenance=true unknown_fields=true state_version=true coverage=true licence=true；样例「 版本：state_version=rc205.1 · ruleset_id=roco-world-s4-2026-09-10 · pack_id=roco-game-data-pack-v2 数据集哈希：4b69a662b4a69b82addd03fba0ef9703d2c3c5f69ab52af7c43c396bc」"
+   "actual": "默认收起=true 展开=true 长度=6124 provenance=true unknown_fields=true state_version=true coverage=true licence=true；样例「 版本：state_version=rc205.1 · ruleset_id=roco-world-s4-2026-09-10 · pack_id=roco-game-data-pack-v2 数据集哈希：4e3ff0ed173d37bb086346d934f410b6e7995f118bda81aff749858b1」"
   },
   {
    "id": "15-判据可恢复",

@@ -90,25 +90,24 @@ def _legacy_initial_energy() -> int:
     return int(value)
 
 
-def _override_energy_initial(value=None) -> list:
-    """v3 开局用的**显式未核验覆盖**（RC-106 的机制本体，见 `roco_env.overrides`）。
+def _v3_overrides() -> list:
+    """v3 开局需要的**显式未核验覆盖**。
 
-    为什么不再用 `dataclasses.replace(cfg, energy_initial=…)`：那个夹具同时绕开了
-    「覆盖必须带出处」与「覆盖必须进载荷」两条纪律，而这两条正是这个机制存在的理由。
-    这里走的是**产品路径**：`reset(unverified_overrides=[...])`。
+    2026-09-22：`energy.initial` 不再需要覆盖（用户实机核对开局双方各 10 星 → 台账 RECORDED_IN_GAME，
+    配置里已是登记值 10）；覆盖只用于把 UNKNOWN 显式假设掉。仍需要覆盖的只剩同速平手裁决。
     """
     return [{
-        "path": "energy.initial",
-        "value": _legacy_initial_energy() if value is None else value,
+        "path": "turn_order.speed_tie",
+        "value": "random_seeded",
         "confidence": "ENGINE_HYPOTHESIS",
-        "reason": "练习局口径（legacy 的入场能量），不是标准 PVP 的实机结论；MC-E04 未录制",
-        "microcase_id": "MC-E04",
+        "reason": "同速平手裁决未核验（MC-E05 未录制），按已登记的工程权宜走",
+        "microcase_id": "MC-E05",
     }]
 
 
 def _new_state(cfg: rc.RuleConfig | None = None):
     return renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=cfg or _v3(),
-                      unverified_overrides=_override_energy_initial())
+                      unverified_overrides=_v3_overrides())
 
 
 def _attack_actions(state, side: str):
@@ -175,8 +174,13 @@ class RuleConfigManaActionsTest(unittest.TestCase):
             entry = ledger[leaf["evidence_id"]]
             if leaf.get("evidence_role") == "supports":
                 self.assertEqual(leaf["confidence"], entry["confidence"], path)
-            self.assertNotIn(leaf["confidence"], ("OFFICIAL_CURRENT", "RECORDED_IN_GAME"),
-                             f"{path} 被抬到了 {leaf['confidence']} —— MC-E07/E08/E09 都没录")
+            # 2026-09-22：改成**更严的**一致性判据 —— 配置等级不许高于它引用的台账条目。
+            _order = ("UNKNOWN", "ENGINE_HYPOTHESIS", "COMMUNITY_CURRENT",
+                      "CROSS_SOURCE_SUPPORTED", "RECORDED_IN_GAME", "OFFICIAL_CURRENT")
+            self.assertIn(leaf["confidence"], _order)
+            self.assertIn(entry["confidence"], _order)
+            self.assertLessEqual(_order.index(leaf["confidence"]), _order.index(entry["confidence"]),
+                                 f"{path} 被抬到了 {leaf['confidence']}，台账只到 {entry['confidence']}")
         self.assertGreaterEqual(checked, 3, "v3 至少要引三条台账条目（六宠/魔力/力竭）")
         # mana 四件套里，投降**没有**台账支撑 —— 必须如实写成 ENGINE_HYPOTHESIS + reason
         surrender = cfg.raw["mana"]["surrender"]

@@ -459,13 +459,14 @@ const MARK_VIEW = {
 };
 
 test('RC-502 能量带上限（上限读引擎的 energy_max，不是写死的 6/10）', () => {
+  // 2026-09-22：玩家层的资源名改成 **⭐ / 星**（引擎字段仍叫 energy）——判据跟着改口径。
   const capped = box.fieldFactsHtml(MARK_VIEW, {energyMax: 10}).html;
-  assert.match(capped, /能量[\s\S]*?3\s*\/\s*10/, `能量要写成「x / 上限」${report('fieldFactsHtml', capped)}`);
+  assert.match(capped, /⭐[\s\S]*?3\s*\/\s*10/, `资源要写成「⭐ x / 上限」${report('fieldFactsHtml', capped)}`);
   const legacy = box.fieldFactsHtml({energy: 2}, {energyMax: 6}).html;
   assert.match(legacy, /2\s*\/\s*6/, `上限换了页面就得跟着换${report('fieldFactsHtml(legacy)', legacy)}`);
   // 引擎没给上限（这一局没有这个量）⇒ 只写当前值，**不画豆子、不补一个上限**
   const noCap = box.fieldFactsHtml({energy: 3}, {energyMax: null}).html;
-  assert.match(noCap, /能量[\s\S]*?3/, `没上限时当前值仍要给${report('fieldFactsHtml(no cap)', noCap)}`);
+  assert.match(noCap, /⭐[\s\S]*?3/, `没上限时当前值仍要给${report('fieldFactsHtml(no cap)', noCap)}`);
   assert.ok(!/\/\s*\d/.test(noCap), `上限不知道就不许写出一个「/ 10」${report('fieldFactsHtml(no cap)', noCap)}`);
   assert.ok(!/●/.test(noCap), `上限不知道就不许画豆子（那是暗示了一个没核验的上限）${report('fieldFactsHtml(no cap)', noCap)}`);
 });
@@ -521,7 +522,7 @@ test('RC-502 反证：写死一个上限（或凭空画一串豆子）必须被�
   };
   const real = box.fieldFactsHtml({energy: 3}, {energyMax: null}).html;
   assert.deepStrictEqual(capProblems(real), [], `当前实现必须干净${report('fieldFactsHtml(no cap)', real)}`);
-  const faked = real.replace('能量', '能量 ●●●<b>3 / 10</b>');
+  const faked = real.replace('⭐', '⭐ ●●●<b>3 / 10</b>');
   assert.ok(capProblems(faked).length === 2,
     `反证构造失败：伪造的「写死上限 + 豆子」没被判据抓住${report('伪造的 html', faked)}`);
 });

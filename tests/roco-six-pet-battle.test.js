@@ -88,11 +88,12 @@ test('RC-106 v2/v3：区别只有 mana / actions / binding 三处', () => {
   const v2 = onDisk(CANDIDATE_ID);
   const v3 = onDisk(V3_CANDIDATE_ID);
   // 逐字相同的两块：本活没有重新解释既有口径
-  assert.deepEqual(v3.energy, v2.energy, 'v3 的 energy 必须逐字沿用 v2（含 energy.initial 仍是 null）');
+  assert.deepEqual(v3.energy, v2.energy, 'v3 的 energy 必须逐字沿用 v2');
   assert.deepEqual(v3.turn_order, v2.turn_order, 'v3 的 turn_order 必须逐字沿用 v2');
-  assert.equal(v3.energy.initial.value, null,
-    'v3 的 energy.initial 必须是 null（UNKNOWN）—— 覆盖机制是运行期旁路，不许写回配置');
-  assert.equal(v2.energy.initial.value, null);
+  // 2026-09-22：开局资源是用户实机核对的 10 星（两侧同源同值）。
+  assert.equal(v3.energy.initial.value, 10);
+  assert.equal(v3.energy.initial.confidence, 'RECORDED_IN_GAME');
+  assert.equal(v2.energy.initial.value, 10);
   // 新增的两块
   assert.ok(v3.mana && v3.actions, 'v3 必须有 mana 与 actions');
   assert.equal(v2.mana, undefined);

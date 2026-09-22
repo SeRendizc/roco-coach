@@ -480,7 +480,7 @@
         {
           "id": "energy_initial",
           "topic": "energy.initial",
-          "level": "CROSS_SOURCE_SUPPORTED",
+          "level": "RECORDED_IN_GAME",
           "pattern_hit": true
         },
         {
@@ -1673,12 +1673,12 @@
       "id": "energy_initial",
       "topic": "energy.initial",
       "quantity": "首次入场能量",
-      "level": "CROSS_SOURCE_SUPPORTED",
+      "level": "RECORDED_IN_GAME",
       "cap": "high",
       "pointer": "entries[topic=energy.initial].claim",
-      "pattern": "入场初始 2",
+      "pattern": "开局双方各 10 星",
       "pattern_hit": true,
-      "ledger_confidence": "CROSS_SOURCE_SUPPORTED",
+      "ledger_confidence": "RECORDED_IN_GAME",
       "microcase_id": "MC-E04"
     },
     {
@@ -1880,7 +1880,7 @@
             }
           ],
           "unverified": [
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial"
@@ -3014,7 +3014,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -4465,7 +4465,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -6462,7 +6462,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -8928,7 +8928,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -11660,7 +11660,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -14946,7 +14946,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -20058,7 +20058,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -23170,7 +23170,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -26058,7 +26058,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -27789,7 +27789,7 @@
             }
           ],
           "unverified": [
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial"
@@ -29155,7 +29155,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",
@@ -31948,7 +31948,7 @@
             "未核实：回合末自然回能 —— 台账 energy.regen 记 ENGINE_HYPOTHESIS（entries[topic=energy.regen].claim，逐字命中 \"ENERGY_REGEN_PER_TURN = 1\"），挂 MC-E03",
             "未核实：能耗能不能付得起——入场初始能量是占位值，回能是工程假设，microcase MC-E04 未执行（PLAN_ONLY_NOT_EXECUTED）",
             "未核实：能量上限（6 还是 10） —— 台账 energy.max 记 ENGINE_HYPOTHESIS（entries[topic=energy.max].claim，逐字命中 \"ENERGY_MAX = 6 是 ENGINE_HYPOTHESIS\"），挂 MC-E01",
-            "未核实：首次入场能量 —— 台账 energy.initial 记 CROSS_SOURCE_SUPPORTED（entries[topic=energy.initial].claim，逐字命中 \"入场初始 2\"），挂 MC-E04"
+            "未核实：首次入场能量 —— 台账 energy.initial 记 RECORDED_IN_GAME（entries[topic=energy.initial].claim，逐字命中 \"开局双方各 10 星\"），挂 MC-E04"
           ],
           "depends_on": [
             "energy.initial",

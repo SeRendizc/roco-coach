@@ -205,9 +205,7 @@ class SupportTierMatchesEngineTest(unittest.TestCase):
         team_b = [p for p in list(rs.pets) if p not in team_a][:6]
         state = env_mod.reset(team_a, team_b, seed=7, rs=rs, config="mobile_s4_candidate_v3",
                               unverified_overrides=[
-                                  {"path": "energy.initial", "value": 2,
-                                   "confidence": "ENGINE_HYPOTHESIS", "reason": "test",
-                                   "microcase_id": "MC-E04"},
+                                  # `energy.initial` 已登记为 10（用户实机核对）→ 不许用覆盖改它。
                                   {"path": "turn_order.speed_tie", "value": "random_seeded",
                                    "confidence": "ENGINE_HYPOTHESIS", "reason": "test",
                                    "microcase_id": "MC-E05"}])

@@ -126,11 +126,16 @@ test('RC-105 配置：mana/actions 的每个 kind 都带 confidence，台账等�
   assert.equal(v3.mana.faint_cost.value_status, 'CANDIDATE_HYPOTHESIS');
   assert.equal(v3.mana.surrender.evidence_id, null);
   assert.equal(v3.mana.surrender.confidence, 'ENGINE_HYPOTHESIS');
-  // 全局：没有任何字段被升到 current 两级
+  // 2026-09-22 改写：改成**更严的**一致性判据 —— 配置等级不许高于它引用的台账条目。
+  const ORDER = ['UNKNOWN', 'ENGINE_HYPOTHESIS', 'COMMUNITY_CURRENT',
+    'CROSS_SOURCE_SUPPORTED', 'RECORDED_IN_GAME', 'OFFICIAL_CURRENT'];
+  const ledgerById = Object.fromEntries((ledger.entries ?? []).map((e) => [e.id, e]));
   for (const [path, leaf] of leaves(v3)) {
     if (leaf.evidence_role !== 'supports') continue;
-    assert.ok(!['OFFICIAL_CURRENT', 'RECORDED_IN_GAME'].includes(leaf.confidence),
-      `${path} 的等级是 ${leaf.confidence} —— MC-E07/E08/E09 都没录，不可能到这一级`);
+    const entry = ledgerById[leaf.evidence_id];
+    assert.ok(entry, `${path} 引了不存在的台账条目 ${leaf.evidence_id}`);
+    assert.ok(ORDER.indexOf(leaf.confidence) <= ORDER.indexOf(entry.confidence),
+      `${path} 的等级 ${leaf.confidence} 高于台账 ${leaf.evidence_id} 的 ${entry.confidence}`);
   }
 });
 

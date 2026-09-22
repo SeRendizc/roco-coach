@@ -2,13 +2,13 @@
 
 这一轮修的是三个**阻断**（RC-105 实测出来的），每条都配一个必红反证：
 
-  1. **v3 开不了局**：`mobile_s4_candidate_v3.json` 的 `energy.initial` 是 `null`
+  1. **v3 的 UNKNOWN 字段**：`turn_order.speed_tie`（`energy.initial` 2026-09-22 起已登记为 10 星）
      （UNKNOWN，MC-E04 未录制），`reset(config=v3)` 按 RC-101 纪律 fail closed。
      修法不是往配置里填一个数，而是加一条**显式的、带出处的未核验覆盖**
      （`unverified_overrides`）：
        · 没有覆盖 + `null` ⇒ **仍然抛**（这条不许放宽，它就是纪律的价值）；
        · 有覆盖 ⇒ 开局，且覆盖**如实出现在对外载荷**里（公开面 / UI / 序列化）；
-       · 覆盖**不写回**配置文件（v3 的 `energy.initial` 必须还是 `null`）。
+       · 覆盖**不写回**配置文件（被覆盖的字段在磁盘上仍是 UNKNOWN）。
   2. **引擎只会 3v3**：`reset` / `validate_team` 只接受 3 只，而
      `pvp-standard-six-pet` 登记的是 `team_size: 6`。修法是**按配置/模式参数**取规模，
      `legacy_sim_v1` / `demo-training-3v3` 仍然是 3，且默认路径**逐位不变**。
@@ -18,7 +18,7 @@
 口径纪律（不要在这份测试里放宽）：
   · 覆盖用的 2 是**练习局口径**（legacy 的入场能量），**不是**标准 PVP 的实机结论；
   · 台账等级一律不动：`EV-PVP-STANDARD-TEAM-SIZE` / `-MANA` / `-FAINT-MANA-LOSS`
-    都还是 `CROSS_SOURCE_SUPPORTED`，`energy.initial` 相关的一切都还是
+    都还是 `CROSS_SOURCE_SUPPORTED`，`turn_order.speed_tie` 相关的一切都还是
     `ENGINE_HYPOTHESIS`（见 `roco_env.overrides.OVERRIDE_CONFIDENCE`）。
 
 运行：cd roco && PYTHONPATH=src python3 -m unittest discover -s tests
@@ -68,18 +68,22 @@ IDS_B = [RS.pets_by_name(n)[0].pet_id for n in TEAM_B]
 
 #: 练习局口径的入场能量：**从默认配置里读**，不在测试里写死一个字面量。
 PRACTICE_INITIAL_ENERGY = int(rc.load_config(LEGACY).energy_initial)
-#: v3 的 `energy.initial` 在磁盘上必须是 null —— 覆盖不许写回文件（下面反复核对）。
+#: v3 的 `energy.initial` 在磁盘上是**登记值 10**（用户实机核对）；覆盖不许写回文件。
 V3_INITIAL_ON_DISK = rc.load_config(V3).energy_initial
 
 
-def _override(value: int | None = None, **patch) -> dict:
-    """一条**合规**的未核验覆盖。默认值 = 练习局口径，reason 明说它不是实机结论。"""
+def _override(value: object = None, **patch) -> dict:
+    """一条**合规**的未核验覆盖 —— 指向仍为 UNKNOWN 的 `turn_order.speed_tie`。
+
+    2026-09-22：`energy.initial` 已按用户实机核对登记为 10 星（RECORDED_IN_GAME），
+    覆盖不再能（也不该）指向它。
+    """
     entry = {
-        "path": "energy.initial",
-        "value": PRACTICE_INITIAL_ENERGY if value is None else value,
+        "path": "turn_order.speed_tie",
+        "value": "random_seeded" if value is None else value,
         "confidence": "ENGINE_HYPOTHESIS",
-        "reason": "练习局口径（legacy 的入场能量）：标准 PVP 的首次入场能量没有实机证据（MC-E04 未录制）",
-        "microcase_id": "MC-E04",
+        "reason": "同速平手裁决未核验（MC-E05 未录制），按已登记的工程权宜走",
+        "microcase_id": "MC-E05",
     }
     entry.update(patch)
     return entry
@@ -160,12 +164,14 @@ class UnverifiedOverrideTest(unittest.TestCase):
         else:
             os.environ.pop(rc.ENV_VAR, None)
 
-    def test_v3_initial_energy_is_still_unknown_on_disk(self):
-        """前提自检：v3 的 `energy.initial` 仍然是 `null`（UNKNOWN）。"""
+    def test_v3_initial_energy_is_recorded_on_disk(self):
+        """前提自检（2026-09-22）：v3 的 `energy.initial` 是**登记值 10 星**（用户实机核对）。"""
         cfg = rc.load_config(V3)
-        self.assertIsNone(cfg.energy_initial)
-        self.assertIsNone(V3_INITIAL_ON_DISK)
-        self.assertEqual(cfg.raw["energy"]["initial"]["confidence"], "UNKNOWN")
+        self.assertEqual(cfg.energy_initial, 10)
+        self.assertEqual(V3_INITIAL_ON_DISK, 10)
+        leaf = cfg.raw["energy"]["initial"]
+        self.assertEqual(leaf["confidence"], "RECORDED_IN_GAME")
+        self.assertEqual(leaf["evidence_id"], "EV-ENERGY-INITIAL")
 
     def test_no_override_fails_closed(self):
         """必红反证①的**正面**：没有覆盖 + `null` ⇒ 抛错，绝不回落到某个默认值。
@@ -173,21 +179,16 @@ class UnverifiedOverrideTest(unittest.TestCase):
         必红方向：把 `reset` 里那次 `resolve_int(...)` 改成回落到 legacy 的 2
         （或任何默认值），这条会立刻红 —— 见报告 `checks[].counter_proof`。
         """
-        with self.assertRaises(fx.UnsupportedEffect) as ctx:
-            renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=V3)
-        message = str(ctx.exception)
-        self.assertIn("energy.initial", message)
-        self.assertIn("MC-E04", message)
-        self.assertIn("UNKNOWN", message)
-        self.assertIn("unverified_overrides", message, "错误信息要指出唯一的合法旁路")
-        # 同一个纪律对 v2 也成立（v2 绑的是同一个六宠模式）
-        with self.assertRaises(fx.UnsupportedEffect):
-            renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=V2)
+        # 2026-09-22 变更：不带覆盖**能**开局（资源是登记值 10 星）。
+        state = renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=V3)
+        self.assertEqual(state.unverified_overrides, [])
+        self.assertEqual(state.player.field_pet.energy, 10)
+        self.assertEqual(renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=V2).player.field_pet.energy, 10)
 
     def test_with_override_the_match_starts_and_the_payload_carries_it(self):
         state = renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=V3,
                            unverified_overrides=[_override()])
-        self.assertEqual(state.player.field_pet.energy, PRACTICE_INITIAL_ENERGY)
+        self.assertEqual(state.player.field_pet.energy, 10)  # 开局 10 星（用户实机核对）
         self.assertEqual(state.ruleset_config_id, V3)
         self.assertEqual(len(state.player.pets), 6)
         # ① 状态里带上了它
@@ -195,9 +196,9 @@ class UnverifiedOverrideTest(unittest.TestCase):
         entry = state.unverified_overrides[0]
         self.assertEqual(
             (entry["path"], entry["value"], entry["confidence"], entry["microcase_id"]),
-            ("energy.initial", PRACTICE_INITIAL_ENERGY, "ENGINE_HYPOTHESIS", "MC-E04"))
+            ("turn_order.speed_tie", "random_seeded", "ENGINE_HYPOTHESIS", "MC-E05"))
         self.assertIs(entry["unverified"], True)
-        self.assertIn("练习局口径", entry["reason"])
+        self.assertIn("工程权宜", entry["reason"])
         # ② 序列化（存档）里带上了它
         dumped = renv.serialize(state)
         self.assertEqual(dumped["unverified_overrides"], state.unverified_overrides)
@@ -209,19 +210,19 @@ class UnverifiedOverrideTest(unittest.TestCase):
         self.assertEqual(ui["unverified_overrides"], state.unverified_overrides)
         notes = ui["notes"]["unverified_overrides"]
         self.assertEqual(len(notes), 1)
-        self.assertIn("energy.initial", notes[0])
+        self.assertIn("turn_order.speed_tie", notes[0])
         self.assertIn("未核验", notes[0])
-        self.assertIn("MC-E04", notes[0])
+        self.assertIn("MC-E05", notes[0])
         # ⑤ 由公开面重建的分析状态也带上了它（否则差分分析会以为配置里真有这个数）
         rebuilt = renv.state_from_public_planner(planner, RS, analysis_seed=7)
         self.assertEqual(rebuilt.unverified_overrides, state.unverified_overrides)
 
     def test_override_is_not_written_back_to_the_config_file(self):
-        """覆盖**不写回**配置文件：跑完一局之后磁盘上那份 `energy.initial` 还是 null。"""
-        before = ov._dig(rc.load_config(V3).raw, "energy.initial")
+        """覆盖**不写回**配置文件：跑完一局之后磁盘上那条被覆盖字段仍是 UNKNOWN。"""
+        before = ov._dig(rc.load_config(V3).raw, "turn_order.speed_tie")
         renv.reset(IDS_A, IDS_B, seed=3, rs=RS, config=V3, unverified_overrides=[_override()])
         rc.clear_cache()
-        after = ov._dig(rc.load_config(V3).raw, "energy.initial")
+        after = ov._dig(rc.load_config(V3).raw, "turn_order.speed_tie")
         self.assertIsNone(before["value"])
         self.assertIsNone(after["value"], "覆盖把值写回了配置文件 —— 那是编规则，不是假设")
         self.assertEqual(before, after)
@@ -239,7 +240,8 @@ class UnverifiedOverrideTest(unittest.TestCase):
             "覆盖一个不在白名单里的路径": _override(path="mana.pool"),
             "值不是非负整数": _override(value=-1),
             "值不是整数": _override(value="2"),
-            "少一个字段": {"path": "energy.initial", "value": 2, "confidence": "ENGINE_HYPOTHESIS"},
+            "少一个字段": {"path": "turn_order.speed_tie", "value": "random_seeded",
+                            "confidence": "ENGINE_HYPOTHESIS"},
         }
         for name, entry in bad_cases.items():
             with self.subTest(case=name):
@@ -249,7 +251,7 @@ class UnverifiedOverrideTest(unittest.TestCase):
         with self.assertRaises(rc.RuleConfigError):
             ov.normalize_unverified_overrides(rc.load_config(V3), [_override(), _override(3)])
         # 不是数组也要红
-        for bad in ("energy.initial=2", {"path": "energy.initial"}):
+        for bad in ("turn_order.speed_tie=x", {"path": "turn_order.speed_tie"}):
             with self.assertRaises(rc.RuleConfigError):
                 ov.normalize_unverified_overrides(rc.load_config(V3), bad)
 
@@ -264,6 +266,12 @@ class UnverifiedOverrideTest(unittest.TestCase):
         with self.assertRaises(rc.RuleConfigError) as ctx:
             ov.normalize_unverified_overrides(legacy, [_override(7)])
         self.assertIn("不是 UNKNOWN", str(ctx.exception))
+        # v3 的 `energy.initial` 现在是登记值 10 —— 覆盖它同样必须红（引擎守卫抓的就是这个）。
+        with self.assertRaises(rc.RuleConfigError) as ctx2:
+            ov.normalize_unverified_overrides(rc.load_config(V3), [{
+                "path": "energy.initial", "value": 10, "confidence": "ENGINE_HYPOTHESIS",
+                "reason": "不该允许", "microcase_id": "MC-E04"}])
+        self.assertIn("不是 UNKNOWN", str(ctx2.exception))
 
     def test_legacy_payload_has_no_override_key(self):
         """legacy / 没有覆盖的对局：载荷里**不出现**覆盖字段（逐位不变靠它成立）。"""
@@ -468,9 +476,11 @@ class TeamSizeTest(unittest.TestCase):
         replayed = renv.replay(plan, RS)
         self.assertEqual(replayed.result, state.result)
         self.assertEqual(_digest(renv.serialize(replayed)), _digest(renv.serialize(state)))
-        # 反证：把覆盖从记录里摘掉 ⇒ 重放必须 fail closed（而不是悄悄用默认值）
-        broken = {k: v for k, v in plan.items() if k != "unverified_overrides"}
-        with self.assertRaises(fx.UnsupportedEffect):
+        # 反证（2026-09-22 改写）：资源已是登记值，「摘掉覆盖」不再必然炸；
+        # 用一条**坏覆盖**证「被覆盖的 UNKNOWN 不许被静默填默认值」。
+        broken = dict(plan)
+        broken["unverified_overrides"] = [{**plan["unverified_overrides"][0], "value": -1}]
+        with self.assertRaises(rc.RuleConfigError):
             renv.replay(broken, RS)
 
     def test_opponent_strategies_stay_legal_with_six_pets(self):
@@ -632,7 +642,7 @@ class BindingAndCandidateDeltaTest(unittest.TestCase):
         self.assertIsNone(v2.mana_pool)
         self.assertIsNone(v2.allowed_kinds)
         self.assertEqual(v2.energy_max, 10)
-        self.assertIsNone(v2.energy_initial)
+        self.assertEqual(v2.energy_initial, 10)  # 开局 10 星（用户实机核对）
         # 差别只有三处：mana / actions / binding —— 其余逐字相同
         v3 = rc.load_config(V3)
         self.assertEqual(json.dumps(v2.raw["energy"], sort_keys=True),
@@ -724,13 +734,12 @@ class BattleNewEndpointWiringTest(unittest.TestCase):
         self.assertNotIn("item", kinds)
         self.assertNotIn("escape", kinds)
 
-    def test_battle_new_without_override_is_422_not_400(self):
-        """缺覆盖是「机制未核验」⇒ 422 `unsupported_effect`，不是「请求写错了」。"""
+    def test_battle_new_without_override_opens_now_that_initial_is_recorded(self):
+        """2026-09-22：`energy.initial` 已登记为 10 星 ⇒ **不带任何覆盖也能开局**。"""
         status, env = self.svc.battle_new(self._body(ruleset_config_id=V3))
-        self.assertEqual(status, 422, env)
-        self.assertFalse(env["ok"])
-        self.assertEqual(env["error_type"], "unsupported_effect")
-        self.assertIn("energy.initial", env["error"])
+        self.assertEqual(status, 200, env)
+        self.assertTrue(env["ok"])
+        self.assertEqual(env["result"]["public"]["unverified_overrides"], [])
 
     def test_battle_new_team_size_mismatch_is_400(self):
         status, env = self.svc.battle_new(self._body(
@@ -780,8 +789,9 @@ class SpeedTieOverrideTest(unittest.TestCase):
         others_b = ["秩序鱿墨", "画间沉铁兽", "月使鹭纳", "迷迷箱怪", "权杖-V"]
         ids_a = [RS.pets_by_name(lead)[0].pet_id] + [RS.pets_by_name(n)[0].pet_id for n in others_a]
         ids_b = [RS.pets_by_name(lead)[0].pet_id] + [RS.pets_by_name(n)[0].pet_id for n in others_b]
+        # `_override()` 现在就是 speed_tie 那条 → 覆盖完全由调用方给，避免同路径重复。
         return renv.reset(ids_a, ids_b, seed=7, rs=RS, config=V3,
-                          unverified_overrides=[_override(), *overrides]), ids_a, ids_b
+                          unverified_overrides=list(overrides)), ids_a, ids_b
 
     def _skill_action(self, state, side):
         """取该侧当前精灵的第一个合法技能（`Action` 不带 pet_id：行动者就是场上那一只）。"""

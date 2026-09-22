@@ -69,9 +69,11 @@ test('RC-101 规则配置：默认配置的能量三件套就是引擎默认行�
   assert.equal(candidate.ruleset_config_id, 'mobile_s4_candidate_v2');
   assert.equal(candidate.energy_max, 10);
   assert.equal(candidate.energy_regen_per_turn, 0);
-  // ②：候选的入场能量是 unknown（null），不是「看起来合理的 2」
-  assert.equal(candidate.energy_initial, null);
-  assert.equal(candidate.confidence.energy_initial, 'UNKNOWN');
+  // ②（2026-09-22 变更）：候选的入场资源不再是 unknown —— 用户（实机持有者）核对
+  // 「开局双方各 10 星（🌟）」，台账 EV-ENERGY-INITIAL 记 RECORDED_IN_GAME，配置里是 10。
+  // 读取器仍然「读什么给什么」：legacy 那条（6/1/2）一个字节没动，这条只是候选值更新。
+  assert.equal(candidate.energy_initial, 10);
+  assert.equal(candidate.confidence.energy_initial, 'RECORDED_IN_GAME');
   // ③：读不到就 null，不补默认值
   assert.equal(readRulesetEnergy('data/roco/rulesets/does-not-exist.json').energy_max, null);
 });

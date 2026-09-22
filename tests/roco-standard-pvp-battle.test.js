@@ -67,9 +67,10 @@ test('六宠标准 PVP：开局给 6 只、魔力 4/4、覆盖逐条带出处', 
   assert.equal((view.self.pets ?? []).length, mode.parameters.team_size, '己方应当是 6 只');
   assert.deepEqual(view.mana, {self: 4, opponent: 4}, `魔力应当来自引擎，实际 ${JSON.stringify(view.mana)}`);
   const override = view.unverified_overrides[0];
-  assert.equal(override.path, 'energy.initial');
+  assert.equal(override.path, 'turn_order.speed_tie');
   assert.equal(override.confidence, 'ENGINE_HYPOTHESIS');
-  assert.equal(override.microcase_id, 'MC-E04');
+  assert.equal(override.microcase_id, 'MC-E05');
+  assert.equal(view.self.pets[0].energy, 10, '开局 10 星（用户实机核对）');
   assert.equal(override.unverified, true, '每条覆盖都必须标 unverified');
   assert.ok(view.unverified_notes.length >= 1 && view.unverified_notes[0].includes('未核验'),
     `界面要拿到可渲染的「未核验」说明，实际 ${JSON.stringify(view.unverified_notes)}`);
@@ -162,14 +163,14 @@ test('同速平手：配置里是 UNKNOWN，靠**显式覆盖**才走得下去�
 });
 
 test('未核验覆盖的常量只有一份，且值与 microcase 对得上', () => {
-  assert.equal(STANDARD_PVP_UNVERIFIED_OVERRIDES.length, 2);
+  // 2026-09-22：`energy.initial` 已按用户实机核对登记为 10 星 → 覆盖表只剩同速平手那一条。
+  assert.equal(STANDARD_PVP_UNVERIFIED_OVERRIDES.length, 1);
   const [entry] = STANDARD_PVP_UNVERIFIED_OVERRIDES;
-  assert.equal(entry.path, 'energy.initial');
-  assert.equal(entry.microcase_id, 'MC-E04');
+  assert.equal(entry.path, 'turn_order.speed_tie');
+  assert.equal(entry.microcase_id, 'MC-E05');
   assert.equal(entry.confidence, 'ENGINE_HYPOTHESIS');
-  assert.ok(entry.reason.includes('未核验') || entry.reason.includes('没有实机证据'));
-  // 反证：把值改成「配置里已核验的路径」就不该出现——覆盖只能落在 UNKNOWN 的路径上。
-  assert.equal(entry.value, 2, '值取练习局口径的 2（它是假设，不是实机结论）');
+  assert.ok(entry.reason.includes('未核验') || entry.reason.includes('未录制'));
+  assert.equal(entry.value, 'random_seeded');
   log('[实际] 常量 =', JSON.stringify(entry));
 });
 

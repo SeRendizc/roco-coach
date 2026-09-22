@@ -131,12 +131,14 @@ test('RC-101 规则配置：每个 evidence_id 在台账里真的存在，且置
 
 test('RC-101 规则配置：unknown 必须是 null + reason，不许补一个看起来合理的数', () => {
   const candidate = byId.get(CANDIDATE_ID);
-  assert.equal(candidate.energy.initial.value, null,
-    'candidate 的首次入场能量必须留 unknown（null），不许填一个看起来合理的数');
-  assert.equal(candidate.energy.initial.confidence, 'UNKNOWN');
-  assert.ok(candidate.energy.initial.reason, 'unknown 必须写明 reason');
-  assert.ok((candidate.unknowns ?? []).some((u) => u.path === 'energy.initial' && u.microcase_id === 'MC-E04'),
-    'unknown 必须挂到待录 microcase 上');
+  // 2026-09-22：`energy.initial` 已按用户实机核对登记为 10 星（RECORDED_IN_GAME）。
+  assert.equal(candidate.energy.initial.value, 10);
+  assert.equal(candidate.energy.initial.confidence, 'RECORDED_IN_GAME');
+  assert.equal(candidate.energy.initial.evidence_id, 'EV-ENERGY-INITIAL');
+  // 「unknown 不许带值」的样例换成仍为 UNKNOWN 的同速平手裁决。
+  assert.equal(candidate.turn_order.speed_tie.value, null);
+  assert.ok(candidate.turn_order.speed_tie.reason);
+  assert.ok((candidate.unknowns ?? []).some((u) => u.path === 'turn_order.speed_tie'));
   for (const config of configs) {
     for (const [path, leaf] of leaves(config)) {
       if (leaf.confidence !== 'UNKNOWN') continue;
@@ -144,11 +146,11 @@ test('RC-101 规则配置：unknown 必须是 null + reason，不许补一个看
       assert.ok(leaf.reason, `${config.ruleset_config_id}.${path} 标了 UNKNOWN 却没写 reason`);
     }
   }
-  // 反证控制：给 unknown 补一个 2 必须红
+  // 反证控制（样例换成仍为 UNKNOWN 的字段）：补一个值必须红。
   const invented = JSON.parse(JSON.stringify(candidate));
-  invented.energy.initial.value = 2;
-  assert.ok(validateConfig(invented, ledger).some((p) => p.includes('energy.initial')),
-    '给 UNKNOWN 的入场能量补 2 必须被判红');
+  invented.turn_order.speed_tie.value = 'first';
+  assert.ok(validateConfig(invented, ledger).some((p) => p.includes('speed_tie')),
+    '给 UNKNOWN 的同速裁决补值必须被判红');
 });
 
 test('RC-101 规则配置：candidate 带具体值的字段必须标 CANDIDATE_HYPOTHESIS + microcase_id', () => {
@@ -202,12 +204,17 @@ test('RC-101 规则配置：两个配置的字段 diff 与台账结论一致（c
   // 台账判「ENGINE_HYPOTHESIS 且被多源反驳」的回合末自然 +1：candidate 不许保留 1
   assert.equal(candidate.energy.regen.per_turn.value, 0);
   assert.equal(candidate.energy.regen.per_turn.evidence_id, 'EV-ENERGY-ENDTURN-REGEN');
-  // 没有任何字段被升到 OFFICIAL_CURRENT / RECORDED_IN_GAME（那两级才算 current 规则）
+  // 2026-09-22 改写：配置等级不许高于它引用的台账条目（比一律禁止更严）。
+  const ORDER = ['UNKNOWN', 'ENGINE_HYPOTHESIS', 'COMMUNITY_CURRENT',
+    'CROSS_SOURCE_SUPPORTED', 'RECORDED_IN_GAME', 'OFFICIAL_CURRENT'];
+  const ledgerById = Object.fromEntries((ledger.entries ?? []).map((e) => [e.id, e]));
   for (const config of configs) {
     for (const [path, leaf] of leaves(config)) {
       if (leaf.evidence_role !== 'supports') continue;
-      assert.ok(!['OFFICIAL_CURRENT', 'RECORDED_IN_GAME'].includes(leaf.confidence),
-        `${config.ruleset_config_id}.${path} 的置信等级是 ${leaf.confidence} —— 本阶段没有任何实机证据，不可能到这一级`);
+      const entry = ledgerById[leaf.evidence_id];
+      assert.ok(entry, `${config.ruleset_config_id}.${path} 引了不存在的台账条目`);
+      assert.ok(ORDER.indexOf(leaf.confidence) <= ORDER.indexOf(entry.confidence),
+        `${config.ruleset_config_id}.${path} 的等级 ${leaf.confidence} 高于台账 ${leaf.evidence_id}`);
     }
   }
 });

@@ -471,8 +471,8 @@
         "ruleset_config::mobile_s4_candidate_v2",
         "ruleset_config::mobile_s4_candidate_v2#energy.initial"
       ],
-      "evidence_level_expected": "UNKNOWN",
-      "min_evidence_level": null,
+      "evidence_level_expected": "RECORDED_IN_GAME",
+      "min_evidence_level": "RECORDED_IN_GAME",
       "requires_ruleset_config_id": "mobile_s4_candidate_v2",
       "derived_from": {
         "kind": "ruleset_config",
@@ -482,7 +482,7 @@
           "value=null"
         ]
       },
-      "why": "出处=候选配置 energy.initial: value=null、confidence=UNKNOWN、reason 引 10 号文档「首次入场具体能量：需实机/更强一手证据」，以及 unknowns[] 里 path=energy.initial、microcase_id=MC-E04。期望等级记 UNKNOWN：语料明确说这里没填。"
+      "why": "出处=规则配置 ruleset_config::mobile_s4_candidate_v2 的 energy.initial 叶子，以及台账 EV-ENERGY-INITIAL（2026-09-22 起 = RECORDED_IN_GAME，来源为用户实机核对，留档 data/roco/evidence/user-in-game-reports.json）。"
     },
     {
       "id": "R06",
@@ -565,7 +565,7 @@
     {
       "id": "C02",
       "category": "conflict_abstain",
-      "query": "初次入场到底给几点能量，实机测过吗",
+      "query": "换入一只已经离场过的精灵时，入场能量按多少算，实机测过吗",
       "expected": "ABSTAIN",
       "acceptable_entity_keys": [],
       "evidence_level_expected": "RECORDED_IN_GAME",
@@ -574,11 +574,12 @@
         "kind": "ledger_entry",
         "ref": "ledger:EV-ENERGY-INITIAL",
         "anchors": [
-          "首次入场能量",
-          "MC-E04"
+          "换入",
+          "力竭补位",
+          "第二次入场"
         ]
       },
-      "why": "出处=台账 EV-ENERGY-INITIAL（CROSS_SOURCE_SUPPORTED，needs_microcase=true，MC-E04）+ 候选配置 energy.initial=null/UNKNOWN。10 号文档判为「需实机/更强一手证据」；在 MC-E04 录到之前只能当占位值，所以问题「到底几点」必须弃答。"
+      "why": "出处=台账 EV-ENERGY-INITIAL 的 still_open 子问题（换入 / 力竭补位 / 第二次入场）。开局值已由用户实机核对（RECORDED_IN_GAME），但这几个子问题仍无证据 ⇒ 仍必须弃答。"
     },
     {
       "id": "C03",
@@ -1196,6 +1197,6 @@
       "rule_version": 8,
       "skill_mechanic": 8
     },
-    "ids_sha256": "03a600a25048591587ea4f2095fa21b427eb0614621bd0d06ad4f9b38bcd7739"
+    "ids_sha256": "01696cff9b6b0ee76abe8e73388e7fbe9f0f7a7a4a4010978ee292d4d8dc6ec8"
   }
 }

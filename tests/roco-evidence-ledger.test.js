@@ -141,8 +141,10 @@ test('工程假设与外部证据不许互相冒充（能量上限/聚能/回能
   assert.equal(actual['EV-ENERGY-MAX'], 'CROSS_SOURCE_SUPPORTED');
   assert.equal(actual['EV-ENERGY-CHARGE'], 'CROSS_SOURCE_SUPPORTED');
   assert.equal(actual['EV-ENERGY-ENDTURN-REGEN'], 'ENGINE_HYPOTHESIS');
+  // 2026-09-22：`EV-ENERGY-INITIAL` 已是**实机核对过**的（用户核对开局双方各 10 星，
+  // 留档 data/roco/evidence/user-in-game-reports.json）→ 它是 RECORDED_IN_GAME，但仍非官方文案。
+  assert.equal(actual['EV-ENERGY-INITIAL'], 'RECORDED_IN_GAME');
   assert.notEqual(actual['EV-ENERGY-INITIAL'], 'OFFICIAL_CURRENT');
-  assert.notEqual(actual['EV-ENERGY-INITIAL'], 'RECORDED_IN_GAME');
   // 10 号文档 §12.1 判定：极速对决 3v3/2 魔力是官方；六宠/4 魔力不是。
   assert.equal(actual['EV-PVP-SPEED-DUEL-MODE'], 'OFFICIAL_CURRENT');
   assert.equal(actual['EV-BATTLEMODE-PARAMETERIZED'], 'OFFICIAL_CURRENT');

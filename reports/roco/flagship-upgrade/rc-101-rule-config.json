@@ -1,20 +1,20 @@
 {
   "schema": "roco-rc101-rule-config-report/v1",
   "generated_by": "scripts/roco/report-rc101-rule-config.mjs",
-  "generated_at": "2026-09-21T15:38:05.222Z",
+  "generated_at": "2026-09-22T14:49:37.794Z",
   "task": "RC-101 版本化规则配置（legacy_sim_v1 / mobile_s4_candidate_v2）",
   "inputs": {
     "legacy_config": {
       "path": "data/roco/rulesets/legacy-sim-v1.json",
-      "sha256": "f66f760304f1459ab6b62ea2491d8b89a47279b8766b887149622e4e2705cc46"
+      "sha256": "613151c97ead53c9628addb0d2b942e1d5d428462425e42c559a62ae07a331e8"
     },
     "candidate_config": {
       "path": "data/roco/rulesets/mobile-s4-candidate-v2.json",
-      "sha256": "e3435f8438485c729c930a58d86454f1d38447782277249dcf4e0302271eab71"
+      "sha256": "08eabb1a6c67367ea3fe152ab01a3f758fadee838f1f5b319a385b4f34c323f1"
     },
     "ledger": {
       "path": "data/roco/evidence/rule-evidence-ledger.json",
-      "sha256": "aefd634a8bafec7995d065884d62ed0d3f22ba49ccdc1b483b426db14e016903"
+      "sha256": "f571c0a801e15ff019cfbc2c079bc23ab57a474c6d502fcf1df2516d0beae674"
     },
     "artifact_registry": {
       "path": "data/roco/artifact-registry.json",
@@ -45,7 +45,7 @@
     "energy": {
       "max": 10,
       "regen_per_turn": 0,
-      "initial": null,
+      "initial": 10,
       "charge": 5
     },
     "unknowns": [
@@ -127,10 +127,10 @@
         "evidence_role": "refutes"
       },
       "candidate": {
-        "value": null,
-        "confidence": "UNKNOWN",
-        "evidence_id": null,
-        "evidence_role": null
+        "value": 10,
+        "confidence": "RECORDED_IN_GAME",
+        "evidence_id": "EV-ENERGY-INITIAL",
+        "evidence_role": "supports"
       },
       "changed": true,
       "note": "candidate 的值只有在实机 microcase 支持后才能 promotion（见 unknowns）"
@@ -338,11 +338,11 @@
       },
       {
         "path": "energy.initial",
-        "value": null,
-        "confidence": "UNKNOWN",
-        "evidence_id": null,
-        "evidence_role": null,
-        "reason": "10 号文档 §7 原文：「首次入场具体能量：需实机/更强一手证据」。按 RC-101 要求留 unknown，不填一个看起来合理的数；实机判据见 MC-E04。"
+        "value": 10,
+        "confidence": "RECORDED_IN_GAME",
+        "evidence_id": "EV-ENERGY-INITIAL",
+        "evidence_role": "supports",
+        "reason": "用户实机核对：开局双方各 10 星（🌟）。这是**实机记录**（持有者核对），不是官方文案；换入 / 补位 / 第二次入场的读数仍待录（MC-E04 其余子问题）。"
       },
       {
         "path": "energy.charge",
@@ -414,6 +414,15 @@
       ]
     },
     {
+      "evidence_id": "EV-ENERGY-INITIAL",
+      "confidence": "RECORDED_IN_GAME",
+      "microcase_id": "MC-E04",
+      "needs_microcase": true,
+      "used_by": [
+        "mobile_s4_candidate_v2.energy.initial"
+      ]
+    },
+    {
       "evidence_id": "EV-ENERGY-CHARGE",
       "confidence": "CROSS_SOURCE_SUPPORTED",
       "microcase_id": "MC-E02",
@@ -460,6 +469,15 @@
           "mobile_s4_candidate_v2.energy.regen.per_turn"
         ],
         "confidence": "ENGINE_HYPOTHESIS"
+      },
+      {
+        "evidence_id": "EV-ENERGY-INITIAL",
+        "ledger_topic": "energy.initial",
+        "registry_topic": "energy.initial",
+        "used_by": [
+          "mobile_s4_candidate_v2.energy.initial"
+        ],
+        "confidence": "RECORDED_IN_GAME"
       },
       {
         "evidence_id": "EV-ENERGY-CHARGE",

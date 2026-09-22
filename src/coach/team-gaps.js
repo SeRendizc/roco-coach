@@ -89,11 +89,14 @@ export const LEDGER_QUANTITIES = Object.freeze([
     id: 'energy_initial',
     topic: 'energy.initial',
     quantity: '首次入场能量',
-    level: 'CROSS_SOURCE_SUPPORTED',
+    // 2026-09-22：用户（实机持有者）核对「开局双方各 10 星（🌟）」→ 台账 EV-ENERGY-INITIAL
+    // 记 RECORDED_IN_GAME，配置里是登记值 10。这条不再是「已知的未知」。
+    level: 'RECORDED_IN_GAME',
     cap: 'high',
-    pattern: '入场初始 2',
+    pattern: '开局双方各 10 星',
     pointer: 'entries[topic=energy.initial].claim',
-    note: '仓库现在写「入场初始 2」，台账判定为需实机/更强一手证据，只当占位值。',
+    note: '实机核对：开局双方各 10 星（🌟），留档 data/roco/evidence/user-in-game-reports.json；'
+      + '仍未收口的是换入 / 力竭补位 / 第二次入场的读数（MC-E04 其余子问题）。',
   }),
   Object.freeze({
     id: 'standard_mana',

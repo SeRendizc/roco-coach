@@ -445,7 +445,7 @@
       "ok": true
     },
     {
-      "actual": "rule_evidence_ledger:aefd634a8baf… | game_data_pack:629eef273146… | ruleset_config:f66f760304f1… | catalog_reconciliation:bca1bf352a13… | pack_schema:7ed3f4b16307…",
+      "actual": "rule_evidence_ledger:f571c0a801e1… | game_data_pack:da190b43807e… | ruleset_config:613151c97ead… | catalog_reconciliation:bca1bf352a13… | pack_schema:7ed3f4b16307…",
       "criteria": "对每个引用路径重新算 sha256，与先验里写的比对；不一致即红（说明先验引用的产物已经换代）。",
       "label": "derived_from 的 sha256 与磁盘一致",
       "ok": true
@@ -543,7 +543,7 @@
     "speed tie（同速谁先动）= UNKNOWN",
     "能量上限 6 还是 10 = ENGINE_HYPOTHESIS（台账 EV-ENERGY-MAX）"
   ],
-  "meta_prior_id": "roco-meta-prior/v1#7c077248f9436238",
+  "meta_prior_id": "roco-meta-prior/v1#bbb7eee31f51663d",
   "missing_real_evidence": [
     "「萌化」体系在标准 PVP 里的实机出场与胜负记录（当前一条都没有）",
     "「陨星」这一挂的实机配招与出场记录（当前一条都没有）",
@@ -690,7 +690,7 @@
       "where": "archetypes[].feature_axes[].criterion"
     },
     {
-      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DERIVED_FROM] derived_from[1].sha256：data/roco/game-data-pack/v2/pack.json 的 sha256 与磁盘不一致：先验写 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘是 629eef2731464808dc3f4bca55e73c4a69ce1598d1cc0689bb3a70a679164505",
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DERIVED_FROM] derived_from[1].sha256：data/roco/game-data-pack/v2/pack.json 的 sha256 与磁盘不一致：先验写 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘是 da190b43807e4f34b3ba0b6b36daad568f9dee8ed69b5b7fad26a78851c479f9",
       "expect_code": "DERIVED_FROM",
       "id": "10",
       "label": "derived_from 的 sha256 与磁盘不一致 ⇒ 红",

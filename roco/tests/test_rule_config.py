@@ -136,11 +136,12 @@ class RuleConfigLoadingTest(unittest.TestCase):
 
     def test_unknown_field_must_not_carry_a_plausible_value(self):
         candidate = rc.load_config("mobile_s4_candidate_v2")
-        self.assertEqual(candidate.energy_initial, None)
+        # 2026-09-22：`energy.initial` 已是登记值 10（用户实机核对）→ 样例换成仍为 UNKNOWN 的 speed_tie。
+        self.assertEqual(candidate.energy_initial, 10)
         invented = json.loads(json.dumps(candidate.raw))
-        invented["energy"]["initial"]["value"] = 2
+        invented["turn_order"]["speed_tie"]["value"] = "first"
         problems = rc.validate_config(invented, rc._load_ledger())
-        self.assertTrue(any("energy.initial" in p for p in problems), problems)
+        self.assertTrue(any("speed_tie" in p for p in problems), problems)
         # 反向控制：把它标成「已知 + 有证据」的那种写法同样必须被判红
         relabelled = json.loads(json.dumps(candidate.raw))
         relabelled["energy"]["initial"] = {
@@ -277,20 +278,11 @@ class EngineUsesConfigTest(unittest.TestCase):
         # `_end_of_turn` 的回能只来自配置；0 时那一步不会写事件。
         self.assertNotEqual(renv.ENERGY_REGEN_PER_TURN, candidate.energy_regen_per_turn)
 
-    def test_candidate_unknown_initial_energy_fails_closed(self):
-        """candidate 的入场能量是 unknown：引擎必须报错，**不许**回落到 legacy 的 2。
-
-        RC-106：候选绑的是六宠模式，所以要给 6 只 —— 不然队伍规模那一关先抛，
-        这条判据就被一个不相干的错误挡住了（那样它其实什么都没测）。
-        覆盖机制（`unverified_overrides`）是**显式**的旁路，默认不存在；
-        这里刻意不给，验证的就是「不给就抛」。
-        """
-        from roco_env import effects as fx
-        with self.assertRaises(fx.UnsupportedEffect) as ctx:
-            renv.reset(self.team, self.team, seed=3, rs=self.rs, config="mobile_s4_candidate_v2")
-        message = str(ctx.exception)
-        self.assertIn("energy.initial", message)
-        self.assertIn("MC-E04", message)
+    def test_candidate_initial_energy_is_recorded_and_battle_opens(self):
+        """2026-09-22：候选的入场资源是**登记值 10 星**，不带覆盖也能开局。"""
+        state = renv.reset(self.team, self.team, seed=3, rs=self.rs, config="mobile_s4_candidate_v2")
+        self.assertEqual(state.player.field_pet.energy, 10)
+        self.assertEqual(state.unverified_overrides, [])
 
     def test_replay_binds_the_recorded_config(self):
         """记录里带了 ruleset_config_id 就按它重放（旧 replay 绑死旧规则）。"""

@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T13:30:11.288Z",
+ "judged_at": "2026-09-22T15:05:39.212Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -83,13 +83,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=110 full_ms=26 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=99 full_ms=24 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=23 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=21 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -287,13 +287,13 @@
    "id": "35-标准 PVP 战斗页",
    "judge": "按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出",
    "ok": true,
-   "actual": "mode=pvp-standard-six-pet mana=4/4 groups=skill:3,charge:1,switch:5,surrender:1,item:0,escape:0 hidden=0；页面状态栏=「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
+   "actual": "mode=pvp-standard-six-pet mana=4/4 groups=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 hidden=0；页面状态栏=「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
   },
   {
    "id": "36-候选规则下的 Coach 取舍",
    "judge": "v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数",
    "ok": true,
-   "actual": "并列 3 条（[\"防御\",\"啃咬\",\"聚能\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3"
+   "actual": "并列 3 条（[\"防御\",\"啃咬\",\"翅刃\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3"
   },
   {
    "id": "33-控制台干净",
@@ -503,7 +503,7 @@
    "id": "35-标准 PVP 战斗页(覆盖)",
    "judge": "把未核验覆盖藏起来必须被同一条判据抓住",
    "ok": true,
-   "hit": "未核验覆盖必须如实显示（hidden=true 文案=\"⚠ 本局有 2 条未核验（展开可读来源）\"）",
+   "hit": "未核验覆盖必须如实显示（hidden=true 文案=\"⚠ 本局有 1 条未核验（展开可读来源）\"）",
    "actual": "{\"noteHidden\":true}"
   },
   {
@@ -543,14 +543,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "110",
-    "fullMs": "26",
+    "firstMs": "99",
+    "fullMs": "24",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "23"
+    "elapsedMs": "21"
    },
    "dom": {
     "slotNodes": 6,
@@ -600,14 +600,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "26",
-    "fullMs": "24",
+    "firstMs": "24",
+    "fullMs": "22",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "20"
+    "elapsedMs": "17"
    },
    "dom": {
     "slotNodes": 6,
@@ -865,14 +865,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "16",
-    "fullMs": "13",
+    "firstMs": "13",
+    "fullMs": "14",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "8"
+    "elapsedMs": "9"
    },
    "dom": {
     "slotNodes": 6,
@@ -1006,14 +1006,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "17",
-    "fullMs": "18",
+    "firstMs": "20",
+    "fullMs": "20",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "14"
+    "elapsedMs": "15"
    },
    "dom": {
     "slotNodes": 6,
@@ -1061,14 +1061,14 @@
    "facts": {
     "mode": "pvp-standard-six-pet",
     "standardPvp": "yes",
-    "groups": "skill:3,charge:1,switch:5,surrender:1,item:0,escape:0",
+    "groups": "skill:4,charge:1,switch:5,surrender:1,item:0,escape:0",
     "hidden": "0",
     "selfText": "魔力 / 心4",
     "foeText": "魔力 / 心4",
     "selfMana": 4,
     "foeMana": 4,
     "noteHidden": false,
-    "noteText": "⚠ 本局有 2 条未核验（展开可读来源）",
+    "noteText": "⚠ 本局有 1 条未核验（展开可读来源）",
     "battleVisible": true
    }
   }

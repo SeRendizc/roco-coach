@@ -32,8 +32,7 @@ V3 = rc.MANA_ACTIONS_CANDIDATE_ID
 LEGACY = rc.DEFAULT_RULE_CONFIG_ID
 
 OVERRIDES = [
-    {"path": "energy.initial", "value": 2, "confidence": "ENGINE_HYPOTHESIS",
-     "reason": "MC-E04 未录制", "microcase_id": "MC-E04"},
+    # `energy.initial` 已登记为 10（用户实机核对）→ 不再是 UNKNOWN，不许覆盖。
     {"path": "turn_order.speed_tie", "value": "random_seeded", "confidence": "ENGINE_HYPOTHESIS",
      "reason": "MC-E05 未录制", "microcase_id": "MC-E05"},
 ]

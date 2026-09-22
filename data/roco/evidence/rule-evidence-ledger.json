@@ -220,9 +220,16 @@
     {
       "id": "EV-ENERGY-INITIAL",
       "topic": "energy.initial",
-      "claim": "首次入场能量：仓库现在写“入场初始 2”，10 号文档判定为“需实机/更强一手证据”。在 MC-E04 录到之前，我们只把它当占位值，不写进任何对外文案。",
-      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "claim": "首次入场资源：**洛克王国世界手游开局双方各 10 星（🌟）**，用户（实机持有者）2026-09-22 实机核对；资源叫「星星」不是「能量」。仓库原占位值 2 作废。仍需补：换入/力竭补位/第二次入场（MC-E04 其余子问题）。",
+      "confidence": "RECORDED_IN_GAME",
       "sources": [
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-22-energy-initial",
+          "date": "2026-09-22",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "开局双方各 10 星（🌟）；资源名是「星星」，不是「能量」"
+        },
         {
           "url": "roco/src/roco_env/env.py#L60",
           "date": "2026-09-21",
@@ -245,7 +252,7 @@
         "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48",
         "tests/evals/roco/intervention-windows-roco.jsonl"
       ],
-      "notes": "10 号文档 §7 判定原文：首次入场具体能量：需实机/更强一手证据。这里不写 UNKNOWN 是因为 10 号文档没有把它判成 UNKNOWN；“我们不知道”的结论由 needs_microcase=true + claim 的“占位值”措辞表达。"
+      "notes": "开局值按**用户实机核对**定为 10（RECORDED_IN_GAME，留档 data/roco/evidence/user-in-game-reports.json）；MC-E04 未完全收口 —— 换入/补位/第二次入场的读数与继承规则仍无证据，保持 UNKNOWN（fail closed）。"
     },
     {
       "id": "EV-ENERGY-COST8-EXISTS",

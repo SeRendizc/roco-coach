@@ -36,10 +36,9 @@ LEGACY = rc.DEFAULT_RULE_CONFIG_ID
 #: 六只**不在冻结 learnset 里**的图鉴精灵（RC-203 那批跳过的物种）。
 CATALOG_SIX = ["pet_000001", "pet_000002", "pet_000003", "pet_000004", "pet_000005", "pet_000006"]
 
-#: 标准 PVP 需要的两条未核验覆盖（与服务端 `STANDARD_PVP_UNVERIFIED_OVERRIDES` 同一口径）。
+#: 标准 PVP 需要的未核验覆盖（与服务端同一口径）。
+#: `energy.initial` 已按用户实机核对登记为 10 → 不再是 UNKNOWN，不许覆盖。
 OVERRIDES = [
-    {"path": "energy.initial", "value": 2, "confidence": "ENGINE_HYPOTHESIS",
-     "reason": "练习局口径（MC-E04 未录制），不是实机结论", "microcase_id": "MC-E04"},
     {"path": "turn_order.speed_tie", "value": "random_seeded", "confidence": "ENGINE_HYPOTHESIS",
      "reason": "同速裁决未核验（MC-E05 未录制），按已登记的工程权宜走", "microcase_id": "MC-E05"},
 ]

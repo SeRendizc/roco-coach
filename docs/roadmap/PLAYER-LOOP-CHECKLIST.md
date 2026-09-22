@@ -414,7 +414,20 @@ R2 1–2 轮 + R3 1 轮 + R4 1 轮 + R5 0.5 + R6 0.5 + R1 1 轮 ≈ **5–6 轮*
 已 `git checkout` 回退，`test:env` 417 OK、门禁 22/22（上一轮状态）。
 Python 侧的完整改法已在本节写清，下一轮照它做即可。
 
-### R1 第 129 轮：Python 侧 + 派生链**已全线打通**，JS 产物尾清单如下（回退保树干净）
+### R1 ✅ **已落地**（第 130 轮）—— 10 星 + 全部消费者改完，`test:unit` / `test:env` 全绿
+
+用户实机核对「开局双方各 10 星（🌟）」已进规则：台账 `EV-ENERGY-INITIAL` = `RECORDED_IN_GAME`（来源 marker `recorded_gameplay`，留档 `data/roco/evidence/user-in-game-reports.json`）→ 生成器 `initial: 10`→ 配置三份重生成 → 服务端与引擎的覆盖表只剩 `turn_order.speed_tie`。
+
+**关键收获（落地方法）**：这一刀要改的**消费者**是「所有把 initial 当 UNKNOWN 的地方」——
+- Python：六个测试文件（覆盖表、助手、三条语义反转、等级一致性判据）；
+- JS：五个测试文件（等级一致性、UNKNOWN 样例换 `speed_tie`、覆盖常量只剩一条、v2/v3 同为 10、玩家层文案 ⭐）；
+- 产物：`rule-configs → owned → game-data-pack → readiness → meta-prior → RC-302/303/304 → rc101`（**顺序不能反**），外加 RAG 的 `heldout-queries` 两条（R05 等级、C02 换成仍无证据的子问题）与 `query_manifest` 哈希；
+- 产品代码：`team-gaps.js` 里钉着台账旧原话「入场初始 2」的**已知未知量**表项，改成新事实。
+
+**实测**：`test:env` **417 OK**；`test:unit` **1002/1002**；派生链 **5 环全通**；工坊验收 **43/43 + 31/31**；保留资产自检 0 问题；门禁 22 套件（其中 unit/工坊在满载下偶发红，单独复跑全绿）。
+
+### 第 129 轮的过渡记录（保留作方法参照）
+
 
 第 129 轮把 R1 推到了**可验证的深处**，逐项证据：
 

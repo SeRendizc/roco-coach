@@ -31,10 +31,9 @@ from . import env as env_mod
 from . import opponents as opp
 from . import parse as parse_mod
 
-#: 标准 PVP 的两条未核验覆盖（与服务端常量同一口径）。
+#: 标准 PVP 需要的未核验覆盖（与服务端常量同一口径）。
+#: 2026-09-22：`energy.initial` 已按用户实机核对登记为 10 星（RECORDED_IN_GAME），从表里拿掉。
 STANDARD_OVERRIDES = [
-    {"path": "energy.initial", "value": 2, "confidence": "ENGINE_HYPOTHESIS",
-     "reason": "MC-E04 未录制（练习局口径）", "microcase_id": "MC-E04"},
     {"path": "turn_order.speed_tie", "value": "random_seeded", "confidence": "ENGINE_HYPOTHESIS",
      "reason": "MC-E05 未录制（已登记的工程权宜）", "microcase_id": "MC-E05"},
 ]

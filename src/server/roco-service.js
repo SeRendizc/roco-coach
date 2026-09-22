@@ -94,9 +94,8 @@ export function battleModeOf(modeId){
  * 一起进载荷；界面照 `ui.notes.unverified_overrides` 如实标「未核验」。
  */
 export const STANDARD_PVP_UNVERIFIED_OVERRIDES=Object.freeze([Object.freeze({
- path:'energy.initial',value:2,confidence:'ENGINE_HYPOTHESIS',
- reason:'标准 PVP 的首次入场能量没有实机证据（MC-E04 未录制）；这里沿用练习局口径的值，界面必须标未核验',
- microcase_id:'MC-E04'}),Object.freeze({
+ // 2026-09-22：`energy.initial` 已按用户实机核对登记为 10 星 → 不再需要覆盖（覆盖只填 UNKNOWN）。
+ path:'turn_order.speed_tie',value:'random_seeded',confidence:'ENGINE_HYPOTHESIS',
  path:'turn_order.speed_tie',value:'random_seeded',confidence:'ENGINE_HYPOTHESIS',
  reason:'同速平手裁决在候选配置里是 UNKNOWN（MC-E05 未录制）。不声明它就打不下去（引擎按纪律抛错）；'
   + '这里显式按 legacy 那份**已登记的工程权宜** random_seeded 走，界面同样要标未核验',
