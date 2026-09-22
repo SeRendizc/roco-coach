@@ -127,6 +127,20 @@ SCENARIOS: List[Dict[str, Any]] = [
      "team_b": ["秩序鱿墨", "画间沉铁兽", "月使鹭纳", "迷迷箱怪", "权杖-V", "音速犬"],
      "seed": 18, "config": V3, "overrides": True, "turns": 25,
      "find_lead": ["foe_status"], "expect_kinds": ["damage"]},
+    {"id": "speed-order", "dimension": "速度层次",
+     # 冻结层里最快（130）与最慢（40）对位：更快的那一方应当在多数回合先造成伤害。
+     "team_a": ["秩序鱿墨", "寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃"],
+     "team_b": ["女王蜂", "花魁蜂后", "音速犬", "卡卡虫", "权杖-V", "迷迷箱怪"],
+     "seed": 20, "config": V3, "overrides": True, "turns": 25,
+     "expect_kinds": ["damage"], "expect_first_damage": "player"},
+    {"id": "speed-tie", "dimension": "同速平手（候选口径）",
+     # 双方首发同一只 → 同速；(应对/先手度/速度) 全同 ⇒ 必须有裁决依据。
+     # v3 里那条依据是**显式覆盖**的 `random_seeded`（MC-E05 未录制）；这里只要它**不抛错**、
+     # 且顺序可复现（指纹比对就是判据）。
+     "team_a": ["寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃", "音速犬"],
+     "team_b": ["寂灭骨龙", "海豹船长", "黑猫巫师", "圆号鱼", "雪影娃娃", "音速犬"],
+     "seed": 22, "config": V3, "overrides": True, "turns": 20,
+     "expect_kinds": ["damage"]},
     {"id": "legacy-practice-3v3", "dimension": "迁移夹具（legacy 逐位不变）",
      "team_a": ["寂灭骨龙", "海豹船长", "黑猫巫师"], "team_b": ["圆号鱼", "雪影娃娃", "音速犬"],
      "seed": 19, "config": LEGACY, "overrides": False, "turns": 20,
@@ -190,6 +204,8 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
                           config=cfg, unverified_overrides=overrides)
     kinds: Dict[str, int] = {}
     type_multipliers: List[float] = []
+    # 每回合**先造成伤害**的一方（速度层次的证据：更快的先动手）
+    first_damage_by_turn: Dict[int, str] = {}
     used_skills: List[str] = []
     key_events: List[Dict[str, Any]] = []
     picks_hit = 0
@@ -225,6 +241,10 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
         # 注意：`Event` 只有 kind/turn/detail/evidence —— 侧别与倍率都在 `detail` 里
         # （`_bump(state, "damage", {"side": …, "type_multiplier": …})`）。
         detail = getattr(event, "detail", None) or {}
+        if kind == "damage" and isinstance(detail, dict):
+            turn = getattr(event, "turn", None)
+            if isinstance(turn, int) and turn not in first_damage_by_turn:
+                first_damage_by_turn[turn] = str(detail.get("side") or "?")
         if kind == "damage" and isinstance(detail, dict) and detail.get("side") == "player":
             value = detail.get("type_multiplier")
             if isinstance(value, (int, float)):
@@ -238,6 +258,14 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
         if kinds.get(want, 0) == 0:
             problems.append(f"期望证据没有出现：{want}（这一条场景是空转的）")
     # 「真的用出了那条技能」是最直接的证据：用出来才算驱动到了机制。
+    # 速度层次：声明的「谁更快」必须在多数回合里体现为「它先造成伤害」。
+    expect_first = scenario.get("expect_first_damage")
+    if expect_first:
+        hits = sum(1 for side in first_damage_by_turn.values() if side == expect_first)
+        total = len(first_damage_by_turn)
+        if total == 0 or hits < max(1, total // 2):
+            problems.append(f"期望「{expect_first}」先造成伤害，实际 {hits}/{total} 回合"
+                            f"（{first_damage_by_turn}）——速度层次没被驱动")
     wanted_skill_desc = scenario.get("find_lead")
     if wanted_skill_desc and lead_skill:
         if lead_skill not in used_skills:
@@ -252,13 +280,13 @@ def run_scenario(rs: Any, scenario: Dict[str, Any]) -> Dict[str, Any]:
         "seed": scenario["seed"], "steps": steps, "result": state.result,
         "lead_pet": lead_pet, "lead_skill": lead_skill, "used_skills": sorted(set(used_skills)),
         "type_multipliers": type_multipliers,
+        "first_damage_by_turn": {str(k): v for k, v in sorted(first_damage_by_turn.items())},
         "event_kinds": dict(sorted(kinds.items())),
         "state_digest": hashlib.sha256(
             json.dumps(env_mod.serialize(state), ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest(),
         "key_events": key_events,
         "pick_hit_rate": round(picks_hit / picks_total, 4) if picks_total else None,
         "problems": problems,
-        "unreachable": unresolved,
         "unreachable": unresolved,
         "status": "unreachable" if unresolved else "reachable",
     }
@@ -319,6 +347,39 @@ def build_type_sweep_scenarios(rs: Any) -> List[Dict[str, Any]]:
     return out
 
 
+#: 只**登记**、不生成场景的维度：数据与解析器里都没有对应的效果原语，
+#: 硬造一条只会得到「跑了但什么都没驱动到」的假绿。理由由 `probe_unreachable()` 现算。
+PROBE_UNREACHABLE = {
+    "迅捷": "解析器与全量规范配招里都没有 `swift` 这类效果原语（术语 1007 的迅捷注入未实现）",
+    "传动": "解析器与全量规范配招里都没有 `transmission` 这类效果原语",
+}
+
+
+def probe_unreachable(rs: Any) -> List[Dict[str, str]]:
+    """把「驱动不了」的维度连**现算的理由**一起登记（不是手写一句借口）。"""
+    out = []
+    for name, why in PROBE_UNREACHABLE.items():
+        # 判据不是「desc 里有没有这个词」（传动/迅捷**确实**出现在描述里），
+        # 而是「解析器有没有把它变成引擎能结算的效果」：只出现在 `unparsed` 里 = 驱动不了。
+        mentioned = 0
+        modelled = 0
+        for pet in rs.pets.values():
+            for sid in (rs.candidate_moveset(pet.pet_id) or ()):
+                skill = rs.skills.get(sid)
+                if skill is None or name not in (skill.desc or ""):
+                    continue
+                mentioned += 1
+                parsed = parse_mod.parse_skill(skill)
+                if any(name in (e.evidence or "") or name in str(e.value) for e in parsed.effects):
+                    modelled += 1
+        if mentioned and not modelled:
+            out.append({"dimension": name, "reason": why,
+                        "evidence": f"规范配招里有 {mentioned} 条 desc 提到它，但解析器一条都没建模"})
+        elif not mentioned:
+            out.append({"dimension": name, "reason": why, "evidence": "规范配招里根本没有提到它的技能"})
+    return out
+
+
 def build_regression_set(rs: Any, scenarios: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
     """跑整套场景，产出可复核的回归集（确定性：同样的输入 ⇒ 同样的指纹）。"""
     SWEEP_IDS.clear()
@@ -329,7 +390,10 @@ def build_regression_set(rs: Any, scenarios: Optional[List[Dict[str, Any]]] = No
     dimensions = sorted({row["dimension"] for row in results})
     problems = [f"{row['id']}：{p}" for row in results for p in row["problems"]]
     unreachable = [f"{row['id']}：{row['unreachable'][0]}" for row in results if row.get("unreachable")]
-    unreachable = [f"{row['id']}：{row['unreachable'][0]}" for row in results if row.get("unreachable")]
+    # 「跑不了」的维度也要进**同一张** unreachable 清单：只写在子结构里、
+    # 顶层看不见，等于没登记（本函数早先就漏过一次）。
+    probed = probe_unreachable(rs)
+    unreachable += [f"{row['dimension']}：{row['reason']}｜{row['evidence']}" for row in probed]
     return {
         "schema": "roco-regression-set/v1",
         "rc": "RC-404",
@@ -365,6 +429,12 @@ def check_against(regression: Dict[str, Any], fresh: Dict[str, Any]) -> List[str
             problems.append(f"场景 {sid} 的终局指纹变了：{old[sid]['state_digest'][:12]} → {new[sid]['state_digest'][:12]}")
         if old[sid]["event_kinds"] != new[sid]["event_kinds"]:
             problems.append(f"场景 {sid} 的事件分布变了：{old[sid]['event_kinds']} → {new[sid]['event_kinds']}")
+    # 不可达清单也是结论：某条从「可达」变「不可达」必须红，不能悄悄留在旧表里。
+    old_unreachable, new_unreachable = set(regression.get("unreachable") or []), set(fresh.get("unreachable") or [])
+    for row in sorted(new_unreachable - old_unreachable):
+        problems.append(f"新出现不可达：{row}（要么补场景，要么重新生成指纹表）")
+    for row in sorted(old_unreachable - new_unreachable):
+        problems.append(f"原本不可达的现在不再登记：{row}（是修好了还是漏登记了？）")
     return problems
 
 

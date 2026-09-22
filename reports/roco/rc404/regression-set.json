@@ -5,13 +5,14 @@
  "ruleset_id": "roco-world-s4-2026-09-10",
  "why": "镜像对局只能压出 14 种事件，印记/天气/应对/持续状态根本不会出现。本集用**脚本化**对局逐条驱动机制，并声明每条的期望证据 —— 没出现就算空转，如实报出来。",
  "totals": {
-  "scenarios": 27,
-  "dimensions": 27,
+  "scenarios": 29,
+  "dimensions": 29,
   "scenarios_with_problems": 0
  },
  "dimensions": [
   "力竭/魔力",
   "印记",
+  "同速平手（候选口径）",
   "天气",
   "属性/伤害",
   "属性·光系",
@@ -36,11 +37,14 @@
   "换入离场",
   "资源（能量/聚能）",
   "迁移夹具（legacy 逐位不变）",
+  "速度层次",
   "防御"
  ],
  "problems": [],
  "unreachable": [
-  "weather：数据里没有任何精灵的**规范配招**带 ['weather'] 这类效果——这一条不可达"
+  "weather：数据里没有任何精灵的**规范配招**带 ['weather'] 这类效果——这一条不可达",
+  "迅捷：解析器与全量规范配招里都没有 `swift` 这类效果原语（术语 1007 的迅捷注入未实现）｜规范配招里有 31 条 desc 提到它，但解析器一条都没建模",
+  "传动：解析器与全量规范配招里都没有 `transmission` 这类效果原语｜规范配招里有 57 条 desc 提到它，但解析器一条都没建模"
  ],
  "known_limits": [
   "场景只覆盖**能驱动得了**的机制；驱动不了的要登记进 unreachable，而不是当作通过",
@@ -76,6 +80,29 @@
     1.0,
     0.5
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "player",
+    "8": "enemy",
+    "9": "enemy",
+    "11": "enemy",
+    "12": "enemy",
+    "13": "enemy",
+    "14": "enemy",
+    "16": "enemy",
+    "17": "enemy",
+    "19": "enemy",
+    "20": "enemy",
+    "21": "enemy",
+    "22": "enemy",
+    "23": "enemy",
+    "24": "enemy",
+    "25": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 30,
@@ -184,6 +211,29 @@
     1.0,
     0.5
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "player",
+    "8": "enemy",
+    "9": "enemy",
+    "11": "enemy",
+    "12": "enemy",
+    "13": "enemy",
+    "14": "enemy",
+    "16": "enemy",
+    "17": "enemy",
+    "19": "enemy",
+    "20": "enemy",
+    "21": "enemy",
+    "22": "enemy",
+    "23": "enemy",
+    "24": "enemy",
+    "25": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 30,
@@ -275,6 +325,24 @@
    "lead_skill": null,
    "used_skills": [],
    "type_multipliers": [],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy",
+    "12": "enemy",
+    "13": "enemy",
+    "14": "enemy",
+    "15": "enemy",
+    "16": "enemy",
+    "17": "enemy",
+    "18": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 16,
@@ -389,6 +457,38 @@
     2.0,
     2.0
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "player",
+    "8": "enemy",
+    "9": "enemy",
+    "11": "enemy",
+    "12": "enemy",
+    "13": "enemy",
+    "14": "enemy",
+    "16": "enemy",
+    "17": "enemy",
+    "19": "enemy",
+    "20": "enemy",
+    "21": "enemy",
+    "22": "enemy",
+    "23": "enemy",
+    "24": "enemy",
+    "25": "enemy",
+    "26": "player",
+    "27": "enemy",
+    "28": "player",
+    "29": "player",
+    "30": "enemy",
+    "31": "player",
+    "32": "player",
+    "33": "enemy",
+    "34": "player"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 45,
@@ -506,6 +606,38 @@
     2.0,
     2.0
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "player",
+    "8": "enemy",
+    "9": "enemy",
+    "11": "enemy",
+    "12": "enemy",
+    "13": "enemy",
+    "14": "enemy",
+    "16": "enemy",
+    "17": "enemy",
+    "19": "enemy",
+    "20": "enemy",
+    "21": "enemy",
+    "22": "enemy",
+    "23": "enemy",
+    "24": "enemy",
+    "25": "enemy",
+    "26": "player",
+    "27": "enemy",
+    "28": "player",
+    "29": "player",
+    "30": "enemy",
+    "31": "player",
+    "32": "player",
+    "33": "enemy",
+    "34": "player"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 45,
@@ -590,6 +722,30 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy",
+    "12": "enemy",
+    "13": "enemy",
+    "14": "enemy",
+    "15": "enemy",
+    "16": "enemy",
+    "17": "enemy",
+    "18": "enemy",
+    "19": "enemy",
+    "20": "enemy",
+    "21": "enemy",
+    "22": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 1,
@@ -697,6 +853,26 @@
     0.5,
     0.5
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy",
+    "12": "enemy",
+    "13": "enemy",
+    "14": "player",
+    "15": "enemy",
+    "16": "enemy",
+    "18": "enemy",
+    "19": "enemy",
+    "20": "enemy",
+    "21": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 25,
@@ -815,6 +991,28 @@
     0.5,
     0.5
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy",
+    "12": "player",
+    "13": "player",
+    "14": "enemy",
+    "15": "enemy",
+    "16": "player",
+    "17": "enemy",
+    "18": "enemy",
+    "19": "enemy",
+    "20": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "damage": 34,
@@ -898,6 +1096,259 @@
    "status": "reachable"
   },
   {
+   "id": "speed-order",
+   "dimension": "速度层次",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 20,
+   "steps": 25,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000286",
+    "skill_000750"
+   ],
+   "type_multipliers": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "first_damage_by_turn": {
+    "2": "player",
+    "3": "player",
+    "5": "player",
+    "6": "player",
+    "7": "player",
+    "8": "player",
+    "9": "player",
+    "10": "player",
+    "11": "player",
+    "12": "player",
+    "13": "player",
+    "14": "player",
+    "15": "player",
+    "16": "player",
+    "17": "player",
+    "18": "enemy",
+    "19": "enemy",
+    "20": "player",
+    "21": "enemy"
+   },
+   "event_kinds": {
+    "action_cancelled": 2,
+    "damage": 33,
+    "defense": 7,
+    "effects_registered_unsupported": 5,
+    "energy_gain": 5,
+    "faint": 4,
+    "mana_loss": 4,
+    "replacement": 4,
+    "turn_start": 21
+   },
+   "state_digest": "b1588431a2a86eb847daf12dbb0fc42c33868b128450652fab19ac3ae7c2ebed",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": "player"
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
+   "id": "speed-tie",
+   "dimension": "同速平手（候选口径）",
+   "config": "mobile_s4_candidate_v3",
+   "seed": 22,
+   "steps": 20,
+   "result": null,
+   "lead_pet": null,
+   "lead_skill": null,
+   "used_skills": [
+    "skill_000294",
+    "skill_000321",
+    "skill_000576",
+    "skill_000750"
+   ],
+   "type_multipliers": [
+    2.0,
+    2.0,
+    2.0,
+    0.5,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "4": "enemy",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy",
+    "12": "enemy",
+    "13": "player",
+    "14": "player",
+    "15": "player",
+    "16": "player"
+   },
+   "event_kinds": {
+    "action_cancelled": 2,
+    "damage": 19,
+    "defense": 2,
+    "faint": 4,
+    "mana_loss": 4,
+    "replacement": 4,
+    "status_unsupported": 9,
+    "turn_start": 16
+   },
+   "state_digest": "e714022ae26347d75d3d36316498dbda8e6635a49c81642e10f296c631b2402b",
+   "key_events": [
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 2,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 3,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 4,
+     "side": "player"
+    },
+    {
+     "kind": "damage",
+     "turn": 5,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 6,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 7,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 8,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 9,
+     "side": "enemy"
+    },
+    {
+     "kind": "damage",
+     "turn": 10,
+     "side": "enemy"
+    }
+   ],
+   "pick_hit_rate": 1.0,
+   "problems": [],
+   "unreachable": [],
+   "status": "reachable"
+  },
+  {
    "id": "legacy-practice-3v3",
    "dimension": "迁移夹具（legacy 逐位不变）",
    "config": "legacy_sim_v1",
@@ -925,6 +1376,20 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "5": "enemy",
+    "6": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "12": "player",
+    "13": "player",
+    "15": "player",
+    "16": "player",
+    "18": "player"
+   },
    "event_kinds": {
     "damage": 19,
     "defense": 12,
@@ -1027,6 +1492,17 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 1,
     "charge": 2,
@@ -1130,6 +1606,19 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 1,
     "charge": 2,
@@ -1231,6 +1720,16 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 2,
@@ -1333,6 +1832,18 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 2,
@@ -1436,6 +1947,18 @@
     0.5,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "player",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "player"
+   },
    "event_kinds": {
     "action_cancelled": 1,
     "charge": 1,
@@ -1541,6 +2064,19 @@
     0.5,
     0.5
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "player",
+    "7": "player",
+    "8": "player",
+    "9": "player",
+    "10": "player",
+    "11": "player"
+   },
    "event_kinds": {
     "damage": 18,
     "defense": 4,
@@ -1641,6 +2177,18 @@
     0.5,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 2,
@@ -1744,6 +2292,19 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "player",
+    "7": "player",
+    "8": "player",
+    "9": "player",
+    "10": "player",
+    "11": "player"
+   },
    "event_kinds": {
     "damage": 18,
     "defense": 4,
@@ -1846,6 +2407,19 @@
     0.25,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 1,
     "charge": 1,
@@ -1948,6 +2522,19 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 2,
@@ -2053,6 +2640,19 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 1,
     "damage": 19,
@@ -2156,6 +2756,18 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "player",
+    "8": "player",
+    "9": "player",
+    "10": "player"
+   },
    "event_kinds": {
     "damage": 17,
     "defense": 3,
@@ -2257,6 +2869,18 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 2,
@@ -2358,6 +2982,19 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 1,
     "charge": 1,
@@ -2457,6 +3094,16 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 2,
@@ -2558,6 +3205,19 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 2,
     "charge": 2,
@@ -2660,6 +3320,19 @@
     0.25,
     0.25
    ],
+   "first_damage_by_turn": {
+    "1": "player",
+    "2": "enemy",
+    "3": "enemy",
+    "4": "player",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "enemy",
+    "11": "enemy"
+   },
    "event_kinds": {
     "action_cancelled": 1,
     "damage": 19,
@@ -2762,6 +3435,17 @@
     1.0,
     1.0
    ],
+   "first_damage_by_turn": {
+    "2": "enemy",
+    "3": "enemy",
+    "5": "enemy",
+    "6": "enemy",
+    "7": "enemy",
+    "8": "enemy",
+    "9": "enemy",
+    "10": "player",
+    "11": "player"
+   },
    "event_kinds": {
     "damage": 17,
     "defense": 5,
