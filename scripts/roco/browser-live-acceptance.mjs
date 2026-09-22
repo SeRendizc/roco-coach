@@ -864,6 +864,36 @@ async function main() {
       if ((f?.turns ?? []).filter((t) => t.open).length > 1) bad.push('战报同时展开了多个回合（应当只默认展开最近一回合）');
       return bad;
     };
+    // ── E2/E4：规则口径与未核验项必须在**战场下面**的一处折叠里（不许压在战场上方）──
+    const hierarchy = await js(`(()=>{const r=document.getElementById('rules-note');
+      const note=document.getElementById('unverified-note');
+      const self=document.getElementById('self-panel');
+      const top=(el)=>el?Math.round(el.getBoundingClientRect().top):null;
+      return {rulesTop:top(r),stageTop:top(self),
+        noteIsChip:Boolean(note&&note.closest('summary')),
+        noteVisible:Boolean(note&&!note.hidden),
+        // 战场上方还有没有别的「未核验/规则」行
+        aboveCount:r&&self?[...document.querySelectorAll('#battle-panel > *')]
+          .filter((el)=>el!==r&&/未核验|规则口径/.test((el.textContent||''))&&
+            el.getBoundingClientRect().top<self.getBoundingClientRect().top).length:null};})()`);
+    const hierarchyProblems = (f) => {
+      const bad = [];
+      if (f?.stageTop === null || f?.rulesTop === null) bad.push('缺战场或规则折叠块');
+      else if (!(f.rulesTop > f.stageTop)) bad.push('规则折叠块还在战场上方（会抢主视线）');
+      if (f?.noteIsChip !== true) bad.push('未核验提示不是折叠行上的短标签（还在单独占一行）');
+      if (Number(f?.aboveCount) > 0) bad.push(`战场上方还有 ${f.aboveCount} 处「未核验/规则」文本`);
+      return bad;
+    };
+    check('live-battle-hierarchy', '战场优先：双方精灵在最上面；「规则口径与未核验项」收在**战场下面**的一处折叠里，'
+      + '未核验只做折叠行上的短标签（不再单独占行）',
+      hierarchyProblems(hierarchy).length === 0,
+      hierarchyProblems(hierarchy).join(' | ')
+      || `战场 top=${hierarchy.stageTop}；规则折叠 top=${hierarchy.rulesTop}；`
+        + `未核验=${hierarchy.noteVisible ? '显示' : '隐藏'}（折叠行内=${hierarchy.noteIsChip}）；`
+        + `战场上方残留 ${hierarchy.aboveCount} 处`);
+    counter('live-battle-hierarchy', '把规则/未核验挪回战场上方必须被同一条判据抓住',
+      hierarchyProblems({...hierarchy, rulesTop: 10, stageTop: 400}), '{"rulesTop":10,"stageTop":400}');
+
     check('live-lineup-and-log', '开局前给出双方阵容展示（我方六只 + 对手「上场才亮明」，且在流里不挡行动）；'
       + '战报按回合分组、默认只展开最近一回合',
       r56Problems(r56).length === 0,

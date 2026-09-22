@@ -227,15 +227,6 @@
    <div class="resource" id="foe-resource"></div>
    <div class="roster-line" id="foe-roster-line"></div>
   </div>
-  <!-- 未核验覆盖（RC-106）：这一局用到的**假设值**逐条写在这里，默认隐藏（没有假设就不显示）。
-       它是引擎给的中文句子（`ui.notes.unverified_overrides`），页面只做搬运与展示。 -->
-  <p class="unverified-note" id="unverified-note" hidden></p>
-  <!-- 规则口径与未核验来源**集中在这一处**（人类视觉规格：候选规则细节合并为一处可展开说明，
-       双方卡片不再重复）。默认收起，需要时展开即可读到来源。 -->
-  <details class="rules-note" id="rules-note">
-   <summary>规则口径与未核验项（来源可核对）</summary>
-   <p class="muted" id="rules-note-body">还没有开局。</p>
-  </details>
  </div>
 
  <div class="stage">
@@ -257,6 +248,13 @@
   <div class="bench-col"><span class="muted bench-label">我方后备</span><div id="self-bench" class="bench"></div></div>
   <div class="bench-col"><span class="muted bench-label">对手后备</span><div id="foe-bench" class="bench"></div></div>
  </div>
+
+ <!-- 2026-09-22（人类视觉规格 E2/E4）：规则口径与未核验项**收在战场下面的一处折叠里**，
+      默认只留一行短标签；展开才读得到逐条来源。战场（双方精灵）回到主视线。 -->
+ <details class="rules-note" id="rules-note">
+  <summary><span id="unverified-note" class="unverified-chip" hidden></span>规则口径与未核验项（来源可核对）</summary>
+  <p class="muted" id="rules-note-body">还没有开局。</p>
+ </details>
 
  <div class="battle-tools">
   <button id="plan">✦ 让小芽看一眼</button>
