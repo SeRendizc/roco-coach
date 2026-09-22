@@ -830,6 +830,13 @@ function render() {
   // 但**大段规则与证据**在战斗时不该占主视线：它们本来就在开发者抽屉里。
   const modeLine = $('mode-line');
   if (modeLine) modeLine.dataset.rocoCompact = busy ? 'yes' : 'no';
+  // 「对手是示例阵容」要写在玩家看得到的地方（2026-09-22 人类实测：对手曾经就是我的镜像）。
+  const sampleFoeNote = $('foe-note');
+  if (sampleFoeNote) {
+    const note = view?.enemy_note ?? null;
+    sampleFoeNote.hidden = !note;
+    sampleFoeNote.textContent = note ?? '';
+  }
   $('log-panel').hidden = !busy;
   $('action-panel').hidden = !busy;
   $('result-panel').hidden = !view?.battle_result;

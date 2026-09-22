@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `4b6e04e`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `5cc52ae`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2316,3 +2316,14 @@ P0-C 机制覆盖 / P0-D Agent / P0-E UI / P1 算法与 Coach / P2 训练与交�
 三个实现坑（都是判据抓出来的）：`api()` 只发 **POST**（名单是 GET → 必须用 fetch）；`renderMode()` 会 `innerHTML` 重建 `#mode-line`（chip 放里面会被冲掉 → 移到按钮行）；按需推算的配招不在默认 48 只名单里（开局后懒加载一次 `support=all`）。
 
 判据：真机 **21/21 + 20/20**；demo **120/0**；`test:unit` 1001/1001；门禁 **22/22**。
+
+
+### C6.52 第 126 轮：对手不再镜像我方（人类实测 Q1）+ 五问回执与工期
+
+**Q1 已修**：`roco/src/roco_env/service.py:1681` 的 `enemy_team = body.get("enemy_team", team)` ——客户端开标准 PVP 从不带对手阵容，于是引擎**直接镜像我方六只**（截图里两边同一只）。服务端现在从 `data/roco/derived/on-demand-builds.json`（622 物种、确定性排序）取**与我不重合**的六只当**示例对手**，回执标 `enemy_source=sample` + 中文说明，页面在对手栏上方照实显示。判据写在**服务端**（`tests/roco-standard-pvp-battle.test.js`）—— 公开视图故意不给对手全队，在页面上量这条只会是假判据。
+
+**Q2–Q5 回执与工期**见 `docs/roadmap/PLAYER-LOOP-CHECKLIST.md` 末尾「人类 2026-09-22 追加五问」：
+- Q2 假想序列里的图鉴物种（实测一次召回 50/50 全是 `pet_*`、0 个我的个体）：补全优先用已拥有 + 槽位逐只标 → **1–2 轮**
+- Q3 选精灵的框做大：桌面加宽加高、手机做成默认展开抽屉 → **1 轮**
+- Q4 UI：结构层已改（行动区分类 / 灰置配招 / 对手按公开视图 / 事件与战报折叠 / 页头对齐 / 战斗中收起选阵容面），**视觉层没做**（桌面两列、手机顺序、字号间距节奏、技能 2×2、五态截图人工复核）→ **4–6 轮**
+- Q5 **不确定**：`energy.initial` 在台账里是 **UNKNOWN**；标准 PVP 用的是候选配置的**假设值 2**（`ENGINE_HYPOTHESIS`，microcase **MC-E04 待录**），页面按规矩标「未核验」。正确说法是「候选规则下按假设值 2 开局」，**不是**「洛手开局 2 能量」——要变成事实只能录 MC-E04。

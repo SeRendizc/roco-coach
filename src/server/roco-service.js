@@ -1772,6 +1772,26 @@ function resolveBattleTeamIds(team){
   *   · 需要未核验覆盖的模式（v3 的 `energy.initial`）⇒ 由**服务端**补上唯一的常量
   *     （`STANDARD_PVP_UNVERIFIED_OVERRIDES`），并原样带到载荷里让界面标「未核验」。
   */
+/**
+ * **示例对手**的物种池（2026-09-22 人类实测「对手就是我的阵容」）。
+ *
+ * 来源：`data/roco/derived/on-demand-builds.json`（RC-402 的冻结产物，622 个物种，
+ * 每个都带规范配招）。**只读**，且**确定性**排序（按 species_id），
+ * 这样同一个 seed/同一时刻不会给出不同对手。读不到就返回空数组 ——
+ * 那时宁可不给样例对手（引擎会退回镜像），也不凭空编一个物种。
+ */
+let samplePoolCache=null;
+function sampleEnemyPool(){
+ if(samplePoolCache)return samplePoolCache;
+ try{
+  const doc=JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)),'..','..',
+   'data/roco/derived/on-demand-builds.json'),'utf8'));
+  const builds=doc?.builds??{};
+  samplePoolCache=Object.keys(builds).sort();
+ }catch{samplePoolCache=[];}
+ return samplePoolCache;
+}
+
  async function startBattle(body={}){
   const up=await ensure();
   if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
@@ -1812,7 +1832,25 @@ function resolveBattleTeamIds(team){
    return {ok:false,status:400,
     error:`模式 ${modeId} 的对手也必须是 ${teamSize} 只（登记表），实际 ${enemyRaw.length} 只`};
   }
-  const enemyTeam=modeId?(enemyRaw??undefined):((enemyRaw&&enemyRaw.length===3)?enemyRaw:undefined);
+  // 2026-09-22（人类实测）：**没有对手阵容时，引擎会直接镜像我方**
+  // （`roco/src/roco_env/service.py` 的 `enemy_team = body.get("enemy_team", team)`），
+  // 于是标准 PVP 打起来是「自己打自己」。v3 的口径是「匹配前对手未知、按版本环境倾向评价」，
+  // 所以这里给一个**确定性的示例对手**：从候选宇宙里取与我方不重复的物种，
+  // 并在回执里标明它是**示例**（页面照实显示，不冒充真实匹配）。
+  const sampleEnemyFor=(mine)=>{
+   if(!modeId||enemyRaw)return null;
+   const mineSpecies=new Set(mine.map((id)=>String(id)));
+   const pool=sampleEnemyPool();
+   const picked=[];
+   for(const id of pool){
+    if(mineSpecies.has(String(id)))continue;
+    picked.push(id);
+    if(picked.length>=teamSize)break;
+   }
+   return picked.length===teamSize?picked:null;
+  };
+  const enemyTeam=modeId?((enemyRaw??sampleEnemyFor(team))??undefined):((enemyRaw&&enemyRaw.length===3)?enemyRaw:undefined);
+  const enemyIsSample=modeId&&!enemyRaw&&Array.isArray(enemyTeam);
 
   // owned 个体 → 物种 id（引擎的名单是物种级）。不在 owned 里的 id 照实报错，不猜。
   const resolved=resolveBattleTeamIds(resolvedTeam);
@@ -1831,9 +1869,16 @@ function resolveBattleTeamIds(team){
   const out=unwrap(envelope);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
   const id=newSessionId();
+  if(enemyIsSample)out.result.enemy_source='sample';
   sessions.set(id,{state:out.result.state,strategy,seed,turn:out.result.turn,
    mode_id:modeId,ruleset_config_id:rulesetConfigId});
   const base=publicView(out.result,{modeId,rulesetConfigId});
+  // 「对手是示例阵容」这件事必须写进**页面读得到的地方**（`view`），
+  // 只挂在 `out.result` 上页面看不到（第一版就是这么漏的）。
+  if(enemyIsSample){
+   base.enemy_source='sample';
+   base.enemy_note='对手是按候选宇宙取的**示例阵容**（匹配前对手未知）：不是你的镜像，也不是真实匹配结果。';
+  }
   return {ok:true,battle_id:id,view:base,
    mode:mode?{id:mode.id,label:mode.label,status:mode.status,confidence:mode.confidence,
     team_size:teamSize,ruleset_config_id:rulesetConfigId}:null,

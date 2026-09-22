@@ -175,3 +175,45 @@ test('未核验覆盖的常量只有一份，且值与 microcase 对得上', () 
 
 test.after?.(() => {});
 process.on('exit', () => { try { service.stop(); } catch { /* 已经停了 */ } });
+
+// ─────────────────────────────────────────────────────────────────────────
+// 2026-09-22（人类实测）：「对手选宠直接用的我的阵容」。
+// 根因：`roco/src/roco_env/service.py` 里 `enemy_team = body.get("enemy_team", team)` ——
+// 没给对手阵容时引擎**镜像我方**。v3 口径是「匹配前对手未知、按版本环境倾向评价」，
+// 所以服务端在没有对手阵容时给一个**确定性的示例对手**（与我不重合），并标 `enemy_source`。
+// 为什么在服务端判而不是页面判：公开视图**故意不给对手全队**（`opponent.bench` 只有位次与
+// 是否倒下），页面根本看不到真相 —— 在页面上量这条只会是假判据。
+// ─────────────────────────────────────────────────────────────────────────
+test('标准 PVP 没有指定对手时：不许镜像我方（示例对手 + enemy_source 标记）', async () => {
+  const {createCoachServer} = await import('../src/server/index.js');
+  const server = createCoachServer({fetchImpl: async () => { throw Error('测试环境不允许联网'); }});
+  await new Promise((res, rej) => { server.once('error', rej); server.listen(0, '127.0.0.1', res); });
+  const base = `http://127.0.0.1:${server.address().port}/`;
+  try {
+    // CSRF 三件套：Origin + Cookie + X-Coach-CSRF。少一个就是 403
+    // （第一版只带 X-Coach-CSRF，直接被「请求来源或类型不正确」拦下）。
+    const bootResponse = await fetch(`${base}api/bootstrap`);
+    const cookie = (bootResponse.headers.get('set-cookie') ?? '').split(';')[0];
+    const boot = await bootResponse.json();
+    const headers = {'Content-Type': 'application/json', 'X-Coach-CSRF': boot.csrf,
+      Origin: base.replace(/\/$/, ''), Cookie: cookie};
+    const mine = ['own-0001', 'own-0003', 'own-0005', 'own-0007', 'own-0009', 'own-0011'];
+    const started = await (await fetch(`${base}api/roco/battle/new`, {
+      method: 'POST', headers, body: JSON.stringify({mode: 'pvp-standard-six-pet', team: mine}),
+    })).json();
+    assert.equal(started.ok, true, `开局必须成功：${started.error ?? ''}`);
+    const mineIds = (started.view.self.pets ?? []).map((p) => p.species_id ?? p.pet_id);
+    // 公开视图不给对手全队 —— 用**引擎侧**的对手上场那只与后备做交叉判断：
+    // 至少「对手与我一模一样」这种镜像，会让对手**每一只**都能在我方名单里找到。
+    const foeField = started.view.opponent?.field;
+    assert.ok(foeField, '对手场上那只必须在公开视图里');
+    assert.equal(started.view.enemy_source, 'sample',
+      '没有指定对手时必须在回执里标 enemy_source=sample（页面才知道这是示例对手）');
+    // 反证方向：镜像我方时，对手上场那只**必然**是我方第一只 —— 这条能抓住镜像实现
+    assert.notEqual(String(foeField.species_id ?? foeField.pet_id), String(mineIds[0]),
+      `对手上场那只不该就是我方第一只（镜像）：对手 ${foeField.species_id ?? foeField.pet_id} / 我方首位 ${mineIds[0]}`);
+  } finally {
+    server.closeAllConnections?.();
+    await new Promise((r) => server.close(r));
+  }
+});
