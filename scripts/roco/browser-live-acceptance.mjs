@@ -727,6 +727,59 @@ async function main() {
       settleProblems({result: null, resultVisible: false, lessonShown: null}), '{"result":null}');
     await shoot('live-04-1440-settled');
 
+    // ── ③b A9 换局迁移验证：第二局必须**接着上一课**，不许把同一课当新知识再讲一遍 ──
+    // 老师层的「学过就不再教 / 没学会就再教」在单测里有；缺的是**真机跨局**证据。
+    const m1 = await js(`(()=>{const b=document.body.dataset;
+      return {goal:b.rocoTeacherGoal??'',point:b.rocoTeacherPoint??'',repeat:b.rocoTeacherRepeat??''};})()`);
+    await mouseClick('#start-standard-pvp');
+    await waitFor(`document.body.dataset.rocoView==='ready'
+      && !document.getElementById('battle-panel').hidden`, 100, 250);
+    await sleep(600);
+    let second = null;
+    for (let i = 0; i < 150; i += 1) {
+      const probe = await js(`(()=>{const v=window.rocoDemo.state.view;
+        return v&&v.battle_result?v.battle_result:null;})()`);
+      if (probe) break;
+      try { await mouseClick('#auto-turn'); } catch { break; }
+      await sleep(220);
+    }
+    second = await js(`(()=>{const b=document.body.dataset;
+      return {result:b.rocoView,lesson:b.rocoLesson??null,goal:b.rocoTeacherGoal??'',
+        point:b.rocoTeacherPoint??'',repeat:b.rocoTeacherRepeat??'',checked:b.rocoTeacherChecked??'',
+        improved:b.rocoTeacherImproved??'',
+        progress:(document.getElementById('lesson-progress')||{}).textContent||'',
+        lessonText:(document.getElementById('lesson')||{}).textContent||''};})()`);
+    steps.push({at: 'second-match-teacher', m1, second});
+    const migrateProblems = (first, f) => {
+      const bad = [];
+      if (f?.lesson !== 'shown') bad.push('第二局没有给出教学入口');
+      if (!String(f?.lessonText ?? '').includes('回合')) bad.push('第二局的复盘正文没有局面信息');
+      if (f?.repeat === 'yes') {
+        // 同一课又出现了：必须**接着核对上一次**，而不是当作新知识再讲一遍
+        if (f?.checked !== 'yes') bad.push('同一课重复出现，却没有做「上一次那一课的核对」');
+        if (!String(f?.progress ?? '').trim()) bad.push('核对说明是空的（说了核对却没内容）');
+      } else if (f?.repeat === 'no') {
+        // 不是同一课：不许是**与第一局逐字相同**的那一课（那就是换个说法重讲）
+        if (first?.goal && f?.goal === first.goal && f?.point === first.point) {
+          bad.push(`第二局又拎出与第一局完全相同的一课（${f.goal}/${f.point}）`);
+        }
+      } else {
+        bad.push(`第二局没有登记「是不是同一课」（repeat=${JSON.stringify(f?.repeat)}）`);
+      }
+      return bad;
+    };
+    check('live-lesson-migration', '换局迁移：第二局的教学必须**接着上一课**（同一课时做核对，'
+      + '不同课时不许逐字重讲第一局那一课），且复盘正文带局面信息',
+      migrateProblems(m1, second).length === 0,
+      migrateProblems(m1, second).join(' | ')
+      || `第一局 ${m1.goal}/${m1.point} → 第二局 ${second.goal}/${second.point}`
+        + `；repeat=${second.repeat} checked=${second.checked}；核对「${String(second.progress).slice(0, 60)}」`);
+    counter('live-lesson-migration', '第二局把同一课当新知识再讲一遍（repeat=yes 但没做核对）必须被同一条判据抓住',
+      migrateProblems({goal: '稳态', point: 'defense-branch'},
+        {lesson: 'shown', lessonText: '第 12 回合', goal: '稳态', point: 'defense-branch',
+          repeat: 'yes', checked: 'no', progress: ''}),
+      '{"repeat":"yes","checked":"no"}');
+
     // ── ④ 窄屏 390×844：六宠主流程的版式 + 小芽可见 ────────────────────────
     await setViewport(390, 844, true);
     await cdp.send('Page.navigate', {url: `${BASE}roco.html`});

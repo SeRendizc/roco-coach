@@ -3,20 +3,20 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-22T08:44:51.142Z",
+ "judged_at": "2026-09-22T09:23:58.244Z",
  "totals": {
-  "checks": 16,
-  "passed": 16,
+  "checks": 17,
+  "passed": 17,
   "failed": 0,
-  "counterproofs": 15,
-  "counterproofs_hit": 15
+  "counterproofs": 16,
+  "counterproofs_hit": 16
  },
  "checks": [
   {
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=6"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=0"
   },
   {
    "id": "live-boot",
@@ -76,13 +76,19 @@
    "id": "live-battle-spec",
    "judge": "战斗页规格：技能为主区（≤4 张、卡高 ≥44、带关键效果）、聚能/换精灵/投降各自独立入口、只渲染本回合合法动作、最新一条事件在、对手后备不放占位也不泄漏 id、1440×900 行动区在视口内",
    "ok": true,
-   "actual": "技能卡 3 张（最矮 71px）；聚能=yes 换精灵=yes 投降=yes；最新事件「」；对手后备「对手后备 5 只 · 上场时亮明」；行动区底 669 / 视口 900"
+   "actual": "技能卡 3 张（最矮 71px）；聚能=yes 换精灵=yes 投降=yes；最新事件「」；对手后备「对手后备 5 只 · 上场时亮明」；行动区底 900 / 视口 900"
   },
   {
    "id": "live-settle",
    "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、最新一条事件在）",
    "ok": true,
    "actual": "true"
+  },
+  {
+   "id": "live-lesson-migration",
+   "judge": "换局迁移：第二局的教学必须**接着上一课**（同一课时做核对，不同课时不许逐字重讲第一局那一课），且复盘正文带局面信息",
+   "ok": true,
+   "actual": "第一局 read-the-replacement-first/first-faint → 第二局 stop-attacking-into-resistance/first-faint；repeat=no checked=yes；核对「上一次那一课的核对：「对面有伙伴倒下」这一局又出现了。对比第 14 回合（上一次：补位之后第一手打在抵抗上）与第 14 」"
   },
   {
    "id": "live-narrow-390",
@@ -186,6 +192,13 @@
    "ok": true,
    "hit": "引擎没给出对局结果 | 结算区没出现 | 局末教学入口没出现",
    "actual": "{\"result\":null}"
+  },
+  {
+   "id": "live-lesson-migration",
+   "judge": "第二局把同一课当新知识再讲一遍（repeat=yes 但没做核对）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "同一课重复出现，却没有做「上一次那一课的核对」 | 核对说明是空的（说了核对却没内容）",
+   "actual": "{\"repeat\":\"yes\",\"checked\":\"no\"}"
   },
   {
    "id": "live-narrow-390",
@@ -460,17 +473,17 @@
     "rendered": "skill,charge,switch,surrender",
     "skillCards": [
      {
-      "w": 387,
+      "w": 420,
       "h": 71,
       "desc": 11
      },
      {
-      "w": 387,
+      "w": 420,
       "h": 71,
       "desc": 33
      },
      {
-      "w": 387,
+      "w": 420,
       "h": 71,
       "desc": 14
      }
@@ -478,18 +491,18 @@
     "lastEvent": "",
     "battle": {
      "shown": true,
-     "top": -377,
-     "bottom": 468
+     "top": -176,
+     "bottom": 669
     },
     "actions": {
      "shown": true,
-     "top": 478,
-     "bottom": 669
+     "top": 709,
+     "bottom": 900
     },
     "log": {
      "shown": true,
-     "top": -377,
-     "bottom": -264
+     "top": -176,
+     "bottom": -63
     },
     "coach": {
      "shown": false,
@@ -512,6 +525,25 @@
     "turn": 45,
     "resultVisible": true,
     "lessonShown": "shown",
+    "lessonText": "关键转折在第 13 回合（这一局 45 个回合）。"
+   }
+  },
+  {
+   "at": "second-match-teacher",
+   "m1": {
+    "goal": "read-the-replacement-first",
+    "point": "first-faint",
+    "repeat": "no"
+   },
+   "second": {
+    "result": "ready",
+    "lesson": "shown",
+    "goal": "stop-attacking-into-resistance",
+    "point": "first-faint",
+    "repeat": "no",
+    "checked": "yes",
+    "improved": "no",
+    "progress": "上一次那一课的核对：「对面有伙伴倒下」这一局又出现了。对比第 14 回合（上一次：补位之后第一手打在抵抗上）与第 14 回合（这一次：补位之后第一手打在抵抗上）。两次的处理方式一样，所以这一局看不到变化。",
     "lessonText": "关键转折在第 13 回合（这一局 45 个回合）。"
    }
   },
