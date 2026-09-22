@@ -1,0 +1,328 @@
+{
+ "schema": "roco-retained-assets/v1",
+ "rc": "RC-501",
+ "generated_by": "scripts/roco/revalidate-retained-assets.mjs",
+ "why": "v3 红线：不得重写或退化现有 Agent/RAG/Memory/三角色/game adapter/mock host/stale-result guard/release guard。「保留」必须有牙 —— 缺判据、掉出套件清单、产物不再生成、没有必红方向，四样缺一样都要红（守卫不跑等于没有守卫）。",
+ "gate": {
+  "path": "reports/roco/verification/latest.json",
+  "verdict": "pass",
+  "declared_suites": [
+   "env",
+   "unit",
+   "bridge",
+   "toolbox-roco",
+   "plan-e2e",
+   "trajectories",
+   "trajectories-model",
+   "sft-split",
+   "model-manifest",
+   "provenance",
+   "rag-eval",
+   "game-data-pack",
+   "reconciliation",
+   "state-doc",
+   "guard-selftest",
+   "browser-acceptance",
+   "demo-acceptance",
+   "roco-ux-acceptance"
+  ],
+  "last_run_suites": [
+   "env",
+   "unit",
+   "bridge",
+   "toolbox-roco",
+   "plan-e2e",
+   "trajectories",
+   "trajectories-model",
+   "sft-split",
+   "model-manifest",
+   "provenance",
+   "rag-eval",
+   "game-data-pack",
+   "reconciliation",
+   "state-doc",
+   "guard-selftest",
+   "browser-acceptance",
+   "demo-acceptance",
+   "roco-ux-acceptance"
+  ],
+  "head_run": null
+ },
+ "totals": {
+  "assets": 13,
+  "ok": 13,
+  "with_problems": 0
+ },
+ "assets": [
+  {
+   "id": "agent-trajectories",
+   "name": "Agent 轨迹与工具协议（6048 条回放）",
+   "promise": "工具协议与轨迹回放不退化：结构、回放、grader 三层都逐条复验，且「改坏一条就判红」的负数样本真的被抓到",
+   "judge": {
+    "kind": "suite",
+    "ref": "trajectories"
+   },
+   "evidence": "reports/roco/agent-trajectories-verification.json",
+   "negative": [
+    {
+     "kind": "script_flag",
+     "path": "scripts/roco/verify-agent-trajectories.mjs",
+     "flag": "--selftest"
+    },
+    {
+     "kind": "report_field",
+     "path": "reports/roco/agent-trajectories-verification.json",
+     "field": "grader.negative",
+     "expect": "all_passed_batch",
+     "min_total": 1000
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "rag-evidence",
+   "name": "RAG 证据与 held-out 评测",
+   "promise": "五类查询的 Recall@K / MRR / 版本命中 / grounding / 冲突弃答都能复算",
+   "judge": {
+    "kind": "suite",
+    "ref": "rag-eval"
+   },
+   "evidence": "reports/roco/rag/rag-eval.json",
+   "negative": [
+    {
+     "kind": "test_pair",
+     "path": "tests/roco-rag-eval.test.js",
+     "needle": "弃答"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "memory-preference",
+   "name": "Memory（偏好记忆）",
+   "promise": "静默偏好能被记住、能进聊天链路、可忘记",
+   "judge": {
+    "kind": "unit_file",
+    "ref": "tests/companion.test.js"
+   },
+   "evidence": null,
+   "negative": [
+    {
+     "kind": "test_pair",
+     "path": "tests/companion.test.js",
+     "needle": "偏好"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "strategist",
+   "name": "军师（主动提示）",
+   "promise": "多动作比较 + 未来后果：两个合法动作、下一回合机会、最大下行，且不给伪精确胜率",
+   "judge": {
+    "kind": "suite",
+    "ref": "plan-e2e"
+   },
+   "evidence": "reports/roco/demo-acceptance/demo-acceptance.json",
+   "negative": [
+    {
+     "kind": "report_field",
+     "path": "reports/roco/ux-acceptance/browser-roco-ux-acceptance.json",
+     "field": "counterproofs_all_hit",
+     "expect": true
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "companion",
+   "name": "陪练（小芽）",
+   "promise": "入口可用、手动说话能回、不聊天也会出主动提示，且不打断对局",
+   "judge": {
+    "kind": "npm_script",
+    "ref": "roco:companion-nonintrusion"
+   },
+   "evidence": "reports/roco/companion-nonintrusion.json",
+   "negative": [
+    {
+     "kind": "report_field",
+     "path": "reports/roco/companion-nonintrusion.json",
+     "field": "gates",
+     "expect": "all_values_true"
+    },
+    {
+     "kind": "report_field",
+     "path": "reports/roco/companion-nonintrusion.json",
+     "field": "criteria_can_fail",
+     "expect": "any_key_suffix_true",
+     "suffix": "_can_fail"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "teacher",
+   "name": "老师（局末复盘）",
+   "promise": "按可教性选课、挂账回合用局面回合；不是一句话模板",
+   "judge": {
+    "kind": "unit_file",
+    "ref": "tests/evals/teacher-review.test.js"
+   },
+   "evidence": null,
+   "negative": [
+    {
+     "kind": "test_pair",
+     "path": "tests/evals/roco/teacher-match-review.test.js",
+     "needle": "课"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "game-adapter",
+   "name": "game adapter（游戏适配层）",
+   "promise": "适配层只搬运、不改规则：编数字 / 编动作 / 越界字段一律拒",
+   "judge": {
+    "kind": "unit_file",
+    "ref": "tests/evals/roco/game-adapter.test.js"
+   },
+   "evidence": "reports/roco/adapter-acceptance/browser-adapter-acceptance.json",
+   "negative": [
+    {
+     "kind": "test_pair",
+     "path": "tests/evals/roco/game-adapter.test.js",
+     "needle": "都会被丢掉并换回执"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "mock-host",
+   "name": "mock host（本地模拟宿主）",
+   "promise": "装配期缺能力就拒绝装配；线上竞技 PVP 里不给战术分析",
+   "judge": {
+    "kind": "unit_file",
+    "ref": "tests/evals/roco/mock-host-integration.test.js"
+   },
+   "evidence": null,
+   "negative": [
+    {
+     "kind": "test_pair",
+     "path": "tests/evals/roco/mock-host-integration.test.js",
+     "needle": "拒绝装配"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "stale-plan-guard",
+   "name": "stale-result guard（陈旧规划必须被丢弃）",
+   "promise": "陈旧规划不许上屏：版本对不上就作废，且只有一个入口",
+   "judge": {
+    "kind": "unit_file",
+    "ref": "tests/roco-experience.test.js"
+   },
+   "evidence": "reports/roco/demo-acceptance/demo-acceptance.json",
+   "negative": [
+    {
+     "kind": "test_pair",
+     "path": "tests/roco-experience.test.js",
+     "needle": "作废"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "release-guard",
+   "name": "release guard（发版闸门自身）",
+   "promise": "注入真实违规时登记过的守卫**真的会红**",
+   "judge": {
+    "kind": "suite",
+    "ref": "guard-selftest"
+   },
+   "evidence": null,
+   "negative": [
+    {
+     "kind": "script_flag",
+     "path": "scripts/roco/guard-selftest.mjs",
+     "flag": "注入"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "pvp-gate",
+   "name": "PVP 门控（按 BattleMode 裁剪合法行动）",
+   "promise": "标准 PVP 下不出现道具与逃跑；隐藏要如实记账，不是假装引擎没给",
+   "judge": {
+    "kind": "unit_file",
+    "ref": "tests/roco-standard-pvp-battle.test.js"
+   },
+   "evidence": "reports/roco/workshop-acceptance/browser-workshop-acceptance.json",
+   "negative": [
+    {
+     "kind": "report_field",
+     "path": "reports/roco/ux-acceptance/browser-roco-ux-acceptance.json",
+     "field": "counterproofs_all_hit",
+     "expect": true
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "page-ux-p0",
+   "name": "用户 P0 的页面能力（翻页 / 选宠 / 行动坞 / 场上事实）",
+   "promise": "页面看不到或点不动的能力不得仅凭单元测试标记完成",
+   "judge": {
+    "kind": "suite",
+    "ref": "roco-ux-acceptance"
+   },
+   "evidence": "reports/roco/ux-acceptance/browser-roco-ux-acceptance.json",
+   "negative": [
+    {
+     "kind": "report_field",
+     "path": "reports/roco/ux-acceptance/browser-roco-ux-acceptance.json",
+     "field": "counterproofs_all_hit",
+     "expect": true
+    }
+   ],
+   "problems": [],
+   "ok": true
+  },
+  {
+   "id": "intervention-gate",
+   "name": "介入层硬门控（规则不许被学习层覆盖）",
+   "promise": "规则说不行就是不行：介入层只能在规则允许的窗口里开口，一个都不许多",
+   "judge": {
+    "kind": "unit_file",
+    "ref": "tests/evals/roco/intervention-agreement.test.js"
+   },
+   "evidence": "reports/roco/intervention-agreement.json",
+   "negative": [
+    {
+     "kind": "test_pair",
+     "path": "tests/evals/roco/intervention-agreement.test.js",
+     "needle": "不许把点估计写成区间"
+    }
+   ],
+   "problems": [],
+   "ok": true
+  }
+ ],
+ "known_limits": [
+  "这里验的是「这条资产**还在被判据守着**」，不是「它的行为一定对」——行为对错由各自的判据负责",
+  "证据产物是**最近一次**跑出来的：产物陈旧（引擎改了但没重跑）这里看不出来，所以每条的判据都还是各自套件里的判据，这一层只是防止它们被悄悄摘掉",
+  "`min_checks` 是手写的下限，不是自动推导的：判据被删到只剩一半会红，删几条看不出来"
+ ]
+}

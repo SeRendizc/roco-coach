@@ -102,6 +102,11 @@ export const SUITES = [
     why: '**页面真的能开**。第 24 轮的回归只有这条抓得到', quick: true},
   {id: 'demo-acceptance', cmd: 'npm', args: ['run', 'roco:demo-acceptance'],
     why: '无聊天入口的完整演示链路；页面能开但演示链路断了也在这里', quick: true},
+  {id: 'retained-assets', cmd: 'node', args: ['scripts/roco/revalidate-retained-assets.mjs', '--check', '--selftest'],
+    why: 'v3 红线：**保留资产不许静默退化**（Agent/RAG/Memory/三角色/game adapter/mock host/'
+      + 'stale-result guard/release guard）。这一条不重跑那些判据，而是逐条核对'
+      + '「它还有判据吗、判据还接在会跑的入口上吗、产物还在生成吗、怎么才会红」——'
+      + '「没红」与「没在跑」在 CI 里长得一样，这一条就是分它们的。带 9 条自检必红方向'},
   {id: 'roco-ux-acceptance', cmd: 'node', args: ['scripts/roco/browser-roco-ux-acceptance.mjs'],
     why: '用户 P0 的第 8 条：**页面看不到或点不动的能力不得仅凭单元测试标记完成**。'
       + '这一条用真实键鼠走一遍翻页 / 筛选 / 选宠 / 行动坞 / 小芽 / 场上事实（印记·能量上限·防御冷却），'
