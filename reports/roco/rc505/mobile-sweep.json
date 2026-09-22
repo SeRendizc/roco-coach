@@ -1,0 +1,757 @@
+{
+ "schema": "roco-mobile-sweep/v1",
+ "rc": "RC-505",
+ "generated_by": "scripts/roco/browser-mobile-sweep.mjs",
+ "why": "窄屏判据此前散在四个脚本里，没有任何一处回答得了「这一版**每一页**在手机上都不横向溢出吗」。这里把五个公开页面放在同一把尺子下（390×844 与 360×640 两档）。",
+ "viewports": [
+  "390x844",
+  "360x640"
+ ],
+ "pages": [
+  {
+   "id": "index.html",
+   "name": "营地页（小芽陪你成长）"
+  },
+  {
+   "id": "connect.html",
+   "name": "加密配置页"
+  },
+  {
+   "id": "roco.html",
+   "name": "训练场（选宠 / 对战 / 小芽 / 工坊）"
+  },
+  {
+   "id": "box.html",
+   "name": "精灵盒子（我的 / 全图鉴）"
+  },
+  {
+   "id": "workshop.html",
+   "name": "阵容工坊（开发夹具）"
+  }
+ ],
+ "totals": {
+  "checks": 10,
+  "passed": 10,
+  "failed": 0,
+  "counterproofs": 5,
+  "counterproofs_hit": 5
+ },
+ "checks": [
+  {
+   "id": "mobile-index.html-390",
+   "judge": "390×844：营地页（小芽陪你成长） —— 不横向溢出 + 页面真的渲染了 + 控制台干净（KEEP 老页面不重排版式）",
+   "ok": true,
+   "actual": "scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 36 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-index.html-360",
+   "judge": "360×640：营地页（小芽陪你成长） —— 不横向溢出 + 页面真的渲染了 + 控制台干净（KEEP 老页面不重排版式）",
+   "ok": true,
+   "actual": "scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 36 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-connect.html-390",
+   "judge": "390×844：加密配置页 —— 不横向溢出 + 页面真的渲染了 + 控制台干净（KEEP 老页面不重排版式）",
+   "ok": true,
+   "actual": "scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 2 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-connect.html-360",
+   "judge": "360×640：加密配置页 —— 不横向溢出 + 页面真的渲染了 + 控制台干净（KEEP 老页面不重排版式）",
+   "ok": true,
+   "actual": "scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 2 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-roco.html-390",
+   "judge": "390×844：训练场（选宠 / 对战 / 小芽 / 工坊） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
+   "ok": true,
+   "actual": "scrollW 390 = clientW 390；声明的可点控件 35 个都 ≥44；整页其它小于 44 的有 21 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-roco.html-360",
+   "judge": "360×640：训练场（选宠 / 对战 / 小芽 / 工坊） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
+   "ok": true,
+   "actual": "scrollW 360 = clientW 360；声明的可点控件 35 个都 ≥44；整页其它小于 44 的有 21 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-box.html-390",
+   "judge": "390×844：精灵盒子（我的 / 全图鉴） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
+   "ok": true,
+   "actual": "scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-box.html-360",
+   "judge": "360×640：精灵盒子（我的 / 全图鉴） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
+   "ok": true,
+   "actual": "scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-workshop.html-390",
+   "judge": "390×844：阵容工坊（开发夹具） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
+   "ok": true,
+   "actual": "scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）"
+  },
+  {
+   "id": "mobile-workshop.html-360",
+   "judge": "360×640：阵容工坊（开发夹具） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
+   "ok": true,
+   "actual": "scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）"
+  }
+ ],
+ "counterproofs": [
+  {
+   "id": "横向溢出",
+   "judge": "把 scrollWidth 撑大 20px（真的横向溢出）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "横向溢出 20px（clientW=390 scrollW=410）",
+   "actual": "scrollW=410"
+  },
+  {
+   "id": "触控目标",
+   "judge": "把**声明的**可点控件缩到 30×30 必须被同一条判据抓住",
+   "ok": true,
+   "hit": "1 个**声明的**可点控件小于 44×44：button.tiny 30×30",
+   "actual": "30×30"
+  },
+  {
+   "id": "首屏主操作",
+   "judge": "把主操作推到视口下方 1500px 必须被同一条判据抓住",
+   "ok": true,
+   "hit": "主操作「开一局」不在首屏（top=1500 > 844）",
+   "actual": "top=1500"
+  },
+  {
+   "id": "白屏",
+   "judge": "可见文本只剩 5 个字（白屏）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "可见文本只有 5 字（这一页可能没渲染出来）",
+   "actual": "visibleText=5"
+  },
+  {
+   "id": "控制台报错",
+   "judge": "控制台有 1 条报错必须被同一条判据抓住",
+   "ok": true,
+   "hit": "控制台有 1 条报错",
+   "actual": "consoleErrors=1"
+  }
+ ],
+ "measurements": [
+  {
+   "clientW": 390,
+   "scrollW": 390,
+   "clientH": 844,
+   "visibleText": 8127,
+   "required": [],
+   "small_all": 36,
+   "tappables_all": 41,
+   "primary": null,
+   "minText": 40,
+   "consoleErrors": 0,
+   "page": "index.html",
+   "legacy_page": true,
+   "tap_scope_declared": false,
+   "viewport": "390x844",
+   "ready": true
+  },
+  {
+   "clientW": 360,
+   "scrollW": 360,
+   "clientH": 640,
+   "visibleText": 8127,
+   "required": [],
+   "small_all": 36,
+   "tappables_all": 41,
+   "primary": null,
+   "minText": 40,
+   "consoleErrors": 0,
+   "page": "index.html",
+   "legacy_page": true,
+   "tap_scope_declared": false,
+   "viewport": "360x640",
+   "ready": true
+  },
+  {
+   "clientW": 390,
+   "scrollW": 390,
+   "clientH": 844,
+   "visibleText": 854,
+   "required": [],
+   "small_all": 2,
+   "tappables_all": 7,
+   "primary": null,
+   "minText": 40,
+   "consoleErrors": 0,
+   "page": "connect.html",
+   "legacy_page": true,
+   "tap_scope_declared": false,
+   "viewport": "390x844",
+   "ready": true
+  },
+  {
+   "clientW": 360,
+   "scrollW": 360,
+   "clientH": 640,
+   "visibleText": 854,
+   "required": [],
+   "small_all": 2,
+   "tappables_all": 7,
+   "primary": null,
+   "minText": 40,
+   "consoleErrors": 0,
+   "page": "connect.html",
+   "legacy_page": true,
+   "tap_scope_declared": false,
+   "viewport": "360x640",
+   "ready": true
+  },
+  {
+   "clientW": 390,
+   "scrollW": 390,
+   "clientH": 844,
+   "visibleText": 15151,
+   "required": [
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 74,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 74,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "primary",
+     "w": 366,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 70,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 46,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "side-tab selected",
+     "w": 62,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "side-tab",
+     "w": 62,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-reset",
+     "w": 70,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 74,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 62,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 62,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 74,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 64,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "primary",
+     "w": 366,
+     "h": 44
+    }
+   ],
+   "small_all": 21,
+   "tappables_all": 68,
+   "primary": {
+    "label": "开一局（双方各 3 只）",
+    "top": 720
+   },
+   "minText": 200,
+   "consoleErrors": 0,
+   "page": "roco.html",
+   "legacy_page": false,
+   "tap_scope_declared": true,
+   "viewport": "390x844",
+   "ready": true
+  },
+  {
+   "clientW": 360,
+   "scrollW": 360,
+   "clientH": 640,
+   "visibleText": 15151,
+   "required": [
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 74,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 74,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "primary",
+     "w": 336,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 70,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 46,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "side-tab selected",
+     "w": 62,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "side-tab",
+     "w": 62,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-reset",
+     "w": 70,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 74,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 62,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 62,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 74,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "filter-chip",
+     "w": 50,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "",
+     "w": 64,
+     "h": 44
+    },
+    {
+     "tag": "button",
+     "cls": "primary",
+     "w": 336,
+     "h": 44
+    }
+   ],
+   "small_all": 21,
+   "tappables_all": 68,
+   "primary": {
+    "label": "开一局（双方各 3 只）",
+    "top": 516
+   },
+   "minText": 200,
+   "consoleErrors": 0,
+   "page": "roco.html",
+   "legacy_page": false,
+   "tap_scope_declared": true,
+   "viewport": "360x640",
+   "ready": true
+  },
+  {
+   "clientW": 390,
+   "scrollW": 390,
+   "clientH": 844,
+   "visibleText": 31289,
+   "required": [],
+   "small_all": 0,
+   "tappables_all": 90,
+   "primary": null,
+   "minText": 100,
+   "consoleErrors": 0,
+   "page": "box.html",
+   "legacy_page": false,
+   "tap_scope_declared": true,
+   "viewport": "390x844",
+   "ready": true
+  },
+  {
+   "clientW": 360,
+   "scrollW": 360,
+   "clientH": 640,
+   "visibleText": 31289,
+   "required": [],
+   "small_all": 0,
+   "tappables_all": 90,
+   "primary": null,
+   "minText": 100,
+   "consoleErrors": 0,
+   "page": "box.html",
+   "legacy_page": false,
+   "tap_scope_declared": true,
+   "viewport": "360x640",
+   "ready": true
+  },
+  {
+   "clientW": 390,
+   "scrollW": 390,
+   "clientH": 844,
+   "visibleText": 8082,
+   "required": [],
+   "small_all": 0,
+   "tappables_all": 0,
+   "primary": null,
+   "minText": 80,
+   "consoleErrors": 0,
+   "page": "workshop.html",
+   "legacy_page": false,
+   "tap_scope_declared": true,
+   "viewport": "390x844",
+   "ready": true
+  },
+  {
+   "clientW": 360,
+   "scrollW": 360,
+   "clientH": 640,
+   "visibleText": 8082,
+   "required": [],
+   "small_all": 0,
+   "tappables_all": 0,
+   "primary": null,
+   "minText": 80,
+   "consoleErrors": 0,
+   "page": "workshop.html",
+   "legacy_page": false,
+   "tap_scope_declared": true,
+   "viewport": "360x640",
+   "ready": true
+  }
+ ],
+ "screenshots": [
+  "index-390x844.png",
+  "index-360x640.png",
+  "connect-390x844.png",
+  "connect-360x640.png",
+  "roco-390x844.png",
+  "roco-360x640.png",
+  "box-390x844.png",
+  "box-360x640.png",
+  "workshop-390x844.png",
+  "workshop-360x640.png"
+ ],
+ "known_limits": [
+  "这条只量**版式**（溢出 / 触控尺寸 / 首屏 / 白屏 / 报错）；功能正确性由各自的验收脚本负责",
+  "「可点元素 ≥44×44」取的是 button/summary/input/a[href]/select/textarea 里**可见**的那些，上限 120 个：菜单展开后才出现的元素不在这条里",
+  "主操作是**逐页显式声明**的（`PAGES[].primary`），不是自动猜的：roco.html 认的是底栏那个 `#start-battle`（工坊里的开局按钮在 DOM 里更靠前，但它在页面下半部分，不是「一进来就能按」的那个）；没声明主操作的页面不做这条判定",
+  "触控目标**只对声明的范围**判红（`PAGES[].tapScope`）：roco.html 覆盖底栏 / 行动坞 /侧别切换 / 筛选 / 小芽入口 / 工坊控件（实测 35 个全 ≥44），盒子页覆盖页签与筛选。**整页其它可点元素只记账**（`small_all`）——营地页 36 个、加密配置页 2 个：这两个是 KEEP 的老页面，红线写着不许重写它们，所以本轮不为它们改版式；roco.html 上还有 21 个（主要是开发者抽屉与折叠区里的次要控件）",
+  "两档窄屏（390×844 / 360×640）都量；**筛选菜单是打开着量的**——那个状态此前没有任何判据覆盖，实测真的坏过（浮层把页面撑宽 111px / 140px）"
+ ]
+}

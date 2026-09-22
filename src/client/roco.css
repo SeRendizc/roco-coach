@@ -448,6 +448,10 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  #about-drawer{width:auto;max-width:none;margin:8px 0 0;order:-1;max-height:none}
  .mode-line{order:-1;flex-basis:100%}
  .mode-line .chip{font-size:11px}
+ /* 模式徽记在窄屏必须**能换行**：它是一整句中文（「匹配前对手未知 · 按版本环境倾向评价」），
+    写死 `nowrap` 会在 360px 机型上把整页撑出横向滚动（实测 7px，`#prematch-chip` 355px）。
+    窄屏的判据是「不横向溢出」，所以这里让它折成两行而不是继续往右长。 */
+ .mode-line .chip{white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:12px}
  /* 教程在手机上挤成**一行**：三步各占一张卡会把阵容池整个推到首屏之外，
     而这三步是「第一次来的人唯一会先读的东西」——读得到才有用。 */
  .onboard-bar{flex-wrap:wrap;gap:4px 8px;padding:5px 8px}
@@ -463,8 +467,17 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  #pool-search{width:100%}
  .fmenu{flex:1 1 40%}
  .fmenu>summary{width:100%;justify-content:space-between}
- .fmenu-body{width:min(320px,86vw)}
+ /* 展开的筛选菜单**不许把页面撑宽**（实测 360px 机型上 menu 打开后 scrollWidth 471 > 360）：
+    桌面那套是「绝对定位的浮层」。窄屏上浮层无论贴哪一边都会出事——
+    贴左则右边出屏，贴右则左边出屏。所以窄屏改成**就地展开**（`position:static`），
+    菜单在被点的那一栏下面把整行铺开，两侧都不会越界。 */
+ .fmenu[open]{flex-basis:100%}
+ .fmenu-body{position:static;width:100%;max-width:none;margin-top:4px}
  .filter-reset{flex:0 0 auto}
+ /* 窄屏的筛选菜单是**就地展开**的（见上面 .fmenu-body），里面的选项就是玩家要在拇指下点的目标，
+    所以在这一档给它 44px 的可点高度（桌面那套浮层紧凑排版不适用于手指）。 */
+ .filter-chip{min-height:44px;padding:8px 12px}
+ .fmenu-body{gap:6px}
  #roster{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
  #roster .pick{min-height:168px;padding:8px 9px}
  #roster .pick .nm{font-size:15px}
@@ -479,6 +492,13 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  .footbar .muted{flex:1 1 100%;order:3;margin-right:0;font-size:11.5px}
  .pool-tools{order:4;flex:1 1 auto;justify-content:flex-start}
  .pool-tools button{flex:0 0 auto}
+ /* 拇指要点的控件在窄屏统一给到 44px 高（RC-505：`#coach-entry` 35 / `.side-tab` 38 /
+    `.filter-reset` 29 实测都不够）。这三处都是**玩家每一步都要碰**的东西：
+    叫小芽、切我方/对手、清除筛选。 */
+ #coach-entry,.filter-reset,.footbar button{min-height:44px}
+ /* 注意：基础规则是 `.seg .side-tab`（两个类），单写 `.side-tab` 会被它压住 ——
+    第一版就是这么写的，实测仍然是 38px。 */
+ .seg .side-tab{min-height:44px}
  .sidebars{grid-template-columns:1fr;gap:8px}
  .stage{grid-template-columns:1fr;gap:8px}
  .vs{display:none}

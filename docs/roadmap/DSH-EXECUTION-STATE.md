@@ -44,7 +44,7 @@
 |---|---|
 | 已提交的 HEAD | 见下面 git log（本节写下时是 `817fdec`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29，第 93 轮的三路 P0/RC-105 见 §C6.30，第 94 轮的 RC-306/机制渲染/RC-106 见 §C6.31）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
-| 闸门现状 | **19/19 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
+| 闸门现状 | **20/20 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
 | **跨机器协作区（2026-09-21 建立）** | Mac DSH（我）与 Windows DSH 通过 `SeRendizc/ai-dev-platform` 的 `coord/roco-coach` 分支上 `projects/roco-coach/` 交换**durable facts**：我只改 `MAC_STATUS.md` 与 `CONTRACTS.md`，需要 Windows 的事追加 `BLOCKERS.md`，方向性改变追加 `DECISIONS.md`；**契约只有证据齐全才能标 `ready`**（它是正式训练闸门）。摘要与同步循环见 `docs/roadmap/CROSS-MACHINE-COORDINATION.md`；每个工作阶段开始与结束各同步一次 |
 | **v3 纠偏生效（2026-09-21）** | **标准 PVP 改按六宠设计**（候选规则，`CROSS_SOURCE_SUPPORTED`，禁止写成官方事实）；官方 3v3/2 魔力是**极速对决**独立 BattleMode；**48 只只是迁移夹具**，候选宇宙是全量 600+；匹配前对手未知，按版本 Meta prior 评价；**在线 3 秒内禁止批量模拟**。停止用旧规则（max=6/入场 2/回合末 +1）生成或重训任何产物（13 条已进「禁止重跑」清单）。入口：`docs/roadmap/FLAGSHIP-V3-REDIRECT.md`、`docs/roadmap/FLAGSHIP-V3-CHECKLIST.md`；机器可读：`reports/roco/flagship-upgrade/{baseline,artifact-invalidation}.json`、`data/roco/battle-modes.json`、`data/roco/evidence/rule-evidence-ledger.json` |
@@ -726,7 +726,7 @@ active goal 已按此重写（revision 2）。
 |---|---|
 | HEAD | `0aafe66`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
-| 验证 | **一条命令可复现**：`npm run verify:release` → **19 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
+| 验证 | **一条命令可复现**：`npm run verify:release` → **20 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
 | 守卫自检 | `npm run guard:selftest`：7 条注入，**7/7 全部变红**；另有各自带反证的检查：`verify-agent-trajectories --selftest` 3/3、`verify-sft-split --selftest` 7/7、`model-arm-identity` 正反两向 |
 | 文档一致性 | `npm run verify:state-doc`：声明的 HEAD 仍在历史里、验证产物在、没有引用不存在的路径。**第 38 轮改掉了它的自指死锁**：原来它要求「最近一次 verify:release 必须是 pass」，而 `verify:release` 里又有 `unit`包含这条断言——一次失败之后每次跑都会因为上一次红而红，唯一出路是手改 `latest.json`。现在硬判据是 `last-green.json`（必须存在一次全绿、verdict=pass、套件数够、它记的 HEAD 仍在当前历史里），`latest.json` 红了只报**警告**。**第 45 轮又拆掉同形状的第二处死锁**：「落后 >12 个提交」原来是硬失败，而这条断言同时长在 `unit` 里——一个阶段提交超过 12 次之后，`last-green` 追不上、`verify:release` 永远绿不了，也永远写不出新的 `last-green`（实测 19 个提交时 14 个套件里只有 `unit` 与 `state-doc` 红，两条红的是同一条断言）。现在落后只报警告，`tests/evals/state-doc.test.js` 有一条正反两向的回归（反证：把警告改回硬失败，立刻红） |
@@ -2130,3 +2130,37 @@ replay / grader.positive）零失败，且 **17760 条负数样本全被抓到**
 **边界**：这一层验的是「这条资产**还在被判据守着**」，**不是**「它的行为一定对」——
 行为对错由各自的判据负责；证据是最近一次跑出来的，**产物陈旧它看不出来**；
 `min_checks` 是手写下限，判据被删到只剩一半会红，删掉几条看不出来。
+
+### C6.43 第 106 轮：RC-505 移动端总扫 —— 五个页面、两档窄屏、同一把尺子（又抓到三个真缺陷）
+
+**为什么**：窄屏判据此前**散在四个脚本里**（`roco.html` 在 UX 验收、工坊模块在工坊验收、
+盒子页在盒子验收、营地页在 M0 验收）。散着量有两个问题：**没有任何一处**回答得了
+「这一版**每一页**在手机上都不横向溢出吗」；而且某一段版式被改坏时，只有正好跑那一个脚本才看得见 ——
+而「没红」与「没在跑」在 CI 里长得一模一样（RC-501 那一轮刚吃过同形的亏）。
+
+**新增** `scripts/roco/browser-mobile-sweep.mjs`（`npm run roco:mobile-sweep`）：
+五个公开页面（`index/connect/roco/box/workshop`）× 两档窄屏（**390×844** 与 **360×640**）× 五条判据：
+不横向溢出 / **声明的**可点控件 ≥44×44 / 主操作在首屏 / 页面真的渲染了（**含 shadow root 文本**）/
+控制台干净。**筛选菜单是打开着量的**。
+
+**实测抓到的三个真缺陷（都不是「样式不好看」，是实打实能用数字复现的坏）**：
+
+1. **模式徽记写死 `nowrap`**：360px 上 `#prematch-chip` 宽 355px、left=12 ⇒ 整页横向溢出 **7px**。
+   窄屏改成折行。
+2. **筛选菜单是绝对定位浮层**：`roco.html` 360px 上菜单一打开 `scrollWidth` **471 > 360**（溢出 111px）；
+   改成贴右对齐又会让左边出屏 ⇒ 窄屏改成**就地展开**（`position:static` + `.fmenu[open]{flex-basis:100%}`）。
+3. **盒子页同样的浮层**：390px 上打开后 `scrollWidth` **530 > 390**（溢出 140px）⇒ `box.css` 同一修法。
+
+顺带补齐拇指目标：`#coach-entry` 35px、`.side-tab` 38px、`.filter-reset` 29px ⇒ 窄屏统一 `min-height:44px`。
+**踩坑**：基础规则是 `.seg .side-tab`（两个类），单写 `.side-tab` 会被压住 —— 第一版实测仍然 38px。
+
+**修完实测**：判据 **10/10**；反证 **5/5**（横向溢出 / 声明的控件缩到 30×30 / 主操作推到视口下 /
+白屏 / 控制台报错；反证没命中也算失败）；`roco.html` 上声明的 **35 个**可点控件在 390 与 360 上都 ≥44×44。
+另外三套浏览器验收复跑确认没有回归：工坊 **41/41 + 27/27**、盒子 **22/22 + 5/5**、UX **39/39 + 2/2**。
+
+**接进门禁**：第 **20** 个套件 `mobile-sweep`（14 秒）。门禁 **20/20**。
+
+**边界**：只量**版式**（功能正确性归各自验收脚本）；触控目标**只对声明的范围**判红，
+整页其它小于 44px 的**只记账**（营地页 36 个、加密配置页 2 个 —— 这两个是 KEEP 老页面，
+红线不许重写，本轮不为它们改版式；`roco.html` 上还有 21 个，主要是开发者抽屉与默认收起的折叠区）；
+主操作是逐页**显式声明**的，不是自动猜的；局部 `overflow:auto` 滚动区里的横向溢出不在判据里。

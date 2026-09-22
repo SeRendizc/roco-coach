@@ -149,7 +149,11 @@ button{min-width:44px}
  #box-count{margin-left:0;flex:1 1 100%}
  .fmenu{flex:1 1 40%}
  .fmenu>summary{width:100%;justify-content:space-between}
- .fmenu-body{width:min(330px,88vw)}
+ /* 窄屏的筛选菜单**就地展开**（与 roco.css 同一条修法）：绝对定位的浮层在窄屏上
+    无论贴左还是贴右都会把页面撑宽（实测 390px 上 `scrollWidth` 530 > 390）。
+    浮层是桌面那套排版，手指这一档要的是「点开就在下面铺开」。 */
+ .fmenu[open]{flex-basis:100%}
+ .fmenu-body{position:static;width:100%;max-width:none;margin-top:4px}
  .metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
  .cmp-values{grid-template-columns:1fr}
  .drawer{right:0;left:0;top:0;bottom:0;width:100vw;border-radius:0;border-left:0;border-right:0}

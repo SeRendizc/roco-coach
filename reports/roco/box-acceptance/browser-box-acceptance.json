@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-21T16:50:57.088Z",
+ "judged_at": "2026-09-22T03:45:49.613Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -147,7 +147,7 @@
    "id": "17-玩家层载荷",
    "judge": "玩家层载荷里没有工程键（pet_id / species_id / unknown_fields / provenance…），也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 6429 字节"
+   "actual": "扫过 12881 字节"
   },
   {
    "id": "18-窄屏不溢出",
