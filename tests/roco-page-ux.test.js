@@ -643,6 +643,33 @@ test('P0 玩家那一行不许出现注册表/验收台术语（枚举名留数�
   assert.match(html, /id="mode-probe"/, '开发者抽屉里要有 #mode-probe 这个节点');
 });
 
+// ── 2026-09-22 人类 P0：小芽必须能**自由对话**（不许写死「只处理情绪与偏好」）─────────
+//
+// 现场：`say()` 只走离线模板，页面明写「离线模板、只处理情绪与偏好」——与用户明确要求
+// 「自由对话」相冲突。修法：离线模板仍是**立刻**给的兜底，但用户主动问就路由到 `/api/coach`
+// （真 Agent：RAG + 只读工具 + 事实核验 + 长度/延迟界限）；没有模型时**明说能力边界**并给出
+// 接模型的入口，不装成自由聊天。
+
+test('P0 小芽：主动提问路由到真 Agent（/api/coach），并如实标出来源', () => {
+  assert.match(PAGE, /async function say\(text\)/, 'say() 必须是异步的（要等模型）');
+  assert.match(PAGE, /api\('\/api\/coach',\s*\{[\s\S]{0,200}role: 'companion'/,
+    'say() 必须把玩家原话发给 /api/coach（role=companion）');
+  assert.match(PAGE, /document\.body\.dataset\.rocoCompanionSource = 'model'/,
+    '走模型时必须把来源写进钩子（来源要可核对）');
+  assert.match(PAGE, /function coachCampContext\(/, '要有一个**营地上下文**构造器（只送公开名单/机制）');
+  assert.match(PAGE, /battle: null,\s*\n\s*\};\s*\n\}/, '营地上下文里 battle 必须是 null（六宠局不进这个合同）');
+});
+
+test('P0 小芽：没有模型时明说边界 + 给出接模型入口（不许装作自由聊天）', () => {
+  assert.match(PAGE, /dataset\.rocoCompanionBoundary = 'no-model'/,
+    '没有模型时必须写 boundary 钩子');
+  assert.match(PAGE, /没接模型|没接上模型/, '要在回复里明说「没接模型」');
+  assert.match(PAGE, /连接模型/, '要给出接模型的入口（不是只说「做不到」）');
+  // 反证：把边界那段删掉，同一条判据必须红
+  const stripped = PAGE.replace(/dataset\.rocoCompanionBoundary = 'no-model'/, '');
+  assert.ok(!/dataset\.rocoCompanionBoundary = 'no-model'/.test(stripped), '反证构造失败');
+});
+
 // ── 交付纪律：单元测试真的被 test:unit 收进去了 ─────────────────────────────
 // 2026-09-22 修：原来这条断言「本文件必须是 test:unit 的**最后一项**」。那条判据真正要回答的是
 // 「这个文件有没有被收进清单（否则它是死的）」，而「排在末尾」只是当时写它时的一个偶然事实——

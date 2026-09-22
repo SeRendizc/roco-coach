@@ -2121,7 +2121,32 @@ async function finishMatch() {
  * 为什么不是问答：这个页面要证明的是「不打开聊天也能得到帮助」，
  * 所以这里的输入框只处理情绪与偏好。战术问题会让页面变回一个聊天窗口。
  */
-function say(text) {
+/**
+ * 这一页的**营地上下文**：给 `/api/coach` 用（它只认 `camp/pve/pvp-local/pvp-live` 这几种模式）。
+ *
+ * 为什么不用六宠对局状态：那个合同的 `battle` 段要求**每方恰好 3 只**且带旧字段
+ * （`skills/hp/maxHp/atk/def/speed/energy`）—— 把六宠局硬塞进去就是伪造数据结构，
+ * 属于红线里「未知即 fail closed」的反面。所以：
+ *   · 这里只送**公开的名单/机制**（营地模式），模型回答的是规则、阵容、机制这类问题；
+ *   · 对局中问「这一手怎么打」走的是**规则引擎**那条路（军师浮条 + 展开取舍），不是聊天。
+ * 六宠状态进模型的接线（要不要扩 `coach` 上下文合同）是**下一件事**，不是这里偷偷绕过去的事。
+ */
+function coachCampContext() {
+  const rows = (state.pool.rows?.length ? state.pool.rows : state.roster).slice(0, 12);
+  return {
+    mode: 'camp',
+    profile: {
+      pets: rows.map((p) => ({
+        id: p.pet_id ?? null, name: p.name ?? null, types: p.types ?? [],
+        role: p.role ?? null, stats: p.stats ?? null,
+        mechanism: p.mechanism?.line ?? null,
+      })),
+    },
+    battle: null,
+  };
+}
+
+async function say(text) {
   const message = String(text || '').trim();
   if (!message) return null;
   // 说了话就把这一栏打开：输入框与回复必须在**同一屏**（P0-2）——
@@ -2147,7 +2172,46 @@ function say(text) {
   saveMemory();
   $('say-reply').hidden = false;
   $('say-reply').textContent = reply;
+  document.body.dataset.rocoCompanionSource = 'offline';
+  delete document.body.dataset.rocoCompanionRoute;
   renderMemory();
+  // ── 真 Agent（2026-09-22 人类 P0）：用户主动问就路由到 `/api/coach` ───────────────
+  // 离线模板是**立刻**给的兜底（不让玩家对着空气等），但只要模型可用，紧接着就用
+  // 真回答覆盖它，并把来源写进钩子（`data-roco-companion-source=model`）。
+  // 没有模型时**明说边界**，不装成自由聊天 —— 这正是用户点名的那条冲突。
+  const configured = session?.configured === true;
+  if (!configured) {
+    $('say-reply').textContent = `${reply}`
+      + '（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——'
+      + '请到右上角「关于这一页 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）';
+    document.body.dataset.rocoCompanionBoundary = 'no-model';
+    return {register, reason, reply, source: 'offline'};
+  }
+  try {
+    const data = await api('/api/coach', {
+      message,
+      role: 'companion',
+      context: coachCampContext(),
+      memory: state.memory,
+      conversation: (state.memory?.dialogue ?? []).slice(-6),
+    });
+    const text = typeof data?.text === 'string' ? data.text : null;
+    if (text) {
+      const evidence = Array.isArray(data.evidence) && data.evidence.length
+        ? `\n依据：${data.evidence.slice(0, 3).join('；')}` : '';
+      $('say-reply').textContent = `${text}${evidence}`;
+      document.body.dataset.rocoCompanionSource = 'model';
+      document.body.dataset.rocoCompanionRoute = String(data.route ?? '');
+      document.body.dataset.rocoCompanionVerified = data.verified === true ? 'yes' : 'no';
+      document.body.dataset.rocoCompanionProvider = String(data.provider ?? '');
+    }
+    delete document.body.dataset.rocoCompanionBoundary;
+  } catch (error) {
+    // 模型这一步失败也**不装作没发生**：说清原因，保留规则事实那一份。
+    $('say-reply').textContent = `${reply}（模型这一步没答上来：${error.message}）`;
+    document.body.dataset.rocoCompanionSource = 'offline';
+    document.body.dataset.rocoCompanionBoundary = 'model-failed';
+  }
   document.body.dataset.rocoCompanion = register;
   document.body.dataset.rocoCompanionWhy = reason;
   document.body.dataset.rocoCompanionSeen = 'yes';
@@ -2155,7 +2219,7 @@ function say(text) {
   const body = $('companion-body');
   if (body) body.scrollTop = body.scrollHeight;
   syncBottomBars();
-  return {register, reason, reply};
+  return {register, reason, reply, source: document.body.dataset.rocoCompanionSource};
 }
 
 // ── 演示覆盖清单（页面自己说清「这次演示覆盖了什么」）───────────────────────
@@ -2210,7 +2274,7 @@ function bind() {
   $('onboard-skip').addEventListener('click', dismissOnboard);
   $('say-form').addEventListener('submit', (event) => {
     event.preventDefault();
-    say($('say-input').value);
+    void say($('say-input').value);
     $('say-input').value = '';
   });
   // 窗口失焦/回到前台时重新判一次：失焦是硬门控，回来之后要能重新开口。

@@ -3,20 +3,20 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-22T07:22:52.139Z",
+ "judged_at": "2026-09-22T07:32:50.451Z",
  "totals": {
-  "checks": 12,
-  "passed": 12,
+  "checks": 13,
+  "passed": 13,
   "failed": 0,
-  "counterproofs": 10,
-  "counterproofs_hit": 10
+  "counterproofs": 11,
+  "counterproofs_hit": 11
  },
  "checks": [
   {
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=2"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=0"
   },
   {
    "id": "live-boot",
@@ -77,6 +77,12 @@
    "judge": "390×844：不横向溢出、六宠主操作在首屏可点（≥44px）、小芽那一栏能打开且输入框在首屏",
    "ok": true,
    "actual": "clientW/scrollW=390/390 route=six-pet 主操作 top=767 h=44；小芽 {\"open\":true,\"viewport\":{\"width\":390,\"height\":844},\"card\":{\"top\":626,\"bottom\":830,\"left\":10,\"right\":380},\"form\":{\"top\":775,\"bottom\":819,\"left\":23,\"right\":367},\"input\":{\"top\":775,\"bottom\":819,\"left\":23,\"right\":288},\"reply\":null,\"replyHidden\":true,\"inputInView\":true,\"replyInView\":null,\"formInView\":true,\"bottombar\":0,\"actionCap\":253,\"actionPanel\":null,\"bothOnScreen\":true}"
+  },
+  {
+   "id": "live-chat",
+   "judge": "主动问一句非预设问题：有模型就走真 Agent 并标出来源；没有模型就明说能力边界（不装成自由聊天），且给出接模型的入口",
+   "ok": true,
+   "actual": "来源=offline 边界=no-model 路由=null；回复「我在。想聊哪一只伙伴，或者刚才那一手？（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请到右上角「关于这一页 → 连接模型」配置密钥；配置后这里」"
   },
   {
    "id": "live-console",
@@ -155,6 +161,13 @@
    "ok": true,
    "hit": "横向溢出（420 > 390） | 六宠主操作不在首屏（top=1500） | 小芽的输入框不在首屏",
    "actual": "{\"startTop\":1500,\"scrollW\":+30,\"inputInView\":false}"
+  },
+  {
+   "id": "live-chat",
+   "judge": "没有模型却装作自由聊天（不给边界说明）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "没有模型也没说边界（boundary=null） | 边界说明里没说清怎么接上模型",
+   "actual": "{\"boundary\":null}"
   }
  ],
  "steps": [

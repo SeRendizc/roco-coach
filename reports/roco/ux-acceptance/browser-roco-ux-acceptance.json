@@ -1,6 +1,6 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-22T07:30:21.384Z",
+ "generated_at": "2026-09-22T07:52:32.002Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [
@@ -83,13 +83,13 @@
    "id": "P0-2-say",
    "name": "真实键盘输入 + 真实鼠标提交：拿到一句中文回复，且回话不是 [object Object]",
    "ok": true,
-   "actual": "回复「烦啊——烦就先搁着，不聊对局也行。」"
+   "actual": "回复「烦啊——烦就先搁着，不聊对局也行。（现在没接模型：我只能给规则事实与主动提示。想」"
   },
   {
    "id": "P0-2-same-screen",
    "name": "输入框与**最近一句回复**都在首屏（量 getBoundingClientRect）",
    "ok": true,
-   "actual": "输入 {\"top\":772,\"bottom\":812,\"left\":1099,\"right\":1337} / 回复 {\"top\":137,\"bottom\":174,\"left\":1099,\"right\":1413} / 视口 {\"width\":1440,\"height\":900}"
+   "actual": "输入 {\"top\":772,\"bottom\":812,\"left\":1099,\"right\":1337} / 回复 {\"top\":137,\"bottom\":266,\"left\":1099,\"right\":1413} / 视口 {\"width\":1440,\"height\":900}"
   },
   {
    "id": "P0-2-auto-hint",
@@ -143,7 +143,7 @@
    "id": "P0-2-390-same-screen",
    "name": "390×844 下输入框与最近一句回复仍在首屏",
    "ok": true,
-   "actual": "输入 {\"top\":528,\"bottom\":572,\"left\":23,\"right\":288} / 回复 {\"top\":379,\"bottom\":414,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 247px 动作坞 {\"top\":597,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
+   "actual": "输入 {\"top\":528,\"bottom\":572,\"left\":23,\"right\":288} / 回复 {\"top\":294,\"bottom\":415,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 247px 动作坞 {\"top\":597,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
   },
   {
    "id": "P0-6-top",
@@ -397,7 +397,7 @@
     },
     "reply": {
      "top": 137,
-     "bottom": 174,
+     "bottom": 266,
      "left": 1099,
      "right": 1413
     },
@@ -417,7 +417,7 @@
      "height": 844
     },
     "card": {
-     "top": 338,
+     "top": 276,
      "bottom": 583,
      "left": 10,
      "right": 380
@@ -435,8 +435,8 @@
      "right": 288
     },
     "reply": {
-     "top": 379,
-     "bottom": 414,
+     "top": 294,
+     "bottom": 415,
      "left": 23,
      "right": 367
     },

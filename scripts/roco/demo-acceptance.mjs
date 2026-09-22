@@ -395,22 +395,28 @@ async function main(){
  check('这一课真的记进了账本（下一次才有得核对）',teacher.teachRows>=1,`teach 行 ${teacher.teachRows}`);
 
  // ── 场景 6：玩家抱怨时陪练先回应情绪 ────────────────────────────────
- const reply=await js(`(()=>{const r=window.rocoDemo.say('好烦，又输了');
-   return {register:r.register,reply:r.reply,shown:(document.getElementById('say-reply').textContent||'').trim()};})()`);
+ // 2026-09-22：`say()` 改成异步（主动提问要等真 Agent 回话），所以这里要 `await` ——
+ // 第一版直接取返回值，拿到的是 Promise，判据读到 undefined。
+ const reply=await js(`(async()=>{const r=await window.rocoDemo.say('好烦，又输了');
+   return {register:r.register,reply:r.reply,source:r.source,
+     shown:(document.getElementById('say-reply').textContent||'').trim()};})()`);
  await sleep(200);
  const replyShown=await js(`!document.getElementById('say-reply').hidden`);
  // 第 64 轮补：**玩家实际读到的那句话**必须是人话。`chatReply` 返回的是结构
  // （`{text, parts, ...}`），页面原来把整个结构塞进 `textContent`，于是气泡上印的是
  // `[object Object]`——原来的判据只看语域与「气泡显示了吗」，两条都能过。
  check('玩家抱怨时陪练先回应情绪（R2/R3），且回话是一句中文（不是 [object Object]）',
+  // 2026-09-22：`say()` 现在还会**追加一句能力边界**（没有模型时明说不能自由问答 + 怎么接模型），
+  // 所以「气泡内容 === 回复原文」这条旧等式不再成立；改成量它**包含**那句情绪回应，
+  // 且气泡里没有一个 `[object`（那条真正要守的东西没变）。
   ['R2','R3'].includes(reply.register)&&replyShown
-  &&/[\u4e00-\u9fff]/.test(reply.reply)&&!/\[object/.test(reply.reply)
-  &&reply.shown===String(reply.reply).trim(),
-  `${reply.register}: ${String(reply.reply).slice(0,60)}`);
+  &&/[\u4e00-\u9fff]/.test(reply.reply)&&!/\[object/.test(reply.shown)
+  &&String(reply.shown).includes(String(reply.reply).trim()),
+  `${reply.register}: ${String(reply.reply).slice(0,60)}｜气泡「${String(reply.shown).slice(0,90)}」`);
  shots.push(await shoot('06-companion-emotion'));
 
  // ── P1-3：她记住了什么，玩家看得见、也能一条条忘掉 ──────────────────────
- await js(`window.rocoDemo.say('以后叫我老王')`);
+ await js(`(async()=>{await window.rocoDemo.say('以后叫我老王');return true;})()`);
  await sleep(150);
  const memAdded=JSON.parse(await js(`JSON.stringify({hook:document.body.dataset.rocoMemory,
    rows:[...document.querySelectorAll('#memory-list li .mem-label')].map((e)=>e.textContent)})`));

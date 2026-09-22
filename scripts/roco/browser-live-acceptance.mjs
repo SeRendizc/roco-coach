@@ -679,6 +679,38 @@ async function main() {
       '{"startTop":1500,"scrollW":+30,"inputInView":false}');
     await shoot('live-05-390-coach');
 
+    // ── ⑤ 小芽自由对话：主动问一句**非预设**的问题 ─────────────────────────
+    // 无模型时必须**明说能力边界**（不装成自由聊天）；有模型时必须走真 Agent 且标出来源。
+    await setViewport(1440, 900);
+    await js(`(()=>{window.rocoDemo.state.coach.open=true;window.rocoDemo.renderCompanion();return true;})()`);
+    await sleep(300);
+    await typeInto('#say-input', '洛克手游的能量上限是多少？顺便说说我这套阵容缺什么');
+    await mouseClick('#say-form button');
+    await sleep(1500);
+    const chat = await js(`(()=>{const b=document.body.dataset;
+      return {source:b.rocoCompanionSource??null,boundary:b.rocoCompanionBoundary??null,
+        route:b.rocoCompanionRoute??null,reply:(document.getElementById('say-reply')||{}).textContent||'',
+        configured:Boolean(window.rocoDemo?.state?.configured)};})()`);
+    const chatProblems = (f) => {
+      const bad = [];
+      if (!f?.reply || f.reply.length < 6) bad.push('没有拿到任何回复');
+      if (f?.source === 'model') {
+        if (!f?.route) bad.push('走的是模型但没标出路由（来源不可核对）');
+      } else {
+        // 无模型（验收环境就是这种）：必须说清边界，且必须**提到怎么接模型**
+        if (f?.boundary !== 'no-model') bad.push(`没有模型也没说边界（boundary=${JSON.stringify(f?.boundary)}）`);
+        if (!/没接模型|连接模型|配置/.test(String(f?.reply ?? ''))) bad.push('边界说明里没说清怎么接上模型');
+      }
+      return bad;
+    };
+    check('live-chat', '主动问一句非预设问题：有模型就走真 Agent 并标出来源；没有模型就明说能力边界'
+      + '（不装成自由聊天），且给出接模型的入口',
+      chatProblems(chat).length === 0,
+      chatProblems(chat).join(' | ')
+      || `来源=${chat.source} 边界=${chat.boundary} 路由=${chat.route}；回复「${String(chat.reply).slice(0, 90)}」`);
+    counter('live-chat', '没有模型却装作自由聊天（不给边界说明）必须被同一条判据抓住',
+      chatProblems({source: 'offline', boundary: null, reply: '好的，我们聊聊吧。'}), '{"boundary":null}');
+
     check('live-console', '整个过程没有 console.error / 未捕获异常',
       consoleErrors.length === 0, `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 3))}`);
   } catch (error) {
