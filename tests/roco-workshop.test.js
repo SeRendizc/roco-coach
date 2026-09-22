@@ -35,6 +35,7 @@ import {
   slotProblems, badgeProblems, nextCandidateProblems, axisProblems, badRequestProblems,
   playerCopyProblems, playerLayerProblems, evaluationFollowsTeamProblems, touchTargetProblems,
   mobileOrderProblems, deepTextValues, SLOT_COUNT, FORBIDDEN_PLAYER, PSEUDO_PRECISION,
+  sourcedMechanismLines,
 } from '../scripts/roco/browser-workshop-acceptance.mjs';
 import {progressiveNext, recallCandidates, buildCandidateIndex} from '../src/coach/team-candidates.mjs';
 import {compareTeams, minimalReplacement, AXIS_IDS} from '../src/coach/team-compare.mjs';
@@ -215,7 +216,8 @@ test('路由契约：回执里不出现胜率 / 伪精确字段，玩家可见�
     // 文案判据只吃**字符串值**（键名层面的禁令由 playerLayerProblems 管）：
     // 直接 stringify 会把 JSON 自己的大括号也当成玩家可见文本，那是误报。
     const blob = deepTextValues(json.player);
-    const problems = playerCopyProblems(blob);
+    // 机制原文里可能有百分数（「双攻+100%」），只豁免**能追溯回冻结产物**的那些。
+    const problems = playerCopyProblems(blob, {sourcedLines: sourcedMechanismLines(json.player)});
     // 玩家层里不许有胜率样式的人话（键名层面的禁令由 playerLayerProblems 管）
     assert.deepEqual(problems, [], `${count} 只的玩家层文案有问题：${problems.join(' | ')}`);
     for (const banned of ['win_rate', 'winrate', 'win_probability', 'strength_score', 'win_rate_smoothed']) {
@@ -453,6 +455,12 @@ test('反证：六条必红方向都抓得住违规样本（实际输出原文�
   record('玩家可见文本出现胜率 58%',
     playerCopyProblems('这套阵容胜率 58%'),
     '「这套阵容胜率 58%」');
+  // 这条钉的是「豁免不是绕过」：把「胜率 62%」塞进 mechanism.line，因为**核不回冻结产物**，
+  // 必须照样红（否则页面只要换个字段名就能把伪精确数字送出去）。
+  record('假机制行里塞「胜率 62%」',
+    playerCopyProblems('（机制原文）胜率 62%',
+      {sourcedLines: sourcedMechanismLines({next_candidates: [{mechanism: {line: '胜率 62%'}}]})}),
+    '{"next_candidates":[{"mechanism":{"line":"胜率 62%"}}]}');
   record('触控目标 30×30',
     touchTargetProblems([{tag: 'BUTTON', cls: 'tiny', w: 30, h: 30}]),
     'BUTTON.tiny 30×30');
@@ -470,7 +478,7 @@ test('反证：判据本身不是恒真的（干净样本必须过，坏样本�
   // 干净样本：每一条判据都必须过
   assert.deepEqual(axisProblems(clean.json.axes), []);
   assert.deepEqual(playerLayerProblems(clean.json.player), []);
-  assert.deepEqual(playerCopyProblems(deepTextValues(clean.json.player)), []);
+  assert.deepEqual(playerCopyProblems(deepTextValues(clean.json.player), {sourcedLines: sourcedMechanismLines(clean.json.player)}), []);
   assert.deepEqual(badgeProblems({hasModeBadge: true, hasCandidateBadge: true,
     hasUnknownPrematch: true, hasFullUniverse: true, poolTotal: clean.json.facts.universe_size,
     mentionsLegacySlots: false}), []);

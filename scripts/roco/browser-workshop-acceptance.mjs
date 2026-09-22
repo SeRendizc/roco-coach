@@ -220,14 +220,71 @@ export function deepTextValues(value) {
   return out.join(' · ');
 }
 
+/**
+ * 一条机制原文**只有在能追溯到冻结产物**时才算「可核对原文」。
+ *
+ * 为什么必须交叉核对而不是「凡 `mechanism.line` 就放行」：那样页面只要把
+ * 「胜率 62%」塞进 `mechanism.line` 就能绕过伪精确判据——判据当场变成空转。
+ * 所以这里只认 `data/roco/derived/pet-mechanisms.json` 里真实存在的 `mechanism_line`
+ * （或它是某条冻结 `feature.desc` 的原文子串）。
+ */
+let mechanismArtifactCache = null;
+export function loadMechanismArtifact() {
+  if (mechanismArtifactCache) return mechanismArtifactCache;
+  const path = join(ROOT, 'data/roco/derived/pet-mechanisms.json');
+  mechanismArtifactCache = JSON.parse(readFileSync(path, 'utf8'));
+  return mechanismArtifactCache;
+}
+
+/** 从一份载荷里收集「可核对的机制原文」（交叉核对冻结产物，核不上的一律不放行）。 */
+export function sourcedMechanismLines(payload, artifact = loadMechanismArtifact()) {
+  const allowed = new Set();
+  for (const row of Object.values(artifact?.pets ?? {})) {
+    if (typeof row?.mechanism_line === 'string') allowed.add(row.mechanism_line);
+  }
+  const descs = Object.values(artifact?.pets ?? {})
+    .map((row) => row?.feature?.desc).filter((desc) => typeof desc === 'string' && desc.trim() !== '');
+  const out = [];
+  const walk = (node) => {
+    if (Array.isArray(node)) { node.forEach(walk); return; }
+    if (!node || typeof node !== 'object') return;
+    for (const [key, value] of Object.entries(node)) {
+      if (key === 'mechanism' && value && typeof value.line === 'string' && value.line.includes('%')) {
+        if (allowed.has(value.line) || descs.some((desc) => desc.includes(value.line))) out.push(value.line);
+        continue;
+      }
+      walk(value);
+    }
+  };
+  walk(payload);
+  return [...new Set(out)];
+}
+
+/** 把**已核对的**机制原文换成占位符，返回可用于扫判据的文本与被豁免的命中数。 */
+export function exemptSourcedLines(text, sourcedLines = []) {
+  let scanned = String(text);
+  let exempted = 0;
+  for (const line of sourcedLines) {
+    if (typeof line !== 'string' || !line.includes('%') || !scanned.includes(line)) continue;
+    exempted += scanned.split(line).length - 1;
+    scanned = scanned.split(line).join('（机制原文）');
+  }
+  return {text: scanned, exempted};
+}
+
 /** 玩家可见文本：不许工程词、不许伪精确、必须有玩家可读的未知说明。 */
-export function playerCopyProblems(text) {
+export function playerCopyProblems(text, {sourcedLines = []} = {}) {
   const problems = [];
-  const hit = String(text).match(FORBIDDEN_PLAYER);
+  // 冻结效果原文里的百分数（例如特性「图书守卫者」的「双攻+100%」）不是伪精确强度：
+  // 做法是把**已核对过的原文**换成占位符再扫，而**不是**放宽正则——
+  // 手写一个「这套阵容胜率 58%」照样会被抓到（反证见 tests/roco-workshop.test.js）。
+  const {text: scanned, exempted} = exemptSourcedLines(text, sourcedLines);
+  const hit = scanned.match(FORBIDDEN_PLAYER);
   if (hit) problems.push(`玩家可见文本里出现工程词「${hit[0]}」`);
-  const pseudo = String(text).match(PSEUDO_PRECISION);
+  const pseudo = scanned.match(PSEUDO_PRECISION);
   if (pseudo) problems.push(`玩家可见文本里出现伪精确「${pseudo[0]}」`);
   if (!/未核实|未知|未产出/.test(String(text))) problems.push('玩家可见文本里没有任何「未核实 / 未知」的说明');
+  Object.defineProperty(problems, 'sourced_exempted', {value: exempted, enumerable: false});
   return problems;
 }
 
@@ -693,18 +750,23 @@ async function main() {
 
     // ── ⑥ 玩家可见文本：无工程词、无胜率/百分数、有未知说明 ──────────────
     const playerNow = await playerText();
-    const copyProblems = playerCopyProblems(playerNow);
+    // 机制原文（逐字冻结 desc）里可能有百分数（「双攻+100%」）；只豁免**能追溯回产物**的那些。
+    const sourcedLines = sourcedMechanismLines(sixRoutePlayer);
+    const copyProblems = playerCopyProblems(playerNow, {sourcedLines});
     check('18-玩家层无工程话', '模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON',
       copyProblems.length === 0,
-      copyProblems.join(' | ') || `扫过 ${playerNow.length} 字；样例「${playerNow.slice(0, 90)}…」`);
+      copyProblems.join(' | ') || `扫过 ${playerNow.length} 字（豁免机制原文 ${copyProblems.sourced_exempted} 处）；样例「${playerNow.slice(0, 90)}…」`);
     counter('18-玩家层无工程话', '往玩家区注入 pet_id / state_version 后同一条判据必须命中',
       playerCopyProblems('音速犬 pet_id=pet_000062 state_version=roco-workshop/v1'),
       '「音速犬 pet_id=pet_000062 state_version=roco-workshop/v1」');
-    const pseudoNow = String(playerNow).match(PSEUDO_PRECISION);
-    check('19-无胜率与百分数', '可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法',
-      pseudoNow === null, pseudoNow ? `命中「${pseudoNow[0]}」` : `扫过 ${playerNow.length} 字无命中`);
+    const pseudoNow = exemptSourcedLines(playerNow, sourcedLines).text.match(PSEUDO_PRECISION);
+    check('19-无胜率与百分数', '可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）',
+      pseudoNow === null, pseudoNow ? `命中「${pseudoNow[0]}」` : `扫过 ${playerNow.length} 字无命中（豁免机制原文 ${sourcedLines.length} 条）`);
     counter('19-无胜率与百分数', '把「胜率 58%」写进可见文本必须被同一条判据抓住',
       playerCopyProblems('这套阵容胜率 58%'), '「这套阵容胜率 58%」');
+    counter('19-无胜率与百分数（假机制绕过）', '把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住',
+      playerCopyProblems('（机制原文）胜率 62%', {sourcedLines: sourcedMechanismLines({next_candidates: [{mechanism: {line: '胜率 62%'}}]})}),
+      '{"next_candidates":[{"mechanism":{"line":"胜率 62%"}}]}');
     check('20-未知写在玩家层', '「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里）',
       sixDom.unknownNodes >= 4 && /现在算不出来/.test(playerNow) && /未核实|未知/.test(playerNow),
       `未知条目=${sixDom.unknownNodes}；含「现在算不出来」=${/现在算不出来/.test(playerNow)}`);

@@ -1001,6 +1001,10 @@ function workshopPlayerView(indexRef,computed){
   const member=members[index_]??null;
   slots.push({index:index_+1,state:member?'filled':'empty',
    name:member?.name??null,types:member?.types??[],locked:member?.locked??false,
+   // 已选槽位也带机制：卡片首层那句「机制」在选宠池和已选栏里必须是**同一句话**
+   // （都来自 `data/roco/derived/pet-mechanisms.json` 的逐字冻结 desc），否则玩家会看到两套口径。
+   // **空槽位是 null**，不是「机制资料待确认」——那里压根没有精灵，不该写「资料待确认」。
+   mechanism:member?rosterMechanism(mechanismIndex().get(computed.teamMembers[index_]?.species_id)):null,
    build_tier_label:member?.build_tier_label??null,
    source_note:member?.source_note??null,
    empty_hint:member?null:(selectedCount>=2?'可以从候选里挑一只补上':'先挑一只你信得过的')});
@@ -1050,6 +1054,8 @@ function workshopPlayerView(indexRef,computed){
     ?`补上它之后，队里还有 ${row.unanswered_weaknesses_after} 处弱点没人能接。`:null,
    support_label:WORKSHOP_TIER_LABELS[row.confidence]??'未知',
    build_note:row.instance_id?'这一只是你已经拥有的个体。':'这一只是图鉴条目（你还没有它）。',
+   // 候选卡的机制：与选宠池同源（逐字冻结 desc），取不到就是「机制资料待确认」。
+   mechanism:rosterMechanism(mechanismIndex().get(row.species_id)),
   }));
  }
  // 0～1 只：给「体系入口」而不是假装有唯一答案。这里列的是**候选宇宙的头部**，
@@ -1064,6 +1070,8 @@ function workshopPlayerView(indexRef,computed){
     name:row.species_name??'（名字未登记）',types:Array.isArray(row.types)?row.types:[],
     owned_note:row.kind==='owned'?'你已经拥有':'图鉴条目（你还没有）',
     build_note:row.has_frozen_learnset?'有具体构建':'只有图鉴资料',
+    // 「体系入口」阶段的候选也带机制：这时候玩家最需要的就是「这只是什么体系」。
+    mechanism:rosterMechanism(mechanismIndex().get(row.species_id)),
    })),
    archetype_note:'想按体系起步的话，先挑 1～2 只你信得过的：候选会立刻按你的队伍收窄，'
     +'而不是从一张固定的强队榜单里往下抄。',
