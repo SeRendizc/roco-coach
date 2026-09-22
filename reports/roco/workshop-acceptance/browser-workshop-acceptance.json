@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-22T15:23:44.399Z",
+ "judged_at": "2026-09-22T16:50:45.054Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -83,7 +83,7 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=98 full_ms=25 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=99 full_ms=25 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
@@ -543,7 +543,7 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "98",
+    "firstMs": "99",
     "fullMs": "25",
     "fullState": "ok",
     "ready": "yes",
@@ -600,14 +600,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "24",
-    "fullMs": "22",
+    "firstMs": "25",
+    "fullMs": "23",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "17"
+    "elapsedMs": "19"
    },
    "dom": {
     "slotNodes": 6,
@@ -731,14 +731,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "15",
-    "fullMs": "12",
+    "firstMs": "16",
+    "fullMs": "13",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "8"
+    "elapsedMs": "9"
    },
    "dom": {
     "slotNodes": 6,
@@ -865,7 +865,7 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "12",
+    "firstMs": "18",
     "fullMs": "15",
     "fullState": "ok",
     "ready": "yes",

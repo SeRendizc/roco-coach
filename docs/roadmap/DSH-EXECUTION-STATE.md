@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `d9f8188`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `396e302`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **22 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据 / **保留资产复验** / **移动端总扫** / **盒子交接验收** / **工坊与取舍验收** / **P0 真实键鼠 UX 验收**），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -2372,3 +2372,15 @@ diff `git status`，用来抓「产物里有易变字段」。但同一次 `veri
 修法：把「新增脏文件」这条收窄到**本套件产出目录**（`reports/roco/microcases/` 等），`produced` 的 sha256 逐字节比对**一字未放松**（那才是真正抓易变字段的判据）。
 
 结果：`node scripts/roco/verify-release.mjs` → **pass（22 套件）**；`test:env` 417 OK；`test:unit` 1002/1002；派生链 5/5。开局 10 星（用户实机核对）随之全链落地。
+
+### C6.56 第 132 轮：战斗页 v2 —— **技能区四格**落地（人类规格 R2）
+
+按实机截图与人类逐条要求做：**永远四个技能格**；每格左上角是**消耗（🌟）**，**星不够标红**（`data-roco-cost-short=yes`）；第一层还有**名字 / 属性 / 类别 / 威力 / 本局预计伤害**（取自引擎 `damage_preview.samples`）；**完整描述折进详情层**（`<details>`）；只有引擎给的合法动作可点，其余灰置并写明原因（「星不够：要 X，现在 Y」/「引擎这一手没给这一招」）。
+
+**实现中抓到的真问题**：第一版把 `<details>` 塞进了 `<button>`（HTML 不允许按钮内含交互内容），真实鼠标点下去会落到 `<summary>` 上 —— 技能**点不动**（UX 验收「点防御看冷却」当场红）。改成「按钮 + 详情」**平级**后通过。
+
+**颜色语义的诚实边界**：人类要求「绿=增幅 / 红=削弱 / 白=默认」，但引擎目前**只给一个伤害数**（`samples[].damage`），没有「相对基准的增幅/削弱」信号 —— 所以这一版一律按**默认（白）**呈现，并在代码注释里写明「不自己造基准（那等于页面在算伤害）」。要真做绿/红，需要引擎侧新增「相对基准」字段。
+
+**判据**：真机 `live-battle-spec`（四格 / 消耗徽记 / 红标与能量一致 / 属性 / 预计伤害 / 详情层 + 两条必红反证：星不够不标红、聚能混进技能区）；UX `D4-skill-info` 按新信息架构量；demo 里「按钮上不出现技能内部 id」改成只扫**玩家可见文本**（`skill_id` 只留在 `data-*` 钩子）。
+
+**实测**：真机 **22/22 + 21/21**；UX **39/39 + 4/4**；demo **120/0**；`test:unit` **1002/1002**；门禁 **22/22 pass**。

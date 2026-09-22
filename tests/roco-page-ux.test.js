@@ -313,7 +313,9 @@ test('P0-4 技能卡信息给全：名称/系别/类别/能耗/威力/说明，�
       power_status: 'static_value_present', desc: '造成魔伤，每失去5%生命，本次技能威力-10。'},
   };
   const html = box.actionCardHtml(rich, 0);
-  const missing = ['彗星', '普通系', '攻击', '能耗 0', '威力 240', '造成魔伤'].filter((bit) => !html.includes(bit));
+  // 2026-09-22（人类战斗页 v2 规格）：第一层改为「消耗（🌟）+ 名称 + 属性 + 类别 + 威力 + 预计伤害」，
+  // **完整说明折进详情层**（详情可展开读，不再挤在首层）。判据跟着新信息架构走。
+  const missing = ['彗星', '普通系', '攻击', '🌟', '威力 240', '造成魔伤'].filter((bit) => !html.includes(bit));
   assert.deepEqual(missing, [], `技能卡缺信息：${missing.join(' / ')}${report('actionCardHtml(彗星)', html)}`);
   const noPower = box.actionCardHtml({
     kind: 'skill', label: '防御',

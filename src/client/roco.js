@@ -864,9 +864,10 @@ function actionCardHtml(action, index, {disabled = false, slotName = null} = {})
   let meta = '';
   let desc = '';
   if (kind === 'skill') {
+    // 2026-09-22（人类战斗页 v2 规格）：技能卡第一层只放**实战要看的四样** ——
+    // 消耗（🌟，左上角，星不够标红）、名字、属性、本局预计伤害；完整描述折进详情层。
     title = skill?.name ?? action?.skill_name ?? title;
     const bits = [skill?.element, categoryCn(skill?.category)];
-    if (Number.isFinite(skill?.energy)) bits.push(`能耗 ${skill.energy}`);
     if (Number.isFinite(skill?.power)) bits.push(`威力 ${skill.power}`);
     meta = bits.filter(Boolean).join(' · ');
     desc = typeof skill?.desc === 'string' ? skill.desc : '';
@@ -889,9 +890,14 @@ function actionCardHtml(action, index, {disabled = false, slotName = null} = {})
   }
   const classes = ['action'];
   if (kind === 'escape' || kind === 'struggle') classes.push('is-escape');
+  // 消耗放在**名字左边**（人类 v2 规格：左上角显示 🌟 数，星不够标红由槽位层负责染色）。
+  const costChip = kind === 'skill' && Number.isFinite(Number(skill?.energy))
+    ? `<em class="tag skill-cost" data-roco-cost-chip="yes">🌟 ${Number(skill.energy)}</em>` : '';
   return `<button class="${classes.join(' ')}" data-action="${index}" data-kind="${escapeAttr(String(kind))}"
-    ${disabled ? 'disabled' : ''} title="${escapeAttr(desc || meta)}">
-    <span>${escapeHtml(String(title))}</span>
+    ${disabled ? 'disabled' : ''} title="${escapeAttr(desc || meta)}"
+    ${kind === 'skill' && Number.isFinite(Number(skill?.energy))
+      ? `data-roco-skill-cost="${Number(skill.energy)}"` : ''}>
+    <span class="skill-top">${costChip}<span>${escapeHtml(String(title))}</span></span>
     ${meta ? `<small class="act-meta">${escapeHtml(meta)}</small>` : ''}
     ${desc ? `<small class="act-desc">${escapeHtml(desc)}</small>` : ''}</button>`;
 }
@@ -934,6 +940,84 @@ function greyedMoveset(view) {
   }
 }
 
+/**
+ * 战斗页 v2 的**四格技能**（人类 2026-09-22 规格）：永远画四个格，格内信息第一层只放
+ * 实战要看的四样 —— 消耗（🌟，左上角，星不够标红）、名字、属性、**本局预计伤害**；
+ * 完整描述折进详情层。只有引擎给的**合法**动作可点，其余一律灰置并写清为什么。
+ *
+ * 数据来源：这一只的配招（`state.rosterAll` / `state.roster` 的 `moveset`，含 element/energy/desc）
+ * × 引擎本回合的合法动作（按 `skill_id` 对齐）× `view.damage_preview.samples`（按技能名对齐）。
+ * 任何一项拿不到就**不编**：配招拿不到时返回 `null`，由调用方退回「引擎给了什么就画什么」。
+ *
+ * 颜色语义（人类要求「绿=增幅 / 红=削弱 / 白=默认」）：引擎目前**只给一个数**
+ * （`samples[].damage`），没有「相对基准的增幅/削弱」信号 —— 所以这一版一律按**默认（白）**
+ * 呈现，并在说明里如实写「引擎暂未给增幅信号」。**不自己造基准**（那等于页面在算伤害）。
+ */
+function skillSlots(view, legalSkills) {
+  const active = view?.self?.pets?.[view?.self?.active ?? 0] ?? null;
+  if (!active) return null;
+  const speciesId = active.species_id ?? active.pet_id ?? null;
+  const pool = [...(state.roster ?? []), ...(state.rosterAll ?? [])];
+  const row = pool.find((p) => p.pet_id === speciesId)
+    ?? pool.find((p) => p.name === active.name);
+  const moves = (row?.moveset ?? []).filter((m) => m.is_trait !== true).slice(0, 4);
+  if (!moves.length) return null;
+  const energy = Number.isFinite(active.energy) ? active.energy : null;
+  const samples = Array.isArray(view?.damage_preview?.samples) ? view.damage_preview.samples : [];
+  const bySkillId = new Map();
+  for (const action of legalSkills) {
+    if (action?.skill_id) bySkillId.set(action.skill_id, action);
+  }
+  return moves.map((move) => {
+    const action = move.skill_id ? bySkillId.get(move.skill_id) ?? null : null;
+    const cost = Number.isFinite(Number(move.energy)) ? Number(move.energy) : null;
+    const enough = cost === null || energy === null ? null : energy >= cost;
+    const sample = samples.find((x) => x?.label === move.name) ?? null;
+    return {
+      move, action, cost, enough,
+      legal: action !== null,
+      damage: sample && Number.isFinite(sample.damage) ? sample.damage : null,
+      damageVerified: sample ? sample.formula_verified === true : false,
+      reason: action !== null ? null
+        : (enough === false ? `星不够：要 ${cost}，现在 ${energy}`
+          : '引擎这一手没给这一招（可能被规则/状态挡住）'),
+    };
+  });
+}
+
+/** 一格技能卡（合法可点 / 灰置不可点，同一套信息层级）。 */
+function skillSlotHtml(slot, actions, disabled) {
+  const {move, action, cost, enough, damage, reason} = slot;
+  const short = enough === false ? 'yes' : 'no';
+  const index = action ? actions.indexOf(action) : -1;
+  const clickable = action !== null && !disabled;
+  // ⚠ **按钮与详情必须是平级的两个元素**：`<button>` 里不允许再放交互内容（`<details>`），
+  // 第一版把 details 塞进 button，真实鼠标点下去会落到 `<summary>` 上 —— 技能点不动
+  // （UX 验收里「点防御看冷却」那条就是这么红的）。
+  return `<div class="skill-slot ${clickable ? '' : 'greyed'}"
+    data-roco-skill-slot="yes"
+    data-roco-skill-id="${escapeAttr(move.skill_id ?? '')}"
+    data-roco-skill-cost="${cost ?? ''}"
+    data-roco-cost-short="${short}"
+    data-roco-skill-legal="${action ? 'yes' : 'no'}"
+    ${damage !== null ? `data-roco-skill-damage="${damage}"` : ''}>
+    <button class="skill-card" type="button" ${clickable ? `data-action="${index}"` : 'disabled'}
+      data-kind="skill"
+      ${action?.skill_id ? `data-skill="${escapeAttr(action.skill_id)}"` : ''}>
+      <span class="skill-top">
+        <em class="tag skill-cost" data-roco-cost-chip="yes">🌟 ${cost ?? '?'}</em>
+        <strong>${escapeHtml(move.name ?? '(未登记)')}</strong>
+      </span>
+      <span class="skill-meta">${escapeHtml([move.element, categoryCn(move.category)].filter(Boolean).join(' · '))}</span>
+      <span class="skill-dmg flat" data-roco-damage-chip="yes">${
+        damage !== null ? `预计 ${damage}${slot.damageVerified ? '' : '（未核验）'}` : '预计伤害：算不出'}</span>
+      ${reason ? `<small class="act-none" data-roco-skill-reason="yes">${escapeHtml(reason)}</small>` : ''}
+    </button>
+    ${move.desc ? `<details class="skill-detail"><summary>详情</summary>
+      <small>${escapeHtml(move.desc)}</small></details>` : ''}
+  </div>`;
+}
+
 function renderActions(actions, disabled) {
   const box = $('actions');
   if (!box) return;
@@ -956,7 +1040,15 @@ function renderActions(actions, disabled) {
   // 引擎合法技能确实是 0 —— 但页面原来只写「引擎没有给技能动作」，把配招全藏了，
   // 玩家会以为坏了。现在：**灰置展示这只精灵的配招与费用**，写清差额，并明确提示先聚能。
   // 纪律没变：**只有引擎给的合法动作可点**，灰置卡一律 disabled。
-  const greyed = skills.length ? null : greyedMoveset(state.view);
+  // 技能区**永远四格**（人类 v2 规格）：合法的那几张可点，其余灰置并写清为什么。
+  const slots = skillSlots(state.view, byKind('skill'));
+  const slotsHtml = slots ? `<section class="act-group" data-act-group="skill">
+    <div class="act-group-head"><b>技能</b>
+      <span class="muted">${slots.filter((x) => x.legal).length} / ${slots.length} 可用${
+        slots.some((x) => x.enough === false) ? '（灰置 = 星不够）' : ''}</span></div>
+    <div class="act-row">${slots.map((slot) => skillSlotHtml(slot, actions, disabled)).join('')}</div>
+  </section>` : null;
+  const greyed = slots ? null : (skills.length ? null : greyedMoveset(state.view));
   const greyedHtml = greyed ? `<section class="act-group" data-act-group="skill-greyed">
     <div class="act-group-head"><b>配招（这一手都不可用）</b>
       <span class="muted">${greyed.reason}</span></div>
@@ -971,14 +1063,14 @@ function renderActions(actions, disabled) {
       </button>`).join('')}</div>
     <p class="act-none" data-roco-skill-shortfall="yes">${greyed.shortfall}</p>
   </section>` : '';
-  box.innerHTML = skills.length
+  box.innerHTML = slotsHtml ?? (skills.length
     ? `<section class="act-group" data-act-group="skill">
     <div class="act-group-head"><b>技能</b>
       <span class="muted">${skills.length} 个${byKind('skill').length > 4
         ? `（本回合引擎给了 ${byKind('skill').length} 个，先显示前 4 个）` : ''}</span></div>
     <div class="act-row">${skills.map((action) => actionCardHtml(action, actions.indexOf(action), {disabled})).join('')}</div>
   </section>`
-    : '<p class="act-none">这一手引擎没有给技能动作。</p>';
+    : '<p class="act-none">这一手引擎没有给技能动作。</p>');
   if (greyedHtml) box.insertAdjacentHTML('afterbegin', greyedHtml);
   // 其余被模式允许的动作（本仓库的候选配置里只有技能/聚能/换人/投降，这里留兜底）
   if (others.length) {
@@ -1066,6 +1158,8 @@ function renderActions(actions, disabled) {
   ].filter(Boolean).join(',') || 'none';
   document.body.dataset.rocoActSkillCards = String(skills.length);
   document.body.dataset.rocoGreyedSkills = String(greyed ? greyed.moves.length : 0);
+  document.body.dataset.rocoSkillSlots = String(slots ? slots.length : 0);
+  document.body.dataset.rocoSkillSlotsLegal = String(slots ? slots.filter((x) => x.legal).length : 0);
   document.body.dataset.rocoSkillShortfall = greyed ? 'yes' : 'no';
   document.body.dataset.rocoActCharge = charge.length ? 'yes' : 'no';
   document.body.dataset.rocoActSwitch = switches.length ? 'yes' : 'no';

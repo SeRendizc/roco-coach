@@ -471,10 +471,14 @@ async function main() {
       title:(g.querySelector('.act-group-head b')||{}).textContent||'',
       count:g.querySelectorAll('button[data-action]').length,
     }));
+    // 2026-09-22（战斗页 v2）：技能格第一层是「消耗 + 名字 + 属性 + 预计伤害」，描述在详情层。
     const cards=[...document.querySelectorAll('#actions button[data-action]')].map((b)=>({
-      kind:b.dataset.kind, label:(b.querySelector('span')||{}).textContent||'',
-      meta:(b.querySelector('.act-meta')||{}).textContent||'',
-      desc:(b.querySelector('.act-desc')||{}).textContent||''}));
+      kind:b.dataset.kind,
+      label:(b.querySelector('.skill-top strong')||b.querySelector('span')||{}).textContent||'',
+      meta:(b.querySelector('.skill-meta')||b.querySelector('.act-meta')||{}).textContent||'',
+      desc:(((b.closest('.skill-slot')||b).querySelector('.skill-detail small')
+        ||b.querySelector('.act-desc')||{}).textContent||''),
+      cost:(b.querySelector('[data-roco-cost-chip]')||{}).textContent||''}));
     const byKind={};for(const a of legal)byKind[a.kind]=(byKind[a.kind]||0)+1;
     return {legalCount:legal.length,groups,cards,byKind,
       hidden:Number(document.body.dataset.rocoActionsHidden||'0'),
@@ -885,7 +889,9 @@ async function main() {
       // 所以扫到 0 张卡时这条判据应当等下一手，而不是判红。
       const rows=[...document.querySelectorAll('#actions button[data-action]')];
       rows.forEach((b)=>delete b.dataset.rc502);
-      const labels=rows.map((b)=>({kind:b.dataset.kind,label:((b.querySelector('span')||{}).textContent||'').trim()}));
+      // v2：按钮文本里带消耗徽记（「🌟 1 防御」）→ 取**名字**那一处，避免匹配不到。
+      const labels=rows.map((b)=>({kind:b.dataset.kind,
+        label:((b.querySelector('.skill-top strong')||b.querySelector('span')||{}).textContent||'').trim()}));
       if(!v)return {kind:null,labels,turn:null,active:null,defenders:[]};
       const legal=v.legal||[];
       // 「谁带防御」从**页面自己已经拿到的名单**里读：名单那一次回执（state.roster）

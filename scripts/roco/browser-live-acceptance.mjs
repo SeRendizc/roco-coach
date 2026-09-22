@@ -669,9 +669,17 @@ async function main() {
       const vis=(id)=>{const el=document.getElementById(id);if(!el)return null;
         const r=el.getBoundingClientRect();
         return {shown:!el.hidden&&r.width>0&&r.height>0,top:Math.round(r.top),bottom:Math.round(r.bottom)};};
-      const skills=[...document.querySelectorAll('#actions .act-group[data-act-group="skill"] button[data-action]')]
+      // 2026-09-22（人类战斗页 v2）：技能区**永远四格** —— 合法可点、其余灰置；
+      // 每格左上角是消耗（🌟），星不够必须标红；还要有属性、预计伤害、详情层。
+      const skills=[...document.querySelectorAll('#actions [data-roco-skill-slot]')]
         .map((x)=>({w:Math.round(x.getBoundingClientRect().width),h:Math.round(x.getBoundingClientRect().height),
-          desc:((x.querySelector('.act-desc')||{}).textContent||'').length}));
+          legal:x.dataset.rocoSkillLegal==='yes',cost:x.dataset.rocoSkillCost,
+          short:x.dataset.rocoCostShort,damage:x.dataset.rocoSkillDamage??null,
+          chip:Boolean(x.querySelector('[data-roco-cost-chip]')),
+          dmgChip:Boolean(x.querySelector('[data-roco-damage-chip]')),
+          meta:((x.querySelector('.skill-meta')||{}).textContent||'').trim(),
+          detail:Boolean(x.querySelector('.skill-detail')),
+          energy:(window.rocoDemo?.state?.view?.self?.pets?.[window.rocoDemo.state.view.self.active]?.energy)??null}));
       const foeBench=(document.getElementById('foe-bench')||{}).textContent||'';
       return {vh:window.innerHeight,clientW:document.documentElement.clientWidth,
         scrollW:document.documentElement.scrollWidth,
@@ -685,10 +693,20 @@ async function main() {
       const bad = [];
       if (f?.clientW !== f?.scrollW) bad.push(`横向溢出（${f?.scrollW} > ${f?.clientW}）`);
       if (!(f?.skillCards ?? []).length) bad.push('技能主区一张卡都没有');
-      if ((f?.skillCards ?? []).length > 4) bad.push(`技能卡 ${f.skillCards.length} 张（最多四张）`);
+      if ((f?.skillCards ?? []).length !== 4) bad.push(`技能格 ${f.skillCards.length} 个（规格是永远四格）`);
       for (const card of f?.skillCards ?? []) {
-        if (card.h < 44) bad.push(`技能卡只有 ${card.h}px 高（<44）`);
-        if (!card.desc) bad.push('技能卡上没有关键效果说明');
+        if (card.h < 44) bad.push(`技能格只有 ${card.h}px 高（<44）`);
+        if (!card.chip) bad.push('技能格左上角没有消耗徽记');
+        if (!card.dmgChip) bad.push('技能格没有「预计伤害」这一行');
+        if (!card.meta) bad.push('技能格没有属性');
+        if (!card.detail) bad.push('技能格没有详情层（描述要能展开读）');
+        // 星不够 ⇒ 必须标红（`data-roco-cost-short=yes`）；够 ⇒ 不许乱标
+        const expectedShort = card.cost !== '' && card.energy !== null
+          && Number(card.cost) > Number(card.energy) ? 'yes' : 'no';
+        if (card.short !== expectedShort) {
+          bad.push(`消耗 ${card.cost} / 现有 ${card.energy}，红标应为 ${expectedShort}，实际 ${card.short}`);
+        }
+        if (card.short === 'yes' && card.legal) bad.push('星不够的格子居然是可点的合法动作');
       }
       if (f?.charge !== 'yes') bad.push('没有独立的「聚能」入口');
       if (f?.switchEntry !== 'yes') bad.push('没有独立的「换精灵」入口');
@@ -716,6 +734,10 @@ async function main() {
         + `聚能=${spec.charge} 换精灵=${spec.switchEntry} 投降=${spec.surrender}；`
         + `最新事件「${String(spec.lastEvent).slice(0, 40)}」；对手后备「${spec.foeBench}」；`
         + `行动区底 ${spec.actions?.bottom} / 视口 ${spec.vh}`);
+    counter('live-battle-spec(星不够不标红)', '星不够却标成不红（或星够却标红）必须被同一条判据抓住',
+      specProblems({...spec, skillCards: [{w: 120, h: 113, legal: false, cost: '6', short: 'no',
+        damage: '40', chip: true, dmgChip: true, meta: '草系 · 攻击', detail: true, energy: 2}]}),
+      '{"cost":"6","short":"no","energy":2}');
     counter('live-battle-spec', '把「聚能」混进技能区（没有独立入口）必须被同一条判据抓住',
       specProblems({...spec, charge: 'no', rendered: 'skill,item'}), '{"charge":"no","rendered":"skill,item"}');
 

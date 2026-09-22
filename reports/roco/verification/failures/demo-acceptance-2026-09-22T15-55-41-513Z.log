@@ -1,0 +1,130 @@
+npm run roco:demo-acceptance
+
+> roco:demo-acceptance
+> node scripts/roco/demo-acceptance.mjs
+
+[demo-acceptance] ✔ 页面没有聊天入口（无 #chat-input / #chat-form / textarea） — {"chat":false,"coachApi":false,"textareas":0}
+[demo-acceptance] ✔ 开局后页面拿到公开局面 
+[demo-acceptance] ✔ 合法动作渲染成按钮（不只是文字） 
+[demo-acceptance] ✔ 动作按钮上有技能信息（系别/能耗/威力或说明） — 技能 3 / 4 可用（灰置 = 星不够） 🌟 0 诡刺 幽系 · 攻击 预计伤害：算不出 详情 🌟 2 龙血 龙系 · 防御 预计伤害：算不出 详情 🌟 4 坟场搏击 幽系
+[demo-acceptance] ✖ 动作按钮上不出现技能内部 id — 技能 3 / 4 可用（灰置 = 星不够） 🌟 0 诡刺 幽系 · 攻击 预计伤害：算不出 详情 🌟 2 龙血 龙系
+[demo-acceptance] ✔ 威力缺来源时不写成 0，也不把工程话写在按钮上 — （按钮上没有威力段）
+[demo-acceptance] ✔ 整局内小芽至少自动出现一次（没有任何点击） — 自动出现 3 次；自动推进 21 次；样例=它速度 75 快过你 60：别硬对拼，这一轮先换人躲一下 ｜ 对面「铠甲虫」只剩 4 血：这一轮先把它补掉，别让它换人喘口气
+[demo-acceptance] ✔ 出现的建议都来自真实局面检测器（kind 已知，不是拼出来的句子） — speed-decides:它速度 75 快过你 60：别硬对拼，这一轮先换 ／ foe-low-hp:对面「铠甲虫」只剩 4 血：这一轮先把它补掉，别 ／ energy-short:能量还差 2 才能收掉它：先吃「能量果」补上，这
+[demo-acceptance] ✔ 出现的建议点名了具体动作/伙伴，并给出「为什么是现在」 — [speed-decides] 它速度 75 快过你 60：别硬对拼，这一轮先换人躲一下 / 依据：对面的速度比你高，同档对拼是它先出手 · 风险：硬拼的话这一下会先落在你身上
+[demo-acceptance] ✔ 玩家可见的建议与依据里没有工程术语 — 它速度 75 快过你 60：别硬对拼，这一轮先换人躲一下||依据：对面的速度比你高，同档对拼是它先出手 · 风险：硬拼的话这一下会先落在你身上 ／ 对面「铠甲虫」只剩 4 血：这一轮先把它补掉，别让它换人喘口气||依据：它只剩 4/445，是这一轮最值得先兑现的东西 · 风险：它
+[demo-acceptance] ✔ 这一刻要么给出可执行建议，要么是明确的沉默（不允许含糊） — hint=micro_hint 血量比=0.36 判定={"gate":null,"action":"micro_hint","reason":"moderate-risk","value":1.5,"floor":1.2,"decisive":false,"budget":null,"layer":{"mode":"off","model_status":"pass（全部可判定判据通过：H1_recall_floor、H2_false_positive_ceiling、H3_calibration、H4_discrimination、H5_ood、H8_criteria_are_falsifiable）","suppresses_by":"only","active":false,"suppress":false,"probability":null,"threshold":null,"reason":"flag-off"},"advice":{"text":"能量还差 2 才能收掉它：先吃「能量果」补上，这一轮别硬顶","why":"「坟场搏击」估 119 盖得过对面 72 血，但「寂灭骨龙」还差 2 点能量","risk":"这一轮吃道具虽然先动，但对面那一手照样会打过来","kind":"energy-short","evidence":{"energy":2,"cost":4,"move":"坟场搏击","estimate":{"min":119,"max":119},"foeHp":72,"item":"能量果","decisive":true}},"advice_error":null}
+[demo-acceptance] ✔ 展开里有可核对的搜索证据（区间、分支、分析种子） — 并列比较（这一回合能走的动作）【事实】第 1 个合法动作：龙血（龙系 · 防御 · 能耗 2）【不确定】往后 2—3 回合的推演：引擎这一次只算出了推荐那一手，这个动作没有单独的后续推演（拿不到就不编
+[demo-acceptance] ✔ 提示不把胜率当结论、也不承诺必胜 — 能量还差 2 才能收掉它：先吃「能量果」补上，这一轮别硬顶并列比较（这一回合能走的动作）【事实】第 1 个合法动作：龙血（龙系 · 防御 · 能耗 2）【不确定】往后 2—3 回合
+[demo-acceptance] ✔ 点掉后该沉默的局面不再提示 — hidden=true action=silent
+[demo-acceptance] ✔ 换人后旧建议不再挂在旧版本上 — 换上第2位 v111 → v116
+[demo-acceptance] ✔ 换人这一手本身是引擎接受的合法动作 — 换上第2位
+[demo-acceptance] ✔ 开局引导渲染出来（压成一句，不再占三步的位置） — {"开局时":{"hook":"shown","hidden":false,"steps":1,"h":39},"现在":"hidden"}
+[demo-acceptance] ✔ 每个系别都有形象：阵容卡上的 emoji 徽记齐全（12 张卡，没有空的） — {"avatars":12,"empty":0,"distinct":7}
+[demo-acceptance] ✔ 系别不只靠颜色：每个色块同时带系别文字与图形符号 — {"chips":18,"name":18,"symbol":18}
+[demo-acceptance] ✔ 形象全部自制：全页零 <img>、零外链样式与脚本 — {"imgs":0,"external":0}
+[demo-acceptance] ✔ 一局能真的打完（引擎给出结果） — win
+[demo-acceptance] ✔ 局末给出一个教学入口 — 关键转折在第 16 回合（这一局 35 个回合）。
+[demo-acceptance] ✔ 局末教学入口在页面上真的显示了 
+[demo-acceptance] ✔ 局末复盘用的是**整局**事件，不是最后一次推进的那几条 — 整局 206 条 / 最后一次推进 8 条 / 有可行动局面快照 true
+[demo-acceptance] ✔ 复盘说清了整局回合数与一个具体转折点 — 关键转折在第 16 回合（这一局 35 个回合）。 ｜ 这一局一共 35 个回合，最后赢了下来。第 16 回合 对方第 1 位 倒下，这是全场第一次减员。它倒下之前，背包里的回复药一直没有用过。
+[demo-acceptance] ✔ 转折点规则是登记过的那两条之一，学习点不是空话 — first-faint ｜ 这一局学到一件事：血线掉下一半时先把回复药吃掉，再决定继续输出还是换人。
+[demo-acceptance] ✔ 复盘正文里没有内部 id 与工程词 — 这一局一共 35 个回合，最后赢了下来。第 16 回合 对方第 1 位 倒下，这是全场第一次减员。它倒下之前，背包里的回复药一直没有用过。
+[demo-acceptance] ✔ 这一课真的记进了账本（下一次才有得核对） — teach 行 1
+[demo-acceptance] ✔ 玩家抱怨时陪练先回应情绪（R2/R3），且回话是一句中文（不是 [object Object]） — R2: 嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。｜气泡「嗯，这一局确实不顺。要复盘的话我随时在，不想说就先歇会儿。（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——请到右上角「关于这一页 → 连接模型」」
+[demo-acceptance] ✔ 玩家说过的话会出现在「她记住了什么」里（记忆可见） — {"hook":"1","rows":["称呼：老王"]}
+[demo-acceptance] ✔ 记忆面板只列偏好，不把对局记录混进来（摘要不等于记忆） — ["称呼：老王"]
+[demo-acceptance] ✔ 忘掉一条之后列表里真的没有了（删除落到记忆里，不是只改界面） — {"hook":"none","rows":[]}
+[demo-acceptance] ✔ 重画一次也不会把刚忘掉的那条捡回来 — none
+[demo-acceptance] ✔ 可选精灵至少 6 只（实际 12 只名额） — count=12
+[demo-acceptance] ✔ 名单里是真名，不是 pet_ 占位 — 铠甲虫、音速犬、仪式巨像、雪影娃娃、皇家狮鹫
+[demo-acceptance] ✔ 名单状态写了「配招来自引擎」 — 48 只可选（配招来自引擎规范配招）
+[demo-acceptance] ✔ 双方各选 3 只后开局按钮可用 — disabled=false player=3 enemy=3
+[demo-acceptance] ✔ 事件区渲染的是中文句子（不是 kind + JSON） — 第 35 回合开始。 对方的偷师命中，造成约 38 点伤害（伤害公式未核验，这是引擎估值）。 对方用偷师回收了 1 点能量（回能时序未核验，按出手时立即回能
+[demo-acceptance] ✔ 事件区里没有内部事件标识符（kind） — 第 35 回合开始。 对方的偷师命中，造成约 38 点伤害（伤害公式未核验，这是引擎估值）。 对方用偷师回收了 1 点能量（回能时序未核验，按出手时立即回能
+[demo-acceptance] ✔ 事件区里没有精灵/技能的内部 id 
+[demo-acceptance] ✔ 原始事件 JSON 收在折叠区里（默认收起） — {"hasDetails":true,"open":false,"rawLen":1959,"rawLooksJson":true}
+[demo-acceptance] ✔ 队伍/对手/行动面板里不出现 pet_ / skill_ 占位 
+[demo-acceptance] ✔ 面板里精灵显示的是真名（不是 id） — 🐾 黑猫巫师 🐾普通系 生命 436 / 474 ⭐ ●1 / 6 ⛰️ 仪式巨像 ⛰️地系 ✨幻系 生命 0 / 401 ⭐ ●●2 / 6 对手后备 0
+[demo-acceptance] ✔ 页面上不出现真实对局 seed 或私有状态 
+[demo-acceptance] ✔ 控制台没有报错 — []
+[demo-acceptance] ✔ 开发者抽屉存在且**默认收起** — {"exists":true,"open":false,"summary":"关于这一页（规则快照 / 服务状态 / 验收钩子 / 工程说明）","coverageInside":true,"shadowInside":true}
+[demo-acceptance] ✔ 验收清单与模型面板都在抽屉里 — {"exists":true,"open":false,"summary":"关于这一页（规则快照 / 服务状态 / 验收钩子 / 工程说明）","coverageInside":true,"shadowInside":true}
+[demo-acceptance] ✔ 折叠证据区与开发者抽屉默认都是收起的（排除它们才不算放过） — {"hintBodyHidden":true,"drawerOpen":false}
+[demo-acceptance] ✔ 玩家可见区域没有工程话与验收钩子说明 — （干净）
+[demo-acceptance] ✔ 玩家可见区域仍然说人话（有中文、有「开一局」这类操作词） —  小芽 · 洛克王国：世界 训练场 标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）本局有 4 条规则未核实，界面上会逐条标出来（原
+[demo-acceptance] ✔ 对照面板默认不显示（要显式点按钮才跑，不打扰玩家） — {"hidden":true,"hasButton":true}
+[demo-acceptance] ✔ 开发者抽屉能正常展开 — {"open":true}
+[demo-acceptance] ✔ 点一下能真的问到本机小模型（面板出现内容） — {"hidden":false,"hasFn":"function","battleId":"s2-gk6hcjq5","panelExists":true,"err":null,"html":"\n      <table class=\"shadow\">\n        <tbody><tr><th>规则引擎（真值来源）</th><td>规则引擎这一步的行动建议：换上第2位</td></tr>\n        <tr><th>本机小模型（只提议工具）</th><td>模型说：不用再查了<br>\n          <span class=\"muted\">耗时 492 ms · 
+[demo-acceptance] ✔ 面板明确写出「规则引擎是真值来源 / 模型只提议工具」 —  规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 492 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」
+[demo-acceptance] ✔ 面板不许暗示两边在同一维度上一致 —  规则引擎（真值来源）规则引擎这一步的行动建议：换上第2位 本机小模型（只提议工具）模型说：不用再查了 耗时 492 ms · 提示摘要 a5cb0fbcc53f… 面板并列的是两类不同的提议：规则引擎给的是这一步的「行动建议」
+[demo-acceptance] ✔ 局面矩阵：逐局面推进到位（12 个写死的局面，每个跑两遍） — 局面 12 个；推进到位的 12 个；异常 0 个 []
+[demo-acceptance] ✔ 局面矩阵：每个局面实际开口的 kind === 写死的期望 kind（12/12） — 01-ko-now-lethal=ko-now 02-ko-now-mid=ko-now 03-energy-short=energy-short 04-type-resisted=type-resisted 05-type-favoured=type-favoured 06-foe-energy-high=foe-energy-high 07-replace-required=replace-required 08-switch-low-hp-mid=switch-low-hp 09-foe-low-hp=foe-low-hp 10-speed-faster=speed-decides 11-speed-slower-defend=speed-decides 12-peaceful-silent=（沉默）
+[demo-acceptance] ✔ 局面矩阵：至少 10 个局面真的有气泡产出（实际 11/12） — 开口 11 个、沉默 1 个；沉默原因 [{"id":"12-peaceful-silent","reason":"门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null"}]
+[demo-acceptance] ✔ 局面矩阵：互不相同的 kind ≥ 8（实际 9 种；分支 count>=8） — 观测到 9 种：energy-short/foe-energy-high/foe-low-hp/ko-now/replace-required/speed-decides/switch-low-hp/type-favoured/type-resisted
+[demo-acceptance] ✔ 局面矩阵：没有任何形状重复超过一次（实际最大重复 2 次，上限 2） — 形状 10 种 / 最大重复 2 次；超限 []
+[demo-acceptance] ✔ 局面矩阵：页面上显示的那一句 === Node 侧用同一批公开量重算的那一句 — 11 条逐字相同；kind 也逐条相同（不一致 0 条）
+[demo-acceptance] ✔ 局面矩阵：每条气泡都含「做什么 / 为什么是现在 / 一个关键风险」三部分，且后两部分真的渲染给玩家 — 三部分齐全 11/11；依据与风险真的在 DOM 里 11/11；缺件 []
+[demo-acceptance] ✔ 局面矩阵：玩家可见文案里没有工程术语（区间/尾部/margin/score/种子/coverage/state_version/pet_id/裸 JSON） — 11 条气泡正文与依据行全部干净
+[demo-acceptance] ✔ 局面矩阵：有建议层结论却没有气泡的局面为 0（那种局面是缺陷，不是沉默） — 0 个
+[demo-acceptance] ✔ 局面矩阵：产物里没有 pet_id / 内部评分 / 对手后备血量 / 密钥 — 逐字节扫过 coach-positions-browser.json：干净
+[demo-acceptance] ✔ 局面矩阵：同一批写死的输入跑两遍，结果逐字节相同（确定性） — passA 1ee1da0dd023d88c… / passB 1ee1da0dd023d88c…；相同=true
+[demo-acceptance] ✔ 局面矩阵：形状去重判据本身不是空的（换技能名与数字 → 同形状；换句式 → 不同形状） — 同模板换名字与数字判为同形=true；换句式判为不同形=true
+[demo-acceptance] ✔ 对局进行中阵容选择是收起的，点「重选阵容」能真的放出来 — briefShown=true reopened=已展开
+[demo-acceptance] ✔ 阵容卡有「这一侧点不动」的状态（blocked / 角标），不是静默无反应 — {"cards":12,"blocked":10,"taken":2}
+[demo-acceptance] ✔ 鼠标点「已分给对手」的卡：给出可执行的提示，而且不会悄悄改阵容 — {"hint":"铠甲虫 已经分给对手了。先在这一侧点它取消，或点上面的「对手」切过去。","blocked":true,"aria":"true","stillEnemy":true,"player":0}
+[demo-acceptance] ✔ 键盘（聚焦 + 回车）点同一张卡，拿到同一句提示 — 铠甲虫 已经分给对手了。先在这一侧点它取消，或点上面的「对手」切过去。
+[demo-acceptance] ✔ 我方已满 3 只时点第 4 只：提示说清「已满」且不改变阵容 — {"hint":"我方已经选满 3 只了。点一只已选的取消，或切到另一侧。","player":3}
+[demo-acceptance] ✔ 点「对手」切换选择侧：tab 的 aria-pressed 与面板标记都跟着变 — {"pressed":["false","true"],"panel":"enemy","hint":"现在选的是「对手」。"}
+[demo-acceptance] ✔ 选好的我方阵容真的进了引擎（名字逐位对上） — 期望 铠甲虫、音速犬、仪式巨像 ／ 实际 铠甲虫、音速犬、仪式巨像
+[demo-acceptance] ✔ 选好的对手阵容也进了引擎 — 期望 雪影娃娃 ／ 实际 雪影娃娃
+[demo-acceptance] ✔ 每一步 DOM 快照的**可见文本**都干净（共 3 步 × 9 个字段） — 3 步全部干净
+[demo-acceptance] ✔ 真实鼠标「查看阵容 → 收起」之后行动坞恢复（六宠工作台，不再是废弃的 #select-panel） — 收起→打开→收起：workshop false/true/false；picking yes→no；行动坞恢复=true
+[demo-acceptance] ✔ 真实鼠标「查看阵容 → 收起」之后行动坞恢复（反证：收起后不恢复必须被抓） — 喂进去的坏状态被判：["收起之后**行动坞没有恢复**（玩家会卡在看不到动作的状态）"]
+[demo-acceptance] ✔ 真实鼠标点「下一页」：每页 12 张、集合变了、且与第 1 页没有一张重合 — 第 1 页 12 张（1 / 4） → 第 2 页 12 张（2 / 4）；重合 0 张
+[demo-acceptance] ✔ 真实鼠标点「上一页」回到第 1 页，卡片逐张相同 — 回到 12 张；与第 1 页逐张相同=true
+[demo-acceptance] ✔ 搜索框真的收到键盘输入，阵容池按名字过滤（每一张都含搜索词） — 输入框="音速"；命中 1 张：音速犬；data-roco-pool=1/1
+[demo-acceptance] ✔ 真键盘清空搜索词之后阵容池回到完整一页（没把筛掉的那 11 张留在外面） — 输入框=""；卡片回到 12 张
+[demo-acceptance] ✔ 真实鼠标按属性筛选：卡片集合真的变化，且**每一张**都带这个属性 — 属性=草系；3 张卡片属性=🌿草系|❄️冰系 / 🌿草系|❄️冰系 / 🌿草系|☠️毒系
+[demo-acceptance] ✔ 真实鼠标把属性筛选改回「全部」之后池子恢复 — 回到 12 张
+[demo-acceptance] ✔ 真实鼠标按定位筛选：卡片集合变化，且每一张的定位都等于所选项 — 定位=attacker；12 张定位=定位：输出
+[demo-acceptance] ✔ 分段选择器用真实点击切到「对手」：aria-pressed / 面板标记 / 当前侧样式三者同步 — sides=player,enemy pressed=false,true 面板=enemy 背景 rgba(0, 0, 0, 0) vs rgb(232, 167, 106)
+[demo-acceptance] ✔ 分段选择器用真实点击切回「我方」：状态跟着反过来 — pressed=true,false 面板=player 背景 rgb(198, 241, 204) vs rgba(0, 0, 0, 0)
+[demo-acceptance] ✔ 卡片首层只给「名字/属性/定位/一个特点」：没有六维面板、没有四技能长列表 — {"stats":0,"moves":0,"keys":12,"roles":12}
+[demo-acceptance] ✔ 真实鼠标点「详情」：抽屉里给出面板数值与四个技能 — 面板 6 项 / 技能 4 条： 铠甲虫 · 详情 × 🐛虫系 定位：坦克 · 速度档 71-90 基础面板（六维） 生命132物攻95物防128魔攻43魔防82速度75 四个技能 啃咬虫系 · 攻击 · 能耗 0 · 威力 40造成物伤，1连击，本技能会受奉献影响，每
+[demo-acceptance] ✔ 真实鼠标点「详情」的关闭按钮：抽屉能关掉 — hidden=true
+[demo-acceptance] ✔ 选阵容页两张真实截图都不横向溢出（clientW === scrollW） — 1440×900 clientW/scrollW=1440/1440；390×844 clientW/scrollW=390/390；截图 ui-roster-1440x900.png、ui-roster-390x844.png
+[demo-acceptance] ✔ 真实鼠标点「开一局」：阵容池完全收起，只留一行摘要 + 「重选阵容」 — 开局按钮可用=true；阵容池收起=true；摘要「我方 铠甲虫、音速犬、仪式巨像 ｜ 对手 雪影娃娃、皇家狮鹫、化蝶查看或调整下局阵容」
+[demo-acceptance] ✔ 对战页中央是双方当前宠物的战斗舞台，后备压成小条（对手只写还剩几只） — 舞台上 2 只 / 我方后备 2 条 / 对手后备 1 条
+[demo-acceptance] ✔ 合法动作一屏可点（窄屏贴底 / 桌面在流里且不出视口） — 动作 3 个；position=fixed 底边=900 视口高=900
+[demo-acceptance] ✔ 对战页真实截图不横向溢出（clientW === scrollW） — 1440×900 clientW/scrollW=1440/1440；截图 ui-battle-1440x900.png
+[demo-acceptance] ✔ 教程只在首次出现：真实点击「跳过」之后它不再占位（高度归零） — 跳过前 1 步 / 高 39px（shown） → 跳过后 高 0px（hidden）
+[demo-acceptance] ✔ 「跳过」写进了 localStorage 的登记键（不是只改这一次的 DOM） — localStorage['roco-coach-onboard-v1']="1"
+[demo-acceptance] ✔ 刷新之后教程仍然不出现（localStorage 那个键真的生效） — 刷新后 hook=hidden 高=0px 键="1"
+[demo-acceptance] ✔ ① 宠物卡上没有占位文案（遍历 4 页共 48 张卡的可见文本） — 扫过 48 张卡（第1页12张/第2页12张/第3页12张/第4页12张），占位命中 0；带定位行的卡 12/12（第 1 页）
+[demo-acceptance] ✔ ① 反证：把「定位：未标注」塞回卡片，同一个检查器必须抓住（否则上一条是空话） — 注入后命中 "未标注"（片段「 ⚙️机械系 ✨幻系 定位：未标注 机制：特性「虚假宝箱」）；重画后命中 null
+[demo-acceptance] ✔ ③ 真实鼠标点「开一局」之后教程自动收起（hidden 且高度 0px，不是只靠 CSS 藏） — 开局前 1 步 / 高 39px（shown）→ 开局后（第 1 回合）高 0px / hidden=true（hidden）
+[demo-acceptance] ✔ ③ 自动收起同样写 localStorage 登记键（下次进来不再显示） — 开局前 null → 开局后 "1"
+[demo-acceptance] ✔ ① 对战页的宠物卡与后备条上也没有占位文案（这是「未知」原来反复出现的地方） — 扫过 5 张卡；片段「🔥 音速犬 🔥火系 生命 366 / 366 ⭐ ●●2 / 6 增益 物攻 +100%
+🔥 音速犬 🔥火系 生命 366 / 366 ⭐ ●●2 / 6
+第 2 位 雪影娃娃 · 442/442 · ⭐ 0
+第 3 位 圆号鱼 · 413/413 · ⭐ 0
+对手后备 2 只 · 上场时亮明」
+[demo-acceptance] ✔ ① 反证：把「状态未知」塞回一条后备，同一个检查器必须抓住 — 注入后命中 "未知"；重画后命中 null
+[demo-acceptance] ✔ ② 玩家可见层没有「来源未给 / not_provided_by_source / power_status」 — 动作栏 8 个动作（其中 2 个技能、1 个没给威力）玩家层一个工程词都没有
+[demo-acceptance] ✔ ② 开发者抽屉默认收起，展开后能看到原始 power_status（fail-closed 凭据） — 抽屉默认收起=true；证据 80 行 / 5278 字节，含 power_status=true、含 not_provided_by_source=true；样例「| 防御 | power=null | power_status=not_provided_by_source」
+[demo-acceptance] ✔ ④ 真实点「让小芽看一眼」：浮条真的出现（不再只写一句「建议已就绪」） — 自动推进 3 手到第 4 回合（自动开口 kind=foe-energy-high）；点掉后 dismissed=true / 浮条隐藏=false；做什么「「火云车」估 414，够收对面「音速犬」这 190 血：这一轮直接收」/ 为什么=true / 风险=true；状态行「已在浮条上给出这一手（第 4 回合）；展开可看并列比较」
+[demo-acceptance] ✔ ④ 浮条不超过两行：2 个文本行（做什么 + 为什么·风险），且第一行没有被截断 — 逻辑行 2 个（hint-line + hint-foot）；实测可视行数 #hint-text=1 / #hint-why=2；像素高 文本行 26px + 依据行 34px；第一行被截断=false
+[demo-acceptance] ✔ ④ 展开的比较区里也没有工程话（威力没给就是不写，不写「来源未给」） — 比较区正文一个工程词都没有
+[demo-acceptance] ✔ ④ 展开后的比较区并列 ≥2 个**这一回合真实合法**的动作（逐个核对动作表） — 并列 3 个：防御、火苗、火云车；这一回合合法动作 10 个（防御、火苗、火云车、焚烧烙印、换上第2位、换上第3位…）；每一个都在动作表里=true；引擎推荐那一手也在并列里=["火云车"]
+[demo-acceptance] ✔ ④ 比较区给出后续 2—3 回合的后果（来自规划回执的真实字段） — 后续条目 5 条；规划回执 分支=87 深度=2 对手应对="防御" 稳健=true；样例「【事实】引擎把这一手往后算了 2 层、覆盖 87 个分支（固定分析种子 11/29/47）。」
+[demo-acceptance] ✔ ④ 比较区标明「事实 / 估计 / 不确定」三类 — 【事实】=true 【估计】=true 【不确定】=true
+[demo-acceptance] ✔ ④ 两张真实截图（含展开后的比较区）都不横向溢出（clientW === scrollW） — 1440×900 clientW/scrollW=1440/1440；390×844 clientW/scrollW=390/390；截图 ui-ux-hint-compare-1440x900.png、ui-ux-hint-compare-390x844.png
+[demo-acceptance] ✔ ④ 展开后浮条不顶出屏幕，且滚动停在顶部（两行结论还在可视区里） — 1440×900 浮条 top/bottom/视口高=14/628/900（高 614px，内部可滚动=true，scrollTop=0，--bottombar=258px）；390×844 top/bottom/视口高=14/810/844（高 796px，内部可滚动=true，scrollTop=0，--bottombar=20px）
+[demo-acceptance] ✔ ④ 浮条的第一行真的在**最上面**（没有被开发者抽屉盖住） — elementFromPoint 落在浮条里=true（命中的是 hint-text）；z-index 浮条=32 / 开发者抽屉=30
+[demo-acceptance] ✔ ④ 状态一变，旧建议就地作废（浮条上那条不许挂在旧 state_version 上） — 推进前浮条版本=25 → 推进后本局版本=30 / 浮条版本=null；一致=true
+[demo-acceptance] ✔ ④ 陈旧规划必须整条丢弃并记账（构造竞态：规划属于旧版、回来时已推进） — 规划属于 state_version=30，回来时画面=37；plan 保留=false planAtVersion=null；丢弃账={"plan_version":30,"view_version":37,"at":1790092540897}；状态行「没有采用这份建议：等待期间局面已推进（30 → 37）：这份规划属于已经不存在的局面，整条丢弃」
+[demo-acceptance] ✔ ④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上 — 浮条版本=37 / 丢弃时画面=37
+[demo-acceptance] ✔ ④ 自然竞态下的不变量：页面上的规划/建议必须属于**当前**局面 — 同时发 plan 与 advance：局面 30 → 31；plan 版本=30 保留=false；浮条版本=31；丢弃账累计=4；（撞上与否由这两个版本号说话，不靠猜）
+[demo-acceptance] ✔ ③ 自动收起之后再进来也不再显示（刷新后 hidden / 高 0px / 登记键仍在） — 刷新后 hook=hidden hidden=true 高=0px 键="1"
+[demo-acceptance] 结果：119 通过 / 1 失败；报告见 reports/roco/demo-acceptance/

@@ -1,0 +1,48 @@
+node scripts/roco/browser-roco-ux-acceptance.mjs
+
+[roco-ux] ✔ D1-pages 真实鼠标连点三次「下一页」：四页各 12 只、四批互不重合 — 四页各 12/12/12/12 只；互不重合=true
+[roco-ux] ✔ D1-offset 每页渲染的精灵与「服务端 offset=(n-1)*12」的结果逐张一致 — 第1页 offset=0 一致；第2页 offset=12 一致；第3页 offset=24 一致；第4页 offset=36 一致
+[roco-ux] ✔ D1-label 页码文案与真实页码/页数一致，且第 4 页「下一页」disabled — 第 4 页文案「4 / 4」next.disabled=true；第 1 页 prev.disabled=true
+[roco-ux] ✔ D1-hooks 验收钩子 data-roco-pool-offset 随翻页真的变（0 → 12 → 24 → 36） — 翻四页的 offset 钩子：0,12,24,36
+[roco-ux] ✔ D1-back 真实鼠标点「上一页」回到第 3 页，卡片逐张相同 — 回到第 3 页（12 只），与来时逐张相同=true
+[roco-ux] ✔ D1-search-reset 真键盘输入搜索词后回到第 1 页，且结果集跟着换 — 搜索「画间」命中 2 只：搜索前第 4 页（12 只） → 搜索后第 1 页「1 / 1」（2 只）
+[roco-ux] ✔ D1-filter-reset+clamp 属性筛选后重置到第 1 页，并把页码夹到新结果集内（不是停在 4/4） — 筛选前第 4/4 页 → 草系：第 1/1 页 (3 只，next.disabled=true)
+[roco-ux] ✔ D1-filter-clear 「清除筛选」把结果集换回全量（4 页、每页 12 只） — 清除后第 1/4 页，12 只
+[roco-ux] ✔ P0-3 开局引导是常规流里的一条（不浮层、只占一行），且与候选卡零重叠 — 步骤=1（压成一句）高度=39px 与卡片重叠=0 张
+[roco-ux] ✔ P0-3-click 真实鼠标点候选卡真的选上；点「跳过」之后引导收起且卡片照样可点 — 可选卡 2 张（pet_000112 尺寸 283×223，aria-disabled=false）；点卡后我方 1 只（提示「雪影娃娃 加入我方（1/3）。」）→ 跳过后再点一只 2 只（提示「皇家狮鹫 加入我方（2/3）。」）；引导 hidden=true
+[roco-ux] ✔ P0-2-entry 页头「✦ 小芽」真实点一下：这一栏打开、焦点落到输入框 — 点之前 open=false，点之后 open=true，焦点=say-input，入口尺寸=69×44
+[roco-ux] ✔ P0-2-say 真实键盘输入 + 真实鼠标提交：拿到一句中文回复，且回话不是 [object Object] — 回复「烦啊——烦就先搁着，不聊对局也行。（现在没接模型：我只能给规则事实与主动提示。想」
+[roco-ux] ✔ P0-2-same-screen 输入框与**最近一句回复**都在首屏（量 getBoundingClientRect） — 输入 {"top":772,"bottom":812,"left":1099,"right":1337} / 回复 {"top":137,"bottom":266,"left":1099,"right":1413} / 视口 {"width":1440,"height":900}
+[roco-ux] ✔ P0-2-auto-hint 不打开小芽那一栏也能出现主动提示（军师浮条自己冒出来） — 第 6 回合浮条可见=true（hidden=false / display=block）；正文「「啃咬」打「雪影娃娃」只有抵抗（33 伤害）：别再硬用它」
+[roco-ux] ✔ D4-groups 行动区结构等于规格：技能为主区（≤4 张卡）、聚能/换精灵/投降各自独立入口、换人列表条数等于引擎给的换人数、道具与逃跑不渲染、被模式隐藏的仍如实记账 — 引擎账 {"skill":2,"switch":2,"item":3,"escape":1}；页面渲染 ["skill","switch"]；技能卡 2 聚能 no 换精灵 yes（列表 2）投降 no；隐藏 4 条
+[roco-ux] ✖ D4-skill-info 每个技能条都带说明文字；系别/类别/能耗/威力按引擎给的一起显示 — 0 个技能条，缺说明 0 个；样例「undefined · undefined · undefined」
+[roco-ux] ✔ D4-item-name 物品名要么用引擎给的真实名字，要么按标准 PVP 模式隐藏并记账 — 引擎物品 ["净化药","回复药","能量果"]；页面显示「null」；隐藏条数 4（按模式隐藏并已记账）
+[roco-ux] ✔ D4-clickable 每个可点动作条的高度 ≥44px（触屏点得到） — 2 个动作条，最矮 134px；<44px 的有 0 个
+[roco-ux] ✔ D4-narrow-safe-1440 1440×900 无横向溢出（clientW === scrollW） — clientW/scrollW=1440/1440
+[roco-ux] ✔ P0-7-390 390×844 无横向溢出（clientW === scrollW） — clientW/scrollW=390/390
+[roco-ux] ✔ P0-7-390-tap 390×844 下每个动作条高度 ≥44px — 2 个动作条，最矮 113px
+[roco-ux] ✔ P0-2-390-same-screen 390×844 下输入框与最近一句回复仍在首屏 — 输入 {"top":522,"bottom":566,"left":23,"right":288} / 回复 {"top":288,"bottom":408,"left":23,"right":367} / 视口 {"width":390,"height":844} / 底栏 253px 动作坞 {"top":591,"bottom":844,"left":0,"right":390} 动作坞上界 253px
+[roco-ux] ✔ P0-6-top 战斗页顶部对称给出双方资源（未核验就如实写）与队伍状态 — 我方「魔力 / 心未核验本仓库引擎暂无此量…」对手「魔力 / 心未核验本仓库引擎暂无此量…」；队伍状态「还能打 3/3铠甲虫 261/445音速犬 36」
+[roco-ux] ✔ D2-cards 卡片首层给「定位 + 机制 + 基础面板」，且没有模板句 — 12 张卡：定位 12 / 机制 12 / 基础面板 12 / 模板句命中 0
+[roco-ux] ✔ RC502-窄屏候选宇宙开关 390×844：候选宇宙开关整行都在屏内、可点（≥44px 高），且页面不横向溢出 — 开关 {"w":197,"h":44,"boxW":16,"boxH":16,"text":"包含按需推算的精灵（未核验）","right":301,"vw":390}；clientW/scrollW=390/390
+[roco-ux] ✔ D5-mode-badge 模式徽记：玩家层是中文结论（候选规则（待实机核对）+ 匹配前对手未知），枚举与注册表原文留在数据层与开发者抽屉里，且首屏可见 — ；徽记「标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）本局有 4 条规则未核实，界面上会逐条标出来（原文在开发者抽屉）匹配前对手未知 · 按版本环境倾向评价」；注册表 label「标准 PVP 六宠阵容工坊（候选模式）」
+[roco-ux] ✔ [反证 D5-mode-badge] 把注册表枚举名印回玩家层（`UNKNOWN_PREMATCH` 直接写进徽记）必须被同一条判据抓住 — 命中：玩家层出现了注册表/验收台术语（枚举名、注册表字样、引擎实际规模）
+[roco-ux] ✔ [反证 D5-mode-badge(枚举丢了)] 数据层把 prematch 枚举丢掉必须被同一条判据抓住 — 命中：数据层没带枚举（dataset.rocoPrematch=null）
+[roco-ux] ✔ D5-no-fake-hearts 页面上没有心形计数器（魔力/心只显示引擎给的数，没有就写未核验） — 页面正文无心形字符，资源条写的是「未核验」
+[roco-ux] ✔ RC502-默认视野冻结 默认（开关没勾）：候选宇宙仍是冻结已核验的那一批，没有按需推算的精灵 — scope=frozen total=48 pages=4 卡上支持等级=["FULL_VERIFIED"]
+[roco-ux] ✔ RC502-勾上开关换视野 真鼠标勾上「包含按需推算的精灵（未核验）」：候选宇宙换成全量图鉴（>600 只） — scope=all total=622 pages=52（默认时 48 只）
+[roco-ux] ✔ RC502-按需推算的卡如实标记 全量视野里这只按需推算的精灵，卡上写着「按需推算的配招 · 未核验」（不冒充已核验） — 卡 {"pet":"pet_000296","name":"幽星光","support":"SIMULATABLE_UNVERIFIED","unverified":"按需推算的配招 · 未核验","w":283,"h":219}；问题 无
+[roco-ux] ✔ [反证 RC502-按需推算的卡如实标记] 把「未核验」标记去掉（卡上不写配招来源）必须被同一条判据抓住 — 命中：卡上没写「未核验」
+[roco-ux] ✔ RC502-全量视野的精灵能真的选上 真鼠标点这张卡：它进了我方队伍（不是只能看、点不动） — 我方=["pet_000296"] 现在在选「player」
+[roco-ux] ✔ RC502-全量视野组队开局 全量视野下真鼠标点满双方各 3 只并开局（这条能力本身能点通） — 我方 3（["pet_000296","雪影娃娃","喵喵"]）／对手 3（["铠甲虫","音速犬","仪式巨像"]）；防御手=雪影娃娃；开局按钮 disabled=false；试过的防御手 [{"name":"雪影娃娃","shown":true,"blocked":false}]
+[roco-ux] ✔ RC502-能量上限来自引擎 战斗卡的能量写成「当前 / 上限」，上限是引擎这一局的规则配置（legacy=6）给的 — 引擎上限 self=6 foe=6，当前能量 2
+[roco-ux] ✔ RC502-能量行真的画在卡上 自己那张卡上真的出现带上限的能量行（DOM 与引擎数值一致） — 能量行「⭐ ●●2 / 6」；引擎 self=2/6
+[roco-ux] ✔ RC502-对手增益口径写在页面上 对手那一侧的场上事实缺口有说明（引擎不给对手增益，页面照实说） — 对手侧说明「对手的增益不在公开视图里：引擎只给血/星/异常/印记/冷却」
+[roco-ux] ✔ RC502-印记逐条画在对手卡上 真鼠标打出一手带印记的技能：对面卡上出现印记，名字与层数与引擎逐字一致 — 引擎 {"星陨印记":3}；页面那一行「印记 星陨印记 ×3」；钩子「energy=2/6;marks=星陨印记:3;defense_cooldown=2」；问题 无
+[roco-ux] ✔ [反证 RC502-印记逐条画在对手卡上] 把印记那一行删掉（页面少画一行）必须被同一条判据抓住 — 命中：页面上没有印记那一行
+[roco-ux] ✖ RC502-防御冷却画在自己卡上 真鼠标点「防御」（必要时先换上带防御的那只）：自己卡上出现防御冷却，数字与引擎一致 — 引擎 null；页面那一行「null」；过程 [{"attempt":0,"act":"no-cards","turn":2,"active":"幽星光","defenders":[],"labels":[]},{"attempt":1,"act":null,"turn":3,"active":"雪影娃娃","defenders":["雪影娃娃"],"labels":["🌟 0\n      风吹雪","🌟 1\n      防御","🌟 1\n      啮合传递"]}]
+[roco-ux] ✔ RC502-场上事实不撑破版面 加上这几行之后 1440×900 仍然没有横向溢出 — clientW/scrollW=1440/1440
+[roco-ux] ✔ errors 整个过程没有 console error / page exception — console error 0 条、page exception 0 条
+[roco-ux] 报告：reports/roco/ux-acceptance/browser-roco-ux-acceptance.json（判据 37/39 通过；反证 4/4 命中）
+
+[roco-ux] 2 条判据失败：D4-skill-info, RC502-防御冷却画在自己卡上

@@ -656,3 +656,16 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 .skill-card.greyed{opacity:.55;cursor:not-allowed;border-style:dashed}
 .skill-card.greyed .tag{background:#3a2f2a;color:#e2b48c}
 .act-group[data-act-group="skill-greyed"] .act-group-head b{color:#c9b28a}
+
+/* 战斗页 v2 技能格（人类 2026-09-22 规格）：消耗在左上角，星不够标红；伤害默认白（引擎暂无增幅信号）。 */
+.skill-slot{position:relative;display:flex;flex-direction:column;gap:4px;text-align:left}
+.skill-slot .skill-top{display:flex;align-items:center;gap:6px}
+.skill-cost{font-weight:700;font-variant-numeric:tabular-nums}
+.skill-slot[data-roco-cost-short="yes"] .skill-cost{background:#4a1f22;color:#ffb4b4;border-color:#7d3a3f}
+.skill-dmg{font-size:11.5px;color:#dfe8ef}
+.skill-dmg.flat{color:#cfd9e3}
+.skill-dmg.up{color:#8fe0a2}
+.skill-dmg.down{color:#ffb4b4}
+.skill-detail{margin-top:2px}
+.skill-detail>summary{font-size:11px;color:#9caebe;cursor:pointer;min-height:32px;display:flex;align-items:center}
+.skill-detail small{font-size:11px;color:#b9c7d4;line-height:1.5}

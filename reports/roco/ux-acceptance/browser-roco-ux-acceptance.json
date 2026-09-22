@@ -1,6 +1,6 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-22T15:24:16.739Z",
+ "generated_at": "2026-09-22T16:51:17.519Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [
@@ -107,7 +107,7 @@
    "id": "D4-skill-info",
    "name": "每个技能条都带说明文字；系别/类别/能耗/威力按引擎给的一起显示",
    "ok": true,
-   "actual": "2 个技能条，缺说明 0 个；样例「啃咬 · 虫系 · 攻击 · 能耗 0 · 威力 40 · 造成物伤，1连击，本技能会受奉献影响，每被影响1」"
+   "actual": "2 个技能条，缺说明 0 个；样例「啃咬 · 虫系 · 攻击 · 造成物伤，1连击，本技能会受奉献影响，每被影响1」"
   },
   {
    "id": "D4-item-name",
@@ -143,7 +143,7 @@
    "id": "P0-2-390-same-screen",
    "name": "390×844 下输入框与最近一句回复仍在首屏",
    "ok": true,
-   "actual": "输入 {\"top\":545,\"bottom\":589,\"left\":23,\"right\":288} / 回复 {\"top\":311,\"bottom\":431,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 230px 动作坞 {\"top\":614,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
+   "actual": "输入 {\"top\":522,\"bottom\":566,\"left\":23,\"right\":288} / 回复 {\"top\":288,\"bottom\":408,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 253px 动作坞 {\"top\":591,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
   },
   {
    "id": "P0-6-top",
@@ -233,7 +233,7 @@
    "id": "RC502-防御冷却画在自己卡上",
    "name": "真鼠标点「防御」（必要时先换上带防御的那只）：自己卡上出现防御冷却，数字与引擎一致",
    "ok": true,
-   "actual": "引擎 {\"turn\":4,\"active\":1,\"present\":true,\"name\":\"雪影娃娃\",\"value\":2}；页面那一行「防御冷却 2」；过程 [{\"attempt\":0,\"act\":\"no-cards\",\"turn\":2,\"active\":\"幽星光\",\"defenders\":[],\"labels\":[]},{\"attempt\":1,\"act\":\"defend\",\"turn\":3,\"active\":\"雪影娃娃\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"防御\",\"啮合传递\",\"风吹雪\"]}]"
+   "actual": "引擎 {\"turn\":4,\"active\":1,\"present\":true,\"name\":\"雪影娃娃\",\"value\":2}；页面那一行「防御冷却 2」；过程 [{\"attempt\":0,\"act\":\"no-cards\",\"turn\":2,\"active\":\"幽星光\",\"defenders\":[],\"labels\":[]},{\"attempt\":1,\"act\":\"defend\",\"turn\":3,\"active\":\"雪影娃娃\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"风吹雪\",\"防御\",\"啮合传递\"]}]"
   },
   {
    "id": "RC502-场上事实不撑破版面",
@@ -348,24 +348,24 @@
    "battle": [
     {
      "k": "skill",
-     "w": 420,
+     "w": 112,
      "h": 71
     },
     {
      "k": "skill",
-     "w": 420,
+     "w": 112,
      "h": 71
     }
    ],
    "narrow": [
     {
      "k": "skill",
-     "w": 179,
-     "h": 87
+     "w": 112,
+     "h": 71
     },
     {
      "k": "skill",
-     "w": 179,
+     "w": 112,
      "h": 71
     }
    ]
@@ -417,26 +417,26 @@
      "height": 844
     },
     "card": {
-     "top": 277,
-     "bottom": 600,
+     "top": 254,
+     "bottom": 577,
      "left": 10,
      "right": 380
     },
     "form": {
-     "top": 545,
-     "bottom": 589,
+     "top": 522,
+     "bottom": 566,
      "left": 23,
      "right": 367
     },
     "input": {
-     "top": 545,
-     "bottom": 589,
+     "top": 522,
+     "bottom": 566,
      "left": 23,
      "right": 288
     },
     "reply": {
-     "top": 311,
-     "bottom": 431,
+     "top": 288,
+     "bottom": 408,
      "left": 23,
      "right": 367
     },
@@ -444,10 +444,10 @@
     "inputInView": true,
     "replyInView": true,
     "formInView": true,
-    "bottombar": 230,
+    "bottombar": 253,
     "actionCap": 253,
     "actionPanel": {
-     "top": 614,
+     "top": 591,
      "bottom": 844,
      "left": 0,
      "right": 390

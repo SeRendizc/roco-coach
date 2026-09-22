@@ -209,8 +209,12 @@ async function main(){
  const actionText=await js(`document.getElementById('actions').innerText`);
  check('动作按钮上有技能信息（系别/能耗/威力或说明）',
   /系|能耗|威力|换人|道具/.test(actionText), actionText.slice(0,90).replace(/\s+/g,' '));
- check('动作按钮上不出现技能内部 id',
-  !/skill_\d/.test(await js(`document.getElementById('actions').innerHTML`)),
+ // 2026-09-22：这条量的是**玩家读到的文本**有没有内部 id。原来扫 `innerHTML`，
+ // 而战斗页 v2 为了「判据能逐格对齐引擎动作」把 `skill_id` 放进 `data-*` 钩子
+ // （按既有分层：内部 id 去 `data-*` 与开发者抽屉，玩家层只留中文）——
+ // 扫 HTML 会把那些**刻意的钩子**当成泄漏。改成扫可见文本。
+ check('动作按钮上不出现技能内部 id（只看玩家可见文本）',
+  !/skill_\d/.test(await js(`document.getElementById('actions').innerText`)),
   actionText.slice(0,60).replace(/\s+/g,' '));
  // 第 64 轮口径：引擎没给威力的技能，按钮上**整段不写**（原来写的是「威力来源未给」，
  // 那是 `power_status: 'not_provided_by_source'` 的直译，是工程话）。

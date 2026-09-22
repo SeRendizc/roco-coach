@@ -1,0 +1,17 @@
+node scripts/roco/browser-roco-ux-acceptance.mjs
+
+[roco-ux] ✔ D1-pages 真实鼠标连点三次「下一页」：四页各 12 只、四批互不重合 — 四页各 12/12/12/12 只；互不重合=true
+[roco-ux] ✔ D1-offset 每页渲染的精灵与「服务端 offset=(n-1)*12」的结果逐张一致 — 第1页 offset=0 一致；第2页 offset=12 一致；第3页 offset=24 一致；第4页 offset=36 一致
+[roco-ux] ✔ D1-label 页码文案与真实页码/页数一致，且第 4 页「下一页」disabled — 第 4 页文案「4 / 4」next.disabled=true；第 1 页 prev.disabled=true
+[roco-ux] ✔ D1-hooks 验收钩子 data-roco-pool-offset 随翻页真的变（0 → 12 → 24 → 36） — 翻四页的 offset 钩子：0,12,24,36
+[roco-ux] ✔ D1-back 真实鼠标点「上一页」回到第 3 页，卡片逐张相同 — 回到第 3 页（12 只），与来时逐张相同=true
+[roco-ux] ✔ D1-search-reset 真键盘输入搜索词后回到第 1 页，且结果集跟着换 — 搜索「画间」命中 2 只：搜索前第 4 页（12 只） → 搜索后第 1 页「1 / 1」（2 只）
+[roco-ux] ✔ D1-filter-reset+clamp 属性筛选后重置到第 1 页，并把页码夹到新结果集内（不是停在 4/4） — 筛选前第 4/4 页 → 草系：第 1/1 页 (3 只，next.disabled=true)
+[roco-ux] ✔ D1-filter-clear 「清除筛选」把结果集换回全量（4 页、每页 12 只） — 清除后第 1/4 页，12 只
+[roco-ux] ✔ P0-3 开局引导是常规流里的一条（不浮层、只占一行），且与候选卡零重叠 — 步骤=1（压成一句）高度=39px 与卡片重叠=0 张
+
+[roco-ux] 验收脚本自身出错： Error: 页面求值失败：TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+    at <anonymous>:2:15
+    at <anonymous>:3:120
+    at js (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-roco-ux-acceptance.mjs:171:13)
+    at async main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-roco-ux-acceptance.mjs:387:20)
