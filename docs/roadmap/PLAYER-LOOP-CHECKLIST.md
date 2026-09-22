@@ -384,3 +384,32 @@
 
 R2 1–2 轮 + R3 1 轮 + R4 1 轮 + R5 0.5 + R6 0.5 + R1 1 轮 ≈ **5–6 轮**，
 其中 R1（10 星）是**规则更正**，优先级最高（它影响每一手的合法性判断）。
+
+### R1 第 128 轮进展：**Python 侧已全线打通，JS 侧还差两步**（回退以保树干净）
+
+第 128 轮**逐文件人工改**（不再用脚本），把 R1 在 Python 侧改到**全绿**：
+- `test:env` **417 OK**；`test_six_pet_battle` / `test_rule_config` / `test_mana_actions` /
+  `test_multi_hit` / `test_on_demand_builds` / `test_effect_coverage` 全过；
+- 做法：台账 claim/等级 → `RECORDED_IN_GAME`；生成器 `initial: 10`；
+  `test_effect_coverage` / `test_multi_hit` / `test_on_demand_builds` 删掉那条覆盖；
+  `test_mana_actions` 的助手改成只覆盖 `turn_order.speed_tie`；
+  `test_six_pet_battle` 的 `_override()` 改成 speed_tie、并把「不带覆盖就 fail closed」
+  三条**反过来**（现在不带覆盖能开局，仍 fail closed 的是**真撞平手**那一刻）；
+  `test_rule_config` 的「UNKNOWN 字段不许带合理值」样例换成 `turn_order.speed_tie`，
+  并把「等级不许抬高」改成**与台账逐条一致**（配置等级 ≤ 台账等级）。
+
+**JS 侧还差两步（下一轮，1 轮内可完成）**：
+1. **台账来源必须能被校验**（`tests/roco-evidence-ledger.test.js:168`：来源要么 http(s)、
+   要么**仓内真实文件**）→ 需要新建一份仓内证据文件，例如
+   `data/roco/evidence/user-in-game-reports.json`，内容形如
+   `{"date":"2026-09-22","reporter":"owner(实机持有者)","claim":"开局双方各 10 星（🌟）",
+     "method":"实机核对（口述）","asset":null}`，然后台账那条来源写成
+   `{"url":"data/roco/evidence/user-in-game-reports.json#2026-09-22-energy-initial","level":"RECORDED_IN_GAME","marker":"repo_internal"}`。
+2. **等级被钉住的那条测试**（同文件 128 行「工程假设与外部证据不许互相冒充」）要把
+   `EV-ENERGY-INITIAL` 的期望改成 `RECORDED_IN_GAME`；另外 `EV-ENERGY-INITIAL` 的等级一变，
+   game-data-pack 的 provenance / readiness 两条（1446 条实体、9 项 satisfied）需要**重算产物**
+   （`npm run` 里那条 pack 构建脚本），这一步要连带跑一次。
+
+**为什么回退**：这一步没做完时门禁会红（JS 台账 5 条）。按纪律**不留半破状态**：
+已 `git checkout` 回退，`test:env` 417 OK、门禁 22/22（上一轮状态）。
+Python 侧的完整改法已在本节写清，下一轮照它做即可。
