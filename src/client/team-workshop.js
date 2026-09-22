@@ -293,8 +293,13 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
    </div>`;
 
   const $ = (id) => shadow.getElementById(id);
+  // RC-801：从盒子带过来的初始选人（`?team=own-…`）。**只认形状对的 id**：
+  // 认不出的直接丢掉（不猜、不静默塞一个别的）——多带一只或少带一只都要看得见。
+  const initialSelected = Array.isArray(opts.initialSelected)
+    ? opts.initialSelected.filter((id) => typeof id === 'string' && /^own-\d+$/.test(id)).slice(0, TEAM_SLOTS)
+    : [];
   const state = {
-    selected: [],
+    selected: initialSelected.slice(),
     locked: [],
     favourite: false,
     maxReplacements: null,
@@ -499,6 +504,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
 
   function renderEval(player, stage = 'full') {
     const selected = player?.selected_count ?? 0;
+    // 从盒子带过来的，页面上要看得见（`data-tw-handoff`），验收脚本按它核对交接真的到位。
+    if (initialSelected.length) rootEl.dataset.twHandoff = String(initialSelected.length);
     if (!player) { $('tw-eval-body').innerHTML = ''; $('tw-eval-sub').textContent = '—'; return; }
     // 初判阶段（`stage='first'`）：证据段服务端根本没跑，`player.full_team` 是 null。
     // 这里**如实说「正在补依据」**，而不是显示「五轴算不出来」——后者会把

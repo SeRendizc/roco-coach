@@ -1571,6 +1571,23 @@ function setPickHint(text) {
 }
 
 /**
+ * `?team=own-…,own-…` → 个体 id 数组（RC-801 的盒子→配队交接）。
+ *
+ * 只认 `own-\d+` 这种形状（那是盒子与工作台共用的个体 id）；认不出的整条丢掉，
+ * 并且**不补位** —— 带过来 3 只就是 3 只，少带的那几只由玩家自己在页面上选。
+ * 不做去重以外的任何加工：这一层不是校验层，坏 id 由服务端按 RC-301 的合同拒。
+ */
+function teamFromUrl(search = window.location.search) {
+  try {
+    const raw = new URLSearchParams(search).get('team');
+    if (!raw) return [];
+    return raw.split(',').map((id) => id.trim()).filter((id) => /^own-\d+$/.test(id)).slice(0, 6);
+  } catch {
+    return [];
+  }
+}
+
+/**
  * 全量名单（带 role/speed_tier/trait/mechanism_line）：选中项的名字回查、筛选下拉、以及
  * 「同一只不能同时在两边」都靠它。**不渲染**——渲染的是 `loadPool()` 给的那一页。
  *
@@ -2080,6 +2097,9 @@ function mountWorkshop() {
   if (!root) return;
   try {
     window.rocoTeamWorkshop = mountTeamWorkshop(root, {
+      // RC-801：盒子页「带上这两只去配队」把个体 id 放在 `?team=` 上带过来。
+      // 页面只做搬运：预填槽位，口径仍然由工作台那一套现算（不在这一层下任何结论）。
+      initialSelected: teamFromUrl(),
       onTeamChange: (detail) => {
         state.teamWorkshop = detail;
         // 六槽一变，开局按钮的可用性就跟着变（判据在 updateStandardPvpBar 里）。

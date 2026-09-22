@@ -303,6 +303,10 @@ function renderCompareBar() {
   const bar = $('compare-bar');
   const sameGroup = selected.length === 2 && selected[0].group === selected[1].group;
   $('compare-go').disabled = !sameGroup;
+  // 「带上这两只去配队」要对**任意两只**可用（不要求同种）：配队看的是六只互补，
+  // 不是同种个体的差异。同种比较那条判据（`compare-go`）仍然只对同种开放。
+  const toTeam = $('compare-to-team');
+  if (toTeam) toTeam.disabled = selected.length === 0;
   if (selected.length === 0) {
     $('compare-hint').textContent = '选两只同种伙伴，就能逐字段比较。';
   } else if (selected.length === 1) {
@@ -464,6 +468,13 @@ function wire() {
   $('box-reset').addEventListener('click', resetFilters);
   $('detail-close').addEventListener('click', closeDetail);
   $('compare-go').addEventListener('click', () => void compareSelected());
+  // RC-801：把选中的个体**带去产品页的六槽工作台**（`?team=own-…,own-…`）。
+  // 只带 id，不带任何结论 —— 配队口径仍然由产品页那一套（RC-301…305）现算。
+  $('compare-to-team').addEventListener('click', () => {
+    const ids = state.selected.map((row) => row.select).filter(Boolean);
+    if (!ids.length) return;
+    window.location.href = `roco.html?team=${encodeURIComponent(ids.join(','))}`;
+  });
   $('compare-clear').addEventListener('click', () => {
     state.selected = [];
     $('compare-panel').hidden = true;

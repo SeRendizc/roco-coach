@@ -518,6 +518,91 @@ async function main() {
       narrowDrawer.scrollW === narrowDrawer.clientW,
       `clientW=${narrowDrawer.clientW} scrollW=${narrowDrawer.scrollW}`);
 
+    // ── RC-801 的第一段交接：盒子 → 产品页六槽工作台（`?team=own-…`）──────────
+    // 五分钟 Demo 的第一步是「盒子 → 个体比较 → **锁定** → **补队**」。此前这一步是断的：
+    // 比完之后玩家得回产品页按名字再找一遍。这一段量交接真的通了没有。
+    await js(`window.scrollTo(0,0)`);
+    // 先把前置条件**自己重建一遍**（这一段前面切换过标签页与抽屉，选中状态不保证还在）：
+    // 回到「我的」标签、真鼠标点两张卡的「加入比较」、再真鼠标点「比较这两只」。
+    await cdp.send('Emulation.setDeviceMetricsOverride', {width: 1440, height: 900, deviceScaleFactor: 1, mobile: false});
+    await sleep(300);
+    await mouseClick('#tab-mine');
+    await waitFor(`document.body.dataset.boxKind==='mine'`);
+    await sleep(400);
+    await js(`document.getElementById('detail-drawer').hidden = true; document.getElementById('compare-close')?.click();`);
+    const twoForCompare = JSON.parse(await js(`JSON.stringify(
+      [...document.querySelectorAll('#box-grid .card .cmp-toggle')].slice(0, 2).map((b) => b.dataset.cmp))`));
+    for (const sel of twoForCompare) await mouseClick(`#box-grid .card[data-select="${sel}"] .cmp-toggle`);
+    await waitFor(`document.getElementById('compare-go')?.disabled===false`);
+    await mouseClick('#compare-go');
+    await waitFor(`document.getElementById('compare-panel')?.hidden===false`);
+    await sleep(400);
+    // 选中的个体从 **DOM** 里读（页面不暴露全局状态；`.card.picked` 就是选进比较的那些）
+    const handoffIds = await js(`JSON.stringify([...document.querySelectorAll('#box-grid .card.picked')]
+      .map((el) => el.dataset.select).filter(Boolean))`);
+    const parsedHandoff = JSON.parse(handoffIds || '[]');
+    const handoffButton = await js(`(()=>{const b=document.getElementById('compare-to-team');
+      if(!b)return null;const r=b.getBoundingClientRect();
+      return {disabled:b.disabled,w:Math.round(r.width),h:Math.round(r.height)};})()`);
+    const handoffEntryProblems = (facts, count) => {
+      const bad = [];
+      if (facts === null) bad.push('入口不存在');
+      else if (facts.disabled !== false) bad.push('入口是禁用的（等于没有入口）');
+      else if (facts.h < 44) bad.push(`入口只有 ${facts.h}px 高（摸不到）`);
+      if (!(count > 0)) bad.push('页面上一只选中的个体都没有');
+      return bad;
+    };
+    check('23-带去配队的入口', '比完两只之后「带上这两只去配队」可用（触控目标 ≥44px）',
+      handoffEntryProblems(handoffButton, parsedHandoff.length).length === 0,
+      `按钮 ${JSON.stringify(handoffButton)}；选中的个体 ${JSON.stringify(parsedHandoff)}`);
+    counter('23-带去配队的入口', '一个 disabled 的入口等于没有入口，必须被同一条判据抓住',
+      handoffEntryProblems({...handoffButton, disabled: true}, parsedHandoff.length), '{"disabled":true}');
+
+    await mouseClick('#compare-to-team');
+    await sleep(1200);
+    for (let i = 0; i < 60; i += 1) {
+      if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
+      await sleep(200);
+    }
+    const handed = await js(`(()=>{const root=document.getElementById('team-workshop');
+      const url=new URLSearchParams(window.location.search).get('team');
+      const slots=[...document.querySelectorAll('#team-workshop')].map((el)=>el);
+      return {path:window.location.pathname.split('/').pop(),teamParam:url,
+        twState:root?root.dataset.twState:null, selected:root?root.dataset.twSelected:null,
+        handoff:root?root.dataset.twHandoff:null,
+        teamButton:document.getElementById('start-standard-pvp')?.dataset.rocoStandardTeam??null,
+        note:(document.getElementById('standard-pvp-note')||{}).textContent||''};})()`);
+    await sleep(600);
+    const handedNow = await js(`(()=>{const root=document.getElementById('team-workshop');
+      return {path:window.location.pathname.split('/').pop(),
+        twState:root?root.dataset.twState:null, selected:root?root.dataset.twSelected:null,
+        handoff:root?root.dataset.twHandoff:null,
+        teamButton:document.getElementById('start-standard-pvp')?.dataset.rocoStandardTeam??null,
+        note:(document.getElementById('standard-pvp-note')||{}).textContent||''};})()`);
+    const handedProblems = (f) => {
+      const bad = [];
+      if (f?.path !== 'roco.html') bad.push(`没有跳到产品页（现在在 ${f?.path}）`);
+      if (f?.twState !== 'ok') bad.push(`工作台状态 ${JSON.stringify(f?.twState)}`);
+      if (Number(f?.selected) !== parsedHandoff.length) {
+        bad.push(`带过来 ${parsedHandoff.length} 只，工作台只认了 ${f?.selected}`);
+      }
+      if (Number(f?.handoff) !== parsedHandoff.length) bad.push(`交接钩子 data-tw-handoff=${f?.handoff}`);
+      if (Number(f?.teamButton) !== parsedHandoff.length) {
+        bad.push(`开局按钮读到的队伍规模是 ${f?.teamButton}`);
+      }
+      return bad;
+    };
+    check('24-盒子→配队交接', '真鼠标点「带上这两只去配队」：跳到产品页，六槽工作台按带过来的个体预填，'
+      + '开局按钮读到的规模一致，且如实说「还差几只」',
+      handedProblems(handedNow).length === 0,
+      handedProblems(handedNow).join(' | ')
+      + `（带过来 ${parsedHandoff.length} 只；URL ${JSON.stringify(handed.teamParam)}；`
+      + `工作台 selected=${handedNow.selected} handoff=${handedNow.handoff} 按钮规模=${handedNow.teamButton}；`
+      + `文案「${handedNow.note}」）`);
+    counter('24-盒子→配队交接', '把交接数量改成 0（没预填）必须被同一条判据抓住',
+      handedProblems({...handedNow, selected: '0', handoff: null, teamButton: '0'}), '{"selected":"0"}');
+    shots.push(await shoot('box-08-handoff-roco-1440x900'));
+
     check('22-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,
       `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 2))} pageErrors=${JSON.stringify(pageErrors.slice(0, 2))}`);

@@ -66,6 +66,9 @@
  <p id="compare-hint" role="status" aria-live="polite">选两只同种伙伴，就能逐字段比较。</p>
  <div class="compare-actions">
   <button id="compare-go" class="primary" disabled>比较这两只</button>
+  <!-- RC-801 的第一步交接：比完就该去配队，而不是让玩家回产品页再按名字找一遍。
+       带上的是**选中的个体 id**（`own-XXXX`），产品页的六槽工作台直接按它们预填。 -->
+  <button id="compare-to-team" disabled>带上这两只去配队</button>
   <button id="compare-clear">清空选择</button>
  </div>
 </section>
