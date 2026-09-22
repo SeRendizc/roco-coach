@@ -724,7 +724,7 @@ active goal 已按此重写（revision 2）。
 
 | 项 | 值 |
 |---|---|
-| HEAD | `eac6990`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
+| HEAD | `830f632`（`feat(rc106): 六宠标准 PVP 真的能开一局`）。口径不变：文档声明的 HEAD 落后一两个提交是正常的（写文档本身也要一次提交），**但落后 >12 个提交会判红**——这一行要跟着阶段的最后一个提交走。历史断点必须写成 `| HEAD（…当时…） |`，因为 `verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | `。 |
 | 工作区 | **只有本轮尚未提交的文档/判据改动**（代码与产物都已按路径分次提交） |
 | 验证 | **一条命令可复现**：`npm run verify:release` → **17 个套件全绿**（env / unit / bridge / toolbox-roco / plan-e2e / trajectories / **trajectories-model** / sft-split / model-manifest / provenance / **rag-eval** / **reconciliation** / **game-data-pack** / state-doc / guard-selftest / 浏览器验收 / demo 产品判据），产物 `reports/roco/verification/latest.json`。另有 `reports/roco/verification/last-green.json`：**最近一次全绿运行**的记录（`latest.json` 可能是红的，这一份只有全绿才写）。**判据条数以产物为准**（`demo-acceptance/demo-acceptance.json` 的 `passed/failed`，当前 119/0），不在这里手抄。**注意**：`verify-state-doc.mjs` 取的是文件里**第一处** `| HEAD | \`hash\`` —— 所以历史断点里的那一行必须写成 `| HEAD（…当时…） |`，否则它会去核对一份早已过期的快照（第 65 轮实测踩到） |
 | 日志 | `reports/roco/verification/round8..round30-*.log` + `latest.json` |
@@ -1842,3 +1842,39 @@ A7 1440/390 无遮挡无横向溢出、A8 页面看不到的能力不得只凭�
 3. 两阶段取数目前对所有点击生效（每次 2 个请求）；要做成 `opts.stage` 开关需产品点头。
 4. `MC-E04/E05/E07/E08/E09` 仍未录制；现在整局是靠**页面上逐条标出的假设值**在跑。
 5. 跨机协作区仍未同步（等用户允许扩权）。
+
+### C6.34 第 97 轮：RC-402 按需配招编译 —— 「选得到、上不了场」这件事结束了
+
+**问题**：RC-203 只给「冻结 `learnsets.json` 里有 native_skills」的精灵编配招，全量 622 只里只有
+**48 只**过得了那一关；另外 **574 只**在引擎里「学不到任何技能」。而全量图鉴其实每只都带
+`learnable_skills`（实测 **622/622、8787 条引用全部**能在冻结 `skills.json` 里解析）——
+这不是数据缺失，是**没人把它编成配招**。
+
+**交付（提交见本轮）**：
+| 层 | 内容 |
+|---|---|
+| 产物 | `data/roco/derived/on-demand-builds.json`：622 只 = 已核验 48 + 按需推算 574，跳过 0；每只带四个技能、可学池、静态种族值、出处 pointer 与三条 `unknowns` |
+| 构建/检查 | `scripts/roco/{on-demand-builds-lib,build-on-demand-builds,verify-on-demand-builds}.mjs`（`--check` 逐字节、`--selftest` 9 条必红） |
+| 判据 | `tests/roco-on-demand-builds.test.js`（9 条）+ `roco/tests/test_on_demand_builds.py`（8 条，含「六只图鉴精灵打到魔力归零」） |
+| 引擎 | `data.py` 以**叠加**方式载入（冻结物种一个字节不动）；`Ruleset.build_support_of()` 是唯一读法；`on_demand_builds` 记产物 sha256/count |
+| 接口 | `/rules/query` 的 roster **默认仍是已核验 48 只**（练习局口径，逐位不变），`support=all` 给全量 622；`pets[].build_support` 逐只带出；`evidence_ids` 按档指向 `pets.json#…` 或 `on-demand-builds.json#…` |
+| 报告 | `reports/roco/rc402/on-demand-builds.json`、`docs/roco/RC-402-ON-DEMAND-BUILDS.md` |
+
+**顺带修掉一个真停滞**（本轮实测）：RC-105 给引擎加了 `ACTION_CHARGE`（聚能），但对手策略
+`greedy_damage` 把它归进「换人」那一支 → 一旦能量付不起任何技能，双方**无限换人**：200 回合、
+无人力竭、魔力一直 4/4。修法：给聚能自己的分支（11 分），并在有聚能可选时把换人上限压到 9 分
+（legacy/v2 没有聚能，逐位不变）。修完：图鉴队与 RC-106 队都在 **26 回合**打到魔力归零。
+
+**踩到并处理掉的两个陷阱**（都写进代码注释）：
+1. **派生数据不许进冻结指纹**：最初把按需产物塞进 `Ruleset.files`，于是 `kind=ruleset` 回执的
+   摘要变了 → 已录制且**禁止重跑**的 agent 轨迹全部对不上。改成单独记在 `Ruleset.on_demand_builds`。
+2. **版本回执描述的是冻结快照**：`counts.pets/learnsets` 一度跟着 `len(rs.pets)` 漂到 622。
+   现在读 `frozen_pet_count`（48），派生宇宙走 `build_support` 与产物本身。轨迹复验恢复
+   **6048/6048 通过**。
+
+**实测**：`test:env` 362 → **371 条 OK**；`tests/roco-on-demand-builds.test.js` 9/9；
+六宠图鉴队 seed 11/12/13 全部打完（26 回合，终局 0:1 / 1:0 / 0:1）。
+
+**下一轮入口**：RC-401（Effect/Trigger IR 增量迁移）与 RC-403（Support Classifier v2：把
+`FULL_VERIFIED` / `SIMULATABLE_UNVERIFIED` / `PARTIAL` / `KNOWLEDGE_ONLY` / `REFUSED` 做成
+可执行分类）；页面与训练数据生成器要按 `build_support` 分档显示；台账第三条仓内来源仍待补。

@@ -52,7 +52,7 @@
 | RC | 内容 | 状态 |
 |---|---|---|
 | RC-401 | Effect/Trigger IR 增量迁移（按覆盖收益，不一次重写 68 个原语） | NOT_STARTED |
-| RC-402 | 按需 Build Compiler（48 只只是夹具；第 49/301 只复用原语即可进入模拟层） | NOT_STARTED |
+| RC-402 | 按需 Build Compiler（48 只只是夹具；第 49/301 只复用原语即可进入模拟层） | **DONE** | `data/roco/derived/on-demand-builds.json`：**622 只 = 冻结已核验 48 + 按需推算 574，跳过 0**。关键事实：全量图鉴每只都带 `learnable_skills`（实测 622/622、**8787 条引用全部**能在冻结 `skills.json` 里解析）——之前「574 只没有配招」不是数据缺失，是没人编。三条纪律：不许发明技能（必须在学额表里且在冻结 skills.json 可解析）、不许冒充已核验（冻结 48 只 `FULL_VERIFIED` 且带 `frozen_build` 对账，推算的 574 只 `SIMULATABLE_UNVERIFIED`）、不许声称最优（选择规则 = 威力降序 → 能耗升序 → skill_id，`ENGINE_HYPOTHESIS`，实测**不复现**冻结那一份：`compiled_matches_frozen=0`）。构建/检查 `scripts/roco/{on-demand-builds-lib,build-on-demand-builds,verify-on-demand-builds}.mjs`（`--check` 逐字节、`--selftest` 9 条必红）；判据 `tests/roco-on-demand-builds.test.js`（9 条）+ `roco/tests/test_on_demand_builds.py`（8 条）；报告 `reports/roco/rc402/on-demand-builds.json`；文档 `docs/roco/RC-402-ON-DEMAND-BUILDS.md`。**引擎**：`data.py` 以叠加方式载入（冻结物种一个字节不动），`Ruleset.build_support_of()` 是唯一读法；roster 默认仍给已核验 48 只（练习局口径，逐位不变），`?support=all` 给全量 622，`evidence_ids` 按档指向 `pets.json#…` / `on-demand-builds.json#…`。**顺带修掉一个真停滞**：`greedy_damage` 把聚能当成换人 → 付不起技能时双方无限换人（200 回合无人力竭、魔力 4/4）。修完图鉴队与 RC-106 队都在 **26 回合**打到魔力归零。**实测**：`test:env` **371 OK**、门禁 **17/17**、轨迹复验 **6048/6048**（派生数据不许进冻结指纹、版本回执描述冻结快照）|
 | RC-403 | Support Classifier v2（FULL_VERIFIED / SIMULATABLE_UNVERIFIED / PARTIAL / KNOWLEDGE_ONLY / REFUSED） | NOT_STARTED |
 | RC-404 | 代表性回归集（18 属性 + 角色 + 速度 + 资源 + 换入离场 + 应对 + 印记 + 天气 + 迅捷 + 传动） | NOT_STARTED |
 

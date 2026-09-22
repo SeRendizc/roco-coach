@@ -1,0 +1,3 @@
+node scripts/roco/verify-agent-trajectories.mjs --trajectories tests/evals/agent-trajectories-model-v1.jsonl --quiet
+
+
