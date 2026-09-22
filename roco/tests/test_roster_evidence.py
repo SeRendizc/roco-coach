@@ -39,7 +39,9 @@ RULESET_ID = RS.ruleset_id
 BASE = {"ruleset_id": RULESET_ID, "state_version": 0}
 
 #: 出处 id 的**形状**（`ev.<ruleset>.pets.json#<pet_id>`），用来先钉形状、再逐 id 比内容。
-PET_EVIDENCE_RE = re.compile(r"^ev:[^:]+:pets\.json#(?P<pet_id>[A-Za-z0-9_]+)$")
+# RC-402 起，精灵级的出处有两种合法形状：冻结覆盖的指 `pets.json`，
+# 按需推算的指 `on-demand-builds.json`（两者都必须是各自那只精灵自己的记录）。
+PET_EVIDENCE_RE = re.compile(r"^ev:[^:]+:(?P<file>pets|on-demand-builds)\.json#(?P<pet_id>[A-Za-z0-9_]+)$")
 SKILL_EVIDENCE_RE = re.compile(r"^ev:[^:]+:skills\.json#(?P<skill_id>[A-Za-z0-9_]+)$")
 ROSTER_EVIDENCE_RE = re.compile(r"^ev:(?P<ruleset>[^:]+):roster#")
 
@@ -66,7 +68,12 @@ def roster_evidence_problems(result, answer_evidence):
 
     for pet in pets:
         pet_id = pet.get("pet_id")
-        want_pet = f"ev:{ruleset}:pets.json#{pet_id}"
+        # RC-402 起，出处**按支持等级**分开：冻结覆盖的指 pets.json，按需推算的指
+        # on-demand-builds.json（它在冻结 pets.json 里根本不存在，写那一份就是编出处）。
+        # 两种形状都必须精确命中自己的那一只，不接受「包含」。
+        frozen_pet = f"ev:{ruleset}:pets.json#{pet_id}"
+        on_demand_pet = f"ev:{ruleset}:on-demand-builds.json#{pet_id}"
+        want_pet = on_demand_pet if pet.get("build_support") == "SIMULATABLE_UNVERIFIED" else frozen_pet
         got_pet = pet.get("evidence_ids")
         if got_pet != [want_pet]:
             problems.append(f"{pet_id} 的 evidence_ids={got_pet!r}，应为 [{want_pet!r}]")
@@ -117,11 +124,34 @@ class RosterCarriesPerPetAndPerSkillEvidence(unittest.TestCase):
         self.assertEqual(problems, [], "出处核对不通过：\n" + "\n".join(problems))
 
         # 顺便钉住「核到了几只在 / 几招」：全绿但 pets 为空也算通过，那是假绿。
+        # RC-402 起默认名单是**冻结已核验的 48 只**（练习局/迁移夹具口径）；
+        # 全量 622 走 `support=all`（配队与检索口径），下面单独钉。
         pets = result["pets"]
-        self.assertEqual(len(pets), 48, f"名单应当是全量 48 只，实际 {len(pets)}")
+        self.assertEqual(len(pets), 48, f"默认名单应当仍是 48 只（已核验档），实际 {len(pets)}")
         self.assertTrue(all(p["moveset_size"] == len(p["moveset"]) for p in pets))
         self.assertEqual(sum(len(p["moveset"]) for p in pets), 192,
                          "48 只 × 4 招 = 192 条技能级出处，逐条核过")
+        self.assertTrue(all(p["build_support"] == "FULL_VERIFIED" for p in pets),
+                        "默认名单里不该出现按需推算的那一档")
+
+    def test_support_all_returns_the_full_catalog_with_two_evidence_files(self):
+        """`support=all`：全量 622，且出处按支持等级分成两种文件，两种都要真的出现。"""
+        envelope = query_roster(self.service, support="all")
+        result = envelope["result"]
+        problems = roster_evidence_problems(result, envelope["evidence_ids"])
+        self.assertEqual(problems, [], "全量名单的出处核对不通过：\n" + "\n".join(problems[:5]))
+        pets = result["pets"]
+        self.assertEqual(len(pets), 622)
+        by_support = {}
+        for pet in pets:
+            by_support.setdefault(pet["build_support"], []).append(pet["pet_id"])
+        self.assertEqual(sorted(by_support), ["FULL_VERIFIED", "SIMULATABLE_UNVERIFIED"])
+        self.assertEqual(len(by_support["FULL_VERIFIED"]), 48)
+        self.assertEqual(len(by_support["SIMULATABLE_UNVERIFIED"]), 574)
+        for pet in pets:
+            want_file = "on-demand-builds.json" if pet["build_support"] == "SIMULATABLE_UNVERIFIED" else "pets.json"
+            self.assertIn(f":{want_file}#{pet['pet_id']}", pet["evidence_ids"][0],
+                          f"{pet['pet_id']} 的出处文件与支持等级不符：{pet['evidence_ids']}")
 
     def test_roster_level_evidence_is_unchanged_and_distinct(self):
         """roster 级那条保持原样（钉 total/offset/limit），不是被逐只出处顶替掉。"""
@@ -159,6 +189,9 @@ class OrphanSkillIsNotGivenInventedEvidence(unittest.TestCase):
 
             def candidate_moveset(self, pet_id):
                 return ("skill_999999",)
+
+            def build_support_of(self, pet_id):
+                return "FULL_VERIFIED"   # 桩：没有按需产物，一律当作已核验那一档
 
         service = RocoService(served_ruleset_id=RULESET_ID)
         answer = service._answer_roster(_StubRuleset(), {})   # noqa: SLF001

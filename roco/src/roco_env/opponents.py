@@ -39,7 +39,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from . import env as renv
 from .data import Ruleset
-from .schema import ACTION_ESCAPE, ACTION_ITEM, ACTION_SKILL, ACTION_SWITCH, Action
+from .schema import ACTION_CHARGE, ACTION_ESCAPE, ACTION_ITEM, ACTION_SKILL, ACTION_SWITCH, Action
 
 __all__ = [
     "STRATEGY_VERSION",
@@ -469,6 +469,7 @@ def _decide_greedy_damage(obs, legal, rng) -> Action:
     me = _self_pet(obs)
     hp_ratio = float(me.hp) / max(1.0, float(me.max_hp))
 
+    charge_available = any(a.kind == ACTION_CHARGE for a in legal)
     scored: List[Tuple[float, int, Action]] = []
     for index, action in enumerate(legal):
         if action.kind == ACTION_SKILL:
@@ -481,13 +482,30 @@ def _decide_greedy_damage(obs, legal, rng) -> Action:
         elif action.kind == ACTION_ITEM:
             score = _heal_value(obs, action.item_id or "")
             score = score if hp_ratio < 0.5 else score * 0.2
+        elif action.kind == ACTION_CHARGE:
+            # 聚能（RC-105 新增的动作类）**必须**有自己的分支。
+            # 实测踩到的坑：它落到下面的 `else`（当作换人处理）→ `_switch_target()` 返回 None
+            # → 得分 0 → 一旦当前能量付不起任何技能，双方就无限换人：200 回合、无人力竭、
+            # 魔力一直 4/4（六宠标准 PVP 打不完）。
+            #
+            # 分值取 **11**：中性换人（`_matchup`≈1 → 10 分）压得住，所以「打不出技能就聚能、
+            # 而不是无限换人」；但任何一个真实攻击的估计值都会高过它（攻击分支在上面），
+            # 所以**不会**出现「有招不打一直聚能」的反向停滞。两条边界都有实测：
+            # 全量图鉴队伍 26 回合打到魔力归零；原来那两支队仍按原样跑完。
+            score = 11.0
         else:
             # 换人本身不造成伤害；用对位差当收益，但**严格低于**最好的攻击，
             # 免得「贪心伤害」变成「贪心换人」——那会让两个策略名不副实。
             bench = _pet_at(obs, _switch_target(action))
             score = 0.0
             if bench is not None:
-                score = min(20.0, 10.0 * _matchup(rs, bench.pet_id, _foe_pet(obs).pet_id))
+                # 有聚能可选时（v3 这类声明了它的配置），换人的上限必须**低于**聚能：
+                # 换人不推进局面，而聚能至少在下回合换来一次输出。实测踩到的坑是
+                # 「双方都有看起来不错的对位 → 换过来换过去 → 200 回合无人力竭、魔力一直 4/4」。
+                # 没有聚能的配置（legacy / v2）保持原来的上限，逐位不变。
+                cap = 9.0 if charge_available else 20.0
+                weight = 9.0 if charge_available else 10.0
+                score = min(cap, weight * _matchup(rs, bench.pet_id, _foe_pet(obs).pet_id))
         scored.append((score, -index, action))
     scored.sort(key=lambda t: (t[0], t[1]))
     return scored[-1][2]

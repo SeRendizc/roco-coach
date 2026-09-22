@@ -55,14 +55,19 @@ class TestRulesetLoading(unittest.TestCase):
         self.assertEqual(RS.game, "roco_world_mobile")
         self.assertEqual(RS.ruleset_id, "roco-world-s4-2026-09-10")
 
-    def test_playable_pool_is_48_over_the_intact_baseline_12(self):
-        """引擎候选池 = 基线 12 只 + 叠加层 36 只 = 48 只（第 60 轮）。
+    def test_baseline_12_intact_and_pool_split_by_support_level(self):
+        """基线 12 只一只不少；候选池按**支持等级**分成「已核验 48」与「按需推算 574」（RC-402）。
 
-        两件事都要守住，缺一不可：
+        第 60 轮这条判据钉的是「池子正好 48」——那是当时的真相。RC-402 把冻结学招表
+        覆盖不到的 574 只也编成了可上场配招（全量图鉴每只都带 `learnable_skills`），
+        所以现在要守住的是**等级不许混**：
+
           · **M1 的 12 只基线一只不少**（它们是验收基线，基线文件本身逐字节未动，
             由 `tests/evals/roco/data-acceptance.test.js` 钉着「恰好 12 只」）；
-          · 池子**正好 48**——多出来的只能是 `layer-playable-48/` 里的登记条目，
-            不是谁绕过叠加层偷偷塞进来的（那条由加载期的重复定义检查兜住）。
+          · 冻结层那 48 只必须是 `FULL_VERIFIED`——**不许**被按需产物改写；
+          · 按需推算的每一只必须是 `SIMULATABLE_UNVERIFIED`；
+          · 两只集合不相交，合起来正好是候选池。
+
         这里直接从磁盘读基线，**不复制名单**：复制一份名单就会有第二个真相。
         """
         baseline_path = os.path.join(
@@ -72,11 +77,22 @@ class TestRulesetLoading(unittest.TestCase):
         with open(baseline_path, "r", encoding="utf-8") as fh:
             baseline = json.load(fh)["pets"]
         self.assertEqual(len(baseline), 12, "M1 基线应当仍是 12 只")
-        self.assertEqual(len(RS.pets), 48, "引擎候选池应当是 12 + 36 = 48 只")
         for pid, row in baseline.items():
             self.assertIn(pid, RS.pets, f"基线精灵 {row['name']} 不在候选池里")
             self.assertEqual(RS.pets[pid].name, row["name"])
             self.assertEqual(RS.pets[pid].learnset_id, row["learnset_id"])
+            self.assertEqual(RS.build_support_of(pid), "FULL_VERIFIED",
+                             "基线 12 只必须仍是已核验那一档")
+
+        from roco_env.data import SUPPORT_FULL_VERIFIED, SUPPORT_SIMULATABLE_UNVERIFIED
+        supports = {pid: RS.build_support_of(pid) for pid in RS.pets}
+        full = {pid for pid, level in supports.items() if level == SUPPORT_FULL_VERIFIED}
+        on_demand = {pid for pid, level in supports.items() if level == SUPPORT_SIMULATABLE_UNVERIFIED}
+        self.assertEqual(len(full), 48, f"冻结层应当是 48 只，实际 {len(full)}")
+        self.assertEqual(len(on_demand), 574, f"按需推算应当是 574 只，实际 {len(on_demand)}")
+        self.assertEqual(full & on_demand, set(), "同一只不许同时属于两档（等级混了就说不清了）")
+        self.assertEqual(full | on_demand, set(RS.pets), "候选池里每一只都必须有一档支持等级")
+        self.assertEqual(len(RS.pets), 622, "候选池 = 冻结 48 + 按需 574 = 622（全量图鉴）")
 
     def test_every_pet_has_exactly_four_candidate_moves(self):
         """每只精灵都必须正好 4 个规范配招技能（3v3 的四个技能位都要有牌可打）。"""

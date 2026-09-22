@@ -109,7 +109,8 @@ from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import parse_qs
 
 try:  # 作为包导入：python3 -m roco_env.service
-    from .data import DEFAULT_RULESET, Ruleset, RulesetError, load_ruleset
+    from .data import (DEFAULT_RULESET, SUPPORT_SIMULATABLE_UNVERIFIED, Ruleset, RulesetError,
+                       load_ruleset)
     from . import team as team_mod
     from . import env as env_mod
     from . import opponents as opp
@@ -117,7 +118,8 @@ try:  # 作为包导入：python3 -m roco_env.service
     from .schema import Action
 except ImportError:  # 直接当脚本跑：python3 roco/src/roco_env/service.py
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    from roco_env.data import DEFAULT_RULESET, Ruleset, RulesetError, load_ruleset  # type: ignore
+    from roco_env.data import (DEFAULT_RULESET, SUPPORT_SIMULATABLE_UNVERIFIED, Ruleset,  # type: ignore
+                               RulesetError, load_ruleset)
     from roco_env import team as team_mod  # type: ignore
     from roco_env import env as env_mod  # type: ignore
     from roco_env import opponents as opp  # type: ignore
@@ -561,9 +563,13 @@ class RocoService:
                 "game": rs.game,
                 "source_revision": rs.source_revision,
                 "counts": {
-                    "pets": len(rs.pets),
+                    # 这两个数是**冻结快照**的规模（回执回答的是「这份规则集是哪个版本」）。
+                    # 按需推算的那 574 只不在冻结快照里，它们走 `build_support` 与产物本身
+                    # （`data/roco/derived/on-demand-builds.json`）——把派生数据混进版本回执，
+                    # 会让已录制且禁止重跑的 agent 轨迹全部对不上（实测踩到）。
+                    "pets": getattr(rs, "frozen_pet_count", len(rs.pets)) or len(rs.pets),
                     "skills": len(rs.skills),
-                    "learnsets": len(rs.learnsets),
+                    "learnsets": getattr(rs, "frozen_learnset_count", len(rs.learnsets)) or len(rs.learnsets),
                     "type_rows": len(rs.type_chart.rows),
                     "terms": len(rs.terms),
                 },
@@ -643,9 +649,11 @@ class RocoService:
                 "game": rs.game,
                 "source_revision": rs.source_revision,
                 "counts": {
-                    "pets": len(rs.pets),
+                    # 同 `/status`：这两个数是**冻结快照**的规模（回执回答的是「这份规则集
+                    # 是哪个版本」），按需推算的 574 只不在冻结快照里（见 Ruleset 上的注释）。
+                    "pets": getattr(rs, "frozen_pet_count", len(rs.pets)) or len(rs.pets),
                     "skills": len(rs.skills),
-                    "learnsets": len(rs.learnsets),
+                    "learnsets": getattr(rs, "frozen_learnset_count", len(rs.learnsets)) or len(rs.learnsets),
                     "type_rows": len(rs.type_chart.rows),
                     "terms": len(rs.terms),
                 },
@@ -784,6 +792,18 @@ class RocoService:
         from . import rule_config as rc_mod
         return rc_mod.get_rule_config(None).require_team_size()
 
+    @staticmethod
+    def _pet_evidence(rs: Ruleset, pet_id: str) -> str:
+        """一只精灵的出处 id —— **按支持等级**指向真正记录了它的那份产物（RC-402）。
+
+        为什么不能一律写 `pets.json`：按需推算出来的 574 只**不在**冻结 `pets.json` 里，
+        给它们挂一条 `pets.json#pet_000001` 是**编出处**——那正是这一层要防的事。
+        出处必须能被核对：冻结的指 `pets.json`，推算的指 `on-demand-builds.json`。
+        """
+        if rs.build_support_of(pet_id) == SUPPORT_SIMULATABLE_UNVERIFIED:
+            return ev(rs.ruleset_id, "on-demand-builds.json", pet_id)
+        return ev(rs.ruleset_id, "pets.json", pet_id)
+
     def _answer_roster(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
         """可选用精灵名单（第 42 轮 P0-3：阵容选择要真数据）。
 
@@ -821,6 +841,16 @@ class RocoService:
         offset = query.get("offset", 0)
         type_filter = query.get("type")
         role_filter = query.get("role")
+        # RC-402：名单的**默认视野**是冻结已核验的那 48 只（练习局/迁移夹具口径，逐位不变）；
+        # `support=all` 时给全量 622（配队与检索口径）。这不是白名单——引擎两种都收，
+        # 只是这一份名单默认只列已核验档；非法取值一律 400，不静默当默认。
+        support_filter = query.get("support")
+        if support_filter in (None, ""):
+            include_on_demand = False
+        elif support_filter == "all":
+            include_on_demand = True
+        else:
+            return _bad_request(f"support 只能是 all（实际 {support_filter!r}）：默认名单只给冻结已核验的那 48 只")
 
         if type_filter is not None and (not isinstance(type_filter, str) or not type_filter.strip()):
             return _bad_request("type 必须是非空字符串（例如 草系）")
@@ -855,6 +885,8 @@ class RocoService:
             pet = rs.pets[pet_id]
             if not type_matches(pet) or not role_matches(pet):
                 continue
+            if not include_on_demand and rs.build_support_of(pet_id) == SUPPORT_SIMULATABLE_UNVERIFIED:
+                continue
             moveset = list(rs.candidate_moveset(pet_id) or ())
             moves = []
             for sid in moveset:
@@ -888,9 +920,15 @@ class RocoService:
                 # 空配招的精灵在引擎里连合法动作都出不来。
                 "moveset_size": len(moves),
                 "moveset": moves,
-                # 每只精灵自己的出处：pets.json 里那一条图鉴记录。
+                # RC-402：这一只的配招是哪一档（FULL_VERIFIED / SIMULATABLE_UNVERIFIED）。
+                # 页面与训练数据生成器都要能一眼看出「这条结论站在哪份数据上」。
+                "build_support": rs.build_support_of(pet_id),
+                # 每只精灵自己的出处。**按支持等级分两种**（RC-402）：
+                #   · 冻结覆盖的 48 只 → `pets.json` 里那一条图鉴记录；
+                #   · 按需推算的 574 只 → `on-demand-builds.json` 里那一条（它在冻结
+                #     `pets.json` 里**根本不存在**，写 pets.json 就是编出处）。
                 # roster 级那条只说明「这份名单是哪一次查询」，钉不到具体某只，所以逐只再给。
-                "evidence_ids": [ev(rs.ruleset_id, "pets.json", pet_id)],
+                "evidence_ids": [self._pet_evidence(rs, pet_id)],
             })
 
         total = len(selected)

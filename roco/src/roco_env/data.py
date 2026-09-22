@@ -25,6 +25,14 @@ LAYER_FILES = ("pets", "learnsets", "support-matrix")
 #: 规范配招的技能个数。3v3 的每个技能位都要有牌可打，少一个就 fail closed。
 MOVESET_SIZE = 4
 
+#: RC-402 按需配招产物（可选）。**只有**在冻结 learnset 覆盖不到某只精灵时才用得上它，
+#: 而且它带来的每一只都带 `SIMULATABLE_UNVERIFIED` 等级 —— 冻结那一份**永不**被它覆盖。
+ON_DEMAND_BUILDS_REL = os.path.join("data", "roco", "derived", "on-demand-builds.json")
+
+#: RC-403 的支持等级词汇（本模块只产出这两种）。
+SUPPORT_FULL_VERIFIED = "FULL_VERIFIED"
+SUPPORT_SIMULATABLE_UNVERIFIED = "SIMULATABLE_UNVERIFIED"
+
 
 class RulesetError(RuntimeError):
     """规则集缺失或不一致。加载期就该炸，不要拖到对局中途。"""
@@ -225,6 +233,20 @@ class Ruleset:
     # 它是**数据**（有选择规则与证据，见 support-matrix.json 的 selection_evidence），
     # 不是我们的偏好；引擎用它当规范配招，而不是拿整个固有技能池当配招。
     candidate_movesets: Dict[str, Tuple[str, ...]]
+    #: 每只精灵的配招来源等级（RC-402/403）：`FULL_VERIFIED` = 冻结 learnset，
+    #: `SIMULATABLE_UNVERIFIED` = 按需推算。没有登记的一律不在这个字典里（调用方按未知处理）。
+    build_support: Dict[str, str]
+    #: 按需配招产物本身的出处（`{path, sha256, count}`；没有这份产物时是 `None`）。
+    #: **刻意不进 `files`**：`files` 是冻结快照指纹，这一份是派生产物（见上面那段注释）。
+    on_demand_builds: Optional[Dict[str, Any]] = None
+    #: **冻结快照**里的精灵数 / 学习表数（不含按需推算那 574 只）。
+    #:
+    #: 为什么要单独留一份：`/rules/query` 的 `kind=ruleset` 回执回答的是
+    #: 「**这份规则集是哪个版本**」——它描述的是冻结快照，而不是派生的候选宇宙。
+    #: 用 `len(pets)` 会让回执跟着派生数据漂（实测后果：已录制且**禁止重跑**的 agent 轨迹
+    #: 全部对不上）。所以回执读这两个数，派生宇宙走 `on_demand_builds` 与 `build_support`。
+    frozen_pet_count: int = 0
+    frozen_learnset_count: int = 0
 
     def skill(self, skill_id: str) -> Skill:
         try:
@@ -256,6 +278,15 @@ class Ruleset:
     def candidate_moveset(self, pet_id: str) -> Tuple[str, ...]:
         """该精灵的规范配招（M1 选定的 4 技能）。没有就返回空元组，不编。"""
         return self.candidate_movesets.get(pet_id, ())
+
+    def build_support_of(self, pet_id: str) -> Optional[str]:
+        """这只精灵的配招是哪一档：`FULL_VERIFIED` / `SIMULATABLE_UNVERIFIED` / `None`（未登记）。
+
+        为什么要单独给一个读法：按需推算出来的配招**可以上场，但不是已核验数据**。
+        调用方（页面、报告、训练数据生成器）必须能一眼看出差别——把两者混起来，
+        「哪些结论站在冻结数据上」这件事就没人说得清了。
+        """
+        return self.build_support.get(pet_id)
 
     def term(self, term_id: str) -> Optional[Term]:
         return self.terms.get(str(term_id))
@@ -472,6 +503,58 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
                 )
             movesets[pid] = ids
 
+    # ── RC-402：按需配招叠加（可选，**只补冻结覆盖不到的物种**）────────────────
+    # 三条不许越过的线：① 已核验的物种一个字节都不动；② 补进来的每一只都带
+    # `SIMULATABLE_UNVERIFIED`；③ 补进来的配招与可学池都必须能在 `skills.json` 里解析，
+    # 否则跳过并计入 `on_demand_problems`（加载期不静默）。
+    build_support: Dict[str, str] = {pid: SUPPORT_FULL_VERIFIED for pid in movesets}
+    #: 叠加**之前**的冻结快照规模（回执用它回答「规则集版本」，见 Ruleset 上的注释）。
+    frozen_pet_count = len(pets)
+    frozen_learnset_count = len(learnsets)
+    on_demand_problems: List[str] = []
+    on_demand_path = os.path.join(root or _repo_root(), ON_DEMAND_BUILDS_REL)
+    on_demand_doc: Optional[Dict[str, Any]] = None
+    if os.path.exists(on_demand_path):
+        with open(on_demand_path, "r", encoding="utf-8") as fh:
+            on_demand_doc = json.load(fh)
+        # **不进 `files`**：`files` 是**冻结快照**的指纹（pets/skills/learnsets/types/terms +
+        # 叠加层），而按需配招是**派生产物**（它有自己的产物、校验器与报告）。把它塞进
+        # 冻结指纹会让「这份规则集是哪个版本」的答复跟着派生数据漂——实测后果是
+        # 已录制的 agent 轨迹全部对不上（`query_rules` 回执摘要变了），而那些轨迹按
+        # `artifact-registry.json` 的说明是**禁止重跑**的。所以它单独记在 Ruleset 上。
+        on_demand_sha = _sha256(on_demand_path)
+        if on_demand_doc.get("ruleset_id") not in (None, ruleset_id):
+            raise RulesetError(
+                f"按需配招产物的 ruleset_id 是 {on_demand_doc.get('ruleset_id')}，期望 {ruleset_id}"
+            )
+        for pid, row in (on_demand_doc.get("builds") or {}).items():
+            if row.get("support") != SUPPORT_SIMULATABLE_UNVERIFIED:
+                continue                       # 冻结那一档由 baseline 负责，这里不碰
+            if pid in pets:
+                continue                       # ① 已核验的**绝不**被覆盖
+            stats = {k: int(v) for k, v in (row.get("stats") or {}).items()
+                     if isinstance(v, (int, float)) and not isinstance(v, bool)}
+            pool = tuple(sid for sid in (row.get("learnable_pool") or []) if sid in skills)
+            chosen = tuple(s["skill_id"] for s in (row.get("skills") or []) if s.get("skill_id"))
+            if len(stats) != 6 or len(pool) < MOVESET_SIZE or len(chosen) != MOVESET_SIZE:
+                on_demand_problems.append(
+                    f"{pid}：stats={len(stats)}/6，可学池={len(pool)}，配招={len(chosen)}/4 —— 不补"
+                )
+                continue
+            if any(sid not in pool for sid in chosen):
+                on_demand_problems.append(f"{pid}：配招里有不在可学池里的技能")
+                continue
+            pets[pid] = Pet(
+                pet_id=pid, name=row.get("name") or pid, title=row.get("name") or pid,
+                types=tuple(row.get("types") or ()), stats=stats,
+                feature_skill_id=row.get("feature_skill_id"), learnset_id=f"on-demand:{pid}",
+                release_date=None, game_id=None, role=None, speed_tier=None,
+            )
+            by_name.setdefault(pets[pid].name, []).append(pid)
+            learnsets[pid] = Learnset(pet_id=pid, native=tuple(pool), blood=(), stones=())
+            movesets[pid] = chosen
+            build_support[pid] = SUPPORT_SIMULATABLE_UNVERIFIED
+
     # 加载期硬校验（§C6.8）：叠加之后**每只**都必须正好 4 个互不重复、
     # 真实存在且**自己学得到**的技能。任何一个不满足就在加载期炸，
     # 不许静默少人、不许把配招缩到 3 个、更不许删技能去凑数。
@@ -515,4 +598,12 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
         files=files,
         by_name=by_name,
         candidate_movesets=movesets,
+        build_support=build_support,
+        frozen_pet_count=frozen_pet_count,
+        frozen_learnset_count=frozen_learnset_count,
+        on_demand_builds=({
+            "path": os.path.relpath(on_demand_path, root or _repo_root()),
+            "sha256": on_demand_sha,
+            "count": sum(1 for level in build_support.values() if level == SUPPORT_SIMULATABLE_UNVERIFIED),
+        } if on_demand_doc is not None else None),
     )
