@@ -1898,7 +1898,7 @@ function sampleEnemyPool(){
   // 「对手是示例阵容」这件事必须写进**页面读得到的地方**（`view`），
   // 只挂在 `out.result` 上页面看不到（第一版就是这么漏的）。
   if(enemyIsSample){
-   base.enemy_source='sample';
+   base.enemy_source=enemySource??'sample';   // 不再硬编码：来源见 sampleEnemyFor（usable / fallback）
    base.enemy_note='对手是按候选宇宙取的**示例阵容**（匹配前对手未知）：不是你的镜像，也不是真实匹配结果。';
   }
   return {ok:true,battle_id:id,view:base,

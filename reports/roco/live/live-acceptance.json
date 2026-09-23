@@ -3,11 +3,11 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-23T05:23:18.962Z",
+ "judged_at": "2026-09-23T05:26:26.878Z",
  "totals": {
   "checks": 26,
-  "passed": 25,
-  "failed": 1,
+  "passed": 26,
+  "failed": 0,
   "counterproofs": 31,
   "counterproofs_hit": 31
  },
@@ -16,7 +16,7 @@
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=4"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=1"
   },
   {
    "id": "live-boot",
@@ -106,19 +106,19 @@
    "id": "live-battle-info",
    "judge": "双方出战信息：两张镜像卡各给名字/属性/血量（**带百分比**，且与「生命 x / y」和血条宽度一致）+ 顶栏双方存活点数（与公开视图一致）。【按人类 2026-09-23 版式，原来的 `#self-panel`/`#foe-panel` 与「还能打 N/N」那一行由 `[data-b3-self-card]`/`[data-b3-foe-card]` 与 `#b3-dots-self`/`#b3-dots-foe` 承担】",
    "ok": true,
-   "actual": "我方「铠甲虫 生命 445 / 445 100% 虫系」对手「喵喵 生命 332 / 332 100% 草系」；存活点 {\"txt\":\"●●●●●●\",\"alive\":6,\"down\":0} / {\"txt\":\"●●●●●●\",\"alive\":6,\"down\":0}；视图 self=6 foe=6"
+   "actual": "我方「铠甲虫 生命 445 / 445 100% 虫系」对手「朔夜伊芙 生命 391 / 391 100% 恶系」；存活点 {\"txt\":\"●●●●●●\",\"alive\":6,\"down\":0} / {\"txt\":\"●●●●●●\",\"alive\":6,\"down\":0}；视图 self=6 foe=6"
   },
   {
    "id": "live-settle",
-   "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、页眉回合与引擎一致、右列战报最新一回合有内容）。【按人类 2026-09-23 版式，原来的 `#last-event`「最新一条事件」由**右列战报**承担（框内滚动、最新回合在上）；`#last-event` 所在的 `#b3-sink` 是隐藏接收槽，不再作读数点】",
-   "ok": false,
-   "actual": "引擎中途丢了这一局（state.view 变 null，battleId=\"s7-2l35ayy4\"，状态行「」，战报已有 6 个回合块） | 结算区没出现 | 局末教学入口没出现 | 页眉回合「未开局」与引擎回合 null 不一致 | 右列战报不在位"
+   "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、页眉回合与引擎一致、右列战报最新一回合有内容）。【按人类 2026-09-23 版式，原来的 `#last-event`「最新一条事件」由**右列战报**承担（框内滚动、最新回合在上）；`#last-event` 所在的 `#b3-sink` 是隐藏接收槽，不再作读数点。另：引擎拒绝一步推进会让页面清空 `state.view`（HTTP 200 + `{ok:false}`，见 known_limits），脚本按玩家的做法重试这一步 / 最多整局重开一次 —— 断言没有放松】",
+   "ok": true,
+   "actual": "result=win 回合=44 页眉回合「第 44 回合」结算区可见=true 教学=shown 战报回合块=44 最新块=第 44 回合（8 条）；存活点 ●●●●○○/●●○○○○；点了 48 次自动推进（最后回合 44，停滞 0 次）；当时 {\"turn\":44,\"mana\":{\"self\":2,\"opponent\":0},\"selfLiving\":4,\"foeLiving\":2,\"status\":\"\"}；正文「关键转折在第 3 回合（这一局 44 个回合）。」"
   },
   {
    "id": "live-lesson-migration",
    "judge": "换局迁移：第二局的教学必须**接着上一课**（同一课时做核对，不同课时不许逐字重讲第一局那一课），复盘正文带局面信息，且换局把 v3h 顶栏归零（页眉回合回到第 1 回合、双方存活点回到 6/6）。【按人类 2026-09-23 版式，「换了一局」在战斗页上的可见证据由顶栏承担（旧版式读的是开局前的阵容展示块）】",
    "ok": true,
-   "actual": "第一局 / → 第二局 switch-out-of-the-bad-matchup/first-faint；repeat=no checked=no；核对「」；第二局顶栏「第 1 回合」存活点 ●●●●●●/●●●●●●"
+   "actual": "第一局 stop-attacking-into-resistance/first-faint → 第二局 stop-attacking-into-resistance/first-faint；repeat=yes checked=yes；核对「上一次那一课的核对：「我方打在属性抵抗上」这一局又出现了。对比第 15 回合（上一次：连续回合都打在抵抗上）与第 15 」；第二局顶栏「第 1 回合」存活点 ●●●●●●/●●●●●●"
   },
   {
    "id": "live-narrow-390",
@@ -148,7 +148,7 @@
    "id": "live-mobile-e2e",
    "judge": "手机 390×844 整条 E2E：URL 带锁定进来 → 补满六只 → 开局 → 打到结算 → 教学入口，每一步都不横向溢出，且战斗页那一档必须是 v3h（页眉回合、顶栏 6 个存活点、底栏四个大选项、聚能 ≥44px）。【按人类 2026-09-23 版式，窄屏战斗页的「行动区在首屏」由**底栏四选项 + 左列四格技能**承担（旧 `#action-panel` 在战斗态收起）；右列战报在 ≤760px 按设计**整列收起**（「单列、战报不占首屏」），所以窄屏那一档要求「在位就得分组、否则必须整列收起」，并用 `data-roco-log-turns` 兜住内容】",
    "ok": true,
-   "actual": "轨迹 m-url-handoff:3只/390 → m-six-picked:6只/390 → m-battle:6只/390；战斗页 回合「第 1 回合」存活点「●●●●●●」选项 4 个；结算 result=win 回合=30 教学=shown 战报 30 块（右列收起=true）"
+   "actual": "轨迹 m-url-handoff:3只/390 → m-six-picked:6只/390 → m-battle:6只/390；战斗页 回合「第 1 回合」存活点「●●●●●●」选项 4 个；结算 result=win 回合=44 教学=shown 战报 44 块（右列收起=true）"
   },
   {
    "id": "live-trial-labels",
@@ -969,56 +969,74 @@
     "samples": 0,
     "turn": 1,
     "foeDots": "●●●●●●",
-    "foeCardText": "60 级 🌿草系 喵喵 100% 生命 332 / 332 ⭐ 10"
+    "foeCardText": "60 级 😈恶系 朔夜伊芙 100% 生命 391 / 391 ⭐ 10"
    }
   },
   {
    "at": "auto-play",
-   "clicks": 21,
-   "lastTurn": null,
-   "stalled": 8
+   "clicks": 48,
+   "lastTurn": 44,
+   "stalled": 0,
+   "viewDrops": 0,
+   "restarts": 0
   },
   {
    "at": "settled",
    "settled": {
-    "result": null,
-    "turn": null,
-    "resultVisible": false,
-    "lessonShown": null,
-    "lessonText": "",
-    "round": "未开局",
-    "logShown": false,
+    "result": "win",
+    "turn": 44,
+    "resultVisible": true,
+    "lessonShown": "shown",
+    "lessonText": "关键转折在第 3 回合（这一局 44 个回合）。",
+    "round": "第 44 回合",
+    "logShown": true,
     "logLatest": {
-     "turn": "6",
-     "lines": 6
+     "turn": "44",
+     "lines": 8
     },
-    "logTurns": 6,
-    "hasView": false,
-    "battleId": "s7-2l35ayy4",
+    "logTurns": 44,
+    "hasView": true,
+    "battleId": "s3-lacsx24g",
     "plan": "",
     "dots": {
-     "self": "○○○○○○",
-     "foe": "○○○○○○"
+     "self": "●●●●○○",
+     "foe": "●●○○○○"
     }
+   }
+  },
+  {
+   "at": "second-match-play",
+   "clicks": 49,
+   "lastTurn": 44,
+   "stalled": 0,
+   "viewDrops": 0,
+   "restarts": 0,
+   "result": {
+    "result": "win",
+    "turn": 44,
+    "hasView": true,
+    "phase": "ended",
+    "selfLiving": 4,
+    "foeLiving": 2
    }
   },
   {
    "at": "second-match-teacher",
    "m1": {
-    "goal": "",
-    "point": "",
-    "repeat": ""
+    "goal": "stop-attacking-into-resistance",
+    "point": "first-faint",
+    "repeat": "no"
    },
    "second": {
     "result": "ready",
     "lesson": "shown",
-    "goal": "switch-out-of-the-bad-matchup",
+    "goal": "stop-attacking-into-resistance",
     "point": "first-faint",
-    "repeat": "no",
-    "checked": "no",
-    "improved": "unknown",
-    "progress": "",
-    "lessonText": "关键转折在第 2 回合（这一局 30 个回合）。",
+    "repeat": "yes",
+    "checked": "yes",
+    "improved": "no",
+    "progress": "上一次那一课的核对：「我方打在属性抵抗上」这一局又出现了。对比第 15 回合（上一次：连续回合都打在抵抗上）与第 15 回合（这一次：连续回合都打在抵抗上）。两次的处理方式一样，所以这一局看不到变化。",
+    "lessonText": "关键转折在第 3 回合（这一局 44 个回合）。",
     "round": "第 1 回合",
     "dotsSelf": "●●●●●●",
     "dotsFoe": "●●●●●●",
@@ -1067,6 +1085,22 @@
      "actionPanel": null,
      "bothOnScreen": true
     }
+   }
+  },
+  {
+   "at": "mobile-play",
+   "clicks": 49,
+   "lastTurn": 44,
+   "stalled": 0,
+   "viewDrops": 0,
+   "restarts": 0,
+   "result": {
+    "result": "win",
+    "turn": 44,
+    "hasView": true,
+    "phase": "ended",
+    "selfLiving": 4,
+    "foeLiving": 2
    }
   },
   {
@@ -1120,10 +1154,10 @@
     "lesson": "shown",
     "clientW": 390,
     "scrollW": 390,
-    "turn": 30,
-    "round": "第 30 回合",
-    "logGroups": 30,
-    "logTurns": 30,
+    "turn": 44,
+    "round": "第 44 回合",
+    "logGroups": 44,
+    "logTurns": 44,
     "logLatestLines": 8,
     "rightColHidden": true,
     "logShown": false
@@ -1238,7 +1272,8 @@
   "它只走到「结算 + 局末教学入口出现」；复盘正文与三角色的其余判据在 demo-acceptance 里",
   "选六只走的是 owned 名单前六个**不同物种**（与工坊验收同一条先例：同种重复会被引擎拒）",
   "2026-09-23 起战斗页判据读 v3h 钩子：右列战报 `.b3-log-scroll` 已经由主线程按引擎事件（`state.matchEvents`，最新回合在上）真渲染；但**开局那一手还没有事件**（战报只写「还没推进。」），所以 `live-lineup-and-log` 会先推一手再量——这是那条判据的适用范围，不是放过",
-  "v3h 底栏的 `#b3-charge` 与逃跑页的 `[data-b3-escape-confirm]`/`[data-b3-escape-cancel]`目前**只渲染、没有点击绑定**（有 onclick 的还是战斗态收起的 `#act-charge` 等）；脚本推进走 `window.rocoDemo.playAction()`，入口本身只断言「可见 + 文案/数值来自引擎」"
+  "v3h 底栏的 `#b3-charge` 与逃跑页的 `[data-b3-escape-confirm]`/`[data-b3-escape-cancel]`目前**只渲染、没有点击绑定**（有 onclick 的还是战斗态收起的 `#act-charge` 等）；脚本推进走 `window.rocoDemo.playAction()`，入口本身只断言「可见 + 文案/数值来自引擎」",
+  "⚠ 已知产品缺陷（本轮只取证、不改 src）：`POST /api/roco/battle/advance` 在引擎拒绝这一步（`{ok:false,error:…}`，例如「没有任何可选行动」那一帧）时**仍回 HTTP 200**；页面的 `api()` 只在非 2xx 时抛、`applyResult()` 也不校验 `data.view` → `state.view` 被清成 null，页眉变「未开局」、右列战报不在位，而 `state.battleId` 还在（**整局假死**，状态行一个字都不说）。实测 5 次真机里中 2 次（第 6／第 7 回合）。脚本按玩家会做的「重试」处理：先重试这一步，连续不恢复就整局重开一次（`steps.auto-play.viewDrops/restarts` 有如实记账），`live-settle` 的断言一条没放松（仍要求结果 + 结算区 + 教学 + 页眉回合 + 战报）"
  ],
- "ok": false
+ "ok": true
 }
