@@ -669,15 +669,10 @@ function renderMode() {
   const chips = modeChipHtml(state.mode);
   if (modeLine) modeLine.innerHTML = chips;
   else if (flags) flags.innerHTML = chips;          // 专用容器：直接覆盖
-  else {
-    // 共享容器（页眉中间列）：**只插一次**，否则每次渲染都会追加一份（会把点击目标挤走）
-    const holder = $('head-center');
-    if (holder) {
-      let slot = holder.querySelector('#mode-chips');
-      if (!slot) { slot = document.createElement('div'); slot.id = 'mode-chips'; holder.appendChild(slot); }
-      slot.innerHTML = chips;
-    }
-  }
+  // 人类 2026-09-23 批注：战斗页页眉**下面不要再堆这两行徽记**（「全部删掉」）——
+  // 口径仍然可查，但只在**小芽设置**里出现一次，不占战斗页。
+  const side = $('mode-chips');
+  if (side) side.innerHTML = chips;
   document.body.dataset.rocoMode = state.mode?.id ?? 'none';
   document.body.dataset.rocoPrematch = state.mode?.prematch?.visibility ?? 'none';
   document.body.dataset.rocoStandardPvp = standardPvpActive() ? 'yes' : 'no';
@@ -1710,10 +1705,16 @@ function renderB3Panels(view) {
   // B（子代理 C 报的真缺陷）：按需推算的精灵在 legacy 路线上 `state.rosterAll` 是 null →
   //   名单行找不到 → 四格全 `data-b3-pending`（空且点不动）。这里**回落到引擎给的合法技能**：
   //   `view.legal` 里 kind=skill 的动作自带 skill 名称/属性/消耗，足够填满四格并可点。
-  const fallbackMoves = legalSkills.map((a) => a.skill ?? {
-    skill_id: a.skill_id, name: a.skill_name ?? a.label ?? null,
-    element: a.element ?? null, category: a.category ?? null, energy: a.energy ?? a.cost ?? null,
-  });
+  const fallbackMoves = legalSkills.map((a) => ({
+    ...(a.skill ?? {}),
+    // skill_id 在**动作**上（a.skill_id），a.skill 里没有 —— 第一版只 spread 了 a.skill，
+    // 于是 find(a.skill_id === mv.skill_id) 永远落空 → 名字填上了、四格仍然点不动。
+    skill_id: a.skill_id ?? a.skill?.skill_id ?? null,
+    name: a.skill?.name ?? a.skill_name ?? a.label ?? null,
+    element: a.skill?.element ?? a.element ?? null,
+    category: a.skill?.category ?? a.category ?? null,
+    energy: a.skill?.energy ?? a.energy ?? a.cost ?? null,
+  }));
   const movesFinal = moves.length ? moves : fallbackMoves.slice(0, 4);
   const slots = [...root.querySelectorAll('[data-b3-skill-slot]')];
   slots.forEach((slot, i) => {
@@ -1832,6 +1833,8 @@ function renderB3Panels(view) {
     if (rows.length) {
       foeBuffs.innerHTML = rows.map(([k, v]) => `<span class="b3-buff" data-b3-buff-kind="mark"
         data-b3-buff-name="${escapeAttr(k)}">${escapeHtml(STATUS_LABEL[k] ?? k)} ${Number(v)}</span>`).join('');
+    } else {
+      foeBuffs.innerHTML = '';   // 这一帧引擎没给印记 → 必须清空（陈旧 DOM 会骗过判据与玩家）
     }
   }
   // G3 背包格：按引擎给的 item 动作填（id/名字/可用态）；没给就写「不可用」。
@@ -1843,10 +1846,10 @@ function renderB3Panels(view) {
     cell.classList.toggle('b3-slot--grey', !act);
     const nameEl = cell.querySelector('[data-b3-item-name]');
     const idEl = cell.querySelector('[data-b3-item-id]');
-    if (nameEl) nameEl.textContent = act ? (act.item_id ?? '道具') : '本模式未给这一件';
+    if (nameEl) nameEl.textContent = act ? (act.item_id ?? '道具') : '不可用';
     if (idEl) idEl.dataset.b3ItemId = act ? String(act.item_id ?? '') : '';
     const note = cell.querySelector('[data-b3-item-note]');
-    if (note) note.textContent = act ? '由引擎给出' : '未核验：引擎这一手没有给这件道具';
+    if (note) note.textContent = act ? '' : '未核验';
     delete cell.dataset.b3Action;
     if (act) { cell.dataset.b3Action = String((view.legal ?? []).indexOf(act)); cell.dataset.b3ActionKind = 'item'; }
     b3Show(cell);
