@@ -3,9 +3,11 @@
    与营地页的 `src/client/style.css`（监工留的 UI 框架）并存，于是两个页面像两个产品。
    现在框架那一份先加载（`roco.html` 里 style.css 在前），这里只写框架里没有的东西：
      · 三页各自的结构（选阵容页 / 对战页 / 结算页）与它们的固定底栏；
-     · 模式徽记、阵容池的轻卡、分段选择器、筛选行、分页；
+     · 阵容池的轻卡、分段选择器、**定位**筛选行、分页；
      · 军师的两行小浮条、伙伴详情抽屉（框架里没有这两个组件）；
      · **小芽那一栏**（宽屏 = 右侧 Coach 栏，窄屏 = 贴底一块）与伤害浮层。
+   （2026-09-23：模式徽记三条口径按人类要求整块删除，页头与首屏都不再有它们 ——
+    所以 `.mode-line` / `.first-screen-badges` 那几组规则也一并没有了。）
    凡是框架里已经有的（`.panel`/`button`/`input`/`select`/`.type`/`.hp-track`/`.hp-fill`/
    `.energy`/`.bench-pet`/`.action`/`.stats`/`.pet-icon`/`.muted`/`.section-title`），
    这里**一个字都不重复**。
@@ -19,7 +21,7 @@
    所以下面那些 `position:fixed` 的高度都改成跟着 `--bottombar` 算，不再各写一个魔数。 */
 
 /* ── 页头 ─────────────────────────────────────────────────────────────────
-   只放：游戏标题、模式徽记、回合状态、轻量小芽入口、重开/重试、右上角抽屉。
+   只放：游戏标题、轻量小芽入口、重开/重试、右上角抽屉。
    规则版本、服务状态、验收钩子、工程说明全部在抽屉里（默认收起）。 */
 .topbar{align-items:center;flex-wrap:wrap;row-gap:6px;height:auto;min-height:44px}
 .topbar h1 small{font-size:11px;padding:2px 6px}
@@ -89,7 +91,8 @@
  color:var(--muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .slot.on{border-style:solid;border-color:#8dd49c;color:#dff3e3;background:#1d3435}
 .side.enemy .slot.on{border-color:#e8a76a;color:#f6e3d0;background:#33291d}
-/* 阵容池：搜索 + 属性/定位筛选 + 分页；卡片首层是「认得出 + 有区分度」。 */
+/* 阵容池：搜索 + **定位**筛选 + 分页；卡片首层是「认得出 + 有区分度」。
+   （属性筛选与「清除筛选」已按人类 2026-09-23 要求删除 —— 那一档由工坊模块承担。） */
 .pool{padding-bottom:6px}
 .filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .filters .muted{margin-left:auto}
@@ -968,3 +971,20 @@ body[data-roco-view="ready"]{overflow:hidden}
 html{overflow-y:scroll}
 .say-form input{min-height:40px;font-size:13px}
 .xy-modal2-box .companion-body{min-height:96px;max-height:34vh}
+
+/* 人类 2026-09-23：「能上下滑说明上面元素有问题，高度剪一点点」——
+   首页锁死一屏：body 不滚、主区 = 视口 − 页眉 − 开一局栏，工坊网格撑满、列表内部滚。 */
+body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))){height:100vh;overflow:hidden}
+body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))) main{
+ height:calc(100vh - 150px);min-height:0;display:flex;flex-direction:column;
+ padding-top:6px;padding-bottom:0}
+body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))) main>#team-workshop{
+ flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))) header.topbar{padding-top:6px;padding-bottom:6px}
+body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))) .onboard-bar{margin:0 0 6px}
+
+/* 人类 2026-09-23：「展开连接状态下面为啥压着个东西？删了吧」——
+   那是**空的对话体**（`#companion-body` 我给了 min-height:96px，没消息时是一块空壳，
+   边框贴在一起看着像「压着」）。空的时候就别占位。 */
+.companion-body:empty{display:none}
+.xy-modal2-box>.companion-body{margin-top:2px}

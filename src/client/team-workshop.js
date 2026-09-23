@@ -82,7 +82,9 @@ const STYLE = `
  align-self:center;padding:16px 10px;border:1px solid #2b3d4e;border-right:0;border-radius:0 14px 14px 0;
  background:#101a24;color:#eaf2f8;font-size:13px;font-weight:600;cursor:pointer;min-height:132px;
  box-shadow:0 6px 18px rgba(0,0,0,.35)}   /* 对齐小芽按钮的观感 */
-.tw-drawer[data-open="yes"] .tw-drawer-btn{border-radius:12px 0 0 12px;border-right:1px solid var(--line)}
+.tw-drawer[data-open="yes"] .tw-drawer-btn{display:none}   /* 人类：展开后按钮要**消失**，别压着面板 */
+.tw-drawer-close{display:block;width:100%;margin:0 0 8px;padding:6px 10px;border:1px solid var(--line);
+ border-radius:10px;background:#16222f;color:#dbe7f1;font-size:12px;cursor:pointer;text-align:left}
 .tw-drawer-panel{display:none;width:min(380px,86vw);overflow:auto;background:#101a24;
  border:1px solid var(--line);border-radius:0 14px 14px 0;padding:12px 14px;margin-left:0}
 .tw-drawer[data-open="yes"] .tw-drawer-panel{display:block}
@@ -340,7 +342,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      与右边小芽对应；正文里不再占位。 -->
    <aside class="tw-drawer" id="tw-eval-drawer" data-open="no">
     <button class="tw-drawer-btn" id="tw-eval-toggle" type="button" aria-expanded="false">阵容评估</button>
-    <div class="tw-drawer-panel" id="tw-eval-panel">
+    <div class="tw-drawer-panel" id="tw-eval-panel"><button class="tw-drawer-close" id="tw-eval-close" type="button">收起 ›</button>
      <div class="tw-head"><h3 id="tw-eval-title">阵容评估</h3>
       <span class="tw-sub" id="tw-eval-sub">—</span></div>
      <div id="tw-eval-body"></div>
@@ -1246,6 +1248,11 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   };
   // 左侧「阵容评估」悬浮抽屉：点按钮展开/收回（与右边小芽对应）
   const evalToggle = $('tw-eval-toggle');
+  const evalClose = $('tw-eval-close');
+  if (evalClose) evalClose.addEventListener('click', () => {
+    const d = $('tw-eval-drawer'); d.dataset.open = 'no';
+    const t = $('tw-eval-toggle'); if (t) t.setAttribute('aria-expanded', 'false');
+  });
   if (evalToggle) evalToggle.addEventListener('click', () => {
     const d = $('tw-eval-drawer');
     const open = d.dataset.open !== 'yes';
