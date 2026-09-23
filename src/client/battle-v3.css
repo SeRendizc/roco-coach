@@ -519,3 +519,13 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
 .b3-wrap .b3-topbar .b3-side.right{justify-self:end !important;justify-content:flex-end !important}
 .b3-wrap .b3-panel--escape{align-items:center;justify-content:center;text-align:center}
 .b3-wrap .b3-panel--escape .b3-slot{max-width:360px;width:100%;text-align:center}
+
+/* 窄屏（单列）下：我方存活点必须在**对手上面**（真缺陷：判据 P0-6-top 实测不过）。
+   碎片里窄屏只是把 grid 变成一列 + 居中，没有规定**顺序**，这里显式排序。 */
+@media (max-width:760px){
+  /* 必须 !important：基础规则是 `.b3-topbar{display:grid !important}`，同层 !important 与顺序无关 */
+  .b3-wrap .b3-topbar{display:flex !important;flex-direction:column;align-items:center;gap:6px}
+  .b3-wrap .b3-topbar .b3-side{order:1;justify-self:center;justify-content:center}
+  .b3-wrap .b3-topbar .b3-turn{order:2;text-align:center}
+  .b3-wrap .b3-topbar .b3-side--foe,.b3-wrap .b3-topbar .b3-side.right{order:3;justify-content:center}
+}

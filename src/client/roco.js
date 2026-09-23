@@ -3301,7 +3301,8 @@ function bind() {
     coachEntry.dataset.bound = 'yes';
     coachEntry.addEventListener('click', () => {
       state.coach.open = !state.coach.open;
-      renderCompanion();
+      // 打开时走 `openCompanion()`：它会**把焦点落到 `#say-input`**（判据 P0-2-entry 要求）。
+      if (state.coach.open) openCompanion(); else renderCompanion();
       if (state.coach.open) {
     const fold = $('xy-fold-status');
     if (fold) {
