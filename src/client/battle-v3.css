@@ -466,3 +466,9 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
   .b3-wrap .b3-panel--skill .b3-slot{min-height:44px;flex:0 0 auto}
   .b3-wrap .b3-slot[data-b3-action],.b3-wrap .b3-slot[data-b3-switch-row]{min-height:44px}
 }
+
+/* 人类 2026-09-23 批注：顶部两侧存活点要**和卡片的左右边缘对齐**（原来贴在整页两端，
+   而卡片是从左右两列之后才开始的）。左右内边距 = 对应列的宽 + 卡片间隙。 */
+.b3-wrap .b3-topbar{padding-left:calc(var(--b3-left) + var(--b3-card-gap));
+ padding-right:calc(var(--b3-right) + var(--b3-card-gap))}
+@media (max-width:760px){ .b3-wrap .b3-topbar{padding-left:8px;padding-right:8px} }
