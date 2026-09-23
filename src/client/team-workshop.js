@@ -95,9 +95,10 @@ const STYLE = `
 :host{pointer-events:none}
 .tw-grid,.tw-panel,.tw-drawer-btn,.tw-drawer-panel,.tw-cand-list,.tw-slots{pointer-events:auto}
 .tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;
- height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}
+ height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}   /* 行吃满 → 两框纵向铺满 */
 .tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0;height:100%;align-self:stretch}
-.tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto}   /* 一屏下也要有可用高度（实测曾被挤到 60px） */
+.tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto;grid-auto-rows:44px;gap:4px}
+.tw-cand-list>*{height:44px;min-height:44px;max-height:44px;overflow:hidden}   /* 人类：两种档位行高**一致**、不许变高 */   /* 一屏下也要有可用高度（实测曾被挤到 60px） */
 .tw-team{grid-column:1;grid-row:1;width:100%}
 .tw-eval{grid-column:2;grid-row:1}
 
@@ -120,7 +121,7 @@ const STYLE = `
    2026-09-22 人类 P0 实测：选中之后往卡里塞了整段机制原文，卡片当场长高，
    空槽/已选槽高度参差、网格跳动 —— 选前选后必须是同一张版式。 */
 .tw-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;grid-auto-rows:1fr}
-.tw-slot{min-height:200px;border:1px dashed #36495e;border-radius:10px;padding:8px 9px;
+.tw-slot{height:232px;min-height:232px;max-height:232px;border:1px dashed #36495e;border-radius:10px;padding:8px 9px;
  display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
 .tw-slot.on{border-style:solid;border-color:#8dd49c;background:#17242f}
 .tw-slot .tw-who{font-weight:600;font-size:14px;overflow-wrap:anywhere}

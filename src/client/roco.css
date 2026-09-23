@@ -974,9 +974,9 @@ html{overflow-y:scroll}
 
 /* 人类 2026-09-23：「能上下滑说明上面元素有问题，高度剪一点点」——
    首页锁死一屏：body 不滚、主区 = 视口 − 页眉 − 开一局栏，工坊网格撑满、列表内部滚。 */
-body:has(#team-workshop:not([hidden])){height:100vh;overflow:hidden}
+body:has(#team-workshop:not([hidden])){height:100vh;overflow:hidden;display:flex;flex-direction:column}
 body:has(#team-workshop:not([hidden])) main{
- height:calc(100vh - 150px);min-height:0;display:flex;flex-direction:column;
+ flex:1 1 auto;height:auto;min-height:0;display:flex;flex-direction:column;
  padding-top:6px;padding-bottom:0}
 body:has(#team-workshop:not([hidden])) main>#team-workshop{
  flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
@@ -1005,3 +1005,15 @@ body:has(#team-workshop:not([hidden])) main>#team-workshop{height:100% !importan
    口径：**v3 工坊在产品路线上必须可点** → 给它更高的层叠；旧 #select-panel 只作迁移夹具。 */
 #team-workshop{position:relative;z-index:6}
 #select-panel{position:relative;z-index:1}
+
+/* ── 人类 2026-09-23 第十二轮 ────────────────────────────────────────────────
+   ①「展开连接状态那个框下面压着的框」= `#model-list` 压住 `#companion-body`（实测重叠 69px）。
+      真因：`<details>` 收起时靠**浏览器默认**隐藏非 summary 子元素，而我给 `.xy-models{display:grid}`
+      是**作者样式**、优先级高于 UA 默认 → 收起也照样渲染。这里显式补回隐藏。 */
+details:not([open])>:not(summary){display:none !important}
+
+/* 人类 2026-09-23：小芽打开时正文**不许位移**。
+   实测根因：body 变 flex 列后 main 的宽度不再稳定（实测 859 且居中位置浮动）→ 固定宽度与居中，
+   并锁掉横向溢出。 */
+body:has(#team-workshop:not([hidden])) main{width:100%;max-width:1240px;margin:0 auto;box-sizing:border-box}
+body:has(#team-workshop:not([hidden])){overflow-x:hidden}
