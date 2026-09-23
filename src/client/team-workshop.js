@@ -189,7 +189,8 @@ const STYLE = `
 .tw-about>summary::after{content:'▾';margin-left:auto;color:#6b7f92}
 .tw-about[open]>summary::after{content:'▴'}
 .tw-about>*:not(summary){margin:0 10px 8px}
-.tw-slot .tw-detail{margin-top:auto}
+.tw-slot .tw-detail{margin-top:auto;width:100%}
+.tw-slot .tw-detail>summary{width:100%;display:block;box-sizing:border-box}
 /* 槽位里的「移除」是拇指要点的（390 实测 43×25 < 44）：给它 44×44。 */
 .tw-slot-remove{margin-left:auto;min-width:44px;min-height:44px;font-size:11px;color:#9caebe;
  background:#121e2c;border:1px solid #314154;border-radius:8px;padding:0 8px;cursor:pointer}
@@ -246,6 +247,12 @@ const STYLE = `
 .tw-filter-row input[type=search]{flex:1 1 90px;min-width:60px;font-size:11px;min-height:30px;padding:2px 6px}
 .tw-filter-row #tw-filter-reset{flex:0 0 auto;width:auto;font-size:11px;min-height:30px;padding:2px 10px}
 .tw-filter-row select,.tw-filter-row input,.tw-filter-row button{font-size:11.5px;padding-left:6px;padding-right:6px}
+/* 人类口径「做小」只在桌面；窄屏必须 ≥44px（判据 30-触控目标 量 390×844） */
+@media (max-width:760px){
+  .tw-select,.tw-filter-row input[type=search],.tw-filter-row #tw-filter-reset,
+  .tw-scope-row button,.tw-cand-prev,.tw-cand-next,#tw-cand-prev,#tw-cand-next{min-height:44px !important;font-size:12.5px}
+  .tw-select{width:96px;max-width:96px}
+}
 
 
 .tw-filter-row #tw-filter-reset{flex:0 0 auto}
@@ -1256,23 +1263,31 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   // 人类 2026-09-23：属性 / 定位改成**下拉选择框**（原来是点击循环的按钮）
   const fillSelect = (el, values, label) => {
     if (!el) return;
+    // ⚠ TYPE_CYCLE / ROLE_CYCLE 是**扁平字符串数组**（第一版按 [[value,label]] 写 → 选项变成单字）。
+    const ROLE_CN = {attacker: '输出', tank: '坦克', recovery: '恢复', control: '控制', support: '辅助'};
     el.innerHTML = ['<option value="">' + label + '</option>']
-      .concat(values.map((v) => `<option value="${escapeHtml(v[0])}">${escapeHtml(v[1])}</option>`)).join('');
+      .concat(values.filter(Boolean).map((v) => {
+        const val = Array.isArray(v) ? v[0] : v;
+        const txt = Array.isArray(v) ? v[1] : (ROLE_CN[v] ?? v);
+        return `<option value="${escapeHtml(val)}">${escapeHtml(txt)}</option>`;
+      })).join('');
   };
   fillSelect($('tw-filter-type'), TYPE_CYCLE, '属性');
   fillSelect($('tw-filter-role'), ROLE_CYCLE, '定位');
+  // ⚠ 第一版写的是 `state.filter.*` + 不存在的 `refreshPool()`（change 必然 ReferenceError）——
+  //   真实字段是 `state.pool.type/role`，分页用 `offset`，刷新走 `loadPool()`。
   if ($('tw-filter-type')) $('tw-filter-type').addEventListener('change', (e) => {
-    state.filter.type = e.target.value || ''; state.pool.page = 1; refreshPool();
+    state.pool.type = e.target.value || ''; state.pool.offset = 0; loadPool();
   });
   if ($('tw-filter-role')) $('tw-filter-role').addEventListener('change', (e) => {
-    state.filter.role = e.target.value || ''; state.pool.page = 1; refreshPool();
+    state.pool.role = e.target.value || ''; state.pool.offset = 0; loadPool();
   });
   if ($('tw-filter-reset')) $('tw-filter-reset').addEventListener('click', () => {
     state.pool.q = ''; state.pool.type = ''; state.pool.role = '';
     if ($('tw-search')) $('tw-search').value = '';
     if ($('tw-filter-type')) $('tw-filter-type').value = '';
     if ($('tw-filter-role')) $('tw-filter-role').value = '';
-    if ($('tw-search')) $('tw-search').value = '';
+    state.pool.offset = 0; loadPool();
     void loadPool({reset: true});
   });
   // 槽位里的「移除」：持有成员按实例 id 摘，理论阵容按物种 id 摘。
