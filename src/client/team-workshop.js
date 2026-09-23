@@ -90,9 +90,9 @@ const STYLE = `
 .tw-drawer[data-open="yes"] .tw-drawer-panel{display:block}
 /* 一屏装完：网格高度 = 可用高度，候选列表**内部滚动**，页面本身不上下滑。 */
 .tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;
- height:100%;min-height:0}
-.tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0}
-.tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto}
+ height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}
+.tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0;height:100%}
+.tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto}   /* 一屏下也要有可用高度（实测曾被挤到 60px） */
 .tw-team{grid-column:1;grid-row:1}
 .tw-eval{grid-column:2;grid-row:1}
 
