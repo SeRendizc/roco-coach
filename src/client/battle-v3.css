@@ -38,6 +38,10 @@
  *   `#b3-topbar`（204–219）、`.sidebars`（230–242）、`.stage`（244–254）、
  *   `.bench-row`（259–262）这四块 —— 它们是 v2 版式，片段里已经有 v3h 的对应物。
  *   片段自带一层 `.b3-wrap`，**不要再套第二层**（三列宽度的基准就是它）。
+ *   ⚠ 片段里的 id（`#b3-topbar` / `#b3-dots-self` / `#b3-hearts-foe` / `#b3-mode` / `#b3-round` /
+ *     `#b3-charge`）与主线程现在 `roco.html` 里那一块**同名** —— 必须**整块替换**，
+ *     不能两块并存：重复 id 会让 `getElementById` 拿到先出现的那个，主线程的 JS 写进旧块、
+ *     屏幕上是新块，表现成「数据不更新」。
  *   `#rules-note` / `.battle-tools` / `#log-panel` 保留不动：
  *   · 想让右列战报用真数据，把 `#log-panel` 的 `#events` 挪进片段里的
  *     `.b3-log-scroll`（结构见片段里 `data-b3-log-turn` 那两行），否则右列先放静态占位；

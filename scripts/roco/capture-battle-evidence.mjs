@@ -132,8 +132,10 @@ const battleFacts = () => js(`(()=>{const v=window.rocoDemo?.state?.view;
   // 选择器照**真实 DOM** 写（我第一版猜了 #foe-pets，那个 id 根本不存在 →
   // 守卫把六张战斗图全拦下了。这次先读页面结构再写：自己=#self-panel / 对手=#foe-panel，
   // 血量是里面的 .hp-line）。
-  const selfHp=hp('#self-panel .hp-line');
-  const foeHp=hp('#foe-panel .hp-line');
+  // 2026-09-23：战斗区改成 v3h 片段后，血量挂在 b3 的 hp-text 钩子上；旧选择器留作兜底。
+  // 断言本身没有放松：**必须真的读到「生命 x / y」**，读不到就不存盘。
+  const selfHp=hp('[data-b3-self-hp-text], #self-panel .hp-line');
+  const foeHp=hp('[data-b3-foe-hp-text], #foe-panel .hp-line');
   const actions=[...document.querySelectorAll('#actions button[data-action]')].length
     +[...document.querySelectorAll('#act-side button:not([hidden])')].length;
   return {view:Boolean(v), panel:visible(panel), turn:v?v.turn:null,

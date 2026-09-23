@@ -1,0 +1,3204 @@
+{
+ "schema": "roco-battle-v3-acceptance/v1",
+ "generated_by": "scripts/roco/browser-battle-v3-acceptance.mjs",
+ "judged_at": "2026-09-23T03:34:26.366Z",
+ "page": "http://127.0.0.1:8899/roco.html",
+ "base": "http://127.0.0.1:8899",
+ "viewport": "1440x900",
+ "mockup": "docs/roco/mockups/battle-v3h.html",
+ "reference_image": "docs/roco/mockups/v3h/battle-v3-default-1440x900.png",
+ "why": "战斗页 v3h 版式的判据 + 截图：三列几何 / 顶部信息栏 / 左竖排四格 / 更换态 / 背包态 / 右列战报 / 底部，外加对手血条镜像。每条判据都配了**真的喂坏输入**的反证（对合成基线做单点变异）。",
+ "entry": {
+  "ok": true,
+  "steps": [
+   {
+    "step": "workshop-six",
+    "ok": true,
+    "team": 6
+   },
+   {
+    "step": "click-start-standard-pvp",
+    "ok": true
+   },
+   {
+    "step": "battle-visible",
+    "ok": true
+   },
+   {
+    "step": "advance-one-turn",
+    "ok": true,
+    "how": "click:#auto-turn",
+    "from": 1,
+    "to": 2
+   }
+  ]
+ },
+ "steps": [
+  {
+   "step": "ready",
+   "ok": true,
+   "url": "http://127.0.0.1:8899/roco.html"
+  },
+  {
+   "step": "collect-skill",
+   "ok": true,
+   "hooks": {
+    "data-b3-skill-slot": 4,
+    "data-b3-cost": 10,
+    "data-b3-cost-short": 4,
+    "data-b3-rel": 14,
+    "data-b3-switch-row": 5,
+    "data-b3-item-cell": 2,
+    "data-b3-log-turn": 2,
+    "data-b3-turn": 2,
+    "data-b3-dots-self": 1,
+    "data-b3-dots-foe": 1
+   },
+   "tabs": {
+    "skill": "skill"
+   }
+  },
+  {
+   "step": "click-更换",
+   "ok": true,
+   "how": "click:[data-b3-tab=\"switch\"]",
+   "bodyTab": "skill"
+  },
+  {
+   "step": "collect-switch",
+   "ok": true
+  },
+  {
+   "step": "click-物品",
+   "ok": true,
+   "how": "click:[data-b3-tab=\"item\"]",
+   "bodyTab": "skill"
+  },
+  {
+   "step": "collect-item",
+   "ok": true
+  },
+  {
+   "step": "boot-facts",
+   "ok": true,
+   "ready": "yes",
+   "battlePanelVisible": true,
+   "hasView": true,
+   "entryOk": true,
+   "consoleErrors": 0,
+   "firstError": null,
+   "hooks": {
+    "data-b3-skill-slot": 4,
+    "data-b3-cost": 10,
+    "data-b3-cost-short": 4,
+    "data-b3-rel": 14,
+    "data-b3-switch-row": 5,
+    "data-b3-item-cell": 2,
+    "data-b3-log-turn": 2,
+    "data-b3-turn": 2,
+    "data-b3-dots-self": 1,
+    "data-b3-dots-foe": 1,
+    "body[data-b3-tab]": 1
+   },
+   "absent": []
+  }
+ ],
+ "totals": {
+  "criteria": 26,
+  "passed": 21,
+  "failed": 5,
+  "skipped": 2,
+  "counterproofs": 31,
+  "counterproofs_hit": 31
+ },
+ "missing_hooks": [],
+ "pending_markers": {
+  "count": 24,
+  "kinds": [
+   "b3-slot-row",
+   "b3-slot",
+   "b3-slot.b3-slot--grey"
+  ]
+ },
+ "hook_matrix": {
+  "data-b3-skill-slot": 4,
+  "data-b3-cost": 10,
+  "data-b3-cost-short": 4,
+  "data-b3-rel": 14,
+  "data-b3-switch-row": 5,
+  "data-b3-item-cell": 2,
+  "data-b3-log-turn": 2,
+  "data-b3-turn": 2,
+  "data-b3-dots-self": 1,
+  "data-b3-dots-foe": 1,
+  "body[data-b3-tab]": 1
+ },
+ "by_criterion": {
+  "C0 前置": {
+   "total": 2,
+   "passed": 2,
+   "failed": [],
+   "skipped": []
+  },
+  "C0 钩子契约": {
+   "total": 2,
+   "passed": 2,
+   "failed": [],
+   "skipped": []
+  },
+  "C1 三列几何": {
+   "total": 3,
+   "passed": 2,
+   "failed": [
+    "geom-stage-axis"
+   ],
+   "skipped": []
+  },
+  "C2 顶部信息栏": {
+   "total": 3,
+   "passed": 3,
+   "failed": [],
+   "skipped": []
+  },
+  "C3 左侧竖排四格": {
+   "total": 3,
+   "passed": 3,
+   "failed": [],
+   "skipped": []
+  },
+  "C4 更换态": {
+   "total": 5,
+   "passed": 2,
+   "failed": [
+    "tab-hook-switch"
+   ],
+   "skipped": [
+    "switch-bottom-align",
+    "switch-not-overlap-charge"
+   ]
+  },
+  "C5 背包态": {
+   "total": 3,
+   "passed": 1,
+   "failed": [
+    "tab-hook-item",
+    "item-no-definite-numbers"
+   ],
+   "skipped": []
+  },
+  "C6 右列战报": {
+   "total": 3,
+   "passed": 3,
+   "failed": [],
+   "skipped": []
+  },
+  "C7 底部": {
+   "total": 3,
+   "passed": 3,
+   "failed": [],
+   "skipped": []
+  },
+  "CX 扩展（示意图 .fighter.foe .hp .bar{direction:rtl}）": {
+   "total": 1,
+   "passed": 1,
+   "failed": [],
+   "skipped": []
+  },
+  "CX 扩展（三列几何的容器条件）": {
+   "total": 1,
+   "passed": 0,
+   "failed": [
+    "wrap-spans-page"
+   ],
+   "skipped": []
+  }
+ },
+ "checks": [
+  {
+   "id": "page-boots",
+   "criterion": "C0 前置",
+   "rule": "页面必须启动（body[data-rocoReady]=\"yes\"）并且真的进了战斗（view 在、战斗区可见）",
+   "state": "skill",
+   "missing": [],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "ready=\"yes\"；战斗区可见=true；view=true；entry=true"
+  },
+  {
+   "id": "console-clean",
+   "criterion": "C0 前置",
+   "rule": "整段流程没有 console.error / 未捕获异常（页面报错时下面的判据都不可信）",
+   "state": "skill",
+   "missing": [],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "0 条报错"
+  },
+  {
+   "id": "hooks-required",
+   "criterion": "C0 钩子契约",
+   "rule": "主线程承诺的 data-b3-* 钩子必须都出现（缺的逐条点名；跨技能/更换/背包三态取并集）",
+   "state": "skill",
+   "missing": [
+    "data-b3-skill-slot",
+    "data-b3-cost",
+    "data-b3-cost-short",
+    "data-b3-rel",
+    "data-b3-switch-row",
+    "data-b3-item-cell",
+    "data-b3-log-turn",
+    "data-b3-turn",
+    "data-b3-dots-self",
+    "data-b3-dots-foe",
+    "body[data-b3-tab]"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "缺：（一个都不缺）；逐态计数 {\"data-b3-skill-slot\":4,\"data-b3-cost\":10,\"data-b3-cost-short\":4,\"data-b3-rel\":14,\"data-b3-switch-row\":5,\"data-b3-item-cell\":2,\"data-b3-log-turn\":2,\"data-b3-turn\":2,\"data-b3-dots-self\":1,\"data-b3-dots-foe\":1,\"body[data-b3-tab]\":1}"
+  },
+  {
+   "id": "geom-columns-equal",
+   "criterion": "C1 三列几何",
+   "rule": "左列/右列宽度相等（±2px）且都 ≥200px",
+   "state": "skill",
+   "missing": [
+    "左列（技能格的列容器，或 data-b3-col-left）",
+    "右列（战报格的列容器，或 data-b3-col-right）"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "左列 232px / 右列 232px；主行 DIV.b3-main 有 3 个子块（DIV>DIV>DIV）；推导=hook"
+  },
+  {
+   "id": "geom-stage-axis",
+   "criterion": "C1 三列几何",
+   "rule": "两张出战卡的轴心（两卡中心的连线中点）== 页面中线（±2px）",
+   "state": "skill",
+   "missing": [
+    "中列两张出战卡（或 data-b3-fighter / data-b3-stage）"
+   ],
+   "meta": false,
+   "ok": false,
+   "skipped": false,
+   "problems": [
+    "两卡轴心 464.51 ≠ 页面中线 720（差 255.49px > 2px）"
+   ],
+   "actual": "卡①②中心 x=428.76 / 500.27；轴心=464.51；页面中线=720；推导=hook"
+  },
+  {
+   "id": "geom-no-hscroll",
+   "criterion": "C1 三列几何",
+   "rule": "无横向溢出（documentElement.scrollWidth == clientWidth）",
+   "state": "skill",
+   "missing": [],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "documentElement 1440/1440；body 1440/1440；innerWidth 1440"
+  },
+  {
+   "id": "topbar-plain",
+   "criterion": "C2 顶部信息栏",
+   "rule": "顶部信息栏无边框（四边 border-width 全 0）且无底色（backgroundColor 透明、无 background-image）",
+   "state": "skill",
+   "missing": [
+    "data-b3-dots-self / data-b3-dots-foe（或 data-b3-topbar）"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "四边 0px/0px/0px/0px；底色 rgba(0, 0, 0, 0)（透明=true）；背景图 none；来源=hook"
+  },
+  {
+   "id": "topbar-dots-center",
+   "criterion": "C2 顶部信息栏",
+   "rule": "左右存活点组垂直中心相等，且都 == 该行中心（±2px）",
+   "state": "skill",
+   "missing": [
+    "data-b3-dots-self",
+    "data-b3-dots-foe"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "左点组心 y=176.25（\"●●●●●●\"）= 右点组心 y=176.25（\"●●●●●●\"）；行中心 y=176.25"
+  },
+  {
+   "id": "topbar-turn-text",
+   "criterion": "C2 顶部信息栏",
+   "rule": "中央有回合文字「第 <n> 回合」，且 n == view.turn",
+   "state": "skill",
+   "missing": [
+    "data-b3-turn"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "文字 \"第 2 回合\" → n=2；view.turn=2"
+  },
+  {
+   "id": "skills-four-cells",
+   "criterion": "C3 左侧竖排四格",
+   "rule": "技能态左列恰好 4 格",
+   "state": "skill",
+   "missing": [
+    "data-b3-skill-slot"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "4 格；底边 969；每格高 184.88/184.88/184.88/184.88"
+  },
+  {
+   "id": "skills-cell-content",
+   "criterion": "C3 左侧竖排四格",
+   "rule": "每格有 ⭐ 消耗（data-b3-cost）、属性（emoji+中文）、克制标记（data-b3-rel ∈ up/down/none，或字形）",
+   "state": "skill",
+   "missing": [
+    "data-b3-cost",
+    "data-b3-rel",
+    "属性（emoji+中文）"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "#1 耗\"⭐ 0\" 属性虫系(emoji) 克制=none；#2 耗\"⭐ 1\" 属性普通系(emoji) 克制=none；#3 耗\"⭐ 3\" 属性虫系(emoji) 克制=none；#4 耗\"⭐ 1\" 属性翼系(emoji) 克制=none"
+  },
+  {
+   "id": "skills-cost-short",
+   "criterion": "C3 左侧竖排四格",
+   "rule": "星不够的格子 data-b3-cost-short=\"yes\" 且不可点；可点格子数 == 引擎给的合法技能数；每格都要带该钩子",
+   "state": "skill",
+   "missing": [
+    "data-b3-cost-short"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "星不够 0 格；可点 4；引擎合法技能 4（kind=skill,charge,switch,surrender）；可点信号 data-b3-slot-legal/data-b3-slot-legal/data-b3-slot-legal/data-b3-slot-legal"
+  },
+  {
+   "id": "tab-hook-switch",
+   "criterion": "C4 更换态",
+   "rule": "点「更换」之后 body[data-b3-tab] 必须是 switch",
+   "state": "switch",
+   "missing": [
+    "body[data-b3-tab]"
+   ],
+   "meta": false,
+   "ok": false,
+   "skipped": false,
+   "problems": [
+    "点「更换」按钮之后 body[data-b3-tab]=\"skill\"（要 \"switch\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
+   ],
+   "actual": "body[data-b3-tab]=\"skill\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"switch\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"skill\"}"
+  },
+  {
+   "id": "switch-five-rows",
+   "criterion": "C4 更换态",
+   "rule": "更换态左列一行一只可换上的精灵（活着的队友，不含场上那只；示意图 6 宠队 → 5 行）",
+   "state": "switch",
+   "missing": [
+    "data-b3-switch-row"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "5 行；可换上的存活队友 5（活着 6/6）；行高 0/0/0/0/0"
+  },
+  {
+   "id": "switch-row-content",
+   "criterion": "C4 更换态",
+   "rule": "每行有 名字 / 属性（emoji+中文）/ 克制标记 / 血量",
+   "state": "switch",
+   "missing": [
+    "data-b3-switch-row",
+    "data-b3-rel"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "#1 音速犬/火系/克制up/366/366；#2 仪式巨像/地系/克制none/401/401；#3 雪影娃娃/冰系/克制up/442/442；#4 皇家狮鹫/翼系/克制down/403/403；#5 化蝶/虫系/克制none/311/311"
+  },
+  {
+   "id": "switch-bottom-align",
+   "criterion": "C4 更换态",
+   "rule": "更换态左列底边与技能态最后一格的底边对齐（±4px）",
+   "state": "switch",
+   "missing": [
+    "data-b3-switch-row"
+   ],
+   "meta": false,
+   "ok": null,
+   "skipped": true,
+   "problems": [],
+   "actual": "更换态底边 0 / 技能态最后一格底边 969（差 969px）"
+  },
+  {
+   "id": "switch-not-overlap-charge",
+   "criterion": "C4 更换态",
+   "rule": "更换态的行不得覆盖聚能区（两者矩形不相交）",
+   "state": "switch",
+   "missing": [
+    "data-b3-switch-row"
+   ],
+   "meta": false,
+   "ok": null,
+   "skipped": true,
+   "problems": [],
+   "actual": "行范围 y 0→0；聚能区 y 981→1025"
+  },
+  {
+   "id": "tab-hook-item",
+   "criterion": "C5 背包态",
+   "rule": "点「物品」之后 body[data-b3-tab] 必须是 item",
+   "state": "item",
+   "missing": [
+    "body[data-b3-tab]"
+   ],
+   "meta": false,
+   "ok": false,
+   "skipped": false,
+   "problems": [
+    "点「物品」按钮之后 body[data-b3-tab]=\"skill\"（要 \"item\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
+   ],
+   "actual": "body[data-b3-tab]=\"skill\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"item\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"skill\"}"
+  },
+  {
+   "id": "item-candidate-boundary",
+   "criterion": "C5 背包态",
+   "rule": "背包态必须写出「候选 / 未核验」的边界说明",
+   "state": "item",
+   "missing": [
+    "data-b3-item-cell"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "2 件；命中「未登记」；原文 \"愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 /\""
+  },
+  {
+   "id": "item-no-definite-numbers",
+   "criterion": "C5 背包态",
+   "rule": "背包态不得出现确定性数字（每场 n 次 / 冷却 n 回合 / +150% / 立即生效）",
+   "state": "item",
+   "missing": [
+    "data-b3-item-cell"
+   ],
+   "meta": false,
+   "ok": false,
+   "skipped": false,
+   "problems": [
+    "确定性数字/时长 1 处：立即生效"
+   ],
+   "actual": "违规命中 1 处：立即生效"
+  },
+  {
+   "id": "log-width-equal",
+   "criterion": "C6 右列战报",
+   "rule": "右列战报与左列等宽（±2px）",
+   "state": "skill",
+   "missing": [
+    "data-b3-log-turn",
+    "左列（技能格列容器）"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "战报列 232px / 左列 232px；战报列在右列内=true"
+  },
+  {
+   "id": "log-latest-first",
+   "criterion": "C6 右列战报",
+   "rule": "最新回合在最上（DOM 顺序按回合号降序）",
+   "state": "skill",
+   "missing": [
+    "data-b3-log-turn"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "DOM 顺序 [2,1]（来源 attr）；首组 2；最大 2"
+  },
+  {
+   "id": "log-grouped-by-turn",
+   "criterion": "C6 右列战报",
+   "rule": "战报按回合分组：每组一个 data-b3-log-turn 且带可读的回合号（不重复）",
+   "state": "skill",
+   "missing": [
+    "data-b3-log-turn"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "2 组 → [2,1]（回合号来源 attr）；文本 [\"第 2 回合（最新） 你换上雪影娃娃；对手换上喵喵。\",\"第 1 回合 音速犬使用强制重启，造成 214 伤害（属性克制）。 水灵使用水枪，造成 66 伤害。\"]"
+  },
+  {
+   "id": "bottom-charge-current",
+   "criterion": "C7 底部",
+   "rule": "聚能显示当前 ⭐（⭐ n / 上限），n == view.self.pets[active].energy",
+   "state": "skill",
+   "missing": [
+    "底部「聚能 ⭐ n / 上限」（或 data-b3-charge）"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "\"⭐ 7 / 10\" → n=7 上限=10；view.self.pets[0].energy=7 energy_max=10；来源=hook"
+  },
+  {
+   "id": "bottom-four-buttons",
+   "criterion": "C7 底部",
+   "rule": "底部有四个按钮：技能 / 更换 / 物品 / 逃跑",
+   "state": "skill",
+   "missing": [
+    "技能/更换/物品/逃跑 四个按钮（或 data-b3-tab-btn）"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "\"技能\"<BUTTON> \"更换\"<BUTTON> \"物品\"<BUTTON> \"逃跑\"<BUTTON>（4 个）"
+  },
+  {
+   "id": "bottom-exactly-one-highlight",
+   "criterion": "C7 底部",
+   "rule": "四个按钮里恰好一个高亮（底色与另外三个不同，且更亮）",
+   "state": "skill",
+   "missing": [
+    "技能/更换/物品/逃跑 四个按钮"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "\"技能\"=rgb(30, 59, 85)(标了 on) \"更换\"=rgb(21, 34, 48) \"物品\"=rgb(21, 34, 48) \"逃跑\"=rgb(21, 34, 48)；body[data-b3-tab]=\"skill\""
+  },
+  {
+   "id": "foe-hp-mirrored",
+   "criterion": "CX 扩展（示意图 .fighter.foe .hp .bar{direction:rtl}）",
+   "rule": "对手血条必须从右往左（direction:rtl 或填充右对齐），我方血条从左侧开始",
+   "state": "skill",
+   "missing": [
+    "对手卡的血条（或 data-b3-hp-bar / data-b3-hp-fill）"
+   ],
+   "meta": false,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "我方 dir=ltr 对齐=left 填充=—（hook:data-b3-self-hp-fill）；对手 dir=rtl 对齐=left 填充=—（hook:data-b3-foe-hp-fill）"
+  },
+  {
+   "id": "wrap-spans-page",
+   "criterion": "CX 扩展（三列几何的容器条件）",
+   "rule": "v3h 片段的根容器必须占满页面（宽 ≥ 视口 − 2×16px）且水平居中（±2px）——容器被挤扁时，左右列即使等宽也「轴心对不上页面中线」，中间的卡会被压成 57px",
+   "state": "skill",
+   "missing": [
+    "data-b3-root（v3h 片段的根容器）"
+   ],
+   "meta": false,
+   "ok": false,
+   "skipped": false,
+   "problems": [
+    "根容器宽 653.03px < 1400px（视口 1440 − 2×16px 留白）——被别的块挤扁了",
+    "根容器中心 x=464.52 ≠ 页面中线 720（差 255.48px）"
+   ],
+   "actual": "根容器 653.03px（138→791.03），中心 464.52 / 页面中线 720；来源=hook；父块=SECTION#battle-panel"
+  },
+  {
+   "id": "selftest-baseline",
+   "criterion": "C0 钩子契约",
+   "rule": "自身证据：判据对「已知全绿的合成基线」必须一条都不红（红＝判据写空了）",
+   "state": "skill",
+   "missing": [],
+   "meta": true,
+   "ok": true,
+   "skipped": false,
+   "problems": [],
+   "actual": "合成基线全绿（28 条判据都在判事）"
+  }
+ ],
+ "facts": {
+  "skill": {
+   "state": "skill",
+   "errors": [],
+   "requiredHooks": {
+    "data-b3-skill-slot": 4,
+    "data-b3-cost": 10,
+    "data-b3-cost-short": 4,
+    "data-b3-rel": 14,
+    "data-b3-switch-row": 5,
+    "data-b3-item-cell": 2,
+    "data-b3-log-turn": 2,
+    "data-b3-turn": 2,
+    "data-b3-dots-self": 1,
+    "data-b3-dots-foe": 1
+   },
+   "optionalAnchors": {
+    "data-b3-col-left": 1,
+    "data-b3-col-right": 1,
+    "data-b3-stage": 1,
+    "data-b3-fighter": 0,
+    "data-b3-fighter-self": 0,
+    "data-b3-fighter-foe": 0,
+    "data-b3-topbar": 1,
+    "data-b3-footer": 1,
+    "data-b3-charge": 2,
+    "data-b3-tab-btn": 0
+   },
+   "derivedFrom": {
+    "columns": "hook",
+    "stage": "hook",
+    "topbar": "hook"
+   },
+   "bodyTab": "skill",
+   "doc": {
+    "scrollWidth": 1440,
+    "clientWidth": 1440,
+    "innerWidth": 1440,
+    "bodyScrollWidth": 1440,
+    "bodyClientWidth": 1440,
+    "centerX": 720,
+    "title": "小芽 · 洛克王国：世界（训练场）",
+    "url": "http://127.0.0.1:8899/roco.html"
+   },
+   "engine": {
+    "hasView": true,
+    "turn": 2,
+    "activeIndex": 0,
+    "activeName": "铠甲虫",
+    "energy": 7,
+    "energyMax": 10,
+    "aliveTeammates": 6,
+    "aliveOthers": 5,
+    "petCount": 6,
+    "legalSkills": 4,
+    "legalKinds": "skill,charge,switch,surrender",
+    "phase": "battle"
+   },
+   "columns": {
+    "resolved": true,
+    "mainTag": "DIV.b3-main",
+    "kidCount": 3,
+    "kidTags": "DIV>DIV>DIV",
+    "left": {
+     "left": 154,
+     "top": 205.5,
+     "right": 386,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 270,
+     "cy": 587.25
+    },
+    "right": {
+     "left": 543.03,
+     "top": 205.5,
+     "right": 775.03,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 659.03,
+     "cy": 587.25
+    },
+    "mid": {
+     "left": 400,
+     "top": 205.5,
+     "right": 529.03,
+     "bottom": 969,
+     "w": 129.03,
+     "h": 763.5,
+     "cx": 464.52,
+     "cy": 587.25
+    },
+    "leftIsSkillParent": true,
+    "rightHasLog": true,
+    "logOutsideRight": false
+   },
+   "stage": {
+    "resolved": true,
+    "source": "hook",
+    "stageRect": {
+     "left": 400,
+     "top": 205.5,
+     "right": 529.03,
+     "bottom": 969,
+     "w": 129.03,
+     "h": 763.5,
+     "cx": 464.52,
+     "cy": 587.25
+    },
+    "fighters": [
+     {
+      "rect": {
+       "left": 400,
+       "top": 205.5,
+       "right": 457.52,
+       "bottom": 969,
+       "w": 57.52,
+       "h": 763.5,
+       "cx": 428.76,
+       "cy": 587.25
+      },
+      "tag": "DIV"
+     },
+     {
+      "rect": {
+       "left": 471.52,
+       "top": 205.5,
+       "right": 529.03,
+       "bottom": 969,
+       "w": 57.52,
+       "h": 763.5,
+       "cx": 500.27,
+       "cy": 587.25
+      },
+      "tag": "DIV"
+     }
+    ]
+   },
+   "topbar": {
+    "resolved": true,
+    "source": "hook",
+    "rect": {
+     "left": 154,
+     "top": 157,
+     "right": 775.03,
+     "bottom": 195.5,
+     "w": 621.03,
+     "h": 38.5,
+     "cx": 464.52,
+     "cy": 176.25
+    },
+    "tag": "DIV#b3-topbar",
+    "borderTopWidth": "0px",
+    "borderRightWidth": "0px",
+    "borderBottomWidth": "0px",
+    "borderLeftWidth": "0px",
+    "borderTopStyle": "none",
+    "bg": "rgba(0, 0, 0, 0)",
+    "bgTransparent": true,
+    "bgImage": "none",
+    "boxShadow": "none"
+   },
+   "dotsSelf": {
+    "present": true,
+    "rect": {
+     "left": 158,
+     "top": 167.25,
+     "right": 284,
+     "bottom": 185.25,
+     "w": 126,
+     "h": 18,
+     "cx": 221,
+     "cy": 176.25
+    },
+    "text": "●●●●●●"
+   },
+   "dotsFoe": {
+    "present": true,
+    "rect": {
+     "left": 645.03,
+     "top": 167.25,
+     "right": 771.03,
+     "bottom": 185.25,
+     "w": 126,
+     "h": 18,
+     "cx": 708.03,
+     "cy": 176.25
+    },
+    "text": "●●●●●●"
+   },
+   "turnText": {
+    "present": true,
+    "text": "第 2 回合",
+    "rect": {
+     "left": 425.05,
+     "top": 174.25,
+     "right": 503.98,
+     "bottom": 195.5,
+     "w": 78.94,
+     "h": 21.25,
+     "cx": 464.52,
+     "cy": 184.88
+    },
+    "candidates": [
+     "DIV#b3-round=\"第 2 回合\""
+    ],
+    "bodyMirror": "2"
+   },
+   "skills": {
+    "count": 4,
+    "cells": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 154,
+       "top": 205.5,
+       "right": 386,
+       "bottom": 390.38,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 297.94
+      },
+      "text": "⭐ 0 啃咬 🐛虫系 攻击 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 0",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 154,
+       "top": 398.38,
+       "right": 386,
+       "bottom": 583.25,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 490.81
+      },
+      "text": "⭐ 1 防御 ⚪普通系 防御 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 1",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "普通系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 2,
+      "rect": {
+       "left": 154,
+       "top": 591.25,
+       "right": 386,
+       "bottom": 776.13,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 683.69
+      },
+      "text": "⭐ 3 翅刃 🐛虫系 攻击 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 3",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 3,
+      "rect": {
+       "left": 154,
+       "top": 784.13,
+       "right": 386,
+       "bottom": 969,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 876.56
+      },
+      "text": "⭐ 1 风隐 🪶翼系 状态 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 1",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "翼系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     }
+    ],
+    "clickableCount": 4,
+    "shortCount": 0,
+    "lastBottom": 969
+   },
+   "switchRows": {
+    "count": 5,
+    "rows": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 0 音速犬 🔥火系 366/366",
+      "elementName": "火系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "up",
+      "relGlyph": true,
+      "hpText": "366/366",
+      "name": "音速犬"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 1 仪式巨像 ⛰️地系 401/401",
+      "elementName": "地系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "hpText": "401/401",
+      "name": "仪式巨像"
+     },
+     {
+      "index": 2,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 2 雪影娃娃 ❄️冰系 442/442",
+      "elementName": "冰系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "up",
+      "relGlyph": true,
+      "hpText": "442/442",
+      "name": "雪影娃娃"
+     },
+     {
+      "index": 3,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 1 皇家狮鹫 🪶翼系 403/403",
+      "elementName": "翼系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "down",
+      "relGlyph": true,
+      "hpText": "403/403",
+      "name": "皇家狮鹫"
+     },
+     {
+      "index": 4,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 3 化蝶 🐛虫系 311/311",
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "hpText": "311/311",
+      "name": "化蝶"
+     }
+    ],
+    "lastBottom": 0,
+    "skillTabLastBottom": null
+   },
+   "item": {
+    "count": 2,
+    "cells": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做"
+     }
+    ],
+    "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
+    "panelFound": true
+   },
+   "log": {
+    "count": 2,
+    "turns": [
+     2,
+     1
+    ],
+    "turnSource": "attr",
+    "firstTurn": 2,
+    "maxTurn": 2,
+    "colWidth": 232,
+    "colRect": {
+     "left": 543.03,
+     "top": 205.5,
+     "right": 775.03,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 659.03,
+     "cy": 587.25
+    },
+    "texts": [
+     "第 2 回合（最新） 你换上雪影娃娃；对手换上喵喵。",
+     "第 1 回合 音速犬使用强制重启，造成 214 伤害（属性克制）。 水灵使用水枪，造成 66 伤害。"
+    ],
+    "scrollTag": "DIV"
+   },
+   "footer": {
+    "resolved": true,
+    "rect": {
+     "left": 154,
+     "top": 981,
+     "right": 775.03,
+     "bottom": 1025,
+     "w": 621.03,
+     "h": 44,
+     "cx": 464.52,
+     "cy": 1003
+    },
+    "charge": {
+     "present": true,
+     "source": "hook",
+     "text": "⭐ 7 / 10",
+     "energy": 7,
+     "cap": 10,
+     "rect": {
+      "left": 154,
+      "top": 981,
+      "right": 278.7,
+      "bottom": 1025,
+      "w": 124.7,
+      "h": 44,
+      "cx": 216.35,
+      "cy": 1003
+     }
+    },
+    "chargeRect": {
+     "left": 154,
+     "top": 981,
+     "right": 278.7,
+     "bottom": 1025,
+     "w": 124.7,
+     "h": 44,
+     "cx": 216.35,
+     "cy": 1003
+    },
+    "tabs": {
+     "count": 4,
+     "buttons": [
+      {
+       "label": "技能",
+       "value": "skill",
+       "on": true,
+       "bg": "rgb(30, 59, 85)",
+       "borderColor": "rgb(91, 134, 173)",
+       "color": "rgb(255, 255, 255)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 356.03,
+        "top": 981,
+        "right": 454.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 405.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "更换",
+       "value": "switch",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 463.03,
+        "top": 981,
+        "right": 561.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 512.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "物品",
+       "value": "item",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 570.03,
+        "top": 981,
+        "right": 668.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 619.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "逃跑",
+       "value": "escape",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 677.03,
+        "top": 981,
+        "right": 775.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 726.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      }
+     ],
+     "bodyTab": "skill",
+     "labels": [
+      "技能",
+      "更换",
+      "物品",
+      "逃跑"
+     ]
+    }
+   },
+   "hp": {
+    "self": {
+     "found": true,
+     "source": "hook:data-b3-self-hp-fill",
+     "bar": {
+      "left": 474.41,
+      "top": 404.86,
+      "right": 474.41,
+      "bottom": 412.86,
+      "w": 0,
+      "h": 8,
+      "cx": 474.41,
+      "cy": 408.86
+     },
+     "fill": {
+      "left": 474.41,
+      "top": 404.86,
+      "right": 474.41,
+      "bottom": 412.86,
+      "w": 0,
+      "h": 8,
+      "cx": 474.41,
+      "cy": 408.86
+     },
+     "direction": "ltr",
+     "fillLeft": 0,
+     "fillRight": 0,
+     "ratio": null,
+     "align": "left"
+    },
+    "foe": {
+     "found": true,
+     "source": "hook:data-b3-foe-hp-fill",
+     "bar": {
+      "left": 487.52,
+      "top": 359.19,
+      "right": 487.52,
+      "bottom": 367.19,
+      "w": 0,
+      "h": 8,
+      "cx": 487.52,
+      "cy": 363.19
+     },
+     "fill": {
+      "left": 487.52,
+      "top": 359.19,
+      "right": 487.52,
+      "bottom": 367.19,
+      "w": 0,
+      "h": 8,
+      "cx": 487.52,
+      "cy": 363.19
+     },
+     "direction": "rtl",
+     "fillLeft": 0,
+     "fillRight": 0,
+     "ratio": null,
+     "align": "left"
+    }
+   },
+   "tab": {
+    "skill": "skill"
+   },
+   "root": {
+    "present": true,
+    "rect": {
+     "left": 138,
+     "top": 139,
+     "right": 791.03,
+     "bottom": 1039,
+     "w": 653.03,
+     "h": 900,
+     "cx": 464.52,
+     "cy": 589
+    },
+    "source": "hook",
+    "tag": "DIV.b3-wrap",
+    "parentTag": "SECTION#battle-panel"
+   },
+   "pending": {
+    "count": 24,
+    "kinds": [
+     "b3-slot-row",
+     "b3-slot",
+     "b3-slot.b3-slot--grey"
+    ]
+   },
+   "hooks": {
+    "present": [
+     "data-b3-skill-slot",
+     "data-b3-cost",
+     "data-b3-cost-short",
+     "data-b3-rel",
+     "data-b3-switch-row",
+     "data-b3-item-cell",
+     "data-b3-log-turn",
+     "data-b3-turn",
+     "data-b3-dots-self",
+     "data-b3-dots-foe",
+     "body[data-b3-tab]"
+    ],
+    "absent": [],
+    "counts": {
+     "data-b3-skill-slot": 4,
+     "data-b3-cost": 10,
+     "data-b3-cost-short": 4,
+     "data-b3-rel": 14,
+     "data-b3-switch-row": 5,
+     "data-b3-item-cell": 2,
+     "data-b3-log-turn": 2,
+     "data-b3-turn": 2,
+     "data-b3-dots-self": 1,
+     "data-b3-dots-foe": 1,
+     "body[data-b3-tab]": 1
+    }
+   },
+   "boot": {
+    "ready": "yes",
+    "battlePanelVisible": true,
+    "hasView": true,
+    "entryOk": true,
+    "consoleErrors": 0,
+    "firstError": null
+   }
+  },
+  "switch": {
+   "state": "switch",
+   "errors": [],
+   "requiredHooks": {
+    "data-b3-skill-slot": 4,
+    "data-b3-cost": 10,
+    "data-b3-cost-short": 4,
+    "data-b3-rel": 14,
+    "data-b3-switch-row": 5,
+    "data-b3-item-cell": 2,
+    "data-b3-log-turn": 2,
+    "data-b3-turn": 2,
+    "data-b3-dots-self": 1,
+    "data-b3-dots-foe": 1
+   },
+   "optionalAnchors": {
+    "data-b3-col-left": 1,
+    "data-b3-col-right": 1,
+    "data-b3-stage": 1,
+    "data-b3-fighter": 0,
+    "data-b3-fighter-self": 0,
+    "data-b3-fighter-foe": 0,
+    "data-b3-topbar": 1,
+    "data-b3-footer": 1,
+    "data-b3-charge": 2,
+    "data-b3-tab-btn": 0
+   },
+   "derivedFrom": {
+    "columns": "hook",
+    "stage": "hook",
+    "topbar": "hook"
+   },
+   "bodyTab": "skill",
+   "doc": {
+    "scrollWidth": 1440,
+    "clientWidth": 1440,
+    "innerWidth": 1440,
+    "bodyScrollWidth": 1440,
+    "bodyClientWidth": 1440,
+    "centerX": 720,
+    "title": "小芽 · 洛克王国：世界（训练场）",
+    "url": "http://127.0.0.1:8899/roco.html"
+   },
+   "engine": {
+    "hasView": true,
+    "turn": 2,
+    "activeIndex": 0,
+    "activeName": "铠甲虫",
+    "energy": 7,
+    "energyMax": 10,
+    "aliveTeammates": 6,
+    "aliveOthers": 5,
+    "petCount": 6,
+    "legalSkills": 4,
+    "legalKinds": "skill,charge,switch,surrender",
+    "phase": "battle"
+   },
+   "columns": {
+    "resolved": true,
+    "mainTag": "DIV.b3-main",
+    "kidCount": 3,
+    "kidTags": "DIV>DIV>DIV",
+    "left": {
+     "left": 154,
+     "top": 205.5,
+     "right": 386,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 270,
+     "cy": 587.25
+    },
+    "right": {
+     "left": 543.03,
+     "top": 205.5,
+     "right": 775.03,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 659.03,
+     "cy": 587.25
+    },
+    "mid": {
+     "left": 400,
+     "top": 205.5,
+     "right": 529.03,
+     "bottom": 969,
+     "w": 129.03,
+     "h": 763.5,
+     "cx": 464.52,
+     "cy": 587.25
+    },
+    "leftIsSkillParent": true,
+    "rightHasLog": true,
+    "logOutsideRight": false
+   },
+   "stage": {
+    "resolved": true,
+    "source": "hook",
+    "stageRect": {
+     "left": 400,
+     "top": 205.5,
+     "right": 529.03,
+     "bottom": 969,
+     "w": 129.03,
+     "h": 763.5,
+     "cx": 464.52,
+     "cy": 587.25
+    },
+    "fighters": [
+     {
+      "rect": {
+       "left": 400,
+       "top": 205.5,
+       "right": 457.52,
+       "bottom": 969,
+       "w": 57.52,
+       "h": 763.5,
+       "cx": 428.76,
+       "cy": 587.25
+      },
+      "tag": "DIV"
+     },
+     {
+      "rect": {
+       "left": 471.52,
+       "top": 205.5,
+       "right": 529.03,
+       "bottom": 969,
+       "w": 57.52,
+       "h": 763.5,
+       "cx": 500.27,
+       "cy": 587.25
+      },
+      "tag": "DIV"
+     }
+    ]
+   },
+   "topbar": {
+    "resolved": true,
+    "source": "hook",
+    "rect": {
+     "left": 154,
+     "top": 157,
+     "right": 775.03,
+     "bottom": 195.5,
+     "w": 621.03,
+     "h": 38.5,
+     "cx": 464.52,
+     "cy": 176.25
+    },
+    "tag": "DIV#b3-topbar",
+    "borderTopWidth": "0px",
+    "borderRightWidth": "0px",
+    "borderBottomWidth": "0px",
+    "borderLeftWidth": "0px",
+    "borderTopStyle": "none",
+    "bg": "rgba(0, 0, 0, 0)",
+    "bgTransparent": true,
+    "bgImage": "none",
+    "boxShadow": "none"
+   },
+   "dotsSelf": {
+    "present": true,
+    "rect": {
+     "left": 158,
+     "top": 167.25,
+     "right": 284,
+     "bottom": 185.25,
+     "w": 126,
+     "h": 18,
+     "cx": 221,
+     "cy": 176.25
+    },
+    "text": "●●●●●●"
+   },
+   "dotsFoe": {
+    "present": true,
+    "rect": {
+     "left": 645.03,
+     "top": 167.25,
+     "right": 771.03,
+     "bottom": 185.25,
+     "w": 126,
+     "h": 18,
+     "cx": 708.03,
+     "cy": 176.25
+    },
+    "text": "●●●●●●"
+   },
+   "turnText": {
+    "present": true,
+    "text": "第 2 回合",
+    "rect": {
+     "left": 425.05,
+     "top": 174.25,
+     "right": 503.98,
+     "bottom": 195.5,
+     "w": 78.94,
+     "h": 21.25,
+     "cx": 464.52,
+     "cy": 184.88
+    },
+    "candidates": [
+     "DIV#b3-round=\"第 2 回合\""
+    ],
+    "bodyMirror": "2"
+   },
+   "skills": {
+    "count": 4,
+    "cells": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 154,
+       "top": 205.5,
+       "right": 386,
+       "bottom": 390.38,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 297.94
+      },
+      "text": "⭐ 0 啃咬 🐛虫系 攻击 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 0",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 154,
+       "top": 398.38,
+       "right": 386,
+       "bottom": 583.25,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 490.81
+      },
+      "text": "⭐ 1 防御 ⚪普通系 防御 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 1",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "普通系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 2,
+      "rect": {
+       "left": 154,
+       "top": 591.25,
+       "right": 386,
+       "bottom": 776.13,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 683.69
+      },
+      "text": "⭐ 3 翅刃 🐛虫系 攻击 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 3",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 3,
+      "rect": {
+       "left": 154,
+       "top": 784.13,
+       "right": 386,
+       "bottom": 969,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 876.56
+      },
+      "text": "⭐ 1 风隐 🪶翼系 状态 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 1",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "翼系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     }
+    ],
+    "clickableCount": 4,
+    "shortCount": 0,
+    "lastBottom": 969
+   },
+   "switchRows": {
+    "count": 5,
+    "rows": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 0 音速犬 🔥火系 366/366",
+      "elementName": "火系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "up",
+      "relGlyph": true,
+      "hpText": "366/366",
+      "name": "音速犬"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 1 仪式巨像 ⛰️地系 401/401",
+      "elementName": "地系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "hpText": "401/401",
+      "name": "仪式巨像"
+     },
+     {
+      "index": 2,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 2 雪影娃娃 ❄️冰系 442/442",
+      "elementName": "冰系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "up",
+      "relGlyph": true,
+      "hpText": "442/442",
+      "name": "雪影娃娃"
+     },
+     {
+      "index": 3,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 1 皇家狮鹫 🪶翼系 403/403",
+      "elementName": "翼系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "down",
+      "relGlyph": true,
+      "hpText": "403/403",
+      "name": "皇家狮鹫"
+     },
+     {
+      "index": 4,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 3 化蝶 🐛虫系 311/311",
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "hpText": "311/311",
+      "name": "化蝶"
+     }
+    ],
+    "lastBottom": 0,
+    "skillTabLastBottom": 969
+   },
+   "item": {
+    "count": 2,
+    "cells": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做"
+     }
+    ],
+    "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
+    "panelFound": true
+   },
+   "log": {
+    "count": 2,
+    "turns": [
+     2,
+     1
+    ],
+    "turnSource": "attr",
+    "firstTurn": 2,
+    "maxTurn": 2,
+    "colWidth": 232,
+    "colRect": {
+     "left": 543.03,
+     "top": 205.5,
+     "right": 775.03,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 659.03,
+     "cy": 587.25
+    },
+    "texts": [
+     "第 2 回合（最新） 你换上雪影娃娃；对手换上喵喵。",
+     "第 1 回合 音速犬使用强制重启，造成 214 伤害（属性克制）。 水灵使用水枪，造成 66 伤害。"
+    ],
+    "scrollTag": "DIV"
+   },
+   "footer": {
+    "resolved": true,
+    "rect": {
+     "left": 154,
+     "top": 981,
+     "right": 775.03,
+     "bottom": 1025,
+     "w": 621.03,
+     "h": 44,
+     "cx": 464.52,
+     "cy": 1003
+    },
+    "charge": {
+     "present": true,
+     "source": "hook",
+     "text": "⭐ 7 / 10",
+     "energy": 7,
+     "cap": 10,
+     "rect": {
+      "left": 154,
+      "top": 981,
+      "right": 278.7,
+      "bottom": 1025,
+      "w": 124.7,
+      "h": 44,
+      "cx": 216.35,
+      "cy": 1003
+     }
+    },
+    "chargeRect": {
+     "left": 154,
+     "top": 981,
+     "right": 278.7,
+     "bottom": 1025,
+     "w": 124.7,
+     "h": 44,
+     "cx": 216.35,
+     "cy": 1003
+    },
+    "tabs": {
+     "count": 4,
+     "buttons": [
+      {
+       "label": "技能",
+       "value": "skill",
+       "on": true,
+       "bg": "rgb(30, 59, 85)",
+       "borderColor": "rgb(91, 134, 173)",
+       "color": "rgb(255, 255, 255)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 356.03,
+        "top": 981,
+        "right": 454.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 405.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "更换",
+       "value": "switch",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 463.03,
+        "top": 981,
+        "right": 561.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 512.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "物品",
+       "value": "item",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 570.03,
+        "top": 981,
+        "right": 668.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 619.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "逃跑",
+       "value": "escape",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 677.03,
+        "top": 981,
+        "right": 775.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 726.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      }
+     ],
+     "bodyTab": "skill",
+     "labels": [
+      "技能",
+      "更换",
+      "物品",
+      "逃跑"
+     ]
+    }
+   },
+   "hp": {
+    "self": {
+     "found": true,
+     "source": "hook:data-b3-self-hp-fill",
+     "bar": {
+      "left": 474.41,
+      "top": 404.86,
+      "right": 474.41,
+      "bottom": 412.86,
+      "w": 0,
+      "h": 8,
+      "cx": 474.41,
+      "cy": 408.86
+     },
+     "fill": {
+      "left": 474.41,
+      "top": 404.86,
+      "right": 474.41,
+      "bottom": 412.86,
+      "w": 0,
+      "h": 8,
+      "cx": 474.41,
+      "cy": 408.86
+     },
+     "direction": "ltr",
+     "fillLeft": 0,
+     "fillRight": 0,
+     "ratio": null,
+     "align": "left"
+    },
+    "foe": {
+     "found": true,
+     "source": "hook:data-b3-foe-hp-fill",
+     "bar": {
+      "left": 487.52,
+      "top": 359.19,
+      "right": 487.52,
+      "bottom": 367.19,
+      "w": 0,
+      "h": 8,
+      "cx": 487.52,
+      "cy": 363.19
+     },
+     "fill": {
+      "left": 487.52,
+      "top": 359.19,
+      "right": 487.52,
+      "bottom": 367.19,
+      "w": 0,
+      "h": 8,
+      "cx": 487.52,
+      "cy": 363.19
+     },
+     "direction": "rtl",
+     "fillLeft": 0,
+     "fillRight": 0,
+     "ratio": null,
+     "align": "left"
+    }
+   },
+   "tab": {
+    "skill": "skill",
+    "switch": "skill",
+    "switchClick": {
+     "how": "click:[data-b3-tab=\"switch\"]",
+     "w": 98,
+     "h": 44,
+     "bodyTabAfter": "skill"
+    }
+   },
+   "root": {
+    "present": true,
+    "rect": {
+     "left": 138,
+     "top": 139,
+     "right": 791.03,
+     "bottom": 1039,
+     "w": 653.03,
+     "h": 900,
+     "cx": 464.52,
+     "cy": 589
+    },
+    "source": "hook",
+    "tag": "DIV.b3-wrap",
+    "parentTag": "SECTION#battle-panel"
+   },
+   "pending": {
+    "count": 24,
+    "kinds": [
+     "b3-slot-row",
+     "b3-slot",
+     "b3-slot.b3-slot--grey"
+    ]
+   },
+   "hooks": {
+    "present": [
+     "data-b3-skill-slot",
+     "data-b3-cost",
+     "data-b3-cost-short",
+     "data-b3-rel",
+     "data-b3-switch-row",
+     "data-b3-item-cell",
+     "data-b3-log-turn",
+     "data-b3-turn",
+     "data-b3-dots-self",
+     "data-b3-dots-foe",
+     "body[data-b3-tab]"
+    ],
+    "absent": [],
+    "counts": {
+     "data-b3-skill-slot": 4,
+     "data-b3-cost": 10,
+     "data-b3-cost-short": 4,
+     "data-b3-rel": 14,
+     "data-b3-switch-row": 5,
+     "data-b3-item-cell": 2,
+     "data-b3-log-turn": 2,
+     "data-b3-turn": 2,
+     "data-b3-dots-self": 1,
+     "data-b3-dots-foe": 1,
+     "body[data-b3-tab]": 1
+    }
+   },
+   "boot": {
+    "ready": "yes",
+    "battlePanelVisible": true,
+    "hasView": true,
+    "entryOk": true,
+    "consoleErrors": 0,
+    "firstError": null
+   }
+  },
+  "item": {
+   "state": "item",
+   "errors": [],
+   "requiredHooks": {
+    "data-b3-skill-slot": 4,
+    "data-b3-cost": 10,
+    "data-b3-cost-short": 4,
+    "data-b3-rel": 14,
+    "data-b3-switch-row": 5,
+    "data-b3-item-cell": 2,
+    "data-b3-log-turn": 2,
+    "data-b3-turn": 2,
+    "data-b3-dots-self": 1,
+    "data-b3-dots-foe": 1
+   },
+   "optionalAnchors": {
+    "data-b3-col-left": 1,
+    "data-b3-col-right": 1,
+    "data-b3-stage": 1,
+    "data-b3-fighter": 0,
+    "data-b3-fighter-self": 0,
+    "data-b3-fighter-foe": 0,
+    "data-b3-topbar": 1,
+    "data-b3-footer": 1,
+    "data-b3-charge": 2,
+    "data-b3-tab-btn": 0
+   },
+   "derivedFrom": {
+    "columns": "hook",
+    "stage": "hook",
+    "topbar": "hook"
+   },
+   "bodyTab": "skill",
+   "doc": {
+    "scrollWidth": 1440,
+    "clientWidth": 1440,
+    "innerWidth": 1440,
+    "bodyScrollWidth": 1440,
+    "bodyClientWidth": 1440,
+    "centerX": 720,
+    "title": "小芽 · 洛克王国：世界（训练场）",
+    "url": "http://127.0.0.1:8899/roco.html"
+   },
+   "engine": {
+    "hasView": true,
+    "turn": 2,
+    "activeIndex": 0,
+    "activeName": "铠甲虫",
+    "energy": 7,
+    "energyMax": 10,
+    "aliveTeammates": 6,
+    "aliveOthers": 5,
+    "petCount": 6,
+    "legalSkills": 4,
+    "legalKinds": "skill,charge,switch,surrender",
+    "phase": "battle"
+   },
+   "columns": {
+    "resolved": true,
+    "mainTag": "DIV.b3-main",
+    "kidCount": 3,
+    "kidTags": "DIV>DIV>DIV",
+    "left": {
+     "left": 154,
+     "top": 205.5,
+     "right": 386,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 270,
+     "cy": 587.25
+    },
+    "right": {
+     "left": 543.03,
+     "top": 205.5,
+     "right": 775.03,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 659.03,
+     "cy": 587.25
+    },
+    "mid": {
+     "left": 400,
+     "top": 205.5,
+     "right": 529.03,
+     "bottom": 969,
+     "w": 129.03,
+     "h": 763.5,
+     "cx": 464.52,
+     "cy": 587.25
+    },
+    "leftIsSkillParent": true,
+    "rightHasLog": true,
+    "logOutsideRight": false
+   },
+   "stage": {
+    "resolved": true,
+    "source": "hook",
+    "stageRect": {
+     "left": 400,
+     "top": 205.5,
+     "right": 529.03,
+     "bottom": 969,
+     "w": 129.03,
+     "h": 763.5,
+     "cx": 464.52,
+     "cy": 587.25
+    },
+    "fighters": [
+     {
+      "rect": {
+       "left": 400,
+       "top": 205.5,
+       "right": 457.52,
+       "bottom": 969,
+       "w": 57.52,
+       "h": 763.5,
+       "cx": 428.76,
+       "cy": 587.25
+      },
+      "tag": "DIV"
+     },
+     {
+      "rect": {
+       "left": 471.52,
+       "top": 205.5,
+       "right": 529.03,
+       "bottom": 969,
+       "w": 57.52,
+       "h": 763.5,
+       "cx": 500.27,
+       "cy": 587.25
+      },
+      "tag": "DIV"
+     }
+    ]
+   },
+   "topbar": {
+    "resolved": true,
+    "source": "hook",
+    "rect": {
+     "left": 154,
+     "top": 157,
+     "right": 775.03,
+     "bottom": 195.5,
+     "w": 621.03,
+     "h": 38.5,
+     "cx": 464.52,
+     "cy": 176.25
+    },
+    "tag": "DIV#b3-topbar",
+    "borderTopWidth": "0px",
+    "borderRightWidth": "0px",
+    "borderBottomWidth": "0px",
+    "borderLeftWidth": "0px",
+    "borderTopStyle": "none",
+    "bg": "rgba(0, 0, 0, 0)",
+    "bgTransparent": true,
+    "bgImage": "none",
+    "boxShadow": "none"
+   },
+   "dotsSelf": {
+    "present": true,
+    "rect": {
+     "left": 158,
+     "top": 167.25,
+     "right": 284,
+     "bottom": 185.25,
+     "w": 126,
+     "h": 18,
+     "cx": 221,
+     "cy": 176.25
+    },
+    "text": "●●●●●●"
+   },
+   "dotsFoe": {
+    "present": true,
+    "rect": {
+     "left": 645.03,
+     "top": 167.25,
+     "right": 771.03,
+     "bottom": 185.25,
+     "w": 126,
+     "h": 18,
+     "cx": 708.03,
+     "cy": 176.25
+    },
+    "text": "●●●●●●"
+   },
+   "turnText": {
+    "present": true,
+    "text": "第 2 回合",
+    "rect": {
+     "left": 425.05,
+     "top": 174.25,
+     "right": 503.98,
+     "bottom": 195.5,
+     "w": 78.94,
+     "h": 21.25,
+     "cx": 464.52,
+     "cy": 184.88
+    },
+    "candidates": [
+     "DIV#b3-round=\"第 2 回合\""
+    ],
+    "bodyMirror": "2"
+   },
+   "skills": {
+    "count": 4,
+    "cells": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 154,
+       "top": 205.5,
+       "right": 386,
+       "bottom": 390.38,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 297.94
+      },
+      "text": "⭐ 0 啃咬 🐛虫系 攻击 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 0",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 154,
+       "top": 398.38,
+       "right": 386,
+       "bottom": 583.25,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 490.81
+      },
+      "text": "⭐ 1 防御 ⚪普通系 防御 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 1",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "普通系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 2,
+      "rect": {
+       "left": 154,
+       "top": 591.25,
+       "right": 386,
+       "bottom": 776.13,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 683.69
+      },
+      "text": "⭐ 3 翅刃 🐛虫系 攻击 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 3",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     },
+     {
+      "index": 3,
+      "rect": {
+       "left": 154,
+       "top": 784.13,
+       "right": 386,
+       "bottom": 969,
+       "w": 232,
+       "h": 184.88,
+       "cx": 270,
+       "cy": 876.56
+      },
+      "text": "⭐ 1 风隐 🪶翼系 状态 预期伤害 —",
+      "costHook": true,
+      "costText": "⭐ 1",
+      "costShortAttr": "no",
+      "costShortHook": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "elementName": "翼系",
+      "hasEmoji": true,
+      "starChars": "⭐",
+      "clickable": true,
+      "clickSignal": "data-b3-slot-legal"
+     }
+    ],
+    "clickableCount": 4,
+    "shortCount": 0,
+    "lastBottom": 969
+   },
+   "switchRows": {
+    "count": 5,
+    "rows": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 0 音速犬 🔥火系 366/366",
+      "elementName": "火系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "up",
+      "relGlyph": true,
+      "hpText": "366/366",
+      "name": "音速犬"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 1 仪式巨像 ⛰️地系 401/401",
+      "elementName": "地系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "hpText": "401/401",
+      "name": "仪式巨像"
+     },
+     {
+      "index": 2,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 2 雪影娃娃 ❄️冰系 442/442",
+      "elementName": "冰系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "up",
+      "relGlyph": true,
+      "hpText": "442/442",
+      "name": "雪影娃娃"
+     },
+     {
+      "index": 3,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 1 皇家狮鹫 🪶翼系 403/403",
+      "elementName": "翼系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "down",
+      "relGlyph": true,
+      "hpText": "403/403",
+      "name": "皇家狮鹫"
+     },
+     {
+      "index": 4,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "⭐ 3 化蝶 🐛虫系 311/311",
+      "elementName": "虫系",
+      "hasEmoji": true,
+      "relPresent": true,
+      "relValue": "none",
+      "relGlyph": true,
+      "hpText": "311/311",
+      "name": "化蝶"
+     }
+    ],
+    "lastBottom": 0,
+    "skillTabLastBottom": null
+   },
+   "item": {
+    "count": 2,
+    "cells": [
+     {
+      "index": 0,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
+     },
+     {
+      "index": 1,
+      "rect": {
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
+      },
+      "text": "首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做"
+     }
+    ],
+    "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
+    "panelFound": true
+   },
+   "log": {
+    "count": 2,
+    "turns": [
+     2,
+     1
+    ],
+    "turnSource": "attr",
+    "firstTurn": 2,
+    "maxTurn": 2,
+    "colWidth": 232,
+    "colRect": {
+     "left": 543.03,
+     "top": 205.5,
+     "right": 775.03,
+     "bottom": 969,
+     "w": 232,
+     "h": 763.5,
+     "cx": 659.03,
+     "cy": 587.25
+    },
+    "texts": [
+     "第 2 回合（最新） 你换上雪影娃娃；对手换上喵喵。",
+     "第 1 回合 音速犬使用强制重启，造成 214 伤害（属性克制）。 水灵使用水枪，造成 66 伤害。"
+    ],
+    "scrollTag": "DIV"
+   },
+   "footer": {
+    "resolved": true,
+    "rect": {
+     "left": 154,
+     "top": 981,
+     "right": 775.03,
+     "bottom": 1025,
+     "w": 621.03,
+     "h": 44,
+     "cx": 464.52,
+     "cy": 1003
+    },
+    "charge": {
+     "present": true,
+     "source": "hook",
+     "text": "⭐ 7 / 10",
+     "energy": 7,
+     "cap": 10,
+     "rect": {
+      "left": 154,
+      "top": 981,
+      "right": 278.7,
+      "bottom": 1025,
+      "w": 124.7,
+      "h": 44,
+      "cx": 216.35,
+      "cy": 1003
+     }
+    },
+    "chargeRect": {
+     "left": 154,
+     "top": 981,
+     "right": 278.7,
+     "bottom": 1025,
+     "w": 124.7,
+     "h": 44,
+     "cx": 216.35,
+     "cy": 1003
+    },
+    "tabs": {
+     "count": 4,
+     "buttons": [
+      {
+       "label": "技能",
+       "value": "skill",
+       "on": true,
+       "bg": "rgb(30, 59, 85)",
+       "borderColor": "rgb(91, 134, 173)",
+       "color": "rgb(255, 255, 255)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 356.03,
+        "top": 981,
+        "right": 454.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 405.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "更换",
+       "value": "switch",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 463.03,
+        "top": 981,
+        "right": 561.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 512.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "物品",
+       "value": "item",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 570.03,
+        "top": 981,
+        "right": 668.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 619.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      },
+      {
+       "label": "逃跑",
+       "value": "escape",
+       "on": false,
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
+       "fontWeight": "650",
+       "rect": {
+        "left": 677.03,
+        "top": 981,
+        "right": 775.03,
+        "bottom": 1025,
+        "w": 98,
+        "h": 44,
+        "cx": 726.03,
+        "cy": 1003
+       },
+       "tag": "BUTTON",
+       "hidden": false
+      }
+     ],
+     "bodyTab": "skill",
+     "labels": [
+      "技能",
+      "更换",
+      "物品",
+      "逃跑"
+     ]
+    }
+   },
+   "hp": {
+    "self": {
+     "found": true,
+     "source": "hook:data-b3-self-hp-fill",
+     "bar": {
+      "left": 474.41,
+      "top": 404.86,
+      "right": 474.41,
+      "bottom": 412.86,
+      "w": 0,
+      "h": 8,
+      "cx": 474.41,
+      "cy": 408.86
+     },
+     "fill": {
+      "left": 474.41,
+      "top": 404.86,
+      "right": 474.41,
+      "bottom": 412.86,
+      "w": 0,
+      "h": 8,
+      "cx": 474.41,
+      "cy": 408.86
+     },
+     "direction": "ltr",
+     "fillLeft": 0,
+     "fillRight": 0,
+     "ratio": null,
+     "align": "left"
+    },
+    "foe": {
+     "found": true,
+     "source": "hook:data-b3-foe-hp-fill",
+     "bar": {
+      "left": 487.52,
+      "top": 359.19,
+      "right": 487.52,
+      "bottom": 367.19,
+      "w": 0,
+      "h": 8,
+      "cx": 487.52,
+      "cy": 363.19
+     },
+     "fill": {
+      "left": 487.52,
+      "top": 359.19,
+      "right": 487.52,
+      "bottom": 367.19,
+      "w": 0,
+      "h": 8,
+      "cx": 487.52,
+      "cy": 363.19
+     },
+     "direction": "rtl",
+     "fillLeft": 0,
+     "fillRight": 0,
+     "ratio": null,
+     "align": "left"
+    }
+   },
+   "tab": {
+    "skill": "skill",
+    "item": "skill",
+    "itemClick": {
+     "how": "click:[data-b3-tab=\"item\"]",
+     "w": 98,
+     "h": 44,
+     "bodyTabAfter": "skill"
+    }
+   },
+   "root": {
+    "present": true,
+    "rect": {
+     "left": 138,
+     "top": 139,
+     "right": 791.03,
+     "bottom": 1039,
+     "w": 653.03,
+     "h": 900,
+     "cx": 464.52,
+     "cy": 589
+    },
+    "source": "hook",
+    "tag": "DIV.b3-wrap",
+    "parentTag": "SECTION#battle-panel"
+   },
+   "pending": {
+    "count": 24,
+    "kinds": [
+     "b3-slot-row",
+     "b3-slot",
+     "b3-slot.b3-slot--grey"
+    ]
+   },
+   "hooks": {
+    "present": [
+     "data-b3-skill-slot",
+     "data-b3-cost",
+     "data-b3-cost-short",
+     "data-b3-rel",
+     "data-b3-switch-row",
+     "data-b3-item-cell",
+     "data-b3-log-turn",
+     "data-b3-turn",
+     "data-b3-dots-self",
+     "data-b3-dots-foe",
+     "body[data-b3-tab]"
+    ],
+    "absent": [],
+    "counts": {
+     "data-b3-skill-slot": 4,
+     "data-b3-cost": 10,
+     "data-b3-cost-short": 4,
+     "data-b3-rel": 14,
+     "data-b3-switch-row": 5,
+     "data-b3-item-cell": 2,
+     "data-b3-log-turn": 2,
+     "data-b3-turn": 2,
+     "data-b3-dots-self": 1,
+     "data-b3-dots-foe": 1,
+     "body[data-b3-tab]": 1
+    }
+   },
+   "boot": {
+    "ready": "yes",
+    "battlePanelVisible": true,
+    "hasView": true,
+    "entryOk": true,
+    "consoleErrors": 0,
+    "firstError": null
+   }
+  }
+ },
+ "counterproofs": [
+  {
+   "id": "selftest-baseline",
+   "check": "(全部非 meta 判据)",
+   "desc": "判据对已知全绿的合成基线必须全绿（红＝判据是空的）",
+   "ok": true,
+   "hit": "（全绿）"
+  },
+  {
+   "id": "cp-columns-skew",
+   "check": "geom-columns-equal",
+   "desc": "把右列宽度写歪（232 → 272px）",
+   "ok": true,
+   "hit": "左右列不等宽：左 232px / 右 272px，差 40px > 2px"
+  },
+  {
+   "id": "cp-hscroll",
+   "check": "geom-no-hscroll",
+   "desc": "让页面横向溢出（scrollWidth 1460 > clientWidth 1440）",
+   "ok": true,
+   "hit": "横向溢出：scrollWidth 1460 > clientWidth 1440（多 20px）"
+  },
+  {
+   "id": "cp-axis-off",
+   "check": "geom-stage-axis",
+   "desc": "把两张出战卡整体右移 20px（轴心离开页面中线）",
+   "ok": true,
+   "hit": "两卡轴心 740 ≠ 页面中线 720（差 20px > 2px）"
+  },
+  {
+   "id": "cp-topbar-border",
+   "check": "topbar-plain",
+   "desc": "给顶部信息栏加 1px 上边框",
+   "ok": true,
+   "hit": "有 Top 边框 borderTopWidth=1px"
+  },
+  {
+   "id": "cp-topbar-bg",
+   "check": "topbar-plain",
+   "desc": "给顶部信息栏加底色",
+   "ok": true,
+   "hit": "有底色 backgroundColor=rgb(17, 28, 38)"
+  },
+  {
+   "id": "cp-dots-misaligned",
+   "check": "topbar-dots-center",
+   "desc": "把右侧存活点组下移 6px",
+   "ok": true,
+   "hit": "左右点组垂直中心不等：37 vs 43（差 6px > 2px） | 右点组中心 43 ≠ 行中心 37（差 6px）"
+  },
+  {
+   "id": "cp-turn-mismatch",
+   "check": "topbar-turn-text",
+   "desc": "回合文字写「第 3 回合」而 view.turn=2",
+   "ok": true,
+   "hit": "回合文字 3 ≠ view.turn 2"
+  },
+  {
+   "id": "cp-five-cells",
+   "check": "skills-four-cells",
+   "desc": "左列只画 3 格",
+   "ok": true,
+   "hit": "左列 3 格（要 4 格）"
+  },
+  {
+   "id": "cp-cell-no-rel",
+   "check": "skills-cell-content",
+   "desc": "第 1 格去掉克制标记",
+   "ok": true,
+   "hit": "第 1 格缺 data-b3-rel（克制标记）"
+  },
+  {
+   "id": "cp-cell-cost-only-number",
+   "check": "skills-cell-content",
+   "desc": "第 2 格消耗只写「3」不写 ⭐",
+   "ok": true,
+   "hit": "第 2 格消耗没写成「⭐ n」：\"3\""
+  },
+  {
+   "id": "cp-cost-short-clickable",
+   "check": "skills-cost-short",
+   "desc": "星不够的格子（cost-short=yes）仍然可点",
+   "ok": true,
+   "hit": "第 3 格 data-b3-cost-short=\"yes\" 却仍可点（信号 enabled-button） | 可点格 3 ≠ 引擎合法技能 2"
+  },
+  {
+   "id": "cp-legal-skills-mismatch",
+   "check": "skills-cost-short",
+   "desc": "可点格 1 个，引擎却给了 2 个合法技能",
+   "ok": true,
+   "hit": "可点格 1 ≠ 引擎合法技能 2"
+  },
+  {
+   "id": "cp-switch-tab-hook",
+   "check": "tab-hook-switch",
+   "desc": "点了「更换」但 body[data-b3-tab] 还停在 skill",
+   "ok": true,
+   "hit": "点「更换」按钮之后 body[data-b3-tab]=\"skill\"（要 \"switch\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
+  },
+  {
+   "id": "cp-switch-four-rows",
+   "check": "switch-five-rows",
+   "desc": "更换态只画 4 行（存活队友 5 只）",
+   "ok": true,
+   "hit": "左列 4 行 ≠ 可换上的存活队友 5 行（活着 6 只，其中 1 只正在场上）"
+  },
+  {
+   "id": "cp-switch-row-no-hp",
+   "check": "switch-row-content",
+   "desc": "更换态第 3 行不写血量",
+   "ok": true,
+   "hit": "第 3 行没有血量（要写成 n / m）：\"化蝶 虫系 攻击\""
+  },
+  {
+   "id": "cp-switch-bottom-misalign",
+   "check": "switch-bottom-align",
+   "desc": "更换态底边比技能态最后一格低 40px",
+   "ok": true,
+   "hit": "更换态底边 852 ≠ 技能态最后一格底边 820（差 32px > 4px）"
+  },
+  {
+   "id": "cp-switch-overlap-charge",
+   "check": "switch-not-overlap-charge",
+   "desc": "更换态第 5 行压到聚能区上",
+   "ok": true,
+   "hit": "第 5 行与聚能区相交：行 [16,860→248,1012]；聚能 [16,874→136,918]"
+  },
+  {
+   "id": "cp-item-forbidden-number",
+   "check": "item-no-definite-numbers",
+   "desc": "把「每场 3 次」这种确定性数字塞进背包格",
+   "ok": true,
+   "hit": "确定性数字/时长 4 处：每场 3 次、冷却 2 回合、+150%、立即生效"
+  },
+  {
+   "id": "cp-item-no-candidate-note",
+   "check": "item-candidate-boundary",
+   "desc": "背包格只写效果、不写「未核验/候选」边界",
+   "ok": true,
+   "hit": "左列没有「未核验/候选」字样：左边一列原文「愿力强化：把当前精灵的第一个技能换成愿力冲击。」"
+  },
+  {
+   "id": "cp-log-order-flipped",
+   "check": "log-latest-first",
+   "desc": "把战报顺序倒过来（最旧的回合在最上）",
+   "ok": true,
+   "hit": "顺序不对：DOM 里第 1 个回合分组是「第 2 回合」，上一个却是「第 1 回合」——最新在最上要求降序，实际 1 → 2"
+  },
+  {
+   "id": "cp-log-ungrouped",
+   "check": "log-grouped-by-turn",
+   "desc": "战报不按回合分组（回合号读不出）",
+   "ok": true,
+   "hit": "2/2 个分组读不出回合号（属性与文字里都没有「第 n 回合」）"
+  },
+  {
+   "id": "cp-log-wider",
+   "check": "log-width-equal",
+   "desc": "把战报列拉宽到 300px（与左列不等宽）",
+   "ok": true,
+   "hit": "战报列 300px ≠ 左列 232px（差 68px > 2px）"
+  },
+  {
+   "id": "cp-charge-stale",
+   "check": "bottom-charge-current",
+   "desc": "聚能显示 ⭐ 3 而 view 里是 2",
+   "ok": true,
+   "hit": "聚能显示 ⭐ 3 ≠ view.self.pets[0].energy 2"
+  },
+  {
+   "id": "cp-two-highlights",
+   "check": "bottom-exactly-one-highlight",
+   "desc": "两个按钮同时高亮",
+   "ok": true,
+   "hit": "高亮 2 个（要 1 个）：高亮=[\"物品\",\"逃跑\"]；底色分布 [[\"rgb(30,59,85)\",2],[\"rgb(21,34,48)\",2]]"
+  },
+  {
+   "id": "cp-foe-hp-ltr",
+   "check": "foe-hp-mirrored",
+   "desc": "把对手血条改成从左往右（direction:ltr + 左对齐）",
+   "ok": true,
+   "hit": "对手血条从左往右了：direction=ltr，填充=left（要求 rtl 或右对齐）"
+  },
+  {
+   "id": "cp-missing-hooks",
+   "check": "hooks-required",
+   "desc": "主线程一个 data-b3-* 钩子都不加",
+   "ok": true,
+   "hit": "缺 11 个钩子：data-b3-skill-slot、data-b3-cost、data-b3-cost-short、data-b3-rel、data-b3-switch-row、data-b3-item-cell、data-b3-log-turn、data-b3-turn、data-b3-dots-self、data-b3-dots-foe、body[data-b3-tab]"
+  },
+  {
+   "id": "cp-not-booted",
+   "check": "page-boots",
+   "desc": "页面没启动（render() 抛异常 → rocoReady 不是 yes、view 是空的）",
+   "ok": true,
+   "hit": "body.dataset.rocoReady=null（没启动） | window.rocoDemo.state.view 是空的（没进战斗） | #battle-panel 不可见 | 进入战斗的流程没走通（看报告 entry.steps）"
+  },
+  {
+   "id": "cp-console-error",
+   "check": "console-clean",
+   "desc": "页面抛了一个未捕获异常但界面看起来还在",
+   "ok": true,
+   "hit": "1 条报错，第一条：TypeError: x is not a function"
+  },
+  {
+   "id": "cp-wrap-squeezed",
+   "check": "wrap-spans-page",
+   "desc": "把 v3h 根容器挤成 621px 并左偏（和页面上现在发生的一样）",
+   "ok": true,
+   "hit": "根容器宽 621px < 1400px（视口 1440 − 2×16px 留白）——被别的块挤扁了 | 根容器中心 x=464.5 ≠ 页面中线 720（差 255.5px）"
+  },
+  {
+   "id": "cp-empty-rects",
+   "check": "geom-columns-equal",
+   "desc": "列容器量出来是 0 尺寸（元素在但没渲染）——不许当成「宽度相等」假绿",
+   "ok": true,
+   "hit": "左列尺寸是 0（元素在但没渲染出来：父级隐藏 / 页面没进战斗） | 右列尺寸是 0（元素在但没渲染出来）"
+  }
+ ],
+ "screenshots": [
+  "battle-v3-skill-1440x900.png",
+  "battle-v3-switch-1440x900.png",
+  "battle-v3-item-1440x900.png"
+ ],
+ "screenshots_note": "三张截图内容相同：切屏没生效（body[data-b3-tab] 在更换态=\"skill\"、背包态=\"skill\"）——技能/更换/物品三态拍到的都是技能态",
+ "console_errors": [],
+ "build_list": [
+  {
+   "id": "geom-stage-axis",
+   "criterion": "C1 三列几何",
+   "rule": "两张出战卡的轴心（两卡中心的连线中点）== 页面中线（±2px）",
+   "actual": "卡①②中心 x=428.76 / 500.27；轴心=464.51；页面中线=720；推导=hook",
+   "problems": [
+    "两卡轴心 464.51 ≠ 页面中线 720（差 255.49px > 2px）"
+   ]
+  },
+  {
+   "id": "tab-hook-switch",
+   "criterion": "C4 更换态",
+   "rule": "点「更换」之后 body[data-b3-tab] 必须是 switch",
+   "actual": "body[data-b3-tab]=\"skill\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"switch\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"skill\"}",
+   "problems": [
+    "点「更换」按钮之后 body[data-b3-tab]=\"skill\"（要 \"switch\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
+   ]
+  },
+  {
+   "id": "tab-hook-item",
+   "criterion": "C5 背包态",
+   "rule": "点「物品」之后 body[data-b3-tab] 必须是 item",
+   "actual": "body[data-b3-tab]=\"skill\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"item\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"skill\"}",
+   "problems": [
+    "点「物品」按钮之后 body[data-b3-tab]=\"skill\"（要 \"item\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
+   ]
+  },
+  {
+   "id": "item-no-definite-numbers",
+   "criterion": "C5 背包态",
+   "rule": "背包态不得出现确定性数字（每场 n 次 / 冷却 n 回合 / +150% / 立即生效）",
+   "actual": "违规命中 1 处：立即生效",
+   "problems": [
+    "确定性数字/时长 1 处：立即生效"
+   ]
+  },
+  {
+   "id": "wrap-spans-page",
+   "criterion": "CX 扩展（三列几何的容器条件）",
+   "rule": "v3h 片段的根容器必须占满页面（宽 ≥ 视口 − 2×16px）且水平居中（±2px）——容器被挤扁时，左右列即使等宽也「轴心对不上页面中线」，中间的卡会被压成 57px",
+   "actual": "根容器 653.03px（138→791.03），中心 464.52 / 页面中线 720；来源=hook；父块=SECTION#battle-panel",
+   "problems": [
+    "根容器宽 653.03px < 1400px（视口 1440 − 2×16px 留白）——被别的块挤扁了",
+    "根容器中心 x=464.52 ≠ 页面中线 720（差 255.48px）"
+   ]
+  }
+ ],
+ "known_limits": [
+  "**不启动服务**：它对着已经在跑的 ROCO_BASE（默认 8899）走一遍；服务没跑就整段红，所以它不进 verify:release",
+  "进入战斗走的是工坊六宠 → #start-standard-pvp 这条既有主流程；这条流程若改名，entry.steps 会写清卡在哪一步",
+  "「两卡轴心 == 页面中线」的量法 = 两张出战卡中心连线的中点与 documentElement 中线比较（两张并排卡不可能各自居中）",
+  "可点性的信号优先级：data-b3-legal → disabled/aria-disabled → pointer-events:none → opacity<0.8；报告逐格记了用的是哪个信号",
+  "「右边战报最新在上」需要 ≥2 个回合分组才可判：只有一个分组时判据记 skipped（不计入 N/M）",
+  "几何锚点优先读可选钩子（data-b3-col-left/right、data-b3-stage、data-b3-fighter、data-b3-topbar、data-b3-charge、data-b3-hp-bar/fill），缺了就按结构推导，推导来源写在 derivedFrom 里"
+ ],
+ "ok": false
+}

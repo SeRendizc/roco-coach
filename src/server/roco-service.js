@@ -1712,6 +1712,13 @@ function modeSummary(){
     sources_count:Array.isArray(mode.sources)?mode.sources.length:0,
     unknowns_count:unknowns.length,
     microcase_ids:Array.isArray(mode.microcase_ids)?mode.microcase_ids.slice():[],
+    // 2026-09-23（人类口径）：首领化与 PVP 魔法是**策略**，不是布尔 —— 页面与 Coach
+    // 要能读到 `allowed_if_eligible` 这样的可审计取值，所以这三块**只读转发**登记表原文。
+    // 转发的是原文，不做解释、不补默认值：读不到就是 undefined（页面写「未登记」）。
+    policies:mode.policies??null,
+    entry_gate:mode.entry_gate??null,
+    theme:mode.theme??null,
+    parameter_mirrors:Array.isArray(mode.parameters_mirrors)?mode.parameters_mirrors.slice():[],
     prematch:prematchContract(),
    };
   }

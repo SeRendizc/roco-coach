@@ -14,19 +14,19 @@
    "baseline_lexical_pack",
    "rag_index"
   ],
-  "generated_at": "2026-09-22T23:59:31.354Z"
+  "generated_at": "2026-09-23T03:27:13.183Z"
  },
  "corpus": {
-  "documents": 1714,
+  "documents": 1720,
   "by_record_kind": {
    "battle_skill": 579,
    "pet_record": 460,
    "pet_form": 162,
    "trait_record": 245,
-   "ledger_entry": 20,
+   "ledger_entry": 21,
    "conflict_record": 99,
    "conflict_policy": 1,
-   "ruleset_config": 68,
+   "ruleset_config": 73,
    "owned_instance": 80
   },
   "ruleset_config_ids": [
@@ -486,9 +486,9 @@
      "query": "腾挪这个特性该算哪一条",
      "query_length": 11,
      "contained_in": [],
-     "max_lcs": 2,
-     "max_lcs_doc": "trait::skill_000134",
-     "max_lcs_text": "腾挪",
+     "max_lcs": 3,
+     "max_lcs_doc": "EV-PVP-BOSS-FORM-STANDARD",
+     "max_lcs_text": "算哪一",
      "leak": false
     },
     {
@@ -1228,20 +1228,20 @@
    "recall_at_1": 0.7058823529411765,
    "recall_at_3": 0.8235294117647058,
    "recall_at_10": 0.9117647058823529,
-   "mrr": 0.7772058823529411,
+   "mrr": 0.7762254901960784,
    "entity_hit_rate": 0.9117647058823529,
-   "version_hit_rate": 0.3333333333333333,
+   "version_hit_rate": 0.5,
    "version_queries": 6,
    "conflict_abstention_rate": 0,
    "abstain_precision": null,
-   "evidence_level_match_rate": 0.9705882352941176,
+   "evidence_level_match_rate": 1,
    "recall_by_category": {
     "entity_alias": {
      "n": 9,
      "recall_at_1": 0.6666666666666666,
      "recall_at_3": 0.7777777777777778,
      "recall_at_10": 0.8888888888888888,
-     "mrr": 0.7444444444444445
+     "mrr": 0.7407407407407407
     },
     "skill_mechanic": {
      "n": 8,
@@ -1399,7 +1399,7 @@
     "top3": [
      {
       "id": "pet::pet_000274",
-      "score": 116.064305,
+      "score": 116.100291,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1415,7 +1415,7 @@
      },
      {
       "id": "pet::pet_000419",
-      "score": 116.064305,
+      "score": 116.100291,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1431,7 +1431,7 @@
      },
      {
       "id": "pet::pet_000151",
-      "score": 115.778361,
+      "score": 115.813855,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1462,7 +1462,7 @@
     "top3": [
      {
       "id": "pet::pet_000542",
-      "score": 6422.042897,
+      "score": 6422.45945,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1482,7 +1482,7 @@
      },
      {
       "id": "pet::pet_000537",
-      "score": 79.797755,
+      "score": 79.70993,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1494,7 +1494,7 @@
      },
      {
       "id": "pet::pet_000566",
-      "score": 79.797755,
+      "score": 79.70993,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1519,7 +1519,7 @@
     "top3": [
      {
       "id": "pet::pet_000011",
-      "score": 2099.84555,
+      "score": 2099.910798,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1531,14 +1531,7 @@
      },
      {
       "id": "pet::pet_000471",
-      "score": 27.559603,
-      "record_kind": "pet_record",
-      "evidence_level": "COMMUNITY_CURRENT",
-      "matched_aliases": []
-     },
-     {
-      "id": "pet::pet_000023",
-      "score": 25.233846,
+      "score": 27.265858,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -1558,7 +1551,7 @@
     "top3": [
      {
       "id": "battle_skill::skill_000338",
-      "score": 6337.290825,
+      "score": 6337.594919,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1574,14 +1567,14 @@
      },
      {
       "id": "pet::pet_000063",
-      "score": 35.321676,
+      "score": 35.476646,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "conflict::CF-NAMECOLLISION-0023",
-      "score": 34.800365,
+      "score": 35.010983,
       "record_kind": "conflict_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -1601,7 +1594,7 @@
     "top3": [
      {
       "id": "trait::skill_000003",
-      "score": 6338.443988,
+      "score": 6338.750701,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1617,14 +1610,14 @@
      },
      {
       "id": "trait::skill_000209",
-      "score": 82.380354,
+      "score": 82.754861,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "trait::skill_000009",
-      "score": 43.362835,
+      "score": 43.53836,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -1644,14 +1637,14 @@
     "top3": [
      {
       "id": "EV-OFFICIAL-PAIRING-AI",
-      "score": 109.413383,
+      "score": 110.185175,
       "record_kind": "ledger_entry",
       "evidence_level": "OFFICIAL_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "trait::skill_000101",
-      "score": 43.050361,
+      "score": 43.234747,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -1671,21 +1664,21 @@
     "top3": [
      {
       "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
-      "score": 37.4369,
+      "score": 36.384484,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "EV-MARKS-PERSISTENCE",
-      "score": 20.749582,
+      "score": 20.921578,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "EV-PVP-UNKNOWN-OPPONENT",
-      "score": 14.277627,
+      "score": 14.032547,
       "record_kind": "ledger_entry",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
@@ -1705,21 +1698,21 @@
     "top3": [
      {
       "id": "ruleset_config::mobile_s4_candidate_v2#energy.charge",
-      "score": 29.948236,
+      "score": 30.031383,
       "record_kind": "ruleset_config",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v3#energy.charge",
-      "score": 28.299709,
+      "score": 28.37828,
       "record_kind": "ruleset_config",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v2",
-      "score": 27.94199,
+      "score": 28.120605,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
@@ -1739,21 +1732,21 @@
     "top3": [
      {
       "id": "ruleset_config::mobile_s4_candidate_v2",
-      "score": 11.464615,
+      "score": 11.481664,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::legacy_sim_v1",
-      "score": 7.543759,
+      "score": 7.585087,
       "record_kind": "ruleset_config",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v3",
-      "score": 6.783112,
+      "score": 6.468706,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
@@ -1773,22 +1766,22 @@
     "top3": [
      {
       "id": "EV-PVP-STANDARD-TEAM-SIZE",
-      "score": 79.476201,
+      "score": 78.264851,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "EV-PVP-STANDARD-MANA",
-      "score": 62.917967,
+      "score": 61.947797,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
-      "id": "ruleset_config::mobile_s4_candidate_v3",
-      "score": 49.849005,
-      "record_kind": "ruleset_config",
+      "id": "EV-PVP-BOSS-FORM-STANDARD",
+      "score": 51.684241,
+      "record_kind": "ledger_entry",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
      }
@@ -1807,7 +1800,7 @@
     "top3": [
      {
       "id": "pet::pet_000274",
-      "score": 116.064305,
+      "score": 116.100291,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1823,7 +1816,7 @@
      },
      {
       "id": "pet::pet_000419",
-      "score": 116.064305,
+      "score": 116.100291,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1839,7 +1832,7 @@
      },
      {
       "id": "pet::pet_000151",
-      "score": 115.778361,
+      "score": 115.813855,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1868,7 +1861,7 @@
     "top3": [
      {
       "id": "owned::own-0001",
-      "score": 3181.274795,
+      "score": 3181.632108,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1880,14 +1873,14 @@
      },
      {
       "id": "owned::own-0011",
-      "score": 21.032723,
+      "score": 21.155271,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "owned::own-0012",
-      "score": 21.032723,
+      "score": 21.155271,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -1907,7 +1900,7 @@
     "top3": [
      {
       "id": "pet::pet_000355",
-      "score": 5862.75783,
+      "score": 5862.930789,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1923,7 +1916,7 @@
      },
      {
       "id": "pet::pet_000019",
-      "score": 5862.583627,
+      "score": 5862.756089,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1939,7 +1932,7 @@
      },
      {
       "id": "pet::pet_000357",
-      "score": 34.950833,
+      "score": 35.126806,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -1959,7 +1952,7 @@
     "top3": [
      {
       "id": "pet::pet_000532",
-      "score": 2618.991054,
+      "score": 2618.992568,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -1971,7 +1964,7 @@
      },
      {
       "id": "battle_skill::skill_000532",
-      "score": 26.40402,
+      "score": 26.455232,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -3226,9 +3219,9 @@
  "score_calibration": {
   "floor": 25,
   "path": "SCORE_FLOOR 只作用于**普通路径**；命中强意图词（哪条台账/哪套配置/我的个体/冲突）的查询把答案空间钉死到 2～100 条文档，走 floor=0，不再设相关性门槛。",
-  "min_plain_answerable_top_score": 44.054445,
-  "min_answerable_top_score_all_paths": 7.326423,
-  "max_absence_top_score": 13.669056,
+  "min_plain_answerable_top_score": 44.019894,
+  "min_answerable_top_score_all_paths": 7.220181,
+  "max_absence_top_score": 13.847757,
   "filter_fallback_queries": [
    "M01",
    "M02",
@@ -3361,7 +3354,7 @@
      "top3": [
       {
        "id": "pet::pet_000420",
-       "score": 6381.790585,
+       "score": 6382.091213,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -3381,7 +3374,7 @@
       },
       {
        "id": "pet::pet_000230",
-       "score": 5973.399969,
+       "score": 5973.772469,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -3401,7 +3394,7 @@
       },
       {
        "id": "pet::pet_000231",
-       "score": 5973.399969,
+       "score": 5973.772469,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -3469,7 +3462,7 @@
     "top3": [
      {
       "id": "pet::pet_000420",
-      "score": 6381.790585,
+      "score": 6382.091213,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -3489,7 +3482,7 @@
      },
      {
       "id": "pet::pet_000230",
-      "score": 5973.399969,
+      "score": 5973.772469,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -3509,7 +3502,7 @@
      },
      {
       "id": "pet::pet_000231",
-      "score": 5973.399969,
+      "score": 5973.772469,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -3564,14 +3557,14 @@
      "ids": [
       "pet::pet_000535",
       "conflict::CF-FORM-0003",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "pet::pet_000054",
       "pet::pet_000055",
       "pet::pet_000537",
       "pet::pet_000566",
       "pet::pet_000567",
       "pet::pet_000568",
-      "pet::pet_000016",
-      "pet::pet_000017"
+      "pet::pet_000016"
      ],
      "abstained": false,
      "reason_code": null,
@@ -3600,10 +3593,10 @@
        "evidence_level": "COMMUNITY_CURRENT"
       },
       {
-       "id": "pet::pet_000054",
-       "score": 8,
-       "record_kind": "pet_record",
-       "evidence_level": "COMMUNITY_CURRENT"
+       "id": "EV-PVP-BOSS-FORM-STANDARD",
+       "score": 9,
+       "record_kind": "ledger_entry",
+       "evidence_level": "RECORDED_IN_GAME"
       }
      ],
      "top_evidence_level": "COMMUNITY_CURRENT"
@@ -3654,7 +3647,7 @@
      "top3": [
       {
        "id": "pet::pet_000535",
-       "score": 6460.536944,
+       "score": 6461.190997,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -3674,7 +3667,7 @@
       },
       {
        "id": "pet::pet_000537",
-       "score": 79.543434,
+       "score": 79.446646,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -3686,7 +3679,7 @@
       },
       {
        "id": "pet::pet_000566",
-       "score": 79.543434,
+       "score": 79.446646,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -3746,7 +3739,7 @@
     "top3": [
      {
       "id": "pet::pet_000535",
-      "score": 6460.536944,
+      "score": 6461.190997,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -3766,7 +3759,7 @@
      },
      {
       "id": "pet::pet_000537",
-      "score": 79.543434,
+      "score": 79.446646,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -3778,7 +3771,7 @@
      },
      {
       "id": "pet::pet_000566",
-      "score": 79.543434,
+      "score": 79.446646,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -3832,6 +3825,7 @@
     },
     "baseline_lexical_pack": {
      "ids": [
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-ENERGY-ENDTURN-REGEN",
       "EV-MARKS-PERSISTENCE",
       "EV-PVP-OPPONENT-ROSTER-VISIBLE",
@@ -3840,8 +3834,7 @@
       "EV-TRAITS-TRIGGER-COMPLEXITY",
       "EV-TYPE-MULTIPLIER",
       "pet::pet_000023",
-      "pet::pet_000471",
-      "trait::skill_000055"
+      "pet::pet_000471"
      ],
      "abstained": false,
      "reason_code": null,
@@ -3855,8 +3848,14 @@
      "counted_as_hit_by_injection": false,
      "reciprocal_rank": 0,
      "version_hit": null,
-     "evidence_level_match": false,
+     "evidence_level_match": true,
      "top3": [
+      {
+       "id": "EV-PVP-BOSS-FORM-STANDARD",
+       "score": 4,
+       "record_kind": "ledger_entry",
+       "evidence_level": "RECORDED_IN_GAME"
+      },
       {
        "id": "EV-ENERGY-ENDTURN-REGEN",
        "score": 3,
@@ -3868,15 +3867,9 @@
        "score": 3,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT"
-      },
-      {
-       "id": "EV-PVP-OPPONENT-ROSTER-VISIBLE",
-       "score": 3,
-       "record_kind": "ledger_entry",
-       "evidence_level": "COMMUNITY_CURRENT"
       }
      ],
-     "top_evidence_level": "ENGINE_HYPOTHESIS"
+     "top_evidence_level": "RECORDED_IN_GAME"
     },
     "rag_index": {
      "ids": [
@@ -3914,7 +3907,7 @@
      "top3": [
       {
        "id": "pet::pet_000001",
-       "score": 2106.46202,
+       "score": 2106.521661,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -3926,7 +3919,7 @@
       },
       {
        "id": "pet::pet_000471",
-       "score": 27.320743,
+       "score": 27.026453,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -3971,7 +3964,7 @@
     "top3": [
      {
       "id": "pet::pet_000001",
-      "score": 2106.46202,
+      "score": 2106.521661,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -3983,7 +3976,7 @@
      },
      {
       "id": "pet::pet_000471",
-      "score": 27.320743,
+      "score": 27.026453,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -4024,6 +4017,7 @@
     "baseline_lexical_pack": {
      "ids": [
       "trait::skill_000189",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "pet::pet_000023",
       "pet::pet_000471",
       "trait::skill_000055",
@@ -4031,8 +4025,7 @@
       "ruleset_config::mobile_s4_candidate_v3",
       "EV-ENERGY-ENDTURN-REGEN",
       "EV-MARKS-PERSISTENCE",
-      "EV-PVP-OPPONENT-ROSTER-VISIBLE",
-      "EV-PVP-SPEED-DUEL-MODE"
+      "EV-PVP-OPPONENT-ROSTER-VISIBLE"
      ],
      "abstained": false,
      "reason_code": null,
@@ -4044,7 +4037,7 @@
       "hit_at_10": true
      },
      "counted_as_hit_by_injection": false,
-     "reciprocal_rank": 0.2,
+     "reciprocal_rank": 0.16666666666666666,
      "version_hit": null,
      "evidence_level_match": true,
      "top3": [
@@ -4055,13 +4048,13 @@
        "evidence_level": "COMMUNITY_CURRENT"
       },
       {
-       "id": "pet::pet_000023",
+       "id": "EV-PVP-BOSS-FORM-STANDARD",
        "score": 5,
-       "record_kind": "pet_record",
-       "evidence_level": "COMMUNITY_CURRENT"
+       "record_kind": "ledger_entry",
+       "evidence_level": "RECORDED_IN_GAME"
       },
       {
-       "id": "pet::pet_000471",
+       "id": "pet::pet_000023",
        "score": 5,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT"
@@ -4072,8 +4065,7 @@
     "rag_index": {
      "ids": [
       "pet::pet_000001",
-      "pet::pet_000471",
-      "pet::pet_000023"
+      "pet::pet_000471"
      ],
      "abstained": false,
      "reason_code": null,
@@ -4106,7 +4098,7 @@
      "top3": [
       {
        "id": "pet::pet_000001",
-       "score": 2104.678846,
+       "score": 2104.745156,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -4118,14 +4110,7 @@
       },
       {
        "id": "pet::pet_000471",
-       "score": 27.559603,
-       "record_kind": "pet_record",
-       "evidence_level": "COMMUNITY_CURRENT",
-       "matched_aliases": []
-      },
-      {
-       "id": "pet::pet_000023",
-       "score": 25.233846,
+       "score": 27.265858,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -4137,8 +4122,7 @@
    "rag_index": {
     "ids": [
      "pet::pet_000001",
-     "pet::pet_000471",
-     "pet::pet_000023"
+     "pet::pet_000471"
     ],
     "abstained": false,
     "reason_code": null,
@@ -4171,7 +4155,7 @@
     "top3": [
      {
       "id": "pet::pet_000001",
-      "score": 2104.678846,
+      "score": 2104.745156,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -4183,14 +4167,7 @@
      },
      {
       "id": "pet::pet_000471",
-      "score": 27.559603,
-      "record_kind": "pet_record",
-      "evidence_level": "COMMUNITY_CURRENT",
-      "matched_aliases": []
-     },
-     {
-      "id": "pet::pet_000023",
-      "score": 25.233846,
+      "score": 27.265858,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -4329,7 +4306,7 @@
      "top3": [
       {
        "id": "pet::pet_000011",
-       "score": 8578.076759,
+       "score": 8578.900631,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -4349,7 +4326,7 @@
       },
       {
        "id": "pet::pet_000033",
-       "score": 6016.94006,
+       "score": 6017.41757,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -4365,7 +4342,7 @@
       },
       {
        "id": "pet::pet_000393",
-       "score": 5994.954417,
+       "score": 5995.242658,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -4427,7 +4404,7 @@
     "top3": [
      {
       "id": "pet::pet_000011",
-      "score": 8578.076759,
+      "score": 8578.900631,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -4447,7 +4424,7 @@
      },
      {
       "id": "pet::pet_000033",
-      "score": 6016.94006,
+      "score": 6017.41757,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -4463,7 +4440,7 @@
      },
      {
       "id": "pet::pet_000393",
-      "score": 5994.954417,
+      "score": 5995.242658,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -4592,7 +4569,7 @@
      "top3": [
       {
        "id": "battle_skill::skill_000246",
-       "score": 6300.510637,
+       "score": 6300.637246,
        "record_kind": "battle_skill",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -4644,7 +4621,7 @@
     "top3": [
      {
       "id": "battle_skill::skill_000246",
-      "score": 6300.510637,
+      "score": 6300.637246,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -4815,7 +4792,7 @@
      "top3": [
       {
        "id": "owned::own-0001",
-       "score": 3205.045348,
+       "score": 3205.628919,
        "record_kind": "owned_instance",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -4827,14 +4804,14 @@
       },
       {
        "id": "owned::own-0011",
-       "score": 45.295233,
+       "score": 45.630697,
        "record_kind": "owned_instance",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "owned::own-0012",
-       "score": 45.295233,
+       "score": 45.630697,
        "record_kind": "owned_instance",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -4889,7 +4866,7 @@
     "top3": [
      {
       "id": "owned::own-0001",
-      "score": 3205.045348,
+      "score": 3205.628919,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -4901,14 +4878,14 @@
      },
      {
       "id": "owned::own-0011",
-      "score": 45.295233,
+      "score": 45.630697,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "owned::own-0012",
-      "score": 45.295233,
+      "score": 45.630697,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -5059,7 +5036,7 @@
      "top3": [
       {
        "id": "trait::skill_000001",
-       "score": 6297.260186,
+       "score": 6297.382609,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -5075,7 +5052,7 @@
       },
       {
        "id": "trait::skill_000217",
-       "score": 47.373891,
+       "score": 47.562605,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -5119,7 +5096,7 @@
     "top3": [
      {
       "id": "trait::skill_000001",
-      "score": 6297.260186,
+      "score": 6297.382609,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -5135,7 +5112,7 @@
      },
      {
       "id": "trait::skill_000217",
-      "score": 47.373891,
+      "score": 47.562605,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -5255,7 +5232,7 @@
      "top3": [
       {
        "id": "battle_skill::skill_000337",
-       "score": 6350.871236,
+       "score": 6351.207881,
        "record_kind": "battle_skill",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -5307,7 +5284,7 @@
     "top3": [
      {
       "id": "battle_skill::skill_000337",
-      "score": 6350.871236,
+      "score": 6351.207881,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -5390,11 +5367,11 @@
       "EV-PVP-OPPONENT-ROSTER-VISIBLE",
       "EV-ENERGY-ENDTURN-REGEN",
       "EV-LEAVE-SEMANTICS",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-PVP-SPEED-DUEL-MODE",
       "EV-SWIFT-INJECTION",
       "pet::pet_000023",
-      "pet::pet_000471",
-      "ruleset_config::mobile_s4_candidate_v3"
+      "pet::pet_000471"
      ],
      "abstained": false,
      "reason_code": null,
@@ -5468,21 +5445,21 @@
      "top3": [
       {
        "id": "EV-MARKS-PERSISTENCE",
-       "score": 71.256751,
+       "score": 71.982242,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "pet::pet_000471",
-       "score": 27.320743,
+       "score": 27.026453,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "trait::skill_000055",
-       "score": 25.935091,
+       "score": 25.644469,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -5528,21 +5505,21 @@
     "top3": [
      {
       "id": "EV-MARKS-PERSISTENCE",
-      "score": 71.256751,
+      "score": 71.982242,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "pet::pet_000471",
-      "score": 27.320743,
+      "score": 27.026453,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "trait::skill_000055",
-      "score": 25.935091,
+      "score": 25.644469,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -5696,21 +5673,21 @@
      "top3": [
       {
        "id": "EV-SWIFT-INJECTION",
-       "score": 67.682861,
+       "score": 68.481356,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "pet::pet_000471",
-       "score": 27.320743,
+       "score": 27.026453,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "trait::skill_000055",
-       "score": 25.935091,
+       "score": 25.644469,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -5757,21 +5734,21 @@
     "top3": [
      {
       "id": "EV-SWIFT-INJECTION",
-      "score": 67.682861,
+      "score": 68.481356,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "pet::pet_000471",
-      "score": 27.320743,
+      "score": 27.026453,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "trait::skill_000055",
-      "score": 25.935091,
+      "score": 25.644469,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -5889,7 +5866,7 @@
      "top3": [
       {
        "id": "EV-LEAVE-SEMANTICS",
-       "score": 65.363157,
+       "score": 65.961676,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -5930,7 +5907,7 @@
     "top3": [
      {
       "id": "EV-LEAVE-SEMANTICS",
-      "score": 65.363157,
+      "score": 65.961676,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -6006,10 +5983,10 @@
       "EV-BATTLEMODE-PARAMETERIZED",
       "EV-ENERGY-CHARGE",
       "EV-LEAVE-SEMANTICS",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-SWIFT-INJECTION",
       "EV-TRAITS-TRIGGER-COMPLEXITY",
-      "ruleset_config::mobile_s4_candidate_v2",
-      "ruleset_config::mobile_s4_candidate_v3"
+      "ruleset_config::mobile_s4_candidate_v2"
      ],
      "abstained": false,
      "reason_code": null,
@@ -6080,7 +6057,7 @@
      "top3": [
       {
        "id": "EV-ENERGY-COST8-EXISTS",
-       "score": 70.211304,
+       "score": 70.043465,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -6123,7 +6100,7 @@
     "top3": [
      {
       "id": "EV-ENERGY-COST8-EXISTS",
-      "score": 70.211304,
+      "score": 70.043465,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -6198,11 +6175,11 @@
       "EV-BATTLEMODE-PARAMETERIZED",
       "EV-ENERGY-ENDTURN-REGEN",
       "EV-OFFICIAL-PAIRING-AI",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "conflict_policy::pack",
       "EV-PVP-FAINT-MANA-LOSS",
-      "EV-PVP-STANDARD-MANA",
-      "EV-SWIFT-INJECTION",
-      "EV-TURN-ORDER-STRICT"
+      "ruleset_config::mobile_s4_candidate_v3",
+      "EV-PVP-STANDARD-MANA"
      ],
      "abstained": false,
      "reason_code": null,
@@ -6273,7 +6250,7 @@
      "top3": [
       {
        "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
-       "score": 51.678425,
+       "score": 50.820756,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -6316,7 +6293,7 @@
     "top3": [
      {
       "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
-      "score": 51.678425,
+      "score": 50.820756,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -6386,12 +6363,12 @@
       "EV-TURN-ORDER-STRICT",
       "EV-ENERGY-COST8-EXISTS",
       "ruleset_config::mobile_s4_candidate_v3",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "ruleset_config::mobile_s4_candidate_v2",
       "ruleset_config::mobile_s4_candidate_v2#turn_order",
       "ruleset_config::mobile_s4_candidate_v2#turn_order.end_turn",
       "ruleset_config::mobile_s4_candidate_v3#turn_order",
-      "ruleset_config::mobile_s4_candidate_v3#turn_order.end_turn",
-      "EV-BATTLEMODE-PARAMETERIZED"
+      "ruleset_config::mobile_s4_candidate_v3#turn_order.end_turn"
      ],
      "abstained": false,
      "reason_code": null,
@@ -6430,8 +6407,7 @@
     },
     "rag_index": {
      "ids": [
-      "EV-TURN-ORDER-MECHANISMS-EXIST",
-      "EV-ENERGY-COST8-EXISTS"
+      "EV-TURN-ORDER-MECHANISMS-EXIST"
      ],
      "abstained": false,
      "reason_code": null,
@@ -6461,16 +6437,9 @@
      "top3": [
       {
        "id": "EV-TURN-ORDER-MECHANISMS-EXIST",
-       "score": 74.456886,
+       "score": 73.962004,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
-       "matched_aliases": []
-      },
-      {
-       "id": "EV-ENERGY-COST8-EXISTS",
-       "score": 25.299824,
-       "record_kind": "ledger_entry",
-       "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       }
      ],
@@ -6479,8 +6448,7 @@
    },
    "rag_index": {
     "ids": [
-     "EV-TURN-ORDER-MECHANISMS-EXIST",
-     "EV-ENERGY-COST8-EXISTS"
+     "EV-TURN-ORDER-MECHANISMS-EXIST"
     ],
     "abstained": false,
     "reason_code": null,
@@ -6510,16 +6478,9 @@
     "top3": [
      {
       "id": "EV-TURN-ORDER-MECHANISMS-EXIST",
-      "score": 74.456886,
+      "score": 73.962004,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
-      "matched_aliases": []
-     },
-     {
-      "id": "EV-ENERGY-COST8-EXISTS",
-      "score": 25.299824,
-      "record_kind": "ledger_entry",
-      "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      }
     ],
@@ -6588,10 +6549,15 @@
     "baseline_lexical_pack": {
      "ids": [
       "EV-TYPE-MULTIPLIER",
-      "conflict_policy::pack",
-      "EV-PVP-FAINT-MANA-LOSS",
-      "EV-PVP-OPPONENT-ROSTER-VISIBLE",
-      "EV-PVP-STANDARD-TEAM-SIZE"
+      "EV-PVP-BOSS-FORM-STANDARD",
+      "ruleset_config::mobile_s4_candidate_v3",
+      "ruleset_config::mobile_s4_candidate_v3#actions",
+      "ruleset_config::mobile_s4_candidate_v3#actions.kinds",
+      "ruleset_config::mobile_s4_candidate_v3#actions.kinds.item",
+      "ruleset_config::mobile_s4_candidate_v3#policies",
+      "ruleset_config::mobile_s4_candidate_v3#policies.boss_form_policy",
+      "ruleset_config::mobile_s4_candidate_v3#policies.boss_form_policy.eligibility",
+      "ruleset_config::mobile_s4_candidate_v3#policies.magic_policy"
      ],
      "abstained": false,
      "reason_code": null,
@@ -6614,16 +6580,16 @@
        "evidence_level": "COMMUNITY_CURRENT"
       },
       {
-       "id": "conflict_policy::pack",
-       "score": 1,
-       "record_kind": "conflict_policy",
-       "evidence_level": "COMMUNITY_CURRENT"
+       "id": "EV-PVP-BOSS-FORM-STANDARD",
+       "score": 6,
+       "record_kind": "ledger_entry",
+       "evidence_level": "RECORDED_IN_GAME"
       },
       {
-       "id": "EV-PVP-FAINT-MANA-LOSS",
-       "score": 1,
-       "record_kind": "ledger_entry",
-       "evidence_level": "CROSS_SOURCE_SUPPORTED"
+       "id": "ruleset_config::mobile_s4_candidate_v3",
+       "score": 2,
+       "record_kind": "ruleset_config",
+       "evidence_level": "RECORDED_IN_GAME"
       }
      ],
      "top_evidence_level": "COMMUNITY_CURRENT"
@@ -6660,7 +6626,7 @@
      "top3": [
       {
        "id": "EV-TYPE-MULTIPLIER",
-       "score": 45.993649,
+       "score": 44.019894,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -6701,7 +6667,7 @@
     "top3": [
      {
       "id": "EV-TYPE-MULTIPLIER",
-      "score": 45.993649,
+      "score": 44.019894,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -6854,7 +6820,7 @@
      "top3": [
       {
        "id": "battle_skill::skill_000269",
-       "score": 6297.209304,
+       "score": 6297.341791,
        "record_kind": "battle_skill",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -6870,7 +6836,7 @@
       },
       {
        "id": "battle_skill::skill_000776",
-       "score": 47.16681,
+       "score": 47.364747,
        "record_kind": "battle_skill",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -6916,7 +6882,7 @@
     "top3": [
      {
       "id": "battle_skill::skill_000269",
-      "score": 6297.209304,
+      "score": 6297.341791,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -6932,7 +6898,7 @@
      },
      {
       "id": "battle_skill::skill_000776",
-      "score": 47.16681,
+      "score": 47.364747,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -6972,6 +6938,7 @@
     },
     "baseline_lexical_pack": {
      "ids": [
+      "EV-PVP-BOSS-FORM-STANDARD",
       "ruleset_config::mobile_s4_candidate_v2",
       "ruleset_config::mobile_s4_candidate_v2#energy",
       "ruleset_config::mobile_s4_candidate_v2#turn_order",
@@ -6980,8 +6947,7 @@
       "ruleset_config::mobile_s4_candidate_v3",
       "ruleset_config::mobile_s4_candidate_v3#energy",
       "ruleset_config::mobile_s4_candidate_v3#mana",
-      "ruleset_config::mobile_s4_candidate_v3#mana.loss_when_zero",
-      "ruleset_config::mobile_s4_candidate_v3#turn_order"
+      "ruleset_config::mobile_s4_candidate_v3#mana.loss_when_zero"
      ],
      "abstained": false,
      "reason_code": null,
@@ -6994,9 +6960,15 @@
      },
      "counted_as_hit_by_injection": false,
      "reciprocal_rank": 0,
-     "version_hit": false,
+     "version_hit": true,
      "evidence_level_match": true,
      "top3": [
+      {
+       "id": "EV-PVP-BOSS-FORM-STANDARD",
+       "score": 10,
+       "record_kind": "ledger_entry",
+       "evidence_level": "RECORDED_IN_GAME"
+      },
       {
        "id": "ruleset_config::mobile_s4_candidate_v2",
        "score": 6,
@@ -7008,12 +6980,6 @@
        "score": 6,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME"
-      },
-      {
-       "id": "ruleset_config::mobile_s4_candidate_v2#turn_order",
-       "score": 6,
-       "record_kind": "ruleset_config",
-       "evidence_level": "ENGINE_HYPOTHESIS"
       }
      ],
      "top_evidence_level": "RECORDED_IN_GAME"
@@ -7052,7 +7018,7 @@
      "top3": [
       {
        "id": "ruleset_config::legacy_sim_v1",
-       "score": 7.923475,
+       "score": 7.8075,
        "record_kind": "ruleset_config",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
@@ -7095,7 +7061,7 @@
     "top3": [
      {
       "id": "ruleset_config::legacy_sim_v1",
-      "score": 7.923475,
+      "score": 7.8075,
       "record_kind": "ruleset_config",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
@@ -7166,6 +7132,7 @@
     "baseline_lexical_pack": {
      "ids": [
       "EV-ENERGY-ENDTURN-REGEN",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "ruleset_config::legacy_sim_v1#energy",
       "ruleset_config::mobile_s4_candidate_v3",
       "EV-ENERGY-COST8-EXISTS",
@@ -7173,8 +7140,7 @@
       "EV-PVP-STANDARD-MANA",
       "EV-PVP-UNKNOWN-OPPONENT",
       "ruleset_config::legacy_sim_v1",
-      "ruleset_config::legacy_sim_v1#energy.regen",
-      "ruleset_config::legacy_sim_v1#energy.regen.per_turn"
+      "ruleset_config::legacy_sim_v1#energy.regen"
      ],
      "abstained": false,
      "reason_code": null,
@@ -7197,16 +7163,16 @@
        "evidence_level": "ENGINE_HYPOTHESIS"
       },
       {
+       "id": "EV-PVP-BOSS-FORM-STANDARD",
+       "score": 6,
+       "record_kind": "ledger_entry",
+       "evidence_level": "RECORDED_IN_GAME"
+      },
+      {
        "id": "ruleset_config::legacy_sim_v1#energy",
        "score": 4,
        "record_kind": "ruleset_config",
        "evidence_level": "CROSS_SOURCE_SUPPORTED"
-      },
-      {
-       "id": "ruleset_config::mobile_s4_candidate_v3",
-       "score": 4,
-       "record_kind": "ruleset_config",
-       "evidence_level": "RECORDED_IN_GAME"
       }
      ],
      "top_evidence_level": "ENGINE_HYPOTHESIS"
@@ -7246,14 +7212,14 @@
      "top3": [
       {
        "id": "ruleset_config::mobile_s4_candidate_v2",
-       "score": 7.326423,
+       "score": 7.220181,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v3",
-       "score": 5.235296,
+       "score": 4.825686,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME",
        "matched_aliases": []
@@ -7297,14 +7263,14 @@
     "top3": [
      {
       "id": "ruleset_config::mobile_s4_candidate_v2",
-      "score": 7.326423,
+      "score": 7.220181,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v3",
-      "score": 5.235296,
+      "score": 4.825686,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
@@ -7425,8 +7391,8 @@
       "ruleset_config::mobile_s4_candidate_v2#energy.max",
       "ruleset_config::mobile_s4_candidate_v3#energy.max",
       "ruleset_config::mobile_s4_candidate_v2",
-      "ruleset_config::mobile_s4_candidate_v3#actions.kinds.charge",
       "ruleset_config::mobile_s4_candidate_v2#energy",
+      "ruleset_config::mobile_s4_candidate_v3#actions.kinds.charge",
       "ruleset_config::mobile_s4_candidate_v2#energy.charge",
       "ruleset_config::mobile_s4_candidate_v3",
       "ruleset_config::mobile_s4_candidate_v3#energy",
@@ -7463,21 +7429,21 @@
      "top3": [
       {
        "id": "ruleset_config::mobile_s4_candidate_v2#energy.max",
-       "score": 34.233506,
+       "score": 34.213954,
        "record_kind": "ruleset_config",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v3#energy.max",
-       "score": 32.349092,
+       "score": 32.330617,
        "record_kind": "ruleset_config",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v2",
-       "score": 25.876672,
+       "score": 25.968792,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME",
        "matched_aliases": []
@@ -7491,8 +7457,8 @@
      "ruleset_config::mobile_s4_candidate_v2#energy.max",
      "ruleset_config::mobile_s4_candidate_v3#energy.max",
      "ruleset_config::mobile_s4_candidate_v2",
-     "ruleset_config::mobile_s4_candidate_v3#actions.kinds.charge",
      "ruleset_config::mobile_s4_candidate_v2#energy",
+     "ruleset_config::mobile_s4_candidate_v3#actions.kinds.charge",
      "ruleset_config::mobile_s4_candidate_v2#energy.charge",
      "ruleset_config::mobile_s4_candidate_v3",
      "ruleset_config::mobile_s4_candidate_v3#energy",
@@ -7529,21 +7495,21 @@
     "top3": [
      {
       "id": "ruleset_config::mobile_s4_candidate_v2#energy.max",
-      "score": 34.233506,
+      "score": 34.213954,
       "record_kind": "ruleset_config",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v3#energy.max",
-      "score": 32.349092,
+      "score": 32.330617,
       "record_kind": "ruleset_config",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v2",
-      "score": 25.876672,
+      "score": 25.968792,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
@@ -7693,7 +7659,7 @@
      "top3": [
       {
        "id": "ruleset_config::legacy_sim_v1",
-       "score": 10.253381,
+       "score": 10.259204,
        "record_kind": "ruleset_config",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
@@ -7736,7 +7702,7 @@
     "top3": [
      {
       "id": "ruleset_config::legacy_sim_v1",
-      "score": 10.253381,
+      "score": 10.259204,
       "record_kind": "ruleset_config",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
@@ -7895,21 +7861,21 @@
      "top3": [
       {
        "id": "ruleset_config::mobile_s4_candidate_v2",
-       "score": 30.448446,
+       "score": 30.694294,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v2#energy.initial",
-       "score": 29.504489,
+       "score": 29.643297,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v3#energy.initial",
-       "score": 27.858627,
+       "score": 27.984146,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME",
        "matched_aliases": []
@@ -7961,21 +7927,21 @@
     "top3": [
      {
       "id": "ruleset_config::mobile_s4_candidate_v2",
-      "score": 30.448446,
+      "score": 30.694294,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v2#energy.initial",
-      "score": 29.504489,
+      "score": 29.643297,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v3#energy.initial",
-      "score": 27.858627,
+      "score": 27.984146,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
@@ -8134,21 +8100,21 @@
      "top3": [
       {
        "id": "EV-ENERGY-MAX",
-       "score": 42.836853,
+       "score": 43.129581,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
-       "score": 28.089951,
+       "score": 28.30445,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "EV-ENERGY-CHARGE",
-       "score": 26.263351,
+       "score": 26.412958,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
@@ -8200,21 +8166,21 @@
     "top3": [
      {
       "id": "EV-ENERGY-MAX",
-      "score": 42.836853,
+      "score": 43.129581,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
-      "score": 28.089951,
+      "score": 28.30445,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "EV-ENERGY-CHARGE",
-      "score": 26.263351,
+      "score": 26.412958,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
@@ -8373,21 +8339,21 @@
      "top3": [
       {
        "id": "EV-ENERGY-ENDTURN-REGEN",
-       "score": 90.113024,
+       "score": 91.151612,
        "record_kind": "ledger_entry",
        "evidence_level": "ENGINE_HYPOTHESIS",
        "matched_aliases": []
       },
       {
        "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
-       "score": 7.821607,
+       "score": 7.865335,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "EV-TURN-ORDER-STRICT",
-       "score": 3.971244,
+       "score": 4.011786,
        "record_kind": "ledger_entry",
        "evidence_level": "ENGINE_HYPOTHESIS",
        "matched_aliases": []
@@ -8439,21 +8405,21 @@
     "top3": [
      {
       "id": "EV-ENERGY-ENDTURN-REGEN",
-      "score": 90.113024,
+      "score": 91.151612,
       "record_kind": "ledger_entry",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
      },
      {
       "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
-      "score": 7.821607,
+      "score": 7.865335,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "EV-TURN-ORDER-STRICT",
-      "score": 3.971244,
+      "score": 4.011786,
       "record_kind": "ledger_entry",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
@@ -8575,21 +8541,21 @@
      "top3": [
       {
        "id": "ruleset_config::legacy_sim_v1",
-       "score": 48.382925,
+       "score": 48.717078,
        "record_kind": "ruleset_config",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v2",
-       "score": 11.032899,
+       "score": 10.943541,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v3",
-       "score": 6.902931,
+       "score": 6.871694,
        "record_kind": "ruleset_config",
        "evidence_level": "RECORDED_IN_GAME",
        "matched_aliases": []
@@ -8634,21 +8600,21 @@
     "top3": [
      {
       "id": "ruleset_config::legacy_sim_v1",
-      "score": 48.382925,
+      "score": 48.717078,
       "record_kind": "ruleset_config",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v2",
-      "score": 11.032899,
+      "score": 10.943541,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v3",
-      "score": 6.902931,
+      "score": 6.871694,
       "record_kind": "ruleset_config",
       "evidence_level": "RECORDED_IN_GAME",
       "matched_aliases": []
@@ -8798,21 +8764,21 @@
      "top3": [
       {
        "id": "ruleset_config::legacy_sim_v1#turn_order.speed_tie",
-       "score": 32.464691,
+       "score": 32.781084,
        "record_kind": "ruleset_config",
        "evidence_level": "ENGINE_HYPOTHESIS",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v2#turn_order.speed_tie",
-       "score": 26.496284,
+       "score": 26.744833,
        "record_kind": "ruleset_config",
        "evidence_level": "UNKNOWN",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v3#turn_order.speed_tie",
-       "score": 26.496284,
+       "score": 26.744833,
        "record_kind": "ruleset_config",
        "evidence_level": "UNKNOWN",
        "matched_aliases": []
@@ -8855,21 +8821,21 @@
     "top3": [
      {
       "id": "ruleset_config::legacy_sim_v1#turn_order.speed_tie",
-      "score": 32.464691,
+      "score": 32.781084,
       "record_kind": "ruleset_config",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v2#turn_order.speed_tie",
-      "score": 26.496284,
+      "score": 26.744833,
       "record_kind": "ruleset_config",
       "evidence_level": "UNKNOWN",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v3#turn_order.speed_tie",
-      "score": 26.496284,
+      "score": 26.744833,
       "record_kind": "ruleset_config",
       "evidence_level": "UNKNOWN",
       "matched_aliases": []
@@ -9020,7 +8986,7 @@
      "top3": [
       {
        "id": "pet::pet_000471",
-       "score": 28.413572,
+       "score": 28.107511,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -9064,7 +9030,7 @@
     "top3": [
      {
       "id": "pet::pet_000471",
-      "score": 28.413572,
+      "score": 28.107511,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -9142,8 +9108,8 @@
       "ruleset_config::legacy_sim_v1#energy.charge",
       "ruleset_config::mobile_s4_candidate_v2#energy",
       "ruleset_config::mobile_s4_candidate_v3",
-      "ruleset_config::mobile_s4_candidate_v3#energy",
-      "ruleset_config::legacy_sim_v1#energy.max"
+      "ruleset_config::mobile_s4_candidate_v3#actions",
+      "ruleset_config::mobile_s4_candidate_v3#actions.kinds"
      ],
      "abstained": false,
      "reason_code": null,
@@ -9220,21 +9186,21 @@
      "top3": [
       {
        "id": "EV-ENERGY-CHARGE",
-       "score": 55.701474,
+       "score": 56.259913,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "EV-ENERGY-MAX",
-       "score": 42.865963,
+       "score": 43.26934,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "battle_skill::skill_000267",
-       "score": 40.055991,
+       "score": 40.191448,
        "record_kind": "battle_skill",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -9283,21 +9249,21 @@
     "top3": [
      {
       "id": "EV-ENERGY-CHARGE",
-      "score": 55.701474,
+      "score": 56.259913,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "EV-ENERGY-MAX",
-      "score": 42.865963,
+      "score": 43.26934,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "battle_skill::skill_000267",
-      "score": 40.055991,
+      "score": 40.191448,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -9451,21 +9417,21 @@
      "top3": [
       {
        "id": "EV-ENERGY-ENDTURN-REGEN",
-       "score": 51.747695,
+       "score": 52.231168,
        "record_kind": "ledger_entry",
        "evidence_level": "ENGINE_HYPOTHESIS",
        "matched_aliases": []
       },
       {
        "id": "battle_skill::skill_000267",
-       "score": 39.922148,
+       "score": 40.054879,
        "record_kind": "battle_skill",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "battle_skill::skill_000307",
-       "score": 39.922148,
+       "score": 40.054879,
        "record_kind": "battle_skill",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -9512,21 +9478,21 @@
     "top3": [
      {
       "id": "EV-ENERGY-ENDTURN-REGEN",
-      "score": 51.747695,
+      "score": 52.231168,
       "record_kind": "ledger_entry",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
      },
      {
       "id": "battle_skill::skill_000267",
-      "score": 39.922148,
+      "score": 40.054879,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "battle_skill::skill_000307",
-      "score": 39.922148,
+      "score": 40.054879,
       "record_kind": "battle_skill",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -9681,21 +9647,21 @@
      "top3": [
       {
        "id": "EV-TURN-ORDER-STRICT",
-       "score": 53.670921,
+       "score": 54.485059,
        "record_kind": "ledger_entry",
        "evidence_level": "ENGINE_HYPOTHESIS",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v2#turn_order.action_order",
-       "score": 40.440252,
+       "score": 40.731935,
        "record_kind": "ruleset_config",
        "evidence_level": "ENGINE_HYPOTHESIS",
        "matched_aliases": []
       },
       {
        "id": "ruleset_config::mobile_s4_candidate_v3#turn_order.action_order",
-       "score": 40.440252,
+       "score": 40.731935,
        "record_kind": "ruleset_config",
        "evidence_level": "ENGINE_HYPOTHESIS",
        "matched_aliases": []
@@ -9743,21 +9709,21 @@
     "top3": [
      {
       "id": "EV-TURN-ORDER-STRICT",
-      "score": 53.670921,
+      "score": 54.485059,
       "record_kind": "ledger_entry",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v2#turn_order.action_order",
-      "score": 40.440252,
+      "score": 40.731935,
       "record_kind": "ruleset_config",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
      },
      {
       "id": "ruleset_config::mobile_s4_candidate_v3#turn_order.action_order",
-      "score": 40.440252,
+      "score": 40.731935,
       "record_kind": "ruleset_config",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
@@ -9916,21 +9882,21 @@
      "top3": [
       {
        "id": "owned::own-0011",
-       "score": 50.144009,
+       "score": 50.496852,
        "record_kind": "owned_instance",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "owned::own-0012",
-       "score": 50.144009,
+       "score": 50.496852,
        "record_kind": "owned_instance",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "owned::own-0015",
-       "score": 49.973527,
+       "score": 50.328145,
        "record_kind": "owned_instance",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -9982,21 +9948,21 @@
     "top3": [
      {
       "id": "owned::own-0011",
-      "score": 50.144009,
+      "score": 50.496852,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "owned::own-0012",
-      "score": 50.144009,
+      "score": 50.496852,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "owned::own-0015",
-      "score": 49.973527,
+      "score": 50.328145,
       "record_kind": "owned_instance",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -10129,21 +10095,21 @@
      "top3": [
       {
        "id": "conflict_policy::pack",
-       "score": 17.277587,
+       "score": 16.307291,
        "record_kind": "conflict_policy",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "conflict::CF-FORM-0002",
-       "score": 0.310643,
+       "score": 0.321187,
        "record_kind": "conflict_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "conflict::CF-FORM-0005",
-       "score": 0.310643,
+       "score": 0.321187,
        "record_kind": "conflict_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -10199,21 +10165,21 @@
     "top3": [
      {
       "id": "conflict_policy::pack",
-      "score": 17.277587,
+      "score": 16.307291,
       "record_kind": "conflict_policy",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "conflict::CF-FORM-0002",
-      "score": 0.310643,
+      "score": 0.321187,
       "record_kind": "conflict_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "conflict::CF-FORM-0005",
-      "score": 0.310643,
+      "score": 0.321187,
       "record_kind": "conflict_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -10343,7 +10309,7 @@
      "top3": [
       {
        "id": "pet::pet_000056",
-       "score": 6329.832632,
+       "score": 6330.112719,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -10359,7 +10325,7 @@
       },
       {
        "id": "pet::pet_000532",
-       "score": 6031.856562,
+       "score": 6032.55684,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -10379,7 +10345,7 @@
       },
       {
        "id": "conflict::CF-UNRESOLVED-0001",
-       "score": 2082.825441,
+       "score": 2083.302031,
        "record_kind": "conflict_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -10428,7 +10394,7 @@
     "top3": [
      {
       "id": "pet::pet_000056",
-      "score": 6329.832632,
+      "score": 6330.112719,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -10444,7 +10410,7 @@
      },
      {
       "id": "pet::pet_000532",
-      "score": 6031.856562,
+      "score": 6032.55684,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -10464,7 +10430,7 @@
      },
      {
       "id": "conflict::CF-UNRESOLVED-0001",
-      "score": 2082.825441,
+      "score": 2083.302031,
       "record_kind": "conflict_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -10545,10 +10511,10 @@
       "EV-BATTLEMODE-PARAMETERIZED",
       "EV-ENERGY-ENDTURN-REGEN",
       "EV-LEAVE-SEMANTICS",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-PVP-UNKNOWN-OPPONENT",
       "EV-TRAITS-TRIGGER-COMPLEXITY",
-      "EV-TYPE-MULTIPLIER",
-      "ruleset_config::legacy_sim_v1"
+      "EV-TYPE-MULTIPLIER"
      ],
      "abstained": false,
      "reason_code": null,
@@ -10620,7 +10586,7 @@
      "top3": [
       {
        "id": "trait::skill_000164",
-       "score": 6296.287294,
+       "score": 6296.405632,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -10636,7 +10602,7 @@
       },
       {
        "id": "trait::skill_000134",
-       "score": 6294.526903,
+       "score": 6294.645524,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -10689,7 +10655,7 @@
     "top3": [
      {
       "id": "trait::skill_000164",
-      "score": 6296.287294,
+      "score": 6296.405632,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -10705,7 +10671,7 @@
      },
      {
       "id": "trait::skill_000134",
-      "score": 6294.526903,
+      "score": 6294.645524,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -10868,7 +10834,7 @@
      "top3": [
       {
        "id": "trait::skill_000166",
-       "score": 6379.250406,
+       "score": 6379.779278,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -10884,7 +10850,7 @@
       },
       {
        "id": "trait::skill_000136",
-       "score": 6375.11443,
+       "score": 6375.640478,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -10900,7 +10866,7 @@
       },
       {
        "id": "trait::skill_000165",
-       "score": 6299.478183,
+       "score": 6299.61231,
        "record_kind": "trait_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -10956,7 +10922,7 @@
     "top3": [
      {
       "id": "trait::skill_000166",
-      "score": 6379.250406,
+      "score": 6379.779278,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -10972,7 +10938,7 @@
      },
      {
       "id": "trait::skill_000136",
-      "score": 6375.11443,
+      "score": 6375.640478,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -10988,7 +10954,7 @@
      },
      {
       "id": "trait::skill_000165",
-      "score": 6299.478183,
+      "score": 6299.61231,
       "record_kind": "trait_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -11174,11 +11140,11 @@
       "EV-PVP-SPEED-DUEL-MODE",
       "ruleset_config::mobile_s4_candidate_v3",
       "ruleset_config::mobile_s4_candidate_v2",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-BATTLEMODE-PARAMETERIZED",
       "EV-PVP-UNKNOWN-OPPONENT",
       "ruleset_config::mobile_s4_candidate_v3#battle_mode",
-      "ruleset_config::mobile_s4_candidate_v3#battle_mode.team_size",
-      "ruleset_config::mobile_s4_candidate_v3#mana"
+      "ruleset_config::mobile_s4_candidate_v3#battle_mode.team_size"
      ],
      "abstained": false,
      "reason_code": null,
@@ -11220,13 +11186,13 @@
       "EV-PVP-STANDARD-TEAM-SIZE",
       "EV-PVP-STANDARD-MANA",
       "EV-PVP-SPEED-DUEL-MODE",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-PVP-UNKNOWN-OPPONENT",
       "ruleset_config::mobile_s4_candidate_v3",
       "ruleset_config::mobile_s4_candidate_v3#mana.pool",
       "EV-PVP-OPPONENT-ROSTER-VISIBLE",
       "EV-PVP-FAINT-MANA-LOSS",
-      "ruleset_config::mobile_s4_candidate_v3#battle_mode.team_size",
-      "ruleset_config::mobile_s4_candidate_v2"
+      "ruleset_config::mobile_s4_candidate_v3#battle_mode.team_size"
      ],
      "abstained": false,
      "reason_code": null,
@@ -11256,21 +11222,21 @@
      "top3": [
       {
        "id": "EV-PVP-STANDARD-TEAM-SIZE",
-       "score": 68.75074,
+       "score": 67.633215,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "EV-PVP-STANDARD-MANA",
-       "score": 62.605575,
+       "score": 61.638138,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "EV-PVP-SPEED-DUEL-MODE",
-       "score": 44.917635,
+       "score": 44.074208,
        "record_kind": "ledger_entry",
        "evidence_level": "OFFICIAL_CURRENT",
        "matched_aliases": []
@@ -11284,13 +11250,13 @@
      "EV-PVP-STANDARD-TEAM-SIZE",
      "EV-PVP-STANDARD-MANA",
      "EV-PVP-SPEED-DUEL-MODE",
+     "EV-PVP-BOSS-FORM-STANDARD",
      "EV-PVP-UNKNOWN-OPPONENT",
      "ruleset_config::mobile_s4_candidate_v3",
      "ruleset_config::mobile_s4_candidate_v3#mana.pool",
      "EV-PVP-OPPONENT-ROSTER-VISIBLE",
      "EV-PVP-FAINT-MANA-LOSS",
-     "ruleset_config::mobile_s4_candidate_v3#battle_mode.team_size",
-     "ruleset_config::mobile_s4_candidate_v2"
+     "ruleset_config::mobile_s4_candidate_v3#battle_mode.team_size"
     ],
     "abstained": false,
     "reason_code": null,
@@ -11320,21 +11286,21 @@
     "top3": [
      {
       "id": "EV-PVP-STANDARD-TEAM-SIZE",
-      "score": 68.75074,
+      "score": 67.633215,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "EV-PVP-STANDARD-MANA",
-      "score": 62.605575,
+      "score": 61.638138,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "EV-PVP-SPEED-DUEL-MODE",
-      "score": 44.917635,
+      "score": 44.074208,
       "record_kind": "ledger_entry",
       "evidence_level": "OFFICIAL_CURRENT",
       "matched_aliases": []
@@ -11381,9 +11347,9 @@
       "EV-PVP-STANDARD-TEAM-SIZE",
       "ruleset_config::mobile_s4_candidate_v2",
       "EV-BATTLEMODE-PARAMETERIZED",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-PVP-UNKNOWN-OPPONENT",
-      "ruleset_config::mobile_s4_candidate_v3#actions",
-      "ruleset_config::mobile_s4_candidate_v3#actions.kinds"
+      "ruleset_config::mobile_s4_candidate_v3#actions"
      ],
      "abstained": false,
      "reason_code": null,
@@ -11429,9 +11395,9 @@
       "pet::pet_000007",
       "pet::pet_000536",
       "conflict::CF-FORM-0004",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "ruleset_config::mobile_s4_candidate_v3",
-      "EV-PVP-UNKNOWN-OPPONENT",
-      "EV-PVP-OPPONENT-ROSTER-VISIBLE"
+      "EV-PVP-UNKNOWN-OPPONENT"
      ],
      "abstained": false,
      "reason_code": null,
@@ -11461,21 +11427,21 @@
      "top3": [
       {
        "id": "EV-PVP-STANDARD-MANA",
-       "score": 69.704084,
+       "score": 68.909229,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "EV-PVP-STANDARD-TEAM-SIZE",
-       "score": 56.1186,
+       "score": 54.935008,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "EV-PVP-FAINT-MANA-LOSS",
-       "score": 54.220366,
+       "score": 53.805177,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
@@ -11493,9 +11459,9 @@
      "pet::pet_000007",
      "pet::pet_000536",
      "conflict::CF-FORM-0004",
+     "EV-PVP-BOSS-FORM-STANDARD",
      "ruleset_config::mobile_s4_candidate_v3",
-     "EV-PVP-UNKNOWN-OPPONENT",
-     "EV-PVP-OPPONENT-ROSTER-VISIBLE"
+     "EV-PVP-UNKNOWN-OPPONENT"
     ],
     "abstained": false,
     "reason_code": null,
@@ -11525,21 +11491,21 @@
     "top3": [
      {
       "id": "EV-PVP-STANDARD-MANA",
-      "score": 69.704084,
+      "score": 68.909229,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "EV-PVP-STANDARD-TEAM-SIZE",
-      "score": 56.1186,
+      "score": 54.935008,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "EV-PVP-FAINT-MANA-LOSS",
-      "score": 54.220366,
+      "score": 53.805177,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
@@ -11692,21 +11658,21 @@
      "top3": [
       {
        "id": "EV-PVP-FAINT-MANA-LOSS",
-       "score": 61.204137,
+       "score": 61.911944,
        "record_kind": "ledger_entry",
        "evidence_level": "CROSS_SOURCE_SUPPORTED",
        "matched_aliases": []
       },
       {
        "id": "pet::pet_000007",
-       "score": 42.826492,
+       "score": 42.974231,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "pet::pet_000536",
-       "score": 37.552095,
+       "score": 37.73448,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -11752,21 +11718,21 @@
     "top3": [
      {
       "id": "EV-PVP-FAINT-MANA-LOSS",
-      "score": 61.204137,
+      "score": 61.911944,
       "record_kind": "ledger_entry",
       "evidence_level": "CROSS_SOURCE_SUPPORTED",
       "matched_aliases": []
      },
      {
       "id": "pet::pet_000007",
-      "score": 42.826492,
+      "score": 42.974231,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "pet::pet_000536",
-      "score": 37.552095,
+      "score": 37.73448,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -11841,11 +11807,11 @@
       "ruleset_config::mobile_s4_candidate_v3",
       "ruleset_config::mobile_s4_candidate_v2",
       "EV-OFFICIAL-PAIRING-AI",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-PVP-STANDARD-MANA",
       "EV-PVP-STANDARD-TEAM-SIZE",
       "EV-ENERGY-MAX",
-      "EV-PVP-OPPONENT-ROSTER-VISIBLE",
-      "EV-PVP-SPEED-DUEL-MODE"
+      "EV-PVP-OPPONENT-ROSTER-VISIBLE"
      ],
      "abstained": false,
      "reason_code": null,
@@ -11914,7 +11880,7 @@
      "top3": [
       {
        "id": "EV-PVP-UNKNOWN-OPPONENT",
-       "score": 77.689912,
+       "score": 78.593717,
        "record_kind": "ledger_entry",
        "evidence_level": "ENGINE_HYPOTHESIS",
        "matched_aliases": []
@@ -11955,7 +11921,7 @@
     "top3": [
      {
       "id": "EV-PVP-UNKNOWN-OPPONENT",
-      "score": 77.689912,
+      "score": 78.593717,
       "record_kind": "ledger_entry",
       "evidence_level": "ENGINE_HYPOTHESIS",
       "matched_aliases": []
@@ -12095,7 +12061,7 @@
      "top3": [
       {
        "id": "EV-PVP-OPPONENT-ROSTER-VISIBLE",
-       "score": 44.054445,
+       "score": 44.678356,
        "record_kind": "ledger_entry",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -12136,7 +12102,7 @@
     "top3": [
      {
       "id": "EV-PVP-OPPONENT-ROSTER-VISIBLE",
-      "score": 44.054445,
+      "score": 44.678356,
       "record_kind": "ledger_entry",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -12191,10 +12157,10 @@
       "EV-PVP-STANDARD-MANA",
       "EV-PVP-STANDARD-TEAM-SIZE",
       "conflict::CF-FORM-0004",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "pet::pet_000007",
       "pet::pet_000536",
-      "ruleset_config::mobile_s4_candidate_v3",
-      "ruleset_config::mobile_s4_candidate_v3#mana"
+      "ruleset_config::mobile_s4_candidate_v3"
      ],
      "abstained": false,
      "reason_code": null,
@@ -12269,21 +12235,21 @@
      "top3": [
       {
        "id": "EV-PVP-SPEED-DUEL-MODE",
-       "score": 58.525588,
+       "score": 57.558028,
        "record_kind": "ledger_entry",
        "evidence_level": "OFFICIAL_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "pet::pet_000007",
-       "score": 42.658145,
+       "score": 42.741885,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
       },
       {
        "id": "pet::pet_000536",
-       "score": 37.383748,
+       "score": 37.502134,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -12330,21 +12296,21 @@
     "top3": [
      {
       "id": "EV-PVP-SPEED-DUEL-MODE",
-      "score": 58.525588,
+      "score": 57.558028,
       "record_kind": "ledger_entry",
       "evidence_level": "OFFICIAL_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "pet::pet_000007",
-      "score": 42.658145,
+      "score": 42.741885,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
      },
      {
       "id": "pet::pet_000536",
-      "score": 37.383748,
+      "score": 37.502134,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []
@@ -12385,15 +12351,15 @@
     "baseline_lexical_pack": {
      "ids": [
       "EV-BATTLEMODE-PARAMETERIZED",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "EV-PVP-SPEED-DUEL-MODE",
+      "ruleset_config::mobile_s4_candidate_v3#actions",
+      "ruleset_config::mobile_s4_candidate_v3#actions.kinds",
+      "ruleset_config::mobile_s4_candidate_v3#actions.kinds.item",
       "ruleset_config::mobile_s4_candidate_v2",
       "ruleset_config::mobile_s4_candidate_v3",
-      "EV-PVP-UNKNOWN-OPPONENT",
-      "ruleset_config::legacy_sim_v1",
-      "ruleset_config::legacy_sim_v1#battle_mode",
-      "ruleset_config::legacy_sim_v1#battle_mode.active_count",
-      "ruleset_config::legacy_sim_v1#battle_mode.team_size",
-      "ruleset_config::mobile_s4_candidate_v2#battle_mode"
+      "ruleset_config::mobile_s4_candidate_v3#policies",
+      "ruleset_config::mobile_s4_candidate_v3#policies.boss_form_policy"
      ],
      "abstained": false,
      "reason_code": null,
@@ -12416,16 +12382,16 @@
        "evidence_level": "OFFICIAL_CURRENT"
       },
       {
+       "id": "EV-PVP-BOSS-FORM-STANDARD",
+       "score": 13,
+       "record_kind": "ledger_entry",
+       "evidence_level": "RECORDED_IN_GAME"
+      },
+      {
        "id": "EV-PVP-SPEED-DUEL-MODE",
        "score": 6,
        "record_kind": "ledger_entry",
        "evidence_level": "OFFICIAL_CURRENT"
-      },
-      {
-       "id": "ruleset_config::mobile_s4_candidate_v2",
-       "score": 4,
-       "record_kind": "ruleset_config",
-       "evidence_level": "RECORDED_IN_GAME"
       }
      ],
      "top_evidence_level": "OFFICIAL_CURRENT"
@@ -12462,7 +12428,7 @@
      "top3": [
       {
        "id": "EV-BATTLEMODE-PARAMETERIZED",
-       "score": 69.0271,
+       "score": 62.465691,
        "record_kind": "ledger_entry",
        "evidence_level": "OFFICIAL_CURRENT",
        "matched_aliases": []
@@ -12503,7 +12469,7 @@
     "top3": [
      {
       "id": "EV-BATTLEMODE-PARAMETERIZED",
-      "score": 69.0271,
+      "score": 62.465691,
       "record_kind": "ledger_entry",
       "evidence_level": "OFFICIAL_CURRENT",
       "matched_aliases": []
@@ -12663,7 +12629,7 @@
      "top3": [
       {
        "id": "pet::pet_000537",
-       "score": 2706.117817,
+       "score": 2706.552341,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -12675,7 +12641,7 @@
       },
       {
        "id": "pet::pet_000017",
-       "score": 2706.106109,
+       "score": 2706.540836,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -12687,7 +12653,7 @@
       },
       {
        "id": "pet::pet_000018",
-       "score": 2706.106109,
+       "score": 2706.540836,
        "record_kind": "pet_form",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -12745,7 +12711,7 @@
     "top3": [
      {
       "id": "pet::pet_000537",
-      "score": 2706.117817,
+      "score": 2706.552341,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -12757,7 +12723,7 @@
      },
      {
       "id": "pet::pet_000017",
-      "score": 2706.106109,
+      "score": 2706.540836,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -12769,7 +12735,7 @@
      },
      {
       "id": "pet::pet_000018",
-      "score": 2706.106109,
+      "score": 2706.540836,
       "record_kind": "pet_form",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -12849,11 +12815,11 @@
       "conflict::CF-FORM-0023",
       "conflict::CF-FORM-0025",
       "conflict::CF-FORM-0026",
+      "EV-PVP-BOSS-FORM-STANDARD",
       "pet::pet_000004",
       "pet::pet_000558",
       "pet::pet_000560",
-      "pet::pet_000561",
-      "conflict_policy::pack"
+      "pet::pet_000561"
      ],
      "abstained": false,
      "reason_code": null,
@@ -12929,7 +12895,7 @@
      "top3": [
       {
        "id": "pet::pet_000559",
-       "score": 6362.819123,
+       "score": 6363.307197,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -12945,7 +12911,7 @@
       },
       {
        "id": "pet::pet_000004",
-       "score": 6284.944646,
+       "score": 6285.043509,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": [
@@ -12961,7 +12927,7 @@
       },
       {
        "id": "pet::pet_000558",
-       "score": 34.324737,
+       "score": 34.460754,
        "record_kind": "pet_record",
        "evidence_level": "COMMUNITY_CURRENT",
        "matched_aliases": []
@@ -13009,7 +12975,7 @@
     "top3": [
      {
       "id": "pet::pet_000559",
-      "score": 6362.819123,
+      "score": 6363.307197,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -13025,7 +12991,7 @@
      },
      {
       "id": "pet::pet_000004",
-      "score": 6284.944646,
+      "score": 6285.043509,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": [
@@ -13041,7 +13007,7 @@
      },
      {
       "id": "pet::pet_000558",
-      "score": 34.324737,
+      "score": 34.460754,
       "record_kind": "pet_record",
       "evidence_level": "COMMUNITY_CURRENT",
       "matched_aliases": []

@@ -227,6 +227,8 @@
       "topic": "energy.initial",
       "claim": "首次入场资源：**洛克王国世界手游开局双方各 10 星（🌟）**，用户（实机持有者）2026-09-22 实机核对；资源叫「星星」不是「能量」。仓库原占位值 2 作废。仍需补：换入/力竭补位/第二次入场（MC-E04 其余子问题）。",
       "confidence": "RECORDED_IN_GAME",
+      "value": 10,
+      "value_note": "本字段是**实机读数本身**（不是「我们打算怎么施工」）：持有者核对到的首次入场读数是 10。生成器据此判一条硬规则 —— 任何 evidence_role=supports 地引用本条的配置叶子，值必须是 10；写 2（旧占位）或别的数都必须判红。「打算按 10 施工」这类结论仍在 claim 里，两者不要混。",
       "sources": [
         {
           "url": "data/roco/evidence/user-in-game-reports.json#2026-09-22-energy-initial",

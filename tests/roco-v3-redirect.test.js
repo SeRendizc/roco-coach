@@ -28,6 +28,134 @@ import {SUITES as RELEASE_GATE_SUITES} from '../scripts/roco/verify-release.mjs'
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = (rel) => JSON.parse(readFileSync(join(ROOT, rel), 'utf8'));
 
+// ── 首领化 / PVP 魔法 / 主题参数的**判据本体** ────────────────────────────
+//
+// 写成纯函数（输入 = 一个模式登记，输出 = 问题清单），是为了让每条判据都能在同一个
+// 用例里跑**正反两向**：合格登记必须放行，改坏的那一份必须被抓到。判据放在断言里而不是
+// 只写 `assert.equal(...)`，才能证明「它真的有牙」而不是「它恰好现在是对的」。
+
+/** 首领化策略判据：取值必须 allowed_if_eligible，资格未核验必须 fail closed，数值必须 null+UNVERIFIED。 */
+function judgeBossFormPolicy(mode) {
+  const problems = [];
+  const policy = mode?.policies?.boss_form_policy;
+  if (!policy) return ['标准 PVP 缺 policies.boss_form_policy'];
+  if (policy.value !== 'allowed_if_eligible') {
+    const why = policy.value === 'forbidden'
+      ? '（forbidden = 这个模式没有首领化，与人类实机口径冲突）'
+      : (['required', 'required_for_entry'].includes(policy.value)
+        ? '（required = 要求全员满足，会挡住打不了首领化的正常队伍）' : '');
+    problems.push(`首领化策略必须是 allowed_if_eligible，实际 ${JSON.stringify(policy.value)}${why}`);
+  }
+  if (policy.evidence_id !== 'EV-PVP-BOSS-FORM-STANDARD') {
+    problems.push(`首领化策略必须引台账 EV-PVP-BOSS-FORM-STANDARD，实际 ${JSON.stringify(policy.evidence_id)}`);
+  }
+  if (policy.confidence !== 'RECORDED_IN_GAME') {
+    problems.push(`首领化策略等级必须是 RECORDED_IN_GAME（持有者实机口径），实际 ${JSON.stringify(policy.confidence)}`);
+  }
+  if (policy.eligibility?.on_unknown !== 'FAIL_CLOSED') {
+    problems.push('首领化资格判定未核验时 on_unknown 必须是 FAIL_CLOSED');
+  }
+  for (const u of policy.unknowns ?? []) {
+    if (u.value !== null) problems.push(`首领化 ${u.field} 未核验却带值 ${JSON.stringify(u.value)}`);
+    if (u.status !== 'UNVERIFIED') problems.push(`首领化 ${u.field} 的状态必须是 UNVERIFIED`);
+  }
+  if (mode?.parameters?.boss_form !== null) {
+    problems.push(`parameters.boss_form 已废弃为镜像，必须是 null，实际 ${JSON.stringify(mode?.parameters?.boss_form)}`);
+  }
+  return problems;
+}
+
+/** PVP 魔法判据：它是特殊行动，不是普通 item；未核验项必须 null + UNVERIFIED。 */
+function judgeMagicPolicy(mode) {
+  const problems = [];
+  const magic = mode?.policies?.magic_policy;
+  if (!magic) return ['标准 PVP 缺 policies.magic_policy'];
+  if (magic.classification !== 'pvp_magic_special_action') {
+    problems.push(`PVP 魔法分类必须是 pvp_magic_special_action，实际 ${JSON.stringify(magic.classification)}`);
+  }
+  if (magic.is_item !== false) problems.push('PVP 魔法不是普通 item，is_item 必须是 false');
+  if (magic.occupies_action !== null) {
+    problems.push(`是否占行动未核验，occupies_action 必须是 null，实际 ${JSON.stringify(magic.occupies_action)}`);
+  }
+  if (magic.occupies_action_status !== 'UNVERIFIED') problems.push('occupies_action_status 必须是 UNVERIFIED');
+  for (const u of magic.unknowns ?? []) {
+    if (u.value !== null) problems.push(`PVP 魔法 ${u.field} 未核验却带值 ${JSON.stringify(u.value)}`);
+    if (u.status !== 'UNVERIFIED') problems.push(`PVP 魔法 ${u.field} 的状态必须是 UNVERIFIED`);
+  }
+  return problems;
+}
+
+/** 队伍规模判据：1～6；「必须选满」没有来源支持 → null + UNVERIFIED。 */
+function judgeTeamSizePolicy(mode) {
+  const problems = [];
+  const policy = mode?.policies?.team_size_policy;
+  if (!policy) return ['标准 PVP 缺 policies.team_size_policy'];
+  if (policy.min !== 1 || policy.max !== 6) {
+    problems.push(`队伍规模区间必须是 min=1 / max=6，实际 ${policy.min}～${policy.max}`);
+  }
+  if (policy.fill_required !== null) {
+    problems.push(`「必须选满」没有来源支持，fill_required 必须是 null，实际 ${JSON.stringify(policy.fill_required)}`);
+  }
+  if (policy.fill_required_status !== 'UNVERIFIED') problems.push('fill_required_status 必须是 UNVERIFIED');
+  if (policy.evidence_id !== 'EV-PVP-STANDARD-TEAM-SIZE' || policy.microcase_id !== 'MC-E07') {
+    problems.push('队伍规模策略必须引 EV-PVP-STANDARD-TEAM-SIZE / MC-E07（未录制）');
+  }
+  return problems;
+}
+
+/** 主题参数判据：标准模式不预设主题（null = 未定，不是 false）。 */
+function judgeTheme(mode) {
+  const problems = [];
+  const theme = mode?.theme;
+  if (!theme) return ['标准 PVP 缺 theme 子对象'];
+  for (const key of ['theme_id', 'boss_form_required', 'period']) {
+    if (theme[key] !== null) {
+      problems.push(`theme.${key} 必须是 null（标准模式不预设主题；null = 未定，不是 false），实际 ${JSON.stringify(theme[key])}`);
+    }
+  }
+  return problems;
+}
+
+/** 门控判据：条件不满足就禁用 + 说明原因；**绝不**回落到别的模式。 */
+function judgeEntryGate(mode) {
+  const problems = [];
+  const gate = mode?.entry_gate;
+  if (!gate) return ['标准 PVP 缺 entry_gate'];
+  if (!Array.isArray(gate.requires) || gate.requires.length < 3) problems.push('entry_gate.requires 要逐条列出条件');
+  if (gate.on_unmet !== 'SHOW_DISABLED_WITH_REASON') {
+    problems.push(`on_unmet 必须是 SHOW_DISABLED_WITH_REASON，实际 ${JSON.stringify(gate.on_unmet)}`);
+  }
+  if (gate.on_unknown !== 'FAIL_CLOSED') problems.push('on_unknown 必须是 FAIL_CLOSED');
+  if (!(gate.never ?? []).includes('call_engine_after_unmet')) problems.push('never 必须含 call_engine_after_unmet');
+  if (!(gate.never ?? []).includes('fallback_to_other_mode')) {
+    problems.push('never 必须含 fallback_to_other_mode（不许悄悄回落别的模式）');
+  }
+  return problems;
+}
+
+/** 跨模式隔离判据：三模式禁止互相借规则。 */function judgeCrossModeIsolation(registry) {
+  const problems = [];
+  const byId = Object.fromEntries((registry?.modes ?? []).map((m) => [m.id, m]));
+  const standard = byId['pvp-standard-six-pet'];
+  const duel = byId['pvp-speed-duel-3v3'];
+  const trial = byId['pvp-territory-trial-2v2'];
+  if (standard?.policies?.boss_form_policy?.value !== 'allowed_if_eligible') {
+    problems.push('标准模式的首领化策略必须是 allowed_if_eligible');
+  }
+  if (standard?.parameters?.trait_sharing !== false) {
+    problems.push('标准模式不该继承领地试炼的 trait_sharing');
+  }
+  if (duel?.parameters?.team_size !== 3 || duel?.parameters?.mana_pool !== 2) {
+    problems.push('极速对决必须保持 3v3 / 2 魔力');
+  }
+  if (trial?.parameters?.team_size !== 2 || trial?.parameters?.trait_sharing !== true
+    || trial?.parameters?.boss_form !== true) {
+    problems.push('领地试炼必须保持 2v2 / 特性共享 / boss_form=true');
+  }
+  if (trial?.policies !== undefined) problems.push('领地试炼不该被塞进标准模式的首领化策略子树');
+  return problems;
+}
+
 const registry = readJson('data/roco/artifact-registry.json');
 const modes = readJson('data/roco/battle-modes.json');
 
@@ -176,6 +304,180 @@ test('BattleMode：标准 PVP 六宠是 CANDIDATE，绝不许写成官方已确�
     .includes(promoted.confidence), '反向控制：升成官方后，候选级白名单不再包含它 —— 判据成立');
 });
 
+// ── 首领化 / PVP 魔法 / 主题参数（人类实机口径，人类是唯一权威）───────────────
+//
+// 这几条判据存在的理由：旧口径把标准 PVP 的 `boss_form=false` 读成「这个模式没有首领化」，
+// 而人类实机口径是**存在**（首领化 = 精灵首领形态 / 血脉觉醒；首领信物 / 进化之力 = 资格或
+// 触发条件；**不叫普通 item**）。所以判据必须同时钉住三件事：
+//   ① 标准模式的策略**必须**是 `allowed_if_eligible`（不是 forbidden，也不是 required）；
+//   ② 领地试炼的 `boss_form:true` 与极速对决的 3v3 / 2 魔力**不许**被反向污染；
+//   ③ 未核验的数值一律 null + UNVERIFIED（引擎遇未知 fail closed），不许沿用 mockup 文案。
+
+test('BattleMode：标准 PVP 的首领化策略必须是 allowed_if_eligible（forbidden / required 必红）', () => {
+  const standard = modes.modes.find((m) => m.id === 'pvp-standard-six-pet');
+  const policy = standard.policies?.boss_form_policy;
+  assert.ok(policy, '标准 PVP 必须登记 policies.boss_form_policy（不许再用一个全局布尔 boss_form 代替）');
+  assert.equal(policy.value, 'allowed_if_eligible',
+    `首领化策略必须是 allowed_if_eligible（满足资格即可用），实际 ${JSON.stringify(policy.value)}`);
+  // 靶心：不是 forbidden（那等于说这个模式没有首领化）、也不是 required_*（那会挡住正常队伍）
+  assert.notEqual(policy.value, 'forbidden');
+  assert.notEqual(policy.value, 'required');
+  assert.notEqual(policy.value, 'required_for_entry');
+  // 策略本身有台账支撑：人类实机口径 → RECORDED_IN_GAME（与台账条目逐字同级）
+  const ledgerById = Object.fromEntries(readJson('data/roco/evidence/rule-evidence-ledger.json')
+    .entries.map((e) => [e.id, e]));
+  const evidence = ledgerById[policy.evidence_id];
+  assert.equal(policy.evidence_id, 'EV-PVP-BOSS-FORM-STANDARD');
+  assert.ok(evidence, `首领化策略必须引台账里真实存在的条目，实际 ${policy.evidence_id}`);
+  assert.equal(policy.confidence, 'RECORDED_IN_GAME',
+    '首领化在标准 PVP 里存在 = 持有者实机口径，等级是 RECORDED_IN_GAME（不是 OFFICIAL_CURRENT、也不是 ENGINE_HYPOTHESIS）');
+  assert.equal(policy.confidence, evidence.confidence, '配置等级与台账等级必须逐字相同（不许静默升降级）');
+  // 资格判定未核验 → fail closed（不释放首领化、也不猜「满足」）
+  assert.equal(policy.eligibility?.on_unknown, 'FAIL_CLOSED');
+  assert.equal(policy.eligibility?.status, 'UNVERIFIED');
+  // 未核验的数值：一律 null + UNVERIFIED，不许沿用 mockup 的确定文案
+  const unknownFields = (policy.unknowns ?? []).map((u) => u.field);
+  for (const want of ['activation_occupies_action', 'per_battle_uses', 'cooldown', 'removal', 'duration', 'stat_multipliers']) {
+    assert.ok(unknownFields.includes(want), `首领化未核验项必须逐条列出 ${want}，实际 ${JSON.stringify(unknownFields)}`);
+  }
+  for (const u of policy.unknowns) {
+    assert.equal(u.value, null, `首领化 ${u.field} 的值未核验，必须是 null，实际 ${JSON.stringify(u.value)}`);
+    assert.equal(u.status, 'UNVERIFIED');
+  }
+  // 废弃镜像：parameters.boss_form 不再是权威，且**不许**被读成 forbidden(false) / required(true)
+  assert.equal(standard.parameters.boss_form, null,
+    'parameters.boss_form 已废弃为镜像（null = 不再是权威布尔），不许留 false/true');
+  assert.ok((standard.parameters_mirrors ?? []).some((row) => row.parameter === 'boss_form'
+    && row.deprecated === true && row.authoritative_path === 'policies.boss_form_policy.value'),
+  '登记表必须写明 boss_form 是废弃镜像、权威在 policies.boss_form_policy.value');
+
+  // 反向控制①：写成 forbidden → 判据必须红
+  const asForbidden = JSON.parse(JSON.stringify(standard));
+  asForbidden.policies.boss_form_policy.value = 'forbidden';
+  assert.ok(judgeBossFormPolicy(asForbidden).length > 0,
+    '反向控制：改成 forbidden 必须被判红（那等于说标准 PVP 没有首领化）');
+  // 反向控制②：写成 required_for_entry → 判据必须红
+  const asRequired = JSON.parse(JSON.stringify(standard));
+  asRequired.policies.boss_form_policy.value = 'required_for_entry';
+  assert.ok(judgeBossFormPolicy(asRequired).length > 0,
+    '反向控制：改成 required_for_entry 必须被判红（那会挡住打不了首领化的正常队伍）');
+  // 反向控制③：给未核验的次数补一个数 → 判据必须红
+  const invented = JSON.parse(JSON.stringify(standard));
+  invented.policies.boss_form_policy.unknowns.find((u) => u.field === 'per_battle_uses').value = 1;
+  assert.ok(judgeBossFormPolicy(invented).length > 0,
+    '反向控制：给未核验的次数补一个 1 必须被判红（未核验必须 null + UNVERIFIED）');
+  // 反向控制④：把废弃镜像改回 false（旧读法的入口）→ 判据必须红
+  const staleMirror = JSON.parse(JSON.stringify(standard));
+  staleMirror.parameters.boss_form = false;
+  assert.ok(judgeBossFormPolicy(staleMirror).length > 0,
+    '反向控制：parameters.boss_form 改回 false 必须被判红（那正是被撤回的旧读法）');
+});
+
+test('BattleMode：PVP 魔法（愿力强化 / 共鸣魔法）单独建模，不许被当成普通 item', () => {
+  const standard = modes.modes.find((m) => m.id === 'pvp-standard-six-pet');
+  const magic = standard.policies?.magic_policy;
+  assert.ok(magic, '标准 PVP 必须登记 policies.magic_policy（愿力强化不能因为旧 item:0 就当作不存在）');
+  assert.equal(magic.value, 'allowed_candidate');
+  assert.equal(magic.classification, 'pvp_magic_special_action');
+  assert.equal(magic.is_item, false, 'PVP 魔法**不叫普通 item**');
+  assert.deepEqual(magic.kinds, ['愿力强化', '共鸣魔法']);
+  // 未核验：是否占行动 / 次数 / 冷却 / 解除 / 持续 / 倍率一律 null + UNVERIFIED
+  assert.equal(magic.occupies_action, null);
+  assert.equal(magic.occupies_action_status, 'UNVERIFIED');
+  assert.equal(magic.all_unverified, true);
+  for (const u of magic.unknowns ?? []) {
+    assert.equal(u.value, null, `PVP 魔法 ${u.field} 未核验，必须是 null`);
+    assert.equal(u.status, 'UNVERIFIED');
+  }
+  // 普通道具依旧 forbidden —— 但那是**普通道具**这一类，不能被读成「首领化 / PVP 魔法不存在」
+  const v3 = readJson('data/roco/rulesets/mobile-s4-candidate-v3.json');
+  assert.equal(v3.actions.kinds.item.value, 'forbidden');
+  assert.equal(v3.actions.kinds.item.classification, 'forbidden_normal_item');
+  assert.match(v3.actions.kinds.item.not_absent_note, /首领化/);
+  assert.match(v3.actions.kinds.item.not_absent_note, /不存在/);
+  // 配置侧的策略与登记表一致，且引的是人类实机那条台账
+  assert.equal(v3.policies.boss_form_policy.value, 'allowed_if_eligible');
+  assert.equal(v3.policies.boss_form_policy.evidence_id, 'EV-PVP-BOSS-FORM-STANDARD');
+  assert.equal(v3.policies.magic_policy.classification, 'pvp_magic_special_action');
+  // 反向控制：把 PVP 魔法标成普通 item → 判据必须红
+  const asItem = JSON.parse(JSON.stringify(standard));
+  asItem.policies.magic_policy.is_item = true;
+  assert.ok(judgeMagicPolicy(asItem).length > 0, '反向控制：标成普通 item 必须被判红');
+  const wrongClass = JSON.parse(JSON.stringify(standard));
+  wrongClass.policies.magic_policy.classification = 'item';
+  assert.ok(judgeMagicPolicy(wrongClass).length > 0, '反向控制：分类写成 item 必须被判红');
+  const inventedUses = JSON.parse(JSON.stringify(standard));
+  inventedUses.policies.magic_policy.unknowns.find((u) => u.field === 'cooldown').value = 2;
+  assert.ok(judgeMagicPolicy(inventedUses).length > 0, '反向控制：给未核验的冷却补一个 2 必须被判红');
+});
+
+test('BattleMode：队伍规模策略是 1～6，「必须选满」未核验（null + UNVERIFIED）', () => {
+  const standard = modes.modes.find((m) => m.id === 'pvp-standard-six-pet');
+  const policy = standard.policies?.team_size_policy;
+  assert.ok(policy, '标准 PVP 必须登记 policies.team_size_policy（min / max / fill_required）');
+  assert.equal(policy.min, 1);
+  assert.equal(policy.max, 6);
+  assert.equal(policy.evidence_id, 'EV-PVP-STANDARD-TEAM-SIZE');
+  assert.equal(policy.confidence, 'CROSS_SOURCE_SUPPORTED');
+  assert.equal(policy.microcase_id, 'MC-E07', '六宠上限仍卡在未录制的 MC-E07 上');
+  // 「6 只必须选满」没有任何来源支持 → null + UNVERIFIED，引擎遇未知 fail closed
+  assert.equal(policy.fill_required, null);
+  assert.equal(policy.fill_required_status, 'UNVERIFIED');
+  // 反向控制：「必须选满」被写成 true → 判据必须红
+  const invented = JSON.parse(JSON.stringify(standard));
+  invented.policies.team_size_policy.fill_required = true;
+  assert.ok(judgeTeamSizePolicy(invented).length > 0,
+    '反向控制：把 fill_required 写成 true 必须被判红（那是一条没有来源支持的断言）');
+  const widened = JSON.parse(JSON.stringify(standard));
+  widened.policies.team_size_policy.max = 7;
+  assert.ok(judgeTeamSizePolicy(widened).length > 0, '反向控制：max 改成 7 必须被判红');
+});
+
+test('BattleMode：主题参数（首领对决）不是全局布尔 —— theme 留给主题 PVP', () => {
+  const standard = modes.modes.find((m) => m.id === 'pvp-standard-six-pet');
+  const theme = standard.theme;
+  assert.ok(theme, '标准 PVP 必须有 theme 子对象（普通闪耀大赛是否开放 / 首领对决是否要求全员满足）');
+  assert.equal(theme.theme_id, null, '标准模式不预设主题：null = 未定，不是 false');
+  assert.equal(theme.boss_form_required, null, '「首领对决是否要求全员满足」是主题参数，标准模式不预设');
+  assert.equal(theme.period, null);
+  assert.equal(theme.status, 'UNVERIFIED');
+  // 反向控制：把主题预设成 false（把「未定」写成「确定不允许」）→ 判据必须红
+  const preset = JSON.parse(JSON.stringify(standard));
+  preset.theme.boss_form_required = false;
+  assert.ok(judgeTheme(preset).length > 0, '反向控制：theme.boss_form_required 预设成 false 必须被判红');
+  // 台账的 topic_crosswalk 里，首领对决映射到标准 PVP（它是主题变体，不是第三个模式）
+  const ledger = readJson('data/roco/evidence/rule-evidence-ledger.json');
+  const crosswalk = ledger.topic_crosswalk;
+  const row = (crosswalk.ledger_extensions ?? []).find((x) => x.topic === 'battle_mode.boss_duel');
+  assert.ok(row, '台账 topic_crosswalk 必须补 battle_mode.boss_duel（首领对决主题）');
+  assert.equal(row.maps_to, 'battle_mode.standard_pvp',
+    '首领对决是标准 PVP 的主题变体，映射到 battle_mode.standard_pvp');
+  // 它映射到的 topic 必须真的在台账里用过（否则这个映射是空话）
+  assert.ok(ledger.entries.some((e) => e.topic === row.maps_to),
+    `maps_to=${row.maps_to} 必须真的出现在台账条目里`);
+});
+
+test('BattleMode：门控不许偷偷回落别的模式（条件不满足就禁用并说明原因）', () => {
+  const standard = modes.modes.find((m) => m.id === 'pvp-standard-six-pet');
+  const gate = standard.entry_gate;
+  assert.ok(gate, '标准 PVP 必须有 entry_gate');
+  assert.ok(Array.isArray(gate.requires) && gate.requires.length >= 3,
+    '门控条件要逐条列出来，不能只说「不符合就不行」');
+  assert.equal(gate.on_unmet, 'SHOW_DISABLED_WITH_REASON',
+    '条件不满足时给禁用态 + 原因，不许静默开一局');
+  assert.equal(gate.on_unknown, 'FAIL_CLOSED');
+  assert.ok(gate.never.includes('call_engine_after_unmet'));
+  assert.ok(gate.never.includes('fallback_to_other_mode'),
+    '**不许**回落到别的模式 —— 那会让标准 PVP 悄悄变成极速对决 3v3');
+  // 反向控制：去掉那条禁令 → 判据必须红
+  const leaked = JSON.parse(JSON.stringify(standard));
+  leaked.entry_gate.never = leaked.entry_gate.never.filter((x) => x !== 'fallback_to_other_mode');
+  assert.ok(judgeEntryGate(leaked).length > 0, '反向控制：去掉 fallback_to_other_mode 禁令必须被判红');
+  const silent = JSON.parse(JSON.stringify(standard));
+  silent.entry_gate.on_unmet = 'START_ANYWAY';
+  assert.ok(judgeEntryGate(silent).length > 0, '反向控制：on_unmet 改成「照样开局」必须被判红');
+});
+
 test('BattleMode：极速对决是独立模式（3v3 / 2 魔力），不能拿来当标准模式', () => {
   const byId = Object.fromEntries(modes.modes.map((m) => [m.id, m]));
   const duel = byId['pvp-speed-duel-3v3'];
@@ -189,6 +491,61 @@ test('BattleMode：极速对决是独立模式（3v3 / 2 魔力），不能拿�
   assert.equal(trial.parameters.team_size, 2);
   assert.equal(trial.parameters.trait_sharing, true);
   assert.equal(trial.parameters.boss_form, true);
+  // 三模式禁止互相借规则：领地试炼既没有标准模式的首领化**策略**，也没有极速对决的 2 魔力
+  assert.equal(trial.parameters.mana_pool, null);
+  assert.equal(trial.policies, undefined, '领地试炼不该被塞进标准模式的首领化策略子树');
+  assert.equal(trial.theme, undefined, '领地试炼不需要标准模式的主题参数');
+  // 反向控制：把标准模式写 forbidden、或把极速对决改成 4 魔力 → 必须被判红
+  const polluted = {
+    standard: {value: 'forbidden'},
+    duel: {team_size: 3, mana_pool: 4},
+  };
+  assert.ok(judgeCrossModeIsolation(modes).length === 0, '当前三模式必须互不借规则');
+  assert.ok(polluted.standard.value === 'forbidden' && polluted.duel.mana_pool === 4,
+    '反向控制：坏值本身可构造，判据必须能判出来');
+  const mutated = JSON.parse(JSON.stringify(modes));
+  mutated.modes.find((m) => m.id === 'pvp-territory-trial-2v2').parameters.trait_sharing = false;
+  assert.ok(judgeCrossModeIsolation(mutated).length > 0,
+    '反向控制：把领地试炼的 trait_sharing 改掉必须被判红');
+  const copied = JSON.parse(JSON.stringify(modes));
+  copied.modes.find((m) => m.id === 'pvp-standard-six-pet').policies = undefined;
+  copied.modes.find((m) => m.id === 'pvp-standard-six-pet').parameters.trait_sharing = true;
+  assert.ok(judgeCrossModeIsolation(copied).length > 0,
+    '反向控制：把领地试炼的 trait_sharing 复制到标准模式必须被判红');
+});
+
+test('台账：直接登记读数时，配置不许改写它（实机读数 10 就是 10）', () => {
+  // 为什么这条要在这里：台账原来只写「我们打算按 10 施工」，所以「把配置里的 10 改回旧占位值 2、
+  // 同时把引用与等级伪造得自洽」是一条**所有既有判据都会放行**的改法 —— 最安静的那种失真。
+  // 现在台账条目直接登记读数（`value`），判据就有东西可比：supports 引它的叶子必须逐字相等。
+  const ledger = readJson('data/roco/evidence/rule-evidence-ledger.json');
+  const entry = ledger.entries.find((e) => e.id === 'EV-ENERGY-INITIAL');
+  assert.ok(entry, '台账必须有 EV-ENERGY-INITIAL');
+  assert.equal(entry.value, 10, '台账条目直接登记的实机读数是 10');
+  assert.equal(entry.confidence, 'RECORDED_IN_GAME');
+  assert.ok(String(entry.value_note ?? '').length > 0, '台账要写清这个 value 是「读数」而不是「施工口径」');
+  // 正向了：两份引它的配置叶子都等于这个读数
+  const v2 = readJson('data/roco/rulesets/mobile-s4-candidate-v2.json');
+  const v3 = readJson('data/roco/rulesets/mobile-s4-candidate-v3.json');
+  for (const [label, cfg] of [['v2', v2], ['v3', v3]]) {
+    const leaf = cfg.energy.initial;
+    assert.equal(leaf.evidence_role, 'supports', `${label} 的 energy.initial 是支持这条台账的`);
+    assert.equal(leaf.value, entry.value, `${label} 的 energy.initial 必须等于台账登记的读数`);
+  }
+  // 判据本体（与生成器同口径，写成纯函数以便正反两向都跑）
+  const judge = (ledgerEntry, leaf) => (leaf.evidence_role !== 'supports' || ledgerEntry.value === undefined
+    || JSON.stringify(leaf.value) === JSON.stringify(ledgerEntry.value)
+    ? [] : [`配置值 ${JSON.stringify(leaf.value)} 与台账读数 ${JSON.stringify(ledgerEntry.value)} 不一致`]);
+  assert.deepEqual(judge(entry, {evidence_role: 'supports', value: 10}), [], '合格的一对必须放行');
+  // 反向控制①：把实机读数改写成 2（引用与等级都自洽）→ 必须红
+  assert.notDeepEqual(judge(entry, {evidence_role: 'supports', value: 2}), [],
+    '反向控制：把 10 改写成 2 必须被判红');
+  // 反向控制②：把「支持」改成「反驳」时不受这条约束（legacy 正是用 refutes 记「6 只是引擎假设」）
+  assert.deepEqual(judge(entry, {evidence_role: 'refutes', value: 2}), [],
+    'refutes 的叶子本来就是在说「台账说的和我实现的不一样」，不该被这条判红');
+  // 反向控制③：台账把读数改掉（10 → 2），同一份配置立刻不一致 → 判据不是常量
+  assert.notDeepEqual(judge({...entry, value: 2}, {evidence_role: 'supports', value: 10}), [],
+    '反向控制：台账读数换成 2 之后，配置里的 10 必须被判红');
 });
 
 test('BattleMode：候选模式的 team_size 不得来自「当前 Demo 的 48 只名单」', () => {

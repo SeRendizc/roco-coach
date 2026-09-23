@@ -115,6 +115,16 @@ const $ = (id) => document.getElementById(id);
  * 直接 `$('x').addEventListener` 会在缺元素时把整个 boot 打断 —— 那正是「页面一片空白」
  * 的根因。所以统一走这里：元素不在就安静跳过。
  */
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+  return el;
+}
+function setHtml(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+  return el;
+}
 const on = (id, event, handler) => { const el = $(id); if (el) el.addEventListener(event, handler); };
 
 /**
@@ -688,13 +698,14 @@ function render() {
   // 数字只来自公开视图：我方存活 = self.pets 里未倒下的只数；对手 = opponent.living_count
   // （未上场的不给名字，这是公开信息边界）。心只在掉心时闪几秒（`showHeartPop` 同源数据）。
   renderB3Topbar(view);
+  renderB3Panels(view);
   const turnChip = $('turn-chip');
   if (turnChip) turnChip.textContent = view ? `第 ${view.turn} 回合 · ${replacingLabel}` : '未开局';
   const phaseChip = $('phase-chip');
   if (phaseChip) phaseChip.textContent = view?.battle_result
     ? `对局结束：${RESULT_CN[view.battle_result] ?? view.battle_result}`
     : '';
-  $('self-active').textContent = view?.self?.active != null ? `场上：第 ${view.self.active + 1} 位` : '';
+  setText('self-active', view?.self?.active != null ? `场上：第 ${view.self.active + 1} 位` : '');
 
   // ── 双方状态条：资源（魔力/心）+ 当前精灵 + 队伍状态 ────────────────────
   const selfPets = view?.self?.pets ?? [];
@@ -752,8 +763,8 @@ function render() {
   const energyMax = Number.isFinite(view?.self?.energy_max) ? view.self.energy_max : null;
   const foeEnergyMax = Number.isFinite(view?.opponent?.energy_max) ? view.opponent.energy_max : null;
   $('self-pets').innerHTML = view ? petCard(selfPets[activeIndex] ?? selfPets[0] ?? null, {active: true, energyMax}) : '';
-  $('self-bench').innerHTML = selfPets
-    .map((pet, index) => (index === activeIndex ? '' : benchStrip(pet, index))).join('');
+  setHtml('self-bench', selfPets
+    .map((pet, index) => (index === activeIndex ? '' : benchStrip(pet, index))).join(''));
   $('foe-field').innerHTML = view?.opponent?.field
     ? petCard(view.opponent.field, {active: true, energyMax: foeEnergyMax}) : '';
   // 对手的**增益**不在公开视图里（引擎只给对手场上的血/能量/异常/印记/冷却），
@@ -1614,15 +1625,150 @@ function showHeartPop(text) {
  * 纪律：点/心的数字**只取公开视图**（`self.pets` 未倒下数、`opponent.living_count`）；
  * 未上场的对手只计入数量，不出现名字。回合数取 `view.turn`，没有 view 时保持「未开局」。
  */
+const B3_EL = {
+  '光系': '✨', '冰系': '❄️', '地系': '⛰️', '幻系': '🌀', '幽系': '👻', '恶系': '😈',
+  '普通系': '⚪', '机械系': '⚙️', '武系': '🥊', '毒系': '☠️', '水系': '💧', '火系': '🔥',
+  '电系': '⚡', '翼系': '🪶', '草系': '🌿', '萌系': '💗', '虫系': '🐛', '龙系': '🐉',
+};
+
+/** 把一行从「待填」变成可见（示例数据隐藏靠这个解除）。 */
+function b3Show(el) { if (el) el.removeAttribute('data-b3-pending'); }
+
+/** 属性徽章：emoji + 中文；对手侧 CSS 会镜像。 */
+function b3El(el, name) {
+  if (!el) return;
+  const emo = B3_EL[name] || '';
+  el.dataset.b3ElName = name || '';
+  el.innerHTML = `<span class="b3-el-ic">${emo}</span><span class="b3-el-nm">${escapeHtml(name || '')}</span>`;
+  el.onclick = () => {
+    const on = el.classList.toggle('b3-el--name');
+    if (on) { el.innerHTML = `<span class="b3-el-nm">${escapeHtml(name || '')}</span>`;
+      setTimeout(() => { el.classList.remove('b3-el--name'); b3El(el, name); }, 3000); }
+  };
+}
+
+/**
+ * 用公开视图填 v3h 片段的可见内容（示例数据一律隐藏，填一行解除一行）。
+ * 纪律：只搬运 `view` 里的公开事实；拿不到的（伤害样本、克制倍率、道具次数）**留空不编**。
+ */
+function renderB3Panels(view) {
+  const root = document.querySelector('[data-b3-root]');
+  if (!root) return;
+  const self = Array.isArray(view?.self?.pets) ? view.self.pets : [];
+  const active = Number.isInteger(view?.self?.active) ? view.self.active : 0;
+  const me = self[active] ?? null;
+  const energyMax = Number.isFinite(view?.self?.energy_max) ? view.self.energy_max : null;
+
+  // ① 双方出战卡（左：名字在左、等级在右；右：镜像）
+  const fillCard = (side, pet, isFoe) => {
+    const card = root.querySelector(`[data-b3-${side}-card]`);
+    if (!card || !pet) return;
+    const name = card.querySelector(`[data-b3-${side}-name]`);
+    if (name) name.textContent = pet.name ?? '';
+    const lv = card.querySelector(`[data-b3-${side}-lv]`);
+    if (lv) lv.textContent = '60 级';
+    const star = card.querySelector(`[data-b3-${side}-star]`);
+    if (star) star.textContent = Number.isFinite(pet.energy) ? `⭐ ${pet.energy}` : '⭐ —';
+    const hpT = card.querySelector(`[data-b3-${side}-hp-text]`);
+    if (hpT) hpT.textContent = Number.isFinite(pet.hp) && Number.isFinite(pet.max_hp)
+      ? `生命 ${pet.hp} / ${pet.max_hp}` : '';
+    const pct = Number.isFinite(pet.hp) && pet.max_hp > 0 ? Math.round((pet.hp / pet.max_hp) * 100) : null;
+    const pctEl = card.querySelector(`[data-b3-${side}-hp-pct]`);
+    if (pctEl) pctEl.textContent = pct === null ? '' : `${pct}%`;
+    const fill = card.querySelector(`[data-b3-${side}-hp-fill]`);
+    if (fill && pct !== null) fill.style.width = `${pct}%`;
+    const el = card.querySelector(`[data-b3-${side}-el]`);
+    if (el) b3El(el, Array.isArray(pet.types) ? pet.types[0] : (pet.type ?? null));
+    b3Show(card);
+  };
+  fillCard('self', me, false);
+  fillCard('foe', view?.opponent?.field ?? null, true);
+
+  // ② 四格技能：这一只的配招 × 引擎给的合法技能 × 伤害样本（拿不到就留空）
+  const row = (state.roster ?? []).concat(state.rosterAll ?? [])
+    .find((p) => p.pet_id === (me?.species_id ?? me?.pet_id)) ?? null;
+  const moves = (row?.moveset ?? []).filter((m) => m.is_trait !== true).slice(0, 4);
+  const legalSkills = (view?.legal ?? []).filter((a) => a.kind === 'skill');
+  const samples = Array.isArray(view?.damage_preview?.samples) ? view.damage_preview.samples : [];
+  const slots = [...root.querySelectorAll('[data-b3-skill-slot]')];
+  slots.forEach((slot, i) => {
+    const mv = moves[i];
+    if (!mv) { slot.setAttribute('data-b3-pending', 'yes'); return; }
+    const act = legalSkills.find((a) => a.skill_id === mv.skill_id) ?? null;
+    const cost = Number.isFinite(Number(mv.energy)) ? Number(mv.energy) : null;
+    const short = cost !== null && Number.isFinite(me?.energy) ? me.energy < cost : null;
+    slot.dataset.b3CostShort = short === true ? 'yes' : 'no';
+    slot.dataset.b3SlotLegal = act ? 'yes' : 'no';
+    slot.classList.toggle('b3-slot--grey', !act);
+    const costEl = slot.querySelector('[data-b3-cost]');
+    if (costEl) costEl.textContent = cost === null ? '⭐ —' : `⭐ ${cost}`;
+    const nameEl = slot.querySelector('[data-b3-skill-name]');
+    if (nameEl) nameEl.textContent = mv.name ?? '';
+    const catEl = slot.querySelector('[data-b3-skill-cat]');
+    if (catEl) catEl.textContent = categoryCn(mv.category) ?? '';
+    b3El(slot.querySelector('[data-b3-self-el], [data-b3-el-name]'), mv.element ?? null);
+    const sample = samples.find((x) => x?.label === mv.name) ?? null;
+    const dmg = slot.querySelector('[data-b3-dmg]');
+    if (dmg) {
+      const val = sample && Number.isFinite(sample.damage) ? sample.damage : null;
+      dmg.textContent = val === null ? '预期伤害 —' : `预期伤害 ${val}`;
+      dmg.dataset.b3DmgKind = val === null ? 'none' : 'plain';
+    }
+    const rel = slot.querySelector('[data-b3-rel]');
+    if (rel) rel.dataset.b3Rel = 'none';   // 倍率拿不到就一律 none（不编）
+    // 注意：这里**没有** `disabled` 这个参数（它是 renderActions 的）—— 第一版引用了它，
+    // 直接让整个 render 抛错、战斗面板再也显示不出来。用「对局是否结束」代替。
+    if (act && !view?.battle_result) slot.dataset.b3Action = String((view.legal ?? []).indexOf(act));
+    b3Show(slot);
+  });
+
+  // ③ 换宠行：场上以外的队友（名字 / 属性 / 血量）
+  const switchRows = [...root.querySelectorAll('[data-b3-switch-row]')];
+  const bench = self.map((p, idx) => ({p, idx})).filter(({idx}) => idx !== active);
+  switchRows.forEach((cell, i) => {
+    const item = bench[i];
+    if (!item) { cell.setAttribute('data-b3-pending', 'yes'); return; }
+    const p = item.p;
+    const n = cell.querySelector('[data-b3-switch-name]');
+    if (n) n.textContent = p.name ?? '';
+    const hp = cell.querySelector('[data-b3-switch-hp]');
+    if (hp) hp.textContent = Number.isFinite(p.hp) && Number.isFinite(p.max_hp) ? `${p.hp}/${p.max_hp}` : '';
+    const rel = cell.querySelector('[data-b3-switch-rel-text]');
+    if (rel) rel.textContent = '';        // 克制关系要倍率；拿不到就留空（不编）
+    const el = cell.querySelector('[data-b3-switch-el], [data-b3-el-name]');
+    if (el) b3El(el, Array.isArray(p.types) ? p.types[0] : (p.type ?? null));
+    const act = (view?.legal ?? []).find((a) => a.kind === 'switch' && a.target_index === item.idx);
+    cell.dataset.b3SwitchLegal = act ? 'yes' : 'no';
+    cell.classList.toggle('b3-slot--grey', !act);
+    if (act) cell.dataset.b3Action = String((view.legal ?? []).indexOf(act));
+    b3Show(cell);
+  });
+
+  // ④ 聚能：显示**当前**⭐ / 上限（人类口径）
+  const charge = root.querySelector('[data-b3-charge]');
+  if (charge) {
+    const val = root.querySelector('[data-b3-charge-value]');
+    if (val) val.textContent = Number.isFinite(me?.energy)
+      ? (Number.isFinite(energyMax) ? `⭐ ${me.energy} / ${energyMax}` : `⭐ ${me.energy}`) : '⭐ —';
+    const label = root.querySelector('[data-b3-charge-label]');
+    if (label) label.textContent = '聚能';
+  }
+
+  // ⑤ 切屏信号：技能 / 更换 / 背包 / 逃跑（CSS 按 body.dataset.b3Tab 切左列与高亮）
+  const tab = state.actTab ?? 'skill';
+  document.body.dataset.b3Tab = tab;
+  document.body.dataset.b3Charge = tab === 'switch' ? 'mana' : 'energy';
+}
+
 function renderB3Topbar(view) {
   const box = $('b3-topbar');
   if (!box) return;
   const self = Array.isArray(view?.self?.pets) ? view.self.pets : [];
   const selfAlive = self.filter((p) => p && p.fainted !== true).length;
   const foeAlive = Number.isFinite(view?.opponent?.living_count) ? view.opponent.living_count : null;
-  // 对手总数按**模式规模**（6）算：`opponent.bench` 是**后备**（不含场上），拿它加存活会数出 12 个点。
+  const size = self.length || 6;   // 队伍规模（我方名单长度；没开局时按 6）
+  // 对手总数按**模式规模**算：`opponent.bench` 是**后备**（不含场上），拿它加存活会数出 12 个点。
   const foeTotal = size;
-  const size = self.length || 6;
   const dots = (alive, total) => {
     if (alive === null) return '<span class="down">' + '○'.repeat(total) + '</span>';
     return `<span class="alive">${'●'.repeat(Math.max(0, alive))}</span>`

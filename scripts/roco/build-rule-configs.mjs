@@ -91,6 +91,8 @@ export function ledgerIndex(ledger) {
     index.set(entry.id, {
       confidence: entry.confidence, topic: entry.topic, claim: entry.claim,
       needsMicrocase: entry.needs_microcase === true, microcaseId: entry.microcase_id ?? null,
+      // 台账**直接登记读数**时才有的字段（例如 EV-ENERGY-INITIAL 的 10）。见 validateConfig 的判据。
+      value: entry.value,
     });
   }
   return index;
@@ -661,7 +663,7 @@ export function checkPolicyInvariants(configs, battleModes, problems) {
   const policyValue = bossPolicy?.value;
   // ① / ②：取值只能是 allowed_if_eligible。
   if (!bossPolicy) {
-    problems.push('pvp-standard-six-pet 缺少 parameters.policies.boss_form_policy'
+    problems.push('pvp-standard-six-pet 缺少 policies.boss_form_policy'
       + '（首领化必须登记成 allowed_if_eligible，不是全局布尔 boss_form）');
   } else if (policyValue !== BOSS_FORM_POLICY_EXPECTED) {
     const why = policyValue === 'forbidden'
@@ -669,7 +671,7 @@ export function checkPolicyInvariants(configs, battleModes, problems) {
       : (['required', 'required_for_entry'].includes(policyValue)
         ? '——那会挡住打不了首领化的正常队伍；主题是否要求全员满足属于 theme 参数，不是模式入口条件'
         : `——只允许 ${BOSS_FORM_POLICY_EXPECTED}`);
-    problems.push(`pvp-standard-six-pet.parameters.policies.boss_form_policy.value=`
+    problems.push(`pvp-standard-six-pet.policies.boss_form_policy.value=`
       + `${JSON.stringify(policyValue)}，必须是 ${BOSS_FORM_POLICY_EXPECTED}${why}`);
   }
   if (bossPolicy && !BOSS_FORM_POLICY_VALUES.has(policyValue)) {
@@ -693,7 +695,7 @@ export function checkPolicyInvariants(configs, battleModes, problems) {
   // ⑤：PVP 魔法是特殊行动，不是普通道具。
   const magic = standard.policies?.magic_policy;
   if (!magic) {
-    problems.push('pvp-standard-six-pet：缺 parameters.policies.magic_policy'
+    problems.push('pvp-standard-six-pet：缺 policies.magic_policy'
       + '（愿力强化 / 共鸣魔法作为 PVP 魔法 / 特殊行动单独建模，不能因为旧 item:0 就当不存在）');
   } else {
     if (magic.classification !== PVP_MAGIC_CLASSIFICATION) {
@@ -725,7 +727,7 @@ export function checkPolicyInvariants(configs, battleModes, problems) {
   // 队伍规模策略：1～6，且「必须填满」必须是 null + UNVERIFIED。
   const teamSizePolicy = standard.policies?.team_size_policy;
   if (!teamSizePolicy) {
-    problems.push('pvp-standard-six-pet：缺 parameters.policies.team_size_policy（min/max/fill_required）');
+    problems.push('pvp-standard-six-pet：缺 policies.team_size_policy（min/max/fill_required）');
   } else {
     if (teamSizePolicy.min !== 1 || teamSizePolicy.max !== 6) {
       problems.push(`pvp-standard-six-pet.policies.team_size_policy 必须是 min=1 / max=6，实际 `
@@ -996,8 +998,19 @@ export function validateConfig(config, ledger) {
       }
       const known = index.get(leaf.evidence_id);
       if (!known) bad(`${leaf.path}：evidence_id=${leaf.evidence_id} 不在台账里`);
-      else if (leaf.evidence_role === 'supports' && known.confidence !== leaf.confidence) {
-        bad(`${leaf.path}：confidence=${leaf.confidence} 与台账 ${leaf.evidence_id}=${known.confidence} 不一致（不许静默升降级）`);
+      else {
+        if (leaf.evidence_role === 'supports' && known.confidence !== leaf.confidence) {
+          bad(`${leaf.path}：confidence=${leaf.confidence} 与台账 ${leaf.evidence_id}=${known.confidence} 不一致（不许静默升降级）`);
+        }
+        // 台账**直接登记了读数**时（`entry.value`），「支持」它的配置叶子必须逐字等于那个读数。
+        // 没有这条，就会留下一个很安静的洞：把实机核对过的 10 改回旧占位值 2、同时把引用与等级
+        // 都伪造得自洽 —— 所有既有判据都会放行，而配置里的数已经不是实机读数了。
+        // 只在台账显式写了 `value` 时判（其它条目登记的是「结论」而不是读数，见 ledger 的 value_note）。
+        if (leaf.evidence_role === 'supports' && known.value !== undefined
+            && JSON.stringify(leaf.value) !== JSON.stringify(known.value)) {
+          bad(`${leaf.path}：台账 ${leaf.evidence_id} 直接登记的读数是 ${JSON.stringify(known.value)}，`
+            + `配置里却是 ${JSON.stringify(leaf.value)} —— 读数与配置不一致，不许改写已核对的数`);
+        }
       }
       if (leaf.evidence_role === 'refutes' && !leaf.reason) {
         bad(`${leaf.path}：把台账条目当反证用时必须写 reason`);
@@ -1105,12 +1118,23 @@ function selftest() {
   push('反证②：引用台账里不存在的 evidence_id 必须被判红',
     refProblems.some((p) => p.includes('不在台账里')), JSON.stringify(refProblems).slice(0, 240));
 
-  // 反证③：把 candidate 的入场能量补成 2（「看起来合理」）→ 必须红
+  // 反证③：把 candidate 的入场能量**降级**（值仍是 10，但等级从 RECORDED_IN_GAME 悄悄降成
+  // CROSS_SOURCE_SUPPORTED）→ 必须红。这条抓的是「静默降级」：值看起来没动，但「这是实机读数」
+  // 这件事被抹掉了。注意「改值」是另一条（下面 ③-b），两条各管一段，谁也不替谁兜底。
   const invented = JSON.parse(JSON.stringify(configs));
-  invented[1].energy.initial.value = 2;
+  invented[1].energy.initial.confidence = 'CROSS_SOURCE_SUPPORTED';
   const inventedProblems = validateConfig(invented[1], ledger);
-  push('反证③：给 UNKNOWN 的入场能量补一个 2 必须被判红',
+  push('反证③：把入场能量的等级从 RECORDED_IN_GAME 静默降级必须被判红',
     inventedProblems.some((p) => p.includes('energy.initial')), JSON.stringify(inventedProblems).slice(0, 240));
+
+  // 反证③-b：只改值、引用与等级全都保持自洽（引用台账 + 等级照抄）→ 仍然必须红。
+  // 这条是「读数与配置不一致」判据的**唯一**必红方向：删掉那条判据，它当场变绿。
+  const valueDrift = JSON.parse(JSON.stringify(configs));
+  valueDrift[1].energy.initial.value = 2;
+  const valueDriftProblems = validateConfig(valueDrift[1], ledger);
+  push('反证③-b：引用与等级自洽、但把实机读数 10 改写成 2 必须被判红（读数不许被改写）',
+    valueDriftProblems.some((p) => p.includes('energy.initial') && p.includes('读数')),
+    JSON.stringify(valueDriftProblems).slice(0, 260));
 
   // 反证④：台账指纹换掉 → 必须红（台账改了配置就该重新生成）
   const staleFingerprint = JSON.parse(JSON.stringify(configs));
@@ -1241,7 +1265,7 @@ function selftest() {
 
   // 反证⑯：把标准模式的首领化写成 forbidden → 必须红
   const bossForbidden = tamperedModes((modes) => {
-    standardModeOf(modes).parameters.policies.boss_form_policy.value = 'forbidden';
+    standardModeOf(modes).policies.boss_form_policy.value = 'forbidden';
   });
   push('反证⑯：标准 PVP 的首领化策略改成 forbidden 必须被判红',
     bossForbidden.some((p) => p.includes('boss_form_policy') && p.includes('allowed_if_eligible')),
@@ -1249,7 +1273,7 @@ function selftest() {
 
   // 反证⑰：写成 required_for_entry（要求全员满足）→ 也必须红（挡住正常队伍）
   const bossRequired = tamperedModes((modes) => {
-    standardModeOf(modes).parameters.policies.boss_form_policy.value = 'required_for_entry';
+    standardModeOf(modes).policies.boss_form_policy.value = 'required_for_entry';
   });
   push('反证⑰：标准 PVP 的首领化策略改成 required_for_entry 必须被判红',
     bossRequired.some((p) => p.includes('boss_form_policy') && p.includes('挡住')),
@@ -1273,7 +1297,7 @@ function selftest() {
 
   // 反证⑳：把 PVP 魔法标成普通 item（旧 item:0 的错误读法）→ 必须红
   const magicAsItem = tamperedModes((modes) => {
-    standardModeOf(modes).parameters.policies.magic_policy.is_item = true;
+    standardModeOf(modes).policies.magic_policy.is_item = true;
   });
   push('反证⑳：把 PVP 魔法标成普通 item 必须被判红（愿力强化不是道具）',
     magicAsItem.some((p) => p.includes('magic_policy') && p.includes('is_item')),
@@ -1281,7 +1305,7 @@ function selftest() {
 
   // 反证㉑：给「是否占行动」补一个 false（看起来合理）→ 必须红
   const inventedActionCost = tamperedModes((modes) => {
-    standardModeOf(modes).parameters.policies.magic_policy.occupies_action = false;
+    standardModeOf(modes).policies.magic_policy.occupies_action = false;
   });
   push('反证㉑：给未核验的 occupies_action 填一个 false 必须被判红（必须 null + UNVERIFIED）',
     inventedActionCost.some((p) => p.includes('occupies_action')),
@@ -1289,7 +1313,7 @@ function selftest() {
 
   // 反证㉒：「必须选满 6 只」被写成 true（没有来源支持的那个断言）→ 必须红
   const fillInvented = tamperedModes((modes) => {
-    standardModeOf(modes).parameters.policies.team_size_policy.fill_required = true;
+    standardModeOf(modes).policies.team_size_policy.fill_required = true;
   });
   push('反证㉒：把 fill_required 写成 true 必须被判红（「必须选满」没有来源支持）',
     fillInvented.some((p) => p.includes('fill_required')),

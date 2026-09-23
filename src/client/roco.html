@@ -1,4 +1,5 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 洛克王国：世界（训练场）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/roco.css"></head><body>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 洛克王国：世界（训练场）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/roco.css">
+<link rel="stylesheet" href="/src/client/battle-v3.css"></head><body>
 <div id="boot-fallback" class="boot-fallback" role="alert">页面脚本没有加载成功：本机服务可能还是**旧版本**（静态资源清单在进程启动时就定下了）。请在仓库根目录重启 <code>npm start</code>，然后刷新这一页；开发者抽屉里能看到服务进程的启动时间与资源清单规模。</div>
 
 <!-- 玩家层的三条口径（模式 / 候选规则 / 匹配前对手未知）：**首屏可见但不在页眉里**
@@ -201,65 +202,432 @@
 
 <!-- ── 对战页：中央是双方当前宠物的战斗舞台 + 双方阵容状态 ──────────────────── -->
 <section class="panel battle" id="battle-panel" hidden>
- <!-- 顶部信息栏（v3h 版式）：**无框**、左右两端对齐且垂直居中；中央两行（模式 / 回合）。
-      左端=我方存活点 ●○ + 心 ♥♡；右端镜像。心只在掉心时出现几秒。 -->
- <div class="b3-topbar" id="b3-topbar">
-  <div class="b3-side">
-   <span class="b3-dots" id="b3-dots-self" data-b3-dots-self="yes" title="我方存活"></span>
-   <span class="b3-hearts" id="b3-hearts-self" data-b3-hearts-self="yes" hidden></span>
-  </div>
-  <div class="b3-turn">
-   <div class="b3-mode" id="b3-mode">PVP · AI模拟</div>
-   <div class="b3-round" id="b3-round" data-b3-turn="yes">第 1 回合</div>
-  </div>
-  <div class="b3-side right">
-   <span class="b3-hearts" id="b3-hearts-foe" data-b3-hearts-foe="yes" hidden></span>
-   <span class="b3-dots" id="b3-dots-foe" data-b3-dots-foe="yes" title="对手存活"></span>
-  </div>
- </div>
- <!-- 对局进行中的一行阵容摘要（阵容池收起来之后，玩家仍看得见自己选了什么） -->
- <div id="lineup-brief" class="lineup-brief" hidden></div>
- <!-- R5：开局前的**短暂**阵容展示（人类规格：选完宠、开局前给一眼对峙画面）。
-      ⚠ 严格按公开视图：我方六只给名字/属性；对手只给「上场才亮明」与后备数量 ——
-      把对手整队亮出来会违反「未上场不揭示」的公开信息边界。 -->
- <div id="lineup-reveal" class="lineup-reveal" role="status" aria-live="polite" hidden></div>
 
- <!-- 顶部对称：双方资源条（魔力/心）+ 当前精灵 + 队伍状态。
-      **资源条的数字只能来自引擎**：引擎没给（mana/hearts 都是 null）就写「未核验」
-      并指向开发者抽屉，绝不画心形计数、也绝不替它补一个 4。 -->
- <div class="sidebars">
-  <div class="sidebar player" id="self-bar">
-   <div class="sb-head"><span class="side-tag player">我方</span><span class="muted" id="self-active"></span></div>
-   <div class="resource" id="self-resource"></div>
-   <div class="roster-line" id="self-roster-line"></div>
-  </div>
-  <div class="vs" aria-hidden="true">VS</div>
-  <div class="sidebar enemy" id="foe-bar">
-   <div class="sb-head"><span class="side-tag enemy">对手</span><span class="muted">规则引擎驱动</span></div>
-   <div class="resource" id="foe-resource"></div>
-   <div class="roster-line" id="foe-roster-line"></div>
-  </div>
+
+<div class="b3-wrap" data-b3-root="yes">
+ <!-- 旧的渲染写入点（被 v3h 片段取代）：保留**隐藏接收槽**，让既有 render 不崩；
+      真正可见的内容由 `.b3-*` 那一套承载。 -->
+ <div class="b3-sink" id="b3-sink" hidden aria-hidden="true">
+  <span id="self-active"></span><span id="self-resource"></span><span id="foe-resource"></span>
+  <div id="self-pets"></div><div id="foe-field"></div>
+  <div id="self-bench"></div><div id="foe-bench"></div>
+  <p id="self-field-note"></p><p id="foe-field-note"></p><p id="foe-note"></p>
+  <div id="self-roster-line"></div><div id="foe-roster-line"></div>
+  <p id="last-event"></p><div id="lineup-brief"></div>
  </div>
 
- <div class="stage">
-  <article class="fighter" id="self-panel">
-   <div class="fighter-head"><span class="side-tag player">我方场上</span><span class="muted" id="self-field-note"></span></div>
-   <div id="self-pets" class="pets"></div>
-  </article>
-  <p class="muted" id="foe-note" hidden></p>
-  <article class="fighter" id="foe-panel">
-   <div class="fighter-head"><span class="side-tag enemy">对手场上</span><span class="muted" id="foe-field-note"></span></div>
-   <div id="foe-field" class="pets"></div>
-  </article>
+
+ <!-- ═══ ① 顶部信息栏（无框、左右两端对齐且垂直居中、中央两行） ═══════════════
+      左端＝我方存活点 ●○ ＋ 心 ♥♡；右端＝镜像（心在前、点在后）。
+      「无框」是硬口径：这一块不要加 border/background。 -->
+ <div class="b3-topbar" id="b3-topbar" data-b3-topbar="yes">
+  <!-- 左端：我方 -->
+  <div class="b3-side" data-b3-side="self">
+   <!-- 存活点：内层 span 的类名沿用 roco.css 既有约定 alive/down，主线程现有生成逻辑不用改。
+        例：6 只里 4 只存活 → <i class="alive">●●●●</i><i class="down">○○</i> -->
+   <span class="b3-dots" id="b3-dots-self" data-b3-dots-self="yes"
+     data-b3-src="view.self.pets[].fainted（活=● alive 绿 / 倒=○ down 灰）" title="我方存活"><i class="alive">&#x25CF;&#x25CF;&#x25CF;&#x25CF;</i><i class="down">&#x25CB;&#x25CB;</i></span>
+   <!-- 心 ♥：引擎公开视图**没有** hearts 字段（roco.js:391）→ 默认 hidden。
+        只有引擎真给了数、或掉心动效要演那几秒，才 hidden=false。绝不硬写 4 颗。 -->
+   <span class="b3-hearts" id="b3-hearts-self" data-b3-hearts-self="yes" hidden
+     data-b3-src="view.hearts.self（引擎暂无 → 保持 hidden；掉心动效时才显）"><i>&#x2665;&#x2665;</i><i class="lost">&#x2661;&#x2661;</i></span>
+  </div>
+  <!-- 中央两行：模式 / 回合 -->
+  <div class="b3-turn" data-b3-turn-block="yes">
+   <div class="b3-mode" id="b3-mode" data-b3-mode="yes"
+     data-b3-src="state.mode.label（或 view.mode.label）；形如「PVP · AI模拟」">PVP &middot; AI模拟</div>
+   <div class="b3-round" id="b3-round" data-b3-turn="yes"
+     data-b3-src="view.turn（整数）→ 拼「第 {turn} 回合」">第 1 回合</div>
+  </div>
+  <!-- 右端：对手（镜像 —— 心在前、点在后，且点序本身就是镜像的） -->
+  <div class="b3-side right b3-side--foe" data-b3-side="foe">
+   <span class="b3-hearts" id="b3-hearts-foe" data-b3-hearts-foe="yes" hidden
+     data-b3-src="view.hearts.opponent（同上；引擎暂无 → hidden）"><i class="lost">&#x2661;&#x2661;&#x2661;</i><i>&#x2665;</i></span>
+   <span class="b3-dots" id="b3-dots-foe" data-b3-dots-foe="yes"
+     data-b3-src="view.opponent.bench[].fainted + view.opponent.field（**不揭示名字**，只给点数；点序镜像：倒的在前）"
+     title="对手存活"><i class="down">&#x25CB;&#x25CB;&#x25CB;</i><i class="alive">&#x25CF;&#x25CF;&#x25CF;</i></span>
+  </div>
  </div>
 
- <!-- 最新一条战斗事件（战斗主视线只留这一条；完整战报在下面的折叠里独立滚动） -->
- <p class="last-event" id="last-event" aria-live="polite"></p>
+ <!-- ═══ ②③④ 主区：三列 = 232px / 自适应 / 232px（判据量过，别改） ═════════ -->
+ <div class="b3-main" data-b3-main="yes">
 
- <div class="bench-row">
-  <div class="bench-col"><span class="muted bench-label">我方后备</span><div id="self-bench" class="bench"></div></div>
-  <div class="bench-col"><span class="muted bench-label">对手后备</span><div id="foe-bench" class="bench"></div></div>
+  <!-- ─── ② 左列：竖排四格技能 / 更换五行 / 背包格 ───────────────────────────
+       三屏同处一列，靠 `body.dataset.b3Tab` 三选一（见 battle-v3.css）。
+       技能态每格 flex:1 平分列高 → 更换态 5 行、背包态 2 格的**底边仍然对齐**，
+       而「聚能」在底栏（列外），永远不会被盖住。 -->
+  <div class="b3-col b3-col--left" data-b3-col-left="yes">
+
+   <!-- ② -A 技能屏（4 格；第 5 格演示灰置＋消耗标红） -->
+   <div class="b3-panel b3-panel--skill" data-b3-panel="skill" data-b3-skills="yes">
+    <!-- 每格： ⭐消耗 · 名字 · 克制标记 ／ 属性徽章 + 2 个预留位 · 技能类别 ／ 预期伤害 -->
+    <div class="b3-slot" data-b3-pending="yes" data-b3-skill-slot="0" data-b3-cost-short="no" data-b3-slot-legal="yes"
+      data-b3-src="state.roster[].moveset[i]（名字/属性/类别/消耗）+ view.legal[]（按 skill_id 对齐）+ view.damage_preview.samples[]">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="0" data-b3-src="moveset[i].energy（⭐ 消耗）">&#x2B50; 0</span>
+      <span class="b3-slot-name" data-b3-skill-name="魔能爆">魔能爆</span>
+      <!-- 克制标记：三个 SVG 都在，只按 data-b3-rel 显示对应的那个（up/down/none） -->
+      <span class="b3-rel" data-b3-rel="none" data-b3-src="view.damage_preview.samples[].multiplier（>1 up / <1 down / =1 none）">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <!-- 属性徽章：emoji + 中文（🔥火系）；点一下加 class b3-el--name → 只显中文，约 3 秒后回到 emoji -->
+      <span class="b3-el-slots" data-b3-el-slots="self">
+       <span class="b3-el" data-b3-self-el="普通系" data-b3-el-name="普通系" data-b3-src="moveset[i].element（系别名，如「普通系」）"
+         title="点一下显示系别名"><span class="b3-el-ic">&#x26AA;</span><span class="b3-el-nm">普通系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-skill-cat="攻击" data-b3-src="moveset[i].category（攻击/防御/状态）">攻击</span>
+     </div>
+     <div class="b3-dmg b3-dmg--plain" data-b3-dmg="128" data-b3-dmg-kind="plain"
+       data-b3-src="view.damage_preview.samples[].damage + .formula_verified">预期伤害 128</div>
+    </div>
+
+    <div class="b3-slot" data-b3-pending="yes" data-b3-skill-slot="1" data-b3-cost-short="no" data-b3-slot-legal="yes"
+      data-b3-src="同上；本格是防御类（无克制标记 → none）">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="1">&#x2B50; 1</span>
+      <span class="b3-slot-name" data-b3-skill-name="防御">防御</span>
+      <span class="b3-rel" data-b3-rel="none">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-el-slots">
+       <span class="b3-el" data-b3-self-el="普通系" data-b3-el-name="普通系"><span class="b3-el-ic">&#x26AA;</span><span class="b3-el-nm">普通系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-skill-cat="防御">防御</span>
+     </div>
+     <div class="b3-dmg b3-dmg--none" data-b3-dmg="--" data-b3-dmg-kind="none">预期伤害 --</div>
+    </div>
+
+    <div class="b3-slot" data-b3-pending="yes" data-b3-skill-slot="2" data-b3-cost-short="no" data-b3-slot-legal="yes"
+      data-b3-src="克制对手 → data-b3-rel=&quot;up&quot;（绿▲）＋ dmg 绿色">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="3">&#x2B50; 3</span>
+      <span class="b3-slot-name" data-b3-skill-name="强制重启">强制重启</span>
+      <span class="b3-rel" data-b3-rel="up">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-el-slots">
+       <span class="b3-el" data-b3-self-el="电系" data-b3-el-name="电系"><span class="b3-el-ic">&#x26A1;</span><span class="b3-el-nm">电系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-skill-cat="攻击">攻击</span>
+     </div>
+     <div class="b3-dmg b3-dmg--up" data-b3-dmg="214" data-b3-dmg-kind="up">预期伤害 214</div>
+    </div>
+
+    <!-- 灰置 + 星不够：data-b3-slot-legal="no" + data-b3-cost-short="yes"（⭐ 变红） -->
+    <div class="b3-slot b3-slot--grey" data-b3-pending="yes" data-b3-skill-slot="3" data-b3-cost-short="yes" data-b3-slot-legal="no"
+      data-b3-src="view.legal[] 里没有这个 skill_id → 灰置；view.self.pets[active].energy < cost → 标红">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="5">&#x2B50; 5</span>
+      <span class="b3-slot-name" data-b3-skill-name="电离爆破">电离爆破</span>
+      <span class="b3-rel" data-b3-rel="down">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-el-slots">
+       <span class="b3-el" data-b3-self-el="电系" data-b3-el-name="电系"><span class="b3-el-ic">&#x26A1;</span><span class="b3-el-nm">电系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-skill-cat="状态">状态</span>
+     </div>
+     <div class="b3-dmg b3-dmg--down" data-b3-dmg="0" data-b3-dmg-kind="down">预期伤害 0</div>
+    </div>
+   </div>
+
+   <!-- ② -B 更换屏（5 行；底边与技能屏对齐，聚能在列外不被盖） -->
+   <div class="b3-panel b3-panel--switch" data-b3-panel="switch" data-b3-switch="yes">
+    <!-- 每行：⭐ · 名字 · 克制标记 ／ 属性徽章 + 预留位 ／ 血量 -->
+    <div class="b3-slot" data-b3-pending="yes" data-b3-switch-row="0" data-b3-rel="up" data-b3-switch-legal="yes"
+      data-b3-src="view.legal[] kind=switch 的 target_index + view.self.pets[target_index]（名字/血量）+ roster.types">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="0" data-b3-src="view.self.pets[target_index].energy">&#x2B50; 0</span>
+      <span class="b3-slot-name" data-b3-switch-name="铠甲虫">铠甲虫</span>
+      <span class="b3-rel" data-b3-rel="up" data-b3-src="换上它打对手的属性倍率（up 克制对手 / down 被对手克制 / none 无影响）">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-el-slots">
+       <span class="b3-el" data-b3-switch-el="虫系" data-b3-el-name="虫系" data-b3-src="roster[].types[]（系别名）"><span class="b3-el-ic">&#x1F41B;</span><span class="b3-el-nm">虫系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-switch-rel-text="克制对手">克制对手</span>
+     </div>
+     <div class="b3-note" data-b3-switch-hp="雪影娃娃 · 442/442"
+       data-b3-src="view.self.pets[target_index].hp / .max_hp">雪影娃娃 &middot; 442/442</div>
+    </div>
+
+    <div class="b3-slot" data-b3-pending="yes" data-b3-switch-row="1" data-b3-rel="none" data-b3-switch-legal="yes">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="1">&#x2B50; 1</span>
+      <span class="b3-slot-name" data-b3-switch-name="雪影娃娃">雪影娃娃</span>
+      <span class="b3-rel" data-b3-rel="none">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-el-slots">
+       <span class="b3-el" data-b3-switch-el="冰系" data-b3-el-name="冰系"><span class="b3-el-ic">&#x2744;&#xFE0F;</span><span class="b3-el-nm">冰系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-switch-rel-text="无影响">无影响</span>
+     </div>
+     <div class="b3-note" data-b3-switch-hp="皇家狮鹫 · 403/403">皇家狮鹫 &middot; 403/403</div>
+    </div>
+
+    <div class="b3-slot" data-b3-pending="yes" data-b3-switch-row="2" data-b3-rel="up" data-b3-switch-legal="yes">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="2">&#x2B50; 2</span>
+      <span class="b3-slot-name" data-b3-switch-name="皇家狮鹫">皇家狮鹫</span>
+      <span class="b3-rel" data-b3-rel="up">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-el-slots">
+       <span class="b3-el" data-b3-switch-el="翼系" data-b3-el-name="翼系"><span class="b3-el-ic">&#x1FAB6;</span><span class="b3-el-nm">翼系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-switch-rel-text="克制对手">克制对手</span>
+     </div>
+     <div class="b3-note" data-b3-switch-hp="化蝶 · 311/311">化蝶 &middot; 311/311</div>
+    </div>
+
+    <div class="b3-slot" data-b3-pending="yes" data-b3-switch-row="3" data-b3-rel="down" data-b3-switch-legal="yes">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="1">&#x2B50; 1</span>
+      <span class="b3-slot-name" data-b3-switch-name="化蝶">化蝶</span>
+      <span class="b3-rel" data-b3-rel="down">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-el-slots">
+       <span class="b3-el" data-b3-switch-el="虫系" data-b3-el-name="虫系"><span class="b3-el-ic">&#x1F41B;</span><span class="b3-el-nm">虫系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-switch-rel-text="被对手克制">被对手克制</span>
+     </div>
+     <div class="b3-note" data-b3-switch-hp="仪式巨像 · 401/401">仪式巨像 &middot; 401/401</div>
+    </div>
+
+    <div class="b3-slot" data-b3-pending="yes" data-b3-switch-row="4" data-b3-rel="none" data-b3-switch-legal="yes">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-cost" data-b3-cost="3">&#x2B50; 3</span>
+      <span class="b3-slot-name" data-b3-switch-name="仪式巨像">仪式巨像</span>
+      <span class="b3-rel" data-b3-rel="none">
+       <svg class="b3-rel-up" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.2 L13.2 12.4 Q8 10.6 2.8 12.4 Z" fill="#5fd39a"/></svg>
+       <svg class="b3-rel-down" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.8 L2.8 3.6 Q8 5.4 13.2 3.6 Z" fill="#ff8f8f"/></svg>
+       <svg class="b3-rel-none" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4.4" fill="#dfe8ef"/></svg>
+      </span>
+     </div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-el-slots">
+       <span class="b3-el" data-b3-switch-el="地系" data-b3-el-name="地系"><span class="b3-el-ic">&#x26F0;&#xFE0F;</span><span class="b3-el-nm">地系</span></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+       <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      </span>
+      <span class="b3-slot-tail" data-b3-switch-rel-text="无影响">无影响</span>
+     </div>
+     <div class="b3-note" data-b3-switch-hp="铠甲虫 · 445/445">铠甲虫 &middot; 445/445</div>
+    </div>
+   </div>
+
+   <!-- ② -C 背包屏（2 格；互斥 → 选了另一个自动灰置） -->
+   <div class="b3-panel b3-panel--item" data-b3-panel="item" data-b3-items="yes">
+    <div class="b3-slot" data-b3-pending="yes" data-b3-item-cell="0" data-b3-item-grey="no" data-b3-item-id="wish_power_up"
+      data-b3-src="view.legal[] kind=item 的 item_id / label；次数与冷却未登记时不编">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-slot-name" data-b3-item-name="愿力强化">愿力强化</span>
+      <span class="b3-cost" data-b3-item-count="未登记" data-b3-src="动作自带的剩余次数；引擎没给 → 写「未登记」">未登记</span>
+     </div>
+     <div class="b3-note" data-b3-item-desc="候选 · 未核验：仓内只有一条 bwiki 特性文案提到会替换首个技能；次数 / 冷却 / 是否占行动均未登记。">对任意精灵使用，立即生效，不占行动。
+&#10;把当前精灵的第一个技能换成「愿力冲击」。
+&#10;再用一次可解除（解除后进冷却，不减次数）。</div>
+     <div class="b3-note" data-b3-item-note="次数 / 冷却 / 是否占行动均未登记" data-b3-src="view.unverified_notes[]（未核验项如实照搬）">次数 / 冷却 / 是否占行动均未登记</div>
+    </div>
+    <div class="b3-slot b3-slot--grey" data-b3-pending="yes" data-b3-item-cell="1" data-b3-item-grey="yes" data-b3-item-id="leader_form"
+      data-b3-src="引擎没给这个动作 → 灰置；原因走 data-b3-item-note">
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <span class="b3-slot-name" data-b3-item-name="首领化">首领化</span>
+      <span class="b3-cost" data-b3-item-count="不可用">不可用</span>
+     </div>
+     <div class="b3-note" data-b3-item-desc="候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。">候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。</div>
+     <div class="b3-note" data-b3-item-note="需要「首领血脉」，本版未做">需要「首领血脉」，本版未做</div>
+    </div>
+   </div>
+
+   <!-- ② -D 逃跑屏（唯一一个需要确认的动作） -->
+   <div class="b3-panel b3-panel--escape" data-b3-panel="escape" data-b3-escape="yes">
+    <div class="b3-slot" data-b3-pending="yes">
+     <div class="b3-note" data-b3-src="—（固定文案：投降立刻结束本局并按失败记）">投降会立刻结束这一局（这一局按失败记）。</div>
+     <div class="b3-slot-row" data-b3-pending="yes">
+      <button class="b3-tab" data-b3-escape-confirm="yes" data-b3-src="view.legal[] kind=surrender 的那一条"
+        data-b3-action-src="view.legal[] 的下标（主线程点它就走这一步）">确认投降</button>
+      <button class="b3-tab" data-b3-escape-cancel="yes" data-b3-src="—（只切回技能屏，不发动作）">再想想</button>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <!-- ─── ③ 中间两张出战卡（关于页面中线**镜像**） ──────────────────────────
+       镜像不是靠 row-reverse 猜的：DOM 顺序本身就镜像 ——
+         左卡 f-top： 名字 → 属性 → [占位] → 等级   ／ f-mid：⭐ → 血条
+         右卡 f-top： 等级 → [占位] → 属性 → 名字   ／ f-mid：血条 → ⭐
+       对手侧血条从右往左填充（CSS direction:rtl + margin-left:auto）。 -->
+  <div class="b3-stage" data-b3-stage="yes">
+
+   <!-- 我方出战卡 -->
+   <div class="b3-fighter b3-fighter--self" data-b3-self-card="yes" data-b3-mirror="self">
+    <div class="b3-f-top">
+     <span class="b3-f-name" data-b3-self-name="音速犬" data-b3-src="view.self.pets[view.self.active].name">音速犬</span>
+     <span class="b3-el-slots">
+      <span class="b3-el" data-b3-self-el="火系" data-b3-el-name="火系"
+        data-b3-src="roster[].types[]（系别名）；多属性就多几个徽章，剩余留空撑宽度"><span class="b3-el-ic">&#x1F525;</span><span class="b3-el-nm">火系</span></span>
+      <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+     </span>
+     <span class="b3-spacer" aria-hidden="true"></span>
+     <span class="b3-f-lv" data-b3-self-lv="60" data-b3-src="view.self.pets[active].level">60 级</span>
+    </div>
+    <div class="b3-f-mid">
+     <span class="b3-f-star" data-b3-self-star="10" data-b3-src="view.self.pets[active].energy（⭐ 当前值）">&#x2B50; 10</span>
+     <div class="b3-hp" data-b3-self-hp="445/445">
+      <div class="b3-hp-num">
+       <span data-b3-self-hp-text="生命 445 / 445" data-b3-src="view.self.pets[active].hp / .max_hp">生命 445 / 445</span>
+       <span data-b3-self-hp-pct="100%" data-b3-src="hp / max_hp 取整百分比">100%</span>
+      </div>
+      <div class="b3-hp-bar"><div class="b3-hp-fill" data-b3-self-hp-fill="100" style="width:100%"
+        data-b3-src="hp / max_hp（**唯一允许的 inline style**，因为它是数据）"></div></div>
+     </div>
+    </div>
+    <div class="b3-free" data-b3-self-free="yes" data-b3-src="—（立绘/动画预留区，暂不放数据）"></div>
+    <!-- buffs：引擎给了才写；没给就保留 ghost 占位（透明度 .32，表示「这个位置存在但没数据」） -->
+    <div class="b3-buffs" data-b3-self-buffs="yes" data-b3-src="view.self.pets[active].buffs / .statuses（没给整条不写）">
+     <span class="b3-buff b3-buff--ghost" data-b3-buff-kind="status">状态</span>
+     <span class="b3-buff b3-buff--ghost" data-b3-buff-kind="buff">增益</span>
+     <span class="b3-buff b3-buff--ghost" data-b3-buff-kind="mark">印记</span>
+    </div>
+   </div>
+
+   <!-- 对手出战卡（DOM 顺序显式镜像） -->
+   <div class="b3-fighter b3-fighter--foe" data-b3-foe-card="yes" data-b3-mirror="foe">
+    <div class="b3-f-top">
+     <span class="b3-f-lv" data-b3-foe-lv="60" data-b3-src="view.opponent.field.level">60 级</span>
+     <span class="b3-spacer" aria-hidden="true"></span>
+     <!-- 对手侧属性徽章**反过来**：中文在前、emoji 在后（.b3-el--mirror） -->
+     <span class="b3-el-slots">
+      <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      <span class="b3-el-slot b3-el-slot--empty" aria-hidden="true"></span>
+      <span class="b3-el b3-el--mirror" data-b3-foe-el="水系" data-b3-el-name="水系"
+        data-b3-src="view.opponent.field.types[]（公开视图没给就**不猜**，留空占位）"><span class="b3-el-ic">&#x1F4A7;</span><span class="b3-el-nm">水系</span></span>
+     </span>
+     <span class="b3-f-name" data-b3-foe-name="水灵" data-b3-src="view.opponent.field.name（上场才亮明）">水灵</span>
+    </div>
+    <div class="b3-f-mid">
+     <div class="b3-hp" data-b3-foe-hp="212/332">
+      <div class="b3-hp-num">
+       <span data-b3-foe-hp-pct="64%" data-b3-src="opponent.field.hp / .max_hp 取整百分比">64%</span>
+       <span data-b3-foe-hp-text="生命 212 / 332" data-b3-src="view.opponent.field.hp / .max_hp">生命 212 / 332</span>
+      </div>
+      <div class="b3-hp-bar"><div class="b3-hp-fill b3-hp-fill--mid" data-b3-foe-hp-fill="64" style="width:64%"
+        data-b3-src="hp / max_hp（对手侧从右往左填充，由 CSS 镜像，不用改这里）"></div></div>
+     </div>
+     <span class="b3-f-star" data-b3-foe-star="3" data-b3-src="view.opponent.field.energy（⭐ 当前值）">&#x2B50; 3</span>
+    </div>
+    <div class="b3-free" data-b3-foe-free="yes" data-b3-src="—（立绘/动画预留区）"></div>
+    <!-- 对手的 buffs **不在公开视图里**（roco.js:755）：只保留 ghost 占位，不编内容 -->
+    <div class="b3-buffs" data-b3-foe-buffs="yes" data-b3-src="公开视图无此字段 → 只留占位，别补">
+     <span class="b3-buff b3-buff--ghost" data-b3-buff-kind="status">状态</span>
+     <span class="b3-buff b3-buff--ghost" data-b3-buff-kind="buff">增益</span>
+     <span class="b3-buff b3-buff--ghost" data-b3-buff-kind="mark">印记</span>
+    </div>
+   </div>
+  </div>
+
+  <!-- ─── ④ 右列：战报（按回合分块，最新一回合在上） ─────────────────────────── -->
+  <div class="b3-col b3-col--right" data-b3-col-right="yes">
+   <div class="b3-log" data-b3-log="yes">
+    <h4 class="b3-log-title" data-b3-log-title="战报">战报</h4>
+    <div class="b3-log-scroll" data-b3-log-scroll="yes"
+      data-b3-src="state.events[]（按 event.turn 分组；每条只用 event.text 的中文句子）">
+     <!-- 一回合一块：b 是回合标签，p 是这一回合的每一条中文事件 -->
+     <div class="b3-log-turn" data-b3-log-turn="2" data-b3-log-latest="yes"
+       data-b3-src="event.turn 倒序第一个分组">
+      <b data-b3-log-turn-label="第 2 回合（最新）">第 2 回合（最新）</b>
+      <p data-b3-log-line="你换上雪影娃娃；对手换上喵喵。"
+        data-b3-src="event.text（引擎侧已生成的中文句子，照搬不改写）">你换上雪影娃娃；对手换上喵喵。</p>
+     </div>
+     <div class="b3-log-turn" data-b3-log-turn="1" data-b3-src="event.turn === 1 的分组">
+      <b data-b3-log-turn-label="第 1 回合">第 1 回合</b>
+      <p data-b3-log-line="音速犬使用强制重启，造成 214 伤害（属性克制）。">音速犬使用强制重启，造成 214 伤害（属性克制）。</p>
+      <p data-b3-log-line="水灵使用水枪，造成 66 伤害。">水灵使用水枪，造成 66 伤害。</p>
+     </div>
+    </div>
+   </div>
+  </div>
  </div>
+
+ <!-- ═══ ⑤ 底栏：左=聚能（⭐ 当前 / 上限）／右=四个大选项 ═══════════════════
+      `body.dataset.b3Charge = 'mana'` 时左按钮自动变紫、文案换成剩余魔力
+      （换宠那一屏就是这个态，见 battle-v3.css）。 -->
+ <div class="b3-footer" data-b3-footer="yes">
+  <!-- 聚能：文案里的数**只能来自引擎**（view.self.pets[active].energy / view.self.energy_max）；
+       引擎给了 charge 动作时还可以用 action.energy_gain 算「聚能 → x / cap」。
+       mana 态（换宠那一屏）：body.dataset.b3Charge='mana' 只负责变紫，
+       **文字由 JS 换**（label →「剩余魔力」、value →「♥ {view.mana.self} / {pool}」）。 -->
+  <button class="b3-charge" id="b3-charge" data-b3-charge="yes" data-b3-charge-state="energy"
+    data-b3-cost="2" data-b3-cost-max="10"
+    data-b3-src="view.self.pets[active].energy（当前 ⭐）/ view.self.energy_max（上限）；mana 态改用 view.mana.self">
+   <span class="b3-charge-label" data-b3-charge-label="聚能"
+     data-b3-src="固定「聚能」；mana 态由 JS 改成「剩余魔力」">聚能</span> <span class="b3-charge-sub" data-b3-charge-value="⭐ 2 / 10"
+     data-b3-src="同上；引擎没给上限就只写当前值，不编上限。mana 态写成「♥ {view.mana.self} / {pool}」">&#x2B50; 2 / 10</span>
+  </button>
+  <div class="b3-spacer" aria-hidden="true"></div>
+  <!-- 四个大选项：**高亮由 body.dataset.b3Tab 自动跟随**（不用手写 class） -->
+  <div class="b3-tabs" data-b3-tabs="yes" role="tablist">
+   <button class="b3-tab" data-b3-tab="skill" role="tab" data-b3-tab-on="yes"
+     data-b3-src="—（切屏；可点性由 view.legal[] 决定，不在这里裁动作）">技能</button>
+   <button class="b3-tab" data-b3-tab="switch" role="tab" data-b3-src="—（切屏）">更换</button>
+   <button class="b3-tab" data-b3-tab="item" role="tab" data-b3-src="—（切屏）">物品</button>
+   <button class="b3-tab" data-b3-tab="escape" role="tab" data-b3-src="—（切屏；真投降走 ②-D 的确认按钮）">逃跑</button>
+  </div>
+ </div>
+</div>
+
 
  <!-- 2026-09-22（人类视觉规格 E2/E4）：规则口径与未核验项**收在战场下面的一处折叠里**，
       默认只留一行短标签；展开才读得到逐条来源。战场（双方精灵）回到主视线。 -->

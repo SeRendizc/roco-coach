@@ -803,3 +803,8 @@ summary{min-height:44px;display:flex;align-items:center}
  .b3-turn .b3-round{font-size:15px}
  .b3-turn .b3-mode{font-size:11.5px}
 }
+
+/* 片段的示例数据在 JS 用 view 覆盖前**一律隐藏** —— 绝不能把设计稿里的示例名字/数字当真数据给人看。
+   JS 填完一行就移除该行的 data-b3-pending。 */
+[data-b3-pending="yes"]{display:none}
+.b3-sink{display:none}

@@ -433,7 +433,7 @@
       "ok": true
     },
     {
-      "actual": "带台账锚点的证据 11 条，台账条目 20 条",
+      "actual": "带台账锚点的证据 11 条，台账条目 21 条",
       "criteria": "evidence[].ledger_entry 形如 EV-* 时：该条目必须真的在 rule-evidence-ledger.json 里，且 confidence 与 ref 必须等于台账该条目的等级与首要来源（抄一份就会漂移）。",
       "label": "逐条证据能指回台账条目，且等级与首要来源都与台账一致",
       "ok": true
@@ -445,7 +445,7 @@
       "ok": true
     },
     {
-      "actual": "rule_evidence_ledger:f571c0a801e1… | game_data_pack:da190b43807e… | ruleset_config:613151c97ead… | catalog_reconciliation:bca1bf352a13… | pack_schema:7ed3f4b16307…",
+      "actual": "rule_evidence_ledger:f1a0b073b1e0… | game_data_pack:476ef71f376f… | ruleset_config:5359313f0fda… | catalog_reconciliation:bca1bf352a13… | pack_schema:7ed3f4b16307…",
       "criteria": "对每个引用路径重新算 sha256，与先验里写的比对；不一致即红（说明先验引用的产物已经换代）。",
       "label": "derived_from 的 sha256 与磁盘一致",
       "ok": true
@@ -543,7 +543,7 @@
     "speed tie（同速谁先动）= UNKNOWN",
     "能量上限 6 还是 10 = ENGINE_HYPOTHESIS（台账 EV-ENERGY-MAX）"
   ],
-  "meta_prior_id": "roco-meta-prior/v1#bbb7eee31f51663d",
+  "meta_prior_id": "roco-meta-prior/v1#57aa6539dcde39ca",
   "missing_real_evidence": [
     "「萌化」体系在标准 PVP 里的实机出场与胜负记录（当前一条都没有）",
     "「陨星」这一挂的实机配招与出场记录（当前一条都没有）",
@@ -690,7 +690,7 @@
       "where": "archetypes[].feature_axes[].criterion"
     },
     {
-      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DERIVED_FROM] derived_from[1].sha256：data/roco/game-data-pack/v2/pack.json 的 sha256 与磁盘不一致：先验写 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘是 da190b43807e4f34b3ba0b6b36daad568f9dee8ed69b5b7fad26a78851c479f9",
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DERIVED_FROM] derived_from[1].sha256：data/roco/game-data-pack/v2/pack.json 的 sha256 与磁盘不一致：先验写 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘是 476ef71f376f7c5f728d2edc0d0ff1be416413dec0832f3bf12ebe4a62d7a5e1",
       "expect_code": "DERIVED_FROM",
       "id": "10",
       "label": "derived_from 的 sha256 与磁盘不一致 ⇒ 红",

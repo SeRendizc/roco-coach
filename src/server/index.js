@@ -53,6 +53,7 @@ const publicAssets=new Set([
  // JS 由模块图自动收录（HTML 里的 `<script type="module">` 是入口）。
  'src/client/workshop.html',
  'src/client/style.css','src/client/connect.css','src/client/connect.js',
+ 'src/client/battle-v3.css',  // v3h 战斗区样式（人类定稿的版式）
 ]);
 
 // 浏览器模块从入口的 import 图**自动推导**，不再手工维护。

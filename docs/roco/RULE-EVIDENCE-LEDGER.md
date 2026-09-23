@@ -53,7 +53,7 @@
 | 19 | `EV-OFFICIAL-PAIRING-AI` | `product.pairing_ai` | 配队助手不能是唯一创新点；卖点在局中决策与规则可验证 | `OFFICIAL_CURRENT` | — | 官方 B 站账号发布（2026-08-07） |
 | 20 | `EV-BATTLEMODE-PARAMETERIZED` | `battle_mode.territory_trial` | `team_size / active_count / trait_sharing / boss_form` 全部参数化 | `OFFICIAL_CURRENT` | — | TapTap 官方公告（领地试炼 2v2 / 特性共享 / 首领化） |
 
-等级分布：`OFFICIAL_CURRENT` 3 · `RECORDED_IN_GAME` **0** · `COMMUNITY_CURRENT` 7 ·
+等级分布：`OFFICIAL_CURRENT` 3 · `RECORDED_IN_GAME` **2** · `COMMUNITY_CURRENT` 7 ·
 `CROSS_SOURCE_SUPPORTED` 7 · `ENGINE_HYPOTHESIS` 3 · `UNKNOWN` 0。
 `RECORDED_IN_GAME` 是 0 不是遗漏：本轮**没有录到任何实机**，所以一条都不许写成已录。
 
@@ -180,3 +180,11 @@ node scripts/roco/verify-evidence-ledger.mjs --ledger /tmp/tampered.json
    不为了凑出一个 `UNKNOWN` 条目而把别的东西降级。
 6. **台账不会自己变绿。** 它只保证“来源、等级、microcase 三栏写清了”。
    规则对不对，只能由 §3 那张表里的录屏回答。
+
+## 2026-09-23 追加（人类口径）
+
+- `EV-PVP-BOSS-FORM-STANDARD`（topic `battle_mode.standard_pvp`，`RECORDED_IN_GAME`）：首领化在闪耀大赛式标准 PVP 中**存在**，
+  建模为策略 `allowed_if_eligible`（不是 forbidden、不是 required）；首领信物 / 进化之力 = 资格或触发条件，**不叫普通 item**；
+  次数 / 冷却 / 是否占行动 / 持续 / 倍率一律 `null + UNVERIFIED`（引擎 fail closed）。
+- `topic_crosswalk.ledger_extensions` 补 `battle_mode.boss_duel` → maps_to `battle_mode.standard_pvp`（主题 PVP 复用标准模式，只改 theme 那一块）。
+- 台账现有 **21** 条，其中 `RECORDED_IN_GAME` **2** 条。

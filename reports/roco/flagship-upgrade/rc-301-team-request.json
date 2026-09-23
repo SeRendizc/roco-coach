@@ -247,7 +247,7 @@
       "team_size_expected": 6,
       "registry_status": "CANDIDATE",
       "registry_confidence": "CROSS_SOURCE_SUPPORTED",
-      "unknown_count": 4,
+      "unknown_count": 7,
       "note": "标准 PVP 六宠的参数只从 battle-modes.json 读；注册表里它有未核实项，报告不替它补事实。"
     }
   },
@@ -525,7 +525,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       },
       {
@@ -551,7 +551,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       },
       {
@@ -581,7 +581,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       },
       {
@@ -611,7 +611,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       },
       {
@@ -637,7 +637,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）",
           "[CONSTRAINT_NOTE] constraints：已采纳的硬约束：species_unique（实际值 {\"species_unique\":true}）"
         ]
       },
@@ -690,7 +690,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       },
       {
@@ -712,7 +712,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       },
       {
@@ -738,7 +738,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[VISIBILITY_NOT_DEFAULT] visibility：标准 PVP 的首选口径是 UNKNOWN_PREMATCH（匹配前不知道对手）；本次用的是 KNOWN_SCENARIO，下游不得把它当成匹配前口径（实际值 \"KNOWN_SCENARIO\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）",
           "[VISIBILITY_NOT_DEFAULT] visibility：原话把标准 PVP 的可见性说成 KNOWN_SCENARIO（不是首选的 UNKNOWN_PREMATCH）；下游不得当成匹配前口径（实际值 \"KNOWN_SCENARIO\"）"
         ]
       }
@@ -843,7 +843,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）",
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）",
           "[CONSTRAINT_NOTE] constraints：已采纳的硬约束：species_unique（实际值 {\"species_unique\":true}）"
         ]
       },
@@ -1017,7 +1017,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       }
     },
@@ -1041,7 +1041,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[DEFAULTED_FIELD] visibility：没给 visibility：代入 UNKNOWN_PREMATCH（匹配前不知道对手；13 号设计文档 §1/§4）（实际值 \"UNKNOWN_PREMATCH\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       }
     },
@@ -1096,7 +1096,7 @@
           "[DERIVED_FIELD] ruleset_config_id：没给 ruleset_config_id：按模式 pvp-standard-six-pet 的 ruleset_binding 代入 mobile_s4_candidate_v3（实际值 \"mobile_s4_candidate_v3\"）",
           "[DERIVED_FIELD] team_size：没给 team_size：按模式 pvp-standard-six-pet 的注册表参数代入 6（实际值 6）",
           "[VISIBILITY_NOT_DEFAULT] visibility：标准 PVP 的首选口径是 UNKNOWN_PREMATCH（匹配前不知道对手）；本次用的是 KNOWN_SCENARIO，下游不得把它当成匹配前口径（实际值 \"KNOWN_SCENARIO\"）",
-          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 4 条未核实项（未实机核对前不得当官方事实）（实际值 4）"
+          "[MODE_NOTE] mode：模式 pvp-standard-six-pet 在注册表里有 7 条未核实项（未实机核对前不得当官方事实）（实际值 7）"
         ]
       }
     },
