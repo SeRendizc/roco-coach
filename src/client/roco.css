@@ -853,3 +853,9 @@ body[data-roco-view="ready"] main>#dev-zone{display:none}
 /* 战斗态：旧的「规则口径」折叠行也收起（v3h 顶栏已经承担口径展示）。
    注意 `.battle-tools`（让小芽看一眼 / 自动走一步）**保留** —— 真机判据要点它。 */
 body[data-roco-view="ready"] #battle-panel>.rules-note{display:none}
+
+/* 页眉中间列：模式 + 回合（人类：放页眉正中间） */
+header.topbar .head-center{justify-self:center;text-align:center;line-height:1.2}
+header.topbar .hc-mode{display:block;font-size:12.5px;color:#93a7b8;font-weight:600}
+header.topbar .hc-turn{display:block;font-size:17px;font-weight:700}
+.xy-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}

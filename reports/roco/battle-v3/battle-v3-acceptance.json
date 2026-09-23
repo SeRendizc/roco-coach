@@ -1,7 +1,7 @@
 {
  "schema": "roco-battle-v3-acceptance/v1",
  "generated_by": "scripts/roco/browser-battle-v3-acceptance.mjs",
- "judged_at": "2026-09-23T03:54:25.831Z",
+ "judged_at": "2026-09-23T04:15:07.551Z",
  "page": "http://127.0.0.1:8899/roco.html",
  "base": "http://127.0.0.1:8899",
  "viewport": "1440x900",
@@ -277,7 +277,7 @@
    "ok": true,
    "skipped": false,
    "problems": [],
-   "actual": "卡①②中心 x=495 / 945；轴心=720；页面中线=720；推导=hook"
+   "actual": "卡①②中心 x=496 / 944；轴心=720；页面中线=720；推导=hook"
   },
   {
    "id": "geom-no-hscroll",
@@ -318,7 +318,7 @@
    "ok": true,
    "skipped": false,
    "problems": [],
-   "actual": "左点组心 y=161.25（\"●●●●●●\"）= 右点组心 y=161.25（\"●●●●●●\"）；行中心 y=161.25"
+   "actual": "左点组心 y=132.81（\"●●●●●●\"）= 右点组心 y=132.81（\"●●●●●●\"）；行中心 y=132.81"
   },
   {
    "id": "topbar-turn-text",
@@ -346,7 +346,7 @@
    "ok": true,
    "skipped": false,
    "problems": [],
-   "actual": "4 格；底边 954；每格高 184.88/184.88/184.88/184.88"
+   "actual": "4 格；底边 776；每格高 145.09/145.09/145.09/145.09"
   },
   {
    "id": "skills-cell-content",
@@ -404,7 +404,7 @@
    "ok": true,
    "skipped": false,
    "problems": [],
-   "actual": "5 行；可换上的存活队友 5（活着 6/6）；行高 146.3/146.31/146.3/146.3/146.3"
+   "actual": "5 行；可换上的存活队友 5（活着 6/6）；行高 114.47/114.48/114.47/114.48/114.47"
   },
   {
    "id": "switch-row-content",
@@ -433,7 +433,7 @@
    "ok": true,
    "skipped": false,
    "problems": [],
-   "actual": "更换态底边 954 / 技能态最后一格底边 954（差 0px）"
+   "actual": "更换态底边 776 / 技能态最后一格底边 776（差 0px）"
   },
   {
    "id": "switch-not-overlap-charge",
@@ -447,7 +447,7 @@
    "ok": true,
    "skipped": false,
    "problems": [],
-   "actual": "行范围 y 190.5→954；聚能区 y 966→1010"
+   "actual": "行范围 y 171.63→776；聚能区 y 782→826"
   },
   {
    "id": "tab-hook-item",
@@ -682,33 +682,33 @@
     "kidTags": "DIV>DIV>DIV",
     "left": {
      "left": 31,
-     "top": 190.5,
+     "top": 171.63,
      "right": 263,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 147,
-     "cy": 572.25
+     "cy": 473.81
     },
     "right": {
      "left": 1177,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1409,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 1293,
-     "cy": 572.25
+     "cy": 473.81
     },
     "mid": {
      "left": 277,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1163,
-     "bottom": 954,
+     "bottom": 776,
      "w": 886,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 720,
-     "cy": 572.25
+     "cy": 473.81
     },
     "leftIsSkillParent": true,
     "rightHasLog": true,
@@ -719,38 +719,38 @@
     "source": "hook",
     "stageRect": {
      "left": 277,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1163,
-     "bottom": 954,
+     "bottom": 776,
      "w": 886,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 720,
-     "cy": 572.25
+     "cy": 473.81
     },
     "fighters": [
      {
       "rect": {
        "left": 277,
-       "top": 190.5,
-       "right": 713,
-       "bottom": 954,
-       "w": 436,
-       "h": 763.5,
-       "cx": 495,
-       "cy": 572.25
+       "top": 171.63,
+       "right": 715,
+       "bottom": 776,
+       "w": 438,
+       "h": 604.38,
+       "cx": 496,
+       "cy": 473.81
       },
       "tag": "DIV"
      },
      {
       "rect": {
-       "left": 727,
-       "top": 190.5,
+       "left": 725,
+       "top": 171.63,
        "right": 1163,
-       "bottom": 954,
-       "w": 436,
-       "h": 763.5,
-       "cx": 945,
-       "cy": 572.25
+       "bottom": 776,
+       "w": 438,
+       "h": 604.38,
+       "cx": 944,
+       "cy": 473.81
       },
       "tag": "DIV"
      }
@@ -761,13 +761,13 @@
     "source": "hook",
     "rect": {
      "left": 31,
-     "top": 142,
+     "top": 104,
      "right": 1409,
-     "bottom": 180.5,
+     "bottom": 161.63,
      "w": 1378,
-     "h": 38.5,
+     "h": 57.63,
      "cx": 720,
-     "cy": 161.25
+     "cy": 132.81
     },
     "tag": "DIV#b3-topbar",
     "borderTopWidth": "0px",
@@ -784,13 +784,13 @@
     "present": true,
     "rect": {
      "left": 35,
-     "top": 152.25,
+     "top": 123.81,
      "right": 161,
-     "bottom": 170.25,
+     "bottom": 141.81,
      "w": 126,
      "h": 18,
      "cx": 98,
-     "cy": 161.25
+     "cy": 132.81
     },
     "text": "●●●●●●"
    },
@@ -798,13 +798,13 @@
     "present": true,
     "rect": {
      "left": 1279,
-     "top": 152.25,
+     "top": 123.81,
      "right": 1405,
-     "bottom": 170.25,
+     "bottom": 141.81,
      "w": 126,
      "h": 18,
      "cx": 1342,
-     "cy": 161.25
+     "cy": 132.81
     },
     "text": "●●●●●●"
    },
@@ -812,14 +812,14 @@
     "present": true,
     "text": "第 2 回合",
     "rect": {
-     "left": 680.53,
-     "top": 159.25,
-     "right": 759.47,
-     "bottom": 180.5,
-     "w": 78.94,
+     "left": 455.03,
+     "top": 140.38,
+     "right": 984.97,
+     "bottom": 161.63,
+     "w": 529.94,
      "h": 21.25,
      "cx": 720,
-     "cy": 169.88
+     "cy": 151
     },
     "candidates": [
      "DIV#b3-round=\"第 2 回合\""
@@ -833,13 +833,13 @@
       "index": 0,
       "rect": {
        "left": 31,
-       "top": 190.5,
+       "top": 171.63,
        "right": 263,
-       "bottom": 375.38,
+       "bottom": 316.72,
        "w": 232,
-       "h": 184.88,
+       "h": 145.09,
        "cx": 147,
-       "cy": 282.94
+       "cy": 244.17
       },
       "text": "⭐ 0 啃咬 🐛虫系 攻击 预期伤害 —",
       "costHook": true,
@@ -859,13 +859,13 @@
       "index": 1,
       "rect": {
        "left": 31,
-       "top": 383.38,
+       "top": 324.72,
        "right": 263,
-       "bottom": 568.25,
+       "bottom": 469.81,
        "w": 232,
-       "h": 184.88,
+       "h": 145.09,
        "cx": 147,
-       "cy": 475.81
+       "cy": 397.27
       },
       "text": "⭐ 1 防御 ⚪普通系 防御 预期伤害 —",
       "costHook": true,
@@ -885,13 +885,13 @@
       "index": 2,
       "rect": {
        "left": 31,
-       "top": 576.25,
+       "top": 477.81,
        "right": 263,
-       "bottom": 761.13,
+       "bottom": 622.91,
        "w": 232,
-       "h": 184.88,
+       "h": 145.09,
        "cx": 147,
-       "cy": 668.69
+       "cy": 550.36
       },
       "text": "⭐ 3 翅刃 🐛虫系 攻击 预期伤害 —",
       "costHook": true,
@@ -911,13 +911,13 @@
       "index": 3,
       "rect": {
        "left": 31,
-       "top": 769.13,
+       "top": 630.91,
        "right": 263,
-       "bottom": 954,
+       "bottom": 776,
        "w": 232,
-       "h": 184.88,
+       "h": 145.09,
        "cx": 147,
-       "cy": 861.56
+       "cy": 703.45
       },
       "text": "⭐ 1 风隐 🪶翼系 状态 预期伤害 —",
       "costHook": true,
@@ -936,7 +936,7 @@
     ],
     "clickableCount": 4,
     "shortCount": 0,
-    "lastBottom": 954
+    "lastBottom": 776
    },
    "switchRows": {
     "count": 5,
@@ -1097,13 +1097,13 @@
     "colWidth": 232,
     "colRect": {
      "left": 1177,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1409,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 1293,
-     "cy": 572.25
+     "cy": 473.81
     },
     "texts": [
      "第 2 回合（最新） 你换上雪影娃娃；对手换上喵喵。",
@@ -1115,13 +1115,13 @@
     "resolved": true,
     "rect": {
      "left": 31,
-     "top": 966,
+     "top": 782,
      "right": 1409,
-     "bottom": 1010,
+     "bottom": 826,
      "w": 1378,
      "h": 44,
      "cx": 720,
-     "cy": 988
+     "cy": 804
     },
     "charge": {
      "present": true,
@@ -1131,24 +1131,24 @@
      "cap": 10,
      "rect": {
       "left": 31,
-      "top": 966,
+      "top": 782,
       "right": 155.7,
-      "bottom": 1010,
+      "bottom": 826,
       "w": 124.7,
       "h": 44,
       "cx": 93.35,
-      "cy": 988
+      "cy": 804
      }
     },
     "chargeRect": {
      "left": 31,
-     "top": 966,
+     "top": 782,
      "right": 155.7,
-     "bottom": 1010,
+     "bottom": 826,
      "w": 124.7,
      "h": 44,
      "cx": 93.35,
-     "cy": 988
+     "cy": 804
     },
     "tabs": {
      "count": 4,
@@ -1163,13 +1163,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 990,
-        "top": 966,
+        "top": 782,
         "right": 1088,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1039,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -1184,13 +1184,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1097,
-        "top": 966,
+        "top": 782,
         "right": 1195,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1146,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -1205,13 +1205,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1204,
-        "top": 966,
+        "top": 782,
         "right": 1302,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1253,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -1226,13 +1226,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1311,
-        "top": 966,
+        "top": 782,
         "right": 1409,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1360,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -1253,27 +1253,27 @@
      "source": "hook:data-b3-self-hp-fill",
      "bar": {
       "left": 351.41,
-      "top": 265.17,
-      "right": 697,
-      "bottom": 273.17,
-      "w": 345.59,
+      "top": 246.3,
+      "right": 699,
+      "bottom": 254.3,
+      "w": 347.59,
       "h": 8,
-      "cx": 524.2,
-      "cy": 269.17
+      "cx": 525.2,
+      "cy": 250.3
      },
      "fill": {
       "left": 351.41,
-      "top": 265.17,
-      "right": 645.16,
-      "bottom": 273.17,
-      "w": 293.75,
+      "top": 246.3,
+      "right": 646.86,
+      "bottom": 254.3,
+      "w": 295.45,
       "h": 8,
-      "cx": 498.28,
-      "cy": 269.17
+      "cx": 499.13,
+      "cy": 250.3
      },
      "direction": "ltr",
      "fillLeft": 0,
-     "fillRight": 51.84,
+     "fillRight": 52.14,
      "ratio": 0.85,
      "align": "left"
     },
@@ -1281,27 +1281,27 @@
      "found": true,
      "source": "hook:data-b3-foe-hp-fill",
      "bar": {
-      "left": 743,
-      "top": 265.17,
+      "left": 741,
+      "top": 246.3,
       "right": 1087.94,
-      "bottom": 273.17,
-      "w": 344.94,
+      "bottom": 254.3,
+      "w": 346.94,
       "h": 8,
-      "cx": 915.47,
-      "cy": 269.17
+      "cx": 914.47,
+      "cy": 250.3
      },
      "fill": {
       "left": 1087.94,
-      "top": 265.17,
+      "top": 246.3,
       "right": 1087.94,
-      "bottom": 273.17,
+      "bottom": 254.3,
       "w": 0,
       "h": 8,
       "cx": 1087.94,
-      "cy": 269.17
+      "cy": 250.3
      },
      "direction": "rtl",
-     "fillLeft": 344.94,
+     "fillLeft": 346.94,
      "fillRight": 0,
      "ratio": 0,
      "align": "right"
@@ -1314,13 +1314,13 @@
     "present": true,
     "rect": {
      "left": 15,
-     "top": 124,
+     "top": 92,
      "right": 1425,
-     "bottom": 1024,
+     "bottom": 834,
      "w": 1410,
-     "h": 900,
+     "h": 742,
      "cx": 720,
-     "cy": 574
+     "cy": 463
     },
     "source": "hook",
     "tag": "DIV.b3-wrap",
@@ -1436,33 +1436,33 @@
     "kidTags": "DIV>DIV>DIV",
     "left": {
      "left": 31,
-     "top": 190.5,
+     "top": 171.63,
      "right": 263,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 147,
-     "cy": 572.25
+     "cy": 473.81
     },
     "right": {
      "left": 1177,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1409,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 1293,
-     "cy": 572.25
+     "cy": 473.81
     },
     "mid": {
      "left": 277,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1163,
-     "bottom": 954,
+     "bottom": 776,
      "w": 886,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 720,
-     "cy": 572.25
+     "cy": 473.81
     },
     "leftIsSkillParent": true,
     "rightHasLog": true,
@@ -1473,38 +1473,38 @@
     "source": "hook",
     "stageRect": {
      "left": 277,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1163,
-     "bottom": 954,
+     "bottom": 776,
      "w": 886,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 720,
-     "cy": 572.25
+     "cy": 473.81
     },
     "fighters": [
      {
       "rect": {
        "left": 277,
-       "top": 190.5,
-       "right": 713,
-       "bottom": 954,
-       "w": 436,
-       "h": 763.5,
-       "cx": 495,
-       "cy": 572.25
+       "top": 171.63,
+       "right": 715,
+       "bottom": 776,
+       "w": 438,
+       "h": 604.38,
+       "cx": 496,
+       "cy": 473.81
       },
       "tag": "DIV"
      },
      {
       "rect": {
-       "left": 727,
-       "top": 190.5,
+       "left": 725,
+       "top": 171.63,
        "right": 1163,
-       "bottom": 954,
-       "w": 436,
-       "h": 763.5,
-       "cx": 945,
-       "cy": 572.25
+       "bottom": 776,
+       "w": 438,
+       "h": 604.38,
+       "cx": 944,
+       "cy": 473.81
       },
       "tag": "DIV"
      }
@@ -1515,13 +1515,13 @@
     "source": "hook",
     "rect": {
      "left": 31,
-     "top": 142,
+     "top": 104,
      "right": 1409,
-     "bottom": 180.5,
+     "bottom": 161.63,
      "w": 1378,
-     "h": 38.5,
+     "h": 57.63,
      "cx": 720,
-     "cy": 161.25
+     "cy": 132.81
     },
     "tag": "DIV#b3-topbar",
     "borderTopWidth": "0px",
@@ -1538,13 +1538,13 @@
     "present": true,
     "rect": {
      "left": 35,
-     "top": 152.25,
+     "top": 123.81,
      "right": 161,
-     "bottom": 170.25,
+     "bottom": 141.81,
      "w": 126,
      "h": 18,
      "cx": 98,
-     "cy": 161.25
+     "cy": 132.81
     },
     "text": "●●●●●●"
    },
@@ -1552,13 +1552,13 @@
     "present": true,
     "rect": {
      "left": 1279,
-     "top": 152.25,
+     "top": 123.81,
      "right": 1405,
-     "bottom": 170.25,
+     "bottom": 141.81,
      "w": 126,
      "h": 18,
      "cx": 1342,
-     "cy": 161.25
+     "cy": 132.81
     },
     "text": "●●●●●●"
    },
@@ -1566,14 +1566,14 @@
     "present": true,
     "text": "第 2 回合",
     "rect": {
-     "left": 680.53,
-     "top": 159.25,
-     "right": 759.47,
-     "bottom": 180.5,
-     "w": 78.94,
+     "left": 455.03,
+     "top": 140.38,
+     "right": 984.97,
+     "bottom": 161.63,
+     "w": 529.94,
      "h": 21.25,
      "cx": 720,
-     "cy": 169.88
+     "cy": 151
     },
     "candidates": [
      "DIV#b3-round=\"第 2 回合\""
@@ -1699,13 +1699,13 @@
       "index": 0,
       "rect": {
        "left": 31,
-       "top": 190.5,
+       "top": 171.63,
        "right": 263,
-       "bottom": 336.8,
+       "bottom": 286.09,
        "w": 232,
-       "h": 146.3,
+       "h": 114.47,
        "cx": 147,
-       "cy": 263.65
+       "cy": 228.86
       },
       "text": "⭐ 0 音速犬 🔥火系 366/366",
       "elementName": "火系",
@@ -1720,13 +1720,13 @@
       "index": 1,
       "rect": {
        "left": 31,
-       "top": 344.8,
+       "top": 294.09,
        "right": 263,
-       "bottom": 491.11,
+       "bottom": 408.58,
        "w": 232,
-       "h": 146.31,
+       "h": 114.48,
        "cx": 147,
-       "cy": 417.95
+       "cy": 351.34
       },
       "text": "⭐ 1 仪式巨像 ⛰️地系 401/401",
       "elementName": "地系",
@@ -1741,13 +1741,13 @@
       "index": 2,
       "rect": {
        "left": 31,
-       "top": 499.11,
+       "top": 416.58,
        "right": 263,
-       "bottom": 645.41,
+       "bottom": 531.05,
        "w": 232,
-       "h": 146.3,
+       "h": 114.47,
        "cx": 147,
-       "cy": 572.26
+       "cy": 473.81
       },
       "text": "⭐ 2 雪影娃娃 ❄️冰系 442/442",
       "elementName": "冰系",
@@ -1762,13 +1762,13 @@
       "index": 3,
       "rect": {
        "left": 31,
-       "top": 653.41,
+       "top": 539.05,
        "right": 263,
-       "bottom": 799.7,
+       "bottom": 653.53,
        "w": 232,
-       "h": 146.3,
+       "h": 114.48,
        "cx": 147,
-       "cy": 726.55
+       "cy": 596.29
       },
       "text": "⭐ 1 皇家狮鹫 🪶翼系 403/403",
       "elementName": "翼系",
@@ -1783,13 +1783,13 @@
       "index": 4,
       "rect": {
        "left": 31,
-       "top": 807.7,
+       "top": 661.53,
        "right": 263,
-       "bottom": 954,
+       "bottom": 776,
        "w": 232,
-       "h": 146.3,
+       "h": 114.47,
        "cx": 147,
-       "cy": 880.85
+       "cy": 718.77
       },
       "text": "⭐ 3 化蝶 🐛虫系 311/311",
       "elementName": "虫系",
@@ -1801,8 +1801,8 @@
       "name": "化蝶"
      }
     ],
-    "lastBottom": 954,
-    "skillTabLastBottom": 954
+    "lastBottom": 776,
+    "skillTabLastBottom": 776
    },
    "item": {
     "count": 2,
@@ -1851,13 +1851,13 @@
     "colWidth": 232,
     "colRect": {
      "left": 1177,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1409,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 1293,
-     "cy": 572.25
+     "cy": 473.81
     },
     "texts": [
      "第 2 回合（最新） 你换上雪影娃娃；对手换上喵喵。",
@@ -1869,13 +1869,13 @@
     "resolved": true,
     "rect": {
      "left": 31,
-     "top": 966,
+     "top": 782,
      "right": 1409,
-     "bottom": 1010,
+     "bottom": 826,
      "w": 1378,
      "h": 44,
      "cx": 720,
-     "cy": 988
+     "cy": 804
     },
     "charge": {
      "present": true,
@@ -1885,24 +1885,24 @@
      "cap": 10,
      "rect": {
       "left": 31,
-      "top": 966,
+      "top": 782,
       "right": 155.75,
-      "bottom": 1010,
+      "bottom": 826,
       "w": 124.75,
       "h": 44,
       "cx": 93.38,
-      "cy": 988
+      "cy": 804
      }
     },
     "chargeRect": {
      "left": 31,
-     "top": 966,
+     "top": 782,
      "right": 155.75,
-     "bottom": 1010,
+     "bottom": 826,
      "w": 124.75,
      "h": 44,
      "cx": 93.38,
-     "cy": 988
+     "cy": 804
     },
     "tabs": {
      "count": 4,
@@ -1917,13 +1917,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 990,
-        "top": 966,
+        "top": 782,
         "right": 1088,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1039,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -1938,13 +1938,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1097,
-        "top": 966,
+        "top": 782,
         "right": 1195,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1146,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -1959,13 +1959,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1204,
-        "top": 966,
+        "top": 782,
         "right": 1302,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1253,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -1980,13 +1980,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1311,
-        "top": 966,
+        "top": 782,
         "right": 1409,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1360,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -2007,27 +2007,27 @@
      "source": "hook:data-b3-self-hp-fill",
      "bar": {
       "left": 351.41,
-      "top": 265.17,
-      "right": 697,
-      "bottom": 273.17,
-      "w": 345.59,
+      "top": 246.3,
+      "right": 699,
+      "bottom": 254.3,
+      "w": 347.59,
       "h": 8,
-      "cx": 524.2,
-      "cy": 269.17
+      "cx": 525.2,
+      "cy": 250.3
      },
      "fill": {
       "left": 351.41,
-      "top": 265.17,
-      "right": 645.16,
-      "bottom": 273.17,
-      "w": 293.75,
+      "top": 246.3,
+      "right": 646.86,
+      "bottom": 254.3,
+      "w": 295.45,
       "h": 8,
-      "cx": 498.28,
-      "cy": 269.17
+      "cx": 499.13,
+      "cy": 250.3
      },
      "direction": "ltr",
      "fillLeft": 0,
-     "fillRight": 51.84,
+     "fillRight": 52.14,
      "ratio": 0.85,
      "align": "left"
     },
@@ -2035,27 +2035,27 @@
      "found": true,
      "source": "hook:data-b3-foe-hp-fill",
      "bar": {
-      "left": 743,
-      "top": 265.17,
+      "left": 741,
+      "top": 246.3,
       "right": 1087.94,
-      "bottom": 273.17,
-      "w": 344.94,
+      "bottom": 254.3,
+      "w": 346.94,
       "h": 8,
-      "cx": 915.47,
-      "cy": 269.17
+      "cx": 914.47,
+      "cy": 250.3
      },
      "fill": {
       "left": 1087.94,
-      "top": 265.17,
+      "top": 246.3,
       "right": 1087.94,
-      "bottom": 273.17,
+      "bottom": 254.3,
       "w": 0,
       "h": 8,
       "cx": 1087.94,
-      "cy": 269.17
+      "cy": 250.3
      },
      "direction": "rtl",
-     "fillLeft": 344.94,
+     "fillLeft": 346.94,
      "fillRight": 0,
      "ratio": 0,
      "align": "right"
@@ -2075,13 +2075,13 @@
     "present": true,
     "rect": {
      "left": 15,
-     "top": 124,
+     "top": 92,
      "right": 1425,
-     "bottom": 1024,
+     "bottom": 834,
      "w": 1410,
-     "h": 900,
+     "h": 742,
      "cx": 720,
-     "cy": 574
+     "cy": 463
     },
     "source": "hook",
     "tag": "DIV.b3-wrap",
@@ -2197,33 +2197,33 @@
     "kidTags": "DIV>DIV>DIV",
     "left": {
      "left": 31,
-     "top": 190.5,
+     "top": 171.63,
      "right": 263,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 147,
-     "cy": 572.25
+     "cy": 473.81
     },
     "right": {
      "left": 1177,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1409,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 1293,
-     "cy": 572.25
+     "cy": 473.81
     },
     "mid": {
      "left": 277,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1163,
-     "bottom": 954,
+     "bottom": 776,
      "w": 886,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 720,
-     "cy": 572.25
+     "cy": 473.81
     },
     "leftIsSkillParent": true,
     "rightHasLog": true,
@@ -2234,38 +2234,38 @@
     "source": "hook",
     "stageRect": {
      "left": 277,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1163,
-     "bottom": 954,
+     "bottom": 776,
      "w": 886,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 720,
-     "cy": 572.25
+     "cy": 473.81
     },
     "fighters": [
      {
       "rect": {
        "left": 277,
-       "top": 190.5,
-       "right": 713,
-       "bottom": 954,
-       "w": 436,
-       "h": 763.5,
-       "cx": 495,
-       "cy": 572.25
+       "top": 171.63,
+       "right": 715,
+       "bottom": 776,
+       "w": 438,
+       "h": 604.38,
+       "cx": 496,
+       "cy": 473.81
       },
       "tag": "DIV"
      },
      {
       "rect": {
-       "left": 727,
-       "top": 190.5,
+       "left": 725,
+       "top": 171.63,
        "right": 1163,
-       "bottom": 954,
-       "w": 436,
-       "h": 763.5,
-       "cx": 945,
-       "cy": 572.25
+       "bottom": 776,
+       "w": 438,
+       "h": 604.38,
+       "cx": 944,
+       "cy": 473.81
       },
       "tag": "DIV"
      }
@@ -2276,13 +2276,13 @@
     "source": "hook",
     "rect": {
      "left": 31,
-     "top": 142,
+     "top": 104,
      "right": 1409,
-     "bottom": 180.5,
+     "bottom": 161.63,
      "w": 1378,
-     "h": 38.5,
+     "h": 57.63,
      "cx": 720,
-     "cy": 161.25
+     "cy": 132.81
     },
     "tag": "DIV#b3-topbar",
     "borderTopWidth": "0px",
@@ -2299,13 +2299,13 @@
     "present": true,
     "rect": {
      "left": 35,
-     "top": 152.25,
+     "top": 123.81,
      "right": 161,
-     "bottom": 170.25,
+     "bottom": 141.81,
      "w": 126,
      "h": 18,
      "cx": 98,
-     "cy": 161.25
+     "cy": 132.81
     },
     "text": "●●●●●●"
    },
@@ -2313,13 +2313,13 @@
     "present": true,
     "rect": {
      "left": 1279,
-     "top": 152.25,
+     "top": 123.81,
      "right": 1405,
-     "bottom": 170.25,
+     "bottom": 141.81,
      "w": 126,
      "h": 18,
      "cx": 1342,
-     "cy": 161.25
+     "cy": 132.81
     },
     "text": "●●●●●●"
    },
@@ -2327,14 +2327,14 @@
     "present": true,
     "text": "第 2 回合",
     "rect": {
-     "left": 680.53,
-     "top": 159.25,
-     "right": 759.47,
-     "bottom": 180.5,
-     "w": 78.94,
+     "left": 455.03,
+     "top": 140.38,
+     "right": 984.97,
+     "bottom": 161.63,
+     "w": 529.94,
      "h": 21.25,
      "cx": 720,
-     "cy": 169.88
+     "cy": 151
     },
     "candidates": [
      "DIV#b3-round=\"第 2 回合\""
@@ -2572,13 +2572,13 @@
       "index": 0,
       "rect": {
        "left": 31,
-       "top": 190.5,
+       "top": 171.63,
        "right": 263,
-       "bottom": 568.25,
+       "bottom": 469.81,
        "w": 232,
-       "h": 377.75,
+       "h": 298.19,
        "cx": 147,
-       "cy": 379.38
+       "cy": 320.72
       },
       "text": "愿力强化 未登记 候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
      },
@@ -2586,13 +2586,13 @@
       "index": 1,
       "rect": {
        "left": 31,
-       "top": 576.25,
+       "top": 477.81,
        "right": 263,
-       "bottom": 954,
+       "bottom": 776,
        "w": 232,
-       "h": 377.75,
+       "h": 298.19,
        "cx": 147,
-       "cy": 765.13
+       "cy": 626.91
       },
       "text": "首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做"
      }
@@ -2612,13 +2612,13 @@
     "colWidth": 232,
     "colRect": {
      "left": 1177,
-     "top": 190.5,
+     "top": 171.63,
      "right": 1409,
-     "bottom": 954,
+     "bottom": 776,
      "w": 232,
-     "h": 763.5,
+     "h": 604.38,
      "cx": 1293,
-     "cy": 572.25
+     "cy": 473.81
     },
     "texts": [
      "第 2 回合（最新） 你换上雪影娃娃；对手换上喵喵。",
@@ -2630,13 +2630,13 @@
     "resolved": true,
     "rect": {
      "left": 31,
-     "top": 966,
+     "top": 782,
      "right": 1409,
-     "bottom": 1010,
+     "bottom": 826,
      "w": 1378,
      "h": 44,
      "cx": 720,
-     "cy": 988
+     "cy": 804
     },
     "charge": {
      "present": true,
@@ -2646,24 +2646,24 @@
      "cap": 10,
      "rect": {
       "left": 31,
-      "top": 966,
+      "top": 782,
       "right": 155.7,
-      "bottom": 1010,
+      "bottom": 826,
       "w": 124.7,
       "h": 44,
       "cx": 93.35,
-      "cy": 988
+      "cy": 804
      }
     },
     "chargeRect": {
      "left": 31,
-     "top": 966,
+     "top": 782,
      "right": 155.7,
-     "bottom": 1010,
+     "bottom": 826,
      "w": 124.7,
      "h": 44,
      "cx": 93.35,
-     "cy": 988
+     "cy": 804
     },
     "tabs": {
      "count": 4,
@@ -2678,13 +2678,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 990,
-        "top": 966,
+        "top": 782,
         "right": 1088,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1039,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -2699,13 +2699,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1097,
-        "top": 966,
+        "top": 782,
         "right": 1195,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1146,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -2720,13 +2720,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1204,
-        "top": 966,
+        "top": 782,
         "right": 1302,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1253,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -2741,13 +2741,13 @@
        "fontWeight": "650",
        "rect": {
         "left": 1311,
-        "top": 966,
+        "top": 782,
         "right": 1409,
-        "bottom": 1010,
+        "bottom": 826,
         "w": 98,
         "h": 44,
         "cx": 1360,
-        "cy": 988
+        "cy": 804
        },
        "tag": "BUTTON",
        "hidden": false
@@ -2768,27 +2768,27 @@
      "source": "hook:data-b3-self-hp-fill",
      "bar": {
       "left": 351.41,
-      "top": 265.17,
-      "right": 697,
-      "bottom": 273.17,
-      "w": 345.59,
+      "top": 246.3,
+      "right": 699,
+      "bottom": 254.3,
+      "w": 347.59,
       "h": 8,
-      "cx": 524.2,
-      "cy": 269.17
+      "cx": 525.2,
+      "cy": 250.3
      },
      "fill": {
       "left": 351.41,
-      "top": 265.17,
-      "right": 645.16,
-      "bottom": 273.17,
-      "w": 293.75,
+      "top": 246.3,
+      "right": 646.86,
+      "bottom": 254.3,
+      "w": 295.45,
       "h": 8,
-      "cx": 498.28,
-      "cy": 269.17
+      "cx": 499.13,
+      "cy": 250.3
      },
      "direction": "ltr",
      "fillLeft": 0,
-     "fillRight": 51.84,
+     "fillRight": 52.14,
      "ratio": 0.85,
      "align": "left"
     },
@@ -2796,27 +2796,27 @@
      "found": true,
      "source": "hook:data-b3-foe-hp-fill",
      "bar": {
-      "left": 743,
-      "top": 265.17,
+      "left": 741,
+      "top": 246.3,
       "right": 1087.94,
-      "bottom": 273.17,
-      "w": 344.94,
+      "bottom": 254.3,
+      "w": 346.94,
       "h": 8,
-      "cx": 915.47,
-      "cy": 269.17
+      "cx": 914.47,
+      "cy": 250.3
      },
      "fill": {
       "left": 1087.94,
-      "top": 265.17,
+      "top": 246.3,
       "right": 1087.94,
-      "bottom": 273.17,
+      "bottom": 254.3,
       "w": 0,
       "h": 8,
       "cx": 1087.94,
-      "cy": 269.17
+      "cy": 250.3
      },
      "direction": "rtl",
-     "fillLeft": 344.94,
+     "fillLeft": 346.94,
      "fillRight": 0,
      "ratio": 0,
      "align": "right"
@@ -2836,13 +2836,13 @@
     "present": true,
     "rect": {
      "left": 15,
-     "top": 124,
+     "top": 92,
      "right": 1425,
-     "bottom": 1024,
+     "bottom": 834,
      "w": 1410,
-     "h": 900,
+     "h": 742,
      "cx": 720,
-     "cy": 574
+     "cy": 463
     },
     "source": "hook",
     "tag": "DIV.b3-wrap",

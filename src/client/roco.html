@@ -19,6 +19,10 @@
  <div class="heart-pop" id="heart-pop" role="status" aria-live="polite" hidden></div>
  <!-- 模型状态：**一行、不用打开面板就能看见**（判据 `live-model-status` 量它），点它去连接页 -->
  <a class="chip model-line" id="model-chip" href="connect.html" data-roco-model="offline">模型：正在读取…</a>
+ <div class="head-center" id="head-center" aria-live="polite">
+  <span class="hc-mode" id="b3-mode">PVP · AI模拟</span>
+  <span class="hc-turn" id="b3-round" data-b3-turn="yes">第 1 回合</span>
+ </div>
  <button id="coach-entry" class="xiaoya-btn" title="小芽：模型连接 / 对话" aria-expanded="false"><span class="xy-ico" aria-hidden="true">✦</span><span class="xy-label">小芽</span></button>
 </header>
 
@@ -46,6 +50,12 @@
  </aside>
  <!-- 设置：三张模型卡 / 记忆 / 模式条 / 重开重试 / 工程抽屉，全部收在这里 -->
  <details class="xy-settings" id="xy-settings">
+  <!-- 战斗工具（原底部那一行，人类：整合进小芽） -->
+  <div class="battle-tools xy-tools">
+  <button id="plan">✦ 让小芽看一眼</button>
+  <button id="auto-turn">让双方各走一步（自动演示）</button>
+  <span id="plan-status" class="muted"></span>
+ </div>
   <summary>设置（模型 / 记忆 / 规则台账 / 工程信息）</summary>
   <div class="xy-models" id="model-list">
    <div class="model-cell"><div class="mc-name">正在读取模型状态…</div></div>
@@ -226,19 +236,7 @@
      data-b3-src="view.hearts.self（引擎暂无 → 保持 hidden；掉心动效时才显）"><i>&#x2665;&#x2665;</i><i class="lost">&#x2661;&#x2661;</i></span>
   </div>
   <!-- 中央两行：模式 / 回合 -->
-  <div class="b3-turn" data-b3-turn-block="yes">
-   <div class="b3-mode" id="b3-mode" data-b3-mode="yes"
-     data-b3-src="state.mode.label（或 view.mode.label）；形如「PVP · AI模拟」">PVP &middot; AI模拟</div>
-   <!-- 三条玩家层口径（模式 / 候选规则 / 匹配前对手未知）：并进这一行，**不再单开一行**（人类：不要多余的东西）。
-        验收 `D5-mode-badge` 要「首屏可见」，放在这里同样满足。 -->
-   <div class="b3-flags" id="b3-flags">
-    <span class="chip" id="mode-label">标准 PVP 六宠阵容工坊（候选模式）</span>
-    <span class="chip">候选规则（待实机核对）</span>
-    <span class="chip">匹配前对手未知 · 按版本环境倾向评价</span>
-   </div>
-   <div class="b3-round" id="b3-round" data-b3-turn="yes"
-     data-b3-src="view.turn（整数）→ 拼「第 {turn} 回合」">第 1 回合</div>
-  </div>
+  
   <!-- 右端：对手（镜像 —— 心在前、点在后，且点序本身就是镜像的） -->
   <div class="b3-side right b3-side--foe" data-b3-side="foe">
    <span class="b3-hearts" id="b3-hearts-foe" data-b3-hearts-foe="yes" hidden
@@ -636,11 +634,7 @@
   <p class="muted" id="rules-note-body">还没有开局。</p>
  </details>
 
- <div class="battle-tools">
-  <button id="plan">✦ 让小芽看一眼</button>
-  <button id="auto-turn">让双方各走一步（自动演示）</button>
-  <span id="plan-status" class="muted"></span>
- </div>
+ 
 </section>
 
 <!-- 战斗记录：不抢主视线（最多 6 行、可滚动）；原始 JSON 收在默认折叠区里。 -->
