@@ -387,3 +387,27 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
   .b3-wrap .b3-f-name{font-size:17px}
   .b3-wrap .b3-f-lv{font-size:11.5px}
 }
+
+/* ── 一页放完（人类 2026-09-23）：去掉多余行、压缩高度；只有战报框内部滚动 ───────── */
+.b3-flags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:2px}
+.b3-flags .chip{font-size:10.5px;padding:1px 7px;border-radius:999px;border:1px solid #2b3d4e;
+ background:#111d27;color:#9caebe;white-space:nowrap}
+/* 战报：**框内上下滑**，不撑高整页 */
+.b3-wrap .b3-log{display:flex;flex-direction:column;min-height:0;max-height:100%}
+.b3-wrap .b3-log-scroll{overflow-y:auto;min-height:0;flex:1 1 auto;padding-right:2px}
+/* 压缩：左右列与中间卡的间距、格子高度都收一点，保证 900 高能全放下 */
+.b3-wrap{--b3-pad-y-top:6px;--b3-pad-y-bottom:8px;--b3-card-gap:10px}
+.b3-wrap .b3-slot{padding:6px 9px}
+.b3-wrap .b3-topbar{min-height:30px}
+
+/* ── 一页装完（人类 2026-09-23）──────────────────────────────────────────────
+   页面上方还有页眉（+ 首屏三条口径那一行），所以根容器高度必须减掉那一段，
+   否则它会从 100vh 起算、把页脚顶到视口外（实测 docH 1600）。 */
+.b3-wrap{--b3-viewport-offset:104px;height:calc(100vh - var(--b3-viewport-offset));
+ min-height:0;overflow:hidden}
+.b3-wrap .b3-main{min-height:0;overflow:hidden}
+.b3-wrap .b3-col{min-height:0;overflow:hidden}
+.b3-wrap .b3-panel{min-height:0}
+/* 四格技能按可用高度**等分**，不写死高度；不撑高整页、也不内部滚动。 */
+.b3-wrap .b3-panel--skill .b3-slot{flex:1 1 0;min-height:0}
+.b3-wrap .b3-footer{margin-top:6px}

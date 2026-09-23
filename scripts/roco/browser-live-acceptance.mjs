@@ -626,7 +626,7 @@ async function main() {
       const greyed=[...document.querySelectorAll('#actions [data-roco-greyed-skill]')]
         .map((el)=>({id:el.dataset.rocoGreyedSkill,cost:el.dataset.rocoGreyedCost,
           disabled:el.disabled===true,text:(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,40)}));
-      const legalSkills=[...document.querySelectorAll('#actions .act-group[data-act-group="skill"] button[data-action]')].length;
+      const legalSkills=[...document.querySelectorAll('[data-b3-skill-slot]')].length;
       const shortfall=document.querySelector('[data-roco-skill-shortfall]');
       const view=window.rocoDemo.state.view;
       return {legalSkills,greyed,shortfall:shortfall?(shortfall.textContent||'').trim():null,
@@ -1159,7 +1159,7 @@ async function main() {
       const bannedHits=banned.filter((w)=>countOutside(playerText,w)>0);
       const badge='候选规则（待实机核对）';
       const dupBadge=countOutside(playerText,badge);
-      const skills=[...document.querySelectorAll('#actions button[data-action]')].map((b)=>b.getBoundingClientRect());
+      const skills=[...document.querySelectorAll('[data-b3-action]')].map((b)=>b.getBoundingClientRect());
       const skillBox=skills.length?{top:Math.min(...skills.map((r)=>r.top)),bottom:Math.max(...skills.map((r)=>r.bottom)),
         left:Math.min(...skills.map((r)=>r.left)),right:Math.max(...skills.map((r)=>r.right))}:null;
       const hp=rect('#self-pets .hp-line')||rect('#self-pets .pet');
@@ -1364,7 +1364,7 @@ async function main() {
       await sleep(700);
     }
     const trialGate = await js(`(()=>{const b=document.body.dataset;const v=window.rocoDemo.state.view;
-      const legal=[...document.querySelectorAll('#actions .act-group[data-act-group="skill"] button[data-action]')].length;
+      const legal=[...document.querySelectorAll('[data-b3-skill-slot]')].length;
       const greyed=[...document.querySelectorAll('#actions [data-roco-greyed-skill]')];
       const sf=document.querySelector('[data-roco-skill-shortfall]');
       return {legal,greyed:greyed.length,greyedDisabled:greyed.every((el)=>el.disabled===true),
@@ -1378,7 +1378,7 @@ async function main() {
       await mouseClick('#act-charge');
       await sleep(1100);
       charged = await js(`(()=>{const b=document.body.dataset;const v=window.rocoDemo.state.view;
-        const legal=[...document.querySelectorAll('#actions .act-group[data-act-group="skill"] button[data-action]')].length;
+        const legal=[...document.querySelectorAll('[data-b3-skill-slot]')].length;
         const greyed=[...document.querySelectorAll('#actions [data-roco-greyed-skill]')].length;
         return {legal,greyed,charge:b.rocoActCharge??'no',
           energy:v&&v.self?v.self.pets[v.self.active??0]?.energy:null,turn:v?v.turn:null,

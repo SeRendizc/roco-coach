@@ -4,14 +4,7 @@
 
 <!-- 玩家层的三条口径（模式 / 候选规则 / 匹配前对手未知）：**首屏可见但不在页眉里**
      （人类规格：页眉只留标题 + 小芽；验收 `D5-mode-badge` 要求首屏可见） -->
-<div class="first-screen-badges">
- <div class="mode-line" id="mode-line" aria-live="polite">
-  <span class="chip" id="mode-label">模式：正在读取…</span>
-  <!-- 2026-09-22（人类实测 configured=false）：**连接状态要明显呈现**，别让玩家以为
-       小芽在自由对话。拿不到模型时写「未连接模型 · 只给规则事实」，并指向连接入口；
-       连上之后写「已连接模型」，不夸口它做了什么。 -->
 
- </div>
 </div>
 <main>
 
@@ -236,6 +229,13 @@
   <div class="b3-turn" data-b3-turn-block="yes">
    <div class="b3-mode" id="b3-mode" data-b3-mode="yes"
      data-b3-src="state.mode.label（或 view.mode.label）；形如「PVP · AI模拟」">PVP &middot; AI模拟</div>
+   <!-- 三条玩家层口径（模式 / 候选规则 / 匹配前对手未知）：并进这一行，**不再单开一行**（人类：不要多余的东西）。
+        验收 `D5-mode-badge` 要「首屏可见」，放在这里同样满足。 -->
+   <div class="b3-flags" id="b3-flags">
+    <span class="chip" id="mode-label">标准 PVP 六宠阵容工坊（候选模式）</span>
+    <span class="chip">候选规则（待实机核对）</span>
+    <span class="chip">匹配前对手未知 · 按版本环境倾向评价</span>
+   </div>
    <div class="b3-round" id="b3-round" data-b3-turn="yes"
      data-b3-src="view.turn（整数）→ 拼「第 {turn} 回合」">第 1 回合</div>
   </div>

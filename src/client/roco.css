@@ -827,3 +827,29 @@ summary{min-height:44px;display:flex;align-items:center}
    这两条是**几何判据**（`wrap-spans-page` / `geom-stage-axis`）的前提，别删。 */
 #battle-panel{width:100% !important;max-width:none !important;float:none !important;box-sizing:border-box}
 #battle-panel>.b3-wrap,#battle-panel .b3-wrap{width:100% !important;max-width:none !important}
+
+/* v3h 片段自带右列战报：战斗进行中旧战报面板不再占位（重复且把页面撑长）。 */
+body[data-roco-view="ready"] main>#log-panel{display:none}
+
+/* v3h 片段承载了行动区（左列技能 + 底栏四选项），旧行动坞在战斗态**收起**：
+   它既重复又把页面撑到 1359px（人类：一页全部显示、不要多余的东西）。 */
+body[data-roco-view="ready"] main>#action-panel{display:none}
+
+/* 战斗进行中：页面只留 v3h 片段（人类：一页全部显示、不要多余的东西）。
+   工坊 / 候选池 / 结果 / 课程卡这些属于**别的阶段**，战斗态收起，避免把页面撑长。 */
+body[data-roco-view="ready"] main>#team-workshop,
+body[data-roco-view="ready"] main>#select-panel,
+body[data-roco-view="ready"] main>#pool-footbar,
+body[data-roco-view="ready"] main>#result-panel,
+body[data-roco-view="ready"] main>#lesson-card{display:none}
+
+/* 战斗态旧底栏已收起，页面就别再给它留位置（否则 main 仍预留 ~250px，docH 1132 > 900）。 */
+body[data-roco-view="ready"] main{padding-bottom:8px}
+
+/* 工程区（模式条 / 规则快照 / 未核验长文 / 重开重试）在战斗态也收起：
+   它属于排查入口，不是战斗页的一部分（人类：一页全部显示、不要多余的东西）。 */
+body[data-roco-view="ready"] main>#dev-zone{display:none}
+
+/* 战斗态：旧的「规则口径」折叠行也收起（v3h 顶栏已经承担口径展示）。
+   注意 `.battle-tools`（让小芽看一眼 / 自动走一步）**保留** —— 真机判据要点它。 */
+body[data-roco-view="ready"] #battle-panel>.rules-note{display:none}
