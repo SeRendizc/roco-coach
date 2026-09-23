@@ -434,10 +434,13 @@ body[data-roco-hint-visible="yes"] .companion .companion-body{visibility:hidden}
 @media(min-width:861px){
  /* 对战页两栏：左边是舞台与后备，右边是这一回合的记录（记录不抢主视线）。
     小芽是**固定定位的右侧 Coach 栏**（不在流里），所以它不参与这个 grid。 */
- body[data-roco-view="ready"] main{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);
+ body[data-roco-view="ready"] main{display:grid;grid-template-columns:minmax(0,1fr);
   gap:0 14px;align-items:start;
-  /* 右侧给小芽那一栏让位（宽屏时它是固定定位的）。 */
-  padding-right:var(--coach-rail,0px)}
+  /* v3h 片段自带右列，所以战斗态**左右内边距对称**（左侧 22px 也要在右侧补上）——
+     否则内容中心会偏 11px，验收量到「两卡轴心 731 ≠ 页面中线 720」。 */
+  padding-left:14px;padding-right:14px;max-width:none}
+ /* 战斗面板自身不要再留边距（片段 `.b3-wrap` 自带 12/16/14）——否则 wrap 达不到「视口−40」。 */
+ body[data-roco-view="ready"] main>#battle-panel{padding:0}
  body[data-roco-view="ready"] main>.topbar,
  body[data-roco-view="ready"] main>.onboard-bar,
  body[data-roco-view="ready"] main>#select-panel,
@@ -445,8 +448,11 @@ body[data-roco-hint-visible="yes"] .companion .companion-body{visibility:hidden}
  body[data-roco-view="ready"] main>#lesson-card,
  body[data-roco-view="ready"] main>#action-panel,
  body[data-roco-view="ready"] main>#team-workshop{grid-column:1/-1}
- body[data-roco-view="ready"] main>#battle-panel{grid-column:1}
- body[data-roco-view="ready"] main>#log-panel{grid-column:2}
+ /* 2026-09-23（v3h 片段接入）：战斗面板**自带右列战报**，所以两块都跨整行 ——
+    旧的 `grid-column:1` / `:2` 两列并排会把 v3h 根容器压成 653px（实测轴心 464.5 ≠ 720）。
+    旧战报面板**保留可见**（只是移到片段下方），避免影响既有判据。 */
+ body[data-roco-view="ready"] main>#battle-panel{grid-column:1/-1}
+ body[data-roco-view="ready"] main>#log-panel{grid-column:1/-1}
 }
 /* 底栏是固定定位，正文要给它让出位置，否则最后一段永远被压住。 */
 main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
