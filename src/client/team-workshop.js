@@ -242,7 +242,10 @@ const STYLE = `
  .tw-coach{grid-column:span 2}
 }
 @media(max-width:620px){
- .tw-grid{grid-template-columns:minmax(0,1fr)}
+ .tw-grid{grid-template-columns:minmax(0,1fr);grid-template-rows:none}
+ /* 人类 2026-09-23（子代理实测 390 下 .tw-team 只有 26px）：宽屏那两条显式列位
+    （.tw-team{grid-column:1} / .tw-cand{grid-column:2}）会盖掉单列规则 → 这里复位。 */
+ .tw-team,.tw-cand{grid-column:1 / -1 !important;grid-row:auto !important;width:100% !important}
  .tw-team,.tw-cand,.tw-eval,.tw-coach{grid-column:span 1}
  .tw-slots{grid-template-columns:repeat(2,minmax(0,1fr))}
  .tw-cand-list{max-height:none}
