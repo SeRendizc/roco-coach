@@ -252,6 +252,8 @@ const STYLE = `
   .tw-select,.tw-filter-row input[type=search],.tw-filter-row #tw-filter-reset,
   .tw-scope-row button,.tw-cand-prev,.tw-cand-next,#tw-cand-prev,#tw-cand-next{min-height:44px !important;font-size:12.5px}
   .tw-select{width:96px;max-width:96px}
+  /* 子代理实测：左侧「阵容评估」抽屉按钮在 390×844 是 34×120（宽 <44）→ 补窄屏最小宽度 */
+  .tw-drawer-btn{min-width:44px;width:44px;padding:14px 6px}
 }
 
 
