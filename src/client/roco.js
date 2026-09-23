@@ -2139,6 +2139,19 @@ function applyResult(data) {
     showHeartPop(`我方掉了 ${lost} 颗心（${beforeMana} → ${nowMana}）`);
   }
   if (nowMana !== null) state.lastMana = nowMana;
+  // 2026-09-23（子代理实测到的真实缺陷，也正是人类说的「战斗完全推进不了」）：
+  // 引擎**拒绝这一步**时，服务端回的是 `{ok:false,error:…}` 但仍带 **HTTP 200**；
+  // 页面原来无条件 `state.view = data.view` → view 被清成 null → 页眉变「未开局」、战报消失、
+  // `battleId` 还在 → **整局静默假死，一个字都不提示**（实测 5 次里中 2 次，第 6/7 回合）。
+  // 现在：拒绝/没有 view 时**保留上一帧局面**，并把原因说出来（fail closed，不假装还在推进）。
+  const rejected = data?.ok === false || !data?.view;
+  if (rejected) {
+    const why = data?.error || data?.error_type || '引擎没有接受这一步';
+    setText('plan-status', `这一步没被接受：${why}（局面保持在上一手）`);
+    if (data?.view) state.view = data.view;   // 有 view 就用它；没有就保留上一帧
+    render();
+    return;
+  }
   state.view = data.view;
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();

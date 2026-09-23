@@ -1789,6 +1789,7 @@ function resolveBattleTeamIds(team){
  * 那时宁可不给样例对手（引擎会退回镜像），也不凭空编一个物种。
  */
 let samplePoolCache=null;
+let sampleEnemySourceCache=null;   // sample-usable | sample-fallback
 function sampleEnemyPool(){
  if(samplePoolCache)return samplePoolCache;
  try{
@@ -1847,18 +1848,31 @@ function sampleEnemyPool(){
   // 并在回执里标明它是**示例**（页面照实显示，不冒充真实匹配）。
   const sampleEnemyFor=(mine)=>{
    if(!modeId||enemyRaw)return null;
-   const mineSpecies=new Set(mine.map((id)=>String(id)));
    const pool=sampleEnemyPool();
-   const picked=[];
-   for(const id of pool){
-    if(mineSpecies.has(String(id)))continue;
-    picked.push(id);
-    if(picked.length>=teamSize)break;
-   }
-   return picked.length===teamSize?picked:null;
+   const mineSet=new Set(mine.map((id)=>String(id)));
+   const fallback=()=>{ const picked=[];
+    for(const id of pool){ if(mineSet.has(String(id)))continue; picked.push(id); if(picked.length>=teamSize)break; }
+    return picked.length===teamSize?picked:null; };
+   try{
+    const doc=JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)),'..','..',
+     'data/roco/owned','owned-pets.json'),'utf8'));
+    const rows=Array.isArray(doc)?doc:(doc.pets??doc.owned??doc.instances??[]);
+    const byInstance=new Map();
+    for(const r of rows){ const i=String(r?.instance_id??''); const sp=String(r?.species_id??''); if(i&&sp)byInstance.set(i,sp); }
+    const mineSpecies=new Set();
+    for(const id of mine){ const v=String(id); const sp=byInstance.get(v)??(v.startsWith('pet_')?v:''); if(sp)mineSpecies.add(sp); }
+    const mineAll=new Set([...mineSet, ...mineSpecies]);
+    const myUsable=[...new Set([...byInstance.values()].filter((sp)=>pool.includes(sp)))];
+    const fromMine=myUsable.filter((sp)=>!mineAll.has(sp));
+    console.error('[roco] 对手候选（我的可用物种）:', fromMine.length, fromMine.slice(0,8).join(','));
+    if(fromMine.length>=teamSize){ sampleEnemySourceCache='sample-usable'; return fromMine.slice(0,teamSize); }
+    const fb=fallback(); if(fb)sampleEnemySourceCache='sample-fallback'; return fb;
+   }catch(e){ console.error('[roco] 对手池异常:', e?.message||e); const fb=fallback(); if(fb)sampleEnemySourceCache='sample-fallback'; return fb; }
   };
   const enemyTeam=modeId?((enemyRaw??sampleEnemyFor(team))??undefined):((enemyRaw&&enemyRaw.length===3)?enemyRaw:undefined);
   const enemyIsSample=modeId&&!enemyRaw&&Array.isArray(enemyTeam);
+  // 对手来源（可审计）：`sample-usable` = 从我的可用精灵里选；`sample-fallback` = 退回全量池
+  const enemySource=enemyIsSample?(sampleEnemySourceCache??'sample'):null;
 
   // owned 个体 → 物种 id（引擎的名单是物种级）。不在 owned 里的 id 照实报错，不猜。
   const resolved=resolveBattleTeamIds(resolvedTeam);
@@ -1877,7 +1891,7 @@ function sampleEnemyPool(){
   const out=unwrap(envelope);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
   const id=newSessionId();
-  if(enemyIsSample)out.result.enemy_source='sample';
+  if(enemyIsSample)out.result.enemy_source=enemySource??'sample';
   sessions.set(id,{state:out.result.state,strategy,seed,turn:out.result.turn,
    mode_id:modeId,ruleset_config_id:rulesetConfigId});
   const base=publicView(out.result,{modeId,rulesetConfigId});

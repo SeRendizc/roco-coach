@@ -3,11 +3,11 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-23T05:20:44.809Z",
+ "judged_at": "2026-09-23T05:23:18.962Z",
  "totals": {
   "checks": 26,
-  "passed": 26,
-  "failed": 0,
+  "passed": 25,
+  "failed": 1,
   "counterproofs": 31,
   "counterproofs_hit": 31
  },
@@ -16,7 +16,7 @@
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=7"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=4"
   },
   {
    "id": "live-boot",
@@ -111,14 +111,14 @@
   {
    "id": "live-settle",
    "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、页眉回合与引擎一致、右列战报最新一回合有内容）。【按人类 2026-09-23 版式，原来的 `#last-event`「最新一条事件」由**右列战报**承担（框内滚动、最新回合在上）；`#last-event` 所在的 `#b3-sink` 是隐藏接收槽，不再作读数点】",
-   "ok": true,
-   "actual": "result=win 回合=30 页眉回合「第 30 回合」结算区可见=true 教学=shown 战报回合块=30 最新块=第 30 回合（8 条）；存活点 ●●●●○○/●●○○○○；点了 34 次自动推进（最后回合 30，停滞 0 次）；当时 {\"turn\":30,\"mana\":{\"self\":2,\"opponent\":0},\"selfLiving\":4,\"foeLiving\":2,\"status\":\"\"}；正文「关键转折在第 2 回合（这一局 30 个回合）。」"
+   "ok": false,
+   "actual": "引擎中途丢了这一局（state.view 变 null，battleId=\"s7-2l35ayy4\"，状态行「」，战报已有 6 个回合块） | 结算区没出现 | 局末教学入口没出现 | 页眉回合「未开局」与引擎回合 null 不一致 | 右列战报不在位"
   },
   {
    "id": "live-lesson-migration",
    "judge": "换局迁移：第二局的教学必须**接着上一课**（同一课时做核对，不同课时不许逐字重讲第一局那一课），复盘正文带局面信息，且换局把 v3h 顶栏归零（页眉回合回到第 1 回合、双方存活点回到 6/6）。【按人类 2026-09-23 版式，「换了一局」在战斗页上的可见证据由顶栏承担（旧版式读的是开局前的阵容展示块）】",
    "ok": true,
-   "actual": "第一局 switch-out-of-the-bad-matchup/first-faint → 第二局 read-the-replacement-first/first-faint；repeat=no checked=yes；核对「上一次那一课的核对：「我方有伙伴倒下」这一局又出现了。对比第 6 回合（上一次：吃到克制伤害之后一直留在场上）与第 6 」；第二局顶栏「第 1 回合」存活点 ●●●●●●/●●●●●●"
+   "actual": "第一局 / → 第二局 switch-out-of-the-bad-matchup/first-faint；repeat=no checked=no；核对「」；第二局顶栏「第 1 回合」存活点 ●●●●●●/●●●●●●"
   },
   {
    "id": "live-narrow-390",
@@ -974,50 +974,50 @@
   },
   {
    "at": "auto-play",
-   "clicks": 34,
-   "lastTurn": 30,
-   "stalled": 0
+   "clicks": 21,
+   "lastTurn": null,
+   "stalled": 8
   },
   {
    "at": "settled",
    "settled": {
-    "result": "win",
-    "turn": 30,
-    "resultVisible": true,
-    "lessonShown": "shown",
-    "lessonText": "关键转折在第 2 回合（这一局 30 个回合）。",
-    "round": "第 30 回合",
-    "logShown": true,
+    "result": null,
+    "turn": null,
+    "resultVisible": false,
+    "lessonShown": null,
+    "lessonText": "",
+    "round": "未开局",
+    "logShown": false,
     "logLatest": {
-     "turn": "30",
-     "lines": 8
+     "turn": "6",
+     "lines": 6
     },
-    "logTurns": 30,
-    "hasView": true,
-    "battleId": "s1-4e58ba1t",
+    "logTurns": 6,
+    "hasView": false,
+    "battleId": "s7-2l35ayy4",
     "plan": "",
     "dots": {
-     "self": "●●●●○○",
-     "foe": "●●○○○○"
+     "self": "○○○○○○",
+     "foe": "○○○○○○"
     }
    }
   },
   {
    "at": "second-match-teacher",
    "m1": {
-    "goal": "switch-out-of-the-bad-matchup",
-    "point": "first-faint",
-    "repeat": "no"
+    "goal": "",
+    "point": "",
+    "repeat": ""
    },
    "second": {
     "result": "ready",
     "lesson": "shown",
-    "goal": "read-the-replacement-first",
+    "goal": "switch-out-of-the-bad-matchup",
     "point": "first-faint",
     "repeat": "no",
-    "checked": "yes",
-    "improved": "no",
-    "progress": "上一次那一课的核对：「我方有伙伴倒下」这一局又出现了。对比第 6 回合（上一次：吃到克制伤害之后一直留在场上）与第 6 回合（这一次：吃到克制伤害之后一直留在场上）。两次的处理方式一样，所以这一局看不到变化。",
+    "checked": "no",
+    "improved": "unknown",
+    "progress": "",
     "lessonText": "关键转折在第 2 回合（这一局 30 个回合）。",
     "round": "第 1 回合",
     "dotsSelf": "●●●●●●",
@@ -1240,5 +1240,5 @@
   "2026-09-23 起战斗页判据读 v3h 钩子：右列战报 `.b3-log-scroll` 已经由主线程按引擎事件（`state.matchEvents`，最新回合在上）真渲染；但**开局那一手还没有事件**（战报只写「还没推进。」），所以 `live-lineup-and-log` 会先推一手再量——这是那条判据的适用范围，不是放过",
   "v3h 底栏的 `#b3-charge` 与逃跑页的 `[data-b3-escape-confirm]`/`[data-b3-escape-cancel]`目前**只渲染、没有点击绑定**（有 onclick 的还是战斗态收起的 `#act-charge` 等）；脚本推进走 `window.rocoDemo.playAction()`，入口本身只断言「可见 + 文案/数值来自引擎」"
  ],
- "ok": true
+ "ok": false
 }

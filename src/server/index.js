@@ -445,7 +445,12 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
    if(asset.includes('..'))throw fail(404,'文件不存在');
    if(!publicAssets.has(asset)&&!resolveAssetOnMiss(asset))throw fail(404,'文件不存在');
    const data=await readFile(join(root,asset));res.writeHead(200,{'Content-Type':asset.endsWith('.html')?'text/html; charset=utf-8':asset.endsWith('.css')?'text/css; charset=utf-8':'text/javascript; charset=utf-8'});res.end(req.method==='HEAD'?undefined:data);
-  }catch(e){if(!res.headersSent)json(res,e.status||500,{error:e.status?e.message:'本地服务无法完成请求'});else res.end();}
+  }catch(e){
+   // 2026-09-23：500 的兜底以前只回一句「本地服务无法完成请求」，把真正的原因吞掉了 ——
+   // 排查「开局失败」时完全看不到引擎说了什么。玩家层文案保持不变，**细节进服务端日志**。
+   if(!e?.status)console.error('[roco] 未处理异常:',e?.stack||e);
+   if(!res.headersSent)json(res,e.status||500,{error:e.status?e.message:'本地服务无法完成请求'});else res.end();
+  }
  });
  server.on('close',()=>{retriever?.close();credential='';sessions.clear();
   // 关服务时必须显式带走 Python 子进程：它按父 pid 自杀，但 Node 被 SIGKILL
