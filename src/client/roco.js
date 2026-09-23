@@ -3258,7 +3258,20 @@ function bind() {
   // 轻量小芽入口（P0-2）：点一下**有可见反应**——这一栏展开、焦点落到输入框。
   // 这三个元素**必然存在**（页头入口 / 对话表单 / 教程跳过），按既有契约直接绑定；
   // 只有「重开 / 重试」这类在精简页眉后可能不存在的按钮才走 null-safe 的 on()。
-  $('coach-entry').addEventListener('click', () => { toggleXiaoya(); openCompanion(); });
+  // 人类 2026-09-23：「小芽再点一次应该能收回去才对」——
+  // 原来无条件 `openCompanion()`，所以点了只会开、永远关不掉。现在按当前状态切换。
+  $('coach-entry').addEventListener('click', () => {
+    // 只有 `openCompanion()` 这一个入口（没有 closeCompanion）：关就是把状态置 false 再渲染，
+    // `renderCompanion()` 会按 `state.coach.open` 自动开/关（见它的实现）。
+    if (state.coach.open) {
+      state.coach.open = false;
+      renderCompanion();
+      syncBottomBars();
+    } else {
+      toggleXiaoya(true);
+      openCompanion();
+    }
+  });
   // 设置入口 = `#xy-settings` 的原生 summary（不再有独立按钮）。
   const xyFold = $('xy-fold-models');
   if (xyFold) xyFold.addEventListener('click', () => {

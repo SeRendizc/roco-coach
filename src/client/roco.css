@@ -434,11 +434,16 @@ body[data-roco-hint-visible="yes"] .companion .companion-body{visibility:hidden}
 @media(min-width:861px){
  /* 对战页两栏：左边是舞台与后备，右边是这一回合的记录（记录不抢主视线）。
     小芽是**固定定位的右侧 Coach 栏**（不在流里），所以它不参与这个 grid。 */
- body[data-roco-view="ready"] main{display:grid;grid-template-columns:minmax(0,1fr);
+ body[data-roco-view="ready"] main{display:grid;grid-template-columns:minmax(0,1.32fr) minmax(0,1fr);
   gap:0 14px;align-items:start;
-  /* v3h 片段自带右列，所以战斗态**左右内边距对称**（左侧 22px 也要在右侧补上）——
-     否则内容中心会偏 11px，验收量到「两卡轴心 731 ≠ 页面中线 720」。 */
-  padding-left:14px;padding-right:14px;max-width:none}
+  /* 右侧给小芽那一栏让位（宽屏时它是固定定位的）。 */
+  padding-right:var(--coach-rail,0px)}
+ /* ── 以下**只在战斗面板可见时**生效（`:has()` 作用域）────────────────────────
+    人类 2026-09-23：我早先把这些规则写成 `body[data-roco-view="ready"] main{…}`，
+    而**首页（阵容工坊）用的是同一个 main**，于是把它的两列压成了一列（首页被改坏）。 */
+ body[data-roco-view="ready"] main:has(#battle-panel:not([hidden])){
+  grid-template-columns:minmax(0,1fr);padding-left:0;padding-right:0;padding-bottom:8px}
+ body[data-roco-view="ready"] main:has(#battle-panel:not([hidden]))>#battle-panel{padding:0}
  /* 战斗面板自身不要再留边距（片段 `.b3-wrap` 自带 12/16/14）——否则 wrap 达不到「视口−40」。 */
  body[data-roco-view="ready"] main>#battle-panel{padding:0}
  body[data-roco-view="ready"] main>.topbar,
@@ -451,8 +456,8 @@ body[data-roco-hint-visible="yes"] .companion .companion-body{visibility:hidden}
  /* 2026-09-23（v3h 片段接入）：战斗面板**自带右列战报**，所以两块都跨整行 ——
     旧的 `grid-column:1` / `:2` 两列并排会把 v3h 根容器压成 653px（实测轴心 464.5 ≠ 720）。
     旧战报面板**保留可见**（只是移到片段下方），避免影响既有判据。 */
- body[data-roco-view="ready"] main>#battle-panel{grid-column:1/-1}
- body[data-roco-view="ready"] main>#log-panel{grid-column:1/-1}
+ body[data-roco-view="ready"] main:has(#battle-panel:not([hidden]))>#battle-panel{grid-column:1/-1}
+ body[data-roco-view="ready"] main:has(#battle-panel:not([hidden]))>#log-panel{grid-column:1/-1;display:none}
 }
 /* 底栏是固定定位，正文要给它让出位置，否则最后一段永远被压住。 */
 main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
@@ -861,10 +866,11 @@ header.topbar .hc-turn{display:block;font-size:17px;font-weight:700}
 .xy-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
 
 /* 页眉三列：左标题 / **中模式+回合** / 右（模型状态 + 小芽）。两侧等宽 → 中间真居中。 */
-header.topbar{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
-header.topbar .head-center{grid-column:2;justify-self:center}
-header.topbar .model-line{grid-column:3;justify-self:end}
-header.topbar .xiaoya-btn{grid-column:3;justify-self:end}
+/* 页眉两列：标题（可缩） | 右上「✦ 小芽」。回合/模式已移进战斗顶栏，不需要中间列 ——
+   三列版会把 h1 压成竖排（人类 2026-09-23 截图的首页翻车就是这个）。 */
+header.topbar{grid-template-columns:minmax(0,1fr) auto}
+header.topbar h1{white-space:normal;min-width:0}
+header.topbar .xiaoya-btn{justify-self:end}
 
 /* 设置块在小芽卡片里：**footer 不滚动**、不参与正文滚动区（否则会被面板盖住点不到）。 */
 .companion .xy-settings{flex:0 0 auto;max-height:46vh;overflow:auto;margin-top:6px;
@@ -895,4 +901,5 @@ body[data-roco-view="ready"] main{padding-bottom:8px}
 /* 结构现实（2026-09-23 实测）：`#dev-zone` 与旧行动坞都嵌在 <header> 里，不是 main 的直接子元素，
    所以任何 `main>#x` 规则都命中不了。战斗态一律用**不依赖父级**的选择器收起。 */
 body[data-roco-view="ready"] #dev-zone,
-body[data-roco-view="ready"] .dev-zone{display:none !important}
+body[data-roco-view="ready"] .dev-zone,
+body[data-roco-view="ready"] #action-panel{display:none !important}

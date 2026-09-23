@@ -509,3 +509,13 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
 /* ── 纵向顶满：主区撑满、不留底部空白 ── */
 .b3-wrap .b3-main{height:100%;align-items:stretch}
 .b3-wrap .b3-col,.b3-wrap .b3-stage,.b3-wrap .b3-card{height:100%}
+
+/* 人类 2026-09-23 批注（截图两张）：
+   ①「左右留空不要完全顶满，上下也留一点点」→ 加大片段内边距；
+   ②「对方的剩余数量还是没向右」→ 强制对手点组靠右（片段里那是 class="b3-side right b3-side--foe"）；
+   ③「框内比如右下角和逃跑跳出来的一般都居中」→ 逃跑确认居中。 */
+.b3-wrap{padding:14px 24px 16px}
+.b3-wrap .b3-topbar .b3-side--foe,
+.b3-wrap .b3-topbar .b3-side.right{justify-self:end !important;justify-content:flex-end !important}
+.b3-wrap .b3-panel--escape{align-items:center;justify-content:center;text-align:center}
+.b3-wrap .b3-panel--escape .b3-slot{max-width:360px;width:100%;text-align:center}
