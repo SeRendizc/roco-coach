@@ -1845,20 +1845,41 @@ function sampleEnemyPool(){
   // 于是标准 PVP 打起来是「自己打自己」。v3 的口径是「匹配前对手未知、按版本环境倾向评价」，
   // 所以这里给一个**确定性的示例对手**：从候选宇宙里取与我方不重复的物种，
   // 并在回执里标明它是**示例**（页面照实显示，不冒充真实匹配）。
+  // 我这一队用到的**物种**（team 里给的是实例 id `own-XXXX`，要映射到 species）
+  const ownedIndex=()=>{
+   try{
+    const doc=JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)),'..','..',
+     'data/roco/owned','owned-pets.json'),'utf8'));
+    const rows=Array.isArray(doc)?doc:(doc.pets??doc.owned??doc.instances??[]);
+    return rows.map((r)=>({instance:String(r.instance_id??''),species:String(r.species_id??'')}))
+     .filter((r)=>r.instance&&r.species);
+   }catch{return [];}
+  };
   const sampleEnemyFor=(mine)=>{
    if(!modeId||enemyRaw)return null;
-   const mineSpecies=new Set(mine.map((id)=>String(id)));
-   const pool=sampleEnemyPool();
+   const idx=ownedIndex();
+   const byInstance=new Map(idx.map((r)=>[r.instance,r.species]));
+   // ⚠ 人类 2026-09-23：对手要从**我选剩下的可用精灵**里选，不许从全量池里抽不可用的。
+   // 之前的写法把实例 id 当物种比，集合根本不相交 → 于是从 574 全量池里抽，可能抽到我没有/不可上场的物种。
+   const mineSpecies=new Set(mine.map((id)=>String(id)).map((id)=>byInstance.get(id)??(id.startsWith('pet_')?id:null))
+     .filter(Boolean));
+   const usable=sampleEnemyPool();                       // 有按需推算 build 的物种 = 可上场
+   const myUsable=idx.map((r)=>r.species).filter((sp)=>usable.includes(sp));   // 我的可用物种
+   const fromMine=myUsable.filter((sp)=>!mineSpecies.has(sp));                 // 去掉我这一队
    const picked=[];
-   for(const id of pool){
-    if(mineSpecies.has(String(id)))continue;
-    picked.push(id);
-    if(picked.length>=teamSize)break;
+   for(const id of [...new Set(fromMine)]){ picked.push(id); if(picked.length>=teamSize)break; }
+   let source=picked.length>=teamSize?'sample-usable':'sample-fallback';
+   if(picked.length<teamSize){                                                 // 不够才退回全量池
+    for(const id of usable){ if(mineSpecies.has(id)||picked.includes(id))continue;
+     picked.push(id); if(picked.length>=teamSize)break; }
    }
-   return picked.length===teamSize?picked:null;
+   if(picked.length<teamSize)return null;
+   sampleEnemySourceCache=source;
+   return picked;
   };
   const enemyTeam=modeId?((enemyRaw??sampleEnemyFor(team))??undefined):((enemyRaw&&enemyRaw.length===3)?enemyRaw:undefined);
   const enemyIsSample=modeId&&!enemyRaw&&Array.isArray(enemyTeam);
+  const enemySource=enemyIsSample?(sampleEnemySourceCache??'sample'):null;
 
   // owned 个体 → 物种 id（引擎的名单是物种级）。不在 owned 里的 id 照实报错，不猜。
   const resolved=resolveBattleTeamIds(resolvedTeam);
@@ -1877,7 +1898,7 @@ function sampleEnemyPool(){
   const out=unwrap(envelope);
   if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
   const id=newSessionId();
-  if(enemyIsSample)out.result.enemy_source='sample';
+  if(enemyIsSample)out.result.enemy_source=enemySource??'sample';
   sessions.set(id,{state:out.result.state,strategy,seed,turn:out.result.turn,
    mode_id:modeId,ruleset_config_id:rulesetConfigId});
   const base=publicView(out.result,{modeId,rulesetConfigId});

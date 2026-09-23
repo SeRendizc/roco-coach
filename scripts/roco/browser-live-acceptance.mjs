@@ -1079,9 +1079,13 @@ async function main() {
         return !el.hidden&&b.width>0&&b.height>0&&getComputedStyle(el).display!=='none';};
       const top=(el)=>el?Math.round(el.getBoundingClientRect().top):null;
       // 战斗页里**可见**的「未核验/规则口径」文本：只数叶子节点，免得祖先重复计数。
+      // ⚠ 排除右列战报：引擎自己的事件句子会带「伤害公式未核验」这类**逐条证据措辞**
+      //   （fail-closed 纪律要求标出来），那不是「规则口径与未核验项」那一块折叠。
       const visibleRuleText=[...document.querySelectorAll('#battle-panel *')]
-        .filter((el)=>el.children.length===0&&vis(el)&&/未核验|规则口径/.test(el.textContent||''))
-        .map((el)=>el.id||String(el.className||el.tagName));
+        .filter((el)=>el.children.length===0&&!el.closest('.b3-log-scroll')&&vis(el)
+          &&/未核验|规则口径/.test(el.textContent||''))
+        .map((el)=>String(el.id||el.className||el.tagName)+':'
+          +(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,24));
       return {rulesTop:top(r),stageTop:top(stage),cardTop:top(document.querySelector('[data-b3-self-card]')),
         noteVisible:vis(note),rulesVisible:vis(rules),visibleRuleText,
         // 战场上方还有没有别的「未核验/规则」块
@@ -1095,6 +1099,8 @@ async function main() {
       if (f?.stageTop === null || f?.rulesTop === null) bad.push('缺战场或片段根容器');
       else if (!(f.rulesTop < f.stageTop)) bad.push('片段根容器不在战场上方');
       if (Number(f?.aboveCount) > 0) bad.push(`战场上方还有 ${f.aboveCount} 处「未核验/规则」文本`);
+      if (f?.rulesVisible === true) bad.push('「规则口径与未核验项」折叠在战斗页里还看得见');
+      if (f?.noteVisible === true) bad.push('「未核验」短标签在战斗页里还看得见');
       if ((f?.visibleRuleText ?? []).length) {
         bad.push(`战斗页里还有可见的「未核验/规则」文本：${f.visibleRuleText.join('、')}`);
       }
@@ -1383,6 +1389,10 @@ async function main() {
       await sleep(250);
     }
     await sleep(900);
+    // 2026-09-23 版式：人类把**页头右上角只留「✦ 小芽」**（commit 8288f2e），
+    // 「模型连接状态」那一行从页头搬进了小芽面板 → 读取点跟着走：先点开小芽，再量 chip。
+    await mouseClick('#coach-entry');
+    await sleep(600);
     const modelChip = await js(`(()=>{const el=document.getElementById('model-chip');
       if(!el)return null;const r=el.getBoundingClientRect();
       return {text:(el.textContent||'').trim(),hook:el.dataset.rocoModel??null,
@@ -1390,17 +1400,20 @@ async function main() {
         configured:document.body.dataset.rocoModelConfigured??null};})()`);
     const chipProblems = (c, configured) => {
       const bad = [];
-      if (!c) { bad.push('页头没有连接状态'); return bad; }
+      if (!c) { bad.push('小芽面板里没有模型连接状态'); return bad; }
       if (!c.text) bad.push('连接状态没有文字');
       if (configured && c.hook !== 'connected') bad.push(`已连接模型却标 ${c.hook}`);
       if (!configured && c.hook !== 'offline') bad.push(`没连模型却标 ${c.hook}`);
-      if (!configured && !/未连接|没连/.test(c.text)) bad.push('未连接时没有明说');
+      // 「明说」的口径没变，只是文案随探测结果分两档（短句「未连接」/ 探针句「0/3 已连接 … 未连 …」）。
+      if (!configured && !/未连接|没连|未连/.test(c.text)) bad.push('未连接时没有明说');
       if (!c.href) bad.push('状态 chip 没有连接入口');
       if (c.h < 24) bad.push(`状态行只有 ${c.h}px 高（太小，看不见）`);
       return bad;
     };
     const modelConfigured = await js(`document.body.dataset.rocoModelConfigured==='yes'`);
-    check('live-model-status', '页头的「模型连接状态」与实际一致（未连接时明说 + 给连接入口），不冒充模型',
+    check('live-model-status', '模型连接状态与实际一致（未连接时明说 + 给连接入口），不冒充模型。'
+      + '【按人类 2026-09-23 版式（页头右上角只留「✦ 小芽」），连接状态那一行由**小芽面板**承担；'
+      + '读取点 = 打开小芽面板后的 `#model-chip`】',
       chipProblems(modelChip, modelConfigured).length === 0,
       chipProblems(modelChip, modelConfigured).join(' | ')
       || `chip「${modelChip.text}」hook=${modelChip.hook} 入口=${modelChip.href} 高=${modelChip.h}px`);
@@ -1559,14 +1572,19 @@ async function main() {
     const mSettled = await js(`(()=>{const v=window.rocoDemo.state.view;
       const b=document.body.dataset;
       const turns=[...document.querySelectorAll('.b3-wrap [data-b3-log-turn]')];
+      const col=document.querySelector('.b3-wrap .b3-col--right');
+      const scroll=document.querySelector('.b3-log-scroll');
       return JSON.stringify({result:v?v.battle_result:null,lesson:b.rocoLesson??null,
         clientW:document.documentElement.clientWidth,scrollW:document.documentElement.scrollWidth,
         turn:v?v.turn:null,
         round:((document.getElementById('b3-round')||{}).textContent||'').trim(),
-        logTurns:turns.length,
+        logGroups:turns.length,
+        logTurns:Number(b.rocoLogTurns||'0'),
         logLatestLines:turns.length?[...turns[0].querySelectorAll('p')].filter((p)=>(p.textContent||'').trim()).length:0,
-        logShown:(()=>{const el=document.querySelector('.b3-log-scroll');if(!el)return false;
-          const r=el.getBoundingClientRect();return r.width>0&&r.height>0;})()});})()`).then(JSON.parse);
+        // 窄屏（≤760px）设计口径：**右列整列收起**（战报不占首屏）→ 见 battle-v3.css 的媒体查询。
+        rightColHidden:Boolean(col&&getComputedStyle(col).display==='none'),
+        logShown:(()=>{if(!scroll)return false;const r=scroll.getBoundingClientRect();
+          return r.width>0&&r.height>0&&getComputedStyle(scroll).display!=='none';})()});})()`).then(JSON.parse);
     steps.push({at: 'mobile-e2e', trace: mobileTrace, settled: mSettled});
     const mobileProblems = (trace, started, settled) => {
       const bad = [];
@@ -1591,36 +1609,53 @@ async function main() {
       if (settled?.lesson !== 'shown') bad.push('手机上局末教学入口没出现');
       if (settled && settled.clientW !== settled.scrollW) bad.push('结算时横向溢出');
       if (settled && !/第\s*\d+\s*回合/.test(String(settled.round))) bad.push(`手机结算页页眉回合「${settled.round}」`);
-      if (settled && !(settled.logShown === true && Number(settled.logTurns) > 0)) {
-        bad.push('手机结算页右列战报不在位 / 没有回合分组');
+      // 战报在窄屏下的等价口径：battle-v3.css 的 ≤760px 媒体查询**整列收起右列战报**
+      // （人类：「单列、战报不占首屏」）。所以手机上要么右列在位且按回合分组，要么**整列按设计收起**——
+      // 不许「半吊子」（既不显示、也没收起）。同时用 `data-roco-log-turns` 兜住「整局真的分组了」。
+      if (settled) {
+        if (!(Number(settled.logTurns) > 0)) bad.push('手机上整局战报一个回合块都没有（没有按引擎事件分组）');
+        if (settled.logShown === true) {
+          if (!(Number(settled.logGroups) > 0)) bad.push('手机右列战报在位却没有回合分组');
+        } else if (settled.rightColHidden !== true) {
+          bad.push('手机右列战报既不可见、又没按窄屏设计整列收起（半吊子）');
+        }
       }
       return bad;
     };
     check('live-mobile-e2e', '手机 390×844 整条 E2E：URL 带锁定进来 → 补满六只 → 开局 → 打到结算 → 教学入口，'
       + '每一步都不横向溢出，且战斗页那一档必须是 v3h（页眉回合、顶栏 6 个存活点、底栏四个大选项、聚能 ≥44px）。'
       + '【按人类 2026-09-23 版式，窄屏战斗页的「行动区在首屏」由**底栏四选项 + 左列四格技能**承担'
-      + '（旧 `#action-panel` 在战斗态收起）；口径未放松：窄屏也要能点到聚能与四个大选项】',
+      + '（旧 `#action-panel` 在战斗态收起）；右列战报在 ≤760px 按设计**整列收起**（「单列、战报不占首屏」），'
+      + '所以窄屏那一档要求「在位就得分组、否则必须整列收起」，并用 `data-roco-log-turns` 兜住内容】',
       mobileProblems(mobileTrace, mStarted, mSettled).length === 0,
       mobileProblems(mobileTrace, mStarted, mSettled).join(' | ')
       || `轨迹 ${mobileTrace.map((r) => `${r.stage}:${r.selected}只/${r.clientW}`).join(' → ')}；`
         + `战斗页 回合「${mobileTrace.find((r) => r.stage === 'm-battle')?.round}」`
         + `存活点「${mobileTrace.find((r) => r.stage === 'm-battle')?.dotsSelf}」`
         + `选项 ${mobileTrace.find((r) => r.stage === 'm-battle')?.tabs} 个；`
-        + `结算 result=${mSettled.result} 回合=${mSettled.turn} 教学=${mSettled.lesson} 战报 ${mSettled.logTurns} 块`);
+        + `结算 result=${mSettled.result} 回合=${mSettled.turn} 教学=${mSettled.lesson} `
+        + `战报 ${mSettled.logTurns} 块（右列收起=${mSettled.rightColHidden}）`);
     counter('live-mobile-e2e', '手机上没选满六只（只选到 4 只）必须被同一条判据抓住',
       mobileProblems([{stage: 'm-six-picked', selected: 4, clientW: 390, scrollW: 390},
         {stage: 'm-battle', selected: 6, clientW: 390, scrollW: 390, round: '第 1 回合',
           dotsSelf: '●●●●●●', tabs: 4, charge: {shown: true, h: 44}}], true,
         {result: 'loss', lesson: 'shown', clientW: 390, scrollW: 390, round: '第 5 回合',
-          logShown: true, logTurns: 5}),
+          logShown: false, rightColHidden: true, logTurns: 5, logGroups: 0}),
       '{"selected":4}');
     counter('live-mobile-e2e(战斗页不成版式)', '窄屏战斗页没渲染出 v3h（选项不足/聚能点不到）必须被同一条判据抓住',
       mobileProblems([{stage: 'm-six-picked', selected: 6, clientW: 390, scrollW: 390},
         {stage: 'm-battle', selected: 6, clientW: 390, scrollW: 390, round: '未开局',
           dotsSelf: '○○○○○○', tabs: 0, charge: {shown: false, h: 0}}], true,
         {result: 'win', lesson: 'shown', clientW: 390, scrollW: 390, round: '第 9 回合',
-          logShown: true, logTurns: 9}),
+          logShown: false, rightColHidden: true, logTurns: 9, logGroups: 0}),
       '{"tabs":0,"charge":{"shown":false}}');
+    counter('live-mobile-e2e(战报半吊子)', '窄屏战报既不显示、又没按设计整列收起（且整局没分组）必须被同一条判据抓住',
+      mobileProblems([{stage: 'm-six-picked', selected: 6, clientW: 390, scrollW: 390},
+        {stage: 'm-battle', selected: 6, clientW: 390, scrollW: 390, round: '第 1 回合',
+          dotsSelf: '●●●●●●', tabs: 4, charge: {shown: true, h: 44}}], true,
+        {result: 'win', lesson: 'shown', clientW: 390, scrollW: 390, round: '第 9 回合',
+          logShown: false, rightColHidden: false, logTurns: 0, logGroups: 0}),
+      '{"logShown":false,"rightColHidden":false,"logTurns":0}');
 
     // ── ⑧ 试玩（按需推算六只）的能量门：人类实测的场景 —— 首回合能量 2 / 最便宜技能 3 ──
     // 上面那条用的是**持有六只**（配招里有 0 消耗技能，首回合就有合法技能），

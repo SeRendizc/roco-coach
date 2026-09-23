@@ -1755,6 +1755,29 @@ function renderB3Panels(view) {
     if (label) label.textContent = '聚能';
   }
 
+  // ⑥ 点击绑定（人类 2026-09-23：「战斗完全推进不了」）：
+  //    旧行动坞一收起，**没人接点击了** —— 片段的技能格/换宠行/聚能此前只是展示。
+  //    这里在片段根上**委托**一次（只绑一次）：`data-b3-action` 指向 `view.legal` 的下标，
+  //    与旧坞完全同一套口径（可点性仍由引擎给的合法动作决定）。
+  if (root.dataset.b3ClickBound !== 'yes') {
+    root.dataset.b3ClickBound = 'yes';
+    root.addEventListener('click', (ev) => {
+      const el = ev.target.closest?.('[data-b3-action]');
+      if (!el || el.disabled) return;
+      const idx = Number(el.dataset.b3Action);
+      const act = (state.view?.legal ?? [])[idx];
+      if (act) playAction(act);
+    });
+  }
+  const chargeBtn = root.querySelector('#b3-charge');
+  if (chargeBtn && chargeBtn.dataset.b3Bound !== 'yes') {
+    chargeBtn.dataset.b3Bound = 'yes';
+    chargeBtn.addEventListener('click', () => {
+      const act = (state.view?.legal ?? []).find((a) => a.kind === 'charge');
+      if (act) playAction(act);
+    });
+  }
+
   // ⑥ 战报：**用引擎事件真渲染**（人类 2026-09-23：「战报为啥没及时更新」——
   //    根因是我只填了顶栏/卡/技能，战报还停在设计稿的静态示例文本上）。
   //    数据源是整局累计事件 `state.matchEvents`（结算那份回执不带新事件，只看当回合会空）。
