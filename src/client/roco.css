@@ -903,3 +903,21 @@ body[data-roco-view="ready"] main{padding-bottom:8px}
 body[data-roco-view="ready"] #dev-zone,
 body[data-roco-view="ready"] .dev-zone,
 body[data-roco-view="ready"] #action-panel{display:none !important}
+
+/* 小芽里的两个弹窗入口 + 三级弹窗（人类 2026-09-23） */
+.xy-open{display:block;width:100%;margin:6px 0 0;padding:8px 10px;border-radius:10px;
+ border:1px solid var(--line);background:#16222f;color:#dbe7f1;font:inherit;cursor:pointer;text-align:center}
+.xy-modal{position:fixed;inset:0;z-index:90;background:rgba(6,10,14,.62);display:flex;
+ align-items:center;justify-content:center;padding:20px}
+.xy-modal[hidden]{display:none}
+.xy-modal-box{width:min(560px,94vw);max-height:78vh;overflow:auto;background:#101a24;
+ border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.xy-modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.xy-modal-x{min-width:32px;min-height:32px;border-radius:10px;border:1px solid var(--line);
+ background:#16222f;color:#dbe7f1;cursor:pointer}
+/* 首页底部不许有别的东西（人类：「开一局就最下面」）——工程区在首页也收起 */
+body:not([data-roco-view=battle]) #dev-zone{display:none}
+
+/* 人类 2026-09-23：「小芽整体删除，该弹窗自己弹出来，不要留这里」——
+   首页里那块**内联**小芽卡不再显示（只保留右上角弹窗）。 */
+#hint-body{display:none !important}

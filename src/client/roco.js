@@ -910,6 +910,7 @@ function render() {
   renderModelChip();
   renderMemory();
   renderCompanion();
+  bindXiaoyaPopups();
   syncBottomBars();
 }
 
@@ -1476,6 +1477,31 @@ function syncBottomBars() {
 //   ① 页头「✦ 小芽」点一下有可见反应（这一栏展开 + 焦点落到输入框）；
 //   ② 真的能输入并拿到回复（走 `say()`，与原来同一条路径）；
 //   ③ **不打开这一栏也要能出现主动提示**（军师浮条与它是两条独立的通道）。
+
+/** 人类 2026-09-23：小芽面板只留两个入口 —— 模型连接状态（+调试连接弹窗）与「查看记忆」（三级弹窗）。
+ *  另外**首页不再内联渲染小芽**（那是「两个小芽窗口」的来源）；弹窗自己弹出来。 */
+function bindXiaoyaPopups() {
+  const openMemory = $('open-memory');
+  if (openMemory && openMemory.dataset.bound !== 'yes') {
+    openMemory.dataset.bound = 'yes';
+    openMemory.addEventListener('click', () => { const m = $('memory-pop'); if (m) m.hidden = false; });
+  }
+  const closeMemory = $('close-memory');
+  if (closeMemory && closeMemory.dataset.bound !== 'yes') {
+    closeMemory.dataset.bound = 'yes';
+    closeMemory.addEventListener('click', () => { const m = $('memory-pop'); if (m) m.hidden = true; });
+  }
+  const openConnect = $('open-connect');
+  if (openConnect && openConnect.dataset.bound !== 'yes') {
+    openConnect.dataset.bound = 'yes';
+    openConnect.addEventListener('click', () => {
+      // 人类：按一下弹出 connect.html 连接页（独立小窗，不覆盖主界面）
+      window.open('connect.html', 'roco-connect', 'width=520,height=680,noopener');
+    });
+  }
+}
+
+const B3_NO_INLINE_XIAOYA = true;   // 首页不内联小芽
 function renderCompanion() {
   const card = $('companion-card');
   if (!card) return;

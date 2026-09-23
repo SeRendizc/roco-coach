@@ -36,10 +36,9 @@
    <button class="primary">说一句</button>
   </form>
    <!-- 设置（人类：整合进小芽；原来放在 </aside> 后面会被固定定位的面板盖住、点不到） -->
-  <details class="xy-settings" id="xy-settings">
+  <div class="xy-settings" id="xy-settings">
   <!-- 三条口径（模式 / 候选规则 / 匹配前对手未知）：人类要求**不占战斗页**，
        但必须可查 —— 所以容器在这里，`renderMode()` 往这里写。 -->
-  <div class="b3-flags" id="mode-chips"></div>
   <!-- 模型连接状态（人类：页眉右上角只留「✦ 小芽」） -->
   <a class="chip model-line" id="model-chip" href="connect.html" data-roco-model="offline">模型：正在读取…</a>
   <!-- 战斗工具（原底部那一行，人类：整合进小芽） -->
@@ -48,17 +47,23 @@
   <button id="auto-turn">让双方各走一步（自动演示）</button>
   <span id="plan-status" class="muted"></span>
  </div>
-  <summary>设置（模型 / 记忆 / 规则台账 / 工程信息）</summary>
+    <button class="xy-open" id="open-connect" type="button">调试连接</button>
   <div class="xy-models" id="model-list">
    <div class="model-cell"><div class="mc-name">正在读取模型状态…</div></div>
   </div>
 
-  <div class="section-title" id="memory-head"><h3>小芽记住的（都是你说过的）</h3>
-   <span class="muted">说错了？直接再说一句就能改，或者点「忘掉」</span></div>
-  <ul id="memory-list" class="memory"></ul>
-  <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>
+    <!-- 记忆：**三级弹窗**（人类 2026-09-23：面板里只留一个按钮） -->
+  <button class="xy-open" id="open-memory" type="button">查看记忆</button>
+  <div class="xy-modal" id="memory-pop" hidden role="dialog" aria-label="小芽的记忆">
+   <div class="xy-modal-box">
+    <div class="xy-modal-head"><strong>小芽记住的（都是你说过的）</strong>
+     <button class="xy-modal-x" id="close-memory" type="button" aria-label="关掉">×</button></div>
+    <p class="muted">说错了？直接再说一句就能改，或者点「忘掉」。</p>
+    <ul id="memory-list" class="memory"></ul>
+    <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>
+   </div>
+  </div>
 
- </details>
  </aside>
  <!-- 设置：三张模型卡 / 记忆 / 模式条 / 重开重试 / 工程抽屉，全部收在这里 -->
  
