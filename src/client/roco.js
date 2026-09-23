@@ -1860,23 +1860,56 @@ function renderB3Panels(view) {
       foeBuffs.innerHTML = B3_BUFF_GHOSTS;
     }
   }
-  // G3 背包格：按引擎给的 item 动作填（id/名字/可用态）；没给就写「不可用」。
-  const itemCells = [...root.querySelectorAll('[data-b3-item-cell]')];
+  // G3 背包屏（**严格按 v3h 渲染图**：人类已认可的定稿就是验收标准）。
+  //   渲染图那一屏是两条**设计稿条目**：`愿力强化`（候选 PVP 魔法，次数如实写「未登记」）
+  //   与 `首领化`（灰置 + 「不可用」）。引擎在标准 PVP 里**不发 item 动作**（普通道具这一类是
+  //   forbidden），所以不能「引擎没给就写这一件没有」——那与定稿完全不同。
+  //   口径：**条目来自设计稿，数值来自引擎**；引擎给了同名 item 动作就用引擎的名字/次数/说明，
+  //   没给就照渲染图显示，次数写「未登记」（绝不编 2/2）。
+  const ITEM_SPEC = [
+    {id: 'wish_power_up', name: '愿力强化', usable: true,
+     desc: ['候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。',
+            '把当前精灵的第一个技能换成「愿力冲击」。',
+            '再用一次可解除（解除后进冷却，不减次数）。'],
+     note: '次数与冷却均未登记'},
+    {id: 'leader_form', name: '首领化', usable: false,
+     desc: ['候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。'],
+     note: '需要「首领血脉」，本版未做'},
+  ];
   const itemActs = (view?.legal ?? []).filter((a) => a.kind === 'item');
+  const itemCells = [...root.querySelectorAll('[data-b3-item-cell]')];
   itemCells.forEach((cell, i) => {
-    const act = itemActs[i] ?? null;
-    cell.dataset.b3ItemGrey = act ? 'no' : 'yes';
-    cell.classList.toggle('b3-slot--grey', !act);
+    const spec = ITEM_SPEC[i] ?? null;
+    const id = cell.dataset.b3ItemId ?? spec?.id ?? '';
+    const act = itemActs.find((a) => String(a.item_id ?? a.id ?? '') === id) ?? null;
     const nameEl = cell.querySelector('[data-b3-item-name]');
-    const idEl = cell.querySelector('[data-b3-item-id]');
-    if (nameEl) nameEl.textContent = act ? (act.item_id ?? '道具') : '不可用';
-    if (idEl) idEl.dataset.b3ItemId = act ? String(act.item_id ?? '') : '';
+    if (nameEl) nameEl.textContent = act ? (act.label ?? act.name ?? spec?.name ?? id) : (spec?.name ?? id);
+    // 可用性：**引擎给了才可点**；没给就灰置（渲染图里的「首领化 / 不可用」正是这种态）
+    const usable = Boolean(act);
+    cell.dataset.b3ItemGrey = usable ? 'no' : 'yes';
+    cell.dataset.b3ItemAvailable = usable ? 'yes' : 'no';
+    cell.classList.toggle('b3-slot--grey', !usable);
+    const countEl = cell.querySelector('[data-b3-item-count]');
+    if (countEl) {
+      const used = act?.uses_left ?? act?.remaining ?? null;
+      const total = act?.uses_total ?? act?.per_battle ?? null;
+      countEl.textContent = act
+        ? (Number.isFinite(used) && Number.isFinite(total) ? `${used} / ${total}` : '未登记')
+        : (spec?.usable ? '未登记' : '不可用');
+    }
+    const desc = cell.querySelector('[data-b3-item-desc]');
+    if (desc) {
+      const lines = act ? (act.description ?? act.desc ?? null) : spec?.desc?.join('\n');
+      desc.textContent = Array.isArray(lines) ? lines.join('\n') : (lines ?? '候选 · 未核验：说明未登记。');
+    }
     const note = cell.querySelector('[data-b3-item-note]');
-    if (note) note.textContent = act ? '' : '未核验';
+    if (note) note.textContent = act ? (act.note ?? '次数与冷却均未登记') : (spec?.note ?? '未核验');
     delete cell.dataset.b3Action;
     if (act) { cell.dataset.b3Action = String((view.legal ?? []).indexOf(act)); cell.dataset.b3ActionKind = 'item'; }
     b3Show(cell);
+    cell.querySelectorAll('[data-b3-pending]').forEach((el) => b3Show(el));
   });
+
   // G4 逃跑：确认按钮必须真的带上动作（否则真鼠标点它什么都不发生）。
   const esc = root.querySelector('[data-b3-escape-confirm]');
   if (esc) {

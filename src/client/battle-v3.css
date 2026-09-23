@@ -480,3 +480,32 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
  padding-left:0;padding-right:0}
 .b3-wrap .b3-topbar>.b3-side,.b3-wrap .b3-topbar .b3-side{flex:0 0 auto;display:flex;align-items:center;gap:10px}
 @media (max-width:760px){ .b3-wrap .b3-topbar{gap:12px;flex-wrap:wrap} }
+
+/* ── 圆角统一（人类 2026-09-23）──────────────────────────────────────────────
+   规则：**外侧半径 ≥ 内侧半径 + 中间的内边距**，否则外圈会把内层内容切掉（「外部圆角弧度
+   比内部小、把内部遮住」）。这里把三个层级写成同一个几何关系，并给面板留出与半径匹配的内边距。 */
+.b3-wrap{--b3-r-card:14px;--b3-r-slot:10px;--b3-r-inner:6px}
+.b3-wrap .b3-card{border-radius:var(--b3-r-card);padding:12px}         /* 外 */
+.b3-wrap .b3-slot{border-radius:var(--b3-r-slot)}                      /* 中：14-12≥10 ✓ */
+.b3-wrap .b3-slot .b3-el,.b3-wrap .b3-slot .b3-cost,
+.b3-wrap .b3-slot .b3-rel{border-radius:var(--b3-r-inner)}             /* 内：10-6≥6 ✓ */
+.b3-wrap .b3-spritebox{border-radius:calc(var(--b3-r-card) - 4px)}
+.b3-wrap .b3-charge,.b3-wrap .b3-tab{border-radius:11px}
+
+/* 人类 2026-09-23：**剩余精灵数量在两边、回合那坨字在两者中间**（不是在页眉），
+   且不要把点组顶到卡片边缘。两侧各 1fr、中间 auto 居中，整体内缩 14px。 */
+.b3-wrap .b3-topbar{display:grid !important;grid-template-columns:1fr auto 1fr;
+ align-items:center;gap:12px;padding-left:14px;padding-right:14px}
+.b3-wrap .b3-topbar .b3-side{justify-self:start}
+.b3-wrap .b3-topbar .b3-side--foe,.b3-wrap .b3-topbar .b3-side.right{justify-self:end}
+.b3-wrap .b3-topbar .b3-turn{justify-self:center;text-align:center}
+/* ── 圆角：**外 = 内 + 中间内边距**（人类：外圈弧度不能比内圈小、否则遮住内容）── */
+.b3-wrap{--b3-r-card:17px;--b3-r-slot:9px;--b3-r-inner:4px}
+.b3-wrap .b3-card{border-radius:var(--b3-r-card);padding:8px}
+.b3-wrap .b3-slot{border-radius:var(--b3-r-slot);padding:5px 8px}
+.b3-wrap .b3-slot .b3-el,.b3-wrap .b3-slot .b3-cost,.b3-wrap .b3-slot .b3-rel,
+.b3-wrap .b3-buff{border-radius:var(--b3-r-inner)}
+.b3-wrap .b3-spritebox{border-radius:calc(var(--b3-r-card) - 3px)}
+/* ── 纵向顶满：主区撑满、不留底部空白 ── */
+.b3-wrap .b3-main{height:100%;align-items:stretch}
+.b3-wrap .b3-col,.b3-wrap .b3-stage,.b3-wrap .b3-card{height:100%}

@@ -17,22 +17,10 @@
  <h1>小芽 · 洛克王国：世界 <small>训练场</small></h1>
  <!-- 掉心提示：**最顶居中**（人类规格）。平时不出现，扣心时闪几秒。 -->
  <div class="heart-pop" id="heart-pop" role="status" aria-live="polite" hidden></div>
+ <!-- 小芽入口（唯一一个，右上角；页眉中间不再放回合/模式——那两行在战斗顶栏里） -->
+ <button id="coach-entry" class="xiaoya-btn" type="button" aria-label="打开小芽"><span class="xy-star" aria-hidden="true">✦</span> 小芽</button>
  <!-- 模型状态：**一行、不用打开面板就能看见**（判据 `live-model-status` 量它），点它去连接页 -->
- <div class="head-center" id="head-center" aria-live="polite">
-  <span class="hc-mode" id="b3-mode">PVP · AI模拟</span>
-  <span class="hc-turn" id="b3-round" data-b3-turn="yes">第 1 回合</span>
- </div>
- <button id="coach-entry" class="xiaoya-btn" title="小芽：模型连接 / 对话" aria-expanded="false"><span class="xy-ico" aria-hidden="true">✦</span><span class="xy-label">小芽</span></button>
-</header>
-
-<!-- 小芽面板（人类 2026-09-22 规格）：三只模型状态一行 + 可收起；下面是正式对话框。
-     模型状态来自 `/api/models` 的**真实探针**（没配 key / 没开本地开关就如实说，不画绿点）。 -->
-<section class="panel xiaoya-panel" id="xiaoya-panel" hidden aria-label="小芽">
- <div class="xy-head">
-  <strong>小芽</strong>
-  <span class="muted" id="companion-sub">她该说话时自己会出来</span>
-  <button id="companion-close" class="xy-fold" aria-label="收起小芽">收起</button>
- </div>
+ 
  <!-- 只留**一行**简短连接状态 + 设置入口（人类 2026-09-22：三张模型卡、规则快照、
       未核验长文、重开重试都不许占聊天弹窗的地方）。 -->
  <!-- 设置入口就是下面那个 <details> 的 summary，**不要再放一个按钮**（会造成两个「设置」）。 -->
@@ -247,7 +235,11 @@
   <div class="b3-side right b3-side--foe" data-b3-side="foe">
    <span class="b3-hearts" id="b3-hearts-foe" data-b3-hearts-foe="yes" hidden
      data-b3-src="view.hearts.opponent（同上；引擎暂无 → hidden）"><i class="lost">&#x2661;&#x2661;&#x2661;</i><i>&#x2665;</i></span>
-   <span class="b3-dots" id="b3-dots-foe" data-b3-dots-foe="yes"
+   <div class="b3-turn" data-b3-turn-block="yes">
+   <div class="b3-mode" id="b3-mode" data-b3-mode="yes">PVP &middot; AI模拟</div>
+   <div class="b3-round" id="b3-round" data-b3-turn="yes">第 1 回合</div>
+  </div>
+  <span class="b3-dots" id="b3-dots-foe" data-b3-dots-foe="yes"
      data-b3-src="view.opponent.bench[].fainted + view.opponent.field（**不揭示名字**，只给点数；点序镜像：倒的在前）"
      title="对手存活"><i class="down">&#x25CB;&#x25CB;&#x25CB;</i><i class="alive">&#x25CF;&#x25CF;&#x25CF;</i></span>
   </div>
