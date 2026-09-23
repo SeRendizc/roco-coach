@@ -1,0 +1,30 @@
+node scripts/roco/browser-roco-ux-acceptance.mjs
+
+[roco-ux] ✔ D1-pages 真实鼠标连点三次「下一页」：四页各 12 只、四批互不重合 — 四页各 12/12/12/12 只；互不重合=true
+[roco-ux] ✔ D1-offset 每页渲染的精灵与「服务端 offset=(n-1)*12」的结果逐张一致 — 第1页 offset=0 一致；第2页 offset=12 一致；第3页 offset=24 一致；第4页 offset=36 一致
+[roco-ux] ✔ D1-label 页码文案与真实页码/页数一致，且第 4 页「下一页」disabled — 第 4 页文案「4 / 4」next.disabled=true；第 1 页 prev.disabled=true
+[roco-ux] ✔ D1-hooks 验收钩子 data-roco-pool-offset 随翻页真的变（0 → 12 → 24 → 36） — 翻四页的 offset 钩子：0,12,24,36
+[roco-ux] ✔ D1-back 真实鼠标点「上一页」回到第 3 页，卡片逐张相同 — 回到第 3 页（12 只），与来时逐张相同=true
+[roco-ux] ✔ D1-search-reset 真键盘输入搜索词后回到第 1 页，且结果集跟着换 — 搜索「画间」命中 2 只：搜索前第 4 页（12 只） → 搜索后第 1 页「1 / 1」（2 只）
+[roco-ux] ✔ D1-filter-reset+clamp 属性筛选后重置到第 1 页，并把页码夹到新结果集内（不是停在 4/4） — 筛选前第 4/4 页 → 草系：第 1/1 页 (3 只，next.disabled=true)
+[roco-ux] ✔ D1-filter-clear 「清除筛选」把结果集换回全量（4 页、每页 12 只） — 清除后第 1/4 页，12 只
+[roco-ux] ✔ P0-3 开局引导是常规流里的一条（不浮层、只占一行），且与候选卡零重叠 — 步骤=1（压成一句）高度=39px 与卡片重叠=0 张
+[roco-ux] ✔ P0-3-click 真实鼠标点候选卡真的选上；点「跳过」之后引导收起且卡片照样可点 — 可选卡 2 张（pet_000112 尺寸 283×223，aria-disabled=false）；点卡后我方 1 只（提示「雪影娃娃 加入我方（1/3）。」）→ 跳过后再点一只 2 只（提示「皇家狮鹫 加入我方（2/3）。」）；引导 hidden=true
+[roco-ux] ✔ P0-2-entry 页头「✦ 小芽」真实点一下：这一栏打开、焦点落到输入框 — 点之前 open=false，点之后 open=true，焦点=say-input，入口尺寸=80×44
+[roco-ux] ✔ P0-2-say 真实键盘输入 + 真实鼠标提交：拿到一句中文回复，且回话不是 [object Object] — 回复「烦啊——烦就先搁着，不聊对局也行。（现在没接模型：我只能给规则事实与主动提示。想」
+[roco-ux] ✔ P0-2-same-screen 输入框与**最近一句回复**都在首屏（量 getBoundingClientRect） — 输入 {"top":535,"bottom":575,"left":1099,"right":1337} / 回复 {"top":107,"bottom":236,"left":1099,"right":1413} / 视口 {"width":1440,"height":900}
+[roco-ux] ✔ P0-2-auto-hint 不打开小芽那一栏也能出现主动提示（军师浮条自己冒出来） — 第 6 回合浮条可见=true（hidden=false / display=block）；正文「「啃咬」打「雪影娃娃」只有抵抗（33 伤害）：别再硬用它」
+[roco-ux] ✔ D4-groups 行动区结构等于规格：技能为主区（≤4 张卡）、聚能/换精灵/投降各自独立入口、换人列表条数等于引擎给的换人数、道具与逃跑不渲染、被模式隐藏的仍如实记账 — 引擎账 {"skill":2,"switch":2,"item":3,"escape":1}；页面渲染 ["skill","switch"]；技能卡 2 聚能 no 换精灵 yes（列表 2）投降 no；隐藏 4 条
+[roco-ux] ✔ D4-skill-info 每个技能条都带说明文字；系别/类别/能耗/威力按引擎给的一起显示 — 2 个技能条，缺说明 0 个；样例「啃咬 · 虫系 · 攻击 · 造成物伤，1连击，本技能会受奉献影响，每被影响1」
+[roco-ux] ✔ D4-item-name 物品名要么用引擎给的真实名字，要么按标准 PVP 模式隐藏并记账 — 引擎物品 ["净化药","回复药","能量果"]；页面显示「null」；隐藏条数 4（按模式隐藏并已记账）
+[roco-ux] ✖ D4-clickable 每个可点动作条的高度 ≥44px（触屏点得到） — 2 个动作条，最矮 0px；<44px 的有 2 个
+[roco-ux] ✔ D4-narrow-safe-1440 1440×900 无横向溢出（clientW === scrollW） — clientW/scrollW=1440/1440
+[roco-ux] ✔ P0-7-390 390×844 无横向溢出（clientW === scrollW） — clientW/scrollW=390/390
+[roco-ux] ✖ P0-7-390-tap 390×844 下每个动作条高度 ≥44px — 2 个动作条，最矮 0px
+[roco-ux] ✔ P0-2-390-same-screen 390×844 下输入框与最近一句回复仍在首屏 — 输入 {"top":775,"bottom":819,"left":23,"right":288} / 回复 {"top":635,"bottom":755,"left":23,"right":367} / 视口 {"width":390,"height":844} / 底栏 0px 动作坞 null 动作坞上界 253px
+
+[roco-ux] 验收脚本自身出错： Error: 页面求值失败：TypeError: Cannot read properties of null (reading 'getBoundingClientRect')
+    at <anonymous>:4:79
+    at <anonymous>:5:92
+    at js (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-roco-ux-acceptance.mjs:171:13)
+    at async main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/browser-roco-ux-acceptance.mjs:583:19)

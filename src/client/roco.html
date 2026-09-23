@@ -18,7 +18,6 @@
  <!-- 掉心提示：**最顶居中**（人类规格）。平时不出现，扣心时闪几秒。 -->
  <div class="heart-pop" id="heart-pop" role="status" aria-live="polite" hidden></div>
  <!-- 模型状态：**一行、不用打开面板就能看见**（判据 `live-model-status` 量它），点它去连接页 -->
- <a class="chip model-line" id="model-chip" href="connect.html" data-roco-model="offline">模型：正在读取…</a>
  <div class="head-center" id="head-center" aria-live="polite">
   <span class="hc-mode" id="b3-mode">PVP · AI模拟</span>
   <span class="hc-turn" id="b3-round" data-b3-turn="yes">第 1 回合</span>
@@ -50,6 +49,8 @@
  </aside>
  <!-- 设置：三张模型卡 / 记忆 / 模式条 / 重开重试 / 工程抽屉，全部收在这里 -->
  <details class="xy-settings" id="xy-settings">
+  <!-- 模型连接状态（人类：页眉右上角只留「✦ 小芽」） -->
+  <a class="chip model-line" id="model-chip" href="connect.html" data-roco-model="offline">模型：正在读取…</a>
   <!-- 战斗工具（原底部那一行，人类：整合进小芽） -->
   <div class="battle-tools xy-tools">
   <button id="plan">✦ 让小芽看一眼</button>

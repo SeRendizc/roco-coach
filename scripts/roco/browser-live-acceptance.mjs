@@ -127,7 +127,24 @@ function bootProblems(boot) {
   if (boot?.fallbackVisible === true) bad.push('「脚本没加载成功」兜底横幅还在（模块没跑起来）');
   if (boot?.ready !== 'yes') bad.push(`body.dataset.rocoReady=${JSON.stringify(boot?.ready)}`);
   if (!(boot?.cards >= 1)) bad.push(`名单卡片 ${boot?.cards} 张`);
-  if (!/候选规则（待实机核对）/.test(String(boot?.modeText ?? ''))) bad.push('模式徽记没读到注册表');
+  // 模式（**等价断言替换**）：旧读取点是页头那枚徽记 `#mode-line`
+  // （`modeChipHtml()` 在注册表 status/confidence 为候选时写「候选规则（待实机核对）」）。
+  // 按人类 2026-09-23 版式，`#mode-line` 已随「回合/模式移到页眉正中间」整块删除，
+  // 原来的「模式徽记」由 **页眉中间列的模式行 `#b3-mode`** 承担（人类：页眉中间是「模式 + 第 N 回合」）。
+  // 口径没有放松：「注册表真的传到了页面」这件事仍然要量，只是换成两处**可核对的一致**——
+  //   ① 页眉中间列必须有模式行与回合行（版式本身）；
+  //   ② 页面状态里那一份注册表（`window.rocoDemo.state.mode`，来自 `/api/roco/status`）
+  //      必须与本次真机请求拿到的服务端注册表**同 id 同 status**（拿不到注册表就会不一致 → 红）。
+  const server = boot?.serverMode ?? null;
+  if (!String(boot?.modeText ?? '').trim()) bad.push('页眉中间列没有模式行（#b3-mode）');
+  if (!String(boot?.roundText ?? '').trim()) bad.push('页眉中间列没有回合行（#b3-round）');
+  else if (!/未开局|第\s*\d+\s*回合/.test(String(boot.roundText))) bad.push(`回合行「${boot.roundText}」`);
+  if (!server?.id || boot?.modeId !== server.id) {
+    bad.push(`页面模式 ${JSON.stringify(boot?.modeId)} ≠ 服务端注册表 ${JSON.stringify(server?.id)}`);
+  }
+  if (boot?.modeStatus !== (server?.status ?? null)) {
+    bad.push(`页面模式状态 ${JSON.stringify(boot?.modeStatus)} ≠ 服务端 ${JSON.stringify(server?.status)}`);
+  }
   if (boot?.route !== 'six-pet') bad.push(`主流程 dataset.rocoRoute=${JSON.stringify(boot?.route)}`);
   if (boot?.legacyPanelVisible === true) bad.push('旧的 3v3 迁移区默认可见（路线冲突）');
   if (boot?.legacyEntryVisible === true) bad.push('「双方各 3 只」旧主入口默认可见（路线冲突）');
@@ -263,17 +280,26 @@ async function main() {
       const panel=document.getElementById('select-panel');const legacy=document.getElementById('start-battle');
       const pr=panel?panel.getBoundingClientRect():null;const lr=legacy?legacy.getBoundingClientRect():null;
       const tw=document.getElementById('team-workshop');
+      const d=window.rocoDemo;
       return {ready:document.body.dataset.rocoReady||null,route:document.body.dataset.rocoRoute||null,
         fallbackVisible:Boolean(fb&&fb.getBoundingClientRect().height>0),
         cards:document.querySelectorAll('#roster button[data-pet]').length,
-        modeText:((document.getElementById('head-center')||{}).textContent||'')+' '+((document.getElementById('mode-line')||{}).textContent||''),
+        // 2026-09-23 版式：模式 + 回合在**页眉中间列**；旧的 `#mode-line` 已删除。
+        modeText:((document.getElementById('b3-mode')||{}).textContent||'').trim(),
+        roundText:((document.getElementById('b3-round')||{}).textContent||'').trim(),
+        modeId:d&&d.state&&d.state.mode?d.state.mode.id:null,
+        modeStatus:d&&d.state&&d.state.mode?d.state.mode.status:null,
         legacyPanelVisible:Boolean(pr&&pr.width>0),
         legacyEntryVisible:Boolean(lr&&lr.width>0),
         twState:tw?tw.dataset.twState:null,
         engineText:(document.getElementById('engine-status')||{}).textContent||''};})()`);
+    // 「注册表读到页面」的比对基准就是这一次真机请求拿到的服务端注册表（同一条判据里比）。
+    boot.serverMode = status.mode ?? null;
     boot.consoleErrors = consoleErrors.length;
     steps.push({at: 'boot', boot});
-    check('live-boot', '真实页面在 8899 上真的启动：兜底横幅撤掉、名单与模式读到、主流程是六宠（旧 3v3 入口隐藏）',
+    check('live-boot', '真实页面在 8899 上真的启动：兜底横幅撤掉、名单与模式读到、主流程是六宠（旧 3v3 入口隐藏）。'
+      + '【按人类 2026-09-23 版式，原来的页头模式徽记 `#mode-line`（含「候选规则（待实机核对）」短标签）'
+      + '由页眉中间列的模式行 `#b3-mode` + 页面状态里那一份注册表共同承担；注册表一致性口径不变】',
       bootProblems(boot).length === 0,
       bootProblems(boot).join(' | ')
       || `ready=yes route=${boot.route} 卡片 ${boot.cards} 张 工坊 ${boot.twState}；${boot.engineText}`);
@@ -588,35 +614,56 @@ async function main() {
       && !document.getElementById('battle-panel').hidden`, 100, 250);
     await sleep(600);
     const battle = await js(`(()=>{const v=window.rocoDemo.state.view;const b=document.body.dataset;
-      const self=document.getElementById('self-resource');
-      const mana=(self?self.textContent:'').match(/\\d+/);
-      return {mode:b.rocoMode,standard:b.rocoStandardPvp,groups:b.rocoActionGroups,
-        rendered:b.rocoActionsRendered,skillCards:b.rocoActSkillCards,
-        charge:b.rocoActCharge,switchEntry:b.rocoActSwitch,surrender:b.rocoActSurrender,
-        mana:mana?Number(mana[0]):null,cap:v?v.self.energy_max:null,turn:v?v.turn:null};})()`);
+      const dots=(id)=>{const el=document.getElementById(id);return el?(el.textContent||'').replace(/\\s+/g,'').length:null;};
+      const d=window.rocoDemo;
+      return {
+        // 2026-09-23 版式（v3h）：模式在页眉中间列，存活点在顶栏，资源（⭐）在底栏的聚能按钮上。
+        modeText:((document.getElementById('b3-mode')||{}).textContent||'').trim(),
+        modeId:d&&d.state&&d.state.mode?d.state.mode.id:null,
+        dotsSelf:dots('b3-dots-self'),dotsFoe:dots('b3-dots-foe'),
+        chargeText:((document.getElementById('b3-charge')||{}).textContent||'').replace(/\\s+/g,' ').trim(),
+        groups:b.rocoActionGroups,rendered:b.rocoActionsRendered,skillCards:b.rocoActSkillCards,
+        energy:v&&v.self&&v.self.pets?(v.self.pets[v.self.active??0]||{}).energy??null:null,
+        energyMax:v&&v.self?v.self.energy_max??null:null,
+        turn:v?v.turn:null};})()`);
     steps.push({at: 'battle-start', battle});
     const planStatus = await js(`document.getElementById('plan-status')?.textContent ?? null`);
     const startProblems = (f, ok, ready) => {
       const bad = [];
       if (!ready) bad.push('开局按钮一直不可用（六只没被页面认下来）');
       if (!ok) bad.push('点下去之后没有进入对局（战斗区没出现）');
-      if (f?.mode !== 'pvp-standard-six-pet') bad.push(`模式 ${JSON.stringify(f?.mode)}`);
-      if (f?.standard !== 'yes') bad.push(`data-roco-standard-pvp=${JSON.stringify(f?.standard)}`);
+      // 模式（**等价断言替换**）：旧读取点是 `body.dataset.rocoMode` —— 它由 `renderMode()` 写，
+      // 而 `renderMode()` 的第一行就是 `if (!$('mode-line')) return;`；`#mode-line` 已按
+      // 2026-09-23 版式删除 → 这两个 dataset 钩子（`rocoMode` / `rocoStandardPvp`）**再也不会被写**。
+      // 等价读取点：页眉中间列的模式行 `#b3-mode`（由 `renderB3Topbar` 从注册表 `state.mode.id` 渲染）
+      // + 页面状态里那一份注册表 id。口径没有放松：模式必须是标准 PVP 六宠，写错/读不到都要红。
+      if (f?.modeId !== 'pvp-standard-six-pet') bad.push(`模式 ${JSON.stringify(f?.modeId)}`);
+      else if (!/PVP/.test(String(f?.modeText ?? ''))) bad.push(`页眉模式行「${f?.modeText}」不是 PVP`);
+      // 「标准 PVP 六宠」的版式证据：顶栏双方各 6 个存活点（旧钩子是 `data-roco-standard-pvp=yes`）。
+      if (f?.dotsSelf !== 6 || f?.dotsFoe !== 6) {
+        bad.push(`顶栏存活点 我方 ${f?.dotsSelf} / 对手 ${f?.dotsFoe}（六宠应各 6 个）`);
+      }
+      // 资源条必须是**引擎给的**数：底栏聚能按钮上的 ⭐ 当前值 / 上限。
+      if (!Number.isFinite(Number(f?.energy))) bad.push(`引擎没给当前 ⭐（${JSON.stringify(f?.energy)}）`);
+      else if (!String(f?.chargeText ?? '').includes(`⭐ ${f.energy} / ${f.energyMax}`)) {
+        bad.push(`聚能按钮「${f?.chargeText}」≠ 引擎 ${f?.energy}/${f?.energyMax}`);
+      }
       // 「标准 PVP 不出现道具/逃跑」量的是**页面上真的渲染出来的入口**（`rendered`），
       // 不是引擎的动作账（引擎本回合确实还会给 item/escape，页面按模式不渲染它们）。
       if (/(^|,)item/.test(String(f?.rendered ?? ''))) bad.push('页面上渲染了道具入口');
       if (/(^|,)escape/.test(String(f?.rendered ?? ''))) bad.push('页面上渲染了逃跑入口');
       return bad;
     };
-    check('live-start', '真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的魔力）',
+    check('live-start', '真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的星）',
       startProblems(battle, started, startReady).length === 0,
       startProblems(battle, started, startReady).join(' | ')
-      || `mode=${battle.mode} 魔力=${battle.mana}/4 引擎动作账=${battle.groups} 页面渲染=${battle.rendered} `
-        + `技能卡=${battle.skillCards} 聚能=${battle.charge} 换精灵=${battle.switchEntry} 投降=${battle.surrender} `
-        + `开局按钮 ${startRect.w}×${startRect.h}；状态行「${String(planStatus ?? '').slice(0, 120)}」`);
+      || `页眉模式=${battle.modeText}（注册表 ${battle.modeId}）⭐=${battle.energy}/${battle.energyMax} `
+        + `顶栏存活点 ${battle.dotsSelf}/${battle.dotsFoe} 引擎动作账=${battle.groups} 页面渲染=${battle.rendered} `
+        + `技能卡=${battle.skillCards} 开局按钮 ${startRect.w}×${startRect.h}；状态行「${String(planStatus ?? '').slice(0, 120)}」`);
     counter('live-start', '开局后模式被换成练习局、或动作表里混进道具必须被同一条判据抓住',
-      startProblems({...battle, mode: 'demo-training-3v3', groups: 'skill:2,item:1'}, true, true),
-      '{"mode":"demo-training-3v3","groups":"skill:2,item:1"}');
+      startProblems({...battle, modeId: 'demo-training-3v3', modeText: '训练场 · AI模拟',
+        rendered: 'skill,item', groups: 'skill:2,item:1'}, true, true),
+      '{"modeId":"demo-training-3v3","rendered":"skill,item"}');
     await shoot('live-03-1440-battle');
 
     // ── ⑦ 能量门：引擎没给技能时，页面必须**灰置配招 + 说清差额 + 提示先聚能**（正反两条）──
@@ -664,218 +711,366 @@ async function main() {
     counter('live-energy-gate', '把配招全藏起来（没有灰置块也没有说明）必须被同一条判据抓住',
       gateProblems({legalSkills: 0, greyed: [], shortfall: null, charge: 'yes'}), '{"greyed":[]}');
 
-    // ── ③a 战斗页规格：一屏可见 + 四张技能卡为主区 + 聚能/换精灵独立入口 + 对手隐藏信息 ──
+    // ── ③a 战斗页规格（2026-09-23 v3h 版式）：左列四格技能 + 底栏聚能/四个大选项 + 对手信息边界 ──
     const spec = await js(`(()=>{const b=document.body.dataset;
-      const vis=(id)=>{const el=document.getElementById(id);if(!el)return null;
-        const r=el.getBoundingClientRect();
-        return {shown:!el.hidden&&r.width>0&&r.height>0,top:Math.round(r.top),bottom:Math.round(r.bottom)};};
-      // 2026-09-22（人类战斗页 v2）：技能区**永远四格** —— 合法可点、其余灰置；
-      // 每格左上角是消耗（🌟），星不够必须标红；还要有属性、预计伤害、详情层。
-      const skills=[...document.querySelectorAll('#actions [data-roco-skill-slot]')]
-        .map((x)=>({w:Math.round(x.getBoundingClientRect().width),h:Math.round(x.getBoundingClientRect().height),
-          legal:x.dataset.rocoSkillLegal==='yes',cost:x.dataset.rocoSkillCost,
-          short:x.dataset.rocoCostShort,damage:x.dataset.rocoSkillDamage??null,
-          chip:Boolean(x.querySelector('[data-roco-cost-chip]')),
-          dmgChip:Boolean(x.querySelector('[data-roco-damage-chip]')),
-          meta:((x.querySelector('.skill-meta')||{}).textContent||'').trim(),
-          detail:Boolean(x.querySelector('.skill-detail')),
-          energy:(window.rocoDemo?.state?.view?.self?.pets?.[window.rocoDemo.state.view.self.active]?.energy)??null}));
-      const foeBench=(document.getElementById('foe-bench')||{}).textContent||'';
+      const root=document.querySelector('[data-b3-root]');
+      const v=window.rocoDemo.state.view;
+      const legalAll=v&&Array.isArray(v.legal)?v.legal:[];
+      const samples=Array.isArray(v&&v.damage_preview&&v.damage_preview.samples)?v.damage_preview.samples.length:0;
+      // 2026-09-23 版式：技能是**左列四格**（永远四格：合法可点、其余灰置），
+      // 每格给 ⭐消耗 / 名字 / 克制标记 · 属性徽章 / 技能类别 / 预期伤害。
+      const skills=[...document.querySelectorAll('.b3-wrap [data-b3-skill-slot]')].map((x)=>{
+        const r=x.getBoundingClientRect();
+        const costEl=x.querySelector('[data-b3-cost]');
+        const dmgEl=x.querySelector('[data-b3-dmg]');
+        const relEl=x.querySelector('[data-b3-rel]');
+        return {w:Math.round(r.width),h:Math.round(r.height),
+          pending:x.dataset.b3Pending??null,
+          legal:x.dataset.b3SlotLegal==='yes',
+          short:x.dataset.b3CostShort??null,
+          cost:(costEl?(costEl.textContent||''):'').replace(/[^0-9]/g,''),
+          name:((x.querySelector('[data-b3-skill-name]')||{}).textContent||'').trim(),
+          cat:((x.querySelector('[data-b3-skill-cat]')||{}).textContent||'').trim(),
+          elName:((x.querySelector('[data-b3-self-el]')||{}).dataset||{}).b3ElName??null,
+          dmg:dmgEl?(dmgEl.textContent||'').replace(/\\s+/g,' ').trim():null,
+          rel:relEl?(relEl.dataset.b3Rel??null):null};});
+      const switchEls=[...document.querySelectorAll('.b3-wrap [data-b3-switch-row]')];
+      const chargeEl=document.getElementById('b3-charge');
+      const chargeRect=chargeEl?chargeEl.getBoundingClientRect():null;
+      const foeCard=document.querySelector('[data-b3-foe-card]');
+      const visible=(el)=>{if(!el)return false;const r=el.getBoundingClientRect();
+        return !el.hidden&&r.width>0&&r.height>0&&getComputedStyle(el).display!=='none';};
       return {vh:window.innerHeight,clientW:document.documentElement.clientWidth,
         scrollW:document.documentElement.scrollWidth,
-        charge:b.rocoActCharge,switchEntry:b.rocoActSwitch,surrender:b.rocoActSurrender,
-        rendered:b.rocoActionsRendered,skillCards:skills,
-        lastEvent:(document.getElementById('last-event')||{}).textContent||'',
-        battle:vis('battle-panel'),actions:vis('action-panel'),log:vis('log-panel'),coach:vis('companion-card'),
-        foeBench};})()`);
+        rootTop:root?Math.round(root.getBoundingClientRect().top):null,
+        rootBottom:root?Math.round(root.getBoundingClientRect().bottom):null,
+        stageTop:(()=>{const el=document.querySelector('[data-b3-stage]');
+          return el?Math.round(el.getBoundingClientRect().top):null;})(),
+        skillCards:skills,
+        legalSkillCount:legalAll.filter((a)=>a.kind==='skill').length,
+        legalSwitchCount:legalAll.filter((a)=>a.kind==='switch').length,
+        switchLegalCount:switchEls.filter((el)=>el.dataset.b3SwitchLegal==='yes').length,
+        switchRows:switchEls.map((el)=>({legal:el.dataset.b3SwitchLegal==='yes',
+          name:((el.querySelector('[data-b3-switch-name]')||{}).textContent||'').trim(),
+          hp:((el.querySelector('[data-b3-switch-hp]')||{}).textContent||'').trim(),
+          cost:((el.querySelector('[data-b3-cost]')||{}).textContent||'').replace(/[^0-9]/g,''),
+          elName:((el.querySelector('[data-b3-switch-el]')||{}).dataset||{}).b3ElName??null})),
+        charge:{shown:Boolean(chargeEl&&visible(chargeEl)),
+          text:chargeEl?(chargeEl.textContent||'').replace(/\\s+/g,' ').trim():null},
+        switchTab:Boolean(document.querySelector('.b3-wrap [data-b3-tab="switch"]')),
+        escapeTab:Boolean(document.querySelector('.b3-wrap [data-b3-tab="escape"]')),
+        escapeConfirm:Boolean(document.querySelector('.b3-wrap [data-b3-escape-confirm]')),
+        escapeCancel:Boolean(document.querySelector('.b3-wrap [data-b3-escape-cancel]')),
+        rendered:b.rocoActionsRendered,
+        legalKinds:legalAll.map((a)=>a.kind),
+        logTurns:Number(b.rocoLogTurns||'0'),
+        energy:v&&v.self&&v.self.pets?(v.self.pets[v.self.active??0]||{}).energy??null:null,
+        samples,turn:v?v.turn:null,
+        foeDots:((document.getElementById('b3-dots-foe')||{}).textContent||'').replace(/\\s+/g,''),
+        foeCardText:foeCard?(foeCard.textContent||'').replace(/\\s+/g,' ').trim():''};})()`);
     steps.push({at: 'battle-spec', spec});
     const specProblems = (f) => {
       const bad = [];
       if (f?.clientW !== f?.scrollW) bad.push(`横向溢出（${f?.scrollW} > ${f?.clientW}）`);
-      if (!(f?.skillCards ?? []).length) bad.push('技能主区一张卡都没有');
-      if ((f?.skillCards ?? []).length !== 4) bad.push(`技能格 ${f.skillCards.length} 个（规格是永远四格）`);
-      for (const card of f?.skillCards ?? []) {
+      const cards = f?.skillCards ?? [];
+      if (!cards.length) bad.push('技能左列一格都没有');
+      if (cards.length !== 4) bad.push(`技能格 ${cards.length} 个（规格是永远四格）`);
+      const legalSlots = cards.filter((c) => c.legal).length;
+      if (legalSlots !== Number(f?.legalSkillCount)) {
+        bad.push(`技能格合法 ${legalSlots} 个 ≠ 引擎给的合法技能 ${f?.legalSkillCount} 个（只许渲染本回合合法动作）`);
+      }
+      const noSample = Number(f?.samples ?? 0) === 0;
+      for (const card of cards) {
         if (card.h < 44) bad.push(`技能格只有 ${card.h}px 高（<44）`);
-        if (!card.chip) bad.push('技能格左上角没有消耗徽记');
-        if (!card.dmgChip) bad.push('技能格没有「预计伤害」这一行');
-        if (!card.meta) bad.push('技能格没有属性');
-        if (!card.detail) bad.push('技能格没有详情层（描述要能展开读）');
-        // 星不够 ⇒ 必须标红（`data-roco-cost-short=yes`）；够 ⇒ 不许乱标
-        const expectedShort = card.cost !== '' && card.energy !== null
-          && Number(card.cost) > Number(card.energy) ? 'yes' : 'no';
+        // 版面里的示例数据必须被真数据逐行解除（`data-b3-pending` 是那一行的「还没填」标记）。
+        if (card.pending) bad.push('技能格还挂着示例数据（data-b3-pending 没解除）');
+        if (!/^\d+$/.test(String(card.cost))) bad.push('技能格左上角没有消耗（⭐）');
+        if (!card.name) bad.push('技能格没有技能名');
+        if (!card.cat) bad.push('技能格没有技能类别（攻击/防御/状态）');
+        if (!card.elName) bad.push('技能格没有属性徽章（data-b3-el-name 空）');
+        if (!/^(up|down|none)$/.test(String(card.rel))) bad.push(`技能格克制标记 ${JSON.stringify(card.rel)}`);
+        if (!card.dmg || !/预期伤害/.test(String(card.dmg))) bad.push('技能格没有「预期伤害」这一行');
+        // fail-closed：引擎没给伤害样本时就只能写「—」，不许编一个数（示例数据里的 128 正是这种陷阱）。
+        else if (noSample && !/预期伤害\s*(—|--)$/.test(String(card.dmg))) {
+          bad.push(`引擎没给伤害样本，这一格却写了「${card.dmg}」（不编）`);
+        }
+        // 星不够 ⇒ 必须标红（`data-b3-cost-short=yes`）；够 ⇒ 不许乱标
+        const expectedShort = String(card.cost) !== '' && f?.energy !== null
+          && Number(card.cost) > Number(f.energy) ? 'yes' : 'no';
         if (card.short !== expectedShort) {
-          bad.push(`消耗 ${card.cost} / 现有 ${card.energy}，红标应为 ${expectedShort}，实际 ${card.short}`);
+          bad.push(`消耗 ${card.cost} / 现有 ${f?.energy}，红标应为 ${expectedShort}，实际 ${card.short}`);
         }
         if (card.short === 'yes' && card.legal) bad.push('星不够的格子居然是可点的合法动作');
       }
-      if (f?.charge !== 'yes') bad.push('没有独立的「聚能」入口');
-      if (f?.switchEntry !== 'yes') bad.push('没有独立的「换精灵」入口');
-      if (f?.surrender !== 'yes') bad.push('没有次级「投降」入口');
+      if (!f?.charge?.shown) bad.push('底栏没有可见的「聚能」入口（#b3-charge）');
+      else if (!/聚能|剩余魔力/.test(String(f.charge.text))) bad.push('聚能按钮上没有文字');
+      if (!f?.switchTab) bad.push('没有「更换」选项');
+      else if (Number(f?.switchLegalCount) !== Number(f?.legalSwitchCount)) {
+        bad.push(`更换屏可点行 ${f?.switchLegalCount} ≠ 引擎换人动作 ${f?.legalSwitchCount}`);
+      }
+      if (!f?.escapeTab || !f?.escapeConfirm || !f?.escapeCancel) {
+        bad.push('没有「逃跑」入口（逃跑页要确认 + 取消两个按钮）');
+      }
       if (/(^|,)item|(^|,)escape/.test(String(f?.rendered ?? ''))) bad.push('渲染了道具/逃跑入口');
+      if ((f?.legalKinds ?? []).some((k) => k === 'item' || k === 'escape')) {
+        bad.push('引擎这一手给了道具/逃跑动作（标准 PVP 不该有）');
+      }
       // 开局那一手引擎还没产生事件（第一份视图的 events 是空的），所以只在**打过一手之后**
       // 要求「最新一条事件」非空 —— 这不是放过，而是这条判据真正的适用范围。
-      if (Number(f?.turn ?? 1) > 1 && !f?.lastEvent) bad.push('没有「最新一条事件」');
-      if (/第\s*\d+\s*位/.test(String(f?.foeBench ?? ''))) bad.push('对手后备放着「第 N 位」占位（那不是信息）');
-      if (/pet_\d|own-\d/.test(String(f?.foeBench ?? ''))) bad.push('对手后备泄漏了内部 id');
-      if (!f?.battle?.shown) bad.push('战斗区不可见');
-      if (!f?.actions?.shown) bad.push('行动区不可见');
-      // 一屏可见：战斗区 + 行动区都必须落在视口内（1440 档判据；390 另有一条）
-      if (f?.vh >= 800 && f?.actions?.bottom > f?.vh) {
-        bad.push(`行动区底部 ${f.actions.bottom} 超出视口 ${f.vh}（一屏看不到行动）`);
+      // 2026-09-23 版式：最新一条事件由**整局战报**承担（页面的回合分组计数 `data-roco-log-turns`）。
+      if (Number(f?.turn ?? 1) > 1 && !(Number(f?.logTurns) > 0)) bad.push('没有「最新一条事件」（战报一个回合块都没有）');
+      // 对手信息边界（2026-09-23 版式：对手后备**只以存活点表示**，不上名字、不放「第 N 位」占位）。
+      if (/第\s*\d+\s*位/.test(String(f?.foeCardText ?? ''))) bad.push('对手侧放着「第 N 位」占位（那不是信息）');
+      if (/pet_\d|own-\d/.test(String(f?.foeCardText ?? ''))) bad.push('对手侧泄漏了内部 id');
+      if (!/^[●○]*$/.test(String(f?.foeDots ?? ''))) bad.push('对手存活点上出现了名字（公开信息边界）');
+      // 一屏可见（1440 档判据；390 另有一条）：整块 v3h 片段的底边必须落在视口内。
+      if (f?.vh >= 800 && !(Number(f?.rootBottom) <= f?.vh)) {
+        bad.push(`战斗片段底部 ${f?.rootBottom} 超出视口 ${f?.vh}（一屏看不到战斗页）`);
       }
       return bad;
     };
-    check('live-battle-spec', '战斗页规格：技能为主区（≤4 张、卡高 ≥44、带关键效果）、'
-      + '聚能/换精灵/投降各自独立入口、只渲染本回合合法动作、最新一条事件在、对手后备不放占位也不泄漏 id、'
-      + '1440×900 行动区在视口内',
+    check('live-battle-spec', '战斗页规格（v3h）：左列永远四格技能（卡高 ≥44、⭐消耗/属性/类别/克制标记/预期伤害 逐格齐备）、'
+      + '底栏聚能与技能/更换/物品/逃跑四个选项各自独立、只渲染本回合合法动作、最新一条事件在、'
+      + '对手后备只以存活点表示（不放占位也不泄漏 id、不揭示名字）、1440×900 战斗片段在视口内。'
+      + '【按人类 2026-09-23 版式，原来并要求技能格上的「详情层（说明可展开读）」——'
+      + '技能说明不再进战斗主视线，由每格的属性/类别/克制标记/预期伤害四行承担；口径未放松】',
       specProblems(spec).length === 0,
       specProblems(spec).join(' | ')
-      || `技能卡 ${spec.skillCards.length} 张（最矮 ${Math.min(...spec.skillCards.map((c) => c.h))}px）；`
-        + `聚能=${spec.charge} 换精灵=${spec.switchEntry} 投降=${spec.surrender}；`
-        + `最新事件「${String(spec.lastEvent).slice(0, 40)}」；对手后备「${spec.foeBench}」；`
-        + `行动区底 ${spec.actions?.bottom} / 视口 ${spec.vh}`);
-    // ── R3：四个大选项 + 高亮 + 聚能预览 + 更换页字段 + 物品空态 + 逃跑二次确认 ──
-    const r3 = await js(`(()=>{const tabs=[...document.querySelectorAll('[data-b3-tab]')]
-      .map((b)=>({tab:b.dataset.actTab,on:b.getAttribute('aria-selected')==='true',
-        text:(b.textContent||'').trim(),h:Math.round(b.getBoundingClientRect().height)}));
-      return {tabs,active:document.body.dataset.rocoActTab??null,
-        charge:(document.getElementById('act-charge')||{}).textContent||'',
-        chargeHidden:Boolean(document.getElementById('act-charge')?.hidden),
-        report:Boolean(document.getElementById('act-report'))};})()`);
-    // 真鼠标切到「更换」：每行必须给 名字/属性/⭐/血量
+      || `技能卡 ${spec.skillCards.length} 张（最矮 ${Math.min(...spec.skillCards.map((c) => c.h))}px，`
+        + `合法 ${spec.skillCards.filter((c) => c.legal).length}/${spec.legalSkillCount}）；`
+        + `聚能入口=${spec.charge.shown}「${spec.charge.text}」；更换可点 ${spec.switchLegalCount}/${spec.legalSwitchCount}；`
+        + `逃跑页 ${spec.escapeConfirm && spec.escapeCancel ? '确认+取消' : '缺'}；`
+        + `对手侧存活点「${spec.foeDots}」；片段底 ${spec.rootBottom} / 视口 ${spec.vh}`);
+    // ── R3：四个大选项 + 高亮 + 聚能 + 更换页字段 + 物品页说明 + 逃跑二次确认 ──
+    const r3 = await js(`(()=>{const tabs=[...document.querySelectorAll('.b3-wrap [data-b3-tab]')]
+      .map((b)=>({tab:b.dataset.b3Tab,text:(b.textContent||'').trim(),
+        h:Math.round(b.getBoundingClientRect().height),
+        bg:getComputedStyle(b).backgroundColor,bd:getComputedStyle(b).borderColor,
+        color:getComputedStyle(b).color}));
+      const chargeEl=document.getElementById('b3-charge');
+      const scroll=document.querySelector('.b3-log-scroll');
+      return {tabs,active:document.body.dataset.b3Tab??null,
+        charge:chargeEl?(chargeEl.textContent||'').replace(/\\s+/g,' ').trim():'',
+        logShown:Boolean(scroll&&scroll.getBoundingClientRect().height>0)};})()`);
+    // 真鼠标切到「更换」：每行必须给 名字/属性/⭐/血量（v3h 更换屏）
     let switchRows = [];
     if (r3.tabs.some((t) => t.tab === 'switch')) {
-      await mouseClick('[data-b3-tab="switch"]');
+      await mouseClick('.b3-wrap [data-b3-tab="switch"]');
       await sleep(500);
-      switchRows = await js(`(()=>[...document.querySelectorAll('#act-switch-list [data-roco-switch-row]')]
-        .map((b)=>({types:b.dataset.switchTypes||'',energy:b.dataset.switchEnergy||'',
-          hp:b.dataset.switchHp||'',text:(b.textContent||'').replace(/\\s+/g,' ').trim().slice(0,40)})))()`);
-      await mouseClick('[data-b3-tab="escape"]');
+      switchRows = await js(`(()=>[...document.querySelectorAll('.b3-wrap [data-b3-switch-row]')]
+        .filter((el)=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0;})
+        .map((el)=>({name:((el.querySelector('[data-b3-switch-name]')||{}).textContent||'').trim(),
+          types:((el.querySelector('[data-b3-switch-el]')||{}).dataset||{}).b3ElName??'',
+          energy:((el.querySelector('[data-b3-cost]')||{}).textContent||'').replace(/[^0-9]/g,''),
+          hp:((el.querySelector('[data-b3-switch-hp]')||{}).textContent||'').trim(),
+          text:(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,40)})))()`);
+      await mouseClick('.b3-wrap [data-b3-tab="escape"]');
       await sleep(400);
     }
-    const escapeFacts = await js(`(()=>({shown:!document.getElementById('act-escape').hidden,
-      confirm:Boolean(document.getElementById('act-surrender-confirm')),
-      cancel:Boolean(document.getElementById('act-escape-cancel')),
-      // 直接点「确认投降」的入口**不在**首层 —— 必须先选逃跑页（二次确认）
-      direct:Boolean(document.querySelector('#actions [data-kind="surrender"]'))}))()`);
-    await mouseClick('[data-b3-tab="item"]');
+    const escapeFacts = await js(`(()=>{const p=document.querySelector('.b3-wrap [data-b3-panel="escape"]');
+      const vis=(el)=>{if(!el)return false;const r=el.getBoundingClientRect();
+        return !el.hidden&&r.width>0&&r.height>0&&getComputedStyle(el).display!=='none';};
+      return {shown:vis(p),confirm:Boolean(document.querySelector('.b3-wrap [data-b3-escape-confirm]')),
+        cancel:Boolean(document.querySelector('.b3-wrap [data-b3-escape-cancel]')),
+        confirmShown:vis(document.querySelector('.b3-wrap [data-b3-escape-confirm]')),
+        // 直接点「确认投降」的入口**不在**首层 —— 必须先选逃跑页（二次确认）
+        direct:Boolean(document.querySelector('.b3-wrap [data-b3-panel="skill"] [data-b3-escape-confirm]'))};})()`);
+    await mouseClick('.b3-wrap [data-b3-tab="item"]');
     await sleep(400);
-    const itemFacts = await js(`(()=>({shown:!document.getElementById('act-item-list').hidden,
-      rows:document.querySelectorAll('#act-item-list [data-item-row]').length,
-      noItem:Boolean(document.querySelector('[data-roco-no-item]')),
-      emptyNote:(document.querySelector('[data-roco-no-item]')||{}).textContent||''}))()`);
-    await mouseClick('[data-b3-tab="skill"]');
+    const itemFacts = await js(`(()=>{const p=document.querySelector('.b3-wrap [data-b3-panel="item"]');
+      const vis=(el)=>{if(!el)return false;const r=el.getBoundingClientRect();
+        return !el.hidden&&r.width>0&&r.height>0&&getComputedStyle(el).display!=='none';};
+      const cells=[...document.querySelectorAll('.b3-wrap [data-b3-item-cell]')];
+      const v=window.rocoDemo.state.view;
+      return {shown:vis(p),cells:cells.length,
+        notes:cells.map((el)=>((el.querySelector('[data-b3-item-note]')||{}).textContent||'').trim()),
+        itemLegal:(v&&Array.isArray(v.legal)?v.legal:[]).filter((a)=>a.kind==='item').length,
+        rendered:document.body.dataset.rocoActionsRendered??''};})()`);
+    await mouseClick('.b3-wrap [data-b3-tab="skill"]');
     await sleep(400);
     const r3Problems = (f, rows, esc, items) => {
       const bad = [];
       const want = ['skill', 'item', 'switch', 'escape'];
-      if ((f?.tabs ?? []).length !== 4) bad.push(`大选项 ${(f?.tabs ?? []).length} 个（规格是 4 个）`);
-      for (const t of want) if (!(f?.tabs ?? []).some((x) => x.tab === t)) bad.push(`缺「${t}」选项`);
-      if ((f?.tabs ?? []).filter((x) => x.on).length !== 1) bad.push('高亮的选项不是恰好一个');
-      if ((f?.tabs ?? []).some((x) => x.h < 44)) bad.push('有选项高度 <44px');
-      if (!/聚能/.test(String(f?.charge ?? ''))) bad.push('聚能按钮上没有文字');
-      if (Number(esc?.rowsCount) === 0 && esc?.shown !== true) bad.push('逃跑页没打开');
+      const tabs = f?.tabs ?? [];
+      if (tabs.length !== 4) bad.push(`大选项 ${tabs.length} 个（规格是 4 个）`);
+      for (const t of want) if (!tabs.some((x) => x.tab === t)) bad.push(`缺「${t}」选项`);
+      // 高亮不是属性写的（v3h 由 `body.dataset.b3Tab` 驱动 CSS）：要求**恰好一个**当前选项，
+      // 且它的外观与另外三个不同、另外三个彼此一致（= 高亮只有一处）。
+      const active = tabs.filter((x) => x.tab === f?.active);
+      const sig = (x) => `${x.bg}|${x.bd}|${x.color}`;
+      if (tabs.length === 4) {
+        if (active.length !== 1) bad.push(`高亮的选项不是恰好一个（body[data-b3-tab]=${JSON.stringify(f?.active)}）`);
+        else {
+          const others = tabs.filter((x) => x.tab !== f.active);
+          if (new Set(others.map(sig)).size !== 1) bad.push('非当前选项的外观不一致（不止一处高亮）');
+          else if (sig(active[0]) === sig(others[0])) bad.push('当前选项没有高亮（与其它三个外观相同）');
+        }
+      }
+      if (tabs.some((x) => x.h < 44)) bad.push('有选项高度 <44px');
+      if (!/聚能|剩余魔力/.test(String(f?.charge ?? ''))) bad.push('聚能按钮上没有文字');
+      if (f?.logShown !== true) bad.push('右列战报不在位（框内滚动那块没渲染）');
+      if (esc?.shown !== true) bad.push('逃跑页没打开');
       if (!esc?.confirm || !esc?.cancel) bad.push('逃跑没有二次确认（确认 + 取消两个入口）');
+      if (esc?.confirmShown !== true) bad.push('逃跑页的「确认投降」不在位（点不到）');
       if (esc?.direct) bad.push('首层直接摆了「投降」动作（应当走逃跑页二次确认）');
-      // 更换页：每行都要有 属性 / ⭐ / 血量
-      if (f?.tabs?.some((t) => t.tab === 'switch')) {
-        if (!rows.length) bad.push('更换页一行都没有');
+      // 更换页：每行都要有 名字 / 属性 / ⭐ / 血量
+      if (tabs.some((t) => t.tab === 'switch')) {
+        if (!rows.length) bad.push('更换页一行都没有（切过去也看不到可换的精灵）');
         for (const row of rows) {
+          if (!row.name) bad.push(`更换页「${row.text}」没给名字`);
           if (!row.types) bad.push(`更换页「${row.text}」没给属性`);
           if (row.energy === '') bad.push(`更换页「${row.text}」没给 ⭐`);
           if (!row.hp) bad.push(`更换页「${row.text}」没给血量`);
         }
       }
+      // 物品页：2026-09-23 版式把「为什么用不了」写在**每一格**的 `data-b3-item-note` 上
+      // （旧读取点是已收起的 `#act-item-list` + `[data-roco-no-item]`）。
       if (!items?.shown) bad.push('物品页没打开');
-      if (items?.rows === 0 && !items?.noItem) bad.push('这一手没有物品动作，却没写清为什么（会看起来像坏了）');
+      if (!(items?.cells > 0)) bad.push('物品页一格都没有');
+      else {
+        const silent = (items.notes ?? []).filter((n) => !n);
+        if (silent.length) bad.push(`物品页 ${silent.length} 格没写清为什么用不了/未核验`);
+      }
+      if (Number(items?.itemLegal) === 0 && /(^|,)item/.test(String(items?.rendered ?? ''))) {
+        bad.push('这一手没有物品动作，页面却渲染了物品入口');
+      }
       return bad;
     };
-    check('live-act-tabs', '四个大选项（技能/物品/更换/逃跑）都在、恰好一个高亮、≥44px；'
-      + '聚能/战报在位；更换页每行给名字/属性/⭐/血量；物品页没有就写清原因；逃跑是二次确认',
-      r3Problems(r3, switchRows, {...escapeFacts, rowsCount: switchRows.length}, itemFacts).length === 0,
-      r3Problems(r3, switchRows, {...escapeFacts, rowsCount: switchRows.length}, itemFacts).join(' | ')
-      || `选项 ${JSON.stringify(r3.tabs.map((t) => `${t.tab}${t.on ? '*' : ''}`))}；`
+    check('live-act-tabs', '四个大选项（技能/物品/更换/逃跑）都在、恰好一个高亮（按 body[data-b3-tab] 实际外观判定）、≥44px；'
+      + '聚能/战报在位；更换页每行给名字/属性/⭐/血量；物品页每格写清为什么用不了；逃跑是二次确认。'
+      + '【按人类 2026-09-23 版式：高亮与切屏由 `body[data-b3-tab]` 驱动（不再有 `aria-selected`）；'
+      + '物品页的「说明」由每格 `data-b3-item-note` 承担（旧 `[data-roco-no-item]` 在被收起的旧行动坞里）】',
+      r3Problems(r3, switchRows, escapeFacts, itemFacts).length === 0,
+      r3Problems(r3, switchRows, escapeFacts, itemFacts).join(' | ')
+      || `选项 ${JSON.stringify(r3.tabs.map((t) => `${t.tab}${t.tab === r3.active ? '*' : ''}`))}；`
         + `聚能「${r3.charge}」；更换页 ${switchRows.length} 行 ${JSON.stringify(switchRows[0] ?? null)}；`
-        + `物品 ${itemFacts.rows} 行 / 空态 ${itemFacts.noItem}；逃跑确认 ${escapeFacts.confirm}`);
-    // ── R4：双方出战信息 —— 名字/属性/血量百分比 + 每方剩余只数 ──
+        + `物品页 ${itemFacts.cells} 格（无动作 ${itemFacts.itemLegal}）/ 说明「${String(itemFacts.notes[0] ?? '').slice(0, 30)}」；`
+        + `逃跑页 确认=${escapeFacts.confirm} 取消=${escapeFacts.cancel}`);
+    // ── R4：双方出战信息（v3h）—— 名字/属性/血量百分比 + 每方存活点数 ──
+    // 旧读取点 `#self-panel` / `#foe-panel` / `.rl-self` 在 2026-09-23 版式里**已经不存在**
+    // （中间改成两张镜像卡 `[data-b3-self-card]` / `[data-b3-foe-card]`，
+    //  「每方剩余只数」由顶栏的存活点 `#b3-dots-self` / `#b3-dots-foe` 承担）。
     const r4 = await js(`(()=>{const v=window.rocoDemo.state.view;
-      const read=(sel)=>{const el=document.querySelector(sel);if(!el)return null;
-        return {pct:el.dataset.rocoHpPct??null,hp:el.dataset.rocoHp??null,max:el.dataset.rocoMaxHp??null,
-          text:(el.textContent||'').replace(/\\s+/g,' ').trim()};};
-      const rl=[...document.querySelectorAll('.rl-self')].map((el)=>({
-        living:el.dataset.rocoLiving??null,size:el.dataset.rocoTeamSize??null,
-        text:(el.textContent||'').trim()}));
+      const read=(side)=>{const el=document.querySelector('[data-b3-'+side+'-card]');if(!el)return null;
+        const g=(sel)=>{const e=el.querySelector(sel);return e?(e.textContent||'').replace(/\\s+/g,' ').trim():null;};
+        const fill=el.querySelector('[data-b3-'+side+'-hp-fill]');
+        return {name:g('[data-b3-'+side+'-name]'),hpText:g('[data-b3-'+side+'-hp-text]'),
+          pctText:g('[data-b3-'+side+'-hp-pct]'),
+          elName:((el.querySelector('[data-b3-'+side+'-el]')||{}).dataset||{}).b3ElName??null,
+          fill:fill?fill.style.width:null,
+          rect:(()=>{const r=el.getBoundingClientRect();return {w:Math.round(r.width),h:Math.round(r.height)};})()};};
+      const dots=(id)=>{const el=document.getElementById(id);if(!el)return null;
+        return {txt:(el.textContent||'').replace(/\\s+/g,''),
+          alive:((el.querySelector('.alive')||{}).textContent||'').length,
+          down:((el.querySelector('.down')||{}).textContent||'').length};};
       const selfPets=(v?.self?.pets??[]).filter((p)=>p.fainted!==true).length;
-      return {self:read('#self-panel .hp-line span:last-child'),
-        foe:read('#foe-panel .hp-line span:last-child'),rl,
+      return {self:read('self'),foe:read('foe'),selfDots:dots('b3-dots-self'),foeDots:dots('b3-dots-foe'),
         selfLiving:Number.isFinite(selfPets)?selfPets:null,
-        foeLiving:Number.isFinite(v?.opponent?.living_count)?v.opponent.living_count:null,
-        types:[...document.querySelectorAll('#self-panel .pet-types, #foe-panel .pet-types')].length,
-        names:[...document.querySelectorAll('#self-panel h3, #foe-panel h3')].map((h)=>h.textContent.trim())};})()`);
+        foeLiving:Number.isFinite(v?.opponent?.living_count)?v.opponent.living_count:null};})()`);
+    const HP_TEXT_RE = /生命\s*(\d+)\s*\/\s*(\d+)/;
     const r4Problems = (f) => {
       const bad = [];
       for (const [who, side] of [['我方', f?.self], ['对手', f?.foe]]) {
-        if (!side) { bad.push(`${who}那张卡没有血量行`); continue; }
-        const pct = Number(side.pct);
+        if (!side) { bad.push(`${who}那张卡不在（[data-b3-${who === '我方' ? 'self' : 'foe'}-card]）`); continue; }
+        if (!side.name) bad.push(`${who}那张卡没有名字`);
+        if (!side.elName) bad.push(`${who}那张卡没有属性徽章（data-b3-el-name 空）`);
+        const m = HP_TEXT_RE.exec(String(side.hpText ?? ''));
+        const pct = Number(String(side.pctText ?? '').replace('%', ''));
+        if (!m) { bad.push(`${who}没有血量行（「生命 x / y」）`); continue; }
         if (!Number.isFinite(pct)) { bad.push(`${who}没有血量百分比`); continue; }
-        const expect = Number(side.max) > 0 ? Math.round(Number(side.hp) / Number(side.max) * 100) : null;
-        if (expect !== null && pct !== expect) bad.push(`${who}百分比 ${pct}% 与 ${side.hp}/${side.max} 不一致`);
-        if (!/%/.test(String(side.text))) bad.push(`${who}血量的可见文本里没有百分号`);
+        if (!/%/.test(String(side.pctText))) bad.push(`${who}血量的可见文本里没有百分号`);
+        const hp = Number(m[1]); const max = Number(m[2]);
+        const expect = max > 0 ? Math.round(hp / max * 100) : null;
+        if (expect !== null && pct !== expect) bad.push(`${who}百分比 ${pct}% 与 ${hp}/${max} 不一致`);
+        if (side.fill && side.fill !== `${pct}%`) bad.push(`${who}血条宽度 ${side.fill} 与百分比 ${pct}% 不一致`);
+        if (!(side.rect?.w > 0)) bad.push(`${who}那张卡不在画面上`);
       }
-      if ((f?.names ?? []).length < 2) bad.push('双方出战精灵的名字没都画出来');
-      if ((f?.types ?? 0) < 2) bad.push('双方出战精灵的属性没都画出来');
-      if ((f?.rl ?? []).length < 2) bad.push('没有「每方剩余只数」这一行（双方各一条）');
-      const mine = (f?.rl ?? [])[0];
-      const theirs = (f?.rl ?? [])[1];
-      if (mine && Number(mine.living) !== Number(f?.selfLiving)) {
-        bad.push(`我方剩余 ${mine.living} 与公开视图 ${f?.selfLiving} 不一致`);
-      }
-      if (theirs && Number(theirs.living) !== Number(f?.foeLiving)) {
-        bad.push(`对手剩余 ${theirs.living} 与公开视图 ${f?.foeLiving} 不一致`);
+      // 每方存活点数（原来的 `.rl-self`「还能打 N/N」那一行的等价物）：点数来自公开视图，且不许编。
+      for (const [who, d, expect] of [['我方', f?.selfDots, f?.selfLiving], ['对手', f?.foeDots, f?.foeLiving]]) {
+        if (!d) { bad.push(`顶栏没有${who}存活点`); continue; }
+        if (d.alive + d.down !== 6) bad.push(`${who}存活点不是 6 个（${d.txt}）`);
+        if (Number(d.alive) !== Number(expect)) bad.push(`${who}存活点 ${d.alive} 与公开视图 ${expect} 不一致`);
       }
       return bad;
     };
-    // ── R5/R6：开局前阵容展示（短暂、不挡行动）+ 战报按回合分组 ──
-    // 战报那一刻可能还没有事件（刚开局）—— 推一手再量，判据才有东西可看。
+    // ── R5/R6（v3h 等价断言）：顶栏双方存活点 + 右列战报按回合分组、最新在上 ──
+    // 旧读取点：开局前那块短暂展示 `#lineup-reveal` / `#lineup-brief`（**已删除**，只剩 `#lineup-brief`
+    // 一个 hidden 接收槽）与旧战报 `#events`（在战斗态被收起的 `#log-panel` 里）。
+    // 按人类 2026-09-23 版式：我方六只由**顶栏 6 个存活点**承担，对手「上场才亮明」由
+    // **只给点数、不给名字**的镜像点承担；战报由右列 `.b3-log-scroll`（框内滚动、最新回合在上）承担。
     if (Number(await js(`document.body.dataset.rocoLogTurns||'0'`)) === 0) {
-      try { await mouseClick('#auto-turn'); await sleep(1200); } catch {}
+      try { await js('window.rocoDemo.autoTurn()'); await sleep(1200); } catch {}
     }
-    const r56 = await js(`(()=>{const box=document.getElementById('lineup-reveal');
-      const ev=document.getElementById('events');
-      const turns=[...document.querySelectorAll('#events [data-roco-log-turn]')].map((d)=>({
-        turn:d.dataset.rocoLogTurn,open:d.open===true,
-        rows:d.querySelectorAll('p').length}));
-      return {reveal:document.body.dataset.rocoLineupReveal??null,
-        revealText:box?(box.textContent||'').replace(/\\s+/g,' ').trim():null,
-        // 展示块必须**在流里**：不能盖住行动区（矩形不相交即视为不挡）
-        overlap:(()=>{if(!box||box.hidden)return false;const a=box.getBoundingClientRect();
-          const b=document.getElementById('action-panel').getBoundingClientRect();
-          return !(a.right<=b.left||a.left>=b.right||a.bottom<=b.top||a.top>=b.bottom);})(),
-        turns,logTurns:Number(document.body.dataset.rocoLogTurns||'0')};})()`);
+    const r56 = await js(`(()=>{const scroll=document.querySelector('.b3-log-scroll');
+      const turns=[...document.querySelectorAll('.b3-wrap [data-b3-log-turn]')].map((d)=>({
+        turn:d.dataset.b3LogTurn,latest:d.dataset.b3LogLatest??null,
+        label:((d.querySelector('[data-b3-log-turn-label]')||{}).textContent||'').trim(),
+        rows:[...d.querySelectorAll('p')].map((p)=>(p.textContent||'').trim()).filter(Boolean).length}));
+      const dotsFoe=(document.getElementById('b3-dots-foe')||{}).textContent||'';
+      const r=scroll?scroll.getBoundingClientRect():null;
+      return {turns,
+        childOrder:scroll?[...scroll.children].map((c)=>c.dataset.b3LogTurn??null):[],
+        shown:Boolean(scroll&&r.width>0&&r.height>0),
+        overflow:scroll?getComputedStyle(scroll).overflowY:null,
+        title:((document.querySelector('.b3-wrap [data-b3-log-title]')||{}).textContent||'').trim(),
+        dotsSelf:((document.getElementById('b3-dots-self')||{}).textContent||'').replace(/\\s+/g,''),
+        dotsFoe:String(dotsFoe).replace(/\\s+/g,''),
+        logTurns:Number(document.body.dataset.rocoLogTurns||'0'),
+        view:{selfAlive:(window.rocoDemo.state.view?.self?.pets??[]).filter((p)=>p.fainted!==true).length,
+          foeLiving:window.rocoDemo.state.view?.opponent?.living_count??null}};})()`);
     const r56Problems = (f) => {
       const bad = [];
-      if (!f?.revealText || !/我方阵容/.test(String(f.revealText))) bad.push('开局前没有给出双方阵容展示');
-      if (!/上场才亮明|未公开/.test(String(f.revealText ?? ''))) {
-        bad.push('对手那侧没有写明「未上场不揭示」（公开信息边界）');
+      // ① 我方阵容（等价于旧的「开局前阵容展示 · 我方 6 只」）：顶栏必须给出 6 个存活点，
+      //    且点数与公开视图一致。
+      if (!/^[●○]{6}$/.test(String(f?.dotsSelf ?? ''))) {
+        bad.push(`顶栏我方存活点不是 6 个（「${f?.dotsSelf}」）`);
+      } else if (String(f.dotsSelf).split('●').length - 1 !== Number(f?.view?.selfAlive)) {
+        bad.push(`我方存活点 ${String(f.dotsSelf).split('●').length - 1} 与公开视图 ${f?.view?.selfAlive} 不一致`);
       }
-      if (f?.overlap) bad.push('阵容展示盖住了行动区');
-      if (!(f?.turns ?? []).length) bad.push('战报没有按回合分组');
-      if ((f?.turns ?? []).some((t) => !/^\d+$/.test(String(t.turn)))) bad.push('战报分组里有非数字回合号');
-      if ((f?.turns ?? []).filter((t) => t.open).length > 1) bad.push('战报同时展开了多个回合（应当只默认展开最近一回合）');
+      // ② 对手信息边界（等价于旧的「对手 · 上场才亮明 / 未公开」）：只给点数，绝不给名字。
+      if (!/^[●○]{6}$/.test(String(f?.dotsFoe ?? ''))) {
+        bad.push(`顶栏对手存活点不是 6 个纯点数（「${f?.dotsFoe}」——是不是把名字画出来了？）`);
+      } else if (String(f.dotsFoe).split('●').length - 1 !== Number(f?.view?.foeLiving)) {
+        bad.push(`对手存活点 ${String(f.dotsFoe).split('●').length - 1} 与公开视图 ${f?.view?.foeLiving} 不一致`);
+      }
+      // ③ 右列战报：按回合分组、最新回合在上（DOM 第一个就是最新的那一块）。
+      const turns = f?.turns ?? [];
+      if (!turns.length) bad.push('右列战报没有按回合分组');
+      if (turns.some((t) => !/^\d+$/.test(String(t.turn)))) bad.push('战报分组里有非数字回合号');
+      if (turns.some((t) => !(t.rows > 0))) bad.push('战报有空的回合块（一条中文事件都没有）');
+      turns.forEach((t, i) => {
+        if (!new RegExp(`第\\s*${t.turn}\\s*回合`).test(String(t.label))) {
+          bad.push(`战报第 ${i + 1} 块的标签「${t.label}」与回合号 ${t.turn} 不一致`);
+        }
+      });
+      const order = turns.map((t) => Number(t.turn));
+      if (order.length && order.some((n, i) => i > 0 && !(order[i - 1] >= n))) bad.push('战报不是最新回合在上（回合号没有倒序）');
+      if (turns.filter((t) => t.latest === 'yes').length !== 1) bad.push('战报没有标出唯一的「最新一回合」');
+      else if (turns[0].latest !== 'yes') bad.push('战报最新一回合不在最上面');
+      if (!(f?.childOrder ?? []).length) bad.push('战报滚动框里一个回合块都没有');
+      else if (Number(f.childOrder[0]) !== Number(turns[0]?.turn)) bad.push('战报 DOM 第一块不是最新的回合');
+      if (f?.shown !== true) bad.push('右列战报不在位');
+      else if (!/auto|scroll/.test(String(f?.overflow))) bad.push(`战报框不是框内滚动（overflow-y=${f?.overflow}）`);
       return bad;
     };
-    // ── E2/E4：规则口径与未核验项必须在**战场下面**的一处折叠里（不许压在战场上方）──
+    // ── E2/E4：规则口径与未核验项（v3h：战斗页里一处都不可见）──
     const hierarchy = await js(`(()=>{const r=document.querySelector('[data-b3-root]');
       const note=document.getElementById('unverified-note');
-      const self=document.querySelector('[data-b3-self-card]');
+      const rules=document.getElementById('rules-note');
+      const stage=document.querySelector('[data-b3-stage]');
+      const vis=(el)=>{if(!el)return false;const b=el.getBoundingClientRect();
+        return !el.hidden&&b.width>0&&b.height>0&&getComputedStyle(el).display!=='none';};
       const top=(el)=>el?Math.round(el.getBoundingClientRect().top):null;
-      return {rulesTop:top(r),stageTop:top(self),
-        noteIsChip:Boolean(note&&note.closest('summary')),
-        noteVisible:Boolean(note&&!note.hidden),
-        // 战场上方还有没有别的「未核验/规则」行
-        aboveCount:r&&self?[...document.querySelectorAll('#battle-panel > *')]
-          .filter((el)=>el!==r&&/未核验|规则口径/.test((el.textContent||''))&&
-            el.getBoundingClientRect().top<self.getBoundingClientRect().top).length:null};})()`);
+      // 战斗页里**可见**的「未核验/规则口径」文本：只数叶子节点，免得祖先重复计数。
+      const visibleRuleText=[...document.querySelectorAll('#battle-panel *')]
+        .filter((el)=>el.children.length===0&&vis(el)&&/未核验|规则口径/.test(el.textContent||''))
+        .map((el)=>el.id||String(el.className||el.tagName));
+      return {rulesTop:top(r),stageTop:top(stage),cardTop:top(document.querySelector('[data-b3-self-card]')),
+        noteVisible:vis(note),rulesVisible:vis(rules),visibleRuleText,
+        // 战场上方还有没有别的「未核验/规则」块
+        aboveCount:r&&stage?[...document.querySelectorAll('#battle-panel > *')]
+          .filter((el)=>el!==r&&vis(el)&&/未核验|规则口径/.test((el.textContent||''))&&
+            el.getBoundingClientRect().top<stage.getBoundingClientRect().top).length:null};})()`);
     const hierarchyProblems = (f) => {
       const bad = [];
       // 口径（2026-09-23 按人类规格调整，**没有放松**）：规则/未核验不再出现在战斗页，
@@ -883,39 +1078,57 @@ async function main() {
       if (f?.stageTop === null || f?.rulesTop === null) bad.push('缺战场或片段根容器');
       else if (!(f.rulesTop < f.stageTop)) bad.push('片段根容器不在战场上方');
       if (Number(f?.aboveCount) > 0) bad.push(`战场上方还有 ${f.aboveCount} 处「未核验/规则」文本`);
+      if ((f?.visibleRuleText ?? []).length) {
+        bad.push(`战斗页里还有可见的「未核验/规则」文本：${f.visibleRuleText.join('、')}`);
+      }
       return bad;
     };
-    check('live-battle-hierarchy', '战场优先：双方精灵在最上面；「规则口径与未核验项」收在**战场下面**的一处折叠里，'
-      + '未核验只做折叠行上的短标签（不再单独占行）',
+    check('live-battle-hierarchy', '战场优先：中间两张出战卡（`[data-b3-stage]`）在片段最上面；'
+      + '「规则口径与未核验项」在战斗页里**一处都不可见**（战斗态整块收起）。'
+      + '【按人类 2026-09-23 版式，原来的「收在战场下面的一处折叠里」由「战斗页根本不出现」承担；'
+      + '口径未放松：可见一处就红】',
       hierarchyProblems(hierarchy).length === 0,
       hierarchyProblems(hierarchy).join(' | ')
-      || `战场 top=${hierarchy.stageTop}；规则折叠 top=${hierarchy.rulesTop}；`
-        + `未核验=${hierarchy.noteVisible ? '显示' : '隐藏'}（折叠行内=${hierarchy.noteIsChip}）；`
-        + `战场上方残留 ${hierarchy.aboveCount} 处`);
+      || `片段根 top=${hierarchy.rulesTop}；战场 top=${hierarchy.stageTop}；`
+        + `规则折叠可见=${hierarchy.rulesVisible}；未核验标签可见=${hierarchy.noteVisible}；`
+        + `战斗页可见「未核验/规则」文本 ${hierarchy.visibleRuleText.length} 处`);
     counter('live-battle-hierarchy', '把规则/未核验挪回战场上方必须被同一条判据抓住',
-      hierarchyProblems({...hierarchy, rulesTop: 10, stageTop: 400}), '{"rulesTop":10,"stageTop":400}');
+      hierarchyProblems({...hierarchy, rulesTop: 10, stageTop: 400, visibleRuleText: ['unverified-note']}),
+      '{"rulesTop":10,"stageTop":400,"visibleRuleText":["unverified-note"]}');
 
-    check('live-lineup-and-log', '开局前给出双方阵容展示（我方六只 + 对手「上场才亮明」，且在流里不挡行动）；'
-      + '战报按回合分组、默认只展开最近一回合',
+    check('live-lineup-and-log', '顶栏给出双方存活点数（我方 6 只 + 对手只给点数、不给名字：上场才亮明），'
+      + '右列战报按回合分组、最新一回合在最上面、框内滚动。'
+      + '【按人类 2026-09-23 版式，原来的「开局前双方阵容短暂展示 `#lineup-reveal`」由**顶栏存活点**承担；'
+      + '战报由右列 `.b3-log-scroll` 承担（旧 `#events` 在被收起的旧战报面板里）】',
       r56Problems(r56).length === 0,
       r56Problems(r56).join(' | ')
-      || `展示「${String(r56.revealText).slice(0, 60)}…」；战报回合 ${JSON.stringify(r56.turns)}`);
-    counter('live-lineup-and-log', '把对手整队也亮出来（违反公开信息边界）必须被同一条判据抓住',
-      r56Problems({...r56, revealText: '我方阵容（6 只）…… 对手阵容（6 只）甲、乙、丙'}),
-      '{"revealText":"对手阵容（6 只）"}');
+      || `顶栏存活点 我方「${r56.dotsSelf}」对手「${r56.dotsFoe}」；战报「${r56.title}」`
+        + `${JSON.stringify(r56.turns)}（DOM 顺序 ${JSON.stringify(r56.childOrder)}，框内溢出 ${r56.overflow}）`);
+    counter('live-lineup-and-log', '把对手整队名字亮出来、或把战报倒过来（最新在最后）必须被同一条判据抓住',
+      r56Problems({...r56, dotsFoe: '●●喵喵●●', childOrder: ['1', '2'],
+        turns: [{turn: '1', latest: null, label: '第 1 回合', rows: 2},
+          {turn: '2', latest: 'yes', label: '第 2 回合', rows: 1}]}),
+      '{"dotsFoe":"●●喵喵●●","order":[1,2]}');
 
-    check('live-battle-info', '双方出战信息：名字/属性/血量（**带百分比**）+ 每方剩余只数（与公开视图一致）',
+    check('live-battle-info', '双方出战信息：两张镜像卡各给名字/属性/血量（**带百分比**，且与「生命 x / y」和血条宽度一致）'
+      + '+ 顶栏双方存活点数（与公开视图一致）。'
+      + '【按人类 2026-09-23 版式，原来的 `#self-panel`/`#foe-panel` 与「还能打 N/N」那一行由 '
+      + '`[data-b3-self-card]`/`[data-b3-foe-card]` 与 `#b3-dots-self`/`#b3-dots-foe` 承担】',
       r4Problems(r4).length === 0,
       r4Problems(r4).join(' | ')
-      || `我方「${r4.self?.text}」对手「${r4.foe?.text}」；剩余行 ${JSON.stringify(r4.rl)}；`
+      || `我方「${r4.self?.name} ${r4.self?.hpText} ${r4.self?.pctText} ${r4.self?.elName}」`
+        + `对手「${r4.foe?.name} ${r4.foe?.hpText} ${r4.foe?.pctText} ${r4.foe?.elName}」；`
+        + `存活点 ${JSON.stringify(r4.selfDots)} / ${JSON.stringify(r4.foeDots)}；`
         + `视图 self=${r4.selfLiving} foe=${r4.foeLiving}`);
     counter('live-battle-info', '百分比与血量不一致（例如写死 100%）必须被同一条判据抓住',
-      r4Problems({...r4, self: {pct: '100', hp: '100', max: '445', text: '100 / 445（100%）'}}),
-      '{"pct":"100","hp":"100","max":"445"}');
+      r4Problems({...r4, self: {...r4.self, hpText: '生命 100 / 445', pctText: '100%', fill: '100%'}}),
+      '{"hpText":"生命 100 / 445","pctText":"100%"}');
 
     counter('live-act-tabs', '逃跑没有二次确认（首层直接摆投降）必须被同一条判据抓住',
-      r3Problems({...r3, tabs: []}, [], {shown: true, confirm: false, cancel: false, direct: true, rowsCount: 0},
-        {shown: true, rows: 0, noItem: false}), '{"confirm":false,"direct":true}');
+      r3Problems({...r3, tabs: [], charge: ''}, [],
+        {shown: false, confirm: false, cancel: false, confirmShown: false, direct: true},
+        {shown: true, cells: 2, notes: ['', ''], itemLegal: 0, rendered: 'skill,item'}),
+      '{"confirm":false,"direct":true}');
 
     counter('live-battle-spec(星不够不标红)', '星不够却标成不红（或星够却标红）必须被同一条判据抓住',
       specProblems({...spec, skillCards: [{w: 120, h: 113, legal: false, cost: '6', short: 'no',
@@ -941,7 +1154,7 @@ async function main() {
       stalled = probe.turn === lastTurn ? stalled + 1 : 0;
       lastTurn = probe.turn;
       if (stalled >= 8) break;
-      try { await mouseClick('#auto-turn'); } catch { break; }
+      try { await js('window.rocoDemo.autoTurn()'); } catch { break; }
       clicks += 1;
       await sleep(220);
     }
@@ -949,10 +1162,22 @@ async function main() {
     const settled = await js(`(()=>{const v=window.rocoDemo.state.view;
       const panel=document.getElementById('result-panel');
       const lesson=document.getElementById('lesson');
+      const scroll=document.querySelector('.b3-log-scroll');
+      const turns=[...document.querySelectorAll('.b3-wrap [data-b3-log-turn]')];
+      const newest=turns.find((d)=>d.dataset.b3LogLatest==='yes')??turns[0]??null;
       return {result:v?v.battle_result:null,turn:v?v.turn:null,
         resultVisible:Boolean(panel&&!panel.hidden),
         lessonShown:document.body.dataset.rocoLesson||null,
-        lessonText:(lesson?lesson.textContent:'').replace(/\\s+/g,' ').slice(0,120)};})()`);
+        lessonText:(lesson?lesson.textContent:'').replace(/\\s+/g,' ').slice(0,120),
+        // 2026-09-23 版式（v3h）：回合在页眉中间列，战报在右列（框内滚动、最新回合在上）。
+        round:((document.getElementById('b3-round')||{}).textContent||'').trim(),
+        logShown:Boolean(scroll&&scroll.getBoundingClientRect().height>0),
+        logLatest:{turn:newest?newest.dataset.b3LogTurn:null,
+          lines:newest?[...newest.querySelectorAll('p')].map((p)=>(p.textContent||'').trim()).filter(Boolean).length:0},
+        // 整局战报的**真实**回合分组（页面按引擎事件分组后写在 body 上）。
+        logTurns:Number(document.body.dataset.rocoLogTurns||'0'),
+        dots:{self:((document.getElementById('b3-dots-self')||{}).textContent||'').replace(/\\s+/g,''),
+          foe:((document.getElementById('b3-dots-foe')||{}).textContent||'').replace(/\\s+/g,'')}};})()`);
     steps.push({at: 'settled', settled});
     const lastProbe = await js(`(()=>{const v=window.rocoDemo.state.view;
       return {turn:v?v.turn:null,mana:v&&v.mana?v.mana:null,
@@ -964,17 +1189,30 @@ async function main() {
       if (!f?.result) bad.push('引擎没给出对局结果');
       if (f?.resultVisible !== true) bad.push('结算区没出现');
       if (f?.lessonShown !== 'shown') bad.push('局末教学入口没出现');
+      // 「最新一条事件在」的 v3h 读取点：页眉回合必须与引擎回合一致，右列战报的最新一回合必须有内容，
+      // 且页面按引擎事件分出的回合块必须 > 0（原来的 `#last-event` 在被收起的 `#b3-sink` 里）。
+      if (!new RegExp(`第\\s*${f?.turn}\\s*回合`).test(String(f?.round ?? ''))) {
+        bad.push(`页眉回合「${f?.round}」与引擎回合 ${f?.turn} 不一致`);
+      }
+      if (f?.logShown !== true) bad.push('右列战报不在位');
+      else if (!(Number(f?.logLatest?.lines) > 0)) bad.push('右列战报最新一回合没有内容');
+      if (!(Number(f?.logTurns) > 0)) bad.push('整局战报一个回合块都没有（最新一条事件没进战报）');
       return bad;
     };
-    const lastEventAfter = await js(`document.getElementById('last-event')?.textContent ?? ''`);
-    check('live-settle', '从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、最新一条事件在）',
-      Boolean(String(lastEventAfter).trim()),
-      settleProblems(settled).length === 0 && Boolean(String(lastEventAfter).trim()),
-      `result=${settled.result} 回合=${settled.turn} 结算区可见=${settled.resultVisible} 教学=${settled.lessonShown}`
-      + `；点了 ${clicks} 次自动推进（最后回合 ${lastTurn}，停滞 ${stalled} 次）；`
-      + `当时 ${JSON.stringify(lastProbe)}；正文「${settled.lessonText}」`);
-    counter('live-settle', '没打到结算（没有结果 / 结算区没出现 / 教学入口没出现）必须被同一条判据抓住',
-      settleProblems({result: null, resultVisible: false, lessonShown: null}), '{"result":null}');
+    check('live-settle', '从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、'
+      + '页眉回合与引擎一致、右列战报最新一回合有内容）。'
+      + '【按人类 2026-09-23 版式，原来的 `#last-event`「最新一条事件」由**右列战报**承担'
+      + '（框内滚动、最新回合在上）；`#last-event` 所在的 `#b3-sink` 是隐藏接收槽，不再作读数点】',
+      settleProblems(settled).length === 0,
+      settleProblems(settled).join(' | ')
+      || `result=${settled.result} 回合=${settled.turn} 页眉回合「${settled.round}」结算区可见=${settled.resultVisible} `
+        + `教学=${settled.lessonShown} 战报回合块=${settled.logTurns} 最新块=第 ${settled.logLatest?.turn} 回合`
+        + `（${settled.logLatest?.lines} 条）；存活点 ${settled.dots.self}/${settled.dots.foe}；`
+        + `点了 ${clicks} 次自动推进（最后回合 ${lastTurn}，停滞 ${stalled} 次）；`
+        + `当时 ${JSON.stringify(lastProbe)}；正文「${settled.lessonText}」`);
+    counter('live-settle', '没打到结算（没有结果 / 结算区没出现 / 教学入口没出现 / 战报最新回合空）必须被同一条判据抓住',
+      settleProblems({result: null, resultVisible: false, lessonShown: null, round: '第 3 回合', turn: 3,
+        logShown: true, logLatest: {turn: '3', lines: 0}, logTurns: 0}), '{"result":null}');
     await shoot('live-04-1440-settled');
 
     // ── ③b A9 换局迁移验证：第二局必须**接着上一课**，不许把同一课当新知识再讲一遍 ──
@@ -985,12 +1223,19 @@ async function main() {
     await waitFor(`document.body.dataset.rocoView==='ready'
       && !document.getElementById('battle-panel').hidden`, 100, 250);
     await sleep(600);
+    // 换局必须把 v3h 顶栏**归零**（新一局的回合 + 双方满员存活点）：这是新版式下
+    // 「换了一局」这件事在战斗页上的等价证据（旧版式读的是开局前的阵容展示块）。
+    const secondV3h = await js(`(()=>({
+      round:((document.getElementById('b3-round')||{}).textContent||'').trim(),
+      dotsSelf:((document.getElementById('b3-dots-self')||{}).textContent||'').replace(/\\s+/g,''),
+      dotsFoe:((document.getElementById('b3-dots-foe')||{}).textContent||'').replace(/\\s+/g,''),
+      tab:document.body.dataset.b3Tab??null}))()`);
     let second = null;
     for (let i = 0; i < 150; i += 1) {
       const probe = await js(`(()=>{const v=window.rocoDemo.state.view;
         return v&&v.battle_result?v.battle_result:null;})()`);
       if (probe) break;
-      try { await mouseClick('#auto-turn'); } catch { break; }
+      try { await js('window.rocoDemo.autoTurn()'); } catch { break; }
       await sleep(220);
     }
     second = await js(`(()=>{const b=document.body.dataset;
@@ -999,11 +1244,17 @@ async function main() {
         improved:b.rocoTeacherImproved??'',
         progress:(document.getElementById('lesson-progress')||{}).textContent||'',
         lessonText:(document.getElementById('lesson')||{}).textContent||''};})()`);
+    second = {...second, ...secondV3h};
     steps.push({at: 'second-match-teacher', m1, second});
     const migrateProblems = (first, f) => {
       const bad = [];
       if (f?.lesson !== 'shown') bad.push('第二局没有给出教学入口');
       if (!String(f?.lessonText ?? '').includes('回合')) bad.push('第二局的复盘正文没有局面信息');
+      // 换局在战斗页上的 v3h 证据：页眉回合归 1、双方存活点归满 6、左列回到技能屏。
+      if (!/^第\s*1\s*回合$/.test(String(f?.round ?? ''))) bad.push(`第二局页眉回合「${f?.round}」不是第 1 回合（换局没归零）`);
+      if (!/^[●○]{6}$/.test(String(f?.dotsSelf ?? '')) || !/^[●○]{6}$/.test(String(f?.dotsFoe ?? ''))) {
+        bad.push(`第二局顶栏存活点 我方「${f?.dotsSelf}」对手「${f?.dotsFoe}」（应各 6 个）`);
+      }
       if (f?.repeat === 'yes') {
         // 同一课又出现了：必须**接着核对上一次**，而不是当作新知识再讲一遍
         if (f?.checked !== 'yes') bad.push('同一课重复出现，却没有做「上一次那一课的核对」');
