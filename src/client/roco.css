@@ -998,3 +998,10 @@ header.topbar{padding-top:10px !important;padding-bottom:10px !important;min-hei
 header.topbar .xiaoya-btn{height:36px;display:inline-flex;align-items:center}
 /* 「你管这叫占满？高度为啥都差一截」—— 主区与工坊都必须吃满剩余高度 */
 body:has(#team-workshop:not([hidden])) main>#team-workshop{height:100% !important}
+
+/* 人类 2026-09-23（两个子代理各自独立复现）：在 ?legacy3v3=1 下，页面级 #select-panel 盖住了
+   工坊的控件（#tw-cand-next / #tw-filter-reset），elementFromPoint 命中 #pool-count / #side-enemy
+   → 翻页与筛选点击不生效（ux 的 D1 两条、demo 迁移后的两条因此红）。
+   口径：**v3 工坊在产品路线上必须可点** → 给它更高的层叠；旧 #select-panel 只作迁移夹具。 */
+#team-workshop{position:relative;z-index:6}
+#select-panel{position:relative;z-index:1}

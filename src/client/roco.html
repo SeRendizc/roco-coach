@@ -139,18 +139,14 @@
     <button class="side-tab" data-side="enemy" aria-pressed="false">对手</button>
    </div>
    <input type="search" id="pool-search" placeholder="搜索名字（48 只）" aria-label="按名字搜索" autocomplete="off">
-   <!-- 属性/定位筛选：折叠菜单里的按钮组。
+   <!-- 定位筛选：折叠菜单里的按钮组（人类 2026-09-23：**属性筛选与「清除筛选」已删** ——
+        它们是工坊 `#team-workshop >>> #tw-filter-type` / `#tw-filter-reset` 的重复件）。
         为什么不是原生 <select>：原生下拉在无头 Chrome 里**打不开也按不动**
         （实测：聚焦后真实 ArrowDown 完全不改 value），那样就没法写「真实键鼠」判据。 -->
-   <details class="fmenu" id="filter-type-menu">
-    <summary>属性：<span id="filter-type-label">全部</span></summary>
-    <div class="fmenu-body" id="filter-type" role="group" aria-label="按属性筛选"></div>
-   </details>
    <details class="fmenu" id="filter-role-menu">
     <summary>定位：<span id="filter-role-label">全部</span></summary>
     <div class="fmenu-body" id="filter-role" role="group" aria-label="按定位筛选"></div>
    </details>
-   <button id="filter-reset" class="filter-reset">清除筛选</button>
    <!-- 候选宇宙开关（RC-502）：默认只列**冻结已核验**的 48 只（练习局/迁移夹具口径）。
         勾上之后向服务端要 `support=all`，把「按需推算」的那 574 只也列出来 ——
         它们是**未核验**的推算配招（RC-402），所以每张卡都如实标出来。
@@ -217,7 +213,6 @@
   <div id="self-bench"></div><div id="foe-bench"></div>
   <p id="self-field-note"></p><p id="foe-field-note"></p><p id="foe-note"></p>
   <div id="self-roster-line"></div><div id="foe-roster-line"></div>
-  <p id="last-event"></p><div id="lineup-brief"></div>
  </div>
 
 
