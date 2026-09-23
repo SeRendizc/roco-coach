@@ -209,6 +209,93 @@ async function main() {
     await send('Input.insertText', {text});
     await sleep(150);
   };
+  // ── 工坊（`#team-workshop` 的 shadow root）里的真实鼠标 / 读数 ────────────────
+  // 2026-09-23：人类把**候选筛选**从页面级 `#select-panel` 迁到工坊模块里
+  // （`#tw-filter-type` / `#tw-filter-role` 两个 `<select>` + `#tw-filter-reset`「重置」），
+  // 页面级旧控件随之删除。所以下面两条筛选判据改在这里量。
+  const SHADOW_HOST = '#team-workshop';
+  /** 真鼠标点 shadow root 里的元素（`document.querySelector` 看不到 shadow 内部，必须自己算坐标）。 */
+  const shadowClick = async (innerSelector) => {
+    // 先滚到视口中间，**等布局稳定之后**再量坐标：首页锁一屏 + 候选列表内部滚动会让
+    // 「滚动后再布局一次」，同一轮里先量后点会落到别的地方（与工坊自己那条 `mouseClick` 同一套做法）。
+    await js(`(()=>{const host=document.querySelector(${JSON.stringify(SHADOW_HOST)});
+      const el=host?.shadowRoot?.querySelector(${JSON.stringify(innerSelector)});
+      if(el)el.scrollIntoView({block:'center'});return true;})()`);
+    await sleep(180);
+    const info = await js(`(()=>{const host=document.querySelector(${JSON.stringify(SHADOW_HOST)});
+      const el=host?.shadowRoot?.querySelector(${JSON.stringify(innerSelector)});
+      if(!el)return null;const r=el.getBoundingClientRect();
+      const x=Math.round(r.left+r.width/2),y=Math.round(r.top+r.height/2);
+      const top=document.elementFromPoint(x,y);
+      const path=(()=>{const out=[];let n=top;while(n){out.push(n.tagName+(n.id?'#'+n.id:''));n=n.parentNode??n.host??null;if(out.length>5)break;}return out.join('<');})();
+      return {x,y,w:Math.round(r.width),h:Math.round(r.height),topTag:top?top.tagName:null,topPath:path};})()`);
+    if (!info) throw new Error(`工坊里找不到可点的元素：${innerSelector}`);
+    if (info.w === 0 || info.h === 0) throw new Error(`工坊里的 ${innerSelector} 尺寸为 0（${info.w}×${info.h}），真实鼠标点不到`);
+    await send('Input.dispatchMouseEvent', {type: 'mouseMoved', x: info.x, y: info.y});
+    for (const type of ['mousePressed', 'mouseReleased']) {
+      await send('Input.dispatchMouseEvent', {type, x: info.x, y: info.y, button: 'left', clickCount: 1});
+    }
+    await sleep(220);
+    return info;
+  };
+  /** 工坊候选池的读数：分页 / 总量 / 本页卡 / 下拉当前值。 */
+  const workshopPool = async () => js(`(()=>{const host=document.querySelector(${JSON.stringify(SHADOW_HOST)});
+    const sr=host?.shadowRoot??null;
+    if(!sr)return null;
+    const pageText=(sr.getElementById('tw-cand-page')?.textContent||'').trim();
+    const m=/(\\d+)\\s*\\/\\s*(\\d+)/.exec(pageText);
+    const rows=[...sr.querySelectorAll('#tw-cand-list .tw-row')];
+    const nameOf=(r)=>(r.querySelector('.tw-name')?.textContent||'').trim();
+    const next=sr.getElementById('tw-cand-next');
+    const prev=sr.getElementById('tw-cand-prev');
+    const sel=sr.getElementById('tw-filter-type');
+    const reset=sr.getElementById('tw-filter-reset');
+    return {label:pageText,page:m?Number(m[1]):null,pages:m?Number(m[2]):null,
+      total:Number(host.dataset.twPoolTotal||'0'),rows:rows.length,
+      names:rows.map(nameOf),first:rows.length?nameOf(rows[0]):null,
+      nextDisabled:next?Boolean(next.disabled):null,prevDisabled:prev?Boolean(prev.disabled):null,
+      typeValue:sel?sel.value:null,
+      typeOptions:sel?[...sel.options].map((o)=>o.value):[],
+      typeLabels:sel?[...sel.options].map((o)=>o.textContent):[],
+      resetFound:Boolean(reset)};})()`);
+  /** 用**真实键盘**改工坊的属性下拉；无头 Chrome 里原生下拉点不开，键盘改不动时才退回 change 事件。 */
+  const setWorkshopType = async (value) => {
+    const info = await js(`(()=>{const host=document.querySelector(${JSON.stringify(SHADOW_HOST)});
+      const sel=host?.shadowRoot?.querySelector('#tw-filter-type');
+      if(!sel)return null;sel.focus();
+      return {value:sel.value,options:[...sel.options].map((o)=>o.value)};})()`);
+    if (!info) throw new Error('工坊里没有 #tw-filter-type');
+    const index = info.options.indexOf(value);
+    let path = '真键盘方向键';
+    let steps = 0;
+    if (index > 0) {
+      const from = Math.max(0, info.options.indexOf(info.value));
+      const down = from < index;
+      steps = Math.abs(index - from);
+      for (let i = 0; i < steps; i += 1) {
+        for (const type of ['keyDown', 'keyUp']) {
+          await send('Input.dispatchKeyEvent', {type, key: down ? 'ArrowDown' : 'ArrowUp',
+            code: down ? 'ArrowDown' : 'ArrowUp', windowsVirtualKeyCode: down ? 40 : 38,
+            nativeVirtualKeyCode: down ? 40 : 38});
+        }
+        await sleep(70);
+      }
+      await sleep(300);
+    }
+    let now = await js(`document.querySelector(${JSON.stringify(SHADOW_HOST)})?.shadowRoot?.querySelector('#tw-filter-type')?.value ?? null`);
+    if (now !== value) {
+      // 如实披露：无头 Chrome 里原生 `<select>` 的下拉列表打不开、方向键也改不动 value
+      // （仓库里页面级旧筛选也踩过同一个坑），退回该控件自己的 `change` 事件。
+      path = '真键盘改不动（无头 Chrome 原生 select 打不开）→ 退回该控件自己的 change 事件';
+      now = await js(`(()=>{const host=document.querySelector(${JSON.stringify(SHADOW_HOST)});
+        const sel=host?.shadowRoot?.querySelector('#tw-filter-type');
+        if(!sel)return null;sel.value=${JSON.stringify(value)};
+        sel.dispatchEvent(new Event('change',{bubbles:true}));
+        return sel.value;})()`);
+    }
+    await sleep(800);
+    return {path, wanted: value, value: now, index, optionCount: info.options.length, steps};
+  };
   const pressEnter = async () => {
     for (const type of ['keyDown', 'keyUp']) {
       await send('Input.dispatchKeyEvent', {type, key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, nativeVirtualKeyCode: 13});
@@ -332,28 +419,78 @@ async function main() {
   await send('Input.dispatchKeyEvent', {type: 'keyUp', key: 'Backspace', code: 'Backspace', windowsVirtualKeyCode: 8, nativeVirtualKeyCode: 8});
   await sleep(700);
 
-  // 属性筛选（草系只有 3 只 ⇒ 只有 1 页）：先站到第 4 页，再点筛选
-  await js(`(()=>{const d=window.rocoDemo;d.state.pool.page=4;return d.loadPool();})()`);
-  await sleep(700);
-  const atPageFour = await poolState();
-  await mouseClick('#filter-type-menu > summary');
-  await sleep(200);
-  await mouseClick('#filter-type button[data-type="草系"]');
-  await sleep(800);
-  const afterType = await poolState();
-  check('D1-filter-reset+clamp', '属性筛选后重置到第 1 页，并把页码夹到新结果集内（不是停在 4/4）',
-    atPageFour.page === 4 && afterType.page === 1 && afterType.pages === 1
-    && afterType.ids.length === 3 && afterType.nextDisabled === true,
-    `筛选前第 ${atPageFour.page}/${atPageFour.pages} 页 → 草系：第 ${afterType.page}/${afterType.pages} 页 `
-    + `(${afterType.ids.length} 只，next.disabled=${afterType.nextDisabled})`);
-  await js(`(()=>{const type=window.rocoDemo.state.pool.type;
-    return type;})()`);
-  await mouseClick('#filter-reset');
-  await sleep(800);
-  const afterReset = await poolState();
-  check('D1-filter-clear', '「清除筛选」把结果集换回全量（4 页、每页 12 只）',
-    afterReset.pages === 4 && afterReset.ids.length === 12,
-    `清除后第 ${afterReset.page}/${afterReset.pages} 页，${afterReset.ids.length} 只`);
+  // ── 属性筛选（迁移到工坊的新控件）：先站到靠后的页，再筛，页码必须夹回第 1 页 ──────
+  // 2026-09-23（人类）：「旧的筛选机制迁移到新的后旧的就删掉」→ 页面级 `#filter-type-menu` /
+  // `#filter-reset` 会被删，读点迁到工坊模块的 `#tw-filter-type`（`<select>` 的 change）与
+  // `#tw-filter-reset`（「重置」）。口径不变：筛选后**回第 1 页**且页码夹到新结果集内。
+  const wsReady = await waitFor(`(()=>{const h=document.querySelector('#team-workshop');
+    return Boolean(h&&h.shadowRoot&&h.dataset.twReady==='yes');})()`, 80, 150);
+  const wsBefore = await workshopPool();
+  // 真鼠标连点「下一页」到第 4 页（不直接改 state，保证导航本身可用）。
+  // 控件缺失/尺寸为 0 时**不让整轮 fatal**：记下来，让这条判据自己红。
+  let wsNav = null;
+  let wsNavError = null;
+  try {
+    for (let i = 0; i < 3; i += 1) {
+      wsNav = await shadowClick('#tw-cand-next');
+      await sleep(500);
+    }
+  } catch (error) { wsNavError = error.message; }
+  const wsAtPageFour = await workshopPool();
+  // 挑一个**结果集最小**的属性：逐个拿下拉里真实存在的选项问服务端，取总量最小的那个
+  // （全图鉴 622 条 / 52 页；只要筛完的页数严格少于我们站的第 4 页，就证明页码被夹回来了）。
+  const wsTypeOptions = (wsAtPageFour?.typeOptions ?? []).filter((v) => v !== '');
+  let wsPick = null;
+  const wsProbe = [];
+  for (const value of wsTypeOptions) {
+    const res = await fetch(`${base}api/roco/box?kind=catalog&limit=12&offset=0&type=${encodeURIComponent(value)}`);
+    if (!res.ok) { wsProbe.push(`${value}:HTTP${res.status}`); continue; }
+    const json = await res.json();
+    const total = Number(json?.player?.total ?? NaN);
+    wsProbe.push(`${value}:${Number.isFinite(total) ? total : '—'}`);
+    if (!Number.isFinite(total) || total < 1) continue;
+    if (wsPick === null || total < wsPick.total) wsPick = {value, total};
+  }
+  const wsSet = wsPick ? await setWorkshopType(wsPick.value) : null;
+  const wsAfterType = await workshopPool();
+  const wsExpectedPages = wsPick ? Math.max(1, Math.ceil(wsPick.total / 12)) : null;
+  check('D1-filter-reset+clamp', '属性筛选后重置到第 1 页，并把页码夹到新结果集内（不是停在原来那几页）。'
+    + '【按人类 2026-09-23 口径，读取点从页面级 `#filter-type-menu` / `#filter-type` / `#filter-reset`（已按人类口径删除）'
+    + '迁到**工坊**的新控件：`#team-workshop >>> #tw-filter-type`（`<select>` 的 change）'
+    + '与 `>>> #tw-filter-reset`（「重置」）；口径不变】',
+    wsReady === true && wsAtPageFour?.page === 4 && wsNavError === null
+    && wsPick !== null && wsAfterType?.page === 1
+    && wsAfterType?.total === wsPick?.total && wsAfterType?.pages === wsExpectedPages
+    && wsAfterType?.pages < wsAtPageFour?.pages,
+    `工坊就绪=${wsReady}；翻到第 ${wsAtPageFour?.page}/${wsAtPageFour?.pages} 页`
+    + `${wsNavError ? `（翻页失败：${wsNavError}）` : ''} → `
+    + `筛「${wsPick?.value ?? '（下拉里没有可用属性）'}」（服务端 ${wsPick?.total ?? '—'} 条 ⇒ 期望 ${wsExpectedPages} 页）→ `
+    + `实际 ${wsAfterType?.total} 条 / 第 ${wsAfterType?.page}/${wsAfterType?.pages} 页`
+    + `（${wsAfterType?.rows} 张卡，next.disabled=${wsAfterType?.nextDisabled}）；`
+    + `输入路径=${wsSet?.path ?? '—'}，选中值=${JSON.stringify(wsSet?.value ?? null)}；`
+    + `下拉选项 ${JSON.stringify(wsAtPageFour?.typeOptions)}；`
+    + `选项探测 ${JSON.stringify(wsProbe).slice(0, 260)}；命中翻页=${JSON.stringify(wsNav)}`
+    + `（命中点上是 ${wsNav?.topPath ?? '—'}）`);
+  // 2026-09-23（人类）：「重置」把结果集换回全量、页码回第 1 页 —— 读点迁到工坊 `#tw-filter-reset`。
+  let wsResetClick = null;
+  try { wsResetClick = await shadowClick('#tw-filter-reset'); }
+  catch (error) { wsResetClick = {error: error.message}; }
+  await waitFor(`Number(document.querySelector('#team-workshop')?.dataset.twPoolTotal||'0')
+    === ${Number(wsBefore?.total ?? 0)}`, 40, 200);
+  await sleep(400);
+  const wsAfterReset = await workshopPool();
+  check('D1-filter-clear', '「重置」把结果集换回全量（工坊候选池回到初始总量与第 1 页）。'
+    + '【按人类 2026-09-23 口径，读取点从页面级 `#filter-reset`（已按人类口径删除）迁到 '
+    + '`#team-workshop >>> #tw-filter-reset`（「重置」）；口径不变：结果集回全量、页码夹回第 1 页。'
+    + '⚠ 这条同时要求「重置之前筛选真的生效过」（重置前后的候选总量必须不同），'
+    + '否则「重置回全量」是空转】',
+    wsAfterType?.total !== wsBefore?.total
+    && wsAfterReset?.total === wsBefore?.total && wsAfterReset?.page === 1
+    && wsAfterReset?.typeValue === '',
+    `重置前总量=${wsAfterType?.total}（${wsAfterType?.label}）→ 重置后总量=${wsAfterReset?.total}（${wsAfterReset?.label}），`
+    + `第 ${wsAfterReset?.page}/${wsAfterReset?.pages} 页，本页 ${wsAfterReset?.rows} 张，`
+    + `下拉值=${JSON.stringify(wsAfterReset?.typeValue)}；命中=${JSON.stringify(wsResetClick)}`
+    + `（命中点上是 ${wsResetClick?.topPath ?? wsResetClick?.error ?? '—'}）`);
 
   // ── P0-3 引导条不遮挡候选卡 ─────────────────────────────────────────────
   await js(`localStorage.removeItem('roco-coach-onboard-v1')`);
@@ -801,56 +938,103 @@ async function main() {
     && /按需推算/.test(scopeToggle390.text),
     `开关 ${JSON.stringify(scopeToggle390)}；clientW/scrollW=${scopeOverflow390.clientW}/${scopeOverflow390.scrollW}`);
 
-  // 模式徽记（D5）：读注册表，候选徽记与「匹配前对手未知」在玩家层
+  // 模式口径（D5）：注册表口径在**数据层与开发者抽屉**里可核对，玩家层不留口径文案
   //
-  // 2026-09-23（人类 v3h 版式）：页眉中间列是「模式 + 第 N 回合」（`#b3-mode` / `#b3-round`），
-  // 三条口径的徽记按人类批注**只在「小芽 → 设置」里出现一次**（不再堆在战斗页页眉下面）。
-  // ⚠ 那两行在一个**默认收起的 `<details>`** 里，而 `innerText` **不含** hidden 子树
-  //（仓库里另一条判据踩过同一个坑：实测得到 -1）——所以玩家层那一层用 `textContent` 读全文，
-  // 并**照旧排除**工程抽屉（`#about-drawer`）。可见徽记（`#b3-mode`）单独读。
+  // 三次口径演变，判据跟着走、一次都没放松：
+  //   · 2026-09-22：三条口径（模式 / 候选规则（待实机核对）/ 匹配前对手未知）必须在**玩家层**各出现一次，
+  //     且**首屏可见**；
+  //   · 2026-09-23 白天：人类要求它们不占战斗页页眉 → 收进小芽面板的 `#mode-chips`（旧 `#mode-line` 已删）；
+  //   · 2026-09-23 第六轮（人类，话说得很重）：「口径文案真删」——`<div id="mode-chips">` 容器
+  //     **从 HTML 里删掉**（不是隐藏），界面上一处不留。
+  // 所以这一条的等价形态是：
+  //   ① 玩家层（`body.textContent` 去掉默认收起的 `#about-drawer`）里那两句结论**一次都不许出现**；
+  //   ② 真鼠标点 `#coach-entry` 打开小芽面板，面板里同样一次都不许出现
+  //      （「可查」不靠玩家层，靠下面的数据层与抽屉）；
+  //   ③ 口径本身**没丢、仍可机器核对**：`body.dataset.rocoMode` = 注册表 mode id、
+  //      `body.dataset.rocoPrematch` = `UNKNOWN_PREMATCH` 枚举，注册表原文仍在开发者抽屉
+  //      （`#mode-raw` / `#mode-probe`）；
+  //   ④ 战斗页页眉那枚可见徽记 `#b3-mode` 仍在、且不许印注册表/验收台术语。
+  const entryClick = await mouseClick('#coach-entry');
+  await sleep(420);
+  // `#coach-entry` 是**开关**（点一次开、再点一次收）。为了确保下面读到的是**打开态**，
+  // 这里轮询补齐（若前面某一步已经把它打开过，这一下反而会关掉 —— 轮询会再点回来）。
+  const ensureCoachPanel = async () => {
+    for (let i = 0; i < 3; i += 1) {
+      if (await js(`(()=>{const c=document.getElementById('companion-card');
+        return Boolean(c)&&c.hidden===false&&c.getClientRects().length>0;})()`)) return true;
+      await mouseClick('#coach-entry');
+      await sleep(420);
+    }
+    return false;
+  };
+  const coachPanelOpen = await ensureCoachPanel();
   const modeFacts = await js(`(()=>{const d=document.body.dataset;
     const badge=document.getElementById('b3-mode');
+    const chips=document.getElementById('mode-chips');
+    const card=document.getElementById('companion-card');
+    const clean=(x)=>String(x||'').replace(/\\s+/g,' ').trim();
     const clone=document.body.cloneNode(true);
     const dev=clone.querySelector('#about-drawer');if(dev)dev.remove();
-    const player=(clone.textContent||'').replace(/\\s+/g,' ');
     const r=badge?badge.getBoundingClientRect():{height:0,top:0};
     return {mode:d.rocoMode??null,prematch:d.rocoPrematch??null,standardPvp:d.rocoStandardPvp??null,
-      text:badge?(badge.textContent||'').replace(/\\s+/g,' ').trim():null,
-      playerText:player,hidden:r.height===0,top:Math.round(r.top),vh:window.innerHeight};})()`);
+      text:badge?clean(badge.textContent):null,
+      playerText:clean(clone.textContent),
+      chipsFound:Boolean(chips),chipsText:chips?clean(chips.textContent):null,
+      panelText:card?clean(card.textContent):null,
+      companionOpen:Boolean(card)&&card.hidden===false&&card.getClientRects().length>0,
+      hidden:r.height===0,top:Math.round(r.top),vh:window.innerHeight};})()`);
   const statusMode = await fetch(`${base}api/roco/status`).then((r) => r.json()).then((d) => d.mode);
-  // 2026-09-22 人类 P0：玩家那一行**不再印注册表枚举**（`UNKNOWN_PREMATCH` 属于验收台术语），
-  // 于是判据拆成两层，各自钉该钉的：
-  //   · **玩家层**必须是中文结论「候选规则（待实机核对）」「匹配前对手未知」；
-  //   · **数据层**（`document.body.dataset.rocoPrematch`）仍然逐字带枚举，机器可核对；
+  if (coachPanelOpen) { await mouseClick('#close-companion'); await sleep(320); }
+  // 2026-09-22 人类 P0：玩家那一行**不再印注册表枚举**（`UNKNOWN_PREMATCH` 属于验收台术语）。
+  // 2026-09-23 第六轮又把那两句中文结论本身也删了，所以现在拆成三层，各自钉该钉的：
+  //   · **玩家层**（含真鼠标打开的小芽面板）里，那两句口径文案**一次都不许出现**（人类要求删干净）；
+  //   · **数据层**（`document.body.dataset.rocoMode` / `rocoPrematch`）仍然逐字带 mode id 与枚举，机器可核对；
   //   · **注册表原文**必须还在开发者抽屉里（`#mode-raw` / `#mode-probe`），不能连原文都丢掉。
+  const DELETED_COPY = ['候选规则（待实机核对）', '匹配前对手未知'];
   const modeProblems = (f, rawText) => {
     const bad = [];
     if (f?.mode !== 'pvp-standard-six-pet') bad.push(`模式 id 实际 ${JSON.stringify(f?.mode)}`);
-    // 玩家层：读**整个玩家层**（去掉默认收起的开发者抽屉）里有没有那两句中文结论。
-    if (!/候选规则（待实机核对）/.test(String(f?.playerText ?? ''))) bad.push('玩家层没有「候选规则（待实机核对）」');
-    if (!/匹配前对手未知/.test(String(f?.playerText ?? ''))) bad.push('玩家层没有「匹配前对手未知」');
-    // 可见徽记（页眉中间列）本身不许印注册表术语。
+    // ① 玩家层不许出现已删的口径文案（整页去掉默认收起的开发者抽屉；`textContent` 连 hidden 子树一起算，是最严的读法）。
+    for (const needle of DELETED_COPY) {
+      if (String(f?.playerText ?? '').includes(needle)) bad.push(`玩家层又出现了已删的口径文案「${needle}」`);
+      if (String(f?.panelText ?? '').includes(needle)) bad.push(`小芽面板里又出现了已删的口径文案「${needle}」`);
+      if (String(f?.chipsText ?? '').includes(needle)) bad.push(`\`#mode-chips\` 又被加回来了：里面出现「${needle}」`);
+    }
+    if (f?.chipsFound === true) bad.push('`#mode-chips` 容器已按人类要求从 HTML 删除，现在又被加回来了');
+    // ② 口径本身没丢：数据层仍带 mode id / 枚举（机器可核对）。
+    if (f?.prematch !== 'UNKNOWN_PREMATCH') bad.push(`数据层没带枚举（dataset.rocoPrematch=${JSON.stringify(f?.prematch)}）`);
+    if (f?.mode !== 'pvp-standard-six-pet') bad.push(`数据层没带 mode id（dataset.rocoMode=${JSON.stringify(f?.mode)}）`);
+    // ③ 注册表原文必须还在开发者抽屉里。
+    if (!/pvp-standard-six-pet|标准 PVP/.test(String(rawText ?? ''))) bad.push('开发者抽屉里没有注册表原文');
+    // ④ 可见徽记（战斗页页眉中间列 `#b3-mode`）本身不许印注册表/验收台术语。
     if (/UNKNOWN_PREMATCH|注册表|引擎实际/.test(String(f?.text ?? ''))) {
       bad.push('玩家层出现了注册表/验收台术语（枚举名、注册表字样、引擎实际规模）');
     }
-    if (f?.prematch !== 'UNKNOWN_PREMATCH') bad.push(`数据层没带枚举（dataset.rocoPrematch=${JSON.stringify(f?.prematch)}）`);
-    if (f?.hidden !== false || !(f?.top < f?.vh)) bad.push('徽记不在首屏');
-    if (!/pvp-standard-six-pet|标准 PVP/.test(String(rawText ?? ''))) bad.push('开发者抽屉里没有注册表原文');
+    if (f?.companionOpen !== true) bad.push('真鼠标点 `#coach-entry` 之后小芽面板没有真的打开（口径文案的删除要连面板一起核）');
     return bad;
   };
   const modeRawText = await js(`(()=>{const a=document.getElementById('mode-raw');
     const b=document.getElementById('mode-probe');
     return [a?a.textContent:'',b?b.textContent:''].join(' | ');})()`);
-  check('D5-mode-badge', '模式徽记：玩家层是中文结论（候选规则（待实机核对）+ 匹配前对手未知），'
-    + '枚举与注册表原文留在数据层与开发者抽屉里，且首屏可见。'
-    + '【按人类 2026-09-23 版式，可见徽记读 `#b3-mode`（页眉中间列）；'
-    + '⚠ 旧读取点 `#mode-line` 已从 roco.html 删除 —— 三条口径目前无处渲染，这条会红】',
+  check('D5-mode-badge', '模式口径：人类 2026-09-23 第六轮要求「口径文案真删」—— 那两句中文结论'
+    + '（候选规则（待实机核对）/ 匹配前对手未知）在玩家层与真鼠标打开的小芽面板里**一次都不许出现**；'
+    + '口径本身没丢：mode id 与 prematch 枚举留在数据层，注册表原文留在开发者抽屉里。'
+    + '【三次口径演变：2026-09-22「玩家层各出现一次」→ 09-23 白天「收进小芽面板 `#mode-chips`」'
+    + '→ 第六轮「容器从 HTML 真删」。这条判据从「断言出现」等价改成「断言不出现」，'
+    + '并保留数据层/抽屉的可核对性（旧读取点 `#mode-line` 与 `#mode-chips` 都已删除）】',
     modeProblems(modeFacts, modeRawText).length === 0,
     modeProblems(modeFacts, modeRawText).join(' | ')
-    + `；徽记「${modeFacts.text}」；注册表 label「${statusMode?.label ?? '(服务端没转发 mode)'}」`);
-  counter('D5-mode-badge', '把注册表枚举名印回玩家层（`UNKNOWN_PREMATCH` 直接写进徽记）必须被同一条判据抓住',
-    modeProblems({...modeFacts, text: `${modeFacts.text} UNKNOWN_PREMATCH`, prematch: 'UNKNOWN_PREMATCH'}, modeRawText),
-    '{"text":"…UNKNOWN_PREMATCH"}');
+    + `；入口命中 (${entryClick.x},${entryClick.y})，真鼠标点开小芽=${coachPanelOpen}；`
+    + `#mode-chips=${modeFacts.chipsFound ? '**又被加回来了**' : '缺失（符合「真删」）'}；`
+    + `玩家层含已删文案=${DELETED_COPY.filter((n) => String(modeFacts.playerText ?? '').includes(n)).length} 处 / `
+    + `面板 ${DELETED_COPY.filter((n) => String(modeFacts.panelText ?? '').includes(n)).length} 处；`
+    + `数据层 mode=${JSON.stringify(modeFacts.mode)} prematch=${JSON.stringify(modeFacts.prematch)}；`
+    + `页眉徽记「${modeFacts.text}」；注册表 label「${statusMode?.label ?? '(服务端没转发 mode)'}」`);
+  counter('D5-mode-badge', '把已删的口径文案塞回玩家层（或把注册表枚举名印进可见徽记）'
+    + '必须被同一条判据抓住',
+    modeProblems({...modeFacts, playerText: `${modeFacts.playerText} 候选规则（待实机核对）`,
+      text: `${modeFacts.text} UNKNOWN_PREMATCH`}, modeRawText),
+    '{"playerText":"…候选规则（待实机核对）","text":"…UNKNOWN_PREMATCH"}');
   counter('D5-mode-badge(枚举丢了)', '数据层把 prematch 枚举丢掉必须被同一条判据抓住',
     modeProblems({...modeFacts, prematch: null}, modeRawText), '{"prematch":null}');
   check('D5-no-fake-hearts', '页面上没有心形计数器（心/魔力只显示引擎给的数，没有就如实收起、不编）。'

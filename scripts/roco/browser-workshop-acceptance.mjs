@@ -8,14 +8,21 @@
 //   ② 逐只用**真实鼠标**点候选池，连续选入六只：`2～5 只` 时评估随着阵容变化
 //      （候选换人、缺口清单在、取舍标签在），选满六只后出现**完整诊断**
 //      （五轴 + 一个最小替换 + 未知清单）。
-//   ③ 首屏徽记必须在**可见文本**里：「标准 PVP · 六宠」「候选规则（待实机核对）」
-//      「匹配前对手未知」「候选来自全图鉴」；「已选 3 只固定栏」这类 v3 废止口径必须没有。
+//   ③ 三条口径（模式 / 候选规则（待实机核对）/ 匹配前对手未知）按人类 2026-09-23 第六轮要求
+//      **已从玩家层真删**：判据断言它们在玩家层（含真鼠标打开的小芽面板）**一次都不出现**；
+//      口径本身没丢 —— `body.dataset.rocoMode` / `rocoPrematch` 与开发者抽屉里的注册表原文仍可核对。
+//      候选池总量由模块的 `data-tw-pool-total`（≥600）记账。
+//      （演变：2026-09-22「玩家层各出现一次」→ 09-23 白天「收进小芽面板 `#mode-chips`」→ 第六轮「真删」。）
+//      「已选 3 只固定栏」这类 v3 废止口径必须没有。
 //   ④ **没有真实环境分布就绝不给胜率或伪精确强度数字**：玩家可见文本里不许出现
 //      「数字 + %」或「胜率/概率 + 数字」；算不出来的轴必须写「现在算不出来」并点名缺什么，
 //      不许补 0。
 //   ⑤ 两档（1440×900 / 390×844）都没有横向溢出（`clientW == scrollW`），
-//      390px 下模块里每个可点元素 ≥44px，且**区块顺序**是
-//      「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」。
+//      390px 下模块里每个可点元素 ≥44px，且**常规流**里的区块顺序是
+//      「队伍槽位 → 候选池」（→ 若「当前评估」「小芽短提示」还在流里，必须依次排在后面）。
+//      2026-09-23 版式演变：人类批注「右下角的小芽模块整体删除」→ `.tw-coach` 删除；
+//      紧接着「阵容评估 → 左侧悬浮抽屉」→ `.tw-eval` 也不在流里，改由 `#tw-eval-drawer`
+//      承担（判据里另加一条等价断言：真鼠标点 `#tw-eval-toggle` 能打开、面板可见且有内容）。
 //
 // 这个文件**同时是判据的唯一来源**：`tests/roco-workshop.test.js` 直接 import 下面这些导出
 // 来跑必红反证。判据写两份就会各自漂移，所以 main() 只在「这个文件是被直接执行的那一个」
@@ -475,13 +482,29 @@ export function coachCompareProblems(facts) {
 
 /** 触控目标：390px 下模块里每个可见可点元素都 ≥44×44。 */
 export function touchTargetProblems(small) {
-  return (small ?? []).map((row) => `${row.tag}.${row.cls ?? ''} 只有 ${row.w}×${row.h}`);
+  return (small ?? []).map((row) => `${row.tag}.${row.cls ?? ''} 只有 ${row.w}×${row.h}`
+    + (row.path ? `（${row.path}${row.text ? ` · 「${row.text}」` : ''}）` : ''));
 }
 
-/** 移动端区块顺序必须是「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」。 */
+/**
+ * 移动端**常规流**里的区块顺序必须是「队伍槽位 → 候选池」（→ 若「当前评估」「小芽短提示」
+ * 还在流里，必须依次排在后面）。
+ *
+ * 2026-09-23 版式演变（判据跟着走，一次都没放松）：
+ *   · 人类批注「右下角的小芽模块整体删除」→ `.tw-coach` 可以不存在；
+ *   · 紧接着「阵容评估 → 左侧悬浮抽屉」→ `.tw-eval` 也**不在常规流里**了（改成 `#tw-eval-drawer`
+ *     的固定抽屉）。「当前评估」这条口径没有丢：它由主流程里另加的一条等价断言守
+ *     （抽屉存在 + 真鼠标点 `#tw-eval-toggle` 能打开 + 打开后 `#tw-eval-panel` 真的可见且里面有内容）。
+ * （反证仍然成立：`['tw-team','tw-eval','tw-cand',…]` 这种把评估插到候选池前面的顺序 → 不等于期望 → 红。）
+ */
 export function mobileOrderProblems(order, tops) {
   const problems = [];
-  const expect = ['tw-team', 'tw-cand', 'tw-eval', 'tw-coach'];
+  const required = ['tw-team', 'tw-cand'];
+  const present = required.filter((cls) => (order ?? []).includes(cls));
+  const missing = required.filter((cls) => !present.includes(cls));
+  if (missing.length) problems.push(`模块缺少必需区块：${missing.join(', ')}`);
+  const optional = ['tw-eval', 'tw-coach'].filter((cls) => (order ?? []).includes(cls));
+  const expect = [...present, ...optional];
   if (JSON.stringify(order) !== JSON.stringify(expect)) {
     problems.push(`移动端区块顺序必须是 ${JSON.stringify(expect)}，实际 ${JSON.stringify(order)}`);
   }
@@ -617,9 +640,14 @@ async function main() {
     const r = await rectOf(sel);
     if (!r) throw new Error(`找不到可点的元素：${sel}`);
     const top = JSON.parse(await js(`(()=>{const el=document.elementFromPoint(${r.x},${r.y});
-      if(!el)return '{"tag":null}';
-      const path=(()=>{const out=[];let node=el;while(node){out.push(node.tagName+(node.id?'#'+node.id:''));node=node.parentNode??node.host??null;if(out.length>6)break;}return out.join('<');})();
-      return JSON.stringify({tag:el.tagName,cls:String(el.className||'').slice(0,40),path});})()`));
+      const host=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=host?host.shadowRoot:null;
+      const sEl=(sr&&typeof sr.elementFromPoint==='function')?sr.elementFromPoint(${r.x},${r.y}):null;
+      const pathOf=(node)=>{const out=[];let n=node;while(n){out.push(String(n.tagName||'')
+        +(n.id?'#'+n.id:'')+(n.className?'.'+String(n.className).trim().split(/\\s+/).join('.'):''));
+        n=n.parentNode||n.host||null;if(out.length>6)break;}return out.join('<');};
+      return JSON.stringify({tag:el?el.tagName:null,cls:el?String(el.className||'').slice(0,40):null,
+        path:el?pathOf(el):null,shadowTag:sEl?sEl.tagName:null,shadowPath:sEl?pathOf(sEl):null});})()`));
     for (const type of ['mousePressed', 'mouseReleased']) {
       await cdp.send('Input.dispatchMouseEvent', {type, x: r.x, y: r.y, button: 'left', clickCount: 1});
     }
@@ -731,11 +759,14 @@ async function main() {
       return JSON.stringify({rows:rows.length,match:match.length,
         species:owned?owned.dataset.twSpecies:(match[0]?match[0].dataset.twSpecies:null)});})()`));
     if (probe.species === null) return {added: false, probe, beforeCount};
-    await mouseClick(`${ROOT_SEL} >>> .tw-row[data-tw-species="${probe.species}"]`);
+    const click = await mouseClick(`${ROOT_SEL} >>> .tw-row[data-tw-species="${probe.species}"]`);
     await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0') >= ${beforeCount + 1}`,
       {tries: 40, ms: 120});
     const after = Number((await facts()).selected ?? 0);
-    return {added: after > beforeCount, probe, beforeCount, after};
+    // 判据红了要能看出「点上去落在了谁身上」：把命中的路径与点后的模块状态一起带回去。
+    const topAfter = await js(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twState ?? null`);
+    return {added: after > beforeCount, probe, beforeCount, after,
+      click: click?.top ?? null, topAfter};
   };
   /** 一只 owned 个体的显示名（与页面读同一份登记名）。 */
   const nameOfInstance = (instanceId) => js(`(async()=>{
@@ -791,48 +822,153 @@ async function main() {
     // `innerText` **不含** hidden 子树，会把面板里的那几条漏掉（实测得到 -1）；
     // 改用 `textContent`（含收起的面板），并继续**排除**工程抽屉那份 —— 语义仍是
     // 「玩家层恰好各出现一次，不许重复」。模块仍在 shadow root 里，textContent 也看不到它。
+    // 2026-09-22（人类实测 Q2）：候选里约一半是**我不拥有的物种**（实测 50 个候选 25 个非我拥有）。
+    // 2026-09-23（人类批注）：原来那两行 `[data-tw-group]` 分组说明**已删**（`groupPoolRows()`
+    // 现在插的是空串）。判据按新设计做**等价替换**，口径不放松：
+    //   ① **作用域分档**（`#tw-scope-all` 全图鉴 / `#tw-scope-mine` 我的精灵）真的改变结果集，
+    //      且「我的精灵」一档里**只含我拥有的**；
+    //   ② **逐卡**携带拥有与否的状态标签（「你还没有这一只」/「持有 · 可正式上场」）；
+    //   ③ 「图鉴参考不能正式出战」这层含义仍可读到 —— 由卡上的状态标
+    //      「图鉴 · 按需推算（未核验）」＋行标「你还没有这一只」承担（原分组说明由它们承担）。
+    const readOwnership = async () => JSON.parse(await js(`(()=>{
+      const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=root?.shadowRoot??null;
+      const rows=sr?[...sr.querySelectorAll('#tw-cand-list .tw-row')]:[];
+      const tagOf=(r)=>{const el=r.querySelector('.tw-state-tag');return el?(el.textContent||'').trim():'';};
+      const rowtagOf=(r)=>{const el=r.querySelector('.tw-rowtag');return el?(el.textContent||'').trim():'';};
+      const nameOf=(r)=>(r.querySelector('.tw-name')?.textContent||'').trim();
+      const held=rows.filter((r)=>r.dataset.twStatus==='held');
+      const notHeld=rows.filter((r)=>r.dataset.twStatus!=='held');
+      return JSON.stringify({
+        scope:(sr&&sr.querySelector('#tw-scope-all')?.getAttribute('aria-pressed')==='true')?'all':'mine',
+        total:Number(root?.dataset.twPoolTotal||'0'),
+        heldCount:Number(root?.dataset.twPoolHeld||'0'),
+        refCount:Number(root?.dataset.twPoolRef||'0'),
+        rowCount:rows.length,
+        taggedRows:rows.filter((r)=>Boolean(tagOf(r))).length,
+        hasNotOwned:notHeld.some((r)=>/你还没有这一只/.test(rowtagOf(r))),
+        hasTrial:notHeld.some((r)=>/图鉴|按需推算|未核验/.test(tagOf(r))),
+        heldTagOk:held.every((r)=>/持有|可正式上场/.test(tagOf(r))),
+        notOwnedSample:notHeld[0]?{name:nameOf(notHeld[0]),status:notHeld[0].dataset.twStatus,
+          tag:tagOf(notHeld[0]),rowtag:rowtagOf(notHeld[0])}:null,
+        heldSample:held[0]?{name:nameOf(held[0]),status:held[0].dataset.twStatus,
+          tag:tagOf(held[0]),rowtag:rowtagOf(held[0])}:null});})()`));
+    const scopeOwnership = {};
+    for (const [scope, sel] of [['all', `${ROOT_SEL} >>> #tw-scope-all`],
+      ['mine', `${ROOT_SEL} >>> #tw-scope-mine`]]) {
+      await mouseClick(sel);
+      await sleep(900);
+      scopeOwnership[scope] = await readOwnership();
+    }
+    // 回到**全图鉴**：后面的 `08` / `09` 与按名字搜索都按全量宇宙量。
+    await mouseClick(`${ROOT_SEL} >>> #tw-scope-all`);
+    await sleep(900);
+    const poolOwnership = {
+      allTotal: scopeOwnership.all.total,
+      mineTotal: scopeOwnership.mine.total,
+      mineRowCount: scopeOwnership.mine.rowCount,
+      mineRefCount: scopeOwnership.mine.refCount,
+      rowCount: scopeOwnership.all.rowCount,
+      taggedRows: scopeOwnership.all.taggedRows,
+      hasNotOwned: scopeOwnership.all.hasNotOwned,
+      hasTrial: scopeOwnership.all.hasTrial,
+      heldTagOk: scopeOwnership.all.heldTagOk,
+      notOwnedSample: scopeOwnership.all.notOwnedSample,
+      heldSample: scopeOwnership.all.heldSample,
+    };
+    const ownershipProblems = (f) => {
+      const bad = [];
+      if (!(f?.allTotal >= 1)) bad.push(`「全图鉴」一档没有结果（total=${f?.allTotal}）`);
+      if (!(f?.mineTotal >= 1)) bad.push(`「我的精灵」一档没有结果（total=${f?.mineTotal}）`);
+      if (f?.allTotal === f?.mineTotal) {
+        bad.push(`「全图鉴」与「我的精灵」结果条数相同（${f?.allTotal}）——作用域分档没真的换结果集`);
+      }
+      if (!(f?.rowCount >= 1)) bad.push('全图鉴这一页没有任何候选卡');
+      if (!(f?.taggedRows === f?.rowCount)) {
+        bad.push(`有 ${(f?.rowCount ?? 0) - (f?.taggedRows ?? 0)} 张候选卡没有状态标签`);
+      }
+      if (!f?.hasNotOwned) bad.push('没有一张卡标出「你还没有这一只」（拥有与否没逐卡说清）');
+      if (!f?.hasTrial) bad.push('没有一张卡标出「图鉴 / 按需推算（未核验）」（「不能正式出战」这层含义丢了）');
+      if (f?.heldTagOk === false) bad.push('持有的卡没有写「持有 · 可正式上场」');
+      if (!(f?.mineRefCount === 0 && f?.mineRowCount >= 1)) {
+        bad.push(`「我的精灵」一档里混进了非持有的卡（rows=${f?.mineRowCount} ref=${f?.mineRefCount}）`);
+      }
+      return bad;
+    };
+    check('候选按拥有与否分组', '人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有）。'
+      + '【按人类 2026-09-23 批注，原 `#tw-cand-list > [data-tw-group]` 两行分组说明**已删**；'
+      + '改由三条等价断言承担：① `#tw-scope-all`（全图鉴）与 `#tw-scope-mine`（我的精灵）结果集真的不同、'
+      + '且「我的精灵」只含我拥有的；② **逐卡**状态标签说清拥有与否（「你还没有这一只」/「持有 · 可正式上场」）；'
+      + '③ 「图鉴参考不能正式出战」由卡上的「图鉴 · 按需推算（未核验）」状态标承担】',
+      ownershipProblems(poolOwnership).length === 0,
+      ownershipProblems(poolOwnership).join(' | ')
+      || `全图鉴 ${poolOwnership.allTotal} 条 / 我的精灵 ${poolOwnership.mineTotal} 条（ref=${poolOwnership.mineRefCount}）；`
+        + `全图鉴本页 ${poolOwnership.rowCount} 张，带状态标 ${poolOwnership.taggedRows} 张；`
+        + `非拥有样例 ${JSON.stringify(poolOwnership.notOwnedSample)}；拥有样例 ${JSON.stringify(poolOwnership.heldSample)}`);
+    counter('候选按拥有与否分组', '作用域分档形同虚设（两档结果条数相同）+ 卡片不带拥有与否状态标，'
+      + '必须被同一条判据抓住',
+      ownershipProblems({allTotal: 24, mineTotal: 24, mineRowCount: 24, mineRefCount: 0,
+        rowCount: 24, taggedRows: 0, hasNotOwned: false, hasTrial: false, heldTagOk: false}),
+      '{"allTotal":24,"mineTotal":24,"taggedRows":0,"hasNotOwned":false}');
+
+    // 2026-09-23（人类第六轮，「口径文案真删」）：三条口径（模式 / 候选规则 / 匹配前对手未知）
+    // 的容器 `#mode-chips` 已**从 HTML 删除**（不是隐藏），界面上一处不留。
+    // 这条判据的等价形态（2026-09-22 是「玩家层各出现一次」→ 白天「收进小芽面板 `#mode-chips`」）：
+    //   ① 玩家层（`document.body.textContent` 去掉默认收起的 `#about-drawer`）里那三条**一次都不许出现**；
+    //   ② 真鼠标点 `#coach-entry` 打开小芽面板，面板里同样一次都不许出现；
+    //   ③ 口径没丢：`body.dataset.rocoMode` / `rocoPrematch` 与开发者抽屉里的注册表原文仍可核对；
+    //   ④ 候选池总量仍由模块 `data-tw-pool-total`（≥600）记账。
+    const openCoachPanel = async () => {
+      for (let i = 0; i < 3; i += 1) {
+        if (await js(`(()=>{const c=document.getElementById('companion-card');
+          return Boolean(c)&&c.hidden===false&&c.getClientRects().length>0;})()`)) return true;
+        await mouseClick('#coach-entry');
+        await sleep(420);
+      }
+      return false;
+    };
+    const closeCoachPanel = async () => {
+      if (await js(`(()=>{const c=document.getElementById('companion-card');return Boolean(c)&&c.hidden===false;})()`)) {
+        await mouseClick('#close-companion');
+        await sleep(360);
+      }
+    };
+    const coachPanelOpen = await openCoachPanel();
     const headerBadges = await js(`(()=>{const t=document.body.textContent||'';
       const d=document.getElementById('about-drawer');
       const dt=d?(d.textContent||''):'';
       const count=(needle)=>(t.split(needle).length-1)-(dt.split(needle).length-1);
       const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
-      return JSON.stringify({mode:count('标准 PVP 六宠阵容工坊'),candidate:count('候选规则（待实机核对）'),
-        prematch:count('匹配前对手未知'),poolTotal:Number(root?.dataset.twPoolTotal||'0')});})()`).then(JSON.parse);
-    // 2026-09-22（人类实测 Q2）：候选里约一半是**我不拥有的物种**（实测 50 个候选 25 个非我拥有），
-    // 页面必须按**拥有与否**分组说明 —— 否则玩家会以为「不存在的精灵进了我的队伍」。
-    // 先切到**全图鉴参考**范围：只有在那一档，列表里才会同时出现「我拥有的」与「图鉴参考」，
-    // 分组那条判据的真分支才被量到（「我的」范围里 ref=0，量它是空转）。
-    await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)})?.shadowRoot;
-      const b=sr&&sr.querySelector('#tw-scope-all');if(b)b.click();return true;})()`);
-    await sleep(900);
-    const poolGroups = await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
-      const sr=root?.shadowRoot;
-      const notes=sr?[...sr.querySelectorAll('#tw-cand-list [data-tw-group]')].map((el)=>el.textContent.trim()):[];
-      return {notes,held:Number(root?.dataset.twPoolHeld||'0'),ref:Number(root?.dataset.twPoolRef||'0')};})()`);
-    const groupProblems = (f) => {
-      const bad = [];
-      if (!(f?.held >= 1)) bad.push(`一类候选都没有（held=${f?.held}）`);
-      if (f?.ref > 0) {
-        if ((f?.notes ?? []).length < 2) bad.push('同时有「我的」与「图鉴参考」却没分组说明');
-        if (!(f?.notes ?? []).some((n) => /你拥有的/.test(n))) bad.push('没有「你拥有的可选」这组');
-        if (!(f?.notes ?? []).some((n) => /图鉴参考/.test(n))) bad.push('没有「图鉴参考」这组');
-        if (!(f?.notes ?? []).some((n) => /试玩|不能正式出战/.test(n))) bad.push('没说清图鉴参考不能正式出战');
-      }
-      return bad;
-    };
-    check('候选按拥有与否分组', '人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有），'
-      + '页面必须按**拥有与否**分组说明，并写清图鉴参考只能试玩',
-      groupProblems(poolGroups).length === 0,
-      groupProblems(poolGroups).join(' | ')
-      || `拥有 ${poolGroups.held} / 图鉴参考 ${poolGroups.ref}；说明 ${JSON.stringify(poolGroups.notes)}`);
-    counter('候选按拥有与否分组', '把两类混成一列（不给分组说明）必须被同一条判据抓住',
-      groupProblems({held: 5, ref: 7, notes: []}), '{"notes":[]}');
+      const card=document.getElementById('companion-card');
+      const chips=document.getElementById('mode-chips');
+      const panelText=card?(card.textContent||''):'';
+      const raw=(document.getElementById('mode-raw')?.textContent||'')
+        +' | '+(document.getElementById('mode-probe')?.textContent||'');
+      return JSON.stringify({mode:count('标准 PVP 六宠阵容工坊'),
+        candidate:count('候选规则（待实机核对）'),prematch:count('匹配前对手未知'),
+        poolTotal:Number(root?.dataset.twPoolTotal||'0'),
+        panelOpen:Boolean(card)&&card.hidden===false&&card.getClientRects().length>0,
+        chipsFound:Boolean(chips),
+        panelHasCopy:/候选规则（待实机核对）|匹配前对手未知/.test(panelText),
+        datasetMode:document.body.dataset.rocoMode??null,
+        datasetPrematch:document.body.dataset.rocoPrematch??null,
+        drawerRaw:raw});})()`).then(JSON.parse);
+    await closeCoachPanel();
 
-    check('03-徽记与候选池', '三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），'
-      + '模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账）',
-      headerBadges.mode===1&&headerBadges.candidate===1&&headerBadges.prematch===1
-      &&Number(headerBadges.poolTotal)>=600,
-      `页头出现次数 ${JSON.stringify(headerBadges)}`);
+    check('03-徽记与候选池', '三条口径按人类 2026-09-23 第六轮要求**已从玩家层真删**（一次都不出现，'
+      + '真鼠标打开的小芽面板里也没有）；候选池总量仍由模块 `data-tw-pool-total`（≥600）记账；'
+      + '口径本身没丢 —— `body.dataset.rocoMode` / `rocoPrematch` 与开发者抽屉里的注册表原文仍可核对。'
+      + '【2026-09-22 的口径是「三条各出现一次」→ 09-23 白天改到小芽面板 `#mode-chips` → 第六轮人类'
+      + '再次明确定为「真删」（容器已从 HTML 删除）。这条判据从「断言出现」等价改成「断言不出现」，'
+      + '并保留数据层/抽屉的可核对性（旧读取点 `#mode-line` 与 `#mode-chips` 都已删除）】',
+      headerBadges.mode===0&&headerBadges.candidate===0&&headerBadges.prematch===0
+      &&Number(headerBadges.poolTotal)>=600
+      &&headerBadges.datasetMode==='pvp-standard-six-pet'
+      &&headerBadges.datasetPrematch==='UNKNOWN_PREMATCH'
+      &&/pvp-standard-six-pet|标准 PVP/.test(String(headerBadges.drawerRaw??''))
+      &&headerBadges.chipsFound===false&&headerBadges.panelHasCopy===false,
+      `玩家层出现次数 ${JSON.stringify(headerBadges)}；真鼠标点开小芽=${coachPanelOpen}，`
+      + `#mode-chips=${headerBadges.chipsFound ? '**又被加回来了**' : '缺失（符合「真删」）'}`);
 
     counter('03-候选规则徽记', '把「候选规则（待实机核对）」徽记去掉必须被同一条判据抓住',
       badgeProblems({hasModeBadge: true, hasCandidateBadge: false, hasUnknownPrematch: true,
@@ -895,16 +1031,34 @@ async function main() {
     check('08-候选含图鉴物种', '候选池里能点到「我没有的图鉴物种」（证明候选宇宙是 600+，不是 48 只）',
       catalogOnly.length > 0, catalogOnly.length ? `命中 ${catalogOnly[0].name}` : '第 11 页 60 条里没有非拥有物种');
 
-    // 真实鼠标点开「只看收藏」→ 再关掉
-    const favClick = await mouseClick(`${ROOT_SEL} >>> #tw-favourite`);
-    await waitFor(`document.querySelector(${JSON.stringify(ROOT_SEL)})?.shadowRoot.getElementById('tw-favourite').getAttribute('aria-pressed')==='true'`);
-    await sleep(300);
-    const favOn = await facts();
-    await mouseClick(`${ROOT_SEL} >>> #tw-favourite`);
-    await sleep(320);
-    check('09-只看收藏开关', '真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok',
-      favOn.state === 'ok' && (await facts()).state === 'ok',
-      `开了之后 state=${favOn.state}（selected=${favOn.selected}）；关掉之后 state=${(await facts()).state}；命中=${JSON.stringify(favClick.top)}`);
+    // 2026-09-23（人类批注）：`#tw-favourite`（只看收藏）**已删除**，原步骤会直接抛 fatal。
+    // 等价替换：仍然用**真实鼠标**切换一档候选范围 → 候选池真的重新取数（`data-twPoolTotal` 变：
+    // 全图鉴 622 ↔ 我的精灵 80）→ 模块回到 ok；再切回「全图鉴」，后面的按名搜索仍在全量宇宙上量。
+    // （原「只看收藏」与「我的精灵」是同一类**收窄作用域**的操作，口径不变；
+    //   ⚠ `data-twSeq` 只记**评估**请求，范围切换只重取候选池 —— 所以这里量的是结果集本身。）
+    const poolTotalOf = async () => Number((await facts()).poolTotal ?? 0);
+    const totalBeforeScope = await poolTotalOf();
+    const mineClick = await mouseClick(`${ROOT_SEL} >>> #tw-scope-mine`);
+    await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twPoolTotal||'0') !== ${totalBeforeScope}`,
+      {tries: 60, ms: 150});
+    await sleep(360);
+    const scopeMineOn = await facts();
+    const totalMine = Number(scopeMineOn.poolTotal ?? 0);
+    const allClick = await mouseClick(`${ROOT_SEL} >>> #tw-scope-all`);
+    await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twPoolTotal||'0') !== ${totalMine}`,
+      {tries: 60, ms: 150});
+    await sleep(420);
+    const scopeAllBack = await facts();
+    check('09-范围分档开关', '真实鼠标点「我的精灵」→ 候选池真的重新取数（结果集从全量收窄）且模块回到 ok；'
+      + '再点「全图鉴」回到原结果集与 ok。'
+      + '【原 `#tw-favourite`（只看收藏）已按人类 2026-09-23 删除，由范围分档 '
+      + '`#tw-scope-mine` / `#tw-scope-all` 承担（同样是「收窄候选范围」这一类操作）】',
+      scopeMineOn.state === 'ok' && scopeAllBack.state === 'ok'
+      && totalMine !== totalBeforeScope && totalMine > 0
+      && Number(scopeAllBack.poolTotal) === totalBeforeScope,
+      `点「我的精灵」后 state=${scopeMineOn.state}（selected=${scopeMineOn.selected}，`
+      + `total ${totalBeforeScope}→${totalMine}）；点回「全图鉴」后 state=${scopeAllBack.state}`
+      + `（total=${scopeAllBack.poolTotal}）；命中=${JSON.stringify(mineClick.top)} / ${JSON.stringify(allClick.top)}`);
 
     // 点一只自己没有的图鉴物种：路由照实拒绝（fail closed），并且错误只出现在一行里
     await typeText(`${ROOT_SEL} >>> #tw-search`, catalogOnly[0].name);
@@ -1211,12 +1365,27 @@ async function main() {
         const r=el.getBoundingClientRect();
         if(r.width===0&&r.height===0)continue;
         if(el.closest('[hidden]'))continue;
-        out.push({tag:el.tagName,cls:String(el.className||'').slice(0,26),w:Math.round(r.width),h:Math.round(r.height)});}
-      return JSON.stringify({count:out.length,small:out.filter((x)=>x.w<44||x.h<44)});})()`));
+        // 判据红了要能一眼看出**是哪一个**元素：把父链（带 id/class）与一小段文本带上。
+        const chain=(()=>{const parts=[];let n=el;while(n){parts.push(n.tagName
+          +(n.id?'#'+n.id:'')+(n.className?'.'+String(n.className).trim().split(/\\s+/).join('.'):''));
+          n=n.parentNode??n.host??null;if(parts.length>4)break;}return parts.join('<');})();
+        out.push({tag:el.tagName,cls:String(el.className||'').slice(0,26),
+          w:Math.round(r.width),h:Math.round(r.height),path:chain,
+          text:String(el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,16)});}
+      // 容器读数：窄屏下「0 宽」的小元素到底是自己塌了，还是**父容器**没宽度。
+      const box=(el)=>{if(!el)return null;const r=el.getBoundingClientRect();
+        return {w:Math.round(r.width),h:Math.round(r.height)};};
+      const slots=sr?sr.getElementById('tw-slots'):null;
+      const firstSlot=sr?sr.querySelector('#tw-slots .tw-slot'):null;
+      const firstDetail=sr?sr.querySelector('#tw-slots .tw-slot .tw-detail'):null;
+      return JSON.stringify({count:out.length,small:out.filter((x)=>x.w<44||x.h<44),
+        boxes:{slots:box(slots),slot:box(firstSlot),detail:box(firstDetail),
+          team:box(sr?sr.querySelector('.tw-panel.tw-team'):null)}});})()`));
     const touchProblems = touchTargetProblems(targets.small);
     check('30-触控目标', '390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44',
       touchProblems.length === 0,
       touchProblems.join(' | ') || `量了 ${targets.count} 个元素，全部达标`);
+    if (touchProblems.length) log('[30 诊断] 容器框：', JSON.stringify(targets.boxes));
     counter('30-触控目标', '一个 30×30 的按钮必须被同一条判据抓住',
       touchTargetProblems([{tag: 'BUTTON', cls: 'tiny', w: 30, h: 30}]), 'BUTTON.tiny 30×30');
     const order = JSON.parse(await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
@@ -1227,9 +1396,47 @@ async function main() {
       const tops=order.map((cls)=>({cls,top:Math.round(sr.querySelector('.'+cls).getBoundingClientRect().top)}));
       return JSON.stringify({order,tops});})()`));
     const orderProblems = mobileOrderProblems(order.order, order.tops);
-    check('31-移动端顺序', '390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」',
-      orderProblems.length === 0,
-      orderProblems.join(' | ') || `顺序=${JSON.stringify(order.order)} 顶部位置=${JSON.stringify(order.tops)}`);
+    // 「当前评估」在 2026-09-23 版式里改成**左侧悬浮抽屉**（`#tw-eval-drawer` + `#tw-eval-toggle`），
+    // 不再占常规流的格子。口径不放松：抽屉必须存在、**真鼠标**点得开、打开后那一块真的可见且有内容。
+    const evalDrawerState = async () => JSON.parse(await js(`(()=>{const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=root?.shadowRoot??null;
+      const drawer=sr?sr.getElementById('tw-eval-drawer'):null;
+      const toggle=sr?sr.getElementById('tw-eval-toggle'):null;
+      const panel=sr?sr.getElementById('tw-eval-panel'):null;
+      const body=sr?sr.getElementById('tw-eval-body'):null;
+      const box=(el)=>{if(!el)return null;const r=el.getBoundingClientRect();
+        return {w:Math.round(r.width),h:Math.round(r.height)};};
+      return JSON.stringify({found:Boolean(drawer&&toggle&&body&&panel),
+        open:drawer?(drawer.dataset.open??null):null,
+        panelBox:box(panel),panelVisible:Boolean(panel)&&panel.getBoundingClientRect().width>0
+          &&panel.getBoundingClientRect().height>0,
+        bodyLen:body?(body.innerHTML||'').length:0,toggleBox:box(toggle)});})()`));
+    const evalBefore = await evalDrawerState();
+    let evalAfter = evalBefore;
+    let evalToggleError = null;
+    if (evalBefore.found) {
+      try {
+        await mouseClick(`${ROOT_SEL} >>> #tw-eval-toggle`);
+        await sleep(420);
+        evalAfter = await evalDrawerState();
+        await mouseClick(`${ROOT_SEL} >>> #tw-eval-toggle`);   // 收回去，别影响后面的截图
+        await sleep(320);
+      } catch (error) { evalToggleError = error.message; }
+    }
+    const evalReachable = evalBefore.found && evalBefore.bodyLen > 0
+      && evalAfter.open === 'yes' && evalAfter.panelVisible === true;
+    check('31-移动端顺序', '390×844：常规流里的区块顺序固定为「队伍槽位 → 候选池」'
+      + '（→ 若「当前评估」「小芽短提示」还在流里，必须依次排在后面）；'
+      + '「当前评估」改由左侧悬浮抽屉承担（真鼠标点 `#tw-eval-toggle` 能打开、面板可见且有内容）。'
+      + '【2026-09-23 版式演变：`.tw-coach`（✦ 小芽 · 阵容阶段）按人类批注删除；`.tw-eval` 由人类要求'
+      + '改成 `#tw-eval-drawer` 固定抽屉（不在常规流）。「当前评估」这条口径由抽屉可达性这条等价断言守】',
+      orderProblems.length === 0 && evalReachable && evalToggleError === null,
+      (orderProblems.join(' | ')
+        || `顺序=${JSON.stringify(order.order)} 顶部位置=${JSON.stringify(order.tops)}`)
+      + `；阵容评估抽屉：存在=${evalBefore.found} 内容 ${evalBefore.bodyLen} 字节，`
+      + `点开后 data-open=${JSON.stringify(evalAfter.open)} 面板可见=${evalAfter.panelVisible} `
+      + `面板尺寸=${JSON.stringify(evalAfter.panelBox)} 切换按钮=${JSON.stringify(evalBefore.toggleBox)}`
+      + `${evalToggleError ? `（点不动：${evalToggleError}）` : ''}`);
     counter('31-移动端顺序', '把顺序改成「评估在候选池前面」必须被同一条判据抓住',
       mobileOrderProblems(['tw-team', 'tw-eval', 'tw-cand', 'tw-coach'],
         [{cls: 'tw-team', top: 0}, {cls: 'tw-eval', top: 100}, {cls: 'tw-cand', top: 200}, {cls: 'tw-coach', top: 300}]),
@@ -1240,15 +1447,17 @@ async function main() {
     await mouseClick(`${ROOT_SEL} >>> #tw-reset`);
     await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0')===0`);
     await sleep(360);
-    for (const name of pickNames.slice(0, 2)) await addByName(name);
+    const narrowAdds = [];
+    for (const name of pickNames.slice(0, 2)) narrowAdds.push({name, ...(await addByName(name))});
     const narrowTwo = await facts();
     const narrowDom = await domFacts();
     const narrowMetrics = await metrics();
-    steps.push({at: 'narrow-two', facts: narrowTwo, dom: narrowDom, metrics: narrowMetrics});
+    steps.push({at: 'narrow-two', facts: narrowTwo, dom: narrowDom, metrics: narrowMetrics, adds: narrowAdds});
     screens.push({viewport: '390x844', at: 'two-selected', ...narrowMetrics});
     check('32-窄屏候选区', '390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在',
       narrowMetrics.scrollW === narrowMetrics.clientW && Number(narrowTwo.next) === 3 && narrowDom.gapNodes >= 1,
-      `clientW=${narrowMetrics.clientW} scrollW=${narrowMetrics.scrollW} next=${narrowTwo.next} 缺口=${narrowDom.gapNodes}`);
+      `clientW=${narrowMetrics.clientW} scrollW=${narrowMetrics.scrollW} selected=${narrowTwo.selected} `
+      + `next=${narrowTwo.next} 缺口=${narrowDom.gapNodes}；加人过程=${JSON.stringify(narrowAdds)}`);
     shots.push(await shootModule('workshop-06-two-selected-390x844'));
 
     // ── ⑫ 标准 PVP 真的能开局（RC-106）：六槽选满 → 点按钮 → 战斗页拿到引擎的魔力 ──
@@ -1340,18 +1549,29 @@ async function main() {
       sixPetBattleProblems({...battleFacts, noteHidden: true}), '{"noteHidden":true}');
     shots.push(await shoot('workshop-07-standard-pvp-1440x900'));
 
-    // ── ⑬ RC-503：候选规则下的 Coach 取舍（真鼠标点「让小芽看一眼」）────────────
+    // ── ⑬ RC-503：候选规则下的 Coach 取舍（真鼠标打开小芽 → 要一份建议）──────────
     // 这一条量的是**教练层在 v3 候选规则下**给不给那四样，以及建议是不是引擎真给的动作。
     //
-    // 2026-09-23：那个按钮按人类规格**整合进了小芽面板**（`.battle-tools` 现在在
-    // `#xiaoya-panel > #xy-settings` 里，两层默认都收起）—— 直接点 `#plan` 等于点空气
-    // （实测 0×0，事件落在 (0,0)）。所以这里像玩家一样：先真实点开小芽，再点开「设置」，
-    // 最后点那一下。旧读取点 `#plan` 本身没变，变的是**够到它的路径**。
+    // 2026-09-23（人类改版）：小芽是**弹出式二级窗口**；旧的 `#xy-settings` 折叠与
+    // 「让小芽看一眼」（`#plan`）/「让双方各走一步」（`#auto-turn`）**都被删掉了**。
+    // 等价替换（读取点 `#hint-body` 与断言口径一字未变）：
+    //   · 真鼠标点 `#coach-entry` → 打开小芽弹窗，并顺带读面板里的模型状态
+    //     （原 `#xy-settings` 折叠里的那一排由面板第一排 `#model-list` 承担）；
+    //   · 「要一份建议」走页面自己暴露的**同一条路径**
+    //     `window.rocoDemo.requestPlan({reason:'manual',explicit:true})`（`roco.js` 里 `#plan` 的 click 监听）；
+    //   · 读完关掉弹窗（`#close-companion`），免得盖住 `#hint` 浮条。
     const coachEntryClick = await mouseClick('#coach-entry');
+    await sleep(420);
+    const coachPanelOpened = await openCoachPanel();
+    const coachPanel = JSON.parse(await js(`(()=>{const card=document.getElementById('companion-card');
+      const cells=[...document.querySelectorAll('#model-list .model-cell')].map((el)=>(el.textContent||'').trim());
+      const mem=document.getElementById('open-memory');
+      return JSON.stringify({open:Boolean(card)&&card.hidden===false,cells,
+        memoryButton:mem?(mem.textContent||'').trim():null});})()`));
+    coachPanel.opened = coachPanelOpened;
+    await closeCoachPanel();
     await sleep(320);
-    const settingsClick = await mouseClick('#xy-settings > summary');
-    await sleep(320);
-    const planClick = await mouseClick('#plan');
+    await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);
     await waitFor(`document.getElementById('hint') && !document.getElementById('hint').hidden
       && document.querySelectorAll('#hint-body [data-cmp-action]').length>=2`, {tries: 80, ms: 250});
     await sleep(400);
@@ -1370,12 +1590,16 @@ async function main() {
         hasPlan:Boolean(window.rocoDemo.state.plan),
         bodyLen:(body.innerHTML||'').length,
         status:(document.getElementById('plan-status')||{}).textContent||''});})()`));
-    coachFacts.clickPath = `小芽入口 ${coachEntryClick?.top?.path ?? '—'} / 设置 ${settingsClick?.top?.path ?? '—'} / 看一眼 ${planClick?.top?.path ?? '—'}`;
+    coachFacts.clickPath = `小芽入口 ${coachEntryClick?.top?.path ?? '—'} / `
+      + `面板（弹窗打开=${coachPanel.open}，模型格 ${coachPanel.cells.length} 个：${coachPanel.cells.join(' / ')}；`
+      + `记忆入口「${coachPanel.memoryButton}」） / `
+      + `看一眼（原 \`#plan\` 已删，走同一条 requestPlan({reason:'manual',explicit:true}) 路径）`;
     const coachProblems = coachCompareProblems(coachFacts);
     check('36-候选规则下的 Coach 取舍', 'v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、'
       + '未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数。'
-      + '【按人类 2026-09-23 版式，「让小芽看一眼」已整合进小芽面板 → 读取点不变（`#plan` / `#hint-body`），'
-      + '但必须先真鼠标点开小芽、再点开「设置」才够得到它（旧路径是页面上一个常驻按钮）】',
+      + '【按人类 2026-09-23 版式，读取点 `#hint-body` 不变；`#plan`「让小芽看一眼」与 `#xy-settings` 折叠**已删**，'
+      + '改由弹出式小芽窗口（真鼠标点 `#coach-entry`，面板里读 `#model-list`）＋同一条 '
+      + '`requestPlan({reason:\'manual\',explicit:true})` 路径触发】',
       coachProblems.length === 0,
       (coachProblems.join(' | ') || `并列 ${coachFacts.actions} 条（${JSON.stringify(coachFacts.labels)}）`
         + `；未来 ${coachFacts.futures} 条；规则配置 ${coachFacts.planMode}`)

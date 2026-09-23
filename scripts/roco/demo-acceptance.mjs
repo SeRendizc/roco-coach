@@ -140,6 +140,39 @@ async function main(){
   for(const type of ['mousePressed','mouseReleased'])
    await cdp.send('Input.dispatchMouseEvent',{type,x:r.x,y:r.y,button:'left',clickCount:1});
   await sleep(120);};
+ /**
+  * 真鼠标点一个「可能被别的浮层盖住一部分」的元素（2026-09-23 实测）：
+  * 小芽面板里 `.companion` 卡片是 `position:fixed`、画在原 `#xy-settings`（**已删**）上面，
+  * 「设置」那一行与「让小芽看一眼」大部分宽度被盖住 —— 直接点中心会**点空**
+  *（`elementFromPoint` 返回 `DIV#companion-body`）。这里先扫一遍元素自己的框，
+  * 找一个真的没被盖住的点再派发，并把遮挡比例带回去（断言信息里如实披露）。
+  *
+  * 2026-09-23（人类改版）：`#xy-settings` 折叠与 `#plan`「让小芽看一眼」按钮都已删除，
+  * 小芽改成**弹出式二级窗口**（真鼠标点 `#coach-entry` 开 / `#close-companion` 关）。
+  * 这个「找没被盖住的点」的通用工具保留，但下面那段流程不再点那两个旧元素。
+  */
+ const clickUnoccluded=async(sel)=>{
+  const probe=JSON.parse(await js(`(()=>{const el=document.querySelector(${JSON.stringify(sel)});
+    if(!el)return JSON.stringify({found:false});
+    el.scrollIntoView({block:'center'});
+    const r=el.getBoundingClientRect();
+    const pts=[];let free=0;let total=0;
+    for(let fy=0.15;fy<=0.851;fy+=0.1){for(let fx=0.05;fx<=0.951;fx+=0.05){
+      const x=Math.round(r.left+r.width*fx), y=Math.round(r.top+r.height*fy);
+      total+=1;
+      const top=document.elementFromPoint(x,y);
+      const ok=Boolean(top&&(top===el||el.contains(top)||top.contains(el)));
+      if(ok){free+=1;if(pts.length<3)pts.push({x,y});}
+    }}
+    return JSON.stringify({found:true,w:Math.round(r.width),h:Math.round(r.height),free,total,pts});})()`));
+  if(!probe.found)throw new Error(`找不到可点的元素：${sel}`);
+  if(!probe.free)throw new Error(`${sel} 整块都被盖住了（可点探测点 ${probe.free}/${probe.total}）`);
+  const p=probe.pts[0];
+  await cdp.send('Input.dispatchMouseEvent',{type:'mouseMoved',x:p.x,y:p.y});
+  for(const type of ['mousePressed','mouseReleased'])
+   await cdp.send('Input.dispatchMouseEvent',{type,x:p.x,y:p.y,button:'left',clickCount:1});
+  await sleep(260);
+  return probe;};
  const keyActivate=async(sel,key='Enter')=>{
   await js(`document.querySelector(${JSON.stringify(sel)}).scrollIntoView({block:'center'})`);
   await js(`document.querySelector(${JSON.stringify(sel)}).focus()`);
@@ -168,9 +201,9 @@ async function main(){
   const data=JSON.parse(await js(`(()=>{const d=document.body.dataset;
    const out={};for(const k of Object.keys(d))if(k.startsWith('roco'))out[k]=d[k];
    const txt=(id)=>{const el=document.getElementById(id);return el?(el.textContent||'').trim().slice(0,300):null;};
-   // 2026-09-23（v3h）：战斗页可见读数一律走片段自己的钩子 —— 旧的 `#self-pets`/`#foe-field`/
-   // `#foe-bench`/`#events`/`#actions` 都被收进了 `#b3-sink[hidden]` 或收起的旧面板里
-   //（`innerText` 对隐藏子树仍会吐 textContent，拿它当「玩家可见文本」是在量没显示的东西）。
+   // 2026-09-23（v3h）：战斗页可见读数一律走片段自己的钩子 —— 旧的 #self-pets / #foe-field /
+   // #foe-bench / #events / #actions 都被收进了 #b3-sink[hidden] 或收起的旧面板里
+   //（innerText 对隐藏子树仍会吐 textContent，拿它当「玩家可见文本」是在量没显示的东西）。
    const v3=(sel)=>{const el=document.querySelector(sel);
      return el?(el.innerText||el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,300):null;};
    return JSON.stringify({datasets:out,hintText:txt('hint-text'),hintWhy:txt('hint-why'),
@@ -354,7 +387,13 @@ async function main(){
     avatars:avatars.length,empty:avatars.filter((x)=>!x).length,distinct:new Set(avatars).size,
     chips:chips.length,chipsWithSymbol:chips.filter((t)=>/[^\u4e00-\u9fff\s]/.test(t)).length,
     chipsWithName:chips.filter((t)=>/[\u4e00-\u9fff]+系/.test(t)).length,
-    imgs:document.querySelectorAll('img').length,externalStyles:document.querySelectorAll('link[href^="http"],script[src^="http"]').length});})()`));
+    imgs:document.querySelectorAll('img').length,
+    // 2026-09-23（v3h）：中间两张卡里确实会有 <img> —— 那是**本仓自己的**立绘路由
+    // /api/roco/sprite?name=…（本地只读路由，没有外链、没有第三方资源）。
+    // 所以真正要守的口径是「零**外链**资源」，不是字面上的「零 <img>」。
+    foreignImgs:[...document.querySelectorAll('img')].filter((im)=>
+      !/^\\/api\\/roco\\/sprite\\?/.test(im.getAttribute('src')||'')).length,
+    externalStyles:document.querySelectorAll('link[href^="http"],script[src^="http"]').length});})()`));
  // 教程那一条量的是**首屏那一刻**的样子（`onboardAtLoad`）：第 64 轮起对局一开
  // 它就自动收起（见文件末尾那一段判据），所以推进到这里它已经不是 shown 了。
  // 2026-09-22（人类 P0）：教程压成**一句**（首屏只留六槽 + 筛选 + 一句建议）。
@@ -370,8 +409,9 @@ async function main(){
  check('系别不只靠颜色：每个色块同时带系别文字与图形符号',
   visual.chips===visual.chipsWithName&&visual.chipsWithSymbol===visual.chips,
   JSON.stringify({chips:visual.chips,name:visual.chipsWithName,symbol:visual.chipsWithSymbol}));
- check('形象全部自制：全页零 <img>、零外链样式与脚本',
-  visual.imgs===0&&visual.externalStyles===0,JSON.stringify({imgs:visual.imgs,external:visual.externalStyles}));
+ check('形象全部自制：零外链样式/脚本，且页面上所有 <img> 都来自本仓自己的立绘路由',
+  visual.foreignImgs===0&&visual.externalStyles===0,
+  JSON.stringify({imgs:visual.imgs,非本仓立绘:visual.foreignImgs,外链:visual.externalStyles}));
 
  // ── 场景 5：打到结束，给一个教学入口 ────────────────────────────────
  for(let i=0;i<240;i++){
@@ -1140,10 +1180,12 @@ async function main(){
   poisoned.length > 0 && poisoned.some((line) => /行动面|picking|占着屏幕/.test(line)),
   `喂进去的坏状态被判：${JSON.stringify(poisoned)}`);
  // 回到选阵容页（对局中的阵容入口已按人类规格移除；这一组量的是阵容卡本身）。
+ // 注意：`setViewport` 这个 helper 在下面 ④ 段才定义（`const` → 有 TDZ），这里不能提前调它；
+ // 此时视口仍是脚本开头那一次 1440×900（本段没有改过视口）。
  await cdp.send('Page.reload');
  for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}
+ for(let i=0;i<60;i++){if((await js(`document.querySelectorAll('#roster button[data-pet]').length`))>0)break;await sleep(250);}
  await sleep(400);
- await setViewport(1440,900);
  // 先把两个**固定定位**的悬浮层收起来：提示条（bottom:18px）与局末卡片（bottom:200px）
  // 会盖住页面右下角，被盖住的位置点下去落在浮层上——这跟「元素在视口外」一样，
  // 都属于「事件派发了但没落在你想的地方」，而且同样不会报错。
@@ -1272,49 +1314,66 @@ async function main(){
   const el=document.getElementById(id);if(el)el.hidden=true;}
   const drawer=document.getElementById('about-drawer');if(drawer)drawer.open=false;return true;})()`);
 
- // ① 六宠工作台：对局进行中它是收起的；真实鼠标点「查看或调整下局阵容」把它放回来，
- //    再点一次收起时**行动坞必须恢复**（2026-09-22 人类实测的卡死：查看阵容→收起→行动坞不回来）。
+ // ① 六宠工作台 + v3h 行动面：对局中工作台是收起的；**两屏来回切**之后行动面必须还在。
  //
- // 为什么改掉旧断言：`#select-panel` 是**已废弃**的 3v3 选人面（现在只有 `?legacy3v3=1`
- // 才会渲染），拿它的 `hidden` 当「阵容池收放」的证据是在量一个玩家看不到的元素。
- const readBattleUi = () => js(`(()=>{const w=document.getElementById('team-workshop');
-   const a=document.getElementById('action-panel');
-   const vis=(el)=>{if(!el)return null;const r=el.getBoundingClientRect();
-     return !el.hidden&&r.width>0&&r.height>0;};
-   return JSON.stringify({workshopHidden:Boolean(w&&w.hidden),workshopVisible:vis(w),
-     actionVisible:vis(a),picking:document.body.dataset.rocoPicking??null});})()`).then(JSON.parse);
+ // 2026-09-23（v3h）等价改写：旧断言是「真实鼠标点『查看或调整下局阵容』→ 再点一次收起 →
+ // 行动坞必须恢复」（2026-09-22 人类实测的卡死）。那个入口（`#lineup-brief` 里的
+ // `#reopen-pick`）已按人类规格收进 `#b3-sink[hidden]`，对局中**不再提供**回选阵容的入口，
+ // 所以等价断言换成**同一件事在 v3h 上的形态**：真鼠标在底栏切到「更换」屏、再切回「技能」屏，
+ // 切回来之后四格技能与底栏聚能必须**照样可见可点** —— 玩家不会卡在看不到动作的状态。
+ // 另外保留「对局中工作台收起、`data-roco-picking=no`」这条（它没变）。
+ const readBattleUi = () => js(`(()=>{const vis=(el)=>{if(!el)return null;const r=el.getBoundingClientRect();
+    return !el.hidden&&r.width>0&&r.height>0;};
+    const w=document.getElementById('team-workshop');
+    const slot=document.querySelector('.b3-wrap [data-b3-skill-slot]');
+    const charge=document.getElementById('b3-charge');
+    const actionable=[...document.querySelectorAll('.b3-wrap [data-b3-action]')]
+      .filter((el)=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0;});
+    return JSON.stringify({workshopHidden:Boolean(w&&w.hidden),workshopVisible:vis(w),
+      actionVisible:vis(slot)&&vis(charge),actionable:actionable.length,
+      tab:document.body.dataset.b3Tab??null,picking:document.body.dataset.rocoPicking??null});})()`).then(JSON.parse);
  const beforeOpen = await readBattleUi();
- await mouseClick('#reopen-pick');
+ await mouseClick('.b3-wrap [data-b3-tab="switch"]');
  await sleep(500);
  const whileOpen = await readBattleUi();
- await mouseClick('#reopen-pick');
+ await mouseClick('.b3-wrap [data-b3-tab="skill"]');
  await sleep(500);
  const afterClose = await readBattleUi();
  const recoveryProblems = (before, open, after) => {
    const bad = [];
    if (before.workshopVisible !== false) bad.push('对局中工作台本来是收起的，实测却可见');
-   if (open.workshopVisible !== true) bad.push('点了「查看阵容」工作台没出现');
-   if (open.picking !== 'yes') bad.push(`打开阵容时 data-roco-picking=${open.picking}（应为 yes）`);
-   if (after.workshopVisible !== false) bad.push('收起之后工作台还占着屏幕');
-   if (after.picking !== 'no') bad.push(`收起后 data-roco-picking=${after.picking}（应为 no）`);
-   if (after.actionVisible !== true) bad.push('收起之后**行动坞没有恢复**（玩家会卡在看不到动作的状态）');
+   if (!(before.actionable >= 1)) bad.push('对局中 v3h 行动面一个可点动作都没有');
+   if (open.tab !== 'switch') bad.push(`真鼠标切到「更换」屏失败（body[data-b3-tab]=${open.tab}）`);
+   if (after.tab !== 'skill') bad.push(`真鼠标切回「技能」屏失败（body[data-b3-tab]=${after.tab}）`);
+   if (after.actionVisible !== true) bad.push('切回技能屏之后**行动面没有恢复**（玩家会卡在看不到动作的状态）');
+   if (!(after.actionable >= 1)) bad.push('切回技能屏之后一个可点动作都没有');
+   if (after.picking !== 'no') bad.push(`切屏之后 data-roco-picking=${after.picking}（应为 no）`);
    return bad;
  };
- check('真实鼠标「查看阵容 → 收起」之后行动坞恢复（六宠工作台，不再是废弃的 #select-panel）',
+ check('真实鼠标「更换屏 → 切回技能屏」之后行动面恢复（v3h；原「查看阵容 → 收起」由底栏切屏承担）',
   recoveryProblems(beforeOpen, whileOpen, afterClose).length === 0,
   recoveryProblems(beforeOpen, whileOpen, afterClose).join(' | ')
-   || `收起→打开→收起：workshop ${beforeOpen.workshopVisible}/${whileOpen.workshopVisible}/${afterClose.workshopVisible}；`
-     + `picking ${whileOpen.picking}→${afterClose.picking}；行动坞恢复=${afterClose.actionVisible}`);
- // 必红反证：把「收起后行动坞不恢复」这个坏状态喂给**同一个检查器**，它必须报错。
- const poisoned = recoveryProblems({workshopVisible: false}, {workshopVisible: true, picking: 'yes'},
-   {workshopVisible: false, picking: 'no', actionVisible: false});
- check('真实鼠标「查看阵容 → 收起」之后行动坞恢复（反证：收起后不恢复必须被抓）',
-  poisoned.length > 0 && poisoned.some((line) => /行动坞/.test(line)),
-  `喂进去的坏状态被判：${JSON.stringify(poisoned)}`);
- // 我的检查把阵容池「打开→收起」走了一遍，而下面这几条（分页/搜索）**默认它开着** ——
- // 这里把它恢复成开着的状态，别让后面几条因为我的用例而假红。
- await mouseClick('#reopen-pick');
- await sleep(500);
+   || `工作台收起=${beforeOpen.workshopVisible === false}（对局中）→ 切屏 ${beforeOpen.tab}→${whileOpen.tab}→${afterClose.tab}；`
+     + `行动面可见 ${beforeOpen.actionVisible}/${whileOpen.actionVisible}/${afterClose.actionVisible}；`
+     + `可点动作 ${beforeOpen.actionable}/${whileOpen.actionable}/${afterClose.actionable}；picking=${afterClose.picking}`);
+ // 必红反证：把「切回技能屏后行动面不恢复」这个坏状态喂给**同一个检查器**，它必须报错。
+ const poisonedTabs = recoveryProblems({workshopVisible: false, actionable: 1, tab: 'skill'},
+   {workshopVisible: true, picking: 'yes', tab: 'switch', actionable: 1},
+   {workshopVisible: false, picking: 'no', actionVisible: false, actionable: 0, tab: 'skill'});
+ check('真实鼠标「更换屏 → 切回技能屏」之后行动面恢复（反证：切回来不恢复必须被抓）',
+  poisonedTabs.length > 0 && poisonedTabs.some((line) => /行动面/.test(line)),
+  `喂进去的坏状态被判：${JSON.stringify(poisonedTabs)}`);
+ // ②–⑦ 量的是**选阵容页**的池子（分页 / 搜索 / 筛选 / 分段选择器 / 详情抽屉）。
+ // 对局中的阵容入口已按人类规格移除（见上），所以回到选阵容页再跑；真鼠标 / 真键盘照旧。
+ // ⚠ 刷新会把选人状态清空 → 后面 ⑨ 要点「开一局」，先按老流程把双方各 3 只选上
+ //（原来这一段跑在「已经选满 3+3」的状态里，刷新之后必须补回来，否则开局按钮是 disabled）。
+ await cdp.send('Page.reload');
+ for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}
+ for(let i=0;i<60;i++){if((await js(`document.querySelectorAll('#roster button[data-pet]').length`))>0)break;await sleep(250);}
+ await js(`(()=>{const d=window.rocoDemo;const ids=d.state.roster.map((p)=>p.pet_id);
+   d.state.pick.player=ids.slice(0,3);d.state.pick.enemy=ids.slice(3,6);d.state.pick.side='player';
+   d.state.pick.hint='';d.renderRoster();return true;})()`);
+ await sleep(300);
  await hideFloats();
  await setViewport(1440,900);
 
@@ -1362,37 +1421,111 @@ async function main(){
   clearedValue===''&&backToFull.length===12,
   `输入框="${clearedValue}"；卡片回到 ${backToFull.length} 张`);
 
- // ④ 属性筛选：真实鼠标开菜单 → 点某一项（原生 <select> 在无头 Chrome 里按不动，见页面注释）
- await mouseClick('#filter-type-menu > summary');
- await mouseClick('#filter-type button[data-type="草系"]');
- await sleep(700);
- const typedFilter=JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('#roster button[data-pet]')];
-  return JSON.stringify({side:document.body.dataset.rocoPoolType??null,count:cards.length,
-   chips:cards.map((c)=>[...c.querySelectorAll('.type')].map((t)=>t.textContent.trim()).join('|'))});})()`));
- check('真实鼠标按属性筛选：卡片集合真的变化，且**每一张**都带这个属性',
-  typedFilter.side==='草系'&&typedFilter.count>0&&typedFilter.count<12
-  &&typedFilter.chips.every((c)=>c.includes('草系')),
-  `属性=${typedFilter.side}；${typedFilter.count} 张卡片属性=${typedFilter.chips.join(' / ')}`);
- await mouseClick('#filter-type-menu > summary');
- await mouseClick('#filter-type button[data-type=""]');
- await sleep(700);
- const typeReset=await cardsNow();
- check('真实鼠标把属性筛选改回「全部」之后池子恢复', typeReset.length===12, `回到 ${typeReset.length} 张`);
+ // ④⑤ 属性 / 定位筛选（2026-09-23 迁移）：人类「旧的筛选机制迁移到新的后旧的就删掉」→
+ //   页面级 `#filter-type-menu` / `#filter-type` / `#filter-reset` 已从 `roco.html` 删除，
+ //   读点迁到**工坊模块**的 `#team-workshop >>> #tw-filter-type` / `>>> #tw-filter-role`
+ //   （两个 `<select>`，change 即生效）与 `>>> #tw-filter-reset`（「重置」）。
+ //   口径不变：换条件后候选池真的重新取数；属性筛选仍要求**每一条**候选都带所选属性；
+ //   定位筛选因工坊候选卡**不渲染定位**（卡上只有名字 / 系别 / 拥有状态），
+ //   改成与服务端 `role=` 的第一页名单**逐条比对**（比「每张卡都有那一行」更硬）。
+ const wsPool=async()=>js(`(()=>{const host=document.querySelector('#team-workshop');
+   const sr=host?.shadowRoot??null;if(!sr)return null;
+   const rows=[...sr.querySelectorAll('#tw-cand-list .tw-row')];
+   const sel=sr.getElementById('tw-filter-type'),selRole=sr.getElementById('tw-filter-role');
+   const reset=sr.getElementById('tw-filter-reset');
+   const txt=(el)=>el?(el.textContent||'').trim():'';
+   return {total:Number(host.dataset.twPoolTotal||'0'),rows:rows.length,
+     names:rows.map((r)=>txt(r.querySelector('.tw-name'))),
+     types:rows.map((r)=>txt(r.querySelector('.tw-types'))),
+     typeValue:sel?sel.value:null,typeOptions:sel?[...sel.options].map((o)=>o.value):[],
+     roleValue:selRole?selRole.value:null,roleOptions:selRole?[...selRole.options].map((o)=>o.value):[],
+     roleLabels:selRole?[...selRole.options].map((o)=>o.textContent):[],
+     resetFound:Boolean(reset)};})()`);
+ const wsClick=async(id)=>{
+  const r=await js(`(()=>{const host=document.querySelector('#team-workshop');
+    const el=host?.shadowRoot?.querySelector(${JSON.stringify(id)});if(!el)return null;
+    el.scrollIntoView({block:'center'});const b=el.getBoundingClientRect();
+    return {x:Math.round(b.left+b.width/2),y:Math.round(b.top+b.height/2),w:Math.round(b.width),h:Math.round(b.height)};})()`);
+  if(!r)throw new Error(`工坊里找不到 ${id}`);
+  for(const type of ['mousePressed','mouseReleased'])
+   await cdp.send('Input.dispatchMouseEvent',{type,x:r.x,y:r.y,button:'left',clickCount:1});
+  await sleep(260);return r;};
+ const wsSetSelect=async(id,value)=>{
+  const probe=await js(`(()=>{const host=document.querySelector('#team-workshop');
+    const sel=host?.shadowRoot?.querySelector(${JSON.stringify(id)});if(!sel)return null;
+    sel.focus();return {value:sel.value,options:[...sel.options].map((o)=>o.value)};})()`);
+  if(!probe)throw new Error(`工坊里没有 ${id}`);
+  const index=probe.options.indexOf(value);
+  let path='真键盘方向键';
+  if(index>0){
+   const from=Math.max(0,probe.options.indexOf(probe.value));
+   const down=from<index;const steps=Math.abs(index-from);
+   for(let i=0;i<steps;i+=1){
+    for(const type of ['keyDown','keyUp'])
+     await cdp.send('Input.dispatchKeyEvent',{type,key:down?'ArrowDown':'ArrowUp',
+       code:down?'ArrowDown':'ArrowUp',windowsVirtualKeyCode:down?40:38,nativeVirtualKeyCode:down?40:38});
+    await sleep(70);}
+   await sleep(300);}
+  let now=await js(`document.querySelector('#team-workshop')?.shadowRoot?.querySelector(${JSON.stringify(id)})?.value ?? null`);
+  if(now!==value){
+   // 如实披露：无头 Chrome 里原生 `<select>` 打不开、方向键也改不动 value（页面注释里记过同一个坑），
+   // 退回该控件自己的 `change` 事件。
+   path='真键盘改不动（无头 Chrome 原生 select 打不开）→ 退回该控件自己的 change 事件';
+   now=await js(`(()=>{const sel=document.querySelector('#team-workshop')?.shadowRoot?.querySelector(${JSON.stringify(id)});
+     if(!sel)return null;sel.value=${JSON.stringify(value)};
+     sel.dispatchEvent(new Event('change',{bubbles:true}));return sel.value;})()`);}
+  await sleep(800);
+  return {path,value:now,wanted:value,index};};
+ const wsProbe=async(kind,value)=>{
+  const res=await fetch(`${base}api/roco/box?kind=catalog&limit=12&offset=0&${kind}=${encodeURIComponent(value)}`);
+  if(!res.ok)return null;
+  const j=await res.json();
+  return {total:Number(j?.player?.total??NaN),names:(j?.player?.cards??[]).map((c)=>String(c.name??''))};};
 
- // ⑤ 定位筛选：同上，且逐张核对定位
- await mouseClick('#filter-role-menu > summary');
- await mouseClick('#filter-role button[data-role="attacker"]');
+ // ④ 属性筛选
+ const wsBefore=await wsPool();
+ let typePick=null;
+ for(const value of (wsBefore?.typeOptions??[]).filter((v)=>v!=='')){
+  const p=await wsProbe('type',value);
+  if(p&&Number.isFinite(p.total)&&p.total>0&&p.total<Number(wsBefore.total)){typePick={value,...p};break;}}
+ const typeSet=typePick?await wsSetSelect('#tw-filter-type',typePick.value):null;
+ const wsTyped=await wsPool();
+ check('真实鼠标按属性筛选（迁移到工坊 `#tw-filter-type`）：候选集合真的变化，且**每一条**都带这个属性。'
+  +'【原读取点 `#filter-type-menu` / `#filter-type`（页面级旧筛选）已按人类 2026-09-23 口径删除，'
+  +'由工坊的 `#team-workshop >>> #tw-filter-type`（`<select>` 的 change）承担】',
+  typePick!==null&&wsTyped?.total===typePick.total&&wsTyped?.rows>0
+  &&wsTyped?.typeValue===typePick.value&&wsTyped.types.every((t)=>t.includes(typePick.value)),
+  `属性=${typePick?.value??'（下拉里没有可用属性）'}；服务端 ${typePick?.total??'—'} 条 → 页面 ${wsTyped?.total} 条 / 本页 ${wsTyped?.rows} 张；`
+  +`逐张属性=${JSON.stringify(wsTyped?.types)}；下拉选项=${JSON.stringify(wsBefore?.typeOptions)}；输入路径=${typeSet?.path??'—'}`);
+ const resetClick=await wsClick('#tw-filter-reset');
  await sleep(700);
- const roledFilter=JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('#roster button[data-pet]')];
-  return JSON.stringify({side:document.body.dataset.rocoPoolRole??null,count:cards.length,
-   roles:cards.map((c)=>(c.querySelector('.card-role')||{}).textContent||'')});})()`));
- check('真实鼠标按定位筛选：卡片集合变化，且每一张的定位都等于所选项',
-  roledFilter.side==='attacker'&&roledFilter.count>0&&roledFilter.roles.length>0
-  &&roledFilter.roles.every((r)=>r==='定位：输出'),
-  `定位=${roledFilter.side}；${roledFilter.count} 张定位=${[...new Set(roledFilter.roles)].join(' / ')}`);
- await mouseClick('#filter-role-menu > summary');
- await mouseClick('#filter-role button[data-role=""]');
- await sleep(700);
+ const wsAfterReset=await wsPool();
+ check('真实鼠标点「重置」之后工坊候选池回到全量',
+  wsAfterReset?.total===wsBefore?.total&&wsAfterReset?.typeValue==='',
+  `重置前 ${wsTyped?.total} 条 → 重置后 ${wsAfterReset?.total} 条（下拉值="${wsAfterReset?.typeValue}"）；`
+  +`初始全量 ${wsBefore?.total} 条；命中=${JSON.stringify(resetClick)}`);
+
+ // ⑤ 定位筛选（同一套新控件；候选卡不渲染定位 → 与服务端第一页名单逐条比对）
+ const wsBeforeRole=await wsPool();
+ let rolePick=null;
+ for(const value of (wsBeforeRole?.roleOptions??[]).filter((v)=>v!=='')){
+  const p=await wsProbe('role',value);
+  if(p&&Number.isFinite(p.total)&&p.total>0&&p.total<Number(wsBeforeRole.total)){rolePick={value,...p};break;}}
+ const roleSet=rolePick?await wsSetSelect('#tw-filter-role',rolePick.value):null;
+ const wsRoled=await wsPool();
+ const namesMatch=JSON.stringify(wsRoled?.names)===JSON.stringify((rolePick?.names??[]).slice(0,wsRoled?.rows??0));
+ check('真实鼠标按定位筛选（迁移到工坊 `#tw-filter-role`）：候选集合变化，且结果集与服务端口径逐条一致。'
+  +'【原读取点 `#filter-role-menu` / `#filter-role`（页面级旧筛选）由工坊的 '
+  +'`#team-workshop >>> #tw-filter-role` 承担；工坊候选卡**不渲染定位**（只有名字 / 系别 / 拥有状态），'
+  +'所以「每一张的定位」改成与服务端 `role=` 的第一页名单**逐条比对**】',
+  rolePick!==null&&wsRoled?.total===rolePick.total&&wsRoled?.rows>0
+  &&wsRoled?.roleValue===rolePick.value&&namesMatch,
+  `定位=${rolePick?.value??'—'}（下拉标签 ${JSON.stringify(wsBeforeRole?.roleLabels)}）；服务端 ${rolePick?.total??'—'} 条 → 页面 ${wsRoled?.total} 条；`
+  +`本页名单逐条一致=${namesMatch}；服务端名单=${JSON.stringify((rolePick?.names??[]).slice(0,4))}…；页面名单=${JSON.stringify((wsRoled?.names??[]).slice(0,4))}…；`
+  +`输入路径=${roleSet?.path??'—'}`);
+ // 复位：别把筛选项留给后面的判据
+ await wsSetSelect('#tw-filter-role','');
+ await sleep(600);
 
  // ⑥ 我方/对手 = 分段选择器：真实点击切换，aria-pressed、面板标记、当前侧样式三者同步
  const segState=async()=>JSON.parse(await js(`(()=>{const tabs=[...document.querySelectorAll('.side-tab')];
@@ -1457,37 +1590,57 @@ async function main(){
  await mouseClick('#start-battle');
  for(let i=0;i<120;i++){if(await js(`document.body.dataset.rocoView==='ready'&&document.getElementById('select-panel').hidden`))break;await sleep(250);}
  const battlefield=JSON.parse(await js(`(()=>{const b=document.getElementById('battle-panel');
-  const a=document.getElementById('action-panel');
-  const bar=a.getBoundingClientRect();
+  const root=document.querySelector('.b3-wrap');
+  const rr=root?root.getBoundingClientRect():null;
+  const card=(side)=>{const el=document.querySelector('[data-b3-'+side+'-card]');
+    if(!el)return null;const r=el.getBoundingClientRect();
+    return {w:Math.round(r.width),h:Math.round(r.height),
+      name:((el.querySelector('[data-b3-'+side+'-name]')||{}).textContent||'').trim(),
+      hp:((el.querySelector('[data-b3-'+side+'-hp-text]')||{}).textContent||'').trim()};};
+  const dots=(id)=>{const el=document.getElementById(id);
+    return el?(el.textContent||'').replace(/\\s+/g,''):null;};
+  const visible=(sel)=>[...document.querySelectorAll(sel)].filter((el)=>{const r=el.getBoundingClientRect();
+    return r.width>0&&r.height>0;}).length;
+  const sink=document.getElementById('b3-sink');
   return JSON.stringify({selectHidden:document.getElementById('select-panel').hidden,
-   briefHidden:document.getElementById('lineup-brief').hidden,
-   brief:(document.getElementById('lineup-brief').textContent||'').replace(/\\s+/g,' ').trim().slice(0,80),
-   reopen:Boolean(document.getElementById('reopen-pick')),
-   actions:document.querySelectorAll('#actions button[data-action]').length,
-   stageActive:document.querySelectorAll('#self-pets .pet.active, #foe-field .pet.active').length,
-   selfBench:document.querySelectorAll('#self-bench .bench-pet').length,
-   foeBench:document.querySelectorAll('#foe-bench .bench-pet').length,
-   actionFixed:getComputedStyle(a).position,
-   actionBottom:Math.round(bar.bottom),viewportH:document.documentElement.clientHeight,
+   sinkHidden:sink?Boolean(sink.hidden):null,
+   actions:document.querySelectorAll('.b3-wrap [data-b3-action]').length,
+   slots:visible('.b3-wrap [data-b3-skill-slot]'),
+   tabs:document.querySelectorAll('.b3-wrap [data-b3-tab]').length,
+   selfCard:card('self'),foeCard:card('foe'),
+   dotsSelf:dots('b3-dots-self'),dotsFoe:dots('b3-dots-foe'),
+   selfBench:document.querySelectorAll('.b3-wrap [data-b3-switch-row]:not([data-b3-pending])').length,
+   rootVisible:Boolean(rr&&rr.width>0&&rr.height>0),
+   rootBottom:rr?Math.round(rr.bottom):null,viewportH:document.documentElement.clientHeight,
+   scrollH:document.documentElement.scrollHeight,
    battleVisible:!b.hidden});})()`));
- check('真实鼠标点「开一局」：阵容池完全收起，只留一行摘要 + 「重选阵容」',
+ check('真实鼠标点「开一局」：阵容池完全收起，战斗页切到 v3h 片段（原「一行摘要 + 重选阵容」由 v3h 顶栏/行动面承担）',
   startDisabled===false&&battlefield.battleVisible&&battlefield.selectHidden===true
-  &&battlefield.briefHidden===false&&battlefield.reopen===true,
-  `开局按钮可用=${startDisabled===false}；阵容池收起=${battlefield.selectHidden}；摘要「${battlefield.brief}」`);
+  &&battlefield.rootVisible===true&&battlefield.slots===4&&battlefield.tabs===4
+  &&battlefield.actions>0,
+  `开局按钮可用=${startDisabled===false}；阵容池收起=${battlefield.selectHidden}；`
+  +`v3h 片段可见=${battlefield.rootVisible}（四格技能 ${battlefield.slots} / 底栏 ${battlefield.tabs} 项 / 可点动作 ${battlefield.actions}）；`
+  +`旧摘要接收槽 #b3-sink 隐藏=${battlefield.sinkHidden}`);
  // 2026-09-22（人类规格 · 对手信息按 public view）：对手后备**不放一串「第 N 位」占位**，
- // 只写还剩几只（上场才亮明）。所以这里量「我方后备是小条」+「对手后备是一条说明」。
+ // 只写还剩几只（上场才亮明）。2026-09-23（v3h）：中央改成**两张镜像卡**，
+ // 我方后备压成更换屏的行、对手只剩顶栏点数。
  check('对战页中央是双方当前宠物的战斗舞台，后备压成小条（对手只写还剩几只）',
-  battlefield.stageActive===2&&battlefield.selfBench===2&&battlefield.foeBench>=1,
-  `舞台上 ${battlefield.stageActive} 只 / 我方后备 ${battlefield.selfBench} 条 / 对手后备 ${battlefield.foeBench} 条`);
+  Boolean(battlefield.selfCard&&battlefield.foeCard)
+  &&Boolean(battlefield.selfCard.name&&battlefield.foeCard.name)
+  &&/生命\s*\d+\s*\/\s*\d+/.test(battlefield.selfCard.hp)&&/生命\s*\d+\s*\/\s*\d+/.test(battlefield.foeCard.hp)
+  &&/^[●○]+$/.test(String(battlefield.dotsFoe))&&battlefield.dotsFoe.replace(/○/g,'').length>=1
+  &&battlefield.selfBench>=1,
+  `我方卡「${battlefield.selfCard?.name} ${battlefield.selfCard?.hp}」/ 对手卡「${battlefield.foeCard?.name} ${battlefield.foeCard?.hp}」；`
+  +`我方后备行 ${battlefield.selfBench} 条；对手存活点「${battlefield.dotsFoe}」（只给点数、不给名字）`);
  // 2026-09-22（人类视觉规格）：桌面动作区改成**在流里**（不再是一条固定全宽底栏盖住战场），
- // 所以「底边贴视口底」这条旧等式不再成立。真正要守的是：**动作一屏可点** ——
- // 要么固定贴底（窄屏那条路），要么在流里且底部不超出视口。
- check('合法动作一屏可点（窄屏贴底 / 桌面在流里且不出视口）',
-  battlefield.actions>0
-  &&(battlefield.actionFixed==='fixed'
-    ?Math.abs(battlefield.actionBottom-battlefield.viewportH)<=2
-    :battlefield.actionBottom<=battlefield.viewportH+1),
-  `动作 ${battlefield.actions} 个；position=${battlefield.actionFixed} 底边=${battlefield.actionBottom} 视口高=${battlefield.viewportH}`);
+ // 所以「底边贴视口底」这条旧等式不再成立。真正要守的是：**动作一屏可点**。
+ // 2026-09-23（v3h）：整个战斗片段一页装完（`[data-b3-root]` 的底边落在视口内），
+ // 且可点动作 ≥1（左列四格 + 底栏四选项）。
+ check('合法动作一屏可点（v3h 片段底边落在视口内，且可点动作 ≥1）',
+  battlefield.actions>0&&battlefield.slots===4&&battlefield.tabs===4
+  &&(battlefield.viewportH<800?true:battlefield.rootBottom<=battlefield.viewportH+1),
+  `可点动作 ${battlefield.actions} 个 / 四格技能 ${battlefield.slots} / 底栏 ${battlefield.tabs} 项；`
+  +`片段底边=${battlefield.rootBottom} 视口高=${battlefield.viewportH} 文档高=${battlefield.scrollH}`);
  const mBattle=await overflowOf();
  const shotBattle=await uiShoot('battle-1440x900');
  check('对战页真实截图不横向溢出（clientW === scrollW）',
@@ -1626,17 +1779,24 @@ async function main(){
  // ── ① 续：**对战页的宠物卡与后备条**（「未知」真正反复出现过的地方）─────────
  // 选阵容页那 48 张卡上「定位」都有值（48 只全部登记过 role），所以那一面上占位文案
  // 本来就不出现；玩家实际反复看到的是这里：每局都印的「状态未知」（对手两条后备）
- // 与「异常：—」（双方场上）。这一条量的是**对战页**的四类卡片。
- const BATTLE_CARDS='#self-pets .pet, #foe-field .pet, #self-bench .bench-pet, #foe-bench .bench-pet';
+ // 与「异常：—」（双方场上）。这一条量的是**对战页**的卡片。
+ //
+ // 2026-09-23（v3h）：中央改成两张镜像卡 `[data-b3-self-card]`/`[data-b3-foe-card]`，
+ // 我方后备压成更换屏的行 `[data-b3-switch-row]`，对手只剩顶栏点数（不再有后备条）。
+ const BATTLE_CARDS='[data-b3-self-card], [data-b3-foe-card], .b3-wrap [data-b3-switch-row]';
  const battleCardScan=async()=>JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll(${JSON.stringify(BATTLE_CARDS)})];
    const text=cards.map((c)=>c.innerText.replace(/\\s+/g,' ')).join('\\n');
    const hit=text.match(${CARD_PLACEHOLDER.toString()});
    return JSON.stringify({cards:cards.length,hit:hit?hit[0]:null,
     around:hit?text.slice(Math.max(0,hit.index-16),hit.index+16):null,sample:text.slice(0,200)});})()`));
  const battleCards=await battleCardScan();
- // 必红反证：把「状态未知」塞回一条后备（修之前每一局的对手后备都是这一句）。
- const battlePoison=await js(`(()=>{const el=document.querySelector('#foe-bench .bench-pet');
-   if(!el)return {ok:false};el.insertAdjacentHTML('beforeend','<div class="stats">状态未知</div>');
+ // 必红反证：把「状态未知」塞进对手那张卡的**血量行**（修之前每一局的对手后备都是这一句）。
+ // 2026-09-23（v3h）：对手的「后备条」已经不存在（只给点数）；而且 v3h 的渲染是**增量写**的
+ //（不再整块 innerHTML 重写），往容器里塞一个新节点不会被下一次 render 清掉 —— 所以这里塞的
+ // 是**引擎每一帧都会覆盖的那一处文字**（血量行），重画之后必须回到引擎给的值。
+ const battlePoison=await js(`(()=>{const el=document.querySelector('[data-b3-foe-card] [data-b3-foe-hp-text]')
+     || document.querySelector('[data-b3-foe-hp-text]');
+   if(!el)return {ok:false};el.textContent='状态未知';
    const text=[...document.querySelectorAll(${JSON.stringify(BATTLE_CARDS)})].map((c)=>c.innerText).join('\\n');
    const hit=text.match(${CARD_PLACEHOLDER.toString()});
    return {ok:true,hit:hit?hit[0]:null};})()`);
@@ -1644,14 +1804,14 @@ async function main(){
  const battleRestored=await battleCardScan();
  check('① 对战页的宠物卡与后备条上也没有占位文案（这是「未知」原来反复出现的地方）',
   // 2026-09-22：对手后备由「N 条占位」改成**一条**说明，卡片总数从 6 变 5；
+  // 2026-09-23（v3h）：对手后备条整条没了（只给点数），卡片变成 2 张镜像卡 + 我方后备行。
   // 这条判据真正要守的是「卡片上不出现占位文案」（`hit===null`），数量只要够覆盖舞台+后备。
-  battleCards.cards>=5&&battleCards.hit===null,
+  battleCards.cards>=4&&battleCards.hit===null,
   battleCards.hit?`命中 ${JSON.stringify(battleCards)}`
-   :`扫过 ${battleCards.cards} 张卡；片段「${battleCards.sample}」`);
+   :`扫过 ${battleCards.cards} 张卡（两张镜像卡 + 我方后备行）；片段「${battleCards.sample}」`);
  check('① 反证：把「状态未知」塞回一条后备，同一个检查器必须抓住',
   battlePoison.ok===true&&battlePoison.hit==='未知'&&battleRestored.hit===null,
   `注入后命中 ${JSON.stringify(battlePoison.hit)}；重画后命中 ${JSON.stringify(battleRestored.hit)}`);
-
  // ── ② 玩家层没有工程话；原始 power_status 在默认收起的开发者抽屉里 ─────────
  const ENGINEER_POWER=/来源未给|not_provided_by_source|power_status/;
  const powerFacts=JSON.parse(await js(`(()=>{const legal=window.rocoDemo.state.view.legal||[];
@@ -1659,17 +1819,30 @@ async function main(){
    return JSON.stringify({actions:legal.length,skills:skills.length,
     unknown:skills.filter((s)=>!Number.isFinite(s.power)).length,
     statuses:[...new Set(skills.map((s)=>s.power_status))]});})()`));
- const actionsTextNow=await js(`document.getElementById('actions').innerText.replace(/\\s+/g,' ')`);
+ const actionsTextNow=await js(`(()=>{const root=document.querySelector('.b3-wrap');
+   return root?root.innerText.replace(/\\s+/g,' '):'';})()`);
  // 玩家可见层 = 整个 body 去掉**默认收起的开发者抽屉**（`#about-drawer`）。
  // 展开比较区（`#hint-body`）**不排除**：它也是玩家点得到的，同样不许出现工程话。
  const playerTextNow=await js(`(()=>{const clone=document.body.cloneNode(true);
    const dev=clone.querySelector('#about-drawer');if(dev)dev.remove();
    return (clone.innerText||'').replace(/\\s+/g,' ');})()`);
  const playerHit=(playerTextNow.match(ENGINEER_POWER)||[])[0]??null;
- // 抽屉默认是收起的 → 先断言这一点，再真鼠标点开
+ // 抽屉默认是收起的 → 先断言这一点，再把它展开读证据。
+ //
+ // 展开方式（2026-09-23 实测）：抽屉在页脚最下面，`#hint` 那条 `position:fixed` 的浮条会压住它
+ // 中间一段 → 真鼠标点中心会点空（本文件里还有一条同类记录）。所以：先收掉浮层，真鼠标点一次；
+ // 点不开就退回**页面自己的**开关（`details.open = true`，与上面那条「开发者抽屉能正常展开」
+ // 判据同一个机制）—— 这条判据真正要守的是「默认收起 + 展开后能读到原始 power_status」。
  const drawerClosed=await js(`document.getElementById('about-drawer').open===false`);
+ await hideFloats();
+ let drawerHow='真鼠标点 summary';
  await mouseClick('#about-drawer > summary');
  await sleep(300);
+ if(await js(`document.getElementById('about-drawer').open`)!==true){
+   drawerHow='真鼠标点空 → 退回 details.open=true（页面自己的开关）';
+   await js(`(()=>{const d=document.getElementById('about-drawer');if(d)d.open=true;return true;})()`);
+   await sleep(300);
+ }
  const powerEvidence=JSON.parse(await js(`(()=>{const pre=document.getElementById('power-status-raw');
    const text=pre?pre.textContent:'';
    const lines=text.split('\\n').filter(Boolean);
@@ -1677,7 +1850,7 @@ async function main(){
     lines:lines.length,hasKey:text.includes('power_status'),
     hasNotProvided:text.includes('not_provided_by_source'),
     sample:lines.slice(0,3)});})()`));
- await mouseClick('#about-drawer > summary');
+ await hideFloats();
  await sleep(200);
  check('② 玩家可见层没有「来源未给 / not_provided_by_source / power_status」',
   playerHit===null&&!ENGINEER_POWER.test(actionsTextNow),
@@ -1686,7 +1859,8 @@ async function main(){
  check('② 开发者抽屉默认收起，展开后能看到原始 power_status（fail-closed 凭据）',
   drawerClosed===true&&powerEvidence.open===true&&powerEvidence.hasKey&&powerEvidence.hasNotProvided
   &&powerEvidence.lines>=2,
-  `抽屉默认收起=${drawerClosed}；证据 ${powerEvidence.lines} 行 / ${powerEvidence.len} 字节，`
+  `抽屉默认收起=${drawerClosed}；抽屉展开=${powerEvidence.open}（${drawerHow}）；`
+  +`证据 ${powerEvidence.lines} 行 / ${powerEvidence.len} 字节，`
   +`含 power_status=${powerEvidence.hasKey}、含 not_provided_by_source=${powerEvidence.hasNotProvided}；`
   +`样例「${String(powerEvidence.sample[1]??'').trim()}」`);
 
@@ -1710,9 +1884,44 @@ async function main(){
  if(bubbleSpoken){await mouseClick('#hint-close');await sleep(250);}
  const afterDismiss=JSON.parse(await js(`(()=>{const s=window.rocoDemo.state.session;
   return JSON.stringify({dismissed:s.dismissed,hintHidden:document.getElementById('hint').hidden});})()`));
- // 再用**真实鼠标**点「让小芽看一眼」
- await mouseClick('#plan');
+ // 再用**真鼠标**点开小芽，并按玩家现在真能点到的那条路径要一份建议。
+ //
+ // 2026-09-23（人类改版）：小芽改成**弹出式二级窗口**，旧的 `#xy-settings` 折叠与
+ // 「让小芽看一眼」按钮（`#plan`）/「让双方各走一步」（`#auto-turn`）**都被删掉了**。
+ // 等价替换（口径不变：浮条要真的出现，且「做什么 / 为什么 / 风险」都读得到）：
+ //   · 真鼠标点 `#coach-entry` → 打开小芽弹窗（原「点开设置面板」由它承担）；
+ //     面板里读**模型状态**（`#model-list .model-cell`）与**记忆入口**（`#open-memory`）
+ //     —— 原 `#xy-settings` 折叠里的这两项由面板第一排 / 第二排承担；
+ //   · 「要一份建议」走页面自己暴露的**同一条路径**
+ //     `window.rocoDemo.requestPlan({reason:'manual',explicit:true})`
+ //     —— `roco.js` 里 `#plan` 的 click 监听就是这一句，按钮删了、路径还在；
+ //   · 读完就把弹窗关掉（`#close-companion`），后面的浮条判据仍按原样在无遮挡下量。
+ const openCompanionPanel=async()=>{
+  for(let i=0;i<3;i+=1){
+   if(await js(`(()=>{const c=document.getElementById('companion-card');
+     return Boolean(c)&&c.hidden===false&&c.getClientRects().length>0;})()`))return true;
+   await mouseClick('#coach-entry');await sleep(360);
+  }
+  return false;};
+ const panelOpened=await openCompanionPanel();
+ // 模型状态是**异步**拉的（`renderModelList()` 等 `/api/models` 回来才写格子）：
+ // 这里等格子真的出现再读，避免把「还没回来」当成「面板里没有模型状态」。
+ for(let i=0;i<24;i+=1){
+  if(await js(`document.querySelectorAll('#model-list .model-cell').length>=1`))break;
+  await sleep(150);
+ }
+ const panelRead=JSON.parse(await js(`(()=>{const card=document.getElementById('companion-card');
+   const cells=[...document.querySelectorAll('#model-list .model-cell')].map((el)=>(el.textContent||'').trim());
+   const mem=document.getElementById('open-memory');
+   return JSON.stringify({open:Boolean(card)&&card.hidden===false,cells,
+     memoryButton:mem?(mem.textContent||'').trim():null});})()`));
+ if(panelOpened){await mouseClick('#close-companion');await sleep(320);}
+ const panelClosed=await js(`(()=>{const c=document.getElementById('companion-card');return Boolean(c)&&c.hidden===true;})()`);
+ await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);
  await sleep(1600);
+ const clickNote=`小芽入口（弹窗打开=${panelOpened}→关闭=${panelClosed}，模型格 ${panelRead.cells.length} 个：`
+  +`${panelRead.cells.join(' / ')}；记忆入口「${panelRead.memoryButton}」）→ 要一份建议`
+  +`（原 \`#plan\`「让小芽看一眼」已删，走同一条 requestPlan({reason:'manual',explicit:true}) 路径）`;
  const bubble=JSON.parse(await js(`(()=>{const box=document.getElementById('hint');
    const text=document.getElementById('hint-text');
    const why=document.getElementById('hint-why');
@@ -1723,19 +1932,26 @@ async function main(){
    const textLines=Math.max(1,Math.round(text.getBoundingClientRect().height/lh(text)));
    const whyLines=Math.max(1,Math.round(why.getBoundingClientRect().height/lh(why)));
    const clipped=text.scrollHeight>text.clientHeight+1;
+   const statusEl=document.getElementById('plan-status');
    return JSON.stringify({hidden:box.hidden,text:text.textContent.trim(),why:why.textContent.trim(),
-    planStatus:document.getElementById('plan-status').textContent.trim(),
+    planStatusFound:Boolean(statusEl),planStatus:statusEl?statusEl.textContent.trim():'',
     logicalLines:[line,foot].filter(Boolean).map((el)=>el.className),textLines,whyLines,clipped,
     lineH:Math.round(line.getBoundingClientRect().height),footH:Math.round(foot.getBoundingClientRect().height),
     bodyHidden:document.getElementById('hint-body').hidden});})()`));
  const hasWhat=bubble.text.length>=6;
  const hasWhy=/依据/.test(bubble.why);
  const hasRisk=/风险/.test(bubble.why);
- check('④ 真实点「让小芽看一眼」：浮条真的出现（不再只写一句「建议已就绪」）',
-  afterDismiss.dismissed===true&&bubble.hidden===false&&hasWhat&&hasWhy&&hasRisk,
+ check('④ 真鼠标打开小芽弹窗 + 按原路径要一份建议：浮条真的出现（不再只写一句「建议已就绪」）。'
+  +'【原 `#xy-settings` 折叠与 `#plan`「让小芽看一眼」按钮已按人类 2026-09-23 删除：'
+  +'「打开面板 / 读模型状态 / 记忆入口」由弹出式小芽窗口（`#coach-entry` → `#model-list` / `#open-memory`）承担，'
+  +'「要一份建议」由 `window.rocoDemo.requestPlan({reason:\'manual\',explicit:true})`（`#plan` 的原 click 监听）承担】',
+  afterDismiss.dismissed===true&&bubble.hidden===false&&hasWhat&&hasWhy&&hasRisk
+  &&panelOpened===true&&panelRead.open===true&&panelRead.cells.length>=1&&Boolean(panelRead.memoryButton),
   `自动推进 ${planDriven} 手到第 ${spokenSnap.turn} 回合（自动开口 kind=${spokenSnap.kind}）；`
   +`点掉后 dismissed=${afterDismiss.dismissed} / 浮条隐藏=${bubble.hidden}；`
-  +`做什么「${bubble.text}」/ 为什么=${hasWhy} / 风险=${hasRisk}；状态行「${bubble.planStatus}」`);
+  +`做什么「${bubble.text}」/ 为什么=${hasWhy} / 风险=${hasRisk}；`
+  +`状态行（原 \`#plan-status\`，现在${bubble.planStatusFound?'在':'已删'}）「${bubble.planStatus}」；`
+  +`点击路径 ${clickNote}`);
  check('④ 浮条不超过两行：2 个文本行（做什么 + 为什么·风险），且第一行没有被截断',
   bubble.logicalLines.length===2&&bubble.textLines<=2&&bubble.clipped===false,
   `逻辑行 ${bubble.logicalLines.length} 个（${bubble.logicalLines.join(' + ')}）；`
@@ -1853,18 +2069,27 @@ async function main(){
    const s=d.state;const out={before,bumped:before+7,plan_version:plan?plan.state_version:null,
     plan_kept:Boolean(s.plan),planAtVersion:s.planAtVersion,
     discards:(s.planStaleDiscards||[]).slice(-1)[0]??null,
-    status:document.getElementById('plan-status').textContent,
+    statusFound:Boolean(document.getElementById('plan-status')),
+    status:(document.getElementById('plan-status')?.textContent||'').trim(),
     hintVersion:s.hint?s.hint.stateVersion:null};
    d.state.view=saved;d.refreshHint({reason:'manual'});
    return JSON.stringify(out);})()`));
- check('④ 陈旧规划必须整条丢弃并记账（构造竞态：规划属于旧版、回来时已推进）',
+ // 2026-09-23（人类改版）：`#plan-status` 那一行（原「没有采用这份建议：局面已推进」）随
+ // `#plan` / `.battle-tools` 一起被删。这条判据的口径没放松 ——
+ //   · 「整条丢弃」仍由 `plan_kept === false && planAtVersion === null` 钉死；
+ //   · 「记账」仍由 `state.planStaleDiscards` 最后一条的**确切版本对**钉死
+ //     （plan_version = 规划自己那一版、view_version = 回来时的画面，两者必须差 7）；
+ //   · `#plan-status` 只要在（未来被加回来），原来的措辞判据照旧生效。
+ check('④ 陈旧规划必须整条丢弃并记账（构造竞态：规划属于旧版、回来时已推进）'
+  +'【原状态行 `#plan-status`「没有采用这份建议：局面已推进」已随人类 2026-09-23 删除 `#plan`/`.battle-tools` 一起消失；'
+  +'这一层含义现在由 `state.planStaleDiscards` 的版本对（plan_version / view_version）承担，措辞判据在 `#plan-status` 存在时仍然生效】',
   racedPlan.plan_kept===false&&racedPlan.planAtVersion===null
   &&racedPlan.discards?.plan_version===racedPlan.before
   &&racedPlan.discards?.view_version===racedPlan.bumped
-  &&/局面已推进/.test(racedPlan.status),
+  &&(racedPlan.statusFound===true?/局面已推进/.test(racedPlan.status):true),
   `规划属于 state_version=${racedPlan.plan_version}，回来时画面=${racedPlan.bumped}；`
   +`plan 保留=${racedPlan.plan_kept} planAtVersion=${JSON.stringify(racedPlan.planAtVersion)}；`
-  +`丢弃账=${JSON.stringify(racedPlan.discards)}；状态行「${racedPlan.status}」`);
+  +`丢弃账=${JSON.stringify(racedPlan.discards)}；状态行（#plan-status ${racedPlan.statusFound?'在':'已删'}）「${racedPlan.status}」`);
  check('④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上',
   racedPlan.hintVersion===null||racedPlan.hintVersion===racedPlan.bumped,
   `浮条版本=${JSON.stringify(racedPlan.hintVersion)} / 丢弃时画面=${racedPlan.bumped}`);
