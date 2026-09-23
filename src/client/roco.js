@@ -886,6 +886,7 @@ function render() {
   renderMemory();
   renderCompanion();
   bindXiaoyaPopups();
+  syncCompanionBodyVisibility();
   syncBottomBars();
 }
 
@@ -1458,6 +1459,18 @@ function bindXiaoyaPopups() {
 }
 
 const B3_NO_INLINE_XIAOYA = true;   // 首页不内联小芽
+function syncCompanionBodyVisibility() {
+  // 人类 2026-09-23：「展开连接状态下面那个重叠的框还在」——那块是**空的对话体**
+  // （`.companion-body` 有边框与 min-height；CSS 的 `:empty` 因为里面有注释/空白而不匹配）。
+  // 所以由 JS 显式判定：没有回复、没有提示行，就 `hidden`。
+  const body = $('companion-body');
+  if (!body) return;
+  const line = $('companion-line');
+  const reply = $('say-reply');
+  const hasLine = Boolean(line && !line.hidden && String(line.textContent || '').trim());
+  const hasReply = Boolean(reply && !reply.hidden && String(reply.textContent || '').trim());
+  body.hidden = !(hasLine || hasReply);
+}
 function renderCompanion() {
   const card = $('companion-card');
   if (!card) return;

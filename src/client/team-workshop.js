@@ -685,7 +685,15 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   }
 
   function renderPool() {
-    const rows = state.pool.rows;
+    // 人类 2026-09-23：「所有拥有的 x2 都给删了，重复的精灵不要」——
+    // 召回的实例可能同一 species 有多只个体 → 列表**按 species 去重**（保留第一只）。
+    const seen = new Set();
+    const rows = state.pool.rows.filter((r) => {
+      const key = String(r?.species_id ?? r?.name ?? '');
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
     if (!rows.length) {
       // 空态要**说出下一步**，不是留一片空白。
       $('tw-cand-list').innerHTML = `<p class="tw-note" data-tw-empty="yes">`
@@ -748,7 +756,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       : '';   // 人类：这一行删掉
     const filters = [state.pool.type, state.pool.role].filter(Boolean).join(' / ');
     $('tw-cand-result').textContent = state.pool.total
-      ? `${state.pool.total} 条${filters ? `（${filters}）` : ''} · 本页 ${rows.length}`
+      // 人类 2026-09-23：列表已按 species 去重，结果行要**如实**说明（总数是服务端的实例数）
+      ? `${state.pool.total} 条${filters ? `（${filters}）` : ''} · 去重后本页 ${rows.length}`
       : '没有符合条件的精灵：换个属性/定位，或点「清除筛选」。';
     if ($('tw-cand-note')) $('tw-cand-note').textContent = state.pool.kind === 'mine'
       ? '这些是你**拥有**的个体：可以直接进正式队伍并开局。'
