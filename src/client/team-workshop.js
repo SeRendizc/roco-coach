@@ -295,16 +295,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
    <style>${STYLE}</style>
    <div class="tw-grid">
     <section class="tw-panel tw-team" aria-labelledby="tw-team-title">
-     <div class="tw-head"><h3 id="tw-team-title">队伍（六个槽位）</h3>
+     <div class="tw-head"><h3 id="tw-team-title">队伍</h3>
       <span class="tw-sub" id="tw-team-sub">还差 6 只</span></div>
-     <details class="tw-about" id="tw-about">
-      <summary>这一局的规则口径（候选 / 未核验 / 候选宇宙）</summary>
-      <div class="tw-badges">
-       <!-- 2026-09-22（人类视觉规格）：模式/候选规则/对手未知这三枚徽记**页头已经写着**，
-            这里再放一份就是「同屏重复」。这一块只留「候选宇宙」这一条模块自己才知道的信息。 -->
-       <span class="tw-badge muted" id="tw-badge-universe">${escapeHtml(TEAM_WORKSHOP_BADGES.universe)} 600+</span>
-      </div>
-     </details>
+     
      <div class="tw-slots" id="tw-slots" role="list"></div>
      <!-- 2026-09-22（人类 P0）：队伍面板里**不再**放第二排槽位。
           理论阵容只在候选人页签里出现（它是「分析用」的清单，不该和出战六槽并排抢首屏）。 -->
@@ -312,18 +305,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       <summary id="tw-analysis-head">理论阵容（放图鉴物种进来做搭配分析）</summary>
       <div class="tw-slots" id="tw-analysis-slots" role="list" data-tw-analysis></div>
      </details>
-     <details class="tw-about" id="tw-why">
-      <summary>为什么是这些 / 有什么约束</summary>
-      <p class="tw-note" id="tw-team-note"></p>
-      <p class="tw-note" id="tw-team-constraints" hidden></p>
-     </details>
+     
      <p class="tw-error" id="tw-team-error" hidden></p>
-     <div class="tw-knobs" style="margin-top:9px">
-      <button class="tw-btn" id="tw-favourite" aria-pressed="false">只看收藏</button>
-      <details class="tw-fmenu" id="tw-replace-menu">
-       <summary>最多替换：<span id="tw-replace-label">不限</span></summary>
-       <div class="tw-fmenu-body" id="tw-replace-body" role="group" aria-label="最多替换几只"></div>
-      </details>
+     <div class="tw-knobs tw-knobs--right">
       <button class="tw-btn" id="tw-reset">清空阵容</button>
      </div>
     </section>
@@ -332,13 +316,15 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      <div class="tw-head"><h3 id="tw-cand-title">候选池</h3>
       <span class="tw-sub" id="tw-cand-sub">—</span></div>
      <p class="tw-note" id="tw-cand-note"></p>
-     <div class="tw-cand-tools">
-      <input type="search" id="tw-search" placeholder="搜索名字（全图鉴）" aria-label="搜索候选" autocomplete="off">
-      <button class="tw-btn" id="tw-scope-all" aria-pressed="true">全图鉴参考</button>
-      <button class="tw-btn" id="tw-scope-mine" aria-pressed="false">我的精灵（能出战）</button>
-      <button class="tw-btn" id="tw-filter-type">属性：全部</button>
-      <button class="tw-btn" id="tw-filter-role">定位：全部</button>
-      <button class="tw-btn" id="tw-filter-clear">清除筛选</button>
+     <div class="tw-cand-tools tw-scope-row">
+      <button class="tw-btn" id="tw-scope-all" aria-pressed="true">全图鉴</button>
+      <button class="tw-btn" id="tw-scope-mine" aria-pressed="false">我的精灵</button>
+     </div>
+     <div class="tw-cand-tools tw-filter-row">
+      <select class="tw-btn" id="tw-filter-type" aria-label="按属性筛选"></select>
+      <select class="tw-btn" id="tw-filter-role" aria-label="按定位筛选"></select>
+      <input type="search" id="tw-search" placeholder="搜索精灵" aria-label="搜索候选" autocomplete="off">
+      <button class="tw-btn" id="tw-filter-reset">重置</button>
      </div>
      <p class="tw-note" id="tw-cand-result" role="status" aria-live="polite"></p>
      <div class="tw-cand-tools tw-pager">
@@ -478,12 +464,12 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     }).join('');
     const filled = slots.filter((slot) => slot.state === 'filled').length;
     $('tw-team-sub').textContent = filled >= TEAM_SLOTS ? '六个槽位都满了' : `还差 ${TEAM_SLOTS - filled} 只`;
-    $('tw-team-note').textContent = player?.structure_note ?? '';
+    if ($('tw-team-note')) $('tw-team-note').textContent = player?.structure_note ?? '';
     const constraints = Array.isArray(player?.constraints) ? player.constraints : [];
-    $('tw-team-constraints').hidden = constraints.length === 0;
-    $('tw-team-constraints').textContent = constraints.length ? `当前约束：${constraints.join('；')}` : '';
+    if ($('tw-team-constraints')) $('tw-team-constraints').hidden = constraints.length === 0;
+    if ($('tw-team-constraints')) $('tw-team-constraints').textContent = constraints.length ? `当前约束：${constraints.join('；')}` : '';
     // 模式/候选规则/对手未知的徽记已挪回页头那一处（同屏只出现一次）。
-    $('tw-badge-universe').textContent = player?.candidates_universe?.pool_label ?? `${TEAM_WORKSHOP_BADGES.universe} 600+`;
+    if ($('tw-badge-universe')) $('tw-badge-universe').textContent = player?.candidates_universe?.pool_label ?? `${TEAM_WORKSHOP_BADGES.universe} 600+`;
     $('tw-team-error').hidden = !state.error;
     // 玩家那一行只说「这一只现在进不了队伍 + 能做什么」；服务端原文进 data-tw-error-raw，
     // 开发者抽屉与验收脚本读它（人类 P0：`selected` / `own-0001` / 「服务端原话」不许上玩家层）。
@@ -620,8 +606,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const note = (text) => `<p class="tw-group-note" data-tw-group="yes">${text}</p>`;
     const firstRef = ref[0];
     firstRef.insertAdjacentHTML('beforebegin',
-      note(`你拥有的可选（${held.length} 只，能正式出战）`)
-      + note(`图鉴参考（${ref.length} 只：还不能正式出战，放进理论阵容后只能试玩）`));
+      '');   // 人类 2026-09-23：这两行分段统计删掉（候选池大小由结果行自己说）
     rootEl.dataset.twPoolHeld = String(held.length);
     rootEl.dataset.twPoolRef = String(ref.length);
   }
@@ -684,16 +669,17 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     $('tw-cand-page').textContent = `${page} / ${pages}`;
     $('tw-cand-prev').disabled = state.pool.offset <= 0;
     $('tw-cand-next').disabled = state.pool.offset + state.pool.pageSize >= state.pool.total;
-    $('tw-cand-sub').textContent = state.pool.kind === 'mine'
+    if ($('tw-cand-sub')) $('tw-cand-sub').textContent = state.pool.kind === 'mine'
       ? `我的精灵 ${state.pool.total} 只（能出战）`
-      : `全图鉴 ${state.pool.total} 条（含参考，不一定能出战）`;
+      : '';   // 人类：这一行删掉
     const filters = [state.pool.type, state.pool.role].filter(Boolean).join(' / ');
     $('tw-cand-result').textContent = state.pool.total
-      ? `筛出 ${state.pool.total} 条${filters ? `（条件：${filters}）` : ''}，这一页 ${rows.length} 条`
+      ? `${state.pool.total} 条${filters ? `（${filters}）` : ''} · 本页 ${rows.length}`
       : '没有符合条件的精灵：换个属性/定位，或点「清除筛选」。';
-    $('tw-cand-note').textContent = state.pool.kind === 'mine'
+    if ($('tw-cand-note')) $('tw-cand-note').textContent = state.pool.kind === 'mine'
       ? '这些是你**拥有**的个体：可以直接进正式队伍并开局。'
       : '全图鉴是**参考**：可以配队与比较；能不能出战要看每一只卡片上的状态标。';
+    if ($('tw-cand-note')) $('tw-cand-note').textContent = '';   // 人类：这两行统计删掉
     rootEl.dataset.twPoolTotal = String(state.pool.total);
     rootEl.dataset.twPoolRows = String(rows.length);
   }
@@ -1196,8 +1182,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   // 范围与筛选（人类 P1：622 条候选必须有**真实可用**的搜索与筛选，换条件回第一页）
   const setScope = (kind) => {
     state.pool.kind = kind;
-    $('tw-scope-all').setAttribute('aria-pressed', kind === 'catalog' ? 'true' : 'false');
-    $('tw-scope-mine').setAttribute('aria-pressed', kind === 'mine' ? 'true' : 'false');
+    if ($('tw-scope-all')) $('tw-scope-all').setAttribute('aria-pressed', kind === 'catalog' ? 'true' : 'false');
+    if ($('tw-scope-mine')) $('tw-scope-mine').setAttribute('aria-pressed', kind === 'mine' ? 'true' : 'false');
     rootEl.dataset.twScope = kind;
     void loadPool({reset: true});
   };
@@ -1212,13 +1198,26 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     labelEl.textContent = `${key === 'type' ? '属性' : '定位'}：${key === 'role' ? (ROLE_CN[label] ?? label) : label}`;
     void loadPool({reset: true});
   };
-  $('tw-filter-type').addEventListener('click', () => cycle('type', $('tw-filter-type'), TYPE_CYCLE));
-  $('tw-filter-role').addEventListener('click', () => cycle('role', $('tw-filter-role'), ROLE_CYCLE));
-  $('tw-filter-clear').addEventListener('click', () => {
+  // 人类 2026-09-23：属性 / 定位改成**下拉选择框**（原来是点击循环的按钮）
+  const fillSelect = (el, values, label) => {
+    if (!el) return;
+    el.innerHTML = ['<option value="">' + label + '</option>']
+      .concat(values.map((v) => `<option value="${escapeHtml(v[0])}">${escapeHtml(v[1])}</option>`)).join('');
+  };
+  fillSelect($('tw-filter-type'), TYPE_CYCLE, '属性：全部');
+  fillSelect($('tw-filter-role'), ROLE_CYCLE, '定位：全部');
+  if ($('tw-filter-type')) $('tw-filter-type').addEventListener('change', (e) => {
+    state.filter.type = e.target.value || ''; state.pool.page = 1; refreshPool();
+  });
+  if ($('tw-filter-role')) $('tw-filter-role').addEventListener('change', (e) => {
+    state.filter.role = e.target.value || ''; state.pool.page = 1; refreshPool();
+  });
+  if ($('tw-filter-reset')) $('tw-filter-reset').addEventListener('click', () => {
     state.pool.q = ''; state.pool.type = ''; state.pool.role = '';
-    $('tw-search').value = '';
-    $('tw-filter-type').textContent = '属性：全部';
-    $('tw-filter-role').textContent = '定位：全部';
+    if ($('tw-search')) $('tw-search').value = '';
+    if ($('tw-filter-type')) $('tw-filter-type').value = '';
+    if ($('tw-filter-role')) $('tw-filter-role').value = '';
+    if ($('tw-search')) $('tw-search').value = '';
     void loadPool({reset: true});
   });
   // 槽位里的「移除」：持有成员按实例 id 摘，理论阵容按物种 id 摘。
@@ -1251,24 +1250,24 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     state.pool.offset += state.pool.pageSize;
     void loadPool();
   });
-  $('tw-favourite').addEventListener('click', () => {
+  if ($('tw-favourite')) $('tw-favourite').addEventListener('click', () => {
     state.favourite = !state.favourite;
-    $('tw-favourite').setAttribute('aria-pressed', state.favourite ? 'true' : 'false');
+    if ($('tw-favourite')) $('tw-favourite').setAttribute('aria-pressed', state.favourite ? 'true' : 'false');
     void reload();
   });
-  $('tw-replace-body').innerHTML = [['', '不限'], ['0', '0 只'], ['1', '1 只'], ['2', '2 只'], ['3', '3 只']]
+  if ($('tw-replace-body')) $('tw-replace-body').innerHTML = [['', '不限'], ['0', '0 只'], ['1', '1 只'], ['2', '2 只'], ['3', '3 只']]
     .map(([value, label]) => `<button class="tw-btn" data-tw-replace="${value}"
       aria-pressed="${value === '' ? 'true' : 'false'}">${label}</button>`).join('');
-  $('tw-replace-body').addEventListener('click', (event) => {
+  if ($('tw-replace-body')) $('tw-replace-body').addEventListener('click', (event) => {
     const chip = event.target.closest?.('[data-tw-replace]');
     if (!chip) return;
     const raw = chip.dataset.twReplace;
     state.maxReplacements = raw === '' ? null : Number(raw);
-    $('tw-replace-label').textContent = raw === '' ? '不限' : `${raw} 只`;
+    if ($('tw-replace-label')) $('tw-replace-label').textContent = raw === '' ? '不限' : `${raw} 只`;
     for (const other of shadow.querySelectorAll('[data-tw-replace]')) {
       other.setAttribute('aria-pressed', other === chip ? 'true' : 'false');
     }
-    $('tw-replace-menu').open = false;
+    if ($('tw-replace-menu')) $('tw-replace-menu').open = false;
     void reload();
   });
   $('tw-reset').addEventListener('click', () => {
@@ -1276,8 +1275,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     state.locked = [];
     state.favourite = false;
     state.maxReplacements = null;
-    $('tw-favourite').setAttribute('aria-pressed', 'false');
-    $('tw-replace-label').textContent = '不限';
+    if ($('tw-favourite')) $('tw-favourite').setAttribute('aria-pressed', 'false');
+    if ($('tw-replace-label')) $('tw-replace-label').textContent = '不限';
     for (const chip of shadow.querySelectorAll('[data-tw-replace]')) {
       chip.setAttribute('aria-pressed', chip.dataset.twReplace === '' ? 'true' : 'false');
     }

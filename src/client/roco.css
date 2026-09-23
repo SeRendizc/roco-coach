@@ -921,3 +921,8 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
 /* 人类 2026-09-23：「小芽整体删除，该弹窗自己弹出来，不要留这里」——
    首页里那块**内联**小芽卡不再显示（只保留右上角弹窗）。 */
 #hint-body{display:none !important}
+
+/* 工坊（人类 2026-09-23 批注）：清空阵容靠右；筛选第二排一行放下；结果行字号小一点 */
+.tw-knobs--right{justify-content:flex-end}
+.tw-filter-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px;align-items:center}
+.tw-filter-row input[type=search]{width:100%}
