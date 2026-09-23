@@ -852,8 +852,8 @@ function render() {
   document.body.dataset.rocoLogTurns = String(turnKeys.length);
   const rawBox = $('events-raw');
   if (rawBox) rawBox.textContent = raw.length ? JSON.stringify(raw, null, 1) : '（还没有事件）';
-  $('plan-status').textContent = state.plan && state.plan.timed_out ? '这一手算得慢了点，先用规则提示' : '';
-  $('plan-status').dataset.detail = state.plan
+  if ($('plan-status')) $('plan-status').textContent = state.plan && state.plan.timed_out ? '这一手算得慢了点，先用规则提示' : '';
+  if ($('plan-status')) $('plan-status').dataset.detail = state.plan
     ? `state_version=${state.planAtVersion} coverage=${state.plan.coverage ?? '—'} timed_out=${state.plan.timed_out === true}`
     : '';
 
@@ -1397,7 +1397,7 @@ function renderMemory() {
   if (!list) return;
   const rows = memoryItems(state.memory).filter((row) => row.group === 'stated');
   list.hidden = rows.length === 0;
-  $('memory-empty').hidden = rows.length > 0;
+  if ($('memory-empty')) $('memory-empty').hidden = rows.length > 0;
   list.innerHTML = rows.map((row) => `<li data-memory="${escapeAttr(row.id)}">
     <span class="mem-kind">${MEMORY_GROUPS[row.group] ?? row.group}</span>
     <span class="mem-label">${escapeAttr(row.label)}</span>
@@ -1490,6 +1490,13 @@ function bindXiaoyaPopups() {
   if (closeMemory && closeMemory.dataset.bound !== 'yes') {
     closeMemory.dataset.bound = 'yes';
     closeMemory.addEventListener('click', () => { const m = $('memory-pop'); if (m) m.hidden = true; });
+  }
+  const closeCompanion2 = $('close-companion');
+  if (closeCompanion2 && closeCompanion2.dataset.bound !== 'yes') {
+    closeCompanion2.dataset.bound = 'yes';
+    closeCompanion2.addEventListener('click', () => {
+      state.coach.open = false; renderCompanion(); syncBottomBars();
+    });
   }
   const openConnect = $('open-connect');
   if (openConnect && openConnect.dataset.bound !== 'yes') {
@@ -1596,6 +1603,8 @@ function onboardDismissed() {
  * 读不到接口时**不编**：显示「状态未知」并保留连接入口。
  */
 async function renderModelList() {
+  // 人类 2026-09-23：小芽弹窗里**第一排三个框**（等宽等高、**一行字**、放不下就简写）显示
+  // ds api / qwen3.5-4b / qwen3.8-27b 的连接状态。别的（长理由、角色、配置入口）都不在这儿。
   const box = $('model-list');
   if (!box) return;
   let data = null;
@@ -1604,29 +1613,24 @@ async function renderModelList() {
     if (res.ok) data = await res.json();
   } catch { data = null; }
   const rows = Array.isArray(data?.models) ? data.models : [];
-  if (!rows.length) {
-    box.innerHTML = `<div class="model-cell"><div class="mc-name">模型状态读不到</div>
-      <div class="mc-state no">● 未知</div>
-      <div class="mc-why">接口没回应；这不代表没连上，也不代表连上了。</div>
-      <a class="chip" href="${escapeAttr(data?.connectUrl || 'connect.html')}">去连接页配置</a></div>`;
-    document.body.dataset.rocoModels = 'unknown';
-    return;
-  }
-  box.innerHTML = rows.map((m) => `<div class="model-cell" data-model-id="${escapeAttr(m.id ?? '')}">
-    <div class="mc-name">${escapeHtml(m.label ?? m.id ?? '模型')}</div>
-    <div class="mc-state ${m.connected ? 'ok' : 'no'}">● ${m.connected ? '已连接' : '未连接'}</div>
-    <div class="mc-role">${escapeHtml(m.role ?? '')}</div>
-    ${m.reason ? `<div class="mc-why">${escapeHtml(m.reason)}</div>` : ''}
-    ${m.connected ? '' : `<a class="chip" href="${escapeAttr(m.action || 'connect.html')}">配置</a>`}</div>`).join('');
-  const ok = rows.filter((m) => m.connected).length;
-  document.body.dataset.rocoModels = `${ok}/${rows.length}`;
-  // 聊天弹窗里只留**一行**：哪几只连上、没连上的原因（一句）。
+  // 固定三格 + 简写名（一行放得下）；未知就写「状态未知」，不猜
+  const SHORT = {cloud: 'ds api', local_4b: 'qwen3.5-4b', local_27b: 'qwen3.8-27b'};
+  const cells = rows.length ? rows.slice(0, 3) : [
+    {id: 'cloud', label: 'ds api'}, {id: 'local_4b', label: 'qwen3.5-4b'}, {id: 'local_27b', label: 'qwen3.8-27b'},
+  ];
+  box.innerHTML = cells.map((m) => {
+    // 一行放不下就简写：去掉「云端 ·」「本地 ·」前缀，取模型名（人类：不要提行）
+    const raw = String(m.label ?? m.id ?? '模型');
+    const short = SHORT[m.id] ?? raw.replace(/^(云端|本地)\s*·\s*/, '').replace(/\s*\(.*\)$/, '');
+    const state = rows.length ? (m.connected ? '已连' : '未连') : '未知';
+    const title = `${m.label ?? m.id ?? '模型'}：${rows.length ? (m.connected ? '已连接' : '未连接') : '状态未知'}`
+      + (m.reason ? `（${m.reason}）` : '');
+    return `<div class="model-cell" data-model-id="${escapeAttr(m.id ?? '')}" title="${escapeAttr(title)}">`
+      + `<div class="mc-name">${escapeHtml(short)} · ${state}</div></div>`;
+  }).join('');
+  document.body.dataset.rocoModels = rows.length ? (rows.some((m) => m.connected) ? 'partial' : 'offline') : 'unknown';
   const chip = $('model-chip');
-  if (chip) {
-    const down = rows.filter((m) => !m.connected);
-    chip.textContent = ok === rows.length ? `模型：${ok} 只已连接`
-      : `模型：${ok}/${rows.length} 已连接${down[0] ? `（${down[0].label} 未连：${down[0].reason}）` : ''}`;
-  }
+  if (chip) chip.textContent = `模型：${rows.length ? (rows.some((m) => m.connected) ? '部分已连接' : '未连接') : '状态未知'}`;
 }
 
 /** 小芽面板开关（页眉那个按钮）。 */
@@ -2162,7 +2166,7 @@ function dismissOnboard() {
 
 // ── 提示：显示 / 作废 / 展开 ────────────────────────────────────────────────
 function hideHint(action = 'silent', gate = '') {
-  $('hint').hidden = true;
+  if ($('hint')) $('hint').hidden = true;
   document.body.dataset.rocoHint = 'hidden';
   document.body.dataset.rocoHintVisible = 'no';
   // dataset 必须反映**最后一次判定**，包括「判定为沉默」和「被硬门控拦下」。
@@ -2275,7 +2279,7 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
     ? `<p class="muted">这条建议用了这些公开事实：${Object.entries(state.lastAdviceEvidence)
         .map(([k, v]) => `${ADVICE_FACT_LABEL[k] ?? k} ${factValue(v)}`).join(' · ')}</p>`
     : '';
-  $('hint-body').innerHTML = `${compareBlockHtml(plan, view)}
+  if ($('hint-body')) $('hint-body').innerHTML = `${compareBlockHtml(plan, view)}
     ${adviceEvidence}${preview ? `<p><strong>${preview}</strong></p>` : ''}
     <p>${expectedLine(plan)}</p>
     <p>搜索：${plan?.branches_evaluated ?? '—'} 个分支 · 深度 ${plan?.depth_searched ?? '—'} · 分析种子 ${(plan?.analysis_seeds ?? []).join('/')}</p>
@@ -2287,8 +2291,8 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
   // ⚠ 这一行**必须**在：`#hint` 的 `hidden` 属性来自 HTML 的初始状态，
   // 少了它浮条会写着正文却永远不显示（实测：`data-roco-hint-visible="yes"`
   // 与 `#hint[hidden]` 同时成立，玩家一个字都看不到）。第 92 轮重写时漏过一次。
-  $('hint').hidden = false;
-  $('hint-body').hidden = true;
+  if ($('hint')) $('hint').hidden = false;
+  if ($('hint-body')) $('hint-body').hidden = true;
   $('hint').scrollTop = 0;
   document.body.dataset.rocoHint = hintAction;
   document.body.dataset.rocoHintVisible = 'yes';
@@ -2955,7 +2959,7 @@ async function startBattle() {
     dismissOnboard();
     await requestPlan({reason: 'match-start'});
   } catch (error) {
-    $('plan-status').textContent = `开局失败：${error.message}`;
+    if ($('plan-status')) $('plan-status').textContent = `开局失败：${error.message}`;
   } finally {
     renderRoster();
   }
@@ -2977,7 +2981,7 @@ async function playAction(action) {
       await requestPlan({reason: 'roster-changed'});
     }
   } catch (error) {
-    $('plan-status').textContent = `推进失败：${error.message}`;
+    if ($('plan-status')) $('plan-status').textContent = `推进失败：${error.message}`;
   }
 }
 
@@ -2987,7 +2991,7 @@ async function autoTurn() {
     const data = await api('/api/roco/battle/advance', {battle_id: state.battleId, auto: true});
     applyResult(data);
   } catch (error) {
-    $('plan-status').textContent = `自动推进失败：${error.message}`;
+    if ($('plan-status')) $('plan-status').textContent = `自动推进失败：${error.message}`;
   }
 }
 
@@ -3008,14 +3012,14 @@ async function requestPlan({reason = 'manual', explicit = false} = {}) {
         at: Date.now(),
       });
       refreshHint({reason: 'stale-plan', plan: null, explicit});
-      $('plan-status').textContent = `没有采用这份建议：${fresh.reason}`;
+      if ($('plan-status')) $('plan-status').textContent = `没有采用这份建议：${fresh.reason}`;
       return plan;
     }
     state.plan = plan;
     state.planAtVersion = fresh.plan_version;
     refreshHint({reason, plan, explicit});
     const spoken = Boolean(state.hint);
-    $('plan-status').textContent = explicit && spoken
+    if ($('plan-status')) $('plan-status').textContent = explicit && spoken
       ? `已在浮条上给出这一手（第 ${state.view?.turn ?? '—'} 回合）；展开可看并列比较`
       : (plan.recommendation_stable === false
         ? '这一手没有稳健结论（换个算法会变）'
@@ -3023,7 +3027,7 @@ async function requestPlan({reason = 'manual', explicit = false} = {}) {
     if (state.hint && state.hint.action !== 'explicit-facts') recordHintSaid();
     return plan;
   } catch (error) {
-    $('plan-status').textContent = `规划失败：${error.message}`;
+    if ($('plan-status')) $('plan-status').textContent = `规划失败：${error.message}`;
     return null;
   }
 }
@@ -3264,8 +3268,8 @@ function bind() {
   const standardButton = $('start-standard-pvp');
   if (standardButton) standardButton.addEventListener('click', () => void startStandardPvp());
   on('reset-battle', 'click', () => void startBattle());
-  $('plan').addEventListener('click', () => void requestPlan({reason: 'manual', explicit: true}));
-  $('auto-turn').addEventListener('click', () => void autoTurn());
+  if ($('plan')) $('plan').addEventListener('click', () => void requestPlan({reason: 'manual', explicit: true}));
+  if ($('auto-turn')) $('auto-turn').addEventListener('click', () => void autoTurn());
   $('hint-close').addEventListener('click', () => {
     state.session.dismissed = true;
     state.hint = null;
@@ -3284,20 +3288,20 @@ function bind() {
   // 轻量小芽入口（P0-2）：点一下**有可见反应**——这一栏展开、焦点落到输入框。
   // 这三个元素**必然存在**（页头入口 / 对话表单 / 教程跳过），按既有契约直接绑定；
   // 只有「重开 / 重试」这类在精简页眉后可能不存在的按钮才走 null-safe 的 on()。
-  // 人类 2026-09-23：「小芽再点一次应该能收回去才对」——
-  // 原来无条件 `openCompanion()`，所以点了只会开、永远关不掉。现在按当前状态切换。
-  $('coach-entry').addEventListener('click', () => {
-    // 只有 `openCompanion()` 这一个入口（没有 closeCompanion）：关就是把状态置 false 再渲染，
-    // `renderCompanion()` 会按 `state.coach.open` 自动开/关（见它的实现）。
-    if (state.coach.open) {
-      state.coach.open = false;
+  // 人类 2026-09-23：小芽是**弹出式二级窗口**，点一次开、再点一次收。
+  // 直接按状态开关（不再经 `toggleXiaoya`，它操作的是另一个旧元素，而且状态会被别的逻辑重置）。
+  // ⚠ `bind()` 每次 render 都会跑 → 不加守卫就会**重复绑定**：点一下实际切换了偶数次，
+  //   表现成「点不开 / 收不回」（人类报的「更多按了收不回去」也是这一类）。
+  const coachEntry = $('coach-entry');
+  if (coachEntry && coachEntry.dataset.bound !== 'yes') {
+    coachEntry.dataset.bound = 'yes';
+    coachEntry.addEventListener('click', () => {
+      state.coach.open = !state.coach.open;
       renderCompanion();
-      syncBottomBars();
-    } else {
-      toggleXiaoya(true);
-      openCompanion();
-    }
-  });
+      if (state.coach.open) renderModelList();
+    });
+  }
+
   // 设置入口 = `#xy-settings` 的原生 summary（不再有独立按钮）。
   const xyFold = $('xy-fold-models');
   if (xyFold) xyFold.addEventListener('click', () => {
@@ -3512,7 +3516,7 @@ async function startStandardPvp() {
     }
     await requestPlan({reason: 'match-start'});
   } catch (error) {
-    $('plan-status').textContent = `${trial ? '试玩' : '标准 PVP'}开局失败：${error.message}`;
+    if ($('plan-status')) $('plan-status').textContent = `${trial ? '试玩' : '标准 PVP'}开局失败：${error.message}`;
   } finally {
     updateStandardPvpBar();
   }

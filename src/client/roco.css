@@ -926,3 +926,23 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
 .tw-knobs--right{justify-content:flex-end}
 .tw-filter-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px;align-items:center}
 .tw-filter-row input[type=search]{width:100%}
+
+/* ── 小芽＝弹出式二级窗口（人类 2026-09-23：「不是首页啊」）────────────────────
+   原来是右侧停靠的固定栏（会把首页挤窄）；现在是**居中弹窗 + 遮罩**，覆盖一级界面。
+   面板内只有三块：第一排三个模型连接状态、第二排两个按钮、底部对话输入。 */
+.companion{position:fixed;inset:0;z-index:120;display:block;width:auto;max-height:none;right:auto}
+.companion[hidden]{display:none}
+.xy-modal2{position:absolute;inset:0;background:rgba(6,10,14,.62);display:flex;align-items:center;justify-content:center;padding:20px}
+.xy-modal2-box{width:min(560px,92vw);max-height:78vh;overflow:auto;background:#101a24;border:1px solid var(--line);
+ border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.xy-modal2-head{display:flex;align-items:center;justify-content:space-between}
+.xy-models{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.xy-models .model-cell{min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:#16222f}
+.xy-models .mc-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px}
+.xy-actions2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.xy-actions2 .xy-open{margin:0}
+
+/* 修正：`.companion` 是 width:auto 的固定定位元素，内部绝对定位的遮罩会被收缩成 26px。
+   遮罩自己 `position:fixed` + 面板撑满，弹窗才真正居中铺满（人类 2026-09-23）。 */
+.companion{width:100%;height:100%;left:0;top:0;right:0;bottom:0}
+.xy-modal2{position:fixed;inset:0}
