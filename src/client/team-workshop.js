@@ -76,14 +76,15 @@ const STYLE = `
 *{box-sizing:border-box}
 /* 人类 2026-09-23：删掉工坊里的「✦ 小芽（阵容阶段）」后重排 ——
    第一排：**队伍 | 阵容评估**；第二排：**候选池通栏**（「筛选精灵直接拉到最后面」，往下探满）。 */
-.tw-drawer{position:fixed;left:0;top:64px;bottom:78px;z-index:60;display:flex;align-items:stretch;pointer-events:none}
+.tw-drawer{position:fixed;left:0;top:64px;bottom:78px;z-index:60;display:flex;align-items:flex-start;pointer-events:none}
 .tw-drawer>*{pointer-events:auto}
 .tw-drawer-btn{writing-mode:vertical-rl;text-orientation:upright;letter-spacing:2px;
- align-self:center;padding:14px 8px;border:1px solid var(--line);border-right:0;border-radius:0 12px 12px 0;
- background:#16222f;color:#dbe7f1;font-size:12.5px;cursor:pointer;min-height:120px}
+ align-self:center;padding:16px 10px;border:1px solid #2b3d4e;border-right:0;border-radius:0 14px 14px 0;
+ background:#101a24;color:#eaf2f8;font-size:13px;font-weight:600;cursor:pointer;min-height:132px;
+ box-shadow:0 6px 18px rgba(0,0,0,.35)}   /* 对齐小芽按钮的观感 */
 .tw-drawer[data-open="yes"] .tw-drawer-btn{border-radius:12px 0 0 12px;border-right:1px solid var(--line)}
-.tw-drawer-panel{display:none;width:min(420px,90vw);overflow:auto;background:#101a24;
- border:1px solid var(--line);border-radius:0 14px 14px 0;padding:12px 14px}
+.tw-drawer-panel{display:none;width:min(380px,86vw);overflow:auto;background:#101a24;
+ border:1px solid var(--line);border-radius:0 14px 14px 0;padding:12px 14px;margin-left:0}
 .tw-drawer[data-open="yes"] .tw-drawer-panel{display:block}
 /* 一屏装完：网格高度 = 可用高度，候选列表**内部滚动**，页面本身不上下滑。 */
 .tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;

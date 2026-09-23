@@ -23,13 +23,14 @@
    规则版本、服务状态、验收钩子、工程说明全部在抽屉里（默认收起）。 */
 .topbar{align-items:center;flex-wrap:wrap;row-gap:6px;height:auto;min-height:44px}
 .topbar h1 small{font-size:11px;padding:2px 6px}
-.header-actions{gap:8px;flex-wrap:wrap;align-items:center}
 /* 页头三行（标题 / 徽记 / 按钮）各自成行、行内元素**等高**：
    用户实测「上面俩框上下就没对齐」——开发者抽屉按钮比旁边几个按钮高，整行就歪了。 */
 .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:12px;row-gap:8px}
 .topbar>h1{grid-column:1}
-.topbar>.header-actions{grid-column:2;justify-content:flex-end}
-.mode-line{grid-column:1/-1}
+/* 2026-09-23 死代码清理：`.header-actions` 与 `.mode-line` 两个包装层**都不在 roco.html 里**
+   （页头只剩标题 + 小芽按钮；模式徽记的三条口径按人类要求整块删除，见 roco.js::renderMode）
+   → 它们的规则一并删除。同名 `.header-actions` 只出现在 index.html / box.html，
+   那两页加载的是 style.css / box.css，**不加载这个文件**（已逐页核对 `<link>`）。 */
 #about-drawer{grid-column:1/-1;justify-self:end}
 .topbar button,.topbar .chip{min-height:44px;display:inline-flex;align-items:center}
 #about-drawer>summary{min-height:44px;display:flex;align-items:center;justify-content:flex-end}
@@ -37,13 +38,13 @@
  padding:3px 10px;background:#16222f;white-space:nowrap;color:#cfe0d4}
 #turn-chip{color:#f0cb77}
 #phase-chip{white-space:nowrap}
-/* 模式徽记：**注册表的原文**（label / status / confidence），只是换个读法。
-   `候选规则（待实机核对）` 这个徽记不是装饰：它说明「六宠」目前是 CANDIDATE。 */
-.mode-line{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
-.mode-line .chip{font-size:11.5px}
+/* 模式徽记的**文字版式**：`modeChipHtml()` 仍然存在（`tests/roco-page-ux.test.js` 直接抠它
+   跑断言），所以芯片本身这几条样式保留。但装它的容器 `.mode-line` 已从 HTML 删除
+   （人类第三次要求：那三条口径整块删掉、不是隐藏）→ 容器规则删除。
+   `.mode-chip-official` 没有任何生成点（`modeChipHtml()` 只产出 muted / candidate / unknown）
+   → 删除。 */
 #mode-label{color:#dbe7f1}
 .mode-chip-candidate{color:#f0cb77;border-color:#6b5b3a;background:#2a2318}
-.mode-chip-official{color:#bbebc5;border-color:#4a6858;background:#1d3435}
 .mode-chip-muted{color:#a9bccd}
 .mode-unknown{font-size:11.5px;color:#f0cb77}
 /* 抽屉：躲在页头右上角，**默认收起**。
@@ -98,7 +99,8 @@
 .seg .side-tab[aria-pressed="true"]{background:var(--accent);color:#152c24;font-weight:700}
 .seg .side-tab[data-side="enemy"][aria-pressed="true"]{background:#e8a76a;color:#2a1c10}
 #pool-search{width:220px;min-height:38px}
-.filter-reset{font-size:12px;padding:5px 10px;min-height:0}
+/* 2026-09-23 死代码清理：`.filter-reset`（旧「清除筛选」按钮）已从 roco.html 删除
+   —— 判据 `D1-filter-clear` 的读取点迁到工坊 `#team-workshop >>> #tw-filter-reset`。 */
 /* 候选宇宙开关（RC-502）：默认只看冻结已核验的 48 只，勾上才列按需推算的那一批。 */
 .pool-scope{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);
  cursor:pointer;min-height:44px}
@@ -155,7 +157,6 @@
 .card-key .ck-grid span{display:flex;align-items:baseline;justify-content:space-between;gap:3px;
  font-size:11px;color:#b4c3d1;min-width:0}
 .card-key .ck-grid b{color:#e3eaf1;font-weight:600}
-.card-key .ck-missing{display:block;font-size:11px;color:var(--muted);margin-top:3px}
 .pick .taken{position:absolute;right:8px;top:8px;font-size:10.5px;color:#c9b07a;
  border:1px solid #6b5b3a;border-radius:5px;padding:1px 5px;white-space:nowrap;background:#1a2635}
 .pick .taken.picked{color:#8dd49c;border-color:#4a6858}
@@ -183,26 +184,24 @@
 .lesson-card .result-goal{margin-top:10px;border-left:3px solid var(--warn);padding:8px 12px;
  background:#1d2c30;border-radius:0 9px 9px 0;font-size:14px;line-height:1.65}
 .lesson-card .result-goal b{color:#f0cb77;margin-right:6px}
-.lesson-full,.dev-raw{margin-top:10px;background:#121e2c;border:1px solid var(--line);border-radius:9px;padding:8px 11px}
-.lesson-full>summary,.dev-raw>summary{cursor:pointer;font-size:12.5px;color:var(--warn)}
+/* 2026-09-23 死代码清理：`.dev-raw` 已从这两条里去掉 —— roco.html 里没有任何元素带这个类
+   （旧事件原文那个折叠区是 `#events-raw.raw`，现在也随 `#log-panel` 一起保留不动）。 */
+.lesson-full{margin-top:10px;background:#121e2c;border:1px solid var(--line);border-radius:9px;padding:8px 11px}
+.lesson-full>summary{cursor:pointer;font-size:12.5px;color:var(--warn)}
 .lesson-full p{margin:8px 0 0;font-size:12.5px;line-height:1.75}
 .lesson-close{font-size:12px;padding:5px 10px;min-height:0}
 
-/* ── 对战页：顶部双方状态 → 中央舞台 → 后备小条 ─────────────────────────── */
+/* ── 对战页：v3h 片段自带版式（`battle-v3.css`）───────────────────────────────
+   2026-09-23 死代码清理：下面这一整段 v2 版式的容器（`.lineup-brief` / `.sidebars` /
+   `.sidebar` / `.sb-head` / `.side-tag` / `.stage` / `.fighter` / `.fighter-head` /
+   `.bench-row` / `.bench-col` / `.bench-label` / `.battle-tools`）**在 roco.html 与
+   roco.js 里都没有生成点**（逐个 grep 过：HTML 里只有 `b3-stage` / `b3-fighter` 这类
+   v3h 类名；`.battle-tools` / `.bench-row` / `.sidebars` 只出现在 battle-v3.css 与
+   设计稿的**注释**里）→ 整段删除。
+   注意 `.pet` / `.pet-facts` / `.bench` / `.bench-pet` / `.resource` / `.roster-line`
+   仍然保留：前两组由 `petCard()` 生成（`#b3-sink` 里的接收槽要它们），后两组是
+   `resourceHtml()` / `rosterLineHtml()` 的落点。 */
 .battle{border-color:#3c5b6e}
-.lineup-brief{display:flex;align-items:center;justify-content:space-between;gap:10px;
- background:#16222f;border:1px solid var(--line);border-radius:10px;padding:7px 12px;margin-bottom:10px;
- font-size:12.5px}
-.lineup-brief strong{color:#dbe7f1}
-.lineup-brief button{padding:4px 10px;font-size:12px;min-height:0}
-/* 双方对称状态条：资源（魔力/心）+ 当前精灵 + 队伍状态。 */
-.sidebars{display:grid;grid-template-columns:minmax(0,1fr) 34px minmax(0,1fr);gap:10px;align-items:stretch}
-.sidebar{background:#16222f;border:1px solid var(--line);border-radius:13px;padding:10px 12px;min-width:0}
-.sidebar.enemy{border-color:#3a3327}
-.sb-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:7px}
-.side-tag{font-size:12px;border-radius:999px;padding:2px 9px;border:1px solid var(--line);white-space:nowrap}
-.side-tag.player{color:#cfeed6;border-color:#4a6858;background:#1d3435}
-.side-tag.enemy{color:#f6e3d0;border-color:#6b5b3a;background:#33291d}
 /* 资源（魔力 / 心）：**只渲染引擎给的数**；没给就是一句「未核验」，没有计数器。 */
 .resource{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12.5px}
 .resource .res-name{color:var(--muted)}
@@ -216,10 +215,6 @@
 .roster-line .rl.fainted{opacity:.5;text-decoration:line-through}
 .roster-line .rl.foe{color:#a9bccd}
 .roster-line .rl-self{font-size:11.5px;color:var(--muted);white-space:nowrap}
-.vs{align-self:center;text-align:center;font-size:13px;color:#667e99;letter-spacing:1px}
-.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:start;margin-top:10px}
-.fighter{background:#16222f;border:1px solid var(--line);border-radius:13px;padding:12px;min-width:0}
-.fighter-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:8px}
 .pets{display:grid;gap:8px}
 .pet{position:relative;border:1px solid #36495e;border-radius:10px;padding:10px;min-width:0;background:#1a2635}
 .pet.active{border-color:#8dd49c;background:#1d3435}
@@ -244,16 +239,11 @@
 .pet-facts .ff-buff{color:#8dd49c}
 .pet-facts .ff-charging{color:#ffd479}
 .pet-facts .ff-cooldown{color:#9fc3e0}
-.bench-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.bench-col{min-width:0}
-.bench-label{display:block;margin-bottom:5px}
 .bench{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .bench-pet{border:1px dashed #36495e;border-radius:8px;padding:6px 8px;font-size:12px;
  color:var(--muted);min-width:0;overflow-wrap:anywhere}
 .bench-pet strong{font-size:11.5px;font-weight:600}
 .bench-pet.fainted{opacity:.5}
-.battle-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
-.battle-tools button{font-size:12.5px;padding:6px 11px;min-height:0}
 
 /* 战斗记录：不抢主视线（一屏看得完，超出自己滚）。 */
 .log-panel{border-color:#314154}
@@ -313,10 +303,8 @@ body[data-roco-picking="yes"] #action-panel{display:none}
  display:flex;flex-direction:column;gap:8px;background:#16222f;border:1px solid #4d6b5c;
  border-radius:12px;padding:10px 12px;box-shadow:0 12px 40px #0009}
 .companion[hidden]{display:none}
-.companion-head{display:flex;align-items:baseline;gap:8px;flex:0 0 auto}
-.companion-head strong{color:#bbebc5;font-size:13.5px}
-.companion-head .muted{font-size:11.5px;flex:1;min-width:0}
-.companion-head button{font-size:11.5px;padding:2px 8px;min-height:0}
+/* 2026-09-23 死代码清理：`.companion-head`（旧内联小芽那一行的标题条）在 roco.html 里
+   没有任何落点（弹窗自己的标题条是 `.xy-modal2-head`）→ 规则删除。 */
 /* 中间滚动区：记忆在这里滚，输入与回复永远在它下面。 */
 .companion-body{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain}
 .companion-line{margin:0 0 8px;background:#2b403c;border:1px solid #4d6b5c;
@@ -471,24 +459,19 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  /* 窄屏：小芽回到**贴底整块**（宽屏那套「贴右整列」在手机上会盖住战场）。 */
  .companion{top:auto;max-height:calc(100vh - var(--bottombar,0px) - 28px)}
  /* 2026-09-22 实测回归：宽屏那套两列网格（标题 | 按钮）在 390 下把标题列压成 0 宽，
-    于是标题**一个字符一行**竖着排（截图可见）。窄屏改成单列、显式排三行：
-    标题 → 徽记 → 按钮，谁都不会被挤没。 */
+    于是标题**一个字符一行**竖着排（截图可见）。窄屏改成单列。
+    2026-09-23：`.mode-line` / `.header-actions` 两行已随容器删除（页头只剩标题 + 小芽入口）
+    → 抽屉提到第 2 行（中间空行高度为 0，视觉不变）。 */
  .topbar{grid-template-columns:minmax(0,1fr)}
  .topbar>h1{grid-column:1;grid-row:1}
- .topbar>.mode-line{grid-column:1;grid-row:2}
- .topbar>.header-actions{grid-column:1;grid-row:3;justify-content:flex-start}
- #about-drawer{grid-column:1;grid-row:4;justify-self:stretch}
+ #about-drawer{grid-column:1;grid-row:2;justify-self:stretch}
 }
 @media (max-width:720px){
  :root{font-size:15px}
  .topbar h1{font-size:17px}
  #about-drawer{width:auto;max-width:none;margin:8px 0 0;order:-1;max-height:none}
- .mode-line{order:-1;flex-basis:100%}
- .mode-line .chip{font-size:11px}
- /* 模式徽记在窄屏必须**能换行**：它是一整句中文（「匹配前对手未知 · 按版本环境倾向评价」），
-    写死 `nowrap` 会在 360px 机型上把整页撑出横向滚动（实测 7px，`#prematch-chip` 355px）。
-    窄屏的判据是「不横向溢出」，所以这里让它折成两行而不是继续往右长。 */
- .mode-line .chip{white-space:normal;overflow-wrap:anywhere;text-align:left;border-radius:12px}
+ /* 2026-09-23 死代码清理：`.mode-line` 容器已从 HTML 删除（那三条口径整块删掉）
+    → 它的窄屏换行规则一并删除。 */
  /* 教程在手机上挤成**一行**：三步各占一张卡会把阵容池整个推到首屏之外，
     而这三步是「第一次来的人唯一会先读的东西」——读得到才有用。 */
  .onboard-bar{flex-wrap:wrap;gap:4px 8px;padding:5px 8px}
@@ -510,7 +493,6 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
     菜单在被点的那一栏下面把整行铺开，两侧都不会越界。 */
  .fmenu[open]{flex-basis:100%}
  .fmenu-body{position:static;width:100%;max-width:none;margin-top:4px}
- .filter-reset{flex:0 0 auto}
  /* 窄屏的筛选菜单是**就地展开**的（见上面 .fmenu-body），里面的选项就是玩家要在拇指下点的目标，
     所以在这一档给它 44px 的可点高度（桌面那套浮层紧凑排版不适用于手指）。 */
  .filter-chip{min-height:44px;padding:8px 12px}
@@ -529,10 +511,10 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  .footbar .muted{flex:1 1 100%;order:3;margin-right:0;font-size:11.5px}
  .pool-tools{order:4;flex:1 1 auto;justify-content:flex-start}
  .pool-tools button{flex:0 0 auto}
- /* 拇指要点的控件在窄屏统一给到 44px 高（RC-505：`#coach-entry` 35 / `.side-tab` 38 /
-    `.filter-reset` 29 实测都不够）。这三处都是**玩家每一步都要碰**的东西：
-    叫小芽、切我方/对手、清除筛选。 */
- #coach-entry,.filter-reset,.footbar button{min-height:44px}
+ /* 拇指要点的控件在窄屏统一给到 44px 高（RC-505：`#coach-entry` 35 / `.side-tab` 38 实测都不够）。
+    这两处都是**玩家每一步都要碰**的东西：叫小芽、切我方/对手。
+    （2026-09-23：`.filter-reset`「清除筛选」已删，那一档不再需要。） */
+ #coach-entry,.footbar button{min-height:44px}
  /* 小芽入口与开发者抽屉的 summary 都是拇指要点的东西（实测 summary 只有 17/34px 高）。 */
  summary{min-height:44px;display:flex;align-items:center}
  /* 2026-09-22 人类 P0 实测：默认六宠路线上，「开一局（标准 PVP · 六宠）」在三屏之外
@@ -548,10 +530,8 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  /* 注意：基础规则是 `.seg .side-tab`（两个类），单写 `.side-tab` 会被它压住 ——
     第一版就是这么写的，实测仍然是 38px。 */
  .seg .side-tab{min-height:44px}
- .sidebars{grid-template-columns:1fr;gap:8px}
- .stage{grid-template-columns:1fr;gap:8px}
- .vs{display:none}
- .bench-row{grid-template-columns:1fr}
+ /* 2026-09-23 死代码清理：`.sidebars` / `.stage` / `.vs` / `.bench-row` 这四条窄屏规则
+    对应的 v2 版式容器已整段删除（见文件上半部分那段说明）→ 这里一并删除。 */
  /* 行动坞：分组纵向排；每组内卡片两列，宽度自适应、不横向溢出。
     高度**必须**给个上界：窄屏下它与贴底的小芽栏是两条固定浮层，动作坞无限长就会
     把「输入 + 最近一句回复」顶出视口（实测 390×844 下 say-input 的 bottom=868>844）。
@@ -569,7 +549,6 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  /* 窄屏：小芽的输入行是拇指要点的（输入框与「说一句」），实测按钮 39px < 44。 */
  #say-input,.say-form button{min-height:44px}
  .companion .section-title{margin-bottom:2px}
- .companion-head{flex-wrap:wrap;row-gap:2px}
  .pet-detail{left:14px;right:14px;width:auto;top:auto;max-height:52vh}
  .hint{left:14px;right:14px;transform:none;width:auto}
  .hint-body{line-height:1.8}
@@ -653,9 +632,11 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
    真正要做的是**两列布局**（左：战场；右：动作 + 战报），那是下一刀，不该用半步蒙过去。 */
 
 
-/* 2026-09-22 人工核对 390 战斗页时抓到：窄屏下「重选阵容」被压成**一个字一行**（竖排）。
-   同一个坑这一轮已经踩过两次（标题、规则口径），统一给这类小按钮禁止断词。 */
-#reopen-pick,#plan,#auto-turn,.battle-tools button{white-space:nowrap;min-height:44px}
+/* 2026-09-23 人工核对 390 战斗页时抓到：窄屏下「重选阵容」被压成**一个字一行**（竖排）。
+   同一个坑这一轮已经踩过两次（标题、规则口径），统一给这类小按钮禁止断词。
+   2026-09-23 死代码清理：`#reopen-pick`（`#lineup-brief` 里的旧入口）、`#plan`、`#auto-turn`
+   与 `.battle-tools button` **四个都不在 roco.html 里**（grep 逐条核对过）→ 这条选择器
+   里的四个项全是空的，整条删除。 */
 /**
  * 390 规格偏差（人类规格④：「先看对手简版 → 我方状态 → ≤2 行提示 → 四技能」）：
  * 现在的顺序是**我方在前**，对手卡被挤到折叠线以下（证据 `battle-decision-390x844.png`）。
@@ -698,14 +679,8 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 .log-turn[open]>summary{color:#dfe8ef}
 .log-turn p{margin:4px 9px 8px;font-size:12.5px;line-height:1.55}
 
-/* R5：开局前的短暂阵容展示。**在流里**（不是浮层），所以不会盖住行动坞；
-   只显示几秒或点一下就收，之后不占位置。 */
-.lineup-reveal{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 0;padding:10px;
- border:1px solid #3a5470;border-radius:10px;background:#111d2b}
-.lineup-reveal h4{margin:0 0 6px;font-size:12.5px;color:#cfe0f0}
-.lineup-reveal .lr-row{font-size:12px;color:#c9d6e2;line-height:1.7}
-.lineup-reveal .lr-foe{color:#9caebe}
-@media (max-width:720px){.lineup-reveal{grid-template-columns:1fr}}
+/* R5 的落点 `#lineup-reveal` 已从 roco.html 删除（人类 v3h 版式：「我方六只」由顶栏
+   6 个存活点承担），roco.js 里 `showLineupReveal()` 也一并删除 → 这一组规则删除。 */
 
 /* E2/E4：未核验只是**折叠行上的一个短标签**，不再单独占一行主视线。 */
 .unverified-chip{display:inline-block;margin-right:6px;padding:1px 6px;border-radius:6px;
@@ -715,8 +690,6 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
 /* ── 2026-09-22 人类规格：页眉只剩标题 + 小芽按钮；模型/回合/关于都收进小芽面板 ── */
 header.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;
  gap:10px;margin:0 0 8px}
-.model-line{justify-self:end;font-size:12px;min-height:26px;display:inline-flex;align-items:center;gap:6px;
- max-width:min(46vw,360px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 header.topbar h1{margin:0;font-size:19px}
 .xiaoya-btn{justify-self:end;width:44px;height:44px;border-radius:14px;border:1px solid #2f465c;
  background:#16242f;color:#dfe8ef;font-size:19px;cursor:pointer}
@@ -724,41 +697,31 @@ header.topbar h1{margin:0;font-size:19px}
 .heart-pop{justify-self:center;padding:5px 13px;border-radius:999px;border:1px solid #6a3a44;
  background:#2a161c;color:#ffb4c0;font-size:12.5px;font-weight:650;white-space:nowrap}
 .heart-pop[hidden]{display:none}
-.xiaoya-panel{position:fixed;top:56px;right:14px;width:min(460px,calc(100vw - 28px));
- max-height:calc(100vh - 84px);overflow:auto;z-index:60;display:flex;flex-direction:column;gap:10px;
- box-shadow:0 22px 60px rgba(0,0,0,.55)}
-.xy-head{display:flex;align-items:center;gap:10px}
-.xy-head strong{font-size:15px}
-.xy-head .muted{flex:1;font-size:12px}
+/* 2026-09-23 死代码清理：旧「小芽面板」`#xiaoya-panel`（连同 `.xy-head` / `.xy-status` /
+   `.xy-settings` / `.xy-foldrow`）、旧 `.model-line`、以及只被已删的 `#xy-fold-models`
+   绑定切换的 `.xy-models.folded` —— 这些类在 roco.html 与 roco.js 里**都没有落点**，整段删除。
+   （小芽现在是 `#companion-card` 浮层弹窗：`.xy-modal2-*` / `.xy-models` / `.model-cell` 那几套
+   才是活的，`.xy-models` 与 `.model-cell` 保留；`.xy-fold` 也是活的，见 `#xy-fold-status`。） */
 .xy-models{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
-.xy-models.folded{display:none}
 .model-cell{border:1px solid #2b3d4e;border-radius:11px;background:#111d27;padding:8px 10px;min-height:62px}
 .model-cell .mc-name{font-size:12.5px;font-weight:650;color:#dfe8ef}
 .model-cell .mc-state{font-size:11.5px;margin-top:3px}
 .model-cell .mc-state.ok{color:#8fe0a2} .model-cell .mc-state.no{color:#ff9a9a}
-.model-cell .mc-role{font-size:11px;color:#7f93a5;margin-top:2px}
-.model-cell .mc-why{font-size:11px;color:#e2b48c;margin-top:3px;line-height:1.45}
-.xy-foldrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .xy-fold{height:30px;padding:0 10px;border-radius:9px;border:1px solid #2b3d4e;background:#111d27;
  color:#9caebe;font-size:11.5px;cursor:pointer}
 
 @media (max-width:520px){
- .xiaoya-panel{top:52px;right:8px;left:8px;width:auto;max-height:calc(100vh - 70px)}
  .xy-models{grid-template-columns:1fr}
 }
 
 /* ── 2026-09-22 人类规格：小芽入口 = **白色图标 + 「小芽」**，始终右上角 ── */
 .xiaoya-btn{display:inline-flex;align-items:center;gap:7px;width:auto;padding:0 14px;height:44px;
  border-radius:14px;border:1px solid #2f465c;background:#16242f;color:#fff;font-size:15px;font-weight:650}
-.xiaoya-btn .xy-ico{color:#ffffff;font-size:17px;line-height:1}
-.xiaoya-btn .xy-label{color:#ffffff}
-/* 小芽面板：标题 + 可滚动最近对话 + 固定输入；设置收在 details 里 */
-.xiaoya-panel .companion{display:flex;flex-direction:column;min-height:0;flex:1;gap:8px}
-.xiaoya-panel .companion-body{overflow:auto;max-height:min(46vh,420px);display:flex;flex-direction:column;gap:8px}
-.xiaoya-panel .say-form{position:sticky;bottom:0;background:var(--panel,#111c26);padding-top:6px}
-.xy-status{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.xy-settings{border-top:1px solid #243444;padding-top:9px}
-.xy-settings>summary{cursor:pointer;font-size:12.5px;color:#9caebe;min-height:44px;display:flex;align-items:center}
+/* 2026-09-23 死代码清理：`.xiaoya-btn` 里的图标 span 现在是 `.xy-star`（`✦`），
+   `.xy-ico` / `.xy-label` 两个类**没有任何落点** → 删除；
+   `.xiaoya-panel .companion*` / `.xy-status` / `.xy-settings`（旧面板的容器，`#xiaoya-panel`
+   与 `#xy-settings` 都已删除）→ 一并删除。`.xy-actions` 保留（`#reset-battle` / `#engine-retry`
+   那一栏在用）。 */
 .xy-actions{display:flex;gap:8px;margin:8px 0}
 /* 「开一局」始终贴在页面底部（人类规格） */
 .standard-pvp-bar{position:sticky;bottom:0;z-index:12;display:flex;align-items:center;gap:12px;
@@ -767,11 +730,9 @@ header.topbar h1{margin:0;font-size:19px}
 /* 旧 3v3 路线（?legacy3v3=1）下这一栏不参与吸底，避免盖住候选池的翻页控件 */
 body[data-roco-route="legacy-3v3"] .standard-pvp-bar{position:static;z-index:auto}
 
-/* 窄屏：状态行让位（换到第二行、可截断），否则 nowrap 会把页头撑宽 → 整页横向溢出 */
+/* 窄屏：小芽入口固定在右上角（`.model-line` 那一条状态行已删除，规则一并去掉） */
 @media (max-width:560px){
  header.topbar{grid-template-columns:minmax(0,1fr) auto}
- .model-line{grid-column:1 / -1;justify-self:start;max-width:100%;white-space:nowrap;overflow:hidden;
-  text-overflow:ellipsis}
  .xiaoya-btn{grid-row:1;grid-column:2}
 }
 
@@ -782,15 +743,14 @@ summary{min-height:44px;display:flex;align-items:center}
 /* 工程区：页面底部、默认收起；与聊天弹窗和页眉都无关 */
 .dev-zone{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0 6px;
  padding-top:10px;border-top:1px solid #1d2833;opacity:.92}
-.dev-zone .mode-line{max-width:none}
 
 /* 抽屉必须盖过吸底栏（否则真实鼠标点「关闭」会落到那条栏上，demo 验收实测 red） */
 #pet-detail{z-index:80}   /* 必须高于小芽面板（60），否则真鼠标点「关闭」会落在面板上 */
 .dev-zone{z-index:1}
 
-/* 首屏三条口径（不在页眉里）：一行、留足边距 */
-.first-screen-badges{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
-.first-screen-badges .mode-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:none}
+/* 2026-09-23 死代码清理：`.dev-zone .mode-line` 与 `.first-screen-badges`（旧「首屏三条口径」
+   那一行）的落点都已随口径文案整块删除（`#mode-line` 不在 HTML 里、没有任何元素带
+   `first-screen-badges`）→ 两条规则删除。 */
 
 /* ── v3h 顶部信息栏：无框、两端对齐、垂直居中（验收会量「左右两组垂直中心相等」） ── */
 .b3-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;
@@ -855,15 +815,12 @@ body[data-roco-view="ready"] main{padding-bottom:8px}
    它属于排查入口，不是战斗页的一部分（人类：一页全部显示、不要多余的东西）。 */
 body[data-roco-view="ready"] main>#dev-zone{display:none}
 
-/* 战斗态：旧的「规则口径」折叠行也收起（v3h 顶栏已经承担口径展示）。
-   注意 `.battle-tools`（让小芽看一眼 / 自动走一步）**保留** —— 真机判据要点它。 */
+/* 战斗态：旧的「规则口径」折叠行也收起（v3h 顶栏已经承担口径展示）。 */
 body[data-roco-view="ready"] #battle-panel>.rules-note{display:none}
 
-/* 页眉中间列：模式 + 回合（人类：放页眉正中间） */
-header.topbar .head-center{justify-self:center;text-align:center;line-height:1.2}
-header.topbar .hc-mode{display:block;font-size:12.5px;color:#93a7b8;font-weight:600}
-header.topbar .hc-turn{display:block;font-size:17px;font-weight:700}
-.xy-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+/* 2026-09-23 死代码清理：页眉中间列（`head-center` / `.hc-mode` / `.hc-turn`）与 `.xy-tools`
+   都**没有落点**（回合/模式现在在战斗顶栏 `#b3-mode` / `#b3-round`；`#xy-fold-models` 那一排
+   工具已删）→ 规则删除。 */
 
 /* 页眉三列：左标题 / **中模式+回合** / 右（模型状态 + 小芽）。两侧等宽 → 中间真居中。 */
 /* 页眉两列：标题（可缩） | 右上「✦ 小芽」。回合/模式已移进战斗顶栏，不需要中间列 ——
@@ -871,10 +828,6 @@ header.topbar .hc-turn{display:block;font-size:17px;font-weight:700}
 header.topbar{grid-template-columns:minmax(0,1fr) auto}
 header.topbar h1{white-space:normal;min-width:0}
 header.topbar .xiaoya-btn{justify-self:end}
-
-/* 设置块在小芽卡片里：**footer 不滚动**、不参与正文滚动区（否则会被面板盖住点不到）。 */
-.companion .xy-settings{flex:0 0 auto;max-height:46vh;overflow:auto;margin-top:6px;
- border-top:1px solid var(--line);padding-top:6px}
 
 /* 人类 2026-09-23：小芽点开后**两个 UI 不许交叠** ——
    ① 面板高度避开底栏（不再盖住行动区）；② 宽屏打开时正文让出右侧一栏，两个界面并排。 */
@@ -921,10 +874,10 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
    首页里那块**内联**小芽卡不再显示（只保留右上角弹窗）。 */
 #hint-body{display:none !important}
 
-/* 工坊（人类 2026-09-23 批注）：清空阵容靠右；筛选第二排一行放下；结果行字号小一点 */
-.tw-knobs--right{justify-content:flex-end}
-.tw-filter-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:6px;align-items:center}
-.tw-filter-row input[type=search]{width:100%}
+/* 工坊（人类 2026-09-23 批注）：清空阵容靠右；筛选第二排一行放下；结果行字号小一点。
+   2026-09-23 死代码清理：`.tw-knobs--right` / `.tw-filter-row` 这两条从 roco.css 删除 ——
+   它们是**工坊 shadow root 内部**的类，样式由 team-workshop.js 自己的 `<style>` 负责
+   （那里有同名规则），这个文件只加载在 roco.html、根本进不了 shadow root。 */
 
 /* ── 小芽＝弹出式二级窗口（人类 2026-09-23：「不是首页啊」）────────────────────
    原来是右侧停靠的固定栏（会把首页挤窄）；现在是**居中弹窗 + 遮罩**，覆盖一级界面。
@@ -1008,3 +961,10 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
 body[data-roco-view="ready"] main:not(:has(#battle-panel:not([hidden]))){height:calc(100vh - 200px);min-height:0;display:flex;flex-direction:column}
 body[data-roco-view="ready"] main:not(:has(#battle-panel:not([hidden])))>#team-workshop{flex:1 1 auto;min-height:0}
 body[data-roco-view="ready"]{overflow:hidden}
+
+/* 人类 2026-09-23：
+   ①「小芽展开还是会影响正文，正文会往右探一点点」→ 固定纵向滚动条宽度，开合不再引起位移；
+   ②「下面的聊天框不能长点吗？」→ 输入框加高加长。 */
+html{overflow-y:scroll}
+.say-form input{min-height:40px;font-size:13px}
+.xy-modal2-box .companion-body{min-height:96px;max-height:34vh}
