@@ -801,18 +801,18 @@ async function main() {
     && /按需推算/.test(scopeToggle390.text),
     `开关 ${JSON.stringify(scopeToggle390)}；clientW/scrollW=${scopeOverflow390.clientW}/${scopeOverflow390.scrollW}`);
 
-  // 模式徽记（D5）：读注册表，候选徽记与「匹配前对手未知」在首屏
+  // 模式徽记（D5）：读注册表，候选徽记与「匹配前对手未知」在玩家层
   //
-  // 2026-09-23（人类 v3h 版式）：页眉中间列是「模式 + 第 N 回合」（`#b3-mode` / `#b3-round`）。
-  // 旧的 `#mode-line`（页眉里那条三条口径的徽记）**已经不在 roco.html 里**
-  // （roco.html:5-6 的注释还在，说明三条口径本该「首屏可见」——元素被删了）。
-  // 所以这里：① 可见徽记读 `#b3-mode`；② 三条口径按**口径**读玩家层全文（不绑定某个元素，
-  // 少一句就红 —— 口径未放松）；③ 数据层与开发者抽屉的读取点不变。
+  // 2026-09-23（人类 v3h 版式）：页眉中间列是「模式 + 第 N 回合」（`#b3-mode` / `#b3-round`），
+  // 三条口径的徽记按人类批注**只在「小芽 → 设置」里出现一次**（不再堆在战斗页页眉下面）。
+  // ⚠ 那两行在一个**默认收起的 `<details>`** 里，而 `innerText` **不含** hidden 子树
+  //（仓库里另一条判据踩过同一个坑：实测得到 -1）——所以玩家层那一层用 `textContent` 读全文，
+  // 并**照旧排除**工程抽屉（`#about-drawer`）。可见徽记（`#b3-mode`）单独读。
   const modeFacts = await js(`(()=>{const d=document.body.dataset;
     const badge=document.getElementById('b3-mode');
     const clone=document.body.cloneNode(true);
     const dev=clone.querySelector('#about-drawer');if(dev)dev.remove();
-    const player=(clone.innerText||'').replace(/\\s+/g,' ');
+    const player=(clone.textContent||'').replace(/\\s+/g,' ');
     const r=badge?badge.getBoundingClientRect():{height:0,top:0};
     return {mode:d.rocoMode??null,prematch:d.rocoPrematch??null,standardPvp:d.rocoStandardPvp??null,
       text:badge?(badge.textContent||'').replace(/\\s+/g,' ').trim():null,
@@ -1092,12 +1092,31 @@ async function main() {
     const act=legal.find((a)=>a.kind==='skill'&&descOf(a).includes('星陨印记'));
     if(!act)return JSON.stringify({found:false,skillId:null,clickable:false});
     const sid=act.skill_id!==undefined&&act.skill_id!==null?act.skill_id:(act.skill&&act.skill.skill_id);
-    const slot=document.querySelector('.b3-wrap [data-b3-skill-slot][data-b3-skill-id="'+sid+'"]');
-    if(!slot||slot.dataset.b3ActionKind!=='skill')return JSON.stringify({found:true,skillId:sid,clickable:false});
+    const idx=legal.indexOf(act);
+    // 两种动作信号都认（页面自己的两套写法）：
+    //   ① 按身份 data-b3-skill-id（名单行找得到时写的就是它）；
+    //   ② 按 view.legal 下标 data-b3-action（按需推算的精灵走「回落到引擎合法技能」那条路时，
+    //      格子上只有下标 —— 点击处理器本身也是「先按身份、退不到再按下标」解析的）。
+    const slots=[...document.querySelectorAll('.b3-wrap [data-b3-skill-slot]')];
+    const slot=slots.find((s)=>s.dataset.b3ActionKind==='skill'
+      &&((sid!==undefined&&sid!==null&&s.dataset.b3SkillId===String(sid))
+        ||s.dataset.b3Action===String(idx)));
+    if(!slot)return JSON.stringify({found:true,skillId:sid,index:idx,clickable:false,
+      slots:slots.map((s)=>s.dataset.b3SkillId??('#'+s.dataset.b3Action))});
     slot.dataset.rc502='mark';
-    return JSON.stringify({found:true,skillId:sid,clickable:true});})()`).then(JSON.parse);
+    return JSON.stringify({found:true,skillId:sid,index:idx,clickable:true});})()`).then(JSON.parse);
+  let markDrivenBy = 'v3h 技能格（真鼠标）';
   if (markTarget.clickable) {
     await mouseClick('.b3-wrap [data-b3-skill-slot][data-rc502="mark"]');
+  } else {
+    // 格子不可点（见下面的 problems：这是缺陷，**判红不解**）。为了把「对手卡上到底画没画印记」
+    // 这件事也取到证据，这里再用**页面自己的** playAction 走同一条动作路径兜一次，
+    // 并把兜底这件事写清楚 —— 它不会让这一条变绿。
+    markDrivenBy = 'playAction 兜底（v3h 技能格不可点 → 这一条仍然判红）';
+    await js(`(()=>{const d=window.rocoDemo;const act=(d.state.view.legal||[])[${markTarget.index}];
+      if(act)d.playAction(act);return true;})()`);
+  }
+  if (markTarget.found) {
     await waitFor(`(()=>{const v=window.rocoDemo.state.view;
       const m=v&&v.opponent&&v.opponent.field&&v.opponent.field.marks;
       return Boolean(m&&Object.keys(m).length);})()`, 60, 250);
@@ -1107,7 +1126,7 @@ async function main() {
     const engine=(v&&v.opponent&&v.opponent.field&&v.opponent.field.marks)||null;
     const buffs=document.querySelector('[data-b3-foe-card] [data-b3-foe-buffs]');
     const chips=buffs?[...buffs.querySelectorAll('.b3-buff')]:[];
-    return {engine,target:${JSON.stringify(markTarget)},
+    return {engine,target:${JSON.stringify(markTarget)},drivenBy:${JSON.stringify(markDrivenBy)},
       // v3h 对手卡的「场上事实」区：data-b3-buff-kind 分 status / buff / mark 三类。
       buffArea:buffs?{chips:chips.length,
         ghost:chips.filter((c)=>c.classList.contains('b3-buff--ghost')).length,
@@ -1141,7 +1160,7 @@ async function main() {
     + '【按人类 2026-09-23 版式，旧读取点 `#foe-field .ff-mark`（已收进 `#b3-sink[hidden]`）由 '
     + '`[data-b3-foe-card] [data-b3-foe-buffs]` 里 `data-b3-buff-kind="mark"` 的那一格承担】',
     markProblems(markFacts).length === 0,
-    `引擎 ${JSON.stringify(markFacts.engine)}；目标 ${JSON.stringify(markFacts.target)}；`
+    `引擎 ${JSON.stringify(markFacts.engine)}；这一手由「${markFacts.drivenBy}」驱动；目标 ${JSON.stringify(markFacts.target)}；`
     + `对手卡事实区 ${JSON.stringify(markFacts.buffArea)}；问题 ${markProblems(markFacts).join(' | ') || '无'}`);
   counter('RC502-印记逐条画在对手卡上', '把印记那一格删掉（页面少画一格）必须被同一条判据抓住',
     markProblems({...markFacts, buffArea: {...markFacts.buffArea, nonGhost: []}}), 'nonGhost=[]');
@@ -1267,6 +1286,11 @@ async function main() {
 
   const failed = checks.filter((c) => !c.ok);
   const report = {
+    // 保留资产元套件（revalidate-retained-assets.mjs）的契约字段：
+    // 它按 `all_ok` 判断「这套判据还全绿吗」；迁移 v3h 时漏了这个字段会让元套件报
+    // 「现状本身就有问题」（它防的正是这种静默退化）。
+    all_ok: checks.every((c) => c.ok !== false),
+
     schema: 'roco-ux-acceptance/v1',
     generated_at: new Date().toISOString(),
     fault_injected: FAULT,
