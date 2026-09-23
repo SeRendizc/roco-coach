@@ -201,6 +201,22 @@
 
 <!-- ── 对战页：中央是双方当前宠物的战斗舞台 + 双方阵容状态 ──────────────────── -->
 <section class="panel battle" id="battle-panel" hidden>
+ <!-- 顶部信息栏（v3h 版式）：**无框**、左右两端对齐且垂直居中；中央两行（模式 / 回合）。
+      左端=我方存活点 ●○ + 心 ♥♡；右端镜像。心只在掉心时出现几秒。 -->
+ <div class="b3-topbar" id="b3-topbar">
+  <div class="b3-side">
+   <span class="b3-dots" id="b3-dots-self" data-b3-dots-self="yes" title="我方存活"></span>
+   <span class="b3-hearts" id="b3-hearts-self" data-b3-hearts-self="yes" hidden></span>
+  </div>
+  <div class="b3-turn">
+   <div class="b3-mode" id="b3-mode">PVP · AI模拟</div>
+   <div class="b3-round" id="b3-round" data-b3-turn="yes">第 1 回合</div>
+  </div>
+  <div class="b3-side right">
+   <span class="b3-hearts" id="b3-hearts-foe" data-b3-hearts-foe="yes" hidden></span>
+   <span class="b3-dots" id="b3-dots-foe" data-b3-dots-foe="yes" title="对手存活"></span>
+  </div>
+ </div>
  <!-- 对局进行中的一行阵容摘要（阵容池收起来之后，玩家仍看得见自己选了什么） -->
  <div id="lineup-brief" class="lineup-brief" hidden></div>
  <!-- R5：开局前的**短暂**阵容展示（人类规格：选完宠、开局前给一眼对峙画面）。

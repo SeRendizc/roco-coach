@@ -20,6 +20,11 @@
     "boss_form",
     "level_normalization"
   ],
+  "policy_names": [
+    "boss_form_policy",
+    "magic_policy",
+    "team_size_policy"
+  ],
   "modes": [
     {
       "id": "demo-training-3v3",
@@ -55,24 +60,115 @@
         "mana_pool": 4,
         "faint_mana_cost": 1,
         "trait_sharing": false,
-        "boss_form": false,
+        "boss_form": null,
         "level_normalization": "demo_standardized_max_level"
       },
+      "parameters_note": "`boss_form` 在这个模式里**已废弃为镜像**：它曾经是 `false`，那**不是**最终设计（v3 纠偏）。现在它只保留「这个布尔不再权威」这一条信息，取值恒为 null；真正生效的是 `policies.boss_form_policy.value = 'allowed_if_eligible'`。**不许**再把 null 读成 forbidden（false）或 required（true）——那两个取值由下面的 `parameters_mirrors` 与判据挡住。",
+      "parameters_mirrors": [
+        {"parameter": "boss_form", "authoritative_path": "policies.boss_form_policy.value", "deprecated": true},
+        {"parameter": "team_size", "authoritative_path": "policies.team_size_policy", "deprecated": false},
+        {"parameter": "mana_pool", "authoritative_path": null, "deprecated": false, "note": "魔力池仍只有候选口径（EV-PVP-STANDARD-MANA），未核验，因此没有单独的 policy 子树。"}
+      ],
+      "policies": {
+        "boss_form_policy": {
+          "name": "boss_form",
+          "value": "allowed_if_eligible",
+          "confidence": "RECORDED_IN_GAME",
+          "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+          "evidence_role": "supports",
+          "microcase_id": null,
+          "reason": "人类实机口径（人类是唯一权威）：首领化 = 精灵**首领形态 / 血脉觉醒**，在闪耀大赛式标准 PVP 里**存在**，不是领地试炼专属；`boss_form=false` 不是最终设计。因此标准模式写成 allowed_if_eligible = **满足资格即可使用**，既不是 forbidden（那等于说这个模式没有首领化），也不是 required_for_entry（那会挡住打不了首领化的正常队伍）。首领信物 / 进化之力 = 资格或触发条件，**不叫普通 item**。主题层的「普通闪耀大赛是否开放 / 首领对决是否要求全员满足」写成 theme 子对象，不是全局布尔。",
+          "eligibility": {
+            "predicate": "pet.has_boss_lineage && team.holds_boss_token(pet) —— 换成人类口径的话：该精灵具备**首领血脉**（首领形态 / 血脉觉醒的资格），且队伍持有对应的**首领信物 / 进化之力**（触发条件）。资格判定不成立时该精灵不能首领化，但**不影响**它正常参赛。",
+            "status": "UNVERIFIED",
+            "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+            "on_unknown": "FAIL_CLOSED",
+            "reason": "资格判定的两半（血脉是否具备、信物如何取得与消耗）只有「它们存在」这一条实机口径，具体判定式未核验：所以 predicate 是**待核验的表达式**，status=UNVERIFIED；引擎在判定不出资格时**必须 fail closed**（不释放首领化、不猜一个默认值），不许静默当作「满足」。"
+          },
+          "unknowns": [
+            {"field": "activation_occupies_action", "value": null, "status": "UNVERIFIED", "why": "首领化是否占用一次行动，未核验 —— 不许从 mockup 文案沿用确定说法。"},
+            {"field": "per_battle_uses", "value": null, "status": "UNVERIFIED", "why": "同一场的次数上限，未核验。"},
+            {"field": "cooldown", "value": null, "status": "UNVERIFIED", "why": "冷却，未核验。"},
+            {"field": "removal", "value": null, "status": "UNVERIFIED", "why": "如何解除（换下 / 力竭 / 特定效果），未核验。"},
+            {"field": "duration", "value": null, "status": "UNVERIFIED", "why": "是否持续到回合末 / 整场，未核验。"},
+            {"field": "stat_multipliers", "value": null, "status": "UNVERIFIED", "why": "数值倍率，未核验。"}
+          ]
+        },
+        "magic_policy": {
+          "name": "pvp_magic",
+          "value": "allowed_candidate",
+          "classification": "pvp_magic_special_action",
+          "confidence": "RECORDED_IN_GAME",
+          "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+          "evidence_role": "supports",
+          "reason": "愿力强化 / 共鸣魔法等 PVP 魔法是**特殊行动**，不是普通道具。旧标准 PVP 口径里的 `item:0` **不**意味着它们不存在 —— 那正是这次要修掉的错误。本条只登记「它们算哪一类、是被允许的候选」，具体语义未核验。",
+          "kinds": ["愿力强化", "共鸣魔法"],
+          "occupies_action": null,
+          "occupies_action_status": "UNVERIFIED",
+          "is_item": false,
+          "all_unverified": true,
+          "unknowns": [
+            {"field": "per_battle_uses", "value": null, "status": "UNVERIFIED", "why": "次数上限，未核验。"},
+            {"field": "cooldown", "value": null, "status": "UNVERIFIED", "why": "冷却，未核验。"},
+            {"field": "removal", "value": null, "status": "UNVERIFIED", "why": "解除方式，未核验。"},
+            {"field": "occupies_action", "value": null, "status": "UNVERIFIED", "why": "是否占行动，未核验（因此单独写 occupies_action=null，不默认 true/false）。"},
+            {"field": "duration", "value": null, "status": "UNVERIFIED", "why": "持续时间，未核验。"},
+            {"field": "stat_multipliers", "value": null, "status": "UNVERIFIED", "why": "倍率，未核验。"}
+          ]
+        },
+        "team_size_policy": {
+          "min": 1,
+          "max": 6,
+          "fill_required": null,
+          "fill_required_status": "UNVERIFIED",
+          "value": "candidate_1_to_6",
+          "confidence": "CROSS_SOURCE_SUPPORTED",
+          "evidence_id": "EV-PVP-STANDARD-TEAM-SIZE",
+          "evidence_role": "supports",
+          "microcase_id": "MC-E07",
+          "microcase_status": "NOT_RECORDED",
+          "value_status": "CANDIDATE_HYPOTHESIS",
+          "reason": "上下界：**最多** 6 只（官方转载原文「最多可携带 6 只随机精灵」+ 社区「六只」口径），下界 1（只带 1 只仍然是一套阵容）。「必须选满 6 只」没有任何来源支持 → fill_required=null + UNVERIFIED，引擎遇到「没填满算不算合法」必须 fail closed，不许替玩家补满。"
+        }
+      },
+      "entry_gate": {
+        "requires": [
+          "team.size 落在 policies.team_size_policy 的 [min, max] 区间内（1～6，且每只都在候选宇宙里）",
+          "所有参赛精灵都通过 UNKNOWN_PREMATCH 的赛前信息口径（不知道对手阵容，不得假装知道）",
+          "被绑定的 ruleset 是可运行的候选（mobile_s4_candidate_v3 已生成且未被 promote 成默认，见 ruleset_binding）",
+          "首领化若要用：policies.boss_form_policy.eligibility 判定为满足（资格未核验时按 on_unknown=FAIL_CLOSED 处理，**不**阻止整队参赛）"
+        ],
+        "on_unmet": "SHOW_DISABLED_WITH_REASON",
+        "on_unknown": "FAIL_CLOSED",
+        "reason": "门控的语义是**先拦住、再把原因说出来**：条件不满足时给出禁用态与具体缺哪一条，而不是偷偷换一套规则开一局、也不是回落到别的模式（那会让「标准 PVP」悄悄变成极速对决 3v3）。判定不出来的资格一律按未知处理。",
+        "never": ["call_engine_after_unmet", "fallback_to_other_mode"]
+      },
+      "theme": {
+        "theme_id": null,
+        "boss_form_required": null,
+        "period": null,
+        "status": "UNVERIFIED",
+        "why": "「普通闪耀大赛是否开放首领化」「首领对决主题是否要求全员满足」属于**主题 PVP** 的参数，不是全局布尔：它们写在这里、由具体主题填，标准模式本身保持 null（= 未定，不是 false）。首领对决（battle_mode.boss_duel）复用标准模式的规模与结算，只改 theme 这一块。"
+      },
       "sources": [
-        {"kind": "official", "ref": "https://www.taptap.cn/moment/838434682965067210", "confidence": "OFFICIAL_CURRENT", "settled": "官方 PVP 更新：随机精灵**最多可携带 6 只**。"},
+        {"kind": "official", "ref": "https://www.taptap.cn/moment/838434682965067210", "confidence": "OFFICIAL_CURRENT", "settled": "官方 PVP 更新：随机精灵**最多可携带 6 只**。（注意：该链接打开后是极速对决活动公告，只支持「最多 6 只」这一句，**不**支持首领化或 4 点魔力。）"},
         {"kind": "community", "ref": "https://news.17173.com/content/03182026/104940843.shtml", "confidence": "CROSS_SOURCE_SUPPORTED", "settled": "标准 PVP 六宠、通常 4 点魔力、力竭通常扣 1 —— 交叉支持，非官方原文。"},
         {"kind": "community", "ref": "https://www.gameres.com/forum/t/917446", "confidence": "CROSS_SOURCE_SUPPORTED", "settled": "同上口径的第二来源。"},
-        {"kind": "repo", "ref": "https://github.com/AofeiLi-code/rocom-data", "confidence": "COMMUNITY_CURRENT", "settled": "社区数据仓，用于交叉核对字段口径。"}
+        {"kind": "repo", "ref": "https://github.com/AofeiLi-code/rocom-data", "confidence": "COMMUNITY_CURRENT", "settled": "社区数据仓，用于交叉核对字段口径。"},
+        {"kind": "user_in_game", "ref": "data/roco/evidence/user-in-game-reports.json#2026-09-22-boss-form-standard-pvp", "confidence": "RECORDED_IN_GAME", "settled": "持有者实机口径：首领化在闪耀大赛式标准 PVP 里存在 → boss_form 策略为 allowed_if_eligible；愿力强化 = PVP 魔法 / 特殊行动。台账条目 EV-PVP-BOSS-FORM-STANDARD。"}
       ],
       "needs_microcase": true,
       "microcase_ids": ["MC-BM01", "MC-BM02", "MC-BM03"],
       "unknowns": [
-        "6 只是否**必须**选满（还是 1～6 都允许）——未核实。",
+        "6 只是否**必须**选满（还是 1～6 都允许）——未核实；因此 team_size_policy.fill_required=null + UNVERIFIED。",
         "4 点魔力是「通常」还是固定值；不同活动/段位是否不同——未核实。",
         "力竭扣魔力的准确语义（扣谁、扣多少、是否可被效果改变）——未核实。",
-        "先手/出场顺序与 6 只编队的对应关系——未核实。"
+        "先手/出场顺序与 6 只编队的对应关系——未核实。",
+        "首领化的资格判定式（血脉 + 首领信物 / 进化之力）——未核实；引擎遇未知 fail closed（policies.boss_form_policy.eligibility）。",
+        "首领化的次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率——一律未核验，写 null + UNVERIFIED，不得沿用 mockup 的确定文案。",
+        "愿力强化 / 共鸣魔法的次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率——同样全部未核验（policies.magic_policy.unknowns）。"
       ],
-      "product_note": "**禁止**把 4 点魔力或六宠写成官方已确认事实；UI 上标「候选规则（待实机核对）」而不是「官方规则」。"
+      "product_note": "**禁止**把 4 点魔力或六宠写成官方已确认事实；UI 上标「候选规则（待实机核对）」而不是「官方规则」。**同样禁止**把首领化写成这个模式没有（forbidden）或必须全员满足（required）—— 人类实机口径是 allowed_if_eligible：满足资格即可用，不挡正常队伍。"
     },
     {
       "id": "pvp-speed-duel-3v3",
@@ -146,6 +242,11 @@
   "invariants": [
     "标准 PVP 六宠的 confidence **不得**是 OFFICIAL_CURRENT / RECORDED_IN_GAME（在录到实机 microcase 之前）。",
     "极速对决的 team_size 必须是 3、mana_pool 必须是 2；它不是标准模式。",
-    "任何模式的 team_size 都不得来自「当前 Demo 的 48 只名单」——候选宇宙与模式规模是两件事。"
+    "任何模式的 team_size 都不得来自「当前 Demo 的 48 只名单」——候选宇宙与模式规模是两件事。",
+    "标准 PVP 六宠的 boss_form 策略**必须**是 `allowed_if_eligible`：不得写成 forbidden（那等于说这个模式没有首领化），也不得写成 required / required_for_entry（那会挡住打不了首领化的正常队伍）。",
+    "领地试炼的 `parameters.boss_form` 必须保持 true（它是官方 2v2 / 特性共享 / 首领化模式）；标准模式的策略**不得**反向污染它。",
+    "极速对决的 team_size=3 / mana_pool=2 **不得**被标准模式的口径污染（三模式禁止互相借规则）。",
+    "首领化与愿力强化**不叫普通 item**：它们是首领形态 / 血脉觉醒与 PVP 魔法 / 特殊行动；`item` 仍是 forbidden 的**普通道具**类，两者不许混为一谈。",
+    "首领化与 PVP 魔法的次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率一律 `null + UNVERIFIED`（引擎遇未知 fail closed）；不得沿用 docs/roco/mockups/battle-v3*.html 的确定文案。"
   ]
 }

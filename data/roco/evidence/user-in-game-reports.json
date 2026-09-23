@@ -17,6 +17,31 @@
       ],
       "microcase_id": "MC-E04",
       "note": "本文件只是把「谁在什么时候实机核对了什么」留档；数值进规则配置仍要走台账 → 生成器。"
+    },
+    {
+      "id": "2026-09-22-boss-form-standard-pvp",
+      "date": "2026-09-22",
+      "claim": "首领化（精灵首领形态 / 血脉觉醒）在闪耀大赛式标准 PVP 里**存在**，不是领地试炼专属；它不是「未开放所以按 forbidden 处理」的东西，也不叫普通 item。首领信物 / 进化之力是实现它的**资格或触发条件**（不是普通道具）。因此 pvp-standard-six-pet 的口径是 boss_form=allowed_if_eligible（**不是** required）：「普通闪耀大赛是否开放」与「首领对决主题是否要求全员满足」属于 BattleMode / ruleset 的主题参数，不是全局布尔。愿力强化同理，是 PVP 魔法 / 特殊行动，不能因为旧口径 item:0 就当它不存在。",
+      "method": "实机核对（持有者口述，人类为唯一权威）",
+      "affects": [
+        "data/roco/battle-modes.json#modes[pvp-standard-six-pet].policies.boss_form_policy",
+        "data/roco/battle-modes.json#modes[pvp-standard-six-pet].policies.magic_policy",
+        "data/roco/rulesets/mobile-s4-candidate-v3.json#policies",
+        "data/roco/rulesets/mobile-s4-candidate-v3.json#actions.kinds.item"
+      ],
+      "asset": null,
+      "still_open": [
+        "首领化是否在普通闪耀大赛（无首领对决主题）里也开放",
+        "首领对决主题是否会要求全员满足首领化资格",
+        "首领化的具体数值改动 / 倍率",
+        "触发是否占用一次行动",
+        "同一场的次数上限与冷却",
+        "如何解除 / 是否会持续到回合末",
+        "首领信物 / 进化之力的取得与消耗时机",
+        "愿力强化（共鸣魔法等 PVP 魔法 / 特殊行动）的次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率"
+      ],
+      "microcase_id": null,
+      "note": "这条与 energy.initial 那条同源（都是持有者实机口径）。**已录到的是「存在性与归类」，不是数值**：具体的次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率一律保持 null + UNVERIFIED，引擎遇到未知必须 fail closed。台账里对应 EV-PVP-BOSS-FORM-STANDARD（RECORDED_IN_GAME，needs_microcase=false —— 它回答「有没有 / 算哪一类」，不回答任何数值）。"
     }
   ]
 }

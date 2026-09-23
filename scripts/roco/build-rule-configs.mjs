@@ -33,6 +33,22 @@ export const CANDIDATE_ID = 'mobile_s4_candidate_v2';
 /** RC-105：第一个声明 `mana`（魔力/心）与 `actions`（合法动作裁剪）的候选配置。 */
 export const V3_CANDIDATE_ID = 'mobile_s4_candidate_v3';
 
+/**
+ * v3 纠偏：首领化的**策略取值**词表。
+ *
+ * `allowed_if_eligible` = 「满足资格即可用」—— 它**不是** `forbidden`（那等于说这个模式没有
+ * 首领化），也**不是** `required` / `required_for_entry`（那会挡住打不了首领化的正常队伍）。
+ * 人类实机口径（台账 EV-PVP-BOSS-FORM-STANDARD，RECORDED_IN_GAME）确定的正是这个取值，
+ * 所以它必须是**唯一**被允许写进规则配置的那一个。
+ */
+export const BOSS_FORM_POLICY_VALUES = Object.freeze(new Set([
+  'allowed_if_eligible', 'forbidden', 'required', 'required_for_entry',
+]));
+/** 首领化在标准 PVP 里的目标取值：只有它是对的。 */
+export const BOSS_FORM_POLICY_EXPECTED = 'allowed_if_eligible';
+/** PVP 魔法 / 特殊行动的分类（愿力强化、共鸣魔法…）——**不是**普通 item。 */
+export const PVP_MAGIC_CLASSIFICATION = 'pvp_magic_special_action';
+
 /** RC-103：`turn_order.speed_tie` 允许的取值。`null` = UNKNOWN（不是「随便挑一个」）。 */
 export const SPEED_TIE_POLICIES = Object.freeze(new Set(['random_seeded']));
 
@@ -287,6 +303,13 @@ export function buildConfigs({ledger, battleModes}) {
   //   ② 新增 `actions`：合法动作类 skill→charge→switch→surrender，禁 item/escape。
   // 两份配置绑的是**同一个** BattleMode（pvp-standard-six-pet），所以「模式口径」没变，
   // 变的是「这个模式怎么结算」。仍然 `BLOCKED_UNTIL_MICROCASE`：MC-E07/E08/E09 都没录。
+  //
+  // v3 纠偏补齐第三类：`policies`（首领化 / PVP 魔法 / 队伍规模的策略子树）。它的取值从
+  // 登记表读入，所以「标准 PVP 的首领化策略」只有登记表一个事实源。
+  const standardMode = modeById.get('pvp-standard-six-pet');
+  if (!standardMode) throw new Error(`BattleMode pvp-standard-six-pet 不在 ${BATTLE_MODES_PATH} 里`);
+  /** 登记表里标准模式的首领化策略（配置里的 `policies.boss_form_policy` 从它读）。 */
+  const bossPolicy = standardMode.policies?.boss_form_policy;
   field.policy = policyFor[V3_CANDIDATE_ID];
   const manaActionsCandidate = {
     ...skeleton(V3_CANDIDATE_ID, 'CANDIDATE_NOT_FOR_DEFAULT', 'pvp-standard-six-pet', [
@@ -356,14 +379,64 @@ export function buildConfigs({ledger, battleModes}) {
         surrender: field('allowed', 'ENGINE_HYPOTHESIS', null,
           '投降是标准 PVP 的独立动作类（无道具无逃跑，玩家需要一个「认输」的出口）。'
           + '台账没有任何条目讲它的语义 —— 见 mana.surrender 的 reason'),
-        item: field('forbidden', 'ENGINE_HYPOTHESIS', null,
-          '道具（回复药 / 净化药 / 能量果）在标准 PVP 里不出现；'
-          + '它们在 `env.DEFAULT_ITEM_STOCK` 里，属于 PVE/练习局（legacy、pve-camp）。'
-          + '台账没有对应条目，这是从模式口径推出来的策略'),
+        item: {
+          ...field('forbidden', 'ENGINE_HYPOTHESIS', null,
+            '道具（回复药 / 净化药 / 能量果）在标准 PVP 里不出现；'
+            + '它们在 `env.DEFAULT_ITEM_STOCK` 里，属于 PVE/练习局（legacy、pve-camp）。'
+            + '台账没有对应条目，这是从模式口径推出来的策略'),
+          // v3 纠偏：`item = forbidden` **不等于**「首领化 / PVP 魔法不存在」——
+          // 这是两个不同的东西，必须显式分类写出来，否则下一个人会把 forbidden 误读成「没有」。
+          classification: 'forbidden_normal_item',
+          is_item: true,
+          not_absent_note: '禁止的是**普通道具**这一类（回复药 / 净化药 / 能量果）。'
+            + '首领化（精灵首领形态 / 血脉觉醒）与愿力强化等 PVP 魔法**不叫普通 item**，'
+            + '它们是另一类声明：见 `policies.boss_form_policy` 与 `policies.magic_policy`'
+            + '（台账 EV-PVP-BOSS-FORM-STANDARD，RECORDED_IN_GAME）。'
+            + '**禁止**因为这里写着 forbidden 就当作首领化在标准 PVP 里不存在。',
+        },
         escape: field('forbidden', 'ENGINE_HYPOTHESIS', null,
           '逃跑在标准 PVP 里不出现（对局以魔力归零结算，玩家用「投降」退出）。'
           + '台账没有对应条目，这是从模式口径推出来的策略'),
       },
+    },
+    // v3 纠偏：**首领化 / PVP 魔法 / 队伍规模**的策略子树。
+    //
+    // 为什么不再用一个全局布尔：`parameters.boss_form=false` 曾经被读成「标准 PVP 没有首领化」，
+    // 而人类实机口径是**存在**。所以策略取值搬进 `policies`，并且「普通闪耀大赛是否开放 /
+    // 首领对决主题是否要求全员满足」留给 BattleMode 的 `theme` —— 不是全局布尔。
+    // 取值本身从 `battle-modes.json` 读（登记表是模式口径的唯一事实源，配置跟着它生成），
+    // 所以改登记表会让 `--check` 判红，而不是两份文件各说一套。
+    policies: {
+      // 首领化：**显式**构造，不用 `field()` 的展开 —— `field()` 只会把 extra 里的键铺上来，
+      // 嵌套的 `eligibility` / `unknowns` 会被丢掉，而它们正是「未核验就 fail closed」的落点。
+      // 取值从登记表读入；登记表改了就必须重新生成（`--check` 会判红）。
+      boss_form_policy: {
+        name: bossPolicy?.name ?? 'boss_form',
+        value: bossPolicy?.value,
+        confidence: 'RECORDED_IN_GAME',
+        evidence_id: 'EV-PVP-BOSS-FORM-STANDARD',
+        evidence_role: 'supports',
+        microcase_id: null,
+        reason: '人类实机口径（人类是唯一权威）：首领化 = 精灵**首领形态 / 血脉觉醒**，在闪耀大赛式标准 '
+          + 'PVP 里**存在**，`boss_form=false` 不是最终设计。allowed_if_eligible = 满足资格即可用，'
+          + '既不是 forbidden（没有首领化），也不是 required_for_entry（会挡住正常队伍）。'
+          + '首领信物 / 进化之力 = 资格或触发条件，**不叫普通 item**。'
+          + '取值从 battle-modes.json 的 policies.boss_form_policy 读入 —— 登记表改了就重新生成。',
+        eligibility: JSON.parse(JSON.stringify(bossPolicy?.eligibility ?? null)),
+        unknowns: JSON.parse(JSON.stringify(bossPolicy?.unknowns ?? [])),
+      },
+      team_size_policy: field('candidate_1_to_6', 'CROSS_SOURCE_SUPPORTED', 'EV-PVP-STANDARD-TEAM-SIZE',
+        '**最多** 6 只（EV-PVP-STANDARD-TEAM-SIZE，CROSS_SOURCE_SUPPORTED，MC-E07 未录制），'
+        + '下界 1；「必须选满 6 只」没有任何来源支持 → `min` / `max` / `fill_required` 三个细项'
+        + '放在 battle-modes.json 的 policies.team_size_policy 里（那里 fill_required=null + UNVERIFIED，'
+        + '引擎遇未知 fail closed），本字段只登记「这是候选的 1～6 口径」这一条。'),
+      magic_policy: field('allowed_candidate', 'RECORDED_IN_GAME', 'EV-PVP-BOSS-FORM-STANDARD',
+        '愿力强化 / 共鸣魔法等 PVP 魔法是**特殊行动**（classification='
+        + PVP_MAGIC_CLASSIFICATION + '），不是普通道具。旧标准 PVP 口径的 `item:0` **不**意味着'
+        + '它们不存在 —— 这正是这次要修掉的错误。它们被允许作为候选参与，但次数 / 冷却 / 解除 / '
+        + '是否占行动 / 持续 / 倍率一律未核验（battle-modes.json 的 policies.magic_policy 里逐条'
+        + '写 null + UNVERIFIED），引擎遇未知 fail closed。',
+        'supports', {classification: PVP_MAGIC_CLASSIFICATION, is_item: false, all_unverified: true}),
     },
     // RC-401：**效果能力声明**。
     //
@@ -551,6 +624,173 @@ function dig(node, path) {
     cur = cur[part];
   }
   return cur;
+}
+
+/** 登记表里的一个模式（找不到就是 undefined —— 调用方自己决定算不算问题）。 */
+function modeOf(battleModes, id) {
+  return (battleModes?.modes ?? []).find((m) => m?.id === id);
+}
+
+/**
+ * v3 纠偏的**策略判据**：策略取值本身必须是对的，而且不许在「登记表 / 配置 / 模式参数」
+ * 三处各说一套。
+ *
+ * 为什么它必须在生成器里（而不是只在测试里）：生成器是**写入方**。判据放这里，
+ * 坏值根本落不了盘；放测试里，磁盘上那份坏配置已经写进去了。测试是第二道锁，不是唯一那道。
+ *
+ * 每一条都对应一个真实会被写错的方向：
+ *   ① 把标准 PVP 写成 forbidden —— 等于说这个模式没有首领化（人类实机口径说它有）；
+ *   ② 写成 required / required_for_entry —— 挡住打不了首领化的正常队伍；
+ *   ③ 领地试炼 `parameters.boss_form=true`（官方 2v2 / 特性共享 / 首领化）被顺手改坏；
+ *   ④ 极速对决 3v3 / 2 魔力被标准模式口径污染（三模式禁止互相借规则）；
+ *   ⑤ PVP 魔法被当成普通 item（`item: forbidden` 被读成「愿力强化不存在」）；
+ *   ⑥ 未知数值被填上一个「看起来合理」的数（必须 null + UNVERIFIED，引擎 fail closed）。
+ */
+export function checkPolicyInvariants(configs, battleModes, problems) {
+  const configOf = (modeId) => configs.find((c) => c?.battle_mode?.id === modeId
+    && c?.ruleset_config_id === V3_CANDIDATE_ID);
+  const standard = modeOf(battleModes, 'pvp-standard-six-pet');
+  const trial = modeOf(battleModes, 'pvp-territory-trial-2v2');
+  const duel = modeOf(battleModes, 'pvp-speed-duel-3v3');
+
+  if (!standard) {
+    problems.push(`${BATTLE_MODES_PATH}：缺少 pvp-standard-six-pet（标准 PVP 六宠必须有登记）`);
+    return;
+  }
+  const bossPolicy = standard.policies?.boss_form_policy;
+  const policyValue = bossPolicy?.value;
+  // ① / ②：取值只能是 allowed_if_eligible。
+  if (!bossPolicy) {
+    problems.push('pvp-standard-six-pet 缺少 parameters.policies.boss_form_policy'
+      + '（首领化必须登记成 allowed_if_eligible，不是全局布尔 boss_form）');
+  } else if (policyValue !== BOSS_FORM_POLICY_EXPECTED) {
+    const why = policyValue === 'forbidden'
+      ? '——那等于说标准 PVP 没有首领化，与人类实机口径（首领化在闪耀大赛式 PVP 中存在）冲突'
+      : (['required', 'required_for_entry'].includes(policyValue)
+        ? '——那会挡住打不了首领化的正常队伍；主题是否要求全员满足属于 theme 参数，不是模式入口条件'
+        : `——只允许 ${BOSS_FORM_POLICY_EXPECTED}`);
+    problems.push(`pvp-standard-six-pet.parameters.policies.boss_form_policy.value=`
+      + `${JSON.stringify(policyValue)}，必须是 ${BOSS_FORM_POLICY_EXPECTED}${why}`);
+  }
+  if (bossPolicy && !BOSS_FORM_POLICY_VALUES.has(policyValue)) {
+    problems.push(`pvp-standard-six-pet：boss_form_policy.value 不在词表里（`
+      + `${[...BOSS_FORM_POLICY_VALUES].join(' / ')}），实际 ${JSON.stringify(policyValue)}`);
+  }
+  if (bossPolicy?.eligibility?.on_unknown !== 'FAIL_CLOSED') {
+    problems.push('pvp-standard-six-pet：首领化资格未核验，eligibility.on_unknown 必须是 FAIL_CLOSED'
+      + '（不释放首领化，也不替玩家猜「满足」）');
+  }
+  // ③：领地试炼不许被改坏。
+  if (trial?.parameters?.boss_form !== true) {
+    problems.push(`pvp-territory-trial-2v2.parameters.boss_form 必须保持 true（官方 2v2 / 特性共享 / `
+      + `首领化模式），实际 ${JSON.stringify(trial?.parameters?.boss_form)}`);
+  }
+  // ④：极速对决不许被污染。
+  if (duel?.parameters?.team_size !== 3 || duel?.parameters?.mana_pool !== 2) {
+    problems.push(`pvp-speed-duel-3v3 必须仍然是 team_size=3 / mana_pool=2（独立模式，禁止借标准模式的规则），`
+      + `实际 team_size=${JSON.stringify(duel?.parameters?.team_size)} / mana_pool=${JSON.stringify(duel?.parameters?.mana_pool)}`);
+  }
+  // ⑤：PVP 魔法是特殊行动，不是普通道具。
+  const magic = standard.policies?.magic_policy;
+  if (!magic) {
+    problems.push('pvp-standard-six-pet：缺 parameters.policies.magic_policy'
+      + '（愿力强化 / 共鸣魔法作为 PVP 魔法 / 特殊行动单独建模，不能因为旧 item:0 就当不存在）');
+  } else {
+    if (magic.classification !== PVP_MAGIC_CLASSIFICATION) {
+      problems.push(`pvp-standard-six-pet.policies.magic_policy.classification=`
+        + `${JSON.stringify(magic.classification)}，必须是 ${PVP_MAGIC_CLASSIFICATION}`);
+    }
+    if (magic.is_item !== false) {
+      problems.push('pvp-standard-six-pet.policies.magic_policy.is_item 必须是 false'
+        + '（它不是普通 item）');
+    }
+  }
+  // ⑥：未核验的数值不许有值。
+  if (magic && magic.occupies_action !== null) {
+    problems.push(`pvp-standard-six-pet.policies.magic_policy.occupies_action=`
+      + `${JSON.stringify(magic.occupies_action)} 必须是 null：它是否占行动未核验，不许填 true/false`);
+  }
+  if (magic && magic.occupies_action_status !== 'UNVERIFIED') {
+    problems.push('pvp-standard-six-pet.policies.magic_policy.occupies_action_status 必须是 UNVERIFIED');
+  }
+  for (const [label, node] of [['boss_form_policy', bossPolicy], ['magic_policy', magic]]) {
+    for (const item of node?.unknowns ?? []) {
+      if (item?.value !== null || item?.status !== 'UNVERIFIED') {
+        problems.push(`pvp-standard-six-pet.policies.${label}.unknowns.${item?.field}：未核验项必须`
+          + ` value=null + status=UNVERIFIED（引擎遇未知 fail closed），实际 `
+          + `value=${JSON.stringify(item?.value)} / status=${JSON.stringify(item?.status)}`);
+      }
+    }
+  }
+  // 队伍规模策略：1～6，且「必须填满」必须是 null + UNVERIFIED。
+  const teamSizePolicy = standard.policies?.team_size_policy;
+  if (!teamSizePolicy) {
+    problems.push('pvp-standard-six-pet：缺 parameters.policies.team_size_policy（min/max/fill_required）');
+  } else {
+    if (teamSizePolicy.min !== 1 || teamSizePolicy.max !== 6) {
+      problems.push(`pvp-standard-six-pet.policies.team_size_policy 必须是 min=1 / max=6，实际 `
+        + `min=${JSON.stringify(teamSizePolicy.min)} / max=${JSON.stringify(teamSizePolicy.max)}`);
+    }
+    if (teamSizePolicy.fill_required !== null || teamSizePolicy.fill_required_status !== 'UNVERIFIED') {
+      problems.push('pvp-standard-six-pet.policies.team_size_policy.fill_required 必须是 null + '
+        + 'UNVERIFIED（「6 只必须选满」没有来源支持；引擎遇到未填满必须 fail closed，不许替玩家补满）');
+    }
+  }
+  // 门控：不许悄悄回落别的模式，也不许在条件不满足时照样开局。
+  const gate = standard.entry_gate;
+  if (!gate) {
+    problems.push('pvp-standard-six-pet：缺 entry_gate（requires / on_unmet / never）');
+  } else {
+    if (gate.on_unmet !== 'SHOW_DISABLED_WITH_REASON') {
+      problems.push('pvp-standard-six-pet.entry_gate.on_unmet 必须是 SHOW_DISABLED_WITH_REASON');
+    }
+    for (const forbidden of ['call_engine_after_unmet', 'fallback_to_other_mode']) {
+      if (!(gate.never ?? []).includes(forbidden)) {
+        problems.push(`pvp-standard-six-pet.entry_gate.never 必须包含 ${forbidden}`);
+      }
+    }
+  }
+  // 主题参数：留着，但标准模式自己不预设（null = 未定，不是 false）。
+  const theme = standard.theme;
+  if (!theme) {
+    problems.push('pvp-standard-six-pet：缺 theme 子对象（普通闪耀大赛是否开放 / 首领对决主题是否要求全员满足）');
+  } else {
+    if (theme.theme_id !== null || theme.boss_form_required !== null || theme.period !== null) {
+      problems.push('pvp-standard-six-pet.theme 的 theme_id / boss_form_required / period 必须是 null：'
+        + '标准模式不预设主题（null = 未定，不是 false）');
+    }
+  }
+
+  // 配置侧：v3 的 policies 必须与登记表一致（同一事实源，不许各说一套）。
+  const v3 = configOf('pvp-standard-six-pet');
+  if (!v3) {
+    problems.push(`缺少绑定 pvp-standard-six-pet 的 ${V3_CANDIDATE_ID} 配置`);
+  } else {
+    const leaf = v3.policies?.boss_form_policy;
+    if (leaf?.value !== BOSS_FORM_POLICY_EXPECTED) {
+      problems.push(`${V3_CANDIDATE_ID}.policies.boss_form_policy.value=`
+        + `${JSON.stringify(leaf?.value)}，必须与登记表一致（${BOSS_FORM_POLICY_EXPECTED}）`);
+    }
+    if (leaf?.evidence_id !== 'EV-PVP-BOSS-FORM-STANDARD') {
+      problems.push(`${V3_CANDIDATE_ID}.policies.boss_form_policy 必须引台账 EV-PVP-BOSS-FORM-STANDARD`
+        + `（人类实机口径），实际 ${JSON.stringify(leaf?.evidence_id)}`);
+    }
+    if (v3.policies?.magic_policy?.classification !== PVP_MAGIC_CLASSIFICATION) {
+      problems.push(`${V3_CANDIDATE_ID}.policies.magic_policy.classification 必须是 `
+        + `${PVP_MAGIC_CLASSIFICATION}`);
+    }
+    // `actions` 模式参数里的 team_size 必须仍然等于登记表（配置侧的镜像没被改坏）。
+    const declared = v3.battle_mode?.team_size?.value;
+    if (declared !== standard.parameters?.team_size) {
+      problems.push(`${V3_CANDIDATE_ID}.battle_mode.team_size=${JSON.stringify(declared)} 与登记表 `
+        + `${JSON.stringify(standard.parameters?.team_size)} 不一致`);
+    }
+    // 普通 item 的显式分类：禁止 ≠ 不存在。
+    if (v3.actions?.kinds?.item?.classification !== 'forbidden_normal_item') {
+      problems.push(`${V3_CANDIDATE_ID}.actions.kinds.item 必须带 classification=forbidden_normal_item`
+        + '（forbidden 说的是普通道具这一类，不许被读成「首领化 / PVP 魔法不存在」）');
+    }
+  }
 }
 
 /**
@@ -799,6 +1039,7 @@ function writeConfigs() {
   const configs = buildConfigs({ledger, battleModes});
   const problems = configs.flatMap((c) => validateConfig(c, ledger));
   checkLegacyBitExact(configs, problems);
+  checkPolicyInvariants(configs, battleModes, problems);
   if (problems.length) {
     for (const p of problems) console.error(`✖ ${p}`);
     return 1;
@@ -820,6 +1061,7 @@ export function checkConfigsForTest() {
   const expected = buildConfigs({ledger, battleModes});
   const problems = [];
   checkLegacyBitExact(expected, problems);
+  checkPolicyInvariants(expected, battleModes, problems);
   for (const config of expected) {
     problems.push(...validateConfig(config, ledger));
     const name = config.ruleset_config_id.replace(/_/g, '-') + '.json';
@@ -983,12 +1225,108 @@ function selftest() {
   push('反证⑮：legacy 里补一个假的 mana=0 必须被判红（0 是「已判负」，不是「没有这条概念」）',
     fakeManaProblems.some((p) => p.includes('mana.pool')), JSON.stringify(fakeManaProblems).slice(0, 240));
 
+  // ── v3 纠偏：首领化 / PVP 魔法 / 主题参数 的反证 ───────────────────────
+  // 每条都改**内存里的登记表**再重跑同一个判据（不是重写一份判据），所以它测的是真判据。
+  const tamperedModes = (mutate) => {
+    const copy = JSON.parse(JSON.stringify(battleModes));
+    const modes = copy.modes;
+    mutate(modes);
+    const built = buildConfigs({ledger, battleModes: copy});
+    const out = [];
+    checkLegacyBitExact(built, out);
+    checkPolicyInvariants(built, copy, out);
+    return out;
+  };
+  const standardModeOf = (modes) => modes.find((m) => m.id === 'pvp-standard-six-pet');
+
+  // 反证⑯：把标准模式的首领化写成 forbidden → 必须红
+  const bossForbidden = tamperedModes((modes) => {
+    standardModeOf(modes).parameters.policies.boss_form_policy.value = 'forbidden';
+  });
+  push('反证⑯：标准 PVP 的首领化策略改成 forbidden 必须被判红',
+    bossForbidden.some((p) => p.includes('boss_form_policy') && p.includes('allowed_if_eligible')),
+    JSON.stringify(bossForbidden).slice(0, 300));
+
+  // 反证⑰：写成 required_for_entry（要求全员满足）→ 也必须红（挡住正常队伍）
+  const bossRequired = tamperedModes((modes) => {
+    standardModeOf(modes).parameters.policies.boss_form_policy.value = 'required_for_entry';
+  });
+  push('反证⑰：标准 PVP 的首领化策略改成 required_for_entry 必须被判红',
+    bossRequired.some((p) => p.includes('boss_form_policy') && p.includes('挡住')),
+    JSON.stringify(bossRequired).slice(0, 300));
+
+  // 反证⑱：把领地试炼的 boss_form 改成 false（顺手改坏官方模式）→ 必须红
+  const trialBroken = tamperedModes((modes) => {
+    modes.find((m) => m.id === 'pvp-territory-trial-2v2').parameters.boss_form = false;
+  });
+  push('反证⑱：领地试炼的 boss_form 改成 false 必须被判红',
+    trialBroken.some((p) => p.includes('pvp-territory-trial-2v2') && p.includes('boss_form')),
+    JSON.stringify(trialBroken).slice(0, 300));
+
+  // 反证⑲：把极速对决改成 3v3 / 4 魔力（标准模式口径污染过来了）→ 必须红
+  const duelPolluted = tamperedModes((modes) => {
+    modes.find((m) => m.id === 'pvp-speed-duel-3v3').parameters.mana_pool = 4;
+  });
+  push('反证⑲：极速对决的 mana_pool 被改成 4 必须被判红（三模式禁止互相借规则）',
+    duelPolluted.some((p) => p.includes('pvp-speed-duel-3v3')),
+    JSON.stringify(duelPolluted).slice(0, 300));
+
+  // 反证⑳：把 PVP 魔法标成普通 item（旧 item:0 的错误读法）→ 必须红
+  const magicAsItem = tamperedModes((modes) => {
+    standardModeOf(modes).parameters.policies.magic_policy.is_item = true;
+  });
+  push('反证⑳：把 PVP 魔法标成普通 item 必须被判红（愿力强化不是道具）',
+    magicAsItem.some((p) => p.includes('magic_policy') && p.includes('is_item')),
+    JSON.stringify(magicAsItem).slice(0, 300));
+
+  // 反证㉑：给「是否占行动」补一个 false（看起来合理）→ 必须红
+  const inventedActionCost = tamperedModes((modes) => {
+    standardModeOf(modes).parameters.policies.magic_policy.occupies_action = false;
+  });
+  push('反证㉑：给未核验的 occupies_action 填一个 false 必须被判红（必须 null + UNVERIFIED）',
+    inventedActionCost.some((p) => p.includes('occupies_action')),
+    JSON.stringify(inventedActionCost).slice(0, 300));
+
+  // 反证㉒：「必须选满 6 只」被写成 true（没有来源支持的那个断言）→ 必须红
+  const fillInvented = tamperedModes((modes) => {
+    standardModeOf(modes).parameters.policies.team_size_policy.fill_required = true;
+  });
+  push('反证㉒：把 fill_required 写成 true 必须被判红（「必须选满」没有来源支持）',
+    fillInvented.some((p) => p.includes('fill_required')),
+    JSON.stringify(fillInvented).slice(0, 300));
+
+  // 反证㉓：门控里去掉「不许回落别的模式」→ 必须红（那会让标准 PVP 悄悄变成 3v3）
+  const gateLeak = tamperedModes((modes) => {
+    const gate = standardModeOf(modes).entry_gate;
+    gate.never = gate.never.filter((x) => x !== 'fallback_to_other_mode');
+  });
+  push('反证㉓：entry_gate.never 少了 fallback_to_other_mode 必须被判红',
+    gateLeak.some((p) => p.includes('fallback_to_other_mode')),
+    JSON.stringify(gateLeak).slice(0, 300));
+
+  // 反证㉔：主题参数被预设成 false（把「未定」写成「确定不允许」）→ 必须红
+  const themePreset = tamperedModes((modes) => {
+    standardModeOf(modes).theme.boss_form_required = false;
+  });
+  push('反证㉔：把 theme.boss_form_required 预设成 false 必须被判红（标准模式不预设主题，null=未定）',
+    themePreset.some((p) => p.includes('theme')),
+    JSON.stringify(themePreset).slice(0, 300));
+
+  // 反证㉕：配置侧的 policies 被手改成 forbidden（配置文件与登记表各说一套）→ 必须红
+  const configDrift = JSON.parse(JSON.stringify(configs));
+  const driftCfg = configDrift.find((c) => c.ruleset_config_id === V3_CANDIDATE_ID);
+  driftCfg.policies.boss_form_policy.value = 'forbidden';
+  const driftProblems = [];
+  checkPolicyInvariants(configDrift, battleModes, driftProblems);
+  push('反证㉕：v3 配置里的 boss_form_policy 被改成 forbidden 必须被判红（配置必须跟登记表一致）',
+    driftProblems.some((p) => p.includes('boss_form_policy')),
+    JSON.stringify(driftProblems).slice(0, 300));
+
   const failed = checks.filter((c) => !c.ok);
   for (const c of checks) console.log(`${c.ok ? '✔' : '✖'} ${c.name} — 实际：${c.actual}`);
   console.log(`自检：${checks.length - failed.length}/${checks.length} 通过`);
   return failed.length ? 1 : 0;
 }
-
 if (import.meta.url === `file://${process.argv[1]}`) {
   const argv = process.argv.slice(2);
   if (argv.includes('--selftest')) process.exit(selftest());

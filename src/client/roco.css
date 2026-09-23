@@ -780,3 +780,26 @@ summary{min-height:44px;display:flex;align-items:center}
 /* 首屏三条口径（不在页眉里）：一行、留足边距 */
 .first-screen-badges{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
 .first-screen-badges .mode-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:none}
+
+/* ── v3h 顶部信息栏：无框、两端对齐、垂直居中（验收会量「左右两组垂直中心相等」） ── */
+.b3-topbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;
+ margin:2px 0 8px;padding:0 4px}
+.b3-side{display:flex;align-items:center;gap:12px;min-height:34px}
+.b3-side.right{justify-content:flex-end}
+.b3-dots{font-size:18px;line-height:1;letter-spacing:3px;font-style:normal}
+.b3-dots .alive{color:#67c9a8} .b3-dots .down{color:#4a5b6b}
+.b3-hearts{font-size:17px;line-height:1;letter-spacing:2px;color:#ffb4c0;font-style:normal}
+.b3-hearts .lost{color:#3d4a57}
+.b3-hearts[hidden]{display:none}
+.b3-turn{text-align:center;line-height:1.25}
+.b3-turn .b3-mode{font-size:12.5px;color:#93a7b8;font-weight:600}
+.b3-turn .b3-round{font-size:17px;font-weight:700;margin-top:1px}
+
+/* 窄屏：存活点/心 收小，避免顶部信息栏把页面撑宽（390px 实测会溢出到 408） */
+@media (max-width:520px){
+ .b3-topbar{gap:6px;padding:0}
+ .b3-dots{font-size:14px;letter-spacing:1.5px}
+ .b3-hearts{font-size:13px;letter-spacing:1px}
+ .b3-turn .b3-round{font-size:15px}
+ .b3-turn .b3-mode{font-size:11.5px}
+}

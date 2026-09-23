@@ -1,0 +1,385 @@
+/* ============================================================================
+ * battle-v3.css —— 战斗页 v3h 版式（把已定稿设计稿 `docs/roco/mockups/battle-v3h.html`
+ * 翻译成一份**独立**样式表；HTML 片段在同目录的配套文件
+ * `docs/roco/mockups/battle-v3h-fragment.html`）。
+ *
+ * 真图（人类 2026-09-23 确认的最后一版预览，本文件的每一项尺寸都对着它们量）：
+ *   docs/roco/mockups/v3h/battle-v3-default-1440x900.png
+ *   docs/roco/mockups/v3h/battle-v3-switch-1440x900.png
+ *   docs/roco/mockups/v3h/battle-v3-items-1440x900.png
+ *
+ * ---------------------------------------------------------------------------
+ * 「判据量过的」两条 —— 别改
+ * ---------------------------------------------------------------------------
+ * ① 三列 = 左 232px / 中 自适应 / 右 232px。
+ *    · 左右两列**等宽**（232 = 232，这就是镜像对称的宽度基础）；
+ *    · 中间列是 `minmax(0, 1fr)` 自适应 —— 设计稿自己的规则就是
+ *      `main{grid-template-columns:232px 1fr 232px}`，1440 宽下中列≈916px。
+ *    ⚠ 口径澄清：任务书写的是「三列等宽」。设计稿 + 真图量出来的事实是
+ *      **左右两列等宽、中间自适应**（中列 916px ≠ 232px）。这里按**设计稿和真图**落地；
+ *      若真的要三列都 232px，那不是这张图，需要人类重新定稿 —— 不要在这里偷偷改。
+ * ② 镜像对称：中间两卡关于**页面中线**镜像。
+ *    · 卡内顺序显式镜像（不靠 row-reverse 猜）：左卡「名字 → 属性 → … → 等级」、
+ *      右卡「等级 → … → 属性 → 名字」；
+ *    · 第二行同理：左卡「⭐ → 血条」、右卡「血条 → ⭐」；
+ *    · 对手侧血条**从右往左填充**（`direction:rtl` + `margin-left:auto`）；
+ *    · 对手侧属性徽章**反过来**：中文在前、emoji 在后（`.b3-el--mirror`）；
+ *    · buffs 行同理（`.b3-fighter--foe .b3-buffs{flex-direction:row-reverse}`）。
+ *    镜像判据：两卡各自的中心与页面中线之差 ≤ 1px（见交付报告的自检数字）。
+ *
+ * ---------------------------------------------------------------------------
+ * 接入说明（主线程照这个接）
+ * ---------------------------------------------------------------------------
+ * 【1】HTML 插哪里
+ *   片段的**首选**用法是整块插一次：把 `battle-v3h-fragment.html` 里
+ *   `<!-- b3:fragment:start -->` 到 `<!-- b3:fragment:end -->` 之间的内容整段放进
+ *   `src/client/roco.html`，插在 `<section class="panel battle" id="battle-panel" hidden>`
+ *   开标签**之后**（即现在 `roco.html:206` 那个 `#b3-topbar` 的位置），并删掉旧的
+ *   `#b3-topbar`（204–219）、`.sidebars`（230–242）、`.stage`（244–254）、
+ *   `.bench-row`（259–262）这四块 —— 它们是 v2 版式，片段里已经有 v3h 的对应物。
+ *   片段自带一层 `.b3-wrap`，**不要再套第二层**（三列宽度的基准就是它）。
+ *   `#rules-note` / `.battle-tools` / `#log-panel` 保留不动：
+ *   · 想让右列战报用真数据，把 `#log-panel` 的 `#events` 挪进片段里的
+ *     `.b3-log-scroll`（结构见片段里 `data-b3-log-turn` 那两行），否则右列先放静态占位；
+ *   · `.battle-tools`（让小芽看一眼 / 自动演示）放在片段**上面**或**下面**都行，
+ *     别塞进 `.b3-main`（那会挤掉三列的宽度基准）。
+ *   也支持分块插：片段里 ①顶部信息栏 / ②左列 / ③中间两卡 / ④右列 / ⑤底栏
+ *   各自独立，块间用注释标了锚点。分块时**必须**各自带 parent 上的 `.b3-wrap`
+ *   （或给 `#battle-panel` 加 `.b3-wrap`）。CSS 全部作用域在 `.b3-wrap` 下。
+ *
+ * 【2】CSS 怎么引
+ *   在 `roco.html` 现有 `<link rel="stylesheet" href="roco.css">` **之后**再加一行
+ *   `<link rel="stylesheet" href="battle-v3.css">`。
+ *   本文件全部选择器都带 `.b3-wrap` 前缀（特异性高于 `roco.css` 里已有的 `.b3-*`
+ *   顶层规则），所以：
+ *   · 片段内部的观感由本文件决定，**与两个文件谁先加载无关**；
+ *   · `roco.css:784-796` 那几条 `b3-topbar/b3-side/b3-dots/...` 变成无害的兜底
+ *     （老 markup 仍然能用），**不需要删**，也不要去改它们。
+ *   · 内层 span 的类名沿用 `roco.css` 已经约定的 `.alive/.down/.lost`，
+ *     主线程现有生成逻辑（`b3-dots` / `b3-hearts` 的 innerHTML）不用改。
+ *
+ * 【3】roco.js 要点亮什么（只需设 class / dataset，不要写 inline style）
+ *   document.body.dataset.b3Tab = 'skill' | 'switch' | 'item' | 'escape'
+ *        → 决定 ② 左列显示哪一屏，并自动高亮 ⑤ 对应的那个 tab。
+ *   document.body.dataset.b3Charge = 'energy' | 'mana'
+ *        → 'energy'：底栏左按钮是「聚能 ⭐ x / cap」（绿）；
+ *          'mana'  ：换成「剩余魔力 ♥ x / pool」（紫）—— 换宠那一屏就是这个态。
+ *   <div class="b3-wrap"> 上也可以挂同样的 `data-b3-tab` / `data-b3-charge`
+ *        （两个位置都认；`body` 优先）。
+ *   .b3-el 点击态：加 class `b3-el--name` → 只显示中文（emoji 隐藏），
+ *        约 3 秒后移除即回到「emoji + 中文」（与 ELEMENT-EMOJI.md 的口径一致）。
+ *   .b3-slot 的克制标记：只改 `data-b3-rel` = 'up' | 'down' | 'none'
+ *        （三个 SVG 都在 DOM 里，CSS 按属性显示对应那个 —— 不用换 HTML）。
+ *   技能格：`data-b3-cost-short="yes"` → ⭐ 消耗标红（星不够）。
+ *   `data-b3-slot-legal="no"` 或 class `b3-slot--grey` → 整格灰置。
+ *   血量条：给 `.b3-hp-fill` 设 `style.width = '<pct>%'`（唯一允许的 inline style，
+ *        因为它是数据；其余一律走 class/dataset）。
+ *   心（♥）：引擎公开视图**没有** hearts 字段（见 roco.js:391 的注释）。
+ *        默认 `<span class="b3-hearts" hidden>`；只有引擎真给了数、或 demo 掉心动效
+ *        要演那几秒时才 `hidden = false`。**绝不**为了「像设计稿」硬写 4 颗心。
+ *
+ * 色值/尺寸全部走本文件顶部 `.b3-wrap` 上的 CSS 变量，页面别的地方不要复用这些变量名
+ * （本作用域之外它们不该被读到）。
+ * ==========================================================================*/
+
+/* ── 变量：布局（判据量过的两条在这里）、色板、组件尺寸 ───────────────────── */
+.b3-wrap{
+  /* 布局 —— 判据量过的：左右两列等宽 232/232，中间自适应 */
+  --b3-left:232px;
+  --b3-right:232px;
+  --b3-col-gap:14px;          /* 三列之间的间距 */
+  --b3-card-gap:14px;         /* 中间两卡之间的间距 */
+  --b3-max:1408px;            /* 内容盒最大宽度（1440 视口下 = 视口 - 2×16 padding） */
+  --b3-pad-x:16px;            /* 左右留白：顶部信息栏「两端对齐」的基准线 */
+  --b3-pad-y-top:12px;
+  --b3-pad-y-bottom:14px;
+  --b3-topbar-pad-x:4px;      /* 顶栏自己的内缩（设计稿是 0 4px） */
+  --b3-viewport-offset:0px;   /* 页面上方还有固定条时，主线程把它设成那条的高度 */
+  --b3-min-h:640px;
+  --b3-topbar-min-h:34px;     /* 左右两组的最小高，垂直居中以它为准 */
+
+  /* 色板（与 roco.css 的深色底同源；本文件自带，不依赖页面变量） */
+  --b3-bg:#0b1218;
+  --b3-panel:#111c26;
+  --b3-panel-foe:#131a24;
+  --b3-line:#243444;
+  --b3-line2:#2f465c;
+  --b3-ink:#e8f0f7;
+  --b3-dim:#93a7b8;
+  --b3-brand:#67c9a8;
+  --b3-red:#ff9a9a;
+  --b3-grn:#8fe0a2;
+  --b3-mana:#b79bff;
+  --b3-gold:#ffd479;
+  --b3-ink-soft:#c9d6e2;
+
+  /* 组件尺寸 */
+  --b3-radius:13px;           /* 卡片圆角 */
+  --b3-radius-slot:11px;      /* 左列格子圆角 */
+  --b3-radius-el:8px;         /* 属性徽章圆角 */
+  --b3-btn-h:44px;            /* 聚能 / 四个大选项的高度 */
+  --b3-tab-min-w:98px;
+  --b3-el-slot:26px;          /* 属性预留位的方框边长 */
+  --b3-el-h:24px;
+  --b3-hp-h:8px;
+}
+
+/* ── 作用域与最小重置：自带盒模型/字体，避免被 roco.css 的全局 button/p/h4 影响 ── */
+.b3-wrap, .b3-wrap *{box-sizing:border-box}
+.b3-wrap{
+  max-width:calc(var(--b3-max) + 2 * var(--b3-pad-x));
+  margin:0 auto;
+  padding:var(--b3-pad-y-top) var(--b3-pad-x) var(--b3-pad-y-bottom);
+  background:var(--b3-bg);
+  color:var(--b3-ink);
+  font:13.5px/1.45 -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  display:flex;
+  flex-direction:column;
+  /* 高度：内容盒 = 100vh - 上下 padding(12+14)，与设计稿 body padding + wrap 高度等值。
+     页面上方还有固定条时，主线程把 --b3-viewport-offset 设成那条的高度。 */
+  height:calc(100vh - var(--b3-viewport-offset));
+  min-height:var(--b3-min-h);
+}
+.b3-wrap [hidden]{display:none !important}
+.b3-wrap button{
+  font:inherit;color:inherit;margin:0;padding:0;text-align:inherit;cursor:pointer;
+  background:none;border:0;appearance:none;
+}
+.b3-wrap h4,.b3-wrap p{margin:0}
+.b3-wrap i,.b3-wrap em{font-style:normal}
+
+/* ==========================================================================
+ * ① 顶部信息栏：**无框**、左右两端对齐且垂直居中、中央两行（模式 / 回合）
+ * ========================================================================*/
+.b3-wrap .b3-topbar{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:center;              /* 三格都垂直居中 → 左右两组的垂直中心相等 */
+  gap:12px;
+  flex:none;
+  margin:6px 0 10px;
+  padding:0 var(--b3-topbar-pad-x);
+  position:relative;
+  border:0;                        /* 无框（设计稿口径，写死在这里防止被别处加边） */
+  background:none;
+}
+.b3-wrap .b3-side{
+  display:flex;align-items:center;gap:12px;
+  align-self:center;
+  min-height:var(--b3-topbar-min-h);
+}
+.b3-wrap .b3-side--foe{justify-content:flex-end;text-align:right}
+.b3-wrap .b3-turn{text-align:center;line-height:1.25;align-self:center}
+.b3-wrap .b3-turn .b3-mode{font-size:13px;color:var(--b3-dim);font-weight:600}
+.b3-wrap .b3-turn .b3-round{font-size:17px;font-weight:700;margin-top:1px}
+
+/* 存活点 ●○（内层 span 类名沿用 roco.css 的 alive/down 约定） */
+.b3-wrap .b3-dots{letter-spacing:3px;font-size:18px;line-height:1;white-space:nowrap}
+.b3-wrap .b3-dots .alive{color:var(--b3-brand)}
+.b3-wrap .b3-dots .down{color:#4a5b6b}
+
+/* 心 ♥♡（只在引擎给数或掉心动效出现；默认 hidden） */
+.b3-wrap .b3-hearts{font-size:17px;letter-spacing:2px;color:#ffb4c0;white-space:nowrap}
+.b3-wrap .b3-hearts .lost{color:#3d4a57}
+.b3-wrap .b3-hearts[hidden]{display:none}   /* 盖过上面的 display:flex/inline */
+
+/* ==========================================================================
+ * ② + ③ + ④ 主区：三列 = 232px / 自适应 / 232px
+ * ========================================================================*/
+.b3-wrap .b3-main{
+  display:grid;
+  /* 判据量过的：左 232 / 中 自适应 / 右 232。中间用 minmax(0,1fr) 而不是 1fr，
+     是为了让「中间列的 min-content」不能把布局撑宽（无横向溢出的硬保证）。 */
+  grid-template-columns:var(--b3-left) minmax(0, 1fr) var(--b3-right);
+  gap:var(--b3-col-gap);
+  flex:1;
+  min-height:0;
+}
+.b3-wrap .b3-col{display:flex;flex-direction:column;min-height:0;min-width:0}
+
+/* ── ② 左列：竖排技能 / 更换 / 背包（同一列里三选一，底边始终与右侧对齐） ────
+   显隐口径（**唯一真源 = body.dataset.b3Tab**，也认 .b3-wrap 上的同名属性）：
+   1) 没有任何 tab 信号 → 只显示技能屏（渐进增强，页面不会空一列）；
+   2) 有 tab 信号 → 先**全部关掉**，再开命中那一个。
+   这样「body 说 switch、而片段里技能屏自带静态默认」也不会两屏同时显示。 */
+.b3-wrap .b3-panel{display:none;flex-direction:column;gap:8px;height:100%;min-height:0}
+.b3-wrap .b3-panel--skill{display:flex}                      /* 1) 无信号时的默认屏 */
+body[data-b3-tab] .b3-wrap .b3-panel,
+.b3-wrap[data-b3-tab] .b3-panel{display:none}                 /* 2) 有信号 → 先全关 */
+body[data-b3-tab="skill"]  .b3-wrap .b3-panel--skill,
+body[data-b3-tab="switch"] .b3-wrap .b3-panel--switch,
+body[data-b3-tab="item"]   .b3-wrap .b3-panel--item,
+body[data-b3-tab="escape"] .b3-wrap .b3-panel--escape,
+.b3-wrap[data-b3-tab="skill"]  .b3-panel--skill,
+.b3-wrap[data-b3-tab="switch"] .b3-panel--switch,
+.b3-wrap[data-b3-tab="item"]   .b3-panel--item,
+.b3-wrap[data-b3-tab="escape"] .b3-panel--escape{display:flex}/* 2) 再开命中的那一个 */
+
+/* 一个格子（技能 / 换宠 / 背包共用同一套骨架） */
+.b3-wrap .b3-slot{
+  flex:1;                          /* 四格平分整列高度 → 5 行换宠时底边仍然对齐 */
+  border:1px solid var(--b3-line2);
+  border-radius:var(--b3-radius-slot);
+  background:var(--b3-panel);
+  padding:8px 11px;
+  display:flex;flex-direction:column;justify-content:center;gap:3px;
+  min-height:0;
+}
+.b3-wrap .b3-slot--grey{opacity:.6}          /* 灰置：本手不可点 */
+.b3-wrap .b3-slot-row{display:flex;align-items:center;gap:7px;min-width:0}
+.b3-wrap .b3-slot-name{font-weight:650;font-size:14px;min-width:0}
+.b3-wrap .b3-slot-tail{font-size:11.5px;color:var(--b3-dim);margin-left:auto;white-space:nowrap}
+.b3-wrap .b3-cost{font-weight:700;font-size:12.5px;color:var(--b3-gold);white-space:nowrap}
+.b3-wrap .b3-slot[data-b3-cost-short="yes"] .b3-cost{color:var(--b3-red)}
+.b3-wrap .b3-note{font-size:11.5px;color:var(--b3-dim);white-space:pre-line;line-height:1.6}
+
+/* 预期伤害：白=默认 / 绿=增幅 / 红=削弱 / 灰=无 */
+.b3-wrap .b3-dmg{font-size:12px;font-weight:600}
+.b3-wrap .b3-dmg--plain{color:var(--b3-ink)}
+.b3-wrap .b3-dmg--up{color:var(--b3-grn)}
+.b3-wrap .b3-dmg--down{color:var(--b3-red)}
+.b3-wrap .b3-dmg--none{color:var(--b3-dim)}
+
+/* ── 属性徽章：显示形态 = emoji + 中文（如 🔥火系）；点一下只显示中文 ──────
+   18 属性的 emoji 口径见 docs/roco/ELEMENT-EMOJI.md：
+     光系✨ 冰系❄️ 地系⛰️ 幻系🌀 幽系👻 恶系😈 普通系⚪ 机械系⚙️ 武系🥊
+     毒系☠️ 水系💧 火系🔥 电系⚡ 翼系🪶 草系🌿 萌系💗 虫系🐛 龙系🐉
+   ⚠ 与 roco.js 里那份旧的 TYPE_EMOJI 有两处不同（普通系 ⚪ vs 🐾、光系 ✨ vs ☀️、
+     萌系 💗 vs 🎀、幻系 🌀 vs ✨、恶系 😈 vs 🌑）：以 ELEMENT-EMOJI.md 的 18 属性表为准。 */
+.b3-wrap .b3-el-slots{display:flex;gap:4px;align-items:center;flex:none}
+.b3-wrap .b3-el-slot{width:var(--b3-el-slot);height:var(--b3-el-slot);border-radius:var(--b3-radius-el);
+  display:grid;place-items:center;flex:none}
+.b3-wrap .b3-el-slot--empty{border:1px dashed #22303e;opacity:.35}  /* 预留位：撑宽度、不显示内容 */
+.b3-wrap .b3-el{
+  height:var(--b3-el-h);border-radius:var(--b3-radius-el);
+  display:inline-flex;align-items:center;gap:4px;
+  cursor:pointer;user-select:none;white-space:nowrap;
+  border:1px solid #35506a;background:#0f1c26;
+  font-size:12.5px;line-height:1;padding:0 7px;
+}
+.b3-wrap .b3-el-ic{font-size:14px}
+.b3-wrap .b3-el-nm{font-weight:600;color:#cfe6ff}
+/* 对手侧反过来：中文在前、emoji 在后（轴对称） */
+.b3-wrap .b3-el--mirror{flex-direction:row-reverse}
+/* 点一下：只显示中文（3 秒后由 JS 移除这个 class 回到 emoji + 中文） */
+.b3-wrap .b3-el--name{padding:0 8px}
+.b3-wrap .b3-el--name .b3-el-ic{display:none}
+
+/* ── 克制关系标记：克制=绿色向上圆角三角 / 被克制=红色向下三角 / 无影响=白实心圆 ──
+   三个 SVG 都放在 DOM 里，只按 `data-b3-rel` 显示对应的那个 → JS 只需改一个属性。 */
+.b3-wrap .b3-rel{width:14px;height:14px;flex:none;display:inline-flex;align-items:center;
+  justify-content:center;margin-left:auto}
+.b3-wrap .b3-rel svg{width:14px;height:14px;display:none}
+.b3-wrap .b3-rel[data-b3-rel="up"] .b3-rel-up{display:block}
+.b3-wrap .b3-rel[data-b3-rel="down"] .b3-rel-down{display:block}
+.b3-wrap .b3-rel[data-b3-rel="none"] .b3-rel-none{display:block}
+
+/* ── ③ 中间两张卡（显式镜像，不靠 row-reverse 猜顺序） ─────────────────── */
+.b3-wrap .b3-stage{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:var(--b3-card-gap);height:100%;min-height:0;align-items:stretch;
+}
+.b3-wrap .b3-fighter{
+  border:1px solid var(--b3-line2);border-radius:var(--b3-radius);background:var(--b3-panel);
+  padding:13px 15px;display:flex;flex-direction:column;gap:12px;height:100%;min-height:0;
+}
+.b3-wrap .b3-fighter--foe{background:var(--b3-panel-foe)}
+.b3-wrap .b3-f-top{display:flex;align-items:center;gap:9px;min-width:0}
+.b3-wrap .b3-f-name{font-size:20px;font-weight:750;letter-spacing:.4px}
+.b3-wrap .b3-f-lv{font-size:12.5px;color:#a9bccd;font-weight:600;white-space:nowrap}
+.b3-wrap .b3-f-mid{display:flex;align-items:center;gap:10px;min-width:0}
+.b3-wrap .b3-f-star{
+  font-size:14px;font-weight:750;color:var(--b3-gold);
+  border:1px solid #4a3f22;background:#221d10;border-radius:9px;padding:2px 8px;white-space:nowrap;
+}
+.b3-wrap .b3-spacer{flex:1;min-width:0}
+.b3-wrap .b3-hp{flex:1;min-width:0}
+.b3-wrap .b3-hp-num{display:flex;justify-content:space-between;font-size:11.5px;color:var(--b3-dim);margin-bottom:3px}
+.b3-wrap .b3-hp-bar{height:var(--b3-hp-h);border-radius:999px;background:#1d2833;overflow:hidden}
+.b3-wrap .b3-hp-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#4fbf8f,#67c9a8)}
+.b3-wrap .b3-hp-fill--mid{background:linear-gradient(90deg,#c9b45a,#e0c96a)}
+/* 镜像：对手侧血条**从右往左**填充 */
+.b3-wrap .b3-fighter--foe .b3-hp-bar{direction:rtl}
+.b3-wrap .b3-fighter--foe .b3-hp-fill{margin-left:auto}
+/* ⚠ 「64% / 生命 x / y」这一行的镜像**由 DOM 顺序给**（右卡 DOM 就是 [百分比, 生命值]，
+   见片段），这里**不要**再 row-reverse —— 那会二次翻转，把两边的数序翻回来。 */
+/* 中段空区（立绘/动画预留）与 buffs 行 */
+.b3-wrap .b3-free{border:1px dashed #26374a;border-radius:11px;flex:1;min-height:80px}
+.b3-wrap .b3-buffs{display:flex;gap:6px;align-items:center;min-height:22px}
+.b3-wrap .b3-fighter--foe .b3-buffs{flex-direction:row-reverse}
+.b3-wrap .b3-buff{font-size:10.5px;color:#cfe0f0;border:1px dashed #33485c;border-radius:7px;padding:1px 7px}
+.b3-wrap .b3-buff--ghost{opacity:.32}
+
+/* ── ④ 右列：战报（底边与主区对齐；字号小一号） ────────────────────────── */
+.b3-wrap .b3-log{
+  border:1px solid var(--b3-line2);border-radius:var(--b3-radius);background:var(--b3-panel);
+  display:flex;flex-direction:column;gap:8px;padding:11px;min-height:0;width:100%;
+}
+.b3-wrap .b3-log-title{font-size:15px;font-weight:700;color:#eaf2f8;letter-spacing:.3px}
+.b3-wrap .b3-log-scroll{overflow:auto;display:flex;flex-direction:column;gap:6px;min-height:0}
+.b3-wrap .b3-log-turn{border-left:2px solid #2b3d4e;padding-left:8px;margin-bottom:9px}
+.b3-wrap .b3-log-turn b{display:block;font-size:11.5px;color:#9caebe;font-weight:600;margin-bottom:4px}
+.b3-wrap .b3-log-turn p{margin:0 0 5px;font-size:11.5px;color:var(--b3-ink-soft);line-height:1.5}
+
+/* ==========================================================================
+ * ⑤ 底栏：左=聚能（⭐ 当前 / 上限），右=四个大选项（技能/更换/物品/逃跑）
+ * ========================================================================*/
+.b3-wrap .b3-footer{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;gap:var(--b3-col-gap);flex:none;margin-top:12px;
+}
+.b3-wrap .b3-charge{
+  height:var(--b3-btn-h);padding:0 18px;border-radius:11px;
+  border:1px solid #3c5a4a;background:#12231d;color:#cdeadd;font-weight:650;
+  display:flex;align-items:center;gap:8px;font-size:13.5px;
+}
+.b3-wrap .b3-charge-sub{font-size:12px;color:#8fbfa9;font-weight:500}
+/* 换宠那一屏：聚能的位置换成**剩余魔力**（紫）。
+   两个写法都认，`body[data-b3-charge]` 优先（特异性 0,3,1 > 元素属性的 0,3,0）：
+     · `document.body.dataset.b3Charge = 'mana'`（主线程首选）；
+     · 或直接改按钮自己的 `data-b3-charge-state="mana"`。 */
+.b3-wrap .b3-charge[data-b3-charge-state="mana"]{border-color:#4a3f6a;background:#1a1526}
+.b3-wrap .b3-charge[data-b3-charge-state="mana"] .b3-charge-sub{color:var(--b3-mana);font-weight:650}
+body[data-b3-charge="mana"] .b3-wrap .b3-charge,
+body[data-b3-charge="energy"] .b3-wrap .b3-charge[data-b3-charge-state="mana"]{
+  border-color:#4a3f6a;background:#1a1526;
+}
+body[data-b3-charge="mana"] .b3-wrap .b3-charge .b3-charge-sub{color:var(--b3-mana);font-weight:650}
+.b3-wrap .b3-tabs{display:flex;gap:9px;justify-content:flex-end}
+.b3-wrap .b3-tab{
+  height:var(--b3-btn-h);min-width:var(--b3-tab-min-w);border-radius:11px;
+  border:1px solid var(--b3-line2);background:#152230;color:var(--b3-ink-soft);
+  font-weight:650;font-size:14px;text-align:center;
+}
+/* 高亮当前项：**唯一真源 = body.dataset.b3Tab**（下面的抑制 + 点亮两条配套）。
+   `data-b3-tab-on="yes"` 只是「片段单独预览」时的静态默认，有 tab 信号时自动让位。 */
+.b3-wrap .b3-tab[data-b3-tab-on="yes"]{background:#1e3b55;border-color:#5b86ad;color:#fff}
+/* 有 tab 信号 → 静态高亮先失效 */
+body[data-b3-tab] .b3-wrap .b3-tab[data-b3-tab-on="yes"]{
+  background:#152230;border-color:var(--b3-line2);color:var(--b3-ink-soft);
+}
+/* 再按信号点亮命中那一个（与上面同特异性、声明更靠后 → 赢） */
+body[data-b3-tab="skill"]  .b3-wrap .b3-tab[data-b3-tab="skill"],
+body[data-b3-tab="switch"] .b3-wrap .b3-tab[data-b3-tab="switch"],
+body[data-b3-tab="item"]   .b3-wrap .b3-tab[data-b3-tab="item"],
+body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
+  background:#1e3b55;border-color:#5b86ad;color:#fff;
+}
+
+/* ==========================================================================
+ * 窄屏（≤760px）：与设计稿的媒体查询同口径 —— 单列、战报不占首屏
+ * ========================================================================*/
+@media (max-width:760px){
+  .b3-wrap{height:auto;min-height:0;padding:10px}
+  .b3-wrap .b3-topbar{grid-template-columns:minmax(0,1fr);justify-items:center;gap:4px}
+  .b3-wrap .b3-side,.b3-wrap .b3-side--foe{justify-content:center}
+  .b3-wrap .b3-main{grid-template-columns:minmax(0,1fr);gap:11px}
+  .b3-wrap .b3-stage{grid-template-columns:minmax(0,1fr)}
+  .b3-wrap .b3-col--right{display:none}
+  .b3-wrap .b3-footer{grid-template-columns:minmax(0,1fr);gap:9px}
+  .b3-wrap .b3-tabs{justify-content:space-between}
+  .b3-wrap .b3-tab{flex:1;min-width:0}
+  .b3-wrap .b3-slot{min-height:58px}
+  .b3-wrap .b3-f-name{font-size:17px}
+  .b3-wrap .b3-f-lv{font-size:11.5px}
+}

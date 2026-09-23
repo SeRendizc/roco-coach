@@ -684,6 +684,10 @@ function render() {
     ? (needsMe === true ? '我方补位（不占回合）' : (needsMe === false ? '对手补位中…' : '补位'))
     : '对战';
   // 回合条已收进小芽面板；取不到就跳过（页眉只剩标题 + 小芽按钮）。
+  // ── v3h 顶部信息栏：回合 + 左右对称的存活点 ──────────────────────────────
+  // 数字只来自公开视图：我方存活 = self.pets 里未倒下的只数；对手 = opponent.living_count
+  // （未上场的不给名字，这是公开信息边界）。心只在掉心时闪几秒（`showHeartPop` 同源数据）。
+  renderB3Topbar(view);
   const turnChip = $('turn-chip');
   if (turnChip) turnChip.textContent = view ? `第 ${view.turn} 回合 · ${replacingLabel}` : '未开局';
   const phaseChip = $('phase-chip');
@@ -1602,6 +1606,37 @@ function showHeartPop(text) {
   el.hidden = false;
   if (state.heartTimer) clearTimeout(state.heartTimer);
   state.heartTimer = setTimeout(() => { el.hidden = true; }, 3200);
+}
+
+/**
+ * 顶部信息栏（v3h）：回合 + 左右两端对称的存活点。
+ *
+ * 纪律：点/心的数字**只取公开视图**（`self.pets` 未倒下数、`opponent.living_count`）；
+ * 未上场的对手只计入数量，不出现名字。回合数取 `view.turn`，没有 view 时保持「未开局」。
+ */
+function renderB3Topbar(view) {
+  const box = $('b3-topbar');
+  if (!box) return;
+  const self = Array.isArray(view?.self?.pets) ? view.self.pets : [];
+  const selfAlive = self.filter((p) => p && p.fainted !== true).length;
+  const foeAlive = Number.isFinite(view?.opponent?.living_count) ? view.opponent.living_count : null;
+  // 对手总数按**模式规模**（6）算：`opponent.bench` 是**后备**（不含场上），拿它加存活会数出 12 个点。
+  const foeTotal = size;
+  const size = self.length || 6;
+  const dots = (alive, total) => {
+    if (alive === null) return '<span class="down">' + '○'.repeat(total) + '</span>';
+    return `<span class="alive">${'●'.repeat(Math.max(0, alive))}</span>`
+      + `<span class="down">${'○'.repeat(Math.max(0, total - alive))}</span>`;
+  };
+  const selfDots = $('b3-dots-self');
+  if (selfDots) selfDots.innerHTML = dots(selfAlive, size);
+  const foeDots = $('b3-dots-foe');
+  if (foeDots) foeDots.innerHTML = dots(foeAlive, foeTotal);
+  const round = $('b3-round');
+  if (round) round.textContent = view ? `第 ${view.turn} 回合` : '未开局';
+  const mode = $('b3-mode');
+  if (mode) mode.textContent = state.mode?.id === 'pvp-standard-six-pet' ? 'PVP · AI模拟' : '训练场 · AI模拟';
+  document.body.dataset.b3Turn = view ? String(view.turn) : '';
 }
 
 function renderModelChip() {

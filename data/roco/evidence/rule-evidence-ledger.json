@@ -44,6 +44,11 @@
         "topic": "product.pairing_ai",
         "maps_to": null,
         "why": "官方已发布配队 AI 是产品/竞争事实，不是战斗规则主题，共享登记表里没有对应项，故不映射。"
+      },
+      {
+        "topic": "battle_mode.boss_duel",
+        "maps_to": "battle_mode.standard_pvp",
+        "why": "首领对决是**主题 PVP**（闪耀大赛式标准 PVP 的一个主题变体），不是第三个独立 BattleMode：它复用标准模式的规模与结算，只把「首领化是否要求全员满足」这类主题参数写进 BattleMode / ruleset 的 theme 子对象。共享登记表（data/roco/artifact-registry.json）目前没有这个更细的键，因此映射到 battle_mode.standard_pvp —— 与 pvp.standard.team_size 同一套做法。"
       }
     ]
   },
@@ -680,6 +685,37 @@
         "reports/roco/product-wiring/full-match-wiring.json"
       ],
       "notes": "10 号文档 §12 原文：官方 2026-09 领地试炼公告存在 2v2、特性共享、首领信物/首领化；说明 team_size / active_count / trait_sharing / boss_form 不应全硬编码成一种 PVP 模式。两条来源都是 TapTap「洛克王国：世界」官方公告账号的原文，本轮已逐句核对。"
+    },
+    {
+      "id": "EV-PVP-BOSS-FORM-STANDARD",
+      "topic": "battle_mode.standard_pvp",
+      "claim": "首领化（精灵首领形态 / 血脉觉醒）在**闪耀大赛式标准 PVP** 里存在，不是领地试炼专属；它既不叫普通 item，也不是「未开放」——因此 pvp-standard-six-pet 的规则配置写成 `boss_form = allowed_if_eligible`（**不是** required、更不是 forbidden）：「普通闪耀大赛是否开放首领化」与「首领对决主题是否要求全员满足」属于 **BattleMode / ruleset 的 theme 参数**，不是全局布尔。首领信物 / 进化之力 = 资格或触发条件。愿力强化（共鸣魔法等）同理，是 **PVP 魔法 / 特殊行动**，不能因为旧口径 `item:0` 就当它不存在。未核验的次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率一律 `null + UNVERIFIED`，引擎遇未知 fail closed。",
+      "confidence": "RECORDED_IN_GAME",
+      "sources": [
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-22-boss-form-standard-pvp",
+          "date": "2026-09-22",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "首领化（精灵首领形态 / 血脉觉醒）在闪耀大赛式标准 PVP 里**存在**，不是领地试炼专属；它不是「未开放所以按 forbidden 处理」的东西，也不叫普通 item。首领信物 / 进化之力是实现它的**资格或触发条件**（不是普通道具）。因此 pvp-standard-six-pet 的口径是 boss_form=allowed_if_eligible（**不是** required）。"
+        },
+        {
+          "url": "data/roco/battle-modes.json",
+          "date": "2026-09-22",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "v3 纠偏前的 `pvp-standard-six-pet.parameters.boss_form=false` —— 本次登记明确它**不是最终设计**，改成可审计的策略子树（policies.boss_form_policy）。"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "data/roco/rulesets/mobile-s4-candidate-v3.json",
+        "data/roco/evidence/user-in-game-reports.json",
+        "docs/roco/RULE-EVIDENCE-LEDGER.md"
+      ],
+      "notes": "等级 RECORDED_IN_GAME 的理由：它是**持有者实机口径**（人类是唯一权威），来源落在 data/roco/evidence/user-in-game-reports.json 那条，marker 记 recorded_gameplay —— 与 EV-ENERGY-INITIAL 同一套判定。它**不是** OFFICIAL_CURRENT（没有官方文案逐字支持「标准 PVP 开放首领化」），也**不是** ENGINE_HYPOTHESIS（不是我们为了有界运行选的值）。needs_microcase=false 的理由：本条回答的是「有没有 / 算哪一类 / 写成哪个策略」，不回答任何数值；数值类的未知项（次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率）留在 BattleMode 与 ruleset 的 unknowns 里，保持 null + UNVERIFIED、引擎 fail closed。它与 EV-BATTLEMODE-PARAMETERIZED 互补：那一条说 boss_form 必须参数化，这一条说它在标准 PVP 里的**策略取值**。**为什么这里没有挂领地试炼的官方公告**：校验器有一条硬规则「official_first_party 来源只能出现在 OFFICIAL_CURRENT 条目上」，而本条是 RECORDED_IN_GAME —— 那条公告只用来证明「首领信物 / 首领化」这套机制在游戏里存在（证据见 EV-BATTLEMODE-PARAMETERIZED 的两条 official_first_party 来源），**不**用来给「标准 PVP 也开放」背书；后者由持有者口径承担，不借官方文案抬高。"
     }
   ]
 }

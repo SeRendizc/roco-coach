@@ -3,7 +3,7 @@
   "ruleset_config_id": "mobile_s4_candidate_v3",
   "game": "roco_world_mobile",
   "source_id": "handoff-10-sources-and-confidence-2026-09-21",
-  "derived_from_ledger_sha256": "f571c0a801e15ff019cfbc2c079bc23ab57a474c6d502fcf1df2516d0beae674",
+  "derived_from_ledger_sha256": "79e7712c57a4aaf689a6b88a1a2d06613a3d383d10f45efa2a9bbe6952df110d",
   "derived_from_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
   "status": "CANDIDATE_NOT_FOR_DEFAULT",
   "promotion_policy": "BLOCKED_UNTIL_MICROCASE",
@@ -235,7 +235,10 @@
         "confidence": "ENGINE_HYPOTHESIS",
         "evidence_id": null,
         "evidence_role": null,
-        "reason": "道具（回复药 / 净化药 / 能量果）在标准 PVP 里不出现；它们在 `env.DEFAULT_ITEM_STOCK` 里，属于 PVE/练习局（legacy、pve-camp）。台账没有对应条目，这是从模式口径推出来的策略"
+        "reason": "道具（回复药 / 净化药 / 能量果）在标准 PVP 里不出现；它们在 `env.DEFAULT_ITEM_STOCK` 里，属于 PVE/练习局（legacy、pve-camp）。台账没有对应条目，这是从模式口径推出来的策略",
+        "classification": "forbidden_normal_item",
+        "is_item": true,
+        "not_absent_note": "禁止的是**普通道具**这一类（回复药 / 净化药 / 能量果）。首领化（精灵首领形态 / 血脉觉醒）与愿力强化等 PVP 魔法**不叫普通 item**，它们是另一类声明：见 `policies.boss_form_policy` 与 `policies.magic_policy`（台账 EV-PVP-BOSS-FORM-STANDARD，RECORDED_IN_GAME）。**禁止**因为这里写着 forbidden 就当作首领化在标准 PVP 里不存在。"
       },
       "escape": {
         "value": "forbidden",
@@ -244,6 +247,82 @@
         "evidence_role": null,
         "reason": "逃跑在标准 PVP 里不出现（对局以魔力归零结算，玩家用「投降」退出）。台账没有对应条目，这是从模式口径推出来的策略"
       }
+    }
+  },
+  "policies": {
+    "boss_form_policy": {
+      "name": "boss_form",
+      "value": "allowed_if_eligible",
+      "confidence": "RECORDED_IN_GAME",
+      "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+      "evidence_role": "supports",
+      "microcase_id": null,
+      "reason": "人类实机口径（人类是唯一权威）：首领化 = 精灵**首领形态 / 血脉觉醒**，在闪耀大赛式标准 PVP 里**存在**，`boss_form=false` 不是最终设计。allowed_if_eligible = 满足资格即可用，既不是 forbidden（没有首领化），也不是 required_for_entry（会挡住正常队伍）。首领信物 / 进化之力 = 资格或触发条件，**不叫普通 item**。取值从 battle-modes.json 的 policies.boss_form_policy 读入 —— 登记表改了就重新生成。",
+      "eligibility": {
+        "predicate": "pet.has_boss_lineage && team.holds_boss_token(pet) —— 换成人类口径的话：该精灵具备**首领血脉**（首领形态 / 血脉觉醒的资格），且队伍持有对应的**首领信物 / 进化之力**（触发条件）。资格判定不成立时该精灵不能首领化，但**不影响**它正常参赛。",
+        "status": "UNVERIFIED",
+        "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+        "on_unknown": "FAIL_CLOSED",
+        "reason": "资格判定的两半（血脉是否具备、信物如何取得与消耗）只有「它们存在」这一条实机口径，具体判定式未核验：所以 predicate 是**待核验的表达式**，status=UNVERIFIED；引擎在判定不出资格时**必须 fail closed**（不释放首领化、不猜一个默认值），不许静默当作「满足」。"
+      },
+      "unknowns": [
+        {
+          "field": "activation_occupies_action",
+          "value": null,
+          "status": "UNVERIFIED",
+          "why": "首领化是否占用一次行动，未核验 —— 不许从 mockup 文案沿用确定说法。"
+        },
+        {
+          "field": "per_battle_uses",
+          "value": null,
+          "status": "UNVERIFIED",
+          "why": "同一场的次数上限，未核验。"
+        },
+        {
+          "field": "cooldown",
+          "value": null,
+          "status": "UNVERIFIED",
+          "why": "冷却，未核验。"
+        },
+        {
+          "field": "removal",
+          "value": null,
+          "status": "UNVERIFIED",
+          "why": "如何解除（换下 / 力竭 / 特定效果），未核验。"
+        },
+        {
+          "field": "duration",
+          "value": null,
+          "status": "UNVERIFIED",
+          "why": "是否持续到回合末 / 整场，未核验。"
+        },
+        {
+          "field": "stat_multipliers",
+          "value": null,
+          "status": "UNVERIFIED",
+          "why": "数值倍率，未核验。"
+        }
+      ]
+    },
+    "team_size_policy": {
+      "value": "candidate_1_to_6",
+      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "evidence_id": "EV-PVP-STANDARD-TEAM-SIZE",
+      "evidence_role": "supports",
+      "microcase_id": "MC-E07",
+      "microcase_status": "NOT_RECORDED",
+      "value_status": "CANDIDATE_HYPOTHESIS",
+      "reason": "**最多** 6 只（EV-PVP-STANDARD-TEAM-SIZE，CROSS_SOURCE_SUPPORTED，MC-E07 未录制），下界 1；「必须选满 6 只」没有任何来源支持 → `min` / `max` / `fill_required` 三个细项放在 battle-modes.json 的 policies.team_size_policy 里（那里 fill_required=null + UNVERIFIED，引擎遇未知 fail closed），本字段只登记「这是候选的 1～6 口径」这一条。"
+    },
+    "magic_policy": {
+      "value": "allowed_candidate",
+      "confidence": "RECORDED_IN_GAME",
+      "evidence_id": "EV-PVP-BOSS-FORM-STANDARD",
+      "evidence_role": "supports",
+      "reason": "愿力强化 / 共鸣魔法等 PVP 魔法是**特殊行动**（classification=pvp_magic_special_action），不是普通道具。旧标准 PVP 口径的 `item:0` **不**意味着它们不存在 —— 这正是这次要修掉的错误。它们被允许作为候选参与，但次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率一律未核验（battle-modes.json 的 policies.magic_policy 里逐条写 null + UNVERIFIED），引擎遇未知 fail closed。",
+      "classification": "pvp_magic_special_action",
+      "is_item": false,
+      "all_unverified": true
     }
   },
   "damage": {
