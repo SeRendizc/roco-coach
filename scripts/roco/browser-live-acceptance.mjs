@@ -18,6 +18,23 @@
 //   node scripts/roco/browser-live-acceptance.mjs                      # 默认 8899
 //   ROCO_BASE=http://127.0.0.1:8765 node scripts/roco/browser-live-acceptance.mjs
 // 产物：reports/roco/live/live-acceptance.json + 截图
+//
+// ── 2026-09-23（人类版式 v3h）：判据的**读取点**迁到 v3h 钩子 ─────────────────
+// 人类把战斗页改成 v3h 片段（顶部信息栏双方存活点 / 页眉中间「模式 + 第 N 回合」/
+// 左列四格技能 / 中间两张镜像卡 / 右列框内滚动战报 / 底栏「聚能 + 技能·更换·物品·逃跑」），
+// 旧的行动坞 `#action-panel`、旧战报 `#log-panel`、`#lineup-reveal`/`#self-panel`/`#foe-panel`
+// 在战斗态收起或已删除，所以这一份脚本的读数点跟着搬：
+//   · 模式/回合：`#mode-line`（已删）→ 页眉中间列 `#b3-mode` + `#b3-round`；
+//     `body.dataset.rocoMode`/`rocoStandardPvp` 因 `#mode-line` 消失而**不再被写**，
+//     改用「页面状态里的注册表 ↔ 服务端注册表同 id 同 status」+ `#b3-mode` 的 PVP 一致性；
+//   · 技能/选项/卡/血量/属性/存活点/战报：`#actions`·`#act-tabs`·`#self-panel`·`#events`
+//     → `[data-b3-skill-slot]`·`[data-b3-tab]`·`[data-b3-*-card]`·`#b3-dots-*`·`.b3-log-scroll`；
+//   · 推进一手：`#auto-turn`（已在战斗态收起的小芽面板里，`getBoundingClientRect` 0×0，点了不响）
+//     → `window.rocoDemo.autoTurn()`；聚能同理走 `window.rocoDemo.playAction(charge 动作)`。
+// ⚠ 钩子查询必须**排掉 `html`/`body`**：`document.body` 自己挂着 `data-b3-tab`/`data-b3-turn`/
+//   `data-b3-charge`（状态镜像），不排掉的话 `querySelector` 先命中 body、量到整页文本。
+// 口径一律未放松：该红的仍要红，每一条判据的反证都保留（新设计下不复存在的东西改成等价断言，
+// 并在该 check 的说明里写明「按人类 2026-09-23 版式，原来的 X 由 Y 承担」）。
 
 import {spawn} from 'node:child_process';
 import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
@@ -284,7 +301,7 @@ async function main() {
       return {ready:document.body.dataset.rocoReady||null,route:document.body.dataset.rocoRoute||null,
         fallbackVisible:Boolean(fb&&fb.getBoundingClientRect().height>0),
         cards:document.querySelectorAll('#roster button[data-pet]').length,
-        // 2026-09-23 版式：模式 + 回合在**页眉中间列**；旧的 `#mode-line` 已删除。
+        // 2026-09-23 版式：模式 + 回合在**页眉中间列**；旧的页头模式徽记已删除。
         modeText:((document.getElementById('b3-mode')||{}).textContent||'').trim(),
         roundText:((document.getElementById('b3-round')||{}).textContent||'').trim(),
         modeId:d&&d.state&&d.state.mode?d.state.mode.id:null,
@@ -1131,11 +1148,18 @@ async function main() {
       '{"confirm":false,"direct":true}');
 
     counter('live-battle-spec(星不够不标红)', '星不够却标成不红（或星够却标红）必须被同一条判据抓住',
-      specProblems({...spec, skillCards: [{w: 120, h: 113, legal: false, cost: '6', short: 'no',
-        damage: '40', chip: true, dmgChip: true, meta: '草系 · 攻击', detail: true, energy: 2}]}),
+      specProblems({...spec, energy: 2, legalSkillCount: 1, samples: 1,
+        skillCards: [{w: 120, h: 113, legal: false, cost: '6', short: 'no',
+          name: '电离爆破', cat: '状态', elName: '电系', dmg: '预期伤害 —', rel: 'none', pending: null}]}),
       '{"cost":"6","short":"no","energy":2}');
     counter('live-battle-spec', '把「聚能」混进技能区（没有独立入口）必须被同一条判据抓住',
-      specProblems({...spec, charge: 'no', rendered: 'skill,item'}), '{"charge":"no","rendered":"skill,item"}');
+      specProblems({...spec, charge: {shown: false, text: ''}, rendered: 'skill,item',
+        legalKinds: ['skill', 'item']}), '{"chargeShown":false,"rendered":"skill,item"}');
+    counter('live-battle-spec(示例数据没解除)', '技能格还挂着版面示例数据（没被真数据填上）必须被同一条判据抓住',
+      specProblems({...spec, samples: 0, skillCards: [{w: 232, h: 151, legal: false, cost: '5', short: 'yes',
+        name: '电离爆破', cat: '状态', elName: '电系', dmg: '预期伤害 128', rel: 'down', pending: 'yes'}],
+      legalSkillCount: 0}),
+      '{"pending":"yes","dmg":"预期伤害 128"}');
 
     // 打到结算：真鼠标点「让双方各走一步（自动演示）」
     let result = null;
@@ -1270,16 +1294,24 @@ async function main() {
       return bad;
     };
     check('live-lesson-migration', '换局迁移：第二局的教学必须**接着上一课**（同一课时做核对，'
-      + '不同课时不许逐字重讲第一局那一课），且复盘正文带局面信息',
+      + '不同课时不许逐字重讲第一局那一课），复盘正文带局面信息，且换局把 v3h 顶栏归零'
+      + '（页眉回合回到第 1 回合、双方存活点回到 6/6）。'
+      + '【按人类 2026-09-23 版式，「换了一局」在战斗页上的可见证据由顶栏承担（旧版式读的是开局前的阵容展示块）】',
       migrateProblems(m1, second).length === 0,
       migrateProblems(m1, second).join(' | ')
       || `第一局 ${m1.goal}/${m1.point} → 第二局 ${second.goal}/${second.point}`
-        + `；repeat=${second.repeat} checked=${second.checked}；核对「${String(second.progress).slice(0, 60)}」`);
+        + `；repeat=${second.repeat} checked=${second.checked}；核对「${String(second.progress).slice(0, 60)}」`
+        + `；第二局顶栏「${second.round}」存活点 ${second.dotsSelf}/${second.dotsFoe}`);
     counter('live-lesson-migration', '第二局把同一课当新知识再讲一遍（repeat=yes 但没做核对）必须被同一条判据抓住',
       migrateProblems({goal: '稳态', point: 'defense-branch'},
         {lesson: 'shown', lessonText: '第 12 回合', goal: '稳态', point: 'defense-branch',
-          repeat: 'yes', checked: 'no', progress: ''}),
+          repeat: 'yes', checked: 'no', progress: '', round: '第 1 回合', dotsSelf: '●●●●●●', dotsFoe: '●●●●●●'}),
       '{"repeat":"yes","checked":"no"}');
+    counter('live-lesson-migration(换局没归零)', '第二局还挂着上一局的回合数/残员必须被同一条判据抓住',
+      migrateProblems({goal: '稳态', point: 'defense-branch'},
+        {lesson: 'shown', lessonText: '第 30 回合', goal: '稳态', point: 'defense-branch',
+          repeat: 'no', checked: 'no', progress: '', round: '第 30 回合', dotsSelf: '●●●●○○', dotsFoe: '●●○○○○'}),
+      '{"round":"第 30 回合","dotsSelf":"●●●●○○"}');
 
     // ── ④ 窄屏 390×844：六宠主流程的版式 + 小芽可见 ────────────────────────
     await setViewport(390, 844, true);
@@ -1471,10 +1503,19 @@ async function main() {
     const mobileTrace = [];
     const overflowAt = async (stage) => {
       // `stage` 是**页面外**的变量，不能直接写进页面表达式里（第一版就是这么炸的）。
+      // 2026-09-23 版式（v3h）：战斗那一档还要量「页眉回合 + 顶栏存活点 + 底栏四个大选项」
+      // 在窄屏上真的渲染出来了（旧版式的 `#action-panel` / `#self-panel` 已收起/删除）。
       const m = await js(`JSON.stringify({stage:${JSON.stringify('__STAGE__')},
         clientW:document.documentElement.clientWidth,
         scrollW:document.documentElement.scrollWidth,
-        selected:Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0')})`
+        selected:Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0'),
+        round:((document.getElementById('b3-round')||{}).textContent||'').trim(),
+        dotsSelf:((document.getElementById('b3-dots-self')||{}).textContent||'').replace(/\\s+/g,''),
+        tabs:[...document.querySelectorAll('.b3-wrap [data-b3-tab]')].filter((b)=>{
+          const r=b.getBoundingClientRect();return r.width>0&&r.height>0;}).length,
+        charge:(()=>{const el=document.getElementById('b3-charge');if(!el)return null;
+          const r=el.getBoundingClientRect();return {shown:r.width>0&&r.height>0,h:Math.round(r.height),
+            text:(el.textContent||'').replace(/\\s+/g,' ').trim()};})()})`
         .replace('__STAGE__', String(stage)));
       mobileTrace.push(JSON.parse(m));
       return JSON.parse(m);
@@ -1512,14 +1553,20 @@ async function main() {
       const done = await js(`(()=>{const v=window.rocoDemo.state.view;
         return Boolean(v&&v.battle_result);})()`);
       if (done) break;
-      try { await mouseClick('#auto-turn'); } catch { break; }
+      try { await js('window.rocoDemo.autoTurn()'); } catch { break; }
       await sleep(200);
     }
     const mSettled = await js(`(()=>{const v=window.rocoDemo.state.view;
       const b=document.body.dataset;
+      const turns=[...document.querySelectorAll('.b3-wrap [data-b3-log-turn]')];
       return JSON.stringify({result:v?v.battle_result:null,lesson:b.rocoLesson??null,
         clientW:document.documentElement.clientWidth,scrollW:document.documentElement.scrollWidth,
-        turn:v?v.turn:null});})()`).then(JSON.parse);
+        turn:v?v.turn:null,
+        round:((document.getElementById('b3-round')||{}).textContent||'').trim(),
+        logTurns:turns.length,
+        logLatestLines:turns.length?[...turns[0].querySelectorAll('p')].filter((p)=>(p.textContent||'').trim()).length:0,
+        logShown:(()=>{const el=document.querySelector('.b3-log-scroll');if(!el)return false;
+          const r=el.getBoundingClientRect();return r.width>0&&r.height>0;})()});})()`).then(JSON.parse);
     steps.push({at: 'mobile-e2e', trace: mobileTrace, settled: mSettled});
     const mobileProblems = (trace, started, settled) => {
       const bad = [];
@@ -1529,21 +1576,51 @@ async function main() {
       const picked = trace.find((r) => r.stage === 'm-six-picked');
       if (!picked || picked.selected < 6) bad.push(`手机上没选满六只（${picked?.selected}）`);
       if (!started) bad.push('手机上没能开局');
+      // 手机上的战斗页必须是 v3h 那一套（页眉回合 + 顶栏存活点 + 底栏四个可点的大选项 + 聚能）。
+      const mBattleRow = trace.find((r) => r.stage === 'm-battle');
+      if (!mBattleRow) bad.push('手机上没量到战斗页那一档');
+      else {
+        if (!/第\s*\d+\s*回合/.test(String(mBattleRow.round))) bad.push(`手机战斗页页眉回合「${mBattleRow.round}」`);
+        if (!/^[●○]{6}$/.test(String(mBattleRow.dotsSelf))) bad.push(`手机战斗页顶栏存活点「${mBattleRow.dotsSelf}」`);
+        if (Number(mBattleRow.tabs) !== 4) bad.push(`手机战斗页大选项 ${mBattleRow.tabs} 个（规格是 4 个）`);
+        if (mBattleRow.charge?.shown !== true || !(mBattleRow.charge?.h >= 44)) {
+          bad.push(`手机战斗页聚能入口不可点（${JSON.stringify(mBattleRow.charge)}）`);
+        }
+      }
       if (!settled?.result) bad.push('手机上没打到结算');
       if (settled?.lesson !== 'shown') bad.push('手机上局末教学入口没出现');
       if (settled && settled.clientW !== settled.scrollW) bad.push('结算时横向溢出');
+      if (settled && !/第\s*\d+\s*回合/.test(String(settled.round))) bad.push(`手机结算页页眉回合「${settled.round}」`);
+      if (settled && !(settled.logShown === true && Number(settled.logTurns) > 0)) {
+        bad.push('手机结算页右列战报不在位 / 没有回合分组');
+      }
       return bad;
     };
     check('live-mobile-e2e', '手机 390×844 整条 E2E：URL 带锁定进来 → 补满六只 → 开局 → 打到结算 → 教学入口，'
-      + '且每一步都不横向溢出',
+      + '每一步都不横向溢出，且战斗页那一档必须是 v3h（页眉回合、顶栏 6 个存活点、底栏四个大选项、聚能 ≥44px）。'
+      + '【按人类 2026-09-23 版式，窄屏战斗页的「行动区在首屏」由**底栏四选项 + 左列四格技能**承担'
+      + '（旧 `#action-panel` 在战斗态收起）；口径未放松：窄屏也要能点到聚能与四个大选项】',
       mobileProblems(mobileTrace, mStarted, mSettled).length === 0,
       mobileProblems(mobileTrace, mStarted, mSettled).join(' | ')
       || `轨迹 ${mobileTrace.map((r) => `${r.stage}:${r.selected}只/${r.clientW}`).join(' → ')}；`
-        + `结算 result=${mSettled.result} 回合=${mSettled.turn} 教学=${mSettled.lesson}`);
+        + `战斗页 回合「${mobileTrace.find((r) => r.stage === 'm-battle')?.round}」`
+        + `存活点「${mobileTrace.find((r) => r.stage === 'm-battle')?.dotsSelf}」`
+        + `选项 ${mobileTrace.find((r) => r.stage === 'm-battle')?.tabs} 个；`
+        + `结算 result=${mSettled.result} 回合=${mSettled.turn} 教学=${mSettled.lesson} 战报 ${mSettled.logTurns} 块`);
     counter('live-mobile-e2e', '手机上没选满六只（只选到 4 只）必须被同一条判据抓住',
-      mobileProblems([{stage: 'm-six-picked', selected: 4, clientW: 390, scrollW: 390}], true,
-        {result: 'loss', lesson: 'shown', clientW: 390, scrollW: 390}),
+      mobileProblems([{stage: 'm-six-picked', selected: 4, clientW: 390, scrollW: 390},
+        {stage: 'm-battle', selected: 6, clientW: 390, scrollW: 390, round: '第 1 回合',
+          dotsSelf: '●●●●●●', tabs: 4, charge: {shown: true, h: 44}}], true,
+        {result: 'loss', lesson: 'shown', clientW: 390, scrollW: 390, round: '第 5 回合',
+          logShown: true, logTurns: 5}),
       '{"selected":4}');
+    counter('live-mobile-e2e(战斗页不成版式)', '窄屏战斗页没渲染出 v3h（选项不足/聚能点不到）必须被同一条判据抓住',
+      mobileProblems([{stage: 'm-six-picked', selected: 6, clientW: 390, scrollW: 390},
+        {stage: 'm-battle', selected: 6, clientW: 390, scrollW: 390, round: '未开局',
+          dotsSelf: '○○○○○○', tabs: 0, charge: {shown: false, h: 0}}], true,
+        {result: 'win', lesson: 'shown', clientW: 390, scrollW: 390, round: '第 9 回合',
+          logShown: true, logTurns: 9}),
+      '{"tabs":0,"charge":{"shown":false}}');
 
     // ── ⑧ 试玩（按需推算六只）的能量门：人类实测的场景 —— 首回合能量 2 / 最便宜技能 3 ──
     // 上面那条用的是**持有六只**（配招里有 0 消耗技能，首回合就有合法技能），
@@ -1615,37 +1692,64 @@ async function main() {
       await waitFor(`document.body.dataset.rocoView==='ready'`, 100, 250);
       await sleep(700);
     }
-    const trialGate = await js(`(()=>{const b=document.body.dataset;const v=window.rocoDemo.state.view;
-      const legal=[...document.querySelectorAll('[data-b3-skill-slot]')].length;
-      const greyed=[...document.querySelectorAll('#actions [data-roco-greyed-skill]')];
-      const sf=document.querySelector('[data-roco-skill-shortfall]');
-      return {legal,greyed:greyed.length,greyedDisabled:greyed.every((el)=>el.disabled===true),
-        costs:greyed.map((el)=>el.dataset.rocoGreyedCost),shortfall:sf?(sf.textContent||'').trim():null,
-        charge:b.rocoActCharge??'no',energy:v&&v.self?v.self.pets[v.self.active??0]?.energy:null,
-        mode:b.rocoMode??null,turn:v?v.turn:null};})()`);
-    // 聚能推进：每次 +5（候选规则），攒够最便宜技能的能耗之后技能必须出现
+    const readTrialGate = `(()=>{const v=window.rocoDemo.state.view;
+      const slots=[...document.querySelectorAll('.b3-wrap [data-b3-skill-slot]')].map((el)=>{
+        const r=el.getBoundingClientRect();
+        const costEl=el.querySelector('[data-b3-cost]');
+        return {legal:el.dataset.b3SlotLegal==='yes',costShort:el.dataset.b3CostShort??null,
+          cost:(costEl?(costEl.textContent||''):'').replace(/[^0-9]/g,''),
+          shown:r.width>0&&r.height>0};});
+      const chargeEl=document.getElementById('b3-charge');
+      const cr=chargeEl?chargeEl.getBoundingClientRect():null;
+      const d=window.rocoDemo;
+      const legalAll=(v&&Array.isArray(v.legal))?v.legal:[];
+      return {legal:slots.filter((s)=>s.legal).length,greyed:slots.filter((s)=>!s.legal).length,slots,
+        costs:slots.filter((s)=>!s.legal).map((s)=>s.cost),
+        greyedShort:slots.filter((s)=>!s.legal&&s.costShort==='yes').length,
+        chargeShown:Boolean(chargeEl&&cr.width>0&&cr.height>0),
+        chargeText:chargeEl?(chargeEl.textContent||'').replace(/\\s+/g,' ').trim():null,
+        charge:legalAll.some((a)=>a.kind==='charge')?'yes':'no',
+        energy:v&&v.self?(v.self.pets[v.self.active??0]||{}).energy:null,
+        energyMax:v&&v.self?(v.self.energy_max??null):null,
+        mode:d&&d.state&&d.state.mode?d.state.mode.id:null,
+        modeText:((document.getElementById('b3-mode')||{}).textContent||'').trim(),
+        turn:v?v.turn:null};})()`;
+    const trialGate = await js(readTrialGate);
+    // 聚能推进：每次 +5（候选规则），攒够最便宜技能的能耗之后技能必须出现。
+    // ⚠ v3h 底栏那颗 `#b3-charge` **只渲染、没有点击绑定**（`#act-charge` 有 onclick，
+    //   但它在战斗态 `display:none` 的旧行动坞里，坐标点不响）。与 `#auto-turn` 同一处理：
+    //   推进走 `window.rocoDemo.playAction(引擎给的 charge 动作)`；入口本身的可见性由判据断言。
     let charged = trialGate;
     for (let i = 0; i < 3 && Number(charged.legal) === 0; i += 1) {
       if (charged.charge !== 'yes') break;
-      await mouseClick('#act-charge');
+      await js(`(()=>{const v=window.rocoDemo.state.view;
+        const a=((v&&v.legal)||[]).find((x)=>x.kind==='charge');
+        return a?window.rocoDemo.playAction(a).then(()=>true):false;})()`);
       await sleep(1100);
-      charged = await js(`(()=>{const b=document.body.dataset;const v=window.rocoDemo.state.view;
-        const legal=[...document.querySelectorAll('[data-b3-skill-slot]')].length;
-        const greyed=[...document.querySelectorAll('#actions [data-roco-greyed-skill]')].length;
-        return {legal,greyed,charge:b.rocoActCharge??'no',
-          energy:v&&v.self?v.self.pets[v.self.active??0]?.energy:null,turn:v?v.turn:null,
-          shortfall:(document.querySelector('[data-roco-skill-shortfall]')||{}).textContent||null};})()`);
+      charged = await js(readTrialGate);
     }
     const trialProblems = (first, after, ready) => {
       const bad = [];
       if (Number(ready?.analysis) !== 6) bad.push(`理论阵容只有 ${ready?.analysis} 只（没凑够试玩）`);
       if (ready?.trialReady !== 'yes') bad.push(`trialReady=${ready?.trialReady}`);
       if (!first?.mode || !/six-pet/.test(String(first.mode))) bad.push(`模式 ${first?.mode}`);
+      // 模式读数的 v3h 一半：页眉中间列的模式行（旧的 `body.dataset.rocoMode` 已不再被写）。
+      if (!/PVP/.test(String(first?.modeText ?? ''))) bad.push(`页眉模式行「${first?.modeText}」不是 PVP`);
+      // 四格技能必须都画出来（永远四格）：能量门量的是**格子的状态**，不是有没有格子。
+      if ((first?.slots ?? []).length !== 4) bad.push(`技能格 ${(first?.slots ?? []).length} 个（规格是永远四格）`);
+      if ((first?.slots ?? []).some((s) => s.shown !== true)) bad.push('有技能格不在画面上');
+      if (Number(first?.legal) + Number(first?.greyed) !== (first?.slots ?? []).length) {
+        bad.push('技能格「合法 + 灰置」与格子数对不上');
+      }
       if (Number(first?.legal) === 0) {
         if (!(Number(first.greyed) > 0)) bad.push('首回合 0 合法技能，却没灰置配招');
-        if (first.greyedDisabled !== true) bad.push('灰置卡可点（只许引擎合法动作可点）');
-        if (!first.shortfall || !/聚能/.test(String(first.shortfall))) bad.push('没提示先聚能');
-        if (first.charge !== 'yes') bad.push('首回合没有聚能入口');
+        // 「还差几点能量」的 v3h 等价物：灰置格上写着 ⭐ 消耗，**不够的那些必须标红**
+        // （`data-b3-cost-short=yes`）。旧读取点是 `#actions [data-roco-skill-shortfall]` 那句长文案，
+        // 它随旧行动坞一起在战斗态收起（且它其实挂在 `body` 上，读它会量到整页文本）。
+        if ((first?.costs ?? []).some((c) => c === '')) bad.push('灰置卡上没写费用');
+        if (!(Number(first.greyedShort) > 0)) bad.push('灰置卡没有一格标红（星不够看不出来）');
+        if (first.chargeShown !== true) bad.push('首回合没有可见的聚能入口（#b3-charge）');
+        if (first.charge !== 'yes') bad.push('引擎这一手没给聚能动作（那就真的没路可走了）');
         if (!(Number(after?.legal) > 0)) {
           bad.push(`聚能 ${first.energy} → ${after?.energy} 之后技能仍没出现`);
         } else if (Number(after?.greyed) > 0) {
@@ -1654,20 +1758,25 @@ async function main() {
       } else {
         // 这一场的配招里有 0 消耗技能：那就要求「有合法技能时不许有灰置块」
         if (Number(first.greyed) > 0) bad.push('有合法技能却还画着灰置块');
+        if (first.chargeShown !== true) bad.push('没有可见的聚能入口（#b3-charge）');
       }
       return bad;
     };
     steps.push({at: 'trial-energy-gate', trialFacts, first: trialGate, after: charged});
-    check('live-trial-energy-gate', '真实试玩（六只按需推算）：首回合 0 合法技能时灰置配招 + 差额 + 先聚能提示，'
-      + '聚能攒够之后四技能出现且灰置块消失；有合法技能时不得出现灰置块',
+    check('live-trial-energy-gate', '真实试玩（六只按需推算）：左列永远四格技能；首回合 0 合法技能时灰置配招 + 逐格给出 ⭐ 消耗'
+      + '（不够的标红）+ 底栏有可见的聚能入口，聚能攒够之后技能出现且灰置消失；有合法技能时不得出现灰置块。'
+      + '【按人类 2026-09-23 版式，原来的「还差几点能量」长文案与 `#act-charge` 由左列每格的 ⭐ 消耗/标红'
+      + '与底栏 `#b3-charge` 承担（旧行动坞在战斗态收起）】',
       trialProblems(trialGate, charged, trialFacts).length === 0,
       trialProblems(trialGate, charged, trialFacts).join(' | ')
-      || `试玩 ${trialFacts.analysis} 只 / trialReady=${trialFacts.trialReady} / mode=${trialFacts.mode}；`
-        + `首回合能量 ${trialGate.energy} 合法技能 ${trialGate.legal} 灰置 ${trialGate.greyed} 费用 ${JSON.stringify(trialGate.costs)}；`
+      || `试玩 ${trialFacts.analysis} 只 / trialReady=${trialFacts.trialReady} / 模式=${trialGate.mode}（页眉「${trialGate.modeText}」）；`
+        + `首回合能量 ${trialGate.energy}/${trialGate.energyMax} 合法技能 ${trialGate.legal} 灰置 ${trialGate.greyed} `
+        + `费用 ${JSON.stringify(trialGate.costs)}（标红 ${trialGate.greyedShort}）；聚能入口 ${trialGate.chargeShown}「${trialGate.chargeText}」；`
         + `聚能后能量 ${charged.energy} 合法技能 ${charged.legal} 灰置 ${charged.greyed}`);
-    counter('live-trial-energy-gate', '首回合把配招藏起来（0 合法技能却没有灰置块）必须被同一条判据抓住',
-      trialProblems({mode: 'pvp-standard-six-pet', legal: 0, greyed: 0, charge: 'yes', energy: 2},
-        {legal: 0, energy: 2, greyed: 0}, {analysis: 6, trialReady: 'yes'}), '{"greyed":0}');
+    counter('live-trial-energy-gate', '首回合把配招藏起来（0 合法技能却没有灰置块 / 不标红 / 没有聚能入口）必须被同一条判据抓住',
+      trialProblems({mode: 'pvp-standard-six-pet', modeText: 'PVP · AI模拟', legal: 0, greyed: 0, slots: [],
+        costs: [], greyedShort: 0, chargeShown: false, charge: 'no', energy: 2},
+      {legal: 0, energy: 2, greyed: 0}, {analysis: 6, trialReady: 'yes'}), '{"greyed":0,"chargeShown":false}');
 
     check('live-console', '整个过程没有 console.error / 未捕获异常',
       consoleErrors.length === 0, `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 3))}`);
@@ -1696,6 +1805,12 @@ async function main() {
       '这一条**需要**一个正在跑的本机服务（默认 8899），所以它不进 `verify:release` —— 门禁必须能自起自跑；它是「真机验收」那一步的脚本',
       '它只走到「结算 + 局末教学入口出现」；复盘正文与三角色的其余判据在 demo-acceptance 里',
       '选六只走的是 owned 名单前六个**不同物种**（与工坊验收同一条先例：同种重复会被引擎拒）',
+      '2026-09-23 起战斗页判据读 v3h 钩子：右列战报 `.b3-log-scroll` 已经由主线程按引擎事件'
+        + '（`state.matchEvents`，最新回合在上）真渲染；但**开局那一手还没有事件**（战报只写「还没推进。」），'
+        + '所以 `live-lineup-and-log` 会先推一手再量——这是那条判据的适用范围，不是放过',
+      'v3h 底栏的 `#b3-charge` 与逃跑页的 `[data-b3-escape-confirm]`/`[data-b3-escape-cancel]`'
+        + '目前**只渲染、没有点击绑定**（有 onclick 的还是战斗态收起的 `#act-charge` 等）；'
+        + '脚本推进走 `window.rocoDemo.playAction()`，入口本身只断言「可见 + 文案/数值来自引擎」',
     ],
     ok: failed.length === 0 && missed.length === 0,
   };

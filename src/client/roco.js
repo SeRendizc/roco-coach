@@ -1755,6 +1755,31 @@ function renderB3Panels(view) {
     if (label) label.textContent = '聚能';
   }
 
+  // ⑥ 战报：**用引擎事件真渲染**（人类 2026-09-23：「战报为啥没及时更新」——
+  //    根因是我只填了顶栏/卡/技能，战报还停在设计稿的静态示例文本上）。
+  //    数据源是整局累计事件 `state.matchEvents`（结算那份回执不带新事件，只看当回合会空）。
+  //    最新回合在最上；没有事件就写「还没推进。」——不编。
+  const logScroll = root.querySelector('[data-b3-log-scroll]');
+  if (logScroll) {
+    const src = (state.matchEvents?.length ? state.matchEvents : state.events) ?? [];
+    const byTurn = new Map();
+    for (const e of src) {
+      const t = Number.isInteger(e?.turn) ? e.turn : 0;
+      if (!byTurn.has(t)) byTurn.set(t, []);
+      const text = typeof e?.text === 'string' ? e.text : null;
+      if (text) byTurn.get(t).push(text);
+    }
+    const turns = [...byTurn.keys()].sort((a, b) => b - a);   // 最新在上
+    if (!turns.length) {
+      logScroll.innerHTML = '<p class="muted">还没推进。</p>';
+    } else {
+      logScroll.innerHTML = turns.map((t, i) => `<div class="b3-log-turn" data-b3-log-turn="${t}"${i === 0 ? ' data-b3-log-latest="yes"' : ''}>
+        <b data-b3-log-turn-label="第 ${t} 回合">第 ${t} 回合${i === 0 ? '（最新）' : ''}</b>
+        ${byTurn.get(t).map((line) => `<p data-b3-log-line="yes">${escapeHtml(line)}</p>`).join('')}</div>`).join('');
+    }
+    document.body.dataset.b3LogTurns = String(turns.length);
+  }
+
   // ⑤ 切屏信号：技能 / 更换 / 背包 / 逃跑（CSS 按 body.dataset.b3Tab 切左列与高亮）
   const tab = state.actTab ?? 'skill';
   document.body.dataset.b3Tab = tab;
