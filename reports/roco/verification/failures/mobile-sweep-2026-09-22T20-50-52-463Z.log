@@ -1,0 +1,22 @@
+node scripts/roco/browser-mobile-sweep.mjs
+
+[roco-mobile] ✔ [mobile-index.html-390] — scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 36 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-index.html-360] — scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 36 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-connect.html-390] — scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 2 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-connect.html-360] — scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 2 个（只记账，见 known_limits）
+[roco-mobile] ✖ [mobile-roco.html-390] — 1 个**声明的**可点控件小于 44×44：summary 342×32
+[roco-mobile] ✖ [mobile-roco.html-360] — 1 个**声明的**可点控件小于 44×44：summary 312×32
+[roco-mobile] ✔ [mobile-box.html-390] — scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-box.html-360] — scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-workshop.html-390] — scrollW 390 = clientW 390；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）
+[roco-mobile] ✔ [mobile-workshop.html-360] — scrollW 360 = clientW 360；声明的可点控件 0 个都 ≥44；整页其它小于 44 的有 0 个（只记账，见 known_limits）
+[roco-mobile] ✔ [反证 横向溢出] — 横向溢出 20px（clientW=390 scrollW=410）
+[roco-mobile] ✔ [反证 触控目标] — 1 个**声明的**可点控件小于 44×44：button.tiny 30×30 | 声明的可点范围只匹配到 1 个元素（下限 4）——区域被删/改名/藏起来了，这条判据会静默变成空集合
+[roco-mobile] ✔ [反证 声明范围不能是空的] — 声明的可点范围只匹配到 0 个元素（下限 4）——区域被删/改名/藏起来了，这条判据会静默变成空集合
+[roco-mobile] ✔ [反证 主流程不能是旧的] — 主流程应当是 six-pet，实际 "legacy-3v3"（旧入口没藏住？）
+[roco-mobile] ✔ [反证 首屏主操作] — 主操作「开一局」不在首屏（top=1500 > 844）
+[roco-mobile] ✔ [反证 白屏] — 可见文本只有 5 字（这一页可能没渲染出来）
+[roco-mobile] ✔ [反证 控制台报错] — 控制台有 1 条报错
+[roco-mobile] 报告：reports/roco/rc505/mobile-sweep.json（判据 8/10；反证 7/7）
+
+[roco-mobile] 2 条判据失败：mobile-roco.html-390, mobile-roco.html-360

@@ -1,0 +1,156 @@
+node scripts/roco/browser-workshop-acceptance.mjs
+
+[workshop-acceptance] ✔ [01-产品页挂载] 产品页 roco.html 上有 #team-workshop，模块在自己的 shadow root 里渲染（不是另起一套临时页面） —实际： shadow root=true dataset.twSlots=6 槽位节点=6
+[workshop-acceptance] ✔ [02-六个槽位] 第一次打开就画出 6 个槽位（不是「已选 3 只固定栏」），filled == 已选数 —实际： slots=6 节点=6 filled=0 selected=0
+[workshop-acceptance] ✔ [反证 02-六个槽位] 把槽位数改成 3（退回「已选 3 只固定栏」）必须被同一条判据抓住 —实际命中： 槽位数必须是 6，实际 3 | 页面上必须画出 6 个槽位节点，实际 3
+[workshop-acceptance] ✔ [候选按拥有与否分组] 人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有），页面必须按**拥有与否**分组说明，并写清图鉴参考只能试玩 —实际： 拥有 1 / 图鉴参考 11；说明 ["你拥有的可选（1 只，能正式出战）","图鉴参考（11 只：还不能正式出战，放进理论阵容后只能试玩）"]
+[workshop-acceptance] ✔ [反证 候选按拥有与否分组] 把两类混成一列（不给分组说明）必须被同一条判据抓住 —实际命中： 同时有「我的」与「图鉴参考」却没分组说明 | 没有「你拥有的可选」这组 | 没有「图鉴参考」这组 | 没说清图鉴参考不能正式出战
+[workshop-acceptance] ✖ [03-徽记与候选池] 三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账） —实际： 页头出现次数 {"mode":-1,"candidate":-1,"prematch":0,"poolTotal":622}
+[workshop-acceptance] ✔ [反证 03-候选规则徽记] 把「候选规则（待实机核对）」徽记去掉必须被同一条判据抓住 —实际命中： 缺徽记「候选规则（待实机核对）」
+[workshop-acceptance] ✔ [反证 03-候选池 600+] 把候选池写成 48/60（迁移夹具）必须被同一条判据抓住 —实际命中： 候选池总量必须 ≥600（全量图鉴），实际 60
+[workshop-acceptance] ✔ [04-宽屏不溢出] 1440×900：产品页与模块都没有横向溢出（scrollW == clientW） —实际： clientW=1440 scrollW=1440 bodyScrollW=1440
+[workshop-acceptance] ✔ [05-初判不含证据段] `stage=first` 的回执：axes === null、axes_status === not_requested、serving.full_withheld === NOT_REQUESTED（主动不要证据段，不是降级），且真的产出了结构化初判 —实际： （HTTP 200；serving.first="structured_first" withheld=["evidence_and_counterfactual"] missing=[]）
+[workshop-acceptance] ✔ [反证 05-初判不含证据段] 让 first 那一次也带上五轴（把「初判不跑证据段」破掉）必须被同一条判据抓住 —实际命中： stage=first 的 axes 必须是 null，实际 []
+[workshop-acceptance] ✔ [反证 05-初判不含证据段（降级混淆）] 把「超时降级」混成「主动只要初判」必须被同一条判据抓住 —实际命中： stage=first 不许产出完整段，实际 full={"kind":"full_answer"} | stage=first 是「调用方主动只要初判」，不是降级：degraded 必须是 false
+[workshop-acceptance] ✔ [06-初判先于完整载荷] 页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms） —实际： ；fetches=first|full rendered_after_first=yes first_ms=110 full_ms=26 stage=full full_state=ok
+[workshop-acceptance] ✔ [反证 06-初判先于完整载荷] 把两阶段退化成一次性请求（fetches=full、没有初判耗时）必须被同一条判据抓住 —实际命中： 请求顺序必须是 first|full（初判先发、完整载荷后发），实际 "full" | 完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画） | 没有量到初判渲染耗时（data-tw-first-ms=null）
+[workshop-acceptance] ✔ [反证 06-初判先于完整载荷（初判被挡住）] 让「完整载荷到达之前」什么都不画（rendered_after_first=no）也必须被抓住 —实际命中： 完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画）
+[workshop-acceptance] ✔ [07-分段元数据在 dataset] 分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有 —实际： serving=roco-serving/v1 degraded=no elapsed_ms=23 withheld=""
+[workshop-acceptance] ✔ [08-候选含图鉴物种] 候选池里能点到「我没有的图鉴物种」（证明候选宇宙是 600+，不是 48 只） —实际： 命中 千棘海针（磨损的样子）
+[workshop-acceptance] ✔ [09-只看收藏开关] 真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok —实际： 开了之后 state=ok（selected=0）；关掉之后 state=ok；命中={"tag":"SECTION","cls":"","path":"SECTION#team-workshop<MAIN<BODY<HTML<undefined"}
+[workshop-acceptance] ✔ [10-图鉴物种照实拒绝] 点一只自己没有的图鉴物种：它进**理论阵容**并带「按需推算（未核验）/仅试玩」标，页面不进错误态、玩家层不出现内部串 —实际： state=ok；理论阵容 1 只；格子 [{"status":"on_demand","canBattle":"trial"}]
+[workshop-acceptance] ✔ [反证 10-图鉴物种照实拒绝] 把服务端原话（含 selected / own-0001）直接印到玩家层必须被同一条判据抓住 —实际命中： 玩家那一行没说清「进不了队伍」 | 没说清为什么（要放你拥有的个体） | 没给出下一步怎么做 | 玩家层泄漏了内部串「服务端原话」 | 玩家层泄漏了内部串「selected」 | 玩家层泄漏了内部串「own-0001」 | 服务端原文没有留在 data-tw-error-raw（排查要用）
+[workshop-acceptance] ✔ [反证 10-图鉴物种照实拒绝] 把「静默接受」的样本过同一条判据必须报错 —实际命中： selected=pet_000562 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true
+[workshop-acceptance] ✔ [11-错误态可恢复] 错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里 —实际： 加点={"added":true,"probe":{"rows":2,"match":1,"species":"pet_000012"},"beforeCount":0,"after":1} state=ok selected=1
+[workshop-acceptance] ✔ [12-真实键鼠选到第 2 只] 真实键盘搜名字 + 真实鼠标点候选：已选 == 2，六个槽位里两个填上了 —实际： state=ok selected=2 填了 2/6 槽
+[workshop-acceptance] ✔ [13-恰好三个候选] 已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径（偏好保留池空时 RC-303 会如实回落，第三个位置由召回的参考候选补上并标「候选参考」） —实际： 标签=强度|稳定|候选参考 候选节点=3 缺口节点=10
+[workshop-acceptance] ✔ [反证 13-恰好三个候选] 把三个候选改成两个必须被同一条判据抓住 —实际命中： 下一只候选必须恰好 3 个，实际 2 | 页面上必须画出 3 个候选节点，实际 2
+[workshop-acceptance] ✔ [反证 13-候选标签去重] 三个候选里有两个是同一个取舍标签（等于只有两个选择）必须被抓住 —实际命中： 三个候选的取舍标签必须两两不同，实际 ["强度","强度","候选参考"]
+[workshop-acceptance] ✔ [14-候选与核心同源] 路由的 next_candidates 逐条带 RC-303 的口径 id（strength / stability / preference），去重或回落时如实标 recall_tail，而不是页面层另编一个候选 —实际： tradeoff_id=["strength","stability","recall_tail"]（source=["progressive_next","progressive_next","recall_tail"]）
+[workshop-acceptance] ✔ [15-缺口清单在评估区] 评估区呈现 RC-302 的缺口口径（缺什么 / 台账里标未核实），且没有工程键名 —实际： 缺口节点=10 路由口径=["属性覆盖","速度层次","能量曲线","应对手段","换入换出","队内互补","资源消耗"]
+[workshop-acceptance] ✔ [16-评估随阵容变化] 从 2 只加到 5 只之后：下一只候选换了人、缺口清单还在、仍然恰好三个候选 —实际： 2 只时候选=["仪式巨像","伊兰亚龙","画间沉铁兽"]；5 只时=["画间沉铁兽","黑猫巫师","嗜光嗡嗡"]
+[workshop-acceptance] ✔ [反证 16-评估随阵容变化] 把「阵容变了候选一字未变」的样本过同一条判据必须报错 —实际命中： 阵容从 2 只变到 5 只，下一只候选却一字未变：["甲","乙","丙"]
+[workshop-acceptance] ✔ [17-连续选入六只] 连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体 —实际： selected=6 填了 6/6 槽；加点记录=[{"name":"铠甲虫","added":false,"probe":{"rows":3,"match":1,"species":"pet_000012"},"beforeCount":1,"after":1},{"name":"音速犬","added":true,"probe":{"rows":3,"match":1,"species":"pet_000062"},"beforeCount":1,"after":2},{
+[workshop-acceptance] ✔ [18-满六只五轴] 选满六只后出现完整诊断：五轴都在；能算的给值，算不出的给原因且不带值（不补 0） —实际： 轴节点=5；环境价值:算不出 / 最怕的体系:算不出 / 对局离散度:算不出 / 操作容错:算不出 / 覆盖置信:能算
+[workshop-acceptance] ✔ [反证 18-满六只五轴] 把「算不出来」的轴填成 0 必须被同一条判据抓住 —实际命中： 轴「环境价值」算不出来却带着值 0（不许补 0） | 轴「环境价值」算不出来却没点名缺什么：null
+[workshop-acceptance] ✔ [19-最大短板与替换建议] 完整诊断里有主短板（缺口/未知清单）与**一个**最小替换：换出/换入各一只，并说清是结构理由 —实际： 缺口=0 未知=6 替换显示=true 换出=雪影娃娃 换入=动力猿
+[workshop-acceptance] ✔ [20-玩家层载荷] 路由的 player 段里没有工程键，也没有 id 形状的展示值 —实际： 扫过 6238 字节
+[workshop-acceptance] ✔ [反证 20-玩家层载荷] 把 pet_id / instance_id 混进 player 段必须被同一条判据抓住 —实际命中： 玩家层出现工程键 slots[0].pet_id | 玩家层的 slots[0].pet_id 里出现 id 形状的值：pet_000062 | 玩家层出现工程键 next_candidates[0].instance_id | 玩家层的 next_candidates[0].instance_id 里出现 id 形状的值：own-0001
+[workshop-acceptance] ✔ [21-机制行上卡] 六个槽位里每一只的**冻结机制原文**都逐字渲染在卡的首层（小字、不截断），枚举原文（FROZEN_DESC / MECHANISM_UNCONFIRMED）一个都不出现在可见文本里 —实际： ；机制行节点=6 已填槽位=6 待确认=0；卡上样例「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」
+[workshop-acceptance] ✔ [反证 21-机制行上卡] 把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住 —实际命中： 冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」
+[workshop-acceptance] ✔ [反证 21-机制枚举不上面] 把 FROZEN_DESC 印到可见文本里必须被同一条判据抓住 —实际命中： 可见文本里出现机制枚举原文「FROZEN_DESC」
+[workshop-acceptance] ✔ [22-玩家层无工程话] 模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON —实际： 扫过 2671 字（豁免机制原文 4 处）；样例「 队伍（六个槽位） 六个槽位都满了 这一局的规则口径（候选 / 未核验 / 候选宇宙） 候选来自全图鉴 600+ 铠甲虫 移除 虫系 图鉴 · 按需推算（未核验） 有具体构建（结构…」
+[workshop-acceptance] ✔ [反证 22-玩家层无工程话] 往玩家区注入 pet_id / state_version 后同一条判据必须命中 —实际命中： 玩家可见文本里出现工程词「pet_id」 | 玩家可见文本里没有任何「未核实 / 未知」的说明
+[workshop-acceptance] ✔ [23-无胜率与百分数] 可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外） —实际： 扫过 2671 字无命中（豁免机制原文 2 条）
+[workshop-acceptance] ✔ [反证 23-无胜率与百分数] 把「胜率 58%」写进可见文本必须被同一条判据抓住 —实际命中： 玩家可见文本里出现伪精确「胜率 58」 | 玩家可见文本里没有任何「未核实 / 未知」的说明
+[workshop-acceptance] ✔ [反证 23-无胜率与百分数（假机制绕过）] 把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住 —实际命中： 玩家可见文本里出现伪精确「胜率 62」 | 玩家可见文本里没有任何「未核实 / 未知」的说明
+[workshop-acceptance] ✔ [24-未知写在玩家层] 「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里） —实际： 未知条目=6；含「现在算不出来」=true
+[workshop-acceptance] ✔ [25-非法参数(selected)] 「selected=own-0001,own-0003,own-0005,own-0007」必须 HTTP 400 + ok:false 并点名 selected —实际： HTTP 400 error=「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」
+[workshop-acceptance] ✔ [25-非法参数(mode)] 「mode=zzz」必须 HTTP 400 + ok:false 并点名 mode —实际： HTTP 400 error=「[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3v3 / pvp-standard-six-pet / pvp-speed-duel-3」
+[workshop-acceptance] ✔ [25-非法参数(zzz)] 「zzz=1」必须 HTTP 400 + ok:false 并点名 zzz —实际： HTTP 400 error=「未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/analysis_species/favourites_only/max_replacements/stage）」
+[workshop-acceptance] ✔ [25-非法参数(max_replacements)] 「max_replacements=abc」必须 HTTP 400 + ok:false 并点名 max_replacements —实际： HTTP 400 error=「max_replacements 必须是非负整数（实际 "abc"）」
+[workshop-acceptance] ✔ [25-非法参数(favourites_only)] 「favourites_only=yes」必须 HTTP 400 + ok:false 并点名 favourites_only —实际： HTTP 400 error=「favourites_only 只能是 true 或 false（实际 "yes"）」
+[workshop-acceptance] ✔ [25-非法参数(selected)] 「selected=pet_000012」必须 HTTP 400 + ok:false 并点名 selected —实际： HTTP 400 error=「selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000012）」
+[workshop-acceptance] ✔ [25-非法参数(locked)] 「locked=own-0013」必须 HTTP 400 + ok:false 并点名 locked —实际： HTTP 400 error=「[LOCKED_NOT_SELECTED] locked：锁定的 own-0013 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 "own-0013"）」
+[workshop-acceptance] ✔ [反证 25-非法参数(mode)] 把「非法 mode 静默接受」的样本过同一条判据必须报错 —实际命中： mode=zzz 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true
+[workshop-acceptance] ✔ [反证 25-非法参数(第七个槽位)] 把「接受第 7 个槽位」的样本过同一条判据必须报错 —实际命中： selected=own-0001,own-0003,own-0005,own-0007,own-0009,own-0011,own-0013 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true
+[workshop-acceptance] ✔ [26-六槽上限] 同名参数下 6 只必须 200、7 只必须 400：上限只认六个槽位 —实际： 6 只 → HTTP 200；7 只 → HTTP 400「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」
+[workshop-acceptance] ✔ [27-开发夹具] workshop.html 只是单独调试同一模块的薄壳（能挂上、标题写明是夹具，不冒充产品页） —实际： 夹具就绪=true 标题=「小芽 · 阵容工坊（RC-305 开发夹具，不是产品页）」
+[workshop-acceptance] ✔ [28-产品页重新选满六只] 回到产品页后仍能用真实键鼠选满六只（窄屏量测的前提） —实际： selected=6
+[workshop-acceptance] ✔ [29-窄屏不溢出] 390×844：scrollW == clientW —实际： clientW=390 scrollW=390 bodyScrollW=390
+[workshop-acceptance] ✔ [30-触控目标] 390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44 —实际： 量了 31 个元素，全部达标
+[workshop-acceptance] ✔ [反证 30-触控目标] 一个 30×30 的按钮必须被同一条判据抓住 —实际命中： BUTTON.tiny 只有 30×30
+[workshop-acceptance] ✔ [31-移动端顺序] 390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」 —实际： 顺序=["tw-team","tw-cand","tw-eval","tw-coach"] 顶部位置=[{"cls":"tw-team","top":183},{"cls":"tw-cand","top":1212},{"cls":"tw-eval","top":1660},{"cls":"tw-coach","top":2953}]
+[workshop-acceptance] ✔ [反证 31-移动端顺序] 把顺序改成「评估在候选池前面」必须被同一条判据抓住 —实际命中： 移动端区块顺序必须是 ["tw-team","tw-cand","tw-eval","tw-coach"]，实际 ["tw-team","tw-eval","tw-cand","tw-coach"]
+[workshop-acceptance] ✔ [32-窄屏候选区] 390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在 —实际： clientW=390 scrollW=390 next=3 缺口=10
+[workshop-acceptance] [标准 PVP] 用这六只不同物种的 owned 精灵开局： 铠甲虫、音速犬、仪式巨像、雪影娃娃、皇家狮鹫（崖间地的样子）、化蝶（平常的样子）
+[workshop-acceptance] ✔ [34-标准 PVP 开局按钮] 六槽选满后「开一局（标准 PVP · 六宠）」按钮可用，且它读的是页面选出的六只 —实际： {"disabled":false,"team":"6","fieldable":"6"}
+[workshop-acceptance] ✔ [反证 34-标准 PVP 开局按钮] 队伍不满六只（或按钮把规模读错）必须被同一条判据抓住 —实际命中： 按钮读到的队伍规模必须是 6，实际 "5"
+[workshop-acceptance] ✔ [35-标准 PVP 战斗页] 按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出 —实际： mode=pvp-standard-six-pet mana=4/4 groups=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 hidden=0；页面状态栏=「这一手引擎没有值得单独说的局面事实（拿不到就不编）」
+[workshop-acceptance] ✔ [反证 35-标准 PVP 战斗页(模式)] 开局后模式被换成练习局必须被同一条判据抓住 —实际命中： 开局后的模式必须是 pvp-standard-six-pet，实际 "demo-training-3v3"
+[workshop-acceptance] ✔ [反证 35-标准 PVP 战斗页(魔力)] 资源条还写「未核验」必须被同一条判据抓住 —实际命中： 引擎已经给了魔力，资源条却还写「未核验」
+[workshop-acceptance] ✔ [反证 35-标准 PVP 战斗页(动作)] 物品组混进 1 条必须被同一条判据抓住 —实际命中： 标准 PVP 下物品组必须为空，实际 skill:2,charge:0,switch:1,surrender:0,item:1,escape:0
+[workshop-acceptance] ✔ [反证 35-标准 PVP 战斗页(覆盖)] 把未核验覆盖藏起来必须被同一条判据抓住 —实际命中： 未核验覆盖必须如实显示（hidden=true 文案="⚠ 本局有 1 条未核验（展开可读来源）"）
+[workshop-acceptance] ✔ [36-候选规则下的 Coach 取舍] v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数 —实际： 并列 3 条（["防御","啃咬","翅刃"]）；未来 5 条；规则配置 mobile_s4_candidate_v3
+[workshop-acceptance] ✔ [反证 36-候选规则下的 Coach 取舍(编动作)] 建议里混进一个引擎没给的动作必须被同一条判据抓住 —实际命中： 建议里有引擎没给的动作：["旋风无敌斩"]
+[workshop-acceptance] ✔ [反证 36-候选规则下的 Coach 取舍(胜率)] 把「胜率 58%」写进取舍区必须被同一条判据抓住 —实际命中： 可见文本里出现伪精确（胜率 / 百分数）
+[workshop-acceptance] ✔ [33-控制台干净] 整轮下来没有 console.error，也没有未捕获异常 —实际： consoleErrors=[] pageErrors=[]
+[workshop-acceptance] ────────────────────────────────────────────────────────────────────────────
+[workshop-acceptance] ✔ 01-产品页挂载 产品页 roco.html 上有 #team-workshop，模块在自己的 shadow root 里渲染（不是另起一套临时页面） → shadow root=true dataset.twSlots=6 槽位节点=6
+[workshop-acceptance] ✔ 02-六个槽位 第一次打开就画出 6 个槽位（不是「已选 3 只固定栏」），filled == 已选数 → slots=6 节点=6 filled=0 selected=0
+[workshop-acceptance] ✔ 候选按拥有与否分组 人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有），页面必须按**拥有与否**分组说明，并写清图鉴参考只能试玩 → 拥有 1 / 图鉴参考 11；说明 ["你拥有的可选（1 只，能正式出战）","图鉴参考（11 只：还不能正式出战，放进理论阵容后只能试玩）"]
+[workshop-acceptance] ✖ 03-徽记与候选池 三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账） → 页头出现次数 {"mode":-1,"candidate":-1,"prematch":0,"poolTotal":622}
+[workshop-acceptance] ✔ 04-宽屏不溢出 1440×900：产品页与模块都没有横向溢出（scrollW == clientW） → clientW=1440 scrollW=1440 bodyScrollW=1440
+[workshop-acceptance] ✔ 05-初判不含证据段 `stage=first` 的回执：axes === null、axes_status === not_requested、serving.full_withheld === NOT_REQUESTED（主动不要证据段，不是降级），且真的产出了结构化初判 → （HTTP 200；serving.first="structured_first" withheld=["evidence_and_counterfactual"] missing=[]）
+[workshop-acceptance] ✔ 06-初判先于完整载荷 页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms） → ；fetches=first|full rendered_after_first=yes first_ms=110 full_ms=26 stage=full full_state=ok
+[workshop-acceptance] ✔ 07-分段元数据在 dataset 分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有 → serving=roco-serving/v1 degraded=no elapsed_ms=23 withheld=""
+[workshop-acceptance] ✔ 08-候选含图鉴物种 候选池里能点到「我没有的图鉴物种」（证明候选宇宙是 600+，不是 48 只） → 命中 千棘海针（磨损的样子）
+[workshop-acceptance] ✔ 09-只看收藏开关 真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok → 开了之后 state=ok（selected=0）；关掉之后 state=ok；命中={"tag":"SECTION","cls":"","path":"SECTION#team-workshop<MAIN<BODY<HTML<undefined"}
+[workshop-acceptance] ✔ 10-图鉴物种照实拒绝 点一只自己没有的图鉴物种：它进**理论阵容**并带「按需推算（未核验）/仅试玩」标，页面不进错误态、玩家层不出现内部串 → state=ok；理论阵容 1 只；格子 [{"status":"on_demand","canBattle":"trial"}]
+[workshop-acceptance] ✔ 11-错误态可恢复 错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里 → 加点={"added":true,"probe":{"rows":2,"match":1,"species":"pet_000012"},"beforeCount":0,"after":1} state=ok selected=1
+[workshop-acceptance] ✔ 12-真实键鼠选到第 2 只 真实键盘搜名字 + 真实鼠标点候选：已选 == 2，六个槽位里两个填上了 → state=ok selected=2 填了 2/6 槽
+[workshop-acceptance] ✔ 13-恰好三个候选 已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径（偏好保留池空时 RC-303 会如实回落，第三个位置由召回的参考候选补上并标「候选参考」） → 标签=强度|稳定|候选参考 候选节点=3 缺口节点=10
+[workshop-acceptance] ✔ 14-候选与核心同源 路由的 next_candidates 逐条带 RC-303 的口径 id（strength / stability / preference），去重或回落时如实标 recall_tail，而不是页面层另编一个候选 → tradeoff_id=["strength","stability","recall_tail"]（source=["progressive_next","progressive_next","recall_tail"]）
+[workshop-acceptance] ✔ 15-缺口清单在评估区 评估区呈现 RC-302 的缺口口径（缺什么 / 台账里标未核实），且没有工程键名 → 缺口节点=10 路由口径=["属性覆盖","速度层次","能量曲线","应对手段","换入换出","队内互补","资源消耗"]
+[workshop-acceptance] ✔ 16-评估随阵容变化 从 2 只加到 5 只之后：下一只候选换了人、缺口清单还在、仍然恰好三个候选 → 2 只时候选=["仪式巨像","伊兰亚龙","画间沉铁兽"]；5 只时=["画间沉铁兽","黑猫巫师","嗜光嗡嗡"]
+[workshop-acceptance] ✔ 17-连续选入六只 连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体 → selected=6 填了 6/6 槽；加点记录=[{"name":"铠甲虫","added":false,"probe":{"rows":3,"match":1,"species":"pet_000012"},"beforeCount":1,"after":1},{"name":"音速犬","added":true,"probe":{"rows":3,"m
+[workshop-acceptance] ✔ 18-满六只五轴 选满六只后出现完整诊断：五轴都在；能算的给值，算不出的给原因且不带值（不补 0） → 轴节点=5；环境价值:算不出 / 最怕的体系:算不出 / 对局离散度:算不出 / 操作容错:算不出 / 覆盖置信:能算
+[workshop-acceptance] ✔ 19-最大短板与替换建议 完整诊断里有主短板（缺口/未知清单）与**一个**最小替换：换出/换入各一只，并说清是结构理由 → 缺口=0 未知=6 替换显示=true 换出=雪影娃娃 换入=动力猿
+[workshop-acceptance] ✔ 20-玩家层载荷 路由的 player 段里没有工程键，也没有 id 形状的展示值 → 扫过 6238 字节
+[workshop-acceptance] ✔ 21-机制行上卡 六个槽位里每一只的**冻结机制原文**都逐字渲染在卡的首层（小字、不截断），枚举原文（FROZEN_DESC / MECHANISM_UNCONFIRMED）一个都不出现在可见文本里 → ；机制行节点=6 已填槽位=6 待确认=0；卡上样例「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」
+[workshop-acceptance] ✔ 22-玩家层无工程话 模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON → 扫过 2671 字（豁免机制原文 4 处）；样例「 队伍（六个槽位） 六个槽位都满了 这一局的规则口径（候选 / 未核验 / 候选宇宙） 候选来自全图鉴 600+ 铠甲虫 移除 虫系 图鉴 · 按需推算（未核验） 有具体构建（结构…」
+[workshop-acceptance] ✔ 23-无胜率与百分数 可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外） → 扫过 2671 字无命中（豁免机制原文 2 条）
+[workshop-acceptance] ✔ 24-未知写在玩家层 「这一页现在还不知道什么」与「现在算不出来」的说明在可见文本里（不是只放在属性里） → 未知条目=6；含「现在算不出来」=true
+[workshop-acceptance] ✔ 25-非法参数(selected) 「selected=own-0001,own-0003,own-0005,own-0007」必须 HTTP 400 + ok:false 并点名 selected → HTTP 400 error=「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」
+[workshop-acceptance] ✔ 25-非法参数(mode) 「mode=zzz」必须 HTTP 400 + ok:false 并点名 mode → HTTP 400 error=「[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3v3 / pvp-standard-six-pet / pvp-speed-duel-3」
+[workshop-acceptance] ✔ 25-非法参数(zzz) 「zzz=1」必须 HTTP 400 + ok:false 并点名 zzz → HTTP 400 error=「未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/analysis_species/favourites_only/max_replacements/stage）」
+[workshop-acceptance] ✔ 25-非法参数(max_replacements) 「max_replacements=abc」必须 HTTP 400 + ok:false 并点名 max_replacements → HTTP 400 error=「max_replacements 必须是非负整数（实际 "abc"）」
+[workshop-acceptance] ✔ 25-非法参数(favourites_only) 「favourites_only=yes」必须 HTTP 400 + ok:false 并点名 favourites_only → HTTP 400 error=「favourites_only 只能是 true 或 false（实际 "yes"）」
+[workshop-acceptance] ✔ 25-非法参数(selected) 「selected=pet_000012」必须 HTTP 400 + ok:false 并点名 selected → HTTP 400 error=「selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000012）」
+[workshop-acceptance] ✔ 25-非法参数(locked) 「locked=own-0013」必须 HTTP 400 + ok:false 并点名 locked → HTTP 400 error=「[LOCKED_NOT_SELECTED] locked：锁定的 own-0013 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 "own-0013"）」
+[workshop-acceptance] ✔ 26-六槽上限 同名参数下 6 只必须 200、7 只必须 400：上限只认六个槽位 → 6 只 → HTTP 200；7 只 → HTTP 400「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」
+[workshop-acceptance] ✔ 27-开发夹具 workshop.html 只是单独调试同一模块的薄壳（能挂上、标题写明是夹具，不冒充产品页） → 夹具就绪=true 标题=「小芽 · 阵容工坊（RC-305 开发夹具，不是产品页）」
+[workshop-acceptance] ✔ 28-产品页重新选满六只 回到产品页后仍能用真实键鼠选满六只（窄屏量测的前提） → selected=6
+[workshop-acceptance] ✔ 29-窄屏不溢出 390×844：scrollW == clientW → clientW=390 scrollW=390 bodyScrollW=390
+[workshop-acceptance] ✔ 30-触控目标 390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44 → 量了 31 个元素，全部达标
+[workshop-acceptance] ✔ 31-移动端顺序 390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」 → 顺序=["tw-team","tw-cand","tw-eval","tw-coach"] 顶部位置=[{"cls":"tw-team","top":183},{"cls":"tw-cand","top":1212},{"cls":"tw-eval","top":1660},{"cls":"tw-coach","top":2953}]
+[workshop-acceptance] ✔ 32-窄屏候选区 390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在 → clientW=390 scrollW=390 next=3 缺口=10
+[workshop-acceptance] ✔ 34-标准 PVP 开局按钮 六槽选满后「开一局（标准 PVP · 六宠）」按钮可用，且它读的是页面选出的六只 → {"disabled":false,"team":"6","fieldable":"6"}
+[workshop-acceptance] ✔ 35-标准 PVP 战斗页 按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出 → mode=pvp-standard-six-pet mana=4/4 groups=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 hidden=0；页面状态栏=「这一手引擎没有值得单独说的局面事实（拿不到就不编）」
+[workshop-acceptance] ✔ 36-候选规则下的 Coach 取舍 v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数 → 并列 3 条（["防御","啃咬","翅刃"]）；未来 5 条；规则配置 mobile_s4_candidate_v3
+[workshop-acceptance] ✔ 33-控制台干净 整轮下来没有 console.error，也没有未捕获异常 → consoleErrors=[] pageErrors=[]
+[workshop-acceptance] ✔ 02-六个槽位 [反证] 把槽位数改成 3（退回「已选 3 只固定栏」）必须被同一条判据抓住 → 槽位数必须是 6，实际 3 | 页面上必须画出 6 个槽位节点，实际 3
+[workshop-acceptance] ✔ 候选按拥有与否分组 [反证] 把两类混成一列（不给分组说明）必须被同一条判据抓住 → 同时有「我的」与「图鉴参考」却没分组说明 | 没有「你拥有的可选」这组 | 没有「图鉴参考」这组 | 没说清图鉴参考不能正式出战
+[workshop-acceptance] ✔ 03-候选规则徽记 [反证] 把「候选规则（待实机核对）」徽记去掉必须被同一条判据抓住 → 缺徽记「候选规则（待实机核对）」
+[workshop-acceptance] ✔ 03-候选池 600+ [反证] 把候选池写成 48/60（迁移夹具）必须被同一条判据抓住 → 候选池总量必须 ≥600（全量图鉴），实际 60
+[workshop-acceptance] ✔ 05-初判不含证据段 [反证] 让 first 那一次也带上五轴（把「初判不跑证据段」破掉）必须被同一条判据抓住 → stage=first 的 axes 必须是 null，实际 []
+[workshop-acceptance] ✔ 05-初判不含证据段（降级混淆） [反证] 把「超时降级」混成「主动只要初判」必须被同一条判据抓住 → stage=first 不许产出完整段，实际 full={"kind":"full_answer"} | stage=first 是「调用方主动只要初判」，不是降级：degraded 必须是 false
+[workshop-acceptance] ✔ 06-初判先于完整载荷 [反证] 把两阶段退化成一次性请求（fetches=full、没有初判耗时）必须被同一条判据抓住 → 请求顺序必须是 first|full（初判先发、完整载荷后发），实际 "full" | 完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画） | 没有量到初判渲染耗时（data-tw-first-ms=null）
+[workshop-acceptance] ✔ 06-初判先于完整载荷（初判被挡住） [反证] 让「完整载荷到达之前」什么都不画（rendered_after_first=no）也必须被抓住 → 完整载荷到达之前页面没有画出槽位（等于把两阶段退化成了等两次都回来再画）
+[workshop-acceptance] ✔ 10-图鉴物种照实拒绝 [反证] 把服务端原话（含 selected / own-0001）直接印到玩家层必须被同一条判据抓住 → 玩家那一行没说清「进不了队伍」 | 没说清为什么（要放你拥有的个体） | 没给出下一步怎么做 | 玩家层泄漏了内部串「服务端原话」 | 玩家层泄漏了内部串「selected」 | 玩家层泄漏了内部串「own-0001」 | 服务端原文没有留在 data-tw-error-raw（排查要用）
+[workshop-acceptance] ✔ 10-图鉴物种照实拒绝 [反证] 把「静默接受」的样本过同一条判据必须报错 → selected=pet_000562 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true
+[workshop-acceptance] ✔ 13-恰好三个候选 [反证] 把三个候选改成两个必须被同一条判据抓住 → 下一只候选必须恰好 3 个，实际 2 | 页面上必须画出 3 个候选节点，实际 2
+[workshop-acceptance] ✔ 13-候选标签去重 [反证] 三个候选里有两个是同一个取舍标签（等于只有两个选择）必须被抓住 → 三个候选的取舍标签必须两两不同，实际 ["强度","强度","候选参考"]
+[workshop-acceptance] ✔ 16-评估随阵容变化 [反证] 把「阵容变了候选一字未变」的样本过同一条判据必须报错 → 阵容从 2 只变到 5 只，下一只候选却一字未变：["甲","乙","丙"]
+[workshop-acceptance] ✔ 18-满六只五轴 [反证] 把「算不出来」的轴填成 0 必须被同一条判据抓住 → 轴「环境价值」算不出来却带着值 0（不许补 0） | 轴「环境价值」算不出来却没点名缺什么：null
+[workshop-acceptance] ✔ 20-玩家层载荷 [反证] 把 pet_id / instance_id 混进 player 段必须被同一条判据抓住 → 玩家层出现工程键 slots[0].pet_id | 玩家层的 slots[0].pet_id 里出现 id 形状的值：pet_000062 | 玩家层出现工程键 next_candidates[0].instance_id | 玩家层的 next_candidates[0].instance_id 里出现 id 形状的值：own-0001
+[workshop-acceptance] ✔ 21-机制行上卡 [反证] 把机制行从卡上抹掉（渲染结果少一行）必须被同一条判据抓住 → 冻结机制原文没有渲染到卡上：「特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。」
+[workshop-acceptance] ✔ 21-机制枚举不上面 [反证] 把 FROZEN_DESC 印到可见文本里必须被同一条判据抓住 → 可见文本里出现机制枚举原文「FROZEN_DESC」
+[workshop-acceptance] ✔ 22-玩家层无工程话 [反证] 往玩家区注入 pet_id / state_version 后同一条判据必须命中 → 玩家可见文本里出现工程词「pet_id」 | 玩家可见文本里没有任何「未核实 / 未知」的说明
+[workshop-acceptance] ✔ 23-无胜率与百分数 [反证] 把「胜率 58%」写进可见文本必须被同一条判据抓住 → 玩家可见文本里出现伪精确「胜率 58」 | 玩家可见文本里没有任何「未核实 / 未知」的说明
+[workshop-acceptance] ✔ 23-无胜率与百分数（假机制绕过） [反证] 把「胜率 62%」塞进 mechanism.line（核不回产物）必须照样被抓住 → 玩家可见文本里出现伪精确「胜率 62」 | 玩家可见文本里没有任何「未核实 / 未知」的说明
+[workshop-acceptance] ✔ 25-非法参数(mode) [反证] 把「非法 mode 静默接受」的样本过同一条判据必须报错 → mode=zzz 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true
+[workshop-acceptance] ✔ 25-非法参数(第七个槽位) [反证] 把「接受第 7 个槽位」的样本过同一条判据必须报错 → selected=own-0001,own-0003,own-0005,own-0007,own-0009,own-0011,own-0013 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true
+[workshop-acceptance] ✔ 30-触控目标 [反证] 一个 30×30 的按钮必须被同一条判据抓住 → BUTTON.tiny 只有 30×30
+[workshop-acceptance] ✔ 31-移动端顺序 [反证] 把顺序改成「评估在候选池前面」必须被同一条判据抓住 → 移动端区块顺序必须是 ["tw-team","tw-cand","tw-eval","tw-coach"]，实际 ["tw-team","tw-eval","tw-cand","tw-coach"]
+[workshop-acceptance] ✔ 34-标准 PVP 开局按钮 [反证] 队伍不满六只（或按钮把规模读错）必须被同一条判据抓住 → 按钮读到的队伍规模必须是 6，实际 "5"
+[workshop-acceptance] ✔ 35-标准 PVP 战斗页(模式) [反证] 开局后模式被换成练习局必须被同一条判据抓住 → 开局后的模式必须是 pvp-standard-six-pet，实际 "demo-training-3v3"
+[workshop-acceptance] ✔ 35-标准 PVP 战斗页(魔力) [反证] 资源条还写「未核验」必须被同一条判据抓住 → 引擎已经给了魔力，资源条却还写「未核验」
+[workshop-acceptance] ✔ 35-标准 PVP 战斗页(动作) [反证] 物品组混进 1 条必须被同一条判据抓住 → 标准 PVP 下物品组必须为空，实际 skill:2,charge:0,switch:1,surrender:0,item:1,escape:0
+[workshop-acceptance] ✔ 35-标准 PVP 战斗页(覆盖) [反证] 把未核验覆盖藏起来必须被同一条判据抓住 → 未核验覆盖必须如实显示（hidden=true 文案="⚠ 本局有 1 条未核验（展开可读来源）"）
+[workshop-acceptance] ✔ 36-候选规则下的 Coach 取舍(编动作) [反证] 建议里混进一个引擎没给的动作必须被同一条判据抓住 → 建议里有引擎没给的动作：["旋风无敌斩"]
+[workshop-acceptance] ✔ 36-候选规则下的 Coach 取舍(胜率) [反证] 把「胜率 58%」写进取舍区必须被同一条判据抓住 → 可见文本里出现伪精确（胜率 / 百分数）
+[workshop-acceptance] 截图 8 张 → reports/roco/workshop-acceptance/
+[workshop-acceptance] 判据 42/43 通过；反证 31/31 命中
+[workshop-acceptance] 报告 → reports/roco/workshop-acceptance/browser-workshop-acceptance.json
+[workshop-acceptance] 有 1 条不通过

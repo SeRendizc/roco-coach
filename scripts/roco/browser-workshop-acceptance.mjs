@@ -775,9 +775,13 @@ async function main() {
     //   ② 模块自己只留「候选来自全图鉴 600+」这条它才知道的信息。
     // 页头那三条口径用 `body.innerText` 数（模块在 shadow root 里，body.innerText 看不到它，
     // 正好用来数「页面上出现几次」）；模块自己那条从 dataset 读（`twPoolTotal`）。
-    const headerBadges = await js(`(()=>{const t=document.body.innerText||'';
+    // 2026-09-23：页头按人类规格精简后，这三条口径搬进了**小芽面板**（默认收起）与内联位置。
+    // `innerText` **不含** hidden 子树，会把面板里的那几条漏掉（实测得到 -1）；
+    // 改用 `textContent`（含收起的面板），并继续**排除**工程抽屉那份 —— 语义仍是
+    // 「玩家层恰好各出现一次，不许重复」。模块仍在 shadow root 里，textContent 也看不到它。
+    const headerBadges = await js(`(()=>{const t=document.body.textContent||'';
       const d=document.getElementById('about-drawer');
-      const dt=d?(d.innerText||''):'';
+      const dt=d?(d.textContent||''):'';
       const count=(needle)=>(t.split(needle).length-1)-(dt.split(needle).length-1);
       const root=document.querySelector(${JSON.stringify(ROOT_SEL)});
       return JSON.stringify({mode:count('标准 PVP 六宠阵容工坊'),candidate:count('候选规则（待实机核对）'),

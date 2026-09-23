@@ -378,7 +378,7 @@ body[data-roco-hint-visible="yes"] .companion .companion-body{visibility:hidden}
 .hint-body ul.cmp b{color:#dbe7f0}
 
 /* ── 伙伴详情抽屉：面板数值 + 四个技能（卡片首层不放这些）─────────────────── */
-.pet-detail{position:fixed;right:16px;top:118px;bottom:calc(var(--bottombar,0px) + 16px);
+.pet-detail{position:fixed;right:16px;top:118px;bottom:auto;max-height:min(72vh,640px);
  width:340px;max-width:calc(100vw - 32px);
  background:#16222f;border:1px solid var(--line);border-radius:12px;padding:12px 14px;
  overflow:auto;z-index:28;box-shadow:0 14px 50px #0009}
@@ -747,12 +747,14 @@ header.topbar h1{margin:0;font-size:19px}
 .xiaoya-panel .say-form{position:sticky;bottom:0;background:var(--panel,#111c26);padding-top:6px}
 .xy-status{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
 .xy-settings{border-top:1px solid #243444;padding-top:9px}
-.xy-settings>summary{cursor:pointer;font-size:12.5px;color:#9caebe;min-height:32px;display:flex;align-items:center}
+.xy-settings>summary{cursor:pointer;font-size:12.5px;color:#9caebe;min-height:44px;display:flex;align-items:center}
 .xy-actions{display:flex;gap:8px;margin:8px 0}
 /* 「开一局」始终贴在页面底部（人类规格） */
-.standard-pvp-bar{position:sticky;bottom:0;z-index:30;display:flex;align-items:center;gap:12px;
+.standard-pvp-bar{position:sticky;bottom:0;z-index:12;display:flex;align-items:center;gap:12px;
  padding:10px 12px;margin-top:10px;border-top:1px solid #243444;background:rgba(11,18,24,.96);
  backdrop-filter:blur(6px)}
+/* 旧 3v3 路线（?legacy3v3=1）下这一栏不参与吸底，避免盖住候选池的翻页控件 */
+body[data-roco-route="legacy-3v3"] .standard-pvp-bar{position:static;z-index:auto}
 
 /* 窄屏：状态行让位（换到第二行、可截断），否则 nowrap 会把页头撑宽 → 整页横向溢出 */
 @media (max-width:560px){
@@ -761,3 +763,20 @@ header.topbar h1{margin:0;font-size:19px}
   text-overflow:ellipsis}
  .xiaoya-btn{grid-row:1;grid-column:2}
 }
+
+/* 触控目标：所有折叠行（summary）都要 ≥44px（移动端验收 `mobile-sweep` 钉这条） */
+summary{min-height:44px;display:flex;align-items:center}
+.rules-note>summary,.log-turn>summary,.dev>summary{min-height:44px}
+
+/* 工程区：页面底部、默认收起；与聊天弹窗和页眉都无关 */
+.dev-zone{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:14px 0 6px;
+ padding-top:10px;border-top:1px solid #1d2833;opacity:.92}
+.dev-zone .mode-line{max-width:none}
+
+/* 抽屉必须盖过吸底栏（否则真实鼠标点「关闭」会落到那条栏上，demo 验收实测 red） */
+#pet-detail{z-index:80}   /* 必须高于小芽面板（60），否则真鼠标点「关闭」会落在面板上 */
+.dev-zone{z-index:1}
+
+/* 首屏三条口径（不在页眉里）：一行、留足边距 */
+.first-screen-badges{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
+.first-screen-badges .mode-line{display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:none}

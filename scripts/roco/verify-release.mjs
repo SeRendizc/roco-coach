@@ -102,11 +102,6 @@ export const SUITES = [
     why: '**页面真的能开**。第 24 轮的回归只有这条抓得到', quick: true},
   {id: 'demo-acceptance', cmd: 'npm', args: ['run', 'roco:demo-acceptance'],
     why: '无聊天入口的完整演示链路；页面能开但演示链路断了也在这里', quick: true},
-  {id: 'retained-assets', cmd: 'node', args: ['scripts/roco/revalidate-retained-assets.mjs', '--check', '--selftest'],
-    why: 'v3 红线：**保留资产不许静默退化**（Agent/RAG/Memory/三角色/game adapter/mock host/'
-      + 'stale-result guard/release guard）。这一条不重跑那些判据，而是逐条核对'
-      + '「它还有判据吗、判据还接在会跑的入口上吗、产物还在生成吗、怎么才会红」——'
-      + '「没红」与「没在跑」在 CI 里长得一样，这一条就是分它们的。带 9 条自检必红方向'},
   {id: 'mobile-sweep', cmd: 'node', args: ['scripts/roco/browser-mobile-sweep.mjs'],
     why: 'RC-505 移动端验收：**五个公开页面放在同一把尺子下**（390×844 与 360×640 两档）。'
       + '窄屏判据此前散在四个脚本里，没有任何一处回答得了「这一版每一页在手机上都不横向溢出吗」。'
@@ -124,6 +119,12 @@ export const SUITES = [
     why: '用户 P0 的第 8 条：**页面看不到或点不动的能力不得仅凭单元测试标记完成**。'
       + '这一条用真实键鼠走一遍翻页 / 筛选 / 选宠 / 行动坞 / 小芽 / 场上事实（印记·能量上限·防御冷却），'
       + '并把 DOM 与引擎的公开视图逐字对齐；每条判据都配一条**必红反证**（反证没命中也算失败）'},
+  // ⚠ 元套件必须**最后**跑：它自检的是别的套件产出的报告，排前面会读到上一轮的旧报告。
+    {id: 'retained-assets', cmd: 'node', args: ['scripts/roco/revalidate-retained-assets.mjs', '--check', '--selftest'],
+    why: 'v3 红线：**保留资产不许静默退化**（Agent/RAG/Memory/三角色/game adapter/mock host/'
+      + 'stale-result guard/release guard）。这一条不重跑那些判据，而是逐条核对'
+      + '「它还有判据吗、判据还接在会跑的入口上吗、产物还在生成吗、怎么才会红」——'
+      + '「没红」与「没在跑」在 CI 里长得一样，这一条就是分它们的。带 9 条自检必红方向'},
 ];
 
 /** 清净的子进程环境：清掉测试运行器自己的变量（见 tests/helpers/subprocess.mjs 的说明）。 */
@@ -166,7 +167,8 @@ function run(suite) {
 
 export function runSuites({quick = false, log = () => {}} = {}) {
   const selected = SUITES.filter((suite) => !(quick && suite.quick));
-  const rows = [];
+  const rows = [
+];
   for (const suite of selected) {
     log(`… ${suite.id}`);
     const row = run(suite);

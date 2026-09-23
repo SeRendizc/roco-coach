@@ -725,7 +725,7 @@ function render() {
     else parts.push('本局没有使用未核验覆盖：规则值全部来自规则配置本身。');
     const mode = state.mode;
     if (mode) {
-      parts.push(`模式：${mode.label ?? mode.id ?? '未知'}`
+      parts.push('本局按上方徽记标明的模式结算'
         + (mode.status === 'CANDIDATE' ? '（候选规则，待实机核对）' : '')
         + (mode.unknowns_count ? `；登记未核实 ${mode.unknowns_count} 项` : ''));
     }
@@ -2120,6 +2120,7 @@ function openPetDetail(petId) {
      <p class="muted">面板数值与配招来自规则引擎。引擎没给威力的技能**不显示威力**，也不当成 0；
      原始来源状态在小芽面板的「设置 → 关于这一页」里逐条可核对。</p>`;
   box.hidden = false;
+  box.scrollIntoView({block:'nearest'});
   document.body.dataset.rocoDetail = petId;
 }
 
@@ -2742,14 +2743,10 @@ function bind() {
     $('lesson-card').hidden = true;
   });
   // 轻量小芽入口（P0-2）：点一下**有可见反应**——这一栏展开、焦点落到输入框。
+  // 这三个元素**必然存在**（页头入口 / 对话表单 / 教程跳过），按既有契约直接绑定；
+  // 只有「重开 / 重试」这类在精简页眉后可能不存在的按钮才走 null-safe 的 on()。
   $('coach-entry').addEventListener('click', () => { toggleXiaoya(); openCompanion(); });
-  on('xy-settings-toggle', 'click', () => {
-    const box = $('xy-settings');
-    if (!box) return;
-    box.open = !box.open;
-    const btn = $('xy-settings-toggle');
-    if (btn) btn.setAttribute('aria-expanded', box.open ? 'true' : 'false');
-  });
+  // 设置入口 = `#xy-settings` 的原生 summary（不再有独立按钮）。
   const xyFold = $('xy-fold-models');
   if (xyFold) xyFold.addEventListener('click', () => {
     const box = $('model-list');
@@ -2765,8 +2762,8 @@ function bind() {
     renderCompanion();
     syncBottomBars();
   });
-  on('onboard-skip', 'click', dismissOnboard);
-  on('say-form', 'submit', (event) => {
+  $('onboard-skip').addEventListener('click', dismissOnboard);
+  $('say-form').addEventListener('submit', (event) => {
     event.preventDefault();
     void say($('say-input').value);
     $('say-input').value = '';

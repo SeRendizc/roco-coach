@@ -1,6 +1,6 @@
 {
  "schema": "roco-ux-acceptance/v1",
- "generated_at": "2026-09-22T18:18:16.498Z",
+ "generated_at": "2026-09-23T00:04:58.601Z",
  "fault_injected": false,
  "counterproofs_all_hit": true,
  "viewports": [
@@ -77,7 +77,7 @@
    "id": "P0-2-entry",
    "name": "页头「✦ 小芽」真实点一下：这一栏打开、焦点落到输入框",
    "ok": true,
-   "actual": "点之前 open=false，点之后 open=true，焦点=say-input，入口尺寸=69×44"
+   "actual": "点之前 open=false，点之后 open=true，焦点=say-input，入口尺寸=80×44"
   },
   {
    "id": "P0-2-say",
@@ -89,7 +89,7 @@
    "id": "P0-2-same-screen",
    "name": "输入框与**最近一句回复**都在首屏（量 getBoundingClientRect）",
    "ok": true,
-   "actual": "输入 {\"top\":772,\"bottom\":812,\"left\":1099,\"right\":1337} / 回复 {\"top\":137,\"bottom\":266,\"left\":1099,\"right\":1413} / 视口 {\"width\":1440,\"height\":900}"
+   "actual": "输入 {\"top\":535,\"bottom\":575,\"left\":1099,\"right\":1337} / 回复 {\"top\":107,\"bottom\":236,\"left\":1099,\"right\":1413} / 视口 {\"width\":1440,\"height\":900}"
   },
   {
    "id": "P0-2-auto-hint",
@@ -143,7 +143,7 @@
    "id": "P0-2-390-same-screen",
    "name": "390×844 下输入框与最近一句回复仍在首屏",
    "ok": true,
-   "actual": "输入 {\"top\":522,\"bottom\":566,\"left\":23,\"right\":288} / 回复 {\"top\":288,\"bottom\":408,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 253px 动作坞 {\"top\":591,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
+   "actual": "输入 {\"top\":522,\"bottom\":566,\"left\":23,\"right\":288} / 回复 {\"top\":382,\"bottom\":502,\"left\":23,\"right\":367} / 视口 {\"width\":390,\"height\":844} / 底栏 253px 动作坞 {\"top\":591,\"bottom\":844,\"left\":0,\"right\":390} 动作坞上界 253px"
   },
   {
    "id": "P0-6-top",
@@ -384,20 +384,20 @@
      "right": 1426
     },
     "form": {
-     "top": 772,
-     "bottom": 812,
+     "top": 529,
+     "bottom": 575,
      "left": 1099,
      "right": 1413
     },
     "input": {
-     "top": 772,
-     "bottom": 812,
+     "top": 535,
+     "bottom": 575,
      "left": 1099,
      "right": 1337
     },
     "reply": {
-     "top": 137,
-     "bottom": 266,
+     "top": 107,
+     "bottom": 236,
      "left": 1099,
      "right": 1413
     },
@@ -417,13 +417,13 @@
      "height": 844
     },
     "card": {
-     "top": 254,
+     "top": 371,
      "bottom": 577,
      "left": 10,
      "right": 380
     },
     "form": {
-     "top": 522,
+     "top": 516,
      "bottom": 566,
      "left": 23,
      "right": 367
@@ -435,8 +435,8 @@
      "right": 288
     },
     "reply": {
-     "top": 288,
-     "bottom": 408,
+     "top": 382,
+     "bottom": 502,
      "left": 23,
      "right": 367
     },
@@ -473,7 +473,7 @@
    "standardPvp": "yes",
    "text": "标准 PVP 六宠阵容工坊（候选模式）候选规则（待实机核对）本局有 4 条规则未核实，界面上会逐条标出来（原文在开发者抽屉）匹配前对手未知 · 按版本环境倾向评价",
    "hidden": false,
-   "top": 45,
+   "top": 0,
    "vh": 844
   }
  },

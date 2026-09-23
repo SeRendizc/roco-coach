@@ -1,6 +1,17 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 洛克王国：世界（训练场）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/roco.css"></head><body>
 <div id="boot-fallback" class="boot-fallback" role="alert">页面脚本没有加载成功：本机服务可能还是**旧版本**（静态资源清单在进程启动时就定下了）。请在仓库根目录重启 <code>npm start</code>，然后刷新这一页；开发者抽屉里能看到服务进程的启动时间与资源清单规模。</div>
 
+<!-- 玩家层的三条口径（模式 / 候选规则 / 匹配前对手未知）：**首屏可见但不在页眉里**
+     （人类规格：页眉只留标题 + 小芽；验收 `D5-mode-badge` 要求首屏可见） -->
+<div class="first-screen-badges">
+ <div class="mode-line" id="mode-line" aria-live="polite">
+  <span class="chip" id="mode-label">模式：正在读取…</span>
+  <!-- 2026-09-22（人类实测 configured=false）：**连接状态要明显呈现**，别让玩家以为
+       小芽在自由对话。拿不到模型时写「未连接模型 · 只给规则事实」，并指向连接入口；
+       连上之后写「已连接模型」，不夸口它做了什么。 -->
+
+ </div>
+</div>
 <main>
 
 <!-- ── 页头：游戏标题 + **模式徽记** + 小芽入口 + 抽屉 ──────────────────────
@@ -27,9 +38,7 @@
  </div>
  <!-- 只留**一行**简短连接状态 + 设置入口（人类 2026-09-22：三张模型卡、规则快照、
       未核验长文、重开重试都不许占聊天弹窗的地方）。 -->
- <div class="xy-status">
-  <button class="xy-fold" id="xy-settings-toggle" aria-expanded="false">设置（模型 / 记忆 / 规则台账）</button>
- </div>
+ <!-- 设置入口就是下面那个 <details> 的 summary，**不要再放一个按钮**（会造成两个「设置」）。 -->
  <!-- 可滚动的最近对话 + **固定在底部的输入框** -->
  <aside class="companion" id="companion-card" aria-label="小芽对话">
   <div class="companion-body" id="companion-body">
@@ -47,63 +56,12 @@
   <div class="xy-models" id="model-list">
    <div class="model-cell"><div class="mc-name">正在读取模型状态…</div></div>
   </div>
-  <div class="mode-line" id="mode-line" aria-live="polite">
-  <span class="chip" id="mode-label">模式：正在读取…</span>
-  <!-- 2026-09-22（人类实测 configured=false）：**连接状态要明显呈现**，别让玩家以为
-       小芽在自由对话。拿不到模型时写「未连接模型 · 只给规则事实」，并指向连接入口；
-       连上之后写「已连接模型」，不夸口它做了什么。 -->
 
- </div>
-
-  <div class="xy-actions">
-   <button id="reset-battle" class="xy-fold">重开</button>
-   <button id="engine-retry" class="xy-fold" hidden>重试</button>
-  </div>
   <div class="section-title" id="memory-head"><h3>小芽记住的（都是你说过的）</h3>
    <span class="muted">说错了？直接再说一句就能改，或者点「忘掉」</span></div>
   <ul id="memory-list" class="memory"></ul>
   <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>
-  <!-- 开发者抽屉：默认收起。工程信息只在这里出现。 -->
-  <details class="dev" id="about-drawer">
-   <summary>关于这一页（规则快照 / 服务状态 / 验收钩子 / 工程说明）</summary>
-   <div class="dev-body">
-    <p><span id="engine-status" class="chip">规则服务：未启动</span></p>
-    <p>结算由 <strong>Python 规则引擎</strong>按手游子集完成，规则快照
-     <code id="about-ruleset">roco-world-s4-2026-09-10</code>。</p>
-    <p><strong>本仓库的引擎现在还没有「魔力 / 心」这个量</strong>（<code>legacy_sim_v1</code> 的胜负按
-     打光判定），所以战斗页那一栏只显示「未核验」，**不画计数器也不补一个 4**。
-     真实实现属于候选规则落地（并等 <code>MC-E08</code> 实机录制）——这一条写在
-     <code>docs/roco/USER-DIRECTIVES-2026-09-22.md</code> 的 D5 里。</p>
-    <p><strong>未核验的机制一律不猜</strong>（fail closed）：引擎会说「这里我们不知道」，
-     而不是补一个默认值。页面上带「未核验」字样的数字都是估值，不是实测值。</p>
-    <p>页面上的 <code>data-roco-*</code> 属性是<strong>验收钩子</strong>：自动化验收脚本读它们
-     判断「该出现的是否出现」。它们对玩家不可见，也不要依赖它们做产品逻辑。</p>
-    <p>本机小模型（Qwen3.5-4B + LoRA 适配器）只作为<strong>对照项</strong>出现在下面：
-     它只提议工具，参数照常过引擎校验，<strong>规则引擎仍是唯一真值来源</strong>，
-     默认不参与生成玩家看到的正文。</p>
-    <div class="section-title"><h3>本机小模型对照（它真的在参与吗）</h3></div>
-    <p><button id="shadow-run">问一次本机小模型</button>
-     <span class="muted">要拉起本地推理，几秒；只在这一局里对照一次。</span></p>
-    <div id="shadow-panel" hidden></div>
-    <!-- 威力来源的 fail-closed 凭据（第 64 轮）。
-         玩家层**不显示**没给的威力（也绝不补 0），但「引擎这一招到底给没给威力」
-         必须可核对：原始 `power_status` 逐条列在这里，默认收起。 -->
-    <div class="section-title"><h3>威力来源（fail-closed 凭据）</h3></div>
-    <p class="muted">玩家层不显示没给的威力，也绝不补 0；这一份是引擎给的原始来源状态。</p>
-    <pre id="power-status-raw" class="raw">点开这一栏后按当前局面与名单生成。</pre>
-    <!-- 模式注册表的**原文**（不是转述）：读自 data/roco/battle-modes.json -->
-    <div class="section-title"><h3>被模式隐藏的动作（工程口径）</h3></div>
-    <pre id="hidden-actions-raw" class="raw">还没有推进过回合。</pre>
-    <div class="section-title"><h3>模式注册表（原文，未核验项逐条列出）</h3></div>
-    <!-- 注册表口径的内部数字（引擎当前生效规模 vs 登记规模、未核实项数、prematch）：
-         它们是排查用的，不是玩家首屏该读的东西（2026-09-22 人类 P0：这类「验收台术语」
-         不许出现在玩家那一行）。玩家那一行只保留等价结论：「本局有 N 条规则未核实」。 -->
-    <p class="muted" id="mode-probe">模式注册表还没读到。</p>
-    <pre id="mode-raw" class="raw">正在读取模式注册表…</pre>
-    <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
-    <ul class="checklist" id="coverage"></ul>
-   </div>
-  </details>
+
  </details>
 </section>
 
@@ -343,6 +301,57 @@
      两种版式下 `#say-form` 与 `#say-reply` 都在首屏（判据量 `getBoundingClientRect`）。 -->
 
 
+
+<!-- 工程区（人类 2026-09-23：这些**移出聊天弹窗**，放页面底部；首屏与聊天都不该看到） -->
+<section class="dev-zone" id="dev-zone" aria-label="工程信息（默认收起）">
+ 
+
+  <div class="xy-actions">
+   <button id="reset-battle" class="xy-fold">重开</button>
+   <button id="engine-retry" class="xy-fold" hidden>重试</button>
+  </div>
+  <!-- 开发者抽屉：默认收起。工程信息只在这里出现。 -->
+  <details class="dev" id="about-drawer">
+   <summary>关于这一页（规则快照 / 服务状态 / 验收钩子 / 工程说明）</summary>
+   <div class="dev-body">
+    <p><span id="engine-status" class="chip">规则服务：未启动</span></p>
+    <p>结算由 <strong>Python 规则引擎</strong>按手游子集完成，规则快照
+     <code id="about-ruleset">roco-world-s4-2026-09-10</code>。</p>
+    <p><strong>本仓库的引擎现在还没有「魔力 / 心」这个量</strong>（<code>legacy_sim_v1</code> 的胜负按
+     打光判定），所以战斗页那一栏只显示「未核验」，**不画计数器也不补一个 4**。
+     真实实现属于候选规则落地（并等 <code>MC-E08</code> 实机录制）——这一条写在
+     <code>docs/roco/USER-DIRECTIVES-2026-09-22.md</code> 的 D5 里。</p>
+    <p><strong>未核验的机制一律不猜</strong>（fail closed）：引擎会说「这里我们不知道」，
+     而不是补一个默认值。页面上带「未核验」字样的数字都是估值，不是实测值。</p>
+    <p>页面上的 <code>data-roco-*</code> 属性是<strong>验收钩子</strong>：自动化验收脚本读它们
+     判断「该出现的是否出现」。它们对玩家不可见，也不要依赖它们做产品逻辑。</p>
+    <p>本机小模型（Qwen3.5-4B + LoRA 适配器）只作为<strong>对照项</strong>出现在下面：
+     它只提议工具，参数照常过引擎校验，<strong>规则引擎仍是唯一真值来源</strong>，
+     默认不参与生成玩家看到的正文。</p>
+    <div class="section-title"><h3>本机小模型对照（它真的在参与吗）</h3></div>
+    <p><button id="shadow-run">问一次本机小模型</button>
+     <span class="muted">要拉起本地推理，几秒；只在这一局里对照一次。</span></p>
+    <div id="shadow-panel" hidden></div>
+    <!-- 威力来源的 fail-closed 凭据（第 64 轮）。
+         玩家层**不显示**没给的威力（也绝不补 0），但「引擎这一招到底给没给威力」
+         必须可核对：原始 `power_status` 逐条列在这里，默认收起。 -->
+    <div class="section-title"><h3>威力来源（fail-closed 凭据）</h3></div>
+    <p class="muted">玩家层不显示没给的威力，也绝不补 0；这一份是引擎给的原始来源状态。</p>
+    <pre id="power-status-raw" class="raw">点开这一栏后按当前局面与名单生成。</pre>
+    <!-- 模式注册表的**原文**（不是转述）：读自 data/roco/battle-modes.json -->
+    <div class="section-title"><h3>被模式隐藏的动作（工程口径）</h3></div>
+    <pre id="hidden-actions-raw" class="raw">还没有推进过回合。</pre>
+    <div class="section-title"><h3>模式注册表（原文，未核验项逐条列出）</h3></div>
+    <!-- 注册表口径的内部数字（引擎当前生效规模 vs 登记规模、未核实项数、prematch）：
+         它们是排查用的，不是玩家首屏该读的东西（2026-09-22 人类 P0：这类「验收台术语」
+         不许出现在玩家那一行）。玩家那一行只保留等价结论：「本局有 N 条规则未核实」。 -->
+    <p class="muted" id="mode-probe">模式注册表还没读到。</p>
+    <pre id="mode-raw" class="raw">正在读取模式注册表…</pre>
+    <div class="section-title"><h3>这次演示覆盖了什么（验收清单）</h3></div>
+    <ul class="checklist" id="coverage"></ul>
+   </div>
+  </details>
+</section>
 </main>
 
 <!-- 军师：关键局面自动出现的**两行以内**小浮条；展开才看动作比较与长效后果 -->

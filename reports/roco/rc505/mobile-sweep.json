@@ -65,13 +65,13 @@
    "id": "mobile-roco.html-390",
    "judge": "390×844：训练场（六宠工作台 / 小芽 / 六宠开局） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
    "ok": true,
-   "actual": "scrollW 390 = clientW 390；声明的可点控件 4 个都 ≥44；整页其它小于 44 的有 2 个（只记账，见 known_limits）"
+   "actual": "scrollW 390 = clientW 390；声明的可点控件 5 个都 ≥44；整页其它小于 44 的有 8 个（只记账，见 known_limits）"
   },
   {
    "id": "mobile-roco.html-360",
    "judge": "360×640：训练场（六宠工作台 / 小芽 / 六宠开局） —— 不横向溢出 + 声明的可点控件 ≥44×44 + 主操作在首屏",
    "ok": true,
-   "actual": "scrollW 360 = clientW 360；声明的可点控件 4 个都 ≥44；整页其它小于 44 的有 2 个（只记账，见 known_limits）"
+   "actual": "scrollW 360 = clientW 360；声明的可点控件 5 个都 ≥44；整页其它小于 44 的有 8 个（只记账，见 known_limits）"
   },
   {
    "id": "mobile-box.html-390",
@@ -246,12 +246,12 @@
    "clientW": 390,
    "scrollW": 390,
    "clientH": 844,
-   "visibleText": 15975,
+   "visibleText": 16174,
    "required": [
     {
      "tag": "button",
-     "cls": "",
-     "w": 64,
+     "cls": "xiaoya-btn",
+     "w": 80,
      "h": 44
     },
     {
@@ -269,15 +269,21 @@
     {
      "tag": "summary",
      "cls": "",
+     "w": 342,
+     "h": 44
+    },
+    {
+     "tag": "summary",
+     "cls": "",
      "w": 320,
      "h": 44
     }
    ],
-   "small_all": 2,
-   "tappables_all": 11,
+   "small_all": 8,
+   "tappables_all": 15,
    "primary": {
     "label": "开一局（标准 PVP · 六宠）",
-    "top": 767
+    "top": 762
    },
    "minText": 200,
    "route": "six-pet",
@@ -301,12 +307,12 @@
    "clientW": 360,
    "scrollW": 360,
    "clientH": 640,
-   "visibleText": 15975,
+   "visibleText": 16174,
    "required": [
     {
      "tag": "button",
-     "cls": "",
-     "w": 64,
+     "cls": "xiaoya-btn",
+     "w": 80,
      "h": 44
     },
     {
@@ -324,15 +330,21 @@
     {
      "tag": "summary",
      "cls": "",
+     "w": 312,
+     "h": 44
+    },
+    {
+     "tag": "summary",
+     "cls": "",
      "w": 310,
      "h": 44
     }
    ],
-   "small_all": 2,
-   "tappables_all": 11,
+   "small_all": 8,
+   "tappables_all": 15,
    "primary": {
     "label": "开一局（标准 PVP · 六宠）",
-    "top": 563
+    "top": 558
    },
    "minText": 200,
    "route": "six-pet",
