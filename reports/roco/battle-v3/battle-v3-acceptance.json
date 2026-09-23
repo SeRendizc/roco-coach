@@ -1,7 +1,7 @@
 {
  "schema": "roco-battle-v3-acceptance/v1",
  "generated_by": "scripts/roco/browser-battle-v3-acceptance.mjs",
- "judged_at": "2026-09-23T03:34:26.366Z",
+ "judged_at": "2026-09-23T03:42:39.870Z",
  "page": "http://127.0.0.1:8899/roco.html",
  "base": "http://127.0.0.1:8899",
  "viewport": "1440x900",
@@ -62,7 +62,7 @@
    "step": "click-更换",
    "ok": true,
    "how": "click:[data-b3-tab=\"switch\"]",
-   "bodyTab": "skill"
+   "bodyTab": "switch"
   },
   {
    "step": "collect-switch",
@@ -72,7 +72,7 @@
    "step": "click-物品",
    "ok": true,
    "how": "click:[data-b3-tab=\"item\"]",
-   "bodyTab": "skill"
+   "bodyTab": "item"
   },
   {
    "step": "collect-item",
@@ -104,10 +104,10 @@
   }
  ],
  "totals": {
-  "criteria": 26,
-  "passed": 21,
-  "failed": 5,
-  "skipped": 2,
+  "criteria": 28,
+  "passed": 26,
+  "failed": 2,
+  "skipped": 0,
   "counterproofs": 31,
   "counterproofs_hit": 31
  },
@@ -168,22 +168,14 @@
   },
   "C4 更换态": {
    "total": 5,
-   "passed": 2,
-   "failed": [
-    "tab-hook-switch"
-   ],
-   "skipped": [
-    "switch-bottom-align",
-    "switch-not-overlap-charge"
-   ]
+   "passed": 5,
+   "failed": [],
+   "skipped": []
   },
   "C5 背包态": {
    "total": 3,
-   "passed": 1,
-   "failed": [
-    "tab-hook-item",
-    "item-no-definite-numbers"
-   ],
+   "passed": 3,
+   "failed": [],
    "skipped": []
   },
   "C6 右列战报": {
@@ -401,12 +393,10 @@
     "body[data-b3-tab]"
    ],
    "meta": false,
-   "ok": false,
+   "ok": true,
    "skipped": false,
-   "problems": [
-    "点「更换」按钮之后 body[data-b3-tab]=\"skill\"（要 \"switch\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
-   ],
-   "actual": "body[data-b3-tab]=\"skill\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"switch\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"skill\"}"
+   "problems": [],
+   "actual": "body[data-b3-tab]=\"switch\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"switch\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"switch\"}"
   },
   {
    "id": "switch-five-rows",
@@ -420,7 +410,7 @@
    "ok": true,
    "skipped": false,
    "problems": [],
-   "actual": "5 行；可换上的存活队友 5（活着 6/6）；行高 0/0/0/0/0"
+   "actual": "5 行；可换上的存活队友 5（活着 6/6）；行高 146.3/146.31/146.3/146.3/146.3"
   },
   {
    "id": "switch-row-content",
@@ -446,10 +436,10 @@
     "data-b3-switch-row"
    ],
    "meta": false,
-   "ok": null,
-   "skipped": true,
+   "ok": true,
+   "skipped": false,
    "problems": [],
-   "actual": "更换态底边 0 / 技能态最后一格底边 969（差 969px）"
+   "actual": "更换态底边 969 / 技能态最后一格底边 969（差 0px）"
   },
   {
    "id": "switch-not-overlap-charge",
@@ -460,10 +450,10 @@
     "data-b3-switch-row"
    ],
    "meta": false,
-   "ok": null,
-   "skipped": true,
+   "ok": true,
+   "skipped": false,
    "problems": [],
-   "actual": "行范围 y 0→0；聚能区 y 981→1025"
+   "actual": "行范围 y 205.5→969；聚能区 y 981→1025"
   },
   {
    "id": "tab-hook-item",
@@ -474,12 +464,10 @@
     "body[data-b3-tab]"
    ],
    "meta": false,
-   "ok": false,
+   "ok": true,
    "skipped": false,
-   "problems": [
-    "点「物品」按钮之后 body[data-b3-tab]=\"skill\"（要 \"item\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
-   ],
-   "actual": "body[data-b3-tab]=\"skill\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"item\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"skill\"}"
+   "problems": [],
+   "actual": "body[data-b3-tab]=\"item\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"item\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"item\"}"
   },
   {
    "id": "item-candidate-boundary",
@@ -493,7 +481,7 @@
    "ok": true,
    "skipped": false,
    "problems": [],
-   "actual": "2 件；命中「未登记」；原文 \"愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 /\""
+   "actual": "2 件；命中「未登记」；原文 \"愿力强化 未登记 候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）\""
   },
   {
    "id": "item-no-definite-numbers",
@@ -504,12 +492,10 @@
     "data-b3-item-cell"
    ],
    "meta": false,
-   "ok": false,
+   "ok": true,
    "skipped": false,
-   "problems": [
-    "确定性数字/时长 1 处：立即生效"
-   ],
-   "actual": "违规命中 1 处：立即生效"
+   "problems": [],
+   "actual": "违规命中 0 处（无）"
   },
   {
    "id": "log-width-equal",
@@ -1088,7 +1074,7 @@
        "cx": 0,
        "cy": 0
       },
-      "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
+      "text": "愿力强化 未登记 候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
      },
      {
       "index": 1,
@@ -1105,7 +1091,7 @@
       "text": "首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做"
      }
     ],
-    "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
+    "text": "愿力强化 未登记 候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
     "panelFound": true
    },
    "log": {
@@ -1427,7 +1413,7 @@
     "stage": "hook",
     "topbar": "hook"
    },
-   "bodyTab": "skill",
+   "bodyTab": "switch",
    "doc": {
     "scrollWidth": 1440,
     "clientWidth": 1440,
@@ -1609,14 +1595,14 @@
      {
       "index": 0,
       "rect": {
-       "left": 154,
-       "top": 205.5,
-       "right": 386,
-       "bottom": 390.38,
-       "w": 232,
-       "h": 184.88,
-       "cx": 270,
-       "cy": 297.94
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
       },
       "text": "⭐ 0 啃咬 🐛虫系 攻击 预期伤害 —",
       "costHook": true,
@@ -1635,14 +1621,14 @@
      {
       "index": 1,
       "rect": {
-       "left": 154,
-       "top": 398.38,
-       "right": 386,
-       "bottom": 583.25,
-       "w": 232,
-       "h": 184.88,
-       "cx": 270,
-       "cy": 490.81
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
       },
       "text": "⭐ 1 防御 ⚪普通系 防御 预期伤害 —",
       "costHook": true,
@@ -1661,14 +1647,14 @@
      {
       "index": 2,
       "rect": {
-       "left": 154,
-       "top": 591.25,
-       "right": 386,
-       "bottom": 776.13,
-       "w": 232,
-       "h": 184.88,
-       "cx": 270,
-       "cy": 683.69
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
       },
       "text": "⭐ 3 翅刃 🐛虫系 攻击 预期伤害 —",
       "costHook": true,
@@ -1687,14 +1673,14 @@
      {
       "index": 3,
       "rect": {
-       "left": 154,
-       "top": 784.13,
-       "right": 386,
-       "bottom": 969,
-       "w": 232,
-       "h": 184.88,
-       "cx": 270,
-       "cy": 876.56
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
       },
       "text": "⭐ 1 风隐 🪶翼系 状态 预期伤害 —",
       "costHook": true,
@@ -1713,7 +1699,7 @@
     ],
     "clickableCount": 4,
     "shortCount": 0,
-    "lastBottom": 969
+    "lastBottom": 0
    },
    "switchRows": {
     "count": 5,
@@ -1721,14 +1707,14 @@
      {
       "index": 0,
       "rect": {
-       "left": 0,
-       "top": 0,
-       "right": 0,
-       "bottom": 0,
-       "w": 0,
-       "h": 0,
-       "cx": 0,
-       "cy": 0
+       "left": 154,
+       "top": 205.5,
+       "right": 386,
+       "bottom": 351.8,
+       "w": 232,
+       "h": 146.3,
+       "cx": 270,
+       "cy": 278.65
       },
       "text": "⭐ 0 音速犬 🔥火系 366/366",
       "elementName": "火系",
@@ -1742,14 +1728,14 @@
      {
       "index": 1,
       "rect": {
-       "left": 0,
-       "top": 0,
-       "right": 0,
-       "bottom": 0,
-       "w": 0,
-       "h": 0,
-       "cx": 0,
-       "cy": 0
+       "left": 154,
+       "top": 359.8,
+       "right": 386,
+       "bottom": 506.11,
+       "w": 232,
+       "h": 146.31,
+       "cx": 270,
+       "cy": 432.95
       },
       "text": "⭐ 1 仪式巨像 ⛰️地系 401/401",
       "elementName": "地系",
@@ -1763,14 +1749,14 @@
      {
       "index": 2,
       "rect": {
-       "left": 0,
-       "top": 0,
-       "right": 0,
-       "bottom": 0,
-       "w": 0,
-       "h": 0,
-       "cx": 0,
-       "cy": 0
+       "left": 154,
+       "top": 514.11,
+       "right": 386,
+       "bottom": 660.41,
+       "w": 232,
+       "h": 146.3,
+       "cx": 270,
+       "cy": 587.26
       },
       "text": "⭐ 2 雪影娃娃 ❄️冰系 442/442",
       "elementName": "冰系",
@@ -1784,14 +1770,14 @@
      {
       "index": 3,
       "rect": {
-       "left": 0,
-       "top": 0,
-       "right": 0,
-       "bottom": 0,
-       "w": 0,
-       "h": 0,
-       "cx": 0,
-       "cy": 0
+       "left": 154,
+       "top": 668.41,
+       "right": 386,
+       "bottom": 814.7,
+       "w": 232,
+       "h": 146.3,
+       "cx": 270,
+       "cy": 741.55
       },
       "text": "⭐ 1 皇家狮鹫 🪶翼系 403/403",
       "elementName": "翼系",
@@ -1805,14 +1791,14 @@
      {
       "index": 4,
       "rect": {
-       "left": 0,
-       "top": 0,
-       "right": 0,
-       "bottom": 0,
-       "w": 0,
-       "h": 0,
-       "cx": 0,
-       "cy": 0
+       "left": 154,
+       "top": 822.7,
+       "right": 386,
+       "bottom": 969,
+       "w": 232,
+       "h": 146.3,
+       "cx": 270,
+       "cy": 895.85
       },
       "text": "⭐ 3 化蝶 🐛虫系 311/311",
       "elementName": "虫系",
@@ -1824,7 +1810,7 @@
       "name": "化蝶"
      }
     ],
-    "lastBottom": 0,
+    "lastBottom": 969,
     "skillTabLastBottom": 969
    },
    "item": {
@@ -1842,7 +1828,7 @@
        "cx": 0,
        "cy": 0
       },
-      "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
+      "text": "愿力强化 未登记 候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
      },
      {
       "index": 1,
@@ -1859,7 +1845,7 @@
       "text": "首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做"
      }
     ],
-    "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
+    "text": "愿力强化 未登记 候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
     "panelFound": true
    },
    "log": {
@@ -1909,22 +1895,22 @@
      "rect": {
       "left": 154,
       "top": 981,
-      "right": 278.7,
+      "right": 278.75,
       "bottom": 1025,
-      "w": 124.7,
+      "w": 124.75,
       "h": 44,
-      "cx": 216.35,
+      "cx": 216.38,
       "cy": 1003
      }
     },
     "chargeRect": {
      "left": 154,
      "top": 981,
-     "right": 278.7,
+     "right": 278.75,
      "bottom": 1025,
-     "w": 124.7,
+     "w": 124.75,
      "h": 44,
-     "cx": 216.35,
+     "cx": 216.38,
      "cy": 1003
     },
     "tabs": {
@@ -1934,9 +1920,9 @@
        "label": "技能",
        "value": "skill",
        "on": true,
-       "bg": "rgb(30, 59, 85)",
-       "borderColor": "rgb(91, 134, 173)",
-       "color": "rgb(255, 255, 255)",
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
        "fontWeight": "650",
        "rect": {
         "left": 356.03,
@@ -1955,9 +1941,9 @@
        "label": "更换",
        "value": "switch",
        "on": false,
-       "bg": "rgb(21, 34, 48)",
-       "borderColor": "rgb(47, 70, 92)",
-       "color": "rgb(201, 214, 226)",
+       "bg": "rgb(30, 59, 85)",
+       "borderColor": "rgb(91, 134, 173)",
+       "color": "rgb(255, 255, 255)",
        "fontWeight": "650",
        "rect": {
         "left": 463.03,
@@ -2015,7 +2001,7 @@
        "hidden": false
       }
      ],
-     "bodyTab": "skill",
+     "bodyTab": "switch",
      "labels": [
       "技能",
       "更换",
@@ -2086,12 +2072,12 @@
    },
    "tab": {
     "skill": "skill",
-    "switch": "skill",
+    "switch": "switch",
     "switchClick": {
      "how": "click:[data-b3-tab=\"switch\"]",
      "w": 98,
      "h": 44,
-     "bodyTabAfter": "skill"
+     "bodyTabAfter": "switch"
     }
    },
    "root": {
@@ -2188,7 +2174,7 @@
     "stage": "hook",
     "topbar": "hook"
    },
-   "bodyTab": "skill",
+   "bodyTab": "item",
    "doc": {
     "scrollWidth": 1440,
     "clientWidth": 1440,
@@ -2370,14 +2356,14 @@
      {
       "index": 0,
       "rect": {
-       "left": 154,
-       "top": 205.5,
-       "right": 386,
-       "bottom": 390.38,
-       "w": 232,
-       "h": 184.88,
-       "cx": 270,
-       "cy": 297.94
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
       },
       "text": "⭐ 0 啃咬 🐛虫系 攻击 预期伤害 —",
       "costHook": true,
@@ -2396,14 +2382,14 @@
      {
       "index": 1,
       "rect": {
-       "left": 154,
-       "top": 398.38,
-       "right": 386,
-       "bottom": 583.25,
-       "w": 232,
-       "h": 184.88,
-       "cx": 270,
-       "cy": 490.81
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
       },
       "text": "⭐ 1 防御 ⚪普通系 防御 预期伤害 —",
       "costHook": true,
@@ -2422,14 +2408,14 @@
      {
       "index": 2,
       "rect": {
-       "left": 154,
-       "top": 591.25,
-       "right": 386,
-       "bottom": 776.13,
-       "w": 232,
-       "h": 184.88,
-       "cx": 270,
-       "cy": 683.69
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
       },
       "text": "⭐ 3 翅刃 🐛虫系 攻击 预期伤害 —",
       "costHook": true,
@@ -2448,14 +2434,14 @@
      {
       "index": 3,
       "rect": {
-       "left": 154,
-       "top": 784.13,
-       "right": 386,
-       "bottom": 969,
-       "w": 232,
-       "h": 184.88,
-       "cx": 270,
-       "cy": 876.56
+       "left": 0,
+       "top": 0,
+       "right": 0,
+       "bottom": 0,
+       "w": 0,
+       "h": 0,
+       "cx": 0,
+       "cy": 0
       },
       "text": "⭐ 1 风隐 🪶翼系 状态 预期伤害 —",
       "costHook": true,
@@ -2474,7 +2460,7 @@
     ],
     "clickableCount": 4,
     "shortCount": 0,
-    "lastBottom": 969
+    "lastBottom": 0
    },
    "switchRows": {
     "count": 5,
@@ -2594,33 +2580,33 @@
      {
       "index": 0,
       "rect": {
-       "left": 0,
-       "top": 0,
-       "right": 0,
-       "bottom": 0,
-       "w": 0,
-       "h": 0,
-       "cx": 0,
-       "cy": 0
+       "left": 154,
+       "top": 205.5,
+       "right": 386,
+       "bottom": 583.25,
+       "w": 232,
+       "h": 377.75,
+       "cx": 270,
+       "cy": 394.38
       },
-      "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
+      "text": "愿力强化 未登记 候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记"
      },
      {
       "index": 1,
       "rect": {
-       "left": 0,
-       "top": 0,
-       "right": 0,
-       "bottom": 0,
-       "w": 0,
-       "h": 0,
-       "cx": 0,
-       "cy": 0
+       "left": 154,
+       "top": 591.25,
+       "right": 386,
+       "bottom": 969,
+       "w": 232,
+       "h": 377.75,
+       "cx": 270,
+       "cy": 780.13
       },
       "text": "首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做"
      }
     ],
-    "text": "愿力强化 未登记 对任意精灵使用，立即生效，不占行动。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
+    "text": "愿力强化 未登记 候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。 把当前精灵的第一个技能换成「愿力冲击」。 再用一次可解除（解除后进冷却，不减次数）。 次数 / 冷却 / 是否占行动均未登记 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做",
     "panelFound": true
    },
    "log": {
@@ -2695,9 +2681,9 @@
        "label": "技能",
        "value": "skill",
        "on": true,
-       "bg": "rgb(30, 59, 85)",
-       "borderColor": "rgb(91, 134, 173)",
-       "color": "rgb(255, 255, 255)",
+       "bg": "rgb(21, 34, 48)",
+       "borderColor": "rgb(47, 70, 92)",
+       "color": "rgb(201, 214, 226)",
        "fontWeight": "650",
        "rect": {
         "left": 356.03,
@@ -2737,9 +2723,9 @@
        "label": "物品",
        "value": "item",
        "on": false,
-       "bg": "rgb(21, 34, 48)",
-       "borderColor": "rgb(47, 70, 92)",
-       "color": "rgb(201, 214, 226)",
+       "bg": "rgb(30, 59, 85)",
+       "borderColor": "rgb(91, 134, 173)",
+       "color": "rgb(255, 255, 255)",
        "fontWeight": "650",
        "rect": {
         "left": 570.03,
@@ -2776,7 +2762,7 @@
        "hidden": false
       }
      ],
-     "bodyTab": "skill",
+     "bodyTab": "item",
      "labels": [
       "技能",
       "更换",
@@ -2847,12 +2833,12 @@
    },
    "tab": {
     "skill": "skill",
-    "item": "skill",
+    "item": "item",
     "itemClick": {
      "how": "click:[data-b3-tab=\"item\"]",
      "w": 98,
      "h": 44,
-     "bodyTabAfter": "skill"
+     "bodyTabAfter": "item"
     }
    },
    "root": {
@@ -3142,7 +3128,7 @@
   "battle-v3-switch-1440x900.png",
   "battle-v3-item-1440x900.png"
  ],
- "screenshots_note": "三张截图内容相同：切屏没生效（body[data-b3-tab] 在更换态=\"skill\"、背包态=\"skill\"）——技能/更换/物品三态拍到的都是技能态",
+ "screenshots_note": null,
  "console_errors": [],
  "build_list": [
   {
@@ -3152,33 +3138,6 @@
    "actual": "卡①②中心 x=428.76 / 500.27；轴心=464.51；页面中线=720；推导=hook",
    "problems": [
     "两卡轴心 464.51 ≠ 页面中线 720（差 255.49px > 2px）"
-   ]
-  },
-  {
-   "id": "tab-hook-switch",
-   "criterion": "C4 更换态",
-   "rule": "点「更换」之后 body[data-b3-tab] 必须是 switch",
-   "actual": "body[data-b3-tab]=\"skill\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"switch\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"skill\"}",
-   "problems": [
-    "点「更换」按钮之后 body[data-b3-tab]=\"skill\"（要 \"switch\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
-   ]
-  },
-  {
-   "id": "tab-hook-item",
-   "criterion": "C5 背包态",
-   "rule": "点「物品」之后 body[data-b3-tab] 必须是 item",
-   "actual": "body[data-b3-tab]=\"skill\"；按钮点击 {\"how\":\"click:[data-b3-tab=\\\"item\\\"]\",\"w\":98,\"h\":44,\"bodyTabAfter\":\"skill\"}",
-   "problems": [
-    "点「物品」按钮之后 body[data-b3-tab]=\"skill\"（要 \"item\"）——按钮与状态之间没接上：CSS 只认 body[data-b3-tab]，得有人把点击写进去"
-   ]
-  },
-  {
-   "id": "item-no-definite-numbers",
-   "criterion": "C5 背包态",
-   "rule": "背包态不得出现确定性数字（每场 n 次 / 冷却 n 回合 / +150% / 立即生效）",
-   "actual": "违规命中 1 处：立即生效",
-   "problems": [
-    "确定性数字/时长 1 处：立即生效"
    ]
   },
   {

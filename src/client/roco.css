@@ -808,3 +808,16 @@ summary{min-height:44px;display:flex;align-items:center}
    JS 填完一行就移除该行的 data-b3-pending。 */
 [data-b3-pending="yes"]{display:none}
 .b3-sink{display:none}
+
+/* v3h 片段接入（2026-09-23）：根容器必须**占满** #battle-panel —— 旧的 flex 布局会把它缩成半宽，
+   实测 653px、轴心 464 ≠ 720（验收 `wrap-spans-page` / `geom-stage-axis` 就是这么红的）。 */
+#battle-panel{display:block}
+#battle-panel>.b3-wrap{width:100%;max-width:none;flex:1 1 auto}
+
+/* v3h 片段自带右列战报，所以战斗面板要**横跨父级网格的整行**（实测它只占一列 = 653px）。 */
+#battle-panel{grid-column:1 / -1}
+
+/* v3h：战斗面板与根容器必须占满 main 的内容宽度（实测战斗中被限到 653px，轴心 464≠720）。
+   这两条是**几何判据**（`wrap-spans-page` / `geom-stage-axis`）的前提，别删。 */
+#battle-panel{width:100% !important;max-width:none !important;float:none !important;box-sizing:border-box}
+#battle-panel>.b3-wrap,#battle-panel .b3-wrap{width:100% !important;max-width:none !important}

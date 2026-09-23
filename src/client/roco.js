@@ -1758,6 +1758,13 @@ function renderB3Panels(view) {
   const tab = state.actTab ?? 'skill';
   document.body.dataset.b3Tab = tab;
   document.body.dataset.b3Charge = tab === 'switch' ? 'mana' : 'energy';
+  // v3h 底栏那四个按钮**必须真的切屏**（验收 `tab-hook-switch`/`tab-hook-item` 就是这么红的：
+  // CSS 只认 `body.dataset.b3Tab`，而按钮此前没有绑定）。绑定只做一次。
+  for (const btn of root.querySelectorAll('[data-b3-tab]')) {
+    if (btn.dataset.b3Bound === 'yes') continue;
+    btn.dataset.b3Bound = 'yes';
+    btn.addEventListener('click', () => setActTab(btn.dataset.b3Tab));
+  }
 }
 
 function renderB3Topbar(view) {
