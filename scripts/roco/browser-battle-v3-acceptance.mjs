@@ -919,7 +919,10 @@ const CHECKS = [
       if (EMPTY(r.rect)) return [`根容器尺寸是 0（${fmt(r.rect?.w)}×${fmt(r.rect?.h)}）：没渲染出来`];
       const bad = [];
       const viewport = f.doc?.clientWidth ?? 0;
-      const min = viewport - 40;
+      // 人类 2026-09-23：「左右留空不要完全顶满，上下也留一点点」→ 允许两侧各 24px 留白
+      // 人类 2026-09-23：不要完全顶满 → 只要**居中**且宽度 ≥ 页面内容宽（1200）即算「占满内容区」；
+      // 视口很宽时页面本就有 max-width，不该要求贴到视口边。
+      const min = Math.min(viewport - 56, 1200);
       if (r.rect.w < min) bad.push(`根容器宽 ${fx(r.rect.w)}px < ${min}px（视口 ${viewport} − 2×16px 留白）——被别的块挤扁了`);
       if (Math.abs(r.rect.cx - (f.doc?.centerX ?? 0)) > 2) {
         bad.push(`根容器中心 x=${fx(r.rect.cx)} ≠ 页面中线 ${fx(f.doc?.centerX)}（差 ${fx(Math.abs(r.rect.cx - (f.doc?.centerX ?? 0)))}px）`);
