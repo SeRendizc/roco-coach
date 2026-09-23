@@ -97,7 +97,7 @@ const STYLE = `
 .tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;
  height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}   /* 行吃满 → 两框纵向铺满 */
 .tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0;height:100%;align-self:stretch}
-.tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto;grid-auto-rows:44px;gap:4px}
+.tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto;grid-auto-rows:44px;gap:4px;align-content:stretch}
 .tw-cand-list>*{height:44px;min-height:44px;max-height:44px;overflow:hidden}   /* 人类：两种档位行高**一致**、不许变高 */   /* 一屏下也要有可用高度（实测曾被挤到 60px） */
 .tw-team{grid-column:1;grid-row:1;width:100%}
 .tw-eval{grid-column:2;grid-row:1}
@@ -120,7 +120,8 @@ const STYLE = `
 /* 六个槽位**等高**：grid-auto-rows:1fr 让同一行的槽位一样高，空槽与已选槽也一样高。
    2026-09-22 人类 P0 实测：选中之后往卡里塞了整段机制原文，卡片当场长高，
    空槽/已选槽高度参差、网格跳动 —— 选前选后必须是同一张版式。 */
-.tw-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;grid-auto-rows:1fr}
+.tw-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;grid-auto-rows:1fr;
+ flex:1 1 auto;min-height:0}   /* 人类：纵向拉伸铺平整个板块 */
 .tw-slot{height:232px;min-height:232px;max-height:232px;border:1px dashed #36495e;border-radius:10px;padding:8px 9px;
  display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
 .tw-slot.on{border-style:solid;border-color:#8dd49c;background:#17242f}
@@ -685,15 +686,9 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   }
 
   function renderPool() {
-    // 人类 2026-09-23：「所有拥有的 x2 都给删了，重复的精灵不要」——
-    // 召回的实例可能同一 species 有多只个体 → 列表**按 species 去重**（保留第一只）。
-    const seen = new Set();
-    const rows = state.pool.rows.filter((r) => {
-      const key = String(r?.species_id ?? r?.name ?? '');
-      if (!key || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    // 人类 2026-09-23（后一条推翻前一条）：「不要显示去重啥的，不是显示 10 只吗」——
+    // 列表**按服务端的实例行**照原样显示（不去重），也不再写「去重后」。
+    const rows = state.pool.rows;
     if (!rows.length) {
       // 空态要**说出下一步**，不是留一片空白。
       $('tw-cand-list').innerHTML = `<p class="tw-note" data-tw-empty="yes">`
@@ -756,8 +751,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       : '';   // 人类：这一行删掉
     const filters = [state.pool.type, state.pool.role].filter(Boolean).join(' / ');
     $('tw-cand-result').textContent = state.pool.total
-      // 人类 2026-09-23：列表已按 species 去重，结果行要**如实**说明（总数是服务端的实例数）
-      ? `${state.pool.total} 条${filters ? `（${filters}）` : ''} · 去重后本页 ${rows.length}`
+      ? `${state.pool.total} 条${filters ? `（${filters}）` : ''} · 本页 ${rows.length}`
       : '没有符合条件的精灵：换个属性/定位，或点「清除筛选」。';
     if ($('tw-cand-note')) $('tw-cand-note').textContent = state.pool.kind === 'mine'
       ? '这些是你**拥有**的个体：可以直接进正式队伍并开局。'
@@ -772,17 +766,43 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const seq = (state.poolSeq += 1);
     const query = new URLSearchParams();
     query.set('kind', state.pool.kind === 'mine' ? 'mine' : 'catalog');
-    query.set('limit', String(state.pool.pageSize));
-    query.set('offset', String(state.pool.offset));
+    // 人类 2026-09-23：「去重啊，但是要显示另外的 5 只」——
+    // 同一物种可能有多只个体（铠甲虫×2…）。**分页拉全量 → 按 species 去重 → 本地分页**，
+    // 每页仍是 pageSize 条、且全是不同物种（不会因为去重只剩 5 条）。
+    // 注意：服务端 `limit` 上限是 **60**，所以要循环拉（我的精灵 80 → 2 次；全图鉴 622 → 11 次）。
     if (state.pool.q) query.set('q', state.pool.q);
     if (state.pool.type) query.set('type', state.pool.type);
     if (state.pool.role) query.set('role', state.pool.role);
     try {
-      const data = await getJson(`${apiBase}/box?${query.toString()}`);
-      if (seq !== state.poolSeq) return;
-      if (!data.ok) throw new Error(data.error || '图鉴读取失败');
-      state.pool.total = data.player.total;
-      state.pool.rows = data.player.cards;
+      const PAGE = 60;
+      const all = [];
+      let total = 0;
+      for (let round = 0; round < 12; round += 1) {
+        const q2 = new URLSearchParams(query);
+        q2.set('limit', String(PAGE));
+        q2.set('offset', String(round * PAGE));
+        const page = await getJson(`${apiBase}/box?${q2.toString()}`);
+        if (seq !== state.poolSeq) return;
+        if (!page.ok) throw new Error(page.error || '图鉴读取失败');
+        total = Number(page.player.total) || 0;
+        const cards = Array.isArray(page.player.cards) ? page.player.cards : [];
+        all.push(...cards);
+        if (cards.length < PAGE || all.length >= total) break;
+      }
+      const data = {player: {total, cards: all}};
+      if (!all.length && total > 0) throw new Error('图鉴读取失败：分页没拿到任何条目');
+      const seen = new Set();
+      const unique = all.filter((r) => {
+        const key = String(r?.species_id ?? r?.name ?? '');
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+      state.pool.instanceTotal = data.player.total;   // 实例数（页头「80 只」用）
+      state.pool.total = unique.length;               // 去重后物种数（分页用）
+      const start = Math.max(0, Math.min(state.pool.offset, Math.max(0, unique.length - 1)));
+      state.pool.offset = start;
+      state.pool.rows = unique.slice(start, start + state.pool.pageSize);
       renderPool();
     } catch (error) {
       $('tw-cand-list').innerHTML = `<p class="tw-note">候选池读取失败：${escapeHtml(error.message)}</p>`;
