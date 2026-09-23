@@ -974,14 +974,14 @@ html{overflow-y:scroll}
 
 /* 人类 2026-09-23：「能上下滑说明上面元素有问题，高度剪一点点」——
    首页锁死一屏：body 不滚、主区 = 视口 − 页眉 − 开一局栏，工坊网格撑满、列表内部滚。 */
-body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))){height:100vh;overflow:hidden}
-body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))) main{
+body:has(#team-workshop:not([hidden])){height:100vh;overflow:hidden}
+body:has(#team-workshop:not([hidden])) main{
  height:calc(100vh - 150px);min-height:0;display:flex;flex-direction:column;
  padding-top:6px;padding-bottom:0}
-body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))) main>#team-workshop{
+body:has(#team-workshop:not([hidden])) main>#team-workshop{
  flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
-body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))) header.topbar{padding-top:6px;padding-bottom:6px}
-body[data-roco-view="ready"]:not(:has(#battle-panel:not([hidden]))) .onboard-bar{margin:0 0 6px}
+body:has(#team-workshop:not([hidden])) header.topbar{padding-top:6px;padding-bottom:6px}
+body:has(#team-workshop:not([hidden])) .onboard-bar{margin:0 0 6px}
 
 /* 人类 2026-09-23：「展开连接状态下面为啥压着个东西？删了吧」——
    那是**空的对话体**（`#companion-body` 我给了 min-height:96px，没消息时是一块空壳，
