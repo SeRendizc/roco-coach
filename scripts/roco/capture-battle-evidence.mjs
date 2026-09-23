@@ -156,7 +156,15 @@ const battleGuard = (stage) => async () => {
 const run = async () => {
   await send('Page.enable');
   await send('Runtime.enable');
-  const shots = [];
+  
+/** 按**坐标**真鼠标点（片段里的格子没有 id/selector 稳定性，直接给中心点更可靠）。 */
+const mouseAt = async (x, y) => {
+  for (const type of ['mousePressed', 'mouseReleased']) {
+    await send('Input.dispatchMouseEvent', {type, x, y, button: 'left', clickCount: 1});
+  }
+};
+
+const shots = [];
   for (const [width, height, tag] of [[1440, 900, '1440x900'], [390, 844, '390x844']]) {
     await setViewport(width, height);
     await send('Page.navigate', {url: `${BASE}roco.html`});
@@ -231,6 +239,29 @@ const run = async () => {
       }
       return {note: `${turnBefore} → ${f.turn} 回合，行动 ${f.actions}`};
     }));
+
+    // 2026-09-23（人类实测：战斗完全推进不了）：**真鼠标点技能格**必须推进回合。
+    // 这是「片段接上点击绑定」的常驻判据 —— 旧行动坞收起后，点击路径只有这一条。
+    {
+      const beforeClick = await js(`window.rocoDemo?.state?.view?.turn ?? null`);
+      const slot = await js(`(()=>{const s=[...document.querySelectorAll('[data-b3-skill-slot]')]
+        .find((el)=>el.dataset.b3Action!==undefined && el.dataset.b3SlotLegal==='yes');
+        if(!s)return null;const r=s.getBoundingClientRect();
+        return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2),
+          w:Math.round(r.width),h:Math.round(r.height),action:s.dataset.b3Action};})()`);
+      if (!slot) {
+        failures.push(`${tag}：没有任何**可点**的技能格（引擎给了合法动作却点不到 → 玩家推不动战斗）`);
+      } else {
+        await mouseAt(slot.x, slot.y);
+        await sleep(1600);
+        const afterClick = await js(`window.rocoDemo?.state?.view?.turn ?? null`);
+        if (!(Number(afterClick) > Number(beforeClick))) {
+          failures.push(`${tag}：真鼠标点了技能格（第 ${beforeClick} 回合）回合没推进 → 仍是 ${afterClick}`);
+        } else {
+          console.log(`  · ${tag}：真鼠标点技能格 → 回合 ${beforeClick} → ${afterClick}（点击路径可用）`);
+        }
+      }
+    }
 
     // 小芽打开：必须仍在战斗中
     await click('#coach-entry');

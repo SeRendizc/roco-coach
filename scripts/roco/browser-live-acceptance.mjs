@@ -284,6 +284,24 @@ async function main() {
       startDisabled:document.getElementById('start-standard-pvp')?.disabled??null,
       startTeam:document.getElementById('start-standard-pvp')?.dataset.rocoStandardTeam??null};})()`);
 
+  /**
+   * 真鼠标点「开一局（标准 PVP · 六宠）」并等到战斗区真的出现。
+   *
+   * 为什么带重试：工坊是异步挂载的，实测有过一次「按钮那时已经可点，但这一击落空」——
+   * 布局抖动会让坐标读完之后按钮挪位。重试的只是「点准」，判据依旧要求**战斗区真的出现**，
+   * 所以这不是放水（真机验收本来就要对布局抖动有免疫力）。
+   */
+  const clickStartStandardPvp = async () => {
+    let rect = null;
+    let ok = false;
+    for (let attempt = 0; attempt < 3 && !ok; attempt += 1) {
+      rect = await mouseClick('#start-standard-pvp');
+      ok = await waitFor(`document.body.dataset.rocoView==='ready'
+        && !document.getElementById('battle-panel').hidden`, 60, 250);
+    }
+    return {rect, ok};
+  };
+
   try {
     await cdp.send('Page.bringToFront');
     await setViewport(1440, 900);
@@ -626,10 +644,17 @@ async function main() {
     // ── ③ 真鼠标开局 → 打到结算 ────────────────────────────────────────────
     const startReady = await waitFor(`document.getElementById('start-standard-pvp')
       && document.getElementById('start-standard-pvp').disabled===false`, 60, 250);
-    const startRect = await mouseClick('#start-standard-pvp');
-    const started = await waitFor(`document.body.dataset.rocoView==='ready'
-      && !document.getElementById('battle-panel').hidden`, 100, 250);
+    // 真鼠标点「开一局」；工坊是异步挂载的，布局抖动偶尔会让这一击落空（实测过一次）。
+    // 重试的只是「点准」这一下 —— 判据依旧要求**战斗区真的出现**，所以不是放水。
+    const startClick = await clickStartStandardPvp();
+    const startRect = startClick.rect;
+    const started = startClick.ok;
     await sleep(600);
+    const startDiag = await js(`(()=>({plan:(document.getElementById('plan-status')||{}).textContent||'',
+      engine:(document.getElementById('engine-status')||{}).textContent||'',
+      view:document.body.dataset.rocoView??null,
+      btn:(()=>{const b=document.getElementById('start-standard-pvp');
+        return b?{disabled:b.disabled,text:(b.textContent||'').trim(),team:b.dataset.rocoStandardTeam??null}:null;})()}))()`);
     const battle = await js(`(()=>{const v=window.rocoDemo.state.view;const b=document.body.dataset;
       const dots=(id)=>{const el=document.getElementById(id);return el?(el.textContent||'').replace(/\\s+/g,'').length:null;};
       const d=window.rocoDemo;
@@ -645,6 +670,7 @@ async function main() {
         turn:v?v.turn:null};})()`);
     steps.push({at: 'battle-start', battle});
     const planStatus = await js(`document.getElementById('plan-status')?.textContent ?? null`);
+    steps.push({at: 'battle-start-diag', startDiag, planStatus});
     const startProblems = (f, ok, ready) => {
       const bad = [];
       if (!ready) bad.push('开局按钮一直不可用（六只没被页面认下来）');
@@ -673,10 +699,12 @@ async function main() {
     };
     check('live-start', '真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的星）',
       startProblems(battle, started, startReady).length === 0,
-      startProblems(battle, started, startReady).join(' | ')
-      || `页眉模式=${battle.modeText}（注册表 ${battle.modeId}）⭐=${battle.energy}/${battle.energyMax} `
+      (startProblems(battle, started, startReady).join(' | ') + ' ｜ ')
+      + `页眉模式=${battle.modeText}（注册表 ${battle.modeId}）⭐=${battle.energy}/${battle.energyMax} `
         + `顶栏存活点 ${battle.dotsSelf}/${battle.dotsFoe} 引擎动作账=${battle.groups} 页面渲染=${battle.rendered} `
-        + `技能卡=${battle.skillCards} 开局按钮 ${startRect.w}×${startRect.h}；状态行「${String(planStatus ?? '').slice(0, 120)}」`);
+        + `技能卡=${battle.skillCards} 开局按钮 ${startRect?.w}×${startRect?.h}；`
+        + `状态行「${String(startDiag.plan ?? '').slice(0, 120)}」${startDiag.engine} view=${startDiag.view} `
+        + `按钮 ${JSON.stringify(startDiag.btn)}`);
     counter('live-start', '开局后模式被换成练习局、或动作表里混进道具必须被同一条判据抓住',
       startProblems({...battle, modeId: 'demo-training-3v3', modeText: '训练场 · AI模拟',
         rendered: 'skill,item', groups: 'skill:2,item:1'}, true, true),
@@ -1249,9 +1277,7 @@ async function main() {
     // 老师层的「学过就不再教 / 没学会就再教」在单测里有；缺的是**真机跨局**证据。
     const m1 = await js(`(()=>{const b=document.body.dataset;
       return {goal:b.rocoTeacherGoal??'',point:b.rocoTeacherPoint??'',repeat:b.rocoTeacherRepeat??''};})()`);
-    await mouseClick('#start-standard-pvp');
-    await waitFor(`document.body.dataset.rocoView==='ready'
-      && !document.getElementById('battle-panel').hidden`, 100, 250);
+    await clickStartStandardPvp();
     await sleep(600);
     // 换局必须把 v3h 顶栏**归零**（新一局的回合 + 双方满员存活点）：这是新版式下
     // 「换了一局」这件事在战斗页上的等价证据（旧版式读的是开局前的阵容展示块）。
@@ -1557,9 +1583,8 @@ async function main() {
     await waitFor(`(()=>{const d=window.rocoDemo;
       return (d?.state?.teamWorkshop?.team?.length||0)===6;})()`, 60, 250);
     await overflowAt('m-six-picked');
-    await mouseClick('#start-standard-pvp');
-    const mStarted = await waitFor(`document.body.dataset.rocoView==='ready'
-      && !document.getElementById('battle-panel').hidden`, 100, 250);
+    const mStart = await clickStartStandardPvp();
+    const mStarted = mStart.ok;
     await sleep(700);
     const mBattle = await overflowAt('m-battle');
     for (let i = 0; i < 150; i += 1) {
@@ -1723,8 +1748,7 @@ async function main() {
         buttonText: '开一局（标准 PVP · 六宠）', mode: 'trial', note: '**按需推算**'}), '{"buttonText":"开一局"}');
 
     if (trialFacts.disabled === false) {
-      await mouseClick('#start-standard-pvp');
-      await waitFor(`document.body.dataset.rocoView==='ready'`, 100, 250);
+      await clickStartStandardPvp();
       await sleep(700);
     }
     const readTrialGate = `(()=>{const v=window.rocoDemo.state.view;

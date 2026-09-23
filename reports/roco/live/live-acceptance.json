@@ -3,20 +3,20 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-23T05:07:15.697Z",
+ "judged_at": "2026-09-23T05:13:03.216Z",
  "totals": {
   "checks": 26,
-  "passed": 23,
-  "failed": 3,
-  "counterproofs": 29,
-  "counterproofs_hit": 29
+  "passed": 16,
+  "failed": 10,
+  "counterproofs": 30,
+  "counterproofs_hit": 30
  },
  "checks": [
   {
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=3"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=7"
   },
   {
    "id": "live-boot",
@@ -69,56 +69,56 @@
   {
    "id": "live-start",
    "judge": "真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的星）",
-   "ok": true,
-   "actual": "页眉模式=PVP · AI模拟（注册表 pvp-standard-six-pet）⭐=10/10 顶栏存活点 6/6 引擎动作账=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 页面渲染=skill,charge,switch,surrender 技能卡=4 开局按钮 195×38；状态行「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
+   "ok": false,
+   "actual": "点下去之后没有进入对局（战斗区没出现） | 页眉模式行「训练场 · AI模拟」不是 PVP | 聚能按钮「聚能 ⭐ —」≠ 引擎 null/null"
   },
   {
    "id": "live-energy-gate",
    "judge": "开局那一手若引擎没给合法技能：配招**灰置**列出（带费用、不可点）+ 写清差额 + 提示先聚能；有合法技能时灰置块必须消失",
    "ok": true,
-   "actual": "回合 1：合法技能 4、能量 10/undefined；灰置 0 张 []；聚能=yes；说明「小芽 · 洛克王国：世界 训练场\n \n \n \n \n  PVP · AI模拟\n  第 1 回合\n \n ✦小芽\n\n\n\n\n \n  小芽\n  她该说话时自己会出来\n  」"
+   "actual": "回合 null：合法技能 4、能量 null/null；灰置 0 张 []；聚能=no；说明「小芽 · 洛克王国：世界 训练场\n \n \n \n \n  训练场 · AI模拟\n  未开局\n \n ✦小芽\n\n\n\n\n \n  小芽\n  她该说话时自己会出来\n  收起\n」"
   },
   {
    "id": "live-battle-spec",
    "judge": "战斗页规格（v3h）：左列永远四格技能（卡高 ≥44、⭐消耗/属性/类别/克制标记/预期伤害 逐格齐备）、底栏聚能与技能/更换/物品/逃跑四个选项各自独立、只渲染本回合合法动作、最新一条事件在、对手后备只以存活点表示（不放占位也不泄漏 id、不揭示名字）、1440×900 战斗片段在视口内。【按人类 2026-09-23 版式，原来并要求技能格上的「详情层（说明可展开读）」——技能说明不再进战斗主视线，由每格的属性/类别/克制标记/预期伤害四行承担；口径未放松】",
-   "ok": true,
-   "actual": "技能卡 4 张（最矮 151px，合法 4/4）；聚能入口=true「聚能 ⭐ 10 / 10」；更换可点 5/5；逃跑页 确认+取消；对手侧存活点「●●●●●●」；片段底 834 / 视口 900"
+   "ok": false,
+   "actual": "技能格合法 3 个 ≠ 引擎给的合法技能 0 个（只许渲染本回合合法动作） | 技能格只有 0px 高（<44） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 128」（不编） | 技能格只有 0px 高（<44） | 技能格还挂着示例数据（data-b3-pending 没解除） | 技能格只有 0px 高（<44） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 214」（不编） | 技能格只有 0px 高（<44） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 0」（不编） | 消耗 5 / 现有 null，红标应为 no，实际 yes | 底栏没有可见的「聚能」入口（#b3-charge） | 更换屏可点行 5 ≠ 引擎换人动作 0"
   },
   {
    "id": "live-act-tabs",
    "judge": "四个大选项（技能/物品/更换/逃跑）都在、恰好一个高亮（按 body[data-b3-tab] 实际外观判定）、≥44px；聚能/战报在位；更换页每行给名字/属性/⭐/血量；物品页每格写清为什么用不了；逃跑是二次确认。【按人类 2026-09-23 版式：高亮与切屏由 `body[data-b3-tab]` 驱动（不再有 `aria-selected`）；物品页的「说明」由每格 `data-b3-item-note` 承担（旧 `[data-roco-no-item]` 在被收起的旧行动坞里）】",
-   "ok": true,
-   "actual": "选项 [\"skill*\",\"switch\",\"item\",\"escape\"]；聚能「聚能 ⭐ 10 / 10」；更换页 5 行 {\"name\":\"音速犬\",\"types\":\"火系\",\"energy\":\"0\",\"hp\":\"366/366\",\"text\":\"⭐ 0 音速犬 🔥火系 366/366\"}；物品页 2 格（无动作 0）/ 说明「次数 / 冷却 / 是否占行动均未登记」；逃跑页 确认=true 取消=true"
+   "ok": false,
+   "actual": "有选项高度 <44px | 右列战报不在位（框内滚动那块没渲染） | 逃跑页没打开 | 逃跑页的「确认投降」不在位（点不到） | 更换页一行都没有（切过去也看不到可换的精灵） | 物品页没打开"
   },
   {
    "id": "live-battle-hierarchy",
    "judge": "战场优先：中间两张出战卡（`[data-b3-stage]`）在片段最上面；「规则口径与未核验项」在战斗页里**一处都不可见**（战斗态整块收起）。【按人类 2026-09-23 版式，原来的「收在战场下面的一处折叠里」由「战斗页根本不出现」承担；口径未放松：可见一处就红】",
    "ok": false,
-   "actual": "战斗页里还有可见的「未核验/规则」文本：P、P"
+   "actual": "片段根容器不在战场上方"
   },
   {
    "id": "live-lineup-and-log",
    "judge": "顶栏给出双方存活点数（我方 6 只 + 对手只给点数、不给名字：上场才亮明），右列战报按回合分组、最新一回合在最上面、框内滚动。【按人类 2026-09-23 版式，原来的「开局前双方阵容短暂展示 `#lineup-reveal`」由**顶栏存活点**承担；战报由右列 `.b3-log-scroll` 承担（旧 `#events` 在被收起的旧战报面板里）】",
-   "ok": true,
-   "actual": "顶栏存活点 我方「●●●●●●」对手「●●●●●●」；战报「战报」[{\"turn\":\"1\",\"latest\":\"yes\",\"label\":\"第 1 回合（最新）\",\"rows\":3}]（DOM 顺序 [\"1\"]，框内溢出 auto）"
+   "ok": false,
+   "actual": "右列战报没有按回合分组 | 战报没有标出唯一的「最新一回合」 | 战报 DOM 第一块不是最新的回合 | 右列战报不在位"
   },
   {
    "id": "live-battle-info",
    "judge": "双方出战信息：两张镜像卡各给名字/属性/血量（**带百分比**，且与「生命 x / y」和血条宽度一致）+ 顶栏双方存活点数（与公开视图一致）。【按人类 2026-09-23 版式，原来的 `#self-panel`/`#foe-panel` 与「还能打 N/N」那一行由 `[data-b3-self-card]`/`[data-b3-foe-card]` 与 `#b3-dots-self`/`#b3-dots-foe` 承担】",
-   "ok": true,
-   "actual": "我方「铠甲虫 生命 445 / 445 100% 虫系」对手「喵喵 生命 332 / 332 100% 草系」；存活点 {\"txt\":\"●●●●●●\",\"alive\":6,\"down\":0} / {\"txt\":\"●●●●●●\",\"alive\":6,\"down\":0}；视图 self=6 foe=6"
+   "ok": false,
+   "actual": "我方那张卡不在画面上 | 对手那张卡不在画面上"
   },
   {
    "id": "live-settle",
    "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、页眉回合与引擎一致、右列战报最新一回合有内容）。【按人类 2026-09-23 版式，原来的 `#last-event`「最新一条事件」由**右列战报**承担（框内滚动、最新回合在上）；`#last-event` 所在的 `#b3-sink` 是隐藏接收槽，不再作读数点】",
-   "ok": true,
-   "actual": "result=win 回合=30 页眉回合「第 30 回合」结算区可见=true 教学=shown 战报回合块=30 最新块=第 30 回合（8 条）；存活点 ●●●●○○/●●○○○○；点了 34 次自动推进（最后回合 30，停滞 0 次）；当时 {\"turn\":30,\"mana\":{\"self\":2,\"opponent\":0},\"selfLiving\":4,\"foeLiving\":2,\"status\":\"\"}；正文「关键转折在第 2 回合（这一局 30 个回合）。」"
+   "ok": false,
+   "actual": "引擎没给出对局结果 | 结算区没出现 | 局末教学入口没出现 | 页眉回合「未开局」与引擎回合 null 不一致 | 右列战报不在位 | 整局战报一个回合块都没有（最新一条事件没进战报）"
   },
   {
    "id": "live-lesson-migration",
    "judge": "换局迁移：第二局的教学必须**接着上一课**（同一课时做核对，不同课时不许逐字重讲第一局那一课），复盘正文带局面信息，且换局把 v3h 顶栏归零（页眉回合回到第 1 回合、双方存活点回到 6/6）。【按人类 2026-09-23 版式，「换了一局」在战斗页上的可见证据由顶栏承担（旧版式读的是开局前的阵容展示块）】",
-   "ok": true,
-   "actual": "第一局 switch-out-of-the-bad-matchup/first-faint → 第二局 read-the-replacement-first/first-faint；repeat=no checked=yes；核对「上一次那一课的核对：「我方有伙伴倒下」这一局又出现了。对比第 6 回合（上一次：吃到克制伤害之后一直留在场上）与第 6 」；第二局顶栏「第 1 回合」存活点 ●●●●●●/●●●●●●"
+   "ok": false,
+   "actual": "第二局没有给出教学入口 | 第二局的复盘正文没有局面信息 | 第二局页眉回合「未开局」不是第 1 回合（换局没归零） | 第二局没有登记「是不是同一课」（repeat=\"\"）"
   },
   {
    "id": "live-narrow-390",
@@ -128,9 +128,9 @@
   },
   {
    "id": "live-model-status",
-   "judge": "页头的「模型连接状态」与实际一致（未连接时明说 + 给连接入口），不冒充模型",
-   "ok": false,
-   "actual": "状态行只有 0px 高（太小，看不见）"
+   "judge": "模型连接状态与实际一致（未连接时明说 + 给连接入口），不冒充模型。【按人类 2026-09-23 版式（页头右上角只留「✦ 小芽」），连接状态那一行由**小芽面板**承担；读取点 = 打开小芽面板后的 `#model-chip`】",
+   "ok": true,
+   "actual": "chip「模型：0/3 已连接（云端 · DeepSeek 未连：还没有配置 API key）」hook=offline 入口=connect.html 高=26px"
   },
   {
    "id": "live-chat",
@@ -146,9 +146,9 @@
   },
   {
    "id": "live-mobile-e2e",
-   "judge": "手机 390×844 整条 E2E：URL 带锁定进来 → 补满六只 → 开局 → 打到结算 → 教学入口，每一步都不横向溢出，且战斗页那一档必须是 v3h（页眉回合、顶栏 6 个存活点、底栏四个大选项、聚能 ≥44px）。【按人类 2026-09-23 版式，窄屏战斗页的「行动区在首屏」由**底栏四选项 + 左列四格技能**承担（旧 `#action-panel` 在战斗态收起）；口径未放松：窄屏也要能点到聚能与四个大选项】",
+   "judge": "手机 390×844 整条 E2E：URL 带锁定进来 → 补满六只 → 开局 → 打到结算 → 教学入口，每一步都不横向溢出，且战斗页那一档必须是 v3h（页眉回合、顶栏 6 个存活点、底栏四个大选项、聚能 ≥44px）。【按人类 2026-09-23 版式，窄屏战斗页的「行动区在首屏」由**底栏四选项 + 左列四格技能**承担（旧 `#action-panel` 在战斗态收起）；右列战报在 ≤760px 按设计**整列收起**（「单列、战报不占首屏」），所以窄屏那一档要求「在位就得分组、否则必须整列收起」，并用 `data-roco-log-turns` 兜住内容】",
    "ok": false,
-   "actual": "手机结算页右列战报不在位 / 没有回合分组"
+   "actual": "手机上没能开局 | 手机战斗页页眉回合「未开局」 | 手机战斗页大选项 0 个（规格是 4 个） | 手机战斗页聚能入口不可点（{\"shown\":false,\"h\":0,\"text\":\"聚能 ⭐ —\"}） | 手机上没打到结算 | 手机上局末教学入口没出现 | 手机结算页页眉回合「未开局」 | 手机上整局战报一个回合块都没有（没有按引擎事件分组）"
   },
   {
    "id": "live-trial-labels",
@@ -159,8 +159,8 @@
   {
    "id": "live-trial-energy-gate",
    "judge": "真实试玩（六只按需推算）：左列永远四格技能；首回合 0 合法技能时灰置配招 + 逐格给出 ⭐ 消耗（不够的标红）+ 底栏有可见的聚能入口，聚能攒够之后技能出现且灰置消失；有合法技能时不得出现灰置块。【按人类 2026-09-23 版式，原来的「还差几点能量」长文案与 `#act-charge` 由左列每格的 ⭐ 消耗/标红与底栏 `#b3-charge` 承担（旧行动坞在战斗态收起）】",
-   "ok": true,
-   "actual": "试玩 6 只 / trialReady=yes / 模式=pvp-standard-six-pet（页眉「PVP · AI模拟」）；首回合能量 10/10 合法技能 4 灰置 0 费用 []（标红 0）；聚能入口 true「聚能 ⭐ 10 / 10」；聚能后能量 10 合法技能 4 灰置 0"
+   "ok": false,
+   "actual": "页眉模式行「训练场 · AI模拟」不是 PVP | 有技能格不在画面上 | 有合法技能却还画着灰置块 | 没有可见的聚能入口（#b3-charge）"
   },
   {
    "id": "live-console",
@@ -230,7 +230,7 @@
    "id": "live-start",
    "judge": "开局后模式被换成练习局、或动作表里混进道具必须被同一条判据抓住",
    "ok": true,
-   "hit": "模式 \"demo-training-3v3\" | 页面上渲染了道具入口",
+   "hit": "模式 \"demo-training-3v3\" | 聚能按钮「聚能 ⭐ —」≠ 引擎 null/null | 页面上渲染了道具入口",
    "actual": "{\"modeId\":\"demo-training-3v3\",\"rendered\":\"skill,item\"}"
   },
   {
@@ -251,42 +251,42 @@
    "id": "live-lineup-and-log",
    "judge": "把对手整队名字亮出来、或把战报倒过来（最新在最后）必须被同一条判据抓住",
    "ok": true,
-   "hit": "顶栏对手存活点不是 6 个纯点数（「●●喵喵●●」——是不是把名字画出来了？） | 战报不是最新回合在上（回合号没有倒序） | 战报最新一回合不在最上面",
+   "hit": "顶栏对手存活点不是 6 个纯点数（「●●喵喵●●」——是不是把名字画出来了？） | 战报不是最新回合在上（回合号没有倒序） | 战报最新一回合不在最上面 | 右列战报不在位",
    "actual": "{\"dotsFoe\":\"●●喵喵●●\",\"order\":[1,2]}"
   },
   {
    "id": "live-battle-info",
    "judge": "百分比与血量不一致（例如写死 100%）必须被同一条判据抓住",
    "ok": true,
-   "hit": "我方百分比 100% 与 100/445 不一致",
+   "hit": "我方百分比 100% 与 100/445 不一致 | 我方那张卡不在画面上 | 对手那张卡不在画面上",
    "actual": "{\"hpText\":\"生命 100 / 445\",\"pctText\":\"100%\"}"
   },
   {
    "id": "live-act-tabs",
    "judge": "逃跑没有二次确认（首层直接摆投降）必须被同一条判据抓住",
    "ok": true,
-   "hit": "大选项 0 个（规格是 4 个） | 缺「skill」选项 | 缺「item」选项 | 缺「switch」选项 | 缺「escape」选项 | 聚能按钮上没有文字 | 逃跑页没打开 | 逃跑没有二次确认（确认 + 取消两个入口） | 逃跑页的「确认投降」不在位（点不到） | 首层直接摆了「投降」动作（应当走逃跑页二次确认） | 物品页 2 格没写清为什么用不了/未核验 | 这一手没有物品动作，页面却渲染了物品入口",
+   "hit": "大选项 0 个（规格是 4 个） | 缺「skill」选项 | 缺「item」选项 | 缺「switch」选项 | 缺「escape」选项 | 聚能按钮上没有文字 | 右列战报不在位（框内滚动那块没渲染） | 逃跑页没打开 | 逃跑没有二次确认（确认 + 取消两个入口） | 逃跑页的「确认投降」不在位（点不到） | 首层直接摆了「投降」动作（应当走逃跑页二次确认） | 物品页 2 格没写清为什么用不了/未核验 | 这一手没有物品动作，页面却渲染了物品入口",
    "actual": "{\"confirm\":false,\"direct\":true}"
   },
   {
    "id": "live-battle-spec(星不够不标红)",
    "judge": "星不够却标成不红（或星够却标红）必须被同一条判据抓住",
    "ok": true,
-   "hit": "技能格 1 个（规格是永远四格） | 技能格合法 0 个 ≠ 引擎给的合法技能 1 个（只许渲染本回合合法动作） | 消耗 6 / 现有 2，红标应为 yes，实际 no",
+   "hit": "技能格 1 个（规格是永远四格） | 技能格合法 0 个 ≠ 引擎给的合法技能 1 个（只许渲染本回合合法动作） | 消耗 6 / 现有 2，红标应为 yes，实际 no | 底栏没有可见的「聚能」入口（#b3-charge） | 更换屏可点行 5 ≠ 引擎换人动作 0",
    "actual": "{\"cost\":\"6\",\"short\":\"no\",\"energy\":2}"
   },
   {
    "id": "live-battle-spec",
    "judge": "把「聚能」混进技能区（没有独立入口）必须被同一条判据抓住",
    "ok": true,
-   "hit": "底栏没有可见的「聚能」入口（#b3-charge） | 渲染了道具/逃跑入口 | 引擎这一手给了道具/逃跑动作（标准 PVP 不该有）",
+   "hit": "技能格合法 3 个 ≠ 引擎给的合法技能 0 个（只许渲染本回合合法动作） | 技能格只有 0px 高（<44） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 128」（不编） | 技能格只有 0px 高（<44） | 技能格还挂着示例数据（data-b3-pending 没解除） | 技能格只有 0px 高（<44） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 214」（不编） | 技能格只有 0px 高（<44） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 0」（不编） | 消耗 5 / 现有 null，红标应为 no，实际 yes | 底栏没有可见的「聚能」入口（#b3-charge） | 更换屏可点行 5 ≠ 引擎换人动作 0 | 渲染了道具/逃跑入口 | 引擎这一手给了道具/逃跑动作（标准 PVP 不该有）",
    "actual": "{\"chargeShown\":false,\"rendered\":\"skill,item\"}"
   },
   {
    "id": "live-battle-spec(示例数据没解除)",
    "judge": "技能格还挂着版面示例数据（没被真数据填上）必须被同一条判据抓住",
    "ok": true,
-   "hit": "技能格 1 个（规格是永远四格） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 128」（不编） | 消耗 5 / 现有 10，红标应为 no，实际 yes",
+   "hit": "技能格 1 个（规格是永远四格） | 技能格还挂着示例数据（data-b3-pending 没解除） | 引擎没给伤害样本，这一格却写了「预期伤害 128」（不编） | 消耗 5 / 现有 null，红标应为 no，实际 yes | 底栏没有可见的「聚能」入口（#b3-charge） | 更换屏可点行 5 ≠ 引擎换人动作 0",
    "actual": "{\"pending\":\"yes\",\"dmg\":\"预期伤害 128\"}"
   },
   {
@@ -358,6 +358,13 @@
    "ok": true,
    "hit": "手机战斗页页眉回合「未开局」 | 手机战斗页大选项 0 个（规格是 4 个） | 手机战斗页聚能入口不可点（{\"shown\":false,\"h\":0}）",
    "actual": "{\"tabs\":0,\"charge\":{\"shown\":false}}"
+  },
+  {
+   "id": "live-mobile-e2e(战报半吊子)",
+   "judge": "窄屏战报既不显示、又没按设计整列收起（且整局没分组）必须被同一条判据抓住",
+   "ok": true,
+   "hit": "手机上整局战报一个回合块都没有（没有按引擎事件分组） | 手机右列战报既不可见、又没按窄屏设计整列收起（半吊子）",
+   "actual": "{\"logShown\":false,\"rightColHidden\":false,\"logTurns\":0}"
   },
   {
    "id": "live-trial-labels",
@@ -798,17 +805,17 @@
   {
    "at": "battle-start",
    "battle": {
-    "modeText": "PVP · AI模拟",
+    "modeText": "训练场 · AI模拟",
     "modeId": "pvp-standard-six-pet",
     "dotsSelf": 6,
     "dotsFoe": 6,
-    "chargeText": "聚能 ⭐ 10 / 10",
-    "groups": "skill:4,charge:1,switch:5,surrender:1,item:0,escape:0",
-    "rendered": "skill,charge,switch,surrender",
-    "skillCards": "4",
-    "energy": 10,
-    "energyMax": 10,
-    "turn": 1
+    "chargeText": "聚能 ⭐ —",
+    "groups": "skill:0,charge:0,switch:0,surrender:0,item:0,escape:0",
+    "rendered": "none",
+    "skillCards": "0",
+    "energy": null,
+    "energyMax": null,
+    "turn": null
    }
   },
   {
@@ -817,180 +824,168 @@
     "vh": 900,
     "clientW": 1440,
     "scrollW": 1440,
-    "rootTop": 92,
-    "rootBottom": 834,
-    "stageTop": 148,
+    "rootTop": 0,
+    "rootBottom": 0,
+    "stageTop": 0,
     "skillCards": [
      {
-      "w": 232,
-      "h": 151,
-      "pending": null,
+      "w": 0,
+      "h": 0,
+      "pending": "yes",
       "legal": true,
       "short": "no",
       "cost": "0",
-      "name": "啃咬",
+      "name": "魔能爆",
       "cat": "攻击",
-      "elName": "虫系",
-      "dmg": "预期伤害 —",
+      "elName": "普通系",
+      "dmg": "预期伤害 128",
       "rel": "none"
      },
      {
-      "w": 232,
-      "h": 151,
-      "pending": null,
+      "w": 0,
+      "h": 0,
+      "pending": "yes",
       "legal": true,
       "short": "no",
       "cost": "1",
       "name": "防御",
       "cat": "防御",
       "elName": "普通系",
-      "dmg": "预期伤害 —",
+      "dmg": "预期伤害 --",
       "rel": "none"
      },
      {
-      "w": 232,
-      "h": 151,
-      "pending": null,
+      "w": 0,
+      "h": 0,
+      "pending": "yes",
       "legal": true,
       "short": "no",
       "cost": "3",
-      "name": "翅刃",
+      "name": "强制重启",
       "cat": "攻击",
-      "elName": "虫系",
-      "dmg": "预期伤害 —",
-      "rel": "none"
+      "elName": "电系",
+      "dmg": "预期伤害 214",
+      "rel": "up"
      },
      {
-      "w": 232,
-      "h": 151,
-      "pending": null,
-      "legal": true,
-      "short": "no",
-      "cost": "1",
-      "name": "风隐",
+      "w": 0,
+      "h": 0,
+      "pending": "yes",
+      "legal": false,
+      "short": "yes",
+      "cost": "5",
+      "name": "电离爆破",
       "cat": "状态",
-      "elName": "翼系",
-      "dmg": "预期伤害 —",
-      "rel": "none"
+      "elName": "电系",
+      "dmg": "预期伤害 0",
+      "rel": "down"
      }
     ],
-    "legalSkillCount": 4,
-    "legalSwitchCount": 5,
+    "legalSkillCount": 0,
+    "legalSwitchCount": 0,
     "switchLegalCount": 5,
     "switchRows": [
      {
       "legal": true,
-      "name": "音速犬",
-      "hp": "366/366",
+      "name": "铠甲虫",
+      "hp": "雪影娃娃 · 442/442",
       "cost": "0",
-      "elName": "火系"
-     },
-     {
-      "legal": true,
-      "name": "仪式巨像",
-      "hp": "401/401",
-      "cost": "1",
-      "elName": "地系"
+      "elName": "虫系"
      },
      {
       "legal": true,
       "name": "雪影娃娃",
-      "hp": "442/442",
-      "cost": "2",
+      "hp": "皇家狮鹫 · 403/403",
+      "cost": "1",
       "elName": "冰系"
      },
      {
       "legal": true,
       "name": "皇家狮鹫",
-      "hp": "403/403",
-      "cost": "1",
+      "hp": "化蝶 · 311/311",
+      "cost": "2",
       "elName": "翼系"
      },
      {
       "legal": true,
       "name": "化蝶",
-      "hp": "311/311",
-      "cost": "3",
+      "hp": "仪式巨像 · 401/401",
+      "cost": "1",
       "elName": "虫系"
+     },
+     {
+      "legal": true,
+      "name": "仪式巨像",
+      "hp": "铠甲虫 · 445/445",
+      "cost": "3",
+      "elName": "地系"
      }
     ],
     "charge": {
-     "shown": true,
-     "text": "聚能 ⭐ 10 / 10"
+     "shown": false,
+     "text": "聚能 ⭐ —"
     },
     "switchTab": true,
     "escapeTab": true,
     "escapeConfirm": true,
     "escapeCancel": true,
-    "rendered": "skill,charge,switch,surrender",
-    "legalKinds": [
-     "skill",
-     "skill",
-     "skill",
-     "skill",
-     "charge",
-     "switch",
-     "switch",
-     "switch",
-     "switch",
-     "switch",
-     "surrender"
-    ],
+    "rendered": "none",
+    "legalKinds": [],
     "logTurns": 0,
-    "energy": 10,
+    "energy": null,
     "samples": 0,
-    "turn": 1,
-    "foeDots": "●●●●●●",
-    "foeCardText": "60 级 🌿草系 喵喵 100% 生命 332 / 332 ⭐ 10"
+    "turn": null,
+    "foeDots": "○○○○○○",
+    "foeCardText": "60 级 💧水系 水灵 64% 生命 212 / 332 ⭐ 3"
    }
   },
   {
    "at": "auto-play",
-   "clicks": 34,
-   "lastTurn": 30,
-   "stalled": 0
+   "clicks": 8,
+   "lastTurn": null,
+   "stalled": 8
   },
   {
    "at": "settled",
    "settled": {
-    "result": "win",
-    "turn": 30,
-    "resultVisible": true,
-    "lessonShown": "shown",
-    "lessonText": "关键转折在第 2 回合（这一局 30 个回合）。",
-    "round": "第 30 回合",
-    "logShown": true,
+    "result": null,
+    "turn": null,
+    "resultVisible": false,
+    "lessonShown": null,
+    "lessonText": "",
+    "round": "未开局",
+    "logShown": false,
     "logLatest": {
-     "turn": "30",
-     "lines": 8
+     "turn": null,
+     "lines": 0
     },
-    "logTurns": 30,
+    "logTurns": 0,
     "dots": {
-     "self": "●●●●○○",
-     "foe": "●●○○○○"
+     "self": "○○○○○○",
+     "foe": "○○○○○○"
     }
    }
   },
   {
    "at": "second-match-teacher",
    "m1": {
-    "goal": "switch-out-of-the-bad-matchup",
-    "point": "first-faint",
-    "repeat": "no"
+    "goal": "",
+    "point": "",
+    "repeat": ""
    },
    "second": {
-    "result": "ready",
-    "lesson": "shown",
-    "goal": "read-the-replacement-first",
-    "point": "first-faint",
-    "repeat": "no",
-    "checked": "yes",
-    "improved": "no",
-    "progress": "上一次那一课的核对：「我方有伙伴倒下」这一局又出现了。对比第 6 回合（上一次：吃到克制伤害之后一直留在场上）与第 6 回合（这一次：吃到克制伤害之后一直留在场上）。两次的处理方式一样，所以这一局看不到变化。",
-    "lessonText": "关键转折在第 2 回合（这一局 30 个回合）。",
-    "round": "第 1 回合",
-    "dotsSelf": "●●●●●●",
-    "dotsFoe": "●●●●●●",
+    "result": "empty",
+    "lesson": null,
+    "goal": "",
+    "point": "",
+    "repeat": "",
+    "checked": "",
+    "improved": "",
+    "progress": "",
+    "lessonText": "",
+    "round": "未开局",
+    "dotsSelf": "○○○○○○",
+    "dotsFoe": "○○○○○○",
     "tab": "skill"
    }
   },
@@ -1074,25 +1069,27 @@
      "clientW": 390,
      "scrollW": 390,
      "selected": 6,
-     "round": "第 1 回合",
-     "dotsSelf": "●●●●●●",
-     "tabs": 4,
+     "round": "未开局",
+     "dotsSelf": "○○○○○○",
+     "tabs": 0,
      "charge": {
-      "shown": true,
-      "h": 44,
-      "text": "聚能 ⭐ 10 / 10"
+      "shown": false,
+      "h": 0,
+      "text": "聚能 ⭐ —"
      }
     }
    ],
    "settled": {
-    "result": "win",
-    "lesson": "shown",
+    "result": null,
+    "lesson": null,
     "clientW": 390,
     "scrollW": 390,
-    "turn": 30,
-    "round": "第 30 回合",
-    "logTurns": 30,
-    "logLatestLines": 8,
+    "turn": null,
+    "round": "未开局",
+    "logGroups": 0,
+    "logTurns": 0,
+    "logLatestLines": 0,
+    "rightColHidden": true,
     "logShown": false
    }
   },
@@ -1105,84 +1102,88 @@
     "mode": "trial"
    },
    "first": {
-    "legal": 4,
-    "greyed": 0,
+    "legal": 3,
+    "greyed": 1,
     "slots": [
      {
       "legal": true,
       "costShort": "no",
-      "cost": "6",
-      "shown": true
+      "cost": "0",
+      "shown": false
      },
      {
       "legal": true,
       "costShort": "no",
-      "cost": "4",
-      "shown": true
+      "cost": "1",
+      "shown": false
      },
      {
       "legal": true,
       "costShort": "no",
       "cost": "3",
-      "shown": true
+      "shown": false
      },
      {
-      "legal": true,
-      "costShort": "no",
-      "cost": "7",
-      "shown": true
+      "legal": false,
+      "costShort": "yes",
+      "cost": "5",
+      "shown": false
      }
     ],
-    "costs": [],
-    "greyedShort": 0,
-    "chargeShown": true,
-    "chargeText": "聚能 ⭐ 10 / 10",
-    "charge": "yes",
-    "energy": 10,
-    "energyMax": 10,
+    "costs": [
+     "5"
+    ],
+    "greyedShort": 1,
+    "chargeShown": false,
+    "chargeText": "聚能 ⭐ —",
+    "charge": "no",
+    "energy": null,
+    "energyMax": null,
     "mode": "pvp-standard-six-pet",
-    "modeText": "PVP · AI模拟",
-    "turn": 1
+    "modeText": "训练场 · AI模拟",
+    "turn": null
    },
    "after": {
-    "legal": 4,
-    "greyed": 0,
+    "legal": 3,
+    "greyed": 1,
     "slots": [
      {
       "legal": true,
       "costShort": "no",
-      "cost": "6",
-      "shown": true
+      "cost": "0",
+      "shown": false
      },
      {
       "legal": true,
       "costShort": "no",
-      "cost": "4",
-      "shown": true
+      "cost": "1",
+      "shown": false
      },
      {
       "legal": true,
       "costShort": "no",
       "cost": "3",
-      "shown": true
+      "shown": false
      },
      {
-      "legal": true,
-      "costShort": "no",
-      "cost": "7",
-      "shown": true
+      "legal": false,
+      "costShort": "yes",
+      "cost": "5",
+      "shown": false
      }
     ],
-    "costs": [],
-    "greyedShort": 0,
-    "chargeShown": true,
-    "chargeText": "聚能 ⭐ 10 / 10",
-    "charge": "yes",
-    "energy": 10,
-    "energyMax": 10,
+    "costs": [
+     "5"
+    ],
+    "greyedShort": 1,
+    "chargeShown": false,
+    "chargeText": "聚能 ⭐ —",
+    "charge": "no",
+    "energy": null,
+    "energyMax": null,
     "mode": "pvp-standard-six-pet",
-    "modeText": "PVP · AI模拟",
-    "turn": 1
+    "modeText": "训练场 · AI模拟",
+    "turn": null
    }
   }
  ],
