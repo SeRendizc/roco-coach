@@ -223,10 +223,11 @@ const STYLE = `
 
 /* ── 人类 2026-09-23 批注（这些必须写在 shadow 内，写到 roco.css 是**不生效**的）── */
 .tw-knobs--right{justify-content:flex-end}
-.tw-scope-row{display:flex;gap:6px;flex-wrap:wrap}
-.tw-filter-row{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,.85fr) minmax(0,1.3fr) auto;gap:4px;align-items:center;font-size:11.5px}
-.tw-filter-row>*{min-width:0;width:100%}
-.tw-filter-row>#tw-filter-reset{width:auto}
+.tw-scope-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}   /* 全图鉴 / 我的精灵 一左一右 */
+.tw-filter-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:11px}
+.tw-filter-row select{flex:0 0 auto;width:74px;font-size:11px;min-height:30px;padding:2px 4px}
+.tw-filter-row input[type=search]{flex:1 1 90px;min-width:60px;font-size:11px;min-height:30px;padding:2px 6px}
+.tw-filter-row #tw-filter-reset{flex:0 0 auto;width:auto;font-size:11px;min-height:30px;padding:2px 10px}
 .tw-filter-row select,.tw-filter-row input,.tw-filter-row button{font-size:11.5px;padding-left:6px;padding-right:6px}
 
 

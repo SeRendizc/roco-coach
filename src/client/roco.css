@@ -879,9 +879,8 @@ header.topbar .xiaoya-btn{justify-self:end}
 /* 人类 2026-09-23：小芽点开后**两个 UI 不许交叠** ——
    ① 面板高度避开底栏（不再盖住行动区）；② 宽屏打开时正文让出右侧一栏，两个界面并排。 */
 .companion{max-height:calc(100vh - var(--bottombar, 0px) - 76px);overflow:auto}
-@media (min-width:1100px){
-  body[data-roco-coach-open="yes"] main{padding-right:calc(min(460px, 32vw) + 28px)}
-}
+/* 人类 2026-09-23：小芽是**浮层弹窗**，打开时**不许顶开正文**（原来给它让位的规则会让它看起来像内联栏）。 */
+body[data-roco-coach-open="yes"] main{padding-right:var(--coach-rail,0px)}
 
 /* 根容器必须 ≥「视口 − 40」（人类：一页占满）。战斗态把 main 的左右内边距归零，
    由片段自身的 16px 内边距负责留白 —— 否则两层内边距叠加会把宽度吃到 1380。 */
