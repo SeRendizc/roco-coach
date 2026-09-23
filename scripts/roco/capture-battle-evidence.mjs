@@ -33,6 +33,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 mkdirSync(OUT, {recursive: true});
 const failures = [];
+const skipped = [];
 
 const profile = mkdtempSync(join(tmpdir(), 'roco-evidence-'));
 const chrome = spawn(CHROME, ['--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run',
@@ -254,7 +255,14 @@ const shots = [];
         return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2),
           w:Math.round(r.width),h:Math.round(r.height),action:s.dataset.b3Action};})()`);
       if (!slot) {
-        failures.push(`${tag}：没有任何**可点**的技能格（引擎给了合法动作却点不到 → 玩家推不动战斗）`);
+        // 真·没有合法技能（例如对手行动后轮到我方但被规则挡住）——**如实记为跳过**，不算失败；
+        // 但如果引擎账上**有** skill 类合法动作却点不到，那才是缺陷。
+        const engineSkills = await js(`(window.rocoDemo?.state?.view?.legal??[]).filter((a)=>a.kind==='skill').length`);
+        if (engineSkills > 0) {
+          failures.push(`${tag}：引擎给了 ${engineSkills} 个合法技能，页面却没有一个可点技能格（玩家推不动战斗）`);
+        } else {
+          skipped.push(`${tag}：这一手引擎没给合法技能（skip）`);
+        }
       } else {
         // 点前**重读**一次坐标与下标：上一帧量到的 rect/action 可能已经过期
         // （1440 第一次没推进就是这么来的——命中检查显示格子本身是可点的）。

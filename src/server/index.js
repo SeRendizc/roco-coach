@@ -317,6 +317,7 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
       }
       const variant=String(q.get('v')||'default').trim();
 
+      if(!key){ return json(res,404,{ok:false,error:'清单里没有这只精灵的立绘'}); }
       if(!/^pet-\d{2}-[\u4e00-\u9fa5A-Za-z0-9]+$/.test(key)||!['default','action'].includes(variant)){
         return json(res,400,{ok:false,error:'key 或 v 不合法'});
       }

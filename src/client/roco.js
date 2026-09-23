@@ -1696,6 +1696,11 @@ function renderB3Panels(view) {
     const mv = moves[i];
     if (!mv) { slot.setAttribute('data-b3-pending', 'yes'); return; }
     const act = legalSkills.find((a) => a.skill_id === mv.skill_id) ?? null;
+    // ⚠ 先**清掉**上一帧的动作信号：只在有动作时写、从不清除，会让引擎没给技能时格子仍是「可点」
+    //   → 玩家点下去什么都不发生（人类实测「战斗完全推进不了」就是这么来的）。
+    delete slot.dataset.b3Action;
+    delete slot.dataset.b3SkillId;
+    delete slot.dataset.b3ActionKind;
     const cost = Number.isFinite(Number(mv.energy)) ? Number(mv.energy) : null;
     const short = cost !== null && Number.isFinite(me?.energy) ? me.energy < cost : null;
     slot.dataset.b3CostShort = short === true ? 'yes' : 'no';
@@ -1744,6 +1749,9 @@ function renderB3Panels(view) {
     if (rel) rel.textContent = '';        // 克制关系要倍率；拿不到就留空（不编）
     const el = cell.querySelector('[data-b3-switch-el], [data-b3-el-name]');
     if (el) b3El(el, Array.isArray(p.types) ? p.types[0] : (p.type ?? null));
+    delete cell.dataset.b3Action;
+    delete cell.dataset.b3Target;
+    delete cell.dataset.b3ActionKind;
     const act = (view?.legal ?? []).find((a) => a.kind === 'switch' && a.target_index === item.idx);
     cell.dataset.b3SwitchLegal = act ? 'yes' : 'no';
     cell.classList.toggle('b3-slot--grey', !act);
