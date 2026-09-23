@@ -425,6 +425,18 @@ export function sixPetBattleProblems(facts) {
   if (!Number.isInteger(facts?.selfMana) || !Number.isInteger(facts?.foeMana)) {
     problems.push(`资源条必须显示引擎给的魔力（读到 self=${JSON.stringify(facts?.selfMana)} foe=${JSON.stringify(facts?.foeMana)}）`);
   }
+  // 2026-09-23（人类 v3h 版式）：魔力读数从 `#self-resource`/`#foe-resource`
+  // （已被收进 `#b3-sink[hidden]`，玩家看不到）迁到**换宠屏的底栏聚能位**：
+  // `body[data-b3-charge]='mana'` + `[data-b3-charge-value]` =「♥ n / pool」。
+  if (facts?.chargeState !== 'mana') {
+    problems.push(`换宠屏的聚能位必须切到 mana 态（body[data-b3-charge] 实际 ${JSON.stringify(facts?.chargeState)}）`);
+  }
+  if (!/♥/.test(String(facts?.selfText ?? ''))) {
+    problems.push(`魔力读数必须写成「♥ n」（底栏聚能实际「${facts?.selfText}」）`);
+  }
+  if (Number.isFinite(facts?.engineSelfMana) && Number(facts?.selfMana) !== Number(facts.engineSelfMana)) {
+    problems.push(`底栏读到的魔力 ${facts?.selfMana} ≠ 引擎给的 view.mana.self ${facts?.engineSelfMana}`);
+  }
   if (/未核验/.test(String(facts?.selfText ?? '')) || /未核验/.test(String(facts?.foeText ?? ''))) {
     problems.push('引擎已经给了魔力，资源条却还写「未核验」');
   }
@@ -1281,22 +1293,38 @@ async function main() {
     const battleStarted = await waitFor(`document.body.dataset.rocoView==='ready'`
       + ` && document.getElementById('battle-panel') && !document.getElementById('battle-panel').hidden`);
     await sleep(420);
+    // 2026-09-23（v3h）：魔力读数在**换宠屏**的底栏聚能位（`body[data-b3-charge]='mana'` +
+    // `[data-b3-charge-value]` =「♥ n / pool」）。旧读取点 `#self-resource` / `#foe-resource`
+    // 已被收进 `#b3-sink[hidden]`（`getBoundingClientRect` 全 0，玩家看不到）——
+    // 所以先**真鼠标**切到「更换」，再读那一处。
+    const switchTab = await mouseClick('.b3-wrap [data-b3-tab="switch"]');
+    await sleep(420);
     const battleFacts = JSON.parse(await js(`(()=>{const b=document.body.dataset;
-      const self=document.getElementById('self-resource'), foe=document.getElementById('foe-resource');
+      const charge=document.getElementById('b3-charge');
+      const chargeVal=document.querySelector('[data-b3-charge-value]');
       const note=document.getElementById('unverified-note'), panel=document.getElementById('battle-panel');
-      const manaOf=(el)=>{const m=/(\\d+)/.exec(el?el.textContent:'');return m?Number(m[1]):null;};
+      const v=window.rocoDemo.state.view;
+      const manaOf=(t)=>{const m=/(\\d+)/.exec(String(t||''));return m?Number(m[1]):null;};
       return JSON.stringify({mode:b.rocoMode??null,standardPvp:b.rocoStandardPvp??null,
         groups:b.rocoActionGroups??null,hidden:b.rocoActionsHidden??null,
-        selfText:self?self.textContent.trim():null,foeText:foe?foe.textContent.trim():null,
-        selfMana:manaOf(self),foeMana:manaOf(foe),
+        selfText:charge?(charge.textContent||'').replace(/\\s+/g,' ').trim():null,
+        foeText:'',
+        selfMana:manaOf(chargeVal?chargeVal.textContent:''),
+        engineSelfMana:Number.isFinite(v&&v.mana&&v.mana.self)?v.mana.self:null,
+        foeMana:Number.isFinite(v&&v.mana&&v.mana.opponent)?v.mana.opponent:null,
+        chargeState:b.b3Charge??null,
         noteHidden:note?note.hidden:null,noteText:note?note.textContent.trim():null,
         battleVisible:Boolean(panel)&&!panel.hidden});})()`));
     const battleProblems = sixPetBattleProblems(battleFacts);
     // 开局失败时页面会把服务端原文写进 `#plan-status`——把它带进断言信息里（报错原文就是证据）。
     const planStatus = await js(`document.getElementById('plan-status')?.textContent ?? null`);
-    check('35-标准 PVP 战斗页', '按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出',
+    check('35-标准 PVP 战斗页', '按 v3 候选规则开局：魔力来自引擎（4/4，写在换宠屏的底栏聚能位上）、'
+      + '无物品/逃跑、未核验假设如实标出。'
+      + '【按人类 2026-09-23 版式，旧读取点 `#self-resource`/`#foe-resource`（已收进 `#b3-sink[hidden]`）由 '
+      + '换宠屏的 `#b3-charge` / `[data-b3-charge-value]`（mana 态「♥ n / pool」）承担】',
       battleProblems.length === 0 && battleStarted,
       (battleProblems.join(' | ') || `mode=${battleFacts.mode} mana=${battleFacts.selfMana}/${battleFacts.foeMana} `
+        + `（换宠屏聚能「${battleFacts.selfText}」，切屏命中 ${switchTab?.top?.path ?? '—'}）`
         + `groups=${battleFacts.groups} hidden=${battleFacts.hidden}`)
       + `；页面状态栏=「${String(planStatus ?? '').slice(0, 160)}」`);
     steps.push({at: 'standard-pvp-battle', facts: battleFacts});
@@ -1314,7 +1342,16 @@ async function main() {
 
     // ── ⑬ RC-503：候选规则下的 Coach 取舍（真鼠标点「让小芽看一眼」）────────────
     // 这一条量的是**教练层在 v3 候选规则下**给不给那四样，以及建议是不是引擎真给的动作。
-    await mouseClick('#plan');
+    //
+    // 2026-09-23：那个按钮按人类规格**整合进了小芽面板**（`.battle-tools` 现在在
+    // `#xiaoya-panel > #xy-settings` 里，两层默认都收起）—— 直接点 `#plan` 等于点空气
+    // （实测 0×0，事件落在 (0,0)）。所以这里像玩家一样：先真实点开小芽，再点开「设置」，
+    // 最后点那一下。旧读取点 `#plan` 本身没变，变的是**够到它的路径**。
+    const coachEntryClick = await mouseClick('#coach-entry');
+    await sleep(320);
+    const settingsClick = await mouseClick('#xy-settings > summary');
+    await sleep(320);
+    const planClick = await mouseClick('#plan');
     await waitFor(`document.getElementById('hint') && !document.getElementById('hint').hidden
       && document.querySelectorAll('#hint-body [data-cmp-action]').length>=2`, {tries: 80, ms: 250});
     await sleep(400);
@@ -1329,13 +1366,21 @@ async function main() {
         legalLabels:legal.map(nameOf).filter(Boolean),
         text:body.innerText.replace(/\s+/g,' ').slice(0,400),
         planMode:window.rocoDemo.state.view?.ruleset_config_id??null,
+        hintHidden:Boolean(document.getElementById('hint')?.hidden),
+        hasPlan:Boolean(window.rocoDemo.state.plan),
+        bodyLen:(body.innerHTML||'').length,
         status:(document.getElementById('plan-status')||{}).textContent||''});})()`));
+    coachFacts.clickPath = `小芽入口 ${coachEntryClick?.top?.path ?? '—'} / 设置 ${settingsClick?.top?.path ?? '—'} / 看一眼 ${planClick?.top?.path ?? '—'}`;
     const coachProblems = coachCompareProblems(coachFacts);
     check('36-候选规则下的 Coach 取舍', 'v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、'
-      + '未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数',
+      + '未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数。'
+      + '【按人类 2026-09-23 版式，「让小芽看一眼」已整合进小芽面板 → 读取点不变（`#plan` / `#hint-body`），'
+      + '但必须先真鼠标点开小芽、再点开「设置」才够得到它（旧路径是页面上一个常驻按钮）】',
       coachProblems.length === 0,
-      coachProblems.join(' | ') || `并列 ${coachFacts.actions} 条（${JSON.stringify(coachFacts.labels)}）`
-        + `；未来 ${coachFacts.futures} 条；规则配置 ${coachFacts.planMode}`);
+      (coachProblems.join(' | ') || `并列 ${coachFacts.actions} 条（${JSON.stringify(coachFacts.labels)}）`
+        + `；未来 ${coachFacts.futures} 条；规则配置 ${coachFacts.planMode}`)
+      + `；诊断（浮条 hidden=${coachFacts.hintHidden} / 有 plan=${coachFacts.hasPlan} / 取舍区 ${coachFacts.bodyLen} 字节 / `
+      + `状态「${String(coachFacts.status).slice(0, 90)}」/ 点击命中 ${coachFacts.clickPath}）`);
     counter('36-候选规则下的 Coach 取舍(编动作)', '建议里混进一个引擎没给的动作必须被同一条判据抓住',
       coachCompareProblems({...coachFacts, labels: [...coachFacts.labels, '旋风无敌斩']}), '{"labels":[…,"旋风无敌斩"]}');
     counter('36-候选规则下的 Coach 取舍(胜率)', '把「胜率 58%」写进取舍区必须被同一条判据抓住',

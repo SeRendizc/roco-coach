@@ -168,10 +168,16 @@ async function main(){
   const data=JSON.parse(await js(`(()=>{const d=document.body.dataset;
    const out={};for(const k of Object.keys(d))if(k.startsWith('roco'))out[k]=d[k];
    const txt=(id)=>{const el=document.getElementById(id);return el?(el.textContent||'').trim().slice(0,300):null;};
+   // 2026-09-23（v3h）：战斗页可见读数一律走片段自己的钩子 —— 旧的 `#self-pets`/`#foe-field`/
+   // `#foe-bench`/`#events`/`#actions` 都被收进了 `#b3-sink[hidden]` 或收起的旧面板里
+   //（`innerText` 对隐藏子树仍会吐 textContent，拿它当「玩家可见文本」是在量没显示的东西）。
+   const v3=(sel)=>{const el=document.querySelector(sel);
+     return el?(el.innerText||el.textContent||'').replace(/\\s+/g,' ').trim().slice(0,300):null;};
    return JSON.stringify({datasets:out,hintText:txt('hint-text'),hintWhy:txt('hint-why'),
-    events:txt('events'),actions:txt('actions'),roster:txt('roster-status'),
-    selfPets:txt('self-pets'),foeField:txt('foe-field'),foeBench:txt('foe-bench'),
-    planStatus:txt('plan-status'),actionButtons:document.querySelectorAll('#actions button[data-action]').length,
+    events:v3('.b3-log-scroll'),actions:v3('.b3-col--left')||v3('.b3-footer'),roster:txt('roster-status'),
+    selfPets:v3('[data-b3-self-card]'),foeField:v3('[data-b3-foe-card]'),foeBench:v3('#b3-dots-foe'),
+    planStatus:txt('plan-status'),
+    actionButtons:document.querySelectorAll('.b3-wrap [data-b3-action]').length,
     drawerOpen:Boolean(document.getElementById('about-drawer')&&document.getElementById('about-drawer').open),
     hintHidden:Boolean(document.getElementById('hint')&&document.getElementById('hint').hidden)});})()`));
   snapshots.push({step:label,...data});
@@ -202,19 +208,24 @@ async function main(){
  await js('window.rocoDemo.startBattle()');
  for(let i=0;i<160;i++){if(await js(`document.body.dataset.rocoView==='ready'`))break;await sleep(250);}
  check('开局后页面拿到公开局面',(await js(`document.body.dataset.rocoView`))==='ready');
- check('合法动作渲染成按钮（不只是文字）',(await js(`document.querySelectorAll('#actions button[data-action]').length`))>0);
+ check('合法动作渲染成按钮（不只是文字）',
+  (await js(`document.querySelectorAll('.b3-wrap [data-b3-action]').length`))>0);
  // ── 产品判据：技能按钮要写清「这是什么技能」 ──────────────────────────
  // 位置很关键：必须在**对局进行中**检查。放到最后检查的话，局已经打完、
  // 按钮被清空，`innerText` 是空的——第一版就是这么写的，判红但原因是位置错了。
- const actionText=await js(`document.getElementById('actions').innerText`);
+ //
+ // 2026-09-23（v3h）：读取点从旧行动坞 `#actions`（战斗态收起）迁到 v3h 左列技能格 +
+ // 底栏四选项；`innerText` 只算**真的渲染出来**的那部分，隐藏的旧坞不再参与。
+ const actionText=await js(`(()=>{const root=document.querySelector('.b3-wrap');
+   return root?root.innerText:'';})()`);
  check('动作按钮上有技能信息（系别/能耗/威力或说明）',
-  /系|能耗|威力|换人|道具/.test(actionText), actionText.slice(0,90).replace(/\s+/g,' '));
+  /系|能耗|威力|换人|道具|更换|物品|预期伤害/.test(actionText), actionText.slice(0,90).replace(/\s+/g,' '));
  // 2026-09-22：这条量的是**玩家读到的文本**有没有内部 id。原来扫 `innerHTML`，
  // 而战斗页 v2 为了「判据能逐格对齐引擎动作」把 `skill_id` 放进 `data-*` 钩子
  // （按既有分层：内部 id 去 `data-*` 与开发者抽屉，玩家层只留中文）——
  // 扫 HTML 会把那些**刻意的钩子**当成泄漏。改成扫可见文本。
  check('动作按钮上不出现技能内部 id（只看玩家可见文本）',
-  !/skill_\d/.test(await js(`document.getElementById('actions').innerText`)),
+  !/skill_\d/.test(actionText),
   actionText.slice(0,60).replace(/\s+/g,' '));
  // 第 64 轮口径：引擎没给威力的技能，按钮上**整段不写**（原来写的是「威力来源未给」，
  // 那是 `power_status: 'not_provided_by_source'` 的直译，是工程话）。
@@ -1087,18 +1098,52 @@ async function main(){
 
  // ── 真实鼠标/键盘交互：点不动的卡必须有反馈，切侧必须看得出来（第 45 轮 UX hotfix）──
  //
- // 对局进行中阵容选择是**收起**的（第 46 轮减重），所以先用真实鼠标点「重选阵容」把它放出来——
- // 这条同时也验收了「收起之后还能一键回来」。
- const briefVisible=await js(`(()=>{const b=document.getElementById('lineup-brief');
-   return JSON.stringify({briefShown:b?!b.hidden:null,panelHidden:document.getElementById('select-panel').hidden,
-     hasReopen:Boolean(document.getElementById('reopen-pick'))});})()`);
- if (JSON.parse(briefVisible).panelHidden) {
-  await mouseClick('#reopen-pick');
-  const reopened=await js(`document.getElementById('select-panel').hidden`);
-  check('对局进行中阵容选择是收起的，点「重选阵容」能真的放出来',
-    JSON.parse(briefVisible).briefShown===true&&reopened===false,
-    `briefShown=${JSON.parse(briefVisible).briefShown} reopened=${reopened===false?'已展开':'仍收起'}`);
- }
+ // 2026-09-23（v3h）等价改写：
+ //   · 旧「对局中先用真鼠标点『重选阵容』把阵容面放回来」——那个入口
+ //     （`#lineup-brief` 里的 `#reopen-pick`）已按人类规格收进 `#b3-sink[hidden]`，
+ //     对局中**不再提供**回选阵容的入口。等价断言换成：对局中阵容面收起（不占屏），
+ //     而 v3h 行动面（左列四格 + 底栏四选项 + 聚能）**常驻可见可点** ——
+ //     也就是「收起之后玩家不会卡在看不到动作的状态」这件事由 v3h 片段承担。
+ //   · 下面那一组（卡片点不动要有反馈 / 切侧要看得出来）量的是**阵容卡本身**，
+ //     所以先刷一次页面回到选阵容页再跑；所有交互仍然走真实鼠标 / 真实键盘。
+ const battleUi=await js(`(()=>{const vis=(sel)=>{const el=document.querySelector(sel);
+   if(!el)return null;const r=el.getBoundingClientRect();
+   return {hidden:Boolean(el.hidden)||r.width===0||r.height===0,w:Math.round(r.width),h:Math.round(r.height)};};
+   return JSON.stringify({select:vis('#select-panel'),workshop:vis('#team-workshop'),
+     picking:document.body.dataset.rocoPicking??null,
+     slots:document.querySelectorAll('.b3-wrap [data-b3-skill-slot]').length,
+     actionable:document.querySelectorAll('.b3-wrap [data-b3-action]').length,
+     charge:vis('#b3-charge'),tabs:document.querySelectorAll('.b3-wrap [data-b3-tab]').length,
+     reopen:vis('#reopen-pick')});})()`).then(JSON.parse);
+ const battleUiProblems=(f)=>{
+  const bad=[];
+  if(f?.picking!=='no') bad.push(`对局中 data-roco-picking=${f?.picking}（应为 no）`);
+  if(!f?.select?.hidden) bad.push('对局中阵容面（#select-panel）还占着屏幕');
+  if(!f?.workshop?.hidden) bad.push('对局中六宠工作台（#team-workshop）还占着屏幕');
+  if((f?.slots??0)!==4) bad.push(`v3h 技能左列 ${f?.slots} 格（规格是 4 格）`);
+  if(!(f?.actionable>0)) bad.push('v3h 行动面一个可点动作都没有（玩家会卡在看不到动作的状态）');
+  if(f?.charge?.hidden!==false) bad.push('底栏聚能入口不可见');
+  if((f?.tabs??0)!==4) bad.push(`底栏选项 ${f?.tabs} 个（规格是 4 个）`);
+  return bad;
+ };
+ check('对局进行中阵容面收起、行动面常驻（原「点『重选阵容』把阵容面放回来」由 v3h 行动面承担）',
+  battleUiProblems(battleUi).length===0,
+  battleUiProblems(battleUi).join(' | ')
+  || `阵容面 hidden=${battleUi.select?.hidden} / 工作台 hidden=${battleUi.workshop?.hidden}；`
+    + `picking=${battleUi.picking}；v3h 四格技能 ${battleUi.slots} 格、可点动作 ${battleUi.actionable} 个、`
+    + `底栏 ${battleUi.tabs} 个选项、聚能可见=${battleUi.charge?.hidden===false}；`
+    + `旧入口 #reopen-pick 现在 ${battleUi.reopen?.hidden?'不可见（隐藏接收槽）':'可见'}`);
+ // 必红反证：把「对局中行动面不可点 / 阵容面没收起」这个坏状态喂给**同一个检查器**，它必须报错。
+ const poisoned = battleUiProblems({...battleUi, actionable: 0, slots: 0, picking: 'yes',
+   select: {hidden: false}, workshop: {hidden: false}});
+ check('对局进行中阵容面收起、行动面常驻（反证：行动面不可点或阵容面没收起必须被抓）',
+  poisoned.length > 0 && poisoned.some((line) => /行动面|picking|占着屏幕/.test(line)),
+  `喂进去的坏状态被判：${JSON.stringify(poisoned)}`);
+ // 回到选阵容页（对局中的阵容入口已按人类规格移除；这一组量的是阵容卡本身）。
+ await cdp.send('Page.reload');
+ for(let i=0;i<80;i++){await sleep(250);if(await js(`document.body.dataset.rocoReady==='yes'`))break;}
+ await sleep(400);
+ await setViewport(1440,900);
  // 先把两个**固定定位**的悬浮层收起来：提示条（bottom:18px）与局末卡片（bottom:200px）
  // 会盖住页面右下角，被盖住的位置点下去落在浮层上——这跟「元素在视口外」一样，
  // 都属于「事件派发了但没落在你想的地方」，而且同样不会报错。

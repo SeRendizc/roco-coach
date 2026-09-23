@@ -1789,6 +1789,31 @@ function renderB3Panels(view) {
   }
 
   // ⑦ 子代理 C 报的 G2/G3/G4/G5（v3h 缺的落点，一次补齐）────────────────────
+  // G6（子代理 C 报）：**自己卡**的场上事实区也要接线 —— 引擎给了 buffs / statuses /
+  // 防御冷却就逐条写（没给保留 ghost 占位）。旧读取点 `#self-pets .ff-cooldown` 已收进隐藏槽，
+  // v3h 的落点就是 `[data-b3-self-buffs]`。实测反例：点「防御」后引擎 `defense_cooldown=2`，
+  // 自己卡上却全是空占位。
+  const selfCard = document.querySelector('[data-b3-self-card]');
+  const selfBuffs = selfCard?.querySelector('[data-b3-self-buffs]') ?? selfCard?.querySelector('.b3-buffs');
+  if (selfBuffs) {
+    const me = self[active] ?? null;
+    const rows = [];
+    if (Number.isFinite(me?.defense_cooldown) && me.defense_cooldown > 0) {
+      rows.push({kind: 'status', text: `防御冷却 ${me.defense_cooldown}`});
+    }
+    for (const [k, v] of Object.entries(me?.statuses ?? {})) {
+      if (Number(v) > 0) rows.push({kind: 'status', text: `${STATUS_LABEL[k] ?? k}${Number(v) > 1 ? ' ' + Number(v) : ''}`});
+    }
+    for (const [k, v] of Object.entries(me?.buffs ?? {})) {
+      if (Number(v) !== 0 && v !== null && v !== undefined) {
+        rows.push({kind: 'buff', text: `${buffLabel(k) ?? k} ${Number(v) > 0 ? '+' : ''}${v}`});
+      }
+    }
+    if (rows.length) {
+      selfBuffs.innerHTML = rows.map((r) => `<span class="b3-buff" data-b3-buff-kind="${r.kind}">${escapeHtml(r.text)}</span>`).join('');
+    }
+  }
+
   // G2 对手印记/增益：引擎给了就逐条画（没给保留 ghost 占位；不编）。
   const foeCard = document.querySelector('[data-b3-foe-card]');
   const foeBuffs = foeCard?.querySelector('[data-b3-foe-buffs]') ?? foeCard?.querySelector('.b3-buffs');

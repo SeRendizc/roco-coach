@@ -1,0 +1,11 @@
+node scripts/roco/verify-state-doc.mjs
+
+状态文档：声明 HEAD 7760304，当前 3b1079e，最近一次全绿运行 04f2278
+警告（不阻断）：最近一次全绿运行在 21 个提交之前（HEAD 3b1079e）：闸门该重跑了（这一条不阻断——否则提交一多就永远绿不了，第 45 轮实测踩到）
+警告（不阻断）：最近一次 verify:release 是 failed：失败套件 ["demo-acceptance","workshop-acceptance","roco-ux-acceptance","retained-assets"]（不阻断，但要说出来）
+警告（不阻断）：套件 demo-acceptance 最近一次是失败的
+警告（不阻断）：套件 workshop-acceptance 最近一次是失败的
+警告（不阻断）：套件 roco-ux-acceptance 最近一次是失败的
+警告（不阻断）：套件 retained-assets 最近一次是失败的
+不一致：
+  状态文档的 HEAD 落后当前 19 个提交：它说的「现状」已经很久不是现状了

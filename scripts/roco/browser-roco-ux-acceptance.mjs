@@ -492,7 +492,7 @@ async function main() {
       id:s.dataset.b3ItemId||null, grey:s.dataset.b3ItemGrey||null,
       label:((s.querySelector('[data-b3-item-name]')||{}).textContent||'').trim(),
       note:((s.querySelector('[data-b3-item-note]')||{}).textContent||'').trim()}));
-    // ⚠ `[data-b3-tab]` 会命中 \`<body data-b3-tab>\`（state 镜像）—— 必须排掉 html/body，
+    // ⚠ [data-b3-tab] 会命中 body（state 镜像）—— 必须排掉 html/body，
     //   否则「四个大选项」会数出一个 1440×843 的假选项。
     const tabs=[...document.querySelectorAll('[data-b3-tab]')]
       .filter((el)=>el!==document.body&&el!==document.documentElement)
@@ -505,7 +505,7 @@ async function main() {
       charge:{shown:Boolean(chargeBtn&&chargeRect.width>0&&chargeRect.height>0),
         text:chargeBtn?(chargeBtn.textContent||'').replace(/\\s+/g,' ').trim():null},
       hidden:Number(document.body.dataset.rocoActionsHidden||'0'),
-      // 玩家**看得见**的战斗区文本：`innerText` 天然排除 `hidden` 的隐藏接收槽（#b3-sink）。
+      // 玩家**看得见**的战斗区文本：innerText 天然排除 hidden 的隐藏接收槽（#b3-sink）。
       playerText:((document.getElementById('battle-panel')||{}).innerText||'').replace(/\\s+/g,' '),
       hiddenRaw:((document.getElementById('hidden-actions-raw')||{}).textContent||''),
       hook:document.body.dataset.rocoActionGroups};})()`);
@@ -550,16 +550,30 @@ async function main() {
   }
   if (actionFacts.tabs.some((t) => t.h < 44)) groupProblems.push('底栏有选项高度 <44px');
   // 四个选项必须**真的切屏**：用真鼠标逐个点过去，读 `body[data-b3-tab]`（状态镜像）。
+  //
+  // ⚠ 清场（实测踩到）：上面 `P0-2-auto-hint` 把军师浮条留在了屏幕上，而它是
+  // `position:fixed; bottom:…; width:min(680px,…)` 居中的浮层 —— 正好压住 v3h 底栏
+  // **最左边那个「技能」选项**（实测：点「技能」落在浮条上，`body[data-b3-tab]` 不变）。
+  // 这与 `demo-acceptance` 的 `hideFloats()` 是同一手法：浮层不是这一段要量的东西，收起来再点；
+  // 同时下面每条都加一次 `elementFromPoint` 命中检查 —— 遮住了就报出来，不许悄悄点空。
+  await js(`(()=>{for(const id of ['hint','pet-detail','lesson-card']){
+    const el=document.getElementById(id);if(el)el.hidden=true;}
+    const drawer=document.getElementById('about-drawer');if(drawer)drawer.open=false;return true;})()`);
   const tabWalk = [];
   for (const want of ['switch', 'item', 'escape', 'skill']) {
     if (!actionFacts.tabs.some((t) => t.tab === want)) { tabWalk.push({tab: want, ok: false, actual: '缺这个选项'}); continue; }
     let actual = null;
     let ok = false;
     try {
-      await mouseClick(`.b3-wrap [data-b3-tab="${want}"]`);
+      const r = await mouseClick(`.b3-wrap [data-b3-tab="${want}"]`);
       await sleep(220);
+      // 真鼠标点下去必须**落在那个选项上**（没被浮层盖住）。
+      const hitSelf = await js(`(()=>{const el=document.elementFromPoint(${r.x},${r.y});
+        const t=document.querySelector('.b3-wrap [data-b3-tab="${want}"]');
+        return Boolean(el&&t&&(el===t||t.contains(el)||el.contains(t)));})()`);
       actual = await js(`document.body.dataset.b3Tab ?? null`);
-      ok = actual === want;
+      ok = actual === want && hitSelf === true;
+      if (!hitSelf) actual = `${actual}（点空了：那个坐标上不是这个选项）`;
     } catch (error) { actual = `点了报错：${error.message}`; }
     tabWalk.push({tab: want, ok, actual});
   }
@@ -681,23 +695,82 @@ async function main() {
     overflow390.clientW === overflow390.scrollW,
     `clientW/scrollW=${overflow390.clientW}/${overflow390.scrollW}`);
   const narrowTooSmall = narrow.rows.filter((t) => t.h < 44);
-  check('P0-7-390-tap', '390×844 下每个动作条高度 ≥44px',
+  check('P0-7-390-tap', '390×844 下每个可点动作条高度 ≥44px。'
+    + '【按人类 2026-09-23 版式，读取点从旧行动坞 `#actions button[data-action]` 迁到 '
+    + 'v3h 技能格 `[data-b3-skill-slot]` 与底栏四选项 `[data-b3-tab]`】',
     narrow.rows.length > 0 && narrowTooSmall.length === 0,
-    `${narrow.rows.length} 个动作条，最矮 ${Math.min(...narrow.rows.map((t) => t.h))}px`);
+    `${narrow.rows.length} 个可点目标（底栏当前屏 ${narrow.tab}），最矮 ${Math.min(...narrow.rows.map((t) => t.h))}px；`
+    + `<44px 的有 ${narrowTooSmall.length} 个`);
   check('P0-2-390-same-screen', '390×844 下输入框与最近一句回复仍在首屏',
     narrow.vis.inputInView === true && narrow.vis.replyInView === true,
     `输入 ${JSON.stringify(narrow.vis.input)} / 回复 ${JSON.stringify(narrow.vis.reply)} / 视口 ${JSON.stringify(narrow.vis.viewport)}`
     + ` / 底栏 ${narrow.vis.bottombar}px 动作坞 ${JSON.stringify(narrow.vis.actionPanel)} 动作坞上界 ${narrow.vis.actionCap}px`);
   const shotBattle390 = await shoot('battle-390x844');
-  // 顶部对称信息（P0-6）：双方资源条 + 队伍状态都在
-  const topInfo = await js(`(()=>{const self=document.getElementById('self-resource').textContent.trim();
-    const foe=document.getElementById('foe-resource').textContent.trim();
-    const line=document.getElementById('self-roster-line').textContent.trim();
-    return {self,foe,line,selfW:Math.round(document.getElementById('self-bar').getBoundingClientRect().width),
-      foeW:Math.round(document.getElementById('foe-bar').getBoundingClientRect().width)};})()`);
-  check('P0-6-top', '战斗页顶部对称给出双方资源（未核验就如实写）与队伍状态',
-    /未核验/.test(topInfo.self) && /未核验/.test(topInfo.foe) && /还能打/.test(topInfo.line),
-    `我方「${topInfo.self.slice(0, 24)}…」对手「${topInfo.foe.slice(0, 24)}…」；队伍状态「${topInfo.line.slice(0, 24)}」`);
+  // ── P0-6 顶部对称信息：双方「资源 + 队伍状态」（读取点已迁到 v3h 顶栏）─────────
+  // 旧读取点 `#self-resource` / `#foe-resource` / `#self-roster-line` / `#self-bar` / `#foe-bar`
+  // 里，`#self-bar` / `#foe-bar` **已经不存在**，其余三个被收进 `#b3-sink[hidden]`（玩家看不到）。
+  // 按人类 2026-09-23 版式，顶部信息栏由**双方存活点** `#b3-dots-self` / `#b3-dots-foe` 承担：
+  //   · 原「资源（未核验就如实写）」→ 心形计数在引擎没给数据时**保持 hidden**（fail-closed，不编）；
+  //   · 原「队伍状态 · 还能打 N/N」→ 由存活点承担（● 存活 / ○ 倒下，点数来自公开视图）。
+  const topInfo = await js(`(()=>{const dotsOf=(id)=>{const el=document.getElementById(id);
+    if(!el)return null;const r=el.getBoundingClientRect();
+    return {txt:(el.textContent||'').replace(/\\s+/g,''),
+      alive:((el.querySelector('.alive')||{}).textContent||'').length,
+      down:((el.querySelector('.down')||{}).textContent||'').length,
+      w:Math.round(r.width),h:Math.round(r.height),top:Math.round(r.top),left:Math.round(r.left)};};
+    const v=window.rocoDemo.state.view;
+    const hearts={self:document.getElementById('b3-hearts-self'),foe:document.getElementById('b3-hearts-foe')};
+    const bar=document.getElementById('b3-topbar');
+    const br=bar?bar.getBoundingClientRect():null;
+    return {self:dotsOf('b3-dots-self'),foe:dotsOf('b3-dots-foe'),vw:window.innerWidth,
+      teamSize:(v&&v.self&&v.self.pets)?v.self.pets.length:null,
+      topbar:br?{top:Math.round(br.top),bottom:Math.round(br.bottom),left:Math.round(br.left),right:Math.round(br.right)}:null,
+      selfAlive:(v.self.pets||[]).filter((p)=>p.fainted!==true).length,
+      foeAlive:Number.isFinite(v.opponent.living_count)?v.opponent.living_count:null,
+      heartsHidden:{self:hearts.self?hearts.self.hidden:null,foe:hearts.foe?hearts.foe.hidden:null},
+      mode:((document.getElementById('b3-mode')||{}).textContent||'').replace(/\\s+/g,' ').trim(),
+      round:((document.getElementById('b3-round')||{}).textContent||'').replace(/\\s+/g,' ').trim()};})()`);
+  const topProblems = (f) => {
+    const bad = [];
+    if (!f?.self || !f?.foe) { bad.push('顶栏缺一侧的存活点（#b3-dots-self / #b3-dots-foe）'); return bad; }
+    const total = Number.isFinite(f.teamSize) ? f.teamSize : null;
+    if (total === null) bad.push('读不到队伍规模（view.self.pets）');
+    if (total !== null && f.self.alive + f.self.down !== total) {
+      bad.push(`我方存活点不是 ${total} 个（「${f.self.txt}」）`);
+    }
+    if (total !== null && f.foe.alive + f.foe.down !== total) {
+      bad.push(`对手存活点不是 ${total} 个（「${f.foe.txt}」）`);
+    }
+    if (f.self.alive !== f.selfAlive) bad.push(`我方存活点 ${f.self.alive} 与公开视图 ${f.selfAlive} 不一致`);
+    if (f.foe.alive !== f.foeAlive) bad.push(`对手存活点 ${f.foe.alive} 与公开视图 ${f.foeAlive} 不一致`);
+    if (!/^[●○]*$/.test(String(f.foe.txt))) bad.push(`对手存活点上出现了名字（公开信息边界）：「${f.foe.txt}」`);
+    // 「左右两端对称」这条按 v3h 的版式分两档量（CSS：宽屏三列 grid，窄屏单列）：
+    //   宽屏 → 我方在左、对手在右，且两组**垂直中心相等**；窄屏 → 单列，我方在上、对手在下。
+    if (f.vw >= 800) {
+      if (!(f.self.left < f.foe.left)) bad.push('宽屏下两侧存活点不是左右分布（我方应在左）');
+      if (Math.abs(f.self.top - f.foe.top) > 8) bad.push(`两侧存活点不在同一条基线上（${f.self.top} / ${f.foe.top}）`);
+    } else if (!(f.self.top < f.foe.top)) {
+      bad.push('窄屏（单列）下我方存活点不在对手上面');
+    }
+    if (f.topbar && (f.self.top < f.topbar.top - 1 || f.foe.bottom > f.topbar.bottom + 1)) {
+      bad.push(`存活点跑出了顶栏（顶栏 ${f.topbar.top}–${f.topbar.bottom}）`);
+    }
+    if (f.heartsHidden.self !== true || f.heartsHidden.foe !== true) {
+      bad.push(`引擎没给心形计数，页面却把心画出来了（self=${f.heartsHidden.self} foe=${f.heartsHidden.foe}）`);
+    }
+    if (!f.mode) bad.push('页眉中间列没有模式（#b3-mode）');
+    if (!/第\s*\d+\s*回合/.test(String(f.round))) bad.push(`页眉中间列没有「第 N 回合」（「${f.round}」）`);
+    return bad;
+  };
+  check('P0-6-top', '战斗页顶部对称给出双方状态（我方 6 点 / 对手只给点数）与页眉中间的「模式 + 第 N 回合」；'
+    + '引擎没给的心形计数如实收起（不编）。'
+    + '【按人类 2026-09-23 版式，原 `#self-resource`/`#foe-resource` 的「资源 · 未核验」由「心形计数保持 hidden」'
+    + '承担，原 `#self-roster-line` 的「还能打 N/N」与 `#self-bar`/`#foe-bar`（已删除）由双方存活点 '
+    + '`#b3-dots-self`/`#b3-dots-foe` 承担】',
+    topProblems(topInfo).length === 0,
+    topProblems(topInfo).join(' | ')
+    || `我方「${topInfo.self.txt}」对手「${topInfo.foe.txt}」；公开视图 ${topInfo.selfAlive}/${topInfo.foeAlive}；`
+      + `心形 hidden=${JSON.stringify(topInfo.heartsHidden)}；页眉「${topInfo.mode} / ${topInfo.round}」`);
 
   // 回到选择页拍 390 的名单
   await js(`(()=>{const d=window.rocoDemo;d.state.view=null;d.state.pick.open=true;d.render();return true;})()`);
@@ -729,11 +802,21 @@ async function main() {
     `开关 ${JSON.stringify(scopeToggle390)}；clientW/scrollW=${scopeOverflow390.clientW}/${scopeOverflow390.scrollW}`);
 
   // 模式徽记（D5）：读注册表，候选徽记与「匹配前对手未知」在首屏
+  //
+  // 2026-09-23（人类 v3h 版式）：页眉中间列是「模式 + 第 N 回合」（`#b3-mode` / `#b3-round`）。
+  // 旧的 `#mode-line`（页眉里那条三条口径的徽记）**已经不在 roco.html 里**
+  // （roco.html:5-6 的注释还在，说明三条口径本该「首屏可见」——元素被删了）。
+  // 所以这里：① 可见徽记读 `#b3-mode`；② 三条口径按**口径**读玩家层全文（不绑定某个元素，
+  // 少一句就红 —— 口径未放松）；③ 数据层与开发者抽屉的读取点不变。
   const modeFacts = await js(`(()=>{const d=document.body.dataset;
-    const line=document.getElementById('mode-line');
-    return {mode:d.rocoMode,prematch:d.rocoPrematch,standardPvp:d.rocoStandardPvp,
-      text:line.textContent.replace(/\\s+/g,' ').trim(),hidden:line.getBoundingClientRect().height===0,
-      top:Math.round(line.getBoundingClientRect().top),vh:window.innerHeight};})()`);
+    const badge=document.getElementById('b3-mode');
+    const clone=document.body.cloneNode(true);
+    const dev=clone.querySelector('#about-drawer');if(dev)dev.remove();
+    const player=(clone.innerText||'').replace(/\\s+/g,' ');
+    const r=badge?badge.getBoundingClientRect():{height:0,top:0};
+    return {mode:d.rocoMode??null,prematch:d.rocoPrematch??null,standardPvp:d.rocoStandardPvp??null,
+      text:badge?(badge.textContent||'').replace(/\\s+/g,' ').trim():null,
+      playerText:player,hidden:r.height===0,top:Math.round(r.top),vh:window.innerHeight};})()`);
   const statusMode = await fetch(`${base}api/roco/status`).then((r) => r.json()).then((d) => d.mode);
   // 2026-09-22 人类 P0：玩家那一行**不再印注册表枚举**（`UNKNOWN_PREMATCH` 属于验收台术语），
   // 于是判据拆成两层，各自钉该钉的：
@@ -743,8 +826,10 @@ async function main() {
   const modeProblems = (f, rawText) => {
     const bad = [];
     if (f?.mode !== 'pvp-standard-six-pet') bad.push(`模式 id 实际 ${JSON.stringify(f?.mode)}`);
-    if (!/候选规则（待实机核对）/.test(String(f?.text ?? ''))) bad.push('玩家层没有「候选规则（待实机核对）」');
-    if (!/匹配前对手未知/.test(String(f?.text ?? ''))) bad.push('玩家层没有「匹配前对手未知」');
+    // 玩家层：读**整个玩家层**（去掉默认收起的开发者抽屉）里有没有那两句中文结论。
+    if (!/候选规则（待实机核对）/.test(String(f?.playerText ?? ''))) bad.push('玩家层没有「候选规则（待实机核对）」');
+    if (!/匹配前对手未知/.test(String(f?.playerText ?? ''))) bad.push('玩家层没有「匹配前对手未知」');
+    // 可见徽记（页眉中间列）本身不许印注册表术语。
     if (/UNKNOWN_PREMATCH|注册表|引擎实际/.test(String(f?.text ?? ''))) {
       bad.push('玩家层出现了注册表/验收台术语（枚举名、注册表字样、引擎实际规模）');
     }
@@ -757,7 +842,9 @@ async function main() {
     const b=document.getElementById('mode-probe');
     return [a?a.textContent:'',b?b.textContent:''].join(' | ');})()`);
   check('D5-mode-badge', '模式徽记：玩家层是中文结论（候选规则（待实机核对）+ 匹配前对手未知），'
-    + '枚举与注册表原文留在数据层与开发者抽屉里，且首屏可见',
+    + '枚举与注册表原文留在数据层与开发者抽屉里，且首屏可见。'
+    + '【按人类 2026-09-23 版式，可见徽记读 `#b3-mode`（页眉中间列）；'
+    + '⚠ 旧读取点 `#mode-line` 已从 roco.html 删除 —— 三条口径目前无处渲染，这条会红】',
     modeProblems(modeFacts, modeRawText).length === 0,
     modeProblems(modeFacts, modeRawText).join(' | ')
     + `；徽记「${modeFacts.text}」；注册表 label「${statusMode?.label ?? '(服务端没转发 mode)'}」`);
@@ -766,10 +853,14 @@ async function main() {
     '{"text":"…UNKNOWN_PREMATCH"}');
   counter('D5-mode-badge(枚举丢了)', '数据层把 prematch 枚举丢掉必须被同一条判据抓住',
     modeProblems({...modeFacts, prematch: null}, modeRawText), '{"prematch":null}');
-  check('D5-no-fake-hearts', '页面上没有心形计数器（魔力/心只显示引擎给的数，没有就写未核验）',
+  check('D5-no-fake-hearts', '页面上没有心形计数器（心/魔力只显示引擎给的数，没有就如实收起、不编）。'
+    + '【按人类 2026-09-23 版式，旧读取点 `#self-resource` 的「未核验」由 v3h 心形计数 '
+    + '`#b3-hearts-self`/`#b3-hearts-foe` 保持 hidden 承担】',
     (await js(`!/[♥❤]/.test(document.body.innerText)`)) === true
-    && (await js(`/未核验/.test(document.getElementById('self-resource').textContent)`)) === true,
-    '页面正文无心形字符，资源条写的是「未核验」');
+    && (await js(`(()=>{const a=document.getElementById('b3-hearts-self');
+      const b=document.getElementById('b3-hearts-foe');
+      return Boolean(a&&b)&&a.hidden===true&&b.hidden===true;})()`)) === true,
+    '页面正文无心形字符，两侧心形计数都保持 hidden（引擎没给 → 不编）');
 
   // ── RC-502 战斗信息架构：场上事实（能量上限 / 印记 / 防御冷却）────────────
   //
@@ -927,128 +1018,242 @@ async function main() {
   await mouseClick('#start-battle');
   await waitFor(`document.body.dataset.rocoView==='ready' && !document.getElementById('battle-panel').hidden`);
   await sleep(600);
+  // 2026-09-23（人类 v3h 版式）：卡上读数从 `#self-pets`/`#foe-field`（旧渲染写入点，
+  // 现在都在 `#b3-sink[hidden]` 里）迁到中间两张镜像卡 `[data-b3-self-card]`/`[data-b3-foe-card]`，
+  // 聚能读数迁到底栏 `#b3-charge`。口径没松：还是「引擎给的数必须逐字画在卡上/底栏上」。
   const battleStart = await js(`(()=>{const v=window.rocoDemo.state.view;
+    const star=(side)=>{const el=document.querySelector('[data-b3-'+side+'-card] [data-b3-'+side+'-star]');
+      return el?(el.textContent||'').replace(/\\s+/g,' ').trim():null;};
+    const charge=document.getElementById('b3-charge');
+    const foeBuffs=document.querySelector('[data-b3-foe-card] [data-b3-foe-buffs]');
+    const chips=foeBuffs?[...foeBuffs.querySelectorAll('.b3-buff')]:[];
     return {turn:v?.turn,selfEnergy:v?.self?.pets?.[v.self.active]?.energy??null,
       cap:v?.self?.energy_max??null,foeCap:v?.opponent?.energy_max??null,
-      foeNote:(document.getElementById('foe-field-note')||{}).textContent||''};})()`);
+      selfStar:star('self'),foeStar:star('foe'),
+      chargeText:charge?(charge.textContent||'').replace(/\\s+/g,' ').trim():null,
+      engineBuffs:v?.self?.pets?.[v.self.active]?.buffs??null,
+      engineStatuses:v?.self?.pets?.[v.self.active]?.statuses??null,
+      foeBuffArea:foeBuffs?{chips:chips.length,
+        ghost:chips.filter((c)=>c.classList.contains('b3-buff--ghost')).length,
+        text:(foeBuffs.textContent||'').replace(/\\s+/g,' ').trim(),
+        nonGhost:chips.filter((c)=>!c.classList.contains('b3-buff--ghost'))
+          .map((c)=>({kind:c.dataset.b3BuffKind||null,text:(c.textContent||'').trim()}))}:null};})()`);
   check('RC502-能量上限来自引擎', '战斗卡的能量写成「当前 / 上限」，上限是引擎这一局的规则配置（legacy=6）给的',
     Number.isFinite(battleStart.cap) && battleStart.cap > 0 && battleStart.cap === battleStart.foeCap,
     `引擎上限 self=${battleStart.cap} foe=${battleStart.foeCap}，当前能量 ${battleStart.selfEnergy}`);
-  const energyRow = await js(`(()=>{const el=document.querySelector('#self-pets .ff-energy');
-    return el?el.textContent.replace(/\\s+/g,' ').trim():null;})()`);
-  check('RC502-能量行真的画在卡上', '自己那张卡上真的出现带上限的能量行（DOM 与引擎数值一致）',
-    energyRow !== null && energyRow.includes(String(battleStart.cap)) && energyRow.includes(String(battleStart.selfEnergy)),
-    `能量行「${energyRow}」；引擎 self=${battleStart.selfEnergy}/${battleStart.cap}`);
-  check('RC502-对手增益口径写在页面上', '对手那一侧的场上事实缺口有说明（引擎不给对手增益，页面照实说）',
-    /增益/.test(battleStart.foeNote),
-    `对手侧说明「${battleStart.foeNote}」`);
+  // 旧读取点 `#self-pets .ff-energy` 已被收进隐藏接收槽；v3h 的等价读数有两处：
+  // 卡上的 `[data-b3-self-star]`（⭐ 当前值）与底栏 `#b3-charge`（⭐ 当前 / 上限）。
+  const energyFacts = {
+    star: battleStart.selfStar,
+    charge: battleStart.chargeText,
+    selfEnergy: battleStart.selfEnergy,
+    cap: battleStart.cap,
+  };
+  const energyProblems = (f) => {
+    const bad = [];
+    if (!f?.star) bad.push('自己卡上没有 ⭐ 读数（[data-b3-self-star]）');
+    else if (!String(f.star).includes(String(f.selfEnergy))) bad.push(`卡上 ⭐「${f.star}」与引擎能量 ${f.selfEnergy} 不一致`);
+    if (!f?.charge) bad.push('底栏没有聚能读数（#b3-charge）');
+    else if (!String(f.charge).includes(String(f.selfEnergy)) || !String(f.charge).includes(String(f.cap))) {
+      bad.push(`底栏聚能「${f.charge}」没有同时写出当前值与引擎上限 ${f.cap}`);
+    }
+    return bad;
+  };
+  check('RC502-能量行真的画在卡上', '能量读数与引擎数值一致：卡上 ⭐ = 当前能量，底栏聚能 = 「⭐ 当前 / 引擎上限」。'
+    + '【按人类 2026-09-23 版式，旧读取点 `#self-pets .ff-energy`（已收进 `#b3-sink[hidden]`）由 '
+    + '`[data-b3-self-card] [data-b3-self-star]` + `#b3-charge` 承担】',
+    energyProblems(energyFacts).length === 0,
+    energyProblems(energyFacts).join(' | ')
+    || `卡上「${energyFacts.star}」/ 底栏「${energyFacts.charge}」；引擎 self=${energyFacts.selfEnergy}/${energyFacts.cap}`);
+  check('RC502-对手增益口径写在页面上', '对手那一侧的场上事实缺口照实说：增益/状态引擎不给 → 对手卡上只留空占位、一个字都不编。'
+    + '【按人类 2026-09-23 版式，旧读取点 `#foe-field-note`（已收进 `#b3-sink[hidden]`）由 '
+    + '`[data-b3-foe-card] [data-b3-foe-buffs]` 的 ghost 占位承担（设计稿：公开视图没有对手 buffs → 只留占位，别补）】',
+    Boolean(battleStart.foeBuffArea) && battleStart.foeBuffArea.chips > 0
+    && battleStart.foeBuffArea.text === ''
+    && battleStart.foeBuffArea.nonGhost.every((c) => c.kind === 'mark'),
+    `对手卡增益区 ${JSON.stringify(battleStart.foeBuffArea)}；`
+    + `对手增益/状态在公开视图里 ${battleStart.foeBuffArea && battleStart.foeBuffArea.ghost > 0 ? '没有 → 只留 ghost 占位' : '被写出来了'}`);
 
   // 真鼠标点「错乱」（描述里带 星陨印记 的那一招）→ 对面获得 3 层印记。
-  const markIdx = await js(`(()=>{const rows=[...document.querySelectorAll('#actions button[data-action]')];
-    const hit=rows.findIndex((b)=>((b.querySelector('.act-desc')||{}).textContent||'').includes('星陨印记'));
-    if(hit<0)return -1;rows[hit].dataset.rc502='mark';return hit;})()`);
-  if (markIdx >= 0) {
-    await mouseClick('#actions button[data-action][data-rc502="mark"]');
+  //
+  // 2026-09-23（v3h）：找那一招的办法从「扫旧行动坞按钮的 `.act-desc`」改成
+  // 「在**引擎自己的动作表**里找 `skill_id`，再去 v3h 技能格上按同一个 `skill_id` 点它」——
+  // v3h 技能格上不再有说明层（人类规格把说明移出战斗主视线），但找法与点法仍在公开数据上。
+  const markTarget = await js(`(()=>{const d=window.rocoDemo;const v=d.state.view;
+    // 那一招的说明**引擎就写在动作里**（legal[].skill.desc）—— 与旧行动坞 actionCardHtml
+    // 渲染 .act-desc 用的是同一个字段；名单里的 moveset 只作为兜底（全量视野选进来的那只
+    // 可能已经不在当前页的 pool.rows 里）。
+    const roster=(d.state.roster||[]).concat((d.state.pool&&d.state.pool.rows)||[]);
+    const rosterDesc=(id)=>{for(const row of roster){for(const m of (row.moveset||[])){
+      if(m.skill_id===id)return String(m.desc||'');}}return '';};
+    const legal=(v&&v.legal)||[];
+    const descOf=(a)=>{const sid=a.skill_id!==undefined&&a.skill_id!==null?a.skill_id:(a.skill&&a.skill.skill_id);
+      return String((a.skill&&a.skill.desc)||rosterDesc(sid)||'');};
+    const act=legal.find((a)=>a.kind==='skill'&&descOf(a).includes('星陨印记'));
+    if(!act)return JSON.stringify({found:false,skillId:null,clickable:false});
+    const sid=act.skill_id!==undefined&&act.skill_id!==null?act.skill_id:(act.skill&&act.skill.skill_id);
+    const slot=document.querySelector('.b3-wrap [data-b3-skill-slot][data-b3-skill-id="'+sid+'"]');
+    if(!slot||slot.dataset.b3ActionKind!=='skill')return JSON.stringify({found:true,skillId:sid,clickable:false});
+    slot.dataset.rc502='mark';
+    return JSON.stringify({found:true,skillId:sid,clickable:true});})()`).then(JSON.parse);
+  if (markTarget.clickable) {
+    await mouseClick('.b3-wrap [data-b3-skill-slot][data-rc502="mark"]');
     await waitFor(`(()=>{const v=window.rocoDemo.state.view;
       const m=v&&v.opponent&&v.opponent.field&&v.opponent.field.marks;
-      return Boolean(m&&Object.keys(m).length);})()`, 20000);
+      return Boolean(m&&Object.keys(m).length);})()`, 60, 250);
     await sleep(350);
   }
   const markFacts = await js(`(()=>{const v=window.rocoDemo.state.view;
     const engine=(v&&v.opponent&&v.opponent.field&&v.opponent.field.marks)||null;
-    const facts=document.querySelector('#foe-field .pet-facts');
-    const row=document.querySelector('#foe-field .ff-mark');
-    return {engine,hook:facts?facts.dataset.rocoFieldFacts:null,
-      row:row?row.textContent.replace(/\\s+/g,' ').trim():null};})()`);
+    const buffs=document.querySelector('[data-b3-foe-card] [data-b3-foe-buffs]');
+    const chips=buffs?[...buffs.querySelectorAll('.b3-buff')]:[];
+    return {engine,target:${JSON.stringify(markTarget)},
+      // v3h 对手卡的「场上事实」区：data-b3-buff-kind 分 status / buff / mark 三类。
+      buffArea:buffs?{chips:chips.length,
+        ghost:chips.filter((c)=>c.classList.contains('b3-buff--ghost')).length,
+        text:(buffs.textContent||'').replace(/\\s+/g,' ').trim(),
+        nonGhost:chips.filter((c)=>!c.classList.contains('b3-buff--ghost'))
+          .map((c)=>({kind:c.dataset.b3BuffKind||null,text:(c.textContent||'').replace(/\\s+/g,' ').trim()}))}:null};})()`);
   const engineMarks = markFacts.engine ? Object.entries(markFacts.engine) : [];
-  const markProblems = ({engine, row, hook}) => {
+  // 口径未放松：引擎给了印记 → 对手卡上必须**逐条**把 名字 + 层数 画出来（名字与层数逐字一致）。
+  // 找到的「印记芯片」按 `data-b3-buff-kind="mark"` 认（v3h 设计稿给三类占位：status / buff / mark）。
+  const markProblems = ({engine, buffArea, target}) => {
     const entries = engine ? Object.entries(engine) : [];
     const bad = [];
     if (entries.length === 0) bad.push('引擎这一手没给印记（场景没驱动到）');
-    if (row === null) bad.push('页面上没有印记那一行');
+    if (target && target.found === true && target.clickable === false) {
+      bad.push('引擎给了这一招，v3h 技能格上却没有可点的对应格（data-b3-skill-id 没写或没写成可点）');
+    }
+    if (!buffArea || buffArea.chips === 0) {
+      bad.push('对手卡上没有「场上事实」区（[data-b3-foe-buffs] 缺）');
+      return bad;
+    }
+    const markChips = (buffArea.nonGhost ?? []).filter((c) => c.kind === 'mark');
+    const markText = markChips.map((c) => c.text).join(' ');
+    if (!markChips.length) bad.push('对手卡上没有印记芯片（data-b3-buff-kind="mark" 的占位）——引擎给的印记无处落地');
     for (const [name, layers] of entries) {
-      if (row !== null && !row.includes(name)) bad.push(`印记行里没有「${name}」`);
-      if (row !== null && !row.includes(String(layers))) bad.push(`印记行里没有层数 ${layers}`);
-      if (!String(hook ?? '').includes(`marks=${name}:${layers}`)) bad.push(`钩子里没有 marks=${name}:${layers}`);
+      if (!markText.includes(name)) bad.push(`印记芯片里没有「${name}」`);
+      if (!markText.includes(String(layers))) bad.push(`印记芯片里没有层数 ${layers}`);
     }
     return bad;
   };
-  check('RC502-印记逐条画在对手卡上', '真鼠标打出一手带印记的技能：对面卡上出现印记，名字与层数与引擎逐字一致',
+  check('RC502-印记逐条画在对手卡上', '真鼠标打出一手带印记的技能：对面卡上出现印记，名字与层数与引擎逐字一致。'
+    + '【按人类 2026-09-23 版式，旧读取点 `#foe-field .ff-mark`（已收进 `#b3-sink[hidden]`）由 '
+    + '`[data-b3-foe-card] [data-b3-foe-buffs]` 里 `data-b3-buff-kind="mark"` 的那一格承担】',
     markProblems(markFacts).length === 0,
-    `引擎 ${JSON.stringify(markFacts.engine)}；页面那一行「${markFacts.row}」；钩子「${markFacts.hook}」`
-    + `；问题 ${markProblems(markFacts).join(' | ') || '无'}`);
-  counter('RC502-印记逐条画在对手卡上', '把印记那一行删掉（页面少画一行）必须被同一条判据抓住',
-    markProblems({...markFacts, row: null}), 'row=null');
+    `引擎 ${JSON.stringify(markFacts.engine)}；目标 ${JSON.stringify(markFacts.target)}；`
+    + `对手卡事实区 ${JSON.stringify(markFacts.buffArea)}；问题 ${markProblems(markFacts).join(' | ') || '无'}`);
+  counter('RC502-印记逐条画在对手卡上', '把印记那一格删掉（页面少画一格）必须被同一条判据抓住',
+    markProblems({...markFacts, buffArea: {...markFacts.buffArea, nonGhost: []}}), 'nonGhost=[]');
 
-  // 真鼠标点「防御」→ 自己卡上出现防御冷却行（术语 1016）。
+  // 真鼠标点「防御」→ 自己卡上出现防御冷却（术语 1016）。
+  //
+  // 2026-09-23（v3h）：读取点从 `#self-pets .ff-cooldown`（已收进 `#b3-sink[hidden]`）
+  // 迁到中间那张自己卡的**场上事实区** `[data-b3-self-card] [data-b3-self-buffs]`。
+  // 口径没松：引擎给了冷却，卡上就必须逐字出现那个数字；全是空占位 = 红。
   //
   // 陷阱（实测踩到）：首发的幽星光配招里**没有**防御招，而且打完印记那一手之后场上
   // 随时可能进入补位。所以这一段的做法是**像玩家一样打**：先看这一手的技能里有没有
-  // 防御（`应对攻击` 那类才有冷却），没有就真鼠标点「换上」把带防御的那只换上来，
+  // 防御（`应对攻击` 那类才有冷却），没有就真鼠标点「更换」屏里的行把带防御的那只换上来，
   // 再点防御。找不到防御招时 `actual` 里直接列出当时可选的动作 ——
   // 「点不到」与「点了但没生效」是两件事，报告必须能分清。
   let cooldownRow = null;
   let cooldownEngine = null;
   let cooldownAfter = null;
   const defendTrace = [];
+  const selfFactsNow = () => js(`(()=>{const card=document.querySelector('[data-b3-self-card]');
+    const box=card?card.querySelector('[data-b3-self-buffs]'):null;
+    const v=window.rocoDemo.state.view;
+    const p=v&&v.self&&v.self.pets?v.self.pets[v.self.active]:null;
+    const chips=box?[...box.querySelectorAll('.b3-buff')]:[];
+    return JSON.stringify({turn:v?v.turn:null,active:v?v.self.active:null,present:Boolean(p),
+      name:p?p.name:null,value:p?p.defense_cooldown:null,
+      box:box?{chips:chips.length,
+        ghost:chips.filter((c)=>c.classList.contains('b3-buff--ghost')).length,
+        text:(box.textContent||'').replace(/\\s+/g,' ').trim()}:null});})()`).then(JSON.parse);
   for (let attempt = 0; attempt < 6 && cooldownEngine === null; attempt += 1) {
     // 一次扫清楚：这一手有没有防御招；没有就找一只**配招里带防御**的后备换上去。
-    // 配招从公开视图自己的 `self.loadouts` 读（那是自己的信息，不是猜的）。
+    // 配招从页面自己已经拿到的名单里读（那是自己的信息，不是猜的）。
     const scan = await js(`(()=>{const v=window.rocoDemo.state.view;
-      // 对手补位的那一手页面**故意不渲染任何动作卡**（人类规格：那一刻不需要玩家操作），
-      // 所以扫到 0 张卡时这条判据应当等下一手，而不是判红。
-      const rows=[...document.querySelectorAll('#actions button[data-action]')];
-      rows.forEach((b)=>delete b.dataset.rc502);
-      // v2：按钮文本里带消耗徽记（「🌟 1 防御」）→ 取**名字**那一处，避免匹配不到。
-      const labels=rows.map((b)=>({kind:b.dataset.kind,
-        label:((b.querySelector('.skill-top strong')||b.querySelector('span')||{}).textContent||'').trim()}));
-      if(!v)return {kind:null,labels,turn:null,active:null,defenders:[]};
+      const slots=[...document.querySelectorAll('.b3-wrap [data-b3-skill-slot]')];
+      const switchRows=[...document.querySelectorAll('.b3-wrap [data-b3-switch-row]')];
+      [...slots,...switchRows].forEach((el)=>delete el.dataset.rc502);
+      const labels=slots.map((s)=>({kind:'skill',
+        label:((s.querySelector('[data-b3-skill-name]')||{}).textContent||'').trim()}));
+      if(!v)return {kind:null,labels,turn:null,active:null,defenders:[],cards:0};
       const legal=v.legal||[];
       // 「谁带防御」从**页面自己已经拿到的名单**里读：名单那一次回执（state.roster）
-      // 与阵容池每一页（pool.rows）都带 four-skill moveset —— 换人卡上的名字也是同一来源。
-      // （服务端的 UI 公开面**没有**逐只 loadouts，所以这里不许假装有。）
-      const roster=(window.rocoDemo.state.roster||[]).concat(window.rocoDemo.state.pool.rows||[]);
+      // 与阵容池每一页（pool.rows）都带 four-skill moveset —— 更换屏上的名字也是同一来源。
+      const roster=(window.rocoDemo.state.roster||[]).concat((window.rocoDemo.state.pool&&window.rocoDemo.state.pool.rows)||[]);
       const movesOf=(petId)=>{const r=roster.find((p)=>p.pet_id===petId);return (r&&r.moveset)||[];};
       const defenders=(v.self.pets||[]).map((p,i)=>({slot:i,name:p.name,petId:p.pet_id,
         hasDefense:movesOf(p.pet_id).some((m)=>String(m.name||'').includes('防御'))}));
-      let idx=rows.findIndex((b)=>b.dataset.kind==='skill'
-        &&((b.querySelector('span')||{}).textContent||'').trim().includes('防御'));
-      if(idx>=0){rows[idx].dataset.rc502='defend';
-        return {kind:'defend',labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,defenders};}
-      idx=rows.findIndex((b)=>{const a=legal[Number(b.dataset.action)];
-        return b.dataset.kind==='switch'&&a&&(defenders[a.target_index]||{}).hasDefense;});
-      if(idx>=0){rows[idx].dataset.rc502='swap';
-        return {kind:'swap',labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,defenders};}
-      return {kind:null,labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,defenders};})()`);
-    if (!scan.labels.length && scan.turn !== null) {
-      // 没有动作卡：先推进一手再来（这一手不需要玩家操作）
+      // ① 技能屏里有没有「防御」那一格（可点的那些）
+      const defend=slots.find((s)=>s.dataset.b3ActionKind==='skill'
+        &&((s.querySelector('[data-b3-skill-name]')||{}).textContent||'').trim()==='防御');
+      if(defend){defend.dataset.rc502='defend';
+        return {kind:'defend',labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,
+          defenders,cards:slots.length+switchRows.length,tab:'skill'};}
+      // ② 更换屏里有没有「换上一只带防御的」可点行
+      const swap=switchRows.find((s)=>s.dataset.b3ActionKind==='switch'
+        &&(defenders[Number(s.dataset.b3Target)]||{}).hasDefense);
+      if(swap){swap.dataset.rc502='swap';
+        return {kind:'swap',labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,
+          defenders,cards:slots.length+switchRows.length,tab:'switch'};}
+      return {kind:null,labels,turn:v.turn,active:(v.self.pets[v.self.active]||{}).name,
+        defenders,cards:slots.length+switchRows.length,tab:document.body.dataset.b3Tab||null};})()`);
+    if (scan.cards === 0 && scan.turn !== null) {
+      // 这一手页面**故意不渲染任何动作**（对手补位那一刻不需要玩家操作）→ 推进一手再来。
+      // 旧写法是点 `#auto-turn`，但那个按钮在小芽面板里、战斗态 0×0 点了不响 →
+      // 一律走 `window.rocoDemo.autoTurn()`（与人类 2026-09-23 的口径一致）。
       defendTrace.push({attempt, act: 'no-cards', turn: scan.turn, active: scan.active,
         defenders: [], labels: []});
-      try { await mouseClick('#auto-turn'); } catch { break; }
-      await sleep(700);
+      await js('window.rocoDemo.autoTurn()');
+      await sleep(900);
       continue;
     }
     defendTrace.push({attempt, act: scan.kind, turn: scan.turn, active: scan.active,
       defenders: (scan.defenders || []).filter((d) => d.hasDefense).map((d) => d.name),
       labels: scan.labels.map((l) => l.label)});
     if (scan.kind === null) break;
-    await mouseClick(`#actions button[data-action][data-rc502="${scan.kind === 'defend' ? 'defend' : 'swap'}"]`);
+    // v3h：技能格与更换行分处两屏（靠 `body.dataset.b3Tab` 切），点之前先切到那一屏。
+    const wantTab = scan.kind === 'defend' ? 'skill' : 'switch';
+    if (await js(`document.body.dataset.b3Tab ?? null`) !== wantTab) {
+      await mouseClick(`.b3-wrap [data-b3-tab="${wantTab}"]`);
+      await sleep(260);
+    }
+    await mouseClick(`.b3-wrap [data-b3-${scan.kind === 'defend' ? 'skill-slot' : 'switch-row'}][data-rc502="${scan.kind}"]`);
     await sleep(1100);
     if (scan.kind !== 'defend') continue;
-    cooldownAfter = await js(`(()=>{const v=window.rocoDemo.state.view;
-      const p=v&&v.self&&v.self.pets&&v.self.pets[v.self.active];
-      return {turn:v?v.turn:null,active:v?v.self.active:null,present:Boolean(p),
-        name:p?p.name:null,value:p?p.defense_cooldown:null};})()`);
+    cooldownAfter = await selfFactsNow();
     cooldownEngine = cooldownAfter?.value ?? null;
-    cooldownRow = await js(`(()=>{const el=document.querySelector('#self-pets .ff-cooldown');
-      return el?el.textContent.replace(/\\s+/g,' ').trim():null;})()`);
+    cooldownRow = cooldownAfter?.box ? cooldownAfter.box.text : null;
     break;
   }
-  check('RC502-防御冷却画在自己卡上', '真鼠标点「防御」（必要时先换上带防御的那只）：自己卡上出现防御冷却，数字与引擎一致',
-    Number.isFinite(cooldownEngine) && cooldownEngine > 0 && cooldownRow !== null
-    && cooldownRow.includes(String(cooldownEngine)),
-    `引擎 ${JSON.stringify(cooldownAfter)}；页面那一行「${cooldownRow}」；`
-    + `过程 ${JSON.stringify(defendTrace)}`);
+  const cooldownProblems = (after) => {
+    const bad = [];
+    if (!Number.isFinite(after?.value) || !(after?.value > 0)) return bad;   // 场景没驱动到 → 报告里说清，不在这里判
+    if (!after?.box || after.box.chips === 0) {
+      bad.push('自己卡上没有「场上事实」区（[data-b3-self-buffs] 缺）——引擎给的防御冷却无处落地');
+      return bad;
+    }
+    if (after.box.ghost === after.box.chips) {
+      bad.push(`引擎给了防御冷却 ${after.value}，自己卡上却全是空占位（一个数都没搬）`);
+    } else if (!String(after.box.text).includes(String(after.value))) {
+      bad.push(`自己卡的场上事实里没有冷却 ${after.value}（「${after.box.text}」）`);
+    }
+    return bad;
+  };
+  check('RC502-防御冷却画在自己卡上', '真鼠标点「防御」（必要时先切到更换屏把带防御的那只换上来）：'
+    + '自己卡上出现防御冷却，数字与引擎一致。'
+    + '【按人类 2026-09-23 版式，旧读取点 `#self-pets .ff-cooldown`（已收进 `#b3-sink[hidden]`）由 '
+    + '`[data-b3-self-card] [data-b3-self-buffs]` 承担；旧「没有动作卡时点 `#auto-turn`」也改成 '
+    + '`window.rocoDemo.autoTurn()`（那个按钮在战斗态 0×0，点了不响）】',
+    Number.isFinite(cooldownEngine) && cooldownEngine > 0
+    && cooldownProblems(cooldownAfter).length === 0,
+    cooldownProblems(cooldownAfter).join(' | ')
+    || `引擎 ${JSON.stringify(cooldownAfter)}；页面那一行「${cooldownRow}」；`
+      + `过程 ${JSON.stringify(defendTrace)}`);
   const markShot = await shoot('battle-field-facts-1440x900');
   const factsOverflow = await overflowOf();
   check('RC502-场上事实不撑破版面', '加上这几行之后 1440×900 仍然没有横向溢出',
