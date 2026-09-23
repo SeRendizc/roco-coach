@@ -957,3 +957,13 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
  background:#101a24;border:1px solid var(--line);border-radius:18px;padding:14px 16px;
  display:flex;flex-direction:column;gap:10px;box-shadow:0 16px 40px rgba(0,0,0,.45)}
 @media (max-width:760px){ .xy-modal2-box{left:10px;right:10px;width:auto;top:56px} }
+
+/* 人类 2026-09-23 第三轮批注：
+   ①「有遮罩啥都看不见」→ **彻底去掉暗化**（遮罩只作定位容器，不画背景、不拦截）；
+   ②「宽度缩小点，不要挡住原来元素」→ 面板收窄到 340px；
+   ③「未连/已连提行第二行」→ 名字一行、状态一行；
+   ④「模型名放不下就缩小字体」→ 名字用较小字号 + 允许缩排，不再用省略号截断。 */
+.xy-modal2{background:none !important;backdrop-filter:none !important}
+.xy-modal2-box{width:min(340px,92vw) !important;background:#101a24;border:1px solid var(--line)}
+.xy-models .mc-name{font-size:11.5px;white-space:nowrap;overflow:visible;text-overflow:clip;letter-spacing:-.2px}
+.xy-models .mc-state{font-size:11px;opacity:.85;margin-top:2px;white-space:nowrap}

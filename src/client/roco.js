@@ -1625,8 +1625,12 @@ async function renderModelList() {
     const state = rows.length ? (m.connected ? '已连' : '未连') : '未知';
     const title = `${m.label ?? m.id ?? '模型'}：${rows.length ? (m.connected ? '已连接' : '未连接') : '状态未知'}`
       + (m.reason ? `（${m.reason}）` : '');
+    // 人类：名字在第一行、**未连/已连另起第二行**；名字放不下就靠**缩小字号**（不是省略号）
+    const nameLen = String(short ?? '').length;
+    const size = nameLen > 18 ? '10px' : (nameLen > 14 ? '10.5px' : '11.5px');
     return `<div class="model-cell" data-model-id="${escapeAttr(m.id ?? '')}" title="${escapeAttr(title)}">`
-      + `<div class="mc-name">${escapeHtml(short)} · ${state}</div></div>`;
+      + `<div class="mc-name" style="font-size:${size}">${escapeHtml(short)}</div>`
+      + `<div class="mc-state ${m.connected ? 'ok' : 'no'}">● ${state}</div></div>`;
   }).join('');
   document.body.dataset.rocoModels = rows.length ? (rows.some((m) => m.connected) ? 'partial' : 'offline') : 'unknown';
   const chip = $('model-chip');
