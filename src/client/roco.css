@@ -880,3 +880,19 @@ header.topbar .xiaoya-btn{grid-column:3;justify-self:end}
 /* 根容器必须 ≥「视口 − 40」（人类：一页占满）。战斗态把 main 的左右内边距归零，
    由片段自身的 16px 内边距负责留白 —— 否则两层内边距叠加会把宽度吃到 1380。 */
 body[data-roco-view="ready"] main{padding-left:0;padding-right:0}
+
+/* 人类 2026-09-23：旧行动坞在战斗态必须收起 —— 它实际挂在 `<header>` 里（不是 main），
+   所以之前写的 `main>#action-panel` **从来没匹配上**（截图里那一大块 + 页面变 1030 高）。
+   改成不依赖父级的选择器。 */
+body[data-roco-view="ready"] #action-panel{display:none !important}
+body[data-roco-view="ready"] #log-panel{display:none}
+body[data-roco-view="ready"] main{padding-bottom:8px}
+
+/* 战斗态旧底栏已收起 → 不再为它预留高度（否则页面比视口高 90px、出现空白）。 */
+body[data-roco-view="ready"]{--bottombar:0px}
+body[data-roco-view="ready"] main{padding-bottom:8px}
+
+/* 结构现实（2026-09-23 实测）：`#dev-zone` 与旧行动坞都嵌在 <header> 里，不是 main 的直接子元素，
+   所以任何 `main>#x` 规则都命中不了。战斗态一律用**不依赖父级**的选择器收起。 */
+body[data-roco-view="ready"] #dev-zone,
+body[data-roco-view="ready"] .dev-zone{display:none !important}
