@@ -46,9 +46,8 @@
    <input id="say-input" maxlength="80" placeholder="想问什么就问（例如「这回合怎么打」）" aria-label="对小芽说一句">
    <button class="primary">说一句</button>
   </form>
- </aside>
- <!-- 设置：三张模型卡 / 记忆 / 模式条 / 重开重试 / 工程抽屉，全部收在这里 -->
- <details class="xy-settings" id="xy-settings">
+   <!-- 设置（人类：整合进小芽；原来放在 </aside> 后面会被固定定位的面板盖住、点不到） -->
+  <details class="xy-settings" id="xy-settings">
   <!-- 模型连接状态（人类：页眉右上角只留「✦ 小芽」） -->
   <a class="chip model-line" id="model-chip" href="connect.html" data-roco-model="offline">模型：正在读取…</a>
   <!-- 战斗工具（原底部那一行，人类：整合进小芽） -->
@@ -68,6 +67,9 @@
   <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>
 
  </details>
+ </aside>
+ <!-- 设置：三张模型卡 / 记忆 / 模式条 / 重开重试 / 工程抽屉，全部收在这里 -->
+ 
 </section>
 
 
