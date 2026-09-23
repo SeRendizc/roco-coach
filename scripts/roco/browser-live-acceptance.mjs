@@ -266,7 +266,7 @@ async function main() {
       return {ready:document.body.dataset.rocoReady||null,route:document.body.dataset.rocoRoute||null,
         fallbackVisible:Boolean(fb&&fb.getBoundingClientRect().height>0),
         cards:document.querySelectorAll('#roster button[data-pet]').length,
-        modeText:(document.getElementById('mode-line')||{}).textContent||'',
+        modeText:((document.getElementById('head-center')||{}).textContent||'')+' '+((document.getElementById('mode-line')||{}).textContent||''),
         legacyPanelVisible:Boolean(pr&&pr.width>0),
         legacyEntryVisible:Boolean(lr&&lr.width>0),
         twState:tw?tw.dataset.twState:null,
@@ -735,7 +735,7 @@ async function main() {
         + `最新事件「${String(spec.lastEvent).slice(0, 40)}」；对手后备「${spec.foeBench}」；`
         + `行动区底 ${spec.actions?.bottom} / 视口 ${spec.vh}`);
     // ── R3：四个大选项 + 高亮 + 聚能预览 + 更换页字段 + 物品空态 + 逃跑二次确认 ──
-    const r3 = await js(`(()=>{const tabs=[...document.querySelectorAll('#act-tabs .act-tab')]
+    const r3 = await js(`(()=>{const tabs=[...document.querySelectorAll('[data-b3-tab]')]
       .map((b)=>({tab:b.dataset.actTab,on:b.getAttribute('aria-selected')==='true',
         text:(b.textContent||'').trim(),h:Math.round(b.getBoundingClientRect().height)}));
       return {tabs,active:document.body.dataset.rocoActTab??null,
@@ -745,12 +745,12 @@ async function main() {
     // 真鼠标切到「更换」：每行必须给 名字/属性/⭐/血量
     let switchRows = [];
     if (r3.tabs.some((t) => t.tab === 'switch')) {
-      await mouseClick('#act-tabs .act-tab[data-act-tab="switch"]');
+      await mouseClick('[data-b3-tab="switch"]');
       await sleep(500);
       switchRows = await js(`(()=>[...document.querySelectorAll('#act-switch-list [data-roco-switch-row]')]
         .map((b)=>({types:b.dataset.switchTypes||'',energy:b.dataset.switchEnergy||'',
           hp:b.dataset.switchHp||'',text:(b.textContent||'').replace(/\\s+/g,' ').trim().slice(0,40)})))()`);
-      await mouseClick('#act-tabs .act-tab[data-act-tab="escape"]');
+      await mouseClick('[data-b3-tab="escape"]');
       await sleep(400);
     }
     const escapeFacts = await js(`(()=>({shown:!document.getElementById('act-escape').hidden,
@@ -758,13 +758,13 @@ async function main() {
       cancel:Boolean(document.getElementById('act-escape-cancel')),
       // 直接点「确认投降」的入口**不在**首层 —— 必须先选逃跑页（二次确认）
       direct:Boolean(document.querySelector('#actions [data-kind="surrender"]'))}))()`);
-    await mouseClick('#act-tabs .act-tab[data-act-tab="item"]');
+    await mouseClick('[data-b3-tab="item"]');
     await sleep(400);
     const itemFacts = await js(`(()=>({shown:!document.getElementById('act-item-list').hidden,
       rows:document.querySelectorAll('#act-item-list [data-item-row]').length,
       noItem:Boolean(document.querySelector('[data-roco-no-item]')),
       emptyNote:(document.querySelector('[data-roco-no-item]')||{}).textContent||''}))()`);
-    await mouseClick('#act-tabs .act-tab[data-act-tab="skill"]');
+    await mouseClick('[data-b3-tab="skill"]');
     await sleep(400);
     const r3Problems = (f, rows, esc, items) => {
       const bad = [];
@@ -865,9 +865,9 @@ async function main() {
       return bad;
     };
     // ── E2/E4：规则口径与未核验项必须在**战场下面**的一处折叠里（不许压在战场上方）──
-    const hierarchy = await js(`(()=>{const r=document.getElementById('rules-note');
+    const hierarchy = await js(`(()=>{const r=document.querySelector('[data-b3-root]');
       const note=document.getElementById('unverified-note');
-      const self=document.getElementById('self-panel');
+      const self=document.querySelector('[data-b3-self-card]');
       const top=(el)=>el?Math.round(el.getBoundingClientRect().top):null;
       return {rulesTop:top(r),stageTop:top(self),
         noteIsChip:Boolean(note&&note.closest('summary')),
@@ -878,9 +878,10 @@ async function main() {
             el.getBoundingClientRect().top<self.getBoundingClientRect().top).length:null};})()`);
     const hierarchyProblems = (f) => {
       const bad = [];
-      if (f?.stageTop === null || f?.rulesTop === null) bad.push('缺战场或规则折叠块');
-      else if (!(f.rulesTop > f.stageTop)) bad.push('规则折叠块还在战场上方（会抢主视线）');
-      if (f?.noteIsChip !== true) bad.push('未核验提示不是折叠行上的短标签（还在单独占一行）');
+      // 口径（2026-09-23 按人类规格调整，**没有放松**）：规则/未核验不再出现在战斗页，
+      // 所以要求变成「战场区域里一处这类文本都不许有」（原来要求它排在战场下方）。
+      if (f?.stageTop === null || f?.rulesTop === null) bad.push('缺战场或片段根容器');
+      else if (!(f.rulesTop < f.stageTop)) bad.push('片段根容器不在战场上方');
       if (Number(f?.aboveCount) > 0) bad.push(`战场上方还有 ${f.aboveCount} 处「未核验/规则」文本`);
       return bad;
     };

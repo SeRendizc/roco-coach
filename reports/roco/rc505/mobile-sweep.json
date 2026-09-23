@@ -246,7 +246,7 @@
    "clientW": 390,
    "scrollW": 390,
    "clientH": 844,
-   "visibleText": 16174,
+   "visibleText": 15622,
    "required": [
     {
      "tag": "button",
@@ -280,7 +280,7 @@
     }
    ],
    "small_all": 8,
-   "tappables_all": 15,
+   "tappables_all": 17,
    "primary": {
     "label": "开一局（标准 PVP · 六宠）",
     "top": 762
@@ -307,7 +307,7 @@
    "clientW": 360,
    "scrollW": 360,
    "clientH": 640,
-   "visibleText": 16174,
+   "visibleText": 15622,
    "required": [
     {
      "tag": "button",
@@ -341,7 +341,7 @@
     }
    ],
    "small_all": 8,
-   "tappables_all": 15,
+   "tappables_all": 17,
    "primary": {
     "label": "开一局（标准 PVP · 六宠）",
     "top": 558

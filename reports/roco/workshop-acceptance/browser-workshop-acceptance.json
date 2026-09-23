@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-23T00:04:26.061Z",
+ "judged_at": "2026-09-23T04:31:35.689Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -64,8 +64,8 @@
   {
    "id": "03-徽记与候选池",
    "judge": "三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账）",
-   "ok": true,
-   "actual": "页头出现次数 {\"mode\":1,\"candidate\":1,\"prematch\":1,\"poolTotal\":622}"
+   "ok": false,
+   "actual": "页头出现次数 {\"mode\":0,\"candidate\":0,\"prematch\":0,\"poolTotal\":622}"
   },
   {
    "id": "04-宽屏不溢出",
@@ -83,13 +83,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=116 full_ms=29 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=122 full_ms=30 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=25 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=27 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -269,7 +269,7 @@
    "id": "31-移动端顺序",
    "judge": "390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":183},{\"cls\":\"tw-cand\",\"top\":1212},{\"cls\":\"tw-eval\",\"top\":1660},{\"cls\":\"tw-coach\",\"top\":2953}]"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":160},{\"cls\":\"tw-cand\",\"top\":1190},{\"cls\":\"tw-eval\",\"top\":1637},{\"cls\":\"tw-coach\",\"top\":2930}]"
   },
   {
    "id": "32-窄屏候选区",
@@ -286,14 +286,14 @@
   {
    "id": "35-标准 PVP 战斗页",
    "judge": "按 v3 候选规则开局：魔力来自引擎（4/4）、无物品/逃跑、未核验假设如实标出",
-   "ok": true,
-   "actual": "mode=pvp-standard-six-pet mana=4/4 groups=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 hidden=0；页面状态栏=「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
+   "ok": false,
+   "actual": "开局后的模式必须是 pvp-standard-six-pet，实际 null | data-roco-standard-pvp 必须是 yes，实际 null；页面状态栏=「这一手引擎没有值得单独说的局面事实（拿不到就不编）」"
   },
   {
    "id": "36-候选规则下的 Coach 取舍",
    "judge": "v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数",
-   "ok": true,
-   "actual": "并列 3 条（[\"防御\",\"啃咬\",\"翅刃\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3"
+   "ok": false,
+   "actual": "并列比较只有 0 条（至少 2 条） | 未来后果只有 0 条（至少 2 条） | 并列比较里一个动作名都没读到 | 取舍区必须如实标出置信/未核验，没读到"
   },
   {
    "id": "33-控制台干净",
@@ -482,42 +482,42 @@
    "id": "35-标准 PVP 战斗页(模式)",
    "judge": "开局后模式被换成练习局必须被同一条判据抓住",
    "ok": true,
-   "hit": "开局后的模式必须是 pvp-standard-six-pet，实际 \"demo-training-3v3\"",
+   "hit": "开局后的模式必须是 pvp-standard-six-pet，实际 \"demo-training-3v3\" | data-roco-standard-pvp 必须是 yes，实际 null",
    "actual": "{\"mode\":\"demo-training-3v3\"}"
   },
   {
    "id": "35-标准 PVP 战斗页(魔力)",
    "judge": "资源条还写「未核验」必须被同一条判据抓住",
    "ok": true,
-   "hit": "引擎已经给了魔力，资源条却还写「未核验」",
+   "hit": "开局后的模式必须是 pvp-standard-six-pet，实际 null | data-roco-standard-pvp 必须是 yes，实际 null | 引擎已经给了魔力，资源条却还写「未核验」",
    "actual": "{\"selfText\":\"魔力 / 心未核验\"}"
   },
   {
    "id": "35-标准 PVP 战斗页(动作)",
    "judge": "物品组混进 1 条必须被同一条判据抓住",
    "ok": true,
-   "hit": "标准 PVP 下物品组必须为空，实际 skill:2,charge:0,switch:1,surrender:0,item:1,escape:0",
+   "hit": "开局后的模式必须是 pvp-standard-six-pet，实际 null | data-roco-standard-pvp 必须是 yes，实际 null | 标准 PVP 下物品组必须为空，实际 skill:2,charge:0,switch:1,surrender:0,item:1,escape:0",
    "actual": "{\"groups\":\"…,item:1,escape:0\"}"
   },
   {
    "id": "35-标准 PVP 战斗页(覆盖)",
    "judge": "把未核验覆盖藏起来必须被同一条判据抓住",
    "ok": true,
-   "hit": "未核验覆盖必须如实显示（hidden=true 文案=\"⚠ 本局有 1 条未核验（展开可读来源）\"）",
+   "hit": "开局后的模式必须是 pvp-standard-six-pet，实际 null | data-roco-standard-pvp 必须是 yes，实际 null | 未核验覆盖必须如实显示（hidden=true 文案=\"⚠ 本局有 1 条未核验（展开可读来源）\"）",
    "actual": "{\"noteHidden\":true}"
   },
   {
    "id": "36-候选规则下的 Coach 取舍(编动作)",
    "judge": "建议里混进一个引擎没给的动作必须被同一条判据抓住",
    "ok": true,
-   "hit": "建议里有引擎没给的动作：[\"旋风无敌斩\"]",
+   "hit": "并列比较只有 0 条（至少 2 条） | 未来后果只有 0 条（至少 2 条） | 建议里有引擎没给的动作：[\"旋风无敌斩\"] | 取舍区必须如实标出置信/未核验，没读到",
    "actual": "{\"labels\":[…,\"旋风无敌斩\"]}"
   },
   {
    "id": "36-候选规则下的 Coach 取舍(胜率)",
    "judge": "把「胜率 58%」写进取舍区必须被同一条判据抓住",
    "ok": true,
-   "hit": "可见文本里出现伪精确（胜率 / 百分数）",
+   "hit": "并列比较只有 0 条（至少 2 条） | 未来后果只有 0 条（至少 2 条） | 并列比较里一个动作名都没读到 | 取舍区必须如实标出置信/未核验，没读到 | 可见文本里出现伪精确（胜率 / 百分数）",
    "actual": "{\"text\":\"…胜率 58%\"}"
   }
  ],
@@ -543,14 +543,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "116",
-    "fullMs": "29",
+    "firstMs": "122",
+    "fullMs": "30",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "25"
+    "elapsedMs": "27"
    },
    "dom": {
     "slotNodes": 6,
@@ -600,8 +600,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "29",
-    "fullMs": "28",
+    "firstMs": "30",
+    "fullMs": "29",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -731,14 +731,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "17",
-    "fullMs": "17",
+    "firstMs": "19",
+    "fullMs": "16",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "12"
+    "elapsedMs": "11"
    },
    "dom": {
     "slotNodes": 6,
@@ -865,14 +865,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "18",
-    "fullMs": "19",
+    "firstMs": "16",
+    "fullMs": "20",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "13"
+    "elapsedMs": "14"
    },
    "dom": {
     "slotNodes": 6,
@@ -1006,7 +1006,7 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "24",
+    "firstMs": "23",
     "fullMs": "24",
     "fullState": "ok",
     "ready": "yes",
@@ -1059,8 +1059,8 @@
   {
    "at": "standard-pvp-battle",
    "facts": {
-    "mode": "pvp-standard-six-pet",
-    "standardPvp": "yes",
+    "mode": null,
+    "standardPvp": null,
     "groups": "skill:4,charge:1,switch:5,surrender:1,item:0,escape:0",
     "hidden": "0",
     "selfText": "魔力 / 心4",
@@ -1073,5 +1073,5 @@
    }
   }
  ],
- "ok": true
+ "ok": false
 }
