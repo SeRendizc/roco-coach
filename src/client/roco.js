@@ -1464,7 +1464,10 @@ function syncBottomBars() {
   const wide = window.matchMedia('(min-width:861px)').matches;
   const actionCap = wide ? 0 : Math.max(160, Math.round(window.innerHeight * 0.30));
   document.documentElement.style.setProperty('--action-cap', `${actionCap}px`);
-  document.documentElement.style.setProperty('--coach-rail', wide && coachShown ? '356px' : '0px');
+  // 人类 2026-09-23：「小芽还是会挤开正文」——真凶就是这条：宽屏打开小芽时给正文
+  // **预留 356px**（`--coach-rail`），于是浮层变成了「内联栏」。现在恒为 0：小芽是**纯浮层**，
+  // 不占正文任何宽度（要显示内容就浮在上面）。
+  document.documentElement.style.setProperty('--coach-rail', '0px');
   document.documentElement.style.setProperty('--coach-under', wide ? '0px' : `${coachHeight + 8}px`);
   document.body.dataset.rocoCoachHeight = String(coachHeight);
   document.body.dataset.rocoCoachOpen = coachShown ? 'yes' : 'no';

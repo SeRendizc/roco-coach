@@ -992,3 +992,19 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
 .xy-actions2{margin-top:4px}
 .companion-body{max-height:22vh}
 .say-form{gap:6px}
+
+/* 人类 2026-09-23：「小芽还是挤成一坨」——上一版为「更紧凑」把间距压太狠了，这里恢复可读间距。 */
+.xy-modal2-box{gap:10px !important;padding:14px 16px !important;min-width:300px}
+.xy-models{gap:8px !important}
+.xy-models .model-cell{padding:8px 10px !important;min-height:52px}
+.xy-models .mc-name{font-size:12px !important;line-height:1.30;white-space:normal !important;
+ overflow-wrap:anywhere;word-break:break-word}
+.xy-models .mc-state{margin-top:4px}
+.xy-actions2{gap:8px !important}
+.companion-body{max-height:30vh !important}
+
+/* 人类 2026-09-23：首页（选阵容）要**像战斗画面一样填满一屏、不上下滑** ——
+   main 高度 = 视口 − 页眉 − 开一局栏；工坊网格撑满，候选列表内部滚动。 */
+body[data-roco-view="ready"] main:not(:has(#battle-panel:not([hidden]))){height:calc(100vh - 200px);min-height:0;display:flex;flex-direction:column}
+body[data-roco-view="ready"] main:not(:has(#battle-panel:not([hidden])))>#team-workshop{flex:1 1 auto;min-height:0}
+body[data-roco-view="ready"]{overflow:hidden}

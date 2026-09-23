@@ -76,10 +76,23 @@ const STYLE = `
 *{box-sizing:border-box}
 /* 人类 2026-09-23：删掉工坊里的「✦ 小芽（阵容阶段）」后重排 ——
    第一排：**队伍 | 阵容评估**；第二排：**候选池通栏**（「筛选精灵直接拉到最后面」，往下探满）。 */
-.tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.tw-drawer{position:fixed;left:0;top:64px;bottom:78px;z-index:60;display:flex;align-items:stretch;pointer-events:none}
+.tw-drawer>*{pointer-events:auto}
+.tw-drawer-btn{writing-mode:vertical-rl;text-orientation:upright;letter-spacing:2px;
+ align-self:center;padding:14px 8px;border:1px solid var(--line);border-right:0;border-radius:0 12px 12px 0;
+ background:#16222f;color:#dbe7f1;font-size:12.5px;cursor:pointer;min-height:120px}
+.tw-drawer[data-open="yes"] .tw-drawer-btn{border-radius:12px 0 0 12px;border-right:1px solid var(--line)}
+.tw-drawer-panel{display:none;width:min(420px,90vw);overflow:auto;background:#101a24;
+ border:1px solid var(--line);border-radius:0 14px 14px 0;padding:12px 14px}
+.tw-drawer[data-open="yes"] .tw-drawer-panel{display:block}
+/* 一屏装完：网格高度 = 可用高度，候选列表**内部滚动**，页面本身不上下滑。 */
+.tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;
+ height:100%;min-height:0}
+.tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0}
+.tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto}
 .tw-team{grid-column:1;grid-row:1}
 .tw-eval{grid-column:2;grid-row:1}
-.tw-cand{grid-column:1 / -1;grid-row:2}
+
 /* 两列**等高**（用户：小芽那栏不能拉长吗、非得这么丑？）：网格项拉伸，
    面板内部再让最后一栏吃满剩余高度。 */
 .tw-grid{align-items:stretch}
@@ -313,6 +326,16 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   const shadow = rootEl.shadowRoot ?? rootEl.attachShadow({mode: 'open'});
   shadow.innerHTML = `
    <style>${STYLE}</style>
+   <!-- 人类 2026-09-23：**阵容评估挪到左边做成隐藏式悬浮抽屉**（竖排按钮，点一下展开、可收回），
+     与右边小芽对应；正文里不再占位。 -->
+   <aside class="tw-drawer" id="tw-eval-drawer" data-open="no">
+    <button class="tw-drawer-btn" id="tw-eval-toggle" type="button" aria-expanded="false">阵容评估</button>
+    <div class="tw-drawer-panel" id="tw-eval-panel">
+     <div class="tw-head"><h3 id="tw-eval-title">阵容评估</h3>
+      <span class="tw-sub" id="tw-eval-sub">—</span></div>
+     <div id="tw-eval-body"></div>
+    </div>
+   </aside>
    <div class="tw-grid">
     <section class="tw-panel tw-team" aria-labelledby="tw-team-title">
      <div class="tw-head"><h3 id="tw-team-title">队伍</h3>
@@ -355,16 +378,22 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      <div class="tw-cand-list" id="tw-cand-list" role="group" aria-label="从全图鉴挑一只"></div>
     </section>
 
-    <section class="tw-panel tw-eval" id="tw-eval-panel" aria-labelledby="tw-eval-title">
-     <div class="tw-head"><h3 id="tw-eval-title">阵容评估</h3>
-      <span class="tw-sub" id="tw-eval-sub">—</span></div>
-     <div id="tw-eval-body"></div>
-    </section>
+    
 
     <!-- 人类 2026-09-23：「右下角的小芽模块整体删除，不只是内联小芽」——这里原来还有一份「✦ 小芽 · 阵容阶段」栏 -->
    </div>`;
 
   const $ = (id) => shadow.getElementById(id);
+
+  /** 人类 2026-09-23：按候选列表的**实测可用高度**算每页数量（一行约 46px），夹在 6–24 之间。
+   *  「全图鉴」与「我的精灵」共用同一个 pageSize，切档与搜索都不改变它。 */
+  const fitPageSize = () => {
+    const list = $('tw-cand-list');
+    const h = list ? list.getBoundingClientRect().height : 0;
+    if (!(h > 120)) return;
+    const fit = Math.max(6, Math.min(24, Math.floor(h / 46)));
+    if (fit !== state.pool.pageSize) { state.pool.pageSize = fit; }
+  };
   // RC-801：从盒子带过来的初始选人（`?team=own-…`）。**只认形状对的 id**：
   // 认不出的直接丢掉（不猜、不静默塞一个别的）——多带一只或少带一只都要看得见。
   const initialSelected = Array.isArray(opts.initialSelected)
@@ -390,6 +419,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     seq: 0,
     // 候选区**只有一套导航**：分页器（页码），列表整块摊开不内滚（人类 P1）。
     // 筛选走服务端（`/api/roco/box` 的 kind/q/type/role 白名单），换条件一律回第一页。
+    // 人类 2026-09-23：每页数量**按可用页高**算（一屏装完、不上下滑）——初值 12，挂载后按实测高度重算。
     pool: {offset: 0, total: 0, pageSize: 12, q: '', kind: 'catalog', type: '', role: '', rows: []},
     poolSeq: 0,
     ownedBySpecies: new Map(),      // 物种 → [{select: 个体, name, ...}]
@@ -679,6 +709,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     // 「我拥有的」混在一列里，看起来像「不存在的精灵进了我的队伍」。这里按**拥有与否**分组显示并给计数，
     // 让玩家一眼看出哪些能正式出战、哪些只是图鉴参考（只能试玩）。
     groupPoolRows();
+    fitPageSize();
     const pages = Math.max(1, Math.ceil(state.pool.total / state.pool.pageSize));
     const page = Math.min(pages, Math.floor(state.pool.offset / state.pool.pageSize) + 1);
     $('tw-cand-page').textContent = `${page} / ${pages}`;
@@ -1203,6 +1234,14 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     rootEl.dataset.twScope = kind;
     void loadPool({reset: true});
   };
+  // 左侧「阵容评估」悬浮抽屉：点按钮展开/收回（与右边小芽对应）
+  const evalToggle = $('tw-eval-toggle');
+  if (evalToggle) evalToggle.addEventListener('click', () => {
+    const d = $('tw-eval-drawer');
+    const open = d.dataset.open !== 'yes';
+    d.dataset.open = open ? 'yes' : 'no';
+    evalToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
   $('tw-scope-all').addEventListener('click', () => setScope('catalog'));
   $('tw-scope-mine').addEventListener('click', () => setScope('mine'));
   // 属性/定位：用**闭集文本**循环（选项来自数据里真实出现过的值，不编）
