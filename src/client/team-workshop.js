@@ -197,8 +197,10 @@ const STYLE = `
 .tw-about>summary::after{content:'▾';margin-left:auto;color:#6b7f92}
 .tw-about[open]>summary::after{content:'▴'}
 .tw-about>*:not(summary){margin:0 10px 8px}
-.tw-slot .tw-detail{margin-top:auto;width:100%}
-.tw-slot .tw-detail>summary{width:100%;display:block;box-sizing:border-box}
+/* 通用（不再限定 .tw-slot）：槽位与**候选卡**都有 <details class="tw-detail">，
+   候选卡那两个 summary 曾在 390×844 塌成 0×112（判据 30-触控目标 因此红）。 */
+.tw-detail{width:100%;margin-top:auto}
+.tw-detail>summary{width:100%;display:block;box-sizing:border-box;min-height:44px}
 /* 槽位里的「移除」是拇指要点的（390 实测 43×25 < 44）：给它 44×44。 */
 .tw-slot-remove{margin-left:auto;min-width:44px;min-height:44px;font-size:11px;color:#9caebe;
  background:#121e2c;border:1px solid #314154;border-radius:8px;padding:0 8px;cursor:pointer}
