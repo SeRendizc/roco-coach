@@ -74,7 +74,12 @@ const NO_ITEM = '本仓库没有这一项';
 const STYLE = `
 :host{display:block;color:#e3eaf1;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif}
 *{box-sizing:border-box}
-.tw-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:start}
+/* 人类 2026-09-23：删掉工坊里的「✦ 小芽（阵容阶段）」后重排 ——
+   第一排：**队伍 | 阵容评估**；第二排：**候选池通栏**（「筛选精灵直接拉到最后面」，往下探满）。 */
+.tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:start}
+.tw-team{grid-column:1;grid-row:1}
+.tw-eval{grid-column:2;grid-row:1}
+.tw-cand{grid-column:1 / -1;grid-row:2}
 /* 两列**等高**（用户：小芽那栏不能拉长吗、非得这么丑？）：网格项拉伸，
    面板内部再让最后一栏吃满剩余高度。 */
 .tw-grid{align-items:stretch}
@@ -82,8 +87,6 @@ const STYLE = `
 .tw-panel.tw-coach,.tw-panel.tw-eval{height:100%}
 .tw-panel{background:#1a2635;border:1px solid #314154;border-radius:12px;padding:6px 12px 10px;min-width:0}
 .tw-team{grid-column:span 2}
-.tw-cand{grid-column:span 2}
-.tw-eval{grid-column:span 2}
 .tw-coach{grid-column:span 2}
 .tw-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 8px}
 .tw-head h3{margin:0;font-size:15px}
