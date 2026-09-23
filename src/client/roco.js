@@ -1830,12 +1830,31 @@ function renderB3Panels(view) {
   // G2 对手印记/增益：引擎给了就逐条画（没给保留 ghost 占位；不编）。
   const foeCard = document.querySelector('[data-b3-foe-card]');
   const foeBuffs = foeCard?.querySelector('[data-b3-foe-buffs]') ?? foeCard?.querySelector('.b3-buffs');
-  const marks = view?.opponent?.field?.marks ?? null;
-  if (foeBuffs && marks && typeof marks === 'object') {
-    const rows = Object.entries(marks).filter(([, v]) => Number(v) > 0);
+  const foeField = view?.opponent?.field ?? null;
+  // 人类 2026-09-23：「为啥对面没挂上？」—— 我原来只读 marks，而引擎给的可能是
+  // buffs / statuses（自伤/防御冷却那类走 statuses）。三个来源都读，谁给了就画谁。
+  const foeRows = [];
+  const pushRows = (obj, kind, label) => {
+    for (const [k, v] of Object.entries(obj ?? {})) {
+      const n = Number(v);
+      if (!Number.isFinite(n) || n <= 0) continue;
+      foeRows.push({kind, text: `${label(k)}${n > 1 ? ' ' + n : ''}`});
+    }
+  };
+  if (foeBuffs) {
+    pushRows(foeField?.marks, 'mark', (k) => STATUS_LABEL[k] ?? k);
+    pushRows(foeField?.statuses, 'status', (k) => STATUS_LABEL[k] ?? k);
+    for (const [k, v] of Object.entries(foeField?.buffs ?? {})) {
+      if (Number(v) !== 0 && v !== null && v !== undefined) {
+        foeRows.push({kind: 'buff', text: `${buffLabel(k) ?? k} ${Number(v) > 0 ? '+' : ''}${v}`});
+      }
+    }
+  }
+  if (foeBuffs && foeRows.length) {
+    const rows = foeRows;
     if (rows.length) {
-      foeBuffs.innerHTML = rows.map(([k, v]) => `<span class="b3-buff" data-b3-buff-kind="mark"
-        data-b3-buff-name="${escapeAttr(k)}">${escapeHtml(STATUS_LABEL[k] ?? k)} ${Number(v)}</span>`).join('');
+      foeBuffs.innerHTML = rows.map((r) => `<span class="b3-buff" data-b3-buff-kind="${r.kind}"
+        data-b3-buff-name="${escapeAttr(r.text)}">${escapeHtml(r.text)}</span>`).join('');
     } else {
       // 这一帧引擎没给印记 → 清掉旧值，但**保留设计稿要求的空占位**（不清成彻底空）
       foeBuffs.innerHTML = B3_BUFF_GHOSTS;

@@ -472,3 +472,11 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
 .b3-wrap .b3-topbar{padding-left:calc(var(--b3-left) + var(--b3-card-gap));
  padding-right:calc(var(--b3-right) + var(--b3-card-gap))}
 @media (max-width:760px){ .b3-wrap .b3-topbar{padding-left:8px;padding-right:8px} }
+
+/* 人类 2026-09-23 批注：「这三个没摆在三个应该在的地方，两个数量在左右顶到，感觉很怪」——
+   上一版把两侧点组推到卡片边缘（=顶到），现在改成**三块靠在一起居中**：
+   〔我方点〕〔模式+回合〕〔对手点〕，彼此留固定间距。 */
+.b3-wrap .b3-topbar{display:flex;justify-content:center;align-items:center;gap:26px;
+ padding-left:0;padding-right:0}
+.b3-wrap .b3-topbar>.b3-side,.b3-wrap .b3-topbar .b3-side{flex:0 0 auto;display:flex;align-items:center;gap:10px}
+@media (max-width:760px){ .b3-wrap .b3-topbar{gap:12px;flex-wrap:wrap} }
