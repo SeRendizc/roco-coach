@@ -3,7 +3,7 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-23T05:26:26.878Z",
+ "judged_at": "2026-09-23T05:29:16.013Z",
  "totals": {
   "checks": 26,
   "passed": 26,
@@ -16,7 +16,7 @@
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=1"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=3"
   },
   {
    "id": "live-boot",
@@ -996,7 +996,7 @@
     },
     "logTurns": 44,
     "hasView": true,
-    "battleId": "s3-lacsx24g",
+    "battleId": "s5-875j7kds",
     "plan": "",
     "dots": {
      "self": "●●●●○○",

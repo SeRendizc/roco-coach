@@ -659,10 +659,25 @@ function modeProbeText(mode) {
 }
 
 function renderMode() {
-  const box = $('mode-line');
-  if (!box) return;
+  // 2026-09-23（子代理 C 的 G1）：页眉精简时删掉了 `#mode-line`，而这里第一行 `if(!box)return`
+  // 让**整段都停摆** —— body 的 `rocoMode/rocoPrematch/rocoStandardPvp` 从此再也没被写过，
+  // 玩家层也再没有「候选规则（待实机核对）」「匹配前对手未知」这两句。
+  // 现在：`#mode-line` 在就用它；不在就渲染到页眉中间列旁边（**首屏可见**），并且**照旧写 body 数据集**。
+  const modeLine = $('mode-line');
+  const flags = $('b3-flags');
   state.mode = resolveMode(state.mode);
-  box.innerHTML = modeChipHtml(state.mode);
+  const chips = modeChipHtml(state.mode);
+  if (modeLine) modeLine.innerHTML = chips;
+  else if (flags) flags.innerHTML = chips;          // 专用容器：直接覆盖
+  else {
+    // 共享容器（页眉中间列）：**只插一次**，否则每次渲染都会追加一份（会把点击目标挤走）
+    const holder = $('head-center');
+    if (holder) {
+      let slot = holder.querySelector('#mode-chips');
+      if (!slot) { slot = document.createElement('div'); slot.id = 'mode-chips'; holder.appendChild(slot); }
+      slot.innerHTML = chips;
+    }
+  }
   document.body.dataset.rocoMode = state.mode?.id ?? 'none';
   document.body.dataset.rocoPrematch = state.mode?.prematch?.visibility ?? 'none';
   document.body.dataset.rocoStandardPvp = standardPvpActive() ? 'yes' : 'no';
@@ -1771,6 +1786,50 @@ function renderB3Panels(view) {
       ? (Number.isFinite(energyMax) ? `⭐ ${me.energy} / ${energyMax}` : `⭐ ${me.energy}`) : '⭐ —';
     const label = root.querySelector('[data-b3-charge-label]');
     if (label) label.textContent = '聚能';
+  }
+
+  // ⑦ 子代理 C 报的 G2/G3/G4/G5（v3h 缺的落点，一次补齐）────────────────────
+  // G2 对手印记/增益：引擎给了就逐条画（没给保留 ghost 占位；不编）。
+  const foeCard = document.querySelector('[data-b3-foe-card]');
+  const foeBuffs = foeCard?.querySelector('[data-b3-foe-buffs]') ?? foeCard?.querySelector('.b3-buffs');
+  const marks = view?.opponent?.field?.marks ?? null;
+  if (foeBuffs && marks && typeof marks === 'object') {
+    const rows = Object.entries(marks).filter(([, v]) => Number(v) > 0);
+    if (rows.length) {
+      foeBuffs.innerHTML = rows.map(([k, v]) => `<span class="b3-buff" data-b3-buff-kind="mark"
+        data-b3-buff-name="${escapeAttr(k)}">${escapeHtml(STATUS_LABEL[k] ?? k)} ${Number(v)}</span>`).join('');
+    }
+  }
+  // G3 背包格：按引擎给的 item 动作填（id/名字/可用态）；没给就写「不可用」。
+  const itemCells = [...root.querySelectorAll('[data-b3-item-cell]')];
+  const itemActs = (view?.legal ?? []).filter((a) => a.kind === 'item');
+  itemCells.forEach((cell, i) => {
+    const act = itemActs[i] ?? null;
+    cell.dataset.b3ItemGrey = act ? 'no' : 'yes';
+    cell.classList.toggle('b3-slot--grey', !act);
+    const nameEl = cell.querySelector('[data-b3-item-name]');
+    const idEl = cell.querySelector('[data-b3-item-id]');
+    if (nameEl) nameEl.textContent = act ? (act.item_id ?? '道具') : '本模式未给这一件';
+    if (idEl) idEl.dataset.b3ItemId = act ? String(act.item_id ?? '') : '';
+    const note = cell.querySelector('[data-b3-item-note]');
+    if (note) note.textContent = act ? '由引擎给出' : '未核验：引擎这一手没有给这件道具';
+    delete cell.dataset.b3Action;
+    if (act) { cell.dataset.b3Action = String((view.legal ?? []).indexOf(act)); cell.dataset.b3ActionKind = 'item'; }
+    b3Show(cell);
+  });
+  // G4 逃跑：确认按钮必须真的带上动作（否则真鼠标点它什么都不发生）。
+  const esc = root.querySelector('[data-b3-escape-confirm]');
+  if (esc) {
+    const sur = (view?.legal ?? []).find((a) => a.kind === 'surrender') ?? null;
+    delete esc.dataset.b3Action;
+    if (sur) { esc.dataset.b3Action = String((view.legal ?? []).indexOf(sur)); esc.dataset.b3ActionKind = 'surrender'; }
+  }
+  // G5 mana 态读数：换宠屏要把剩余魔力写出来（`view.mana.self`，引擎没给就不写）。
+  const chargeVal = root.querySelector('[data-b3-charge-value]');
+  if (chargeVal && (state.actTab ?? 'skill') === 'switch') {   // 这里 `tab` 还没声明，用 state 读
+    const mana = Number.isFinite(view?.mana?.self) ? view.mana.self : null;
+    const pool = Number.isFinite(view?.mana?.pool) ? view.mana.pool : null;
+    chargeVal.textContent = mana === null ? '未核验' : (pool === null ? `♥ ${mana}` : `♥ ${mana} / ${pool}`);
   }
 
   // ⑥ 点击绑定（人类 2026-09-23：「战斗完全推进不了」）：

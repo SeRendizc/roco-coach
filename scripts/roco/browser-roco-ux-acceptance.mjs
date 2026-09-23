@@ -460,94 +460,200 @@ async function main() {
     `第 ${hintTurn} 回合浮条可见=${hintFacts.visible}（hidden=${hintFacts.hidden} / display=${hintFacts.display}）；`
     + `正文「${hintFacts.text}」`);
 
-  // ── P0-5 / D4 行动坞：分组条数逐项等于引擎动作表 ─────────────────────────
+  // ── P0-5 / D4 行动面：逐项等于引擎动作表（读取点已迁到 v3h 钩子）────────
   //
-  // 「等于引擎动作表」这件事的正确写法是**两边逐项对齐**：
-  //   页面上某一组的条数 + 按模式被隐藏的该 kind 条数 === 引擎给的该 kind 条数；
-  // 同时四个组的可见条数之和 + 隐藏条数 === `view.legal.length`（一条都不许丢）。
+  // 2026-09-23（人类 v3h 版式）：行动面从旧行动坞 `#action-panel`（按规格在战斗态收起、
+  // 实测 0×0、点了不响）迁到 v3h 片段 —— 左列四格技能 `[data-b3-skill-slot]`、
+  // 更换屏 `[data-b3-switch-row]`、背包屏 `[data-b3-item-cell]`、底栏四选项
+  // `[data-b3-tab]`、聚能 `#b3-charge`。**口径一个字没松**：仍然是「页面上真的渲染了什么」
+  // 与「引擎给的账」两边逐项对齐，只是「旧坞渲染了什么」换成「v3h 片段渲染了什么」。
+  //
+  // 两条**按新设计改写的等价断言**（都写在这里，不藏）：
+  //   · 原「聚能 / 换精灵 / 投降各自独立入口」→ 由 v3h 底栏四选项 + `#b3-charge` 承担；
+  //   · 原「道具与逃跑不渲染」这条**前提已不成立**（人类规格要求底栏必须有这两个入口），
+  //     等价断言换成「物品屏 / 逃跑屏只许出现引擎给的动作，不许自造」。
   const actionFacts = await js(`(()=>{const legal=window.rocoDemo.state.view.legal||[];
-    const groups=[...document.querySelectorAll('#actions .act-group')].map((g)=>({
-      id:g.dataset.actGroup,
-      title:(g.querySelector('.act-group-head b')||{}).textContent||'',
-      count:g.querySelectorAll('button[data-action]').length,
-    }));
-    // 2026-09-22（战斗页 v2）：技能格第一层是「消耗 + 名字 + 属性 + 预计伤害」，描述在详情层。
-    const cards=[...document.querySelectorAll('#actions button[data-action]')].map((b)=>({
-      kind:b.dataset.kind,
-      label:(b.querySelector('.skill-top strong')||b.querySelector('span')||{}).textContent||'',
-      meta:(b.querySelector('.skill-meta')||b.querySelector('.act-meta')||{}).textContent||'',
-      desc:(((b.closest('.skill-slot')||b).querySelector('.skill-detail small')
-        ||b.querySelector('.act-desc')||{}).textContent||''),
-      cost:(b.querySelector('[data-roco-cost-chip]')||{}).textContent||''}));
+    const slots=[...document.querySelectorAll('.b3-wrap [data-b3-skill-slot]')].map((s)=>({
+      kind:s.dataset.b3ActionKind||null, action:s.dataset.b3Action||null,
+      label:((s.querySelector('[data-b3-skill-name]')||{}).textContent||'').trim(),
+      cat:((s.querySelector('[data-b3-skill-cat]')||{}).textContent||'').trim(),
+      elName:((s.querySelector('[data-b3-self-el],[data-b3-el-name]')||{}).dataset||{}).b3ElName||'',
+      cost:((s.querySelector('[data-b3-cost]')||{}).textContent||'').trim(),
+      dmg:((s.querySelector('[data-b3-dmg]')||{}).textContent||'').replace(/[ ]+/g,' ').trim(),
+      pending:s.dataset.b3Pending||null, legal:s.dataset.b3SlotLegal||null,
+      short:s.dataset.b3CostShort||null,
+      h:Math.round(s.getBoundingClientRect().height)}));
+    const switchRows=[...document.querySelectorAll('.b3-wrap [data-b3-switch-row]')].map((s)=>({
+      kind:s.dataset.b3ActionKind||null, action:s.dataset.b3Action||null,
+      label:((s.querySelector('[data-b3-switch-name]')||{}).textContent||'').trim(),
+      legal:s.dataset.b3SwitchLegal||null}));
+    const itemCells=[...document.querySelectorAll('.b3-wrap [data-b3-item-cell]')].map((s)=>({
+      kind:s.dataset.b3ActionKind||null, action:s.dataset.b3Action||null,
+      id:s.dataset.b3ItemId||null, grey:s.dataset.b3ItemGrey||null,
+      label:((s.querySelector('[data-b3-item-name]')||{}).textContent||'').trim(),
+      note:((s.querySelector('[data-b3-item-note]')||{}).textContent||'').trim()}));
+    // ⚠ `[data-b3-tab]` 会命中 \`<body data-b3-tab>\`（state 镜像）—— 必须排掉 html/body，
+    //   否则「四个大选项」会数出一个 1440×843 的假选项。
+    const tabs=[...document.querySelectorAll('[data-b3-tab]')]
+      .filter((el)=>el!==document.body&&el!==document.documentElement)
+      .map((b)=>({tab:b.dataset.b3Tab,text:(b.textContent||'').trim(),
+        h:Math.round(b.getBoundingClientRect().height),w:Math.round(b.getBoundingClientRect().width)}));
+    const chargeBtn=document.getElementById('b3-charge');
+    const chargeRect=chargeBtn?chargeBtn.getBoundingClientRect():null;
     const byKind={};for(const a of legal)byKind[a.kind]=(byKind[a.kind]||0)+1;
-    return {legalCount:legal.length,groups,cards,byKind,
+    return {legalCount:legal.length,slots,switchRows,itemCells,tabs,byKind,
+      charge:{shown:Boolean(chargeBtn&&chargeRect.width>0&&chargeRect.height>0),
+        text:chargeBtn?(chargeBtn.textContent||'').replace(/\\s+/g,' ').trim():null},
       hidden:Number(document.body.dataset.rocoActionsHidden||'0'),
-      hiddenNote:(document.querySelector('#actions .act-none')||{}).textContent||'',
+      // 玩家**看得见**的战斗区文本：`innerText` 天然排除 `hidden` 的隐藏接收槽（#b3-sink）。
+      playerText:((document.getElementById('battle-panel')||{}).innerText||'').replace(/\\s+/g,' '),
+      hiddenRaw:((document.getElementById('hidden-actions-raw')||{}).textContent||''),
       hook:document.body.dataset.rocoActionGroups};})()`);
+  const renderedSkills = actionFacts.slots.filter((s) => s.kind === 'skill' && s.action !== null);
+  const renderedSwitch = actionFacts.switchRows.filter((s) => s.kind === 'switch' && s.action !== null);
+  const renderedItems = actionFacts.itemCells.filter((s) => s.action !== null);
+  const engineItems = await js(`JSON.stringify((window.rocoDemo.state.view.legal||[])
+    .filter((a)=>a.kind==='item').map((a)=>a.item_id))`).then(JSON.parse);
   const groupCount = (kind) => {
-    const row = actionFacts.groups.find((g) => g.id === kind);
-    return row ? row.count : 0;
+    if (kind === 'skill') return renderedSkills.length;
+    if (kind === 'switch') return renderedSwitch.length;
+    if (kind === 'item') return renderedItems.length;
+    return 0;
   };
-  const pageVisible = actionFacts.groups.reduce((sum, g) => sum + g.count, 0);
-  // 2026-09-22（人类规格）：行动区结构变了 —— 技能是主区（≤4 张卡）、
-  // **聚能 / 换精灵 / 投降各自独立入口**（换精灵是按钮 + 列表）。所以这条判据改成
-  // 「引擎的账 vs 页面真的渲染了什么」两边对齐，而不是逐组数字面相等。
   const rendered = String(await js(`document.body.dataset.rocoActionsRendered ?? 'none'`)).split(',').filter(Boolean);
   const hooks = {
-    skillCards: Number(await js(`document.body.dataset.rocoActSkillCards ?? '0'`)),
+    skillCards: renderedSkills.length,
+    // 「聚能与投降各自独立入口」在 v3h 由**底栏 `#b3-charge` + 逃跑页二次确认**承担；
+    // 下面这两条 dataset 仍是旧坞对**引擎账**的记账（页面与验收之间的显式契约，未删）。
     charge: await js(`document.body.dataset.rocoActCharge ?? 'no'`),
-    switchEntry: await js(`document.body.dataset.rocoActSwitch ?? 'no'`),
-    switchList: Number(await js(`document.body.dataset.rocoActSwitchList ?? '0'`)),
-    surrender: await js(`document.body.dataset.rocoActSurrender ?? 'no'`),
+    switchEntry: actionFacts.tabs.some((t) => t.tab === 'switch') ? 'yes' : 'no',
+    switchList: renderedSwitch.length,
+    surrender: actionFacts.tabs.some((t) => t.tab === 'escape') ? 'yes' : 'no',
   };
   const engineKinds = Object.keys(actionFacts.byKind).filter((k) => actionFacts.byKind[k] > 0);
   const groupProblems = [];
-  if (!engineKinds.includes('skill') && hooks.skillCards > 0) groupProblems.push('引擎没给技能，页面却画了技能卡');
-  if (engineKinds.includes('skill') && hooks.skillCards === 0) groupProblems.push('引擎给了技能，技能主区却是空的');
-  if (hooks.skillCards > 4) groupProblems.push(`技能卡 ${hooks.skillCards} 张（最多四张）`);
+  if (actionFacts.slots.length !== 4) groupProblems.push(`技能左列 ${actionFacts.slots.length} 格（规格是永远四格）`);
+  if (actionFacts.slots.some((s) => s.pending)) groupProblems.push('技能格还挂着版面示例数据（data-b3-pending 没解除）');
+  if (!engineKinds.includes('skill') && hooks.skillCards > 0) groupProblems.push('引擎没给技能，页面却画了可点的技能格');
+  if (engineKinds.includes('skill') && hooks.skillCards === 0) groupProblems.push('引擎给了技能，技能左列却没有一格可点');
+  if (hooks.skillCards !== (actionFacts.byKind.skill ?? 0)) {
+    groupProblems.push(`技能左列可点 ${hooks.skillCards} 格 ≠ 引擎给的合法技能 ${actionFacts.byKind.skill ?? 0} 个`);
+  }
   if (hooks.charge === 'yes' && !engineKinds.includes('charge')) groupProblems.push('引擎没给聚能，页面却画了聚能入口');
+  if (!actionFacts.charge.shown) groupProblems.push('底栏没有可见的「聚能」入口（#b3-charge）');
   if (engineKinds.includes('switch') && hooks.switchEntry !== 'yes') groupProblems.push('引擎给了换人，却没有独立的换精灵入口');
   if (hooks.switchList !== (actionFacts.byKind.switch ?? 0)) {
-    groupProblems.push(`换精灵列表 ${hooks.switchList} 条，引擎换人 ${actionFacts.byKind.switch ?? 0} 个`);
+    groupProblems.push(`更换屏可点行 ${hooks.switchList} 条，引擎换人 ${actionFacts.byKind.switch ?? 0} 个`);
   }
-  if (rendered.includes('item') || rendered.includes('escape')) groupProblems.push('渲染了道具/逃跑入口');
+  if (actionFacts.tabs.map((t) => t.tab).join(',') !== 'skill,switch,item,escape') {
+    groupProblems.push(`底栏四选项实际是 ${JSON.stringify(actionFacts.tabs.map((t) => t.tab))}`);
+  }
+  if (actionFacts.tabs.some((t) => t.h < 44)) groupProblems.push('底栏有选项高度 <44px');
+  // 四个选项必须**真的切屏**：用真鼠标逐个点过去，读 `body[data-b3-tab]`（状态镜像）。
+  const tabWalk = [];
+  for (const want of ['switch', 'item', 'escape', 'skill']) {
+    if (!actionFacts.tabs.some((t) => t.tab === want)) { tabWalk.push({tab: want, ok: false, actual: '缺这个选项'}); continue; }
+    let actual = null;
+    let ok = false;
+    try {
+      await mouseClick(`.b3-wrap [data-b3-tab="${want}"]`);
+      await sleep(220);
+      actual = await js(`document.body.dataset.b3Tab ?? null`);
+      ok = actual === want;
+    } catch (error) { actual = `点了报错：${error.message}`; }
+    tabWalk.push({tab: want, ok, actual});
+  }
+  const tabProblems = tabWalk.filter((r) => !r.ok);
+  if (tabProblems.length) {
+    groupProblems.push(`底栏选项没有真的切屏：${tabProblems.map((r) => `${r.tab}→${r.actual}`).join('、')}`);
+  }
+  if (rendered.includes('item') || rendered.includes('escape')) groupProblems.push('旧坞渲染了道具/逃跑入口');
+  // 物品屏**不许自造动作**：屏里带 `data-b3-action` 的格子必须逐条能在 `view.legal` 的 item 里找到。
+  for (const cell of renderedItems) {
+    if (!(engineItems.includes(cell.id) || engineItems.includes(cell.label))) {
+      groupProblems.push(`物品屏自造了一条引擎没给的动作（${cell.label || cell.id}）`);
+    }
+  }
   // 模式隐藏的旧动作仍要如实记账 —— 但按人类视觉规格，它记账在**开发者抽屉**里
   //（`#hidden-actions-raw`），玩家层只说「按当前模式少了 N 个动作」（不再出现 item/escape/RC-306）。
-  const hiddenRaw = await js(`document.getElementById('hidden-actions-raw')?.textContent ?? ''`);
-  if (actionFacts.hidden > 0 && !/隐藏的旧引擎动作/.test(String(hiddenRaw))) {
+  if (actionFacts.hidden > 0 && !/隐藏的旧引擎动作/.test(String(actionFacts.hiddenRaw))) {
     groupProblems.push('被模式隐藏的动作没有在开发者抽屉里如实记账');
   }
-  if (actionFacts.hidden > 0 && /item|escape|RC-306/.test(String(actionFacts.hiddenNote))) {
+  if (actionFacts.hidden > 0 && /item|escape|RC-306/.test(String(actionFacts.playerText))) {
     groupProblems.push('玩家层出现了被隐藏动作的工程名（item/escape/RC-306）');
   }
-  check('D4-groups', '行动区结构等于规格：技能为主区（≤4 张卡）、聚能/换精灵/投降各自独立入口、'
-    + '换人列表条数等于引擎给的换人数、道具与逃跑不渲染、被模式隐藏的仍如实记账',
+  check('D4-groups', '行动面结构等于 v3h 规格：左列永远四格技能、可点格数逐格等于引擎给的合法技能、'
+    + '底栏「技能/更换/物品/逃跑」四选项齐备且逐个真鼠标点过真的切屏、聚能入口可见、'
+    + '更换屏可点行数等于引擎给的换人数、物品屏不许自造动作、被模式隐藏的仍如实记账。'
+    + '【按人类 2026-09-23 版式，原「聚能/换精灵/投降各自独立入口」由 v3h 底栏四选项 + `#b3-charge` 承担；'
+    + '原「道具与逃跑不渲染」的前提已不成立（人类规格要求底栏必须有这两个入口），'
+    + '等价断言换成「物品屏不许自造引擎没给的动作」；旧读取点 `#actions .act-group` 在被收起的旧行动坞里】',
     groupProblems.length === 0,
     groupProblems.join(' | ')
     || `引擎账 ${JSON.stringify(actionFacts.byKind)}；页面渲染 ${JSON.stringify(rendered)}；`
-      + `技能卡 ${hooks.skillCards} 聚能 ${hooks.charge} 换精灵 ${hooks.switchEntry}（列表 ${hooks.switchList}）投降 ${hooks.surrender}；`
-      + `隐藏 ${actionFacts.hidden} 条`);
-  const skillCardsMissingDesc = actionFacts.cards.filter((c) => c.kind === 'skill' && c.desc.length === 0);
-  check('D4-skill-info', '每个技能条都带说明文字；系别/类别/能耗/威力按引擎给的一起显示',
-    actionFacts.cards.filter((c) => c.kind === 'skill').length > 0 && skillCardsMissingDesc.length === 0,
-    `${actionFacts.cards.filter((c) => c.kind === 'skill').length} 个技能条，缺说明 ${skillCardsMissingDesc.length} 个；`
-    + `样例「${(actionFacts.cards.find((c) => c.kind === 'skill') || {}).label} · ${(actionFacts.cards.find((c) => c.kind === 'skill') || {}).meta} · ${String((actionFacts.cards.find((c) => c.kind === 'skill') || {}).desc).slice(0, 24)}」`);
-  // 物品名：标准 PVP 下物品是被模式隐藏的（引擎还给了 4 个旧动作），所以这一条分两种情形——
-  // 页面上真的显示了物品就必须是引擎给的 `item_id`；没显示就如实记「按模式隐藏」。
-  const itemName = (actionFacts.cards.find((c) => c.kind === 'item') || {}).label ?? null;
-  const engineItems = await js(`JSON.stringify((window.rocoDemo.state.view.legal||[])
-    .filter((a)=>a.kind==='item').map((a)=>a.item_id))`).then(JSON.parse);
+      + `技能格 ${hooks.skillCards}/${actionFacts.byKind.skill ?? 0} 可点；聚能 ${hooks.charge}「${actionFacts.charge.text}」；`
+      + `更换 ${hooks.switchEntry}（可点 ${hooks.switchList}）投降 ${hooks.surrender}；`
+      + `切屏 ${JSON.stringify(tabWalk.map((r) => `${r.tab}${r.ok ? '✔' : '✖'}`))}；隐藏 ${actionFacts.hidden} 条`);
+  // 技能格第一层（v3h）：消耗 ⭐ + 名字 + 属性 + 类别 + 克制标记 + 预期伤害；
+  // **预期伤害必须与引擎样本一致，没给就写「—」不许编**（旧读取点是 `#actions button[data-action]`
+  // 里的 `.skill-detail small` 说明层——v3h 版式把说明移出战斗主视线，由这四行承担）。
+  const samples = await js(`JSON.stringify(((window.rocoDemo.state.view||{}).damage_preview||{}).samples||[])`).then(JSON.parse);
+  const skillSlotProblems = (slots, sampleRows) => {
+    const bad = [];
+    const shown = slots.filter((s) => s.legal === 'yes' || s.action !== null);
+    if (!shown.length) bad.push('一个技能格都没填上');
+    for (const s of shown) {
+      if (!s.label) bad.push('技能格没有技能名');
+      if (!s.elName) bad.push(`技能格「${s.label}」没有属性徽章（data-b3-el-name 空）`);
+      if (!s.cat) bad.push(`技能格「${s.label}」没有类别（攻击/防御/状态）`);
+      if (!/\d/.test(String(s.cost))) bad.push(`技能格「${s.label}」左上角没有消耗（⭐）`);
+      if (!/预期伤害/.test(String(s.dmg))) bad.push(`技能格「${s.label}」没有「预期伤害」这一行`);
+      const sample = (sampleRows ?? []).find((x) => x && x.label === s.label);
+      if (sample && Number.isFinite(sample.damage)) {
+        if (!String(s.dmg).includes(String(sample.damage))) {
+          bad.push(`技能格「${s.label}」的预期伤害与引擎样本不一致（引擎 ${sample.damage}，页面「${s.dmg}」）`);
+        }
+      } else if (!/预期伤害\s*(—|--)$/.test(String(s.dmg))) {
+        bad.push(`引擎没给「${s.label}」的伤害样本，格子却写了「${s.dmg}」（不编）`);
+      }
+    }
+    return bad;
+  };
+  const skillSlotIssues = skillSlotProblems(actionFacts.slots, samples);
+  check('D4-skill-info', '每个技能格都给全「消耗 ⭐ / 名字 / 属性 / 类别 / 预期伤害」，且预期伤害与引擎样本逐格一致'
+    + '（引擎没给样本就只能写「—」，绝不补一个数）。'
+    + '【按人类 2026-09-23 版式，旧读取点 `#actions button[data-action]` 的技能说明层由 v3h '
+    + '技能格这四行承担；口径未放松：少一行或数字对不上就红】',
+    skillSlotIssues.length === 0,
+    skillSlotIssues.join(' | ')
+    || `${actionFacts.slots.filter((s) => s.legal === 'yes').length} 个技能格，引擎伤害样本 ${samples.length} 条；`
+      + `样例「${(actionFacts.slots[0] || {}).cost} ${(actionFacts.slots[0] || {}).label} · `
+      + `${(actionFacts.slots[0] || {}).elName} · ${(actionFacts.slots[0] || {}).cat} · ${(actionFacts.slots[0] || {}).dmg}」`);
+  // 物品名：页面上真的显示了可点的物品就必须是引擎给的 `item_id`；没显示就如实记「按模式隐藏」。
+  // v3h 的物品屏每格都带 `data-b3-item-note`（说明为什么用不了），可点性由 `data-b3-action` 决定。
+  const itemName = renderedItems.length ? renderedItems[0].label : null;
+  const engineItemNames = await js(`JSON.stringify((window.rocoDemo.state.view.legal||[])
+    .filter((a)=>a.kind==='item').map((a)=>a.item_id||a.label))`).then(JSON.parse);
   const itemsHidden = groupCount('item') === 0 && engineItems.length > 0 && actionFacts.hidden > 0;
-  check('D4-item-name', '物品名要么用引擎给的真实名字，要么按标准 PVP 模式隐藏并记账',
-    itemName === null ? (itemsHidden || engineItems.length === 0) : engineItems.includes(itemName),
-    `引擎物品 ${JSON.stringify(engineItems)}；页面显示「${itemName}」；`
-    + `隐藏条数 ${actionFacts.hidden}（${itemsHidden ? '按模式隐藏并已记账' : '页面上真的显示了它'}）`);
-  const clickTargets = await js(`(()=>{const rows=[...document.querySelectorAll('#actions button[data-action]')];
-    return rows.map((b)=>{const r=b.getBoundingClientRect();return {k:b.dataset.kind,w:Math.round(r.width),h:Math.round(r.height)};});})()`);
+  check('D4-item-name', '物品名要么用引擎给的真实名字，要么按模式隐藏并如实记账（不编一个引擎没给的名字）。'
+    + '【按人类 2026-09-23 版式，旧读取点 `#actions button[data-action][data-kind=item]` 由 v3h 背包屏 '
+    + '`[data-b3-item-cell]` + `data-b3-item-note` 承担】',
+    itemName === null ? (itemsHidden || engineItems.length === 0) : engineItemNames.includes(itemName),
+    `引擎物品 ${JSON.stringify(engineItems)}；物品屏可点格 ${renderedItems.length} 个（名字「${itemName}」）；`
+    + `隐藏条数 ${actionFacts.hidden}（${itemsHidden ? '按模式隐藏并已记账' : '物品屏没有可点格'}）`);
+  const clickTargets = await js(`(()=>{const slots=[...document.querySelectorAll('.b3-wrap [data-b3-skill-slot]')];
+    const tabs=[...document.querySelectorAll('[data-b3-tab]')]
+      .filter((el)=>el!==document.body&&el!==document.documentElement);
+    return [...slots,...tabs].filter((el)=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0;})
+      .map((el)=>({k:el.dataset.b3ActionKind||el.dataset.b3Tab||'slot',
+        w:Math.round(el.getBoundingClientRect().width),h:Math.round(el.getBoundingClientRect().height)}));})()`);
   const tooSmall = clickTargets.filter((t) => t.h < 44);
-  check('D4-clickable', '每个可点动作条的高度 ≥44px（触屏点得到）',
+  check('D4-clickable', '每个可点动作条的高度 ≥44px（触屏点得到）。'
+    + '【按人类 2026-09-23 版式，读取点从旧行动坞 `#actions button[data-action]` 迁到 '
+    + 'v3h 技能格 `[data-b3-skill-slot]` 与底栏四选项 `[data-b3-tab]`】',
     clickTargets.length > 0 && tooSmall.length === 0,
-    `${clickTargets.length} 个动作条，最矮 ${Math.min(...clickTargets.map((t) => t.h))}px；<44px 的有 ${tooSmall.length} 个`);
+    `${clickTargets.length} 个可点目标（技能格 + 底栏选项），最矮 ${Math.min(...clickTargets.map((t) => t.h))}px；`
+    + `<44px 的有 ${tooSmall.length} 个`);
   const shotBattle1440 = await shoot('battle-1440x900');
   const overflow1440 = await overflowOf();
   check('D4-narrow-safe-1440', '1440×900 无横向溢出（clientW === scrollW）',
@@ -563,9 +669,13 @@ async function main() {
   await mouseClick('#coach-entry');
   await sleep(300);
   const narrow = await js(`(()=>{const vis=window.rocoDemo.companionVisibility();
-    const rows=[...document.querySelectorAll('#actions button[data-action]')].map((b)=>{const r=b.getBoundingClientRect();
-      return {k:b.dataset.kind,w:Math.round(r.width),h:Math.round(r.height)};});
-    return {vis,rows};})()`);
+    const slots=[...document.querySelectorAll('.b3-wrap [data-b3-skill-slot]')];
+    const tabs=[...document.querySelectorAll('[data-b3-tab]')]
+      .filter((el)=>el!==document.body&&el!==document.documentElement);
+    const rows=[...slots,...tabs].filter((el)=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0;})
+      .map((el)=>({k:el.dataset.b3ActionKind||el.dataset.b3Tab||'slot',
+        w:Math.round(el.getBoundingClientRect().width),h:Math.round(el.getBoundingClientRect().height)}));
+    return {vis,rows,tab:document.body.dataset.b3Tab??null};})()`);
   const overflow390 = await overflowOf();
   check('P0-7-390', '390×844 无横向溢出（clientW === scrollW）',
     overflow390.clientW === overflow390.scrollW,
