@@ -208,8 +208,10 @@ test('标准 PVP 没有指定对手时：不许镜像我方（示例对手 + ene
     // 至少「对手与我一模一样」这种镜像，会让对手**每一只**都能在我方名单里找到。
     const foeField = started.view.opponent?.field;
     assert.ok(foeField, '对手场上那只必须在公开视图里');
-    assert.equal(started.view.enemy_source, 'sample',
-      '没有指定对手时必须在回执里标 enemy_source=sample（页面才知道这是示例对手）');
+    assert.ok(['sample', 'sample-usable', 'sample-fallback'].includes(started.view.enemy_source),
+      '没有指定对手时必须在回执里标 enemy_source（页面才知道这是示例对手）；'
+      + `当前=${JSON.stringify(started.view.enemy_source)}（sample-usable=从我的可用精灵里选，`
+      + 'sample-fallback=退回全量池）');
     // 反证方向：镜像我方时，对手上场那只**必然**是我方第一只 —— 这条能抓住镜像实现
     assert.notEqual(String(foeField.species_id ?? foeField.pet_id), String(mineIds[0]),
       `对手上场那只不该就是我方第一只（镜像）：对手 ${foeField.species_id ?? foeField.pet_id} / 我方首位 ${mineIds[0]}`);

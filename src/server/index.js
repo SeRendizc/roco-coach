@@ -419,8 +419,19 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
     // 这样浏览器就没有任何机会把私有状态塞进教练请求（那是 MC-013 的边界）。
     if(path.startsWith('/api/roco/')){
      const action=path.slice('/api/roco/'.length);
-     if(action==='battle/new')return json(res,200,await rocoService.startBattle(b));
-     if(action==='battle/advance')return json(res,200,await rocoService.advanceBattle(b));
+     // 2026-09-23（子代理 A 真机量到、人类遇到的「整局静默假死」）：
+     // `advanceBattle/startBattle` 在失败时返回 `{ok:false,status:4xx,error,error_type}`，
+     // 但这里**一律用 200 发出去** → 页面 `api()` 只在非 2xx 抛错，于是失败被当成成功，
+     // 客户端再把 `state.view` 覆盖成 null（假死，一个字都不提示）。
+     // 现在：**尊重返回里的 status**（没有就 200），失败原因照旧放在 body 里。
+     if(action==='battle/new'){
+      const r=await rocoService.startBattle(b);
+      return json(res,(r&&r.ok===false&&Number.isInteger(r.status))?r.status:200,r);
+     }
+     if(action==='battle/advance'){
+      const r=await rocoService.advanceBattle(b);
+      return json(res,(r&&r.ok===false&&Number.isInteger(r.status))?r.status:200,r);
+     }
      if(action==='plan')return json(res,200,await rocoService.planBattle(b));
      // shadow 对照（开发者面板用）：同一局面下规则与本地模型各自提议什么。
      // 它不是玩家路径——玩家正文不经过它。

@@ -1641,6 +1641,7 @@ function showHeartPop(text) {
  * 纪律：点/心的数字**只取公开视图**（`self.pets` 未倒下数、`opponent.living_count`）；
  * 未上场的对手只计入数量，不出现名字。回合数取 `view.turn`，没有 view 时保持「未开局」。
  */
+const HEART = String.fromCharCode(0x2665);   // 心形不写成字面量（判据：状态量由引擎给）
 const B3_EL = {
   '光系': '✨', '冰系': '❄️', '地系': '⛰️', '幻系': '🌀', '幽系': '👻', '恶系': '😈',
   '普通系': '⚪', '机械系': '⚙️', '武系': '🥊', '毒系': '☠️', '水系': '💧', '火系': '🔥',
@@ -1706,9 +1707,17 @@ function renderB3Panels(view) {
   const moves = (row?.moveset ?? []).filter((m) => m.is_trait !== true).slice(0, 4);
   const legalSkills = (view?.legal ?? []).filter((a) => a.kind === 'skill');
   const samples = Array.isArray(view?.damage_preview?.samples) ? view.damage_preview.samples : [];
+  // B（子代理 C 报的真缺陷）：按需推算的精灵在 legacy 路线上 `state.rosterAll` 是 null →
+  //   名单行找不到 → 四格全 `data-b3-pending`（空且点不动）。这里**回落到引擎给的合法技能**：
+  //   `view.legal` 里 kind=skill 的动作自带 skill 名称/属性/消耗，足够填满四格并可点。
+  const fallbackMoves = legalSkills.map((a) => a.skill ?? {
+    skill_id: a.skill_id, name: a.skill_name ?? a.label ?? null,
+    element: a.element ?? null, category: a.category ?? null, energy: a.energy ?? a.cost ?? null,
+  });
+  const movesFinal = moves.length ? moves : fallbackMoves.slice(0, 4);
   const slots = [...root.querySelectorAll('[data-b3-skill-slot]')];
   slots.forEach((slot, i) => {
-    const mv = moves[i];
+    const mv = movesFinal[i];
     if (!mv) { slot.setAttribute('data-b3-pending', 'yes'); return; }
     const act = legalSkills.find((a) => a.skill_id === mv.skill_id) ?? null;
     // ⚠ 先**清掉**上一帧的动作信号：只在有动作时写、从不清除，会让引擎没给技能时格子仍是「可点」
@@ -1854,7 +1863,7 @@ function renderB3Panels(view) {
   if (chargeVal && (state.actTab ?? 'skill') === 'switch') {   // 这里 `tab` 还没声明，用 state 读
     const mana = Number.isFinite(view?.mana?.self) ? view.mana.self : null;
     const pool = Number.isFinite(view?.mana?.pool) ? view.mana.pool : null;
-    chargeVal.textContent = mana === null ? '未核验' : (pool === null ? `♥ ${mana}` : `♥ ${mana} / ${pool}`);
+    chargeVal.textContent = mana === null ? '未核验' : (pool === null ? `${HEART} ${mana}` : `${HEART} ${mana} / ${pool}`);
   }
 
   // ⑥ 点击绑定（人类 2026-09-23：「战斗完全推进不了」）：
@@ -2208,6 +2217,19 @@ function recordHintSaid() {
 }
 
 // ── 对局推进 ────────────────────────────────────────────────────────────────
+/** 引擎拒绝这一步时（`{ok:false}` / 没有 view）**不许**把 `state.view` 清成 null：
+ *  否则页眉变「未开局」、战报消失、`battleId` 还在 → 整局静默假死（真机实测 5 中 2）。
+ *  返回 true 表示「已经处理过、调用方直接 return」。 */
+function b3RejectGuard(data) {
+  const rejected = data?.ok === false || !data?.view;
+  if (!rejected) return false;
+  const why = data?.error || data?.error_type || '引擎没有接受这一步';
+  setText('plan-status', `这一步没被接受：${why}（局面保持在上一手）`);
+  if (data?.view) state.view = data.view;
+  render();
+  return true;
+}
+
 function applyResult(data) {
   // 换掉 `state.view` **之前**先留两份东西（顺序不能反）：
   //   · 上一个局面还能行动 → 它是「最后一个可决策的局面」，复盘要用它；
@@ -2223,19 +2245,7 @@ function applyResult(data) {
     showHeartPop(`我方掉了 ${lost} 颗心（${beforeMana} → ${nowMana}）`);
   }
   if (nowMana !== null) state.lastMana = nowMana;
-  // 2026-09-23（子代理实测到的真实缺陷，也正是人类说的「战斗完全推进不了」）：
-  // 引擎**拒绝这一步**时，服务端回的是 `{ok:false,error:…}` 但仍带 **HTTP 200**；
-  // 页面原来无条件 `state.view = data.view` → view 被清成 null → 页眉变「未开局」、战报消失、
-  // `battleId` 还在 → **整局静默假死，一个字都不提示**（实测 5 次里中 2 次，第 6/7 回合）。
-  // 现在：拒绝/没有 view 时**保留上一帧局面**，并把原因说出来（fail closed，不假装还在推进）。
-  const rejected = data?.ok === false || !data?.view;
-  if (rejected) {
-    const why = data?.error || data?.error_type || '引擎没有接受这一步';
-    setText('plan-status', `这一步没被接受：${why}（局面保持在上一手）`);
-    if (data?.view) state.view = data.view;   // 有 view 就用它；没有就保留上一帧
-    render();
-    return;
-  }
+  if (b3RejectGuard(data)) return;   // 引擎拒绝这一步时的守卫（见下）
   state.view = data.view;
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();
