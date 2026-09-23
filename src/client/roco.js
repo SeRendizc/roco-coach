@@ -3434,7 +3434,8 @@ function updateStandardPvpBar() {
   const note = $('standard-pvp-note');
   if (note) {
     if (formal) {
-      note.textContent = '这一局按候选规则（六宠 / 4 点魔力 / 力竭扣 1）；未核验的假设值会在战斗页逐条标出来。';
+      // 人类 2026-09-23：「开一局」这一区**只留一句**「只要选满六只开局」。
+      note.textContent = '只要选满六只开局';
     } else if (trial) {
       note.textContent = '试玩一局：这六只里有些你还没有，引擎用按需推算的配招跑（未核验）。'
         + '正式队伍仍然是「持有六只」那条路。';
