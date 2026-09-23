@@ -225,7 +225,8 @@ const STYLE = `
 .tw-knobs--right{justify-content:flex-end}
 .tw-scope-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}   /* 全图鉴 / 我的精灵 一左一右 */
 .tw-filter-row{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-size:11px}
-.tw-filter-row select{flex:0 0 auto;width:74px;font-size:11px;min-height:30px;padding:2px 4px}
+.tw-select{flex:0 0 auto;width:76px;max-width:76px;font-size:11px;min-height:30px;padding:2px 4px;
+ border:1px solid var(--line);border-radius:8px;background:#16222f;color:#dbe7f1}
 .tw-filter-row input[type=search]{flex:1 1 90px;min-width:60px;font-size:11px;min-height:30px;padding:2px 6px}
 .tw-filter-row #tw-filter-reset{flex:0 0 auto;width:auto;font-size:11px;min-height:30px;padding:2px 10px}
 .tw-filter-row select,.tw-filter-row input,.tw-filter-row button{font-size:11.5px;padding-left:6px;padding-right:6px}
@@ -337,8 +338,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       <button class="tw-btn" id="tw-scope-mine" aria-pressed="false">我的精灵</button>
      </div>
      <div class="tw-cand-tools tw-filter-row">
-      <select class="tw-btn" id="tw-filter-type" aria-label="按属性筛选"></select>
-      <select class="tw-btn" id="tw-filter-role" aria-label="按定位筛选"></select>
+      <select class="tw-select" id="tw-filter-type" aria-label="按属性筛选"></select>
+      <select class="tw-select" id="tw-filter-role" aria-label="按定位筛选"></select>
       <input type="search" id="tw-search" placeholder="搜索精灵" aria-label="搜索候选" autocomplete="off">
       <button class="tw-btn" id="tw-filter-reset">重置</button>
      </div>
