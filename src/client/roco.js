@@ -1636,6 +1636,7 @@ function showHeartPop(text) {
  * 纪律：点/心的数字**只取公开视图**（`self.pets` 未倒下数、`opponent.living_count`）；
  * 未上场的对手只计入数量，不出现名字。回合数取 `view.turn`，没有 view 时保持「未开局」。
  */
+const B3_BUFF_GHOSTS = '<span class="b3-buff b3-buff--ghost" data-b3-buff-kind="status"></span>' + '<span class="b3-buff b3-buff--ghost" data-b3-buff-kind="buff"></span>' + '<span class="b3-buff b3-buff--ghost" data-b3-buff-kind="mark"></span>';
 const HEART = String.fromCharCode(0x2665);   // 心形不写成字面量（判据：状态量由引擎给）
 const B3_EL = {
   '光系': '✨', '冰系': '❄️', '地系': '⛰️', '幻系': '🌀', '幽系': '👻', '恶系': '😈',
@@ -1821,6 +1822,8 @@ function renderB3Panels(view) {
     }
     if (rows.length) {
       selfBuffs.innerHTML = rows.map((r) => `<span class="b3-buff" data-b3-buff-kind="${r.kind}">${escapeHtml(r.text)}</span>`).join('');
+    } else {
+      selfBuffs.innerHTML = B3_BUFF_GHOSTS;   // 没有 buff/状态 → 留空占位（不编）
     }
   }
 
@@ -1834,7 +1837,8 @@ function renderB3Panels(view) {
       foeBuffs.innerHTML = rows.map(([k, v]) => `<span class="b3-buff" data-b3-buff-kind="mark"
         data-b3-buff-name="${escapeAttr(k)}">${escapeHtml(STATUS_LABEL[k] ?? k)} ${Number(v)}</span>`).join('');
     } else {
-      foeBuffs.innerHTML = '';   // 这一帧引擎没给印记 → 必须清空（陈旧 DOM 会骗过判据与玩家）
+      // 这一帧引擎没给印记 → 清掉旧值，但**保留设计稿要求的空占位**（不清成彻底空）
+      foeBuffs.innerHTML = B3_BUFF_GHOSTS;
     }
   }
   // G3 背包格：按引擎给的 item 动作填（id/名字/可用态）；没给就写「不可用」。
