@@ -431,3 +431,17 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
  70%{transform:translateX(-4px)}}
 /* 预留区不再画虚线（放立绘）；没有立绘时也不显示占位文字 */
 .b3-wrap .b3-spritebox{border-style:solid;border-color:#1d2833}
+
+/* ── 立绘画框（人类 2026-09-23：圆角、别裁内容）─────────────────────────────
+   立绘 PNG 自带浅灰底，放进深色卡里像一块灰方块 —— 这里给它**圆角 + 暗角 + 描边**，
+   让它看起来是「画框」而不是漏出来的素材；同时只裁画框本身，**不裁卡片内容**。 */
+.b3-wrap .b3-spritebox{
+  border-radius:14px;overflow:hidden;border:1px solid #243444;
+  background:linear-gradient(180deg,#141d27,#0f161d);position:relative}
+.b3-wrap .b3-spritebox::after{              /* 暗角：把灰底压进画面里 */
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:14px;
+  background:radial-gradient(120% 90% at 50% 30%, rgba(0,0,0,0) 45%, rgba(0,0,0,.45) 100%)}
+.b3-wrap .b3-sprite{z-index:1}
+/* 卡片自身**不裁内容**（人类：显示不全）—— 圆角只作用于画框与卡片边框 */
+.b3-wrap .b3-card{overflow:visible}
+.b3-wrap .b3-free.b3-spritebox{flex:1;min-height:120px}
