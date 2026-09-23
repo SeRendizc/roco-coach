@@ -96,7 +96,7 @@ const STYLE = `
 .tw-grid,.tw-panel,.tw-drawer-btn,.tw-drawer-panel,.tw-cand-list,.tw-slots{pointer-events:auto}
 .tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;
  height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}
-.tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0;height:100%}
+.tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0;height:100%;align-self:stretch}
 .tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto}   /* 一屏下也要有可用高度（实测曾被挤到 60px） */
 .tw-team{grid-column:1;grid-row:1;width:100%}
 .tw-eval{grid-column:2;grid-row:1}
@@ -120,7 +120,7 @@ const STYLE = `
    2026-09-22 人类 P0 实测：选中之后往卡里塞了整段机制原文，卡片当场长高，
    空槽/已选槽高度参差、网格跳动 —— 选前选后必须是同一张版式。 */
 .tw-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;grid-auto-rows:1fr}
-.tw-slot{min-height:92px;border:1px dashed #36495e;border-radius:10px;padding:8px 9px;
+.tw-slot{min-height:200px;border:1px dashed #36495e;border-radius:10px;padding:8px 9px;
  display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
 .tw-slot.on{border-style:solid;border-color:#8dd49c;background:#17242f}
 .tw-slot .tw-who{font-weight:600;font-size:14px;overflow-wrap:anywhere}
@@ -410,8 +410,13 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     const list = $('tw-cand-list');
     const h = list ? list.getBoundingClientRect().height : 0;
     if (!(h > 120)) return;
-    const fit = Math.max(6, Math.min(24, Math.floor(h / 46)));
-    if (fit !== state.pool.pageSize) { state.pool.pageSize = fit; }
+    const fit = Math.max(6, Math.min(30, Math.floor(h / 46)));
+    if (fit !== state.pool.pageSize) {
+      // 人类：**每页条数按页面整体高度决定**（不是让条目高度变来变去）
+      state.pool.pageSize = fit;
+      state.pool.offset = 0;
+      setTimeout(() => { loadPool(); }, 0);   // 布局稳定后再取一次数
+    }
   };
   // RC-801：从盒子带过来的初始选人（`?team=own-…`）。**只认形状对的 id**：
   // 认不出的直接丢掉（不猜、不静默塞一个别的）——多带一只或少带一只都要看得见。

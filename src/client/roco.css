@@ -992,3 +992,9 @@ body:has(#team-workshop:not([hidden])) .onboard-bar{margin:0 0 6px}
 /* 人类 2026-09-23：「小芽/阵容评估还是会占正文，宽度减一点」+「下面要放在页面最下方」 */
 .xy-modal2-box{width:min(300px,90vw) !important}
 .standard-pvp-bar{margin-top:auto}
+
+/* 人类 2026-09-23：「页眉为啥那么窄，页眉高一点，小芽按钮都占到下面的横线了」 */
+header.topbar{padding-top:10px !important;padding-bottom:10px !important;min-height:64px;align-items:center}
+header.topbar .xiaoya-btn{height:36px;display:inline-flex;align-items:center}
+/* 「你管这叫占满？高度为啥都差一截」—— 主区与工坊都必须吃满剩余高度 */
+body:has(#team-workshop:not([hidden])) main>#team-workshop{height:100% !important}
