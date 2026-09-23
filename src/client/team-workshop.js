@@ -85,24 +85,29 @@ const STYLE = `
 .tw-drawer[data-open="yes"] .tw-drawer-btn{display:none}   /* 人类：展开后按钮要**消失**，别压着面板 */
 .tw-drawer-close{display:block;width:100%;margin:0 0 8px;padding:6px 10px;border:1px solid var(--line);
  border-radius:10px;background:#16222f;color:#dbe7f1;font-size:12px;cursor:pointer;text-align:left}
-.tw-drawer-panel{display:none;width:min(380px,86vw);overflow:auto;background:#101a24;
+.tw-drawer-panel{display:none;width:min(300px,80vw);overflow:auto;background:#101a24;
  border:1px solid var(--line);border-radius:0 14px 14px 0;padding:12px 14px;margin-left:0}
 .tw-drawer[data-open="yes"] .tw-drawer-panel{display:block}
 /* 一屏装完：网格高度 = 可用高度，候选列表**内部滚动**，页面本身不上下滑。 */
+/* 人类 2026-09-23（子代理 A/B 实测）：工坊 host 曾是 h=0 但 shadow 里的固定浮层溢出，
+   把页面级控件（#select-panel 的切换/搜索）挡住了 —— elementFromPoint 命中 SECTION#team-workshop。
+   这里让 host 与浮层容器默认不吃点击，只有真正需要交互的块恢复可点。 */
+:host{pointer-events:none}
+.tw-grid,.tw-panel,.tw-drawer-btn,.tw-drawer-panel,.tw-cand-list,.tw-slots{pointer-events:auto}
 .tw-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;
  height:100%;min-height:0;grid-template-rows:minmax(0,1fr)}
 .tw-cand,.tw-team{display:flex;flex-direction:column;min-height:0;height:100%}
 .tw-cand-list{flex:1 1 auto;min-height:0;overflow:auto}   /* 一屏下也要有可用高度（实测曾被挤到 60px） */
-.tw-team{grid-column:1;grid-row:1}
+.tw-team{grid-column:1;grid-row:1;width:100%}
 .tw-eval{grid-column:2;grid-row:1}
 
 /* 两列**等高**（用户：小芽那栏不能拉长吗、非得这么丑？）：网格项拉伸，
    面板内部再让最后一栏吃满剩余高度。 */
 .tw-grid{align-items:stretch}
+.tw-cand{grid-column:2;grid-row:1;width:100%}
 .tw-panel{display:flex;flex-direction:column}
 .tw-panel.tw-coach,.tw-panel.tw-eval{height:100%}
 .tw-panel{background:#1a2635;border:1px solid #314154;border-radius:12px;padding:6px 12px 10px;min-width:0}
-.tw-team{grid-column:span 2}
 .tw-coach{grid-column:span 2}
 .tw-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0 8px}
 .tw-head h3{margin:0;font-size:15px}

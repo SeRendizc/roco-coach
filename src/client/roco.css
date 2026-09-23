@@ -988,3 +988,7 @@ body:has(#team-workshop:not([hidden])) .onboard-bar{margin:0 0 6px}
    边框贴在一起看着像「压着」）。空的时候就别占位。 */
 .companion-body:empty{display:none}
 .xy-modal2-box>.companion-body{margin-top:2px}
+
+/* 人类 2026-09-23：「小芽/阵容评估还是会占正文，宽度减一点」+「下面要放在页面最下方」 */
+.xy-modal2-box{width:min(300px,90vw) !important}
+.standard-pvp-bar{margin-top:auto}

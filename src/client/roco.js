@@ -235,8 +235,8 @@ function typeChips(types) {
 //: 定位（引擎侧的标注，不是引擎数值）与速度档的中文名。
 const ROLE_LABEL = {attacker: '输出', tank: '坦克', recovery: '回复', control: '控制', support: '辅助'};
 const ROLE_ORDER = ['attacker', 'tank', 'recovery', 'control', 'support'];
-const TYPE_ORDER = ['普通系', '火系', '水系', '武系', '翼系', '冰系', '龙系', '幽系', '萌系',
-  '虫系', '幻系', '自然系', '草系', '地系', '恶系', '毒系', '电系', '机械系', '光系'];
+// `TYPE_ORDER`（属性下拉的固定顺序）随人类 2026-09-23 删掉页面级「属性筛选」而**删除**：
+// 属性筛选现在只有工坊模块里那一份（`#team-workshop >>> #tw-filter-type`），这一页不再有落点。
 //: 异常状态的中文名（与引擎侧 `events_text._STATUS` 同源口径；这里只做显示）。
 const STATUS_LABEL = {burn: '灼烧', poison: '中毒', paralysis: '麻痹', freeze: '冰冻',
   sleep: '睡眠', confusion: '混乱', seal: '封印'};
@@ -659,20 +659,17 @@ function modeProbeText(mode) {
 }
 
 function renderMode() {
-  // 2026-09-23（子代理 C 的 G1）：页眉精简时删掉了 `#mode-line`，而这里第一行 `if(!box)return`
-  // 让**整段都停摆** —— body 的 `rocoMode/rocoPrematch/rocoStandardPvp` 从此再也没被写过，
-  // 玩家层也再没有「候选规则（待实机核对）」「匹配前对手未知」这两句。
-  // 现在：`#mode-line` 在就用它；不在就渲染到页眉中间列旁边（**首屏可见**），并且**照旧写 body 数据集**。
-  const modeLine = $('mode-line');
-  const flags = $('b3-flags');
+  // 2026-09-23（人类第三次要求「口径文案真删」）：
+  // 三条口径（模式 / 候选规则（待实机核对）/ 匹配前对手未知）**整块删掉，不是隐藏**。
+  // 三个渲染落点 `#mode-line`（页头徽记）、`#b3-flags`（v3h 备用位）、`#mode-chips`
+  // （小芽弹窗）**都已不在 roco.html 里** —— 旧代码那三段 `if (el) el.innerHTML = chips`
+  // 全是拿 null 的空转，`chips` 算出来也没人用，所以整段删除。
+  // 口径本身没丢，只是不再上玩家层：
+  //   · 数据层：`body.dataset.rocoMode` / `rocoPrematch` / `rocoStandardPvp`（机器可核对）；
+  //   · 开发者抽屉：`#mode-probe`（内部数字）+ `#mode-raw`（注册表原文）。
+  // ⚠ `modeChipHtml()` 保留：`tests/roco-page-ux.test.js` 直接抠出它跑断言
+  //   （「玩家徽记里不许出现注册表术语」等），它现在是**纯函数 + 单测资产**，没有页面调用点。
   state.mode = resolveMode(state.mode);
-  const chips = modeChipHtml(state.mode);
-  if (modeLine) modeLine.innerHTML = chips;
-  else if (flags) flags.innerHTML = chips;          // 专用容器：直接覆盖
-  // 人类 2026-09-23 批注：战斗页页眉**下面不要再堆这两行徽记**（「全部删掉」）——
-  // 口径仍然可查，但只在**小芽设置**里出现一次，不占战斗页。
-  const side = $('mode-chips');
-  if (side) side.innerHTML = chips;
   document.body.dataset.rocoMode = state.mode?.id ?? 'none';
   document.body.dataset.rocoPrematch = state.mode?.prematch?.visibility ?? 'none';
   document.body.dataset.rocoStandardPvp = standardPvpActive() ? 'yes' : 'no';
@@ -797,12 +794,9 @@ function render() {
       ? `<div class="bench-pet">对手后备 ${alive} 只 · 上场时亮明</div>`
       : '';
   }
-  // 最新一条战斗事件：只留最后一条中文句子（完整战报在下面的折叠区）。
-  const lastEvent = $('last-event');
-  if (lastEvent) {
-    const texts = (state.events ?? []).filter((e) => typeof e.text === 'string' && e.text);
-    lastEvent.textContent = texts.length ? texts[texts.length - 1].text : '';
-  }
+  // 2026-09-23 死代码清理：`#last-event`（「最新一条战斗事件」）与 `#lineup-brief`
+  // （旧「一行摘要 + 重选阵容」）这两个接收槽**已从 roco.html 删除** —— 前者由右列战报
+  // （`.b3-log-scroll`）承担，后者由 v3h 顶栏存活点承担，两处都没有活代码再读它们。
 
   // ── 行动坞：按引擎 kind 分组 ────────────────────────────────────────────
   const actions = view?.legal ?? [];
@@ -863,23 +857,6 @@ function render() {
   // 主流程裁剪（2026-09-22）：六宠路线下旧的 3v3 选人区**永远**不显示，
   // 不能被这一步的动画状态重新翻出来（第一版就是这里把它翻回来了）。
   if (pickPanel) pickPanel.hidden = legacyPracticeEnabled() ? (busy && !state.pick.open) : true;
-  const brief = $('lineup-brief');
-  if (brief) {
-    brief.hidden = !busy;
-    if (!brief.hidden) {
-      const nameOf = petNameOf;
-      const mine = state.pick.player.length
-        ? state.pick.player.map(nameOf)
-        : (view?.self?.pets ?? []).map((p) => p.name).filter(Boolean);
-      const foes = state.pick.enemy.length
-        ? state.pick.enemy.map(nameOf)
-        : [view?.opponent?.field?.name, ...(view?.opponent?.bench ?? []).map(() => null)].filter(Boolean);
-      brief.innerHTML = `<span>我方 <strong>${mine.join('、') || '（未选）'}</strong>`
-        + ` ｜ 对手 <strong>${foes.join('、') || '（未选）'}</strong></span>`
-        + `<button id="reopen-pick">${state.pick.open ? '收起阵容，继续战斗' : '查看或调整下局阵容'}</button>`;
-      $('reopen-pick').addEventListener('click', () => { state.pick.open = !state.pick.open; render(); });
-    }
-  }
   $('battle-panel').hidden = !busy;
   // 开局栏只在**还没开局**时露脸：一局进行中它的任务已经完成，玩家这时候的主操作是行动坞。
   // （窄屏上它是贴底的，不收起会与动作坞抢同一条底边。）
@@ -889,10 +866,8 @@ function render() {
   // 整块收起 —— 它占的高度比战场还大。要看阵容时用「重选阵容」那一行把它叫回来。
   const workshop = $('team-workshop');
   if (workshop) workshop.hidden = busy && !state.pick.open;
-  // 战斗页顶部的规则/置信度徽记仍在页头（那是「这一局的规则口径」），
-  // 但**大段规则与证据**在战斗时不该占主视线：它们本来就在开发者抽屉里。
-  const modeLine = $('mode-line');
-  if (modeLine) modeLine.dataset.rocoCompact = busy ? 'yes' : 'no';
+  // `#mode-line`（页头那枚模式徽记）已按人类 2026-09-23 版式从 HTML 删除，
+  // 所以这里不再写它的 `data-roco-compact`（元素不存在 → 旧写法是空转）。
   // 「对手是示例阵容」要写在玩家看得到的地方（2026-09-22 人类实测：对手曾经就是我的镜像）。
   const sampleFoeNote = $('foe-note');
   if (sampleFoeNote) {
@@ -1120,41 +1095,12 @@ function chargePreviewHtml(chargeActions) {
 /**
  * R5：开局前的**短暂**双方阵容展示（人类 2026-09-22 规格）。
  *
- * 公开信息边界：我方六只给名字 + 属性（名单数据）；**对手只给「上场才亮明」与后备数量** ——
- * 把对手整队亮出来会违反「未上场不揭示」。展示是**在流里**的一块（不是浮层），
- * 所以不挡行动坞；几秒后自动收起，点一下也能立刻收起。
+ * 2026-09-23 死代码清理：这块展示的落点 `#lineup-reveal` **已从 roco.html 删除**
+ * （人类 v3h 版式：「我方六只」由顶栏 6 个存活点承担，「对手上场才亮明」由只给点数的
+ * 镜像点承担）。所以 `showLineupReveal()` / `lineupTimer` / `dataset.rocoLineupReveal`
+ * 这一段**整块删除** —— 它自 `#lineup-reveal` 消失起就是 `if (!box) return` 的空转，
+ * 触发它的 `playAction()` 那一行也一并删掉；全文没有任何判据再读 `rocoLineupReveal`。
  */
-let lineupTimer = null;
-function showLineupReveal(view) {
-  const box = $('lineup-reveal');
-  if (!box || !view) return;
-  const mine = (view.self?.pets ?? []).map((pet) => {
-    const row = [...(state.roster ?? []), ...(state.rosterAll ?? [])]
-      .find((p) => p.pet_id === (pet.species_id ?? pet.pet_id)) ?? null;
-    const types = Array.isArray(row?.types) ? row.types.join('·') : '';
-    return `<div class="lr-row">${escapeHtml(pet.name ?? '（名字未登记）')}`
-      + `${types ? ` <span class="muted">${escapeHtml(types)}</span>` : ''}</div>`;
-  }).join('');
-  const foeField = view.opponent?.field?.name ?? null;
-  const foeBench = Array.isArray(view.opponent?.bench)
-    ? view.opponent.bench.filter((b) => b.fainted !== true).length : null;
-  box.innerHTML = `<div><h4>我方阵容（${(view.self?.pets ?? []).length} 只）</h4>${mine}</div>
-    <div><h4>对手</h4><div class="lr-row lr-foe">${
-      foeField ? `上场的是「${escapeHtml(foeField)}」` : '还没亮明'}</div>
-      <div class="lr-row lr-foe">后备 ${foeBench === null ? '未公开' : foeBench} 只 · 上场才亮明</div>
-      <div class="lr-row lr-foe">对手的招式与后备名单不在公开视图里</div></div>`;
-  box.hidden = false;
-  document.body.dataset.rocoLineupReveal = 'shown';
-  if (lineupTimer) clearTimeout(lineupTimer);
-  lineupTimer = setTimeout(() => { box.hidden = true; document.body.dataset.rocoLineupReveal = 'hidden'; }, 3200);
-  if (!box.dataset.bound) {
-    box.dataset.bound = 'yes';
-    box.addEventListener('click', () => {
-      box.hidden = true;
-      document.body.dataset.rocoLineupReveal = 'hidden';
-    });
-  }
-}
 
 function renderActions(actions, disabled) {
   const box = $('actions');
@@ -1516,17 +1462,12 @@ function renderCompanion() {
   const card = $('companion-card');
   if (!card) return;
   card.hidden = !state.coach.open;
-  // 2026-09-22（人类规格）：对话卡现在住在「小芽面板」里 —— 只要小芽是开着的状态，
-  // 面板就必须跟着打开，否则卡在 DOM 里但被 `hidden` 的面板罩住（点和读都够不到）。
-  // 小芽开着 ⇒ 面板必须跟着开（否则卡在 hidden 的面板里，点和读都够不到）；
-  // 小芽关掉 ⇒ 面板一起收（否则留一个空壳在屏幕上，第一版就是这样「关不掉」的）。
-  const panel = $('xiaoya-panel');
-  if (panel) {
-    if (state.coach.open && panel.hidden) toggleXiaoya(true);
-    if (!state.coach.open && !panel.hidden) toggleXiaoya(false);
-  }
-  const close = $('companion-close');
-  if (close) close.setAttribute('aria-expanded', state.coach.open ? 'true' : 'false');
+  // 2026-09-23 死代码清理：旧「小芽面板」`#xiaoya-panel` / 它的关闭按钮 `#companion-close`
+  // 已不在 roco.html 里（人类改版：小芽是 `#companion-card` 的**浮层弹窗**，
+  // 由 `#coach-entry` 开 / `#close-companion` 关）。所以这里那段
+  // `const panel = $('xiaoya-panel'); if (panel) toggleXiaoya(...)` 与
+  // `$('companion-close').setAttribute('aria-expanded', …)` 都是拿 null 的空转 —— 整段删除。
+  // 弹窗自己的关闭绑定在 `bindXiaoyaPopups()`（`#close-companion`），那条不动。
   document.body.dataset.rocoCoach = state.coach.open ? 'open' : 'closed';
 }
 
@@ -1638,20 +1579,6 @@ async function renderModelList() {
   document.body.dataset.rocoModels = rows.length ? (rows.some((m) => m.connected) ? 'partial' : 'offline') : 'unknown';
   const chip = $('model-chip');
   if (chip) chip.textContent = `模型：${rows.length ? (rows.some((m) => m.connected) ? '部分已连接' : '未连接') : '状态未知'}`;
-}
-
-/** 小芽面板开关（页眉那个按钮）。 */
-function toggleXiaoya(force) {
-  const panel = $('xiaoya-panel');
-  const btn = $('coach-entry');
-  if (!panel) return;
-  const open = force === undefined ? panel.hidden : Boolean(force);
-  panel.hidden = !open;
-  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-  if (open) {
-    renderModelList();
-    panel.scrollIntoView({block: 'nearest'});
-  }
 }
 
 /**
@@ -2465,10 +2392,16 @@ async function loadPool({reset = false} = {}) {
 }
 
 /**
- * 属性/定位筛选的按钮组（折叠菜单里）。
+ * 定位筛选的按钮组（折叠菜单里）。
  *
  * 为什么不是原生 `<select>`：原生下拉在无头 Chrome 里打不开也按不动——
  * 实测「聚焦之后派发真实 ArrowDown」完全不改 value，于是这一条写不出真实键鼠判据。
+ *
+ * 2026-09-23（人类）：「旧的筛选机制迁移到新的后旧的就删掉」——**属性筛选**
+ * （`#filter-type-menu` / `#filter-type` / `#filter-type-label`）与**「清除筛选」**
+ * （`#filter-reset`）已从 roco.html 删除：它们的等价物是工坊模块里的
+ * `#team-workshop >>> #tw-filter-type` 与 `>>> #tw-filter-reset`（判据 `D1-filter-reset+clamp`
+ * / `D1-filter-clear` 已迁到那两处）。这里只剩**定位**这一档。
  */
 function renderFilterMenus() {
   const build = (box, options, current, attr) => {
@@ -2486,20 +2419,17 @@ function renderFilterMenus() {
       });
     }
   };
-  const types = new Set();
   const roles = new Set();
   for (const pet of state.roster) {
-    for (const t of pet.types ?? []) types.add(t);
     if (pet.role) roles.add(pet.role);
   }
-  build($('filter-type'), [['', '全部属性'], ...TYPE_ORDER.filter((t) => types.has(t)).map((t) => [t, t])],
-    state.pool.type, 'type');
   build($('filter-role'), [['', '全部定位'], ...ROLE_ORDER.filter((r) => roles.has(r)).map((r) => [r, ROLE_LABEL[r]])],
     state.pool.role, 'role');
-  const typeLabel = $('filter-type-label');
-  if (typeLabel) typeLabel.textContent = state.pool.type || '全部';
   const roleLabel = $('filter-role-label');
   if (roleLabel) roleLabel.textContent = state.pool.role ? (ROLE_LABEL[state.pool.role] ?? state.pool.role) : '全部';
+  // `state.pool.type` 与 `poolQueryOf()` 的 `type` 分支**保留**：那是 `/api/roco/roster` 的
+  // 查询契约（工坊的属性筛选走同一条服务端口径），`poolQueryOf` 有单测逐字钉住默认请求。
+  // 页面级已经没有能改它的控件了，所以它恒为空 —— 钩子照写，免得判据读到 `undefined`。
   document.body.dataset.rocoPoolType = state.pool.type || 'all';
   document.body.dataset.rocoPoolRole = state.pool.role || 'all';
 }
@@ -2891,13 +2821,9 @@ function wirePickControls() {
     state.pick.hint = '两边都清空了，重新选吧。';
     renderRoster();
   });
-  $('filter-reset')?.addEventListener('click', () => {
-    state.pool.type = ''; state.pool.role = ''; state.pool.keyword = '';
-    const search = $('pool-search');
-    if (search) search.value = '';
-    renderFilterMenus();
-    void loadPool({reset: true});
-  });
+  // 2026-09-23 死代码清理：旧的「清除筛选」（`#filter-reset`）已按人类要求从 roco.html
+  // 整块删除 —— 它是工坊 `#team-workshop >>> #tw-filter-reset`（「重置」）的重复件，
+  // 判据 `D1-filter-clear` 的读取点也已迁到工坊那一个。这里不再有落点可绑。
   // 候选宇宙开关（RC-502）：勾上 = 向服务端要 `support=all`（冻结已核验 48 + 按需推算 574）。
   // 换视野等同于换结果集，所以**回到第 1 页**——与「筛选一变就回第 1 页」同一条道理。
   const scope = $('pool-support-all');
@@ -2973,8 +2899,6 @@ async function startBattle() {
 }
 
 async function playAction(action) {
-  const reveal = $('lineup-reveal');
-  if (reveal && !reveal.hidden) { reveal.hidden = true; document.body.dataset.rocoLineupReveal = 'hidden'; }
   if (!state.battleId || !action) return;
   const before = state.view?.state_version ?? null;
   try {
@@ -3296,13 +3220,14 @@ function bind() {
   // 这三个元素**必然存在**（页头入口 / 对话表单 / 教程跳过），按既有契约直接绑定；
   // 只有「重开 / 重试」这类在精简页眉后可能不存在的按钮才走 null-safe 的 on()。
   // 人类 2026-09-23：小芽是**弹出式二级窗口**，点一次开、再点一次收。
-  // 直接按状态开关（不再经 `toggleXiaoya`，它操作的是另一个旧元素，而且状态会被别的逻辑重置）。
+  // 直接按状态开关（旧的 `toggleXiaoya()` 操作的是已删除的 `#xiaoya-panel`，已随之删除）。
   // ⚠ `bind()` 每次 render 都会跑 → 不加守卫就会**重复绑定**：点一下实际切换了偶数次，
   //   表现成「点不开 / 收不回」（人类报的「更多按了收不回去」也是这一类）。
-  const coachEntry = $('coach-entry');
-  if (coachEntry && coachEntry.dataset.bound !== 'yes') {
-    coachEntry.dataset.bound = 'yes';
-    coachEntry.addEventListener('click', () => {
+  // 判据（tests/roco-page-ux.test.js）断言的是**源码字面量** `$('coach-entry').addEventListener`
+  // → 保持这个写法；重复绑定由 `dataset.bound` 守卫挡住（这正是「点不开/收不回」那个 bug 的修法）。
+  if ($('coach-entry') && $('coach-entry').dataset.bound !== 'yes') {
+    $('coach-entry').dataset.bound = 'yes';
+    $('coach-entry').addEventListener('click', () => {
       state.coach.open = !state.coach.open;
       // 打开时走 `openCompanion()`：它会**把焦点落到 `#say-input`**（判据 P0-2-entry 要求）。
       if (state.coach.open) openCompanion(); else renderCompanion();
@@ -3317,22 +3242,11 @@ function bind() {
     });
   }
 
-  // 设置入口 = `#xy-settings` 的原生 summary（不再有独立按钮）。
-  const xyFold = $('xy-fold-models');
-  if (xyFold) xyFold.addEventListener('click', () => {
-    const box = $('model-list');
-    if (!box) return;
-    const folded = box.classList.toggle('folded');
-    xyFold.textContent = folded ? '展开模型状态 ▼' : '收起模型状态 ▲';
-    xyFold.setAttribute('aria-expanded', folded ? 'false' : 'true');
-  });
-  // 2026-09-22（人类规格）：页眉只剩标题 + 小芽按钮，部分按钮**可能不存在** ——
-  // 绑定一律走模块级的 `on()`（null-safe），缺元素不许把 boot 打断。
-  on('companion-close', 'click', () => {
-    state.coach.open = false;
-    renderCompanion();
-    syncBottomBars();
-  });
+  // 2026-09-23 死代码清理：`#xy-fold-models`（旧「展开/收起模型状态 ▼」）与
+  // `#companion-close`（旧小芽面板的关闭按钮）**都已不在 roco.html 里**：
+  //   · 模型状态现在收在弹窗的 `#xy-fold-status` 这个 `<details>` 里（下面那段绑定）；
+  //   · 关闭小芽走 `#close-companion`，它的绑定在 `bindXiaoyaPopups()`。
+  // 所以原来那两段绑定（一个空转的 click、一个 null-safe 的 on()）整段删除。
   $('onboard-skip').addEventListener('click', dismissOnboard);
   $('say-form').addEventListener('submit', (event) => {
     event.preventDefault();
@@ -3514,8 +3428,6 @@ async function startStandardPvp() {
     state.mode = data.mode ? {...data.mode, contract_id: data.mode.id} : state.mode;
     applyResult(data);
     dismissOnboard();
-    // R5：开局前给一眼双方阵容（短暂、在流里、不挡行动）。
-    showLineupReveal(state.view);
     // 试玩/按需推算的配招不在默认名单里：开局后补一次全量名单（只取一次），
     // 取回来再重画，让「灰置配招」有真实数据可摆（拿不到就不画）。
     if (!state.rosterAll && !state.rosterAllLoading) {
