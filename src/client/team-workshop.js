@@ -220,6 +220,18 @@ const STYLE = `
  .tw-cand-list{max-height:none}
  .tw-pager{justify-content:space-between}
 }
+
+/* ── 人类 2026-09-23 批注（这些必须写在 shadow 内，写到 roco.css 是**不生效**的）── */
+.tw-knobs--right{justify-content:flex-end}
+.tw-scope-row{display:flex;gap:6px;flex-wrap:wrap}
+.tw-filter-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tw-filter-row select.tw-btn{flex:0 0 auto}
+.tw-filter-row input[type=search]{flex:1 1 140px;min-width:120px}
+.tw-filter-row #tw-filter-reset{flex:0 0 auto}
+.tw-filter-row input[type=search]{width:100%}
+.tw-filter-row select.tw-btn{min-height:36px}
+#tw-cand-result{font-size:11.5px}         /* 「N 条 · 本页 M」字号小一点 */
+.tw-panel.tw-team .tw-slots .tw-slot[data-tw-state="empty"]{border-style:dashed}
 `;
 
 /**
