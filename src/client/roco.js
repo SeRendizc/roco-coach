@@ -3302,7 +3302,14 @@ function bind() {
     coachEntry.addEventListener('click', () => {
       state.coach.open = !state.coach.open;
       renderCompanion();
-      if (state.coach.open) renderModelList();
+      if (state.coach.open) {
+    const fold = $('xy-fold-status');
+    if (fold) {
+      fold.open = false;                       // 默认收缩（人类要求）
+      fold.addEventListener('toggle', () => { if (fold.open) renderModelList(); }, {once: false});
+    }
+    renderModelList();                         // 先拉一次（summary 里也给个状态）
+  }
     });
   }
 

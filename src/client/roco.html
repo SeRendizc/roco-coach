@@ -34,7 +34,8 @@
      <button class="xy-modal-x" id="close-companion" type="button" aria-label="关掉小芽">×</button>
     </div>
     <!-- 第一排：三个模型连接状态（等宽等高、一行、放不下就简写） -->
-    <div class="xy-models" id="model-list" role="list"></div>
+    <details class="xy-fold" id="xy-fold-status"><summary>连接状态（三个模型）</summary>
+<div class="xy-models" id="model-list" role="list"></div>
     <!-- 第二排：两个按钮 -->
     <div class="xy-actions2">
      <button class="xy-open" id="open-connect" type="button">调试连接</button>
@@ -45,6 +46,7 @@
      <div class="xy-modal-box">
       <div class="xy-modal-head"><strong>小芽记住的（都是你说过的）</strong>
        <button class="xy-modal-x" id="close-memory" type="button" aria-label="关掉">×</button></div>
+</details>
       <p class="muted">说错了？直接再说一句就能改，或者点「忘掉」。</p>
       <ul id="memory-list" class="memory"></ul>
       <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是潮甲龟」「输了先不复盘」。</p>

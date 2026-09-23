@@ -967,3 +967,21 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
 .xy-modal2-box{width:min(340px,92vw) !important;background:#101a24;border:1px solid var(--line)}
 .xy-models .mc-name{font-size:11.5px;white-space:nowrap;overflow:visible;text-overflow:clip;letter-spacing:-.2px}
 .xy-models .mc-state{font-size:11px;opacity:.85;margin-top:2px;white-space:nowrap}
+
+/* 人类 2026-09-23：「现在还是这样，有遮罩看不见，但是能操作」——
+   病根不在遮罩层，而在**容器 `.companion` 自己还在画不透明背景**（它 inset:0 铺满整屏）。
+   这里把它彻底清成透明、无边框无阴影；只有面板盒子有背景。 */
+.companion{background:none !important;border:0 !important;box-shadow:none !important;backdrop-filter:none !important}
+/* 连接状态 + 两个按钮：**默认收缩的可展开块**（人类：变成可展开的、默认收缩不展示） */
+.xy-fold>summary{cursor:pointer;padding:6px 8px;border:1px solid var(--line);border-radius:10px;
+ background:#16222f;color:#dbe7f1;list-style:none;font-size:12px}
+.xy-fold>summary::-webkit-details-marker{display:none}
+.xy-fold[open]>summary{margin-bottom:8px}
+
+/* 立绘占位（人类 2026-09-23：「占位也可以」）：名单里没有这只精灵时，画中性占位而不是留空 */
+.b3-wrap .b3-spritebox[data-b3-sprite="none"]::before{content:"";position:absolute;inset:0;
+ background:radial-gradient(60% 60% at 50% 42%, rgba(120,160,200,.16), rgba(0,0,0,0) 70%)}
+
+/* 三级弹窗（记忆）默认必须**藏住**：上面几轮追加的 .xy-modal{display:flex} 会盖掉 [hidden]，
+   结果记忆内容漏进小芽面板里（人类截图能看到那两段话）。用 !important 钉死。 */
+.xy-modal[hidden]{display:none !important}
