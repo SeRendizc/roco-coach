@@ -985,3 +985,11 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
 /* 三级弹窗（记忆）默认必须**藏住**：上面几轮追加的 .xy-modal{display:flex} 会盖掉 [hidden]，
    结果记忆内容漏进小芽面板里（人类截图能看到那两段话）。用 !important 钉死。 */
 .xy-modal[hidden]{display:none !important}
+
+/* 人类 2026-09-23：小芽面板更紧凑；可展开项点开时不要把上面挤成一坨 */
+.xy-modal2-box{gap:6px;padding:10px 12px}
+.xy-fold>summary{padding:5px 8px;font-size:12px}
+.xy-models .model-cell{padding:5px 7px;border-radius:10px}
+.xy-actions2{margin-top:4px}
+.companion-body{max-height:22vh}
+.say-form{gap:6px}

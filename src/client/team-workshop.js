@@ -96,7 +96,7 @@ const STYLE = `
    2026-09-22 人类 P0 实测：选中之后往卡里塞了整段机制原文，卡片当场长高，
    空槽/已选槽高度参差、网格跳动 —— 选前选后必须是同一张版式。 */
 .tw-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;grid-auto-rows:1fr}
-.tw-slot{border:1px dashed #36495e;border-radius:10px;padding:8px 9px;
+.tw-slot{min-height:92px;border:1px dashed #36495e;border-radius:10px;padding:8px 9px;
  display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden}
 .tw-slot.on{border-style:solid;border-color:#8dd49c;background:#17242f}
 .tw-slot .tw-who{font-weight:600;font-size:14px;overflow-wrap:anywhere}
@@ -224,7 +224,8 @@ const STYLE = `
 /* ── 人类 2026-09-23 批注（这些必须写在 shadow 内，写到 roco.css 是**不生效**的）── */
 .tw-knobs--right{justify-content:flex-end}
 .tw-scope-row{display:flex;gap:6px;flex-wrap:wrap}
-.tw-filter-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tw-filter-row{display:flex;flex-wrap:nowrap;gap:4px;align-items:center;font-size:11.5px}
+.tw-filter-row select.tw-btn,.tw-filter-row input[type=search],.tw-filter-row button{font-size:11.5px;padding-left:6px;padding-right:6px}
 .tw-filter-row select.tw-btn{flex:0 0 auto}
 .tw-filter-row input[type=search]{flex:1 1 140px;min-width:120px}
 .tw-filter-row #tw-filter-reset{flex:0 0 auto}
@@ -353,12 +354,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      <div id="tw-eval-body"></div>
     </section>
 
-    <aside class="tw-panel tw-coach" aria-labelledby="tw-coach-title">
-     <div class="tw-head"><h3 id="tw-coach-title">✦ 小芽</h3>
-      <span class="tw-sub" id="tw-coach-sub">阵容阶段</span></div>
-     <div class="tw-coach-body" id="tw-coach-body"></div>
-     <p class="tw-note">聊天与记忆是页头「✦ 小芽」那个抽屉（全局的，不在这里）；这里只放**与上面同一份评估**得出的短结论。展开的依据在「阵容评估」那一块，两处不重复。</p>
-    </aside>
+    <!-- 人类 2026-09-23：「右下角的小芽模块整体删除，不只是内联小芽」——这里原来还有一份「✦ 小芽 · 阵容阶段」栏 -->
    </div>`;
 
   const $ = (id) => shadow.getElementById(id);
@@ -895,6 +891,7 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
 
   function renderCoach(player, stage = 'full') {
     const body = $('tw-coach-body');
+  if (!body) return;   // 人类 2026-09-23：工坊里那块「✦ 小芽 · 阵容阶段」已删 → 没有落点就直接返回
     if (!player) { body.innerHTML = '<p class="tw-note">正在读取…</p>'; return; }
     const selected = player.selected_count ?? 0;
     const next = Array.isArray(player.next_candidates) ? player.next_candidates : [];
@@ -1216,8 +1213,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     el.innerHTML = ['<option value="">' + label + '</option>']
       .concat(values.map((v) => `<option value="${escapeHtml(v[0])}">${escapeHtml(v[1])}</option>`)).join('');
   };
-  fillSelect($('tw-filter-type'), TYPE_CYCLE, '属性：全部');
-  fillSelect($('tw-filter-role'), ROLE_CYCLE, '定位：全部');
+  fillSelect($('tw-filter-type'), TYPE_CYCLE, '属性');
+  fillSelect($('tw-filter-role'), ROLE_CYCLE, '定位');
   if ($('tw-filter-type')) $('tw-filter-type').addEventListener('change', (e) => {
     state.filter.type = e.target.value || ''; state.pool.page = 1; refreshPool();
   });
