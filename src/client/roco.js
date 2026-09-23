@@ -1719,7 +1719,13 @@ function renderB3Panels(view) {
     if (rel) rel.dataset.b3Rel = 'none';   // 倍率拿不到就一律 none（不编）
     // 注意：这里**没有** `disabled` 这个参数（它是 renderActions 的）—— 第一版引用了它，
     // 直接让整个 render 抛错、战斗面板再也显示不出来。用「对局是否结束」代替。
-    if (act && !view?.battle_result) slot.dataset.b3Action = String((view.legal ?? []).indexOf(act));
+    if (act && !view?.battle_result) {
+      slot.dataset.b3Action = String((view.legal ?? []).indexOf(act));
+      // 身份（2026-09-23）：只写下标会**过期**（1440 实测点了不推进）——点的时候按下标取到的
+      // 可能已经不是那一手。带上 kind/skill_id，点击时在**当前** legal 里按身份重新解析。
+      slot.dataset.b3ActionKind = 'skill';
+      if (mv.skill_id) slot.dataset.b3SkillId = String(mv.skill_id);
+    }
     b3Show(slot);
   });
 
@@ -1741,7 +1747,11 @@ function renderB3Panels(view) {
     const act = (view?.legal ?? []).find((a) => a.kind === 'switch' && a.target_index === item.idx);
     cell.dataset.b3SwitchLegal = act ? 'yes' : 'no';
     cell.classList.toggle('b3-slot--grey', !act);
-    if (act) cell.dataset.b3Action = String((view.legal ?? []).indexOf(act));
+    if (act) {
+      cell.dataset.b3Action = String((view.legal ?? []).indexOf(act));
+      cell.dataset.b3ActionKind = 'switch';
+      cell.dataset.b3Target = String(item.idx);
+    }
     b3Show(cell);
   });
 
@@ -1764,8 +1774,15 @@ function renderB3Panels(view) {
     root.addEventListener('click', (ev) => {
       const el = ev.target.closest?.('[data-b3-action]');
       if (!el || el.disabled) return;
-      const idx = Number(el.dataset.b3Action);
-      const act = (state.view?.legal ?? [])[idx];
+      const legal = state.view?.legal ?? [];
+      let act = null;
+      const kind = el.dataset.b3ActionKind ?? null;
+      if (kind === 'skill' && el.dataset.b3SkillId) {
+        act = legal.find((a) => a.kind === 'skill' && a.skill_id === el.dataset.b3SkillId) ?? null;
+      } else if (kind === 'switch' && el.dataset.b3Target !== undefined) {
+        act = legal.find((a) => a.kind === 'switch' && String(a.target_index) === el.dataset.b3Target) ?? null;
+      }
+      if (!act) act = legal[Number(el.dataset.b3Action)] ?? null;   // 兜底：旧的下标路径
       if (act) playAction(act);
     });
   }

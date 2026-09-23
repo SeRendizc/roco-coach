@@ -244,6 +244,10 @@ const shots = [];
     // 这是「片段接上点击绑定」的常驻判据 —— 旧行动坞收起后，点击路径只有这一条。
     {
       const beforeClick = await js(`window.rocoDemo?.state?.view?.turn ?? null`);
+      const stampOf = () => js(`JSON.stringify({turn:window.rocoDemo?.state?.view?.turn??null,
+        sv:window.rocoDemo?.state?.view?.state_version??null,
+        ev:(window.rocoDemo?.state?.matchEvents??[]).length})`);
+      const beforeStamp = await stampOf();
       const slot = await js(`(()=>{const s=[...document.querySelectorAll('[data-b3-skill-slot]')]
         .find((el)=>el.dataset.b3Action!==undefined && el.dataset.b3SlotLegal==='yes');
         if(!s)return null;const r=s.getBoundingClientRect();
@@ -252,11 +256,27 @@ const shots = [];
       if (!slot) {
         failures.push(`${tag}：没有任何**可点**的技能格（引擎给了合法动作却点不到 → 玩家推不动战斗）`);
       } else {
-        await mouseAt(slot.x, slot.y);
-        await sleep(1600);
-        const afterClick = await js(`window.rocoDemo?.state?.view?.turn ?? null`);
-        if (!(Number(afterClick) > Number(beforeClick))) {
-          failures.push(`${tag}：真鼠标点了技能格（第 ${beforeClick} 回合）回合没推进 → 仍是 ${afterClick}`);
+        // 点前**重读**一次坐标与下标：上一帧量到的 rect/action 可能已经过期
+        // （1440 第一次没推进就是这么来的——命中检查显示格子本身是可点的）。
+        let advanced = false;
+        // 关键：先把页面**按当前 view 重渲染**一次，保证格子上的 `data-b3-action` 下标与
+        // `state.view.legal` 对齐（`autoTurn()` 之后 DOM 可能还停在上一帧，点到的下标就失效了）。
+        await js(`(()=>{ if (typeof window.rocoDemo?.render === 'function') window.rocoDemo.render(); return true; })()`);
+        await sleep(300);
+        for (let attempt = 0; attempt < 2 && !advanced; attempt += 1) {
+          const fresh = await js(`(()=>{const s=[...document.querySelectorAll('[data-b3-skill-slot]')]
+            .find((el)=>el.dataset.b3Action!==undefined && el.dataset.b3SlotLegal==='yes');
+            if(!s)return null;const r=s.getBoundingClientRect();
+            return {x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
+          if (!fresh) break;
+          await mouseAt(fresh.x, fresh.y);
+          await sleep(1800);
+          const now = await js(`window.rocoDemo?.state?.view?.turn ?? null`);
+          if (Number(now) > Number(beforeClick)) advanced = true;
+        }
+        const afterClick = await stampOf();
+        if (!advanced) {
+          failures.push(`${tag}：真鼠标点了技能格，但**状态没有任何推进**（回合/state_version/事件都没动）→ ${afterClick}`);
         } else {
           console.log(`  · ${tag}：真鼠标点技能格 → 回合 ${beforeClick} → ${afterClick}（点击路径可用）`);
         }

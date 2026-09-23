@@ -1234,6 +1234,10 @@ async function main() {
           lines:newest?[...newest.querySelectorAll('p')].map((p)=>(p.textContent||'').trim()).filter(Boolean).length:0},
         // 整局战报的**真实**回合分组（页面按引擎事件分组后写在 body 上）。
         logTurns:Number(document.body.dataset.rocoLogTurns||'0'),
+        // 诊断：state.view 变 null（引擎中途丢了这一局）/ 还有没有 battleId / 状态行说了什么。
+        hasView:Boolean(window.rocoDemo.state.view),
+        battleId:window.rocoDemo.state.battleId??null,
+        plan:(document.getElementById('plan-status')||{}).textContent||'',
         dots:{self:((document.getElementById('b3-dots-self')||{}).textContent||'').replace(/\\s+/g,''),
           foe:((document.getElementById('b3-dots-foe')||{}).textContent||'').replace(/\\s+/g,'')}};})()`);
     steps.push({at: 'settled', settled});
@@ -1244,7 +1248,14 @@ async function main() {
         status:(document.getElementById('plan-status')||{}).textContent||''};})()`);
     const settleProblems = (f) => {
       const bad = [];
-      if (!f?.result) bad.push('引擎没给出对局结果');
+      if (!f?.result) {
+        bad.push(f?.hasView === false
+          // 引擎在推进中途把这一局丢了（`POST /api/roco/battle/advance` 没回 view，`state.view` 变 null）。
+          // 这一条仍然红（「从开局一路打到结算」没做到），但把现场说清楚，别让人以为是判据读错了钩子。
+          ? `引擎中途丢了这一局（state.view 变 null，battleId=${JSON.stringify(f?.battleId)}，`
+            + `状态行「${String(f?.plan ?? '').slice(0, 80)}」，战报已有 ${f?.logTurns} 个回合块）`
+          : '引擎没给出对局结果');
+      }
       if (f?.resultVisible !== true) bad.push('结算区没出现');
       if (f?.lessonShown !== 'shown') bad.push('局末教学入口没出现');
       // 「最新一条事件在」的 v3h 读取点：页眉回合必须与引擎回合一致，右列战报的最新一回合必须有内容，
@@ -1271,6 +1282,11 @@ async function main() {
     counter('live-settle', '没打到结算（没有结果 / 结算区没出现 / 教学入口没出现 / 战报最新回合空）必须被同一条判据抓住',
       settleProblems({result: null, resultVisible: false, lessonShown: null, round: '第 3 回合', turn: 3,
         logShown: true, logLatest: {turn: '3', lines: 0}, logTurns: 0}), '{"result":null}');
+    counter('live-settle(引擎中途丢局)', '引擎推进到一半把 view 弄丢（状态变 null）必须被同一条判据抓住',
+      settleProblems({result: null, resultVisible: false, lessonShown: null, round: '未开局', turn: null,
+        hasView: false, battleId: null, plan: '自动推进失败：HTTP 500', logShown: false,
+        logLatest: {turn: '7', lines: 5}, logTurns: 7}),
+      '{"hasView":false,"turn":null,"logTurns":7}');
     await shoot('live-04-1440-settled');
 
     // ── ③b A9 换局迁移验证：第二局必须**接着上一课**，不许把同一课当新知识再讲一遍 ──
