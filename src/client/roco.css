@@ -859,3 +859,9 @@ header.topbar .head-center{justify-self:center;text-align:center;line-height:1.2
 header.topbar .hc-mode{display:block;font-size:12.5px;color:#93a7b8;font-weight:600}
 header.topbar .hc-turn{display:block;font-size:17px;font-weight:700}
 .xy-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+
+/* 页眉三列：左标题 / **中模式+回合** / 右（模型状态 + 小芽）。两侧等宽 → 中间真居中。 */
+header.topbar{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+header.topbar .head-center{grid-column:2;justify-self:center}
+header.topbar .model-line{grid-column:3;justify-self:end}
+header.topbar .xiaoya-btn{grid-column:3;justify-self:end}

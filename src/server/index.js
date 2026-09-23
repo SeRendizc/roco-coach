@@ -2,7 +2,7 @@ import {fitTokenBudget} from './token-budget-server.js';
 import {createSemanticRetriever} from './semantic-server.js';
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
-import {readFileSync} from 'node:fs';
+import {readFileSync, existsSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {dirname,join,relative,resolve} from 'node:path';
 import {generateKeyPairSync,privateDecrypt,constants,randomBytes,timingSafeEqual} from 'node:crypto';
@@ -294,6 +294,40 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
     // 它不改状态、不需要 CSRF，也不碰密钥。其余 /api/ 一律 POST + CSRF。
     // RC-50x（人类 P0 实测）：状态接口**主动探一次**（引擎是惰性启动的，被动探针会
     // 在页面刚打开时谎报 available:false）。它仍然只读、不要 CSRF、不改任何对局状态。
+    // 立绘资源（人类 2026-09-23）：图在**仓库外**（/Users/serendizc/Codex/Internship/roco-assets），
+    // 所以不走静态白名单，而是加一条**只读**路由：key 只允许 `pet-NN-名字` + default|action，
+    // 文件名列表来自 manifest.json —— 不做目录遍历、不接受任意路径。
+    if(path==='/api/roco/sprite'&&req.method==='GET'){
+      // 2026-09-23：立绘已**收进仓库**（`data/roco/assets/pets`，95 张 PNG + manifest），
+      // 所以优先读仓内；仓外那份只在开发机上作兜底（别的机器没有它）。
+      const REPO_ROOT=dirname(dirname(dirname(fileURLToPath(import.meta.url))));
+      const IN_REPO=join(REPO_ROOT,'data','roco','assets','pets');
+      const ROOT=existsSync(IN_REPO)?IN_REPO:'/Users/serendizc/Codex/Internship/roco-assets/cropped';
+      const ROOT_MANIFEST=existsSync(join(IN_REPO,'manifest.json'))
+        ? join(IN_REPO,'manifest.json')
+        : '/Users/serendizc/Codex/Internship/roco-assets/manifest.json';
+      const q=new URL(req.url,origin).searchParams;
+      let key=String(q.get('key')||'').trim();
+      const byName=String(q.get('name')||'').trim();
+      if(!key&&byName){                       // 按**精灵名**取（客户端手上只有名字）
+        try{
+          const man=JSON.parse(readFileSync(join(ROOT_MANIFEST),'utf8'));
+          key=(man.find((r)=>r?.name===byName)||{}).asset_key||'';
+        }catch{ key=''; }
+      }
+      const variant=String(q.get('v')||'default').trim();
+
+      if(!/^pet-\d{2}-[\u4e00-\u9fa5A-Za-z0-9]+$/.test(key)||!['default','action'].includes(variant)){
+        return json(res,400,{ok:false,error:'key 或 v 不合法'});
+      }
+      const file=join(ROOT,`${key}-${variant}.png`);
+      try{
+        const buf=readFileSync(file);
+        res.writeHead(200,{'Content-Type':'image/png','Cache-Control':'public, max-age=3600',
+          'X-Content-Type-Options':'nosniff'});
+        return res.end(buf);
+      }catch{ return json(res,404,{ok:false,error:'没有这张立绘'}); }
+    }
     if(path==='/api/roco/status'&&req.method==='GET')return json(res,200,await rocoService.status({probe:true}));
     // 可选用精灵名单（P0-3）：只读、全公开事实。放在 GET 上是刻意的——
     // 它不改任何状态，也没有 CSRF 风险。

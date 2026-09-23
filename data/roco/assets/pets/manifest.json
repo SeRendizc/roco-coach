@@ -1,0 +1,515 @@
+[
+  {
+    "slot": 1,
+    "name": "音速犬",
+    "asset_key": "pet-01-音速犬",
+    "types": [
+      "火系"
+    ],
+    "role": "attacker",
+    "speed_tier": ">=111"
+  },
+  {
+    "slot": 2,
+    "name": "雪影娃娃",
+    "asset_key": "pet-02-雪影娃娃",
+    "types": [
+      "冰系",
+      "萌系"
+    ],
+    "role": "recovery",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 3,
+    "name": "化蝶",
+    "asset_key": "pet-03-化蝶",
+    "types": [
+      "虫系",
+      "萌系"
+    ],
+    "role": "recovery",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 4,
+    "name": "海豹船长",
+    "asset_key": "pet-04-海豹船长",
+    "types": [
+      "武系",
+      "水系"
+    ],
+    "role": "support",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 5,
+    "name": "寂灭骨龙",
+    "asset_key": "pet-05-寂灭骨龙",
+    "types": [
+      "龙系",
+      "幽系"
+    ],
+    "role": "recovery",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 6,
+    "name": "圆号鱼",
+    "asset_key": "pet-06-圆号鱼",
+    "types": [
+      "水系"
+    ],
+    "role": "recovery",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 7,
+    "name": "黑猫巫师",
+    "asset_key": "pet-07-黑猫巫师",
+    "types": [
+      "普通系"
+    ],
+    "role": "tank",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 8,
+    "name": "秩序鱿墨",
+    "asset_key": "pet-08-秩序鱿墨",
+    "types": [
+      "幽系",
+      "萌系"
+    ],
+    "role": "attacker",
+    "speed_tier": ">=111"
+  },
+  {
+    "slot": 9,
+    "name": "画间沉铁兽",
+    "asset_key": "pet-09-画间沉铁兽",
+    "types": [
+      "普通系",
+      "武系"
+    ],
+    "role": "recovery",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 10,
+    "name": "圣凯布米龙",
+    "asset_key": "pet-10-圣凯布米龙",
+    "types": [
+      "火系",
+      "虫系"
+    ],
+    "role": "attacker",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 11,
+    "name": "银月狼王",
+    "asset_key": "pet-11-银月狼王",
+    "types": [
+      "幽系",
+      "幻系"
+    ],
+    "role": "attacker",
+    "speed_tier": ">=111"
+  },
+  {
+    "slot": 12,
+    "name": "月使鹭纳",
+    "asset_key": "pet-12-月使鹭纳",
+    "types": [
+      "翼系",
+      "冰系"
+    ],
+    "role": "control",
+    "speed_tier": ">=111"
+  },
+  {
+    "slot": 13,
+    "name": "迷迷箱怪",
+    "asset_key": "pet-13-迷迷箱怪",
+    "types": [
+      "机械系",
+      "幻系"
+    ],
+    "role": "tank",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 14,
+    "name": "权杖-V",
+    "asset_key": "pet-14-权杖-V",
+    "types": [
+      "机械系"
+    ],
+    "role": "tank",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 15,
+    "name": "电咩咩",
+    "asset_key": "pet-15-电咩咩",
+    "types": [
+      "电系"
+    ],
+    "role": "recovery",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 16,
+    "name": "闪电环",
+    "asset_key": "pet-16-闪电环",
+    "types": [
+      "电系"
+    ],
+    "role": "control",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 17,
+    "name": "獠牙猪",
+    "asset_key": "pet-17-獠牙猪",
+    "types": [
+      "冰系",
+      "地系"
+    ],
+    "role": "control",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 18,
+    "name": "新月鹭",
+    "asset_key": "pet-18-新月鹭",
+    "types": [
+      "翼系",
+      "冰系"
+    ],
+    "role": "control",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 19,
+    "name": "卡卡虫",
+    "asset_key": "pet-19-卡卡虫",
+    "types": [
+      "草系",
+      "冰系"
+    ],
+    "role": "control",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 20,
+    "name": "呼呼猪",
+    "asset_key": "pet-20-呼呼猪",
+    "types": [
+      "冰系",
+      "地系"
+    ],
+    "role": "control",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 21,
+    "name": "丢丢",
+    "asset_key": "pet-21-丢丢",
+    "types": [
+      "草系",
+      "冰系"
+    ],
+    "role": "control",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 22,
+    "name": "嗜光嗡嗡",
+    "asset_key": "pet-22-嗜光嗡嗡",
+    "types": [
+      "恶系",
+      "光系"
+    ],
+    "role": "recovery",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 23,
+    "name": "智辉章脑",
+    "asset_key": "pet-23-智辉章脑",
+    "types": [
+      "光系",
+      "水系"
+    ],
+    "role": "attacker",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 24,
+    "name": "混乱鱿彩",
+    "asset_key": "pet-24-混乱鱿彩",
+    "types": [
+      "幽系",
+      "恶系"
+    ],
+    "role": "tank",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 25,
+    "name": "蹦蹦种子",
+    "asset_key": "pet-25-蹦蹦种子",
+    "types": [
+      "草系",
+      "毒系"
+    ],
+    "role": "recovery",
+    "speed_tier": "<=50"
+  },
+  {
+    "slot": 26,
+    "name": "花魁蜂后",
+    "asset_key": "pet-26-花魁蜂后",
+    "types": [
+      "虫系",
+      "翼系"
+    ],
+    "role": "support",
+    "speed_tier": "<=50"
+  },
+  {
+    "slot": 27,
+    "name": "深蓝鲸",
+    "asset_key": "pet-27-深蓝鲸",
+    "types": [
+      "水系"
+    ],
+    "role": "tank",
+    "speed_tier": "<=50"
+  },
+  {
+    "slot": 28,
+    "name": "女王蜂",
+    "asset_key": "pet-28-女王蜂",
+    "types": [
+      "虫系",
+      "翼系"
+    ],
+    "role": "support",
+    "speed_tier": "<=50"
+  },
+  {
+    "slot": 29,
+    "name": "雪蛮人",
+    "asset_key": "pet-29-雪蛮人",
+    "types": [
+      "冰系"
+    ],
+    "role": "recovery",
+    "speed_tier": "<=50"
+  },
+  {
+    "slot": 30,
+    "name": "铠甲虫",
+    "asset_key": "pet-30-铠甲虫",
+    "types": [
+      "虫系"
+    ],
+    "role": "tank",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 31,
+    "name": "祭礼巨像",
+    "asset_key": "pet-31-祭礼巨像",
+    "types": [
+      "地系",
+      "幻系"
+    ],
+    "role": "tank",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 32,
+    "name": "雪巨人",
+    "asset_key": "pet-32-雪巨人",
+    "types": [
+      "冰系"
+    ],
+    "role": "tank",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 33,
+    "name": "千棘海针",
+    "asset_key": "pet-33-千棘海针",
+    "types": [
+      "水系",
+      "毒系"
+    ],
+    "role": "tank",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 34,
+    "name": "朔夜伊芙",
+    "asset_key": "pet-34-朔夜伊芙",
+    "types": [
+      "恶系"
+    ],
+    "role": "attacker",
+    "speed_tier": ">=111"
+  },
+  {
+    "slot": 35,
+    "name": "声波缇塔",
+    "asset_key": "pet-35-声波缇塔",
+    "types": [
+      "机械系"
+    ],
+    "role": "attacker",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 36,
+    "name": "皇家狮鹫",
+    "asset_key": "pet-36-皇家狮鹫",
+    "types": [
+      "翼系"
+    ],
+    "role": "attacker",
+    "speed_tier": ">=111"
+  },
+  {
+    "slot": 37,
+    "name": "深渊蛙",
+    "asset_key": "pet-37-深渊蛙",
+    "types": [
+      "水系",
+      "武系"
+    ],
+    "role": "attacker",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 38,
+    "name": "棋契陛下",
+    "asset_key": "pet-38-棋契陛下",
+    "types": [
+      "武系",
+      "地系"
+    ],
+    "role": "attacker",
+    "speed_tier": ">=111"
+  },
+  {
+    "slot": 39,
+    "name": "爆焰喷喷",
+    "asset_key": "pet-39-爆焰喷喷",
+    "types": [
+      "火系",
+      "龙系"
+    ],
+    "role": "attacker",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 40,
+    "name": "多多",
+    "asset_key": "pet-40-多多",
+    "types": [
+      "毒系",
+      "地系"
+    ],
+    "role": "support",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 41,
+    "name": "瑰眼仔",
+    "asset_key": "pet-41-瑰眼仔",
+    "types": [
+      "恶系",
+      "虫系"
+    ],
+    "role": "recovery",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 42,
+    "name": "十字蝌蚪",
+    "asset_key": "pet-42-十字蝌蚪",
+    "types": [
+      "水系"
+    ],
+    "role": "support",
+    "speed_tier": "51-70"
+  },
+  {
+    "slot": 43,
+    "name": "古啦多",
+    "asset_key": "pet-43-古啦多",
+    "types": [
+      "毒系",
+      "地系"
+    ],
+    "role": "support",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 44,
+    "name": "耳翎瑰魅",
+    "asset_key": "pet-44-耳翎瑰魅",
+    "types": [
+      "恶系",
+      "虫系"
+    ],
+    "role": "recovery",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 45,
+    "name": "仪式巨像",
+    "asset_key": "pet-45-仪式巨像",
+    "types": [
+      "地系",
+      "幻系"
+    ],
+    "role": "tank",
+    "speed_tier": "71-90"
+  },
+  {
+    "slot": 46,
+    "name": "学院呱呱",
+    "asset_key": "pet-46-学院呱呱",
+    "types": [
+      "武系"
+    ],
+    "role": "recovery",
+    "speed_tier": "91-110"
+  },
+  {
+    "slot": 47,
+    "name": "画间法师手",
+    "asset_key": "pet-47-画间法师手",
+    "types": [
+      "普通系",
+      "幻系"
+    ],
+    "role": "attacker",
+    "speed_tier": ">=111"
+  },
+  {
+    "slot": 48,
+    "name": "棋契陛下",
+    "asset_key": "pet-48-棋契陛下-2",
+    "types": [
+      "武系",
+      "地系"
+    ],
+    "role": "tank",
+    "speed_tier": "71-90"
+  }
+]

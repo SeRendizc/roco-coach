@@ -699,6 +699,7 @@ function render() {
   // （未上场的不给名字，这是公开信息边界）。心只在掉心时闪几秒（`showHeartPop` 同源数据）。
   renderB3Topbar(view);
   renderB3Panels(view);
+  renderB3Sprites(view);
   const turnChip = $('turn-chip');
   if (turnChip) turnChip.textContent = view ? `第 ${view.turn} 回合 · ${replacingLabel}` : '未开局';
   const phaseChip = $('phase-chip');
@@ -1790,6 +1791,91 @@ function renderB3Topbar(view) {
   const mode = $('b3-mode');
   if (mode) mode.textContent = state.mode?.id === 'pvp-standard-six-pet' ? 'PVP · AI模拟' : '训练场 · AI模拟';
   document.body.dataset.b3Turn = view ? String(view.turn) : '';
+}
+
+/**
+ * 立绘（人类 2026-09-23）：中间那块预留区放精灵立绘；出招时换成「动作立绘」并加动效。
+ *
+ * 图在仓库外（`/api/roco/sprite?name=…&v=default|action`，只读路由）。
+ * 拿不到图就**留空**（不画占位、不猜），并把 `data-b3-sprite="none"` 记下来给判据。
+ */
+function b3SpriteUrl(name, variant) {
+  return `/api/roco/sprite?name=${encodeURIComponent(String(name || ''))}&v=${variant}`;
+}
+
+function renderB3Sprites(view) {
+  const self = view?.self?.pets?.[view?.self?.active ?? 0] ?? null;
+  const foe = view?.opponent?.field ?? null;
+  const put = (cardSel, pet, side) => {
+    const card = document.querySelector(cardSel);
+    if (!card) return;
+    const box = card.querySelector('[data-b3-spritebox]') || card.querySelector('.b3-free');
+    if (!box || !pet?.name) return;
+    let img = box.querySelector('img.b3-sprite');
+    if (!img) {
+      box.classList.add('b3-spritebox');
+      img = document.createElement('img');
+      img.className = 'b3-sprite';
+      img.alt = '';
+      box.appendChild(img);
+      const fx = document.createElement('div');       // 飘字层
+      fx.className = 'b3-fx';
+      box.appendChild(fx);
+    }
+    const want = b3SpriteUrl(pet.name, box.dataset.b3Variant === 'action' ? 'action' : 'default');
+    if (img.dataset.src !== want) { img.dataset.src = want; img.src = want; }
+    img.onerror = () => { box.dataset.b3Sprite = 'none'; img.remove(); };
+    img.onload = () => { box.dataset.b3Sprite = 'ok'; };
+    box.dataset.b3Side = side;
+  };
+  put('[data-b3-self-card]', self, 'self');
+  put('[data-b3-foe-card]', foe, 'foe');
+}
+
+/**
+ * 动效与飘字（人类：攻击 / 受击 + 显示受到的伤害与回血）。
+ * 数据只来自引擎事件：`damage` 事件给伤害、`heal`/`energy` 类给回复；没有就不画。
+ */
+function b3PlayActionFx(events) {
+  const list = Array.isArray(events) ? events : [];
+  for (const e of list) {
+    const kind = e?.kind ?? '';
+    const side = e?.detail?.side ?? e?.side ?? null;
+    if (kind === 'damage') {
+      const dmg = Number(e?.detail?.damage ?? e?.damage);
+      const target = side === 'player' ? '[data-b3-foe-card]' : '[data-b3-self-card]';
+      const defender = (side === 'player' || side === 'enemy') ? target : null;
+      const attacker = side === 'player' ? '[data-b3-self-card]' : '[data-b3-foe-card]';
+      if (defender && Number.isFinite(dmg)) b3Float(defender, `-${dmg}`, 'hit');
+      b3Pulse(attacker, 'b3-attack');
+      if (defender) b3Pulse(defender, 'b3-hit');
+    }
+    if (kind === 'heal' || kind === 'recovery') {
+      const amount = Number(e?.detail?.amount ?? e?.detail?.heal ?? e?.amount);
+      const card = (side === 'player' || side === 'enemy') ? '[data-b3-self-card]' : '[data-b3-foe-card]';
+      if (Number.isFinite(amount)) b3Float(card, `+${amount}`, 'heal');
+    }
+  }
+}
+
+function b3Pulse(sel, cls) {
+  const card = document.querySelector(sel);
+  if (!card) return;
+  card.classList.remove(cls);
+  void card.offsetWidth;                 // 重排一次，动画能重放
+  card.classList.add(cls);
+  setTimeout(() => card.classList.remove(cls), 700);
+}
+
+function b3Float(sel, text, kind) {
+  const card = document.querySelector(sel);
+  const fx = card?.querySelector('.b3-fx');
+  if (!fx) return;
+  const span = document.createElement('span');
+  span.className = `b3-float b3-float--${kind}`;
+  span.textContent = text;
+  fx.appendChild(span);
+  setTimeout(() => span.remove(), 1200);
 }
 
 function renderModelChip() {

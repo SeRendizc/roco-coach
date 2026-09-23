@@ -210,7 +210,14 @@ const run = async () => {
     const turnBefore = Number(decisionFacts.turn ?? 0);
 
     // 推进一手 → 「回合后」
-    await click('#auto-turn');
+    // 2026-09-23：这一行搬进了小芽面板（人类：底部不要多余的行），所以按钮可能不可见 ——
+  // 优先点按钮，点不到就用页面显式挂出来的 `window.rocoDemo.autoTurn()`（与验收脚本同一先例）。
+  // ⚠ `click()` 缺元素时是**同步抛错**，`.catch` 接不到 → 必须 try/catch。
+  let clicked = false;
+  try { await click('#auto-turn'); clicked = true; } catch { clicked = false; }
+  if (!clicked && await js(`typeof window.rocoDemo?.autoTurn`) === 'function') {
+    await js(`window.rocoDemo.autoTurn()`);
+  }
     await sleep(1400);
     shots.push(await shoot(`battle-after-turn-${tag}`, async () => {
       const f = await battleFacts();
