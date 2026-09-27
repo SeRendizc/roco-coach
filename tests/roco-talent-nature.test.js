@@ -11,7 +11,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {
-  natures, natureOf, natureFactor, panelOf, pvpPanelOf, natureCandidates, validateNatures,
+  natures, natureOf, natureFactor, natureFloorFactor, NATURE_PVE_FLOOR, panelOf, pvpPanelOf,
+  natureCandidates, validateNatures,
   STAT_KEYS, TALENT_PVP_STEP, PANEL_FORMULA, TALENT_RANGE,
 } from '../src/coach/talent.js';
 
@@ -130,4 +131,27 @@ test('⑦ 性格候选只做"算出来排序"，不替玩家拍板（防止纯�
   assert.equal(rows.length, 30, '默认把 30 条都算一遍（limit=30）');
   const slow = natureCandidates({race: RACE, stats: ['spe'], limit: 1})[0];
   assert.ok(slow.panel.spe >= 220, `最快的性格速度不该低于中性：${slow.panel.spe}`);
+});
+
+test('⑧ 非 PVP 那一档只给**零突破下界**（人述 10%↔20% 的两句按台账引文可以同时为真）', () => {
+  // 人类 2026-09-27 的两句看似矛盾（「幅度从 10% 提到 20%」vs「一项 +10%、一项 −10%」），
+  // 台账 `EV-NATURE-BALANCE-PVP`（OFFICIAL_CURRENT）逐字给的是：
+  //   PVP 平衡到 +20%/−10%；非 PVP 初始 +10%、每突破 +2%、满 +20%、降低固定 −10%。
+  // ⇒ ±10% 是**非 PVP 零突破**那一档。我们没有突破次数 ⇒ 只能给下界，且必须标 `floor:true`。
+  assert.equal(NATURE_PVE_FLOOR.up, 0.1, '零突破下界 = +10%');
+  assert.equal(NATURE_PVE_FLOOR.down, -0.1, '降低固定 −10%');
+  assert.equal(NATURE_PVE_FLOOR.cap, 0.2, '满突破 +20%（与 PVP 同顶）');
+  assert.match(NATURE_PVE_FLOOR.note, /下界/, '常量自己要说清这是下界');
+  const up = natureFloorFactor('开朗', 'spe');
+  assert.equal(up.factor, 1.1, '速度是开朗的长处 ⇒ 下界 1.1');
+  assert.equal(up.floor, true, '必须标成下界（调用方不许当实测用）');
+  assert.match(up.reason, /每突破 \+2%|满突破 \+20%/, `要把成长那条说出来：${up.reason}`);
+  assert.equal(natureFloorFactor('开朗', 'spa').factor, 0.9, '短处仍是 −10%');
+  assert.equal(natureFloorFactor('开朗', 'hp').factor, 1, '不受影响');
+  // 与 PVP 档的关系：长处下界 ≤ PVP，短处相同（判据钉住两者的相对关系，防以后有人把两档合并）
+  assert.ok(natureFloorFactor('开朗', 'spe').factor < natureFactor('开朗', 'spe').factor,
+    '非 PVP 下界必须低于 PVP 的 +20%');
+  assert.equal(natureFloorFactor('开朗', 'spa').factor, natureFactor('开朗', 'spa').factor,
+    '短处在两档里都是 −10%');
+  assert.equal(natureFloorFactor('不存在的性格', 'spe').known, false, '认不出就 known:false');
 });

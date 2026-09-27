@@ -18,8 +18,8 @@ import {join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {buildLayer, CAPTURE_DIR, CAPTURE_FACTS} from '../scripts/roco/build-hke-layer.mjs';
-import {hkePetOf, evolutionOf, evolutionAsk, evolutionLocalAnswer, HKE_SOURCE, resetHkeLayerForTest}
-  from '../src/coach/evolution-advice.js';
+import {hkePetOf, evolutionOf, evolutionAsk, evolutionLocalAnswer, hkeSkillLine, HKE_SOURCE,
+  resetHkeLayerForTest} from '../src/coach/evolution-advice.js';
 import {PET_NAME_ROWS} from '../src/coach/pet-names-data.js';
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -121,4 +121,21 @@ test('④ 接得进小芽：进化链说得出、来路标得到；编的名字�
   } else {
     console.log('ℹ 名字表里的名字这一层全都有 ⇒ "查不到"分支这一轮没样本');
   }
+});
+
+test('⑤ 缺口填充：引擎给不出学习表时，用这一层给一句**带三组计数**的清单（不给等级）', async () => {
+  resetHkeLayerForTest();
+  const line = await hkeSkillLine('喵喵');
+  assert.ok(line, '这一只在这一层里 ⇒ 要能给出清单');
+  assert.match(line.line, /升级学 \d+/, `要报三组计数：${line.line}`);
+  assert.match(line.line, /技能机 \d+|血脉 \d+/, '另外两组也要在');
+  assert.match(line.line, /社区|非官方/, '要标出来路');
+  // 「不许编等级」的判据要**精确到形状**：句子里允许出现"没有几级学"这句**否定说明**
+  //（那是我们要说的话），但不许出现「Lv.16」这种**具体的等级断言**。
+  assert.doesNotMatch(line.line, /Lv\.\d+|\d+\s*级(学|学会)/,
+    `**不许**编出具体等级（上游没有这个字段）：${line.line}`);
+  assert.match(line.line, /没有"?几级学"?/, '要主动说清"这一层没有等级"');
+  assert.ok(line.evidence.length >= 2, '证据里要有读数与来源');
+  // 查不到的 ⇒ null（调用方据此保持原样，不许编一句）
+  assert.equal(await hkeSkillLine('不存在的精灵'), null);
 });

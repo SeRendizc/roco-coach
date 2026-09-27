@@ -44,7 +44,7 @@
 |---|---|
 | 已提交的 HEAD | 见下面 git log（本节写下时是 `817fdec`；v3 纠偏与 RC-101～RC-304 见 §C6.15～§C6.29，第 93 轮的三路 P0/RC-105 见 §C6.30，第 94 轮的 RC-306/机制渲染/RC-106 见 §C6.31）——**所有代码与文档都已提交**，工作区里只剩运行产物 |
 | 最近一次**全绿** gate | `42596b0` 前一次运行（2026-09-21T15:2xZ，**16/16**，含新增的 `reconciliation` 与 `game-data-pack` 两条套件）。第 45 轮把 `state-doc` 的第二处自指死锁拆掉了（「全绿记录落后 >12 个提交」从硬失败改成警告），所以**可以**跑出新的全绿来刷新它 |
-| 闸门现状 | **22/22 全绿**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
+| 闸门现状 | **27/27 全绿（2026-09-27 更正：门禁已是 27 套；旧文写的 22/22 是当时的数字）**（`latest.json` 与 `last-green.json` 同时为绿，rc=0）。`unit` 在**有重活并行时**会偶发红（Python 后端的用例在 CPU 争抢下超时）——跑 gate 前先确认没有别的重任务在跑；**尤其不要在 gate 期间让别的 agent 写 `src/coach/intervention-model.js`**（`guard-selftest` 会临时重写它） |
 | 未提交（运行产物，不是代码） | 无（这一阶段收尾时工作区是干净的） |
 | **跨机器协作区（2026-09-21 建立）** | Mac DSH（我）与 Windows DSH 通过 `SeRendizc/ai-dev-platform` 的 `coord/roco-coach` 分支上 `projects/roco-coach/` 交换**durable facts**：我只改 `MAC_STATUS.md` 与 `CONTRACTS.md`，需要 Windows 的事追加 `BLOCKERS.md`，方向性改变追加 `DECISIONS.md`；**契约只有证据齐全才能标 `ready`**（它是正式训练闸门）。摘要与同步循环见 `docs/roadmap/CROSS-MACHINE-COORDINATION.md`；每个工作阶段开始与结束各同步一次 |
 | **v3 纠偏生效（2026-09-21）** | **标准 PVP 改按六宠设计**（候选规则，`CROSS_SOURCE_SUPPORTED`，禁止写成官方事实）；官方 3v3/2 魔力是**极速对决**独立 BattleMode；**48 只只是迁移夹具**，候选宇宙是全量 600+；匹配前对手未知，按版本 Meta prior 评价；**在线 3 秒内禁止批量模拟**。停止用旧规则（max=6/入场 2/回合末 +1）生成或重训任何产物（13 条已进「禁止重跑」清单）。入口：`docs/roadmap/FLAGSHIP-V3-REDIRECT.md`、`docs/roadmap/FLAGSHIP-V3-CHECKLIST.md`；机器可读：`reports/roco/flagship-upgrade/{baseline,artifact-invalidation}.json`、`data/roco/battle-modes.json`、`data/roco/evidence/rule-evidence-ledger.json` |
@@ -10738,3 +10738,46 @@ roco-ux-acceptance/battle-feedback/coverage-axes/retained-assets）。
 **没做到 / 未验证**：① 清单里那五件**都要人**（我一件都替代不了）；② 引擎内部的加点常量与
 `inspect_training` 工具**仍在**（删它要重测 v8 那两个数字，所以等你点头）；③ 判据 30 只覆盖
 "同一只个体、性格那一路"的三步，**天分+性格交叉**（例如退天分之后刷性格）没有单独跑。
+
+#### §C6.323 第 66 轮：**新系统全面接入小芽**（社区图鉴层）+ 培养页两处版式重排 + 三份子代理产出收口
+
+人类 2026-09-27 睡前：「现在手里的做完了继续优化系统，**新系统全面接入小芽**，顺便优化一下**培养页面**
+（丑死了，竖着挤在一坨），我离开的时间务必不要向工作区外写入，另外你可以把桌面那个调研的挪到项目里，
+看看有没有必要再优化一下我们项目的目录逻辑，另外告诉我还需不需要补精灵信息」。
+
+**① 社区图鉴层（新系统）**：`scripts/roco/build-hke-layer.mjs` → `data/roco/derived/hke-2026-09-27/`
+（547 只，全部含**进化链**（495 只多段、1093 条带等级）、**特性说明**、**等级技能表**；
+上游 `sum_race` 不采信、零宽字符剥掉、`--check` 逐字节可复算；manifest 写明 UNKNOWN/REFERENCE_ONLY + 不进 normalized）。
+**接进小芽**：新增 `src/coach/evolution-advice.js` ——
+`喵喵 → Lv.16 进化成「喵呜」，Lv.32 进化成「魔力猫」。最终形态是「魔力猫」。（这条来自小黑盒社区图鉴接口快照…）`；
+引擎给不出学习表时补一句"三组技能清单"（**不给等级** —— 上游没有这个字段）。
+**真机踩到并修掉**：不进 `localFactAsk` 白名单时，「喵喵几级进化？」落到陪练通道 ⇒ 玩家听到「我在。聊游戏里的都行。」
+（探针的"进化检查"三条全红）；补上路由后 **14/14 干净**。
+判据 `tests/roco-hke-layer.test.js` **5 条**（可复算 / 来路写清且不混进 normalized / 不采信上游总和 / 接得进含反证 / 缺口填充不给等级）。
+
+**② 培养页两处版式（先用数字定位，再改）**：新工具 `scripts/roco/shoot-layout.mjs`
+（整页/元素截图 + `--measure` 逐选择器几何；只写仓库内）实测：
+盒子页抽屉宽 **158px**、`.individual` 一行 **544px（≈41 行字）**；营地页配招六张卡**单列** ⇒ 展开后 `.loadout` **711px**。
+改后：`.individual` **237px**、抽屉 **349px**、抽屉宽 **381px**；`.skill-grid` **270px**、`.loadout` **485px**、右栏 **833px**。
+验证：盒子真机 **30/30 + 12/12**、移动端总扫 **10/10 + 9/9**、390 宽下无横向溢出。
+
+**③ 桌面调研入仓**：`data/roco/raw/hke-2026-09-27/`（入库 10 个 764KB；`raw/**` 1120 个 33MB 进 `.gitignore`；
+**凭据 0 入库**）+ `docs/roco/CAPTURE-HKE-2026-09-27.md`（一页纸：能答/不能答）。
+
+**④ 子代理三条线（并行）**：
+- 宝可梦对照 `docs/roco/MECHANICS-VS-POKEMON.md` + 判据 9/9：**人述在"分层"上成立、数值上多被洛手改过**；
+  性格的 A/B 两解里 **B（±10%＝非 PVP 零突破底档、+20%/−10%＝PVP 满突破档）与仓内 OFFICIAL_CURRENT 引文吻合**；
+  升星/学习力/突破次数三层**我们完全没建**；抓包 `base_race_params` 是"0 星还是当前星级"**未确认**（建层前必须先定）。
+- 困难留出集 **四类各 32 条（共 128）、与训练集零重叠 0**：`tests/evals/agent-tasks-v3-difficulty/**`
+  + 生成器/校验器 + 判据 9 项；**一个模型都没跑** ⇒ 这批目前没有任何比率（README 写明"要跑先跟人类确认"）。
+- 目录审阅 `docs/roco/REPO-LAYOUT-REVIEW.md`（715 行）：三个"只增不减的平铺层"（tests 116 / scripts/roco 142 / reports 90+64）；
+  并**自我推翻**了一条"零引用可删"的建议（c17 截图其实被 8 处通配引用）。
+
+**⑤ 顺带修**：三个新判据文件注册进 `test:unit`（结构契约要求）；`shoot-layout.mjs` 里一处裸 `rmSync`
+（ENOTEMPTY 会把绿判据变红）；台账里陈旧的「22/22 全绿」改成 27/27 并注明。
+
+**验证**：`test:unit` **1668/0**；真机探针 **14/14**；盒子真机 **30/30 + 12/12**；移动端总扫 **10/10 + 9/9**。
+
+**没做到 / 未验证**：① 困难留出集**没跑基座**（要起 3GB 本地模型，人类睡前要求别卡；README 已写明）；② 升星 / 学习力 /
+突破次数**三层仍未建**（等人类定"抓包种族值是 0 星还是当前星级"）；③ 抓包还差 **100 只**（59 只 ≥5000 从未扫过、
+36 只落在 3761–3796；清单在 `reports/roco/hke-reconcile.md` 与桌面清单里）；④ 目录审阅的搬迁建议**一条都没执行**（零风险的那几条留待人类点头）。

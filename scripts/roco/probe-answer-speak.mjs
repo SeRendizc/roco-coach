@@ -70,8 +70,15 @@ const context = {
   coachAllowed: true,
 };
 
+/** `--ask '问句1|问句2'`：只问这几句（排查用；不写产物）。 */
+const onlyArg = (() => {
+  const i = process.argv.indexOf('--ask');
+  return i >= 0 && process.argv[i + 1] ? process.argv[i + 1].split('|').map((x) => x.trim()).filter(Boolean) : null;
+})();
+const LIST = onlyArg ? onlyArg.map((q) => ({q})) : ASKS;
+
 const rows = [];
-for (const ask of ASKS) {
+for (const ask of LIST) {
   const question = ask.q;
   let record = {question};
   try {
@@ -113,7 +120,7 @@ for (const ask of ASKS) {
       + `正文命中=${JSON.stringify([...(record.hard ?? []), ...(record.soft ?? []), ...(record.latin ?? [])])}`
       + (record.retired ? ` 退役检查=${JSON.stringify(record.retiredProblems)}` : '')
       + (record.evolution ? ` 进化检查=${JSON.stringify(record.evolutionProblems)}` : ''));
-    if (bad) console.error(`      正文：${record.text}`);
+    if (bad || onlyArg) console.error(`      正文：${record.text}${record.retired || record.evolution ? '' : ''}`);
   }
 }
 
@@ -133,9 +140,12 @@ const report = {
     '它对的是"正在跑的那个进程"：旧进程会给出旧答案（这正是它的用处 —— 真机复现）',
   ],
 };
+if (onlyArg) { console.error('（--ask 模式：不写产物）'); process.exitCode = 0; }
+else {
 mkdirSync(dirname(OUT), {recursive: true});
 writeFileSync(OUT, `${JSON.stringify(report, null, 1)}\n`);
 if (asJson) console.log(JSON.stringify(report.counters));
 console.error(`报告：reports/roco/answer-speak-probe.json（干净 ${report.counters.clean}/${report.counters.asked}；`
   + `脏 ${report.counters.dirty}）`);
 if (dirty.length) process.exitCode = 1;
+}

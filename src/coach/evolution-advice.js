@@ -118,3 +118,27 @@ export async function evolutionLocalAnswer(message) {
     trace: [],
   };
 }
+
+/**
+ * 「这一只能学哪些技能」——**只在引擎给不出学习表时**补一句（缺口填充，不抢引擎的活）。
+ *
+ * 我们的引擎只覆盖练习局那几十只；图鉴里另外 500+ 只以前是"学习表查不到"。
+ * 社区图鉴层里每一只都有三组技能（升级学 / 技能机 / 血脉），带威力/耗能/类别/说明 ——
+ * 所以这里能给出一句**有来路**的清单。**不给等级**（上游那一层没有等级字段，不许编）。
+ */
+export async function hkeSkillLine(nameOrId, {limit = 8} = {}) {
+  const pet = await hkePetOf(nameOrId);
+  if (!pet) return null;
+  const groups = [['升级学', pet.skills?.level ?? []], ['技能机', pet.skills?.machine ?? []],
+    ['血脉', pet.skills?.blood ?? []]].filter(([, rows]) => rows.length);
+  if (!groups.length) return null;
+  const head = groups.map(([label, rows]) => `${label} ${rows.length}`).join(' / ');
+  const first = groups[0][1].slice(0, limit).map((row) => row.name).filter(Boolean);
+  return {
+    line: `它能学的技能（${head}）：${first.join('、')}${groups[0][1].length > first.length ? '…' : ''}。`
+      + `（这一份来自${HKE_SOURCE}；只有"能学什么"，没有"几级学"。）`,
+    evidence: [`社区图鉴层读数：${pet.name} 的技能三组 = ${head}`,
+      ...(first.length ? [`第一组前 ${first.length} 个：${first.join('、')}`] : []),
+      `来源：${HKE_SOURCE}`],
+  };
+}

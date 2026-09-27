@@ -74,6 +74,42 @@ export function natureFactor(name, stat) {
   return {factor: neutral, known: true, reason: `${row.name}：${STAT_NAMES[stat]}不受影响`};
 }
 
+/**
+ * **非 PVP 那一档**的性格系数**下界**（2026-09-27 人类口述 + 台账引文推出的那一条）。
+ *
+ * 人类 2026-09-27 贴的评论里两句看似矛盾的话 —— 「增加幅度从 10% 提到 20%」与「性格都是一项 +10%、
+ * 一项 −10%」—— 按台账 `EV-NATURE-BALANCE-PVP`（OFFICIAL_CURRENT，逐字）可以**同时为真**：
+ *   · PVP（闪耀大赛）把加成平衡到 **+20%**，负面固定 **−10%**；
+ *   · 非 PVP：提升 **初始 +10%**，**每突破一次 +2%**，满突破 **+20%**；降低固定 −10%。
+ * 所以"±10%"是**非 PVP 零突破**那一档，不是与 PVP 冲突。
+ *
+ * ⚠ 我们**没有"每只的突破次数"这个数据** ⇒ 这一层只能给**零突破下界**（1.1 / 0.9），
+ * 并且**必须标成下界**（`floor: true`）——不许把它当成"这一只的实际加成"。
+ */
+export const NATURE_PVE_FLOOR = Object.freeze({up: 0.1, down: -0.1, perBreakthrough: 0.02, cap: 0.2,
+  source: 'EV-NATURE-BALANCE-PVP（data/roco/evidence/rule-evidence-ledger.json）逐字：'
+    + '「提升初始 +10%，每突破一次 +2%，满突破 +20%；降低固定 −10%」+ 人类 2026-09-27 口述',
+  note: '零突破下界；每突破 +2%、满 +20% —— 我们没有突破次数，所以只给下界'});
+
+/** 非 PVP 档的**下界**系数（`floor: true` 提醒调用方"这是下界不是实测"）。 */
+export function natureFloorFactor(name, stat) {
+  const row = natureOf(name);
+  if (!row) return {factor: 1, known: false, floor: true, reason: name ? `认不出性格「${name}」` : '这一只还没填性格'};
+  if (!STAT_KEYS.includes(stat)) throw new Error(`没有这一项：${stat}`);
+  const up = 1 + NATURE_PVE_FLOOR.up;
+  const down = 1 + NATURE_PVE_FLOOR.down;
+  if (row.up === stat) {
+    return {factor: up, known: true, floor: true,
+      reason: `${row.name}：${STAT_NAMES[stat]}是长处（非 PVP 零突破下界 +${Math.round(NATURE_PVE_FLOOR.up * 100)}%，`
+        + `每突破 +${Math.round(NATURE_PVE_FLOOR.perBreakthrough * 100)}%、满突破 +${Math.round(NATURE_PVE_FLOOR.cap * 100)}%）`};
+  }
+  if (row.down === stat) {
+    return {factor: down, known: true, floor: true,
+      reason: `${row.name}：${STAT_NAMES[stat]}是短处（${Math.round(NATURE_PVE_FLOOR.down * 100)}%，非 PVP 档也是这个数）`};
+  }
+  return {factor: 1, known: true, floor: true, reason: `${row.name}：${STAT_NAMES[stat]}不受影响`};
+}
+
 // ── 面板换算 ────────────────────────────────────────────────────────────────
 //
 // 来源：桌面笔记 `~/Desktop/洛克王国PVP规则、战术、策略、技巧小黑盒帖子简单收集.md` 的 pvp 公式一节，逐字：

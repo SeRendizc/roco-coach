@@ -26,7 +26,7 @@ import {trainingSaveOf,trainingSaveMissing} from './profile-shape.js';
 import {natureTalentAsk,natureLocalAnswer} from './nature-advice.js';
 // 进化那一族：数据来自**社区图鉴层**（`data/roco/derived/hke-2026-09-27/`，REFERENCE_ONLY）。
 // 成句时会**说出这条来路**（不许冒充官方文本）—— 接线只有下面那一行。
-import {evolutionAsk,evolutionLocalAnswer} from './evolution-advice.js';
+import {evolutionAsk,evolutionLocalAnswer,hkeSkillLine} from './evolution-advice.js';
 import {companion} from './companion.js';
 // 台账等级的中文标签（玩家可见的「依据等级 X」）：表只有一份，在 `evidence-levels.js` ——
 // 那个文件不 import node 内建，所以这一层（浏览器也加载）能安全 import（2026-09-27 审计 ②）。
@@ -516,6 +516,14 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){
    parts.push(`特性技能：${skillName?`${skillName}（${pet.feature_skill_id}）`:pet.feature_skill_id}。`);
   }
   if(Number.isFinite(ls.total))parts.push(`学习表 ${ls.total} 条（本系 ${ls.native??0} / 血脉 ${ls.blood??0} / 技能石 ${ls.stones??0}）。`);
+  // 2026-09-27（人类：「新系统全面接入小芽」）：**引擎给不出学习表时**，用社区图鉴层补一句
+  // （那一层覆盖 547 只，带三组技能的名字；**没有等级**，所以只说"能学什么"）。
+  // 只在缺口处补 —— 引擎有的那一档照旧走上面的路，不许被这一层顶掉。
+  let hkeSkill = null;
+  if(!Number.isFinite(ls.total)) {
+   try { hkeSkill = await hkeSkillLine(pet.name ?? args.name); } catch { hkeSkill = null; }
+   if(hkeSkill) parts.push(hkeSkill.line);
+  }
   if(mine)parts.push(`你名下有一只：${mine.id}${Number.isFinite(mine.level)?`，${mine.level} 级`:''}`
    +`${mine.role?`，定位 ${mine.role}`:''}`
    // 页面给的机制行**原文照搬**（它本身常以「特性「X」：…」开头，再包一层就成「特性「特性「X」」）。
@@ -524,7 +532,8 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){
   // 玩家要知道的是「这是从游戏图鉴里逐字抄的」。文件名留在下面 evidence 里，照样追得到。
   parts.push('（来源：游戏图鉴里逐字抄下来的；要它的技能清单或相性，接着问。）');
   return {text:parts.join(''),evidence:[...(receipt.evidence_ids??[]),
-   `pet_id=${pet.pet_id??'—'}；types=${(pet.types??[]).join('|')||'—'}`],trace};
+   `pet_id=${pet.pet_id??'—'}；types=${(pet.types??[]).join('|')||'—'}`,
+   ...(hkeSkill?.evidence??[])],trace};
  }
  if(policy.reason==='roster-list-ask'){
   // 只列**名单里真的有的**：前 12 只名字 + 总数（是一页就写清"这一页 N 只 / 总数 M 只"）。
