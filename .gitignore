@@ -33,7 +33,7 @@ data/roco/raw/NRC_AI.tar.gz
 #   3. 这批快照全部标 UNKNOWN / REFERENCE_ONLY —— 许可未确认，不得进执行域或对外分发，
 #      因此更不该进 git 历史。
 # 入库的是**结论**：同目录的 pets.csv / index.jsonl / roster.json /
-# skipped-ranges.jsonl / CAPTURED-LIST.md（约 760KB）。
+# skipped-ranges.jsonl / CAPTURED-LIST.md 与 tools/、README.md（10 个文件，约 765KB）。
 data/roco/raw/hke-2026-09-27/raw/
 
 .dsh-pushplus-token
