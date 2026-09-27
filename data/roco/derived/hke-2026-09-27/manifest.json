@@ -1,0 +1,25 @@
+{
+ "schema": "roco-hke-layer-manifest/v1",
+ "built_by": "scripts/roco/build-hke-layer.mjs",
+ "source": {
+  "provider": "xiaoheihe",
+  "endpoint": "/game/roco_kingdom/pet/detail",
+  "licence": "UNKNOWN",
+  "redistribution": "REFERENCE_ONLY",
+  "source_note": "社区接口快照（人类 2026-09-27 抓包），**不是官方文本**；本层只做静态读数",
+  "sum_race_warning": "上游 sum_race 不可信（547 里 521 条与实际六维之和不符）⇒ 本层只存六维，不存总和",
+  "capture_dir": "data/roco/raw/hke-2026-09-27",
+  "source_sha256": {
+   "pets_csv": "2506c14d9d133c7997b6869cf358551c48cdf63f47bb64c1d59cefed406cdc29",
+   "index_jsonl": "d1df128cde1c18d0a6eec40db8a4c48e0327bab3aa2ce44a3faefc94d3b23fef"
+  }
+ },
+ "counts": {
+  "pets": 547,
+  "with_evolution": 547,
+  "with_feature": 547,
+  "with_skills": 547,
+  "unknown_element_rows": 0
+ },
+ "note": "本层是**派生产物**：从 data/roco/raw/hke-2026-09-27/ 的原始响应里抽静态读数。许可 UNKNOWN / REFERENCE_ONLY —— 使用时要写明来源，且**不许**并入 normalized/。"
+}

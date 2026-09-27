@@ -1,0 +1,116 @@
+{
+ "generated_by": "scripts/roco/verify-difficulty-holdout.mjs",
+ "set": "agent-tasks-v3-difficulty",
+ "source_dir": "tests/evals/agent-tasks-v3-difficulty",
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "requires_min_per_category": 30,
+ "total": 128,
+ "categories": {
+  "multi-turn": {
+   "cases": 32,
+   "stop_only": 8,
+   "must_call": 24,
+   "tools": [
+    "compare_actions",
+    "plan_actions",
+    "query_rules",
+    "read_state",
+    "simulate_branch"
+   ],
+   "with_receipts": 8
+  },
+  "conflicting-receipts": {
+   "cases": 32,
+   "stop_only": 0,
+   "must_call": 32,
+   "tools": [
+    "evaluate_team",
+    "query_rules",
+    "read_evidence",
+    "read_last_turn",
+    "read_match"
+   ],
+   "with_receipts": 32
+  },
+  "long-context": {
+   "cases": 32,
+   "stop_only": 8,
+   "must_call": 24,
+   "tools": [
+    "query_rules",
+    "read_evidence",
+    "read_match"
+   ],
+   "with_receipts": 32
+  },
+  "vague-reference": {
+   "cases": 32,
+   "stop_only": 16,
+   "must_call": 16,
+   "tools": [
+    "query_rules",
+    "read_state"
+   ],
+   "with_receipts": 0
+  }
+ },
+ "overlap": {
+  "training_or_v1": 0,
+  "detail": {
+   "sft": 0,
+   "v1": 0,
+   "v2": 0,
+   "total": 0
+  },
+  "training_corpus_size": {
+   "sft": 32,
+   "v1": 288,
+   "v2": 18
+  }
+ },
+ "restart_condition": "docs/roadmap/DSH-EXECUTION-STATE.md §C6.312：每个困难类别 ≥30 条且与训练集零重叠",
+ "boundary": [
+  "这一份只是**数据**：本报告不含任何模型跑分，也**没有**跑过任何模型。",
+  "按 §C6.312：扩完要先跑**基座**看基线，再谈提升；在那之前算出来的比率只当冒烟。",
+  "回执是评测夹具（fixture），不是引擎实测记录；实体名/id 与图鉴字段逐值来自归一化语料。"
+ ],
+ "checks": [
+  {
+   "id": "min-per-category",
+   "title": "每类 ≥ 30 条",
+   "ok": true,
+   "detail": "multi-turn=32 · conflicting-receipts=32 · long-context=32 · vague-reference=32"
+  },
+  {
+   "id": "zero-overlap",
+   "title": "问句与训练集零重叠（逐字）",
+   "ok": true,
+   "detail": "命中 训练集=0 v1=0 v2=0（训练集共 32 句、v1 288 句）"
+  },
+  {
+   "id": "decidable-expect",
+   "title": "expect 可判定（工具在契约里、calls 是闭区间、stop_ok 自洽）",
+   "ok": true,
+   "detail": "工具被期望 9 个（query_rules×28 plan_actions×4 compare_actions×8 simulate_branch×4 read_state×16 read_evidence×30 read_match×18 evaluate_team×4 read_last_turn×8）；只许停的用例 32 条"
+  },
+  {
+   "id": "why-present",
+   "title": "每条都有非空 why",
+   "ok": true,
+   "detail": "128 条逐条检查"
+  },
+  {
+   "id": "identity",
+   "title": "case_id 唯一 / message 本集内不重复 / category 与文件名一致",
+   "ok": true,
+   "detail": "128 个 case_id、128 句不同的问句、79 句不同的历史铺垫"
+  },
+  {
+   "id": "grounding",
+   "title": "引用的实体 id / 图鉴字段都来自归一化语料",
+   "ok": true,
+   "detail": "id 命中 128 条记录；逐值核对 facts_used 24 项（语料 roco-world-s4-2026-09-10）"
+  }
+ ],
+ "ok": true
+}

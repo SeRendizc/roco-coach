@@ -90,7 +90,16 @@ async function launchChrome() {
     try { port = readFileSync(join(profile, 'DevToolsActivePort'), 'utf8').split('\n')[0].trim(); } catch { /* 还没写 */ }
     if (chrome.exitCode !== null || chrome.signalCode) break;
   }
-  if (!port) { chrome.kill('SIGKILL'); rmSync(profile, {recursive: true, force: true}); throw new Error('Chrome 没起来'); }
+  if (!port) {
+    chrome.kill('SIGKILL');
+    // 与 `close()` 同一条纪律：Chrome 刚被 kill 时 profile 里还有句柄 ⇒ 裸 rmSync 会 ENOTEMPTY，
+    // 把一次"起不来"变成一次"收尾异常"（判据 `structure-contract` 会红）。这里重试几次。
+    for (let i = 0; i < 5; i += 1) {
+      try { rmSync(profile, {recursive: true, force: true, maxRetries: 3, retryDelay: 150}); break; }
+      catch { await sleep(200); }
+    }
+    throw new Error('Chrome 没起来');
+  }
   const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
   const target = list.find((t) => t.type === 'page');
   const ws = new WebSocket(target.webSocketDebuggerUrl);

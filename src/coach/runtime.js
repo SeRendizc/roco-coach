@@ -24,6 +24,9 @@ import {teacher,makeQuiz,review,summarizeMatch,reviewMatch,analyzeTurn,compareTu
 import {trainingSaveOf,trainingSaveMissing} from './profile-shape.js';
 // 天分/性格那一族：识别与成句都在 `nature-advice.js`（数字只从 `talent.js` 来，这里只负责接线）。
 import {natureTalentAsk,natureLocalAnswer} from './nature-advice.js';
+// 进化那一族：数据来自**社区图鉴层**（`data/roco/derived/hke-2026-09-27/`，REFERENCE_ONLY）。
+// 成句时会**说出这条来路**（不许冒充官方文本）—— 接线只有下面那一行。
+import {evolutionAsk,evolutionLocalAnswer} from './evolution-advice.js';
 import {companion} from './companion.js';
 // 台账等级的中文标签（玩家可见的「依据等级 X」）：表只有一份，在 `evidence-levels.js` ——
 // 那个文件不 import node 内建，所以这一层（浏览器也加载）能安全 import（2026-09-27 审计 ②）。
@@ -186,6 +189,10 @@ export function localFactAsk(message='',policy=null){
  // 性格/天分那一族（2026-09-27 接）：种族值来自归一化图鉴、性格表来自数据层，
  // 两处都是现算 ⇒ 本来就该是本地事实（0 次模型调用），不必让模型复述数字。
  if(natureTalentAsk(message))return true;
+ // 进化那一族（2026-09-27 接）：数据来自**社区图鉴层**（REFERENCE_ONLY），本地成句并标出来路。
+ // ⚠ 真机踩到过：不在这里放行的话，「喵喵几级进化？」会落到陪练通道 ⇒ 玩家听到「我在。聊游戏里的都行。」
+ //（探针当场抓到，`scripts/roco/probe-answer-speak.mjs` 的"进化检查"三条全红）。
+ if(evolutionAsk(message))return true;
  // 训练点/培养格那一族也必须走本地：数字全在包里，模型没有可补充的事实（只有措辞）。
  if(policy?.reason==='training-ask')return true;
  // 队形问句但队伍不全：本地答「缺哪几只、怎么补」，这一族同样不该让陪练回一句「我在。」。
@@ -361,6 +368,9 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){
  // 性格/天分那一族最优先：它自带取舍句（防止纯机器算），而且不需要任何工具调用。
  const natureAnswer=await natureLocalAnswer({message,context});
  if(natureAnswer)return {...natureAnswer,trace:[]};
+ // 进化（「X 几级进化成什么」）：本地成句，0 次模型调用；数据来自社区图鉴层并如实标出来路。
+ const evolutionAnswer=await evolutionLocalAnswer(message);
+ if(evolutionAnswer)return {...evolutionAnswer,trace:[]};
  // 参数化事实（代码常量）优先：0 次查询、0 次模型调用。
  const constant=localParametricFact(message,context);   // ⚠ 必须传 context：常量分档（2026-09-26）
  if(constant)return {...constant,trace:[]};

@@ -52,6 +52,8 @@ const ASKS = [
   {q: '我还差多少训练点满级？', retired: true},
   {q: '还有几个培养格？', retired: true},
   {q: '我的能量上限是多少？'},
+  // 2026-09-27 新接入：进化链（数据来自社区图鉴层，答案里必须标出来路）
+  {q: '喵喵几级进化？', evolution: true},
 ];
 /** 退役问句的判据：直说没有加点 + 不报旧数（与 `tests/roco-nurture-page.test.js` ⑤ 同一口径）。 */
 const RETIRED_LEAK = /训练点 ?\d|培养格|满级还差|还差 \d+ ?格|\+12 生命|\+4 攻击|\+3 速度/;
@@ -88,7 +90,13 @@ for (const ask of ASKS) {
     const retiredProblems = !ask.retired ? []
       : [...(text.includes('没有加点') ? [] : ['正文没有直说"没有加点"']),
         ...(RETIRED_LEAK.test(text) ? [`正文里还报着旧口径的数：${text.match(RETIRED_LEAK)[0]}`] : [])];
-    record = {...record, retired: ask.retired === true, retiredProblems,
+    // 进化那一族：必须说得出链与等级，并标出来路（社区数据，不是官方文本）
+    const evolutionProblems = !ask.evolution ? []
+      : [...(/进化成/.test(text) ? [] : ['正文没说进化成谁']),
+        ...(/Lv\.\d+/.test(text) ? [] : ['正文没给进化等级']),
+        ...(/社区|非官方/.test(text) ? [] : ['正文没标出来路'])];
+    record = {...record, retired: ask.retired === true, retiredProblems, evolution: ask.evolution === true,
+      evolutionProblems,
       status: response.status, agentStop: data.agentStop ?? null,
       provider: data.provider ?? null, text: text.slice(0, 300),
       hard: hits.hard, soft: hits.soft, latin,
@@ -99,17 +107,19 @@ for (const ask of ASKS) {
   }
   rows.push(record);
   const bad = (record.hard?.length ?? 0) + (record.soft?.length ?? 0) + (record.latin?.length ?? 0)
-    + (record.retiredProblems?.length ?? 0);
+    + (record.retiredProblems?.length ?? 0) + (record.evolutionProblems?.length ?? 0);
   if (!asJson) {
     console.error(`${bad ? 'FAIL' : 'ok  '} ${question}  stop=${record.agentStop} `
       + `正文命中=${JSON.stringify([...(record.hard ?? []), ...(record.soft ?? []), ...(record.latin ?? [])])}`
-      + (record.retired ? ` 退役检查=${JSON.stringify(record.retiredProblems)}` : ''));
+      + (record.retired ? ` 退役检查=${JSON.stringify(record.retiredProblems)}` : '')
+      + (record.evolution ? ` 进化检查=${JSON.stringify(record.evolutionProblems)}` : ''));
     if (bad) console.error(`      正文：${record.text}`);
   }
 }
 
 const dirty = rows.filter((row) => (row.hard?.length ?? 0) + (row.soft?.length ?? 0)
-  + (row.latin?.length ?? 0) + (row.retiredProblems?.length ?? 0) > 0);
+  + (row.latin?.length ?? 0) + (row.retiredProblems?.length ?? 0)
+  + (row.evolutionProblems?.length ?? 0) > 0);
 const report = {
   schema: 'roco-answer-speak-probe/v1',
   generated_at: new Date().toISOString(),
