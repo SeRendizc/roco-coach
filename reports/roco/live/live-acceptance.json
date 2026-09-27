@@ -3,7 +3,7 @@
  "generated_by": "scripts/roco/browser-live-acceptance.mjs",
  "base": "http://127.0.0.1:8899/",
  "why": "**对着已经在跑的那个服务**走一遍（不启动临时服务）：现有判据全部自起服务，所以「跑了很久的进程白名单陈旧 → 新模块 404 → 整页 JS 不执行 → 卡在正在读取」这一类运行态故障，它们一条都抓不到。",
- "judged_at": "2026-09-23T05:29:16.013Z",
+ "judged_at": "2026-09-23T11:56:13.102Z",
  "totals": {
   "checks": 26,
   "passed": 26,
@@ -16,7 +16,7 @@
    "id": "live-status",
    "judge": "8899 的状态接口必须 available:true 且带健康快照（不许谎报不可用）",
    "ok": true,
-   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=3"
+   "actual": "available=true health=roco-world-s4-2026-09-10/877a54c52d6b mode=pvp-standard-six-pet 规则服务会话=0"
   },
   {
    "id": "live-boot",
@@ -46,7 +46,7 @@
    "id": "live-mine-owned",
    "judge": "「我的精灵（能出战）」：标题是「我的精灵 N 只」，每张卡都是「持有·可正式上场」，并且带个体 id（可点进去）",
    "ok": true,
-   "actual": "我的精灵 2 只（能出战）；前几张 [{\"status\":\"held\",\"kind\":\"mine\",\"instance\":\"own-0015\",\"species\":\"pet_000137\",\"tag\":\"持有 · 可正式上场\",\"name\":\"多多×2\"}]"
+   "actual": "我的精灵 1 只（能出战）；前几张 [{\"status\":\"held\",\"kind\":\"mine\",\"instance\":\"own-0015\",\"species\":\"pet_000137\",\"tag\":\"持有 · 可正式上场\",\"name\":\"多多\"}]"
   },
   {
    "id": "live-mine-add",
@@ -70,31 +70,31 @@
    "id": "live-start",
    "judge": "真鼠标点「开一局（标准 PVP · 六宠）」：按候选规则进对局（无道具无逃跑，资源条是引擎给的星）",
    "ok": true,
-   "actual": " ｜ 页眉模式=PVP · AI模拟（注册表 pvp-standard-six-pet）⭐=10/10 顶栏存活点 6/6 引擎动作账=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 页面渲染=skill,charge,switch,surrender 技能卡=4 开局按钮 195×38；状态行「这一手引擎没有值得单独说的局面事实（拿不到就不编）」规则服务：已连接 view=ready 按钮 {\"disabled\":false,\"text\":\"开一局（标准 PVP · 六宠）\",\"team\":\"6\"}"
+   "actual": " ｜ 页眉模式=PVP · AI模拟（注册表 pvp-standard-six-pet）⭐=10/10 顶栏存活点 6/6 引擎动作账=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 页面渲染=skill,charge,switch,surrender 技能卡=4 开局按钮 195×38；状态行「」规则服务：已连接 view=ready 按钮 {\"disabled\":false,\"text\":\"开一局（标准 PVP · 六宠）\",\"team\":\"6\"}"
   },
   {
    "id": "live-energy-gate",
    "judge": "开局那一手若引擎没给合法技能：配招**灰置**列出（带费用、不可点）+ 写清差额 + 提示先聚能；有合法技能时灰置块必须消失",
    "ok": true,
-   "actual": "回合 1：合法技能 4、能量 10/undefined；灰置 0 张 []；聚能=yes；说明「小芽 · 洛克王国：世界 训练场\n \n \n \n \n  PVP · AI模拟\n  第 1 回合\n \n ✦小芽\n\n\n\n\n \n  小芽\n  她该说话时自己会出来\n  」"
+   "actual": "回合 1：合法技能 4、能量 10/undefined；灰置 0 张 []；聚能=yes；说明「小芽 · 洛克王国：世界 训练场\n \n \n \n ✦ 小芽\n\n \n \n \n \n \n \n  \n   \n    \n     小芽\n     \n     模型：未连接（」"
   },
   {
    "id": "live-battle-spec",
    "judge": "战斗页规格（v3h）：左列永远四格技能（卡高 ≥44、⭐消耗/属性/类别/克制标记/预期伤害 逐格齐备）、底栏聚能与技能/更换/物品/逃跑四个选项各自独立、只渲染本回合合法动作、最新一条事件在、对手后备只以存活点表示（不放占位也不泄漏 id、不揭示名字）、1440×900 战斗片段在视口内。【按人类 2026-09-23 版式，原来并要求技能格上的「详情层（说明可展开读）」——技能说明不再进战斗主视线，由每格的属性/类别/克制标记/预期伤害四行承担；口径未放松】",
    "ok": true,
-   "actual": "技能卡 4 张（最矮 151px，合法 4/4）；聚能入口=true「聚能 ⭐ 10 / 10」；更换可点 5/5；逃跑页 确认+取消；对手侧存活点「●●●●●●」；片段底 834 / 视口 900"
+   "actual": "技能卡 4 张（最矮 146px，合法 4/4）；聚能入口=true「聚能 ⭐ 10 / 10」；更换可点 5/5；逃跑页 确认+取消；对手侧存活点「●●●●●●」；片段底 830 / 视口 900"
   },
   {
    "id": "live-act-tabs",
    "judge": "四个大选项（技能/物品/更换/逃跑）都在、恰好一个高亮（按 body[data-b3-tab] 实际外观判定）、≥44px；聚能/战报在位；更换页每行给名字/属性/⭐/血量；物品页每格写清为什么用不了；逃跑是二次确认。【按人类 2026-09-23 版式：高亮与切屏由 `body[data-b3-tab]` 驱动（不再有 `aria-selected`）；物品页的「说明」由每格 `data-b3-item-note` 承担（旧 `[data-roco-no-item]` 在被收起的旧行动坞里）】",
    "ok": true,
-   "actual": "选项 [\"skill*\",\"switch\",\"item\",\"escape\"]；聚能「聚能 ⭐ 10 / 10」；更换页 5 行 {\"name\":\"音速犬\",\"types\":\"火系\",\"energy\":\"0\",\"hp\":\"366/366\",\"text\":\"⭐ 0 音速犬 🔥火系 366/366\"}；物品页 2 格（无动作 0）/ 说明「次数 / 冷却 / 是否占行动均未登记」；逃跑页 确认=true 取消=true"
+   "actual": "选项 [\"skill*\",\"switch\",\"item\",\"escape\"]；聚能「聚能 ⭐ 10 / 10」；更换页 5 行 {\"name\":\"音速犬\",\"types\":\"火系\",\"energy\":\"0\",\"hp\":\"366/366\",\"text\":\"⭐ 0 音速犬 🔥火系 366/366\"}；物品页 2 格（无动作 0）/ 说明「次数与冷却均未登记」；逃跑页 确认=true 取消=true"
   },
   {
    "id": "live-battle-hierarchy",
    "judge": "战场优先：中间两张出战卡（`[data-b3-stage]`）在片段最上面；「规则口径与未核验项」在战斗页里**一处都不可见**（战斗态整块收起）。【按人类 2026-09-23 版式，原来的「收在战场下面的一处折叠里」由「战斗页根本不出现」承担；口径未放松：可见一处就红】",
    "ok": true,
-   "actual": "片段根 top=92；战场 top=148；规则折叠可见=false；未核验标签可见=false；战斗页可见「未核验/规则」文本 0 处"
+   "actual": "片段根 top=88；战场 top=157；规则折叠可见=false；未核验标签可见=false；战斗页可见「未核验/规则」文本 0 处"
   },
   {
    "id": "live-lineup-and-log",
@@ -112,7 +112,7 @@
    "id": "live-settle",
    "judge": "从开局一路打到结算（引擎给出结果、结算区可见、局末教学入口出现、页眉回合与引擎一致、右列战报最新一回合有内容）。【按人类 2026-09-23 版式，原来的 `#last-event`「最新一条事件」由**右列战报**承担（框内滚动、最新回合在上）；`#last-event` 所在的 `#b3-sink` 是隐藏接收槽，不再作读数点。另：引擎拒绝一步推进会让页面清空 `state.view`（HTTP 200 + `{ok:false}`，见 known_limits），脚本按玩家的做法重试这一步 / 最多整局重开一次 —— 断言没有放松】",
    "ok": true,
-   "actual": "result=win 回合=44 页眉回合「第 44 回合」结算区可见=true 教学=shown 战报回合块=44 最新块=第 44 回合（8 条）；存活点 ●●●●○○/●●○○○○；点了 48 次自动推进（最后回合 44，停滞 0 次）；当时 {\"turn\":44,\"mana\":{\"self\":2,\"opponent\":0},\"selfLiving\":4,\"foeLiving\":2,\"status\":\"\"}；正文「关键转折在第 3 回合（这一局 44 个回合）。」"
+   "actual": "result=win 回合=44 页眉回合「第 44 回合」结算区可见=true 教学=shown 战报回合块=44 最新块=第 44 回合（8 条）；存活点 ●●●●○○/○○○○●●；点了 45 次自动推进（最后回合 44，停滞 0 次）；当时 {\"turn\":44,\"mana\":{\"self\":2,\"opponent\":0},\"selfLiving\":4,\"foeLiving\":2,\"status\":\"\"}；正文「关键转折在第 3 回合（这一局 44 个回合）。」"
   },
   {
    "id": "live-lesson-migration",
@@ -124,13 +124,13 @@
    "id": "live-narrow-390",
    "judge": "390×844：不横向溢出、六宠主操作在首屏可点（≥44px）、小芽那一栏能打开且输入框在首屏",
    "ok": true,
-   "actual": "clientW/scrollW=390/390 route=six-pet 主操作 top=762 h=44；小芽 {\"open\":true,\"viewport\":{\"width\":390,\"height\":844},\"card\":{\"top\":750,\"bottom\":830,\"left\":10,\"right\":380},\"form\":{\"top\":769,\"bottom\":819,\"left\":23,\"right\":367},\"input\":{\"top\":775,\"bottom\":819,\"left\":23,\"right\":288},\"reply\":null,\"replyHidden\":true,\"inputInView\":true,\"replyInView\":null,\"formInView\":true,\"bottombar\":0,\"actionCap\":253,\"actionPanel\":null,\"bothOnScreen\":true}"
+   "actual": "clientW/scrollW=390/390 route=six-pet 主操作 top=759 h=72；小芽 {\"open\":true,\"viewport\":{\"width\":390,\"height\":844},\"card\":{\"top\":0,\"bottom\":844,\"left\":0,\"right\":390},\"form\":{\"top\":173,\"bottom\":217,\"left\":23,\"right\":297},\"input\":{\"top\":173,\"bottom\":217,\"left\":23,\"right\":220},\"reply\":null,\"replyHidden\":true,\"inputInView\":true,\"replyInView\":null,\"formInView\":true,\"bottombar\":0,\"actionCap\":253,\"actionPanel\":null,\"bothOnScreen\":true}"
   },
   {
    "id": "live-model-status",
    "judge": "模型连接状态与实际一致（未连接时明说 + 给连接入口），不冒充模型。【按人类 2026-09-23 版式（页头右上角只留「✦ 小芽」），连接状态那一行由**小芽面板**承担；读取点 = 打开小芽面板后的 `#model-chip`】",
    "ok": true,
-   "actual": "chip「模型：0/3 已连接（云端 · DeepSeek 未连：还没有配置 API key）」hook=offline 入口=connect.html 高=26px"
+   "actual": "chip「模型：未连接（只给规则事实）」hook=offline 入口=connect.html 高=26px"
   },
   {
    "id": "live-chat",
@@ -396,7 +396,7 @@
     "route": "six-pet",
     "fallbackVisible": false,
     "cards": 12,
-    "modeText": "训练场 · AI模拟",
+    "modeText": "PVP · AI模拟",
     "roundText": "未开局",
     "modeId": "pvp-standard-six-pet",
     "modeStatus": "CANDIDATE",
@@ -828,7 +828,7 @@
   {
    "at": "battle-start-diag",
    "startDiag": {
-    "plan": "这一手引擎没有值得单独说的局面事实（拿不到就不编）",
+    "plan": "",
     "engine": "规则服务：已连接",
     "view": "ready",
     "btn": {
@@ -837,7 +837,7 @@
      "team": "6"
     }
    },
-   "planStatus": "这一手引擎没有值得单独说的局面事实（拿不到就不编）"
+   "planStatus": null
   },
   {
    "at": "battle-spec",
@@ -845,13 +845,13 @@
     "vh": 900,
     "clientW": 1440,
     "scrollW": 1440,
-    "rootTop": 92,
-    "rootBottom": 834,
-    "stageTop": 148,
+    "rootTop": 88,
+    "rootBottom": 830,
+    "stageTop": 157,
     "skillCards": [
      {
       "w": 232,
-      "h": 151,
+      "h": 146,
       "pending": null,
       "legal": true,
       "short": "no",
@@ -864,7 +864,7 @@
      },
      {
       "w": 232,
-      "h": 151,
+      "h": 146,
       "pending": null,
       "legal": true,
       "short": "no",
@@ -877,7 +877,7 @@
      },
      {
       "w": 232,
-      "h": 151,
+      "h": 146,
       "pending": null,
       "legal": true,
       "short": "no",
@@ -890,7 +890,7 @@
      },
      {
       "w": 232,
-      "h": 151,
+      "h": 146,
       "pending": null,
       "legal": true,
       "short": "no",
@@ -974,7 +974,7 @@
   },
   {
    "at": "auto-play",
-   "clicks": 48,
+   "clicks": 45,
    "lastTurn": 44,
    "stalled": 0,
    "viewDrops": 0,
@@ -996,17 +996,17 @@
     },
     "logTurns": 44,
     "hasView": true,
-    "battleId": "s5-875j7kds",
+    "battleId": "s1-n73ytkhf",
     "plan": "",
     "dots": {
      "self": "●●●●○○",
-     "foe": "●●○○○○"
+     "foe": "○○○○●●"
     }
    }
   },
   {
    "at": "second-match-play",
-   "clicks": 49,
+   "clicks": 46,
    "lastTurn": 44,
    "stalled": 0,
    "viewDrops": 0,
@@ -1048,8 +1048,8 @@
    "narrow": {
     "clientW": 390,
     "scrollW": 390,
-    "startTop": 762,
-    "startH": 44,
+    "startTop": 759,
+    "startH": 72,
     "route": "six-pet",
     "coach": {
      "open": true,
@@ -1058,22 +1058,22 @@
       "height": 844
      },
      "card": {
-      "top": 750,
-      "bottom": 830,
-      "left": 10,
-      "right": 380
+      "top": 0,
+      "bottom": 844,
+      "left": 0,
+      "right": 390
      },
      "form": {
-      "top": 769,
-      "bottom": 819,
+      "top": 173,
+      "bottom": 217,
       "left": 23,
-      "right": 367
+      "right": 297
      },
      "input": {
-      "top": 775,
-      "bottom": 819,
+      "top": 173,
+      "bottom": 217,
       "left": 23,
-      "right": 288
+      "right": 220
      },
      "reply": null,
      "replyHidden": true,
@@ -1089,7 +1089,7 @@
   },
   {
    "at": "mobile-play",
-   "clicks": 49,
+   "clicks": 46,
    "lastTurn": 44,
    "stalled": 0,
    "viewDrops": 0,

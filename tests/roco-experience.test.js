@@ -283,9 +283,24 @@ test('页面局末复盘接的是「整局事件 + 最后一个可行动的局�
   assert.match(args, /lastLiveView:\s*state\.lastLiveView/, `复盘要用最后一个可行动的局面，当前：${args.slice(0, 200)}`);
   assert.doesNotMatch(args, /events:\s*state\.events\b/, '用这一次推进的事件做整局复盘会安静地少讲一大截');
   // 累计必须发生在换掉 `state.view` 之前，否则快照永远慢一拍（legal 已经空了）。
-  const apply = page.match(/function applyResult\(data\)\s*\{([\s\S]{0,1500}?)\n\}/);
-  assert.ok(apply, '页面里应当有 applyResult');
-  const body = apply[1];
+  //
+  // 2026-09-23（接手轮）：这里原来写的是 `[\s\S]{0,1500}?)\n\}` —— 一个**长度上限**。
+  // `applyResult` 后来加了「掉心提示」那一块，函数体涨到 1900+ 字符，正则再也匹配不上，
+  // 于是这条守卫变成 `actual: null` 的假红/（更坏的情况）换个写法就悄悄不检查了。
+  // 现在按**花括号配对**取函数体：函数长长短短都不会失效，判据本身一条没放松。
+  const fnBody = (src, header) => {
+    const start = src.indexOf(header);
+    if (start < 0) return null;
+    let i = src.indexOf('{', start), depth = 0;
+    for (let j = i; j < src.length; j++) {
+      if (src[j] === '{') depth++;
+      else if (src[j] === '}') { depth--; if (depth === 0) return src.slice(i + 1, j); }
+    }
+    return null;
+  };
+  const applySrc = fnBody(page, 'function applyResult(data)');
+  assert.ok(applySrc !== null, '页面里应当有 applyResult');
+  const body = applySrc;
   const at = (needle) => body.indexOf(needle);
   assert.ok(at('state.matchEvents') >= 0, 'applyResult 要累计整局事件');
   assert.ok(at('state.lastLiveView') >= 0, 'applyResult 要在换 view 之前留一份「还能行动的局面」');
@@ -294,10 +309,10 @@ test('页面局末复盘接的是「整局事件 + 最后一个可行动的局�
   assert.ok(at('state.matchEvents') < at('state.view = data.view'),
     '顺序反了：先换 view 再累计，会漏掉最后一次推进的事件');
   // 开局要把两份快照清干净，否则上一局的局面会被带进新的一局。
-  const start = page.match(/async function startBattle\(\)\s*\{([\s\S]{0,2000}?)\n\}/);
-  assert.ok(start, '页面里应当有 startBattle');
-  assert.match(start[1], /state\.matchEvents = \[\]/, '开新局要清空整局事件');
-  assert.match(start[1], /state\.lastLiveView = null/, '开新局要清掉上一局的快照');
+  const startSrc = fnBody(page, 'async function startBattle()');
+  assert.ok(startSrc !== null, '页面里应当有 startBattle');
+  assert.match(startSrc, /state\.matchEvents = \[\]/, '开新局要清空整局事件');
+  assert.match(startSrc, /state\.lastLiveView = null/, '开新局要清掉上一局的快照');
 });
 
 // ── 形象体系（P1-1）：自制 emoji 与配色必须同一个键集 ──────────────────────
@@ -334,4 +349,42 @@ test('12 个系别的 emoji 与配色逐键对齐，且不引用任何外链素�
   assert.ok(!/https?:\/\/[^"' ]+\.(png|jpe?g|webp|svg)/i.test(page),
     '形象一律自制（emoji / 色块），不引用任何外链图片素材');
   assert.ok(!/<img\b/i.test(page), '页面里不该有 <img>：官方立绘的许可不明，不抓');
+});
+
+// 2026-09-25（人类：「复盘有点太简单了」）：加厚层必须落在**玩家不点开也看得见**的地方。
+// 这条是**结构性**的（对抗性复核指出：加厚的事实全塞进 `#lesson-note`，而它在 `roco.html` 的
+// `<details class="lesson-full">` 里、默认收起；此前没有任何判据盯这件事 —— 判据只到
+// `review.evidence` 那一层，读 `textContent` 读得到、画不画得出来没人管）。
+// 钉法：正文那一行与「下一局练一件事」必须真的拿到加厚内容；深细节留在折叠区（刻意），
+// 但折叠块的标题必须写明它是收起的。哪天有人把加厚内容只往折叠区塞，这条会红。
+test('复盘加厚层落在「不点开也看得见」的两个节点上（不是只塞进默认收起的折叠区）', () => {
+  const page = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
+  const html = readFileSync(new URL('../src/client/roco.html', import.meta.url), 'utf8');
+  const exp = readFileSync(new URL('../src/coach/roco-experience.js', import.meta.url), 'utf8');
+  // ① 装配层：summary 进正文，next_step 随 depth 挂出去
+  assert.match(exp, /if \(depth\.summary\) review\.text = /, '加厚的 summary 必须接进正文（否则不点开看不到）');
+  assert.match(exp, /review\.depth = depth/, '装配层要把整个 depth 带出去');
+  // ② 页面可见节点：正文那一行 + 「下一局练一件事」
+  assert.match(page, /\$\('lesson-question'\)\.textContent = review\.text/,
+    '正文那一行必须写 review.text（含加厚 summary）');
+  assert.match(page, /const nextStep = review\.depth\?\.next_step\?\.text/, '页面要取加厚层的 next_step');
+  const learning = page.match(/\$\('lesson-learning'\)\.textContent = \[([\s\S]{0,300}?)\]\.filter\(Boolean\)/);
+  assert.ok(learning, '找不到「下一局练一件事」那一栏的写入点（口径变了就重新钉，别删这条）');
+  assert.match(learning[1], /nextStep/, '「下一局练一件事」那一栏必须把 next_step 拼进去（可见的那一处）');
+  // ③ 深细节仍在折叠区（刻意），但必须写明「默认收起」，不许悄悄藏
+  const details = html.match(/<details class="lesson-full">[\s\S]{0,200}?<\/summary>/);
+  assert.ok(details, '找不到完整复盘的折叠块（`<details class="lesson-full">`）');
+  assert.match(details[0], /默认收起/, '折叠块必须在标题里写明它是收起的');
+});
+
+// 同一条线的第二半（2026-09-25 复核发现）：`review === null` 的**兜底分支**原来把
+// 「下一局练一件事」无条件清成空，而加厚层的 `next_step` 这时候可能**有内容**
+// （例：只有对面补位、没有减员 ⇒ 老师沉默，但 `enemy-replacement-first` 成立）——
+// 等于把已经算好的一条如实结论白丢。这一条钉住「有就写出来、没有才留空」。
+test('老师沉默的兜底分支也要写出加厚层的「下一件事」（不再无条件清空）', () => {
+  const page = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(page, /\$\('lesson-learning'\)\.textContent = '';/,
+    '兜底分支不许再无条件清空「下一局练一件事」（口径变了就重新钉，别删这条）');
+  assert.match(page, /\$\('lesson-learning'\)\.textContent = depth\?\.next_step\?\.text \?\? ''/,
+    '兜底分支要把加厚层的 next_step 写出来（没有就留空）');
 });

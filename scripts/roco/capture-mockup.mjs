@@ -64,4 +64,4 @@ await shot('battle-v3-items-1440x900.png', {w: 1440, h: 900, frame: 'items'});
 await shot('battle-v3-default-390x844.png', {w: 390, h: 844, frame: 'default'});
 
 ws.close(); chrome.kill('SIGKILL');
-try { rmSync(profile, {recursive: true, force: true}); } catch {}
+try { rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120}); } catch {}

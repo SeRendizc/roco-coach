@@ -1,0 +1,32 @@
+
+问：喵喵学得到哪些技能？
+  agentStop=complete | 工具=[query_rules] | 2030ms
+  答：喵喵能学抓挠、休息回复、棘突、扫尾、藤绞、防御、徒长、叶绿光束、酶浓度调整、筛管奔流、盛开、孢子、仙人掌刺击、丰饶、光合作用、光能聚集，共16个。
+  依据：依据：查了图鉴 · 你选的六只 · 你的名单
+
+问：我这六只谁速度最快？
+  agentStop=policy-route-without-tools | 工具=[] | 650ms
+  答：这轮没法替你比速度——证据里只有名字，没有速度数值。
+  依据：依据：你选的六只 · 你的名单
+
+问：「应对」这条术语是怎么定义的？
+  agentStop=complete | 工具=[query_rules] | 1201ms
+  答：册子里没有正好叫“应对”的独立术语，只有「应对状态」「应对攻击」「应对防御」三个：都是在对方用对应类型技能时应对成功，本次行动必定先手，并触发应对效果。你要问的是哪条？
+  依据：依据：查了术语表 · 你选的六只 · 你的名单
+
+问：第三只换成圆号鱼好不好？
+  agentStop=complete | 工具=[compare_team_change(缺参)] | 1262ms
+  答：圆号鱼，换第三只——六只阵容的换人对比我这边暂时算不了，不多嘴。
+  依据：依据：你选的六只 · 你的名单
+
+问：能量上限是几个豆？
+  agentStop=policy-route-without-tools | 工具=[] | 490ms
+  答：能量上限是6个豆。
+  依据：依据：你选的六只 · 你的名单
+
+问：这个阵容打 PVP 有什么短板？
+  agentStop=policy-route-without-tools | 工具=[] | 585ms
+  答：这会就别聊阵容了，我在。
+  依据：依据：你选的六只 · 你的名单
+
+JSON [{"message":"喵喵学得到哪些技能？","status":200,"ms":2030,"agentStop":"complete","text":"喵喵能学抓挠、休息回复、棘突、扫尾、藤绞、防御、徒长、叶绿光束、酶浓度调整、筛管奔流、盛开、孢子、仙人掌刺击、丰饶、光合作用、光能聚集，共16个。","activityLine":"依据：查了图鉴 · 你选的六只 · 你的名单","tools":["query_rules"],"args":[{"kind":"learnset","name":"喵喵","state_version":0}]},{"message":"我这六只谁速度最快？","status":200,"ms":650,"agentStop":"policy-route-without-tools","text":"这轮没法替你比速度——证据里只有名字，没有速度数值。","activityLine":"依据：你选的六只 · 你的名单","tools":[],"args":[]},{"message":"「应对」这条术语是怎么定义的？","status":200,"ms":1201,"agentStop":"complete","text":"册子里没有正好叫“应对”的独立术语，只有「应对状态」「应对攻击」「应对防御」三个：都是在对方用对应类型技能时应对成功，本次行动必定先手，并触发应对效果。你要问的是哪条？","activityLine":"依据：查了术语表 · 你选的六只 · 你的名单","tools":["query_rules"],"args":[{"kind":"term","name":"应对","state_version":0}]},{"message":"第三只换成圆号鱼好不好？","status":200,"ms":1262,"agentStop":"complete","text":"圆号鱼，换第三只——六只阵容的换人对比我这边暂时算不了，不多嘴。","activityLine":"依据：你选的六只 · 你的名单","tools":["compare_team_change(缺参)"],"args":[{}]},{"message":"能量上限是几个豆？","status":200,"ms":490,"agentStop":"policy-route-without-tools","text":"能量上限是6个豆。","activityLine":"依据：你选的六只 · 你的名单","tools":[],"args":[]},{"message":"这个阵容打 PVP 有什么短板？","status":200,"ms":585,"agentStop":"policy-route-without-tools","text":"这会就别聊阵容了，我在。","activityLine":"依据：你选的六只 · 你的名单","tools":[],"args":[]}]

@@ -27,12 +27,21 @@ export function strategist(context){
  // 短句只给结论与备选。那句「这是结合双方合法行动的一回合风险比较，不能保证后续最优或获胜」
  // 曾经挂在每一条建议后面，使用者反馈是废话——它每次都一样，却不提供任何新信息。
  // 边界说明保留在 evidence 与「查看原因」里，那里才是想深究的人会看的地方。
- const text=`这一回合优先考虑「${actionName(g,'player',best)}」。${ranked[1]?'可比较的备选是「'+actionName(g,'player',ranked[1].action)+'」。':''}`;
+ // 2026-09-26（目标 ②「给建议时同时给出引擎模拟出的两种走法各自的结果」）：
+ // 两种走法的结果以前**只在证据里**（模型看得到、玩家看不到）。模型答得好的时候它会照抄进正文，
+ // 但模型被守卫打回时，玩家拿到的是这一句兜底 —— 那就只剩两个名字、看不到引擎算出来的差别。
+ // 现在兜底自己就把「多数情况 / 最糟」两个数摆出来（逐字来自同一个 `ranked`，与证据同一份），
+ // 并照旧写明**分数只用来排序、不是胜率**。数字全在 evidence 里，守卫那一条不变。
+ const scoreText=(row)=>row?`多数情况 ${row.expected.toFixed(1)} 分、最糟 ${row.worst.toFixed(1)} 分`:'';
+ const text=`这一回合优先考虑「${actionName(g,'player',best)}」`
+  +`（把对手各种应对算一遍：${scoreText(ranked[0])}）。`
+  +`${ranked[1]?`可比较的备选是「${actionName(g,'player',ranked[1].action)}」（${scoreText(ranked[1])}）。`:''}`
+  +'这两个数只用来排序，**不是胜率**。';
  const knowledge=searchKnowledge(context.query||'换宠 预判 能量 '+(q.status?'灼烧 追猎':'先手'),{limit:3,game:g,rulesVersion:g.version});
  // 卡片 ID 与英文状态是内部标识，不该出现在玩家的「计算依据」里。
  // 用卡片标题代替 ID；条件只在**不满足**时才说，且说人话——正常适用时不必告诉玩家「条件：candidate」。
  const COND={candidate:null,'conditions-not-met':'这张卡的前提在当前局面不成立',absent:'这张卡的前提在当前局面不成立',
-  'reference-only':'这张卡只作背景参考，不是当前局面的判据','version-mismatch':'这张卡对应的是旧规则版本，仅供参考'};
+  'reference-only':'这张卡只作背景参考，不适用于当前局面','version-mismatch':'这张卡对应的是旧规则版本，仅供参考'};
  evidence.push(...knowledge.cards.map(c=>{const w=COND[c.applicability?.status];
   return `${c.title||'规则'}：${c.principle} 注意：${c.counterexample}${w?'（'+w+'）':''}`;}));
  evidence.push('这里是按双方下一步各自可能的选择算过一遍，用来看哪个更划算；不是胜率，也管不了更后面的回合。');
@@ -63,8 +72,17 @@ const concepts=[
  ['看不懂 随机 种子 复现','随机 种子 同速'],
 ];
 function expandQuery(query){let out=String(query);for(const [terms,expansion] of concepts)if(terms.split(' ').some(t=>out.includes(t)))out+=' '+expansion;return out;}
+/**
+ * 已知的检索策略。'lexical' 是默认那一档；'semantic' / 'fusion' 由 semantic-server 传进来
+ * （两者都走下面的 IDF 那一档：融合排序在语义层里做，词法层只需要 IDF）。
+ * 这个白名单是 RC-205 补的：原来只判 `strategy==='lexical'`，**其它任何字符串都静默走 IDF**，
+ * 于是 `strategy:'rag'` 不报错、悄悄回一份 IDF 结果，调用方会以为走的是 RAG。
+ */
+export const RETRIEVAL_STRATEGIES=Object.freeze(['lexical','semantic','fusion']);
 export function searchKnowledge(query, {rulesVersion=RULES_VERSION, limit=3, budget=2400,strategy='lexical',game=null}={}) {
  if (!Number.isInteger(limit)||limit<1||limit>10||!Number.isFinite(budget)||budget<0)throw Error('Invalid retrieval budget');
+ // 未知策略**显式抛**，不静默降级（RAG 不是一个词法策略，它有独立入口：ROCO_RAG_MODE + toolbox）。
+ if(!RETRIEVAL_STRATEGIES.includes(strategy))throw Error(`未知检索策略 ${strategy}：searchKnowledge 只实现 ${RETRIEVAL_STRATEGIES.join(' / ')}；rag 走 toolbox 的 RAG 入口（ROCO_RAG_MODE），不许静默降级成 IDF`);
  const eligible=cards.filter(c=>c.game==='pet-coach'&&c.rulesVersion===rulesVersion&&c.status==='active');
  const q=tokens(strategy==='lexical'?query:expandQuery(query));
  const docs=eligible.map(c=>[tokens(c.title+' '+c.keywords),tokens(c.principle+' '+c.counterexample)]);

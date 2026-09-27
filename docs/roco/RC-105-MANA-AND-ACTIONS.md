@@ -36,6 +36,17 @@
 台账条目一个字都没改，等级也没有升降（`data/roco/evidence/rule-evidence-ledger.json` 的 sha256
 仍是 `aefd634a8bafec79…`，这就是配置里 `derived_from_ledger_sha256` 的值）。
 
+> **⚠️ 2026-09-25 就地更正（本节原文一字未删，见下表）**：人类实机口径「**就是4点，哎反正就是生命数，就是4颗心**」
+> 把 `mana.pool` 的依据从"社区交叉"升级为**人类实机口径** —— `EV-PVP-STANDARD-MANA` 已升 `RECORDED_IN_GAME`，
+> 配置里的 `mana.pool.confidence` 同步升到 `RECORDED_IN_GAME`（`derived_from_ledger_sha256` 随之变化）。
+> **同轮全量核对结论**：百科「闪耀大赛」1,830 字与官方《洛个明白》全文里「魔力」**0 次**；官方万字公告 12 次全是别的语义
+> （魔力果/魔力瓶/魔力猫…）⇒ **依据是人类实机口径，不是官方文案**，依然**禁止**写成"官方已确认"。
+> 另：`battle_mode.team_size` 的 `fill_required` 由 `null + UNVERIFIED` 改为 **`true` + `RECORDED_IN_GAME`**
+> （同一轮人类口径「闪耀大赛就是6v6…自己配队」），并登记了与官方"最多 6 只"措辞的张力。
+> ⇒ **下表是 2026-09-25 之前的状态，作为留痕保留**；要看当前值请读 `data/roco/battle-modes.json` 与
+> `data/roco/rulesets/mobile-s4-candidate-v3.json`（或跑 `node scripts/roco/build-rule-configs.mjs --check`）。
+> `mana.faint_cost` / `mana.loss_when_zero` / `actions.kinds.charge` **没有**升级，仍按下表。
+
 | 配置字段 | 值 | confidence | evidence_id | microcase | 台账说了什么 |
 | --- | --- | --- | --- | --- | --- |
 | `battle_mode.team_size` | 6 | `CROSS_SOURCE_SUPPORTED` | `EV-PVP-STANDARD-TEAM-SIZE` | `MC-E07` 未录制 | 标准 PVP 六宠：交叉支持，**不是**官方原文 |
@@ -86,7 +97,7 @@
 2. **魔力是小整数池，且「4」在游戏文本里逐字出现过** —— 御驾亲征「力竭时扣除4魔力」（一次扣掉相当于
    整个候选池子的量）、图书守卫者/构装契约者以「魔力值为 1」为条件（说明魔力会走到 1）⇒ 支持
    `mana.pool = 4` 的候选口径。
-3. **局限（必须一起读）**：这 6 条全部来自**社区 wiki 快照**，等级仍是 `CROSS_SOURCE_SUPPORTED`；
+3. **局限（必须一起读）**：这 6 条全部来自**社区 wiki 快照**，等级仍是 `CROSS_SOURCE_SUPPORTED`；（**2026-09-25 更正**：`mana.pool` 与 `battle_mode.team_size` 两条**已不再**属于这一档 —— 前者依据人类实机口径升 `RECORDED_IN_GAME`，后者的 `fill_required` 由人类口径定 `true`；**其余四条仍是本档**。上面那句"没有升级任何等级"是**当时的**事实，保留不删。）
    它们**只有一份来源**，不满足台账「两条不同 URL 来源」的入库门槛，所以本活
    **没有新增台账条目、也没有升级任何等级**，只把它们登记成配置里的 `repo_internal_evidence`
    （并有一条测试逐字核对引文真的在冻结快照里）。
@@ -97,7 +108,7 @@
 
 ## 5. MC-E07 / E08 / E09 未录制意味着什么
 
-* 台账里那三条的等级是 `CROSS_SOURCE_SUPPORTED`（交叉支持），**不是**官方原文；8 号 microcase
+* 台账里那三条的等级~~是 `CROSS_SOURCE_SUPPORTED`~~（**2026-09-25 更正**：`EV-PVP-STANDARD-MANA` 已升 `RECORDED_IN_GAME`，依据是人类实机口径；`EV-PVP-STANDARD-TEAM-SIZE` 与 `EV-PVP-FAINT-MANA-LOSS` 仍是 `CROSS_SOURCE_SUPPORTED`），**都不是**官方原文；8 号 microcase
   一条都没录，所以 v3 的 `promotion_policy` 是 `BLOCKED_UNTIL_MICROCASE`、`is_default: false`、
   `requires_microcase_before_default: true`。
 * **任何对外文案都不许把它写成「官方已确认」**：4 点魔力、力竭 -1、六宠都仍是候选口径。
@@ -158,12 +169,11 @@
    字面量）的**显式夹具**把对局开起来，并在测试 docstring 里写明这一点。要让候选真能开局，需要先录 MC-E04，或由产品显式给一个占位入场能量。
 3. **Node 桥 / 客户端契约没有为 mana 增加显式字段**：`service.py` 的 `_sim_envelope` 直接转发
    `serialize(state)`、`public_planner_state`、`ui_public_view`，所以本地对局域的回执里**已经**有
-   `state.*.mana` 与 `public.mana`（Python 侧三处都带上了）；但**没有任何 JS 代码读它**，
-   页面也不会显示「还剩几点魔力」。最小改动建议（留给客户端同事）：
-   ① `src/client/roco.js` 渲染 `ui.mana`（缺键时整个元素不渲染，**不要**显示 0）；
-   ② `src/coach/team-gaps.js` 的 `cost.mana_rule` 里写死的 `mana_per_side: 4` 改成读
+   `state.*.mana` 与 `public.mana`（Python 侧三处都带上了）。**2026-09-25 起页面这一侧已经接上**
+   （见 §10：顶栏生命心常显 + 三处判据）；仍然没做的是：
+   ① `src/coach/team-gaps.js` 的 `cost.mana_rule` 里写死的 `mana_per_side: 4` 改成读
    `data/roco/rulesets/mobile-s4-candidate-v3.json` 的 `mana.pool.value`；
-   ③ 要让 PVP 模式真正走 v3 口径，需要 `battle-modes.json` 的 `ruleset_binding` 决策（主线程的事）。
+   ② 要让 PVP 模式真正走 v3 口径，需要 `battle-modes.json` 的 `ruleset_binding` 决策（主线程的事）。
 4. **`events_text.py` 没有新事件的中文模板**：`charge` / `mana_loss` / `surrender` 会落到诚实兜底句。
    legacy 对局产不出这些 kind，所以既有事件覆盖面测试仍然全绿；最小改动建议是加三个模板 +
    把 `KNOWN_EVENT_KINDS` / `SAMPLE_EVENTS` 一起补上，并让取样对局覆盖一份声明 mana 的配置
@@ -199,3 +209,27 @@ python3 scripts/roco/report-rc105-mana-actions.py    # 重新生成机器可读�
 cd roco && PYTHONPATH=src python3 -m unittest tests.test_mana_actions -v
 node --test tests/roco-mana-actions.test.js
 ```
+
+## 10. 页面侧落地（2026-09-25）：顶栏生命心 ♥ **常显**
+
+> 人类原话：「战斗页顶部的**生命心 ♥ 要一直看得见**」。**心 = 魔力**，是同一个量的两种叫法。
+
+字段只有一个来源：引擎公开视图里的 **`view.mana.{self, opponent, pool}`**
+（当前心数 / 对手当前心数 / 本局每人几颗；`pool` 是规则常量，页面从**回执**读，不写字面量 4）。
+声明了 `mana` 的配置（`data/roco/rulesets/mobile-s4-candidate-v3.json`：`pool:4 / faint_cost:1 / loss_when_zero`）
+才带这个键；legacy / v2 不带 ⇒ 页面**保持 hidden**（fail closed，**绝不硬写 4 颗**）。
+
+| 改了什么 | 文件 | 说明 |
+| --- | --- | --- |
+| 抽出**唯一**一份心的画法 `drawHeartCounters({self, opponent, pool})` | `src/client/roco.js` | 顶栏常显与掉心动效**共用**；`heartsFromMana(mana)` 是唯一的取数口径 |
+| 顶栏渲染路径每次都画（常显） | `src/client/roco.js`（`renderB3Topbar`） | 每次 `render()` 都按 `view.mana` 画一次；拿不到 ⇒ hidden |
+| 掉心动效只收回**动效** | `src/client/roco.js`（`flashHearts`） | 3.2s 后**按当时那份 `view.mana` 重画常显那一份**，不再 `hidden = true`（不会把常显一起收掉） |
+| 三处过时注释改成新口径 | `src/client/roco.js` | 「心 = 魔力，字段是 `view.mana.{self,opponent,pool}`；拿不到就 hidden」 |
+| **J10**（新判据 + 2 条必红反证 R14） | `scripts/roco/browser-battle-feedback-acceptance.mjs` | 真无头 Chrome 进标准 PVP 六宠：① 开局后实心数 == `view.mana.{self,opponent}`、总数 == `view.mana.pool`（从回执读）② 真鼠标推到**引擎自己报出的力竭**（`events[].kind==='mana_loss'`）⇒ 掉心那一侧实心 **-1** 且与引擎**逐位一致** ③ 抽掉 `state.view.mana` 再 `render()` ⇒ 两侧**必须 hidden**（合成「引擎没给」的输入） |
+| **D5-no-fake-hearts** 换读取点 | `scripts/roco/browser-roco-ux-acceptance.mjs` | 旧：「引擎没给 `hearts` 字段 ⇒ 不许显示」；新：「**必须等于 `view.mana` 的当前值**、总数等于 `view.mana.pool`；拿不到必须 hidden」+ 2 条反证（硬写 4 颗 / 与引擎错开 1）。**是换读取点，不是放松判据** |
+| Node 侧回归（同口径，跑得快） | `tests/roco-page-ux.test.js` | ① 画法只有一份（源码里实心那段只许出现一次）② 拿不到 mana 的七种形态都 hidden、一个心形都不画 ③ 给了就画对 + 2 条必红反证 |
+
+反证（都跑**同一条纯函数**，命中原文见报告）：
+`node scripts/roco/browser-battle-feedback-acceptance.mjs --selftest-only` 里
+R14「无 mana 却硬写 4 颗 ⇒ 报『绝不硬写 4 颗』」「与引擎错开 1 ⇒ 报『实心数 ≠ view.mana.opponent』」。
+

@@ -23,6 +23,8 @@ import {CONFIDENCE_ORDER} from '../scripts/roco/evidence-ledger-lib.mjs';
 import {EVIDENCE_LEVELS, createRagIndex, loadCorpus} from '../src/coach/rag-index.js';
 import {
   CATEGORY_MIN,
+  CONFLICT_ABSTENTION_EXCEPTIONS,
+  UNKNOWN_MARKER_RE,
   GATE_DEFINITIONS,
   HELDOUT_PATH,
   LEAK_SPAN_LIMIT,
@@ -31,8 +33,12 @@ import {
   canonical,
   checkFixtureIntersection,
   checkLeakage,
+  COVERAGE_SAMPLE_SIZE,
+  checkCoverage,
   computeReport,
   evaluateRetrieval,
+  loadCatalogPets,
+  sampleCatalogPets,
   idMatches,
   indexTexts,
   loadFixtures,
@@ -153,7 +159,24 @@ test('指标：三套检索器（含现有 searchKnowledge 原样）都有完整
   assert.equal(report.metrics.baseline_searchKnowledge.id_space, 'tactic_card');
   assert.match(report.metrics.baseline_searchKnowledge.note, /不是同一套 id 空间|id 空间/);
   assert.ok(report.metrics.baseline_lexical_pack.recall_at_1 > 0, '同语料基线的实体类指标必须非零，否则对照没有意义');
-  assert.equal(report.metrics.rag_index.conflict_abstention_rate, 1);
+  // 2026-09-23：④ 类的口径从「弃答率 = 1.0」改成「弃答，或命中一条**正文写着未核验**的台账条目」
+  // （例外逐条登记，最多 1 条，见 eval-rag-retrieval.mjs 的 CONFLICT_ABSTENTION_EXCEPTIONS）。
+  // 这里断言三件事：① 原始弃答率 = (分母 − 登记例外)/分母；② 判据本身是过的；
+  // ③ 每条例外都真的命中登记的那个文档，而且那个文档正文里确实有未核验标记。
+  const abstainExpected = report.queries.filter((entry) => entry.expected === 'ABSTAIN');
+  const exceptionCount = Object.keys(CONFLICT_ABSTENTION_EXCEPTIONS).length;
+  assert.equal(report.metrics.rag_index.conflict_abstention_rate,
+    (abstainExpected.length - exceptionCount) / abstainExpected.length,
+    '④ 类原始弃答率必须等于「分母 − 登记例外」');
+  const abstainGate = runGates(report).checks.find((check) => check.check === 'conflict_abstention');
+  assert.equal(abstainGate.ok, true, `④ 类判据必须过：${abstainGate.problems.join(' | ')}`);
+  for (const [id, spec] of Object.entries(CONFLICT_ABSTENTION_EXCEPTIONS)) {
+    const row = report.queries.find((entry) => entry.id === id);
+    assert.ok(row, `登记表里的 ${id} 不在查询集里`);
+    assert.equal(row.rag_index.top_doc, spec.top_doc, `${id} 的 top-1 必须是登记的那个文档`);
+    assert.equal(row.rag_index.top_doc_unknown_marker, true, `${id} 的 top-1 正文必须逐字写着「未核验」`);
+  }
+  assert.ok(abstainExpected.length - exceptionCount >= 10, '弃答的那部分不许被例外吃掉');
   assert.equal(report.metrics.rag_index.version_hit_rate, 1);
   assert.ok(report.metrics.rag_index.recall_at_1 >= report.metrics.baseline_lexical_pack.recall_at_1,
     '新索引在 Recall@1 上不应当弱于同语料基线');
@@ -206,7 +229,9 @@ test('探针集：另外写、只跑一次、失败也登记（不许只报主�
 // 3. 十三组判据的必红方向
 // ─────────────────────────────────────────────────────────────────────────
 
-test('判据集合：十三组全部通过，且每组都写了「什么输入必须让它红」', () => {
+// 2026-09-25 改钉（名字换了、断言没动）：判据从 13 组增到 14 组 —— 新增 `catalog_coverage`
+// （P0-b：图鉴全量抽样覆盖）。名字里的数字不再写死，组数由 `gates.checks` 与闸门定义对齐着钉。
+test('判据集合：全部通过，且每组都写了「什么输入必须让它红」', () => {
   log('[实际] 判据 =', gates.checks.map((check) => `${check.check}:${check.ok ? 'ok' : 'FAIL'}`).join(' '));
   for (const check of gates.checks) {
     assert.ok(GATE_DEFINITIONS[check.check], `${check.check} 没写必红方向`);
@@ -291,7 +316,11 @@ test('反证④ 让 runner 把 ABSTAIN 算成命中 ⇒ 口径判据红', () => 
     .checks.find((check) => check.check === 'abstain_consistency');
   log('[实际] rc =', gate.ok ? 0 : 1, `；问题条数 = ${gate.problems.length}；原文 = ${gate.problems.slice(0, 2).join(' | ')}`);
   assert.equal(gate.ok, false);
-  assert.ok(gate.problems.length >= report.metrics.rag_index.abstain_expected_queries);
+  // 分母是「真的弃答了的那部分」：登记例外（C02）本来就没有弃答，不该算进这条反证的命中数。
+  const expectedCaught = report.metrics.rag_index.abstain_expected_queries
+    - Object.keys(CONFLICT_ABSTENTION_EXCEPTIONS).length;
+  assert.ok(gate.problems.length >= expectedCaught,
+    `把弃答算成命中，至少该抓出 ${expectedCaught} 条，实际 ${gate.problems.length}`);
 });
 
 test('反证⑤ 把一条 query 原文塞进语料 ⇒ 泄漏判据红', () => {
@@ -311,11 +340,55 @@ test('反证⑥ held-out 与既有 fixture 交集非空 ⇒ 红', () => {
   assert.ok(injected.problems.length > 0);
 });
 
+// ─────────────────────────────────────────────────────────────────────────
+// 4.5 判据⑤：图鉴全量覆盖（P0-b「600 只规模」）
+// ─────────────────────────────────────────────────────────────────────────
+
+test('判据⑤：图鉴抽样覆盖 = 1（每只的图鉴卡与特性技能都能被检索到）', () => {
+  const report = computeReport();
+  const coverage = report.coverage;
+  assert.equal(coverage.catalog_size, 622, '抽样池必须是**冻结图鉴全量**（622），不是语料本身');
+  assert.equal(coverage.sample_size, COVERAGE_SAMPLE_SIZE);
+  log(`[实际] 抽样 ${coverage.sample_size}/${coverage.catalog_size}：精灵卡 ${coverage.pet_covered}/${coverage.sample_size}，`
+    + `特性技能 ${coverage.feature_covered}/${coverage.feature_sample}`);
+  assert.equal(coverage.pet_coverage, 1, `未命中的精灵：${JSON.stringify(coverage.misses)}`);
+  assert.equal(coverage.feature_coverage, 1,
+    `未命中的特性：${JSON.stringify(coverage.rows.filter((row) => row.feature_hit === false).slice(0, 5))}`);
+  // 判据必须过闸门（不是"报告里有个数、闸门不看"）：`GATE_DEFINITIONS` 是 id → 必红方向的映射。
+  assert.ok(Object.hasOwn(GATE_DEFINITIONS, 'catalog_coverage'), '覆盖必须是闸门里的一条');
+  assert.match(GATE_DEFINITIONS.catalog_coverage, /删掉某一只的图鉴文档/, '闸门文案要写清必红方向');
+});
+
+test('判据⑤ 的形状：抽样是**确定性**的（同一输入两次逐条相同、顺序稳定）', () => {
+  const {pets} = loadCatalogPets();
+  const a = sampleCatalogPets(pets).map((pet) => pet.pet_id);
+  const b = sampleCatalogPets(pets).map((pet) => pet.pet_id);
+  assert.deepEqual(a, b, '两次抽样必须逐条相同（报告才可能逐字节复算）');
+  assert.equal(new Set(a).size, a.length, '抽样不许重复');
+  assert.deepEqual(a, [...a].sort(), '按 pet_id 升序（等距抽样的定义）');
+});
+
+test('反证⑦ 删掉某只抽样精灵的图鉴文档 ⇒ 那一只必须变成未覆盖', () => {
+  const {pets, skills} = loadCatalogPets();
+  const liveIndex = createRagIndex(loadCorpus());
+  const before = checkCoverage({index: liveIndex, pets, skills});
+  const victim = before.rows.find((row) => row.pet_hit);
+  const doc = liveIndex.documents.find((item) => idMatches(item.id, `pet::${victim.pet_id}`));
+  assert.ok(doc, `前提：${victim.pet_id} 的图鉴文档本来在语料里`);
+  const trimmed = {...liveIndex, documents: liveIndex.documents.filter((item) => item !== doc)};
+  const after = checkCoverage({index: trimmed, pets, skills});
+  const stillCovered = after.rows.find((row) => row.pet_id === victim.pet_id)?.pet_hit;
+  log(`[实际] 删掉 ${victim.pet_id}（${victim.name}）后：该只 hit=${stillCovered}，总体 ${before.pet_coverage} → ${after.pet_coverage}`);
+  assert.equal(stillCovered, false, '删掉文档之后那一只不许仍然算命中（否则判据是空的）');
+  assert.ok(after.pet_coverage < 1, '总体覆盖必须下降');
+});
+
 test('反证自检：--selftest 的六条注入反证全部按预期翻红', () => {
   const result = selftest();
   for (const item of result.cases) log(`[实际] ${item.id} ${item.name} → ${item.ok ? '按预期翻红' : '没有转红'}；${item.detail}`);
   assert.equal(result.base_ok, true, '真产物本身应当过闸门');
-  assert.equal(result.cases.length, 6);
+  // 2026-09-25：注入反证从 6 条增到 7 条（新增 R7：删掉某只抽样精灵的图鉴文档 ⇒ 覆盖判据红）。
+  assert.equal(result.cases.length, 7);
   for (const item of result.cases) assert.equal(item.ok, true, `${item.id} 没有按预期翻红`);
 });
 

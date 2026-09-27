@@ -59,7 +59,15 @@ test('agent planner can adapt to tool receipts and invalid tools never execute',
   return {tool:'read_state',args:{}};
  }});
  assert.deepEqual(result.trace.map(x=>x.tool),['search_rules','compare_actions','read_state']);assert.equal(result.stopped,'tool-budget');
- const invalid=await gatherAgentEvidence({message:'x',context,plan:async()=>({tool:'execute_code'})});assert.equal(invalid.stopped,'invalid-tool');assert.equal(invalid.trace.length,0);
+ // 2026-09-25（A4「循环加一次纠错」）：工具名不存在不再**立刻**结束——先发一张纠错券（全局只 1 张），
+ // 把失败写成错误回执塞进 trace 让规划器重决定；规划器第二次仍给同一个坏工具 ⇒ `stopped` 照旧是
+ // `invalid-tool`（取值没变），但 trace 里**必须**留下那一条错误回执（外部可复算「它试过、拿到过错误、又失败了」）。
+ // 判据同批落在 `tests/evals/roco/agent-loop-correction.test.js`（8 条，含两条必红反证与「干净路径逐字节相同」）。
+ const invalid=await gatherAgentEvidence({message:'x',context,plan:async()=>({tool:'execute_code'})});
+ assert.equal(invalid.stopped,'invalid-tool');
+ assert.equal(invalid.trace.length,1,'一次纠错 ⇒ trace 里应有且只有 1 条错误回执');
+ assert.equal(invalid.trace[0].chosenBy,'correction');
+ assert.equal(invalid.trace[0].result?.error,'invalid-tool');
  let count=0;await gatherAgentEvidence({message:'x',context:{...context,mode:'pvp-live'},plan:async()=>{count++;}});assert.equal(count,0);
 });
 

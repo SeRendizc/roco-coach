@@ -1,0 +1,1302 @@
+{
+ "generated_by": "scripts/roco/shadow-replay.mjs",
+ "arm": "deepseek_product",
+ "identity": {
+  "role": "cloud-arm",
+  "adapter": null,
+  "adapter_basename": null,
+  "adapter_sha256": null,
+  "model": "deepseek-flash",
+  "note": "云端臂：**生产 planner 提示**（src/coach/planner-prompt.js，口径 ROCO_PLANNER_RULES=catalog）"
+ },
+ "written_to": "/Users/serendizc/Developer/roco-coach/reports/roco/shadow-replay-slice40-deepseek_product.json",
+ "gateway": "http://127.0.0.1:8766",
+ "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
+ "prompt": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。\n可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、\ncompare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、\nread_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。\n需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。\n**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。\n查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，\n并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。\n参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。",
+ "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
+ "summary": {
+  "tasks": 40,
+  "passed": 0,
+  "pass_rate": 0,
+  "stopped": {
+   "complete": 40
+  },
+  "latency": {
+   "p50_ms": 664,
+   "p95_ms": 1054
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 40,
+    "passed": 0,
+    "pass_rate": 0,
+    "p50_ms": 664,
+    "p95_ms": 1054
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 40,
+     "passed": 0,
+     "pass_rate": 0
+    },
+    "seen": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "by_value": {
+     "全图鉴": {
+      "total": 40,
+      "passed": 0,
+      "held_out": true,
+      "pass_rate": 0
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 40,
+     "passed": 0,
+     "pass_rate": 0
+    },
+    "by_value": {
+     "图鉴字段": {
+      "total": 40,
+      "passed": 0,
+      "held_out": false,
+      "pass_rate": 0
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 40,
+     "passed": 0,
+     "pass_rate": 0
+    },
+    "by_value": {
+     "直问": {
+      "total": 40,
+      "passed": 0,
+      "held_out": false,
+      "pass_rate": 0
+     }
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "case_id": "cat-a-pet_000001",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "喵喵",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000001\"} 的一次调用"
+   ],
+   "wall_ms": 482
+  },
+  {
+   "case_id": "cat-a-pet_000002",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "水蓝蓝",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000002\"} 的一次调用"
+   ],
+   "wall_ms": 423
+  },
+  {
+   "case_id": "cat-a-pet_000003",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "火花",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000003\"} 的一次调用"
+   ],
+   "wall_ms": 694
+  },
+  {
+   "case_id": "cat-a-pet_000004",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "迪莫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000004\"} 的一次调用"
+   ],
+   "wall_ms": 596
+  },
+  {
+   "case_id": "cat-a-pet_000005",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "水灵",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000005\"} 的一次调用"
+   ],
+   "wall_ms": 650
+  },
+  {
+   "case_id": "cat-a-pet_000006",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "火神",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000006\"} 的一次调用"
+   ],
+   "wall_ms": 645
+  },
+  {
+   "case_id": "cat-a-pet_000007",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "魔力猫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000007\"} 的一次调用"
+   ],
+   "wall_ms": 375
+  },
+  {
+   "case_id": "cat-a-pet_000008",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "草头鸭",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000008\"} 的一次调用"
+   ],
+   "wall_ms": 904
+  },
+  {
+   "case_id": "cat-a-pet_000009",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "恶魔叮",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000009\"} 的一次调用"
+   ],
+   "wall_ms": 807
+  },
+  {
+   "case_id": "cat-a-pet_000010",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "恶魔狼",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000010\"} 的一次调用"
+   ],
+   "wall_ms": 625
+  },
+  {
+   "case_id": "cat-a-pet_000012",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "铠甲虫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000012\"} 的一次调用"
+   ],
+   "wall_ms": 721
+  },
+  {
+   "case_id": "cat-a-pet_000013",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "阿米亚特",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000013\"} 的一次调用"
+   ],
+   "wall_ms": 670
+  },
+  {
+   "case_id": "cat-a-pet_000014",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "阿米樱",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000014\"} 的一次调用"
+   ],
+   "wall_ms": 703
+  },
+  {
+   "case_id": "cat-a-pet_000015",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "罗隐",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000015\"} 的一次调用"
+   ],
+   "wall_ms": 707
+  },
+  {
+   "case_id": "cat-a-pet_000022",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "喵呜",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000022\"} 的一次调用"
+   ],
+   "wall_ms": 885
+  },
+  {
+   "case_id": "cat-a-pet_000023",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "绿草精灵",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000023\"} 的一次调用"
+   ],
+   "wall_ms": 673
+  },
+  {
+   "case_id": "cat-a-pet_000024",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "蒲公英娃娃",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000024\"} 的一次调用"
+   ],
+   "wall_ms": 696
+  },
+  {
+   "case_id": "cat-a-pet_000026",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "奇丽草",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000026\"} 的一次调用"
+   ],
+   "wall_ms": 657
+  },
+  {
+   "case_id": "cat-a-pet_000027",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "奇丽叶",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000027\"} 的一次调用"
+   ],
+   "wall_ms": 444
+  },
+  {
+   "case_id": "cat-a-pet_000028",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "奇丽花",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000028\"} 的一次调用"
+   ],
+   "wall_ms": 564
+  },
+  {
+   "case_id": "cat-a-pet_000029",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "焰火",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000029\"} 的一次调用"
+   ],
+   "wall_ms": 527
+  },
+  {
+   "case_id": "cat-a-pet_000030",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "波波拉",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000030\"} 的一次调用"
+   ],
+   "wall_ms": 1054
+  },
+  {
+   "case_id": "cat-a-pet_000031",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "蒲公英",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000031\"} 的一次调用"
+   ],
+   "wall_ms": 666
+  },
+  {
+   "case_id": "cat-a-pet_000032",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "魔草巫灵",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000032\"} 的一次调用"
+   ],
+   "wall_ms": 539
+  },
+  {
+   "case_id": "cat-a-pet_000035",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "小甲虫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000035\"} 的一次调用"
+   ],
+   "wall_ms": 518
+  },
+  {
+   "case_id": "cat-a-pet_000036",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "叮叮恶魔",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000036\"} 的一次调用"
+   ],
+   "wall_ms": 778
+  },
+  {
+   "case_id": "cat-a-pet_000040",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "伊贝儿",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000040\"} 的一次调用"
+   ],
+   "wall_ms": 415
+  },
+  {
+   "case_id": "cat-a-pet_000041",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "伊贝粉粉",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000041\"} 的一次调用"
+   ],
+   "wall_ms": 538
+  },
+  {
+   "case_id": "cat-a-pet_000042",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "锥尾羊",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000042\"} 的一次调用"
+   ],
+   "wall_ms": 740
+  },
+  {
+   "case_id": "cat-a-pet_000043",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "铃兰羊",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000043\"} 的一次调用"
+   ],
+   "wall_ms": 424
+  },
+  {
+   "case_id": "cat-a-pet_000044",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "花影羚羊",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000044\"} 的一次调用"
+   ],
+   "wall_ms": 664
+  },
+  {
+   "case_id": "cat-a-pet_000045",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "白发懒人",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000045\"} 的一次调用"
+   ],
+   "wall_ms": 845
+  },
+  {
+   "case_id": "cat-a-pet_000046",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "记忆石",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000046\"} 的一次调用"
+   ],
+   "wall_ms": 861
+  },
+  {
+   "case_id": "cat-a-pet_000050",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "一窝蜂",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000050\"} 的一次调用"
+   ],
+   "wall_ms": 959
+  },
+  {
+   "case_id": "cat-a-pet_000051",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "黄蜂后",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000051\"} 的一次调用"
+   ],
+   "wall_ms": 1186
+  },
+  {
+   "case_id": "cat-a-pet_000052",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-5",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "小灵面",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000052\"} 的一次调用"
+   ],
+   "wall_ms": 636
+  },
+  {
+   "case_id": "cat-a-pet_000054",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "小独角兽",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000054\"} 的一次调用"
+   ],
+   "wall_ms": 525
+  },
+  {
+   "case_id": "cat-a-pet_000055",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "白金独角兽",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000055\"} 的一次调用"
+   ],
+   "wall_ms": 389
+  },
+  {
+   "case_id": "cat-a-pet_000057",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-5",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "忽幽狸",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000057\"} 的一次调用"
+   ],
+   "wall_ms": 795
+  },
+  {
+   "case_id": "cat-a-pet_000058",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "影狸",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000058\"} 的一次调用"
+   ],
+   "wall_ms": 424
+  }
+ ]
+}

@@ -58,7 +58,7 @@ async function launch() {
   const chrome = spawn(CHROME, ['--headless=new', '--no-sandbox', '--disable-gpu', '--no-first-run',
     '--disable-crash-reporter', '--hide-scrollbars', `--user-data-dir=${profile}`,
     '--remote-debugging-port=0', 'about:blank'], {stdio: ['ignore', 'ignore', 'pipe']});
-  const kill = () => { try { chrome.kill('SIGKILL'); } catch {} try { rmSync(profile, {recursive: true, force: true}); } catch {} };
+  const kill = () => { try { chrome.kill('SIGKILL'); } catch {} try { rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120}); } catch {} };
   let port = null;
   for (let i = 0; i < 240 && !port; i++) {
     await sleep(250);

@@ -24,11 +24,11 @@
    "guard-selftest",
    "browser-acceptance",
    "demo-acceptance",
-   "retained-assets",
    "mobile-sweep",
    "box-acceptance",
    "workshop-acceptance",
-   "roco-ux-acceptance"
+   "roco-ux-acceptance",
+   "retained-assets"
   ],
   "last_run_suites": [
    "env",
@@ -48,11 +48,11 @@
    "guard-selftest",
    "browser-acceptance",
    "demo-acceptance",
-   "retained-assets",
    "mobile-sweep",
    "box-acceptance",
    "workshop-acceptance",
-   "roco-ux-acceptance"
+   "roco-ux-acceptance",
+   "retained-assets"
   ],
   "head_run": null
  },

@@ -527,8 +527,14 @@ class TestTraits(unittest.TestCase):
         summary = tr.implementation_summary()
         # RC-401 批次二：入库了两条**条件可判**的入场特性（图书守卫者 / 构装契约者，
         # 条件是「魔力值是否为 1」——只有声明了魔力的配置才判得了）。所以是 12 + 2 = 14。
-        self.assertEqual(summary["FULL"] + summary["PARTIAL"] + summary["REFUSED"], 14,
-                         "A 组 6 只 + B/C 组 6 只 + RC-401 批次二 2 只 = 14 只特性")
+        # RC-401 批次三（2026-09-23）：`抓到你了` 入库（PARTIAL：能耗修正骑手落地、
+        # 两层冻结只记账——术语 1004 没写时序，回合末结算仍未实现）。14 + 1 = 15。
+        # RC-401 批次四：`贪得无厌` 入库（PARTIAL：吸血/过量转化两条原语落地，
+        # 但「溢出的累计口径」与「增益持续多久」是 ENGINE_HYPOTHESIS）。15 + 1 = 16。
+        # RC-401 批次四再加一条同类特性 `渴求`（FULL：只有吸血一条原语，与 `贪得无厌`
+        # 共用按**解析结果**分派的实现）。16 + 1 = 17。
+        self.assertEqual(summary["FULL"] + summary["PARTIAL"] + summary["REFUSED"], 17,
+                         "A 组 6 + B/C 组 6 + 批次二 2 + 批次三 1 + 批次四 2 = 17 只特性")
         self.assertGreater(summary["FULL"], 0)
         self.assertGreater(summary["REFUSED"], 0,
                            "至少有一条应当被明确拒绝——做不到和没做是两件事")
@@ -648,10 +654,19 @@ class TestTraits(unittest.TestCase):
             self.assertIn("未实现", spec.reason, f"{name} 的理由要说明未实现的部分")
 
     def test_loud_trait_effect_reads_its_number_from_data(self):
-        """圆号鱼 [泛音列] 引用「聒噪」——它的数值必须来自数据，不能写死。"""
+        """圆号鱼 [泛音列] 引用「聒噪」——它的数值必须来自数据，不能写死。
+
+        2026-09-25（第 40 轮）改钉：档位从 `FULL` 改成 `PARTIAL`（**判据的意图没变** ——
+        数值必须来自数据、理由里要指出出处；变的是档位说真话）。理由：这条特性自己的理由里
+        写着「当前只挂印记、**不结算能耗**」+「『持续 3 回合』与回合边界的对齐**仍需口径**」，
+        按 `traits.py` 开头那行定义（`FULL = 描述能被机械实现`）它只能算 PARTIAL；
+        缺口现在写进机器可读的 `TraitSpec.gaps`，由 `test_trait_status_export` 里那条
+        `FULL ⇒ gaps 为空` 钉住。
+        """
         from roco_env import traits as tr
         spec = tr.spec_for_trait_name("泛音列")
-        self.assertEqual(spec.status, tr.FULL)
+        self.assertEqual(spec.status, tr.PARTIAL)
+        self.assertTrue(spec.gaps, "降档后缺口要逐条写在 gaps 里（不许只留在散文里）")
         noisy = RS.skill_by_name("聒噪")
         self.assertIn("能耗", noisy.desc)
         self.assertIn("skill_000274", spec.reason, "理由里要指出数值出处")

@@ -9,6 +9,9 @@ import {observe,assessDecision,attentionState,trackAttention,releaseAttention,sh
  dwellSignal,dwellVerdict,dwellIntervention,DWELL} from '../src/coach/experience.js';
 import {freshMemory,rememberDecision,recordCoachEvent,adaptiveGate,markTaught,teachingPlan,observeStruggle,roleSuppressed,ROLE_SILENCE_MS} from '../src/coach/memory.js';
 import {skillLesson,decisionLesson} from '../src/coach/teacher.js';
+import {strategist} from '../src/coach/strategist.js';
+import {buildContext} from '../src/coach/runtime.js';
+import {newProfile} from '../src/game/progression.js';
 
 // 一个确定性的玩家策略：优先用零消耗的「撞击」，否则用第一个非防御技能。
 // 打满一局也只用它，所以每个用例都能重放同一盘。
@@ -530,4 +533,29 @@ test('点掉即静音优先：本局点掉之后，无论教没教过、有没�
  assert.equal(dwellIntervention({game:g,attention:muted,session:strategistSession(),ranked,memory:struggle.memory,now:12000,turn:'1:battle',mode:'gentle'}),null);
  // 安静档同样压过教学账本。
  assert.equal(dwellIntervention({game:g,attention:att,session:strategistSession(),ranked,memory:struggle.memory,now:12000,turn:'1:battle',mode:'quiet'}),null);
+});
+
+test('军师的兜底正文要摆出**两种走法各自的结果**（目标 ②），且数字与证据逐字一致', () => {
+ // 为什么钉这一条：模型答得好时会照抄证据里的分数，但模型被守卫打回时玩家拿到的是
+ // `strategist()` 这句兜底 —— 2026-09-26 之前那句话只有两个**名字**（「优先考虑 X。备选 Y。」），
+ // 于是"引擎算出来的差别"在最需要它的时候恰好不见了。
+ const game = createGame(445, ['fox', 'turtle', 'deer'], {mode: 'pve', difficulty: 'normal', stageId: 'meadow'});
+ const context = buildContext(game, newProfile(), 'fox');
+ const packet = strategist({...context, query: '这回合该怎么打'});
+ const text = String(packet.text);
+ const evidence = (packet.evidence ?? []).map(String).join(' ');
+ // ① 两种走法的"多数情况 / 最糟"都要出现在正文里
+ const numbers = [...text.matchAll(/多数情况 (-?\d+\.\d) 分、最糟 (-?\d+\.\d) 分/g)].map((m) => [m[1], m[2]]);
+ assert.ok(numbers.length >= 2, `正文要给出两种走法的结果：${text}`);
+ // ② 逐个数都要能在证据里查到（这是守卫那条口径，判据提前钉住）
+ for (const [expected, worst] of numbers) {
+  assert.ok(evidence.includes(`${expected} 分`), `正文里的 ${expected} 分在证据里查不到`);
+  assert.ok(evidence.includes(`${worst} 分`), `正文里的 ${worst} 分在证据里查不到`);
+ }
+ // ③ 口径不许变：这两个数只用来排序，不是胜率
+ assert.match(text, /不是胜率/, `必须写明不是胜率：${text}`);
+ assert.doesNotMatch(text, /胜率 \d|%/, `不许出现胜率/百分数：${text}`);
+ // 反证：没有对局时不出建议（不拿一套空局面编两种走法）
+ const empty = strategist({profile: {}, battle: null, query: '这回合该怎么打'});
+ assert.doesNotMatch(String(empty.text), /多数情况/, '没有对局时不许编分数');
 });

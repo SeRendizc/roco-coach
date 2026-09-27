@@ -15,7 +15,7 @@
     }
   },
   "data_basis": {
-    "owned_instances": 80,
+    "owned_instances": 48,
     "owned_species": 48,
     "pack_pet_entities": 622,
     "battle_modes": [
@@ -35,7 +35,7 @@
     "sample_species_id": "pet_000012",
     "favourite_instance_id": "own-0001",
     "pack_only_species_id": "pet_000001",
-    "second_owned_species_id": "pet_000118"
+    "second_owned_species_id": "pet_000062"
   },
   "contract": {
     "allowed_fields": [
@@ -1154,8 +1154,8 @@
       "actual": "MUST_INCLUDE_HAS_UNOWNED_SPECIES",
       "ok": true,
       "actual_output": [
-        "[MUST_INCLUDE_HAS_UNOWNED_SPECIES] must_include：favourites_only=true，但 pet_000118 对应的物种 pet_000118 没有任何一只收藏个体（实际值 \"pet_000118\"）",
-        "[LOCKED_FAVOURITES_ONLY_CONFLICT] favourites_only：favourites_only=true，但 must_include/locked 里 [\"pet_000118\"] 没有一只是收藏：约束不可同时满足（实际值 [\"pet_000118\"]）"
+        "[MUST_INCLUDE_HAS_UNOWNED_SPECIES] must_include：favourites_only=true，但 pet_000062 对应的物种 pet_000062 没有任何一只收藏个体（实际值 \"pet_000062\"）",
+        "[LOCKED_FAVOURITES_ONLY_CONFLICT] favourites_only：favourites_only=true，但 must_include/locked 里 [\"pet_000062\"] 没有一只是收藏：约束不可同时满足（实际值 [\"pet_000062\"]）"
       ]
     },
     {
@@ -1177,11 +1177,11 @@
       "actual_output": {
         "forward": [
           "own-0001",
-          "pet_000118"
+          "pet_000062"
         ],
         "backward": [
           "own-0001",
-          "pet_000118"
+          "pet_000062"
         ]
       }
     },

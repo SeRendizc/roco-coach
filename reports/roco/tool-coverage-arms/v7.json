@@ -1,0 +1,382 @@
+{
+ "generated_at": "2026-09-26T09:52:20.738Z",
+ "contract_tools": 13,
+ "summary": {
+  "arm": "v7",
+  "prompt_mode": "toolPromptFor(production)",
+  "baseUrl": "http://127.0.0.1:8766",
+  "adapter": "qwen35-4b-tool-v7",
+  "model": "Qwen3.5-4B-4bit",
+  "total": 20,
+  "pass": 15,
+  "rate": 0.75,
+  "positive": "6/10",
+  "negative": "9/10",
+  "unknown_tool": 0,
+  "unparseable": 0,
+  "median_latency_ms": 464,
+  "tools_covered": 6
+ },
+ "results": [
+  {
+   "case_id": "cov-read_state-yes",
+   "tool": "read_state",
+   "expect": {
+    "tool": "read_state",
+    "args_keys": [],
+    "max_tool_calls": 1
+   },
+   "message": "现在场上是什么情况？",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 421,
+   "ok": false,
+   "reason": "该调 read_state，它却停下了（model-stop）"
+  },
+  {
+   "case_id": "cov-read_state-no",
+   "tool": "read_state",
+   "expect": {
+    "tool": null,
+    "must_not_call": "read_state",
+    "max_tool_calls": 1
+   },
+   "message": "什么是应对？",
+   "picked": "search_rules",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"search_rules\",\"args\":{\"query\":\"什么是应对\"}}",
+   "latency_ms": 523,
+   "ok": true,
+   "reason": "没调 read_state（调了 search_rules）"
+  },
+  {
+   "case_id": "cov-search_rules-yes",
+   "tool": "search_rules",
+   "expect": {
+    "tool": "search_rules",
+    "args_keys": [
+     "query"
+    ],
+    "max_tool_calls": 1
+   },
+   "message": "应对到底怎么算？",
+   "picked": "search_rules",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"search_rules\",\"args\":{\"query\":\"应对到底\"}}",
+   "latency_ms": 492,
+   "ok": true,
+   "reason": "选对了"
+  },
+  {
+   "case_id": "cov-search_rules-no",
+   "tool": "search_rules",
+   "expect": {
+    "tool": null,
+    "must_not_call": "search_rules",
+    "max_tool_calls": 1
+   },
+   "message": "帮我开一局",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 394,
+   "ok": true,
+   "reason": "忍住了"
+  },
+  {
+   "case_id": "cov-compare_actions-yes",
+   "tool": "compare_actions",
+   "expect": {
+    "tool": "compare_actions",
+    "args_keys": [],
+    "max_tool_calls": 1
+   },
+   "message": "这回合出招还是换人，哪个更稳？",
+   "picked": "compare_actions",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"compare_actions\",\"args\":{}}",
+   "latency_ms": 479,
+   "ok": true,
+   "reason": "选对了"
+  },
+  {
+   "case_id": "cov-compare_actions-no",
+   "tool": "compare_actions",
+   "expect": {
+    "tool": null,
+    "must_not_call": "compare_actions",
+    "max_tool_calls": 1
+   },
+   "message": "我上一局输在哪？",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 416,
+   "ok": true,
+   "reason": "忍住了"
+  },
+  {
+   "case_id": "cov-simulate_branch-yes",
+   "tool": "simulate_branch",
+   "expect": {
+    "tool": "simulate_branch",
+    "args_keys": [
+     "candidates",
+     "opponent",
+     "unresolved",
+     "actionIndex",
+     "opponentIndex"
+    ],
+    "max_tool_calls": 1
+   },
+   "message": "要是我先手换人，对面打过来会怎样？",
+   "picked": "simulate_branch",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"simulate_branch\",\"args\":{\"candidates\":[\"switch:1\"]}}",
+   "latency_ms": 538,
+   "ok": true,
+   "reason": "选对了"
+  },
+  {
+   "case_id": "cov-simulate_branch-no",
+   "tool": "simulate_branch",
+   "expect": {
+    "tool": null,
+    "must_not_call": "simulate_branch",
+    "max_tool_calls": 1
+   },
+   "message": "火系克制什么属性？",
+   "picked": "search_rules",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"search_rules\",\"args\":{\"query\":\"火系 克制\"}}",
+   "latency_ms": 538,
+   "ok": true,
+   "reason": "没调 simulate_branch（调了 search_rules）"
+  },
+  {
+   "case_id": "cov-inspect_training-yes",
+   "tool": "inspect_training",
+   "expect": {
+    "tool": "inspect_training",
+    "args_keys": [],
+    "max_tool_calls": 1
+   },
+   "message": "这只还能加多少培养格？",
+   "picked": "inspect_training",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"inspect_training\",\"args\":{}}",
+   "latency_ms": 472,
+   "ok": true,
+   "reason": "选对了"
+  },
+  {
+   "case_id": "cov-inspect_training-no",
+   "tool": "inspect_training",
+   "expect": {
+    "tool": null,
+    "must_not_call": "inspect_training",
+    "max_tool_calls": 1
+   },
+   "message": "这只的属性是什么？",
+   "picked": "inspect_training",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"inspect_training\",\"args\":{}}",
+   "latency_ms": 468,
+   "ok": false,
+   "reason": "不该调 inspect_training，它调了"
+  },
+  {
+   "case_id": "cov-read_match-yes",
+   "tool": "read_match",
+   "expect": {
+    "tool": "read_match",
+    "args_keys": [
+     "offset",
+     "limit"
+    ],
+    "max_tool_calls": 1
+   },
+   "message": "我最近打了哪几局？",
+   "picked": "read_match",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"read_match\",\"args\":{}}",
+   "latency_ms": 464,
+   "ok": true,
+   "reason": "选对了"
+  },
+  {
+   "case_id": "cov-read_match-no",
+   "tool": "read_match",
+   "expect": {
+    "tool": null,
+    "must_not_call": "read_match",
+    "max_tool_calls": 1
+   },
+   "message": "这回合该干嘛？",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 382,
+   "ok": true,
+   "reason": "忍住了"
+  },
+  {
+   "case_id": "cov-read_evidence-yes",
+   "tool": "read_evidence",
+   "expect": {
+    "tool": "read_evidence",
+    "args_keys": [
+     "turn",
+     "matchId"
+    ],
+    "max_tool_calls": 1
+   },
+   "message": "第 3 回合到底发生了什么？",
+   "picked": "read_evidence",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"read_evidence\",\"args\":{\"turn\":3}}",
+   "latency_ms": 504,
+   "ok": true,
+   "reason": "选对了"
+  },
+  {
+   "case_id": "cov-read_evidence-no",
+   "tool": "read_evidence",
+   "expect": {
+    "tool": null,
+    "must_not_call": "read_evidence",
+    "max_tool_calls": 1
+   },
+   "message": "给我讲讲这队的思路",
+   "picked": "compare_actions",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"compare_actions\",\"args\":{}}",
+   "latency_ms": 452,
+   "ok": true,
+   "reason": "没调 read_evidence（调了 compare_actions）"
+  },
+  {
+   "case_id": "cov-read_last_turn-yes",
+   "tool": "read_last_turn",
+   "expect": {
+    "tool": "read_last_turn",
+    "args_keys": [],
+    "max_tool_calls": 1
+   },
+   "message": "刚才那一手结算了吗？",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 406,
+   "ok": false,
+   "reason": "该调 read_last_turn，它却停下了（model-stop）"
+  },
+  {
+   "case_id": "cov-read_last_turn-no",
+   "tool": "read_last_turn",
+   "expect": {
+    "tool": null,
+    "must_not_call": "read_last_turn",
+    "max_tool_calls": 1
+   },
+   "message": "帮我组个队",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 410,
+   "ok": true,
+   "reason": "忍住了"
+  },
+  {
+   "case_id": "cov-plan_actions-yes",
+   "tool": "plan_actions",
+   "expect": {
+    "tool": "plan_actions",
+    "args_keys": [
+     "state",
+     "state_version"
+    ],
+    "max_tool_calls": 1
+   },
+   "message": "这回合给我一个出招计划",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 414,
+   "ok": false,
+   "reason": "该调 plan_actions，它却停下了（model-stop）"
+  },
+  {
+   "case_id": "cov-plan_actions-no",
+   "tool": "plan_actions",
+   "expect": {
+    "tool": null,
+    "must_not_call": "plan_actions",
+    "max_tool_calls": 1
+   },
+   "message": "你好",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 410,
+   "ok": true,
+   "reason": "忍住了"
+  },
+  {
+   "case_id": "cov-summarize_battle-yes",
+   "tool": "summarize_battle",
+   "expect": {
+    "tool": "summarize_battle",
+    "args_keys": [
+     "record",
+     "state_version"
+    ],
+    "max_tool_calls": 1
+   },
+   "message": "这一局打完帮我总结一下",
+   "picked": null,
+   "stop": true,
+   "error": null,
+   "raw": "{\"stop\":true}",
+   "latency_ms": 406,
+   "ok": false,
+   "reason": "该调 summarize_battle，它却停下了（model-stop）"
+  },
+  {
+   "case_id": "cov-summarize_battle-no",
+   "tool": "summarize_battle",
+   "expect": {
+    "tool": null,
+    "must_not_call": "summarize_battle",
+    "max_tool_calls": 1
+   },
+   "message": "这只精灵的属性是什么？",
+   "picked": "inspect_training",
+   "stop": false,
+   "error": null,
+   "raw": "{\"tool\":\"inspect_training\",\"args\":{}}",
+   "latency_ms": 465,
+   "ok": true,
+   "reason": "没调 summarize_battle（调了 inspect_training）"
+  }
+ ]
+}

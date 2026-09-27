@@ -72,7 +72,7 @@ async function launchChrome() {
   chrome.stderr?.on('data', (d) => { chromeErr = (chromeErr + String(d)).slice(-800); });
   const kill = () => {
     try { chrome.kill('SIGKILL'); } catch {}
-    try { rmSync(profile, { recursive: true, force: true }); } catch {}
+    try { rmSync(profile, {recursive: true, force: true,maxRetries:5,retryDelay:120}); } catch {}
   };
   let port = null;
   for (let i = 0; i < 240 && !port; i++) {

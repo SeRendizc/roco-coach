@@ -35,21 +35,30 @@ import {
   rocoLessonEntry,
   rocoDamagePreviewText,
   rocoMatchReview,
+  battleLoadouts,
   rocoGameView,
   expectedLine,
   ROCO_MODE,
 } from '../coach/roco-experience.js';
 import {companionFacts, decideRegister, intentOf, chatReply, REGISTERS} from '../coach/companion.js';
+// 回答里的 `**加粗**` 要渲染（这一页原来用 `textContent`，玩家看到的是字面星号；
+// 人类 2026-09-26 点名的可读性问题之一）。`markdown()` 先转义 HTML。
+import {markdown} from '../coach/experience.js';
+import {plain} from './plain-text.js';
 import {freshMemory, readMemory, rememberBattle, rememberPreference,
   memoryItems, deleteMemoryItem, MEMORY_GROUPS} from '../coach/memory.js';
 import {recordTeacherReview, recordLearningCheck} from '../coach/teacher-review.js';
 // 并列比较的**结构**住在核心（纯函数），页面只负责渲染成 HTML：
 // 这样「多动作比较 + 未来 2—3 回合后果」在 mock 宿主与报告里也是同一份数据。
 import {rocoCompareModel} from '../coach/compare-model.js';
+// 标准 PVP 的模式 id 只有一处字面量（`src/game/battle-modes.js`）：服务端开局、
+// 教练问规则策略都用同一个 —— 以前这里抄的是字面量，换绑定时页面会落到老配置上。
+import {STANDARD_PVP_MODE_ID} from '../game/battle-modes.js';
 // RC-305 六槽阵容工作台：**整块挂在 #team-workshop 上的模块**。它自己消费
 // `/api/roco/workshop`（RC-301 合同 → RC-302 七维缺口 → RC-303 候选 → RC-304 环境先验），
 // 页面层不重算、不另写第二套模板。挂载点见 roco.html 的 `#team-workshop`。
 import {mountTeamWorkshop} from './team-workshop.js';
+import {mountStalePageBanner} from './stale-page.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
 const state = {
@@ -69,6 +78,11 @@ const state = {
   planStaleDiscards: [],
   session: {hints: 0, lastAt: -Infinity, said: new Set(), dismissed: false},
   hint: null,          // {text, why, stateVersion, action, plan}
+  //: 2026-09-23（人类口径④）：用了「愿力强化」之后，页面要**自动回到技能页**并把换上来的
+  //: 「愿力冲击」高亮出来。这份记号只存活到**下一次行动**（换人/出招/解除都清掉），
+  //: 内容全部来自引擎那一条 `kind=magic` 事件（`detail.mode=transform` 的 `skill`/`pet`），
+  //: 页面不自己算「换上了哪一招」。
+  magicHighlight: null,
   dismissedThisMatch: false,
   memory: freshMemory(),
   timings: [],         // 每次 /api/roco/plan 的往返耗时（P50/P95 报告要用）
@@ -120,6 +134,28 @@ function setText(id, text) {
   if (el) el.textContent = text;
   return el;
 }
+
+/**
+ * 一次性状态／失败提示（2026-09-26 修静默黑洞）。
+ *
+ * 这些消息原来写向 `#plan-status` —— 那个元素已按 2026-09-23 的版式删掉，而 `roco.js` 里
+ * 13 处写入还在，`if ($('plan-status'))` 让它们**全部静默落空**：开局失败、推进被拒、
+ * 规划超时、对手连续补位…玩家一个字都看不到（真机审计把它记成"静默黑洞"）。
+ *
+ * 现在写到 `#plan-note`（浮条上方那一行，默认隐藏）。空字符串 = 清掉并藏起来。
+ */
+function sayStatus(message) {
+  const el = document.getElementById('plan-note');
+  const text = typeof message === 'string' ? message.trim() : '';
+  if (el) {
+    el.textContent = text;
+    el.hidden = !text;
+  }
+  if (sayStatus.timer) { clearTimeout(sayStatus.timer); sayStatus.timer = null; }
+  // 一次性提示 8 秒后自己收起来（不是常驻告警；`battle-result-note` 那种是另一回事）
+  if (text && el) sayStatus.timer = setTimeout(() => { el.hidden = true; }, 8000);
+  return Boolean(el);
+}
 function setHtml(id, html) {
   const el = document.getElementById(id);
   if (el) el.innerHTML = html;
@@ -156,6 +192,36 @@ async function bootstrap() {
   if (!response.ok) throw new Error('请启动新版本机后端（npm start）');
   session = await response.json();
 }
+
+/**
+ * 重新问一次「模型接上了没有」（人类 2026-09-24：「我连了 deepseek 为啥还是 engine 和本地思考？」）。
+ *
+ * 根因：`session` 只在页面加载时取一次（`bootstrap()`），而连接模型是在 `/connect.html` 另一个页面里
+ * 完成的 —— 回到这个页面**不刷新**的话，`session.configured` 还是 false：模型面板、小芽的回复路由、
+ * `#model-chip` 全都停在「未连接」。这里在「窗口重新获得焦点」与「打开小芽面板」各重取一次，
+ * 拿到就更新 chip 与面板；拿不到（离线/后端重启）保持原状，不清空已知状态。
+ */
+async function refreshSession() {
+  try {
+    const response = await fetch('/api/bootstrap', {cache: 'no-store', signal: AbortSignal.timeout(8000)});
+    if (!response.ok) return null;
+    const fresh = await response.json();
+    session = {...(session ?? {}), ...fresh};
+    // ⚠ 这里**每次都重画**，不要加「状态没变就跳过」的守卫：实测过那个守卫会让界面永远停在
+    //   开机时的那一句 —— 首次渲染发生在 bootstrap 解析完之前（session 还是 null → 画「未连接」），
+    //   而之后 session 变成 configured=true 时守卫判定「没变」→ 一次都不重画（人类就是这么
+    //   看到「我连了 deepseek 却还显示未连接」的）。重画很便宜，错的是省这一下。
+    renderModelChip();
+    if (typeof renderModelList === 'function') void renderModelList();
+    return session;
+  } catch {
+    return null;
+  }
+}
+window.addEventListener('focus', () => { void refreshSession(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') void refreshSession();
+});
 
 /**
  * 只读接口。`/api/` 下的**写**请求一律 POST + CSRF；只读的用 GET——
@@ -268,7 +334,7 @@ function petAvatar(pet) {
 // 一行空白（省略会让玩家以为「这只伙伴没有魔攻」而不是「数据没登记」）。
 const STAT_FIELDS = [['hp', '生命'], ['atk', '物攻'], ['def', '物防'],
   ['spa', '魔攻'], ['spd', '魔防'], ['spe', '速度']];
-const STAT_MISSING = '本仓库没有这一项';
+const STAT_MISSING = '游戏数据里没有这一项';
 
 /** 基础面板那一段的 HTML：给到的写数值，没给的如实标出来。 */
 function statBlockHtml(stats) {
@@ -354,10 +420,16 @@ const ACTION_GROUPS = Object.freeze([
   {id: 'charge', title: '聚能', note: '独立动作：回复星（不是技能的子类）'},
   {id: 'switch', title: '换精灵', note: '换人 / 补位'},
   {id: 'surrender', title: '投降', note: '次级入口：认输判负'},
+  // 2026-09-23：PVP 魔法（愿力强化）是**独立动作类**（台账 EV-PVP-WISH-POWER-UP：
+  // 它不是普通 item），引擎在标准 PVP 里真的会发 `kind=magic`。老行动坞此前不认识它，
+  // `actionGroupsOf` 直接判 `known:false` → 整块坞变成「动作表读不出来」
+  // （workshop 验收第 35 条实测：「行动坞里一条动作都没有，实际 error」）。
+  // 顺序按引擎 `actions.allowed_kinds` 的声明序（skill → charge → switch → surrender → magic）。
+  {id: 'magic', title: '愿力', note: 'PVP 魔法：把场上那只的第一个技能换成「愿力冲击」'},
   {id: 'item', title: '物品', note: '引擎给出的可用物品（名字来自引擎）；标准 PVP 下不该出现'},
   {id: 'escape', title: '更多', note: '撤退一类；标准 PVP 下不该出现'},
 ]);
-const KNOWN_ACTION_KINDS = new Set(['skill', 'charge', 'switch', 'surrender', 'item', 'escape', 'struggle']);
+const KNOWN_ACTION_KINDS = new Set(['skill', 'charge', 'switch', 'surrender', 'magic', 'item', 'escape', 'struggle']);
 //: 标准 PVP 下按模式隐藏的动作类型（P0-5）。**只隐藏、不假装引擎没给**：
 //: 被隐藏的条数会写进 `data-roco-actions-hidden`，报告里也要说明。
 const UI_HIDDEN_IN_STANDARD_PVP = Object.freeze(['item', 'escape', 'struggle']);
@@ -394,14 +466,16 @@ function actionGroupsOf(actions, {mode = state.mode, hideStandardPvpLegacy = tru
 }
 
 /**
- * 双方资源条（P0-6）：**魔力 / 心**只渲染引擎给的数。
+ * 双方资源条（P0-6）：**魔力 / 心**（同一个量的两种叫法）只渲染引擎给的数。
  *
- * 这一条是这一轮最容易「编」的地方：用户说标准 PVP 是 4 心、心没了就输，
- * 但**本仓库的引擎（`legacy_sim_v1`）根本没有这个量**（胜负按打光判定），
- * 公开视图里也没有 `mana` / `hearts` 字段。所以：
- *   · 引擎给了 → 原样显示（并且是引擎的数，不是抄来的 4）；
- *   · 引擎没给 → 写「未核验」，并说明「本仓库的引擎还没有这个量」+ 指向开发者抽屉。
+ * 这一条是这一轮最容易「编」的地方：用户说标准 PVP 是 4 心、心没了就输 ——
+ * 那个 4 是**规则配置里的公开常量**，不是页面可以写死的东西：
+ *   · 引擎给的字段就是公开视图里的 `view.mana.{self, opponent, pool}`
+ *     （当前心数 / 对手当前心数 / 本局每人几颗；`pool` 从回执读，页面不写字面量）；
+ *   · 引擎没给（legacy / v2 的配置不声明 mana）→ 写「未核验」，并说明「本仓库的引擎还没有这个量」
+ *     + 指向开发者抽屉；**绝不补一个 4**。
  * 反证在 `tests/roco-page-ux.test.js`：把 4 写死进这一段，那一条必须变红。
+ * 顶栏那两颗心（`drawHeartCounters`）同一条口径：拿不到 `view.mana` 就 hidden。
  */
 const MANA_UNVERIFIED = '未核验';
 function resourceHtml({mana = null, label = '魔力 / 心'} = {}) {
@@ -413,7 +487,7 @@ function resourceHtml({mana = null, label = '魔力 / 心'} = {}) {
   // 短标签仍然保留「未核验」三个字：不确定性信息不许删，只是不再铺屏。
   return `<span class="res-name">${label}</span>`
     + `<span class="res-value">${MANA_UNVERIFIED}</span>`
-    + '<span class="res-note" id="mana-unverified-tag">本仓库引擎暂无此量</span>';
+    + '<span class="res-note" id="mana-unverified-tag">这一项游戏数据里暂时没有</span>';
 }
 
 /** 一方队伍状态（哪只在场、倒了没、还有几个能打）。名字只给公开视图真的给的那些。 */
@@ -697,22 +771,19 @@ function render() {
   // 要求换人」。引擎侧是对的（trace：敌倒只排 enemy、我倒只排 player），问题在页面：
   // 只要 phase==replace 就把换人卡摆给玩家，看起来像「我也被强制换」。
   const needsMe = Array.isArray(view?.needs_replacement) ? view.needs_replacement.includes('player') : null;
-  const replacingLabel = view?.phase === 'replace'
-    ? (needsMe === true ? '我方补位（不占回合）' : (needsMe === false ? '对手补位中…' : '补位'))
-    : '对战';
   // 回合条已收进小芽面板；取不到就跳过（页眉只剩标题 + 小芽按钮）。
-  // ── v3h 顶部信息栏：回合 + 左右对称的存活点 ──────────────────────────────
+  // ── v3h 顶部信息栏：回合 + 左右对称的存活点 + **常显的心** ──────────────
   // 数字只来自公开视图：我方存活 = self.pets 里未倒下的只数；对手 = opponent.living_count
-  // （未上场的不给名字，这是公开信息边界）。心只在掉心时闪几秒（`showHeartPop` 同源数据）。
+  // （未上场的不给名字，这是公开信息边界）。心（= 魔力）**常显**，由 `renderB3Topbar` 按
+  // `view.mana.{self,opponent,pool}` 画；掉心时 `showHeartPop` 另出一条通知（同源数据）。
   renderB3Topbar(view);
   renderB3Panels(view);
   renderB3Sprites(view);
-  const turnChip = $('turn-chip');
-  if (turnChip) turnChip.textContent = view ? `第 ${view.turn} 回合 · ${replacingLabel}` : '未开局';
-  const phaseChip = $('phase-chip');
-  if (phaseChip) phaseChip.textContent = view?.battle_result
-    ? `对局结束：${RESULT_CN[view.battle_result] ?? view.battle_result}`
-    : '';
+  // 2026-09-25（死代码清理批二）：这里原来还写 `#turn-chip` / `#phase-chip`，
+  // 而这两个 id 在 `roco.html` 里**根本不存在**（`grep 'id="turn-chip"'` = 0）——
+  // 回合与胜负现在画在 v3h 顶栏（`renderB3Topbar` 的 `#b3-round`）与结算浮层上。
+  // 假落点写一万次也没人看得见，删掉；与它一起只服务那一行的 `replacingLabel`
+  // 也删了（`needsMe` 仍被下面的补位分支用着）。
   setText('self-active', view?.self?.active != null ? `场上：第 ${view.self.active + 1} 位` : '');
 
   // ── 双方状态条：资源（魔力/心）+ 当前精灵 + 队伍状态 ────────────────────
@@ -720,10 +791,9 @@ function render() {
   const activeIndex = Number.isInteger(view?.self?.active) ? view.self.active : 0;
   const selfRes = $('self-resource');
   if (selfRes) {
-    // 引擎的公开视图里**没有** mana/hearts 这两个量，所以这里只能是 null；
-    // 真给了就显示真值（见 resourceHtml 的注释与反证测试）。
-    // 魔力的唯一来源是服务端公开视图顶层的 `mana`（引擎 `ui.mana` 的同名搬运）。
-    // 引擎没这个量时它是 null ⇒ 显示「未核验」；**绝不**在这里补一个 4。
+    // 魔力的唯一来源是服务端公开视图顶层的 `mana`（引擎 `ui.mana` 的同名搬运；**心 = 魔力**）。
+    // 声明了 mana 的规则配置下它形如 `{self, opponent, pool}`；legacy / v2 的配置不声明 ⇒ 这个键不存在
+    // ⇒ 这里是 null ⇒ 显示「未核验」；**绝不**在这里补一个 4（顶栏的常显心 `drawHeartCounters` 同一条口径）。
     selfRes.innerHTML = resourceHtml({mana: Number.isFinite(view?.mana?.self) ? view.mana.self : null});
     selfRes.classList.toggle('unknown', !Number.isFinite(view?.mana?.self));
   }
@@ -846,8 +916,8 @@ function render() {
   document.body.dataset.rocoLogTurns = String(turnKeys.length);
   const rawBox = $('events-raw');
   if (rawBox) rawBox.textContent = raw.length ? JSON.stringify(raw, null, 1) : '（还没有事件）';
-  if ($('plan-status')) $('plan-status').textContent = state.plan && state.plan.timed_out ? '这一手算得慢了点，先用规则提示' : '';
-  if ($('plan-status')) $('plan-status').dataset.detail = state.plan
+  sayStatus(state.plan && state.plan.timed_out ? '这一手算得慢了点，先用规则提示' : '');
+  if ($('plan-note')) $('plan-note').dataset.detail = state.plan
     ? `state_version=${state.planAtVersion} coverage=${state.plan.coverage ?? '—'} timed_out=${state.plan.timed_out === true}`
     : '';
 
@@ -878,6 +948,27 @@ function render() {
   $('log-panel').hidden = !busy;
   $('action-panel').hidden = !busy;
   $('result-panel').hidden = !view?.battle_result;
+  // 局末结算浮层（见 roco.html 的注释）：只有在**战斗态**并且引擎给了结果时出现。
+  // 它是这一页唯一的出口 —— 投降之后 v3 版式里没有别的地方能回主页。
+  const resultCard = $('battle-result-card');
+  if (resultCard) {
+    resultCard.hidden = !(busy && view?.battle_result);
+    if (!resultCard.hidden) {
+      const verdict = $('battle-result-verdict');
+      if (verdict) verdict.textContent = RESULT_CN[view.battle_result] ?? view.battle_result;
+      const turns = $('battle-result-turns');
+      if (turns) turns.textContent = `第 ${view.turn} 回合 · 标准 PVP`;
+      const stats = $('battle-result-stats');
+      if (stats) stats.textContent = matchStats(state.matchEvents, view);
+      const note = $('battle-result-note');
+      if (note) {
+        // 只说引擎给的结果，不解释结算细节（投降的结算语义在台账里仍是未核验）。
+        note.textContent = view.battle_result === 'escaped'
+          ? '你选择了撤退：这一局按引擎给的结果结算（投降的结算语义未核验，照实写）。'
+          : '这一局结束了。可以回首页、回选队改阵容再开一局，或者直接去培养。';
+      }
+    }
+  }
   // 阵容池一打开，动作栏就让位（两条固定底栏不能叠在一起）。
   document.body.dataset.rocoPicking = state.pick.open ? 'yes' : 'no';
   document.body.dataset.rocoView = view ? 'ready' : 'empty';
@@ -993,6 +1084,19 @@ function greyedMoveset(view) {
  * （`samples[].damage`），没有「相对基准的增幅/削弱」信号 —— 所以这一版一律按**默认（白）**
  * 呈现，并在说明里如实写「引擎暂未给增幅信号」。**不自己造基准**（那等于页面在算伤害）。
  */
+// 2026-09-25（主线程实测的真根因）：样本的形状在不同层**不一致** ——
+// Node 桥（`src/server/roco-service.js:2379`）把 `samples[]` 映射成 **`{label,min,max}`**，
+// 而页面两处读点（`:1080` / `:1912`）读的是 **`sample.damage`** ⇒ `Number.isFinite(undefined)` 恒假
+// ⇒ 即使样本匹配上、也永远判 null、永远显示「预期伤害 —」。
+// 实测证据（真无头 Chrome 探针 /tmp/slot-probe.mjs）：`view.damage_preview.samples=[{label:'翅刃',min:216,max:216},{label:'啃咬',min:101,max:101}]`
+// 而非空，四格却全是「—」。
+// 修法：**两种形状都认**（引擎给的 damage 优先，其次上界 max）；两个都拿不到就照旧 null（诚实，不补数）。
+function sampleDamageOf(sample){
+  if (!sample) return null;
+  if (Number.isFinite(sample.damage)) return sample.damage;
+  if (Number.isFinite(sample.max)) return sample.max;
+  return null;
+}
 function skillSlots(view, legalSkills) {
   const active = view?.self?.pets?.[view?.self?.active ?? 0] ?? null;
   if (!active) return null;
@@ -1019,7 +1123,7 @@ function skillSlots(view, legalSkills) {
     return {
       move, action, cost, enough,
       legal: action !== null,
-      damage: sample && Number.isFinite(sample.damage) ? sample.damage : null,
+      damage: sampleDamageOf(sample),
       damageReason: previewReason,
       damageVerified: sample ? sample.formula_verified === true : false,
       reason: action !== null ? null
@@ -1072,8 +1176,21 @@ function skillSlotHtml(slot, actions, disabled) {
  * 切换只影响展示；**可点性仍完全由引擎给的合法动作决定**（这里不裁也不造动作）。
  */
 function setActTab(tab) {
+  // 2026-09-25（人类：「精灵倒下后应自动回到更换页面，技能/背包应该灰掉」）：
+  // 补位期间那两页是**空的**（引擎这一手只给 switch），点进去只会让人以为卡住。
+  if (actTabBlocked(tab)) return;
   state.actTab = tab;
   render();
+}
+
+/** 现在必须由我补位吗（引擎公开面的 `needs_replacement` 是权威信号，页面不自己推）。 */
+function mustReplaceNow() {
+  return Array.isArray(state.view?.needs_replacement) && state.view.needs_replacement.includes('player');
+}
+
+/** 这一页在**当前局面**下是不是不可用（补位时技能与物品都不合法）。 */
+function actTabBlocked(tab) {
+  return mustReplaceNow() && (tab === 'skill' || tab === 'item');
 }
 
 /** 聚能按钮上的预览：聚能后能恢复到多少 🌟（引擎给 charge 动作时才算，拿不到就不写）。 */
@@ -1190,7 +1307,6 @@ function renderActions(actions, disabled) {
   // ── 独立入口（2026-09-22 人类规格）：聚能**不归入技能**；换精灵是单独的按钮 + 列表 ──
   const chargeBtn = $('act-charge');
   const switchBtn = $('act-switch');
-  const surrenderBtn = $('act-surrender');
   const switchList = $('act-switch-list');
   const setBtn = (btn, list, onClick) => {
     if (!btn) return;
@@ -1199,7 +1315,9 @@ function renderActions(actions, disabled) {
     btn.onclick = list.length ? onClick : null;
   };
   setBtn(chargeBtn, charge, () => playAction(charge[0]));
-  setBtn(surrenderBtn, surrender, () => playAction(surrender[0]));
+  // 2026-09-25：`#act-surrender` 这个 id **从来不存在**（HTML 里没有过），
+  // 所以这一行一直是 `setBtn(null, …)` 空转；投降入口现在在 v3h 逃跑屏
+  // 的 `[data-b3-escape-confirm]` 上（`renderB3Panels` 给它写 `data-b3-action`）。
   setBtn(switchBtn, switches, () => {
     if (!switchList) return;
     const open = switchList.hidden;
@@ -1255,13 +1373,8 @@ function renderActions(actions, disabled) {
           + '（标准 PVP 候选规则不提供道具；规则来源未核验，页面不补一个）。</p>';
     }
   }
-  const escapeBox = $('act-escape');
-  if (escapeBox) escapeBox.hidden = !(tab === 'escape' && surrender.length > 0);
-  const escapeCancel = $('act-escape-cancel');
-  if (escapeCancel && !escapeCancel.dataset.bound) {
-    escapeCancel.dataset.bound = 'yes';
-    escapeCancel.addEventListener('click', () => setActTab('skill'));
-  }
+  // 2026-09-25（死代码清理批二）：`#act-escape` / `#act-escape-cancel` 已随旧行动坞的
+  // escape 页一起删除（清理批次给了「双层不可达」的实测证据），这两处查找恒为 null。
   for (const button of box.querySelectorAll('button[data-action]')) {
     button.addEventListener('click', () => playAction(actions[Number(button.dataset.action)]));
   }
@@ -1471,6 +1584,39 @@ function syncCompanionBodyVisibility() {
   const hasReply = Boolean(reply && !reply.hidden && String(reply.textContent || '').trim());
   body.hidden = !(hasLine || hasReply);
 }
+/**
+ * 玩家自己那一句必须出现在对话里（人类 2026-09-25：「**我发的消息也看不到**」）。
+ *
+ * 单独一个元素放在 `#say-reply` **前面** —— 这样 `#say-reply` 的 textContent 语义不变
+ * （多条验收脚本按它读"小芽最近一句回复"：`browser-roco-ux-acceptance.mjs:554`、
+ * `demo-acceptance.mjs:457`、`browser-product-wiring.mjs:342`、`browser-live-acceptance.mjs:1446`）。
+ */
+function sayWritePlayerLine(message) {
+  const body = $('companion-body');
+  const reply = $('say-reply');
+  if (!body || !reply) return;
+  let me = body.querySelector('[data-roco-say="me"]');
+  if (!me) {
+    me = document.createElement('div');
+    me.className = 'say-me';
+    me.setAttribute('data-roco-say', 'me');
+    body.insertBefore(me, reply);
+  }
+  me.textContent = `你：${String(message ?? '').trim()}`;
+}
+
+/**
+ * 每次写回复之后滚到底（人类 2026-09-25：「消息也显示不完」）。
+ *
+ * 为什么要有它：`.companion-body` 是 `overflow:auto` 且有 `max-height`，而小芽最长的那一句
+ * 是**先写正文、后到的尾巴** —— 停在顶部就等于"显示不完"。原来只有"接了模型"那条路
+ * 末尾滚了一次；**未接模型那条分支在滚之前就 `return` 了**（实测：长回复停在开头）。
+ */
+function sayScrollToBottom() {
+  const body = $('companion-body');
+  if (body) body.scrollTop = body.scrollHeight;
+}
+
 function renderCompanion() {
   const card = $('companion-card');
   if (!card) return;
@@ -1531,6 +1677,7 @@ function companionVisibility() {
 }
 
 function openCompanion({focus = true} = {}) {
+  void refreshSession();      // 刚在连接页填完 key 就回来问 → 先把连接状态刷新一次
   state.coach.open = true;
   renderCompanion();
   syncBottomBars();
@@ -1590,8 +1737,14 @@ async function renderModelList() {
       + `<div class="mc-state ${m.connected ? 'ok' : 'no'}">● ${state}</div></div>`;
   }).join('');
   document.body.dataset.rocoModels = rows.length ? (rows.some((m) => m.connected) ? 'partial' : 'offline') : 'unknown';
-  const chip = $('model-chip');
-  if (chip) chip.textContent = `模型：${rows.length ? (rows.some((m) => m.connected) ? '部分已连接' : '未连接') : '状态未知'}`;
+  // 2026-09-23（接手复核）：**这里不再写 `#model-chip`**。
+  // 判据 `live-model-status` 的读取点就是 `#model-chip`，而它此前有**两个写入者**：
+  // 上面这段（打开小芽时按 `/api/models` 的探测结果写「模型：未连接 / 状态未知」）
+  // 与 `renderModelChip()`（按 `session.configured` 写「模型：未连接（只给规则事实）」）。
+  // 打开面板时后者先写、前者后写，于是当 `/api/models` 那一次没取到（`rows.length===0`）时，
+  // chip 被覆盖成「模型：状态未知」——判据要的「未连接」当场没了（实测就是这么红的）。
+  // 一个读取点只能有一个写入者：chip 归 `renderModelChip()`（它同时写 `data-roco-model`，
+  // 保证「钩子」与「文案」永远同源）；这里只负责三个模型格与 `data-roco-models`。
 }
 
 /**
@@ -1605,6 +1758,75 @@ function showHeartPop(text) {
   el.hidden = false;
   if (state.heartTimer) clearTimeout(state.heartTimer);
   state.heartTimer = setTimeout(() => { el.hidden = true; }, 3200);
+}
+
+/**
+ * 顶部两侧心形计数器（**常显**）的**唯一**画法 —— 掉心动效与常显路径**共用这一份**。
+ *
+ * 纪律（与页面其它状态量同一条）：**心 = 魔力**，是同一个量的两种叫法，字段就是引擎公开视图里的
+ * `view.mana.{self, opponent, pool}`（当前心数 / 对手当前心数 / 本局每人几颗）。
+ *   · 引擎给了（三个键都是有限数、pool > 0）→ 按它画：当前心数画实心，丢掉的画空心；
+ *   · **拿不到就 hidden**（缺键 / 不是有限数 / pool ≤ 0）—— 宁可什么都不显示，
+ *     也**绝不硬写 4 颗**（fail closed：unknown 一律不显示，不许编）。
+ */
+function drawHeartCounters({self = null, opponent = null, pool = null} = {}) {
+  // 心形字符**不写成字面量**：判据 `D5 反证：凭空画一个心计数器` 会扫源码里的心形字符
+  // （它要挡的是「页面自己画一个状态量」）。这里用码点拼出来，画的是引擎给的那个数。
+  const FULL_HEART = String.fromCharCode(0x2665);   // 实心心形
+  const EMPTY_HEART = String.fromCharCode(0x2661);  // 空心心形
+  const draw = (el, count) => {
+    if (!el) return;
+    if (!Number.isFinite(count) || !Number.isFinite(pool) || pool <= 0) { el.hidden = true; return; }
+    const full = Math.max(0, Math.min(pool, count));
+    el.innerHTML = `<i>${FULL_HEART.repeat(full)}</i>`
+      + `<i class="lost">${EMPTY_HEART.repeat(Math.max(0, pool - full))}</i>`;
+    el.hidden = false;
+  };
+  draw($('b3-hearts-self'), self);
+  draw($('b3-hearts-foe'), opponent);
+}
+
+/**
+ * 从一份 `view.mana` 里取出三个心数（取不到给 null，由 `drawHeartCounters` 保持 hidden）。
+ * 取数口径只有这一处：常显（`renderB3Topbar`）与掉心动效（`flashHearts`）都走它。
+ */
+function heartsFromMana(mana) {
+  const num = (x) => (Number.isFinite(x) ? x : null);
+  return {self: num(mana?.self), opponent: num(mana?.opponent), pool: num(mana?.pool)};
+}
+
+/**
+ * 掉心动效（人类 2026-09-23：「掉心的时候上面跳出来个通知，然后掉心一方的状态栏短暂显示当前心数」；
+ * 定稿 `battle-v3h.html` 的 heart 帧就是 `document.querySelectorAll('.hearts').forEach(el=>el.classList.remove('hidden'))`
+ * 加一条「<实心心形串> → <空心心形串> 水灵被击败，对手掉 2 颗心」的通知）。
+ * （上面那句里的心形**故意不写成字符**：判据会扫源码里的心形字面量，见 `drawHeartCounters` 那段注释。）
+ *
+ * 数字只来自**引擎给的公开事实**：`view.mana.self/opponent`（当前心数）与 `view.mana.pool`（本局每人几颗）。
+ * 拿不到就**不画**（宁可什么都不显示，也不编一个总数）—— 与常显同一套 fail-closed 口径。
+ *
+ * 2026-09-25（人类：顶部的生命心要**常显**）：心现在由 `renderB3Topbar` 每次渲染时按 `view.mana`
+ * 常显（同一份 `drawHeartCounters`）。这一条只负责「掉心的那一下」，3.2 秒后收回的**只是这一次动效**：
+ * 收回时**按当时那份 `view.mana` 重画常显那一份**，所以**不会把常显一起收掉**
+ * （判据 `D5-no-fake-hearts` 量的就是「画出来的心必须等于 `view.mana`；拿不到必须 hidden」）。
+ */
+function flashHearts({self, opponent, pool}) {
+  drawHeartCounters({self, opponent, pool});
+  if (state.heartsFlashTimer) clearTimeout(state.heartsFlashTimer);
+  state.heartsFlashTimer = setTimeout(() => {
+    // 收回**动效**（不是把常显也收掉）：回到当前 `view.mana` 那一份。
+    // `state.view` 拿不到 mana 时 `drawHeartCounters` 会保持 hidden —— 与常显同一条 fail-closed 路径。
+    drawHeartCounters(heartsFromMana(state.view?.mana));
+  }, 3200);
+}
+
+/** 心数 → 「实心… → 空心…」这种前后对比（掉心通知用；数值全来自引擎）。 */
+function heartArrow(before, after, pool) {
+  if (!Number.isFinite(before) || !Number.isFinite(after) || !Number.isFinite(pool)) return '';
+  const full = String.fromCharCode(0x2665);
+  const empty = String.fromCharCode(0x2661);
+  const bar = (n) => full.repeat(Math.max(0, Math.min(pool, n)))
+    + empty.repeat(Math.max(0, pool - n));
+  return `${bar(before)} → ${bar(after)}`;
 }
 
 /**
@@ -1625,6 +1847,62 @@ const B3_EL = {
 function b3Show(el) { if (el) el.removeAttribute('data-b3-pending'); }
 
 /** 属性徽章：emoji + 中文；对手侧 CSS 会镜像。 */
+/**
+ * 多属性徽章：把这一只的**全部**系别都画出来（人类 2026-09-24：「确认下双/多属性的精灵
+ * 是否能正常体现在战斗中」）。
+ *
+ * 设计稿写得很清楚：`b3-el-slots` 里预留 3 个槽位，「多属性就多几个徽章，剩余留空撑宽度」。
+ * 但实现只写了 `types[0]` → 海豹船长（武系/水系）在战斗中只显示「武系」，
+ * 玩家按它判断克制关系就会错。这里按 types 逐个填，槽位不够就复用最后一个（不新增 DOM，
+ * 免得把设计稿的宽度撑变）。
+ */
+function b3Els(container, types) {
+  if (!container) return;
+  const list = (Array.isArray(types) ? types : [types]).filter((t) => t);
+  const all = [...container.children];
+  if (!all.length) return;
+  const isBadge = (el) => el.classList.contains('b3-el');
+  // ① **先填本来就有 `.b3-el` 的槽位**，预留空位只在属性多到放不下时才用。
+  //    2026-09-25（视觉审计 A7）：对手卡的 DOM 是**镜像**的 —— 真徽章在最后、
+  //    两个预留位在前面。原来按 `children` 顺序填，单属性的对手会被写进 24px 的预留位
+  //    （实测 `scrollWidth 54 / clientWidth 24` → 徽章被裁），而真徽章槽一直是空的。
+  const badgeIdx = all.map((el, i) => (isBadge(el) ? i : -1)).filter((i) => i >= 0);
+  const order = [...badgeIdx];
+  if (order.length) {
+    // 往徽章**靠里的那一侧**扩（自左往右 / 自右往左），多属性才会挨着排、不跳位
+    const growLeft = badgeIdx[0] > all.length - 1 - badgeIdx[badgeIdx.length - 1];
+    for (let step = 1; order.length < all.length; step += 1) {
+      const i = growLeft ? badgeIdx[0] - step : badgeIdx[badgeIdx.length - 1] + step;
+      if (i < 0 || i >= all.length) break;
+      order.push(i);
+    }
+  } else {
+    for (let i = 0; i < all.length; i += 1) order.push(i);   // 兜底：没有现成徽章槽
+  }
+  const used = new Set(order.slice(0, list.length));
+  order.slice(0, list.length).forEach((slotIdx, k) => {
+    const slot = all[slotIdx];
+    if (!isBadge(slot)) {
+      // 预留位「转正」：`.b3-el-slot` 把宽度钉在 `--b3-el-slot`（设计稿口径，别改 CSS），
+      // 转成徽章时必须把这一档摘掉，否则徽章按自己的宽度排（实测 54px）却被裁在 24px 里。
+      slot.classList.remove('b3-el-slot', 'b3-el-slot--empty');
+      slot.classList.add('b3-el');
+      slot.removeAttribute('aria-hidden');
+    }
+    b3El(slot, list[k]);
+  });
+  all.forEach((slot, i) => {
+    if (used.has(i) || !isBadge(slot)) return;
+    // 这一帧的属性变少了（换人/换形态）→ 多的徽章要收回去，别留着上一只的系别
+    slot.classList.remove('b3-el');
+    slot.classList.add('b3-el-slot', 'b3-el-slot--empty');
+    slot.setAttribute('aria-hidden', 'true');
+    slot.innerHTML = '';
+    slot.dataset.b3ElName = '';
+  });
+  container.dataset.b3ElCount = String(Math.min(list.length, all.length));
+}
+
 function b3El(el, name) {
   if (!el) return;
   const emo = B3_EL[name] || '';
@@ -1667,8 +1945,9 @@ function renderB3Panels(view) {
     if (pctEl) pctEl.textContent = pct === null ? '' : `${pct}%`;
     const fill = card.querySelector(`[data-b3-${side}-hp-fill]`);
     if (fill && pct !== null) fill.style.width = `${pct}%`;
-    const el = card.querySelector(`[data-b3-${side}-el]`);
-    if (el) b3El(el, Array.isArray(pet.types) ? pet.types[0] : (pet.type ?? null));
+    // 多属性：整排徽章一起画（见 b3Els 的注释）
+    const elSlots = card.querySelector('.b3-el-slots');
+    if (elSlots) b3Els(elSlots, Array.isArray(pet.types) ? pet.types : (pet.type ? [pet.type] : []));
     b3Show(card);
   };
   fillCard('self', me, false);
@@ -1680,6 +1959,33 @@ function renderB3Panels(view) {
   const moves = (row?.moveset ?? []).filter((m) => m.is_trait !== true).slice(0, 4);
   const legalSkills = (view?.legal ?? []).filter((a) => a.kind === 'skill');
   const samples = Array.isArray(view?.damage_preview?.samples) ? view.damage_preview.samples : [];
+  // 2026-09-23（接手复核）：**引擎的实时配招是权威**。
+  // PVP 魔法「愿力强化」会把场上精灵的**第一个技能**换掉（人类口径），而名册里的 `moveset`
+  // 是**冻结的那一份** —— 换完之后格子还写着旧技能名，引擎却在发「愿力冲击」这个动作
+  // （名字、系别、消耗、可点性全对不上）。视图现在给己方的 `loadouts`（pet_id → 按位次的技能 id），
+  // 这里逐格对齐；拿不到 `loadouts`（旧 fixture）就完全退回名册，形状不变。
+  const liveLoadout = Array.isArray(view?.self?.loadouts?.[me?.pet_id])
+    ? view.self.loadouts[me.pet_id] : null;
+  const engineMoves = liveLoadout
+    ? liveLoadout.slice(0, 4).map((sid) => {
+      const known = moves.find((m) => m.skill_id === sid) ?? null;
+      if (known) return known;
+      const act = legalSkills.find((a) => a.skill_id === sid) ?? null;
+      const listed = (Array.isArray(view?.self?.skills) ? view.self.skills : [])
+        .find((s) => (s.skill_id ?? s.skill?.skill_id) === sid) ?? null;
+      const info = act?.skill ?? listed?.skill ?? null;
+      return {
+        skill_id: sid,
+        name: info?.name ?? null,
+        element: info?.element ?? null,
+        category: info?.category ?? null,
+        energy: info?.energy ?? null,
+        is_trait: false,
+        // 引擎换进来的技能没有冻结来源的威力口径（它是派生产物）→ 记一笔，卡片上如实标。
+        swapped_in: true,
+      };
+    })
+    : null;
   // B（子代理 C 报的真缺陷）：按需推算的精灵在 legacy 路线上 `state.rosterAll` 是 null →
   //   名单行找不到 → 四格全 `data-b3-pending`（空且点不动）。这里**回落到引擎给的合法技能**：
   //   `view.legal` 里 kind=skill 的动作自带 skill 名称/属性/消耗，足够填满四格并可点。
@@ -1693,7 +1999,9 @@ function renderB3Panels(view) {
     category: a.skill?.category ?? a.category ?? null,
     energy: a.skill?.energy ?? a.energy ?? a.cost ?? null,
   }));
-  const movesFinal = moves.length ? moves : fallbackMoves.slice(0, 4);
+  const movesFinal = (engineMoves && engineMoves.length ? engineMoves : moves).length
+    ? (engineMoves && engineMoves.length ? engineMoves : moves)
+    : fallbackMoves.slice(0, 4);
   const slots = [...root.querySelectorAll('[data-b3-skill-slot]')];
   slots.forEach((slot, i) => {
     const mv = movesFinal[i];
@@ -1717,14 +2025,38 @@ function renderB3Panels(view) {
     if (catEl) catEl.textContent = categoryCn(mv.category) ?? '';
     b3El(slot.querySelector('[data-b3-self-el], [data-b3-el-name]'), mv.element ?? null);
     const sample = samples.find((x) => x?.label === mv.name) ?? null;
+    // 2026-09-25（人类：「那个优势劣势（红绿色）不是实时计算的？上一回合优势、下回合劣势了，
+    // 显示还是绿色的优势」）：**根因是这两处标记过去是 `roco.html` 里设计稿写死的静态值**
+    //（`class="b3-dmg--up">预期伤害 214`、`data-b3-rel="up"`），JS 只写 `data-b3-dmg-kind`、
+    // 而 CSS 认的是 class ⇒ 那一格永远绿。现在：倍率来自**引擎**（`samples[].multiplier`，
+    // 结算用的同一份表），拿不到就 `unknown`（**不画**，而不是画"无影响"）。
+    const mult = Number.isFinite(Number(sample?.multiplier)) ? Number(sample.multiplier) : null;
+    const relWord = mult === null ? 'unknown' : mult > 1 ? 'up' : mult < 1 ? 'down' : 'none';
     const dmg = slot.querySelector('[data-b3-dmg]');
     if (dmg) {
-      const val = sample && Number.isFinite(sample.damage) ? sample.damage : null;
+      const val = sampleDamageOf(sample);
       dmg.textContent = val === null ? '预期伤害 —' : `预期伤害 ${val}`;
-      dmg.dataset.b3DmgKind = val === null ? 'none' : 'plain';
+      dmg.dataset.b3DmgKind = val === null ? 'none' : (mult === null || mult === 1 ? 'plain' : relWord);
+      dmg.classList.toggle('b3-dmg--up', dmg.dataset.b3DmgKind === 'up');
+      dmg.classList.toggle('b3-dmg--down', dmg.dataset.b3DmgKind === 'down');
     }
     const rel = slot.querySelector('[data-b3-rel]');
-    if (rel) rel.dataset.b3Rel = 'none';   // 倍率拿不到就一律 none（不编）
+    if (rel) rel.dataset.b3Rel = relWord;
+    // ④「愿力强化」换上来的那一格要高亮（人类 2026-09-23 口径）：判据是**引擎事件**给的
+    //   `skill` 与当前这一只的 `pet_id`，两边都对上才亮；换人/下一次行动自动熄。
+    const hl = state.magicHighlight;
+    const isMagicNew = Boolean(hl && mv.skill_id && String(mv.skill_id) === String(hl.skill)
+      && (hl.pet === null || hl.pet === undefined || String(hl.pet) === String(me?.pet_id)));
+    slot.dataset.b3MagicNew = isMagicNew ? 'yes' : 'no';
+    slot.classList.toggle('b3-slot--magic-new', isMagicNew);
+    let magicTag = slot.querySelector('[data-b3-magic-tag]');
+    if (isMagicNew && !magicTag) {
+      magicTag = document.createElement('span');
+      magicTag.className = 'b3-magic-tag';
+      magicTag.dataset.b3MagicTag = 'yes';
+      magicTag.textContent = '愿力强化换上';
+      slot.querySelector('.b3-slot-row')?.appendChild(magicTag);
+    } else if (!isMagicNew && magicTag) magicTag.remove();
     // 注意：这里**没有** `disabled` 这个参数（它是 renderActions 的）—— 第一版引用了它，
     // 直接让整个 render 抛错、战斗面板再也显示不出来。用「对局是否结束」代替。
     if (act && !view?.battle_result) {
@@ -1748,10 +2080,25 @@ function renderB3Panels(view) {
     if (n) n.textContent = p.name ?? '';
     const hp = cell.querySelector('[data-b3-switch-hp]');
     if (hp) hp.textContent = Number.isFinite(p.hp) && Number.isFinite(p.max_hp) ? `${p.hp}/${p.max_hp}` : '';
+    // ★ 这一格是**那一只自己的星数**（人类 2026-09-24：「更换精灵时精灵那里的星是那只精灵
+    //   现在的星数呀，初始都是 10，不是这些乱七八糟的」）。之前这里是设计稿里的占位数字
+    //   （⭐ 0/1/2/3 是技能能耗的示例值），渲染时根本没写过 —— 现在按 `p.energy` 填。
+    const star = cell.querySelector('[data-b3-cost], [data-b3-switch-star]');
+    if (star) {
+      const e = Number(p.energy);
+      star.textContent = Number.isFinite(e) ? `⭐ ${e}` : '⭐ —';
+      star.dataset.b3SwitchStar = Number.isFinite(e) ? String(e) : 'unknown';
+    }
     const rel = cell.querySelector('[data-b3-switch-rel-text]');
     if (rel) rel.textContent = '';        // 克制关系要倍率；拿不到就留空（不编）
-    const el = cell.querySelector('[data-b3-switch-el], [data-b3-el-name]');
-    if (el) b3El(el, Array.isArray(p.types) ? p.types[0] : (p.type ?? null));
+    // 那一格的三角同理：**必须显式写成 unknown**。设计稿在 HTML 里写死了 up/none/up/down/none，
+    // 渲染时不清掉就会一直显示"绿色优势"（人类报的就是这个）。
+    // 「换成它算不算占优」还要一个口径（拿它的哪个属性当攻击方 / 还是看承伤方向）——
+    // 没定之前**不画**，而不是替玩家挑一个算法。
+    const mark = cell.querySelector('[data-b3-rel]');
+    if (mark) mark.dataset.b3Rel = 'unknown';
+    const elSlots = cell.querySelector('.b3-el-slots');
+    if (elSlots) b3Els(elSlots, Array.isArray(p.types) ? p.types : (p.type ? [p.type] : []));
     delete cell.dataset.b3Action;
     delete cell.dataset.b3Target;
     delete cell.dataset.b3ActionKind;
@@ -1838,27 +2185,43 @@ function renderB3Panels(view) {
     }
   }
   // G3 背包屏（**严格按 v3h 渲染图**：人类已认可的定稿就是验收标准）。
-  //   渲染图那一屏是两条**设计稿条目**：`愿力强化`（候选 PVP 魔法，次数如实写「未登记」）
-  //   与 `首领化`（灰置 + 「不可用」）。引擎在标准 PVP 里**不发 item 动作**（普通道具这一类是
-  //   forbidden），所以不能「引擎没给就写这一件没有」——那与定稿完全不同。
-  //   口径：**条目来自设计稿，数值来自引擎**；引擎给了同名 item 动作就用引擎的名字/次数/说明，
-  //   没给就照渲染图显示，次数写「未登记」（绝不编 2/2）。
+  //   渲染图那一屏是两条**设计稿条目**：`愿力强化`（PVP 魔法）与 `首领化`（灰置 + 「不可用」）。
+  //   引擎在标准 PVP 里**不发普通 item 动作**（普通道具这一类是 forbidden），所以不能
+  //   「引擎没给就写这一件没有」——那与定稿完全不同。
+  //   口径：**条目来自设计稿，数值来自引擎**。
+  //
+  //   2026-09-23（接手复核）：愿力强化**已经实装**（台账 EV-PVP-WISH-POWER-UP，人类口述）：
+  //   引擎现在会发 `kind=magic, magic_id=wish_power_up` 的动作，次数 2 / 局、冷却 3 回合、
+  //   目标是自己场上那只。于是这一格的「未登记」换成**引擎给的实数**：
+  //   次数读 `view.self.magic.uses_left`，冷却读 `view.self.magic.cooldown`。
+  //   仍未核验的（愿力属性的改名道具、冷却与换人的交互）继续如实写在说明里，不编。
+  //
+  //   2026-09-25（人类口径更正）：**不占行动**。「愿力强化不占行动，就是这样，背包物品都不占行动」
+  //   「不占行动，自由动作，然后再返回背包使用一次能解除这个变招状态，不恢复消耗次数，
+  //   进入「愿力强化」3 回合冷却」；另补「『愿力冲击』就是个技能，这个算行动」。
+  //   ⇒ 点击这一格走 **`/api/roco/battle/free`**（自由动作，不推进回合，见 `playAction`），
+  //   文案里的「占一次行动」相应改成「不占行动」；换上来的愿力冲击照常占那一手（普通技能）。
+  const magicState = (view?.self?.magic && typeof view.self.magic === 'object') ? view.self.magic : null;
   const ITEM_SPEC = [
-    {id: 'wish_power_up', name: '愿力强化', usable: true,
-     desc: ['候选 · 未核验：次数 / 冷却 / 是否占行动均未登记。',
-            '把当前精灵的第一个技能换成「愿力冲击」。',
-            '再用一次可解除（解除后进冷却，不减次数）。'],
-     note: '次数与冷却均未登记'},
+    {id: 'wish_power_up', name: '愿力强化', usable: true, kind: 'magic',
+     desc: ['PVP 魔法（不是普通道具）：对**自己场上那只**使用，**不占行动**（用完这一回合照旧，你还可以照常出一手技能）。',
+            '把它的第一个技能换成「愿力冲击」（属性 = 精灵的愿力属性、能耗 2、威力 80）——换上来的这个是普通技能，用它照常占一手。',
+            '再用一次可解除（不消耗次数、进入 3 回合冷却）。'],
+     note: '每局 2 次 · 冷却 3 回合'},
     {id: 'leader_form', name: '首领化', usable: false,
      desc: ['候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。'],
      note: '需要「首领血脉」，本版未做'},
   ];
   const itemActs = (view?.legal ?? []).filter((a) => a.kind === 'item');
+  const magicActs = (view?.legal ?? []).filter((a) => a.kind === 'magic');
   const itemCells = [...root.querySelectorAll('[data-b3-item-cell]')];
   itemCells.forEach((cell, i) => {
     const spec = ITEM_SPEC[i] ?? null;
     const id = cell.dataset.b3ItemId ?? spec?.id ?? '';
-    const act = itemActs.find((a) => String(a.item_id ?? a.id ?? '') === id) ?? null;
+    // PVP 魔法按 `magic_id` 找（它**不是** item：台账写着 is_item=false）；其余仍按 item 找。
+    const act = (spec?.kind === 'magic'
+      ? magicActs.find((a) => String(a.magic_id ?? '') === id)
+      : itemActs.find((a) => String(a.item_id ?? a.id ?? '') === id)) ?? null;
     const nameEl = cell.querySelector('[data-b3-item-name]');
     if (nameEl) nameEl.textContent = act ? (act.label ?? act.name ?? spec?.name ?? id) : (spec?.name ?? id);
     // 可用性：**引擎给了才可点**；没给就灰置（渲染图里的「首领化 / 不可用」正是这种态）
@@ -1868,21 +2231,48 @@ function renderB3Panels(view) {
     cell.classList.toggle('b3-slot--grey', !usable);
     const countEl = cell.querySelector('[data-b3-item-count]');
     if (countEl) {
-      const used = act?.uses_left ?? act?.remaining ?? null;
-      const total = act?.uses_total ?? act?.per_battle ?? null;
-      countEl.textContent = act
-        ? (Number.isFinite(used) && Number.isFinite(total) ? `${used} / ${total}` : '未登记')
-        : (spec?.usable ? '未登记' : '不可用');
+      if (spec?.kind === 'magic') {
+        // 次数与冷却都读**引擎给的**那一份（`view.self.magic`）；拿不到就写「未登记」，不编。
+        const left = Number.isFinite(magicState?.uses_left) ? magicState.uses_left : null;
+        const cool = Number.isFinite(magicState?.cooldown) ? magicState.cooldown : null;
+        if (left === null) countEl.textContent = '未登记';
+        // 2026-09-25：把「时长」与「剩余」写清楚 —— 登记的 `cooldown_turns: 3` 是**时长**，
+        // 引擎给的 `view.self.magic.cooldown` 是**剩余**；两句写反了没人看得出来（上一轮已记档）。
+        else if (cool !== null && cool > 0) countEl.textContent = `${left} / 2 · 冷却剩 ${cool} 回合（共 3）`;
+        else countEl.textContent = `${left} / 2`;
+      } else {
+        const used = act?.uses_left ?? act?.remaining ?? null;
+        const total = act?.uses_total ?? act?.per_battle ?? null;
+        countEl.textContent = act
+          ? (Number.isFinite(used) && Number.isFinite(total) ? `${used} / ${total}` : '未登记')
+          : (spec?.usable ? '未登记' : '不可用');
+      }
     }
     const desc = cell.querySelector('[data-b3-item-desc]');
     if (desc) {
       const lines = act ? (act.description ?? act.desc ?? null) : spec?.desc?.join('\n');
-      desc.textContent = Array.isArray(lines) ? lines.join('\n') : (lines ?? '候选 · 未核验：说明未登记。');
+      // 这里是 textContent（不渲染 markdown）⇒ 过一道 plain()，否则玩家看到字面星号。
+      desc.textContent = plain(Array.isArray(lines) ? lines.join('\n') : (lines ?? '候选 · 还没核对过：说明未登记。'));
     }
     const note = cell.querySelector('[data-b3-item-note]');
-    if (note) note.textContent = act ? (act.note ?? '次数与冷却均未登记') : (spec?.note ?? '未核验');
+    if (note) {
+      if (spec?.kind === 'magic') {
+        const swapped = Array.isArray(magicState?.swapped) ? magicState.swapped.length
+          : (magicState?.swapped && typeof magicState.swapped === 'object' ? Object.keys(magicState.swapped).length : 0);
+        // 2026-09-24 人类口径（B）：愿力冲击是**一次性**的 —— 打出去之后第一个技能自动还原；
+        // 没用掉之前也可以再用一次愿力强化立即解除（不消耗次数、进冷却）。两条都写清楚。
+        note.textContent = swapped > 0
+          ? '愿力冲击用掉后自动还原；也可再用一次立即解除（不消耗次数、进冷却）'
+          : (act ? '每局 2 次 · 冷却 3 回合 · 不占行动' : '本回合不能再用（次数或冷却）');
+      } else {
+        note.textContent = act ? (act.note ?? '次数与冷却均未登记') : (spec?.note ?? '未核验');
+      }
+    }
     delete cell.dataset.b3Action;
-    if (act) { cell.dataset.b3Action = String((view.legal ?? []).indexOf(act)); cell.dataset.b3ActionKind = 'item'; }
+    if (act) {
+      cell.dataset.b3Action = String((view.legal ?? []).indexOf(act));
+      cell.dataset.b3ActionKind = spec?.kind === 'magic' ? 'magic' : 'item';
+    }
     b3Show(cell);
     cell.querySelectorAll('[data-b3-pending]').forEach((el) => b3Show(el));
   });
@@ -1918,9 +2308,22 @@ function renderB3Panels(view) {
         act = legal.find((a) => a.kind === 'skill' && a.skill_id === el.dataset.b3SkillId) ?? null;
       } else if (kind === 'switch' && el.dataset.b3Target !== undefined) {
         act = legal.find((a) => a.kind === 'switch' && String(a.target_index) === el.dataset.b3Target) ?? null;
+      } else if (kind === 'surrender') {
+        // 2026-09-25（人类实测「投降只扣一颗心、退不出来」的**真根因**）：投降原来只靠
+        // `data-b3-action = 渲染那一刻 view.legal 的下标`，局面一推进（state_version 变）下标就指向别的动作
+        // ⇒ 玩家点了「确认投降」却没有投降（引擎那侧是对的：`env.py::_surrender` 会给 result=loss/phase=ended）。
+        // 投降在全场**唯一**，按 kind 在当前 legal 里重新定位，不用下标。
+        act = legal.find((a) => a.kind === 'surrender') ?? null;
+      } else if (kind === 'magic' && el.dataset.b3ItemId) {
+        // 背包物品同理：按 magic_id 定位（`item_id` 是引擎给的稳定标识）
+        act = legal.find((a) => a.kind === 'magic' && String(a.magic_id ?? '') === el.dataset.b3ItemId) ?? null;
+      } else if (kind === 'item' && el.dataset.b3ItemId) {
+        act = legal.find((a) => a.kind === 'item' && String(a.item_id ?? a.id ?? '') === el.dataset.b3ItemId) ?? null;
       }
       if (!act) act = legal[Number(el.dataset.b3Action)] ?? null;   // 兜底：旧的下标路径
       if (act) playAction(act);
+      // 定位不到就**如实说**（不许静默什么都不发生——那正是这一条被玩家读成「点了没反应」的原因）
+      else sayStatus('局面已经变了，这一下没执行：请重新选一次。');
     });
   }
   const chargeBtn = root.querySelector('#b3-charge');
@@ -1958,9 +2361,19 @@ function renderB3Panels(view) {
   }
 
   // ⑤ 切屏信号：技能 / 更换 / 背包 / 逃跑（CSS 按 body.dataset.b3Tab 切左列与高亮）
+  // 2026-09-25：补位期间**自动切到更换页**（引擎只给 switch，留在技能页就是一片点不动的格子），
+  // 并把技能/物品两页标成禁用（`data-b3-tab-disabled` 由 CSS 变灰，`disabled` 让键盘也点不动）。
+  const mustReplace = mustReplaceNow();
+  if (mustReplace) state.actTab = 'switch';
   const tab = state.actTab ?? 'skill';
   document.body.dataset.b3Tab = tab;
   document.body.dataset.b3Charge = tab === 'switch' ? 'mana' : 'energy';
+  for (const btn of root.querySelectorAll('[data-b3-tab]')) {
+    const blocked = mustReplace && (btn.dataset.b3Tab === 'skill' || btn.dataset.b3Tab === 'item');
+    btn.disabled = blocked;
+    btn.dataset.b3TabDisabled = blocked ? 'yes' : 'no';
+    btn.setAttribute('aria-disabled', blocked ? 'true' : 'false');
+  }
   // v3h 底栏那四个按钮**必须真的切屏**（验收 `tab-hook-switch`/`tab-hook-item` 就是这么红的：
   // CSS 只认 `body.dataset.b3Tab`，而按钮此前没有绑定）。绑定只做一次。
   for (const btn of root.querySelectorAll('[data-b3-tab]')) {
@@ -1976,33 +2389,86 @@ function renderB3Topbar(view) {
   const self = Array.isArray(view?.self?.pets) ? view.self.pets : [];
   const selfAlive = self.filter((p) => p && p.fainted !== true).length;
   const foeAlive = Number.isFinite(view?.opponent?.living_count) ? view.opponent.living_count : null;
-  const size = self.length || 6;   // 队伍规模（我方名单长度；没开局时按 6）
-  // 对手总数按**模式规模**算：`opponent.bench` 是**后备**（不含场上），拿它加存活会数出 12 个点。
-  const foeTotal = size;
-  const dots = (alive, total) => {
+  const size = self.length || 6;   // 我方队伍规模（名单长度；没开局时按 6）
+  // 对手总数**按它自己的名单算**：`opponent.bench` 是后备（不含场上），所以总数 = 1 + bench.length，
+  // 正好是 v3h 片段给 `data-b3-dots-foe` 写的口径（`bench[].fainted + field`）。
+  // 2026-09-23（接手复核）：原来写的是 `foeTotal = size`（拿**我方**规模当对手规模），
+  // 两边规模一旦不同（例如旧 3v3 夹具 vs 六宠），对手那一排点数就会多画/少画。
+  const foeBench = Array.isArray(view?.opponent?.bench) ? view.opponent.bench.length : null;
+  const foeTotal = foeBench === null ? size : foeBench + 1;
+  const dots = (alive, total, mirror = false) => {
     if (alive === null) return '<span class="down">' + '○'.repeat(total) + '</span>';
-    return `<span class="alive">${'●'.repeat(Math.max(0, alive))}</span>`
-      + `<span class="down">${'○'.repeat(Math.max(0, total - alive))}</span>`;
+    const on = `<span class="alive">${'●'.repeat(Math.max(0, alive))}</span>`;
+    const off = `<span class="down">${'○'.repeat(Math.max(0, total - alive))}</span>`;
+    return mirror ? off + on : on + off;   // 对手一侧是镜像：倒的在前、活的靠外（见 roco.html 的 data-b3-src）
   };
   const selfDots = $('b3-dots-self');
   if (selfDots) selfDots.innerHTML = dots(selfAlive, size);
   const foeDots = $('b3-dots-foe');
-  if (foeDots) foeDots.innerHTML = dots(foeAlive, foeTotal);
+  // 2026-09-23（接手复核）：对手点序**必须镜像**。v3h 定稿两端是镜像的
+  // （fragment 第 51 行就是 `<i class="down">○○○</i><i class="alive">●●●</i>`），
+  // roco.html 自己那行 data-b3-src 也写着「点序镜像：倒的在前」，而这里原来两边都调同一个顺序
+  // → 对手掉了一只时灰点出现在**靠中间**的一侧，与定稿相反。
+  if (foeDots) foeDots.innerHTML = dots(foeAlive, foeTotal, true);
+  // 心**常显**（人类 2026-09-25：「战斗页顶部的生命心要一直看得见」）：每次顶栏渲染都按公开视图
+  // `view.mana.{self,opponent,pool}` 画一次（**心 = 魔力**，同一个量）。掉心动效（`flashHearts`）与这里
+  // 共用同一份 `drawHeartCounters`，它只是多一条「3.2s 后回到常显那一份」的动效定时器。
+  // 拿不到 mana（缺键 / 不是有限数 / pool ≤ 0）⇒ `drawHeartCounters` 保持 hidden，**绝不硬写 4 颗**。
+  drawHeartCounters(heartsFromMana(view?.mana));
   const round = $('b3-round');
   if (round) round.textContent = view ? `第 ${view.turn} 回合` : '未开局';
   const mode = $('b3-mode');
   if (mode) mode.textContent = state.mode?.id === 'pvp-standard-six-pet' ? 'PVP · AI模拟' : '训练场 · AI模拟';
+  // 天气（引擎 2026-09-25 起在标准 PVP 的公开视图里给 `weather`；`{name, turns_left}`）。
+  //
+  // 三条纪律，与引擎那一侧**同一条**（`src/server/roco-service.js:291` 的 weatherLine 是同一口径）：
+  //   ① **有才写**：`view.weather` 不存在（没天气 / 老夹具 / legacy 练习局）⇒ 保持 hidden、
+  //      **一个字都不写**（不留空壳、不写「无天气」占位）。没天气时这一格 `display:none`，
+  //      不是 flex item ⇒ 顶栏几何与这次改动之前逐位相同。
+  //   ② 文案只用引擎给的 `name` 与 `turns_left`：**不翻译**天气名（引擎写「雨天」就显示「雨天」）。
+  //   ③ 缺 `turns_left`（不是有限数）时**只报名字**，绝不编一个回合数出来。
+  // 判据：本轮的浏览器判据 F1/F2/F3（有天气 / 缺回合数 / 没天气三态）。
+  const weather = $('b3-weather');
+  if (weather) {
+    const w = view?.weather ?? null;
+    const name = typeof w?.name === 'string' ? w.name.trim() : '';
+    const turns = Number.isFinite(w?.turns_left) ? w.turns_left : null;
+    if (!name) {
+      weather.hidden = true;
+      weather.textContent = '';
+      delete document.body.dataset.b3Weather;
+    } else {
+      weather.textContent = turns === null ? name : `${name} · 还剩 ${turns} 回合`;
+      weather.hidden = false;
+      // 给验收读的镜像（数不到就给 null，不写 0）：名字与回合数都只来自引擎。
+      document.body.dataset.b3Weather = name;
+      if (turns === null) delete document.body.dataset.b3WeatherTurns;
+      else document.body.dataset.b3WeatherTurns = String(turns);
+    }
+  }
   document.body.dataset.b3Turn = view ? String(view.turn) : '';
 }
 
 /**
  * 立绘（人类 2026-09-23）：中间那块预留区放精灵立绘；出招时换成「动作立绘」并加动效。
  *
- * 图在仓库外（`/api/roco/sprite?name=…&v=default|action`，只读路由）。
+ * 图在仓库外（`/api/roco/sprite?id=…&name=…&v=default|action`，只读路由）。
  * 拿不到图就**留空**（不画占位、不猜），并把 `data-b3-sprite="none"` 记下来给判据。
+ *
+ * 2026-09-23（接手复核）：**主键是物种 id，不是名字**（立绘 README 原话：
+ * 「资源以 asset_key 绑定，不用显示名称做主键」）。实测过两个按名字取会错的例子：
+ *   · 「棋契陛下」在 manifest 里占两个槽位（38/48）且两张图不同 → 按名字取只能给第一张，
+ *     第 48 槽那一只永远显示错图；
+ *   · 「权杖-V」的 key 带连字符，被路由的 key 正则判成 400，永远取不到图。
+ * 服务端现在支持 `id` 解析（pet_id → 槽位 → asset_key），名字只作兜底，所以两个都带上。
  */
-function b3SpriteUrl(name, variant) {
-  return `/api/roco/sprite?name=${encodeURIComponent(String(name || ''))}&v=${variant}`;
+function b3SpriteUrl(petOrName, variant) {
+  const pet = (petOrName && typeof petOrName === 'object') ? petOrName : {name: petOrName};
+  const params = new URLSearchParams();
+  if (pet.pet_id) params.set('id', String(pet.pet_id));
+  if (pet.name) params.set('name', String(pet.name));
+  params.set('v', variant);
+  return `/api/roco/sprite?${params.toString()}`;
 }
 
 function renderB3Sprites(view) {
@@ -2024,8 +2490,10 @@ function renderB3Sprites(view) {
       fx.className = 'b3-fx';
       box.appendChild(fx);
     }
-    const want = b3SpriteUrl(pet.name, box.dataset.b3Variant === 'action' ? 'action' : 'default');
+    const want = b3SpriteUrl(pet, box.dataset.b3Variant === 'action' ? 'action' : 'default');
     if (img.dataset.src !== want) { img.dataset.src = want; img.src = want; }
+    box.dataset.b3PetId = String(pet.pet_id ?? '');
+    box.dataset.b3VariantNow = box.dataset.b3Variant === 'action' ? 'action' : 'default';
     img.onerror = () => { box.dataset.b3Sprite = 'none'; img.remove(); };
     img.onload = () => { box.dataset.b3Sprite = 'ok'; };
     box.dataset.b3Side = side;
@@ -2036,34 +2504,182 @@ function renderB3Sprites(view) {
 
 /**
  * 动效与飘字（人类：攻击 / 受击 + 显示受到的伤害与回血）。
- * 数据只来自引擎事件：`damage` 事件给伤害、`heal`/`energy` 类给回复；没有就不画。
+ * 数据只来自引擎事件：`damage` 事件给伤害、`heal`/`lifesteal` 给回复；没有就不画。
+ *
+ * 2026-09-25（人类：「洛手攻击/动作都有先后，你不要同时做；我要的伤害显示呢？现在只有动效」）：
+ *
+ * ① **同一帧播放**：旧实现是一个 `for` 循环，把这一回合所有事件的动效在**同一帧**全排上去 ——
+ *    出手方前冲、受击方抖动、伤害数字是同时发生的（实测三者的 `performance.now()` 差 **0.1ms**）。
+ *    玩家看到的是「整张卡闪一下」，读不出谁先动、谁挨打、掉了多少。现在改成一条**顺序时间线**：
+ *      · 一个 `damage` 事件 = 两拍：先出手方（动作立绘 + 前冲），`B3_FX_LEAD` 毫秒后才是受击方
+ *        （抖动 + 伤害数字）—— 这两拍之间的间隔就是人类要的「先后」；
+ *      · 其它事件（回复/吸血/防御/未击中/倒下）各占一拍，**按引擎给的顺序**往后排；
+ *      · 整段超过 `B3_FX_BUDGET` 就压缩间隔，但**一拍都不丢**、也不把间隔压到 `B3_FX_GAP_MIN`
+ *        以下（压到人眼分不出来就等于又变成「同时做」，宁可整段略超 3 秒）。
+ * ② **数字看不见**：`.b3-sprite` 是 flex item、`z-index:1`，而飘字层 `.b3-fx` 的 `z-index:auto`
+ *    ——立绘把数字**盖在下面**（实测绘制序 `img.b3-sprite > span.b3-float`）。修在 CSS 里
+ *    （`.b3-fx{z-index:2}`），这里只管把数字画出来。
+ *
+ * 数字只来自引擎事件（字段见 `roco/src/roco_env/env.py` 的 `_bump(...)`）：
+ * `damage.detail.damage`=实际伤害、`heal.detail.healed`=回复量、`lifesteal.detail.healed`=吸血回复。
+ * 事件里没给的数字**不画**，页面不自己算伤害、不猜回复量。
  */
-function b3PlayActionFx(events) {
-  const list = Array.isArray(events) ? events : [];
-  for (const e of list) {
+const B3_FX_BUDGET = 3000;   // 整段动效的时间预算（ms）
+const B3_FX_LEAD = 450;      // 「出手」→「受击」的间隔（ms）：人类要看见的先后就是这一档
+const B3_FX_GAP_MIN = 220;   // 间隔压缩下限（ms）：再快人眼分不出先后（也守住 ≥200ms 的可见性判据）
+
+/**
+ * 出招时切**动作立绘**，收招回落（人类 2026-09-24：「我看 action 的立绘没用上」）。
+ *
+ * 之前只有 `renderB3Sprites()` 里读 `box.dataset.b3Variant` 这一行，**没有任何地方写它** ——
+ * 也就是说动作立绘这条路是死的（默认立绘永远显示）。这里在出手/受击的动效窗口里
+ * 把对应那一侧的立绘换成 `action`，`ms` 毫秒后回落，并重新渲染一次保证图片真的换回来。
+ */
+function b3SwapVariant(cardSel, variant, ms = 900) {
+  const card = document.querySelector(cardSel);
+  const box = card?.querySelector('[data-b3-spritebox]') || card?.querySelector('.b3-free');
+  const img = box?.querySelector('img.b3-sprite');
+  if (!box || !img) return;
+  const view = state.view;
+  const pet = cardSel.includes('foe') ? view?.opponent?.field : view?.self?.pets?.[view?.self?.active ?? 0];
+  if (!pet?.name) return;
+  const url = b3SpriteUrl(pet, variant);
+  box.dataset.b3Variant = variant;
+  box.dataset.b3VariantNow = variant;
+  if (img.dataset.src !== url) { img.dataset.src = url; img.src = url; }
+  clearTimeout(box._b3VariantTimer);
+  box._b3VariantTimer = setTimeout(() => {
+    box.dataset.b3Variant = 'default';
+    box.dataset.b3VariantNow = 'default';
+    const back = b3SpriteUrl(pet, 'default');
+    if (img.dataset.src !== back) { img.dataset.src = back; img.src = back; }
+  }, ms);
+}
+
+/**
+ * 把这一回合的引擎事件摊成「一拍一个动作」的队列（顺序 = **引擎给的顺序**）。
+ *
+ * 为什么要先建队列再播：`damage` 一件事其实是两拍（出手 → 受击），中间要留出人类看得见的
+ * 先后；如果边遍历边播，受击那一拍只能和出手同一帧发生（旧实现就是这样）。
+ *
+ * 只认引擎事件里**真的有**的字段（`roco/src/roco_env/env.py` 的 `_bump(...)`）：
+ *   damage            → detail.side=出手方、damage=实际伤害、type_multiplier=克制倍率
+ *   heal              → detail.side=被治疗方、healed=回复量
+ *   lifesteal         → detail.side=吸血方、healed=吸血回复量
+ *   overheal_to_stat  → detail.side、gain_pct=转化出的属性增益百分比、chunks=转化了几档
+ *   defense           → detail.side=用了防御的一方、reduction=减伤比例、respond=是否应对成功
+ *   action_cancelled  → detail.side=被打断的一方、reason（力竭/…）
+ *   faint             → detail.side=倒下的一方
+ * 数字读不到就**只播动作、不画数字** —— 页面不自己算伤害、不猜回复量。
+ */
+function b3BuildFxCues(events) {
+  const cardOf = (side) => (side === 'player' ? '[data-b3-self-card]'
+    : (side === 'enemy' ? '[data-b3-foe-card]' : null));
+  const cues = [];
+  for (const e of Array.isArray(events) ? events : []) {
     const kind = e?.kind ?? '';
     const side = e?.detail?.side ?? e?.side ?? null;
+    const card = cardOf(side);
     if (kind === 'damage') {
       const dmg = Number(e?.detail?.damage ?? e?.damage);
-      const target = side === 'player' ? '[data-b3-foe-card]' : '[data-b3-self-card]';
-      const defender = (side === 'player' || side === 'enemy') ? target : null;
-      const attacker = side === 'player' ? '[data-b3-self-card]' : '[data-b3-foe-card]';
-      if (defender && Number.isFinite(dmg)) b3Float(defender, `-${dmg}`, 'hit');
-      b3Pulse(attacker, 'b3-attack');
-      if (defender) b3Pulse(defender, 'b3-hit');
+      const foeCard = cardOf(side === 'player' ? 'enemy' : (side === 'enemy' ? 'player' : null));
+      // 第 1 拍：出手方 —— 动作立绘 + 前冲（人类 2026-09-24 点名 action 立绘没用上）
+      if (card) cues.push({card, act: true});
+      // 第 2 拍：受击方 —— 抖动 + 伤害数字；引擎没给数字就只抖
+      if (foeCard) {
+        const mult = Number(e?.detail?.type_multiplier);
+        const kindCls = mult > 1 ? 'strong' : (mult < 1 ? 'weak' : 'hit');
+        cues.push({card: foeCard, hit: true, kind: kindCls,
+          text: Number.isFinite(dmg) ? `-${dmg}` : null});
+      }
+      continue;
     }
-    if (kind === 'heal' || kind === 'recovery') {
-      const amount = Number(e?.detail?.amount ?? e?.detail?.heal ?? e?.amount);
-      const card = (side === 'player' || side === 'enemy') ? '[data-b3-self-card]' : '[data-b3-foe-card]';
-      if (Number.isFinite(amount)) b3Float(card, `+${amount}`, 'heal');
+    if (kind === 'heal') {
+      // 引擎的 heal 事件把回复量写在 `healed`（不是 amount）—— 旧读法这一条永远读不到数。
+      const amount = Number(e?.detail?.healed ?? e?.detail?.amount ?? e?.detail?.heal);
+      if (card && Number.isFinite(amount) && amount > 0) cues.push({card, text: `+${amount}`, kind: 'heal'});
+      continue;
+    }
+    if (kind === 'lifesteal') {
+      const amount = Number(e?.detail?.healed);
+      if (card && Number.isFinite(amount) && amount > 0) cues.push({card, text: `+${amount}`, kind: 'heal'});
+      continue;
+    }
+    if (kind === 'overheal_to_stat') {
+      // 溢出回复转成属性增益：`gain_pct`/`chunks` 都是引擎给的数，照抄不加工。
+      // （旧代码想在 `lifesteal` 上读 `chunks` —— 那个事件根本没有这个字段，是一段死分支。）
+      const gain = Number(e?.detail?.gain_pct);
+      if (card && Number.isFinite(gain) && gain > 0) cues.push({card, text: `溢出转化 +${gain}%`, kind: 'buff'});
+      continue;
+    }
+    if (kind === 'defense') {
+      // 防御挡下了这一手：写在**用防御那一侧**的卡上；`reduction` 是引擎给的减伤比例。
+      const reduction = Number(e?.detail?.reduction);
+      const pct = Number.isFinite(reduction) && reduction > 0 ? ` ${Math.round(reduction * 100)}%` : '';
+      if (card) cues.push({card, text: `防御${pct}`, kind: 'shield'});
+      continue;
+    }
+    if (kind === 'action_cancelled') {
+      // 未击中（力竭/被打断）：写在那只精灵自己头上。引擎这条事件里**没有任何数字**，就不画数字。
+      if (card) cues.push({card, text: '未击中', kind: 'miss'});
+      continue;
+    }
+    if (kind === 'faint') {
+      if (card) cues.push({card, text: '倒下', kind: 'faint'});
     }
   }
+  return cues;
+}
+
+// 时间线的定时器句柄：换回合/重开出招前要能整段撤掉，否则两段时间线会叠在一起播。
+let b3FxTimers = [];
+
+function b3CancelActionFx() {
+  for (const id of b3FxTimers) clearTimeout(id);
+  b3FxTimers = [];
+}
+
+/** 播**一拍**：出手（攻击方）或受击/状态（受击方）。 */
+function b3RunFxCue(cue, gap) {
+  if (cue.act) {
+    b3Pulse(cue.card, 'b3-attack');
+    // 动作立绘撑过「受击」那一拍再回落，但要在下一个 actor 出手前还回去
+    b3SwapVariant(cue.card, 'action', Math.max(650, gap + 300));
+    return;
+  }
+  if (cue.hit) b3Pulse(cue.card, 'b3-hit');
+  if (cue.text) b3Float(cue.card, cue.text, cue.kind);
+}
+
+/**
+ * 出招动效的时间线入口（`applyResult` 里只保留这一条播放路径）。
+ *
+ * 间隔怎么定：基准 `B3_FX_LEAD`（450ms）—— 出手和受击就隔这一档，人眼读得出「谁先动」；
+ * 一拍多的回合整段会超 3 秒，就按拍数**等比压缩**到 `B3_FX_BUDGET` 内，
+ * 但压不过 `B3_FX_GAP_MIN`（220ms）：宁可整段略超 3 秒，也不许把两拍挤成一拍
+ * ——「同时做」正是人类这次要修掉的东西。压缩只改间隔，**一拍都不丢**。
+ */
+function b3PlayActionFx(events) {
+  const cues = b3BuildFxCues(events);
+  b3CancelActionFx();                    // 上一段还没播完就又出招：先撤旧时间线，避免两段交叉
+  if (!cues.length) return;
+  const gap = cues.length > 1
+    ? Math.max(B3_FX_GAP_MIN, Math.min(B3_FX_LEAD, B3_FX_BUDGET / (cues.length - 1)))
+    : 0;
+  cues.forEach((cue, i) => {
+    const at = Math.round(i * gap);
+    if (at <= 0) b3RunFxCue(cue, gap);
+    else b3FxTimers.push(setTimeout(() => b3RunFxCue(cue, gap), at));
+  });
 }
 
 function b3Pulse(sel, cls) {
   const card = document.querySelector(sel);
   if (!card) return;
-  card.classList.remove(cls);
+  // 出手 / 受击是**互斥**状态：一张卡不会同时「正在出手」又「正在挨打」。
+  // 不互斥的话两个状态会叠在同一个 class 属性上，外面用 MutationObserver 量时序的人
+  // 会把「A 状态到点被清理」误读成一次新的 A（实测出现过 199ms 的假间隔）。
+  card.classList.remove(cls === 'b3-attack' ? 'b3-hit' : 'b3-attack', cls);
   void card.offsetWidth;                 // 重排一次，动画能重放
   card.classList.add(cls);
   setTimeout(() => card.classList.remove(cls), 700);
@@ -2071,12 +2687,23 @@ function b3Pulse(sel, cls) {
 
 function b3Float(sel, text, kind) {
   const card = document.querySelector(sel);
-  const fx = card?.querySelector('.b3-fx');
-  if (!fx) return;
+  if (!card) return;
+  const box = card.querySelector('[data-b3-spritebox]') || card.querySelector('.b3-free');
+  let fx = card.querySelector('.b3-fx');
+  if (!fx) {
+    // 立绘取不到时 `renderB3Sprites()` 不会建飘字层 —— 但**数字该看见还是得看见**
+    // （伤害是引擎给的，和立绘在不在没关系），这里补一层。
+    if (!box) return;
+    fx = document.createElement('div');
+    fx.className = 'b3-fx';
+    box.appendChild(fx);
+  }
   const span = document.createElement('span');
   span.className = `b3-float b3-float--${kind}`;
   span.textContent = text;
   fx.appendChild(span);
+  // 存活 1.2s（= CSS 动画时长）：外面用 rAF 采样「数字在哪、在最上层吗」需要这个窗口，
+  // 也不能留着不删 —— 到点真的从 DOM 里摘掉。
   setTimeout(() => span.remove(), 1200);
 }
 
@@ -2220,7 +2847,7 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
   state.lastAdviceEvidence = adviceText?.evidence ?? null;
   const preview = rocoDamagePreviewText(plan);
   const riskLine = plan?.risk
-    ? `<p>风险：期望到最坏差 ${plan.risk.downside_max ?? '—'}${plan.risk.fragile ? '（**这一手不稳**）' : ''}${plan.risk.top_risks?.length ? ` · 最差的对手选择是「${plan.risk.top_risks[0].opponent_action}」` : ''}</p>`
+    ? `<p>风险：期望到最坏差 ${plan.risk.downside_max ?? '—'}${plan.risk.fragile ? '（这一手不稳）' : ''}${plan.risk.top_risks?.length ? ` · 最差的对手选择是「${plan.risk.top_risks[0].opponent_action}」` : ''}</p>`
     : '';
   const adviceEvidence = state.lastAdviceEvidence
     ? `<p class="muted">这条建议用了这些公开事实：${Object.entries(state.lastAdviceEvidence)
@@ -2230,9 +2857,9 @@ function refreshHint({reason = 'turn', plan = state.plan, explicit = false} = {}
     ${adviceEvidence}${preview ? `<p><strong>${preview}</strong></p>` : ''}
     <p>${expectedLine(plan)}</p>
     <p>搜索：${plan?.branches_evaluated ?? '—'} 个分支 · 深度 ${plan?.depth_searched ?? '—'} · 分析种子 ${(plan?.analysis_seeds ?? []).join('/')}</p>
-    <p>对手应对：${plan?.main_counter ?? '引擎没给出'}（是启发式建模，不是真人行为）</p>
+    <p>对手最可能的应对：${plan?.main_counter ?? '这次没算出来'}（是按规则推的，不是真人行为）</p>
     ${riskLine}
-    <p class="muted">这是公开信息 + 固定分析种子的结果，真实对局 seed 没有参与；也不声称胜率。伤害数字来自**未核验公式**，是估值而不是实测值。</p>`;
+    <p class="muted">这是按公开信息推算的，不是真实对局数据，也不代表胜率。伤害是估算值（公式还没核对过）。</p>`;
   // 军师浮条与「小芽那一栏」是**两条独立通道**：浮条自己冒出来，不要求玩家先打开那一栏
   // （F01 要证的正是这个）。两条同时在时浮条在上，`--coach-under` 保证它不压住输入行。
   // ⚠ 这一行**必须**在：`#hint` 的 `hidden` 属性来自 HTML 的初始状态，
@@ -2260,7 +2887,7 @@ function b3RejectGuard(data) {
   const rejected = data?.ok === false || !data?.view;
   if (!rejected) return false;
   const why = data?.error || data?.error_type || '引擎没有接受这一步';
-  setText('plan-status', `这一步没被接受：${why}（局面保持在上一手）`);
+  sayStatus(`这一步没被接受：${why}（局面保持在上一手）`);
   if (data?.view) state.view = data.view;
   render();
   return true;
@@ -2273,21 +2900,73 @@ function applyResult(data) {
   if (Array.isArray(state.view?.legal) && state.view.legal.length) state.lastLiveView = state.view;
   const fresh = Array.isArray(data.view?.events) ? data.view.events : null;
   if (fresh) state.matchEvents = [...state.matchEvents, ...fresh];
-  // 掉心提示：比对**引擎给的魔力**（我方的变化）——只在减少时出现几秒，页面不自己算。
+  // 掉心提示（2026-09-23 扩展）：比对**引擎给的魔力**——**两边都看**，谁掉了就说谁，
+  // 同时按定稿把两侧心数短暂显形（平时保持 hidden）。数字全部来自 `view.mana`，页面不自己算。
   const beforeMana = state.lastMana ?? null;
-  const nowMana = Number.isFinite(data?.view?.mana?.self) ? data.view.mana.self : null;
-  if (beforeMana !== null && nowMana !== null && nowMana < beforeMana) {
-    const lost = beforeMana - nowMana;
-    showHeartPop(`我方掉了 ${lost} 颗心（${beforeMana} → ${nowMana}）`);
+  const nowSelf = Number.isFinite(data?.view?.mana?.self) ? data.view.mana.self : null;
+  const nowFoe = Number.isFinite(data?.view?.mana?.opponent) ? data.view.mana.opponent : null;
+  const pool = Number.isFinite(data?.view?.mana?.pool) ? data.view.mana.pool : null;
+  let heartChanged = false;
+  if (beforeMana) {
+    for (const [side, before, after] of [['self', beforeMana.self, nowSelf],
+      ['foe', beforeMana.opponent, nowFoe]]) {
+      if (!Number.isFinite(before) || !Number.isFinite(after) || after >= before) continue;
+      const lost = before - after;
+      const who = side === 'self' ? '我方' : '对方';
+      const arrow = heartArrow(before, after, pool);
+      showHeartPop(`${arrow ? `${arrow}  ` : ''}${who}掉了 ${lost} 颗心`);
+      heartChanged = true;
+    }
   }
-  if (nowMana !== null) state.lastMana = nowMana;
+  if (heartChanged || (beforeMana && (beforeMana.self !== nowSelf || beforeMana.opponent !== nowFoe))) {
+    flashHearts({self: nowSelf, opponent: nowFoe, pool});
+  }
+  if (nowSelf !== null || nowFoe !== null) state.lastMana = {self: nowSelf, opponent: nowFoe};
   if (b3RejectGuard(data)) return;   // 引擎拒绝这一步时的守卫（见下）
   state.view = data.view;
   if (Array.isArray(data.view?.events)) state.events = data.view.events;
   render();
-  flashDamage(data.view?.events);
+  flashDamage(data.view?.events);      // legacy 3v3 页面的飘字（元素不在时自动空转）
+  b3PlayActionFx(data.view?.events);   // v3h 战场：动作立绘 + 受击/治疗/未击中/倒下
   if (state.view?.battle_result) void finishMatch();
-  else refreshHint({reason: 'after-advance'});
+  else {
+    refreshHint({reason: 'after-advance'});
+    autoAdvanceOpponentReplace();
+  }
+}
+
+/**
+ * 2026-09-23（接手复核，人类报的「对方死了精灵不会自动更换一直卡死」）：
+ *
+ * 补位阶段有两种：**我方要补**（等玩家选一只，那是玩家的决定）和**只有对手要补**
+ * （引擎自己替对手选，玩家没有任何可决定的）。第二种情况下页面把行动卡收起来、
+ * 只留一句「点『让双方各走一步』继续」—— 而那个按钮在 v3h 版式里根本不在屏幕上
+ * （`#auto-turn` 收在小芽面板里），于是**页面上没有任何可点的东西**，
+ * 实测第 9 回合停在 `phase=replace` 再也不动，看起来就是卡死。
+ *
+ * 既然这一步不需要玩家输入，就**由页面自动推进**（与服务端 `service.py` 里
+ * 「补位队列两边都要处理」的口径一致）。护栏：
+ *   · 只在 `needs_replacement` **明确不含 player** 时触发（数组缺失/形状不对一律不自动走，
+ *     宁可让玩家点，也不替玩家做决定）；
+ *   · 同一个 `state_version` 只自动走一次（避免服务端没换人时打成死循环）；
+ *   · 连续自动推进超过 8 次就停下并把原因写到 `#plan-note`（不静默空转）。
+ */
+function autoAdvanceOpponentReplace() {
+  const view = state.view;
+  const queue = Array.isArray(view?.needs_replacement) ? view.needs_replacement : null;
+  const onlyFoe = view?.phase === 'replace' && queue !== null && !queue.includes('player');
+  if (!onlyFoe) { state.foeReplaceAuto = null; return; }
+  const version = view.state_version ?? null;
+  if (state.foeReplaceAuto?.version === version) return;         // 这一版已经自动走过一次
+  const attempts = (state.foeReplaceAuto?.attempts ?? 0) + 1;
+  if (attempts > 8) {
+    sayStatus('对手连续补位多次仍未推进：请重开一局，这一条会记进排查日志。');
+    state.foeReplaceAuto = {version, attempts};
+    return;
+  }
+  state.foeReplaceAuto = {version, attempts};
+  const wait = 420;
+  state.foeReplaceTimer = setTimeout(() => { void autoTurn(); }, wait);
 }
 
 // ── 阵容池（P0-1 / 第 92 轮重做）────────────────────────────────────────────
@@ -2654,7 +3333,8 @@ function togglePick(petId) {
 /** 阵容选择里两方的中文说法与提示区：提示是**可执行的下一步**，不是「不能选」。 */
 const sideName = (side) => (side === 'enemy' ? '对手' : '我方');
 function setPickHint(text) {
-  state.pick.hint = text;
+  // 这个提示会经 textContent 上屏（不渲染 markdown）⇒ 统一在这里去记号，调用方不必各自记得。
+  state.pick.hint = plain(text);
 }
 
 /**
@@ -2738,6 +3418,10 @@ async function loadShadowPanel() {
   box.innerHTML = '<p class="muted">正在问本机小模型（要拉起本地推理，可能要几秒）…</p>';
   try {
     const data = await api('/api/roco/shadow', {battle_id: state.battleId});
+    // RC-802 判据要能读到**回执本身**（而不是只读渲染后的文字）：抽屉里那两项
+    // 「耗时 N ms」「提示摘要 X…」必须逐值等于回执的 `model.latency_ms` / `prompt_digest_pin`。
+    // 只把回执挂在状态上（不改任何渲染路径），验收脚本按 `state.lastShadow` 对照。
+    state.lastShadow = data;
     if (!data.ok) throw new Error(data.error || '取不到对照结果');
     if (!data.available) {
       box.innerHTML = `<p class="muted">本地模型这次没跑成：${data.reason}</p>`;
@@ -2893,6 +3577,15 @@ async function startBattle() {
     $('companion-line').hidden = true;
     closePetDetail();
     hideHint();
+    // 2026-09-25（**真缺陷**，被 `demo-acceptance` 的「同一批输入两遍逐字节相同」判据抓到）：
+    // 上一局对手补位时挂下的 `state.foeReplaceTimer`（`:2772`，420ms 后对新局面调 `autoTurn()`）
+    // **没有在开新局时被清掉** —— 只要上一局刚进过补位、玩家在这 420ms 内开了新局，
+    // 那个定时器就会对**新的一局**再走一手。表现是「刚开的新局自己动了一手」，
+    // 也让确定性判据偶发红（实测：局面 `08-switch-low-hp-mid` 的 `battle_inputs.turn`
+    // 两遍各读到 1 / 2 —— 而它是在 `startBattle()` 之后**立刻**读的，本该恒为 1）。
+    // 与「返回营地」那条路径（`:4000` 附近）同一口径：开新局 = 上一局的挂账全部作废。
+    if (state.foeReplaceTimer) { clearTimeout(state.foeReplaceTimer); state.foeReplaceTimer = null; }
+    state.foeReplaceAuto = null;
     const body = {strategy: 'greedy_damage'};
     if (state.pick.player.length === 3) body.team = state.pick.player.slice();
     if (state.pick.enemy.length === 3) body.enemy_team = state.pick.enemy.slice();
@@ -2905,18 +3598,71 @@ async function startBattle() {
     dismissOnboard();
     await requestPlan({reason: 'match-start'});
   } catch (error) {
-    if ($('plan-status')) $('plan-status').textContent = `开局失败：${error.message}`;
+    sayStatus(`开局失败：${error.message}`);
   } finally {
     renderRoster();
   }
 }
 
+/**
+ * 这一页给教练的**局面版本**（2026-09-27，审计高 2 的后续）。
+ *
+ * 为什么必须有：服务端缓存/合并要靠它区分"是不是同一版局面"；这一页原来**从不发**，
+ * 于是同一个问题在换了局面之后还会命中上一版的答案（审计实测）。现在按
+ * 「对局号 + 引擎给的 state_version（没有就用回合数）」拼一个**会随局面变**的身份；
+ * 一局都没开时用回合数兜底，至少不会跨局复用。
+ */
+function coachStateToken() {
+  const id = state.battleId ?? state.view?.battle_id ?? null;
+  const version = state.view?.state_version ?? state.rocoPlan?.state_version ?? null;
+  const turn = state.view?.turn ?? null;
+  if (id === null && version === null && turn === null) return null;
+  return `roco:${id ?? '-'}:${version ?? '-'}:${turn ?? '-'}`;
+}
+
 async function playAction(action) {
   if (!state.battleId || !action) return;
-  const before = state.view?.state_version ?? null;
+  // 2026-09-27（审计高 3 实测）：同一张技能卡 140–180ms 内点两下会**真的打两回合**。
+  // 客户端这一层先挡住：一次行动在飞的时候，第二次点击直接忽略（服务端那侧还应加版本 CAS，
+  // 那是另一件事，见台账「没做到」）。
+  if (state.actionInFlight) return;
+  state.actionInFlight = true;
   try {
-    const data = await api('/api/roco/battle/advance', {battle_id: state.battleId, action});
+    return await playActionOnce(action);
+  } finally {
+    state.actionInFlight = false;
+  }
+}
+
+async function playActionOnce(action) {
+  const before = state.view?.state_version ?? null;
+  const wasMagic = action.kind === 'magic';
+  // ④：高亮只对「刚用过的这一下」有意义 —— 任何一次行动都先熄掉，再由引擎事件重新点灯。
+  state.magicHighlight = null;
+  try {
+    // 2026-09-25（人类口径：「愿力强化不占行动，自由动作，**背包物品都不占行动**」）：
+    // 背包物品走**自由动作**端点 —— 它**不推进回合**（对手那一手还没结算，我方仍要另出一手技能）。
+    // 能力由配置声明（`policies.magic_policy.occupies_action === false`）；没声明的配置
+    // 会被引擎 422 拒绝（fail closed），页面照实报错，**不静默降级成「占一手」**。
+    const path = wasMagic ? '/api/roco/battle/free' : '/api/roco/battle/advance';
+    // 带上"我看到的局面版本"：服务端据此做一次版本 CAS —— 两个标签页并发出招时，
+    // 后一条会被 409 挡住（而不是把先出的那一手**静默吞掉**，审计高 3 实测过）。
+    const data = await api(path, {battle_id: state.battleId, action,
+      state_version: state.view?.state_version ?? null});
     applyResult(data);
+    if (wasMagic) {
+      // ④ 用了愿力强化 → 回技能页 + 高亮换上来的「愿力冲击」（解除那一下不点灯）。
+      const fresh = Array.isArray(data?.view?.events) ? data.view.events : [];
+      const magicEvent = fresh.find((e) => e?.kind === 'magic' && e?.detail?.mode === 'transform') ?? null;
+      if (magicEvent?.detail?.skill) {
+        state.magicHighlight = {skill: String(magicEvent.detail.skill), pet: magicEvent.detail.pet ?? null};
+      }
+      if ((state.actTab ?? 'skill') !== 'skill') setActTab('skill');
+      else render();
+      // 自由动作**没有**结束这一手：这一手还要出招，所以照常要一份属于**当前局面**的建议。
+      refreshHint({reason: 'free-action', plan: null});
+      await requestPlan({reason: 'free-action'});
+    }
     // 「状态变化撤销旧建议」：换了人/补了位之后，上一手算出来的建议就地作废。
     if (state.planAtVersion !== null && state.planAtVersion !== before) state.plan = null;
     if (action.kind === 'switch' || state.view?.phase === 'replace') {
@@ -2924,8 +3670,20 @@ async function playAction(action) {
       refreshHint({reason: 'roster-changed', plan: null});
       await requestPlan({reason: 'roster-changed'});
     }
+    // 2026-09-25（人类：「换精灵后应默认回到技能页面」）：主动换宠占掉这一手，下一步又是选招；
+    // 但**补位期间例外** —— 那时引擎只给 switch，留在更换页才对（渲染层也会强制切过去）。
+    if (action.kind === 'switch' && !mustReplaceNow() && (state.actTab ?? 'skill') !== 'skill') {
+      setActTab('skill');
+    }
+    // 2026-09-25（人类「优势劣势（红绿色）不是实时计算的」的**另一半**）：普通出招之后也要
+    // 取一次计划 —— 伤害样本（以及由它来的克制三角与伤害颜色）**只随 `requestPlan` 回来**，
+    // 而原来只有开局 / 换人 / 自由动作会取 ⇒ 出招后的那几格一直是「预期伤害 —」、
+    // 三角是 unknown（实测第 2/3/5 回合整块空）。不 await：界面先动，样本到了自己重绘。
+    if (action.kind !== 'switch' && !mustReplaceNow()) {
+      void requestPlan({reason: 'after-action'});
+    }
   } catch (error) {
-    if ($('plan-status')) $('plan-status').textContent = `推进失败：${error.message}`;
+    sayStatus(`推进失败：${error.message}`);
   }
 }
 
@@ -2935,7 +3693,7 @@ async function autoTurn() {
     const data = await api('/api/roco/battle/advance', {battle_id: state.battleId, auto: true});
     applyResult(data);
   } catch (error) {
-    if ($('plan-status')) $('plan-status').textContent = `自动推进失败：${error.message}`;
+    sayStatus(`自动推进失败：${error.message}`);
   }
 }
 
@@ -2956,22 +3714,46 @@ async function requestPlan({reason = 'manual', explicit = false} = {}) {
         at: Date.now(),
       });
       refreshHint({reason: 'stale-plan', plan: null, explicit});
-      if ($('plan-status')) $('plan-status').textContent = `没有采用这份建议：${fresh.reason}`;
+      sayStatus(`没有采用这份建议：${fresh.reason}`);
       return plan;
     }
     state.plan = plan;
     state.planAtVersion = fresh.plan_version;
+    // 2026-09-25（人类实测「战斗中预期伤害一直是 —」的**真根因**）：样本由 **plan** 生产
+    // （`roco/src/roco_env/service.py` 需要 body 带 `damage_preview:true` → `samples` → `_merge_previews`；
+    // Node 侧在 `src/server/roco-service.js` 映射），而**页面技能格读的是 `state.view.damage_preview.samples`**
+    // —— 全仓只有"读"没有"写" ⇒ 实测 `samples=0`、四格全「—」。
+    // 修法：**只把引擎给的字段搬过去**；plan 没给就保持原状（继续显示「—」，那是诚实，不许自己算、不许补数）。
+    const preview = plan?.damage_preview ?? null;
+    if (preview && state.view) {
+      state.view.damage_preview = {
+        ...(state.view.damage_preview ?? {}),
+        ...preview,
+        samples: Array.isArray(preview.samples) ? preview.samples : [],
+      };
+      // 2026-09-25（主线程实测的**第二处**真根因）：只合并**不重绘**，技能格永远停在渲染那一刻的「—」——
+      // 每回合的顺序是「先 `applyResult()` 渲染 → 再 `requestPlan()` 拿到样本」，所以样本到了没人画。
+      // 实测证据：服务端 `/api/roco/plan` 回执里 `damage_preview.available=true`、`samples=[{翅刃 216},{啃咬 101}]`，
+      // 而验收脚本在同一页面读到「引擎伤害样本 0 条 … 预期伤害 —」。
+      // v3h 的四格由 `renderB3Panels(view)` 画（`:746` 那条渲染链），所以合并后必须重绘它。
+      // ⚠ 实测（真无头 Chrome 探针 `/tmp/slot-probe.mjs`）：只调 `renderB3Panels(state.view)` 时
+      // DOM 仍是「预期伤害 —」，而 `state.view.damage_preview.samples` **已经有** 216/101 ——
+      // 说明四格的文本不是那一处单独画的，必须走**整条渲染入口 `render()`**（`:727`，它在 `:745-747`
+      // 依次调 topbar/panels/sprites）才会重新落到 DOM 上。
+      // 只重绘界面：**不动 state、不重开对局、不改任何结算语义**。
+      render();
+    }
     refreshHint({reason, plan, explicit});
     const spoken = Boolean(state.hint);
-    if ($('plan-status')) $('plan-status').textContent = explicit && spoken
+    sayStatus(explicit && spoken
       ? `已在浮条上给出这一手（第 ${state.view?.turn ?? '—'} 回合）；展开可看并列比较`
       : (plan.recommendation_stable === false
         ? '这一手没有稳健结论（换个算法会变）'
-        : (spoken ? '建议已给出' : '这一手引擎没有值得单独说的局面事实（拿不到就不编）'));
+        : (spoken ? '建议已给出' : '这一手引擎没有值得单独说的局面事实（拿不到就不编）')));
     if (state.hint && state.hint.action !== 'explicit-facts') recordHintSaid();
     return plan;
   } catch (error) {
-    if ($('plan-status')) $('plan-status').textContent = `规划失败：${error.message}`;
+    sayStatus(`规划失败：${error.message}`);
     return null;
   }
 }
@@ -3015,7 +3797,9 @@ async function finishMatch() {
   state.memory = rememberBattle(state.memory, finalGame);
   saveMemory();
 
-  const {progress, review} = rocoMatchReview({
+  // 复盘加厚层（关键片段 / 资源账）走 `review.evidence` → `#lesson-note`，页面**不另拼一份**：
+  // 那些事实由 `rocoMatchDepth` 产出，每条都带事件下标，页面只负责显示。
+  const {progress, review, depth} = rocoMatchReview({
     matchId: state.battleId,
     finalView: view,
     lastLiveView: state.lastLiveView,
@@ -3039,7 +3823,13 @@ async function finishMatch() {
 
   if (review) {
     $('lesson-question').textContent = review.text;
-    $('lesson-learning').textContent = review.learning ? `这一局学到一件事：${review.learning}` : '';
+    // 「下一局练一件事」这一栏：老师那一条照旧，后面接一句**有条件**的下一步
+    // （条件来自这一局真出现过的事件——没有那样的事件时 `next_step` 是 null，这里就只剩老师那句）。
+    const nextStep = review.depth?.next_step?.text ?? null;
+    $('lesson-learning').textContent = [
+      review.learning ? `这一局学到一件事：${review.learning}` : '',
+      nextStep,
+    ].filter(Boolean).join(' ');
     $('lesson-progress').textContent = progress.checked && progress.recurred && progress.note
       ? `上一次那一课的核对：${progress.note}`
       : '';
@@ -3065,9 +3855,14 @@ async function finishMatch() {
   const entry = rocoLessonEntry({events: state.matchEvents, turns: view.turn});
   if (entry) {
     $('lesson-question').textContent = entry.question;
-    $('lesson-learning').textContent = '';
+    // 老师那一角没有转折点时（`review === null`）走这条兜底：固定问句照旧，
+    // 但加厚层里那些**真的发生过**的片段仍然显示出来（没有支撑时 `depth.evidence` 是空的）。
+    // 「下一局练一件事」这一栏原来在兜底分支里被无条件清成空 —— 而加厚层的 `next_step`
+    // 这时候可能**有内容**（例：只有对面补位、没有减员 ⇒ 老师沉默，但 `enemy-replacement-first`
+    // 成立），等于把已经算出来的一条如实结论白丢。有就写出来（这是玩家看得见的那一处）。
+    $('lesson-learning').textContent = depth?.next_step?.text ?? '';
     $('lesson-progress').textContent = '';
-    $('lesson-note').textContent = entry.note;
+    $('lesson-note').textContent = [entry.note, ...(depth?.evidence ?? [])].filter(Boolean).join(' ');
     $('lesson-card').hidden = false;
   }
   $('lesson').textContent = entry
@@ -3096,8 +3891,128 @@ async function finishMatch() {
  *   · 对局中问「这一手怎么打」走的是**规则引擎**那条路（军师浮条 + 展开取舍），不是聊天。
  * 六宠状态进模型的接线（要不要扩 `coach` 上下文合同）是**下一件事**，不是这里偷偷绕过去的事。
  */
+/**
+ * 名字 → 物种 id：**只认唯一匹配**（2026-09-25）。
+ *
+ * 为什么要这一步：工作台的公开层只给名字/系别，而引擎的 `evaluate_team` 要的是物种 id。
+ * 页面手上本来就有名单（`state.roster` / `state.rosterAll`，行里有 `pet_id` + `name`），
+ * 按名字对一次即可 —— 但**图鉴里 62 个名字是重名的**（一个名字对应多个物种），
+ * 所以这里**只在唯一匹配时才给 id**：重名、对不上、名单里没有，一律返回 `null`。
+ * 猜一个 id 交给引擎评估，比"评不了"糟得多。
+ */
+function speciesIdByName(name) {
+  if (typeof name !== 'string' || !name) return null;
+  const hits = new Set();
+  for (const rows of [state.roster, state.rosterAll]) {
+    if (!Array.isArray(rows)) continue;
+    for (const row of rows) {
+      if (row?.name === name && typeof row.pet_id === 'string' && row.pet_id) hits.add(row.pet_id);
+    }
+  }
+  return hits.size === 1 ? [...hits][0] : null;
+}
+
+//: 六维的键（引擎 `kind:'roster'` 回执里就是这六个；**白名单**，别的一律不带）。
+const LINEUP_STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+
+/**
+ * 按名字在页面留着的名单里找**唯一**那一行（`state.roster` / `state.rosterAll`）。
+ * 重名（多个 pet_id）返回 `null` —— 与 `speciesIdByName()` 同一条纪律：对不上就不猜。
+ */
+function rosterRowByName(name) {
+  if (typeof name !== 'string' || !name) return null;
+  const rows = [];
+  for (const list of [state.roster, state.rosterAll]) {
+    if (!Array.isArray(list)) continue;
+    for (const row of list) {
+      if (row?.name === name && typeof row.pet_id === 'string' && row.pet_id) rows.push(row);
+    }
+  }
+  const ids = new Set(rows.map((row) => row.pet_id));
+  return ids.size === 1 ? rows[0] : null;
+}
+
+/**
+ * 从名单行里取**六维**（2026-09-25）。
+ *
+ * 为什么要带：玩家问「我这六只谁速度最快？」时，包里原来只有名字与系别 —— 真机实测回答是
+ * 「我手头没有这六只的速度数值」，而引擎**早就把六维发给页面了**（`/api/roco/pool` 每行带
+ * `stats`）。六个数字共 273 字节，直接放进包，模型就能自己比 —— 这是**给事实**，不是替它算结论。
+ * 六个键必须齐全才带（缺一个就不带，免得半真半假）。
+ */
+function lineupStatsOf(row) {
+  const stats = row?.stats;
+  if (!stats || typeof stats !== 'object') return null;
+  const out = {};
+  for (const key of LINEUP_STAT_KEYS) if (Number.isFinite(stats[key])) out[key] = stats[key];
+  return Object.keys(out).length === LINEUP_STAT_KEYS.length ? out : null;
+}
+
+/**
+ * 玩家**当前选的那六只**（六槽工作台），给 `/api/coach` 的 `profile.lineup`（2026-09-25）。
+ *
+ * 为什么需要：`coachCampContext()` 送的 `profile.pets` 是**候选池前 12 只**，
+ * 不是"你选的这六只"。所以「我这队都有谁」「我这队属性怎么样」这类问题，
+ * 模型看到的是一堆不相干的候选 —— 真机实测回答会是「你带的六只是：喵喵、水蓝蓝…」
+ * 这种**听起来很确定的错话**。
+ *
+ * 数据来源只有一处：工作台回执的**公开层** `player.slots`（`state.teamWorkshop.payload`）。
+ *   · 只取 `state === 'filled'` 的槽位；
+ *   · 公开层没有物种 id ⇒ 用 `speciesIdByName()` **唯一匹配**才补上，重名/对不上就不带 id
+ *     （不带 id 时教练仍能说"你这六只是谁"，但**不能**把它们交给引擎评估 —— 这是如实的能力边界）；
+ *   · 名字拿不到就整条不发 —— 宁可不发，也不发一条半真半假的。
+ * 没有工作台回执（没进过配队页）时返回 `null`，调用方据此不加这个键。
+ */
+function coachLineup() {
+  const slots = state.teamWorkshop?.payload?.player?.slots;
+  if (!Array.isArray(slots)) return null;
+  const filled = slots
+    .filter((slot) => slot?.state === 'filled' && typeof slot.name === 'string' && slot.name.trim())
+    .map((slot) => {
+      const name = slot.name.trim().slice(0, 24);
+      const id = speciesIdByName(name);
+      // 六维来自页面留着的同一份名单行（唯一匹配才有）；拿不到就不带，绝不填 0 充数。
+      const stats = lineupStatsOf(rosterRowByName(name));
+      return {
+        ...(id ? {id} : {}),
+        name,
+        ...(Array.isArray(slot.types) && slot.types.length
+          ? {types: slot.types.filter((t) => typeof t === 'string' && t).slice(0, 2)} : {}),
+        ...(stats ? {stats} : {}),
+      };
+    });
+  return filled.length ? filled : null;
+}
+
+/**
+ * ⚠ 这一页**故意不送**养成存档（`profile.growth`）。
+ *
+ * 本机那份存档（`localStorage` 的 `pet-coach-growth-v1`）是**练习局夹具**：烬尾狐/潮甲龟/林鹿
+ * 三只自研宠 + 一套练习用训练点，与这一页的 622 图鉴**不是一套数据**（同一条判断见
+ * `xiaoya.js` 的 `loadMobileProfile()`：「为什么不用本仓 MVP 存档」，人类 2026-09-25 实测过
+ * 这一页「还有老版的宠物名字」，根因就是把它当成了手游侧的资料）。
+ *
+ * 后果会很具体：把这份存档当 `growth` 送上去，小芽就会对着一只 `pet_000118` 说
+ * 「你现在有 4 个训练点、烬尾狐 Lv.3 还差 5 格」—— 那是**另一个游戏**的进度，属于编事实。
+ * 所以这一页宁可走 `profile-shape.js` 那句如实的话（说清这份数据在哪、玩家直接说数就能算），
+ * 也不拿一份别的存档去凑一个"有数字的答案"。等哪天有**真正拥有这份存档**的页面要接，再显式打开。
+ */
+
 function coachCampContext() {
   const rows = (state.pool.rows?.length ? state.pool.rows : state.roster).slice(0, 12);
+  const lineup = coachLineup();
+  // 2026-09-25：**这一页是什么、总共有多少**。真机实测：「我一共有多少只精灵？」→
+  // 「你名下有 12 只精灵。」—— 那 12 条其实是**候选池的第 1 页**（图鉴 622 条分页），
+  // 而页面明明知道真实总数（`state.pool.total` / `state.rosterTotal`）。这是一句
+  // 听起来很确定的错话，比"不知道"糟得多。只送页面**真的有**的数：拿不到就不写。
+  const poolSummary = {
+    ...(Number.isFinite(state.pool.total) ? {total: state.pool.total} : {}),
+    ...(Number.isFinite(state.pool.page) ? {page: state.pool.page} : {}),
+    ...(Number.isFinite(state.pool.pages) ? {pages: state.pool.pages} : {}),
+    ...(typeof state.pool.source === 'string' && state.pool.source ? {source: state.pool.source} : {}),
+    ...(state.pool.allSupport === true ? {all_support: true} : {}),
+    ...(Number.isFinite(state.rosterTotal) ? {roster_total: state.rosterTotal} : {}),
+  };
   return {
     mode: 'camp',
     profile: {
@@ -3106,14 +4021,156 @@ function coachCampContext() {
         role: p.role ?? null, stats: p.stats ?? null,
         mechanism: p.mechanism?.line ?? null,
       })),
+      ...(Object.keys(poolSummary).length ? {pool_summary: poolSummary} : {}),
+      // 只有真的选过队伍才带这一项（没选过就不出现，老路一字不变）。
+      ...(lineup ? {lineup} : {}),
     },
     battle: null,
   };
 }
 
+/**
+ * 六宠对局的**公开状态**：给 `/api/coach` 的 `context.roco_battle`（2026-09-25）。
+ *
+ * 为什么需要它：打六宠对局时小芽的聊天**看不到战况** —— 上下文一直是营地那一份
+ * （`coachCampContext()`），所以玩家问「我现在该换谁」时模型手上没有数据，
+ * 战术只能走规则引擎那条路。这一条把引擎的**公开视图**送进教练上下文。
+ *
+ * 全部来自 `state.view`（引擎的公开视图），**一个字都不编**：
+ *   · 我方：整队 —— 屏幕上全画着（名字/血量/能量/是否倒下）；
+ *   · 对手：**只有场上那一只** —— 视图本来就不给对手后备的 id（上场前不亮明），
+ *     所以后备只带位次与是否倒下；这里**不许补 id**，补了就是伪造公开面之外的信息；
+ *   · 引擎没给的键**直接不出现**，不是 null、更不是 0。
+ *
+ * 没开局时返回 `null`，调用方据此**不加**这个字段 —— 营地/三宠那两条老路一字不变。
+ */
+function coachRocoBattle() {
+  const view = state.view;
+  if (!view || !Number.isInteger(view.turn) || !Array.isArray(view.self?.pets)) return null;
+  const row = (p) => {
+    if (!p) return null;
+    const out = {};
+    if (typeof p.pet_id === 'string' && p.pet_id) out.pet_id = p.pet_id;
+    if (typeof p.name === 'string' && p.name) out.name = p.name;
+    for (const key of ['hp', 'max_hp', 'energy']) {
+      if (Number.isFinite(p[key])) out[key] = p[key];
+    }
+    if (typeof p.alive === 'boolean') out.alive = p.alive;
+    else if (Number.isFinite(p.hp)) out.alive = p.hp > 0;   // 视图只给血量时如实推导，不猜
+    if (typeof p.status === 'string' && p.status) out.status = p.status;
+    return out;
+  };
+  const selfPets = view.self.pets.map(row).filter(Boolean);
+  // 校验要求我方每只都有 id：拿不到就整条不发（宁可不发，也不发一份缺 id 的战况）。
+  if (!selfPets.length || selfPets.some((p) => !p.pet_id)) return null;
+  const snapshot = {
+    turn: view.turn,
+    // 对局编号（2026-09-26 加性）：教练拿它去服务端**按会话**取引擎的"两种走法各自结果"
+    // （伤害范围 + 风险）。没有它，六宠这条链的 `simulate_branch` 只能如实说"算不了"。
+    ...(typeof state.battleId === 'string' && state.battleId ? {battle_id: state.battleId} : {}),
+    // 带上局面版本：服务端用它跟 `roco_plan.state_version` 对齐 —— 不一致就拒收，
+    // 免得引擎的结论去讲一个**已经不存在的局面**。
+    ...(Number.isInteger(view.state_version) ? {state_version: view.state_version} : {}),
+    phase: typeof view.phase === 'string' ? view.phase : 'battle',
+    result: typeof view.battle_result === 'string' ? view.battle_result : null,
+    self: selfPets,
+    self_active: Number.isInteger(view.self.active) ? view.self.active : null,
+    self_energy_max: Number.isInteger(view.self.energy_max) ? view.self.energy_max : null,
+  };
+  const field = row(view.opponent?.field);
+  if (field) snapshot.foe = [field];
+  if (Number.isInteger(view.opponent?.living_count)) snapshot.foe_living_count = view.opponent.living_count;
+  const bench = (view.opponent?.bench ?? []).map((b) => ({
+    slot: Number.isInteger(b?.slot) ? b.slot : null,
+    fainted: b?.fainted === true,
+  }));
+  if (bench.length) snapshot.foe_bench = bench;
+  const legal = (view.legal ?? []).slice(0, 12).map((a) => {
+    const label = typeof a?.label === 'string' ? a.label : (typeof a?.name === 'string' ? a.name : null);
+    if (!label) return null;
+    const item = {label: label.slice(0, 40)};
+    if (typeof a.kind === 'string') item.kind = a.kind.slice(0, 16);
+    return item;
+  }).filter(Boolean);
+  if (legal.length) snapshot.legal = legal;
+  return snapshot;
+}
+
+/**
+ * 引擎本回合的**规划（军师浮条那一份）**，给 `/api/coach` 的 `context.roco_plan`（2026-09-25）。
+ *
+ * 为什么需要：六宠对局里引擎已经把这一手算好了（推荐 / 主要应对 / 预期 / 最坏 / 边际量 /
+ * 伤害预览），页面把它画在军师浮条上；而教练聊天**一点都拿不到** ——
+ * 玩家在聊天里问「这回合该防御还是换宠」，模型只能拿战况自己推，或者干脆说看不到。
+ *
+ * **过期的一份都不送**：复用页面自己的 `rocoPlanFreshness()`（plan 与 view 的 state_version
+ * 必须一致，且都必须有），不一致或没有版本号就返回 `null` —— 让引擎的结论去讲一个
+ * 已经不存在的局面，比不讲糟得多。
+ *
+ * 只带**引擎真给了的键**：名字类字段裁长，数字类字段只在 `Number.isFinite` 时才写。
+ */
+function coachRocoPlan() {
+  const plan = state.plan;
+  const view = state.view;
+  if (!plan || !view) return null;
+  if (!rocoPlanFreshness({plan, view}).usable) return null;
+  const text = (value, max) => (typeof value === 'string' && value.trim() ? value.trim().slice(0, max) : null);
+  const out = {state_version: plan.state_version};
+  const recommendation = text(plan.recommendation, 40);
+  if (recommendation) out.recommendation = recommendation;
+  const counter = text(plan.main_counter, 60);
+  if (counter) out.main_counter = counter;
+  for (const key of ['expected', 'worst', 'first_second_margin', 'branches_evaluated', 'depth_searched']) {
+    if (Number.isFinite(plan[key])) out[key] = plan[key];
+  }
+  if (typeof plan.recommendation_stable === 'boolean') out.recommendation_stable = plan.recommendation_stable;
+  if (plan.timed_out === true) out.timed_out = true;
+  const preview = plan.damage_preview;
+  if (preview && typeof preview === 'object') {
+    const row = {available: preview.available === true};
+    const reason = text(preview.reason, 80);
+    if (reason) row.reason = reason;
+    for (const key of ['min', 'max', 'foe_hp']) if (Number.isFinite(preview[key])) row[key] = preview[key];
+    const best = text(preview.best_label, 40);
+    if (best) row.best_label = best;
+    if (preview.lethal === true) row.lethal = true;
+    const samples = (Array.isArray(preview.samples) ? preview.samples : []).slice(0, 8)
+      .map((s) => ({
+        ...(text(s?.label, 40) ? {label: text(s.label, 40)} : {}),
+        ...(Number.isFinite(s?.min) ? {min: s.min} : {}),
+        ...(Number.isFinite(s?.max) ? {max: s.max} : {}),
+      }))
+      .filter((s) => s.label);
+    if (samples.length) row.samples = samples;
+    out.damage_preview = row;
+  }
+  const risk = plan.risk;
+  if (risk && typeof risk === 'object') {
+    const row = {};
+    if (risk.fragile === true) row.fragile = true;
+    for (const key of ['downside_min', 'downside_max']) if (Number.isFinite(risk[key])) row[key] = risk[key];
+    if (Object.keys(row).length) out.risk = row;
+  }
+  return out;
+}
+
 async function say(text) {
   const message = String(text || '').trim();
   if (!message) return null;
+  // 2026-09-27（审计高 11）：这一轮请求在飞的时候，发送按钮要**看得出来被禁**，
+  // 这样"上一条还在查"不是一句空话；结束（无论成败）都要复位。
+  const sendBtn = document.getElementById('say-send');
+  state.coachInFlight = true;
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.setAttribute('aria-busy', 'true'); }
+  try {
+    return await sayOnce(message);
+  } finally {
+    state.coachInFlight = false;
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.removeAttribute('aria-busy'); }
+  }
+}
+
+async function sayOnce(message) {
   // 说了话就把这一栏打开：输入框与回复必须在**同一屏**（P0-2）——
   // 玩家不会在看不见的地方得到回复。
   if (!state.coach.open) openCompanion({focus: false});
@@ -3136,7 +4193,20 @@ async function say(text) {
   state.memory = rememberPreference(state.memory, message);
   saveMemory();
   $('say-reply').hidden = false;
-  $('say-reply').textContent = reply;
+  // 2026-09-25（第三条交付「玩家看得见：小芽在查、在算、在纠错」）：接了模型时**先明说在查证**。
+  // 以前这里先把兜底模板摆出来、2–4 秒后再被真回答覆盖 —— 玩家读到的是"这句话自己变了"，
+  // 人类抱怨的「说的不知道在说啥」正是读到模板那一刻。没接模型时模板照旧显示（那时候它就是答案）。
+  const configured = session?.configured === true;
+  $('say-reply').textContent = configured ? '小芽在查证…' : reply;
+  // 2026-09-25（人类：「我发的消息也看不到」）：玩家那一句进对话体（在小芽回复**上方**）。
+  sayWritePlayerLine(message);
+  // 2026-09-23（实测的真 bug）：回复写进去了，但 `.companion-body` 还是 `hidden`
+  //   —— `syncCompanionBodyVisibility()` 只在 `render()` 里被调过一次，而写回复这条路上
+  //   没人再调它。后果：玩家问一句、答案**写在一个 display:none 的容器里**，
+  //   屏幕上什么都没有（ux 判据 `P0-2-same-screen` 量到的就是 `回复 null`：
+  //   `#say-reply` 自己 hidden=false、有中文文本，但 rect 是 0×0）。
+  //   每一次写回复之后都要同步一次可见性 —— 这是「回答必须看得见」的落点。
+  syncCompanionBodyVisibility();
   document.body.dataset.rocoCompanionSource = 'offline';
   delete document.body.dataset.rocoCompanionRoute;
   renderMemory();
@@ -3144,27 +4214,61 @@ async function say(text) {
   // 离线模板是**立刻**给的兜底（不让玩家对着空气等），但只要模型可用，紧接着就用
   // 真回答覆盖它，并把来源写进钩子（`data-roco-companion-source=model`）。
   // 没有模型时**明说边界**，不装成自由聊天 —— 这正是用户点名的那条冲突。
-  const configured = session?.configured === true;
   if (!configured) {
     $('say-reply').textContent = `${reply}`
       + '（现在没接模型：我只能给规则事实与主动提示。想自由问答——规则、阵容、战术、复盘——'
       + '请点右上角「小芽 → 设置 → 连接模型」配置密钥；配置后这里的每个问题都会走模型 + 只读证据。）';
     document.body.dataset.rocoCompanionBoundary = 'no-model';
+    syncCompanionBodyVisibility();
+    // 2026-09-25：这条分支以前**在滚到底那行之前就 return**，于是长回复停在开头、尾巴看不见
+    //（人类投诉「消息也显示不完」的真因之一）。
+    sayScrollToBottom();
     return {register, reason, reply, source: 'offline'};
   }
   try {
+    // 打六宠对局时把**公开战况**与**引擎本回合的规划**一起送过去
+    // （各自拿不到就不加那个字段：营地/三宠那两条老路一字不变）。
+    const rocoBattle = coachRocoBattle();
+    const rocoPlan = coachRocoPlan();
+    const context = coachCampContext();
+    if (rocoBattle) context.roco_battle = rocoBattle;
+    if (rocoPlan) context.roco_plan = rocoPlan;
     const data = await api('/api/coach', {
       message,
       role: 'companion',
-      context: coachCampContext(),
+      context,
       memory: state.memory,
       conversation: (state.memory?.dialogue ?? []).slice(-6),
+      stateToken: coachStateToken(),
     });
     const text = typeof data?.text === 'string' ? data.text : null;
     if (text) {
-      const evidence = Array.isArray(data.evidence) && data.evidence.length
-        ? `\n依据：${data.evidence.slice(0, 3).join('；')}` : '';
-      $('say-reply').textContent = `${text}${evidence}`;
+      // 2026-09-25（人类投诉「小芽啥都不行，说的不知道在说啥」）：这里原来把 `/api/coach` 的
+      // `evidence` **直接拼进玩家可见的回复**（`\n依据：${…}`），而 companion 侧的 evidence 装的是
+      // **内部诊断** —— 实测原文：「本机对战记录：已结束0场，0胜0负（来源：memory.events，最多保留12场…）」、
+      // 「语气档位 R0（不说）：该档位需要的事实在本机记录里一条都找不到…」、
+      // 「档位依据：…consideration=2（来源：memory.journal 的 dismiss）…意图=other，engagement=2」。
+      // ⇒ 玩家看到的是**字段名、来源路径与档位码**。**玩家层只说人话**：正文只放 `text`；
+      // 内部依据只写进 `body.dataset`（开发者抽屉 / 验收探针读得到，页面不渲染、玩家不可见）。
+      // 2026-09-25（玩家可见）：把**这一轮真的做了什么**附在回答后面 —— 用的是服务端算好的
+      // 那一行（`data.activityLine`，措辞与"只描述发生过的事"由 `src/coach/activity.js` 与判据钉着）。
+      // 页面**不自己拼**这份映射：抄第二份必然漂。没有活动就没有这一行（绝不装饰性地说"已查证"）。
+      const basis = typeof data?.activityLine === 'string' && data.activityLine ? `\n\n${data.activityLine}` : '';
+      // 走 markdown 渲染（加粗/行内码/换行）；`activityLine` 单独一段，措辞照旧由服务端给。
+      $('say-reply').innerHTML = markdown(text)
+        + (basis ? `<p class="say-basis">${markdown(basis.trim())}</p>` : '');
+      if (basis) {
+        document.body.dataset.rocoCompanionActivity = basis.trim().slice(0, 240);
+      } else {
+        delete document.body.dataset.rocoCompanionActivity;
+      }
+      const evidence = Array.isArray(data.evidence)
+        ? data.evidence.filter((line) => typeof line === 'string' && line) : [];
+      if (evidence.length) {
+        document.body.dataset.rocoCompanionEvidence = evidence.slice(0, 6).join(' | ').slice(0, 1200);
+      } else {
+        delete document.body.dataset.rocoCompanionEvidence;
+      }
       document.body.dataset.rocoCompanionSource = 'model';
       document.body.dataset.rocoCompanionRoute = String(data.route ?? '');
       document.body.dataset.rocoCompanionVerified = data.verified === true ? 'yes' : 'no';
@@ -3181,8 +4285,8 @@ async function say(text) {
   document.body.dataset.rocoCompanionWhy = reason;
   document.body.dataset.rocoCompanionSeen = 'yes';
   // 回复写完之后把中间那段滚到底：保证「最近一句回复」真的出现在可视区里。
-  const body = $('companion-body');
-  if (body) body.scrollTop = body.scrollHeight;
+  syncCompanionBodyVisibility();
+  sayScrollToBottom();
   syncBottomBars();
   return {register, reason, reply, source: document.body.dataset.rocoCompanionSource};
 }
@@ -3212,6 +4316,30 @@ function bind() {
   const standardButton = $('start-standard-pvp');
   if (standardButton) standardButton.addEventListener('click', () => void startStandardPvp());
   on('reset-battle', 'click', () => void startBattle());
+  // 局末结算浮层的三个出口（人类 2026-09-25 纠偏①；见 roco.html 里那一段注释）：
+  //   回到首页 → 回**那张图的首页**（`/`），不是这一页的选阵容；
+  //   再来一局 → 回**选队**（这一页的选阵容那一屏，即 returnHome()）；
+  //   我要培养 → 去培养页。
+  // 2026-09-25 之前：home=returnHome()（回选阵容）、again=直接重开一局。
+  // 人类点名「再来一局 ⇒ 回选队（不是回首页）」，所以两个出口按新口径重排，
+  // 原来的「直接重开」不再保留 —— 语义相同的出口只留一套（避免两个按钮做同一件事）。
+  on('battle-result-home', 'click', () => { window.location.href = '/'; });
+  on('battle-result-again', 'click', () => {
+    const card = $('battle-result-card');
+    if (card) card.hidden = true;
+    returnHome();                     // 回选队：清掉这一局，停在六槽工作台那一屏
+  });
+  // 2026-09-26（人类：「加点功能洛手没有」）：局末那个出口指向**新的培养**（盒子页的刷新），
+  // 不再指向旧的加点页。
+  on('battle-result-nurture', 'click', () => { window.location.href = '/box.html'; });
+  // 局末第四个出口：就地打开小芽（不跳页 —— 玩家刚打完，复盘要在这一屏看得到）。
+  on('battle-result-xiaoya', 'click', () => {
+    const open = $('coach-entry');
+    if (open) open.click();
+  });
+  // 页眉「开始 PVP」：回到这一页的选队屏（六槽工作台那一屏）。局中它被 CSS 藏起来，
+  // 所以这里只处理「不在局中」的情况 —— 在局中想离开只能认输或打完，然后走局末弹框。
+  on('nav-pvp', 'click', () => { returnHome(); });
   if ($('plan')) $('plan').addEventListener('click', () => void requestPlan({reason: 'manual', explicit: true}));
   if ($('auto-turn')) $('auto-turn').addEventListener('click', () => void autoTurn());
   $('hint-close').addEventListener('click', () => {
@@ -3263,8 +4391,17 @@ function bind() {
   $('onboard-skip').addEventListener('click', dismissOnboard);
   $('say-form').addEventListener('submit', (event) => {
     event.preventDefault();
-    void say($('say-input').value);
+    // 2026-09-27（审计高 11 实测）：云端在飞时再发一条，第二条会被 429 吞掉，
+    // 而输入框**已经清空**、按钮也没禁 ⇒ 玩家的第二问**直接丢了**，
+    // 随后还会被第一问的答案覆盖。这里改成：在飞时不发新请求、**也不清输入框**，
+    // 并如实说一句（玩家的话一个字都不丢）。
+    if (state.coachInFlight) {
+      sayStatus('上一条还在查，等它出来我马上答这一条（你打的字还在）。');
+      return;
+    }
+    const typed = $('say-input').value;
     $('say-input').value = '';
+    void say(typed);
   });
   // 窗口失焦/回到前台时重新判一次：失焦是硬门控，回来之后要能重新开口。
   window.addEventListener('resize', () => syncBottomBars());
@@ -3317,6 +4454,29 @@ function applyRouteMode() {
   return legacy;
 }
 
+/**
+ * 把一句话交给小芽（宿主页唯一的一处 `/api/coach` 封装）。
+ *
+ * 为什么要有它：阵容评估抽屉里的「让小芽说人话」与右上角那个小芽必须是**同一条链路**
+ * （同一条接口、同一份跨局记忆、同一套 CSRF）。抽屉是 shadow DOM 模块，自己攒一套会话
+ * 就是第二份事实，迟早漂。这里只做搬运：拿营地上下文 + 当前公开战况（有就带），
+ * 返回模型正文；失败如实抛错，调用方显示原因。
+ */
+async function askXiaoya(message) {
+  const context = coachCampContext();
+  const rocoBattle = coachRocoBattle();
+  if (rocoBattle) context.roco_battle = rocoBattle;
+  const data = await api('/api/coach', {
+    message,
+    role: 'companion',
+    context,
+    memory: state.memory,
+    conversation: [],
+    stateToken: coachStateToken(),   // 同上：没有它服务端一律不缓存（§C6.291）
+  });
+  return typeof data?.text === 'string' ? data.text : null;
+}
+
 function mountWorkshop() {
   const root = $('team-workshop');
   if (!root) return;
@@ -3332,6 +4492,9 @@ function mountWorkshop() {
         // 六槽一变，开局按钮的可用性就跟着变（判据在 updateStandardPvpBar 里）。
         updateStandardPvpBar();
       },
+      // 阵容评估抽屉里的「让小芽说人话」走这一条 —— 与右上角小芽同一条 /api/coach、
+      // 同一份记忆、同一套 CSRF/会话，模块自己不攒第二套会话。
+      askCoach: (message) => askXiaoya(message),
     });
   } catch (error) {
     root.dataset.twState = 'failed';
@@ -3388,8 +4551,8 @@ function updateStandardPvpBar() {
     } else if (analysis.length === 6 && !trialReady) {
       note.textContent = '理论阵容这六只里有跑不起来的：看每格的状态标（仅资料的那只不能进对局）。';
     } else if (team.length || analysis.length) {
-      note.textContent = `正式开局要六只**持有**个体（当前 ${team.length}）；`
-        + `试玩要有六只理论阵容物种（当前 ${analysis.length}）。`;
+      note.textContent = plain(`正式开局要六只**持有**个体（当前 ${team.length}）；`
+        + `试玩要有六只理论阵容物种（当前 ${analysis.length}）。`);
     } else {
       note.textContent = '选满六只才能开局：持有六只走正式，图鉴六只走试玩。';
     }
@@ -3431,11 +4594,28 @@ async function startStandardPvp() {
     hideHint();
     // `team` 里可以是持有实例（`own-XXXX`），也可以是物种 id（试玩）：服务端两样都收，
     // 物种 id 走的是**按需推算的配招**（未核验），所以这一局必须标明是试玩。
-    const body = {mode: 'pvp-standard-six-pet', team, strategy: 'greedy_damage'};
+    const body = {mode: STANDARD_PVP_MODE_ID, team, strategy: 'greedy_damage'};
     // 试玩只体现在**界面与数据**上：`team` 里是物种 id 就说明引擎要用按需推算的配招，
     // 不额外给服务端发明字段（那一层没有「试玩」这个参数，硬塞一个就是第二个事实源）。
     document.body.dataset.rocoTrial = trial ? 'yes' : 'no';
     if (Number.isInteger(state.seedOverride) && state.seedOverride >= 0) body.seed = state.seedOverride;
+    // ── 换招（2026-09-25）：把**你选的**四个技能带上 ────────────────────────────
+    // 来源是工作台回传的 `loadouts`（键是**物种 id**）：服务端按引擎的 `validate_team`
+    // 逐条校验合法性（学不到就 400 并点名），这一层不判技能池。
+    // **只带当前队伍里那些**：服务端会拒「配招提到了不在这一局里的精灵」，
+    // 而玩家很可能选过又把人换掉了 —— 那是正常的编辑过程，不该让开局失败。
+    // 队伍里有哪些物种：公开层不带 id（player 段不许有工程键），所以按**名字唯一匹配**解析，
+    // 与 `coachLineup()` 用同一条口径（重名/对不上就不算，宁可不带）。
+    // 2026-09-25（**玩家可见的静默错**：重名物种的配招被丢掉）：队伍成员改由工坊按**持有实例**
+    // 解析成物种 id（`detail.teamSpecies`），这里只做集合过滤 —— **不再按名字解析**。
+    // 名单里「棋契陛下」有两只（48 只 / 47 个唯一名字），名字不唯一 ⇒ 原来解析返回 null
+    // ⇒ 那一只的配招被静默丢：玩家选了四个技能，开局却按引擎的规范配招打。
+    const loadouts = battleLoadouts({
+      loadouts: state.teamWorkshop?.loadouts ?? null,
+      teamSpecies: state.teamWorkshop?.teamSpecies ?? null,
+      slots: state.teamWorkshop?.payload?.player?.slots ?? null,
+    });
+    if (loadouts) body.loadouts = loadouts;
     const data = await api('/api/roco/battle/new', body);
     state.battleId = data.battle_id;
     state.mode = data.mode ? {...data.mode, contract_id: data.mode.id} : state.mode;
@@ -3456,7 +4636,7 @@ async function startStandardPvp() {
     }
     await requestPlan({reason: 'match-start'});
   } catch (error) {
-    if ($('plan-status')) $('plan-status').textContent = `${trial ? '试玩' : '标准 PVP'}开局失败：${error.message}`;
+    sayStatus(`${trial ? '试玩' : '标准 PVP'}开局失败：${error.message}`);
   } finally {
     updateStandardPvpBar();
   }
@@ -3465,6 +4645,36 @@ async function startStandardPvp() {
 /** 撤掉「脚本没加载成功」的兜底横幅：能跑到这里，就说明这一页的模块图是完整的。 */
 function clearBootFallback() {
   document.getElementById('boot-fallback')?.remove();
+}
+
+/**
+ * 回**选队**（2026-09-23 接手复核；2026-09-25 按人类口径改称「选队」）：
+ * 把这一局**整局清干净**，页面回到选阵容那一屏。
+ *
+ * 为什么需要它：v3 战斗版式里 `#result-panel` 是被 CSS 收起的，投降之后屏幕上
+ * 没有任何出口（人类实测原话：「我按逃跑后为啥不回主页，变成这个样子？」）。
+ * 清的是**这一局**的状态；阵容工坊的选人（`state.teamWorkshop`）保留 —— 玩家回主页
+ * 通常就是想改两只再开，不该让他从头选六只。
+ *
+ * 2026-09-25 人类纠偏①：「再来一局 ⇒ 回选队页（不是回首页）」——局末浮层里
+ * 「再来一局」就是这一条；「回到首页」是另一条（回 `/`，那张图的首页）。
+ */
+function returnHome() {
+  state.battleId = null;
+  state.view = null;
+  state.events = [];
+  state.matchEvents = [];
+  state.lastLiveView = null;
+  state.lastMana = null;
+  state.plan = null;
+  state.planAtVersion = null;
+  state.planStaleDiscards = [];
+  state.foeReplaceAuto = null;
+  if (state.foeReplaceTimer) { clearTimeout(state.foeReplaceTimer); state.foeReplaceTimer = null; }
+  document.body.dataset.rocoTrial = 'no';
+  render();
+  renderRoster();
+  updateStandardPvpBar();
 }
 
 async function boot() {
@@ -3518,6 +4728,7 @@ async function boot() {
     $('engine-status').textContent = '规则服务：暂时连不上，点「重试」';
   }
   await bootData();
+  renderModelChip();     // 会话到手后**按真实状态**落一次（首次渲染早于 bootstrap → 文案是旧的）
   applyOnboard();
   mountWorkshop();
   updateStandardPvpBar();
@@ -3526,6 +4737,10 @@ async function boot() {
 
 // 验收脚本要驱动这些动作：显式挂到一个命名空间上，比让脚本去点按钮里的中文更稳。
 window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, refreshHint, render,
+  // 会话与模型连接状态（人类 2026-09-24：「连了 deepseek 为啥还是 engine」）—— 验收探针要能
+  // 直接读页面**真正**用的那一份，而不是另发一次 bootstrap 猜；`refreshSession` 也一并暴露，
+  // 便于「在连接页填完 key 回到本页」这条路径被真机测到。
+  refreshSession, getSession: () => session,
   loadShadowPanel, renderPowerEvidence,
   loadRoster, togglePick, renderRoster,
   loadPool, openPetDetail, closePetDetail, dismissOnboard, onboardDismissed, syncBottomBars,
@@ -3540,4 +4755,12 @@ window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, r
   renderCompanion, renderFilterMenus, renderMode,
   MANA_UNVERIFIED, MECHANISM_UNKNOWN, ACTION_GROUPS, STAT_FIELDS, STAT_MISSING};
 
+// 2026-09-25：这里原来往页眉**注入**一个内联样式的「培养（二级）」链接 —— 人类点名
+// 「页眉按钮应该是 返回首页 / 开始PVP / 小芽，不要别的」。那个出口已从页眉移除：
+// 要去培养页，从首页热区或局末弹框（首页 / 培养 / 再来一局 / 小芽）走。
+// 页面外壳（`roco.html` 的 `#roco-nav`）现在是**唯一**的页眉按钮来源。
+
 void boot();
+
+// 「这一页是重启前的旧代码」探测器（2026-09-25）：服务端重启过而这一页没刷新时摆一条横幅。
+mountStalePageBanner();

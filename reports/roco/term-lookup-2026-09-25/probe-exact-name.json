@@ -1,0 +1,27 @@
+{
+  "status": 200,
+  "latencyMs": 1514,
+  "provider": "deepseek",
+  "agentStop": "complete",
+  "text": "敌方用状态技能时，你这招应对成功就会先手并触发额外效果。",
+  "activityLine": "依据：查了术语表",
+  "calls": 1,
+  "trace": [
+    {
+      "tool": "query_rules",
+      "args": {
+        "kind": "term",
+        "name": "应对状态",
+        "state_version": 0
+      },
+      "ok": true,
+      "error": null,
+      "result": {
+        "record": "term",
+        "term_id": "1015",
+        "note": "应对状态",
+        "desc": "若敌方使用状态技能，则本技能应对成功，本次行动必定先手，且触发应对效果。"
+      }
+    }
+  ]
+}

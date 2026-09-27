@@ -10,8 +10,8 @@ import assert from 'node:assert/strict';
 import {createGame,step,legalActions,rankEnemyActions,SKILLS,SPECIES} from '../src/game/engine.js';
 import {newProfile} from '../src/game/progression.js';
 import {freshMemory,rememberBattle,readMemory,recordCoachEvent} from '../src/coach/memory.js';
-import {fitReading,companion,companionState,companionFacts,checkCompanionRestraint,checkCompanionInformation,checkCompanionStance,decideRegister,proactiveRegister,proactiveText,proactiveReading,readingsFor,intentOf,trailingStreak,REGISTERS,REGISTER_ORDER,companionEvents,companionSignals,companionSession,companionLedger,companionReadings,eventRegister,bubbleDurationMs,companionCueSlot,companionAvatar,COMPANION_LIMITS,COMPANION_BUBBLE,COMPANION_EVENTS,COMPANION_DEFER,SCREEN_ECHO,EMPTY_LEDGER_ECHO,EMPTY_LEDGER_MENU,SELF_CENTERED_EMOTION,SELF_FOCUS,AFFECTS,AFFECT_WORDS,STANCE_REQUIRED,PERMISSION_REQUIRED,checkCompanionPermission,DAY_PARTS,dayPartOf,dayPartAt,SESSION_GAP,LONG_SESSION,chatReply,chatThread,previousChatThread,CHAT_THREADS,playerWords,isGreetingTurn,GREETING_TALK,TACTICAL_OVERREACH} from '../src/coach/companion.js';
-import {runCoach,buildContext} from '../src/coach/runtime.js';
+import {fitReading,companion,companionState,companionFacts,checkCompanionRestraint,checkCompanionInformation,checkCompanionStance,decideRegister,proactiveRegister,proactiveText,proactiveReading,readingsFor,intentOf,trailingStreak,REGISTERS,REGISTER_ORDER,companionEvents,companionSignals,companionSession,companionLedger,companionReadings,eventRegister,bubbleDurationMs,companionCueSlot,companionAvatar,COMPANION_LIMITS,COMPANION_BUBBLE,COMPANION_EVENTS,COMPANION_DEFER,SCREEN_ECHO,EMPTY_LEDGER_ECHO,EMPTY_LEDGER_MENU,SELF_CENTERED_EMOTION,SELF_FOCUS,AFFECTS,AFFECT_WORDS,STANCE_REQUIRED,PERMISSION_REQUIRED,checkCompanionPermission,DAY_PARTS,dayPartOf,dayPartAt,SESSION_GAP,LONG_SESSION,chatReply,chatThread,previousChatThread,CHAT_THREADS,playerWords,isGreetingTurn,GREETING_TALK,TACTICAL_OVERREACH,replyConstraints} from '../src/coach/companion.js';
+import {runCoach,buildContext,lineupPickAsk} from '../src/coach/runtime.js';
 import {strategistTrigger,strategistSession,attentionState} from '../src/coach/experience.js';
 import {coachEvent,coachContext} from '../src/coach/session.js';
 
@@ -234,8 +234,15 @@ test('one loss never becomes comfort, and silence stays a real output',()=>{
  // 允许沉默：没有真实经历时只说最短承接句；安静档与线上竞技恒为 R0
  const empty=companion({mode:'camp'},freshMemory(),'这局怎么打');
  assert.equal(empty.register,'R0');
- assert.equal(empty.text,'我在。');
+ // 改钉（2026-09-26）：R0 的**文字**不再恒为「我在。」——真机审计实测 30 条里 9 条拿到那三个字，
+ // 而且它同时吃掉"求建议／问事实／越界"三类诉求（人类：「说的是人话吗…自娱自乐」）。
+ // 判据的意图没变，而且更严了：① 档位仍是 R0 ② `silent` 仍为真 ③ 正文仍受 R0 的 24 字契约约束
+ // ④ 不许出现问句、不许编事实。**非提问**时仍回最短承接句（下面那条反证钉住）。
+ assert.ok(empty.text.length<=24, `R0 的正文必须在上限内（24 字）：${empty.text}`);
+ assert.doesNotMatch(empty.text,/[？?]/, 'R0 不许反问玩家');
  assert.equal(empty.silent,true);
+ // 「沉默仍是一个真实输出」这条不变，但它的载体是**档位与 silent 标记**（上面已断言 `silent===true`），
+ // 不是某个固定字符串：真机审计点名「我在。」吞掉三类诉求，所以 R0 的正文改成一句有用的话。
  assert.equal(companion({mode:'camp',preference:'quiet'},memory,'这局怎么打').register,'R0');
  assert.equal(companion({mode:'pvp-live',battle:{mode:'pvp-live'}},memory,'这局怎么打').register,'R0');
  // 旧实现不管练过什么都说「速度判断」：这一条必须按真实课程名说
@@ -376,7 +383,7 @@ test('the register changes the wording and the length ceiling',()=>{
  // 不再被「本机没有记录」压回「我在。」（那一版的验收在文件末尾）。
  const r0Empty=companion({mode:'camp'},freshMemory(),'这局怎么打');
  assert.equal(r0Empty.register,'R0');
- assert.equal(r0Empty.text,'我在。');
+ assert.ok(r0Empty.text.length<=24, `R0 的正文必须在上限内（24 字）：${r0Empty.text}`);
  assert.deepEqual(answers.map(a=>a.register),['R1','R2','R3']);
  assert.equal(new Set([r0Empty.text,...answers.map(a=>a.text)]).size,4,'四个档位必须给出四段不同的文本');
  for(const answer of answers){
@@ -2431,4 +2438,29 @@ test('六个场景一张表：每一条都接得住，而且每条都过得了�
  assert.equal(statedLine('今天天气不错'),null);
  assert.equal(sharingWord('我赢了'),true);assert.equal(sharingWord('这局怎么打'),false);
  assert.equal(shareLine({sharing:true,history:[]}),null,'没有记录就不出恭喜句');
+});
+
+
+// 2026-09-25（人类口径：「**可以给推荐的下一个精灵呀**」）：玩家**明确在问「该带谁／推荐哪只」**时，
+// 陪练可以点名 1–2 只 —— 但理由必须是**引擎回执里的事实**，而**战斗中的动作指令照旧一句不给**。
+// 这一条钉住两层分界，并且带反证：**默认口径一个字都不许被改**（没在问推荐时仍然是「战术指挥」全禁）。
+test('问「该带谁」时放开队伍推荐、战斗动作仍禁（默认口径不许被改）', () => {
+  const ask = replyConstraints('R1','companion',{chat:true,askingPick:true});
+  const normal = replyConstraints('R1','companion',{chat:true});
+  // ① 放开的是「队伍推荐」：不再整条禁掉战术指挥，但动作指令仍然禁
+  assert.equal(ask.forbid.includes('战术指挥'),false,
+    `玩家明确在问推荐时不该整条禁掉战术指挥：${ask.forbid.join(' | ')}`);
+  assert(ask.forbid.some((f)=>/替他决定这一手该出什么/.test(f)),
+    '战斗动作指令（换成谁／守住／先出哪招）必须继续禁');
+  // ② 推荐必须建立在引擎回执上（红线：结论要来自引擎）
+  assert(/引擎回执/.test(ask.instruction),`instruction 里必须要求回执出处：${ask.instruction.slice(0,120)}`);
+  assert(ask.allow.some((a)=>/按引擎回执点名/.test(a)),'allow 里要有「按回执点名」这一条');
+  // ③ 反证：默认（没在问推荐）仍然是原口径——不许被这次改动稀释
+  assert.equal(normal.forbid.includes('战术指挥'),true,'默认口径不许被改：战术指挥仍然全禁');
+  assert.equal(normal.allow.some((a)=>/按引擎回执点名/.test(a)),false,'默认不许出现「点名」许可');
+  assert(/都属于军师的活/.test(normal.instruction),'默认那句 noTactics 原话必须还在');
+  // ④ 只有「队伍推荐」问句才会被当成 askingPick（与产品判定同源）
+  assert.equal(lineupPickAsk('对面场上是火系，我下一个该带谁？'),true);
+  assert.equal(lineupPickAsk('这回合该出什么？'),false,'战斗动作问句不许被当成推荐');
+  assert.equal(lineupPickAsk('建议我换上潮甲龟'),false,'战斗换人问句不许被当成推荐');
 });

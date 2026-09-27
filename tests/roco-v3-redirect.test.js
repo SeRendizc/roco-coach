@@ -74,10 +74,30 @@ function judgeMagicPolicy(mode) {
     problems.push(`PVP 魔法分类必须是 pvp_magic_special_action，实际 ${JSON.stringify(magic.classification)}`);
   }
   if (magic.is_item !== false) problems.push('PVP 魔法不是普通 item，is_item 必须是 false');
-  if (magic.occupies_action !== null) {
-    problems.push(`是否占行动未核验，occupies_action 必须是 null，实际 ${JSON.stringify(magic.occupies_action)}`);
+  // 2026-09-23 演进：人类把「愿力强化」的整套口径**口述登记**了（台账 EV-PVP-WISH-POWER-UP，
+  // RECORDED_IN_GAME：占行动 / 每局 2 次 / 冷却 3 回合 / 目标 / 替换第一个技能 / 愿力冲击的能耗威力）。
+  // 判据因此不能继续钉「occupies_action 必须是 null」——那会把**已登记的事实**判成违规。
+  // 守住的是同一件事：**没出处的不许有值**。所以改成三档：
+  //   · 已登记（all_unverified=false）→ 必须挂 evidence_id，registered 每条必须带 confidence；
+  //   · 未核验（unknowns）→ 仍然必须 null + UNVERIFIED（不许顺手填）；
+  //   · 两处必须自洽（不能一处登记了、另一处还是 null）。
+  const registered = Array.isArray(magic.registered) ? magic.registered : [];
+  if (magic.all_unverified === true) {
+    if (registered.length > 0) problems.push('all_unverified=true 却带着 registered 条目：两件事互相矛盾');
+    if (magic.occupies_action !== null) {
+      problems.push(`是否占行动未核验，occupies_action 必须是 null，实际 ${JSON.stringify(magic.occupies_action)}`);
+    }
+  } else {
+    if (!magic.evidence_id) problems.push('已登记（all_unverified=false）就必须挂 evidence_id');
+    if (registered.length === 0) problems.push('all_unverified=false 却没有 registered 条目');
+    for (const r of registered) {
+      if (!r.kind) problems.push('registered 条目缺 kind');
+      if (!r.confidence) problems.push(`registered「${r.kind ?? '?'}」缺 confidence（没出处的值不许出现）`);
+    }
+    if (magic.occupies_action === null && registered.some((r) => r.occupies_action !== undefined)) {
+      problems.push('occupies_action 仍是 null，但 registered 里已经登记了它 —— 两处必须同步');
+    }
   }
-  if (magic.occupies_action_status !== 'UNVERIFIED') problems.push('occupies_action_status 必须是 UNVERIFIED');
   for (const u of magic.unknowns ?? []) {
     if (u.value !== null) problems.push(`PVP 魔法 ${u.field} 未核验却带值 ${JSON.stringify(u.value)}`);
     if (u.status !== 'UNVERIFIED') problems.push(`PVP 魔法 ${u.field} 的状态必须是 UNVERIFIED`);
@@ -85,20 +105,58 @@ function judgeMagicPolicy(mode) {
   return problems;
 }
 
-/** 队伍规模判据：1～6；「必须选满」没有来源支持 → null + UNVERIFIED。 */
-function judgeTeamSizePolicy(mode) {
+/**
+ * 队伍规模判据：1～6 是**上限**；「是否必须选满 6 只」由**人类实机口径**给出（2026-09-25）。
+ *
+ * 改钉留痕（不删旧口径）：这一格原来是 `fill_required === null` + `UNVERIFIED`，
+ * 理由是"「必须选满 6 只」没有任何来源支持"。2026-09-25 人类实机口径逐字
+ * 「闪耀大赛就是6v6 4魔力v4魔力的pvp啊，不是随机6只啊，自己配队」⇒ 取 true。
+ * **但判据没有放松**：值本身不再算证据 —— `evidence_id` 必须指向一条**真实存在且等级为
+ * `RECORDED_IN_GAME`** 的台账条目，否则照样红（见下面 `recorded` 检查与对应反证）。
+ */
+function judgeTeamSizePolicy(mode, {ledger = null} = {}) {
   const problems = [];
   const policy = mode?.policies?.team_size_policy;
   if (!policy) return ['标准 PVP 缺 policies.team_size_policy'];
   if (policy.min !== 1 || policy.max !== 6) {
     problems.push(`队伍规模区间必须是 min=1 / max=6，实际 ${policy.min}～${policy.max}`);
   }
-  if (policy.fill_required !== null) {
-    problems.push(`「必须选满」没有来源支持，fill_required 必须是 null，实际 ${JSON.stringify(policy.fill_required)}`);
+  if (policy.fill_required !== true) {
+    problems.push(`「必须编入 6 只」已由人类实机口径确认，fill_required 必须是 true，实际 ${JSON.stringify(policy.fill_required)}`);
   }
-  if (policy.fill_required_status !== 'UNVERIFIED') problems.push('fill_required_status 必须是 UNVERIFIED');
-  if (policy.evidence_id !== 'EV-PVP-STANDARD-TEAM-SIZE' || policy.microcase_id !== 'MC-E07') {
-    problems.push('队伍规模策略必须引 EV-PVP-STANDARD-TEAM-SIZE / MC-E07（未录制）');
+  if (policy.fill_required_status !== 'RECORDED_IN_GAME') {
+    problems.push('fill_required_status 必须是 RECORDED_IN_GAME（依据是人类实机口径）');
+  }
+  if (policy.confidence !== 'RECORDED_IN_GAME') {
+    problems.push(`队伍规模策略的 confidence 必须是 RECORDED_IN_GAME，实际 ${JSON.stringify(policy.confidence)}`);
+  }
+  // 2026-09-25 对抗复核加强：原来只查"数组非空"，换成 `[{claim:'随便'}]` 也能过。
+  // 现在要求这条张力**内容上**也成立：必须引到官方一手，且原话里有「最多」。
+  if (!policy.disputed_with?.length) {
+    problems.push('必须把官方文本「最多可携带 6 只」（上限）这条张力登记在 disputed_with 里，不许抹平');
+  } else {
+    const official = policy.disputed_with.filter((row) => row?.kind === 'official_first_party');
+    if (!official.length) problems.push('disputed_with 必须引到官方一手（kind=official_first_party）');
+    if (!official.some((row) => /最多/.test(String(row?.claim ?? '')))) {
+      problems.push('disputed_with 的官方那条必须写出「最多」这个关键措辞（张力就在这个词上）');
+    }
+    if (!official.some((row) => typeof row?.how_resolved === 'string' && row.how_resolved.length > 10)) {
+      problems.push('disputed_with 必须写清 how_resolved（凭什么按人类口径取 true）');
+    }
+  }
+  if (ledger) {
+    const entry = ledger.entries?.find((row) => row.id === policy.evidence_id);
+    if (!entry) {
+      problems.push(`team_size_policy.evidence_id 指向的台账条目不存在：${JSON.stringify(policy.evidence_id)}`
+        + '（值本身不算证据：true 必须有一条 RECORDED_IN_GAME 条目撑着）');
+    } else {
+      if (entry.confidence !== 'RECORDED_IN_GAME') {
+        problems.push(`台账条目 ${entry.id} 的等级是 ${entry.confidence}，撑不起 fill_required=true`);
+      }
+      if (!(entry.sources || []).some((source) => source.marker === 'recorded_gameplay')) {
+        problems.push(`台账条目 ${entry.id} 没有任何 recorded_gameplay 来源：人类口径才是它的依据`);
+      }
+    }
   }
   return problems;
 }
@@ -381,12 +439,24 @@ test('BattleMode：PVP 魔法（愿力强化 / 共鸣魔法）单独建模，不
   assert.equal(magic.classification, 'pvp_magic_special_action');
   assert.equal(magic.is_item, false, 'PVP 魔法**不叫普通 item**');
   assert.deepEqual(magic.kinds, ['愿力强化', '共鸣魔法']);
-  // 未核验：是否占行动 / 次数 / 冷却 / 解除 / 持续 / 倍率一律 null + UNVERIFIED
-  assert.equal(magic.occupies_action, null);
-  assert.equal(magic.occupies_action_status, 'UNVERIFIED');
-  assert.equal(magic.all_unverified, true);
+  // 2026-09-23：人类把「愿力强化」的整套口径口述登记了（台账 EV-PVP-WISH-POWER-UP）→
+  // 已登记的字段写进 `registered`（每条带 confidence），**仍未核验的**留在 `unknowns` 里保持 null。
+  assert.equal(magic.all_unverified, false, '人类登记之后不再是 all_unverified');
+  assert.equal(magic.evidence_id, 'EV-PVP-WISH-POWER-UP', '已登记就必须挂到那条人类口述台账');
+  const wish = (magic.registered ?? []).find((r) => r.kind === '愿力强化');
+  assert.ok(wish, 'registered 里必须有「愿力强化」');
+  // 2026-09-25：人类改口为「**不占行动**（自由动作），背包物品都不占行动」⇒ 这条取值从 true 变 false，
+  // 台账 EV-PVP-WISH-POWER-UP 里 2026-09-23 那条旧 quote 原样保留、由 2026-09-25 那条取代（历史不抹）。
+  assert.equal(wish.occupies_action, false, '人类 2026-09-25 口径：愿力强化不占行动（自由动作）');
+  assert.equal(wish.per_battle_uses, 2, '人类口径：每局两次');
+  assert.equal(wish.cooldown_turns, 3, '人类口径：冷却三回合');
+  assert.equal(wish.target, 'self_active', '人类口径：只能对自己场上那只');
+  assert.equal(wish.wish_impact.energy, 2);
+  assert.equal(wish.wish_impact.power, 80);
+  assert.equal(wish.wish_impact.respond_bonus.power_multiplier, 2.5, '「额外 150%」按总倍率 2.5 实现');
+  assert.equal(magic.occupies_action, false, '顶层 occupies_action 与 registered 必须同步');
   for (const u of magic.unknowns ?? []) {
-    assert.equal(u.value, null, `PVP 魔法 ${u.field} 未核验，必须是 null`);
+    assert.equal(u.value, null, `PVP 魔法 ${u.field} 仍未核验，必须是 null`);
     assert.equal(u.status, 'UNVERIFIED');
   }
   // 普通道具依旧 forbidden —— 但那是**普通道具**这一类，不能被读成「首领化 / PVP 魔法不存在」
@@ -406,31 +476,62 @@ test('BattleMode：PVP 魔法（愿力强化 / 共鸣魔法）单独建模，不
   const wrongClass = JSON.parse(JSON.stringify(standard));
   wrongClass.policies.magic_policy.classification = 'item';
   assert.ok(judgeMagicPolicy(wrongClass).length > 0, '反向控制：分类写成 item 必须被判红');
+  // 反向控制（改到仍未核验的那个字段上）：给「愿力属性改名道具」补一个值必须被判红
   const inventedUses = JSON.parse(JSON.stringify(standard));
-  inventedUses.policies.magic_policy.unknowns.find((u) => u.field === 'cooldown').value = 2;
-  assert.ok(judgeMagicPolicy(inventedUses).length > 0, '反向控制：给未核验的冷却补一个 2 必须被判红');
+  inventedUses.policies.magic_policy.unknowns.find((u) => u.field === 'wish_element_reitem').value = 2;
+  assert.ok(judgeMagicPolicy(inventedUses).length > 0, '反向控制：给仍未核验的字段补一个值必须被判红');
+  // 反向控制（新加的那一条）：已登记却不挂出处，必须被判红
+  const orphan = JSON.parse(JSON.stringify(standard));
+  delete orphan.policies.magic_policy.evidence_id;
+  assert.ok(judgeMagicPolicy(orphan).length > 0, '反向控制：已登记却没有 evidence_id 必须被判红');
+  // 反向控制（新加的那一条）：registered 里某条缺 confidence，必须被判红
+  const noConfidence = JSON.parse(JSON.stringify(standard));
+  delete noConfidence.policies.magic_policy.registered[0].confidence;
+  assert.ok(judgeMagicPolicy(noConfidence).length > 0, '反向控制：registered 条目缺 confidence 必须被判红');
 });
 
-test('BattleMode：队伍规模策略是 1～6，「必须选满」未核验（null + UNVERIFIED）', () => {
+test('BattleMode：队伍规模 1～6 是上限；「是否必须编入 6 只」由**人类实机口径**给出（true + RECORDED_IN_GAME）', () => {
   const standard = modes.modes.find((m) => m.id === 'pvp-standard-six-pet');
   const policy = standard.policies?.team_size_policy;
+  const ledger = readJson('data/roco/evidence/rule-evidence-ledger.json');
   assert.ok(policy, '标准 PVP 必须登记 policies.team_size_policy（min / max / fill_required）');
   assert.equal(policy.min, 1);
   assert.equal(policy.max, 6);
-  assert.equal(policy.evidence_id, 'EV-PVP-STANDARD-TEAM-SIZE');
-  assert.equal(policy.confidence, 'CROSS_SOURCE_SUPPORTED');
-  assert.equal(policy.microcase_id, 'MC-E07', '六宠上限仍卡在未录制的 MC-E07 上');
-  // 「6 只必须选满」没有任何来源支持 → null + UNVERIFIED，引擎遇未知 fail closed
-  assert.equal(policy.fill_required, null);
-  assert.equal(policy.fill_required_status, 'UNVERIFIED');
-  // 反向控制：「必须选满」被写成 true → 判据必须红
-  const invented = JSON.parse(JSON.stringify(standard));
-  invented.policies.team_size_policy.fill_required = true;
-  assert.ok(judgeTeamSizePolicy(invented).length > 0,
-    '反向控制：把 fill_required 写成 true 必须被判红（那是一条没有来源支持的断言）');
+  assert.equal(policy.microcase_id, 'MC-E07', '六宠口径仍卡在未录制的 MC-E07 上');
+  // 2026-09-25 改钉：人类实机口径「闪耀大赛就是6v6…自己配队」⇒ fill_required=true。
+  // **旧口径留痕**：此前是 null + UNVERIFIED（理由："「必须选满」没有任何来源支持"）——
+  // 那条理由在当时成立，现在被人类实机口径取代；原因与张力都写在 battle-modes.json 的 reason / disputed_with 里。
+  assert.equal(policy.fill_required, true);
+  assert.equal(policy.fill_required_status, 'RECORDED_IN_GAME');
+  assert.equal(policy.confidence, 'RECORDED_IN_GAME');
+  assert.equal(policy.evidence_id, 'EV-PVP-STANDARD-FILL-SIX');
+  assert.ok(policy.fill_required_prior === null && policy.fill_required_prior_status === 'UNVERIFIED',
+    '旧口径必须留痕（fill_required_prior / fill_required_prior_status）');
+  assert.ok(Array.isArray(policy.disputed_with) && policy.disputed_with.length > 0,
+    '官方「最多可携带 6 只」（上限）这条张力必须登记，不许抹平');
+  assert.deepEqual(judgeTeamSizePolicy(standard, {ledger}), []);
+
+  // 反向控制①：值改回 null（把人类口径当没发生）→ 必须红
+  const reverted = JSON.parse(JSON.stringify(standard));
+  reverted.policies.team_size_policy.fill_required = null;
+  assert.ok(judgeTeamSizePolicy(reverted, {ledger}).length > 0, '反向控制：fill_required 改回 null 必须被判红');
+  // 反向控制②：**值本身不是证据** —— 指向一条不存在/等级不够的台账条目 → 必须红
+  const orphan = JSON.parse(JSON.stringify(standard));
+  orphan.policies.team_size_policy.evidence_id = 'EV-NOT-A-REAL-ENTRY';
+  assert.ok(judgeTeamSizePolicy(orphan, {ledger}).length > 0,
+    '反向控制：evidence_id 指向不存在的条目必须被判红（true 必须有真来源撑着）');
+  const weak = JSON.parse(JSON.stringify(standard));
+  weak.policies.team_size_policy.evidence_id = 'EV-PVP-STANDARD-TEAM-SIZE'; // 该条是 CROSS_SOURCE_SUPPORTED
+  assert.ok(judgeTeamSizePolicy(weak, {ledger}).length > 0,
+    '反向控制：拿一条非 RECORDED_IN_GAME 的条目来撑 true 必须被判红');
+  // 反向控制③：把张力登记删掉 → 必须红
+  const noDispute = JSON.parse(JSON.stringify(standard));
+  delete noDispute.policies.team_size_policy.disputed_with;
+  assert.ok(judgeTeamSizePolicy(noDispute, {ledger}).length > 0, '反向控制：删掉 disputed_with 必须被判红');
+  // 反向控制④：max 被放宽 → 必须红
   const widened = JSON.parse(JSON.stringify(standard));
   widened.policies.team_size_policy.max = 7;
-  assert.ok(judgeTeamSizePolicy(widened).length > 0, '反向控制：max 改成 7 必须被判红');
+  assert.ok(judgeTeamSizePolicy(widened, {ledger}).length > 0, '反向控制：max 改成 7 必须被判红');
 });
 
 test('BattleMode：主题参数（首领对决）不是全局布尔 —— theme 留给主题 PVP', () => {

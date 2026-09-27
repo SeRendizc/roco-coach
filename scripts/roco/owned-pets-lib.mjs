@@ -36,6 +36,7 @@ export const RC203_REPORT_PATH = 'reports/roco/flagship-upgrade/rc-203-owned-pet
 
 export const FROZEN_ROOT = `data/roco/normalized/${RULESET_ID}`;
 export const FROZEN_MAIN_LEARNSETS = `${FROZEN_ROOT}/learnsets.json`;
+export const FROZEN_MAIN_SUPPORT = `${FROZEN_ROOT}/support-matrix.json`;
 export const FROZEN_LAYER_DIR = `${FROZEN_ROOT}/layer-playable-48`;
 export const FROZEN_LAYER_LEARNSETS = `${FROZEN_LAYER_DIR}/learnsets.json`;
 export const FROZEN_LAYER_PETS = `${FROZEN_LAYER_DIR}/pets.json`;
@@ -48,12 +49,21 @@ export const SOURCES_PATH = 'data/roco/sources.yaml';
 
 /** 固定 seed：同一个 seed + 同一份冻结目录 ⇒ 逐字节相同的 owned-pets.json。 */
 export const SEED = 20301;
-/** P0B 验收要求「80 个 owned 可持久化」；这里把它写成常量，判据才能引用同一个数字。 */
-export const INSTANCE_TARGET = 80;
+/** 实例数 = **候选物种数**：每个物种恰好 1 个个体。
+ *
+ * 2026-09-24（人类实测纠正）：「之前 80 只应该是之前留下的不知道怎么来的重复的精灵，
+ * 那些居然没删掉吗？重复的删掉啊」。原来 `INSTANCE_TARGET = 80`，生成器会把 32 个物种
+ * **伪造出第二个个体**（等级/技能都不同），目的是演示「同种不同个体比较」——
+ * 但那批个体**游戏里并不存在**，属于编数据，而且「我的精灵」里会看到同名两张卡。
+ * 现在改成一人一只：48 个物种 → 48 个实例（`MIN_SPECIES` 是它现在的真实含义）。
+ * 同种比较能力仍在：`compareOwnedPets()` 是纯函数，测试里用**显式夹具**验它。
+ */
+export const INSTANCE_TARGET = 48;
 /** 判据下界（写死在这里，免得生成器把判据悄悄调松）。 */
 export const MIN_SPECIES = 40;
 export const MIN_OUTSIDE_LAYER = 12;
-export const MIN_SAME_SPECIES_GROUPS = 20;
+/** 同种多实例组数上限：**0**（人类要求删掉重复个体）。判据从「至少 N 组」改成「恰好 0 组」。 */
+export const MAX_SAME_SPECIES_GROUPS = 0;
 
 /** 养成属性的面板换算公式**未校准**：这是全仓唯一一处「效果」措辞。 */
 export const GROWTH_EFFECT_REASON = '面板换算公式未校准（见 10 号文档 §13）';
@@ -124,6 +134,71 @@ export function deepEqual(a, b) {
 
 export function deepClone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+// ── 规范四技能：**唯一**的合并规则（纯函数） ─────────────────────────────────
+//
+// 2026-09-25（人类：「配招这个你得修好」「反正对齐洛手的真实技能，我不清楚那个是真的对的，你最好再核验一下」）：
+// 核验结论是「**没有任何一份能证明是游戏里的真实配招**」（台账 23 条里没有一条主题是配招/配队/技能选择，
+// 基线 support-matrix 自己的 caveats 也逐字写着「不是最优解、不是社区推荐」）⇒ 四条链全部只能挂
+// `ENGINE_HYPOTHESIS`。在「都是启发式」这个前提下，能当**唯一事实源**的只有**引擎真正装上的那一份**：
+// `Ruleset.candidate_moveset()`（`roco/src/roco_env/data.py:309-311`），它在加载期按下面这个顺序合并两片：
+//
+//   1) `support-matrix.json`（基线 12 只，选招规则见 `scripts/roco/build-support-matrix.mjs`）
+//   2) `layer-playable-48/support-matrix.json`（叠加层 36 只，选招规则见
+//      `scripts/roco/build-roster-48-engine-inputs.mjs` / `reports/roco/coverage/roster-48.json#selection_rules.moveset_rule`）
+//
+// 合并语义与 `data.py:515-535` **逐条同义**（这里只是把它写成纯函数，好让生成器/校验器/单测共用一份）：
+//   · 两片都按 `pets[]` 顺序读 `candidate_moveset.skills[].skill_id`；
+//   · 同一个 pet_id 在两片里都出现 → **报错**（引擎那边直接抛 `RulesetError`，这里记进 problems 由调用方判红）；
+//   · 没有 `candidate_moveset` 的条目跳过（引擎也一样：`if not ids: continue`）。
+//
+// **顺序有意义**：引擎用 `loadout.index()` 算「技能位」（传动/位置类机制依赖它），
+// 所以比对必须**逐位**，不是按集合。
+export const CANONICAL_LOADOUT_RULE_ID = 'engine-candidate-moveset-baseline-then-layer';
+export const CANONICAL_LOADOUT_RULE_TEXT =
+  '引擎 loadout = support-matrix.json（基线 12）在前 + layer-playable-48/support-matrix.json（叠加层 36）在后，'
+  + '逐片按 pets[] 顺序取 candidate_moveset.skills[].skill_id，同一 pet_id 不许重复定义（data.py:515-535）';
+export const CANONICAL_LOADOUT_CONFIDENCE = 'ENGINE_HYPOTHESIS';
+export const CANONICAL_LOADOUT_CONFIDENCE_WHY =
+  '台账（data/roco/evidence/rule-evidence-ledger.json，23 条）里没有任何一条主题是配招 / 配队 / 技能选择；'
+  + '基线 support-matrix.json 自己的 caveats 逐字写着「候选配招是一组机制覆盖互不重复的真实技能，不是最优解，'
+  + '也不是社区推荐」⇒ 「游戏里的真实四技能」在现有证据下**不可得**；能钉的只是「引擎装的是哪四个」。';
+
+/**
+ * 合并「规范四技能」。纯函数：只吃已解析的文档，不读盘、不看时钟。
+ *
+ * @param {Array<{label: string, doc: object}>} sources 按引擎的加载顺序给（基线在前、叠加层在后）
+ * @returns {{byPetId: Map<string,string[]>, definedIn: Map<string,string>, problems: string[]}}
+ */
+export function mergeCanonicalLoadouts(sources) {
+  const byPetId = new Map();
+  const definedIn = new Map();
+  const problems = [];
+  for (const source of Array.isArray(sources) ? sources : []) {
+    const label = source?.label ?? '(未命名来源)';
+    for (const entry of source?.doc?.pets ?? []) {
+      const ids = (entry?.candidate_moveset?.skills ?? [])
+        .map((row) => (typeof row === 'string' ? row : row?.skill_id))
+        .filter((id) => typeof id === 'string' && id.length > 0);
+      if (ids.length === 0) continue;
+      const petId = entry?.pet_id;
+      if (typeof petId !== 'string' || petId.length === 0) {
+        problems.push(`${label}: 有 candidate_moveset 但没有 pet_id`);
+        continue;
+      }
+      if (byPetId.has(petId)) {
+        problems.push(`候选配招重复定义：${petId}（${label}；已在 ${definedIn.get(petId)} 定义过）`
+          + '—— 引擎 data.py:522-529 对这种情况直接抛 RulesetError');
+        continue;
+      }
+      if (ids.length !== 4) problems.push(`${petId}（${label}）的 candidate_moveset 不是 4 个技能：${ids.length}`);
+      if (new Set(ids).size !== ids.length) problems.push(`${petId}（${label}）的 candidate_moveset 有重复技能：${ids.join(',')}`);
+      byPetId.set(petId, ids);
+      definedIn.set(petId, label);
+    }
+  }
+  return {byPetId, definedIn, problems};
 }
 
 // ── 养成属性 ────────────────────────────────────────────────────────────────
@@ -575,7 +650,7 @@ export function buildOwnedPetSchema() {
       instance_target: INSTANCE_TARGET,
       min_species: MIN_SPECIES,
       min_outside_layer_playable_48: MIN_OUTSIDE_LAYER,
-      min_same_species_groups: MIN_SAME_SPECIES_GROUPS,
+      max_same_species_groups: MAX_SAME_SPECIES_GROUPS,
       seed: SEED,
     },
   };

@@ -42,6 +42,7 @@ import {
   FROZEN_LAYER_PETS,
   FROZEN_LAYER_SUPPORT,
   FROZEN_MAIN_LEARNSETS,
+  FROZEN_MAIN_SUPPORT,
   FROZEN_ROOT,
   FROZEN_SKILLS,
   GENERATED_AT,
@@ -49,7 +50,7 @@ import {
   INSTANCE_TARGET,
   LICENCE_REF,
   MIN_OUTSIDE_LAYER,
-  MIN_SAME_SPECIES_GROUPS,
+  MAX_SAME_SPECIES_GROUPS,
   MIN_SPECIES,
   OWNED_PETS_PATH,
   OWNED_SCHEMA_PATH,
@@ -64,12 +65,12 @@ import {
   compareOwnedPets,
   datasetHash,
   deepClone,
-  deepEqual,
   expectedBattleBuildUnknownFields,
   expectedInstanceUnknownFields,
   growthAttribute,
   instanceBuildHash,
   makeRng,
+  mergeCanonicalLoadouts,
   sha256Hex,
 } from './owned-pets-lib.mjs';
 import {CHECK_NAMES, SELFTEST_MUTATIONS, criteriaReport, runChecks, runSelftest} from './verify-owned-pets.mjs';
@@ -91,15 +92,9 @@ function shaOf(root, path) {
   return createHash('sha256').update(readFileSync(join(root, path))).digest('hex');
 }
 
-/** Fisher-Yates：用我们自己的 rng，而不是 Math.random（那会毁掉可复跑性）。 */
-function shuffle(rng, list) {
-  const out = [...list];
-  for (let i = out.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(rng() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
+// 2026-09-25：这里原来有一个 `shuffle(rng, list)`（Fisher-Yates）—— 它只服务
+// 「从 native_skills 里随机抽四个技能」那条路。配招改成**引擎 loadout** 之后没有任何调用点，
+// 按死代码删掉（判据在 `tests/roco-owned-pets.test.js`：配招必须逐位等于引擎 loadout）。
 
 // ── 候选宇宙 ────────────────────────────────────────────────────────────────
 
@@ -114,6 +109,7 @@ function collectCandidates(root) {
   const mainLearnsets = readJson(root, FROZEN_MAIN_LEARNSETS);
   const layerLearnsets = readJson(root, FROZEN_LAYER_LEARNSETS);
   const layerPets = readJson(root, FROZEN_LAYER_PETS);
+  const mainSupport = readJson(root, FROZEN_MAIN_SUPPORT);
   const layerSupport = readJson(root, FROZEN_LAYER_SUPPORT);
   const fullCatalog = readJson(root, FROZEN_FULL_CATALOG);
   const skillsDoc = readJson(root, FROZEN_SKILLS);
@@ -137,14 +133,44 @@ function collectCandidates(root) {
   const sources = {
     FROZEN_MAIN_LEARNSETS: shaOf(root, FROZEN_MAIN_LEARNSETS),
     FROZEN_LAYER_LEARNSETS: shaOf(root, FROZEN_LAYER_LEARNSETS),
+    FROZEN_MAIN_SUPPORT: shaOf(root, FROZEN_MAIN_SUPPORT),
+    FROZEN_LAYER_SUPPORT: shaOf(root, FROZEN_LAYER_SUPPORT),
     FROZEN_FULL_CATALOG: shaOf(root, FROZEN_FULL_CATALOG),
     PACK_PATH: shaOf(root, PACK_PATH),
   };
+
+  // ── 规范四技能 = 引擎 loadout（**唯一事实源**，2026-09-25 人类口径「配招这个你得修好」）──────
+  // 合并规则与 `roco/src/roco_env/data.py:515-535` 逐条同义（见 owned-pets-lib 的
+  // `mergeCanonicalLoadouts`）。**这里曾经是 `shuffle(rng, pool).slice(0,4)` 伪随机抽样** ——
+  // 那让 owned 的四技能与引擎实战装上的四技能 48/48 全不一致（集合级），是数据层的自相矛盾。
+  const supportMatrices = [
+    {label: 'support-matrix.json（基线 12）', doc: mainSupport,
+      artifact_path: FROZEN_MAIN_SUPPORT, artifact_sha256: sources.FROZEN_MAIN_SUPPORT},
+    {label: 'layer-playable-48/support-matrix.json（叠加层 36）', doc: layerSupport,
+      artifact_path: FROZEN_LAYER_SUPPORT, artifact_sha256: sources.FROZEN_LAYER_SUPPORT},
+  ];
+  const canonical = mergeCanonicalLoadouts(supportMatrices);
+  if (canonical.problems.length) {
+    throw new Error(`规范四技能合并失败（引擎 data.py:515-535 同款校验）：${canonical.problems.slice(0, 3).join(' | ')}`);
+  }
+  const supportSourceByPet = new Map();
+  for (const source of supportMatrices) {
+    (source.doc?.pets ?? []).forEach((entry, index) => {
+      if (!(entry?.candidate_moveset?.skills ?? []).length) return;
+      supportSourceByPet.set(entry.pet_id, {
+        artifact_path: source.artifact_path,
+        artifact_sha256: source.artifact_sha256,
+        pointer: `pets[${index}].candidate_moveset.skills`,
+      });
+    });
+  }
 
   const skipped = {
     no_frozen_learnset: [],
     insufficient_learnable_skills: [],
     no_blood_skills_in_learnset: [],
+    no_canonical_moveset: [],
+    canonical_moveset_unresolvable: [],
     species_not_in_pack: [],
   };
   const candidates = [];
@@ -181,6 +207,29 @@ function collectCandidates(root) {
       skipped.no_blood_skills_in_learnset.push({species_id: petId, species_name: name, reason: 'no_blood_skills_in_learnset'});
       return;
     }
+    // 规范四技能：**只认引擎 loadout**，没有就跳过（fail closed，绝不自己选一组出来）。
+    const canonicalSkills = canonical.byPetId.get(petId) ?? null;
+    const movesetSource = supportSourceByPet.get(petId) ?? null;
+    if (!canonicalSkills || canonicalSkills.length !== 4 || !movesetSource) {
+      skipped.no_canonical_moveset.push({
+        species_id: petId,
+        species_name: name,
+        reason: 'no_canonical_moveset',
+        note: '引擎 loadout（support-matrix / layer-playable-48）里没有这一只的 candidate_moveset',
+      });
+      return;
+    }
+    const unresolvable = canonicalSkills.filter((id) => !skillIds.has(id));
+    if (unresolvable.length) {
+      skipped.canonical_moveset_unresolvable.push({
+        species_id: petId,
+        species_name: name,
+        reason: 'canonical_moveset_unresolvable',
+        skill_ids: unresolvable,
+        note: '引擎 loadout 里的技能在冻结 skills.json 里解析不了 —— 不删技能、不换技能去凑四个',
+      });
+      return;
+    }
     candidates.push({
       petId,
       speciesName: name,
@@ -189,9 +238,11 @@ function collectCandidates(root) {
       learnsetSha: artifactPath === FROZEN_MAIN_LEARNSETS
         ? sources.FROZEN_MAIN_LEARNSETS
         : sources.FROZEN_LAYER_LEARNSETS,
-      pointer: `learnsets.${petId}.native_skills`,
+      pointer: `learnsets.${petId}`,
       usable,
       bloodSkills,
+      canonicalSkills: [...canonicalSkills],
+      movesetSource,
       catalogIndex: catalog.index,
       stats: catalog.pet.stats,
       packIndex: packEntry.index,
@@ -246,9 +297,11 @@ function collectCandidates(root) {
 /**
  * 生成整份产物。
  *
- * 实例配比是**算出来的**、不是写死的：先给每个候选 1 个实例，再按确定性洗牌的顺序
- * 把 species 提升为「2 个实例」，直到凑够 80 个。这样「同种不同个体」组数是
- * 由数据规模推出来的，而不是「先写 32 组再解释」。
+ * 实例配比：**每个候选物种恰好 1 个个体**（人类 2026-09-24：「重复的删掉」）。
+ * 以前这里会按确定性洗牌把 32 个物种提升为「2 个实例」凑到 80 —— 那批第二个个体
+ * 在游戏里并不存在（是我们为了让「同种比较」有数据可演而造的），既违反「不编数据」，
+ * 也让「我的精灵」出现同名两张卡。现在 `groupSize` 恒为 1，判据反向钉住
+ * 「同种组数 == 0」（`MAX_SAME_SPECIES_GROUPS`）。
  */
 export function buildOwnedPets({root = ROOT} = {}) {
   const {candidates, skipped, counts: universe, sources} = collectCandidates(root);
@@ -262,18 +315,12 @@ export function buildOwnedPets({root = ROOT} = {}) {
   }
 
   const rng = makeRng(SEED);
-  // baseline 一律 2 个（这样「不在 layer-playable-48」那条判据天然满足）；
-  // overlay 按确定性洗牌顺序逐个提升，直到总数到 80。
-  const paired = new Set(baseline.map((c) => c.petId));
-  let projected = candidates.length + paired.size;
-  const overlayOrder = shuffle(rng, overlay.map((c) => c.petId));
-  for (const petId of overlayOrder) {
-    if (projected >= INSTANCE_TARGET) break;
-    paired.add(petId);
-    projected += 1;
-  }
+  // 一个人一只：不造第二个个体（见上面的说明）。
+  const paired = new Set();
+  const projected = candidates.length;
   if (projected !== INSTANCE_TARGET) {
-    throw new Error(`配比算出来是 ${projected} 个实例，凑不到 ${INSTANCE_TARGET} 个（候选 ${candidates.length} 个 species）`);
+    throw new Error(`候选物种 ${projected} 个 ≠ 期望实例数 ${INSTANCE_TARGET} 个：`
+      + '实例数现在等于物种数（一人一只），对不上说明候选宇宙变了，判据要跟着改');
   }
 
   const instances = [];
@@ -282,7 +329,6 @@ export function buildOwnedPets({root = ROOT} = {}) {
   for (const candidate of candidates) {
     const groupSize = paired.has(candidate.petId) ? 2 : 1;
     let previousLevel = null;
-    let previousSkills = null;
     for (let k = 0; k < groupSize; k += 1) {
       serial += 1;
       const instanceId = `own-${String(serial).padStart(4, '0')}`;
@@ -293,13 +339,12 @@ export function buildOwnedPets({root = ROOT} = {}) {
         level = LEVELS[(LEVELS.indexOf(level) + 1 + Math.floor(rng() * (LEVELS.length - 1))) % LEVELS.length];
       }
 
-      // 四个技能：从该 species 的 native_skills 里取四个，顺序即技能位顺序。
-      const pool = candidate.usable.map((row) => row.skill_id);
-      let skills = shuffle(rng, pool).slice(0, 4);
-      if (previousSkills !== null && deepEqual(skills, previousSkills)) {
-        // 极小概率撞上同一组：旋转一位，保证「有序技能组合」不同。
-        skills = [skills[3], skills[0], skills[1], skills[2]];
-      }
+      // 四个技能 = **引擎 loadout**（顺序即技能位顺序；逐位，不是按集合）。
+      // 2026-09-25 之前这里是 `shuffle(rng, pool).slice(0, 4)`：那是**伪随机抽样**，
+      // 与引擎实战真正装上的四个技能 48/48 全不一致（集合级）—— 玩家在工坊选的那只，
+      // 进对局后四个技能是另一套。现在唯一事实源是 support-matrix / layer 的
+      // `candidate_moveset`（`Ruleset.candidate_moveset()` 读的就是它）。
+      const skills = [...candidate.canonicalSkills];
 
       // 血脉：只有**真的带血脉名**的行才能当标签用。layer-playable-48 的 36 只 overlay 里
       // blood 是 null（blood_status=not_provided_by_source）——那就标 UNKNOWN，不拿 18 条
@@ -328,10 +373,12 @@ export function buildOwnedPets({root = ROOT} = {}) {
         specialty: growthAttribute(),
         bloodline,
         skills,
+        // 这四技能**从哪来**：引擎 loadout 的那一片 support-matrix（基线 12 走主文件、
+        // 叠加层 36 走 layer-playable-48）里的 `candidate_moveset.skills`。
         skills_source: {
-          artifact_path: candidate.learnsetPath,
-          artifact_sha256: candidate.learnsetSha,
-          pointer: candidate.pointer,
+          artifact_path: candidate.movesetSource.artifact_path,
+          artifact_sha256: candidate.movesetSource.artifact_sha256,
+          pointer: candidate.movesetSource.pointer,
         },
         base_stats: {
           hp: candidate.stats.hp,
@@ -350,10 +397,20 @@ export function buildOwnedPets({root = ROOT} = {}) {
           {
             source_id: LICENCE_REF,
             source_scope: 'frozen_l1',
+            artifact_path: candidate.movesetSource.artifact_path,
+            artifact_sha256: candidate.movesetSource.artifact_sha256,
+            pointer: candidate.movesetSource.pointer,
+            note: '规范四技能的**选择**出处（引擎 loadout；confidence=ENGINE_HYPOTHESIS，'
+              + '台账 23 条里没有配招主题 ⇒ 这一份是工程启发式，不是游戏真实配招）',
+          },
+          {
+            source_id: LICENCE_REF,
+            source_scope: 'frozen_l1',
             artifact_path: candidate.learnsetPath,
             artifact_sha256: candidate.learnsetSha,
             pointer: candidate.pointer,
-            note: '四个技能的候选集合出处（native_skills）',
+            note: '四个技能的**合法性**出处（该物种学习表：native + blood + stones —— '
+              + '与引擎 `Ruleset.is_learnable` 的 `all_skill_ids` 同一口径）',
           },
           {
             source_id: LICENCE_REF,
@@ -400,7 +457,6 @@ export function buildOwnedPets({root = ROOT} = {}) {
       battleBuilds.push(build);
 
       previousLevel = level;
-      previousSkills = skills;
     }
   }
 
@@ -624,7 +680,7 @@ export function buildReport({dataset, datasetText, checkResult, skipped, univers
       },
     },
     same_species_groups: {
-      expected_min: MIN_SAME_SPECIES_GROUPS,
+      expected_max: MAX_SAME_SPECIES_GROUPS,
       count: checkResult.facts.sameSpeciesGroups,
       with_difference: checkResult.facts.sameSpeciesGroupsWithDifference,
       groups: checkResult.facts.sameSpeciesGroupDetails,

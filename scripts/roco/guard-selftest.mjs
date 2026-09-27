@@ -155,6 +155,51 @@ export const INJECTIONS = [
     catches: '引擎能量上限又出现第二份来源：规则配置改了，教练层的上下文仍报旧上限，而所有既有测试照常绿',
     run: {cmd: 'node', args: ['--test', 'tests/evals/structure-contract.test.js']},
   },
+  {
+    id: 'match-review-depth-fabricated-number',
+    guard: '局末复盘加厚层（rocoMatchDepth）里的每个数字都必须能在事件里指认出来',
+    file: 'src/coach/roco-experience.js',
+    // 注入：把「全场最重的一击」那个数字 **+1**。刻意只差一点——编造最危险的样子不是
+    // 「胡写一个 999」，而是「跟真的几乎一样、玩家按回合回查时对不上」。
+    // 只动 `fields`、不动文案：这正是「文案与事实各说各话」那种最难发现的坏法。
+    find: '    fields: {turn: best.turn, side: best.side, damage: best.damage, target_slot: best.targetSlot, skill_id: best.skillId},',
+    replace: '    fields: {turn: best.turn, side: best.side, damage: best.damage + 1, target_slot: best.targetSlot, skill_id: best.skillId},',
+    catches: '复盘的「依据」里多出一个事件里没有的数字：玩家照着回合去战报回查会对不上，'
+      + '而页面照常显示、没有任何东西会红（红线①「数字只由引擎产生」的破口）',
+    run: {cmd: 'node', args: ['--test', 'tests/roco-match-review-depth.test.js']},
+  },
+  {
+    id: 'gold-revision-drift-blind',
+    guard: '金标内容一变就必须重新送审（指纹漂移不许被吞掉）',
+    file: 'scripts/roco/gold-review.mjs',
+    // 人类口径 1：「金标可以改，但必须人类先审阅」。指纹漂移就是「改了答案没重新送审」，
+    // 这条注入把它变成看不见 —— 于是状态文件里那 54 条 draft 会永远"看着一致"。
+    find: '    if (saved.revision !== entry.revision) {',
+    replace: '    if (false) {',
+    catches: '标准答案被改而审阅状态不更新：报告照跑、数字照出，没有任何东西会红'
+      + '（人类明确说过"审之前不许拿去刷指标"）',
+    run: {cmd: 'node', args: ['--test', 'tests/roco-gold-review-gate.test.js']},
+  },
+  {
+    id: 'gold-reviewer-allowlist-blind',
+    guard: '批准只能由允许名单里的人写（agent 不许自我批准金标）',
+    file: 'scripts/roco/gold-review.mjs',
+    find: '      if (!allowed.includes(saved.reviewed_by)) {',
+    replace: '      if (false) {',
+    catches: '任何人写一句 reviewed_by 就能把未审的金标变成"已审"，'
+      + '闸门于是变成一个布尔值装饰（口径 1 的送审流程当场作废）',
+    run: {cmd: 'node', args: ['--test', 'tests/roco-gold-review-gate.test.js']},
+  },
+  {
+    id: 'gold-status-vocabulary-widened',
+    guard: '金标状态取值域封闭（draft / approved 之外不许有别的值）',
+    file: 'scripts/roco/gold-review.mjs',
+    find: "export const GOLD_STATUSES = ['draft', 'approved'];",
+    replace: "export const GOLD_STATUSES = ['draft', 'approved', 'maybe'];",
+    catches: '取值域被放宽后，一个既不是 draft 也不是 approved 的状态会被当成"不是非法值"放过去，'
+      + '而 approved 的判定却在别处 —— 两种口径从此可以各说各话',
+    run: {cmd: 'node', args: ['--test', 'tests/roco-gold-review-gate.test.js']},
+  },
 ];
 
 /**

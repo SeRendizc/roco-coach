@@ -9,12 +9,20 @@
 //   execution_tolerance  次优操作下掉多少               ← 需要「分布」
 //   coverage_confidence  六宠 build 的规则与数据覆盖     ← **不依赖分布，现在就能算**
 //
-// 这份先验（`data/roco/meta-prior/v1.json`）当前 `distribution[]` 全部
-// `source: "unknown"` + `value: null`，所以前四个口径现在**无定义**：本模块返回
-// `available:false` + 点名缺什么的 `unknown_reason`，`value` 是 `null`（不是 0），
-// 并**永不**输出胜率 / 百分数 / 「差不多」。这是 fail closed，不是「永远 unknown」：
-// 注入一份 `source: "measured"` 的分布（带逐条来源与数值）后，前四个口径必须**真的亮起来**，
-// 值来自注入分布（测试里有一条反向控制钉住这一点——恒 unknown 也是骗人）。
+// 这三个口径的三档输入，本模块都认（`resolveDistribution()` 是唯一的判定点）：
+//
+//   · `measured`   逐条带可核对来源（url / 仓内文件 + 日期）+ 数值 ⇒ 前四轴亮起来，值来自注入分布；
+//   · `assumption` **声明假设**：逐条带 `basis`（`kind` + `denominator > 0` + `recomputable_from`）、
+//                  `confidence: "ENGINE_HYPOTHESIS"`、`unit: "share"`，且**不许挂 sources**；
+//                  占比构成一次划分（合计 = 1）。这时「对环境的期望」有分母了，但
+//                  `relative_score` / `tolerance` 不是离线联赛产物——它们由**本模块**按体系自己声明的
+//                  `archetypes[].feature_axes[].criterion` 从 RC-302 的缺口诊断里**结构性**算出来，
+//                  每个判据的分母随证据一起写进产出（见 `structuralScoresForTeam()`），
+//                  置信等级是 `ENGINE_HYPOTHESIS`，四轴必须 `available:true` 并对分母敏感；
+//   · `unknown`    没有可用分母 ⇒ `available:false` + 点名缺什么的 `unknown_reason` + `value: null`（不是 0）。
+//
+// 三档都**永不**输出胜率 / 百分数 / 「差不多」。一个不带 `basis` 的裸数字不是 assumption，是编造：
+// 它让整份分布退回 unknown（判据 ⑨ 的反证钉住这一点）。
 //
 // 它**不做**的事（边界同 RC-303，报告与 `docs/roco/TEAM-COMPARE.md` 里各写一遍）：
 //   · 在线路径不跑模拟、不调引擎、不起进程（结构判据扫源码，见 ONLINE_SECTION_MARKER）；
@@ -31,7 +39,7 @@
 // （队伍规模常量在这里没用到：六宠口径出现在文档与报告样例形状里，本模块不校验人数。）
 
 import {
-  CONFIDENCE_LEVELS, CONFIDENCE_RANK, diagnoseTeamGaps,
+  CONFIDENCE_LEVELS, CONFIDENCE_RANK, RESPOND_VARIANTS, diagnoseTeamGaps,
 } from './team-gaps.js';
 
 /**
@@ -99,17 +107,19 @@ export const RANKER_STATUSES = Object.freeze(['ready', 'missing', 'invalid']);
  * 报告、文档与测试都引用这些常量，改一处不会三处漂移。
  */
 export const FAIL_CLOSED_REASONS = Object.freeze({
-  DISTRIBUTION_UNKNOWN: '缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前'
-    + ' `source: "unknown"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，'
+  DISTRIBUTION_UNKNOWN: '缺**版本对手分布**：注入的 `distribution[]` 是 `source: "unknown"` + `value: null`'
+    + '（没有任何真实对局数据，也没有声明假设的分母），所以「对环境的期望」的分母不存在，'
     + '这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。',
   DISTRIBUTION_ENTRY_VALUE_MISSING: '缺**逐体系分布值**：注入的分布里至少一个体系的 `value` 是 `null`，'
     + '分母不闭合，所以这一轴现在无定义（要么补齐每个体系的值，要么整份分布保持 unknown）。',
   NO_RELATIVE_SCORE: '缺**逐体系相对表现表**：分布说的是「对手占多少」，'
-    + '还需要 `distribution[].relative_score`（离线联赛 / matchup bank 的产物）才能把占比折成期望。'
-    + '本仓现在既没有 matchup bank 也没有逐体系表现估计。',
+    + '还需要每行的 `relative_score` 才能把占比折成期望。measured 档的 `relative_score` 是离线联赛 / '
+    + 'matchup bank 的产物，本仓没有这份产物；assumption 档的行由本模块从 RC-302 结构性算出（见 NO_STRUCTURAL_SIGNAL）。',
   NO_EXECUTION_SAMPLE: '缺**可复跑的对局采样**：`distribution[].tolerance`（同一支队伍在次优操作下的'
     + '相对表现）是离线回放/联赛的产物，本仓一次都没跑过；规则本身还在 candidate 阶段'
-    + '（台账里严格总序仍是 ENGINE_HYPOTHESIS），所以容错数值现在一定是伪精确。',
+    + '（台账里严格总序仍是 ENGINE_HYPOTHESIS），所以容错数值现在一定是伪精确。'
+    + 'assumption 档下这一轴用的是**结构短板**（该体系所声明判据里的最小结构分，见产出里的 structural_basis），'
+    + '它是下界代理，不是回放测量。',
   NO_GAP_DIAGNOSIS: '缺**build 覆盖数据**：这一轴只依赖 build 的规则/数据覆盖，本可以立刻算；'
     + '但没有注入 RC-302 的缺口诊断（`gapsByTeam[team_id]`）时，连「哪些量在台账里是 UNKNOWN」都读不到，'
     + '所以 fail closed 而不是报 0 覆盖。',
@@ -117,6 +127,17 @@ export const FAIL_CLOSED_REASONS = Object.freeze({
     + '却没有 url / 仓内文件 + 日期（先验的 `DISTRIBUTION` 判据要求 measured 必须有来源）。'
     + '没有来源的数字不许进比较，所以这一轴仍然 unknown。',
   NO_ARCHETYPE: '缺**可识别体系**：注入的分布里一条体系都没有，分母是空的，这一轴无定义。',
+  ASSUMPTION_BASIS_MISSING: '缺**声明假设的可复算依据**：分布里有 `source: "assumption"` 的行，'
+    + '但 `basis` 不完整（`kind` / `denominator > 0` / `recomputable_from` 缺一，或 `confidence` 不是 '
+    + '`ENGINE_HYPOTHESIS`、`notes` 太短、`unit` 不是 `share`）。**一个不带依据的数字就是编的**，'
+    + '所以这一轴回到 unknown，而不是照用这个数。',
+  ASSUMPTION_CARRIES_SOURCE: '**声明假设不许挂来源**：`source: "assumption"` 的行上带了 `sources[]`——'
+    + '这是把假设伪装成实测。要么撤掉来源保留 `basis`，要么拿真的可核对来源并把 `source` 改成 `measured`。',
+  NO_PARTITION: '**占比不闭合**：`distribution[].value` 的合计不等于 1（容差 0.001）。'
+    + '权重只有在构成一次划分时才有分母含义；合计不是 1 就说明这不是一次划分，这一轴无定义。',
+  NO_STRUCTURAL_SIGNAL: '缺**该体系所声明判据的结构输入**：assumption 档下这一轴的相对表现要按体系自己的 '
+    + '`archetypes[].feature_axes[].criterion` 从 RC-302 的缺口诊断里算（每个判据的分子 / 分母都写进 `evidence[]`），'
+    + '但诊断里没有这些字段，或者这一队没有注入 `gapsByTeam`。本模块不拿别的数据顶替、不给 0：回到 unknown。',
 });
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -182,12 +203,22 @@ export const ONLINE_ENTRYPOINTS = Object.freeze([
 
 /** 结构判据的文本（报告里逐条贴出来，与实现同源）。 */
 export const STRUCTURAL_CRITERIA = Object.freeze({
-  distribution_fail_closed: '[严格] 注入的 `metaPrior` 里 `distribution_source === "unknown"`（或 `distribution[].value` 有 null）时，'
+  distribution_fail_closed: '[严格] 注入的 `metaPrior` 是 `unknown` 档（`distribution_source === "unknown"`，'
+    + '或 `distribution[].value` 有 null，或没有任何可用分母）时，'
     + `${DISTRIBUTION_AXES.join(' / ')} 四轴的 \`available\` 必须是 \`false\`、\`value\` 必须是 \`null\`、`
     + '`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。',
-  availability_shape: '`available:true` 的轴必须给出**非 null 的数值型** `value`（或最怕体系那轴的非空对象）；'
-    + '`available:false` 的轴必须给出 `value: null` 且 `value_numbers` 为空。'
-    + '数值轴报 `null` 却写 `available:true` ⇒ `AVAILABILITY_SHAPE`（红）。',
+  assumption_needs_basis: '[严格] `source: "assumption"` 的行必须带**可复算的声明依据**：'
+    + '`basis.kind === "uniform-over-candidate-universe"`、`basis.denominator > 0`、'
+    + '`basis.recomputable_from` 非空、`unit === "share"`、`confidence === "ENGINE_HYPOTHESIS"`、'
+    + '`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。'
+    + '任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；'
+    + '照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。',
+  assumption_structural_scores: '[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，'
+    + '必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：'
+    + '每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），'
+    + '`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），'
+    + '轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），'
+    + '不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。',
   measured_lights_up: '注入带来源的 `measured` 分布时，前四轴**必须**亮起来（`available:true`），'
     + '值必须来自注入分布（加权均值 / 极差 / 最差体系逐条可对账）。'
     + '反过来，如果 `available` 的轴数与注入分布里 `value` 非 null 的体系数对不上 ⇒ `MEASURED_NOT_WIRED`（红）：'
@@ -195,6 +226,9 @@ export const STRUCTURAL_CRITERIA = Object.freeze({
   coverage_from_build: '[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定'
     + '（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，'
     + '否则 `COVERAGE_NOT_FROM_BUILD`（红）。',
+  availability_shape: '`available:true` 的轴必须给出**非 null 的数值型** `value`（或最怕体系那轴的非空对象）；'
+    + '`available:false` 的轴必须给出 `value: null` 且 `value_numbers` 为空。'
+    + '数值轴报 `null` 却写 `available:true` ⇒ `AVAILABILITY_SHAPE`（红）。',
   no_pseudo_precision: '产出与渲染文本里不许出现胜率 / 概率 / 百分数 / 强度分 / 榜单标签（T0 / 强势 / 必带…）；'
     + '命中即 `PSEUDO_PRECISION`（红）。`value_numbers`（单位与量纲）必须逐条声明，'
     + '`unit` 与 `value_numbers[].unit` 里出现 `BANNED_UNIT_WORDS`（胜率 / 概率 / 百分比 / %）'
@@ -254,47 +288,113 @@ const sourceRefs = (sources) => arr(sources)
   .map((source) => source?.ref ?? source?.path ?? null)
   .filter(isNonEmptyString);
 
+/** 声明假设的 `basis.kind`：均匀铺在候选宇宙上——分母必须能被第三方**重算**出来。 */
+export const ASSUMPTION_BASIS_KIND = 'uniform-over-candidate-universe';
+/** 占比合计的容差：`distribution[].value` 是一次划分，合计必须落在 1 ± 这个值里。 */
+export const PARTITION_TOLERANCE = 0.001;
+/** `notes` 的长度下限（与 `scripts/roco/meta-prior-lib.mjs` 的校验器同一条）。 */
+const ASSUMPTION_NOTES_MIN = 12;
+
+/**
+ * 一条 `source: "assumption"` 的行缺什么。返回 `[]` 就是「依据齐全」。
+ *
+ * 校验与 `scripts/roco/meta-prior-lib.mjs` 的校验器**同形**（那边是产出侧的闸门，这边是消费侧的闸门）：
+ * 少了这边，一个手写的裸数字只要标成 assumption 就能进比较——那正是「硬编码样例数字」的入口。
+ */
+export function assumptionBasisProblems(entry) {
+  const problems = [];
+  const basis = isPlainObject(entry?.basis) ? entry.basis : null;
+  if (basis === null) problems.push('basis');
+  else {
+    if (basis.kind !== ASSUMPTION_BASIS_KIND) problems.push('basis.kind');
+    if (!(Number.isFinite(basis.denominator) && Number(basis.denominator) > 0)) problems.push('basis.denominator');
+    if (!isNonEmptyString(basis.recomputable_from)) problems.push('basis.recomputable_from');
+  }
+  if (!Number.isFinite(entry?.value) || Number(entry.value) < 0 || Number(entry.value) > 1) problems.push('value(0～1)');
+  if (entry?.unit !== 'share') problems.push('unit=share');
+  if (entry?.confidence !== 'ENGINE_HYPOTHESIS') problems.push('confidence=ENGINE_HYPOTHESIS');
+  if (!isNonEmptyString(entry?.notes) || entry.notes.trim().length < ASSUMPTION_NOTES_MIN) problems.push('notes');
+  return problems;
+}
+
 /**
  * 读注入的分布。**两套形状都认**，因为先验的 schema 与先验的 v1.json 各写了一套：
  *   · `metaPrior.distribution_source`（顶层判定，RC-304 任务书写的就是这个）；
- *   · `metaPrior.distribution[]`（先验实际产物：逐体系 `source` / `value` / `sources`）。
- * 顶层没写就按逐条推断；**任何一条 `value` 是 null 就算整份分布不可用**（分母不闭合）。
+ *   · `metaPrior.distribution[]`（先验实际产物：逐体系 `source` / `value` / `sources` / `basis`）。
+ * 顶层没写就按逐条推断。三档判定，任何一档都不许「差不多」：
+ *   · `measured`   每行都有可核对来源 + 数值；
+ *   · `assumption` 每行都有可复算 `basis` + `unit: share` + ENGINE_HYPOTHESIS、**不许挂来源**、占比合计 = 1；
+ *   · `unknown`    其余情况（含任何一条 `value` 是 null、任何一条 basis 不全）。
  */
 export function resolveDistribution(metaPrior) {
   const prior = isPlainObject(metaPrior) ? metaPrior : {};
   const entries = arr(prior.distribution);
   const declared = prior.distribution_source ?? null;
 
-  const rows = entries.map((entry, index) => ({
-    index,
-    archetype_id: entry?.archetype_id ?? null,
-    label: entry?.label ?? entry?.archetype_label ?? null,
-    source: isNonEmptyString(entry?.source) ? entry.source : null,
-    value: Number.isFinite(entry?.value) ? Number(entry.value) : null,
-    relative_score: Number.isFinite(entry?.relative_score) ? Number(entry.relative_score) : null,
-    tolerance: Number.isFinite(entry?.tolerance) ? Number(entry.tolerance) : null,
-    sources: arr(entry?.sources),
-    has_source: hasMeasuredSource(entry?.sources),
-    reason: isNonEmptyString(entry?.reason) ? entry.reason : null,
-  }));
+  const rows = entries.map((entry, index) => {
+    const source = isNonEmptyString(entry?.source) ? entry.source : null;
+    const value = Number.isFinite(entry?.value) ? Number(entry.value) : null;
+    const basisProblems = source === 'assumption' ? assumptionBasisProblems(entry) : [];
+    const sources = arr(entry?.sources);
+    // 展示用 label：分布行自己没有就回落到 `archetypes[]` 的同一个体系（只是名字，不产生任何数）。
+    const metaLabel = arr(prior.archetypes)
+      .find((item) => item?.archetype_id === entry?.archetype_id)?.label ?? null;
+    return {
+      index,
+      archetype_id: entry?.archetype_id ?? null,
+      label: entry?.label ?? entry?.archetype_label ?? metaLabel,
+      source,
+      value,
+      relative_score: Number.isFinite(entry?.relative_score) ? Number(entry.relative_score) : null,
+      tolerance: Number.isFinite(entry?.tolerance) ? Number(entry.tolerance) : null,
+      basis: isPlainObject(entry?.basis) ? entry.basis : null,
+      basis_problems: basisProblems,
+      notes: isNonEmptyString(entry?.notes) ? entry.notes : null,
+      confidence: isNonEmptyString(entry?.confidence) ? entry.confidence : null,
+      unit: isNonEmptyString(entry?.unit) ? entry.unit : null,
+      sources,
+      has_source: hasMeasuredSource(sources),
+      reason: isNonEmptyString(entry?.reason) ? entry.reason : null,
+    };
+  });
 
   const measuredRows = rows.filter((row) => row.source === 'measured' || row.value !== null);
   const unknownDeclared = declared === 'unknown';
   // 逐条**自己**标了 unknown（或 value 为 null）也算「分布不存在」，不只是看顶层声明：
-  // 先验的 v1.json 就是这种形状（没有顶层 distribution_source，7 条全是 unknown + null）。
+  // 先验的 v1.json 早期形状就是这种（没有顶层 distribution_source，全部 unknown + null）。
   const unknownEntries = rows.filter((row) => row.source === 'unknown' || row.value === null).length;
   const rowsAllUnknown = rows.length > 0 && unknownEntries === rows.length;
   const noRows = rows.length === 0;
+
+  // 三档的判据，逐条都要过：
+  const measuredOk = !unknownDeclared && !noRows && measuredRows.length === rows.length
+    && measuredRows.every((row) => row.value !== null && row.has_source && row.source === 'measured');
+  // 假设档：每行都自报 assumption、basis 齐全、不挂来源；且占比合计 = 1（一次划分）。
+  const assumptionRows = rows.filter((row) => row.source === 'assumption');
+  const weightSumForPartition = round(rows.reduce((sum, row) => sum + (row.value ?? 0), 0));
+  const partitionOk = rows.length > 0
+    && Math.abs(weightSumForPartition - 1) <= PARTITION_TOLERANCE;
+  const basisOk = rows.every((row) => row.source === 'assumption' && row.basis_problems.length === 0);
+  const noSourcesOnAssumption = rows.every((row) => row.sources.length === 0);
+  const assumptionOk = !unknownDeclared && !noRows && assumptionRows.length === rows.length
+    && rows.every((row) => row.value !== null) && basisOk && noSourcesOnAssumption && partitionOk;
+
   let kind = 'unknown';
-  if (!unknownDeclared && !noRows && measuredRows.length === rows.length
-    && measuredRows.every((row) => row.value !== null && row.has_source)) {
-    kind = 'measured';
-  }
+  if (measuredOk) kind = 'measured';
+  else if (assumptionOk) kind = 'assumption';
 
   const missingValue = rows.filter((row) => row.value === null).map((row) => row.archetype_id ?? `distribution[${row.index}]`);
   const missingSource = measuredRows.filter((row) => !row.has_source)
     .map((row) => row.archetype_id ?? `distribution[${row.index}]`);
-  const missingValueSource = measuredRows.filter((row) => isNonEmptyString(row.source) && row.source !== 'measured')
+  const missingValueSource = measuredRows.filter((row) => isNonEmptyString(row.source) && row.source !== 'measured'
+    && row.source !== 'assumption')
+    .map((row) => row.archetype_id ?? `distribution[${row.index}]`);
+  const basisProblemRows = rows.filter((row) => row.source === 'assumption' && row.basis_problems.length > 0)
+    .map((row) => `${row.archetype_id ?? `distribution[${row.index}]`}（缺 ${row.basis_problems.join(' / ')}）`);
+  const sourcedAssumptionRows = rows.filter((row) => row.source === 'assumption' && row.sources.length > 0)
+    .map((row) => row.archetype_id ?? `distribution[${row.index}]`);
+  const unlabelledValueRows = rows.filter((row) => row.value !== null
+    && row.source !== 'measured' && row.source !== 'assumption')
     .map((row) => row.archetype_id ?? `distribution[${row.index}]`);
 
   // 权重：分母。分布给了 `value` 就当作占比；没有就把可用行等权（并说明这一点）。
@@ -305,16 +405,26 @@ export function resolveDistribution(metaPrior) {
   const missing = [];
   if (noRows) missing.push('distribution[]（一条体系都没有）');
   if (unknownDeclared || rowsAllUnknown) {
-    missing.push('metaPrior.distribution_source = "unknown"（没有任何真实对局数据）');
+    missing.push('metaPrior.distribution_source = "unknown"（没有任何真实对局数据，也没有声明假设的分母）');
   }
   if (missingValue.length) missing.push(`distribution[].value（${missingValue.join(' / ')}）`);
   if (missingSource.length) missing.push(`distribution[].sources（${missingSource.join(' / ')} 标了 measured 却没有 url / 文件）`);
   if (missingValueSource.length) missing.push(`distribution[].value_source（${missingValueSource.join(' / ')} 标了 measured 却没有来源）`);
+  if (basisProblemRows.length) missing.push(`distribution[].basis（${basisProblemRows.join(' / ')}）`);
+  if (sourcedAssumptionRows.length) missing.push(`distribution[].sources（${sourcedAssumptionRows.join(' / ')} 标了 assumption 却挂了来源）`);
+  if (unlabelledValueRows.length) missing.push(`distribution[].source（${unlabelledValueRows.join(' / ')} 有 value 却没写 source=measured / assumption）`);
+  if (!noRows && rows.every((row) => row.value !== null) && !partitionOk) {
+    missing.push(`distribution[].value 合计 = ${weightSum}（不是 1，分布不是一次划分）`);
+  }
 
-  const reason = kind === 'measured' ? null
+  const reason = kind !== 'unknown' ? null
     : (noRows ? FAIL_CLOSED_REASONS.NO_ARCHETYPE
       : (unknownDeclared || rowsAllUnknown ? FAIL_CLOSED_REASONS.DISTRIBUTION_UNKNOWN
-        : (missingSource.length ? FAIL_CLOSED_REASONS.NO_MEASURED_SOURCE : FAIL_CLOSED_REASONS.DISTRIBUTION_ENTRY_VALUE_MISSING)));
+        : (basisProblemRows.length ? FAIL_CLOSED_REASONS.ASSUMPTION_BASIS_MISSING
+          : (sourcedAssumptionRows.length ? FAIL_CLOSED_REASONS.ASSUMPTION_CARRIES_SOURCE
+            : (!partitionOk ? FAIL_CLOSED_REASONS.NO_PARTITION
+              : (missingSource.length ? FAIL_CLOSED_REASONS.NO_MEASURED_SOURCE
+                : FAIL_CLOSED_REASONS.DISTRIBUTION_ENTRY_VALUE_MISSING))))));
 
   return {
     kind,
@@ -323,9 +433,12 @@ export function resolveDistribution(metaPrior) {
     weights,
     weight_sum: weightSum,
     weight_mode: weightMode,
+    partition_ok: partitionOk,
+    assumption_rows: assumptionRows.length,
     missing,
     missing_value_entries: missingValue,
     missing_source_entries: missingSource,
+    missing_basis_entries: basisProblemRows,
     reason,
     evidence: buildDistributionEvidence(prior, rows, kind, declared),
   };
@@ -335,7 +448,7 @@ function buildDistributionEvidence(prior, rows, kind, declared) {
   const evidenceRows = [evidence(
     'data/roco/meta-prior/v1.json', 'distribution[]', 'source',
     declared === null ? '（未注入顶层 distribution_source）' : declared,
-    '环境先验的分布口径：先验自己写下的 unknown/measured 判定',
+    '环境先验的分布口径：先验自己写下的 unknown / assumption / measured 判定',
   )];
   for (const row of rows) {
     evidenceRows.push(evidence(
@@ -343,13 +456,37 @@ function buildDistributionEvidence(prior, rows, kind, declared) {
       row.value === null ? null : row.value,
       `体系 ${row.archetype_id ?? `#${row.index}`}：source=${stableJson(row.source)}、`
       + `relative_score=${stableJson(row.relative_score)}、tolerance=${stableJson(row.tolerance)}、`
+      + `basis=${row.basis === null ? '（没有）' : stableJson({kind: row.basis.kind, denominator: row.basis.denominator,
+        recomputable_from: row.basis.recomputable_from})}、`
       + `来源 ${sourceRefs(row.sources).join(' / ') || '（没有）'}`,
     ));
   }
-  if (kind !== 'measured') {
+  if (kind === 'assumption') {
+    const denominators = uniqueSorted(rows.map((row) => row.basis?.denominator)
+      .filter((value) => Number.isFinite(value)).map((value) => String(value)));
+    evidenceRows.push(evidence(
+      'data/roco/meta-prior/v1.json', 'distribution[].basis', 'kind',
+      rows[0]?.basis?.kind ?? null,
+      `占比是**声明假设**（不是实测分布）：${rows.length} 个体系各 1/${denominators.join(' / ') || '?'}，`
+      + '分母可由 `basis.recomputable_from` 指向的脚本重算；合计 = 1（一次划分）。'
+      + '这条分布只提供**分母**，不提供任何体系的强弱结论。置信等级：ENGINE_HYPOTHESIS。',
+    ));
+    evidenceRows.push(evidence(
+      'data/roco/meta-prior/v1.json', 'distribution[].basis.recomputable_from', 'recomputable_from',
+      uniqueSorted(rows.map((row) => row.basis?.recomputable_from).filter(isNonEmptyString)),
+      '重算通道：拿这个脚本跑一遍就能得出同一组占比（K 或等级变了，占比随之变）',
+    ));
+    evidenceRows.push(evidence(
+      'data/roco/meta-prior/v1.json', 'distribution[].basis.replace_with', 'replace_with',
+      rows[0]?.basis?.replace_with ?? null,
+      '替换通道：拿到带 url / 仓内文件 + 日期 + 台账等级的来源后，把 source 改成 measured，'
+      + '相对表现改用离线联赛 / matchup bank 的产物（本模块的 measured 通路已经就位）',
+    ));
+  }
+  if (kind === 'unknown') {
     evidenceRows.push(evidence(
       'data/roco/meta-prior/v1.json', 'claim.does_not_contain', 'claim',
-      '任何体系的占比数值：当前没有任何可核对的来源，distribution 全部是 unknown + value: null + reason',
+      '任何体系的占比数值：这份分布没有可用分母（unknown 或 value: null 或 basis 不全）',
       '先验自己声明它不产出占比：所以本模块不能从这里读出一个分母',
     ));
     const firstReason = rows.find((row) => isNonEmptyString(row.reason))?.reason ?? null;
@@ -362,6 +499,203 @@ function buildDistributionEvidence(prior, rows, kind, declared) {
   }
   return evidenceRows;
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// assumption 档的「队伍 × 体系」结构分：分母全部来自 RC-302 的登记字段
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * 七个判据各自的**结构分**，每一项都只读 RC-302 缺口诊断里已登记的字段，
+ * 分子 / 分母都是可复算计数（没有阈值、没有权重、没有拟合参数）：
+ *
+ *   coverage  `1 − Σ|weak_members| / Σ(|resisting|+|weak|+|neutral|+|unknown|)`（`coverage.unresisted.*`）
+ *   synergy   `1 − summary.unanswered_weaknesses / summary.weaknesses_total`（`synergy.summary`）
+ *   respond   `|variants_in_team_learnsets| / |RESPOND_VARIANTS|`（3 种应对，`respond.effect_unverified`）
+ *   energy    `|{成员 : zero_cost_moves ≥ 1}| / |members|`（`energy.build_curve`）
+ *   speed     `|distinct speed_tier| / |members|`（`speed.team_tiers`）
+ *   pivot     `|members_with_tool_in_build| / |队伍成员|`（`pivot.tool_coverage`）
+ *   cost      `validated_members / team_size`（`cost.build_support`）
+ *
+ * 缺任何一个字段 ⇒ `null`（**不猜、不用别的字段顶替**）⇒ 整条 assumption 分布 fail closed。
+ * 这些分数是**结构描述**，不是对局结果：它们和胜负无关，只回答「这一队的这一环铺开了多少」。
+ */
+const CRITERION_SCORERS = Object.freeze({
+  coverage: ({gaps, entry, members}) => {
+    const rows = gaps.filter((gap) => gap?.dimension === 'coverage'
+      && isNonEmptyString(gap?.id) && gap.id.startsWith('coverage.unresisted.'));
+    const slots = rows.reduce((sum, gap) => sum + arr(gap.value?.resisting_members).length
+      + arr(gap.value?.weak_members).length + arr(gap.value?.neutral_members).length
+      + arr(gap.value?.unknown_members).length, 0);
+    const weak = rows.reduce((sum, gap) => sum + arr(gap.value?.weak_members).length, 0);
+    if (rows.length === 0) {
+      // 一条 `coverage.unresisted.*` 都没有 = 每个已登记系别都有成员能接。这只有在**扫描确实跑过**时才算数。
+      if (members.length === 0 || !(Number(entry?.facts?.registered_attack_types) > 0)) return null;
+      return {value: 1, numerator: 0, denominator: 0, fields: ['facts.registered_attack_types'],
+        gap_ids: [], note: '没有任何 coverage.unresisted 缺口 ⇒ 每个已登记系别都有成员能接（分子 0，分母 0）'};
+    }
+    if (slots === 0) return null;
+    return {value: 1 - weak / slots, numerator: weak, denominator: slots,
+      fields: ['coverage.unresisted.*.value.weak_members', 'coverage.unresisted.*.value.{resisting,neutral,unknown}_members'],
+      gap_ids: rows.map((gap) => gap.id), note: '被克制成员数 / 全部成员槽位'};
+  },
+  synergy: ({gaps, entry}) => {
+    const summary = gaps.find((gap) => gap?.id === 'synergy.summary')?.value ?? null;
+    if (!isPlainObject(summary) || !(Number(summary.members_known) > 0)) return null;
+    const total = Number(summary.weaknesses_total);
+    const unanswered = Number(summary.unanswered_weaknesses);
+    if (!Number.isFinite(total) || !Number.isFinite(unanswered) || total < 0 || unanswered < 0) return null;
+    if (total === 0) {
+      return {value: 1, numerator: 0, denominator: 0, fields: ['synergy.summary.value.weaknesses_total'],
+        gap_ids: ['synergy.summary'], note: '全队没有任何弱点 ⇒ 没有「无人能接」的弱点（分子 0，分母 0）'};
+    }
+    // 独立复算：`synergy.unanswered_weakness.*` 的条数必须与 summary 里的数一致，否则不猜。
+    const listed = gaps.filter((gap) => isNonEmptyString(gap?.id) && gap.id.startsWith('synergy.unanswered_weakness.')).length;
+    if (listed !== unanswered) return null;
+    return {value: 1 - unanswered / total, numerator: unanswered, denominator: total,
+      fields: ['synergy.summary.value.unanswered_weaknesses', 'synergy.summary.value.weaknesses_total'],
+      gap_ids: ['synergy.summary'], note: '无人能接的弱点数 / 弱点总数（与逐条缺口条数交叉核对过）'};
+  },
+  respond: ({gaps}) => {
+    const row = gaps.find((gap) => gap?.id === 'respond.effect_unverified')?.value ?? null;
+    const present = arr(row?.variants_in_team_learnsets).filter(isNonEmptyString);
+    if (!isPlainObject(row) || !Array.isArray(row.variants_in_team_learnsets)) return null;
+    const missing = gaps.filter((gap) => isNonEmptyString(gap?.id) && gap.id.startsWith('respond.variant_missing.')).length;
+    if (missing + present.length !== RESPOND_VARIANTS.length) return null;
+    return {value: present.length / RESPOND_VARIANTS.length, numerator: present.length,
+      denominator: RESPOND_VARIANTS.length,
+      fields: ['respond.effect_unverified.value.variants_in_team_learnsets'],
+      gap_ids: ['respond.effect_unverified'], note: `学招表里有的应对种类 / ${RESPOND_VARIANTS.length} 种应对`};
+  },
+  energy: ({gaps}) => {
+    const curve = gaps.find((gap) => gap?.id === 'energy.build_curve')?.value ?? null;
+    const members = arr(curve?.members).filter((member) => Number.isFinite(member?.zero_cost_moves));
+    if (!isPlainObject(curve) || members.length === 0) return null;
+    const cheap = members.filter((member) => Number(member.zero_cost_moves) >= 1).length;
+    return {value: cheap / members.length, numerator: cheap, denominator: members.length,
+      fields: ['energy.build_curve.value.members[].zero_cost_moves'],
+      gap_ids: ['energy.build_curve'], note: '四个技能里带 0 费技能的成员数 / 有 build 数据的成员数'};
+  },
+  speed: ({gaps}) => {
+    const tiers = gaps.find((gap) => gap?.id === 'speed.team_tiers')?.value ?? null;
+    const members = arr(tiers?.members).filter((member) => isNonEmptyString(member?.speed_tier));
+    if (!isPlainObject(tiers) || members.length === 0) return null;
+    const distinct = uniqueSorted(members.map((member) => member.speed_tier)).length;
+    return {value: distinct / members.length, numerator: distinct, denominator: members.length,
+      fields: ['speed.team_tiers.value.members[].speed_tier'],
+      gap_ids: ['speed.team_tiers'], note: '速度档的种类数 / 有速度档的成员数（梯度铺开程度）'};
+  },
+  pivot: ({gaps, members}) => {
+    const tools = gaps.find((gap) => gap?.id === 'pivot.tool_coverage')?.value ?? null;
+    if (!isPlainObject(tools) || members.length === 0) return null;
+    const inBuild = arr(tools.members_with_tool_in_build).length;
+    return {value: inBuild / members.length, numerator: inBuild, denominator: members.length,
+      fields: ['pivot.tool_coverage.value.members_with_tool_in_build'],
+      gap_ids: ['pivot.tool_coverage'], note: '配招里带换入/离场手段的成员数 / 队伍成员数'};
+  },
+  cost: ({gaps}) => {
+    const support = gaps.find((gap) => gap?.id === 'cost.build_support')?.value ?? null;
+    if (!isPlainObject(support)) return null;
+    const teamSize = Number(support.team_size);
+    const validated = Number(support.validated_members);
+    if (!(teamSize > 0) || !Number.isFinite(validated) || validated < 0) return null;
+    return {value: validated / teamSize, numerator: validated, denominator: teamSize,
+      fields: ['cost.build_support.value.validated_members', 'cost.build_support.value.team_size'],
+      gap_ids: ['cost.build_support'], note: '有冻结配招数据的成员数 / 队伍规模'};
+  },
+});
+
+export const STRUCTURAL_CRITERION_IDS = Object.freeze(Object.keys(CRITERION_SCORERS));
+
+/** 一支队伍的七个结构分（缺一个就把它的 id 记进 `missing_criteria`，不猜）。 */
+export function structuralCriteriaScores(team, gapsByTeam) {
+  const teamId = teamLabel(team);
+  const entry = isPlainObject(gapsByTeam) && teamId !== null ? gapsByTeam[teamId] : null;
+  const members = memberKeys(team);
+  const gaps = arr(entry?.gaps);
+  if (!isPlainObject(entry) || gaps.length === 0 || members.length === 0) {
+    return {ok: false, scores: {}, missing_criteria: [...STRUCTURAL_CRITERION_IDS],
+      reason: FAIL_CLOSED_REASONS.NO_STRUCTURAL_SIGNAL, gaps_length: gaps.length};
+  }
+  const scores = {};
+  const missing = [];
+  for (const criterion of STRUCTURAL_CRITERION_IDS) {
+    const scored = CRITERION_SCORERS[criterion]({gaps, entry, members});
+    if (scored === null || !Number.isFinite(scored.value) || scored.value < 0 || scored.value > 1) {
+      missing.push(criterion);
+      continue;
+    }
+    scores[criterion] = {...scored, criterion, value: round(scored.value)};
+  }
+  return {ok: missing.length === 0, scores, missing_criteria: missing,
+    reason: missing.length === 0 ? null : FAIL_CLOSED_REASONS.NO_STRUCTURAL_SIGNAL, gaps_length: gaps.length};
+}
+
+/**
+ * 把「队伍 × 体系」的结构分填进分布：`relative_score` = 该体系**自己声明的**
+ * `archetypes[].feature_axes[].criterion` 上结构分的等权均值；`tolerance` = 这些结构分里的最小值
+ * （**结构短板**：面对这个体系时最先崩的一环，作为次优操作余量的下界代理）。
+ *
+ * 权重是等权，分母 = 该体系的 `feature_axes[].length`（体系自己声明的判据条数），
+ * 所以每一个数都能被第三方从 `meta-prior/v1.json` + RC-302 重算出来。
+ */
+export function structuralScoresForTeam(team, gapsByTeam, metaPrior) {
+  const base = structuralCriteriaScores(team, gapsByTeam);
+  if (!base.ok) return {...base, archetypes: []};
+  const prior = isPlainObject(metaPrior) ? metaPrior : {};
+  const archetypes = arr(prior.archetypes);
+  const rows = [];
+  const problems = [];
+  for (const entry of arr(prior.distribution)) {
+    const archetypeId = entry?.archetype_id ?? null;
+    const meta = archetypes.find((item) => item?.archetype_id === archetypeId) ?? null;
+    const criteria = uniqueSorted(arr(meta?.feature_axes).map((axis) => axis?.criterion ?? axis?.axis)
+      .filter(isNonEmptyString));
+    if (meta === null || criteria.length === 0) {
+      problems.push(`${archetypeId ?? '(无 archetype_id)'} 在 meta-prior 的 archetypes[] 里找不到 feature_axes`);
+      continue;
+    }
+    const unavailable = criteria.filter((criterion) => !isPlainObject(base.scores[criterion]));
+    if (unavailable.length > 0) {
+      problems.push(`${archetypeId} 声明的判据 ${unavailable.join(' / ')} 没有结构分`);
+      continue;
+    }
+    const values = criteria.map((criterion) => base.scores[criterion].value);
+    rows.push({
+      archetype_id: archetypeId,
+      criteria,
+      criterion_values: Object.fromEntries(criteria.map((criterion, index) => [criterion, values[index]])),
+      relative_score: round(values.reduce((sum, value) => sum + value, 0) / values.length),
+      tolerance: round(Math.min(...values)),
+      weakest_criterion: criteria[values.indexOf(Math.min(...values))],
+      worst_criterion: criteria[values.indexOf(Math.min(...values))],
+    });
+  }
+  if (problems.length > 0 || rows.length === 0) {
+    return {...base, ok: false, archetypes: rows, problems,
+      missing_criteria: uniqueSorted([...base.missing_criteria, ...problems])};
+  }
+  return {...base, ok: true, archetypes: rows, problems: []};
+}
+
+/** 把结构分挂到分布的行上（**只补 null 的字段**：注入方自己给的 relative_score / tolerance 优先）。 */
+export function applyStructuralScores(distribution, structural) {
+  const byId = new Map(arr(structural?.archetypes).map((row) => [row.archetype_id, row]));
+  return {
+    ...distribution,
+    structural_used: true,
+    entries: arr(distribution?.entries).map((row) => {
+      const scored = byId.get(row.archetype_id) ?? null;
+      if (scored === null) return row;
+      return {
+        ...row,
+        relative_score: row.relative_score === null ? scored.relative_score : row.relative_score,
+        tolerance: row.tolerance === null ? scored.tolerance : row.tolerance,
+        structural: scored,
+      };
+    }),
+  };
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────
 // 第五轴：coverage_confidence（唯一现在就能算的一轴）
@@ -615,7 +949,7 @@ function singleAxis(axisId, team, metaPrior, gapsByTeam) {
     value_numbers: axisValueNumbers(axisId),
   };
 
-  if (distribution.kind !== 'measured') {
+  if (distribution.kind === 'unknown') {
     return {
       ...base,
       available: false,
@@ -634,7 +968,34 @@ function singleAxis(axisId, team, metaPrior, gapsByTeam) {
     };
   }
 
-  const value = compareAxisValues(axisId, distribution);
+  // assumption 档：占比只是**分母**（声明假设），相对表现由本模块按体系自己声明的判据
+  // 从 RC-302 结构性地算。缺任何一个判据的输入就整轴 fail closed——不拿别的数据顶替、不给 0。
+  const structural = distribution.kind === 'assumption'
+    ? structuralScoresForTeam(team, gapsByTeam, metaPrior) : null;
+  if (structural !== null && !structural.ok) {
+    const detail = [...structural.missing_criteria].slice(0, 8).join(' / ');
+    return {
+      ...base,
+      available: false,
+      value: null,
+      unknown_reason: `${FAIL_CLOSED_REASONS.NO_STRUCTURAL_SIGNAL}（缺：${detail || 'gapsByTeam'}）`,
+      evidence: [...distribution.evidence, evidence(
+        'injected:gapsByTeam', teamId === null ? 'gapsByTeam' : `gapsByTeam[${teamId}].gaps`, 'gaps',
+        structural.gaps_length,
+        'assumption 档的结构分只读 RC-302 已登记的缺口字段；这里缺口诊断没到位，所以不给数',
+      )],
+      confidence: 'UNKNOWN',
+      unverified: [`未核实：${axis.label} —— 占比到位了（声明假设），但结构分算不出来：${detail}`],
+      missing: structural.missing_criteria.length > 0 ? structural.missing_criteria : ['gapsByTeam[team_id].gaps'],
+      value_mask: null,
+      distribution_kind: distribution.kind,
+      structural_ok: false,
+      team_id: teamId,
+    };
+  }
+  const effective = structural === null ? distribution : applyStructuralScores(distribution, structural);
+
+  const value = compareAxisValues(axisId, effective);
   if (value === null) {
     const reason = axisId === 'execution_tolerance'
       ? FAIL_CLOSED_REASONS.NO_EXECUTION_SAMPLE : FAIL_CLOSED_REASONS.NO_RELATIVE_SCORE;
@@ -643,44 +1004,85 @@ function singleAxis(axisId, team, metaPrior, gapsByTeam) {
       available: false,
       value: null,
       unknown_reason: reason,
-      evidence: distribution.evidence,
+      evidence: effective.evidence,
       confidence: 'UNKNOWN',
-      unverified: [`未核实：${axis.label} —— 分布是 measured，但${reason}`],
+      unverified: [`未核实：${axis.label} —— 分布是 ${effective.kind}，但${reason}`],
       missing: [axisId === 'execution_tolerance' ? 'distribution[].tolerance' : 'distribution[].relative_score'],
-      distribution_kind: distribution.kind,
+      distribution_kind: effective.kind,
       team_id: teamId,
     };
   }
 
-  const bootstrap = distribution.evidence.some((item) => typeof item.note === 'string'
+  const bootstrap = effective.evidence.some((item) => typeof item.note === 'string'
     && item.note.includes('ENGINE_HYPOTHESIS'));
+  const structuralUsed = structural !== null && structural.ok;
+  const structuralEvidence = structuralUsed ? [
+    evidence('data/roco/meta-prior/v1.json', 'archetypes[].feature_axes[].criterion', 'criterion',
+      uniqueSorted(structural.archetypes.flatMap((row) => row.criteria)),
+      'assumption 档下相对表现的**权重来源**：每个体系按它自己声明的判据等权（分母 = feature_axes[].length），'
+      + '本模块不另设权重表'),
+    ...structural.archetypes.map((row) => evidence(
+      'injected:gapsByTeam', teamId === null ? 'gapsByTeam' : `gapsByTeam[${teamId}].gaps`, 'dimension',
+      {...row.criterion_values, relative_score: row.relative_score, tolerance: row.tolerance},
+      `体系 ${row.archetype_id} 的结构分：判据 ${row.criteria.join(' / ')} 各自 0～1（分子 / 分母见 `
+      + '`structuralCriteriaScores()` 的判据表），等权均值为相对分，最小值为**结构短板**（= tolerance）',
+    )),
+    evidence('injected:gapsByTeam', teamId === null ? 'gapsByTeam' : `gapsByTeam[${teamId}].gaps`, 'machine_evidence',
+      structural.scores ? Object.fromEntries(Object.entries(structural.scores)
+        .map(([criterion, scored]) => [criterion, {numerator: scored.numerator, denominator: scored.denominator,
+          gaps: scored.gap_ids, fields: scored.fields}])) : null,
+      '每个结构分的分子 / 分母 / 依据缺口（全部是 RC-302 的登记计数；这一档的置信等级是 ENGINE_HYPOTHESIS）'),
+  ] : [];
   return {
     ...base,
     available: true,
     value,
     unknown_reason: null,
     evidence: [
-      ...distribution.evidence,
+      ...effective.evidence,
+      ...structuralEvidence,
       evidence('injected:metaPrior.distribution[]', 'distribution[].relative_score',
         axisId === 'worst_archetype' ? 'min(relative_score)'
           : (axisId === 'matchup_spread' ? 'max(relative_score) - min(relative_score)'
             : (axisId === 'execution_tolerance' ? 'Σ(tolerance × weight) / Σweight' : 'Σ(relative_score × weight) / Σweight')),
         value,
         '值来自注入分布：权重 = distribution[].value（占比），逐条可对账；'
+        + (structuralUsed ? '相对分 / 容错这一档是 RC-302 结构分（ENGINE_HYPOTHESIS），不是对局测量' : '')
         + '如果权重是等权回落，另见 weight_mode'),
-      evidence('injected:metaPrior.distribution[]', 'distribution[].value', 'weight_mode', distribution.weight_mode,
-        distribution.weight_mode === 'value' ? '权重直接用注入的占比值'
+      evidence('injected:metaPrior.distribution[]', 'distribution[].value', 'weight_mode', effective.weight_mode,
+        effective.weight_mode === 'value' ? '权重直接用注入的占比值'
           : '注入分布没有给占比值，四轴按逐体系等权回落并在 unverified 点名'),
     ],
-    confidence: bootstrap ? 'ENGINE_HYPOTHESIS' : 'CROSS_SOURCE_SUPPORTED',
-    unverified: [
+    confidence: (structuralUsed || bootstrap) ? 'ENGINE_HYPOTHESIS' : 'CROSS_SOURCE_SUPPORTED',
+    unverified: structuralUsed ? [
+      '未核实：这一档的**占比**是声明假设（均匀铺在已识别体系上），不是实测版本分布；'
+        + '相对分是**结构分**（RC-302 的登记计数按体系自己声明的判据合成），不是对局结果，也不是任何胜负结论',
+      '未核实：容错这一档用的是**结构短板**（该体系判据里的最小结构分），是次优操作余量的下界代理；'
+        + '真的「次优操作下掉多少」要离线回放 / 联赛采样，本仓一次都没跑过',
+      '替换通道：拿到带 url / 仓内文件 + 日期 + 台账等级的来源后，把先验的 `distribution[].source` 改成 '
+        + '`measured` 并给出 `relative_score` / `tolerance`（measured 通路已就位，值优先用注入的那份）',
+      ...(effective.weight_mode === 'value' ? []
+        : ['未核实：环境占比 —— 注入分布没有 value，四轴按逐体系等权回落']),
+    ] : [
       '未核实：相对表现本身的正确性 —— 它来自注入的离线产物（league / matchup bank），'
         + '本仓现在**没有**这份产物；这条通路是为了让「分布到位后接口是活的」这件事可验证',
-      ...(distribution.weight_mode === 'value' ? []
+      ...(effective.weight_mode === 'value' ? []
         : ['未核实：环境占比 —— 注入分布没有 value，四轴按逐体系等权回落']),
     ],
     missing: [],
-    distribution_kind: distribution.kind,
+    distribution_kind: effective.kind,
+    // 结构分的可对账形状抬到轴上来（与 coverage_confidence 的 value_parts 同一个理由）：
+    // 只报一个数，读的人没法核它是怎么来的。
+    structural_basis: structuralUsed ? {
+      kind: effective.entries[0]?.basis?.kind ?? null,
+      denominator: effective.entries[0]?.basis?.denominator ?? null,
+      recomputable_from: effective.entries[0]?.basis?.recomputable_from ?? null,
+      criteria: uniqueSorted(structural.archetypes.flatMap((row) => row.criteria)),
+      per_archetype: Object.fromEntries(structural.archetypes.map((row) => [row.archetype_id, {
+        criteria: row.criteria, criterion_values: row.criterion_values,
+        relative_score: row.relative_score, tolerance: row.tolerance,
+      }])),
+    } : null,
     team_id: teamId,
   };
 }
@@ -692,11 +1094,17 @@ function singleAxis(axisId, team, metaPrior, gapsByTeam) {
 /** 判据正文里的 `[严格]` / `[弱]` 标签是给审计读的，比较结构里统一剥掉（判据只有一份）。 */
 const stripCriterionTags = (text) => String(text ?? '').replace(/\[(严格|弱)\]/gu, '');
 
+/** 四轴的判据文本按**档位**（unknown / assumption / measured）选，三档各有一条判据。 */
+const AXIS_TIER_CRITERIA = Object.freeze({
+  unknown: STRUCTURAL_CRITERIA.distribution_fail_closed,
+  assumption: `${STRUCTURAL_CRITERIA.assumption_needs_basis} ${STRUCTURAL_CRITERIA.assumption_structural_scores}`,
+  measured: STRUCTURAL_CRITERIA.measured_lights_up,
+});
+const tierCriterionFor = (kind) => AXIS_TIER_CRITERIA[kind] ?? AXIS_TIER_CRITERIA.unknown;
+
 const AXIS_CRITERIA_TEXT = Object.freeze({
-  environment_value: STRUCTURAL_CRITERIA.distribution_fail_closed,
-  worst_archetype: STRUCTURAL_CRITERIA.distribution_fail_closed,
-  matchup_spread: STRUCTURAL_CRITERIA.distribution_fail_closed,
-  execution_tolerance: STRUCTURAL_CRITERIA.distribution_fail_closed,
+  // 四轴的判据文本**随档位变**（unknown / assumption / measured 三档各一条），
+  // 由 `compareTeams()` 里的 `axisCriterion()` 按注入分布的档位选，这里只留覆盖置信这一条固定判据。
   coverage_confidence: STRUCTURAL_CRITERIA.coverage_from_build,
 });
 
@@ -719,6 +1127,11 @@ const AXIS_CRITERIA_TEXT = Object.freeze({
 export function compareTeams({teamA, teamB, metaPrior, gapsByTeam = {}, ranker = null} = {}) {
   const distribution = resolveDistribution(metaPrior);
   const ranker_ = resolveRanker(ranker);
+  // 判据文本随**这一档输入**走：unknown 档的判据是 fail closed，assumption 档的判据是
+  // 「带 basis 的声明假设 + 结构分」，measured 档的判据是「注入值必须真的被用上」。
+  const tierCriterion = tierCriterionFor(distribution.kind);
+  const axisCriterion = (axisId) => (axisId === 'coverage_confidence'
+    ? STRUCTURAL_CRITERIA.coverage_from_build : tierCriterion);
   const axes = {};
   for (const axis of AXES) {
     const a = singleAxis(axis.id, teamA, metaPrior, gapsByTeam);
@@ -727,10 +1140,10 @@ export function compareTeams({teamA, teamB, metaPrior, gapsByTeam = {}, ranker =
     const bothAvailable = a.available === true && b.available === true
       && (a.value !== null || b.value !== null);
     const sameValue = bothAvailable && stableJson(a.value) === stableJson(b.value);
-    const comparisonRaw = compareAxisValuesForAxis(axis.id, a, b);
+    const comparisonRaw = compareAxisValuesForAxis(axis.id, a, b, tierCriterion);
     const comparison = sameValue
       ? {...comparisonRaw,
-        value: {criterion: stripCriterionTags(AXIS_CRITERIA_TEXT[axis.id]), delta: 0, winner: null},
+        value: {criterion: stripCriterionTags(axisCriterion(axis.id)), delta: 0, winner: null},
         delta: 0, winner: null}
       : comparisonRaw;
     // worst_archetype 的**值本身**就是一个对象（`{archetype_id, relative_score, weight}`），
@@ -750,8 +1163,8 @@ export function compareTeams({teamA, teamB, metaPrior, gapsByTeam = {}, ranker =
       //   · 其余数值轴：同值就是那个数，不同值给比较结构（`comparison` 里有同样的 delta / winner）。
       value: !bothAvailable ? null
         : (axis.id === 'worst_archetype'
-          ? {...worstArchetypeObject, criterion: stripCriterionTags(AXIS_CRITERIA_TEXT[axis.id]),
-            structural: STRUCTURAL_CRITERIA.distribution_fail_closed}
+          ? {...worstArchetypeObject, criterion: stripCriterionTags(axisCriterion(axis.id)),
+            structural: axisCriterion(axis.id)}
           : (axis.id === 'coverage_confidence'
             ? Math.min(Number(a.value), Number(b.value))
             : (sameValue ? a.value : comparison.value))),
@@ -771,12 +1184,18 @@ export function compareTeams({teamA, teamB, metaPrior, gapsByTeam = {}, ranker =
       weakest_part: bothAvailable && isPlainObject(a.value_parts) && isPlainObject(b.value_parts)
         ? {[teamLabel(teamA) ?? 'teamA']: a.weakest_part ?? null,
           [teamLabel(teamB) ?? 'teamB']: b.weakest_part ?? null} : null,
+      // 分布档位与结构分依据也抬上来（同样是「只报一个数没法对账」的理由）：
+      // 页面要能一眼看出「这个数是**声明假设的分母** × RC-302 的结构分」，而不是实测环境分布。
+      distribution_kind: bothAvailable ? (a.distribution_kind ?? b.distribution_kind ?? null) : null,
+      structural_basis: bothAvailable
+        ? {[teamLabel(teamA) ?? 'teamA']: a.structural_basis ?? null,
+          [teamLabel(teamB) ?? 'teamB']: b.structural_basis ?? null} : null,
       comparison,
       teams: {
         [teamLabel(teamA) ?? 'teamA']: publicTeamAxis(a),
         [teamLabel(teamB) ?? 'teamB']: publicTeamAxis(b),
       },
-      criteria: stripCriterionTags(AXIS_CRITERIA_TEXT[axis.id]),
+      criteria: stripCriterionTags(axisCriterion(axis.id)),
     };
   }
   const availability = Object.fromEntries(AXIS_IDS.map((axisId) => [axisId, axes[axisId].available]));
@@ -793,8 +1212,20 @@ export function compareTeams({teamA, teamB, metaPrior, gapsByTeam = {}, ranker =
       entries: distribution.entries.length,
       weight_mode: distribution.weight_mode,
       weight_sum: distribution.weight_sum,
+      partition_ok: distribution.partition_ok,
       missing: distribution.missing,
       reason: distribution.reason,
+      // 逐体系 relative_score / tolerance 的**作用域**：measured 档它们在分布里（离线联赛产物）；
+      // assumption 档先验只带占比，相对分是**队伍级**结构分（看 `axes[*].structural_basis`），
+      // 所以这里如实写 null + 作用域，不把队伍级的东西塞进版本先验（先验只带占比）。
+      relative_score_scope: distribution.kind === 'measured' ? 'distribution-level（注入分布自带）'
+        : (distribution.kind === 'assumption' ? 'team-level（见 axes[*].structural_basis）' : null),
+      basis: distribution.entries[0]?.basis === undefined || distribution.entries[0]?.basis === null ? null : {
+        kind: distribution.entries[0].basis.kind ?? null,
+        denominator: distribution.entries[0].basis.denominator ?? null,
+        recomputable_from: distribution.entries[0].basis.recomputable_from ?? null,
+        replace_with: distribution.entries[0].basis.replace_with ?? null,
+      },
       archetypes: distribution.entries.map((row) => ({
         archetype_id: row.archetype_id, source: row.source, value: row.value,
         relative_score: row.relative_score, tolerance: row.tolerance,
@@ -812,6 +1243,10 @@ export function compareTeams({teamA, teamB, metaPrior, gapsByTeam = {}, ranker =
       '未核实：相对表现的绝对含义 —— 0～1 的相对分只在**同一份注入分布**内可比（谁高谁低），不是「赢多少」',
       ...(distribution.kind === 'measured' ? [
         '未核实：注入分布的来源真实性 —— 本模块只检查「有没有 url / 仓内文件 + 日期」，不联网核对',
+      ] : []),
+      ...(distribution.kind === 'assumption' ? [
+        '未核实：四轴的**分母**是声明假设（均匀铺在已识别体系上，逐条带 basis，可复算、可替换），'
+          + '不是实测版本分布；相对分 / 容错是 RC-302 的**结构分**（ENGINE_HYPOTHESIS），不是对局结果，也不预测胜负',
       ] : []),
     ],
   };
@@ -832,9 +1267,13 @@ const publicTeamAxis = (row) => ({
   missing: arr(row.missing),
 });
 
-function compareAxisValuesForAxis(axisId, a, b) {
-  const criterion = stripCriterionTags(AXIS_CRITERIA_TEXT[axisId]);
-  const structural = STRUCTURAL_CRITERIA[axisId === 'coverage_confidence' ? 'coverage_from_build' : 'distribution_fail_closed'];
+function compareAxisValuesForAxis(axisId, a, b, tierCriterion = STRUCTURAL_CRITERIA.distribution_fail_closed) {
+  // 四轴的判据文本随档位走（unknown / assumption / measured），由 `compareTeams()` 传进来；
+  // 覆盖置信不吃分布，判据固定。
+  const criterion = stripCriterionTags(axisId === 'coverage_confidence'
+    ? AXIS_CRITERIA_TEXT.coverage_confidence : tierCriterion);
+  const structural = axisId === 'coverage_confidence'
+    ? STRUCTURAL_CRITERIA.coverage_from_build : tierCriterion;
   if (!a.available || !b.available) {
     return {
       available: false,
@@ -1400,12 +1839,35 @@ export function auditTeamCompare(result, options = {}) {
       }
     }
     // 反向：unknown 分布下前四轴必须全部 unknown
-    if (distributionKind !== 'measured') {
+    if (distributionKind === 'unknown') {
       for (const axisId of DISTRIBUTION_AXES) {
         const axis = compare.axes[axisId];
         if (isPlainObject(axis) && axis.available === true) {
           push('UNKNOWN_AXIS_HAS_VALUE', `compare.axes.${axisId}`,
             `分布是 ${distributionKind}，这一轴却 available:true：没有分布就没有期望`);
+        }
+      }
+    }
+    // ③ assumption 档：有可复算分母 ⇒ 前四轴必须真的算出来，且必须带队伍级结构依据。
+    // 「声明假设 + 结构分」与「恒 unknown」都不许冒充对方：一个是在骗人，一个是把能算的写成算不出来。
+    if (distributionKind === 'assumption') {
+      for (const axisId of DISTRIBUTION_AXES) {
+        const axis = compare.axes[axisId];
+        if (!isPlainObject(axis) || axis.available !== true) {
+          push('NO_STRUCTURAL_SIGNAL', `compare.axes.${axisId}`,
+            `分布是 assumption（逐条带 basis 的可复算分母），这一轴却 unknown`
+            + `（${stableJson(axis?.unknown_reason ?? null)}）：能算的必须算出来，缺结构输入才允许 fail closed`);
+          continue;
+        }
+        if (axis.confidence !== 'ENGINE_HYPOTHESIS') {
+          push('STRUCTURAL_BASIS_MISSING', `compare.axes.${axisId}.confidence`,
+            `assumption 档的结构分必须以 ENGINE_HYPOTHESIS 出账，实际 ${stableJson(axis.confidence)}`);
+        }
+        if (!isPlainObject(axis.structural_basis)
+          || !Object.values(axis.structural_basis).some((basis) => isPlainObject(basis?.per_archetype))) {
+          push('STRUCTURAL_BASIS_MISSING', `compare.axes.${axisId}.structural_basis`,
+            'assumption 档的轴必须带 structural_basis（逐体系的判据、分子 / 分母与重算入口）；'
+            + '只给一个数，读的人没法对账');
         }
       }
     }
@@ -1747,6 +2209,100 @@ export function buildRc304Report(input) {
     const teamBRef = {team_id: teamIdB, members: teams.find((row) => row.team_id === teamIdB)?.team?.members ?? []};
     return compareTeams({teamA: teamARef, teamB: teamBRef, metaPrior, gapsByTeam, ranker});
   });
+  const currentDistribution = currentComparisons.length > 0 ? currentComparisons[0].distribution : null;
+  const currentKind = currentDistribution?.kind ?? 'unknown';
+  const negTeams = teams.slice(0, 2);
+  const negRefs = negTeams.length < 2 ? null : negTeams.map((row) => ({
+    team_id: row.team_id, members: row.team?.members ?? [],
+  }));
+
+  /**
+   * 负向控制：全部**由注入的 metaPrior 派生**（纯函数、不读盘、不看时钟）。
+   * 每一条都对应一条必红方向：改了那一处，四轴就必须回到 `available:false`（或随分母变），
+   * 而不是照用一个「看起来像数」的东西。这些控制本身也是报告的一部分（评审可复跑）。
+   */
+  const derivePrior = (mutate) => ({
+    ...metaPrior,
+    archetypes: arr(metaPrior?.archetypes),
+    distribution: arr(metaPrior?.distribution).map((row, index) => mutate({...row}, index)),
+  });
+  const negativePriors = {
+    unknown: derivePrior((row) => ({...row, source: 'unknown', value: null, basis: null, sources: [],
+      reason: '（负向控制：整份降级成 unknown + value: null）'})),
+    basis_missing: derivePrior((row) => ({...row, basis: null})),
+    assumption_with_sources: derivePrior((row) => ({...row,
+      sources: [{ref: 'injected:rc-304-negative-control', date: '2026-09-25'}]})),
+    partition_broken: derivePrior((row, index) => (index === 0 ? {...row, value: 0.5} : row)),
+  };
+  const negativeControls = negRefs === null ? {} : Object.fromEntries(
+    Object.entries(negativePriors).map(([name, variantPrior]) => {
+      const comparison = compareTeams({teamA: negRefs[0], teamB: negRefs[1],
+        metaPrior: variantPrior, gapsByTeam, ranker});
+      return [name, {
+        distribution_kind: comparison.distribution.kind,
+        distribution_reason: comparison.distribution.reason,
+        availability: Object.fromEntries(DISTRIBUTION_AXES.map((axisId) => [axisId, comparison.availability[axisId]])),
+        values: Object.fromEntries(DISTRIBUTION_AXES.map((axisId) => [axisId, comparison.axes[axisId].value])),
+        unknown_reasons: Object.fromEntries(DISTRIBUTION_AXES
+          .map((axisId) => [axisId, comparison.axes[axisId].unknown_reason])),
+      }];
+    }),
+  );
+
+  /**
+   * 分母敏感性控制：把体系数从 K 改成 K + 1（每行 1/(K+1) + 一条合成体系），
+   * 占比与权重必须随之变、四轴仍必须可用。这一条钉住「四轴真的吃分母」，而不是恒定的手写数。
+   */
+  const universeControl = (() => {
+    if (negRefs === null || currentKind !== 'assumption' || currentDistribution === null) return null;
+    // 用**注入的先验原始行**（带 basis / notes）来派生，而不是比较结果里的公开投影（那里只有占比）。
+    const rows = arr(metaPrior?.distribution).filter((row) => row?.source === 'assumption');
+    if (rows.length === 0) return null;
+    const widerK = rows.length + 1;
+    const syntheticId = 'rc304-synthetic-universe';
+    const widerPrior = {
+      ...metaPrior,
+      distribution: [
+        ...rows.map((row) => ({
+          archetype_id: row.archetype_id,
+          source: 'assumption', unit: 'share', confidence: 'ENGINE_HYPOTHESIS',
+          value: Number((1 / widerK).toFixed(6)),
+          notes: row.notes ?? '（分母敏感性控制：均匀铺在 K+1 个体系上）',
+          basis: {...row.basis, denominator: widerK,
+            value_rule: `每个体系 1/K，K = ${widerK}（分母敏感性控制：K 从 ${rows.length} 改成 ${widerK}）`},
+        })),
+        {
+          archetype_id: syntheticId, source: 'assumption', unit: 'share', confidence: 'ENGINE_HYPOTHESIS',
+          value: Number((1 / widerK).toFixed(6)),
+          notes: '（分母敏感性控制用的合成体系：只改分母，不带任何真实体系含义）',
+          basis: {...(rows[0]?.basis ?? {}), denominator: widerK,
+            value_rule: `每个体系 1/K，K = ${widerK}（分母敏感性控制）`},
+        },
+      ],
+      archetypes: [...arr(metaPrior?.archetypes),
+        {archetype_id: syntheticId, label: '（合成体系）', feature_axes: [{criterion: 'coverage'}]}],
+    };
+    const comparison = compareTeams({teamA: negRefs[0], teamB: negRefs[1],
+      metaPrior: widerPrior, gapsByTeam, ranker});
+    const baselineWeight = currentComparisons.length > 0
+      ? currentComparisons[0].axes.worst_archetype.value?.weight ?? null : null;
+    return {
+      denominator_before: rows.length,
+      denominator_after: widerK,
+      partition_ok: comparison.distribution.partition_ok,
+      weight_before: baselineWeight,
+      weight_after: comparison.axes.worst_archetype.value?.weight ?? null,
+      environment_value_before: currentComparisons.length > 0
+        ? currentComparisons[0].axes.environment_value.value : null,
+      environment_value_after: comparison.axes.environment_value.value,
+      availability: comparison.availability,
+      weight_changed: baselineWeight !== null
+        && comparison.axes.worst_archetype.value?.weight !== baselineWeight,
+      value_changed: currentComparisons.length > 0
+        && stableJson(comparison.axes.environment_value.value)
+          !== stableJson(currentComparisons[0].axes.environment_value.value),
+    };
+  })();
 
   const unknownReasonRows = AXIS_IDS.map((axisId) => ({
     axis: axisId,
@@ -1756,24 +2312,48 @@ export function buildRc304Report(input) {
     unknown_reason: currentComparisons.length > 0
       ? (currentComparisons[0].axes[axisId].unknown_reason ?? null) : FAIL_CLOSED_REASONS.DISTRIBUTION_UNKNOWN,
     missing: currentComparisons.length > 0 ? arr(currentComparisons[0].axes[axisId].missing) : [],
-    lights_up_when: axisId === 'coverage_confidence' ? '现在就是 available'
-      : '注入 measured 分布（带逐条来源 + value + relative_score）后 available',
+    lights_up_when: axisId === 'coverage_confidence' ? '现在就是 available（只依赖 build 的规则/数据覆盖）'
+      : '现在就是 available（assumption 档：占比 = 声明假设的分母，相对分 / 容错 = RC-302 结构分）；'
+        + '换成带来源的 measured 分布后改用注入的 relative_score / tolerance',
   }));
 
   const auditAll = [...pairRows.map((row) => row.audit_ok), ...(control ? [control.audit_ok] : [])];
   const criteria = [
-    reportVerdict('分布 unknown 时前四轴 available:false + value:null + unknown_reason 点名缺什么',
-      STRUCTURAL_CRITERIA.distribution_fail_closed,
-      unknownReasonRows.map((row) => `${row.axis}: available_now=${row.available_now}`),
-      unknownReasonRows.filter((row) => row.axis !== 'coverage_confidence').every((row) => row.available_now === false)),
-    reportVerdict('五轴里**恰好一轴**现在可用（coverage_confidence），它真算而不是报 0',
-      STRUCTURAL_CRITERIA.coverage_from_build,
-      currentComparisons.map((comparison) => `available=${comparison.available_axis_count}/5 `
-        + `coverage=${comparison.axes.coverage_confidence.value}/${comparison.axes.coverage_confidence.confidence} `
-        + `parts=${stableJson(comparison.axes.coverage_confidence.value_parts)}`),
-      currentComparisons.every((comparison) => comparison.available_axis_count === 1
+    reportVerdict('真实数据下五轴全部可用（coverage_confidence 真算 + 四轴 assumption 结构分）',
+      STRUCTURAL_CRITERIA.assumption_structural_scores,
+      currentComparisons.map((comparison) => `available=${comparison.available_axis_count}/5 kind=${comparison.distribution.kind} `
+        + DISTRIBUTION_AXES.map((axisId) => `${axisId}=${stableJson(comparison.axes[axisId].value)?.slice(0, 48)}`
+          + `/${comparison.axes[axisId].confidence}`).join(' ')
+        + ` coverage=${comparison.axes.coverage_confidence.value}/${comparison.axes.coverage_confidence.confidence}`),
+      currentComparisons.length > 0 && currentComparisons.every((comparison) => comparison.available_axis_count === 5
+        && DISTRIBUTION_AXES.every((axisId) => comparison.availability[axisId] === true
+          && comparison.axes[axisId].confidence === 'ENGINE_HYPOTHESIS')
         && comparison.availability.coverage_confidence === true
         && Number.isFinite(comparison.axes.coverage_confidence.value))),
+    reportVerdict('把分布降级成 unknown ⇒ 前四轴必须 available:false + value:null + 点名缺什么（负向控制）',
+      STRUCTURAL_CRITERIA.distribution_fail_closed,
+      Object.entries(negativeControls).map(([name, row]) => `${name}: kind=${row.distribution_kind} `
+        + DISTRIBUTION_AXES.map((axisId) => `${axisId}=${row.availability[axisId]}`).join(' ')),
+      ['unknown'].every((name) => negativeControls[name] !== undefined
+        && DISTRIBUTION_AXES.every((axisId) => negativeControls[name].availability[axisId] === false
+          && negativeControls[name].values[axisId] === null
+          && typeof negativeControls[name].unknown_reasons[axisId] === 'string'))),
+    reportVerdict('assumption 行缺 basis / 挂 sources / 占比不闭合 ⇒ 前四轴必须 fail closed（裸数字不许进）',
+      STRUCTURAL_CRITERIA.assumption_needs_basis,
+      Object.entries(negativeControls).map(([name, row]) => `${name}: kind=${row.distribution_kind} reason=${String(row.distribution_reason).slice(0, 60)}`),
+      ['basis_missing', 'assumption_with_sources', 'partition_broken'].every((name) => negativeControls[name] !== undefined
+        && DISTRIBUTION_AXES.every((axisId) => negativeControls[name].availability[axisId] === false
+          && negativeControls[name].values[axisId] === null))),
+    reportVerdict('四轴对**分母**敏感：K → K+1（每行 1/(K+1)）⇒ 权重与加权值随之变，且仍然可用',
+      STRUCTURAL_CRITERIA.assumption_structural_scores,
+      universeControl === null ? '未做分母敏感性控制'
+        : `K ${universeControl.denominator_before} → ${universeControl.denominator_after}、`
+          + `weight ${universeControl.weight_before} → ${universeControl.weight_after}、`
+          + `environment_value ${stableJson(universeControl.environment_value_before)} → `
+          + `${stableJson(universeControl.environment_value_after)}、partition_ok=${universeControl.partition_ok}`,
+      universeControl !== null && universeControl.partition_ok === true
+        && universeControl.weight_changed === true && universeControl.value_changed === true
+        && DISTRIBUTION_AXES.every((axisId) => universeControl.availability[axisId] === true)),
     reportVerdict('注入 measured 分布后前四轴必须亮起来（反向控制：fail closed ≠ 恒 unknown）',
       STRUCTURAL_CRITERIA.measured_lights_up,
       control === null ? '未注入对照样例' : Object.entries(control.availability)
@@ -1810,24 +2390,31 @@ export function buildRc304Report(input) {
     report_version: RC304_REPORT_VERSION,
     rc: 'RC-304',
     title: '未知对手下的队伍比较：能算的算、算不出的 fail closed 返回 unknown',
-    axes: AXES.map((axis) => ({...axis, criteria: AXIS_CRITERIA_TEXT[axis.id]})),
+    axes: AXES.map((axis) => ({...axis, criteria: axis.id === 'coverage_confidence'
+      ? AXIS_CRITERIA_TEXT.coverage_confidence : tierCriterionFor(currentKind)})),
     fail_closed_reasons: FAIL_CLOSED_REASONS,
     structural_criteria: STRUCTURAL_CRITERIA,
     distribution_now: {
-      source: currentComparisons.length > 0 ? currentComparisons[0].distribution.kind : 'unknown',
-      declared_source: currentComparisons.length > 0 ? currentComparisons[0].distribution.declared_source : null,
-      entries: currentComparisons.length > 0 ? currentComparisons[0].distribution.entries : 0,
-      reason: FAIL_CLOSED_REASONS.DISTRIBUTION_UNKNOWN,
-      evidence: [
-        'data/roco/meta-prior/v1.json#distribution[]：7 个体系全部 source="unknown" + value=null + reason',
-        'data/roco/meta-prior/v1.json#claim.does_not_contain：先验自己声明「不产出任何占比数值」',
-        'data/roco/meta-prior/v1.json#usage.inputs.*.honesty：分布 unknown 时前四轴必须 fail closed',
-      ],
+      source: currentKind,
+      declared_source: currentDistribution?.declared_source ?? null,
+      entries: currentDistribution?.entries ?? 0,
+      partition_ok: currentDistribution?.partition_ok ?? null,
+      value_sum: currentDistribution?.weight_sum ?? null,
+      basis: currentDistribution?.basis ?? null,
+      relative_score_source: '**队伍级**结构分：按每个体系自己声明的 `archetypes[].feature_axes[].criterion` '
+        + '从 RC-302 的缺口诊断算出（等权、分母 = 判据条数），置信等级 ENGINE_HYPOTHESIS；'
+        + '它不是离线联赛 / matchup bank 的产物，也不预测胜负',
+      reason: currentDistribution?.reason ?? null,
+      evidence: currentDistribution?.evidence ?? [],
     },
     availability_now: {
       available: AXIS_IDS.filter((axisId) => unknownReasonRows.find((row) => row.axis === axisId)?.available_now === true),
       unknown: AXIS_IDS.filter((axisId) => unknownReasonRows.find((row) => row.axis === axisId)?.available_now !== true),
-      note: '预计 1 可用 / 4 unknown：**唯一**能算的是 coverage_confidence（它只依赖 build 的规则/数据覆盖）',
+      note: currentKind === 'assumption'
+        ? '5 轴全部可用：coverage_confidence 只依赖 build 的规则/数据覆盖；四轴的分母来自**声明假设**'
+          + '（先验里逐条带 basis，可复算、可替换），相对分 / 容错来自 RC-302 的结构分（ENGINE_HYPOTHESIS）'
+        : '按注入分布的档位：unknown ⇒ 四轴 fail closed；assumption ⇒ 四轴用声明假设的分母 + RC-302 结构分；'
+          + 'measured ⇒ 四轴用注入的 relative_score / tolerance',
     },
     unknown_reasons: unknownReasonRows,
     /**
@@ -1842,6 +2429,8 @@ export function buildRc304Report(input) {
       actual: typeof row?.actual === 'string' ? row.actual : stableJson(row?.actual ?? null),
     })),
     measured_control_sample: control,
+    negative_controls: negativeControls,
+    denominator_sensitivity_control: universeControl,
     criteria,
     teams: teamRecords,
     comparisons: pairRows,

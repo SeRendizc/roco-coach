@@ -199,3 +199,201 @@ test('UI 视图与模型协议必须分开：页面拿到真名，规划协议�
  assert.equal(legacy.self.pets[0].pet_id, 'pet_000225');
  assert.deepEqual(legacy.opponent.bench, [{slot: 1, fainted: false}]);
 });
+
+// ─────────────────────────────────────────────────────────────────────────
+// RC-901 R4：回答缓存 + 同局去重（2026-09-25）
+// ─────────────────────────────────────────────────────────────────────────
+//
+// 规划出处 `docs/roadmap/MODEL-ROUTING-PLAN.md` §2.3 建议新增第 1、2 条。这一组是**真服务**判据
+// （用既有 `setup(t, fetchImpl)` 注入假上游并数调用次数），四条 + 两条反证：
+//   ① 同一请求两次 ⇒ 上游只被调一次，第二次回执 `cache:'hit'`；
+//   ② **反证**：改 `stateToken` 必须 miss（否则会把上一局的答案发给下一局）；
+//   ③ **反证**：两次**不同消息**并发不许合并（第二次必须拿到自己的调用，不是别人的答案）；
+//   ④ 降级/被守卫拒的答案**不入缓存**（缓存省下的必须是一次真的云端调用）。
+test('R4①：同一请求第二次命中缓存（上游只调一次，回执标 cache:hit）',async t=>{
+ let calls=0;const x=await setup(t,async(url,args)=>{calls++;if(JSON.parse(args.body).messages[0].content.includes('选择只读工具'))return new Response(JSON.stringify({choices:[{message:{content:'{"stop":true}'}}]}));return ok();});
+ await x.connect();
+ const first=await(await x.post('/api/coach',chat())).json();
+ assert.equal(first.cache,'miss','第一次必须是 miss');
+ // 这一问被政策判为「不需要工具」⇒ 只走 generate 一次（实测 1，不是 2；写死 2 会假红）。
+ assert.equal(calls,1,`第一次应当真的问了上游一次，实际 ${calls}`);
+ const second=await(await x.post('/api/coach',chat())).json();
+ assert.equal(second.cache,'hit','第二次必须命中缓存');
+ assert.equal(calls,1,`命中缓存不许再打上游，实际 ${calls}`);
+ assert.equal(second.text,first.text,'命中缓存要把那一份答案原样发回');
+ assert.equal(second.usage,null,'命中缓存没有新的 usage（不许把旧的当这一轮的）');
+});
+
+test('R4②（反证）：改 stateToken 必须 miss',async t=>{
+ let calls=0;const x=await setup(t,async(url,args)=>{calls++;if(JSON.parse(args.body).messages[0].content.includes('选择只读工具'))return new Response(JSON.stringify({choices:[{message:{content:'{"stop":true}'}}]}));return ok();});
+ await x.connect();
+ await x.post('/api/coach',chat());
+ const before=calls;
+ const moved=await(await x.post('/api/coach',{...chat(),stateToken:99})).json();
+ assert.equal(moved.cache,'miss','局面版本变了必须 miss');
+ assert.ok(calls>before,'换了 stateToken 就要重新问上游（不许复用上一局的答案）');
+});
+
+test('R4③：同一 key 并发 ⇒ 合并（上游一次、第二条标 dedup:joined）',async t=>{
+ let calls=0;let release=null;const gate=new Promise(r=>{release=r;});
+ const x=await setup(t,async(url,args)=>{calls++;
+  if(JSON.parse(args.body).messages[0].content.includes('选择只读工具'))return new Response(JSON.stringify({choices:[{message:{content:'{"stop":true}'}}]}));
+  await gate;return ok();});
+ await x.connect();
+ const a=x.post('/api/coach',chat()).then(r=>r.json());
+ await new Promise(r=>setTimeout(r,20));
+ const b=x.post('/api/coach',chat()).then(r=>r.json());   // **同一 key**：应当等同一份结果
+ await new Promise(r=>setTimeout(r,20));
+ release();
+ const [ra,rb]=await Promise.all([a,b]);
+ assert.equal(calls,1,`同一 key 并发只许问上游一次，实际 ${calls}`);
+ assert.equal(ra.dedup,undefined,'先到的那条不是"合并进来的"');
+ assert.equal(rb.dedup,'joined','后到的那条必须如实标成合并');
+ assert.equal(rb.text,ra.text,'合并的两条拿到同一份答案');
+ assert.equal(rb.usage,null,'合并的那条没有新的 usage');
+});
+
+test('R4③（反证）：两个**不同消息**并发不许合并',async t=>{
+ let calls=0;let release=null;const gate=new Promise(r=>{release=r;});
+ const x=await setup(t,async(url,args)=>{calls++;
+  if(JSON.parse(args.body).messages[0].content.includes('选择只读工具'))return new Response(JSON.stringify({choices:[{message:{content:'{"stop":true}'}}]}));
+  await gate;return ok();});
+ await x.connect();
+ const a=x.post('/api/coach',chat()).then(async r=>({status:r.status,body:await r.json()}));
+ await new Promise(r=>setTimeout(r,20));
+ // 不同 message ⇒ 不同 key ⇒ **不许**合并：既不许拿到第一条的答案，也不许被算成 dedup。
+ const b=x.post('/api/coach',{...chat(),message:'我该练哪只？'}).then(async r=>({status:r.status,body:await r.json()}));
+ await new Promise(r=>setTimeout(r,20));
+ release();
+ const [ra,rb]=await Promise.all([a,b]);
+ assert.notEqual(rb.body?.dedup,'joined',`不同消息不许合并，实际 ${JSON.stringify(rb.body)}`);
+ assert.notEqual(rb.body?.text,ra.body?.text,'不同消息不许拿到同一条答案');
+ assert.ok(rb.status===429||rb.status===200,`不同消息要么被 429 挡住、要么走自己的调用，实际 ${rb.status}`);
+});
+test('R4④：被守卫拒/降级的答案不入缓存（省下的必须是一次真云端调用）',async t=>{
+ let calls=0;let bad=true;
+ const x=await setup(t,async(url,args)=>{calls++;
+  if(JSON.parse(args.body).messages[0].content.includes('选择只读工具'))return new Response(JSON.stringify({choices:[{message:{content:'{"stop":true}'}}]}));
+  // 第一次给一段**超过 360 字**的正文（长度闸门必拒 ⇒ 降级成本地模板）。
+  // 为什么不用"带未登记数字"那种：这一问的包里可能碰巧含同一串数字（实测 999 就在包里出现过），
+  // 那会让守卫放行、判据假红 —— 长度闸门与包内容无关，才是稳定的成因。
+  if(bad){bad=false;return new Response(JSON.stringify({choices:[{message:{content:'长'.repeat(400)}}]}));}
+  return ok();});
+ await x.connect();
+ const first=await(await x.post('/api/coach',chat())).json();
+ assert.equal(first.provider,'local-fallback','这一段必须被守卫拒掉并降级');
+ const before=calls;
+ const second=await(await x.post('/api/coach',chat())).json();
+ assert.equal(second.cache,'miss','降级答案不许进缓存');
+ assert.ok(calls>before,'第二次必须重新问上游（否则一次偶发失败会被粘住）');
+});
+
+// ── 没有 stateToken ⇒ 不许进缓存、不许合并（2026-09-27，审计高 2 实测）────────────────
+//
+// 事实经过：训练场页那两条 `/api/coach` **从不发 stateToken** ⇒ key 退化成「同一句话」，
+// 局面从 turn3/100HP 换成 turn9/7HP 之后第二次仍然 `cache:'hit'`、文本逐字相同。
+// 缓存自己的注释写着"跨局一定会因为 stateToken 变而 miss" —— 那条前提缺 stateToken 时不成立，
+// 所以按本仓一贯口径**未知 fail closed**：不进缓存、不合并（宁可多花一次钱，也不给错答案）。
+test('R4⑤：缺 stateToken 的请求不许命中缓存，也不许被合并（审计实测的「缓存串局」）', async (t) => {
+  let calls = 0;
+  const x = await setup(t, async () => { calls += 1; return ok(); });
+  await x.connect();
+  const noToken = {message: '这回合怎么打', role: 'auto',
+    context: buildContext(createGame(), newProfile(), 'fox'), memory: freshMemory(), conversation: []};
+  const first = await (await x.post('/api/coach', noToken)).json();
+  const second = await (await x.post('/api/coach', noToken)).json();
+  assert.notEqual(second.cache, 'hit', '缺 stateToken 时第二次不许命中缓存（局面可能已经换了）');
+  assert.equal(calls, 2, `两次都要真的问上游，实际 ${calls}`);
+  // 并发也不许合并：没有身份就分不清是不是同一版局面
+  calls = 0;
+  const [a, b] = await Promise.all([
+    x.post('/api/coach', noToken).then(async (r) => ({status: r.status, body: await r.json()})),
+    x.post('/api/coach', noToken).then(async (r) => ({status: r.status, body: await r.json()}))]);
+  assert.notEqual(b.body.dedup, 'joined', '缺 stateToken 时不许合并两条请求');
+  assert.ok([a.status, b.status].includes(429) || calls === 2,
+    `要么各自问一次上游、要么第二条 429，不许合并（calls=${calls}）`);
+  // 反证：带上 stateToken 之后，缓存与合并都恢复（判据不是"一律不缓存"）
+  calls = 0;
+  const withToken = {...noToken, stateToken: 'turn-3'};
+  await x.post('/api/coach', withToken);
+  const again = await (await x.post('/api/coach', withToken)).json();
+  assert.equal(again.cache, 'hit', '带上 stateToken 之后要能命中');
+  assert.equal(calls, 1, `有身份时上游只许问一次，实际 ${calls}`);
+});
+
+// ── 出招的版本 CAS（2026-09-27，审计高 3 后半：并发 advance 静默吞掉一手）────────────
+test('R6①：出招带旧版本 ⇒ 409 stale_state，不许把玩家那一手静默吞掉', async (t) => {
+  const x = await setup(t, ok);
+  await x.connect();
+  // 直接用服务模块构造一局需要引擎；这里只钉**判据本身**：源码必须做版本 CAS 且返回 409。
+  const {readFileSync: read} = await import('node:fs');
+  const src = read(new URL('../src/server/roco-service.js', import.meta.url), 'utf8');
+  assert.match(src, /const claimed=body\.state_version;/, 'advanceBattle 要读调用方带的版本');
+  assert.match(src, /error_type:'stale_state',state_version:stateVersion/, '版本不一致要回 409 + 当前版本 + stale_state');
+  assert.match(src, /status:409/, '状态码必须是 409（不是 400：400 表示请求本身坏，409 表示局面变了）');
+  // 反证：不带版本时**不做检查**（老页面不许因为这条被判死）
+  assert.match(src, /claimed!==undefined&&claimed!==null&&Number\.isInteger\(Number\(claimed\)\)/,
+    '只在调用方明确带版本时才检查');
+});
+
+test('R6②：出招必须在**第一次 await 之前同步占位**（真机复验：只比对版本挡不住并发）', async () => {
+  const {readFileSync: read} = await import('node:fs');
+  const src = read(new URL('../src/server/roco-service.js', import.meta.url), 'utf8');
+  // 2026-09-27 真机复验发现：两条并发请求都在"改状态之前"读到同一个 state_version ⇒ **两条都过**，
+  // 于是 200/200（审计那次的"静默吞一手"照旧）。所以除了比对版本，还必须同步占位。
+  assert.match(src, /if\(session\.inFlight\)\{/, '这一局正在结算时要挡住第二条');
+  assert.match(src, /session\.inFlight=true;/, '要在 await 之前同步置位');
+  assert.match(src, /finally\{[\s\S]{0,60}session\.inFlight=false;/, '无论成败都要复位（否则这一局被永久锁死）');
+  // 反证：占位必须在 `battleAdvance(` 之前（放到后面就等于没放）
+  const inFlightAt = src.indexOf('session.inFlight=true;');
+  const awaitAt = src.indexOf('await client.battleAdvance(', inFlightAt);
+  assert.ok(inFlightAt > 0 && awaitAt > inFlightAt, '占位必须早于那次 await');
+});
+
+test('R7①：被合并的那条请求在首个请求失败时**也要返回**（审计高 10：原来挂到 45s 超时）',
+  async (t) => {
+   // 上游先延迟再回 500 ⇒ 第一条失败；第二条与它同 key（同 stateToken）⇒ 走合并分支。
+   let calls = 0;
+   const x = await setup(t, async () => { calls += 1; await new Promise((r) => setTimeout(r, 120));
+     return new Response('boom', {status: 500}); });
+   await x.connect();
+   const body = {...chat(), stateToken: 'turn-9'};
+   const started = Date.now();
+   const [a, b] = await Promise.all([
+     x.post('/api/coach', body).then(async (r) => ({status: r.status, body: await r.json()})),
+     x.post('/api/coach', body).then(async (r) => ({status: r.status, body: await r.json()}))]);
+   const waited = Date.now() - started;
+   // 判据的核心：**两条都必须返回**，而且要在"上游失败"之后很快返回（不是挂到客户端超时）。
+   assert.ok(waited < 5000, `两条都要及时返回（实际 ${waited}ms，挂到超时就是这条 bug）`);
+   assert.equal(a.status !== undefined && b.status !== undefined, true, '两条都要有状态码');
+   const joined = [a, b].find((row) => row.body?.dedup === 'joined' || row.body?.dedupFailed === true);
+   assert.ok(joined, `被合并的那条要带 dedup 标记：${JSON.stringify([a.body, b.body]).slice(0, 200)}`);
+   assert.ok(String(joined.body?.text ?? '').length > 0, '被合并那条也要有一句能给玩家看的话');
+   assert.ok(calls >= 1, '至少真的问过一次上游');
+  });
+
+test('R8①：引擎不可用要报 503（不是 400），且玩家文案里不许出现内部地址（审计高 5）', async () => {
+  const {readFileSync: read} = await import('node:fs');
+  const src = read(new URL('../src/server/roco-service.js', import.meta.url), 'utf8');
+  // ① 不可用 → 503（两处：开局与出招）
+  assert.equal((src.match(/unavailable'\?503/g) ?? []).length, 2,
+    '开局与出招两处都要把 unavailable 映成 503');
+  // ② 内部 URL 不许进正文
+  // 真机复验（2026-09-27）：第一版只剥 http://…，而同一句末尾还会再出现一次裸的
+  // 127.0.0.1:54800 ⇒ 判据钉「源码里既有 127 的替换、又出现『对局引擎』这个替身」。
+  assert.ok(/127\\.0\\.0\\.1/.test(src) && /对局引擎/.test(src),
+    '要把内部地址换成「对局引擎」（两种形状都要）');
+  // 反证：源码里**不许**再有把不可用混进 400 的写法
+  assert.doesNotMatch(src, /status:out\.error_type==='unsupported_effect'\?422:400,/, '旧写法必须消失');
+});
+
+test('R8②：被信号杀死的引擎必须能被**重新拉起**（真机复验：原来永不重启）', async () => {
+  const {readFileSync: read} = await import('node:fs');
+  const src = read(new URL('../src/coach/roco-client.js', import.meta.url), 'utf8');
+  // 2026-09-27 真机复验：`kill -9` 之后再开局一直 503 —— 因为 startService 的"已在运行"判据
+  // 也只看 exitCode（被信号杀死时恒为 null）⇒ 永远不重拉。判死之后必须清掉 child/baseUrl。
+  assert.match(src, /const alive = this\.child && this\.child\.exitCode === null\s*\n?\s*&& \(this\.child\.signalCode === null \|\| this\.child\.signalCode === undefined\);/,
+    'startService 的存活判据要看 signalCode');
+  assert.match(src, /if \(!alive && this\.child\) \{[\s\S]{0,120}this\.child = null;[\s\S]{0,60}this\.baseUrl = null;/,
+    '判死之后要清掉 child 与 baseUrl（否则下方启动逻辑以为还占着端口）');
+});

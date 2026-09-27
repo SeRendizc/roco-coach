@@ -56,3 +56,12 @@ reports/roco/local-model/*.log
 reports/roco/local-model/*.pid
 reports/roco/local-model/responses.jsonl
 reports/roco/local-model/requests.fifo
+
+# 门禁失败日志（2026-09-27 提交时补）：每次跑都新生成、几百 KB 一份，
+# 结论已经落在 `reports/roco/verification/latest.json` 与 `last-green.json` 里；
+# 与上面「每次运行都变的那一份不入库」同一条口径。
+reports/roco/verification/failures/
+
+# 验收截图（2026-09-27 提交时收紧）：与下面几条同一条口径 —— 截图每次跑都是新字节，
+# 留着只会让 git 次次变脏。**结论**在各自的 `*.json` 里，截图随时可以重跑生成。
+reports/roco/**/*.png

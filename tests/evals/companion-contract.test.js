@@ -392,3 +392,63 @@ test('情绪与拒绝优先于复盘路由：输了 / 别复盘了 归陪练，�
   assert.equal((await run('然后呢', memory)).route, 'companion', '旧拒绝生效期间不再推复盘');
   assert.equal((await run('复盘一下吧', memory)).route, 'teacher', '玩家改主意了要照办');
 });
+
+// ── 2026-09-25（人类投诉）：「小芽说的不知道在说啥」+「消息也显示不完」+「我发的消息也看不到」──
+//
+// 三条玩家可见缺陷的**回归判据**（结构钉 + 反证；纯读源码，不开浏览器）：
+//   ① 内部诊断串不许再拼进玩家可见的回复（原来 `$('say-reply').textContent = text + '\n依据：' + …`）；
+//   ② 长回复必须能滚到底（原来只有"接了模型"那条路末尾滚一次，**未接模型的早退分支在滚之前就 return**）；
+//   ③ 玩家自己那一句必须进对话体（`[data-roco-say="me"]`，单独元素放在 `#say-reply` 前面，
+//      这样 `#say-reply` 的 textContent 语义不变 —— 多条验收脚本按它读"小芽最近一句回复"）。
+import {readFileSync} from 'node:fs';
+import {dirname, join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+
+const SAY_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+/** 扫描前**先剥注释**（本项目踩过：注释里逐字引用旧代码会导致假红）。 */
+const stripComments = (src) => src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+
+/** 判据本体（纯函数，真源码与合成反证共用同一条）。 */
+function sayPanelProblems({rocoJs, rocoCss}) {
+  const js = stripComments(String(rocoJs ?? ''));
+  const css = String(rocoCss ?? '');
+  const bad = [];
+  if (!/sayWritePlayerLine\(\s*message\s*\)/.test(js)) {
+    bad.push('玩家那一句没有被写进对话体：`sayWritePlayerLine(message)` 的调用点不见了');
+  }
+  if (!/data-roco-say/.test(js) || !/'me'/.test(js)) bad.push('玩家行缺少可识别标记 `[data-roco-say="me"]`');
+  if (!/function sayWritePlayerLine\(/.test(js)) bad.push('`sayWritePlayerLine` 的实现不见了');
+  if (!/function sayScrollToBottom\(/.test(js) || !/sayScrollToBottom\(\)/.test(js)) {
+    bad.push('没有「写回复后滚到底」的实现/调用（长回复会停在开头、尾巴看不见）');
+  }
+  // 只看**写进小芽回复那一句**的语句：`依据：` 在 `#hint-why` / `#lesson-note` 上是合法用途，
+  // 判据要盯的是「同一条语句里同时出现 say-reply 与 依据」（那正是被投诉的那段内部诊断串）。
+  const dirty = js.split(';').filter((st) => st.includes("'say-reply'") && st.includes('依据'));
+  if (dirty.length) {
+    bad.push(`小芽回复的写入语句里又拼进了内部诊断（${dirty.length} 处）：`
+      + dirty[0].replace(/\s+/g, ' ').slice(0, 90));
+  }
+  if (/max-height:30vh !important/.test(css)) {
+    bad.push('`.companion-body` 又回到了 30vh 的旧上限（实测 231 字回复就卡边）');
+  }
+  if (!/max-height:36vh/.test(css)) bad.push('`.companion-body` 的可读高度上限不见了（应 ≥36vh）');
+  if (!/\.say-me\{/.test(css)) bad.push('玩家行的样式 `.say-me` 不见了');
+  return bad;
+}
+
+test('小芽面板：玩家那句要看得见、回复不许被截断、内部诊断串不许露出来（三条一起钉）', () => {
+  const rocoJs = readFileSync(join(SAY_ROOT, 'src/client/roco.js'), 'utf8');
+  const rocoCss = readFileSync(join(SAY_ROOT, 'src/client/roco.css'), 'utf8');
+  const problems = sayPanelProblems({rocoJs, rocoCss});
+  assert.deepEqual(problems, [], problems.join(' | '));
+});
+
+test('反证：把 2026-09-25 之前那三种写法喂给同一条判据，必须报（判据不是空的）', () => {
+  const oldShape = {
+    // 旧写法：直接拼内部依据、没有玩家行、只有一条路滚到底、30vh 上限
+    rocoJs: "function f(){ $('say-reply').textContent = text + '\\n依据：' + evidence.join('；'); }",
+    rocoCss: '.companion-body{max-height:30vh !important}\n.reply{margin:0}',
+  };
+  const hit = sayPanelProblems(oldShape);
+  assert.ok(hit.length >= 4, `反证没命中（判据是空的）：${JSON.stringify(hit)}`);
+});

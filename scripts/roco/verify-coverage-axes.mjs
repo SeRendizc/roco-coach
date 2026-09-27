@@ -29,7 +29,20 @@ const HARD_MECHS = ['charge', 'mark', 'multi_hit', 'position', 'random', 'escape
 const TYPES_ALL = ['普通系', '草系', '火系', '水系', '电系', '冰系', '武系', '毒系', '地系', '翼系', '虫系', '幽系', '龙系', '恶系', '光系', '萌系', '幻系', '机械系'];
 // 引擎层面的能耗上限：只从规则配置读（RC-101 的唯一事实源），不在这里抄一份。
 const ENGINE_ENERGY_MAX = engineEnergyMax();
-const EXPECTED_TRAIT_COUNTS = { FULL: 6, PARTIAL: 2, REFUSED: 4 };
+//: M1 那 12 只精灵的**特性实现状态**期望（这份矩阵本来就是 M1 产物）。
+//: 2026-09-23：`engine-trait-status.json` 过去只覆盖这 12 只，而 `traits.py` 的登记表
+//: 早已涨到 15 条（RC-401 批次二 +2、批次三 +1）—— 文件**落后于引擎**却没人发现，
+//: 因为判据比的是「文件里的计数」而不是「文件是否覆盖了引擎的登记表」。
+//: 现在分成两条：M1 那 12 只的计数照旧钉死；**全量覆盖**另有一条判据（见 trait_file_covers_registry）。
+//: ⚠️ 2026-09-25（第 40 轮）**改钉**：`FULL 6 / PARTIAL 2 / REFUSED 4` → `FULL 5 / PARTIAL 3 / REFUSED 4`。
+//: 变的是 M1 那 12 只里的 `圆号鱼 [泛音列]`：它自己的理由里写着「当前只挂印记、**不结算能耗**」，
+//: 按 `traits.py` 开头那行定义（FULL = 描述能被机械实现）只能算 PARTIAL ⇒ 档位由 FULL 改 PARTIAL。
+//: 这不是漂移，是**把过度声明改对**（缺口现在写进机器可读的 `TraitSpec.gaps`，
+//: 判据见 `roco/tests/test_trait_status_export.py::FullMeansNoDeclaredGapTest`）。
+//: 旧值按「改钉不删」记在这里：`{ FULL: 6, PARTIAL: 2, REFUSED: 4 }`。
+const EXPECTED_TRAIT_COUNTS = { FULL: 5, PARTIAL: 3, REFUSED: 4 };
+const M1_TRAIT_PETS = ['音速犬', '雪影娃娃', '化蝶', '海豹船长', '寂灭骨龙', '圆号鱼',
+  '黑猫巫师', '秩序鱿墨', '画间沉铁兽', '圣凯布米龙', '银月狼王', '月使鹭纳'];
 
 const MECHANISM_PATTERNS = [
   { key: 'damage', re: /造成(物理|魔法|物伤|魔伤)|本次技能威力|连击|威力\+|威力翻倍|威力变为/ },
@@ -101,16 +114,35 @@ function runChecks(inp) {
   const eff = [...new Set(Object.values(skills).map((s) => s.effect_support))];
   if (eff.length !== 1 || eff[0] !== 'unsupported') fail('effect_support_drift', `effect_support 集合 = ${JSON.stringify(eff)}`);
   else ok('effect_support_all_unsupported', `${Object.keys(skills).length}/824`);
-  if (JSON.stringify(inp.traitCounts) !== JSON.stringify(EXPECTED_TRAIT_COUNTS)) {
-    fail('trait_counts_drift', `counts = ${JSON.stringify(inp.traitCounts)}，期望 ${JSON.stringify(EXPECTED_TRAIT_COUNTS)}`);
-  } else ok('trait_counts_match', JSON.stringify(inp.traitCounts));
-  if (inp.traitPetsLen !== 12) fail('trait_pets_len', `${inp.traitPetsLen} 条特性，期望 12`);
-  else ok('trait_pets_len_12');
+  // M1 那 12 只的计数：从**逐条明细**现算（不读文件自己的汇总，汇总字段自证清白没有意义）
+  const m1Rows = (inp.traitPets ?? []).filter((p) => M1_TRAIT_PETS.includes(p.name));
+  const m1Counts = m1Rows.reduce((acc, p) => (acc[p.status] = (acc[p.status] ?? 0) + 1, acc),
+    {FULL: 0, PARTIAL: 0, REFUSED: 0});
+  if (M1_TRAIT_PETS.some((name) => !m1Rows.some((p) => p.name === name))) {
+    fail('trait_pets_missing', `M1 名单里有精灵不在特性状态表里：`
+      + `${M1_TRAIT_PETS.filter((name) => !m1Rows.some((p) => p.name === name)).join('、')}`);
+  } else ok('trait_m1_pets_present', `${m1Rows.length}/12`);
+  if (JSON.stringify(m1Counts) !== JSON.stringify(EXPECTED_TRAIT_COUNTS)) {
+    fail('trait_counts_drift', `M1 12 只的 counts = ${JSON.stringify(m1Counts)}，`
+      + `期望 ${JSON.stringify(EXPECTED_TRAIT_COUNTS)}`);
+  } else ok('trait_counts_match', JSON.stringify(m1Counts));
+  // 全量：文件必须**覆盖引擎登记表的每一条**（这条才是抓「文件落后于引擎」的判据）
+  const engineTraitNames = engineTraitNameList();
+  const fileNames = new Set((inp.traitPets ?? []).map((p) => p.trait));
+  const missingTraits = engineTraitNames.filter((name) => !fileNames.has(name));
+  if (engineTraitNames.length && missingTraits.length) {
+    fail('trait_file_covers_registry', `文件里缺 ${missingTraits.length} 条引擎已登记的特性：`
+      + `${missingTraits.join('、')}（跑 scripts/roco/export-trait-status.py --write 重新导出）`);
+  } else if (engineTraitNames.length) ok('trait_file_covers_registry', `${fileNames.size} 条`);
+  if (inp.traitPetsLen < 12) fail('trait_pets_len', `${inp.traitPetsLen} 条特性，至少要有 M1 的 12 条`);
+  else ok('trait_pets_len_min_12', `${inp.traitPetsLen} 条`);
   if (!/FULL 6 \/ PARTIAL 2 \/ REFUSED 4/.test(inp.progressDoc)) fail('progress_trait_line', 'PROGRESS.md 里找不到 6/2/4');
   else ok('progress_trait_line_present');
-  if (inp.engineTraitSummary && JSON.stringify(inp.engineTraitSummary) !== JSON.stringify(EXPECTED_TRAIT_COUNTS)) {
-    fail('trait_summary_vs_engine', `traits.implementation_summary() = ${JSON.stringify(inp.engineTraitSummary)}`);
-  } else if (inp.engineTraitSummary) ok('trait_summary_vs_engine_equal');
+  // 文件自己的汇总（全量）必须与引擎现算一致 —— 这一条同时抓「文件落后」与「文件编数」
+  if (inp.engineTraitSummary && JSON.stringify(inp.traitCounts) !== JSON.stringify(inp.engineTraitSummary)) {
+    fail('trait_summary_vs_engine', `文件汇总 ${JSON.stringify(inp.traitCounts)} ≠ `
+      + `traits.implementation_summary() ${JSON.stringify(inp.engineTraitSummary)}`);
+  } else if (inp.engineTraitSummary) ok('trait_summary_vs_engine_equal', JSON.stringify(inp.traitCounts));
 
   // 3. 名单硬约束（独立重算）
   const checkRoster = (doc, size, tag) => {
@@ -181,6 +213,18 @@ function runChecks(inp) {
   return { problems, checks };
 }
 
+//: 引擎登记表里的**全量特性名**（用来判「文件是否落后于引擎」）。跑不起来就返回空数组，
+//: 这时那条判据整体不表态（宁可不说，也不假装通过）。
+function engineTraitNameList() {
+  try {
+    return JSON.parse(execFileSync('python3', ['-c',
+      'import sys,json;sys.path.insert(0,"roco/src");from roco_env import traits;print(json.dumps(sorted(traits.TRAITS)))'],
+      { cwd: ROOT, encoding: 'utf8' }).trim());
+  } catch (e) {
+    return [];
+  }
+}
+
 // ── 读真实输入 ──────────────────────────────────────────────────────────
 const readJsonSafe = (p) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8')) : null);
 const matrixDoc = readFileSync(ROOT + 'docs/roco/PET-SUPPORT-MATRIX.md', 'utf8');
@@ -200,6 +244,7 @@ const realInputs = {
   supportMatrix: readJsonSafe(NORM + 'support-matrix.json'),
   traitCounts: traitStatus?.counts,
   traitPetsLen: traitStatus?.pets?.length,
+  traitPets: traitStatus?.pets ?? null,
   engineTraitSummary,
   roster48: readJsonSafe(ROOT + 'reports/roco/coverage/roster-48.json'),
   roster60: readJsonSafe(ROOT + 'reports/roco/coverage/roster-60.json'),
@@ -217,7 +262,8 @@ const baseline = runChecks(realInputs);
 const clone = () => JSON.parse(JSON.stringify({
   matrixDoc: realInputs.matrixDoc, progressDoc: realInputs.progressDoc,
   supportMatrix: realInputs.supportMatrix, traitCounts: realInputs.traitCounts,
-  traitPetsLen: realInputs.traitPetsLen, engineTraitSummary: realInputs.engineTraitSummary,
+  traitPetsLen: realInputs.traitPetsLen, traitPets: realInputs.traitPets,
+  engineTraitSummary: realInputs.engineTraitSummary,
   roster48: realInputs.roster48, roster60: realInputs.roster60,
 }));
 const overEnergySkill = Object.values(skills).find((s) => s.energy > ENGINE_ENERGY_MAX && s.category !== '特性').skill_id;

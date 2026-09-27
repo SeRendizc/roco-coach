@@ -1,4 +1,12 @@
 # 分层覆盖设计：622 图鉴检索 → 60 阵容评估 → 29 可模拟核心 → 48 Demo
+> **2026-09-25 复核（第 29 轮）**：`data/roco/engine-trait-status.json` 当时停在 **15 条 / FULL 8 · PARTIAL 3 · REFUSED 4**，
+> 而 `roco/src/roco_env/traits.py` 已登记 **17 条**（缺的是 `渴求` FULL、`贪得无厌` PARTIAL）—— 账本与引擎漂了，
+> 三份文档里引的 `FULL 6 / PARTIAL 2 / REFUSED 4`、`12 条` 是**更早**的历史数字。现在账本已重导
+> （`python3 scripts/roco/export-trait-status.py --write`）→ **17 条 / FULL 9 · PARTIAL 4 · REFUSED 4**，
+> 并加了两道闸：`--check`（与现在重算逐字节比，`roco/tests/test_trait_status_export.py` 3 条判据含反证）
+> 与 `scripts/roco/verify-coverage-axes.mjs`（判据 16 项 + 6 条反证，**已进 `verify:release` 成为第 27 个套件**）。
+> 下面正文里的数字保留原样（历史记录），**当前口径以账本 `counts` 与闸门产物为准**。
+
 
 > 第 46 轮 · **只设计/审计，不改引擎实现**。每一层给：进入条件、数据来源与版本、
 > refused 原因分类、**这一层能声称什么 / 不能声称什么**，以及**现在的实测覆盖率**。

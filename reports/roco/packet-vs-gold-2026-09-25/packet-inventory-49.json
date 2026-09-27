@@ -1,0 +1,4092 @@
+{
+ "mode": "dump-packet",
+ "rows": [
+  {
+   "id": "c01",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "我现在场上这只还剩多少血？能量够放技能吗？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c02",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "对方还剩多少药？我要不要换宠？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c03",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_evidence",
+    "read_match",
+    "read_last_turn"
+   ],
+   "policy": {
+    "need": "read_evidence",
+    "reason": "named-turn"
+   },
+   "question": "第5回合到底发生了什么？我想知道当时的能量变化。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 9,
+    "requestedTurn": 5,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c04",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_last_turn",
+    "read_evidence",
+    "read_match"
+   ],
+   "policy": {
+    "need": "read_evidence",
+    "reason": "named-turn"
+   },
+   "question": "上一回合发生了什么？我需要判断这回合怎么打。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c05",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "compare_actions",
+    "simulate_branch"
+   ],
+   "policy": {
+    "need": "simulate_branch",
+    "reason": "branch-simulation"
+   },
+   "question": "对方的技能能打掉我多少血？帮我比较一下换宠和防御。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c06",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "simulate_branch",
+    "compare_actions"
+   ],
+   "policy": {
+    "need": "simulate_branch",
+    "reason": "branch-simulation"
+   },
+   "question": "如果我这回合换宠，对方攻击会怎样？帮我模拟一下。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c07",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "我想看一下目前所有合法行动，然后再决定要不要换宠。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c08",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions",
+    "simulate_branch"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "现在双方的速度和先手关系是什么样？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c09",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "inspect_training"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "我该培养哪只？现在还有多少训练点和培养格？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c10",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "这回合想用技能，但不知道能量够不够，先帮我确认一下能量。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 11,
+    "playerActive": 0,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 0,
+     "cleanse": 2,
+     "ether": 0
+    },
+    "enemyItems": {
+     "potion": 0,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 11,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 17,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 17,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 0,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 14,
+      "speed": 19
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 132,
+      "speed": 43
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c11",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "对手后备还有谁？我要不要换宠预判一下？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c12",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "compare_actions",
+    "simulate_branch"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "帮我算一下这回合不同出招的结果，然后再决定用技能。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c13",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "能量上限是几个豆？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c14",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "防御能减伤多少？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c15",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "回复药能回多少血？比防御更划算吗？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c16",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "换宠之后这回合还能出招吗？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c17",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "技能和道具一共有几种？分别是什么？",
+   "inventory": {
+    "mode": "camp",
+    "hasBattle": false,
+    "phase": null,
+    "turn": null,
+    "playerActive": null,
+    "playerPets": 0,
+    "enemyPets": 0,
+    "playerItems": null,
+    "enemyItems": null,
+    "lastTurnKeys": null,
+    "latestEventCount": null,
+    "evidenceIndexLen": 0,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": null,
+    "activeHp": null,
+    "activeEnergy": null,
+    "playerRoster": null,
+    "enemyRoster": null
+   }
+  },
+  {
+   "id": "c18",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "火属性克制什么属性？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c19",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "技能有冷却时间吗？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c20",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "中毒算属性异常吗？每回合掉多少血？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c21",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "宠物倒下后可以免费换宠补位吗？算整局失败吗？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c22",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "速度快的宠物一定先出手吗？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c23",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "有属性本系加成吗？倍率是多少？",
+   "inventory": {
+    "mode": "camp",
+    "hasBattle": false,
+    "phase": null,
+    "turn": null,
+    "playerActive": null,
+    "playerPets": 0,
+    "enemyPets": 0,
+    "playerItems": null,
+    "enemyItems": null,
+    "lastTurnKeys": null,
+    "latestEventCount": null,
+    "evidenceIndexLen": 0,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": null,
+    "activeHp": null,
+    "activeEnergy": null,
+    "playerRoster": null,
+    "enemyRoster": null
+   }
+  },
+  {
+   "id": "c24",
+   "cat": "cat2-parametric",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "5豆算满豆吗？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c25",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions",
+    "search_rules"
+   ],
+   "policy": {
+    "need": "simulate_branch",
+    "reason": "branch-comparison"
+   },
+   "question": "结合我现在的血量判断这回合该防御还是换宠，另外说明换宠的完整代价。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c26",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "read_state",
+    "search_rules"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "先看我现在场上的能量，再查一下能量果到底恢复多少。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c27",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "read_evidence",
+    "read_match",
+    "compare_actions"
+   ],
+   "policy": {
+    "need": "read_evidence",
+    "reason": "named-turn"
+   },
+   "question": "第5回合我的宠被打掉多少血？结合那一下判断这回合我该怎么打。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 9,
+    "requestedTurn": 5,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c28",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "read_state",
+    "search_rules"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "我队伍里谁还能上场？顺便说下补位是不是免费的。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "replace",
+    "turn": 2,
+    "playerActive": 0,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 4,
+    "evidenceIndexLen": 1,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 0,
+    "activeEnergy": 5,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 79,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 65,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "溪刃獭",
+      "hp": 105,
+      "speed": 40
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 161,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 125,
+      "speed": 29
+     }
+    ]
+   }
+  },
+  {
+   "id": "c29",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "search_rules",
+    "read_match",
+    "read_evidence"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "查一下连续换宠的规则，再看下对手最近的换宠记录。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c30",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "read_state",
+    "search_rules"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "先确认我现在够不够能量用技能，再查防御回能的规则。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c31",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "compare_actions",
+    "simulate_branch",
+    "search_rules"
+   ],
+   "policy": {
+    "need": "search_rules",
+    "reason": "tactics-knowledge"
+   },
+   "question": "对比这回合两个选择的伤害，再引用连续换宠的反例。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c32",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "read_last_turn",
+    "read_evidence",
+    "search_rules"
+   ],
+   "policy": {
+    "need": "read_evidence",
+    "reason": "named-turn"
+   },
+   "question": "告诉我上个回合的事件，并查一下中毒的结算规则。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c33",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions",
+    "search_rules"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "看当前局面决定要不要换宠，同时查换宠和异常暂停的关系。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "replace",
+    "turn": 2,
+    "playerActive": 0,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 4,
+    "evidenceIndexLen": 1,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 0,
+    "activeEnergy": 5,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 79,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 65,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "溪刃獭",
+      "hp": 105,
+      "speed": 40
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 161,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 125,
+      "speed": 29
+     }
+    ]
+   }
+  },
+  {
+   "id": "c34",
+   "cat": "cat3-cross-tool",
+   "calls": [
+    2,
+    2
+   ],
+   "tools": [
+    "inspect_training",
+    "search_rules"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "我还有多少训练点？培养哪个属性最能改变先手？请查一下培养阈值。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c35",
+   "cat": "cat4-should-stop",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "chitchat-or-parametric"
+   },
+   "question": "你好小芽，随便聊聊，今天打得怎么样？",
+   "inventory": {
+    "mode": "camp",
+    "hasBattle": false,
+    "phase": null,
+    "turn": null,
+    "playerActive": null,
+    "playerPets": 0,
+    "enemyPets": 0,
+    "playerItems": null,
+    "enemyItems": null,
+    "lastTurnKeys": null,
+    "latestEventCount": null,
+    "evidenceIndexLen": 0,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": null,
+    "activeHp": null,
+    "activeEnergy": null,
+    "playerRoster": null,
+    "enemyRoster": null
+   }
+  },
+  {
+   "id": "c36",
+   "cat": "cat4-should-stop",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "chitchat-or-parametric"
+   },
+   "question": "谢谢，先不问了。",
+   "inventory": {
+    "mode": "camp",
+    "hasBattle": false,
+    "phase": null,
+    "turn": null,
+    "playerActive": null,
+    "playerPets": 0,
+    "enemyPets": 0,
+    "playerItems": null,
+    "enemyItems": null,
+    "lastTurnKeys": null,
+    "latestEventCount": null,
+    "evidenceIndexLen": 0,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": null,
+    "activeHp": null,
+    "activeEnergy": null,
+    "playerRoster": null,
+    "enemyRoster": null
+   }
+  },
+  {
+   "id": "c37",
+   "cat": "cat4-should-stop",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "明白了，辛苦了。",
+   "inventory": {
+    "mode": "camp",
+    "hasBattle": false,
+    "phase": null,
+    "turn": null,
+    "playerActive": null,
+    "playerPets": 0,
+    "enemyPets": 0,
+    "playerItems": null,
+    "enemyItems": null,
+    "lastTurnKeys": null,
+    "latestEventCount": null,
+    "evidenceIndexLen": 0,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": null,
+    "activeHp": null,
+    "activeEnergy": null,
+    "playerRoster": null,
+    "enemyRoster": null
+   }
+  },
+  {
+   "id": "c38",
+   "cat": "cat4-should-stop",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "能量上限是6对吧？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c39",
+   "cat": "cat4-should-stop",
+   "calls": [
+    0,
+    1
+   ],
+   "tools": [
+    "compare_actions",
+    "read_state"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "我该不该防御？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c40",
+   "cat": "cat4-should-stop",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "刚才那个提醒还算数吗？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c41",
+   "cat": "cat4-should-stop",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "小测一下防御的用法。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c42",
+   "cat": "cat4-should-stop",
+   "calls": [
+    0,
+    1
+   ],
+   "tools": [
+    "read_state",
+    "compare_actions"
+   ],
+   "policy": {
+    "need": null,
+    "reason": "chitchat-or-parametric"
+   },
+   "question": "这回合我想稳一点，你先看看局面再告诉我。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 9,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 9,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     19,
+     11,
+     34
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "炽鬃狮",
+      "hp": 0,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     },
+     {
+      "name": "溪刃獭",
+      "hp": 0,
+      "speed": 34
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 67,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 28,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 38,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c43",
+   "cat": "control-policy",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": null,
+    "reason": "state-in-packet"
+   },
+   "question": "线上竞技这回合我该不该用防御？",
+   "inventory": {
+    "mode": "pvp-live",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 0,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 59,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 59,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c44",
+   "cat": "control-locked",
+   "calls": [
+    0,
+    0
+   ],
+   "tools": [],
+   "policy": {
+    "need": "read_match",
+    "reason": "whole-match"
+   },
+   "question": "总结整局：这局我输在哪？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "ended",
+    "turn": 17,
+    "playerActive": 2,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 0,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 6,
+    "evidenceIndexLen": 17,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 0,
+    "activeEnergy": 1,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 0,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 44
+     },
+     {
+      "name": "炽鬃狮",
+      "hp": 106,
+      "speed": 19
+     },
+     {
+      "name": "苔盾菇",
+      "hp": 0,
+      "speed": 11
+     }
+    ]
+   }
+  },
+  {
+   "id": "c45",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_evidence",
+    "read_last_turn"
+   ],
+   "policy": {
+    "need": "read_evidence",
+    "reason": "named-turn"
+   },
+   "question": "上一回合发生了什么？我想知道那一手的伤害。",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 9,
+    "playerActive": 1,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 2,
+     "cleanse": 2,
+     "ether": 1
+    },
+    "enemyItems": {
+     "potion": 1,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 3,
+    "evidenceIndexLen": 8,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 55,
+    "activeEnergy": 2,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 55,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 47,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c46",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "simulate_branch"
+   ],
+   "policy": {
+    "need": "simulate_branch",
+    "reason": "branch-comparison"
+   },
+   "question": "守一下和换潮甲龟哪个好",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 3,
+    "playerActive": 0,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 2,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 59,
+    "activeEnergy": 4,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 59,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 79,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 0,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "溪刃獭",
+      "hp": 66,
+      "speed": 40
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 161,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 125,
+      "speed": 29
+     }
+    ]
+   }
+  },
+  {
+   "id": "c47",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_evidence",
+    "read_last_turn"
+   ],
+   "policy": {
+    "need": "read_evidence",
+    "reason": "named-turn"
+   },
+   "question": "上一回合发生了什么？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 1,
+    "playerActive": 0,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": null,
+    "latestEventCount": null,
+    "evidenceIndexLen": 5,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 98,
+    "activeEnergy": 5,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 132,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 132,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  },
+  {
+   "id": "c48",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "simulate_branch"
+   ],
+   "policy": {
+    "need": "simulate_branch",
+    "reason": "branch-comparison"
+   },
+   "question": "补位换上潮甲龟还是换上芽角鹿？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "replace",
+    "turn": 2,
+    "playerActive": 0,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 4,
+    "evidenceIndexLen": 1,
+    "requestedTurn": null,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 0,
+    "activeEnergy": 5,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 0,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 79,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 65,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "溪刃獭",
+      "hp": 105,
+      "speed": 40
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 161,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 125,
+      "speed": 29
+     }
+    ]
+   }
+  },
+  {
+   "id": "c49",
+   "cat": "cat1-needs-lookup",
+   "calls": [
+    1,
+    1
+   ],
+   "tools": [
+    "read_evidence"
+   ],
+   "policy": {
+    "need": "read_evidence",
+    "reason": "named-turn"
+   },
+   "question": "上个对局的第3回合发生了什么？",
+   "inventory": {
+    "mode": "pve",
+    "hasBattle": true,
+    "phase": "battle",
+    "turn": 1,
+    "playerActive": 0,
+    "playerPets": 3,
+    "enemyPets": 3,
+    "playerItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "enemyItems": {
+     "potion": 3,
+     "cleanse": 2,
+     "ether": 2
+    },
+    "lastTurnKeys": [
+     "type",
+     "before",
+     "action",
+     "opponent",
+     "events",
+     "after",
+     "result"
+    ],
+    "latestEventCount": 5,
+    "evidenceIndexLen": 5,
+    "requestedTurn": 3,
+    "legalActions": null,
+    "speeds": [
+     38,
+     13,
+     29
+    ],
+    "activeHp": 98,
+    "activeEnergy": 5,
+    "playerRoster": [
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 132,
+      "speed": 13
+     },
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     }
+    ],
+    "enemyRoster": [
+     {
+      "name": "芽角鹿",
+      "hp": 108,
+      "speed": 29
+     },
+     {
+      "name": "潮甲龟",
+      "hp": 132,
+      "speed": 13
+     },
+     {
+      "name": "烬尾狐",
+      "hp": 98,
+      "speed": 38
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -410,7 +410,12 @@ test('三份隐藏信息词汇表必须一一对应（任何一侧改了都会�
 test('两个信任域互不串门：私有端点按路径白名单，教练端点永远扫描', async () => {
   // 演示页需要「本地对局域」（带私有状态）。如果桥的守卫不按路径区分，
   // 开一局都做不到；如果按得太松，教练域就会被顺带放过。这条测试把两侧都钉住。
-  assert.deepEqual([...PRIVATE_PLANE_PATHS].sort(), ['/battle/advance', '/battle/legal', '/battle/new'],
+  // 2026-09-25：`/battle/free` 是**新登记**的自由动作端点（人类口径「愿力强化不占行动、背包物品都不占行动」）：
+  // 它同样带私有状态（要拿 `state` 去结算这一手），所以必须进私有域白名单 —— 见
+  // `src/coach/roco-client.js` 的 `PRIVATE_PLANE_PATHS` 与 `battleFree()`、Python 侧 `service.py:ROUTES`。
+  // 判据本身**没有放松**：清单仍然是**逐条穷举**（多一条没实现的路、少一条真在用的路，都会红）。
+  assert.deepEqual([...PRIVATE_PLANE_PATHS].sort(),
+    ['/battle/advance', '/battle/free', '/battle/legal', '/battle/new'],
     '私有域白名单必须逐条列出，不能按名字猜');
   for (const coachPath of ['/battle/plan', '/rules/query', '/team/evaluate', '/team/compare']) {
     assert.ok(!PRIVATE_PLANE_PATHS.has(coachPath), `教练域端点 ${coachPath} 不得进入私有域白名单`);

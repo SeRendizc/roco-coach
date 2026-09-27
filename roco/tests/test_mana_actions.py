@@ -38,6 +38,7 @@ from roco_env import env as renv              # noqa: E402
 from roco_env import rule_config as rc        # noqa: E402
 from roco_env.schema import (                 # noqa: E402
     ACTION_CHARGE,
+    ACTION_MAGIC,
     ACTION_ESCAPE,
     ACTION_ITEM,
     ACTION_SKILL,
@@ -147,18 +148,43 @@ class RuleConfigManaActionsTest(unittest.TestCase):
         self.assertIs(cfg.mana_loss_when_zero, True)
         self.assertIs(cfg.mana_surrender, True)
         # actions 三件套
-        self.assertEqual(cfg.allowed_kinds, ("skill", "charge", "switch", "surrender"))
+        # 2026-09-23：`magic`（PVP 魔法：愿力强化）进标准 PVP 的合法动作类 ——
+        # 人类口述登记（台账 EV-PVP-WISH-POWER-UP），它不是普通道具，所以单独一类。
+        self.assertEqual(cfg.allowed_kinds, ("skill", "charge", "switch", "surrender", "magic"))
         self.assertEqual(cfg.forbidden_kinds, ("item", "escape"))
         self.assertIs(cfg.unknown_kinds_allowed, False)
         # 一个 problem 都没有（对照组：下面每一条反证都往同一份 raw 上动手）
         self.assertEqual(rc.validate_config(cfg.raw, rc._load_ledger()), [])
 
     def test_v3_energy_and_turn_order_are_verbatim_copies_of_v2(self):
-        """v3 只新增 mana/actions；`energy` 与 `turn_order` 必须与 v2 逐字相同。"""
+        """v3 只新增 mana/actions（外加 2026-09-23 一个显式登记的开关）。
+
+        人类口径⑥（2026-09-23）：开局**每只**精灵都是满的 10 星，所以 v3 的 `energy`
+        多了 `initial_for_all_pets`。判据因此收紧成两条：
+          ① v2 有的每一个 key 都逐字相同；
+          ② v3 多出来的 key 只允许那一个，且它必须引台账 EV-ENERGY-PER-PET。
+        「v3 悄悄改了 v2 的口径」照样红，而「显式新增一个已登记开关」是被允许的。
+        """
         v2 = rc.load_config(rc.CANDIDATE_RULE_CONFIG_ID)
         v3 = _v3()
-        self.assertEqual(json.dumps(v3.raw["energy"], sort_keys=True),
-                         json.dumps(v2.raw["energy"], sort_keys=True))
+        # 2026-09-23：多出来的叶子是**显式登记过**的那些 —— 每加一个都必须写进这个白名单，
+        # 于是「v3 悄悄改了 v2 的口径」照样红，而「新增一个带登记/理由的开关」是可见的。
+        extra = sorted(set(v3.raw["energy"]) - set(v2.raw["energy"]))
+        # 2026-09-25 改钉（不删）：白名单加 `foe_energy_loss` —— RC-401 批次六声明的能力
+        # （「敌方失去 N 能量」两条读法）。判据的**意图一个字没松**：v3 多出来的 key 必须逐个登记在案，
+        # 悄悄改 v2 的口径照样红（下面那条逐字比对仍然对所有 v2 的 key 生效）。
+        # 2026-09-25（第 41 轮）改钉：白名单加 `per_layer_cost`（RC-401 批次九声明的动态能耗修正，
+        # 依据：`skill_000612 毒液渗透`「敌方每有1层中毒效果，本技能能耗-1」，51 只配招带它）。
+        self.assertEqual(extra, ["cost_modifier", "foe_energy_loss", "initial_for_all_pets", "per_layer_cost"],
+                         "v3 的 energy 只允许多出这三个已登记的叶子")
+        for key, value in v2.raw["energy"].items():
+            self.assertEqual(json.dumps(v3.raw["energy"][key], sort_keys=True),
+                             json.dumps(value, sort_keys=True), f"energy.{key}")
+        leaf = v3.raw["energy"]["initial_for_all_pets"]
+        self.assertIs(leaf["value"], True)
+        self.assertEqual(leaf["evidence_id"], "EV-ENERGY-PER-PET")
+        self.assertNotIn("initial_for_all_pets", v2.raw["energy"],
+                         "v2 不许出现这个叶子（legacy/v2 的行为与指纹要逐位不变）")
         self.assertEqual(json.dumps(v3.raw["turn_order"], sort_keys=True),
                          json.dumps(v2.raw["turn_order"], sort_keys=True))
 
@@ -187,14 +213,20 @@ class RuleConfigManaActionsTest(unittest.TestCase):
         self.assertEqual(surrender["confidence"], "ENGINE_HYPOTHESIS")
         self.assertIsNone(surrender["evidence_id"])
         self.assertTrue(surrender["reason"])
-        # 引台账的那三条必须仍停在 CROSS_SOURCE_SUPPORTED
-        for key, ev in (("pool", "EV-PVP-STANDARD-MANA"),
-                        ("faint_cost", "EV-PVP-FAINT-MANA-LOSS"),
-                        ("loss_when_zero", "EV-PVP-FAINT-MANA-LOSS")):
+        # 引台账的三条：等级必须**逐条等于**台账（不许静默升降级）。
+        # 2026-09-25 改钉：人类实机口径「就是4点，哎反正就是生命数，就是4颗心」把
+        # EV-PVP-STANDARD-MANA 升到 RECORDED_IN_GAME ⇒ `pool` 跟着升；
+        # `faint_cost` / `loss_when_zero` **没有**升级（力竭扣减量仍未被实机核验）。
+        # 旧口径留痕：这三条此前一律断言 CROSS_SOURCE_SUPPORTED。
+        for key, ev, want in (("pool", "EV-PVP-STANDARD-MANA", "RECORDED_IN_GAME"),
+                              ("faint_cost", "EV-PVP-FAINT-MANA-LOSS", "CROSS_SOURCE_SUPPORTED"),
+                              ("loss_when_zero", "EV-PVP-FAINT-MANA-LOSS", "CROSS_SOURCE_SUPPORTED")):
             leaf = cfg.raw["mana"][key]
             self.assertEqual(leaf["evidence_id"], ev)
-            self.assertEqual(leaf["confidence"], "CROSS_SOURCE_SUPPORTED")
+            self.assertEqual(leaf["confidence"], want)
             self.assertEqual(leaf["evidence_role"], "supports")
+            self.assertNotEqual(leaf["confidence"], "OFFICIAL_CURRENT",
+                                "依据是人类实机口径，不许写成「官方已确认」")
 
     def test_repo_internal_evidence_quotes_really_exist_in_the_frozen_snapshot(self):
         """配置里引的**仓内原文**必须真的在冻结快照里 —— 引文是可核对的，不是抄来的印象。
@@ -447,9 +479,12 @@ class ManaSettlementTest(unittest.TestCase):
         obs = renv.observe(state, RS, "player")
         self.assertEqual(obs["mana"], {"self": 4, "opponent": 4})
         planner = renv.public_planner_state(state, RS, "player")
-        self.assertEqual(planner["mana"], {"self": 4, "opponent": 4})
+        # 2026-09-23：公开视图多了 `pool`（这一局每人几颗心，规则常量）——
+        # 页面的掉心动效靠它把「掉了的」画成空心 ♡；它同样是公开事实，不是隐藏信息。
+        self.assertEqual(planner["mana"], {"self": 4, "opponent": 4, "pool": 4})
         ui = renv.ui_public_view(state, RS, "player")
-        self.assertEqual(ui["mana"], {"self": 4, "opponent": 4})
+        # 同上：UI 视图也带 `pool`（掉心动效要用）。
+        self.assertEqual(ui["mana"], {"self": 4, "opponent": 4, "pool": 4})
         # 重建出来的分析状态也要保住魔力（否则规划会把「还有几点魔力」忘掉）
         rebuilt = renv.state_from_public_planner(planner, RS, analysis_seed=7)
         self.assertEqual(rebuilt.player.mana, 4)
@@ -522,9 +557,11 @@ class ActionClippingTest(unittest.TestCase):
         self.assertIn(ACTION_CHARGE, kinds, "聚能必须是**独立动作类**并出现在合法动作里")
         self.assertIn(ACTION_SURRENDER, kinds, "投降必须出现在合法动作里")
         # 展示顺序 = 配置里 allowed_kinds 的顺序（去掉技能本身只出现一次的限制）
+        # 2026-09-23：`magic`（愿力强化）也在这个清单里，位置与 allowed_kinds 一致
+        # （skill → charge → switch → surrender → magic 声明顺序的投影）。
         ordered = [k for k in kinds if k not in (ACTION_SKILL, ACTION_SWITCH)]
-        self.assertEqual(ordered, [ACTION_CHARGE, ACTION_SURRENDER],
-                         f"聚能/投降的展示顺序应当跟 allowed_kinds 一致，实际 {kinds}")
+        self.assertEqual(ordered, [ACTION_CHARGE, ACTION_MAGIC, ACTION_SURRENDER],
+                         f"聚能/魔法/投降的展示顺序应当跟 allowed_kinds 一致，实际 {kinds}")
         # 每个动作都补得上 label（不是内部标识符）
         for action in renv.legal_actions(state, RS, "player"):
             self.assertTrue(action.label(RS))

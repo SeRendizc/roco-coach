@@ -15,13 +15,29 @@
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import re
+import tokenize
 import unittest
 
 from roco_env import env as renv
 from roco_env import rule_config as rc
+
+
+def _code_only(source: str) -> str:
+    """把源码里的**注释与字符串**去掉，只留代码（判据必须跑在事实上，而不是注释上）。
+
+    注释不是事实源，代码才是 —— 所以这里先 tokenize 掉 `COMMENT` / `STRING`，
+    再让正则去吃。它同时**加严**了既有的 mana 判据（以前是连注释一起扫的）。
+    """
+    out = []
+    for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+        if tok.type in (tokenize.COMMENT, tokenize.STRING):
+            continue
+        out.append(tok.string)
+    return " ".join(out)
 
 
 def _any_skill_id(rs):
@@ -326,10 +342,12 @@ class ConfigFileIndependenceTest(unittest.TestCase):
                              f"加载器里出现了内联常量 {token!r} —— 那它就又成了一份事实源")
         # RC-105：新增的 mana / actions 判据同样是**只读配置**的 —— 4 / 1 / True 这些值
         # 一个字都不许抄进加载器。上面那几条 token 判据管不到新字段名，所以这里补精确的。
+        # ⚠ 判据必须跑在**去掉注释与字符串**的代码上：注释不是事实源，代码才是。
+        code_only = _code_only(source)
         for name in ("mana_pool", "mana_faint_cost", "mana_loss_when_zero", "mana_surrender",
                      "unknown_kinds_allowed"):
             self.assertIsNone(
-                re.search(rf"\b{name}\s*=\s*(?:\d|True\b|False\b)", source),
+                re.search(rf"\b{name}\s*=\s*(?:\d|True\b|False\b)", code_only),
                 f"加载器把 {name} 内联成了字面量 —— 事实源只能是 data/roco/rulesets/*.json")
         # 这条上限是「加载器别长成第二份事实源」的**粗粒度代理**：精确判据是上面那几条
         # token / 正则。RC-105 为 mana/actions 加了两组加载期校验（纯声明式判断，没有内联
@@ -337,7 +355,24 @@ class ConfigFileIndependenceTest(unittest.TestCase):
         # （`damage.multi_hit`：缺字段 = False，存在时只校验形状），再长到 ~46.8k。
         # 两次都只多了声明式校验、没有内联任何规则值（上面那几条 regex 才是真判据），
         # 所以上限随之上调 —— 但**不许**用它掩盖内联：谁往里写数字，上面的 token 判据先红。
-        self.assertLess(len(source), 50000)
+        # 2026-09-25（第三次上调，50000 → 53000）：新增「背包物品占不占行动」这一个**策略读取点**
+        # （`_optional_policy_bool` + 两个字段 + 摘要两行），与 RC-401 那次同类：只把配置里的声明
+        # 读出来，没有任何规则值被内联（上面 token / regex 判据一条没动、也没放宽）。
+        # 2026-09-25（第四次上调，53000 → 54000，审计 SELF-01）：`selftest()` 的返回值从
+        # exit code 改成 `(failed, total)`（好让 `roco/tests/test_rule_config_selftest.py`
+        # 把它接进 `npm run test:env`，同时挡住「删几条断言」。语义仍是「全绿 = 0」），
+        # 另有两处**过期断言**按事实重写（candidate 的 energy.initial 已是 10 且带
+        # RECORDED_IN_GAME 依据；v3 的 allowed_kinds 已含 magic）、反证③ 改成合成配置。
+        # 四处都只加/改声明式断言与注释，**没有内联任何规则值** —— 上面那几条 token / regex
+        # 判据一条没动、也没放宽，它们才是真判据；这次上调只提高粗粒度代理的上限。
+        # 2026-09-25（第五次上调，54000 → 62000，天气进标准 PVP）：新增的是**天气层**的
+        # 声明式读取与加载期校验（`policies.weather_policy` 的 `_optional_policy_dict`、
+        # 三个只读辅助方法 `weather_enabled` / `weather_effect` / `require_weather_effect`、
+        # 以及 validate_config 里那段形状校验）。四种天气的数值（+75% / 减半 / 2 层 / 1 层）
+        # **一个都没有内联** —— 它们只存在于 `data/roco/rulesets/*.json` 与
+        # `data/roco/battle-modes.json`；上面那几条 token / regex 判据一条没动、也没放宽。
+        # 与前四次同样：这次上调只提高「粗粒度代理」的上限，真判据仍是上面那几条。
+        self.assertLess(len(source), 62000)
 
 
 if __name__ == "__main__":  # pragma: no cover

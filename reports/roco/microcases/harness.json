@@ -530,14 +530,14 @@
       "harness_status": "ENGINE_ASSUMPTION",
       "verification_passed": false,
       "engine_can_run_it": true,
-      "observed": "引擎侧实现状态 **FULL**（钩子 `after_status_skill`）",
+      "observed": "引擎侧实现状态 **PARTIAL**（钩子 `after_status_skill`）",
       "fields": {
-        "status": "FULL",
+        "status": "PARTIAL",
         "hook": "after_status_skill",
         "desc": "使用状态技能后，敌方获得「聒噪」技能的效果，持续3回合。"
       },
       "evidence": "roco/src/roco_env/traits.py",
-      "assumption": "「聒噪」的效果在数据里查得到（`聒噪` skill_000274：敌方获得全攻击技能能耗+2，持续3回合），所以不需要猜。实现为给对手挂一个能耗修正标记。",
+      "assumption": "「聒噪」的效果在数据里查得到（`聒噪` skill_000274：敌方获得全攻击技能能耗+2，持续3回合），所以不需要猜。**当前只挂印记、不结算能耗**：能耗修正机制已在 RC-401 批三落地，但这条的触发（使用状态技能）在冻结 48 名单里够得着，接线会改变既有 V3 对局结果，属于要连带重建回归指纹的独立一批；且「持续 3 回合」与回合边界的对齐仍需口径。⚠️ **2026-09-25（第 40 轮）如实降档 FULL → PARTIAL**：本文件开头那一行定义写着「FULL = 描述能被机械实现，且有测试」，而这条自己的理由里就写着「只挂印记、不结算能耗」——按同一条尺子它只能算 PARTIAL（只实现了描述的一部分）。原文一字未删，只把档位改对。",
       "missing": null,
       "unresolved_questions": [
         "「聒噪」的效果已由数据解答为「敌方获得全攻击技能能耗+2，持续3回合」；仍待解的是：与湿润印记(-1)等能耗修改的复合顺序与上下限。",
@@ -559,7 +559,7 @@
         "desc": "使敌方获得冻结时，也会使其获得全技能能耗+1。"
       },
       "evidence": "roco/src/roco_env/traits.py",
-      "assumption": "「给敌方挂全技能能耗+1」已实现为能耗修正标记。未实现的是它与**其他能耗修改**（湿润印记 -1、聒噪 +2）的复合顺序与下限——术语没有定义，属 MC-018 待验项，因此只登记标记、不在此处结算复合。",
+      "assumption": "「给敌方挂全技能能耗+1」**已经是真机制**（RC-401 批三）：修正写进 `PetState.energy_cost_mods`，由 `env.effective_skill_cost` 在可付性判定与扣费两处读，只在配置声明 `energy.cost_modifier` 时生效。仍未实现的是它与**其他能耗修改**（湿润印记 -1、聒噪 +2）的复合顺序与下限——术语没有定义，属 MC-018 待验项；本引擎按加法累计、不设下限（负值 fail closed）。",
       "missing": null,
       "unresolved_questions": [
         "「全技能能耗+1」是永久还是与冻结同寿？与其他能耗修改（湿润印记-1）如何复合？",

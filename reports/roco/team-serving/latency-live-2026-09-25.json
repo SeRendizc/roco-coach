@@ -1,0 +1,33 @@
+{
+ "schema": "roco-workshop-latency-live/v1",
+ "measured_at": "2026-09-25",
+ "measured_by": "主线程（真服务 127.0.0.1:8765，当前树，带 key）",
+ "method": "curl -s -o /dev/null -w %{time_total}，各 5 次；服务为本机真服务（含 Python 规则引擎子进程）",
+ "samples": {
+  "first": {
+   "ms": [
+    10.49,
+    11.45,
+    10.66,
+    12.08,
+    10.99
+   ],
+   "min": 10.49,
+   "median": 10.99,
+   "max": 12.08
+  },
+  "full": {
+   "ms": [
+    12.18,
+    11.9,
+    10.52,
+    12.95,
+    12.24
+   ],
+   "min": 10.52,
+   "median": 12.18,
+   "max": 12.95
+  }
+ },
+ "conclusion": "规则段（召回/Beam/诊断/候选/五轴）端到端约 11–15ms ⇒ 3s 预算留给 LLM 解释段；与 RC-306 的 300ms 初判 / 3s 解释合同一致"
+}

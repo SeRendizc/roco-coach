@@ -189,7 +189,9 @@ test('P0-5 分组逐条等于引擎动作表（条数、kind 顺序、未知 kin
   // 2026-09-22：分组多了两个**一级**动作类（聚能 / 投降，RC-106 把它们变成引擎真会发的 kind），
   // 顺序也按「技能 → 聚能 → 换精灵 → 投降 → 物品 → 更多」重排。所以签名跟着变——
   // 变的是分组表，不是判据本身（条数与 kind 仍然逐项等于引擎动作表）。
-  assert.equal(counts, 'skill:2,charge:0,switch:1,surrender:0,item:1,escape:1',
+  // 2026-09-23：`magic`（PVP 魔法：愿力强化）也是引擎真会发的 kind（台账 EV-PVP-WISH-POWER-UP），
+  // 所以分组表多了「愿力」这一组。变的是分组表，不是判据本身：条数与 kind 仍然逐项等于引擎动作表。
+  assert.equal(counts, 'skill:2,charge:0,switch:1,surrender:0,magic:0,item:1,escape:1',
     `分组条数与引擎动作表不一致${report('分组', counts)}`);
   const total = grouped.groups.reduce((sum, g) => sum + g.actions.length, 0) + grouped.hidden.length;
   assert.equal(total, actions.length,
@@ -204,7 +206,7 @@ test('P0-5 分组逐条等于引擎动作表（条数、kind 顺序、未知 kin
   const knownNow = box.actionGroupsOf([{kind: 'charge'}, {kind: 'surrender'}], {mode: {id: 'pvp-standard-six-pet'}});
   assert.equal(knownNow.known, true);
   assert.equal(knownNow.groups.map((g) => `${g.id}:${g.actions.length}`).join(','),
-    'skill:0,charge:1,switch:0,surrender:1,item:0,escape:0');
+    'skill:0,charge:1,switch:0,surrender:1,magic:0,item:0,escape:0');
 });
 
 test('P0-5 反证：把 item 重新分类成 skill（页面自己下结论）必须被抓住', () => {
@@ -214,7 +216,7 @@ test('P0-5 反证：把 item 重新分类成 skill（页面自己下结论）必
   const counts = grouped.groups.map((g) => `${g.id}:${g.actions.length}`).join(',');
   // 坏实现会给出 item:1；正确实现把这一条记在 skill 组里。
   assert.ok(!counts.includes('item:1'), `反证失败：坏输入居然得到正确的分组 ${counts}`);
-  assert.equal(counts, 'skill:1,charge:0,switch:0,surrender:0,item:0,escape:0',
+  assert.equal(counts, 'skill:1,charge:0,switch:0,surrender:0,magic:0,item:0,escape:0',
     `反证的实际输出原文：把 item 改写成 skill 后分组 = ${counts}（所以「分组真的按 kind 走」这件事是量的）`);
 });
 
@@ -227,7 +229,7 @@ test('P0-5 标准 PVP 下按 BattleMode 隐藏旧引擎动作，并如实记账�
   ];
   const pvp = box.actionGroupsOf(actions, {mode: {id: 'pvp-standard-six-pet'}});
   const counts = pvp.groups.map((g) => `${g.id}:${g.actions.length}`).join(',');
-  assert.equal(counts, 'skill:1,charge:0,switch:1,surrender:0,item:0,escape:0',
+  assert.equal(counts, 'skill:1,charge:0,switch:1,surrender:0,magic:0,item:0,escape:0',
     `标准 PVP 下不该出现物品/逃跑${report('标准 PVP 分组', counts)}`);
   assert.equal(pvp.hidden.length, 2,
     `被隐藏的动作必须如实记账（实际 ${pvp.hidden.length} 条：${JSON.stringify(pvp.hidden.map((a) => a.kind))}）`);
@@ -362,6 +364,100 @@ test('D5 反证：凭空画一个心计数器（把 4 写死）必须被抓住',
   // 队伍状态那一行只能来自公开视图给的 pets（倒没倒、剩几只）
   const line = box.rosterLineHtml([{name: '寂灭骨龙', hp: 10, max_hp: 120}, {name: '海豹船长', fainted: true}], {active: 0});
   assert.ok(line.includes('还能打 1/2'), `队伍状态应当从公开视图算${report('rosterLineHtml', line)}`);
+});
+
+// ── D5（2026-09-25 心常显）：心 = 魔力（`view.mana.{self,opponent,pool}`）；拿不到就 hidden ──
+//
+// 人类 2026-09-25：「战斗页顶部的生命心要**一直看得见**」。这一条是**浏览器门禁判据的 Node 侧回归**
+// （battle-feedback 的 `J10` + ux 的 `D5-no-fake-hearts` 要真无头 Chrome，跑得慢；这里坏了一眼就看见）：
+//   ① **画法只有一份**：`drawHeartCounters`（顶栏常显与掉心动效**共用**）—— 源码里实心那段只许出现一次；
+//   ② **fail closed**：拿不到 `view.mana`（缺键 / 缺 pool / 不是有限数 / pool ≤ 0）⇒ 两侧 `hidden`，
+//      **绝不硬写 4 颗**；给了就按引擎的数画：实心数 == `self`/`opponent`，心形总数 == `pool`。
+const HEART_FULL = String.fromCharCode(0x2665);    // 与页面同一口径：码点拼，不写字面量
+const HEART_EMPTY = String.fromCharCode(0x2661);
+const heartsCount = (text, ch) => [...String(text ?? '')].filter((c) => c === ch).length;
+
+/**
+ * 页面里取元素那一份写法（`const $ = (id) => document.getElementById(id);`）。
+ *
+ * ⚠ 这里**不能**用现成的 `topLevelConst('$')`：它内部走 `new RegExp('^const $ = …')`，
+ * 而 `$` 在正则里是行尾锚 ⇒ 永远匹配不到（拿回 undefined，沙箱里就变成「$ is not a function」）。
+ * 所以用**字面量正则**抠；抠不到就 assert 失败（不许静默用一个空壳把判据变成空话）。
+ */
+const DOLLAR_IMPL = (PAGE.match(/^const \$ = (.*);$/m) ?? [])[1];
+
+/** 把**页面里那一份** `drawHeartCounters` / `heartsFromMana` 抠进一个只有假 DOM 的沙箱（不抄写法）。 */
+function heartsSandbox() {
+  const els = {'b3-hearts-self': {hidden: true, innerHTML: ''}, 'b3-hearts-foe': {hidden: true, innerHTML: ''}};
+  assert.ok(DOLLAR_IMPL, '页面里找不到 `const $ = …;`（取元素那一份写法），这个沙箱没法照抠');
+  const src = [
+    'const document = {getElementById: (id) => els[id] ?? null};',
+    `const $ = ${DOLLAR_IMPL};`,
+    topLevelFunctionCode('drawHeartCounters'),
+    topLevelFunctionCode('heartsFromMana'),
+    'return {drawHeartCounters, heartsFromMana};',
+  ].join('\n');
+  // eslint-disable-next-line no-new-func
+  const fn = new Function('els', src)(els);
+  return {els, draw: (mana) => { fn.drawHeartCounters(fn.heartsFromMana(mana)); return els; }};
+}
+
+test('D5 心常显：拿不到 view.mana 就 hidden（绝不硬写 4 颗），给了就按引擎的数画', () => {
+  // ① 画法只有一份：常显与掉心动效共用 `drawHeartCounters`（禁「抄第二份」）
+  const drawImpls = (PAGE.match(/FULL_HEART\.repeat\(/g) ?? []).length;
+  assert.equal(drawImpls, 1,
+    `页面里有 ${drawImpls} 处心形实心画法：常显与掉心动效必须共用 drawHeartCounters 那一份`);
+  assert.match(PAGE, /drawHeartCounters\(heartsFromMana\(view\?\.mana\)\)/,
+    '顶栏（每次 view 更新都走的渲染路径）必须按 `view.mana` 画常显的心');
+  const flashCode = topLevelFunctionCode('flashHearts').replace(/\s+/g, ' ');
+  assert.match(flashCode, /drawHeartCounters\(/,
+    '掉心动效必须复用同一份 drawHeartCounters（不许自己再画一份）');
+  assert.ok(!/hidden = true/.test(flashCode),
+    '掉心动效 3.2s 收回时不许把**常显**一起收掉（收回要走「按当前 view.mana 重画」那条路）');
+  // ② fail closed：拿不到 mana 的六种形态都必须 hidden，且一个心形字符都不许画
+  const {draw} = heartsSandbox();
+  const missing = [undefined, null, {}, {self: 4, opponent: 4}, {self: 4, opponent: 4, pool: 0},
+    {self: '4', opponent: '4', pool: '4'}, {self: 4, opponent: 4, pool: null}];
+  for (const mana of missing) {
+    const els = draw(mana);
+    const html = els['b3-hearts-self'].innerHTML + els['b3-hearts-foe'].innerHTML;
+    assert.equal(els['b3-hearts-self'].hidden, true,
+      `view.mana=${JSON.stringify(mana)} 时我方必须 hidden（拿不到就不显示）${report('drawHeartCounters 输出', html)}`);
+    assert.equal(els['b3-hearts-foe'].hidden, true,
+      `view.mana=${JSON.stringify(mana)} 时对手必须 hidden${report('drawHeartCounters 输出', html)}`);
+    assert.equal(heartsCount(html, HEART_FULL) + heartsCount(html, HEART_EMPTY), 0,
+      `拿不到 mana 却画了心形（**绝不硬写 4 颗**）${report('drawHeartCounters 输出', html)}`);
+  }
+  // ③ 引擎给了就画对：实心数 == 引擎的当前心数，总数 == 引擎的 pool（4 来自这一份输入，不是常量）
+  const given = draw({self: 4, opponent: 3, pool: 4});
+  const selfHtml = given['b3-hearts-self'].innerHTML;
+  const foeHtml = given['b3-hearts-foe'].innerHTML;
+  assert.equal(given['b3-hearts-self'].hidden, false, '引擎给了 mana 就必须显示（常显）');
+  assert.equal(given['b3-hearts-foe'].hidden, false, '引擎给了 mana 就必须显示（常显）');
+  assert.equal(heartsCount(selfHtml, HEART_FULL), 4,
+    `我方实心数必须等于 view.mana.self${report('drawHeartCounters({self:4,opponent:3,pool:4})', selfHtml)}`);
+  assert.equal(heartsCount(selfHtml, HEART_FULL) + heartsCount(selfHtml, HEART_EMPTY), 4,
+    `我方心形总数必须等于 view.mana.pool${report('drawHeartCounters({self:4,opponent:3,pool:4})', selfHtml)}`);
+  assert.equal(heartsCount(foeHtml, HEART_FULL), 3,
+    `对手实心数必须等于 view.mana.opponent${report('drawHeartCounters({self:4,opponent:3,pool:4})', foeHtml)}`);
+  assert.equal(heartsCount(foeHtml, HEART_EMPTY), 1,
+    `对手丢掉的那一颗要画成空心${report('drawHeartCounters({self:4,opponent:3,pool:4})', foeHtml)}`);
+});
+
+test('D5 反证：心「拿不到就写 4 颗」与「与引擎错开 1」必须被同一条判据抓住', () => {
+  // 坏实现 ①：拿不到 mana 就写 4 颗（正是「页面自己编一个状态量」）
+  const fakeFour = {hidden: false, innerHTML: `<i>${HEART_FULL.repeat(4)}</i><i class="lost"></i>`};
+  const caught1 = fakeFour.hidden === true || heartsCount(fakeFour.innerHTML, HEART_FULL) > 0;
+  assert.equal(caught1, true, `反证失败：写死的 4 颗没被抓住${report('坏实现输出', fakeFour.innerHTML)}`);
+  // 坏实现 ②：引擎已经掉到 3，页面还画 4 颗（错开 1）
+  const engineSelf = 3;
+  const fakeStale = {hidden: false, innerHTML: `<i>${HEART_FULL.repeat(4)}</i><i class="lost"></i>`};
+  const caught2 = heartsCount(fakeStale.innerHTML, HEART_FULL) !== engineSelf;
+  assert.equal(caught2, true, `反证失败：与引擎错开 1 没被抓住${report('坏实现输出', fakeStale.innerHTML)}`);
+  // 反证的实际输出原文（打印给读报告的人看）
+  assert.equal(`${heartsCount(fakeFour.innerHTML, HEART_FULL)} 实心 / `
+    + `${heartsCount(fakeFour.innerHTML, HEART_FULL) + heartsCount(fakeFour.innerHTML, HEART_EMPTY)} 总`,
+  '4 实心 / 4 总', '反证的实际输出原文应当就是「硬写的 4 颗实心」');
 });
 
 // ── D5 / P0-6：模式徽记读注册表，不写死字符串 ────────────────────────────────

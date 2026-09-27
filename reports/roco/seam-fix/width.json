@@ -1,0 +1,102 @@
+{
+ "why": "人类 2026-09-25：「战斗页横向太长，要适当往里收」+「考虑一下立绘的适配程度」",
+ "target": "面板总宽 1408（= docs/roco/mockups/battle-v3h.html 的 .wrap max-width；1440 视口下两侧各 16px）",
+ "rule": "src/client/roco.css 末尾 body[data-roco-view=\"ready\"] #battle-panel{max-width:1408px!important;margin-inline:auto!important}",
+ "before": {
+  "panel": {
+   "x": 0,
+   "w": 1440
+  },
+  "cols": [
+   {
+    "x": 17,
+    "w": 232
+   },
+   {
+    "x": 263,
+    "w": 914
+   },
+   {
+    "x": 1191,
+    "w": 232
+   }
+  ],
+  "selfCard": {
+   "x": 263,
+   "w": 452
+  },
+  "selfBox": {
+   "x": 279,
+   "w": 420,
+   "h": 465
+  },
+  "selfSprite": {
+   "w": 347,
+   "h": 463
+  },
+  "spriteShareOfBox": 0.826,
+  "borderBottom": "1px rgb(36, 52, 68)"
+ },
+ "after": {
+  "panel": {
+   "x": 16,
+   "w": 1408
+  },
+  "cols": [
+   {
+    "x": 33,
+    "w": 232
+   },
+   {
+    "x": 279,
+    "w": 882
+   },
+   {
+    "x": 1175,
+    "w": 232
+   }
+  ],
+  "selfCard": {
+   "x": 279,
+   "w": 436
+  },
+  "selfBox": {
+   "x": 295,
+   "w": 404,
+   "h": 465
+  },
+  "selfSprite": {
+   "w": 347,
+   "h": 463
+  },
+  "spriteShareOfBox": 0.859,
+  "borderBottom": "1px rgb(17, 28, 38)"
+ },
+ "measured": {
+  "面板宽": [
+   1440,
+   1408
+  ],
+  "中列宽": [
+   914,
+   882
+  ],
+  "立绘框宽": [
+   420,
+   404
+  ],
+  "立绘尺寸": [
+   "347x463",
+   "347x463"
+  ],
+  "立绘占框宽比例": [
+   0.826,
+   0.859
+  ],
+  "左右列": [
+   "232/232",
+   "232/232"
+  ]
+ },
+ "conclusion": "收窄 32px **不会把立绘变小**（立绘两次都是 347×463，高度约束）；只是把画框两侧的深色留白收掉（占比 0.826 → 0.859）"
+}

@@ -1,0 +1,8045 @@
+{
+ "arm": "rule",
+ "summary": {
+  "tasks": 442,
+  "passed": 442,
+  "pass_rate": 1,
+  "stopped": {
+   "complete": 442
+  },
+  "latency": {
+   "p50_ms": 1,
+   "p95_ms": 1
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 442,
+    "passed": 442,
+    "pass_rate": 1,
+    "p50_ms": 1,
+    "p95_ms": 1
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 442,
+     "passed": 442,
+     "pass_rate": 1
+    },
+    "seen": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "by_value": {
+     "全图鉴": {
+      "total": 442,
+      "passed": 442,
+      "held_out": true,
+      "pass_rate": 1
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 442,
+     "passed": 442,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "图鉴字段": {
+      "total": 442,
+      "passed": 442,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 442,
+     "passed": 442,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "直问": {
+      "total": 442,
+      "passed": 442,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   }
+  }
+ },
+ "gateway": null,
+ "rows": [
+  {
+   "case_id": "cat-a-pet_000001",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 7,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000001",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000002",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000002",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000003",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000003",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000004",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000004",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000005",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000005",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000006",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000006",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000007",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000007",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000008",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000008",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000009",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000009",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000010",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000010",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000012",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000012",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000013",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000013",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000014",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000014",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000015",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000015",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000022",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000022",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000023",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000023",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000024",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000024",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000026",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000026",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000027",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000027",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000028",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000028",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000029",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000029",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000030",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000030",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000031",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000031",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000032",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000032",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000035",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000035",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000036",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000036",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000040",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000040",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000041",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000041",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000042",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000042",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000043",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000043",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000044",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000044",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000045",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000045",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000046",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000046",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000050",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000050",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000051",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000051",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000052",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000052",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000054",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000054",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000055",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000055",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000057",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 2,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000057",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000058",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000058",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000059",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000059",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000060",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000060",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000061",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000061",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000062",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000062",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000063",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000063",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000064",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000064",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000065",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000065",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000066",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000066",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000067",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000067",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000068",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000068",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000069",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000069",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000070",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000070",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000071",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000071",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000072",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000072",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000073",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000073",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000074",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000074",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000075",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000075",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000076",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000076",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000077",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000077",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000078",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000078",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000079",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000079",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000080",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000080",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000081",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000081",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000082",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000082",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000083",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000083",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000084",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000084",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000085",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000085",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000086",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000086",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000087",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000087",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000088",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000088",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000089",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000089",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000090",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000090",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000091",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000091",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000092",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000092",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000093",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000093",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000094",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000094",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000098",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000098",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000099",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000099",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000100",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000100",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000101",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000101",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000102",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000102",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000103",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000103",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000104",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000104",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000105",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000105",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000106",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000106",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000107",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000107",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000108",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000108",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000109",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000109",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000110",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000110",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000111",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000111",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000112",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000112",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000113",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000113",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000119",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000119",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000120",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000120",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000121",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000121",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000122",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000122",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000123",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000123",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000125",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000125",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000126",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000126",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000127",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000127",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000128",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000128",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000129",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000129",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000130",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000130",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000131",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000131",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000132",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000132",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000133",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000133",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000134",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000134",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000135",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000135",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000136",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000136",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000137",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000137",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000138",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000138",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000139",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000139",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000140",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000140",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000141",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000141",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000142",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000142",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000143",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000143",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000144",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000144",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000145",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000145",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000146",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000146",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000147",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000147",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000148",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000148",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000149",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000149",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000150",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000150",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000151",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000151",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000152",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000152",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000153",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000153",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000154",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000154",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000155",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000155",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000156",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000156",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000157",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000157",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000158",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000158",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000159",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000159",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000160",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000160",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000161",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000161",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000162",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000162",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000163",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000163",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000164",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000164",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000165",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000165",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000166",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000166",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000167",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000167",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000168",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000168",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000169",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000169",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000172",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000172",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000173",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000173",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000174",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000174",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000175",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000175",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000176",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000176",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000177",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000177",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000178",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000178",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000179",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000179",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000180",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000180",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000181",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000181",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000182",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000182",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000183",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000183",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000184",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000184",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000185",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000185",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000186",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000186",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000187",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000187",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000188",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000188",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000189",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000189",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000190",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000191",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000191",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000192",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000192",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000193",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000193",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000194",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000194",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000195",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000195",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000196",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000196",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000197",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000197",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000198",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000198",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000199",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000199",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000200",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000200",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000201",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000201",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000202",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000202",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000203",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000203",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000204",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000204",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000205",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000205",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000206",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000206",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000207",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000207",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000208",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000208",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000209",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000209",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000210",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000210",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000211",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000211",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000212",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000212",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000213",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000213",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000214",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000214",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000215",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000215",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000216",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000216",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000217",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000217",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000218",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000218",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000219",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000219",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000220",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000220",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000221",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000221",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000222",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000222",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000223",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000223",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000224",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000224",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000225",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000226",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000226",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000227",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000227",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000228",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000228",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000256",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000256",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000258",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000258",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000259",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000259",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000260",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000260",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000261",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000261",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000262",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000262",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000263",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000263",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000264",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000264",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000265",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000265",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000266",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000266",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000267",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000267",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000268",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000268",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000272",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000272",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000273",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000273",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000274",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000274",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000275",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000275",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000276",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000276",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000277",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000277",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000278",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000278",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000279",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000279",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000280",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000280",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000281",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 2,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000281",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000282",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000282",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000283",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000283",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000284",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000284",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000285",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000285",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000286",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000286",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000287",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000287",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000288",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000288",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000289",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000289",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000290",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000290",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000291",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000291",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000292",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000292",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000293",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000293",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000294",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000294",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000295",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000295",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000296",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000296",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000297",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000297",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000298",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000298",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000299",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000299",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000300",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000300",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000301",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000301",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000302",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000302",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000305",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000305",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000306",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000306",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000307",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000307",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000308",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000308",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000309",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000309",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000310",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000310",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000311",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000311",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000312",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000312",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000313",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000313",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000314",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000314",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000315",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000315",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000316",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000316",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000317",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000317",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000318",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000318",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000319",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000319",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000320",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000320",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000321",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000321",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000322",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000322",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000323",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000323",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000324",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000324",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000325",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000325",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000327",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000327",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000328",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000328",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000329",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000329",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000330",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000330",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000331",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000331",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000332",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000332",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000333",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000333",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000338",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000338",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000339",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000339",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000340",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000340",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000341",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000341",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000348",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000348",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000358",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000358",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000367",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000367",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000374",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000374",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000375",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000375",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000384",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000384",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000385",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000385",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000387",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000387",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000388",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000388",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000389",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000389",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000390",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000390",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000391",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000391",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000392",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000392",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000397",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000397",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000401",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000401",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000402",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000402",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000412",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000412",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000413",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000413",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000414",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000414",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000415",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000415",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000416",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000416",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000417",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000417",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000418",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000418",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000419",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000419",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000421",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000421",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000422",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000422",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000429",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000429",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000430",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000430",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000431",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000431",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000442",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000442",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000443",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000443",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000444",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000444",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000445",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000445",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000446",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000446",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000447",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000447",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000448",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000448",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000449",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000449",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000450",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000450",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000451",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000451",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000456",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000456",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000457",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000457",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000458",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000458",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000459",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000459",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000460",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000460",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000461",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000461",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000462",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000462",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000463",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000463",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000464",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000464",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000465",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000465",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000466",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000466",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000467",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000467",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000468",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000468",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000469",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000469",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000470",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000470",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000471",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000471",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000472",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000472",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000473",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000473",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000474",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000474",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000475",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000475",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000476",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000476",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000477",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000477",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000478",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000478",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000479",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000479",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000480",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000480",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000481",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000481",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000482",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000482",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000483",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000483",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000484",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000484",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000485",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000485",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000486",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000486",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000488",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000488",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000489",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000489",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000490",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000490",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000491",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000491",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000492",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000492",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000493",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000493",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000494",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000494",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000495",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000495",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000496",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000496",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000497",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000497",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000498",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000498",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000499",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000499",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000500",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000500",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000501",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000501",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000502",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000502",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000503",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000503",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000504",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000504",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000505",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000505",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000506",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000506",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000507",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000507",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000508",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000508",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000509",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000509",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000510",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000510",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000511",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000511",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000512",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000512",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000515",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000515",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000516",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000516",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000517",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000517",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000518",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000518",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000519",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000519",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000520",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000520",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000521",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000521",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000522",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000522",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000523",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000523",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000524",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000524",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000525",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000525",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000526",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000526",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000527",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000527",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000528",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000528",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000529",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000529",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000530",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000530",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000531",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000531",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000535",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000535",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000536",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000536",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000538",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000538",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000540",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000540",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000541",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000541",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000542",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000542",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000543",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000543",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000544",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000544",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000546",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000546",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000548",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000548",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000549",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000549",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000550",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000550",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000551",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000551",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000552",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000552",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000553",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000553",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000554",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000554",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000555",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000555",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000557",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000557",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000558",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000558",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000559",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000559",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000560",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000560",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000561",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000561",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000586",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000586",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000587",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000587",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000588",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000588",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000590",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000590",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000591",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000591",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000592",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000592",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000593",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000593",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000595",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000595",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000596",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000596",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000597",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000597",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000598",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000598",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000599",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000599",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000600",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000600",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000601",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000601",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000602",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000602",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000603",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000603",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000604",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000604",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000605",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000605",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000606",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000606",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000607",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000607",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000608",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000608",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000609",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000609",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000610",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000610",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000611",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000611",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000612",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000612",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000613",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000613",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000614",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000614",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000615",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000615",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000616",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000616",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000617",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000617",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000618",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000618",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000619",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 1,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000619",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000622",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000622",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000625",
+   "category": "rules_lookup",
+   "passed": true,
+   "stopped": "complete",
+   "wall_ms": 0,
+   "violations": [],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000625",
+      "state_version": 0
+     }
+    ]
+   ]
+  }
+ ]
+}

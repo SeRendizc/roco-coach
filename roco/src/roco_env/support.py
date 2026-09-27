@@ -62,6 +62,7 @@ def classify_pet(rs: Any, pet_id: str, *, multi_hit_declared: bool = True) -> Di
 
     `multi_hit_declared`：与覆盖台账同一口径（当前配置声明了连击能力与否）——
     标定「这一只在这个口径下」的支持等级，而不是一个含糊的全局值。
+    的默认值同一套理由；两者都会写进报告的 `assumed_capabilities`，不藏在实现里。
     """
     pet = rs.pets.get(pet_id)
     if pet is None:

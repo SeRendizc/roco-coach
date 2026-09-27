@@ -120,18 +120,23 @@ curl 'http://127.0.0.1:8765/api/roco/workshop?zzz=1'             # → 400，点
 
 ---
 
-## 4. 现在还是 unknown 的轴，以及为什么
+## 4. 五轴现在怎么算（assumption 档）
 
-`data/roco/meta-prior/v1.json` 的 `distribution_source = "unknown"`、每条 `distribution[].value = null`，
-所以 RC-304 的**前四轴**现在都无定义（`available:false`、`value:null`、`unknown_reason` 点名缺什么）：
+`data/roco/meta-prior/v1.json` 的 `distribution[]` 现在是 **assumption 档**：7 个已识别体系各 `1/7`
+（`basis.denominator = 7`，逐条带 `recomputable_from`，合计 = 1）。它提供的是**声明假设的分母**
+（可复算、可替换成实测分布），不是实测环境占比。所以 RC-304 的**五轴全部可算**：
 
-| 轴 | 现在的状态 | 为什么 | 需要什么才能算 |
+| 轴 | 现在的状态 | 值从哪来 | 置信等级 |
 |---|---|---|---|
-| 环境价值（`expected_meta_value`） | unknown | 缺版本对手分布：没有真实对局数据，分母不存在 | 逐体系占比 + 逐体系相对表现（离线联赛 / matchup bank 产物） |
-| 最怕的体系 | unknown | 同上 | 同上 |
-| 对局离散度 | unknown | 同上 | 同上 |
-| 操作容错 | unknown | 缺可复跑的对局采样（`distribution[].tolerance`） | 离线回放 / 联赛产物 |
-| 覆盖置信 | **能算**（例如 `0.851852`，`confidence=COMMUNITY_CURRENT`） | 它只依赖队里已有的构建与结构事实，**不依赖对手分布** | —— |
+| 环境价值（`expected_meta_value`） | **能算**（如 `0.75735`） | 占比（声明假设）× 逐体系相对分（RC-304 按体系 `feature_axes` 从 RC-302 结构分算出） | `ENGINE_HYPOTHESIS` |
+| 最怕的体系 | **能算**（如 `wing_king_flyer`，相对分 `0.416667`，权重 `0.142857`） | 同上取最小 | `ENGINE_HYPOTHESIS` |
+| 对局离散度 | **能算**（如 `0.5`） | 逐体系相对分的极差 | `ENGINE_HYPOTHESIS` |
+| 操作容错 | **能算（下界代理）**（如 `0.476732`） | 逐体系**结构短板**（该体系判据里最小的结构分）的加权均值 | `ENGINE_HYPOTHESIS` |
+| 覆盖置信 | **能算**（例如 `0.848485`，`confidence=COMMUNITY_CURRENT`） | 只依赖队里已有的构建与结构事实，**不依赖对手分布** | —— |
+
+页面拿到这两类字段：`distribution_kind`（`assumption` / `measured`）与
+`structural_basis`（逐体系的判据、分子 / 分母、重算入口）。**分母是声明假设、
+相对分是结构分**——两者都不是实测对局数据，也都不预测胜负（详见 `docs/roco/TEAM-COMPARE.md` §3）。
 
 覆盖置信的 `value` 是 `(criterion + evidence + build_data) / 3` 三个可复算因子的均值，
 `unit` 明写「相对分（0～1 的序数标度，不预测胜负）」。
@@ -266,7 +271,22 @@ node --test tests/roco-workshop.test.js
 
 另外两条如实说明：
 
-* RC-304 的**四轴仍 unknown**（见 §4），所以工坊在选满六只时只能给「覆盖置信 + 结构理由 + 一个最小替换」；
+* RC-304 的**四轴现在是 assumption 档的结构分**（见 §4）：分母是声明假设、相对分是 RC-302 结构分，
+  所以工坊在选满六只时给「五轴 + 结构理由 + 一个最小替换」，但页面上必须写明这两者不是实测对局数据；
 * `docs/roco/ui-mockup-six-slot.html` 里画的「阵容诊断」（输出核心 / 速度线 / 联防 / 高费技能）
   是**版式**，不是本 RC 的数据：本 RC 呈现的是 RC-302 的七维**口径名**与未核实标记，
   没有把七维折成一个「诊断分数」。
+
+## 2026-09-25：人类五条投诉的修复与真机判据
+
+| # | 投诉（原话） | 根因 | 修法 | 真机实测 |
+|---|---|---|---|---|
+| ① | 「啥数据没有 / 五项全算不出来」 | **四轴按设计不可算**（缺「版本对手分布」，红线不许编）；第 5 轴 `coverage_confidence` 可算 | 能算的排最前；四轴**合并成一行**说清缺什么、明细收起；那一行**不出现任何数字** | 轴节点 **2 = 能算 1 + 合并 1**；合并行「还有四个口径现在算不出来…」 |
+| ② | 「这个什么陛下有啥区别？我根本看不出来啊」 | `mine` 档走 `mergeMineRows()` **分组模板**，它只画名字/属性；且分组时 `variants.push({select,name})` **把 level/role_label 投影掉了**（只改另一支模板在真机上无效） | 分组模板补 `poolRowMetaText(variants[0])`；分组时带上 `level/role_label/badges` | `Lv50 · 输出` / `Lv80 · 坦克`（两行可见文本不同、未被 44px 行裁掉，`metaVisible=true`） |
+| ③ | 「显示不完，下滑不了」 | `.tw-drawer-panel` 没有 `max-height` ⇒ 面板高度=内容高度，`overflow:auto` 永不触发 | 加 `max-height:100%` | `scrollHeight 1294 / clientHeight 756` → 真滚轮后 **scrollTop=200** |
+| ④ | 「收起那么大，箭头还是反的」 | 展开态多一档 `padding-top:9px` 把头部撑高；`::after` 的 ▾/▴ 与惯例相反 | 展开态不再变高；改成 **收起 ▸ / 展开 ▾** | 收起 **44px** / 展开 **44px**；箭头 `"▸"` / `"▾"` |
+| ⑤ | 「大片大片没用的信息」 | 四条恒未知轴各占一行、把同一句「算不出来」印四遍 | 合并成一行 + 明细默认收起（**诚实信息一条不删**） | 见 ① |
+
+**判据**：`scripts/roco/browser-workshop-acceptance.mjs` 新增 **36–41 六条**（各带必红反证），实测 **判据 49/49 + 反证 37/37**；
+`tests/roco-workshop.test.js` **30/30**（含「同名不同种」纯函数判据 + 两条结构钉）。
+**注意**：全图鉴档的同名条目自带分支后缀（如「棋契陛下（白棋棋骑士分支）」），所以判据 41 必须**在「我的精灵」档**量 —— 人类截图那一屏就是我的精灵档。

@@ -521,7 +521,7 @@
               }
             }
           },
-          "minItems": 80
+          "minItems": 48
         },
         "battle_builds": {
           "type": "array",
@@ -674,7 +674,7 @@
               }
             }
           },
-          "minItems": 80
+          "minItems": 48
         },
         "dataset_hash": {
           "type": "string",
@@ -1384,10 +1384,10 @@
     ]
   },
   "x_roco_contract": {
-    "instance_target": 80,
+    "instance_target": 48,
     "min_species": 40,
     "min_outside_layer_playable_48": 12,
-    "min_same_species_groups": 20,
+    "max_same_species_groups": 0,
     "seed": 20301
   }
 }

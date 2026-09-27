@@ -1868,7 +1868,7 @@ export function previousChatThread(memory={},opts={}){
 }
 // 闲聊回复：接住这句话 + 一件自己记得的事 +（有的话）落在同一件事上的情绪。
 // 返回 null 表示「这句不是闲聊」或「没有可核对的经历」，交给原来的观察通道。
-export function chatReply({message='',memory={},facts=null,intent='other',limit=REGISTERS.R1.limit,now=Date.now(),noReview=false}={}){
+export function chatReply({message='',memory={},facts=null,intent='other',limit=REGISTERS.R1.limit,now=Date.now(),noReview=false,askingPick=false}={}){
  const f=facts||companionFacts(memory,{},now);
  const text=String(message||'');
  if(TACTICAL_HINT.test(text))return null;
@@ -1954,7 +1954,7 @@ export const ANSWER_REQUIREMENTS='\n回答要求：';
 export function playerWords(message){return String(message??'').split(ANSWER_REQUIREMENTS)[0];}
 // R0 在这里是最短承接句（聊天通道不能真的空消息，runCoach 会拒绝空文本）；
 // 真正的「不发消息」只存在于主动通道（coach.js 返回 null）。
- export function companion(context={},memory={},message='',now=Date.now()){
+ export function companion(context={},memory={},message='',now=Date.now(),{askingPick=false}={}){
  const words=playerWords(message),intent=intentOf(words);
  const state=companionState(memory,context,{playerInitiated:true,intent,message:words},now);
  const f=state.facts;
@@ -2028,14 +2028,16 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
   const fit=moodFits(mood,limit);
   if(fit){text=fit.text;parts=fit.parts;socialOnly=true;moodUsed=true;}
   else if(social){text=social;parts=[SENT(social,'chat','本轮消息')];socialOnly=true;}
-  else text='我在。';
+  // 2026-09-26：这里以前也是「我在。」——它是**更早**的那个兜底（R0 段），
+  // 真机审计里 9/30 条拿到的那三个字主要出自这一行。改成按诉求给一句有用的话（见 fallbackLine）。
+  else text=fallbackLine(message);
  }
  else if(!text&&(register==='R1'||register==='R2')){
   // 玩家主动搭话（寒暄、家常、问陪练自己）先走闲聊线程：接住这句话，再落一件记得的事。
   // 战术问句与倾诉不走这里——前者是军师的活，后者由 R2/R3 的关切句接。
   // 空账本下说心情／状态会走这条线程（那时没有可关切的事），所以这里也要认出来：
   // 只要这一轮说的是心情／状态，模型那一侧就不许再要跨局记录。
-  chat=chatReply({message:words,memory,facts:f,intent,limit,now,noReview});
+  chat=chatReply({message:words,memory,facts:f,intent,limit,now,noReview,askingPick});
   // 问候轮的接话句本身就是全部内容（第二句是在场，不是记录），所以它按 socialOnly 走：
   // 豁免的只有「至少一句跨局信息」这一条**信息量**判据，其余每一关照旧。
   if(chat){text=chat.text;parts=chat.parts;if(chat.greeting)socialOnly=true;if(MOOD_LINE.test(words))moodUsed=true;}
@@ -2109,8 +2111,11 @@ export function playerWords(message){return String(message??'').split(ANSWER_REQ
  // 包括不含事实的陪伴句（两句一模一样的陪伴句同样是重复）。判据见 repeatedInformation。
  if(text&&text!=='我在。'&&repeatedInformation(text).repeated){text=null;reading=null;parts=[];chat=null;moodUsed=false;socialOnly=false;}
  // 该档位需要的事实一条都拼不出来时，降到 R0 只说承接句：档位要么真的用上，要么明说降到最低。
- if(!text){register='R0';text='我在。';state.register='R0';state.registerReason='该档位需要的事实在本机记录里一条都找不到，降到最短承接句';reading=null;parts=[];chat=null;moodUsed=false;}
- return publicPacket({text,register,state,intent,reading,chat,mood:moodUsed,greeting,scenario,scenarioFailed});
+ if(!text){register='R0';text=fallbackLine(message);state.register='R0';
+  // 仍然如实记账：这一轮没找到可用事实，只是不再拿状态回报当回答。
+  state.registerReason='该档位需要的事实在本机记录里一条都找不到，降到最短承接句';
+  reading=null;parts=[];chat=null;moodUsed=false;}
+ return publicPacket({text,register,state,intent,reading,chat,mood:moodUsed,greeting,scenario,scenarioFailed,askingPick});
 }
 
 // 被动通道手里只有 buildContext 的快照（history 被裁空），把它当成一个「没有回合记录的对局」读。
@@ -2133,7 +2138,30 @@ function followupReply(memory){
 
 // 每个数字都出现在依据里：这样模型改写后的答案也能通过 checkGroundedAnswer 的数字核对，
 // 不会因为「引用了陪练模板里的真实数字」被误判成编造。
-function publicPacket({text,register,state,intent,reading=null,chat=null,mood=false,greeting=false,scenario=null,scenarioFailed=null}){
+/**
+ * R0 兜底那句话（2026-09-26 修）。
+ *
+ * 以前恒为三个字「我在。」。真机审计（30 条问句、无 key 本地路径）实测：**9 条拿到它**，
+ * 而且同一个兜底同时吃掉三类完全不同的诉求 —— 求建议（「首发该上谁？」「我该怎么练？」）、
+ * 问事实（「印记是什么？」）、越界（「帮我写一段 python 代码」）。玩家收到的是状态回报，
+ * 不是回答；产品负责人的原话是「说的是人话吗……不应该自娱自乐」。
+ *
+ * 现在按诉求给一句**有用**的话：仍然**不编事实、不冒充查过**（这是红线），
+ * 但至少告诉玩家下一步能做什么、或者我为什么给不了。
+ */
+function fallbackLine(message=''){
+ const text=String(message).slice(0,50);
+ // ⚠ 长度受 R0 的档位契约约束（`replyConstraints` 给 R0 的上限是 24 字）——所以这几句都压到 20 字上下：
+ // 既要有用（告诉玩家下一步），又不能说成一段解释。
+ if(/写代码|代码|翻译|数学|算一下|作文|写首诗|写一段/.test(text))
+  return '这个我不擅长，聊游戏里的吧。';
+ if(/首发|该上谁|带谁|推荐|建议|怎么练|怎么打|配招|选哪|哪只好|换谁|替补/.test(text))
+  return '说一下你的队伍和对手，我按相性挑。';
+ if(/什么|怎么|为什么|多少|哪些|是不是|吗|呢/.test(text))
+  return '这条我没依据，换个说法或点名一只精灵。';
+ return '我在。聊游戏里的都行。';
+}
+function publicPacket({text,register,state,intent,reading=null,chat=null,mood=false,greeting=false,scenario=null,scenarioFailed=null,askingPick=false}){
  const f=state.facts,history=f.history;
  const wins=history.filter(e=>e.result==='win').length,losses=history.filter(e=>e.result==='loss').length,draws=history.filter(e=>e.result==='draw').length;
  const evidence=[`本机对战记录：已结束${history.length}场，${wins}胜${losses}负${draws?draws+'平':''}（来源：memory.events，最多保留12场，预制场景不写入）。`];
@@ -2167,14 +2195,14 @@ function publicPacket({text,register,state,intent,reading=null,chat=null,mood=fa
  if(f.mood)evidence.push(`情绪假设（不是结论）：你最近一次自己说的是「${f.mood.label}」，置信度 ${f.mood.confidence}，${new Date(f.mood.expiresAt).toISOString().slice(11,16)} 前有效（${f.mood.basis}）。这一轮只接住这个状态，不要据此评价你这个人。`);
  if(f.lessons.length)evidence.push(`课程记录：${f.lessons.join('、')}（${f.lessons.length}条答对过的练习，不等于熟练掌握）。`);
  if(scenarioFailed?.length)evidence.push(`场景文案自检未通过（${scenarioFailed.join('、')}），本机已退回原通道：这一轮不要换成别的说法去讲同一件事。`);
- return {text,evidence,register,companionState:{register,engagement:state.engagement,consideration:state.consideration,momentum:state.momentum,lossStreak:state.lossStreak,winStreak:state.winStreak,reasons:state.reasons},replyConstraints:replyConstraints(register,'companion',{emptyLedger:!history.length&&!f.lessons.length,continuing:Boolean(chat?.continued),chat:Boolean(chat),mood,greeting,metBefore:history.length>0,scenario:scenario?.intent||null,noReview:f.refused,address:f.address}),intent,chatThread:chat?.thread||null,chatContinued:Boolean(chat?.continued),silent:register==='R0'};
+ return {text,evidence,register,companionState:{register,engagement:state.engagement,consideration:state.consideration,momentum:state.momentum,lossStreak:state.lossStreak,winStreak:state.winStreak,reasons:state.reasons},replyConstraints:replyConstraints(register,'companion',{emptyLedger:!history.length&&!f.lessons.length,continuing:Boolean(chat?.continued),chat:Boolean(chat),mood,greeting,metBefore:history.length>0,scenario:scenario?.intent||null,noReview:f.refused,address:f.address,askingPick}),intent,chatThread:chat?.thread||null,chatContinued:Boolean(chat?.continued),silent:register==='R0'};
 }
 
 // 模型路径下的档位约束：随证据包一起送到服务端（server.js 把整个证据包作为 game_evidence 发给模型）。
 // forbid 里的每一条与 checkCompanionRestraint / checkCompanionInformation 的硬线一一对应：
 // 复述屏幕、播报自己的情绪、空泛安慰、评价水平、说教、战术指挥，一条都不留。
 // allow 里写清这一轮**该有**的东西：情绪不是被禁止的，被禁止的是把情绪落在自己身上。
-export function replyConstraints(register,voice='companion',{emptyLedger=false,continuing=false,chat=false,mood=false,greeting=false,metBefore=false,scenario=null,noReview=false,address=null}={}){
+export function replyConstraints(register,voice='companion',{emptyLedger=false,continuing=false,chat=false,mood=false,greeting=false,metBefore=false,scenario=null,noReview=false,address=null,askingPick=false}={}){
  const r=REGISTERS[register];
  // 没有记录时送模型的那句话要换掉：原来写的是「至少一句要来自跨局记录（memory.events）」，
  // 而 memory.events 是空的——照这句写，模型只能编一局出来；
@@ -2222,7 +2250,12 @@ export function replyConstraints(register,voice='companion',{emptyLedger=false,c
  // 速度对比与先手判断是军师的语言，不是陪练的。它单列一条，因为它不属于上面任何一类：
  // 模型把它当成「复述屏幕上看得见的事实」（publicState 里确实有双方速度），
  // 所以「不要复述屏幕」那条约束拦不住它——实测那句正是这样穿过去的。
- const noTactics='速度对比（「速度38比它34快」）、先手判断（「可以先动」「先手在你」）、以及任何告诉玩家这一手该出什么的说法，都属于军师的活：陪练一句都不给。';
+ // 2026-09-25（人类口径：「可以给推荐的下一个精灵呀」）：玩家**明确在问「该带谁／推荐哪只」**时，
+ // 队伍推荐不再算「战术指挥」—— 但必须是**引擎回执里的事实**（属性克制/六维/速度差），
+ // 且**战斗中的动作指令照旧一句不给**（换成谁、守住、先出哪招）。这两层的分界写进判据。
+ const noTactics=askingPick
+  ?'玩家这一轮明确在问「该带谁／推荐哪只」：可以点名 1–2 只，理由必须是**引擎回执里的事实**（属性克制、六维、速度差），说不出出处就不许点；但**仍然不许**替他决定这一手该出什么（换成谁、守住、先出哪招都不行），也不许给胜率或「更强／必胜」。'
+  :'速度对比（「速度38比它34快」）、先手判断（「可以先动」「先手在你」）、以及任何告诉玩家这一手该出什么的说法，都属于军师的活：陪练一句都不给。';
  // ── C02：拒绝与场景轮送给模型的同一句话 ──────────────────────────────────────
  // 本地模板已经做到了，模型那一侧必须同步：否则模型会把「好，不劝了」扩写成一段复盘，
  // 而生成后扫描只会把它判为越界再回退——玩家读到的还是模板，模型那次调用白花。
@@ -2237,11 +2270,12 @@ export function replyConstraints(register,voice='companion',{emptyLedger=false,c
   :'';
  const nameRule=address?`怎么称呼他已经定了（${address}）：按他的要求称呼，但不要每句都点名，也不要拿它当开场白。`:'';
  return {register,voice,maxChars:r.limit,maxQuestions:r.maxQuestions,allowAdvice:r.advice,
-  forbid:['复述屏幕上已经写着的事','播报自己的情绪（「我看得有点急」这类第一人称感受）','空泛安慰','评价玩家水平','说教',r.advice?'':'给建议','战术指挥','速度对比与先手判断（「速度38比它34快」「可以先动」「先手在你」）',emptyLedger?'提任何过去的事（「上次」「之前」「上回」这类说法）':'',emptyLedger?'播报本机有没有记录（「记录还是空的」「一局都还没记上」），或者把玩家推去开一局（「去开一局吧」「打完我就能接上话」）':'',register==='R0'?'提对局、记录、回合数或胜负（安静档只回玩家这一句话）':'',mood?'提对局、记录、回合数或胜负（他这一轮说的是自己的状态，先接住他）':'',greeting?'提对局、记录、回合数、胜负、血线或本局局面（这一轮只是问候，回问候就够）':'',noReview?'推复盘、提「上一局／最近几局／记录」、给建议或追问他（他明确拒绝过）':'',scenario?'提旧值、念记录，或说「我记着／我都留着底」这类展示记忆功能的话':''].filter(Boolean),
+  forbid:['复述屏幕上已经写着的事','播报自己的情绪（「我看得有点急」这类第一人称感受）','空泛安慰','评价玩家水平','说教',r.advice?'':'给建议',askingPick?'替他决定这一手该出什么（战斗动作：换成谁／守住／先出哪招）':'战术指挥','速度对比与先手判断（「速度38比它34快」「可以先动」「先手在你」）',emptyLedger?'提任何过去的事（「上次」「之前」「上回」这类说法）':'',emptyLedger?'播报本机有没有记录（「记录还是空的」「一局都还没记上」），或者把玩家推去开一局（「去开一局吧」「打完我就能接上话」）':'',register==='R0'?'提对局、记录、回合数或胜负（安静档只回玩家这一句话）':'',mood?'提对局、记录、回合数或胜负（他这一轮说的是自己的状态，先接住他）':'',greeting?'提对局、记录、回合数、胜负、血线或本局局面（这一轮只是问候，回问候就够）':'',noReview?'推复盘、提「上一局／最近几局／记录」、给建议或追问他（他明确拒绝过）':'',scenario?'提旧值、念记录，或说「我记着／我都留着底」这类展示记忆功能的话':''].filter(Boolean),
   allow:greeting
    ?['对这句问候本身的回应（用当前时段的问候，或一句同样短的应声）——这一轮不要别的']
    :scenario?['对他这句话本身的承认（新值／他自己的那句话）——这一轮不要别的']
-   :['对真实事件的可惜/漂亮/悬/憋屈/松口气（必须落在具体回合、数字或记录上）','跨局记录与偏好（玩家以前说过、打过的事）'],
+   :[askingPick?'按引擎回执点名 1–2 只（必须说得出出处：属性克制／六维／速度差来自哪份回执）':'',
+    '对真实事件的可惜/漂亮/悬/憋屈/松口气（必须落在具体回合、数字或记录上）','跨局记录与偏好（玩家以前说过、打过的事）'].filter(Boolean),
   instruction:`本轮档位 ${register}（${r.name}）：正文不超过${r.limit}字，${r.maxQuestions?'最多一个问句':'不要问句'}，${mood||greeting||scenario?'':'只写有本机记录支撑的事实。'}${quiet}${care}${greet}${noReviewRule}${scene}${nameRule}${grounding}${threading}${smallTalk}${noTactics}不要复述屏幕上已经写着的事（谁被克制、还剩几只、第几回合的进度），也不要说自己的感受——情绪要落在这一局真实发生的事上（可惜、漂亮、悬、憋屈、松口气），不是落在你自己身上。`};
 }
 

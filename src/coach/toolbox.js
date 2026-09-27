@@ -154,9 +154,9 @@ export const TOOL_CONTRACTS={
  // 参数里**没有**路径、文件名、URL 或代码：只有规则集内的稳定 id、名字与有界小对象。
  // 每个回执都带 ruleset_id / state_version / coverage / evidence_ids / latency_ms / error_type，
  // 引擎说「不支持」时 result 为 null —— 绝不出现编造的数值。
- query_rules:{description:'只读查询手游规则事实（精灵/技能/学习表/属性相性/术语）；机制未支持时返回 unsupported，不含编造数值',arguments:{kind:'必填：ruleset / pet / skill / learnset / term / type_row / type_chart / type_multiplier / effect 之一',pet_id:'可选：精灵稳定 id（如 pet_000225），不用下标',skill_id:'可选：技能稳定 id（如 skill_000744）',name:'可选：精灵/技能名（≤40字符）',term_id:'可选：术语 id',type:'可选：属性名（如 龙系，或双属性 龙系|幽系）',defender_types:'可选：1..2 个属性名（仅 type_multiplier）',attack_element:'可选：攻击属性名（仅 type_multiplier）',state_version:'必填：这条事实对应的状态版本；与当前状态不一致时工具拒绝执行'}},
- evaluate_team:{description:'手游阵容规则 baseline 评估（3 只）：分项特征与文字结论，不是胜率；可带锁定伙伴与候选阵容，锁定后只返回满足约束的候选',arguments:{team:'必填：3 个精灵稳定 id',locked_pet:'可选：玩家锁定的伙伴稳定 id；候选阵容里不含它的会被拒绝',candidates:'可选：1..3 个候选阵容，每项是 3 个稳定 id 的完整阵容',state_version:'必填：状态版本'}},
- compare_team_change:{description:'手游换人前后对比：改善什么、代价什么（规则特征差，不是胜率，也不等于「更强」）',arguments:{team_before:'必填：换人前 3 个精灵稳定 id',team_after:'必填：换人后 3 个精灵稳定 id（与前一队只差一只）',locked_pet:'可选：玩家锁定的伙伴；换人后阵容不含它时拒绝出结论',state_version:'必填：状态版本'}},
+ query_rules:{description:'只读查询手游规则事实（精灵/技能/学习表/属性相性/术语/规则策略）；机制未支持时返回 unsupported，不含编造数值',arguments:{kind:'必填：ruleset / pet / skill / learnset / term / type_row / type_chart / type_multiplier / policy / effect 之一',pet_id:'可选：精灵稳定 id（如 pet_000225），不用下标',skill_id:'可选：技能稳定 id（如 skill_000744）',name:'可选：精灵/技能名（≤40字符）',term_id:'可选：术语 id（术语名见 name）',type:'可选：属性名（如 龙系，或双属性 龙系|幽系）',defender_types:'可选：1..2 个属性名（仅 type_multiplier）',attack_element:'可选：攻击属性名（仅 type_multiplier）',ruleset_config_id:'可选：规则配置 id（仅 policy 用；省略 = 进程当前生效的配置）',mode_id:'可选：模式 id（仅 policy 用；按登记表的 ruleset_binding 解析配置，比配置 id 稳）',element:'可选：属性名（仅 catalog 用：属于这个属性的精灵，如 龙系）',resist:'可选：属性名（仅 catalog 用：**抗**这个属性的精灵）',weak:'可选：属性名（仅 catalog 用：**怕**这个属性的精灵）',beats:'可选：属性名（仅 catalog 用：**克制**这个属性的精灵 —— 与 weak 是两个方向）',pet_ids:'可选：≤60 个精灵稳定 id（catalog 用它限定范围：「我这几只里谁抗龙系」；weakness_summary 必填）',skills:'必填：1..6 个技能（仅 legality 用；id 或名字都收，认不出来的会逐条标出）',compact:'可选：true 表示学习表用**精简投影**（仅 learnset 用；只给名字/属性/类别/能耗/威力，便于配招咨询塞进回执预算）',limit:'可选：1..50，仅 catalog 用（默认 20）',offset:'可选：非负整数，仅 catalog 用（默认 0）',state_version:'必填：这条事实对应的状态版本；与当前状态不一致时工具拒绝执行'}},
+ evaluate_team:{description:'手游阵容规则 baseline 评估（3 或 6 只，按模式声明）：分项特征与文字结论，不是胜率；可带锁定伙伴与候选阵容，锁定后只返回满足约束的候选',arguments:{team:'必填：3 或 6 个精灵稳定 id（引擎按登记表里各模式声明的规模收）',locked_pet:'可选：玩家锁定的伙伴稳定 id；候选阵容里不含它的会被拒绝',candidates:'可选：1..3 个候选阵容，每项是 3 个稳定 id 的完整阵容',state_version:'必填：状态版本'}},
+ compare_team_change:{description:'手游换人前后对比：改善什么、代价什么（规则特征差，不是胜率，也不等于「更强」）',arguments:{team_before:'必填：换人前 3 个精灵稳定 id（引擎按 3 只队伍算；六只阵容的对比尚未支持）',team_after:'必填：换人后 3 个精灵稳定 id（与前一队只差一只）',locked_pet:'可选：玩家锁定的伙伴；换人后阵容不含它时拒绝出结论',state_version:'必填：状态版本'}},
  plan_actions:{description:'给定公开 planner state 给出回合行动建议（推荐/主要应对/最坏尾部/搜索覆盖/超时状态）；规划器未接入或搜索未完成时明确说出来，不编计划',arguments:{state:'必填：**公开** planner state（env.public_planner_state() 的产出，≤8000字节；不得含真实随机种子或对手待执行动作）',state_version:'必填：状态版本'}},
  summarize_battle:{description:'对局复盘摘要；没有对应的引擎端点，返回结构化 not_implemented，不生成摘要',arguments:{record:'必填：公开对局记录对象（≤4000字节）',state_version:'必填：状态版本'}}
 };
@@ -312,7 +312,19 @@ const CONTRACT_FIELDS=Object.freeze(['ruleset_id','state_version','coverage','ev
 // toolbox.js 进浏览器模块图，不能静态 import roco-client.js（后者用 node:child_process），
 // 所以这里是**镜像**；镜像漂了由 tests/evals/roco/toolbox-roco.test.js 的逐键比对抓住。
 const ROCO_HIDDEN_KEYS=new Set(['opponentaction','opponentpendingaction','opponentchoice','opponentselection','pendingaction','hiddenaction','hiddenstate','privatestate','opponentprivatestate','trueseed','rngseed','randomseed','seed','pendingenemy','pendingplayer','pendingenemyaction','pendingplayeraction','replacequeue']);
-const ROCO_QUERY_KINDS=Object.freeze(['ruleset','pet','skill','learnset','term','type_row','type_chart','type_multiplier','effect']);
+const ROCO_QUERY_KINDS=Object.freeze(['ruleset','pet','skill','learnset','term','type_row','type_chart',
+ // 2026-09-25：规则**策略**读口（`policies.weather_policy` 那一份）。加进白名单的同时
+ // `service.py` 也加了同名 kind —— 跨语言契约由 `tests/roco-tool-contract-drift.test.js` 逐条比对。
+ 'type_multiplier','policy','effect',
+ // 2026-09-25（agent 主线 P0-a）：**按属性检索精灵**（不是按名字查一只）。
+ // 真机实测「我想练一只抗龙系的伙伴，配哪四招？」agent 一次工具都没调 —— 因为
+ // 622 只里"谁抗龙系"没有读口。这一个 kind 把「属性 → 精灵列表」补上。
+ 'catalog',
+ // 2026-09-25（P0-a 的最后一块）：**这几招它学得到吗**（逐招对照学习表的那三列）。
+ // 「配哪四招」缺的正是这一步：候选找出来了，但"这套配招合法吗"过去没有只读读口。
+ 'legality',
+ // 2026-09-25：**名单级相性汇总**（逐属性数"怕它的有几只"）—— 「我这份名单最怕什么属性」那一问。
+ 'weakness_summary']);
 const UNSAFE_TEXT=/[/\\]|\.\.|:\/\/|[\u0000-\u001f\u007f]/;
 const UNSAFE_KEYS=new Set(['path','file','filename','filepath','dir','directory','folder','glob','url','uri','href','code','script','source','command','cmd','exec','shell','eval','require','import','module','env','process']);
 const safeText=(x,min,max)=>typeof x==='string'&&x.length>=min&&x.length<=max&&!UNSAFE_TEXT.test(x);
@@ -370,24 +382,79 @@ export function validToolArgs(name,args){
   if(args.type!==undefined&&!typeName(args.type))return false;
   if(args.attack_element!==undefined&&!typeName(args.attack_element))return false;
   if(args.defender_types!==undefined&&!(Array.isArray(args.defender_types)&&args.defender_types.length>=1&&args.defender_types.length<=2&&args.defender_types.every(typeName)))return false;
+  // 跨 kind 的参数守卫要放在**各 kind 的早退之前**：真机实测把它们放在 legality 之前，
+  // 而 `learnset` 的早退在更前面 ⇒ `compact:'yes'` / `limit:99` 都被放行到引擎（引擎只 400 了 limit）。
+  if(args.compact!==undefined&&typeof args.compact!=='boolean')return false;
+  if(args.limit!==undefined&&!(Number.isInteger(args.limit)&&args.limit>=1&&args.limit<=60))return false;
   // 每个 kind 的必填项在本地就判掉，不发到引擎再拿 400。
   if(args.kind==='pet')return Boolean(args.pet_id||args.name);
   if(args.kind==='skill')return Boolean(args.skill_id||args.name);
   if(args.kind==='effect')return Boolean(args.skill_id);
-  if(args.kind==='learnset')return Boolean(args.pet_id);
-  if(args.kind==='term')return Boolean(args.term_id);
+  // 策略读口按**名字**取（目前只有 weather）；可选给 `ruleset_config_id`（不给 = 当前生效
+  // 配置）**或** `mode_id`（按登记表的模式绑定去解析配置，2026-09-25 加：营地里问天气口径
+  // 时，legacy 配置没声明天气层，而玩家问的是游戏规则）。
+  if(args.kind==='policy'){
+   if(!(typeof args.name==='string'&&args.name.length>=1&&args.name.length<=40))return false;
+   if(args.ruleset_config_id!==undefined&&!stableId(args.ruleset_config_id))return false;
+   return args.mode_id===undefined||stableId(args.mode_id);
+  }
+  if(args.ruleset_config_id!==undefined&&!stableId(args.ruleset_config_id))return false;
+  // 2026-09-25：学习表也允许**按名字**查（玩家说不出 pet_id；引擎侧同步加了名字路径，
+  // 唯一名给学习表、重名给候选）。
+  if(args.kind==='learnset')return Boolean(args.pet_id||args.name);
+  // 2026-09-25：术语也允许**按名字**查（`term_id` 不是玩家能说出来的东西；引擎侧同步加了名字路径，
+  // 精确名给定义、短说法给候选）。
+  if(args.kind==='term')return Boolean(args.term_id||args.name);
+  // 按属性检索精灵：`element`（属于这个属性）/`resist`（抗这个属性）/`weak`（怕这个属性），
+  // 至少要给一个；limit/offset 有界。方向语义由引擎按快照原文判（教练不在这里重实现）。
+  if(args.kind==='catalog'){
+   const has=(x)=>typeof x==='string'&&x.length>=1&&x.length<=8&&!/\s/.test(x);
+   if(![args.element,args.resist,args.weak,args.beats].some(has))return false;
+   // 2026-09-25：「我这几只里谁抗龙系」要把玩家那份物种 id 发给引擎（≤60 个稳定 id）。
+   if(args.pet_ids!==undefined){
+    if(!Array.isArray(args.pet_ids)||args.pet_ids.length<1||args.pet_ids.length>60)return false;
+    if(!args.pet_ids.every(stableId))return false;
+   }
+   for(const key of ['element','resist','weak','beats'])if(args[key]!==undefined&&!has(args[key]))return false;
+   if(args.limit!==undefined&&args.limit>50)return false;   // catalog 自己的上限更紧（50）；1..60 已统一在上面的守卫里
+   if(args.offset!==undefined&&!(Number.isInteger(args.offset)&&args.offset>=0))return false;
+   return true;
+  }
+  // 配招可学性：1..6 个技能（id 或名字）+ 一只精灵（pet_id 或 name）。
+  if(args.kind==='legality'){
+   if(!(typeof args.pet_id==='string'&&stableId(args.pet_id))&&!(typeof args.name==='string'&&safeText(args.name,1,40)))return false;
+   if(!Array.isArray(args.skills)||args.skills.length<1||args.skills.length>6)return false;
+   return args.skills.every((skill)=>typeof skill==='string'&&(stableId(skill)||safeText(skill,1,40)));
+  }
+  // 名单级相性汇总：必填 `pet_ids`（1..60 个稳定 id）。
+  if(args.kind==='weakness_summary'){
+   if(!Array.isArray(args.pet_ids)||args.pet_ids.length<1||args.pet_ids.length>60)return false;
+   return args.pet_ids.every(stableId);
+  }
   if(args.kind==='type_row')return Boolean(args.type);
   if(args.kind==='type_multiplier')return Boolean(args.attack_element&&args.defender_types);
   return true;
  }
  if(name==='evaluate_team'){
-  if(!idList(args.team,3))return false;                       // 训练场按 3 只评估
+  // 2026-09-25：引擎按登记表里各模式声明的规模收（`pvp-standard-six-pet` 就是 6）⇒
+  // 本地校验同步到 3 或 6（**不是**在这个文件里另立一份规模表：范围外的规模由引擎 400 拒）。
+  if(!lineupIdList(args.team))return false;
   if(args.locked_pet!==undefined&&!stableId(args.locked_pet))return false;
-  if(args.candidates!==undefined&&!(Array.isArray(args.candidates)&&args.candidates.length<=3&&args.candidates.every(team=>idList(team,3))))return false;
+  if(args.candidates!==undefined&&!(Array.isArray(args.candidates)&&args.candidates.length<=3&&args.candidates.every((team)=>lineupIdList(team))))return false;
   return stateVersionArg(args.state_version);
  }
  if(name==='compare_team_change'){
-  if(!idList(args.team_before,3)||!idList(args.team_after,3))return false;
+  // 两侧规模必须一致，且都在教练支持范围内（3 或 6）。
+  // 留痕：2026-09-25 我一度按 `service.py` 的「等长 + 只差一只」把本地校验放宽到 2..6，
+  // 当时引擎 `team_mod.evaluate_team` 硬判 3 ⇒ 六槽阵容拿到 bad_request（「完整 6 只阵容在第 5 周扩展」），
+  // 所以那次撤回了。**同一个 2026-09-25 稍后**引擎改成按登记表声明收规模（2/3/6）⇒ 现在放宽是对的：
+  // 六只阵容的换人对比在引擎侧真的能算了（`tests/roco-swap-compare.test.js` 与 Python 判据都钉着）。
+  if(!lineupIdList(args.team_before)||!lineupIdList(args.team_after))return false;
+  if(args.team_before.length!==args.team_after.length)return false;
+  // 引擎还会判「两支队伍应当只差一只」；本地**先判掉**，别让一个注定 400 的请求出门
+  //（2026-09-25 实测：本地原来只查数量，`差两只` 这种参数会一路发到引擎才被拒）。
+  if(args.team_before.filter((id)=>!args.team_after.includes(id)).length!==1)return false;
+  if(args.team_after.filter((id)=>!args.team_before.includes(id)).length!==1)return false;
   if(args.locked_pet!==undefined&&!stableId(args.locked_pet))return false;
   return stateVersionArg(args.state_version);
  }
@@ -421,7 +488,11 @@ export function executeTool(name,args,context,message=''){
  if(!validToolArgs(name,args))throw Error('invalid-arguments');
  const g=context.battle;
  if(name==='read_state')return {screen:context.mode,focus:context.focus,turn:g?.turn??null,player:g?.player??null,enemy:g?.enemy??null,legalPlayer:g&&!g.result?legalActions(g):[],legalEnemy:g&&!g.result?legalActions(g,'enemy'):[]};
- if(name==='search_rules')return searchKnowledge(args.query,{limit:3,game:g,rulesVersion:g?.version||RULES_VERSION});
+ // 第一处插入点（RC-205）：`search_rules` 的分派。legacy 走**原来那一行**（同步、逐字节不变），
+ // shadow/rag 才走 RAG 入口（异步返回 Promise —— 调用方 runtime 的 runTool 本来就在 await）。
+ if(name==='search_rules')return ragMode()==='legacy'
+  ?searchKnowledge(args.query,{limit:3,game:g,rulesVersion:g?.version||RULES_VERSION})
+  :searchRulesWithRag(args.query,{game:g,rulesVersion:g?.version||RULES_VERSION,limit:3});
  if(name==='compare_actions')return strategist({...context,query:message});
  if(name==='inspect_training')return teacher(context);
  if(name==='read_match'){
@@ -443,6 +514,44 @@ export function executeTool(name,args,context,message=''){
  // 手游规则工具走的是异步的 Python 规则服务：这里返回 Promise，调用方（runtime 的
  // runTool）本来就在 await，所以既有工具保持同步返回，互不影响。
  if(ROCO_TOOL_NAMES.includes(name))return executeRocoTool(name,args,context);
+ // 六宠对局：**在服务端会话上**取引擎算出来的走法结果（2026-09-26 接上）。
+ // `context.rocoPreview` 是服务端注入的能力（不是客户端字段）：给它对局编号，它去问
+ // `planBattle`，回的是引擎按公开信息 + 固定分析种子算出来的估值 —— 推荐、均值、最糟、
+ // 主要反制、伤害范围（能不能一击收掉）、风险落差。这就是"两种走法各自的结果"的来源。
+ if(!g&&context?.roco_battle?.battle_id&&typeof context.rocoPreview==='function'){
+  // `executeTool` 是**同步**函数（手游规则工具靠返回 Promise 让调用方 await，见上面的注释），
+  // 所以这里同样返回一个 Promise，不写 `await`。
+  const battleId=context.roco_battle.battle_id;
+  return context.rocoPreview(battleId).then((preview)=>{
+   if(preview?.ok){
+    return {engine:'six-pet-rules',battle_id:preview.battle_id??battleId,
+     state_version:preview.state_version??null,turn:context.roco_battle.turn??null,
+     recommendation:preview.recommendation??null,recommendation_stable:preview.recommendation_stable??null,
+     expected:preview.expected??null,worst:preview.worst??null,main_counter:preview.main_counter??null,
+     first_second_margin:preview.first_second_margin??null,damage_preview:preview.damage_preview??null,
+     risk:preview.risk??null,coverage:preview.coverage??null,
+     assumption:'这些是**引擎**按公开信息与固定分析种子算出来的估值（不是胜率，也不含真实对局种子）；'
+      +'对手下一步仍是假设',
+     note:preview.note??null};
+   }
+   return {missing:true,battle_id:battleId,
+    reason:`引擎没给出这一局的走法结果：${preview?.reason??'未知原因'}`,
+    available:['公开快照里的引擎事实：双方血量与能量、合法行动、上回合双方行动与结算伤害'],
+    next:'先按快照事实说明并标注推断；修好服务端会话后再要模拟结果'};
+  });
+ }
+ // 六宠（`roco_battle`）这条链要说**具体**的实话（2026-09-26 实测：这里回的是
+ // 「当前没有进行中的对局，无法模拟」，而那一刻玩家**正在打**六宠对局 —— 句子本身是错的）。
+ // 真正的原因：分支模拟要的是**服务端进程里那一局**（`context.battle`），而六宠链只有浏览器
+ // 送来的**公开快照**（血量/能量/合法行动/上回合伤害）。接会话读口是下一件事；
+ // 在那之前，回执要把"能算什么、不能算什么"讲清楚，模型才不会拿快照假装模拟过。
+ if(!g&&context?.roco_battle){
+  return {missing:true,
+   reason:'六宠这条链的分支模拟要在服务端的对局会话里做，而这一份上下文只有公开快照（双方血量、能量、合法行动、上回合伤害）',
+   available:['公开快照里的引擎事实：双方血量与能量、合法行动、上回合双方行动与结算伤害'],
+   unavailable:['分支模拟（两种走法各自的结算结果）—— 需要服务端会话，教练侧还没接'],
+   next:'需要"两种走法各自结果"时，先按快照事实说明，并明确这是推断；不要声称模拟过'};
+ }
  if(!g)return {missing:true,reason:'当前没有进行中的对局，无法模拟'};
  if(g.result)return {missing:true,reason:'对局已结束，无法模拟'};
  const side='player';
@@ -521,6 +630,12 @@ export function executeTool(name,args,context,message=''){
 // 三者都拿不到时（第一次调用、且没人告诉工具当前版本）按调用方给的版本建立基线，
 // 并在回执的 freshness.source 里如实写明 `first-call`，不含糊其辞。
 
+// 阵容规模：**真源在引擎**（`data/roco/battle-modes.json` 各模式的 `parameters.team_size`，
+// `team.py` 的 `declared_team_sizes()` 读出 2/3/6）。教练这条路上只用 3 与 6（2 是双打，留给以后）；
+// 不在这两个里的规模**本地就 fail closed**，不发注定 400 的请求出门。
+export const LINEUP_SIZES=Object.freeze([3,6]);
+/** 这套阵容的 id 列表规模在教练支持范围内、且每个都是稳定 id。 */
+const lineupIdList=(ids)=>Array.isArray(ids)&&LINEUP_SIZES.includes(ids.length)&&ids.every(stableId);
 const ROCO_TOOL_NAMES=Object.freeze(['query_rules','evaluate_team','compare_team_change','plan_actions','summarize_battle']);
 /**
  * 客户端侧的规划预算：引擎默认按 3 个 analysis_seeds 串行搜索、每个最多 2000ms，
@@ -547,6 +662,173 @@ const rocoSeenStateVersions=new Map();
 function loadRocoModule(){
  if(!rocoModule)rocoModule=import('./roco-client.js');
  return rocoModule;
+}
+
+// ── RAG 检索接线（RC-205）：`ROCO_RAG_MODE` ∈ legacy|shadow|rag，默认 shadow ──────
+//
+// 三个模式的定义，与 runtime.js 的 `judgeMode`（`ROCO_JUDGE`）同一套纪律：
+//   legacy  完全不碰：回执与接线前**逐字节相同**（连字段都不加）；
+//   shadow  只多一个字段 `rag`：它记录「如果走 RAG 会拿到什么」，**绝不改行为** ——
+//           正文、卡片集合、method、missing 一个字都不动（default，因为没验证过就先只观察）；
+//   rag     RAG 优先：命中就用 RAG 结果；空 / 低于 SCORE_FLOOR / 弃答 ⇒ 回落词法检索，
+//           并在回执里如实写 `rag.retrievalPath='lexical-fallback'` + 原因
+//           （照 activity.js 的「降级要说出来」）。
+//
+// ⚠️ `rag-index.js` 静态 import 了 node:fs/crypto/path，而 toolbox.js 在**浏览器模块图**里
+// （app.js → runtime.js → toolbox.js）。所以这里**不许顶层 import 它**，
+// 只能照 `loadRocoModule()` 那套「调用时动态 import / Node 侧注入」。
+export const RAG_MODES=Object.freeze(['legacy','shadow','rag']);
+export function ragMode(env=typeof process==='undefined'?{}:process.env){
+ const mode=String(env?.ROCO_RAG_MODE??'shadow').toLowerCase();
+ // 取值不认识时**落到 shadow**：它不改行为，比"猜一个"或"静默当 legacy"都安全（后者会让
+ // 运维以为在跑 rag）。这一条与 judgeMode 的 off 默认不同，因为 rag 的默认必须是可观察的。
+ return RAG_MODES.includes(mode)?mode:'shadow';
+}
+/** RAG 回执里带几条（与 search_rules 的词法 limit=3 对齐，避免回执比卡片重）。 */
+const RAG_RECEIPT_LIMIT=3;
+/** 单条正文投影上限：语料正文动辄几百字，整段塞进回执会撑爆 10000 字符预算。 */
+const RAG_SNIPPET_LIMIT=160;
+const RAG_METHOD='rag-index：别名表 + 结构化过滤 + BM25 + 证据/版本 rerank';
+let ragRetrievalImpl=null;   // 注入的 RAG 检索实现（测试 / Node 侧装配）
+let ragModule=null;          // import('./rag-index.js')：成功或失败都只试一次
+let ragIndexSet=null;        // {mod, set}：语料读一次、索引建一次（重启即重建）
+
+/**
+ * 注入 RAG 检索实现。两种形状：
+ *   ① `{lookup(query,{limit}) → {ok,path,library,results,floor}|{ok:false,reason,...}}`
+ *      完全替换检索（用来造「弃答 / 不可用 / 低于门槛」这些**真实索引很难稳定造出**的档）；
+ *   ② `{mod,set}`：只换语料/索引，检索逻辑仍然用生产那一份 `lookupWithModule`
+ *      （反证与换语料评测走这个，避免把检索逻辑抄第二遍 —— 抄了必然漂）。
+ * 传 null 清掉注入并丢掉缓存的索引。
+ */
+export function configureRagRetrieval(impl=null){
+ ragRetrievalImpl=impl;
+ if(!impl)ragIndexSet=null;
+}
+/** 当前 RAG 模式（给 server 的诊断面用，避免每个调用方各读一次 env）。 */
+export function currentRagMode(){return ragMode();}
+
+/**
+ * 动态加载 RAG 索引层。浏览器里这个模块不可用（node:fs），加载会失败——
+ * 那时**如实**记成不可用并回落词法，而不是让页面带崩或假装查过。
+ */
+function loadRagModule(){
+ if(!ragModule)ragModule=import('./rag-index.js');
+ return ragModule;
+}
+
+const ragText=(value,limit)=>{const s=String(value??'').replace(/\s+/g,' ').trim();return s.length>limit?`${s.slice(0,limit)}…`:s;};
+
+/** 把 RAG 结果投影成回执能装下的形状（正文截断；不给整段语料）。 */
+function projectRagResults(index,rows){
+ return rows.map(row=>({id:row.id,lib_id:row.lib_id,scope:row.scope,record_kind:row.record_kind,
+  title:ragText(row.title,60),name:ragText(row.name,60),snippet:ragText(index.byId.get(row.id)?.body,RAG_SNIPPET_LIMIT),
+  evidence_level:row.evidence_level,source_scopes:row.source_scopes,score:row.score,relevance:row.relevance,
+  has_provenance:row.has_provenance}));
+}
+
+/** 用已建好的索引做一次「规则通道 + 玩家通道」的检索，并判它算不算命中。 */
+function lookupWithModule(mod,set,query,limit){
+ // 门槛的两档与 searchIndex 内部一致：强意图（台账/配置）把答案空间钉死了，不再设门槛；
+ // 其余走 SCORE_FLOOR。回执里的 relevance 是不含 rerank 加成的原始相关度。
+ const floorOf=result=>result.intent?.strong===true?0:mod.SCORE_FLOOR;
+ const rule=mod.searchIndex(set.joint,query,{limit,includePlayer:false});
+ const ruleTop=rule.results[0]??null;
+ const ruleOk=Boolean(!rule.abstained&&ruleTop&&ruleTop.relevance>=floorOf(rule));
+ // 问句点名了**只存在于玩家库**的记录种类（「我的个体」）时，两条通道都查：
+ // 规则通道可能凭「精灵 / 技能」这类泛词给出一条弱规则文档，把强得多的玩家数据挡在后面
+ // （held-out E07 实测：规则通道 trait 59.4 vs 玩家通道 owned::own-0001 3021.7）。
+ // 谁强用谁，走的是哪条通道如实写进回执的 retrievalPath。
+ const playerKinds=new Set(set.joint.documents.filter(doc=>doc.scope==='player').map(doc=>doc.record_kind));
+ const asksPlayer=rule.intent.kinds.some(kind=>playerKinds.has(kind));
+ const playerLib=set.libs.find(lib=>lib.scope==='player'&&lib.status==='ready');
+ const playerIndex=(playerLib&&set.byLib.get(playerLib.lib_id))||set.joint;
+ // ⚠️ 2026-09-25 对抗复核修的真缺陷（B1）：玩家通道**不许继承** `intent.strong ? 0 : SCORE_FLOOR`
+ // 那份门槛 —— 句子里只要出现「我的」就会置 strong=true（`detectFilters` 的 `/个体|我的/`），
+ // 门槛归零后**任何**一篇玩家文档都算"过门槛"：
+ // 实测「我的能量够不够」曾返回 `owned::own-0001/0002/0003`（relevance **全是 0**）。
+ // 那不是"检索命中"，是把规则问题劫持成玩家数据。现在玩家通道固定用 SCORE_FLOOR，
+ // 且**必须真的词面命中**（`aliasBoost > 0`，即匹配到名字/别名），否则不算命中。
+ const player=asksPlayer?mod.searchIndex(playerIndex,query,{limit,scope:'player',includePlayer:true}):null;
+ const playerTop=player?.results[0]??null;
+ const playerTopAlias=player?.results.find(row=>Number(row.alias_score)>0)??null;
+ const playerOk=Boolean(player&&!player.abstained&&playerTopAlias
+  &&playerTopAlias.relevance>=mod.SCORE_FLOOR);
+ const playerTopForReport=playerTopAlias??playerTop;
+ const hit=(result,index,path)=>({ok:true,path,floor:floorOf(result),
+  library:[...new Set(result.results.map(row=>row.lib_id))],results:projectRagResults(index,result.results),reason_code:null});
+ if(playerOk&&(!ruleOk||playerTopForReport.relevance>ruleTop.relevance)){
+  return hit(player,playerIndex,'rag-player');
+ }
+ if(ruleOk)return hit(rule,set.joint,'rag');
+ if(asksPlayer){
+  return {ok:false,reason:'问句点名了玩家个体数据，但两条通道都没有过门槛的结果'
+   +`（规则：${rule.reason_code??'无结果'}；玩家：${player?.reason_code??'无结果'}）`,
+   would_be:{path:'rag-player',abstained:player?.abstained??true,reason_code:player?.reason_code??rule.reason_code,
+    top:playerTopForReport?.id??null,alias_boost:Number(playerTopForReport?.alias_score??0)}};
+ }
+ return {ok:false,reason:rule.abstained?`${rule.reason_code}：${rule.reason}`
+  :`最高相关度 ${ruleTop?ruleTop.relevance.toFixed(3):0} 低于门槛 ${floorOf(rule)}`,
+  would_be:{path:'rag',abstained:rule.abstained,reason_code:rule.reason_code,top:ruleTop?.id??null}};
+}
+
+/** 默认实现：动态 import 索引层 + 全语料建库（每库一个实例），读盘只做一次。 */
+async function defaultRagLookup(query,{limit=RAG_RECEIPT_LIMIT}={}){
+ if(!ragIndexSet){
+  const mod=await loadRagModule();
+  ragIndexSet={mod,set:mod.createRagIndexSet(mod.loadCorpus())};
+ }
+ return lookupWithModule(ragIndexSet.mod,ragIndexSet.set,query,limit);
+}
+
+async function ragLookup(query,{limit=RAG_RECEIPT_LIMIT}={}){
+ if(ragRetrievalImpl?.lookup)return ragRetrievalImpl.lookup(query,{limit});
+ // 注入 `{mod,set}`：换语料/换索引，但**仍然走上面那一份** lookup 实现 ——
+ // 反证「删掉一条规则 ⇒ 答案必须变」要的正是这个（换语料，不换逻辑）。
+ if(ragRetrievalImpl?.mod&&ragRetrievalImpl?.set)return lookupWithModule(ragRetrievalImpl.mod,ragRetrievalImpl.set,query,limit);
+ return defaultRagLookup(query,{limit});
+}
+
+/** 影子记录：只留能对比的最小信息（id / 库 / 名次分），不把语料正文塞进回执。 */
+function shadowWouldBe(outcome){
+ if(!outcome.ok)return {hit:false,reason:outcome.reason,would_be:outcome.would_be??null};
+ return {hit:true,path:outcome.path,ids:outcome.results.map(row=>row.id),lib_ids:outcome.library,
+  top_relevance:outcome.results[0]?.relevance??null};
+}
+
+/**
+ * 按 `ROCO_RAG_MODE` 处理一次 `search_rules` 回执。
+ * `legacy` 时**返回同一个对象**（连键顺序都不动）——「逐字节相同」这条判据靠它成立。
+ */
+export async function ragAugmentSearchRules(receipt,{query,mode=ragMode(),limit=RAG_RECEIPT_LIMIT}={}){
+ if(mode==='legacy')return receipt;
+ if(!receipt||typeof receipt!=='object'||Array.isArray(receipt))return receipt;
+ let outcome;
+ try{outcome=await ragLookup(query,{limit});}
+ catch(error){outcome={ok:false,reason:`RAG 索引层不可用：${ragText(error?.message||error,120)}`,unavailable:true};}
+ if(mode==='shadow'){
+  return {...receipt,rag:{mode:'shadow',retrievalPath:'lexical',available:!outcome.unavailable,would_be:shadowWouldBe(outcome)}};
+ }
+ if(outcome.ok){
+  // RAG 命中：卡片位让给 RAG 结果（它才是这次的检索产物）。**不改 searchKnowledge 的返回形状**：
+  // 键还是 rulesVersion/cards/usedCharacters/method/missing，另加一个 rag。
+  // 为什么不把语料记录塞进 cards：卡片的 principle / counterexample / applicability 三件套是
+  // 战术卡的定义，语料记录没有这三件，硬套就是**发明字段**。
+  return {...receipt,cards:[],usedCharacters:JSON.stringify(outcome.results).length,method:RAG_METHOD,missing:false,
+   rag:{mode:'rag',retrievalPath:outcome.path,library:outcome.library,floor:outcome.floor,
+    count:outcome.results.length,results:outcome.results}};
+ }
+ return {...receipt,rag:{mode:'rag',retrievalPath:'lexical-fallback',reason:outcome.reason,
+  attempted:{path:'rag',reason_code:outcome.would_be?.reason_code??null,top:outcome.would_be?.top??null}}};
+}
+
+/**
+ * `search_rules` 的 RAG 入口：先拿词法回执（既有行为一字不改），再按模式加东西。
+ * `legacy` 时调用方应当直接用 `searchKnowledge`（同步返回），所以这个函数只在非 legacy 用。
+ */
+export async function searchRulesWithRag(query,{game=null,rulesVersion=RULES_VERSION,limit=3,mode=ragMode()}={}){
+ const base=searchKnowledge(query,{limit,game,rulesVersion});
+ return ragAugmentSearchRules(base,{query,mode,limit:Math.min(limit,RAG_RECEIPT_LIMIT)});
 }
 
 /**
@@ -601,8 +883,12 @@ export function rocoStateVersionOf(context){
  return {version:null,source:'unavailable'};
 }
 
-const rocoNow=()=>process.hrtime.bigint();
-const rocoLatency=started=>Math.round(Number(process.hrtime.bigint()-started)/1e3)/1e3;
+// 计时也必须是浏览器安全的：`process.hrtime` 在浏览器里不存在（同一类坑，见 `src/coach/env.js`）。
+// `performance.now()` 同样是**单调**时钟，单位毫秒；拿不到就退到 `Date.now()`。
+// 回执字段口径不变：`latencyMs` 是毫秒，保留到小数第 3 位（旧实现是 ns→µs 取整再 /1e3，
+// 精度到微秒；新的同样取到微秒，只是不再依赖 Node 的 hrtime）。
+const rocoNow=()=>globalThis.performance?.now?.()??Date.now();
+const rocoLatency=started=>Math.round((rocoNow()-started)*1e3)/1e3;
 const rocoFreshness=(check,stale)=>({checked:true,stale,requested:check.requested,current:check.current,source:check.source,establishedBy:check.current===null?'caller-first-call':'authority'});
 
 function checkRocoFreshness(args,context){
@@ -756,7 +1042,16 @@ async function runRocoTool(name,args,context,client,freshness,started){
  const fresh=rocoFreshness(freshness,false);
  if(name==='query_rules'){
   const fact={kind:args.kind};
-  for(const key of ['pet_id','skill_id','name','term_id','type','defender_types','attack_element'])if(args[key]!==undefined)fact[key]=args[key];
+  // 白名单转发：**逐键点名**（未声明的键永远到不了引擎）。2026-09-25 加 `ruleset_config_id`
+  // （`kind:'policy'` 用它选配置；省略 = 进程当前生效的配置）。
+  // 2026-09-25 稍后加 `mode_id`：按模式问策略时，配置**由引擎查登记表解析**（教练不抄 id）。
+  for(const key of ['pet_id','skill_id','name','term_id','type','defender_types','attack_element','ruleset_config_id','mode_id',
+   // 2026-09-25：按属性检索精灵（`kind:'catalog'`）的三个筛法 + 分页。
+   'element','resist','weak','beats','limit','offset','pet_ids',
+   // 2026-09-25：配招可学性（`kind:'legality'`）的技能清单；名单级相性汇总（`weakness_summary`）的 id 清单。
+   'skills','pet_ids',
+   // 2026-09-25：学习表的紧凑投影（配招咨询那一族）。
+   'compact'])if(args[key]!==undefined)fact[key]=args[key];
   const engine=await client.query(fact,{stateVersion});
   const receipt=rocoReceipt('query_rules',engine,{stateVersion,latencyMs:rocoLatency(started),freshness:fresh});
   return staleResultRefusal(receipt,engine,stateVersion,rocoLatency(started),freshness)??receipt;
@@ -802,11 +1097,18 @@ async function rocoEvaluateTeam(args,client,stateVersion,freshness,started){
  }
  const accepted=candidates.filter(candidate=>candidate.accepted===true);
  const explanation=(locked||accepted.length)?rocoTeamExplanation({locked,accepted,rejected}):null;
+ // 2026-09-25（六只阵容问不出来的**真因**）：`rocoReceipt` 里已经有 `result`，这里又挂了
+ // 一份 `evaluation:receipt.result` ⇒ **整份特征+证据被塞了两遍**：三只时约 4.5 KB 还行，
+ // 六只时直接翻到 >10 KB，被 `runtime.js` 的 `receipt-budget` 拦下（fail closed）——
+ // 玩家问「我这六只怎么样」一个字都得不到。
+ // 修法：**只留 `result`，去掉 `evaluation`**（`evaluation` 在本仓没有任何读者；
+ // 反过来去掉 `result` 会让轨迹回放拿不到回执内容 —— 实测「反证 arm 与基线一模一样」）。
+ // **预算本身不动**（它保护上下文），也不动判据。
  return {...receipt,
   locked_pet:locked,
   constraint:{locked_pet:locked,checked:Boolean(locked),satisfied:locked?accepted.length>0:null,
    teamContainsLocked:locked?args.team.includes(locked):null,rejected},
-  candidates,evaluation:receipt.result,explanation};
+  candidates,explanation};
 }
 
 function rocoTeamExplanation({locked,accepted,rejected}){
@@ -841,7 +1143,32 @@ async function rocoCompareTeamChange(args,client,stateVersion,freshness,started)
  const receipt=rocoReceipt('compare_team_change',engine,{stateVersion,latencyMs:rocoLatency(started),freshness:rocoFreshness(freshness,false)});
  const stale=staleResultRefusal(receipt,engine,stateVersion,rocoLatency(started),freshness);
  if(stale)return stale;
- return {...receipt,locked_pet:locked,constraint:{locked_pet:locked,satisfied:locked?args.team_after.includes(locked):null}};
+ // 2026-09-25（六只阵容问不出来的第二个真因）：引擎的对比回执里 `before`/`after` 各带**一整份特征**
+ // （含 evidence/detail），六只时两份加起来 >10 KB，被 `runtime.js` 的 `receipt-budget` 拦下。
+ // 这一层要的是**差异**，所以投影：留下结论与每个特征的**值**（模型会引用的数都在），
+ // 去掉 evidence/detail 这类大块，并如实标注裁了多少 —— **预算本身不动**（它保护上下文）。
+ return {...receipt,result:projectCompareResult(engine.result),
+  locked_pet:locked,constraint:{locked_pet:locked,satisfied:locked?args.team_after.includes(locked):null}};
+}
+
+/**
+ * 换人对比回执的**投影**（纯函数、可测）：`before`/`after` 只保留
+ * `team` / `coverage` / `strengths` / `weaknesses` / `features:[{name,value}]`，
+ * 其余大块（`evidence` / `detail`）丢掉，并把丢掉多少**记在回执里**（`evidence_trimmed`）。
+ * 语义字段（`from` / `to` / `coverage_delta` / `improves` / `costs` / `note` / `calibration`）原样保留。
+ */
+export function projectCompareResult(result){
+ if(!result||typeof result!=='object')return result??null;
+ const side=(score)=>{
+  if(!score||typeof score!=='object')return score??null;
+  const features=Array.isArray(score.features)?score.features.map((f)=>({name:f?.name,value:f?.value})):[];
+  const evidence=(score.features??[]).reduce((sum,f)=>sum+(Array.isArray(f?.evidence)?f.evidence.length:0),0);
+  return {team:score.team??null,coverage:score.coverage??null,
+   strengths:score.strengths??[],weaknesses:score.weaknesses??[],
+   features,evidence_trimmed:evidence};
+ };
+ const {before,after,...rest}=result;
+ return {...rest,before:side(before),after:side(after)};
 }
 
 /**

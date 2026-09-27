@@ -1,0 +1,1280 @@
+{
+  "generatedAt": "2026-09-24T02:13:48.183Z",
+  "runStarted": "2026-09-24T02:13:40.927Z",
+  "runEnded": "2026-09-24T02:13:47.940Z",
+  "target": "http://127.0.0.1:8936",
+  "model": "deepseek-flash",
+  "provider": "deepseek",
+  "serverConfigured": true,
+  "serverVerified": true,
+  "scope": "Real DeepSeek calls through the running app server. One request per case, no retries, no simulated provider.",
+  "caseSetSize": 49,
+  "executed": 5,
+  "knownLimitations": [
+    "The server reports usage only for the final generation call; planner-call tokens are reconstructed from the known planner prompt and counted with the project tokenizer (estimate).",
+    "Latency is end-to-end per case (planner + generation + local work); per-phase latency is not separable from outside the server.",
+    "Ground truth for tool need is author-written before the run, not an independent blind annotation.",
+    "Argument ground truth comes from the game each context was built from (truthOf), not from the receipt and not from the resolver under test.",
+    "The layered metrics only cover cases that declare expect.argument / expect.evidence / expect.stale; they are not a full correctness proof.",
+    "checkGroundedAnswer is a narrow numeric/citation/certainty guard, not a proof of full correctness."
+  ],
+  "prices": {
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "checked": "2026-09-17",
+    "model": "deepseek-flash (DeepSeek-V4.1-Flash)",
+    "unit": "USD per 1M tokens",
+    "inputCacheMissOffPeak": 0.15,
+    "inputCacheMissPeak": 0.3,
+    "inputCacheHitOffPeak": 0.003,
+    "inputCacheHitPeak": 0.006,
+    "outputOffPeak": 0.6,
+    "outputPeak": 1.2,
+    "peakWindowUTC": "01:00-04:00 and 06:00-10:00 UTC, Monday-Friday",
+    "runBand": "peak"
+  },
+  "metrics": {
+    "casesExecuted": 5,
+    "casesEvaluable": 5,
+    "casesErrored": 0,
+    "layered": {
+      "toolSelectionCorrect": {
+        "checked": 5,
+        "evaluable": 5,
+        "correct": 5,
+        "rate": 1,
+        "failures": []
+      },
+      "argumentCorrect": {
+        "checked": 5,
+        "evaluable": 5,
+        "correct": 5,
+        "rate": 1,
+        "failures": []
+      },
+      "evidenceMatch": {
+        "checked": 0,
+        "evaluable": 0,
+        "correct": 0,
+        "rate": null,
+        "failures": []
+      },
+      "answerConsistency": {
+        "checked": 5,
+        "evaluable": 5,
+        "correct": 5,
+        "rate": 1,
+        "failures": []
+      },
+      "staleInterception": {
+        "checked": 0,
+        "evaluable": 0,
+        "correct": 0,
+        "rate": null,
+        "failures": []
+      }
+    },
+    "toolSelectionCorrectnessRate": 1,
+    "callDecisionCorrectRate": 1,
+    "toolChoiceCorrectRate": 1,
+    "callCountCorrectRate": 1,
+    "unnecessaryToolCallRate": null,
+    "unnecessaryCallShareOfAllCalls": 0,
+    "missedCallRate": 0,
+    "wastedCallRate": 0,
+    "totalToolCalls": 5,
+    "meanCallsPerCase": 1,
+    "groundedAnswerPassRate": 1,
+    "latencyMs": {
+      "n": 5,
+      "p50": 1186,
+      "p90": 1209,
+      "min": 1056,
+      "max": 1209,
+      "mean": 1150
+    },
+    "modelStops": {
+      "complete": 5,
+      "tool-budget": 0,
+      "planner-failed": 0,
+      "invalid-tool": 0,
+      "invalid-arguments": 0,
+      "repeated-tool": 0,
+      "receipt-budget": 0,
+      "policy": 0,
+      "none": 0
+    },
+    "routes": {
+      "teacher": 5
+    },
+    "failures": {
+      "itemNameDrift": [],
+      "unsupportedNumber": [],
+      "unsupportedCertainty": [],
+      "allReasons": []
+    },
+    "byCategory": {
+      "cat1-needs-lookup": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "cat2-parametric": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "cat3-cross-tool": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "cat4-should-stop": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "control-policy": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "control-locked": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      }
+    }
+  },
+  "tokens": {
+    "tokenizer": "DeepSeek official V4 (chat template applied)",
+    "perCaseFields": "apiUsage = server-reported generation usage only; estimatedPlannerTokens = reconstructed planner prompts counted with the official tokenizer; estimatedTotalTokens = sum",
+    "totals": {
+      "input": 23232,
+      "output": 396,
+      "apiInput": 9996,
+      "apiOutput": 223
+    },
+    "costUSD": {
+      "band": "peak",
+      "inputRatePer1M": 0.3,
+      "outputRatePer1M": 1.2,
+      "estimated": 0.0074448,
+      "peakBound": 0.0074448,
+      "offPeakBound": 0.0037224
+    },
+    "note": "Input is charged at the cache-miss rate; the API does not expose cache-hit token counts through this server, so the estimate is an upper bound on input cost."
+  },
+  "badAnswers": [],
+  "rows": [
+    {
+      "id": "w01",
+      "cat": "cat5-other-pet",
+      "question": "喵喵的种族值是多少？",
+      "expect": {
+        "calls": [
+          1,
+          1
+        ],
+        "tools": [
+          "query_rules"
+        ],
+        "argument": {
+          "tool": "query_rules",
+          "targetIds": [
+            "pet_000001"
+          ],
+          "targetName": "喵喵"
+        }
+      },
+      "why": "名字来自玩家的问题，屏幕上没有这一只；只能按名字去查。",
+      "regression": null,
+      "truth": {
+        "lastSettledTurn": 8,
+        "settled": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "matchId": null
+      },
+      "context": "pve",
+      "contextPhase": "battle",
+      "status": 200,
+      "latencyMs": 1056,
+      "model": "deepseek-flash",
+      "text": "图鉴里查到喵喵是草系，种族值：攻击66、防御49、生命65、特攻66、特防91、速度33，合计370。",
+      "error": null,
+      "route": "teacher",
+      "provider": "deepseek",
+      "agentStop": "complete",
+      "localOnly": false,
+      "fallbackReason": null,
+      "judgment": null,
+      "toolTrace": [
+        {
+          "tool": "query_rules",
+          "args": {
+            "kind": "pet",
+            "name": "喵喵",
+            "state_version": 0
+          },
+          "result": {
+            "tool": "query_rules",
+            "ok": true,
+            "ruleset_id": "roco-world-s4-2026-09-10",
+            "state_version": 0,
+            "coverage": 1,
+            "evidence_ids": [
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000001"
+            ],
+            "latency_ms": 136.078,
+            "engine_latency_ms": 4.82,
+            "error_type": null,
+            "failure_class": null,
+            "limitations": [],
+            "freshness": {
+              "checked": true,
+              "stale": false,
+              "requested": 0,
+              "current": null,
+              "source": "first-call",
+              "establishedBy": "caller-first-call"
+            },
+            "result": {
+              "record": "pet",
+              "pet_id": "pet_000001",
+              "name": "喵喵",
+              "title": "喵喵",
+              "types": [
+                "草系"
+              ],
+              "stats": {
+                "atk": 66,
+                "def": 49,
+                "hp": 65,
+                "spa": 66,
+                "spd": 91,
+                "spe": 33
+              },
+              "stat_total": 370,
+              "feature_skill_id": "skill_000003",
+              "learnset_id": "on-demand:pet_000001",
+              "release_date": null,
+              "game_id": null,
+              "learnset_summary": {
+                "native": 16,
+                "blood": 0,
+                "stones": 0,
+                "total": 16
+              }
+            }
+          },
+          "resultBytes": 742
+        }
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 1853,
+        "completion_tokens": 36
+      },
+      "evidenceCount": 0,
+      "knowledgeIds": [],
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "scope": "Narrow numeric/citation/certainty guard; not a proof of all natural language correctness"
+      },
+      "evidence": [],
+      "plannerCalls": 2,
+      "estimatedPlannerTokens": {
+        "input": 2501,
+        "output": 34
+      },
+      "apiUsage": {
+        "prompt_tokens": 1853,
+        "completion_tokens": 36
+      },
+      "estimatedTotalTokens": {
+        "input": 4354,
+        "output": 70
+      },
+      "judgement": {
+        "callDecisionCorrect": true,
+        "toolChoiceCorrect": true,
+        "countCorrect": true,
+        "stopCorrect": true,
+        "strictCorrect": true,
+        "unnecessaryCall": false,
+        "missedCall": false,
+        "wastedCall": false
+      },
+      "layers": {
+        "toolSelection": {
+          "id": "w01",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "argument": {
+          "id": "w01",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "evidenceMatch": {
+          "id": "w01",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "no evidence expectation"
+          ]
+        },
+        "answerConsistency": {
+          "id": "w01",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "staleInterception": {
+          "id": "w01",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "not a stale probe"
+          ]
+        }
+      }
+    },
+    {
+      "id": "w02",
+      "cat": "cat5-other-pet",
+      "question": "水蓝蓝的速度是多少？",
+      "expect": {
+        "calls": [
+          1,
+          1
+        ],
+        "tools": [
+          "query_rules"
+        ],
+        "argument": {
+          "tool": "query_rules",
+          "targetIds": [
+            "pet_000002"
+          ],
+          "targetName": "水蓝蓝"
+        }
+      },
+      "why": "同上：被问的那一只不在场上。",
+      "regression": null,
+      "truth": {
+        "lastSettledTurn": 8,
+        "settled": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "matchId": null
+      },
+      "context": "pve",
+      "contextPhase": "battle",
+      "status": 200,
+      "latencyMs": 1186,
+      "model": "deepseek-flash",
+      "text": "水蓝蓝的速度种族值是 51。这个数值来自图鉴（水系，总种族值 372）。",
+      "error": null,
+      "route": "teacher",
+      "provider": "deepseek",
+      "agentStop": "complete",
+      "localOnly": false,
+      "fallbackReason": null,
+      "judgment": null,
+      "toolTrace": [
+        {
+          "tool": "query_rules",
+          "args": {
+            "kind": "pet",
+            "name": "水蓝蓝",
+            "state_version": 0
+          },
+          "result": {
+            "tool": "query_rules",
+            "ok": true,
+            "ruleset_id": "roco-world-s4-2026-09-10",
+            "state_version": 0,
+            "coverage": 1,
+            "evidence_ids": [
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000002"
+            ],
+            "latency_ms": 1.275,
+            "engine_latency_ms": 1.235,
+            "error_type": null,
+            "failure_class": null,
+            "limitations": [],
+            "freshness": {
+              "checked": true,
+              "stale": false,
+              "requested": 0,
+              "current": 0,
+              "source": "observed",
+              "establishedBy": "authority"
+            },
+            "result": {
+              "record": "pet",
+              "pet_id": "pet_000002",
+              "name": "水蓝蓝",
+              "title": "水蓝蓝",
+              "types": [
+                "水系"
+              ],
+              "stats": {
+                "atk": 35,
+                "def": 56,
+                "hp": 75,
+                "spa": 76,
+                "spd": 79,
+                "spe": 51
+              },
+              "stat_total": 372,
+              "feature_skill_id": "skill_000030",
+              "learnset_id": "on-demand:pet_000002",
+              "release_date": null,
+              "game_id": null,
+              "learnset_summary": {
+                "native": 13,
+                "blood": 0,
+                "stones": 0,
+                "total": 13
+              }
+            }
+          },
+          "resultBytes": 730
+        }
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 1848,
+        "completion_tokens": 23
+      },
+      "evidenceCount": 0,
+      "knowledgeIds": [],
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "scope": "Narrow numeric/citation/certainty guard; not a proof of all natural language correctness"
+      },
+      "evidence": [],
+      "plannerCalls": 2,
+      "estimatedPlannerTokens": {
+        "input": 2496,
+        "output": 35
+      },
+      "apiUsage": {
+        "prompt_tokens": 1848,
+        "completion_tokens": 23
+      },
+      "estimatedTotalTokens": {
+        "input": 4344,
+        "output": 58
+      },
+      "judgement": {
+        "callDecisionCorrect": true,
+        "toolChoiceCorrect": true,
+        "countCorrect": true,
+        "stopCorrect": true,
+        "strictCorrect": true,
+        "unnecessaryCall": false,
+        "missedCall": false,
+        "wastedCall": false
+      },
+      "layers": {
+        "toolSelection": {
+          "id": "w02",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "argument": {
+          "id": "w02",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "evidenceMatch": {
+          "id": "w02",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "no evidence expectation"
+          ]
+        },
+        "answerConsistency": {
+          "id": "w02",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "staleInterception": {
+          "id": "w02",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "not a stale probe"
+          ]
+        }
+      }
+    },
+    {
+      "id": "w03",
+      "cat": "cat5-other-pet",
+      "question": "火花这只的种族值大概多少？",
+      "expect": {
+        "calls": [
+          1,
+          1
+        ],
+        "tools": [
+          "query_rules"
+        ],
+        "argument": {
+          "tool": "query_rules",
+          "targetIds": [
+            "pet_000003"
+          ],
+          "targetName": "火花"
+        }
+      },
+      "why": "口语说法，仍要按名字定位。",
+      "regression": null,
+      "truth": {
+        "lastSettledTurn": 8,
+        "settled": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "matchId": null
+      },
+      "context": "pve",
+      "contextPhase": "battle",
+      "status": 200,
+      "latencyMs": 1114,
+      "model": "deepseek-flash",
+      "text": "火花是火系，种族值大概是：攻击84、防御56、血量70、特攻37、特防43、速度78，总和368。",
+      "error": null,
+      "route": "teacher",
+      "provider": "deepseek",
+      "agentStop": "complete",
+      "localOnly": false,
+      "fallbackReason": null,
+      "judgment": null,
+      "toolTrace": [
+        {
+          "tool": "query_rules",
+          "args": {
+            "kind": "pet",
+            "name": "火花",
+            "state_version": 0
+          },
+          "result": {
+            "tool": "query_rules",
+            "ok": true,
+            "ruleset_id": "roco-world-s4-2026-09-10",
+            "state_version": 0,
+            "coverage": 1,
+            "evidence_ids": [
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000003"
+            ],
+            "latency_ms": 0.871,
+            "engine_latency_ms": 0.822,
+            "error_type": null,
+            "failure_class": null,
+            "limitations": [],
+            "freshness": {
+              "checked": true,
+              "stale": false,
+              "requested": 0,
+              "current": 0,
+              "source": "observed",
+              "establishedBy": "authority"
+            },
+            "result": {
+              "record": "pet",
+              "pet_id": "pet_000003",
+              "name": "火花",
+              "title": "火花",
+              "types": [
+                "火系"
+              ],
+              "stats": {
+                "atk": 84,
+                "def": 56,
+                "hp": 70,
+                "spa": 37,
+                "spd": 43,
+                "spe": 78
+              },
+              "stat_total": 368,
+              "feature_skill_id": "skill_000064",
+              "learnset_id": "on-demand:pet_000003",
+              "release_date": null,
+              "game_id": null,
+              "learnset_summary": {
+                "native": 13,
+                "blood": 0,
+                "stones": 0,
+                "total": 13
+              }
+            }
+          },
+          "resultBytes": 728
+        }
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 1847,
+        "completion_tokens": 32
+      },
+      "evidenceCount": 0,
+      "knowledgeIds": [],
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "scope": "Narrow numeric/citation/certainty guard; not a proof of all natural language correctness"
+      },
+      "evidence": [],
+      "plannerCalls": 2,
+      "estimatedPlannerTokens": {
+        "input": 2495,
+        "output": 33
+      },
+      "apiUsage": {
+        "prompt_tokens": 1847,
+        "completion_tokens": 32
+      },
+      "estimatedTotalTokens": {
+        "input": 4342,
+        "output": 65
+      },
+      "judgement": {
+        "callDecisionCorrect": true,
+        "toolChoiceCorrect": true,
+        "countCorrect": true,
+        "stopCorrect": true,
+        "strictCorrect": true,
+        "unnecessaryCall": false,
+        "missedCall": false,
+        "wastedCall": false
+      },
+      "layers": {
+        "toolSelection": {
+          "id": "w03",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "argument": {
+          "id": "w03",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "evidenceMatch": {
+          "id": "w03",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "no evidence expectation"
+          ]
+        },
+        "answerConsistency": {
+          "id": "w03",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "staleInterception": {
+          "id": "w03",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "not a stale probe"
+          ]
+        }
+      }
+    },
+    {
+      "id": "w04",
+      "cat": "cat5-other-pet",
+      "question": "寂灭骨龙的防御是多少？",
+      "expect": {
+        "calls": [
+          1,
+          1
+        ],
+        "tools": [
+          "query_rules"
+        ],
+        "argument": {
+          "tool": "query_rules",
+          "targetIds": [
+            "pet_000225"
+          ],
+          "targetName": "寂灭骨龙"
+        }
+      },
+      "why": "被问的那一只既不在场上、也不在队伍里。",
+      "regression": null,
+      "truth": {
+        "lastSettledTurn": 8,
+        "settled": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "matchId": null
+      },
+      "context": "pve",
+      "contextPhase": "battle",
+      "status": 200,
+      "latencyMs": 1209,
+      "model": "deepseek-flash",
+      "text": "查到了。寂灭骨龙的防御是 104，种族总 552，龙/幽双系。",
+      "error": null,
+      "route": "teacher",
+      "provider": "deepseek",
+      "agentStop": "complete",
+      "localOnly": false,
+      "fallbackReason": null,
+      "judgment": null,
+      "toolTrace": [
+        {
+          "tool": "query_rules",
+          "args": {
+            "kind": "pet",
+            "name": "寂灭骨龙",
+            "state_version": 0
+          },
+          "result": {
+            "tool": "query_rules",
+            "ok": true,
+            "ruleset_id": "roco-world-s4-2026-09-10",
+            "state_version": 0,
+            "coverage": 1,
+            "evidence_ids": [
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000225"
+            ],
+            "latency_ms": 0.713,
+            "engine_latency_ms": 0.688,
+            "error_type": null,
+            "failure_class": null,
+            "limitations": [],
+            "freshness": {
+              "checked": true,
+              "stale": false,
+              "requested": 0,
+              "current": 0,
+              "source": "observed",
+              "establishedBy": "authority"
+            },
+            "result": {
+              "record": "pet",
+              "pet_id": "pet_000225",
+              "name": "寂灭骨龙",
+              "title": "寂灭骨龙",
+              "types": [
+                "龙系",
+                "幽系"
+              ],
+              "stats": {
+                "hp": 120,
+                "atk": 137,
+                "def": 104,
+                "spa": 50,
+                "spd": 81,
+                "spe": 60
+              },
+              "stat_total": 552,
+              "feature_skill_id": "skill_000129",
+              "learnset_id": "learnset_e1c7b7e68094",
+              "release_date": "2026-03-26",
+              "game_id": 3269,
+              "learnset_summary": {
+                "native": 13,
+                "blood": 18,
+                "stones": 13,
+                "total": 44
+              }
+            }
+          },
+          "resultBytes": 751
+        }
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 1867,
+        "completion_tokens": 23
+      },
+      "evidenceCount": 0,
+      "knowledgeIds": [],
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "scope": "Narrow numeric/citation/certainty guard; not a proof of all natural language correctness"
+      },
+      "evidence": [],
+      "plannerCalls": 2,
+      "estimatedPlannerTokens": {
+        "input": 2515,
+        "output": 36
+      },
+      "apiUsage": {
+        "prompt_tokens": 1867,
+        "completion_tokens": 23
+      },
+      "estimatedTotalTokens": {
+        "input": 4382,
+        "output": 59
+      },
+      "judgement": {
+        "callDecisionCorrect": true,
+        "toolChoiceCorrect": true,
+        "countCorrect": true,
+        "stopCorrect": true,
+        "strictCorrect": true,
+        "unnecessaryCall": false,
+        "missedCall": false,
+        "wastedCall": false
+      },
+      "layers": {
+        "toolSelection": {
+          "id": "w04",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "argument": {
+          "id": "w04",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "evidenceMatch": {
+          "id": "w04",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "no evidence expectation"
+          ]
+        },
+        "answerConsistency": {
+          "id": "w04",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "staleInterception": {
+          "id": "w04",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "not a stale probe"
+          ]
+        }
+      }
+    },
+    {
+      "id": "w05",
+      "cat": "cat5-other-pet",
+      "question": "鸭吉吉的种族值是多少？",
+      "expect": {
+        "calls": [
+          1,
+          1
+        ],
+        "tools": [
+          "query_rules"
+        ],
+        "argument": {
+          "tool": "query_rules",
+          "targetName": "鸭吉吉"
+        },
+        "answer": {
+          "must": [
+            {}
+          ]
+        }
+      },
+      "why": "这个名字在图鉴里对应 6 个物种：正确行为是按名字查出来、并说明有多个形态，而不是挑一个当成唯一答案。",
+      "regression": null,
+      "truth": {
+        "lastSettledTurn": 8,
+        "settled": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "matchId": null
+      },
+      "context": "pve",
+      "contextPhase": "battle",
+      "status": 200,
+      "latencyMs": 1187,
+      "model": "deepseek-flash",
+      "text": "鸭吉吉在本地图鉴里有多个条目，同名但种族值不同，例如：\n\n- 攻击95/防御55/体力136/特攻35/特防45/速度105，总和471\n- 攻击35/防御45/体力136/特攻95/特防55/速度105，总和471\n- 攻击53/防御80/体力107/特攻125/特防113/速度100，总和578\n\n你要的是哪一只？说下形态或来源，我再帮你锁定。",
+      "error": null,
+      "route": "teacher",
+      "provider": "deepseek",
+      "agentStop": "complete",
+      "localOnly": false,
+      "fallbackReason": null,
+      "judgment": null,
+      "toolTrace": [
+        {
+          "tool": "query_rules",
+          "args": {
+            "kind": "pet",
+            "name": "鸭吉吉",
+            "state_version": 0
+          },
+          "result": {
+            "tool": "query_rules",
+            "ok": true,
+            "ruleset_id": "roco-world-s4-2026-09-10",
+            "state_version": 0,
+            "coverage": 1,
+            "evidence_ids": [
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000011",
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000033",
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000353",
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000354",
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000393",
+              "ev:roco-world-s4-2026-09-10:pets.json#pet_000513"
+            ],
+            "latency_ms": 1.097,
+            "engine_latency_ms": 1.061,
+            "error_type": null,
+            "failure_class": null,
+            "limitations": [],
+            "freshness": {
+              "checked": true,
+              "stale": false,
+              "requested": 0,
+              "current": 0,
+              "source": "observed",
+              "establishedBy": "authority"
+            },
+            "result": {
+              "record": "pet",
+              "ambiguous": true,
+              "matches": [
+                {
+                  "record": "pet",
+                  "pet_id": "pet_000011",
+                  "name": "鸭吉吉",
+                  "title": "鸭吉吉",
+                  "types": [
+                    "普通系"
+                  ],
+                  "stats": {
+                    "atk": 95,
+                    "def": 55,
+                    "hp": 136,
+                    "spa": 35,
+                    "spd": 45,
+                    "spe": 105
+                  },
+                  "stat_total": 471,
+                  "feature_skill_id": "skill_000013",
+                  "learnset_id": "on-demand:pet_000011",
+                  "release_date": null,
+                  "game_id": null,
+                  "learnset_summary": {
+                    "native": 13,
+                    "blood": 0,
+                    "stones": 0,
+                    "total": 13
+                  }
+                },
+                {
+                  "record": "pet",
+                  "pet_id": "pet_000033",
+                  "name": "鸭吉吉",
+                  "title": "鸭吉吉",
+                  "types": [
+                    "普通系"
+                  ],
+                  "stats": {
+                    "atk": 35,
+                    "def": 45,
+                    "hp": 136,
+                    "spa": 95,
+                    "spd": 55,
+                    "spe": 105
+                  },
+                  "stat_total": 471,
+                  "feature_skill_id": "skill_000013",
+                  "learnset_id": "on-demand:pet_000033",
+                  "release_date": null,
+                  "game_id": null,
+                  "learnset_summary": {
+                    "native": 13,
+                    "blood": 0,
+                    "stones": 0,
+                    "total": 13
+                  }
+                },
+                {
+                  "record": "pet",
+                  "pet_id": "pet_000353",
+                  "name": "鸭吉吉",
+                  "title": "鸭吉吉",
+                  "types": [
+                    "普通系"
+                  ],
+                  "stats": {
+                    "atk": 95,
+                    "def": 55,
+                    "hp": 130,
+                    "spa": 35,
+                    "spd": 45,
+                    "spe": 110
+                  },
+                  "stat_total": 470,
+                  "feature_skill_id": "skill_000013",
+                  "learnset_id": "on-demand:pet_000353",
+                  "release_date": null,
+                  "game_id": null,
+                  "learnset_summary": {
+                    "native": 13,
+                    "blood": 0,
+                    "stones": 0,
+                    "total": 13
+                  }
+                },
+                {
+                  "record": "pet",
+                  "pet_id": "pet_000354",
+                  "name": "鸭吉吉",
+                  "title": "鸭吉吉",
+                  "types": [
+                    "普通系"
+                  ],
+                  "stats": {
+                    "atk": 35,
+                    "def": 46,
+                    "hp": 137,
+                    "spa": 94,
+                    "spd": 57,
+                    "spe": 100
+                  },
+                  "stat_total": 469,
+                  "feature_skill_id": "skill_000013",
+                  "learnset_id": "on-demand:pet_000354",
+                  "release_date": null,
+                  "game_id": null,
+                  "learnset_summary": {
+                    "native": 13,
+                    "blood": 0,
+                    "stones": 0,
+                    "total": 13
+                  }
+                },
+                {
+                  "record": "pet",
+                  "pet_id": "pet_000393",
+                  "name": "鸭吉吉",
+                  "title": "鸭吉吉",
+                  "types": [
+                    "普通系"
+                  ],
+                  "stats": {
+                    "atk": 89,
+                    "def": 74,
+                    "hp": 108,
+                    "spa": 41,
+                    "spd": 48,
+                    "spe": 115
+                  },
+                  "stat_total": 475,
+                  "feature_skill_id": "skill_000013",
+                  "learnset_id": "on-demand:pet_000393",
+                  "release_date": null,
+                  "game_id": null,
+                  "learnset_summary": {
+                    "native": 13,
+                    "blood": 0,
+                    "stones": 0,
+                    "total": 13
+                  }
+                },
+                {
+                  "record": "pet",
+                  "pet_id": "pet_000513",
+                  "name": "鸭吉吉",
+                  "title": "鸭吉吉",
+                  "types": [
+                    "普通系"
+                  ],
+                  "stats": {
+                    "atk": 53,
+                    "def": 80,
+                    "hp": 107,
+                    "spa": 125,
+                    "spd": 113,
+                    "spe": 100
+                  },
+                  "stat_total": 578,
+                  "feature_skill_id": "skill_000013",
+                  "learnset_id": "on-demand:pet_000513",
+                  "release_date": null,
+                  "game_id": null,
+                  "learnset_summary": {
+                    "native": 13,
+                    "blood": 0,
+                    "stones": 0,
+                    "total": 13
+                  }
+                }
+              ]
+            }
+          },
+          "resultBytes": 2711
+        }
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 2581,
+        "completion_tokens": 109
+      },
+      "evidenceCount": 0,
+      "knowledgeIds": [],
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "scope": "Narrow numeric/citation/certainty guard; not a proof of all natural language correctness"
+      },
+      "evidence": [],
+      "plannerCalls": 2,
+      "estimatedPlannerTokens": {
+        "input": 3229,
+        "output": 35
+      },
+      "apiUsage": {
+        "prompt_tokens": 2581,
+        "completion_tokens": 109
+      },
+      "estimatedTotalTokens": {
+        "input": 5810,
+        "output": 144
+      },
+      "judgement": {
+        "callDecisionCorrect": true,
+        "toolChoiceCorrect": true,
+        "countCorrect": true,
+        "stopCorrect": true,
+        "strictCorrect": true,
+        "unnecessaryCall": false,
+        "missedCall": false,
+        "wastedCall": false
+      },
+      "layers": {
+        "toolSelection": {
+          "id": "w05",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "argument": {
+          "id": "w05",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "evidenceMatch": {
+          "id": "w05",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "no evidence expectation"
+          ]
+        },
+        "answerConsistency": {
+          "id": "w05",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "staleInterception": {
+          "id": "w05",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "not a stale probe"
+          ]
+        }
+      }
+    }
+  ]
+}

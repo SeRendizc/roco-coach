@@ -643,11 +643,23 @@ class BindingAndCandidateDeltaTest(unittest.TestCase):
         self.assertIsNone(v2.allowed_kinds)
         self.assertEqual(v2.energy_max, 10)
         self.assertEqual(v2.energy_initial, 10)  # 开局 10 星（用户实机核对）
-        # 差别只有三处：mana / actions / binding —— 其余逐字相同
+        # 差别只有 mana / actions / binding（外加 2026-09-23 人类口径⑥ 的
+        # `energy.initial_for_all_pets`：开局每只都满 10 星）—— 其余逐字相同。
         v3 = rc.load_config(V3)
-        self.assertEqual(json.dumps(v2.raw["energy"], sort_keys=True),
-                         json.dumps(v3.raw["energy"], sort_keys=True),
-                         "v3 的 energy 必须逐字沿用 v2")
+        extra = sorted(set(v3.raw["energy"]) - set(v2.raw["energy"]))
+        # 2026-09-25 改钉（不删）：白名单加 `foe_energy_loss`（RC-401 批次六声明的能力）。
+        # 意图不变：v3 多出来的 key 必须逐个登记在案，v2 的每个 key 仍逐字比对。
+        # 2026-09-25（第 41 轮）改钉：同上，白名单加 `per_layer_cost`。
+        self.assertEqual(extra, ["cost_modifier", "foe_energy_loss", "initial_for_all_pets", "per_layer_cost"],
+                         "v3 的 energy 只允许多出这两个已登记的叶子"
+                         "（initial_for_all_pets / cost_modifier）")
+        for key, value in v2.raw["energy"].items():
+            self.assertEqual(json.dumps(v3.raw["energy"][key], sort_keys=True),
+                             json.dumps(value, sort_keys=True), f"energy.{key}")
+        self.assertTrue(v3.raw["energy"]["initial_for_all_pets"]["value"])
+        self.assertFalse(v2.energy_initial_for_all_pets,
+                         "v2 不许声明「每只都满星」——它的入场行为与指纹要逐位不变")
+        self.assertTrue(v3.energy_initial_for_all_pets)
         self.assertEqual(json.dumps(v2.raw["turn_order"], sort_keys=True),
                          json.dumps(v3.raw["turn_order"], sort_keys=True),
                          "v3 的 turn_order 必须逐字沿用 v2")

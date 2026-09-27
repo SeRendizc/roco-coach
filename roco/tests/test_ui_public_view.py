@@ -124,9 +124,13 @@ class UiViewCarriesRealNames(unittest.TestCase):
             # `not_provided_by_source`）：
             #   · `static_value_present`  ⟺ power 是数字（358/358）
             #   · `not_provided_by_source` ⟺ power 是 None（466/466）
+            # 2026-09-23：多出第三档 `recorded_from_human` —— PVP 魔法换进来的「愿力冲击」
+            # 的威力/能耗来自人类实机口述（台账 EV-PVP-WISH-POWER-UP），不是冻结来源给的。
+            # 口径不放宽：有威力就必须说得出**这一档是哪种来历**，不许含混。
             if skill["power"] is not None:
-                self.assertEqual(skill["power_status"], "static_value_present",
-                                 f"{skill['name']} 有威力却标着 {skill['power_status']}")
+                self.assertIn(skill["power_status"],
+                              {"static_value_present", "recorded_from_human"},
+                              f"{skill['name']} 有威力却标着 {skill['power_status']}")
             else:
                 self.assertEqual(skill["power_status"], "not_provided_by_source",
                                  f"{skill['name']} 的威力状态不可识别：{skill['power_status']}")
@@ -136,7 +140,7 @@ class SkillPowerIsNeverInvented(unittest.TestCase):
     """判据 2b：全量技能上的威力口径（从数据量出来的不变式）。"""
 
     def test_all_skills_have_a_recognisable_power_status(self):
-        counts = {"static_value_present": 0, "not_provided_by_source": 0}
+        counts = {"static_value_present": 0, "not_provided_by_source": 0, "recorded_from_human": 0}
         for skill in RS.skills.values():
             status = skill.power_status
             self.assertIn(status, counts,
@@ -145,6 +149,15 @@ class SkillPowerIsNeverInvented(unittest.TestCase):
             if status == "static_value_present":
                 self.assertIsInstance(skill.power, int,
                                       f"{skill.name} 标了有静态威力，power 却是 {skill.power!r}")
+                self.assertFalse(skill.derived, f"{skill.name} 是派生产物却标着冻结来源的威力口径")
+            elif status == "recorded_from_human":
+                # 2026-09-23：第三档 = 「这个数来自人类实机口述」（愿力冲击的 2 能耗 / 80 威力）。
+                # 不变式：必须**是派生产物**（`derived`），否则就是往冻结表里塞了一个口述的数 ——
+                # 那正是这条判据原本要挡的事。
+                self.assertIsInstance(skill.power, int,
+                                      f"{skill.name} 标了口述威力，power 却是 {skill.power!r}")
+                self.assertTrue(skill.derived,
+                                f"{skill.name} 标着 recorded_from_human 却不在派生产物里")
             else:
                 self.assertIsNone(skill.power,
                                   f"{skill.name} 标了来源未给威力，却带着 power={skill.power!r}")

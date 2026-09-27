@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-09-24T08:15:35.020Z",
+  "answers": {
+    "codex": {
+      "question": "喵喵的种族值是多少？",
+      "text": "喵喵是草系，种族值：HP 65、物攻 66、物防 49、魔攻 66、魔防 91、速度 33，合计 370。速度偏慢，双防里物防也薄，适合当特攻或辅助用。\n\n依据：查了图鉴 · 你的名单",
+      "source": "model",
+      "offlineFallback": "小芽在查证…"
+    },
+    "pool": {
+      "question": "我一共有多少只精灵？",
+      "text": "你名下一共 48 只精灵。\n\n依据：你选的六只 · 你的名单",
+      "source": "model",
+      "offlineFallback": "小芽在查证…"
+    }
+  },
+  "coachRequests": [
+    {
+      "message": "喵喵的种族值是多少？",
+      "profile_keys": [
+        "pets",
+        "pool_summary"
+      ],
+      "pets": 12,
+      "pool_summary": {
+        "total": 48,
+        "page": 1,
+        "pages": 4,
+        "source": "server",
+        "roster_total": 48
+      }
+    },
+    {
+      "message": "我一共有多少只精灵？",
+      "profile_keys": [
+        "pets",
+        "pool_summary",
+        "lineup"
+      ],
+      "pets": 12,
+      "pool_summary": {
+        "total": 48,
+        "page": 1,
+        "pages": 4,
+        "source": "server",
+        "roster_total": 48
+      }
+    },
+    {
+      "message": "我这六只谁速度最快？",
+      "profile_keys": [
+        "pets",
+        "pool_summary",
+        "lineup"
+      ],
+      "pets": 12,
+      "pool_summary": {
+        "total": 48,
+        "page": 1,
+        "pages": 4,
+        "source": "server",
+        "roster_total": 48
+      }
+    }
+  ],
+  "checks": [
+    {
+      "id": "00-页面就绪",
+      "ok": true,
+      "detail": "产品页起来了，名单已读回、#say-input 在"
+    },
+    {
+      "id": "01-图鉴查询答出真数据",
+      "ok": true,
+      "detail": "问「喵喵的种族值是多少？」→ 喵喵是草系，种族值：HP 65、物攻 66、物防 49、魔攻 66、魔防 91、速度 33，合计 370。速度偏慢，双防里物防也薄，适合当特攻或辅助用。  依据：查了图鉴 · 你的"
+    },
+    {
+      "id": "02-回复来自模型",
+      "ok": true,
+      "detail": "data-roco-companion-source=model"
+    },
+    {
+      "id": "03-不再把一页当成全部",
+      "ok": true,
+      "detail": "问「我一共有多少只精灵？」→ 你名下一共 48 只精灵。  依据：你选的六只 · 你的名单"
+    },
+    {
+      "id": "04-请求体带名单",
+      "ok": true,
+      "detail": "context.profile.pets 12 条"
+    },
+    {
+      "id": "05-请求体带名单概况",
+      "ok": true,
+      "detail": "pool_summary={\"total\":48,\"page\":1,\"pages\":4,\"source\":\"server\",\"roster_total\":48}"
+    },
+    {
+      "id": "06-请求体带六维",
+      "ok": true,
+      "detail": "lineup 6 条，带齐六维的 6 条（例：铠甲虫 spe=75）"
+    },
+    {
+      "id": "07-谁最快答得出来（且不是\"没数据\"）",
+      "ok": true,
+      "detail": "问「我这六只谁速度最快？」→ 音速犬和皇家狮鹫，都是120。  依据：你选的六只 · 你的名单（页面送来的最快：音速犬/皇家狮鹫 spe=120）"
+    }
+  ]
+}

@@ -1,32 +1,87 @@
 import {stageOptions} from '../game/content.js';
 import {SPECIES,createGame,SKILLS,damage,rankEnemyActions,actionName,active,legalActions,TYPES} from '../game/engine.js';
-import {trainingCapacity} from '../game/progression.js';
-function pet(context){const id=context.focus||'fox';return createGame(0,[id,...SPECIES.filter(p=>p.id!==id).slice(0,2).map(p=>p.id)],{pets:context.profile.pets}).player.pets[0];}
+import {trainingCapacity,MAX_STAT_TRAINING,MAX_LEVEL} from '../game/progression.js';
+import {trainingSaveOf,trainingSaveMissing} from './profile-shape.js';
+// `pets` 必须是**养成存档那个对象**（`{id:{level,xp,points}}`）—— 公开层的名单数组里没有 level/points。
+// 调用方先过 `trainingSaveOf()`，所以这一支只会收到对象；数组形状根本走不到这里（见 profile-shape.js）。
+/**
+ * 点名的那只**只在本仓物种表里才生效**，否则用默认那只。
+ *
+ * 2026-09-25 真机复现的 500（G3）：`context.focus` 可能是**手游那一侧的盒子个体 id**（`own-XXXX`，
+ * 见 `src/client/xiaoya.js:222`）—— 直接交给 `createGame()` 会抛「请选择三只不同的宠物」⇒
+ * `/api/coach` 500。实测：小芽页真形状（focus=`own-0001`）+「出个小测验」= **HTTP 500**；
+ * 同一形状但**不带 focus** = 200（`tmp/server.log` 的栈：`createGame (src/game/engine.js:122)`
+ * ← `pet (src/coach/teacher.js:7)`）。两个引擎的 id 不是一套数据，所以这里**不猜**：
+ * 认不出就出默认那只（小测那道"假设练习"本来就是练习面板上的题），而不是崩。
+ */
+function focusIdOf(context){
+ const wanted=context?.focus;
+ return SPECIES.some((species)=>species.id===wanted)?wanted:'fox';
+}
+function pet(context,save){const id=focusIdOf(context);return createGame(0,[id,...SPECIES.filter(p=>p.id!==id).slice(0,2).map(p=>p.id)],{pets:save.pets}).player.pets[0];}
 export function teacher(context){
- const p=pet(context),v=context.profile.pets[p.id],used=Object.values(v.points).reduce((a,b)=>a+b,0),free=trainingCapacity(v.level)-used;
+ // 2026-09-25 修的 500：拿不到存档（或存档里没有这一只）就**如实说**，不再去读 `undefined.points`。
+ // 这里原来有个隐含假设「`profile.pets` 一定是存档对象」，真机一句「培养点该往哪加？」就把它打穿了。
+ const save=trainingSaveOf(context);
+ const p=save?pet(context,save):null;
+ const v=p?save.pets[p.id]:null;
+ if(!v||!v.points||typeof v.points!=='object'){
+  // 三种"算不了"要分清楚（2026-09-26 修）：① 没存档；② 存档里没这一只；③ **这一只在、只是没带
+  // `points`**。旧代码把 ③ 也写成"存档里没有这一只"—— 那是假话（缺的是明细，不是这只）。
+  const id=focusIdOf(context);
+  const reason=!save?'no-save':v?'no-points':'not-in-save';
+  return trainingSaveMissing(context,{reason,
+   petName:reason==='not-in-save'?(SPECIES.find((species)=>species.id===id)?.name??id):null});
+ }
+ // 点数这一项**可能**没给（`growth` 只带 pets 时）：那就只说读得到的账，绝不拿 0 顶替。
+ const tokens=save.tokens;
+ const used=Object.values(v.points).reduce((a,b)=>a+b,0),free=trainingCapacity(v.level)-used;
  const target=createGame(0,undefined,stageOptions(context.stageId||'meadow')).enemy.pets[0];
  const preferred=context.goal==='速攻'?'atk':context.goal==='稳健'||['turtle','shroom','badger'].includes(p.id)?'hp':p.speed<=target.speed&&p.speed+3>target.speed?'speed':'atk';
- const chosen=[preferred,'atk','hp','speed'].find(k=>v.points[k]<5);const stat={hp:'耐久',atk:'力量',speed:'敏捷'}[chosen]||'保留资源';
- const budget=context.profile.tokens<1?'你目前没有训练点，可以先完成一场训练。':free===0?'当前培养格已满，可升级解锁，或免费重置后重新分配。':`还有 ${free} 个培养格、${context.profile.tokens} 个训练点。可以先试一次${stat}，再去训练场比较效果。`;
+ const chosen=[preferred,'atk','hp','speed'].find(k=>v.points[k]<MAX_STAT_TRAINING);const stat={hp:'耐久',atk:'力量',speed:'敏捷'}[chosen]||'保留资源';
+ const budget=tokens===null?'训练点这一项这份上下文里没有 —— 只有培养格那份账是读得到的，我不替你猜点数数量。':tokens<1?'你目前没有训练点，可以先完成一场训练。':free===0?'当前培养格已满，可升级解锁，或免费重置后重新分配。':`还有 ${free} 个培养格、${tokens} 个训练点。可以先试一次${stat}，再去训练场比较效果。`;
   const attack=p.skills.map(id=>SKILLS[id]).find(sk=>sk.power);
  const comparison=`当前关卡首发 ${target.name}，速度 ${target.speed}。敏捷培养：速度 ${p.speed} → ${p.speed+3}，${(p.speed>target.speed)===(p.speed+3>target.speed)?'没有改变与该对手的同优先级先后关系':'能改变与该对手的同优先级先后关系'}。力量培养：攻击 ${p.atk} → ${p.atk+4}，${attack?attack.name+'在对手不换宠、不防御时伤害 '+damage(p,target,attack)+' → '+damage({...p,atk:p.atk+4},target,attack):''}。耐久培养：生命 ${p.maxHp} → ${p.maxHp+12}。`;
- const reserve=context.favorite&&context.favorite!==p.id&&context.profile.tokens<=2;
+ const reserve=tokens!==null&&context.favorite&&context.favorite!==p.id&&tokens<=2;
  const reserveText=reserve?`先留给你的本命${SPECIES.find(x=>x.id===context.favorite)?.name||'伙伴'}`:'也可以先保留1点，实战后再分配';
- const headline=reserve?reserveText:free<=0?'培养格已满':context.profile.tokens<1?'先拿一点训练点':'先试1点'+stat;
- const reason=free<=0?(v.level<5?'再升一级解锁1格，或免费重置。':'已到最高等级，可以免费重置分配。'):context.profile.tokens<1?'完成一场训练就能获得。':chosen==='atk'?`攻击 ${p.atk} → ${p.atk+4}，提高每次出招的伤害。`:chosen==='hp'?`生命 ${p.maxHp} → ${p.maxHp+12}，多留一点承伤空间。`:`速度 ${p.speed} → ${p.speed+3}，超过该关首发的 ${target.speed}。`;
- return {headline,reason:reserve?'训练点不多，这只先不急着投入。':reason,goal:context.goal||null,favorite:context.favorite||null,reserveOption:reserveText,comparisons:[['生命',p.maxHp,p.maxHp+12],['攻击',p.atk,p.atk+4],['速度',p.speed,p.speed+3]],brief:free<=0||context.profile.tokens<1?budget:`${p.name}可先试1点${stat}。速度${p.speed}对${target.speed}，${p.speed>target.speed?'已经更快，不必急着加敏捷':p.speed+3>target.speed?'加敏捷能超过对手':'加一次敏捷仍不能稳拿先手'}。`,text:`${p.name}先考虑${stat}。当前关卡首发${target.name}速度${target.speed}，你的速度${p.speed}，${p.speed>target.speed?'已经更快，暂时不需要靠敏捷抢先手':p.speed===target.speed?'目前平速，不能保证先手':'目前较慢，要看加点后能否超过'}。${budget}`,evidence:[reserveText,`玩家明确目标：${context.goal||'未设置'}；本命：${context.favorite||'未设置'}。`,comparison,`当前生命 ${p.maxHp}，攻击 ${p.atk}，防御 ${p.def}，速度 ${p.speed}。`,'一次培养：生命 +12 / 攻击 +4 / 速度 +3；不会替你执行加点。'],method:'读取当前宠物与资源 → 职责建议 → 训练验证'};
+ const headline=reserve?reserveText:free<=0?'培养格已满':tokens===null?'先看培养格':tokens<1?'先拿一点训练点':'先试1点'+stat;
+ const reason=free<=0?(v.level<MAX_LEVEL?'再升一级解锁1格，或免费重置。':'已到最高等级，可以免费重置分配。'):tokens===null?'训练点这一项这份上下文里没有，我不猜还剩几点。':tokens<1?'完成一场训练就能获得。':chosen==='atk'?`攻击 ${p.atk} → ${p.atk+4}，提高每次出招的伤害。`:chosen==='hp'?`生命 ${p.maxHp} → ${p.maxHp+12}，多留一点承伤空间。`:`速度 ${p.speed} → ${p.speed+3}，超过该关首发的 ${target.speed}。`;
+ return {headline,reason:reserve?'训练点不多，这只先不急着投入。':reason,goal:context.goal||null,favorite:context.favorite||null,reserveOption:reserveText,comparisons:[['生命',p.maxHp,p.maxHp+12],['攻击',p.atk,p.atk+4],['速度',p.speed,p.speed+3]],brief:free<=0||tokens===null||tokens<1?budget:`${p.name}可先试1点${stat}。速度${p.speed}对${target.speed}，${p.speed>target.speed?'已经更快，不必急着加敏捷':p.speed+3>target.speed?'加敏捷能超过对手':'加一次敏捷仍不能稳拿先手'}。`,text:`${p.name}先考虑${stat}。当前关卡首发${target.name}速度${target.speed}，你的速度${p.speed}，${p.speed>target.speed?'已经更快，暂时不需要靠敏捷抢先手':p.speed===target.speed?'目前平速，不能保证先手':'目前较慢，要看加点后能否超过'}。${budget}`,evidence:[reserveText,`玩家明确目标：${context.goal||'未设置'}；本命：${context.favorite||'未设置'}。`,comparison,`当前生命 ${p.maxHp}，攻击 ${p.atk}，防御 ${p.def}，速度 ${p.speed}。`,`训练点=${tokens===null?'未提供（没给 growth.tokens）':tokens}；${p.name} level=${v.level} used=${used} capacity=${trainingCapacity(v.level)}`,'一次培养：生命 +12 / 攻击 +4 / 速度 +3；不会替你执行加点。'],method:'读取当前宠物与资源 → 职责建议 → 训练验证'};
 }
 // 练习题的变式：同一个知识点，参数不同。
 // offet 表每一档都不同（原来是 [2,4,3] 循环，第 4 次出题就与第 1 次完全一样），
 // 而且 id 带上变式号——id 是「这是不是同一道题」的判据（coach/memory.js 的 quizMastery
 // 用 distinctVariants 数它）：参数变了就是另一个变式，答对两次也只算两次不同的题。
 export const QUIZ_OFFSETS=[2,4,3,6,1,5];
-export function makeQuiz(context,{variant=0}={}){
- const v=((variant%QUIZ_OFFSETS.length)+QUIZ_OFFSETS.length)%QUIZ_OFFSETS.length;
- const p=pet(context),offset=QUIZ_OFFSETS[v],enemy=p.speed+offset;
+export function makeQuiz(context,{variant=0,panel=null,avoid=null}={}){
+ // ⚠ 返回里的 `variant` 报的是**真正用掉的那一档**（`v`），不是入参的计数器 —— 加了 `avoid`
+ // 之后这两者会不一样（入参可能指着做过的那档），判据 ① 就是靠这一点抓到"字段报错了档位"。
+ // `avoid`（2026-09-26，目标 ③）：玩家**已经答过**的变式档位。出题优先挑没做过的那一档
+ // ——「把学习进度记下来」这件事只有**用在出题上**才算闭环（真机实测：连问两次拿到同一档）。
+ const answered=avoid instanceof Set?avoid:new Set(Array.isArray(avoid)?avoid:[]);
+ // ⚠ 只有**显式传了** `avoid` 才按"避开做过的"挑档；不传时照旧用入参计数器（老调用方一字不变，
+ //    `tests/coach.test.js` 的三条既有验收就是这么钉的 —— 第一版写成"永远挑没做过的那档"，
+ //    把它们的 variant 参数吃掉了，三条当场红）。
+ const firstFresh=avoid==null?undefined:QUIZ_OFFSETS.map((_,index)=>index).find((index)=>!answered.has(index));
+ const v=Number.isInteger(firstFresh)?firstFresh:((variant%QUIZ_OFFSETS.length)+QUIZ_OFFSETS.length)%QUIZ_OFFSETS.length;
+ // 出题只用到**面板**（速度），存档可有可无：拿不到存档就用引擎的初始面板出题 ——
+ // 题干里那个「假设练习」的对手速度是自己速度 + 档位算出来的，与养成进度无关（口径见下面的注释）。
+ //
+ // `panel`（2026-09-26 加，目标 ③「出题改用玩家自己选的精灵」）：调用方把**玩家自己那只**的
+ // 面板解析好传进来（名单行自带 `stats.spe`，或按 `species_id` 查一次图鉴）。传了就用它，
+ // 不再回落到练习引擎那只 —— 手游页面上出的题从此问的是玩家自己的精灵。
+ // 解析不到时调用方**不传**（走老路），这一层不猜、也不编速度。
+ const save=trainingSaveOf(context);
+ const p=panel??pet(context,save??{pets:undefined});
+ // 2026-09-27（审计 ②）：正文里的「本仓练习引擎」是仓库自称 → 「练习引擎」。
+ const panelSource=panel?`面板来源：${panel.source}`:'面板来源：练习引擎（默认那只，因为这页没给可用面板）';
+ const offset=QUIZ_OFFSETS[v],enemy=p.speed+offset;
  const answer=offset<3?'先':offset>3?'后':'不确定';
  const base=`speed:${p.id}:${p.speed}:${enemy}`;
- return {id:`${base}:v${v}`,sourceId:base,variant:v,variantOf:`${base}:v${v}`,questionKey:'speed',skillKey:'速度比较',variant,question:`假设练习（不是当前敌人的面板）：${p.name}速度 ${p.speed}，对手速度 ${enemy}。培养一次敏捷（+3），双方技能优先级相同，你会先出手、后出手，还是无法确定？`,answer,explanation:`培养后速度 ${p.speed}+3=${p.speed+3}，对手 ${enemy}。${answer==='不确定'?'同速时由随机过程决定，不能保证先手。':answer==='先'?'同优先级下速度更高，先出手。':'同优先级下速度仍更低，后出手。'}`,lesson:'速度比较：同优先级时，速度更高者先行动。',evidenceIds:['tactic:priority','tactic:speed-tie','tactic:training']};
+ // `evidence` 是**给守卫看的出题账**：正文里的每一个数（自己的速度、假设的对手速度）都要能逐条查到。
+ // 金标 c41 实测：题干写了「假设练习…对手速度 40」，证据里空着 ⇒ `unsupported-number:40`。
+ // 这不是编的数字（40 = 自己的速度 + 变式档位），但"没写出来"在守卫眼里与编造无法区分。
+ return {id:`${base}:v${v}`,sourceId:base,variant:v,variantOf:`${base}:v${v}`,questionKey:'speed',skillKey:'速度比较',variant:v,question:`假设练习（不是当前敌人的面板）：${p.name}速度 ${p.speed}，对手速度 ${enemy}。培养一次敏捷（+3），双方技能优先级相同，你会先出手、后出手，还是无法确定？`,answer,explanation:`培养后速度 ${p.speed}+3=${p.speed+3}，对手 ${enemy}。${answer==='不确定'?'同速时由随机过程决定，不能保证先手。':answer==='先'?'同优先级下速度更高，先出手。':'同优先级下速度仍更低，后出手。'}`,lesson:'速度比较：同优先级时，速度更高者先行动。',evidenceIds:['tactic:priority','tactic:speed-tie','tactic:training'],evidence:[`出题参数（假设练习，不是当前敌人的面板）：${p.name} 速度 ${p.speed} + 变式档位 ${offset} = 假设对手速度 ${enemy}；培养一次敏捷 +3 ⇒ 我方 ${p.speed+3}。${panelSource}`]};
 }
 export function review(context){const h=context.lastTurn;if(!h)return {text:'暂时没有回合记录。完成一个回合后再来，我会按当时的信息解释。',evidence:[]};return {text:`第 ${h.before.turn} 回合的事实记录：${h.events.filter(x=>!x.startsWith('──')).join(' ')} 下一次先检查属性、出手优先级和速度。单次输赢不能直接证明选择对错。`,evidence:['来源：实际回合日志；未把事后结果当作决策正确性的唯一依据。'],method:'读取已完成回合 → 事实复盘'};}
 

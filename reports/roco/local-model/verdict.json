@@ -1,0 +1,1804 @@
+{
+ "schema": "roco-local-model-verdict/v1",
+ "generated_by": "reports/roco/local-model/build-verdict.mjs",
+ "note": "每个数字都由 /tmp/roco-4b/** 的原始产物算出，没有一个是手写的；「合法率」是程序判定（可解析成 JSON 对象 + 工具名已注册），不是质量结论。",
+ "inputs": {
+  "sft-v4": {
+   "path": "/tmp/roco-4b/traj-sft-v4.jsonl",
+   "trajectories": 1728,
+   "ask_receipts": 828,
+   "sha256_source": null
+  },
+  "base": {
+   "path": "/tmp/roco-4b/traj-base.jsonl",
+   "trajectories": 432,
+   "ask_receipts": 396,
+   "sha256_source": null
+  },
+  "cloud": {
+   "path": "/tmp/roco-4b/traj-cloud.jsonl",
+   "trajectories": 864,
+   "ask_receipts": 396,
+   "sha256_source": null
+  },
+  "clean-latency": {
+   "path": "/tmp/roco-4b/traj-clean-latency.jsonl",
+   "trajectories": 120,
+   "ask_receipts": 120,
+   "sha256_source": null
+  }
+ },
+ "arms": {
+  "sft-v4": {
+   "byArm": {
+    "baseline": {
+     "trajectories": 864,
+     "passed": 864,
+     "per_category": {
+      "rules_lookup": {
+       "total": 216,
+       "passed": 216,
+       "pass_rate": 1
+      },
+      "roster_constraint": {
+       "total": 72,
+       "passed": 72,
+       "pass_rate": 1
+      },
+      "continue_stop": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "tool_failure": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "stale_state": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "evidence_conflict": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "silence": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "brief_explain": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      }
+     },
+     "stopped": {
+      "complete": 792,
+      "receipt-budget": 36,
+      "policy": 36
+     },
+     "engine_refused": 72,
+     "pass_rate": 1,
+     "window_count": 864,
+     "case_count": 288
+    },
+    "local_4b": {
+     "trajectories": 864,
+     "passed": 822,
+     "per_category": {
+      "rules_lookup": {
+       "total": 216,
+       "passed": 207,
+       "pass_rate": 0.9583
+      },
+      "roster_constraint": {
+       "total": 72,
+       "passed": 39,
+       "pass_rate": 0.5417
+      },
+      "continue_stop": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "tool_failure": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "stale_state": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "evidence_conflict": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "silence": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "brief_explain": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      }
+     },
+     "stopped": {
+      "complete": 792,
+      "receipt-budget": 36,
+      "policy": 36
+     },
+     "engine_refused": 24,
+     "pass_rate": 0.9514,
+     "window_count": 864,
+     "case_count": 288
+    }
+   },
+   "byAskArm": {
+    "local_4b": {
+     "asked": 828,
+     "legal": 827,
+     "transport_ok": 827,
+     "kinds": {
+      "call": 263,
+      "stop": 564,
+      "transport-error": 1
+     },
+     "errors": {
+      "20": 1
+     },
+     "legal_rate": 0.9988,
+     "transport_ok_rate": 0.9988,
+     "latency": {
+      "wall_ms_mean": 843.55,
+      "wall_ms_p50": 767,
+      "wall_ms_p95": 2013,
+      "wall_ms_max": 8003,
+      "engine_total_ms_p50": 754.8,
+      "engine_total_ms_p95": 1828.2,
+      "engine_first_token_ms_p50": 498.9,
+      "engine_first_token_ms_p95": 719.7,
+      "tokens_per_second_p50": 13.9
+     },
+     "cloud_usage": null
+    }
+   }
+  },
+  "base": {
+   "byArm": {
+    "local_base": {
+     "trajectories": 432,
+     "passed": 326,
+     "per_category": {
+      "rules_lookup": {
+       "total": 72,
+       "passed": 28,
+       "pass_rate": 0.3889
+      },
+      "roster_constraint": {
+       "total": 72,
+       "passed": 10,
+       "pass_rate": 0.1389
+      },
+      "continue_stop": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "tool_failure": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "stale_state": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "evidence_conflict": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "silence": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "brief_explain": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      }
+     },
+     "stopped": {
+      "invalid-arguments": 132,
+      "complete": 252,
+      "receipt-budget": 12,
+      "policy": 36
+     },
+     "engine_refused": 80,
+     "pass_rate": 0.7546,
+     "window_count": 432,
+     "case_count": 144
+    }
+   },
+   "byAskArm": {
+    "local_base": {
+     "asked": 396,
+     "legal": 396,
+     "transport_ok": 396,
+     "kinds": {
+      "call": 351,
+      "stop": 45
+     },
+     "errors": {},
+     "legal_rate": 1,
+     "transport_ok_rate": 1,
+     "latency": {
+      "wall_ms_mean": 961.14,
+      "wall_ms_p50": 927,
+      "wall_ms_p95": 1339,
+      "wall_ms_max": 1552,
+      "engine_total_ms_p50": 920.8,
+      "engine_total_ms_p95": 1334.8,
+      "engine_first_token_ms_p50": 580.9,
+      "engine_first_token_ms_p95": 691.6,
+      "tokens_per_second_p50": 24
+     },
+     "cloud_usage": null
+    }
+   }
+  },
+  "cloud": {
+   "byArm": {
+    "baseline": {
+     "trajectories": 432,
+     "passed": 432,
+     "per_category": {
+      "rules_lookup": {
+       "total": 72,
+       "passed": 72,
+       "pass_rate": 1
+      },
+      "roster_constraint": {
+       "total": 72,
+       "passed": 72,
+       "pass_rate": 1
+      },
+      "continue_stop": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "tool_failure": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "stale_state": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "evidence_conflict": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "silence": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "brief_explain": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      }
+     },
+     "stopped": {
+      "complete": 384,
+      "receipt-budget": 12,
+      "policy": 36
+     },
+     "engine_refused": 72,
+     "pass_rate": 1,
+     "window_count": 432,
+     "case_count": 144
+    },
+    "cloud_deepseek": {
+     "trajectories": 432,
+     "passed": 334,
+     "per_category": {
+      "rules_lookup": {
+       "total": 72,
+       "passed": 37,
+       "pass_rate": 0.5139
+      },
+      "roster_constraint": {
+       "total": 72,
+       "passed": 9,
+       "pass_rate": 0.125
+      },
+      "continue_stop": {
+       "total": 108,
+       "passed": 108,
+       "pass_rate": 1
+      },
+      "tool_failure": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "stale_state": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "evidence_conflict": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "silence": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      },
+      "brief_explain": {
+       "total": 36,
+       "passed": 36,
+       "pass_rate": 1
+      }
+     },
+     "stopped": {
+      "complete": 305,
+      "invalid-arguments": 79,
+      "receipt-budget": 12,
+      "policy": 36
+     },
+     "engine_refused": 146,
+     "pass_rate": 0.7731,
+     "window_count": 432,
+     "case_count": 144
+    }
+   },
+   "byAskArm": {
+    "cloud_deepseek": {
+     "asked": 396,
+     "legal": 396,
+     "transport_ok": 396,
+     "kinds": {
+      "call": 395,
+      "stop": 1
+     },
+     "errors": {},
+     "legal_rate": 1,
+     "transport_ok_rate": 1,
+     "latency": {
+      "wall_ms_mean": 574.73,
+      "wall_ms_p50": 537,
+      "wall_ms_p95": 902,
+      "wall_ms_max": 3936,
+      "engine_total_ms_p50": null,
+      "engine_total_ms_p95": null,
+      "engine_first_token_ms_p50": null,
+      "engine_first_token_ms_p95": null,
+      "tokens_per_second_p50": null
+     },
+     "cloud_usage": {
+      "rows": 396,
+      "prompt_tokens": 144048,
+      "completion_tokens": 8020,
+      "total_tokens": 152068
+     }
+    }
+   }
+  },
+  "clean-latency": {
+   "byArm": {
+    "local_4b": {
+     "trajectories": 120,
+     "passed": 111,
+     "per_category": {
+      "rules_lookup": {
+       "total": 120,
+       "passed": 111,
+       "pass_rate": 0.925
+      }
+     },
+     "stopped": {
+      "complete": 108,
+      "receipt-budget": 12
+     },
+     "engine_refused": 0,
+     "pass_rate": 0.925,
+     "window_count": 120,
+     "case_count": 40
+    }
+   },
+   "byAskArm": {
+    "local_4b": {
+     "asked": 120,
+     "legal": 120,
+     "transport_ok": 120,
+     "kinds": {
+      "call": 111,
+      "stop": 9
+     },
+     "errors": {},
+     "legal_rate": 1,
+     "transport_ok_rate": 1,
+     "latency": {
+      "wall_ms_mean": 623.15,
+      "wall_ms_p50": 646,
+      "wall_ms_p95": 708,
+      "wall_ms_max": 719,
+      "engine_total_ms_p50": 643.9,
+      "engine_total_ms_p95": 705.9,
+      "engine_first_token_ms_p50": 317.9,
+      "engine_first_token_ms_p95": 337.1,
+      "tokens_per_second_p50": 38.56
+     },
+     "cloud_usage": null
+    }
+   }
+  }
+ },
+ "pairings": {
+  "rule_vs_sft-v4@864": {
+   "compared_windows": 864,
+   "a": "baseline",
+   "b": "local_4b",
+   "both_pass": 822,
+   "a_pass_b_fail": 42,
+   "a_fail_b_pass": 0,
+   "both_fail": 0,
+   "by_category": {
+    "rules_lookup": {
+     "windows": 216,
+     "both_pass": 207,
+     "a_pass_b_fail": 9,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "roster_constraint": {
+     "windows": 72,
+     "both_pass": 39,
+     "a_pass_b_fail": 33,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "continue_stop": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "tool_failure": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "stale_state": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "evidence_conflict": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "silence": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "brief_explain": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    }
+   }
+  },
+  "rule_vs_base@432": {
+   "compared_windows": 432,
+   "a": "local_base",
+   "b": "baseline",
+   "both_pass": 326,
+   "a_pass_b_fail": 0,
+   "a_fail_b_pass": 106,
+   "both_fail": 0,
+   "by_category": {
+    "rules_lookup": {
+     "windows": 72,
+     "both_pass": 28,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 44,
+     "both_fail": 0
+    },
+    "roster_constraint": {
+     "windows": 72,
+     "both_pass": 10,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 62,
+     "both_fail": 0
+    },
+    "continue_stop": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "tool_failure": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "stale_state": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "evidence_conflict": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "silence": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "brief_explain": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    }
+   }
+  },
+  "rule_vs_cloud@432": {
+   "compared_windows": 432,
+   "a": "baseline",
+   "b": "cloud_deepseek",
+   "both_pass": 334,
+   "a_pass_b_fail": 98,
+   "a_fail_b_pass": 0,
+   "both_fail": 0,
+   "by_category": {
+    "rules_lookup": {
+     "windows": 72,
+     "both_pass": 37,
+     "a_pass_b_fail": 35,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "roster_constraint": {
+     "windows": 72,
+     "both_pass": 9,
+     "a_pass_b_fail": 63,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "continue_stop": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "tool_failure": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "stale_state": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "evidence_conflict": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "silence": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "brief_explain": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    }
+   }
+  },
+  "sft-v4_vs_base@432": {
+   "compared_windows": 432,
+   "a": "local_4b",
+   "b": "local_base",
+   "both_pass": 323,
+   "a_pass_b_fail": 75,
+   "a_fail_b_pass": 3,
+   "both_fail": 31,
+   "by_category": {
+    "rules_lookup": {
+     "windows": 72,
+     "both_pass": 27,
+     "a_pass_b_fail": 44,
+     "a_fail_b_pass": 1,
+     "both_fail": 0
+    },
+    "roster_constraint": {
+     "windows": 72,
+     "both_pass": 8,
+     "a_pass_b_fail": 31,
+     "a_fail_b_pass": 2,
+     "both_fail": 31
+    },
+    "continue_stop": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "tool_failure": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "stale_state": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "evidence_conflict": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "silence": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "brief_explain": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    }
+   }
+  },
+  "sft-v4_vs_cloud@432": {
+   "compared_windows": 432,
+   "a": "local_4b",
+   "b": "cloud_deepseek",
+   "both_pass": 333,
+   "a_pass_b_fail": 65,
+   "a_fail_b_pass": 1,
+   "both_fail": 33,
+   "by_category": {
+    "rules_lookup": {
+     "windows": 72,
+     "both_pass": 36,
+     "a_pass_b_fail": 35,
+     "a_fail_b_pass": 1,
+     "both_fail": 0
+    },
+    "roster_constraint": {
+     "windows": 72,
+     "both_pass": 9,
+     "a_pass_b_fail": 30,
+     "a_fail_b_pass": 0,
+     "both_fail": 33
+    },
+    "continue_stop": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "tool_failure": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "stale_state": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "evidence_conflict": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "silence": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "brief_explain": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    }
+   }
+  },
+  "base_vs_cloud@432": {
+   "compared_windows": 432,
+   "a": "local_base",
+   "b": "cloud_deepseek",
+   "both_pass": 323,
+   "a_pass_b_fail": 3,
+   "a_fail_b_pass": 11,
+   "both_fail": 95,
+   "by_category": {
+    "rules_lookup": {
+     "windows": 72,
+     "both_pass": 28,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 9,
+     "both_fail": 35
+    },
+    "roster_constraint": {
+     "windows": 72,
+     "both_pass": 7,
+     "a_pass_b_fail": 3,
+     "a_fail_b_pass": 2,
+     "both_fail": 60
+    },
+    "continue_stop": {
+     "windows": 108,
+     "both_pass": 108,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "tool_failure": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "stale_state": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "evidence_conflict": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "silence": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    },
+    "brief_explain": {
+     "windows": 36,
+     "both_pass": 36,
+     "a_pass_b_fail": 0,
+     "a_fail_b_pass": 0,
+     "both_fail": 0
+    }
+   }
+  }
+ },
+ "tool_choice": {
+  "sft-v4": {
+   "baseline": {
+    "windows": 864,
+    "expect_null": 576,
+    "correct": 720,
+    "wrong": 0,
+    "over_called": 144,
+    "under_called": 0,
+    "no_such_expectation": 0,
+    "accuracy": 0.8333
+   },
+   "local_4b": {
+    "windows": 864,
+    "expect_null": 576,
+    "correct": 832,
+    "wrong": 0,
+    "over_called": 2,
+    "under_called": 30,
+    "no_such_expectation": 0,
+    "accuracy": 0.963
+   }
+  },
+  "base": {
+   "local_base": {
+    "windows": 432,
+    "expect_null": 288,
+    "correct": 238,
+    "wrong": 0,
+    "over_called": 115,
+    "under_called": 79,
+    "no_such_expectation": 0,
+    "accuracy": 0.5509
+   }
+  },
+  "cloud": {
+   "baseline": {
+    "windows": 432,
+    "expect_null": 288,
+    "correct": 336,
+    "wrong": 0,
+    "over_called": 96,
+    "under_called": 0,
+    "no_such_expectation": 0,
+    "accuracy": 0.7778
+   },
+   "cloud_deepseek": {
+    "windows": 432,
+    "expect_null": 288,
+    "correct": 141,
+    "wrong": 0,
+    "over_called": 227,
+    "under_called": 64,
+    "no_such_expectation": 0,
+    "accuracy": 0.3264
+   }
+  },
+  "clean-latency": {
+   "local_4b": {
+    "windows": 120,
+    "expect_null": 0,
+    "correct": 111,
+    "wrong": 0,
+    "over_called": 0,
+    "under_called": 9,
+    "no_such_expectation": 0,
+    "accuracy": 0.925
+   }
+  }
+ },
+ "sft_leakage": {
+  "subset_check": true,
+  "tasks_with_worlds_outside_sft": 0,
+  "side_of_tasks": {
+   "train": 225,
+   "val": 48,
+   "test": 15
+  }
+ },
+ "by_sft_side": {
+  "sft-v4": {
+   "baseline": {
+    "train": {
+     "windows": 675,
+     "passed": 675,
+     "pass_rate": 1
+    },
+    "val": {
+     "windows": 144,
+     "passed": 144,
+     "pass_rate": 1
+    },
+    "test": {
+     "windows": 45,
+     "passed": 45,
+     "pass_rate": 1
+    }
+   },
+   "local_4b": {
+    "train": {
+     "windows": 675,
+     "passed": 651,
+     "pass_rate": 0.9644
+    },
+    "val": {
+     "windows": 144,
+     "passed": 126,
+     "pass_rate": 0.875
+    },
+    "test": {
+     "windows": 45,
+     "passed": 45,
+     "pass_rate": 1
+    }
+   }
+  },
+  "base": {
+   "local_base": {
+    "train": {
+     "windows": 351,
+     "passed": 268,
+     "pass_rate": 0.7635
+    },
+    "val": {
+     "windows": 60,
+     "passed": 37,
+     "pass_rate": 0.6167
+    },
+    "test": {
+     "windows": 21,
+     "passed": 21,
+     "pass_rate": 1
+    }
+   }
+  },
+  "cloud": {
+   "baseline": {
+    "train": {
+     "windows": 351,
+     "passed": 351,
+     "pass_rate": 1
+    },
+    "val": {
+     "windows": 60,
+     "passed": 60,
+     "pass_rate": 1
+    },
+    "test": {
+     "windows": 21,
+     "passed": 21,
+     "pass_rate": 1
+    }
+   },
+   "cloud_deepseek": {
+    "train": {
+     "windows": 351,
+     "passed": 276,
+     "pass_rate": 0.7863
+    },
+    "val": {
+     "windows": 60,
+     "passed": 37,
+     "pass_rate": 0.6167
+    },
+    "test": {
+     "windows": 21,
+     "passed": 21,
+     "pass_rate": 1
+    }
+   }
+  },
+  "clean-latency": {
+   "local_4b": {
+    "train": {
+     "windows": 90,
+     "passed": 85,
+     "pass_rate": 0.9444
+    },
+    "val": {
+     "windows": 30,
+     "passed": 26,
+     "pass_rate": 0.8667
+    }
+   }
+  }
+ },
+ "cloud_cost": {
+  "rows": 396,
+  "prompt_tokens": 144048,
+  "completion_tokens": 8020,
+  "cache_hit": 36608,
+  "cache_miss": 107440,
+  "price_source": "scripts/eval-live-s04.js（已固化的公开价，read 2026-09-17，USD/1M tokens）",
+  "usd_off_peak": 0.02104,
+  "usd_peak": 0.04208,
+  "note": "本地 4B 这一侧没有 API token 费用；它的成本是常驻统一内存与延迟（见 arms.*.byAskArm.*.latency）"
+ },
+ "short_explain": {
+  "cases": 20,
+  "by_arm": {
+   "rule_template": {
+    "rows": 20,
+    "j1j4_passed": 11,
+    "production_rejected": 0,
+    "rejected_reasons": {},
+    "raw_chars": [
+     28,
+     3,
+     3,
+     3,
+     33,
+     33,
+     3,
+     3,
+     33,
+     18,
+     84,
+     30,
+     30,
+     30,
+     30,
+     27,
+     27,
+     25,
+     3,
+     25
+    ],
+    "wall_ms": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "production_rejection_rate": 0,
+    "raw_chars_max": 84,
+    "raw_chars_mean": 23.6,
+    "wall_ms_mean": 0
+   },
+   "local_4b": {
+    "rows": 20,
+    "j1j4_passed": 0,
+    "production_rejected": 9,
+    "rejected_reasons": {
+     "too-long": 8,
+     "ungrounded": 1
+    },
+    "raw_chars": [
+     432,
+     62,
+     62,
+     62,
+     417,
+     417,
+     62,
+     62,
+     435,
+     323,
+     235,
+     62,
+     62,
+     62,
+     62,
+     441,
+     441,
+     465,
+     62,
+     465
+    ],
+    "wall_ms": [
+     3603,
+     719,
+     703,
+     674,
+     3608,
+     3624,
+     713,
+     667,
+     3579,
+     2900,
+     2191,
+     753,
+     688,
+     687,
+     729,
+     3566,
+     3559,
+     3559,
+     714,
+     3562
+    ],
+    "production_rejection_rate": 0.45,
+    "raw_chars_max": 465,
+    "raw_chars_mean": 234.6,
+    "wall_ms_mean": 2039.9
+   },
+   "cloud_deepseek": {
+    "rows": 20,
+    "j1j4_passed": 4,
+    "production_rejected": 4,
+    "rejected_reasons": {
+     "ungrounded": 1,
+     "too-long": 3
+    },
+    "raw_chars": [
+     83,
+     14,
+     24,
+     59,
+     198,
+     289,
+     14,
+     14,
+     427,
+     19,
+     420,
+     65,
+     40,
+     65,
+     34,
+     47,
+     47,
+     327,
+     14,
+     450
+    ],
+    "wall_ms": [
+     1140,
+     640,
+     496,
+     446,
+     1689,
+     1616,
+     849,
+     844,
+     2086,
+     714,
+     1950,
+     945,
+     685,
+     1165,
+     392,
+     760,
+     696,
+     1704,
+     537,
+     2029
+    ],
+    "production_rejection_rate": 0.2,
+    "raw_chars_max": 450,
+    "raw_chars_mean": 132.5,
+    "wall_ms_mean": 1069.2
+   }
+  },
+  "prompt_source": "src/coach/runtime.js 的 runCoach + localProvider：packet.text，即产品在 on 档真正喂给本地模型的提示"
+ },
+ "fail_closed": {
+  "preflight": {
+   "real": {
+    "ok": true,
+    "missing": [],
+    "provider": "mlx-local",
+    "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
+    "adapter": null,
+    "python": "/Users/serendizc/Developer/roco-coach/.venv-mlx/bin/python"
+   },
+   "broken_missing": [
+    "python 不存在：/nonexistent/python（先跑 scripts/model/setup-mac.sh）",
+    "权重目录不存在：/nonexistent/model"
+   ],
+   "broken_start_rejected": true,
+   "broken_start_message": "python 不存在：/nonexistent/python（先跑 scripts/model/setup-mac.sh）；权重目录不存在：/nonexistent/model"
+  },
+  "readiness": {
+   "cold": {
+    "ok": true,
+    "wall_ms": 4310,
+    "first_token_ms": 2612,
+    "total_ms": 2636.1,
+    "peak_memory_gb": 2.339,
+    "error_code": null,
+    "text": "好"
+   },
+   "warm": {
+    "ok": true,
+    "wall_ms": 202,
+    "first_token_ms": 177.5,
+    "total_ms": 201.4,
+    "tokens_per_second": 9.93,
+    "peak_memory_gb": 2.339,
+    "text": "好"
+   },
+   "cold_within_3s": false
+  },
+  "plan_budget": {
+   "tasks": 14,
+   "generate_ok": 14,
+   "timeouts": 0,
+   "parseable": 14,
+   "illegal_first_json": 0,
+   "chose_stop": 14,
+   "chose_tool": 0,
+   "tool_name_valid": 0,
+   "correct": 5,
+   "correct_denominator": 14,
+   "latency_total_ms": {
+    "p50": 313.6,
+    "p95": 988.3,
+    "max": 988.3
+   },
+   "rows": [
+    {
+     "id": "plan-read-state",
+     "message": "现在场上还剩几只？",
+     "expect": {
+      "tool": "read_state"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 594,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    },
+    {
+     "id": "plan-read-state-2",
+     "message": "我的宠物还剩多少血？",
+     "expect": {
+      "tool": "read_state"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 318.9,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    },
+    {
+     "id": "plan-rules-1",
+     "message": "寂灭骨龙的种族值是多少？",
+     "expect": {
+      "tool": "query_rules"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 314.8,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    },
+    {
+     "id": "plan-rules-2",
+     "message": "先手判定是按什么算的？",
+     "expect": {
+      "tool": "search_rules"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 316,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    },
+    {
+     "id": "plan-compare",
+     "message": "这两个技能哪个伤害更高？",
+     "expect": {
+      "tool": "compare_actions"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 313.1,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    },
+    {
+     "id": "plan-training",
+     "message": "这只宠物还能怎么培养？",
+     "expect": {
+      "tool": "inspect_training"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 313.6,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    },
+    {
+     "id": "plan-stop-chat",
+     "message": "谢谢你，刚才那局打得挺开心。",
+     "expect": {
+      "stop": true
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 988.3,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": true
+    },
+    {
+     "id": "plan-stop-chat-2",
+     "message": "你好呀",
+     "expect": {
+      "stop": true
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 312.8,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": true
+    },
+    {
+     "id": "plan-stop-chat-3",
+     "message": "我有点紧张，陪我聊两句。",
+     "expect": {
+      "stop": true
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 313.3,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": true
+    },
+    {
+     "id": "plan-stop-has-evidence",
+     "message": "那我该出哪一招？",
+     "expect": {
+      "stop": true
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 356.6,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": true
+    },
+    {
+     "id": "plan-stop-has-evidence-2",
+     "message": "再确认一下它还剩多少血。",
+     "expect": {
+      "stop": true
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 334.5,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": true
+    },
+    {
+     "id": "plan-evidence",
+     "message": "刚才第 4 回合发生了什么？",
+     "expect": {
+      "tool": "read_evidence"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 312.9,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    },
+    {
+     "id": "plan-match",
+     "message": "整局总结一下。",
+     "expect": {
+      "tool": "read_match"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 312.2,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    },
+    {
+     "id": "plan-last-turn",
+     "message": "上一回合发生了什么？",
+     "expect": {
+      "tool": "read_last_turn"
+     },
+     "decision": {
+      "stop": true
+     },
+     "last_decision": {
+      "decision": "stop",
+      "reason": "model-stop"
+     },
+     "planner_ok": true,
+     "planner_total_ms": 312.4,
+     "planner_error_code": null,
+     "planner_parseable": true,
+     "planner_raw": "{\"stop\":true}",
+     "correct": false
+    }
+   ]
+  },
+  "fail_closed": {
+   "dead_plan_decision": {
+    "stop": true
+   },
+   "dead_plan_reason": {
+    "decision": "stop",
+    "reason": "preflight"
+   },
+   "wrap_used_fallback": true,
+   "wrap_last_fallback_code": "preflight",
+   "wrap_threw": false,
+   "wrap_stats": {
+    "localUsed": 0,
+    "localFailed": 1
+   },
+   "empty_packet_used_fallback": true,
+   "empty_packet_code": "empty-packet"
+  }
+ },
+ "plan_prompt_control": {
+  "prod_tool_list": {
+   "tools": [
+    "read_state",
+    "search_rules",
+    "compare_actions",
+    "simulate_branch",
+    "inspect_training",
+    "read_match",
+    "read_evidence",
+    "read_last_turn"
+   ],
+   "called": 0,
+   "stopped": 8,
+   "rows": [
+    {
+     "message": "场上还剩几只",
+     "expect": "read_state",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "timeout"
+     }
+    },
+    {
+     "message": "我的宠物还剩多少血",
+     "expect": "read_state",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "timeout"
+     }
+    },
+    {
+     "message": "寂灭骨龙的种族值是多少",
+     "expect": "query_rules",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "先手判定怎么算",
+     "expect": "search_rules",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "哪个技能伤害更高",
+     "expect": "compare_actions",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "还能怎么培养",
+     "expect": "inspect_training",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "第4回合发生了什么",
+     "expect": "read_evidence",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "整局总结",
+     "expect": "read_match",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    }
+   ]
+  },
+  "full_tool_list": {
+   "tools": [
+    "read_state",
+    "search_rules",
+    "compare_actions",
+    "simulate_branch",
+    "inspect_training",
+    "read_match",
+    "read_evidence",
+    "read_last_turn",
+    "query_rules",
+    "evaluate_team",
+    "compare_team_change",
+    "plan_actions",
+    "summarize_battle"
+   ],
+   "called": 0,
+   "stopped": 8,
+   "rows": [
+    {
+     "message": "场上还剩几只",
+     "expect": "read_state",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "我的宠物还剩多少血",
+     "expect": "read_state",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "寂灭骨龙的种族值是多少",
+     "expect": "query_rules",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "先手判定怎么算",
+     "expect": "search_rules",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "哪个技能伤害更高",
+     "expect": "compare_actions",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "还能怎么培养",
+     "expect": "inspect_training",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "第4回合发生了什么",
+     "expect": "read_evidence",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    },
+    {
+     "message": "整局总结",
+     "expect": "read_match",
+     "decided": {
+      "stop": true
+     },
+     "last": {
+      "decision": "stop",
+      "reason": "model-stop"
+     }
+    }
+   ]
+  }
+ },
+ "tool_contract_count": 13
+}

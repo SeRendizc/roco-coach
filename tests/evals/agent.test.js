@@ -70,6 +70,42 @@ test('watch registration is bounded, cancelled explicitly, and never crosses mat
  g.player.pets[0].energy=1;assert(watchCandidate(g,a.memory.watches));assert.equal(watchCandidate({...g,id:'other'},a.memory.watches),null);assert.equal(watchCandidate({...g,mode:'pvp-live'},a.memory.watches),null);
  assert.equal((await runCoach({message:'取消提醒',context,memory:a.memory})).memory.watches.length,0);
 });
+// 2026-09-25（第 36 轮）：玩家问「刚才那条提醒**还算数吗**」时，答案在存档里，不在模型的嘴里。
+//
+// 为什么补这一条（真机实测，不是推测）：`/tmp/probe/unknown-probe.json` 的 p3 同一个问题两轮回答 ——
+//   第一次「那条提醒的内容，我这边没存下来，现在也说不出还在不在」（交白卷）；
+//   第二次「算数的，我还在。」（**没有出处**的断言）。
+// 而 `memory.watches` 每条都带 `matchId` / `expiresTurn` / `kind`，有效性语义早就写在
+// `experience.js:355` 的 `watchCandidate()` 里（同一局、且未到 expiresTurn）。所以这是**纯事实题**：
+// 按人类 A1 口径（c01/c13–c24 同族）问模型 **0** 次，直接读存档作答。
+// 反证（本文件里真跑过）：把 `watches` 换成空表 / 换成别的局 ⇒ 同一个问句必须给出**不同**答案；
+// 把「下委托」的句子也塞进这一支 ⇒ 委托会被吃掉（判据最后一条钉住这个坑）。
+test('reminder validity is answered from the archive (0 model calls), not improvised',async()=>{
+ const g={...createGame(17),id:'watch-game'},context=buildContext(g,newProfile(),'fox');
+ const watch={id:'watch:watch-game:energy',matchId:'watch-game',kind:'energy',expiresTurn:11,once:true};
+ const ask=(memory)=>runCoach({message:'刚才那个提醒还算数吗？',context,memory});
+ const none=await ask(freshMemory());
+ assert.equal(none.provider,'local','纯事实题不许问模型（人类 A1 口径）');
+ assert.equal(none.route,'guide');
+ assert.match(none.text,/没有进行中的条件提醒/);
+ assert.match(none.text,/只在设置它的那一局里有效/,'必须说清有效期口径，而不是只说"不知道"');
+ assert.ok(!/不知道|说不出|没存下来|无法判断/.test(none.text),'这一类问句不许交白卷');
+ const live=await ask({...freshMemory(),watches:[watch]});
+ assert.equal(live.provider,'local');
+ assert.match(live.text,/还在/);
+ assert.match(live.text,/第 11 回合前有效/,'回合数必须来自存档那一条，不许写死');
+ assert.match(live.text,/能量降到1豆或以下/);
+ assert.match(live.evidence.join(' '),/matchId=watch-game/,'依据必须点名它读的是哪一条记录');
+ const stale=await ask({...freshMemory(),watches:[{...watch,matchId:'other-game'}]});
+ assert.match(stale.text,/已经作废/,'别的局的委托不许说成"还在"');
+ assert.notEqual(stale.text,live.text,'同问句不同存档必须给不同答案（证明读的是存档，不是常量）');
+ // 反证的反面：这一支**不许**吞掉"下委托"的请求（真机坑：「能量到1豆提醒我」里同时有能量+提醒）
+ const set=await runCoach({message:'豆不够时提醒我',context,memory:freshMemory()});
+ assert.equal(set.memory.watches.length,1,'下委托照旧要能设上');
+ assert.equal(set.memory.watches[0].expiresTurn,11);
+ assert.equal((await runCoach({message:'取消提醒',context,memory:set.memory})).memory.watches.length,0);
+});
+
 test('parametric practice includes faster, slower and ties with engine-aligned answers',()=>{
  const context=buildContext(null,newProfile(),'sparrow');const answers=[0,1,2].map(variant=>makeQuiz(context,{variant}).answer);assert.deepEqual(answers,['先','后','不确定']);
 });

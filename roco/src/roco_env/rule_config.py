@@ -58,6 +58,9 @@ ACTIONS_REQUIRED_PATHS = (
 #: 两边一致由 `roco/tests/test_mana_actions.py` 钉住。
 KNOWN_ACTION_KINDS = (
     "skill", "charge", "switch", "surrender", "item", "escape", "struggle",
+    # 2026-09-23：PVP 魔法（愿力强化）。与 `item` 分开：台账 EV-PVP-WISH-POWER-UP 写着
+    # 「它不是普通道具」，而标准 PVP 的普通道具仍然是 forbidden。
+    "magic",
 )
 
 #: RC-105：`actions.kinds.<kind>.value` 的合法取值。
@@ -289,6 +292,55 @@ class _Missing:
 _MISSING = _Missing()
 
 
+def _optional_policy_bool(config: Dict[str, Any], path: str) -> Optional[bool]:
+    """策略里的可选布尔：缺字段 / null = `None`（**UNKNOWN，不是 False**）。
+
+    与 `_optional_leaf_true` 的区别就在「缺字段」：那条是**能力声明**（缺了 = 没这个能力），
+    这条是**策略取值**（缺了 = 没核验过 ⇒ 调用方必须 fail closed，不许当 False 用）。
+    形状允许裸布尔（`policies` 里就是这么写的）与叶子 `{"value": …}`。
+    """
+    node = _dig(config, path)
+    if node is _MISSING or node is None:
+        return None
+    if isinstance(node, bool):
+        return node
+    if isinstance(node, dict):
+        value = node.get("value")
+        return value if isinstance(value, bool) or value is None else _bad_policy_value(config, path, value)
+    raise RuleConfigError(
+        f"规则配置 {config.get('ruleset_config_id')} 的 {path} 必须是布尔 / 叶子对象 / null，"
+        f"实际 {type(node).__name__}")
+
+
+def _bad_policy_value(config: Dict[str, Any], path: str, value: Any) -> None:
+    raise RuleConfigError(
+        f"规则配置 {config.get('ruleset_config_id')} 的 {path}.value 必须是布尔或 null，实际 {value!r}")
+
+
+def _optional_raw_str(config: Dict[str, Any], path: str) -> Optional[str]:
+    """策略里的可选字符串（证据等级等）：缺字段 / null → None，只用于诊断。"""
+    node = _dig(config, path)
+    if isinstance(node, dict):
+        node = node.get("value")
+    return None if node is _MISSING or node is None else str(node)
+
+
+def _optional_policy_dict(config: Dict[str, Any], path: str) -> Optional[Dict[str, Any]]:
+    """策略里的可选**对象**（整份政策子树）：缺字段 / null → None = **没声明**。
+
+    与 `_optional_policy_bool` 同一条纪律：`None` 不是「值为空」，而是「这份配置没有这个概念」，
+    调用方遇到它必须 fail closed，不许回落到别的配置或一个看起来合理的默认值。
+    """
+    node = _dig(config, path)
+    if node is _MISSING or node is None:
+        return None
+    if not isinstance(node, dict):
+        raise RuleConfigError(
+            f"规则配置 {config.get('ruleset_config_id')} 的 {path} 必须是对象 / null，"
+            f"实际 {type(node).__name__}")
+    return dict(node)
+
+
 def _optional_leaf_true(config: Dict[str, Any], path: str) -> bool:
     """可选布尔能力：**缺字段 = False**；存在时必须是 `{value: true/false, ...}`。
 
@@ -467,7 +519,10 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
     # RC-401：`damage.multi_hit` 是**可选**能力声明。存在时必须是布尔（不给「看起来
     # 像真」的字符串）；不存在时不校验——legacy 根本没有这一块。
     # C1（第 139 轮）：`damage.slot_condition` / `damage.position_shift` 与 multi_hit 同一套形状规则。
-    for _cap in ("slot_condition", "position_shift"):
+    # RC-401 批次八（2026-09-25）：`damage.initiative_condition`（「若先于敌方攻击」）
+    # 与上面三条同一套形状规则。
+    for _cap in ("slot_condition", "position_shift", "initiative_condition", "foe_switch_condition",
+                 "per_use_ramp", "on_hit_ramp"):
         node_cap = _dig(config, f"damage.{_cap}")
         if node_cap is _MISSING:
             continue
@@ -475,6 +530,14 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
             bad(f"damage.{_cap} 必须是 {{value, confidence, reason?}} 形状的对象")
         elif not isinstance(node_cap.get("value"), bool):
             bad(f"damage.{_cap}.value 必须是 true/false（实际 {node_cap.get('value')!r}）")
+    node_by_class = _dig(config, "damage.attack_stat_by_class")
+    # `_dig` 缺字段返回的是 `_MISSING` 哨兵，不是 None（第一版写成 `is not None`，
+    # 于是「没声明」的 legacy 也被判成形状不对 → 加载期直接抛）。
+    if node_by_class is not _MISSING:
+        if not isinstance(node_by_class, dict) or "value" not in node_by_class:
+            bad("damage.attack_stat_by_class 必须是 {value, confidence, reason?} 形状的对象")
+        elif not isinstance(node_by_class.get("value"), bool):
+            bad(f"damage.attack_stat_by_class.value 必须是 true/false（实际 {node_by_class.get('value')!r}）")
     node_multi = _dig(config, "damage.multi_hit")
     if node_multi is not _MISSING:
         if not isinstance(node_multi, dict) or "value" not in node_multi:
@@ -613,6 +676,52 @@ def validate_config(config: Any, ledger: Dict[str, Any], *, expected_id: Optiona
     for item in config.get("unknowns", []) or []:
         if not isinstance(item, dict) or not item.get("path") or not item.get("reason"):
             bad(f"unknowns 条目必须有 path 与 reason，实际 {item!r}")
+
+    # ── policies.weather_policy（2026-09-25）：只判**形状与合法取值** ──────────
+    #
+    # 「引擎能不能按它结算」由引擎那一侧判（`env.py` 遇到没声明的天气抛
+    # `UnsupportedEffect`）；这里管「这份声明是不是一份合法可读的登记」。
+    # **缺整块 = 合法**（legacy / v2 没有天气层），只是引擎会 fail closed。
+    weather = _dig(config, "policies.weather_policy")
+    if weather is not _MISSING and weather is not None:
+        if not isinstance(weather, dict):
+            bad(f"policies.weather_policy 必须是对象 / null，实际 {type(weather).__name__}")
+        else:
+            if weather.get("value") != "enabled":
+                bad(f"policies.weather_policy.value 只允许 'enabled'，实际 {weather.get('value')!r}"
+                    "（要关掉天气层就整块不声明，而不是写一个别的取值）")
+            if weather.get("max_concurrent") != 1:
+                bad("policies.weather_policy.max_concurrent 必须是 1"
+                    "（官方逐字「但天气只能存在一种」）")
+            duration = weather.get("duration_turns")
+            if not isinstance(duration, int) or isinstance(duration, bool) or duration <= 0:
+                bad(f"policies.weather_policy.duration_turns 必须是正整数，实际 {duration!r}")
+            effects = weather.get("effects")
+            if not isinstance(effects, dict) or not effects:
+                bad("policies.weather_policy.effects 必须是非空对象（四种天气各自的结算口径）")
+            else:
+                for name, spec in effects.items():
+                    if not isinstance(spec, dict) or not spec.get("kind"):
+                        bad(f"policies.weather_policy.effects[{name!r}] 必须带 kind，实际 {spec!r}")
+                        continue
+                    kind = spec.get("kind")
+                    if kind == "end_turn_status":
+                        if not spec.get("status") or not spec.get("immune_element"):
+                            bad(f"天气「{name}」的 end_turn_status 必须声明 status 与 immune_element")
+                        layers = spec.get("layers")
+                        if not isinstance(layers, int) or isinstance(layers, bool) or layers <= 0:
+                            bad(f"天气「{name}」的 layers 必须是正整数，实际 {layers!r}")
+                    elif kind in ("skill_power_multiplier", "skill_energy_cost_multiplier"):
+                        if not spec.get("element") or not isinstance(spec.get("value"), (int, float)):
+                            bad(f"天气「{name}」必须声明 element 与数值 value，实际 {spec!r}")
+                    else:
+                        bad(f"天气「{name}」的 kind={kind!r} 不是本引擎认识的取值"
+                            "（skill_power_multiplier / skill_energy_cost_multiplier / end_turn_status）")
+            for item in weather.get("unknowns") or []:
+                if not isinstance(item, dict) or item.get("value") is not None \
+                        or item.get("status") != "UNVERIFIED" or not item.get("why"):
+                    bad("policies.weather_policy.unknowns 的每一条都必须 "
+                        f"value=null + status=UNVERIFIED + why，实际 {item!r}")
     return problems
 
 
@@ -643,9 +752,46 @@ class RuleConfig:
     #: RC-401：是否按描述里的「N 连击」结算伤害（`damage.multi_hit`）。
     #: **没声明就是 False** —— legacy / v2 里这条概念不存在，行为逐位不变。
     damage_multi_hit: bool
+    #: 2026-09-23：**开局能量发给每一只精灵**（`energy.initial_for_all_pets`），还是只发给场上那只。
+    #: 人类口径：每只精灵的能量（星）是**独立**的、开局都是满的 10 星。
+    #: **没声明就是 False** —— legacy / v2 保持「只给场上那只」，golden 指纹逐位不变。
+    energy_initial_for_all_pets: bool
+    #: RC-401 批三（2026-09-23）：**技能能耗修正**（`energy.cost_modifier`）。
+    #: 声明为真时：合法动作的可付性判定与出手扣费都按「基础能耗 + 该精灵身上的修正」算，
+    #: 修正来源是特性（捉迷藏 / 抓到你了 / 聒噪…）。**没声明就是 False** ——
+    #: legacy / v2 里没有这条机制，动作与扣费逐位不变（术语 1012/1013 只说能耗会增减，
+    #: 复合顺序与下限是 MC-018 待验项，所以本机制只在候选配置里开着）。
+    energy_cost_modifier: bool
+    #: RC-401 批次九（2026-09-25）：**动态能耗修正**（`energy.per_layer_cost`）——
+    #: 「敌方每有 N 层中毒效果，本技能能耗 -M」。**没声明就是 False**：legacy / v2 里这段文本
+    #: 继续按"未认领机制"登记，可付性与扣费一个字都不变。
+    energy_per_layer_cost: bool
+    #: RC-401 批次六（2026-09-25）：**「敌方失去 N 能量」**（`energy.foe_energy_loss`）。
+    #: 声明为真时，`parse.py` 读出的 `foe_energy_loss` / `foe_team_energy_loss` 会被结算
+    #: （对手场上那只 / 全队逐只扣，**没有任何一方获得** —— 与「偷取」严格分开）。
+    #: **没声明就是 False** —— 效果在解析层就被收回（连未认领标记都不补），
+    #: legacy / v2 的 `unsupported` 与结算逐位不变。
+    energy_foe_energy_loss: bool
+    #: 2026-09-23：**伤害按技能的伤害类别取面板**（`damage.attack_stat_by_class`）。
+    #: 声明为真时：`魔攻` 类技能用 `spa/spd` 结算、其余用 `atk/def`；
+    #: **没声明就是 False** —— legacy / v2 里这条概念不存在，结算逐位不变
+    #: （它们继续用 `atk/def`；`test_turn_order_fail_closed` 的 golden 指纹就是这条的守卫）。
+    damage_attack_stat_by_class: bool
     #: C1（第 139 轮）：号位条件 / 传动（`damage.slot_condition` / `damage.position_shift`）。
     damage_slot_condition: bool
     damage_position_shift: bool
+    #: RC-401 批次八：「若先于敌方攻击，本次技能威力+N%」（冻结语料 1 条战斗技能 + 2 条特性）。
+    #: **没声明就是 False** —— legacy / v2 里那段文本继续按"未认领机制"登记，一个字节不变。
+    damage_initiative_condition: bool
+    #: RC-401 批次十一：「**若敌方本回合更换精灵**，<效果>」（12 条技能 / 46 只精灵带得上）。
+    #: 同样是"没声明就是 False"：legacy / v2 里那一段继续算未认领机制。
+    damage_foe_switch_condition: bool
+    #: RC-401 批次十二：「**每次使用后，本技能<威力|能耗|连击数>永久±N**」（7 条技能 / 25 只带 `水炮`）。
+    #: 没声明就是 False：legacy / v2 里那一段继续算未认领机制，`PetState.skill_ramps` 也不会被写。
+    damage_per_use_ramp: bool
+    #: RC-401 批次十三：「**每被攻击1次 / 每受到1次抵抗的技能攻击 → 本技能<属性>永久±N**」
+    #: （3 条技能 / 37 只带得上，含 `skill_000500 岩土暴击` 的 35 只）。
+    damage_on_hit_ramp: bool
     #: 行动排序的**声明维度**（RC-103）。legacy 是引擎现状（respond/priority/speed）；
     #: candidate 声明的是社区口径的总序（respond/switch/priority/speed），引擎只实现了其中一部分。
     action_order: Tuple[str, ...]
@@ -674,8 +820,51 @@ class RuleConfig:
     forbidden_kinds: Tuple[str, ...]
     #: `False` 时，产出未在 `allowed_kinds` 里声明的动作类必须**抛错**，不许静默放过。
     unknown_kinds_allowed: Optional[bool]
-    path: str
+    #: 「PVP 魔法 / 背包物品是否占一次行动」（人类 2026-09-25）。`False` = 声明了**不占行动**
+    #: ⇒ `env.step_free()` 才收自由动作；`True` = 旧口径「占一手」；`None` = 没声明/未核验
+    #: ⇒ **fail closed**。读 `policies.magic_policy.occupies_action`（生成器从登记表照抄）。
+    magic_occupies_action: Optional[bool] = None
+    #: 上面那条取值的证据等级，只用于诊断与报告。
+    magic_occupies_action_status: Optional[str] = None
+    #: 2026-09-25（人类裁决「那你就做！」）：**天气层**。
+    #:
+    #: `None` = **这份配置没有声明天气层**（legacy / v2）⇒ 引擎**不许**自己发明天气行为：
+    #: 技能里的「将天气改为…」照旧登记成 unsupported，回合末也不结算任何天气效果。
+    #: 声明时是 `policies.weather_policy` 的**整份**（四种天气的效果 / 数值 / 免疫属性 /
+    #: 只存在一种 / 持续回合数 / 仍未核验的那几条）—— 由生成器从 `battle-modes.json` 照抄，
+    #: 所以「天气有哪些、各是多少」只有登记表一个事实源。
+    weather_policy: Optional[Dict[str, Any]] = None
+    path: str = ""
     raw: Dict[str, Any] = dc_field(repr=False, default_factory=dict)
+
+    @property
+    def weather_enabled(self) -> bool:
+        """这份配置是否**声明**了天气层（不是「现在场上有天气」）。"""
+        return (isinstance(self.weather_policy, dict)
+                and self.weather_policy.get("value") == "enabled")
+
+    def weather_effect(self, name: str) -> Optional[Dict[str, Any]]:
+        """某个天气声明的效果；**没声明就是 None**（调用方必须 fail closed）。
+
+        注意：这里只回答「配置怎么说」。天气名不在声明表里（例如自造的「晴天」）
+        与「没声明天气层」是两件事，但对调用方而言都只能是「不可结算」。
+        """
+        if not self.weather_enabled:
+            return None
+        effects = self.weather_policy.get("effects")
+        spec = effects.get(name) if isinstance(effects, dict) else None
+        return dict(spec) if isinstance(spec, dict) else None
+
+    def require_weather_effect(self, name: str) -> Dict[str, Any]:
+        """拿某个天气的效果；**没声明就抛**，绝不回落到一个默认效果。"""
+        spec = self.weather_effect(name)
+        if spec is None:
+            raise RuleConfigError(
+                f"规则配置 {self.ruleset_config_id} 没有声明天气「{name}」的结算口径"
+                f"（policies.weather_policy{' 未声明' if not self.weather_enabled else ' 里没有这一条'}）"
+                "—— 引擎不发明天气行为（fail closed）"
+            )
+        return spec
 
     @property
     def has_mana(self) -> bool:
@@ -856,8 +1045,17 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         # 可选能力：**缺字段就是 False**（legacy / v2 里没有这一块），不能借用
         # `_leaf_value`——它对缺字段是抛错（那条纪律是给必填项用的）。
         damage_multi_hit=_optional_leaf_true(config, "damage.multi_hit"),
+        energy_initial_for_all_pets=_optional_leaf_true(config, "energy.initial_for_all_pets"),
+        energy_cost_modifier=_optional_leaf_true(config, "energy.cost_modifier"),
+        energy_foe_energy_loss=_optional_leaf_true(config, "energy.foe_energy_loss"),
+        energy_per_layer_cost=_optional_leaf_true(config, "energy.per_layer_cost"),
+        damage_attack_stat_by_class=_optional_leaf_true(config, "damage.attack_stat_by_class"),
         damage_slot_condition=_optional_leaf_true(config, "damage.slot_condition"),
         damage_position_shift=_optional_leaf_true(config, "damage.position_shift"),
+        damage_initiative_condition=_optional_leaf_true(config, "damage.initiative_condition"),
+        damage_foe_switch_condition=_optional_leaf_true(config, "damage.foe_switch_condition"),
+        damage_per_use_ramp=_optional_leaf_true(config, "damage.per_use_ramp"),
+        damage_on_hit_ramp=_optional_leaf_true(config, "damage.on_hit_ramp"),
         action_order=tuple(str(x) for x in action_order),
         speed_tie=None if speed_tie == "unknown" else speed_tie,
         speed_tie_microcase_id=tie_microcase,
@@ -870,6 +1068,13 @@ def load_config(ruleset_config_id: str) -> RuleConfig:
         allowed_kinds=allowed_kinds,
         forbidden_kinds=forbidden_kinds,
         unknown_kinds_allowed=unknown_kinds_allowed,
+        # 2026-09-25：「背包物品不占行动」是配置声明。**缺字段 = None = UNKNOWN** ⇒ 自由动作拒绝。
+        magic_occupies_action=_optional_policy_bool(config, "policies.magic_policy.occupies_action"),
+        magic_occupies_action_status=_optional_raw_str(
+            config, "policies.magic_policy.occupies_action_status"),
+        # 2026-09-25：天气层整份从配置读（生成器从 battle-modes.json 照抄）。
+        # **缺字段 = None = 没声明** ⇒ 引擎里天气路径全部 fail closed（legacy / v2 逐位不变）。
+        weather_policy=_optional_policy_dict(config, "policies.weather_policy"),
         path=os.path.relpath(path, _repo_root()),
         raw=config,
     )
@@ -956,6 +1161,9 @@ def summarize(config: RuleConfig) -> Dict[str, Any]:
         "allowed_kinds": list(config.allowed_kinds) if config.allowed_kinds is not None else None,
         "forbidden_kinds": list(config.forbidden_kinds),
         "unknown_kinds_allowed": config.unknown_kinds_allowed,
+        # 2026-09-25：PVP 魔法 / 背包物品「占不占一次行动」。`None` = 没声明 ⇒ 自由动作 fail closed。
+        "magic_occupies_action": config.magic_occupies_action,
+        "magic_occupies_action_status": config.magic_occupies_action_status,
         "ledger_sha256": config.derived_from_ledger_sha256,
         "fingerprint": config.fingerprint(),
         "unknowns": config.unknowns,
@@ -985,8 +1193,14 @@ def describe_fields(config: RuleConfig) -> List[Dict[str, Any]]:
     return rows
 
 
-def selftest() -> int:
-    """`python3 -m roco_env.rule_config` 的自检（含反向控制）。"""
+def selftest(*, quiet: bool = False) -> Tuple[int, int]:
+    """`python3 -m roco_env.rule_config` 的自检（含反向控制）。
+
+    返回 `(failed, total)`，不再返回 exit code：SELF-01 之后它由
+    `roco/tests/test_rule_config_selftest.py` 在 `npm run test:env` 里直接调用，
+    调用方要同时拿到「几条红」与「一共几条」（只拿布尔的话，「全绿」与「删掉几条断言」
+    长得一样）。`quiet=True` 只关打印，计数一字不差。
+    """
     checks: List[Tuple[str, bool, str]] = []
 
     def push(name: str, ok: bool, actual: str) -> None:
@@ -1008,8 +1222,15 @@ def selftest() -> int:
     candidate = configs[CANDIDATE_RULE_CONFIG_ID]
     push("candidate 的上限是 10、自然回能是 0", (candidate.energy_max, candidate.energy_regen_per_turn) == (10, 0),
          f"max={candidate.energy_max} regen={candidate.energy_regen_per_turn}")
-    push("candidate 的入场能量是 unknown（null）而不是一个数", candidate.energy_initial is None,
-         repr(candidate.energy_initial))
+    # 2026-09-25（审计 SELF-01）口径变更：原断言写死「candidate 的入场能量必须是 UNKNOWN」，
+    # 那是 2026-09-23 之前的世界。依据：mobile-s4-candidate-v2.json 的 energy.initial 现为
+    # {value:10, confidence:RECORDED_IN_GAME, evidence_id:EV-ENERGY-INITIAL}（持有者实机读数）。
+    # 改成不变量：UNKNOWN(null) 仍合法；是数就必须由实机口径支撑。
+    _initial = candidate.raw.get("energy", {}).get("initial", {})
+    push("candidate 的入场能量：要么 UNKNOWN(null)，要么由实机口径（RECORDED_IN_GAME/MICROCASE）支撑",
+         candidate.energy_initial is None or _initial.get("confidence") in ("RECORDED_IN_GAME", "MICROCASE"),
+         f"initial={candidate.energy_initial!r} confidence={_initial.get('confidence')!r} "
+         f"evidence={_initial.get('evidence_id')!r}")
 
     # ── RC-105：v3 的 mana / actions ──────────────────────────────────────
     mana_cfg = configs.get(MANA_ACTIONS_CANDIDATE_ID)
@@ -1021,9 +1242,24 @@ def selftest() -> int:
               mana_cfg.mana_loss_when_zero, mana_cfg.mana_surrender) == (4, 1, True, True),
              f"pool={mana_cfg.mana_pool} faint={mana_cfg.mana_faint_cost} "
              f"loss_when_zero={mana_cfg.mana_loss_when_zero} surrender={mana_cfg.mana_surrender}")
-        push("v3 的 allowed_kinds 顺序即展示顺序，且聚能是独立动作类",
-             mana_cfg.allowed_kinds == ("skill", "charge", "switch", "surrender"),
-             str(mana_cfg.allowed_kinds))
+        # 2026-09-25（审计 SELF-01）口径变更：原断言是等值元组（没有 "magic"），那是
+        # 2026-09-23 之前的世界。依据：mobile-s4-candidate-v3.json 的 allowed_kinds 现含
+        # "magic"，由台账 EV-PVP-WISH-POWER-UP（RECORDED_IN_GAME）登记为合法动作类。
+        # 改成不变量：聚能是独立动作类且在换人/投降之前（顺序即展示顺序），magic 必须在。
+        _acts = mana_cfg.raw.get("actions", {})
+        _kinds = tuple(mana_cfg.allowed_kinds or ())
+        _declared = tuple(_acts.get("allowed_kinds", {}).get("value", ()) or ())
+        _charge_kind = _acts.get("kinds", {}).get("charge", {}).get("value")
+        push("v3 的 allowed_kinds 顺序即展示顺序，聚能是独立动作类、magic（PVP 魔法）已登记",
+             _kinds == _declared and "magic" in _kinds and "charge" in _kinds
+             and _kinds.index("charge") < _kinds.index("switch") < _kinds.index("surrender")
+             and _charge_kind != "skill",
+             f"allowed_kinds={_kinds} 与声明顺序一致={_kinds == _declared} charge.kind={_charge_kind!r}")
+        # 2026-09-25：这条期望值原来写成 `("item", "escape", "反证故意改错")` ——
+        # 多出来的第三项让断言**永远为假**（写必红反证时改错了地方：该改**输入**，却改了**期望**）。
+        # 后果是自检长期 27/28、`test:env` 长期红，而门禁没在冻结树上跑过就没人发现。
+        # 口径本身没变：标准 PVP 无道具与逃跑，配置里就是这两项（与上面 allowed_kinds 互不重叠、
+        # 与下面的「交集非空必须判红」反证一致）。
         push("v3 的 forbidden_kinds 是 item/escape（标准 PVP 无道具与逃跑）",
              mana_cfg.forbidden_kinds == ("item", "escape"), str(mana_cfg.forbidden_kinds))
         push("v3 不放行未声明的动作类", mana_cfg.unknown_kinds_allowed is False,
@@ -1120,21 +1356,29 @@ def selftest() -> int:
     push("反证②：删掉 energy.max 必须被判红", any("energy.max" in p for p in problems),
          str(problems)[:160])
 
-    # 反证③：UNKNOWN 字段补一个「看起来合理」的数 → 必须被判红
+    # 反证③：给一份**合成**的 UNKNOWN 字段补一个「看起来合理」的数 → 必须被判红
+    # 2026-09-25（审计 SELF-01）：原构造改的是真配置，而真配置已有实机依据 ⇒ 反证失去对象。
+    # 不再依赖「真配置恰好是 UNKNOWN」这种会漂的前提，所以自己合成一份。
     invented = json.loads(json.dumps(candidate.raw))
+    invented["energy"]["initial"] = {"value": None, "confidence": "UNKNOWN", "evidence_id": None,
+                                     "evidence_role": None, "reason": "反证③：合成 UNKNOWN 入场能量"}
+    clean3 = validate_config(invented, _load_ledger())
     invented["energy"]["initial"]["value"] = 2
     problems3 = validate_config(invented, _load_ledger())
     push("反证③：给 UNKNOWN 的入场能量补 2 必须被判红",
-         any("energy.initial" in p and "UNKNOWN" in p for p in problems3), str(problems3)[:160])
+         not clean3 and any("energy.initial" in p and "UNKNOWN" in p for p in problems3),
+         f"合成 UNKNOWN 配置本身应无问题={clean3}；补 2 后={str(problems3)[:160]}")
 
     failed = [c for c in checks if not c[1]]
-    for name, ok, actual in checks:
-        print(f"{'✔' if ok else '✖'} {name} — 实际：{actual}")
-    print(f"自检：{len(checks) - len(failed)}/{len(checks)} 通过")
-    return 1 if failed else 0
+    if not quiet:
+        for name, ok, actual in checks:
+            print(f"{'✔' if ok else '✖'} {name} — 实际：{actual}")
+        print(f"自检：{len(checks) - len(failed)}/{len(checks)} 通过")
+    return len(failed), len(checks)
 
 
 if __name__ == "__main__":  # pragma: no cover - 手工跑
     import sys
 
-    sys.exit(selftest())
+    _failed, _total = selftest()
+    sys.exit(0 if _failed == 0 else 1)   # 退出码语义不变：全绿 = 0

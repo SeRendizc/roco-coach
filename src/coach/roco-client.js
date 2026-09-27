@@ -208,7 +208,7 @@ const HIDDEN_KEYSET = new Set(HIDDEN_KEYS);
  * 新增一个会带私有状态的端点，必须同时改这里和 `roco-service.js`，
  * 并由 `tests/evals/roco/bridge.test.js` 的「两个域互不串门」钉住。
  */
-const PRIVATE_PLANE_PATHS = new Set(['/battle/new', '/battle/legal', '/battle/advance']);
+const PRIVATE_PLANE_PATHS = new Set(['/battle/new', '/battle/legal', '/battle/advance', '/battle/free']);
 
 export {HIDDEN_KEYSET, PRIVATE_PLANE_PATHS};
 
@@ -349,6 +349,17 @@ export class RocoClient {
    * 失败一律抛 `RocoError`：这是环境问题，不是「引擎答不了」。
    */
   async startService(options = {}) {
+    // 2026-09-27 真机复验（kill -9 引擎之后再开局）：这一条原来也只写 `exitCode === null`，
+    // 而**被信号杀死**的子进程 exitCode 恒为 null ⇒ 永远走"已在运行"这一支，
+    // 于是引擎崩了之后**永远不会被重新拉起**（"整局永久不可用"的真正那一半）。
+    // 判死之后要把死掉的 child/baseUrl 清掉，否则下面的启动逻辑会以为还占着端口。
+    const alive = this.child && this.child.exitCode === null
+      && (this.child.signalCode === null || this.child.signalCode === undefined);
+    if (!alive && this.child) {
+      try { this.child.removeAllListeners?.(); } catch { /* 忽略 */ }
+      this.child = null;
+      this.baseUrl = null;
+    }
     if (this.child && this.child.exitCode === null && this.baseUrl) {
       return { ok: true, alreadyRunning: true, baseUrl: this.baseUrl, ...(this.readyInfo || {}) };
     }
@@ -958,6 +969,20 @@ export class RocoClient {
     if (action) body.action = action;
     if (playerStrategy) body.player_strategy = playerStrategy;
     return this._request('POST', '/battle/advance', this._payload(body, { stateVersion }), { stateVersion });
+  }
+
+  /**
+   * **不占行动的自由动作**（PVP 魔法 / 背包物品）。
+   *
+   * 人类 2026-09-25：「愿力强化不占行动，自由动作，背包物品都不占行动」⇒ 它**不推进回合**：
+   * 对手那一手还没结算，玩家随后照常出这一手（再调 `battleAdvance`）。
+   * 能力由规则集声明（`policies.magic_policy.occupies_action === false`）；
+   * 没声明的配置由引擎 fail closed（422 `unsupported_effect`），这里不猜、不降级。
+   */
+  async battleFree({ state, action, strategy = 'greedy_damage', stateVersion = 0 } = {}) {
+    const body = { state, strategy };
+    if (action) body.action = action;
+    return this._request('POST', '/battle/free', this._payload(body, { stateVersion }), { stateVersion });
   }
 
   /**

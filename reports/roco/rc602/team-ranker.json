@@ -1,0 +1,1562 @@
+{
+  "schema": "roco-rc602-team-ranker-report/v1",
+  "generated_by": "scripts/roco/build-rc602-report.mjs",
+  "ruleset_id": "roco-world-s4-2026-09-10",
+  "dataset_hash": "6ef39855bfc7f6ce02ef2bed8bd85bbefcd69e749b8ef54b471b100890ebc382",
+  "ranker_id": "roco-rule-pairwise-ranker",
+  "ranker_version": "rc602/1",
+  "ranker_status": {
+    "schema": "roco-team-ranker-status/v1",
+    "ranker_id": "roco-rule-pairwise-ranker",
+    "version": "rc602/1",
+    "kind": "rule_heuristic",
+    "learned_weights": false,
+    "trained_model_present": false,
+    "training_labels": 0,
+    "calibrated": false,
+    "rank_only": true,
+    "emits_outcome_prediction": false,
+    "emits_win_rate": false,
+    "emits_percent": false,
+    "unknown_policy": "fail_closed",
+    "fills_rc303_ranker_missing": "heuristic_only",
+    "confidence": "ENGINE_HYPOTHESIS",
+    "learned_ranker_unlock_requirements": [
+      "对局标签：RC-601 的轨迹重建必须先产出（manifest 绑定 ruleset/engine/data pack/opponent policy/split/sha256），现在 RC-601 是 BLOCKED、仓内也没有任何一局真实对局记录",
+      "标签契约：每条样本至少要能回指具体 ruleset 版本 + 双方六宠 build + 出手序列；现在 `data/roco/evidence/rule-evidence-ledger.json` 里没有任何一条与之对应的量",
+      "划分：训练/验证/测试按赛季切分（不能同赛季泄漏）；现在连一个赛季的标签都没有",
+      "校准证据：排序器要报 calibrated=true 必须先有 held-out 校准（本仓现在没有）",
+      "特征可用性：面板值（level/nature/talent/specialty/bloodline 换算）至今 UNKNOWN —— 没有它，任何「关键速度线」类特征都建不起来"
+    ],
+    "not_available_reasons": {
+      "learned_weights": "本仓没有任何 train/val/test 对局标签（RC-601 BLOCKED、RC-603 由用户亲训）",
+      "outcome_prediction": "红线：不许发明胜负预测；本排序器也不产出任何概率（`emits_outcome_prediction: false`）",
+      "panel_stats": "冻结数据里 48 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN",
+      "key_speed_lines": "关键速度线要真实面板值（对手速度阈），面板换算公式未校准 ⇒ 现在算不出来",
+      "calibration": "没有 held-out 校准集，所以 calibrated 只能是 false"
+    }
+  },
+  "units": {
+    "relative": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+    "count": "计数（个 / 只 / 条），不带分母时不构成任何比例",
+    "ratio": "0～1 的占比（分子分母都来自同一份注入数据，可逐条复算；不是百分数）",
+    "milliseconds": "毫秒（实测墙钟，只用于延迟报告）"
+  },
+  "corpus": {
+    "owned_instances": 48,
+    "owned_species": 48,
+    "catalog_species": 622,
+    "validated_species": 48,
+    "species_with_frozen_learnset": 48,
+    "registered_attack_types": 18,
+    "registered_type_combo_rows": 120,
+    "speed_values_available": 622,
+    "ruleset_energy_caps": [
+      {
+        "ruleset_config_id": "legacy_sim_v1",
+        "cap": 6,
+        "cap_confidence": "ENGINE_HYPOTHESIS",
+        "cap_source": "data/roco/rulesets/legacy-sim-v1.json"
+      },
+      {
+        "ruleset_config_id": "mobile_s4_candidate_v2",
+        "cap": 10,
+        "cap_confidence": "CROSS_SOURCE_SUPPORTED",
+        "cap_source": "data/roco/rulesets/mobile-s4-candidate-v2.json"
+      },
+      {
+        "ruleset_config_id": "mobile_s4_candidate_v3",
+        "cap": 10,
+        "cap_confidence": "CROSS_SOURCE_SUPPORTED",
+        "cap_source": "data/roco/rulesets/mobile-s4-candidate-v3.json"
+      }
+    ],
+    "ruleset_energy_cap_used": 6
+  },
+  "pairwise_instances": {
+    "criterion": "对 48 个冻结个体取全部 C(48,2) = 1128 对，逐对调 pairwiseFeatures()；可算 = 六个维度全部算得出（available:true）",
+    "pairs_total": 1128,
+    "pairs_available": 1128,
+    "pairs_unavailable": 0,
+    "unknown_reason_distribution": {},
+    "latency_ms": {
+      "unit": "毫秒（实测墙钟，只用于延迟报告）",
+      "samples": 1128,
+      "p50": 0.016,
+      "p95": 0.033,
+      "min": 0.011,
+      "max": 0.541,
+      "total": 23.162
+    },
+    "per_axis_availability": {
+      "type_coverage": {
+        "source": "teamFeatures().coverage",
+        "available": 1128,
+        "unavailable": 0,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
+      },
+      "weakness_exposure": {
+        "source": "teamFeatures().synergy",
+        "available": 1128,
+        "unavailable": 0,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
+      },
+      "speed_layers": {
+        "source": "teamFeatures().speed",
+        "available": 1128,
+        "unavailable": 0,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
+      },
+      "respond_coverage": {
+        "source": "teamFeatures().respond",
+        "available": 1128,
+        "unavailable": 0,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
+      },
+      "energy_curve": {
+        "source": "teamFeatures().energy",
+        "available": 1128,
+        "unavailable": 0,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
+      },
+      "pivot_sustain": {
+        "source": "teamFeatures().pivot",
+        "available": 1128,
+        "unavailable": 0,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）"
+      }
+    },
+    "key_speed_lines": {
+      "available": 0,
+      "unavailable": 1128,
+      "required": "panel_stats（等级换算后的面板值）",
+      "unknown_reason": "关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；冻结数据里 48 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论"
+    }
+  },
+  "pairwise_six_pet": {
+    "criterion": "8 支互不重叠的六宠队（48 只刚好分 8 队）取全部 C(8,2) = 28 对",
+    "teams": [
+      {
+        "team_id": "rc602-team-01",
+        "members": [
+          "instance:own-0001",
+          "instance:own-0002",
+          "instance:own-0003",
+          "instance:own-0004",
+          "instance:own-0005",
+          "instance:own-0006"
+        ]
+      },
+      {
+        "team_id": "rc602-team-02",
+        "members": [
+          "instance:own-0007",
+          "instance:own-0008",
+          "instance:own-0009",
+          "instance:own-0010",
+          "instance:own-0011",
+          "instance:own-0012"
+        ]
+      },
+      {
+        "team_id": "rc602-team-03",
+        "members": [
+          "instance:own-0013",
+          "instance:own-0014",
+          "instance:own-0015",
+          "instance:own-0016",
+          "instance:own-0017",
+          "instance:own-0018"
+        ]
+      },
+      {
+        "team_id": "rc602-team-04",
+        "members": [
+          "instance:own-0019",
+          "instance:own-0020",
+          "instance:own-0021",
+          "instance:own-0022",
+          "instance:own-0023",
+          "instance:own-0024"
+        ]
+      },
+      {
+        "team_id": "rc602-team-05",
+        "members": [
+          "instance:own-0025",
+          "instance:own-0026",
+          "instance:own-0027",
+          "instance:own-0028",
+          "instance:own-0029",
+          "instance:own-0030"
+        ]
+      },
+      {
+        "team_id": "rc602-team-06",
+        "members": [
+          "instance:own-0031",
+          "instance:own-0032",
+          "instance:own-0033",
+          "instance:own-0034",
+          "instance:own-0035",
+          "instance:own-0036"
+        ]
+      },
+      {
+        "team_id": "rc602-team-07",
+        "members": [
+          "instance:own-0037",
+          "instance:own-0038",
+          "instance:own-0039",
+          "instance:own-0040",
+          "instance:own-0041",
+          "instance:own-0042"
+        ]
+      },
+      {
+        "team_id": "rc602-team-08",
+        "members": [
+          "instance:own-0043",
+          "instance:own-0044",
+          "instance:own-0045",
+          "instance:own-0046",
+          "instance:own-0047",
+          "instance:own-0048"
+        ]
+      }
+    ],
+    "pairs_total": 28,
+    "pairs_available": 28,
+    "pairs_unavailable": 0,
+    "latency_ms": {
+      "unit": "毫秒（实测墙钟，只用于延迟报告）",
+      "samples": 28,
+      "p50": 0.078,
+      "p95": 0.1,
+      "min": 0.063,
+      "max": 0.107
+    },
+    "sample_pairing": {
+      "team_a": "rc602-team-01",
+      "team_b": "rc602-team-02",
+      "available": true,
+      "unknown_reason": null,
+      "per_axis": {
+        "type_coverage": {
+          "values": {
+            "teamA": 0.7778,
+            "teamB": 0.7778
+          },
+          "advantage": 0,
+          "leads": null
+        },
+        "weakness_exposure": {
+          "values": {
+            "teamA": 0.7727,
+            "teamB": 0.6429
+          },
+          "advantage": 0.1298,
+          "leads": "teamA"
+        },
+        "speed_layers": {
+          "values": {
+            "teamA": 1,
+            "teamB": 1
+          },
+          "advantage": 0,
+          "leads": null
+        },
+        "respond_coverage": {
+          "values": {
+            "teamA": 1,
+            "teamB": 1
+          },
+          "advantage": 0,
+          "leads": null
+        },
+        "energy_curve": {
+          "values": {
+            "teamA": 1,
+            "teamB": 1
+          },
+          "advantage": 0,
+          "leads": null
+        },
+        "pivot_sustain": {
+          "values": {
+            "teamA": 1,
+            "teamB": 0.6667
+          },
+          "advantage": 0.3333,
+          "leads": "teamA"
+        }
+      },
+      "speed_key_lines_available": false
+    }
+  },
+  "ranking": {
+    "criterion": "同分必须有稳定 tie-break（默认 team_id 字典序）；任何一维不可算的队伍进 unranked，不用 0 混进排序",
+    "tie_break": "team_id_lexicographic",
+    "tie_break_order": [
+      "team_id_lexicographic",
+      "input_order"
+    ],
+    "teams_in": 8,
+    "ranked_count": 8,
+    "unranked_count": 0,
+    "top5": [
+      {
+        "rank": 1,
+        "team_id": "rc602-team-07",
+        "score": 0.9063,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+        "tied_with_previous": false,
+        "parts": {
+          "type_coverage": {
+            "raw": 0.8333,
+            "weight": 0.24,
+            "contribution": 0.2,
+            "from": "type_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
+            "values": {
+              "teamA": 0.8333,
+              "teamB": 0.8333
+            },
+            "leads": null
+          },
+          "weakness_exposure": {
+            "raw": 0.8148,
+            "weight": 0.2,
+            "contribution": 0.163,
+            "from": "weakness_exposure",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
+            "values": {
+              "teamA": 0.8148,
+              "teamB": 0.8148
+            },
+            "leads": null
+          },
+          "speed_layers": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "speed_layers",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "respond_coverage": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "respond_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "energy_curve": {
+            "raw": 1,
+            "weight": 0.14,
+            "contribution": 0.14,
+            "from": "energy_curve",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "pivot_sustain": {
+            "raw": 0.8333,
+            "weight": 0.1,
+            "contribution": 0.0833,
+            "from": "pivot_sustain",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
+            "values": {
+              "teamA": 0.8333,
+              "teamB": 0.8333
+            },
+            "leads": null
+          }
+        },
+        "resolved_member_count": 6,
+        "unavailable_dimensions": []
+      },
+      {
+        "rank": 2,
+        "team_id": "rc602-team-08",
+        "score": 0.9027,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+        "tied_with_previous": false,
+        "parts": {
+          "type_coverage": {
+            "raw": 0.8333,
+            "weight": 0.24,
+            "contribution": 0.2,
+            "from": "type_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
+            "values": {
+              "teamA": 0.8333,
+              "teamB": 0.8333
+            },
+            "leads": null
+          },
+          "weakness_exposure": {
+            "raw": 0.88,
+            "weight": 0.2,
+            "contribution": 0.176,
+            "from": "weakness_exposure",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
+            "values": {
+              "teamA": 0.88,
+              "teamB": 0.88
+            },
+            "leads": null
+          },
+          "speed_layers": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "speed_layers",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "respond_coverage": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "respond_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "energy_curve": {
+            "raw": 1,
+            "weight": 0.14,
+            "contribution": 0.14,
+            "from": "energy_curve",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "pivot_sustain": {
+            "raw": 0.6667,
+            "weight": 0.1,
+            "contribution": 0.0667,
+            "from": "pivot_sustain",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
+            "values": {
+              "teamA": 0.6667,
+              "teamB": 0.6667
+            },
+            "leads": null
+          }
+        },
+        "resolved_member_count": 6,
+        "unavailable_dimensions": []
+      },
+      {
+        "rank": 3,
+        "team_id": "rc602-team-01",
+        "score": 0.9012,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+        "tied_with_previous": false,
+        "parts": {
+          "type_coverage": {
+            "raw": 0.7778,
+            "weight": 0.24,
+            "contribution": 0.1867,
+            "from": "type_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
+            "values": {
+              "teamA": 0.7778,
+              "teamB": 0.7778
+            },
+            "leads": null
+          },
+          "weakness_exposure": {
+            "raw": 0.7727,
+            "weight": 0.2,
+            "contribution": 0.1545,
+            "from": "weakness_exposure",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
+            "values": {
+              "teamA": 0.7727,
+              "teamB": 0.7727
+            },
+            "leads": null
+          },
+          "speed_layers": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "speed_layers",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "respond_coverage": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "respond_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "energy_curve": {
+            "raw": 1,
+            "weight": 0.14,
+            "contribution": 0.14,
+            "from": "energy_curve",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "pivot_sustain": {
+            "raw": 1,
+            "weight": 0.1,
+            "contribution": 0.1,
+            "from": "pivot_sustain",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          }
+        },
+        "resolved_member_count": 6,
+        "unavailable_dimensions": []
+      },
+      {
+        "rank": 4,
+        "team_id": "rc602-team-02",
+        "score": 0.8419,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+        "tied_with_previous": false,
+        "parts": {
+          "type_coverage": {
+            "raw": 0.7778,
+            "weight": 0.24,
+            "contribution": 0.1867,
+            "from": "type_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
+            "values": {
+              "teamA": 0.7778,
+              "teamB": 0.7778
+            },
+            "leads": null
+          },
+          "weakness_exposure": {
+            "raw": 0.6429,
+            "weight": 0.2,
+            "contribution": 0.1286,
+            "from": "weakness_exposure",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
+            "values": {
+              "teamA": 0.6429,
+              "teamB": 0.6429
+            },
+            "leads": null
+          },
+          "speed_layers": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "speed_layers",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "respond_coverage": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "respond_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "energy_curve": {
+            "raw": 1,
+            "weight": 0.14,
+            "contribution": 0.14,
+            "from": "energy_curve",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "pivot_sustain": {
+            "raw": 0.6667,
+            "weight": 0.1,
+            "contribution": 0.0667,
+            "from": "pivot_sustain",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
+            "values": {
+              "teamA": 0.6667,
+              "teamB": 0.6667
+            },
+            "leads": null
+          }
+        },
+        "resolved_member_count": 6,
+        "unavailable_dimensions": []
+      },
+      {
+        "rank": 5,
+        "team_id": "rc602-team-04",
+        "score": 0.7815,
+        "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+        "tied_with_previous": false,
+        "parts": {
+          "type_coverage": {
+            "raw": 0.6667,
+            "weight": 0.24,
+            "contribution": 0.16,
+            "from": "type_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
+            "values": {
+              "teamA": 0.6667,
+              "teamB": 0.6667
+            },
+            "leads": null
+          },
+          "weakness_exposure": {
+            "raw": 0.7241,
+            "weight": 0.2,
+            "contribution": 0.1448,
+            "from": "weakness_exposure",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
+            "values": {
+              "teamA": 0.7241,
+              "teamB": 0.7241
+            },
+            "leads": null
+          },
+          "speed_layers": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "speed_layers",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "respond_coverage": {
+            "raw": 1,
+            "weight": 0.16,
+            "contribution": 0.16,
+            "from": "respond_coverage",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "energy_curve": {
+            "raw": 1,
+            "weight": 0.14,
+            "contribution": 0.14,
+            "from": "energy_curve",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
+            "values": {
+              "teamA": 1,
+              "teamB": 1
+            },
+            "leads": null
+          },
+          "pivot_sustain": {
+            "raw": 0.1667,
+            "weight": 0.1,
+            "contribution": 0.0167,
+            "from": "pivot_sustain",
+            "provenance": "ENGINE_HYPOTHESIS",
+            "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
+            "values": {
+              "teamA": 0.1667,
+              "teamB": 0.1667
+            },
+            "leads": null
+          }
+        },
+        "resolved_member_count": 6,
+        "unavailable_dimensions": []
+      }
+    ],
+    "latency_ms": {
+      "unit": "毫秒（实测墙钟，只用于延迟报告）",
+      "samples": 5,
+      "p50": 0.329,
+      "p95": 0.342,
+      "min": 0.296,
+      "max": 0.342
+    }
+  },
+  "partial_completion_value": {
+    "criterion": "k ∈ [1,6] 才算；所有金额都是可复算的计数或占比；uncertainty 只描述候选池规模与 unknown 占比",
+    "candidate_pool_size": 42,
+    "latency_ms": {
+      "unit": "毫秒（实测墙钟，只用于延迟报告）",
+      "samples": 6,
+      "p50": 0.058,
+      "p95": 0.083,
+      "min": 0.056,
+      "max": 0.083
+    },
+    "rows": [
+      {
+        "k": 1,
+        "available": true,
+        "unknown_reason": null,
+        "score": 0.3704,
+        "weakest_part": "coverage_resistable_types",
+        "remaining_slots": 5,
+        "parts": {
+          "coverage_resistable_types": {
+            "value": 2,
+            "target": 18,
+            "ratio": 0.1111,
+            "gap_count": 16,
+            "gap_types": [
+              "光系",
+              "冰系",
+              "地系",
+              "幻系",
+              "幽系",
+              "恶系",
+              "普通系",
+              "机械系",
+              "毒系",
+              "水系",
+              "火系",
+              "电系",
+              "翼系",
+              "萌系",
+              "虫系",
+              "龙系"
+            ],
+            "unknown_members": []
+          },
+          "speed_bands_covered": {
+            "value": 1,
+            "target": 3,
+            "bands": [
+              "mid"
+            ],
+            "gap_count": 2,
+            "unknown_members": []
+          },
+          "respond_variants_covered": {
+            "value": 2,
+            "target": 3,
+            "variants": [
+              "应对攻击",
+              "应对状态"
+            ],
+            "gap_count": 1,
+            "unknown_members": []
+          },
+          "pivot_holders": {
+            "value": 1,
+            "target": 1,
+            "holders": [
+              "instance:own-0001"
+            ],
+            "ratio": 1
+          },
+          "pool_fillable_slots": {
+            "value": 5,
+            "remaining_slots": 5,
+            "pool_size": 42,
+            "pool_fully_known": 42,
+            "pool_unknown": 0,
+            "raw_pool_size": 42
+          }
+        },
+        "uncertainty": {
+          "available_pool_size": 42,
+          "raw_candidate_count": 42,
+          "pool_unknown_members": 0,
+          "pool_unknown_ratio": 0,
+          "pool_fully_known_ratio": 1,
+          "fillability_ratio": 1,
+          "structural_gap_count": 19,
+          "score_band": {
+            "low": 0.3704,
+            "high": 0.3704
+          },
+          "band_half_width": 0,
+          "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+          "why": "区间宽度只由「候选池能填满几个剩余槽位」与「池里有多少只带 unknown」决定；它描述的是**我们不知道多少**，不是任何意义上的可能性"
+        }
+      },
+      {
+        "k": 2,
+        "available": true,
+        "unknown_reason": null,
+        "score": 0.6667,
+        "weakest_part": "coverage_resistable_types",
+        "remaining_slots": 4,
+        "parts": {
+          "coverage_resistable_types": {
+            "value": 6,
+            "target": 18,
+            "ratio": 0.3333,
+            "gap_count": 12,
+            "gap_types": [
+              "光系",
+              "地系",
+              "幻系",
+              "幽系",
+              "恶系",
+              "普通系",
+              "毒系",
+              "水系",
+              "火系",
+              "电系",
+              "翼系",
+              "龙系"
+            ],
+            "unknown_members": []
+          },
+          "speed_bands_covered": {
+            "value": 2,
+            "target": 3,
+            "bands": [
+              "fast",
+              "mid"
+            ],
+            "gap_count": 1,
+            "unknown_members": []
+          },
+          "respond_variants_covered": {
+            "value": 3,
+            "target": 3,
+            "variants": [
+              "应对攻击",
+              "应对状态",
+              "应对防御"
+            ],
+            "gap_count": 0,
+            "unknown_members": []
+          },
+          "pivot_holders": {
+            "value": 2,
+            "target": 2,
+            "holders": [
+              "instance:own-0001",
+              "instance:own-0002"
+            ],
+            "ratio": 1
+          },
+          "pool_fillable_slots": {
+            "value": 4,
+            "remaining_slots": 4,
+            "pool_size": 42,
+            "pool_fully_known": 42,
+            "pool_unknown": 0,
+            "raw_pool_size": 42
+          }
+        },
+        "uncertainty": {
+          "available_pool_size": 42,
+          "raw_candidate_count": 42,
+          "pool_unknown_members": 0,
+          "pool_unknown_ratio": 0,
+          "pool_fully_known_ratio": 1,
+          "fillability_ratio": 1,
+          "structural_gap_count": 13,
+          "score_band": {
+            "low": 0.6667,
+            "high": 0.6667
+          },
+          "band_half_width": 0,
+          "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+          "why": "区间宽度只由「候选池能填满几个剩余槽位」与「池里有多少只带 unknown」决定；它描述的是**我们不知道多少**，不是任何意义上的可能性"
+        }
+      },
+      {
+        "k": 3,
+        "available": true,
+        "unknown_reason": null,
+        "score": 0.7778,
+        "weakest_part": "speed_bands_covered",
+        "remaining_slots": 3,
+        "parts": {
+          "coverage_resistable_types": {
+            "value": 12,
+            "target": 18,
+            "ratio": 0.6667,
+            "gap_count": 6,
+            "gap_types": [
+              "光系",
+              "地系",
+              "幽系",
+              "恶系",
+              "水系",
+              "龙系"
+            ],
+            "unknown_members": []
+          },
+          "speed_bands_covered": {
+            "value": 2,
+            "target": 3,
+            "bands": [
+              "fast",
+              "mid"
+            ],
+            "gap_count": 1,
+            "unknown_members": []
+          },
+          "respond_variants_covered": {
+            "value": 3,
+            "target": 3,
+            "variants": [
+              "应对攻击",
+              "应对状态",
+              "应对防御"
+            ],
+            "gap_count": 0,
+            "unknown_members": []
+          },
+          "pivot_holders": {
+            "value": 3,
+            "target": 3,
+            "holders": [
+              "instance:own-0001",
+              "instance:own-0002",
+              "instance:own-0003"
+            ],
+            "ratio": 1
+          },
+          "pool_fillable_slots": {
+            "value": 3,
+            "remaining_slots": 3,
+            "pool_size": 42,
+            "pool_fully_known": 42,
+            "pool_unknown": 0,
+            "raw_pool_size": 42
+          }
+        },
+        "uncertainty": {
+          "available_pool_size": 42,
+          "raw_candidate_count": 42,
+          "pool_unknown_members": 0,
+          "pool_unknown_ratio": 0,
+          "pool_fully_known_ratio": 1,
+          "fillability_ratio": 1,
+          "structural_gap_count": 7,
+          "score_band": {
+            "low": 0.7778,
+            "high": 0.7778
+          },
+          "band_half_width": 0,
+          "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+          "why": "区间宽度只由「候选池能填满几个剩余槽位」与「池里有多少只带 unknown」决定；它描述的是**我们不知道多少**，不是任何意义上的可能性"
+        }
+      },
+      {
+        "k": 4,
+        "available": true,
+        "unknown_reason": null,
+        "score": 0.8148,
+        "weakest_part": "speed_bands_covered",
+        "remaining_slots": 2,
+        "parts": {
+          "coverage_resistable_types": {
+            "value": 14,
+            "target": 18,
+            "ratio": 0.7778,
+            "gap_count": 4,
+            "gap_types": [
+              "地系",
+              "幽系",
+              "恶系",
+              "龙系"
+            ],
+            "unknown_members": []
+          },
+          "speed_bands_covered": {
+            "value": 2,
+            "target": 3,
+            "bands": [
+              "fast",
+              "mid"
+            ],
+            "gap_count": 1,
+            "unknown_members": []
+          },
+          "respond_variants_covered": {
+            "value": 3,
+            "target": 3,
+            "variants": [
+              "应对攻击",
+              "应对状态",
+              "应对防御"
+            ],
+            "gap_count": 0,
+            "unknown_members": []
+          },
+          "pivot_holders": {
+            "value": 4,
+            "target": 4,
+            "holders": [
+              "instance:own-0001",
+              "instance:own-0002",
+              "instance:own-0003",
+              "instance:own-0004"
+            ],
+            "ratio": 1
+          },
+          "pool_fillable_slots": {
+            "value": 2,
+            "remaining_slots": 2,
+            "pool_size": 42,
+            "pool_fully_known": 42,
+            "pool_unknown": 0,
+            "raw_pool_size": 42
+          }
+        },
+        "uncertainty": {
+          "available_pool_size": 42,
+          "raw_candidate_count": 42,
+          "pool_unknown_members": 0,
+          "pool_unknown_ratio": 0,
+          "pool_fully_known_ratio": 1,
+          "fillability_ratio": 1,
+          "structural_gap_count": 5,
+          "score_band": {
+            "low": 0.8148,
+            "high": 0.8148
+          },
+          "band_half_width": 0,
+          "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+          "why": "区间宽度只由「候选池能填满几个剩余槽位」与「池里有多少只带 unknown」决定；它描述的是**我们不知道多少**，不是任何意义上的可能性"
+        }
+      },
+      {
+        "k": 5,
+        "available": true,
+        "unknown_reason": null,
+        "score": 0.8148,
+        "weakest_part": "speed_bands_covered",
+        "remaining_slots": 1,
+        "parts": {
+          "coverage_resistable_types": {
+            "value": 14,
+            "target": 18,
+            "ratio": 0.7778,
+            "gap_count": 4,
+            "gap_types": [
+              "地系",
+              "幽系",
+              "恶系",
+              "龙系"
+            ],
+            "unknown_members": []
+          },
+          "speed_bands_covered": {
+            "value": 2,
+            "target": 3,
+            "bands": [
+              "fast",
+              "mid"
+            ],
+            "gap_count": 1,
+            "unknown_members": []
+          },
+          "respond_variants_covered": {
+            "value": 3,
+            "target": 3,
+            "variants": [
+              "应对攻击",
+              "应对状态",
+              "应对防御"
+            ],
+            "gap_count": 0,
+            "unknown_members": []
+          },
+          "pivot_holders": {
+            "value": 5,
+            "target": 5,
+            "holders": [
+              "instance:own-0001",
+              "instance:own-0002",
+              "instance:own-0003",
+              "instance:own-0004",
+              "instance:own-0005"
+            ],
+            "ratio": 1
+          },
+          "pool_fillable_slots": {
+            "value": 1,
+            "remaining_slots": 1,
+            "pool_size": 42,
+            "pool_fully_known": 42,
+            "pool_unknown": 0,
+            "raw_pool_size": 42
+          }
+        },
+        "uncertainty": {
+          "available_pool_size": 42,
+          "raw_candidate_count": 42,
+          "pool_unknown_members": 0,
+          "pool_unknown_ratio": 0,
+          "pool_fully_known_ratio": 1,
+          "fillability_ratio": 1,
+          "structural_gap_count": 5,
+          "score_band": {
+            "low": 0.8148,
+            "high": 0.8148
+          },
+          "band_half_width": 0,
+          "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+          "why": "区间宽度只由「候选池能填满几个剩余槽位」与「池里有多少只带 unknown」决定；它描述的是**我们不知道多少**，不是任何意义上的可能性"
+        }
+      },
+      {
+        "k": 6,
+        "available": true,
+        "unknown_reason": null,
+        "score": 0.8148,
+        "weakest_part": "speed_bands_covered",
+        "remaining_slots": 0,
+        "parts": {
+          "coverage_resistable_types": {
+            "value": 14,
+            "target": 18,
+            "ratio": 0.7778,
+            "gap_count": 4,
+            "gap_types": [
+              "地系",
+              "幽系",
+              "恶系",
+              "龙系"
+            ],
+            "unknown_members": []
+          },
+          "speed_bands_covered": {
+            "value": 2,
+            "target": 3,
+            "bands": [
+              "fast",
+              "mid"
+            ],
+            "gap_count": 1,
+            "unknown_members": []
+          },
+          "respond_variants_covered": {
+            "value": 3,
+            "target": 3,
+            "variants": [
+              "应对攻击",
+              "应对状态",
+              "应对防御"
+            ],
+            "gap_count": 0,
+            "unknown_members": []
+          },
+          "pivot_holders": {
+            "value": 6,
+            "target": 6,
+            "holders": [
+              "instance:own-0001",
+              "instance:own-0002",
+              "instance:own-0003",
+              "instance:own-0004",
+              "instance:own-0005",
+              "instance:own-0006"
+            ],
+            "ratio": 1
+          },
+          "pool_fillable_slots": {
+            "value": 0,
+            "remaining_slots": 0,
+            "pool_size": 42,
+            "pool_fully_known": 42,
+            "pool_unknown": 0,
+            "raw_pool_size": 42
+          }
+        },
+        "uncertainty": {
+          "available_pool_size": 42,
+          "raw_candidate_count": 42,
+          "pool_unknown_members": 0,
+          "pool_unknown_ratio": 0,
+          "pool_fully_known_ratio": 1,
+          "fillability_ratio": 1,
+          "structural_gap_count": 5,
+          "score_band": {
+            "low": 0.8148,
+            "high": 0.8148
+          },
+          "band_half_width": 0,
+          "unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+          "why": "区间宽度只由「候选池能填满几个剩余槽位」与「池里有多少只带 unknown」决定；它描述的是**我们不知道多少**，不是任何意义上的可能性"
+        }
+      }
+    ],
+    "boundary_cases": {
+      "k_zero": {
+        "available": false,
+        "unknown_reason": "一只都没选（k = 0）：没有已选结构，覆盖/速度/应对缺口都无从谈起，所以不给价值（也不给 0）",
+        "chosen_count": 0,
+        "problems": []
+      },
+      "k_seven": {
+        "available": false,
+        "unknown_reason": "已选 7 只 > 标准六宠：超出槽位数没有定义（不给「多出来的算不算」这种猜测）",
+        "chosen_count": 7,
+        "problems": []
+      },
+      "duplicate": {
+        "available": false,
+        "unknown_reason": "重复的成员 id：[DUPLICATE_MEMBER] rc602-partial-dup.members[own-0001]：同一只被登记了两次：同一只上两次不构成第二层覆盖，按重复拒绝而不是算两遍",
+        "chosen_count": 2,
+        "problems": [
+          "[DUPLICATE_MEMBER] rc602-partial-dup.members[own-0001]"
+        ]
+      },
+      "illegal_id": {
+        "available": false,
+        "unknown_reason": "已选的 1 只一个都解析不出来：[UNRESOLVED_MEMBER] rc602-partial-bad.members[instance:own-9999]：成员引用解析不出 species_id（key=instance:own-9999）：既不是 owned 实例、也没有 species_id；[NO_RESOLVED_MEMBERS] rc602-partial-bad：一个成员都没解析出来：没有可算的结构基线（不返回全 0）",
+        "chosen_count": 1,
+        "problems": [
+          "[UNRESOLVED_MEMBER] rc602-partial-bad.members[instance:own-9999]",
+          "[NO_RESOLVED_MEMBERS] rc602-partial-bad"
+        ]
+      }
+    }
+  },
+  "minimal_replacement_sample": {
+    "criterion": "复用 RC-304 minimalReplacement()，不另写一套；本脚本不建 RC-302 缺口诊断，所以它应当如实说算不出来",
+    "replacement": null,
+    "confirmed_by_distribution": false,
+    "confidence": "UNKNOWN",
+    "why": "队伍里一个成员都没有：没有可换下的槽位，所以不给替换方案（不编一个假方案）"
+  },
+  "rc303_wiring": {
+    "criterion": "RC-303 resolveRanker(RULE_PAIRWISE_RANKER) 必须报 ready，且 calibrated=false 让置信等级停在 ENGINE_HYPOTHESIS",
+    "resolve_ranker_status": "ready",
+    "ranker_id": "roco-rule-pairwise-ranker",
+    "version": "rc602/1",
+    "reason": "版本化排序器产物 roco-rule-pairwise-ranker@rc602/1",
+    "calibrated": false,
+    "no_win_rate_preserved": true
+  },
+  "weights": {
+    "type_coverage": {
+      "id": "type_coverage",
+      "weight": 0.24,
+      "feature": "type_coverage",
+      "source": "teamFeatures().coverage",
+      "provenance": "ENGINE_HYPOTHESIS",
+      "reason": "冻结相性表（120 行，含 102 行组合）逐条可复算，是六个维度里证据最硬的一项",
+      "direction": "higher_is_better",
+      "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[组合键].resist"
+    },
+    "weakness_exposure": {
+      "id": "weakness_exposure",
+      "weight": 0.2,
+      "feature": "weakness_exposure",
+      "source": "teamFeatures().synergy",
+      "provenance": "ENGINE_HYPOTHESIS",
+      "reason": "与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感",
+      "direction": "lower_is_better（取 1 − 未承接占比，已翻正）",
+      "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/types.json#types[组合键].weak"
+    },
+    "speed_layers": {
+      "id": "speed_layers",
+      "weight": 0.16,
+      "feature": "speed_layers",
+      "source": "teamFeatures().speed",
+      "provenance": "ENGINE_HYPOTHESIS",
+      "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+      "direction": "higher_is_better",
+      "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[].stats.spe 与 pets[].speed_tier"
+    },
+    "respond_coverage": {
+      "id": "respond_coverage",
+      "weight": 0.16,
+      "feature": "respond_coverage",
+      "source": "teamFeatures().respond",
+      "provenance": "ENGINE_HYPOTHESIS",
+      "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+      "direction": "higher_is_better",
+      "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[].desc（词条判定见 team-gaps.js respondVariantsOf）"
+    },
+    "energy_curve": {
+      "id": "energy_curve",
+      "weight": 0.14,
+      "feature": "energy_curve",
+      "source": "teamFeatures().energy",
+      "provenance": "ENGINE_HYPOTHESIS",
+      "reason": "能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档",
+      "direction": "higher_is_better",
+      "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[].energy + data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[].ruleset 能耗上限"
+    },
+    "pivot_sustain": {
+      "id": "pivot_sustain",
+      "weight": 0.1,
+      "feature": "pivot_sustain",
+      "source": "teamFeatures().pivot",
+      "provenance": "ENGINE_HYPOTHESIS",
+      "reason": "换入/离场只靠技能描述关键字（迅捷 / 自己脱离 / 立即替换），是六个维度里最弱的一条判据 ⇒ 最低",
+      "direction": "higher_is_better",
+      "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[].desc（关键字见 team-gaps.js isPivotSkill）"
+    }
+  },
+  "weights_audit": {
+    "ok": true,
+    "schema": "roco-team-ranker-audit/v1",
+    "problems": [],
+    "weight_audit": {
+      "ok": true,
+      "schema": "roco-team-ranker-weights-audit/v1",
+      "provenance_levels": [
+        "ENGINE_HYPOTHESIS"
+      ],
+      "weight_count": 6,
+      "problems": [],
+      "criteria": "每条权重必须是 `{id, weight ∈ [0,1], feature ∈ FEATURE_IDS, provenance ∈ WEIGHT_PROVENANCE_LEVELS, reason}`；缺 provenance 或 reason 即判红（`WEIGHT_PROVENANCE_MISSING` / `WEIGHT_REASON_MISSING`）",
+      "status": {
+        "schema": "roco-team-ranker-status/v1",
+        "ranker_id": "roco-rule-pairwise-ranker",
+        "version": "rc602/1",
+        "kind": "rule_heuristic",
+        "learned_weights": false,
+        "trained_model_present": false,
+        "training_labels": 0,
+        "calibrated": false,
+        "rank_only": true,
+        "emits_outcome_prediction": false,
+        "emits_win_rate": false,
+        "emits_percent": false,
+        "unknown_policy": "fail_closed",
+        "fills_rc303_ranker_missing": "heuristic_only",
+        "confidence": "ENGINE_HYPOTHESIS",
+        "learned_ranker_unlock_requirements": [
+          "对局标签：RC-601 的轨迹重建必须先产出（manifest 绑定 ruleset/engine/data pack/opponent policy/split/sha256），现在 RC-601 是 BLOCKED、仓内也没有任何一局真实对局记录",
+          "标签契约：每条样本至少要能回指具体 ruleset 版本 + 双方六宠 build + 出手序列；现在 `data/roco/evidence/rule-evidence-ledger.json` 里没有任何一条与之对应的量",
+          "划分：训练/验证/测试按赛季切分（不能同赛季泄漏）；现在连一个赛季的标签都没有",
+          "校准证据：排序器要报 calibrated=true 必须先有 held-out 校准（本仓现在没有）",
+          "特征可用性：面板值（level/nature/talent/specialty/bloodline 换算）至今 UNKNOWN —— 没有它，任何「关键速度线」类特征都建不起来"
+        ],
+        "not_available_reasons": {
+          "learned_weights": "本仓没有任何 train/val/test 对局标签（RC-601 BLOCKED、RC-603 由用户亲训）",
+          "outcome_prediction": "红线：不许发明胜负预测；本排序器也不产出任何概率（`emits_outcome_prediction: false`）",
+          "panel_stats": "冻结数据里 48 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN",
+          "key_speed_lines": "关键速度线要真实面板值（对手速度阈），面板换算公式未校准 ⇒ 现在算不出来",
+          "calibration": "没有 held-out 校准集，所以 calibrated 只能是 false"
+        }
+      }
+    },
+    "criteria": "每条权重必须是 `{id, weight ∈ [0,1], feature ∈ FEATURE_IDS, provenance ∈ WEIGHT_PROVENANCE_LEVELS, reason}`；缺 provenance 或 reason 即判红（`WEIGHT_PROVENANCE_MISSING` / `WEIGHT_REASON_MISSING`）；对模块导出的对象做深度遍历：任何键名命中 BANNED_CLAIM_KEYS（`no_win_rate` 前缀豁免）或任何字符串命中 BANNED_CLAIM_PATTERNS（伪精确词表里的每一个模式，含百分号）即判红；判据同时喂一个带伪精确字段名的对象做反证，必须被同一条判据抓到。唯一豁免：`SCAN_EXEMPT_KEYS` 里那几个**证据留痕**字段 —— 必红反证的实际输出原文里必然出现被禁词本身（那正是「判据抓住了它」的证据）；豁免是**按字段名逐层判**的，不是整棵树放行。；RANKER_STATUS 的 learned_weights / calibrated / emits_* 必须都是 false"
+  },
+  "honesty": {
+    "learned_weights": false,
+    "calibrated": false,
+    "training_labels": 0,
+    "emits_win_rate": false,
+    "emits_percent": false,
+    "unknown_policy": "fail_closed",
+    "score_unit": "0～1 的**序数**标度（只用于同一份注入特征内的相对排序；不预测胜负、不是强度分、不是任何比例）",
+    "score_range": {
+      "min": 0,
+      "max": 1
+    },
+    "not_available": [
+      {
+        "key": "learned_weights",
+        "reason": "本仓没有任何 train/val/test 对局标签（RC-601 BLOCKED、RC-603 由用户亲训）"
+      },
+      {
+        "key": "outcome_prediction",
+        "reason": "红线：不许发明胜负预测；本排序器也不产出任何概率（`emits_outcome_prediction: false`）"
+      },
+      {
+        "key": "panel_stats",
+        "reason": "冻结数据里 48 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN"
+      },
+      {
+        "key": "key_speed_lines",
+        "reason": "关键速度线要真实面板值（对手速度阈），面板换算公式未校准 ⇒ 现在算不出来"
+      },
+      {
+        "key": "calibration",
+        "reason": "没有 held-out 校准集，所以 calibrated 只能是 false"
+      }
+    ],
+    "unlock_requirements": [
+      "对局标签：RC-601 的轨迹重建必须先产出（manifest 绑定 ruleset/engine/data pack/opponent policy/split/sha256），现在 RC-601 是 BLOCKED、仓内也没有任何一局真实对局记录",
+      "标签契约：每条样本至少要能回指具体 ruleset 版本 + 双方六宠 build + 出手序列；现在 `data/roco/evidence/rule-evidence-ledger.json` 里没有任何一条与之对应的量",
+      "划分：训练/验证/测试按赛季切分（不能同赛季泄漏）；现在连一个赛季的标签都没有",
+      "校准证据：排序器要报 calibrated=true 必须先有 held-out 校准（本仓现在没有）",
+      "特征可用性：面板值（level/nature/talent/specialty/bloodline 换算）至今 UNKNOWN —— 没有它，任何「关键速度线」类特征都建不起来"
+    ]
+  },
+  "not_computable": [
+    {
+      "feature": "key_speed_lines",
+      "what": "关键速度线（对手速度阈之上的先手关系）",
+      "why": "关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；冻结数据里 48 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论",
+      "unlock": "面板值换算校准（10 号文档 §13）"
+    },
+    {
+      "feature": "panel_stats",
+      "what": "任何依赖面板值的量（血量阈值、伤害区间）",
+      "why": "48 个实例的 panel_stats 一律 null；nature/talent/specialty/bloodline 的 effect=UNKNOWN",
+      "unlock": "养成效果校准 + 微案例"
+    },
+    {
+      "feature": "learned_weights",
+      "what": "学习出来的权重（真正意义上的 Team Ranker）",
+      "why": "没有任何对局标签；RC-601 BLOCKED、RC-603 由用户亲训",
+      "unlock": "RC-601 轨迹重建 → 标签契约 → 训练/验证/测试切分"
+    },
+    {
+      "feature": "outcome_prediction",
+      "what": "任何胜负预测 / 概率 / 百分数",
+      "why": "红线：仓库纪律禁止发明预测类数字；本模块也没有任何标签可校准",
+      "unlock": "不计划解锁（即使有标签，也要先有 held-out 校准才允许谈预测）"
+    },
+    {
+      "feature": "archetype_matchup",
+      "what": "对版本环境分布的表现（RC-304 前四轴）",
+      "why": "data/roco/meta-prior/v1.json 的 distribution[] 全部 source=unknown、value=null",
+      "unlock": "一份 measured 分布（带逐条来源与日期）"
+    },
+    {
+      "feature": "catalog_species_panel",
+      "what": "图鉴物种（非冻结 48 只）的面板与养成",
+      "why": "on-demand-builds 的 574 只标 SIMULATABLE_UNVERIFIED：配招是工程启发式、没有实机核验",
+      "unlock": "冻结层扩到全量图鉴 + 效果原语实现"
+    }
+  ],
+  "red_proofs": [
+    {
+      "where": "tests/roco-team-ranker.test.js#③",
+      "criterion": "同分顺序必须等于按 team_id 字典序排的声明顺序",
+      "mutation": "把 tie-break 换成「按输入顺序」并倒序输入",
+      "actual": "声明顺序=rc602-team-01,rc602-team-02,rc602-team-03；无 tie-break 版本（倒序输入）=rc602-team-03,rc602-team-02,rc602-team-01 ⇒ 判红"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#④",
+      "criterion": "速度未知时该队必须 available:false 且 score=null",
+      "mutation": "把 speed_layers 的 null 改成 0 并标 available:true",
+      "actual": "补 0 版本 available=true score=0.9012；正确版本 available=false score=null ⇒ 判红"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑤",
+      "criterion": "多属性精灵必须按冻结相性表的显式组合行算（组合行优先）",
+      "mutation": "把 own-0003（地系|幻系）的抗性按 types[0]=地系 的单属性行算",
+      "actual": "组合行=6 个抗性（模块输出=6）；types[0] 行=5 个 ⇒ 判红"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑥a",
+      "criterion": "任何键名命中 BANNED_CLAIM_KEYS 即判红",
+      "mutation": "往 score 里注入 {win_rate: 0.62}",
+      "actual": "[PSEUDO_PRECISION] $.module_exports.score.win_rate：键名 win_rate 是禁止的伪精确字段名（不许发明胜负 / 概率 / 榜单字段）"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑥b",
+      "criterion": "任何字符串命中 BANNED_CLAIM_PATTERNS 即判红",
+      "mutation": "往字符串里写「这一队的胜率更高（62%）」",
+      "actual": "[PSEUDO_PRECISION] $.text.why：字符串出现「中文伪精确词」（胜率）：这一队的胜率更高（62%）；[PSEUDO_PRECISION] $.text.why：字符串出现「百分号」（%）：这一队的胜率更高（62%）"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑧",
+      "criterion": "覆盖类计数与结构分对成员质量单调（更好不许更低、更差不许更高）",
+      "mutation": "把「补进 own-0002（抗性更多）」换成「补进 own-0028（抗性更少）」",
+      "actual": "更好：覆盖=6 分=0.6667；更差：覆盖=3 分=0.6111 ⇒ 单调性判据区分得开"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑨a",
+      "criterion": "每条权重必须有 provenance ∈ WEIGHT_PROVENANCE_LEVELS",
+      "mutation": "删掉 speed_layers 权重的 provenance 字段",
+      "actual": "[WEIGHT_PROVENANCE_MISSING] weights.speed_layers.provenance：provenance = null，不在允许集合 ENGINE_HYPOTHESIS 里：每条权重都必须自报来源等级，没有来源的权重就是魔数"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑨b",
+      "criterion": "每条权重必须有非空 reason",
+      "mutation": "删掉 energy_curve 权重的 reason 字段",
+      "actual": "[WEIGHT_REASON_MISSING] weights.energy_curve.reason：权重没有写理由：没有理由的数值就是藏在函数体里的魔数"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑨c",
+      "criterion": "RANKER_STATUS 的 learned_weights / calibrated / emits_* 必须都是 false",
+      "mutation": "把 RANKER_STATUS.learned_weights 改成 true",
+      "actual": "[STATUS_OVERCLAIM] status.learned_weights：RANKER_STATUS.learned_weights = true：本仓没有任何学习权重，只能是 false"
+    }
+  ],
+  "generated_note": "本报告的所有数字都是在 48 个冻结个体上真跑出来的墙钟实测与计数；没有任何一项是估计、外推或概率。时延随机器负载浮动，复跑不保证逐位相同（数字会差）；**可算/unknown 的计数是确定的**，所以 `--check` 只比对除时延外的字段。",
+  "source_length": 69273
+}

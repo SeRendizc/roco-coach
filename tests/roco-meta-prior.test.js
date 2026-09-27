@@ -176,22 +176,46 @@ test('RC-304-②b 就算补了来源，没写清数值出自哪里也必须红�
 // ─────────────────────────────────────────────────────────────────────────
 
 test('RC-304-③ unknown 却带非 null value 必须红（DISTRIBUTION）', () => {
-  const report = expectRed((doc) => { doc.distribution[3].value = 0.25; }, 'DISTRIBUTION',
-    '③ 给 unknown 项填一个 0.25');
+  // 2026-09-25：产物现在是 `assumption` 档（可复算的均匀分母），所以先把它翻回 `unknown`
+  // 再注入「非 null value」——这条量的是 **unknown 档的牙**，加第三档不许把它弄钝。
+  const report = expectRed((doc) => {
+    Object.assign(doc.distribution[3], {source: 'unknown', value: 0.25, reason: '没有真实对局数据，占比没有可核对的来源。'});
+  }, 'DISTRIBUTION', '③ 给 unknown 项填一个 0.25');
   const hit = rowsOf(report, 'DISTRIBUTION')[0];
   assert.match(hit.detail, /必须是 null/);
 });
 
-test('RC-304-③b unknown 没有 reason 必须红，且分布形态如实是 unknown', () => {
-  expectRed((doc) => { doc.distribution[3].reason = ''; }, 'DISTRIBUTION', '③b 抹掉 unknown 的 reason');
+test('RC-304-③b unknown 没有 reason 必须红；分布形态如实是「有分母但不是实测」(assumption)', () => {
+  expectRed((doc) => {
+    Object.assign(doc.distribution[3], {source: 'unknown', value: null, reason: ''});
+  }, 'DISTRIBUTION', '③b 抹掉 unknown 的 reason');
   raw('③b 实测分布形态', {
     on_disk: onDisk.distribution.map((row) => row.source),
     summary: baselineReport.summary.distribution,
     distribution_source: baselineReport.summary.distribution_source,
   });
-  assert.equal(baselineReport.summary.distribution_source, 'unknown',
-    '没有真实对局数据时，distribution 只能是 unknown —— 这是本任务最重要的一条');
-  assert.ok(onDisk.distribution.every((row) => row.source === 'unknown' && row.value === null));
+  assert.equal(baselineReport.summary.distribution_source, 'assumption',
+    '没有真实对局数据时，distribution 只能是「声明假设」或 unknown —— 绝不许写成 measured（本任务最重要的一条）');
+  assert.ok(onDisk.distribution.every((row) => row.source === 'assumption'
+    && Number.isFinite(row.value) && row.basis && row.confidence === 'ENGINE_HYPOTHESIS'),
+  'assumption 档必须同时有：有限数值 + basis + 只许 ENGINE_HYPOTHESIS（缺一样就是在编数据）');
+});
+
+test('RC-304-③c assumption 档自己的牙：缺 basis / 挂 sources / 抬等级 / 拿掉数值 都必须红', () => {
+  expectRed((doc) => { delete doc.distribution[3].basis; }, 'DISTRIBUTION', '③c-1 删掉 basis（假设凭什么成立？）');
+  expectRed((doc) => {
+    doc.distribution[3].sources = [{url: 'https://example.com/ladder', date: '2026-09-01',
+      confidence: 'COMMUNITY_CURRENT', ref: 'README.md'}];
+  }, 'DISTRIBUTION', '③c-2 assumption 挂上 sources（会看起来像 measured）');
+  expectRed((doc) => { doc.distribution[3].confidence = 'RECORDED_IN_GAME'; }, 'CONFIDENCE',
+    '③c-3 把 assumption 的等级抬到 RECORDED_IN_GAME（它是我们选的假设，不是实机事实）');
+  expectRed((doc) => { doc.distribution[3].value = null; }, 'DISTRIBUTION', '③c-4 拿掉数值（分母就不存在了）');
+  expectRed((doc) => { doc.distribution[3].basis = {kind: 'uniform-over-candidate-universe', denominator: 0, recomputable_from: 'x'}; },
+    'DISTRIBUTION', '③c-5 分母写成 0');
+  // 反向控制：**合法**的 assumption 必须放行（否则这条判据是恒假的）
+  const legal = check((doc) => { doc.distribution[3].value = 0.2; });
+  assert.ok(legal.problems.every((row) => row.code !== 'DISTRIBUTION'),
+    `合法的 assumption 不许被判红：${legal.problems.map(formatProblem).join(' | ')}`);
 });
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -432,12 +456,12 @@ test('RC-304-⑭ 机器可读报告可复跑，且报告里的分布形态与先
     evidence_confidence: report.evidence_confidence,
     distribution_source: report.distribution_source,
   });
-  assert.equal(report.distribution_source, 'unknown');
+  assert.equal(report.distribution_source, 'assumption');
   assert.equal(report.archetypes.length, baseline.archetypes.length);
   assert.ok(report.not_a_ranking.length > 0, '「这份先验不能用来做什么」不能为空');
   assert.ok(report.missing_real_evidence.length > 0, '「还缺哪些实机证据」不能为空');
   raw('⑭-2b 报告里的必红方向', report.red_proofs.map((row) => `${row.id} ${row.label} → passed=${row.passed}`));
-  assert.ok(report.red_proofs.length >= 12, '报告必须逐条带上必红方向');
+  assert.ok(report.red_proofs.length >= 15, '报告必须逐条带上必红方向（2026-09-25 起含 assumption 档的 4 条）');
   assert.ok(report.red_proofs.every((row) => row.passed), '每一条必红方向都必须真的变红');
 
   if (process.env.RC304_WRITE_REPORT === '1') {
@@ -605,9 +629,17 @@ const RED_PROOFS = [
   {id: '2b', label: 'measured 有来源却没写清数值出自哪里 ⇒ 红', code: 'DISTRIBUTION', where: 'distribution[].value_source',
    patch: (doc) => { doc.distribution[0].source = 'measured'; doc.distribution[0].value = 0.3; doc.distribution[0].value_source = null; }},
   {id: '3', label: 'unknown 却带非 null value ⇒ 红', code: 'DISTRIBUTION', where: 'distribution[].value',
-   patch: (doc) => { doc.distribution[3].value = 0.25; }},
+   patch: (doc) => { Object.assign(doc.distribution[3], {source: 'unknown', value: 0.25, reason: '没有真实对局数据，占比没有可核对的来源。'}); }},
   {id: '3b', label: 'unknown 没有 reason ⇒ 红', code: 'DISTRIBUTION', where: 'distribution[].reason',
-   patch: (doc) => { doc.distribution[3].reason = ''; }},
+   patch: (doc) => { Object.assign(doc.distribution[3], {source: 'unknown', value: null, reason: ''}); }},
+  {id: '3c-1', label: 'assumption 缺 basis（假设凭什么成立）⇒ 红', code: 'DISTRIBUTION', where: 'distribution[].basis',
+   patch: (doc) => { delete doc.distribution[3].basis; }},
+  {id: '3c-2', label: 'assumption 挂上 sources（会看起来像 measured）⇒ 红', code: 'DISTRIBUTION', where: 'distribution[].sources',
+   patch: (doc) => { doc.distribution[3].sources = [{url: 'https://example.com/ladder', date: '2026-09-01', confidence: 'COMMUNITY_CURRENT', ref: 'README.md'}]; }},
+  {id: '3c-3', label: 'assumption 把等级抬到 RECORDED_IN_GAME ⇒ 红', code: 'CONFIDENCE', where: 'distribution[].confidence',
+   patch: (doc) => { doc.distribution[3].confidence = 'RECORDED_IN_GAME'; }},
+  {id: '3c-4', label: 'assumption 分母写成 0 ⇒ 红', code: 'DISTRIBUTION', where: 'distribution[].basis.denominator',
+   patch: (doc) => { doc.distribution[3].basis = {kind: 'uniform-over-candidate-universe', denominator: 0, recomputable_from: 'x'}; }},
   {id: '4', label: 'seed_species 引用不存在的精灵 ⇒ 红', code: 'SEED_SPECIES', where: 'archetypes[].seed_species',
    patch: (doc) => { doc.archetypes[2].seed_species = ['陨星龙王']; }},
   {id: '5', label: 'confidence 用了台账之外的等级 ⇒ 红', code: 'CONFIDENCE', where: 'archetypes[].confidence',

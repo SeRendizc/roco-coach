@@ -93,3 +93,105 @@ test('教练记账绝不允许把一步棋卡死',()=>{
  assert.match(body,/let decision=null,shown=false;[\s\S]{0,400}?\}catch\{decision=null;\}/,
   'act() 的记账段必须自带 try/catch，异常不许打断出招');
 });
+
+test('记账必须带上出招前的局面，否则「残血习惯」永远是 0 样本',()=>{
+ // 判据在 src/coach/memory.js 的 lowHpFact：残血只认**这条记录自己带着的血量事实**。
+ // 所以调用方必须把出招前那份局面（act() 里的 old）传进去。两种错法都当场钉死：
+ //   不传 → 那一类样本恒为 0（读数会如实显示样本不足，能力白做）；
+ //   传结算后的 game → 把出手后的血量冒充成决策时的血量（编数据）。
+ const call=app.match(/rememberDecision\(coachMemory,\{[\s\S]{0,400}?\}\)/);
+ assert.ok(call,'app.js 里必须真的有 rememberDecision 调用');
+ assert.match(call[0],/[,{]game:old[,}]/,'rememberDecision 必须收到出招前的局面 old');
+ assert.match(app,/const old=game;busy=true;busySince=Date\.now\(\);actError=null;/,
+  'old 必须是出招前那一份局面（act() 第一句），不许把结算后的 game 传进去');
+});
+
+test('营地上下文必须带上「当前选的三只」：否则「我这套阵容」查不到引擎',()=>{
+ // 2026-09-25 真机实测：「我这套阵容有什么短板？」在营地页一次工具都不调
+ // （`teamAsk` 认的是 `profile.lineup`，而营地上下文原来只有全部持有的 `profile.pets`），
+ // 答案退化成模型拿包里六维随口点评。判据钉住两条：
+ //   ① `matchContext()` 把当前选中的三只按名单形状挂进 `profile.lineup`；
+ //   ② 名字/类型从引擎的 `SPECIES` 现查（不许在页面里另存一份属性表），且**至少三只**才挂。
+ const body=app.slice(app.indexOf('function matchContext('),app.indexOf('function matchContext(')+1200);
+ assert.match(body,/selected/, 'lineup 必须来自当前选择，不是全部持有');
+ assert.match(body,/SPECIES\.find\(/, '名字与类型必须从引擎 SPECIES 现查（不另存属性表）');
+ assert.match(body,/if\(picked\.length>=3\)c\.profile=\{\.\.\.c\.profile,lineup:picked\}/,
+  '至少三只才挂 lineup（不足三只时这个键不许出现，老路逐字节不变）');
+ // 反证方向：把挂载那一行删掉 ⇒ 这条必须红（判据量的就是它）
+ const broken=body.replace('if(picked.length>=3)c.profile={...c.profile,lineup:picked};','');
+ assert.ok(!/lineup:picked/.test(broken), '构造失败');
+ assert.ok(!/if\(picked\.length>=3\)c\.profile=\{\.\.\.c\.profile,lineup:picked\}/.test(broken),
+  '删掉挂载之后判据必须红（否则这条是空的）');
+});
+
+// ── 「小芽入口」与「旧代码横幅」（2026-09-25 人类实测原话）─────────────────────────────
+//
+// 「首页点进去的小芽还是老版本啊？？为什么 0.1 的代码还在跑啊？？」
+// 实测（headless Chrome 真点）：首页热区 `#home-xiaoya` 去的是新的单独小芽页，
+// 而**页眉那个「✦ 小芽」**还绑着旧版式的页内面板 `#coach-panel` ⇒ 同一个小芽两个样子。
+// 这一条钉两件事：① 没有进行中的对局时页眉入口也去单独小芽页；② 每个页面都挂上
+// 「这一页是重启前的旧代码」探测器（服务端 `started_at` 变了就摆横幅）。
+test('小芽入口在首页必须去同一个地方（没有进行中的对局时）', () => {
+  const fn = /function openXiaoya\(\)\{([\s\S]*?)\n\}/.exec(app);
+  assert.ok(fn, 'app.js 里必须有 openXiaoya()');
+  assert.match(fn[1], /game&&!game\.result/, '对局进行中才允许留在页内面板（离开页面会丢掉这一局）');
+  assert.match(fn[1], /openCoach\(\)/, '对局进行中走页内面板');
+  assert.match(fn[1], /location\.href='\/xiaoya\.html'/, '其余情况一律去单独的小芽页');
+  assert.match(app, /\$\('coach-open'\)\.onclick=openXiaoya;/, '页眉入口必须绑到这条规则上');
+  assert.match(app, /\$\('home-xiaoya'\)\.onclick=\(\)=>\{location\.href='\/xiaoya\.html';\}/,
+    '首页热区也去同一页（两处目的地不许再分叉）');
+});
+
+test('每个页面都挂「这一页是旧代码」探测器，且它与服务端事实同源', () => {
+  const pages = {
+    'src/client/app.js': 'src/client/index.html',
+    'src/client/roco.js': 'src/client/roco.html',
+    'src/client/xiaoya.js': 'src/client/xiaoya.html',
+    'src/client/nurture.js': 'src/client/nurture.html',
+    'src/client/box.js': 'src/client/box.html',
+  };
+  for (const entry of Object.keys(pages)) {
+    const src = readFileSync(new URL('../' + entry, import.meta.url), 'utf8');
+    assert.match(src, /mountStalePageBanner\(\)/, `${entry} 必须挂上探测器`);
+  }
+  const mod = readFileSync(new URL('../src/client/stale-page.js', import.meta.url), 'utf8');
+  assert.match(mod, /\/api\/bootstrap/, '探测器要读服务端的 started_at（不能靠猜；/api/status 只接 POST）');
+  assert.match(mod, /started_at/, '比对的就是进程启动时刻');
+  // 纪律：只报告、给一个刷新按钮，**不许自动 reload**（打字/出招中途会把状态冲掉）
+  const reloads = [...mod.matchAll(/location\.reload\(\)/g)].length;
+  assert.equal(reloads, 1, `location.reload() 只许出现在按钮的点击处理里，实际 ${reloads} 处`);
+  assert.match(mod, /addEventListener\('click', \(\) => location\.reload\(\)\)/, '刷新只由点击触发');
+});
+
+test('服务端诊断面必须报出进程启动时刻与资源清单规模', () => {
+  const server = readFileSync(new URL('../src/server/index.js', import.meta.url), 'utf8');
+  assert.match(server, /server:\{started_at:STARTED_AT,assets:publicAssets\.size/,
+    '/api/bootstrap 必须报 server.started_at + assets（页面的旧代码探测器就靠它）');
+  assert.match(server, /const status=\(\)=>\(\{[^}]*started_at:STARTED_AT/,
+    '诊断面（POST /api/status）也带上同一对数，便于事后核对');
+});
+
+// ── 小芽页的**内容**必须是手游那一档（人类 2026-09-25 原话）──────────────────────────
+//
+// 「这个小芽不是 UI 的问题，是**内容**啊内容！你自己测试一下啊，还有老版的宠物名字」
+// 实测根因：`xiaoya.js` 把教练上下文建成**本仓 MVP 练习局**那份存档（`pet-coach-growth-v1`：
+// 烬尾狐/潮甲龟/林鹿三只自研宠），而产品是手游 622 图鉴 ⇒ 满口老版宠物名。
+// 现在上下文来自 `/api/roco/box?kind=mine`（48 只持有、真名/真属性/真等级）。
+test('小芽页的名单来自手游盒子，且拿不到时绝不退回 MVP 那三只', () => {
+  const src = readFileSync(new URL('../src/client/xiaoya.js', import.meta.url), 'utf8');
+  assert.match(src, /\/api\/roco\/box\?kind=mine/, '名单必须来自手游盒子（我的）');
+  assert.match(src, /async function loadMobileProfile/, '要有手游档案加载器');
+  assert.match(src, /unavailable: true/, '拿不到时要有一份**明确不可用**的档案（而不是 MVP 存档）');
+  // 上下文必须用 `state.mobileProfile`；MVP 存档只允许作为"还没取到"的兜底形状，
+  // 且**页面模式**（`mode==='page'`）下不许出现在建上下文那一句里。
+  assert.match(src, /const activeProfile = state\.mobileProfile \?\? state\.profile;/,
+    '页面/盒子这一档优先用手游档案');
+  assert.match(src, /const context = buildContext\(null, activeProfile, focus/,
+    '建上下文用的必须是手游档案');
+  // 快捷问题也不许再是 MVP 口径（「怎么培养/回顾上一局」是练习局那一套）
+  const quick = /const QUICK = \[([^\]]+)\]/.exec(src);
+  assert.ok(quick, 'QUICK 必须还在');
+  assert.doesNotMatch(quick[1], /怎么培养|回顾上一局|上一回合|小测验/,
+    `快捷问题还留着练习局口径：${quick[1]}`);
+  assert.match(quick[1], /多少只精灵|雨天|相性|克制/, '快捷问题要换成手游问得出来的');
+});

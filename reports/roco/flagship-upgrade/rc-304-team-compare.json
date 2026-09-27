@@ -8,28 +8,28 @@
       "prior_field": "expected_meta_value",
       "label": "环境价值",
       "definition": "队伍对**版本对手分布**的期望表现：对每个可识别体系求相对表现的加权均值，权重 = 该体系在环境里的占比。",
-      "criteria": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。"
+      "criteria": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
     },
     {
       "id": "worst_archetype",
       "prior_field": "worst_archetype",
       "label": "最怕的体系",
       "definition": "逐体系相对表现里**最差**的那一个（含它的占比）：它回答「撞到谁最吃亏」。",
-      "criteria": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。"
+      "criteria": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
     },
     {
       "id": "matchup_spread",
       "prior_field": "matchup_spread",
       "label": "对局离散度",
       "definition": "逐体系相对表现的极差（最好 − 最差）：越大越说明这支队伍严重依赖撞到特定阵容。",
-      "criteria": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。"
+      "criteria": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
     },
     {
       "id": "execution_tolerance",
       "prior_field": "execution_tolerance",
       "label": "操作容错",
       "definition": "次优操作下的相对表现（1 = 与最优操作同分，0 = 完全崩掉）在分布上的加权均值。",
-      "criteria": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。"
+      "criteria": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
     },
     {
       "id": "coverage_confidence",
@@ -40,19 +40,25 @@
     }
   ],
   "fail_closed_reasons": {
-    "DISTRIBUTION_UNKNOWN": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
+    "DISTRIBUTION_UNKNOWN": "缺**版本对手分布**：注入的 `distribution[]` 是 `source: \"unknown\"` + `value: null`（没有任何真实对局数据，也没有声明假设的分母），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
     "DISTRIBUTION_ENTRY_VALUE_MISSING": "缺**逐体系分布值**：注入的分布里至少一个体系的 `value` 是 `null`，分母不闭合，所以这一轴现在无定义（要么补齐每个体系的值，要么整份分布保持 unknown）。",
-    "NO_RELATIVE_SCORE": "缺**逐体系相对表现表**：分布说的是「对手占多少」，还需要 `distribution[].relative_score`（离线联赛 / matchup bank 的产物）才能把占比折成期望。本仓现在既没有 matchup bank 也没有逐体系表现估计。",
-    "NO_EXECUTION_SAMPLE": "缺**可复跑的对局采样**：`distribution[].tolerance`（同一支队伍在次优操作下的相对表现）是离线回放/联赛的产物，本仓一次都没跑过；规则本身还在 candidate 阶段（台账里严格总序仍是 ENGINE_HYPOTHESIS），所以容错数值现在一定是伪精确。",
+    "NO_RELATIVE_SCORE": "缺**逐体系相对表现表**：分布说的是「对手占多少」，还需要每行的 `relative_score` 才能把占比折成期望。measured 档的 `relative_score` 是离线联赛 / matchup bank 的产物，本仓没有这份产物；assumption 档的行由本模块从 RC-302 结构性算出（见 NO_STRUCTURAL_SIGNAL）。",
+    "NO_EXECUTION_SAMPLE": "缺**可复跑的对局采样**：`distribution[].tolerance`（同一支队伍在次优操作下的相对表现）是离线回放/联赛的产物，本仓一次都没跑过；规则本身还在 candidate 阶段（台账里严格总序仍是 ENGINE_HYPOTHESIS），所以容错数值现在一定是伪精确。assumption 档下这一轴用的是**结构短板**（该体系所声明判据里的最小结构分，见产出里的 structural_basis），它是下界代理，不是回放测量。",
     "NO_GAP_DIAGNOSIS": "缺**build 覆盖数据**：这一轴只依赖 build 的规则/数据覆盖，本可以立刻算；但没有注入 RC-302 的缺口诊断（`gapsByTeam[team_id]`）时，连「哪些量在台账里是 UNKNOWN」都读不到，所以 fail closed 而不是报 0 覆盖。",
     "NO_MEASURED_SOURCE": "缺**逐条可核对的来源**：注入的分布标了 `source: \"measured\"`，却没有 url / 仓内文件 + 日期（先验的 `DISTRIBUTION` 判据要求 measured 必须有来源）。没有来源的数字不许进比较，所以这一轴仍然 unknown。",
-    "NO_ARCHETYPE": "缺**可识别体系**：注入的分布里一条体系都没有，分母是空的，这一轴无定义。"
+    "NO_ARCHETYPE": "缺**可识别体系**：注入的分布里一条体系都没有，分母是空的，这一轴无定义。",
+    "ASSUMPTION_BASIS_MISSING": "缺**声明假设的可复算依据**：分布里有 `source: \"assumption\"` 的行，但 `basis` 不完整（`kind` / `denominator > 0` / `recomputable_from` 缺一，或 `confidence` 不是 `ENGINE_HYPOTHESIS`、`notes` 太短、`unit` 不是 `share`）。**一个不带依据的数字就是编的**，所以这一轴回到 unknown，而不是照用这个数。",
+    "ASSUMPTION_CARRIES_SOURCE": "**声明假设不许挂来源**：`source: \"assumption\"` 的行上带了 `sources[]`——这是把假设伪装成实测。要么撤掉来源保留 `basis`，要么拿真的可核对来源并把 `source` 改成 `measured`。",
+    "NO_PARTITION": "**占比不闭合**：`distribution[].value` 的合计不等于 1（容差 0.001）。权重只有在构成一次划分时才有分母含义；合计不是 1 就说明这不是一次划分，这一轴无定义。",
+    "NO_STRUCTURAL_SIGNAL": "缺**该体系所声明判据的结构输入**：assumption 档下这一轴的相对表现要按体系自己的 `archetypes[].feature_axes[].criterion` 从 RC-302 的缺口诊断里算（每个判据的分子 / 分母都写进 `evidence[]`），但诊断里没有这些字段，或者这一队没有注入 `gapsByTeam`。本模块不拿别的数据顶替、不给 0：回到 unknown。"
   },
   "structural_criteria": {
-    "distribution_fail_closed": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
-    "availability_shape": "`available:true` 的轴必须给出**非 null 的数值型** `value`（或最怕体系那轴的非空对象）；`available:false` 的轴必须给出 `value: null` 且 `value_numbers` 为空。数值轴报 `null` 却写 `available:true` ⇒ `AVAILABILITY_SHAPE`（红）。",
+    "distribution_fail_closed": "[严格] 注入的 `metaPrior` 是 `unknown` 档（`distribution_source === \"unknown\"`，或 `distribution[].value` 有 null，或没有任何可用分母）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
+    "assumption_needs_basis": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。",
+    "assumption_structural_scores": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
     "measured_lights_up": "注入带来源的 `measured` 分布时，前四轴**必须**亮起来（`available:true`），值必须来自注入分布（加权均值 / 极差 / 最差体系逐条可对账）。反过来，如果 `available` 的轴数与注入分布里 `value` 非 null 的体系数对不上 ⇒ `MEASURED_NOT_WIRED`（红）：fail closed 不许写成「永远 unknown」。",
     "coverage_from_build": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。",
+    "availability_shape": "`available:true` 的轴必须给出**非 null 的数值型** `value`（或最怕体系那轴的非空对象）；`available:false` 的轴必须给出 `value: null` 且 `value_numbers` 为空。数值轴报 `null` 却写 `available:true` ⇒ `AVAILABILITY_SHAPE`（红）。",
     "no_pseudo_precision": "产出与渲染文本里不许出现胜率 / 概率 / 百分数 / 强度分 / 榜单标签（T0 / 强势 / 必带…）；命中即 `PSEUDO_PRECISION`（红）。`value_numbers`（单位与量纲）必须逐条声明，`unit` 与 `value_numbers[].unit` 里出现 `BANNED_UNIT_WORDS`（胜率 / 概率 / 百分比 / %）⇒ `PSEUDO_PRECISION`（红）：量纲是伪精确最常见的藏身处。扫描范围只排除 `definition` 与判据正文，**键名检查不受豁免**。",
     "evidence_and_confidence": "每一轴必须有非空 `evidence[]`（`source_file` + `pointer` + `field`），`confidence` 必须命中台账六级；`available:false` 时 `confidence` 只能是 `UNKNOWN`，否则 `EVIDENCE_MISSING` / `CONFIDENCE_NOT_IN_LEDGER`（红）。",
     "online_no_engine": "把 `src/coach/team-compare.mjs` 的在线段（`ONLINE_SECTION_MARKER` 之前）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。",
@@ -61,72 +67,64 @@
     "deterministic": "同一份输入连续两次调用，五个口径 + 最小替换 + 渲染文本的 `JSON.stringify` 结果必须逐字节相同（含 tie-break），否则 `NONDETERMINISTIC`（红）。"
   },
   "distribution_now": {
-    "source": "unknown",
+    "source": "assumption",
     "declared_source": null,
     "entries": 7,
-    "reason": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-    "evidence": [
-      "data/roco/meta-prior/v1.json#distribution[]：7 个体系全部 source=\"unknown\" + value=null + reason",
-      "data/roco/meta-prior/v1.json#claim.does_not_contain：先验自己声明「不产出任何占比数值」",
-      "data/roco/meta-prior/v1.json#usage.inputs.*.honesty：分布 unknown 时前四轴必须 fail closed"
-    ]
+    "partition_ok": true,
+    "value_sum": 0.999999,
+    "basis": {
+      "kind": "uniform-over-candidate-universe",
+      "denominator": 7,
+      "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+      "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured"
+    },
+    "relative_score_source": "**队伍级**结构分：按每个体系自己声明的 `archetypes[].feature_axes[].criterion` 从 RC-302 的缺口诊断算出（等权、分母 = 判据条数），置信等级 ENGINE_HYPOTHESIS；它不是离线联赛 / matchup bank 的产物，也不预测胜负",
+    "reason": null,
+    "evidence": []
   },
   "availability_now": {
     "available": [
-      "coverage_confidence"
-    ],
-    "unknown": [
       "environment_value",
       "worst_archetype",
       "matchup_spread",
-      "execution_tolerance"
+      "execution_tolerance",
+      "coverage_confidence"
     ],
-    "note": "预计 1 可用 / 4 unknown：**唯一**能算的是 coverage_confidence（它只依赖 build 的规则/数据覆盖）"
+    "unknown": [],
+    "note": "5 轴全部可用：coverage_confidence 只依赖 build 的规则/数据覆盖；四轴的分母来自**声明假设**（先验里逐条带 basis，可复算、可替换），相对分 / 容错来自 RC-302 的结构分（ENGINE_HYPOTHESIS）"
   },
   "unknown_reasons": [
     {
       "axis": "environment_value",
       "prior_field": "expected_meta_value",
-      "available_now": false,
-      "unknown_reason": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-      "missing": [
-        "distribution[].value（poison_stack / wing_king_flyer / meteor_burst / sugar_morph / ice_control / sandstorm_weather / fighting_press）",
-        "metaPrior.distribution_source = \"unknown\"（没有任何真实对局数据）"
-      ],
-      "lights_up_when": "注入 measured 分布（带逐条来源 + value + relative_score）后 available"
+      "available_now": true,
+      "unknown_reason": null,
+      "missing": [],
+      "lights_up_when": "现在就是 available（assumption 档：占比 = 声明假设的分母，相对分 / 容错 = RC-302 结构分）；换成带来源的 measured 分布后改用注入的 relative_score / tolerance"
     },
     {
       "axis": "worst_archetype",
       "prior_field": "worst_archetype",
-      "available_now": false,
-      "unknown_reason": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-      "missing": [
-        "distribution[].value（poison_stack / wing_king_flyer / meteor_burst / sugar_morph / ice_control / sandstorm_weather / fighting_press）",
-        "metaPrior.distribution_source = \"unknown\"（没有任何真实对局数据）"
-      ],
-      "lights_up_when": "注入 measured 分布（带逐条来源 + value + relative_score）后 available"
+      "available_now": true,
+      "unknown_reason": null,
+      "missing": [],
+      "lights_up_when": "现在就是 available（assumption 档：占比 = 声明假设的分母，相对分 / 容错 = RC-302 结构分）；换成带来源的 measured 分布后改用注入的 relative_score / tolerance"
     },
     {
       "axis": "matchup_spread",
       "prior_field": "matchup_spread",
-      "available_now": false,
-      "unknown_reason": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-      "missing": [
-        "distribution[].value（poison_stack / wing_king_flyer / meteor_burst / sugar_morph / ice_control / sandstorm_weather / fighting_press）",
-        "metaPrior.distribution_source = \"unknown\"（没有任何真实对局数据）"
-      ],
-      "lights_up_when": "注入 measured 分布（带逐条来源 + value + relative_score）后 available"
+      "available_now": true,
+      "unknown_reason": null,
+      "missing": [],
+      "lights_up_when": "现在就是 available（assumption 档：占比 = 声明假设的分母，相对分 / 容错 = RC-302 结构分）；换成带来源的 measured 分布后改用注入的 relative_score / tolerance"
     },
     {
       "axis": "execution_tolerance",
       "prior_field": "execution_tolerance",
-      "available_now": false,
-      "unknown_reason": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-      "missing": [
-        "distribution[].value（poison_stack / wing_king_flyer / meteor_burst / sugar_morph / ice_control / sandstorm_weather / fighting_press）",
-        "metaPrior.distribution_source = \"unknown\"（没有任何真实对局数据）"
-      ],
-      "lights_up_when": "注入 measured 分布（带逐条来源 + value + relative_score）后 available"
+      "available_now": true,
+      "unknown_reason": null,
+      "missing": [],
+      "lights_up_when": "现在就是 available（assumption 档：占比 = 声明假设的分母，相对分 / 容错 = RC-302 结构分）；换成带来源的 measured 分布后改用注入的 relative_score / tolerance"
     },
     {
       "axis": "coverage_confidence",
@@ -134,30 +132,79 @@
       "available_now": true,
       "unknown_reason": null,
       "missing": [],
-      "lights_up_when": "现在就是 available"
+      "lights_up_when": "现在就是 available（只依赖 build 的规则/数据覆盖）"
     }
   ],
   "red_proofs": [
     {
       "where": "compare.axes.environment_value.value",
       "mutation": "分布 unknown 时把 value 改成 0",
-      "criterion": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
+      "criterion": "[严格] 注入的 `metaPrior` 是 `unknown` 档（`distribution_source === \"unknown\"`，或 `distribution[].value` 有 null，或没有任何可用分母）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
       "expect_code": "UNKNOWN_AXIS_HAS_VALUE",
       "actual": "[\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value：available:false 却给了值 0：unknown 不许拿一个数（含 0）顶替\",\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value：available:false 却给了数值 0\"]"
     },
     {
       "where": "compare.axes.environment_value.value",
       "mutation": "分布 unknown 时把 value 改成 1",
-      "criterion": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
+      "criterion": "[严格] 注入的 `metaPrior` 是 `unknown` 档（`distribution_source === \"unknown\"`，或 `distribution[].value` 有 null，或没有任何可用分母）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
       "expect_code": "UNKNOWN_AXIS_HAS_VALUE",
       "actual": "[\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value：available:false 却给了值 1：unknown 不许拿一个数（含 0）顶替\",\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value：available:false 却给了数值 1\"]"
     },
     {
       "where": "compare.axes.environment_value.value",
       "mutation": "分布 unknown 时把 value 改成 0.5",
-      "criterion": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
+      "criterion": "[严格] 注入的 `metaPrior` 是 `unknown` 档（`distribution_source === \"unknown\"`，或 `distribution[].value` 有 null，或没有任何可用分母）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
       "expect_code": "UNKNOWN_AXIS_HAS_VALUE",
       "actual": "[\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value：available:false 却给了值 0.5：unknown 不许拿一个数（含 0）顶替\",\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value：available:false 却给了数值 0.5\"]"
+    },
+    {
+      "where": "（反向控制的正向）先验 assumption 档",
+      "mutation": "注入磁盘上的先验（**不改坏**）",
+      "criterion": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+      "expect_code": "五轴全部 available:true + ENGINE_HYPOTHESIS",
+      "actual": "{\"kind\":\"assumption\",\"availability\":{\"environment_value\":true,\"worst_archetype\":true,\"matchup_spread\":true,\"execution_tolerance\":true,\"coverage_confidence\":true},\"structural_basis_archetypes\":[\"rc304-six-a\",\"rc304-six-b\"]}"
+    },
+    {
+      "where": "compare.distribution#distribution[].basis",
+      "mutation": "把 assumption 行的 basis 整条删掉（value 保留）",
+      "criterion": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。",
+      "expect_code": "ASSUMPTION_BASIS_MISSING",
+      "actual": "{\"kind\":\"unknown\",\"availability\":{\"environment_value\":false,\"worst_archetype\":false,\"matchup_spread\":false,\"execution_tolerance\":false,\"coverage_confidence\":true}}"
+    },
+    {
+      "where": "compare.distribution#distribution[].sources",
+      "mutation": "给 assumption 行挂上 sources（伪装 measured）",
+      "criterion": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。",
+      "expect_code": "ASSUMPTION_CARRIES_SOURCE",
+      "actual": "{\"kind\":\"unknown\",\"reason\":\"**声明假设不许挂来源**：`source: \\\"assumption\\\"` 的行上带了 `sources[]`——这是把假\"}"
+    },
+    {
+      "where": "compare.distribution#distribution[].value",
+      "mutation": "把第一条占比改成 0.5（合计 ≠ 1）",
+      "criterion": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。",
+      "expect_code": "NO_PARTITION",
+      "actual": "{\"kind\":\"unknown\",\"value_sum\":1.357142}"
+    },
+    {
+      "where": "compare.distribution#distribution[].basis.denominator",
+      "mutation": "分母 K=7 改成 K=8",
+      "criterion": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+      "expect_code": "权重与四轴加权值随之变",
+      "actual": "{\"weight_after\":0.125,\"environment_value_after\":{\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.064592,\"winner\":\"rc304-six-a\"}}"
+    },
+    {
+      "where": "compare.axes.environment_value.structural_basis",
+      "mutation": "assumption 档下把结构依据抹掉",
+      "criterion": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+      "expect_code": "STRUCTURAL_BASIS_MISSING",
+      "actual": "[\"[STRUCTURAL_BASIS_MISSING] compare.axes.environment_value.structural_basis：assumption 档的轴必须带 structural_basis（逐体系的判据、分子 / 分母与重算入口）；只给一个数，读的人没法对账\"]"
+    },
+    {
+      "where": "compare.axes.environment_value.available",
+      "mutation": "assumption 档下把四轴整体退回 unknown",
+      "criterion": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+      "expect_code": "NO_STRUCTURAL_SIGNAL",
+      "actual": "[\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value_numbers：available:false 却声明了量纲：没有值就没有量纲\",\"[CONFIDENCE_NOT_IN_LEDGER] compare.axes.environment_value.confidence：available:false 的轴 confidence 只能是 UNKNOWN，实际 \\\"ENGINE_HYPOTHESIS\\\"\",\"[NO_STRUCTURAL_SIGNAL] compare.axes.environment_value：分布是 assumption（逐条带 basis 的可复算分母），这一轴却 unknown（\\\"（变异体：假装算不出来）\\\"）：能算的必须算出来，缺结构输入才允许 fail closed\"]"
     },
     {
       "where": "compare.axes.coverage_confidence.value",
@@ -168,10 +215,10 @@
     },
     {
       "where": "compare.axes.environment_value.value",
-      "mutation": "分布 unknown 却把 available 改成 true、value 设成 0",
+      "mutation": "把 available 改成 false、value 设成 0（用 0 冒充「不知道」）",
       "criterion": "`available:true` 的轴必须给出**非 null 的数值型** `value`（或最怕体系那轴的非空对象）；`available:false` 的轴必须给出 `value: null` 且 `value_numbers` 为空。数值轴报 `null` 却写 `available:true` ⇒ `AVAILABILITY_SHAPE`（红）。",
-      "expect_code": "AVAILABILITY_SHAPE 或 UNKNOWN_AXIS_HAS_VALUE",
-      "actual": "[\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value：分布是 unknown，这一轴却 available:true：没有分布就没有期望\"]"
+      "expect_code": "UNKNOWN_AXIS_HAS_VALUE",
+      "actual": "[\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value：available:false 却给了值 0：unknown 不许拿一个数（含 0）顶替\",\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value：available:false 却给了数值 0\",\"[UNKNOWN_AXIS_HAS_VALUE] compare.axes.environment_value.value_numbers：available:false 却声明了量纲：没有值就没有量纲\",\"[AVAILABILITY_SHAPE] compare.axes.environment_value.unknown_reason：available:false 必须点名缺什么（unknown_reason）\",\"[CONFIDENCE_NOT_IN_LEDGER] compare.axes.environment_value.confidence：available:false 的轴 confidence 只能是 UNKNOWN，实际 \\\"ENGINE_HYPOTHESIS\\\"\",\"[NO_STRUCTURAL_SIGNAL] compare.axes.environment_value：分布是 assumption（逐条带 basis 的可复算分母），这一轴却 unknown（null）：能算的必须算出来，缺结构输入才允许 fail closed\"]"
     },
     {
       "where": "compare.axes.environment_value.win_rate",
@@ -192,7 +239,7 @@
       "mutation": "渲染文本追加一句「这套阵容的胜率 62%」",
       "criterion": "产出与渲染文本里不许出现胜率 / 概率 / 百分数 / 强度分 / 榜单标签（T0 / 强势 / 必带…）；命中即 `PSEUDO_PRECISION`（红）。`value_numbers`（单位与量纲）必须逐条声明，`unit` 与 `value_numbers[].unit` 里出现 `BANNED_UNIT_WORDS`（胜率 / 概率 / 百分比 / %）⇒ `PSEUDO_PRECISION`（红）：量纲是伪精确最常见的藏身处。扫描范围只排除 `definition` 与判据正文，**键名检查不受豁免**。",
       "expect_code": "PSEUDO_PRECISION",
-      "actual": "[\"[PSEUDO_PRECISION] text：出现 胜率：\\\"五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / cover\\\"\",\"[PSEUDO_PRECISION] text：出现 %（伪精确百分数）：\\\"五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / cover\\\"\"]"
+      "actual": "[\"[PSEUDO_PRECISION] text：出现 %（伪精确百分数）：\\\"五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available\\\"\"]"
     },
     {
       "where": "（反向控制的正向）compare.axes[*].available",
@@ -234,14 +281,14 @@
       "mutation": "在线段插入 engine.step_joint()",
       "criterion": "把 `src/coach/team-compare.mjs` 的在线段（`ONLINE_SECTION_MARKER` 之前）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。",
       "expect_code": "ONLINE_ENGINE_CALL",
-      "actual": "[\"[ONLINE_ENGINE_CALL] src/coach/team-compare.mjs:38（scanned=online）：出现 step_joint：在线队伍比较里出现引擎的联合推进入口：比较只读注入数据，跑模拟是离线产标签的事（实际源码 \\\"export const ONLINE_SECTION_MARKER = 'const leak = () => engine.step_joint();\\\"）\"]"
+      "actual": "[\"[ONLINE_ENGINE_CALL] src/coach/team-compare.mjs:46（scanned=online）：出现 step_joint：在线队伍比较里出现引擎的联合推进入口：比较只读注入数据，跑模拟是离线产标签的事（实际源码 \\\"export const ONLINE_SECTION_MARKER = 'const leak = () => engine.step_joint();\\\"）\"]"
     },
     {
       "where": "src/coach/team-compare.mjs（在线段）",
       "mutation": "在线段插入 import('node:child_process')",
       "criterion": "把 `src/coach/team-compare.mjs` 的在线段（`ONLINE_SECTION_MARKER` 之前）逐行取出、剥掉行注释与块注释，再对每行做 `FORBIDDEN_ONLINE_PATTERNS[].pattern` 的子串匹配：命中即 `ONLINE_ENGINE_CALL` / `ONLINE_SUBPROCESS_CALL`（红）。判据是**源码结构**，不是注释声明。",
       "expect_code": "ONLINE_SUBPROCESS_CALL",
-      "actual": "[\"[ONLINE_SUBPROCESS_CALL] src/coach/team-compare.mjs:38（scanned=online）：出现 child_process：在线队伍比较里出现子进程模块：在线路径不 spawn 任何进程（实际源码 \\\"export const ONLINE_SECTION_MARKER = 'const run = () => import('node:child_process');\\\"）\"]"
+      "actual": "[\"[ONLINE_SUBPROCESS_CALL] src/coach/team-compare.mjs:46（scanned=online）：出现 child_process：在线队伍比较里出现子进程模块：在线路径不 spawn 任何进程（实际源码 \\\"export const ONLINE_SECTION_MARKER = 'const run = () => import('node:child_process');\\\"）\"]"
     },
     {
       "where": "src/coach/team-compare.mjs（在线段）",
@@ -269,14 +316,14 @@
       "mutation": "分布 unknown 却写 confirmed_by_distribution: true + why「换上它更好」",
       "criterion": "分布 unknown 时 `minimalReplacement()` **不许**写「换谁更好」：`confirmed_by_distribution` 必须是 `false`，并必须给出结构理由。写成 `true` 或给出「更优」结论 ⇒ `REPLACEMENT_OVERCLAIM`（红）。",
       "expect_code": "REPLACEMENT_OVERCLAIM",
-      "actual": "[\"[REPLACEMENT_OVERCLAIM] replacement.confirmed_by_distribution：分布是 unknown 却宣称替换结论已由分布确认：分布 unknown 时不许判「哪个更好」\",\"[REPLACEMENT_OVERCLAIM] replacement.why：分布 unknown 时 why 必须明说「不知道换谁更强」，只给结构理由；实际 why 里没有这句话\"]"
+      "actual": "[\"[REPLACEMENT_OVERCLAIM] replacement.confirmed_by_distribution：分布是 assumption 却宣称替换结论已由分布确认：分布 unknown 时不许判「哪个更好」\",\"[REPLACEMENT_OVERCLAIM] replacement.why：分布 unknown 时 why 必须明说「不知道换谁更强」，只给结构理由；实际 why 里没有这句话\"]"
     },
     {
       "where": "compareTeams 的两次运行",
       "mutation": "把第二次运行的结果改掉一个值",
       "criterion": "同一份输入连续两次调用，五个口径 + 最小替换 + 渲染文本的 `JSON.stringify` 结果必须逐字节相同（含 tie-break），否则 `NONDETERMINISTIC`（红）。",
       "expect_code": "NONDETERMINISTIC",
-      "actual": "[\"[NONDETERMINISTIC] compareTeams/minimalReplacement:compare：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版 vs {\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版\",\"[NONDETERMINISTIC] compareTeams/minimalReplacement:replacement：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-minimal-replacement/v1\\\",\\\"team_id\\\":\\\"rc304-six-a\\\",\\\"candidate_universe_size\\\":4,\\\"replacement\\\":{\\\"out\\\":{\\\"key\\\":\\\"instance:own-0007\\\",\\\"unanswered_weakness vs null\"]"
+      "actual": "[\"[NONDETERMINISTIC] compareTeams/minimalReplacement:compare：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版 vs {\\\"schema\\\":\\\"roco-team-compare/v1\\\",\\\"axes\\\":{\\\"environment_value\\\":{\\\"axis\\\":\\\"environment_value\\\",\\\"prior_field\\\":\\\"expected_meta_value\\\",\\\"label\\\":\\\"环境价值\\\",\\\"definition\\\":\\\"队伍对**版\",\"[NONDETERMINISTIC] compareTeams/minimalReplacement:replacement：同一输入两次运行的 JSON.stringify 不一致（含 tie-break）：{\\\"schema\\\":\\\"roco-minimal-replacement/v1\\\",\\\"team_id\\\":\\\"rc304-six-a\\\",\\\"candidate_universe_size\\\":4,\\\"replacement\\\":{\\\"out\\\":{\\\"key\\\":\\\"instance:own-0004\\\",\\\"unanswered_weakness vs null\"]"
     }
   ],
   "measured_control_sample": {
@@ -325,19 +372,19 @@
         "label": "毒系消耗",
         "relative_score": 0.3,
         "weight": 0.35,
-        "criterion": " 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
-        "structural": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。"
+        "criterion": "注入带来源的 `measured` 分布时，前四轴**必须**亮起来（`available:true`），值必须来自注入分布（加权均值 / 极差 / 最差体系逐条可对账）。反过来，如果 `available` 的轴数与注入分布里 `value` 非 null 的体系数对不上 ⇒ `MEASURED_NOT_WIRED`（红）：fail closed 不许写成「永远 unknown」。",
+        "structural": "注入带来源的 `measured` 分布时，前四轴**必须**亮起来（`available:true`），值必须来自注入分布（加权均值 / 极差 / 最差体系逐条可对账）。反过来，如果 `available` 的轴数与注入分布里 `value` 非 null 的体系数对不上 ⇒ `MEASURED_NOT_WIRED`（红）：fail closed 不许写成「永远 unknown」。"
       },
       "matchup_spread": 0.42,
       "execution_tolerance": 0.745,
-      "coverage_confidence": 0.855072
+      "coverage_confidence": 0.848485
     },
     "environment_value_recomputed_from_injected_distribution": 0.505,
     "environment_value_matches_weighted_mean": true,
     "coverage_confidence_unchanged": true,
     "minimal_replacement": {
       "out": {
-        "key": "instance:own-0007",
+        "key": "instance:own-0004",
         "unanswered_weaknesses": 2
       },
       "in": {
@@ -352,28 +399,160 @@
     "minimal_replacement_confirmed_by_distribution": true,
     "audit_ok": true,
     "audit_problems": [],
-    "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：两队在这一份注入分布上相同（不排名）\nworst_archetype：两队在这一份注入分布上相同（不排名）\nmatchup_spread：两队在这一份注入分布上相同（不排名）\nexecution_tolerance：两队在这一份注入分布上相同（不排名）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
+    "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：两队在这一份注入分布上相同（不排名）\nworst_archetype：两队在这一份注入分布上相同（不排名）\nmatchup_spread：两队在这一份注入分布上相同（不排名）\nexecution_tolerance：两队在这一份注入分布上相同（不排名）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0004，换上 cand:aaa"
+  },
+  "negative_controls": {
+    "unknown": {
+      "distribution_kind": "unknown",
+      "distribution_reason": "缺**版本对手分布**：注入的 `distribution[]` 是 `source: \"unknown\"` + `value: null`（没有任何真实对局数据，也没有声明假设的分母），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
+      "availability": {
+        "environment_value": false,
+        "worst_archetype": false,
+        "matchup_spread": false,
+        "execution_tolerance": false
+      },
+      "values": {
+        "environment_value": null,
+        "worst_archetype": null,
+        "matchup_spread": null,
+        "execution_tolerance": null
+      },
+      "unknown_reasons": {
+        "environment_value": "缺**版本对手分布**：注入的 `distribution[]` 是 `source: \"unknown\"` + `value: null`（没有任何真实对局数据，也没有声明假设的分母），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
+        "worst_archetype": "缺**版本对手分布**：注入的 `distribution[]` 是 `source: \"unknown\"` + `value: null`（没有任何真实对局数据，也没有声明假设的分母），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
+        "matchup_spread": "缺**版本对手分布**：注入的 `distribution[]` 是 `source: \"unknown\"` + `value: null`（没有任何真实对局数据，也没有声明假设的分母），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
+        "execution_tolerance": "缺**版本对手分布**：注入的 `distribution[]` 是 `source: \"unknown\"` + `value: null`（没有任何真实对局数据，也没有声明假设的分母），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
+      }
+    },
+    "basis_missing": {
+      "distribution_kind": "unknown",
+      "distribution_reason": "缺**声明假设的可复算依据**：分布里有 `source: \"assumption\"` 的行，但 `basis` 不完整（`kind` / `denominator > 0` / `recomputable_from` 缺一，或 `confidence` 不是 `ENGINE_HYPOTHESIS`、`notes` 太短、`unit` 不是 `share`）。**一个不带依据的数字就是编的**，所以这一轴回到 unknown，而不是照用这个数。",
+      "availability": {
+        "environment_value": false,
+        "worst_archetype": false,
+        "matchup_spread": false,
+        "execution_tolerance": false
+      },
+      "values": {
+        "environment_value": null,
+        "worst_archetype": null,
+        "matchup_spread": null,
+        "execution_tolerance": null
+      },
+      "unknown_reasons": {
+        "environment_value": "缺**声明假设的可复算依据**：分布里有 `source: \"assumption\"` 的行，但 `basis` 不完整（`kind` / `denominator > 0` / `recomputable_from` 缺一，或 `confidence` 不是 `ENGINE_HYPOTHESIS`、`notes` 太短、`unit` 不是 `share`）。**一个不带依据的数字就是编的**，所以这一轴回到 unknown，而不是照用这个数。",
+        "worst_archetype": "缺**声明假设的可复算依据**：分布里有 `source: \"assumption\"` 的行，但 `basis` 不完整（`kind` / `denominator > 0` / `recomputable_from` 缺一，或 `confidence` 不是 `ENGINE_HYPOTHESIS`、`notes` 太短、`unit` 不是 `share`）。**一个不带依据的数字就是编的**，所以这一轴回到 unknown，而不是照用这个数。",
+        "matchup_spread": "缺**声明假设的可复算依据**：分布里有 `source: \"assumption\"` 的行，但 `basis` 不完整（`kind` / `denominator > 0` / `recomputable_from` 缺一，或 `confidence` 不是 `ENGINE_HYPOTHESIS`、`notes` 太短、`unit` 不是 `share`）。**一个不带依据的数字就是编的**，所以这一轴回到 unknown，而不是照用这个数。",
+        "execution_tolerance": "缺**声明假设的可复算依据**：分布里有 `source: \"assumption\"` 的行，但 `basis` 不完整（`kind` / `denominator > 0` / `recomputable_from` 缺一，或 `confidence` 不是 `ENGINE_HYPOTHESIS`、`notes` 太短、`unit` 不是 `share`）。**一个不带依据的数字就是编的**，所以这一轴回到 unknown，而不是照用这个数。"
+      }
+    },
+    "assumption_with_sources": {
+      "distribution_kind": "unknown",
+      "distribution_reason": "**声明假设不许挂来源**：`source: \"assumption\"` 的行上带了 `sources[]`——这是把假设伪装成实测。要么撤掉来源保留 `basis`，要么拿真的可核对来源并把 `source` 改成 `measured`。",
+      "availability": {
+        "environment_value": false,
+        "worst_archetype": false,
+        "matchup_spread": false,
+        "execution_tolerance": false
+      },
+      "values": {
+        "environment_value": null,
+        "worst_archetype": null,
+        "matchup_spread": null,
+        "execution_tolerance": null
+      },
+      "unknown_reasons": {
+        "environment_value": "**声明假设不许挂来源**：`source: \"assumption\"` 的行上带了 `sources[]`——这是把假设伪装成实测。要么撤掉来源保留 `basis`，要么拿真的可核对来源并把 `source` 改成 `measured`。",
+        "worst_archetype": "**声明假设不许挂来源**：`source: \"assumption\"` 的行上带了 `sources[]`——这是把假设伪装成实测。要么撤掉来源保留 `basis`，要么拿真的可核对来源并把 `source` 改成 `measured`。",
+        "matchup_spread": "**声明假设不许挂来源**：`source: \"assumption\"` 的行上带了 `sources[]`——这是把假设伪装成实测。要么撤掉来源保留 `basis`，要么拿真的可核对来源并把 `source` 改成 `measured`。",
+        "execution_tolerance": "**声明假设不许挂来源**：`source: \"assumption\"` 的行上带了 `sources[]`——这是把假设伪装成实测。要么撤掉来源保留 `basis`，要么拿真的可核对来源并把 `source` 改成 `measured`。"
+      }
+    },
+    "partition_broken": {
+      "distribution_kind": "unknown",
+      "distribution_reason": "**占比不闭合**：`distribution[].value` 的合计不等于 1（容差 0.001）。权重只有在构成一次划分时才有分母含义；合计不是 1 就说明这不是一次划分，这一轴无定义。",
+      "availability": {
+        "environment_value": false,
+        "worst_archetype": false,
+        "matchup_spread": false,
+        "execution_tolerance": false
+      },
+      "values": {
+        "environment_value": null,
+        "worst_archetype": null,
+        "matchup_spread": null,
+        "execution_tolerance": null
+      },
+      "unknown_reasons": {
+        "environment_value": "**占比不闭合**：`distribution[].value` 的合计不等于 1（容差 0.001）。权重只有在构成一次划分时才有分母含义；合计不是 1 就说明这不是一次划分，这一轴无定义。",
+        "worst_archetype": "**占比不闭合**：`distribution[].value` 的合计不等于 1（容差 0.001）。权重只有在构成一次划分时才有分母含义；合计不是 1 就说明这不是一次划分，这一轴无定义。",
+        "matchup_spread": "**占比不闭合**：`distribution[].value` 的合计不等于 1（容差 0.001）。权重只有在构成一次划分时才有分母含义；合计不是 1 就说明这不是一次划分，这一轴无定义。",
+        "execution_tolerance": "**占比不闭合**：`distribution[].value` 的合计不等于 1（容差 0.001）。权重只有在构成一次划分时才有分母含义；合计不是 1 就说明这不是一次划分，这一轴无定义。"
+      }
+    }
+  },
+  "denominator_sensitivity_control": {
+    "denominator_before": 7,
+    "denominator_after": 8,
+    "partition_ok": true,
+    "weight_before": 0.142857,
+    "weight_after": 0.125,
+    "environment_value_before": {
+      "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+      "delta": 0.044056,
+      "winner": "rc304-six-a"
+    },
+    "environment_value_after": {
+      "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+      "delta": 0.064592,
+      "winner": "rc304-six-a"
+    },
+    "availability": {
+      "environment_value": true,
+      "worst_archetype": true,
+      "matchup_spread": true,
+      "execution_tolerance": true,
+      "coverage_confidence": true
+    },
+    "weight_changed": true,
+    "value_changed": true
   },
   "criteria": [
     {
-      "label": "分布 unknown 时前四轴 available:false + value:null + unknown_reason 点名缺什么",
-      "criteria": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
+      "label": "真实数据下五轴全部可用（coverage_confidence 真算 + 四轴 assumption 结构分）",
+      "criteria": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
       "actual": [
-        "environment_value: available_now=false",
-        "worst_archetype: available_now=false",
-        "matchup_spread: available_now=false",
-        "execution_tolerance: available_now=false",
-        "coverage_confidence: available_now=true"
+        "available=5/5 kind=assumption environment_value={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS worst_archetype={\"archetype_id\":\"wing_king_flyer\",\"label\":\"翼王飞翼\"/ENGINE_HYPOTHESIS matchup_spread={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS execution_tolerance={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS coverage=0.848485/COMMUNITY_CURRENT",
+        "available=5/5 kind=assumption environment_value={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS worst_archetype={\"archetype_id\":\"wing_king_flyer\",\"label\":\"翼王飞翼\"/ENGINE_HYPOTHESIS matchup_spread=0.5/ENGINE_HYPOTHESIS execution_tolerance={\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可/ENGINE_HYPOTHESIS coverage=0.84/COMMUNITY_CURRENT"
       ],
       "ok": true
     },
     {
-      "label": "五轴里**恰好一轴**现在可用（coverage_confidence），它真算而不是报 0",
-      "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。",
+      "label": "把分布降级成 unknown ⇒ 前四轴必须 available:false + value:null + 点名缺什么（负向控制）",
+      "criteria": "[严格] 注入的 `metaPrior` 是 `unknown` 档（`distribution_source === \"unknown\"`，或 `distribution[].value` 有 null，或没有任何可用分母）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
       "actual": [
-        "available=1/5 coverage=0.855072/COMMUNITY_CURRENT parts={\"rc304-six-a\":{\"criterion\":0.565217,\"evidence\":1,\"build_data\":1},\"rc304-six-b\":{\"criterion\":0.677419,\"evidence\":1,\"build_data\":1}}",
-        "available=1/5 coverage=0.84/COMMUNITY_CURRENT parts={\"rc304-six-a\":{\"criterion\":0.565217,\"evidence\":1,\"build_data\":1},\"rc304-six-c\":{\"criterion\":0.52,\"evidence\":1,\"build_data\":1}}"
+        "unknown: kind=unknown environment_value=false worst_archetype=false matchup_spread=false execution_tolerance=false",
+        "basis_missing: kind=unknown environment_value=false worst_archetype=false matchup_spread=false execution_tolerance=false",
+        "assumption_with_sources: kind=unknown environment_value=false worst_archetype=false matchup_spread=false execution_tolerance=false",
+        "partition_broken: kind=unknown environment_value=false worst_archetype=false matchup_spread=false execution_tolerance=false"
       ],
+      "ok": true
+    },
+    {
+      "label": "assumption 行缺 basis / 挂 sources / 占比不闭合 ⇒ 前四轴必须 fail closed（裸数字不许进）",
+      "criteria": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。",
+      "actual": [
+        "unknown: kind=unknown reason=缺**版本对手分布**：注入的 `distribution[]` 是 `source: \"unknown\"` + `va",
+        "basis_missing: kind=unknown reason=缺**声明假设的可复算依据**：分布里有 `source: \"assumption\"` 的行，但 `basis` 不完整",
+        "assumption_with_sources: kind=unknown reason=**声明假设不许挂来源**：`source: \"assumption\"` 的行上带了 `sources[]`——这是把假",
+        "partition_broken: kind=unknown reason=**占比不闭合**：`distribution[].value` 的合计不等于 1（容差 0.001）。权重只有在构成一"
+      ],
+      "ok": true
+    },
+    {
+      "label": "四轴对**分母**敏感：K → K+1（每行 1/(K+1)）⇒ 权重与加权值随之变，且仍然可用",
+      "criteria": "[严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+      "actual": "K 7 → 8、weight 0.142857 → 0.125、environment_value {\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.044056,\"winner\":\"rc304-six-a\"} → {\"criterion\":\" `source: \\\"assumption\\\"` 的行必须带**可复算的声明依据**：`basis.kind === \\\"uniform-over-candidate-universe\\\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \\\"share\\\"`、`confidence === \\\"ENGINE_HYPOTHESIS\\\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。\",\"delta\":0.064592,\"winner\":\"rc304-six-a\"}、partition_ok=true",
       "ok": true
     },
     {
@@ -404,13 +583,13 @@
       "label": "最小替换恰好一个方案且带 why；分布 unknown 时只给结构理由",
       "criteria": "`minimalReplacement()` 必须给**恰好一个**方案（`replacement.out` + `replacement.in` 各恰好一个），且必须带非空的 `why` 与 `evidence[]`；返回数组 / 多方案 / 没有 `why` ⇒ `REPLACEMENT_SHAPE`（红）。",
       "actual": [
-        "rc304-six-a vs rc304-six-b: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-a vs rc304-six-c: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-b vs rc304-six-c: instance:own-0015 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-d vs rc304-six-e: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
-        "rc304-six-a vs rc304-six-e: instance:own-0007 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-b: instance:own-0004 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-c: instance:own-0004 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-b vs rc304-six-c: instance:own-0008 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-d vs rc304-six-e: instance:own-0006 → cand:aaa confirmed_by_distribution=false",
+        "rc304-six-a vs rc304-six-e: instance:own-0004 → cand:aaa confirmed_by_distribution=false",
         "rc304-six-c vs rc304-six-f: 给不出（why 已写） confirmed_by_distribution=false",
-        "rc304-six-e vs rc304-six-f: instance:own-0007 → cand:aaa confirmed_by_distribution=false"
+        "rc304-six-e vs rc304-six-f: instance:own-0009 → cand:aaa confirmed_by_distribution=false"
       ],
       "ok": true
     },
@@ -430,7 +609,7 @@
     },
     {
       "label": "没有排序器时如实降级（ranker_status = missing）",
-      "criteria": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
+      "criteria": "[严格] 注入的 `metaPrior` 是 `unknown` 档（`distribution_source === \"unknown\"`，或 `distribution[].value` 有 null，或没有任何可用分母）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。",
       "actual": [
         "ranker=missing",
         "ranker=missing"
@@ -443,15 +622,15 @@
       "team_id": "rc304-six-a",
       "members": [
         "instance:own-0001",
+        "instance:own-0002",
         "instance:own-0003",
+        "instance:own-0004",
         "instance:own-0005",
-        "instance:own-0007",
-        "instance:own-0009",
-        "instance:own-0011"
+        "instance:own-0006"
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 23,
+      "gap_count": 22,
       "dimension_unknown_counts": {
         "coverage": 4,
         "energy": 1,
@@ -463,11 +642,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.855072,
+        "value": 0.848485,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.565217,
+          "criterion": 0.545455,
           "evidence": 1,
           "build_data": 1
         },
@@ -477,7 +656,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-a].gaps",
             "field": "length",
-            "value": 23,
+            "value": 22,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -498,7 +677,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-a].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 23,
+            "value": 22,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -507,11 +686,11 @@
             "field": "members_with_build",
             "value": [
               "instance:own-0001",
+              "instance:own-0002",
               "instance:own-0003",
+              "instance:own-0004",
               "instance:own-0005",
-              "instance:own-0007",
-              "instance:own-0009",
-              "instance:own-0011"
+              "instance:own-0006"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -519,7 +698,7 @@
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 23 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 22 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
@@ -528,7 +707,7 @@
         "coverage": 4,
         "energy": 2,
         "pivot": 2,
-        "respond": 2,
+        "respond": 1,
         "speed": 3,
         "synergy": 8
       },
@@ -539,26 +718,26 @@
         "龙系"
       ],
       "unanswered_weaknesses": {
+        "instance:own-0002": 1,
         "instance:own-0003": 1,
-        "instance:own-0005": 1,
-        "instance:own-0007": 2,
-        "instance:own-0011": 1
+        "instance:own-0004": 2,
+        "instance:own-0006": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
     {
       "team_id": "rc304-six-b",
       "members": [
-        "instance:own-0013",
-        "instance:own-0015",
-        "instance:own-0017",
-        "instance:own-0018",
-        "instance:own-0019",
-        "instance:own-0021"
+        "instance:own-0007",
+        "instance:own-0008",
+        "instance:own-0009",
+        "instance:own-0010",
+        "instance:own-0011",
+        "instance:own-0012"
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 31,
+      "gap_count": 30,
       "dimension_unknown_counts": {
         "coverage": 4,
         "energy": 1,
@@ -570,11 +749,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.892473,
+        "value": 0.888889,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.677419,
+          "criterion": 0.666667,
           "evidence": 1,
           "build_data": 1
         },
@@ -584,7 +763,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-b].gaps",
             "field": "length",
-            "value": 31,
+            "value": 30,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -605,7 +784,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-b].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 31,
+            "value": 30,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -613,12 +792,12 @@
             "pointer": "gapsByTeam[rc304-six-b].energy.build_curve",
             "field": "members_with_build",
             "value": [
-              "instance:own-0013",
-              "instance:own-0015",
-              "instance:own-0017",
-              "instance:own-0018",
-              "instance:own-0019",
-              "instance:own-0021"
+              "instance:own-0007",
+              "instance:own-0008",
+              "instance:own-0009",
+              "instance:own-0010",
+              "instance:own-0011",
+              "instance:own-0012"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -626,7 +805,7 @@
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 31 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 30 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
@@ -635,7 +814,7 @@
         "coverage": 4,
         "energy": 2,
         "pivot": 2,
-        "respond": 2,
+        "respond": 1,
         "speed": 3,
         "synergy": 16
       },
@@ -646,22 +825,22 @@
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0015": 3,
-        "instance:own-0017": 3,
-        "instance:own-0019": 2,
-        "instance:own-0021": 2
+        "instance:own-0008": 3,
+        "instance:own-0009": 3,
+        "instance:own-0011": 2,
+        "instance:own-0012": 2
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
     {
       "team_id": "rc304-six-c",
       "members": [
-        "instance:own-0022",
-        "instance:own-0023",
-        "instance:own-0025",
-        "instance:own-0027",
-        "instance:own-0029",
-        "instance:own-0031"
+        "instance:own-0013",
+        "instance:own-0014",
+        "instance:own-0015",
+        "instance:own-0016",
+        "instance:own-0017",
+        "instance:own-0018"
       ],
       "member_count": 6,
       "ok": true,
@@ -720,12 +899,12 @@
             "pointer": "gapsByTeam[rc304-six-c].energy.build_curve",
             "field": "members_with_build",
             "value": [
-              "instance:own-0022",
-              "instance:own-0023",
-              "instance:own-0025",
-              "instance:own-0027",
-              "instance:own-0029",
-              "instance:own-0031"
+              "instance:own-0013",
+              "instance:own-0014",
+              "instance:own-0015",
+              "instance:own-0016",
+              "instance:own-0017",
+              "instance:own-0018"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -755,10 +934,10 @@
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0022": 1,
-        "instance:own-0023": 1,
-        "instance:own-0029": 2,
-        "instance:own-0031": 1
+        "instance:own-0013": 1,
+        "instance:own-0014": 1,
+        "instance:own-0017": 2,
+        "instance:own-0018": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
@@ -766,17 +945,17 @@
       "team_id": "rc304-six-d",
       "members": [
         "instance:own-0001",
-        "instance:own-0003",
         "instance:own-0006",
-        "instance:own-0007",
-        "instance:own-0012",
-        "instance:own-0018"
+        "instance:own-0010",
+        "instance:own-0011",
+        "instance:own-0013",
+        "instance:own-0014"
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 24,
+      "gap_count": 41,
       "dimension_unknown_counts": {
-        "coverage": 4,
+        "coverage": 10,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -786,11 +965,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.861111,
+        "value": 0.869919,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.583333,
+          "criterion": 0.609756,
           "evidence": 1,
           "build_data": 1
         },
@@ -800,7 +979,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-d].gaps",
             "field": "length",
-            "value": 24,
+            "value": 41,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -821,7 +1000,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-d].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 24,
+            "value": 41,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -830,11 +1009,11 @@
             "field": "members_with_build",
             "value": [
               "instance:own-0001",
-              "instance:own-0003",
               "instance:own-0006",
-              "instance:own-0007",
-              "instance:own-0012",
-              "instance:own-0018"
+              "instance:own-0010",
+              "instance:own-0011",
+              "instance:own-0013",
+              "instance:own-0014"
             ],
             "note": "有具体 build 数据的成员登记键（RC-302 的 cost.build_support 记 validated_members = 6 只；其余成员按 build_data = 0 计，不猜）"
           }
@@ -842,30 +1021,38 @@
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 24 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 16 / 41 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 4,
+        "coverage": 10,
         "energy": 2,
         "pivot": 2,
-        "respond": 2,
+        "respond": 1,
         "speed": 3,
-        "synergy": 9
+        "synergy": 21
       },
       "uncovered_attack_types": [
         "地系",
-        "幽系",
-        "恶系",
+        "幻系",
+        "普通系",
+        "机械系",
+        "毒系",
+        "火系",
+        "电系",
+        "翼系",
+        "萌系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0003": 1,
-        "instance:own-0006": 1,
-        "instance:own-0007": 2,
-        "instance:own-0012": 1
+        "instance:own-0001": 2,
+        "instance:own-0006": 4,
+        "instance:own-0010": 3,
+        "instance:own-0011": 3,
+        "instance:own-0013": 3,
+        "instance:own-0014": 3
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
@@ -881,9 +1068,9 @@
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 23,
+      "gap_count": 21,
       "dimension_unknown_counts": {
-        "coverage": 4,
+        "coverage": 3,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -893,11 +1080,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.855072,
+        "value": 0.857143,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.565217,
+          "criterion": 0.571429,
           "evidence": 1,
           "build_data": 1
         },
@@ -907,7 +1094,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-e].gaps",
             "field": "length",
-            "value": 23,
+            "value": 21,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -928,7 +1115,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-e].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 23,
+            "value": 21,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -949,30 +1136,28 @@
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 23 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 9 / 21 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 4,
+        "coverage": 3,
         "energy": 2,
         "pivot": 2,
-        "respond": 2,
+        "respond": 1,
         "speed": 3,
         "synergy": 8
       },
       "uncovered_attack_types": [
         "地系",
-        "幽系",
-        "恶系",
+        "机械系",
         "龙系"
       ],
       "unanswered_weaknesses": {
         "instance:own-0003": 1,
-        "instance:own-0005": 1,
-        "instance:own-0007": 2,
-        "instance:own-0011": 1
+        "instance:own-0009": 2,
+        "instance:own-0011": 2
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
     },
@@ -988,9 +1173,9 @@
       ],
       "member_count": 6,
       "ok": true,
-      "gap_count": 23,
+      "gap_count": 28,
       "dimension_unknown_counts": {
-        "coverage": 4,
+        "coverage": 5,
         "energy": 1,
         "pivot": 1,
         "respond": 1,
@@ -1000,11 +1185,11 @@
       "coverage_confidence": {
         "axis": "coverage_confidence",
         "available": true,
-        "value": 0.855072,
+        "value": 0.869048,
         "unit": "相对分（0～1 的序数标度，不预测胜负）",
         "unknown_reason": null,
         "value_parts": {
-          "criterion": 0.565217,
+          "criterion": 0.607143,
           "evidence": 1,
           "build_data": 1
         },
@@ -1014,7 +1199,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-f].gaps",
             "field": "length",
-            "value": 23,
+            "value": 28,
             "note": "覆盖置信的输入是 RC-302 的缺口诊断条数"
           },
           {
@@ -1035,7 +1220,7 @@
             "source_file": "injected:gapsByTeam",
             "pointer": "gapsByTeam[rc304-six-f].gaps[].machine_evidence",
             "field": "gaps_with_evidence",
-            "value": 23,
+            "value": 28,
             "note": "带完整机器证据的缺口条数"
           },
           {
@@ -1056,29 +1241,31 @@
         "confidence": "COMMUNITY_CURRENT",
         "unverified": [
           "未核实：全量 622 只的 build 覆盖 —— 冻结迁移层只有 48 只（RC-302 的域上限），其余只能是 unknown",
-          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 10 / 23 条缺口），已按条数计入覆盖置信的扣分"
+          "未核实：coverage / energy / pivot / respond / speed / synergy 维度里有被台账标 UNKNOWN 的量（共 11 / 28 条缺口），已按条数计入覆盖置信的扣分"
         ],
         "missing": []
       },
       "dimension_gap_counts": {
         "cost": 2,
-        "coverage": 4,
+        "coverage": 5,
         "energy": 2,
         "pivot": 2,
-        "respond": 2,
+        "respond": 1,
         "speed": 3,
-        "synergy": 8
+        "synergy": 13
       },
       "uncovered_attack_types": [
         "地系",
+        "幻系",
         "幽系",
         "恶系",
         "龙系"
       ],
       "unanswered_weaknesses": {
-        "instance:own-0004": 1,
+        "instance:own-0002": 1,
+        "instance:own-0004": 2,
         "instance:own-0006": 1,
-        "instance:own-0008": 2,
+        "instance:own-0008": 3,
         "instance:own-0012": 1
       },
       "criteria": "[弱] `coverage_confidence` 必须**真算**：它的 `value` 只由注入的 build / 台账数据决定（注入一份更差的 build ⇒ 覆盖置信必须更低）。同一份数据算两次必须逐字节相同，否则 `COVERAGE_NOT_FROM_BUILD`（红）。"
@@ -1091,35 +1278,49 @@
         "rc304-six-b"
       ],
       "availability": {
-        "environment_value": false,
-        "worst_archetype": false,
-        "matchup_spread": false,
-        "execution_tolerance": false,
+        "environment_value": true,
+        "worst_archetype": true,
+        "matchup_spread": true,
+        "execution_tolerance": true,
         "coverage_confidence": true
       },
-      "unknown_reasons": {
-        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
-      },
+      "unknown_reasons": {},
       "values": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
-        "coverage_confidence": 0.855072
+        "environment_value": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": 0.044056,
+          "winner": "rc304-six-a"
+        },
+        "worst_archetype": {
+          "archetype_id": "wing_king_flyer",
+          "label": "翼王飞翼",
+          "relative_score": 0.416667,
+          "weight": 0.142857,
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
+        },
+        "matchup_spread": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": 0.035715,
+          "winner": "rc304-six-b"
+        },
+        "execution_tolerance": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": 0.051562,
+          "winner": "rc304-six-a"
+        },
+        "coverage_confidence": 0.848485
       },
       "comparison_winners": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": "rc304-six-a",
+        "worst_archetype": "rc304-six-b",
+        "matchup_spread": "rc304-six-b",
+        "execution_tolerance": "rc304-six-a",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0007",
+          "key": "instance:own-0004",
           "unanswered_weaknesses": 2
         },
         "in": {
@@ -1131,11 +1332,11 @@
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0004 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-a（差 0.044056，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-b（差 0.013889，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-b（差 0.035715，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-a（差 0.051562，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0004，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1143,35 +1344,45 @@
         "rc304-six-c"
       ],
       "availability": {
-        "environment_value": false,
-        "worst_archetype": false,
-        "matchup_spread": false,
-        "execution_tolerance": false,
+        "environment_value": true,
+        "worst_archetype": true,
+        "matchup_spread": true,
+        "execution_tolerance": true,
         "coverage_confidence": true
       },
-      "unknown_reasons": {
-        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
-      },
+      "unknown_reasons": {},
       "values": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.018113,
+          "winner": "rc304-six-c"
+        },
+        "worst_archetype": {
+          "archetype_id": "wing_king_flyer",
+          "label": "翼王飞翼",
+          "relative_score": 0.430556,
+          "weight": 0.142857,
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
+        },
+        "matchup_spread": 0.5,
+        "execution_tolerance": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.006828,
+          "winner": "rc304-six-c"
+        },
         "coverage_confidence": 0.84
       },
       "comparison_winners": {
-        "environment_value": null,
-        "worst_archetype": null,
+        "environment_value": "rc304-six-c",
+        "worst_archetype": "rc304-six-a",
         "matchup_spread": null,
-        "execution_tolerance": null,
+        "execution_tolerance": "rc304-six-c",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0007",
+          "key": "instance:own-0004",
           "unanswered_weaknesses": 2
         },
         "in": {
@@ -1183,11 +1394,11 @@
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0004 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-c（差 -0.018113，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-a（差 -0.023148，相对分，不是胜率）\nmatchup_spread：两队在这一份注入分布上相同（不排名）\nexecution_tolerance：更有利的是 rc304-six-c（差 -0.006828，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0004，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1195,35 +1406,49 @@
         "rc304-six-c"
       ],
       "availability": {
-        "environment_value": false,
-        "worst_archetype": false,
-        "matchup_spread": false,
-        "execution_tolerance": false,
+        "environment_value": true,
+        "worst_archetype": true,
+        "matchup_spread": true,
+        "execution_tolerance": true,
         "coverage_confidence": true
       },
-      "unknown_reasons": {
-        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
-      },
+      "unknown_reasons": {},
       "values": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.062169,
+          "winner": "rc304-six-c"
+        },
+        "worst_archetype": {
+          "archetype_id": "wing_king_flyer",
+          "label": "翼王飞翼",
+          "relative_score": 0.416667,
+          "weight": 0.142857,
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
+        },
+        "matchup_spread": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.035715,
+          "winner": "rc304-six-b"
+        },
+        "execution_tolerance": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.05839,
+          "winner": "rc304-six-c"
+        },
         "coverage_confidence": 0.84
       },
       "comparison_winners": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": "rc304-six-c",
+        "worst_archetype": "rc304-six-b",
+        "matchup_spread": "rc304-six-b",
+        "execution_tolerance": "rc304-six-c",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0015",
+          "key": "instance:own-0008",
           "unanswered_weaknesses": 3
         },
         "in": {
@@ -1234,11 +1459,11 @@
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0015 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0008 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0015，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-c（差 -0.062169，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-b（差 -0.037037，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-b（差 -0.035715，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-c（差 -0.05839，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0008，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1246,51 +1471,64 @@
         "rc304-six-e"
       ],
       "availability": {
-        "environment_value": false,
-        "worst_archetype": false,
-        "matchup_spread": false,
-        "execution_tolerance": false,
+        "environment_value": true,
+        "worst_archetype": true,
+        "matchup_spread": true,
+        "execution_tolerance": true,
         "coverage_confidence": true
       },
-      "unknown_reasons": {
-        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
-      },
+      "unknown_reasons": {},
       "values": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
-        "coverage_confidence": 0.855072
+        "environment_value": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.024914,
+          "winner": "rc304-six-e"
+        },
+        "worst_archetype": {
+          "archetype_id": "wing_king_flyer",
+          "label": "翼王飞翼",
+          "relative_score": 0.407407,
+          "weight": 0.142857,
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
+        },
+        "matchup_spread": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.078705,
+          "winner": "rc304-six-d"
+        },
+        "execution_tolerance": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.091826,
+          "winner": "rc304-six-e"
+        },
+        "coverage_confidence": 0.857143
       },
       "comparison_winners": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": "rc304-six-e",
+        "worst_archetype": "rc304-six-e",
+        "matchup_spread": "rc304-six-d",
+        "execution_tolerance": "rc304-six-e",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0007",
-          "unanswered_weaknesses": 2
+          "key": "instance:own-0006",
+          "unanswered_weaknesses": 4
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系",
-            "幽系"
+            "地系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0006 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-e（差 -0.024914，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-e（差 0.048149，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-d（差 -0.078705，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-e（差 -0.091826，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0006，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1298,35 +1536,49 @@
         "rc304-six-e"
       ],
       "availability": {
-        "environment_value": false,
-        "worst_archetype": false,
-        "matchup_spread": false,
-        "execution_tolerance": false,
+        "environment_value": true,
+        "worst_archetype": true,
+        "matchup_spread": true,
+        "execution_tolerance": true,
         "coverage_confidence": true
       },
-      "unknown_reasons": {
-        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
-      },
+      "unknown_reasons": {},
       "values": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
-        "coverage_confidence": 0.855072
+        "environment_value": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": 0.017436,
+          "winner": "rc304-six-a"
+        },
+        "worst_archetype": {
+          "archetype_id": "wing_king_flyer",
+          "label": "翼王飞翼",
+          "relative_score": 0.407407,
+          "weight": 0.142857,
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
+        },
+        "matchup_spread": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.023149,
+          "winner": "rc304-six-a"
+        },
+        "execution_tolerance": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": 0.01443,
+          "winner": "rc304-six-a"
+        },
+        "coverage_confidence": 0.848485
       },
       "comparison_winners": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": "rc304-six-a",
+        "worst_archetype": "rc304-six-e",
+        "matchup_spread": "rc304-six-a",
+        "execution_tolerance": "rc304-six-a",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0007",
+          "key": "instance:own-0004",
           "unanswered_weaknesses": 2
         },
         "in": {
@@ -1338,11 +1590,11 @@
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0004 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-a（差 0.017436，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-e（差 0.023149，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-a（差 -0.023149，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-a（差 0.01443，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0004，换上 cand:aaa"
     },
     {
       "teams": [
@@ -1350,30 +1602,44 @@
         "rc304-six-f"
       ],
       "availability": {
-        "environment_value": false,
-        "worst_archetype": false,
-        "matchup_spread": false,
-        "execution_tolerance": false,
+        "environment_value": true,
+        "worst_archetype": true,
+        "matchup_spread": true,
+        "execution_tolerance": true,
         "coverage_confidence": true
       },
-      "unknown_reasons": {
-        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
-      },
+      "unknown_reasons": {},
       "values": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.006832,
+          "winner": "rc304-six-f"
+        },
+        "worst_archetype": {
+          "archetype_id": "wing_king_flyer",
+          "label": "翼王飞翼",
+          "relative_score": 0.453704,
+          "weight": 0.142857,
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
+        },
+        "matchup_spread": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": 0.111111,
+          "winner": "rc304-six-f"
+        },
+        "execution_tolerance": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.028528,
+          "winner": "rc304-six-f"
+        },
         "coverage_confidence": 0.84
       },
       "comparison_winners": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": "rc304-six-f",
+        "worst_archetype": "rc304-six-c",
+        "matchup_spread": "rc304-six-f",
+        "execution_tolerance": "rc304-six-f",
         "coverage_confidence": null
       },
       "minimal_replacement": null,
@@ -1381,7 +1647,7 @@
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换：给不出（见 why）"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-f（差 -0.006832，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-c（差 -0.068518，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-f（差 0.111111，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-f（差 -0.028528，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换：给不出（见 why）"
     },
     {
       "teams": [
@@ -1389,58 +1655,71 @@
         "rc304-six-f"
       ],
       "availability": {
-        "environment_value": false,
-        "worst_archetype": false,
-        "matchup_spread": false,
-        "execution_tolerance": false,
+        "environment_value": true,
+        "worst_archetype": true,
+        "matchup_spread": true,
+        "execution_tolerance": true,
         "coverage_confidence": true
       },
-      "unknown_reasons": {
-        "environment_value": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "worst_archetype": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "matchup_spread": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。",
-        "execution_tolerance": "缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。"
-      },
+      "unknown_reasons": {},
       "values": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
-        "coverage_confidence": 0.855072
+        "environment_value": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.042381,
+          "winner": "rc304-six-f"
+        },
+        "worst_archetype": {
+          "archetype_id": "wing_king_flyer",
+          "label": "翼王飞翼",
+          "relative_score": 0.407407,
+          "weight": 0.142857,
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "structural": "[严格] `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。 [严格] assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。"
+        },
+        "matchup_spread": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": 0.13426,
+          "winner": "rc304-six-f"
+        },
+        "execution_tolerance": {
+          "criterion": " `source: \"assumption\"` 的行必须带**可复算的声明依据**：`basis.kind === \"uniform-over-candidate-universe\"`、`basis.denominator > 0`、`basis.recomputable_from` 非空、`unit === \"share\"`、`confidence === \"ENGINE_HYPOTHESIS\"`、`notes` 足够长，**且不许挂 `sources[]`**；全部分布的 `value` 合计 = 1（容差 0.001，一次划分）。任一条不满足 ⇒ 四轴必须回到 `available:false` + `value:null` 并点名缺什么；照用这个裸数字 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）——「硬编码样例数字」就是从这儿进来的。  assumption 档下的 `relative_score` / `tolerance` 不许直接抄注入值，必须由**体系自己声明的** `archetypes[].feature_axes[].criterion` 从 RC-302 的登记字段结构性算出：每个判据的分子 / 分母 / 依据缺口写进 `evidence[]` 与 `structural_basis`（等权、分母 = 判据条数），`relative_score` = 判据结构分的等权均值，`tolerance` = 其中的最小值（结构短板），轴的 `confidence` 必须是 `ENGINE_HYPOTHESIS`。缺任一判据的输入 ⇒ 整轴 fail closed（`NO_STRUCTURAL_SIGNAL`），不拿别的数据顶替、不给 0。把裸数字当相对分、或绕开 `feature_axes` 另设权重表 ⇒ 红。",
+          "delta": -0.049786,
+          "winner": "rc304-six-f"
+        },
+        "coverage_confidence": 0.857143
       },
       "comparison_winners": {
-        "environment_value": null,
-        "worst_archetype": null,
-        "matchup_spread": null,
-        "execution_tolerance": null,
+        "environment_value": "rc304-six-f",
+        "worst_archetype": "rc304-six-e",
+        "matchup_spread": "rc304-six-f",
+        "execution_tolerance": "rc304-six-f",
         "coverage_confidence": null
       },
       "minimal_replacement": {
         "out": {
-          "key": "instance:own-0007",
+          "key": "instance:own-0009",
           "unanswered_weaknesses": 2
         },
         "in": {
           "key": "cand:aaa",
           "covers_types": [
-            "地系",
-            "幽系"
+            "地系"
           ],
           "has_build": true
         }
       },
-      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0007 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系 / 幽系（2 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
+      "minimal_replacement_why": "结构理由（可复算计数，不是强度判断）：把 instance:own-0009 换成 cand:aaa，它声明能接住队里现在**没有人接**的 地系（1 个）；这一只还有具体 build 数据 ⇒ 覆盖置信（coverage_confidence）不会因为换它而降档；版本对手分布是 unknown：**不知道**换谁在这个版本里更强，这里的「换它」只因为它补的是结构缺口；不返回「更优」结论、不给收益数值",
       "minimal_replacement_confirmed_by_distribution": false,
       "audit_ok": true,
       "audit_problems": [],
-      "text": "五轴可用性：environment_value=unknown / worst_archetype=unknown / matchup_spread=unknown / execution_tolerance=unknown / coverage_confidence=available\nenvironment_value：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nworst_archetype：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nmatchup_spread：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\nexecution_tolerance：unknown —— 缺**版本对手分布**：`meta-prior/v1.json` 的 `distribution[]` 当前 `source: \"unknown\"` + `value: null`（没有任何真实对局数据），所以「对环境的期望」的分母不存在，这一轴现在无定义。按契约返回 unknown，不返回 0、不给「差不多」、不输出伪精确结论。\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0007，换上 cand:aaa"
+      "text": "五轴可用性：environment_value=available / worst_archetype=available / matchup_spread=available / execution_tolerance=available / coverage_confidence=available\nenvironment_value：更有利的是 rc304-six-f（差 -0.042381，相对分，不是胜率）\nworst_archetype：更有利的是 rc304-six-e（差 -0.114815，相对分，不是胜率）\nmatchup_spread：更有利的是 rc304-six-f（差 0.13426，相对分，不是胜率）\nexecution_tolerance：更有利的是 rc304-six-f（差 -0.049786，相对分，不是胜率）\ncoverage_confidence：两队在这一份注入分布上相同（不排名）\n最小替换（恰好一个）：换下 instance:own-0009，换上 cand:aaa"
     }
   ],
   "ranker": {
     "status": "missing",
     "ranker_id": null,
     "reason": "没有注入版本化 Team Ranker 产物（13 号文档 §5.1 的离线链路还没产出标签）：比较退化成注入分布上的相对分，排序不可用",
-    "criteria": "[严格] 注入的 `metaPrior` 里 `distribution_source === \"unknown\"`（或 `distribution[].value` 有 null）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。"
+    "criteria": "[严格] 注入的 `metaPrior` 是 `unknown` 档（`distribution_source === \"unknown\"`，或 `distribution[].value` 有 null，或没有任何可用分母）时，environment_value / worst_archetype / matchup_spread / execution_tolerance 四轴的 `available` 必须是 `false`、`value` 必须是 `null`、`unknown_reason` 必须点名缺什么。出现数值 / `0` / 「差不多」/ 胜率 ⇒ `UNKNOWN_AXIS_HAS_VALUE`（红）。"
   },
   "does_not_do": [
     "不产出胜率 / 强度分 / 榜单名次 / 伪精确概率：13 号文档 §4 的五个口径都不是胜率",

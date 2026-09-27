@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-23T05:40:09.120Z",
+ "judged_at": "2026-09-27T07:00:17.200Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -30,7 +30,7 @@
    "at": "six-selected",
    "clientW": 390,
    "scrollW": 390,
-   "bodyScrollW": 390,
+   "bodyScrollW": 613,
    "innerW": 390
   },
   {
@@ -38,7 +38,7 @@
    "at": "two-selected",
    "clientW": 390,
    "scrollW": 390,
-   "bodyScrollW": 390,
+   "bodyScrollW": 863,
    "innerW": 390
   }
  ],
@@ -57,15 +57,15 @@
   },
   {
    "id": "候选按拥有与否分组",
-   "judge": "人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有），页面必须按**拥有与否**分组说明，并写清图鉴参考只能试玩",
+   "judge": "人类实测 Q2：候选里约一半是我不拥有的物种（实测 50 个候选 25 个非我拥有）。【按人类 2026-09-23 批注，原 `#tw-cand-list > [data-tw-group]` 两行分组说明**已删**；改由三条等价断言承担：① `#tw-scope-all`（全图鉴）与 `#tw-scope-mine`（我的精灵）结果集真的不同、且「我的精灵」只含我拥有的；② **逐卡**状态标签说清拥有与否（「你还没有这一只」/「持有 · 可正式上场」）；③ 「图鉴参考不能正式出战」由卡上的「图鉴 · 按需推算（未核验）」状态标承担】",
    "ok": true,
-   "actual": "拥有 1 / 图鉴参考 11；说明 [\"你拥有的可选（1 只，能正式出战）\",\"图鉴参考（11 只：还不能正式出战，放进理论阵容后只能试玩）\"]"
+   "actual": "全图鉴 622 条 / 我的精灵 48 条（ref=0）；全图鉴本页 10 张，带状态标 10 张；非拥有样例 {\"name\":\"喵喵\",\"status\":\"on_demand\",\"tag\":\"图鉴 · 按需推算（未核验）\",\"rowtag\":\"你还没有这一只\"}；拥有样例 null"
   },
   {
    "id": "03-徽记与候选池",
-   "judge": "三条口径（模式 / 候选规则 / 匹配前对手未知）在玩家层**恰好各出现一次**（不重复），模块只保留「候选来自全图鉴 600+」（总量由 dataset.twPoolTotal 记账）",
+   "judge": "三条口径按人类 2026-09-23 第六轮要求**已从玩家层真删**（一次都不出现，真鼠标打开的小芽面板里也没有）；候选池总量仍由模块 `data-tw-pool-total`（≥600）记账；口径本身没丢 —— `body.dataset.rocoMode` / `rocoPrematch` 与开发者抽屉里的注册表原文仍可核对。【2026-09-22 的口径是「三条各出现一次」→ 09-23 白天改到小芽面板 `#mode-chips` → 第六轮人类再次明确定为「真删」（容器已从 HTML 删除）。这条判据从「断言出现」等价改成「断言不出现」，并保留数据层/抽屉的可核对性（旧读取点 `#mode-line` 与 `#mode-chips` 都已删除）】",
    "ok": true,
-   "actual": "页头出现次数 {\"mode\":1,\"candidate\":1,\"prematch\":1,\"poolTotal\":622}"
+   "actual": "玩家层出现次数 {\"mode\":0,\"candidate\":0,\"prematch\":0,\"poolTotal\":622,\"panelOpen\":true,\"chipsFound\":false,\"panelHasCopy\":false,\"datasetMode\":\"pvp-standard-six-pet\",\"datasetPrematch\":\"UNKNOWN_PREMATCH\",\"drawerRaw\":\"{\\n \\\"id\\\": \\\"pvp-standard-six-pet\\\",\\n \\\"label\\\": \\\"标准 PVP 六宠阵容工坊（候选模式）\\\",\\n \\\"status\\\": \\\"CANDIDATE\\\",\\n \\\"confidence\\\": \\\"CROSS_SOURCE_SUPPORTED\\\",\\n \\\"ruleset_binding\\\": \\\"mobile_s4_candidate_v3\\\",\\n \\\"parameters\\\": {\\n  \\\"team_size\\\": 6,\\n  \\\"active_count\\\": 1,\\n  \\\"mana_pool\\\": 4,\\n  \\\"faint_mana_cost\\\": 1,\\n  \\\"trait_sharing\\\": false,\\n  \\\"boss_form\\\": null,\\n  \\\"level_normalization\\\": \\\"demo_standardized_max_level\\\"\\n },\\n \\\"engine\\\": {\\n  \\\"team_size\\\": 3,\\n  \\\"ruleset_id\\\": \\\"roco-world-s4-2026-09-10\\\"\\n },\\n \\\"sources_count\\\": 6,\\n \\\"unknowns_count\\\": 7,\\n \\\"microcase_ids\\\": [\\n  \\\"MC-BM01\\\",\\n  \\\"MC-BM02\\\",\\n  \\\"MC-BM03\\\"\\n ],\\n \\\"policies\\\": {\\n  \\\"boss_form_policy\\\": {\\n   \\\"name\\\": \\\"boss_form\\\",\\n   \\\"value\\\": \\\"allowed_if_eligible\\\",\\n   \\\"confidence\\\": \\\"RECORDED_IN_GAME\\\",\\n   \\\"evidence_id\\\": \\\"EV-PVP-BOSS-FORM-STANDARD\\\",\\n   \\\"evidence_role\\\": \\\"supports\\\",\\n   \\\"microcase_id\\\": null,\\n   \\\"reason\\\": \\\"人类实机口径（人类是唯一权威）：首领化 = 精灵**首领形态 / 血脉觉醒**，在闪耀大赛式标准 PVP 里**存在**，不是领地试炼专属；`boss_form=false` 不是最终设计。因此标准模式写成 allowed_if_eligible = **满足资格即可使用**，既不是 forbidden（那等于说这个模式没有首领化），也不是 required_for_entry（那会挡住打不了首领化的正常队伍）。首领信物 / 进化之力 = 资格或触发条件，**不叫普通 item**。主题层的「普通闪耀大赛是否开放 / 首领对决是否要求全员满足」写成 theme 子对象，不是全局布尔。\\\",\\n   \\\"eligibility\\\": {\\n    \\\"predicate\\\": \\\"pet.has_boss_lineage && team.holds_boss_token(pet) —— 换成人类口径的话：该精灵具备**首领血脉**（首领形态 / 血脉觉醒的资格），且队伍持有对应的**首领信物 / 进化之力**（触发条件）。资格判定不成立时该精灵不能首领化，但**不影响**它正常参赛。\\\",\\n    \\\"status\\\": \\\"UNVERIFIED\\\",\\n    \\\"evidence_id\\\": \\\"EV-PVP-BOSS-FORM-STANDARD\\\",\\n    \\\"on_unknown\\\": \\\"FAIL_CLOSED\\\",\\n    \\\"reason\\\": \\\"资格判定的两半（血脉是否具备、信物如何取得与消耗）只有「它们存在」这一条实机口径，具体判定式未核验：所以 predicate 是**待核验的表达式**，status=UNVERIFIED；引擎在判定不出资格时**必须 fail closed**（不释放首领化、不猜一个默认值），不许静默当作「满足」。\\\"\\n   },\\n   \\\"unknowns\\\": [\\n    {\\n     \\\"field\\\": \\\"activation_occupies_action\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"首领化是否占用一次行动，未核验 —— 不许从 mockup 文案沿用确定说法。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"per_battle_uses\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"同一场的次数上限，未核验。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"cooldown\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"冷却，未核验。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"removal\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"如何解除（换下 / 力竭 / 特定效果），未核验。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"duration\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"是否持续到回合末 / 整场，未核验。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"stat_multipliers\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"数值倍率，未核验。\\\"\\n    }\\n   ]\\n  },\\n  \\\"magic_policy\\\": {\\n   \\\"name\\\": \\\"pvp_magic\\\",\\n   \\\"value\\\": \\\"allowed_candidate\\\",\\n   \\\"classification\\\": \\\"pvp_magic_special_action\\\",\\n   \\\"confidence\\\": \\\"RECORDED_IN_GAME\\\",\\n   \\\"evidence_id\\\": \\\"EV-PVP-WISH-POWER-UP\\\",\\n   \\\"evidence_role\\\": \\\"supports\\\",\\n   \\\"evidence_id_prior\\\": \\\"EV-PVP-BOSS-FORM-STANDARD\\\",\\n   \\\"reason\\\": \\\"愿力强化 / 共鸣魔法等 PVP 魔法是**特殊行动**，不是普通道具。旧标准 PVP 口径里的 `item:0` **不**意味着它们不存在 —— 那正是这次要修掉的错误。2026-09-23 人类口述把「愿力强化」的语义与数值补齐（台账 EV-PVP-WISH-POWER-UP，RECORDED_IN_GAME），因此本策略不再是 all_unverified：**已登记的字段**写进 registered，**仍未核验的**留在 unknowns（引擎对它们一律 fail closed）。**2026-09-25 人类更正**：「愿力强化不占行动，就是这样，**背包物品都不占行动**」（台账 EV-PVP-WISH-POWER-UP 的第二条 2026-09-25 来源）—— 于是 `occupies_action` 从 `true` 改成 **`false`**：这一类是**自由动作**（用掉之后回合不变、还能照常出这一手），「『愿力冲击』就是个技能，这个算行动」说的是换上来的那个技能本身照常占一手。这条取值就是**能力声明**：引擎只认 `false`（`RuleConfig.magic_occupies_action`），没声明 / 未核验一律 fail closed。\\\",\\n   \\\"kinds\\\": [\\n    \\\"愿力强化\\\",\\n    \\\"共鸣魔法\\\"\\n   ],\\n   \\\"is_item\\\": false,\\n   \\\"occupies_action\\\": false,\\n   \\\"occupies_action_status\\\": \\\"RECORDED_IN_GAME\\\",\\n   \\\"all_unverified\\\": false,\\n   \\\"registered\\\": [\\n    {\\n     \\\"kind\\\": \\\"愿力强化\\\",\\n     \\\"action_class\\\": \\\"magic\\\",\\n     \\\"occupies_action\\\": false,\\n     \\\"occupies_action_status\\\": \\\"RECORDED_IN_GAME\\\",\\n     \\\"occupies_action_note\\\": \\\"自由动作（人类 2026-09-25：「不占行动，自由动作」）：用掉之后 `state.turn` 不变、对手这一手还没结算、我方仍可照常出一手技能（引擎入口 `env.step_free`；服务端点 `/battle/free`）。**旧口径「占一次行动」已被这一条取代**（2026-09-23 口述），历史留在台账里，不抹掉。\\\",\\n     \\\"per_battle_uses\\\": 2,\\n     \\\"cooldown_turns\\\": 3,\\n     \\\"target\\\": \\\"self_active\\\",\\n     \\\"target_note\\\": \\\"只能对自己**场上那只**用（人类：这点和首领化一致）。\\\",\\n     \\\"effect\\\": \\\"把目标精灵的**最上面（第一个）技能**替换成「愿力冲击」。\\\",\\n     \\\"removal\\\": \\\"再在背包里用一次「愿力强化」解除这次替换、还原原来的第一个技能；**不消耗次数**，但**自动进入冷却**。两次都是**自由动作**（不占行动）。\\\",\\n     \\\"visibility\\\": {\\n      \\\"skill_visible_to_opponent\\\": true,\\n      \\\"magic_visible_to_opponent\\\": false,\\n      \\\"status\\\": \\\"RECORDED_IN_GAME\\\",\\n      \\\"note\\\": \\\"人类原话：「能看见你使用这个技能，道具应该看不见吧」——后半句带「吧」，页面上按**不揭示**处理，不写成断言。\\\"\\n     },\\n     \\\"purpose\\\": \\\"反制「对方拿克制自己阵容的精灵」（人类原话）。\\\",\\n     \\\"wish_impact\\\": {\\n      \\\"name\\\": \\\"愿力冲击\\\",\\n      \\\"energy\\\": 2,\\n      \\\"power\\\": 80,\\n      \\\"element\\\": \\\"pet.wish_element\\\",\\n      \\\"element_note\\\": \\\"该精灵的**愿力属性**：默认取它的第一个属性；培养页可用道具改成任意属性（本系统里直接改即可）。按属性分形态（同族出处：特性「裁决」「滋养」的『首个技能替换为光系/草系/火系愿力冲击』）。\\\",\\n      \\\"damage_class\\\": \\\"atk >= spa ? 物攻 : 魔攻\\\",\\n      \\\"damage_class_note\\\": \\\"取该精灵物攻 / 魔攻里更高的那一项（人类：后面也得做进培养系统）。\\\",\\n      \\\"respond_bonus\\\": {\\n       \\\"condition\\\": \\\"应对状态\\\",\\n       \\\"power_multiplier\\\": 2.5,\\n       \\\"human_wording\\\": \\\"额外造成150%伤害\\\",\\n       \\\"reading\\\": \\\"按 +150% = 总倍率 2.5 实现；若口径是「变为 150%」则改 1.5。\\\",\\n       \\\"condition_basis\\\": \\\"本仓术语 1015/1016/1017：技能 desc 写「应对状态」= 对手这一手是**状态**类动作时应对成功（roco/src/roco_env/effects.py::respond_to / env.py::_respond_success）。人类表示不确定，让本仓自行确认。\\\"\\n      },\\n      \\\"other_effects\\\": \\\"无（人类：没别的效果了）。\\\"\\n     },\\n     \\\"confidence\\\": \\\"RECORDED_IN_GAME\\\",\\n     \\\"status\\\": \\\"READY_TO_IMPLEMENT\\\"\\n    }\\n   ],\\n   \\\"unknowns\\\": [\\n    {\\n     \\\"field\\\": \\\"wish_element_reitem\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"愿力属性的改名道具、消耗与是否可反复改，未核验（本系统按「直接改」处理）。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"cooldown_interaction\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"冷却与换人 / 外层回合的交互，未核验（本实现按自己的回合递减）。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"swap_persistence\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"被替换掉的第一个技能在换下场 / 再次上场之后还原成什么，未核验。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"duration\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"替换的持续时间（是否持续到本局结束）—— 人类口径只说「再用一次解除」，没有说自动到期，故按「持续到解除」实现，但仍记为未核验。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"stat_multipliers\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"除愿力冲击本身外没有别的倍率（人类：没别的效果了），保留此条以便将来登记。\\\"\\n    }\\n   ]\\n  },\\n  \\\"team_size_policy\\\": {\\n   \\\"min\\\": 1,\\n   \\\"max\\\": 6,\\n   \\\"fill_required\\\": true,\\n   \\\"fill_required_status\\\": \\\"RECORDED_IN_GAME\\\",\\n   \\\"value\\\": \\\"recorded_six\\\",\\n   \\\"confidence\\\": \\\"RECORDED_IN_GAME\\\",\\n   \\\"evidence_id\\\": \\\"EV-PVP-STANDARD-FILL-SIX\\\",\\n   \\\"evidence_role\\\": \\\"supports\\\",\\n   \\\"microcase_id\\\": \\\"MC-E07\\\",\\n   \\\"microcase_status\\\": \\\"NOT_RECORDED\\\",\\n   \\\"value_status\\\": \\\"RECORDED_IN_GAME\\\",\\n   \\\"reason\\\": \\\"上下界仍是 1～6（最多 6 只有官方转载与社区口径支撑）。「**是否必须选满 6 只**」这一格在 2026-09-25 由**人类实机口径**给出：「闪耀大赛就是6v6 4魔力v4魔力的pvp啊，不是随机6只啊，自己配队」⇒ fill_required=**true**、value=recorded_six、confidence=RECORDED_IN_GAME，台账条目 EV-PVP-STANDARD-FILL-SIX。**原口径（改钉不删）**：此前这里是 fill_required=null + UNVERIFIED，理由是\\\\\\\"「必须选满 6 只」没有任何来源支持\\\\\\\" —— 那条理由在当时成立（没有任何官方/社区文本支持），现在被人类实机口径取代；**张力**：官方一手的措辞是「最多可携带 6 只」（上限），与\\\\\\\"必须编入 6 只\\\\\\\"的措辞不同，已登记在 disputed_with 里。引擎遇到\\\\\\\"没填满算不算合法\\\\\\\"时**不再** fail closed 到\\\\\\\"未知\\\\\\\"，而是按 true（必须 6 只）判定；若将来拿到官方\\\\\\\"可以少于 6 只\\\\\\\"的条文，改这一格（原值已留在 fill_required_prior）。\\\",\\n   \\\"evidence_id_prior\\\": \\\"EV-PVP-STANDARD-TEAM-SIZE\\\",\\n   \\\"fill_required_prior\\\": null,\\n   \\\"fill_required_prior_status\\\": \\\"UNVERIFIED\\\",\\n   \\\"disputed_with\\\": [\\n    {\\n     \\\"ref\\\": \\\"https://news.qq.com/rain/a/20260414A0644900\\\",\\n     \\\"kind\\\": \\\"official_first_party\\\",\\n     \\\"claim\\\": \\\"官方一手措辞是「每人**最多**可携带6只随机精灵进行对战」= **上限**，没有逐字写过\\\\\\\"必须编入 6 只\\\\\\\"。\\\",\\n     \\\"how_resolved\\\": \\\"按本仓效力等级取**人类实机口径**（owner 2026-09-25：「闪耀大赛就是6v6…自己配队」）⇒ fill_required=true；张力原样留在这里，不许抹平，也不许写成\\\\\\\"官方已确认必须 6 只\\\\\\\"。\\\"\\n    }\\n   ]\\n  },\\n  \\\"weather_policy\\\": {\\n   \\\"name\\\": \\\"weather\\\",\\n   \\\"value\\\": \\\"enabled\\\",\\n   \\\"confidence\\\": \\\"OFFICIAL_CURRENT\\\",\\n   \\\"evidence_id\\\": \\\"EV-WEATHER-STANDARD-PVP\\\",\\n   \\\"evidence_role\\\": \\\"supports\\\",\\n   \\\"microcase_id\\\": null,\\n   \\\"reason\\\": \\\"官方一手（腾讯新闻·官方号《洛个明白》闪耀大赛入门篇 2026-04-14，正文全文精读）在整篇讲闪耀大赛的语境下专设「07 对战基础：印记与天气效果」一节，逐字：「天气是常驻在全场的效果，让对战双方都能获得相应的加成，但天气只能存在一种。」2026-09-25 人类据此**推翻**此前「天气仅存在于 PvE ⇒ 引擎删掉天气层」的口径（旧口径原话逐字留在 superseded_ruling 里，不抹掉）。四种天气的效果与数值以**当前规则集（S4 术语表 terms.json）**为准：3008 雨天水系技能威力 +75% / 3006 沙暴地系技能能耗减半 / 3007 暴风雪双方回合末 +2 层冻结（冰系免疫）/ 3021 雷鸣双方回合末 +1 层引电（电系免疫）；官方 4/14 那篇写雨天 +50%，属**更早版本**，逐字登记在 unknowns。回合数限制与「只能存在一种」同出官方 4/14；持续 8 回合由造天气技能的冻结描述给出（见 duration_note）。\\\",\\n   \\\"superseded_ruling\\\": \\\"旧口径原话（改钉不删）：「人类核实天气**仅存在于 PvE** ⇒ 这个天气系统可以删掉」（引擎侧曾据此回滚天气层）。2026-09-25 人类以官方一手 4/14 那篇推翻它，原话：「那你就做！」\\\",\\n   \\\"scope\\\": \\\"standard_pvp_field_effect\\\",\\n   \\\"max_concurrent\\\": 1,\\n   \\\"max_concurrent_reason\\\": \\\"官方 4/14 逐字「但天气只能存在一种」⇒ 新天气**替换**旧天气，不叠加。\\\",\\n   \\\"duration_turns\\\": 8,\\n   \\\"duration_source\\\": \\\"skill_desc\\\",\\n   \\\"duration_note\\\": \\\"引擎从**技能描述**里读回合数，不写死常量：四条造天气技能的冻结描述逐字都是「将天气改为X，持续8回合。」（skills.json：skill_000427 落雨 / skill_000507 沙涌 / skill_000555 冬至 / skill_000605 惊雷）。官方万字公告（2026-03-13）另有「落雨：技能能耗8→5，将天气改为雨天，持续8回合」（见台账 notes）。\\\",\\n   \\\"settlement\\\": \\\"end_turn_after_declared_stages\\\",\\n   \\\"settlement_note\\\": \\\"天气的回合末效果（暴风雪 / 雷鸣）**不是** `turn_order.end_turn.order` 里声明的逐宠阶段 —— 那个清单的语义是「每一只在场精灵内部」的结算顺序（见 env.py 的注释），而天气是**场地级、双方一起**结算。引擎在声明阶段跑完之后、天气回合数递减之前结算它。这条顺序**没有一手证据**，登记为 unknowns 里的一条。\\\",\\n   \\\"effects\\\": {\\n    \\\"雨天\\\": {\\n     \\\"element\\\": \\\"水系\\\",\\n     \\\"kind\\\": \\\"skill_power_multiplier\\\",\\n     \\\"value\\\": 1.75,\\n     \\\"term_id\\\": \\\"3008\\\",\\n     \\\"text\\\": \\\"天气为雨天时，双方的水系技能威力+75%。\\\"\\n    },\\n    \\\"沙暴\\\": {\\n     \\\"element\\\": \\\"地系\\\",\\n     \\\"kind\\\": \\\"skill_energy_cost_multiplier\\\",\\n     \\\"value\\\": 0.5,\\n     \\\"term_id\\\": \\\"3006\\\",\\n     \\\"text\\\": \\\"天气为沙暴时，双方的地系技能能耗减半。\\\"\\n    },\\n    \\\"暴风雪\\\": {\\n     \\\"kind\\\": \\\"end_turn_status\\\",\\n     \\\"status\\\": \\\"冻结\\\",\\n     \\\"layers\\\": 2,\\n     \\\"immune_element\\\": \\\"冰系\\\",\\n     \\\"term_id\\\": \\\"3007\\\",\\n     \\\"text\\\": \\\"天气为暴风雪时，双方每回合结束获得2层冻结。（冰系精灵免疫此效果）\\\"\\n    },\\n    \\\"雷鸣\\\": {\\n     \\\"kind\\\": \\\"end_turn_status\\\",\\n     \\\"status\\\": \\\"引电\\\",\\n     \\\"layers\\\": 1,\\n     \\\"immune_element\\\": \\\"电系\\\",\\n     \\\"term_id\\\": \\\"3021\\\",\\n     \\\"text\\\": \\\"天气为雷鸣时，双方每回合结束获得1层引电。（电系精灵免疫此效果）\\\"\\n    }\\n   },\\n   \\\"unknowns\\\": [\\n    {\\n     \\\"field\\\": \\\"energy_cost_halving_rounding\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"「能耗减半」遇到**奇数**能耗怎么取整（1 能耗 → 0 还是 1）没有任何来源；引擎按**向下取整**实现并登记，等人类裁决（不要以为这是规则）。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"freeze_tick\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"冻结层数的结算（术语 1004「冻结5%生命，若当前生命低于冻结比例，则力竭」）**未实现**：本轮只做「获得层数」。引擎照既有做法把未实现的回合末状态登记进 unsupported（不静默、不猜伤害）。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"shock_two_layer_trigger\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"术语 3022「获得2层引电时，立即受到25%生命的电系伤害，并失去2层引电」—— 雷鸣每回合 +1 层，两层时**该不该立刻结算**没有来源；引擎不实现它，只在层数达到 2 时登记 unsupported。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"end_turn_order_vs_status_tick\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"天气的回合末效果与 status_tick / regen 的先后顺序没有一手证据（官方只说「每回合结束时」）；引擎选「声明阶段之后」并登记。\\\"\\n    },\\n    {\\n     \\\"field\\\": \\\"rain_power_percent\\\",\\n     \\\"value\\\": null,\\n     \\\"status\\\": \\\"UNVERIFIED\\\",\\n     \\\"why\\\": \\\"官方 4/14 逐字「双方水系技能威力提升50%」，而仓内 S4 术语表 3008 逐字「双方的水系技能威力+75%」。**版本差异**：人类裁决取**当前规则集（S4 术语表）= +75%**，+50% 作为更早版本逐字留在台账 EV-WEATHER-STANDARD-PVP 的 notes 里。本条登记的是「两个数都真实存在过」，不是「随便取一个」。\\\"\\n    }\\n   ]\\n  }\\n },\\n \\\"entry_gate\\\": {\\n  \\\"requires\\\": [\\n   \\\"team.size 落在 policies.team_size_policy 的 [min, max] 区间内（1～6，且每只都在候选宇宙里）\\\",\\n   \\\"所有参赛精灵都通过 UNKNOWN_PREMATCH 的赛前信息口径（不知道对手阵容，不得假装知道）\\\",\\n   \\\"被绑定的 ruleset 是可运行的候选（mobile_s4_candidate_v3 已生成且未被 promote 成默认，见 ruleset_binding）\\\",\\n   \\\"首领化若要用：policies.boss_form_policy.eligibility 判定为满足（资格未核验时按 on_unknown=FAIL_CLOSED 处理，**不**阻止整队参赛）\\\"\\n  ],\\n  \\\"on_unmet\\\": \\\"SHOW_DISABLED_WITH_REASON\\\",\\n  \\\"on_unknown\\\": \\\"FAIL_CLOSED\\\",\\n  \\\"reason\\\": \\\"门控的语义是**先拦住、再把原因说出来**：条件不满足时给出禁用态与具体缺哪一条，而不是偷偷换一套规则开一局、也不是回落到别的模式（那会让「标准 PVP」悄悄变成极速对决 3v3）。判定不出来的资格一律按未知处理。\\\",\\n  \\\"never\\\": [\\n   \\\"call_engine_after_unmet\\\",\\n   \\\"fallback_to_other_mode\\\"\\n  ]\\n },\\n \\\"theme\\\": {\\n  \\\"theme_id\\\": null,\\n  \\\"boss_form_required\\\": null,\\n  \\\"period\\\": null,\\n  \\\"status\\\": \\\"UNVERIFIED\\\",\\n  \\\"why\\\": \\\"「普通闪耀大赛是否开放首领化」「首领对决主题是否要求全员满足」属于**主题 PVP** 的参数，不是全局布尔：它们写在这里、由具体主题填，标准模式本身保持 null（= 未定，不是 false）。首领对决（battle_mode.boss_duel）复用标准模式的规模与结算，只改 theme 这一块。\\\"\\n },\\n \\\"parameter_mirrors\\\": [\\n  {\\n   \\\"parameter\\\": \\\"boss_form\\\",\\n   \\\"authoritative_path\\\": \\\"policies.boss_form_policy.value\\\",\\n   \\\"deprecated\\\": true\\n  },\\n  {\\n   \\\"parameter\\\": \\\"team_size\\\",\\n   \\\"authoritative_path\\\": \\\"policies.team_size_policy\\\",\\n   \\\"deprecated\\\": false\\n  },\\n  {\\n   \\\"parameter\\\": \\\"mana_pool\\\",\\n   \\\"authoritative_path\\\": null,\\n   \\\"deprecated\\\": false,\\n   \\\"note\\\": \\\"魔力池仍只有候选口径（EV-PVP-STANDARD-MANA），未核验，因此没有单独的 policy 子树。\\\"\\n  }\\n ],\\n \\\"prematch\\\": {\\n  \\\"visibility\\\": \\\"UNKNOWN_PREMATCH\\\",\\n  \\\"evidence_id\\\": \\\"EV-PVP-UNKNOWN-OPPONENT\\\",\\n  \\\"topic\\\": \\\"pvp.fairness\\\",\\n  \\\"confidence\\\": \\\"ENGINE_HYPOTHESIS\\\",\\n  \\\"microcase_ids\\\": [\\n   \\\"MC-E11\\\"\\n  ],\\n  \\\"claim\\\": \\\"匹配前不知道对手阵容：这是**产品场景**（阵容工坊固定 UNKNOWN_PREMATCH），不是一条可引用的游戏规则。所有“对手会怎么打”的推断都必须标成先验而不是事实。\\\"\\n }\\n} | 引擎当前生效规模 3 只 · 注册表登记规模 6 只（不一致：对局开始前引擎是练习局配置，标准 PVP 会按注册表的六只开）；注册表登记的未核实项：7 条；prematch.visibility = UNKNOWN_PREMATCH\"}；真鼠标点开小芽=true，#mode-chips=缺失（符合「真删」）"
   },
   {
    "id": "04-宽屏不溢出",
@@ -83,13 +83,13 @@
    "id": "06-初判先于完整载荷",
    "judge": "页面分两次要数据：请求顺序 first|full；**在完整载荷到达之前**槽位就已经画出来了（data-tw-rendered-after-first=yes）；两次渲染耗时都量到了（data-tw-first-ms / data-tw-full-ms）",
    "ok": true,
-   "actual": "；fetches=first|full rendered_after_first=yes first_ms=132 full_ms=34 stage=full full_state=ok"
+   "actual": "；fetches=first|full rendered_after_first=yes first_ms=84 full_ms=23 stage=full full_state=ok"
   },
   {
    "id": "07-分段元数据在 dataset",
    "judge": "分段交付的信封在**属性**上可核对（契约名 / 是否降级 / 主动扣下的段 / 耗时），可见文本里一个工程词都没有",
    "ok": true,
-   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=30 withheld=\"\""
+   "actual": "serving=roco-serving/v1 degraded=no elapsed_ms=19 withheld=\"\""
   },
   {
    "id": "08-候选含图鉴物种",
@@ -98,10 +98,10 @@
    "actual": "命中 千棘海针（磨损的样子）"
   },
   {
-   "id": "09-只看收藏开关",
-   "judge": "真实鼠标点「只看收藏」→ 路由重算且模块回到 ok；再点一次回到 ok",
+   "id": "09-范围分档开关",
+   "judge": "真实鼠标点「我的精灵」→ 候选池真的重新取数（结果集从全量收窄）且模块回到 ok；再点「全图鉴」回到原结果集与 ok。【原 `#tw-favourite`（只看收藏）已按人类 2026-09-23 删除，由范围分档 `#tw-scope-mine` / `#tw-scope-all` 承担（同样是「收窄候选范围」这一类操作）】",
    "ok": true,
-   "actual": "开了之后 state=ok（selected=0）；关掉之后 state=ok；命中={\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<undefined\"}"
+   "actual": "点「我的精灵」后 state=ok（selected=0，total 622→48）；点回「全图鉴」后 state=ok（total=622）；命中={\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON#tw-scope-mine.tw-btn<DIV.tw-cand-tools.tw-scope-row<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"} / {\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON#tw-scope-all.tw-btn<DIV.tw-cand-tools.tw-scope-row<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"}"
   },
   {
    "id": "10-图鉴物种照实拒绝",
@@ -113,7 +113,7 @@
    "id": "11-错误态可恢复",
    "judge": "错误态下再点一只有效的候选：模块回到 ok，刚被拒的那一只没有偷偷留在队伍里",
    "ok": true,
-   "actual": "加点={\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":0,\"after\":1} state=ok selected=1"
+   "actual": "加点={\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"} state=ok selected=1"
   },
   {
    "id": "12-真实键鼠选到第 2 只",
@@ -125,7 +125,7 @@
    "id": "13-恰好三个候选",
    "judge": "已选 2 只时评估区常驻显示**恰好三个**下一只候选，取舍标签两两不同，且至少覆盖两个真正的取舍口径（偏好保留池空时 RC-303 会如实回落，第三个位置由召回的参考候选补上并标「候选参考」）",
    "ok": true,
-   "actual": "标签=强度|稳定|候选参考 候选节点=3 缺口节点=10"
+   "actual": "标签=强度|稳定|候选参考 候选节点=3 缺口节点=9"
   },
   {
    "id": "14-候选与核心同源",
@@ -137,25 +137,25 @@
    "id": "15-缺口清单在评估区",
    "judge": "评估区呈现 RC-302 的缺口口径（缺什么 / 台账里标未核实），且没有工程键名",
    "ok": true,
-   "actual": "缺口节点=10 路由口径=[\"属性覆盖\",\"速度层次\",\"能量曲线\",\"应对手段\",\"换入换出\",\"队内互补\",\"资源消耗\"]"
+   "actual": "缺口节点=9 路由口径=[\"属性覆盖\",\"速度层次\",\"能量曲线\",\"换入换出\",\"队内互补\",\"资源消耗\"]"
   },
   {
    "id": "16-评估随阵容变化",
    "judge": "从 2 只加到 5 只之后：下一只候选换了人、缺口清单还在、仍然恰好三个候选",
    "ok": true,
-   "actual": "2 只时候选=[\"仪式巨像\",\"伊兰亚龙\",\"画间沉铁兽\"]；5 只时=[\"画间沉铁兽\",\"黑猫巫师\",\"嗜光嗡嗡\"]"
+   "actual": "2 只时候选=[\"棋契陛下\",\"伊兰亚龙\",\"海豹船长\"]；5 只时=[\"画间沉铁兽\",\"棋契陛下\",\"海豹船长\"]"
   },
   {
    "id": "17-连续选入六只",
    "judge": "连续用真实键鼠加人：六个槽位全部填满（selected == 6），填进去的是六个**不同**的个体",
    "ok": true,
-   "actual": "selected=6 填了 6/6 槽；加点记录=[{\"name\":\"铠甲虫\",\"added\":false,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":1,\"after\":1},{\"name\":\"音速犬\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000062\"},\"beforeCount\":1,\"after\":2},{\"name\":\"仪式巨像\",\"added\":true,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000100\"},\"beforeCount\":2,\"after\":3},{\"name\":\"雪影娃娃\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000112\"},\"beforeCount\":3,\"after\":4},{\"name\":\"皇家狮鹫（崖间地的样子）\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000118\"},\"beforeCount\":4,\"after\":5},{\"name\":\"化蝶（平常的样子）\",\"added\":true,\"probe\":{\"rows\":7,\"match\":1,\"species\":\"pet_000124\"},\"beforeCount\":5,\"after\":6}]"
+   "actual": "selected=6 填了 6/6 槽；加点记录=[{\"name\":\"铠甲虫\",\"added\":false,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":1,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"音速犬\",\"added\":true,\"probe\":{\"rows\":3,\"match\":1,\"species\":\"pet_000062\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"仪式巨像\",\"added\":true,\"probe\":{\"rows\":4,\"match\":1,\"species\":\"pet_000100\"},\"beforeCount\":2,\"after\":3,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"雪影娃娃\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000112\"},\"beforeCount\":3,\"after\":4,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"皇家狮鹫（崖间地的样子）\",\"added\":true,\"probe\":{\"rows\":6,\"match\":1,\"species\":\"pet_000118\"},\"beforeCount\":4,\"after\":5,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"},{\"name\":\"化蝶（平常的样子）\",\"added\":true,\"probe\":{\"rows\":7,\"match\":1,\"species\":\"pet_000124\"},\"beforeCount\":5,\"after\":6,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"SPAN\",\"shadowPath\":\"SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop\"},\"topAfter\":\"ok\"}]"
   },
   {
    "id": "18-满六只五轴",
-   "judge": "选满六只后出现完整诊断：五轴都在；能算的给值，算不出的给原因且不带值（不补 0）",
+   "judge": "选满六只后出现完整诊断：五轴都在（**接口层**）；能算的给值，算不出的给原因且不带值（不补 0）。【2026-09-25（人类投诉「五项全算不出来 + 大片没用的信息」）：页面上算不出来的轴**合并成一行** ⇒ DOM 轴节点数 = 能算的轴数 + 1；接口层仍是五轴逐条（口径没放松，只是不再把同一句话印四遍）】",
    "ok": true,
-   "actual": "轴节点=5；环境价值:算不出 / 最怕的体系:算不出 / 对局离散度:算不出 / 操作容错:算不出 / 覆盖置信:能算"
+   "actual": "轴节点=5；环境价值:能算 / 最怕的体系:能算 / 对局离散度:能算 / 操作容错:能算 / 覆盖置信:能算"
   },
   {
    "id": "19-最大短板与替换建议",
@@ -167,7 +167,55 @@
    "id": "20-玩家层载荷",
    "judge": "路由的 player 段里没有工程键，也没有 id 形状的展示值",
    "ok": true,
-   "actual": "扫过 6238 字节"
+   "actual": "扫过 9125 字节"
+  },
+  {
+   "id": "37-配招那一行有四个技能名",
+   "judge": "每只已选精灵下面那行要么是你选的、要么是引擎规范配招，**不能是空的**（空的等于换招要从零挑四个）【审计高 6】",
+   "ok": true,
+   "actual": "配招行 6 条；示例「换招 引擎规范配招：啃咬、防御、翅刃、风隐」"
+  },
+  {
+   "id": "39-「最怕的体系」写出体系名",
+   "judge": "这一栏要有**名字**（「撞上「X」这类」）而不是只剩分数或含糊的「某类体系」【§C6.303 改了取数没验渲染】",
+   "ok": true,
+   "actual": "命中=true 示例「最怕的体系 现在能算 撞上「翼王飞翼」这类最吃亏（这类在环境里大约每 7 局遇到 1 次） 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。 原始数值与说明 archetype_id=wing_king_flyer · weight=0.142857 · label=翼王飞翼 撞上哪一类体系最」"
+  },
+  {
+   "id": "36-评估抽屉滚得动",
+   "judge": "评估抽屉内容超出面板高度时必须**滚得动**（真滚轮 → scrollTop > 0）【人类 2026-09-25：「这个阵容评估也是显示不完，下滑不了」】",
+   "ok": true,
+   "actual": "scrollHeight=2000 clientHeight=756 （需要滚=true）；滚轮后 scrollTop=200"
+  },
+  {
+   "id": "37-折叠头两态等高",
+   "judge": "「看是哪几个 / 为什么」的折叠头在收起/展开两态高度差 ≤ 4px（前提：存在算不出来的轴）【人类 2026-09-25：「上面那个收起那么大」】",
+   "ok": true,
+   "actual": "前提不成立：五轴全部可算 ⇒「还有 N 个口径算不出来」那一行不渲染（如实记账，不假装验过）"
+  },
+  {
+   "id": "38-折叠箭头方向",
+   "judge": "折叠箭头遵守惯例：收起 ▸（右）/ 展开 ▾（下）（前提：存在算不出来的轴）【人类 2026-09-25：「箭头还是反的」】",
+   "ok": true,
+   "actual": "前提不成立：五轴全部可算 ⇒「还有 N 个口径算不出来」那一行不渲染（如实记账，不假装验过）"
+  },
+  {
+   "id": "39-不可算的轴合并成一行",
+   "judge": "算不出来的轴在页面上**只占一行**（旧的逐轴平铺必须消失），且那一行不出现任何数字",
+   "ok": true,
+   "actual": "轴节点 5 = 能算 5 + 合并 0；合并行原文「」"
+  },
+  {
+   "id": "40-能算的轴给真值",
+   "judge": "能算的轴必须写出真值（含数字），且不可算的那些一个数字都不许给",
+   "ok": true,
+   "actual": "能算 5 个：「环境价值\n       \n       现在能算\n      偏高\n      \n      这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。\n      原始数值与说明\n        0.75735 · 相对分」"
+  },
+  {
+   "id": "41-同名不同种看得出区别",
+   "judge": "候选池里同名不同物种的两行，可见文本必须不同且各含自己的等级与定位【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】",
+   "ok": true,
+   "actual": "[\"棋契陛下 武系地系 Lv50 · 输出 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 Lv80 · 坦克 持有 · 可正式上场 在你的盒子里\"]"
   },
   {
    "id": "21-机制行上卡",
@@ -179,13 +227,13 @@
    "id": "22-玩家层无工程话",
    "judge": "模块的可见文本里不出现 pet_id / instance_id / state_version / coverage / provenance / unknown_fields / ranker_status / ruleset，也不出现裸 JSON",
    "ok": true,
-   "actual": "扫过 2671 字（豁免机制原文 4 处）；样例「 队伍（六个槽位） 六个槽位都满了 这一局的规则口径（候选 / 未核验 / 候选宇宙） 候选来自全图鉴 600+ 铠甲虫 移除 虫系 图鉴 · 按需推算（未核验） 有具体构建（结构…」"
+   "actual": "扫过 3686 字（豁免机制原文 4 处）；样例「 阵容评估 收起 › 阵容评估 六只满编 · 六个方面 这六只的五个方面现在都能算。其中四个方面要先假设\"对手会用什么体系\"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里…」"
   },
   {
    "id": "23-无胜率与百分数",
    "judge": "可见文本里不出现「数字 + %」或「胜率/概率 + 数字」这种伪精确说法（可核对的冻结机制原文除外）",
    "ok": true,
-   "actual": "扫过 2671 字无命中（豁免机制原文 2 条）"
+   "actual": "扫过 3686 字无命中（豁免机制原文 2 条）"
   },
   {
    "id": "24-未知写在玩家层",
@@ -195,7 +243,7 @@
   },
   {
    "id": "25-非法参数(selected)",
-   "judge": "「selected=own-0001,own-0003,own-0005,own-0007」必须 HTTP 400 + ok:false 并点名 selected",
+   "judge": "「selected=own-0001,own-0002,own-0003,own-0004」必须 HTTP 400 + ok:false 并点名 selected",
    "ok": true,
    "actual": "HTTP 400 error=「[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）」"
   },
@@ -231,9 +279,9 @@
   },
   {
    "id": "25-非法参数(locked)",
-   "judge": "「locked=own-0013」必须 HTTP 400 + ok:false 并点名 locked",
+   "judge": "「locked=own-0007」必须 HTTP 400 + ok:false 并点名 locked",
    "ok": true,
-   "actual": "HTTP 400 error=「[LOCKED_NOT_SELECTED] locked：锁定的 own-0013 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 \"own-0013\"）」"
+   "actual": "HTTP 400 error=「[LOCKED_NOT_SELECTED] locked：锁定的 own-0007 既不在 selected 也不在 must_include：locked ⊆ must_include ∪ selected（实际值 \"own-0007\"）」"
   },
   {
    "id": "26-六槽上限",
@@ -257,25 +305,31 @@
    "id": "29-窄屏不溢出",
    "judge": "390×844：scrollW == clientW",
    "ok": true,
-   "actual": "clientW=390 scrollW=390 bodyScrollW=390"
+   "actual": "clientW=390 scrollW=390 bodyScrollW=613"
   },
   {
    "id": "30-触控目标",
    "judge": "390×844：模块里每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44",
    "ok": true,
-   "actual": "量了 31 个元素，全部达标"
+   "actual": "量了 27 个元素，全部达标"
   },
   {
    "id": "31-移动端顺序",
-   "judge": "390×844：区块顺序固定为「队伍槽位 → 候选池 → 当前评估 → Coach 短提示」",
+   "judge": "390×844：常规流里的区块顺序固定为「队伍槽位 → 候选池」（→ 若「当前评估」「小芽短提示」还在流里，必须依次排在后面）；「当前评估」改由左侧悬浮抽屉承担（真鼠标点 `#tw-eval-toggle` 能打开、面板可见且有内容）。【2026-09-23 版式演变：`.tw-coach`（✦ 小芽 · 阵容阶段）按人类批注删除；`.tw-eval` 由人类要求改成 `#tw-eval-drawer` 固定抽屉（不在常规流）。「当前评估」这条口径由抽屉可达性这条等价断言守】",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\",\"tw-eval\",\"tw-coach\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":248},{\"cls\":\"tw-cand\",\"top\":1278},{\"cls\":\"tw-eval\",\"top\":1725},{\"cls\":\"tw-coach\",\"top\":3018}]"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":146},{\"cls\":\"tw-cand\",\"top\":427}]；阵容评估抽屉：存在=true 内容 4854 字节，点开后 data-open=\"yes\" 面板可见=true 面板尺寸={\"w\":300,\"h\":287} 切换按钮={\"w\":44,\"h\":132}"
+  },
+  {
+   "id": "31b-窄屏候选区有可见高度",
+   "judge": "390×844：候选列表必须至少露出一整行（0 高度 = 玩家真的点不到）",
+   "ok": true,
+   "actual": "列表可见高 clientH=132 几何高=132 scrollH=132 行高=44"
   },
   {
    "id": "32-窄屏候选区",
    "judge": "390×844：选到第 2 只后仍然不横向溢出，三个候选与缺口清单都在",
    "ok": true,
-   "actual": "clientW=390 scrollW=390 next=3 缺口=10"
+   "actual": "clientW=390 scrollW=390 selected=2 next=3 缺口=9；加人过程=[{\"name\":\"铠甲虫\",\"added\":true,\"probe\":{\"rows\":1,\"match\":1,\"species\":\"pet_000012\"},\"beforeCount\":0,\"after\":1,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"},{\"name\":\"音速犬\",\"added\":true,\"probe\":{\"rows\":2,\"match\":1,\"species\":\"pet_000062\"},\"beforeCount\":1,\"after\":2,\"click\":{\"tag\":\"SECTION\",\"cls\":\"\",\"path\":\"SECTION#team-workshop<MAIN<BODY<HTML<\",\"shadowTag\":\"BUTTON\",\"shadowPath\":\"BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN\"},\"topAfter\":\"ok\"}]"
   },
   {
    "id": "34-标准 PVP 开局按钮",
@@ -287,13 +341,13 @@
    "id": "35-标准 PVP 战斗页",
    "judge": "按 v3 候选规则开局：魔力来自引擎（4/4，写在换宠屏的底栏聚能位上）、无物品/逃跑、未核验假设如实标出。【按人类 2026-09-23 版式，旧读取点 `#self-resource`/`#foe-resource`（已收进 `#b3-sink[hidden]`）由 换宠屏的 `#b3-charge` / `[data-b3-charge-value]`（mana 态「♥ n / pool」）承担】",
    "ok": true,
-   "actual": "mode=pvp-standard-six-pet mana=4/4 （换宠屏聚能「聚能 ♥ 4」，切屏命中 BUTTON<DIV<DIV<DIV<SECTION#battle-panel<MAIN<BODY）groups=skill:4,charge:1,switch:5,surrender:1,item:0,escape:0 hidden=0；页面状态栏=「」"
+   "actual": "mode=pvp-standard-six-pet mana=4/4 （换宠屏聚能「聚能 ♥ 4 / 4」，切屏命中 BUTTON.b3-tab<DIV.b3-tabs<DIV.b3-footer<DIV.b3-wrap<SECTION#battle-panel.panel.battle<MAIN<BODY）groups=skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0 hidden=0；页面状态栏=「」"
   },
   {
    "id": "36-候选规则下的 Coach 取舍",
-   "judge": "v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数",
-   "ok": false,
-   "actual": "并列比较只有 0 条（至少 2 条） | 未来后果只有 0 条（至少 2 条） | 并列比较里一个动作名都没读到 | 取舍区必须如实标出置信/未核验，没读到"
+   "judge": "v3 候选规则下：并列比较 ≥2 条且逐条都是引擎给的合法动作、未来 2—3 回合 ≥2 条、如实标置信/未核验、不出现胜率或百分数。【按人类 2026-09-23 版式，读取点 `#hint-body` 不变；`#plan`「让小芽看一眼」与 `#xy-settings` 折叠**已删**，改由弹出式小芽窗口（真鼠标点 `#coach-entry`，面板里读 `#model-list`）＋同一条 `requestPlan({reason:'manual',explicit:true})` 路径触发】",
+   "ok": true,
+   "actual": "并列 3 条（[\"防御\",\"啃咬\",\"换上第4位\"]）；未来 5 条；规则配置 mobile_s4_candidate_v3；诊断（浮条 hidden=false / 有 plan=true / 取舍区 1265 字节 / 状态「」/ 点击命中 小芽入口 BUTTON#coach-entry.nav-btn.xy<DIV#roco-nav.header-actions<HEADER.topbar<MAIN<BODY<HTML< / 面板（弹窗打开=true，模型格 3 个：DeepSeek● 未连 / Qwen3.5-4B● 未连 / Qwen3.8-27B● 未连；记忆入口「查看记忆」） / 看一眼（原 `#plan` 已删，走同一条 requestPlan({reason:'manual',explicit:true}) 路径））"
   },
   {
    "id": "33-控制台干净",
@@ -312,10 +366,10 @@
   },
   {
    "id": "候选按拥有与否分组",
-   "judge": "把两类混成一列（不给分组说明）必须被同一条判据抓住",
+   "judge": "作用域分档形同虚设（两档结果条数相同）+ 卡片不带拥有与否状态标，必须被同一条判据抓住",
    "ok": true,
-   "hit": "同时有「我的」与「图鉴参考」却没分组说明 | 没有「你拥有的可选」这组 | 没有「图鉴参考」这组 | 没说清图鉴参考不能正式出战",
-   "actual": "{\"notes\":[]}"
+   "hit": "「全图鉴」与「我的精灵」结果条数相同（24）——作用域分档没真的换结果集 | 有 24 张候选卡没有状态标签 | 没有一张卡标出「你还没有这一只」（拥有与否没逐卡说清） | 没有一张卡标出「图鉴 / 按需推算（未核验）」（「不能正式出战」这层含义丢了） | 持有的卡没有写「持有 · 可正式上场」",
+   "actual": "{\"allTotal\":24,\"mineTotal\":24,\"taggedRows\":0,\"hasNotOwned\":false}"
   },
   {
    "id": "03-候选规则徽记",
@@ -368,6 +422,13 @@
   },
   {
    "id": "10-图鉴物种照实拒绝",
+   "judge": "理论阵容**有内容却是隐藏的**（只读 DOM 不看像素的读法）必须被抓住",
+   "ok": true,
+   "hit": "理论阵容有 1 只，但那个框不可见（hidden=true 高度=0）",
+   "actual": "{count:1, box:{hidden:true,h:0}}"
+  },
+  {
+   "id": "10-图鉴物种照实拒绝",
    "judge": "把「静默接受」的样本过同一条判据必须报错",
    "ok": true,
    "hit": "selected=pet_000562 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
@@ -407,6 +468,62 @@
    "ok": true,
    "hit": "玩家层出现工程键 slots[0].pet_id | 玩家层的 slots[0].pet_id 里出现 id 形状的值：pet_000062 | 玩家层出现工程键 next_candidates[0].instance_id | 玩家层的 next_candidates[0].instance_id 里出现 id 形状的值：own-0001",
    "actual": "{\"slots\":[{\"pet_id\":\"pet_000062\"}],\"next_candidates\":[{\"instance_id\":\"own-0001\"}]}"
+  },
+  {
+   "id": "39-「最怕的体系」写出体系名",
+   "judge": "把名字去掉（只剩「撞上某类体系时」）喂同一条判据必须报",
+   "ok": true,
+   "hit": "没有写出体系名（只剩含糊说法或分数）",
+   "actual": "样本：撞上某类体系时…（无名字）"
+  },
+  {
+   "id": "36-评估抽屉滚得动",
+   "judge": "「内容超出却滚不动」的形态喂同一条判据必须报",
+   "ok": true,
+   "hit": "面板内容超出（scrollHeight 900 > clientHeight 400）却滚不动：scrollTop=0",
+   "actual": "{sh:900,ch:400,st:0}"
+  },
+  {
+   "id": "37-折叠头两态等高",
+   "judge": "展开态加回 padding-top:9px 的形态必须报",
+   "ok": true,
+   "hit": "折叠头收起/展开两态高度差 29px > 4px（人类：「上面那个收起那么大」）",
+   "actual": "{collapsedH:44,openH:73}"
+  },
+  {
+   "id": "38-折叠箭头方向",
+   "judge": "把两个态的箭头对调必须报",
+   "ok": true,
+   "hit": "收起态箭头应为 ▸（右），实际 \"\\\"▾\\\"\" | 展开态箭头应为 ▾（下），实际 \"\\\"▴\\\"\"",
+   "actual": "收起 ▾ / 展开 ▴"
+  },
+  {
+   "id": "39-不可算的轴合并成一行",
+   "judge": "恢复逐轴平铺（四个独立行 + 行里带数字）必须报",
+   "ok": true,
+   "hit": "不可算的轴必须合并成一行（data-tw-axis=\"missing\" 至多 1 个），实际 4 个 | 合并那一行不许出现数字（实际出现 0）—— 那是\"又给了一个数\"的错觉",
+   "actual": "{axisCount:5,availCount:1,missCount:4,missText:\"…0.00\"}"
+  },
+  {
+   "id": "39-不可算的轴合并成一行",
+   "judge": "五轴全可算却仍渲染「算不出来」那一行（前提变了文案没跟上）必须报",
+   "ok": true,
+   "hit": "五轴全可算时不许再渲染「算不出来」那一行（前提变了、文案必须跟上）",
+   "actual": "{axisCount:5,availCount:5,missCount:0,missText:\"还有四个口径现在算不出来\"}"
+  },
+  {
+   "id": "40-能算的轴给真值",
+   "judge": "把能算的轴换成空话（无数字）必须报",
+   "ok": true,
+   "hit": "能算的轴必须写出真值（含数字），实际「现在能算」",
+   "actual": "{availCount:1,availText:\"现在能算\"}"
+  },
+  {
+   "id": "41-同名不同种看得出区别",
+   "judge": "把两行还原成只画名字+属性（投诉当时的样子）必须报",
+   "ok": true,
+   "hit": "同名两行的可见文本完全相同：「棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里」 | 两行必须各带自己的等级（要能同时看到 Lv50 与 Lv80）：[\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\"] | 两行必须各带自己的定位（要能同时看到「输出」与「坦克」）：[\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\",\"棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里\"]",
+   "actual": "两行逐字相同"
   },
   {
    "id": "21-机制行上卡",
@@ -454,7 +571,7 @@
    "id": "25-非法参数(第七个槽位)",
    "judge": "把「接受第 7 个槽位」的样本过同一条判据必须报错",
    "ok": true,
-   "hit": "selected=own-0001,own-0003,own-0005,own-0007,own-0009,own-0011,own-0013 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
+   "hit": "selected=own-0001,own-0002,own-0003,own-0004,own-0005,own-0006,own-0007 必须 HTTP 400 + ok:false，实际 HTTP 200 ok=true",
    "actual": "{ok:true,player:{selected_count:7}} / HTTP 200"
   },
   {
@@ -510,14 +627,14 @@
    "id": "36-候选规则下的 Coach 取舍(编动作)",
    "judge": "建议里混进一个引擎没给的动作必须被同一条判据抓住",
    "ok": true,
-   "hit": "并列比较只有 0 条（至少 2 条） | 未来后果只有 0 条（至少 2 条） | 建议里有引擎没给的动作：[\"旋风无敌斩\"] | 取舍区必须如实标出置信/未核验，没读到",
+   "hit": "建议里有引擎没给的动作：[\"旋风无敌斩\"]",
    "actual": "{\"labels\":[…,\"旋风无敌斩\"]}"
   },
   {
    "id": "36-候选规则下的 Coach 取舍(胜率)",
    "judge": "把「胜率 58%」写进取舍区必须被同一条判据抓住",
    "ok": true,
-   "hit": "并列比较只有 0 条（至少 2 条） | 未来后果只有 0 条（至少 2 条） | 并列比较里一个动作名都没读到 | 取舍区必须如实标出置信/未核验，没读到 | 可见文本里出现伪精确（胜率 / 百分数）",
+   "hit": "可见文本里出现伪精确（胜率 / 百分数）",
    "actual": "{\"text\":\"…胜率 58%\"}"
   }
  ],
@@ -537,20 +654,20 @@
     "axes": "",
     "axesAvailable": "",
     "poolTotal": "622",
-    "poolRows": "12",
+    "poolRows": "10",
     "error": null,
     "hasPayload": true,
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "132",
-    "fullMs": "34",
+    "firstMs": "84",
+    "fullMs": "23",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "30"
+    "elapsedMs": "19"
    },
    "dom": {
     "slotNodes": 6,
@@ -569,13 +686,13 @@
     "pendingNodes": 0,
     "mechanismLines": [
      "特性「向心力」：1号和2号位技能获得传动1和威力+30。",
-     "特性「不朽」：力竭4回合后复活。",
-     "特性「热成像」：若上回合双方有精灵使用火系技能，本回合自己携带的虫系技能威力+100%。"
+     "特性「机械变式」：若回合内自己携带的技能位置发生变化，该技能能耗永久-1。",
+     "特性「虚假宝箱」：自己力竭时，敌方获得攻防+20%。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
     "hasUnknownPrematch": false,
-    "hasFullUniverse": true,
+    "hasFullUniverse": false,
     "mentionsLegacySlots": false,
     "nextNames": [],
     "shadowPresent": true
@@ -600,8 +717,8 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "28",
-    "fullMs": "26",
+    "firstMs": "30",
+    "fullMs": "27",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
@@ -617,7 +734,7 @@
     "analysisCount": "1",
     "analysisTrialReady": "no",
     "nextNodes": 3,
-    "gapNodes": 10,
+    "gapNodes": 9,
     "axisNodes": 0,
     "unknownNodes": 0,
     "entranceNodes": 0,
@@ -625,21 +742,21 @@
     "mechanismNodes": 5,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
-     "特性「专注力」：入场首回合，获得物攻+100%。",
-     "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
+     "特性「御驾亲征」：棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
      "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
-     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。"
+     "特性「身经百练」：己方精灵每应对1次，自己入场时水系和武系技能威力+20%。",
+     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+     "特性「专注力」：入场首回合，获得物攻+100%。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
     "hasUnknownPrematch": false,
-    "hasFullUniverse": true,
+    "hasFullUniverse": false,
     "mentionsLegacySlots": false,
     "nextNames": [
-     "仪式巨像",
+     "棋契陛下",
      "伊兰亚龙",
-     "画间沉铁兽"
+     "海豹船长"
     ],
     "shadowPresent": true
    },
@@ -653,7 +770,15 @@
       "species": "pet_000012"
      },
      "beforeCount": 1,
-     "after": 1
+     "after": 1,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "音速犬",
@@ -664,7 +789,15 @@
       "species": "pet_000062"
      },
      "beforeCount": 1,
-     "after": 2
+     "after": 2,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "仪式巨像",
@@ -675,7 +808,15 @@
       "species": "pet_000100"
      },
      "beforeCount": 2,
-     "after": 3
+     "after": 3,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "雪影娃娃",
@@ -686,7 +827,15 @@
       "species": "pet_000112"
      },
      "beforeCount": 3,
-     "after": 4
+     "after": 4,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "皇家狮鹫（崖间地的样子）",
@@ -697,7 +846,15 @@
       "species": "pet_000118"
      },
      "beforeCount": 4,
-     "after": 5
+     "after": 5,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "化蝶（平常的样子）",
@@ -708,7 +865,15 @@
       "species": "pet_000124"
      },
      "beforeCount": 5,
-     "after": 6
+     "after": 6,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     }
    ]
   },
@@ -721,7 +886,7 @@
     "slots": "6",
     "filled": "5",
     "next": "3",
-    "nextLabels": "强度|候选参考|候选参考",
+    "nextLabels": "强度|偏好保留|候选参考",
     "axes": "",
     "axesAvailable": "",
     "poolTotal": "1",
@@ -731,14 +896,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "19",
-    "fullMs": "17",
+    "firstMs": "20",
+    "fullMs": "16",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "12"
+    "elapsedMs": "10"
    },
    "dom": {
     "slotNodes": 6,
@@ -748,7 +913,7 @@
     "analysisCount": "1",
     "analysisTrialReady": "no",
     "nextNodes": 3,
-    "gapNodes": 10,
+    "gapNodes": 9,
     "axisNodes": 0,
     "unknownNodes": 0,
     "entranceNodes": 0,
@@ -756,24 +921,24 @@
     "mechanismNodes": 8,
     "pendingNodes": 0,
     "mechanismLines": [
+     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。",
+     "特性「御驾亲征」：棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
+     "特性「身经百练」：己方精灵每应对1次，自己入场时水系和武系技能威力+20%。",
      "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
      "特性「专注力」：入场首回合，获得物攻+100%。",
      "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
      "特性「捉迷藏」：使敌方获得冻结时，也会使其获得全技能能耗+1。",
-     "特性「乘风连击」：使用翼系技能后，获得连击数+1。",
-     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。",
-     "特性「预警」：若敌方技能足够击败自己，回合开始时自己获得速度+50。",
-     "特性「血型吸引」：敌方每携带1种系别的技能，自己攻击时威力+10。"
+     "特性「乘风连击」：使用翼系技能后，获得连击数+1。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
     "hasUnknownPrematch": false,
-    "hasFullUniverse": true,
+    "hasFullUniverse": false,
     "mentionsLegacySlots": false,
     "nextNames": [
      "画间沉铁兽",
-     "黑猫巫师",
-     "嗜光嗡嗡"
+     "棋契陛下",
+     "海豹船长"
     ],
     "shadowPresent": true
    },
@@ -787,7 +952,15 @@
       "species": "pet_000012"
      },
      "beforeCount": 1,
-     "after": 1
+     "after": 1,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "音速犬",
@@ -798,7 +971,15 @@
       "species": "pet_000062"
      },
      "beforeCount": 1,
-     "after": 2
+     "after": 2,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "仪式巨像",
@@ -809,7 +990,15 @@
       "species": "pet_000100"
      },
      "beforeCount": 2,
-     "after": 3
+     "after": 3,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "雪影娃娃",
@@ -820,7 +1009,15 @@
       "species": "pet_000112"
      },
      "beforeCount": 3,
-     "after": 4
+     "after": 4,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "皇家狮鹫（崖间地的样子）",
@@ -831,7 +1028,15 @@
       "species": "pet_000118"
      },
      "beforeCount": 4,
-     "after": 5
+     "after": 5,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "化蝶（平常的样子）",
@@ -842,7 +1047,15 @@
       "species": "pet_000124"
      },
      "beforeCount": 5,
-     "after": 6
+     "after": 6,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     }
    ]
   },
@@ -857,7 +1070,7 @@
     "next": "0",
     "nextLabels": "",
     "axes": "环境价值|最怕的体系|对局离散度|操作容错|覆盖置信",
-    "axesAvailable": "覆盖置信",
+    "axesAvailable": "环境价值|最怕的体系|对局离散度|操作容错|覆盖置信",
     "poolTotal": "1",
     "poolRows": "1",
     "error": null,
@@ -865,14 +1078,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "18",
-    "fullMs": "16",
+    "firstMs": "19",
+    "fullMs": "22",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "10"
+    "elapsedMs": "13"
    },
    "dom": {
     "slotNodes": 6,
@@ -900,7 +1113,7 @@
     "hasModeBadge": false,
     "hasCandidateBadge": false,
     "hasUnknownPrematch": false,
-    "hasFullUniverse": true,
+    "hasFullUniverse": false,
     "mentionsLegacySlots": false,
     "nextNames": [],
     "shadowPresent": true
@@ -915,7 +1128,15 @@
       "species": "pet_000012"
      },
      "beforeCount": 1,
-     "after": 1
+     "after": 1,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "音速犬",
@@ -926,7 +1147,15 @@
       "species": "pet_000062"
      },
      "beforeCount": 1,
-     "after": 2
+     "after": 2,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "仪式巨像",
@@ -937,7 +1166,15 @@
       "species": "pet_000100"
      },
      "beforeCount": 2,
-     "after": 3
+     "after": 3,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "雪影娃娃",
@@ -948,7 +1185,15 @@
       "species": "pet_000112"
      },
      "beforeCount": 3,
-     "after": 4
+     "after": 4,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-state-tag.tw-state-held<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "皇家狮鹫（崖间地的样子）",
@@ -959,7 +1204,15 @@
       "species": "pet_000118"
      },
      "beforeCount": 4,
-     "after": 5
+     "after": 5,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     },
     {
      "name": "化蝶（平常的样子）",
@@ -970,7 +1223,15 @@
       "species": "pet_000124"
      },
      "beforeCount": 5,
-     "after": 6
+     "after": 6,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "SPAN",
+      "shadowPath": "SPAN.tw-row-meta<BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop"
+     },
+     "topAfter": "ok"
     }
    ],
    "selected_keys": "6"
@@ -978,13 +1239,13 @@
   {
    "at": "bad-params",
    "rows": [
-    "selected=own-0001,own-0003,own-0005,own-0007,own-0009,own-00 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）\",\"problems\":",
+    "selected=own-0001,own-0002,own-0003,own-0004,own-0005,own-00 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[SELECTED_OVER_TEAM_SIZE] selected：已选 7 只，超过 team_size=6（实际值 7）\",\"problems\":",
     "mode=zzz → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[UNKNOWN_MODE] mode：battle-modes.json 里没有这个 id：模式不许自创（现有 5 个：demo-training-3",
     "zzz=1 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"未知参数 zzz（白名单：mode/selected/locked/must_include/must_exclude/analysis_species",
     "max_replacements=abc → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"max_replacements 必须是非负整数（实际 \\\"abc\\\"）\",\"problems\":[\"max_replacements 必须是非负整数（",
     "favourites_only=yes → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"favourites_only 只能是 true 或 false（实际 \\\"yes\\\"）\",\"problems\":[\"favourites_only 只",
     "selected=pet_000012 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"selected 的每一项都必须是own-0001 形状的个体的 id（不认得的：pet_000012）\",\"problems\":[\"selected ",
-    "locked=own-0013 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[LOCKED_NOT_SELECTED] locked：锁定的 own-0013 既不在 selected 也不在 must_include：lock"
+    "locked=own-0007 → HTTP 400 {\"ok\":false,\"status\":400,\"error\":\"[LOCKED_NOT_SELECTED] locked：锁定的 own-0007 既不在 selected 也不在 must_include：lock"
    ]
   },
   {
@@ -1006,14 +1267,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "21",
-    "fullMs": "23",
+    "firstMs": "26",
+    "fullMs": "24",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "19"
+    "elapsedMs": "18"
    },
    "dom": {
     "slotNodes": 6,
@@ -1023,7 +1284,7 @@
     "analysisCount": "0",
     "analysisTrialReady": "no",
     "nextNodes": 3,
-    "gapNodes": 10,
+    "gapNodes": 9,
     "axisNodes": 0,
     "unknownNodes": 0,
     "entranceNodes": 0,
@@ -1031,39 +1292,79 @@
     "mechanismNodes": 5,
     "pendingNodes": 0,
     "mechanismLines": [
-     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
-     "特性「专注力」：入场首回合，获得物攻+100%。",
-     "特性「观星」：敌方每有1层星陨印记，自己的地系技能威力+20%。",
+     "特性「御驾亲征」：棋契陛下大幅提升种族资质，力竭时扣除4魔力。",
      "特性「嫉妒」：蓄力状态下，可以使用任一携带技能。",
-     "特性「变形活画」：行动时，敌方每有1层增益，本次行动技能威力+10%，速度+5。"
+     "特性「身经百练」：己方精灵每应对1次，自己入场时水系和武系技能威力+20%。",
+     "特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。",
+     "特性「专注力」：入场首回合，获得物攻+100%。"
     ],
     "hasModeBadge": false,
     "hasCandidateBadge": false,
     "hasUnknownPrematch": false,
-    "hasFullUniverse": true,
+    "hasFullUniverse": false,
     "mentionsLegacySlots": false,
     "nextNames": [
-     "仪式巨像",
+     "棋契陛下",
      "伊兰亚龙",
-     "画间沉铁兽"
+     "海豹船长"
     ],
     "shadowPresent": true
    },
    "metrics": {
     "clientW": 390,
     "scrollW": 390,
-    "bodyScrollW": 390,
+    "bodyScrollW": 863,
     "innerW": 390
-   }
+   },
+   "adds": [
+    {
+     "name": "铠甲虫",
+     "added": true,
+     "probe": {
+      "rows": 1,
+      "match": 1,
+      "species": "pet_000012"
+     },
+     "beforeCount": 0,
+     "after": 1,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+     },
+     "topAfter": "ok"
+    },
+    {
+     "name": "音速犬",
+     "added": true,
+     "probe": {
+      "rows": 2,
+      "match": 1,
+      "species": "pet_000062"
+     },
+     "beforeCount": 1,
+     "after": 2,
+     "click": {
+      "tag": "SECTION",
+      "cls": "",
+      "path": "SECTION#team-workshop<MAIN<BODY<HTML<",
+      "shadowTag": "BUTTON",
+      "shadowPath": "BUTTON.tw-row<DIV#tw-cand-list.tw-cand-list<SECTION.tw-panel.tw-cand<DIV.tw-grid<<SECTION#team-workshop<MAIN"
+     },
+     "topAfter": "ok"
+    }
+   ]
   },
   {
    "at": "standard-pvp-battle",
    "facts": {
     "mode": "pvp-standard-six-pet",
     "standardPvp": "yes",
-    "groups": "skill:4,charge:1,switch:5,surrender:1,item:0,escape:0",
+    "groups": "skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0",
     "hidden": "0",
-    "selfText": "聚能 ♥ 4",
+    "selfText": "聚能 ♥ 4 / 4",
     "foeText": "",
     "selfMana": 4,
     "engineSelfMana": 4,
@@ -1075,5 +1376,5 @@
    }
   }
  ],
- "ok": false
+ "ok": true
 }

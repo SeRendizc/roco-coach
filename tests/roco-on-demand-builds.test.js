@@ -16,7 +16,8 @@
 
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {existsSync, readFileSync} from 'node:fs';
+import {existsSync, readFileSync, writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -30,6 +31,8 @@ const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/tests$/, '');
 const TARGET = join(ROOT, 'data/roco/derived/on-demand-builds.json');
 const CATALOG = join(ROOT, 'data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json');
 const SKILLS = join(ROOT, 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json');
+// 2026-09-25：产物的 `derived_from.frozen_learnsets.sha256` 记的是这一份整文件的 sha
+const OWNED = join(ROOT, 'data/roco/owned/owned-pets.json');
 const log = (...args) => console.log('  ·', ...args);
 const readJson = (abs) => JSON.parse(readFileSync(abs, 'utf8'));
 const copy = (value) => JSON.parse(JSON.stringify(value));
@@ -46,6 +49,42 @@ test('产物存在且真的能过检查（这条红了就是真问题）', () =>
   assert.ok(existsSync(TARGET), `缺少 ${TARGET}；先跑 node scripts/roco/build-on-demand-builds.mjs`);
   const report = checkRepo();
   assert.equal(report.ok, true, `检查未通过：${JSON.stringify(report.issues?.slice(0, 4))}`);
+});
+
+// 2026-09-25：**产物新鲜度**（前一位子代理抓到的真缺口）。这条判据原来**根本没跑过**：
+// `verify-on-demand-builds.mjs` 只把 catalog / skills 两个 sha 交给校验器，**没给 frozen** ⇒
+// `owned-pets.json` 改了而产物没重建时 `--check` 照样绿（静默过期），`compiled_matches_frozen`
+// 比的是**旧快照**。现在：产物的 `derived_from.frozen_learnsets.sha256` 必须等于**当前**
+// `owned-pets.json` 的 sha，缺了也红。反证走**真检查器** `checkRepo({file})`（就是 `--file` 那条路）：
+// 把 sha 改成 0×64 / 把来源块整块删掉，都必须红。
+test('产物新鲜度：derived_from 的 frozen sha 必须等于当前 owned-pets.json（过期就红）', () => {
+  const ownedText = readFileSync(OWNED, 'utf8');
+  const ownedHash = sha256(ownedText);
+  const doc = readJson(TARGET);
+  const ownedDoc = JSON.parse(ownedText);
+  log('[实际] 新鲜度', {artifact_sha: String(doc.derived_from?.frozen_learnsets?.sha256).slice(0, 16),
+    disk_sha: ownedHash.slice(0, 16), count: doc.derived_from?.frozen_learnsets?.count,
+    owned_battle_builds: (ownedDoc.battle_builds ?? []).length});
+  assert.equal(doc.derived_from?.frozen_learnsets?.sha256, ownedHash,
+    '产物的 frozen_learnsets.sha256 与磁盘 owned-pets.json 不符 —— 产物过期，重跑 node scripts/roco/build-on-demand-builds.mjs');
+  assert.equal(doc.derived_from.frozen_learnsets.count, 48, '冻结配招覆盖 48 只');
+  const catalogText = readFileSync(CATALOG, 'utf8');
+  const skillsText = readFileSync(SKILLS, 'utf8');
+  const hashes = {catalog: sha256(catalogText), skills: sha256(skillsText), frozen: ownedHash};
+  const badSha = copy(doc);
+  badSha.derived_from.frozen_learnsets.sha256 = '0'.repeat(64);
+  const noBlock = copy(doc);
+  noBlock.derived_from.frozen_learnsets = null;
+  const probe = (tag, tampered) => {
+    const file = join(tmpdir(), `roco-on-demand-${tag}.json`);
+    writeFileSync(file, `${JSON.stringify(tampered)}\n`, 'utf8');
+    const report = checkRepo({file});
+    log(`[反证] ${tag}`, report.issues.map((i) => `${i.rule}`).join(',') || '（没有报！判据是空的）');
+    assert.equal(report.ok, false, `${tag}：过期/缺来源的产物必须被 checkRepo 抓到`);
+    assert.ok(report.issues.some((i) => i.rule === 'derived_from_stale'), `${tag}：必须报 derived_from_stale`);
+  };
+  probe('sha0', badSha);
+  probe('noblock', noBlock);
 });
 
 test('覆盖账目自洽：622 只 = 已核验 48 + 推算 574（且没有既编又跳过的）', () => {

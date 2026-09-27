@@ -1,8 +1,8 @@
 {
   "schema": "roco-adapter-browser-acceptance/v1",
   "generated_by": "scripts/roco/browser-adapter-acceptance.mjs",
-  "generated_at": "2026-09-21T10:04:47.180Z",
-  "url": "http://127.0.0.1:60639/roco.html",
+  "generated_at": "2026-09-23T17:29:20.038Z",
+  "url": "http://127.0.0.1:55912/roco.html?legacy3v3=1",
   "checks": [
     {
       "name": "① 选阵容页 1440×900 无横向溢出（scrollW ≤ clientW）",
@@ -47,7 +47,7 @@
     {
       "name": "⑨ 窄屏下的比较区不横向溢出（浮条内部 scrollW ≤ clientW）",
       "ok": true,
-      "detail": "{\"actions\":3,\"futures\":5,\"hintClientW\":360,\"hintScrollW\":360,\"hintClientH\":539,\"hintScrollH\":1031,\"fits\":true}"
+      "detail": "{\"actions\":3,\"futures\":5,\"hintClientW\":360,\"hintScrollW\":360,\"hintClientH\":102,\"hintScrollH\":102,\"fits\":true}"
     },
     {
       "name": "⑩ 窄屏下比较区仍然渲染出并列与后果",
@@ -55,14 +55,14 @@
       "detail": "{\"actions\":3,\"futures\":5}"
     },
     {
-      "name": "⑪ 自动推进按钮真的点得到（那一点上就是它，不是浮层）",
+      "name": "⑪ 推进一手的真鼠标落点真的点得到（那一点上就是它，不是浮层）",
       "ok": true,
-      "detail": "点到的元素：{\"tag\":\"BUTTON\",\"id\":\"auto-turn\",\"cls\":\"\",\"hit_target\":true}（按钮 187×31 @ 352,459）"
+      "detail": "路径=click:[data-b3-skill-slot][data-b3-action]；点到的元素：{\"tag\":\"SPAN\",\"id\":null,\"cls\":\"b3-el-slot b3-el-slot--empty\",\"hit_target\":true}（落点 232×146 @ 133,229）"
     },
     {
       "name": "⑫ 推进一手后 state_version 真的变了（陈旧判定的前提）",
       "ok": true,
-      "detail": "8 → 15；endState={\"result\":null,\"turn\":3,\"phase\":\"battle\",\"planStatus\":\"\"}；页面网络账=[{\"url\":\"/api/roco/plan\",\"status\":200,\"ms\":79},{\"url\":\"/api/roco/plan\",\"status\":200,\"ms\":82},{\"url\":\"/api/roco/battle/advance\",\"status\":200,\"ms\":19},{\"url\":\"/api/roco/battle/advance\",\"status\":200,\"ms\":9}]；服务端计时=[{\"op\":\"plan\",\"ms\":76,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"plan\",\"ms\":79,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"battle/advance\",\"ms\":5,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"battle/advance\",\"ms\":5,\"ok\":true,\"status\":null,\"error\":null}]"
+      "detail": "8 → 15；endState={\"result\":null,\"turn\":3,\"phase\":\"battle\",\"planStatus\":\"\"}；页面网络账=[{\"url\":\"/api/roco/plan\",\"status\":200,\"ms\":117},{\"url\":\"/api/roco/plan\",\"status\":200,\"ms\":113},{\"url\":\"/api/roco/battle/advance\",\"status\":200,\"ms\":5},{\"url\":\"/api/roco/battle/advance\",\"status\":200,\"ms\":3}]；服务端计时=[{\"op\":\"plan\",\"ms\":116,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"plan\",\"ms\":112,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"battle/advance\",\"ms\":3,\"ok\":true,\"status\":null,\"error\":null},{\"op\":\"battle/advance\",\"ms\":2,\"ok\":true,\"status\":null,\"error\":null}]"
     },
     {
       "name": "⑬ 控制台零报错、零未捕获异常",
@@ -163,25 +163,26 @@
         "futures": 5,
         "hintClientW": 360,
         "hintScrollW": 360,
-        "hintClientH": 539,
-        "hintScrollH": 1031,
+        "hintClientH": 102,
+        "hintScrollH": 102,
         "fits": true
       }
     },
     {
       "at": "advance",
+      "advance_how": "click:[data-b3-skill-slot][data-b3-action]",
       "versionBefore": 8,
       "versionAfter": 15,
       "changed": true,
       "hit": {
-        "x": 352,
-        "y": 459,
-        "w": 187,
-        "h": 31,
+        "x": 133,
+        "y": 229,
+        "w": 232,
+        "h": 146,
         "top": {
-          "tag": "BUTTON",
-          "id": "auto-turn",
-          "cls": "",
+          "tag": "SPAN",
+          "id": null,
+          "cls": "b3-el-slot b3-el-slot--empty",
           "hit_target": true
         }
       },
@@ -193,74 +194,84 @@
       },
       "pageFetchLog": [
         {
+          "url": "/api/roco/workshop?stage=first",
+          "status": 200,
+          "ms": 105
+        },
+        {
+          "url": "/api/roco/workshop?",
+          "status": 200,
+          "ms": 41
+        },
+        {
           "url": "/api/roco/battle/new",
+          "status": 200,
+          "ms": 4
+        },
+        {
+          "url": "/api/roco/plan",
+          "status": 200,
+          "ms": 128
+        },
+        {
+          "url": "/api/roco/plan",
+          "status": 200,
+          "ms": 117
+        },
+        {
+          "url": "/api/roco/plan",
+          "status": 200,
+          "ms": 113
+        },
+        {
+          "url": "/api/roco/battle/advance",
           "status": 200,
           "ms": 5
         },
         {
-          "url": "/api/roco/plan",
-          "status": 200,
-          "ms": 68
-        },
-        {
-          "url": "/api/roco/plan",
-          "status": 200,
-          "ms": 79
-        },
-        {
-          "url": "/api/roco/plan",
-          "status": 200,
-          "ms": 82
-        },
-        {
           "url": "/api/roco/battle/advance",
           "status": 200,
-          "ms": 19
-        },
-        {
-          "url": "/api/roco/battle/advance",
-          "status": 200,
-          "ms": 9
+          "ms": 3
         }
       ],
       "requests": [
         {
-          "at": 1789985074647,
-          "url": "/api/roco/roster?limit=12&offset=0",
+          "at": 1790184548550,
+          "url": "/api/roco/plan",
+          "method": "POST"
+        },
+        {
+          "at": 1790184548554,
+          "url": "/api/roco/sprite?id=pet_000062&name=%E9%9F%B3%E9%80%9F%E7%8A%AC&v=default",
           "method": "GET"
         },
         {
-          "at": 1789985074654,
-          "url": "/api/roco/status",
+          "at": 1790184548554,
+          "url": "/api/roco/sprite?id=pet_000124&name=%E5%8C%96%E8%9D%B6&v=default",
           "method": "GET"
         },
         {
-          "at": 1789985075274,
-          "url": "/api/roco/battle/new",
-          "method": "POST"
-        },
-        {
-          "at": 1789985075283,
+          "at": 1790184549260,
           "url": "/api/roco/plan",
           "method": "POST"
         },
         {
-          "at": 1789985076067,
+          "at": 1790184552513,
           "url": "/api/roco/plan",
           "method": "POST"
         },
         {
-          "at": 1789985079539,
-          "url": "/api/roco/plan",
-          "method": "POST"
-        },
-        {
-          "at": 1789985082283,
+          "at": 1790184555109,
           "url": "/api/roco/battle/advance",
           "method": "POST"
         },
         {
-          "at": 1789985086676,
+          "at": 1790184555567,
+          "url": "/api/roco/sprite?id=pet_000062&name=%E9%9F%B3%E9%80%9F%E7%8A%AC&v=action",
+          "method": "GET"
+        },
+        {
+          "at": 1790184559482,
           "url": "/api/roco/battle/advance",
           "method": "POST"
         }
@@ -271,47 +282,132 @@
   "page_errors": [],
   "api_requests": [
     {
-      "at": 1789985074558,
+      "at": 1790184547815,
       "url": "/api/roco/roster?limit=200&offset=0",
       "method": "GET"
     },
     {
-      "at": 1789985074647,
-      "url": "/api/roco/roster?limit=12&offset=0",
+      "at": 1790184547989,
+      "url": "/api/roco/roster?offset=0&limit=12",
       "method": "GET"
     },
     {
-      "at": 1789985074654,
+      "at": 1790184547996,
       "url": "/api/roco/status",
       "method": "GET"
     },
     {
-      "at": 1789985075274,
+      "at": 1790184548025,
+      "url": "/api/roco/box?kind=mine&limit=60&offset=0",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548028,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=0",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548029,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=60",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548031,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=120",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548033,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=180",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548034,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=240",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548036,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=300",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548038,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=360",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548040,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=420",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548041,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=480",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548043,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=540",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548045,
+      "url": "/api/roco/box?kind=catalog&limit=60&offset=600",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548153,
+      "url": "/api/roco/workshop?stage=first",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548157,
+      "url": "/api/roco/workshop?",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548536,
       "url": "/api/roco/battle/new",
       "method": "POST"
     },
     {
-      "at": 1789985075283,
+      "at": 1790184548550,
       "url": "/api/roco/plan",
       "method": "POST"
     },
     {
-      "at": 1789985076067,
+      "at": 1790184548554,
+      "url": "/api/roco/sprite?id=pet_000062&name=%E9%9F%B3%E9%80%9F%E7%8A%AC&v=default",
+      "method": "GET"
+    },
+    {
+      "at": 1790184548554,
+      "url": "/api/roco/sprite?id=pet_000124&name=%E5%8C%96%E8%9D%B6&v=default",
+      "method": "GET"
+    },
+    {
+      "at": 1790184549260,
       "url": "/api/roco/plan",
       "method": "POST"
     },
     {
-      "at": 1789985079539,
+      "at": 1790184552513,
       "url": "/api/roco/plan",
       "method": "POST"
     },
     {
-      "at": 1789985082283,
+      "at": 1790184555109,
       "url": "/api/roco/battle/advance",
       "method": "POST"
     },
     {
-      "at": 1789985086676,
+      "at": 1790184555567,
+      "url": "/api/roco/sprite?id=pet_000062&name=%E9%9F%B3%E9%80%9F%E7%8A%AC&v=action",
+      "method": "GET"
+    },
+    {
+      "at": 1790184559482,
       "url": "/api/roco/battle/advance",
       "method": "POST"
     }
@@ -325,35 +421,35 @@
     },
     {
       "op": "plan",
-      "ms": 66,
+      "ms": 126,
       "ok": true,
       "status": null,
       "error": null
     },
     {
       "op": "plan",
-      "ms": 76,
+      "ms": 116,
       "ok": true,
       "status": null,
       "error": null
     },
     {
       "op": "plan",
-      "ms": 79,
+      "ms": 112,
       "ok": true,
       "status": null,
       "error": null
     },
     {
       "op": "battle/advance",
-      "ms": 5,
+      "ms": 3,
       "ok": true,
       "status": null,
       "error": null
     },
     {
       "op": "battle/advance",
-      "ms": 5,
+      "ms": 2,
       "ok": true,
       "status": null,
       "error": null

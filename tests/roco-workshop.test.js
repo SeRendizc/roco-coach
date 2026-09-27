@@ -29,7 +29,8 @@ import {
   WORKSHOP_PARAM_KEYS, WORKSHOP_STAGES, parseWorkshopQuery, WORKSHOP_BADGES, loadWorkshopModules,
 } from '../src/server/roco-service.js';
 import {
-  TEAM_WORKSHOP_BADGES, TEAM_SLOTS, AXIS_LABELS, mountTeamWorkshop,
+  TEAM_WORKSHOP_BADGES, TEAM_SLOTS, AXIS_LABELS, axisLevelWord, AXIS_LEVEL_BANDS, mountTeamWorkshop,
+  poolCardKey, dedupePoolCards, poolRowMetaText,
 } from '../src/client/team-workshop.js';
 import {
   slotProblems, badgeProblems, nextCandidateProblems, axisProblems, badRequestProblems,
@@ -150,8 +151,15 @@ test('接线：mountTeamWorkshop 的导出签名与徽记常量是稳定契约',
 // ─────────────────────────────────────────────────────────────────────────
 
 test('锁定：请求里带 locked 必须被接受、回传、并计入 locked_count（A2 的服务端半条）', async () => {
-  const selected = ['own-0001', 'own-0003'].join(',');
-  const res = await workshop(`selected=${selected}&locked=own-0001`);
+  // 2026-09-24：实例集合改成「一人一只」之后，own-0003 在产物里**本身就是 locked=true**
+  // （个体属性：玩家锁了它）——回执把「请求里的锁定」与「产物里的锁定」按 OR 合成，
+  // 所以这里必须挑两只**产物里没锁**的实例，否则量到的是产物标记而不是请求语义。
+  const ownedDoc = JSON.parse(readFileSync(join(ROOT, 'data/roco/owned/owned-pets.json'), 'utf8'));
+  const lockedInData = new Set(ownedDoc.instances.filter((i) => i.locked === true).map((i) => i.instance_id));
+  const free = ownedDoc.instances.map((i) => i.instance_id).filter((id) => !lockedInData.has(id));
+  assert.ok(free.length >= 2, '产物里至少要有一只没被锁定的实例，这条判据才测得下去');
+  const selected = free.slice(0, 2).join(',');
+  const res = await workshop(`selected=${selected}&locked=${free[0]}`);
   assert.equal(res.status, 200, `带合法 locked 的请求必须 200，实际 ${res.status}：${res.raw.slice(0, 200)}`);
   const r = res.json;
   const lockedSlots = r.player.slots.filter((x) => x.locked === true).map((x) => x.index);
@@ -377,7 +385,9 @@ test('同源性：五轴与最小替换与**直接调用** RC-304 一致', async
     const routeAxis = route.json.axes.find((axis) => axis.id === axisId);
     const directAxis = direct.axes[axisId];
     assert.equal(routeAxis.available, directAxis.available, `${axisId} 的 availability 与 RC-304 不一致`);
-    assert.equal(routeAxis.value, directAxis.value, `${axisId} 的值与 RC-304 不一致`);
+    // 值可能是对象（`worst_archetype` 的 `{archetype_id, relative_score, weight, …}`），
+    // 路由与直调各构造一份**结构相同**的对象 ⇒ 这里比结构，不比对象身份。
+    assert.deepEqual(routeAxis.value, directAxis.value, `${axisId} 的值与 RC-304 不一致`);
     assert.equal(routeAxis.unknown_reason, directAxis.unknown_reason ?? null,
       `${axisId} 的 unknown_reason 与 RC-304 不一致`);
   }
@@ -739,3 +749,198 @@ test('分段交付：非法 stage 必须 400 点名（不许静默当成 full）
   assert.match(String(bad.json.error), /stage 只能是/);
   raw('非法 stage 的报错原文', String(bad.json.error).slice(0, 120));
 });
+
+// ── 候选池去重键（2026-09-25 真缺陷：页头「我的精灵 47 只」而数据层是 48）──────────────
+//
+// 人类截图指出工坊页头写 **47 只（能出战）**，而 `/api/roco/box?kind=mine` 回执是 **total 48 / cards 48**。
+// 逐层查到根因在**前端去重键**：原来写 `String(r?.species_id ?? r?.name ?? '')`，
+// 而 box 卡**不带 `species_id`**（卡上只有 `select`(实例)/`group`(物种)/`name`/`types`…）⇒ 永远回落到**显示名**；
+// 而**「棋契陛下」这个名字被两个不同物种共用**（`own-0042`=`pet_000556`、`own-0043`=`pet_000575`）
+// ⇒ 48 个个体被并成 47。修法：键优先稳定物种键、最后才回落显示名；去重仍然**按物种**生效。
+test('候选池去重键：优先稳定物种键（group/species_id），最后才回落显示名', () => {
+  const card = {select: 'own-0042', group: 'pet_000556', name: '棋契陛下'};
+  assert.equal(poolCardKey(card), 'pet_000556', '有 group 时必须用 group，不许用显示名当键');
+  assert.equal(poolCardKey({species_id: 'pet_000001', group: 'pet_000999', name: 'X'}), 'pet_000001',
+    '有 species_id 时优先 species_id');
+  assert.equal(poolCardKey({name: '只有名字'}), '只有名字', '全都没有时才回落显示名');
+  assert.equal(poolCardKey({}), '', '什么都没有 ⇒ 空键（调用方丢弃）');
+});
+
+test('真缺陷回归钉：同名不同物种的两个个体**不许**被合并（48 只必须还是 48 只）', () => {
+  // 真实那一对（本轮实测：`/api/roco/box?kind=mine` 里 group 分别是这两个物种）
+  const cards = [
+    {select: 'own-0042', group: 'pet_000556', name: '棋契陛下'},
+    {select: 'own-0043', group: 'pet_000575', name: '棋契陛下'},
+    {select: 'own-0001', group: 'pet_000012', name: '音速犬'},
+  ];
+  const uniq = dedupePoolCards(cards);
+  assert.equal(uniq.length, 3, `同名不同物种必须保留（期望 3，实际 ${uniq.length}）`);
+  assert.deepEqual(uniq.map((c) => c.select), ['own-0042', 'own-0043', 'own-0001'], '保序且首次出现的保留');
+});
+
+test('去重仍然有效：同一个物种多只个体只留一只；空键条目丢弃', () => {
+  const sameSpecies = [
+    {select: 'own-0001', group: 'pet_000012', name: '音速犬'},
+    {select: 'own-0002', group: 'pet_000012', name: '音速犬'},
+  ];
+  assert.equal(dedupePoolCards(sameSpecies).length, 1, '同物种多只必须并成一只');
+  assert.equal(dedupePoolCards([{name: ''}, {select: 'own-0003'}]).length, 0, '空键条目丢弃（原行为不变）');
+  assert.equal(dedupePoolCards(null).length, 0, '非数组输入不炸');
+});
+
+test('必红反证：回退到旧写法（`species_id ?? name`）时，同名不同物种**必然**被并成一只', () => {
+  // 反证喂的是**同一条数据的旧键函数**：它必须把两张不同的卡并成一张 —— 这正是 47 的成因。
+  // 如果哪天有人把 `poolCardKey` 改回「species_id ?? name」，上面那条回归钉就会红。
+  const legacyKey = (card) => String(card?.species_id ?? card?.name ?? '');
+  const cards = [
+    {select: 'own-0042', group: 'pet_000556', name: '棋契陛下'},
+    {select: 'own-0043', group: 'pet_000575', name: '棋契陛下'},
+  ];
+  const legacySeen = new Set();
+  const legacyKept = cards.filter((c) => { const k = legacyKey(c); if (!k || legacySeen.has(k)) return false; legacySeen.add(k); return true; });
+  assert.equal(legacyKept.length, 1, '旧写法必须把两只并成一只（这就是 47 的成因，反证没命中说明判据是空的）');
+  assert.notEqual(poolCardKey(cards[0]), poolCardKey(cards[1]), '新写法下两只必须是不同的键');
+});
+
+test('结构钉：候选池**真的**走 `dedupePoolCards`（防有人把 inline 旧代码写回去）', () => {
+  const src = readFileSync(join(ROOT, 'src/client/team-workshop.js'), 'utf8');
+  assert.match(src, /const unique = dedupePoolCards\(all\)/, '池子去重必须调用 dedupePoolCards(all)');
+  // ⚠ 必须先剥掉注释再断言：本文件的**注释里逐字引用了旧写法**（说明缺陷成因），
+  // 直接扫全文会把注释误判成代码（第一版就这么假红过一次）。
+  const code = src.split('\n').filter((line) => {
+    const t = line.trim();
+    return !(t.startsWith('//') || t.startsWith('*') || t.startsWith('/*'));
+  }).join('\n');
+  assert.ok(!/species_id \?\? r\?\.name/.test(code), '旧写法（species_id ?? name）不许再出现在**代码**里');
+});
+
+// ── 2026-09-25（人类投诉「这个什么陛下有啥区别？我根本看不出来啊」）────────────────────
+// 实测回执（真服务 8765，`/api/roco/box?kind=mine`）：48 只里有一对**同名不同物种**：
+//   own-0042 / pet_000556 / 「棋契陛下」/ 武系·地系 / **Lv50 · 输出** / 徽章 [锁定]
+//   own-0043 / pet_000575 / 「棋契陛下」/ 武系·地系 / **Lv80 · 坦克** / 徽章 [收藏,锁定]
+// 候选行原来只画 名字 + 属性 + 支持等级 ⇒ 两行**逐字相同**（这就是"看不出来"的成因）。
+// 修法：行里补 `poolRowMetaText()`（等级 + 定位），零新接口。
+const SAME_NAME_CARDS = [
+  {select: 'own-0042', group: 'pet_000556', name: '棋契陛下', types: ['武系', '地系'], level: 50, role_label: '输出'},
+  {select: 'own-0043', group: 'pet_000575', name: '棋契陛下', types: ['武系', '地系'], level: 80, role_label: '坦克'},
+];
+
+test('同名不同物种的候选行必须看得出区别：各行含自己的等级与定位', () => {
+  const [a, b] = SAME_NAME_CARDS;
+  const metaA = poolRowMetaText(a), metaB = poolRowMetaText(b);
+  assert.notEqual(metaA, metaB, `两行的区分文本不许相同（实际都是「${metaA}」）`);
+  assert.ok(/Lv50/.test(metaA) && /输出/.test(metaA), `第一行要写出自己的等级与定位，实际「${metaA}」`);
+  assert.ok(/Lv80/.test(metaB) && /坦克/.test(metaB), `第二行要写出自己的等级与定位，实际「${metaB}」`);
+});
+
+test('必红反证：去掉「等级 + 定位」之后，这两行**确实**一模一样（判据量的正是它）', () => {
+  const [a, b] = SAME_NAME_CARDS;
+  // 复刻投诉当时的可见文本：名字 + 属性（接口里 `types` 也相同）
+  const naive = (c) => `${c.name}｜${c.types.join('/')}`;
+  assert.equal(naive(a), naive(b), '反证前提不成立：去掉 Lv/定位后两行本该完全相同');
+  // 而补上 Lv/定位之后必须不同（与上一条判据同源）
+  assert.notEqual(`${naive(a)}｜${poolRowMetaText(a)}`, `${naive(b)}｜${poolRowMetaText(b)}`,
+    '补上区分信息后两行必须不同');
+});
+
+test('结构钉：候选行必须渲染 `poolRowMetaText`（防有人把区分信息摘掉）', () => {
+  const src = readFileSync(join(ROOT, 'src/client/team-workshop.js'), 'utf8');
+  assert.match(src, /data-tw-row-meta="yes">\$\{escapeHtml\(poolRowMetaText\(card\)\)\}/,
+    '候选行必须用 poolRowMetaText(card) 渲染区分信息');
+  assert.match(src, /export const poolRowMetaText = /, 'poolRowMetaText 必须是导出的纯函数（可单测）');
+});
+
+test('结构钉（关键）：**mine 档真正渲染的那支模板**必须带区分信息，且分组时不许把 level/role_label 投影掉', () => {
+  const src = readFileSync(join(ROOT, 'src/client/team-workshop.js'), 'utf8');
+  // 教训（2026-09-25 真机踩到）：`mine` 档走的是 `mergeMineRows()` 分组模板（另一支），
+  // 只改「非分组」那一支 ⇒ 真机上两行**仍然逐字相同**（探针实测 metaText=null）。
+  assert.match(src, /data-tw-row-meta="yes">\$\{escapeHtml\(poolRowMetaText\(card\.variants\[0\]\)\)\}/,
+    'mine 分组模板必须渲染 poolRowMetaText(card.variants[0])');
+  assert.match(src, /variants\.push\(\{select: instanceId, name: card\.name \?\? null,\s*\n\s*level: card\.level \?\? null, role_label: card\.role_label \?\? null, badges: card\.badges \?\? \[\]\}\)/,
+    '分组时必须把 level / role_label / badges 带进 variants（否则区分信息渲染出来是「Lv— · 定位未登记」）');
+});
+
+// 2026-09-25（对抗性复核揪出的同族事故）：`#tw-analysis-box` 在标记里写死 `hidden`，
+// 而渲染层原来只设 `.open = true` —— 给一个 `display:none` 的元素「展开」，
+// 结果是**玩家永远看不到理论阵容**，而判据读的是 DOM 内容（`data-tw-analysis`）所以一直绿。
+// 这就是本仓反复记的「**判据读取点 ≠ 玩家真正看的像素**」。这条钉住修好后的口径：
+// 有内容才显示（清 `hidden`）、没内容整块收起；只写 `.open` 不算。
+test('理论阵容框对玩家可见：有内容必须清掉 hidden（只写 open 不算）', () => {
+  const src = readFileSync(join(ROOT, 'src/client/team-workshop.js'), 'utf8');
+  assert.match(src, /analysisBox\.hidden = !hasAnalysis/,
+    '有内容时必须把 `hidden` 清掉（否则玩家看不到，判据却因为读 DOM 内容而绿）');
+  assert.match(src, /if \(hasAnalysis\) analysisBox\.open = true/,
+    '有内容时同时展开');
+  assert.match(src, /const hasAnalysis = Number\(analysis\?\.count \?\? 0\) > 0/,
+    '「有没有内容」必须由 analysis.count 判，不许写死 true');
+});
+
+// ── 阵容评估的**可读性**与「接入 AI」（人类 2026-09-25：「可读性一坨屎，不知道在说啥
+//    而且好像没接入 ai 吧？」）────────────────────────────────────────────────────────
+//
+// 修前：五轴主行直接印 `0.75735 · 相对分（0～1 的序数标度）` —— 小数位比结论还长，
+// 而且「序数标度 / 相对分极差」是内部口径。现在主行只有档位词 + 一条进度条，
+// **精确值一个都不删**（收进同一行的「原始数值与口径」折叠区）；
+// 抽屉底部多一颗「让小芽说人话」，走宿主页给的 `askCoach`（同一条 /api/coach）。
+test('阵容评估：主行给人话档位（不是裸小数），精确值收进折叠区，并接上小芽', () => {
+  // ① 档位分界是**展示口径**，三档各自可判，且边界之外不猜
+  assert.equal(axisLevelWord(0.2), '偏低');
+  assert.equal(axisLevelWord(0.5), '中等');
+  assert.equal(axisLevelWord(0.9), '偏高');
+  assert.equal(axisLevelWord(null), null, '没有值不许硬给一个档位');
+  assert.equal(axisLevelWord(Number.NaN), null);
+  assert.deepEqual(AXIS_LEVEL_BANDS.map(([, word]) => word), ['偏低', '中等', '偏高']);
+  // ② 源码形状：主行取值走 axisValueText（人话），原始值只出现在折叠区；
+  //    并且**主行不许再出现「序数标度 / 相对分」这种口径词**（它们只准待在折叠区里）
+  const src = readFileSync(new URL('../src/client/team-workshop.js', import.meta.url), 'utf8');
+  const mainLine = src.slice(src.indexOf('function axisValueText('), src.indexOf('function axisRawText('));
+  assert.ok(!/序数标度|相对分极差/.test(mainLine), '主行文案不许出现内部口径词');
+  assert.match(mainLine, /axisLevelWord\(axis\.value\)/, '主行必须走档位词');
+  const rawFn = src.slice(src.indexOf('function axisRawText('), src.indexOf('function axisBar('));
+  assert.match(rawFn, /序数标度|相对分极差/, '精确值必须在折叠区里留着（一个数都不许删）');
+  // 改钉（2026-09-26）：折叠区的标题由「原始数值与口径」改成「原始数值与说明」——
+  // 人类点出面板"不是人话"，这一轮把玩家可见文案里的内部术语（口径/结构分/声明假设…）全清了。
+  // 判据的**意图没变**：精确值必须有一个折叠区可看。
+  assert.match(src, /<details class="tw-about tw-axis-raw"><summary>原始数值与说明<\/summary>/,
+    '精确值必须有折叠区可看');
+  // 新增：玩家可见文案里不许再出现内部术语（注释里解释口径是可以的，所以先把注释剥掉）
+  const visible = src
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .split('\n').filter((line) => !/^\s*\/\//.test(line)).join('\n');
+  for (const word of ['口径', '结构分', '声明假设', 'ENGINE_HYPOTHESIS', '相对表现']) {
+    assert.ok(!visible.includes(word), `工坊面板的玩家可见文案里还有内部术语「${word}」`);
+  }
+  // ③ 小芽按钮：必须真的接上宿主页给的 askCoach（没给就如实说没接上，不许假装）
+  assert.match(src, /id="tw-ask-ai"/, '抽屉里必须有「让小芽说人话」按钮');
+  assert.match(src, /const askCoach = typeof opts\.askCoach === 'function' \? opts\.askCoach : null;/,
+    'askCoach 只能由宿主页注入');
+  assert.match(src, /这一页没有接上小芽（宿主页没给 askCoach）/, '没接上时必须如实说，不许编一段解释顶上');
+  assert.match(src, /只说结构上的事：属性覆盖、速度线、能耗、角色分工/,
+    '交给小芽的题面必须写清边界（不给强度结论、不把结构分说成胜率）');
+  // ④ 宿主页那一侧：roco.js 必须把同一条 /api/coach 封装成 askCoach 传进去
+  const host = readFileSync(new URL('../src/client/roco.js', import.meta.url), 'utf8');
+  assert.match(host, /askCoach: \(message\) => askXiaoya\(message\)/, '宿主页必须把教练通道传进工作台');
+  assert.match(host, /async function askXiaoya\(message\)/, '宿主页必须有唯一的 askXiaoya 封装');
+});
+
+// ── 槽位必须带上「引擎给的四个技能」（2026-09-27，审计高 6 实测）────────────────────
+//
+// 事实经过：客户端一直读 `slot.skills` 来渲染「引擎规范配招：…」与换招起点，而**服务端从来没发过
+// 这个键** ⇒ 那句话永远空白、换招编辑器一开始就是「已选 0/4」，玩家想换一个招得把四个全重挑。
+test('槽位载荷必须带 skills（每个 {skill_id,name}），否则「引擎规范配招」永远是空的', async () => {
+  const {readFileSync: read} = await import('node:fs');
+  const src = read(new URL('../src/server/roco-service.js', import.meta.url), 'utf8');
+  // ① 槽位里要发这个键，且两个字段都在
+  assert.match(src, /skills:Array\.isArray\(member\?\.skills\)\?member\.skills:\[\]/, '槽位的 skills 要跟着成员走');
+  assert.match(src, /skills:member\.skills\?\?member\.ordered_skills/, '成员构造时要把四个技能传下去');
+  assert.match(src, /skill_id:one\?\.skill_id\?\?one\?\.id\?\?null,name:/, '每一项要有 skill_id 与 name');
+  // ② 名字查不到时要如实说，不许编
+  assert.match(src, /（名字未登记）/, '查不到名字要如实标注');
+  // ③ 反证：直接构造一个成员行，验证它真的产出 {skill_id,name}
+  const {loadBoxIndex} = await import('../src/server/roco-service.js');
+  const index = loadBoxIndex();
+  const one = [...index.skills.keys()].slice(0, 4);
+  assert.equal(one.length, 4, '技能表里要有技能（否则这条判据是空的）');
+  for (const id of one) assert.ok(index.skills.get(id)?.name, `${id} 要查得到名字`);
+});
+

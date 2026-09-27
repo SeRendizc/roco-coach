@@ -50,6 +50,7 @@ import {
   FROZEN_LAYER_PETS,
   FROZEN_LAYER_SUPPORT,
   FROZEN_MAIN_LEARNSETS,
+  FROZEN_MAIN_SUPPORT,
   FROZEN_SKILLS,
   FORBIDDEN_GROWTH_FIELD_PATTERN,
   GENERATED_AT,
@@ -58,7 +59,7 @@ import {
   GROWTH_EFFECT_REASON,
   INSTANCE_TARGET,
   MIN_OUTSIDE_LAYER,
-  MIN_SAME_SPECIES_GROUPS,
+  MAX_SAME_SPECIES_GROUPS,
   MIN_SPECIES,
   OWNED_PETS_PATH,
   OWNED_SCHEMA_PATH,
@@ -75,6 +76,7 @@ import {
   expectedInstanceUnknownFields,
   instanceBuildHash,
   isGrowthAttribute,
+  mergeCanonicalLoadouts,
   resignDataset,
   sha256Hex,
   validateAgainstContract,
@@ -90,6 +92,7 @@ export const CHECK_NAMES = Object.freeze([
   'species_existence',
   'species_universe',
   'learnset_membership',
+  'canonical_loadout',
   'skill_order',
   'instance_identity',
   'growth_attributes',
@@ -111,11 +114,17 @@ export const CRITERIA = Object.freeze([
   {id: 'C01', check: 'schema_file', text: '磁盘 schema.json 与「现在重建」逐字节相同', expected: 'byte-identical', actual: (f) => (f.schemaOnDiskOk ? 'byte-identical' : 'DIFFERENT')},
   {id: 'C02', check: 'schema_compliance', text: '每个 OwnedPet / BattleBuild / 顶层字段都过 schema 声明的类型与必填', expected: '0 违规', actual: (f) => `结构违规 ${f.schemaStructureProblems} 条`},
   {id: 'C03', check: 'species_existence', text: 'species_id 在冻结 full-catalog 或 pack 的 pet 实体里真实存在，且 species_name 逐字相同', expected: '0 违规', actual: (f) => `违规 ${f.speciesExistenceViolations} 条`},
-  {id: 'C04', check: 'species_universe', text: `实例数 >= ${INSTANCE_TARGET}`, expected: `>= ${INSTANCE_TARGET}`, actual: (f) => String(f.instances)},
+  {id: 'C04', check: 'species_universe', text: `实例数 == 物种数 == ${INSTANCE_TARGET}`, expected: `>= ${INSTANCE_TARGET}`, actual: (f) => String(f.instances)},
   {id: 'C05', check: 'species_universe', text: `不同 species_id 数 >= ${MIN_SPECIES}`, expected: `>= ${MIN_SPECIES}`, actual: (f) => String(f.species)},
   {id: 'C06', check: 'species_universe', text: `不在 layer-playable-48 里的 species 数 >= ${MIN_OUTSIDE_LAYER}`, expected: `>= ${MIN_OUTSIDE_LAYER}`, actual: (f) => String(f.speciesOutsideLayerPlayable48)},
-  {id: 'C07', check: 'species_universe', text: `同种不同个体组数 >= ${MIN_SAME_SPECIES_GROUPS}（每组至少一项个体属性不同）`, expected: `>= ${MIN_SAME_SPECIES_GROUPS}`, actual: (f) => `${f.sameSpeciesGroups}（其中有差异 ${f.sameSpeciesGroupsWithDifference}）`},
-  {id: 'C08', check: 'learnset_membership', text: '四个技能逐个属于该 species 的 learnsets.json native_skills（习得等级 <= 实例等级），且都在 skills.json 里', expected: '0 违规', actual: (f) => `违规 ${f.learnsetViolations} 条，引用技能 ${f.skillsReferenced} 个`},
+  {id: 'C07', check: 'species_universe', text: `同种多实例组数 == ${MAX_SAME_SPECIES_GROUPS}（一人一只：人类 2026-09-24「重复的删掉」）`, expected: `== ${MAX_SAME_SPECIES_GROUPS}`, actual: (f) => `${f.sameSpeciesGroups}（同种组）`},
+  {id: 'C08', check: 'learnset_membership', text: '四个技能逐个属于该 species 的学习表池（native ∪ blood ∪ stones —— **与引擎 `Ruleset.is_learnable` 同口径**；native 技能的习得等级 <= 实例等级），且都在 skills.json 里。'
+    + '【2026-09-25 口径对齐：配招改成逐位等于引擎 loadout 之后，只认 native_skills 会把引擎真的会装上的血统/石系技能判成违规；差异**没有消失**，单独记在 `skillsOutsideNative` / `nativeOnlyBuilds` 里】',
+  expected: '0 违规', actual: (f) => `违规 ${f.learnsetViolations} 条，引用技能 ${f.skillsReferenced} 个；`
+    + `其中非 native（blood/stones）${f.skillsOutsideNative} 个技能、四技能全 native 的 ${f.nativeOnlyBuilds} 只`},
+  {id: 'C20', check: 'canonical_loadout', text: 'BattleBuild.ordered_skills **逐位等于引擎 loadout**（support-matrix.json 基线 12 + layer-playable-48/support-matrix.json 叠加层 36 的 candidate_moveset，合并规则同 data.py:515-535）'
+    + '—— 这是「owned 的四技能 = 实战真正装上的四技能」的唯一判据（2026-09-25 人类「配招这个你得修好」）',
+  expected: '0 违规', actual: (f) => `逐位相同 ${f.canonicalLoadoutMatches}/${f.canonicalLoadoutChecked}，违规 ${f.canonicalLoadoutViolations} 条`},
   {id: 'C09', check: 'skill_order', text: 'skills 是有序数组：恰好 4 个、无重复，且 BattleBuild.ordered_skills 逐位相同', expected: '0 违规', actual: (f) => `顺序违规 ${f.skillOrderViolations} 条`},
   {id: 'C10', check: 'instance_identity', text: 'instance_id 唯一、形如 own-NNNN、从 own-0001 起连续', expected: '0 违规', actual: (f) => `违规 ${f.instanceIdentityViolations} 条`},
   {id: 'C11', check: 'growth_attributes', text: `养成属性 effect 只能是 UNKNOWN / 证据 id，reason 逐字为 §13 那句，microcase_id 为 null，且无公式字段（禁 ${FORBIDDEN_GROWTH_FIELD_PATTERN}）`, expected: '0 违规', actual: (f) => `违规 ${f.growthAttributeViolations} 条`},
@@ -202,6 +211,7 @@ export function loadFrozen(root, store) {
   const mainLearnsets = jsonOf(store, root, FROZEN_MAIN_LEARNSETS);
   const layerLearnsets = jsonOf(store, root, FROZEN_LAYER_LEARNSETS);
   const layerPets = jsonOf(store, root, FROZEN_LAYER_PETS);
+  const mainSupport = jsonOf(store, root, FROZEN_MAIN_SUPPORT);
   const layerSupport = jsonOf(store, root, FROZEN_LAYER_SUPPORT);
   const fullCatalog = jsonOf(store, root, FROZEN_FULL_CATALOG);
   const skillsDoc = jsonOf(store, root, FROZEN_SKILLS);
@@ -222,11 +232,19 @@ export function loadFrozen(root, store) {
 
   const skillIds = new Set(Object.keys(skillsDoc?.skills ?? {}));
 
+  // 规范四技能的**唯一**合并（与引擎 data.py:515-535 同义，纯函数在 owned-pets-lib 里）
+  const canonical = mergeCanonicalLoadouts([
+    {label: 'support-matrix.json（基线 12）', doc: mainSupport},
+    {label: 'layer-playable-48/support-matrix.json（叠加层 36）', doc: layerSupport},
+  ]);
+
   return {
     mainLearnsets,
     layerLearnsets,
     layerPets,
+    mainSupport,
     layerSupport,
+    canonical,
     fullCatalog,
     skillsDoc,
     pack,
@@ -239,6 +257,8 @@ export function loadFrozen(root, store) {
     sha: {
       [FROZEN_MAIN_LEARNSETS]: shaOf(store, root, FROZEN_MAIN_LEARNSETS),
       [FROZEN_LAYER_LEARNSETS]: shaOf(store, root, FROZEN_LAYER_LEARNSETS),
+      [FROZEN_MAIN_SUPPORT]: shaOf(store, root, FROZEN_MAIN_SUPPORT),
+      [FROZEN_LAYER_SUPPORT]: shaOf(store, root, FROZEN_LAYER_SUPPORT),
       [FROZEN_FULL_CATALOG]: shaOf(store, root, FROZEN_FULL_CATALOG),
       [PACK_PATH]: shaOf(store, root, PACK_PATH),
     },
@@ -248,10 +268,40 @@ export function loadFrozen(root, store) {
 /** 该 species 的 learnset 出处：baseline 用主 learnsets.json，overlay 用 layer 那份。 */
 export function resolveLearnset(frozen, speciesId) {
   if (frozen.mainLearnsets?.learnsets?.[speciesId]) {
-    return {artifact_path: FROZEN_MAIN_LEARNSETS, pointer: `learnsets.${speciesId}.native_skills`, entry: frozen.mainLearnsets.learnsets[speciesId]};
+    return {artifact_path: FROZEN_MAIN_LEARNSETS, pointer: `learnsets.${speciesId}`, entry: frozen.mainLearnsets.learnsets[speciesId]};
   }
   if (frozen.layerLearnsets?.learnsets?.[speciesId]) {
-    return {artifact_path: FROZEN_LAYER_LEARNSETS, pointer: `learnsets.${speciesId}.native_skills`, entry: frozen.layerLearnsets.learnsets[speciesId]};
+    return {artifact_path: FROZEN_LAYER_LEARNSETS, pointer: `learnsets.${speciesId}`, entry: frozen.layerLearnsets.learnsets[speciesId]};
+  }
+  return null;
+}
+
+/**
+ * 该 species 的**规范四技能出处**：引擎 loadout 的那一片 support-matrix。
+ *
+ * 为什么需要它：2026-09-25 起 `BattleBuild.ordered_skills` 必须逐位等于引擎 loadout，
+ * 而引擎 loadout = 基线 `support-matrix.json`（12）+ 叠加层 `layer-playable-48/support-matrix.json`（36）
+ * 合并（`data.py:515-535`）。所以「这四个技能从哪来」的答案就是**那一片矩阵的 candidate_moveset**，
+ * 不再是 learnset 的 native_skills（后者只回答「这四个技能合不合法」）。
+ */
+export function resolveMovesetSource(frozen, speciesId) {
+  const slices = [
+    {doc: frozen.mainSupport, artifact_path: FROZEN_MAIN_SUPPORT},
+    {doc: frozen.layerSupport, artifact_path: FROZEN_LAYER_SUPPORT},
+  ];
+  for (const slice of slices) {
+    const pets = slice.doc?.pets ?? [];
+    for (let index = 0; index < pets.length; index += 1) {
+      const entry = pets[index];
+      if (entry?.pet_id !== speciesId) continue;
+      if (!(entry?.candidate_moveset?.skills ?? []).length) continue;
+      return {
+        artifact_path: slice.artifact_path,
+        artifact_sha256: frozen.sha?.[slice.artifact_path] ?? null,
+        pointer: `pets[${index}].candidate_moveset.skills`,
+        skills: entry.candidate_moveset.skills.map((row) => row.skill_id),
+      };
+    }
   }
   return null;
 }
@@ -298,6 +348,12 @@ export function runChecks(dataset, {root = ROOT, schema = null, caches = null} =
     skillsReferenced: 0,
     speciesExistenceViolations: 0,
     learnsetViolations: 0,
+    canonicalLoadoutChecked: 0,
+    canonicalLoadoutMatches: 0,
+    canonicalLoadoutViolations: 0,
+    skillsOutsideNative: 0,
+    nativeOnlyBuilds: 0,
+    skillOriginCounts: {},
     skillOrderViolations: 0,
     instanceIdentityViolations: 0,
     growthAttributeViolations: 0,
@@ -414,11 +470,22 @@ export function runChecks(dataset, {root = ROOT, schema = null, caches = null} =
       }
       const resolved = resolveLearnset(frozen, speciesId);
       if (!resolved) continue;
-      if (instance?.skills_source?.artifact_path !== resolved.artifact_path) {
-        add('species_universe', `${instance?.instance_id} 的 skills_source.artifact_path=${instance?.skills_source?.artifact_path}，但 ${speciesId} 的 learnset 在 ${resolved.artifact_path}`);
+      // 2026-09-25：`skills_source` 现在指的是**规范四技能的选择出处**（引擎 loadout 的那一片
+      // support-matrix），不再是 learnset 的 native_skills —— 因为配招已经改成逐位等于引擎 loadout。
+      // learnset 仍然出现在 provenance 里，但它的角色是**合法性**出处。
+      const choice = resolveMovesetSource(frozen, speciesId);
+      if (!choice) {
+        add('species_universe', `${instance?.instance_id}（${speciesId}）在 support-matrix / layer-playable-48 里没有 candidate_moveset —— 引擎 loadout 里就没有这一只`);
+        continue;
       }
-      if (instance?.skills_source?.pointer !== resolved.pointer) {
-        add('species_universe', `${instance?.instance_id} 的 skills_source.pointer=${instance?.skills_source?.pointer}，应为 ${resolved.pointer}`);
+      if (instance?.skills_source?.artifact_path !== choice.artifact_path) {
+        add('species_universe', `${instance?.instance_id} 的 skills_source.artifact_path=${instance?.skills_source?.artifact_path}，但 ${speciesId} 的规范四技能在 ${choice.artifact_path}`);
+      }
+      if (instance?.skills_source?.pointer !== choice.pointer) {
+        add('species_universe', `${instance?.instance_id} 的 skills_source.pointer=${instance?.skills_source?.pointer}，应为 ${choice.pointer}`);
+      }
+      if (instance?.skills_source?.artifact_sha256 !== choice.artifact_sha256) {
+        add('species_universe', `${instance?.instance_id} 的 skills_source.artifact_sha256 与 ${choice.artifact_path} 的磁盘哈希不一致`);
       }
     }
   }
@@ -453,12 +520,13 @@ export function runChecks(dataset, {root = ROOT, schema = null, caches = null} =
   }
   facts.sameSpeciesGroups = sameSpeciesGroups.length;
   facts.sameSpeciesGroupsWithDifference = withDifference;
-  if (sameSpeciesGroups.length < MIN_SAME_SPECIES_GROUPS) {
-    add('species_universe', `同种个体组只有 ${sameSpeciesGroups.length} 组 < ${MIN_SAME_SPECIES_GROUPS}`);
+  // 一人一只：任何「同种两只」都是**重复数据**，必须为 0（人类 2026-09-24 纠正）。
+  if (sameSpeciesGroups.length > MAX_SAME_SPECIES_GROUPS) {
+    add('species_universe', `同种多实例组有 ${sameSpeciesGroups.length} 组 > ${MAX_SAME_SPECIES_GROUPS}：`
+      + `${sameSpeciesGroups.slice(0, 3).map((g) => g.speciesId ?? g.species_id ?? '?').join('、')}…`
+      + '（重复个体要删掉，不要造第二个）');
   }
-  if (withDifference < MIN_SAME_SPECIES_GROUPS) {
-    add('species_universe', `其中「至少一项个体属性不同」的只有 ${withDifference} 组 < ${MIN_SAME_SPECIES_GROUPS}`);
-  }
+
   facts.sameSpeciesGroupDetails = sameSpeciesGroups;
 
   // ④ + ⑤ 技能来自 learnsets / 有序
@@ -479,7 +547,22 @@ export function runChecks(dataset, {root = ROOT, schema = null, caches = null} =
       add('learnset_membership', `${id} 的 species_id=${speciesId} 在冻结 learnsets.json 里没有条目——不能给这只配技能`);
       continue;
     }
-    const learnable = new Set((resolved.entry.native_skills ?? []).map((s) => s.skill_id));
+    // ── 合法性口径 = **引擎自己的那一条**（2026-09-25 对齐，见 C08 判据文本）────────────────
+    // `Ruleset.is_learnable(pet, skill)`（`roco/src/roco_env/data.py:305-307`）读的是
+    // `Learnset.all_skill_ids` = `native ∪ blood ∪ stones`（`data.py:133-135`），**不是**只有 native。
+    // 旧口径（只认 native_skills）是配招还在「从 native 池随机抽」时的写法；配招改成引擎 loadout 之后，
+    // 再用它就会把**引擎真的会装上、也真的会结算**的 33+13 个血统/石系技能判成违规 ——
+    // 那不是「发现缺陷」，那是判据与引擎口径不一致。所以这里按引擎口径判，
+    // 并把「四技能是否全在 native」**单独记数**（facts.nativeOnlyBuilds），不许差异消失。
+    // 字段名与类型**逐字照引擎加载器**（`data.py:477-483`）：`native_skills` / `blood_skills` 是
+    // `[{skill_id}]`，而 `skill_stones` 是**纯字符串数组**（不是 `stones_skills`，也不是对象）。
+    // 写错一个键名就会把引擎真的会装上的技能判成违规 —— 这一版之前就踩过。
+    const nativeSet = new Set((resolved.entry.native_skills ?? []).map((s) => s.skill_id).filter(Boolean));
+    const bloodSet = new Set((resolved.entry.blood_skills ?? []).map((s) => s.skill_id).filter(Boolean));
+    const stonesSet = new Set((resolved.entry.skill_stones ?? []).filter((s) => typeof s === 'string' && s.length > 0));
+    const learnable = new Set([...nativeSet, ...bloodSet, ...stonesSet]);
+    const sourceOfSkill = (skill) => (nativeSet.has(skill) ? 'native'
+      : bloodSet.has(skill) ? 'blood' : stonesSet.has(skill) ? 'stones' : null);
     // 习得等级一致性：技能在 native_skills 里的习得等级不能高于实例等级
     // （等级是 Demo 值，但「这个等级学不学得到这个技能」是冻结目录能回答的问题）。
     const learnLevel = new Map((resolved.entry.native_skills ?? []).map((s) => [s.skill_id, s.level]));
@@ -491,14 +574,19 @@ export function runChecks(dataset, {root = ROOT, schema = null, caches = null} =
         facts.learnsetViolations += 1;
       }
       if (!learnable.has(skill)) {
-        add('learnset_membership', `${id}（${speciesId}）的 ${skill} 不在该 species 的 ${resolved.artifact_path} native_skills 里`);
+        add('learnset_membership', `${id}（${speciesId}）的 ${skill} 不在该 species 的 ${resolved.artifact_path} 学习表里`
+          + '（native ∪ blood ∪ stones —— 与引擎 is_learnable 同口径）');
         facts.learnsetViolations += 1;
       }
       if (!frozen.skillIds.has(skill)) {
         add('learnset_membership', `${id} 的 ${skill} 在全量 skills.json 里不存在`);
         facts.learnsetViolations += 1;
       }
+      const origin = sourceOfSkill(skill);
+      if (origin) facts.skillOriginCounts[origin] = (facts.skillOriginCounts[origin] ?? 0) + 1;
+      if (origin && origin !== 'native') facts.skillsOutsideNative += 1;
     }
+    if (skills.length === 4 && skills.every((skill) => nativeSet.has(skill))) facts.nativeOnlyBuilds += 1;
     for (const [i, build] of builds.entries()) {
       if (build?.owned_pet_instance_id !== id) continue;
       const ordered = build?.ordered_skills;
@@ -511,6 +599,49 @@ export function runChecks(dataset, {root = ROOT, schema = null, caches = null} =
     }
   }
   facts.skillsReferenced = referencedSkills.size;
+
+  // ⑤c C20：BattleBuild.ordered_skills **逐位**等于引擎 loadout（这一条是 2026-09-25 修配招的核心判据）──
+  //
+  // 为什么要独立一条：C08 只回答「这四个技能合不合法」，回答不了「这四技能是不是引擎实战会装上的那四个」。
+  // 2026-09-25 之前 owned 的四技能是 `shuffle(rng,native).slice(0,4)` 伪随机抽样 ⇒ 与引擎 loadout
+  // **48/48 全不一致**（集合级），而 C08 一直是绿的（随机抽的四个当然也都在 native 池里）。
+  // 这一条把「逐位相同」写成判据：顺序也判（引擎用 `loadout.index()` 算技能位，传动/位置类机制依赖它）。
+  for (const build of builds) {
+    const speciesId = build?.species_id ?? null;
+    const buildId = build?.build_id ?? '(缺 build_id)';
+    if (!speciesId) {
+      add('canonical_loadout', `${buildId} 没有 species_id，无法与引擎 loadout 比对`);
+      facts.canonicalLoadoutViolations += 1;
+      continue;
+    }
+    const canonical = frozen.canonical?.byPetId?.get(speciesId) ?? null;
+    if (!canonical) {
+      add('canonical_loadout', `${buildId}（${speciesId}）在 support-matrix / layer-playable-48 里没有 candidate_moveset —— 引擎 loadout 里没有这一只`);
+      facts.canonicalLoadoutViolations += 1;
+      continue;
+    }
+    facts.canonicalLoadoutChecked += 1;
+    const ordered = Array.isArray(build?.ordered_skills) ? build.ordered_skills : null;
+    if (!ordered || ordered.length !== 4) {
+      add('canonical_loadout', `${buildId} 的 ordered_skills 不是 4 项数组：${JSON.stringify(build?.ordered_skills)}`);
+      facts.canonicalLoadoutViolations += 1;
+      continue;
+    }
+    const mismatch = ordered.findIndex((skill, index) => skill !== canonical[index]);
+    if (mismatch >= 0) {
+      add('canonical_loadout', `${buildId}（${speciesId}）的 ordered_skills=${JSON.stringify(ordered)}，`
+        + `但引擎 loadout=${JSON.stringify(canonical)}（第 ${mismatch + 1} 位起不同）`);
+      facts.canonicalLoadoutViolations += 1;
+      continue;
+    }
+    facts.canonicalLoadoutMatches += 1;
+  }
+  if (facts.canonicalLoadoutChecked !== builds.length) {
+    add('canonical_loadout', `参与比对的 build 数 ${facts.canonicalLoadoutChecked} != battle_builds 总数 ${builds.length}`);
+  }
+  if (frozen.canonical?.problems?.length) {
+    add('canonical_loadout', `规范四技能合并本身有 ${frozen.canonical.problems.length} 条问题：${frozen.canonical.problems.slice(0, 2).join(' | ')}`);
+  }
 
   // ⑥ instance_id 唯一 / 连续
   const seenIds = new Set();
@@ -803,7 +934,15 @@ export const SELFTEST_MUTATIONS = Object.freeze([
       const instance = dataset.instances[2];
       const build = dataset.battle_builds[2];
       const resolved = resolveLearnset(ctx.frozen, instance.species_id);
-      const learnable = new Set((resolved?.entry?.native_skills ?? []).map((skill) => skill.skill_id));
+      // 池子与**引擎 is_learnable 同口径**（native ∪ blood ∪ stones；字段名见 data.py:477-483）——
+      // 只按 native 挑「学不到的技能」可能挑到一个血统/石系技能，那时 C08 不该红（它合法），
+      // 这条反证就变成了「证明了一件错的事」。
+      const entry = resolved?.entry ?? {};
+      const learnable = new Set([
+        ...(entry.native_skills ?? []).map((skill) => skill.skill_id),
+        ...(entry.blood_skills ?? []).map((skill) => skill.skill_id),
+        ...(entry.skill_stones ?? []),
+      ].filter(Boolean));
       // 从**全量 skills.json** 里挑一个真实存在、但这只学不到的技能：这样反证证明的是
       // 「learnset 成员资格」这条判据，而不是「技能 id 存不存在」。
       const foreign = [...ctx.frozen.skillIds].sort().find((skill) => !learnable.has(skill));
@@ -821,6 +960,35 @@ export const SELFTEST_MUTATIONS = Object.freeze([
       const build = dataset.battle_builds[3];
       instance.skills = instance.skills.slice(0, 3);
       build.ordered_skills = [...instance.skills];
+    },
+  },
+  {
+    id: 'R14',
+    title: '只调换一只的四技能**顺序**（集合完全不变）—— C20 必须抓住「顺序也算数」',
+    expect: 'canonical_loadout',
+    apply: (dataset) => {
+      const instance = dataset.instances[6];
+      const build = dataset.battle_builds[6];
+      const swapped = [...instance.skills];
+      [swapped[2], swapped[3]] = [swapped[3], swapped[2]];
+      instance.skills = swapped;
+      build.ordered_skills = [...swapped];
+    },
+  },
+  {
+    id: 'R15',
+    title: '把一只的四技能换成另一只的（集合不同）—— C20 必须抓住「不是引擎 loadout 的那四个」',
+    expect: 'canonical_loadout',
+    apply: (dataset) => {
+      const build = dataset.battle_builds[7];
+      const instance = dataset.instances[7];
+      // 必须挑**技能确实不同**的另一只：现成例子 own-0008/own-0009（多多 / 古啦多）
+      // 的四技能逐位相同，拿它当供体这条反证会「什么都没改」而假绿。
+      const other = dataset.battle_builds.find((row) => row.build_id !== build.build_id
+        && JSON.stringify(row.ordered_skills) !== JSON.stringify(build.ordered_skills));
+      if (!other) throw new Error('反证 R15 失败：找不到技能不同的另一只');
+      instance.skills = [...other.ordered_skills];
+      build.ordered_skills = [...other.ordered_skills];
     },
   },
   {

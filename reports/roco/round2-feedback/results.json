@@ -1,0 +1,260 @@
+{
+ "canvas": "ready",
+ "corners": {
+  "wrapRadius": 12,
+  "wrapBorder": 0,
+  "spritebox": 11,
+  "cardRadius": 0,
+  "boxes": [
+   {
+    "sel": ".panel.battle",
+    "r": 13,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-wrap",
+    "r": 12,
+    "hasBorder": false
+   },
+   {
+    "sel": ".pet.active",
+    "r": 10,
+    "hasBorder": true
+   },
+   {
+    "sel": ".avatar.pet-icon",
+    "r": 7,
+    "hasBorder": true
+   },
+   {
+    "sel": ".type",
+    "r": 4,
+    "hasBorder": false
+   },
+   {
+    "sel": ".hp-track",
+    "r": 8,
+    "hasBorder": false
+   },
+   {
+    "sel": ".pet.active",
+    "r": 10,
+    "hasBorder": true
+   },
+   {
+    "sel": ".avatar.pet-icon",
+    "r": 7,
+    "hasBorder": true
+   },
+   {
+    "sel": ".type",
+    "r": 4,
+    "hasBorder": false
+   },
+   {
+    "sel": ".hp-track",
+    "r": 8,
+    "hasBorder": false
+   },
+   {
+    "sel": ".bench-pet",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".bench-pet",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".bench-pet",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".bench-pet",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".bench-pet",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".bench-pet",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-slot",
+    "r": 9,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-cost",
+    "r": 4,
+    "hasBorder": false
+   },
+   {
+    "sel": ".b3-rel",
+    "r": 4,
+    "hasBorder": false
+   },
+   {
+    "sel": ".b3-el",
+    "r": 4,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-el-slot.b3-el-slot--empty",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-el-slot.b3-el-slot--empty",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-slot",
+    "r": 9,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-cost",
+    "r": 4,
+    "hasBorder": false
+   },
+   {
+    "sel": ".b3-rel",
+    "r": 4,
+    "hasBorder": false
+   },
+   {
+    "sel": ".b3-el",
+    "r": 4,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-el-slot.b3-el-slot--empty",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-el-slot.b3-el-slot--empty",
+    "r": 8,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-slot",
+    "r": 9,
+    "hasBorder": true
+   },
+   {
+    "sel": ".b3-cost",
+    "r": 4,
+    "hasBorder": false
+   }
+  ]
+ },
+ "item": {
+  "tab": "item",
+  "cells": [
+   {
+    "id": "wish_power_up",
+    "name": "愿力强化",
+    "count": "2 / 2",
+    "note": "每局 2 次 · 冷却 3 回合 · 占一次行动",
+    "grey": "no",
+    "action": "10",
+    "kind": "magic"
+   },
+   {
+    "id": "leader_form",
+    "name": "首领化",
+    "count": "不可用",
+    "note": "需要「首领血脉」，本版未做",
+    "grey": "yes"
+   }
+  ]
+ },
+ "afterSwitch": {
+  "active": "音速犬",
+  "star": "⭐ 10",
+  "legalSlots": [
+   {
+    "name": "火苗",
+    "legal": "yes",
+    "cost": "⭐ 0"
+   },
+   {
+    "name": "防御",
+    "legal": "yes",
+    "cost": "⭐ 1"
+   },
+   {
+    "name": "火云车",
+    "legal": "yes",
+    "cost": "⭐ 5"
+   },
+   {
+    "name": "焚烧烙印",
+    "legal": "yes",
+    "cost": "⭐ 3"
+   }
+  ]
+ },
+ "skillsBefore": "火苗 | 防御 | 火云车 | 焚烧烙印",
+ "afterMagic": {
+  "tab": "skill",
+  "slots": [
+   {
+    "name": "火系愿力冲击",
+    "magicNew": "yes",
+    "tag": "愿力强化换上",
+    "cost": "⭐ 2",
+    "dmg": "预期伤害 —"
+   },
+   {
+    "name": "防御",
+    "magicNew": "no",
+    "cost": "⭐ 1",
+    "dmg": "预期伤害 —"
+   },
+   {
+    "name": "火云车",
+    "magicNew": "no",
+    "cost": "⭐ 5",
+    "dmg": "预期伤害 —"
+   },
+   {
+    "name": "焚烧烙印",
+    "magicNew": "no",
+    "cost": "⭐ 3",
+    "dmg": "预期伤害 —"
+   }
+  ],
+  "magicNote": [
+   "再用一次可解除（不消耗次数、进入冷却）",
+   "需要「首领血脉」，本版未做"
+  ]
+ },
+ "afterEscape": {
+  "view": "ready",
+  "homeVisible": true,
+  "battleVisible": true,
+  "resultCard": {
+   "hidden": false,
+   "text": "我方负 第 3 回合 · 标准 PVP 3 个回合 · 换人 1 次 · 单次最高伤害约 95 这一局结束了。回主页可以改阵容再开一局。 回主页（重新选阵容） 再开一局"
+  }
+ },
+ "afterHome": {
+  "view": "empty",
+  "homeHidden": null,
+  "homeVisible": null,
+  "battleHidden": true,
+  "resultHidden": true,
+  "startBtn": false
+ }
+}

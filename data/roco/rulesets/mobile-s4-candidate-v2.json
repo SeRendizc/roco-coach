@@ -3,7 +3,7 @@
   "ruleset_config_id": "mobile_s4_candidate_v2",
   "game": "roco_world_mobile",
   "source_id": "handoff-10-sources-and-confidence-2026-09-21",
-  "derived_from_ledger_sha256": "f1a0b073b1e07cf63db9266d9f24ac7d7a16789f1903dff69a5830b6b6678228",
+  "derived_from_ledger_sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
   "derived_from_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
   "status": "CANDIDATE_NOT_FOR_DEFAULT",
   "promotion_policy": "BLOCKED_UNTIL_MICROCASE",

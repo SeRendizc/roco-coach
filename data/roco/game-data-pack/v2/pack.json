@@ -44,7 +44,7 @@
   "ruleset_label": "S4「月涌狂想」赛季",
   "ruleset_config_id": "legacy_sim_v1",
   "ruleset_config_path": "data/roco/rulesets/legacy-sim-v1.json",
-  "ruleset_config_sha256": "5359313f0fdad0393759a730ac648c0c39dc1a454fdc68c4ef78308959c1d63f",
+  "ruleset_config_sha256": "9f7740dedee8d025c39e65408f1a4291b68d9c5b09e273bf9407a1cecf3d3044",
   "ruleset_config_is_default": true,
   "ruleset_configs_available": [
    {
@@ -64,7 +64,7 @@
   "frozen_revision": "aff808eb60003457fe8a260d1ac3c9bd95d53872",
   "frozen_revision_date": "2026-09-10T08:46:18Z",
   "evidence_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
-  "evidence_ledger_sha256": "f1a0b073b1e07cf63db9266d9f24ac7d7a16789f1903dff69a5830b6b6678228",
+  "evidence_ledger_sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
   "reconciliation_report_path": "reports/roco/reconciliation/catalog-reconciliation.json",
   "reconciliation_report_sha256": "bca1bf352a1327b0d32c83c225079c1e4999a792d267fa6e3dc9470d4580c125",
   "sources_path": "data/roco/sources.yaml",
@@ -310,13 +310,13 @@
    "source_id": null
   },
   "data/roco/rulesets/legacy-sim-v1.json": {
-   "sha256": "5359313f0fdad0393759a730ac648c0c39dc1a454fdc68c4ef78308959c1d63f",
+   "sha256": "9f7740dedee8d025c39e65408f1a4291b68d9c5b09e273bf9407a1cecf3d3044",
    "bytes": 6164,
    "source_id": "handoff-10-sources-and-confidence-2026-09-21"
   },
   "data/roco/evidence/rule-evidence-ledger.json": {
-   "sha256": "f1a0b073b1e07cf63db9266d9f24ac7d7a16789f1903dff69a5830b6b6678228",
-   "bytes": 42681,
+   "sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
+   "bytes": 72865,
    "source_id": null
   },
   "roco-game-data-pack/v2/schema.json": {

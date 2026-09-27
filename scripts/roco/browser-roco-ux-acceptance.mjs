@@ -55,10 +55,28 @@ class Cdp {
       for (const handler of this.handlers.get(msg.method) ?? []) handler(msg.params);
     });
   }
-  send(method, params = {}) {
+  // 2026-09-25（第 31 轮门禁实测踩到、**同一形状第二次**）：CDP 调用**必须有超时**。
+  // 现象：判据 39/39 全过、报告也写了，进程却再不往下走（服务都没来得及关，LISTEN 还开着），
+  // 一直等到门禁的 30 分钟兜底才被杀 ⇒ 那一套被判红，而红的其实不是判据。
+  // 根因形状：Chrome 侧没了 / socket 半死时，`ws.send` 不报错、回包永远不来，
+  // 于是这个 Promise **永不 resolve**。加超时之后，"挂住"变成"点名到方法的失败"。
+  send(method, params = {}, {timeoutMs = 20000} = {}) {
     const id = ++this.id;
-    this.ws.send(JSON.stringify({id, method, params}));
-    return new Promise((resolve, reject) => this.pending.set(id, {resolve, reject}));
+    try {
+      this.ws.send(JSON.stringify({id, method, params}));
+    } catch (error) {
+      return Promise.reject(new Error(`CDP ${method} 发送失败：${error?.message ?? error}`));
+    }
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`CDP ${method} 超过 ${timeoutMs}ms 没有回包（Chrome 可能已经死了）`));
+      }, timeoutMs);
+      this.pending.set(id, {
+        resolve: (value) => { clearTimeout(timer); resolve(value); },
+        reject: (error) => { clearTimeout(timer); reject(error); },
+      });
+    });
   }
   on(event, handler) {
     if (!this.handlers.has(event)) this.handlers.set(event, []);
@@ -72,7 +90,14 @@ async function startServer() {
   return {
     server,
     base: `http://127.0.0.1:${server.address().port}/`,
-    close: () => new Promise((r) => { server.closeAllConnections?.(); server.close(r); }),
+    // 收尾也**必须有界**：`server.close` 的回调要等所有连接散掉，而验收里有一条
+    // 长连接（页面自己的 SSE/keep-alive）可能不散 ⇒ 同样会把进程钉住。
+    close: () => new Promise((resolve) => {
+      const done = () => resolve();
+      const timer = setTimeout(done, 8000);
+      try { server.closeAllConnections?.(); } catch { /* 已经关了 */ }
+      server.close(() => { clearTimeout(timer); done(); });
+    }),
   };
 }
 
@@ -101,7 +126,7 @@ async function launchChrome() {
   }
   if (!port) {
     chrome.kill('SIGKILL');
-    rmSync(profile, {recursive: true, force: true});
+    rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
     throw new Error(`Chrome 没起来：${chromeErr}`);
   }
   const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
@@ -114,7 +139,7 @@ async function launchChrome() {
     close: async () => {
       try { ws.close(); } catch { /* 已经关了 */ }
       chrome.kill('SIGKILL');
-      rmSync(profile, {recursive: true, force: true});
+      rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
     },
   };
 }
@@ -1037,14 +1062,95 @@ async function main() {
     '{"playerText":"…候选规则（待实机核对）","text":"…UNKNOWN_PREMATCH"}');
   counter('D5-mode-badge(枚举丢了)', '数据层把 prematch 枚举丢掉必须被同一条判据抓住',
     modeProblems({...modeFacts, prematch: null}, modeRawText), '{"prematch":null}');
-  check('D5-no-fake-hearts', '页面上没有心形计数器（心/魔力只显示引擎给的数，没有就如实收起、不编）。'
-    + '【按人类 2026-09-23 版式，旧读取点 `#self-resource` 的「未核验」由 v3h 心形计数 '
-    + '`#b3-hearts-self`/`#b3-hearts-foe` 保持 hidden 承担】',
-    (await js(`!/[♥❤]/.test(document.body.innerText)`)) === true
-    && (await js(`(()=>{const a=document.getElementById('b3-hearts-self');
-      const b=document.getElementById('b3-hearts-foe');
-      return Boolean(a&&b)&&a.hidden===true&&b.hidden===true;})()`)) === true,
-    '页面正文无心形字符，两侧心形计数都保持 hidden（引擎没给 → 不编）');
+  // 2026-09-25（人类：「战斗页顶部的生命心 ♥ 要一直看得见」）：**读取点换了，判据没放松**。
+  //
+  // 旧读取点是「引擎没给 `hearts` 字段 ⇒ 两侧必须 hidden」（`view.hearts` 这个字段全仓产出点为 0，
+  // 所以那条实际上量的是「页面不编」）；新读取点量的是**页面上画出来的那个数对不对**：
+  //   · **心 = 魔力**，字段是引擎公开视图里的 `view.mana.{self, opponent, pool}`
+  //     （当前心数 / 对手当前心数 / 本局每人几颗；`pool` 从回执读，判据里**不写字面量 4**）；
+  //   · 引擎给了 ⇒ 两侧心形计数**必须可见**、实心数**逐位等于** `view.mana.{self,opponent}`、
+  //     心形总数**等于** `view.mana.pool`；
+  //   · 拿不到（缺键 / 不是有限数 / `pool ≤ 0`）⇒ 两侧**必须 hidden**，页面上不许有心形字符
+  //     ——**绝不硬写 4 颗**（fail closed）。
+  const heartsFacts = await js(`(()=>{const FULL=String.fromCharCode(0x2665),EMPTY=String.fromCharCode(0x2661);
+    const st=(window.rocoDemo&&window.rocoDemo.state)||{};
+    const v=st.view||null;
+    const n=(x)=>Number.isFinite(Number(x))?Number(x):null;
+    const m=(v&&v.mana&&typeof v.mana==='object')?v.mana:null;
+    const cnt=(t,ch)=>[...String(t==null?'':t)].filter((c)=>c===ch).length;
+    const one=(el)=>{if(!el)return {found:false};
+      const fullEl=el.querySelector('i:not(.lost)'),emptyEl=el.querySelector('i.lost');
+      return {found:true,hidden:el.hidden===true,visible:el.getClientRects().length>0,
+        full:cnt(fullEl?fullEl.textContent:'',FULL),empty:cnt(emptyEl?emptyEl.textContent:'',EMPTY),
+        total:cnt(el.textContent,FULL)+cnt(el.textContent,EMPTY),
+        text:String(el.textContent==null?'':el.textContent),html:String(el.outerHTML||'')};};
+    const body=String(document.body.innerText==null?'':document.body.innerText);
+    return {mana:m?{self:n(m.self),opponent:n(m.opponent),pool:n(m.pool)}:null,
+      viewSeen:Boolean(v),turn:v?n(v.turn):null,phase:v?(v.phase||null):null,
+      self:one(document.getElementById('b3-hearts-self')),foe:one(document.getElementById('b3-hearts-foe')),
+      bodyHearts:cnt(body,FULL)+cnt(body,EMPTY)};})()`);
+  /** 同一条判据（纯函数）：DOM 画出来的心 vs 同一时刻的 `view.mana`；`problems` 非空即红。 */
+  const heartsProblemsOf = (h) => {
+    const bad = [];
+    const m = h?.mana ?? null;
+    const known = Boolean(m) && Number.isFinite(m.self) && Number.isFinite(m.opponent)
+      && Number.isFinite(m.pool) && m.pool > 0;
+    const tail = `引擎 view.mana=${JSON.stringify(m)}；DOM self=${JSON.stringify(h?.self ?? null)}`
+      + ` foe=${JSON.stringify(h?.foe ?? null)}；turn=${JSON.stringify(h?.turn ?? null)}`
+      + ` phase=${JSON.stringify(h?.phase ?? null)} viewSeen=${JSON.stringify(h?.viewSeen ?? null)}`;
+    for (const [side, who] of [['self', '我方'], ['foe', '对手']]) {
+      const el = h?.[side] ?? null;
+      if (el?.found !== true) { bad.push(`${who}心形计数元素不存在（#b3-hearts-${side}）`); continue; }
+      if (!known) {
+        if (el.hidden !== true || el.visible === true) {
+          bad.push(`引擎没给 mana（${JSON.stringify(m)}），${who}心形计数却显示着`
+            + `（hidden=${JSON.stringify(el.hidden)} 可见=${JSON.stringify(el.visible)} 原文「${String(el.text)}」）`
+            + `—— 绝不硬写 4 颗`);
+        }
+        continue;
+      }
+      const want = side === 'self' ? m.self : m.opponent;
+      const field = side === 'self' ? 'self' : 'opponent';
+      if (el.hidden === true || el.visible !== true) {
+        bad.push(`引擎给了 mana=${JSON.stringify(m)}，${who}心形计数却是收起的（心要常显）`);
+      }
+      if (el.full !== want) bad.push(`${who}实心数 ${JSON.stringify(el.full)} ≠ 引擎 view.mana.${field} ${want}`);
+      if (el.total !== m.pool) bad.push(`${who}心形总数 ${JSON.stringify(el.total)} ≠ 引擎 view.mana.pool ${m.pool}`);
+    }
+    if (!known && Number(h?.bodyHearts ?? 0) > 0) {
+      bad.push(`引擎没给 mana，页面上却还有 ${h.bodyHearts} 个心形字符（凭空画出来的心计数器）`);
+    }
+    return bad;
+  };
+  const d5HeartsBad = heartsProblemsOf(heartsFacts);
+  check('D5-no-fake-hearts', '心（= 魔力）画出来的数**必须等于引擎公开视图 `view.mana` 的当前值**：'
+    + '实心数 == `view.mana.{self,opponent}`、心形总数 == `view.mana.pool`（`pool` 从回执读，判据不写字面量）；'
+    + '**拿不到 mana 时必须 hidden**，页面上不许有心形字符（绝不硬写 4 颗）。'
+    + '【2026-09-25 读取点变更（人类：生命心要常显）：旧读取点是「引擎没给 `hearts` 字段 ⇒ 两侧必须 hidden」'
+    + '（`view.hearts` 全仓产出点为 0）；现在量的是「页面画出来的那个数 == 引擎给的数」——**不是放松判据**：'
+    + '旧读取点只要求「不编」，新读取点还要求「引擎给了就必须画对、且必须看得见」】',
+    d5HeartsBad.length === 0,
+    (d5HeartsBad.join(' | ') || `两侧心形计数与 view.mana 一致：我方「${String(heartsFacts?.self?.text ?? '')}」`
+      + `（${JSON.stringify(heartsFacts?.self?.full ?? null)} 实心 / ${JSON.stringify(heartsFacts?.self?.total ?? null)} 总，`
+      + `hidden=${JSON.stringify(heartsFacts?.self?.hidden ?? null)}）、`
+      + `对手「${String(heartsFacts?.foe?.text ?? '')}」`
+      + `（${JSON.stringify(heartsFacts?.foe?.full ?? null)} 实心 / ${JSON.stringify(heartsFacts?.foe?.total ?? null)} 总，`
+      + `hidden=${JSON.stringify(heartsFacts?.foe?.hidden ?? null)}）`
+      + `；引擎 mana=${JSON.stringify(heartsFacts?.mana ?? null)}（本页 view=${JSON.stringify(heartsFacts?.viewSeen ?? null)}`
+      + `/turn=${JSON.stringify(heartsFacts?.turn ?? null)}/phase=${JSON.stringify(heartsFacts?.phase ?? null)}）；`
+      + `页面上心形字符=${JSON.stringify(heartsFacts?.bodyHearts ?? null)}`));
+  // 两条必红反证（都跑**同一条判据** `heartsProblemsOf`）：
+  //   ① 喂「无 mana 状态却硬写 4 颗」；② 喂「把心的值与引擎故意错开 1」。
+  counter('D5-no-fake-hearts', '拿不到 mana 却硬写 4 颗（页面自己编一个状态量）必须被同一条判据抓住',
+    heartsProblemsOf({...heartsFacts, mana: null, bodyHearts: 4,
+      self: {found: true, hidden: false, visible: true, full: 4, empty: 0, total: 4, text: '♥♥♥♥'},
+      foe: {found: true, hidden: false, visible: true, full: 4, empty: 0, total: 4, text: '♥♥♥♥'}}),
+    '{"mana":null,"self":{"hidden":false,"full":4,"total":4}}');
+  counter('D5-no-fake-hearts(与引擎错开 1)', '把心的值与引擎故意错开 1 必须被同一条判据抓住',
+    heartsProblemsOf({...heartsFacts, mana: {self: 3, opponent: 3, pool: 4},
+      self: {found: true, hidden: false, visible: true, full: 4, empty: 0, total: 4, text: '♥♥♥♥'},
+      foe: {found: true, hidden: false, visible: true, full: 3, empty: 1, total: 4, text: '♥♥♥♡'}}),
+    '{"mana":{"self":3,"opponent":3,"pool":4},"self":{"full":4}}');
 
   // ── RC-502 战斗信息架构：场上事实（能量上限 / 印记 / 防御冷却）────────────
   //
@@ -1519,7 +1625,19 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+// 2026-09-25（**同一形状第三次**）：跑完、报告写完，进程却一直不退 ⇒ 门禁那 30 分钟兜底才把它杀掉，
+// 而那一套被判红。根因不是 CDP（C6.118 里我那样归因是错的：报告已经写完，说明 await 都回来了），
+// 而是**只设了 `process.exitCode`、从不显式退出** —— 只要还有一个句柄没散（Chrome 死了、服务关了，
+// 但 socket/计时器还在），事件循环就永远不空。所以收尾统一成：**先让 stdout 冲干净，再显式退出**。
+const flushThenExit = (code) => new Promise((resolve) => {
+  process.exitCode = code;
+  process.stdout.write('', () => resolve());
+}).then(() => process.exit(process.exitCode ?? code));
+
+main().then(
+  () => flushThenExit(process.exitCode ?? 0),
+  (error) => {
   console.error('[roco-ux] 验收脚本自身出错：', error);
-  process.exitCode = 1;
-});
+    return flushThenExit(1);
+  },
+);

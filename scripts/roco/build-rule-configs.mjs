@@ -59,6 +59,11 @@ export const SPEED_TIE_POLICIES = Object.freeze(new Set(['random_seeded']));
  */
 export const KNOWN_ACTION_KINDS = Object.freeze(new Set([
   'skill', 'charge', 'switch', 'surrender', 'item', 'escape', 'struggle',
+  // 2026-09-23：`magic`（PVP 魔法：愿力强化）加进词汇表，与
+  // `roco_env/schema.py::VALID_KINDS` 里的 `ACTION_MAGIC` 一一对应。
+  // 它与 `item` **分开**是口径要求：台账写着 PVP 魔法「不是普通道具」，
+  // 而标准 PVP 的普通道具仍是 forbidden。
+  'magic',
 ]));
 
 /** RC-105：`actions.kinds.<kind>.value` 的合法取值。 */
@@ -312,6 +317,13 @@ export function buildConfigs({ledger, battleModes}) {
   if (!standardMode) throw new Error(`BattleMode pvp-standard-six-pet 不在 ${BATTLE_MODES_PATH} 里`);
   /** 登记表里标准模式的首领化策略（配置里的 `policies.boss_form_policy` 从它读）。 */
   const bossPolicy = standardMode.policies?.boss_form_policy;
+  /** 登记表里标准模式的 **PVP 魔法**策略（愿力强化）：配置里的 `policies.magic_policy` 整份从它读。
+   *  2026-09-23 人类口述登记之后，这一份里既有已登记的口径（`registered`），也有仍未核验的字段
+   *  （`unknowns`）—— 两样都必须原样落到配置里，不许在生成器里另写一份。 */
+  const magicPolicy = standardMode.policies?.magic_policy;
+  /** 登记表里标准模式的**天气**策略（2026-09-25 人类裁决）：配置里的 `policies.weather_policy` 整份从它读。
+   *  四种天气的效果/数值/免疫属性/持续回合数都在里面 —— 引擎不许自己发明天气行为。 */
+  const weatherPolicy = standardMode.policies?.weather_policy;
   field.policy = policyFor[V3_CANDIDATE_ID];
   const manaActionsCandidate = {
     ...skeleton(V3_CANDIDATE_ID, 'CANDIDATE_NOT_FOR_DEFAULT', 'pvp-standard-six-pet', [
@@ -331,13 +343,60 @@ export function buildConfigs({ledger, battleModes}) {
     }),
     is_default: false,
     requires_microcase_before_default: true,
-    // 与 v2 逐字相同（深拷贝，保证「一个值都没改」是结构上成立的，而不是靠人肉比对）
-    energy: JSON.parse(JSON.stringify(candidate.energy)),
-    turn_order: JSON.parse(JSON.stringify(candidate.turn_order)),
-    mana: {
-      pool: field(4, 'CROSS_SOURCE_SUPPORTED', 'EV-PVP-STANDARD-MANA',
-        '标准 PVP 通常每方 4 点魔力。台账本条自注「两份来源里都没有一处逐字写出标准 PVP 每方 4 点'
-        + '魔力」、降级风险最高，所以它只是候选口径，**不**写成官方确认；判据见 MC-E08'),
+    // 与 v2 逐字相同（深拷贝，保证「一个值都没改」是结构上成立的，而不是靠人肉比对），
+    // 只**新增**一个 v2 没有的开关：`initial_for_all_pets`（人类 2026-09-23 口径⑥，见 EV-ENERGY-PER-PET）。
+    energy: {
+      ...JSON.parse(JSON.stringify(candidate.energy)),
+      // RC-401 批三（2026-09-23）：**技能能耗修正**机制开关。术语 1012/1013 把「降低/增加能耗」
+      // 明确列进增益与减益，所以「能耗可以被特性增减」这句话有出处；但**多条修正怎么复合、
+      // 有没有下限**没有定义（MC-018 待验）→ 这条只声明「本配置按加法累计、不设下限（负值 fail closed）」，
+      // 等级按 ENGINE_HYPOTHESIS 登记，不借别的台账条目背书。legacy / v2 不声明 → 机制关闭，
+      // 合法动作与扣费逐位不变（8 条 golden 指纹是守卫）。
+      cost_modifier: field(true, 'ENGINE_HYPOTHESIS', null,
+        '术语 1012「增益」与 1013「减益」都把「降低/增加能耗」列进去了，所以能耗可被特性增减这件事'
+        + '有出处；但复合顺序与下限没有定义（MC-018 待验）。本配置只声明开关与两条工程约定：'
+        + '① 多条修正按**加法**累计（加法可交换，顺序问题不在这里假装解决）；'
+        + '② **不设下限** —— 结果为负时 fail closed（不提供这一手 / 扣费抛错），而不是编一个「最低 0」。'
+        + '实现见 roco/src/roco_env/env.py::effective_skill_cost 与 traits.py::grant_energy_cost_mod。',
+        'supports', {microcase_id: 'MC-018', microcase_status: 'NOT_RECORDED'}),
+      // RC-401 批次六（2026-09-25）：**「敌方失去 N 能量」**开关。
+      // 依据是**技能描述的字面读法**（`skill_000747` 报复「应对攻击：敌方失去3能量」、
+      // `skill_000762` 小型打劫「敌方队伍中所有精灵失去1能量」），与「偷取敌方 N 能量」不同：
+      // 没有任何一方获得。等级按 ENGINE_HYPOTHESIS 登记（两条假设见 reason）。
+      // legacy / v2 不声明 ⇒ 效果在解析层就被收回（连未认领标记都不补），
+      // 结算与 `unsupported` 逐位不变（`resolve_foe_energy_loss` 的判据是守卫）。
+      foe_energy_loss: field(true, 'ENGINE_HYPOTHESIS', null,
+        '「敌方失去 N 能量」是技能描述的字面读法（`skill_000747` 报复「应对攻击：敌方失去3能量」、'
+        + '`skill_000762` 小型打劫「敌方队伍中所有精灵失去1能量」），与「偷取敌方 N 能量」不同：'
+        + '没有任何一方获得。声明这条能力时按字面结算（下限 0）；**未声明**（legacy / v2）时'
+        + '效果在解析层被收回，结算与 `unsupported` 逐位不变（RC-401 批次六）。'
+        + '假设（待实机/官方文字）：① 全队读法**包含力竭个体**（描述写「所有精灵」）；'
+        + '② 「应对X：**改为** …」是条件覆盖、不是追加 —— 覆盖语义尚未实现，'
+        + '带「改为」的技能（`skill_000745` 恶作剧）**整条不结算**。',
+        'supports'),
+      // RC-401 批次九（2026-09-25）：**动态能耗修正** —— 「敌方每有 N 层中毒效果，本技能能耗 -M」。
+      // 冻结语料实测只有一种写法（`skill_000612 毒液渗透`），而它**51 只精灵的配招里都带**
+      // （可达性工作单第一名）。条件在结算时是**可读事实**（对手场上那只的 `中毒` 层数）。
+      // 假设（ENGINE_HYPOTHESIS）：① 每层减 M、层数取对手**当前场上**的中毒层数（不是历史累计）；
+      // ② 不做"最低 0"的自造下限 —— 负能耗由既有的 fail closed 兜底（`legal_actions` 不提供这一手）。
+      per_layer_cost: field(true, 'ENGINE_HYPOTHESIS', null,
+        '动态能耗修正：按对手场上的中毒层数，每层让本技能能耗减 M（M 从描述原文读）'),
+      initial_for_all_pets: field(true, 'RECORDED_IN_GAME', 'EV-ENERGY-PER-PET',
+        '用户 2026-09-23 实机核对：每只精灵的星星（能量）**各自独立**，**开局每一只都是满的 10 星**。'
+        + '旧实现只把入场能量发给场上那只（换上来的是 0 星 → 页面按能量把四格技能全判成不可点，'
+        + '实测 view.self.pets 能量 = [10,0,0,0,0,0]）。'
+        + 'legacy / v2 **不声明**这个叶子，所以那两份的入场行为与 golden 指纹逐位不变。'),
+    },
+    turn_order: JSON.parse(JSON.stringify(candidate.turn_order)),    mana: {
+      // 2026-09-25 改钉：人类实机口径「就是4点，哎反正就是生命数，就是4颗心」⇒ 台账
+      // EV-PVP-STANDARD-MANA 升到 RECORDED_IN_GAME，这里必须同步（校验器专门防「静默升降级」）。
+      // **旧口径留痕（不删）**：这里原来写 CROSS_SOURCE_SUPPORTED，理由是「两份来源里都没有一处逐字写出」。
+      pool: field(4, 'RECORDED_IN_GAME', 'EV-PVP-STANDARD-MANA',
+        '标准 PVP **每方 4 点魔力**（人类实机口径 2026-09-25：「就是4点…就是生命数，就是4颗心」）。'
+        + '**旧口径留痕**：此前是 CROSS_SOURCE_SUPPORTED，理由是台账自注「两份来源里都没有一处逐字写出'
+        + '标准 PVP 每方 4 点魔力」、降级风险最高 —— 那条理由在当时成立，现在被人类实机口径取代。'
+        + '**同轮全量核对结论**：百科「闪耀大赛」1,830 字与官方《洛个明白》里「魔力」0 次；'
+        + '官方万字公告 12 次全是别的语义 ⇒ **禁止**把百科/公告写成这条数字的来源。判据见 MC-E08'),
       faint_cost: field(1, 'CROSS_SOURCE_SUPPORTED', 'EV-PVP-FAINT-MANA-LOSS',
         '力竭通常扣 1 点魔力。台账本条只有 17173「被击败时自己额外损失1点魔力」间接支持，'
         + '第二条来源是产品拆解、没有逐字句 —— 证据强度弱于其他条，判据见 MC-E09'),
@@ -352,11 +411,14 @@ export function buildConfigs({ledger, battleModes}) {
         + '不编一个看起来合理的代价'),
     },
     actions: {
-      allowed_kinds: field(['skill', 'charge', 'switch', 'surrender'], 'ENGINE_HYPOTHESIS', null,
-        '数组顺序**就是展示顺序**（skill → charge → switch → surrender）。聚能是独立动作类，'
+      allowed_kinds: field(['skill', 'charge', 'switch', 'surrender', 'magic'], 'ENGINE_HYPOTHESIS', null,
+        '数组顺序**就是展示顺序**（skill → charge → switch → surrender → magic）。聚能是独立动作类，'
         + '不是技能的子类、也不是「能量不足时的兜底」（EV-ENERGY-CHARGE：聚能是一个主动行动）。'
-        + '整张清单本身是一条**引擎策略声明**：台账只支持其中「聚能是主动行动」这一点（见 kinds.charge），'
-        + '「标准 PVP 的动作全集就这四类」没有台账条目，所以引用留空、按 ENGINE_HYPOTHESIS 登记'),
+        + '`magic`（PVP 魔法：愿力强化）2026-09-23 加进来：台账 EV-PVP-WISH-POWER-UP（RECORDED_IN_GAME）'
+        + '登记了它的完整口径，所以它**是**标准 PVP 的合法动作类 —— 但它**不**是普通 item，'
+        + '所以不能靠放开 kinds.item 来实现（那会同时把回复药放进来）。'
+        + '整张清单本身仍是一条**引擎策略声明**：台账只支持「聚能是主动行动」与「PVP 魔法可用」两点，'
+        + '「动作全集就这五类」没有台账条目，所以引用留空、按 ENGINE_HYPOTHESIS 登记'),
       forbidden_kinds: field(['item', 'escape'], 'ENGINE_HYPOTHESIS', null,
         '标准 PVP 无道具与逃跑；仅当某 PVE 模式登记允许时才出现。台账没有「标准 PVP 禁道具/禁逃跑」'
         + '的条目 —— 这是从「该模式的动作全集」推出来的引擎策略，不是引文'),
@@ -381,6 +443,13 @@ export function buildConfigs({ledger, battleModes}) {
         surrender: field('allowed', 'ENGINE_HYPOTHESIS', null,
           '投降是标准 PVP 的独立动作类（无道具无逃跑，玩家需要一个「认输」的出口）。'
           + '台账没有任何条目讲它的语义 —— 见 mana.surrender 的 reason'),
+        // 2026-09-23：PVP 魔法（愿力强化 / 共鸣魔法）。与 `item` **分成两类**是口径要求：
+        // 台账写着 `magic_policy.is_item=false`（它不是普通道具），而标准 PVP 的普通道具仍是
+        // forbidden —— 借 item 的道会把「标准 PVP 没有普通道具」这条同时破掉。
+        magic: field('allowed', 'RECORDED_IN_GAME', 'EV-PVP-WISH-POWER-UP',
+          '台账 EV-PVP-WISH-POWER-UP（RECORDED_IN_GAME，人类口述）：愿力强化在标准 PVP 六宠里可用，'
+          + '占一次行动、每局两次、冷却三回合、目标是自己场上那只，把该精灵第一个技能换成「愿力冲击」。'
+          + '它不是普通道具（policies.magic_policy.is_item=false），所以单独一个动作类。'),
         item: {
           ...field('forbidden', 'ENGINE_HYPOTHESIS', null,
             '道具（回复药 / 净化药 / 能量果）在标准 PVP 里不出现；'
@@ -432,13 +501,52 @@ export function buildConfigs({ledger, battleModes}) {
         + '下界 1；「必须选满 6 只」没有任何来源支持 → `min` / `max` / `fill_required` 三个细项'
         + '放在 battle-modes.json 的 policies.team_size_policy 里（那里 fill_required=null + UNVERIFIED，'
         + '引擎遇未知 fail closed），本字段只登记「这是候选的 1～6 口径」这一条。'),
-      magic_policy: field('allowed_candidate', 'RECORDED_IN_GAME', 'EV-PVP-BOSS-FORM-STANDARD',
-        '愿力强化 / 共鸣魔法等 PVP 魔法是**特殊行动**（classification='
-        + PVP_MAGIC_CLASSIFICATION + '），不是普通道具。旧标准 PVP 口径的 `item:0` **不**意味着'
-        + '它们不存在 —— 这正是这次要修掉的错误。它们被允许作为候选参与，但次数 / 冷却 / 解除 / '
-        + '是否占行动 / 持续 / 倍率一律未核验（battle-modes.json 的 policies.magic_policy 里逐条'
-        + '写 null + UNVERIFIED），引擎遇未知 fail closed。',
-        'supports', {classification: PVP_MAGIC_CLASSIFICATION, is_item: false, all_unverified: true}),
+      // 2026-09-23：人类把「愿力强化」的整套口径口述登记了（台账 EV-PVP-WISH-POWER-UP）——
+      // 取值同样**从登记表读入**（`registered` / `all_unverified` / `occupies_action` /
+      // `evidence_id` 全部照抄 battle-modes.json），不许在生成器里另写一份，
+      // 否则登记表改了配置不跟着变，两份文件就会各说一套。
+      // `unknowns` 也逐条搬过来：仍未核验的字段照旧 null + UNVERIFIED，引擎遇未知 fail closed。
+      magic_policy: {
+        name: magicPolicy?.name ?? 'pvp_magic',
+        value: magicPolicy?.value ?? 'allowed_candidate',
+        classification: magicPolicy?.classification ?? PVP_MAGIC_CLASSIFICATION,
+        confidence: magicPolicy?.confidence ?? 'RECORDED_IN_GAME',
+        evidence_id: magicPolicy?.evidence_id ?? null,
+        evidence_role: 'supports',
+        reason: magicPolicy?.reason ?? '',
+        kinds: JSON.parse(JSON.stringify(magicPolicy?.kinds ?? [])),
+        is_item: magicPolicy?.is_item !== false,
+        occupies_action: magicPolicy?.occupies_action ?? null,
+        occupies_action_status: magicPolicy?.occupies_action_status ?? null,
+        all_unverified: magicPolicy?.all_unverified !== false,
+        registered: JSON.parse(JSON.stringify(magicPolicy?.registered ?? [])),
+        unknowns: JSON.parse(JSON.stringify(magicPolicy?.unknowns ?? [])),
+      },
+      // ── 2026-09-25：**天气层**（人类裁决「那你就做！」）─────────────────────
+      //
+      // 整份**从 battle-modes.json 照抄**（`weatherPolicy`）：四种天气的效果、数值、免疫属性、
+      // 只存在一种、8 回合、以及仍未核验的那几条 unknowns 全部来自登记表 ——
+      // 引擎只认配置里声明的这份，**没声明就不许自己发明天气行为**（fail closed）。
+      // 与 boss_form / magic 同一套做法：登记表改了就重新生成，配置侧不另写一份。
+      weather_policy: {
+        name: weatherPolicy?.name ?? 'weather',
+        value: weatherPolicy?.value ?? null,
+        confidence: weatherPolicy?.confidence ?? null,
+        evidence_id: weatherPolicy?.evidence_id ?? null,
+        evidence_role: 'supports',
+        reason: weatherPolicy?.reason ?? '',
+        superseded_ruling: weatherPolicy?.superseded_ruling ?? null,
+        scope: weatherPolicy?.scope ?? null,
+        max_concurrent: weatherPolicy?.max_concurrent ?? null,
+        max_concurrent_reason: weatherPolicy?.max_concurrent_reason ?? null,
+        duration_turns: weatherPolicy?.duration_turns ?? null,
+        duration_source: weatherPolicy?.duration_source ?? null,
+        duration_note: weatherPolicy?.duration_note ?? null,
+        settlement: weatherPolicy?.settlement ?? null,
+        settlement_note: weatherPolicy?.settlement_note ?? null,
+        effects: JSON.parse(JSON.stringify(weatherPolicy?.effects ?? {})),
+        unknowns: JSON.parse(JSON.stringify(weatherPolicy?.unknowns ?? [])),
+      },
     },
     // RC-401：**效果能力声明**。
     //
@@ -447,6 +555,17 @@ export function buildConfigs({ledger, battleModes}) {
     // 佐证只有两处：冻结 desc 里的「N连击」原文（仓内），以及社区实现公式里那个 `连击` 因子
     // （`effects.py::_community_v1`，它自己写着「不是官方公式」）。所以等级是 ENGINE_HYPOTHESIS。
     damage: {
+      // 2026-09-23：**伤害按技能的伤害类别取面板**（魔攻用 spa/spd）。
+      // 为什么是候选声明而不是无条件修：默认路径（legacy / v2）必须**逐位不变**，
+      // 而这条会改变每一发魔攻技能的伤害（实测同一技能 物攻 115 / 魔攻 57，
+      // 修之前两者都按物攻算 = 虚高一倍）。golden 指纹 `test_turn_order_fail_closed` 是守卫。
+      // 置信等级 ENGINE_HYPOTHESIS：语义是显然的（魔攻技能用魔攻面板），但 `spa/spd` 的
+      // 面板换算在 `data.PANEL_FORMULAS` 里标着 `exact=False`，所以它是引擎假设而非登记规则。
+      attack_stat_by_class: field(true, 'ENGINE_HYPOTHESIS', null,
+        '魔攻类技能必须用 `spa/spd` 结算、其余用 `atk/def`。不这么做的话物理面板会被套到魔法伤害上'
+        + '（实测同一发「愿力冲击」：按类别取 57，按物攻取 115）。'
+        + '`spa/spd` 的面板换算未校准（PANEL_FORMULAS 里 exact=False），所以这是**引擎假设**；'
+        + '台账里没有对应条目，引用留空。legacy / v2 不声明这一块 → 行为逐位不变。'),
       multi_hit: field(true, 'ENGINE_HYPOTHESIS', null,
         '连击（multi-hit）：按描述里**静态**写明的「N连击」把伤害按 N 次结算。'
         + '证据只有两处仓内材料：冻结 skills.json 的 desc 原文（例如「造成物伤，3连击。」）'
@@ -460,6 +579,37 @@ export function buildConfigs({ledger, battleModes}) {
         '号位条件：按「本技能位于N号位时 威力+X / 连击+X」在出招时按这一手实际用的技能位置加成'),
       position_shift: field(true, 'ENGINE_HYPOTHESIS', null,
         '传动：用后把这个技能在配招里移动 N 位（位置会变，因此号位条件也随之变）'),
+      // RC-401 批次八（2026-09-25）：「**若先于敌方攻击**，本次技能威力+N%」。
+      // 冻结语料实测：1 条战斗技能（`skill_000687 扇风`，**47 只精灵的配招里都带它**）
+      // + 2 条特性（`顺风` / `破空`，特性层另走 `traits.py`，不在这条能力里）。
+      // 条件在结算时是**已知事实**（`order_actions()` 排出的执行序列），不是猜测：
+      // 只有"我这一手排在敌方那一手之前**且敌方那一手是攻击**"才加成。
+      // **假设（ENGINE_HYPOTHESIS）**：① 「敌方攻击」按 `Action.kind=='skill'` 且该技能
+      // `is_attack` 判；敌方换人/聚能时**不加成**（描述写的是"先于敌方**攻击**"）。
+      // ② 加成加在**威力**上（本仓唯一的伤害公式读 power），不是直接改伤害。
+      // RC-401 批次十一（2026-09-25）：**「若敌方本回合更换精灵，<效果>」**（12 条技能 / 46 只带得上）。
+      // 条件在结算时是**已知事实**（对手这一手提交的就是换人 ⇒ `Action.kind == 'switch'`），
+      // 不依赖先后手、也不需要猜。只读条件后面那几种有把握的写法（威力平加/翻倍、回能、
+      // 敌方失能、属性增减）；**读不出的残余一律不认领**（`resolve_foe_switch_condition` 会挡住）。
+      // RC-401 批次十二（2026-09-25）：**「每次使用后，本技能<威力|能耗|连击数>永久±N」**
+      // （7 条技能，其中 `skill_000421 水炮`「每次使用后，本技能能耗永久-1」**25 只配招带**）。
+      // 累计量写在 `PetState.skill_ramps`，只在这个技能上生效（不影响同一只的其他技能）。
+      // 假设（ENGINE_HYPOTHESIS）：① 只对**本技能**生效；② 每次**成功出手**后累加一次（被取消/没出手不算）；
+      // ③ 连击数累计直接加在出手次数上。
+      // RC-401 批次十三（2026-09-25）：**「每被攻击1次 / 每受到1次抵抗的技能攻击 → 本技能<属性>永久±N」**
+      // （3 条技能；`skill_000500 岩土暴击`「每被攻击1次。本技能能耗永久-1」**35 只配招带**）。
+      // 假设（ENGINE_HYPOTHESIS）：① 「被攻击」= 成为一次**技能攻击**的目标（换人/聚能不算）；
+      // ② 「抵抗的」按本引擎的相性倍率 < 1 判（`damage.type_multiplier`）；
+      // ③ 「不含连击」= 一次攻击**只计一次**（不按连击次数重复计）。
+      on_hit_ramp: field(true, 'ENGINE_HYPOTHESIS', null,
+        '「每被攻击1次」/「每受到1次抵抗的技能攻击」时，把这只精灵身上那条技能的永久修正累加一次'),
+      per_use_ramp: field(true, 'ENGINE_HYPOTHESIS', null,
+        '「每次使用后，本技能<属性>永久±N」：按这只精灵用这个技能的累计次数，改本技能的威力/能耗/连击数'),
+      foe_switch_condition: field(true, 'ENGINE_HYPOTHESIS', null,
+        '对手本回合更换精灵时，按描述读出的那几条效果（威力平加/翻倍、回能、敌方失能、属性增减）生效'),
+      initiative_condition: field(true, 'ENGINE_HYPOTHESIS', null,
+        '先手条件：若我这一手在结算顺序里排在敌方那一手之前、且敌方那一手是攻击，'
+        + '则本次技能威力按描述里的百分比加成（判据 = order_actions 的执行序列 + 敌方动作类别）'),
     },
     // RC-105：**仓内冻结快照的原文**佐证（不是台账条目，也不改台账等级）。
     //
@@ -524,7 +674,10 @@ export function buildConfigs({ledger, battleModes}) {
     ],
     unknowns: [
       {path: 'mana.pool', value: 4,
-        reason: '4 点魔力只有 10 号文档转述 + 社区交叉口径（EV-PVP-STANDARD-MANA 自注降级风险最高），需实机',
+        reason: '**2026-09-25 已解决（原话保留）**：原写「4 点魔力只有 10 号文档转述 + 社区交叉口径'
+          + '（EV-PVP-STANDARD-MANA 自注降级风险最高），需实机」—— 现已由人类实机口径给出'
+          + '（「就是4点…就是生命数，就是4颗心」），台账升 RECORDED_IN_GAME；'
+          + '**仍未核验**的是「力竭扣减量能否被特性改写」（见下一条），MC-E08 仍建议录',
         microcase_id: 'MC-E08'},
       {path: 'mana.faint_cost', value: 1,
         reason: '力竭扣 1 点魔力只有间接支持（EV-PVP-FAINT-MANA-LOSS），扣谁/扣多少/能否被效果改变未核实',
@@ -707,15 +860,45 @@ export function checkPolicyInvariants(configs, battleModes, problems) {
         + '（它不是普通 item）');
     }
   }
-  // ⑥：未核验的数值不许有值。
-  if (magic && magic.occupies_action !== null) {
-    problems.push(`pvp-standard-six-pet.policies.magic_policy.occupies_action=`
-      + `${JSON.stringify(magic.occupies_action)} 必须是 null：它是否占行动未核验，不许填 true/false`);
+  // ⑥：未核验的数值不许有值；**已登记**的必须有出处。
+  // 2026-09-23 演进：人类把「愿力强化」的整套口径口述登记了（台账 EV-PVP-WISH-POWER-UP，
+  // RECORDED_IN_GAME：占行动 / 每局 2 次 / 冷却 3 回合 / 目标 / 替换第一个技能 / 愿力冲击的能耗威力）。
+  // 于是这里不能继续钉「occupies_action 必须是 null」——那会把**已登记的事实**判成违规。
+  // 守住的是同一件事：**没出处的不许有值**。三档：
+  //   · all_unverified=true → occupies_action 必须 null + status UNVERIFIED（旧口径，仍然要有牙）；
+  //   · all_unverified=false → 必须挂 evidence_id，registered 每条带 confidence；
+  //   · unknowns 里剩下的每一条，仍然必须 value=null + status=UNVERIFIED。
+  const registered = Array.isArray(magic?.registered) ? magic.registered : [];
+  if (magic && magic.all_unverified === true) {
+    if (registered.length > 0) {
+      problems.push('pvp-standard-six-pet.policies.magic_policy：all_unverified=true 却带着 registered 条目');
+    }
+    if (magic.occupies_action !== null) {
+      problems.push(`pvp-standard-six-pet.policies.magic_policy.occupies_action=`
+        + `${JSON.stringify(magic.occupies_action)} 必须是 null：它是否占行动未核验，不许填 true/false`);
+    }
+    if (magic.occupies_action_status !== 'UNVERIFIED') {
+      problems.push('pvp-standard-six-pet.policies.magic_policy.occupies_action_status 必须是 UNVERIFIED');
+    }
+  } else if (magic) {
+    if (!magic.evidence_id) {
+      problems.push('pvp-standard-six-pet.policies.magic_policy：已登记（all_unverified=false）却没有 evidence_id');
+    }
+    if (registered.length === 0) {
+      problems.push('pvp-standard-six-pet.policies.magic_policy：all_unverified=false 却没有 registered 条目');
+    }
+    for (const r of registered) {
+      if (!r?.kind || !r?.confidence) {
+        problems.push('pvp-standard-six-pet.policies.magic_policy.registered 里有一条缺 kind/confidence'
+          + '（没出处的值不许出现）');
+      }
+      if (r?.occupies_action !== undefined && magic.occupies_action !== r.occupies_action) {
+        problems.push('pvp-standard-six-pet.policies.magic_policy：occupy_action 顶层与 registered 不一致');
+      }
+    }
   }
-  if (magic && magic.occupies_action_status !== 'UNVERIFIED') {
-    problems.push('pvp-standard-six-pet.policies.magic_policy.occupies_action_status 必须是 UNVERIFIED');
-  }
-  for (const [label, node] of [['boss_form_policy', bossPolicy], ['magic_policy', magic]]) {
+  for (const [label, node] of [['boss_form_policy', bossPolicy], ['magic_policy', magic],
+    ['weather_policy', standard.policies?.weather_policy]]) {
     for (const item of node?.unknowns ?? []) {
       if (item?.value !== null || item?.status !== 'UNVERIFIED') {
         problems.push(`pvp-standard-six-pet.policies.${label}.unknowns.${item?.field}：未核验项必须`
@@ -724,7 +907,82 @@ export function checkPolicyInvariants(configs, battleModes, problems) {
       }
     }
   }
-  // 队伍规模策略：1～6，且「必须填满」必须是 null + UNVERIFIED。
+  // ── 天气（2026-09-25 人类裁决「那你就做！」）─────────────────────────────
+  //
+  // 判据只咬「声明是否完整、数值是否有出处」，不重述数值：四种天气必须**都在**、
+  // 免疫属性必须在、只存在一种、持续回合数与结算位置必须是声明过的取值。
+  // 引擎侧另有一组判据（roco/tests/test_weather_pvp.py）：**没声明时不许发明天气行为**。
+  const weather = standard.policies?.weather_policy;
+  if (!weather) {
+    problems.push('pvp-standard-six-pet：缺 policies.weather_policy'
+      + '（官方一手 4/14《洛个明白》说天气是常驻全场的标准 PVP 效果，不许当成「只在 PvE」）');
+  } else {
+    if (weather.value !== 'enabled') {
+      problems.push(`pvp-standard-six-pet.policies.weather_policy.value=`
+        + `${JSON.stringify(weather.value)}，必须是 'enabled'`);
+    }
+    if (weather.evidence_id !== 'EV-WEATHER-STANDARD-PVP') {
+      problems.push('pvp-standard-six-pet.policies.weather_policy.evidence_id 必须引台账 '
+        + `EV-WEATHER-STANDARD-PVP，实际 ${JSON.stringify(weather.evidence_id)}`);
+    }
+    const weatherEntry = (readJson(LEDGER_PATH).entries || []).find((row) => row.id === weather.evidence_id);
+    if (!weatherEntry || weatherEntry.confidence !== weather.confidence) {
+      problems.push(`天气策略的等级 ${JSON.stringify(weather.confidence)} 与台账 `
+        + `${JSON.stringify(weatherEntry?.confidence)} 不一致（等级只有台账那一份）`);
+    }
+    if (!(weatherEntry?.sources || []).some((source) => source.marker === 'official_first_party')) {
+      problems.push(`台账 ${weather.evidence_id} 没有 official_first_party 来源：`
+        + '天气进标准 PVP 的依据必须是官方一手');
+    }
+    if (weather.max_concurrent !== 1) {
+      problems.push('pvp-standard-six-pet.policies.weather_policy.max_concurrent 必须是 1'
+        + '（官方逐字「但天气只能存在一种」）');
+    }
+    if (!Number.isInteger(weather.duration_turns) || weather.duration_turns !== 8) {
+      problems.push('pvp-standard-six-pet.policies.weather_policy.duration_turns 必须是 8'
+        + '（四条造天气技能描述逐字「持续8回合」）');
+    }
+    if (weather.duration_source !== 'skill_desc') {
+      problems.push('pvp-standard-six-pet.policies.weather_policy.duration_source 必须是 skill_desc'
+        + '（回合数从技能描述读，引擎不写死常量）');
+    }
+    const effects = weather.effects ?? {};
+    const expectedKinds = {
+      '雨天': 'skill_power_multiplier',
+      '沙暴': 'skill_energy_cost_multiplier',
+      '暴风雪': 'end_turn_status',
+      '雷鸣': 'end_turn_status',
+    };
+    for (const [name, kind] of Object.entries(expectedKinds)) {
+      const spec = effects[name];
+      if (!spec) {
+        problems.push(`pvp-standard-six-pet.policies.weather_policy.effects 缺「${name}」`);
+        continue;
+      }
+      if (spec.kind !== kind) {
+        problems.push(`天气「${name}」的 kind=${JSON.stringify(spec.kind)}，应为 ${kind}`);
+      }
+      if (!spec.term_id) problems.push(`天气「${name}」必须给 term_id（数值要有出处）`);
+      if (kind === 'end_turn_status') {
+        if (!spec.status || !spec.immune_element || !Number.isInteger(spec.layers)) {
+          problems.push(`天气「${name}」必须声明 status / layers / immune_element（术语里逐字给了这三点）`);
+        }
+      } else if (typeof spec.element !== 'string' || !(spec.value > 0)) {
+        problems.push(`天气「${name}」必须声明 element 与正数 value`);
+      }
+    }
+    if (effects['雨天']?.value !== 1.75) {
+      problems.push(`天气「雨天」的威力系数必须是 1.75（当前规则集 S4 术语表 3008 逐字 +75%），`
+        + `实际 ${JSON.stringify(effects['雨天']?.value)} —— 官方 4/14 的 +50% 是更早版本，`
+        + '两个数都登记在台账 notes 里，取值口径见 unknowns.rain_power_percent');
+    }
+  }
+  // 队伍规模策略：1～6 是**上限**；「是否必须编入 6 只」由**人类实机口径**给出（2026-09-25）。
+  //
+  // 改钉留痕（不删旧口径）：这里原来要求 `fill_required === null` + `UNVERIFIED`，理由是
+  // "「6 只必须选满」没有来源支持"。人类实机口径「闪耀大赛就是6v6…不是随机6只啊，自己配队」推翻了那条理由 ⇒ 取 true。
+  // **判据没有放松**：值本身不算证据 —— 必须指向一条**真实存在、等级为 RECORDED_IN_GAME、
+  // 且带 recorded_gameplay 来源**的台账条目，否则照样红。
   const teamSizePolicy = standard.policies?.team_size_policy;
   if (!teamSizePolicy) {
     problems.push('pvp-standard-six-pet：缺 policies.team_size_policy（min/max/fill_required）');
@@ -733,9 +991,22 @@ export function checkPolicyInvariants(configs, battleModes, problems) {
       problems.push(`pvp-standard-six-pet.policies.team_size_policy 必须是 min=1 / max=6，实际 `
         + `min=${JSON.stringify(teamSizePolicy.min)} / max=${JSON.stringify(teamSizePolicy.max)}`);
     }
-    if (teamSizePolicy.fill_required !== null || teamSizePolicy.fill_required_status !== 'UNVERIFIED') {
-      problems.push('pvp-standard-six-pet.policies.team_size_policy.fill_required 必须是 null + '
-        + 'UNVERIFIED（「6 只必须选满」没有来源支持；引擎遇到未填满必须 fail closed，不许替玩家补满）');
+    if (teamSizePolicy.fill_required !== true || teamSizePolicy.fill_required_status !== 'RECORDED_IN_GAME') {
+      problems.push('pvp-standard-six-pet.policies.team_size_policy.fill_required 必须是 true + RECORDED_IN_GAME'
+        + '（人类实机口径 2026-09-25：「闪耀大赛就是6v6…自己配队」；旧口径 null + UNVERIFIED 已留痕在 fill_required_prior）');
+    }
+    if (!(teamSizePolicy.disputed_with || []).length) {
+      problems.push('pvp-standard-six-pet.policies.team_size_policy 必须登记 disputed_with：'
+        + '官方文本「最多可携带 6 只」（上限）与「必须编入 6 只」的张力不许抹平');
+    }
+    const sizeEntry = (readJson(LEDGER_PATH).entries || []).find((row) => row.id === teamSizePolicy.evidence_id);
+    if (!sizeEntry) {
+      problems.push('pvp-standard-six-pet.policies.team_size_policy.evidence_id 指向的台账条目不存在：'
+        + `${JSON.stringify(teamSizePolicy.evidence_id)} —— 值本身不是证据`);
+    } else if (sizeEntry.confidence !== 'RECORDED_IN_GAME'
+      || !(sizeEntry.sources || []).some((source) => source.marker === 'recorded_gameplay')) {
+      problems.push(`配套台账条目 ${sizeEntry.id} 的等级是 ${sizeEntry.confidence}、或没有 recorded_gameplay 来源：`
+        + 'fill_required=true 的依据只能是人类实机口径');
     }
   }
   // 门控：不许悄悄回落别的模式，也不许在条件不满足时照样开局。
@@ -780,6 +1051,21 @@ export function checkPolicyInvariants(configs, battleModes, problems) {
     if (v3.policies?.magic_policy?.classification !== PVP_MAGIC_CLASSIFICATION) {
       problems.push(`${V3_CANDIDATE_ID}.policies.magic_policy.classification 必须是 `
         + `${PVP_MAGIC_CLASSIFICATION}`);
+    }
+    // 天气：配置侧必须与登记表**同值**（同一事实源，不许各说一套）。
+    const weatherLeaf = v3.policies?.weather_policy;
+    if (weatherLeaf?.value !== 'enabled' || weatherLeaf?.evidence_id !== 'EV-WEATHER-STANDARD-PVP') {
+      problems.push(`${V3_CANDIDATE_ID}.policies.weather_policy 必须与登记表一致`
+        + `（value='enabled' + evidence_id='EV-WEATHER-STANDARD-PVP'），实际 `
+        + `value=${JSON.stringify(weatherLeaf?.value)} / evidence_id=${JSON.stringify(weatherLeaf?.evidence_id)}`);
+    }
+    for (const name of ['雨天', '沙暴', '暴风雪', '雷鸣']) {
+      const a = standard.policies?.weather_policy?.effects?.[name];
+      const b = weatherLeaf?.effects?.[name];
+      if (JSON.stringify(a) !== JSON.stringify(b)) {
+        problems.push(`${V3_CANDIDATE_ID}.policies.weather_policy.effects.${name} 与登记表不一致：`
+          + `${JSON.stringify(b)} vs ${JSON.stringify(a)}`);
+      }
     }
     // `actions` 模式参数里的 team_size 必须仍然等于登记表（配置侧的镜像没被改坏）。
     const declared = v3.battle_mode?.team_size?.value;
@@ -1303,21 +1589,55 @@ function selftest() {
     magicAsItem.some((p) => p.includes('magic_policy') && p.includes('is_item')),
     JSON.stringify(magicAsItem).slice(0, 300));
 
-  // 反证㉑：给「是否占行动」补一个 false（看起来合理）→ 必须红
+  // 反证㉑：把**已登记**的那一条退回「未核验」的同时又留着值 → 必须红。
+  // （旧版是「给未核验的 occupies_action 填一个 false」，2026-09-23 人类登记之后，
+  //   `occupies_action=true` 已经是**有出处的事实**；这条反证改成守住新的边界：
+  //   一旦声明 all_unverified=true，就不许再留着 registered / 带值的 occupies_action。）
   const inventedActionCost = tamperedModes((modes) => {
-    standardModeOf(modes).policies.magic_policy.occupies_action = false;
+    const mp = standardModeOf(modes).policies.magic_policy;
+    mp.all_unverified = true;      // 假装还没登记，但值留着
   });
-  push('反证㉑：给未核验的 occupies_action 填一个 false 必须被判红（必须 null + UNVERIFIED）',
-    inventedActionCost.some((p) => p.includes('occupies_action')),
+  push('反证㉑：声明未核验（all_unverified=true）却留着 registered/occupies_action 必须被判红',
+    inventedActionCost.some((p) => p.includes('occupies_action') || p.includes('registered')),
     JSON.stringify(inventedActionCost).slice(0, 300));
 
-  // 反证㉒：「必须选满 6 只」被写成 true（没有来源支持的那个断言）→ 必须红
-  const fillInvented = tamperedModes((modes) => {
-    standardModeOf(modes).policies.team_size_policy.fill_required = true;
+  // 反证㉑b：已登记却不挂 evidence_id → 必须红（没出处的值不许出现）
+  const orphanMagic = tamperedModes((modes) => {
+    delete standardModeOf(modes).policies.magic_policy.evidence_id;
   });
-  push('反证㉒：把 fill_required 写成 true 必须被判红（「必须选满」没有来源支持）',
-    fillInvented.some((p) => p.includes('fill_required')),
-    JSON.stringify(fillInvented).slice(0, 300));
+  push('反证㉑b：PVP 魔法已登记却没有 evidence_id 必须被判红',
+    orphanMagic.some((p) => p.includes('evidence_id')),
+    JSON.stringify(orphanMagic).slice(0, 300));
+
+  // 反证㉑c：registered 里某条缺 confidence → 必须红
+  const confidentLess = tamperedModes((modes) => {
+    delete standardModeOf(modes).policies.magic_policy.registered[0].confidence;
+  });
+  push('反证㉑c：registered 条目缺 confidence 必须被判红',
+    confidentLess.some((p) => p.includes('confidence')),
+    JSON.stringify(confidentLess).slice(0, 300));
+
+  // 反证㉒（2026-09-25 改钉）：「必须编入 6 只」现在是人类口径支持的 true，
+  // 所以反证换了个更硬的对象：**把依据抽掉**（值仍是 true，但 evidence_id 指向不存在的条目）⇒ 必须红。
+  // 这条比"值必须为 null"更强：它防的是"值对不对"变成"有没有人真的核过"。
+  const fillOrphan = tamperedModes((modes) => {
+    standardModeOf(modes).policies.team_size_policy.evidence_id = 'EV-NOT-A-REAL-ENTRY';
+  });
+  push('反证㉒a：fill_required=true 但 evidence_id 指向不存在的台账条目必须被判红（值本身不是证据）',
+    fillOrphan.some((p) => p.includes('fill_required') || p.includes('evidence_id')),
+    JSON.stringify(fillOrphan).slice(0, 300));
+  const fillNoDispute = tamperedModes((modes) => {
+    delete standardModeOf(modes).policies.team_size_policy.disputed_with;
+  });
+  push('反证㉒b：删掉 disputed_with（官方"最多 6 只"的张力）必须被判红',
+    fillNoDispute.some((p) => p.includes('disputed_with')),
+    JSON.stringify(fillNoDispute).slice(0, 300));
+  const fillReverted = tamperedModes((modes) => {
+    standardModeOf(modes).policies.team_size_policy.fill_required = null;
+  });
+  push('反证㉒c：把 fill_required 改回 null（人类口径当没发生）必须被判红',
+    fillReverted.some((p) => p.includes('fill_required')),
+    JSON.stringify(fillReverted).slice(0, 300));
 
   // 反证㉓：门控里去掉「不许回落别的模式」→ 必须红（那会让标准 PVP 悄悄变成 3v3）
   const gateLeak = tamperedModes((modes) => {

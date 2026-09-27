@@ -59,7 +59,7 @@ async function launchChrome() {
     '--disable-crash-reporter', `--user-data-dir=${profile}`, '--remote-debugging-port=0',
     '--window-size=1440,900', 'about:blank'], {stdio: ['ignore', 'ignore', 'pipe']});
   chrome.stderr?.on('data', (d) => { chromeErr = (chromeErr + String(d)).slice(-800); });
-  const kill = () => { try { chrome.kill('SIGKILL'); } catch {} try { rmSync(profile, {recursive: true, force: true}); } catch {} };
+  const kill = () => { try { chrome.kill('SIGKILL'); } catch {} try { rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120}); } catch {} };
   let port = null;
   for (let i = 0; i < 240 && !port; i++) {
     await sleep(250);
@@ -199,7 +199,12 @@ async function main() {
       JSON.stringify(hooks));
 
     // ── ② 点「让小芽看一眼」→ 展开取舍 → 三档标签 ──
-    await mouseClick('#plan');
+    // 2026-09-25（死代码清理）：`#plan`「让小芽看一眼」这个按钮**已随旧行动坞一起删除**
+    // （`roco.css:640` 记了这次删除；页面现在没有任何按钮承担这一手）。
+    // 它原来的 click 监听就是 `requestPlan({reason:'manual',explicit:true})`，页面也把同一个入口
+    // 挂在 `window.rocoDemo` 上（`roco.js:4074`），所以这里走命名空间出口——
+    // 与 `demo-acceptance.mjs:1920`、`browser-workshop-acceptance.mjs:1574` 同一口径，不是我另写一套 DOM。
+    await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);
     await sleep(1200);
     await mouseClick('#hint-details');
     await sleep(400);
@@ -246,7 +251,8 @@ async function main() {
       `clientW=${narrow.clientW} scrollW=${narrow.scrollW}`);
 
     // 窄屏下再点开一次「让小芽看一眼」→ 展开，看渲染是否仍然成立。
-    await mouseClick('#plan');
+    // 同 ②：`#plan` 已删，走它原来的处理函数挂在页面上的那一个出口。
+    await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);
     await sleep(1200);
     await mouseClick('#hint-details');
     await sleep(400);
@@ -268,7 +274,7 @@ async function main() {
 
     // ── ④ 对局推进：状态版本必须真的变（陈旧结果取消的前提） ──
     //
-    // 推进这一手放回 1440×900 的桌面档：`#auto-turn` 是桌面动作条上的按钮，
+    // 推进这一手放回 1440×900 的桌面档：真鼠标落点（下面 `advanceOneTurn`）在桌面底栏上，
     // 在 390×844 那一档它是否在视口内、能不能点，是**另一条**（窄屏可用性）判据，
     // 不该混进「推进之后状态版本会变」这一条里。
     await cdp.send('Emulation.setDeviceMetricsOverride', {width: 1440, height: 900, deviceScaleFactor: 1, mobile: false});
@@ -281,12 +287,32 @@ async function main() {
       if (!inflight) break;
       await sleep(250);
     }
-    const hit = await mouseClick('#auto-turn');
+    // 2026-09-25（死代码清理）：旧的 `#auto-turn`（「让双方各走一步」）**已随旧行动坞删除**
+    // —— `body[data-roco-view="ready"] #action-panel{display:none !important}`（`roco.css:860/872`），
+    // 那个按钮在页面上的 rect 恒为 0×0，`mouseClick('#auto-turn')` 只会抛
+    // 「找不到可点的元素」。现在**推进一手的真鼠标落点**是 v3h 底栏技能屏里那张
+    // **本回合合法**的技能卡（点它就走这一手并结算回合）；本回合没有合法技能卡时次选聚能。
+    // 两条真落点都没有（页面上确实没有可点的推进入口）才退回页面自己挂出来的
+    // `window.rocoDemo.autoTurn()`（`roco.js:4074`），并把它如实记进 `how`——不假装点了真按钮。
+    const advanceOneTurn = async () => {
+      for (const sel of ['[data-b3-skill-slot][data-b3-action]', '#b3-charge[data-b3-action]']) {
+        if (await js(`Boolean(document.querySelector(${JSON.stringify(sel)}))`)) {
+          return {how: `click:${sel}`, hit: await mouseClick(sel)};
+        }
+      }
+      await js(`window.rocoDemo.autoTurn()`);
+      return {how: 'namespace:window.rocoDemo.autoTurn()', hit: null};
+    };
+    const advance = await advanceOneTurn();
+    const hit = advance.hit;
     // 「真实键鼠判据」：点下去的那一点上必须真的是那个按钮（或它的子节点）。
     // 拿 element.click() 绕过去的话，浮层盖住按钮这件事永远抓不到。
-    check('⑪ 自动推进按钮真的点得到（那一点上就是它，不是浮层）',
-      hit.top?.hit_target === true,
-      `点到的元素：${JSON.stringify(hit.top)}（按钮 ${hit.w}×${hit.h} @ ${hit.x},${hit.y}）`);
+    // 走命名空间出口（`hit===null`）时这一条**判红**：那一刻页面上没有可点的推进入口，
+    // 是缺陷本身，不该被算成通过。
+    check('⑪ 推进一手的真鼠标落点真的点得到（那一点上就是它，不是浮层）',
+      hit?.top?.hit_target === true,
+      `路径=${advance.how}；点到的元素：${JSON.stringify(hit?.top ?? null)}`
+        + (hit ? `（落点 ${hit.w}×${hit.h} @ ${hit.x},${hit.y}）` : '（本回合页面上没有可点的推进入口，只能走命名空间出口）'));
     const versionBefore = await js(`window.rocoDemo.state.view.state_version`);
     let versionAfter = versionBefore;
     const waitForChange = async () => {
@@ -300,7 +326,7 @@ async function main() {
     let changed = await waitForChange();
     if (!changed) {
       // 真实玩家也会再点一次。点了两次仍然不动，才是真问题——下面那条判据会红。
-      await mouseClick('#auto-turn');
+      await advanceOneTurn();
       changed = await waitForChange();
     }
     const pageFetchLog = JSON.parse(await js(`JSON.stringify((window.__rocoFetchLog||[]).slice(-8))`));
@@ -310,7 +336,7 @@ async function main() {
       phase: window.rocoDemo.state.view.phase,
       planStatus: (document.getElementById('plan-status')?.textContent || '').trim(),
     })`));
-    steps.push({at: 'advance', versionBefore, versionAfter, changed, hit, endState, pageFetchLog, requests: requests.slice(-8)});
+    steps.push({at: 'advance', advance_how: advance.how, versionBefore, versionAfter, changed, hit, endState, pageFetchLog, requests: requests.slice(-8)});
     check('⑫ 推进一手后 state_version 真的变了（陈旧判定的前提）',
       versionAfter > versionBefore,
       `${versionBefore} → ${versionAfter}；endState=${JSON.stringify(endState)}；页面网络账=${JSON.stringify(pageFetchLog.slice(-4))}；服务端计时=${JSON.stringify(serverTimings.slice(-4))}`);

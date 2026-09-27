@@ -25,6 +25,8 @@ import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createCoachServer} from '../../src/server/index.js';
+// 工程黑话词表：与单元判据、真机探针**同一份**（`src/coach/plain-words.js`）。
+import {speakHits} from '../../src/coach/plain-words.js';
 
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const OUT = join(ROOT, 'reports/roco/rc505');
@@ -46,8 +48,12 @@ const log = (...a) => console.log('[roco-mobile]', ...a);
 //: 而红线写着不许重写它们。范围和理由都写进产物，不藏着。
 //: `primary` 是这一页的**主操作**（写 null = 这一页没有主操作，不编一个出来）。
 const PAGES = [
+  // 2026-09-27（审计 ①）：**「培养」入口改道**也要在真机上量。
+  // 营地页的「培养」必须去 `/box.html`（手游那一档 = 刷新天分）；练习那一档只从
+  // roco.html / xiaoya.html 上写着「三只」的按钮进 —— 声明在这里，量在真页面上。
   {id: 'index.html', name: '营地页（小芽陪你成长）', ready: 'document.body', minText: 40,
-    legacy: true, tapScope: null, primary: null},
+    legacy: true, tapScope: null, primary: null,
+    entryLink: {selector: '#home-nurture', expect: '/box.html'}},
   {id: 'connect.html', name: '加密配置页', ready: 'document.body', minText: 40,
     legacy: true, tapScope: null, primary: null},
   // 2026-09-22 起产品页**默认只给六宠主流程**：旧的 3v3 选人区（`#select-panel` + 底栏）
@@ -58,13 +64,20 @@ const PAGES = [
   {id: 'roco.html', name: '训练场（六宠工作台 / 小芽 / 六宠开局）',
     ready: `document.body.dataset.rocoReady==='yes'`, minText: 200, legacy: false,
     tapScope: ['#coach-entry', '#say-form button', '#start-standard-pvp', 'summary'],
-    minRequired: 4, primary: '#start-standard-pvp', expectRoute: 'six-pet', openCoach: true},
+    minRequired: 4, primary: '#start-standard-pvp', expectRoute: 'six-pet', openCoach: true,
+    entryLink: {selector: '#nav-nurture', expect: 'nurture.html', label: '三只'}},
   {id: 'box.html', name: '精灵盒子（我的 / 全图鉴）', ready: 'document.body', minText: 100,
     legacy: false, tapScope: ['.box-tab', '.box-filters button', '.box-card', '.box-search'],
     primary: null},
   {id: 'workshop.html', name: '阵容工坊（开发夹具）', ready: `document.querySelector('#team-workshop')`,
     minText: 80, legacy: false,
     tapScope: ['button', '.tw-slot', '.tw-cand'], primary: null, shadowText: true},
+  // 2026-09-27（审计 ②）：**培养页此前没有任何浏览器验收覆盖**（`--` 全仓 grep 只有单元判据
+  // 读它的源码）。它是"培养 = 刷新天分"那条口径在页面上唯一的落点之一，漏掉它等于
+  // 这一页"在自己机器上能打开"都没被验过。这里按同一把尺子加进来（就绪、不溢出、控制台干净）。
+  {id: 'nurture.html', name: '培养页（三只练习引擎那一档）',
+    ready: `document.body.dataset.nurtureReady==='yes'`, minText: 80, legacy: false,
+    tapScope: ['#retry-roster', '#nav-home', '#nav-pvp', '#crumb-nurture'], minRequired: 1, primary: null},
 ];
 
 //: 两档窄屏：390×844 是用户点名的那一档；360×640 是更小的一档（老机型），
@@ -120,7 +133,7 @@ async function launchChrome() {
   }
   if (!port) {
     chrome.kill('SIGKILL');
-    rmSync(profile, {recursive: true, force: true});
+    rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
     throw new Error(`Chrome 没起来：${chromeErr}`);
   }
   const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
@@ -133,7 +146,7 @@ async function launchChrome() {
     close: async () => {
       try { ws.close(); } catch { /* 已经关了 */ }
       chrome.kill('SIGKILL');
-      rmSync(profile, {recursive: true, force: true});
+      rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
     },
   };
 }
@@ -152,6 +165,19 @@ function counter(id, judge, problems, actual) {
 }
 
 // ── 这把尺子（纯函数：反证直接喂坏数据给它）──────────────────────────────────
+/**
+ * 工程黑话：**玩家在页面上真的读到的字**里一个都不许有（2026-09-27，审计 ②）。
+ *
+ * 为什么加在扫描器里、而不是只留在单元判据里：单元判据扫的是**源码字面量**
+ *（谁拼出来的、拼给谁看，它分不出来），而审计抓到的 4 处（`box.js` 的「本仓库」、
+ * `nurture.js` 的「口径」与两个源码路径、`roco.html` 的「用户口径 D5 / 工程口径」）
+ * 都是**真机上玩家读得到**的。所以这里量的是渲染后的 `innerText`。
+ */
+/** 页面可见文本里命中了哪些词（共用 `src/coach/plain-words.js` 的那一份词表）。 */
+function jargonHits(text) {
+  const {hard, soft} = speakHits(text);
+  return [...new Set([...hard, ...soft])];
+}
 /**
  * 窄屏三条判据 + 两条兜底。
  *
@@ -179,6 +205,31 @@ function narrowProblems(metrics) {
   if (metrics.expectRoute && metrics.route !== metrics.expectRoute) {
     problems.push(`主流程应当是 ${metrics.expectRoute}，实际 ${JSON.stringify(metrics.route)}（旧入口没藏住？）`);
   }
+  // 2026-09-27（审计 ①）：「培养」入口在真页面上要指向对的那一档（营地页 → /box.html 去刷天分；
+  // 练习那一档 → nurture.html，而且按钮上要写「三只」）。
+  if (metrics.entryLinkDeclared) {
+    const {href, text} = metrics.entryLink ?? {};
+    if (!metrics.entryLink) {
+      problems.push(`找不到声明的「培养」入口 ${metrics.entryLinkDeclared.selector}（被删/改名了？）`);
+    } else {
+      if (!String(href ?? '').endsWith(metrics.entryLinkDeclared.expect)) {
+        problems.push(`「培养」入口应当指向 ${metrics.entryLinkDeclared.expect}，实际 href=${JSON.stringify(href)}`);
+      }
+      if (metrics.entryLinkDeclared.label && !String(text ?? '').includes(metrics.entryLinkDeclared.label)) {
+        problems.push(`入口文案里要有「${metrics.entryLinkDeclared.label}」，实际「${text}」`);
+      }
+    }
+  }
+  // 2026-09-27（审计 ②）：**渲染后的玩家可见文本**里不许有工程黑话（源码扫描证明不了这一条）。
+  const jargon = (metrics.leafTexts ?? []).flatMap((text) => {
+    const words = jargonHits(text);
+    return words.length ? [{words, text}] : [];
+  });
+  if (jargon.length) {
+    problems.push(`页面可见文本里有工程黑话 ${JSON.stringify(jargon[0].words)}：`
+      + `「${String(jargon[0].text).slice(0, 90)}」（共 ${jargon.length} 处）`);
+  }
+  metrics.jargon = jargon;
   if (metrics.primary && metrics.primary.top > metrics.clientH) {
     problems.push(`主操作「${metrics.primary.label}」不在首屏（top=${metrics.primary.top} > ${metrics.clientH}）`);
   }
@@ -290,6 +341,16 @@ async function main() {
           return out;};
         const visibleText=(document.body.innerText||'').replace(/\s+/g,'').length
           + textOf(document).replace(/\s+/g,'').length;
+        // 2026-09-27（审计 ②）：**每一段叶文本**都带回去，让 Node 那把尺子（jargonHits）
+        // 在真数据上判 —— 判据留在 Node 这一侧，页面只负责"把玩家读得到的字交出来"。
+        // 上限 400 段 × 120 字：够覆盖五个页面的正文，又不会把报告撑爆。
+        const leafTexts=(()=>{const out=[];const walk=(root)=>{
+          for(const el of root.querySelectorAll('*')){
+            if(el.shadowRoot)walk(el.shadowRoot);
+            if(el.children.length===0){const t=(el.textContent||'').replace(/\s+/g,' ').trim();
+              if(t&&out.length<400)out.push(t.slice(0,120));}
+          }};
+          walk(document);return out;})();
         const prim=document.querySelector(${JSON.stringify(page.primary)});
         let primary=null;
         if(prim){const r=prim.getBoundingClientRect();
@@ -297,17 +358,22 @@ async function main() {
         return {clientW:document.documentElement.clientWidth,
           scrollW:document.documentElement.scrollWidth,
           clientH:document.documentElement.clientHeight,
-          visibleText, required,
+          visibleText, required, leafTexts,
           small_all:all.filter((el)=>{const r=el.getBoundingClientRect();return r.width<44||r.height<44;}).length,
           tappables_all:all.length,
           primary,minText:${page.minText},
           route:document.body.dataset.rocoRoute||null,
+          // 「培养」入口：声明了才读（见 PAGES[].entryLink）——读的是**真的那个链接元素**
+          entryLink:(()=>{const sel=${JSON.stringify(page.entryLink?.selector ?? '')};
+            if(!sel)return null;const el=document.querySelector(sel);
+            return el?{href:el.getAttribute('href'),text:(el.textContent||'').replace(/\s+/g,' ').trim()}:null;})(),
           coach:(()=>{const vis=window.rocoDemo&&window.rocoDemo.companionVisibility?window.rocoDemo.companionVisibility():null;
             return vis?{open:vis.open,inputInView:vis.inputInView,replyInView:vis.replyInView}:null;})(),
           legacyPanelVisible:(()=>{const el=document.getElementById('select-panel');
             if(!el)return null;const r=el.getBoundingClientRect();return !el.hidden&&r.width>0&&r.height>0;})()};})()`);
       metrics.minRequired = page.minRequired ?? 0;
       metrics.expectRoute = page.expectRoute ?? null;
+      metrics.entryLinkDeclared = page.entryLink ?? null;
       metrics.expectCoach = page.openCoach === true;
       metrics.consoleErrors = consoleErrors.length;
       metrics.page = page.id;
@@ -351,6 +417,21 @@ async function main() {
     narrowProblems({...healthy, visibleText: 5}), 'visibleText=5');
   counter('控制台报错', '控制台有 1 条报错必须被同一条判据抓住',
     narrowProblems({...healthy, consoleErrors: 1}), 'consoleErrors=1');
+  // 2026-09-27（审计 ②）：喂**真的抓到过的那两句原文**（`nurture.js` / `roco.html` 改之前的写法），
+  // 同一把尺子必须报出来 —— 否则这条判据只是"页面碰巧干净"。
+  const realLeaks = ['要不要在引擎侧补一个培养模型（补了才有「加点后」这个数），等口径定了再算。',
+    '等实机录制确认之后才会补上（登记在用户口径 D5）。',
+    '规则文案来自 src/game/rules.js 与 src/game/content.js 的知识卡原文；',
+    '本仓库没有登记的栏目已经照实写「游戏数据里没有这一项」：更细的工程字段在抽屉里。'];
+  counter('培养入口指向', '把「培养」入口指回旧的加点页（或按钮上不写"三只"），同一条判据必须报出来',
+    [...narrowProblems({...healthy, entryLinkDeclared: {selector: '#home-nurture', expect: '/box.html'},
+      entryLink: {href: '/nurture.html', text: '培养'}}),
+    ...narrowProblems({...healthy, entryLinkDeclared: {selector: '#nav-nurture', expect: 'nurture.html', label: '三只'},
+      entryLink: {href: '/nurture.html', text: '✦ 练习养成'}})],
+    '{"href":"/nurture.html"} / {"text":"✦ 练习养成"}');
+  counter('页面黑话', '把审计抓到过的四句原文放进页面文本，同一条判据必须逐句报出来',
+    realLeaks.flatMap((text) => narrowProblems({...healthy, leafTexts: [text]})),
+    realLeaks.map((text) => `${JSON.stringify(jargonHits(text))}`).join(' / '));
 
   const failed = checks.filter((c) => !c.ok);
   const missed = counterproofs.filter((c) => !c.ok);
@@ -397,7 +478,20 @@ async function main() {
   }
 }
 
-main().catch((error) => {
+// 2026-09-25（**同一形状第三次**）：跑完、报告写完，进程却一直不退 ⇒ 门禁那 30 分钟兜底才把它杀掉，
+// 而那一套被判红。根因不是 CDP（C6.118 里我那样归因是错的：报告已经写完，说明 await 都回来了），
+// 而是**只设了 `process.exitCode`、从不显式退出** —— 只要还有一个句柄没散（Chrome 死了、服务关了，
+// 但 socket/计时器还在），事件循环就永远不空。所以收尾统一成：**先让 stdout 冲干净，再显式退出**。
+const flushThenExit = (code) => new Promise((resolve) => {
+  process.exitCode = code;
+  process.stdout.write('', () => resolve());
+}).then(() => process.exit(process.exitCode ?? code));
+
+main().then(
+  () => flushThenExit(process.exitCode ?? 0),
+  (error) => {
   console.error('[roco-mobile] 验收脚本自身出错：', error);
-  process.exitCode = 1;
-});
+  ;
+    return flushThenExit(1);
+  },
+);

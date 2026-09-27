@@ -1,0 +1,3881 @@
+{
+ "label": "before",
+ "base": "http://127.0.0.1:8901",
+ "cssFacts": {
+  "box": {
+   "cls": "b3-free b3-spritebox",
+   "overflow": "hidden",
+   "z": "auto",
+   "rect": {
+    "w": 312,
+    "h": 465
+   }
+  },
+  "sprite": {
+   "z": "1",
+   "position": "static",
+   "rect": {
+    "w": 310,
+    "h": 413
+   }
+  },
+  "fx": {
+   "z": "auto",
+   "position": "absolute",
+   "overflow": "visible",
+   "pe": "none"
+  }
+ },
+ "marks": [
+  {
+   "t": 30.8,
+   "what": "variant:action",
+   "el": "b3-free b3-spritebox"
+  },
+  {
+   "t": 30.8,
+   "what": "float:add",
+   "side": "foe",
+   "text": "防御",
+   "cls": "b3-float b3-float--shield"
+  },
+  {
+   "t": 30.8,
+   "what": "float:add",
+   "side": "foe",
+   "text": "-30",
+   "cls": "b3-float b3-float--strong"
+  },
+  {
+   "t": 30.8,
+   "what": "class:attack",
+   "side": "self"
+  },
+  {
+   "t": 30.9,
+   "what": "class:attack",
+   "side": "self"
+  },
+  {
+   "t": 30.9,
+   "what": "variant:action",
+   "el": "b3-free b3-spritebox"
+  },
+  {
+   "t": 30.9,
+   "what": "class:hit",
+   "side": "foe"
+  },
+  {
+   "t": 30.9,
+   "what": "class:hit",
+   "side": "foe"
+  }
+ ],
+ "frames": [
+  {
+   "t": 44.7,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    885,
+    328,
+    23,
+    17
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -77,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 44.7,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    883,
+    328,
+    28,
+    22
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -77,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 60.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    885,
+    327,
+    24,
+    17
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -75,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.11,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 60.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    883,
+    327,
+    28,
+    23
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -76,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.11,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 77.6,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    885,
+    325,
+    24,
+    18
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -74,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.22,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 77.6,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    883,
+    326,
+    29,
+    23
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -74,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.22,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 94.3,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    885,
+    324,
+    25,
+    18
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -73,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.32,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 94.3,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    324,
+    29,
+    23
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -73,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.32,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 110.5,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    323,
+    25,
+    18
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -72,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.42,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 110.5,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    323,
+    30,
+    24
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -72,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.42,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 127.6,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    322,
+    26,
+    18
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -71,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.51,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 127.6,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    322,
+    30,
+    24
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -71,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.51,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 143.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    321,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -70,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.59,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 143.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    321,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -70,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.59,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 160.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    320,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -69,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.67,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 160.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    320,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -69,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.67,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 177.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    319,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -68,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.74,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 177.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    319,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -68,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.74,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 193.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    319,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -67,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.81,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 193.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    319,
+    32,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -67,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.81,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 211.2,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    318,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -67,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.87,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 211.2,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    318,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -67,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.87,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 228.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    317,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -66,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.92,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 228.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    317,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -66,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.92,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 243.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    317,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -66,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.96,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 243.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    317,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -66,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.96,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 260.9,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    317,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -65,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.98,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 260.9,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    316,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -65,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.98,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 277.2,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    316,
+    28,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -65,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 1,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 277.2,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    316,
+    33,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -65,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 1,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 293.7,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    316,
+    28,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -65,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.98,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 293.7,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    316,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -65,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.98,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 310.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    315,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -64,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.95,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 310.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    315,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -64,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.95,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 327.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    314,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -63,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.93,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 327.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    314,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -63,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.93,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 344.2,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    314,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -63,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.9,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 344.2,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    314,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -62,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.9,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 360.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    313,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -62,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.87,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 360.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    313,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -62,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.87,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 377.2,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    312,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -61,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.84,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 377.2,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    312,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -61,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.84,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 393.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    312,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -61,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.82,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 393.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    312,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -60,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.82,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 410.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    311,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -60,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.79,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 410.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    311,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -60,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.79,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 427.5,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    310,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -59,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.77,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 427.5,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    310,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -59,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.77,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 443.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    310,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -59,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.74,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 443.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    310,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -58,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.74,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 460.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    309,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -58,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.71,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 460.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    309,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -58,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.71,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 477.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    308,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -57,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.69,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 477.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    308,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -57,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.69,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 493.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    308,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -57,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.67,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 493.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    308,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -57,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.67,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 510.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    883,
+    307,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -56,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.64,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 510.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    307,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -56,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.64,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 527.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    307,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -55,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.62,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 527.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    307,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -55,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.62,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 544.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    306,
+    27,
+    20
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -55,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.59,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 544.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    306,
+    32,
+    26
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -55,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.59,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 560.5,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    305,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -54,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.57,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 560.5,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    305,
+    32,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -54,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.57,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 577.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    305,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -54,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.55,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 577.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    305,
+    32,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -54,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.55,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 594.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    304,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -53,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.53,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 594.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    304,
+    32,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -53,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.53,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 610.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    304,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -53,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.5,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 610.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    304,
+    32,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -52,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.5,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 627.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    303,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -52,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.48,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 627.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    303,
+    32,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -52,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.48,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 643.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    303,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -51,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.46,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 643.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    303,
+    32,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -51,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.46,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 660.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    302,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -51,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.44,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 660.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    302,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -51,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.44,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 677.5,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    302,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -50,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.42,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 677.5,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    301,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -50,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.42,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 693.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    301,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -50,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.4,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 693.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    301,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -50,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.4,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 710.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    301,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -49,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.38,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 710.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    300,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -49,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.38,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 727.6,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    300,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -49,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.36,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 727.6,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    300,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -49,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.36,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 743.7,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    300,
+    27,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -48,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.34,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 743.7,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    299,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -48,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.34,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 760.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    299,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -48,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.32,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 760.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    299,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -48,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.32,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 777.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    299,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -47,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.3,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 777.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    299,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -47,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.3,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 793.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    298,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -47,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.28,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 793.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    298,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -47,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.28,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 810.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    298,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -47,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.26,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 810.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    298,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -46,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.26,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 827.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    297,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -46,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.25,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 827.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    297,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -46,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.25,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 844.2,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    297,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -46,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.23,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 844.2,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    297,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -46,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.23,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 860.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    296,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -45,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.21,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 860.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    296,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -45,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.21,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 877.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    296,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -45,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.2,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 877.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    296,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -45,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.2,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 893.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    296,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -44,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.18,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 893.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    881,
+    296,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -44,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.18,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 910.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    295,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -44,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.17,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 910.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    295,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -44,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.17,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 927.5,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    295,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -44,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.15,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 927.5,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    295,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -44,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.15,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 943.7,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    294,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -43,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.14,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 943.7,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    294,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -43,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.14,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 960.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    294,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -43,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.13,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 960.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    294,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -43,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.13,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 977.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    294,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -43,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.11,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 977.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    294,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -43,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.11,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 993.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    294,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -42,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.1,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 993.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    293,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -42,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.1,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1010.9,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    293,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -42,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.09,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1010.9,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    293,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -42,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.09,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1027.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    293,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -42,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.08,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1027.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    293,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -42,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.08,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1043.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    293,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.07,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1043.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    293,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.07,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1060.5,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    292,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.06,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1060.5,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    292,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.06,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1077.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    292,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.05,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1077.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    292,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.05,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1094.2,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    292,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.04,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1094.2,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    292,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.04,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1110.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    292,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.03,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1110.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    292,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -41,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.03,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1127.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    292,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.02,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1127.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    292,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.02,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1143.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    291,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.02,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1143.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    291,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.02,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1160.7,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    291,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.01,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1160.7,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    291,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.01,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1177.5,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    291,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.01,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1177.5,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    291,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0.01,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1193.8,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    291,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1193.8,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    291,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1210.4,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    291,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0,
+   "stack": [
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter",
+    "div.b3-stage"
+   ]
+  },
+  {
+   "t": 1210.4,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    291,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  },
+  {
+   "t": 1227.1,
+   "text": "防御",
+   "kind": "shield",
+   "rect": [
+    884,
+    291,
+    26,
+    19
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0,
+   "stack": [
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter",
+    "div.b3-stage"
+   ]
+  },
+  {
+   "t": 1227.1,
+   "text": "-30",
+   "kind": "strong",
+   "rect": [
+    882,
+    291,
+    31,
+    25
+   ],
+   "boxRect": [
+    251,
+    716
+   ],
+   "cssTopCut": -40,
+   "inViewport": true,
+   "fullyInsideBox": true,
+   "z": "auto",
+   "opacity": 0,
+   "stack": [
+    "img.b3-sprite",
+    "span.b3-float",
+    "div.b3-free",
+    "div.b3-fighter"
+   ]
+  }
+ ],
+ "shots": [
+  {
+   "text": "-30",
+   "rect": [
+    883,
+    326,
+    29,
+    23
+   ],
+   "red": 0,
+   "green": 0,
+   "png": "/Users/serendizc/Developer/roco-coach/reports/roco/b3-fx-timeline/before/float-0--30.png"
+  },
+  {
+   "text": "-30",
+   "rect": [
+    881,
+    311,
+    32,
+    26
+   ],
+   "red": 85,
+   "green": 0,
+   "png": "/Users/serendizc/Developer/roco-coach/reports/roco/b3-fx-timeline/before/float-1--30.png"
+  },
+  {
+   "text": "-30",
+   "rect": [
+    881,
+    300,
+    31,
+    25
+   ],
+   "red": 0,
+   "green": 0,
+   "png": "/Users/serendizc/Developer/roco-coach/reports/roco/b3-fx-timeline/before/float-2--30.png"
+  },
+  {
+   "text": "-30",
+   "rect": [
+    882,
+    293,
+    31,
+    25
+   ],
+   "red": 0,
+   "green": 0,
+   "png": "/Users/serendizc/Developer/roco-coach/reports/roco/b3-fx-timeline/before/float-3--30.png"
+  }
+ ],
+ "verdict": {
+  "actionSprite": true,
+  "gapAttackToHit": 0.1,
+  "gapAttackToFloat": 0,
+  "floatsInViewport": true,
+  "floatsNotClipped": true,
+  "floatsAboveSprite": false,
+  "redPixelsVisible": true,
+  "floatFrameSamples": 144
+ }
+}

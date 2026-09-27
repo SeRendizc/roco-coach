@@ -1,0 +1,428 @@
+{
+  "generatedAt": "2026-09-24T19:24:58.503Z",
+  "runStarted": "2026-09-24T19:24:56.131Z",
+  "runEnded": "2026-09-24T19:24:58.286Z",
+  "target": "http://127.0.0.1:8765",
+  "model": "deepseek-flash",
+  "provider": "deepseek",
+  "serverConfigured": true,
+  "serverVerified": true,
+  "scope": "Real DeepSeek calls through the running app server. One request per case, no retries, no simulated provider.",
+  "caseSetSize": 49,
+  "executed": 1,
+  "capabilityConclusive": false,
+  "goldReview": {
+    "total": 54,
+    "approved": 0,
+    "draft": 54,
+    "gate_eligible": false,
+    "unreviewed_ids": [
+      "c01",
+      "c02",
+      "c03",
+      "c04",
+      "c05",
+      "c06",
+      "c07",
+      "c08",
+      "c09",
+      "c10",
+      "c11",
+      "c12",
+      "c13",
+      "c14",
+      "c15",
+      "c16",
+      "c17",
+      "c18",
+      "c19",
+      "c20",
+      "c21",
+      "c22",
+      "c23",
+      "c24",
+      "c25",
+      "c26",
+      "c27",
+      "c28",
+      "c29",
+      "c30",
+      "c31",
+      "c32",
+      "c33",
+      "c34",
+      "c35",
+      "c36",
+      "c37",
+      "c38",
+      "c39",
+      "c40",
+      "c41",
+      "c42",
+      "c43",
+      "c44",
+      "c45",
+      "c46",
+      "c47",
+      "c48",
+      "c49",
+      "w01",
+      "w02",
+      "w03",
+      "w04",
+      "w05"
+    ],
+    "reviewers": [],
+    "note": "approved 需要：状态写 approved + 登记指纹与现在代码一致 + reviewed_by 在允许名单里。改了金标而没重新送审 ⇒ 自动退回未审（revision-drift）。跑法：node scripts/roco/gold-review-state.mjs --sync / --check；带 --require-approved 跑本脚本会因未审而非零退出。"
+  },
+  "knownLimitations": [
+    "The server reports usage only for the final generation call; planner-call tokens are reconstructed from the known planner prompt and counted with the project tokenizer (estimate).",
+    "Latency is end-to-end per case (planner + generation + local work); per-phase latency is not separable from outside the server.",
+    "Ground truth for tool need is author-written before the run, not an independent blind annotation.",
+    "Argument ground truth comes from the game each context was built from (truthOf), not from the receipt and not from the resolver under test.",
+    "The layered metrics only cover cases that declare expect.argument / expect.evidence / expect.stale; they are not a full correctness proof.",
+    "checkGroundedAnswer is a narrow numeric/citation/certainty guard, not a proof of full correctness."
+  ],
+  "prices": {
+    "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "checked": "2026-09-17",
+    "model": "deepseek-flash (DeepSeek-V4.1-Flash)",
+    "unit": "USD per 1M tokens",
+    "inputCacheMissOffPeak": 0.15,
+    "inputCacheMissPeak": 0.3,
+    "inputCacheHitOffPeak": 0.003,
+    "inputCacheHitPeak": 0.006,
+    "outputOffPeak": 0.6,
+    "outputPeak": 1.2,
+    "peakWindowUTC": "01:00-04:00 and 06:00-10:00 UTC, Monday-Friday",
+    "runBand": "off-peak"
+  },
+  "metrics": {
+    "casesExecuted": 1,
+    "casesEvaluable": 1,
+    "casesErrored": 0,
+    "layered": {
+      "toolSelectionCorrect": {
+        "checked": 1,
+        "evaluable": 1,
+        "correct": 0,
+        "rate": 0,
+        "failures": [
+          {
+            "id": "c01",
+            "reasons": [
+              "expected a tool call, made none"
+            ]
+          }
+        ]
+      },
+      "argumentCorrect": {
+        "checked": 0,
+        "evaluable": 0,
+        "correct": 0,
+        "rate": null,
+        "failures": []
+      },
+      "evidenceMatch": {
+        "checked": 0,
+        "evaluable": 0,
+        "correct": 0,
+        "rate": null,
+        "failures": []
+      },
+      "answerConsistency": {
+        "checked": 1,
+        "evaluable": 1,
+        "correct": 1,
+        "rate": 1,
+        "failures": []
+      },
+      "staleInterception": {
+        "checked": 0,
+        "evaluable": 0,
+        "correct": 0,
+        "rate": null,
+        "failures": []
+      }
+    },
+    "approvedOnly": {
+      "note": "只统计**人类已审阅**的金标；approved=0 时这里的每个率都是 null（不编数）。",
+      "cases": 0,
+      "evaluable": 0,
+      "toolSelectionCorrectnessRate": null,
+      "callDecisionCorrectRate": null,
+      "callCountCorrectRate": null,
+      "unnecessaryToolCallRate": null,
+      "missedCallRate": null,
+      "groundedAnswerPassRate": null
+    },
+    "toolSelectionCorrectnessRate": 0,
+    "callDecisionCorrectRate": 0,
+    "toolChoiceCorrectRate": 0,
+    "callCountCorrectRate": 0,
+    "unnecessaryToolCallRate": null,
+    "unnecessaryCallShareOfAllCalls": null,
+    "missedCallRate": 1,
+    "wastedCallRate": 0,
+    "totalToolCalls": 0,
+    "meanCallsPerCase": 0,
+    "groundedAnswerPassRate": 1,
+    "latencyMs": {
+      "n": 1,
+      "p50": 1901,
+      "p90": 1901,
+      "min": 1901,
+      "max": 1901,
+      "mean": 1901
+    },
+    "modelStops": {
+      "complete": 0,
+      "tool-budget": 0,
+      "planner-failed": 0,
+      "invalid-tool": 0,
+      "invalid-arguments": 0,
+      "repeated-tool": 0,
+      "receipt-budget": 0,
+      "policy": 0,
+      "none": 0
+    },
+    "routes": {
+      "strategist": 1
+    },
+    "failures": {
+      "itemNameDrift": [],
+      "unsupportedNumber": [],
+      "unsupportedCertainty": [],
+      "allReasons": []
+    },
+    "byCategory": {
+      "cat1-needs-lookup": {
+        "n": 1,
+        "evaluable": 1,
+        "errored": 0,
+        "strictCorrect": 0,
+        "necessaryCallExpected": 1,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 1,
+        "wastedCalls": 0
+      },
+      "cat2-parametric": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "cat3-cross-tool": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "cat4-should-stop": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "control-policy": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      },
+      "control-locked": {
+        "n": 0,
+        "evaluable": 0,
+        "errored": 0,
+        "strictCorrect": null,
+        "necessaryCallExpected": 0,
+        "unnecessaryCalls": 0,
+        "noToolExpected": 0,
+        "missedCalls": 0,
+        "wastedCalls": 0
+      }
+    }
+  },
+  "tokens": {
+    "tokenizer": "DeepSeek official V4 (chat template applied)",
+    "perCaseFields": "apiUsage = server-reported generation usage only; estimatedPlannerTokens = reconstructed planner prompts counted with the official tokenizer; estimatedTotalTokens = sum",
+    "totals": {
+      "input": 3756,
+      "output": 60,
+      "apiInput": 2593,
+      "apiOutput": 52
+    },
+    "costUSD": {
+      "band": "off-peak",
+      "inputRatePer1M": 0.15,
+      "outputRatePer1M": 0.6,
+      "estimated": 0.0005993999999999999,
+      "peakBound": 0.0011987999999999999,
+      "offPeakBound": 0.0005993999999999999
+    },
+    "note": "Input is charged at the cache-miss rate; the API does not expose cache-hit token counts through this server, so the estimate is an upper bound on input cost."
+  },
+  "badAnswers": [],
+  "rows": [
+    {
+      "id": "c01",
+      "cat": "cat1-needs-lookup",
+      "question": "我现在场上这只还剩多少血？能量够放技能吗？",
+      "expect": {
+        "calls": [
+          1,
+          1
+        ],
+        "tools": [
+          "read_state",
+          "compare_actions"
+        ]
+      },
+      "why": "当前血量与能量是实时局面事实，需要读局面或比较行动。",
+      "regression": null,
+      "goldRevision": "dde5af5e",
+      "goldStatus": "draft",
+      "goldUnreviewed": true,
+      "goldReviewReasons": [],
+      "truth": {
+        "lastSettledTurn": 8,
+        "settled": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "matchId": null
+      },
+      "context": "pve",
+      "contextPhase": "battle",
+      "status": 200,
+      "latencyMs": 1901,
+      "model": "deepseek-flash",
+      "text": "潮甲龟现在 55/132 血，能量 2。放 2 豆技能（如水流弹）够，但按净耗算是净耗 1；放蓄势/护甲也行，都是 2 豆。",
+      "error": null,
+      "route": "strategist",
+      "provider": "deepseek",
+      "agentStop": "policy-no-tool",
+      "localOnly": false,
+      "fallbackReason": null,
+      "judgment": null,
+      "toolTrace": [],
+      "calls": 0,
+      "usage": {
+        "prompt_tokens": 2593,
+        "completion_tokens": 52
+      },
+      "evidenceCount": 8,
+      "knowledgeIds": [
+        "tactic:energy-net",
+        "rule:skill:focus",
+        "rule:skill:shell"
+      ],
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "scope": "Narrow numeric/citation/certainty guard; not a proof of all natural language correctness"
+      },
+      "evidence": [
+        "潮甲龟：55/132 HP，能量 2，速度 13。",
+        "潮甲龟：47/132 HP，能量 1，速度 13。",
+        "技能净消耗：普通存活在场者回合末回1；耗2技能通常净耗1，耗4技能通常净耗3。零消耗攻击可边输出边回能。 注意：倒下者不回能，回能有上限；换宠后恢复属于新上场者而非后备。",
+        "蓄势 技能规则：蓄势：消耗2豆，无直接攻击威力，行动优先级0。攻击提高15%，最多2层；持续3次在场回合末，主动换宠清空。 注意：必须先检查当前能量、存活状态及合法行动；伤害还受双方攻防、属性、状态和防御影响。",
+        "护甲 技能规则：护甲：消耗2豆，无直接攻击威力，行动优先级0。防御提高15%，最多2层；持续3次在场回合末，主动换宠清空。 注意：必须先检查当前能量、存活状态及合法行动；伤害还受双方攻防、属性、状态和防御影响。",
+        "这里是按双方下一步各自可能的选择算过一遍，用来看哪个更划算；不是胜率，也管不了更后面的回合。",
+        "回复药 → 潮甲龟：把对手各种应对都算一遍，多数情况下是 20.9 分，最糟的一种是 10.8 分（分数只用来排序，不是胜率）。对手换人的话：35.9 分。",
+        "水流弹：把对手各种应对都算一遍，多数情况下是 15.8 分，最糟的一种是 4.7 分（分数只用来排序，不是胜率）。对手换人的话：56.9 分。"
+      ],
+      "plannerCalls": 1,
+      "estimatedPlannerTokens": {
+        "input": 1163,
+        "output": 8
+      },
+      "apiUsage": {
+        "prompt_tokens": 2593,
+        "completion_tokens": 52
+      },
+      "estimatedTotalTokens": {
+        "input": 3756,
+        "output": 60
+      },
+      "judgement": {
+        "callDecisionCorrect": false,
+        "toolChoiceCorrect": false,
+        "countCorrect": false,
+        "stopCorrect": true,
+        "strictCorrect": false,
+        "unnecessaryCall": false,
+        "missedCall": true,
+        "wastedCall": false,
+        "unreviewed": true
+      },
+      "layers": {
+        "toolSelection": {
+          "id": "c01",
+          "checked": true,
+          "correct": false,
+          "reasons": [
+            "expected a tool call, made none"
+          ]
+        },
+        "argument": {
+          "id": "c01",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "no argument expectation"
+          ]
+        },
+        "evidenceMatch": {
+          "id": "c01",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "no evidence expectation"
+          ]
+        },
+        "answerConsistency": {
+          "id": "c01",
+          "checked": true,
+          "correct": true,
+          "reasons": []
+        },
+        "staleInterception": {
+          "id": "c01",
+          "checked": false,
+          "correct": null,
+          "reasons": [
+            "not a stale probe"
+          ]
+        }
+      }
+    }
+  ]
+}

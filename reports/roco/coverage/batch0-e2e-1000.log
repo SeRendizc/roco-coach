@@ -1,0 +1,6 @@
+技能分类：76 个独特技能 → {"computed": 30, "computed_uncorrected": 28, "computed_unverified": 3, "partial_refused_subset": 6, "fail_closed": 9}
+原因码：{"plain_damage_path": 30, "attack_path_uncorrected": 28, "defense_reduction_unconditional_assumption": 2, "defense_branch_never_applies_respond_clause": 6, "unparsed_markers": 5, "status_effects_applied_with_assumptions": 1, "no_parseable_effect": 2, "effect_kinds_not_implemented": 2}
+3 元组合法性：17296/17296 合法，非法 0
+四技能全部走 damage/status 路径的精灵：0/48；含 fail closed 技能的：22/48；四技能里没有 fail closed 的：26/48
+3v3 冒烟：1000/1000 完赛，截断 0，异常 0；回合 p50=23 p95=47；单局耗时 p50=13ms p95=26ms
+EXIT=0

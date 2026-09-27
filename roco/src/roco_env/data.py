@@ -12,7 +12,7 @@ import hashlib
 import json
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, FrozenSet, List, Optional, Tuple
+from typing import Any, Dict, FrozenSet, List, Optional, Sequence, Tuple
 
 DEFAULT_RULESET = "roco-world-s4-2026-09-10"
 
@@ -28,6 +28,21 @@ MOVESET_SIZE = 4
 #: RC-402 按需配招产物（可选）。**只有**在冻结 learnset 覆盖不到某只精灵时才用得上它，
 #: 而且它带来的每一只都带 `SIMULATABLE_UNVERIFIED` 等级 —— 冻结那一份**永不**被它覆盖。
 ON_DEMAND_BUILDS_REL = os.path.join("data", "roco", "derived", "on-demand-builds.json")
+
+#: PVP 魔法产物（可选，2026-09-23）。人类口述登记了「愿力强化」的口径，而它换进来的
+#: 「愿力冲击」**不在冻结的 824 条技能表里** —— 冻结快照是指纹，不能往里塞东西
+#: （理由与 `ON_DEMAND_BUILDS_REL` 完全相同）。所以这一份同样**只对候选规则集生效**：
+#: 它的 `ruleset_id` 与当前规则集不一致时一律忽略（legacy / v2 一个字节都不受影响）。
+PVP_MAGIC_REL = os.path.join("data", "roco", "derived", "pvp-magic.json")
+
+#: 这份产物挂在**冻结快照**那一层（`roco-world-s4-2026-09-10`），因为引擎是按快照 id 加载规则集的，
+#: 而「候选配置」(`mobile_s4_candidate_v3`) 是叠在它上面的一层规则参数 —— `load_ruleset` 看不到配置。
+#: 两条纪律让这件事仍然安全：
+#:   ① 快照指纹 `snapshot_fingerprint()` 只由 `files`（五份冻结 json 的 sha256）算出来，
+#:      **不**看 `skills` 字典 → 加派生技能不会让任何一条已录制的对局/轨迹对不上；
+#:   ② 「能不能用」的开关在**规则配置**里（`actions.kinds.magic`），不在技能表里 ——
+#:      legacy 与 v2 即使共用同一份快照，也永远不会**发出** magic 动作。
+PVP_MAGIC_RULESET_ID = DEFAULT_RULESET
 
 #: RC-403 的支持等级词汇（本模块只产出这两种）。
 SUPPORT_FULL_VERIFIED = "FULL_VERIFIED"
@@ -64,6 +79,11 @@ class Skill:
     desc: str
     is_trait: bool
     effect_support: str
+    #: 2026-09-23：这一条是不是**派生产物**（不在冻结 `skills.json` 里）。
+    #: PVP 魔法「愿力强化」换进来的「愿力冲击」就是这一类（来历见 data/roco/derived/pvp-magic.json）。
+    #: 覆盖统计 / 「威力不许编」那几条判据只该看**冻结那一份**，所以用这个标记把两者分开 ——
+    #: 而不是让 36 条派生技能悄悄改掉冻结快照的统计口径（实测：battle_skills 579 → 615）。
+    derived: bool = False
 
     @property
     def is_attack(self) -> bool:
@@ -115,34 +135,72 @@ class Learnset:
         return frozenset(self.native) | frozenset(self.blood) | frozenset(self.stones)
 
 
+class TypeCombinationUnknown(LookupError):
+    """该属性组合在快照里**没有显式行** ⇒ 不可查（fail closed，不猜）。
+
+    `types.json` 给出 18 条单属性行与 86 个不同的双属性组合（102 条键，其中
+    16 对互为反写、内容逐字相同）。18 选 2 共 153 个组合，所以有 67 个组合
+    **没有数据**。缺数据时引擎不许自己发明一条相性（既不返回中性 1.0，也不
+    用别的组合去顶），只能抛这个异常，由调用方报成 unsupported。
+    """
+
+    def __init__(self, defender_types: Sequence[str]):
+        self.defender_types = tuple(defender_types)
+        key = "|".join(TypeChart._key(self.defender_types)) or "(空)"
+        super().__init__(f"快照 types.json 没有属性组合「{key}」的相性行（该组合不可查）")
+
+
 @dataclass(frozen=True)
 class TypeChart:
     """防御相性：给定防守方属性组合，返回受到某属性攻击的倍率。
 
-    **优先使用快照的显式双属性行。** Types.lua 里既有单属性行，也有
-    102 条 `光系|地系` 这样的显式组合行，且两者**并不等价**：
-    对拍 1836 组后，41 处不一致，全部是「相乘得 4.0 而快照封顶 3.0」
-    （例：`光系|地系` 受草系，显式给 3，相乘给 4）。
+    **2026-09-25 人类裁决：双属性按两系相乘。** 快照 `types.json` 是上游
+    `Types.lua` 的机械转录，它把双属性组合的倍率**预先算好并封顶在 3**：
+    对拍 1836 组后，41 格与「两系相乘」不一致，全部是「相乘得 4.0 而快照给 3.0」
+    （例：`光系|地系` 受草系，快照给 3，相乘给 4）。两个社区源（9game / ali213）
+    写的是**相乘**（双克制 4×、双抵抗 0.25×、一克一抗 1.0×），人类裁决策：
+    「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」。
+    所以现在：**双属性 = 两个单属性的倍率相乘**，快照的组合行只用来说明
+    「这个组合有没有数据」（可查边界），不再提供倍率数值。
 
-    之前的实现丢弃了组合行、改用两条单属性相乘——那等于用我们的推断
-    覆盖数据。现在以快照为准，推断只在没有显式行时作为**标注过的**回退。
+    **单属性行为一字不变**：克制 2× / 抵抗 0.5× / 未列出 1×。
+
+    **缺 67 个组合不可查**：`multiplier` 抛 `TypeCombinationUnknown`（fail closed），
+    不返回中性、也不用别的组合顶替。
     """
 
-    # 键是排序后的属性组合（单属性时就是长度 1 的元组）
+    # 键是排序后的属性组合（单属性时就是长度 1 的元组）。
+    # 值仍然是快照里那一行的逐字转录（可查性 + 审计用），**不再是**双属性倍率的来源。
     rows: Dict[Tuple[str, ...], Dict[str, float]]
 
     DEFAULT: float = 1.0
 
     @staticmethod
     def _key(types: Tuple[str, ...]) -> Tuple[str, ...]:
-        return tuple(sorted(types))
+        # 去重：`("冰系", "冰系")` 不该被当成一个「快照没有的组合」。
+        return tuple(sorted(set(types)))
+
+    #: 快照里**显式给出**的双属性组合（`multiplier` 的可查边界）。
+    @property
+    def declared_combinations(self) -> FrozenSet[Tuple[str, ...]]:
+        return frozenset(key for key in self.rows if len(key) > 1)
 
     def multiplier(self, defender_types: Tuple[str, ...], attack_element: str) -> float:
-        """防守方属性组合 × 攻击属性 → 倍率。"""
-        row = self.rows.get(self._key(defender_types))
-        if row is not None:
+        """防守方属性组合 × 攻击属性 → 倍率。
+
+        单属性：逐字读快照那一行（未列出 = 中性 1.0，与改前逐位相同）。
+        双属性：**两系相乘**（2026-09-25 人类裁决）；组合不在快照的显式行里
+        ⇒ 抛 `TypeCombinationUnknown`（不可查，fail closed）。
+        """
+        key = self._key(defender_types)
+        if len(key) <= 1:
+            row = self.rows.get(key)
+            if row is None:
+                return self.DEFAULT
             return row.get(attack_element, self.DEFAULT)
-        return self.DEFAULT
+        if len(key) != 2 or key not in self.rows:
+            raise TypeCombinationUnknown(defender_types)
+        return self.fallback_multiplier(key, attack_element)
 
     def has_row(self, defender_types: Tuple[str, ...]) -> bool:
         """快照里有没有这一组合的显式行。
@@ -153,10 +211,11 @@ class TypeChart:
         return self._key(defender_types) in self.rows
 
     def fallback_multiplier(self, defender_types: Tuple[str, ...], attack_element: str) -> float:
-        """没有显式行时的**推断**值（两条单属性相乘）。
+        """两条单属性的**乘积**。
 
-        它不是数据，是推断，所以单独一个方法、名字里带 fallback，
-        调用方必须自己决定要不要用、以及要不要标未核验。
+        名字保留（既有调用方按名字取用），但语义在 2026-09-25 之后变了：
+        它**就是**双属性的结算口径（人类裁决改用社区源的相乘口径），
+        不再是「没有显式行时的推断」。缺单属性行时按中性 1.0 参与相乘。
         """
         m = self.DEFAULT
         for t in defender_types:
@@ -239,6 +298,9 @@ class Ruleset:
     #: 按需配招产物本身的出处（`{path, sha256, count}`；没有这份产物时是 `None`）。
     #: **刻意不进 `files`**：`files` 是冻结快照指纹，这一份是派生产物（见上面那段注释）。
     on_demand_builds: Optional[Dict[str, Any]] = None
+    #: PVP 魔法（愿力强化 / 愿力冲击）的派生产物：`{path, sha256, magic, impact_skills}`。
+    #: 同样是**派生产物**、同样刻意不进 `files`；只有候选规则集会有它。
+    pvp_magic: Optional[Dict[str, Any]] = None
     #: **冻结快照**里的精灵数 / 学习表数（不含按需推算那 574 只）。
     #:
     #: 为什么要单独留一份：`/rules/query` 的 `kind=ruleset` 回执回答的是
@@ -247,6 +309,14 @@ class Ruleset:
     #: 全部对不上）。所以回执读这两个数，派生宇宙走 `on_demand_builds` 与 `build_support`。
     frozen_pet_count: int = 0
     frozen_learnset_count: int = 0
+    #: **冻结快照**里的技能数（不含 PVP 魔法那种派生产物）。
+    #:
+    #: 与上面两个同一条理由、同一个坑：`/rules/query kind=ruleset` 的回执里
+    #: `counts.skills` 原来直接写 `len(rs.skills)`，于是往 `skills` 里加派生技能
+    #: 会让**已录制的 agent 轨迹**回执摘要变掉（实测：824 → 860，轨迹校验当场红，
+    #: 而那份轨迹按 artifact-registry 是**禁止重跑**的）。回执回答的是「这是哪一份快照」，
+    #: 所以它必须只数冻结那一份。
+    frozen_skill_count: int = 0
 
     def skill(self, skill_id: str) -> Skill:
         try:
@@ -270,6 +340,24 @@ class Ruleset:
 
     def pets_by_name(self, name: str) -> List[Pet]:
         return [self.pets[i] for i in self.by_name.get(name, [])]
+
+    def terms_by_name(self, name: str) -> List[Term]:
+        """按**术语名**（`note`）精确查。
+
+        与 `pets_by_name` 同一条纪律：**重名不静默取第一条**（调用方拿到多条时要么显式列候选、
+        要么报歧义）。实测这份规则集里 54 条术语的名字互不相同，但纪律不靠数据巧合成立。
+        """
+        return [self.terms[tid] for tid in sorted(self.terms) if self.terms[tid].note == name]
+
+    def terms_matching(self, text: str, *, limit: int = 6) -> List[Term]:
+        """按**名字里含这段文字**找候选（按 id 升序，最多 `limit` 条）。
+
+        为什么要这一条（2026-09-25 实测）：玩家问的是短说法 ——「『应对』这条术语是怎么定义的？」，
+        而登记在册的名字是 **应对状态 / 应对攻击 / 应对防御** 三条，精确查「应对」一条都命中不到。
+        这时候**给候选**，绝不替玩家挑一条当答案（挑错了就是拿另一条规则的定义骗人）。
+        """
+        return [self.terms[tid] for tid in sorted(self.terms)
+                if text and text in self.terms[tid].note][:limit]
 
     def is_learnable(self, pet_id: str, skill_id: str) -> bool:
         ls = self.learnsets.get(pet_id)
@@ -464,7 +552,9 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
             f"学习表里有 {len(orphans)} 个孤儿技能引用：" + "; ".join(orphans[:5])
         )
 
-    # 单属性行与显式双属性行**都要**收：快照把两者都给了，而它们不等价。
+    # 单属性行与显式双属性行**都要**收：单属性行是结算依据（逐字不变），
+    # 双属性行只说明「这个组合在快照里有没有数据」（`TypeChart.multiplier` 的可查边界，
+    # 见 TypeCombinationUnknown 的注释）—— 它的**数值**自 2026-09-25 起不再用于结算。
     rows: Dict[Tuple[str, ...], Dict[str, float]] = {}
     for key, row in raw["types"]["types"].items():
         table: Dict[str, float] = {}
@@ -511,6 +601,8 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
     #: 叠加**之前**的冻结快照规模（回执用它回答「规则集版本」，见 Ruleset 上的注释）。
     frozen_pet_count = len(pets)
     frozen_learnset_count = len(learnsets)
+    # PVP 魔法会往 `skills` 里补派生技能（见下面的 PVP_MAGIC_REL 段）——先记下冻结的条数。
+    frozen_skill_count = len(skills)
     on_demand_problems: List[str] = []
     on_demand_path = os.path.join(root or _repo_root(), ON_DEMAND_BUILDS_REL)
     on_demand_doc: Optional[Dict[str, Any]] = None
@@ -586,6 +678,54 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
                 + "; ".join(roster_problems[:8])
             )
 
+    # ── PVP 魔法派生产物（愿力强化 / 愿力冲击）──────────────────────────────
+    # 三条不许越过的线（与按需配招同一套纪律）：
+    #   ① 只有候选规则集吃它（`ruleset_id` 对不上就整份忽略，冻结规则集永不受影响）；
+    #   ② 生成的技能 id 与冻结技能表**零碰撞**，一碰就抛（那等于改写既有技能）；
+    #   ③ 加载期把「这一份里哪些读法是本仓补的」一起带出来（`unverified`），不藏在代码里。
+    pvp_magic_doc: Optional[Dict[str, Any]] = None
+    pvp_magic_sha: Optional[str] = None
+    pvp_magic_path = os.path.join(root or _repo_root(), PVP_MAGIC_REL)
+    if ruleset_id == PVP_MAGIC_RULESET_ID and os.path.exists(pvp_magic_path):
+        with open(pvp_magic_path, "r", encoding="utf-8") as fh:
+            pvp_magic_doc = json.load(fh)
+        declared = pvp_magic_doc.get("ruleset_id")
+        if declared != ruleset_id:
+            raise RulesetError(
+                f"{PVP_MAGIC_REL} 的 ruleset_id 是 {declared}，期望 {ruleset_id}"
+            )
+        if pvp_magic_doc.get("problems"):
+            raise RulesetError(
+                f"{PVP_MAGIC_REL} 自带 problems（生成器没通过就写盘了）："
+                + "; ".join(str(p) for p in pvp_magic_doc["problems"][:5])
+            )
+        impact = pvp_magic_doc.get("impact_skills")
+        if not isinstance(impact, list) or not impact:
+            raise RulesetError(f"{PVP_MAGIC_REL} 的 impact_skills 必须是**非空**数组")
+        for s in impact:
+            sid = s.get("skill_id")
+            if not sid:
+                raise RulesetError(f"{PVP_MAGIC_REL} 里有一条愿力冲击没有 skill_id")
+            if sid in skills:
+                raise RulesetError(
+                    f"愿力冲击 {sid} 与冻结技能表碰撞了 —— 派生产物**不许**覆盖既有技能"
+                )
+            skills[sid] = Skill(
+                skill_id=sid,
+                name=s["name"],
+                category=s.get("category") or "",
+                element=s.get("element") or "",
+                energy=int(s.get("energy") or 0),
+                power=s.get("power"),
+                power_status=s.get("power_status"),
+                damage_class=s.get("damage_class"),
+                desc=s.get("desc") or "",
+                is_trait=bool(s.get("is_trait")),
+                effect_support=s.get("effect_support", "unsupported"),
+                derived=True,          # 派生产物：冻结统计与「威力不许编」那些判据不看它
+            )
+        pvp_magic_sha = _sha256(pvp_magic_path)
+
     return Ruleset(
         ruleset_id=ruleset_id,
         game=raw["pets"].get("game"),
@@ -601,9 +741,17 @@ def load_ruleset(ruleset_id: str = DEFAULT_RULESET, root: Optional[str] = None) 
         build_support=build_support,
         frozen_pet_count=frozen_pet_count,
         frozen_learnset_count=frozen_learnset_count,
+        frozen_skill_count=frozen_skill_count,
         on_demand_builds=({
             "path": os.path.relpath(on_demand_path, root or _repo_root()),
             "sha256": on_demand_sha,
             "count": sum(1 for level in build_support.values() if level == SUPPORT_SIMULATABLE_UNVERIFIED),
         } if on_demand_doc is not None else None),
+        pvp_magic=({
+            "path": os.path.relpath(pvp_magic_path, root or _repo_root()),
+            "sha256": pvp_magic_sha,
+            "magic": dict(pvp_magic_doc.get("magic") or {}),
+            "impact_skills": list(pvp_magic_doc.get("impact_skills") or []),
+            "unverified": list(pvp_magic_doc.get("unverified") or []),
+        } if pvp_magic_doc is not None else None),
     )

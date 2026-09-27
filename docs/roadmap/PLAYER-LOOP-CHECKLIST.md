@@ -29,7 +29,7 @@
 
 | # | 步骤 | 状态 | 依赖 | 验收证据 | 负向测试 |
 |---|---|---|---|---|---|
-| A1 | 盒子：同种个体比较（≥2 只同种） | 进行中 | RC-205（已具备） | 1440/390 截图：逐字段比较面板打开、字段对齐 | 注入「比较面板显示工程键」必须红 |
+| A1 | 盒子：同种个体比较（≥2 只同种） | **能力在、数据上不可达**（2026-09-24 去重后） | RC-205（已具备） | 1440/390 截图：逐字段比较面板打开、字段对齐 | 注入「比较面板显示工程键」必须红 | **实测事实**：人类 2026-09-24 要求「重复的删掉」后，`data/roco/owned/owned-pets.json` = **48 个体 / 48 物种 / 0 个同种第二只**（`MAX_SAME_SPECIES_GROUPS=0`）⇒ 浏览器里**再也选不出两只同种**，所以这条的浏览器判据在 `scripts/roco/browser-box-acceptance.mjs` 里**显式登记为不可达（带原因）**，能力本身由 `compareOwnedPets` + `tests/roco-box.test.js` 的夹具继续守着（不同种 400 那条也在）。要重新可达需要人类先给同种第二只个体（属 B2）。
 | A2 | 从比较里**选其中一只并锁定** | ✅（两条页面入口 + 补全算法判据） | A1 + 锁定进服务端硬约束 | **盒子入口**：真鼠标选一只 → 「锁定这一只去配队」→ URL 同时带 `team` 与 `lock` → 产品页那一格显示「锁定」（`live-box-lock-entry`）；**URL 入口**：`?team=…&lock=…` 同样锁上（`live-lock-handoff`）；`locked_count` 与服务端一致 | 已通：锁一个不在 `selected` 的实例 → 服务端 400 `LOCKED_NOT_SELECTED`；**补全不许换掉被锁成员**：`tests/roco-team-candidates.test.js` 新增判据（补全计划必须包含被锁成员，且**每个**候选完整队伍都带着它；反证：不带 `locked` 时请求里不许冒出锁定）。
 **反证**：按钮漏掉 `lock`、或服务端接受锁定却不回传 → 判据必须红（两条都在）。
 **仍然如实说明**：页面上**没有**「自动补队」按钮（补全只经服务端/工作台的下一只候选体现），所以「三条入口等价」这句只在**契约层**成立 |
@@ -61,7 +61,21 @@
 | B4 | Coach 给出「练哪只」+ 对六宠队伍的影响 | 未开始 | B3 + P0-D 工具接入 | 多轮追问「练哪只 / 为什么 / 换掉谁会怎样」 | 无证据时给结论必须红（该弃答） |
 | B5 | 四技能**有序槽位**可合法更换与调序 | 未开始 | RC-203 有序槽位（已具备数据结构） | 换/调序后合法性与引擎一致；传动/位置机制随之变化 | 非法顺序被引擎拒、页面如实显示原因 |
 
+> **B5 的前置调查结论（2026-09-25，只读调研，人类决策 3）**：现在仓里**有三份配招在打架**，
+> 而且 `owned-pets.json#battle_builds[].ordered_skills` **根本不是配招** ——
+> `scripts/roco/build-owned-pets.mjs:292-298` 是 `shuffle(rng,pool).slice(0,4)`（seed 20301）伪随机抽样。
+> **规范四技能 = 引擎 loadout**（`support-matrix.json#candidate_moveset` baseline 12 +
+> `layer-playable-48/support-matrix.json` overlay 36，合并点 `data.py:515-535`，引擎读点 `env.py:231`），
+> 它才有显式选招规则、也是实战真正装上的那一份。**换招的技术通道已经全在了**：
+> `env.py:156/231`、`service.py:1728-1741`、`src/coach/roco-client.js:932-939` 都收 `loadouts`，
+> **唯一断点**是 `src/server/roco-service.js:1897` 的 `client.battleNew({...})` 没把它传下去。
+> 但**必须先定基准再放行换招**（否则等于把随机噪声当配招上线）；`overrides.py` 的
+> `unverified_overrides` **不能复用**（白名单只有 `energy.initial` / `turn_order.speed_tie`）。
+> 另有一条与 B5 相关的真 bug：`roster-48.json#pets[].moveset`（盒子页读）与引擎 loadout 有 **2/48** 不一致。
+> 详见 `FLAGSHIP-V3-CHECKLIST.md` 的 RC-203 行与 `/tmp/roco-moveset-research/REPORT.md`。
+
 ---
+
 
 ## P0-C 机制覆盖（622 图鉴 ≠ 622 完整可模拟）
 

@@ -6,7 +6,11 @@
   ② **不可达要如实登记**：数据里根本没有精灵的规范配招带某机制时，进 `unreachable`
      并写明原因——「没出现在报告里」与「登记为不可达」是两件事；
   ③ **指纹可比对**：`check_against()` 必须能抓到终局摘要或事件分布的变化；
-  ④ **确定性**：同一份输入跑两遍，指纹逐字节相同。
+  ④ **确定性**：同一份输入跑两遍，指纹逐字节相同；
+  ⑤ **磁盘上那份产物不许过期**（2026-09-23 补）：`reports/roco/rc404/regression-set.json`
+     必须与「现在重算」一致 —— 判据 ③ 只在内存里比两次构建，**从不看磁盘**，
+     于是产物可以在没人发现的情况下落后于引擎（我自己就踩到：跑 `--check` 时用了
+     CWD 相对路径，检查的是一个不存在的文件，真正的产物一个字都没动）。
 """
 
 from __future__ import annotations
@@ -110,6 +114,38 @@ class SpeedDimensionTest(unittest.TestCase):
         first, second = reg.run_scenario(RS, tie), reg.run_scenario(RS, tie)
         self.assertEqual(first["state_digest"], second["state_digest"])
         self.assertEqual(first["first_damage_by_turn"], second["first_damage_by_turn"])
+
+
+class DiskArtifactIsFreshTest(unittest.TestCase):
+    """⑤ 磁盘上的回归产物必须与「现在重算」一致（忽略 `generated_at`）。"""
+
+    ARTIFACT = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__)))), "reports", "roco", "rc404", "regression-set.json")
+
+    def test_disk_artifact_matches_a_fresh_build(self):
+        self.assertTrue(os.path.exists(self.ARTIFACT),
+                        f"回归产物不存在：{self.ARTIFACT}；先跑 python3 -m roco_env.regression")
+        with open(self.ARTIFACT, encoding="utf-8") as handle:
+            on_disk = json.load(handle)
+        fresh = reg.build_regression_set(RS)
+
+        def strip(doc):
+            clone = json.loads(json.dumps(doc))
+            clone.pop("generated_at", None)
+            return clone
+
+        disk_rows = {row["id"]: row for row in strip(on_disk).get("scenarios", [])}
+        fresh_rows = {row["id"]: row for row in strip(fresh).get("scenarios", [])}
+        self.assertEqual(sorted(disk_rows), sorted(fresh_rows), "场景清单对不上")
+        stale = [sid for sid in fresh_rows
+                 if json.dumps(disk_rows[sid], sort_keys=True) != json.dumps(fresh_rows[sid], sort_keys=True)]
+        self.assertEqual(stale, [],
+                         "磁盘上的回归指纹已经过期（引擎改了、产物没重建）："
+                         f"{stale[:5]} …；跑 `cd roco && PYTHONPATH=src python3 -m roco_env.regression"
+                         " --out ../reports/roco/rc404/regression-set.json` 重建，并把变化写进文档")
+        self.assertEqual(json.dumps(strip(on_disk).get("unreachable"), sort_keys=True),
+                         json.dumps(strip(fresh).get("unreachable"), sort_keys=True),
+                         "不可达清单与现在重算不一致")
 
 
 class CheckAgainstTest(unittest.TestCase):

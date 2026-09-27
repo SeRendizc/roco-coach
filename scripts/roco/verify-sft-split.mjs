@@ -316,7 +316,7 @@ async function main() {
     result.reproduced_byte_for_byte = reproduced;
     result.passed = result.problems.length === 0;
   } finally {
-    rmSync(temp, {recursive: true, force: true});
+    rmSync(temp, {recursive: true, force: true,maxRetries:5,retryDelay:120});
   }
 
   process.stdout.write(`${JSON.stringify(result, null, 1)}\n`);

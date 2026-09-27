@@ -79,6 +79,7 @@
  */
 
 import {spawn} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {dirname, join} from 'node:path';
@@ -371,11 +372,43 @@ function collectInPage(state) {
     // ── 背包态 ────────────────────────────────────────────────────────────
     const itemCells = qah('[data-b3-item-cell]').map((el, i) => ({index: i, rect: R(el), text: T(el).slice(0, 220)}));
     // 文案只取**背包那一块**：`T(左列)` 会把 4 个面板（含隐藏的）全算进来，
-    // 那样「确定性数字」这条判据会读到技能面板的字，是假阳性。
+    // 那样数字判据会读到技能面板的字，是假阳性。
     const itemPanel = qh('[data-b3-panel="item"]');
     const leftColText = T(itemPanel) || (itemCells.length ? itemCells.map((c) => c.text).join(' ') : T(colLeft || leftCol));
+    // 背包态数字判据的**收据面**：引擎此刻的 PVP 魔法实数 + 页面把哪些字段显示在哪。
+    // 字段名是**在真页面上量出来的**（2026-09-25 探针）：`view.self.magic = {uses_left, cooldown, swapped, cooldown_set_turn}`；
+    // `view.legal[]` 里那条 `kind=magic` 只给 `{kind,label,magic_id,...}` —— **次数与冷却不在动作上**，
+    // 所以「动作自带的次数/冷却」这条读法在本仓不成立，收据一律以 `view.self.magic` 为准。
+    const magicState = (view?.self?.magic && typeof view.self.magic === 'object') ? view.self.magic : null;
+    const legalMagic = (Array.isArray(view?.legal) ? view.legal : []).filter((a) => a?.kind === 'magic');
+    const magicNum = (v) => (Number.isFinite(Number(v)) ? Number(v) : null);
+    const swappedCount = magicState
+      ? (Array.isArray(magicState.swapped) ? magicState.swapped.length
+        : (magicState.swapped && typeof magicState.swapped === 'object' ? Object.keys(magicState.swapped).length : null))
+      : null;
+    out.magic = {present: Boolean(magicState), raw: magicState,
+      keys: magicState ? Object.keys(magicState) : [],
+      usesLeft: magicNum(magicState?.uses_left), cooldown: magicNum(magicState?.cooldown),
+      swappedCount: magicNum(swappedCount),
+      legalCount: legalMagic.length,
+      legalKeys: legalMagic.length ? Object.keys(legalMagic[0]) : [],
+      legalHasUsesField: legalMagic.some((a) => ['uses_left', 'remaining', 'uses', 'per_battle', 'cooldown', 'cooldown_turns']
+        .some((k) => a?.[k] !== undefined && a?.[k] !== null)),
+      legalSample: legalMagic[0] ? {...legalMagic[0], skill: undefined} : null};
+    const itemCountTexts = qah('[data-b3-item-count]').map((el) => T(el).slice(0, 40));
+    const itemNoteTexts = qah('[data-b3-item-note]').map((el) => T(el).slice(0, 120));
     out.item = {count: itemCells.length, cells: itemCells, text: leftColText.slice(0, 900),
-      panelFound: Boolean(itemPanel)};
+      panelFound: Boolean(itemPanel),
+      countTexts: itemCountTexts, noteTexts: itemNoteTexts,
+      engineFacts: {usesLeft: magicNum(magicState?.uses_left), usesLeftFrom: 'view.self.magic.uses_left（引擎实数）',
+        cooldown: magicNum(magicState?.cooldown), cooldownFrom: 'view.self.magic.cooldown（引擎实数）',
+        swappedCount: magicNum(swappedCount), swappedFrom: 'view.self.magic.swapped（引擎实数）'},
+      // `registered` 由 Node 侧注入（读 `data/roco/derived/pvp-magic.json`），页面里读不到那份文件
+      fieldAudit: {text: itemPanel ? '[data-b3-panel="item"] 的 textContent' : '（缺钩子：data-b3-panel="item"）',
+        count: 'data-b3-item-count × ' + itemCountTexts.length,
+        engineMagic: magicState ? `view.self.magic{${Object.keys(magicState).join(',')}}` : 'view.self.magic 不存在',
+        legalMagic: `view.legal[kind=magic] × ${legalMagic.length}（keys: ${(legalMagic.length ? Object.keys(legalMagic[0]) : []).join(',') || '—'}）`,
+        registered: 'data/roco/derived/pvp-magic.json（Node 侧读、注入判据）'}};
 
     // ── 右列战报 ──────────────────────────────────────────────────────────
     const turnSource = logTurnEls.some((el) => /^\d+$/.test(String(el.getAttribute('data-b3-log-turn') ?? '').trim()))
@@ -499,6 +532,143 @@ function collectInPage(state) {
 const CONTAIN = (a, b) => !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
 /** 尺寸为 0 的矩形**不算「量到了」**：页面没渲染/被隐藏时 rect 全是 0，±2px 的判据会假绿。 */
 const EMPTY = (r) => !r || !(r.w > 0) || !(r.h > 0);
+
+// ── 背包态数字判据的共用件（口径：人类 2026-09-25 决策 4「（甲）读法」）───────
+/**
+ * 已登记证据：`data/roco/derived/pvp-magic.json`（生成器 `scripts/roco/build-pvp-magic.mjs`，
+ * 源头 `data/roco/battle-modes.json#modes[pvp-standard-six-pet].policies.magic_policy.registered`
+ * 的 `愿力强化`，证据 id `EV-PVP-WISH-POWER-UP`）。
+ *
+ * **只在「拿不到」时返回 null 字段，不回落成编出来的数**：脚本读不到这份产物 → 判据按
+ * 「这一格没有已登记证据」处理（判红），而不是假装它是 2 / 3。
+ */
+function loadRegisteredItemFacts() {
+  const rel = 'data/roco/derived/pvp-magic.json';
+  const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : null);
+  try {
+    const abs = join(ROOT, rel);
+    const text = readFileSync(abs, 'utf8');
+    const doc = JSON.parse(text);
+    const m = doc?.magic ?? {};
+    return {
+      ok: true, file: rel, sha256: createHash('sha256').update(text).digest('hex').slice(0, 16),
+      bytes: Buffer.byteLength(text),
+      magic_id: m.magic_id ?? null, name: m.name ?? null,
+      per_battle_uses: num(m.per_battle_uses), cooldown_turns: num(m.cooldown_turns),
+      occupies_action: typeof m.occupies_action === 'boolean' ? m.occupies_action : null,
+      // 「愿力冲击」的能耗/威力也在同一个登记条目里（同一份产物、同一条证据），所以它们也是**已登记**的数字
+      wish_impact: {energy: num(m?.wish_impact?.energy), power: num(m?.wish_impact?.power),
+        from: `${rel}#magic.wish_impact`},
+      evidence_id: doc?.generated_from?.evidence_id ?? null,
+      ruleset_id: doc?.ruleset_id ?? null,
+    };
+  } catch (error) {
+    return {ok: false, file: rel, error: oneLine(error?.message ?? error, 160), magic_id: null, name: null,
+      per_battle_uses: null, cooldown_turns: null, occupies_action: null,
+      wish_impact: {energy: null, power: null}, evidence_id: null, ruleset_id: null};
+  }
+}
+
+/**
+ * 背包态「数字」判据：**纯函数**（页面那一跑与合成基线/反证共用同一份）。
+ *
+ * 前提（逐字）：**背包态里出现的每一个数字，都必须能追溯到「引擎给的实数」或「已登记证据」；
+ * 同时，该显示的数字必须真的显示出来。**
+ *
+ * 输入契约（`f.item`）：
+ *   · `text`         —— 背包那一块（`[data-b3-panel="item"]`）的可见原文
+ *   · `engineFacts`  —— 引擎此刻的实数（**字段名是量出来的**，不是猜的）：
+ *                       `{usesLeft, usesLeftFrom, cooldown, cooldownFrom, swappedCount, swappedFrom}`
+ *   · `registered`   —— `loadRegisteredItemFacts()` 的结果
+ *   · `fieldAudit`   —— 这次读数用的字段名清单（写进实际值，便于主线程改动后一眼看出读点漂了）
+ *
+ * 判法：
+ *   ① **收据** = 已登记证据里的数字（per_battle_uses / cooldown_turns / wish_impact.energy|power）
+ *      + 引擎实数字段 + 显式的补充证据 `evidence[]`（例如「愿力强化」这一条目的其它数字）。
+ *   ② 文案里每个数字出现时，必须在收据里有一个**同值实例**（按多重集配对，不按出现顺序猜）；
+ *      配不上的数字 → 红（写死的样例数字正是这样被抓住的）。
+ *   ③ 声明成「该显示」的字段（剩余次数 / 每局次数 / 冷却回合）配不上任何数字实例 → 红
+ *      （把次数与冷却从文案里删掉 = 什么都不写 → 也要红）。
+ *   ④ 声明来源是引擎的字段，值必须与引擎此刻的实数**逐字相等** → 不等就红（页面的读数 ≠ 引擎值）。
+ */
+function itemNumberProblems(f = {}) {
+  // 本文件的判据契约是 `problems: (facts) => string[]`（`recordCheck` 直接对每项做 oneLine），
+  // 所以这里返回**一行行文本**，但每行都带「实际值 / 缺什么」，便于报告里直接读。
+  const P = (text, actual, missing) => `${text}（实际值：${actual}；缺：${missing}）`;
+  const item = f.item ?? {};
+  const text = String(item.text ?? '');
+  const reg = item.registered ?? {};
+  const eng = item.engineFacts ?? {};
+  const detail = [];
+  if (!item.count) {
+    return [P('背包态左列没有 data-b3-item-cell（没有可检的文案）',
+      `count=${JSON.stringify(item.count ?? null)}`, '背包格（data-b3-item-cell）+ 可读文案')];
+  }
+
+  // ── 收据：每条 = {key, value, src}。src 一律写明出处，便于人复核 ─────────────
+  const receipts = [];
+  const add = (key, value, src) => {
+    if (Number.isFinite(Number(value))) receipts.push({key, value: Number(value), src});
+  };
+  if (reg.ok) {
+    add('registered.per_battle_uses', reg.per_battle_uses, `${reg.file}#magic.per_battle_uses（已登记证据）`);
+    add('registered.cooldown_turns', reg.cooldown_turns, `${reg.file}#magic.cooldown_turns（已登记证据）`);
+    add('registered.wish_impact.energy', reg.wish_impact?.energy,
+      `${reg.wish_impact?.from ?? `${reg.file}#magic.wish_impact`}（已登记证据：愿力冲击能耗）`);
+    add('registered.wish_impact.power', reg.wish_impact?.power,
+      `${reg.wish_impact?.from ?? `${reg.file}#magic.wish_impact`}（已登记证据：愿力冲击威力）`);
+  } else {
+    detail.push(`已登记证据读不到（${reg.file}：${reg.error ?? '未知错误'}）`);
+  }
+  add('engine.uses_left', eng.usesLeft, eng.usesLeftFrom ?? 'view.self.magic.uses_left（引擎实数）');
+  add('engine.cooldown', eng.cooldown, eng.cooldownFrom ?? 'view.self.magic.cooldown（引擎实数）');
+  add('engine.swapped_count', eng.swappedCount, eng.swappedFrom ?? 'view.self.magic.swapped（引擎实数）');
+  for (const e of (Array.isArray(item.evidence) ? item.evidence : [])) add(`evidence.${e?.key ?? '?'}`, e?.value, e?.src);
+
+  // ── 页面文案里的数字（阿拉伯数字；「士气 0.5」这种小数按 0 与 5 两个数字读）───
+  const nums = [...text.matchAll(/\d{1,4}/g)].map((m) => ({value: Number(m[0]), at: m.index ?? 0, raw: m[0]}));
+
+  // ① 该显示的数字必须真的显示：声明字段 → 文案里必须能配上同值实例
+  const wantPairs = [
+    {key: 'engine.uses_left', value: eng.usesLeft, label: '剩余次数（引擎实数）'},
+    {key: 'registered.per_battle_uses', value: reg.per_battle_uses, label: '每局次数（已登记证据）'},
+    {key: 'registered.cooldown_turns', value: reg.cooldown_turns, label: '冷却回合（已登记证据）'},
+  ];
+  const pool = nums.slice();
+  const declared = [];                // 声明「该显示」的字段（配不上数字实例就红）
+  const take = (value) => {
+    const i = pool.findIndex((n) => n.value === Number(value));
+    if (i < 0) return false;
+    pool.splice(i, 1);
+    return true;
+  };
+  for (const wp of wantPairs) {
+    if (!Number.isFinite(Number(wp.value))) continue;   // 源头拿不到 → 不假装验过（详见 fieldAudit）
+    declared.push({...wp, matched: take(wp.value)});
+  }
+  for (const r of receipts) take(r.value);
+  const missingNumbers = declared.filter((d) => !d.matched).map((d) => `${d.label} = ${d.value}`);
+  // ② 剩下的数字必须能在收据里找到同值出处
+  const registeredValues = new Set(receipts.map((r) => r.value));
+  const unregistered = pool.filter((n) => !registeredValues.has(n.value));
+
+  const problems = [];
+  if (unregistered.length) {
+    problems.push(P(`背包态出现**没有登记出处**的数字 ${unregistered.length} 处：${unregistered.map((n) => `「${n.raw}」`).join('、')}`,
+      `原文片段「${oneLine(text.slice(Math.max(0, unregistered[0].at - 24), unregistered[0].at + 24), 80)}」；`
+      + `可追溯的数字只有 ${JSON.stringify([...registeredValues])}`,
+      `每个数字都要有出处：${reg.file}#magic.per_battle_uses|cooldown_turns、view.self.magic.uses_left|cooldown，或本条目其它已登记数字`));
+  }
+  if (missingNumbers.length) {
+    problems.push(P(`该显示的数字没显示：${missingNumbers.join('、')}`,
+      `原文「${oneLine(text, 160)}」；可匹配的数字实例 ${JSON.stringify(nums.map((n) => n.raw))}`,
+      '剩余次数与冷却必须显示出来（来自引擎实数 / 已登记证据），不许删掉当「没有数字」'));
+  }
+  detail.push(`收据 ${receipts.length} 条：${JSON.stringify(receipts.map((r) => `${r.value}←${r.src.split('（')[0]}`))}`);
+  detail.push(`文案数字 ${nums.length} 个：${JSON.stringify(nums.map((n) => n.raw))}`);
+  if (item.fieldAudit) detail.push(`读点字段：${JSON.stringify(item.fieldAudit)}`);
+  return problems.map((p) => `${p}；${detail.join('；')}`);
+}
 
 const CHECKS = [
   // ── C0 前置：页面得先跑起来，否则下面每条的实际值都读不懂 ─────────────────
@@ -754,6 +924,15 @@ const CHECKS = [
       + `聚能区 y ${fmt(f.footer?.charge?.rect?.top)}→${fmt(f.footer?.charge?.rect?.bottom)}`},
 
   // ── C5 背包态 ───────────────────────────────────────────────────────────
+  // 口径（人类 2026-09-25 决策 4，原话：「『愿力强化物品』每局可用 2 次 · 冷却 3 回合 · 不占行动；
+  // 首领化一样不占行动…这是我确认过的！！以我为准」）⇒ **（甲）读法**：
+  // **数字允许显示，但必须来自引擎或已登记证据；没登记才不许写数字。**
+  // 旧判据 `item-no-definite-numbers` 的前提是「背包态不得出现确定性数字」，它把**已登记**的
+  // 「冷却 3 回合」也判红 —— 这正是审计 A9 的口径冲突。换成 `item-numbers-must-be-registered`：
+  //   ① 显示的每一个数字都要能在**收据**（引擎实数 / 已登记证据 / 登记产物里同一条目的数字）里找到出处；
+  //   ② 该显示的数字**必须真的显示**（把次数/冷却从文案里删掉也要红，堵住「什么都不写」）；
+  //   ③ 声明成「引擎此刻的实数」的字段（剩余次数、冷却）必须与引擎里的值一致。
+  // 收据契约见 `itemNumberProblems`。
   {id: 'tab-hook-item', criterion: 'C5 背包态', state: 'item', missing: ['body[data-b3-tab]'],
     rule: '点「物品」之后 body[data-b3-tab] 必须是 item',
     problems: (f) => (f.tab?.item === 'item' ? []
@@ -773,21 +952,22 @@ const CHECKS = [
     },
     actual: (f) => `${f.item?.count ?? 0} 件；命中「${(f.item?.text ?? '').match(/未核验|候选|未取证|未登记/)?.[0] ?? '—'}」；原文 "${(f.item?.text ?? '').slice(0, 80)}"`},
 
-  {id: 'item-no-definite-numbers', criterion: 'C5 背包态', state: 'item', missing: ['data-b3-item-cell'],
-    rule: '背包态不得出现确定性数字（每场 n 次 / 冷却 n 回合 / +150% / 立即生效）',
-    problems: (f) => {
-      const text = f.item?.text ?? '';
-      if (!f.item?.count) return ['背包态左列没有 data-b3-item-cell（没有可检的文案）'];
-      const banned = [/每场\s*\d+\s*次/g, /冷却\s*\d+\s*回合/g, /\+?150%/g, /立即生效/g];
-      const hits = [];
-      for (const re of banned) for (const m of text.matchAll(re)) hits.push(m[0]);
-      return hits.length ? [`确定性数字/时长 ${hits.length} 处：${[...new Set(hits)].join('、')}`] : [];
-    },
+  {id: 'item-numbers-must-be-registered', criterion: 'C5 背包态', state: 'item', missing: ['data-b3-item-cell'],
+    rule: '背包态里出现的每一个数字都必须能追溯到「引擎给的实数」（view.self.magic.uses_left / cooldown）'
+      + '或「已登记证据」（data/roco/derived/pvp-magic.json 的 per_battle_uses:2 / cooldown_turns:3）；'
+      + '**同时**该显示的数字必须真的显示出来（把次数/冷却从文案里删掉也要红）。'
+      + '判据本体是纯函数 itemNumberProblems（自带反证 cp-item-sample-numbers / cp-item-numbers-removed）',
+    problems: (f) => itemNumberProblems(f),
     actual: (f) => {
-      const text = f.item?.text ?? '';
-      const banned = [/每场\s*\d+\s*次/g, /冷却\s*\d+\s*回合/g, /\+?150%/g, /立即生效/g];
-      const hits = banned.flatMap((re) => [...text.matchAll(re)].map((m) => m[0]));
-      return `违规命中 ${hits.length} 处${hits.length ? `：${[...new Set(hits)].join('、')}` : '（无）'}`;
+      const item = f.item ?? {};
+      const eng = item.engineFacts ?? {};
+      const reg = item.registered ?? {};
+      const hits = itemNumberProblems(f);
+      return `${item.count ?? 0} 件；引擎实数 uses_left=${JSON.stringify(eng.usesLeft ?? null)}`
+        + `/cooldown=${JSON.stringify(eng.cooldown ?? null)}/swapped=${JSON.stringify(eng.swappedCount ?? null)}；`
+        + `已登记 per_battle_uses=${JSON.stringify(reg.per_battle_uses ?? null)}`
+        + `/cooldown_turns=${JSON.stringify(reg.cooldown_turns ?? null)}；`
+        + `原文 "${oneLine(item.text ?? '', 120)}"；问题 ${hits.length} 条`;
     }},
 
   // ── C6 右列战报 ─────────────────────────────────────────────────────────
@@ -982,7 +1162,22 @@ function baselineFacts() {
     // `skillTabLastBottom` 必须等于 `skills.lastBottom`（60 + 3*200 + 192 = 852）：基线的每一格都要自洽
     switchRows: {count: 5, skillTabLastBottom: 60 + 3 * 200 + 192, lastBottom: 60 + 4 * 160 + 152,
       rows: [0, 1, 2, 3, 4].map(rowOf)},
-    item: {count: 2, cells: [], text: '愿力强化 候选机制（未核验）：是否占行动未登记；次数与冷却均未登记 首领化 候选机制（未取证）'},
+    item: {count: 2, cells: [],
+      // 背包那一块的**原文**（与实测到的页面一致：标题行的「2 / 2」= 引擎 uses_left / 已登记 per_battle_uses，
+      // 说明行的「每局 2 次 · 冷却 3 回合」= 已登记证据的 per_battle_uses / cooldown_turns）。
+      text: '愿力强化 2 / 2 候选 · 未核验：说明未登记。 每局 2 次 · 冷却 3 回合 · 占一次行动 '
+        + '首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。 需要「首领血脉」，本版未做',
+      // 引擎实数（字段名是**量出来的**：view.self.magic.{uses_left,cooldown,swapped}）
+      engineFacts: {usesLeft: 2, usesLeftFrom: 'view.self.magic.uses_left（引擎实数）',
+        cooldown: 0, cooldownFrom: 'view.self.magic.cooldown（引擎实数）',
+        swappedCount: 0, swappedFrom: 'view.self.magic.swapped（引擎实数）'},
+      registered: {ok: true, file: 'data/roco/derived/pvp-magic.json', magic_id: 'wish_power_up', name: '愿力强化',
+        per_battle_uses: 2, cooldown_turns: 3, occupies_action: true,
+        wish_impact: {energy: 2, power: 80, from: 'data/roco/derived/pvp-magic.json#magic.wish_impact'},
+        evidence_id: 'EV-PVP-WISH-POWER-UP', ruleset_id: 'roco-world-s4-2026-09-10'},
+      fieldAudit: {text: '.b3-wrap [data-b3-panel="item"]', count: '.b3-wrap [data-b3-item-count]',
+        engine: 'window.rocoDemo.state.view.self.magic', legal: 'window.rocoDemo.state.view.legal[kind=magic]'},
+      evidence: []},
     log: {count: 2, turns: [2, 1], turnSource: 'attr', firstTurn: 2, maxTurn: 2,
       colWidth: 232, colRect: rect(1192, 60, 232, 800), texts: ['第 2 回合 你换上雪影娃娃', '第 1 回合 音速犬使用强制重启'], scrollTag: 'DIV'},
     footer: {resolved: true, rect: rect(16, 874, 1408, 44),
@@ -1035,8 +1230,14 @@ const COUNTERPROOFS = [
     mutate: (f) => { f.switchRows.skillTabLastBottom = 820; }},
   {id: 'cp-switch-overlap-charge', check: 'switch-not-overlap-charge', desc: '更换态第 5 行压到聚能区上',
     mutate: (f) => { const r = f.switchRows.rows[4].rect; r.top = 860; r.bottom = 1012; r.h = 152; }},
-  {id: 'cp-item-forbidden-number', check: 'item-no-definite-numbers', desc: '把「每场 3 次」这种确定性数字塞进背包格',
-    mutate: (f) => { f.item.text = `${f.item.text} 每场 3 次，冷却 2 回合，+150% 立即生效。`; }},
+  {id: 'cp-item-sample-numbers', check: 'item-numbers-must-be-registered',
+    desc: '把**写死的样例数字**塞进背包格（「每局 5 次，冷却 9 回合」——5/9 在引擎与已登记证据里都没有出处）',
+    mutate: (f) => { f.item.text = `${f.item.text} 每局 5 次，冷却 9 回合。`; }},
+  {id: 'cp-item-numbers-removed', check: 'item-numbers-must-be-registered',
+    desc: '把引擎/登记里的次数与冷却**从文案里删掉**（「什么都不写」也必须红）',
+    mutate: (f) => {
+      f.item.text = '愿力强化 候选 · 未核验：说明未登记。 首领化 不可用 候选机制（未取证）：首领形态 / 血脉觉醒路径。';
+    }},
   {id: 'cp-item-no-candidate-note', check: 'item-candidate-boundary', desc: '背包格只写效果、不写「未核验/候选」边界',
     mutate: (f) => { f.item.text = '愿力强化：把当前精灵的第一个技能换成愿力冲击。'; }},
   {id: 'cp-log-order-flipped', check: 'log-latest-first', desc: '把战报顺序倒过来（最旧的回合在最上）',
@@ -1108,7 +1309,7 @@ async function launchChrome() {
   }
   if (!port) {
     chrome.kill('SIGKILL');
-    rmSync(profile, {recursive: true, force: true});
+    rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
     throw new Error(`Chrome 没起来：${chromeErr}`);
   }
   const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
@@ -1120,7 +1321,7 @@ async function launchChrome() {
     close: async () => {
       try { ws.close(); } catch { /* 已经关了 */ }
       chrome.kill('SIGKILL');
-      rmSync(profile, {recursive: true, force: true});
+      rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
     },
   };
 }
@@ -1174,6 +1375,8 @@ function runSelftest() {
 
 async function main() {
   mkdirSync(OUT, {recursive: true});
+  // 背包态数字判据的「已登记证据」：**在 Node 侧读一次**（页面读不到 data/**），缺了就如实记下来
+  const registeredItemFacts = loadRegisteredItemFacts();
   const {baseline, vacant} = runSelftest();
   if (argv.includes('--selftest-only')) {
     const hits = results.counterproofs.filter((c) => c.ok).length;
@@ -1349,19 +1552,28 @@ async function main() {
       // 推进一回合：让战报至少有 2 个回合分组，「最新在最上」才可判
       if (started) {
         const before = Number(await js(`window.rocoDemo?.state?.view?.turn ?? 0`));
-        // ① 真鼠标点 `#auto-turn`；② 点不到/没动就退回页面自己给的命名空间出口
-        //    （`window.rocoDemo.autoTurn` 是页面为验收脚本显式挂出来的，不是我另写一套 DOM）。
-        let how = 'click:#auto-turn';
-        let advanced = await clickSelector('#auto-turn');
-        let bumped = advanced ? await waitFor(`(window.rocoDemo?.state?.view?.turn ?? 0) > ${before}`, 24, 250) : false;
+        // 2026-09-25（死代码清理批二 / 审计 #4）：这里原来**先点一个不存在的按钮**再记成
+        // `how='click:#auto-turn'` —— `#auto-turn` 已随旧行动坞删除（`#action-panel` 在
+        // v3 版式下 `display:none !important`，实测 rect 恒 0×0），于是 `clickSelector` 返回空、
+        // `how` 却照样写着「点了」。报告会因此**撒谎**（不是判据坏，是记录坏）。
+        // 现在的口径：**真落点优先**——先真鼠标点 v3h 底栏里本回合合法的技能格（点它就走这一手），
+        // 点不到才退回页面为验收脚本显式挂出来的命名空间出口，`how` 全程记**实际**走了哪条路。
+        const slotSel = '.b3-wrap [data-b3-slot-legal="yes"][data-b3-action]';
+        let how = 'none';
+        let bumped = false;
+        const rect = await clickSelector(slotSel);
+        if (rect) {
+          how = `click:${slotSel}`;
+          bumped = await waitFor(`(window.rocoDemo?.state?.view?.turn ?? 0) > ${before}`, 24, 250);
+        }
         if (!bumped && await js(`typeof window.rocoDemo?.autoTurn`) === 'function') {
-          how = 'fallback:window.rocoDemo.autoTurn()';
+          how = (how === 'none' ? '' : `${how}→`) + 'namespace:window.rocoDemo.autoTurn()';
           await js(`window.rocoDemo.autoTurn()`);
           bumped = await waitFor(`(window.rocoDemo?.state?.view?.turn ?? 0) > ${before}`, 40, 250);
         }
         entry.steps.push({step: 'advance-one-turn', ok: Boolean(bumped), how, from: before,
           to: Number(await js(`window.rocoDemo?.state?.view?.turn ?? 0`))});
-        if (!bumped) log('○ 没能推进一回合（#auto-turn 点不到或回合没动）—— 战报可能只有 1 个回合分组');
+        if (!bumped) log('○ 没能推进一回合（合法技能格与命名空间出口都没让回合变化）—— 战报可能只有 1 个回合分组');
       }
     }
     results.entry = entry;
@@ -1403,6 +1615,8 @@ async function main() {
     itemFacts.tab = {...(skillFacts.tab ?? {}), ...(itemFacts.tab ?? {})};
     if (itemFacts.tab.item === undefined) itemFacts.tab.item = null;
     itemFacts.tab.itemClick = itemClick;
+    // 背包态数字判据的「已登记证据」面：读 `data/roco/derived/pvp-magic.json`（页面读不到文件，Node 侧读）
+    itemFacts.item = {...(itemFacts.item ?? {}), registered: registeredItemFacts};
     itemFacts.columns = itemFacts.columns?.left ? itemFacts.columns : skillFacts.columns;
     itemFacts.stage = itemFacts.stage?.resolved ? itemFacts.stage : skillFacts.stage;
     itemFacts.log = skillFacts.log;
@@ -1559,7 +1773,20 @@ async function main() {
   process.exitCode = report.ok ? 0 : 1;
 }
 
-main().catch((error) => {
+// 2026-09-25（**同一形状第三次**）：跑完、报告写完，进程却一直不退 ⇒ 门禁那 30 分钟兜底才把它杀掉，
+// 而那一套被判红。根因不是 CDP（C6.118 里我那样归因是错的：报告已经写完，说明 await 都回来了），
+// 而是**只设了 `process.exitCode`、从不显式退出** —— 只要还有一个句柄没散（Chrome 死了、服务关了，
+// 但 socket/计时器还在），事件循环就永远不空。所以收尾统一成：**先让 stdout 冲干净，再显式退出**。
+const flushThenExit = (code) => new Promise((resolve) => {
+  process.exitCode = code;
+  process.stdout.write('', () => resolve());
+}).then(() => process.exit(process.exitCode ?? code));
+
+main().then(
+  () => flushThenExit(process.exitCode ?? 0),
+  (error) => {
   console.error('[battle-v3] 脚本自身出错：', error);
-  process.exitCode = 2;
-});
+  ;
+    return flushThenExit(2);
+  },
+);

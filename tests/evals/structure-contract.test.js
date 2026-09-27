@@ -24,7 +24,8 @@ import { dirname, join, resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // 服务器导出的资源白名单与模块图：契约测试直接核对**服务器认定的事实**，
 // 而不是自己再算一遍（各自算一遍就会各自漂，白屏那次就是这么漏过去的）。
-import {publicAssets, browserModules as serverBrowserModules, moduleSpecifiers} from '../../src/server/index.js';
+import {publicAssets, browserModules as serverBrowserModules, moduleSpecifiers,
+  PAGE_ALIASES} from '../../src/server/index.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const git = (args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
@@ -176,10 +177,10 @@ const BROWSER_GLOBAL_NAMES = ['document', 'window', 'localStorage', 'navigator',
  * 残留缺口（都是偏严方向，当前仓库没有这种写法）：只通过**形参**引入的同名绑定、
  * 类成员名、标签名，排除不掉。
  */
-function browserGlobalUses(code) {
+function browserGlobalUses(code, names = BROWSER_GLOBAL_NAMES) {
   const locals = new Set();
   for (const m of code.matchAll(/\b(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/g)) locals.add(m[1]);
-  const re = new RegExp(`(?<![.\\w$])(${BROWSER_GLOBAL_NAMES.join('|')})\\b`, 'g');
+  const re = new RegExp(`(?<![.\\w$])(${names.join('|')})\\b`, 'g');
   const hits = [];
   for (const m of code.matchAll(re)) {
     if (locals.has(m[1])) continue;
@@ -495,8 +496,101 @@ test('反证：浏览器全局这条判据不是空的（真使用会红、注�
     "experience.js 里的 'window-unfocused' 是数据字符串、document.hidden 在注释里——都不是读 DOM");
 });
 
-test('结构契约：入口模块图里每个相对 import 都解析到真实文件', () => {
-  const mods = browserModules(ENTRY);
+// ── 浏览器图里不许**裸用** Node 专有全局（2026-09-25 真机事故的直接教训）────────────
+//
+// 事故：`src/coach/runtime.js` 里 9 个开关函数写成 `env = process.env`（默认参数是**调用时**
+// 求值的），浏览器里点「✦ 小芽」→ 输入一句话 → 状态行 `process is not defined`，
+// `/api/coach` **一次请求都没发出去**，整条本地教练链路在页面上是死的。
+// 这类写法在 Node 单测里**永远绿**（Node 里 `process` 存在），所以只能在模块图上静态扫。
+// 允许有守卫的写法：`typeof process` 与 `globalThis.process?.env`（见 `src/coach/env.js`）。
+const NODE_ONLY_GLOBAL_NAMES = ['process', 'Buffer', '__dirname', '__filename', 'setImmediate'];
+/**
+ * 逐行剥注释与字符串，**行号一字不动**。
+ * 为什么不用上面的 `stripCommentsAndStrings`：它会把块注释里的换行一起吃掉
+ * （`src/client/app.js` 上 1244 行 → 1241 行），这条判据要报准确的 `文件:行号`，
+ * 行号一漂就会指向无辜的代码。这份实现在**行内**把注释/字符串抹成空格，行数恒等。
+ */
+function stripLinewise(source) {
+  let inBlock = false;
+  return source.split('\n').map((line) => {
+    let out = '';
+    for (let i = 0; i < line.length; i += 1) {
+      const two = line.slice(i, i + 2);
+      if (inBlock) { if (two === '*/') { inBlock = false; i += 1; } out += ' '; continue; }
+      if (two === '/*') { inBlock = true; i += 1; out += '  '; continue; }
+      if (two === '//') break;
+      const ch = line[i];
+      if (ch === '"' || ch === "'" || ch === '`') {
+        out += ' ';
+        i += 1;
+        while (i < line.length) {
+          if (line[i] === '\\') { out += '  '; i += 2; continue; }
+          out += ' ';
+          if (line[i] === ch) break;
+          i += 1;
+        }
+        continue;
+      }
+      out += ch;
+    }
+    return out;
+  }).join('\n');
+}
+/** 只留**未守卫**的用法：`globalThis.process` 被 browserGlobalUses 的 lookbehind 排掉，
+ *  `typeof process === '…' ? … : process.env` 这种同一行的守卫要放行。 */
+function nodeOnlyGlobalUses(code) {
+  return browserGlobalUses(code, NODE_ONLY_GLOBAL_NAMES).filter((m) => {
+    if (m[1] !== 'process') return true;
+    const line = `${code.slice(0, m.index).split('\n').pop()}${code.slice(m.index).split('\n')[0]}`;
+    return !/typeof\s+process/.test(line);
+  });
+}
+
+test('结构契约：浏览器模块图里不许裸用 Node 专有全局（真机上小芽因此一句都答不上来）', () => {
+  const modules = [...serverBrowserModules()];
+  assert.ok(modules.length >= 20, `浏览器模块图只有 ${modules.length} 个文件，守卫可能失效`);
+  const problems = [];
+  for (const rel of modules) {
+    const source = readFileSync(join(ROOT, rel), 'utf8');
+    const code = stripLinewise(source);
+    assert.equal(code.split('\n').length, source.split('\n').length, `${rel} 剥注释后行数变了`);
+    for (const m of nodeOnlyGlobalUses(code)) {
+      const line = code.slice(0, m.index).split('\n').length;
+      problems.push(`${rel}:${line} 裸用 ${m[1]}（浏览器里会抛 ReferenceError）`);
+    }
+  }
+  assert.deepEqual(problems, [],
+    `浏览器里这些写法会抛 ReferenceError，而 Node 单测永远绿：\n${problems.join('\n')}`);
+});
+
+test('反证：Node 专有全局这条判据不是空的（真用会红、守卫写法与注释/字符串不会）', () => {
+  const scan = (text) => nodeOnlyGlobalUses(stripLinewise(text)).map((m) => m[1]);
+  // ① 真缺陷必须抓到：就是这次真机事故那一行
+  assert.deepEqual(scan('export function f(env=process.env){return env.X;}'), ['process']);
+  assert.deepEqual(scan('const t=process.hrtime.bigint();'), ['process']);
+  assert.deepEqual(scan('const b=Buffer.from("x");'), ['Buffer']);
+  assert.deepEqual(scan('const d=__dirname;'), ['__dirname']);
+  assert.deepEqual(scan('setImmediate(f);'), ['setImmediate']);
+  // ② 两种守卫写法不算（否则 env.js 自己与 toolbox 的既有写法会被误伤）
+  assert.deepEqual(scan('function processEnv(){const env=globalThis.process?.env;return env||{};}'), []);
+  assert.deepEqual(scan("const env = typeof process === 'undefined' ? {} : process.env;"), []);
+  assert.deepEqual(scan('function f(env=processEnv()){return env;}'), [], 'processEnv 不是 process');
+  // ③ 注释/字符串不算：toolbox 的 UNSAFE_KEYS 里真有一个字符串写着 'process'
+  assert.deepEqual(scan("const UNSAFE_KEYS=new Set(['process','path']);"), []);
+  assert.deepEqual(scan('// 浏览器里没有 process 全局\n'), []);
+  assert.deepEqual(scan('/* 块注释\n里面提到 process\n*/\nconst ok=1;'), [], '块注释跨行也不能误报');
+  // ④ 行号必须准（这条判据的价值一半在「报得出是哪一行」）
+  const numbered = nodeOnlyGlobalUses(stripLinewise('const a=1;\nconst b=2;\nconst c=process.pid;\n'));
+  assert.equal(stripLinewise('const a=1;\nconst b=2;\nconst c=process.pid;\n').slice(0, numbered[0].index).split('\n').length, 3);
+  // ⑤ 活证据：那两个真踩过坑的文件，现在必须一干二净
+  const runtime = readFileSync(join(ROOT, 'src/coach/runtime.js'), 'utf8');
+  assert.match(runtime, /env=processEnv\(\)/, '反证前提：runtime.js 现在用的是 processEnv()');
+  assert.deepEqual(scan(runtime), [], 'runtime.js 里不该再有裸用（它的 9 处就是事故点）');
+  assert.deepEqual(scan(readFileSync(join(ROOT, 'src/coach/env.js'), 'utf8')), [],
+    'env.js 是唯一允许读 process 的地方，而它必须走 globalThis 守卫');
+});
+
+test('结构契约：入口模块图里每个相对 import 都解析到真实文件', () => {  const mods = browserModules(ENTRY);
   assert.ok(mods.size >= 8, `模块图应当有一定规模，实际 ${mods.size}`);
   for (const rel of mods) {
     assert.ok(existsSync(join(ROOT, rel)), `模块图里的 ${rel} 在磁盘上不存在`);
@@ -1030,44 +1124,106 @@ test('反证/安全边界：自愈**只**放行推导图里的东西，图外一
   }
 });
 
+// 兜底横幅这条守卫抽成一个函数：主判据与反证跑**同一份实现**。
+// （反证若自己重写一遍判定，它证明的只是「我在反证里写的那几个 if 会红」，
+// 证明不了真守卫会红——那种反证看着绿，其实什么都没钉住。）
+// `override.files` 只给反证用：把改坏的页面/模块喂进来，不动磁盘上的文件。
+const BANNER_CSS_FILES = ['src/client/style.css', 'src/client/roco.css', 'src/client/box.css', 'src/client/connect.css'];
+function bannerProblems(page, override = {}) {
+  const problems = [];
+  const read = (rel) => override.files?.[rel] ?? readFileSync(join(ROOT, rel), 'utf8');
+  const html = override.files?.[page] ?? readFileSync(join(ROOT, page), 'utf8');
+  if (!html.includes('id="boot-fallback"')) problems.push(`${page} 没有兜底横幅：脚本没下发时页面只会一直「正在读取」`);
+  // 横幅必须**默认可见**（不许被 CSS 藏起来）：CSS 与 JS 是两条独立的失败路径。
+  for (const css of BANNER_CSS_FILES) {
+    const text = read(css);
+    const block = /\.boot-fallback\s*\{([^}]*)\}/.exec(text);
+    if (block && /display\s*:\s*none/.test(block[1])) problems.push(`${css} 把兜底横幅藏起来了（等于把这类故障又藏回去）`);
+  }
+  // 入口模块必须撤掉它（否则正常页面永远挂着一条故障横幅）。
+  for (const spec of moduleSpecifiers(html)) {
+    const rel = spec.startsWith('/') ? spec.slice(1)
+      : relative(ROOT, resolve(ROOT, dirname(page), spec)).replace(/\\/g, '/');
+    // 只认 JS 入口。页面里那些 `import './assets/home.jpg'` / `import './xiaoya.html'`
+    // 是**静态资源锚点**（见 src/client/index.html 顶部注释与 src/server/index.js 的
+    // browserModules()），它们不是入口、也不会撤横幅。
+    // 2026-09-25：首页加上图片锚点之后，这条守卫原来会在第一个锚点上就 `break`——
+    // 于是 index.html 的入口模块**从来没被检查过**，守卫静静地失效了。先判扩展名，
+    // 再判存在性，锚点既不算入口也不占掉「第一个入口」这个位置。
+    if (!/\.m?js$/.test(rel)) continue;
+    if (!existsSync(join(ROOT, rel)) && !override.files?.[rel]) continue;
+    if (!/boot-fallback/.test(read(rel))) problems.push(`${rel} 不会撤掉兜底横幅（${page} 上会一直挂着它）`);
+    break;   // 每个页面看第一个 JS 入口就够了
+  }
+  return problems;
+}
+
 test('结构契约：每个页面都有「脚本没加载成功」的兜底横幅，且入口模块会撤掉它', () => {
   const pages = [...publicAssets].filter((rel) => rel.endsWith('.html'));
-  const problems = [];
-  for (const page of pages) {
-    const html = readFileSync(join(ROOT, page), 'utf8');
-    if (!html.includes('id="boot-fallback"')) problems.push(`${page} 没有兜底横幅：脚本没下发时页面只会一直「正在读取」`);
-    // 横幅必须**默认可见**（不许被 CSS 藏起来）：CSS 与 JS 是两条独立的失败路径。
-    for (const css of ['src/client/style.css', 'src/client/roco.css', 'src/client/box.css', 'src/client/connect.css']) {
-      const text = readFileSync(join(ROOT, css), 'utf8');
-      const block = /\.boot-fallback\s*\{([^}]*)\}/.exec(text);
-      if (block && /display\s*:\s*none/.test(block[1])) problems.push(`${css} 把兜底横幅藏起来了（等于把这类故障又藏回去）`);
-    }
-    // 入口模块必须撤掉它（否则正常页面永远挂着一条故障横幅）
-    for (const spec of moduleSpecifiers(html)) {
-      const rel = spec.startsWith('/') ? spec.slice(1)
-        : relative(ROOT, resolve(ROOT, dirname(page), spec)).replace(/\\/g, '/');
-      if (!existsSync(join(ROOT, rel))) continue;
-      const src = readFileSync(join(ROOT, rel), 'utf8');
-      if (!/boot-fallback/.test(src)) problems.push(`${rel} 不会撤掉兜底横幅（${page} 上会一直挂着它）`);
-      break;   // 每个页面看第一个入口模块就够了
-    }
-  }
+  assert.ok(pages.length > 0, '一个页面都没有的话这条守卫是空的');
+  const problems = pages.flatMap((page) => bannerProblems(page));
   assert.deepEqual(problems, [], `兜底横幅这条守卫不成立：\n${problems.join('\n')}`);
 });
 
-test('反证：兜底横幅这条守卫不是空的（把撤除代码去掉必须红）', () => {
-  const page = 'src/client/roco.html';
-  const html = readFileSync(join(ROOT, page), 'utf8');
-  const stripped = html.replace('id="boot-fallback"', 'id="nope"');
-  assert.ok(!stripped.includes('id="boot-fallback"'), '构造失败');
-  const src = readFileSync(join(ROOT, 'src/client/roco.js'), 'utf8');
-  const strippedSrc = src.replace(/boot-fallback/g, 'nope');
-  assert.ok(!/boot-fallback/.test(strippedSrc), '构造失败');
-  // 同一条判据用在坏输入上必须报出问题
+// ── 页面短路径：每一页都要能按**文件名**打开（2026-09-25 实测漏了 /xiaoya.html）────────
+//
+// 失效方式：页面文件明明在静态白名单里（模块图把它收进来了），但 `PAGE_ALIASES` 里没有
+// 它 ⇒ 玩家手敲 `/xiaoya.html` 得到 404；而首页那个热区恰好用的是真实路径
+// `/src/client/xiaoya.html`（那条能开），所以页面"看着是好的"。
+// 白名单类判据查不出这一条：白名单里那一项一直在。
+test('结构契约：每个页面外壳都能按短路径 /<文件名> 打开（漏一页 = 404）', () => {
+  const pages = [...publicAssets].filter((rel) => /^src\/client\/[^/]+\.html$/.test(rel));
+  assert.ok(pages.length >= 6, `页面外壳太少（${pages.length} 个），这条守卫可能已经空了`);
   const problems = [];
-  if (!stripped.includes('id="boot-fallback"')) problems.push('缺横幅');
-  if (!/boot-fallback/.test(strippedSrc)) problems.push('不会撤横幅');
-  assert.equal(problems.length, 2, `反证应当同时命中两条，实际 ${JSON.stringify(problems)}`);
+  for (const page of pages) {
+    const base = page.slice('src/client/'.length);
+    const target = PAGE_ALIASES[base];
+    if (!target) problems.push(`${base} 没有短路径（/${base} 会 404）`);
+    else if (target !== page) problems.push(`${base} 的短路径指向 ${target}，不是它自己（${page}）`);
+    else if (!publicAssets.has(target)) problems.push(`${base} 的短路径指向不在白名单里的 ${target}`);
+  }
+  // 反向：表里指到别处的别名也必须真的有那一页（防止手滑写成别的文件名）
+  for (const [url, rel] of Object.entries(PAGE_ALIASES)) {
+    if (url === '' || url === 'index.html') continue;
+    if (!pages.includes(rel)) problems.push(`短路径 /${url} 指向的 ${rel} 不是页面外壳`);
+  }
+  assert.deepEqual(problems, [], `页面短路径不完整：\n${problems.join('\n')}`);
+});
+
+test('反证：去掉 /xiaoya.html 的短路径 ⇒ 上面那条必须红', () => {
+  const pages = [...publicAssets].filter((rel) => /^src\/client\/[^/]+\.html$/.test(rel));
+  assert.ok(pages.includes('src/client/xiaoya.html'), '前提：单独的小芽页面是页面外壳');
+  // 用**同一份判据**（不是复制一份断言）验证它抓得住这个真实缺口：
+  const problems = (aliases) => pages.filter((page) => {
+    const base = page.slice('src/client/'.length);
+    return aliases[base] !== page;
+  }).map((page) => page.slice('src/client/'.length));
+  const withoutXiaoya = {...PAGE_ALIASES};
+  delete withoutXiaoya['xiaoya.html'];
+  assert.equal(PAGE_ALIASES['xiaoya.html'], 'src/client/xiaoya.html', '前提：这一页的短路径本来是对的');
+  assert.ok(problems(withoutXiaoya).includes('xiaoya.html'),
+    '拿掉 xiaoya.html 的短路径之后必须报出它（否则上面那条判据是空的）');
+  assert.deepEqual(problems(PAGE_ALIASES), [], '前提：当前这张表是齐的');
+});
+
+test('反证：兜底横幅这条守卫不是空的（缺横幅 / 入口不撤 / 资源锚点不许顶掉入口）', () => {
+  const page = 'src/client/roco.html';
+  const entry = 'src/client/roco.js';
+  const html = readFileSync(join(ROOT, page), 'utf8');
+  const entrySrc = readFileSync(join(ROOT, entry), 'utf8');
+  assert.ok(/boot-fallback/.test(entrySrc), '前提：这个页面的入口本来会撤横幅，否则下面两条都不成立');
+  // ① 页面没有横幅 ⇒ 必须报出来
+  const noBanner = bannerProblems(page, {files: {[page]: html.replace('id="boot-fallback"', 'id="nope"')}});
+  assert.ok(noBanner.some((x) => x.includes('没有兜底横幅')), `缺横幅必须红，实际 ${JSON.stringify(noBanner)}`);
+  // ② 入口不撤横幅 ⇒ 必须报出**这个模块**；而且前面先放一个资源锚点（首页的真实排布），
+  //    守卫不许在锚点上 break 掉、把真入口漏过去。
+  const anchored = html.replace(/(<script)/, "import './assets/home.jpg';\n$1");
+  const broken = bannerProblems(page, {files: {[page]: anchored, [entry]: entrySrc.replace(/boot-fallback/g, 'nope')}});
+  assert.ok(broken.some((x) => x.includes(entry)), `入口不撤必须报出来，实际 ${JSON.stringify(broken)}`);
+  // ③ 同一输入、只把入口换回「会撤横幅」的那份 ⇒ 必须一条问题都没有。
+  //    没有这一格，②可能只是「这条判据恒红」，那就不是在钉东西了。
+  assert.deepEqual(bannerProblems(page, {files: {[page]: anchored, [entry]: entrySrc}}), [],
+    '前提：锚点 + 正常入口不该报任何问题（否则②的红是假的）');
 });
 
 // ── 多页面的资源白名单（2026-09-21 加）────────────────────────────────────────
@@ -1115,4 +1271,22 @@ test('结构契约：每个页面的模块图闭包都在白名单里且都真�
   for (const need of ['src/client/roco.js', 'src/coach/roco-experience.js']) {
     assert.ok(graph.has(need), `模块图里缺了 ${need}——它不会被服务器提供，页面会白屏`);
   }
+});
+
+// 2026-09-25（本轮 r45 的真实红）：`browser-roco-ux-acceptance` 的判据 **39/39 全过、反证 6/6 命中**，
+// 却在收尾时崩了 —— `chrome.kill('SIGKILL')` 之后**立刻** `rmSync(profile, ...)`，Chrome 还在写临时
+// profile ⇒ `ENOTEMPTY: Directory not empty`。门禁只看退出码，于是"判据全绿"变成"这一套红"，
+// 而且定位成本极高（要看日志尾部才知道是 teardown）。这一类已经咬过三次（`exitCode` 不退、CDP 误诊、这次）。
+// 契约：**所有浏览器脚本删临时 profile 时必须带重试**（`maxRetries`/`retryDelay`），不许裸删。
+test('结构契约：浏览器脚本收尾删临时 profile 必须带重试（裸 rmSync 会 ENOTEMPTY 把绿判据变红）', () => {
+  const dir = join(ROOT, 'scripts', 'roco');
+  const naked = [];
+  for (const name of readdirSync(dir)) {
+    if (!name.endsWith('.mjs')) continue;
+    const src = readFileSync(join(dir, name), 'utf8');
+    for (const m of src.matchAll(/rmSync\(\s*(profile|dir|tmp|temp)[^)]*\)/g)) {
+      if (!/maxRetries/.test(m[0])) naked.push(`${name}: ${m[0]}`);
+    }
+  }
+  assert.deepEqual(naked, [], `这些收尾会因 ENOTEMPTY 把绿判据变红：\n${naked.join('\n')}`);
 });

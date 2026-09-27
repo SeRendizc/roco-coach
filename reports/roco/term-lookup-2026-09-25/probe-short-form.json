@@ -1,0 +1,47 @@
+{
+  "status": 200,
+  "latencyMs": 2012,
+  "provider": "deepseek",
+  "agentStop": "complete",
+  "text": "「应对」本身不是册子里的单独词条，只有三个带它的分类：应对状态、应对攻击、应对防御，分别对应敌方用状态技、攻击技、防御技时触发。你要的是哪一条？",
+  "activityLine": "依据：查了术语表",
+  "calls": 1,
+  "trace": [
+    {
+      "tool": "query_rules",
+      "args": {
+        "kind": "term",
+        "name": "应对",
+        "state_version": 0
+      },
+      "ok": true,
+      "error": null,
+      "result": {
+        "record": "term",
+        "candidates": true,
+        "queried_name": "应对",
+        "note": "册子上没有与这个名字完全一致的术语；下面是名字里含它的候选，**它们不是这个名字的定义**，要哪一条请按 term_id 再查或让玩家确认。",
+        "matches": [
+          {
+            "record": "term",
+            "term_id": "1015",
+            "note": "应对状态",
+            "desc": "若敌方使用状态技能，则本技能应对成功，本次行动必定先手，且触发应对效果。"
+          },
+          {
+            "record": "term",
+            "term_id": "1016",
+            "note": "应对攻击",
+            "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后，携带的防御技能进入1回合冷却。"
+          },
+          {
+            "record": "term",
+            "term_id": "1017",
+            "note": "应对防御",
+            "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果。"
+          }
+        ]
+      }
+    }
+  ]
+}

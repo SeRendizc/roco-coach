@@ -22,7 +22,14 @@
     `UnsupportedEffect`，不静默跳过、也不退回一个默认顺序
   - 印记的叠加/替换规则（MC-009）
   - 「传动」的技能位移动（术语 1033）
-  - 天气、连击数、属性增减的层数语义
+  - 连击数、属性增减的层数语义
+  - **天气**：2026-09-25 人类裁决后，天气**在标准 PVP 里存在**（官方一手 4/14《洛个明白》
+    闪耀大赛入门篇逐字「天气是常驻在全场的效果…但天气只能存在一种」）—— 本节上面那条
+    旧口径「天气」已作废，实现见 `set_weather` / `_end_turn_weather`。
+    **但天气是配置声明的能力**：规则集没声明 `policies.weather_policy` 时，引擎
+    **不发明**任何天气行为（技能里的「将天气改为…」照旧登记 unsupported）。
+    仍未实现、如实登记的三处：冻结层数的结算（术语 1004）、引电 2 层的立即结算（3022）、
+    「能耗减半」遇奇数能耗的取整。
   - 特性效果：`traits.py` 已登记 12 条（FULL 6 / PARTIAL 2 / REFUSED 4），
     其余精灵的特性**未登记**（MC-014…019 仍未闭合；`engine-trait-status.json` 是账本）
 
@@ -40,6 +47,7 @@
 from __future__ import annotations
 
 import dataclasses
+import math
 import random
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -55,6 +63,7 @@ from .schema import (
     ACTION_CHARGE,
     ACTION_ESCAPE,
     ACTION_ITEM,
+    ACTION_MAGIC,
     ACTION_SKILL,
     ACTION_SURRENDER,
     ACTION_SWITCH,
@@ -106,6 +115,10 @@ ACTION_ORDER_DIMENSIONS: Tuple[str, ...] = ("respond", "switch", "priority", "sp
 #: 声明了一个引擎产不出的动作类，等于把「没实现」说成「已支持」。
 ACTION_KINDS_IMPLEMENTED: Tuple[str, ...] = (
     ACTION_SKILL, ACTION_CHARGE, ACTION_SWITCH, ACTION_SURRENDER, ACTION_ITEM, ACTION_ESCAPE,
+    # 2026-09-23：`magic`（PVP 魔法：愿力强化）真的会被产出（见 `_use_magic` 与
+    # `legal_actions` 的 magic 分支），所以必须列进来 —— 否则配置一旦声明它，
+    # 加载期就会按「声明了引擎产不出的动作类」抛错。
+    ACTION_MAGIC,
 )
 
 DEFAULT_ITEM_STOCK = {"回复药": 3, "净化药": 2, "能量果": 2}
@@ -231,10 +244,19 @@ def reset(
     except RuleConfigError as exc:
         raise fx.UnsupportedEffect("入场初始能量", str(exc)) from exc
 
+    # 2026-09-23（人类口径）：「每只精灵的能量（星）是**独立**的、开局都是满的 10 星」。
+    # 老行为只把入场能量发给**场上那只**，换人上来的是 0 星 —— 页面按能量判可点性，
+    # 于是换上来之后四格技能全灰（实测：开局 view.self.pets 能量 = [10,0,0,0,0,0]）。
+    # 这条同样是**配置声明**（`energy.initial_for_all_pets`）：legacy / v2 不声明 →
+    # 保持「只给场上那只」，`test_turn_order_fail_closed` 的 golden 指纹逐位不变。
     for side in (state.player, state.enemy):
         side.items = dict(DEFAULT_ITEM_STOCK)
         side.active = 0
-        side.field_pet.energy = initial_energy
+        if bool(getattr(cfg, "energy_initial_for_all_pets", False)):
+            for p in side.pets:
+                p.energy = initial_energy
+        else:
+            side.field_pet.energy = initial_energy
         side.field_pet.entered_turn = 1
         # RC-105：只有声明了 `mana` 的配置才给魔力。legacy / v2 里 `mana_pool is None`
         # → `SideState.mana` 保持 `None`（序列化里不会出现这个键，8 条 golden 指纹不变）；
@@ -247,6 +269,9 @@ def reset(
                     "引擎不知道该发多少点魔力，不许回落到 legacy 或任意数",
                 )
             side.mana = int(cfg.mana_pool)
+        # 2026-09-23：PVP 魔法（愿力强化）同样**只在配置声明了 magic 这一类时**初始化。
+        # legacy / v2 没声明 → `side.magic` 保持 None（序列化里不出现这个键，指纹不变）。
+        _init_pvp_magic(side, rs, cfg)
     # 首发入场：入场类特性（专注力/身经百练）在这里结算
     for side in ("player", "enemy"):
         events: List[Dict[str, Any]] = []
@@ -349,7 +374,18 @@ def legal_actions(state: GameState, rs: Ruleset, side: str,
         skill = rs.skills.get(sid)
         if skill is None or skill.is_trait:
             continue
-        if skill.energy > pet.energy:
+        # RC-401 批三：可付性按**有效能耗**（基础 + 能耗修正）。声明了机制才不一样。
+        # 负值表示「修正把能耗压到 0 以下」——下限未定义（MC-018），此时**不提供这一手**
+        # （拿不到定价就不报合法动作），而不是猜一个 0。
+        try:
+            # 沙暴让地系技能能耗减半 —— 天气是场地级，所以这里也要带上它
+            cost = effective_skill_cost(pet, skill, cfg, weather=state.weather,
+                                        foe_status_layers=_poison_layers(state, side))
+        except RuleConfigError:
+            cost = int(skill.energy)
+        if cost < 0:
+            continue
+        if cost > pet.energy:
             continue
         if skill.is_defense and pet.defense_cooldown > 0:
             continue          # 术语 1016
@@ -366,6 +402,27 @@ def legal_actions(state: GameState, rs: Ruleset, side: str,
     for item_id, count in sorted(me.items.items()):
         if count > 0:
             emit(Action(kind=ACTION_ITEM, item_id=item_id, target_index=me.active))
+
+    # 2026-09-23：PVP 魔法（愿力强化）。只在**配置声明**了 magic 这一类时出现。
+    # 两种情形都能出这个动作：
+    #   · 这一只的第一个技能已经被换过 → 这一下是**解除**（人类口径：不消耗次数）；
+    #   · 还有次数、且不在冷却里        → 这一下是**转换**（消耗一次）。
+    # 只剩「没次数又没换过」时才不出现 —— 那时它确实无事可做。
+    if allowed is not None and ACTION_MAGIC in allowed and isinstance(me.magic, dict):
+        magic = pvp_magic_of(rs)
+        if magic is not None:
+            swapped = me.magic.get("swapped") or {}
+            # 2026-09-23（人类实测）：「冷却」必须**真的锁住这个动作**，两支都锁 ——
+            # 冷却的本义是「这件道具现在不能用」，而「解除」也是用这件道具。
+            # 之前只有转换那一支看冷却（而且它自己还不设冷却），解除那一支完全不看，
+            # 于是冷却形同虚设。现在：在冷却里 → 这个动作整支不出现。
+            on_cooldown = int(me.magic.get("cooldown") or 0) > 0
+            can_restore = pet.pet_id in swapped and not on_cooldown
+            can_transform = (int(me.magic.get("uses_left") or 0) > 0
+                             and not on_cooldown
+                             and wish_impact_skill_id(rs, pet) is not None)
+            if can_restore or can_transform:
+                emit(Action(kind=ACTION_MAGIC, magic_id=str(magic.get("magic_id"))))
 
     if allowed is not None and ACTION_SURRENDER in allowed:
         emit(Action(kind=ACTION_SURRENDER))
@@ -616,6 +673,18 @@ def step_joint(
         if action not in legal_actions(state, rs, side):
             raise ValueError(f"{side} 的行动不合法：{action.label(rs)}")
 
+    # 投降是**立即生效的弃权**：不参与速度排序，也不受「我方场上精灵已经倒下」影响。
+    # 真缺陷（人类 2026-09-25 实测「投降只会扣一颗心，为啥退出不出来」）：投降原本跟普通
+    # 动作一样进 `order_actions` 排序，当对手更快、且它这一手正好打倒我方当前精灵时，
+    # `_execute` 的第一道守卫（`if not pet.alive` → `action_cancelled`）会把投降**静默吞掉**：
+    # 本局继续、白扣 1 点魔力、玩家被拖进补位 —— 而投降是屏幕上唯一的出口。
+    # 投降没有速度，也不该以「还站着」为前提，所以在这里先结。
+    pre_surrender: Optional[str] = None
+    for side, action in (("player", player_action), ("enemy", enemy_action)):
+        if action.kind == ACTION_SURRENDER:
+            pre_surrender = side
+            break
+
     # 应对判定（术语 1015/1016/1017）需要知道对手这一手是什么。
     # 这两个字段只用于**结算**，绝不进入 observation（见 schema.observation_for）。
     setattr(state, "_pending_player", player_action)
@@ -623,6 +692,9 @@ def step_joint(
 
     rng = _rng_for(state)
     order = order_actions(state, rs, player_action, enemy_action, rng=rng, cfg=cfg)
+    # RC-401 批次八：「若先于敌方攻击」这条**条件**要读执行序列（谁排在前面）。
+    # 只放在 state 上给结算用，**不进 observation**（与 `_pending_*` 同一条纪律）。
+    setattr(state, "_order_index", {side: index for index, (side, _action) in enumerate(order)})
 
     pre_player = observation_for(state, rs, "player")
     pre_enemy = observation_for(state, rs, "enemy")
@@ -657,8 +729,21 @@ def step_joint(
             if getattr(p, "_defense_reduction", 0.0):
                 setattr(p, "_defense_reduction", 0.0)
 
-    for side, action in order:
-        _execute(state, rs, side, action, cfg)
+    if pre_surrender is not None:
+        # 投降方判负 ⇒ 这一回合**任何一手都不再结算**（对手那一手也不结算：本局已经结束了）。
+        _surrender(state, cfg, pre_surrender)
+    else:
+        for side, action in order:
+            _execute(state, rs, side, action, cfg)
+            # RC-401 批次十二：「每次使用后，本技能<属性>永久±N」在**成功出手之后**累加。
+            # 放在 `_execute` 之后、且只对技能类动作做（换人/聚能/道具没有这条属性）。
+            if action.kind == ACTION_SKILL and action.skill_id:
+                _skill = rs.skills.get(action.skill_id)
+                if _skill is not None:
+                    _pet = getattr(state, side).field_pet
+                    _parsed_ramp = parse.resolve_per_use_ramp(
+                        _skill, declared=bool(getattr(cfg, "damage_per_use_ramp", False)))
+                    _accumulate_per_use_ramp(state, _pet, _skill, _parsed_ramp, cfg)
 
     _end_of_turn(state, rs, cfg)
 
@@ -675,6 +760,44 @@ def step_joint(
     # 有谁倒下就进补位局面；补位**不消耗回合**（术语 3009：力竭下场不属于「离场」）
     _advance_after_turn(state, cfg)
 
+    return state
+
+
+def step_free(state: GameState, rs: Ruleset, side: str, action: Action) -> GameState:
+    """**不占行动的自由动作**（人类 2026-09-25：「PVP 魔法 / 背包物品不占行动」）。
+
+    只结算这一方的这一个动作：`state.turn` 不变、对手这一手不结算、这一方随后照常出这一手
+    （「愿力冲击」就是个技能，用它照常占一手 ⇒ 仍走 `step_joint`）。
+    事件与日志照常产生（页面靠 `magic` 事件点灯），但**不进 joint history**（那不是一回合）。
+
+    能力**由配置声明**：`cfg.magic_occupies_action is False` 才放行；`True`（旧口径）或 `None`
+    （没声明 / 未核验）一律抛 `UnsupportedEffect` —— 没声明就当它不占行动等于白送一个能力。
+    边界：只在 `battle` 阶段、且动作在这一方合法动作表里；「本回合用过没有」不由引擎记账
+    （由道具自己的次数与冷却挡住），次序由调用方负责。
+    """
+    cfg = _rule_config.get_rule_config(state.ruleset_config_id or None)
+    if cfg.magic_occupies_action is not False:
+        raise fx.UnsupportedEffect(
+            "背包物品不占行动",
+            f"规则配置 {cfg.ruleset_config_id} 没有声明这条能力"
+            f"（policies.magic_policy.occupies_action={cfg.magic_occupies_action!r}，"
+            f"status={cfg.magic_occupies_action_status!r}）—— 未声明的配置一律 fail closed，"
+            "照旧按「占一手」走 step_joint",
+        )
+    if state.result:
+        raise ValueError("对局已结束，不能再行动")
+    if state.phase != "battle":
+        raise ValueError(f"当前阶段是 {state.phase!r}：自由动作只在 battle 阶段可用（补位请用 step_replace）")
+    if action.kind != ACTION_MAGIC:
+        raise fx.UnsupportedEffect(
+            f"自由动作({action.kind})",
+            "目前只有 PVP 魔法 / 背包物品这一类是自由动作；技能与换人照旧占这一手（step_joint）",
+        )
+    if action not in legal_actions(state, rs, side):
+        raise ValueError(f"{side} 的自由动作不合法：{action.label(rs)}")
+    # 自由动作不是联合结算 ⇒ 没有本回合执行序列，清掉上回合留下的（避免条件读到陈旧值）。
+    setattr(state, "_order_index", None)
+    _execute(state, rs, side, action, cfg)
     return state
 
 
@@ -784,6 +907,10 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         _use_item(state, rs, side, action, cfg)
         return
 
+    if action.kind == ACTION_MAGIC:
+        _use_magic(state, rs, side, action, cfg)
+        return
+
     if action.kind == ACTION_CHARGE:
         _use_charge(state, rs, side, action, cfg)
         return
@@ -793,7 +920,19 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         return
 
     skill = rs.skill(action.skill_id)
-    pet.energy = max(0, pet.energy - skill.energy)   # 假设：消耗先扣（MC-007）
+    # RC-401 批三：扣的是**有效能耗**（特性可以增减它）。
+    # 两条路径（可付性与扣费）都走 `effective_skill_cost` 这**一个读点**。
+    cost = effective_skill_cost(pet, skill, cfg, weather=state.weather,
+                                foe_status_layers=_poison_layers(state, side))
+    if cost < 0:
+        raise fx.UnsupportedEffect(
+            f"技能「{skill.name}」的有效能耗",
+            f"能耗修正把它压到 {cost}（基础 {skill.energy}）—— 负能耗的下限在术语里没有定义"
+            "（MC-018），不猜一个 0，也不按负数回能",
+        )
+    if cost > pet.energy:
+        raise ValueError(f"能量不足：这一手要 {cost}，只有 {pet.energy}")
+    pet.energy = max(0, pet.energy - cost)   # 假设：消耗先扣（MC-007）
 
     # 出手前的特性（变形活画）：按对手增益层数给自己加威力与速度。
     act_evs: List[Dict[str, Any]] = []
@@ -826,7 +965,10 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         # 应对失败 → **登记**为 unsupported，绝不能当成已生效。
         # 第 46 轮审计实测这一支以前直接 return：`buffs={}`、`unsupported=[]`，
         # 效果被静默丢弃。缺陷由 `roco/tests/test_fail_closed_branches.py` 钉住。
-        parsed_def = parse.parse_skill(skill)
+        # RC-401 批次六：这两条读法只在**配置声明**（`energy.foe_energy_loss`）时落地；
+        # 未声明 ⇒ 效果被解析层收回（连未认领标记也不补），legacy 的 unsupported 与批六之前逐位相同。
+        parsed_def = parse.resolve_foe_energy_loss(
+            skill, declared=bool(getattr(cfg, "energy_foe_energy_loss", False)))
         if parsed_def.effects or parsed_def.unparsed:
             if succeeded:
                 applied = _apply_effect_batch(state, rs, side, skill, parsed_def, cfg)
@@ -837,6 +979,7 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
                 _register_parsed_effects(
                     state, rs, side, skill, parsed_def, applied=False,
                     reason="「应对成功」子句的条件没有成立（对手这一手不是该技能应对的类别）",
+                    cfg=cfg,
                 )
             # 认不出来的机制词无论应对成不成功都要登记：它们不属于已结算的那部分。
             for span in parse.unclaimed_mechanic_spans(skill):
@@ -883,7 +1026,48 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
     # RC-401 连击：判据在 `parse.resolve_hit_count`（见那里的注释）。
     hit_count, parsed_atk = parse.resolve_hit_count(
         skill, declared=bool(getattr(cfg, "damage_multi_hit", False)))
-
+    # RC-401 批次八：先手条件（「若先于敌方攻击，本次技能威力+N%」）。
+    # **只有配置声明了这条能力**才认领那段文本（未声明时它照旧是"未认领机制"）。
+    parsed_atk = parse.resolve_initiative_condition(
+        skill, declared=bool(getattr(cfg, "damage_initiative_condition", False)), parsed=parsed_atk)
+    parsed_atk = parse.resolve_foe_switch_condition(
+        skill, declared=bool(getattr(cfg, "damage_foe_switch_condition", False)), parsed=parsed_atk)
+    parsed_atk = parse.resolve_per_use_ramp(
+        skill, declared=bool(getattr(cfg, "damage_per_use_ramp", False)), parsed=parsed_atk)
+    # RC-401 批次十二：本技能累计出来的永久威力 / 连击数（在条件加成之前先加上）。
+    if bool(getattr(cfg, "damage_per_use_ramp", False)):
+        _ramp_power = _skill_ramp(pet, skill.skill_id, "power")
+        if _ramp_power:
+            skill = dataclasses.replace(skill, power=int(skill.power or 0) + _ramp_power)
+        _ramp_hits = _skill_ramp(pet, skill.skill_id, "hits")
+        if _ramp_hits and hit_count:
+            hit_count = int(hit_count) + _ramp_hits
+    # RC-401 批次十一：「若敌方本回合更换精灵，<效果>」——先按条件把条件效果筛一遍，
+    # 再把**结构性**的那几条（威力平加/翻倍、连击加成）用到这一手上。
+    parsed_atk, _foe_switched = _gate_foe_switch_effects(state, side, skill, parsed_atk, cfg)
+    for _eff in parsed_atk.effects:
+        if _eff.kind == "foe_switch_power_flat":
+            skill = dataclasses.replace(skill, power=int(skill.power or 0) + int(_eff.value["amount"]))
+            _bump(state, "foe_switch_power_applied", {"side": side, "skill_id": skill.skill_id,
+                                                      "kind": "flat", "amount": int(_eff.value["amount"])})
+        elif _eff.kind == "foe_switch_power_mult":
+            skill = dataclasses.replace(skill, power=int((skill.power or 0) * int(_eff.value["multiplier"])))
+            _bump(state, "foe_switch_power_applied", {"side": side, "skill_id": skill.skill_id,
+                                                      "kind": "mult", "multiplier": int(_eff.value["multiplier"])})
+    _initiative = next((e for e in parsed_atk.effects if e.kind == "initiative_power"), None)
+    if _initiative is not None:
+        _applied, _why = _initiative_condition_holds(state, rs, side)
+        if _applied:
+            _pct = int(_initiative.value.get("power_pct") or 0)
+            # 加成加在**威力**上（本仓唯一的伤害公式读 power）。
+            skill = dataclasses.replace(skill, power=int((skill.power or 0) * (100 + _pct) / 100))
+            _bump(state, "initiative_condition_applied", {
+                "side": side, "skill_id": skill.skill_id, "power_pct": _pct,
+                "evidence": _initiative.evidence})
+        else:
+            # 条件不成立 ⇒ 如实记一条（不是未实现，是**这次没满足**）。
+            _bump(state, "initiative_condition_skipped", {
+                "side": side, "skill_id": skill.skill_id, "reason": _why})
     # ── C1（第 139 轮）：位置子系统 —— 号位条件 + 传动 ─────────────────────────
     # 位置在构建时已知（`me.loadouts[pet_id]` 是有序元组），所以这是**确定性**条件。
     # 两条能力**只有配置声明了才生效**：legacy / v2 没声明 → 一个字节都不变。
@@ -929,7 +1113,11 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
     outcome = fx.compute_damage(pet, defender, skill, rs,
                                 attacker_species=attacker_pet,
                                 defender_species=defender_pet,
-                                hit_count=hit_count)
+                                hit_count=hit_count,
+                                cfg=cfg,   # 伤害按类别取面板与否，由**这一局**的配置说了算
+                                # 2026-09-25：天气是**场地级**的威力加成（雨天水系 +75%），
+                                # 只按配置声明的口径加；没声明就什么都不加。
+                                weather=state.weather)
     damage = outcome.damage
     actual = min(defender.hp, damage)
     defender.hp -= actual
@@ -967,6 +1155,23 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
         # RC-105：力竭 → 那一方扣魔力；归零就立即判负（只在声明了 mana 的配置下发生）
         _settle_faint_mana(state, rs, cfg, foe_side)
 
+    # 2026-09-24（人类口径 B）：**愿力冲击用掉之后第一个技能自动还原**。
+    # 旧读法是「替换持续到再用一次愿力强化解除」（人类更早的口述），新口径是**一次性**：
+    # 借来的那一招打出去之后就还回去。这里在**伤害结算完成之后**还原（先结算再还原，
+    # 否则会把同一回合的连击/传动/号位条件读错），并且**不动次数与冷却** ——
+    # 愿力强化在用它的时候就已经扣过次数、进过冷却了。
+    # ⚠ 必须把**这一手打出去的那个技能**传进去：不传就等于「任何攻击技能都会把愿力冲击
+    # 收回」（BUG-1，2026-09-24 真机复现）。
+    consumed_wish = _restore_if_wish_impact(state, rs, side, skill)
+
+    # RC-401 批四：造成伤害之后的吸血 / 过量回复转化（没有 `sustain` 时一步都不做）。
+    _settle_sustain(state, rs, side, actual)
+
+    # RC-401 批次十三：**挨打的那一方**的「每被攻击1次…永久±N」在这里累加
+    #（「不含连击」⇒ 一次攻击只算一次，不看 hit_count）。
+    _accumulate_on_hit_ramps(state, rs, defender, "enemy" if side == "player" else "player",
+                             skill, outcome, cfg)
+
     # 附带效果：**先应用解析得出的部分，再登记认不出来的部分**。
     # 以前这里什么都没有 —— 「造成魔伤，自己回复1能量」被整条静默丢弃
     # （实测 energy 不变、events=['damage']、unsupported=[]）。纪律不允许：
@@ -980,6 +1185,7 @@ def _execute(state: GameState, rs: Ruleset, side: str, action: Action,
             state, rs, side, skill, parsed_atk, applied=True,
             reason="攻击分支只结算伤害、以及**已解析并已应用**的附带效果；"
                    "这一段没有对应的实现",
+            cfg=cfg,
         )
 
 
@@ -992,7 +1198,14 @@ def _apply_status_effects(state: GameState, rs: Ruleset, side: str, skill,
     由调用方登记为 unsupported。**不做部分应用**——半套效果比不支持更危险，
     因为它会让上层以为这个技能已经可用。
     """
-    parsed = parse.parse_skill(skill)
+    parsed = parse.resolve_foe_energy_loss(
+        skill, declared=bool(getattr(cfg, "energy_foe_energy_loss", False)))
+    parsed = parse.resolve_foe_switch_condition(
+        skill, declared=bool(getattr(cfg, "damage_foe_switch_condition", False)), parsed=parsed)
+    parsed = parse.resolve_per_use_ramp(
+        skill, declared=bool(getattr(cfg, "damage_per_use_ramp", False)), parsed=parsed)
+    # RC-401 批次十一：条件效果先按"对手这回合有没有换人"筛一遍（不成立就摘掉、如实记 skipped）。
+    parsed, _ = _gate_foe_switch_effects(state, side, skill, parsed, cfg)
     if not parsed.effects or parsed.unparsed:
         return False
 
@@ -1127,17 +1340,50 @@ def _apply_effect_batch(state: GameState, rs: Ruleset, side: str, skill,
             pet.energy = min(cfg.energy_max, pet.energy + taken)
             applied += 1
             _bump(state, "drain_energy", {"side": side, "taken": taken})
+        elif eff.kind == "foe_energy_loss":
+            # 「敌方失去 N 能量」= **扣掉就没了**（不是偷取：没有任何一方获得）。
+            # 依据：描述字面（术语表里没有单独的条目）；下限 0 由 `min` 保证，不出现负能量。
+            amount = int(v["amount"])
+            taken = min(amount, foe.field_pet.energy)
+            foe.field_pet.energy -= taken
+            applied += 1
+            _bump(state, "foe_energy_loss", {"side": side, "lost": taken},
+                  evidence=(eff.term or "",))
+        elif eff.kind == "foe_team_energy_loss":
+            # 「敌方队伍中所有精灵失去 N 能量」：**全队**（不只场上那只）。
+            # 假设（本条是引擎假设，不是数据给的）：力竭的队员也照扣 —— 描述写的是"所有精灵"，
+            # 而引擎对力竭个体仍保留 energy 字段；这一条需要实机/官方文字确认（MC 待立）。
+            amount = int(v["amount"])
+            lost: List[Dict[str, Any]] = []
+            for mate in foe.pets:
+                taken = min(amount, int(mate.energy))
+                if taken:
+                    mate.energy -= taken
+                lost.append({"pet_id": mate.pet_id, "lost": taken})
+            applied += 1
+            _bump(state, "foe_team_energy_loss",
+                  {"side": side, "lost": lost, "amount": amount}, evidence=(eff.term or "",))
+            _note_unsupported(
+                state, f"技能「{skill.name}」的全队扣能",
+                "「敌方队伍中所有精灵」是否包含力竭个体没有一手证据（本引擎按「所有」照扣）—— MC 待立",
+                skill.skill_id,
+            )
         elif eff.kind == "escape":
             # 术语 3003/3024：离场并换人。本引擎需要调用方决定换谁，所以登记为待处理。
             _note_unsupported(state, f"技能「{skill.name}」的离场效果",
                               "离场需要选择换上谁，属补位流程；引擎未自动代选", "3009")
         elif eff.kind == "weather":
-            _note_unsupported(state, f"天气「{v['weather']}」", "引擎尚未实现天气层", "")
+            # 2026-09-25：天气层由**配置声明**才存在。没声明 ⇒ 照旧登记为 unsupported
+            # （旧消息「引擎尚未实现天气层」改成「这份配置没声明天气层」，
+            #  因为现在不是引擎没有这个能力，而是这一局没有这条规则）。
+            if apply_weather_effect(state, rs, side, skill, v, cfg):
+                applied += 1
     return applied
 
 
 def _register_parsed_effects(state: GameState, rs: Ruleset, side: str, skill,
-                             parsed, *, applied: bool, reason: str) -> None:
+                             parsed, *, applied: bool, reason: str,
+                             cfg: Optional[RuleConfig] = None) -> None:
     """攻击 / 防御分支的**登记**入口。
 
     这两个分支以前直接 `return`，描述里被解析出来却没被执行的效果连一条记录都没有。
@@ -1149,10 +1395,26 @@ def _register_parsed_effects(state: GameState, rs: Ruleset, side: str, skill,
     已经生效的不再重复登记。`applied=False` 表示一条都没结算（应对失败 / 攻击分支
     没吃下的部分），此时逐条登记。
     """
-    unclaimed = parse.unclaimed_mechanic_spans(skill)
+    # ⚠ 传 `parsed`：调用方可能已经把**声明了的能力**（先手条件 / 选择）补成效果了，
+    # 重新 `parse_skill` 会把那份认领丢掉，于是已结算的机制**又被登记成未认领**。
+    unclaimed = parse.unclaimed_mechanic_spans(skill, parsed=parsed)
     handled_kinds = {
         "self_stat", "foe_stat", "self_mark", "foe_mark", "cleanse", "heal",
         "self_energy", "drain_energy",
+        # 2026-09-25（RC-401 批次六）：两条"敌方失去能量"也在 `_apply_effect_batch` 里结算了，
+        # 漏登记会让它们**每次都被写成 unsupported**（判据 test_energy_loss_effects 会红）。
+        "foe_energy_loss", "foe_team_energy_loss",
+        # 2026-09-25（RC-401 批次八）：「若先于敌方攻击」的威力加成在伤害路径里真的加了，
+        # 漏登记会让它每次都被写成 unsupported。
+        "initiative_power",
+        # 2026-09-25（RC-401 批次九）：动态能耗修正在 `effective_skill_cost` 里真的算了。
+        "per_layer_cost",
+        # 2026-09-25（RC-401 批次十一）：条件威力加成在伤害路径里真的加了（不是"未实现"）。
+        "foe_switch_power_flat", "foe_switch_power_mult",
+        # 2026-09-25（RC-401 批次十二）：「每次使用后永久±N」在出手后真的累加了。
+        "per_use_ramp",
+        # 2026-09-25（RC-401 批次十三）：挨打累加在 `_accumulate_on_hit_ramps` 里真的做了。
+        "on_hit_ramp",
     }
     for eff in parsed.effects:
         if applied and eff.kind in handled_kinds:
@@ -1164,7 +1426,8 @@ def _register_parsed_effects(state: GameState, rs: Ruleset, side: str, skill,
             "self_mark": "自己印记", "foe_mark": "敌方印记",
             "foe_status": "敌方持续状态", "cleanse": "驱散",
             "heal": "回复生命", "self_energy": "自带回能",
-            "drain_energy": "偷取能量", "escape": "离场", "weather": "天气",
+            "drain_energy": "偷取能量", "foe_energy_loss": "敌方失去能量",
+            "foe_team_energy_loss": "敌方全队失去能量", "escape": "离场", "weather": "天气",
         }.get(eff.kind, eff.kind)
         _note_unsupported(
             state, f"技能「{skill.name}」的{label}",
@@ -1191,6 +1454,32 @@ def _register_parsed_effects(state: GameState, rs: Ruleset, side: str, skill,
             "reason": reason,
         })
 
+
+
+def _initiative_condition_holds(state: GameState, rs: Ruleset, side: str):
+    """「若先于敌方攻击」这次成立吗？返回 `(成立, 不成立的原因)`。
+
+    口径（配置里登记为 `ENGINE_HYPOTHESIS`，见 `damage.initiative_condition` 的 reason）：
+      · **我这一手排在敌方那一手之前**：读 `order_actions()` 排出的执行序列
+        （`state._order_index`，只用于结算、不进观察）；
+      · **敌方那一手是攻击**：描述写的是「先于敌方**攻击**」，所以敌方换人 / 聚能 /
+        道具时**不加成**；敌方动作拿不到时也不加成（不猜）。
+    """
+    other = "enemy" if side == "player" else "player"
+    index = getattr(state, "_order_index", None)
+    if not index:
+        return False, "没有本回合的执行序列（不在联合结算里）"
+    if index.get(side, 99) > index.get(other, -1):
+        return False, "敌方那一手排在前面"
+    action = _opponent_action_of(state, side)
+    if action is None:
+        return False, "拿不到敌方这一手的动作"
+    if action.kind != ACTION_SKILL:
+        return False, f"敌方这一手不是攻击（{action.kind}）"
+    opp_skill = rs.skills.get(action.skill_id or "")
+    if opp_skill is None or not getattr(opp_skill, "is_attack", False):
+        return False, "敌方这一手不是攻击技能"
+    return True, ""
 
 
 def _opponent_action_of(state: GameState, side: str) -> Optional[Action]:
@@ -1329,6 +1618,521 @@ def _surrender(state: GameState, cfg: RuleConfig, side: str) -> None:
     _bump(state, "surrender", {"side": side, "result": state.result})
 
 
+# ── PVP 魔法（愿力强化）────────────────────────────────────────────────────
+#
+# 依据：台账 EV-PVP-WISH-POWER-UP（RECORDED_IN_GAME，人类口述）+ 派生产物
+# `data/roco/derived/pvp-magic.json`（生成器：scripts/roco/build-pvp-magic.mjs）。
+# 人类口径原文（要点）：占一次行动；每局两次；冷却三回合；目标是自己场上那只；
+# 把它的**最上面（第一个）技能**换成「愿力冲击」；再用一次「愿力强化」解除这次转换
+# （**不消耗次数**、自动进入冷却）；愿力冲击的属性 = 该精灵的**愿力属性**（默认第一个属性）、
+# 能耗 2、威力 80、物攻/魔攻取该精灵更高的那一项、对「应对状态」额外 150% 伤害。
+#
+# 本引擎**不**发明上面没写的部分（改名道具的消耗、冷却与换人的交互、换场后是否还原）：
+# 那些留在 `magic_policy.unknowns` 里，代码遇到就按「不知道」处理。
+
+def pvp_magic_of(rs: Ruleset) -> Optional[Dict[str, Any]]:
+    """这一份规则集的 PVP 魔法声明（没有这份派生产物就返回 None）。"""
+    doc = rs.pvp_magic or {}
+    magic = doc.get("magic")
+    return magic if isinstance(magic, dict) else None
+
+
+def wish_impact_skill_id(rs: Ruleset, pet: PetState) -> Optional[str]:
+    """这只精灵该换成哪一条「愿力冲击」。
+
+    属性 = 它的**愿力属性**（人类：默认取第一个属性；改成任意属性的道具属于未核验，本实现
+    只走默认那条）；类别 = 物攻 / 魔攻里**更高**的那一项（人类口径）。
+    **拿不到就返回 None** —— 调用方 fail closed，不许猜一个属性或一个类别。
+    """
+    magic = pvp_magic_of(rs)
+    if magic is None:
+        return None
+    pet_row = rs.pets.get(pet.pet_id)
+    if pet_row is None or not pet_row.types:
+        return None
+    element = pet_row.types[0]
+    stats = pet_row.stats or {}
+    atk = stats.get("atk")
+    spa = stats.get("spa")
+    if not isinstance(atk, int) or not isinstance(spa, int):
+        return None                      # 攻/魔攻缺一就不猜：类别是按这两个数比的
+    damage_class = "物攻" if atk >= spa else "魔攻"
+    sid = f"magic_wish_impact__{element}__{damage_class}"
+    return sid if sid in rs.skills else None
+
+
+def _init_pvp_magic(side: "SideState", rs: Ruleset, cfg: RuleConfig) -> None:
+    """按配置声明初始化这一方的魔法状态（没声明就保持 None）。"""
+    if not cfg.allowed_kinds or ACTION_MAGIC not in cfg.allowed_kinds:
+        return
+    magic = pvp_magic_of(rs)
+    if magic is None:
+        raise fx.UnsupportedEffect(
+            "PVP 魔法(愿力强化)",
+            f"规则配置 {cfg.ruleset_config_id} 声明了 magic 这一类，但规则集里没有 PVP 魔法产物"
+            "（data/roco/derived/pvp-magic.json 缺失或 ruleset_id 对不上）—— 不许凭空造一个",
+        )
+    uses = magic.get("per_battle_uses")
+    if not isinstance(uses, int) or uses <= 0:
+        raise fx.UnsupportedEffect(
+            "PVP 魔法(每局次数)",
+            "愿力强化的 per_battle_uses 不是正整数 —— 次数未核验时不许回落到任意值",
+        )
+    side.magic = {"uses_left": int(uses), "cooldown": 0, "swapped": {}, "cooldown_set_turn": None}
+
+
+#: 能耗修正的作用域 → 哪些技能算「命中」。术语 1012/1013 只说「技能能耗增加/降低」，
+#: 没有分档；这三个作用域是**本引擎的词汇表**（特性文本里出现的「全技能 / 攻击技能 / 防御技能」
+#: 各有对应），字面量与 trait spec 里的写法一一对应。
+ENERGY_COST_SCOPES = ("all", "attack", "defense", "status")
+
+
+def _cost_mod_applies(mod: Dict[str, Any], skill) -> bool:
+    scope = str(mod.get("scope") or "all")
+    if scope == "all":
+        return True
+    if scope == "attack":
+        return bool(skill.is_attack)
+    if scope == "defense":
+        return bool(skill.is_defense)
+    if scope == "status":
+        return not skill.is_attack and not skill.is_defense
+    return False
+
+
+def effective_skill_cost(pet: PetState, skill, cfg: Optional[RuleConfig] = None,
+                         *, weather: Optional[Dict[str, Any]] = None,
+                         foe_status_layers: int = 0) -> int:
+    """这一手要付多少能量 = 基础能耗 + 这只精灵身上的能耗修正 + **天气修正**。
+
+    **只在配置声明了对应机制时才算**（legacy / v2 两条都不声明 → 原样返回基础值，
+    行为与指纹逐位不变）：
+      · `energy.cost_modifier`：特性带来的能耗增减（捉迷藏 / 抓到你了 / 聒噪），
+        每条形如 `{"scope": …, "delta": int, "until_turn": int|None, "source": str}`；
+      · `policies.weather_policy`（2026-09-25 人类裁决）：**沙暴**让**双方的地系技能**
+        能耗减半（术语 3006）。系数与适用系别**从配置读**，引擎不写死。
+
+    「多条修正的复合顺序」「下限」「减半遇奇数的取整」都没有定义：
+      · 只做**加法**（加法可交换，顺序问题不在这里假装解决），天气的乘法**最后**作用；
+      · **不设下限** —— 结果为负时返回负数，由调用方 fail closed（`legal_actions` 不提供这一手、
+        扣费处抛错），而不是编一个「最低 0 能耗」；
+      · 「减半」按**向下取整**（奇数值的取整口径未核验，登记在 battle-modes 的 unknowns
+        `energy_cost_halving_rounding` 里）。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    base = int(skill.energy)
+    total = base
+    # RC-401 批次九（2026-09-25）：「**敌方每有 N 层中毒效果，本技能能耗 -M**」。
+    # 与静态能耗修正分开算：它的修正量**取决于局面**（对手场上那只的中毒层数），
+    # 所以只有调用方显式把层数传进来才算 —— 没传（`foe_status_layers=0`）等于条件不成立。
+    # 只在配置声明了能力时看这条（legacy / v2 里那段文本照旧是"未认领机制"）。
+    # RC-401 批次十二：「每次使用后，本技能能耗永久±N」（只对本技能生效）。
+    if bool(getattr(cfg, "damage_per_use_ramp", False)):
+        total += _skill_ramp(pet, skill.skill_id, "cost")
+    if bool(getattr(cfg, "energy_per_layer_cost", False)) and int(foe_status_layers) > 0:
+        parsed_plc = parse.resolve_per_layer_cost(skill, declared=True)
+        eff = next((e for e in parsed_plc.effects if e.kind == "per_layer_cost"), None)
+        if eff is not None:
+            step = max(1, int(eff.value.get("layer_step") or 1))
+            units = int(foe_status_layers) // step
+            total += int(eff.value.get("delta") or 0) * units
+    if bool(getattr(cfg, "energy_cost_modifier", False)):
+        for mod in pet.energy_cost_mods or ():
+            if isinstance(mod, dict) and _cost_mod_applies(mod, skill):
+                total += int(mod.get("delta") or 0)
+    if isinstance(weather, dict):
+        name = str(weather.get("name") or "")
+        read_effect = getattr(cfg, "weather_effect", None)
+        spec = read_effect(name) if callable(read_effect) else None
+        if isinstance(spec, dict) and spec.get("kind") == "skill_energy_cost_multiplier" \
+                and str(spec.get("element") or "") == str(getattr(skill, "element", "") or ""):
+            factor = float(spec.get("value") or 1.0)
+            total = int(math.floor(total * factor))
+    return total
+
+
+def _skill_ramp(pet: PetState, skill_id: str, field_name: str) -> int:
+    """这只精灵用这个技能累计出来的永久修正量（RC-401 批次十二）。
+
+    数据形状：`PetState.skill_ramps = {skill_id: {"power": int, "cost": int, "hits": int}}`。
+    **只在配置声明了 `damage.per_use_ramp` 时才会被写**；没写就是 0（legacy / v2 行为不变）。
+    """
+    row = (getattr(pet, "skill_ramps", None) or {}).get(skill_id) or {}
+    try:
+        return int(row.get(field_name) or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _accumulate_on_hit_ramps(state: GameState, rs: Ruleset, defender: PetState,
+                             defender_side: str, attacker_skill, outcome,
+                             cfg: Optional[RuleConfig] = None) -> None:
+    """被打之后：把这只精灵身上带「每被攻击1次…永久±N」的技能各累加一次（RC-401 批次十三）。
+
+    口径（配置的 `reason` 里逐条登记）：
+      · 只有**技能攻击**算（`attacker_skill` 一定是攻击技能，调用点在攻击分支里）；
+      · `requires_resisted` 的那些只在**被抵抗**时算 —— 用本引擎的相性倍率 `< 1` 判；
+      · **一次攻击只算一次**（「不含连击」）—— 连击数不参与计数。
+    只翻这只精灵**配招里真的带着的**技能（没带在身上的技能不该被强化）。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_on_hit_ramp", False)):
+        return
+    side_state = getattr(state, defender_side)
+    loadout = tuple(side_state.loadouts.get(defender.pet_id) or ())
+    if not loadout:
+        return
+    resisted = float(getattr(outcome, "type_multiplier", 1.0) or 1.0) < 1.0
+    for sid in loadout:
+        skill = rs.skills.get(sid)
+        if skill is None:
+            continue
+        parsed = parse.resolve_on_hit_ramp(skill, declared=True)
+        eff = next((e for e in parsed.effects if e.kind == "on_hit_ramp"), None)
+        if eff is None:
+            continue
+        if bool(eff.value.get("requires_resisted")) and not resisted:
+            continue
+        field_name = str(eff.value.get("field") or "")
+        delta = int(eff.value.get("delta") or 0)
+        if field_name not in ("power", "cost", "hits") or not delta:
+            continue
+        ramps = dict(getattr(defender, "skill_ramps", None) or {})
+        row = dict(ramps.get(sid) or {})
+        row[field_name] = int(row.get(field_name) or 0) + delta
+        ramps[sid] = row
+        defender.skill_ramps = ramps
+        _bump(state, "on_hit_ramp", {"side": defender_side, "skill_id": sid,
+                                     "field": field_name, "delta": delta, "total": row[field_name],
+                                     "resisted": resisted})
+
+
+def _accumulate_per_use_ramp(state: GameState, pet: PetState, skill, parsed,
+                             cfg: Optional[RuleConfig] = None) -> None:
+    """一次**成功出手**之后，把「每次使用后永久±N」累加到这只精灵身上。
+
+    只改**这个技能**（不影响同一只精灵的别的技能）；数值来自解析结果，不写死。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_per_use_ramp", False)):
+        return
+    eff = next((e for e in getattr(parsed, "effects", ()) if e.kind == "per_use_ramp"), None)
+    if eff is None:
+        return
+    field_name = str(eff.value.get("field") or "")
+    delta = int(eff.value.get("delta") or 0)
+    if field_name not in ("power", "cost", "hits") or not delta:
+        return
+    ramps = dict(getattr(pet, "skill_ramps", None) or {})
+    row = dict(ramps.get(skill.skill_id) or {})
+    row[field_name] = int(row.get(field_name) or 0) + delta
+    ramps[skill.skill_id] = row
+    pet.skill_ramps = ramps
+    _bump(state, "per_use_ramp", {"side": None, "skill_id": skill.skill_id,
+                                  "field": field_name, "delta": delta,
+                                  "total": row[field_name]})
+
+
+def _foe_switched_this_turn(state: GameState, side: str) -> bool:
+    """对手**这一回合提交的**动作是不是主动换人（RC-401 批次十一的条件）。
+
+    口径：读 `state._pending_*` 里对手那一手（同一个函数 `_opponent_action_of` 也是应对判定用的）。
+    换人与补位分开（术语 3009）：补位不是"主动离场"，所以这里只认 `ACTION_SWITCH` 的**主动**换人
+    —— 补位那一手在引擎里走 `step_replace`，不经过 `step_joint`，因此不会出现在这里。
+    """
+    action = _opponent_action_of(state, side)
+    return bool(action is not None and action.kind == ACTION_SWITCH)
+
+
+def _gate_foe_switch_effects(state: GameState, side: str, skill,
+                             parsed, cfg: Optional[RuleConfig] = None):
+    """把「若敌方本回合更换精灵才生效」的那几条效果**按条件筛一遍**。
+
+    返回 `(parsed, switched)`：
+      · 条件成立 ⇒ 原样返回（那几条效果照常结算）；
+      · 条件不成立 ⇒ 把它们从 `effects` 里**摘掉**（并在事件里记一条 `foe_switch_condition_skipped`），
+        剩下的无条件效果照常结算 —— 这是"条件效果"与本文件里那些"未实现效果"的区别：
+        前者条件不满足是**正常局面**，不该进 `state.unsupported`。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    if not bool(getattr(cfg, "damage_foe_switch_condition", False)):
+        return parsed, False
+    if not any(isinstance(getattr(e, "value", None), dict)
+               and e.value.get("requires") == "foe_switch" for e in parsed.effects):
+        return parsed, False
+    switched = _foe_switched_this_turn(state, side)
+    if switched:
+        return parsed, True
+    kept = [e for e in parsed.effects
+            if not (isinstance(getattr(e, "value", None), dict)
+                    and e.value.get("requires") == "foe_switch")]
+    _bump(state, "foe_switch_condition_skipped", {
+        "side": side, "skill_id": skill.skill_id,
+        "dropped": len(parsed.effects) - len(kept),
+        "reason": "对手这一回合没有更换精灵",
+    })
+    return dataclasses.replace(parsed, effects=kept), False
+
+
+def _poison_layers(state: GameState, side: str) -> int:
+    """对手**场上那只**的中毒层数（RC-401 批次九的动态能耗修正要用）。
+
+    口径：只读公开状态里那条 `中毒` 的层数；没有这条状态就是 0。
+    「每有 1 层中毒效果」按**当前层数**读（不是历史累计）—— 这条口径写在配置的 `reason` 里。
+    """
+    foe = getattr(state, "enemy" if side == "player" else "player")
+    pet = getattr(foe, "field_pet", None)
+    if pet is None:
+        return 0
+    row = (pet.statuses or {}).get("中毒") or {}
+    try:
+        return int(row.get("layers") or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _settle_sustain(state: GameState, rs: Ruleset, side: str, dealt: int) -> None:
+    """造成伤害之后的**吸血**与**过量回复转化**（RC-401 批四，数据驱动）。
+
+    参数来自特性入场时写进 `PetState.sustain` 的**解析值**（`parse.py` 的
+    `self_lifesteal` / `overheal_to_stat`），这里只负责结算，不认字面量：
+      · 吸血：回复 `造成伤害 × lifesteal_pct / 100`（向下取整），上限是最大生命；
+      · 过量回复转化：**溢出**部分按最大生命的百分比累计，每满 `chunk_pct`（如 5%）
+        转化为 `gain_pct`（如 10%）的属性增益，余数**留到下一次**（`carry_pct`）。
+
+    ⚠ 两条**假设**（数据里没有写，如实登记在事件与 `state.unsupported` 里）：
+      ① 溢出的**累计口径**：按「多次回复的溢出累加、满 5% 才转化」实现，
+         而不是「每次回复各自向下取整」（两种读法在多次小额回复下结果不同）；
+      ② 转化出来的属性增益**持续到本局结束**（数据没说持续多久）。
+    """
+    pet = getattr(state, side).field_pet
+    sus = pet.sustain or {}
+    if not sus:
+        return
+    label = "你" if side == "player" else "对手"
+    name = rs.pet(pet.pet_id).name if pet.pet_id in rs.pets else pet.pet_id
+    pct = int(sus.get("lifesteal_pct") or 0)
+    if pct > 0 and dealt > 0:
+        want = max(0, dealt * pct // 100)
+        room = max(0, pet.max_hp - pet.hp)
+        healed = min(want, room)
+        overheal = want - healed
+        pet.hp += healed
+        _bump(state, "lifesteal", {
+            "side": side, "percent": pct, "damage": dealt,
+            "healed": healed, "overhealed": max(0, overheal),
+        }, evidence=("1012",))
+        if healed:
+            state.log.append(
+                f"{label}的{name}吸血回复了 {healed} 点生命。")
+        conv = sus.get("overheal") or {}
+        chunk = int(conv.get("chunk_pct") or 0)
+        gain = int(conv.get("gain_pct") or 0)
+        stats = list(conv.get("stats") or ())
+        if overheal > 0 and chunk > 0 and gain > 0 and stats and pet.max_hp > 0:
+            # 溢出换算成「最大生命的百分比」，余数留在 carry_pct 里（假设①）
+            carried = float(conv.get("carry_pct") or 0.0) + (overheal * 100.0 / pet.max_hp)
+            chunks = int(carried // chunk)
+            conv["carry_pct"] = carried - chunks * chunk
+            sus["overheal"] = conv
+            pet.sustain = sus
+            if chunks:
+                for key in stats:
+                    pet.buffs[key] = pet.buffs.get(key, 0) + gain * chunks
+                _bump(state, "overheal_to_stat", {
+                    "side": side, "stat": stats[0], "stats": stats,
+                    "gain_pct": gain * chunks, "chunks": chunks,
+                    "carry_pct": round(float(conv["carry_pct"]), 4),
+                }, evidence=("1012",))
+                state.log.append(
+                    f"{label}的{name}把过量回复转化成了{'、'.join(stats)} +{gain * chunks}%。")
+            _note_unsupported(
+                state, "「过量回复转化」的累计口径与持续时间",
+                "数据只写「每过量回复 5% 生命转化为 10% 物攻」：溢出的累计方式"
+                "（累加满档 vs 每次各自取整）与转化出来的增益持续多久都没有一手证据。"
+                "本引擎按**累加满档**、增益**持续到本局结束**处理（ENGINE_HYPOTHESIS）", "1012",
+            )
+
+
+def _tick_energy_cost_mods(state: GameState) -> None:
+    """回合末清掉到期的能耗修正（`until_turn` 是本引擎的回合号；None = 一直在）。
+
+    与 `_tick_magic_cooldowns` 同一条纪律：这是**引擎级计数器**，不是
+    `turn_order.end_turn.order` 里声明的游戏阶段。
+    """
+    for side in (state.player, state.enemy):
+        for pet in side.pets:
+            mods = pet.energy_cost_mods
+            if not mods:
+                continue
+            kept = [m for m in mods
+                    if not isinstance(m, dict) or m.get("until_turn") is None
+                    or int(m["until_turn"]) >= state.turn]
+            if len(kept) != len(mods):
+                pet.energy_cost_mods = kept
+
+
+def _tick_magic_cooldowns(state: GameState) -> None:
+    """回合末递减魔法冷却。
+
+    注意：这是**引擎级的计数器**，不是 `turn_order.end_turn.order` 里声明的游戏阶段
+    （那份清单被 `require_declared_end_turn_stages` 逐项对过，不许往里塞东西）。
+
+    对齐方式（人类只说「冷却三回合」，没说与回合边界怎么对齐 —— 仍登记在 `unknowns` 里）：
+    本实现取「**接下来三个回合不能用**」：设成 3 的那一回合**不**递减
+    （否则当回合就被减掉 1，实际只锁两个回合 —— 实测过），之后每过一个回合减 1，
+    减到 0 才重新可用。`cooldown_set_turn` 就是为此记的。
+    """
+    for side in (state.player, state.enemy):
+        st = side.magic
+        if not isinstance(st, dict):
+            continue
+        if int(st.get("cooldown") or 0) <= 0:
+            continue
+        if st.get("cooldown_set_turn") == state.turn:
+            continue                      # 设定冷却的那一回合不递减
+        st["cooldown"] = int(st["cooldown"]) - 1
+
+
+def _use_magic(state: GameState, rs: Ruleset, side: str, action: Action,
+               cfg: Optional[RuleConfig] = None) -> None:
+    """用一次 PVP 魔法。目前只有「愿力强化」这一条（口径见上面那段注释）。
+
+    两条分支：
+      · 这一只**已经换过** → 这一下是**解除**：还原第一个技能、**不消耗次数**、开始冷却；
+      · 否则 → **转换**：消耗一次、把第一个技能换成对应属性的「愿力冲击」。
+
+    可见性口径（人类：「能看见你使用这个技能，道具应该看不见」）：转换这件事**不**出现在
+    对手的观察里 —— 而这是**天然成立**的，因为 `observation_for` 只给对手「场上面板」，
+    从不给对手的技能表（`loadouts` 只在 `self` 那一侧）。使用「愿力冲击」本身照常公开。
+    """
+    cfg = cfg or _rule_config.get_rule_config()
+    me = getattr(state, side)
+    magic = pvp_magic_of(rs)
+    if magic is None:
+        raise fx.UnsupportedEffect("PVP 魔法", "这份规则集没有 PVP 魔法产物")
+    if action.magic_id != magic.get("magic_id"):
+        raise ValueError(f"未知的 PVP 魔法：{action.magic_id!r}")
+    if not isinstance(me.magic, dict):
+        raise fx.UnsupportedEffect(
+            "PVP 魔法",
+            f"规则配置 {cfg.ruleset_config_id} 没有声明 magic 这一类 —— 配置之外不许出现这个动作",
+        )
+    pet = me.field_pet
+    swapped = me.magic.setdefault("swapped", {})
+
+    # ① 解除：还原成原来的第一个技能。**不消耗次数**（人类口径），但开始冷却。
+    # 冷却里两支都不许用（同 `legal_actions` 的判据）；这里再挡一层，是因为动作也可能
+    # 从不走 `legal_actions` 的地方来（手搓动作 / 旧客户端）——两层判据各管一段。
+    if int(me.magic.get("cooldown") or 0) > 0:
+        raise ValueError(f"愿力强化还在冷却（还剩 {me.magic['cooldown']} 回合）")
+    if pet.pet_id in swapped:
+        original = swapped.pop(pet.pet_id)
+        row = list(me.loadouts.get(pet.pet_id) or ())
+        if row:
+            row[0] = original
+            me.loadouts[pet.pet_id] = tuple(row)
+        cooldown = int(magic.get("cooldown_turns") or 0)
+        me.magic["cooldown"] = cooldown
+        me.magic["cooldown_set_turn"] = state.turn     # 这一回合不递减（见 _tick_magic_cooldowns）
+        original_name = rs.skills[original].name if original in rs.skills else original
+        state.log.append(f"愿力强化解除：{_pet_name(rs, pet)}的第一个技能还原成「{original_name}」。")
+        _bump(state, "magic", {"side": side, "magic": action.magic_id, "mode": "restore",
+                               "pet": pet.pet_id, "pet_name": _pet_name(rs, pet),
+                               "restored": original,
+                               "restored_name": original_name, "cooldown": cooldown})
+        return
+
+    # ② 转换：要次数、要不在冷却里。
+    if int(me.magic.get("uses_left") or 0) <= 0:
+        raise ValueError("愿力强化这一局的次数已经用完了")
+    if int(me.magic.get("cooldown") or 0) > 0:
+        raise ValueError(f"愿力强化还在冷却（还剩 {me.magic['cooldown']} 回合）")
+    sid = wish_impact_skill_id(rs, pet)
+    if sid is None:
+        raise fx.UnsupportedEffect(
+            "愿力冲击",
+            f"拿不到 {_pet_name(rs, pet)} 的愿力属性 / 攻与魔攻，或该变体不在技能表里 ——"
+            "属性与伤害类别都必须有出处，不许猜",
+        )
+    row = list(me.loadouts.get(pet.pet_id) or ())
+    if not row:
+        raise ValueError("这只精灵没有配招，无法替换第一个技能")
+    swapped[pet.pet_id] = row[0]
+    row[0] = sid
+    me.loadouts[pet.pet_id] = tuple(row)
+    me.magic["uses_left"] = int(me.magic["uses_left"]) - 1
+    # 2026-09-23（人类实测报的真 bug）：「用了愿力强化没进冷却」—— 转换这一支原来只扣了次数，
+    # **没有设冷却**，于是下一回合它立刻又能用（两次次数可以连着用两个回合），
+    # 与人类口径「每局两次、冷却三回合」直接冲突。设冷却的口径与「解除」那一支完全一致：
+    # `cooldown_turns` 个回合，且设冷却的当回合不递减（见 `_tick_magic_cooldowns`）。
+    cooldown = int(magic.get("cooldown_turns") or 0)
+    me.magic["cooldown"] = cooldown
+    me.magic["cooldown_set_turn"] = state.turn
+    state.log.append(
+        f"愿力强化：{_pet_name(rs, pet)}的第一个技能换成了「{rs.skills[sid].name}」"
+        f"（本局还能用 {me.magic['uses_left']} 次；冷却 {cooldown} 回合）。"
+    )
+    _bump(state, "magic", {"side": side, "magic": action.magic_id, "mode": "transform",
+                           "pet": pet.pet_id, "pet_name": _pet_name(rs, pet),
+                           "skill": sid, "skill_name": rs.skills[sid].name,
+                           "uses_left": me.magic["uses_left"], "cooldown": cooldown})
+
+
+def _restore_if_wish_impact(state: GameState, rs: Ruleset, side: str,
+                            used_skill: Any = None) -> bool:
+    """这一手如果是「愿力冲击」，用完就把第一个技能**还回去**（人类 2026-09-24 口径）。
+
+    返回是否真的还原了。四条边界：
+      · **必须真的是这一手打出的愿力冲击**（`used_skill.skill_id == 换上的那个 id`）——
+        否则「用任何一招攻击技能都会把愿力冲击静默收回」：实测（2026-09-24 真机复现）
+        用第一格以外的攻击技能（例：翅刃 `skill_000650`）打出去时，事件里多出一条
+        `magic/restore/reason=consumed`，而这一手的 `damage.skill_id` 是 `skill_000650`
+        —— 愿力冲击被**凭空吃掉**（次数白扣、冷却照走）。docstring 一直写着「这一手如果是
+        愿力冲击」，实现漏了这条比较。
+      · 只还原**被替换过的**那一只（`swapped[pet_id]` 里有原始技能）；
+      · 还原**不消耗次数、不改冷却**（愿力强化在使用时已经扣过）；
+      · 事件写成 `kind=magic, mode=restore, reason=consumed`，页面据此把技能格改回来。
+    """
+    me = getattr(state, side)
+    st = me.magic
+    if not isinstance(st, dict):
+        return False
+    pet = me.field_pet
+    swapped = st.get("swapped") or {}
+    original = swapped.get(pet.pet_id)
+    if not original:
+        return False
+    row = list(me.loadouts.get(pet.pet_id) or ())
+    if not row:
+        return False
+    wish = wish_impact_skill_id(rs, pet)
+    if wish is None or row[0] != wish:
+        return False
+    # ⚠ 这一条是 BUG-1 的修复点：**这一手打出的必须是愿力冲击本人**。
+    # 借用「愿力冲击」的那一只可能同时带着别的攻击技能，那些技能打出去**不该**触发还原。
+    used_id = getattr(used_skill, "skill_id", None)
+    if not used_id or used_id != wish:
+        return False
+    swapped.pop(pet.pet_id, None)
+    row[0] = original
+    me.loadouts[pet.pet_id] = tuple(row)
+    original_name = rs.skills[original].name if original in rs.skills else original
+    state.log.append(
+        f"愿力冲击用掉了：{_pet_name(rs, pet)}的第一个技能还原成「{original_name}」。"
+    )
+    _bump(state, "magic", {"side": side, "magic": "wish_power_up", "mode": "restore",
+                           "reason": "consumed", "pet": pet.pet_id,
+                           "pet_name": _pet_name(rs, pet), "restored": original,
+                           "restored_name": original_name})
+    return True
+
+
+def _pet_name(rs: Ruleset, pet: PetState) -> str:
+    row = rs.pets.get(pet.pet_id)
+    return row.name if row is not None else pet.pet_id
+
+
 def _use_item(state: GameState, rs: Ruleset, side: str, action: Action,
               cfg: Optional[RuleConfig] = None) -> None:
     cfg = cfg or _rule_config.get_rule_config()
@@ -1354,6 +2158,167 @@ def _use_item(state: GameState, rs: Ruleset, side: str, action: Action,
         _bump(state, "item", {"side": side, "item": item_id, "cleared": cleared})
     else:
         _note_unsupported(state, f"道具「{item_id}」", "未实现", item_id)
+
+
+# ── 天气（2026-09-25 人类裁决「那你就做！」）──────────────────────────────
+#
+# 官方一手（腾讯新闻·官方号《洛个明白》闪耀大赛入门篇 2026-04-14）逐字：
+#   「天气是常驻在全场的效果，让对战双方都能获得相应的加成，但天气只能存在一种。」
+#   「场上的天气效果还将受到回合数的限制…对局战报查看当前天气的剩余回合数！」
+#
+# 三条纪律：
+#   ① **效果与数值全部从规则配置读**（`policies.weather_policy`，生成器从 battle-modes.json
+#      照抄；数值口径是当前规则集 S4 术语表 3006/3007/3008/3021）。引擎里**没有**任何
+#      写死的天气数值 —— 「雨天 +75%」这类数字只出现在数据/配置里。
+#   ② **规则集没声明天气层时，引擎不发明任何天气行为**：技能里的「将天气改为…」照旧
+#      登记成 unsupported，回合末也不结算（legacy / v2 的结算与 golden 指纹逐位不变）。
+#   ③ 回合数是**技能的属性**（描述里的「持续N回合」）：读不到就不接受这一手，
+#      不拿配置里的默认值去顶技能描述。
+#
+# 天气**不是** `turn_order.end_turn.order` 里声明的逐宠阶段：那个清单的语义是
+# 「每一只在场精灵内部」的结算顺序（见 `_end_of_turn`），而天气是场地级、双方一起结算。
+# 顺序（声明阶段之后、回合数递减之前）没有一手证据，登记在 battle-modes 的 unknowns 里。
+
+
+def _weather_effect_of(cfg: RuleConfig, name: str) -> Optional[Dict[str, Any]]:
+    """配置里声明的某种天气的结算口径；没声明/没开天气层 ⇒ `None`（调用方 fail closed）。"""
+    read_effect = getattr(cfg, "weather_effect", None)
+    return read_effect(name) if callable(read_effect) else None
+
+
+def _pet_types(rs: Ruleset, pet: PetState) -> Tuple[str, ...]:
+    species = rs.pets.get(pet.pet_id)
+    return tuple(species.types) if species is not None else ()
+
+
+def _pet_display_name(rs: Ruleset, pet: PetState) -> str:
+    species = rs.pets.get(pet.pet_id)
+    return species.name if species is not None else pet.pet_id
+
+
+def set_weather(state: GameState, rs: Ruleset, name: str, turns: Optional[int], *,
+                side: str, skill_id: str, cfg: Optional[RuleConfig] = None) -> bool:
+    """把天气改成 `name`，剩余 `turns` 回合。返回「是否真的设上了」。
+
+    官方逐字「但天气只能存在一种」⇒ **替换**，不叠加（旧天气的信息进事件，不留在状态上）。
+    三种情形一律**不设天气**、只登记（fail closed，绝不发明天气行为）：
+      · 配置没声明天气层；
+      · 配置声明了天气层，但没声明这一种天气的结算口径；
+      · 技能描述里读不到「持续N回合」（回合数是技能属性，不拿配置默认值顶）。
+    """
+    cfg = cfg or _rule_config.get_rule_config(state.ruleset_config_id or None)
+    if not cfg.weather_enabled:
+        _note_unsupported(
+            state, f"天气「{name}」",
+            f"规则配置 {cfg.ruleset_config_id} 没有声明天气层（policies.weather_policy）——"
+            "引擎不发明天气行为（fail closed）", skill_id)
+        return False
+    spec = _weather_effect_of(cfg, name)
+    if spec is None:
+        _note_unsupported(
+            state, f"天气「{name}」",
+            f"规则配置 {cfg.ruleset_config_id} 声明了天气层，但没有声明「{name}」这一种的结算口径 ——"
+            "不套用别的天气、也不猜一个默认效果", skill_id)
+        return False
+    if not isinstance(turns, int) or isinstance(turns, bool) or turns <= 0:
+        _note_unsupported(
+            state, f"天气「{name}」的持续回合数",
+            "技能描述里读不到「持续N回合」—— 回合数是**技能的属性**，不拿配置里的默认值顶；"
+            "这一手因此不改变天气", skill_id)
+        return False
+    previous = str((state.weather or {}).get("name") or "")
+    state.weather = {
+        "name": name,
+        "turns_left": int(turns),
+        "duration_turns": int(turns),
+        "set_turn": int(state.turn),
+        "set_by": side,
+        "source_skill_id": skill_id,
+        "term_id": spec.get("term_id"),
+    }
+    label = "你" if side == "player" else "对手"
+    state.log.append(f"{label}把天气改成了{name}（持续 {turns} 回合）。"
+                     + (f"（{previous}结束）" if previous and previous != name else ""))
+    _bump(state, "weather_set", {
+        "side": side, "weather": name, "turns_left": int(turns),
+        "replaced": previous or None,
+    }, evidence=(str(spec.get("term_id") or ""),))
+    return True
+
+
+def apply_weather_effect(state: GameState, rs: Ruleset, side: str, skill,
+                         value: Dict[str, Any], cfg: RuleConfig) -> bool:
+    """把技能描述里的「将天气改为X」应用到场上。返回是否生效。"""
+    return set_weather(state, rs, str(value.get("weather") or ""), value.get("turns"),
+                       side=side, skill_id=skill.skill_id, cfg=cfg)
+
+
+def _end_turn_weather(state: GameState, rs: Ruleset, cfg: RuleConfig) -> None:
+    """天气的**回合末**结算：效果（暴风雪 / 雷鸣）→ 回合数递减 → 到期清除。
+
+    它**不是** `turn_order.end_turn.order` 声明的逐宠阶段（那个清单是「每只在场精灵内部」的顺序），
+    而是场地级、双方一起结算；调用点因此是 `_end_of_turn` 里声明阶段跑完之后。
+    「先结算效果、再递减回合数」这条顺序没有一手证据（官方只说「每回合结束时」），
+    登记在 battle-modes 的 unknowns `end_turn_order_vs_status_tick` 里。
+    """
+    weather = state.weather
+    if not isinstance(weather, dict):
+        return
+    name = str(weather.get("name") or "")
+    spec = _weather_effect_of(cfg, name)
+    if spec is None:
+        # 场上有个没声明的天气（不可能由本引擎设出）——不动它、也不算它的回合数。
+        _note_unsupported(
+            state, f"天气「{name}」的回合末结算",
+            f"规则配置 {cfg.ruleset_config_id} 没有声明这一种天气 —— 不结算、也不递减它的回合数", "")
+        return
+    if spec.get("kind") == "end_turn_status":
+        status = str(spec.get("status") or "")
+        layers = int(spec.get("layers") or 0)
+        immune = str(spec.get("immune_element") or "")
+        for side in (state.player, state.enemy):
+            if cfg.has_mana and state.result:
+                return
+            pet = side.field_pet
+            if not pet.alive:
+                continue
+            pet_name = _pet_display_name(rs, pet)
+            if immune and immune in _pet_types(rs, pet):
+                state.log.append(f"{pet_name}是{immune}，免疫{name}的{status}。")
+                _bump(state, "weather_immune", {
+                    "side": side.name, "weather": name, "status": status,
+                    "immune_element": immune,
+                }, evidence=(str(spec.get("term_id") or ""),))
+                continue
+            info = pet.statuses.get(status)
+            if not isinstance(info, dict):
+                info = {"layers": 0}
+            info["layers"] = int(info.get("layers", 0)) + layers
+            info.setdefault("source", f"天气{name}")
+            pet.statuses[status] = info
+            state.log.append(f"{pet_name}获得 {layers} 层{status}（共 {info['layers']} 层）。")
+            _bump(state, "weather_status", {
+                "side": side.name, "weather": name, "status": status,
+                "layers": layers, "layers_after": info["layers"],
+            }, evidence=(str(spec.get("term_id") or ""),))
+            # 术语 3022：引电满 2 层要立刻结算 —— 但**它没实现**，而且「天气给的层数算不算触发」
+            # 没有一手证据。这里如实登记，不猜一个伤害、也不静默把层数扣掉。
+            if status == "引电" and info["layers"] >= 2:
+                _note_unsupported(
+                    state, "引电达到 2 层的立即结算",
+                    "术语 3022 写「获得2层引电时，立即受到25%生命的电系伤害，并失去2层引电」，"
+                    "但本引擎没有实现这条触发，且「天气给的层数是否触发它」没有一手证据 —— 不猜", "3022")
+    elif spec.get("kind") in ("skill_power_multiplier", "skill_energy_cost_multiplier"):
+        # 这两类在**出手时**结算（伤害 / 能耗），回合末没有事情要做。
+        pass
+    _bump(state, "weather_tick", {
+        "weather": name, "turns_left": int(weather.get("turns_left", 0)) - 1,
+    }, evidence=(str(spec.get("term_id") or ""),))
+    weather["turns_left"] = int(weather.get("turns_left", 0)) - 1
+    if weather["turns_left"] <= 0:
+        state.weather = None
+        state.log.append(f"{name}结束了。")
+        _bump(state, "weather_end", {"weather": name})
 
 
 def require_declared_end_turn_stages(cfg: RuleConfig) -> Tuple[str, ...]:
@@ -1447,6 +2412,10 @@ def _end_of_turn(state: GameState, rs: Ruleset,
     """
     cfg = cfg or _rule_config.get_rule_config()
     stages = require_declared_end_turn_stages(cfg)
+    # 引擎级计数器（不是声明里的游戏阶段）：PVP 魔法的冷却每回合减 1。见 `_tick_magic_cooldowns`。
+    _tick_magic_cooldowns(state)
+    # 同一条纪律：能耗修正的到期（`until_turn`）也在回合末清。见 `_tick_energy_cost_mods`。
+    _tick_energy_cost_mods(state)
     for side in (state.player, state.enemy):
         # RC-105：魔力归零已经在结算途中判出胜负 —— 不再继续结算回合末，
         # 也不覆盖那个结果。legacy / v2 没有 mana（`has_mana=False`），这条不触发。
@@ -1469,6 +2438,10 @@ def _end_of_turn(state: GameState, rs: Ruleset,
                     f"规则配置 {cfg.ruleset_config_id} 声明了它，但本引擎没有对应的实现 ——"
                     "不静默跳过",
                 )
+    # 天气的回合末结算（场地级，双方一起）：**在声明阶段之后**。
+    # 它不算 `turn_order.end_turn.order` 里的阶段（那是「每只在场精灵内部」的顺序），
+    # 所以放在这个循环外面；顺序本身没有一手证据，登记在 battle-modes 的 unknowns 里。
+    _end_turn_weather(state, rs, cfg)
 
 
 def _finish(state: GameState) -> None:
@@ -1664,6 +2637,13 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
             "charging": bool(p.charge),
         }
 
+    # `mana.pool`（这一局每人几颗心）是**规则常量**，与 `energy_max` 同一性质 ——
+    # 页面的掉心动效靠它把「掉了的」画成空心的 ♡。读不到就是 None，界面不画（不编总数）。
+    # ⚠ 2026-09-23：这里原先把 `cfg` 当成本函数的局部变量用，而它并不存在（`cfg` 只绑在
+    # `ui_public_view` 里）→ 每次构造公开视图都抛 `NameError: name 'cfg' is not defined`，
+    # 标准 PVP **根本开不了局**（实测：单元测试 6 条红、页面按钮点下去没反应）。
+    # 就地读一次当前生效的规则配置即可（与 `ui_public_view` 用的是同一个入口）。
+    cfg = _rule_config.get_rule_config(state.ruleset_config_id or None)
     return {
         "schema_version": PUBLIC_PLANNER_SCHEMA_VERSION,
         "ruleset_id": state.ruleset_id,
@@ -1677,13 +2657,21 @@ def public_planner_state(state: "GameState", rs: Ruleset, side: str = "player") 
         # RC-105：魔力是**公开**信息（它就是胜负判据，两边的界面都画着它）。
         # 只有声明了 mana 的配置才有这一个键：legacy / v2 里这条概念不存在，
         # 补一个 0 会被读成「已经判负」。
-        **({"mana": {"self": me.mana, "opponent": foe.mana}}
+        # `pool` 是**规则常量**（这一局每人几颗心），与 `energy_max` 同一性质：
+        # 它是公开的，页面的掉心动效要靠它把「掉了的」画成空心的 ♡。
+        **({"mana": {"self": me.mana, "opponent": foe.mana,
+                     "pool": getattr(cfg, "mana_pool", None)}}
            if (me.mana is not None or foe.mana is not None) else {}),
         # RC-106：这一局用过的**未核验覆盖**必须如实出现在公开面里 —— 它改变的是
         # **规则值本身**（例如入场初始能量），而规则值对双方一样、页面上也写着。
         # 藏起来会更坏：页面把「候选口径下的 2」显示成「标准 PVP 的入场能量」，
         # 也就是把一个假设说成事实。没有覆盖时这里是空数组（键始终在）。
         "unverified_overrides": list(state.unverified_overrides),
+        # 2026-09-25：**天气也是公开事实**（官方逐字：「天气是常驻在全场的效果，让对战双方
+        # 都能获得相应的加成」「对局战报查看当前天气的剩余回合数」）⇒ 规划侧必须看得到
+        # 当前天气与剩余回合数（雨天 +75% / 沙暴能耗减半会直接改变最优手）。
+        # **没有天气时这个键不出现**：没开天气的对局（含全部 legacy 调用点）逐位不变。
+        **({"weather": dict(state.weather)} if isinstance(state.weather, dict) else {}),
         "self": {
             "active": me.active,
             "items": dict(me.items),
@@ -1820,6 +2808,15 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
         ui_action_public({"skill_id": sid, "kind": "skill"}, rs)
         for sid in sorted({sid for ids in (me.loadouts or {}).values() for sid in ids})
     ]
+    # 2026-09-23：**己方的实时配招**（pet_id -> [技能 id]），按位次给。
+    # 为什么必须带出来：PVP 魔法「愿力强化」会把**第一个技能**换掉（human 口径），
+    # 而页面的四格技能原来只读客户端名册里的 `moveset` → 换完之后格子还写着旧技能名，
+    # 引擎却在发「愿力冲击」这个动作（名字与可点性对不上）。视图给按位次的真值，
+    # 页面就能逐格对齐。**只给己方**：对手的技能表从来不在公开视图里（`observation_for` 同一口径）。
+    self_panel["loadouts"] = {pid: list(ids) for pid, ids in (me.loadouts or {}).items()}
+    # PVP 魔法状态（次数 / 冷却 / 换过谁）——同样**只给己方**：
+    # 人类口径「对手看不见你用了这件道具」（愿力冲击本身照常公开）。
+    self_panel["magic"] = dict(me.magic) if isinstance(me.magic, dict) else None
     # UI 自己的合法动作表（带技能说明）。协议那份 `legal` 在 service 里，
     # 字段一个都不变——两条链各取所需。
     ui_legal = {
@@ -1868,6 +2865,9 @@ def ui_public_view(state: "GameState", rs: Ruleset, side: str = "player") -> Dic
         **({"mana": view["mana"]} if "mana" in view else {}),
         # RC-106：未核验覆盖同上，照抄规划协议那一份。
         "unverified_overrides": unverified,
+        # 2026-09-25：天气照抄规划协议那一份（同一时刻的同一局，不另算一遍）。
+        # 页面上它就是要画在战报里的那条「当前天气（还剩 N 回合）」。
+        **({"weather": view["weather"]} if "weather" in view else {}),
         "self": self_panel,
         "opponent": foe_panel,
         "legal": ui_legal,

@@ -1,0 +1,60 @@
+{
+  "schema": "roco-rc602-red-proofs/v1",
+  "count": 9,
+  "proofs": [
+    {
+      "where": "tests/roco-team-ranker.test.js#③",
+      "criterion": "同分顺序必须等于按 team_id 字典序排的声明顺序",
+      "mutation": "把 tie-break 换成「按输入顺序」并倒序输入",
+      "actual": "声明顺序=rc602-team-01,rc602-team-02,rc602-team-03；无 tie-break 版本（倒序输入）=rc602-team-03,rc602-team-02,rc602-team-01 ⇒ 判红"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#④",
+      "criterion": "速度未知时该队必须 available:false 且 score=null",
+      "mutation": "把 speed_layers 的 null 改成 0 并标 available:true",
+      "actual": "补 0 版本 available=true score=0.9012；正确版本 available=false score=null ⇒ 判红"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑤",
+      "criterion": "多属性精灵必须按冻结相性表的显式组合行算（组合行优先）",
+      "mutation": "把 own-0003（地系|幻系）的抗性按 types[0]=地系 的单属性行算",
+      "actual": "组合行=6 个抗性（模块输出=6）；types[0] 行=5 个 ⇒ 判红"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑥a",
+      "criterion": "任何键名命中 BANNED_CLAIM_KEYS 即判红",
+      "mutation": "往 score 里注入 {win_rate: 0.62}",
+      "actual": "[PSEUDO_PRECISION] $.module_exports.score.win_rate：键名 win_rate 是禁止的伪精确字段名（不许发明胜负 / 概率 / 榜单字段）"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑥b",
+      "criterion": "任何字符串命中 BANNED_CLAIM_PATTERNS 即判红",
+      "mutation": "往字符串里写「这一队的胜率更高（62%）」",
+      "actual": "[PSEUDO_PRECISION] $.text.why：字符串出现「中文伪精确词」（胜率）：这一队的胜率更高（62%）；[PSEUDO_PRECISION] $.text.why：字符串出现「百分号」（%）：这一队的胜率更高（62%）"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑧",
+      "criterion": "覆盖类计数与结构分对成员质量单调（更好不许更低、更差不许更高）",
+      "mutation": "把「补进 own-0002（抗性更多）」换成「补进 own-0028（抗性更少）」",
+      "actual": "更好：覆盖=6 分=0.6667；更差：覆盖=3 分=0.6111 ⇒ 单调性判据区分得开"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑨a",
+      "criterion": "每条权重必须有 provenance ∈ WEIGHT_PROVENANCE_LEVELS",
+      "mutation": "删掉 speed_layers 权重的 provenance 字段",
+      "actual": "[WEIGHT_PROVENANCE_MISSING] weights.speed_layers.provenance：provenance = null，不在允许集合 ENGINE_HYPOTHESIS 里：每条权重都必须自报来源等级，没有来源的权重就是魔数"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑨b",
+      "criterion": "每条权重必须有非空 reason",
+      "mutation": "删掉 energy_curve 权重的 reason 字段",
+      "actual": "[WEIGHT_REASON_MISSING] weights.energy_curve.reason：权重没有写理由：没有理由的数值就是藏在函数体里的魔数"
+    },
+    {
+      "where": "tests/roco-team-ranker.test.js#⑨c",
+      "criterion": "RANKER_STATUS 的 learned_weights / calibrated / emits_* 必须都是 false",
+      "mutation": "把 RANKER_STATUS.learned_weights 改成 true",
+      "actual": "[STATUS_OVERCLAIM] status.learned_weights：RANKER_STATUS.learned_weights = true：本仓没有任何学习权重，只能是 false"
+    }
+  ]
+}

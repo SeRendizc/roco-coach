@@ -1,0 +1,946 @@
+{
+ "generated_by": "scripts/roco/shadow-replay.mjs",
+ "arm": "rule",
+ "identity": {
+  "role": "rule-arm",
+  "note": "规则臂不经过模型，没有模型身份"
+ },
+ "written_to": "/tmp/roco-recon/arm-rule-roster_constraint.json",
+ "gateway": null,
+ "prompt_digest": null,
+ "prompt": null,
+ "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
+ "summary": {
+  "tasks": 24,
+  "passed": 24,
+  "pass_rate": 1,
+  "stopped": {
+   "complete": 24
+  },
+  "latency": {
+   "p50_ms": 1,
+   "p95_ms": 2
+  },
+  "by_category": {
+   "roster_constraint": {
+    "total": 24,
+    "passed": 24,
+    "pass_rate": 1,
+    "p50_ms": 1,
+    "p95_ms": 2
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 8,
+     "passed": 8,
+     "pass_rate": 1
+    },
+    "seen": {
+     "total": 16,
+     "passed": 16,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "A组三人-无锁定": {
+      "total": 8,
+      "passed": 8,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "A组三人-锁定寂灭骨龙": {
+      "total": 8,
+      "passed": 8,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "混编三人-含B组": {
+      "total": 8,
+      "passed": 8,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 12,
+     "passed": 12,
+     "pass_rate": 1
+    },
+    "seen": {
+     "total": 12,
+     "passed": 12,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "阵容评分": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "换人对比": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 24,
+     "passed": 24,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "直问": {
+      "total": 6,
+      "passed": 6,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "口语": {
+      "total": 6,
+      "passed": 6,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "追问": {
+      "total": 6,
+      "passed": 6,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "背景": {
+      "total": 6,
+      "passed": 6,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "case_id": "rc-eval-f0-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "阵容评分",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 7
+  },
+  {
+   "case_id": "rc-eval-f0-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "阵容评分",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-eval-f0-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "A组三人-无锁定",
+   "mechanism": "阵容评分",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f0-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "阵容评分",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f1-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-5",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "阵容评分",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f1-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "阵容评分",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f1-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "阵容评分",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-eval-f1-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "阵容评分",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f2-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-4",
+   "family": "混编三人-含B组",
+   "mechanism": "阵容评分",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f2-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "混编三人-含B组",
+   "mechanism": "阵容评分",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-eval-f2-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "阵容评分",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-eval-f2-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "阵容评分",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f0-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "换人对比",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-swap-f0-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "换人对比",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-swap-f0-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-5",
+   "family": "A组三人-无锁定",
+   "mechanism": "换人对比",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-swap-f0-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-4",
+   "family": "A组三人-无锁定",
+   "mechanism": "换人对比",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f1-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "换人对比",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-swap-f1-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "换人对比",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f1-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "换人对比",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rc-swap-f1-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "换人对比",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f2-01",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "换人对比",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f2-02",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-5",
+   "family": "混编三人-含B组",
+   "mechanism": "换人对比",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f2-03",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "混编三人-含B组",
+   "mechanism": "换人对比",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rc-swap-f2-04",
+   "category": "roster_constraint",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "换人对比",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_team_change",
+     "args": {
+      "team_before": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "team_after": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000417"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  }
+ ]
+}

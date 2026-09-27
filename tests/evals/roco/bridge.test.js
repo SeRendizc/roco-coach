@@ -412,22 +412,38 @@ test('桥：拒绝携带隐藏信息，连发都不发', { skip: SKIP }, async (
   });
 });
 
-// ── 8. 相性：只用快照显式行，缺行就 unsupported ────────────────────────
+// ── 8. 相性：双属性按两系相乘（人类裁决），缺行仍 unsupported ─────────────
 
-test('桥：双属性相性只用快照显式行（缺行时 unsupported，不相乘）', { skip: SKIP }, async () => {
+test('桥：双属性相性 = 两系相乘（人类裁决），快照原值可对账，缺行仍 unsupported', { skip: SKIP }, async () => {
   await withService(async (client) => {
-    // 快照在 2×2 处封顶为 3.0：相乘假设会给出 4.0，这里是「用数据不用假设」的判别点
-    const capped = await client.typeMultiplier(['光系', '地系'], '草系');
-    assert.equal(capped.ok, true, `显式行应当能直接取到：${capped.message || ''}`);
-    assert.equal(capped.result.multiplier, 3);
-    assert.notEqual(capped.result.multiplier, 4);
-    assert.equal(capped.result.assumption_free, true);
+    // **2026-09-25 人类裁决：属性双属性改用社区源的相乘口径 ⇒ 期望由 3 改成 4。**
+    // 人类原话：「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」。
+    // 光系 受草系 = 2.0（被草系克制）、地系 受草系 = 2.0 ⇒ 相乘 = 4.0；
+    // 快照那一行把双弱封顶在 3.0 —— 它现在只作**对账**用（snapshot_value）。
+    //
+    // 改钉不删（旧期望与旧注释原话留在下面，历史不抹掉）：
+    //   ~~// 快照在 2×2 处封顶为 3.0：相乘假设会给出 4.0，这里是「用数据不用假设」的判别点~~
+    //   ~~assert.equal(capped.result.multiplier, 3);~~
+    //   ~~assert.notEqual(capped.result.multiplier, 4);~~
+    const product = await client.typeMultiplier(['光系', '地系'], '草系');
+    assert.equal(product.ok, true, `显式行应当能直接取到：${product.message || ''}`);
+    assert.equal(product.result.multiplier, 4);
+    assert.notEqual(product.result.multiplier, 3);
+    assert.equal(product.result.snapshot_value, 3, '快照那一行仍要能对账：它就是封顶的 3');
+    assert.equal(product.result.snapshot_agrees, false, '这一格正是「快照与裁决口径不同」的 41 格之一');
+    assert.equal(product.result.combination_rule, 'multiply');
+    // `assumption_free` 的含义（重新说清）：它表示「这个倍率没有用**未核验的**假设补值」。
+    // 新口径下它来自**两条单属性行相乘** —— 相乘是**人类裁决的规则**（台账 EV-TYPE-MULTIPLIER，
+    // RECORDED_IN_GAME），不是我们的工程假设，所以这里仍然是 true；单属性那条同理（直读快照那一行）。
+    assert.equal(product.result.assumption_free, true,
+      'assumption_free = 「没有用未核验假设补值」；相乘是裁决的规则，不是假设');
 
     const single = await client.typeMultiplier(['龙系'], '冰系');
     assert.equal(single.ok, true);
     assert.equal(single.result.multiplier, 2);
 
-    // 快照没有这条组合的行 → 不许用「相乘」补
+    // 缺行 fail closed 这半条**不许**因为改用相乘而放开：快照只给了 86 个双属性组合，
+    // 18 选 2 的其余 67 个组合没有数据 ⇒ 不可查（光系|冰系 就是这 67 个之一）。
     const missing = await client.typeMultiplier(['光系', '冰系'], '草系');
     assert.equal(missing.ok, false);
     assert.equal(missing.code, ROCO_ERROR.UNSUPPORTED_EFFECT);

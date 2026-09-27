@@ -1,0 +1,1313 @@
+{
+  "partial": true,
+  "rows": [
+    {
+      "id": "c46",
+      "cat": "cat1-needs-lookup",
+      "question": "守一下和换潮甲龟哪个好",
+      "expect": {
+        "calls": [
+          1,
+          1
+        ],
+        "tools": [
+          "simulate_branch"
+        ],
+        "argument": {
+          "tool": "simulate_branch",
+          "candidates": [
+            "skill:guard",
+            "switch:turtle"
+          ]
+        },
+        "evidence": "simulation",
+        "answer": {
+          "must": [
+            {},
+            {}
+          ],
+          "why": "正文要讲玩家问的那两个行动（防御 / 换上潮甲龟），不是索引 0 的行动"
+        }
+      },
+      "why": "R02：参数曾经写死 actionIndex:0/opponentIndex:0；候选必须解析成「防御」与「换上潮甲龟」这两个稳定标识。",
+      "regression": "R02",
+      "goldRevision": "10886a4c",
+      "goldStatus": "draft",
+      "goldUnreviewed": true,
+      "goldReviewReasons": [],
+      "truth": {
+        "lastSettledTurn": 1,
+        "settled": [
+          1
+        ],
+        "matchId": "match-branch",
+        "candidateIds": [
+          "skill:guard",
+          "switch:turtle"
+        ],
+        "candidateNames": [
+          "防御",
+          "换上潮甲龟"
+        ]
+      },
+      "context": "pve",
+      "contextPhase": "battle",
+      "status": 200,
+      "latencyMs": 2344,
+      "model": "deepseek-flash",
+      "text": "换潮甲龟略好一点。它平均-225.73分，防御-229.64分，换入也更稳（最差-236.73对-240.8）。这是模拟排序分，不是胜率。\n\n不过溪刃獭速度40快过潮甲龟13，换入后大概率还是先挨一下，只是潮甲龟血厚、防御时多回8血，扛得住。想省血就换龟，想赌疾爪抢先收尾就防御，偏保守选换龟。",
+      "error": null,
+      "route": "strategist",
+      "provider": "deepseek",
+      "agentStop": "complete",
+      "localOnly": false,
+      "fallbackReason": null,
+      "judgment": null,
+      "toolTrace": [
+        {
+          "tool": "simulate_branch",
+          "args": {
+            "candidates": [
+              "skill:guard",
+              "switch:turtle"
+            ],
+            "unresolved": []
+          },
+          "result": {
+            "assumption": "双方行动是假设，不是预测或真实对手选择；所有候选都对同一组当前合法对手行动计算，并覆盖两种同速顺序",
+            "turn": 2,
+            "phase": "battle",
+            "freeReplacement": false,
+            "turnCost": "当前是正常回合：每个候选都消耗整回合，对手会同时行动",
+            "simulated": [
+              {
+                "id": "skill:guard",
+                "name": "防御",
+                "kind": "skill",
+                "cost": "出招（消耗整回合）",
+                "legal": true
+              },
+              {
+                "id": "switch:turtle",
+                "name": "换上潮甲龟",
+                "kind": "switch",
+                "cost": "主动换宠（消耗整回合）",
+                "legal": true
+              }
+            ],
+            "opponentActions": [
+              {
+                "id": "skill:dash",
+                "name": "疾爪"
+              },
+              {
+                "id": "skill:wave",
+                "name": "水流弹"
+              },
+              {
+                "id": "skill:guard",
+                "name": "防御"
+              },
+              {
+                "id": "switch:turtle",
+                "name": "换上潮甲龟"
+              },
+              {
+                "id": "switch:deer",
+                "name": "换上芽角鹿"
+              },
+              {
+                "id": "item:potion:otter",
+                "name": "回复药 → 溪刃獭"
+              },
+              {
+                "id": "item:ether:otter",
+                "name": "能量果 → 溪刃獭"
+              },
+              {
+                "id": "item:ether:turtle",
+                "name": "能量果 → 潮甲龟"
+              }
+            ],
+            "legalAlternatives": [
+              {
+                "id": "skill:dash",
+                "name": "疾爪"
+              },
+              {
+                "id": "skill:ember",
+                "name": "火花"
+              },
+              {
+                "id": "skill:pursuit",
+                "name": "余烬追猎"
+              },
+              {
+                "id": "skill:guard",
+                "name": "防御"
+              },
+              {
+                "id": "switch:turtle",
+                "name": "换上潮甲龟"
+              },
+              {
+                "id": "item:potion:fox",
+                "name": "回复药 → 烬尾狐"
+              },
+              {
+                "id": "item:potion:turtle",
+                "name": "回复药 → 潮甲龟"
+              },
+              {
+                "id": "item:ether:turtle",
+                "name": "能量果 → 潮甲龟"
+              },
+              {
+                "id": "escape",
+                "name": "撤退"
+              }
+            ],
+            "comparisons": [
+              {
+                "id": "skill:guard",
+                "name": "防御",
+                "kind": "skill",
+                "cost": "出招（消耗整回合）",
+                "legal": true,
+                "vs": [
+                  {
+                    "opponent": "skill:dash",
+                    "opponentName": "疾爪",
+                    "scores": [
+                      -235.82,
+                      -235.82
+                    ],
+                    "mean": -235.82
+                  },
+                  {
+                    "opponent": "skill:wave",
+                    "opponentName": "水流弹",
+                    "scores": [
+                      -240.8,
+                      -240.8
+                    ],
+                    "mean": -240.8
+                  },
+                  {
+                    "opponent": "skill:guard",
+                    "opponentName": "防御",
+                    "scores": [
+                      -231.66,
+                      -231.66
+                    ],
+                    "mean": -231.66
+                  },
+                  {
+                    "opponent": "switch:turtle",
+                    "opponentName": "换上潮甲龟",
+                    "scores": [
+                      -223.66,
+                      -223.66
+                    ],
+                    "mean": -223.66
+                  },
+                  {
+                    "opponent": "switch:deer",
+                    "opponentName": "换上芽角鹿",
+                    "scores": [
+                      -210.16,
+                      -210.16
+                    ],
+                    "mean": -210.16
+                  },
+                  {
+                    "opponent": "item:potion:otter",
+                    "opponentName": "回复药 → 溪刃獭",
+                    "scores": [
+                      -237.71,
+                      -237.71
+                    ],
+                    "mean": -237.71
+                  },
+                  {
+                    "opponent": "item:ether:otter",
+                    "opponentName": "能量果 → 溪刃獭",
+                    "scores": [
+                      -230.66,
+                      -230.66
+                    ],
+                    "mean": -230.66
+                  },
+                  {
+                    "opponent": "item:ether:turtle",
+                    "opponentName": "能量果 → 潮甲龟",
+                    "scores": [
+                      -226.66,
+                      -226.66
+                    ],
+                    "mean": -226.66
+                  }
+                ],
+                "best": {
+                  "tieFirst": "player",
+                  "score": -210.16032776747068,
+                  "player": [
+                    {
+                      "name": "烬尾狐",
+                      "hp": 59,
+                      "energy": 6,
+                      "status": null
+                    },
+                    {
+                      "name": "潮甲龟",
+                      "hp": 79,
+                      "energy": 5,
+                      "status": null
+                    },
+                    {
+                      "name": "芽角鹿",
+                      "hp": 0,
+                      "energy": 5,
+                      "status": null
+                    }
+                  ],
+                  "enemy": [
+                    {
+                      "name": "溪刃獭",
+                      "hp": 80,
+                      "energy": 2,
+                      "status": null
+                    },
+                    {
+                      "name": "潮甲龟",
+                      "hp": 161,
+                      "energy": 5,
+                      "status": null
+                    },
+                    {
+                      "name": "芽角鹿",
+                      "hp": 125,
+                      "energy": 6,
+                      "status": null
+                    }
+                  ],
+                  "opponent": "switch:deer",
+                  "opponentName": "换上芽角鹿"
+                },
+                "worst": {
+                  "tieFirst": "player",
+                  "score": -240.8031849103278,
+                  "player": [
+                    {
+                      "name": "烬尾狐",
+                      "hp": 38,
+                      "energy": 6,
+                      "status": null
+                    },
+                    {
+                      "name": "潮甲龟",
+                      "hp": 79,
+                      "energy": 5,
+                      "status": null
+                    },
+                    {
+                      "name": "芽角鹿",
+                      "hp": 0,
+                      "energy": 5,
+                      "status": null
+                    }
+                  ],
+                  "enemy": [
+                    {
+                      "name": "溪刃獭",
+                      "hp": 80,
+                      "energy": 1,
+                      "status": null
+                    },
+                    {
+                      "name": "潮甲龟",
+                      "hp": 161,
+                      "energy": 5,
+                      "status": null
+                    },
+                    {
+                      "name": "芽角鹿",
+                      "hp": 125,
+                      "energy": 5,
+                      "status": null
+                    }
+                  ],
+                  "opponent": "skill:wave",
+                  "opponentName": "水流弹"
+                },
+                "mean": -229.64,
+                "spread": 30.64
+              },
+              {
+                "id": "switch:turtle",
+                "name": "换上潮甲龟",
+                "kind": "switch",
+                "cost": "主动换宠（消耗整回合）",
+                "legal": true,
+                "vs": [
+                  {
+                    "opponent": "skill:dash",
+                    "opponentName": "疾爪",
+                    "scores": [
+                      -232.85,
+                      -232.85
+                    ],
+                    "mean": -232.85
+                  },
+                  {
+                    "opponent": "skill:wave",
+                    "opponentName": "水流弹",
+                    "scores": [
+                      -236.73,
+                      -236.73
+                    ],
+                    "mean": -236.73
+                  },
+                  {
+                    "opponent": "skill:guard",
+                    "opponentName": "防御",
+                    "scores": [
+                      -222.91,
+                      -222.91
+                    ],
+                    "mean": -222.91
+                  },
+                  {
+                    "opponent": "switch:turtle",
+                    "opponentName": "换上潮甲龟",
+                    "scores": [
+                      -218.91,
+                      -218.91
+                    ],
+                    "mean": -218.91
+                  },
+                  {
+                    "opponent": "switch:deer",
+                    "opponentName": "换上芽角鹿",
+                    "scores": [
+                      -225.66,
+                      -225.66
+                    ],
+                    "mean": -225.66
+                  },
+                  {
+                    "opponent": "item:potion:otter",
+                    "opponentName": "回复药 → 溪刃獭",
+                    "scores": [
+                      -228.96,
+                      -228.96
+                    ],
+                    "mean": -228.96
+                  },
+                  {
+                    "opponent": "item:ether:otter",
+                    "opponentName": "能量果 → 溪刃獭",
+                    "scores": [
+                      -221.91,
+                      -221.91
+                    ],
+                    "mean": -221.91
+                  },
+                  {
+                    "opponent": "item:ether:turtle",
+                    "opponentName": "能量果 → 潮甲龟",
+                    "scores": [
+                      -217.91,
+                      -217.91
+                    ],
+                    "mean": -217.91
+                  }
+                ],
+                "best": {
+                  "tieFirst": "player",
+                  "score": -217.91032776747068,
+                  "player": [
+                    {
+                      "name": "烬尾狐",
+                      "hp": 59,
+                      "energy": 6,
+                      "status": null
+                    },
+                    {
+                      "name": "潮甲龟",
+                      "hp": 79,
+                      "energy": 6,
+                      "status": null
+                    },
+                    {
+                      "name": "芽角鹿",
+                      "hp": 0,
+                      "energy": 5,
+                      "status": null
+                    }
+                  ],
+                  "enemy": [
+                    {
+                      "name": "溪刃獭",
+                      "hp": 80,
+                      "energy": 3,
+                      "status": null
+                    },
+                    {
+                      "name": "潮甲龟",
+                      "hp": 161,
+                      "energy": 6,
+                      "status": null
+                    },
+                    {
+                      "name": "芽角鹿",
+                      "hp": 125,
+                      "energy": 5,
+                      "status": null
+                    }
+                  ],
+                  "opponent": "item:ether:turtle",
+                  "opponentName": "能量果 → 潮甲龟"
+                },
+                "worst": {
+                  "tieFirst": "player",
+                  "score": -236.72850958565243,
+                  "player": [
+                    {
+                      "name": "烬尾狐",
+                      "hp": 59,
+                      "energy": 6,
+                      "status": null
+                    },
+                    {
+                      "name": "潮甲龟",
+                      "hp": 43,
+                      "energy": 6,
+                      "status": null
+                    },
+                    {
+                      "name": "芽角鹿",
+                      "hp": 0,
+                      "energy": 5,
+                      "status": null
+                    }
+                  ],
+                  "enemy": [
+                    {
+                      "name": "溪刃獭",
+                      "hp": 80,
+                      "energy": 1,
+                      "status": null
+                    },
+                    {
+                      "name": "潮甲龟",
+                      "hp": 161,
+                      "energy": 5,
+                      "status": null
+                    },
+                    {
+                      "name": "芽角鹿",
+                      "hp": 125,
+                      "energy": 5,
+                      "status": null
+                    }
+                  ],
+                  "opponent": "skill:wave",
+                  "opponentName": "水流弹"
+                },
+                "mean": -225.73,
+                "spread": 18.82
+              }
+            ],
+            "illegal": [],
+            "notes": []
+          },
+          "resultBytes": 4485
+        }
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 4119,
+        "completion_tokens": 112
+      },
+      "evidenceCount": 6,
+      "knowledgeIds": [
+        "rule:pet:turtle"
+      ],
+      "validation": {
+        "valid": true,
+        "reasons": [],
+        "scope": "Narrow numeric/citation/certainty guard; not a proof of all natural language correctness"
+      },
+      "evidence": [
+        "烬尾狐：59/98 HP，能量 6，速度 38。",
+        "溪刃獭：80/105 HP，能量 2，速度 40。",
+        "潮甲龟 基础面板与职责：潮甲龟：水系，Lv.1未培养时生命132、攻击22、防御30、速度13。技能：撞击、水流弹、潮汐重击、防御。防御时额外恢复 8 HP，适合承接换入伤害。 注意：当前面板须读取实际成长与状态，不能拿基础数值替换已培养或减速后的数值。",
+        "这里是按双方下一步各自可能的选择算过一遍，用来看哪个更划算；不是胜率，也管不了更后面的回合。",
+        "回复药 → 烬尾狐：把对手各种应对都算一遍，多数情况下是 -220.4 分，最糟的一种是 -250.6 分（分数只用来排序，不是胜率）。对手换人的话：-200.8 分。",
+        "换上潮甲龟：把对手各种应对都算一遍，多数情况下是 -228.2 分，最糟的一种是 -236.7 分（分数只用来排序，不是胜率）。对手换人的话：-225.7 分。"
+      ],
+      "guardInputs": {
+        "text": "换潮甲龟略好一点。它平均-225.73分，防御-229.64分，换入也更稳（最差-236.73对-240.8）。这是模拟排序分，不是胜率。\n\n不过溪刃獭速度40快过潮甲龟13，换入后大概率还是先挨一下，只是潮甲龟血厚、防御时多回8血，扛得住。想省血就换龟，想赌疾爪抢先收尾就防御，偏保守选换龟。",
+        "evidence": [
+          "烬尾狐：59/98 HP，能量 6，速度 38。",
+          "溪刃獭：80/105 HP，能量 2，速度 40。",
+          "潮甲龟 基础面板与职责：潮甲龟：水系，Lv.1未培养时生命132、攻击22、防御30、速度13。技能：撞击、水流弹、潮汐重击、防御。防御时额外恢复 8 HP，适合承接换入伤害。 注意：当前面板须读取实际成长与状态，不能拿基础数值替换已培养或减速后的数值。",
+          "这里是按双方下一步各自可能的选择算过一遍，用来看哪个更划算；不是胜率，也管不了更后面的回合。",
+          "回复药 → 烬尾狐：把对手各种应对都算一遍，多数情况下是 -220.4 分，最糟的一种是 -250.6 分（分数只用来排序，不是胜率）。对手换人的话：-200.8 分。",
+          "换上潮甲龟：把对手各种应对都算一遍，多数情况下是 -228.2 分，最糟的一种是 -236.7 分（分数只用来排序，不是胜率）。对手换人的话：-225.7 分。"
+        ],
+        "toolTrace": [
+          {
+            "id": "tool:1",
+            "tool": "simulate_branch",
+            "args": {
+              "candidates": [
+                "skill:guard",
+                "switch:turtle"
+              ],
+              "unresolved": []
+            },
+            "result": {
+              "assumption": "双方行动是假设，不是预测或真实对手选择；所有候选都对同一组当前合法对手行动计算，并覆盖两种同速顺序",
+              "turn": 2,
+              "phase": "battle",
+              "freeReplacement": false,
+              "turnCost": "当前是正常回合：每个候选都消耗整回合，对手会同时行动",
+              "simulated": [
+                {
+                  "id": "skill:guard",
+                  "name": "防御",
+                  "kind": "skill",
+                  "cost": "出招（消耗整回合）",
+                  "legal": true
+                },
+                {
+                  "id": "switch:turtle",
+                  "name": "换上潮甲龟",
+                  "kind": "switch",
+                  "cost": "主动换宠（消耗整回合）",
+                  "legal": true
+                }
+              ],
+              "opponentActions": [
+                {
+                  "id": "skill:dash",
+                  "name": "疾爪"
+                },
+                {
+                  "id": "skill:wave",
+                  "name": "水流弹"
+                },
+                {
+                  "id": "skill:guard",
+                  "name": "防御"
+                },
+                {
+                  "id": "switch:turtle",
+                  "name": "换上潮甲龟"
+                },
+                {
+                  "id": "switch:deer",
+                  "name": "换上芽角鹿"
+                },
+                {
+                  "id": "item:potion:otter",
+                  "name": "回复药 → 溪刃獭"
+                },
+                {
+                  "id": "item:ether:otter",
+                  "name": "能量果 → 溪刃獭"
+                },
+                {
+                  "id": "item:ether:turtle",
+                  "name": "能量果 → 潮甲龟"
+                }
+              ],
+              "legalAlternatives": [
+                {
+                  "id": "skill:dash",
+                  "name": "疾爪"
+                },
+                {
+                  "id": "skill:ember",
+                  "name": "火花"
+                },
+                {
+                  "id": "skill:pursuit",
+                  "name": "余烬追猎"
+                },
+                {
+                  "id": "skill:guard",
+                  "name": "防御"
+                },
+                {
+                  "id": "switch:turtle",
+                  "name": "换上潮甲龟"
+                },
+                {
+                  "id": "item:potion:fox",
+                  "name": "回复药 → 烬尾狐"
+                },
+                {
+                  "id": "item:potion:turtle",
+                  "name": "回复药 → 潮甲龟"
+                },
+                {
+                  "id": "item:ether:turtle",
+                  "name": "能量果 → 潮甲龟"
+                },
+                {
+                  "id": "escape",
+                  "name": "撤退"
+                }
+              ],
+              "comparisons": [
+                {
+                  "id": "skill:guard",
+                  "name": "防御",
+                  "kind": "skill",
+                  "cost": "出招（消耗整回合）",
+                  "legal": true,
+                  "vs": [
+                    {
+                      "opponent": "skill:dash",
+                      "opponentName": "疾爪",
+                      "scores": [
+                        -235.82,
+                        -235.82
+                      ],
+                      "mean": -235.82
+                    },
+                    {
+                      "opponent": "skill:wave",
+                      "opponentName": "水流弹",
+                      "scores": [
+                        -240.8,
+                        -240.8
+                      ],
+                      "mean": -240.8
+                    },
+                    {
+                      "opponent": "skill:guard",
+                      "opponentName": "防御",
+                      "scores": [
+                        -231.66,
+                        -231.66
+                      ],
+                      "mean": -231.66
+                    },
+                    {
+                      "opponent": "switch:turtle",
+                      "opponentName": "换上潮甲龟",
+                      "scores": [
+                        -223.66,
+                        -223.66
+                      ],
+                      "mean": -223.66
+                    },
+                    {
+                      "opponent": "switch:deer",
+                      "opponentName": "换上芽角鹿",
+                      "scores": [
+                        -210.16,
+                        -210.16
+                      ],
+                      "mean": -210.16
+                    },
+                    {
+                      "opponent": "item:potion:otter",
+                      "opponentName": "回复药 → 溪刃獭",
+                      "scores": [
+                        -237.71,
+                        -237.71
+                      ],
+                      "mean": -237.71
+                    },
+                    {
+                      "opponent": "item:ether:otter",
+                      "opponentName": "能量果 → 溪刃獭",
+                      "scores": [
+                        -230.66,
+                        -230.66
+                      ],
+                      "mean": -230.66
+                    },
+                    {
+                      "opponent": "item:ether:turtle",
+                      "opponentName": "能量果 → 潮甲龟",
+                      "scores": [
+                        -226.66,
+                        -226.66
+                      ],
+                      "mean": -226.66
+                    }
+                  ],
+                  "best": {
+                    "tieFirst": "player",
+                    "score": -210.16032776747068,
+                    "player": [
+                      {
+                        "name": "烬尾狐",
+                        "hp": 59,
+                        "energy": 6,
+                        "status": null
+                      },
+                      {
+                        "name": "潮甲龟",
+                        "hp": 79,
+                        "energy": 5,
+                        "status": null
+                      },
+                      {
+                        "name": "芽角鹿",
+                        "hp": 0,
+                        "energy": 5,
+                        "status": null
+                      }
+                    ],
+                    "enemy": [
+                      {
+                        "name": "溪刃獭",
+                        "hp": 80,
+                        "energy": 2,
+                        "status": null
+                      },
+                      {
+                        "name": "潮甲龟",
+                        "hp": 161,
+                        "energy": 5,
+                        "status": null
+                      },
+                      {
+                        "name": "芽角鹿",
+                        "hp": 125,
+                        "energy": 6,
+                        "status": null
+                      }
+                    ],
+                    "opponent": "switch:deer",
+                    "opponentName": "换上芽角鹿"
+                  },
+                  "worst": {
+                    "tieFirst": "player",
+                    "score": -240.8031849103278,
+                    "player": [
+                      {
+                        "name": "烬尾狐",
+                        "hp": 38,
+                        "energy": 6,
+                        "status": null
+                      },
+                      {
+                        "name": "潮甲龟",
+                        "hp": 79,
+                        "energy": 5,
+                        "status": null
+                      },
+                      {
+                        "name": "芽角鹿",
+                        "hp": 0,
+                        "energy": 5,
+                        "status": null
+                      }
+                    ],
+                    "enemy": [
+                      {
+                        "name": "溪刃獭",
+                        "hp": 80,
+                        "energy": 1,
+                        "status": null
+                      },
+                      {
+                        "name": "潮甲龟",
+                        "hp": 161,
+                        "energy": 5,
+                        "status": null
+                      },
+                      {
+                        "name": "芽角鹿",
+                        "hp": 125,
+                        "energy": 5,
+                        "status": null
+                      }
+                    ],
+                    "opponent": "skill:wave",
+                    "opponentName": "水流弹"
+                  },
+                  "mean": -229.64,
+                  "spread": 30.64
+                },
+                {
+                  "id": "switch:turtle",
+                  "name": "换上潮甲龟",
+                  "kind": "switch",
+                  "cost": "主动换宠（消耗整回合）",
+                  "legal": true,
+                  "vs": [
+                    {
+                      "opponent": "skill:dash",
+                      "opponentName": "疾爪",
+                      "scores": [
+                        -232.85,
+                        -232.85
+                      ],
+                      "mean": -232.85
+                    },
+                    {
+                      "opponent": "skill:wave",
+                      "opponentName": "水流弹",
+                      "scores": [
+                        -236.73,
+                        -236.73
+                      ],
+                      "mean": -236.73
+                    },
+                    {
+                      "opponent": "skill:guard",
+                      "opponentName": "防御",
+                      "scores": [
+                        -222.91,
+                        -222.91
+                      ],
+                      "mean": -222.91
+                    },
+                    {
+                      "opponent": "switch:turtle",
+                      "opponentName": "换上潮甲龟",
+                      "scores": [
+                        -218.91,
+                        -218.91
+                      ],
+                      "mean": -218.91
+                    },
+                    {
+                      "opponent": "switch:deer",
+                      "opponentName": "换上芽角鹿",
+                      "scores": [
+                        -225.66,
+                        -225.66
+                      ],
+                      "mean": -225.66
+                    },
+                    {
+                      "opponent": "item:potion:otter",
+                      "opponentName": "回复药 → 溪刃獭",
+                      "scores": [
+                        -228.96,
+                        -228.96
+                      ],
+                      "mean": -228.96
+                    },
+                    {
+                      "opponent": "item:ether:otter",
+                      "opponentName": "能量果 → 溪刃獭",
+                      "scores": [
+                        -221.91,
+                        -221.91
+                      ],
+                      "mean": -221.91
+                    },
+                    {
+                      "opponent": "item:ether:turtle",
+                      "opponentName": "能量果 → 潮甲龟",
+                      "scores": [
+                        -217.91,
+                        -217.91
+                      ],
+                      "mean": -217.91
+                    }
+                  ],
+                  "best": {
+                    "tieFirst": "player",
+                    "score": -217.91032776747068,
+                    "player": [
+                      {
+                        "name": "烬尾狐",
+                        "hp": 59,
+                        "energy": 6,
+                        "status": null
+                      },
+                      {
+                        "name": "潮甲龟",
+                        "hp": 79,
+                        "energy": 6,
+                        "status": null
+                      },
+                      {
+                        "name": "芽角鹿",
+                        "hp": 0,
+                        "energy": 5,
+                        "status": null
+                      }
+                    ],
+                    "enemy": [
+                      {
+                        "name": "溪刃獭",
+                        "hp": 80,
+                        "energy": 3,
+                        "status": null
+                      },
+                      {
+                        "name": "潮甲龟",
+                        "hp": 161,
+                        "energy": 6,
+                        "status": null
+                      },
+                      {
+                        "name": "芽角鹿",
+                        "hp": 125,
+                        "energy": 5,
+                        "status": null
+                      }
+                    ],
+                    "opponent": "item:ether:turtle",
+                    "opponentName": "能量果 → 潮甲龟"
+                  },
+                  "worst": {
+                    "tieFirst": "player",
+                    "score": -236.72850958565243,
+                    "player": [
+                      {
+                        "name": "烬尾狐",
+                        "hp": 59,
+                        "energy": 6,
+                        "status": null
+                      },
+                      {
+                        "name": "潮甲龟",
+                        "hp": 43,
+                        "energy": 6,
+                        "status": null
+                      },
+                      {
+                        "name": "芽角鹿",
+                        "hp": 0,
+                        "energy": 5,
+                        "status": null
+                      }
+                    ],
+                    "enemy": [
+                      {
+                        "name": "溪刃獭",
+                        "hp": 80,
+                        "energy": 1,
+                        "status": null
+                      },
+                      {
+                        "name": "潮甲龟",
+                        "hp": 161,
+                        "energy": 5,
+                        "status": null
+                      },
+                      {
+                        "name": "芽角鹿",
+                        "hp": 125,
+                        "energy": 5,
+                        "status": null
+                      }
+                    ],
+                    "opponent": "skill:wave",
+                    "opponentName": "水流弹"
+                  },
+                  "mean": -225.73,
+                  "spread": 18.82
+                }
+              ],
+              "illegal": [],
+              "notes": []
+            },
+            "chosenBy": "policy"
+          }
+        ],
+        "knowledge": [
+          {
+            "game": "pet-coach",
+            "rulesVersion": "0.6",
+            "status": "active",
+            "requiredEvidence": "当前公开面板、合法行动及规则版本",
+            "authority": [
+              "engine.js"
+            ],
+            "inspiration": [
+              "local-design"
+            ],
+            "conditions": [
+              "battle"
+            ],
+            "id": "rule:pet:turtle",
+            "title": "潮甲龟 基础面板与职责",
+            "keywords": "潮甲龟 turtle 水 守势水盾 技能 面板 特性",
+            "principle": "潮甲龟：水系，Lv.1未培养时生命132、攻击22、防御30、速度13。技能：撞击、水流弹、潮汐重击、防御。防御时额外恢复 8 HP，适合承接换入伤害。",
+            "counterexample": "当前面板须读取实际成长与状态，不能拿基础数值替换已培养或减速后的数值。",
+            "score": 6,
+            "applicability": {
+              "status": "candidate",
+              "missing": [],
+              "verified": [
+                "battle"
+              ],
+              "warning": "匹配条件不等于建议最优；还要比较双方各自的合法行动"
+            }
+          }
+        ],
+        "publicState": {
+          "environment": null,
+          "energyLimit": 6,
+          "id": "match-branch",
+          "version": "0.6",
+          "mode": "pve",
+          "phase": "battle",
+          "result": null,
+          "turn": 2,
+          "seed": 0,
+          "player": {
+            "active": 0,
+            "pets": [
+              {
+                "id": "fox",
+                "name": "烬尾狐",
+                "icon": "🦊",
+                "type": "fire",
+                "maxHp": 98,
+                "atk": 27,
+                "def": 17,
+                "speed": 38,
+                "skills": [
+                  "dash",
+                  "ember",
+                  "pursuit",
+                  "guard"
+                ],
+                "bio": "高速游击",
+                "trait": "火花挂灼烧，追猎增伤；疾爪先制收尾",
+                "learnset": [
+                  "dash",
+                  "ember",
+                  "pursuit",
+                  "guard",
+                  "focus",
+                  "dispel"
+                ],
+                "heldItem": "none",
+                "heldUsed": false,
+                "buffs": {},
+                "environment": null,
+                "level": 1,
+                "hp": 59,
+                "energy": 6,
+                "status": null,
+                "lastGuard": false
+              },
+              {
+                "id": "turtle",
+                "name": "潮甲龟",
+                "icon": "🐢",
+                "type": "water",
+                "maxHp": 132,
+                "atk": 22,
+                "def": 30,
+                "speed": 13,
+                "skills": [
+                  "strike",
+                  "wave",
+                  "tide",
+                  "guard"
+                ],
+                "bio": "守势水盾",
+                "trait": "防御时额外恢复 8 HP，适合承接换入伤害",
+                "guardHeal": 8,
+                "learnset": [
+                  "strike",
+                  "wave",
+                  "tide",
+                  "guard",
+                  "shell",
+                  "dispel"
+                ],
+                "heldItem": "none",
+                "heldUsed": false,
+                "buffs": {},
+                "environment": null,
+                "level": 1,
+                "hp": 79,
+                "energy": 5,
+                "status": null,
+                "lastGuard": false
+              },
+              {
+                "id": "deer",
+                "name": "芽角鹿",
+                "icon": "🦌",
+                "type": "leaf",
+                "maxHp": 108,
+                "atk": 27,
+                "def": 21,
+                "speed": 29,
+                "skills": [
+                  "strike",
+                  "vine",
+                  "drain",
+                  "guard"
+                ],
+                "bio": "吸血续航",
+                "trait": "生息藤吸血；速度与持续作战兼顾",
+                "learnset": [
+                  "strike",
+                  "vine",
+                  "drain",
+                  "guard",
+                  "focus",
+                  "shell"
+                ],
+                "heldItem": "none",
+                "heldUsed": false,
+                "buffs": {},
+                "environment": null,
+                "level": 1,
+                "hp": 0,
+                "energy": 5,
+                "status": null,
+                "lastGuard": false
+              }
+            ],
+            "items": {
+              "potion": 3,
+              "cleanse": 2,
+              "ether": 2
+            }
+          },
+          "enemy": {
+            "active": 0,
+            "pets": [
+              {
+                "id": "otter",
+                "name": "溪刃獭",
+                "icon": "🦦",
+                "type": "water",
+                "maxHp": 105,
+                "atk": 31,
+                "def": 18,
+                "speed": 40,
+                "skills": [
+                  "dash",
+                  "wave",
+                  "tide",
+                  "guard"
+                ],
+                "bio": "先制速攻",
+                "trait": "疾爪抢先收尾，水流与潮汐负责爆发",
+                "learnset": [
+                  "dash",
+                  "wave",
+                  "tide",
+                  "guard",
+                  "focus",
+                  "dispel"
+                ],
+                "heldItem": "none",
+                "heldUsed": false,
+                "buffs": {},
+                "environment": null,
+                "level": 2,
+                "hp": 80,
+                "energy": 2,
+                "status": null,
+                "lastGuard": false
+              },
+              {
+                "id": "turtle",
+                "name": "潮甲龟",
+                "icon": "🐢",
+                "type": "water",
+                "maxHp": 161,
+                "atk": 23,
+                "def": 31,
+                "speed": 13,
+                "skills": [
+                  "strike",
+                  "wave",
+                  "tide",
+                  "guard"
+                ],
+                "bio": "守势水盾",
+                "trait": "防御时额外恢复 8 HP，适合承接换入伤害",
+                "guardHeal": 8,
+                "learnset": [
+                  "strike",
+                  "wave",
+                  "tide",
+                  "guard",
+                  "shell",
+                  "dispel"
+                ],
+                "heldItem": "none",
+                "heldUsed": false,
+                "buffs": {},
+                "environment": null,
+                "level": 2,
+                "hp": 161,
+                "energy": 5,
+                "status": null,
+                "lastGuard": false
+              },
+              {
+                "id": "deer",
+                "name": "芽角鹿",
+                "icon": "🦌",
+                "type": "leaf",
+                "maxHp": 125,
+                "atk": 32,
+                "def": 22,
+                "speed": 29,
+                "skills": [
+                  "strike",
+                  "vine",
+                  "drain",
+                  "guard"
+                ],
+                "bio": "吸血续航",
+                "trait": "生息藤吸血；速度与持续作战兼顾",
+                "learnset": [
+                  "strike",
+                  "vine",
+                  "drain",
+                  "guard",
+                  "focus",
+                  "shell"
+                ],
+                "heldItem": "none",
+                "heldUsed": false,
+                "buffs": {},
+                "environment": null,
+                "level": 2,
+                "hp": 125,
+                "energy": 5,
+                "status": null,
+                "lastGuard": false
+              }
+            ],
+            "items": {
+              "potion": 3,
+              "cleanse": 2,
+              "ether": 2
+            }
+          },
+          "history": [],
+          "log": [],
+          "frames": []
+        },
+        "latestEvents": [
+          "── 第 1 回合 ──",
+          "你的烬尾狐使用疾爪，对溪刃獭造成 25 伤害。",
+          "对手的溪刃獭使用潮汐重击，对烬尾狐造成 81 伤害（属性克制）。"
+        ],
+        "textFacts": null,
+        "rocoBattle": null,
+        "roster": null,
+        "lineup": null,
+        "rocoPlan": null
+      }
+    }
+  ]
+}

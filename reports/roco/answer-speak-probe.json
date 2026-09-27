@@ -1,0 +1,139 @@
+{
+ "schema": "roco-answer-speak-probe/v1",
+ "generated_at": "2026-09-27T05:22:22.446Z",
+ "origin": "http://127.0.0.1:8951",
+ "why": "单元判据扫的是源码字面量，证明不了\"服务端发出来、玩家读到的\"那一份还是不是人话（审计 ②）。",
+ "counters": {
+  "asked": 11,
+  "clean": 11,
+  "dirty": 0
+ },
+ "rows": [
+  {
+   "question": "雨天水系伤害加多少？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "天气只能存在一种，持续 8 回合。雨天：天气为雨天时，双方的水系技能威力+75%；沙暴：天气为沙暴时，双方的地系技能能耗减半；暴风雪：天气为暴风雪时，双方每回合结束获得2层冻结（冰系精灵免疫此效果）；雷鸣：天气为雷鸣时，双方每回合结束获得1层引电（电系精灵免疫此效果）。（来源：规则配置 mobile_s4_candidate_v3（模式 pvp-standard-six-pet 绑定的那份） 里的天气声明，依据等级 官方当前材料；数值逐字来自配置，不换算）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 3
+  },
+  {
+   "question": "火系克制什么属性？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "火系克制：冰系 ×2、机械系 ×2、草系 ×2、虫系 ×2。反过来，火系怕：水系 ×2、地系 ×2。（依据：游戏图鉴的相性表 火系 那一行，逐字抄录）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 1
+  },
+  {
+   "question": "水系打火系有优势吗？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "水系打火系：**克制**（×2）。反过来，火系打水系：不是克制关系（默认 ×1）。（依据：游戏图鉴的相性表，逐字抄录；这是属性层面的倍率，不含面板、等级与招式。）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 2
+  },
+  {
+   "question": "我这几只里谁抗龙系？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "你这 48 只里，抗龙系的是 3 只：声波缇塔（机械系）、权杖-V（机械系）、迷迷箱怪（机械系/幻系）。（这次只在你给的这份名单里找；全库抗龙系的一共 38 只，其余不在你的名单里。）要挑一只接着打，我可以查它学得到哪些招（配招可学性也可以逐招核）。",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 2
+  },
+  {
+   "question": "铠甲虫是谁？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "铠甲虫：虫系，种族值合计 555（hp 132 / atk 95 / def 128 / spa 43 / spd 82 / spe 75）。特性技能：坚韧铠甲（skill_000057）。学习表 48 条（本系 13 / 血脉 18 / 技能石 17）。你名下有一只：own-0001，95 级，定位 坦克；特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。。（来源：游戏图鉴里逐字抄下来的；要它的技能清单或相性，接着问。）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 1
+  },
+  {
+   "question": "小翼龙带抓挠、震击合法吗？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "小翼龙：抓挠（本系）学得到；震击**学不到**（学习表三列里都没有）。（这套配招不合法；依据：逐招对照学习表的三个来源，精灵 pet_000186。这里只查**可学性**，不评价配招强弱。）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 3
+  },
+  {
+   "question": "主动换宠还能出招吗？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "**主动换宠占用这一回合**（换完之后这一回合不再出招）；只有伙伴倒下后的**补位**是免费的、不占回合。（游戏里的固定规则：主动换宠占掉这一回合，倒下补位不占回合，不是估的）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 1
+  },
+  {
+   "question": "倒下补位免费吗？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "伙伴倒下后的**补位是免费的、不占回合**；只有**主动换宠**才占一回合。（游戏里的固定规则：倒下补位免费、不占回合，不是估的）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 1
+  },
+  {
+   "question": "技能一共有多少种？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "练习引擎里一共 23 个技能、3 种道具（回复药、净化药、能量果）。（游戏里的固定规则：技能与道具的数量，不是估的）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 0
+  },
+  {
+   "question": "加点每点加多少？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "每点加多少这条，手游那边的加点数据我这边没有：抓到的只有社区阵容里「这只加哪几项」，没有每点收益、也没有加点上限。营地那一档练习引擎倒是有一组每点收益的常量，但那是那一档自己定的，**我不把它当手机版那一档的规矩讲给你**（具体数值留在依据里，正文不念）。你要准确数字的话，给我一份来源或实机读数，我按它答。（来源：没有 —— 这正是要跟你要的东西。）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 2
+  },
+  {
+   "question": "我的能量上限是多少？",
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "手游那一档（闪耀大赛这种）常规能量上限是 **10**，开局每只都是满的 10；聚能是**主动行动**、回复 5 —— 没有「每回合天然回 1」这条证据；所以「5 豆算不算满」在手游里当然不算满。（来源：多方公开资料与实机读数，不是官方文本；换一档引擎数字就不一样，别混着用。）",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 1
+  }
+ ],
+ "known_limits": [
+  "只问事实类问句（本地路径、0 次模型调用）：模型正文的文风不在这一支的范围内",
+  "依据区（`evidence`）按规范第三节的例外**允许**保留文件名与编号，这里只记账（`evidence_latin`）",
+  "它对的是\"正在跑的那个进程\"：旧进程会给出旧答案（这正是它的用处 —— 真机复现）"
+ ]
+}

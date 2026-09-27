@@ -1,0 +1,5497 @@
+{
+ "arm": "local_4b",
+ "summary": {
+  "tasks": 442,
+  "passed": 0,
+  "pass_rate": 0,
+  "stopped": {
+   "complete": 442
+  },
+  "latency": {
+   "p50_ms": 487,
+   "p95_ms": 522
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 442,
+    "passed": 0,
+    "pass_rate": 0,
+    "p50_ms": 487,
+    "p95_ms": 522
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 442,
+     "passed": 0,
+     "pass_rate": 0
+    },
+    "seen": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "by_value": {
+     "全图鉴": {
+      "total": 442,
+      "passed": 0,
+      "held_out": true,
+      "pass_rate": 0
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 442,
+     "passed": 0,
+     "pass_rate": 0
+    },
+    "by_value": {
+     "图鉴字段": {
+      "total": 442,
+      "passed": 0,
+      "held_out": false,
+      "pass_rate": 0
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 442,
+     "passed": 0,
+     "pass_rate": 0
+    },
+    "by_value": {
+     "直问": {
+      "total": 442,
+      "passed": 0,
+      "held_out": false,
+      "pass_rate": 0
+     }
+    }
+   }
+  }
+ },
+ "gateway": "http://127.0.0.1:8766",
+ "rows": [
+  {
+   "case_id": "cat-a-pet_000001",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000001\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000002",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 417,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000002\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000003",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 434,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000003\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000004",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000004\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000005",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000005\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000006",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 433,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000006\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000007",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 430,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000007\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000008",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 693,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000008\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000009",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 432,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000009\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000010",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 439,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000010\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000012",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 440,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000012\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000013",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 440,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000013\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000014",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 439,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000014\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000015",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 438,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000015\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000022",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 438,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000022\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000023",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 433,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000023\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000024",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 431,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000024\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000026",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 425,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000026\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000027",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 426,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000027\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000028",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 428,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000028\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000029",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 420,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000029\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000030",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 426,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000030\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000031",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 438,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000031\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000032",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000032\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000035",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 441,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000035\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000036",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 433,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000036\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000040",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 433,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000040\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000041",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 434,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000041\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000042",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 430,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000042\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000043",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 427,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000043\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000044",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 433,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000044\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000045",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 435,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000045\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000046",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 449,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000046\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000050",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 425,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000050\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000051",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 441,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000051\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000052",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 443,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000052\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000054",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 432,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000054\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000055",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 433,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000055\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000057",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 427,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000057\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000058",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 441,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000058\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000059",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 446,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000059\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000060",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 443,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000060\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000061",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 443,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000061\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000062",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 438,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000062\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000063",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 434,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000063\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000064",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000064\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000065",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 436,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000065\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000066",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 435,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000066\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000067",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 421,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000067\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000068",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 435,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000068\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000069",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 435,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000069\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000070",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 436,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000070\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000071",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 436,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000071\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000072",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 432,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000072\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000073",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 432,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000073\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000074",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 439,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000074\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000075",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 433,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000075\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000076",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 443,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000076\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000077",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 439,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000077\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000078",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 442,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000078\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000079",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 443,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000079\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000080",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 435,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000080\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000081",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 431,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000081\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000082",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 421,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000082\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000083",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000083\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000084",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 438,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000084\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000085",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 434,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000085\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000086",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 444,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000086\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000087",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 703,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000087\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000088",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 443,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000088\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000089",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 435,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000089\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000090",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000090\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000091",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 428,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000091\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000092",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000092\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000093",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000093\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000094",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 438,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000094\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000098",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 447,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000098\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000099",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 432,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000099\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000100",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 439,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000100\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000101",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 442,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000101\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000102",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 433,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000102\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000103",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 445,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000103\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000104",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 704,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000104\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000105",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 436,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000105\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000106",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 435,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000106\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000107",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 447,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000107\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000108",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 428,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000108\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000109",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 440,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000109\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000110",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 448,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000110\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000111",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 444,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000111\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000112",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 440,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000112\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000113",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 431,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000113\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000119",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 452,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000119\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000120",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 445,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000120\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000121",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 435,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000121\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000122",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 436,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000122\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000123",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 438,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000123\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000125",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 441,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000125\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000126",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 710,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000126\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000127",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 439,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000127\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000128",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 430,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000128\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000129",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 439,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000129\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000130",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 447,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000130\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000131",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 701,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000131\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000132",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 434,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000132\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000133",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 436,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000133\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000134",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 443,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000134\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000135",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 442,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000135\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000136",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 440,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000136\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000137",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 438,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000137\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000138",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 445,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000138\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000139",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 440,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000139\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000140",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 444,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000140\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000141",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 444,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000141\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000142",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 432,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000142\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000143",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 434,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000143\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000144",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 434,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000144\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000145",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 442,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000145\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000146",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 439,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000146\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000147",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 437,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000147\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000148",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 442,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000148\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000149",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 444,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000149\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000150",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 446,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000150\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000151",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 451,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000151\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000152",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 445,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000152\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000153",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 454,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000153\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000154",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 451,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000154\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000155",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 456,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000155\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000156",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 454,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000156\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000157",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 450,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000157\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000158",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 455,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000158\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000159",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 452,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000159\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000160",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 456,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000160\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000161",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 449,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000161\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000162",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 466,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000162\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000163",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 465,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000163\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000164",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 467,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000164\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000165",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 469,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000165\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000166",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 461,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000166\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000167",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 475,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000167\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000168",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 467,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000168\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000169",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 740,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000169\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000172",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 478,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000172\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000173",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 474,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000173\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000174",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 477,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000174\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000175",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 475,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000175\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000176",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 474,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000176\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000177",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 473,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000177\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000178",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 471,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000178\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000179",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 472,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000179\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000180",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 474,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000180\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000181",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 475,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000181\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000182",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 475,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000182\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000183",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 485,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000183\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000184",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 477,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000184\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000185",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000185\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000186",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000186\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000187",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 479,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000187\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000188",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 483,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000188\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000189",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 480,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000189\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000190",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 481,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000191",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000191\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000192",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000192\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000193",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 479,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000193\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000194",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000194\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000195",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000195\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000196",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 485,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000196\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000197",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000197\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000198",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000198\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000199",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000199\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000200",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 483,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000200\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000201",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 488,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000201\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000202",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 478,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000202\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000203",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000203\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000204",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 760,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000204\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000205",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000205\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000206",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 499,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000206\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000207",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000207\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000208",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 498,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000208\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000209",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000209\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000210",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 490,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000210\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000211",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 494,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000211\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000212",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 488,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000212\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000213",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 494,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000213\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000214",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000214\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000215",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 499,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000215\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000216",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 500,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000216\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000217",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 499,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000217\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000218",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 497,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000218\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000219",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 497,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000219\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000220",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000220\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000221",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 500,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000221\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000222",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000222\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000223",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000223\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000224",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000224\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000225",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 493,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000226",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 495,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000226\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000227",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000227\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000228",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 506,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000228\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000256",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 507,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000256\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000258",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000258\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000259",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 510,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000259\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000260",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 511,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000260\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000261",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000261\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000262",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000262\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000263",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 510,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000263\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000264",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000264\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000265",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000265\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000266",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000266\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000267",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 507,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000267\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000268",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 507,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000268\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000272",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 512,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000272\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000273",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 511,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000273\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000274",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 506,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000274\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000275",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 510,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000275\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000276",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 791,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000276\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000277",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 520,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000277\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000278",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 533,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000278\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000279",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 550,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000279\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000280",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 542,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000280\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000281",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 789,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000281\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000282",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 514,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000282\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000283",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 792,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000283\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000284",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000284\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000285",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 521,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000285\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000286",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 517,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000286\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000287",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 513,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000287\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000288",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 508,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000288\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000289",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 512,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000289\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000290",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 513,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000290\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000291",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 514,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000291\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000292",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 507,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000292\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000293",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 511,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000293\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000294",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 514,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000294\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000295",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 515,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000295\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000296",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 521,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000296\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000297",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 511,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000297\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000298",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 515,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000298\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000299",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 525,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000299\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000300",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 504,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000300\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000301",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000301\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000302",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 506,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000302\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000305",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 777,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000305\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000306",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 529,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000306\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000307",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 525,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000307\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000308",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 535,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000308\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000309",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 510,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000309\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000310",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000310\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000311",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 515,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000311\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000312",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 512,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000312\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000313",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000313\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000314",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000314\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000315",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000315\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000316",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 508,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000316\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000317",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 520,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000317\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000318",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 524,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000318\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000319",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 513,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000319\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000320",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 522,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000320\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000321",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 507,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000321\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000322",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000322\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000323",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000323\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000324",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 510,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000324\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000325",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 513,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000325\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000327",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000327\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000328",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000328\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000329",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000329\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000330",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000330\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000331",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000331\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000332",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 511,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000332\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000333",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 520,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000333\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000338",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 498,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000338\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000339",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 513,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000339\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000340",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000340\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000341",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 507,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000341\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000348",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000348\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000358",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 507,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000358\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000367",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 526,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000367\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000374",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 508,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000374\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000375",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 513,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000375\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000384",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000384\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000385",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000385\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000387",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000387\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000388",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000388\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000389",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000389\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000390",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000390\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000391",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000391\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000392",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000392\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000397",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000397\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000401",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000401\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000402",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 506,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000402\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000412",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 504,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000412\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000413",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000413\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000414",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 500,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000414\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000415",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 771,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000415\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000416",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000416\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000417",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000417\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000418",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 506,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000418\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000419",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 508,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000419\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000421",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000421\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000422",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 511,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000422\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000429",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 516,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000429\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000430",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 510,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000430\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000431",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 491,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000431\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000442",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000442\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000443",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 504,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000443\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000444",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 500,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000444\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000445",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 491,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000445\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000446",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 506,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000446\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000447",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 780,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000447\"} 的一次调用"
+   ],
+   "tool_calls": [
+    [
+     "query_rules",
+     {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     }
+    ]
+   ]
+  },
+  {
+   "case_id": "cat-a-pet_000448",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 518,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000448\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000449",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 512,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000449\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000450",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000450\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000451",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000451\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000456",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 504,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000456\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000457",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 494,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000457\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000458",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000458\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000459",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000459\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000460",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 498,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000460\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000461",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 483,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000461\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000462",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 499,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000462\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000463",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 495,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000463\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000464",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000464\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000465",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 491,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000465\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000466",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000466\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000467",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 499,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000467\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000468",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 498,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000468\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000469",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000469\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000470",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000470\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000471",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000471\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000472",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 505,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000472\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000473",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 493,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000473\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000474",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 495,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000474\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000475",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 495,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000475\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000476",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 494,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000476\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000477",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000477\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000478",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 489,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000478\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000479",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 495,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000479\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000480",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000480\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000481",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 492,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000481\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000482",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 497,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000482\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000483",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 500,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000483\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000484",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 492,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000484\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000485",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000485\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000486",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000486\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000488",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 492,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000488\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000489",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 493,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000489\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000490",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 499,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000490\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000491",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000491\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000492",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 492,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000492\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000493",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 494,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000493\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000494",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 488,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000494\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000495",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000495\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000496",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 497,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000496\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000497",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 497,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000497\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000498",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 491,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000498\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000499",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 485,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000499\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000500",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000500\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000501",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 488,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000501\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000502",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 499,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000502\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000503",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 491,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000503\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000504",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 492,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000504\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000505",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000505\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000506",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 493,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000506\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000507",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000507\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000508",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 501,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000508\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000509",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000509\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000510",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000510\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000511",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 491,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000511\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000512",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 490,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000512\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000515",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000515\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000516",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 493,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000516\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000517",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000517\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000518",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 488,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000518\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000519",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000519\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000520",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 494,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000520\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000521",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 503,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000521\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000522",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 494,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000522\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000523",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 490,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000523\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000524",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 497,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000524\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000525",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 494,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000525\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000526",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 502,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000526\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000527",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 510,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000527\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000528",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 509,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000528\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000529",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 496,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000529\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000530",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 488,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000530\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000531",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000531\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000535",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000535\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000536",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 483,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000536\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000538",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 475,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000538\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000540",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 485,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000540\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000541",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 483,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000541\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000542",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 481,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000542\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000543",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000543\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000544",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 483,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000544\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000546",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 489,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000546\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000548",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 490,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000548\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000549",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000549\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000550",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 493,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000550\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000551",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 487,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000551\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000552",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000552\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000553",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000553\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000554",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000554\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000555",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 493,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000555\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000557",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 485,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000557\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000558",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 483,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000558\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000559",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000559\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000560",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 493,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000560\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000561",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000561\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000586",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 498,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000586\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000587",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 488,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000587\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000588",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000588\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000590",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000590\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000591",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000591\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000592",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 479,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000592\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000593",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 480,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000593\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000595",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000595\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000596",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 483,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000596\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000597",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 480,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000597\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000598",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000598\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000599",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000599\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000600",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000600\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000601",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 484,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000601\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000602",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 477,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000602\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000603",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000603\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000604",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000604\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000605",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 491,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000605\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000606",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 478,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000606\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000607",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 477,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000607\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000608",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 476,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000608\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000609",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 480,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000609\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000610",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 473,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000610\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000611",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 477,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000611\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000612",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 482,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000612\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000613",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 495,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000613\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000614",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000614\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000615",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 476,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000615\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000616",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 486,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000616\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000617",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 479,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000617\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000618",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 476,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000618\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000619",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 463,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000619\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000622",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 471,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000622\"} 的一次调用"
+   ],
+   "tool_calls": []
+  },
+  {
+   "case_id": "cat-a-pet_000625",
+   "category": "rules_lookup",
+   "passed": false,
+   "stopped": "complete",
+   "wall_ms": 489,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000625\"} 的一次调用"
+   ],
+   "tool_calls": []
+  }
+ ]
+}

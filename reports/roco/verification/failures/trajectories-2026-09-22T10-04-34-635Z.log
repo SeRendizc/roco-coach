@@ -1,3 +1,0 @@
-node scripts/roco/verify-agent-trajectories.mjs --quiet
-
-

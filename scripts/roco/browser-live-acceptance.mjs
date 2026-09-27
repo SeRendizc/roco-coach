@@ -97,7 +97,7 @@ async function launchChrome() {
   }
   if (!port) {
     chrome.kill('SIGKILL');
-    rmSync(profile, {recursive: true, force: true});
+    rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
     throw new Error(`Chrome 没起来：${chromeErr}`);
   }
   const list = await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
@@ -109,7 +109,7 @@ async function launchChrome() {
     close: async () => {
       try { ws.close(); } catch { /* 已经关了 */ }
       chrome.kill('SIGKILL');
-      rmSync(profile, {recursive: true, force: true});
+      rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120});
     },
   };
 }
@@ -1938,7 +1938,20 @@ async function main() {
   process.exitCode = report.ok ? 0 : 1;
 }
 
-main().catch((error) => {
+// 2026-09-25（**同一形状第三次**）：跑完、报告写完，进程却一直不退 ⇒ 门禁那 30 分钟兜底才把它杀掉，
+// 而那一套被判红。根因不是 CDP（C6.118 里我那样归因是错的：报告已经写完，说明 await 都回来了），
+// 而是**只设了 `process.exitCode`、从不显式退出** —— 只要还有一个句柄没散（Chrome 死了、服务关了，
+// 但 socket/计时器还在），事件循环就永远不空。所以收尾统一成：**先让 stdout 冲干净，再显式退出**。
+const flushThenExit = (code) => new Promise((resolve) => {
+  process.exitCode = code;
+  process.stdout.write('', () => resolve());
+}).then(() => process.exit(process.exitCode ?? code));
+
+main().then(
+  () => flushThenExit(process.exitCode ?? 0),
+  (error) => {
   console.error('[roco-live] 脚本自身出错：', error);
-  process.exitCode = 1;
-});
+  ;
+    return flushThenExit(1);
+  },
+);

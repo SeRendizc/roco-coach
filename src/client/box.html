@@ -1,5 +1,5 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 精灵盒子（我的 / 全图鉴）</title><link rel="stylesheet" href="/src/client/style.css"><link rel="stylesheet" href="/src/client/box.css"></head><body>
-<div id="boot-fallback" class="boot-fallback" role="alert">页面脚本没有加载成功：本机服务可能还是**旧版本**（静态资源清单在进程启动时就定下了）。请在仓库根目录重启 <code>npm start</code>，然后刷新这一页；开发者抽屉里能看到服务进程的启动时间与资源清单规模。</div>
+<div id="boot-fallback" class="boot-fallback" role="alert">页面脚本没有加载成功：本机服务可能还是<strong>旧版本</strong>（静态资源清单在进程启动时就定下了）。请在仓库根目录重启 <code>npm start</code>，然后刷新这一页；开发者抽屉里能看到服务进程的启动时间与资源清单规模。</div>
 
 <main>
 
@@ -9,6 +9,12 @@
 <header class="topbar">
  <h1>小芽 · 精灵盒子 <small>我的 / 全图鉴</small></h1>
  <div class="header-actions">
+  <!-- 2026-09-25（人类：「返回培养页没做」）：这一页原来只有状态/重置/关于 —— 从盒子里
+       既回不去首页、也去不了培养。补上与其他页同一套 `.nav-btn`（顺序：返回首页 / 去培养 / 开始PVP），
+       小芽仍由 `xiaoya.js` 注入同一行。 -->
+  <a class="nav-btn" id="box-nav-home" href="/">← 返回首页</a>
+  
+  <a class="nav-btn primary" id="box-nav-pvp" href="/roco.html">⚔ 开始 PVP</a>
   <span id="box-status" class="chip">正在读取…</span>
   <button id="box-reset">重置筛选</button>
   <details class="dev" id="dev-drawer">

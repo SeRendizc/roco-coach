@@ -53,7 +53,16 @@ ROSTER_IDS = [RS.pets_by_name(n)[0].pet_id for n in ROSTER]
 #: 改动前（RC-103 之前的引擎 + 当时的 legacy 配置）抓下来的逐位指纹。
 #: 抓法：固定 seed 的 6 局 `opponents.play_match` → `env.replay` → serialize 的 sha256，
 #: 外加一段 4 回合的固定动作序列。**这六个数就是「默认路径没变」的判据本体**。
-GOLDEN_STATE_DIGESTS = {
+#:
+#: 【2026-09-25 人类裁决 ⇒ 三个指纹**必须**改钉】原话：「属性双属性叠加：快照 3×（现用）
+#: vs 两个社区源 4×，差 41 格。**使用社区源**」—— `data.TypeChart.multiplier` 的双属性分支
+#: 从「读快照封顶行」改成「两系相乘」（见 data.py 的 TypeChart 注释与台账 EV-TYPE-MULTIPLIER）。
+#: 41 格里有 31 个组合的倍率 3→4，其中 `幻系|幽系` / `幽系|萌系` / `冰系|萌系` 这几只**在
+#: 上面这份 12 只名单里**，所以 seed 1000 / 1004 / 1005 三局的伤害与事件**必然**变。
+#: 这不是「顺手改掉旧行为」：单属性 18/18 与其余 3 个 seed 逐位不变（实测），
+#: 用旧实现（读快照行）重跑**恰好**得到下面 PRIOR 里那六个数。
+#: **旧值逐字保留（改钉不删）**，新值附在下面并注明来历。
+GOLDEN_STATE_DIGESTS_PRIOR_2026_09_25 = {
     "1000": "17643bea171d411561ebaea9b494d64381105732e432ebda0e5e0e56af4f83f6",
     "1001": "0c218971216b86a713ea3f94af49e0a43ecd14d92b53cc73cda9dbff2cebab55",
     "1002": "cd4d136fbdbc0bf0714db7b082d9cd160dd84e7f164afb74e1dbead455fe8895",
@@ -61,7 +70,7 @@ GOLDEN_STATE_DIGESTS = {
     "1004": "7453cecc1037d7a510d62ce28406e2082b33c5c26354e4a9de8607a4894de87a",
     "1005": "ece1377e831fc414e812604a4a240abede461687fab8fde8fc36ada90c0446bf",
 }
-GOLDEN_EVENT_DIGESTS = {
+GOLDEN_EVENT_DIGESTS_PRIOR_2026_09_25 = {
     "1000": "96d3b2d623ecae95a89b5020fa0de2bbe7fefb8cb9132a9dfe181ff805194168",
     "1001": "3d7f7b793a7cdd52310816e7571a7333baab65653b6acb55f9d3c8813178bfd0",
     "1002": "037a9520db47e1455f04c9c69a18beb80b3d5358349e94f0253388cdece4ad22",
@@ -69,6 +78,23 @@ GOLDEN_EVENT_DIGESTS = {
     "1004": "6a96c3b147c7980c5b02a7a8b9e8a423bc9584ed7854b574c8519a0bcd6b7da2",
     "1005": "d414c3969c66ed020a18bb524c2201934aaed8bdc4207fd11f14ede69a9024a5",
 }
+GOLDEN_STATE_DIGESTS = {
+    "1000": "dd760c5f8d2d868909381339314bd1c1c8226c283a53a4d26a229076be8d1ac2",
+    "1001": "0c218971216b86a713ea3f94af49e0a43ecd14d92b53cc73cda9dbff2cebab55",
+    "1002": "cd4d136fbdbc0bf0714db7b082d9cd160dd84e7f164afb74e1dbead455fe8895",
+    "1003": "ab3dd5f379783dee763cb185b5555e19b1c5112cdbe748fedd2bb6f8e7870554",
+    "1004": "1b1006848e80c330b21099c8fa841b9d21e755719549bc0721070fb84fc94119",
+    "1005": "e156ca566a1f7b4f1ac2234e5835227a30bb36e7b51159e45d5d65078fce5adf",
+}
+GOLDEN_EVENT_DIGESTS = {
+    "1000": "b11029b0567df39465066085c4126f978ead92551ba0168e3f63c53e35a47f9b",
+    "1001": "3d7f7b793a7cdd52310816e7571a7333baab65653b6acb55f9d3c8813178bfd0",
+    "1002": "037a9520db47e1455f04c9c69a18beb80b3d5358349e94f0253388cdece4ad22",
+    "1003": "fd36fa8db78d5a8d90bf7f58c096315dc587d0bf52690fe2bab7c926325607f5",
+    "1004": "78700023ec17b1d39b18906866b7c071f44a23111cedbc589bc935e8ff6471bf",
+    "1005": "334b639cb742d74d7ce48731971172b20b1c78dcee8fd25a758e7d327cfa22b0",
+}
+#: 短局（seed=3 的四回合固定动作）**未受影响**：逐位与 PRIOR 那对数相同。
 GOLDEN_SHORT_STATE = "244e53d35370f824cfd7352d52413bf8956ced9b2996353c96eee4052b8f70e6"
 GOLDEN_SHORT_EVENTS = "1458c52ee892de4b5806d761186569fbcb155f7627b0c06ab32c940147a42a87"
 

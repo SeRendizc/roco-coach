@@ -229,3 +229,98 @@ BattleBuild 级的 `unknown_fields` 恒为 `["derived_stats"]`（overlay 个体�
 - **个体属性**：`nature` / `talent` / `specialty` 的 `value` 恒为 `null`，`bloodline.value` 有 56/80 为 `null`，
   `panel_stats` / `derived_stats` 全为 `null` —— 因此**能用来做个体比较的只有 `level` 与技能组合**，
   阵容评估**不得**把养成属性当已知加成。
+
+## 2026-09-24：改成「一人一只」（人类纠正）
+
+人类实测看到「80 只」后问「那些重复的居然没删掉吗？重复的删掉啊」。原来的 80 = 48 物种 +
+**32 个伪造的「第二个个体」**（等级/技能都不同），是生成器为了让「同种不同个体比较」有数据可演
+而造出来的 —— 游戏里并不存在这些个体，既违反「不编数据」，也让「我的精灵」出现同名两张卡。
+
+现在的口径：
+
+- **`INSTANCE_TARGET = 48`**：实例数 == 物种数，每个物种**恰好 1 个个体**（`MAX_SAME_SPECIES_GROUPS = 0`）。
+- 判据方向反转：原来「同种组 ≥ 20」；现在「同种组 **== 0**」。少一个实例（47）仍然会红。
+- **同种比较的能力没有删**：`compareOwnedPets()` 仍是纯函数，`tests/roco-box.test.js` 用
+  **显式夹具**（两只同种个体）逐字段验它；路由那一侧验「跨物种比较必须 400」。
+  浏览器验收里的「两个体比较」这一条**如实登记为不可达**（产物里没有同种对），
+  不再靠造数据让它绿。
+- 顺带修掉两条**判据自身的错**（都是这次数据变化揭穿的）：
+  1. `tests/roco-team-gaps.test.js` 的总置信判据自己按 `CONFIDENCE_LEVELS.reverse()` 推「谁更弱」，
+     方向反了；旧的 80 实例基准队里缺口只有一档置信度，所以一直没显形。现在用实现导出的同一张
+     `CONFIDENCE_RANK`。
+  2. `tests/roco-workshop.test.js` 的锁定判据挑中的实例在产物里**本身就是 locked=true**
+     （个体属性），量到的是产物标记而不是请求语义；现在先过滤掉产物里已锁的实例。
+
+
+---
+
+## 2026-09-25：四技能的**唯一事实源**改成引擎 loadout（人类：「配招这个你得修好」）
+
+### 之前错在哪
+
+`BattleBuild.ordered_skills` 是 `scripts/roco/build-owned-pets.mjs` 里
+`shuffle(rng, pool).slice(0, 4)`（seed 20301）从该物种的 `native_skills` 里抽出来的**伪随机抽样** ——
+没有任何选招规则、也不是出战配置。后果（2026-09-24 首次量到、2026-09-25 定性）：
+
+- owned 的四技能与**引擎实战真正装上的**四技能 **48/48 全不一致**（集合级：交集分布 `{0:20,1:18,2:9,3:1}`）；
+- 玩家在工坊里选的那只，进对局后四个技能是另一套 —— 数据层的自相矛盾，页面看不出来；
+- 天气层「demo 里打不出来」的结论也建立在这条错读上（详见 `DSH-EXECUTION-STATE.md` C6.76 的更正）。
+
+### 核验结论（证据分级，先读这一节再看改法）
+
+**四条链没有任何一条能证明是「游戏里的真实配招」**：
+
+| 链 | 选招规则 | 证据 |
+|---|---|---|
+| ① 基线 `support-matrix.json#candidate_moveset`（12 只，冻结） | 逐角色 `predicate + sort(power desc, energy asc[, name asc])`，`source_pool=native_learnset`，逐角色带 `selection_evidence` | 规则写得出，但 `caveats` 自己写着「**不是最优解，也不是社区推荐**」 ⇒ `ENGINE_HYPOTHESIS` |
+| ② 叠加层 `layer-playable-48/support-matrix.json`（36 只，冻结） | `reports/roco/coverage/roster-48.json#selection_rules.moveset_rule`：free_attack（攻击/能耗 0/有静态威力/威力降序）→ reactive_defense（防御且描述含「应对」）→ main_attack → mechanism_support（最大化未覆盖机制数） | `ENGINE_HYPOTHESIS`（工程启发式） |
+| ③ owned `ordered_skills`（本次修掉） | `shuffle(rng, pool).slice(0,4)` | **不是规则**，是抽样 |
+| ④ `roster-48.json#moveset`（盒子页读） | 同 ② 的规则，但**对基线 12 只是另一个生成器算的** | `ENGINE_HYPOTHESIS`；与 ① 有 2/48 不一致（见下） |
+
+**台账（`data/roco/evidence/rule-evidence-ledger.json`，23 条）里没有任何一条主题是配招 / 配队 / 技能选择**
+⇒ 「洛手里的真实四技能」在现有证据下**不可得**。能钉的只有一件事：**引擎装的是哪四个**。
+
+### 所以唯一事实源 = 引擎 loadout（并且如实标成 ENGINE_HYPOTHESIS）
+
+`Ruleset.candidate_moveset()`（`roco/src/roco_env/data.py:309-311`）在加载期把两片矩阵合并
+（`data.py:515-535`）：基线 12 在前、叠加层 36 在后，同一 `pet_id` 重复定义直接抛 `RulesetError`。
+现在 `owned-pets.json` 的 `ordered_skills` **逐位等于**它（**顺序也算**：引擎用 `loadout.index()`
+算「技能位」，传动/位置类机制依赖位次）。
+
+- 生成器：`build-owned-pets.mjs` 读两片冻结矩阵 → `mergeCanonicalLoadouts()`（纯函数，在
+  `owned-pets-lib.mjs`，与 `data.py:515-535` 同义）→ 没有 `candidate_moveset` 的物种**跳过并记账**
+  （`skips.no_canonical_moveset`），绝不自己选一组出来。
+- `skills_source` 改成指向**那一片矩阵**的 `pets[i].candidate_moveset.skills`；
+  learnset 降级为 provenance 里的**合法性**出处（`learnsets.<pid>`，池 = native ∪ blood ∪ stones）。
+- **C20 判据**：`ordered_skills` 必须逐位等于引擎 loadout（含反证：只调换顺序 / 换掉一个技能都必须红）。
+  实测 **48/48 逐位相同**。
+
+### C08 的口径对齐（**不是放松**，是把判据对齐到引擎）
+
+`Ruleset.is_learnable`（`data.py:305-307`）读的是 `Learnset.all_skill_ids` = **native ∪ blood ∪ stones**
+（`data.py:133-135`；字段名照 `data.py:477-483`：`native_skills`/`blood_skills` 是 `[{skill_id}]`，
+`skill_stones` 是**纯字符串数组**）。旧 C08 只认 `native_skills` —— 那是配招还在「从 native 池随机抽」
+时的写法。改成引擎 loadout 之后，只认 native 会把**引擎真的会装上、也真的会结算**的
+**46 个技能引用**（33 个石系 + 13 个血统，192 个槽位里 46 个非 native；48 只里 39 只至少含一个）
+判成违规。所以 C08 按引擎口径判，并把差异**单独记数**
+（`skillsOutsideNative=46` / `nativeOnlyBuilds=9`，测试里钉死 `assert.equal(outsideNative, 46)`）——
+谁把口径偷偷改回 native-only、或把这些技能删掉，都会留下痕迹。
+
+### 已知限制（如实登记，钉进了测试）
+
+1. **`roster-48.json#moveset`（盒子页读）与引擎 loadout 有 2/48 不一致**：
+   `pet_000451` 秩序鱿墨、`pet_000474` 画间沉铁兽。**两侧都是冻结文件**
+   （`data/roco/normalized/**`，一个字节都不许动）：引擎读 `support-matrix.json`，
+   盒子页读 `roster-48.json`（`src/server/roco-service.js:292`）。要修必须改 `src/**` 的读点
+   或拿到「改冻结层」的授权。`tests/roco-owned-pets.test.js` 把这 2 只**钉成已知集合**，
+   新增漂移会立刻红。
+2. **`data/roco/derived/on-demand-builds.json` 是过期产物**：它记录的
+   `derived_from.frozen_learnsets.sha256 = 1a7ade75…`，而当前 `owned-pets.json` 是 `42978e74…`
+   （本次修复后又是新哈希）；它的 `frozen_build` 与**当前 owned** 和**引擎 loadout** 都不同（0/48）。
+   ⇒ RC-402 那句 `compiled_matches_frozen = 0` 是拿**旧快照**比的。它不在本次可写范围内，
+   需要重跑 `scripts/roco/build-on-demand-builds.mjs` 才有意义。
+3. **RC-302 的 `respond.variants_are_word_based` 判据与引擎 loadout 不相容**：
+   它要求 `instances_without_any_respond_in_build > 0`，而引擎 loadout 的 `reactive_defense` 槽
+   **每只都带「应对」** ⇒ 该值恒为 0。这是判据的「分离证据」选得不好（不是数据错），
+   落点在 `src/coach/team-gaps.js:1999`，不在本次可写范围内 —— 建议把证据换成
+   「build 的种类计数 ≠ learnset 的种类计数」（实测 应对状态 13 vs 34，仍然成立）。

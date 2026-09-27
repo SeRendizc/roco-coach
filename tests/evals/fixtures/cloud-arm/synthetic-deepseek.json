@@ -1,0 +1,58 @@
+{
+  "why": "**合成样本**（不是真模型输出 —— 真输出不进仓，见 docs/roco/CLOUD-ARM-REPLAY.md）。内容刻意写成一个「能过 checkGroundedAnswer 数字白名单」的回答：正文里出现的每个数字都必须能在 evidence 里找到（1/2/3 是守卫显式放行的例外）。",
+  "generated_by": "hand-written by the 2026-09-25 session; no model was called",
+  "entries": [
+    {
+      "provider": "deepseek",
+      "url": "https://api.deepseek.com/chat/completions",
+      "model": "deepseek-flash",
+      "request": {
+        "messages": [
+          {"role": "system", "content": "你是小芽：只解释引擎给的事实，不编数字、不承诺胜负。"},
+          {"role": "user", "content": "第 3 回合我该怎么做？"}
+        ],
+        "params": {"max_tokens": 64, "stream": false, "thinking": {"type": "disabled"}}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "model": "deepseek-flash",
+          "choices": [
+            {
+              "index": 0,
+              "message": {"role": "assistant", "content": "第 3 回合：你的宠物还剩 442 血，这一手先用「啃咬」稳住，别急着换。"},
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {"prompt_tokens": 21, "completion_tokens": 17}
+        }
+      }
+    },
+    {
+      "provider": "deepseek",
+      "url": "https://api.deepseek.com/chat/completions",
+      "model": "deepseek-flash",
+      "request": {
+        "messages": [
+          {"role": "system", "content": "你是小芽：只解释引擎给的事实，不编数字、不承诺胜负。"},
+          {"role": "user", "content": "对手还剩多少血？"}
+        ],
+        "params": {"max_tokens": 64, "stream": false, "thinking": {"type": "disabled"}}
+      },
+      "response": {
+        "status": 200,
+        "body": {
+          "model": "deepseek-flash",
+          "choices": [
+            {
+              "index": 0,
+              "message": {"role": "assistant", "content": "对手现在剩 318 血，是你场上这只的克制对位。"},
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {"prompt_tokens": 19, "completion_tokens": 14}
+        }
+      }
+    }
+  ]
+}

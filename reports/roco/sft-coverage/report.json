@@ -1,0 +1,20 @@
+{
+ "generated_by": "scripts/roco/build-tool-coverage-sft.mjs",
+ "system_prompt_digest_pin": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
+ "system_prompt_ok": true,
+ "generated_at": "2026-09-26T09:57:49.222Z",
+ "tools_covered": 7,
+ "excluded": {
+  "search_rules": "与 query_rules 语义重叠：同时教会让模型把规则问题整批改路由（实测 v7 rules_lookup 0/72）",
+  "plan_actions": "必填参数是运行时注入的 planner state（大对象）——训练目标形状要与运行时一起定",
+  "summarize_battle": "必填参数是运行时注入的公开对局记录（大对象）——同上"
+ },
+ "counts": {
+  "train": 126,
+  "valid": 56,
+  "test": 56
+ },
+ "templates": 42,
+ "held_out_overlap": 0,
+ "note": "参数逐条过 validToolArgs；切分按模板；与 tests/evals/agent-tasks-v2-tool-coverage.jsonl 零重叠"
+}

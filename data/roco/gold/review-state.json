@@ -1,0 +1,424 @@
+{
+  "schema": "roco-gold-review-state/v1",
+  "generated_by": "scripts/roco/gold-review-state.mjs",
+  "reviewer_allowlist": [
+    "owner（人类持有者）"
+  ],
+  "note": "人类口径 1：金标可以改，但必须人类先审阅。status=approved 只有人类能写；revision 变了而 status 仍是 approved ⇒ 判据必须红（等于「改了答案没重新送审」）。",
+  "cases": {
+    "c01": {
+      "revision": "09e593e4",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c02": {
+      "revision": "38565283",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c03": {
+      "revision": "4f3631ad",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c04": {
+      "revision": "2acff635",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c05": {
+      "revision": "27b89353",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c06": {
+      "revision": "fdcd3cb0",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c07": {
+      "revision": "6bc44b11",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c08": {
+      "revision": "59241117",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c09": {
+      "revision": "34cf9777",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c10": {
+      "revision": "da868ea5",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c11": {
+      "revision": "a25c471f",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c12": {
+      "revision": "3fd3f83d",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c13": {
+      "revision": "0bc3cd68",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c14": {
+      "revision": "c8a95bf8",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c15": {
+      "revision": "7c942e1c",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c16": {
+      "revision": "12d7fcad",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c17": {
+      "revision": "03533fa9",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c18": {
+      "revision": "47a7fa90",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c19": {
+      "revision": "b52a6525",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c20": {
+      "revision": "e905a081",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c21": {
+      "revision": "d1f6ed50",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c22": {
+      "revision": "8451faaf",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c23": {
+      "revision": "9c40d577",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c24": {
+      "revision": "ab621630",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c25": {
+      "revision": "ec9605ee",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c26": {
+      "revision": "76377f96",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c27": {
+      "revision": "902b8ddf",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c28": {
+      "revision": "5f38abe0",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c29": {
+      "revision": "583332f4",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c30": {
+      "revision": "72ea981f",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c31": {
+      "revision": "bdcf0f53",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c32": {
+      "revision": "6e21b511",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c33": {
+      "revision": "c03fca6f",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c34": {
+      "revision": "4e187387",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c35": {
+      "revision": "5c588a7b",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c36": {
+      "revision": "541a50b7",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c37": {
+      "revision": "73a815c6",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c38": {
+      "revision": "1fe4f239",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c39": {
+      "revision": "950947dd",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c40": {
+      "revision": "4027333a",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c41": {
+      "revision": "7053bd09",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c42": {
+      "revision": "168b93d7",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c43": {
+      "revision": "12aa376a",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c44": {
+      "revision": "a9bbd646",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c45": {
+      "revision": "7fd5ff3b",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c46": {
+      "revision": "10886a4c",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c47": {
+      "revision": "f6474af1",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c48": {
+      "revision": "5f15c400",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "c49": {
+      "revision": "2a042bb1",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "g01": {
+      "revision": "1a5fccd6",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "g02": {
+      "revision": "e690edb7",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "g03": {
+      "revision": "d1356cf3",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "g04": {
+      "revision": "efa17534",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "g05": {
+      "revision": "4408958b",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "w01": {
+      "revision": "efe68933",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "w02": {
+      "revision": "2c541868",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "w03": {
+      "revision": "6fd698de",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "w04": {
+      "revision": "b49d927a",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    },
+    "w05": {
+      "revision": "b5bb5539",
+      "status": "draft",
+      "reviewed_by": null,
+      "reviewed_at": null,
+      "note": "内容变了或上次也未审 ⇒ 退回 draft，等待人类重新审阅"
+    }
+  },
+  "sync_note": "本轮 sync：保留已审 0 条，退回/新增 draft 59 条。"
+}

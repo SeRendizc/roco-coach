@@ -26,7 +26,9 @@
 **只有前两级能直接 promotion 为 current rule。** 其余四级的用途是：
 写 candidate ruleset、挂待录 microcase、把“我们其实不知道”这件事留在明面上。
 
-## 1. 逐条台账（20 条）
+## 1. 逐条台账（23 条 → **27 条**）
+
+> **2026-09-25 更正（原话保留）**：本节标题原写「逐条台账（**20** 条）」，而 JSON 当时已是 **23** 条 —— 属于文档与产物漂移。现在 JSON 实测 **27 条**（`data/roco/evidence/rule-evidence-ledger.json` 的 `entries.length`）。**教训**：这个数字不许手写，引用前回查 JSON；`scripts/roco/verify-rules-corpus.mjs` 已把"文档计数必须能从产物复算"钉成判据。
 
 “我们的施工口径”是该条 `claim` 的缩写；完整句子与 `notes` 见 JSON。
 
@@ -45,7 +47,7 @@
 | 11 | `EV-PVP-OPPONENT-ROSTER-VISIBLE` | `pvp.fairness` | 可见 roster 与隐藏 build 分开建模，隐藏部分 fail closed | `COMMUNITY_CURRENT` | ✅ `MC-E12` | TapTap 社区攻略（单源） |
 | 12 | `EV-SWIFT-INJECTION` | `swift.injection` | 主动换入 + 槽内顺序 + 自动注入动作 + 能量合法性一起建模 | `COMMUNITY_CURRENT` | ✅ `MC-E13` | BWIKI 小鹬页面 |
 | 13 | `EV-MARKS-PERSISTENCE` | `marks.persistence` | 印记建模成 `SideState`，不是精灵 buff | `COMMUNITY_CURRENT` | ✅ `MC-E14` | BWIKI 印记页面 |
-| 14 | `EV-TYPE-MULTIPLIER` | `type.multiplier` | 用 ×3/×2/×0.5/×0.25 四档，**不再**沿用“双弱 ×4” | `COMMUNITY_CURRENT` | — | BWIKI 深渊罗隐 / 溯源钟（两源） |
+| 14 | `EV-TYPE-MULTIPLIER` | `type.multiplier` | ~~用 ×3/×2/×0.5/×0.25 四档，**不再**沿用“双弱 ×4”~~ → **2026-09-25 人类裁决：双属性按两系相乘**（双克制 ×4 / 双抵抗 ×0.25 / 一克一抗 ×1.0）；快照 `types.json` 的组合行只说明「这个组合有没有数据」，**不再提供倍率数值**（41 格与快照不同，全部是「快照 3 → 相乘 4.0」） | ~~`COMMUNITY_CURRENT`~~ → `RECORDED_IN_GAME` | — | 人类原话（`data/roco/evidence/user-in-game-reports.json`）+ BWIKI 深渊罗隐 / 溯源钟（两源） |
 | 15 | `EV-TURN-ORDER-MECHANISMS-EXIST` | `turn_order.priority` | 应对、先手 +1、主动换人、速度参与先后——按真实机制实现 | `CROSS_SOURCE_SUPPORTED` | — | 17173 官方公告转载（先手+1）、TapTap 社区攻略 |
 | 16 | `EV-TURN-ORDER-STRICT` | `turn_order.priority` | 引擎可有一套确定性排序键，但**不得**当游戏规则对外解释 | `ENGINE_HYPOTHESIS` | ✅ `MC-E05` | 本台账（10 号文档 §8 登记）、`MICROCASE-PLAN.md` |
 | 17 | `EV-LEAVE-SEMANTICS` | `leave.semantics` | `ACTIVE_SWITCH != SKILL_LEAVE != FAINT_REPLACEMENT` 三个独立事件 | `COMMUNITY_CURRENT` | ✅ `MC-E16` | BWIKI 邪眼巨魔页面 |
@@ -166,7 +168,9 @@ node scripts/roco/verify-evidence-ledger.mjs --ledger /tmp/tampered.json
 
 ## 7. 已知风险与没做到的事
 
-1. **`EV-PVP-STANDARD-MANA` 的引句是间接的。** 两份来源里**没有任何一处**逐字写出
+1. ~~**`EV-PVP-STANDARD-MANA` 的引句是间接的。**~~ **2026-09-25 已解决（原文保留在下面）**：人类实机口径「就是4点，哎反正就是生命数，就是4颗心」给出该值，台账已升 `RECORDED_IN_GAME`。**同轮全量核对结论**：百科 1,830 字与官方《洛个明白》里「魔力」**0 次**、官方万字公告 12 次全是别的语义（魔力果/魔力瓶/魔力猫…）⇒ 依据是**人类实机口径**，**禁止**署给百科或公告。
+
+   原文（改钉不删）：**`EV-PVP-STANDARD-MANA` 的引句是间接的。** 两份来源里**没有任何一处**逐字写出
    “标准 PVP 每方 4 点魔力”；17173 那条引句是特性回能里的“4能量”。
    这条等级来自 10 号文档的转述，本台账照抄未升等级，但它的支撑强度低于其它
    `CROSS_SOURCE_SUPPORTED` 条目——`MC-E08` 因此是本批优先级最高的录制项。

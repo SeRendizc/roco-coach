@@ -21,7 +21,7 @@
   },
   "frozen_learnsets": {
    "path": "data/roco/owned/owned-pets.json#battle_builds",
-   "sha256": "3ff29910843c7bace2132223fde70f8656a7ccc1edc6c3abe4c8ec29196c4374",
+   "sha256": "ce095ae1c8cd4f615e27873c7b4e1889cbcf051ee8ac880fe5c0d2c6b68488a0",
    "count": 48
   }
  },
@@ -1025,10 +1025,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000648",
-    "skill_000633",
-    "skill_000651",
-    "skill_000645"
+    "skill_000632",
+    "skill_000286",
+    "skill_000650",
+    "skill_000704"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -5475,10 +5475,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000402",
-    "skill_000271",
-    "skill_000387",
-    "skill_000404"
+    "skill_000378",
+    "skill_000286",
+    "skill_000392",
+    "skill_000408"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -8859,10 +8859,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000522",
-    "skill_000505",
     "skill_000807",
-    "skill_000515"
+    "skill_000525",
+    "skill_000516",
+    "skill_000808"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -9914,10 +9914,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000555",
-    "skill_000535",
-    "skill_000728",
-    "skill_000540"
+    "skill_000529",
+    "skill_000286",
+    "skill_000717",
+    "skill_000483"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -10431,10 +10431,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000253",
-    "skill_000691",
-    "skill_000705",
-    "skill_000702"
+    "skill_000686",
+    "skill_000286",
+    "skill_000698",
+    "skill_000298"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -10954,10 +10954,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000729",
     "skill_000645",
-    "skill_000726",
-    "skill_000646"
+    "skill_000286",
+    "skill_000311",
+    "skill_000294"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -11475,10 +11475,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000775",
-    "skill_000271",
+    "skill_000766",
+    "skill_000286",
     "skill_000768",
-    "skill_000777"
+    "skill_000483"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -12083,10 +12083,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000510",
-    "skill_000516",
-    "skill_000609",
-    "skill_000501"
+    "skill_000725",
+    "skill_000626",
+    "skill_000612",
+    "skill_000591"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -12245,10 +12245,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000258",
-    "skill_000521",
-    "skill_000516",
-    "skill_000621"
+    "skill_000725",
+    "skill_000626",
+    "skill_000612",
+    "skill_000591"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -12584,10 +12584,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000635",
-    "skill_000639",
-    "skill_000272",
-    "skill_000650"
+    "skill_000696",
+    "skill_000286",
+    "skill_000650",
+    "skill_000610"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -13365,10 +13365,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000540",
-    "skill_000548",
+    "skill_000541",
+    "skill_000286",
     "skill_000532",
-    "skill_000553"
+    "skill_000683"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -13433,10 +13433,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000546",
-    "skill_000539",
+    "skill_000541",
+    "skill_000286",
     "skill_000532",
-    "skill_000552"
+    "skill_000683"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -14218,10 +14218,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000780",
-    "skill_000793",
-    "skill_000777",
-    "skill_000636"
+    "skill_000632",
+    "skill_000644",
+    "skill_000788",
+    "skill_000793"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -14287,10 +14287,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000642",
-    "skill_000773",
-    "skill_000271",
-    "skill_000777"
+    "skill_000632",
+    "skill_000644",
+    "skill_000788",
+    "skill_000793"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -14624,10 +14624,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000586",
-    "skill_000312",
+    "skill_000265",
+    "skill_000286",
     "skill_000602",
-    "skill_000318"
+    "skill_000603"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -15048,10 +15048,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000286",
     "skill_000580",
-    "skill_000581",
-    "skill_000262"
+    "skill_000286",
+    "skill_000596",
+    "skill_000602"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -16632,10 +16632,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
+    "skill_000673",
     "skill_000429",
-    "skill_000271",
-    "skill_000434",
-    "skill_000678"
+    "skill_000678",
+    "skill_000294"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -19126,10 +19126,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000532",
-    "skill_000556",
-    "skill_000531",
-    "skill_000501"
+    "skill_000321",
+    "skill_000286",
+    "skill_000519",
+    "skill_000546"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -19195,10 +19195,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
+    "skill_000321",
+    "skill_000286",
     "skill_000519",
-    "skill_000530",
-    "skill_000501",
-    "skill_000286"
+    "skill_000546"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -19712,9 +19712,9 @@
    "support": "FULL_VERIFIED",
    "frozen_build": [
     "skill_000750",
-    "skill_000746",
-    "skill_000575",
-    "skill_000563"
+    "skill_000576",
+    "skill_000744",
+    "skill_000591"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -21017,10 +21017,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000313",
-    "skill_000362",
-    "skill_000350",
-    "skill_000345"
+    "skill_000541",
+    "skill_000286",
+    "skill_000532",
+    "skill_000368"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -21264,10 +21264,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000345",
-    "skill_000530",
     "skill_000541",
-    "skill_000555"
+    "skill_000286",
+    "skill_000532",
+    "skill_000368"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -21693,10 +21693,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000624",
-    "skill_000346",
-    "skill_000349",
-    "skill_000616"
+    "skill_000673",
+    "skill_000286",
+    "skill_000340",
+    "skill_000612"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -27038,10 +27038,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000272",
-    "skill_000423",
-    "skill_000429",
-    "skill_000443"
+    "skill_000418",
+    "skill_000286",
+    "skill_000251",
+    "skill_000591"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -28823,9 +28823,9 @@
    "support": "FULL_VERIFIED",
    "frozen_build": [
     "skill_000476",
-    "skill_000472",
     "skill_000286",
-    "skill_000271"
+    "skill_000481",
+    "skill_000610"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -28981,9 +28981,9 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000272",
-    "skill_000286",
     "skill_000321",
+    "skill_000286",
+    "skill_000477",
     "skill_000289"
    ],
    "compiled_matches_frozen": false,
@@ -36747,10 +36747,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
+    "skill_000418",
     "skill_000286",
-    "skill_000275",
     "skill_000305",
-    "skill_000427"
+    "skill_000483"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -39257,9 +39257,9 @@
    "support": "FULL_VERIFIED",
    "frozen_build": [
     "skill_000321",
-    "skill_000305",
+    "skill_000286",
     "skill_000251",
-    "skill_000272"
+    "skill_000483"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -39507,10 +39507,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000405",
-    "skill_000382",
-    "skill_000247",
-    "skill_000573"
+    "skill_000401",
+    "skill_000286",
+    "skill_000567",
+    "skill_000415"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -39664,10 +39664,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
+    "skill_000725",
     "skill_000286",
-    "skill_000267",
-    "skill_000723",
-    "skill_000725"
+    "skill_000744",
+    "skill_000793"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -39733,10 +39733,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000746",
+    "skill_000750",
     "skill_000286",
-    "skill_000751",
-    "skill_000717"
+    "skill_000744",
+    "skill_000591"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -40165,9 +40165,9 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000442",
-    "skill_000677",
-    "skill_000663",
+    "skill_000645",
+    "skill_000286",
+    "skill_000422",
     "skill_000683"
    ],
    "compiled_matches_frozen": false,
@@ -40322,10 +40322,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
+    "skill_000645",
+    "skill_000286",
     "skill_000422",
-    "skill_000663",
-    "skill_000271",
-    "skill_000677"
+    "skill_000683"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -41643,10 +41643,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000249",
-    "skill_000819",
-    "skill_000271",
-    "skill_000248"
+    "skill_000673",
+    "skill_000286",
+    "skill_000248",
+    "skill_000808"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -41712,10 +41712,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000282",
-    "skill_000255",
+    "skill_000741",
     "skill_000286",
-    "skill_000680"
+    "skill_000248",
+    "skill_000670"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -42138,10 +42138,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000452",
+    "skill_000782",
+    "skill_000286",
     "skill_000787",
-    "skill_000272",
-    "skill_000450"
+    "skill_000629"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -42572,10 +42572,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000812",
-    "skill_000818",
-    "skill_000475",
-    "skill_000819"
+    "skill_000816",
+    "skill_000286",
+    "skill_000317",
+    "skill_000481"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -42640,10 +42640,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000271",
-    "skill_000667",
-    "skill_000272",
-    "skill_000302"
+    "skill_000302",
+    "skill_000286",
+    "skill_000673",
+    "skill_000567"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -47618,10 +47618,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000505",
-    "skill_000813",
+    "skill_000807",
+    "skill_000525",
     "skill_000516",
-    "skill_000515"
+    "skill_000808"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -47864,10 +47864,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000440",
-    "skill_000305",
-    "skill_000615",
-    "skill_000625"
+    "skill_000418",
+    "skill_000286",
+    "skill_000612",
+    "skill_000483"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -48113,10 +48113,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000687",
-    "skill_000705",
-    "skill_000688",
-    "skill_000638"
+    "skill_000696",
+    "skill_000286",
+    "skill_000650",
+    "skill_000610"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -48804,10 +48804,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000675",
-    "skill_000272",
+    "skill_000673",
+    "skill_000286",
     "skill_000677",
-    "skill_000670"
+    "skill_000683"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -50510,9 +50510,9 @@
    "support": "FULL_VERIFIED",
    "frozen_build": [
     "skill_000673",
-    "skill_000677",
-    "skill_000680",
-    "skill_000668"
+    "skill_000286",
+    "skill_000519",
+    "skill_000483"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -52824,10 +52824,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000271",
-    "skill_000656",
-    "skill_000645",
-    "skill_000632"
+    "skill_000632",
+    "skill_000286",
+    "skill_000399",
+    "skill_000483"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -53430,9 +53430,9 @@
    "support": "FULL_VERIFIED",
    "frozen_build": [
     "skill_000750",
-    "skill_000271",
     "skill_000286",
-    "skill_000744"
+    "skill_000744",
+    "skill_000825"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -53498,10 +53498,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000692",
-    "skill_000531",
-    "skill_000714",
-    "skill_000536"
+    "skill_000541",
+    "skill_000286",
+    "skill_000700",
+    "skill_000808"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -53658,10 +53658,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000689",
-    "skill_000714",
-    "skill_000692",
-    "skill_000277"
+    "skill_000541",
+    "skill_000286",
+    "skill_000700",
+    "skill_000808"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",
@@ -53816,10 +53816,10 @@
    ],
    "support": "FULL_VERIFIED",
    "frozen_build": [
-    "skill_000462",
+    "skill_000418",
     "skill_000286",
     "skill_000458",
-    "skill_000443"
+    "skill_000599"
    ],
    "compiled_matches_frozen": false,
    "selection_rule_id": "rc402-power-desc-energy-asc-skillid",

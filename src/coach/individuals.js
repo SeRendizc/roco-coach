@@ -1,0 +1,377 @@
+// 个体层：把 `owned-pets.json` 的实例读成"可培养的个体"，并给出**可复现**的刷新。
+//
+// 人类 2026-09-26 的口径（逐条落在这里，改口径就改这一处）：
+//   · 拥有的精灵**默认 100 级**（PvP 面板要有意义）；
+//   · 天分（个体值）与性格**没有真实数值的一律归零并标注** —— 不许编；
+//   · 同一只精灵**可以有多个个体**（可重复拥有），性格/天分不同 ⇒ 配队复杂度；
+//   · 洛手没有加点 ⇒ 用**刷新**代替：`刷新性格` 与 `刷新天分` **分开**，每个个体**各 3 次**；
+//   · 刷新必须**可复现**（种子化），并留下历史（刷新前后 + 剩余次数）。
+//
+// ⚠ 掷点规则的**诚实边界**：官方概率本仓没有。所以两条掷点规则都标 `MODELLED_NOT_OBSERVED`，
+// 界面上必须能说出来"这是我们模拟器的掷点，不是官方概率"。拿到真分布（小黑盒/实机）就替换这一处。
+import {STAT_KEYS, STAT_NAMES, panelOf, natures} from './talent.js';
+
+export const REFRESH_LIMIT = 3;
+
+/** 一种掷点规则：`uniform-nature/v1` 与 `uniform-talent/v1` —— 都标着"建模的、非实测"。 */
+export const ROLL_RULES = {
+  nature: {
+    id: 'uniform-nature/v1',
+    confidence: 'MODELLED_NOT_OBSERVED',
+    note: '30 条性格等概率。官方概率本仓没有；这是模拟器的掷点规则，不是实测分布。',
+  },
+  // 2026-09-26 人类口径（口述）：「刷新天分（一/二/三级，每级随机提升一个**不重复**的属性值 10 点）」。
+  // 所以天分刷新**不是掷一个新值**，而是"三级、每级 +10、落在还没加过的那一项上"——
+  // 次数上限与"不重复"这两条合起来就是**限制机制**（三次之后这只的加法就定格了）。
+  talent: {
+    id: 'tiered-plus10/v1',
+    confidence: 'RECORDED_IN_GAME',
+    note: '一/二/三级各一次，每次 +10 到一个还没被加过的属性；**可以回滚上一次**（次数归还），'
+      + '回滚之后重刷会掷到**另一个**落点；但**每人只许回滚一次**（否则"刷→回滚→刷"会把三次限制架空）。'
+      + '（哪一项被加是随机的 —— 随机性只在这里，幅度与次数都是定死的。）',
+  },
+};
+
+/** 32 位种子散列（FNV-1a）——同一个体、同一件事、第几次，结果固定。 */
+export function seedOf(...parts) {
+  let hash = 0x811c9dc5;
+  for (const part of parts) {
+    const text = String(part);
+    for (let i = 0; i < text.length; i += 1) {
+      hash ^= text.charCodeAt(i);
+      hash = Math.imul(hash, 0x01000193) >>> 0;
+    }
+    hash = Math.imul(hash ^ 0x2f, 0x01000193) >>> 0;
+  }
+  return hash >>> 0;
+}
+
+/** mulberry32：小而稳的确定性 PRNG（同种子同序列，跨进程一致）。 */
+export function rngFrom(seed) {
+  let state = seed >>> 0;
+  return function next() {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const zeroTalent = () => Object.fromEntries(STAT_KEYS.map((stat) => [stat, 0]));
+
+/**
+ * 把 owned 数据集的一条实例读成个体。
+ * `talent.value` 在数据集里是 null（没有取值枚举）⇒ **按 0 计并标 `zeroed:true`**（本人口径），
+ * 这样界面上能一眼看出"这个 0 不是真数据"，而面板仍然算得出来（不会被 null 卡住）。
+ */
+/**
+ * 原版里**性格与天分都是抓到时随机生成的**（人类 2026-09-26：「性格天分是随机的啊」）。
+ * 所以数据集里没这两项时，正确做法不是留空，而是**按种子掷一份出来** ——
+ * 同一只个体在任何机器上掷到的一样（种子只来自 instance_id），换机器能复现。
+ *
+ * ⚠ 分布是**建模的**：性格 30 条等概率；天分按「了不起天分 = 随机三项 7–10」的描述
+ * （另外三项 0–6）。官方概率本仓没有 ⇒ 标 `MODELLED_NOT_OBSERVED`，界面上要说得出这句。
+ */
+export function rollNatureAndTalent(instanceId) {
+  const seed = seedOf(instanceId, 'initial-roll', 0);
+  const next = rngFrom(seed);
+  const nature = rollNature(seedOf(instanceId, 'initial-nature', 0));
+  const stats = [...STAT_KEYS];
+  const talent = {};
+  // 洗牌后前三个进 7–10、后三个进 0–6（不是"每项都高"，与原版"随机三项"的描述一致）
+  for (let i = stats.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(next() * (i + 1));
+    [stats[i], stats[j]] = [stats[j], stats[i]];
+  }
+  stats.forEach((stat, index) => {
+    talent[stat] = index < 3 ? 7 + Math.floor(next() * 4) : Math.floor(next() * 7);
+  });
+  return {nature, talent};
+}
+
+export function individualFromInstance(instance, {level = 100} = {}) {
+  if (!instance || typeof instance !== 'object') throw new Error('individualFromInstance 需要一条实例');
+  const id = String(instance.instance_id ?? instance.id ?? '');
+  if (!id) throw new Error('实例缺少 instance_id');
+  const nature = instance.nature?.value ?? null;
+  const rawTalent = instance.talent?.value ?? null;
+  // 数据集里没有 ⇒ **掷一份**（原版就是随机的），并标明是掷出来的
+  const rolled = (nature === null || !rawTalent) ? rollNatureAndTalent(id) : null;
+  return {
+    individual_id: id,
+    species_id: String(instance.species_id ?? ''),
+    species_name: instance.species_name ?? null,
+    level: Number.isFinite(Number(instance.level)) && level === null ? Number(instance.level) : level,
+    level_source: 'default-100（人类口径 2026-09-26：拥有的精灵都默认 100 级）',
+    nature: nature ?? rolled?.nature ?? null,
+    nature_source: nature ? 'dataset'
+      : 'rolled（原版抓到时随机生成；这里按 instance_id 种子化掷点，换机器结果一致）',
+    talent: rawTalent && typeof rawTalent === 'object' ? {...zeroTalent(), ...rawTalent} : {...(rolled?.talent ?? zeroTalent())},
+    talent_boosts: [],
+    talent_source: rawTalent ? 'dataset'
+      : 'rolled（原版随机生成；种子化掷点：随机三项 7–10、其余 0–6 —— 分布是建模的，非官方概率）',
+    refreshes: {nature: REFRESH_LIMIT, talent: REFRESH_LIMIT},
+    history: [],
+  };
+}
+
+export function individualsFromDataset(dataset, {level = 100} = {}) {
+  const rows = Array.isArray(dataset?.instances) ? dataset.instances : [];
+  const list = rows.map((row) => individualFromInstance(row, {level}));
+  // 同一只精灵允许出现多次 —— 这里只校验 id 唯一（同种不同个体是正常情况）。
+  const seen = new Set();
+  for (const row of list) {
+    if (seen.has(row.individual_id)) throw new Error(`个体 id 重复：${row.individual_id}`);
+    seen.add(row.individual_id);
+  }
+  return list;
+}
+
+/** 按种类分组（界面上的"抽屉"就是这个形状：一行一种，点开才是个体）。 */
+export function groupBySpecies(list) {
+  const groups = new Map();
+  for (const individual of list) {
+    const key = individual.species_id;
+    if (!groups.has(key)) groups.set(key, {species_id: key, species_name: individual.species_name, individuals: []});
+    groups.get(key).individuals.push(individual);
+  }
+  return [...groups.values()].map((group) => ({
+    ...group,
+    count: group.individuals.length,
+    // 默认展示哪个个体：调用方给了 `panel_total` 就先比它（同种之间比才公平），
+    // 没给就按 id 稳定排序 —— **不许在这里自己算面板**（数字只有一个来源：`talent.js`）。
+    best: [...group.individuals].sort((a, b) => (b.panel_total ?? -1) - (a.panel_total ?? -1)
+      || a.individual_id.localeCompare(b.individual_id))[0]?.individual_id ?? null,
+  }));
+}
+
+/** 单个个体的面板（数字只从 `talent.js` 来；缺输入会进 `unknown`）。 */
+export function panelOfIndividual(individual, race) {
+  return panelOf({race, talent: individual.talent, nature: individual.nature, scope: 'pvp'});
+}
+
+/** 掷一次性格（30 条等概率）。 */
+export function rollNature(seed) {
+  const rows = natures();
+  return rows[Math.floor(rngFrom(seed)() * rows.length) % rows.length].name;
+}
+
+/** 天分每级加多少（人类口径：每级 +10）。 */
+export const TALENT_STEP = 10;
+/** 三级：一级/二级/三级各一次。 */
+export const TALENT_TIERS = 3;
+
+/**
+ * 掷一次天分刷新的**落点**：在"还没被加过"的属性里选一个。
+ * `boosted` 是这个个体已被加过的项（来自 history）；全加过就返回 null（次数上限会先挡住）。
+ */
+export function rollTalentStat(seed, boosted = []) {
+  const pool = STAT_KEYS.filter((stat) => !boosted.includes(stat));
+  if (!pool.length) return null;
+  const pick = Math.floor(rngFrom(seed)() * pool.length) % pool.length;
+  return pool[pick];
+}
+
+/** 这一只已经被加过哪些项（从天分加成记录里读，不另存状态）。 */
+export function boostedStatsOf(individual) {
+  return Array.isArray(individual?.talent_boosts)
+    ? individual.talent_boosts.map((row) => row.stat)
+    : [];
+}
+
+const clone = (individual) => ({
+  ...individual,
+  talent: {...individual.talent},
+  talent_boosts: [...(individual.talent_boosts ?? [])],
+  refreshes: {...individual.refreshes},
+  history: [...individual.history],
+});
+
+/**
+ * 刷新（**不原地改**：返回新个体；`at` 由调用方给，便于判据里注入固定时间）。
+ * 超过次数一律拒绝（抛错），绝不"悄悄多给一次"。
+ */
+export function refresh(individual, kind, {at = null, salt = ''} = {}) {
+  if (kind !== 'nature' && kind !== 'talent') throw new Error(`没有这种刷新：${kind}`);
+  if (!Number.isInteger(individual.refreshes?.[kind]) || individual.refreshes[kind] <= 0) {
+    throw Object.assign(new Error(`${kind === 'nature' ? '性格' : '天分'}刷新次数用完了`), {code: 'no-refresh-left'});
+  }
+  const used = REFRESH_LIMIT - individual.refreshes[kind] + 1;             // 第几次
+  // 2026-09-27（审计 §C6.288 ④ 的两处矛盾之一）：**回滚过之后，同一次刷新要掷到不同的落点**。
+  // 原来种子只由「个体 + 种类 + 第几次」决定 ⇒ 回滚再刷**必然回到同一个落点**，
+  // 而教练文案却说「回滚换一个落点可能更值」——两者自相矛盾。
+  // 现在把「这一类回滚过几次」并进种子：回滚一次，重刷就换一个落点；没回滚过时与从前逐字节一致。
+  const undone = (Array.isArray(individual.history) ? individual.history : [])
+    .filter((row) => row?.kind === 'undo' && row?.undo_of === kind).length;
+  const seed = seedOf(individual.individual_id, kind, used, `${salt}${undone ? `#undo${undone}` : ''}`);
+  const next = clone(individual);
+  const before = kind === 'nature' ? individual.nature : {...individual.talent};
+  let stat = null;                                   // 天分这一级落在哪一项（性格类刷新保持 null）
+  if (kind === 'nature') {
+    next.nature = rollNature(seed);
+  } else {
+    // 天分：+10 到一个**还没被加过**的项；`talent_boosts` 是账（每级一条），`talent` 是现值。
+    stat = rollTalentStat(seed, boostedStatsOf(individual));
+    if (!stat) throw Object.assign(new Error('六项都已经加过了 —— 这只的加法定格了'), {code: 'no-stat-left'});
+    next.talent = {...individual.talent, [stat]: Number(individual.talent?.[stat] ?? 0) + TALENT_STEP};
+    next.talent_boosts = [...(individual.talent_boosts ?? []),
+      {tier: used, stat, delta: TALENT_STEP, at}];
+  }
+  next.refreshes[kind] = individual.refreshes[kind] - 1;
+  // 2026-09-27（§C6.313② 的收尾）：这一级的**落点**要记在账上。
+  // 原来只有 `before/after` 两个面板对象，`rollbackAdvice` 得回头去 `talent_boosts` 里按 tier 找，
+  // 玩家问"这次换到了哪一项"时没人答得出来。现在：天分记 `stat`；回滚之后重刷再记 `replaced`
+  //（= 被撤掉的那个落点），于是"换到了 X（原来那个是 Y）"这句话有据可依。
+  const undoneRows = (Array.isArray(individual.history) ? individual.history : [])
+    .filter((row) => row?.kind === 'undo' && row?.undo_of === kind);
+  const replaced = undoneRows.length ? undoneRows[undoneRows.length - 1].undid ?? null : null;
+  const row = {
+    kind, used, before, after: kind === 'nature' ? next.nature : {...next.talent},
+    remaining: next.refreshes[kind], rule: ROLL_RULES[kind].id, at,
+  };
+  if (kind === 'talent') row.stat = stat;
+  if (replaced !== null && replaced !== undefined) row.replaced = replaced;
+  next.history.push(row);
+  return next;
+}
+
+/** 再来一只同种个体（可重复拥有）：新的 id、刷新次数重新是 3+3、数值按本人口径归零。 */
+export function duplicateIndividual(individual, {individual_id, at = null} = {}) {
+  if (!individual_id) throw new Error('duplicateIndividual 需要一个新 individual_id');
+  if (individual_id === individual.individual_id) throw new Error('新个体的 id 不能和原来一样');
+  return {
+    ...clone(individual),
+    individual_id,
+    level: individual.level,
+    nature: null,
+    nature_source: 'new-individual（新抓到的个体还没有性格数据 ⇒ 记 null）',
+    talent: zeroTalent(),
+    talent_boosts: [],
+    talent_source: 'zeroed（新个体还没有天分数值 ⇒ 按 0 计并标注）',
+    refreshes: {nature: REFRESH_LIMIT, talent: REFRESH_LIMIT},
+    history: [{kind: 'duplicate', used: 0, before: individual.individual_id, after: individual_id,
+      remaining: REFRESH_LIMIT, rule: 'duplicate/v1', at}],
+  };
+}
+
+// ── 回滚上一次刷新（人类 2026-09-26：「做个上次刷新可回滚吧，这样可以让 coach 判断是否可以回滚来优化」）──
+//
+// 三条纪律：
+//   ① **只回滚一步**：`history` 里最后一条 `nature`/`talent` 的刷新（`duplicate` 不算）；
+//   ② **次数要还**：回滚哪一类就把那一类的剩余次数 +1（但不超过上限）—— 不然"回滚"等于罚一次；
+//   ③ **留痕**：回滚本身也进 history（`kind:'undo'`），刷了什么、撤了什么，账上一条不少。
+
+/** 上一次可回滚的刷新（没有就 null）。 */
+export function lastRefreshOf(individual) {
+  const rows = Array.isArray(individual?.history) ? individual.history : [];
+  for (let i = rows.length - 1; i >= 0; i -= 1) {
+    if (rows[i]?.kind === 'nature' || rows[i]?.kind === 'talent') return rows[i];
+  }
+  return null;
+}
+
+/** 回滚次数上限：**每个个体一次**（人类 2026-09-26 只说"上次刷新可回滚"）。
+ *
+ * ⚠ 2026-09-27 口子与修法：回滚会**归还次数**，而归还之后就能再刷、再回滚 ⇒
+ * 「每个个体 3 次」这条限制被架空（可以无限刷到满意）。所以回滚**只许一次**：
+ * 想再换，只能靠还没用完的刷新次数。 */
+export const UNDO_LIMIT = 1;
+export function undoUsed(individual) {
+  return (Array.isArray(individual?.history) ? individual.history : [])
+    .filter((row) => row?.kind === 'undo').length;
+}
+export function canUndo(individual) {
+  return lastRefreshOf(individual) !== null && undoUsed(individual) < UNDO_LIMIT;
+}
+
+/**
+ * 回滚上一次刷新。返回**新个体**（不原地改）；没有可回滚的刷新就抛 `nothing-to-undo`。
+ * 次数按"还一次"处理：回滚的是性格就补性格的次数，且封顶在 `REFRESH_LIMIT`。
+ */
+export function undoLastRefresh(individual, {at = null} = {}) {
+  const last = lastRefreshOf(individual);
+  if (!last) throw Object.assign(new Error('没有可以回滚的刷新'), {code: 'nothing-to-undo'});
+  if (undoUsed(individual) >= UNDO_LIMIT) {
+    throw Object.assign(new Error('这一只已经回滚过一次了（每人只有一次）'), {code: 'undo-used'});
+  }
+  const next = clone(individual);
+  const index = next.history.lastIndexOf(last);
+  next.history.splice(index, 1);                       // 把那次刷新的记录拿掉（它已经被撤销）
+  if (last.kind === 'nature') {
+    next.nature = last.before ?? null;
+  } else {
+    next.talent = {...(last.before ?? {})};
+    // 天分：那次加成要从账上删掉（`talent_boosts` 里 tier 等于这次的）
+    next.talent_boosts = (next.talent_boosts ?? []).filter((row) => row.tier !== last.used);
+  }
+  next.refreshes = {...next.refreshes,
+    [last.kind]: Math.min(REFRESH_LIMIT, Number(next.refreshes?.[last.kind] ?? 0) + 1)};
+  // `undid` = **被撤掉的那个落点**（性格是那条性格名，天分是那一项）。
+  // 下一次重刷要靠它说出"换掉了什么"（见 `refresh()` 的 `replaced` 与 `lastRefreshNote()`）。
+  next.history.push({kind: 'undo', used: last.used, undo_of: last.kind,
+    undid: last.kind === 'nature' ? (last.after ?? null) : (last.stat ?? null),
+    before: last.after, after: last.kind === 'nature' ? next.nature : {...next.talent},
+    remaining: next.refreshes[last.kind], rule: 'undo/v1', at});
+  return next;
+}
+
+/**
+ * 上一次刷新**落在哪**（一句话，给玩家看）—— 回滚之后重刷时，把"换掉了什么"也说出来。
+ *
+ * 为什么要有它：§C6.313 记的② —— `rollbackAdvice` 那句「回滚换一个落点**可能更值**」在
+ * `refresh()` 把 `undone` 拼进种子之后**成立了**，但没人把"到底换到了哪一项"说出来。
+ * 玩家在页面上点完刷新，只看到面板数字动了，得自己猜是哪一项变的。
+ *
+ * 返回 `null`（没刷过）或一句话：
+ *   · 「上一次刷天分（第 2 级）：+10 加到「物攻」—— 这次是回滚之后重刷的，换掉了原来的「速度」。」
+ *   · 「上一次刷性格：换成了「开朗」—— 这次是回滚之后重刷的，原来的「胆小」已经撤掉。」
+ */
+export function lastRefreshNote(individual, {labels = null} = {}) {
+  const last = lastRefreshOf(individual);
+  if (!last) return null;
+  const statName = (stat) => labels?.[stat] ?? STAT_NAMES?.[stat] ?? stat;
+  const reroll = (last.replaced === null || last.replaced === undefined)
+    ? ''
+    : last.kind === 'nature'
+      // 不用 `**`：这两处落点（抽屉行、状态行）都是纯文本/`textContent`，星号会原样画出来。
+      ? `—— 这次是回滚之后重刷的，原来的「${last.replaced}」已经撤掉。`
+      : `—— 这次是回滚之后重刷的，换掉了原来的「${statName(last.replaced)}」。`;
+  if (last.kind === 'nature') {
+    return `上一次刷性格：换成了「${last.after ?? '（没填）'}」${reroll}`;
+  }
+  const stat = last.stat ?? (Array.isArray(individual.talent_boosts)
+    ? individual.talent_boosts.find((row) => row.tier === last.used)?.stat ?? null : null);
+  const label = stat ? statName(stat) : '（记录里没有这一项）';
+  return `上一次刷天分（第 ${last.used} 级）：+${TALENT_STEP} 加到「${label}」${reroll}`;
+}
+
+/**
+ * 「这次回滚值不值」——**给 coach 用的材料，不是结论**：
+ * 把"撤掉的这一级加到了哪一项"与"你关心的方向"对上，说清值得/不值得的**理由**，
+ * 但**不替玩家拍板**（拍板要看队伍与对手，那是回答层的事）。
+ */
+export function rollbackAdvice(individual, {priority = [], labels = null} = {}) {
+  const last = lastRefreshOf(individual);
+  if (!last) return {ok: false, reason: '没有可回滚的刷新', text: '这只还没有刷过，回滚没有对象。'};
+  const name = (stat) => (labels?.[stat] ?? stat);
+  if (last.kind === 'nature') {
+    const before = last.before ?? '（没填）';
+    const now = last.after ?? '（没填）';
+    return {ok: true, kind: 'nature', worth: null,
+      text: `上一次刷性格：从「${before}」换成了「${now}」。回滚就是换回「${before}」——`
+        + '哪个更合适要看你要它干什么（抢速度、扛伤害、还是打输出），我不替你拍板。'};
+  }
+  const boosted = Array.isArray(individual.talent_boosts) ? individual.talent_boosts : [];
+  const row = boosted.find((item) => item.tier === last.used) ?? null;
+  const stat = row?.stat ?? null;
+  const hit = stat ? priority.includes(stat) : false;
+  const label = stat ? name(stat) : '（记录里没有这一项）';
+  const tail = priority.length
+    ? (hit ? `这次加到的正是你在意的「${label}」⇒ 回滚会把这一级浪费掉，**不太值得**。`
+      : `这次加到的「${label}」不在你在意的方向里 ⇒ 回滚换一个落点**可能更值**。`)
+    : `这次加到的是「${label}」；你没说要什么方向，所以值不值得由你定。`;
+  return {ok: true, kind: 'talent', stat, worth: priority.length ? !hit : null,
+    text: `上一次刷天分（第 ${last.used} 级）：+${TALENT_STEP} 加到「${label}」。${tail}`};
+}
+

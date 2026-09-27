@@ -77,13 +77,17 @@ export const RETRIEVERS = [
   },
 ];
 
+//: 判据⑤（P0-b）的抽样规模：图鉴全量里确定性等距抽多少只。放在闸门定义**之前** ——
+//: 闸门文案要引用它，而 `const` 在声明前访问会抛 TDZ（真踩到过）。
+export const COVERAGE_SAMPLE_SIZE = 50;
+
 export const GATE_DEFINITIONS = {
   coverage: `五类各 ≥${CATEGORY_MIN} 条、总计 ≥${TOTAL_MIN} 条`,
   leakage: `查询不得逐字出现在语料里：单条文档最长逐字重合 ≤${LEAK_SPAN_LIMIT} 字符且不被完全包含`,
   fixture_intersection: '与 tests/evals/retrieval*.json 的查询文本归一化后交集为空',
   derivation: '每条期望值都能在语料里追到出处（ref 存在 + anchors 命中；absence 类做全语料反向扫描）',
   abstain_consistency: 'ABSTAIN 不许被算成命中：弃答的查询 hit@K 必须为 false',
-  conflict_abstention: '④ 类弃答率 = 1.0',
+  conflict_abstention: '④ 类要么弃答、要么命中一条**正文写着「未核验」的台账条目**（例外逐条登记，最多 1 条）',
   grounded: 'grounded precision = 1.0（每条返回结果的 provenance/证据都能追到磁盘）',
   version_hit: '新索引在版本类查询上的版本命中率 = 1.0',
   evidence_level: '每条查询声明的证据等级都在台账六级内，且答案类查询的证据等级不弱于期望',
@@ -91,9 +95,36 @@ export const GATE_DEFINITIONS = {
   query_manifest: '查询集清单（总数 / 分类计数 / id+文本 sha256）与声明一致；删改一条查询必须被发现',
   probe_reported: '探针集（写完后只跑一次、不回调措辞）存在且 ≥10 条，逐条给出命中与否（失败也如实登记）',
   no_clock: '报告正文不含挂钟时间戳（时间只许在 metadata 里）',
+  // 2026-09-25（P0-b）：图鉴**全量**抽样覆盖 —— held-out 45 条只证明"挑过的那几条查得到"。
+  catalog_coverage: `图鉴全量（冻结 622 只）里确定性等距抽 ${COVERAGE_SAMPLE_SIZE} 只：`
+    + '每只的图鉴卡（`pet::<id>`）与特性技能（`trait::<id>` / `battle_skill::<id>`）都必须出现在 top-10；'
+    + '必红方向：删掉某一只的图鉴文档 ⇒ 那一只必须变成未覆盖（注入反证 R7）',
 };
 
 // ── 文本工具 ──────────────────────────────────────────────────────────────
+
+/** 「这条读数没有证据」的**正文标记**：台账条目自己写「未核验 / 无证据 / 仍待录 / 保持 UNKNOWN」时才认。
+ *  它比分数门槛强的地方在于：分数只能说明「像」，这里要求文档**逐字说它不知道**。 */
+export const UNKNOWN_MARKER_RE = /未核验|没有实机|无证据|仍无证据|仍待录|仍未录|保持 UNKNOWN|保持 unknown|未完全收口/;
+
+/** ④ 类弃答的**登记例外**（最多 1 条，多一条就红）。
+ *
+ *  2026-09-23：新增台账条目 `EV-ENERGY-PER-PET`（人类口径⑥：开局每只 10 星）之后，
+ *  查询 C02「换入一只已经离场过的精灵时，入场能量按多少算，实机测过吗」的 top-1
+ *  变成了这条条目 —— 它的正文**明写**「换入 / 力竭补位 / 第二次入场的读数仍无证据，
+ *  保持 UNKNOWN（fail closed）」。也就是说：检索命中的文档本身就在说「这条没核验」，
+ *  答案会是有出处的「未核验」，不是编一个数。这里**不放松**判据，而是把这一条登记成
+ *  例外，并且要求：① 例外必须真的没弃答；② 它的 top-1 必须还是登记的那个文档；
+ *  ③ 那个文档的正文必须含 `UNKNOWN_MARKER_RE`；④ 例外最多 1 条。任何一条不成立都红。 */
+export const CONFLICT_ABSTENTION_EXCEPTIONS = Object.freeze({
+  C02: {
+    top_doc: 'EV-ENERGY-PER-PET',
+    why: '查询问的是「换入过的精灵再入场」的读数；top-1 台账条目 EV-ENERGY-PER-PET 的正文'
+      + '（结论 + 注记）逐字写着这几个子问题仍无证据、保持 UNKNOWN，所以返回它等于回答「未核验」，'
+      + '不是编数。新增条目前该查询的 top 分数低于门槛（弃答），这就是它翻转的唯一原因。',
+  },
+});
+export const CONFLICT_ABSTENTION_EXCEPTION_MAX = 1;
 
 export function normalizeText(text) {
   return String(text ?? '').toLowerCase().replace(/[\s\u3000]+/g, '');
@@ -454,6 +485,11 @@ export function retrieveRagIndex(query, index) {
     limit: 10,
     requireLevel: spec.min_evidence_level ?? null,
     requireRulesetConfigId: spec.requires_ruleset_config_id ?? null,
+    // T3：规则检索路径**默认排除** scope==='player'（玩家个体不是规则语料）。
+    // 评测是**全语料**口径（联合视图），所以这里显式 opt-in —— 否则 E07（own-0001）、
+    // C06（我的个体面板）、P11 三条 held-out 的语义会被「排除玩家数据」改掉，
+    // 那三条问的确实是玩家自己的个体。
+    includePlayer: true,
   });
   return {
     ids: result.results.map((row) => row.id),
@@ -537,6 +573,10 @@ export function evaluateRetrieval({queries, index, treatAbstainAsHit = false} = 
         evidence_level_match: evidenceLevelMatch,
         top3: (outcome.detail ?? []).slice(0, 3),
         top_evidence_level: topDoc ? topDoc.evidence_level : null,
+        // 2026-09-23：④ 类判据要能区分「凭空作答」与「答的是『这条没核验过』」。
+        // 记号从**索引正文**现算（不是人写死），见 UNKNOWN_MARKER_RE。
+        top_doc: topId,
+        top_doc_unknown_marker: UNKNOWN_MARKER_RE.test(String(topDoc?.body ?? '')),
       };
       entry.retrievers[retriever.id] = row;
       raw[retriever.id].push({query, row});
@@ -633,6 +673,9 @@ export function computeReport({corpus = loadCorpus(), heldout = loadHeldout(), r
   const fixtureIntersection = checkFixtureIntersection(queries, fixtures);
   const derivation = checkDerivation(queries, {index, corpus, root});
   const {perQuery, metrics} = evaluateRetrieval({queries, index});
+  // 判据⑤（P0-b）：图鉴全量抽样覆盖 —— held-out 只证明"挑过的那几条查得到"。
+  const catalog = loadCatalogPets({root});
+  const coverage = checkCoverage({index, pets: catalog.pets, skills: catalog.skills});
   const grounded = groundSample({perQuery, index, root});
   // 探针集：另外写的查询，只跑一次、不回调措辞。指标不过闸门，失败也登记。
   const manifestComputed = queryManifest(queries);
@@ -692,11 +735,14 @@ export function computeReport({corpus = loadCorpus(), heldout = loadHeldout(), r
       determinism: '报告正文不含挂钟时间戳；generated_at 单独放在 metadata 里。同输入两次运行正文逐字节相同。',
       heldout_path: RAG_INPUTS.heldout,
       report_path: RAG_INPUTS.report,
+      coverage_sample_size: COVERAGE_SAMPLE_SIZE,
       vector_retrieval: 'NOT_IMPLEMENTED（无本地嵌入模型、不联网；接口留在 rag-index.searchIndex 的 vector 选项上）',
       score_floor: SCORE_FLOOR,
       leak_span_limit: LEAK_SPAN_LIMIT,
       evaluators: ['baseline_searchKnowledge', 'baseline_lexical_pack', 'rag_index'],
     },
+    // 判据⑤（P0-b）：图鉴**全量**抽样覆盖 —— held-out 45 条只证明"挑过的那几条查得到"。
+    coverage,
     corpus: {
       documents: index.documents.length,
       by_record_kind: corpusCounts,
@@ -743,6 +789,92 @@ export function canonical(report) {
   return `${JSON.stringify(stripClock(report), null, 1)}\n`;
 }
 
+// ── 判据⑤：全量覆盖（600 只规模 · P0-b）──────────────────────────────────
+//
+// 「600 只精灵、机制复杂」这条方向要求 RAG **覆盖全量**，而不是只覆盖评测集里出现过的那几只。
+// held-out 45 条只能证明"我挑的那几条查得到"；这一条把尺子换成**图鉴全量抽样**：
+//   · 抽样是**确定性**的（按 pet_id 排序后等距取 50 只）—— 报告可逐字节复算，不用随机数；
+//   · 每只都按**名字**检索它的图鉴卡（`pet::<pet_id>`），top-10 里必须命中；
+//   · 每只的**特性技能**（`skill::<feature_skill_id>`）同样按名字检索一次；
+//   · 必红反证：从语料里删掉某一只的文档 ⇒ 那一只必须变成未覆盖（`selftest` 里跑）。
+/** 从图鉴全量里**确定性**抽样（等距，按 pet_id 排序）。 */
+export function sampleCatalogPets(pets, count = COVERAGE_SAMPLE_SIZE) {
+  const sorted = [...pets].sort((a, b) => String(a.pet_id).localeCompare(String(b.pet_id)));
+  if (sorted.length <= count) return sorted;
+  const step = sorted.length / count;
+  const out = [];
+  for (let i = 0; i < count; i += 1) out.push(sorted[Math.floor(i * step)]);
+  return out;
+}
+
+export function checkCoverage({index, pets, skills = null, count = COVERAGE_SAMPLE_SIZE} = {}) {
+  const sample = sampleCatalogPets(pets, count);
+  const skillName = (skillId) => {
+    if (!Array.isArray(skills)) return null;
+    const row = skills.find((skill) => skill.skill_id === skillId);
+    return row?.name ?? null;
+  };
+  const rows = sample.map((pet) => {
+    const petOutcome = retrieveRagIndex(pet.name, index);
+    const petRank = petOutcome.ids.slice(0, 10).findIndex((id) => idMatches(id, `pet::${pet.pet_id}`));
+    const featureName = skillName(pet.feature_skill_id);
+    const skillOutcome = featureName ? retrieveRagIndex(featureName, index) : null;
+    // 特性技能在语料里有**两个命名空间**：`trait::<id>`（245 条特性）与 `battle_skill::<id>`
+    // （579 条战斗技能）。实测：特性（如「氧循环」）落在 `trait::`，所以两个都算命中，
+    // 并把命中的是哪一边记下来（免得判据把命名空间差异当成"没覆盖"）。
+    const skillKeys = pet.feature_skill_id
+      ? [`trait::${pet.feature_skill_id}`, `battle_skill::${pet.feature_skill_id}`]
+      : [];
+    let skillRank = -1;
+    let skillMatchedKey = null;
+    if (skillOutcome) {
+      for (const key of skillKeys) {
+        const rank = skillOutcome.ids.slice(0, 10).findIndex((id) => idMatches(id, key));
+        if (rank >= 0 && (skillRank < 0 || rank < skillRank)) { skillRank = rank; skillMatchedKey = key; }
+      }
+    }
+    return {
+      pet_id: pet.pet_id,
+      name: pet.name,
+      pet_hit: petRank >= 0,
+      pet_rank: petRank,
+      pet_top1: petOutcome.ids[0] ?? null,
+      feature_skill_id: pet.feature_skill_id ?? null,
+      feature_skill_name: featureName,
+      feature_hit: featureName ? skillRank >= 0 : null,
+      feature_rank: featureName ? skillRank : null,
+      feature_namespace: skillMatchedKey ? skillMatchedKey.split('::')[0] : null,
+    };
+  });
+  const petCovered = rows.filter((row) => row.pet_hit).length;
+  const skillRows = rows.filter((row) => row.feature_hit !== null);
+  const skillCovered = skillRows.filter((row) => row.feature_hit).length;
+  return {
+    sample_size: rows.length,
+    catalog_size: pets.length,
+    pet_covered: petCovered,
+    pet_coverage: petCovered / (rows.length || 1),
+    feature_sample: skillRows.length,
+    feature_covered: skillCovered,
+    feature_coverage: skillRows.length ? skillCovered / skillRows.length : null,
+    misses: rows.filter((row) => !row.pet_hit).map((row) => ({pet_id: row.pet_id, name: row.name})),
+    rows,
+    note: '确定性等距抽样（按 pet_id）＋按名字检索；`pet::<id>` 必须出现在 top-10，'
+      + '特性技能同样按名字检索。抽样与判据同一份代码，`--check` 逐字节复算。',
+  };
+}
+
+/** 图鉴全量池（抽样来源）：**冻结图鉴**，不是语料本身 —— 缺覆盖必须能红。 */
+export function loadCatalogPets({root = ROOT, rulesetId = 'roco-world-s4-2026-09-10'} = {}) {
+  const dir = join(root, 'data', 'roco', 'normalized', rulesetId);
+  const catalog = JSON.parse(readFileSync(join(dir, 'full-catalog.json'), 'utf8'));
+  const skills = JSON.parse(readFileSync(join(dir, 'skills.json'), 'utf8'));
+  // `skills.json` 是 `{skills: {skill_id: {...}}}`（824 条，含特性）；两种形状都收敛成数组。
+  const rawSkills = Array.isArray(skills) ? skills : (skills.skills ?? skills);
+  const skillRows = Array.isArray(rawSkills) ? rawSkills : Object.values(rawSkills);
+  return {pets: catalog.pets ?? [], skills: skillRows.filter((row) => row && row.skill_id)};
+}
+
 // ── 判据（可被测试与 --selftest 复用） ───────────────────────────────────
 
 export function runGates(report) {
@@ -784,10 +916,43 @@ export function runGates(report) {
     `弃答与命中口径一致：期望弃答 ${report.metrics.rag_index.abstain_expected_queries} 条，全部未被算成命中`,
     inconsistent);
 
+  // ④ 类：要么弃答，要么命中一条**正文写着「未核验」**的台账条目（例外逐条登记）。
+  const abstainExpected = report.queries.filter((entry) => entry.expected === ABSTAIN);
+  const excused = [];
+  const abstainProblems = [];
+  for (const entry of abstainExpected) {
+    const registered = CONFLICT_ABSTENTION_EXCEPTIONS[entry.id] ?? null;
+    if (entry.rag_index.abstained) {
+      if (registered) abstainProblems.push(`${entry.id} 登记成了例外，但它其实弃答了 —— 登记表过期了（该删掉）`);
+      else excused.push(entry.id);
+      continue;
+    }
+    if (!registered) {
+      abstainProblems.push(`${entry.id} 该弃答却给了结果，而且没有登记例外（④ 类的意义就是不许编）`);
+      continue;
+    }
+    if (entry.rag_index.top_doc !== registered.top_doc) {
+      abstainProblems.push(`${entry.id} 的 top-1 变成了 ${entry.rag_index.top_doc}，登记的是 ${registered.top_doc}`);
+    }
+    if (!entry.rag_index.top_doc_unknown_marker) {
+      abstainProblems.push(`${entry.id} 的 top-1（${entry.rag_index.top_doc}）正文里没有「未核验 / 无证据 / 保持 UNKNOWN」这类逐字标记 ——`
+        + '命中一条**说不知道**的文档才算例外，命中一条看起来相关的文档不算');
+    }
+  }
+  const exceptionCount = Object.keys(CONFLICT_ABSTENTION_EXCEPTIONS).length;
+  if (exceptionCount > CONFLICT_ABSTENTION_EXCEPTION_MAX) {
+    abstainProblems.push(`登记的例外有 ${exceptionCount} 条，上限是 ${CONFLICT_ABSTENTION_EXCEPTION_MAX} ——`
+      + '例外一多，这条判据就名存实亡');
+  }
+  for (const id of Object.keys(CONFLICT_ABSTENTION_EXCEPTIONS)) {
+    if (!abstainExpected.some((entry) => entry.id === id)) abstainProblems.push(`登记表里的 ${id} 已经不在 ④ 类查询里了`);
+  }
   const abstention = metrics.rag_index.conflict_abstention_rate;
-  push('conflict_abstention', abstention === 1,
-    `④ 类弃答率 = ${abstention}（${metrics.rag_index.abstain_expected_queries} 条）`,
-    abstention === 1 ? [] : [`弃答率 ${abstention} ≠ 1`]);
+  push('conflict_abstention', abstainProblems.length === 0,
+    `④ 类 ${abstainExpected.length} 条：弃答 ${excused.length} 条`
+      + (exceptionCount ? ` + 登记例外 ${exceptionCount} 条（${Object.entries(CONFLICT_ABSTENTION_EXCEPTIONS)
+        .map(([id, item]) => `${id} → ${item.top_doc}「正文含未核验标记」`).join('；')}）；原始弃答率 = ${abstention}` : `；弃答率 = ${abstention}`),
+    abstainProblems);
 
   const grounded = report.grounded.grounded_precision;
   push('grounded', grounded === 1,
@@ -824,6 +989,20 @@ export function runGates(report) {
   push('probe_reported', Boolean(probe) && probe.count >= 10 && probe.rows.length === probe.count,
     probe ? `探针 ${probe.count} 条；未按预期 ${probe.failures.length} 条（失败也登记，不过闸门）` : '缺探针集',
     probe ? [] : ['探针集不存在或条数不足']);
+
+  // 判据⑤（P0-b）：图鉴全量抽样覆盖 —— 抽到的每一只（含它的特性技能）都必须能被检索到。
+  const coverage = report.coverage;
+  push('catalog_coverage',
+    Boolean(coverage) && coverage.pet_coverage === 1 && coverage.feature_coverage === 1,
+    coverage
+      ? `图鉴抽样 ${coverage.sample_size}/${coverage.catalog_size} 只：精灵卡覆盖 ${coverage.pet_covered}/${coverage.sample_size}，`
+        + `特性技能覆盖 ${coverage.feature_covered}/${coverage.feature_sample}`
+      : '缺覆盖判据（report.coverage）',
+    coverage
+      ? [...coverage.misses.map((row) => `${row.pet_id} ${row.name} 的图鉴卡 top-10 未命中`),
+        ...coverage.rows.filter((row) => row.feature_hit === false)
+          .map((row) => `${row.pet_id} 的特性技能「${row.feature_skill_name}」top-10 未命中`)]
+      : ['缺覆盖判据']);
 
   const clock = /"generated_at"\s*:/.test(JSON.stringify(stripClock(report)));
   push('no_clock', !clock, '正文（除 metadata.generated_at）不含挂钟时间戳', clock ? ['正文里出现了 generated_at'] : []);
@@ -862,6 +1041,26 @@ export function selftest() {
   add('R1', `把 ${victim} 的 expected 改成 ${wrongKey}`,
     mutatedEntry.rag_index.hits.hit_at_1 === false && recallDropped,
     `该条 hit@1=${mutatedEntry.rag_index.hits.hit_at_1}（原 ${hitQuery.rag_index.hits.hit_at_1}）；Recall@1 ${base.metrics.rag_index.recall_at_1} → ${mutated.metrics.rag_index.recall_at_1}`);
+
+  // ﹙R7﹚删掉抽样里某一只精灵的图鉴文档 ⇒ 覆盖判据必须红（P0-b 的必红反证）
+  {
+    const victimRow = base.coverage.rows.find((row) => row.pet_hit);
+    const liveIndex = createRagIndex(loadCorpus());
+    const doc = liveIndex.documents.find((item) => idMatches(item.id, `pet::${victimRow.pet_id}`));
+    const trimmed = {...corpus, pack: {...corpus.pack}};
+    // 直接改**已建好的索引**：把那一只的文档从表里摘掉（语料层删一条最接近"没收录这只"）。
+    const mutatedIndex = {
+      ...liveIndex,
+      documents: liveIndex.documents.filter((item) => item !== doc),
+    };
+    const {pets, skills} = loadCatalogPets();
+    const after = checkCoverage({index: mutatedIndex, pets, skills, count: base.coverage.sample_size});
+    const stillCovered = after.rows.find((row) => row.pet_id === victimRow.pet_id)?.pet_hit;
+    add('R7', `删掉 ${victimRow.pet_id}（${victimRow.name}）的图鉴文档`,
+      stillCovered === false && after.pet_coverage < 1,
+      `该只 hit=${stillCovered}；总体覆盖 ${base.coverage.pet_coverage} → ${after.pet_coverage}`
+      + `（doc 存在=${Boolean(doc)}）`);
+  }
 
   // ② 删掉一条 ④ 类查询 ⇒ 覆盖判据红、弃答分母变化
   const conflictQuery = heldout.queries.find((query) => query.category === 'conflict_abstain');

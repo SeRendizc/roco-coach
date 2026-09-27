@@ -31,9 +31,16 @@ ACTION_CHARGE = "charge"
 # RC-105：**投降**是独立动作类（合法动作里必须出现，标准 PVP 没有道具与逃跑）。
 # 台账里**没有**任何条目讲投降的语义（是否算判负、是否扣魔力）—— 见 `mana.surrender` 的 reason。
 ACTION_SURRENDER = "surrender"
+# 2026-09-23：**PVP 魔法**是独立动作类（愿力强化 / 共鸣魔法）。
+# 为什么不能塞进 `item`：台账 EV-PVP-WISH-POWER-UP 明确它「**不是**普通道具」
+# （`magic_policy.is_item = false`），而标准 PVP 的 `item` 这一类是 **forbidden** ——
+# 借 item 的道会让「标准 PVP 没有普通道具」这条口径当场破掉。
+# 依据：台账 EV-PVP-WISH-POWER-UP（RECORDED_IN_GAME，人类口述）；产物见
+# `data/roco/derived/pvp-magic.json`（愿力强化的口径 + 36 条愿力冲击变体）。
+ACTION_MAGIC = "magic"
 
 VALID_KINDS = (ACTION_SKILL, ACTION_SWITCH, ACTION_ITEM, ACTION_ESCAPE, ACTION_STRUGGLE,
-               ACTION_CHARGE, ACTION_SURRENDER)
+               ACTION_CHARGE, ACTION_SURRENDER, ACTION_MAGIC)
 
 #: RC-105：每种动作类**必须**带齐的字段。缺了就在构造期抛 `ValueError`
 #: （`Action.__post_init__` 真的会跑，不是一句注释）。`charge` / `surrender` /
@@ -45,6 +52,9 @@ ACTION_REQUIRED_FIELDS = {
     ACTION_SKILL: ("skill_id",),
     ACTION_SWITCH: ("target_index",),
     ACTION_ITEM: ("item_id",),
+    # `magic` 只要 `magic_id`（哪一条 PVP 魔法）；目标由该条魔法自己的口径决定
+    # （愿力强化：`target = self_active`，所以题面**不**接受目标位 —— 少一个可被滥用的入口）。
+    ACTION_MAGIC: ("magic_id",),
 }
 
 
@@ -60,6 +70,7 @@ class Action:
     skill_id: Optional[str] = None    # kind == skill
     target_index: Optional[int] = None  # kind == switch / item 的目标位
     item_id: Optional[str] = None     # kind == item
+    magic_id: Optional[str] = None    # kind == magic（PVP 魔法：愿力强化…）
 
     #: RC-105：每种动作类**必须**带齐的字段。缺了就在构造期抛 `ValueError`。
     REQUIRED_FIELDS = ACTION_REQUIRED_FIELDS
@@ -79,6 +90,8 @@ class Action:
             d["target_index"] = self.target_index
         if self.item_id is not None:
             d["item_id"] = self.item_id
+        if self.magic_id is not None:
+            d["magic_id"] = self.magic_id
         return d
 
     @staticmethod
@@ -90,6 +103,7 @@ class Action:
             kind=kind,
             skill_id=d.get("skill_id"),
             target_index=d.get("target_index"),
+            magic_id=d.get("magic_id"),
             item_id=d.get("item_id"),
         )
 
@@ -100,6 +114,14 @@ class Action:
             return f"换上第{(self.target_index or 0) + 1}位"
         if self.kind == ACTION_ITEM:
             return f"使用{self.item_id}"
+        if self.kind == ACTION_MAGIC:
+            # 2026-09-23：名字来自**派生产物**（`data/roco/derived/pvp-magic.json` 的 magic.name），
+            # 不是动作类的字面量。实测踩到的：页面物品屏那一格显示成「magic」——
+            # 因为 `label()` 对未登记的 kind 直接回落到 kind 本身。
+            # 读不到就写「PVP 魔法」（不编一个名字）。
+            doc = getattr(rs, "pvp_magic", None) or {}
+            magic = doc.get("magic") if isinstance(doc, dict) else None
+            return str((magic or {}).get("name") or "PVP 魔法")
         return {"escape": "撤退", "struggle": "挣扎",
                 # RC-105：聚能/投降是**独立动作类**，名字照实写，不借用技能的叫法
                 "charge": "聚能", "surrender": "投降"}.get(self.kind, self.kind)
@@ -126,6 +148,23 @@ class PetState:
     entered_turn: Optional[int] = None                        # 入场回合，用于「迸发」(1010)
     used_burst: bool = False
     fainted: bool = False
+    #: RC-401 批三（2026-09-23）：**技能能耗修正**。术语 1012/1013 把「降低 / 增加能耗」
+    #: 明确列进增益与减益，但在此之前全仓只有 traits.py 里一个没人读的 `_energy_cost_delta_all`
+    #: 标记 —— 机制本身不存在（`cost_mod` / `cost_delta` 零命中）。
+    #: 每条 = `{"scope": all|attack|defense|status, "delta": int, "until_turn": int|None, "source": str}`；
+    #: **只在非空时进序列化**（与 `SideState.mana` 同一条纪律）：legacy / v2 里没有这条概念，
+    #: 序列化里也不出现这个键，8 条 golden 指纹逐位不变。
+    energy_cost_mods: List[Dict[str, Any]] = field(default_factory=list)
+    #: RC-401 批四（2026-09-23）：**吸血与「过量回复转化」**（数据里写作「获得50%吸血，
+    #: 每过量回复5%生命转化为10%物攻」）。形状：
+    #: `{"lifesteal_pct": int, "overheal": {"chunk_pct": int, "gain_pct": int, "stats": [...],
+    #:   "carry_pct": float}}`。由特性在入场时按**解析出来的**数值写入，结算在 `env._settle_sustain`。
+    #: 同样**只在非空时进序列化**（legacy / v2 里没有这条概念，golden 指纹逐位不变）。
+    sustain: Dict[str, Any] = field(default_factory=dict)
+    #: RC-401 批次十二（2026-09-25）：**「每次使用后，本技能<属性>永久±N」** 的累计量。
+    #: 形状：`{skill_id: {"power": int, "cost": int, "hits": int}}`（缺的键就是 0）。
+    #: 只在配置声明了 `damage.per_use_ramp` 时才会被写；同样**只在非空时进序列化**。
+    skill_ramps: Dict[str, Any] = field(default_factory=dict)
 
     @property
     def alive(self) -> bool:
@@ -147,6 +186,10 @@ class PetState:
             "entered_turn": self.entered_turn,
             "used_burst": self.used_burst,
             "fainted": self.fainted,
+            **({"energy_cost_mods": copy.deepcopy(self.energy_cost_mods)}
+               if self.energy_cost_mods else {}),
+            **({"sustain": copy.deepcopy(self.sustain)} if self.sustain else {}),
+            **({"skill_ramps": copy.deepcopy(self.skill_ramps)} if self.skill_ramps else {}),
         }
 
     @staticmethod
@@ -166,6 +209,10 @@ class PetState:
             entered_turn=d.get("entered_turn"),
             used_burst=d.get("used_burst", False),
             fainted=d.get("fainted", False),
+            # 没有这个键 = 没有任何能耗修正（legacy / v2 的往返形状不变）。
+            energy_cost_mods=list(d.get("energy_cost_mods") or []),
+            sustain=dict(d.get("sustain") or {}),
+            skill_ramps={k: dict(v) for k, v in (d.get("skill_ramps") or {}).items()},
         )
 
 
@@ -186,6 +233,17 @@ class SideState:
     #: 那一刻引擎里**不存在**这条概念，序列化里也**不会出现** `mana` 键。
     #: 给它补一个 0 就是编规则：0 的意思是「已经判负」，而不是「没有这个概念」。
     mana: Optional[int] = None
+    #: 2026-09-23：这一方的 **PVP 魔法**状态（愿力强化）。
+    #:
+    #: `None` = 本局的规则配置**没有声明** `magic` 这一类（legacy / v2）——
+    #: 与 `mana` 同一条纪律：那一刻引擎里不存在这条概念，序列化里也**不会出现**这个键
+    #: （legacy / v2 的 8 条 golden 指纹因此一个字节都不变）。
+    #:
+    #: 形状：`{"uses_left": int, "cooldown": int, "swapped": {pet_id: 原来的第一个技能 id}}`
+    #:   · `uses_left`  —— 这一局还能用几次（人类口径：2 次；还原**不**消耗次数）；
+    #:   · `cooldown`   —— 还剩几回合冷却（人类口径：3 回合，还原之后才开始算）；
+    #:   · `swapped`    —— 哪几只精灵的第一个技能被换成了「愿力冲击」，以及换之前是什么。
+    magic: Optional[Dict[str, Any]] = None
 
     @property
     def field_pet(self) -> PetState:
@@ -216,6 +274,8 @@ class SideState:
             # 因此一个字节都不变（8 条 golden 指纹仍然成立）；反过来，声明了 mana 的
             # 模式也不许被补一个 0 —— `0` 是「魔力归零、已经判负」，不是「没有这个概念」。
             **({"mana": self.mana} if self.mana is not None else {}),
+            # 同上：没声明 magic 的配置不写这个键（legacy/v2 序列化逐字节不变）。
+            **({"magic": dict(self.magic)} if self.magic is not None else {}),
         }
 
     @staticmethod
@@ -228,6 +288,8 @@ class SideState:
             pets=[PetState.from_dict(p) for p in d["pets"]],
             # 老存档没有这个键 → `None`（= 当时那份配置没有魔力系统），不是 0。
             mana=d.get("mana"),
+            # 老存档没有这个键 → `None`（= 当时那份配置没有 PVP 魔法），不是空状态。
+            magic=(dict(d["magic"]) if isinstance(d.get("magic"), dict) else None),
         )
 
 
@@ -280,6 +342,16 @@ class GameState:
     #: 「这一局哪些数是按假设走的」——否则页面只能假装自己知道标准 PVP 的入场能量。
     #: **空列表时序列化里不出现这个键**，legacy / 无覆盖的对局因此逐位不变。
     unverified_overrides: List[Dict[str, Any]] = field(default_factory=list)
+    #: 2026-09-25（人类裁决「那你就做！」）：**当前天气与剩余回合数**。
+    #:
+    #: 形状：`{"name": "雨天", "turns_left": 8, "duration_turns": 8, "set_turn": 3, "source_skill_id": …}`。
+    #: `None` = 场上没有天气。天气是**场地级**的公开事实（官方逐字：「天气是常驻在全场的效果，
+    #: 让对战双方都能获得相应的加成，但天气只能存在一种」；「对局战报查看当前天气的剩余回合数」），
+    #: 所以它不是隐藏信息，双方都看得到剩余回合数。
+    #: **只有规则配置声明了天气层时才会有值**（`RuleConfig.weather_enabled`）——
+    #: 没声明时引擎不发明天气行为，这一格恒为 None，序列化里也不出现这个键
+    #: （legacy / v2 的 golden 指纹因此逐位不变）。
+    weather: Optional[Dict[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -300,6 +372,8 @@ class GameState:
             # 调用点）序列化一个字节都不变 —— 8 条 golden 指纹仍然成立。
             **({"unverified_overrides": copy.deepcopy(self.unverified_overrides)}
                if self.unverified_overrides else {}),
+            # 天气同理：**场上没有天气时一个键都不多**（legacy / v2 / 没开天气的对局逐位不变）。
+            **({"weather": copy.deepcopy(self.weather)} if self.weather else {}),
             "history": copy.deepcopy(self.history),
         }
 
@@ -323,6 +397,9 @@ class GameState:
             unsupported=copy.deepcopy(d.get("unsupported") or []),
             # 老存档没有这个键 → 空列表（= 当时没有用任何覆盖），不是「覆盖未知」。
             unverified_overrides=copy.deepcopy(list(d.get("unverified_overrides") or [])),
+            # 老存档没有这个键 → None（= 当时场上没有天气），不是「天气未知」。
+            # 这一条对**回放**很关键：没有天气的旧录屏重放出来必须还是没有天气。
+            weather=(copy.deepcopy(d["weather"]) if isinstance(d.get("weather"), dict) else None),
             history=copy.deepcopy(d.get("history") or []),
         )
 
@@ -411,6 +488,10 @@ def observation_for(state: GameState, rs: Ruleset, side: str) -> Dict[str, Any]:
         "state_version": state.state_version,
         "ruleset_id": state.ruleset_id,
         **({"mana": mana_block} if mana_block is not None else {}),
+        # 2026-09-25：天气同样是**公开**事实（官方：「常驻在全场…双方都能获得相应的加成」、
+        # 「对局战报查看当前天气的剩余回合数」）⇒ 观察里给双方一样的当前天气与剩余回合数。
+        # **没有天气时这个键不出现**（没开天气的对局逐位不变，`_obs_hash` 也不受影响）。
+        **({"weather": copy.deepcopy(state.weather)} if isinstance(state.weather, dict) else {}),
         "self": {
             "active": me.active,
             "items": dict(me.items),

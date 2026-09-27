@@ -60,7 +60,7 @@ E01/E02 两条的冻结 title 没有形态后缀（`frozen.title.plain`），公
 | M04 | 技能耗能存在 8 的情况吗 | `EV-ENERGY-COST8-EXISTS` | COMMUNITY_CURRENT |
 | M05 | 特性触发面都覆盖了哪些时机 | `EV-TRAITS-TRIGGER-COMPLEXITY` | COMMUNITY_CURRENT |
 | M06 | 应对和先手这些机制是真实存在的吗 | `EV-TURN-ORDER-MECHANISMS-EXIST` | CROSS_SOURCE_SUPPORTED |
-| M07 | 属性倍率一共有哪几档 | `EV-TYPE-MULTIPLIER` | COMMUNITY_CURRENT |
+| M07 | 属性倍率一共有哪几档 | `EV-TYPE-MULTIPLIER` | ~~COMMUNITY_CURRENT~~ → RECORDED_IN_GAME（2026-09-25 人类裁决：双属性按两系相乘，档位 `×0.25/×0.5/×2/×4`；快照那档 `×3` 不再是结算口径） |
 | M08 | 吞噬这个技能在公网索引里的属性是什么 | `battle_skill::skill_000269` | COMMUNITY_CURRENT |
 
 ### ③ 规则与版本（8）
@@ -401,3 +401,81 @@ artifact 文件存在、`artifact_sha256` 与磁盘一致、首条 `pointer` 能
 | `tests/roco-rag-eval.test.js` | 21 个测试（真产物判据 + 六条必红反证），已接进 `test:unit` |
 | `reports/roco/rag/rag-eval.json` | 评测报告（含逐条明细与 grounded 逐项判定） |
 | `docs/roco/RAG-EVAL.md` | 本文件 |
+
+## 2026-09-25（第 46 轮）：**L5 术语库上线** —— 人类批注要的「预制规则知识库进 RAG」落地
+
+人类在 c21/c22/c23 三条金标批注里写着：「这一大类规则类问题建议问模型，**并预制相关规则知识库进 RAG**，
+快速查询判断」。核对 `data/roco/rag/libs.json` 时发现：**L4 战术卡库与 L5 术语表一直是 `status: pending`**
+—— 冻结语料里那 **54 条游戏内术语**（1015 应对 / 1020 先手 / 3009 离场 / 3014 属性增减 / 3019 选择…）
+**一篇都检索不到**，规则类问句只能靠模型记忆。
+
+### 做了什么
+
+- `data/roco/rag/libs.json`：L5 由 `pending` 转 **`ready`**，输入 = `data/roco/normalized/roco-world-s4-2026-09-10/terms.json`，
+  `record_kinds=['term_entry']`；
+- `src/coach/rag-index.js`：`termsInput()`（与 `typeChartInput` 同一个做法：路径**从注册表解析**，
+  不许代码里另写一份）+ `loadCorpus` 读术语（路径不存在**就抛**，不许静默变空库）+ `buildDocuments` 追加
+  `term::<id>` 文档（正文 = `note：desc` 原文，provenance 带 artifact sha 与 `terms.<id>` 指针）。
+  **只追加在末尾**：既有文档相对顺序一个字不动（同输入两次构建逐字节相同）。
+
+### 实测
+
+| 项 | 修前 | 修后 |
+|---|---|---|
+| 语料文档数 | 1828 | **1882**（+54 术语） |
+| 新版检索 Recall@1 / MRR | 0.853 / 0.922 | **1.000 / 1.000** |
+| 等级匹配 | 0.971 | **1.000** |
+| `eval-rag-retrieval` 判据 | 14/14 | **14/14** |
+
+### 上线当天被自己的判据抓住的两处**假命中**（修的是检索，不是判据）
+
+1. C02「换入一只已经离场过的精灵时，入场能量按多少算，**实机测过吗**」→ 命中 `term::3009`（离场语义，3059 分），
+   于是从"弃答 + 登记例外"变成**有答案** —— 而术语是定义、不带任何测量；
+2. M07「属性倍率一共有哪几档」→ 命中 `term::3014`（**属性增减**，不是倍率档位），把真正该出的记录级文档挤掉。
+
+两处的共同点：问句只是**话题上**碰到了那个词，问的并不是它的定义。
+⇒ 口径收紧成一条：**术语文档只在定义型问句（`DEFINITION_ASK`：定义/术语/什么意思/指的是）里当候选**。
+弃答判据与等级判据**一个字都没改**。
+
+### 判据
+
+`tests/roco-rag-terms.test.js`（**5 条**，已进 `test:unit` 手写清单）：
+① L5 是 ready、只收 `term_entry`、输入路径在磁盘上；② 54 篇 `term::*` 全 `scope='rule'` 且每篇带真 provenance；
+③ 定义型问句 top-1 就是术语原文；④ **反证**：话题相关但非定义的问句里术语不许当候选；
+⑤ **反证**：输入路径不存在 ⇒ 抛（顺带给 `loadCorpus` 补上 `libs=` 注入，与其它构建函数一致）。
+
+## 2026-09-25（第 47 轮）：**L4 战术卡库上线** —— 接库当天先把规则检索打坏，靠口径收回来
+
+上一轮接了 L5 术语库；这一轮接 **L4 战术卡库**（教练引用得最多的 `tactic:*` / `rule:*` 卡片，
+93 张：战术 49 + 参考 44）。卡片本体在 `src/game/content.js`（**唯一真源**），
+为它加了派生产物 `data/roco/derived/tactic-cards.json`（`scripts/roco/build-tactic-cards.mjs`，
+带 `--check` 与 `source_sha256`）。
+
+### 接库当天实测：**直接塞进联合索引会把规则检索打坏**
+
+| 指标 | 加 L4 之前 | 直接加 L4 | 加 L4 + 口径收紧 |
+|---|---|---|---|
+| Recall@1 | 1.000 | **0.794** | **1.000** |
+| MRR | 1.000 | **0.837** | **1.000** |
+| 等级匹配 | 1.000 | **0.824** | **1.000** |
+| 判据 | 14/14 | **12/14**（弃答 + 等级两条红） | **14/14** |
+
+坏在哪：93 张卡片**关键词极密**，把台账/配置挤掉整整一档（`tactic:switch` 顶掉 `EV-SWIFT-INJECTION`、
+`rule:type:electric` 顶掉 `EV-TYPE-MULTIPLIER`…），而且 C01–C05 五条「必须弃答」的**事实/证据**问句
+全部变成命中卡片 —— 卡片答的是"该怎么打"，答不了"是哪一条 / 测过吗"。
+
+⇒ 口径：**战术卡只在"要打法/建议"的问句里当候选**（`GUIDANCE_ASK`：该不该/要不要/怎么打/怎么用/
+怎么办/如何应对/思路/打法/建议/技巧/为什么/值得吗/划算吗）。判据一个字没改。
+
+### 实测（口径收紧后）
+
+| 项 | 值 |
+|---|---|
+| 语料文档数 | 1882 → **1975**（+93 卡片） |
+| 正向（要打法） | 「我该不该换宠」→ `tactic:switch`；「中毒了怎么办」→ `tactic:status-switch`；「对手速度比我快怎么办」→ `tactic:priority` |
+| 反证（要事实） | 「属性倍率一共有哪几档」→ `EV-TYPE-MULTIPLIER`（不是卡片）；「同速时多次录像能看出谁先动吗」→ 三条 `ruleset_config`（不是卡片） |
+| 判据 | `tests/roco-rag-tactic-cards.test.js` **5 条**（含漂移守卫：产物 `source_sha256` 必须等于当前 `content.js` 的 sha） |
+
+**两条依赖判据按「改钉不删」更新**：`roco-rag-libs.test.js` 的「pending 库允许为空」原来从注册表里
+`find(pending)` —— L4 接上后一个 pending 都没有，`find` 返回 undefined 让判据假红；现在用**内存里合成的
+pending 库**来钉这件事。`roco-rag-typechart.test.js` 的块序与 pending 清单同理更新（现在 pending 为空）。

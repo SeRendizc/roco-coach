@@ -262,7 +262,12 @@ test('反证③：把某条的 sources 清空 → 必须红', () => {
 });
 
 test('反证④：CROSS_SOURCE_SUPPORTED 只剩一条来源 → 必须红', () => {
-  const entryId = 'EV-PVP-STANDARD-MANA';
+  // 2026-09-25 改钉：这条反证原来拿 `EV-PVP-STANDARD-MANA` 当载体，而它已按人类实机口径升到
+  // RECORDED_IN_GAME（该规则只作用于 CROSS_SOURCE_SUPPORTED）⇒ 换一个**仍是**该等级的条目。
+  // **判据本身没改**：仍然要求"只剩一条来源 ⇒ 报出 cross_source_two_urls"。
+  const entryId = 'EV-PVP-STANDARD-TEAM-SIZE';
+  assert.equal(ledger.entries.find((entry) => entry.id === entryId).confidence, 'CROSS_SOURCE_SUPPORTED',
+    '载体条目必须仍是 CROSS_SOURCE_SUPPORTED，否则这条反证会退化成空测');
   const tampered = mutateEntry(ledger, entryId, (entry) => { entry.sources = entry.sources.slice(0, 1); });
   const report = checkLedger(tampered, REAL);
   const hit = report.issues.filter((row) => row.rule === 'cross_source_two_urls');

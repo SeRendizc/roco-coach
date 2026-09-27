@@ -1,0 +1,132 @@
+{
+  "schema": "roco-rag-libs/v1",
+  "note": "RAG 多库划分（人类口径：「是不是可以有多个 RAG 库，这样 debug 也能 debug」）。一个 lib = 一个**独立索引实例**：删掉某库，其它库的检索结果逐字节不变（idf / 平均长度都按库内重算，不共用全局统计）。paths 一律相对仓库根。lib_id 是稳定标识，不许改；改真源只改 inputs / record_kinds。",
+  "record_kind_rule": "每篇文档的 lib_id 由它的 record_kind 唯一决定（LIB_BY_RECORD_KIND）；同一个 record_kind 不许属于两个库，重复会被 rag-libs.js 直接抛错。",
+  "scope_rule": "scope='rule' 是规则语料，scope='player' 是玩家个体数据。规则检索路径**默认排除** player；要读玩家数据必须显式 opt-in（includePlayer / scope:'player'），见 rag-index.js 的 searchIndex。",
+  "libs": [
+    {
+      "lib_id": "L1",
+      "label": "规则真源（证据台账 + 规则配置）",
+      "scope": "rule",
+      "source_of_truth": [
+        "data/roco/evidence/rule-evidence-ledger.json",
+        "data/roco/rulesets/"
+      ],
+      "inputs": [
+        "data/roco/evidence/rule-evidence-ledger.json",
+        "data/roco/rulesets/"
+      ],
+      "record_kinds": [
+        "ledger_entry",
+        "ruleset_config"
+      ],
+      "status": "ready",
+      "update_mode": "人工维护：改一条台账结论或一份 ruleset 配置就重建这一库，不需要碰其它库。"
+    },
+    {
+      "lib_id": "L2",
+      "label": "图鉴语料（pack 实体：精灵 / 形态 / 技能 / 特性）",
+      "scope": "rule",
+      "source_of_truth": [
+        "data/roco/game-data-pack/v2/pack.json"
+      ],
+      "inputs": [
+        "data/roco/game-data-pack/v2/pack.json"
+      ],
+      "record_kinds": [
+        "pet_record",
+        "pet_form",
+        "battle_skill",
+        "trait_record"
+      ],
+      "status": "ready",
+      "update_mode": "由 pack 生成器整包重建后整库替换；这一库最大（1446 篇），单库重建只影响它自己的 idf。"
+    },
+    {
+      "lib_id": "L3",
+      "label": "属性相性表（18 属性 / 120 条键：克制与抵抗）",
+      "scope": "rule",
+      "source_of_truth": [
+        "data/roco/normalized/roco-world-s4-2026-09-10/types.json"
+      ],
+      "inputs": [
+        "data/roco/normalized/roco-world-s4-2026-09-10/types.json"
+      ],
+      "record_kinds": [
+        "type_chart"
+      ],
+      "status": "ready",
+      "planned_source": "真源 = data/roco/normalized/roco-world-s4-2026-09-10/types.json —— 上游 Pets/data/Types.lua 的逐字段机械转录：18 个属性、120 条键（18 单属性 + 102 双属性，其中 16 对是同一组合的两种写法 ⇒ 去重后 104 个唯一组合），倍率恰好 4 档（0.25 / 0.5 / 2 / 3），键形如「光系」或「光系|地系」，值形如 {key, resist[], weak[]}、元素形如 {type, multiplier}。逐格证据（含两个社区源印证单属性部分、以及双弱 3× vs 4× 的 41 格冲突）见 docs/roadmap/RECON-DIGEST-2026-09-25.md §4.4。⚠️ 本仓自研 pet-coach 引擎的常量 src/game/engine.js 的 TYPE_ADVANTAGES 只有 7 个属性（火/水/草/普通/岩/雷/风）、倍率 1.5/0.75，仓内审计已判 RETIRE（docs/roco/M0-REPO-AUDIT.md:69-71），**不得用作真源**。原句「本轮尚无 inputs，不许先塞语料」已随 2026-09-25 接上真源而失效：这一轮 inputs 就是上面那条转录，L3 转 ready（文档由 src/coach/rag-index.js 的 typeChartBody 逐条生成）。",
+      "update_mode": "上游 Types.lua 的转录更新后整库重建（120 篇文档）；每库一个索引实例，所以这一库只影响它自己的 idf。"
+    },
+    {
+      "lib_id": "L4",
+      "label": "战术卡库（`src/game/content.js` 的 93 张战术/规则卡）",
+      "scope": "rule",
+      "source_of_truth": [
+        "src/game/content.js",
+        "data/roco/derived/tactic-cards.json"
+      ],
+      "inputs": [
+        "data/roco/derived/tactic-cards.json"
+      ],
+      "record_kinds": [
+        "tactic_card"
+      ],
+      "status": "ready",
+      "update_mode": "人工维护：卡片本体在 `src/game/content.js`（唯一真源），跑 `node scripts/roco/build-tactic-cards.mjs` 重新生成派生产物后再重建这一库；产物里记着 `source_sha256`，改卡片不重跑就红。",
+      "note": "2026-09-25（第 47 轮）从 pending 转 ready：人类批注要求「预制相关规则知识库进 RAG」，而教练引用的 `tactic:*` / `rule:*` 卡片此前**检索不到**（只有卡片检索通道 `searchKnowledge` 那条 IDF 基线）。"
+    },
+    {
+      "lib_id": "L5",
+      "label": "术语表（游戏内术语：冻结/应对/先手/选择…）",
+      "scope": "rule",
+      "source_of_truth": [
+        "data/roco/normalized/roco-world-s4-2026-09-10/terms.json"
+      ],
+      "inputs": [
+        "data/roco/normalized/roco-world-s4-2026-09-10/terms.json"
+      ],
+      "record_kinds": [
+        "term_entry"
+      ],
+      "status": "ready",
+      "planned_source": "data/roco/normalized/roco-world-s4-2026-09-10/terms.json（实测 54 条）。路线图另指认引擎侧 roco/src/roco_env/service.py:1050 的 _term_record 作为对照（**该 Python 文件未核实**，写在这里只作线索）。注意术语的真源**不是** knowledge/*.json —— 那是战术卡的来源。本轮尚无 inputs，不许先塞语料。",
+      "update_mode": "人工维护：冻结语料的 terms.json 一改就重建这一库。术语 id 稳定（`term::<term_id>`），只许追加、不许改名。",
+      "note": "2026-09-25（第 46 轮）从 pending 转 ready：人类在 c21/c22/c23 批注里要求「预制相关规则知识库进 RAG」——冻结语料的 54 条术语（1015 应对 / 1020 先手 / 3019 选择…）此前**一篇都检索不到**，规则类问句只能靠模型记忆。"
+    },
+    {
+      "lib_id": "L6",
+      "label": "冲突库（pack 冲突条目 + 冲突登记政策）",
+      "scope": "rule",
+      "source_of_truth": [
+        "data/roco/game-data-pack/v2/pack.json"
+      ],
+      "inputs": [
+        "data/roco/game-data-pack/v2/pack.json"
+      ],
+      "record_kinds": [
+        "conflict_record",
+        "conflict_policy"
+      ],
+      "status": "ready",
+      "update_mode": "随 pack 的 conflicts 段更新；与 L2 同源不同段，所以分库不共统计。"
+    },
+    {
+      "lib_id": "L8",
+      "label": "玩家个体（我拥有的精灵）",
+      "scope": "player",
+      "source_of_truth": [
+        "data/roco/owned/owned-pets.json"
+      ],
+      "inputs": [
+        "data/roco/owned/owned-pets.json"
+      ],
+      "record_kinds": [
+        "owned_instance"
+      ],
+      "status": "ready",
+      "update_mode": "玩家自己的数据：**与规则语料分开**（memory / RAG 分离）。规则检索默认不读这一库，要读必须显式走玩家通道。"
+    }
+  ]
+}

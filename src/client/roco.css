@@ -38,8 +38,8 @@
 #about-drawer>summary{min-height:44px;display:flex;align-items:center;justify-content:flex-end}
 .chip{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:999px;
  padding:3px 10px;background:#16222f;white-space:nowrap;color:#cfe0d4}
-#turn-chip{color:#f0cb77}
-#phase-chip{white-space:nowrap}
+/* 2026-09-25（死代码清理批二）：`#turn-chip` / `#phase-chip` 的样式删了 ——
+   这两个 id 在 `roco.html` 里不存在，规则 100% 不命中（回合/胜负现在在 v3h 顶栏与结算浮层里画）。 */
 /* 模式徽记的**文字版式**：`modeChipHtml()` 仍然存在（`tests/roco-page-ux.test.js` 直接抠它
    跑断言），所以芯片本身这几条样式保留。但装它的容器 `.mode-line` 已从 HTML 删除
    （人类第三次要求：那三条口径整块删掉、不是隐藏）→ 容器规则删除。
@@ -201,23 +201,32 @@
    roco.js 里都没有生成点**（逐个 grep 过：HTML 里只有 `b3-stage` / `b3-fighter` 这类
    v3h 类名；`.battle-tools` / `.bench-row` / `.sidebars` 只出现在 battle-v3.css 与
    设计稿的**注释**里）→ 整段删除。
-   注意 `.pet` / `.pet-facts` / `.bench` / `.bench-pet` / `.resource` / `.roster-line`
-   仍然保留：前两组由 `petCard()` 生成（`#b3-sink` 里的接收槽要它们），后两组是
-   `resourceHtml()` / `rosterLineHtml()` 的落点。 */
+   注意 `.pet` / `.pet-facts` / `.bench` / `.bench-pet` 仍然保留：由 `petCard()` 生成
+   （`#b3-sink` 里的接收槽要它们）。
+   **2026-09-25 实测：`.resource` / `.roster-line` 这两个类名从来不加上** ——
+   `roco.js` 对 `#self-resource` / `#foe-resource` 只调 `classList.toggle('unknown', …)`，
+   `#self-roster-line` / `#foe-roster-line` 一个类都不加。下面这一组原来是照
+   「`resourceHtml()` / `rosterLineHtml()` 的落点」写的，但那一层包壳类**从来不存在**
+   ⇒ 11 条规则 100% 不生效（真无头 Chrome 实测 `.resource` / `.roster-line` 命中数 = 0）。
+   现改为**按 id 命中**：元素在 `roco.html:239/243` 的 `#b3-sink` 里（登记过的保留资产，
+   验收脚本读它内部文本），`unknown` 那一档写成 `#self-resource.unknown`（那个类是**真的**
+   会被 toggle 的）。注意 `#b3-sink` 本体是 `hidden`：修好之后规则**匹配上了**，
+   但玩家层仍然看不到这一块（它只是旧渲染的接收槽 + 验收读取点）——
+   这次改的是「让选择器对得上它本来要选的目标」，不是视觉改版。 */
 .battle{border-color:#3c5b6e}
 /* 资源（魔力 / 心）：**只渲染引擎给的数**；没给就是一句「未核验」，没有计数器。 */
-.resource{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12.5px}
-.resource .res-name{color:var(--muted)}
-.resource .res-value{font-size:19px;font-weight:700;color:#f0cb77;letter-spacing:1px}
-.resource.unknown .res-value{font-size:12.5px;font-weight:400;color:#f0cb77;letter-spacing:0}
-.resource .res-note{font-size:11.5px;color:var(--muted);line-height:1.5;flex:1 1 100%}
-.roster-line{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.roster-line .rl{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:#c6d2de;
+#self-resource,#foe-resource{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12.5px}
+#self-resource .res-name,#foe-resource .res-name{color:var(--muted)}
+#self-resource .res-value,#foe-resource .res-value{font-size:19px;font-weight:700;color:#f0cb77;letter-spacing:1px}
+#self-resource.unknown .res-value,#foe-resource.unknown .res-value{font-size:12.5px;font-weight:400;color:#f0cb77;letter-spacing:0}
+#self-resource .res-note,#foe-resource .res-note{font-size:11.5px;color:var(--muted);line-height:1.5;flex:1 1 100%}
+#self-roster-line,#foe-roster-line{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+#self-roster-line .rl,#foe-roster-line .rl{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:#c6d2de;
  border:1px solid #2c3d4a;border-radius:999px;padding:2px 8px;background:#121e2c;max-width:100%}
-.roster-line .rl.active{border-color:#8dd49c;color:#dff3e3}
-.roster-line .rl.fainted{opacity:.5;text-decoration:line-through}
-.roster-line .rl.foe{color:#a9bccd}
-.roster-line .rl-self{font-size:11.5px;color:var(--muted);white-space:nowrap}
+#self-roster-line .rl.active,#foe-roster-line .rl.active{border-color:#8dd49c;color:#dff3e3}
+#self-roster-line .rl.fainted,#foe-roster-line .rl.fainted{opacity:.5;text-decoration:line-through}
+#self-roster-line .rl.foe,#foe-roster-line .rl.foe{color:#a9bccd}
+#self-roster-line .rl-self,#foe-roster-line .rl-self{font-size:11.5px;color:var(--muted);white-space:nowrap}
 .pets{display:grid;gap:8px}
 .pet{position:relative;border:1px solid #36495e;border-radius:10px;padding:10px;min-width:0;background:#1a2635}
 .pet.active{border-color:#8dd49c;background:#1d3435}
@@ -313,7 +322,12 @@ body[data-roco-picking="yes"] #action-panel{display:none}
 .companion-line{margin:0 0 8px;background:#2b403c;border:1px solid #4d6b5c;
  border-radius:12px 12px 12px 4px;padding:9px 12px;font-size:13.5px;line-height:1.65}
 .reply{margin:0 0 8px;font-size:13.5px;line-height:1.7;border-left:3px solid var(--accent);
- padding:7px 11px;background:#1d2c30;border-radius:0 8px 8px 0}
+ padding:7px 11px;background:#1d2c30;border-radius:0 8px 8px 0;overflow-wrap:anywhere}
+/* 玩家自己那一句（人类 2026-09-25：「我发的消息也看不到」）：右对齐，放在小芽回复**上方**。
+   它是**单独元素**（`[data-roco-say="me"]`），不改变 `#say-reply` 的 textContent 语义。 */
+.say-me{margin:0 0 6px 0;font-size:13px;line-height:1.6;color:#cfe0d4;background:#22323a;
+ border:1px solid #3c5a4a;border-radius:10px 10px 4px 10px;padding:6px 10px;
+ width:fit-content;max-width:86%;margin-left:auto;overflow-wrap:anywhere}
 /* 输入行：`flex:0 0 auto` —— 它不参与中间那段滚动，所以永远在面板底部可见。 */
 .say-form{display:flex;align-items:center;gap:8px;flex:0 0 auto;flex-wrap:wrap}
 #say-input{flex:1 1 150px;min-width:0;min-height:40px}
@@ -672,7 +686,9 @@ main{padding-bottom:calc(var(--bottombar,0px) + 40px)}
  background:#16222f;border:1px solid #314154;color:#c9d6e2}
 .act-tab[aria-selected="true"]{background:#1f3a55;border-color:#5b86ad;color:#ffffff}
 .act-item-list{display:grid;gap:6px;margin-top:6px}
-.act-escape{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+/* 2026-09-25（死代码清理）：`.act-escape` 规则随 `#act-escape` 那一整块一起删
+   —— 元素已从 `roco.html` 移除（不可达 + `#act-surrender-confirm` 零引用，证据见那里的注释与
+   `/tmp/roco-clean/probe2.json`）。留一条永远不命中的规则没有意义。 */
 
 /* R6：战报按回合分组的折叠块（整块独立滚动见 .events 的既有 max-height/overflow）。 */
 .log-turn{border:1px solid #2b3a4a;border-radius:8px;background:#131e2a;margin-bottom:5px}
@@ -710,8 +726,14 @@ header.topbar h1{margin:0;font-size:19px}
 .model-cell .mc-name{font-size:12.5px;font-weight:650;color:#dfe8ef}
 .model-cell .mc-state{font-size:11.5px;margin-top:3px}
 .model-cell .mc-state.ok{color:#8fe0a2} .model-cell .mc-state.no{color:#ff9a9a}
-.xy-fold{height:30px;padding:0 10px;border-radius:9px;border:1px solid #2b3d4e;background:#111d27;
- color:#9caebe;font-size:11.5px;cursor:pointer}
+/* 2026-09-23（接手复核）：这曾是 `height:30px`——把「展开连接状态」这个 `<details>` **钉死 30px 高**，
+   而它展开后的内容有 30(summary) + 69(三个模型格) + 34(两个按钮) = 133px。
+   多出来的 103px 只能溢出到框外，正好压住下面的聊天输入行。
+   实测（1440×900）：`#model-list` 落在 y 177–246，而 `#say-form` 在 y 164–204 → **重叠 27px**。
+   这就是人类说的「小芽重叠的框」。改成按内容撑开（height:auto），并把边框留给**这一层**
+   （summary 那一层不再自带边框 → 不再是「框里套框」），展开时输入行被正常推下去。 */
+.xy-fold{height:auto;padding:0;border-radius:11px;border:1px solid #2b3d4e;background:#111d27;
+ color:#cfe0d4;font-size:12.5px;cursor:pointer;overflow:hidden}
 
 @media (max-width:520px){
  .xy-models{grid-template-columns:1fr}
@@ -804,12 +826,19 @@ body[data-roco-view="ready"] main>#log-panel{display:none}
 body[data-roco-view="ready"] main>#action-panel{display:none}
 
 /* 战斗进行中：页面只留 v3h 片段（人类：一页全部显示、不要多余的东西）。
-   工坊 / 候选池 / 结果 / 课程卡这些属于**别的阶段**，战斗态收起，避免把页面撑长。 */
+   工坊 / 候选池 / 结果 / 课程卡这些属于**别的阶段**，战斗态收起，避免把页面撑长。
+   ⚠ 2026-09-25（五分钟链路判据实测抓到）：`data-roco-view="ready"` 不只是「战斗中」——
+   `render()` 只要**有 view** 就写 ready，而一局打完 `state.view` 还在，所以这条规则把
+   **局末复盘卡**（`#lesson-card`，`finishMatch()` 亲手 `hidden=false` 并写好三个字段的那一块）
+   也一起钉成了 `display:none`：DOM 里 400+ 字复盘、`body[data-roco-lesson="shown"]` 都在，
+   玩家一个像素也看不到（与 `#hint-body` 那条是同一类：判据读属性是绿的，玩家看不到）。
+   现在按页面**自己已经写的**状态属性收放：战斗中没有 `data-roco-lesson="shown"` ⇒ 照旧收起；
+   局末写完复盘 ⇒ 露出来。战斗态「别把页面撑长」的口径不变。 */
 body[data-roco-view="ready"] main>#team-workshop,
 body[data-roco-view="ready"] main>#select-panel,
 body[data-roco-view="ready"] main>#pool-footbar,
 body[data-roco-view="ready"] main>#result-panel,
-body[data-roco-view="ready"] main>#lesson-card{display:none}
+body[data-roco-view="ready"]:not([data-roco-lesson="shown"]) main>#lesson-card{display:none}
 
 /* 战斗态旧底栏已收起，页面就别再给它留位置（否则 main 仍预留 ~250px，docH 1132 > 900）。 */
 body[data-roco-view="ready"] main{padding-bottom:8px}
@@ -835,8 +864,14 @@ header.topbar .xiaoya-btn{justify-self:end}
 /* 人类 2026-09-23：小芽点开后**两个 UI 不许交叠** ——
    ① 面板高度避开底栏（不再盖住行动区）；② 宽屏打开时正文让出右侧一栏，两个界面并排。 */
 .companion{max-height:calc(100vh - var(--bottombar, 0px) - 76px);overflow:auto}
-/* 人类 2026-09-23：小芽是**浮层弹窗**，打开时**不许顶开正文**（原来给它让位的规则会让它看起来像内联栏）。 */
-body[data-roco-coach-open="yes"] main{padding-right:var(--coach-rail,0px)}
+/* 2026-09-23（接手复核）：这里原本有一条 `body[data-roco-coach-open="yes"] main{padding-right:0}`
+   —— 它的本意是「小芽打开时不占正文宽度」，但 `--coach-rail` 早已恒为 0px，
+   于是它实际做的是**把框架给的 22px 右内边距清零**，正文容器当场变宽 22px，
+   右对齐的东西（页眉小芽按钮 / 跳过 / 工坊右边界）一起右跳。
+   实测（1440×900，首页）：`.topbar` 与 `#team-workshop` 宽 1196→1218，
+   `#coach-entry` left 1239.1→1261.1。这就是人类反复报的「点开小芽正文右移」。
+   小芽现在是**纯浮层**（`.companion{pointer-events:none}` + 面板本体 auto），不需要正文让位
+   → 整条规则删除。守卫：`home-baseline.mjs` 的「开小芽位移」必须为空数组。 */
 
 /* 根容器必须 ≥「视口 − 40」（人类：一页占满）。战斗态把 main 的左右内边距归零，
    由片段自身的 16px 内边距负责留白 —— 否则两层内边距叠加会把宽度吃到 1380。 */
@@ -873,9 +908,15 @@ body[data-roco-view="ready"] #action-panel{display:none !important}
 /* 首页底部不许有别的东西（人类：「开一局就最下面」）——工程区在首页也收起 */
 body:not([data-roco-view=battle]) #dev-zone{display:none}
 
-/* 人类 2026-09-23：「小芽整体删除，该弹窗自己弹出来，不要留这里」——
-   首页里那块**内联**小芽卡不再显示（只保留右上角弹窗）。 */
-#hint-body{display:none !important}
+/* 人类 2026-09-23 的意图（首页里那块**内联**小芽卡不再显示、只留右上角弹窗）**已经由 HTML 实现**：
+   那块内联卡在 f784c5b 里就从 roco.html 删掉了。这里原来还留着一条
+   `#hint-body{display:none !important}` —— **它指错了元素**：`#hint-body` 从来不是内联小芽卡，
+   而是军师浮条里「展开取舍」的正文容器（`roco.html` 的 `#hint` → `.hint-foot` → `#hint-body`）。
+   后果是玩家点「展开取舍」**一个像素都看不到**：JS 摘掉 `hidden`、DOM 里 700+ 字正文全都在，
+   CSS 却把它钉成 `display:none`（2026-09-25 由 `scripts/roco/eval-five-minute-chain.mjs` 的
+   真键鼠判据实测抓到：`hidden=false 正文 722 字` 而 `getClientRects().length===0`）。
+   顺带的影响：几处按 `innerText` 读这一块正文的判据因此**空绿**（隐藏元素没有 innerText）。
+   规则已删；「展开取舍」的可见性现在由那条链路判据真鼠标钉着。 */
 
 /* 工坊（人类 2026-09-23 批注）：清空阵容靠右；筛选第二排一行放下；结果行字号小一点。
    2026-09-23 死代码清理：`.tw-knobs--right` / `.tw-filter-row` 这两条从 roco.css 删除 ——
@@ -927,11 +968,18 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
    病根不在遮罩层，而在**容器 `.companion` 自己还在画不透明背景**（它 inset:0 铺满整屏）。
    这里把它彻底清成透明、无边框无阴影；只有面板盒子有背景。 */
 .companion{background:none !important;border:0 !important;box-shadow:none !important;backdrop-filter:none !important}
-/* 连接状态 + 两个按钮：**默认收缩的可展开块**（人类：变成可展开的、默认收缩不展示） */
-.xy-fold>summary{cursor:pointer;padding:6px 8px;border:1px solid var(--line);border-radius:10px;
- background:#16222f;color:#dbe7f1;list-style:none;font-size:12px}
-.xy-fold>summary::-webkit-details-marker{display:none}
+/* 连接状态 + 两个按钮：**默认收缩的可展开块**（人类：变成可展开的、默认收缩不展示）。
+   2026-09-23（接手复核）：summary 自己**不再画边框/背景**——它和 `.xy-fold` 各画一层，
+   视觉上就是「框里套着一个框」（人类截图里那个错位的双层框）。
+   现在整块只有 `.xy-fold` 一层边框，summary 是它内部的一行标题（右侧带 ▾/▴ 指示）； */
+.xy-fold>summary{cursor:pointer;padding:0 11px;border:0;background:none;border-radius:0;
+ color:#dbe7f1;list-style:none;font-size:12.5px}
+.xy-fold>summary::after{content:'▾';margin-left:auto;color:#7f93a6;font-size:11px}
+.xy-fold[open]>summary::after{content:'▴'}
 .xy-fold[open]>summary{margin-bottom:8px}
+/* 展开后的两排内容与卡片边框留出同样的内边距（`.xy-fold` 现在是 padding:0，边框在这一层） */
+.xy-fold>.xy-models,.xy-fold>.xy-actions2{padding:0 11px}
+.xy-fold[open]{padding-bottom:11px}
 
 /* 立绘占位（人类 2026-09-23：「占位也可以」）：名单里没有这只精灵时，画中性占位而不是留空 */
 .b3-wrap .b3-spritebox[data-b3-sprite="none"]::before{content:"";position:absolute;inset:0;
@@ -943,21 +991,36 @@ body:not([data-roco-view=battle]) #dev-zone{display:none}
 
 /* 人类 2026-09-23：小芽面板更紧凑；可展开项点开时不要把上面挤成一坨 */
 .xy-modal2-box{gap:6px;padding:10px 12px}
-.xy-fold>summary{padding:5px 8px;font-size:12px}
+/* 2026-09-23（接手复核）：这一行原本把 summary 的 padding 压到 5px 8px / 12px ——
+   它比上面那条「默认收缩块」的规则更靠后，会盖掉新写的 0 11px，双框就会回来。
+   高度交给全局 `summary{min-height:44px}`（触控目标）+ `.xy-fold` 自己的边框，
+   这里只保留字号，不再改 padding。 */
+.xy-fold>summary{font-size:12.5px}
 .xy-models .model-cell{padding:5px 7px;border-radius:10px}
 .xy-actions2{margin-top:4px}
 .companion-body{max-height:22vh}
 .say-form{gap:6px}
 
-/* 人类 2026-09-23：「小芽还是挤成一坨」——上一版为「更紧凑」把间距压太狠了，这里恢复可读间距。 */
-.xy-modal2-box{gap:10px !important;padding:14px 16px !important;min-width:300px}
-.xy-models{gap:8px !important}
-.xy-models .model-cell{padding:8px 10px !important;min-height:52px}
-.xy-models .mc-name{font-size:12px !important;line-height:1.30;white-space:normal !important;
- overflow-wrap:anywhere;word-break:break-word}
+/* 人类 2026-09-23：「小芽还是挤成一坨」——上一版为「更紧凑」把间距压太狠了，这里恢复可读间距。
+   2026-09-23（接手复核）：左右内边距 16→12px —— 面板总宽仍是人类定的 300px，
+   省下的 8px 给三个模型格，好让「名字一行放得下」（见 mc-name 那条注释）。 */
+.xy-modal2-box{gap:10px !important;padding:14px 12px !important;min-width:300px}
+.xy-models{gap:6px !important}
+.xy-models .model-cell{padding:8px 4px !important;min-height:52px}
+.xy-models .mc-name{font-size:10px !important;line-height:1.30;white-space:nowrap !important;
+ overflow:hidden;overflow-wrap:normal;word-break:normal;letter-spacing:-.2px}
+/* 2026-09-23（接手复核）：上一版为了「放不下就缩字号」写了 `white-space:normal + word-break:break-word`，
+   结果三个模型名被**从单词中间掰断**（截图里是「DeepSee / k」「Qwen3.5 / -4B」），比截断更难看。
+   改回**单行**（人类原话：名字一行、状态一行）：字号 12→10px、单元格内边距 10→4px、
+   三格间距 8→6px、面板左右内边距 16→12px，四处一起挤出来的宽度让最长的一个
+   「Qwen3.8-27B」也能整行放下 —— 实测三格 clientWidth/scrollWidth 都是 69/69（fits:true）。 */
 .xy-models .mc-state{margin-top:4px}
 .xy-actions2{gap:8px !important}
-.companion-body{max-height:30vh !important}
+/* 2026-09-25（人类投诉「消息也显示不完」）：原来 30vh（1440×900=270px、390×844=253px）——
+   实测一条 231 字的真实回复就 274px，**正好卡在边缘**，再长一点就只看得到开头、尾巴要手滚。
+   收到 36vh，并把「每次写完滚到底」补到所有分支（含"未接模型"的早退分支）。
+   仍然满足那条护城河判据：输入框与最近一句回复同屏可见（modal box 自身 max-height:78vh）。 */
+.companion-body{max-height:36vh !important;scroll-behavior:smooth}
 
 /* 人类 2026-09-23：首页（选阵容）要**像战斗画面一样填满一屏、不上下滑** ——
    main 高度 = 视口 − 页眉 − 开一局栏；工坊网格撑满，候选列表内部滚动。 */
@@ -1017,3 +1080,111 @@ details:not([open])>:not(summary){display:none !important}
    并锁掉横向溢出。 */
 body:has(#team-workshop:not([hidden])) main{width:100%;max-width:1240px;margin:0 auto;box-sizing:border-box}
 body:has(#team-workshop:not([hidden])){overflow-x:hidden}
+
+/* 2026-09-24（v3h 收敛审计 A1）：**战斗态必须解除 1240 的枷锁**。
+   实测（1440×900，`node /tmp/a1-measure.mjs` 的 `mainRules`）：真正生效的是**基线样式表**
+   `style.css` 里的 `main{max-width:1240px;margin:auto}`（首页口径，从来没人给战斗态解过），
+   本文件 1048 那条工坊口径只是「同值」而已 —— 实测战斗态 `body:has(#team-workshop:not([hidden]))`
+   **不匹配**（`bodyHasWorkshop:false`，因为开局时确实给 `#team-workshop` 加了 `hidden`），
+   所以「改 1048 的选择器」是**无效修法**（改完实测仍是 1240）。
+   代价：`main` = [100,0,1240,839]、`#battle-panel` = [100,87,1240,744]，
+   两侧各 100px 黑边；中间列 916 → **698**、`.b3-fighter` 451 → **344**、立绘框 465 → 413。
+   设计稿（`docs/roco/mockups/v3h/battle-v3-default-1440x900.png` 同法实测）是 1408 宽、左右各 16px。
+   判据用 `#battle-panel:not([hidden])`：战斗态实测为真（`hidden=false`、`bodyHasBattlePanel=true`），
+   选人/工坊态为假 —— 所以这条只影响战斗页。 */
+body:has(#battle-panel:not([hidden])) main{max-width:none;margin:0;width:100%;box-sizing:border-box}
+body:has(#battle-panel:not([hidden])){overflow-x:hidden}
+
+/* ── 局末结算浮层（2026-09-23 接手复核）──────────────────────────────────────
+   人类实测：「我按逃跑后为啥不回主页」——投降/打完一局之后页面停在战斗态，
+   而 `#result-panel` 在 v3 版式里被收起，屏幕上没有任何出口。
+   这一层用 v3h 的配色与圆角（与 `.xy-modal2-box` 同一套：底 #101a24 / 边 var(--line) / 圆角 18），
+   盖在战斗页上，给两个出口。默认 hidden；只有引擎给出 `view.battle_result` 才出现。 */
+.roco-result-card{position:fixed;inset:0;z-index:75;display:flex;align-items:center;justify-content:center;
+ padding:20px;background:none;pointer-events:none}
+.roco-result-card[hidden]{display:none !important}
+.roco-result-box{width:min(420px,92vw);background:#101a24;border:1px solid var(--line);border-radius:18px;
+ padding:18px 20px;display:flex;flex-direction:column;gap:10px;box-shadow:0 18px 46px rgba(0,0,0,.6);
+ pointer-events:auto}
+/* 2026-09-23（接手复核）：**不做暗化遮罩、也不吃整屏点击**。
+   实测教训：第一版写成 `inset:0` + 半透明底 + 默认 pointer-events，结果真机判据
+   `live-lesson-migration` 变红 —— 它打完第一局后要再点一次「开一局」开第二局，
+   而这一层正好盖在按钮上，点击落在浮层上什么都没发生，第二局根本没开起来
+   （判据读到的是上一局的「第 44 回合」）。口径与小芽浮层一致：**不挡别的元素**。 */
+.roco-result-head{display:flex;align-items:baseline;gap:10px}
+.roco-result-head b{font-size:22px;color:#dfe8ef}
+.roco-result-stats{margin:0;font-size:13px;line-height:1.7;color:#c6d2de}
+.roco-result-note{margin:0;font-size:12px;line-height:1.7;color:#9caebe}
+.roco-result-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:4px}
+.roco-result-actions button{min-height:44px;flex:1 1 auto}
+
+/* ── 小芽面板里那一行模型连接状态（判据 `live-model-status` 的读取点 `#model-chip`）──
+   高度按判据给足（≥24px），点它去连接页；文案与 `data-roco-model` 由 `renderModelChip()` 写。 */
+.model-chip{display:inline-flex;align-items:center;min-height:26px;padding:0 9px;border-radius:999px;
+ border:1px solid #3a4a5c;background:#16222f;color:#cfe0d4;font-size:12px;text-decoration:none;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px}
+.model-chip:hover{border-color:#5d7d9e;color:#eaf2f8}
+.model-chip[data-roco-model="connected"]{border-color:#3f6b52;color:#a8e5b0}
+.model-chip[data-roco-model="offline"]{border-color:#6b5a33;color:#f0cb77}
+
+
+/* ── legacy 3v3（`?legacy3v3=1`）：两个区块必须**顺序堆叠**，不许互相压住 ──────────
+   2026-09-23 实测（无头 Chrome，1440×900，真鼠标）：
+     · `body:has(#team-workshop:not([hidden]))` 把首页锁成一屏（`height:100vh;overflow:hidden`），
+       `main` 与 `#team-workshop` 都是 `flex:1 1 auto;min-height:0`；
+     · 但 legacy 模式里 `#select-panel`（老选人区，1018px 高）**同时**在常规流里 →
+       工坊被挤成 **0 高**，而它 shadow 里的面板（`pointer-events:auto`）仍然命中点击；
+     · 后果：`elementFromPoint` 在搜索框 / 阵容卡 / 「对手」分段上全部命中 `SECTION#team-workshop`，
+       真实鼠标点这些控件**什么都不发生**（搜索框收不到键盘、卡片给不出提示、抽屉打不开）。
+       这正是人类反复报的「点不动」那一类。
+   修法：只要老选人区是显示状态，就放弃「锁一屏」，让工坊按**内容高度**参与常规流、选人区排在它下面。
+   **这不是翻上面那条口径**（「v3 工坊在产品路线上必须可点」）：工坊仍然在上、仍然完整可点，
+   只是它不再把下面那块也一起吃掉 —— 两块各自可点比「一块压死另一块」严格更好。
+   反证（改前/改后各量一次）：改前 `elementFromPoint` 命中 `#team-workshop`、搜索框收到 0 个字符；
+   改后命中 `#pool-search` / `BUTTON.side-tab` / `#page-next`，输入「音速」池子从 12 张收到 1 张。 */
+body:has(#select-panel:not([hidden])){height:auto;overflow:visible;display:block}
+body:has(#select-panel:not([hidden])) main{height:auto;min-height:0;display:block}
+body:has(#select-panel:not([hidden])) main>#team-workshop{flex:0 0 auto;min-height:0;height:auto}
+/* 老选人区的底栏是**固定**在视口底部的（`#pool-footbar`），而工坊的层叠更高（上面那条口径）。
+   堆叠之后两者仍会在视口底部重叠：实测点 `#page-next` 会打在被掏空的工坊浮层上 → 翻页不动。
+   底栏是页面级主操作（翻页 / 开一局），legacy 模式下它必须比工坊更上层。 */
+/* 关键：`#select-panel` 自己有 `position:relative;z-index:1` —— 固定底栏在它**里面**，
+   所以给底栏单独加 z-index 是没用的（它仍然困在面板那层 stacking context 里，
+   实测 elementFromPoint 依旧命中 `team-workshop`）。要抬的是**整个面板**。 */
+body:has(#select-panel:not([hidden])) #select-panel{z-index:8}
+/* 面板压在工坊之上后，固定底栏会盖住工坊最下面约 64px：给工坊留出等高的下边距，
+   让「候选列表最后一行」不会被压在底栏下面。 */
+body:has(#select-panel:not([hidden])) main>#team-workshop{padding-bottom:64px}
+
+/* ── 2026-09-25（人类：「战斗页横向太长，要适当往里收」）──────────────────────────
+   改前实测：`#battle-panel` 宽 **1440**（整窗铺满、两侧 0 留白）、`.b3-wrap` `[1,88,1438,742]`、
+   三列 `232 / 914 / 232`（内容盒 1406）。设计稿 `docs/roco/mockups/battle-v3h.html` 是
+   `body{padding:12px 16px 14px}` + `.wrap{max-width:1408px}` ⇒ **面板总宽 1408、两侧各 16px**。
+   目标宽度取 **1408**（= 设计稿的总宽；1440 视口下正好两侧各 16px）。
+   为什么不更窄（人类口径是「考虑立绘的适配程度」）：立绘是**高度约束**的 ——
+   实测立绘 347×463、画框 420×465，立绘已经顶满画框高度；横向收窄只会把画框两侧那块
+   深色留白收掉（立绘占画框宽 347/420 = 83% → 347/388 = 89%），**不会把立绘变小**。
+   再窄下去左列四格与右列战报的可用宽就开始吃紧，没有必要（这是取舍，不是判据）。
+   改后实测见 `reports/roco/seam-fix/width.json`；判据：`roco-ux-acceptance`（39 条）
+   + `demo-acceptance` + `mobile-sweep` 三套重跑全绿。 */
+body[data-roco-view="ready"] #battle-panel{
+  max-width:1408px !important;      /* 必须 !important：上面那条 `max-width:none !important` 是几何判据的前提 */
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+
+/* 战斗态：页眉只留小芽（人类 2026-09-25）——「返回首页 / 开始PVP」在局中藏起来，
+   出口统一走局末弹框（首页 / 培养 / 再来一局（配队）/ 小芽）。 */
+body[data-roco-view="ready"] #roco-nav #nav-home,
+body[data-roco-view="ready"] #roco-nav #nav-pvp{display:none}
+/* 局中也不许有「直接去培养」的旁路（人类 2026-09-25）：出口统一走局末弹框。 */
+body[data-roco-view="ready"] #nav-nurture{display:none}
+.standard-pvp-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#battle-result-card .roco-result-actions{display:flex;flex-wrap:wrap;gap:9px;justify-content:flex-end}
+#battle-result-card .roco-result-actions .b3-tab{min-height:38px}
+
+/* 一次性状态行（开局/推进/规划失败、对手连续补位…）。默认藏起来，有事才出现；
+   原来是写向已删除的 `#plan-status`，玩家看不到任何失败提示（2026-09-26 修）。 */
+.plan-note{margin:6px 12px;padding:6px 10px;border-radius:8px;background:#2a1f22;color:#ffd9d9;
+ border:1px solid #6a3b3b;font-size:13px;line-height:1.5}
+.plan-note[hidden]{display:none}

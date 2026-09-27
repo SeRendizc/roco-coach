@@ -51,6 +51,9 @@ def build() -> Dict[str, Any]:
             "trait_skill_id": found[0].feature_skill_id if found else None,
             "status": spec.status,
             "hook": spec.hook,
+            # 2026-09-25（第 40 轮）：`gaps` 是**机器可读**的"还没实现的那一块"。
+            # 以前它只是理由里的一句话，于是 `泛音列` 能一边写着「只挂印记、不结算能耗」一边标 FULL。
+            "gaps": list(getattr(spec, "gaps", ()) or ()),
             "reason": spec.reason,
             "desc": spec.desc,
         })
@@ -74,10 +77,44 @@ def build() -> Dict[str, Any]:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description="导出特性实现状态")
     parser.add_argument("--write", action="store_true", help="写到 data/roco/engine-trait-status.json")
+    parser.add_argument("--check", action="store_true",
+                        help="只对比：磁盘产物与**现在重算**是否一致（除 generated_at）；不一致退出 1")
     parser.add_argument("--out", default=os.path.join("data", "roco", "engine-trait-status.json"))
     args = parser.parse_args(argv)
 
     payload = build()
+    # 2026-09-25（第 29 轮）：账本会**静默漂移** —— `traits.py` 加到 17 条（渴求 / 贪得无厌）而
+    # `data/roco/engine-trait-status.json` 一直是 15 条（FULL 8 / PARTIAL 3），没有任何一条判据会发现，
+    # 而三份文档还在引更旧的 6/2/4。加 `--check`：与"现在重算"逐字节比（除 `generated_at`），
+    # 好让判据（`roco/tests/test_trait_status_export.py`）把它钉住。
+    if args.check:
+        path = os.path.join(_ROOT, args.out)
+        if not os.path.exists(path):
+            print(f"MISSING {args.out}：账本不存在，先跑 --write")
+            return 1
+        with open(path, encoding="utf-8") as fh:
+            disk = json.load(fh)
+        a, b = dict(payload), dict(disk)
+        a.pop("generated_at", None)
+        b.pop("generated_at", None)
+        if json.dumps(a, ensure_ascii=False, sort_keys=True) != json.dumps(b, ensure_ascii=False, sort_keys=True):
+            fresh_traits = {p.get("trait") for p in payload.get("pets", [])}
+            disk_traits = {p.get("trait") for p in disk.get("pets", [])}
+            print("MISMATCH：账本与现在重算不一致")
+            print("  现在重算 counts:", json.dumps(payload["counts"], ensure_ascii=False),
+                  f"（{len(payload.get('pets', []))} 条）")
+            print("  磁盘账本 counts:", json.dumps(disk.get("counts", {}), ensure_ascii=False),
+                  f"（{len(disk.get('pets', []))} 条）")
+            if fresh_traits - disk_traits:
+                print("  账本里缺：", "、".join(sorted(fresh_traits - disk_traits)))
+            if disk_traits - fresh_traits:
+                print("  账本里多：", "、".join(sorted(disk_traits - fresh_traits)))
+            print("  修法：python3 scripts/roco/export-trait-status.py --write")
+            return 1
+        print(f"check ok：{args.out} 与现在重算一致（counts {json.dumps(payload['counts'], ensure_ascii=False)}，"
+              f"{len(payload.get('pets', []))} 条）")
+        return 0
+
     text = json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
     if args.write:
         path = os.path.join(_ROOT, args.out)

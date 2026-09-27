@@ -1,0 +1,683 @@
+{
+ "schema": "roco-rules-corpus-verification/v1",
+ "generated_by": "scripts/roco/verify-rules-corpus.mjs",
+ "generated_at": "2026-09-25T15:36:22.770Z",
+ "scope": "语料本身对不对（检索器对不对由 eval-rag-retrieval.mjs 的 13 组判据负责）",
+ "inputs": {
+  "ledger": "data/roco/evidence/rule-evidence-ledger.json",
+  "ledger_sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
+  "ledger_entries": 29,
+  "ruleset_dir": "data/roco/rulesets",
+  "pack": "data/roco/game-data-pack/v2/pack.json"
+ },
+ "confidence_distribution": {
+  "CROSS_SOURCE_SUPPORTED": 5,
+  "ENGINE_HYPOTHESIS": 3,
+  "RECORDED_IN_GAME": 9,
+  "COMMUNITY_CURRENT": 7,
+  "OFFICIAL_CURRENT": 5
+ },
+ "gates": {
+  "source_markers_consistent": {
+   "ok": true,
+   "problems": [],
+   "rows": [
+    {
+     "marker": "official_first_party",
+     "used_entries": 5,
+     "declared_count": 5,
+     "claims_none": false
+    },
+    {
+     "marker": "official_reproduction",
+     "used_entries": 6,
+     "declared_count": 6,
+     "claims_none": false
+    },
+    {
+     "marker": "recorded_gameplay",
+     "used_entries": 9,
+     "declared_count": 9,
+     "claims_none": false
+    },
+    {
+     "marker": "community",
+     "used_entries": 16,
+     "declared_count": 16,
+     "claims_none": false
+    },
+    {
+     "marker": "repo_internal",
+     "used_entries": 7,
+     "declared_count": 7,
+     "claims_none": false
+    },
+    {
+     "marker": "product_context",
+     "used_entries": 1,
+     "declared_count": 1,
+     "claims_none": false
+    }
+   ]
+  },
+  "double_source": {
+   "ok": true,
+   "problems": [],
+   "rows": [
+    {
+     "id": "EV-ENERGY-MAX",
+     "confidence": "CROSS_SOURCE_SUPPORTED",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-ENERGY-CHARGE",
+     "confidence": "CROSS_SOURCE_SUPPORTED",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-ENERGY-ENDTURN-REGEN",
+     "confidence": "ENGINE_HYPOTHESIS",
+     "sources": 3,
+     "distinct_urls": 3,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-ENERGY-INITIAL",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 3,
+     "distinct_urls": 3,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-ENERGY-PER-PET",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-ENERGY-COST8-EXISTS",
+     "confidence": "COMMUNITY_CURRENT",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-PVP-STANDARD-TEAM-SIZE",
+     "confidence": "CROSS_SOURCE_SUPPORTED",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-PVP-STANDARD-MANA",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 3,
+     "distinct_urls": 3,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-PVP-FAINT-MANA-LOSS",
+     "confidence": "CROSS_SOURCE_SUPPORTED",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-PVP-SPEED-DUEL-MODE",
+     "confidence": "OFFICIAL_CURRENT",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": true,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-PVP-UNKNOWN-OPPONENT",
+     "confidence": "ENGINE_HYPOTHESIS",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-PVP-OPPONENT-ROSTER-VISIBLE",
+     "confidence": "COMMUNITY_CURRENT",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-SWIFT-INJECTION",
+     "confidence": "COMMUNITY_CURRENT",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-MARKS-PERSISTENCE",
+     "confidence": "COMMUNITY_CURRENT",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-TYPE-MULTIPLIER",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 5,
+     "distinct_urls": 5,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-TURN-ORDER-MECHANISMS-EXIST",
+     "confidence": "CROSS_SOURCE_SUPPORTED",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-TURN-ORDER-STRICT",
+     "confidence": "ENGINE_HYPOTHESIS",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-LEAVE-SEMANTICS",
+     "confidence": "COMMUNITY_CURRENT",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
+     "confidence": "COMMUNITY_CURRENT",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-OFFICIAL-PAIRING-AI",
+     "confidence": "OFFICIAL_CURRENT",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": true,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-BATTLEMODE-PARAMETERIZED",
+     "confidence": "OFFICIAL_CURRENT",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": true,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-PVP-BOSS-FORM-STANDARD",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-PVP-WISH-POWER-UP",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 4,
+     "distinct_urls": 3,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-PVP-STANDARD-FILL-SIX",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-PVP-STANDARD-SELF-BUILT-TEAM",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-NATURE-BALANCE-PVP",
+     "confidence": "OFFICIAL_CURRENT",
+     "sources": 3,
+     "distinct_urls": 3,
+     "has_official_first_party": true,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-TURN-LIMIT-EXISTS-PVP",
+     "confidence": "COMMUNITY_CURRENT",
+     "sources": 2,
+     "distinct_urls": 2,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": false
+    },
+    {
+     "id": "EV-PVP-FAIRNESS-NO-FUTURE-KNOWLEDGE",
+     "confidence": "RECORDED_IN_GAME",
+     "sources": 1,
+     "distinct_urls": 1,
+     "has_official_first_party": false,
+     "has_recorded_gameplay": true
+    },
+    {
+     "id": "EV-WEATHER-STANDARD-PVP",
+     "confidence": "OFFICIAL_CURRENT",
+     "sources": 3,
+     "distinct_urls": 3,
+     "has_official_first_party": true,
+     "has_recorded_gameplay": false
+    }
+   ]
+  },
+  "provenance_resolvable": {
+   "ok": true,
+   "problems": [],
+   "checked": 114
+  },
+  "version_consistent": {
+   "ok": true,
+   "problems": [],
+   "rows": [
+    {
+     "where": "ledger.ruleset_id",
+     "value": "roco-world-s4-2026-09-10"
+    },
+    {
+     "where": "data/roco/rag/heldout-queries.json#ruleset_id",
+     "value": "roco-world-s4-2026-09-10"
+    },
+    {
+     "where": "data/roco/evidence/rule-evidence-microcase-records.json#ruleset_id",
+     "value": "roco-world-s4-2026-09-10"
+    },
+    {
+     "where": "pack.ruleset_binding",
+     "value": {
+      "ruleset_id": "roco-world-s4-2026-09-10",
+      "ruleset_label": "S4「月涌狂想」赛季",
+      "ruleset_config_id": "legacy_sim_v1",
+      "ruleset_config_path": "data/roco/rulesets/legacy-sim-v1.json",
+      "ruleset_config_sha256": "9f7740dedee8d025c39e65408f1a4291b68d9c5b09e273bf9407a1cecf3d3044",
+      "ruleset_config_is_default": true,
+      "ruleset_configs_available": [
+       {
+        "id": "mobile_s4_candidate_v2",
+        "path": "data/roco/rulesets/mobile-s4-candidate-v2.json",
+        "is_default": false,
+        "status": "CANDIDATE_NOT_FOR_DEFAULT"
+       },
+       {
+        "id": "legacy_sim_v1",
+        "path": "data/roco/rulesets/legacy-sim-v1.json",
+        "is_default": true,
+        "status": "LEGACY_BASELINE_BIT_EXACT"
+       }
+      ],
+      "as_of": "2026-09-21",
+      "frozen_revision": "aff808eb60003457fe8a260d1ac3c9bd95d53872",
+      "frozen_revision_date": "2026-09-10T08:46:18Z",
+      "evidence_ledger_path": "data/roco/evidence/rule-evidence-ledger.json",
+      "evidence_ledger_sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8",
+      "reconciliation_report_path": "reports/roco/reconciliation/catalog-reconciliation.json",
+      "reconciliation_report_sha256": "bca1bf352a1327b0d32c83c225079c1e4999a792d267fa6e3dc9470d4580c125",
+      "sources_path": "data/roco/sources.yaml",
+      "sources_sha256": "30b69933778cff771e2780deac88b1e6cdaef62093ad80b8978643946fc2af79",
+      "note": "数据层（L1 图鉴）不依赖战斗规则；这条绑定声明的是「消费这些数值时该按哪套 ruleset 配置模拟」，以及本包所依据的对账报告/证据台账的**指纹**（换一份报告，指纹就变）。"
+     }
+    }
+   ]
+  },
+  "deletion_probe": {
+   "ok": true,
+   "problems": [],
+   "rows": [
+    {
+     "query": "M01",
+     "deleted": "EV-MARKS-PERSISTENCE",
+     "before_top": [
+      "EV-MARKS-PERSISTENCE",
+      "pet::pet_000471",
+      "trait::skill_000055"
+     ],
+     "after_top": [
+      "pet::pet_000471",
+      "pet::pet_000023"
+     ],
+     "changed": true,
+     "still_present": false,
+     "unrelated_control": {
+      "decoy": "EV-ENERGY-MAX",
+      "same": true,
+      "before_top": [
+       "EV-MARKS-PERSISTENCE",
+       "pet::pet_000471",
+       "trait::skill_000055"
+      ],
+      "after_top": [
+       "EV-MARKS-PERSISTENCE",
+       "pet::pet_000471",
+       "trait::skill_000055"
+      ]
+     }
+    }
+   ]
+  },
+  "age_and_mode": {
+   "ok": true,
+   "problems": [],
+   "rows": [
+    {
+     "id": "EV-ENERGY-MAX",
+     "topic": "energy.max",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-ENERGY-CHARGE",
+     "topic": "energy.charge",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-ENERGY-ENDTURN-REGEN",
+     "topic": "energy.regen",
+     "topic_known": true,
+     "sources": 3,
+     "dated": 3
+    },
+    {
+     "id": "EV-ENERGY-INITIAL",
+     "topic": "energy.initial",
+     "topic_known": true,
+     "sources": 3,
+     "dated": 3
+    },
+    {
+     "id": "EV-ENERGY-PER-PET",
+     "topic": "energy.initial_per_pet",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-ENERGY-COST8-EXISTS",
+     "topic": "energy.max",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-PVP-STANDARD-TEAM-SIZE",
+     "topic": "pvp.standard.team_size",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-PVP-STANDARD-MANA",
+     "topic": "battle_mode.standard_pvp",
+     "topic_known": true,
+     "sources": 3,
+     "dated": 3
+    },
+    {
+     "id": "EV-PVP-FAINT-MANA-LOSS",
+     "topic": "battle_mode.standard_pvp",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-PVP-SPEED-DUEL-MODE",
+     "topic": "battle_mode.speed_duel",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-PVP-UNKNOWN-OPPONENT",
+     "topic": "pvp.fairness",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-PVP-OPPONENT-ROSTER-VISIBLE",
+     "topic": "pvp.fairness",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-SWIFT-INJECTION",
+     "topic": "swift.injection",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-MARKS-PERSISTENCE",
+     "topic": "marks.persistence",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-TYPE-MULTIPLIER",
+     "topic": "type.multiplier",
+     "topic_known": true,
+     "sources": 5,
+     "dated": 5
+    },
+    {
+     "id": "EV-TURN-ORDER-MECHANISMS-EXIST",
+     "topic": "turn_order.priority",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-TURN-ORDER-STRICT",
+     "topic": "turn_order.priority",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-LEAVE-SEMANTICS",
+     "topic": "leave.semantics",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-TRAITS-TRIGGER-COMPLEXITY",
+     "topic": "traits.triggers",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-OFFICIAL-PAIRING-AI",
+     "topic": "product.pairing_ai",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-BATTLEMODE-PARAMETERIZED",
+     "topic": "battle_mode.territory_trial",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-PVP-BOSS-FORM-STANDARD",
+     "topic": "battle_mode.standard_pvp",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-PVP-WISH-POWER-UP",
+     "topic": "battle_mode.standard_pvp",
+     "topic_known": true,
+     "sources": 4,
+     "dated": 4
+    },
+    {
+     "id": "EV-PVP-STANDARD-FILL-SIX",
+     "topic": "pvp.standard.team_size",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-PVP-STANDARD-SELF-BUILT-TEAM",
+     "topic": "battle_mode.standard_pvp",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-NATURE-BALANCE-PVP",
+     "topic": "battle_mode.standard_pvp",
+     "topic_known": true,
+     "sources": 3,
+     "dated": 3
+    },
+    {
+     "id": "EV-TURN-LIMIT-EXISTS-PVP",
+     "topic": "battle_mode.standard_pvp",
+     "topic_known": true,
+     "sources": 2,
+     "dated": 2
+    },
+    {
+     "id": "EV-PVP-FAIRNESS-NO-FUTURE-KNOWLEDGE",
+     "topic": "pvp.fairness",
+     "topic_known": true,
+     "sources": 1,
+     "dated": 1
+    },
+    {
+     "id": "EV-WEATHER-STANDARD-PVP",
+     "topic": "battle_mode.standard_pvp",
+     "topic_known": true,
+     "sources": 3,
+     "dated": 3
+    }
+   ],
+   "stale_candidates": [
+    {
+     "id": "EV-ENERGY-ENDTURN-REGEN",
+     "date": "2026-03-18",
+     "url": "https://news.17173.com/content/03182026/104940843.shtml",
+     "marker": "official_reproduction",
+     "days_before_ruleset": 176,
+     "why": "公测（2026-03-26）之前的来源：可能是老系统规则，必须人工判是否已被改掉（**注意**：公测公告类来源通常描述的就是上线状态，属于\"要人看一眼\"而不是\"一定错\"）"
+    },
+    {
+     "id": "EV-PVP-STANDARD-TEAM-SIZE",
+     "date": "2026-03-18",
+     "url": "https://news.17173.com/content/03182026/104940843.shtml",
+     "marker": "official_reproduction",
+     "days_before_ruleset": 176,
+     "why": "公测（2026-03-26）之前的来源：可能是老系统规则，必须人工判是否已被改掉（**注意**：公测公告类来源通常描述的就是上线状态，属于\"要人看一眼\"而不是\"一定错\"）"
+    },
+    {
+     "id": "EV-PVP-STANDARD-MANA",
+     "date": "2026-03-18",
+     "url": "https://news.17173.com/content/03182026/104940843.shtml",
+     "marker": "official_reproduction",
+     "days_before_ruleset": 176,
+     "why": "公测（2026-03-26）之前的来源：可能是老系统规则，必须人工判是否已被改掉（**注意**：公测公告类来源通常描述的就是上线状态，属于\"要人看一眼\"而不是\"一定错\"）"
+    },
+    {
+     "id": "EV-PVP-FAINT-MANA-LOSS",
+     "date": "2026-03-18",
+     "url": "https://news.17173.com/content/03182026/104940843.shtml",
+     "marker": "official_reproduction",
+     "days_before_ruleset": 176,
+     "why": "公测（2026-03-26）之前的来源：可能是老系统规则，必须人工判是否已被改掉（**注意**：公测公告类来源通常描述的就是上线状态，属于\"要人看一眼\"而不是\"一定错\"）"
+    },
+    {
+     "id": "EV-TURN-ORDER-MECHANISMS-EXIST",
+     "date": "2026-03-18",
+     "url": "https://news.17173.com/content/03182026/104940843.shtml",
+     "marker": "official_reproduction",
+     "days_before_ruleset": 176,
+     "why": "公测（2026-03-26）之前的来源：可能是老系统规则，必须人工判是否已被改掉（**注意**：公测公告类来源通常描述的就是上线状态，属于\"要人看一眼\"而不是\"一定错\"）"
+    },
+    {
+     "id": "EV-PVP-STANDARD-FILL-SIX",
+     "date": "2026-03-18",
+     "url": "https://news.17173.com/content/03182026/104940843.shtml",
+     "marker": "official_reproduction",
+     "days_before_ruleset": 176,
+     "why": "公测（2026-03-26）之前的来源：可能是老系统规则，必须人工判是否已被改掉（**注意**：公测公告类来源通常描述的就是上线状态，属于\"要人看一眼\"而不是\"一定错\"）"
+    }
+   ],
+   "note": "`stale_candidates` **只是候选**：本条不自动降级、也不改任何等级 —— 需要人读出\"它是不是已被版本改掉\"，或补一条同期/更新的第二源。人类口径原话：「可能有的是老系统的规则呢」。"
+  },
+  "sample_review_recorded": {
+   "ok": true,
+   "problems": [],
+   "rows": [
+    {
+     "review_path": "reports/roco/rag/corpus-sample-review.json",
+     "exists": false,
+     "required": 10,
+     "note": "**没抽到 ≠ 对**：这一步是人工的，未做就如实写未做"
+    }
+   ],
+   "done": false,
+   "required": 10,
+   "reviewed": 0
+  },
+  "no_clock": {
+   "ok": true,
+   "problems": [],
+   "rows": []
+  }
+ },
+ "verdict": "pass",
+ "failed": [],
+ "limitations": [
+  "**抽样人工复核尚未做**（这一步是人做的，脚本只能如实登记\"未做\"）。",
+  "删条反证只跑 1 条 held-out 查询（成本与稳定性折中）；要更强就加查询，不要放宽判据。",
+  "双源交叉只校验**来源条数与标记**，不校验两条来源是否真的说同一件事（那需要人读）。",
+  "“老系统规则”风险候选 6 条（公测前的来源）：**只是候选**，需要人判，不许自动降级。"
+ ]
+}

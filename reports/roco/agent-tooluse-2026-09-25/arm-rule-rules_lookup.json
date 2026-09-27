@@ -1,0 +1,2143 @@
+{
+ "generated_by": "scripts/roco/shadow-replay.mjs",
+ "arm": "rule",
+ "identity": {
+  "role": "rule-arm",
+  "note": "规则臂不经过模型，没有模型身份"
+ },
+ "written_to": "/tmp/roco-recon/arm-rule-rules_lookup.json",
+ "gateway": null,
+ "prompt_digest": null,
+ "prompt": null,
+ "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
+ "summary": {
+  "tasks": 72,
+  "passed": 72,
+  "pass_rate": 1,
+  "stopped": {
+   "complete": 60,
+   "receipt-budget": 12
+  },
+  "latency": {
+   "p50_ms": 1,
+   "p95_ms": 2
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 72,
+    "passed": 72,
+    "pass_rate": 1,
+    "p50_ms": 1,
+    "p95_ms": 2
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 24,
+     "passed": 24,
+     "pass_rate": 1
+    },
+    "seen": {
+     "total": 48,
+     "passed": 48,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "A组三人-无锁定": {
+      "total": 24,
+      "passed": 24,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "A组三人-锁定寂灭骨龙": {
+      "total": 24,
+      "passed": 24,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "混编三人-含B组": {
+      "total": 24,
+      "passed": 24,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 24,
+     "passed": 24,
+     "pass_rate": 1
+    },
+    "seen": {
+     "total": 48,
+     "passed": 48,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "图鉴字段": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "技能静态威力": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "属性相性": {
+      "total": 12,
+      "passed": 12,
+      "held_out": true,
+      "pass_rate": 1
+     },
+     "学习表": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "应对机制": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "版本指纹": {
+      "total": 12,
+      "passed": 12,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 72,
+     "passed": 72,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "直问": {
+      "total": 18,
+      "passed": 18,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "口语": {
+      "total": 18,
+      "passed": 18,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "追问": {
+      "total": 18,
+      "passed": 18,
+      "held_out": false,
+      "pass_rate": 1
+     },
+     "背景": {
+      "total": 18,
+      "passed": 18,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "case_id": "rl-pet-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 6
+  },
+  {
+   "case_id": "rl-pet-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "图鉴字段",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "图鉴字段",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "A组三人-无锁定",
+   "mechanism": "图鉴字段",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "图鉴字段",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "图鉴字段",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "图鉴字段",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "混编三人-含B组",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "混编三人-含B组",
+   "mechanism": "图鉴字段",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "图鉴字段",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-pet-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "混编三人-含B组",
+   "mechanism": "图鉴字段",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "技能静态威力",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "A组三人-无锁定",
+   "mechanism": "技能静态威力",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "技能静态威力",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "技能静态威力",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-skill-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rl-skill-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-skill-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-type-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "属性相性",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "属性相性",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "属性相性",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "属性相性",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "属性相性",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-type-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "属性相性",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "属性相性",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-type-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-5",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "属性相性",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "混编三人-含B组",
+   "mechanism": "属性相性",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "属性相性",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "混编三人-含B组",
+   "mechanism": "属性相性",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-type-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "混编三人-含B组",
+   "mechanism": "属性相性",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "type_multiplier",
+      "attack_element": "龙系",
+      "defender_types": [
+       "幽系"
+      ],
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-learn-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "学习表",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rl-learn-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "学习表",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rl-learn-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "学习表",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "学习表",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "学习表",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "学习表",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-5",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "学习表",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rl-learn-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "学习表",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 2
+  },
+  {
+   "case_id": "rl-learn-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "学习表",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-5",
+   "family": "混编三人-含B组",
+   "mechanism": "学习表",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "混编三人-含B组",
+   "mechanism": "学习表",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-learn-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "混编三人-含B组",
+   "mechanism": "学习表",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "应对机制",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "应对机制",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "应对机制",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "应对机制",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "应对机制",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-term-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "应对机制",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "应对机制",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "应对机制",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "混编三人-含B组",
+   "mechanism": "应对机制",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-term-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-1",
+   "family": "混编三人-含B组",
+   "mechanism": "应对机制",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-term-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-5",
+   "family": "混编三人-含B组",
+   "mechanism": "应对机制",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-term-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "混编三人-含B组",
+   "mechanism": "应对机制",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "1015",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f0-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "版本指纹",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f0-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "版本指纹",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f0-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "版本指纹",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f0-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "A组三人-无锁定",
+   "mechanism": "版本指纹",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-ruleset-f1-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f1-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f1-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f1-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f2-01",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "版本指纹",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  },
+  {
+   "case_id": "rl-ruleset-f2-02",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "版本指纹",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-ruleset-f2-03",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-0",
+   "family": "混编三人-含B组",
+   "mechanism": "版本指纹",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 0
+  },
+  {
+   "case_id": "rl-ruleset-f2-04",
+   "category": "rules_lookup",
+   "arm": "rule",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "版本指纹",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "ruleset",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1
+  }
+ ]
+}

@@ -23,6 +23,17 @@ import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {dirname,join} from 'node:path';
 import {RocoClient,RULESET_ID} from '../coach/roco-client.js';
+// 标准 PVP 的模式 id 只有一处字面量（本文件上面的 `export {STANDARD_PVP_MODE_ID}` 转出它）。
+import {STANDARD_PVP_MODE_ID} from '../game/battle-modes.js';
+
+export function childAlive(child) {
+  if (!child) return false;
+  if (child.exitCode !== null && child.exitCode !== undefined) return false;
+  // ⚠ 被**信号**杀死的子进程 `exitCode` 恒为 null，只有 `signalCode` 有值 —— 这一条就是那次
+  // "整局永久不可用却报已就绪"的根因（审计 2026-09-27 实测复现）。
+  if (child.signalCode !== null && child.signalCode !== undefined) return false;
+  return true;
+}
 import {shadowToolDecision} from '../coach/shadow-tools.js';
 // RC-205：同种个体比较**只有一份判据**。盒子路由不另写一套「哪些字段算 same/different/unknown」，
 // 直接复用 RC-203 那个纯函数（它本来就带 `OwnedPetSpeciesMismatchError`：不同种直接抛错，不静默比较）。
@@ -98,7 +109,7 @@ export const STANDARD_PVP_UNVERIFIED_OVERRIDES=Object.freeze([Object.freeze({
  path:'turn_order.speed_tie',value:'random_seeded',confidence:'ENGINE_HYPOTHESIS',
  path:'turn_order.speed_tie',value:'random_seeded',confidence:'ENGINE_HYPOTHESIS',
  reason:'同速平手裁决在候选配置里是 UNKNOWN（MC-E05 未录制）。不声明它就打不下去（引擎按纪律抛错）；'
-  + '这里显式按 legacy 那份**已登记的工程权宜** random_seeded 走，界面同样要标未核验',
+  + '这里显式按 legacy 那份已登记的工程权宜 random_seeded 走，界面同样要标未核验',
  microcase_id:'MC-E05'})]);
 /**
  * 演示页的默认对局 seed。
@@ -113,8 +124,11 @@ export const DEMO_SEED=20260921;
 /**
  * 标准 PVP 的模式 id。它**必须**同时存在于 `data/roco/battle-modes.json`；
  * 本文件只拿它当查询键，参数一个都不复制（`modeSummary()` 读原文转发）。
+ *
+ * 2026-09-25：字面量搬到 `src/game/battle-modes.js`（客户端开局、教练问策略也要用同一个
+ * id），这里**转出**同一份 —— 保留这个名字是给既有 import 与测试用的兼容出口。
  */
-export const STANDARD_PVP_MODE_ID='pvp-standard-six-pet';
+export {STANDARD_PVP_MODE_ID};
 /** 模式摘要的进程内缓存（只读、不会在进程生命周期里变；`undefined` 表示还没读过）。 */
 let modeSummaryCache;
 
@@ -178,7 +192,12 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
    energy_charge:Number.isInteger(selfState?.energy_charge)?selfState.energy_charge:null,
    pets:pets(selfState?.pets),
    // 己方可用技能（配招那一套）：UI 的技能面板直接用它
-   skills:Array.isArray(ui?.self?.skills)?ui.self.skills.map(skillRow):[]},
+   skills:Array.isArray(ui?.self?.skills)?ui.self.skills.map(skillRow):[],
+   // 2026-09-23：**己方实时配招**（pet_id -> [技能 id]，按位次）与 **PVP 魔法状态**。
+   // 页面按它逐格渲染技能（愿力强化会换掉第一个技能），并按 次数/冷却 决定物品屏那一格。
+   // 两个键都**只在引擎给了的时候**带出去（旧 fixture 的形状不变）；对手侧一律没有它们。
+   ...(selfState?.loadouts&&typeof selfState.loadouts==='object'?{loadouts:selfState.loadouts}:{}),
+   ...(selfState?.magic&&typeof selfState.magic==='object'?{magic:selfState.magic}:{})},
   // 对手**场上**那一只是公开的（血条与能量画在屏幕上）；后备只有位次与是否倒下。
   opponent:{
    active:foeState?.active??null,
@@ -197,6 +216,8 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
   legal:(Array.isArray(ui?.legal?.player)?ui.legal.player
    :(Array.isArray(result.legal?.player)?result.legal.player:[])).map(a=>({
    kind:a?.kind??null,label:a?.label??null,skill_id:a?.skill_id??null,skill_name:a?.skill_name??null,
+   // PVP 魔法动作靠 `magic_id` 认（愿力强化 = wish_power_up）；旧动作没有这个键 → null
+   magic_id:a?.magic_id??null,
    // 技能说明：来自 `result.ui` 的装饰（缺省为 null，界面显示「说明未提供」）
    skill:a?.skill??null,
    target_index:a?.target_index??null,item_id:a?.item_id??null})),
@@ -215,6 +236,20 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
   strategy:result.strategy?{name:result.strategy.name??null,version:result.strategy.version??null}:null,
   assumptions:publicState?.assumptions??null,
   unsupported_count:Array.isArray(result.unsupported_seen)?result.unsupported_seen.length:0,
+  // ── 天气（2026-09-25 裁决 B + 主线程真机复测）────────────────────────────────
+  // 引擎从裁决 B 起就在 `public_planner_state` 与 `ui_public_view` 里给天气，但这一层是
+  // **白名单**，之前没列它 ⇒ 页面拿到的 `view.weather` 永远是 null，天气条一个字都画不出来
+  // （实测：用 loadouts 给圆号鱼换上「落雨」并打出 `weather_set`，回执里仍然没有 `weather`）。
+  // 与 `mana` 同一条纪律：**引擎给才给**、没有这个键就一个字节都不加（不补「无天气」占位）。
+  ...(()=>{
+   const raw=publicState?.weather??ui?.weather??null;
+   if(!raw||typeof raw!=='object')return {};
+   const name=typeof raw.name==='string'?raw.name.trim():'';
+   if(!name)return {};   // 没有名字就不是一条天气事实（与引擎「没天气不出现键」同口径）
+   return {weather:{name,
+    ...(Number.isInteger(raw.turns_left)?{turns_left:raw.turns_left}:{}),
+    ...(Number.isInteger(raw.duration_turns)?{duration_turns:raw.duration_turns}:{})}};
+  })(),
   // ── RC-105/106：魔力与「未核验覆盖」（都是**公开**信息）────────────────────────
   // 魔力是画在屏幕上的资源条，不是隐藏信息；`mana` 只有声明了 mana 的配置才存在，
   // 没有就是 null —— 界面据此写「未核验」，**不许**补一个 4（那是编规则）。
@@ -222,7 +257,8 @@ export function publicView(result,{modeId=null,rulesetConfigId=null}={}){
    const raw=publicState?.mana??ui?.mana??null;
    if(!raw||typeof raw!=='object')return null;
    const one=(value)=>Number.isInteger(value)?value:null;
-   return {self:one(raw.self),opponent:one(raw.opponent)};
+   // `pool` 是规则常量（这一局每人几颗心），与 energy_max 同性质 —— 掉心动效要拿它画空心的 ♡。
+   return {self:one(raw.self),opponent:one(raw.opponent),pool:one(raw.pool)};
   })(),
   // 未核验覆盖：引擎已经带着 confidence/reason/microcase 吐出来了，Node 只做白名单搬运，
   // 每条都标 `unverified:true`，让界面无法把它当成实机结论。
@@ -269,7 +305,7 @@ function plannerPublicOf(result){
 //   ① **只读**。这里只 readFileSync 冻结产物，不写任何东西；`data/roco/**` 一个字节都不改。
 //      也因此这一层**不碰 Python**：盒子的数据在磁盘上就有，规则服务没起来也照样能查。
 //   ② **不编数值**。全图鉴 622 条里只有 48 条在迁移层里有配招与种族值。没有的那 574 条
-//      就显示「本仓库没有这一项」，绝不拿别的字段凑一个看起来精确的数字。
+//      就显示「游戏数据里没有这一项」，绝不拿别的字段凑一个看起来精确的数字。
 //   ③ **玩家层与工程层分字段**。`player` 只放玩家读得懂的键；`provenance` / `source_scope` /
 //      `unknown_fields` / `state_version` / `coverage` / 许可一律进 `dev`，
 //      页面把它们放进**默认收起**的开发者抽屉。同一份数据在两边的键名刻意不同
@@ -277,6 +313,21 @@ function plannerPublicOf(result){
 //      这样「工程字段漏进玩家层」这件事可以被机械判红。
 //   ④ **fail closed**。参数白名单之外的键、格式不对的数字、不认识的系别/定位/支持等级
 //      一律 `ok:false` + 400，**不静默取整、不静默忽略**。
+
+/**
+ * 天气那一句（给模型当题面用）。**没有天气 ⇒ 返回 null，调用方一个字都不加**
+ * ——与引擎「没天气时序列化里不出现 `weather` 键」同一条纪律（legacy 逐位不变）。
+ * 有天气时**必须**说出来：它改的是双方共用的技能威力 / 能耗 / 回合末层数，
+ * 不提它就是在让模型对着一个不完整的局面出招。
+ *
+ * 导出是给判据直接喂假局面的（`tests/roco-standard-pvp-battle.test.js`），
+ * 免得为了测这一句话去起一整个服务。
+ */
+export function weatherLine(pub){
+ const weather=pub?.weather;
+ if(!weather||typeof weather!=='object'||!weather.name)return null;
+ return `场上天气 ${weather.name}${Number.isInteger(weather.turns_left)?`，还剩 ${weather.turns_left} 回合`:''}。`;
+}
 
 /** 盒子用到的只读产物（与 RC-201/202/203 的产物一一对应，不新增副本）。 */
 export const BOX_PATHS=Object.freeze({
@@ -307,11 +358,11 @@ export const BOX_STATUS_LABELS=Object.freeze({same:'相同',different:'不同',u
 export const BOX_FIELD_LABELS=Object.freeze({level:'等级',nature:'性格',talent:'资质',specialty:'特长',
  bloodline:'血脉',skills:'四个技能（按顺序）',favourite:'收藏',locked:'锁定'});
 /** 玩家层解释「为什么这一栏是未知」的三句人话。 */
-export const BOX_UNKNOWN_REASON='本仓库没有这一项的取值：数据里没有登记，所以这一栏标「未知」，不猜。';
+export const BOX_UNKNOWN_REASON='游戏数据里没有登记这一项，所以这一栏标「未知」，不猜。';
 export const BOX_EFFECT_REASON='养成效果未校准：这里的标签只说明「是什么」，不说明「加多少」。';
-export const BOX_NO_LAYER_REASON='本仓库没有这一项：这只精灵不在有配招与数值的 48 只迁移层里'
+export const BOX_NO_LAYER_REASON='这只精灵不在有配招与数值的那批数据里，所以这一项没有'
  +'（全图鉴 622 条里只有 48 条配过招）。';
-export const BOX_PANEL_REASON='等级换算后的面板数值：本仓库没有这一项——换算公式未校准，'
+export const BOX_PANEL_REASON='等级换算后的面板数值：这个数值游戏数据里没有——换算公式还没校准，'
  +'所以盒子里只给迁移层登记过的种族值，不给伪精确的成品数值。';
 
 const BOX_ROOT=dirname(dirname(dirname(fileURLToPath(import.meta.url))));
@@ -431,6 +482,48 @@ function boxDev(index,extra={}){
  };
 }
 
+/**
+ * 换招（2026-09-25 人类：「配招这个你得修好」）—— 一只精灵带几个技能。
+ *
+ * 这个 4 是**数据口径**、不是我定的：加载期对每只精灵的候选配招有硬校验
+ * 「正好 4 个互不重复、真实存在且自己学得到」（`roco/src/roco_env/data.py`），
+ * 规范配招 `candidate_moveset()` 就是 M1 选定的那 4 个。引擎的 `reset` 本身
+ * **不校验数量**（给 3 个也照收），所以「必须 4 个」这条挡板写在产品层。
+ */
+export const LOADOUT_SLOTS=4;
+
+/**
+ * 客户端传来的配招 → 能进引擎的形状。**只挡形状与格数，不判技能池** ——
+ * 「学不学得到」由引擎 `validate_team` 逐条判（`X 学不到 Y` 并 400）；
+ * 在 Node 再判一遍就等于造了第二个规则源（那正是本仓库一直在防的事）。
+ *
+ * `allowedPets` 必须是**引擎那一侧**的 id（物种 id `pet_xxxxxx`），
+ * 不是工作台里的个体 id（`own-XXXX`）—— 两者在开局前会被换算，混用会得到
+ * 「配招提到了不在这一局里的 own-0007」这种假红。
+ *
+ * 返回 `{loadouts}` / `{error}`；`loadouts` 为 null 表示「没选，用规范配招」。
+ */
+export function normalizeLoadouts(raw,{allowedPets=[]}={}){
+ if(raw===undefined||raw===null)return {loadouts:null};
+ if(typeof raw!=='object'||Array.isArray(raw))return {error:'loadouts 必须是 {精灵 id: [技能 id…]} 的对象'};
+ const allowed=new Set((allowedPets||[]).map(String));
+ const out={};const problems=[];
+ for(const [pid,sids] of Object.entries(raw)){
+  if(!pid)return {error:'loadouts 里有空的精灵 id'};
+  if(allowed.size&&!allowed.has(pid)){problems.push(`配招提到了不在这一局里的 ${pid}`);continue;}
+  if(!Array.isArray(sids)){problems.push(`${pid} 的配招必须是技能 id 数组`);continue;}
+  if(sids.length!==LOADOUT_SLOTS){
+   problems.push(`${pid} 要带 ${LOADOUT_SLOTS} 个技能（与规范配招同格数），实际 ${sids.length} 个`);
+   continue;
+  }
+  if(!sids.every((x)=>typeof x==='string'&&x)){problems.push(`${pid} 的配招里有空的技能 id`);continue;}
+  if(new Set(sids).size!==sids.length){problems.push(`${pid} 的配招里有重复技能`);continue;}
+  out[pid]=[...sids];
+ }
+ if(problems.length)return {error:`配招不合法（形状层；技能池由引擎判）：${problems.join('；')}`};
+ return {loadouts:Object.keys(out).length?out:null};
+}
+
 /** 工程层的筛选回显：原始参数（连 `species_id` 这样的键名一起）只出现在这里。 */
 function boxRawFilters(params){
  return {kind:params.kind??null,q:params.q??null,type:params.type??null,role:params.role??null,
@@ -448,8 +541,8 @@ function boxLayerNumbers(index,petId){
   slot_label:BOX_SLOT_LABELS[m.slot]??null,
   name:m.name??null,element:m.element??null,category:m.category??null,
   energy:Number.isFinite(m.energy)?m.energy:null,
-  // 没给威力就照实说「本仓库没有这一项」，**绝不补 0**（威力那一栏有 fail-closed 凭据）。
-  power_label:Number.isFinite(m.power)?String(m.power):'本仓库没有这一项',
+  // 没给威力就照实说「游戏数据里没有这一项」，**绝不补 0**（威力那一栏有 fail-closed 凭据）。
+  power_label:Number.isFinite(m.power)?String(m.power):'游戏数据里没有这一项',
   desc:m.desc??null,
  }));
  return {
@@ -528,7 +621,7 @@ function boxMineCardDev(i){
   build_hash:i.build_hash??null};
 }
 
-/** 成长属性（性格/资质/特长/血脉）在玩家层的读法：有值就给值，没值就说「本仓库没有这一项」。 */
+/** 成长属性（性格/资质/特长/血脉）在玩家层的读法：有值就给值，没值就说「游戏数据里没有这一项」。 */
 function boxGrowthPlayer(attr){
  const value=attr?.value??null;
  return {
@@ -549,7 +642,7 @@ function boxSkillsPlayer(index,ids){
    element:s?.element??null,
    category:s?.category??null,
    energy:s&&Number.isFinite(s.energy)?s.energy:null,
-   power_label:s&&Number.isFinite(s.power)?String(s.power):'本仓库没有这一项',
+   power_label:s&&Number.isFinite(s.power)?String(s.power):'游戏数据里没有这一项',
    desc:s?.desc??null,
    registered:Boolean(s),
   };
@@ -836,10 +929,18 @@ const WORKSHOP_AXIS_LABELS=Object.freeze({
 
 /** 用 RC-304 的**公开入口**取这一队自己身上的五轴：`compareTeams(team, team)`。
  *  自己没有分布 / 没有构建覆盖时的 fail closed 就是它的 `available:false` + `unknown_reason[原文]`。 */
+const WORKSHOP_DISTRIBUTION_AXES=Object.freeze(['environment_value','worst_archetype',
+ 'matchup_spread','execution_tolerance']);
+
 function workshopAxes(compareResult){
+ const distributionKind=compareResult?.distribution?.kind??'unknown';
  return compareResult.axis_order.map((axisId)=>{
   const axis=compareResult.axes[axisId];
   const rawValue=axis.available?axis.value:null;
+  // 四轴与覆盖置信的**依据不是一回事**：四轴要「版本对手分布」当分母（现在是 assumption 档：
+  // 每个已识别体系等权、逐条带可复算 basis），相对分由 RC-302 的结构事实算出。
+  // 这句话必须随档位变——写死成「不依赖对手分布」就是假话。
+  const needsDistribution=WORKSHOP_DISTRIBUTION_AXES.includes(axisId);
   return {
    id:axisId,
    label:WORKSHOP_AXIS_LABELS[axisId]??axis.label??axisId,
@@ -854,8 +955,14 @@ function workshopAxes(compareResult){
    unknown_reason:axis.available?null:(axis.unknown_reason??null),
    unverified:Array.isArray(axis.unverified)?axis.unverified:[],
    evidence:Array.isArray(axis.evidence)?axis.evidence:[],
+   distribution_kind:axis.available&&needsDistribution?(distributionKind==='unknown'?null:distributionKind):null,
    available_note:axis.available
-    ?'这一轴现在能算：它的输入是队里已有的构建与结构事实，不依赖对手分布。'
+    ?(needsDistribution
+     ?(distributionKind==='measured'
+      ?'这一方面现在能算：数字来自实测的对手分布，每一条都能对到出处。'
+      :'这一方面现在能算：先假设"对手会用什么体系"（现在各体系按同等权重；换成本赛季实测数据会更准），'
+       +'再按阵容自己的结构算高低——不是实测数据，也不是对输赢的预测。')
+     :'这一轴现在能算：它的输入是队里已有的构建与结构事实，不依赖对手分布。')
     :'这一轴现在算不出来：缺的输入写在 unknown_reason 里——不补 0、不给「差不多」。',
   };
  });
@@ -915,8 +1022,8 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
   ?'一只都没有选：这一页现在只能告诉你候选池有多大、以及你盒子里有什么，'
    +'不会假装存在唯一的最优六宠。先挑 1～2 只你信得过的，候选才会收窄。'
   :(catalogOnlyMembers===0
-   ?'选中的这几只在冻结迁移层里都有具体构建，结构分能整队算。'
-   :`有 ${catalogOnlyMembers} 只只有图鉴口径的资料、没有具体构建：结构分在这几只上是空的，`
+   ?'选中的这几只都有具体构建，整队的高低都算得出来。'
+   :`有 ${catalogOnlyMembers} 只只有图鉴资料、没有具体构建：这几只算不出高低，`
     +'所以这里的结论会比它们实际能提供的弱。');
 
  const candidates=(recall?.candidates??[]).map((row)=>({
@@ -989,7 +1096,7 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
     candidate_key:row.candidate_key,instance_id:row.instance_id??null,species_id:row.species_id,
     species_name:row.species_name,types:row.types,
     tradeoff_id:'recall_tail',tradeoff_label:'候选参考',
-    tradeoff_intent:'按结构相似度召回、但不在「强度 / 稳定 / 偏好保留」三个口径里的参考候选。',
+    tradeoff_intent:'按结构相似度找出来的参考候选，不属于「强度 / 稳定 / 保留你原来的偏好」这三类。',
     tradeoff_note:null,fallback_reason:null,
     expected_marginal_gain:null,unanswered_weaknesses_after:null,weakness_total_after:null,
     score_scale:null,confidence:row.confidence??null,
@@ -1013,6 +1120,7 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
  // `fastFirst`（RC-306 接线）：客户端**只要初判**时，这一段（缺口装配 + `compareTeams`）
  // 是整条链路里最贵的一段，必须**不跑**——跑了再丢掉的话「300ms 出初判」就是假的。
  let axes=null;
+ let axesDistributionKind=null;
  let axesStatus=modules.fastFirst===true?'not_requested':'not_full_team';
  let replacement=null;
  if(modules.fastFirst!==true&&selectedCount===request.team_size&&selectedCount>0){
@@ -1025,6 +1133,7 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
     teamB:{team_id:`${teamId}-self`,members},metaPrior,
     gapsByTeam:{...gapsByTeam,[`${teamId}-self`]:gapsByTeam[teamId]}});
    axes=workshopAxes(compareResult);
+   axesDistributionKind=compareResult?.distribution?.kind??'unknown';
    axesStatus='computed';
   }
   if(typeof minimalReplacement==='function'){
@@ -1045,7 +1154,7 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
   request,
   gapDimensionNotes:gapNotes.notes,unknownDimensionNotes:gapNotes.unknowns,
   candidates,nextCandidates,
-  entranceCandidates,axes,axesStatus,replacement,constraints,structureNote,selectionMode};
+  entranceCandidates,axes,axesDistributionKind,axesStatus,replacement,constraints,structureNote,selectionMode};
 }
 
 // ── 工坊的两层视图 ────────────────────────────────────────────────────────
@@ -1056,10 +1165,33 @@ function workshopPayload(index,metaPrior,request,parsed,candidatePlan,modules={}
 
 /** 一队六宠的**玩家可读**摘要：每只只有名字、系别、锁没锁、这一只有没有具体构建。 */
 function workshopPlayerMembers(row){
- const tier=row.has_build?'有具体构建（结构分能算）':'只有图鉴资料（结构分在这只是空的）';
+ const tier=row.has_build?'有具体构建（算得出高低）':'只有图鉴资料（算不出高低）';
+ // 2026-09-27（审计高 6 实测）：客户端一直读 `slot.skills`（`team-workshop.js` 的「引擎规范配招」与
+ // 换招起点），而服务端**从来没发过这个键** ⇒ 那句话永远空白、换招编辑器一开始就是「已选 0/4」，
+  // 玩家想换一个招得把四个全重挑。这里把引擎给的四个技能按 `{skill_id,name}` 发出去
+  //（只有名字与技能号，没有数值 —— 那是 dev 层的事）。
+ const skills=(Array.isArray(row.skills)?row.skills:[]).map((one)=>{
+  if(typeof one==='string')return {skill_id:one,name:skillNameOf(one)??'（名字未登记）'};
+  return {skill_id:one?.skill_id??one?.id??null,name:one?.name??skillNameOf(one?.skill_id??one?.id)??'（名字未登记）'};
+ }).filter((one)=>one.skill_id);
  return {name:row.species_name??'（名字未登记）',types:Array.isArray(row.types)?row.types:[],
   locked:row.locked===true,favourite:row.favourite===true,build_tier_label:tier,
+  skills,
   source_note:row.has_build?'来自冻结迁移层的配招与数值':'来自全图鉴条目，没有四技能与数值'};
+}
+/**
+ * 技能号 → 名字。
+ *
+ * 这里**不新建一份技能索引**（那会多一个要与 `skills.json` 对齐的东西）：工坊载荷里本来就带着
+ * 每一招的名字，`workshopPlayerMembers` 优先用行上的 `name`；只有行上是裸 id 时才回退到
+ * 本模块已有的技能读口（`BOX_PATHS.skills`），查不到就 `null` —— **不编名字**。
+ */
+function skillNameOf(skillId){
+ if(!skillId)return null;
+ try{
+  const row=loadBoxIndex()?.skills?.get?.(String(skillId))??null;   // 索引里 skills 是 Map
+  return row?.name??null;
+ }catch{return null;}
 }
 
 /** 一个 `instance:own-0001` 键的**玩家可读**名字。查不到就返回 null（不印 id）。 */
@@ -1079,7 +1211,7 @@ function workshopNameOf(index,key){
 /** `player` 段：**只**放玩家语言（名字 / 系别 / 取舍标签 / 玩家可读的未知说明）。 */
 function workshopPlayerView(indexRef,computed){
  const {facts,selectedCount,candidates,nextCandidates,entranceCandidates,axes,replacement,
-  constraints,structureNote}=computed;
+  constraints,structureNote,axesDistributionKind}=computed;
  // 锁定的**两个来源**都必须认（2026-09-22 人类 P0 · A2）：
  //   ① 冻结产物里那个 `locked` 标记（玩家的长期收藏夹口径）；
  //   ② **这一次请求**里带的 `locked`（从盒子「锁定这一只去配队」带过来的）。
@@ -1089,8 +1221,12 @@ function workshopPlayerView(indexRef,computed){
   (Array.isArray(computed?.request?.locked)?computed.request.locked:[])
    .map((item)=>(typeof item==='string'?item:item?.instance_id)).filter(Boolean));
  const members=computed.teamMembers.map((member)=>workshopPlayerMembers({
+  species_id:member.species_id??null,
   species_name:member.species_id?indexRef.featureFor(member.species_id)?.species_name:null,
   types:member.species_id?indexRef.featureFor(member.species_id)?.types??[]:[],
+  // 2026-09-27（审计高 6）：把这一只的四个技能一起传下去 —— 客户端读的 `slot.skills` 就是它。
+  skills:member.skills??member.ordered_skills
+   ??indexRef.instances.get(member.key?.slice('instance:'.length))?.skills??[],
   has_build:member.species_id?indexRef.featureFor(member.species_id)?.has_frozen_learnset===true:false,
   locked:requestLocked.has(member.key.slice('instance:'.length))
    ||indexRef.instances.get(member.key.slice('instance:'.length))?.locked===true,
@@ -1101,11 +1237,16 @@ function workshopPlayerView(indexRef,computed){
   const member=members[index_]??null;
   slots.push({index:index_+1,state:member?'filled':'empty',
    name:member?.name??null,types:member?.types??[],locked:member?.locked??false,
+   // 2026-09-25：这里**不放** `species_id`。试过，被 `tests/roco-workshop.test.js` 的
+   // 「两层分界」当场判红 —— player 段不许有工程键（那条规则是对的：id 形状的东西属于 dev 段）。
+   // 页面要物种 id 就**按名字**在它自己的名单里解析（唯一匹配才算，重名不猜）。
    // 已选槽位也带机制：卡片首层那句「机制」在选宠池和已选栏里必须是**同一句话**
    // （都来自 `data/roco/derived/pet-mechanisms.json` 的逐字冻结 desc），否则玩家会看到两套口径。
    // **空槽位是 null**，不是「机制资料待确认」——那里压根没有精灵，不该写「资料待确认」。
    mechanism:member?rosterMechanism(mechanismIndex().get(computed.teamMembers[index_]?.species_id)):null,
    build_tier_label:member?.build_tier_label??null,
+   // 客户端（`team-workshop.js`）读的就是这个键：「引擎规范配招：…」与换招起点都靠它。
+   skills:Array.isArray(member?.skills)?member.skills:[],
    source_note:member?.source_note??null,
    empty_hint:member?null:(selectedCount>=2?'可以从候选里挑一只补上':'先挑一只你信得过的')});
  }
@@ -1131,11 +1272,11 @@ function workshopPlayerView(indexRef,computed){
   /** 「这一页现在还不知道什么」——**逐条点名**，不把未核实的东西写成事实。 */
   unknowns:[
    {label:'六只是否必须选满',state:'未核实',note:'待实机录制确认；这一页按六个槽位做，但不假装「必须选满」是官方规则。'},
-   {label:'魔力点数与力竭的准确语义',state:'候选规则',note:'社区交叉支持，不是官方口径；本页不做与魔力相关的推算。'},
+   {label:'魔力点数与力竭的准确语义',state:'候选规则',note:'多份社区资料一致，但不是官方说法；本页不做与魔力相关的推算。'},
    {label:'能量上限与聚能回复量',state:'候选规则',note:'规则配置里有登记值，但它的证据等级仍是候选规则。'},
    {label:'同速时的先后判定',state:'未知',note:'系统按 fail closed 处理：不猜先后，也不因此给结论。'},
    {label:'对手分布（谁在环境里、各占多少）',state:'未知',note:'没有真实对局数据，所以「对环境的价值」这类判断现在算不出来——不补 0、不补胜率。'},
-   {label:'版本强度排序器',state:'未产出',note:'离线联赛与 matchup bank 还没产出，所以这里的排序只是公开权重的结构分，不是对局期望值。'},
+   {label:'版本强度排序器',state:'未产出',note:'还没跑过离线对战统计，所以这里的排序只是按公开权重算的，不代表真实对局里的期望。'},
   ],
   constraints:constraints.slice(),
   structure_note:structureNote,
@@ -1183,11 +1324,17 @@ function workshopPlayerView(indexRef,computed){
   const availableCount=axes.filter((axis)=>axis.available).length;
   player.full_team={
    headline:availableCount===axes.length
-    ?'这六只的五个口径现在都能算。'
+    ?(axesDistributionKind==='assumption'
+     ?'这六只的五个方面现在都能算。其中四个方面要先假设"对手会用什么体系"（现在各体系按同等权重，'
+      +'换成本赛季实测数据会更准）；这里给的高低是按阵容结构算出来的排序，'
+      +'不是实测数据，也不预测输赢。'
+     :(axesDistributionKind==='measured'
+      ?'这六只的五个方面现在都能算：四个方面的数字来自实测的对手分布，每条都能对到出处。'
+      :'这六只的五个方面现在都能算。'))
     :(availableCount===0
-     ?'这六只的五个口径现在都算不出来：缺的输入都是同一件事——版本对手分布还没到位。'
-     :`这六个口径里现在能算 ${availableCount} 个：能算的只依赖你自己这支队的事实，`
-      +'算不出的那几个都要「版本对手分布」当分母，而那份数据现在还没有。'),
+     ?'这六只的五个方面现在都算不出来：缺的是同一件事——本赛季的对手分布还没有。'
+     :`这六个方面里现在能算 ${availableCount} 个：覆盖情况只看你自己这支队的事实；`
+      +'另外四个要「本赛季对手分布」做参照，而那份数据现在还没有。'),
    axes:axes.map((axis)=>({
     label:axis.label,
     available:axis.available,
@@ -1196,7 +1343,9 @@ function workshopPlayerView(indexRef,computed){
     unit_note:axis.available?axis.unit:null,
     unavailable_note:axis.available?null:'现在算不出来：缺的输入写在下面「这一页现在还不知道什么」里。',
     low_confidence_note:axis.available&&axis.confidence&&axis.confidence!=='FULL_VERIFIED'
-     ?'这一轴的依据还没到「已核验」：它说的是我们自己知道多少，不是这支队伍有多强。':null,
+     ?(axis.distribution_kind==='assumption'
+      ?'这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。'
+      :'这一轴的依据还没到「已核验」：它说的是我们自己知道多少，不是这支队伍有多强。'):null,
    })),
    replacement:replacement&&replacement.replacement?{
     out_name:workshopNameOf(indexRef,replacement.replacement.out?.key),
@@ -1212,7 +1361,7 @@ function workshopPlayerView(indexRef,computed){
     confirmed_by_distribution:replacement.confirmed_by_distribution===true,
     confirmed_note:replacement.confirmed_by_distribution===true
      ?'这个替换是有分布依据的。'
-     :'这个替换**只有结构理由**：它补的是「队里没人接的系别」，不是「换它更强」——版本对手分布还没有，所以这里不说谁更强。',
+     :'这个替换只有结构理由：它补的是「队里没人接的系别」，不是「换它更强」——版本对手分布还没有，所以这里不说谁更强。',
    }:null,
    replacement_unavailable_note:replacement&&!replacement.replacement?(replacement.why??null):null,
   };
@@ -1253,7 +1402,7 @@ function workshopPlayerView(indexRef,computed){
     reason:status==='knowledge_only'
      ?'这一只连按需推算的配招都没有（RC-402 的构建表里查不到）：只能当资料参考，不能进对局。'
      :(status==='on_demand'
-      ?'你没有这一只，引擎会用**按需推算**的配招跑它（ENGINE_HYPOTHESIS，未核验）：可以试玩，不写进正式持有队伍。'
+      ?'你没有这一只，引擎会用按需推算的配招跑它（属于推算，未核验）：可以试玩，不写进正式持有队伍。'
       :'你拥有这一只：可以进正式队伍并开局。'),
     mechanism:rosterMechanism(mechanismIndex().get(speciesId)),
    });
@@ -1266,7 +1415,7 @@ function workshopPlayerView(indexRef,computed){
    // 能不能按理论阵容**试玩**：每只都得有可跑的东西（持有或按需推算）。
    trial_ready:filledAnalysis.length===WORKSHOP_TEAM_SIZE&&filledAnalysis.every((row)=>row.can_trial===true),
    fieldable:filledAnalysis.filter((row)=>row.can_field===true).length,
-   note:'理论阵容只用于**搭配分析与比较**（列在这里的物种不要求你拥有）。'
+   note:'理论阵容只用于搭配分析与比较（列在这里的物种不要求你拥有）。'
     +'能不能出战按每一只的状态单独判断：持有 → 可正式开局；图鉴按需推算 → 只能试玩，且逐条标未核验。',
   };
  return player;
@@ -1400,7 +1549,7 @@ function boxCatalogMode(index,params){
     record_kind_label:params.record_kind==='pet_form'?'形态':(params.record_kind==='pet_record'?'精灵':null)},
    filters_available:boxVocab(index),
    coverage_note:`全图鉴 ${index.coverage.catalog_pets} 条：其中 ${index.coverage.with_moveset_layer} 条配过招、`
-    +`有迁移层登记的种族值；其余只有名字、系别与形态，点开详情会如实说「本仓库没有这一项」。`,
+    +`有迁移层登记的种族值；其余只有名字、系别与形态，点开详情会如实说「游戏数据里没有这一项」。`,
    cards:page.rows.map((e)=>boxCatalogCard(index,e)),
   },
   dev:boxDev(index,{
@@ -1438,7 +1587,7 @@ function boxMineMode(index,params){
     species:params.species_id?{name:(index.catalogById.get(params.species_id)?.name??null)}:null},
    filters_available:boxVocab(index),
    coverage_note:`我的盒子 ${index.coverage.owned_instances} 个个体，来自 ${index.coverage.owned_species} 个物种；`
-    +'性格/资质/特长/血脉在本仓库一律只是标签，养成效果未校准。',
+    +'性格/资质/特长/血脉这一页只当标签看，养成效果还没校准。',
    cards:page.rows.map((i)=>boxMineCard(index,i)),
   },
   dev:boxDev(index,{mode:'mine',filters:boxRawFilters(params),
@@ -1517,7 +1666,7 @@ function boxDetailMode(index,id){
 function boxCompareFieldValue(index,field,value){
  if(field==='skills'){
   if(!Array.isArray(value))return null;
-  return boxSkillsPlayer(index,value).map((s)=>s.name??'（本仓库没有这一项）');
+  return boxSkillsPlayer(index,value).map((s)=>s.name??'（游戏数据里没有这一项）');
  }
  if(value===null||value===undefined)return null;
  return value;
@@ -1577,7 +1726,7 @@ function boxCompareMode(index,ids){
   summary:compared.identical_in_known_attributes
    ?'这两只在已知字段上一模一样（未知的那几栏不算「相同」）。'
    :`这两只有 ${counts.different} 栏不同、${counts.unknown} 栏未知。`,
-  unknown_note:`未知 ${counts.unknown} 栏的原因见每一条；本仓库没有登记取值，就不猜。`,
+  unknown_note:`未知 ${counts.unknown} 栏的原因见每一条；数据里没有登记，就不猜。`,
  }};
 }
 
@@ -1601,8 +1750,24 @@ export function createRocoService(options={}){
   if(idleTimer.unref)idleTimer.unref();
  }
 
+/**
+ * 引擎子进程**真的还活着吗**（2026-09-27 修，审计实测踩到）。
+ *
+ * 事实经过：`kill -9 <python 子进程>` 之后，`battle/*` 连打 9 次全部 `ECONNREFUSED`，
+ * 而 `/api/roco/status` 一直回 `available:true, last_error:null`，页面上
+ * 「规则服务：已就绪」与「名单读取失败：连不上规则服务」同屏矛盾 —— **整局永久不可用**。
+ *
+ * 根因：存活判据原来只写 `child.exitCode === null`。Node 里**被信号杀死**的子进程
+ * `exitCode` 恒为 `null`（只有 `signalCode` 有值），所以这条判据永远为真。
+ * 另外 `roco-client.js` 在就绪后会移除 `exit` 监听，没人清 `child`/`baseUrl`。
+ *
+ * 这里把"活着"定义为**既没退出码、也没有信号码**；判死之后调用方会重新 `ensure()`。
+ */
+function engineAlive() {
+  return Boolean(client.baseUrl) && childAlive(client.child);
+}
  async function ensure(){
-  if(client.baseUrl&&client.child&&client.child.exitCode===null)return {ok:true,alreadyRunning:true};
+  if(engineAlive())return {ok:true,alreadyRunning:true};
   if(starting)return starting;
   starting=(async()=>{
    try{
@@ -1642,9 +1807,17 @@ export function createRocoService(options={}){
 
  /** 内部：把一次服务调用收成「成功就是 result，失败就是结构化原因」。 */
  function unwrap(envelope){
-  if(!envelope||typeof envelope!=='object')return {ok:false,reason:'服务回执不是对象'};
-  if(envelope.ok!==true)return {ok:false,reason:envelope.message||envelope.error||'规则服务拒绝了这次请求',
-   error_type:envelope.error_type??envelope.code??null};
+  if(!envelope||typeof envelope!=='object')return {ok:false,reason:'游戏服务返回的内容读不出来'};
+  if(envelope.ok!==true){
+   // 2026-09-27（审计高 5 实测）：引擎崩了之后这里会把**内部地址**
+   // （http://127.0.0.1:64673）原样写进玩家文案，页面直接印出来。玩家不该看到内部 URL。
+   const raw=String(envelope.message||envelope.error||'规则服务拒绝了这次请求');
+   // 真机复验（2026-09-27）发现第一版只剥了 `http://…` 那一种，而同一句话里
+   // 末尾**还会再出现一次**裸的 `127.0.0.1:54800`（来自底层 connect 错误）⇒ 两种形状都要剥。
+   return {ok:false,reason:raw.replace(/\b(?:https?:\/\/)?127\.0\.0\.1:\d+\S*/g,'对局引擎')
+    .replace(/\s{2,}/g,' ').trim(),
+    error_type:envelope.error_type??envelope.code??null};
+  }
   return {ok:true,result:envelope.result};
  }
 
@@ -1659,7 +1832,7 @@ export function createRocoService(options={}){
   */
  async function status(opts={}){
   if(opts.probe===true){try{await ensure();}catch{/* 失败照实报，不吞成异常 */}}
-  const ready=Boolean(client.baseUrl&&client.child&&client.child.exitCode===null);
+  const ready=engineAlive();
   let health=null;
   if(ready){
    try{
@@ -1878,28 +2051,55 @@ function sampleEnemyPool(){
   const resolved=resolveBattleTeamIds(resolvedTeam);
   if(resolved.unknown.length){
    return {ok:false,status:400,
-    error:`这些个体不在 owned-pets.json 里，不能上场：${resolved.unknown.join('、')}`
+    error:`这些个体不在你的名单里，不能上场：${resolved.unknown.join('、')}`
      + '（工作台里「图鉴条目」是还没有可用构建的物种，换一只你已经拥有的）'};
   }
   const resolvedEnemy=enemyTeam?resolveBattleTeamIds(enemyTeam):null;
   if(resolvedEnemy&&resolvedEnemy.unknown.length){
-   return {ok:false,status:400,error:`对手队伍里有不在 owned-pets.json 的个体：${resolvedEnemy.unknown.join('、')}`};
+   return {ok:false,status:400,error:`对手队伍里有不在你的名单里的个体：${resolvedEnemy.unknown.join('、')}`};
   }
 
+  // ── 换招（人类 2026-09-25：「配招这个你得修好」）──────────────────────────
+  // 这一段以前**根本不存在**：无论页面上选了什么，下面那次 `client.battleNew`
+  // 都不带 `loadouts`，引擎一律按规范配招跑 —— 「换了招没反应」的根因就在这一跳。
+  // 合法性交给引擎（`reset` → `validate_team`，学不到就 400 并点名），
+  // 这里只挡形状与格数。`allowedPets` 用**换算后**的物种 id，不是 `own-XXXX`。
+  const loadoutsCheck=normalizeLoadouts(body.loadouts,{allowedPets:resolved.ids});
+  if(loadoutsCheck.error)return {ok:false,status:400,error:loadoutsCheck.error};
+  const loadouts=loadoutsCheck.loadouts;
+
   const envelope=await client.battleNew({team:resolved.ids,enemyTeam:resolvedEnemy?resolvedEnemy.ids:undefined,
-   seed,strategy,stateVersion:0,rulesetConfigId,unverifiedOverrides});
+   seed,strategy,stateVersion:0,rulesetConfigId,unverifiedOverrides,
+   ...(loadouts?{loadouts}:{})});
   const out=unwrap(envelope);
-  if(!out.ok)return {ok:false,status:502,error:out.reason,error_type:out.error_type};
+  // 2026-09-25（换招判据当场抓到）：这里原来一律回 **502**，但开局失败几乎都是**请求数据的问题**
+  // （引擎的 `validate_team` 逐条判：队伍不合规模、配招里有学不到的技能……），
+  // 那是 400 不是 502 —— 502 会让页面把"这一招它学不到"显示成"规则服务出问题了"。
+  // 与同族的 `advanceBattle` 对齐：`unsupported_effect` → 422，其余 → 400。
+  // （规则服务真的不可用在上面的 `ensure()` 那里已经是 503，不经过这一支。）
+  // 2026-09-27（审计高 5）：**引擎不可用**要报 503，不许混进 400/422 ——
+  // 混进去页面会把「服务挂了」显示成「你的请求不合法」。
+  if(!out.ok)return {ok:false,error:out.reason,error_type:out.error_type,
+   status:out.error_type==='unavailable'?503:(out.error_type==='unsupported_effect'?422:400)};
   const id=newSessionId();
   if(enemyIsSample)out.result.enemy_source=enemySource??'sample';
   sessions.set(id,{state:out.result.state,strategy,seed,turn:out.result.turn,
    mode_id:modeId,ruleset_config_id:rulesetConfigId});
   const base=publicView(out.result,{modeId,rulesetConfigId});
+  // 换了招就得让玩家看得出**哪几只生效了**：技能本身以引擎回执的 `loadouts` 为准
+  // （不重复写一份），这里只标来源是「你选的」还是「引擎规范配招」。
+  const loadoutOrigin={};
+  for(const pid of resolved.ids)loadoutOrigin[pid]=(loadouts&&loadouts[pid])?'player':'canonical';
+  base.loadout_origin=loadoutOrigin;
+  if(loadouts){
+   const picked=Object.values(loadoutOrigin).filter((v)=>v==='player').length;
+   base.loadout_note=`配招：${picked} 只按你选的带，另外 ${resolved.ids.length-picked} 只用引擎规范配招。`;
+  }
   // 「对手是示例阵容」这件事必须写进**页面读得到的地方**（`view`），
   // 只挂在 `out.result` 上页面看不到（第一版就是这么漏的）。
   if(enemyIsSample){
    base.enemy_source=enemySource??'sample';   // 不再硬编码：来源见 sampleEnemyFor（usable / fallback）
-   base.enemy_note='对手是按候选宇宙取的**示例阵容**（匹配前对手未知）：不是你的镜像，也不是真实匹配结果。';
+   base.enemy_note='对手是按候选宇宙取的示例阵容（匹配前对手未知）：不是你的镜像，也不是真实匹配结果。';
   }
   return {ok:true,battle_id:id,view:base,
    mode:mode?{id:mode.id,label:mode.label,status:mode.status,confidence:mode.confidence,
@@ -1917,6 +2117,25 @@ function sampleEnemyPool(){
   if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
   touch();
   const stateVersion=session.state?.state_version??0;
+  // 2026-09-27（审计高 3 的后半，实测）：两个客户端/两个标签页并发对**同一局**发行动时，
+  // 原来两条都 200、后写的那条把先写的那一手**静默吞掉**（last-write-wins）。
+  // 现在做一次**版本 CAS**：请求带来的 `state_version` 必须等于这一局当前版本；
+  // 不等就 409 并把当前版本交回去（页面据此提示"局面已经变了，重新看一眼再出招"）。
+  // 只在调用方**明确带了**版本时检查（老客户端不带 ⇒ 行为不变，不会把老页面打死）。
+  const claimed=body.state_version;
+  if(claimed!==undefined&&claimed!==null&&Number.isInteger(Number(claimed))
+   &&Number(claimed)!==stateVersion){
+   return {ok:false,status:409,error:`局面已经变了（你看到的是第 ${Number(claimed)} 版，现在是第 ${stateVersion} 版）：`
+    +'重新看一眼再出招。',error_type:'stale_state',state_version:stateVersion};
+  }
+  // ⚠ 真机复验（2026-09-27）发现上面那一次比对**挡不住并发**：两条请求都在"改状态之前"读到同一个
+  // `stateVersion`，于是**两条都过**。所以还必须在**第一次 await 之前同步占位**：
+  // 这一局正在结算时，第二条出招直接 409（否则就是审计实测的"后写覆盖前写、静默吞一手"）。
+  if(session.inFlight){
+   return {ok:false,status:409,error:'这一局正在结算上一手：等它出来再出招。',
+    error_type:'stale_state',state_version:stateVersion};
+  }
+  session.inFlight=true;
   const envelope=await client.battleAdvance({
    state:session.state,
    action:body.action&&typeof body.action==='object'?body.action:null,
@@ -1924,11 +2143,50 @@ function sampleEnemyPool(){
    playerStrategy:body.auto===true?'greedy_damage':null,
    stateVersion,
   });
-  const out=unwrap(envelope);
+  let out=null;
+  try{
+   out=unwrap(envelope);
+  }finally{
+   session.inFlight=false;   // 无论成败都复位，否则这一局会被永久锁死
+  }
   if(!out.ok)return {ok:false,status:400,error:out.reason,error_type:out.error_type};
   session.state=out.result.state;
   session.turn=out.result.turn;
   counters.advances+=1;
+  return {ok:true,battle_id:body.battle_id,view:publicView(out.result)};
+ }
+
+ /**
+  * **不占行动的自由动作**（人类 2026-09-25：「愿力强化不占行动，自由动作，背包物品都不占行动」）。
+  *
+  * 与 `advanceBattle` 只差一件事，但那是全部意义所在：**回合不往前走**、对手那一手不结算，
+  * 玩家随后照常出这一手（页面接着调 `advanceBattle`）。
+  * 「『愿力冲击』就是个技能，这个算行动」⇒ 换上来的技能仍旧走 `advanceBattle`。
+  *
+  * 能力由配置声明（规则集的 `policies.magic_policy.occupies_action === false`）：
+  * 没声明的配置由引擎 fail closed，这里**只转发**、不替它猜（`error_type` 原样带回页面）。
+  */
+ async function freeAction(body={}){
+  const session=sessionOf(body.battle_id);
+  if(!session)return {ok:false,status:404,error:'对局不存在或已失效：请重新开一局'};
+  if(!body.action||typeof body.action!=='object')
+   return {ok:false,status:400,error:'自由动作必须给出 action（这一下用哪件物品）'};
+  const up=await ensure();
+  if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
+  touch();
+  const stateVersion=session.state?.state_version??0;
+  const envelope=await client.battleFree({
+   state:session.state,
+   action:body.action,
+   strategy:session.strategy,
+   stateVersion,
+  });
+  const out=unwrap(envelope);
+  if(!out.ok)return {ok:false,error:out.reason,error_type:out.error_type,
+   status:out.error_type==='unavailable'?503:(out.error_type==='unsupported_effect'?422:400)};
+  session.state=out.result.state;
+  session.turn=out.result.turn;      // 自由动作**不**改回合数（照抄引擎回执，不自己加）
+  counters.freeActions=(counters.freeActions??0)+1;
   return {ok:true,battle_id:body.battle_id,view:publicView(out.result)};
  }
 
@@ -2033,6 +2291,12 @@ function sampleEnemyPool(){
   const parts=['现在是我方回合，要不要先查一次工具再决定。'];
   if(mine)parts.push(`我方场上 ${mine.pet_id}：血量 ${mine.hp}/${mine.max_hp}，能量 ${mine.energy}。`);
   if(theirs)parts.push(`对手场上 ${theirs.pet_id}：血量 ${theirs.hp}/${theirs.max_hp}，能量 ${theirs.energy}。`);
+  // 天气（2026-09-25 裁决 B 之后引擎才有的**公开**事实）：**没有天气就一个字都不加**
+  // ——与引擎「没天气时序列化里不出现 weather 键」同一条纪律（legacy 逐位不变）。
+  // 有天气时必须说出来：它改的是**双方**的技能威力 / 能耗 / 回合末层数，
+  // 不提它就是在让模型对着一个不完整的局面出招。文案由 `weatherLine()` 一份实现说了算。
+  const weather=weatherLine(pub);
+  if(weather)parts.push(weather);
   return parts.join('');
  }
 
@@ -2053,6 +2317,50 @@ function sampleEnemyPool(){
   *     这个标记一起带出去，好让宿主分得清「引擎说没有出处」与「映射层把字段丢了」。
   * 传了参数才追加 `total/offset/limit`（以及逐只的 `role/speed_tier`）——这一条没变。
   */
+ /**
+  * 配招可选项（换招界面用）：`GET /api/roco/loadout/options?pet=<物种 id 或 own-XXXX>`。
+  *
+  * 只回答「这只精灵**学得到**哪些技能」：池子直接来自引擎的学习表查询
+  * （`kind:'learnset'`，native/blood/stones 三张表 + 每条技能自己的记录与出处）。
+  *
+  * 这里**不给**「推荐配招 / 最优四招」：那需要强度梯度数据，游戏数据里没有，
+  * 编一个就是造数（红线）。当前带着的四个由页面从 `/api/roco/roster` 的
+  * `moveset` 预填 —— 同一个引擎来源，不另造第二份。
+  */
+ async function loadoutOptions(query={}){
+  const up=await ensure();
+  if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
+  touch();
+  const raw=typeof query.pet==='string'?query.pet.trim():'';
+  if(!raw)return {ok:false,status:400,error:'要查配招可选项得给 pet（物种 id pet_xxxxxx，或你的个体 own-XXXX）'};
+  const resolved=resolveBattleTeamIds([raw]);
+  if(resolved.unknown.length){
+   return {ok:false,status:400,
+    error:`这不在你的名单里：${resolved.unknown.join('、')}（要查没拥有的物种，请直接用物种 id pet_xxxxxx）`};
+  }
+  const petId=resolved.ids[0];
+  const envelope=await client.query({kind:'learnset',pet_id:petId,include_records:true},{});
+  const out=unwrap(envelope);
+  if(!out.ok)return {ok:false,status:404,error:out.reason,error_type:out.error_type};
+  const r=out.result||{};
+  const groups=[['native','天生（学习表）'],['blood','血脉'],['stones','技能石']];
+  const learnable=[];const seen=new Map();
+  for(const [key,label] of groups){
+   for(const row of (Array.isArray(r[key])?r[key]:[])){
+    const sid=row?.skill_id??null;
+    if(!sid)continue;
+    const hit=seen.get(sid);
+    if(hit){if(!hit.sources.includes(label))hit.sources.push(label);continue;}
+    const entry={...row,skill_id:sid,sources:[label]};
+    seen.set(sid,entry);learnable.push(entry);
+   }
+  }
+  return {ok:true,pet_id:petId,slots:LOADOUT_SLOTS,total:r.total??learnable.length,learnable,
+   note:`这是这只精灵学得到的全部技能（原生/血脉/技能石），**不是推荐配招**：游戏数据里没有强度排序，所以这里不排优先级。`
+    +` 带哪 ${LOADOUT_SLOTS} 个由你决定；合法性由引擎在开局时逐条校验（学不到就拒这一局）。`,
+   evidence_ids:Array.isArray(envelope?.evidence_ids)?envelope.evidence_ids:[]};
+ }
+
  async function roster(query={}){
   const up=await ensure();
   if(!up.ok)return {ok:false,status:503,error:`规则服务不可用：${up.error}`};
@@ -2107,7 +2415,7 @@ function sampleEnemyPool(){
    // role/speed_tier 是登记层的**标注**（不是引擎数值）：只在带参数时带出去，
    // 默认回执的 pets[] 元素只多 `evidence_ids`（加性），原有键一个没动。
    //
-   // `build_support`（RC-502）同理：它说明这一只是**冻结已核验**还是**按需推算**，
+   // `build_support`（RC-502）同理：它说明这一只是**冻结已核验**还是按需推算，
    // 页面要靠它把「未核验」如实写在卡上。默认回执里**不加**这个键 ——
    // 那份回执被禁止重跑的轨迹摘要钉着（`trajectories` 6048/6048），多一个键就全变。
    ...(paged?{role:p.role??null,speed_tier:p.speed_tier??null,build_support:p.build_support??null}:{}),
@@ -2356,6 +2664,6 @@ function sampleEnemyPool(){
   };
  }
 
- return {status,startBattle,advanceBattle,planBattle,roster,box,workshop,shadowPlan,ensure,stop,publicView,
+ return {status,startBattle,advanceBattle,freeAction,planBattle,roster,box,workshop,loadoutOptions,shadowPlan,ensure,stop,publicView,
   _sessions:sessions,_client:()=>client};
 }

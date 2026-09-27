@@ -65,7 +65,7 @@ async function launchChrome(){
   '--disable-crash-reporter',`--user-data-dir=${profile}`,'--remote-debugging-port=0',
   '--window-size=1440,900','about:blank'],{stdio:['ignore','ignore','pipe']});
  chrome.stderr?.on('data',(d)=>{chromeErr=(chromeErr+String(d)).slice(-800);});
- const kill=()=>{try{chrome.kill('SIGKILL');}catch{}try{rmSync(profile,{recursive:true,force:true});}catch{}};
+ const kill=()=>{try{chrome.kill('SIGKILL');}catch{}try{rmSync(profile,{recursive:true,force:true,maxRetries:5,retryDelay:120});}catch{}};
  let port=null;
  for(let i=0;i<240&&!port;i++){
   await sleep(250);
@@ -168,7 +168,11 @@ async function main(){
  const quietAtOpen=await js(`(()=>{const s=window.rocoDemo.state;
   return !s.hint&&s.lastDetail&&s.lastDetail.action==='silent';})()`);
  if(quietAtOpen){
-  await mouseClick('#plan');
+  // 2026-09-25（死代码清理）：`#plan`「让小芽看一眼」已随旧行动坞删除（`roco.css:640`），
+  // 它原来的 click 监听就是 `requestPlan({reason:'manual',explicit:true})`；
+  // 页面把同一个入口挂在 `window.rocoDemo` 上（`roco.js:4074`），走它——
+  // 与 `demo-acceptance.mjs:1920`、`browser-workshop-acceptance.mjs:1574` 同一口径。
+  await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);
   await sleep(1500);
   await mouseClick('#hint-details');
   await sleep(300);
@@ -192,7 +196,8 @@ async function main(){
    +`浮条「${fallbackProbe.text}」；并列 ${fallbackProbe.acts} 个真实合法动作 / 后续 ${fallbackProbe.future} 条`
    :'开局第 1 回合引擎就开口了（没有取到「没什么可说」的局面）');
 
- // ── 整局推进：用**真实鼠标**点「让双方各走一步」（自动演示），直到分出结果 ────
+ // ── 整局推进：走页面挂出来的 `window.rocoDemo.autoTurn()`（`#auto-turn` 已随旧行动坞删除），
+ //    直到分出结果 ─────────────────────────────────────────────────────────────
  const bubbles=[];             // 自动出现的气泡（含 kind）
  let lastLayer=null;           // 最后一次**真的算过**的介入判定层结论（硬门控会提前返回、不带 layer）
  let lastShownAdvice=null;     // 玩家最后一次真的看到的那句建议（终局那一次判定是硬门控，advice 为 null）
@@ -220,7 +225,8 @@ async function main(){
   // 写死某一回合不行——那一手可能正是引擎判定「这一手没什么值得单独说」的局面。
   const seenNow=await js(`!document.getElementById('hint').hidden`);
   if(seenNow&&!manualProbe){
-   await mouseClick('#plan');
+   // 同 ① 段：`#plan` 已删，走它的原处理函数挂在页面上的那个出口。
+   await js(`window.rocoDemo.requestPlan({reason:'manual',explicit:true})`);
    await sleep(1500);
    await mouseClick('#hint-details');
    await sleep(400);
@@ -230,7 +236,10 @@ async function main(){
      hidden:document.getElementById('hint').hidden,
      text:(document.getElementById('hint-text').textContent||'').trim(),
      why:(document.getElementById('hint-why').textContent||'').trim(),
-     planStatus:document.getElementById('plan-status').textContent.trim(),
+     // 2026-09-25（死代码清理）：#plan-status 元素**已不存在**于 roco.html（roco.js 那边
+     // 只剩 11 处 null 守卫的写入），原来这里直接 .textContent.trim() 会在元素缺失时抛
+     // TypeError 把整段探针打断。改成 null-safe，并如实承认这一栏现在恒为空。
+     planStatus:((document.getElementById('plan-status')||{}).textContent||'（元素已删，无落点）').trim(),
      acts:[...body.querySelectorAll('[data-cmp-action]')].map((li)=>li.dataset.cmpLabel),
      rec:[...body.querySelectorAll('[data-cmp-action][data-cmp-recommended="yes"]')].map((li)=>li.dataset.cmpLabel),
      future:[...body.querySelectorAll('[data-cmp-future]')].map((li)=>li.innerText.replace(/\s+/g,' ')),
@@ -246,7 +255,13 @@ async function main(){
    await undoScriptDismiss();
   }
   const versionBefore=await js(`window.rocoDemo.state.view?window.rocoDemo.state.view.state_version:null`);
-  await mouseClick('#auto-turn');
+  // 2026-09-25（死代码清理）：旧 `#auto-turn` 已随旧行动坞删除 ——
+  // `body[data-roco-view="ready"] #action-panel{display:none !important}`（`roco.css:860/872`），
+  // 它的 rect 恒为 0×0，`mouseClick('#auto-turn')` 只会在 `rectOf` 之后抛「找不到可点的元素」。
+  // 这一处只是**推进整局**、不是真鼠标可达性判据（可达性在 `browser-adapter-acceptance.mjs` ⑪），
+  // 所以走页面自己挂出来的 `window.rocoDemo.autoTurn()`（`roco.js:4074`），与
+  // `demo-acceptance.mjs:295/420` 同一口径。
+  await js(`window.rocoDemo.autoTurn()`);
   // 等这一手真的结算完（state_version 变了）再读：不等就会读到**上一手**的浮条，
   // 把「玩家主动问来的那句」记成自动气泡（实测踩过）。
   for(let k=0;k<40;k+=1){
@@ -260,7 +275,8 @@ async function main(){
  }
  for(let i=0;i<40;i++){
   if(await js(`Boolean(window.rocoDemo.state.view&&window.rocoDemo.state.view.battle_result)`))break;
-  await mouseClick('#auto-turn');
+  // 同上：`#auto-turn` 已删，推进整局走命名空间出口。
+  await js(`window.rocoDemo.autoTurn()`);
   await sleep(260);
  }
  await sleep(700);

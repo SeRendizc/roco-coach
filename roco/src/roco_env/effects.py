@@ -133,6 +133,23 @@ BUFF_PCT_KEYS = ("atk", "spa", "def", "spd", "spe")
 #: 社区实现的原始键名（小数，0.6 = +60%），只做回落读取，不再由引擎写入。
 LEGACY_DECIMAL_KEYS = ("atk_up", "atk_down", "def_up", "def_down")
 
+#: **逐系别的威力增益键**（`buffs` 里 `power_<x>` → 系别）。
+#:
+#: 抽成一张表是因为写入方必须先问 `element_power_buff_key()` 有没有对应的读点：
+#: 写一个 `compute_damage` **不读**的键 = 静默失效，没有读点就 fail closed。
+ELEMENT_POWER_BUFF_KEYS: Tuple[Tuple[str, str], ...] = (
+    ("power_water", "水系"), ("power_fight", "武系"),
+    ("power_bug", "虫系"), ("power_ice", "冰系"),
+)
+
+_ELEMENT_POWER_BUFF_BY_ELEMENT: Dict[str, str] = {
+    element: key for key, element in ELEMENT_POWER_BUFF_KEYS}
+
+
+def element_power_buff_key(element: Any) -> Optional[str]:
+    """某个系别对应的威力增益键；**没有读点就返回 None**（调用方必须 fail closed）。"""
+    return _ELEMENT_POWER_BUFF_BY_ELEMENT.get(str(element)) if element else None
+
 
 def _pct(buffs: Dict[str, Any], engine_key: str, legacy_up: str, legacy_down: str) -> float:
     """读一个属性的净百分比（小数）。引擎键优先，社区键回落。
@@ -310,6 +327,10 @@ class DamageOutcome:
     defense_reduction: float
     model: str
     verified: bool
+    #: 2026-09-25：天气给的**本手威力系数**（雨天水系 +75% ⇒ 1.75；没有天气 / 没声明 ⇒ 1.0）。
+    #: 它已经乘进 `power_multiplier`，这里单独留一份是为了让「这一下的加成从哪来」可追问。
+    weather_multiplier: float = 1.0
+    weather_note: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -327,15 +348,20 @@ class DamageOutcome:
             "defense_reduction": self.defense_reduction,
             "damage_model": self.model,
             "formula_verified": self.verified,
+            "weather_multiplier": round(self.weather_multiplier, 6),
+            "weather_note": self.weather_note,
         }
 
 
 def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
                    *, attacker_species: Any = None, defender_species: Any = None,
-                   hit_count: int = 1) -> DamageOutcome:
+                   hit_count: int = 1, cfg: Any = None,
+                   weather: Any = None) -> DamageOutcome:
     """一次伤害的完整计算。**唯一实现。**
 
     `attacker` / `defender` 是 `PetState`（要有 `buffs`、`energy`、`hp`）；
+    `weather` 是这一局的**场地天气**（`GameState.weather`，`None` = 没有天气）：
+    它只按**配置声明的**效果加成（目前是雨天水系技能威力），没声明就什么都不加。
     `*_species` 不给就按 `pet_id` 从规则集查。属性增减**只进一次**（走
     `buff_damage_multiplier`），面板值保持未加成 —— 两边同时乘会把增益约掉。
     """
@@ -343,26 +369,69 @@ def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
     defender_species = defender_species or rs.pet(defender.pet_id)
 
     pr = effective_power(skill, attacker=attacker, defender=defender, rs=rs)
-    type_mult = rs.type_chart.multiplier(defender_species.types, skill.element)
+    import roco_env.data as _data  # 局部导入：data 与 effects 互相引用，模块级会成环
+
+    try:
+        type_mult = rs.type_chart.multiplier(defender_species.types, skill.element)
+    except _data.TypeCombinationUnknown as exc:
+        # 2026-09-25：双属性按两系**相乘**（人类裁决），但只有快照给出显式行的
+        # 86 个组合可查；另外 67 个组合没有数据 ⇒ **不猜**（既不中性、也不用别的组合顶），
+        # 如实转成「这个机制没核验」的既有通道。
+        raise UnsupportedEffect(
+            f"属性相性（{'|'.join(defender_species.types)}）", str(exc),
+            "data/roco/normalized/*/types.json（可查组合 = 快照显式行）") from exc
     stab = stab_multiplier(skill, attacker_species.types)
     model = active_damage_model()
 
-    import roco_env.data as _data  # 局部导入：data 与 effects 互相引用，模块级会成环
 
     atk_panel = _data.panel_stats(attacker_species.stats)
     def_panel = _data.panel_stats(defender_species.stats)
-    atk_value = atk_panel.get("atk", float(attacker_species.stats.get("atk", 1)))
-    def_value = def_panel.get("def", float(defender_species.stats.get("def", 1)))
+    # 2026-09-23（接手复核）：**攻防要按技能的伤害类别取**，不能永远用物攻/物防。
+    # 原来这里写死了 `atk` / `def`，于是**魔攻技能也在用物攻算** —— 实测后果：
+    # 物攻高、魔攻低的精灵放魔攻技能伤害虚高（对手一招秒杀就是这么来的），
+    # 反过来高魔防的精灵也挡不住魔攻。冻结数据里 `damage_class` 只有两个取值
+    # （物攻 / 魔攻），正好对应 (atk, def) 与 (spa, spd)。
+    # 拿不到对应面板值就**抛**（fail closed）：宁可拒绝结算，也不拿另一个攻去顶。
+    # 这一条**由配置声明**（`damage.attack_stat_by_class`）：legacy / v2 没声明 → 逐位不变
+    # （继续用 atk/def），只有显式声明的候选配置才按类别取。这是项目里既有能力声明的同一套做法
+    # （见 `damage.multi_hit` / `damage.slot_condition`），也是 `test_turn_order_fail_closed`
+    # 那条 golden 指纹要求的：默认路径一个字节都不许动。
+    from . import rule_config as _rule_config   # 局部导入：与 data 同理由，避免模块级成环
+    # ⚠ 必须读**这一局**的配置：调用方（`env._execute` / 伤害预览）把它传进来；
+    # 不传时才退回当前默认配置。第一版只读默认配置，于是候选局里这条修正根本没生效
+    # （实测：候选配置声明了 true，魔攻技能仍按物攻算 115）。
+    _cfg = cfg if cfg is not None else _rule_config.get_rule_config()
+    want_magic = (bool(getattr(_cfg, "damage_attack_stat_by_class", False))
+                  and str(getattr(skill, "damage_class", "") or "") == "魔攻")
+    atk_key, def_key = ("spa", "spd") if want_magic else ("atk", "def")
+    if atk_key not in atk_panel or def_key not in def_panel:
+        raise UnsupportedEffect(
+            f"伤害结算({atk_key}/{def_key})",
+            f"{attacker_species.name} 或 {defender_species.name} 的面板里没有 {atk_key}/{def_key} ——"
+            "伤害类别决定用哪一对攻防，缺一个就不许拿另一个顶",
+        )
+    atk_value = atk_panel[atk_key]
+    def_value = def_panel[def_key]
 
     ability = buff_damage_multiplier(dict(attacker.buffs or {}), dict(defender.buffs or {}))
 
     power_buff = 1.0 + float((attacker.buffs or {}).get("power", 0)) / 100.0
-    for element_key, element in (("power_water", "水系"), ("power_fight", "武系"),
-                                 ("power_bug", "虫系"), ("power_ice", "冰系")):
+    # 逐系别的威力增益：键名与系别的对应关系只有 `ELEMENT_POWER_BUFF_KEYS` 一处。
+    for element_key, element in ELEMENT_POWER_BUFF_KEYS:
         if element_key in (attacker.buffs or {}) and skill.element == element:
             power_buff *= 1.0 + float(attacker.buffs[element_key]) / 100.0
 
     reduction = float(getattr(defender, "_defense_reduction", 0.0) or 0.0)
+    # ── 天气：技能威力加成（2026-09-25 人类裁决「那你就做！」）────────────────
+    #
+    # 官方 4/14 逐字：「天气是常驻在全场的效果，让对战双方都能获得相应的加成」
+    # ⇒ 这是**场地级**的，攻方是谁都一样（雨天给双方的水系技能都 +75%）。
+    # 数值**只从配置读**（`policies.weather_policy.effects.<天气>.value`，生成器从
+    # battle-modes.json 照抄）：配置没声明天气层 / 没声明这一种天气 ⇒ **什么也不加**，
+    # 由调用方（`env`）在别处如实登记「这个机制没声明」，绝不在这里编一个倍率。
+    weather_mult, weather_note = weather_power_multiplier(cfg, weather, skill)
+    if weather_mult != 1.0:
+        power_buff *= weather_mult
     raw = model.compute(
         attacker_atk=float(atk_value),
         defender_def=float(def_value),
@@ -380,23 +449,49 @@ def compute_damage(attacker: Any, defender: Any, skill: Any, rs: Ruleset,
         attacker_atk=float(atk_value), defender_def=float(def_value),
         ability_level=float(ability), power_multiplier=float(power_buff),
         defense_reduction=reduction, model=model.name, verified=model.verified,
+        weather_multiplier=float(weather_mult), weather_note=weather_note,
     )
 
 
-def max_raw_damage(attacker: Any, defender: Any, loadout: Sequence[str], rs: Ruleset):
+def weather_power_multiplier(cfg: Any, weather: Any, skill: Any) -> Tuple[float, str]:
+    """天气给的**本手威力系数**（目前只有雨天：水系技能 +75%）。
+
+    返回 `(系数, 说明)`；没有天气 / 配置没声明 / 不是这一系 ⇒ `(1.0, "")`。
+    **不抛错**：这是「加成有没有」的读取点，不是「这个机制该不该存在」的判定点 ——
+    后者由 `env` 在应用技能效果与回合末结算时按配置判（fail closed 在那边登记）。
+    """
+    if not isinstance(weather, dict) or cfg is None:
+        return 1.0, ""
+    name = str(weather.get("name") or "")
+    effect = getattr(cfg, "weather_effect", None)
+    spec = effect(name) if callable(effect) else None
+    if not isinstance(spec, dict) or spec.get("kind") != "skill_power_multiplier":
+        return 1.0, ""
+    if str(spec.get("element") or "") != str(getattr(skill, "element", "") or ""):
+        return 1.0, ""
+    value = float(spec.get("value") or 1.0)
+    return value, (f"{name}：{spec.get('element')}系技能威力 ×{value}"
+                   f"（术语 {spec.get('term_id')}）")
+
+
+def max_raw_damage(attacker: Any, defender: Any, loadout: Sequence[str], rs: Ruleset,
+                   cfg: Any = None):
     """配招里**所有攻击技能**里能打出的最大伤害，返回 `(damage, skill_id, outcome)`。
 
     没有可算的攻击技能时返回 `(0, None, None)` —— **不是**一个默认值，
     而是「这只精灵这一步打不出伤害」这个事实。
     算不出来的技能（条件化威力未核验等）直接跳过，并计数（见 `skipped`）。
     """
+    # `cfg` 一路传下去：伤害类别要不要按 `spa/spd` 取，是**这一局**的配置说了算的。
+    from . import rule_config as _rule_config
+    cfg = cfg if cfg is not None else _rule_config.get_rule_config()
     best = (0, None, None)
     for skill_id in loadout or ():
         skill = rs.skills.get(skill_id)
         if skill is None or not skill.is_attack:
             continue
         try:
-            outcome = compute_damage(attacker, defender, skill, rs)
+            outcome = compute_damage(attacker, defender, skill, rs, cfg=cfg)
         except UnsupportedEffect:
             continue
         if outcome.damage > best[0]:

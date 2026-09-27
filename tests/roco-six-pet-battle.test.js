@@ -84,11 +84,26 @@ test('RC-106 模式规模：登记表是唯一事实源，配置必须跟着它�
   assert.deepEqual(checkConfigsForTest(), []);
 });
 
-test('RC-106 v2/v3：区别只有 mana / actions / binding 三处', () => {
+test('RC-106 v2/v3：区别只有 mana / actions / binding 三处（+ 2026-09-23 的「每只 10 星」开关）', () => {
   const v2 = onDisk(CANDIDATE_ID);
   const v3 = onDisk(V3_CANDIDATE_ID);
-  // 逐字相同的两块：本活没有重新解释既有口径
-  assert.deepEqual(v3.energy, v2.energy, 'v3 的 energy 必须逐字沿用 v2');
+  // 逐字相同的两块：本活没有重新解释既有口径。
+  // 2026-09-23（人类口径⑥）：v3 的 energy 多了一个**显式登记过**的叶子
+  // `initial_for_all_pets`（开局每只都满 10 星，台账 EV-ENERGY-PER-PET）。
+  // 判据因此收紧成「v2 有的每个 key 逐字相同 + 多出来的 key 只允许登记的这几个」——
+  // 「v3 悄悄改了 v2 的口径」照样会红。
+  // 2026-09-25（RC-401 批次六）：再登记一个 `foe_energy_loss`（敌方失能类效果的能力开关）。
+  const extraEnergyKeys = Object.keys(v3.energy).filter((k) => !(k in v2.energy)).sort();
+  // 2026-09-25（RC-401 批次九）：再登记一个 `per_layer_cost`（动态能耗修正）。
+  assert.deepEqual(extraEnergyKeys,
+    ['cost_modifier', 'foe_energy_loss', 'initial_for_all_pets', 'per_layer_cost'],
+    'v3 的 energy 只允许多出这四个已登记的叶子');
+  for (const key of Object.keys(v2.energy)) {
+    assert.deepEqual(v3.energy[key], v2.energy[key], `v3 的 energy.${key} 必须逐字沿用 v2`);
+  }
+  assert.equal(v3.energy.initial_for_all_pets.value, true);
+  assert.equal(v3.energy.initial_for_all_pets.evidence_id, 'EV-ENERGY-PER-PET');
+  assert.equal(v2.energy.initial_for_all_pets, undefined, 'v2 不许出现这个叶子（指纹要逐位不变）');
   assert.deepEqual(v3.turn_order, v2.turn_order, 'v3 的 turn_order 必须逐字沿用 v2');
   // 2026-09-22：开局资源是用户实机核对的 10 星（两侧同源同值）。
   assert.equal(v3.energy.initial.value, 10);
@@ -104,16 +119,23 @@ test('RC-106 v2/v3：区别只有 mana / actions / binding 三处', () => {
     ['mana.pool', 'mana.faint_cost', 'mana.loss_when_zero', 'mana.surrender']);
   assert.deepEqual([...ACTIONS_REQUIRED_PATHS],
     ['actions.allowed_kinds', 'actions.forbidden_kinds', 'actions.unknown_kinds_allowed']);
-  // 台账等级一律没抬（MC-E07/E08/E09 未录制）
-  assert.equal(v3.mana.pool.confidence, 'CROSS_SOURCE_SUPPORTED');
+  // 台账等级：**逐条**判，不再"一律没抬"。
+  // 2026-09-25 改钉：人类实机口径给出"每方 4 点魔力"（「就是4点…就是生命数，就是4颗心」）⇒
+  // EV-PVP-STANDARD-MANA 升 RECORDED_IN_GAME；另两条**仍未核验**（力竭扣减量能否被特性改写 / 六宠上限的 microcase），
+  // 保持 CROSS_SOURCE_SUPPORTED。**判据没有放松**：任何一条都不许写成 OFFICIAL_CURRENT（那是"官方已确认"的意思）。
+  assert.equal(v3.mana.pool.confidence, 'RECORDED_IN_GAME');
   assert.equal(v3.mana.faint_cost.confidence, 'CROSS_SOURCE_SUPPORTED');
   assert.equal(v3.battle_mode.team_size.confidence, 'ENGINE_HYPOTHESIS');
-  for (const id of ['EV-PVP-STANDARD-TEAM-SIZE', 'EV-PVP-STANDARD-MANA', 'EV-PVP-FAINT-MANA-LOSS']) {
+  const expectedLevel = {
+    'EV-PVP-STANDARD-TEAM-SIZE': 'CROSS_SOURCE_SUPPORTED',
+    'EV-PVP-STANDARD-MANA': 'RECORDED_IN_GAME',
+    'EV-PVP-FAINT-MANA-LOSS': 'CROSS_SOURCE_SUPPORTED',
+  };
+  for (const [id, want] of Object.entries(expectedLevel)) {
     const entry = (ledger.entries ?? []).find((e) => e.id === id);
     assert.ok(entry, `台账里必须有 ${id}`);
-    assert.equal(entry.confidence, 'CROSS_SOURCE_SUPPORTED',
-      `${id} 不许被升成更高级别`);
-    assert.notEqual(entry.confidence, 'OFFICIAL_CURRENT');
+    assert.equal(entry.confidence, want, `${id} 的等级必须是 ${want}`);
+    assert.notEqual(entry.confidence, 'OFFICIAL_CURRENT', `${id} 不许写成"官方已确认"`);
   }
 });
 

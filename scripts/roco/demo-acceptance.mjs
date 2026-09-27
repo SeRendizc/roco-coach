@@ -34,6 +34,9 @@ import {observableOf, adviceOf, shapeOf, engineeringTermsIn, nameOfPet,
   coverageLineups, scanKindCoverage} from './coach-position-harness.mjs';
 import {COACH_ADVICE_KINDS} from '../../src/coach/coach-advice.js';
 
+import {DEV_DRAWER_CHECKS, rulesetProblems, registryProblems, latencyProblems, digestProblems}
+ from './dev-drawer-checks.mjs';
+
 const ROOT=dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/,'');
 const OUT=join(ROOT,'reports/roco/demo-acceptance');
 const CHROME_CANDIDATES=[
@@ -85,7 +88,7 @@ async function launchChrome(){
   `--user-data-dir=${profile}`,'--remote-debugging-port=0','--window-size=1440,1100','about:blank',
  ],{stdio:['ignore','ignore','pipe']});
  chrome.stderr?.on('data',(d)=>{chromeErr=(chromeErr+String(d)).slice(-800);});
- const kill=()=>{try{chrome.kill('SIGKILL');}catch{}try{rmSync(profile,{recursive:true,force:true});}catch{}};
+ const kill=()=>{try{chrome.kill('SIGKILL');}catch{}try{rmSync(profile,{recursive:true,force:true,maxRetries:5,retryDelay:120});}catch{}};
  let port=null;
  for(let i=0;i<240&&!port;i++){
   await sleep(250);
@@ -629,6 +632,61 @@ async function main(){
   shadow.text.slice(0,160).replace(/\s+/g,' '));
  shots.push(await shoot('08-shadow-panel'));
 
+ // ── RC-802：抽屉里四类值的**逐类判据**（值必须与引擎/回执逐字一致）──────────────
+ //
+ // 缺口原话：「`ruleset / support / latency / digest` 这四类各自『抽屉里真的有、且值来自引擎』
+ // 没有逐类判据（现在只证明了『抽屉默认收起 + 展开后能看到 fail-closed 凭据』）」。
+ // 判据本体在 `scripts/roco/dev-drawer-checks.mjs`（单测 `tests/roco-dev-drawer.test.js` 已用合成事实
+ // 把"写死样例/拿别的数顶上/没跑也显示"逐条钉红）。这里读**真页面 + 真回执**：
+ //   · ruleset ← 引擎公开视图 `state.view.ruleset_id/state_version`
+ //   · support ← 页面那份模式注册表 `state.mode`（`/api/roco/status` 转发）+ 磁盘上的注册表文件
+ //   · latency/digest ← `/api/roco/shadow` 回执（`state.lastShadow`，上面刚跑过那一次）
+ const drawerFacts=JSON.parse(await js(`(()=>{const g=(id)=>{const el=document.getElementById(id);
+   return el?String(el.textContent||''):'';};
+  const view=window.rocoDemo?.state?.view||null;
+  const mode=window.rocoDemo?.state?.mode||null;
+  const shadow=window.rocoDemo?.state?.lastShadow||null;
+  return JSON.stringify({rulesetText:g('about-ruleset'),modeRawText:g('mode-raw'),modeProbeText:g('mode-probe'),
+   panelText:g('shadow-panel'),
+   engineRulesetId:view?view.ruleset_id:null,engineStateVersion:view?view.state_version:null,
+   registry:mode,receiptAvailable:shadow?shadow.available:null,
+   receiptLatencyMs:shadow&&shadow.model?shadow.model.latency_ms:null,
+   receiptDigestPin:shadow?shadow.prompt_digest_pin:null});})()`));
+ for(const spec of DEV_DRAWER_CHECKS){
+  const problems=spec.problems(drawerFacts);
+  check(`RC-802 ${spec.id}：${spec.label}`,problems.length===0,
+   problems.length?problems.join(' | ')
+    :`ruleset=「${String(drawerFacts.rulesetText).slice(0,48)}」 注册表 ${String(drawerFacts.modeRawText).length} 字节`
+     +` 耗时 ${drawerFacts.receiptLatencyMs}ms 摘要 ${String(drawerFacts.receiptDigestPin).slice(0,12)}…`);
+ }
+ // 反证：把**写死的样例值**塞进抽屉（这正是"值来自引擎"要防的那一种）⇒ 同一条判据必须红
+ check('RC-802 反证：抽屉里的值换成写死样例，四条判据必须红',
+  rulesetProblems({...drawerFacts,rulesetText:'roco-world-s4-2026-09-10'}).length>0
+  && registryProblems({...drawerFacts,modeRawText:'{"id":"pvp-standard-six-pet"}'}).length>0
+  && latencyProblems({...drawerFacts,receiptLatencyMs:Number(drawerFacts.receiptLatencyMs)+1}).length>0
+  && digestProblems({...drawerFacts,receiptDigestPin:'deadbeefcafe'}).length>0,
+  '四条各换一个样例值：都用同一份 problems() 判，必须全部红');
+ // 注册表与**磁盘上的原文**对得上（不是"页面自洽"）：只比 `parameters` 这一层（服务端会给它加上
+ // 引擎当前生效规模 `engine.team_size`，那一项不是注册表里的字段）。
+ const registryFile=JSON.parse(readFileSync(join(ROOT,'data/roco/battle-modes.json'),'utf8'));
+ // 磁盘上 `modes` 是**数组**（0..4），不是按 id 索引的对象 —— 按 id 找。
+ const registryModes=Array.isArray(registryFile.modes)?registryFile.modes:Object.values(registryFile.modes??{});
+ const declared=registryModes.find((m)=>m?.id===drawerFacts.registry?.id)??null;
+ // 只比**磁盘上真的声明了的那几项**：`parameters`（规模/魔力/继承这些都是注册表自己写的）+
+ // `ruleset_binding` + `status`。`unknowns_count` / `prematch` 是服务端**另加的**（前者按未核实项
+ // 逐条数出来、后者来自台账 `EV-PVP-UNKNOWN-OPPONENT`）—— 磁盘条目里没有这两项，
+ // 拿它们去比"逐字段一致"是把两个来源混成一个（第一版就是这么误报的）。
+ const diskSame=Boolean(declared)
+  && JSON.stringify(declared.parameters)===JSON.stringify(drawerFacts.registry?.parameters)
+  && String(declared.ruleset_binding??'')===String(drawerFacts.registry?.ruleset_binding??'')
+  && String(declared.status??'')===String(drawerFacts.registry?.status??'');
+ check('RC-802 support：抽屉里的注册表与磁盘上的 battle-modes.json 一致（parameters/ruleset_binding/status）',
+  diskSame,
+  declared?`id=${drawerFacts.registry?.id}；磁盘 parameters ${JSON.stringify(declared.parameters)}`
+    +`；规则集绑定 ${declared.ruleset_binding}；状态 ${declared.status}`
+   :`磁盘注册表里找不到 ${drawerFacts.registry?.id}`);
+ shots.push(await shoot('08b-dev-drawer-values'));
+
  // ── P1 浏览器验收：**逐局面矩阵**（确定性、可逐条核对）──────────────────────
  //
  // 为什么换掉上一版：用户实测原话是气泡反复只说「某技能这一手不稳…先看区间再定
@@ -760,6 +818,8 @@ async function main(){
  };
 
  /** 这一条局面为什么没有气泡（沉默原因必须如实写下，不能留空）。 */
+ // 注：采样里那个 60000ms 与 src/coach/experience.js 的 STRATEGIST_LIMITS.cooldownMs 同值，
+ // 只用于把采样归成「在冷却里 / 已过冷却」两类，不参与任何判定。
  function describeSilence(raw) {
   const gate = raw?.decision?.gate ?? null;
   const action = raw?.decision?.action ?? null;
@@ -769,6 +829,22 @@ async function main(){
   else if (action === 'silent') parts.push(`门控判定 silent（reason=${reason ?? '未给'}）`);
   if (!raw?.advice) parts.push('建议层没有一条成立的局面事实：coachAdvice 返回 null');
   else parts.push(`建议层给了 ${raw.advice.kind} 但页面没有渲染出气泡（**这一条是缺陷信号**）`);
+  // 第 66 轮：把「沉默」按**可诊断的三类**分开记（以前只写一句「coachAdvice 返回 null」，
+  // 看不出是 plan 没到位、会话预算/冷却吃掉，还是建议层真的没有事实）。
+  const p = raw?.probe ?? null;
+  if (p) {
+    parts.push(p.plan_missing ? 'plan-missing（采样时 state.plan 为 null）'
+      : 'plan-present（采样时 state.plan 在）');
+    if (Number.isFinite(p.plan_stale_discards) && p.plan_stale_discards > 0) {
+      parts.push(`本局已丢弃过期 plan ${p.plan_stale_discards} 份`);
+    }
+    parts.push(`会话 hints=${p.session_hints ?? '未知'}／上次开口=${
+      p.session_last_at_state ?? '未知'}／冷却=${p.session_cooldown ?? '未知'}`);
+    parts.push(`等待落定 ${p.hint_wait_ms ?? '未知'}ms／plan 请求 ${p.plan_tries ?? '未知'} 次`);
+    parts.push(`决策原文 gate=${p.detail_gate ?? 'null'}/reason=${p.detail_reason ?? 'null'}`
+      + `/value=${p.detail_value ?? 'null'}/floor=${p.detail_floor ?? 'null'}`
+      + `/decisive=${p.detail_decisive ?? 'null'}/budget=${p.detail_budget ?? 'null'}`);
+  }
   if (raw?.view?.battle_result) parts.push('这一局已经结束');
   return parts.join('；');
  }
@@ -794,8 +870,29 @@ async function main(){
       d.state.pick.player=${JSON.stringify(spec.player)};
       d.state.pick.enemy=${JSON.stringify(spec.enemy)};
       d.state.pick.side='player';d.renderRoster();return true;})()`);
-    await js(`(async()=>{const d=window.rocoDemo;d.state.seedOverride=${spec.seed};
-      await d.startBattle();return Boolean(d.state.battleId);})()`);
+    // 开局并把**这一局真正的输入**读回来（诊断用）：确定性判据一旦红，
+    // 第一件要排除的就是「两遍开的不是同一局」（seed / 我方物种序列 / 对手场上那一只）。
+    // 引擎侧已实测：同 seed + 同阵容 + `auto:true` 两遍轨迹逐字节相同
+    // （/tmp/rng-determinism.mjs），所以两遍不一致只可能出在页面这侧喂进去的输入上。
+    const battleInputs = JSON.parse(await js(`(async()=>{const d=window.rocoDemo;
+      d.state.seedOverride=${spec.seed};
+      await d.startBattle();
+      const v=d.state.view;
+      // 产物里**不许出现 pet_id**（判据：局面矩阵产物不得泄露内部 id）——
+      // 所以这里记「个数 + 一串 sha1 摘要 + 位次」，既能回答「两遍开的是不是同一局」，
+      // 又不把物种 id 落盘。
+      const ids=(v&&v.self&&Array.isArray(v.self.pets))?v.self.pets.map((p)=>String(p.pet_id)):[];
+      const join=ids.join('|');
+      let h=5381; for(let i=0;i<join.length;i+=1){h=((h*33)^join.charCodeAt(i))>>>0;}
+      return JSON.stringify({battle_id_digest:(()=>{const s=String(d.state.battleId||'');let g=5381;
+          for(let i=0;i<s.length;i+=1){g=((g*33)^s.charCodeAt(i))>>>0;}return g;})(),
+        seed:d.state.seedOverride??null,
+        self_count:ids.length, self_digest:h,
+        foe_field_present:Boolean(v&&v.opponent&&v.opponent.field),
+        foe_bench_slots:(v&&v.opponent&&Array.isArray(v.opponent.bench))
+          ?v.opponent.bench.map((b)=>b.slot):null,
+        turn:v?v.turn:null});})()`));
+    row.battle_inputs = battleInputs;
     // ② 推进期间闭嘴：采样方式不许污染 `said` 记账（见段首说明 ②）
     await js(`(()=>{const s=window.rocoDemo.state.session;s.dismissed=true;s.hints=0;
       s.lastAt=-Infinity;s.said=new Set();return true;})()`);
@@ -807,11 +904,61 @@ async function main(){
      await js('window.rocoDemo.autoTurn()');
      driven += 1;
     }
-    // ③ 到位之后放开，并就**这一手**问一次规划
+    // ③ 到位之后放开，并**等这一手的建议落定**再采样（第 66 轮：采样抢跑会量错时刻）
+    //
+    // 为什么要等：plan 是 `/api/roco/plan` **异步**回来的（serving 合同：300ms 初判 / 3s 解释），
+    // 而矩阵原来是「推进完就问」。实测（instrument 产物）被静音的那一局正好是
+    // `plan-missing（state.plan===null，本局已丢弃 2 份过期 plan）`，同一份 view 用节点侧重算
+    // 却开口 ⇒ 量的时刻不对，不是页面不肯说。
+    // 等待口径（有界，上限 3s，与解释预算同档）：
+    //   · 落定条件 A：本回合的 plan 到位（页面判过期时会把它置回 null，所以非 null 即未过期）；
+    //   · 落定条件 B：气泡真的开口了（`body.dataset.rocoHint !== 'hidden'`）；
+    //   · 3s 内没落定 → **如实记 plan-missing 并判静音**（期望开口的局面超时就是红，不算通过）；
+    //   · 等待期间状态又推进导致 plan 再次过期 → 在剩余预算里再要一份（最多到 3s）。
+    // 实测等待毫秒记进 `hint_wait_ms`，随产物一起交出去。
     const raw = JSON.parse(await js(`(async()=>{const d=window.rocoDemo;const s=d.state.session;
-      s.dismissed=false;s.hints=0;s.lastAt=-Infinity;
+      // 采样前把会话**完整**恢复到「这一局还没说过话」：少清一项 said 就会让
+      // 推进期间已经说过的那条形状把这一局按去重挡掉（第 66 轮实测 08 就是这条：
+      // session_said 里留着「你只剩 #% 血，换…」、hints=1、within-cooldown ⇒ 采样必然静音，
+      // 而节点侧用新会话重算却是开口的）。矩阵问的是「这个局面下页面会不会开口」，
+      // 所以每个局面都必须从**同一个空白会话**出发 —— 这同时也是两遍逐字节相同的前提。
+      s.dismissed=false;s.hints=0;s.lastAt=-Infinity;s.said=new Set();
       const saidBefore=[...s.said];
+      const BUDGET_MS=3000, COOLDOWN_MS=60000;
+      const t0=performance.now();
+      const settled=()=>{
+        const open=document.body.dataset.rocoHint&&document.body.dataset.rocoHint!=='hidden';
+        return Boolean(open)||Boolean(d.state.plan);
+      };
+      // 2026-09-24（主线程接手修）两处口径，都是实测逼出来的：
+      //
+      // ① **先等页面静下来**再问。页面在「对手补位」之后挂着一个 「state.foeReplaceTimer」
+      //    （「autoTurn()」 的 setTimeout），它会在采样窗口里再推进一手 —— 于是刚回来的 plan
+      //    立刻按「版本对不上」被丢弃（实测两遍里有一遍 plan_missing:true、另一遍 false，
+      //    同一局面同一输入两遍不一致就是这么来的；引擎侧同 seed 两遍轨迹逐字节相同，
+      //    所以差别只可能来自页面喂进去的时刻）。
+      // ② **只在「还没有任何东西可看」时补问一次**。第一次 requestPlan 已经产出并显示了建议
+      //    之后再去催，会落在 60s 冷却 + 去重窗口里 ⇒ 返回 null 并把气泡藏回去，采样读到 hidden。
+      //    所以补问的条件是 「state.plan === null 且气泡还没开」，最多补一次。
+      let stableSince=performance.now(), lastVersion=d.state.view?d.state.view.state_version:null;
+      while(performance.now()-t0<600){
+        await new Promise((r)=>setTimeout(r,60));
+        const v=d.state.view?d.state.view.state_version:null;
+        if(v!==lastVersion){lastVersion=v;stableSince=performance.now();}
+        if(performance.now()-stableSince>=150&&performance.now()-t0>=180) break;
+      }
       await d.requestPlan({reason:'position-matrix'});
+      let planTries=1;
+      let retried=false;
+      while(!settled()&&performance.now()-t0<BUDGET_MS){
+        await new Promise((r)=>setTimeout(r,60));
+        const open=document.body.dataset.rocoHint&&document.body.dataset.rocoHint!=='hidden';
+        if(!open&&!d.state.plan&&!retried&&performance.now()-t0>600){
+          retried=true;planTries+=1;
+          await d.requestPlan({reason:'position-matrix-retry'});
+        }
+      }
+      const hint_wait_ms=Math.round(performance.now()-t0);
       const hint=d.state.hint;const det=d.state.lastDetail||{};const advice=det.advice||null;
       // 气泡隐藏时**不**把上一局的残留文本当成这一局的观测：#hint-text 在隐藏后
       // 仍然留着上一次的字（页面只把容器 hidden），照抄进产物会让「沉默局面」看起来
@@ -824,6 +971,30 @@ async function main(){
         decision:{action:det.action??null,gate:det.gate??null,reason:det.reason??null},
         advice:advice?{kind:advice.kind??null,text:advice.text??null,why:advice.why??null,
           risk:advice.risk??null}:null,
+        // 采样时刻的「为什么沉默」三类证据（第 66 轮：矩阵偶尔静音一个局面，得能一眼看出
+        // 是 plan 没到位、会话预算/冷却，还是建议层真的没有事实）：
+        //   · plan 缺失：state.plan 为 null（plan 还没回来，或那一份被判过期丢弃）；
+        //   · 会话：hints 累计与 now-lastAt（lastAt===-Infinity 记 'never'）；
+        //   · 决策原文：gate/reason/value/floor/decisive/budget 照抄，不做解释。
+        // 注意：这段是页面内表达式（外层是模板字符串），注释里不许出现反引号。
+        probe:{
+          hint_wait_ms, plan_tries:planTries,
+          plan_missing:!(d.state.plan),
+          hint_plan_missing:!(hint&&hint.plan),
+          plan_stale_discards:(Array.isArray(d.state.planStaleDiscards)?d.state.planStaleDiscards.length:null),
+          session_hints:s.hints??null,
+          // 只记**分类**、不记墙钟毫秒：这两条会进 passA/passB 的逐字节比对，
+          // 记原始时间戳会让「同一批输入两遍结果相同」这条判据被采样本身弄红。
+          session_last_at_state:Number.isFinite(s.lastAt)?'set':'never',
+          session_cooldown:!Number.isFinite(s.lastAt)?'never'
+            :((Date.now()-s.lastAt)<COOLDOWN_MS?'within-cooldown':'past-cooldown'),
+          session_said:[...s.said],
+          detail_gate:det.gate??null, detail_reason:det.reason??null, detail_action:det.action??null,
+          detail_value:Number.isFinite(det.value)?det.value:null,
+          detail_floor:Number.isFinite(det.floor)?det.floor:null,
+          detail_decisive:det.decisive??null, detail_budget:det.budget??null,
+          advice_present:Boolean(advice),
+        },
         dom:{hidden, text:read('hint-text'), why:read('hint-why')},
         dataset:{hint:document.body.dataset.rocoHint??null,
           action:document.body.dataset.rocoAction??null}});})()`));
@@ -835,6 +1006,9 @@ async function main(){
     row.dom = raw.dom;
     row.dataset = raw.dataset;
     row.decision = raw.decision;
+    row.probe = raw.probe ?? null;
+    row.hint_wait_ms = raw.probe?.hint_wait_ms ?? null;
+    row.plan_tries = raw.probe?.plan_tries ?? null;
     row.kind = raw.advice?.kind ?? null;
     row.advice_contract = raw.advice ? {
       has_text: typeof raw.advice.text === 'string' && raw.advice.text.length > 0,
@@ -885,7 +1059,35 @@ async function main(){
  // 第二遍：同一批写死的输入再跑一次。**逐字节相同**才算「确定性」有证据；
  // 上一版用 `Math.random()` 选阵容，这一条根本没法写。
  const passB = await runPositionMatrix('B');
- const canonical = (rows) => JSON.stringify(rows.map(({pass: _p, screenshot: _s, ...rest}) => rest));
+ // 逐字节比对的**口径**（2026-09-24 主线程接手修）：只排除「易变字段」——
+ //   · pass：A/B 两遍的标签，本来就不同；
+ //   · screenshot：文件名带局面序号，与结论无关；
+ //   · hint_wait_ms（行上与 probe 里各一份）：**墙钟毫秒**，是延迟不是结论。
+ // 除这三样，其余字段（view / decision / probe 的分类字段 / dom / dataset）必须逐字节相同。
+ // 为什么不把毫秒粗化：延迟本身是「采样等了多久」的证据，如实留着，只是**不参与**确定性判据 ——
+ // 与门禁报告自己那句「时间戳与耗时是易变字段」同一条口径。第一版没排除它，判据被采样本身弄红过。
+ const canonical = (rows) => JSON.stringify(rows.map((row) => {
+  const {pass: _p, screenshot: _s, hint_wait_ms: _w, probe, battle_inputs, ...rest} = row;
+  const probeRest = probe && typeof probe === 'object'
+   ? Object.fromEntries(Object.entries(probe).filter(([k]) => k !== 'hint_wait_ms')) : probe;
+  // battle_inputs 里的 battle_id 是**会话内自增的局号**（`s3-…` / `s15-…`），
+  // 两遍必然不同；seed / 我方物种序列 / 对手场上那只 / 后备位次**留在比对里**
+  // （它们才是「两遍开的是不是同一局」的证据）。
+  const inputsRest = battle_inputs && typeof battle_inputs === 'object'
+   ? Object.fromEntries(Object.entries(battle_inputs).filter(([k]) => k !== 'battle_id' && k !== 'battle_id_digest')) : battle_inputs;
+  // silent_reason 里也抄了一份等待毫秒（「等待落定 291ms」）——它是字符串，
+  // 只从字段上摘是摘不掉的，所以在比对前把这一段的数字归一成 <ms>。
+  const reasonRest = typeof rest.silent_reason === 'string'
+   ? rest.silent_reason.replace(/等待落定 \d+ms/g, '等待落定 <ms>') : rest.silent_reason;
+  return {...rest, silent_reason: reasonRest, probe: probeRest, battle_inputs: inputsRest};
+ }));
+ // 诊断钩子（2026-09-24 主线程加）：确定性判据红了的时候，「哪一行哪个字段不同」
+ // 必须能一眼看出，否则只能靠猜着改口径。设 ROCO_MATRIX_DUMP=/tmp/xxx.json 就会把
+ // 两遍的原始行各存一份（只在设了环境变量时写，正常跑不落盘）。
+ if (process.env.ROCO_MATRIX_DUMP) {
+  writeFileSync(process.env.ROCO_MATRIX_DUMP,
+    JSON.stringify({passA, passB}, null, 1) + '\n');
+ }
  const digestA = sha256(canonical(passA));
  const digestB = sha256(canonical(passB));
  const reproducible = digestA === digestB;
@@ -1128,6 +1330,90 @@ async function main(){
  check('局面矩阵：同一批写死的输入跑两遍，结果逐字节相同（确定性）',
   reproducible,
   `passA ${digestA.slice(0, 16)}… / passB ${digestB.slice(0, 16)}…；相同=${reproducible}`);
+
+ // ── 换局不许继承上一局的补位定时器（2026-09-25：确定性判据偶发红的**真因**，也是真缺陷）──
+ //
+ // 实测（修前）：这一条红过一次，`ROCO_MATRIX_DUMP` 定位到**唯一**一处差异 =
+ // 局面 `08-switch-low-hp-mid` 的 `battle_inputs.turn` 两遍各读到 `1` / `2` —— 而它是在
+ // `startBattle()` 之后**立刻**读的，本该恒为 1。根因：`roco.js` 里对手补位会挂一个
+ // 420ms 的 `state.foeReplaceTimer`（`:2772` 调 `autoTurn()`），而 `startBattle()` **没清它**
+ // ⇒ 上一局刚进过补位时开新局，那个定时器会对**新的一局**再走一手（产品可见表现：
+ // 「刚开的新局自己动了一手」）。修法：`startBattle()` 里连同 `foeReplaceAuto` 一起清掉。
+ //
+ // 判据是**确定性**的：先把上一局推到「补位定时器还挂着」，在这 420ms 窗口内立刻换局，
+ // 然后量 ① 换局那一刻定时器是否还挂着（这是判据的前提，不成立就按红 —— 不许判据变空）、
+ // ② `startBattle()` 之后 `turn` 是否恒为 1、③ 等 900ms 之后回合/`state_version` 有没有自己动。
+ const handoverJudge = (f) => {
+  const bad = [];
+  if (!f) return ['采样没跑（facts 为空）'];
+  if (f.error) bad.push(`采样出错：${f.error}`);
+  if (f.timerAtStart !== true) {
+   bad.push(`没能造出「换局那一刻上一局的补位定时器还挂着」的场景（timerAtStart=${JSON.stringify(f.timerAtStart)}）`
+    + '—— 判据前提不成立，按红处理（空判据比没有判据更坏）');
+  }
+  if (f.timerRightAfter !== false) {
+   bad.push(`开新局之后上一局的补位定时器还挂着（foeReplaceTimer=${JSON.stringify(f.timerRightAfter)}）`);
+  }
+  if (f.turnRightAfter !== 1) bad.push(`startBattle() 之后 turn 必须是 1，实测 ${JSON.stringify(f.turnRightAfter)}`);
+  if (f.turnAfterWait !== f.turnRightAfter) {
+   bad.push(`等了 900ms 之后回合从 ${JSON.stringify(f.turnRightAfter)} 变成 ${JSON.stringify(f.turnAfterWait)}`
+    + '—— 新局被上一局的定时器推进了一手');
+  }
+  if (f.versionAfterWait !== f.versionRightAfter) {
+   bad.push(`state_version 自己动了：${JSON.stringify(f.versionRightAfter)} → ${JSON.stringify(f.versionAfterWait)}`);
+  }
+  return bad;
+ };
+ const timerHandover = await (async () => {
+  const spec = POSITION_MATRIX.find((s) => s.id === '07-replace-required') ?? POSITION_MATRIX[0];
+  const out = {spec: spec?.id ?? null, drove: 0, timerAtStart: null, timerRightAfter: null,
+   turnRightAfter: null, versionRightAfter: null, turnAfterWait: null, versionAfterWait: null,
+   timerAfterWait: null, reached: null};
+  try {
+   await js(`(()=>{const d=window.rocoDemo;d.state.pick.player=${JSON.stringify(spec.player)};
+     d.state.pick.enemy=${JSON.stringify(spec.enemy)};d.state.pick.side='player';d.renderRoster();return true;})()`);
+   await js(`(async()=>{window.rocoDemo.state.seedOverride=${spec.seed};await window.rocoDemo.startBattle();return true;})()`);
+   for (let step = 0; step < 12; step += 1) {
+    const st = JSON.parse(await js(`(()=>{const d=window.rocoDemo;const v=d.state.view||{};
+      return JSON.stringify({phase:v.phase??null,need:(v.needs_replacement??[]).slice(),
+        result:v.battle_result??null,timer:Boolean(d.state.foeReplaceTimer)});})()`));
+    out.reached = st;
+    if (st.result || st.timer || st.phase === 'replace' || st.need.length) break;
+    await js('window.rocoDemo.autoTurn()');
+    out.drove += 1;
+   }
+   // 在这 420ms 窗口内立刻换局，并记录「换局那一刻」与「换完之后」的两组读数
+   const handover = JSON.parse(await js(`(async()=>{const d=window.rocoDemo;
+     const timerAtStart=Boolean(d.state.foeReplaceTimer);
+     d.state.seedOverride=${spec.seed};
+     await d.startBattle();
+     const v=d.state.view||{};
+     return JSON.stringify({timerAtStart,timerRightAfter:Boolean(d.state.foeReplaceTimer),
+       turnRightAfter:v.turn??null,versionRightAfter:v.state_version??null});})()`));
+   Object.assign(out, handover);
+   await new Promise((resolve) => setTimeout(resolve, 900));
+   const later = JSON.parse(await js(`(()=>{const d=window.rocoDemo;const v=d.state.view||{};
+     return JSON.stringify({timerAfterWait:Boolean(d.state.foeReplaceTimer),turnAfterWait:v.turn??null,
+       versionAfterWait:v.state_version??null});})()`));
+   Object.assign(out, later);
+  } catch (error) { out.error = String(error?.message ?? error).slice(0, 200); }
+  return out;
+ })();
+ const handoverProblems = handoverJudge(timerHandover);
+ check('换局不继承上一局的补位定时器：新局开局后 turn 恒为 1，等 900ms 也不许自己走一手',
+  handoverProblems.length === 0,
+  handoverProblems.length ? handoverProblems.join(' | ')
+   : `用「${timerHandover.spec}」把上一局推到补位（驱动 ${timerHandover.drove} 手；`
+     + `换局那一刻定时器还挂着=${timerHandover.timerAtStart}）→ 换局后定时器=${timerHandover.timerRightAfter}、`
+     + `turn=${timerHandover.turnRightAfter}、state_version=${timerHandover.versionRightAfter}；`
+     + `等 900ms 后 turn=${timerHandover.turnAfterWait}、state_version=${timerHandover.versionAfterWait}`);
+ // 反证：同一条判据喂「把换局清定时器那两行删掉」的合成形态，必须报（判据本身不许是空的）
+ const handoverRedProof = handoverJudge({timerAtStart: true, timerRightAfter: true, turnRightAfter: 1,
+  versionRightAfter: 10, turnAfterWait: 2, versionAfterWait: 12});
+ check('反证：换局不清定时器的形态喂给同一条判据必须报（判据不是空的）',
+  handoverRedProof.length >= 3,
+  `合成输入（timerRightAfter=true / turn 1→2 / state_version 10→12）命中 ${handoverRedProof.length} 条：`
+  + handoverRedProof.join(' | ').slice(0, 220));
  // 形状去重判据本身不许是空的：两条同形状的样例必须被判成「重复」。
  const shapeProbe = shapeOf('「诡刺」估 130，够收对面「寂灭骨龙」这 35 血：这一轮直接收')
   === shapeOf('「气波」估 88，够收对面「黑猫巫师」这 12 血：这一轮直接收');

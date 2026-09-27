@@ -545,7 +545,7 @@ async function launchChrome() {
   chrome.stderr?.on('data', (d) => { chromeErr = (chromeErr + String(d)).slice(-800); });
   const kill = () => {
     try { chrome.kill('SIGKILL'); } catch {}
-    try { rmSync(profile, {recursive: true, force: true}); } catch {}
+    try { rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120}); } catch {}
   };
   let port = null;
   for (let i = 0; i < 240 && !port; i++) {
@@ -1098,7 +1098,13 @@ async function main() {
         const box=sr?sr.querySelector('#tw-analysis-slots'):null;
         const filled=box?[...box.querySelectorAll('[data-tw-state="filled"]')].map((el)=>({
           status:el.dataset.twStatus,canBattle:el.dataset.twCanBattle})):[];
+        // 2026-09-25：**必须看像素**。这个框（#tw-analysis-box）在标记里写死 hidden，
+        // 而代码只给它设 .open —— 于是"理论阵容"一直不可见，而判据只读 DOM 内容，长期是绿的
+        //（「判据读取点 ≠ 玩家真正看的像素」的又一例）。所以这里同时取 hidden/高度。
+        const details=sr?sr.getElementById('tw-analysis-box'):null;
         return {count:Number(root?.dataset.twAnalysis||'0'),slots:filled,
+          box:{hidden:details?.hidden===true,open:details?.open===true,
+            h:details?Math.round(details.getBoundingClientRect().height):null},
           text:((root?.textContent||'')).replace(/\\s+/g,' ')};})()`);
       const catalogProblems = (facts) => {
         const bad = [];
@@ -1109,6 +1115,11 @@ async function main() {
         if (slot && slot.canBattle !== 'trial') bad.push(`出战判定 ${slot.canBattle}（按需推算只能试玩）`);
         for (const leak of ['服务端原话', 'own-0001', 'pet_']) {
           if (String(facts?.playerText ?? '').includes(leak)) bad.push(`玩家层泄漏了内部串「${leak}」`);
+        }
+        // 有内容就必须**看得见**（这不是"接口存在"，是玩家真的能看到那一格）。
+        const box = facts?.analysis?.box;
+        if (box && Number(facts?.analysis?.count) >= 1 && (box.hidden === true || !(box.h > 0))) {
+          bad.push(`理论阵容有 ${facts.analysis.count} 只，但那个框不可见（hidden=${box.hidden} 高度=${box.h}）`);
         }
         return bad;
       };
@@ -1122,6 +1133,10 @@ async function main() {
       counter('10-图鉴物种照实拒绝', '把服务端原话（含 selected / own-0001）直接印到玩家层必须被同一条判据抓住',
         refuseProblems('服务端原话：selected 的每一项都必须是 own-0001 形状的个体的 id', null, 'bad-request'),
         '{"text":"服务端原话：selected …"}');
+      counter('10-图鉴物种照实拒绝', '理论阵容**有内容却是隐藏的**（只读 DOM 不看像素的读法）必须被抓住',
+        catalogProblems({state: 'ok', analysis: {count: 1, slots: [{status: 'on_demand', canBattle: 'trial'}],
+          box: {hidden: true, open: true, h: 0}}, playerText: ''}),
+        '{count:1, box:{hidden:true,h:0}}');
       counter('10-图鉴物种照实拒绝', '把「静默接受」的样本过同一条判据必须报错',
         badRequestProblems(`selected=${catalogSpecies}`, {ok: true, player: {}}, 200, 'selected'),
         '{ok:true} / HTTP 200');
@@ -1223,8 +1238,15 @@ async function main() {
     const sixRoute = await route(`selected=${ids.slice(0, 6).join(',')}&locked=${ids[0]}`);
     const sixRoutePlayer = sixRoute.json.player;
     const axisProblemsFound = axisProblems(sixRoute.json.axes);
-    check('18-满六只五轴', '选满六只后出现完整诊断：五轴都在；能算的给值，算不出的给原因且不带值（不补 0）',
-      axisProblemsFound.length === 0 && sixDom.axisNodes === 5,
+    check('18-满六只五轴', '选满六只后出现完整诊断：五轴都在（**接口层**）；能算的给值，算不出的给原因且不带值（不补 0）。'
+      + '【2026-09-25（人类投诉「五项全算不出来 + 大片没用的信息」）：页面上算不出来的轴**合并成一行** ⇒ DOM 轴节点数 = '
+      + '能算的轴数 + 1；接口层仍是五轴逐条（口径没放松，只是不再把同一句话印四遍）】',
+      axisProblemsFound.length === 0
+      // 2026-09-25：`+1` 那个"恒有 1 行算不出来"的前提**已经过期** —— 四轴改成三档判定（`measured`/`assumption`/`unknown`）之后
+      // `meta-prior` 可以带 assumption ⇒ **五轴全可算** ⇒ DOM 轴节点数应等于「能算的轴数 +（还有不可算的轴 ? 1 : 0）」。
+      // 条件式而不是放宽：两种状态下都要求 DOM 与接口层**逐条对齐**（多一个/少一个仍然红）。
+      && sixDom.axisNodes === (sixRoute.json.axes ?? []).filter((axis) => axis.available).length
+        + ((sixRoute.json.axes ?? []).some((axis) => !axis.available) ? 1 : 0),
       axisProblemsFound.join(' | ') || `轴节点=${sixDom.axisNodes}；` + (sixRoute.json.axes ?? [])
         .map((axis) => `${axis.label}:${axis.available ? '能算' : '算不出'}`).join(' / '));
     counter('18-满六只五轴', '把「算不出来」的轴填成 0 必须被同一条判据抓住',
@@ -1246,6 +1268,219 @@ async function main() {
     counter('20-玩家层载荷', '把 pet_id / instance_id 混进 player 段必须被同一条判据抓住',
       playerLayerProblems({slots: [{name: '音速犬', pet_id: 'pet_000062'}], next_candidates: [{name: '喵喵', instance_id: 'own-0001'}]}),
       '{"slots":[{"pet_id":"pet_000062"}],"next_candidates":[{"instance_id":"own-0001"}]}');
+    // ── 2026-09-25（人类五条投诉）的真机判据：抽屉滚得动 / 折叠头两态等高 / 箭头方向 / 轴合并成一行 / 合并行不带数字 ──
+    //    全部**真鼠标**驱动（wheel / click），量布局与计算样式，不看页面自述。
+    const drawerScrollProblems = ({sh, ch, st}) => {
+      if (!(sh > ch)) return [];      // 内容装得下 ⇒ 这条不适用（如实记账，不假装验过）
+      return st > 0 ? [] : [`面板内容超出（scrollHeight ${sh} > clientHeight ${ch}）却滚不动：scrollTop=${st}`];
+    };
+    const foldHeadProblems = ({collapsedH, openH}) => (Math.abs(collapsedH - openH) <= 4 ? []
+      : [`折叠头收起/展开两态高度差 ${Math.abs(collapsedH - openH)}px > 4px（人类：「上面那个收起那么大」）`]);
+    const arrowProblems = ({collapsedArrow, openArrow}) => {
+      const norm = (v) => String(v ?? '').replace(/["']/g, '');
+      const bad = [];
+      if (norm(collapsedArrow) !== '▸') bad.push(`收起态箭头应为 ▸（右），实际 ${JSON.stringify(collapsedArrow)}`);
+      if (norm(openArrow) !== '▾') bad.push(`展开态箭头应为 ▾（下），实际 ${JSON.stringify(openArrow)}`);
+      return bad;
+    };
+    // 2026-09-25（前提变化的**条件式**判据，不是放宽）：四轴改成三档判定（`measured`/`assumption`/`unknown`）之后，
+    // `meta-prior/v1.json` 可以带 **assumption**（7 体系各 1/7）⇒ **五轴全部可算** ⇒ `missCount` 从 1 变 **0**，合并行**不该再渲染**。
+    // 所以这条判据要在**两种状态**下都成立：① 还有不可算的轴 ⇒ 合并成**至多一行**且那行**不许出现数字**；
+    // ② 五轴全可算 ⇒ **不许**再渲染「算不出来」那一行。两种状态各自都可被证伪（见下面的两条反证）。
+    const mergedAxisProblems = ({axisCount, availCount, missCount, missText}) => {
+      const bad = [];
+      if (missCount > 1) bad.push(`不可算的轴必须合并成一行（data-tw-axis="missing" 至多 1 个），实际 ${missCount} 个`);
+      if (axisCount !== availCount + missCount) {
+        bad.push(`轴节点数 ${axisCount} ≠ 能算 ${availCount} + 合并行 ${missCount}`);
+      }
+      const digits = [...new Set(String(missText ?? '').match(/\d/g) ?? [])];
+      if (missCount > 0 && digits.length) bad.push(`合并那一行不许出现数字（实际出现 ${digits.join('')}）—— 那是"又给了一个数"的错觉`);
+      if (missCount === 0 && String(missText ?? '').trim().length) {
+        bad.push('五轴全可算时不许再渲染「算不出来」那一行（前提变了、文案必须跟上）');
+      }
+      return bad;
+    };
+    const availAxisProblems = ({availCount, availText}) => {
+      if (availCount < 1) return ['至少要有 1 个能算的轴，否则这一页没有任何真值可看'];
+      return /\d/.test(String(availText ?? '')) ? [] : [`能算的轴必须写出真值（含数字），实际「${availText}」`];
+    };
+    await mouseClick(`${ROOT_SEL} >>> #tw-eval-toggle`);
+    await sleep(420);
+    const evalMetrics = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+      const panel=sr.getElementById('tw-eval-panel');
+      const axes=[...sr.querySelectorAll('.tw-axis')];
+      const avail=axes.filter((a)=>a.dataset.twAvailable==='true');
+      const miss=axes.filter((a)=>a.dataset.twAxis==='missing');
+      // 2026-09-25：必须按 id 取。原来按 class 取 .tw-about，而页面里还有另一个
+      // .tw-about（理论阵容框 #tw-analysis-box，标记里带 hidden）—— 选择器撞上它之后
+      // 量到的是「隐藏元素的 0 高度」，判据 37/38 于是红得毫无意义。
+      const about=sr.getElementById('tw-missing-axes-box');
+      const sum=about?about.querySelector('summary'):null;
+      const r=panel.getBoundingClientRect();
+      return JSON.stringify({panel:{sh:panel.scrollHeight,ch:panel.clientHeight,st:panel.scrollTop,
+        cx:Math.round(r.left+r.width/2),cy:Math.round(r.top+r.height/2)},
+        axisCount:axes.length,availCount:avail.length,missCount:miss.length,
+        availText:avail.map((a)=>(a.textContent||'').trim()).join(' | '),
+        missText:miss.map((a)=>(a.textContent||'').trim()).join(' | '),
+        about:{collapsedH:sum?Math.round(sum.getBoundingClientRect().height):null,
+          collapsedArrow:sum?getComputedStyle(sum,'::after').content:null}});})()`));
+    let wheelState = null;
+    try {
+      await cdp.send('Input.dispatchMouseEvent', {type: 'mouseWheel', x: evalMetrics.panel.cx,
+        y: evalMetrics.panel.cy, deltaX: 0, deltaY: 200});
+      await sleep(300);
+      wheelState = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+        const p=sr.getElementById('tw-eval-panel');
+        return JSON.stringify({st:p.scrollTop,sh:p.scrollHeight,ch:p.clientHeight});})()`));
+    } catch (error) { wheelState = {error: error.message}; }
+    let aboutOpenState = null;
+    try {
+      await mouseClick(`${ROOT_SEL} >>> #tw-missing-axes-box > summary`);
+      await sleep(320);
+      aboutOpenState = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+        const a=sr.getElementById('tw-missing-axes-box');const s=a?.querySelector('summary');
+        return JSON.stringify({open:a.open,h:Math.round(s.getBoundingClientRect().height),
+          arrow:getComputedStyle(s,'::after').content});})()`));
+    } catch (error) { aboutOpenState = {error: error.message}; }
+
+    // 37-「引擎规范配招」那一行必须有**四个技能名**（2026-09-27；服务端原来根本没发 skills，
+    //    于是这行一直空着、换招起点是 0/4 —— 审计高 6。判据在页面上看，不在 API 层看）。
+    const loadoutLine = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+      const rows=[...sr.querySelectorAll('.tw-loadout')];
+      const texts=rows.map((el)=>String(el.textContent||'').replace(/\\s+/g,' ').trim());
+      const joined=texts.join(' | ');
+      return JSON.stringify({rows:texts.length,sample:texts[0]??null,
+        hasCanonical:/引擎规范配招：/.test(joined),emptyHint:/引擎未给技能/.test(joined)});})()`));
+    check('37-配招那一行有四个技能名', '每只已选精灵下面那行要么是你选的、要么是引擎规范配招，'
+      + '**不能是空的**（空的等于换招要从零挑四个）【审计高 6】',
+      loadoutLine.rows > 0 && loadoutLine.hasCanonical && !loadoutLine.emptyHint,
+      `配招行 ${loadoutLine.rows} 条；示例「${loadoutLine.sample ?? '—'}」`);
+    // 39-「最怕的体系」那一栏必须真的写出**体系名**（2026-09-27；§C6.303 改了取数却没看渲染结果）。
+    //    服务端给 `value.label`，客户端原来读 `value.archetype_label` ⇒ 名字被丢、只剩分数。
+    //    这一条**读那一格的正文**，不是"整页不炸"；反证喂一段"名字被丢"的样本给同一条判据。
+    const archetypeCell = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+      const boxes=[...sr.querySelectorAll('[data-tw-axis], .tw-axis, .tw-axis-row')];
+      const hit=boxes.map((el)=>String(el.textContent||'').replace(/\\s+/g,' ').trim())
+        .find((t)=>t.includes('最怕的体系'));
+      return JSON.stringify({found:Boolean(hit),text:(hit??'').slice(0,160)});})()`));
+    // 判据只依赖正文（纯函数）：有名字 + 有占比说法
+    const archetypeProblems = (text) => {
+      const body = String(text ?? '');
+      const bad = [];
+      if (!/撞上「[^」]+」这类/.test(body)) bad.push('没有写出体系名（只剩含糊说法或分数）');
+      if (!/大约每 \d+ 局遇到 1 次|环境里占多少没有数据/.test(body)) bad.push('没有说这类体系在环境里占多少');
+      return bad;
+    };
+    const archetypeBad = archetypeProblems(archetypeCell.text);
+    check('39-「最怕的体系」写出体系名', '这一栏要有**名字**（「撞上「X」这类」）而不是只剩分数或含糊的「某类体系」'
+      + '【§C6.303 改了取数没验渲染】',
+      archetypeCell.found && archetypeBad.length === 0,
+      `命中=${archetypeCell.found} 示例「${archetypeCell.text}」${archetypeBad.length ? ' · ' + archetypeBad.join('；') : ''}`);
+    counter('39-「最怕的体系」写出体系名', '把名字去掉（只剩「撞上某类体系时」）喂同一条判据必须报',
+      archetypeProblems('撞上某类体系时最吃亏（这类在环境里大约每 5 局遇到 1 次）'),
+      '样本：撞上某类体系时…（无名字）');
+
+    const scrollProblems = wheelState ? drawerScrollProblems({...evalMetrics.panel, st: wheelState.st}) : ['滚轮取样失败'];
+    check('36-评估抽屉滚得动', '评估抽屉内容超出面板高度时必须**滚得动**（真滚轮 → scrollTop > 0）'
+      + '【人类 2026-09-25：「这个阵容评估也是显示不完，下滑不了」】',
+      scrollProblems.length === 0,
+      `scrollHeight=${evalMetrics.panel.sh} clientHeight=${evalMetrics.panel.ch} `
+      + `（需要滚=${evalMetrics.panel.sh > evalMetrics.panel.ch}）；滚轮后 scrollTop=${wheelState?.st ?? '—'}`);
+    counter('36-评估抽屉滚得动', '「内容超出却滚不动」的形态喂同一条判据必须报',
+      drawerScrollProblems({sh: 900, ch: 400, st: 0}), '{sh:900,ch:400,st:0}');
+
+    // ── 前提变了 ⇒ **条件式判据**（2026-09-25，不是放宽）──────────────────────────
+    // 这个折叠头（`#tw-missing-axes-box`）只在**有算不出来的轴**时才渲染。
+    // 四轴改成三档判定之后五轴全部可算（`missCount` 从 1 变 0）⇒ 那一行整块不渲染 ⇒
+    // 折叠头根本不存在。原来那两条判据无条件去点它，于是红得毫无意义
+    //（而且旧选择器按 class 取，撞上了另一个 hidden 的 `.tw-about`，量到 0 高度）。
+    // 现在：**在**就按原口径判；**不在**则要求"确实没有算不出来的轴"，否则才是真红。
+    const foldPresent = Number.isFinite(evalMetrics.about.collapsedH) && evalMetrics.about.collapsedH > 0;
+    const foldAbsentReason = foldPresent ? null
+      : (evalMetrics.missCount === 0
+        ? '前提不成立：五轴全部可算 ⇒「还有 N 个口径算不出来」那一行不渲染（如实记账，不假装验过）'
+        : `有 ${evalMetrics.missCount} 个轴算不出来，那一行/折叠头却不存在 —— 这是真红`);
+    const foldProblems = foldPresent
+      ? foldHeadProblems({collapsedH: evalMetrics.about.collapsedH, openH: aboutOpenState?.h ?? 0})
+      : (foldAbsentReason && evalMetrics.missCount !== 0 ? [foldAbsentReason] : []);
+    check('37-折叠头两态等高', '「看是哪几个 / 为什么」的折叠头在收起/展开两态高度差 ≤ 4px'
+      + '（前提：存在算不出来的轴）【人类 2026-09-25：「上面那个收起那么大」】',
+      foldProblems.length === 0,
+      foldPresent ? `收起 ${evalMetrics.about.collapsedH}px / 展开 ${aboutOpenState?.h ?? '—'}px` : foldAbsentReason);
+    counter('37-折叠头两态等高', '展开态加回 padding-top:9px 的形态必须报',
+      foldHeadProblems({collapsedH: 44, openH: 73}), '{collapsedH:44,openH:73}');
+
+    const arrowProbs = foldPresent
+      ? arrowProblems({collapsedArrow: evalMetrics.about.collapsedArrow, openArrow: aboutOpenState?.arrow})
+      : (foldAbsentReason && evalMetrics.missCount !== 0 ? [foldAbsentReason] : []);
+    check('38-折叠箭头方向', '折叠箭头遵守惯例：收起 ▸（右）/ 展开 ▾（下）（前提：存在算不出来的轴）'
+      + '【人类 2026-09-25：「箭头还是反的」】',
+      arrowProbs.length === 0, arrowProbs.join(' | ')
+      || (foldPresent
+        ? `收起 ${JSON.stringify(evalMetrics.about.collapsedArrow)} / 展开 ${JSON.stringify(aboutOpenState?.arrow)}`
+        : foldAbsentReason));
+    counter('38-折叠箭头方向', '把两个态的箭头对调必须报',
+      arrowProblems({collapsedArrow: '"▾"', openArrow: '"▴"'}), '收起 ▾ / 展开 ▴');
+
+    const mergedProbs = mergedAxisProblems(evalMetrics);
+    check('39-不可算的轴合并成一行', '算不出来的轴在页面上**只占一行**（旧的逐轴平铺必须消失），且那一行不出现任何数字',
+      mergedProbs.length === 0, mergedProbs.join(' | ')
+      || `轴节点 ${evalMetrics.axisCount} = 能算 ${evalMetrics.availCount} + 合并 ${evalMetrics.missCount}；合并行原文「${evalMetrics.missText.slice(0, 120)}」`);
+    counter('39-不可算的轴合并成一行', '恢复逐轴平铺（四个独立行 + 行里带数字）必须报',
+      mergedAxisProblems({axisCount: 5, availCount: 1, missCount: 4, missText: '环境价值：现在算不出来 0.00'}), '{axisCount:5,availCount:1,missCount:4,missText:"…0.00"}');
+    // 2026-09-25 新增的**状态反证**：前提变了但文案没跟上（五轴全可算、却还挂着「算不出来」那一行）必须报。
+    // 没有这一条，「条件式」就退化成了"两种状态都不查"。
+    counter('39-不可算的轴合并成一行', '五轴全可算却仍渲染「算不出来」那一行（前提变了文案没跟上）必须报',
+      mergedAxisProblems({axisCount: 5, availCount: 5, missCount: 0, missText: '还有四个口径现在算不出来'}),
+      '{axisCount:5,availCount:5,missCount:0,missText:"还有四个口径现在算不出来"}');
+
+    const availProbs = availAxisProblems(evalMetrics);
+    check('40-能算的轴给真值', '能算的轴必须写出真值（含数字），且不可算的那些一个数字都不许给',
+      availProbs.length === 0 && mergedProbs.length === 0,
+      availProbs.join(' | ') || `能算 ${evalMetrics.availCount} 个：「${evalMetrics.availText.slice(0, 120)}」`);
+    counter('40-能算的轴给真值', '把能算的轴换成空话（无数字）必须报',
+      availAxisProblems({availCount: 1, availText: '现在能算'}), '{availCount:1,availText:"现在能算"}');
+
+    // ② 同名不同物种必须看得出区别（人类：「这个什么陛下有啥区别？我根本看不出来啊」）
+    //    实测那两只是 own-0042/pet_000556(Lv50·输出) 与 own-0043/pet_000575(Lv80·坦克)，都叫「棋契陛下」、属性也相同。
+    //    做法：用页面自己的搜索框筛「棋契」→ 读两行**可见文本**，必须不同且各含自己的等级与定位。
+    const sameNameProblems = (texts) => {
+      const bad = [];
+      if (texts.length < 2) return [`同名不同物种的两行没同时出现（只有 ${texts.length} 行）—— 判据不许变空`];
+      if (new Set(texts).size !== texts.length) bad.push(`同名两行的可见文本完全相同：「${texts[0]}」`);
+      if (!texts.some((t) => /Lv50/.test(t)) || !texts.some((t) => /Lv80/.test(t))) {
+        bad.push(`两行必须各带自己的等级（要能同时看到 Lv50 与 Lv80）：${JSON.stringify(texts)}`);
+      }
+      if (!texts.some((t) => /输出/.test(t)) || !texts.some((t) => /坦克/.test(t))) {
+        bad.push(`两行必须各带自己的定位（要能同时看到「输出」与「坦克」）：${JSON.stringify(texts)}`);
+      }
+      return bad;
+    };
+    let sameNameTexts = [];
+    try {
+      // ⚠ 必须先在**「我的精灵」档**量：全图鉴档的同名条目自带分支后缀（实测「棋契陛下（白棋棋骑士分支）」等 4 条），
+      // 看着能区分；人类截图那一屏是「我的精灵」档 —— **没有**分支后缀，那才是"看不出来"的真实场景。
+      await mouseClick(`${ROOT_SEL} >>> #tw-scope-mine`);
+      await sleep(900);
+      await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+        const i=sr.getElementById('tw-search');i.value='棋契';i.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);
+      await sleep(1600);
+      sameNameTexts = JSON.parse(await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+        return JSON.stringify([...sr.querySelectorAll('#tw-cand-list .tw-row')]
+          .map((r)=>(r.textContent||'').replace(/\\s+/g,' ').trim()));})()`));
+    } catch (error) { sameNameTexts = []; }
+    const sameNameProbs = sameNameProblems(sameNameTexts);
+    check('41-同名不同种看得出区别', '候选池里同名不同物种的两行，可见文本必须不同且各含自己的等级与定位'
+      + '【人类 2026-09-25：「这个什么陛下有啥区别？我根本看不出来啊」】',
+      sameNameProbs.length === 0, sameNameProbs.join(' | ') || JSON.stringify(sameNameTexts));
+    counter('41-同名不同种看得出区别', '把两行还原成只画名字+属性（投诉当时的样子）必须报',
+      sameNameProblems(['棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里',
+        '棋契陛下 武系地系 持有 · 可正式上场 在你的盒子里']), '两行逐字相同');
+    // 搜索框还原，别影响后面的截图
+    await js(`(()=>{const sr=document.querySelector(${JSON.stringify(ROOT_SEL)}).shadowRoot;
+      const i=sr.getElementById('tw-search');i.value='';i.dispatchEvent(new Event('input',{bubbles:true}));return true;})()`);
+    await sleep(900);
+
     shots.push(await shootModule('workshop-03-six-selected-1440x900'));
 
     // ── ⑥ 卡上的机制行（冻结原文逐字上卡；枚举原文不许上卡）────────────
@@ -1447,6 +1682,18 @@ async function main() {
     await mouseClick(`${ROOT_SEL} >>> #tw-reset`);
     await waitFor(`Number(document.querySelector(${JSON.stringify(ROOT_SEL)})?.dataset.twSelected||'0')===0`);
     await sleep(360);
+    // 2026-09-25（A/B 定位后的**加严**，不是放宽）：先断言候选区**当时真的看得见**。
+    // 原先这条在「候选列表被挤成 0px（零面积滚动框不参与命中测试）」时报的是"点击落空"，
+    // 定位成本很高（实测 390×844 下面板 289px、头部+档位+筛选+翻页吃满 284px）。
+    const candBox = JSON.parse(await js(`(()=>{const host=document.querySelector(${JSON.stringify(ROOT_SEL)});
+      const sr=host?.shadowRoot??null;const list=sr?.querySelector('#tw-cand-list')??null;
+      const row=list?.querySelector('.tw-row')??null;
+      return JSON.stringify({clientH:list?list.clientHeight:null,scrollH:list?list.scrollHeight:null,
+        geoH:list?Math.round(list.getBoundingClientRect().height):null,
+        rowH:row?Math.round(row.getBoundingClientRect().height):null});})()`));
+    check('31b-窄屏候选区有可见高度', '390×844：候选列表必须至少露出一整行（0 高度 = 玩家真的点不到）',
+      Number(candBox.clientH) >= 44 && Number(candBox.rowH) >= 44,
+      `列表可见高 clientH=${candBox.clientH} 几何高=${candBox.geoH} scrollH=${candBox.scrollH} 行高=${candBox.rowH}`);
     const narrowAdds = [];
     for (const name of pickNames.slice(0, 2)) narrowAdds.push({name, ...(await addByName(name))});
     const narrowTwo = await facts();

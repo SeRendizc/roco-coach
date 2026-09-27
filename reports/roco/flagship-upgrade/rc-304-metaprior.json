@@ -5,14 +5,14 @@
       "archetype_id": "poison_stack",
       "confidence": "ENGINE_HYPOTHESIS",
       "distribution": {
-        "source": "unknown",
-        "unit": null,
-        "value": null
+        "source": "assumption",
+        "unit": "share",
+        "value": 0.142857
       },
       "evidence_levels": [
         "ENGINE_HYPOTHESIS",
         "ENGINE_HYPOTHESIS",
-        "COMMUNITY_CURRENT"
+        "RECORDED_IN_GAME"
       ],
       "feature_axes": [
         {
@@ -74,9 +74,9 @@
       "archetype_id": "wing_king_flyer",
       "confidence": "ENGINE_HYPOTHESIS",
       "distribution": {
-        "source": "unknown",
-        "unit": null,
-        "value": null
+        "source": "assumption",
+        "unit": "share",
+        "value": 0.142857
       },
       "evidence_levels": [
         "ENGINE_HYPOTHESIS",
@@ -112,9 +112,9 @@
       "archetype_id": "meteor_burst",
       "confidence": "ENGINE_HYPOTHESIS",
       "distribution": {
-        "source": "unknown",
-        "unit": null,
-        "value": null
+        "source": "assumption",
+        "unit": "share",
+        "value": 0.142857
       },
       "evidence_levels": [
         "ENGINE_HYPOTHESIS",
@@ -151,9 +151,9 @@
       "archetype_id": "sugar_morph",
       "confidence": "ENGINE_HYPOTHESIS",
       "distribution": {
-        "source": "unknown",
-        "unit": null,
-        "value": null
+        "source": "assumption",
+        "unit": "share",
+        "value": 0.142857
       },
       "evidence_levels": [
         "ENGINE_HYPOTHESIS",
@@ -193,13 +193,13 @@
       "archetype_id": "ice_control",
       "confidence": "ENGINE_HYPOTHESIS",
       "distribution": {
-        "source": "unknown",
-        "unit": null,
-        "value": null
+        "source": "assumption",
+        "unit": "share",
+        "value": 0.142857
       },
       "evidence_levels": [
         "ENGINE_HYPOTHESIS",
-        "COMMUNITY_CURRENT",
+        "RECORDED_IN_GAME",
         "COMMUNITY_CURRENT"
       ],
       "feature_axes": [
@@ -262,9 +262,9 @@
       "archetype_id": "sandstorm_weather",
       "confidence": "ENGINE_HYPOTHESIS",
       "distribution": {
-        "source": "unknown",
-        "unit": null,
-        "value": null
+        "source": "assumption",
+        "unit": "share",
+        "value": 0.142857
       },
       "evidence_levels": [
         "ENGINE_HYPOTHESIS",
@@ -299,14 +299,14 @@
       "archetype_id": "fighting_press",
       "confidence": "ENGINE_HYPOTHESIS",
       "distribution": {
-        "source": "unknown",
-        "unit": null,
-        "value": null
+        "source": "assumption",
+        "unit": "share",
+        "value": 0.142857
       },
       "evidence_levels": [
         "ENGINE_HYPOTHESIS",
         "CROSS_SOURCE_SUPPORTED",
-        "COMMUNITY_CURRENT"
+        "RECORDED_IN_GAME"
       ],
       "feature_axes": [
         {
@@ -427,25 +427,25 @@
       "ok": true
     },
     {
-      "actual": "21 条证据，等级分布 {\"OFFICIAL_CURRENT\":0,\"RECORDED_IN_GAME\":0,\"COMMUNITY_CURRENT\":5,\"CROSS_SOURCE_SUPPORTED\":4,\"ENGINE_HYPOTHESIS\":12,\"UNKNOWN\":0}",
+      "actual": "21 条证据，等级分布 {\"OFFICIAL_CURRENT\":0,\"RECORDED_IN_GAME\":3,\"COMMUNITY_CURRENT\":2,\"CROSS_SOURCE_SUPPORTED\":4,\"ENGINE_HYPOTHESIS\":12,\"UNKNOWN\":0}",
       "criteria": "evidence[].ref 解析失败或缺 date / confidence 即红；confidence ∉ 台账六级即红。",
       "label": "逐条证据可核对（http(s) 或仓内真实文件）且带日期与台账六级等级",
       "ok": true
     },
     {
-      "actual": "带台账锚点的证据 11 条，台账条目 21 条",
+      "actual": "带台账锚点的证据 11 条，台账条目 29 条",
       "criteria": "evidence[].ledger_entry 形如 EV-* 时：该条目必须真的在 rule-evidence-ledger.json 里，且 confidence 与 ref 必须等于台账该条目的等级与首要来源（抄一份就会漂移）。",
       "label": "逐条证据能指回台账条目，且等级与首要来源都与台账一致",
       "ok": true
     },
     {
-      "actual": "measured 0 项 / unknown 7 项",
+      "actual": "measured 0 项 / unknown 0 项",
       "criteria": "measured ⇒ sources 非空 + value 有限 + value_source；unknown ⇒ value === null + reason ≥ 12 字符 + 不挂 sources。",
       "label": "distribution 只有两种形态：measured（有来源）或 unknown（value=null + reason）",
       "ok": true
     },
     {
-      "actual": "rule_evidence_ledger:f1a0b073b1e0… | game_data_pack:476ef71f376f… | ruleset_config:5359313f0fda… | catalog_reconciliation:bca1bf352a13… | pack_schema:7ed3f4b16307…",
+      "actual": "rule_evidence_ledger:267e9b4eeb85… | game_data_pack:355dc06c73f4… | ruleset_config:9f7740dedee8… | catalog_reconciliation:bca1bf352a13… | pack_schema:7ed3f4b16307…",
       "criteria": "对每个引用路径重新算 sha256，与先验里写的比对；不一致即红（说明先验引用的产物已经换代）。",
       "label": "derived_from 的 sha256 与磁盘一致",
       "ok": true
@@ -479,62 +479,62 @@
     "synergy"
   ],
   "determinism": {
-    "actual": "两次构建 28862 / 28862 字节，identical=true",
+    "actual": "两次构建 32796 / 32796 字节，identical=true",
     "criteria": "同一份输入连续两次 buildMetaPrior() 的 stableStringify 必须逐字节相同（没有挂钟字段、排序固定）。",
     "ok": true
   },
   "distribution": [
     {
       "archetype_id": "poison_stack",
-      "source": "unknown",
-      "unit": null,
-      "value": null
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "wing_king_flyer",
-      "source": "unknown",
-      "unit": null,
-      "value": null
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "meteor_burst",
-      "source": "unknown",
-      "unit": null,
-      "value": null
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "sugar_morph",
-      "source": "unknown",
-      "unit": null,
-      "value": null
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "ice_control",
-      "source": "unknown",
-      "unit": null,
-      "value": null
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "sandstorm_weather",
-      "source": "unknown",
-      "unit": null,
-      "value": null
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "fighting_press",
-      "source": "unknown",
-      "unit": null,
-      "value": null
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     }
   ],
   "distribution_note": "仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以七个体系的占比全部是 unknown + value: null + reason。构建器在缺来源时**拒绝**写数值（fail closed）。",
-  "distribution_source": "unknown",
+  "distribution_source": "assumption",
   "evidence_confidence": {
-    "COMMUNITY_CURRENT": 5,
+    "COMMUNITY_CURRENT": 2,
     "CROSS_SOURCE_SUPPORTED": 4,
     "ENGINE_HYPOTHESIS": 12,
     "OFFICIAL_CURRENT": 0,
-    "RECORDED_IN_GAME": 0,
+    "RECORDED_IN_GAME": 3,
     "UNKNOWN": 0
   },
   "evidence_count": 21,
@@ -543,7 +543,7 @@
     "speed tie（同速谁先动）= UNKNOWN",
     "能量上限 6 还是 10 = ENGINE_HYPOTHESIS（台账 EV-ENERGY-MAX）"
   ],
-  "meta_prior_id": "roco-meta-prior/v1#57aa6539dcde39ca",
+  "meta_prior_id": "roco-meta-prior/v1#0f62deba4c3cf4d2",
   "missing_real_evidence": [
     "「萌化」体系在标准 PVP 里的实机出场与胜负记录（当前一条都没有）",
     "「陨星」这一挂的实机配招与出场记录（当前一条都没有）",
@@ -630,6 +630,46 @@
       "where": "distribution[].reason"
     },
     {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DISTRIBUTION] distribution[sugar_morph].basis：source=\"assumption\" 必须给 basis：声明这条假设**凭什么**成立、分母是什么、怎么复算（缺了它就是在编数据）",
+      "expect_code": "DISTRIBUTION",
+      "id": "3c-1",
+      "label": "assumption 缺 basis（假设凭什么成立）⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "distribution[].basis"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DISTRIBUTION] distribution[sugar_morph].sources：source=\"assumption\" 不许挂 sources：挂了就看起来像 measured。要升级成实测，请把 source 改成 measured 并逐条给 url/文件 + 日期 + 等级",
+      "expect_code": "DISTRIBUTION",
+      "id": "3c-2",
+      "label": "assumption 挂上 sources（会看起来像 measured）⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "distribution[].sources"
+    },
+    {
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[CONFIDENCE] distribution[sugar_morph].confidence：source=\"assumption\" 只许挂 ENGINE_HYPOTHESIS（它是我们为了有界运行选的假设，不是实机事实），实际 \"RECORDED_IN_GAME\"",
+      "expect_code": "CONFIDENCE",
+      "id": "3c-3",
+      "label": "assumption 把等级抬到 RECORDED_IN_GAME ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "distribution[].confidence"
+    },
+    {
+      "actual": "ok=false；问题 3 条，去掉 meta_prior_id 漂移后：[DISTRIBUTION] distribution[sugar_morph].basis.denominator：basis.denominator 必须是正有限数（分母是这条假设的核心），实际 0 | [DISTRIBUTION] distribution[sugar_morph].basis.recomputable_from：basis.recomputable_from 必须写清**谁来复算**（脚本/产物路径），否则这条假设不可复核",
+      "expect_code": "DISTRIBUTION",
+      "id": "3c-4",
+      "label": "assumption 分母写成 0 ⇒ 红",
+      "ok": false,
+      "passed": true,
+      "reproduce": "node --test tests/roco-meta-prior.test.js（同样的改坏逻辑在测试里各跑一次并打印）",
+      "where": "distribution[].basis.denominator"
+    },
+    {
       "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[SEED_SPECIES] archetypes[meteor_burst].seed_species[0]：陨星龙王 不在 pack 的 pet 实体里（pack 现有 504 个名字）——先验不许写环境里不存在的精灵",
       "expect_code": "SEED_SPECIES",
       "id": "4",
@@ -650,7 +690,7 @@
       "where": "archetypes[].confidence"
     },
     {
-      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[CONFIDENCE] archetypes[poison_stack].evidence[2].confidence：台账 EV-TYPE-MULTIPLIER 的等级是 COMMUNITY_CURRENT，这里写的是 OFFICIAL_CURRENT（等级只能与台账一致）",
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[CONFIDENCE] archetypes[poison_stack].evidence[2].confidence：台账 EV-TYPE-MULTIPLIER 的等级是 RECORDED_IN_GAME，这里写的是 OFFICIAL_CURRENT（等级只能与台账一致）",
       "expect_code": "CONFIDENCE",
       "id": "5c",
       "label": "逐条证据的等级与台账不一致 ⇒ 红",
@@ -690,7 +730,7 @@
       "where": "archetypes[].feature_axes[].criterion"
     },
     {
-      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DERIVED_FROM] derived_from[1].sha256：data/roco/game-data-pack/v2/pack.json 的 sha256 与磁盘不一致：先验写 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘是 476ef71f376f7c5f728d2edc0d0ff1be416413dec0832f3bf12ebe4a62d7a5e1",
+      "actual": "ok=false；问题 2 条，去掉 meta_prior_id 漂移后：[DERIVED_FROM] derived_from[1].sha256：data/roco/game-data-pack/v2/pack.json 的 sha256 与磁盘不一致：先验写 ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff，磁盘是 355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41",
       "expect_code": "DERIVED_FROM",
       "id": "10",
       "label": "derived_from 的 sha256 与磁盘不一致 ⇒ 红",

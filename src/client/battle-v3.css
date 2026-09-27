@@ -136,6 +136,12 @@
   padding:var(--b3-pad-y-top) var(--b3-pad-x) var(--b3-pad-y-bottom);
   background:var(--b3-bg);
   color:var(--b3-ink);
+  /* 2026-09-23（接手复核，人类报的「战斗页四个角：外侧窗口圆角和内侧线条圆角弧度不一致」）：
+     实测四角上只有两层 —— 外层 `#battle-panel`（圆角 13px、边框 1px、浅色底）与**这一层**
+     （`b3-wrap`，圆角 **0**、更深的底、正好内缩 1px）。于是每个角上都是「方角的内层塞在圆角
+     的外层里」，边界处出现两条不同弧度的线。
+     修法就是本项目自己那条规则「**外 = 内 + 中间的内边距**」：外层 13px = 内层 12px + 边框 1px。 */
+  border-radius:12px;
   font:13.5px/1.45 -apple-system, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   display:flex;
   flex-direction:column;
@@ -243,6 +249,13 @@ body[data-b3-tab="escape"] .b3-wrap .b3-panel--escape,
 .b3-wrap .b3-dmg--up{color:var(--b3-grn)}
 .b3-wrap .b3-dmg--down{color:var(--b3-red)}
 .b3-wrap .b3-dmg--none{color:var(--b3-dim)}
+/* 2026-09-25：颜色同时认 `data-b3-dmg-kind`（**JS 真正会写的那一份**）。
+   以前只认 class，而 JS 只改 data ⇒ HTML 里设计稿的 `b3-dmg--up`（绿）永远盖在上面：
+   人类实测「上一回合优势、下一回合劣势了，显示还是绿色的优势」就是这么来的。 */
+.b3-wrap .b3-dmg[data-b3-dmg-kind="plain"]{color:var(--b3-ink)}
+.b3-wrap .b3-dmg[data-b3-dmg-kind="up"]{color:var(--b3-grn)}
+.b3-wrap .b3-dmg[data-b3-dmg-kind="down"]{color:var(--b3-red)}
+.b3-wrap .b3-dmg[data-b3-dmg-kind="none"]{color:var(--b3-dim)}
 
 /* ── 属性徽章：显示形态 = emoji + 中文（如 🔥火系）；点一下只显示中文 ──────
    18 属性的 emoji 口径见 docs/roco/ELEMENT-EMOJI.md：
@@ -277,6 +290,9 @@ body[data-b3-tab="escape"] .b3-wrap .b3-panel--escape,
 .b3-wrap .b3-rel[data-b3-rel="up"] .b3-rel-up{display:block}
 .b3-wrap .b3-rel[data-b3-rel="down"] .b3-rel-down{display:block}
 .b3-wrap .b3-rel[data-b3-rel="none"] .b3-rel-none{display:block}
+/* `unknown` = **没有权威倍率**：一个都不画（不画 ≠ 无影响；白圈的含义是"无影响"，
+   拿它兜底就是替引擎宣称一件没算过的事）。 */
+.b3-wrap .b3-rel[data-b3-rel="unknown"] svg{display:none}
 
 /* ── ③ 中间两张卡（显式镜像，不靠 row-reverse 猜顺序） ─────────────────── */
 .b3-wrap .b3-stage{
@@ -355,6 +371,10 @@ body[data-b3-charge="mana"] .b3-wrap .b3-charge .b3-charge-sub{color:var(--b3-ma
   border:1px solid var(--b3-line2);background:#152230;color:var(--b3-ink-soft);
   font-weight:650;font-size:14px;text-align:center;
 }
+/* 补位期间技能/物品两页不可用（人类 2026-09-25：「精灵倒下后…"技能""背包"应该灰掉」）：
+   灰掉 + 禁用光标；点击也被 `setActTab` 挡掉（`disabled` 同时管住键盘与点按）。 */
+.b3-wrap .b3-tab[data-b3-tab-disabled="yes"]{opacity:.38;cursor:not-allowed}
+.b3-wrap .b3-tab[data-b3-tab-disabled="yes"]:hover{border-color:var(--b3-line2)}
 /* 高亮当前项：**唯一真源 = body.dataset.b3Tab**（下面的抑制 + 点亮两条配套）。
    `data-b3-tab-on="yes"` 只是「片段单独预览」时的静态默认，有 tab 信号时自动让位。 */
 .b3-wrap .b3-tab[data-b3-tab-on="yes"]{background:#1e3b55;border-color:#5b86ad;color:#fff}
@@ -416,13 +436,28 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
 .b3-wrap .b3-spritebox{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
 .b3-wrap .b3-sprite{max-width:100%;max-height:100%;object-fit:contain;display:block;
  filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));transition:transform .18s ease}
-.b3-wrap .b3-fx{position:absolute;inset:0;pointer-events:none;overflow:visible}
-.b3-wrap .b3-float{position:absolute;left:50%;top:14%;transform:translateX(-50%);
- font-weight:800;font-size:20px;text-shadow:0 2px 6px rgba(0,0,0,.65);animation:b3float 1.2s ease-out forwards}
+/* ── 飘字层必须在立绘**之上**（人类 2026-09-25：「我要的伤害显示呢？」）────────────
+   实测（真无头 Chrome，1440×900）：`.b3-sprite` 是 flex item，`z-index:1` 对 flex item 有效
+   （flex item 即使 `position:static`，只要 z-index≠auto 就建立层叠上下文、进入正 z-index 层），
+   而 `.b3-fx` 原来是 `z-index:auto` —— 于是**立绘把数字盖在下面**：
+   `document.elementsFromPoint(数字中心)` 的首个元素是 `img.b3-sprite`，
+   截图里 `-30` 只有透过立绘 PNG 的透明处才漏出几十个像素。
+   修法：把飘字层抬到 3（顺带压过 `.b3-spritebox::after` 那个 z-index:auto 的暗角），
+   并给 `.b3-float` 自己开 `pointer-events:auto` —— 否则整条链路的 `pointer-events:none`
+   会继承到飘字上，`elementFromPoint` **永远**点不到它，「数字在最上层」这件事就没法从页面外面证。 */
+.b3-wrap .b3-fx{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:3}
+.b3-wrap .b3-float{position:absolute;left:50%;top:18%;transform:translateX(-50%);
+ pointer-events:auto;z-index:1;
+ font-weight:800;font-size:20px;animation:b3float 1.2s ease-out forwards;
+ /* 描边+投影两层：飘字现在压在立绘上，立绘 PNG 自带浅灰底，只有一层投影读不清 */
+ text-shadow:0 0 3px rgba(0,0,0,.9),0 0 6px rgba(0,0,0,.75),0 2px 6px rgba(0,0,0,.85)}
 .b3-wrap .b3-float--hit{color:#ff8f8f}
 .b3-wrap .b3-float--heal{color:#8fe0a2}
+/* 上浮别顶出画框：`.b3-spritebox` 是 `overflow:hidden`（圆角画框要靠它裁），
+   实测 1440×900 下画框高 465px、`top:18%` 的飘字离框顶还有 ~77px，抬 20px 碰不到框顶；
+   窄屏画框矮的那一档同样在框内（这也是把上浮从 26px 收到 20px 的原因）。 */
 @keyframes b3float{0%{opacity:0;transform:translate(-50%,10px) scale(.9)}
- 20%{opacity:1;transform:translate(-50%,0) scale(1.06)}100%{opacity:0;transform:translate(-50%,-26px) scale(1)}}
+ 20%{opacity:1;transform:translate(-50%,0) scale(1.06)}100%{opacity:0;transform:translate(-50%,-20px) scale(1)}}
 .b3-wrap .b3-attack .b3-sprite{animation:b3lunge .5s ease}
 .b3-wrap .b3-hit .b3-sprite{animation:b3shake .5s ease}
 .b3-wrap .b3-hit{box-shadow:0 0 0 2px rgba(255,120,120,.55) inset}
@@ -493,19 +528,29 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
 .b3-wrap .b3-charge,.b3-wrap .b3-tab{border-radius:11px}
 
 /* 人类 2026-09-23：**剩余精灵数量在两边、回合那坨字在两者中间**（不是在页眉），
-   且不要把点组顶到卡片边缘。两侧各 1fr、中间 auto 居中，整体内缩 14px。 */
+   且不要把点组顶到卡片边缘。两侧各 1fr、中间 auto 居中。
+   2026-09-25：内缩**不是**列间隙（14px）——按设计稿 `battle-v3h.html` 的 `.topbar{padding:0 4px}`
+   走顶栏自己的 `--b3-topbar-pad-x`（4px）。实测原来左点组 x=31，设计稿是 20
+   （14px 那一档把点组往中间推了 11px）。 */
 .b3-wrap .b3-topbar{display:grid !important;grid-template-columns:1fr auto 1fr;
- align-items:center;gap:12px;padding-left:14px;padding-right:14px}
+ align-items:center;gap:12px;padding-left:var(--b3-topbar-pad-x);padding-right:var(--b3-topbar-pad-x)}
 .b3-wrap .b3-topbar .b3-side{justify-self:start}
 .b3-wrap .b3-topbar .b3-side--foe,.b3-wrap .b3-topbar .b3-side.right{justify-self:end}
 .b3-wrap .b3-topbar .b3-turn{justify-self:center;text-align:center}
 /* ── 圆角：**外 = 内 + 中间内边距**（人类：外圈弧度不能比内圈小、否则遮住内容）── */
-.b3-wrap{--b3-r-card:17px;--b3-r-slot:9px;--b3-r-inner:4px}
+/* 2026-09-25（视觉审计）：属性徽章的圆角设计值就是 8px（本文件顶部的 `--b3-radius-el:8px`），
+   但这一条把技能格里的徽章压成了 `--b3-r-inner` = 4px —— 同一枚徽章在卡头是 8px、在格子里是 4px。
+   按设计值改成 8px。`.b3-cost`/`.b3-rel` 没有底色和边框（只有文字与 SVG），这一改对它们不可见；
+   `.b3-buff` 会跟着圆一点，与徽章同档。 */
+.b3-wrap{--b3-r-card:17px;--b3-r-slot:9px;--b3-r-inner:8px}
 .b3-wrap .b3-card{border-radius:var(--b3-r-card);padding:8px}
 .b3-wrap .b3-slot{border-radius:var(--b3-r-slot);padding:5px 8px}
 .b3-wrap .b3-slot .b3-el,.b3-wrap .b3-slot .b3-cost,.b3-wrap .b3-slot .b3-rel,
 .b3-wrap .b3-buff{border-radius:var(--b3-r-inner)}
-.b3-wrap .b3-spritebox{border-radius:calc(var(--b3-r-card) - 3px)}
+/* 2026-09-23：立绘框的圆角**不许大于它所在的卡**（人类报的四角问题里，这一处是卡内部那层）：
+   实测卡 `.b3-fighter` 是 13px、而立绘框被算成 `17-3=14px` —— 内层比外层还圆，弧线会反包出去。
+   定稿里同一位置的 `.free` 写的就是 **11px**，按定稿来。 */
+.b3-wrap .b3-spritebox{border-radius:11px}
 /* ── 纵向顶满：主区撑满、不留底部空白 ── */
 .b3-wrap .b3-main{height:100%;align-items:stretch}
 .b3-wrap .b3-col,.b3-wrap .b3-stage,.b3-wrap .b3-card{height:100%}
@@ -513,8 +558,12 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
 /* 人类 2026-09-23 批注（截图两张）：
    ①「左右留空不要完全顶满，上下也留一点点」→ 加大片段内边距；
    ②「对方的剩余数量还是没向右」→ 强制对手点组靠右（片段里那是 class="b3-side right b3-side--foe"）；
-   ③「框内比如右下角和逃跑跳出来的一般都居中」→ 逃跑确认居中。 */
-.b3-wrap{padding:14px 24px 16px}
+   ③「框内比如右下角和逃跑跳出来的一般都居中」→ 逃跑确认居中。
+   2026-09-25：`main{max-width:1240px}` 的上游枷锁解开之后（`roco.css` 的
+   `body:has(#battle-panel:not([hidden])) main{max-width:none}`），战斗区已经能占满 1440，
+   左右再留 24px 会让三列只剩 1390（设计稿口径是 1408 = 232/916/232 + 两处 14px 间隙）
+   —— 所以左右内边距收到 **16px**（上下不动），实测列宽见报告。 */
+.b3-wrap{padding:14px 16px 16px}
 .b3-wrap .b3-topbar .b3-side--foe,
 .b3-wrap .b3-topbar .b3-side.right{justify-self:end !important;justify-content:flex-end !important}
 .b3-wrap .b3-panel--escape{align-items:center;justify-content:center;text-align:center}
@@ -529,3 +578,66 @@ body[data-b3-tab="escape"] .b3-wrap .b3-tab[data-b3-tab="escape"]{
   .b3-wrap .b3-topbar .b3-turn{order:2;text-align:center}
   .b3-wrap .b3-topbar .b3-side--foe,.b3-wrap .b3-topbar .b3-side.right{order:3;justify-content:center}
 }
+
+/* ── 「愿力强化」换上来的那一格：回技能页后**明确高亮** ───────────────────────
+   人类 2026-09-23 口径④：用了愿力强化之后应当自动回到技能页，并把换上来的
+   「愿力冲击」高亮出来。记号由 `roco.js` 按**引擎那一条 magic 事件**（`detail.mode=transform`
+   的 `skill`）写到 `data-b3-magic-new="yes"`，页面不自己判断换上了哪一招。 */
+.b3-wrap .b3-slot[data-b3-magic-new="yes"]{
+  border-color:var(--b3-gold);
+  box-shadow:0 0 0 1px var(--b3-gold) inset, 0 0 14px -4px var(--b3-gold);
+}
+.b3-wrap .b3-magic-tag{
+  margin-left:auto;padding:1px 7px;border-radius:999px;white-space:nowrap;
+  font-size:10.5px;font-weight:700;letter-spacing:.02em;
+  color:#2a1f06;background:var(--b3-gold);
+}
+
+/* ── 实时状态飘字（人类 2026-09-24：「受击/治疗/未击中等实时状态自然的显示一下」）──
+   引擎事件给什么就画什么：伤害（按克制强度变色）、回复/吸血、防御挡住、未击中、倒下。
+   2026-09-25：出招改成时间线之后，同一张卡上会**先后**落好几条飘字（伤害→倒下、
+   伤害→吸血回复…）。原来它们全挤在 `top:14%` 一个点上互相压字，这里按类别错开纵向位置，
+   让「先后」在空间上也读得出来（40%~80% 这几档最矮的画框里也不会顶出框）。 */
+.b3-wrap .b3-float--strong{color:#ff9f86;font-size:17px}
+.b3-wrap .b3-float--weak{color:#a9bccd;font-size:13px}
+.b3-wrap .b3-float--shield{color:#9fc7ff;font-size:13px;top:46%}
+.b3-wrap .b3-float--miss{color:#c9d6e2;font-size:13px;top:58%}
+.b3-wrap .b3-float--faint{color:#ff8f8f;font-size:14px;font-weight:750;top:70%}
+.b3-wrap .b3-float--buff{color:var(--b3-gold);font-size:12.5px;top:82%}
+.b3-wrap .b3-float--heal{top:32%}
+
+/* ── 立绘框底边接缝（人类 2026-09-25：「立绘框底边横线：要处理」，把它压掉）───────────
+   实测（真无头 Chrome 1440×900，`.b3-spritebox` 底边逐行像素，x∈[279,699)）：
+     · y=714 立绘图自己的底边（图里画的地面那块中灰 rgb(81,82,85)）；
+     · y=715 画框的 **1px 实线底边** rgb(36,52,68) —— 整幅框宽一条硬横线（与上一行跳变 47.0/255）；
+     · y=716 起卡片底色 rgb(17,28,38)。
+   修法（**零几何位移**：边框宽度、盒模型、三列宽度一律不动，只换颜色与叠加层）：
+     ① 底边颜色改成**卡片底色**而不是纯 `transparent` —— 透明会把画框自己的背景渐变
+        （底端 rgb(15,22,29)）露出来，仍是一条暗线；写成卡片底色才与下方同色。
+     ② `::after` 那层「暗角」在最后 22px 上叠一层卡片底色（暗角会把它下面的框底色再压暗
+        约 27%，不盖住的话框底仍比卡片暗一档）。
+     ③ 立绘图底边 14px 渐隐 —— 图自己的底边是「灰块切一刀」，渐隐后落进卡色里。
+   这三条都只作用在画框与图自身，不动 `--b3-panel`/三列/任何可点元素。 */
+.b3-wrap .b3-spritebox{border-bottom-color:var(--b3-panel)}
+.b3-wrap .b3-spritebox::after{
+  background:
+    linear-gradient(180deg,rgba(17,28,38,0) calc(100% - 34px),var(--b3-panel) 100%),
+    radial-gradient(120% 90% at 50% 30%, rgba(0,0,0,0) 45%, rgba(0,0,0,.45) 100%);
+}
+.b3-wrap .b3-sprite{
+  -webkit-mask-image:linear-gradient(180deg,#000 calc(100% - 32px),rgba(0,0,0,0) 100%);
+  mask-image:linear-gradient(180deg,#000 calc(100% - 32px),rgba(0,0,0,0) 100%);
+}
+
+/* ── 天气（2026-09-25 引擎起在标准 PVP 的公开视图里给 `weather`）─────────────────
+   人类口径（主线程转述）：战斗顶栏显示「当前天气 + 剩余回合」；**没有天气一个字都不渲染**；
+   文案只用引擎给的 `name` / `turns_left`（不翻译天气名、缺回合数时不编数字）。
+   版式：天气与模式**同一行**（`#b3-mode` 后面）。没有天气时那一格是 `display:none`，
+   不是 flex item → 连 `gap` 都不占，顶栏高度 / 中央两行与加天气之前**逐位相同**
+   （人类 2026-09-23 定稿的「中央两行」没有被改）。 */
+.b3-wrap .b3-turn .b3-line{display:flex;align-items:center;justify-content:center;gap:7px;min-height:16px}
+.b3-wrap .b3-weather{display:inline-flex;align-items:center;height:16px;box-sizing:border-box;
+ font-size:10.5px;font-weight:600;line-height:1;white-space:nowrap;padding:0 7px;
+ color:#a9d8ef;background:#1d3444;border:1px solid #3d5570;border-radius:9px}
+/* 高度钉成 16px = 模式行那一行的高度（13px × 1.25）：天气出现时中央那一行**不长高**，
+   顶栏高度与没天气时逐位相同（实测两态都是 39px）。 */

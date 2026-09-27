@@ -17,7 +17,7 @@
 
 import {interventionDetail,interventionFeaturesOfGame} from './experience.js';
 import {coachAdvice, normaliseAdviceShape} from './coach-advice.js';
-import {reviewMatch, checkLearningProgress} from './teacher-review.js';
+import {reviewMatch, checkLearningProgress, teacherMatchFacts} from './teacher-review.js';
 
 /** 手游 3v3 训练场在旧引擎口径下的「模式」：它属于本地 PvE 练习。 */
 export const ROCO_MODE = 'pve';
@@ -262,6 +262,586 @@ export function rocoLessonEntry({events = [], turns = 0} = {}) {
   };
 }
 
+// ── 局末复盘的「更深一层」：关键片段 · 资源账 · 一条有条件的下一步 ─────────────
+//
+// 动机（人类/产品负责人看过一局的复盘之后说的原话）：「我感觉这个复盘有点太简单了」。
+// 当时「完整复盘与依据」区里只有三样东西：一句「几个回合 + 第一次减员」、一句学习点、
+// 两三条依据加一行统计。这一层把**已经发生过的**事件整理成玩家能自己回查的片段，
+// 一条也不编。
+//
+// 三条纪律（每一条都能被机器核对，判据见 `tests/roco-match-review-depth.test.js`）：
+//   ① 每个数字只来自 `events` 与公开视图，且每条事实都带 `anchors`（事件下标）：
+//      拿同一份事件重算一遍就能核对，不需要相信这里的文案；
+//   ② 没有事件支撑的那一条**不出现**（fail closed）。「零值账」（这一局没换人 / 没用道具）
+//      是另一回事：**只有看得到整局**时才敢说「事件 0 条」——只拿到最后一次推进的事件时
+//      必须闭嘴，否则会把「没看到」说成「没发生」；
+//   ③ 不复述引擎战报里的百分数（「减伤约 70%」是引擎自己的话），更不写胜率、概率、「最优」。
+//
+// 这一层**不产出胜率/概率**，也不做任何预测：它只回答「这一局真的发生过什么」。
+
+/** 事件里「谁」的两种写法。口径与 `teacher-review.js` 的 `sideOf` 一致。 */
+const DEPTH_SIDE_PLAYER = 'player';
+const DEPTH_SIDE_ENEMY = 'enemy';
+
+/** `teacherMatchFacts` 已经认得的 kind：这一层不重复解析，免得同一件事有两个口径。 */
+const DEPTH_PARSED_KINDS = Object.freeze(['damage', 'faint', 'switch', 'item', 'replacement', 'status_tick']);
+
+/**
+ * 效果类事件的中文说法（读作「`<谁>` + 标签 + N 次」）。`in` 会命中原型链上的键，
+ * 所以下面一律用 `Object.hasOwn`。
+ *
+ * ⚠ 侧别语义**按引擎事件原样**，而引擎自己不是统一的：
+ *   · `status_added` / `mark_added` 记的是**承受方**（`env.py` 的 `foe_status` / `foe_mark`
+ *     分支直接写 `side: "enemy"`，也就是「谁身上有这个东西」）；
+ *   · 其余（`defense` / `heal` / `buff_self` / `energy_gain` / …）记的是**行动方**。
+ * 所以标签写成两种主语都读得通的说法（「身上被挂上异常状态」而不是「给对方挂上…」），
+ * 免得出现「对方给对方挂上异常状态」这种读不通的句子。
+ */
+const DEPTH_EFFECT_LABEL = Object.freeze({
+  defense: '减伤/应对',
+  heal: '技能治疗',
+  lifesteal: '吸血',
+  cleanse: '净化',
+  status_added: '身上被挂上异常状态',
+  status_applied: '用出状态类技能',
+  status_tick: '异常状态回合末扣血',
+  mark_added: '身上多了一个印记',
+  buff_self: '自身增益',
+  debuff_foe: '削弱对面',
+  energy_gain: '技能回能',
+  drain_energy: '吸走对面能量',
+  position_shift: '站位变化',
+  slot_condition_applied: '位置条件生效',
+});
+
+/**
+ * kind → 事件里那个「量」的字段与单位（引擎真的写了才有）。
+ * `delta_pct` / `reduction` 这类**百分数字段刻意不登记**：这一层不吐百分数。
+ */
+const DEPTH_EFFECT_POINTS = Object.freeze({
+  heal: {field: 'healed', unit: '点'},
+  lifesteal: {field: 'healed', unit: '点'},
+  status_tick: {field: 'damage', unit: '点'},
+  energy_gain: {field: 'amount', unit: '点能量'},
+  drain_energy: {field: 'taken', unit: '点能量'},
+});
+
+/** 「下一步」的候选规则，按这个次序问，先够得上的赢（次序＝产品口径：挨打最贵）。 */
+const DEPTH_NEXT_STEP_ORDER = Object.freeze(['enemy-type-advantage-hit', 'our-resist-repeat', 'enemy-replacement-first']);
+/** 连着几个回合没换人才值得说一句（1 个回合不叫「连着」）。 */
+const DEPTH_MIN_NO_SWITCH_STREAK = 2;
+/** 「第 1、2、3…回合」这串最多列几个，多了只报个数（数字仍可核对，见 fields.turns）。 */
+const DEPTH_TURN_LIST_LIMIT = 6;
+/**
+ * 至少要有几个回合，才值得说「这一局没换人 / 没用道具」这类**零值账**。
+ *
+ * 与 `teacher-review.js` 的 `MIN_TURNS_FOR_LEAD_FLIP` 同一条产品口径：1 个回合的对局里
+ * 「没换人」什么都说明不了（那一局本来就只够出一手），说出来只是噪声。
+ */
+const DEPTH_MIN_TURNS_FOR_ZERO_LEDGER = 2;
+
+function depthSideOf(value) {
+  const text = String(value ?? '');
+  if (text === 'player' || text === 'Player') return DEPTH_SIDE_PLAYER;
+  if (text === 'enemy' || text === 'Enemy') return DEPTH_SIDE_ENEMY;
+  return null;
+}
+
+function depthNumberOf(value) {
+  return Number.isFinite(value) ? value : null;
+}
+
+/** 与 `teacher-review.js` 的 `detailOf` 同口径：`detail` 优先，顶层字段补进来。 */
+function depthDetailOf(event) {
+  const source = event && typeof event === 'object' ? event : {};
+  const detail = {...(source.detail && typeof source.detail === 'object' ? source.detail : {})};
+  for (const [key, value] of Object.entries(source)) {
+    if (key === 'kind' || key === 'turn' || key === 'detail' || key === 'evidence' || key === 'text') continue;
+    if (!(key in detail)) detail[key] = value;
+  }
+  return detail;
+}
+
+/** `第 9 回合` / `有一回合`（回合号拿不到时不编一个数字出来）。 */
+function depthTurnText(turn) {
+  return Number.isInteger(turn) ? `第 ${turn} 回合` : '有一回合';
+}
+
+/** `第 1、4、7 回合`；超过上限只报数（`fields.turns` 里仍有全量）。 */
+function depthTurnList(turns) {
+  const list = [...new Set((Array.isArray(turns) ? turns : []).filter(Number.isInteger))].sort((a, b) => a - b);
+  if (!list.length) return null;
+  const head = list.slice(0, DEPTH_TURN_LIST_LIMIT).join('、');
+  return list.length > DEPTH_TURN_LIST_LIMIT ? `第 ${head} 等 ${list.length} 个回合` : `第 ${head} 回合`;
+}
+
+/**
+ * 效果账（异常/增益/减伤这类持续手段）用：回合少就列出来，多了只报**起止区间**。
+ * 「第 10–27 回合之间」比一长串「第 10、11、12…」有用得多，也正是一条异常状态的起止。
+ */
+function depthTurnScope(turns) {
+  const list = [...new Set((Array.isArray(turns) ? turns : []).filter(Number.isInteger))].sort((a, b) => a - b);
+  if (!list.length) return null;
+  if (list.length > DEPTH_TURN_LIST_LIMIT && list[list.length - 1] > list[0]) {
+    return `第 ${list[0]}–${list[list.length - 1]} 回合之间`;
+  }
+  return `第 ${list.join('、')} 回合`;
+}
+
+/**
+ * `teacherMatchFacts` 不管的那几类行（回合开始 / 回能 / 效果类）。
+ *
+ * 为什么另起一遍而不是去改 `teacher-review.js`：那是老师那一角的文件（不许在本次施工里
+ * 顺手改），而这里要的只是**多读几个 kind**；已经认得的 kind 一律走 `teacherMatchFacts`，
+ * 保证「同一件事只有一个解析口径」。
+ */
+function depthExtraRows(events) {
+  const rows = [];
+  (Array.isArray(events) ? events : []).forEach((event, index) => {
+    const source = event && typeof event === 'object' ? event : {};
+    const kind = String(source.kind ?? '');
+    if (!kind || DEPTH_PARSED_KINDS.includes(kind)) return;
+    const detail = depthDetailOf(source);
+    rows.push({
+      index,
+      kind,
+      turn: Number.isInteger(source.turn) ? source.turn : (Number.isInteger(detail.turn) ? detail.turn : null),
+      side: depthSideOf(detail.side),
+      detail,
+    });
+  });
+  return rows;
+}
+
+/**
+ * 技能 id → 显示名。三个来源都是**公开**的：
+ *   · `view.self.skills`（`ui_public_view` 给的己方配招全表，带 `name`）；
+ *   · `view.legal`（当前合法动作，带 `skill_name` / `label` / `skill.name`）；
+ *   · 调用方显式给的技能表。
+ *
+ * 对手的配招不在公开视图里；但**「对面这一手用的是哪个技能 id」是事件里就写着的事实**，
+ * 所以只要这个 id 在己方表里出现过就说得名字（同一个 id ＝ 同一个技能）。查不到就只说
+ * 「那一手」——不猜、不拿别的技能顶替。
+ */
+function depthSkillNames(game, skills = null) {
+  const table = {};
+  const sources = [game?.roco?.self?.skills, game?.roco?.legal, game?.legal, skills?.legal];
+  for (const source of sources) {
+    if (!Array.isArray(source)) continue;
+    for (const entry of source) {
+      const id = entry?.skill_id;
+      if (typeof id !== 'string' || !id || table[id]) continue;
+      const label = [entry.skill_name, entry.name, entry?.skill?.name, entry.label]
+        .find((value) => typeof value === 'string' && value);
+      if (label) table[id] = label;
+    }
+  }
+  if (skills?.skills && typeof skills.skills === 'object') {
+    for (const [id, label] of Object.entries(skills.skills)) {
+      if (typeof label === 'string' && label && !table[id]) table[id] = label;
+    }
+  }
+  return table;
+}
+
+/** `（用的是「龙血」）`；查不到名字就返回空串（不写 `skill_000750` 这种内部 id）。 */
+function depthSkillSuffix(skillId, names) {
+  if (typeof skillId !== 'string' || !skillId) return '';
+  const label = names?.[skillId];
+  return typeof label === 'string' && label ? `（用的是「${label}」）` : '';
+}
+
+/** 挨打的是谁。己方名字是公开的；对手**只用位次**——倒下之后场上会换人，点名就会张冠李戴。 */
+function depthTargetSuffix(blow, game) {
+  if (!Number.isInteger(blow?.targetSlot)) return '';
+  if (blow.side === DEPTH_SIDE_ENEMY) {
+    const pets = Array.isArray(game?.roco?.self?.pets) ? game.roco.self.pets : [];
+    const hit = pets.find((pet) => pet && pet.slot === blow.targetSlot) ?? null;
+    const name = typeof hit?.name === 'string' && hit.name
+      ? hit.name
+      : (game?.player?.pets?.[blow.targetSlot]?.name ?? null);
+    return typeof name === 'string' && name
+      ? `，落在我方 ${name} 身上`
+      : `，落在我方第 ${blow.targetSlot + 1} 位身上`;
+  }
+  if (blow.side === DEPTH_SIDE_PLAYER) return `，打在对方第 ${blow.targetSlot + 1} 位身上`;
+  return '';
+}
+
+/** 这一局一共几个回合、回合从哪开始：`span.total` 拿不到时，靠它的那几条一律不说。 */
+function depthSpan({turns, facts, rows}) {
+  const starts = rows
+    .filter((row) => row.kind === 'turn_start')
+    .map((row) => ({index: row.index, turn: row.turn}))
+    .filter((row) => Number.isInteger(row.turn) && row.turn > 0);
+  const seen = [...starts.map((row) => row.turn)];
+  for (const list of Object.values(facts)) {
+    for (const row of list) if (Number.isInteger(row.turn) && row.turn > 0) seen.push(row.turn);
+  }
+  const given = Number.isInteger(turns) && turns > 0 ? turns : null;
+  const total = given ?? (seen.length ? Math.max(...seen) : null);
+  return {total, starts};
+}
+
+/**
+ * 这一份事件流是不是**整局**的（只用来决定能不能声称「没有发生某件事」）。
+ *
+ * 判据：看得到第 1 回合的 `turn_start`，而且看到的最后回合就是这一局的最后回合。
+ * 页面传的是整局累计的 `state.matchEvents`（`rocoMatchReview` 的契约），成立；
+ * 只拿最后一次推进的那几条事件时**不成立**——那种输入下「没换人」只是「没看到换人」。
+ */
+function depthCoversWholeMatch({span, rows}) {
+  if (!Number.isInteger(span.total) || !span.starts.length) return false;
+  const turns = span.starts.map((row) => row.turn);
+  return Math.min(...turns) <= 1 && Math.max(...turns) >= span.total;
+}
+
+/** 最长的一段「连着 N 个回合没有主动换人」。回合跨度不明就返回 null（不说）。 */
+function depthNoSwitchStreak({switchTurns, total}) {
+  if (!Number.isInteger(total) || total <= 0) return null;
+  const marks = [...new Set((switchTurns ?? []).filter((turn) => Number.isInteger(turn) && turn <= total))]
+    .sort((a, b) => a - b);
+  const gaps = [];
+  let from = 1;
+  for (const turn of marks) {
+    if (turn - 1 >= from) gaps.push({from, to: turn - 1});
+    from = turn + 1;
+  }
+  if (total >= from) gaps.push({from, to: total});
+  if (!gaps.length) return null;
+  const best = gaps.reduce((a, b) => (b.to - b.from > a.to - a.from ? b : a));
+  const turns = best.to - best.from + 1;
+  if (turns < DEPTH_MIN_NO_SWITCH_STREAK) return null;
+  return {
+    from: best.from,
+    to: best.to,
+    turns,
+    text: `最长连着 ${turns} 个回合没有主动换人（第 ${best.from}–${best.to} 回合）`,
+  };
+}
+
+/** 关键片段 ①：全场最重的一次伤害（谁打的、多少、打在谁身上）。 */
+function depthHeaviestBlow(blows, {names, game}) {
+  const hits = (blows ?? []).filter((blow) => depthNumberOf(blow.damage) !== null && blow.damage > 0);
+  if (!hits.length) return null;
+  const best = hits.reduce((a, b) => (b.damage > a.damage ? b : a));
+  const who = best.side === DEPTH_SIDE_PLAYER ? '我方' : (best.side === DEPTH_SIDE_ENEMY ? '对方' : '有一方');
+  return {
+    id: 'heaviest-blow',
+    group: 'key-moment',
+    text: `关键片段：全场最重的一次伤害在${depthTurnText(best.turn)}——${who}那一手打出约 ${best.damage} 点`
+      + `${depthSkillSuffix(best.skillId, names)}${depthTargetSuffix(best, game)}。`,
+    anchors: [best.index],
+    fields: {turn: best.turn, side: best.side, damage: best.damage, target_slot: best.targetSlot, skill_id: best.skillId},
+  };
+}
+
+/** 关键片段 ②：我方最吃亏的那一回合（挨的打最多，含异常状态回合末扣血）。 */
+function depthWorstTurn(facts) {
+  const rows = new Map();
+  const add = (turn, amount, index, kind) => {
+    if (!Number.isInteger(turn) || !Number.isFinite(amount) || amount <= 0) return;
+    const row = rows.get(turn) ?? {turn, taken: 0, blows: 0, tickDamage: 0, anchors: []};
+    row.taken += amount;
+    row.anchors.push(index);
+    if (kind === 'blow') row.blows += 1; else row.tickDamage += amount;
+    rows.set(turn, row);
+  };
+  for (const blow of facts.blows) if (blow.side === DEPTH_SIDE_ENEMY) add(blow.turn, blow.damage, blow.index, 'blow');
+  for (const tick of facts.ticks) if (tick.side === DEPTH_SIDE_PLAYER) add(tick.turn, tick.damage, tick.index, 'tick');
+  const list = [...rows.values()];
+  if (!list.length) return null;
+  const worst = list.reduce((a, b) => (b.taken > a.taken ? b : a));
+  if (!(worst.taken > 0)) return null;
+  const tickPart = worst.tickDamage > 0 ? `，另有异常状态回合末扣血约 ${worst.tickDamage} 点` : '';
+  return {
+    id: 'worst-turn-taken',
+    group: 'key-moment',
+    text: `关键片段：最吃亏的一回合是第 ${worst.turn} 回合——我方在这一回合一共挨了约 ${worst.taken} 点`
+      + `（对方出手 ${worst.blows} 次${tickPart}）。`,
+    anchors: worst.anchors,
+    fields: {turn: worst.turn, taken: worst.taken, blows: worst.blows, tick_damage: worst.tickDamage},
+  };
+}
+
+/** 资源账 ①：主动换人次数 + 最长的一段「没换人」+ 被动补位。 */
+function depthSwitchLedger(facts, {whole, zero, span}) {
+  const mine = facts.switches.filter((row) => row.side === DEPTH_SIDE_PLAYER);
+  const theirs = facts.switches.filter((row) => row.side === DEPTH_SIDE_ENEMY);
+  const repMine = facts.replacements.filter((row) => row.side === DEPTH_SIDE_PLAYER);
+  const repFoe = facts.replacements.filter((row) => row.side === DEPTH_SIDE_ENEMY);
+  // 「连着 N 个回合没有换人」是一句**否定**（这段区间里没有换人事件），所以和「零值账」
+  // 同一条纪律：只有看得到整局时才敢说。少一个 gate 的后果实测过——只给第 4 回合那几条
+  // 事件时它会写「最长连着 4 个回合没有主动换人」，而第 2 回合到底换没换，它根本没看见。
+  const streak = whole && mine.length
+    ? depthNoSwitchStreak({switchTurns: mine.map((row) => row.turn), total: span.total})
+    : null;
+  if (!facts.switches.length && !facts.replacements.length && !zero) return null;
+  const parts = [];
+  if (mine.length) parts.push(`我方主动换人 ${mine.length} 次（${depthTurnList(mine.map((row) => row.turn))}）`);
+  else if (zero) parts.push('我方这一局没有主动换人的记录（换人事件 0 条）');
+  if (theirs.length) parts.push(`对方主动换人 ${theirs.length} 次（${depthTurnList(theirs.map((row) => row.turn))}）`);
+  // 逐个报「有几次」；某一侧是 0 次时，只有看得到整局（且局够长）才敢把那句「0 次」说出来。
+  if (repMine.length || repFoe.length) {
+    const parts2 = [];
+    if (repMine.length || zero) parts2.push(`我方 ${repMine.length} 次`);
+    if (repFoe.length || zero) parts2.push(`对方 ${repFoe.length} 次`);
+    parts.push(`被动补位：${parts2.join('／')}（补位不占回合）`);
+  }
+  if (streak) parts.push(streak.text);
+  if (!parts.length) return null;
+  const anchors = [...facts.switches, ...facts.replacements].map((row) => row.index);
+  return {
+    id: 'switch-ledger',
+    group: 'ledger',
+    text: `资源：${parts.join('；')}。`,
+    // 跨度（「连着几个回合」）用的是 `turn_start`，所以那几条也进来当锚点。
+    anchors: [...new Set([...anchors, ...span.starts.map((row) => row.index)])].sort((a, b) => a - b),
+    fields: {
+      player_switches: mine.length,
+      enemy_switches: theirs.length,
+      player_replacements: repMine.length,
+      enemy_replacements: repFoe.length,
+      longest_no_switch: streak ? streak.turns : null,
+      no_switch_from: streak ? streak.from : null,
+      no_switch_to: streak ? streak.to : null,
+    },
+  };
+}
+
+/** 资源账 ②：道具用量（谁、第几回合、哪一件、回了多少）。 */
+function depthItemLedger(items, {zero, span}) {
+  const mine = items.filter((row) => row.side === DEPTH_SIDE_PLAYER);
+  const theirs = items.filter((row) => row.side === DEPTH_SIDE_ENEMY);
+  if (!mine.length && !theirs.length && !zero) return null;
+  const detail = (rows) => rows.map((row) => `${depthTurnText(row.turn)} ${row.item ?? '道具'}`
+    + `${Number.isFinite(row.healed) && row.healed > 0 ? `（回 ${row.healed} 点）` : ''}`).join('、');
+  const parts = [];
+  if (mine.length) parts.push(`我方用了 ${mine.length} 次：${detail(mine)}`);
+  else if (zero) parts.push('我方这一局没有用药或用道具的记录（道具事件 0 条）');
+  if (theirs.length) parts.push(`对方用了 ${theirs.length} 次：${detail(theirs)}`);
+  if (!parts.length) return null;
+  const rows = [...mine, ...theirs];
+  return {
+    id: 'item-ledger',
+    group: 'ledger',
+    text: `资源：道具——${parts.join('；')}。`,
+    // 「这一局没用道具」这句话的支撑是**整局的回合骨架**（`turn_start`）：一条道具事件都
+    // 没有时，锚点指向的就是「我看过的那些回合」，而不是空数组（空锚点＝不可核对）。
+    anchors: (rows.length ? rows.map((row) => row.index) : span.starts.map((row) => row.index))
+      .sort((a, b) => a - b),
+    fields: {player_items: mine.length, enemy_items: theirs.length, turns: mine.map((row) => row.turn)},
+  };
+}
+
+/**
+ * 资源账 ③：我方回合末的能量记录里最低的那一回合。
+ *
+ * 数字来自引擎的 `energy_regen` 事件（`env.py:_end_turn_regen` 在能量变了时才发一条），
+ * 所以这里说的是「记录里最低」——**不说**「这一局能量最低就是它」（没变过的回合没有事件）。
+ */
+function depthEnergyLedger(rows, {game}) {
+  const mine = rows.filter((row) => row.kind === 'energy_regen'
+    && row.side === DEPTH_SIDE_PLAYER && depthNumberOf(row.detail?.energy) !== null);
+  if (!mine.length) return null;
+  const values = mine.map((row) => row.detail.energy);
+  const min = Math.min(...values);
+  const at = mine.filter((row) => row.detail.energy === min).map((row) => row.turn);
+  const max = depthNumberOf(game?.roco?.self?.energy_max);
+  return {
+    id: 'energy-low',
+    group: 'ledger',
+    text: `资源：我方回合末的能量记录里最低是 ${min} 点（${depthTurnList(at)}；这一局记到 ${mine.length} 次回能`
+      + `${max === null ? '' : `，能量上限 ${max}`}）。`,
+    anchors: mine.map((row) => row.index),
+    fields: {samples: mine.length, min, turns: at, energy_max: max},
+  };
+}
+
+/** 资源账 ④：减伤/治疗/异常/增益这类效果事件的次数与回合（用过的「手段」）。 */
+function depthEffectLedger(facts, rows) {
+  const groups = new Map();
+  const add = (row) => {
+    const key = `${row.side ?? '—'}|${row.kind}`;
+    const group = groups.get(key) ?? {side: row.side, kind: row.kind, turns: [], count: 0, total: 0, points: false, unit: null};
+    group.count += 1;
+    group.turns.push(row.turn);
+    const spec = Object.hasOwn(DEPTH_EFFECT_POINTS, row.kind) ? DEPTH_EFFECT_POINTS[row.kind] : null;
+    const amount = spec ? depthNumberOf(row.detail?.[spec.field]) : null;
+    if (amount !== null) {
+      group.points = true;
+      group.total += amount;
+      group.unit = spec.unit;
+    }
+    groups.set(key, group);
+  };
+  for (const row of rows) if (Object.hasOwn(DEPTH_EFFECT_LABEL, row.kind)) add(row);
+  // 异常状态回合末扣血由 `teacherMatchFacts` 认（`facts.ticks`），这里只并进同一本账。
+  for (const tick of facts.ticks) add({index: tick.index, kind: 'status_tick', side: tick.side, turn: tick.turn, detail: {damage: tick.damage}});
+  const list = [...groups.values()].sort((a, b) => {
+    const at = Math.min(...a.turns.filter(Number.isInteger), Infinity);
+    const bt = Math.min(...b.turns.filter(Number.isInteger), Infinity);
+    return at === bt ? a.kind.localeCompare(b.kind) : at - bt;
+  });
+  if (!list.length) return null;
+  const parts = list.map((group) => {
+    const who = group.side === DEPTH_SIDE_PLAYER ? '我方' : (group.side === DEPTH_SIDE_ENEMY ? '对方' : '双方');
+    const scope = depthTurnScope(group.turns);
+    const total = group.points ? `，合计约 ${group.total} ${group.unit ?? '点'}` : '';
+    return `${who}${DEPTH_EFFECT_LABEL[group.kind]} ${group.count} 次（${scope}${total}）`;
+  });
+  const anchors = [];
+  for (const row of rows) if (Object.hasOwn(DEPTH_EFFECT_LABEL, row.kind)) anchors.push(row.index);
+  for (const tick of facts.ticks) anchors.push(tick.index);
+  return {
+    id: 'effect-ledger',
+    group: 'ledger',
+    text: `资源：手段——${parts.join('；')}。`,
+    anchors: [...new Set(anchors)].sort((a, b) => a - b),
+    fields: {groups: list.map((group) => ({side: group.side, kind: group.kind, count: group.count, total: group.points ? group.total : null, turns: group.turns}))},
+  };
+}
+
+/**
+ * 一条**有条件**的下一步：条件必须来自这一局真的出现过的事件。
+ *
+ * 三条规则按 `DEPTH_NEXT_STEP_ORDER` 的次序问，先够得上的赢：
+ *   ① `enemy-type-advantage-hit`：对面打出过属性克制的一击（最贵的那一次）→ 下次先换掉挨打的那一只；
+ *   ② `our-resist-repeat`：我方连着两个回合打在抵抗上 → 下次换一个系别的技能或换人；
+ *   ③ `enemy-replacement-first`：对面补过位 → 下次补位之后先确认它是谁再决定打谁。
+ * 一条都不成立就返回 null：没有本局事实支撑的「下次要……」就是套话。
+ */
+function depthNextStep({facts, game}) {
+  const order = DEPTH_NEXT_STEP_ORDER;
+  for (const rule of order) {
+    if (rule === 'enemy-type-advantage-hit') {
+      const bad = facts.blows.filter((blow) => blow.side === DEPTH_SIDE_ENEMY
+        && blow.multiplier !== null && blow.multiplier > 1 && depthNumberOf(blow.damage) !== null);
+      if (!bad.length) continue;
+      const worst = bad.reduce((a, b) => (b.damage > a.damage ? b : a));
+      const at = depthTurnText(worst.turn);
+      const target = depthTargetSuffix(worst, game);
+      return {
+        rule,
+        condition: `${at}对方打出过一次属性克制的伤害（约 ${worst.damage} 点${target}）`,
+        action: '下一次先盯住对面这一手落在谁身上：被打出克制的那一只，下一回合先换掉或者先吃药顶住，别让它站着挨第二下。',
+        // 回合号拿不到时不写「再遇到有一回合那种局面」这种读不通的句子，退回不带回合的说法。
+        text: Number.isInteger(worst.turn)
+          ? `下一次再遇到第 ${worst.turn} 回合那种局面（对方打出属性克制的一击），先换掉挨打的那一只再打。`
+          : '下一次遇到对方打出属性克制的一击时，先换掉挨打的那一只再打。',
+        anchors: [worst.index],
+        fields: {turn: worst.turn, damage: worst.damage, multiplier: worst.multiplier, target_slot: worst.targetSlot},
+      };
+    }
+    if (rule === 'our-resist-repeat') {
+      const resisted = facts.blows.filter((blow) => blow.side === DEPTH_SIDE_PLAYER
+        && blow.multiplier !== null && blow.multiplier < 1);
+      const turns = [...new Set(resisted.map((blow) => blow.turn).filter(Number.isInteger))].sort((a, b) => a - b);
+      const pair = turns.find((turn) => turns.includes(turn + 1));
+      if (!Number.isInteger(pair)) continue;
+      const anchors = resisted.filter((blow) => blow.turn === pair || blow.turn === pair + 1).map((blow) => blow.index);
+      return {
+        rule,
+        condition: `第 ${pair} 与第 ${pair + 1} 回合连着打在属性抵抗上`,
+        action: '下一次连着两回合打在抵抗上时，先换一个系别的技能或者换一只，别继续对着它砸。',
+        text: `下一次再遇到连着两回合打在抵抗上（这一局第 ${pair}、${pair + 1} 回合就是），先换一个系别的技能或者换人。`,
+        anchors,
+        fields: {from: pair, to: pair + 1},
+      };
+    }
+    if (rule === 'enemy-replacement-first') {
+      const replacement = facts.replacements.find((row) => row.side === DEPTH_SIDE_ENEMY) ?? null;
+      if (!replacement) continue;
+      const slot = Number.isInteger(replacement.slot) ? `第 ${replacement.slot + 1} 位` : '新的一只';
+      return {
+        rule,
+        condition: `${depthTurnText(replacement.turn)}对面补上过${slot}`,
+        action: '下一次对面补位之后，先用一回合确认它是什么系、会什么，再决定这一手打谁。',
+        text: Number.isInteger(replacement.turn)
+          ? `下一次对面补位之后（这一局第 ${replacement.turn} 回合就补过一次），先确认它是谁、什么系，再决定这一手打谁。`
+          : '下一次对面补位之后，先确认它是谁、什么系，再决定这一手打谁。',
+        anchors: [replacement.index],
+        fields: {turn: replacement.turn, slot: replacement.slot},
+      };
+    }
+  }
+  return null;
+}
+
+/** 放进复盘正文的那一句补充。每一个分句都只陈述**已经发生过的**事。 */
+function depthSummary({facts, zero}) {
+  const parts = [];
+  const hits = facts.blows.filter((blow) => depthNumberOf(blow.damage) !== null && blow.damage > 0);
+  if (hits.length) {
+    const best = hits.reduce((a, b) => (b.damage > a.damage ? b : a));
+    const who = best.side === DEPTH_SIDE_PLAYER ? '我方' : (best.side === DEPTH_SIDE_ENEMY ? '对方' : '有一方');
+    const at = Number.isInteger(best.turn) ? `在第 ${best.turn} 回合` : '';
+    parts.push(`全场最重的一次伤害${at}（${who}，约 ${best.damage} 点）`);
+  }
+  if (zero) {
+    const switches = facts.switches.filter((row) => row.side === DEPTH_SIDE_PLAYER).length;
+    const replacements = facts.replacements.filter((row) => row.side === DEPTH_SIDE_PLAYER).length;
+    const items = facts.items.filter((row) => row.side === DEPTH_SIDE_PLAYER).length;
+    parts.push(`我方主动换人 ${switches} 次、被动补位 ${replacements} 次、用道具 ${items} 次`);
+  }
+  return parts.length ? `${parts.join('；')}。` : null;
+}
+
+/**
+ * 局末复盘的「更深一层」事实（纯函数：只吃事件与公开视图，不碰 DOM/时钟）。
+ *
+ * @returns {{
+ *   facts: Array<{id: string, group: string, text: string, anchors: number[], fields: object}>,
+ *   evidence: string[],                                  // = 每条事实的 text（页面「依据」直接用）
+ *   next_step: null | {rule, condition, action, text, anchors, fields},
+ *   summary: string | null,                              // 放进复盘正文的一句补充
+ *   covers_whole_match: boolean,                         // 这份事件流是不是整局的（见 depthCoversWholeMatch）
+ *   counts: object,                                      // 机器可读的账，供判据与探针核对
+ * }}
+ */
+export function rocoMatchDepth({events = [], game = null, turns = null, skills = null} = {}) {
+  const list = Array.isArray(events) ? events : [];
+  const facts = teacherMatchFacts({events: list});
+  const rows = depthExtraRows(list);
+  const names = depthSkillNames(game, skills);
+  const span = depthSpan({turns, facts, rows});
+  const whole = depthCoversWholeMatch({span, rows});
+  // 「零值账」（这一局没换人 / 没用道具）比一般事实多一道门：看得到整局 **且** 这一局至少
+  // 打满 `DEPTH_MIN_TURNS_FOR_ZERO_LEDGER` 个回合——1 个回合的对局里「没换人」说明不了什么。
+  const zero = whole && Number.isInteger(span.total) && span.total >= DEPTH_MIN_TURNS_FOR_ZERO_LEDGER;
+  const factsOut = [
+    depthHeaviestBlow(facts.blows, {names, game}),
+    depthWorstTurn(facts),
+    depthSwitchLedger(facts, {whole, zero, span}),
+    depthItemLedger(facts.items, {zero, span}),
+    depthEnergyLedger(rows, {game}),
+    depthEffectLedger(facts, rows),
+  ].filter(Boolean);
+  const nextStep = depthNextStep({facts, game});
+  const hits = facts.blows.filter((blow) => depthNumberOf(blow.damage) !== null && blow.damage > 0);
+  return {
+    facts: factsOut,
+    evidence: factsOut.map((fact) => fact.text),
+    next_step: nextStep,
+    summary: depthSummary({facts, zero}),
+    covers_whole_match: whole,
+    counts: {
+      events: list.length,
+      turns_total: span.total,
+      damage_events: facts.blows.length,
+      heaviest_damage: hits.length ? hits.reduce((a, b) => (b.damage > a.damage ? b : a)).damage : null,
+      player_switches: facts.switches.filter((row) => row.side === DEPTH_SIDE_PLAYER).length,
+      enemy_switches: facts.switches.filter((row) => row.side === DEPTH_SIDE_ENEMY).length,
+      player_replacements: facts.replacements.filter((row) => row.side === DEPTH_SIDE_PLAYER).length,
+      enemy_replacements: facts.replacements.filter((row) => row.side === DEPTH_SIDE_ENEMY).length,
+      player_items: facts.items.filter((row) => row.side === DEPTH_SIDE_PLAYER).length,
+      energy_samples: rows.filter((row) => row.kind === 'energy_regen' && row.side === DEPTH_SIDE_PLAYER).length,
+      effect_events: factsOut.find((fact) => fact.id === 'effect-ledger')?.fields.groups
+        ?.reduce((sum, group) => sum + group.count, 0) ?? 0,
+    },
+  };
+}
+
 /**
  * 局末复盘的**装配层**：把「老师的判定」需要的两个真实输入从一个页面的状态里挑出来。
  *
@@ -281,9 +861,44 @@ export function rocoLessonEntry({events = [], turns = 0} = {}) {
  * 纯函数、不碰 DOM、不读时钟（时间戳由 `recordTeacherReview` 自己取），
  * 所以 Node 侧的验收可以用真对局的视图直接调它。
  */
+/**
+ * 这一局真正要交给引擎的配招（`battle/new` 的 `loadouts`）。
+ *
+ * 为什么单独抽出来（2026-09-25 实测的玩家可见缺陷）：原来页面上是**按名字**在名单里解析
+ * 「本局有哪些物种」，而名单里「棋契陛下」有两只（接口实测 48 只 / **47 个唯一名字**，
+ * `pet_000556` 与 `pet_000575`）⇒ 名字不唯一 ⇒ 解析返回 null ⇒ **那一只的配招被静默丢掉**：
+ * 玩家明明选了四个技能，开局却按引擎的规范配招打（错得很安静）。
+ *
+ * 现在的口径：**队伍成员由工坊按持有实例解析出物种 id**（`detail.teamSpecies`），
+ * 这里只做一次集合过滤 —— 不碰名字、不猜、不补。拿不到成员列表就返回 `null`（宁可不带）。
+ *
+ * @param {{loadouts?: Record<string,string[]>|null, teamSpecies?: string[]|null,
+ *          slots?: Array<{state?:string, species_id?:string}>|null}} input
+ * @returns {Record<string,string[]>|null} 空集合返回 `null`（页面据此决定要不要带这个字段）
+ */
+export function battleLoadouts({loadouts = null, teamSpecies = null, slots = null} = {}) {
+  const saved = loadouts && typeof loadouts === 'object' ? loadouts : {};
+  const filled = new Set();
+  if (Array.isArray(teamSpecies)) {
+    for (const id of teamSpecies) if (typeof id === 'string' && id) filled.add(id);
+  } else if (Array.isArray(slots)) {
+    // 兜底路径：公开层不许带 id，所以只有 `species_id` 真在的时候才算数（拿不到就不带）。
+    for (const slot of slots) {
+      const id = typeof slot?.species_id === 'string' ? slot.species_id : null;
+      if (slot?.state === 'filled' && id) filled.add(id);
+    }
+  }
+  const out = {};
+  for (const [petId, ids] of Object.entries(saved)) {
+    if (!filled.has(petId)) continue;
+    if (Array.isArray(ids) && ids.length === 4) out[petId] = ids.slice();
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 export function rocoMatchReview({
   matchId = null, finalView = null, lastLiveView = null,
-  events = [], turns = null, result = null, memory = null,
+  events = [], turns = null, result = null, memory = null, skills = null,
 } = {}) {
   const finalGame = rocoGameView(finalView, {matchId});
   const reviewGame = lastLiveView ? rocoGameView(lastLiveView, {matchId}) : finalGame;
@@ -295,7 +910,18 @@ export function rocoMatchReview({
     game: reviewGame,
     memory,
   });
-  return {finalGame, reviewGame, progress, review, usedLastLiveView: Boolean(lastLiveView)};
+  // ── 更深一层的事实（关键片段 / 资源账 / 一条有条件的下一步）────────────────
+  //
+  // 并进 `review.evidence` 与正文，而**不新增任何 DOM**：页面「完整复盘与依据」那一块
+  // 渲染的就是这两个字段，于是这一层厚起来的地方正好是玩家已经会看的那一处。
+  // 装配仍然只在这一处发生——页面不许自己拼复盘（`tests/roco-experience.test.js` 钉着）。
+  const depth = rocoMatchDepth({events, game: reviewGame, turns, skills});
+  if (review) {
+    review.evidence = [...(Array.isArray(review.evidence) ? review.evidence : []), ...depth.evidence];
+    if (depth.summary) review.text = `${review.text}${depth.summary}`;
+    review.depth = depth;
+  }
+  return {finalGame, reviewGame, progress, review, depth, usedLastLiveView: Boolean(lastLiveView)};
 }
 
 /**

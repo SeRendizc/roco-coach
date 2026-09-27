@@ -1,0 +1,1880 @@
+{
+ "generated_by": "scripts/roco/shadow-replay.mjs",
+ "arm": "deepseek_product",
+ "identity": {
+  "role": "cloud-arm",
+  "adapter": null,
+  "adapter_basename": null,
+  "adapter_sha256": null,
+  "model": "deepseek-flash",
+  "note": "云端臂：**生产 planner 提示**（src/coach/planner-prompt.js，口径 ROCO_PLANNER_RULES=catalog）"
+ },
+ "written_to": "reports/roco/roster-agent-2026-09-25/after-rules.json",
+ "gateway": "http://127.0.0.1:8766",
+ "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
+ "prompt": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。\n可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、\ncompare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、\nread_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。\n需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。\n**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。\n查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，\n并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。\n参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。",
+ "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
+ "summary": {
+  "tasks": 72,
+  "passed": 14,
+  "pass_rate": 0.1944,
+  "stopped": {
+   "complete": 45,
+   "invalid-arguments": 24,
+   "receipt-budget": 3
+  },
+  "latency": {
+   "p50_ms": 654,
+   "p95_ms": 956
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 72,
+    "passed": 14,
+    "pass_rate": 0.1944,
+    "p50_ms": 654,
+    "p95_ms": 956
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 24,
+     "passed": 4,
+     "pass_rate": 0.1667
+    },
+    "seen": {
+     "total": 48,
+     "passed": 10,
+     "pass_rate": 0.2083
+    },
+    "by_value": {
+     "A组三人-无锁定": {
+      "total": 24,
+      "passed": 4,
+      "held_out": true,
+      "pass_rate": 0.1667
+     },
+     "A组三人-锁定寂灭骨龙": {
+      "total": 24,
+      "passed": 8,
+      "held_out": false,
+      "pass_rate": 0.3333
+     },
+     "混编三人-含B组": {
+      "total": 24,
+      "passed": 2,
+      "held_out": false,
+      "pass_rate": 0.0833
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 24,
+     "passed": 2,
+     "pass_rate": 0.0833
+    },
+    "seen": {
+     "total": 48,
+     "passed": 12,
+     "pass_rate": 0.25
+    },
+    "by_value": {
+     "图鉴字段": {
+      "total": 12,
+      "passed": 2,
+      "held_out": true,
+      "pass_rate": 0.1667
+     },
+     "技能静态威力": {
+      "total": 12,
+      "passed": 10,
+      "held_out": false,
+      "pass_rate": 0.8333
+     },
+     "属性相性": {
+      "total": 12,
+      "passed": 0,
+      "held_out": true,
+      "pass_rate": 0
+     },
+     "学习表": {
+      "total": 12,
+      "passed": 2,
+      "held_out": false,
+      "pass_rate": 0.1667
+     },
+     "应对机制": {
+      "total": 12,
+      "passed": 0,
+      "held_out": false,
+      "pass_rate": 0
+     },
+     "版本指纹": {
+      "total": 12,
+      "passed": 0,
+      "held_out": false,
+      "pass_rate": 0
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 72,
+     "passed": 14,
+     "pass_rate": 0.1944
+    },
+    "by_value": {
+     "直问": {
+      "total": 18,
+      "passed": 4,
+      "held_out": false,
+      "pass_rate": 0.2222
+     },
+     "口语": {
+      "total": 18,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 0.1667
+     },
+     "追问": {
+      "total": 18,
+      "passed": 4,
+      "held_out": false,
+      "pass_rate": 0.2222
+     },
+     "背景": {
+      "total": 18,
+      "passed": 3,
+      "held_out": false,
+      "pass_rate": 0.1667
+     }
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "case_id": "rl-pet-f0-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 617
+  },
+  {
+   "case_id": "rl-pet-f0-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "图鉴字段",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 746
+  },
+  {
+   "case_id": "rl-pet-f0-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "图鉴字段",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 383
+  },
+  {
+   "case_id": "rl-pet-f0-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "A组三人-无锁定",
+   "mechanism": "图鉴字段",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 654
+  },
+  {
+   "case_id": "rl-pet-f1-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 792
+  },
+  {
+   "case_id": "rl-pet-f1-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "图鉴字段",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 741
+  },
+  {
+   "case_id": "rl-pet-f1-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "图鉴字段",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 449
+  },
+  {
+   "case_id": "rl-pet-f1-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "图鉴字段",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 597
+  },
+  {
+   "case_id": "rl-pet-f2-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "混编三人-含B组",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 538
+  },
+  {
+   "case_id": "rl-pet-f2-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "混编三人-含B组",
+   "mechanism": "图鉴字段",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 531
+  },
+  {
+   "case_id": "rl-pet-f2-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "图鉴字段",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 777
+  },
+  {
+   "case_id": "rl-pet-f2-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "混编三人-含B组",
+   "mechanism": "图鉴字段",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "寂灭骨龙",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"pet\",\"pet_id\":\"pet_000225\"} 的一次调用"
+   ],
+   "wall_ms": 761
+  },
+  {
+   "case_id": "rl-skill-f0-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "技能静态威力",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 401
+  },
+  {
+   "case_id": "rl-skill-f0-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "A组三人-无锁定",
+   "mechanism": "技能静态威力",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 477
+  },
+  {
+   "case_id": "rl-skill-f0-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "技能静态威力",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 521
+  },
+  {
+   "case_id": "rl-skill-f0-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "技能静态威力",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 810
+  },
+  {
+   "case_id": "rl-skill-f1-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 909
+  },
+  {
+   "case_id": "rl-skill-f1-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 593
+  },
+  {
+   "case_id": "rl-skill-f1-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 781
+  },
+  {
+   "case_id": "rl-skill-f1-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 731
+  },
+  {
+   "case_id": "rl-skill-f2-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "画间沉铁兽",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
+   ],
+   "wall_ms": 1054
+  },
+  {
+   "case_id": "rl-skill-f2-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "画间沉铁兽",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"skill\",\"name\":\"坟场搏击\"} 的一次调用"
+   ],
+   "wall_ms": 833
+  },
+  {
+   "case_id": "rl-skill-f2-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 471
+  },
+  {
+   "case_id": "rl-skill-f2-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 721
+  },
+  {
+   "case_id": "rl-type-f0-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "属性相性",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 677
+  },
+  {
+   "case_id": "rl-type-f0-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "属性相性",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 463
+  },
+  {
+   "case_id": "rl-type-f0-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "属性相性",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 618
+  },
+  {
+   "case_id": "rl-type-f0-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "属性相性",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 612
+  },
+  {
+   "case_id": "rl-type-f1-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "属性相性",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 657
+  },
+  {
+   "case_id": "rl-type-f1-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "属性相性",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 525
+  },
+  {
+   "case_id": "rl-type-f1-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "属性相性",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 707
+  },
+  {
+   "case_id": "rl-type-f1-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-5",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "属性相性",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 763
+  },
+  {
+   "case_id": "rl-type-f2-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "混编三人-含B组",
+   "mechanism": "属性相性",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 648
+  },
+  {
+   "case_id": "rl-type-f2-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "属性相性",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 809
+  },
+  {
+   "case_id": "rl-type-f2-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "混编三人-含B组",
+   "mechanism": "属性相性",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 897
+  },
+  {
+   "case_id": "rl-type-f2-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "混编三人-含B组",
+   "mechanism": "属性相性",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 707
+  },
+  {
+   "case_id": "rl-learn-f0-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "学习表",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 630
+  },
+  {
+   "case_id": "rl-learn-f0-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "学习表",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 781
+  },
+  {
+   "case_id": "rl-learn-f0-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "学习表",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 910
+  },
+  {
+   "case_id": "rl-learn-f0-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "学习表",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 597
+  },
+  {
+   "case_id": "rl-learn-f1-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "学习表",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 888
+  },
+  {
+   "case_id": "rl-learn-f1-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "学习表",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "learnset",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "receipt-budget",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 640
+  },
+  {
+   "case_id": "rl-learn-f1-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-5",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "学习表",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 1049
+  },
+  {
+   "case_id": "rl-learn-f1-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "学习表",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 705
+  },
+  {
+   "case_id": "rl-learn-f2-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "学习表",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 773
+  },
+  {
+   "case_id": "rl-learn-f2-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-5",
+   "family": "混编三人-含B组",
+   "mechanism": "学习表",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 555
+  },
+  {
+   "case_id": "rl-learn-f2-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "混编三人-含B组",
+   "mechanism": "学习表",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 653
+  },
+  {
+   "case_id": "rl-learn-f2-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "混编三人-含B组",
+   "mechanism": "学习表",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "海豹船长",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "query_rules 的参数里没有同时满足 {\"kind\":\"learnset\",\"pet_id\":\"pet_000190\"} 的一次调用"
+   ],
+   "wall_ms": 956
+  },
+  {
+   "case_id": "rl-term-f0-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "应对机制",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 755
+  },
+  {
+   "case_id": "rl-term-f0-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "应对机制",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 3878
+  },
+  {
+   "case_id": "rl-term-f0-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "应对机制",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 601
+  },
+  {
+   "case_id": "rl-term-f0-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "应对机制",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 816
+  },
+  {
+   "case_id": "rl-term-f1-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "应对机制",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 531
+  },
+  {
+   "case_id": "rl-term-f1-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "应对机制",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 579
+  },
+  {
+   "case_id": "rl-term-f1-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "应对机制",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 694
+  },
+  {
+   "case_id": "rl-term-f1-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "应对机制",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 310
+  },
+  {
+   "case_id": "rl-term-f2-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "混编三人-含B组",
+   "mechanism": "应对机制",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 777
+  },
+  {
+   "case_id": "rl-term-f2-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "混编三人-含B组",
+   "mechanism": "应对机制",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 677
+  },
+  {
+   "case_id": "rl-term-f2-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-5",
+   "family": "混编三人-含B组",
+   "mechanism": "应对机制",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 643
+  },
+  {
+   "case_id": "rl-term-f2-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "混编三人-含B组",
+   "mechanism": "应对机制",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 559
+  },
+  {
+   "case_id": "rl-ruleset-f0-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "版本指纹",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 323
+  },
+  {
+   "case_id": "rl-ruleset-f0-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "版本指纹",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 384
+  },
+  {
+   "case_id": "rl-ruleset-f0-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "版本指纹",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 573
+  },
+  {
+   "case_id": "rl-ruleset-f0-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "A组三人-无锁定",
+   "mechanism": "版本指纹",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 445
+  },
+  {
+   "case_id": "rl-ruleset-f1-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 530
+  },
+  {
+   "case_id": "rl-ruleset-f1-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 657
+  },
+  {
+   "case_id": "rl-ruleset-f1-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 930
+  },
+  {
+   "case_id": "rl-ruleset-f1-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 618
+  },
+  {
+   "case_id": "rl-ruleset-f2-01",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "版本指纹",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 720
+  },
+  {
+   "case_id": "rl-ruleset-f2-02",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "混编三人-含B组",
+   "mechanism": "版本指纹",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 451
+  },
+  {
+   "case_id": "rl-ruleset-f2-03",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "混编三人-含B组",
+   "mechanism": "版本指纹",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 517
+  },
+  {
+   "case_id": "rl-ruleset-f2-04",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "版本指纹",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 603
+  }
+ ]
+}

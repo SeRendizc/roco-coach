@@ -28,9 +28,10 @@ import {
   DISTRIBUTION_AXES, FAIL_CLOSED_REASONS, FORBIDDEN_ONLINE_PATTERNS, OFFLINE_ENTRYPOINTS,
   ONLINE_ENTRYPOINTS, ONLINE_SECTION_MARKER, RANKER_STATUSES, RC304_REPORT_PATH,
   RELATIVE_SCORE_RANGE, RELATIVE_UNIT, STRUCTURAL_CRITERIA,
-  auditTeamCompare, buildMeasuredDistributionSample, buildRc304Report, collectClaimText,
-  compareTeams, diagnoseForCompare, formatAuditProblem, loadTeamCompareInputs, minimalReplacement,
-  offlineSectionOf, onlineSectionOf, renderCompareText, resolveDistribution, scanForbiddenPatterns,
+  assumptionBasisProblems, auditTeamCompare, buildMeasuredDistributionSample, buildRc304Report,
+  collectClaimText, compareTeams, diagnoseForCompare, formatAuditProblem, loadTeamCompareInputs,
+  minimalReplacement, offlineSectionOf, onlineSectionOf, renderCompareText, resolveDistribution,
+  scanForbiddenPatterns, structuralCriteriaScores,
 } from '../src/coach/team-compare.mjs';
 import {CONFIDENCE_LEVELS} from '../src/coach/team-gaps.js';
 import {
@@ -188,9 +189,27 @@ const TIE_CANDIDATES = Object.freeze([
 // 必红反证 ①～⑧
 // ─────────────────────────────────────────────────────────────────────────
 
+/**
+ * 负向控制用的 unknown 档先验：**由磁盘上的先验派生**（把每一行降级成 unknown + value: null）。
+ * 判据①必须打在「真的没有分母」的那一档上——现在磁盘上的先验是 assumption 档（有可复算分母），
+ * 拿它来验 fail closed 会把「能算的必须算出来」判红。
+ */
+const UNKNOWN_PRIOR = {
+  ...prior,
+  distribution: prior.distribution.map((row) => ({
+    ...row, source: 'unknown', value: null, basis: null, sources: [],
+    reason: '（判据①的负向控制：整份降级成 unknown + value: null）',
+  })),
+};
+/** assumption 档的派生器：只改一处，用来验「裸数字 / 缺依据 / 不闭合」都必须回到 fail closed。 */
+const degradePrior = (mutate) => ({
+  ...prior,
+  distribution: prior.distribution.map((row, index) => mutate({...row}, index)),
+});
+
 test('RC-304 判据①：分布 unknown 时前四轴必须 fail closed（返回数值即判红）', () => {
-  const result = compare('rc304-six-a', 'rc304-six-b');
-  const distribution = resolveDistribution(prior);
+  const result = compare('rc304-six-a', 'rc304-six-b', UNKNOWN_PRIOR);
+  const distribution = resolveDistribution(UNKNOWN_PRIOR);
   raw('① 注入先验的分布判定', {
     kind: distribution.kind, declared_source: distribution.declared_source,
     entries: distribution.entries.map((row) => ({archetype_id: row.archetype_id, source: row.source, value: row.value})),
@@ -221,8 +240,148 @@ test('RC-304 判据①：分布 unknown 时前四轴必须 fail closed（返回�
     assert.equal(audit.ok, false, `① 分布 unknown 时写 value=${broken} 必须判红`);
     assert.ok(audit.problems.some((p) => p.code === 'UNKNOWN_AXIS_HAS_VALUE'));
   }
-  assert.equal(auditTeamCompare({compare: result, replacement: replacement('rc304-six-a')},
-    {text: renderCompareText({...result, replacement: replacement('rc304-six-a')})}).ok, true);
+  assert.equal(auditTeamCompare({compare: result, replacement: replacement('rc304-six-a', UNKNOWN_PRIOR)},
+    {text: renderCompareText({...result, replacement: replacement('rc304-six-a', UNKNOWN_PRIOR)})}).ok, true);
+});
+
+test('RC-304 判据⑨：assumption 档（声明假设的分母）四轴必须真算；裸数字 / 缺依据一律回到 fail closed', () => {
+  const distribution = resolveDistribution(prior);
+  raw('⑨ 磁盘先验的分布判定', {
+    kind: distribution.kind, partition_ok: distribution.partition_ok, weight_sum: distribution.weight_sum,
+    basis: distribution.entries[0]?.basis ? {
+      kind: distribution.entries[0].basis.kind, denominator: distribution.entries[0].basis.denominator,
+      recomputable_from: distribution.entries[0].basis.recomputable_from,
+    } : null,
+  });
+  assert.equal(distribution.kind, 'assumption', '⑨ 磁盘先验是 assumption 档（逐条带可复算 basis）');
+  assert.equal(distribution.partition_ok, true);
+  assert.equal(distribution.reason, null);
+  for (const row of distribution.entries) {
+    assert.ok(Number.isFinite(row.value) && row.value > 0 && row.value <= 1);
+    assert.equal(row.confidence, 'ENGINE_HYPOTHESIS');
+    assert.equal(row.unit, 'share');
+    assert.equal(row.sources.length, 0, '⑨ assumption 行不许挂 sources');
+    assert.equal(assumptionBasisProblems({...row, value: row.value, unit: row.unit, confidence: row.confidence,
+      notes: row.notes ?? '（够长的说明）', basis: row.basis}).length, 0);
+  }
+
+  // 正向控制：四轴必须真的亮起来，值是数，置信等级 ENGINE_HYPOTHESIS，且带逐体系结构依据
+  const result = compare('rc304-six-a', 'rc304-six-b');
+  raw('⑨ assumption 档下四轴的可用性与值', DISTRIBUTION_AXES.map((axisId) => ({
+    axis: axisId, available: result.axes[axisId].available, value: result.axes[axisId].value,
+    confidence: result.axes[axisId].confidence,
+  })));
+  for (const axisId of DISTRIBUTION_AXES) {
+    const axis = result.axes[axisId];
+    assert.equal(axis.available, true, `⑨ assumption 档下 ${axisId} 必须真算（有可复算分母）`);
+    assert.equal(axis.confidence, 'ENGINE_HYPOTHESIS');
+    assert.equal(axis.distribution_kind, 'assumption');
+    assert.ok(Object.values(axis.structural_basis ?? {}).some((basis) => basis?.per_archetype),
+      `⑨ ${axisId} 必须带逐体系结构依据（分子 / 分母可对账）`);
+  }
+  assert.equal(result.distribution.relative_score_scope, 'team-level（见 axes[*].structural_basis）',
+    '⑨ 队伍级的相对分不许写进版本先验（先验只带占比）');
+  proof('（反向控制的正向）先验 assumption 档', '注入磁盘上的先验（**不改坏**）',
+    STRUCTURAL_CRITERIA.assumption_structural_scores, '五轴全部 available:true + ENGINE_HYPOTHESIS',
+    JSON.stringify({kind: result.distribution.kind, availability: result.availability,
+      structural_basis_archetypes: Object.keys(result.axes.environment_value.structural_basis ?? {})}));
+
+  // 结构分的可对账性：判据独立重算一遍等权均值 / 最小值
+  const scores = structuralCriteriaScores(teamRef('rc304-six-a'), gapsByTeam);
+  raw('⑨ rc304-six-a 的七个结构分（分子 / 分母）', Object.fromEntries(Object.entries(scores.scores)
+    .map(([criterion, scored]) => [criterion, `${scored.value} = ${scored.numerator}/${scored.denominator}`])));
+  assert.equal(scores.ok, true, `⑨ 真实队伍的七个结构分必须都能算：缺 ${scores.missing_criteria.join(' / ')}`);
+  const poisonRow = result.axes.environment_value.structural_basis['rc304-six-a']
+    .per_archetype.poison_stack;
+  const expectedMean = Number((poisonRow.criteria
+    .reduce((sum, criterion) => sum + scores.scores[criterion].value, 0) / poisonRow.criteria.length).toFixed(6));
+  const expectedMin = Math.min(...poisonRow.criteria.map((criterion) => scores.scores[criterion].value));
+  assert.equal(poisonRow.relative_score, expectedMean, '⑨ relative_score = 该体系判据结构分的等权均值');
+  assert.equal(poisonRow.tolerance, Number(expectedMin.toFixed(6)), '⑨ tolerance = 结构短板（判据结构分的最小值）');
+
+  // 必红方向 ⑨-1：把 basis 拿掉、只留一个「看起来像数」的 value ⇒ 四轴必须回到 fail closed
+  const noBasis = compare('rc304-six-a', 'rc304-six-b', degradePrior((row) => ({...row, basis: null})));
+  raw('⑨ 缺 basis 的 assumption 分布', {kind: noBasis.distribution.kind,
+    reason: noBasis.distribution.reason,
+    availability: noBasis.availability});
+  proof('compare.distribution#distribution[].basis', '把 assumption 行的 basis 整条删掉（value 保留）',
+    STRUCTURAL_CRITERIA.assumption_needs_basis, 'ASSUMPTION_BASIS_MISSING',
+    JSON.stringify({kind: noBasis.distribution.kind, availability: noBasis.availability}));
+  assert.equal(noBasis.distribution.kind, 'unknown');
+  for (const axisId of DISTRIBUTION_AXES) {
+    assert.equal(noBasis.axes[axisId].available, false, `⑨-1 缺 basis 时 ${axisId} 不许有值`);
+    assert.equal(noBasis.axes[axisId].value, null);
+  }
+
+  // 必红方向 ⑨-2：给 assumption 行挂 sources（伪装成实测）⇒ 同样 fail closed
+  const sourced = compare('rc304-six-a', 'rc304-six-b',
+    degradePrior((row) => ({...row, sources: [{ref: 'injected:rc-304-red-proof', date: '2026-09-25'}]})));
+  proof('compare.distribution#distribution[].sources', '给 assumption 行挂上 sources（伪装 measured）',
+    STRUCTURAL_CRITERIA.assumption_needs_basis, 'ASSUMPTION_CARRIES_SOURCE',
+    JSON.stringify({kind: sourced.distribution.kind, reason: String(sourced.distribution.reason).slice(0, 60)}));
+  assert.equal(sourced.distribution.kind, 'unknown');
+  assert.ok(sourced.distribution.missing.some((item) => item.includes('assumption 却挂了来源')));
+
+  // 必红方向 ⑨-3：占比不闭合（第一条改成 0.5，合计 ≠ 1）⇒ fail closed
+  const broken = compare('rc304-six-a', 'rc304-six-b',
+    degradePrior((row, index) => (index === 0 ? {...row, value: 0.5} : row)));
+  proof('compare.distribution#distribution[].value', '把第一条占比改成 0.5（合计 ≠ 1）',
+    STRUCTURAL_CRITERIA.assumption_needs_basis, 'NO_PARTITION',
+    JSON.stringify({kind: broken.distribution.kind, value_sum: broken.distribution.weight_sum}));
+  assert.equal(broken.distribution.kind, 'unknown');
+
+  // 必红方向 ⑨-4：分母敏感性 —— K → K + 1（每行 1/(K+1) + 一条合成体系），权重必须跟着变
+  const K = prior.distribution.length;
+  const widerK = K + 1;
+  const syntheticId = 'rc304-red-proof-synthetic';
+  const widerPrior = {
+    ...prior,
+    distribution: [...prior.distribution.map((row) => ({...row, value: Number((1 / widerK).toFixed(6)),
+      basis: {...row.basis, denominator: widerK}})),
+    {archetype_id: syntheticId, source: 'assumption', unit: 'share', confidence: 'ENGINE_HYPOTHESIS',
+      value: Number((1 / widerK).toFixed(6)),
+      notes: '（判据⑨-4 的合成体系：只改分母，不带任何真实体系含义）',
+      basis: {...prior.distribution[0].basis, denominator: widerK}}],
+    archetypes: [...prior.archetypes,
+      {archetype_id: syntheticId, label: '（合成体系）', feature_axes: [{criterion: 'coverage'}]}],
+  };
+  const wider = compare('rc304-six-a', 'rc304-six-b', widerPrior);
+  raw('⑨ 分母敏感性（K → K+1）', {
+    weight_before: result.axes.worst_archetype.value.weight,
+    weight_after: wider.axes.worst_archetype.value.weight,
+    environment_value_before: result.axes.environment_value.value,
+    environment_value_after: wider.axes.environment_value.value,
+    partition_ok: wider.distribution.partition_ok,
+  });
+  proof('compare.distribution#distribution[].basis.denominator', `分母 K=${K} 改成 K=${widerK}`,
+    STRUCTURAL_CRITERIA.assumption_structural_scores, '权重与四轴加权值随之变',
+    JSON.stringify({weight_after: wider.axes.worst_archetype.value.weight,
+      environment_value_after: wider.axes.environment_value.value}));
+  assert.equal(wider.distribution.kind, 'assumption');
+  assert.equal(wider.axes.worst_archetype.value.weight, Number((1 / widerK).toFixed(6)));
+  assert.notEqual(wider.axes.worst_archetype.value.weight, result.axes.worst_archetype.value.weight);
+  assert.notEqual(wider.axes.environment_value.value, result.axes.environment_value.value);
+  for (const axisId of DISTRIBUTION_AXES) assert.equal(wider.axes[axisId].available, true);
+
+  // 审计必须认这三档：assumption 档「能算却 unknown」与「缺 structural_basis」都要判红
+  const clean = auditTeamCompare({compare: result, replacement: replacement('rc304-six-a')},
+    {text: renderCompareText({...result, replacement: replacement('rc304-six-a')})});
+  raw('⑨ assumption 档干净产出的审计', {ok: clean.ok, problems: auditText(clean)});
+  assert.equal(clean.ok, true, `⑨ assumption 档的产出必须干净：${auditText(clean).join(' | ')}`);
+  const missingBasis = clone(result);
+  missingBasis.axes.environment_value.structural_basis = null;
+  const auditMissing = auditTeamCompare({compare: missingBasis, replacement: replacement('rc304-six-a')}, {text: 'skip'});
+  proof('compare.axes.environment_value.structural_basis', 'assumption 档下把结构依据抹掉',
+    STRUCTURAL_CRITERIA.assumption_structural_scores, 'STRUCTURAL_BASIS_MISSING', auditRaw(auditMissing));
+  assert.ok(auditMissing.problems.some((row) => row.code === 'STRUCTURAL_BASIS_MISSING'));
+  const fakedUnknown = clone(result);
+  fakedUnknown.axes.environment_value.available = false;
+  fakedUnknown.axes.environment_value.value = null;
+  fakedUnknown.axes.environment_value.unknown_reason = '（变异体：假装算不出来）';
+  const auditFaked = auditTeamCompare({compare: fakedUnknown, replacement: replacement('rc304-six-a')}, {text: 'skip'});
+  proof('compare.axes.environment_value.available', 'assumption 档下把四轴整体退回 unknown',
+    STRUCTURAL_CRITERIA.assumption_structural_scores, 'NO_STRUCTURAL_SIGNAL', auditRaw(auditFaked));
+  assert.ok(auditFaked.problems.some((row) => row.code === 'NO_STRUCTURAL_SIGNAL'));
 });
 
 test('RC-304 判据②：返回 0 / null 却写 available:true 必须判红', () => {
@@ -243,23 +402,22 @@ test('RC-304 判据②：返回 0 / null 却写 available:true 必须判红', ()
   assert.equal(audit.ok, false);
   assert.ok(audit.problems.some((p) => p.code === 'AVAILABILITY_SHAPE'));
 
-  // ②-2 available:true + value:0（0 是「不知道」的伪装）
+  // ②-2 available:false + value:0（0 是「不知道」的伪装）——把 assumption 档的轴退回 unknown 再塞 0
   const zeroClaim = clone(result);
-  zeroClaim.axes.environment_value.available = true;
+  zeroClaim.axes.environment_value.available = false;
   zeroClaim.axes.environment_value.value = 0;
   audit = auditTeamCompare({compare: zeroClaim, replacement: replacement('rc304-six-a')}, {text: 'skip'});
-  raw('② available:true + value:0', {ok: audit.ok, problems: auditText(audit)});
-  proof('compare.axes.environment_value.value', '分布 unknown 却把 available 改成 true、value 设成 0',
-    STRUCTURAL_CRITERIA.availability_shape, 'AVAILABILITY_SHAPE 或 UNKNOWN_AXIS_HAS_VALUE', auditRaw(audit));
+  raw('② available:false + value:0', {ok: audit.ok, problems: auditText(audit)});
+  proof('compare.axes.environment_value.value', '把 available 改成 false、value 设成 0（用 0 冒充「不知道」）',
+    STRUCTURAL_CRITERIA.availability_shape, 'UNKNOWN_AXIS_HAS_VALUE', auditRaw(audit));
   assert.equal(audit.ok, false);
-  assert.ok(audit.problems.some((p) => p.code === 'AVAILABILITY_SHAPE'
-    || p.code === 'UNKNOWN_AXIS_HAS_VALUE'));
+  assert.ok(audit.problems.some((p) => p.code === 'UNKNOWN_AXIS_HAS_VALUE'));
 
   // ②-3 unknown 的轴却声明了量纲
   const unitClaim = clone(result);
-  unitClaim.axes.coverage_confidence.available = false;
-  unitClaim.axes.coverage_confidence.value = null;
-  unitClaim.axes.execution_tolerance.value_numbers = [{name: 'value', unit: RELATIVE_UNIT}];
+  unitClaim.axes.environment_value.available = false;
+  unitClaim.axes.environment_value.value = null;
+  unitClaim.axes.environment_value.value_numbers = [{name: 'value', unit: RELATIVE_UNIT}];
   audit = auditTeamCompare({compare: unitClaim, replacement: replacement('rc304-six-a')}, {text: 'skip'});
   raw('② unknown 的轴声明量纲', {ok: audit.ok, problems: auditText(audit)});
   assert.equal(audit.ok, false);
@@ -267,6 +425,8 @@ test('RC-304 判据②：返回 0 / null 却写 available:true 必须判红', ()
 
   // ②-4 unknown 的轴却报一个台账等级（不是 UNKNOWN）
   const confClaim = clone(result);
+  confClaim.axes.matchup_spread.available = false;
+  confClaim.axes.matchup_spread.value = null;
   confClaim.axes.matchup_spread.confidence = 'COMMUNITY_CURRENT';
   audit = auditTeamCompare({compare: confClaim, replacement: replacement('rc304-six-a')}, {text: 'skip'});
   raw('② unknown 的轴报非 UNKNOWN 置信', {ok: audit.ok, problems: auditText(audit)});
@@ -687,7 +847,8 @@ test('RC-304 结构：对每支队伍都能给出结论，≥6 组两两比较�
   for (const row of rows) {
     assert.equal(row.audit_ok, true, `结构：${row.teams.join(' vs ')} 审计必须干净`);
     assert.equal(row.availability.coverage_confidence, true);
-    assert.equal(row.availability.environment_value, false, '结构：真实数据下前四轴必须 unknown');
+    assert.equal(row.availability.environment_value, true,
+      '结构：真实数据下四轴必须真算（assumption 档：声明假设的分母 + RC-302 结构分）');
   }
   assert.ok(rows.some((row) => row.replacement !== null), '结构：至少要有一支队伍能给出结构性的最小替换');
 });
@@ -709,12 +870,20 @@ test('RC-304 报告：磁盘上的 rc-304-team-compare.json 与生成逻辑逐�
   raw('报告：measured 对照样例', report.measured_control_sample?.values ?? '未注入对照样例');
   raw('报告：判据逐条', report.criteria.map((row) => `${row.ok ? 'PASS' : 'FAIL'} ${row.label}`));
   assert.equal(disk, text, `报告不一致：跑 RC304_WRITE_REPORT=1 node --test tests/roco-team-compare.test.js 重写`);
-  assert.equal(report.availability_now.available.length, 1, '报告：现在恰好一轴可用');
-  assert.deepEqual(report.availability_now.available, ['coverage_confidence']);
-  assert.equal(report.availability_now.unknown.length, 4);
-  for (const row of report.unknown_reasons.filter((item) => item.axis !== 'coverage_confidence')) {
-    assert.ok(row.unknown_reason.length > 0);
-  }
+  assert.equal(report.availability_now.available.length, 5, '报告：assumption 档下五轴全部可用');
+  assert.deepEqual(report.availability_now.available, [...AXIS_IDS]);
+  assert.equal(report.availability_now.unknown.length, 0);
+  assert.equal(report.distribution_now.source, 'assumption');
+  assert.equal(report.distribution_now.entries, prior.distribution.length);
+  assert.equal(report.distribution_now.partition_ok, true);
+  assert.equal(report.distribution_now.basis.denominator, prior.distribution.length);
+  assert.ok(report.distribution_now.basis.recomputable_from.includes('scripts/roco/build-meta-prior.mjs'),
+    '重算通道必须指向真实脚本：' + report.distribution_now.basis.recomputable_from);
+  assert.ok(report.negative_controls.unknown !== undefined);
+  assert.ok(DISTRIBUTION_AXES.every((axisId) => report.negative_controls.unknown.availability[axisId] === false));
+  assert.ok(DISTRIBUTION_AXES.every((axisId) => report.negative_controls.basis_missing.availability[axisId] === false));
+  assert.equal(report.denominator_sensitivity_control.weight_changed, true);
+  assert.equal(report.denominator_sensitivity_control.partition_ok, true);
   assert.ok(report.measured_control_sample !== null, '报告必须带 measured 对照样例');
   assert.equal(report.measured_control_sample.availability.environment_value, true);
   assert.equal(report.measured_control_sample.environment_value_matches_weighted_mean, true);
@@ -727,7 +896,7 @@ test('RC-304 报告：磁盘上的 rc-304-team-compare.json 与生成逻辑逐�
   assert.equal(report.criteria.every((row) => row.ok), true,
     `报告：每条判据都必须通过：${report.criteria.filter((row) => !row.ok).map((row) => row.label).join(' / ')}`);
   assert.ok(report.does_not_do.length >= 3, '报告必须写清「这份比较不能用来做什么」');
-  assert.ok(report.red_proofs.length >= 8, `报告必须留痕 ≥8 条反证的实际输出原文，实际 ${report.red_proofs.length}`);
+  assert.ok(report.red_proofs.length >= 13, `报告必须留痕 ≥13 条反证的实际输出原文，实际 ${report.red_proofs.length}`);
   for (const row of report.red_proofs) {
     assert.ok(typeof row.actual === 'string' && row.actual.length > 0,
       `反证 ${row.where} 缺「实际输出原文」`);

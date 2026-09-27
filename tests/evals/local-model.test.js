@@ -41,8 +41,14 @@ function fakeChild({mode = 'ok', delayMs = 5} = {}) {
       if (mode === 'silent') return true;
       if (mode === 'die') { setTimeout(() => child.emit('exit', 1, null), delayMs); return true; }
       setTimeout(() => {
+        // 改钉（2026-09-27）：包装层现在要**按输出契约**校验本地输出（人类 ⑤：不许"输出英语再删"）。
+        // 所以这里多一个 `ok-json` 模式：返回契约要求的 JSON（`answer` + `basis`）。
+        // 裸模型层（`LocalModel.generate`）仍然回纯文本 —— 契约住在包装层，不在模型层，两者分开测。
+        const text = mode === 'ok-json'
+          ? JSON.stringify({answer: '规则为准。', basis: ['夹具']})
+          : '规则为准。';
         child.stdout.emit('data', `${JSON.stringify({
-          id: payload.id, ok: true, text: '规则为准。', prompt_tokens: 10, completion_tokens: 4,
+          id: payload.id, ok: true, text, prompt_tokens: 10, completion_tokens: 4,
           first_token_ms: 120, total_ms: 180, tokens_per_second: 22, peak_memory_gb: 2.4,
           memory_source: 'mlx-peak', stop_reason: 'stop',
         })}\n`);
@@ -153,13 +159,26 @@ test('provider 一定会回退，并且把回退原因留在 lastFallback', asyn
 });
 
 test('provider 在本地可用时返回模型输出，并清掉上一次的回退记录', async () => {
-  const model = new LocalModel({spawnImpl: () => fakeSpawn({mode: 'ok'})});
+  // 改钉（2026-09-27）：`createLocalProvider` 也要过输出契约 ⇒ 夹具用合规 JSON。
+  const model = new LocalModel({spawnImpl: () => fakeSpawn({mode: 'ok-json'})});
   await model.start();
   const provider = createLocalProvider({model, fallback: () => '模板'});
   provider.lastFallback = {code: 'timeout'};
   const text = await provider.generate({text: '问一句'});
   assert.equal(text, '规则为准。');
   assert.equal(provider.lastFallback, null);
+  assert.deepEqual(provider.stats, {answerUsed: 1, contractViolations: 0}, '合规要记在 answerUsed 上');
+  await model.stop();
+});
+
+test('provider 那一路也**不修剪**：不合契约就降级并单独记账（人类 ⑤）', async () => {
+  const model = new LocalModel({spawnImpl: () => fakeSpawn({mode: 'ok'})});   // 纯文本 ⇒ 不合契约
+  await model.start();
+  const provider = createLocalProvider({model, fallback: () => '模板'});
+  const text = await provider.generate({text: '问一句'});
+  assert.equal(text, '模板', '不合契约时给玩家的是降级文本，不是被修剪过的模型输出');
+  assert.equal(provider.lastFallback.code, 'not-json');
+  assert.deepEqual(provider.stats, {answerUsed: 0, contractViolations: 1});
   await model.stop();
 });
 
@@ -298,7 +317,8 @@ test('工具选择：合法输出要真的变成一次调用', async () => {
 });
 
 test('shadow 模式：本地跑一遍，但玩家看到的结果仍然来自云端', async () => {
-  const model = new LocalModel({spawnImpl: () => fakeSpawn({mode: 'ok'})});
+  // 改钉（2026-09-27）：包装层要过输出契约 ⇒ 这一条用 `ok-json`（合规输出）。
+  const model = new LocalModel({spawnImpl: () => fakeSpawn({mode: 'ok-json'})});
   await model.start();
   const base = {name: 'deepseek', generate: async () => '云端回答'};
   const provider = wrapWithLocalModel(base, {model, mode: 'shadow'});
@@ -310,7 +330,8 @@ test('shadow 模式：本地跑一遍，但玩家看到的结果仍然来自云�
 });
 
 test('on 模式：本地成功就走本地，失败就回退并且不抛给玩家', async () => {
-  const okModel = new LocalModel({spawnImpl: () => fakeSpawn({mode: 'ok'})});
+  // 改钉（2026-09-27）：同上 —— 合规输出才允许被当成"本地答的"。
+  const okModel = new LocalModel({spawnImpl: () => fakeSpawn({mode: 'ok-json'})});
   await okModel.start();
   const base = {name: 'deepseek', generate: async () => '云端回答'};
   const okProvider = wrapWithLocalModel(base, {model: okModel, mode: 'on'});

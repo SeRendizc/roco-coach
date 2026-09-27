@@ -16,6 +16,7 @@
     POST /battle/new     开一局本地练习对局（**私有域**，见下）
     POST /battle/legal   列出私有一局里双方的合法动作（**私有域**）
     POST /battle/advance 推进一个回合或一次补位（**私有域**）
+    POST /battle/free    一个**不占行动**的自由动作（PVP 魔法 / 背包物品，**私有域**）
 
 两个信任域（这是本服务最重要的一条边界）
 ----------------------------------------
@@ -74,19 +75,22 @@ fail closed 的三条纪律
    因为官方伤害公式与条件化威力的取值时机都还没有来源（MC-010）。
 2. **未核验机制一律 ``unsupported_effect`` / ``not_implemented``，``coverage = 0``，
    ``result = null``。** 绝不退化成「默认 40 威力普通攻击」这类自创默认值。
-3. **双属性相性只用快照里显式给出的行。** 快照 ``types.json`` 有 102 条双属性行；
-   其余 67 种组合没有行，本服务返回 ``unsupported``，
-   **不**用「两条单属性相乘」补 —— 实测该假设与快照 41 处不符（2×2 快照封顶为 3）。
+3. **双属性相性是「两系相乘」，组合可查性以快照的行集为界。** 2026-09-25 人类裁决
+   （台账 ``EV-TYPE-MULTIPLIER``，RECORDED_IN_GAME）：「快照 3×（现用）vs 两个社区源 4×，
+   差 41 格。**使用社区源**」⇒ 倍率 = 两条单属性行相乘（与 ``data.TypeChart.multiplier``
+   同口径）。快照 ``types.json`` 有 86 个不同的双属性组合（102 条键、16 对互为反写），
+   18 选 2 的其余 67 种组合没有行 ⇒ ``unsupported``（该组合不可查，不猜中性值）。
+   **旧口径留痕**：本条原文写「只用快照里显式给出的行，不用相乘补 —— 该假设与快照 41 处
+   不符」；那句话在裁决之前成立，现在被人类裁决取代，历史不抹掉。
 
 需要另一侧配合的一处接口
 ------------------------
 
-``data.py`` 的 ``TypeChart`` 只装载单属性行（构造时 ``if "|" in key: continue``），
-显式双属性行被丢弃，而它自带的 ``multiplier()`` 用「相乘」代替。
-本服务为了**不做那个假设**，需要读快照里显式的双属性行；在 ``data.py`` 补
-``TypeChart.combined`` 之前，这里用 ``_type_rows()`` 读一次 ``types.json``，
-并用 ``rs.files["types.json"]`` 的 sha256 校验它没有在加载后变动。
-这是**临时**的第二处只读 I/O，接口落地后应当整段删掉。
+``data.py`` 的 ``TypeChart`` 现在**两种行都装载**（单属性行用于结算，双属性行用于说明
+「这个组合有没有数据」）。本服务仍然用 ``_type_rows()`` 读一次原始 ``types.json``：
+它要回答的是「快照原文怎么说」（``type_row``）与「快照与裁决口径差在哪 41 格」
+（``type_chart`` 对账表），并顺手用 ``rs.files["types.json"]`` 的 sha256 校验快照
+没有在加载后变动。这是**明确的只读 I/O**，不是绕过 ``TypeChart``。
 """
 
 from __future__ import annotations
@@ -103,6 +107,7 @@ import time
 import traceback
 
 from . import events_text
+from . import coverage as coverage_mod
 from .coverage import classify_skill
 from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -569,7 +574,11 @@ class RocoService:
                     # （`data/roco/derived/on-demand-builds.json`）——把派生数据混进版本回执，
                     # 会让已录制且禁止重跑的 agent 轨迹全部对不上（实测踩到）。
                     "pets": getattr(rs, "frozen_pet_count", len(rs.pets)) or len(rs.pets),
-                    "skills": len(rs.skills),
+                    # 2026-09-23：`skills` 也走同一条纪律。PVP 魔法「愿力强化」换进来的
+                    # 36 条「愿力冲击」会进 `rs.skills` 供引擎解析，但**不许**改变这份回执 ——
+                    # 已录制的 agent 轨迹靠回执摘要比对，而那份轨迹是**禁止重跑**的
+                    # （实测：直接数 len(rs.skills) 会让 824 → 860，轨迹校验当场红）。
+                    "skills": getattr(rs, "frozen_skill_count", 0) or len(rs.skills),
                     "learnsets": getattr(rs, "frozen_learnset_count", len(rs.learnsets)) or len(rs.learnsets),
                     "type_rows": len(rs.type_chart.rows),
                     "terms": len(rs.terms),
@@ -614,6 +623,25 @@ class RocoService:
                 answer = self._answer_type_row(rs, query) if kind == "type_row" else self._answer_type_chart(rs)
             elif kind == "type_multiplier":
                 answer = self._answer_type_multiplier(rs, query)
+            elif kind == "policy":
+                # 2026-09-25（人类点名「雨天水系伤害加多少」这类问法答不了）：**规则策略读口**。
+                # 逐字回配置里声明的那一份，不改口径、不补默认、不替玩家算别的。
+                answer = self._answer_policy(rs, query)
+            elif kind == "catalog":
+                # 2026-09-25（agent 主线 P0-a）：**按属性检索精灵**。
+                # 真机实测「我想练一只抗龙系的伙伴，配哪四招？」agent 一次工具都没调
+                # —— 因为 622 只里"谁抗龙系"根本没有读口：`pet` 只能按 id/名字查一只。
+                answer = self._answer_catalog(rs, query)
+            elif kind == "weakness_summary":
+                # 2026-09-25（真机实测：「我这 48 只里整体最怕什么属性？」答成了"进入一场 PVE 对战后…"）：
+                # **名单级**的相性汇总 —— 逐属性数"怕它的有几只"，口径就是引擎自己的相乘规则。
+                answer = self._answer_weakness_summary(rs, query)
+            elif kind == "legality":
+                # 2026-09-25（agent 主线 P0-a 的最后一块）：**这份配招它学得到吗**。
+                # `catalog` 答"该找谁"、`learnset` 答"它能学什么"，而玩家/模型手里常是
+                # 一份**具体配招**（「带 火花、藤鞭、防御、休息回复」）—— 过去只能靠
+                # `team/evaluate`（要凑满模式声明的队伍规模）或让模型自己比学习表。
+                answer = self._answer_legality(rs, query)
             elif kind in EFFECT_KINDS:
                 answer = self._answer_effect(rs, query, kind)
             else:
@@ -653,7 +681,11 @@ class RocoService:
                     # 同 `/status`：这两个数是**冻结快照**的规模（回执回答的是「这份规则集
                     # 是哪个版本」），按需推算的 574 只不在冻结快照里（见 Ruleset 上的注释）。
                     "pets": getattr(rs, "frozen_pet_count", len(rs.pets)) or len(rs.pets),
-                    "skills": len(rs.skills),
+                    # 2026-09-23：`skills` 也走同一条纪律。PVP 魔法「愿力强化」换进来的
+                    # 36 条「愿力冲击」会进 `rs.skills` 供引擎解析，但**不许**改变这份回执 ——
+                    # 已录制的 agent 轨迹靠回执摘要比对，而那份轨迹是**禁止重跑**的
+                    # （实测：直接数 len(rs.skills) 会让 824 → 860，轨迹校验当场红）。
+                    "skills": getattr(rs, "frozen_skill_count", 0) or len(rs.skills),
                     "learnsets": getattr(rs, "frozen_learnset_count", len(rs.learnsets)) or len(rs.learnsets),
                     "type_rows": len(rs.type_chart.rows),
                     "terms": len(rs.terms),
@@ -763,7 +795,21 @@ class RocoService:
         }
         if with_tier:
             # 逐技能的真实档位（唯一分类器）；只在显式索要时附加，默认回执不含这三个键。
-            tier = classify_skill(skill, multi_hit_declared=True)
+            # 档位要按**同一份能力读数**算（`coverage.declared_capabilities_of()`）：以前这里
+            # 写死 `multi_hit_declared=True`，后面几条能力一条都没传 ⇒ 教练的工具回执与覆盖
+            # 台账各说各话（第 38 轮实测：扇风在这儿是 PARTIAL、在台账里是可模拟）。
+            _caps = coverage_mod.declared_capabilities_of()
+            # ⚠ 每加一条能力都要在这里补一行 —— 漏一条就会出现"工具回执说 PARTIAL、台账说可模拟"
+            # 那种两处打架（第 38 轮实测踩过一次，第 45 轮核对时又发现换人条件/每次使用后两条漏了）。
+            tier = classify_skill(skill, multi_hit_declared=_caps.get("multi_hit", False),
+                                  slot_condition_declared=_caps.get("slot_condition", False),
+                                  position_shift_declared=_caps.get("position_shift", False),
+                                  foe_energy_loss_declared=_caps.get("foe_energy_loss", False),
+                                  initiative_declared=_caps.get("initiative_condition", False),
+                                  per_layer_cost_declared=_caps.get("per_layer_cost", False),
+                                  foe_switch_condition_declared=_caps.get("foe_switch_condition", False),
+                                  per_use_ramp_declared=_caps.get("per_use_ramp", False),
+                                  on_hit_ramp_declared=_caps.get("on_hit_ramp", False))
             out["support_tier"] = tier["support"]
             out["support_why"] = tier["why"]
             out["support_unparsed"] = list(tier.get("unparsed") or [])
@@ -987,24 +1033,58 @@ class RocoService:
 
     def _answer_learnset(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
         pet_id = query.get("pet_id") or query.get("id")
+        name = query.get("name")
+        # 2026-09-25：学习表也接受**精灵名**（与 `_answer_term` 同一条理由：玩家说不出 pet_id）。
+        # 唯一命中 ⇒ 用它的 pet_id 走下面同一条路；重名 ⇒ 显式列候选（照 `_answer_pet` 的纪律，不猜）。
         if not isinstance(pet_id, str) or not pet_id:
-            return _bad_request("查学习表需要 pet_id")
+            if isinstance(name, str) and name:
+                hits = rs.pets_by_name(name)
+                if not hits:
+                    return _not_found(f"未知精灵名：{name}")
+                if len(hits) > 1:
+                    return Answer(
+                        result={"record": "learnset", "ambiguous": True, "queried_name": name,
+                                "matches": [{"pet_id": p.pet_id, "name": p.name} for p in hits],
+                                "note": "这个名字对应多只精灵，学习表各不相同；要哪一只请按 pet_id 再查。"},
+                        evidence_ids=[ev(rs.ruleset_id, "pets.json", p.pet_id) for p in hits],
+                    )
+                pet_id = hits[0].pet_id
+            else:
+                return _bad_request("查学习表需要 pet_id / id 或 name")
         ls = rs.learnsets.get(pet_id)
         if ls is None:
             return _not_found(f"未知学习表或精灵 id：{pet_id}")
         include = bool(query.get("include_records", True))
+        # 2026-09-25：`compact` = **精简投影**（只给配招建议要用的字段）。
+        # 为什么要有：真机实测「雪影娃娃的配招怎么选？」—— 它的学习表 50 条、完整回执 23 064 字节，
+        # 超过教练侧 10 000 字节的中转上限 ⇒ 模型一条技能都拿不到，只能凭记忆说方向。
+        # 精简投影**不新增事实**：字段全部来自同一份 `_skill_record`，只是把长描述等裁掉。
+        compact = query.get("compact") is True
+        # 字段集刻意瘦：配招建议只需要"名字/属性/类别/能耗/威力"。
+        # `power_status`/`is_trait` 在 294 条那只是压垮中转上限的那部分，去掉后最坏情况仍有余量。
+        COMPACT_FIELDS = ("skill_id", "name", "category", "element", "energy", "damage_class", "power")
+        # `limit` = **每一栏**最多回几条（默认 60，上限 60）。学习表的规模差异极大：
+        # 实测最大的一只是 294 条（学院呱呱），精简投影也有 56 KB —— 超过教练侧 10 KB 的中转上限。
+        # 所以紧凑模式必须能截断，并且**如实报出** truncated（模型据此知道自己只看到一部分）。
+        raw_limit = query.get("limit", 60)
+        if isinstance(raw_limit, bool) or not isinstance(raw_limit, int) or not 1 <= raw_limit <= 60:
+            return _bad_request("limit 必须是 1..60 的整数（默认 60；只作用于 compact 模式）")
+        limit = raw_limit if compact else None
 
         def records(ids: Tuple[str, ...]) -> List[Any]:
             if not include:
                 return list(ids)
             out = []
-            for sid in ids:
+            for sid in (ids[:limit] if limit is not None else ids):
                 skill = rs.skills.get(sid)
                 if skill is None:
                     # 学习表里的孤儿引用在加载期就该炸；这里若真出现，如实上报而不是跳过
                     out.append({"skill_id": sid, "missing_in_skills_json": True})
                 else:
-                    out.append(self._skill_record(rs, skill))
+                    record = self._skill_record(rs, skill)
+                    if compact:
+                        record = {key: record[key] for key in COMPACT_FIELDS if key in record}
+                    out.append(record)
             return out
 
         return Answer(
@@ -1015,6 +1095,11 @@ class RocoService:
                 "blood": records(ls.blood),
                 "stones": records(ls.stones),
                 "total": len(ls.all_skill_ids),
+                **(dict(compact=True, compact_fields=list(COMPACT_FIELDS), limit=limit,
+                        returned={"native": min(len(ls.native), limit), "blood": min(len(ls.blood), limit),
+                                  "stones": min(len(ls.stones), limit)},
+                        truncated=(len(ls.native) > limit or len(ls.blood) > limit or len(ls.stones) > limit))
+                   if compact else {}),
             },
             evidence_ids=[
                 ev(rs.ruleset_id, "learnsets.json", pet_id),
@@ -1022,17 +1107,58 @@ class RocoService:
             ],
         )
 
+    def _term_record(self, term: Any) -> Dict[str, Any]:
+        return {"record": "term", "term_id": term.term_id, "note": term.note, "desc": term.desc}
+
     def _answer_term(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
+        """按 id 或**按名字**查术语（2026-09-25 新增名字路径）。
+
+        为什么必须补名字路径：玩家问的是「『应对』这条术语是怎么定义的？」，而工具合同与这里
+        原来都只认 `term_id` —— 模型不可能猜到 `1015`，于是这类问题**只能靠编**。
+        名字路径的两段行为（照 `_answer_pet` 的既有纪律，不自己发明）：
+
+          · **精确命中**（`note` 等于查的名字，实测唯一）⇒ 返回定义，出处钉到 `terms.json#<id>`；
+          · **精确不中但名字里含这段文字** ⇒ 返回**候选**（`candidates: true` + 每条自己的 id/名字/描述），
+            并**明确不是定义** —— 玩家说「应对」而册子上是「应对状态 / 应对攻击 / 应对防御」三条时，
+            替玩家挑一条就是拿另一条规则的定义骗人；
+          · 一条都不含 ⇒ `not_found`；既没 id 也没名字 ⇒ `bad_request`。
+        """
         term_id = query.get("term_id") or query.get("id")
-        if term_id is None:
-            return _bad_request("查术语需要 term_id / id")
-        term = rs.term(str(term_id))
-        if term is None:
-            return _not_found(f"未知术语 id：{term_id}")
-        return Answer(
-            result={"record": "term", "term_id": term.term_id, "note": term.note, "desc": term.desc},
-            evidence_ids=[ev(rs.ruleset_id, "terms.json", term.term_id)],
-        )
+        name = query.get("name")
+        if isinstance(term_id, str) and term_id:
+            term = rs.term(str(term_id))
+            if term is None:
+                return _not_found(f"未知术语 id：{term_id}")
+            return Answer(
+                result=self._term_record(term),
+                evidence_ids=[ev(rs.ruleset_id, "terms.json", term.term_id)],
+            )
+        if isinstance(name, str) and name:
+            exact = rs.terms_by_name(name)
+            if len(exact) == 1:
+                return Answer(
+                    result=self._term_record(exact[0]),
+                    evidence_ids=[ev(rs.ruleset_id, "terms.json", exact[0].term_id)],
+                )
+            if len(exact) > 1:
+                # 重名：显式登记为候选，不得静默取第一条（与 `_answer_pet` 的同名纪律一致）。
+                return Answer(
+                    result={"record": "term", "ambiguous": True,
+                            "matches": [self._term_record(t) for t in exact]},
+                    evidence_ids=[ev(rs.ruleset_id, "terms.json", t.term_id) for t in exact],
+                )
+            near = rs.terms_matching(name)
+            if not near:
+                return _not_found(f"未知术语名：{name}")
+            return Answer(
+                result={"record": "term", "candidates": True,
+                        "queried_name": name,
+                        "note": "册子上没有与这个名字完全一致的术语；下面是名字里含它的候选，"
+                                "**它们不是这个名字的定义**，要哪一条请按 term_id 再查或让玩家确认。",
+                        "matches": [self._term_record(t) for t in near]},
+                evidence_ids=[ev(rs.ruleset_id, "terms.json", t.term_id) for t in near],
+            )
+        return _bad_request("查术语需要 term_id / id 或 name")
 
     # ── 属性相性 ────────────────────────────────────────────────────────
 
@@ -1085,13 +1211,451 @@ class RocoService:
         return None, False
 
     def _find_type_row(self, rows: Dict[str, Any], defender_types: List[str]) -> Optional[Dict[str, Any]]:
-        """按键查显式行。双属性两种顺序都试，**不**做相乘。"""
+        """按键查显式行（双属性两种顺序都试）。
+
+        它只回答「快照里有没有这一组合的行」—— **值不再用于结算**：
+        2026-09-25 人类裁决后，双属性倍率 = 两系相乘（见 `_answer_type_multiplier`）。
+        """
         if len(defender_types) == 1:
             return rows.get(defender_types[0])
         if len(defender_types) == 2:
             a, b = defender_types
             return rows.get(f"{a}|{b}") or rows.get(f"{b}|{a}")
         return None
+
+    def _resolve_pet_ref(self, rs: Ruleset, query: Dict[str, Any]):
+        """把 `pet_id` / `name` 解析成一只精灵。返回 `(pet, error_answer)`（二选一非空）。
+
+        与 `_answer_learnset` 同一条路：id 优先；名字**唯一命中**才用；重名就列候选让调用方挑
+        （不静默取第一条）。抽出来是为了让 `learnset` 与 `legality` 两条读口用**同一套**纪律 ——
+        抄一份就会出现"学习表认名字、合法性不认"这种漂移。
+        """
+        ref = query.get("pet_id") or query.get("id")
+        if isinstance(ref, str) and ref:
+            pet = rs.pets.get(ref)
+            if pet is None:
+                return None, _not_found(f"未知精灵 id：{ref}")
+            return pet, None
+        name = query.get("name")
+        if isinstance(name, str) and name:
+            hits = rs.pets_by_name(name)
+            if not hits:
+                return None, _not_found(f"未知精灵名：{name}")
+            if len(hits) > 1:
+                return None, Answer(
+                    result={"record": "pet", "ambiguous": True, "queried_name": name,
+                            "matches": [{"pet_id": item.pet_id, "name": item.name} for item in hits],
+                            "note": "这个名字对应多只精灵（形态不同、学习表也不同）；要哪一只请按 pet_id 再问。"},
+                    evidence_ids=[ev(rs.ruleset_id, "pets.json", item.pet_id) for item in hits],
+                )
+            return hits[0], None
+        return None, _bad_request("需要 pet_id / id 或 name")
+
+    def _answer_legality(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
+        """「这几招它学得到吗」—— 配招的**可学性**读口（P0-a）。
+
+        为什么要有：`catalog` 答"该找谁"、`learnset` 答"它能学什么"，但玩家/模型手里经常是
+        一份**具体配招**（「带 火花、藤鞭、防御、休息回复」）。过去这一问只能靠
+        `team/evaluate`（要凑满模式声明的队伍规模，凑不齐就进不去）或让模型自己比对学习表
+        （会猜）。这里逐招对照 `learnsets.json`，把**来源列**（native/blood/stones）如实写出来。
+
+        口径（三条）：
+          · 技能可以用 id，也可以用**名字**（名字走 `skill_by_name`：重名/查不到都不猜）；
+          · `legal` 是**三态**：全学得到 `true` / 有学不到的 `false` / 有认不出来的技能 `null`
+            （"查不到这个技能"与"学不到这个技能"是两件事，不许混成一句"不合法"）；
+          · 只查**可学性**（与 `env.validate_team` 的配招那一段同一条判据），
+            「6 选 4」「这四招强不强」不在这一层。
+        """
+        pet, error = self._resolve_pet_ref(rs, query)
+        if error is not None:
+            return error
+        skills = query.get("skills")
+        if not isinstance(skills, list) or not skills:
+            return _bad_request("查配招合法性需要 skills（1..6 个技能 id 或名字）")
+        if len(skills) > 6:
+            return _bad_request(f"一次最多查 6 个技能，实际 {len(skills)} 个")
+        learnset = rs.learnsets.get(pet.pet_id)
+        if learnset is None:
+            return _not_found(f"这只精灵没有学习表：{pet.pet_id}")
+
+        rows: List[Dict[str, Any]] = []
+        for raw in skills:
+            if not isinstance(raw, str) or not raw.strip():
+                return _bad_request("skills 里必须是非空字符串（技能 id 或名字）")
+            ref = raw.strip()
+            item: Dict[str, Any] = {"ref": ref}
+            skill = rs.skills.get(ref) if ref.startswith("skill_") else None
+            if skill is None and not ref.startswith("skill_"):
+                try:
+                    skill = rs.skill_by_name(ref)
+                except RulesetError:
+                    skill = None
+            if skill is None:
+                item["unknown_skill"] = True
+                item["learnable"] = False
+                item["note"] = "引擎没有这个技能（id 与名字都没命中）—— 这不等于「学不到」，先把名字核准"
+            else:
+                via = [label for label, ids in (("native", learnset.native),
+                                                ("blood", learnset.blood),
+                                                ("stones", learnset.stones))
+                       if skill.skill_id in ids]
+                item.update({"skill_id": skill.skill_id, "name": skill.name,
+                             "element": skill.element, "category": skill.category,
+                             "learnable": bool(via), "via": via})
+            rows.append(item)
+
+        unknown = [row["ref"] for row in rows if row.get("unknown_skill")]
+        learnable = [row["ref"] for row in rows if row.get("learnable")]
+        legal = None if unknown else len(learnable) == len(rows)
+        return Answer(
+            result={
+                "record": "legality",
+                "pet_id": pet.pet_id,
+                "pet_name": pet.name,
+                "pet_types": list(pet.types),
+                "requested": len(rows),
+                "learnable": len(learnable),
+                "all_learnable": not unknown and len(learnable) == len(rows),
+                "unknown_skills": unknown,
+                "legal": legal,
+                "skills": rows,
+                "note": "逐招对照 learnsets.json：`via` 是来源列（native 本系 / blood 血脉 / stones 技能石），"
+                        "三个来源都学得到才算 legal。`legal: null` = 有技能引擎认不出来（名字不对或没这个技能），"
+                        "**不是**不合法。这里只查可学性，不评价配招强弱、也不判「6 选 4」的形态。",
+            },
+            evidence_ids=[ev(rs.ruleset_id, "learnsets.json", pet.pet_id),
+                          ev(rs.ruleset_id, "pets.json", pet.pet_id)],
+        )
+
+    def _answer_weakness_summary(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
+        """「我这份名单**整体最怕**什么属性」—— 逐属性统计怕它的只数。
+
+        为什么要有：真机实测（2026-09-25，手游那一档）「我这 48 只里整体最怕什么属性？」落到
+        `policy-no-tool`，玩家拿到的是一句"进入一场 PVE 对战后…"（等于没答）。而这个汇总是**纯读**：
+        名单里的属性 × 快照相性表，逐属性数一遍就行 —— 数字全部来自引擎，不涉及概率。
+
+        口径：
+          · **倍率 > 1.0 才算"怕"**（快照的 2×、双属性相乘的 4×……），且用的是 `_single_multiplier`
+            与 `type_multiplier` **同一套**乘法（不另立一份算术）；
+          · 双属性组合**快照没有那一行**时（18 选 2 里缺 67 个）⇒ 那只**不计入**任何一栏，
+            整只列进 `unknown_combination_pet_ids`（fail closed，不猜中性值）；
+          · 不认识的 id 列进 `unknown_pet_ids`；每栏的宠物清单最多给 12 个（计数仍然是全量）。
+        """
+        raw_ids = query.get("pet_ids")
+        if not isinstance(raw_ids, list) or not raw_ids:
+            return _bad_request("查名单弱点汇总需要 pet_ids（非空数组，≤60 个稳定 id）")
+        if len(raw_ids) > 60:
+            return _bad_request(f"pet_ids 一次最多 60 个，实际 {len(raw_ids)} 个")
+        for item in raw_ids:
+            if not isinstance(item, str) or not re.match(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$", item):
+                return _bad_request(f"pet_ids 里有非法 id：{item!r}")
+        rows, why = self._type_rows(rs)
+        if rows is None:
+            return _bad_request(f"相性表不可用：{why}")
+        singles = {key: row for key, row in rows.items() if "|" not in str(key)}
+        elements = sorted(str(key) for key in singles)
+        ids = [str(item) for item in raw_ids]
+        unknown_pet_ids = sorted({pid for pid in ids if pid not in rs.pets})
+
+        counts: Dict[str, Dict[str, Any]] = {element: {"element": element, "count": 0, "pet_ids": []}
+                                             for element in elements}
+        unknown_combos: List[str] = []
+        counted = 0
+        for pid in ids:
+            pet = rs.pets.get(pid)
+            if pet is None:
+                continue
+            types = [str(t) for t in pet.types]
+            if len(types) == 2 and self._find_type_row(rows, types) is None:
+                unknown_combos.append(pid)
+                continue
+            if not types:
+                unknown_combos.append(pid)
+                continue
+            counted += 1
+            for element in elements:
+                value = 1.0
+                for type_name in types:
+                    value *= self._single_multiplier(rows, type_name, element)
+                if value > 1.0:
+                    row = counts[element]
+                    row["count"] += 1
+                    if len(row["pet_ids"]) < 12:
+                        row["pet_ids"].append(pid)
+        by_element = sorted(counts.values(), key=lambda row: (-row["count"], row["element"]))
+        present = [row for row in by_element if row["count"] > 0]
+        return Answer(
+            result={
+                "record": "weakness_summary",
+                "pet_ids": ids,
+                "counted": counted,
+                "unknown_pet_ids": unknown_pet_ids,
+                "unknown_combination_pet_ids": sorted(unknown_combos),
+                "by_element": present,
+                "top": present[:5],
+                "list_cap_per_element": 12,
+                "multiplier_rule": "怕 = 该属性打这只的倍率 > 1.0；双属性按两系**相乘**"
+                                   "（人类裁决 2026-09-25，台账 EV-TYPE-MULTIPLIER）——"
+                                   "与 type_multiplier 用的是同一套乘法",
+                "note": "这是**名单级的相性计数**（几只怕哪个属性），不是胜率、不是强度排序；"
+                        "双属性组合在快照里没有那一行的，整只不计入（列在 unknown_combination_pet_ids），"
+                        "不猜一个中性值。每栏的宠物清单最多 12 个，计数是全部。",
+            },
+            evidence_ids=[ev(rs.ruleset_id, "types.json", "weakness_summary"),
+                          ev(rs.ruleset_id, "pets.json", "weakness_summary")],
+        )
+
+    def _answer_catalog(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
+        """按**属性**检索精灵（不是按名字查一只）—— 600 只规模下的第一个"该找谁"读口。
+
+        为什么必须有：真机实测（2026-09-25，8765 接了 key）「我想练一只抗龙系的伙伴，
+        配哪四招？」→ agent **一次工具都没调**就答了（含糊、无依据）。原因是全量 622 只里
+        「谁抗龙系」过去没有读口：`pet` 只按 id/名字查一只，`type_row` 只回属性层面的相性表，
+        谁都没把「属性 → 精灵列表」连起来。
+
+        口径（三条，与 `type_row` / `_pet_record` 同一条纪律）：
+          · 三个**只读**筛法，方向按快照原文，不做任何推断：
+            `element`（**属于**这个属性的精灵）、
+            `resist`（**抗**这个属性的精灵 —— 谁的相性行 `resist` 里有它）、
+            `weak`（**怕**这个属性的精灵 —— 谁的 `weak` 里有它）、
+            `beats`（**克制**这个属性的精灵 —— 它那一行的 `weak` 里列出的攻击属性就是答案）；
+            同时给多个筛法时取**交集**（例："龙系里抗火的"）。
+          · `pet_ids`（可选，≤60 个稳定 id）：**只在给定 id 里找** —— 「我这几只里谁抗龙系」这一问
+            必须能一次问清；否则分页只取前 N 只，答案会随分页变化（"你队里 0 只"可能是假的）。
+            给不出的 id 不静默丢掉：逐个列进 `unknown_pet_ids`。
+            ⚠ `weak` 与 `beats` 是**两个方向**，别混：`weak: 龙系` = 怕龙系的精灵；
+            `beats: 龙系` = 打龙系有克制的精灵（= `row(龙系).weak` 的那几个属性）。
+          · 只用**单属性行**判方向（与 `type_row` 的 `offense` 同一条：双属性组合行在快照里
+            只说明"这个组合有没有数据"，它不是第二种口径）。
+          · 名字/属性/面板逐字来自快照，**不回任何伤害/胜率数字**；分页显式（默认 20，上限 50），
+            `total_matched` 与 `truncated` 如实写出来，免得调用方把"这一页"当成"全部"。
+        """
+        element = query.get("element") or query.get("type")
+        resist = query.get("resist")
+        weak = query.get("weak")
+        beats = query.get("beats")
+        raw_ids = query.get("pet_ids")
+        if raw_ids is not None:
+            if not isinstance(raw_ids, list) or not raw_ids:
+                return _bad_request("pet_ids 必须是非空数组（≤60 个稳定 id）")
+            if len(raw_ids) > 60:
+                return _bad_request(f"pet_ids 一次最多 60 个，实际 {len(raw_ids)} 个")
+            for item in raw_ids:
+                if not isinstance(item, str) or not re.match(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$", item):
+                    return _bad_request(f"pet_ids 里有非法 id：{item!r}")
+        for name, value in (("element", element), ("resist", resist), ("weak", weak), ("beats", beats)):
+            if value is not None and (not isinstance(value, str) or not value.strip()):
+                return _bad_request(f"{name} 必须是非空属性名（如「龙系」）")
+        if element is None and resist is None and weak is None and beats is None:
+            return _bad_request("按属性检索至少要给 element / resist / weak / beats 之一")
+        key_of = lambda raw: self._normalize_element(str(raw).strip())  # noqa: E731
+        element_key = key_of(element) if element is not None else None
+        resist_key = key_of(resist) if resist is not None else None
+        weak_key = key_of(weak) if weak is not None else None
+        beats_key = key_of(beats) if beats is not None else None
+
+        rows, why = self._type_rows(rs)
+        if rows is None:
+            return _bad_request(f"相性表不可用：{why}")
+        singles = {key: row for key, row in rows.items() if "|" not in str(key)}
+        for label, key in (("element", element_key), ("resist", resist_key), ("weak", weak_key),
+                           ("beats", beats_key)):
+            if key is not None and key not in singles:
+                return _not_found(f"未知属性：{key}（{label}）")
+
+        # 每个筛选条件算出一组"满足条件的**属性**"，再落到精灵身上（精灵可以双属性）。
+        wanted: List[Tuple[str, List[str]]] = []
+        if element_key is not None:
+            wanted.append((f"type={element_key}", [element_key]))
+        if resist_key is not None:
+            wanted.append((f"resist {resist_key}",
+                           self._types_with_entry(singles, resist_key, "resist")))
+        if weak_key is not None:
+            wanted.append((f"weak to {weak_key}",
+                           self._types_with_entry(singles, weak_key, "weak")))
+        if beats_key is not None:
+            # **进攻向**：克制 `beats_key` 的攻击属性 = 它那一行 weak 里列出的属性（逐字读，不推断）。
+            wanted.append((f"beats {beats_key}",
+                           [str(e.get("type")) for e in singles[beats_key].get("weak") or []
+                            if e.get("type")]))
+
+        wanted_ids = None
+        unknown_pet_ids: List[str] = []
+        if raw_ids is not None:
+            wanted_ids = {str(item) for item in raw_ids}
+            unknown_pet_ids = sorted(pid for pid in wanted_ids if pid not in rs.pets)
+
+        matched: List[Dict[str, Any]] = []
+        for pet in rs.pets.values():
+            if wanted_ids is not None and pet.pet_id not in wanted_ids:
+                continue
+            pet_types = [str(t) for t in pet.types]
+            reasons: List[str] = []
+            ok = True
+            for label, types in wanted:
+                hit = [t for t in pet_types if t in types]
+                if not hit:
+                    ok = False
+                    break
+                reasons.append(f"{label} via {'/'.join(hit)}")
+            if not ok:
+                continue
+            matched.append({
+                "pet_id": pet.pet_id,
+                "name": pet.name,
+                "types": pet_types,
+                "stats": dict(pet.stats),
+                "role": pet.role,
+                "speed_tier": pet.speed_tier,
+                "matched": reasons,
+            })
+        matched.sort(key=lambda item: item["pet_id"])
+
+        raw_limit = query.get("limit", 20)
+        raw_offset = query.get("offset", 0)
+        if isinstance(raw_limit, bool) or not isinstance(raw_limit, int) or not 1 <= raw_limit <= 50:
+            return _bad_request("limit 必须是 1..50 的整数（默认 20）")
+        if isinstance(raw_offset, bool) or not isinstance(raw_offset, int) or raw_offset < 0:
+            return _bad_request("offset 必须是非负整数（默认 0）")
+        page = matched[raw_offset:raw_offset + raw_limit]
+        filters = {k: v for k, v in (("element", element_key), ("resist", resist_key),
+                                     ("weak", weak_key), ("beats", beats_key)) if v is not None}
+        if wanted_ids is not None:
+            filters["pet_ids"] = sorted(wanted_ids)
+        evidence_types = sorted({t for _label, types in wanted for t in types})
+        return Answer(
+            result={
+                "record": "catalog",
+                "filters": filters,
+                "matched_types": evidence_types,
+                "total_matched": len(matched),
+                **(dict(unknown_pet_ids=unknown_pet_ids) if raw_ids is not None else {}),
+                "offset": raw_offset,
+                "limit": raw_limit,
+                "returned": len(page),
+                "truncated": raw_offset + len(page) < len(matched),
+                "pets": page,
+                "note": "按属性**检索**精灵：筛法与方向逐字来自 types.json（单属性行），"
+                        "名字/属性/面板逐字来自 pets.json。这里**不含**伤害、胜率、强度排序 —— "
+                        "谁更合适要接着查学习表/相性倍率，或让引擎算。"
+                        "「抗 X」= 相性行 resist 里有 X；「怕 X」= weak 里有 X；"
+                        "「克制 X」= X 那一行的 weak 里列出的属性（**与「怕 X」是两个方向**）；"
+                        "给多个筛法时是**交集**；给了 `pet_ids` 就只在这些 id 里找"
+                        "（`unknown_pet_ids` 是不认识的 id，逐个列出、不静默丢）。",
+            },
+            evidence_ids=[ev(rs.ruleset_id, "types.json",
+                             element_key or resist_key or weak_key or beats_key),
+                          ev(rs.ruleset_id, "pets.json", "catalog")],
+        )
+
+    @staticmethod
+    def _normalize_element(raw: str) -> str:
+        """把玩家/模型嘴里的属性名收敛成快照里的键（`龙` → `龙系`；已经带「系」的原样）。
+
+        只做这一种收敛：**不**翻译别称（「龙属性」不认），也**不**猜错别字 ——
+        认不出来就是未知属性，由调用方拿到 404。快照里的键一律是「X系」。
+        """
+        text = raw.strip()
+        if not text:
+            return text
+        if text.endswith("系"):
+            return text
+        return text + "系"
+
+    @staticmethod
+    def _types_with_entry(singles: Dict[str, Any], element: str, field: str) -> List[str]:
+        """单属性表里哪些属性的 `field`（weak/resist）里有 `element`。逐字读数，不推断。"""
+        out: List[str] = []
+        for key, row in singles.items():
+            for entry in row.get(field) or []:
+                if entry.get("type") == element:
+                    out.append(str(key))
+                    break
+        return sorted(out)
+
+    def _answer_policy(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
+        """规则**策略**读口（目前只有 `weather`）。
+
+        为什么要有：`kind:"ruleset"` 只回 counts/files/capabilities，**不含** `weather_policy`
+        —— 教练因此答不了「雨天水系伤害加多少」（真机实测：那句落到 `state-in-packet`，
+        模型没有事实可引）。而那个数字只有一个事实源：配置里从登记表照抄的那一份。
+
+        口径（三条）：
+          · **逐字回配置**，不重算、不换算、不补默认（`effects` 原样带出）；
+          · `ruleset_config_id` 可选，省略 = 进程当前生效的配置（`ROCO_RULE_CONFIG`）；
+            回执里**写明答的是哪一份**，免得把 legacy（没声明天气层）当成"天气不存在"；
+          · 没声明就是没声明：`enabled:false` + 一句 `note`，不抛错（legacy/v2 是合法状态）。
+        """
+        from . import rule_config as rc_mod
+
+        name = str(query.get("name") or query.get("policy") or "").strip().lower()
+        if not name:
+            return _bad_request("查策略需要 name（目前支持 weather）")
+        if name != "weather":
+            return _not_found(f"未知的策略：{name}")
+        raw_id = query.get("ruleset_config_id")
+        if raw_id is not None and (not isinstance(raw_id, str) or not raw_id):
+            return _bad_request("ruleset_config_id 必须是非空字符串（或省略 = 当前生效配置）")
+        # `mode_id`：**按模式**问策略（比配置 id 稳，因为「哪个模式绑哪份配置」只有登记表
+        # 一处事实源）。2026-09-25：营地里的玩家问「雨天水系伤害加多少」，而营地用的
+        # legacy 配置根本没声明天气层 ⇒ 教练只能回"没声明"。但玩家问的是**游戏规则**，
+        # 那份口径登记在标准 PVP 模式的绑定配置里 —— 让调用方指名模式，由引擎查登记表
+        # 解析，双方都不用各抄一份 id。
+        mode_id = query.get("mode_id")
+        if mode_id is not None and (not isinstance(mode_id, str) or not mode_id):
+            return _bad_request("mode_id 必须是登记表里的模式 id（非空字符串）")
+        bound_from_mode = None
+        if mode_id and raw_id is None:
+            try:
+                bound_from_mode = rc_mod.bound_config_id_for_mode(mode_id)
+            except Exception as exc:  # 没登记的模式**不许**猜一份配置来答
+                return _bad_request(f"模式 {mode_id!r} 不在登记表里：{exc}")
+            if not bound_from_mode:
+                return _not_found(f"模式 {mode_id!r} 在登记表里没有 ruleset_binding（不知道该按哪份配置答）")
+            raw_id = bound_from_mode
+        try:
+            cfg = rc_mod.get_rule_config(raw_id or None)
+        except Exception as exc:  # 配置加载失败**照实说**，不给一个假答案
+            return _bad_request(f"取不到规则配置 {raw_id!r}：{exc}")
+        # 回执里写明"这份配置是照哪个模式选的"，玩家话里才能标出处（不改一个数）。
+        from_mode = ({"mode_id": mode_id, "ruleset_binding": bound_from_mode}
+                     if bound_from_mode else None)
+        policy = cfg.weather_policy if isinstance(cfg.weather_policy, dict) else None
+        if not policy:
+            return Answer(
+                result={
+                    "record": "policy",
+                    "name": "weather",
+                    "ruleset_config_id": cfg.ruleset_config_id,
+                    "enabled": False,
+                    **(from_mode or {}),
+                    "note": "这份配置**没有声明**天气层（legacy / v2 是合法状态）：引擎遇到「把天气改为…」"
+                            "的技能只会登记成 unsupported，不结算任何天气效果。",
+                },
+                evidence_ids=[ev(rs.ruleset_id, "rulesets", f"{cfg.ruleset_config_id}.json")],
+            )
+        return Answer(
+            result={
+                "record": "policy",
+                "name": "weather",
+                "ruleset_config_id": cfg.ruleset_config_id,
+                "enabled": cfg.weather_enabled,
+                **(from_mode or {}),
+                "value": policy.get("value"),
+                "confidence": policy.get("confidence"),
+                "evidence_id": policy.get("evidence_id"),
+                "max_concurrent": policy.get("max_concurrent"),
+                "duration_turns": policy.get("duration_turns"),
+                "duration_source": policy.get("duration_source"),
+                # 四种天气的效果逐字带出（`kind` / `term_id` / 免疫属性 / 数值都在里面）
+                "effects": policy.get("effects"),
+                "unknowns": policy.get("unknowns"),
+                "reason": policy.get("reason"),
+                "note": "本记录是规则配置里 `policies.weather_policy` 的逐字转录（生成器从登记表照抄）。"
+                        "数值以「当前规则集」为准；更早版本的口径登记在 `unknowns` 里，不改写。",
+            },
+            evidence_ids=[ev(rs.ruleset_id, "rulesets", f"{cfg.ruleset_config_id}.json")],
+        )
 
     def _answer_type_row(self, rs: Ruleset, query: Dict[str, Any]) -> Answer:
         key = query.get("type") or query.get("id") or query.get("key")
@@ -1105,17 +1669,38 @@ class RocoService:
             if "|" in key:
                 return _unsupported(
                     "type_row_missing",
-                    f"快照没有给出双属性组合「{key}」的相性行；本服务不用「单属性相乘」补（该假设与快照 41 处不符）",
+                    f"快照没有给出双属性组合「{key}」的相性行（18 选 2 共 153 个组合，快照只给了 86 个）"
+                    "—— 该组合不可查，不用别的组合顶、也不猜一个中性值",
                     combination=key,
                 )
             return _not_found(f"未知属性：{key}")
+        # 2026-09-25（人类：「不要说不知道！预测就说预测」+ 教练侧实测）：
+        # `weak`/`resist` 是**防守向**（「这个属性怕什么/抗什么」）。玩家问的
+        # 「火系**克制**什么属性」是**进攻向** —— 逐字读快照回答不了那个问题
+        # （过去要么让模型去猜，要么拿防守向的列表答错方向）。进攻向 = 谁的 weak 里
+        # 有它：在**引擎里**算一遍（单属性 18 行，值逐字来自快照，不做推断）。
+        offense = []
+        for other_key, other_row in rows.items():
+            if "|" in str(other_key):
+                continue
+            for entry in other_row.get("weak") or []:
+                if entry.get("type") == row.get("key", key):
+                    offense.append({"type": other_key, "multiplier": float(entry.get("multiplier"))})
+        offense.sort(key=lambda item: (-item["multiplier"], item["type"]))
         return Answer(
             result={
                 "record": "type_row",
                 "key": row.get("key", key),
                 "weak": row.get("weak") or [],
                 "resist": row.get("resist") or [],
+                # 进攻向：这个属性打哪些属性是几倍（单属性表里逐行数出来的）
+                "offense": offense,
                 "neutral_default": 1.0,
+                # 这条记录是**快照原文**（数据查询）。引擎结算用的倍率见 type_multiplier：
+                # 双属性按两系相乘（2026-09-25 人类裁决），与快照的封顶行在 41 格上不同。
+                "note": "本记录是 types.json 的逐字转录（数据面）；**结算**用 type_multiplier，"
+                        "双属性按两系相乘（台账 EV-TYPE-MULTIPLIER，2026-09-25 人类裁决）。"
+                        "`weak`/`resist` 是防守向（怕什么/抗什么），`offense` 是进攻向（克制谁）。",
             },
             evidence_ids=[ev(rs.ruleset_id, "types.json", key)],
         )
@@ -1164,9 +1749,34 @@ class RocoService:
         if row is None:
             return _unsupported(
                 "type_combination_missing",
-                "快照没有给出该双属性组合的显式相性行；"
-                "「两条单属性相乘」是未核验假设（且与快照 41 处不符：2×2 快照封顶为 3），故不返回倍率",
+                "快照没有给出该双属性组合的显式相性行（18 选 2 共 153 个组合，快照只给了 86 个）——"
+                "该组合不可查：不用别的组合顶、也不猜一个中性值（fail closed）",
                 defender_types=uniq,
+            )
+        if len(uniq) == 2:
+            # 2026-09-25 人类裁决：「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。
+            # **使用社区源**」⇒ 双属性 = 两系相乘（台账 EV-TYPE-MULTIPLIER，RECORDED_IN_GAME）。
+            # 快照那一行的值只用来做**对照**，不作为结算口径。
+            a, b = uniq
+            value = self._single_multiplier(rows, a, element) * self._single_multiplier(rows, b, element)
+            snapshot_value, snapshot_from_table = self._row_lookup(row, element)
+            return Answer(
+                result={
+                    "record": "type_multiplier",
+                    "defender_types": uniq,
+                    "attack_element": element,
+                    "multiplier": float(value),
+                    "combination_rule": "multiply",
+                    "combination_rule_source": "人类裁决 2026-09-25（台账 EV-TYPE-MULTIPLIER，RECORDED_IN_GAME）",
+                    "neutral_inferred": False,
+                    "source": f"types.json 的单属性行相乘（{a} × {b}）；组合可查性来自 {row.get('key')}",
+                    # 快照的封顶值一并给出：41 格上它与裁决口径不同（3 vs 4），差异要看得见。
+                    "snapshot_value": float(snapshot_value) if snapshot_from_table else 1.0,
+                    "snapshot_agrees": abs((snapshot_value if snapshot_from_table else 1.0) - value) < 1e-9,
+                    # 相乘口径**不是**未核验假设：它是人类裁决（RECORDED_IN_GAME）。
+                    "assumption_free": True,
+                },
+                evidence_ids=[ev(rs.ruleset_id, "types.json", str(row.get("key")))],
             )
         value, from_table = self._row_lookup(row, element)
         if not from_table:
@@ -1180,14 +1790,28 @@ class RocoService:
                 # 未列出的攻击属性按「中性 1.0」处理；这是表的口径，不是新数值。
                 "neutral_inferred": not from_table,
                 "source": f"types.json#{row.get('key')}",
-                # 关键：双属性来自快照显式行，没有用相乘假设。
+                # 单属性来自快照显式行，没有用相乘假设。
                 "assumption_free": True,
             },
             evidence_ids=[ev(rs.ruleset_id, "types.json", str(row.get("key")))],
         )
 
+    @staticmethod
+    def _single_multiplier(rows: Dict[str, Any], type_key: str, element: str) -> float:
+        """单属性行的倍率（未列出 = 中性 1.0）。相乘口径的**唯一**取数口。"""
+        row = rows.get(type_key)
+        if row is None:
+            return 1.0
+        value, _ = RocoService._row_lookup(row, element)
+        return 1.0 if value is None else float(value)
+
     def _answer_type_chart(self, rs: Ruleset) -> Answer:
-        """相性表自检：把「相乘假设」与快照显式行对拍，暴露差异（只报告，不补数）。"""
+        """相性表自检：把「两系相乘」与快照显式行对拍，把差异**暴露出来**（只报告，不改数）。
+
+        2026-09-25 之前这条自检是「证明快照才对、相乘是假设」；人类裁决改用社区源的相乘
+        口径之后，它反过来变成「快照有 41 格与我们的结算口径不同」的**对账表** ——
+        数字一个字没改，读法变了：那 41 格是**快照**的偏差，不是引擎的。
+        """
         rows, why = self._type_rows(rs)
         if rows is None:
             return _bad_request(f"相性表不可用：{why}")
@@ -1240,9 +1864,11 @@ class RocoService:
                     "mismatches": total_mismatch,
                     "examples": mismatches,
                     "note": (
-                        "data.py 的 TypeChart.multiplier 假设「双属性 = 两条单属性相乘」；"
-                        "快照的显式双属性行在 2×2 处一律给 3.0（封顶），故该假设会高估。"
-                        "本服务的 type_multiplier 只用显式行，缺失组合返回 unsupported。"
+                        "2026-09-25 人类裁决改用社区源的**相乘**口径（台账 EV-TYPE-MULTIPLIER，"
+                        "RECORDED_IN_GAME）：「快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」。"
+                        "所以 data.py 的 TypeChart.multiplier 双属性分支就是两系相乘，"
+                        "上面这 41 处不一致是**快照封顶行**与结算口径的差（快照在 2×2 处给 3.0）。"
+                        "本服务的 type_multiplier 与引擎同口径（相乘），并把快照值放在 snapshot_value 里对账。"
                     ),
                 },
             },
@@ -1341,7 +1967,16 @@ class RocoService:
         if loadouts is not None and not isinstance(loadouts, dict):
             return self._answer_envelope(_bad_request("loadouts 必须是 {pet_id: [skill_id...]}"), body, started)
 
-        problems = env_mod.validate_team(rs, squad, loadouts)
+        # 2026-09-25（人类：「我这六只怎么样」问不出来）：队伍规模按**登记表里各模式声明的值**收
+        # （`demo-training-3v3`=3 / `pvp-standard-six-pet`=6 / `pvp-territory-trial-2v2`=2），
+        # 不在其中的一律 refuse。原来这里靠 `validate_team` 的默认 3（RC-106 的注释写着
+        # 「默认 3 是给不经过 reset() 的调用点」）⇒ 六只阵容连评估都进不去。
+        sizes = team_mod.declared_team_sizes()
+        if len(squad) not in sizes:
+            return self._answer_envelope(_bad_request(
+                f"队伍规模必须是 {sizes} 之一（各模式在 battle-modes.json 的 parameters.team_size 里声明）；"
+                f"实际 {len(squad)} 只"), body, started)
+        problems = env_mod.validate_team(rs, squad, loadouts, team_size=len(squad))
         if problems:
             return self._answer_envelope(_bad_request("队伍不合法：" + "；".join(problems)), body, started)
 
@@ -1771,6 +2406,15 @@ class RocoService:
         if early is not None:
             return early
 
+        # 2026-09-25：这份配置声明了「背包物品**不占行动**」时，`/battle/advance` **不接受**把它
+        # 当成这一手交上来 —— 那样回合照走，玩家白搭一个回合。它必须走 `/battle/free`。
+        # 引擎的 `step_joint` 本身**不拦**（机器人推演 `opponents.play_match` 走同一条路：
+        # 那里「这一手用了道具」只是推演里少出一招，不是玩家可见的规则违规）；
+        # 拦截点放在**玩家可达到的 API 边界**上，这也是页面唯一会走的那条路。
+        from . import rule_config as rc_mod
+        cfg_adv = rc_mod.get_rule_config(state.ruleset_config_id or None)
+        free_declared = cfg_adv.magic_occupies_action is False
+
         strategy, why = self._sim_strategy(body, started)
         if why is not None:
             return why
@@ -1842,12 +2486,64 @@ class RocoService:
                 # 策略只能看 observation 代理；真实 seed 只用于它自己的确定性随机源。
                 obs = env_mod.observe(state, rs, "enemy")
                 enemy_action = strategy.act(obs, legal_enemy, int(state.seed), int(state.turn))
+                if free_declared and player_action.kind == "magic":
+                    return self._answer_envelope(_bad_request(
+                        "「愿力强化」不占行动（自由动作）：请走 POST /battle/free，"
+                        "把它当成这一手交上来会白搭一个回合（这一手仍然照常要出一个技能）"),
+                        body, started)
                 env_mod.step_joint(state, rs, player_action, enemy_action)
         except (ValueError, RulesetError) as exc:
             return self._answer_envelope(_bad_request(f"无法推进：{exc}"), body, started)
 
         return self._sim_envelope(
             state, rs, strategy, body, started, event="battle_advance", events_from=events_before
+        )
+
+    def battle_free(self, body: Dict[str, Any]) -> Tuple[int, Dict[str, Any]]:
+        """一个**不占行动**的自由动作（人类 2026-09-25：「PVP 魔法 / 背包物品不占行动」）。
+
+        与 ``/battle/advance`` 只差一件事，但那是全部意义所在：**它不推进回合**。
+        对手这一手不在这一次调用里结算（也不给它任何信息），玩家随后照常出这一手。
+        「『愿力冲击』就是个技能，这个算行动」——换上来的技能仍然走 ``/battle/advance``。
+
+        能力是**配置声明**的（``policies.magic_policy.occupies_action === false``）：
+        没声明 / 未核验的配置在这里 **fail closed**（422 ``unsupported_effect``），
+        绝不静默降级成「占一手」，也绝不静默放行。
+        """
+        started = time.perf_counter()
+        from . import env as env_mod
+
+        state, rs, early = self._private_state(body, started)
+        if early is not None:
+            return early
+
+        raw_action = body.get("action")
+        if not isinstance(raw_action, dict):
+            return self._answer_envelope(
+                _bad_request("必须给出 action（这一下自由动作）；自由动作不替玩家出这一手"),
+                body, started)
+        try:
+            action = Action.from_dict(raw_action)
+        except (ValueError, RulesetError) as exc:
+            return self._answer_envelope(_bad_request(f"动作不合法：{exc}"), body, started)
+
+        # 事件要在结算**之前**记长度：`_end_of_turn` 会清空当前回合的事件，
+        # 但自由动作不结束回合，所以这里切出来的是「这一下新产生的那些」。
+        events_before = len(state.events)
+        try:
+            env_mod.step_free(state, rs, "player", action)
+        except env_mod.fx.UnsupportedEffect as exc:
+            # 配置没声明这条能力（或动作类不是自由动作）—— 引擎没有依据，422 不是 400。
+            return self._answer_envelope(_unsupported("free_action_not_declared", str(exc)),
+                                         body, started)
+        except (ValueError, RulesetError) as exc:
+            return self._answer_envelope(_bad_request(f"自由动作被拒绝：{exc}"), body, started)
+
+        strategy, why = self._sim_strategy(body, started)
+        if why is not None:
+            return why
+        return self._sim_envelope(
+            state, rs, strategy, body, started, event="battle_free", events_from=events_before
         )
 
     def _damage_preview(self, state, rs) -> Dict[str, Any]:
@@ -1867,7 +2563,11 @@ class RocoService:
         不猜、不填默认值。
         """
         from . import effects as fx_mod
+        from . import rule_config as rc_mod
 
+        # 这一局生效的规则配置：伤害类别要不要按 `spa/spd` 取面板，是它的声明说了算。
+        # 原来的预览只按物攻算，修正之后必须与真结算读同一份声明（否则页面预览与打出来的数不一致）。
+        cfg = rc_mod.get_rule_config(state.ruleset_config_id or None)
         foe_hp = state.enemy.field_pet.hp
         pet = state.player.field_pet
         foe_pet = state.enemy.field_pet
@@ -1888,11 +2588,31 @@ class RocoService:
         skipped: List[str] = []
         for skill in attacks:
             try:
-                outcome = fx_mod.compute_damage(pet, foe_pet, skill, rs)
+                # 2026-09-23：把**这一局的配置**传进去 —— 「伤害按类别取面板」是配置声明，
+                # 预览与真结算读同一份声明，否则页面上预览的数与打出来的数会不一样。
+                outcome = fx_mod.compute_damage(pet, foe_pet, skill, rs, cfg=cfg)
             except fx_mod.UnsupportedEffect:
                 # fail closed：条件化威力读不出来的技能不猜，如实登记
                 skipped.append(skill.skill_id)
                 continue
+            # 2026-09-25：**把属性倍率一并给出来** —— 页面 v3h 的「克制三角」与「预期伤害」颜色
+            # 要靠它，而在此之前页面里的那两个标记是**设计稿写死的静态值**（换屏五行永远是
+            # up/none/up/down/none，从来不变；人类实测：「优势突然变劣势了，显示还是绿色的优势」）。
+            # **用结算用的那一份表**（`effects.compute_damage` 内部就是这一句：
+            # `rs.type_chart.multiplier(defender_species.types, skill.element)`）——
+            # 提示的职责是"预告玩家真会看到什么"，不是另立一套规则口径；来源写进 `multiplier_source`。
+            # 拿不到对手的属性就给 None（页面据此**不画**，而不是画一个"无影响"）。
+            defender_types = None
+            try:
+                defender_types = rs.pet(foe_pet.pet_id).types
+            except Exception:
+                defender_types = None
+            multiplier = None
+            if defender_types:
+                try:
+                    multiplier = float(rs.type_chart.multiplier(defender_types, skill.element))
+                except Exception:
+                    multiplier = None
             damages.append({
                 "label": skill.name,
                 "kind": "skill",
@@ -1900,6 +2620,10 @@ class RocoService:
                 "damage": outcome.damage,
                 "energy": skill.energy,
                 "formula_verified": outcome.verified,
+                "multiplier": multiplier,
+                "multiplier_element": skill.element,
+                "multiplier_defender_types": list(defender_types) if defender_types else None,
+                "multiplier_source": "effects.compute_damage 用的同一份 TypeChart（预告「这一下打多少」的口径）",
             })
         if not damages:
             return {"available": False,
@@ -1942,9 +2666,19 @@ class RocoService:
             for sample in preview.get("samples", []):
                 label = sample["label"]
                 entry = merged.setdefault(label, {"label": label, "min": sample["damage"],
-                                                  "max": sample["damage"]})
+                                                  "max": sample["damage"],
+                                                  # 2026-09-25：**倍率要跟着合并走**，否则页面拿不到它
+                                                  #（`_damage_preview` 里算好了，但计划这条路读的是合并结果，
+                                                  # 不在这里带出来就等于没做 —— 实测踩到过一次）。
+                                                  "multiplier": sample.get("multiplier"),
+                                                  "multiplier_element": sample.get("multiplier_element"),
+                                                  "multiplier_defender_types": sample.get("multiplier_defender_types")})
                 entry["min"] = min(entry["min"], sample["damage"])
                 entry["max"] = max(entry["max"], sample["damage"])
+                # 倍率与伤害无关，各分析种子应给出同一个值；不一致就**不写**（fail closed，不挑一个）。
+                for key in ("multiplier", "multiplier_element", "multiplier_defender_types"):
+                    if sample.get(key) != entry.get(key):
+                        entry[key] = None
         return {
             "available": True,
             "min": min(p["min"] for p in usable),
@@ -2085,7 +2819,8 @@ class RocoService:
                 # 放到浏览器里再抄一份必然漂移。原始 JSON 一并带出去，
                 # 但页面把它收进默认隐藏的调试区（玩家只该看到句子）。
                 "events": [dict(e.to_dict(), text=events_text.event_text(e.to_dict(), rs))
-                           for e in state.events[events_from:]] if event == "battle_advance" else [],
+                           for e in state.events[events_from:]]
+                          if event in ("battle_advance", "battle_free") else [],
                 "strategy": {"name": strategy.name, "version": strategy.version},
                 "unsupported_seen": list(state.unsupported),
             },
@@ -2227,6 +2962,8 @@ class RocoRequestHandler(BaseHTTPRequestHandler):
                 status, env = service.battle_legal(body)
             elif path == "/battle/advance":
                 status, env = service.battle_advance(body)
+            elif path == "/battle/free":
+                status, env = service.battle_free(body)
             elif path in NOT_IMPLEMENTED:
                 status, env = service.not_implemented(path, body)
             else:
@@ -2289,7 +3026,7 @@ class RocoRequestHandler(BaseHTTPRequestHandler):
 
 
 ROUTES = ("/health", "/rules/query", "/team/evaluate", "/team/compare", "/battle/plan",
-          "/battle/new", "/battle/legal", "/battle/advance")
+          "/battle/new", "/battle/legal", "/battle/advance", "/battle/free")
 
 
 # ── 进程入口 ────────────────────────────────────────────────────────────

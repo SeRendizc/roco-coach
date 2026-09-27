@@ -29,6 +29,7 @@ import {readFileSync, readdirSync, existsSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 import {dirname, join, resolve as resolvePath} from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {LIB_BY_RECORD_KIND, LIB_SCOPE, LIBS_PATH, assertLib, buildLibKindMap, loadLibs} from './rag-libs.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 /** 仓库根：本文件在 src/coach/ 下。 */
@@ -39,25 +40,13 @@ export const REPO_ROOT = resolvePath(HERE, '..', '..');
  * CONFIDENCE_ORDER **必须**逐字一致；eval-rag-retrieval.mjs 启动时会 deepEqual
  * 对一次，tests/roco-rag-eval.test.js 也会再对一次。两份常量只会漂移一次，
  * 而那一次会被判据抓住，所以这里不复制注释里的话，只复制数组本身。
+ *
+ * 2026-09-27（审计 ②）：常量本体搬到 `./evidence-levels.js`（那里不 import node 内建，
+ * 浏览器侧也用得到 —— 天气回答要把依据等级印给玩家看）。这里 import 进来自己用、
+ * 同时**原样再导出**，外部 API（`EVIDENCE_LEVELS` / `EVIDENCE_LABELS`）一个字没变。
  */
-export const EVIDENCE_LEVELS = Object.freeze([
-  'OFFICIAL_CURRENT',
-  'RECORDED_IN_GAME',
-  'COMMUNITY_CURRENT',
-  'CROSS_SOURCE_SUPPORTED',
-  'ENGINE_HYPOTHESIS',
-  'UNKNOWN',
-]);
-
-/** 中文标签只用于报告可读性，不参与打分。 */
-export const EVIDENCE_LABELS = Object.freeze({
-  OFFICIAL_CURRENT: '官方当前材料',
-  RECORDED_IN_GAME: '可复核实机',
-  COMMUNITY_CURRENT: '社区当前可见',
-  CROSS_SOURCE_SUPPORTED: '多来源支持',
-  ENGINE_HYPOTHESIS: '工程假设',
-  UNKNOWN: '无证据',
-});
+import {EVIDENCE_LEVELS, EVIDENCE_LABELS} from './evidence-levels.js';
+export {EVIDENCE_LEVELS, EVIDENCE_LABELS};
 
 /** 0 = 最强。未知等级一律排到最弱，不用「默认强」蒙混。 */
 export function evidenceRank(level) {
@@ -77,16 +66,32 @@ export const ABSTAIN_REASONS = Object.freeze({
   NO_MATCH: '语料里没有可支撑的候选',
   UNRESOLVED_IDENTITY_CONFLICT: 'pack 自己把该条目标成 UNRESOLVED 身份冲突，查询又没有消歧词',
   EVIDENCE_LEVEL_INSUFFICIENT: '最强候选的证据等级低于该问题当事实断言所需的最低等级',
+  SCOPE_EXCLUDED: '查询点名的记录种类只落在被排除的 scope 上（玩家个体数据不属于规则语料）',
 });
 
 export const RAG_INPUTS = Object.freeze({
   pack: 'data/roco/game-data-pack/v2/pack.json',
   ledger: 'data/roco/evidence/rule-evidence-ledger.json',
   rulesetDir: 'data/roco/rulesets',
-  owned: 'data/roco/owned/owned-pets.json',
   heldout: 'data/roco/rag/heldout-queries.json',
   report: 'reports/roco/rag/rag-eval.json',
   evalFixtures: ['tests/evals/retrieval.json', 'tests/evals/retrieval-extended.json'],
+});
+
+/**
+ * 玩家个体数据**不属于规则语料**（人类口径：「memory 与 RAG 分开做好」）。
+ *
+ * `owned` 原来混在 RAG_INPUTS 里，与 pack/台账平级 —— 后果是「我的个体」这类问题
+ * 和「规则是什么」共用一条检索路径与一个 idf，玩家自己的 48 只个体会参与规则文档的
+ * 词频统计。现在拆成单独一组：`RAG_INPUTS` 与 `PLAYER_INPUTS` 的 key 交集必须为空
+ * （tests/roco-rag-libs.test.js 钉着这一条）。
+ *
+ * ⚠️ `loadCorpus()` 的返回对象里**仍然有** `corpus.owned`：eval 侧
+ * （scripts/roco/eval-rag-retrieval.mjs 的 checkDerivation）在模块加载期就读它。
+ * 这里拆的是「输入登记」，不是返回形状。
+ */
+export const PLAYER_INPUTS = Object.freeze({
+  owned: 'data/roco/owned/owned-pets.json',
 });
 
 /** 记录种类 → 玩家能读的中文标签（机械翻译，不新造事实）。 */
@@ -100,6 +105,7 @@ export const RECORD_KIND_LABELS = Object.freeze({
   owned_instance: '已拥有个体',
   conflict_record: '冲突条目',
   conflict_policy: '冲突登记政策',
+  type_chart: '属性相性',
 });
 
 /**
@@ -119,11 +125,53 @@ const SOURCE_SCOPE_LABELS = Object.freeze({
 
 // ── 读语料（只读；不写任何文件） ───────────────────────────────────────────
 
-export function loadCorpus({root = REPO_ROOT} = {}) {
+/**
+ * L3 属性相性表的输入路径：**由 `libs.json` 的 `inputs` 声明**（record_kinds 含 `type_chart`
+ * 的那个库），不在 RAG_INPUTS 里再抄一份。
+ *
+ * 为什么只留一个登记处：相性表是**分库语料**，真源路径写两处必然漂，而「库声明指向 A、
+ * 索引却读了 B」这种错谁都不会发现（两处各自都"看着对"）。`rag-libs.assertLib` 会检查
+ * 声明出来的路径存在，所以这里的唯一职责是**解析出路径**。
+ *
+ * 库不存在 / 还没 ready / 没写 inputs 一律返回 null —— 不假装有语料（fail closed）。
+ */
+export function typeChartInput({root = REPO_ROOT, libs = null} = {}) {
+  const registry = libs ?? loadLibs({root}).libs;
+  const spec = registry.find((lib) => (lib.record_kinds ?? []).includes('type_chart')) ?? null;
+  if (!spec || spec.status !== 'ready') return null;
+  const path = (spec.inputs ?? [])[0] ?? null;
+  return path ? {lib_id: spec.lib_id, path} : null;
+}
+
+/**
+ * L5 术语表的输入路径 —— 与 `typeChartInput` 同一个做法：读 `libs.json` 的 `inputs`，
+ * 而不是在代码里另写一份路径（否则「文档说来自 A、断言说来自 B」）。
+ */
+export function termsInput({root = REPO_ROOT, libs = null} = {}) {
+  const registry = libs ?? loadLibs({root}).libs;
+  const spec = registry.find((lib) => (lib.record_kinds ?? []).includes('term_entry')) ?? null;
+  if (!spec || spec.status !== 'ready') return null;
+  const path = (spec.inputs ?? [])[0] ?? null;
+  return path ? {lib_id: spec.lib_id, path} : null;
+}
+
+/**
+ * L4 战术卡库的输入 —— 卡片本体在 `src/game/content.js`（**唯一真源，不再生成 JSON 副本**）。
+ * 与 `termsInput`/`typeChartInput` 同一个做法：路径从 `libs.json` 的 `inputs` 解析。
+ */
+export function cardsInput({root = REPO_ROOT, libs = null} = {}) {
+  const registry = libs ?? loadLibs({root}).libs;
+  const spec = registry.find((lib) => (lib.record_kinds ?? []).includes('tactic_card')) ?? null;
+  if (!spec || spec.status !== 'ready') return null;
+  const path = (spec.inputs ?? [])[0] ?? null;
+  return path ? {lib_id: spec.lib_id, path} : null;
+}
+
+export function loadCorpus({root = REPO_ROOT, libs = null} = {}) {
   const readJson = (relative) => JSON.parse(readFileSync(join(root, relative), 'utf8'));
   const pack = readJson(RAG_INPUTS.pack);
   const ledger = readJson(RAG_INPUTS.ledger);
-  const owned = readJson(RAG_INPUTS.owned);
+  const owned = readJson(PLAYER_INPUTS.owned);
   const dir = join(root, RAG_INPUTS.rulesetDir);
   const rulesets = readdirSync(dir)
     .filter((file) => file.endsWith('.json'))
@@ -132,7 +180,43 @@ export function loadCorpus({root = REPO_ROOT} = {}) {
       file: `${RAG_INPUTS.rulesetDir}/${file}`,
       data: JSON.parse(readFileSync(join(dir, file), 'utf8')),
     }));
-  return {pack, ledger, owned, rulesets};
+  // L3 相性表：读哪一份由 libs.json 的 inputs 决定（见 typeChartInput）。
+  // 路径不存在就抛 —— 「库声明了真源、真源却不在」必须响，不许静默变成空库。
+  const typeChartSpec = typeChartInput({root, libs});
+  let typeChart = null;
+  if (typeChartSpec) {
+    if (!existsSync(join(root, typeChartSpec.path))) {
+      throw new Error(`库 ${typeChartSpec.lib_id} 的输入路径不存在：${typeChartSpec.path}（见 ${LIBS_PATH}）`);
+    }
+    typeChart = readJson(typeChartSpec.path);
+  }
+  // L4 战术卡库：读**派生产物** `data/roco/derived/tactic-cards.json`
+  // （由 `scripts/roco/build-tactic-cards.mjs` 从 `src/game/content.js` 生成，`--check` 钉住漂移）。
+  // 为什么不用动态 import 直接读 `content.js`：那会把 `loadCorpus()` 变成 async，
+  // 而它有十来个同步调用点（评测、校验脚本、判据）—— 为了一个库把整条链改异步不划算；
+  // 派生产物里记着 `source_sha256`，判据会拿它跟当前 content.js 的 sha 对，改卡片不重跑就红。
+  const cardsSpec = cardsInput({root, libs});
+  let cards = null;
+  if (cardsSpec) {
+    if (!existsSync(join(root, cardsSpec.path))) {
+      throw new Error(`库 ${cardsSpec.lib_id} 的输入路径不存在：${cardsSpec.path}（见 ${LIBS_PATH}）`);
+    }
+    const raw = readJson(cardsSpec.path);
+    cards = Array.isArray(raw.cards) ? raw.cards : null;
+  }
+  // L5 术语表：同样是"库声明了真源、真源却不在"就抛，不许静默变成空库。
+  const termsSpec = termsInput({root, libs});
+  let terms = null;
+  if (termsSpec) {
+    if (!existsSync(join(root, termsSpec.path))) {
+      throw new Error(`库 ${termsSpec.lib_id} 的输入路径不存在：${termsSpec.path}（见 ${LIBS_PATH}）`);
+    }
+    terms = readJson(termsSpec.path);
+  }
+  // 返回形状只**增加**一个键：`corpus.owned` 一个字都没改（见 PLAYER_INPUTS 的注释）。
+  return {pack, ledger, owned, rulesets, typeChart, terms, cards,
+          cardsArtifact: cardsSpec ? readJson(cardsSpec.path) : null,
+          cardsPath: cardsSpec?.path ?? null};
 }
 
 // ── 分词与 BM25 ───────────────────────────────────────────────────────────
@@ -389,6 +473,112 @@ function rulesetChunks(data, ledgerById) {
   });
 }
 
+/**
+ * 属性相性表的一条文档（record_kind = `type_chart`，lib = L3）。
+ *
+ * 真源的形状：每个键是**防御方**的一个属性或属性组合（`冰系` / `光系|地系`），
+ * `weak` = 它被哪些属性克制，`resist` = 它抵抗哪些属性，每个元素 `{type, multiplier}`。
+ *
+ * 正文写法有三条硬要求，每一条都对应一个**实测过的检索缺口**，不是为了好看：
+ *   ① 逐字写出「克制 / 抵抗」—— 术语表 terms.json 里没有任何一条定义这两个词，
+ *      探针 P10「冰系被哪些属性克制」当年只能按系别标签召回冰系精灵，就是因为正文里
+ *      只有属性名、没有这两个字；
+ *   ② 倍率写成 `X系 ×N`，N 与 types.json 逐字相同（不四舍五入、不换算）；
+ *   ③ 每一对关系另写成 `攻击方克制/抵抗防御方` 的**同一段中文**（中间不留空格）。
+ *      理由：这张表是**防御向**索引，而「火系克什么」问的是**进攻向** ——
+ *      防御向的键（冰系）不会出现在这种问句的别名里，只能靠正文里的
+ *      「火系克制冰系」这一串 bigram（火系 / 系克 / 克制 / 制冰 / 冰系）命中。
+ *
+ * ⚠️ 正文**刻意不写「倍率」这个词**：M07「属性倍率一共有哪几档」的答案是台账条目
+ * EV-TYPE-MULTIPLIER。这 120 条文档每条都短、词又集中，一旦「倍率」进入正文，
+ * ① 全库「倍率」的 idf 会被这 120 条拉低、② 某条短正文会顶掉那条台账 ——
+ * 那正是「新文档抢旧查询的 top-1」。数值本身用 `×N` 逐字给全，信息一点没少。
+ *
+ * 【2026-09-25 人类裁决：双属性按两系相乘】原话「属性双属性叠加：快照 3×（现用）
+ * vs 两个社区源 4×，差 41 格。**使用社区源**」。所以双属性条目的正文数值
+ * **不能**再照抄 `types.json` 那一行的封顶值（×3），必须写成**两条单属性相乘**
+ * 的结果（×4）—— 台账 EV-TYPE-MULTIPLIER（RECORDED_IN_GAME）与
+ * `roco/src/roco_env/data.py::TypeChart.multiplier` 同一口径。
+ * **旧口径留痕**：本条原文写「倍率写成 `X系 ×N`，N 与 types.json 逐字相同」；
+ * 那句话对**单属性**仍然成立（18/18 逐字不变），对双属性已被裁决取代。
+ * 单属性的行为一个字都没动：它继续逐字照抄快照那一行。
+ */
+function typeChartBody(entry, singleRows = null) {
+  const key = String(entry.key ?? '');
+  const parts = key.split('|').filter(Boolean);
+  // 双属性：值 = 两条单属性行的倍率相乘（缺单属性行时按中性 1 参与相乘）。
+  // 归类（weak / resist / 中性）也按**相乘后**的值判定：乘积为 1 的项从两侧都消失。
+  const multiply = parts.length === 2 && singleRows ? parts : null;
+  const valueOf = (attackType, fallback) => {
+    if (!multiply) return fallback;
+    let product = 1;
+    for (const part of multiply) {
+      const row = singleRows.get(part);
+      product *= row ? (row.get(attackType) ?? 1) : 1;
+    }
+    return product;
+  };
+  const candidates = [];
+  const push = (item) => {
+    if (item && item.type && !candidates.some((row) => row.type === item.type)) candidates.push(item);
+  };
+  for (const item of entry.weak ?? []) push(item);
+  for (const item of entry.resist ?? []) push(item);
+  if (multiply) {
+    // 相乘后可能出现快照那一行没列的攻击属性（或反过来），所以候选集要把
+    // 两条单属性行里出现过的攻击属性都算上 —— 否则「正文=真源」只是碰巧成立。
+    for (const part of multiply) {
+      const row = singleRows.get(part);
+      if (!row) continue;
+      for (const attackType of row.keys()) push({type: attackType});
+    }
+  }
+  const weak = candidates
+    .map((item) => ({type: item.type, multiplier: valueOf(item.type, item.multiplier)}))
+    .filter((item) => item.multiplier > 1);
+  const resist = candidates
+    .map((item) => ({type: item.type, multiplier: valueOf(item.type, item.multiplier)}))
+    .filter((item) => item.multiplier < 1);
+  const rows = [
+    RECORD_KIND_LABELS.type_chart,
+    '记录种类 type_chart',
+    `条目 ${entry.key}`,
+    `防御方属性 ${entry.key}`,
+  ];
+  if (multiply) rows.push(`双属性叠加 ${multiply.join('|')} 按两系相乘`);
+  for (const item of weak) rows.push(`${item.type}克制${entry.key} ×${item.multiplier}`);
+  for (const item of resist) rows.push(`${entry.key}抵抗${item.type} ×${item.multiplier}`);
+  rows.push(`克制（weak） ${weak.map((item) => `${item.type} ×${item.multiplier}`).join(' ') || '无'}`);
+  rows.push(`抵抗（resist） ${resist.map((item) => `${item.type} ×${item.multiplier}`).join(' ') || '无'}`);
+  return rows.join(' \n ');
+}
+
+/** 单属性行 → `Map(攻击属性 → 倍率)`。双属性条目正文的**唯一**取数口。 */
+function singleTypeRows(types) {
+  const out = new Map();
+  for (const [key, row] of Object.entries(types ?? {})) {
+    if (String(key).includes('|')) continue;
+    const table = new Map();
+    for (const item of row?.weak ?? []) table.set(item.type, Number(item.multiplier));
+    for (const item of row?.resist ?? []) if (!table.has(item.type)) table.set(item.type, Number(item.multiplier));
+    out.set(key, table);
+  }
+  return out;
+}
+
+/**
+ * 相性表文档的别名：整键给满权重（`冰系` → 3000 分，这是「问哪个属性」的锚点），
+ * 双属性的**组成部分**只给 0.5 —— 否则 16 条含「冰系」的双属性文档会一起去抢
+ * 「冰系被什么克制」的 top-1，而同名的那条单属性文档反而被自己的组合挤下去。
+ */
+function typeChartAliases(key) {
+  const out = [alias(key, 'type_key', 3)];
+  for (const part of String(key).split('|')) {
+    if (part && part !== key) out.push(alias(part, 'type_key_part', 0.5));
+  }
+  return out.filter(Boolean);
+}
+
 function conflictBody(item) {
   const rows = [
     RECORD_KIND_LABELS.conflict_record,
@@ -444,10 +634,33 @@ function ownedBody(instance) {
 }
 
 /**
+ * 给一篇文档打库归属：`lib_id`（哪个 RAG 库）与 `scope`（rule / player）。
+ *
+ * ⚠️ 这是**纯附加**：`DocBuilder.add` 的 fields / tokens 只从 name / title / aliases / body
+ * 派生，多两个字段不参与任何打分，也不动文档顺序。record_kind 没登记过就抛 ——
+ * 一篇无法归库的文档会在「按库检索」时静默消失，那比直接抛错坏得多（fail closed）。
+ */
+export function tagDocument(doc, {kindMap = LIB_BY_RECORD_KIND, scopeByLib = LIB_SCOPE} = {}) {
+  const libId = kindMap[doc.record_kind];
+  if (!libId) {
+    throw new Error(`记录种类 ${doc.record_kind}（文档 ${doc.id}）没有登记在任何 RAG 库里：`
+      + `先把它写进 ${LIBS_PATH} 的某个 lib.record_kinds，不许让它悬空`);
+  }
+  const scope = scopeByLib[libId];
+  if (!scope) throw new Error(`库 ${libId} 没有 scope（见 ${LIBS_PATH}）`);
+  return {...doc, lib_id: libId, scope};
+}
+
+/**
  * 构建全部文档。返回的数组顺序固定（pack → ledger → rulesets → owned），
  * 因此同样的输入两次构建逐字节相同。
+ *
+ * `libs` 可覆盖默认注册表（反证与测试用：给某库一个假路径、或先删掉一个库）。
  */
-export function buildDocuments(corpus, {includeProvenance = true, root = REPO_ROOT} = {}) {
+export function buildDocuments(corpus, {includeProvenance = true, root = REPO_ROOT, libs = null} = {}) {
+  const registry = libs ?? loadLibs({root}).libs;
+  const kindMap = buildLibKindMap(registry);
+  const scopeByLib = Object.fromEntries(registry.map((lib) => [lib.lib_id, lib.scope]));
   const helpers = axisLabelsFromPack(corpus.pack);
   const binding = corpus.pack.ruleset_binding ?? {};
   const builder = new DocBuilder();
@@ -632,7 +845,150 @@ export function buildDocuments(corpus, {includeProvenance = true, root = REPO_RO
       body: ownedBody(instance),
     });
   }
-  return builder.docs;
+  // ── L3 属性相性表（record_kind = type_chart）──
+  //
+  // **追加在最末尾**（owned 之后）：既有文档的相对顺序一个字都不动 ——
+  // pack 实体 → 台账 → 冲突 → 冲突政策 → ruleset 配置 → 玩家个体 → **相性表**。
+  // 顺序不是审美问题：报告与各库文档都按这个顺序产出，「同输入两次构建逐字节相同」
+  // 也依赖它，所以新语料只许**追加**，不许插进既有文档之间。
+  //
+  // 语料来自 corpus.typeChart —— loadCorpus 按 libs.json 的 inputs 读进来的那份；
+  // 路径也从同一份注册表解析，避免「文档说来自 A、断言说来自 B」。
+  const typeChartSpec = typeChartInput({root, libs: registry});
+  if (typeChartSpec && corpus.typeChart?.types) {
+    const sourceId = corpus.typeChart.source_id ?? 'wiki-rocom-snapshot';
+    const levels = [entitySourceLevel(sourceId)];
+    // 单属性行只算一次：双属性条目的正文 = 两条单属性相乘（2026-09-25 人类裁决）。
+    const singleRows = singleTypeRows(corpus.typeChart.types);
+    for (const key of Object.keys(corpus.typeChart.types)) {
+      const entry = corpus.typeChart.types[key] ?? {};
+      builder.add({
+        id: `type_chart::${key}`,
+        record_kind: 'type_chart',
+        group: 'type_chart',
+        name: key,
+        // title 里刻意**不写「属性」（挡 M07 的属性倍率问句）也不写「克制表」**：
+        // 后者是缺席证明（derivation 的 absence 扫描只看 name/title）的比对词。
+        title: `${key} 相性`,
+        source_scopes: ['frozen_l1'],
+        provenance: includeProvenance ? [{
+          source_id: sourceId,
+          source_scope: 'frozen_l1',
+          artifact_path: typeChartSpec.path,
+          artifact_sha256: sha256File(join(root, typeChartSpec.path)),
+          // 真实 JSON pointer：types.json 的 types 是个对象，键就是属性名（含 `光系|地系`）。
+          pointer: `types.${key}`,
+        }] : [],
+        licence_ref: sourceId,
+        evidence_level: strongestLevel(levels),
+        evidence_level_weakest: weakestLevel(levels),
+        confidence_set: [...new Set(levels)].sort((a, b) => evidenceRank(a) - evidenceRank(b)),
+        ruleset_config_id: binding.ruleset_config_id ?? null,
+        unresolved_conflict_id: null,
+        flags: {},
+        aliases: typeChartAliases(key),
+        body: typeChartBody(entry, singleRows),
+      });
+    }
+  }
+  // ── L5 术语表（record_kind = term_entry）──
+  //
+  // **追加在最末尾**（相性表之后）：既有文档的相对顺序一个字都不动（同输入两次构建逐字节相同）。
+  // 为什么要有这一库（2026-09-25 第 46 轮）：人类在 c21/c22/c23 批注里要求「预制相关规则知识库进 RAG」，
+  // 而冻结语料的 54 条术语（1015 应对 / 1020 先手 / 3019 选择…）此前**一篇都检索不到** ——
+  // 规则类问句只能靠模型记忆，正是那几条批注要修的东西。术语是**一手来源**（游戏内文本），
+  // 所以只写 note 与 desc 原文，不加任何解释。
+  const termsSpec = termsInput({root, libs: registry});
+  // ⚠ 冻结语料里 `terms` 是**对象**（`{"1001": {term_id, note, desc}, …}`），不是数组 ——
+  // 第一版按数组写，实测 L5 文档数 = 0（而且是"静默 0"：库声明了却一篇都没有，靠 `rag-libs` 的
+  // fail-closed 才会响）。这里两种形状都收。
+  const termRows = Array.isArray(corpus.terms?.terms)
+    ? corpus.terms.terms
+    : Object.values(corpus.terms?.terms ?? {});
+  if (termsSpec && termRows.length) {
+    const sourceId = corpus.terms.source_id ?? 'frozen-terms';
+    const levels = [entitySourceLevel(sourceId)];
+    for (const term of termRows) {
+      const termId = String(term.term_id ?? '');
+      if (!termId) continue;
+      const note = String(term.note ?? '');
+      builder.add({
+        id: `term::${termId}`,
+        record_kind: 'term_entry',
+        group: 'term',
+        name: note || termId,
+        title: `${note || termId}（术语 ${termId}）`,
+        source_scopes: ['frozen_l1'],
+        provenance: includeProvenance ? [{
+          source_id: sourceId,
+          source_scope: 'frozen_l1',
+          artifact_path: termsSpec.path,
+          artifact_sha256: sha256File(join(root, termsSpec.path)),
+          pointer: `terms.${termId}`,
+        }] : [],
+        licence_ref: sourceId,
+        evidence_level: strongestLevel(levels),
+        evidence_level_weakest: weakestLevel(levels),
+        confidence_set: [...new Set(levels)].sort((a, b) => evidenceRank(a) - evidenceRank(b)),
+        ruleset_config_id: binding.ruleset_config_id ?? null,
+        unresolved_conflict_id: null,
+        flags: {},
+        // 别名只放**术语自己的名字**（`alias()` 的形状，`{text, kind, weight}`）：
+        // 检索「应对是什么」要靠它命中，不许猜同义词。
+        // ⚠ 第一版写成 `[note]`（字符串数组），实测 `searchIndex` 直接抛
+        // `Cannot read properties of undefined (reading 'length')` —— 索引要的是别名**条目**。
+        aliases: note ? [alias(note, 'term_name', 3)] : [],
+        body: `${note}：${String(term.desc ?? '')}`,
+      });
+    }
+  }
+  // ── L4 战术卡库（record_kind = tactic_card）──
+  //
+  // **追加在最末尾**（术语表之后）。语料来自派生产物 `data/roco/derived/tactic-cards.json`
+  // （由 `scripts/roco/build-tactic-cards.mjs` 从 `src/game/content.js` 生成）。
+  // 文档 id **直接沿用卡片 id**（`tactic:*` / `rule:skill:*`）—— 教练引用卡片时用的就是这套 id，
+  // 两处同源才能在回执里对上。
+  const cardsSpec = cardsInput({root, libs: registry});
+  if (cardsSpec && Array.isArray(corpus.cards)) {
+    const artifact = corpus.cardsArtifact ?? {};
+    const sourceId = 'repo-cards';
+    const levels = [entitySourceLevel(sourceId)];
+    corpus.cards.forEach((card, position) => {
+      const cardId = String(card.id ?? '');
+      if (!cardId) return;
+      builder.add({
+        id: cardId,
+        record_kind: 'tactic_card',
+        group: 'tactic_card',
+        name: String(card.title ?? cardId),
+        title: `${String(card.title ?? cardId)}（战术卡 ${cardId}）`,
+        source_scopes: ['frozen_l1'],
+        provenance: includeProvenance ? [{
+          source_id: sourceId,
+          source_scope: 'frozen_l1',
+          artifact_path: cardsSpec.path,
+          artifact_sha256: sha256File(join(root, cardsSpec.path)),
+          pointer: `cards[${position}]`,
+        }] : [],
+        licence_ref: sourceId,
+        evidence_level: strongestLevel(levels),
+        evidence_level_weakest: weakestLevel(levels),
+        confidence_set: [...new Set(levels)].sort((a, b) => evidenceRank(a) - evidenceRank(b)),
+        ruleset_config_id: binding.ruleset_config_id ?? null,
+        unresolved_conflict_id: null,
+        flags: {},
+        // 关键词当别名（卡片自己声明的检索词，不是我们猜的同义词）。
+        aliases: String(card.keywords ?? '').split(/\s+/).filter(Boolean)
+          .map((word) => alias(word, 'card_keyword', 2)),
+        body: [RECORD_KIND_LABELS.tactic_card ?? '战术卡', card.title, card.principle,
+               card.counterexample, `关键词 ${card.keywords ?? ''}`, `规则版本 ${card.rules_version ?? ''}`,
+               `出处 ${(card.authority ?? []).join('、')}`].filter(Boolean).join(' \n '),
+      });
+    });
+    void artifact;
+  }
+  // 一处收口打标（T1）：每篇文档带 lib_id 与 scope。只加字段、不改分数、不改顺序。
+  return builder.docs.map((doc) => tagDocument(doc, {kindMap, scopeByLib}));
 }
 
 let SHA_CACHE = new Map();
@@ -643,13 +999,13 @@ export function sha256File(path) {
   return digest;
 }
 
-/** 索引对象：文档 + 三个字段的 BM25 统计 + 冲突表。测试可整体替换。 */
-export function createRagIndex(corpus, options = {}) {
-  const documents = buildDocuments(corpus, {root: options.root ?? REPO_ROOT, ...options});
+/** 由一组文档造出索引对象（统计量**只**由这组文档算出）。 */
+function indexFromDocuments(documents, {libIds = null} = {}) {
   const byId = new Map(documents.map((doc) => [doc.id, doc]));
   return {
     documents,
     byId,
+    lib_ids: libIds ?? [...new Set(documents.map((doc) => doc.lib_id))].sort(),
     stats: {
       name: buildFieldStats(documents, 'name'),
       alias: buildFieldStats(documents, 'alias'),
@@ -658,6 +1014,66 @@ export function createRagIndex(corpus, options = {}) {
     unresolved: new Map(documents.filter((d) => d.unresolved_conflict_id).map((d) => [d.id, d.unresolved_conflict_id])),
     ruleset_config_ids: [...new Set(documents.map((d) => d.ruleset_config_id).filter(Boolean))].sort(),
   };
+}
+
+/**
+ * 索引对象：文档 + 三个字段的 BM25 统计 + 冲突表。测试可整体替换。
+ *
+ * **每库一个索引实例**（`lib` / `lib_ids` 选项）：统计量（idf / 平均长度）只由该库的
+ * 文档算出。这不是优化，是判据能成立的前提 —— 共用全局索引时，
+ * 「删掉某库 ⇒ 其它库结果逐字节不变」根本不成立（idf 会跟着变）。
+ *
+ * 不传 `lib` 时得到的是**全库联合视图**（与分库前逐字节相同）：
+ * eval-rag-retrieval.mjs 的 `conflict_policy::pack` 硬编码、基线B 遍历 `index.documents`、
+ * grounded 按 id 查都依赖它。
+ */
+export function createRagIndex(corpus, options = {}) {
+  const root = options.root ?? REPO_ROOT;
+  const registry = options.libs ?? loadLibs({root}).libs;
+  const documents = buildDocuments(corpus, {root, ...options});
+  const wanted = normalizeLibIds(options.lib ?? options.lib_ids ?? null);
+  if (!wanted) return indexFromDocuments(documents);
+  for (const libId of wanted) assertLib(libId, {root, libs: registry});
+  const selected = documents.filter((doc) => wanted.includes(doc.lib_id));
+  for (const libId of wanted) {
+    assertLib(libId, {root, libs: registry, documents: selected.filter((doc) => doc.lib_id === libId)});
+  }
+  return indexFromDocuments(selected, {libIds: wanted.slice().sort()});
+}
+
+/** `lib` / `lib_ids` 选项归一：字符串、数组、null 都收。空数组视同「不筛」。 */
+function normalizeLibIds(value) {
+  if (value === null || value === undefined) return null;
+  const ids = Array.isArray(value) ? value : [value];
+  if (!ids.length) return null;
+  for (const id of ids) if (typeof id !== 'string' || !id.trim()) throw new Error(`lib 筛选值必须是 lib_id 字符串：${String(id)}`);
+  return [...new Set(ids)];
+}
+
+/**
+ * 一次把**每个库**建成独立索引，另加一份全库联合视图。
+ * `pending` 的库没有 inputs，建不出索引，也不假装能建 —— 登记在 `pending` 里。
+ *
+ * 返回值：`{root, libs, joint, byLib: Map<lib_id, index>, pending: [{lib_id, reason}]}`。
+ * 「删掉一个库」= 用 `libs` 覆盖注册表后重新建（tests/roco-rag-libs.test.js 的反证就是这么做的）。
+ */
+export function createRagIndexSet(corpus, options = {}) {
+  const root = options.root ?? REPO_ROOT;
+  const registry = options.libs ?? loadLibs({root}).libs;
+  const documents = buildDocuments(corpus, {root, ...options});
+  const byLib = new Map();
+  const pending = [];
+  for (const spec of registry) {
+    assertLib(spec, {root});
+    const docs = documents.filter((doc) => doc.lib_id === spec.lib_id);
+    if (spec.status === 'pending') {
+      pending.push({lib_id: spec.lib_id, reason: 'status=pending（尚无 inputs，本轮不建索引）'});
+      continue;
+    }
+    assertLib(spec, {root, documents: docs});
+    byLib.set(spec.lib_id, indexFromDocuments(docs, {libIds: [spec.lib_id]}));
+  }
+  return {root, libs: registry, joint: indexFromDocuments(documents), byLib, pending};
 }
 
 // ── 查询意图：结构化过滤词 ────────────────────────────────────────────────
@@ -768,7 +1184,22 @@ function aliasMatches(normalizedQuery, entry) {
  *   requireRulesetConfigId 版本要求
  *   vector       可选向量接口 {embed, docs}；本轮不实现，传了才走余弦加成
  *   floor        覆盖相关性门槛（标定与反证用；正常检索不要传）
+ *   libs         只要这些 lib_id 的文档（分库 debug：`libs:['L1']`）
+ *   scope        只要这些 scope（'rule' / 'player' / 数组）；传了就**覆盖**下面的默认
+ *   includePlayer 规则检索**默认排除** scope==='player'（玩家个体不是规则语料）。
+ *                 要读玩家数据必须显式给 includePlayer:true 或 scope:'player'。
  */
+//: 「定义型」问句：问的是**术语本身是什么意思**。术语库（L5）对这类问句是**正解**。
+const DEFINITION_ASK = /定义|术语|什么意思|是什么意思|指的是|怎么解释/;
+
+//: 「要打法/建议」的问句：战术卡库（L4）只在这类问句里当候选。
+//:
+//: 实测（2026-09-25 第 47 轮，把 L4 接进联合索引的当天）：93 张卡片**关键词极密**，
+//: 于是它把台账/配置挤掉了整整一档 —— Recall@1 **1.000 → 0.794**、等级匹配 **1.000 → 0.824**，
+//: 而且 C01–C05 五条"必须弃答"的问句全部变成命中卡片（它们是**事实/证据**问句，卡片答不了）。
+//: 这不是"卡片没用"，而是**问句类型不对**：卡片回答"该怎么打 / 该不该"，不回答"是哪一条 / 测过吗"。
+const GUIDANCE_ASK = /该不该|要不要|怎么打|怎么用|怎么办|咋办|如何应对|怎么应对|思路|打法|建议|技巧|为什么|为啥|值得吗|划算吗/;
+
 export function searchIndex(index, query, options = {}) {
   const {
     limit = 10,
@@ -776,11 +1207,53 @@ export function searchIndex(index, query, options = {}) {
     requireRulesetConfigId = null,
     vector = null,
     floor = null,
+    libs = null,
+    scope = null,
+    includePlayer = false,
   } = options;
   const terms = tokenize(query);
   const intent = detectFilters(query);
   const asksEvidence = EVIDENCE_ASK.test(String(query));
   const normalizedQuery = String(query).toLowerCase();
+
+  // ── 候选集：分库 + scope。默认排除玩家个体（memory / RAG 分离）──
+  const libFilter = normalizeLibIds(libs);
+  if (libFilter && Array.isArray(index.lib_ids)) {
+    // lib_id 打错一个字母就返回空，与「这个库真的没有」长得一模一样 —— 直接抛。
+    for (const libId of libFilter) {
+      if (!index.lib_ids.includes(libId)) {
+        throw new Error(`索引里没有库 ${libId}（这个索引装了 ${JSON.stringify(index.lib_ids)}）：`
+          + 'lib 筛选值写错会静默返回空结果，所以这里直接抛');
+      }
+    }
+  }
+  const scopeFilter = scope === null || scope === undefined ? null : new Set(Array.isArray(scope) ? scope : [scope]);
+  // ── 术语库**只回答"这个词是什么意思"**（2026-09-25 第 46 轮实测）──
+  //
+  // L5 术语表上线后，held-out 里两条被它顶掉（都是**话题相关但答不了那一问**）：
+  //   · C02「换入一只已经离场过的精灵时，入场能量按多少算，**实机测过吗**」→ 命中 `term::3009`（离场语义，3059 分），
+  //     于是从"弃答 + 登记例外"变成有答案 —— 而术语是定义、不带任何测量，弃答判据正是为这种情形存在的；
+  //   · M07「属性倍率一共有哪几档」→ 命中 `term::3014`（**属性增减**，不是倍率档位），把真正该出的记录级文档挤到后面。
+  // 两处的共同点是：问句只是**话题上**碰到了那个词，问的并不是它的定义。
+  // 所以口径收紧成一条：**术语文档只在定义型问句里当候选**（`DEFINITION_ASK`）。
+  // 修的是检索而不是判据 —— 那两条判据（弃答 / 等级）一个字都没动。
+  const termsAllowed = DEFINITION_ASK.test(String(query));
+  // 同理：战术卡只在"要打法/建议"的问句里当候选（同一天的实测见 `GUIDANCE_ASK` 上方）。
+  const cardsAllowed = GUIDANCE_ASK.test(String(query));
+  const candidates = index.documents.filter((doc) => {
+    if (libFilter && !libFilter.includes(doc.lib_id)) return false;
+    if (!termsAllowed && doc.record_kind === 'term_entry') return false;
+    if (!cardsAllowed && doc.record_kind === 'tactic_card') return false;
+    if (scopeFilter) return scopeFilter.has(doc.scope);
+    return includePlayer === true || doc.scope !== 'player';
+  });
+  // 「查询点名的记录种类只存在于被排除的 scope 里」——这时过滤结果必然为空，
+  // 而下面 :906 的静默回落会拿一条**无关的规则文档**顶上（旧行为）。
+  // 这是「玩家数据被排除」这件事被伪装成「规则语料里没有」，必须显式说出来。
+  const playerKinds = new Set(index.documents.filter((doc) => doc.scope === 'player').map((doc) => doc.record_kind));
+  const excludedKinds = intent.kinds.filter((kind) => playerKinds.has(kind)
+    && !candidates.some((doc) => doc.record_kind === kind));
+  const scopeExcluded = excludedKinds.length > 0 && excludedKinds.length === intent.kinds.length;
 
   const scoreFor = (doc) => {
     const nameScore = bm25FieldScore(doc, 'name', terms, index.stats.name);
@@ -827,11 +1300,13 @@ export function searchIndex(index, query, options = {}) {
 
   const hasFilter = intent.kinds.length > 0 || intent.scopes.length > 0
     || intent.prefer_default !== null || intent.config_level;
-  const unfilteredRows = run(index.documents);
-  const filteredRows = hasFilter ? run(index.documents.filter(passFilters)) : unfilteredRows;
+  const unfilteredRows = run(candidates);
+  const filteredRows = hasFilter ? run(candidates.filter(passFilters)) : unfilteredRows;
   let rows = filteredRows;
   let filterFallback = false;
-  if (hasFilter) {
+  // scopeExcluded 时**连退让都不做**：那不是「过滤条件把答案滤掉了」，
+  // 而是「这个 scope 我不读」。退让会把 filter_fallback 记成 true，把性质说错。
+  if (hasFilter && !scopeExcluded) {
     const filteredBest = filteredRows[0]?.relevance ?? 0;
     const unfilteredBest = unfilteredRows[0]?.relevance ?? 0;
     // is_default 是语料里的**权威属性**；强意图（台账/配置）也把答案空间钉死了。
@@ -898,6 +1373,9 @@ export function searchIndex(index, query, options = {}) {
     ruleset_config_id: row.doc.ruleset_config_id,
     has_provenance: row.doc.provenance.length > 0,
     matched_aliases: row.matched,
+    // T1：每条结果都能追到它属于哪个库、哪个 scope（debug 的最小信息量）。
+    lib_id: row.doc.lib_id,
+    scope: row.doc.scope,
   }));
 
   const base = {
@@ -920,6 +1398,26 @@ export function searchIndex(index, query, options = {}) {
   };
 
   // ── 弃答判定（保守方向优先） ──
+  //
+  // 第一条就是「被排除的 scope」，而且必须在**任何回落之前**判：旧行为里过滤结果为空会
+  // 静默退回全库，于是一个问「我的个体」的问题会拿到一条无关的规则文档当答案 ——
+  // 那不是降级，那是把「我不读玩家数据」伪装成「规则是这么说的」。
+  if (scopeExcluded) {
+    const excludedScopes = [...new Set(index.documents
+      .filter((doc) => excludedKinds.includes(doc.record_kind)).map((doc) => doc.scope))].sort();
+    return {
+      ...base,
+      abstained: true,
+      reason_code: 'SCOPE_EXCLUDED',
+      scope_excluded: true,
+      excluded_scopes: excludedScopes,
+      excluded_record_kinds: excludedKinds,
+      candidates: candidates.length,
+      results: [],
+      reason: `${ABSTAIN_REASONS.SCOPE_EXCLUDED}：${excludedKinds.join('、')} 只存在于 scope=${excludedScopes.join('/')} 的库里，`
+        + '规则检索路径默认不读它（要读必须显式走玩家通道 includePlayer / scope:"player"）',
+    };
+  }
   if (!top) {
     return {...base, abstained: true, reason_code: 'NO_MATCH', reason: ABSTAIN_REASONS.NO_MATCH, results: []};
   }

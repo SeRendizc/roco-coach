@@ -24,9 +24,10 @@ import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {
-  AUDIT_RULES, CONFIDENCE_LEVELS, DIMENSIONS, FROZEN_PATHS, RC302_REPORT_PATH, SEVERITIES,
+  AUDIT_RULES, CONFIDENCE_LEVELS, CONFIDENCE_RANK, DIMENSIONS, FROZEN_PATHS, RC302_REPORT_PATH, SEVERITIES,
   SAMPLE_SHAPES, auditGapDiagnosis, buildGapDistribution, buildGapIndex, buildRc302Report,
   costSatisfiability, diagnoseTeamGaps, formatGapProblem, ledgerQuantities, loadTeamGapsInputs,
+  respondSeparationHolds,
 } from '../src/coach/team-gaps.js';
 import {
   STANDARD_PVP_MODE, STANDARD_PVP_TEAM_SIZE, formatProblem, loadRecommendationInputs,
@@ -81,6 +82,14 @@ const gapIndexById = (diagnosis, id) => diagnosis.gaps.findIndex((g) => g.id ===
 // ─────────────────────────────────────────────────────────────────────────
 // ①～⑧ 必红反证
 // ─────────────────────────────────────────────────────────────────────────
+
+/** 实例条数从产物现读（2026-09-24 起是「一人一只」= 48）：判据不许再写死 80。 */
+const OWNED_INSTANCE_COUNT = (() => {
+  try {
+    const doc = JSON.parse(readFileSync(new URL('../data/roco/owned/owned-pets.json', import.meta.url), 'utf8'));
+    return doc.instances.length;
+  } catch { return null; }
+})();
 
 test('RC-302 判据①：gap 抹掉 machine_evidence 必须判红（没有证据的结论不许出现）', () => {
   const diagnosis = baselineDiagnosis();
@@ -298,7 +307,7 @@ test('RC-302 判据⑨：七个维度都有可复算判据，真实输出全部�
   assert.ok(AUDIT_RULES.every((rule) => rule.code && rule.direction));
 });
 
-test('RC-302 判据⑩：80 个实例上的分布可复跑（实测值）', () => {
+test('RC-302 判据⑩：全量实例上的分布可复跑（实测值；条数从 owned-pets.json 读，不写死）', () => {
   const distribution = buildGapDistribution(inputs);
   raw('⑩ 分布（每维度的关键实测值）', {
     instances: distribution.instances,
@@ -320,8 +329,10 @@ test('RC-302 判据⑩：80 个实例上的分布可复跑（实测值）', () =
     synergy: {weakness_total: distribution.synergy.weakness_total},
     cost: distribution.cost,
   });
-  assert.equal(distribution.instances, 80);
-  assert.equal(distribution.speed.instances_with_validated_spe, 80);
+  // 2026-09-24：不再写死 80 —— 产物现在是「一人一只」（人类要求删掉重复个体），
+  // 条数从 owned-pets.json 现读，判据只要求「分布覆盖了全部实例」。
+  assert.equal(distribution.instances, OWNED_INSTANCE_COUNT);
+  assert.equal(distribution.speed.instances_with_validated_spe, OWNED_INSTANCE_COUNT);
   assert.equal(distribution.speed.validated_species, 48);
   assert.equal(distribution.speed.knowledge_only_species, 622);
   assert.equal(distribution.coverage.attack_types.length, 18);
@@ -329,10 +340,42 @@ test('RC-302 判据⑩：80 个实例上的分布可复跑（实测值）', () =
   assert.ok(distribution.energy.moves_without_static_power > 0);
   assert.ok(distribution.pivot.learnset_species_with_tool > 0
     && distribution.pivot.learnset_species_with_tool < distribution.pivot.learnset_species_total);
-  assert.equal(distribution.cost.candidate_universe_instances, 80);
+  assert.equal(distribution.cost.candidate_universe_instances, OWNED_INSTANCE_COUNT);
   assert.equal(distribution.cost.distinct_species, 48);
   // 分布必须可复跑
   assert.equal(JSON.stringify(buildGapDistribution(inputs)), JSON.stringify(distribution));
+});
+
+// 2026-09-25：④ 的分离证据在 owned 改成**引擎 loadout** 之后失效（`instances_without_any_respond_in_build`
+// 恒为 0 ⇒ 判据永远红）。换成 learnset / build 两侧的可复算对照（`respondSeparationHolds`）之后，
+// 这里补上**必红反证**：同一条判据喂三种合成输入（build 侧写满 / 写超 / learnset 侧改小）都必须报红。
+test('RC-302 判据⑱（反证）：④ 的分离证据自己有牙 —— build 侧写满、写超、learnset 侧改小都必须红', () => {
+  const respond = buildGapDistribution(inputs).respond;
+  const collapsed = {
+    build_variant_counts: {...respond.learnset_variant_species},
+    learnset_variant_species: {...respond.learnset_variant_species},
+  };
+  const overshoot = {
+    build_variant_counts: {...respond.build_variant_counts, 应对防御: respond.learnset_variant_species['应对防御'] + 1},
+    learnset_variant_species: {...respond.learnset_variant_species},
+  };
+  const shrunken = {
+    build_variant_counts: {...respond.build_variant_counts},
+    learnset_variant_species: {...respond.learnset_variant_species, 应对攻击: 47},
+  };
+  const hits = {
+    real: respondSeparationHolds(respond),
+    collapsed_build_equals_learnset: respondSeparationHolds(collapsed),
+    overshoot_build_gt_learnset: respondSeparationHolds(overshoot),
+    learnset_attack_not_48: respondSeparationHolds(shrunken),
+  };
+  raw('⑱ 分离证据（真实分布必须成立；三条合成输入必须判红）', hits);
+  log(`④ build=${JSON.stringify(respond.build_variant_counts)} / learnset=${JSON.stringify(respond.learnset_variant_species)}；`
+    + `instances_without_any_respond_in_build=${respond.instances_without_any_respond_in_build}（已不作为分离证据）`);
+  assert.equal(hits.real, true, '真实分布上分离证据必须成立（否则是把它改坏了）');
+  assert.equal(hits.collapsed_build_equals_learnset, false, '把 build 侧写满成 learnset 侧（＝「learnset 有」说成「build 有」）必须红');
+  assert.equal(hits.overshoot_build_gt_learnset, false, 'build 侧某一类超过 learnset 侧必须红');
+  assert.equal(hits.learnset_attack_not_48, false, 'learnset 侧「应对攻击」不是 48 必须红');
 });
 
 test('RC-302 判据⑪：RC-301 说「合同合法」而 RC-302 说「不可满足」——两个 RC 的边界', () => {
@@ -390,7 +433,7 @@ test('RC-302 判据⑫：报告与生成逻辑逐字节一致，且 ≥6 个真�
   assert.deepEqual(report.ledger_pattern_problems, []);
   assert.ok(report.does_not_rank_or_recommend.statement.includes('不排序、不推荐'));
   assert.ok(report.does_not_rank_or_recommend.forbidden_in_this_rc.some((line) => /RC-303/.test(line)));
-  assert.equal(report.distribution.instances, 80);
+  assert.equal(report.distribution.instances, OWNED_INSTANCE_COUNT);
   assert.deepEqual(report.severities, [...SEVERITIES]);
   if (fresh !== onDisk) {
     raw('⑫ 报告与生成逻辑不一致', {fresh_bytes: fresh.length, disk_bytes: onDisk.length});
@@ -409,10 +452,13 @@ test('RC-302 判据⑬：总置信取「非 info 缺口里最弱的一条」，�
 
   const six = baselineDiagnosis();
   const ranked = six.gaps.filter((g) => g.severity !== 'info');
-  const weakest = ranked.reduce((worst, g) => {
-    const order = [...CONFIDENCE_LEVELS].reverse();
-    return order.indexOf(g.confidence) > order.indexOf(worst) ? g.confidence : worst;
-  }, ranked[0].confidence);
+  // 2026-09-24：这里原来自己按 `CONFIDENCE_LEVELS.reverse()` 推了一遍「谁更弱」，
+  // 方向搞反了（`CONFIDENCE_LEVELS` 是**强→弱**，reverse 之后 indexOf 越大反而越强）——
+  // 旧的 80 实例基准队里缺口置信度只有一档，所以这个错一直没显形；换成「一人一只」之后
+  // 缺口集合同时出现 COMMUNITY_CURRENT 与 ENGINE_HYPOTHESIS，判据立刻自己揭穿自己。
+  // 现在用实现**导出的同一张** `CONFIDENCE_RANK`（它本身被 ⑭ 与台账六级钉着）。
+  const weakest = ranked.reduce((worst, g) => (
+    CONFIDENCE_RANK[g.confidence] < CONFIDENCE_RANK[worst] ? g.confidence : worst), ranked[0].confidence);
   raw('⑬ 总置信的实际计算', {gap_confidences: [...new Set(ranked.map((g) => g.confidence))], total: six.confidence, recomputed: weakest});
   assert.equal(six.confidence, weakest);
 });
@@ -497,7 +543,12 @@ test('⑰ cost.mana_rule 的魔力数字必须与候选规则配置逐字一致�
   const v3 = (inputs.rulesets ?? []).find((r) => r?.ruleset_config_id === 'mobile_s4_candidate_v3');
   assert.ok(v3, '候选配置 mobile_s4_candidate_v3 必须被 loadTeamGapsInputs 加载进来');
   assert.equal(v3.mana.pool.value, 4, '候选配置的魔力池是 4');
-  assert.equal(v3.mana.pool.confidence, 'CROSS_SOURCE_SUPPORTED', '等级不许在配置里被悄悄升级');
+  // 2026-09-25 改钉：人类实机口径「就是4点…就是生命数，就是4颗心」把这条升到 RECORDED_IN_GAME
+  // （依据是**人类实机口径**，不是官方文案）。旧口径留痕：此前断言 'CROSS_SOURCE_SUPPORTED'。
+  // **判据没有放松**：任何情况下都不许写成 OFFICIAL_CURRENT（本项目没有"官方确认 4 点魔力"的材料）。
+  assert.equal(v3.mana.pool.confidence, 'RECORDED_IN_GAME',
+    '等级必须与台账一致；旧口径 CROSS_SOURCE_SUPPORTED 已被人类实机口径取代');
+  assert.notEqual(v3.mana.pool.confidence, 'OFFICIAL_CURRENT', '不许写成"官方已确认"');
   assert.equal(v3.mana.pool.microcase_id, 'MC-E08', '魔力池的判据仍是未录制的 MC-E08');
 
   const diagnosis = diagnose({selected: ids.slice(0, 3)});

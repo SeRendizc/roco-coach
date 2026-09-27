@@ -1,0 +1,385 @@
+{
+ "generated_at": "2026-09-25T08:02:58.611Z",
+ "origin": "http://127.0.0.1:8765",
+ "model": "deepseek-flash",
+ "cases": 20,
+ "factLocalRate": 1,
+ "factModelCalls": 0,
+ "judgeToolCallRate": 0.9,
+ "judgeGroundedRate": 0.9,
+ "judgeRejectedRate": 0.1,
+ "latencyMs": {
+  "n": 10,
+  "p50": 2295,
+  "p90": 3382,
+  "max": 3382
+ },
+ "promptTokens": 49273,
+ "completionTokens": 1195,
+ "rows": [
+  {
+   "id": "f01",
+   "kind": "fact",
+   "question": "我这几只里谁抗龙系？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [
+    "query_rules",
+    "query_rules"
+   ],
+   "calls": 2,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 9,
+   "usage": null,
+   "text": "你这 48 只里，抗龙系的是 3 只：声波缇塔（机械系）、权杖-V（机械系）、迷迷箱怪（机械系/幻系）。（这次只在你给的这份名单里找；全库抗龙系的一共 38 只，其余不在你的名单里。）要挑一只接着打，我可以查它学得到哪些招（配招可学性也可以逐招核）。"
+  },
+  {
+   "id": "f02",
+   "kind": "fact",
+   "question": "我这份名单最怕什么属性？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 5,
+   "usage": null,
+   "text": "你这份名单里能算的 48 只，最怕的属性是：火系（18 只）、机械系（17 只）、地系（15 只）、武系（14 只）、翼系（14 只）。其中怕火系的包括 铠甲虫（pet_000012）、雪影娃娃（pet_000112）、化蝶（pet_000124）、花魁蜂后（pet_000143）、雪蛮人（pet_000152）、雪巨人（pet_000153）、瑰眼仔（pet_000162）、耳翎瑰魅（pet_000163）、丢丢（pet_000240）、卡卡虫（pet_000243）、蹦蹦种子（pet_000248）、声波缇塔（pet_000328） 等 18 只。（口径：怕 = 该属性打这只的倍率 > 1.0；双属性按两系**相乘**（人类裁决 2026-09-25，台账 EV-TYPE-MULTIPLIER）——与 type_multiplier 用的是同一套乘法。这是**相性计数**，不是胜率也不"
+  },
+  {
+   "id": "f03",
+   "kind": "fact",
+   "question": "我一共有多少只精灵？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [],
+   "calls": 0,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 3,
+   "usage": null,
+   "text": "你名下现在有 48 只伙伴。要看整本图鉴（622 只）可以翻精灵盒子；要挑一只，我可以按属性相性/学习表帮你筛。（来源：精灵盒子（我的）；只读、不猜）"
+  },
+  {
+   "id": "f04",
+   "kind": "fact",
+   "question": "我有哪些伙伴？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [],
+   "calls": 0,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 3,
+   "usage": null,
+   "text": "你名下现在有 48 只伙伴：铠甲虫、音速犬、仪式巨像、雪影娃娃、皇家狮鹫、化蝶、朔夜伊芙、多多、古啦多、花魁蜂后、雪蛮人、雪巨人（还有 36 只没列出来）。要按属性/定位筛，或者看某一只的技能与学习表，直接说名字就行（名单来自精灵盒子「我的」，只读、不猜）。"
+  },
+  {
+   "id": "f05",
+   "kind": "fact",
+   "question": "雨天水系伤害加多少？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 4,
+   "usage": null,
+   "text": "天气只能存在一种，持续 8 回合。雨天：天气为雨天时，双方的水系技能威力+75%；沙暴：天气为沙暴时，双方的地系技能能耗减半；暴风雪：天气为暴风雪时，双方每回合结束获得2层冻结（冰系精灵免疫此效果）；雷鸣：天气为雷鸣时，双方每回合结束获得1层引电（电系精灵免疫此效果）。（来源：规则配置 mobile_s4_candidate_v3（模式 pvp-standard-six-pet 绑定的那份） 的 weather_policy，等级 OFFICIAL_CURRENT，台账 EV-WEATHER-STANDARD-PVP；数值逐字来自配置，不换算）"
+  },
+  {
+   "id": "f06",
+   "kind": "fact",
+   "question": "火系克制什么属性？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 3,
+   "usage": null,
+   "text": "火系克制：冰系 ×2、机械系 ×2、草系 ×2、虫系 ×2。反过来，火系怕：水系 ×2、地系 ×2。（依据：引擎相性表 火系，逐字来自 types.json）"
+  },
+  {
+   "id": "f07",
+   "kind": "fact",
+   "question": "铠甲虫是谁？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [
+    "query_rules",
+    "query_rules"
+   ],
+   "calls": 2,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 4,
+   "usage": null,
+   "text": "铠甲虫：虫系，种族值合计 555（hp 132 / atk 95 / def 128 / spa 43 / spd 82 / spe 75）。特性技能：坚韧铠甲（skill_000057）。学习表 48 条（本系 13 / 血脉 18 / 技能石 17）。你名下有一只：own-0001，95 级，定位 坦克；特性「坚韧铠甲」：每受到1次攻击伤害，己方队伍获得1次随机奉献。。（来源：引擎图鉴 pets.json + skills.json，逐字转录；要它的技能清单或相性，接着问。）"
+  },
+  {
+   "id": "f08",
+   "kind": "fact",
+   "question": "小翼龙带抓挠、震击合法吗？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 4,
+   "usage": null,
+   "text": "小翼龙：抓挠（本系）学得到；震击**学不到**（学习表三列里都没有）。（这套配招不合法；依据：逐招对照 learnsets.json 的 native/blood/stones 三列，精灵 pet_000186。这里只查**可学性**，不评价配招强弱。）"
+  },
+  {
+   "id": "f09",
+   "kind": "fact",
+   "question": "哪些精灵克制龙系？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 2,
+   "usage": null,
+   "text": "**克制龙系**的精灵一共 111 只（这一页列 12 只，要下一批就说\"再列几只\"）：蒲公英娃娃（草系/萌系）、蒲公英（草系/萌系）、灵狐（火系/冰系）、九尾狐（火系/冰系）、尖嘴狐仙（火系/冰系）、治愈兔（火系/萌系）、红丝绒（火系/萌系）、呆小路（草系/萌系）、舞动路路（草系/萌系）、白发路路（草系/萌系）、甜田螺（水系/萌系）、壳乙螺（水系/萌系）。（依据：龙系那一行列出怕它的属性是 冰系、萌系、龙系，逐字来自 types.json；名单与属性逐字来自 pets.json。这是**检索结果**，不是推荐 —— 要挑一只，我可以接着查它的学习表或面板。）"
+  },
+  {
+   "id": "f10",
+   "kind": "fact",
+   "question": "能量上限是几个豆？",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [],
+   "calls": 0,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 2,
+   "usage": null,
+   "text": "能量上限 6 豆，每回合回 1 豆；6 豆才是满豆，5 豆不算满。来源：src/game/engine.js RULES.energy（代码常量，不是模型记忆）"
+  },
+  {
+   "id": "j01",
+   "kind": "judge",
+   "question": "我想练一只抗龙系的，队里那三只机械系选哪只更合适？",
+   "status": 200,
+   "provider": "deepseek",
+   "agentStop": "complete",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 2038,
+   "usage": {
+    "prompt_tokens": 5686,
+    "completion_tokens": 105
+   },
+   "text": "三只抗龙都靠机械系吃到抵抗，方向没问题；但选谁得看你缺什么位。声波缇塔是输出，速度档91-110抢手，身板偏脆；权杖-V和迷迷箱怪是坦克，后者血防更高、还带幻系第二属性。想单纯扛龙压，我更推迷迷箱怪（推断，非实测，依据是种族面板和定位，把握中等）。要继续我就查它们的可学招式再定。"
+  },
+  {
+   "id": "j02",
+   "kind": "judge",
+   "question": "小翼龙的配招怎么选？先说它学得到哪些招。",
+   "status": 200,
+   "provider": "deepseek",
+   "agentStop": "complete",
+   "tools": [
+    "query_rules",
+    "query_rules"
+   ],
+   "calls": 2,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 2496,
+   "usage": {
+    "prompt_tokens": 5447,
+    "completion_tokens": 185
+   },
+   "text": "小翼龙（翼系）学得到13个招：普系抓挠、力量增效；翼系鹰爪、羽化加速、疾风刺、羽刃、俯冲猛击；龙系龙吟、龙炮、龙威、龙爪、龙之利爪、龙息环爆。\n\n配招方向（推断，非实测，把握中）：它只有翼系单属性，怕冰、电。物攻招为主，龙爪120、俯冲猛击140是高威力但能耗高（4、5），龙炮100魔攻走特攻路线意义不大。建议保留1个低耗起手（鹰爪或抓挠）+1个中威力（羽刃）+1个高威力收尾（龙爪/俯冲猛击）+1个功能位（羽化加速或力量增效）。具体四选四看你队伍缺什么。"
+  },
+  {
+   "id": "j03",
+   "kind": "judge",
+   "question": "雨天队该怎么搭？",
+   "status": 200,
+   "provider": "deepseek",
+   "agentStop": "complete",
+   "tools": [
+    "search_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 2229,
+   "usage": {
+    "prompt_tokens": 5159,
+    "completion_tokens": 164
+   },
+   "text": "雨天队先定目标再选人，你队里水系有深蓝鲸、十字蝌蚪、千棘海针，搭配给承伤、输出和收尾。我按职责给三条：\n\n一、稳：深蓝鲸承伤，千棘海针带毒系技能让水技挂中毒，十字蝌蚪做能耗辅助。\n二、快：声波缇塔输出，海豹船长叠应对加威力，圆号鱼铺状态。\n三、覆盖：别让全队都怕同一种节奏，留一只不依赖水的候选。\n\n这是推断（不是实测），依据是组队职责与覆盖换入者两张卡，把握中等。你打谁、要快还是要稳？说清我再帮你筛到具体几只。"
+  },
+  {
+   "id": "j04",
+   "kind": "judge",
+   "question": "我这 48 只里谁最适合当首发？为什么？",
+   "status": 200,
+   "provider": "local-fallback",
+   "agentStop": "policy-fact-then-model",
+   "tools": [],
+   "calls": 0,
+   "grounded": false,
+   "rejected": true,
+   "wallMs": 2867,
+   "usage": {
+    "prompt_tokens": 4573,
+    "completion_tokens": 120
+   },
+   "text": "整队结论要按「3 或 6 只」算，我这边还没拿到你的出场阵容（名单里有 48 只伙伴，但上场的那几只还没定）。队伍没定下来之前，任何\"短板\"都只能是编的。你可以：① 在营地页的伙伴列表里点满 3 或 6 只，再问我一次；② 直接说队里是哪几只（例如「烬尾狐、潮甲龟、林鹿」），我按相性表和面板算整队的弱点与覆盖。"
+  },
+  {
+   "id": "j05",
+   "kind": "judge",
+   "question": "雪影娃娃的配招怎么选？",
+   "status": 200,
+   "provider": "deepseek",
+   "agentStop": "complete",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 1651,
+   "usage": {
+    "prompt_tokens": 6327,
+    "completion_tokens": 117
+   },
+   "text": "雪影娃娃是回复位，特性「捉迷藏」在造成冻结时额外给敌方全技能能耗+1，所以配招优先带能施加冻结的冰系技能，形成能耗压制。从已学技能看，冰系线可选「霜降」「冰点」「冰墙」等，萌系带「甜心续航」补回复。具体冻结由哪个技能触发，回执里没写明，这点是推断（不是实测），把握中等。你先告诉我打算把它放主奶还是控场位，我再帮你定四格。"
+  },
+  {
+   "id": "j06",
+   "kind": "judge",
+   "question": "我这几只里谁抗龙系？这三个里哪个更合适？",
+   "status": 200,
+   "provider": "deepseek",
+   "agentStop": "complete",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 2295,
+   "usage": {
+    "prompt_tokens": 5676,
+    "completion_tokens": 129
+   },
+   "text": "你这 48 只里抗龙系的就 3 只：声波缇塔、权杖-V、迷迷箱怪，都是机械系。\n\n这三位里要挑一个接着打，我倾向迷迷箱怪。它是机械/幻系，面板血防在三个里最高，定位坦克；权杖-V 也是坦克、双防更均衡；声波缇塔是输出、耐久偏低。哪个「更合适」要看对手招式和队伍缺位，这点是推断（不是实测），依据是属性抗性和面板数值，把握中等。要我接着查它们的配招吗？"
+  },
+  {
+   "id": "j07",
+   "kind": "judge",
+   "question": "铠甲虫和声波缇塔哪个更耐打？",
+   "status": 200,
+   "provider": "deepseek",
+   "agentStop": "complete",
+   "tools": [
+    "query_rules",
+    "query_rules"
+   ],
+   "calls": 2,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 1994,
+   "usage": {
+    "prompt_tokens": 4817,
+    "completion_tokens": 83
+   },
+   "text": "铠甲虫更耐打。它是虫系坦克，生命132、防御128，还有“坚韧铠甲”每次挨攻击给队伍攒奉献；声波缇塔是机械系输出，生命92、防御113，定位就不是扛伤害的。不过声波缇塔速度105更快，能先出手，生存靠抢先压制而不是硬吃。这是图鉴数据推断，不是实测。"
+  },
+  {
+   "id": "j08",
+   "kind": "judge",
+   "question": "我要打龙系道馆，这 48 只里该带哪几只？",
+   "status": 200,
+   "provider": "deepseek",
+   "agentStop": "complete",
+   "tools": [
+    "search_rules",
+    "search_rules"
+   ],
+   "calls": 2,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 3382,
+   "usage": {
+    "prompt_tokens": 5410,
+    "completion_tokens": 137
+   },
+   "text": "48只里我没法凭空挑出“哪几只”，需要知道道馆具体是谁、你要速攻还是稳打。先给方向（推断，不是实测，把握中）：\n\n- 龙系道馆优先带克制龙系或抗龙系的，你那批里冰系最多，比如雪蛮人、雪影娃娃、呼呼猪、獠牙猪，还有翼冰的月使鹭纳。\n- 要稳定可以配一只坦克，比如铠甲虫或仪式巨像。\n- 具体三个位置得看馆主阵容和你的技能列表，把道馆名字或目标宠物发我，我按属性相性帮你筛。"
+  },
+  {
+   "id": "j09",
+   "kind": "judge",
+   "question": "学院呱呱的配招怎么选？",
+   "status": 200,
+   "provider": "deepseek",
+   "agentStop": "complete",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 2994,
+   "usage": {
+    "prompt_tokens": 6178,
+    "completion_tokens": 155
+   },
+   "text": "学院呱呱特性「留学生」自带全技能能耗+2，配招时要优先选低能耗、能补它回复定位的招式。\n\n从本能学到的看：防御1费、落星0费45威力、寸拳0费、气波0费40威力、力量增效1费，起手成本都低，适合填前几格。它还能学全部攻击技能石，这是最大的变数——需要看你的队伍缺什么属性补盲，技能石的具体列表这次回执被截断了，我没法逐个报。\n\n推断（不是实测，依据是它的特性和本能低费招式，把握中等）：先塞2~3个0~1费本能技，再按队伍盲点补技能石。"
+  },
+  {
+   "id": "j10",
+   "kind": "judge",
+   "question": "我这份名单的弱点该怎么补？给个方向。",
+   "status": 200,
+   "provider": "local",
+   "agentStop": "policy-fact-local",
+   "tools": [
+    "query_rules"
+   ],
+   "calls": 1,
+   "grounded": true,
+   "rejected": false,
+   "wallMs": 6,
+   "usage": null,
+   "text": "你这份名单里能算的 48 只，最怕的属性是：火系（18 只）、机械系（17 只）、地系（15 只）、武系（14 只）、翼系（14 只）。其中怕火系的包括 铠甲虫（pet_000012）、雪影娃娃（pet_000112）、化蝶（pet_000124）、花魁蜂后（pet_000143）、雪蛮人（pet_000152）、雪巨人（pet_000153）、瑰眼仔（pet_000162）、耳翎瑰魅（pet_000163）、丢丢（pet_000240）、卡卡虫（pet_000243）、蹦蹦种子（pet_000248）、声波缇塔（pet_000328） 等 18 只。（口径：怕 = 该属性打这只的倍率 > 1.0；双属性按两系**相乘**（人类裁决 2026-09-25，台账 EV-TYPE-MULTIPLIER）——与 type_multiplier 用的是同一套乘法。这是**相性计数**，不是胜率也不"
+  }
+ ]
+}

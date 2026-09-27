@@ -1,0 +1,217 @@
+{
+ "topic": "nature",
+ "generated": "2026-09-26",
+ "stat_order": [
+  "hp",
+  "atk",
+  "spa",
+  "def",
+  "spd",
+  "spe"
+ ],
+ "stat_names": {
+  "hp": "生命",
+  "atk": "物攻",
+  "spa": "魔攻",
+  "def": "物防",
+  "spd": "魔防",
+  "spe": "速度"
+ },
+ "modifier": {
+  "up": 0.2,
+  "down": -0.1,
+  "neutral": 1.0,
+  "evidence": "EV-NATURE-BALANCE-PVP（data/roco/evidence/rule-evidence-ledger.json，confidence=OFFICIAL_CURRENT）",
+  "quote": "闪耀大赛（标准 PVP）里性格加成被平衡：长处 +20%、短处 −10%（负面效果无变化）。非 PVP 场景下增益随突破成长（初始 +10%，每突破一次 +2%，满突破 +20%），减益固定 −10%。",
+  "unverified": "非 PVP 那一档的「每突破 +2%」需要每只精灵的突破次数，本仓没有这个数据 ⇒ 本模块只在 PVP 档给 1.2/0.9，非 PVP 档按 unknown 处理（不许拿 PVP 的数顶）。"
+ },
+ "natures": [
+  {
+   "id": 1,
+   "name": "沉默",
+   "up": "hp",
+   "down": "atk"
+  },
+  {
+   "id": 2,
+   "name": "平和",
+   "up": "hp",
+   "down": "spa"
+  },
+  {
+   "id": 3,
+   "name": "忧郁",
+   "up": "hp",
+   "down": "def"
+  },
+  {
+   "id": 4,
+   "name": "粗心",
+   "up": "hp",
+   "down": "spd"
+  },
+  {
+   "id": 5,
+   "name": "踏实",
+   "up": "hp",
+   "down": "spe"
+  },
+  {
+   "id": 6,
+   "name": "逞强",
+   "up": "atk",
+   "down": "hp"
+  },
+  {
+   "id": 7,
+   "name": "固执",
+   "up": "atk",
+   "down": "spa"
+  },
+  {
+   "id": 8,
+   "name": "大胆",
+   "up": "atk",
+   "down": "def"
+  },
+  {
+   "id": 9,
+   "name": "调皮",
+   "up": "atk",
+   "down": "spd"
+  },
+  {
+   "id": 10,
+   "name": "勇敢",
+   "up": "atk",
+   "down": "spe"
+  },
+  {
+   "id": 11,
+   "name": "理性",
+   "up": "spa",
+   "down": "hp"
+  },
+  {
+   "id": 12,
+   "name": "聪明",
+   "up": "spa",
+   "down": "atk"
+  },
+  {
+   "id": 13,
+   "name": "专注",
+   "up": "spa",
+   "down": "def"
+  },
+  {
+   "id": 14,
+   "name": "偏执",
+   "up": "spa",
+   "down": "spd"
+  },
+  {
+   "id": 15,
+   "name": "冷静",
+   "up": "spa",
+   "down": "spe"
+  },
+  {
+   "id": 16,
+   "name": "坦率",
+   "up": "def",
+   "down": "hp"
+  },
+  {
+   "id": 17,
+   "name": "稳重",
+   "up": "def",
+   "down": "atk"
+  },
+  {
+   "id": 18,
+   "name": "天真",
+   "up": "def",
+   "down": "spa"
+  },
+  {
+   "id": 19,
+   "name": "懒散",
+   "up": "def",
+   "down": "spd"
+  },
+  {
+   "id": 20,
+   "name": "悠闲",
+   "up": "def",
+   "down": "spe"
+  },
+  {
+   "id": 21,
+   "name": "焦虑",
+   "up": "spd",
+   "down": "hp"
+  },
+  {
+   "id": 22,
+   "name": "警惕",
+   "up": "spd",
+   "down": "atk"
+  },
+  {
+   "id": 23,
+   "name": "害羞",
+   "up": "spd",
+   "down": "spa"
+  },
+  {
+   "id": 24,
+   "name": "温顺",
+   "up": "spd",
+   "down": "def"
+  },
+  {
+   "id": 25,
+   "name": "慎重",
+   "up": "spd",
+   "down": "spe"
+  },
+  {
+   "id": 26,
+   "name": "热情",
+   "up": "spe",
+   "down": "hp"
+  },
+  {
+   "id": 27,
+   "name": "胆小",
+   "up": "spe",
+   "down": "atk"
+  },
+  {
+   "id": 28,
+   "name": "开朗",
+   "up": "spe",
+   "down": "spa"
+  },
+  {
+   "id": 29,
+   "name": "急躁",
+   "up": "spe",
+   "down": "def"
+  },
+  {
+   "id": 30,
+   "name": "莽撞",
+   "up": "spe",
+   "down": "spd"
+  }
+ ],
+ "provenance": {
+  "table": "桌面图片「性格修正一览表」（30 条，每条的 ↑/↓ 逐格抄录）",
+  "file": "~/Desktop/微信图片_20260926142521_80_520.jpg",
+  "structure": "6 个上项 × 5 个下项 = 30 组穷举，无重复、无遗漏（判据 tests/roco-talent-nature.test.js 钉住）",
+  "percent": "百分比不在图片里，取自台账 EV-NATURE-BALANCE-PVP（+20% / −10%）",
+  "not_yet": "小黑盒导出的逐只推荐性格尚未拿到 ⇒ 每只精灵的推荐性格一律留空并标注，不许用本表倒推。"
+ }
+}

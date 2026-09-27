@@ -72,8 +72,11 @@ export const SUITES = [
   {id: 'rag-eval', cmd: 'node', args: ['scripts/roco/eval-rag-retrieval.mjs'],
     why: 'RC-204：RAG 检索的 held-out 评测必须在闸门里跑判据（13 组：覆盖/泄漏/fixture 交集/'
       + '推导出处/弃答一致性/冲突弃答/grounded/版本命中/证据等级/三套基线都报/清单指纹/探针登记/无挂钟）。'
-      + '**它报告自己的失败**：探针里有 1 条真的没按预期（「冰系被哪些属性克制」按系别标签召回而不是弃答，'
-      + '语料里确实没有克制表），如实登记、不过闸门 —— 保留失败比做过拟合修复更有价值。'
+      + '**它报告自己的失败**：~~探针里有 1 条真的没按预期（「冰系被哪些属性克制」按系别标签召回而不是弃答，'
+      + '语料里确实没有克制表）~~ —— **2026-09-25 已解决（原话保留）**：语料补上了 L3 属性相性库'
+      + '（`types.json` → `type_chart::*` 120 篇），该探针现在**按预期答得出**（top-1 `type_chart::冰系`），'
+      + '探针失败数 1→0；旧期望（弃答）逐字留在 held-out 的 `expectation_prior`/`why_prior`/`derivation_prior` 里。'
+      + '「保留失败比做过拟合修复更有价值」这条口径不变：这次是**语料变了**，不是把判据改松。'
       + '确定性：两次运行除 metadata.generated_at 外逐字节相同（1.6s）。'
       + '判据的牙在 `unit`（tests/roco-rag-eval.test.js 21 条含 6 条必红反证）。'},
   {id: 'game-data-pack', cmd: 'node', args: ['scripts/roco/verify-game-data-pack.mjs'],
@@ -91,6 +94,13 @@ export const SUITES = [
       + '报告过期 / 报告缺失），所以这条套件同时证明「现在是对的」与「错了会被发现」。'
       + '手工触发的对账会静默过期 —— 这条就是防它（本仓库已经吃过一次：'
       + 'agent-trajectories-verification-model.json 声称 1752/1752、实际 1644/1752）'},
+  {id: 'sprite-identity', cmd: 'node', args: ['scripts/roco/verify-pet-sprites.mjs'],
+    why: '立绘身份：48 槽 × 2 态共 96 张立绘**装的是不是这只精灵的画**。'
+      + '2026-09-23 人类报「立绘很多对不上」，查明素材集从第 25 张起整体错位一格'
+      + '（槽 25–48 全部显示成下一只的立绘，槽 25「蹦蹦种子」根本没有画）——'
+      + '这一层 CSS/JS/规则全都看不见，只有把文件和素材板逐像素对上才发现。'
+      + '这条套件核对审计产物 `data/roco/derived/pet-sprite-audit.json` 里记的 sha256 与仓库现状，'
+      + '并禁止「已知缺图的槽位偷偷补一张来路不明的图」与「两个槽位指向同一张画」'},
   {id: 'state-doc', cmd: 'node', args: ['scripts/roco/verify-state-doc.mjs'],
     why: '状态文档与现实一致：声明的 HEAD 还在历史里、验证产物在、没有引用不存在的路径。'
       + '第 30 轮的教训是文档能漂，而读它的人会在错的前提上继续做事'},
@@ -115,10 +125,44 @@ export const SUITES = [
     why: 'RC-305/RC-503 的产品判据：六槽工作台（候选宇宙 622、评估随阵容变化、满编五轴）'
       + '与**候选规则下的 Coach 取舍**（并列比较的动作逐条都在引擎合法动作表里、'
       + '未来 2—3 回合、如实标置信/未核验、不出现胜率或百分数）。真实键鼠 + 390px 版式'},
+  {id: 'loadout-acceptance', cmd: 'node', args: ['scripts/roco/browser-loadout-acceptance.mjs'],
+    why: '人类从第 2 轮点名的**配招（换招）玩家路径**，以及 2026-09-25 的口径「**每个技能都要对准那个精灵**，'
+      + '拿不准就去查」：六槽工作台里逐槽打开换招，池子必须是**去问引擎**要来的（优先按持有实例 id 解析物种），'
+      + '保存的键用引擎回执的 `pet_id`，并断言**六个槽位各对各的池子**（六只的可学技能数逐只记下、互不串味）；'
+      + '再真鼠标选出四个 → 真实请求体 `loadouts` → **引擎回执里那一只带的就是这四个**。'
+      + '反面同样量：非法配招由引擎拒（这一层不许自己说了算）。自起 app server 与 Chrome'},
+  {id: 'five-minute-chain', cmd: 'node', args: ['scripts/roco/eval-five-minute-chain.mjs'],
+    why: 'RC-801 ②③：**把「盒子 → 个体比较 → 锁定 → 补队 → 战斗 → 主动提示 → 展开取舍 → 局末教学」'
+      + '当成一条链路量一遍**（此前每一段各自有验收，却没有任何一条量过整条路，也没量过耗时）。'
+      + '真键鼠走完全程：总墙钟 ≤ 300s，每一步另有自己的预算（分步预算之和 = 300s，与总预算同源）；'
+      + '「主动提示」必须**自己冒出来**（点击日志里在它出现之前没有点过小芽/提示出口）、带「依据：」、'
+      + '且在开局后 45s 内；「展开取舍」展开后必须有正文且与浮条那行字不同；结算与回合数只读引擎回执；'
+      + '「局末教学」三个字段非空 + 复盘带「依据：」+ 转折回合不超过总回合 + 局末「✦ 小芽」点得开。'
+      + '带 16 条必红反证（超一秒 / 缺步 / 一步吃掉别步预算 / 提示被点出来或迟到或没依据 / '
+      + '展开是空的或与浮条逐字相同 / 结算不是引擎给的 / 教学字段空或转折回合越界 / 计时器是死的 / 页面报错），'
+      + '外加「判据对已知全绿的合成基线必须全绿」的自检。默认自起**离线**服务（这一条链路上没有联网）'},
   {id: 'roco-ux-acceptance', cmd: 'node', args: ['scripts/roco/browser-roco-ux-acceptance.mjs'],
     why: '用户 P0 的第 8 条：**页面看不到或点不动的能力不得仅凭单元测试标记完成**。'
       + '这一条用真实键鼠走一遍翻页 / 筛选 / 选宠 / 行动坞 / 小芽 / 场上事实（印记·能量上限·防御冷却），'
       + '并把 DOM 与引擎的公开视图逐字对齐；每条判据都配一条**必红反证**（反证没命中也算失败）'},
+  {id: 'battle-feedback', cmd: 'node', args: ['scripts/roco/browser-battle-feedback-acceptance.mjs'],
+    why: '人类 2026-09-24 点名的两件事：**伤害数字要看得见**（不是只有动效）与**出手/受击要有先后**'
+      + '（「洛手攻击/动作都有先后，你不要同时做」）。这一条从**页面外面**量，不看客户端自述的任何时间字段：'
+      + '页面内挂 `MutationObserver` 记 `performance.now()` 时间线（`.b3-attack`/`data-b3-variant=action`/'
+      + '动作立绘 src → `.b3-hit` → `.b3-float` 的加入与移除），再逐帧对浮字中心做 '
+      + '`document.elementFromPoint()` —— 被立绘压住时它命中的是 `img.b3-sprite`（这就是人类报的「只有动效没有数字」'
+      + '的真根因），只抬 `.b3-fx` 的 z-index 还不够，`pointer-events:none` 会让 hit-test 跳过浮字（复刻页三档实测）。'
+      + '带 13 条必红反证（同时播 / 顺序反了 / 被压住 / 没有数字 / 残留 / 看不清 / 命中 spritebox / 没有出手线索 / 层叠复刻'
+      + ' / **写死样例数字必须红（R11，2026-09-25 决策 4）** / **框底写死硬横线必须红（R12，决策 1）** 等；'
+      + '2026-09-25 起判据 8 条：J7 背包屏数字可追溯 + J8 立绘框底边接缝 ≤6/≤3 两条像素阈值）'
+      + '与一份合成健康基线（必须判空数组）；**量不到不算量到**（rect 为 0 或不在视口一律红）。自起 app server 与 Chrome'},
+  {id: 'coverage-axes', cmd: 'node', args: ['scripts/roco/verify-coverage-axes.mjs', '--selftest'],
+    why: 'RC-403 的**三套支持口径不许混**（数据侧 `effect_support` / 引擎侧特性实现状态 / 实机核验），'
+      + '外加一条**抓"账本落后于引擎"**的判据：`data/roco/engine-trait-status.json` 必须覆盖 `traits.py` 登记的'
+      + '每一条特性、且它自己那三个档位的计数必须与 `traits.implementation_summary()` 现算一致。'
+      + '2026-09-25 实测：`traits.py` 已 17 条（`渴求` FULL、`贪得无厌` PARTIAL），账本却停在 15 条，'
+      + '**没有任何一条进闸门的判据会发现**（这个核对脚本此前只在手工跑），三份文档还引着更旧的 `FULL 6 / PARTIAL 2`。'
+      + '现在连 `--selftest`（6 条构造必红输入）一起进闸门；判据本身 16 项。'},
   // ⚠ 元套件必须**最后**跑：它自检的是别的套件产出的报告，排前面会读到上一轮的旧报告。
     {id: 'retained-assets', cmd: 'node', args: ['scripts/roco/revalidate-retained-assets.mjs', '--check', '--selftest'],
     why: 'v3 红线：**保留资产不许静默退化**（Agent/RAG/Memory/三角色/game adapter/mock host/'

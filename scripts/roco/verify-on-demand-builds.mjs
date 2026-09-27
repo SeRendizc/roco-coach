@@ -15,6 +15,9 @@ import {checkOnDemandBuilds, selftest, sha256} from './on-demand-builds-lib.mjs'
 const ROOT = dirname(fileURLToPath(import.meta.url)).replace(/\/scripts\/roco$/, '');
 const CATALOG = 'data/roco/normalized/roco-world-s4-2026-09-10/full-catalog.json';
 const SKILLS = 'data/roco/normalized/roco-world-s4-2026-09-10/skills.json';
+// 2026-09-25：产物新鲜度也要比 —— 产物的 `derived_from.frozen_learnsets.sha256` 记的是这一份
+// （`owned-pets.json` 整文件）。原来这里不传 frozen ⇒ 「产物过期」这条判据**从没被跑过**（静默过期）。
+const OWNED = 'data/roco/owned/owned-pets.json';
 const TARGET = 'data/roco/derived/on-demand-builds.json';
 
 const json = (rel) => {
@@ -25,13 +28,15 @@ const json = (rel) => {
 export function checkRepo({file} = {}) {
   const catalog = json(CATALOG);
   const skills = json(SKILLS);
+  const owned = json(OWNED);
   const target = file ? resolve(file) : join(ROOT, TARGET);
   if (!existsSync(target)) {
     return {ok: false, issues: [{rule: 'artifact_missing', species_id: '-', detail: `产物不存在：${file ?? TARGET}`}]};
   }
   const doc = JSON.parse(readFileSync(target, 'utf8'));
   const report = checkOnDemandBuilds(doc, {
-    catalog: catalog.json, skills: skills.json, hashes: {catalog: catalog.hash, skills: skills.hash},
+    catalog: catalog.json, skills: skills.json,
+    hashes: {catalog: catalog.hash, skills: skills.hash, frozen: owned.hash},
   });
   return {...report, path: file ?? TARGET};
 }

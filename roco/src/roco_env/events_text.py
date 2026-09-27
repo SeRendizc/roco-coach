@@ -69,6 +69,10 @@ _ITEM = {
 _CANCEL_REASON = {
     "fainted": "已经倒下",
 }
+#: PVP 魔法的 id → 中文名。读不到就写「PVP 魔法」（不编一个名字）。
+_MAGIC = {
+    "wish_power_up": "愿力强化",
+}
 
 
 def _side(value: Any) -> str:
@@ -133,7 +137,10 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
     if kind == "damage":
         amount = _num(detail.get("damage"))
         who = f"{side}的" if side else ""
-        parts = [f"{who}{skill_name()}命中"]
+        # 2026-09-24（824 条技能名全量扫描发现）：技能名直接接动词时会被读成叠词 ——
+        # 实测「奔波命」「蒸汽革命」渲染成「我方的奔波命命中，…」。技能名一律加「」
+        # 括起来（与本文件 magic 分支的写法一致），这类叠词在结构上就不可能再出现。
+        parts = [f"{who}「{skill_name()}」命中"]
         if amount is not None:
             parts.append(f"，造成约 {amount} 点伤害")
         # 伤害公式未核验时必须标出来：这是估值，不是实测值
@@ -166,8 +173,12 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
         # 回能时序是 MC-007 未解项（`env.py` 里登记了 assumption），所以要标出来。
         tail = "（回能时序未核验，按出手时立即回能处理）" if detail.get("assumption") else ""
         if amount:
-            return f"{side}用{skill_name()}回收了 {amount} 点能量{tail}。"
-        return f"{side}用{skill_name()}回收能量，但已达上限{tail}。"
+            # 同上：技能名加「」。这一支更彻底 —— 技能「回收」原来的渲染是
+            # 「我方用回收回收了 1 点能量」，两个「回收」挨着读起来像结巴；
+            # 动词换成「获得」之后连字符都不再重复（`self_energy` 的语义本来就是
+            # 「自己回复/获得N能量」，见 parse.py 的 `_SELF_ENERGY`）。
+            return f"{side}用「{skill_name()}」获得 {amount} 点能量{tail}。"
+        return f"{side}用「{skill_name()}」回能，但已达上限{tail}。"
 
     # ── RC-106 补的三类：六宠标准 PVP 局里真的会出现，但一直没有句子 ──────────
     #
@@ -259,6 +270,27 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
             return f"{side}使用了{item}，清除了身上的异常。"
         return f"{side}使用了{item}。"
 
+    if kind == "magic":
+        # 2026-09-23：PVP 魔法（愿力强化）。两种模式：转换第一个技能 / 解除还原。
+        # 文案只说**己方**看得到的事（人类口径：对手看不见你用了这件道具；
+        # 而这条事件本来就只进玩家自己的战报）。
+        magic_name = _MAGIC.get(str(detail.get("magic")), "PVP 魔法")
+        # 精灵名来自 detail（引擎给的），没有就退回「场上精灵」——**不**把内部 id 印给玩家。
+        who = detail.get("pet_name") or "场上精灵"
+        if detail.get("mode") == "restore":
+            # ⚠ 2026-09-24（真页面抓到的文案缺陷）：`restore` 有**两个**来源，不能一律说成
+            # 「用愿力强化解除…（进入冷却）」——
+            #   · `reason == "consumed"`：这一手把愿力冲击**打了出去**，第一个技能自动还回去。
+            #     玩家根本没点愿力强化、也没进冷却（次数在换的时候已经扣过）；
+            #   · 其余（手动解除，`reason == "manual"` 或没有 reason）：才是「再用一次愿力强化解除」。
+            if str(detail.get("reason") or "") == "consumed":
+                return f"{who}的愿力冲击已打出，第一个技能自动还原。"
+            return f"{side}用{magic_name}解除了{who}的技能转换，第一个技能还原（不消耗次数，进入冷却）。"
+        skill_name = detail.get("skill_name") or None
+        if skill_name:
+            return f"{side}用{magic_name}把{who}的第一个技能换成了「{skill_name}」。"
+        return f"{side}用了一次{magic_name}。"
+
     if kind == "switch":
         slot = detail.get("to_slot")
         target = f"第 {int(slot) + 1} 位" if isinstance(slot, int) else "另一只"
@@ -270,11 +302,22 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
         return f"{side}补上了{target}精灵。"
 
     if kind == "defense":
-        reduction = _num(detail.get("reduction"))
-        hand = "并作出应对" if detail.get("respond") else ""
-        if reduction:
-            return f"{side}用{skill_name()}防御，减伤约 {reduction}{hand}。"
-        return f"{side}用{skill_name()}进入防御{hand}。"
+        # 2026-09-24（真页面战报抓到两处）：这一句原来写成
+        #     f"{side}用{skill_name()}防御，减伤约 {reduction}{hand}。"
+        # 两个毛病：
+        #   ① 技能名后面**硬写**「防御」二字 —— 技能本身叫「防御」时读成「用防御防御」；
+        #   ② 把**减伤比例**（0.7）直接印出来，而引擎自己的 `state.log` 与页面盾浮字
+        #      都是 70% —— 同一个数三处口径不一致，玩家看到的那一处是错的。
+        # 现在统一到百分比，且技能名后面不再接「防御」二字。
+        reduction = detail.get("reduction")
+        pct = None
+        if isinstance(reduction, (int, float)) and not isinstance(reduction, bool):
+            pct = f"{float(reduction) * 100:.0f}%"
+        hand = "，并作出应对" if detail.get("respond") else ""
+        if pct is not None:
+            # 「约」字保留：减伤来自未核验的公式，不写成一个确定的事实。
+            return f"{side}使用{skill_name()}，本回合减伤约 {pct}{hand}。"
+        return f"{side}使用{skill_name()}，转入防御{hand}。"
 
     if kind == "buff_self":
         delta = _num(detail.get("delta_pct"))
@@ -293,6 +336,17 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
         name = _STATUS.get(str(detail.get("status")), str(detail.get("status") or "异常状态"))
         layers = _num(detail.get("layers"))
         return f"{side}陷入{name}" + (f"（{layers} 层）。" if layers else "。")
+
+    if kind == "lifesteal":
+        amount = _num(detail.get("healed"))
+        pct = _num(detail.get("percent"))
+        tail = "（已满血，回复溢出）" if detail.get("overhealed") else ""
+        return f"{side}吸血回复了 {amount} 点生命（{pct}%）{tail}。"
+
+    if kind == "overheal_to_stat":
+        stat = _stat(detail.get("stat"))
+        gain = _num(detail.get("gain_pct"))
+        return f"{side}把过量回复转化成了{stat} +{gain}%。"
 
     if kind == "status_applied":
         return f"{side}用{skill_name()}施加了效果。"
@@ -336,6 +390,61 @@ def event_text(event: Dict[str, Any], rs: Any = None) -> str:
         what = detail.get("what") or detail.get("reason") or "一条未核验的机制"
         return f"这里有一条未核验的机制「{what}」，引擎按 fail closed 没有结算它。"
 
+    # ── 天气（2026-09-25 裁决 B：天气进标准 PVP）──────────────────────────────
+    # 引擎从 `env.set_weather` / `_end_turn_weather` 产出这 5 个 kind。它们的模板一度缺席：
+    # 因为**规范配招里没有任何一只是造天气的**，真对局根本跑不出天气，`test_event_text`
+    # 的「真对局收 kind」那条判据也就照不到它们。主线程用 `loadouts` 给圆号鱼显式换上
+    # 「落雨」之后，才在真服务里打出 `weather_set` / `weather_tick`（记载见 §C6.176）。
+    # 玩家面前不能出现「本页还没有它的中文说法」，所以逐条给句子并进 KNOWN_EVENT_KINDS。
+    if kind == "weather_set":
+        name = str(detail.get("weather") or "")
+        turns = _num(detail.get("turns_left"))
+        who = _side(detail.get("side"))
+        replaced = detail.get("replaced")
+        body = f"{who}把天气改成了{name}" if name else "天气发生了变化"
+        note = []
+        if turns:
+            note.append(f"持续 {turns} 回合")
+        if replaced and replaced != name:
+            note.append(f"{replaced}结束")
+        if note:
+            body += f"（{'，'.join(note)}）"
+        return body + "。"
+
+    if kind == "weather_tick":
+        name = str(detail.get("weather") or "")
+        turns = _num(detail.get("turns_left"))
+        if not name:
+            return "天气的剩余回合数在走。"
+        # 引擎给的是**减 1 之后**的剩余回合数：0 表示这一回合末就到点（随后会有 weather_end），
+        # 所以 0 不能念成「还剩 0 回合」。
+        if turns and turns != "0":
+            return f"{name}还剩 {turns} 回合。"
+        return f"{name}到点了。" if turns == "0" else f"{name}这一回合结束。"
+
+    if kind == "weather_end":
+        name = str(detail.get("weather") or "")
+        return f"{name}结束了。" if name else "天气结束了。"
+
+    if kind == "weather_status":
+        name = str(detail.get("weather") or "")
+        status = _STATUS.get(str(detail.get("status")), str(detail.get("status") or "异常状态"))
+        layers = _num(detail.get("layers"))
+        after = _num(detail.get("layers_after"))
+        who = _side(detail.get("side"))
+        if not layers:
+            return f"{who}因为{name}获得了{status}。" if name else f"{who}获得了{status}。"
+        tail = f"（共 {after} 层）" if after else ""
+        return f"{who}因为{name}获得 {layers} 层{status}{tail}。"
+
+    if kind == "weather_immune":
+        name = str(detail.get("weather") or "")
+        status = _STATUS.get(str(detail.get("status")), str(detail.get("status") or "异常状态"))
+        element = str(detail.get("immune_element") or "")
+        who = _side(detail.get("side"))
+        why = f"{element}系" if element else "该属性"
+        return f"{who}是{why}，免疫{name}的{status}。"
+
     # 未知 kind **不静默**：交给测试去红，运行时给一句诚实的兜底
     return f"发生了一件事（引擎事件 {kind or '未知'}，本页还没有它的中文说法）。"
 
@@ -352,10 +461,19 @@ KNOWN_EVENT_KINDS = frozenset({
     "energy_gain", "effects_registered_unsupported",
     # 效果层/特性层直接塞进事件列表的那一类（扁平形状，没有 `detail`）
     "trait",
+    # RC-401 批四：吸血 / 过量回复转属性（`env._settle_sustain`）。
+    "lifesteal", "overheal_to_stat",
     # RC-106 补：`env.py` 在 RC-105 就产出了这三个 kind（聚能 / 力竭扣魔力 / 投降），
     # 但模板一直缺席 —— 六宠标准 PVP 局跑起来时它们会以「本页还没有它的中文说法」
     # 出现在玩家面前。补模板的同时把这三个名字登记进来，测试因此才咬得住。
     "charge", "mana_loss", "surrender",
     # C1（第 139 轮）位置子系统：号位条件 + 传动。
     "slot_condition_applied", "position_shift",
+    # 2026-09-23：PVP 魔法（愿力强化）转换/解除第一个技能
+    # （台账 EV-PVP-WISH-POWER-UP；`env._use_magic`）。
+    "magic",
+    # 2026-09-25 裁决 B：天气进标准 PVP（`env.set_weather` / `_end_turn_weather`）。
+    # 这五个 kind 曾经「引擎会发、模板缺席」，而且**判据照不到**（真对局跑不出天气，
+    # 因为规范配招里没有造天气技能）——是主线程用 loadouts 显式换招才打出来的。
+    "weather_set", "weather_tick", "weather_end", "weather_status", "weather_immune",
 })

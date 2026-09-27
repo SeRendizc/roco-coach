@@ -22,7 +22,7 @@ import {fileURLToPath} from 'node:url';
 
 import {RocoClient, RULESET_ID} from '../../src/coach/roco-client.js';
 import {configureRocoTools, resetRocoTools, executeTool} from '../../src/coach/toolbox.js';
-import {checkTask, receiptDigest, FORMAT, canonical, CHECKABLE, worldsFor} from './agent-trajectories.mjs';
+import {checkTask, receiptDigest, receiptSummary, FORMAT, canonical, CHECKABLE, worldsFor} from './agent-trajectories.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -35,7 +35,7 @@ const PYTHON_BIN = process.env.ROCO_PYTHON || 'python3';
 const BUILDER_WORLDS_PER_TASK = Number(process.env.ROCO_TRAJ_WORLDS || 3);
 
 function args(argv) {
-  const out = {write: true, quiet: false, selftest: false, limit: 0, trajectories: null, out: null};
+  const out = {write: true, quiet: false, selftest: false, limit: 0, trajectories: null, out: null, fix: false};
   for (let index = 0; index < argv.length; index += 1) {
     if (argv[index] === '--check') out.write = false;
     else if (argv[index] === '--quiet') out.quiet = true;
@@ -44,6 +44,9 @@ function args(argv) {
     // 模型臂那一份走同一套检查，只是换输入与输出路径（第 41 轮加的）。
     else if (argv[index] === '--trajectories') out.trajectories = String(argv[++index]);
     else if (argv[index] === '--out') out.out = String(argv[++index]);
+    // 引擎的**弃答文案**变了（规则裁决 ⇒ 理由重写）时，记录里的回执摘要会整体过期。
+    // `--fix` 把这些摘要按**现在的回执**重钉一遍，但只允许同一类回执（见 fixReceipts）。
+    else if (argv[index] === '--fix') out.fix = true;
   }
   return out;
 }
@@ -112,7 +115,7 @@ export function structuralCheck(row, {taskById}) {
  * 不能靠「反正也是 ok」蒙过去。工具调用本身还要再过一次参数校验，
  * 因为参数校验规则也可能被改动——记录里合法不代表现在还合法。
  */
-export async function replayRow(row, {client, worldStates, pythonOk}) {
+export async function replayRow(row, {client, worldStates, pythonOk, collect = null}) {
   const problems = [];
   const worldId = row.input?.world?.id;
   const stateVersion = row.input?.world?.state_version;
@@ -131,11 +134,57 @@ export async function replayRow(row, {client, worldStates, pythonOk}) {
       continue;
     }
     const now = receiptDigest(result);
+    // `--fix` 用：把这一条**新鲜回执**交出去（只在显式要求时收集，默认行为一个字节不变）。
+    if (collect) collect.push({tool: call.tool, args: call.args, result, digest: now});
     if (now !== call.receipt?.digest) {
       problems.push(`回放 ${call.tool} 的回执与记录不一致（记录 ${String(call.receipt?.digest).slice(0, 12)}，现在 ${now.slice(0, 12)}）`);
     }
   }
   return {problems, skipped: null};
+}
+
+/**
+ * 把记录里的**回执摘要**按现在的引擎重钉一遍（`--fix`）。
+ *
+ * 什么时候该用它：引擎的**同一类回执换了文案**。实例（2026-09-25）：人类裁决「双属性按两系相乘」
+ * 之后，「快照没有这个组合」的弃答理由从「两条单属性相乘是**未核验假设**」改成
+ * 「该组合不可查（fail closed）」⇒ 全量回放时摘要对不上。那是**记录过期**，不是行为回归。
+ *
+ * 安全边界（必须守住）：只允许 `ok` / `error_type` / `failure_class` 三项与记录**逐字相同**。
+ * 一旦某个回执从「弃答」变成「给出结果」（或反过来），或者换了错误类型，那是**行为变了**，
+ * 必须人来判——`--fix` 直接拒绝，并且**一个字节都不写**。
+ * 记录里的 `reply` 是当时模型说的话，不跟着改：它引用的是**当时**的引擎文案，
+ * 这一点在写回时打印出来，别让人以为回复也一起重钉了。
+ */
+export async function fixReceipts(rows, {client, pythonOk}) {
+  const changed = [];
+  const blocked = [];
+  for (const row of rows) {
+    const fresh = [];
+    const replay = await replayRow(row, {client, worldStates: null, pythonOk, collect: fresh});
+    if (replay.skipped) return {skipped: replay.skipped, changed, blocked};
+    for (const [index, call] of (row.trace || []).entries()) {
+      const now = fresh[index];
+      if (!now) continue;
+      const recorded = call.receipt || {};
+      // 只比**记录里真有**的那几项：`receiptSummary` 只存 ok / error_type（不存 failure_class），
+      // 拿一个记录里根本没有的字段去比，会把「同一类回执换了文案」误判成行为变化。
+      const sameKind = (now.result?.ok ?? null) === (recorded.ok ?? null)
+        && (now.result?.error_type ?? null) === (recorded.error_type ?? null)
+        && (!('failure_class' in recorded) || (now.result?.failure_class ?? null) === (recorded.failure_class ?? null));
+      if (!sameKind) {
+        blocked.push(`${row.traj_id} 的 ${call.tool}：记录 ok=${recorded.ok}/error_type=${recorded.error_type}`
+          + `，现在 ok=${now.result?.ok}/error_type=${now.result?.error_type} —— 这是行为变了，不是文案漂了`);
+        continue;
+      }
+      if (now.digest !== recorded.digest) {
+        changed.push({traj_id: row.traj_id, tool: call.tool,
+          from: String(recorded.digest).slice(0, 12), to: now.digest.slice(0, 12)});
+      }
+      call.receipt = receiptSummary(now.result);
+    }
+  }
+  return {changed, blocked, skipped: null};
 }
 
 /**
@@ -335,6 +384,41 @@ async function main() {
     ? trajectoriesPath.replace(/\.jsonl$/, '.manifest.json')
     : MANIFEST;
   const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : null;
+
+  // `--fix`：只重钉**回执摘要**（同一个 `--trajectories` 输入上原地写回）。
+  // 有行为变化（弃答 ↔ 给出结果、错误类型变了）就**一个字节都不写**。
+  if (options.fix) {
+    const fixPort = await pickFreePort();
+    const fixClient = new RocoClient({port: fixPort, rulesetId: RULESET_ID, timeoutMs: 20000, startTimeoutMs: 30000});
+    const fixPython = RocoClient.probePython(PYTHON_BIN);
+    let fixed;
+    try {
+      if (fixPython.ok) await fixClient.startService();
+      fixed = await fixReceipts(rows, {client: fixClient, pythonOk: fixPython});
+    } finally {
+      if (fixPython.ok) await fixClient.stopService().catch(() => {});
+    }
+    if (fixed.skipped) {
+      process.stderr.write(`[fix] 跳过：${fixed.skipped}\n`);
+      process.exitCode = 2;
+      return;
+    }
+    process.stdout.write(`[fix] 需要重钉的回执摘要 ${fixed.changed.length} 条；拒绝 ${fixed.blocked.length} 条\n`);
+    for (const item of fixed.changed.slice(0, 60)) {
+      process.stdout.write(`[fix]   ${item.traj_id} 的 ${item.tool}：${item.from} → ${item.to}\n`);
+    }
+    if (fixed.changed.length > 60) process.stdout.write(`[fix]   …还有 ${fixed.changed.length - 60} 条\n`);
+    for (const line of fixed.blocked) process.stderr.write(`[fix] 拒绝：${line}\n`);
+    if (fixed.blocked.length) {
+      process.stderr.write('[fix] 存在**行为变化**（不是文案漂移）⇒ 不写文件，请人来判\n');
+      process.exitCode = 1;
+      return;
+    }
+    // 记录里的 `reply` 是当时模型说的话，**不跟着改**（它引用的是当时的引擎文案）。
+    writeFileSync(trajectoriesPath, `${all.map((row) => JSON.stringify(row)).join('\n')}\n`);
+    process.stdout.write(`[fix] 已写回 ${trajectoriesPath}（reply 不动：那是当时的模型输出）\n`);
+    return;
+  }
 
   // ⓪ 生产者一致性（最便宜的一项，最先跑；它红了后面的回放没有意义）
   const producer = producerCheck(header, rows, tasks, {manifest});

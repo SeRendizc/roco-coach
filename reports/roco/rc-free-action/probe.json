@@ -1,0 +1,109 @@
+{
+ "before": {
+  "turn": 1,
+  "version": 0,
+  "tab": "skill",
+  "magic": {
+   "uses_left": 2,
+   "cooldown": 0,
+   "swapped": 0
+  },
+  "firstSkill": null,
+  "clickableSlots": 4,
+  "panelText": "愿力强化\n      2 / 2\n     \n     候选 · 未核验：说明未登记。\n     每局 2 次 · 冷却 3 回合 · 不占行动\n    \n    \n     \n      首领化\n      不可用\n     \n     候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。\n     需要「首领血脉」，本版未做",
+  "countText": "2 / 2",
+  "hints": 0
+ },
+ "tabClick": {
+  "x": 1251,
+  "y": 792,
+  "w": 98,
+  "h": 44
+ },
+ "inBag": {
+  "turn": 1,
+  "version": 0,
+  "tab": "item",
+  "magic": {
+   "uses_left": 2,
+   "cooldown": 0,
+   "swapped": 0
+  },
+  "firstSkill": null,
+  "clickableSlots": 0,
+  "panelText": "愿力强化\n      2 / 2\n     \n     候选 · 未核验：说明未登记。\n     每局 2 次 · 冷却 3 回合 · 不占行动\n    \n    \n     \n      首领化\n      不可用\n     \n     候选机制（未取证）：首领形态 / 血脉觉醒路径，与「首领对决」这一独立 PVP 主题绑定。\n     需要「首领血脉」，本版未做",
+  "countText": "2 / 2",
+  "hints": 0
+ },
+ "cellClick": {
+  "x": 149,
+  "y": 306,
+  "w": 232,
+  "h": 300
+ },
+ "afterFree": {
+  "turn": 1,
+  "version": 1,
+  "tab": "skill",
+  "magic": {
+   "uses_left": 1,
+   "cooldown": 3,
+   "swapped": 1
+  },
+  "firstSkill": null,
+  "clickableSlots": 4,
+  "panelText": "愿力强化\n      1 / 2 · 冷却剩 3 回合（共 3）\n     \n     PVP 魔法（不是普通道具）：对**自己场上那只**使用，**不占行动**（用完这一回合照旧，你还可以照常出一手技能）。\n把它的第一个技能换成「愿力冲击」（属性 = 精灵的愿力属性、能耗 2、威力 80）——换上来的这个是普通技能，用它照常占一手。\n再用一次可解除（不消耗次数、进入 3 回合冷却）。\n     ",
+  "countText": "1 / 2 · 冷却剩 3 回合（共 3）",
+  "hints": 0
+ },
+ "second": {
+  "x": 0,
+  "y": 0,
+  "w": 0,
+  "h": 0
+ },
+ "afterSecond": {
+  "turn": 1,
+  "version": 1,
+  "tab": "skill",
+  "magic": {
+   "uses_left": 1,
+   "cooldown": 3,
+   "swapped": 1
+  },
+  "firstSkill": null,
+  "clickableSlots": 4,
+  "panelText": "愿力强化\n      1 / 2 · 冷却剩 3 回合（共 3）\n     \n     PVP 魔法（不是普通道具）：对**自己场上那只**使用，**不占行动**（用完这一回合照旧，你还可以照常出一手技能）。\n把它的第一个技能换成「愿力冲击」（属性 = 精灵的愿力属性、能耗 2、威力 80）——换上来的这个是普通技能，用它照常占一手。\n再用一次可解除（不消耗次数、进入 3 回合冷却）。\n     ",
+  "countText": "1 / 2 · 冷却剩 3 回合（共 3）",
+  "hints": 0
+ },
+ "skillClick": {
+  "x": 149,
+  "y": 229,
+  "w": 232,
+  "h": 146
+ },
+ "afterSkill": {
+  "turn": 2,
+  "version": 5,
+  "tab": "skill",
+  "magic": {
+   "uses_left": 1,
+   "cooldown": 3,
+   "swapped": 0
+  },
+  "firstSkill": null,
+  "clickableSlots": 4,
+  "panelText": "愿力强化\n      1 / 2 · 冷却剩 3 回合（共 3）\n     \n     PVP 魔法（不是普通道具）：对**自己场上那只**使用，**不占行动**（用完这一回合照旧，你还可以照常出一手技能）。\n把它的第一个技能换成「愿力冲击」（属性 = 精灵的愿力属性、能耗 2、威力 80）——换上来的这个是普通技能，用它照常占一手。\n再用一次可解除（不消耗次数、进入 3 回合冷却）。\n     ",
+  "countText": "1 / 2 · 冷却剩 3 回合（共 3）",
+  "hints": 0
+ },
+ "verdict": {
+  "tabSwitched": true,
+  "turnUnchangedAfterFree": true,
+  "versionAdvanced": true,
+  "stillHasClickableSkill": true,
+  "magicUsed": true,
+  "skillTurnAdvanced": true
+ }
+}

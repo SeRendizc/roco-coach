@@ -15,7 +15,12 @@
 import {checkReceiptConsistency} from '../src/coach/runtime.js';
 
 const tracesOf=row=>Array.isArray(row?.toolTrace)?row.toolTrace:[];
-const receiptFor=(row,tool)=>(tool?tracesOf(row).find(x=>x?.tool===tool):tracesOf(row)[0])||null;
+// ⚠ 2026-09-25（第 26 轮实测）：`toolTrace` 里除了工具回执，还会有一条**答案层改写回执**
+//（`checkGroundedAnswer` 判红之后重写正文，`tool:null`）。它不是"调了一次工具" ——
+// 原来 `tracesOf(row)[0].tool` 会把这条算成第一手（实测 c11 因此被判 `first tool null not in …`，
+// 而它这一轮**一次工具都没调**、金标又允许 0 次）。所以工具口径的地方一律只看**带工具名**的条目。
+const toolReceipts=row=>tracesOf(row).filter(x=>x&&typeof x.tool==='string'&&x.tool);
+const receiptFor=(row,tool)=>(tool?toolReceipts(row).find(x=>x.tool===tool):toolReceipts(row)[0])||null;
 const ids=(list)=>[...new Set((list||[]).map(x=>typeof x==='string'?x:x?.id).filter(Boolean))].sort();
 const sameSet=(a,b)=>a.length===b.length&&a.every((x,i)=>x===b[i]);
 const fail=(id,reasons)=>({id,checked:true,correct:false,reasons});
@@ -24,10 +29,12 @@ const pass=id=>({id,checked:true,correct:true,reasons:[]});
 // ── 1. 工具选择 ─────────────────────────────────────────────────────────────
 export function judgeToolSelection(row){
  if(!row||row.calls===null||row.calls===undefined)return {id:row?.id,checked:false,correct:null,reasons:['no result']};
- const [min]=row.expect?.calls||[0,0],calls=row.calls;
+ const [min]=row.expect?.calls||[0,0];
+ // 调用次数**现数**工具回执（不读 `row.calls`）：那样"答案层改写"这类非工具条目就影响不到判分。
+ const calls=toolReceipts(row).length;
  const expected=row.expect?.tools||[];
  if(calls===0)return min===0?pass(row.id):fail(row.id,['expected a tool call, made none']);
- const first=tracesOf(row)[0]?.tool;
+ const first=toolReceipts(row)[0]?.tool;
  if(!expected.length||expected.includes(first))return pass(row.id);
  return fail(row.id,[`first tool ${first} not in ${expected.join('/')}`]);
 }
@@ -73,6 +80,22 @@ export function judgeArguments(row){
   return missing.length?fail(row.id,[`simulated ${got.join('+')||'(none)'} is missing ${missing.join('+')}`]):pass(row.id);
  }
  if(spec.matchId!==undefined&&args.matchId!==spec.matchId)return fail(row.id,[`matchId=${JSON.stringify(args.matchId)} expected ${spec.matchId}`]);
+ // ── 2026-09-25 新增：「这一问指的是哪一只」───────────────────────────────────
+ // 为什么需要它：全图鉴规模实测发现，模型可能把**屏幕上那只**的 id 拿去回答**另一只**的问题
+ // （`reports/roco/catalog-scale-2026-09-25/REPORT.md`：120/120 都填同一个 id）。
+ // 上面那些 spec 只管回合号/候选/对局，**没有任何一条管「问的是谁」** —— 于是这种错答能一路绿。
+ // 语义：回执必须**指向被问的那个目标** —— `args.pet_id` 落在 `spec.targetIds` 里，
+ // 或者 `args.name` 正好是问题里那个名字。指向别的目标一律判红。
+ if(spec.targetIds||spec.targetName){
+  const target=receiptFor(row,spec.tool||'query_rules');
+  if(!target)return fail(row.id,[`${spec.tool||'query_rules'} was not called, so its target cannot be checked`]);
+  const targs=target.args||{};
+  const byId=targs.pet_id!==undefined&&Array.isArray(spec.targetIds)&&spec.targetIds.includes(targs.pet_id);
+  const byName=spec.targetName!==undefined&&String(targs.name??'')===spec.targetName;
+  if(byId||byName)return pass(row.id);
+  return fail(row.id,[`查的不是被问的那一只：args=${JSON.stringify(targs)}，`
+   +`期望 pet_id ∈ ${JSON.stringify(spec.targetIds||[])}${spec.targetName!==undefined?` 或 name=${JSON.stringify(spec.targetName)}`:''}`]);
+ }
  return pass(row.id);
 }
 

@@ -19,8 +19,8 @@
           "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
         },
         {
-          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
-          "confidence": "COMMUNITY_CURRENT",
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」⇒ **双属性按两系相乘**（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "confidence": "RECORDED_IN_GAME",
           "date": "2026-09-21",
           "ledger_entry": "EV-TYPE-MULTIPLIER",
           "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
@@ -322,8 +322,8 @@
           "ref": "docs/roadmap/handoff-revised-2026-09-21/13-PVP-SIX-PET-LOW-LATENCY-DESIGN.md"
         },
         {
-          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
-          "confidence": "COMMUNITY_CURRENT",
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」⇒ **双属性按两系相乘**（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "confidence": "RECORDED_IN_GAME",
           "date": "2026-09-21",
           "ledger_entry": "EV-TYPE-MULTIPLIER",
           "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
@@ -493,8 +493,8 @@
           "ref": "https://news.17173.com/content/03182026/104940843.shtml"
         },
         {
-          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
-          "confidence": "COMMUNITY_CURRENT",
+          "claim": "台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」⇒ **双属性按两系相乘**（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的 coverage / synergy 判据所依赖的那种倍率。",
+          "confidence": "RECORDED_IN_GAME",
           "date": "2026-09-21",
           "ledger_entry": "EV-TYPE-MULTIPLIER",
           "ref": "https://wiki.biligame.com/nrc/深渊罗隐"
@@ -585,17 +585,17 @@
     {
       "path": "data/roco/evidence/rule-evidence-ledger.json",
       "role": "rule_evidence_ledger",
-      "sha256": "f1a0b073b1e07cf63db9266d9f24ac7d7a16789f1903dff69a5830b6b6678228"
+      "sha256": "267e9b4eeb85342947c7168587650b610c1aa63172a4823772ab8f629bdb0bd8"
     },
     {
       "path": "data/roco/game-data-pack/v2/pack.json",
       "role": "game_data_pack",
-      "sha256": "476ef71f376f7c5f728d2edc0d0ff1be416413dec0832f3bf12ebe4a62d7a5e1"
+      "sha256": "355dc06c73f4838121a95ba4822c8a9793776c0c8e67e84a8614518e21af8c41"
     },
     {
       "path": "data/roco/rulesets/legacy-sim-v1.json",
       "role": "ruleset_config",
-      "sha256": "5359313f0fdad0393759a730ac648c0c39dc1a454fdc68c4ef78308959c1d63f"
+      "sha256": "9f7740dedee8d025c39e65408f1a4291b68d9c5b09e273bf9407a1cecf3d3044"
     },
     {
       "path": "reports/roco/reconciliation/catalog-reconciliation.json",
@@ -611,69 +611,139 @@
   "distribution": [
     {
       "archetype_id": "poison_stack",
+      "basis": {
+        "denominator": 7,
+        "kind": "uniform-over-candidate-universe",
+        "not_measured_note": "这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**",
+        "partition": "meta-prior 登记的 K 个**可复算识别**体系（archetypes[]）",
+        "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+        "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured",
+        "universe": "全图鉴候选宇宙（622 只；可复算：data/roco/game-data-pack/v2/pack.json 的 pet 实体数）",
+        "value_rule": "每个体系 1/K，K = archetypes[].length；改 K 或改等级 ⇒ 数值随之变（四轴必须对分母敏感）"
+      },
+      "confidence": "ENGINE_HYPOTHESIS",
       "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
-      "reason": "体系「毒系消耗」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
-      "source": "unknown",
-      "sources": [],
-      "unit": null,
-      "value": null
+      "notes": "体系「毒系消耗」：占比按**均匀假设**（每个已识别体系等权，1/7）。这不是实测分布（本仓没有任何真实对局数据），也不是「毒系很强」这类结论的依据；它的作用是让「对环境的期望」有一个**可复算、可替换**的分母。替换通道：给出带 url 或仓内文件 + 日期 + 台账等级的来源后，把本条 source 改成 measured。",
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "wing_king_flyer",
+      "basis": {
+        "denominator": 7,
+        "kind": "uniform-over-candidate-universe",
+        "not_measured_note": "这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**",
+        "partition": "meta-prior 登记的 K 个**可复算识别**体系（archetypes[]）",
+        "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+        "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured",
+        "universe": "全图鉴候选宇宙（622 只；可复算：data/roco/game-data-pack/v2/pack.json 的 pet 实体数）",
+        "value_rule": "每个体系 1/K，K = archetypes[].length；改 K 或改等级 ⇒ 数值随之变（四轴必须对分母敏感）"
+      },
+      "confidence": "ENGINE_HYPOTHESIS",
       "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
-      "reason": "体系「翼王飞翼」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
-      "source": "unknown",
-      "sources": [],
-      "unit": null,
-      "value": null
+      "notes": "体系「翼王飞翼」：占比按**均匀假设**（每个已识别体系等权，1/7）。这不是实测分布（本仓没有任何真实对局数据），也不是「毒系很强」这类结论的依据；它的作用是让「对环境的期望」有一个**可复算、可替换**的分母。替换通道：给出带 url 或仓内文件 + 日期 + 台账等级的来源后，把本条 source 改成 measured。",
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "meteor_burst",
+      "basis": {
+        "denominator": 7,
+        "kind": "uniform-over-candidate-universe",
+        "not_measured_note": "这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**",
+        "partition": "meta-prior 登记的 K 个**可复算识别**体系（archetypes[]）",
+        "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+        "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured",
+        "universe": "全图鉴候选宇宙（622 只；可复算：data/roco/game-data-pack/v2/pack.json 的 pet 实体数）",
+        "value_rule": "每个体系 1/K，K = archetypes[].length；改 K 或改等级 ⇒ 数值随之变（四轴必须对分母敏感）"
+      },
+      "confidence": "ENGINE_HYPOTHESIS",
       "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
-      "reason": "体系「陨星爆发」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
-      "source": "unknown",
-      "sources": [],
-      "unit": null,
-      "value": null
+      "notes": "体系「陨星爆发」：占比按**均匀假设**（每个已识别体系等权，1/7）。这不是实测分布（本仓没有任何真实对局数据），也不是「毒系很强」这类结论的依据；它的作用是让「对环境的期望」有一个**可复算、可替换**的分母。替换通道：给出带 url 或仓内文件 + 日期 + 台账等级的来源后，把本条 source 改成 measured。",
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "sugar_morph",
+      "basis": {
+        "denominator": 7,
+        "kind": "uniform-over-candidate-universe",
+        "not_measured_note": "这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**",
+        "partition": "meta-prior 登记的 K 个**可复算识别**体系（archetypes[]）",
+        "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+        "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured",
+        "universe": "全图鉴候选宇宙（622 只；可复算：data/roco/game-data-pack/v2/pack.json 的 pet 实体数）",
+        "value_rule": "每个体系 1/K，K = archetypes[].length；改 K 或改等级 ⇒ 数值随之变（四轴必须对分母敏感）"
+      },
+      "confidence": "ENGINE_HYPOTHESIS",
       "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
-      "reason": "体系「萌化叠层」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
-      "source": "unknown",
-      "sources": [],
-      "unit": null,
-      "value": null
+      "notes": "体系「萌化叠层」：占比按**均匀假设**（每个已识别体系等权，1/7）。这不是实测分布（本仓没有任何真实对局数据），也不是「毒系很强」这类结论的依据；它的作用是让「对环境的期望」有一个**可复算、可替换**的分母。替换通道：给出带 url 或仓内文件 + 日期 + 台账等级的来源后，把本条 source 改成 measured。",
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "ice_control",
+      "basis": {
+        "denominator": 7,
+        "kind": "uniform-over-candidate-universe",
+        "not_measured_note": "这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**",
+        "partition": "meta-prior 登记的 K 个**可复算识别**体系（archetypes[]）",
+        "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+        "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured",
+        "universe": "全图鉴候选宇宙（622 只；可复算：data/roco/game-data-pack/v2/pack.json 的 pet 实体数）",
+        "value_rule": "每个体系 1/K，K = archetypes[].length；改 K 或改等级 ⇒ 数值随之变（四轴必须对分母敏感）"
+      },
+      "confidence": "ENGINE_HYPOTHESIS",
       "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
-      "reason": "体系「冰系控场」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
-      "source": "unknown",
-      "sources": [],
-      "unit": null,
-      "value": null
+      "notes": "体系「冰系控场」：占比按**均匀假设**（每个已识别体系等权，1/7）。这不是实测分布（本仓没有任何真实对局数据），也不是「毒系很强」这类结论的依据；它的作用是让「对环境的期望」有一个**可复算、可替换**的分母。替换通道：给出带 url 或仓内文件 + 日期 + 台账等级的来源后，把本条 source 改成 measured。",
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "sandstorm_weather",
+      "basis": {
+        "denominator": 7,
+        "kind": "uniform-over-candidate-universe",
+        "not_measured_note": "这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**",
+        "partition": "meta-prior 登记的 K 个**可复算识别**体系（archetypes[]）",
+        "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+        "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured",
+        "universe": "全图鉴候选宇宙（622 只；可复算：data/roco/game-data-pack/v2/pack.json 的 pet 实体数）",
+        "value_rule": "每个体系 1/K，K = archetypes[].length；改 K 或改等级 ⇒ 数值随之变（四轴必须对分母敏感）"
+      },
+      "confidence": "ENGINE_HYPOTHESIS",
       "needs_recording": "该体系还缺 3 条实机证据，逐条见 archetypes[].needs_recording",
-      "reason": "体系「沙暴天气」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
-      "source": "unknown",
-      "sources": [],
-      "unit": null,
-      "value": null
+      "notes": "体系「沙暴天气」：占比按**均匀假设**（每个已识别体系等权，1/7）。这不是实测分布（本仓没有任何真实对局数据），也不是「毒系很强」这类结论的依据；它的作用是让「对环境的期望」有一个**可复算、可替换**的分母。替换通道：给出带 url 或仓内文件 + 日期 + 台账等级的来源后，把本条 source 改成 measured。",
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     },
     {
       "archetype_id": "fighting_press",
+      "basis": {
+        "denominator": 7,
+        "kind": "uniform-over-candidate-universe",
+        "not_measured_note": "这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**",
+        "partition": "meta-prior 登记的 K 个**可复算识别**体系（archetypes[]）",
+        "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+        "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured",
+        "universe": "全图鉴候选宇宙（622 只；可复算：data/roco/game-data-pack/v2/pack.json 的 pet 实体数）",
+        "value_rule": "每个体系 1/K，K = archetypes[].length；改 K 或改等级 ⇒ 数值随之变（四轴必须对分母敏感）"
+      },
+      "confidence": "ENGINE_HYPOTHESIS",
       "needs_recording": "该体系还缺 2 条实机证据，逐条见 archetypes[].needs_recording",
-      "reason": "体系「武系压制」：仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：拿一个看起来合理的数字填进去，会让后面所有「对版本环境的期望表现」都建在一个编出来的分母上。即使将来有了真实对局数据，这一条也要给出**逐条可核对的来源**（url 或仓内文件 + 日期 + 等级）才能从 unknown 改成 measured；现在连一次真实匹配的记录都没有。",
-      "source": "unknown",
-      "sources": [],
-      "unit": null,
-      "value": null
+      "notes": "体系「武系压制」：占比按**均匀假设**（每个已识别体系等权，1/7）。这不是实测分布（本仓没有任何真实对局数据），也不是「毒系很强」这类结论的依据；它的作用是让「对环境的期望」有一个**可复算、可替换**的分母。替换通道：给出带 url 或仓内文件 + 日期 + 台账等级的来源后，把本条 source 改成 measured。",
+      "source": "assumption",
+      "unit": "share",
+      "value": 0.142857
     }
   ],
-  "meta_prior_id": "roco-meta-prior/v1#57aa6539dcde39ca",
+  "meta_prior_id": "roco-meta-prior/v1#0f62deba4c3cf4d2",
   "schema": "roco-meta-prior/v1",
   "usage": {
     "consumer": "RC-304（对未知对手的队伍强度口径）。本先验是它的**唯一**版本化环境输入：没有先验就无法把「队伍强不强」写成对环境的期望，只能退化成对单只精灵的描述。",

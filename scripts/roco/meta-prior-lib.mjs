@@ -550,7 +550,14 @@ export function validateMetaPrior(metaPrior, options = {}) {
   const duplicated = archetypeIds.filter((id, index) => archetypeIds.indexOf(id) !== index);
   if (duplicated.length) add('ARCHETYPE_SHAPE', 'archetypes', `archetype_id 重复：${[...new Set(duplicated)].join('/')}`);
 
-  // ⑥ distribution：只有两种合法形态。
+  // ⑥ distribution：三种合法形态（2026-09-25 起加第三档 `assumption`）。
+  //
+  // 为什么需要第三档（人类 2026-09-25 逐字口径：「把它**登记成一条显式假设**并让它成为
+  // meta-prior 的一个**有来源字段**」「**关键：这是声明假设，不是编数据**」）：
+  //   原来只有 `measured`（须逐条 url/文件 + 日期 + 等级）与 `unknown`（value:null + reason），
+  //   于是「均匀对手」这种**可复算的显式假设**根本无处登记 ⇒ RC-304 的四轴永远算不出来。
+  //   第三档把「不知道」换成「声明清楚的可复算启发式」，同时**不动**另外两档的牙：
+  //   `measured` 仍必须逐条来源、`unknown` 仍必须 null + reason；**没有来源的数值一律仍然非法**。
   const distribution = arr(metaPrior.distribution);
   if (!distribution.length) add('DISTRIBUTION', 'distribution', 'distribution 不能为空');
   const distSeen = new Set();
@@ -602,6 +609,41 @@ export function validateMetaPrior(metaPrior, options = {}) {
           'measured 必须写清这个数值本身出自哪里：value_source.availability ∈ {available, not_available}，'
           + 'available 时 ref 必须可核对');
       }
+    } else if (row.source === 'assumption') {
+      // 第三档：**声明的假设**。它必须有数值（否则分母不存在），但**不许**伪装成实测。
+      if (!Number.isFinite(row.value) || row.value < 0 || row.value > 1) {
+        add('DISTRIBUTION', `${at}.value`,
+          `source="assumption" 时 value 必须是 [0,1] 的有限数值（它是占比），实际 ${JSON.stringify(row.value ?? null)}`);
+      }
+      const basis = row.basis;
+      if (!isPlainObject(basis)) {
+        add('DISTRIBUTION', `${at}.basis`,
+          'source="assumption" 必须给 basis：声明这条假设**凭什么**成立、分母是什么、怎么复算（缺了它就是在编数据）');
+      } else {
+        if (typeof basis.kind !== 'string' || basis.kind.trim().length < 3) {
+          add('DISTRIBUTION', `${at}.basis.kind`, `basis.kind 必须非空（如 uniform-over-candidate-universe），实际 ${JSON.stringify(basis.kind ?? null)}`);
+        }
+        if (!Number.isFinite(basis.denominator) || basis.denominator <= 0) {
+          add('DISTRIBUTION', `${at}.basis.denominator`,
+            `basis.denominator 必须是正有限数（分母是这条假设的核心），实际 ${JSON.stringify(basis.denominator ?? null)}`);
+        }
+        if (typeof basis.recomputable_from !== 'string' || basis.recomputable_from.trim().length < 3) {
+          add('DISTRIBUTION', `${at}.basis.recomputable_from`,
+            'basis.recomputable_from 必须写清**谁来复算**（脚本/产物路径），否则这条假设不可复核');
+        }
+      }
+      if (row.confidence !== 'ENGINE_HYPOTHESIS') {
+        add('CONFIDENCE', `${at}.confidence`,
+          `source="assumption" 只许挂 ENGINE_HYPOTHESIS（它是我们为了有界运行选的假设，不是实机事实），实际 ${JSON.stringify(row.confidence ?? null)}`);
+      }
+      if (typeof row.notes !== 'string' || row.notes.trim().length < 12) {
+        add('DISTRIBUTION', `${at}.notes`,
+          'source="assumption" 必须写清 notes：**这不是实测分布**、以及**拿到真数据后怎么替换**（至少 12 个字符）');
+      }
+      if (row.sources !== undefined && row.sources !== null && arr(row.sources).length) {
+        add('DISTRIBUTION', `${at}.sources`,
+          'source="assumption" 不许挂 sources：挂了就看起来像 measured。要升级成实测，请把 source 改成 measured 并逐条给 url/文件 + 日期 + 等级');
+      }
     } else if (row.source === 'unknown') {
       if (row.value !== null) {
         add('DISTRIBUTION', `${at}.value`,
@@ -618,7 +660,7 @@ export function validateMetaPrior(metaPrior, options = {}) {
       }
     } else {
       add('DISTRIBUTION', `${at}.source`,
-        `source 只能是 measured 或 unknown，实际 ${JSON.stringify(row.source ?? null)}`);
+        `source 只能是 measured / assumption 或 unknown，实际 ${JSON.stringify(row.source ?? null)}`);
     }
   });
   for (const id of archetypeIds) {
@@ -626,6 +668,7 @@ export function validateMetaPrior(metaPrior, options = {}) {
   }
   const distSummary = {
     measured: distribution.filter((row) => row?.source === 'measured').length,
+    assumption: distribution.filter((row) => row?.source === 'assumption').length,
     unknown: distribution.filter((row) => row?.source === 'unknown').length,
   };
 
@@ -714,8 +757,8 @@ export function validateMetaPrior(metaPrior, options = {}) {
     },
     {
       code: 'distribution_shape',
-      criteria: 'measured ⇒ 至少一条可核对来源 + 有限数值 + value_source；unknown ⇒ value === null + reason 非空。',
-      actual: `measured ${distSummary.measured} 项 / unknown ${distSummary.unknown} 项（共 ${archetypes.length} 个体系）`,
+      criteria: 'measured ⇒ 至少一条可核对来源 + 有限数值 + value_source；assumption ⇒ 有限数值 + basis{kind,denominator,recomputable_from} + 只许 ENGINE_HYPOTHESIS + notes（声明「不是实测、可替换」）；unknown ⇒ value === null + reason 非空。',
+      actual: `measured ${distSummary.measured} 项 / assumption ${distSummary.assumption} 项 / unknown ${distSummary.unknown} 项（共 ${archetypes.length} 个体系）`,
       ok: problems.every((p) => p.code !== 'DISTRIBUTION'),
     },
     {
@@ -740,7 +783,8 @@ export function validateMetaPrior(metaPrior, options = {}) {
     evidence: evidenceRows.length,
     evidence_confidence: confidenceHistogram,
     distribution: distSummary,
-    distribution_source: distSummary.measured > 0 ? 'measured' : (distSummary.unknown > 0 ? 'unknown' : null),
+    distribution_source: distSummary.measured > 0 ? 'measured' : (distSummary.assumption > 0 ? 'assumption' : (distSummary.unknown > 0 ? 'unknown' : null)),
+    distribution_mix: {measured: distSummary.measured, assumption: distSummary.assumption, unknown: distSummary.unknown},
     seed_species: archetypes.reduce((sum, a) => sum + arr(a?.seed_species).length, 0),
     criteria_used: [...new Set(archetypes.flatMap((a) => arr(a?.feature_axes).map((x) => x?.criterion)).filter(Boolean))].sort(),
     needs_recording: archetypes.reduce((sum, a) => sum + arr(a?.needs_recording).length, 0),
@@ -787,6 +831,23 @@ function weakerOf(levels) {
   const sorted = [...levels].sort((a, b) => CONFIDENCE_LEVELS.indexOf(a) - CONFIDENCE_LEVELS.indexOf(b));
   return sorted[sorted.length - 1] || 'UNKNOWN';
 }
+
+/**
+ * 均匀假设的**唯一**定义处（分母与占比都从这里来，改一处不会两处漂移）。
+ *
+ * `kind` 的读法：候选宇宙 = 全图鉴 622 只（可复算：`data/roco/game-data-pack/v2/pack.json`
+ * 的 pet 实体数）；本先验只登记其中**可复算识别**的 K 个体系，并对这 K 个体系取等权 ——
+ * 所以它是「在已识别体系上均匀」，不是「按精灵数加权」。
+ */
+export const UNIFORM_BASIS = Object.freeze({
+  kind: 'uniform-over-candidate-universe',
+  universe: '全图鉴候选宇宙（622 只；可复算：data/roco/game-data-pack/v2/pack.json 的 pet 实体数）',
+  partition: 'meta-prior 登记的 K 个**可复算识别**体系（archetypes[]）',
+  value_rule: '每个体系 1/K，K = archetypes[].length；改 K 或改等级 ⇒ 数值随之变（四轴必须对分母敏感）',
+  recomputable_from: 'scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）',
+  not_measured_note: '这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**',
+  replace_with: '赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured',
+});
 
 const TOTAL_UNKNOWN_REASON = '仓库里没有任何真实对局数据（录屏 / 匿名对局 / 离线联赛产物都没有），'
   + '所以「各体系在环境里占多少」这个问题现在没有可核对的来源。按契约，unknown + value: null + reason 是**唯一**合法写法：'
@@ -973,9 +1034,19 @@ export const EVIDENCE_REFS = Object.freeze({
     ledger_entry: 'EV-TYPE-MULTIPLIER',
     ref: 'data/roco/evidence/rule-evidence-ledger.json',
     date: '2026-09-21',
-    confidence: 'COMMUNITY_CURRENT',
-    claim: '台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25 四档，'
-      + '不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy 判据所依赖的那种倍率。',
+    // 2026-09-25：EV-TYPE-MULTIPLIER 因人类裁决（双属性改用相乘口径）升 RECORDED_IN_GAME；
+    // 此处的值必须与台账同步（等级只有台账那一份）。
+    // 原文（改钉不删）：confidence: 'COMMUNITY_CURRENT',
+    confidence: 'RECORDED_IN_GAME',
+    // 2026-09-25 同轮更新：**这份 claim 也是手抄的第二份事实**，裁决之后它必须跟着台账走
+    // —— 否则先验会继续对外说「可观察到 ×3、×2、×0.5、×0.25 四档」，与台账/引擎相反。
+    // 原文（改钉不删）：claim: '台账 EV-TYPE-MULTIPLIER（topic type.multiplier）：当前 BWIKI 条目可观察到
+    //   ×3、×2、×0.5、×0.25 四档，不再沿用旧资料「所有双弱 ×4」。这是本先验的 coverage / synergy
+    //   判据所依赖的那种倍率。',
+    claim: '台账 EV-TYPE-MULTIPLIER（topic type.multiplier，RECORDED_IN_GAME）：2026-09-25 人类裁决'
+      + '「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」⇒ **双属性按两系相乘**'
+      + '（双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性仍 ×2 / ×0.5 / ×1）。这是本先验的'
+      + ' coverage / synergy 判据所依赖的那种倍率。',
   }),
   'ledger-EV-ENERGY-MAX': Object.freeze({
     ledger_entry: 'EV-ENERGY-MAX',
@@ -1171,6 +1242,12 @@ export function buildMetaPrior({repo, asOf = '2026-09-21'} = {}) {
     return {path: row.path, sha256: sha256(readFileSync(absolute, 'utf8')), role: row.role};
   });
 
+  const uniformDenominator = archetypes.length;
+  if (!Number.isFinite(uniformDenominator) || uniformDenominator <= 0) {
+    throw new Error('均匀假设的分母不存在（archetypes 为空）—— 不许给一个空分母');
+  }
+  const uniformShare = Number((1 / uniformDenominator).toFixed(6));
+
   const document = {
     schema: META_PRIOR_SCHEMA,
     meta_prior_id: null,
@@ -1203,13 +1280,22 @@ export function buildMetaPrior({repo, asOf = '2026-09-21'} = {}) {
     },
     derived_from: derivedFrom,
     archetypes,
+    // 2026-09-25（人类口径「把它登记成一条显式假设…关键：这是声明假设，不是编数据」）：
+    // 分母从 `unknown` 升级成**可复算的显式假设** —— 均匀分布（每个已识别体系等权）。
+    // 它**不是**天梯实测分布；它存在的唯一理由是让 RC-304 的四轴有一个**可复算、可替换**的分母。
+    // 拿到带来源与日期的真实分布（赛季面板导出 / 匿名对局记录）后，逐条把 source 改成 measured
+    // 并给出 sources + value_source（validator 会强制），四轴自动改用它。
     distribution: archetypes.map((archetype) => ({
       archetype_id: archetype.archetype_id,
-      value: null,
-      unit: null,
-      source: 'unknown',
-      sources: [],
-      reason: `体系「${archetype.label}」：${TOTAL_UNKNOWN_REASON}${PER_ARCHETYPE_UNKNOWN_REASON}`,
+      value: uniformShare,
+      unit: 'share',
+      source: 'assumption',
+      basis: {...UNIFORM_BASIS, denominator: uniformDenominator},
+      confidence: 'ENGINE_HYPOTHESIS',
+      notes: `体系「${archetype.label}」：占比按**均匀假设**（每个已识别体系等权，1/${uniformDenominator}）。`
+        + '这不是实测分布（本仓没有任何真实对局数据），也不是「毒系很强」这类结论的依据；'
+        + '它的作用是让「对环境的期望」有一个**可复算、可替换**的分母。'
+        + '替换通道：给出带 url 或仓内文件 + 日期 + 台账等级的来源后，把本条 source 改成 measured。',
       needs_recording: archetype.needs_recording.length
         ? `该体系还缺 ${archetype.needs_recording.length} 条实机证据，逐条见 archetypes[].needs_recording`
         : '该体系当前没有登记缺什么实机证据（这本身值得复核）',

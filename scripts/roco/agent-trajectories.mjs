@@ -696,6 +696,114 @@ export function armLimit(arm) {
 }
 
 /**
+ * Agent 配置（2026-09-25，人类口径「agent 优先」）——**同一个模型、同一套任务、同一个判定器**，
+ * 只改三件与「agent 到底会不会用工具」直接相关的事。三件都是实测出来的结构性缺口：
+ *
+ *   ① **工具回执真的喂回去**：`runArm`（本文件 :877）早就把 `receipts`（含每条工具的 `result`）
+ *      递给了 planner，而 `localModelPlanner` **完全没用这个入参** —— 它只看自己上一次的决策。
+ *      于是第 2 步永远看不到第 1 步查到了什么：多步管线是通的，模型侧从没用上。
+ *   ② **不塞参数契约**（这一条是**反向**的）：本文件 `buildLocalToolSystem()` 已经量过
+ *      「把契约参数名逐条写进提示」的后果 —— **变差**（0.7847 → 0.7326，`rules_lookup`
+ *      31/72 → 13/72，还多出 27 次「什么都不查」；产物在
+ *      `reports/roco/shadow-replay-local_4b-promptv2.json`）。提示更长、4B 更犹豫。
+ *      所以这一版**保持提示短**，只发工具名，把变量隔离到 ①③ 两件没试过的事上。
+ *   ③ **把「默认是停止」换成有依据的判定**：单步那份系统提示逐字写着
+ *      「**默认是停止。** 只有当答案依赖的某个具体事实不在 receipts 里、也不在常识里时才调工具」。
+ *      `rules_lookup` 12/72、`roster_constraint` 0/24 与云臂 15/49 欠调用都被追到这一句。
+ *      这里改成「问的是具体规则事实就必须查证」，并明确给出**不知道 id 时先按名字查 id** 这一步
+ *      —— 工具箱 `validToolArgs` 支持 `kind=pet` 带 `name`（`src/coach/toolbox.js:374`），
+ *      引擎 `_answer_pet` 也支持按名字查。
+ *
+ * **判定器一个字没改**：仍然要求那次带正确 `pet_id` 的 `query_rules`。
+ * id 必须**查出来**（从 receipts 里抄），不许背下来也不许编 —— 这正是这次要证的 agent 行为。
+ *
+ * ⚠️ **实测结论：这条路对 4B adapter 不成立，别再走一遍**（2026-09-25，产物与复现命令见
+ * `reports/roco/agent-tooluse-2026-09-25/REPORT.md`）。同一任务集/世界/判定器下：
+ *   · 冻结提示 + 单步（改动前的现状）= `rules_lookup` **12/72**、`roster_constraint` 0/24
+ *   · 冻结提示 + **回执/多步**（`local_4b_receipts`，只动 ①）= **10/72**
+ *   · **新判定提示** + 回执/多步（本臂 `local_4b_agent`，①+③）= **2/72**
+ * 三种配置下都有 **56–61/72** 条任务**全程零次工具调用**：模型第 1 步就 `{"stop":true}`，
+ * 多步管线再通也走不到第 2 步。**原因**：adapter 是对着固定那份系统提示 SFT 的，
+ * 改提示＝打出训练分布（同源实测：加参数契约 0.7847 → 0.7326）。
+ * ⇒ 本地臂要补的是**训练数据里「该查就必须查」的样本**，不是提示也不是编排。
+ *
+ * 与 `LOCAL_TOOL_SYSTEM` 的关系：那一份是**已发布数字的一部分**（有 sha256 钉子，逐字不许动），
+ * 所以这里**另起一条**配置，两条各自出数字、可逐条对比，而不是把旧的那条改掉。
+ */
+export const AGENT_TOOL_SYSTEM = [
+  '你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。',
+  '可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、',
+  'compare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、',
+  'read_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。',
+  '需要查证时输出 {"tool":"工具名","args":{...}}；证据已经足够时输出 {"stop":true}。',
+  '**判定规则**：问题问的是具体规则事实（种族值/数值、技能、学习表、属性相性、术语、阵容评估）时，',
+  '必须先查证再回答；不许凭记忆作答，不许编精灵 id、技能 id，也不许编工具名或参数名。',
+  '**不知道精灵 id 时**：先用 {"tool":"query_rules","args":{"kind":"pet","name":"<问题里出现的名字原文>"}} 把 id 查出来，',
+  '再用 receipts 里查到的 pet_id 去查你要的那项事实。查到的 id 与数值一律以 receipts 为准；receipts 里没有的不许写进结论。',
+  '参数里不要放 state_version（运行时会给）。',
+].join('\n');
+
+/**
+ * 用**工具回执**做决策的规划器（`--arm local_4b_agent`）。
+ *
+ * 与 `localModelPlanner` 的三处差别就是上面 ①②③：参数契约进提示、receipts 进提示、
+ * 允许多步（每一步都能看到上一步查到的东西）。防泄漏口径与单步那份**完全一致**：
+ * 只转发 `state_version / locked_pet / team / planner_margin` 四个「局面类」提示，
+ * **不转发** `target_pet_id / target_args` 这类答案 —— 否则量到的就不是 agent 会不会查，
+ * 而是它会不会抄。
+ */
+export function localAgentPlanner(task, hints, {ask, system = AGENT_TOOL_SYSTEM, maxTokens = 160,
+  timeoutMs = 8000, steps = 3} = {}) {
+  if (typeof ask !== 'function') throw new Error('localAgentPlanner 需要注入 ask（没有它就不是模型臂）');
+  let step = 0;
+  const decided = [];
+  return async ({message, screen, hints: live, receipts} = {}) => {
+    step += 1;
+    if (step > steps) return {stop: true};
+    const base = live || hints || {};
+    const observed = (Array.isArray(receipts) ? receipts : []).map((item) => ({
+      tool: item?.tool ?? null,
+      args: item?.args ?? null,
+      ok: item?.result?.ok !== false,
+      // 回执里真正有用的是 result：名字→id 这类**查出来的**东西必须原样带回去
+      result: item?.result?.result ?? item?.result ?? null,
+    }));
+    const prompt = JSON.stringify({
+      message: message ?? task.message,
+      screen: screen === 'battle' ? 'battle' : 'camp',
+      step,
+      steps_left: Math.max(0, steps - step),
+      tools: Object.keys(TOOL_CONTRACTS),
+      hints: {
+        state_version: base.state_version,
+        ...(base.locked_pet ? {locked_pet: base.locked_pet} : {}),
+        ...(base.team ? {team: base.team} : {}),
+        ...(base.planner_margin !== undefined ? {planner_margin: base.planner_margin} : {}),
+      },
+      receipts: observed,
+    });
+    let text = null;
+    try {
+      const reply = await ask({system, prompt, maxTokens, timeoutMs, temperature: 0});
+      text = typeof reply === 'string' ? reply : reply?.text ?? null;
+    } catch (error) {
+      decided.push({raw: null, error: error?.code || 'ask-failed'});
+      return {stop: true};
+    }
+    const parsed = extractFirstJson(text);
+    decided.push({step, raw: String(text ?? '').slice(0, 200), parsed});
+    if (!parsed || typeof parsed !== 'object' || parsed.stop === true) return {stop: true};
+    if (typeof parsed.tool !== 'string') return {stop: true};
+    const args = (parsed.args && typeof parsed.args === 'object' && !Array.isArray(parsed.args))
+      ? parsed.args : {};
+    // `state_version` 由运行时给，不采信模型编的（与单步那份同一条边界）。
+    const withVersion = TOOL_CONTRACTS[parsed.tool]?.arguments?.state_version !== undefined
+      ? {...args, state_version: base.state_version} : args;
+    return {tool: parsed.tool, args: withVersion};
+  };
+}
+
+/**
  * 一次性造好一个 arm 的规划器。
  *
  * 模型臂必须注入 `ask`：**没有注入就抛**，不许安静地退化成一个规则臂——

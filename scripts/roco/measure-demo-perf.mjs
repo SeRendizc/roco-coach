@@ -141,5 +141,5 @@ if (OUT) {
 }
 
 try { chrome.kill('SIGKILL'); } catch {}
-try { rmSync(profile, {recursive: true, force: true}); } catch {}
+try { rmSync(profile, {recursive: true, force: true, maxRetries: 5, retryDelay: 120}); } catch {}
 server.closeAllConnections?.(); server.close();

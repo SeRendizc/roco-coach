@@ -1,0 +1,98 @@
+{
+  "checks": [
+    {
+      "id": "00-候选池就绪",
+      "ok": true,
+      "detail": "工作台 shadow root 里已有 ≥6 条候选"
+    },
+    {
+      "id": "01-六个槽位就位",
+      "ok": true,
+      "detail": "?team=own-0001,own-0002,own-0003,own-0004,own-0005,own-0006 预填后，六个槽位里填上 6 个"
+    },
+    {
+      "id": "02-开局按钮",
+      "ok": true,
+      "detail": "start-standard-pvp → clicked"
+    },
+    {
+      "id": "03-进入对局",
+      "ok": true,
+      "detail": "battle-panel 可见且 view.turn > 0"
+    },
+    {
+      "id": "40-飞行中再发一条不丢字",
+      "ok": true,
+      "detail": "第二次提交后输入框=「第二问：那我该换谁？」· 状态=「上一条还在查，等它出来我马上答这一条（你打的字还在）。」· 按钮禁用=true【审计高 11】"
+    },
+    {
+      "id": "04-对局内回答来自模型",
+      "ok": true,
+      "detail": "source=model"
+    },
+    {
+      "id": "05-玩家看得见依据行",
+      "ok": true,
+      "detail": "回复尾部：选择是换音速犬。这是引擎按公开信息推的，不是实测，把握中等。依据：模拟了后续走向 · 本回合的规划（引擎算的） · 你选的六只 · 你的名单"
+    },
+    {
+      "id": "06-请求体带战况",
+      "ok": true,
+      "detail": "roco_battle={\"turn\":1,\"self\":6,\"phase\":\"battle\",\"sv\":0}"
+    },
+    {
+      "id": "07-请求体带规划",
+      "ok": true,
+      "detail": "roco_plan={\"sv\":0,\"rec\":\"换上第4位\",\"hasPreview\":true}"
+    },
+    {
+      "id": "08-版本对齐",
+      "ok": true,
+      "detail": "battle.sv=0 plan.sv=0"
+    },
+    {
+      "id": "09-回复引用了引擎侧内容",
+      "ok": true,
+      "detail": "引擎推荐=换上第4位；命中片段=[\"第4位\"]；命中=true；正文：对手是恶系的朔夜伊芙，推荐换第4位雪影娃娃，第二选择是换音速犬。这是引擎按公开信息推的，不是实测，把握中等。依据：模拟了后续走向 · 本回合的规划（引擎算的） · 你选的六只 · "
+    },
+    {
+      "id": "10-克制/伤害颜色来自引擎倍率",
+      "ok": true,
+      "detail": "四格：啃咬=up/up(×2) 防御=unknown/none 翅刃=up/up(×2) 风隐=unknown/none；与引擎倍率不一致 0 格"
+    },
+    {
+      "id": "10b-出招之后伤害预览仍在（每回合都取一次，不再是空的）",
+      "ok": true,
+      "detail": "第 2 回合：样本 2 条（其中带倍率 2 条）"
+    },
+    {
+      "id": "10c-双击技能卡只走一个回合（一次行动在飞时忽略第二次点击）",
+      "ok": true,
+      "detail": "回合 2 → 3（涨了 1）"
+    },
+    {
+      "id": "11-补位时自动到更换页，技能/物品灰掉（不留假信号）",
+      "ok": true,
+      "detail": "补位时 tab=switch；技能 {\"disabled\":true,\"mark\":\"yes\"}／物品 {\"disabled\":true,\"mark\":\"yes\"}／更换 {\"disabled\":false,\"mark\":\"no\"}；还原后 tab=switch"
+    },
+    {
+      "id": "12-换宠之后回到技能页",
+      "ok": true,
+      "detail": "换宠前 tab=switch → 换宠后 tab=skill"
+    }
+  ],
+  "bodies": [
+    {
+      "message": "第一问：这回合该怎么打？",
+      "contextKeys": [
+        "mode",
+        "profile",
+        "battle",
+        "roco_battle",
+        "roco_plan"
+      ],
+      "battle": 0,
+      "plan": 0
+    }
+  ]
+}

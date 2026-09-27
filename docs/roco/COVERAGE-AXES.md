@@ -1,4 +1,19 @@
+> **2026-09-25 复核（第 40 轮）**：账本里的档位又改过一次 —— `泛音列`（圆号鱼）从 **FULL 降成 PARTIAL**。
+> 原因是它自己的理由里就写着「当前只挂印记、**不结算能耗**」+「『持续 3 回合』与回合边界的对齐**仍需口径**」，
+> 按 `traits.py` 开头那行定义（`FULL = 描述能被机械实现，且有测试`）它只能算 PARTIAL。
+> 现在账本是 **17 条 / FULL 8 · PARTIAL 5 · REFUSED 4**，且缺口写成机器可读的 `TraitSpec.gaps`
+> （判据：`FULL ⇒ gaps 为空`，见 `roco/tests/test_trait_status_export.py::FullMeansNoDeclaredGapTest`）。
+> 下面正文里引的 `FULL 9 · PARTIAL 4` 是**第 29 轮当时**的数字，按「改钉不删」保留。
+
 # 三套「支持」不要混：12 只全 `KNOWLEDGE_ONLY` vs FULL 6 / PARTIAL 2 / REFUSED 4
+> **2026-09-25 复核（第 29 轮）**：`data/roco/engine-trait-status.json` 当时停在 **15 条 / FULL 8 · PARTIAL 3 · REFUSED 4**，
+> 而 `roco/src/roco_env/traits.py` 已登记 **17 条**（缺的是 `渴求` FULL、`贪得无厌` PARTIAL）—— 账本与引擎漂了，
+> 三份文档里引的 `FULL 6 / PARTIAL 2 / REFUSED 4`、`12 条` 是**更早**的历史数字。现在账本已重导
+> （`python3 scripts/roco/export-trait-status.py --write`）→ **17 条 / FULL 9 · PARTIAL 4 · REFUSED 4**，
+> 并加了两道闸：`--check`（与现在重算逐字节比，`roco/tests/test_trait_status_export.py` 3 条判据含反证）
+> 与 `scripts/roco/verify-coverage-axes.mjs`（判据 16 项 + 6 条反证，**已进 `verify:release` 成为第 27 个套件**）。
+> 下面正文里的数字保留原样（历史记录），**当前口径以账本 `counts` 与闸门产物为准**。
+
 
 > 第 46 轮 · **只设计/审计，不改引擎实现**。
 > 本文回答监工点名的那处文档冲突：`docs/roco/PET-SUPPORT-MATRIX.md` 说 12 只全部

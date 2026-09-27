@@ -22,7 +22,7 @@
 匹配前 UNKNOWN_PREMATCH（13 号文档 §1：阵容工坊固定 UNKNOWN_PREMATCH）
   → 只能依据版本 Meta prior 说话
   → 环境分布 = 这份先验的 distribution[]
-  → 现在 distribution 全部是 unknown + value: null + reason
+  → 现在 distribution 是 **assumption 档**（每行 1/K，带可复算 basis；不是实测分布）
   → 所以 RC-304 的期望值 / 散度 / 容错**现在无定义**，只能如实返回 unknown
 ```
 
@@ -162,9 +162,9 @@ cost      locked ∪ must_include / max_replacements / 候选池 的可满足性
 
 ---
 
-## 4. `measured` 与 `unknown`：本任务最重要的一条
+## 4. `measured` / `assumption` / `unknown`：本任务最重要的一条
 
-`distribution[]` **只允许两种形态**：
+`distribution[]` **只允许三种形态**：
 
 ```jsonc
 // ① measured：真的有一份可核对的来源，逐条给 ref + date + confidence
@@ -179,7 +179,28 @@ cost      locked ∪ must_include / max_replacements / 候选池 的可满足性
   "value_source": {"availability": "available", "ref": "…"}   // 或 not_available + 说明
 }
 
-// ② unknown：我们没有真实对局数据 → 如实写不知道
+// ② assumption：**声明假设** —— 占比是假设出来的，但依据可复算、可替换，且不许挂 sources
+{
+  "archetype_id": "poison_stack",
+  "source": "assumption",
+  "value": 0.142857,                 // = 1/K，K = archetypes[].length
+  "unit": "share",
+  "confidence": "ENGINE_HYPOTHESIS",
+  "notes": "体系「毒系消耗」：占比按**均匀假设**（每个已识别体系等权，1/7）……",   // ≥ 12 字符
+  "basis": {
+    "kind": "uniform-over-candidate-universe",
+    "denominator": 7,                         // > 0，且可复算
+    "universe": "全图鉴候选宇宙（622 只）",
+    "partition": "meta-prior 登记的 K 个可复算识别体系（archetypes[]）",
+    "value_rule": "每个体系 1/K；改 K 或改等级 ⇒ 数值随之变",
+    "recomputable_from": "scripts/roco/build-meta-prior.mjs（确定性、无挂钟字段）",
+    "replace_with": "赛季面板导出 / 匿名对局记录 / 离线联赛产物（须带 url 或仓内文件 + 日期 + 台账等级）⇒ source 改 measured",
+    "not_measured_note": "这不是天梯实测分布，也不是任何体系的强度结论；它是让四轴有分母的**声明假设**"
+  },
+  "sources": []                      // 挂 sources ⇒ 红（那是把假设伪装成实测）
+}
+
+// ③ unknown：连声明假设都没有 → 如实写不知道
 {
   "archetype_id": "poison_stack",
   "source": "unknown",
@@ -190,7 +211,17 @@ cost      locked ∪ must_include / max_replacements / 候选池 的可满足性
 }
 ```
 
-**当前实测：`measured 0 项 / unknown 7 项`，`distribution_source = "unknown"`。**
+**当前实测：`measured 0 项 / assumption 7 项 / unknown 0 项`**（顶层没有 `distribution_source`，
+逐条判定 ⇒ `assumption`）。**每一行的合计 = 1（容差 0.001）**：占比只有在构成一次划分时才有分母含义。
+
+`assumption` 档是怎么被允许的（人类 2026-09-25 的决定）：四轴的分母不能永远缺席，但也不许编。
+所以把「均匀铺在已识别体系上」写成**可复算、可替换、带依据的声明假设**：
+- 消费侧（RC-304）要求 `basis` 齐全（`kind` / `denominator > 0` / `recomputable_from`）、
+  `unit === "share"`、`confidence === "ENGINE_HYPOTHESIS"`、`notes` 够长、`sources` 为空、合计 = 1；
+- 任一条不满足 ⇒ 整份分布退回 `unknown`，四轴 `available:false`（**裸数字不许进比较**）；
+- 四轴的 `relative_score` / `tolerance` 仍**不是**这份先验给的：先验只带占比，
+  相对表现由 RC-304 按 `archetypes[].feature_axes[].criterion` 从 RC-302 结构性地算（ENGINE_HYPOTHESIS）。
+  详见 `docs/roco/TEAM-COMPARE.md` §3。
 
 判据（构建器 fail closed，校验器与测试各自再拦一遍）：
 
@@ -202,10 +233,17 @@ cost      locked ∪ must_include / max_replacements / 候选池 的可满足性
 | `unknown` | `value === null` | `DISTRIBUTION` |
 | `unknown` | `reason` ≥ 12 字符 | `DISTRIBUTION` |
 | `unknown` | **不挂** `sources`（挂了会让「不知道」看起来像有依据） | `DISTRIBUTION` |
+| `assumption` | `basis` 齐全（`kind='uniform-over-candidate-universe'` + `denominator > 0` + `recomputable_from` 非空）、`unit='share'`、`confidence='ENGINE_HYPOTHESIS'`、`notes` ≥ 12 字符 | `DISTRIBUTION` |
+| `assumption` | **不挂** `sources`（挂了是把假设伪装成实测） | `DISTRIBUTION` |
+| `assumption` | 全部 `value` 合计 = 1（容差 0.001）：一次划分 | `DISTRIBUTION` |
 
 为什么连「一个看起来合理的数字」都不能填：环境占比是所有下游结论的**分母**。
 分母编出来之后，`expected_meta_value`、`matchup_spread`、`worst_archetype` 全都会建在沙子上，
 而且它们看起来跟真的一样。**宁可输出 unknown，也不输出一个没人能核对的数。**
+
+`assumption` 不是这条纪律的例外，而是它的**受控出口**：一个数要么带可核对来源（`measured`），
+要么带可复算依据并写明「这是假设」（`assumption`），要么什么都不给（`unknown`）。
+**一个不带 `basis` 的裸数字仍然等于编造，消费侧会让整份分布退回 unknown。**
 
 ---
 
@@ -246,16 +284,18 @@ cost      locked ∪ must_include / max_replacements / 候选池 的可满足性
 `usage.inputs` 写成**字段说明**（`definition` / `inputs` / `honesty` 三栏），不是散文。
 五个口径就是 13 号文档 §4 那五条：
 
-| 口径 | 定义 | 现在能不能算 | 诚实边界（`honesty`） |
+| 口径 | 定义 | 现在（assumption 档）能不能算 | 诚实边界（`honesty`） |
 |---|---|---|---|
-| `expected_meta_value` | 六宠队伍对版本对手分布的期望表现 | **不能** | 分布 unknown 时禁止输出任何数值型期望；只能标 unknown 或给相对排序且附 `ENGINE_HYPOTHESIS` |
-| `worst_archetype` | 最怕的**主流**体系 | **不能** | 「主流」= 分布；分布 unknown 时只能输出「按**结构判据**算最吃亏的体系」，并注明它不是「最主流」 |
-| `matchup_spread` | 是否严重依赖撞到特定阵容 | **不能**（缺 matchup bank） | 没有逐体系表现估计时禁止报散度数值，只能报「无法计算」并列出缺失产物 |
-| `execution_tolerance` | 次优操作下掉多少 | **不能** | 规则本身还在 candidate 阶段（严格总序仍是 `ENGINE_HYPOTHESIS`）时，容错数值一定是伪精确 |
-| `coverage_confidence` | 六宠 build 的规则与数据覆盖 | **能**（唯一一条） | 它是**自我描述**（我们知道自己知道多少），不是实力判断；覆盖率低时必须 fail closed |
+| `expected_meta_value` | 六宠队伍对版本对手分布的期望表现 | **能算**（分母 = 声明假设的占比，相对表现 = RC-304 的结构分） | 分布 unknown 时禁止输出任何数值型期望；assumption 档必须标 `ENGINE_HYPOTHESIS` 并写明分母是声明假设 |
+| `worst_archetype` | 最怕的**主流**体系 | **能算** | 均匀假设下「主流」只是「已识别体系」，不是实测主流；值必须带 `weight` 与判据引用 |
+| `matchup_spread` | 是否严重依赖撞到特定阵容 | **能算** | 散度是对分布的矩；assumption 档的散度只在**同一份声明假设**内可比，不是实测离散度 |
+| `execution_tolerance` | 次优操作下掉多少 | **能算（下界代理）** | 规则本身还在 candidate 阶段时，容错数值一定是伪精确；assumption 档用「结构短板」当代理并写明它不是回放测量 |
+| `coverage_confidence` | 六宠 build 的规则与数据覆盖 | **能算** | 它是**自我描述**（我们知道自己知道多少），不是实力判断；覆盖率低时必须 fail closed |
 
-一句话：**这份先验现在只能用来定义体系与特征轴，不能用来排序队伍。**
-RC-304 拿到它之后，前四个口径必须如实返回 unknown，第五个口径可以做。
+一句话：**这份先验提供的是「可复算、可替换的声明假设分母」，不是实测环境分布。**
+RC-304 拿到它之后，四轴的分母到位、相对表现由它自己从 RC-302 结构性算（见
+`docs/roco/TEAM-COMPARE.md` §3）；拿到带来源的实测分布后（`measured` 档）改用注入的
+`relative_score` / `tolerance`，不用结构分。
 
 ---
 

@@ -1,0 +1,45 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小芽 · 单独的小芽页面</title><link rel="stylesheet" href="/src/client/style.css"></head><body data-xiaoya-page="yes">
+<!-- 兜底横幅：静态资源清单是进程启动时快照的，脚本没下发时这一页只会一直「正在读取」。
+     默认可见（不许被 CSS 藏起来），模块跑起来的第一件事就是撤掉它。
+     文案与 index.html / roco.html / box.html / nurture.html 逐字同一条。 -->
+<div id="boot-fallback" class="boot-fallback" role="alert">页面脚本没有加载成功：本机服务可能还是<strong>旧版本</strong>（静态资源清单在进程启动时就定下了）。请在仓库根目录重启 <code>npm start</code>，然后刷新这一页。</div>
+
+<!-- ── 单独的小芽页面（人类 2026-09-25 纠偏①：「小芽就直接出一个单独的小芽页面，
+     这个可以大点」）─────────────────────────────────────────────────────────
+     它与其它页面右上角那个**弹出式小芽**是同一份实现、同一个教练：
+     对话都走 `/api/coach`，跨局记忆都读 `xiaoya-memory-v1`，对话记录都读
+     `xiaoya-chats-v1`（所以在营地页聊过的，在这里接着看得到）。
+     这里只是版式更大：能常驻、能一直往上翻，不占别的页面的地方。 -->
+<main class="xy-page">
+ <header class="topbar">
+  <h1>小芽 <small>AI 教练 · 洛克王国：世界</small></h1>
+  <div class="header-actions">
+   <span class="muted" id="xy-status" role="status">正在读取连接状态…</span>
+   <!-- 这一页本身就是小芽，所以页眉不给「小芽」按钮；另外两个与其他页面同一套 `.nav-btn`
+        （人类 2026-09-25：页眉只留 返回首页 / 开始PVP / 小芽，不要别的）。 -->
+   <a class="nav-btn" id="xy-nav-home" href="/">← 返回首页</a>
+   <a class="nav-btn" id="xy-nav-nurture" href="/nurture.html">✦ 练习养成（三只）</a>
+   <a class="nav-btn primary" id="xy-nav-pvp" href="/roco.html">⚔ 开始 PVP</a>
+  </div>
+ </header>
+
+ <section class="panel xy-page-body" aria-label="和小芽说话">
+  <div class="xy-log xy-page-log" id="xy-log" aria-live="polite"></div>
+  <div class="xy-page-compose">
+   <div class="xy-page-roles" role="group" aria-label="小芽的身份">
+    <span class="muted">让它以哪种身份回答</span>
+    <button type="button" data-xy-role="auto" class="selected">自动</button>
+    <button type="button" data-xy-role="companion">陪练</button>
+    <button type="button" data-xy-role="strategist">军师</button>
+    <button type="button" data-xy-role="teacher">老师</button>
+   </div>
+   <div class="xy-quick" id="xy-quick"></div>
+   <form class="xy-form" id="xy-form">
+    <input id="xy-input" maxlength="500" autocomplete="off" placeholder="问小芽：怎么培养 / 这局怎么打 / 出一道小测验">
+    <button class="primary" id="xy-send" type="submit">发送</button>
+   </form>
+  </div>
+ </section>
+</main>
+<script type="module" src="/src/client/xiaoya.js"></script>
+</body></html>

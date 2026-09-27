@@ -7,9 +7,8 @@
  "totals": {
   "traits": 245,
   "trigger_unknown": 197,
-  "effect_unparsed": 32,
-  "ready": 2,
-  "registered": 14
+  "effect_unparsed": 31,
+  "registered": 17
  },
  "trigger_vocabulary": {
   "入场时": "on_enter",
@@ -19,38 +18,13 @@
   "攻击时": "on_action",
   "使用技能时": "on_action"
  },
- "pets_blocked_by_traits": 135,
+ "pets_blocked_by_traits": 75,
  "known_limits": [
   "`pets_blocked` 只统计「**唯一**没实现的部件是特性」的精灵；还有别的部件没实现的精灵不计入",
   "`trigger_unknown` 不等于「不能做」，而是「不知道什么时候触发」——按错时点结算比不结算更糟",
   "本清单是**排序依据**，不是实现：任何一条特性落地都要有自己的判据与反证"
  ],
  "worklist": [
-  {
-   "trait": "生物碱",
-   "skill_id": "skill_000005",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": true,
-   "parsed_effects": [
-    "foe_status"
-   ],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 11,
-   "blocked_pets": [
-    "pet_000016",
-    "pet_000017",
-    "pet_000018",
-    "pet_000247",
-    "pet_000249",
-    "pet_000250",
-    "pet_000251",
-    "pet_000252"
-   ],
-   "desc": "使用草系技能时，敌方获得2层中毒。"
-  },
   {
    "trait": "诈死",
    "skill_id": "skill_000007",
@@ -95,46 +69,6 @@
    "desc": "棋契陛下大幅提升种族资质，力竭时扣除4魔力。"
   },
   {
-   "trait": "耐活王",
-   "skill_id": "skill_000138",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 4,
-   "blocked_pets": [
-    "pet_000452",
-    "pet_000453",
-    "pet_000454",
-    "pet_000455"
-   ],
-   "desc": "敌方受到中毒效果伤害时，自己回复等量生命。"
-  },
-  {
-   "trait": "高浓生物碱",
-   "skill_id": "skill_000215",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": true,
-   "parsed_effects": [
-    "foe_status"
-   ],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 4,
-   "blocked_pets": [
-    "pet_000537",
-    "pet_000566",
-    "pet_000567",
-    "pet_000568"
-   ],
-   "desc": "使用草系技能时，敌方获得3层中毒。"
-  },
-  {
    "trait": "守护者",
    "skill_id": "skill_000032",
    "trigger": "入场时",
@@ -151,24 +85,6 @@
     "pet_000103"
    ],
    "desc": "己方其他精灵每有1层萌化，自己入场时全技能能耗-1。"
-  },
-  {
-   "trait": "搜刮",
-   "skill_id": "skill_000076",
-   "trigger": "入场时",
-   "hook": "on_enter",
-   "trigger_known": true,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "effect_unparsed",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000134",
-    "pet_000135",
-    "pet_000136"
-   ],
-   "desc": "敌方每使用1次「聚能」技能或更换精灵，自己入场时获得魔攻+20%。"
   },
   {
    "trait": "仁心",
@@ -243,24 +159,6 @@
    "desc": "自己的能量可以超过能量上限。"
   },
   {
-   "trait": "守望星",
-   "skill_id": "skill_000112",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000296",
-    "pet_000297",
-    "pet_000298"
-   ],
-   "desc": "触发星陨印记时仅消耗一半层数，仍造成满层伤害。"
-  },
-  {
    "trait": "散热",
    "skill_id": "skill_000065",
    "trigger": null,
@@ -297,24 +195,6 @@
     "pet_000198"
    ],
    "desc": "使用「选择」技能后，会额外使用1次另一种「选择」效果。使用任意技能后，该技能冷却1回合。"
-  },
-  {
-   "trait": "毒蘑菇",
-   "skill_id": "skill_000075",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000131",
-    "pet_000132",
-    "pet_000133"
-   ],
-   "desc": "回合结束时，偷取敌方场上所有精灵1能量。"
   },
   {
    "trait": "灵魂灼伤",
@@ -378,41 +258,6 @@
    "desc": "初始生命为10%，入场前己方精灵每使用1次草系技能，回复30%生命。"
   },
   {
-   "trait": "蓄电池",
-   "skill_id": "skill_000084",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 3,
-   "blocked_pets": [
-    "pet_000288",
-    "pet_000289",
-    "pet_000290"
-   ],
-   "desc": "每入场1次，永久获得双攻+30%。"
-  },
-  {
-   "trait": "噼啪！",
-   "skill_id": "skill_000078",
-   "trigger": "入场后",
-   "hook": "on_enter",
-   "trigger_known": true,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "effect_unparsed",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000165",
-    "pet_000166"
-   ],
-   "desc": "入场后首次行动，所选技能使用次数+1。"
-  },
-  {
    "trait": "渗透",
    "skill_id": "skill_000114",
    "trigger": "入场时",
@@ -445,25 +290,6 @@
     "pet_000402"
    ],
    "desc": "首次入场时，失去自己一半的当前生命。"
-  },
-  {
-   "trait": "乌龟塔理论",
-   "skill_id": "skill_000206",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": true,
-   "parsed_effects": [
-    "foe_mark"
-   ],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000602",
-    "pet_000603"
-   ],
-   "desc": "每受到1次攻击伤害，敌方获得3层星陨印记。"
   },
   {
    "trait": "保卫",
@@ -534,23 +360,6 @@
    "desc": "携带的能耗大于3的技能，威力+40%。"
   },
   {
-   "trait": "复方汤剂",
-   "skill_id": "skill_000097",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000294",
-    "pet_000295"
-   ],
-   "desc": "在场时，双方回合结束时的中毒效果会额外触发1次。"
-  },
-  {
    "trait": "好象坏象",
    "skill_id": "skill_000136",
    "trigger": null,
@@ -604,77 +413,6 @@
    "desc": "使用光系技能后，回合结束时自己返场。"
   },
   {
-   "trait": "扩散侵蚀",
-   "skill_id": "skill_000038",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000108",
-    "pet_000109"
-   ],
-   "desc": "使用水系技能后，敌方获得中毒，获得层数等于中毒印记层数的2倍。"
-  },
-  {
-   "trait": "月相",
-   "skill_id": "skill_000245",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": true,
-   "parsed_effects": [
-    "foe_status",
-    "heal"
-   ],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000626",
-    "pet_000627"
-   ],
-   "desc": "敌方受到中毒效果伤害时，自己回复等量生命。每过量回复10%生命敌方获得1层中毒。"
-  },
-  {
-   "trait": "木桶戏法",
-   "skill_id": "skill_000008",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000023",
-    "pet_000032"
-   ],
-   "desc": "离场后，更换入场的精灵以木桶状态登场。"
-  },
-  {
-   "trait": "焰色反应",
-   "skill_id": "skill_000161",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000490",
-    "pet_000491"
-   ],
-   "desc": "在场时，衰减的灼烧变为相同层数的中毒。"
-  },
-  {
    "trait": "煤渣草",
    "skill_id": "skill_000107",
    "trigger": null,
@@ -690,40 +428,6 @@
     "pet_000341"
    ],
    "desc": "在场时，所有灼烧的衰减变为增长。"
-  },
-  {
-   "trait": "电流刺激",
-   "skill_id": "skill_000080",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000170",
-    "pet_000171"
-   ],
-   "desc": "携带的攻击技能获得迸发：威力+40。"
-  },
-  {
-   "trait": "盲从",
-   "skill_id": "skill_000099",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000200",
-    "pet_000201"
-   ],
-   "desc": "可以携带多个复写/借用/取念技能，非幻系技能能耗-2。"
   },
   {
    "trait": "腾挪",
@@ -779,74 +483,6 @@
    "desc": "离场后，更换入场的精灵回复20%生命且免疫寄生。"
   },
   {
-   "trait": "防过载保护",
-   "skill_id": "skill_000081",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": true,
-   "parsed_effects": [
-    "escape"
-   ],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000173",
-    "pet_000174"
-   ],
-   "desc": "每次行动后脱离。"
-  },
-  {
-   "trait": "魔术帽",
-   "skill_id": "skill_000160",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 2,
-   "blocked_pets": [
-    "pet_000492",
-    "pet_000493"
-   ],
-   "desc": "在场时，场上双方携带的技能获得巧变：同系别技能。"
-  },
-  {
-   "trait": "噼啪噼啪！",
-   "skill_id": "skill_000240",
-   "trigger": "入场后",
-   "hook": "on_enter",
-   "trigger_known": true,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "effect_unparsed",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000592"
-   ],
-   "desc": "入场后首次行动，所选技能使用次数+1，且该回合每次行动后回复2能量。"
-  },
-  {
-   "trait": "扫荡",
-   "skill_id": "skill_000243",
-   "trigger": "入场时",
-   "hook": "on_enter",
-   "trigger_known": true,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "effect_unparsed",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000591"
-   ],
-   "desc": "敌方每使用1次「聚能」技能或更换精灵，自己入场时获得魔攻+20%和魔防+10%。"
-  },
-  {
    "trait": "一意孤行",
    "skill_id": "skill_000187",
    "trigger": null,
@@ -897,22 +533,6 @@
    "desc": "造成克制伤害后，获得攻防速+20%，回复2能量，首个技能替换为水系愿力冲击。"
   },
   {
-   "trait": "双向光速",
-   "skill_id": "skill_000020",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000265"
-   ],
-   "desc": "在场时，双方回合结束时的效果会额外触发1次。"
-  },
-  {
    "trait": "吉利丁片",
    "skill_id": "skill_000150",
    "trigger": null,
@@ -943,22 +563,6 @@
     "pet_000004"
    ],
    "desc": "造成克制伤害后，获得攻防速+20%，并回复2能量。"
-  },
-  {
-   "trait": "毒牙",
-   "skill_id": "skill_000096",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000138"
-   ],
-   "desc": "使敌方获得中毒时，也会使其获得物攻-40%和速度-40。"
   },
   {
    "trait": "滋养",
@@ -1057,86 +661,6 @@
    "desc": "造成克制伤害后，获得攻防速+20%，回复2能量，首个技能替换为光系愿力冲击。"
   },
   {
-   "trait": "超级电池",
-   "skill_id": "skill_000223",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000553"
-   ],
-   "desc": "每入场1次，获得双攻永久+40%。"
-  },
-  {
-   "trait": "连续负荷",
-   "skill_id": "skill_000120",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000348"
-   ],
-   "desc": "自己技能的迸发效果延长1回合。"
-  },
-  {
-   "trait": "陨落",
-   "skill_id": "skill_000139",
-   "trigger": null,
-   "hook": null,
-   "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "trigger_unknown",
-   "pets_blocked": 1,
-   "blocked_pets": [
-    "pet_000385"
-   ],
-   "desc": "在场时，双方回合结束时的效果不会触发。"
-  },
-  {
-   "trait": "抓到你了",
-   "skill_id": "skill_000219",
-   "trigger": "入场时",
-   "hook": "on_enter",
-   "trigger_known": true,
-   "effect_clean": true,
-   "parsed_effects": [
-    "foe_status"
-   ],
-   "unparsed": [],
-   "readiness": "ready",
-   "pets_blocked": 0,
-   "blocked_pets": [],
-   "desc": "自己入场时敌方获得2层冻结，使敌方获得冻结时，也会使其获得全技能能耗+1。"
-  },
-  {
-   "trait": "贪得无厌",
-   "skill_id": "skill_000239",
-   "trigger": "入场时",
-   "hook": "on_enter",
-   "trigger_known": true,
-   "effect_clean": true,
-   "parsed_effects": [
-    "heal"
-   ],
-   "unparsed": [],
-   "readiness": "ready",
-   "pets_blocked": 0,
-   "blocked_pets": [],
-   "desc": "入场时获得50%吸血，每过量回复5%生命转化为10%物攻。"
-  },
-  {
    "trait": "不朽",
    "skill_id": "skill_000129",
    "trigger": null,
@@ -1224,6 +748,22 @@
    "desc": "入场时，若自己魔力值为1，自己获得双攻+100%。"
   },
   {
+   "trait": "抓到你了",
+   "skill_id": "skill_000219",
+   "trigger": "入场时",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": true,
+   "parsed_effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "readiness": "registered",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "自己入场时敌方获得2层冻结，使敌方获得冻结时，也会使其获得全技能能耗+1。"
+  },
+  {
    "trait": "捉迷藏",
    "skill_id": "skill_000039",
    "trigger": null,
@@ -1269,6 +809,22 @@
    "desc": "使用状态技能后，敌方获得「聒噪」技能的效果，持续3回合。"
   },
   {
+   "trait": "渴求",
+   "skill_id": "skill_000058",
+   "trigger": "入场时",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": true,
+   "parsed_effects": [
+    "self_lifesteal"
+   ],
+   "unparsed": [],
+   "readiness": "registered",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "入场时获得50%吸血。"
+  },
+  {
    "trait": "热成像",
    "skill_id": "skill_000197",
    "trigger": null,
@@ -1295,6 +851,23 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "受到非敌方系别的技能攻击时伤害-50%。"
+  },
+  {
+   "trait": "贪得无厌",
+   "skill_id": "skill_000239",
+   "trigger": "入场时",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": true,
+   "parsed_effects": [
+    "self_lifesteal",
+    "overheal_to_stat"
+   ],
+   "unparsed": [],
+   "readiness": "registered",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "入场时获得50%吸血，每过量回复5%生命转化为10%物攻。"
   },
   {
    "trait": "身经百练",
@@ -1379,6 +952,34 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "敌方携带技能总能耗每有1点，自己攻击时威力+10%。"
+  },
+  {
+   "trait": "噼啪噼啪！",
+   "skill_id": "skill_000240",
+   "trigger": "入场后",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "effect_unparsed",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "入场后首次行动，所选技能使用次数+1，且该回合每次行动后回复2能量。"
+  },
+  {
+   "trait": "噼啪！",
+   "skill_id": "skill_000078",
+   "trigger": "入场后",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "effect_unparsed",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "入场后首次行动，所选技能使用次数+1。"
   },
   {
    "trait": "大捞一笔",
@@ -1467,6 +1068,20 @@
    "desc": "携带的翼系攻击技能获得选择：能耗+1，攻击时吸血50%。"
   },
   {
+   "trait": "扫荡",
+   "skill_id": "skill_000243",
+   "trigger": "入场时",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "effect_unparsed",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "敌方每使用1次「聚能」技能或更换精灵，自己入场时获得魔攻+20%和魔防+10%。"
+  },
+  {
    "trait": "拨浪鼓",
    "skill_id": "skill_000093",
    "trigger": "入场时",
@@ -1479,6 +1094,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "己方精灵每使用1次状态技能，自己入场时毒系和萌系技能威力+10。"
+  },
+  {
+   "trait": "搜刮",
+   "skill_id": "skill_000076",
+   "trigger": "入场时",
+   "hook": "on_enter",
+   "trigger_known": true,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "effect_unparsed",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "敌方每使用1次「聚能」技能或更换精灵，自己入场时获得魔攻+20%。"
   },
   {
    "trait": "旧玩具",
@@ -1535,20 +1164,6 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "己方精灵每使用1次水系技能，自己入场时获得全技能能耗-1，且能耗为0的技能威力+30%。"
-  },
-  {
-   "trait": "渴求",
-   "skill_id": "skill_000058",
-   "trigger": "入场时",
-   "hook": "on_enter",
-   "trigger_known": true,
-   "effect_clean": false,
-   "parsed_effects": [],
-   "unparsed": [],
-   "readiness": "effect_unparsed",
-   "pets_blocked": 0,
-   "blocked_pets": [],
-   "desc": "入场时获得50%吸血。"
   },
   {
    "trait": "猫精灵的礼物",
@@ -1779,6 +1394,22 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "携带的无额外效果的攻击技能，威力+30%。"
+  },
+  {
+   "trait": "乌龟塔理论",
+   "skill_id": "skill_000206",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": true,
+   "parsed_effects": [
+    "foe_mark"
+   ],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "每受到1次攻击伤害，敌方获得3层星陨印记。"
   },
   {
    "trait": "乘风连击",
@@ -2018,6 +1649,20 @@
    "desc": "回合结束时，双方队伍中的所有精灵回复1能量。"
   },
   {
+   "trait": "双向光速",
+   "skill_id": "skill_000020",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "在场时，双方回合结束时的效果会额外触发1次。"
+  },
+  {
    "trait": "合拍",
    "skill_id": "skill_000162",
    "trigger": null,
@@ -2245,6 +1890,20 @@
    "desc": "队伍存在虫系精灵，自己获得双攻+50%。"
   },
   {
+   "trait": "复方汤剂",
+   "skill_id": "skill_000097",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "在场时，双方回合结束时的中毒效果会额外触发1次。"
+  },
+  {
    "trait": "大火球",
    "skill_id": "skill_000174",
    "trigger": null,
@@ -2399,6 +2058,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "双方场上每有1种不同的增益，自己获得物防+20%。"
+  },
+  {
+   "trait": "守望星",
+   "skill_id": "skill_000112",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "触发星陨印记时仅消耗一半层数，仍造成满层伤害。"
   },
   {
    "trait": "守望者",
@@ -2688,6 +2361,20 @@
    "desc": "每受到1次技能攻击（不含连击），敌方获得1层棘刺印记。"
   },
   {
+   "trait": "扩散侵蚀",
+   "skill_id": "skill_000038",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "使用水系技能后，敌方获得中毒，获得层数等于中毒印记层数的2倍。"
+  },
+  {
    "trait": "扫拖一体",
    "skill_id": "skill_000152",
    "trigger": null,
@@ -2876,6 +2563,37 @@
    "desc": "使用攻击技能时，敌方每有1层冻结，在攻击前使其获得1层星陨印记。"
   },
   {
+   "trait": "月相",
+   "skill_id": "skill_000245",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": true,
+   "parsed_effects": [
+    "foe_status",
+    "heal"
+   ],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "敌方受到中毒效果伤害时，自己回复等量生命。每过量回复10%生命敌方获得1层中毒。"
+  },
+  {
+   "trait": "木桶戏法",
+   "skill_id": "skill_000008",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "离场后，更换入场的精灵以木桶状态登场。"
+  },
+  {
    "trait": "机械变式",
    "skill_id": "skill_000105",
    "trigger": null,
@@ -2920,6 +2638,20 @@
    "desc": "自己队伍中的其他精灵，在力竭1回合后会变为未完虫。"
   },
   {
+   "trait": "毒牙",
+   "skill_id": "skill_000096",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "使敌方获得中毒时，也会使其获得物攻-40%和速度-40。"
+  },
+  {
    "trait": "毒腺",
    "skill_id": "skill_000052",
    "trigger": null,
@@ -2934,6 +2666,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "使用能耗小于等于1的技能时，敌方获得4层中毒。"
+  },
+  {
+   "trait": "毒蘑菇",
+   "skill_id": "skill_000075",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "回合结束时，偷取敌方场上所有精灵1能量。"
   },
   {
    "trait": "氧循环",
@@ -3158,6 +2904,20 @@
    "desc": "攻击会使敌方已有的减益层数+3。"
   },
   {
+   "trait": "焰色反应",
+   "skill_id": "skill_000161",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "在场时，衰减的灼烧变为相同层数的中毒。"
+  },
+  {
    "trait": "爆裂玉米",
    "skill_id": "skill_000175",
    "trigger": null,
@@ -3233,6 +2993,22 @@
    "desc": "携带的电系技能获得迸发：能耗-2。"
   },
   {
+   "trait": "生物碱",
+   "skill_id": "skill_000005",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": true,
+   "parsed_effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "使用草系技能时，敌方获得2层中毒。"
+  },
+  {
    "trait": "生长",
    "skill_id": "skill_000012",
    "trigger": null,
@@ -3247,6 +3023,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "回合结束时，回复12%生命。"
+  },
+  {
+   "trait": "电流刺激",
+   "skill_id": "skill_000080",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "携带的攻击技能获得迸发：威力+40。"
   },
   {
    "trait": "留学生",
@@ -3303,6 +3093,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "携带的非光系技能，威力+25%。"
+  },
+  {
+   "trait": "盲从",
+   "skill_id": "skill_000099",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "可以携带多个复写/借用/取念技能，非幻系技能能耗-2。"
   },
   {
    "trait": "盲拧",
@@ -3396,8 +3200,10 @@
    "trigger": null,
    "hook": null,
    "trigger_known": false,
-   "effect_clean": false,
-   "parsed_effects": [],
+   "effect_clean": true,
+   "parsed_effects": [
+    "foe_energy_loss"
+   ],
    "unparsed": [],
    "readiness": "trigger_unknown",
    "pets_blocked": 0,
@@ -3478,6 +3284,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "1号位技能获得迅捷和传动1。"
+  },
+  {
+   "trait": "耐活王",
+   "skill_id": "skill_000138",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "敌方受到中毒效果伤害时，自己回复等量生命。"
   },
   {
    "trait": "腐植循环",
@@ -3569,6 +3389,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "获得增益时，额外获得层数+2。"
+  },
+  {
+   "trait": "蓄电池",
+   "skill_id": "skill_000084",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "每入场1次，永久获得双攻+30%。"
   },
   {
    "trait": "虚假宝箱",
@@ -3680,6 +3514,20 @@
    "desc": "本场战斗首次使用的技能获得迅捷。"
   },
   {
+   "trait": "超级电池",
+   "skill_id": "skill_000223",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "每入场1次，获得双攻永久+40%。"
+  },
+  {
    "trait": "超负荷",
    "skill_id": "skill_000163",
    "trigger": null,
@@ -3706,6 +3554,20 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "自己或其他精灵离场时，更换入场的精灵获得萌化。"
+  },
+  {
+   "trait": "连续负荷",
+   "skill_id": "skill_000120",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "自己技能的迸发效果延长1回合。"
   },
   {
    "trait": "逐魂鸟",
@@ -3754,6 +3616,36 @@
    "desc": "自己的聚能获得选择：偷取敌方3能量。"
   },
   {
+   "trait": "防过载保护",
+   "skill_id": "skill_000081",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": true,
+   "parsed_effects": [
+    "escape"
+   ],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "每次行动后脱离。"
+  },
+  {
+   "trait": "陨落",
+   "skill_id": "skill_000139",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "在场时，双方回合结束时的效果不会触发。"
+  },
+  {
    "trait": "顺风",
    "skill_id": "skill_000045",
    "trigger": null,
@@ -3798,6 +3690,36 @@
    "pets_blocked": 0,
    "blocked_pets": [],
    "desc": "对本精灵的技能，若其他翼系精灵携带相同技能，则获得迅捷。被敌方精灵击败时，自己额外损失1点魔力。"
+  },
+  {
+   "trait": "高浓生物碱",
+   "skill_id": "skill_000215",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": true,
+   "parsed_effects": [
+    "foe_status"
+   ],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "使用草系技能时，敌方获得3层中毒。"
+  },
+  {
+   "trait": "魔术帽",
+   "skill_id": "skill_000160",
+   "trigger": null,
+   "hook": null,
+   "trigger_known": false,
+   "effect_clean": false,
+   "parsed_effects": [],
+   "unparsed": [],
+   "readiness": "trigger_unknown",
+   "pets_blocked": 0,
+   "blocked_pets": [],
+   "desc": "在场时，场上双方携带的技能获得巧变：同系别技能。"
   },
   {
    "trait": "鼓气",

@@ -1,0 +1,1222 @@
+{
+ "generated_by": "scripts/roco/shadow-replay.mjs",
+ "arm": "deepseek_product",
+ "identity": {
+  "role": "cloud-arm",
+  "adapter": null,
+  "adapter_basename": null,
+  "adapter_sha256": null,
+  "model": "deepseek-flash",
+  "note": "云端臂：**生产 planner 提示**（src/coach/planner-prompt.js，口径 ROCO_PLANNER_RULES=catalog）"
+ },
+ "written_to": "/tmp/roco-recon/B-catalog.json",
+ "gateway": "http://127.0.0.1:8766",
+ "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
+ "prompt": "你在为游戏教练决定「下一步查不查工具、查哪个」。只输出一行 JSON，不要解释，不要思考过程。\n可用工具：query_rules（查规则事实：精灵/技能/学习表/术语/属性相性）、evaluate_team（评阵容）、\ncompare_team_change（换人前后对比）、plan_actions（给行动建议）、read_evidence（读某回合）、\nread_match（整局统计）、read_last_turn（上一回合）、search_rules（战术检索）。\n需要查证时输出 {\"tool\":\"工具名\",\"args\":{...}}；证据已经足够时输出 {\"stop\":true}。\n**默认是停止。** 只有当答案依赖的某个具体事实不在下面的 receipts 里、也不在常识里时才调工具。\n查规则事实用 query_rules，`kind` 取 pet/skill/learnset/term/type_row/type_multiplier/ruleset 之一，\n并给出该 kind 需要的定位参数（精灵用 pet_id，技能用 name）。\n参数里不要放 state_version（运行时会给）。不要编工具名，不要编参数名。",
+ "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
+ "summary": {
+  "tasks": 40,
+  "passed": 40,
+  "pass_rate": 1,
+  "stopped": {
+   "complete": 40
+  },
+  "latency": {
+   "p50_ms": 619,
+   "p95_ms": 968
+  },
+  "by_category": {
+   "rules_lookup": {
+    "total": 40,
+    "passed": 40,
+    "pass_rate": 1,
+    "p50_ms": 619,
+    "p95_ms": 968
+   }
+  },
+  "by_split": {
+   "family": {
+    "held_out": {
+     "total": 40,
+     "passed": 40,
+     "pass_rate": 1
+    },
+    "seen": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "by_value": {
+     "全图鉴": {
+      "total": 40,
+      "passed": 40,
+      "held_out": true,
+      "pass_rate": 1
+     }
+    }
+   },
+   "mechanism": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 40,
+     "passed": 40,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "图鉴字段": {
+      "total": 40,
+      "passed": 40,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   },
+   "template": {
+    "held_out": {
+     "total": 0,
+     "passed": 0,
+     "pass_rate": null
+    },
+    "seen": {
+     "total": 40,
+     "passed": 40,
+     "pass_rate": 1
+    },
+    "by_value": {
+     "直问": {
+      "total": 40,
+      "passed": 40,
+      "held_out": false,
+      "pass_rate": 1
+     }
+    }
+   }
+  }
+ },
+ "rows": [
+  {
+   "case_id": "cat-b-pet_000001",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "喵喵",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 593
+  },
+  {
+   "case_id": "cat-b-pet_000002",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "水蓝蓝",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 656
+  },
+  {
+   "case_id": "cat-b-pet_000003",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "火花",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 485
+  },
+  {
+   "case_id": "cat-b-pet_000004",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "迪莫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 710
+  },
+  {
+   "case_id": "cat-b-pet_000005",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "水灵",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 968
+  },
+  {
+   "case_id": "cat-b-pet_000006",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "火神",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 861
+  },
+  {
+   "case_id": "cat-b-pet_000007",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "魔力猫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 622
+  },
+  {
+   "case_id": "cat-b-pet_000008",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-5",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "草头鸭",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 532
+  },
+  {
+   "case_id": "cat-b-pet_000009",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-5",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "恶魔叮",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 987
+  },
+  {
+   "case_id": "cat-b-pet_000010",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "恶魔狼",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 656
+  },
+  {
+   "case_id": "cat-b-pet_000011",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "鸭吉吉",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 508
+  },
+  {
+   "case_id": "cat-b-pet_000012",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "铠甲虫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 539
+  },
+  {
+   "case_id": "cat-b-pet_000013",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "阿米亚特",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 687
+  },
+  {
+   "case_id": "cat-b-pet_000014",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "阿米樱",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 479
+  },
+  {
+   "case_id": "cat-b-pet_000015",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "罗隐",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 619
+  },
+  {
+   "case_id": "cat-b-pet_000016",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "蹦蹦种子",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 813
+  },
+  {
+   "case_id": "cat-b-pet_000017",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "蹦蹦草",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 534
+  },
+  {
+   "case_id": "cat-b-pet_000018",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "蹦蹦花",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 529
+  },
+  {
+   "case_id": "cat-b-pet_000019",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "地鼠",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 432
+  },
+  {
+   "case_id": "cat-b-pet_000020",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "遁鼠",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 563
+  },
+  {
+   "case_id": "cat-b-pet_000021",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "遁地鼠",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 453
+  },
+  {
+   "case_id": "cat-b-pet_000022",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "喵呜",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 835
+  },
+  {
+   "case_id": "cat-b-pet_000023",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "绿草精灵",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 582
+  },
+  {
+   "case_id": "cat-b-pet_000024",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "蒲公英娃娃",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 772
+  },
+  {
+   "case_id": "cat-b-pet_000025",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "冬羽雀",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 593
+  },
+  {
+   "case_id": "cat-b-pet_000026",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "奇丽草",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 532
+  },
+  {
+   "case_id": "cat-b-pet_000027",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "奇丽叶",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 567
+  },
+  {
+   "case_id": "cat-b-pet_000028",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "奇丽花",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 324
+  },
+  {
+   "case_id": "cat-b-pet_000029",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "焰火",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 623
+  },
+  {
+   "case_id": "cat-b-pet_000030",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "波波拉",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 688
+  },
+  {
+   "case_id": "cat-b-pet_000031",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "蒲公英",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 646
+  },
+  {
+   "case_id": "cat-b-pet_000032",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "魔草巫灵",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 623
+  },
+  {
+   "case_id": "cat-b-pet_000033",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "鸭吉吉",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 741
+  },
+  {
+   "case_id": "cat-b-pet_000034",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "岚鸟",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 477
+  },
+  {
+   "case_id": "cat-b-pet_000035",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "小甲虫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 464
+  },
+  {
+   "case_id": "cat-b-pet_000036",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-3",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "叮叮恶魔",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 711
+  },
+  {
+   "case_id": "cat-b-pet_000037",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-0",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "丢丢",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 749
+  },
+  {
+   "case_id": "cat-b-pet_000038",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-4",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "卡卡虫",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 303
+  },
+  {
+   "case_id": "cat-b-pet_000039",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-2",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "卡瓦重",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 573
+  },
+  {
+   "case_id": "cat-b-pet_000040",
+   "category": "rules_lookup",
+   "arm": "deepseek_product",
+   "world": "camp-locked-1",
+   "family": "全图鉴",
+   "mechanism": "图鉴字段",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "name": "伊贝儿",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 875
+  }
+ ]
+}

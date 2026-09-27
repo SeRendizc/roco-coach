@@ -19,6 +19,9 @@
 //     node scripts/roco/shadow-replay.mjs --arm rule                 # 参考臂（不需要模型）
 //     node scripts/roco/shadow-replay.mjs --arm local_4b --limit 24  # 真模型（要网关在线）
 //     node scripts/roco/shadow-replay.mjs --arm local_4b --gateway http://127.0.0.1:8766
+//     node scripts/roco/shadow-replay.mjs --arm deepseek_agent --pool catalog --limit 120
+//     ROCO_PLANNER_RULES=catalog node scripts/roco/shadow-replay.mjs --arm deepseek_product \
+//       --pool catalog --limit 120      # 生产提示 + 图鉴两条规则（默认口径是 off）
 
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
@@ -26,6 +29,10 @@ import {createServer as createNetServer} from 'node:net';
 import {readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync} from 'node:fs';
 import {dirname, join, basename} from 'node:path';
 import {fileURLToPath} from 'node:url';
+// 2026-09-25（4B 实测发现）：这个文件在 `:267` 用了 `gatewayAsk`，却从来没有 import 过它 ⇒
+// `npm run roco:shadow-replay -- --arm local_4b` 直接 `ReferenceError: gatewayAsk is not defined`，
+// 本地臂因此**跑不起来**（不是模型问题）。实现与再导出都在 `./local-model-ask.mjs`。
+import {gatewayAsk, deepseekAsk} from './local-model-ask.mjs';
 
 import {RocoClient, RULESET_ID} from '../../src/coach/roco-client.js';
 import {configureRocoTools, resetRocoTools} from '../../src/coach/toolbox.js';
@@ -34,8 +41,21 @@ import {
 } from './build-agent-trajectories.mjs';
 import {
   worldsFor, runInput, runArm, finalAnswer, refusalsIn, makePlanner, armLimit,
-  checkTask, receiptSummary, localModelPlanner, canonical, digest, LOCAL_TOOL_SYSTEM,
+  checkTask, receiptSummary, localModelPlanner, localAgentPlanner, canonical, digest,
+  LOCAL_TOOL_SYSTEM, AGENT_TOOL_SYSTEM,
 } from './agent-trajectories.mjs';
+// 2026-09-25（主线程修，与 `gatewayAsk` 同源的一类缺陷）：这个文件在 `:290` 还用了 `modelIdentity`，
+// 同样**从来没有 import 过** ⇒ `npm run roco:shadow-replay -- --arm local_4b` 直接
+// `ReferenceError: modelIdentity is not defined`（本地臂第二次跑不起来 —— 仍然不是模型的问题）。
+// 实现与签名见 `scripts/roco/model-identity.mjs:30`：`modelIdentity(gatewayUrl, adapterPath?)`。
+import {modelIdentity} from './model-identity.mjs';
+// 全图鉴（622 只）的取证任务：现有 288 条只用 4 只精灵、任务池写死 12 只，
+// 这份把同一个问题族铺到整本图鉴（判据/世界都不新造，见该文件的说明）。
+import {catalogLookupTasks, ambiguousNames, catalogPets} from './catalog-lookup-tasks.mjs';
+// 生产真正发出去的那份 planner 提示（2026-09-25）：`--arm deepseek` 用的是**测评内**的冻结提示，
+// 而玩家那边跑的是 `src/server/index.js` 里的这一份。两者不是同一份文字，所以"生产提示下 agent
+// 自己会不会查图鉴"必须单独量 —— 这个臂就是为它存在的（提示从模块取，不在这里再抄一份）。
+import {productionPlannerSystem, plannerRulesMode} from '../../src/coach/planner-prompt.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..');
@@ -75,9 +95,36 @@ export async function replayTask({task, world, state, authority, arm, ask, clien
     callIndex += 1;
     return value;
   }});
+  // `local_4b_agent`（2026-09-25，人类口径「agent 优先」）：同一个模型、同一套任务、
+  // 同一个判定器，只换成**用工具回执做决策**的规划器（多步 + 判定规则 + 名字→id 解析）。
+  // 旧臂 `local_4b` 一字不动，两条各自出数字、可逐条对比。
   const planner = arm === 'rule'
     ? makePlanner('baseline', task, input.hints)
-    : localModelPlanner(task, input.hints, {ask});
+    : arm === 'deepseek_agent'
+      // 云端 + agent 配置（回执/多步 + 判定规则）
+      ? localAgentPlanner(task, input.hints, {ask})
+      : arm === 'deepseek_product'
+        // 云端 + **生产提示**（`ROCO_PLANNER_RULES=catalog` 时含"图鉴事实必须查证 / 先按名字查 id"）。
+        // 与 `deepseek`（测评内冻结提示）只差 system：用来量"生产提示下 agent 自己会不会查"。
+        // ⚠ 这一条是**单步**（`localModelPlanner` 不看回执）。产品运行时其实是**多步 + 回执**
+        //（`gatherAgentEvidenceOnce` 最多 4 步），所以"必须两步"的题（学习表只认 pet_id）
+        // 在单步臂上**永远不可能过** —— 那不是模型的问题，是这一条臂的口径。
+        // 量产品真实循环请用 `deepseek_product_agent`（同提示 + 回执/多步）。
+        ? localModelPlanner(task, input.hints, {ask, system: productionPlannerSystem()})
+        : arm === 'deepseek_product_agent'
+          // 云端 + **生产提示 + 产品的多步循环**（回执喂回去、最多 3 步）= 产品路径的忠实还原
+          ? localAgentPlanner(task, input.hints, {ask, system: productionPlannerSystem()})
+          : arm === 'deepseek'
+        // 云端 + 与本地臂**同一份**冻结提示、同样单步：只换模型的对照
+        ? localModelPlanner(task, input.hints, {ask})
+        : arm === 'local_4b_agent'
+      // ①+③：新判定提示 + 回执/多步
+      ? localAgentPlanner(task, input.hints, {ask})
+      : arm === 'local_4b_receipts'
+        // **只动 ①**：系统提示逐字用冻结那份（adapter 是对着它 SFT 的），
+        // 只把「回执喂回去 + 允许多步」打开。用来把「提示改写」与「用回执」两个变量分开。
+        ? localAgentPlanner(task, input.hints, {ask, system: LOCAL_TOOL_SYSTEM})
+        : localModelPlanner(task, input.hints, {ask});
   const started = Date.now();
   const run = await runArm({task, arm, input, planner, limit: armLimit('baseline')});
   const reply = finalAnswer(task, {trace: run.trace, stopped: run.stopped, hints: input.hints});
@@ -263,8 +310,29 @@ async function main(argv) {
   const compareWith = arg('--compare');   // 参考臂的 JSON 路径
   const outPath = arg('--out');           // 显式指定产物路径（存档名不该由 arm 名猜）
 
-  const tasks = loadTasks().slice(0, limit || undefined);
-  const ask = arm === 'rule' ? null : gatewayAsk(gateway);
+  // `--category`：只跑某一类任务（量一个改动的影响时不必每次都跑满 288 条）。
+  const category = arg('--category');
+  // `--pool catalog --contract A|B`：把问题族铺到全图鉴 622 只（见 `catalog-lookup-tasks.mjs`）。
+  const pool = arg('--pool', 'tasks');
+  const contract = arg('--contract', 'A');
+  if (pool !== 'tasks' && pool !== 'catalog') {
+    throw new Error(`未知 --pool ${JSON.stringify(pool)}（只有 tasks / catalog）`);
+  }
+  const tasks = (pool === 'catalog'
+    ? catalogLookupTasks({contract, limit})
+    : loadTasks())
+    .filter((task) => !category || task.category === category)
+    .slice(0, limit || undefined);
+  if (pool === 'catalog') {
+    const excluded = catalogLookupTasks({contract}).excluded_ambiguous;
+    console.error(`[catalog] 契约 ${contract}：图鉴 ${catalogPets().length} 只、同名异形 ${ambiguousNames().length} 个`
+      + `（A 契约排除 ${excluded} 个名字）⇒ 本次任务 ${tasks.length} 条`);
+  }
+  // 云端臂（2026-09-25）：与本地臂**同一个 ask 形状**、同一份提示集、同一套判据，
+  // 只有模型不同（`deepseekAsk` 与产品侧 `/api/coach` 用同一个上游与同一个 model）。
+  // 这样「同一批任务上 4B 与云端各能查到什么」才是可比的。
+  const CLOUD_ARMS = new Set(['deepseek', 'deepseek_agent', 'deepseek_product', 'deepseek_product_agent']);
+  const ask = arm === 'rule' ? null : CLOUD_ARMS.has(arm) ? deepseekAsk() : gatewayAsk(gateway);
 
   const port = await pickFreePort();
   const client = new RocoClient({port, rulesetId: RULESET_ID, timeoutMs: 20000, startTimeoutMs: 30000});
@@ -285,8 +353,25 @@ async function main(argv) {
 
   const identity = arm === 'rule'
     ? {role: 'rule-arm', note: '规则臂不经过模型，没有模型身份'}
-    : modelIdentity(gateway);
-  const path = outPath || OUT.replace(/\.json$/, arm === 'rule' ? '.json' : `-${arm}.json`);
+    : CLOUD_ARMS.has(arm)
+      ? {role: 'cloud-arm', adapter: null, adapter_basename: null, adapter_sha256: null,
+        model: 'deepseek-flash',
+        // 生产提示臂必须把**当时的口径**记进身份里：同一臂名、两个口径会给出两个数，
+        // 不写下来就分不清哪次是哪次（`ROCO_PLANNER_RULES` 是环境变量）。
+        note: arm === 'deepseek_product'
+          ? `云端臂：**生产 planner 提示**（单步；src/coach/planner-prompt.js，口径 ROCO_PLANNER_RULES=${plannerRulesMode()}）`
+          : arm === 'deepseek_product_agent'
+            ? `云端臂：**生产 planner 提示 + 产品的多步循环**（回执喂回去；口径 ROCO_PLANNER_RULES=${plannerRulesMode()}）`
+            : '云端臂：同一份任务/提示/判据，只换模型（deepseekAsk）'}
+      : modelIdentity(gateway);
+  // 2026-09-25（实测踩到，值得单记）：`--limit` 的**冒烟跑**与全量跑写的是同一个文件名 ——
+  // 我用 `--limit 5` 干跑了一次参考臂，就把已发布的 442 条产物覆盖成 5 条
+  //（`tests/evals/shadow-replay.test.js` 要求 `summary.tasks >= 200`，差一步就红）。
+  // 现在：**带 `--limit` 且没显式给 `--out` 时，产物名自动带 `-sliceN`**；
+  // 全量跑（不带 `--limit`）的路径一个字不变 —— 文档里引用的就是那些。
+  const path = outPath || (limit > 0
+    ? OUT.replace(/\.json$/, `-slice${limit}${arm === 'rule' ? '' : `-${arm}`}.json`)
+    : OUT.replace(/\.json$/, arm === 'rule' ? '.json' : `-${arm}.json`));
   const report = buildShadowReport({arm, gateway, rows, compareWith, identity, outPath: write ? path : null});
   if (write) {
     mkdirSync(dirname(path), {recursive: true});

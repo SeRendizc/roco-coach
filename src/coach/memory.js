@@ -1,11 +1,13 @@
 import {SPECIES} from '../game/engine.js';
-export function freshMemory(){return {version:1,preference:null,lessons:[],events:[],pendingQuiz:null,dialogue:[],lastTopic:null,journal:[],reflections:{},goal:null,favorite:null,ruleReferenceId:null,quizCount:0,watches:[],stated:[],mood:null,quizLog:[]};}
+// 新存档里 habits / skill / acceptance 是 null：它们是**派生读数**，不是玩家说过的话，
+// 也不是系统观察到的一手证据。谁需要读数谁现算，算不出来就如实说「样本不够」。
+export function freshMemory(){return {version:1,preference:null,lessons:[],events:[],pendingQuiz:null,dialogue:[],lastTopic:null,journal:[],reflections:{},goal:null,favorite:null,ruleReferenceId:null,quizCount:0,watches:[],stated:[],mood:null,quizLog:[],habits:null,skill:null,acceptance:null};}
 // 已结束对局里可以核对的事实字段。旧存档没有这些字段，读回来就是空数组 / null，
 // 陪练只能少说一句，不能拿默认值把它补成一句听起来具体的话。
 const factNames=v=>Array.isArray(v)?v.filter(x=>typeof x==='string'&&x.length<=12).slice(0,3):[];
 const factCount=v=>Number.isInteger(v)&&v>=0&&v<=9?v:null;
-const readEventFacts=e=>({enemy:factNames(e.enemy),faints:factNames(e.faints),...(Number.isInteger(e.firstLossTurn)&&e.firstLossTurn>0?{firstLossTurn:e.firstLossTurn}:{}),...(typeof e.firstFallen==='string'&&e.firstFallen.length<=12?{firstFallen:e.firstFallen}:{}),survivors:Number.isInteger(e.survivors)&&e.survivors>=0&&e.survivors<=3?e.survivors:null,items:e.items&&typeof e.items==='object'?{potion:factCount(e.items.potion),cleanse:factCount(e.items.cleanse),ether:factCount(e.items.ether)}:null});
-export function readMemory(raw){try{const m=JSON.parse(raw);if(m?.version!==1)return freshMemory();return {version:1,preference:['brief','detailed'].includes(m.preference)?m.preference:null,lessons:Array.isArray(m.lessons)?m.lessons.filter(x=>typeof x==='string').slice(-12):[],events:Array.isArray(m.events)?m.events.filter(x=>x&&typeof x.result==='string').slice(-12).map(e=>({...e,...readEventFacts(e)})):[],pendingQuiz:m.pendingQuiz&&typeof m.pendingQuiz.explanation==='string'&&typeof m.pendingQuiz.question==='string'&&['先','后','不确定'].includes(m.pendingQuiz.answer)?m.pendingQuiz:null,dialogue:Array.isArray(m.dialogue)?m.dialogue.filter(x=>x&&['user','assistant'].includes(x.role)&&typeof x.content==='string').slice(-8).map(x=>({...x,content:(x.role==='user'?x.content.split('\n回答要求：不要向玩家报内部局面评分')[0]:x.content).slice(0,600)})):[],lastTopic:typeof m.lastTopic==='string'?m.lastTopic:null,journal:Array.isArray(m.journal)?m.journal.filter(e=>e&&typeof e.id==='string'&&typeof e.time==='string').slice(-240):[],reflections:m.reflections&&typeof m.reflections==='object'?Object.fromEntries(Object.entries(m.reflections).filter(([k,v])=>v&&Array.isArray(v.evidenceIds))):{},watches:Array.isArray(m.watches)?m.watches.filter(w=>w&&['energy','finish'].includes(w.kind)&&typeof w.matchId==='string'&&Number.isInteger(w.expiresTurn)).slice(0,1):[],quizCount:Number.isInteger(m.quizCount)&&m.quizCount>=0?m.quizCount:0,goal:['稳健','速攻'].includes(m.goal)?m.goal:null,ruleReferenceId:typeof m.ruleReferenceId==='string'?m.ruleReferenceId:null,favorite:typeof m.favorite==='string'?m.favorite:null,stated:readStated(m.stated),mood:readMood(m.mood),quizLog:readQuizLog(m.quizLog)};}catch{return freshMemory();}}
+const readEventFacts=e=>({enemy:factNames(e.enemy),faints:factNames(e.faints),...(Number.isInteger(e.firstLossTurn)&&e.firstLossTurn>0?{firstLossTurn:e.firstLossTurn}:{}),...(typeof e.firstFallen==='string'&&e.firstFallen.length<=12?{firstFallen:e.firstFallen}:{}),...(typeof e.lowHp==='boolean'?{lowHp:e.lowHp}:{}),survivors:Number.isInteger(e.survivors)&&e.survivors>=0&&e.survivors<=3?e.survivors:null,items:e.items&&typeof e.items==='object'?{potion:factCount(e.items.potion),cleanse:factCount(e.items.cleanse),ether:factCount(e.items.ether)}:null});
+export function readMemory(raw){try{const m=JSON.parse(raw);if(m?.version!==1)return freshMemory();const d=DERIVED_MEMORY_KEYS.filter(k=>Object.hasOwn(m,k));const next={version:1,preference:['brief','detailed'].includes(m.preference)?m.preference:null,lessons:Array.isArray(m.lessons)?m.lessons.filter(x=>typeof x==='string').slice(-12):[],events:Array.isArray(m.events)?m.events.filter(x=>x&&typeof x.result==='string').slice(-12).map(e=>({...e,...readEventFacts(e)})):[],pendingQuiz:m.pendingQuiz&&typeof m.pendingQuiz.explanation==='string'&&typeof m.pendingQuiz.question==='string'&&['先','后','不确定'].includes(m.pendingQuiz.answer)?m.pendingQuiz:null,dialogue:Array.isArray(m.dialogue)?m.dialogue.filter(x=>x&&['user','assistant'].includes(x.role)&&typeof x.content==='string').slice(-8).map(x=>({...x,content:(x.role==='user'?x.content.split('\n回答要求：不要向玩家报内部局面评分')[0]:x.content).slice(0,600)})):[],lastTopic:typeof m.lastTopic==='string'?m.lastTopic:null,journal:Array.isArray(m.journal)?m.journal.filter(e=>e&&typeof e.id==='string'&&typeof e.time==='string').slice(-240):[],reflections:m.reflections&&typeof m.reflections==='object'?Object.fromEntries(Object.entries(m.reflections).filter(([k,v])=>v&&Array.isArray(v.evidenceIds))):{},watches:Array.isArray(m.watches)?m.watches.filter(w=>w&&['energy','finish'].includes(w.kind)&&typeof w.matchId==='string'&&Number.isInteger(w.expiresTurn)).slice(0,1):[],quizCount:Number.isInteger(m.quizCount)&&m.quizCount>=0?m.quizCount:0,goal:['稳健','速攻'].includes(m.goal)?m.goal:null,ruleReferenceId:typeof m.ruleReferenceId==='string'?m.ruleReferenceId:null,favorite:typeof m.favorite==='string'?m.favorite:null,stated:readStated(m.stated),mood:readMood(m.mood),quizLog:readQuizLog(m.quizLog)};for(const k of d)delete next[k];return next;}catch{return freshMemory();}}
 /**
  * 记一条玩家明说的偏好 / 拒绝 / 情绪。
  *
@@ -49,6 +51,15 @@ export function matchFacts(game){
   ...(Number.isInteger(firstLossTurn)?{firstLossTurn,firstFallen}:{}),survivors:pets.filter(p=>p&&p.hp>0).length,
   items:{potion:factCount(items?.potion),cleanse:factCount(items?.cleanse),ether:factCount(items?.ether)}};
 }
+// ── 习惯判据里「残血」的定义：在场精灵血量占上限 30% 以下 ─────────────────────
+// 只在样本行自己带着当时的血量事实时才算得出（见 rememberDecision 的 game 入参）；
+// 没有这个事实的行**不算样本**，不用别的字段凑。
+export const LOW_HP_RATIO=.3;
+const lowHpFact=game=>{
+ const s=game?.player,pet=Array.isArray(s?.pets)?s.pets[s.active]:null;
+ return pet&&Number.isFinite(pet.hp)&&Number.isFinite(pet.maxHp)&&pet.maxHp>0?(pet.hp/pet.maxHp<=LOW_HP_RATIO):null;
+};
+const lowHpRow=e=>e?.lowHp===true||e?.lowHp===false?e.lowHp:null;
 export function rememberBattle(memory,game){if(!game?.result||game.preview)return memory;const m=structuredClone(memory);if(game.id&&m.events.some(e=>e.id===game.id))return m;m.events.push({id:game.id||null,result:game.result,stage:game.stageName||'训练场',turns:game.turn,time:new Date().toISOString(),source:'local-game',rulesVersion:game.version,...matchFacts(game)});m.events=m.events.slice(-12);return m;}
 
 // Evidence-bearing local memory. Behavioural hypotheses never override explicit controls.
@@ -59,8 +70,12 @@ export function recordCoachEvent(memory,event){
  m.journal.push({...event,time:event.time||new Date().toISOString(),rulesVersion:event.rulesVersion||'0.6',source:'local-game',confidence:event.confidence??1});
  m.journal=m.journal.slice(-240);return m;
 }
-export function rememberDecision(memory,{matchId,turn,lesson,reasonable,prompted,scoreGap,rulesVersion,caseKey}){
- let m=recordCoachEvent(memory,{id:`${matchId}:decision:${turn}`,kind:'decision',matchId,turn,lesson,reasonable,prompted,scoreGap,rulesVersion,caseKey,confidence:.6});
+// `lowHp` 是**当时局面的事实**（在场精灵血量低于 LOW_HP_RATIO），不是推断：
+// 调用方（src/client/app.js 出招前那一处）手里就有局面，把 game 一并传进来即可；
+// 传不了就留空——宁可这一条样本不参与「残血习惯」，也不许事后拿别的字段假装它在残血。
+export function rememberDecision(memory,{matchId,turn,lesson,reasonable,prompted,scoreGap,rulesVersion,caseKey,game=null}){
+ const lowHp=lowHpFact(game);
+ let m=recordCoachEvent(memory,{id:`${matchId}:decision:${turn}`,kind:'decision',matchId,turn,lesson,reasonable,prompted,scoreGap,rulesVersion,caseKey,confidence:.6,...(lowHp===null?{}:{lowHp})});
  const relevant=m.journal.filter(e=>e.kind==='decision'&&e.lesson===lesson&&!e.prompted);
  const recent=relevant.slice(-6),good=recent.filter(e=>e.reasonable);
  m.reflections??={};
@@ -191,6 +206,7 @@ export function coachSelfAudit(memory){
 //      deleteMemoryItem / clearMemory）。
 //   ② 系统观察到的行为 → memory.journal / memory.events / memory.lessons / memory.quizLog。
 //   ③ 从①②推出来的判断 → memory.reflections / memory.mood：永远是**假设**，不是标签。
+//      同层还有 T12 的三类读数：memory.habits / skill / acceptance（见下面 T12 一段）。
 // ①② 可以逐条删；删掉之后引用它的 ③ 必须一起消失（purgeDerived）。否则删除只是把条目
 // 藏起来，习惯判断还接着引用它——那正是「删了还在说」的成因。
 //
@@ -415,9 +431,225 @@ export function quizMastery(memory,{skillKey=null,quizId=null}={}){
  return {skillKey,quizId,attempts:rows.length,correct:rows.filter(a=>a.correct).length,independentCorrect:independent.length,distinctVariants:variants.size,evidenceIds:independent.map(a=>a.id),
   mastered,status:mastered?'出现过跨变式的独立答对，仍需观察':independent.length?'一次答对不构成掌握，再看下一个变式':'还没有独立答对的证据',causalClaim:false};
 }
+// ══════════════════════════════════════════════════════════════════════════════
+// T12：Memory 的三类读数——① 对局/回合记录（events + journal，已有）
+//                          ② 习惯 + 水平（habits / skill，这一块是新补的缺口）
+//                          ③ 对 AI 辅助的接受度（acceptance，把三档信号合成一次）
+// ══════════════════════════════════════════════════════════════════════════════
+// 三条纪律，写在这里免得后来的人重新踩：
+//
+// 1) **三类都属于「关于玩家」**，与规则/图鉴那类世界知识（RAG）分开存。判别口诀：
+//    换个玩家就该不一样 ⇒ Memory；换个玩家必须一模一样 ⇒ RAG。所以这三类不新增任何
+//    知识库输入，存储位置是 memory.habits / memory.skill / memory.acceptance，
+//    与 rag-index.js 的 RAG_INPUTS（pack / ledger / rulesetDir / heldout / report…）
+//    没有任何交集（tests/roco-memory-three-classes.test.js 有静态断言钉着）。
+//
+// 2) **读数永远是派生量，不是账本**。它们由 events / journal / quizLog / stated 现算，
+//    每条读数带 {value,sampleN,evidenceIds[],source,method:'stats',updatedAt}。
+//    玩家不能直接改读数（他和 correctMemoryItem 一样只能纠正自己说过的 stated 条目），
+//    但删掉依据必须让它一起消失——purgeDerived 会清掉缓存读数，见那里的说明。
+//
+// 3) **样本不够就不出数**。minSamples 与 QUIZ_MASTERY / RELEARN 同族：一个样本不构成
+//    习惯，也不构成掌握。读数只有两种形态，调用方必须分得清：
+//      · `insufficient:true` ⇒ value 一律 null，但 sampleN 与 evidenceIds 照旧给出
+//        （「有几条、是哪几条」与「够不够下结论」是两件事）；
+//      · `insufficient:false` ⇒ value 有数，且 sampleN === evidenceIds.length
+//        （样本数与证据条数在这类读数里必须是同一个数，否则 sampleN 就是编的）。
+export const MEMORY_MIN_SAMPLES=5;                 // 习惯 / 水平：少于 5 条依据不出数
+export const ACCEPTANCE_MIN_SAMPLES=3;             // 接受度：明说信号本来就稀少，门槛另设
+export const HABIT_WINDOW_MATCHES=20;              // 习惯是**滚动窗口**：最近 20 局
+export const HABIT_WINDOW_MS=30*86400000;          // ……或最近 30 天，先到为准
+// 「点掉」的统计窗口（7 天）。**故意不等于** REFUSAL_TTL_MS(6h) 与 ROLE_SILENCE_MS(30min)：
+// 三个时长量的是三件不同的事——「明说的拒绝多久算数」「点掉一次多久算数」「这一类安静多久」。
+// 把它们统一成一个数就等于把三档信号压成一档，所以 playerAcceptance 每次都会核对这一点。
+export const DISMISS_WINDOW_MS=7*86400000;
+export const ACCEPTANCE_WINDOW_SPREAD_OK=REFUSAL_TTL_MS!==DISMISS_WINDOW_MS&&DISMISS_WINDOW_MS!==ROLE_SILENCE_MS&&REFUSAL_TTL_MS!==ROLE_SILENCE_MS;
+const DERIVED_MEMORY_KEYS=['habits','skill','acceptance'];
+export const MEMORY_READING_SOURCE={habits:'stats:journal',skill:'stats:quiz+journal',acceptance:'stats:stated+journal'};
+// 三种状态写清楚，免得调用方把「没证据」读成「没问题」：
+//   value 有数        = 样本够了，这个数可以拿出来说；
+//   value:null + insufficient:false = 不是「样本不足」，是**窗口里没有这类样本**（它不出数也不报错）；
+//   value:null + insufficient:true  = 有样本但不够数，明说不够。
+const reading=(value,sampleN,evidenceIds,source,note=null)=>({
+ value:Number.isFinite(value)?value:null,sampleN,evidenceIds,source,method:'stats',insufficient:!Number.isFinite(value),...(note?{note}:{})});
+const insufficient=(sampleN,source,note)=>reading(null,sampleN,[],source,note||'样本不够，不出数');
+const insufficientMsg=n=>`只有 ${n} 条依据，不够 ${MEMORY_MIN_SAMPLES} 条，不出数`;
+// stats() 只做「读数 → 要存下来的那几个字段」的转换，别处一律读现算的结果。
+const stats=(r,{now=Date.now(),extra={}}={})=>({value:r.value,sampleN:r.sampleN,evidenceIds:[...(Array.isArray(r.evidenceIds)?r.evidenceIds:[])],source:r.source,method:'stats',
+ updatedAt:new Date(now).toISOString(),insufficient:r.insufficient===true,...(r.note?{note:r.note}:{}),...extra});
+function windowedDecisions(memory,{now=Date.now(),matchLimit=HABIT_WINDOW_MATCHES}={}){
+ const journal=(Array.isArray(memory?.journal)?memory.journal:[]).filter(e=>e&&e.kind==='decision');
+ const fresh=journal.filter(e=>Number.isFinite(Date.parse(e.time))&&now-Date.parse(e.time)<=HABIT_WINDOW_MS);
+ const events=(Array.isArray(memory?.events)?memory.events:[]).filter(e=>typeof e?.id==='string');
+ // 「最近 N 局」这一半只有在**对局账本里真有这些局**时才有意义：账本还是空的时候，
+ // 一条挂在对局上的 decision 也照样是这一局里发生的。按「不在账本里就丢掉」过滤会把
+ // 刚写下、还没打完的那一局的读数整段切掉（实测：4 换宠 + 4 攻击被算成「没有样本」）。
+ if(!events.length)return fresh;
+ const recent=new Set(events.slice(-matchLimit).map(e=>e.id));
+ // 没挂在对局账本上的行（老师的复盘核对、测试里的合成记录）照收——窗口只用来排除**过老**的行。
+ return fresh.filter(e=>!(typeof e.matchId==='string'&&e.matchId&&!recent.has(e.matchId)));
+}
+// 习惯（两类）：① 残血时的取舍倾向 ② 是否常在提示之后才改变选择。两类都只由 journal
+// 的既有行算出来，全部可复算——同输入两次同输出，没有随机、没有「印象」。
+export function playerHabits(memory={},{now=Date.now()}={}){
+ const rows=windowedDecisions(memory,{now});
+ const base={window:{matches:HABIT_WINDOW_MATCHES,days:HABIT_WINDOW_MS/86400000,now,source:'stats:journal'},minSamples:MEMORY_MIN_SAMPLES,source:MEMORY_READING_SOURCE.habits,method:'stats'};
+ const low=rows.filter(e=>lowHpRow(e)===true),switched=low.filter(e=>e.lesson==='换宠承伤'),attacked=low.filter(e=>e.lesson!=='换宠承伤');
+ const lowHp={kind:'low-hp-choice',lowHpRatio:LOW_HP_RATIO,switched:switched.length,attacked:attacked.length,
+  ...(low.length>=MEMORY_MIN_SAMPLES
+   ?{...reading(Math.round(switched.length/low.length*100)/100,low.length,low.map(e=>e.id),MEMORY_READING_SOURCE.habits),
+     label:switched.length>attacked.length?'残血时更常换宠承伤':attacked.length>switched.length?'残血时更常继续攻击':'残血时换宠与攻击差不多',
+     minority:Math.min(switched.length,attacked.length)}
+   :{...insufficient(low.length,MEMORY_READING_SOURCE.habits,low.length?insufficientMsg(low.length):'窗口里没有「当时残血」这条事实，可能是调用方记账时没带上当时的局面'),
+     evidenceIds:low.map(e=>e.id),
+     label:'样本不够，不判断残血时的倾向',minority:0})};
+ // 「是否常在提示后才改变选择」判据是 prompted：这一手是在**已经给过提示之后**做的。
+ // 只看被提示过的那些行，所以它不与 transferAssessment 抢同一条证据（那边只收 !prompted）。
+ // 样本不够时 value 是 null，但 sampleN 与 evidenceIds 照旧成立——「有几条、是哪几条」
+ // 与「够不够下结论」是两件事，混在一起就会让样本数看起来是编的。
+ const prompted=rows.filter(e=>e.prompted===true),independent=rows.filter(e=>!e.prompted);
+ const afterHint={kind:'after-hint-change',promptedCount:prompted.length,independentCount:independent.length,
+  ...(prompted.length>=MEMORY_MIN_SAMPLES
+   ?{...reading(Math.round(prompted.length/(prompted.length+independent.length)*100)/100,prompted.length,prompted.map(e=>e.id),MEMORY_READING_SOURCE.habits),
+     label:prompted.length/(prompted.length+independent.length)>=.5?'改变选择多数发生在提示之后':'多数改变是没等提示就做了'}
+   :{...insufficient(prompted.length,MEMORY_READING_SOURCE.habits,prompted.length?insufficientMsg(prompted.length):'窗口里没有「被提示之后才改」的记录'),evidenceIds:prompted.map(e=>e.id),label:'样本不够，不判断依赖提示的程度'})};
+ return {...base,lowHpChoice:lowHp,afterHintChange:afterHint};
+}
+// 水平分维度：**不给总分**。机制理解（quiz）/ 迁移能力（transferAssessment）/ 课程进度
+// （lessons + 同一条 transferAssessment 判据）/ 决策质量（journal 的 reasonable 比例）。
+// 四维各自带证据 id 与样本数，样本不够的维度 value:null，不参与 overall。
+// 课程进度这一维：memory 里**没有** checkLearningProgress 的持久结果（那个函数要当场的
+// match 才算得出来，见 teacher-review.js），所以这里只读它留在 memory 里的既有字段
+// （lessons 账本 + decision 行），口径写在 progressBasis 里，不冒充「老师核对过」。
+export function playerSkill(memory={}){
+ const journal=(Array.isArray(memory?.journal)?memory.journal:[]).filter(e=>e&&e.kind==='decision');
+ const quiz=readQuizLog(memory?.quizLog);
+ const independent=quiz.filter(a=>a.independent);
+ const variants=mastered=>new Set(mastered.map(a=>a.variantOf||a.quizId));
+ const indVariants=variants(independent);
+ const mechanism=independent.length>=QUIZ_MASTERY.minIndependent&&indVariants.size>=QUIZ_MASTERY.minVariants
+  ?{...reading(Math.round(independent.length/quiz.length*100)/100,independent.length,independent.map(a=>a.id),MEMORY_READING_SOURCE.skill),
+    label:`跨 ${indVariants.size} 个变式独立答对 ${independent.length} 次`,detail:{independentCorrect:independent.length,distinctVariants:indVariants.size,attempts:quiz.length}}
+  :{...insufficient(independent.length,MEMORY_READING_SOURCE.skill,quiz.length?`${quiz.length} 次作答里只有 ${independent.length} 次是没看提示的独立答对`:'还没有练习作答记录'),label:'机制理解：样本不够，不出数',detail:{independentCorrect:independent.length,distinctVariants:indVariants.size,attempts:quiz.length}};
+ const byLesson=new Map();
+ for(const e of journal)if(typeof e.lesson==='string'&&e.lesson)byLesson.set(e.lesson,[...(byLesson.get(e.lesson)||[]),e]);
+ const lessonKeys=[...byLesson.keys()];
+ const transferRows=lessonKeys.map(lesson=>transferAssessment(memory,lesson));
+ const transferred=transferRows.filter(t=>t.status.startsWith('出现跨局独立迁移迹象'));
+ const transfer=transferred.length
+  ?{...reading(transferred.length/transferRows.length,transferred.reduce((n,t)=>n+t.independentAttempts,0),transferred.flatMap(t=>t.evidenceIds),MEMORY_READING_SOURCE.skill),
+    label:`${transferred.length}/${transferRows.length} 门课出现跨局独立迁移迹象`,detail:{lessons:transferred.map(t=>t.lesson)}}
+  :{...insufficient(transferRows.length,MEMORY_READING_SOURCE.skill,transferRows.length?'还没有一门课凑够「跨局 + 多局面 + 独立做对」的证据':'还没有可判断的课'),label:'迁移能力：样本不够，不出数',detail:{lessons:[]}};
+ // 课程进度不发「课」的推断，只做除法：最近 6 条独立行动里合理的占比。
+ // 这样第 3 条判据（删掉一条依据 ⇒ 读数跟着变）在这一维上是算术上必然成立的。
+ const taught=(Array.isArray(memory?.lessons)?memory.lessons:[]).filter(x=>typeof x==='string'&&byLesson.has(x));
+ const progressRows=taught.length?journal.filter(e=>!e.prompted&&taught.includes(e.lesson)).slice(-6):[];
+ const progressGood=progressRows.filter(e=>e.reasonable===true).length;
+ const progress=taught.length&&progressRows.length>=MEMORY_MIN_SAMPLES
+  ?{...reading(Math.round(progressGood/progressRows.length*100)/100,progressRows.length,progressRows.map(e=>e.id),MEMORY_READING_SOURCE.skill),
+    label:`最近 ${progressRows.length} 次独立行动里 ${progressGood} 次合理`,progressBasis:'只读 memory 里的 lessons 账本与 decision 行；老师当场的 checkLearningProgress 结果没有持久化，不在这一维里'}
+  :{...insufficient(progressRows.length,MEMORY_READING_SOURCE.skill,taught.length?insufficientMsg(progressRows.length):'账本里还没有讲过/练过的课'),label:'课程进度：样本不够，不出数',progressBasis:'只读 memory 里的 lessons 账本与 decision 行；老师当场的 checkLearningProgress 结果没有持久化，不在这一维里'};
+ const recent=journal.slice(-40),reasonable=recent.filter(e=>e.reasonable===true).length;
+ const decision=recent.length>=MEMORY_MIN_SAMPLES
+  ?{...reading(Math.round(reasonable/recent.length*100)/100,recent.length,recent.map(e=>e.id),MEMORY_READING_SOURCE.skill),
+    label:`最近 ${recent.length} 次行动里 ${reasonable} 次合理（一回合启发式比较，不等于真正掌握）`}
+  :{...insufficient(recent.length,MEMORY_READING_SOURCE.skill,recent.length?insufficientMsg(recent.length):'还没有行动记账'),label:'决策质量：样本不够，不出数'};
+ const dimensions={mechanism,transfer,progress,decision};
+ const clear=Object.entries(dimensions).filter(([,r])=>!r.insufficient);
+ // overall 只是**够数的那些维度的均值**，不是「掌握度总分」。它的 sampleN 是各维样本数之和，
+ // 而 evidenceIds 是去重后的并集（同一条 decision 会同时进「迁移」和「课程进度」两维），
+ // 所以 overall 的 sampleN **不等于** evidenceIds.length —— 逐维的那条不变式在维度上成立。
+ const overall={dimensionCount:clear.length,...(clear.length
+  ?reading(Math.round(clear.reduce((s,[,r])=>s+r.value,0)/clear.length*100)/100,clear.reduce((s,[,r])=>s+r.sampleN,0),[...new Set(clear.flatMap(([,r])=>r.evidenceIds))],MEMORY_READING_SOURCE.skill)
+  :insufficient(0,MEMORY_READING_SOURCE.skill,'四个维度都没有够数的证据'))};
+ // 水平**没有时间窗口**，也不随时间衰减：学会的东西不会因为一周没玩就忘。
+ // 它会变只有两种原因——出现新证据，或者删掉旧证据（purgeDerived）。
+ return {source:MEMORY_READING_SOURCE.skill,method:'stats',minSamples:MEMORY_MIN_SAMPLES,decaysWithTime:false,decayBasis:'水平只随新证据更新、不随时间衰减：学会的东西不会因为一周没玩就忘',dimensions,overall};
+}
+// ── 接受度：三档**分开存、分开解释**，每一档保留自己的来源 ──────────────────────
+//   ① 明说（stated）：refusal 的 advice / review / talk → 有效期 REFUSAL_TTL_MS（6 小时）
+//      ＋ review-after-loss='no'（玩家说过「输了先不复盘」）只进 review 档
+//   ② 行为（journal 的 dismiss 点掉提示卡）→ 只看最近 DISMISS_WINDOW_MS（7 天）内的次数
+//   ③ 情绪假设（memory.mood）→ MOOD_TTL_MS（30 分钟）：**只记下来，不进任何一档的分子**
+// ①②③ 都只在玩家**自己**做过什么时产生证据。⚠️ 静默不产生任何一档证据（照 memory.js
+// 既有的情绪纪律）：没有说话、没有点掉时，逐字与上一刻相同——「他没反对」不是「他接受」。
+//
+// 「明说」与「点掉」两档信号**分开放**，谁也不降级成谁：
+//   · 点掉记录的 `channel` 记的是**角色**（teacher / strategist，见 dismissRole），
+//     没有「点掉的是建议还是复盘」这种信息。所以在「哪一档更不准」这个问题上，
+//     它按 ACCEPTANCE_DISMISS_WEIGHT 折算成**怀疑票**，而不是当成「拒绝建议」的样本；
+//     折算权重写成一个常量，将来接了新的点掉类型就改这一个地方。
+//   · acceptRate 的分母只算**有足够明说证据的档位**（evidencedChannels）：没有证据的档位是
+//     「不知道」，既不记成接受、也不记成拒绝；点掉的怀疑票只按权重扣分。
+// REFUSAL_TTL_MS(6h) / DISMISS_WINDOW_MS(7天) / ROLE_SILENCE_MS(30min) 三个数刻意不同：
+// 它们量的分别是「明说的拒绝多久算数」「点掉一次多久算数」「这一类安静多久」。统一成一个数
+// 就等于把三档信号压成一档，所以 playerAcceptance 每次都核对这一点（spreadOk）。
+export const ACCEPTANCE_CHANNEL_OF_DISMISS={teacher:'review',strategist:'advice',any:'advice',inline:'advice'};
+export const ACCEPTANCE_DISMISS_WEIGHT=.5;
+export function playerAcceptance(memory={},{now=Date.now()}={}){
+ const stated=readStated(memory?.stated);
+ const live=stated.filter(i=>!Number.isFinite(i.until)||now<i.until);
+ const journal=(Array.isArray(memory?.journal)?memory.journal:[]).filter(e=>e&&e.kind==='dismiss');
+ const dismissed=journal.filter(e=>Number.isFinite(Date.parse(e.time))&&now-Date.parse(e.time)<=DISMISS_WINDOW_MS);
+ const mood=moodHypothesis(memory,{now});
+ const buckets={
+  advice:live.filter(i=>i.kind==='refusal'&&i.value==='advice'),
+  // review 档有两个来源，但它们是**同一个信号**：refusal:review（「别复盘」）与
+  // review-after-loss='no'（「输了先不复盘」）。玩家说一句「别复盘了」会同时写下这两条，
+  // 所以按**去重后的信号数**算样本——否则一句话会被数成两条明说（实测踩到）。
+  review:[...new Set([...live.filter(i=>i.kind==='refusal'&&i.value==='review'),...live.filter(i=>i.kind==='review-after-loss'&&i.value==='no')].map(i=>i.id))]
+   .map(id=>live.find(i=>i.id===id)).filter(Boolean),
+  talk:live.filter(i=>i.kind==='refusal'&&i.value==='talk')};
+ // 同一档里的同义条目只算一个信号：玩家说一句「别复盘了」会同时写下 refusal:review 与
+ // review-after-loss='no'，`refusal:*` 更具体、优先；没有它时，'no' 也算一次明说信号。
+ const signals=list=>{const explicit=list.filter(i=>i.kind==='refusal');return explicit.length?explicit:[...list].slice(0,1);};
+ const channels={};
+ for(const k of ['advice','review','talk']){
+  const rows=buckets[k],mine=signals(rows);
+  // 这一档相关的点掉：按角色折算（老师卡 → review，军师提示 → advice）。
+  const related=dismissed.filter(e=>ACCEPTANCE_CHANNEL_OF_DISMISS[dismissRole(e.channel)]===k);
+  const refusedBy={explicit:true,ttlMs:REFUSAL_TTL_MS,items:mine.map(i=>({id:i.id,kind:i.kind,until:i.until||null})),rows:rows.map(i=>i.id)};
+  const dismissedBy={behavior:'dismiss',channel:k,windowMs:DISMISS_WINDOW_MS,count:related.length,ids:related.map(e=>e.id),weight:ACCEPTANCE_DISMISS_WEIGHT,
+   basis:'点掉记的是角色（teacher/strategist），没有「点掉的是建议还是复盘」这种信息，所以折算成怀疑票、不当成明说拒绝的样本'};
+  // sampleN = **去重后的明说信号数**；点掉既不是明说、也不是决策依据的样本，它只进怀疑票。
+  // value = 这一档的明说读数：1 = 他明确说过「先别」（6 小时内有效），0 = 没有说过。
+  // evidenceIds 保留这一档全部条目 id（面板要能一条条列出来），去重只作用于「算几次」。
+  channels[k]=mine.length>=ACCEPTANCE_MIN_SAMPLES
+   ?{...reading(mine.length?1:0,mine.length,mine.map(i=>i.id),MEMORY_READING_SOURCE.acceptance),
+     label:'这一档玩家明说过不愿意的次数够数了',refusedBy,dismissedBy}
+   :{...insufficient(mine.length,MEMORY_READING_SOURCE.acceptance,'这一档还没有足够的明说信号'),evidenceIds:rows.map(i=>i.id),label:'这一档还没有足够的明说信号',refusedBy,dismissedBy};
+  if(mine.length)channels[k].refusedUntil=mine.map(i=>i.until).filter(Number.isFinite).at(-1)||null;
+ }
+ const sampleN=Object.values(channels).reduce((n,c)=>n+c.sampleN,0);
+ // 明说这一层：分母只算有足够明说证据的档位；点掉的怀疑票按权重扣。
+ const evidenced=Object.values(channels).filter(c=>!c.insufficient);
+ const suspicious=Object.values(channels).reduce((n,c)=>n+c.dismissedBy.count*ACCEPTANCE_DISMISS_WEIGHT,0);
+ const acceptRate=evidenced.length?Math.max(0,Math.round((1-(evidenced.filter(c=>c.refusedBy.items.length>0).length+suspicious)/evidenced.length)*100)/100):null;
+ return {channels,acceptRate,evidencedChannels:evidenced.length,sampleN,minSamples:ACCEPTANCE_MIN_SAMPLES,
+  lastDismissAt:dismissed.map(e=>e.time).sort().at(-1)||null,suspicionWeight:ACCEPTANCE_DISMISS_WEIGHT,
+  distinctWindows:{refusalTtlMs:REFUSAL_TTL_MS,dismissWindowMs:DISMISS_WINDOW_MS,roleSilenceMs:ROLE_SILENCE_MS,spreadOk:ACCEPTANCE_WINDOW_SPREAD_OK,
+   basis:'三个时长刻意不同：明说的拒绝 6 小时、点掉一次 7 天、这一档安静 30 分钟；统一成一个数就是把三档信号压成一档'},
+  mood:{...(mood?{label:mood.label,expiresAt:mood.expiresAt}:{}),affectsAcceptance:false,basis:'情绪假设只记下来，不进任何一档的分子：心情不好不等于不接受辅助'},
+  enough:channels.advice.sampleN>=ACCEPTANCE_MIN_SAMPLES||channels.review.sampleN>=ACCEPTANCE_MIN_SAMPLES||channels.talk.sampleN>=ACCEPTANCE_MIN_SAMPLES,
+  source:MEMORY_READING_SOURCE.acceptance,method:'stats'};
+}
+// 合并一次，落盘成三个字段。谁要「读一次就记住」就调它；**空读数不写**（没有证据的类不占位置）。
+export function memoryDerivations(memory={},{now=Date.now()}={}){
+ let m=structuredClone(memory);
+ for(const k of DERIVED_MEMORY_KEYS)delete m[k];
+ const habits=playerHabits(m,{now}),skill=playerSkill(m),acceptance=playerAcceptance(m,{now});
+ m.habits=stats(habits.lowHpChoice,{now,extra:{window:habits.window,afterHintChange:stats(habits.afterHintChange,{now})}});
+ m.skill=stats(skill.overall,{now,extra:{decaysWithTime:false,dimensions:Object.fromEntries(Object.entries(skill.dimensions).map(([k,r])=>[k,stats(r,{now})]))}});
+ m.acceptance=stats({value:acceptance.acceptRate,sampleN:acceptance.sampleN,evidenceIds:[...new Set(Object.values(acceptance.channels).flatMap(c=>c.evidenceIds))],source:MEMORY_READING_SOURCE.acceptance,insufficient:!acceptance.enough,note:acceptance.enough?null:'三档都还没有足够的明说/点掉信号'},
+  {now,extra:{acceptRate:acceptance.acceptRate,channels:Object.fromEntries(Object.entries(acceptance.channels).map(([k,c])=>[k,{value:c.value,sampleN:c.sampleN,evidenceIds:c.evidenceIds,insufficient:c.insufficient,refusedUntil:c.refusedUntil??null,dismissedBy:c.dismissedBy}])),lastDismissAt:acceptance.lastDismissAt,enough:acceptance.enough,distinctWindows:acceptance.distinctWindows,mood:acceptance.mood}});
+ return {memory:m,habits,skill,acceptance};
+}
 // ── 级联删除（C03）──────────────────────────────────────────────────────────
 // 「删掉一条记忆」必须同时让引用它的推断失去依据，否则被删掉的事还会被说出来。
 // 只处理派生层与挂在同一场对局上的记录；**玩家自己说过的话不在这里被删**（那是 deleteMemoryItem 的事）。
+// 三档读数的缓存（memory.habits / skill / acceptance）是**派生量的副本**，所以删掉任何依据
+// 都要连着清掉它，不然「删了还在说」会从这一层重新长出来。清完之后谁要读数谁现算
+// （playerHabits / playerSkill / playerAcceptance 都是纯函数，同输入两次同输出）。
 export function purgeDerived(memory,ids=[]){
  const m=structuredClone(memory),dead=new Set((ids||[]).filter(x=>typeof x==='string'));
  if(!dead.size)return m;
@@ -441,10 +673,13 @@ export function purgeDerived(memory,ids=[]){
   if(m.mood&&(dead.has(m.mood.id)||(m.mood.evidenceIds||[]).some(x=>dead.has(x)))){m.mood=null;changed=true;}
   if(!changed)break;
  }
+ // 这一步在循环**外面**：循环的 changed 只管「删掉了什么」，而这三次删除有没有发生
+ // 不影响「缓存读数必须失效」。放在里面会让短路（!changed 就 break）把清理一起跳过。
+ for(const k of DERIVED_MEMORY_KEYS)if(Object.hasOwn(m,k))delete m[k];
  return m;
 }
 // ── 记忆控制：查看 / 纠正 / 逐条删除 / 全部清空（C03）────────────────────────
-export const MEMORY_GROUPS={stated:'玩家说过的偏好',events:'对局记录',journal:'行为记录',reflections:'推断与假设',lessons:'教学记录',quiz:'练习与待作答',mood:'情绪假设',watches:'条件委托',dialogue:'对话存档'};
+export const MEMORY_GROUPS={stated:'玩家说过的偏好',events:'对局记录',journal:'行为记录',reflections:'推断与假设',habits:'习惯读数',skill:'水平读数',acceptance:'接受度读数',lessons:'教学记录',quiz:'练习与待作答',mood:'情绪假设',watches:'条件委托',dialogue:'对话存档'};
 // 查看：每一条都带来源与时间。derived=true 的是推断出来的，删掉它的依据就会一起消失。
 export function memoryItems(memory={}){
  const rows=[];
@@ -459,6 +694,14 @@ export function memoryItems(memory={}){
  for(const lesson of Array.isArray(memory.lessons)?memory.lessons:[]){
   const taught=[...(memory.journal||[])].reverse().find(e=>e.kind==='teach'&&e.lesson===lesson)||null;
   rows.push({id:`lesson:${lesson}`,kind:'lesson',group:'lessons',label:`讲过/练过：${lesson}`,value:lesson,source:taught?.source||'coach-record',time:taught?.time||'',derived:false,evidenceIds:[]});
+ }
+ // T12 三类读数里的派生量（习惯 / 水平 / 接受度）也进这张表：**只有算过、存下来的才显示**
+ // （没证据的读数没有 evidenceIds，宁可不在面板上占一行，也不显示一个「null」）。
+ // 每行都带 source / time / derived / evidenceIds，与其它行同一套字段。
+ for(const [group,cached] of [['habits',memory.habits],['skill',memory.skill],['acceptance',memory.acceptance]]){
+  if(!cached||cached.value===null||!Array.isArray(cached.evidenceIds)||!cached.evidenceIds.length)continue;
+  rows.push({id:`derived:${group}`,kind:group,group,label:`${MEMORY_GROUPS[group]}：${cached.value}（${cached.sampleN} 条依据）`,value:cached.value,
+   source:cached.source||MEMORY_READING_SOURCE[group],time:cached.updatedAt||'',derived:true,evidenceIds:cached.evidenceIds,method:cached.method||'stats'});
  }
  return rows.sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
 }
@@ -503,7 +746,7 @@ export function deleteMemoryItem(memory,{id,now=Date.now()}={}){
 }
 // 全部清空（或按组清空）。清空的是记忆，不是游戏成长——成长在 profile 里，这一层一个字都不碰。
 export function clearMemory(memory,{groups=null}={}){
- const m=structuredClone(memory);
+ let m=structuredClone(memory);
  if(!groups||!groups.length)return {memory:freshMemory(),cleared:Object.keys(MEMORY_GROUPS)};
  const cleared=[];
  for(const g of groups){
@@ -516,9 +759,14 @@ export function clearMemory(memory,{groups=null}={}){
   else if(g==='mood')m.mood=null;
   else if(g==='watches')m.watches=[];
   else if(g==='dialogue'){m.dialogue=[];m.lastTopic=null;}
+  else if(DERIVED_MEMORY_KEYS.includes(g)){/* 见循环后面的重算：这里只需要让它落进 cleared */}
   else continue;
   cleared.push(g);
  }
+ // 先按组清掉**依据**，最后把三类派生读数重算一遍：算不出来（依据被清了）的自然就不写回来。
+ // 清「读数」这一组本身时只删缓存，依据一个字不动——删了以后要再看得重新算。
+ for(const k of DERIVED_MEMORY_KEYS)if(Object.hasOwn(m,k))delete m[k];
+ if(cleared.some(g=>DERIVED_MEMORY_KEYS.includes(g)))m=memoryDerivations(m).memory;
  // 只有真的清掉了「玩家说过的偏好」时才重算旧字段：否则清一次对话记录会把
  // 旧存档里没有 stated 条目的 favorite/goal/preference 一起抹掉。
  if(cleared.includes('stated'))syncKinds(m,new Set(['favorite','chat-style','goal']));

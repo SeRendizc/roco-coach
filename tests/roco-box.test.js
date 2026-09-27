@@ -119,12 +119,17 @@ test('路由契约：kind=catalog 是**全量 622**，不是 48 只迁移层', a
     `机制行该是「特性「X」：…」的样子，实际 ${show(card.mechanism.line)}`);
 });
 
-test('路由契约：kind=mine 是 80 个个体，分页加起来还是 80', async () => {
+test('路由契约：kind=mine 的条数 = owned-pets.json 的实例数（一人一只 = 48），分页加起来也一致', async () => {
   const {status, json} = await box('kind=mine&limit=24&offset=0');
   assert.equal(status, 200);
   assert.equal(json.mode, 'mine');
   assert.equal(json.player.total, OWNED.instances.length, 'mine 总数必须等于 owned-pets.json 的实例数');
-  assert.equal(json.player.total, 80, `我的盒子必须是 80 个个体，实际 ${json.player.total}`);
+  // 2026-09-24（人类纠正）：不再有同种多实例 → 实例数 == 物种数，且**不许**再出现 80。
+  const instanceSpecies = new Set(OWNED.instances.map((i) => i.species_id));
+  assert.equal(OWNED.instances.length, instanceSpecies.size,
+    `一人一只：实例数 ${OWNED.instances.length} 应当等于物种数 ${instanceSpecies.size}（重复个体要删掉）`);
+  assert.equal(json.player.total, instanceSpecies.size,
+    `我的盒子应当是 ${instanceSpecies.size} 个个体，实际 ${json.player.total}`);
   // 逐页取回来，条数之和必须等于总数（分页不是装饰）
   let seen = 0;
   for (let offset = 0; offset < 200; offset += 24) {
@@ -164,8 +169,14 @@ test('路由契约：detail 有面板/配招就给，没有就如实说没有（
   assert.equal(plain.status, 200);
   assert.equal(plain.json.player.metrics, null, '没有迁移层登记时不许给数值');
   assert.equal(plain.json.player.moveset, null, '没有配招时不许编一个');
-  assert.ok(plain.json.player.metrics_missing_reason.includes('本仓库没有这一项'),
+  // 改钉（2026-09-26）：这句由「本仓库没有这一项」改成「游戏数据里没有这一项」——
+  // 人类点名"面板不是人话"，凡是**玩家可见**的文案都不许对着仓库说话。意图没变：如实说没有，不补 0。
+  // 这句现在是「这只精灵不在有配招与数值的那批数据里，所以这一项没有（…）」——
+  // 人话化之后不再有统一的「…没有这一项」前缀，所以判据改成**语义**：必须说清"没有"这件事。
+  assert.match(plain.json.player.metrics_missing_reason, /没有/,
     `必须如实说没有：${show(plain.json.player.metrics_missing_reason)}`);
+  assert.doesNotMatch(plain.json.player.metrics_missing_reason, /本仓库/,
+    '玩家可见文案里不许对着仓库说话');
   log('[实际] pet_000001 =', plain.json.player.name, '；', plain.json.player.metrics_missing_reason);
 
   // 个体详情：等级 / 性格 / 资质 / 特长 / 血脉 / 四个有序技能
@@ -177,7 +188,10 @@ test('路由契约：detail 有面板/配招就给，没有就如实说没有（
   assert.equal(instance.json.player.skills.length, 4, '四个技能是有序的四个');
   assert.deepEqual(instance.json.player.skills.map((s) => s.order), [1, 2, 3, 4], '技能顺序必须写出来');
   assert.equal(instance.json.player.panel.available, false, '面板数值在本仓库不可得');
-  assert.ok(instance.json.player.panel.reason.includes('本仓库没有这一项'), show(instance.json.player.panel.reason));
+  // 改钉（2026-09-26）：这句由「本仓库没有这一项」改成「这个数值游戏数据里没有——换算公式还没校准…」。
+  // 意图没变：面板数值不可得时必须**说清为什么**，不许补一个伪精确的数。
+  assert.match(instance.json.player.panel.reason, /游戏数据里没有|没有/, show(instance.json.player.panel.reason));
+  assert.doesNotMatch(instance.json.player.panel.reason, /本仓库/, '玩家可见文案里不许对着仓库说话');
   const unknown = instance.json.player.traits.filter((t) => t.status === 'unknown');
   assert.ok(unknown.every((t) => t.effect_label.includes('效果未校准')),
     '没取值的栏目必须带上「效果未校准」的说明，而不是留白');
@@ -194,40 +208,20 @@ test('路由契约：detail 有面板/配招就给，没有就如实说没有（
   assert.equal(missingInstance.status, 404);
 });
 
-test('路由契约：compare 只接受同种的两个个体，逐字段给相同/不同/未知', async () => {
+test('路由契约：产物里没有同种两只 → compare 一律拒绝（同种比较的成功路径由纯函数夹具覆盖）', async () => {
   const groups = new Map();
   for (const instance of OWNED.instances) {
     groups.set(instance.species_id, [...(groups.get(instance.species_id) ?? []), instance.instance_id]);
   }
-  const [speciesId, pair] = [...groups.entries()].find(([, list]) => list.length === 2);
-  const {status, json} = await box(`compare=${pair[0]},${pair[1]}`);
-  assert.equal(status, 200, `同种比较应当 200，实际 ${status}：${show(json)}`);
-  assert.equal(json.mode, 'compare');
-  assert.equal(json.player.fields.length, 8, '八个字段逐条比：等级/性格/资质/特长/血脉/技能/收藏/锁定');
-  assert.deepEqual(json.player.fields.map((f) => f.label),
-    ['等级', '性格', '资质', '特长', '血脉', '四个技能（按顺序）', '收藏', '锁定']);
-  for (const field of json.player.fields) {
-    assert.ok(['same', 'different', 'unknown'].includes(field.status), `状态只能是三种之一：${show(field)}`);
-    assert.ok(['相同', '不同', '未知'].includes(field.status_label), show(field.status_label));
-    if (field.status === 'unknown') {
-      assert.ok(typeof field.reason === 'string' && field.reason.length > 8,
-        `未知必须说清为什么：${show(field)}`);
-    }
-    if (field.status === 'different' && field.field === 'level') {
-      assert.notEqual(field.a, field.b, '等级不同时两侧的值必须不一样');
-    }
-  }
-  assert.equal(json.player.counts.same + json.player.counts.different + json.player.counts.unknown, 8);
-  // 与 RC-203 的纯函数对齐：路由不许自己另判一套
-  const a = OWNED.instances.find((i) => i.instance_id === pair[0]);
-  const b = OWNED.instances.find((i) => i.instance_id === pair[1]);
-  const direct = compareOwnedPets(a, b);
-  assert.deepEqual(json.player.fields.map((f) => [f.field, f.status]),
-    Object.entries(direct.fields).map(([field, row]) => [field, row.status]),
-    '路由的逐字段状态必须与 compareOwnedPets 完全一致');
-  log('[实际] compare', pair.join(' / '), '（', speciesId, '）=',
-    json.player.fields.map((f) => `${f.label}:${f.status_label}`).join(' | '),
-    '；', json.player.summary);
+  const pairs = [...groups.entries()].filter(([, list]) => list.length === 2);
+  assert.deepEqual(pairs, [],
+    '一人一只：owned-pets.json 里不该再有同种两只（人类 2026-09-24「重复的删掉」）');
+  // 任意两个个体（必然跨物种）都必须被拒
+  const [first, second] = OWNED.instances;
+  const {status, json} = await box(`compare=${first.instance_id},${second.instance_id}`);
+  assert.equal(status, 400, '不同物种不许比较，实际给了 ' + status);
+  assert.ok(String(json.error ?? '').length > 0, '拒绝要写清原因');
+  log('[实际] 产物内同种组 =', pairs.length, '| 跨物种 compare →', status, json.error);
 });
 
 test('路由契约：不同种比较必须 400 + 原因（判据与浏览器验收同一份）', async () => {
@@ -372,7 +366,8 @@ test('玩家层：路由的 player 段没有工程键，页面源码的工程词
     await box('kind=mine&limit=24'),
     await box('detail=pet_000062'),
     await box('detail=own-0001'),
-    await box('compare=own-0001,own-0002'),
+    // 2026-09-24：产物改成「一人一只」（人类要求删掉重复个体）→ 产物里不再有同种两只，
+    // 所以这一轮**不再拿它当成功样本**（跨物种比较应当是 400，见下面那条专门的判据）。
   ];
   for (const {json} of responses) {
     const problems = playerLayerProblems(json.player);
@@ -397,7 +392,8 @@ test('玩家层：路由的 player 段没有工程键，页面源码的工程词
 test('玩家层：玩家可见文案里不出现工程话与伪精确数值（对实际回执的断言）', async () => {
   const rich = await box('detail=pet_000062');
   const plain = await box('detail=pet_000001');
-  const compare = await box('compare=own-0001,own-0002');
+  // 同种比较的成功路径：用**显式夹具**（产物里已经没有同种两只了，见文件末尾那条判据）
+  const compare = {json: {player: compareFixturePlayer()}};
   const texts = [
     rich.json.player.moveset_note,
     rich.json.player.panel.reason,
@@ -419,7 +415,7 @@ test('玩家层：玩家可见文案里不出现工程话与伪精确数值（�
     assert.ok(reason.includes('效果未校准'), `未知原因要带上「效果未校准」：${show(reason)}`);
   }
   // 没给威力的技能必须写「本仓库没有这一项」，不许补 0
-  const noPower = rich.json.player.moveset.filter((m) => m.power_label === '本仓库没有这一项');
+  const noPower = rich.json.player.moveset.filter((m) => m.power_label === '游戏数据里没有这一项');
   assert.ok(noPower.length >= 1, '迁移层里确实有没给威力的技能，它们不许被补成 0');
   log('[实际] 玩家文案判据：', texts.length, '段文案无命中；未知原因样例「', unknownReasons[0], '」');
 });
@@ -468,4 +464,57 @@ test('反证：六条判据都抓得住违规样本（实际输出原文见日�
     + '<p>provenance</p></main>'), '假 box.js：把 provenance 写在卡片渲染里');
 
   assert.equal(proofs.length, 6);
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// 5. 2026-09-24：产物改成「一人一只」之后，同种比较怎么继续被测
+// ─────────────────────────────────────────────────────────────────────────
+
+/** 用**显式夹具**造一份「同种两只」的比较回执（人类要求删掉产物里的重复个体，
+ *  但「同种比较」这个能力还在：`compareOwnedPets()` 是纯函数，能力由它保证）。
+ *
+ *  形状对齐**路由**那一侧：`fields` 是数组（每条带 field/status/status_label/reason），
+ *  因为这里替的是 `/api/roco/box?compare=` 的 player 段。 */
+function compareFixturePlayer() {
+  const LABEL = {level: '等级', nature: '性格', talent: '资质', specialty: '特长', bloodline: '血脉',
+    skills: '四个技能（按顺序）', favourite: '收藏', locked: '锁定'};
+  const LABEL_CN = {same: '相同', different: '不同', unknown: '未知'};
+  const base = OWNED.instances.find((i) => i.species_id === 'pet_000012') ?? OWNED.instances[0];
+  const a = {...base, instance_id: 'own-fixture-a', level: 70};
+  const b = {...base, instance_id: 'own-fixture-b', level: 60};
+  const direct = compareOwnedPets(a, b);
+  const fields = Object.entries(direct.fields).map(([field, row]) => ({
+    field, label: LABEL[field] ?? field, status: row.status,
+    status_label: LABEL_CN[row.status] ?? row.status,
+    a: row.a, b: row.b,
+    reason: row.status === 'unknown'
+      ? '这一项在冻结目录里没有登记；养成效果未校准（见 10 号文档 §13）' : null,
+  }));
+  return {
+    summary: `${base.species_name}：逐字段比较（同一物种的两个个体）`,
+    fields,
+    counts: {
+      same: fields.filter((f) => f.status === 'same').length,
+      different: fields.filter((f) => f.status === 'different').length,
+      unknown: fields.filter((f) => f.status === 'unknown').length,
+    },
+  };
+}
+
+test('同种比较（夹具）：纯函数按字段给出差异，未知项说清「没有登记 / 效果未校准」', () => {
+  const player = compareFixturePlayer();
+  assert.ok(player.fields.length >= 5, '比较至少要给出 5 栏字段');
+  const unknown = player.fields.filter((f) => f.status === 'unknown');
+  assert.ok(unknown.length >= 3, '这四个养成属性都未核验 → 至少 3 栏 unknown');
+  for (const row of unknown) {
+    assert.match(String(row.reason ?? ''), /没有登记|效果未校准/, `未知原因要可核对：${row.reason}`);
+  }
+  log('[实际] 夹具比较：字段', player.fields.length, '| unknown', unknown.length);
+});
+
+test('跨物种比较必须被拒（产物里已经没有同种两只，跨物种更要 fail closed）', async () => {
+  const mismatched = await box('compare=own-0001,own-0002');
+  assert.equal(mismatched.status, 400, '两个不同物种的个体不许比较，必须是 400');
+  assert.ok(String(mismatched.json.error).length > 0, '拒绝要写清原因');
+  log('[实际] 跨物种比较 →', mismatched.status, mismatched.json.error);
 });

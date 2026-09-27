@@ -102,11 +102,15 @@ export const LEDGER_QUANTITIES = Object.freeze([
     id: 'standard_mana',
     topic: 'battle_mode.standard_pvp',
     quantity: '标准 PVP 每方 4 点魔力',
-    level: 'CROSS_SOURCE_SUPPORTED',
+    // 2026-09-25 改钉：人类实机口径「就是4点…就是生命数，就是4颗心」把台账那条的措辞改成
+    // 「**每方 4 点魔力**」并升到 RECORDED_IN_GAME ⇒ 命中模式跟着改（**旧措辞保留为备选，改钉不删**）。
+    // 检测器的职责是「台账里有没有登记这条未知量」，不是「它必须用哪句话写」。
+    level: 'RECORDED_IN_GAME',
     cap: 'medium',
-    pattern: '通常 4 点魔力',
+    pattern: '每方 4 点魔力',
+    pattern_alternates: ['通常 4 点魔力'],
     pointer: 'entries[topic=battle_mode.standard_pvp].claim',
-    note: 'candidate ruleset 参数，禁止写成官方已确认；MC-E08 未执行。',
+    note: 'candidate ruleset 参数；**禁止**写成官方已确认（依据是人类实机口径，不是官方文案）；MC-E08 未执行。',
   }),
 ]);
 
@@ -237,10 +241,11 @@ export function ledgerQuantities(ledger) {
       .map((entry) => [entry.claim, entry.notes, ...(Array.isArray(entry.sources) ? entry.sources.map((s) => s.quote) : [])]
         .filter((x) => typeof x === 'string').join('\n'))
       .join('\n');
-    const hit = haystack.includes(spec.pattern);
+    const patterns = [spec.pattern, ...(spec.pattern_alternates ?? [])];
+    const hit = patterns.some((pattern) => haystack.includes(pattern));
     if (!hit) {
       problems.push(gapProblem('LEDGER_PATTERN_MISSING', `ledger#${spec.topic}`,
-        `台账里找不到这条未知量的登记句：${stableJson(spec.pattern)}（${spec.pointer}）。`
+        `台账里找不到这条未知量的登记句：${stableJson(patterns)}（${spec.pointer}）。`
         + '台账变了就不再拿它当「已知的未知」，先人工核对再放开'));
     }
     const ledgerEntry = byTopic.get(spec.topic)?.[0] ?? null;
@@ -1014,6 +1019,30 @@ function respondVariants(skill) {
   const desc = String(skill?.desc ?? '');
   if (!desc.includes('应对') || skill?.category === '特性') return [];
   return RESPOND_VARIANTS.filter((variant) => desc.includes(variant));
+}
+
+/**
+ * 维度④ 的**分离证据**（2026-09-25 改写；只在 `team-gaps.js` 内使用，导出是为了让判据能被反证）。
+ *
+ * 这一条要证明的是「**learnset 里有** ≠ **出战四技能里有**」。旧写法用的是
+ * `instances_without_any_respond_in_build > 0`（有几只 build 一个应对词条都没带）——
+ * 那条证据在 `owned-pets.json` 改成**引擎 loadout** 之后**永久失效**了：引擎给出的
+ * `reactive_defense` 槽每只都带应对 ⇒ 该计数恒为 0 ⇒ 判据永远红。
+ * 那不是「数据坏了」，是**分离证据选得不好**（证据依赖了一个已经不再成立的数据形态）。
+ *
+ * 新证据用同一次统计里**天然存在**的分离（两侧都是可复算计数，不引入新数据、不写死新数）：
+ *   ① `learnset_variant_species['应对攻击'] === 48`：48 只的学招池里都有「应对攻击」；
+ *   ② 存在某一类应对「learnset 有、build 完全没有」（实测 `应对防御`：learnset 36 / build 0）；
+ *   ③ build 侧任何一类都不许**超过** learnset 侧（超了说明计数或口径错了）。
+ * ②③ 合起来就是「学习池有 ≠ 出战四技能有」的可复算证据；三条缺一条都算红
+ * （反证见 `tests/roco-team-gaps.test.js` 判据⑱：把 build 侧写满 / 写超 / 把 learnset 侧改小都必须红）。
+ */
+export function respondSeparationHolds(respond) {
+  const learnset = respond?.learnset_variant_species ?? {};
+  const build = respond?.build_variant_counts ?? {};
+  if (Number(learnset['应对攻击']) !== 48) return false;
+  if (!RESPOND_VARIANTS.some((v) => Number(build[v] ?? 0) === 0 && Number(learnset[v] ?? 0) > 0)) return false;
+  return RESPOND_VARIANTS.every((v) => Number(build[v] ?? 0) <= Number(learnset[v] ?? 0));
 }
 
 /**
@@ -1835,6 +1864,9 @@ export function buildGapDistribution(inputs) {
         应对状态: rows.filter((r) => r.respond_variants.includes('应对状态')).length,
         应对防御: rows.filter((r) => r.respond_variants.includes('应对防御')).length,
       },
+      // 2026-09-25：这个计数在 owned 改成**引擎 loadout** 之后恒为 0（引擎每只都带应对），
+      // 所以它**不再**充当分离证据（改用 `respondSeparationHolds`，见维度④段首）。
+      // 字段本身留着：它是「build 侧一个应对都没有」的实况读数，仍然是可复算的事实。
       instances_without_any_respond_in_build: rows.filter((r) => r.respond_variants.length === 0).length,
       learnset_variant_species: Object.fromEntries(RESPOND_VARIANTS.map((variant) => [variant,
         [...index.learnsets.entries()].filter(([, learnset]) => learnset.skill_ids
@@ -2000,8 +2032,9 @@ export function buildReportCriteria({distribution, samples, audit, ledgerInfo, i
       criteria: '应对种类只由描述词条（应对攻击/应对状态/应对防御）判定，且 learning-set 与 build 分开统计',
       direction: '把 learnset 有说成 build 有 ⇒ 红',
       actual: distribution.respond,
-      ok: distribution.respond.learnset_variant_species['应对攻击'] === 48
-        && distribution.respond.instances_without_any_respond_in_build > 0,
+      // 2026-09-25：分离证据从「build 里一个应对都没有的只数 > 0」（在引擎 loadout 下恒为 0，
+      // 永久红）换成 `respondSeparationHolds`（learnset 与 build 的可复算对照，见该函数注释）。
+      ok: respondSeparationHolds(distribution.respond),
     },
     {
       id: 'pivot.not_equal_to_switching',

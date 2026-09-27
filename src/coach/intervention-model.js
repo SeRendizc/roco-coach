@@ -32,6 +32,8 @@
 // 浏览器拿到的就是**随代码一起发布的那一份**，不需要任何文件读取。
 // 读盘只保留给 Node 侧的工具与测试（`loadInterventionModelFromDisk`，动态 import）。
 import {GENERATED_INTERVENTION_MODEL} from './intervention-model.generated.js';
+// 环境读法的唯一实现（浏览器里没有 `process`；见 env.js 顶部的事故记录）。
+import {processEnv} from './env.js';
 
 export const INTERVENTION_MODEL = GENERATED_INTERVENTION_MODEL;
 
@@ -54,13 +56,9 @@ export const INTERVENTION_MODEL = GENERATED_INTERVENTION_MODEL;
  * 而且**不抛**。这一条由 `tests/evals/roco/game-adapter.test.js` 用
  * 「把 globalThis.process 拿掉再调用」钉住——必红方向是恢复 `process.env` 写法即抛。
  */
-function processEnv() {
-  // 不用 `typeof process`：在浏览器里 `typeof process` 是安全的，但打包器/工具链
-  // 可能把它静态替换掉。直接读 globalThis 更明确，也不依赖任何全局存在。
-  const env = globalThis.process?.env;
-  return env && typeof env === 'object' ? env : {};
-}
-
+// 2026-09-25：这一份实现搬到 `src/coach/env.js`（全仓唯一一份），这里只 import。
+// 起因是 `runtime.js` 里 9 个开关函数又踩了同一个坑（默认参数 `env=process.env`），
+// 而两处各写一份 `processEnv()` 就是两份事实 —— 合并成一份，判据也只需要钉一处。
 export function interventionModelMode(env = processEnv()) {
   const raw = String(env.ROCO_INTERVENTION_MODEL || 'off').trim().toLowerCase();
   if (raw === 'off' || raw === 'shadow' || raw === 'on') return raw;

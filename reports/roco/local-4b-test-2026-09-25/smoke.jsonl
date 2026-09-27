@@ -1,0 +1,2 @@
+{"id": "r1", "ok": true, "text": "{\"stop\":true}", "prompt_tokens": 59, "completion_tokens": 6, "first_token_ms": 3607.8, "total_ms": 3692.5, "tokens_per_second": 1.62, "peak_memory_gb": 2.474, "memory_source": "mlx-peak", "stop_reason": "stop", "counted_by": "engine"}
+{"id": "r2", "ok": true, "text": "能量不足时切勿硬出招，而应懂得收敛蓄力、以静制动，待时机成熟再行发力。", "prompt_tokens": 25, "completion_tokens": 27, "first_token_ms": 324.0, "total_ms": 711.4, "tokens_per_second": 37.95, "peak_memory_gb": 2.474, "memory_source": "mlx-peak", "stop_reason": "stop", "counted_by": "engine"}

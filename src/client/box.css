@@ -169,3 +169,25 @@ button{min-width:44px}
 .boot-fallback{margin:10px 14px;padding:10px 12px;border:1px solid #7a4a3a;border-radius:10px;
  background:#2a1c18;color:#ffd7c2;font-size:13px;line-height:1.6}
 .boot-fallback code{background:#3a2a22;padding:1px 5px;border-radius:5px}
+
+/* 我的盒子：按种类收进抽屉（2026-09-27，人类口径：一个种类一行、点开才是个体）。
+   样式只做"看得清"这一件事：种类头一行、个体在它下面缩进一格。 */
+.species-drawer { border: 1px solid var(--line, #2a3442); border-radius: 10px; margin: 0 0 8px; }
+.drawer-head { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px;
+  background: none; border: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.drawer-name { font-weight: 600; }
+.drawer-count { margin-left: auto; opacity: .75; font-size: 12px; }
+.drawer-body { padding: 4px 12px 10px 24px; display: grid; gap: 6px; }
+.individual { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; }
+.individual-name { background: none; border: 0; color: inherit; font: inherit; cursor: pointer;
+  text-decoration: underline dotted; }
+.individual-level { opacity: .8; }
+.individual-traits { display: inline-flex; gap: 6px; }
+.trait { border: 1px solid var(--line, #2a3442); border-radius: 999px; padding: 1px 8px; font-size: 12px; }
+.trait[data-state="absent"] { opacity: .6; border-style: dashed; }
+.individual-actions { margin-left: auto; display: inline-flex; gap: 6px; }
+.refresh-btn { font-size: 12px; padding: 2px 8px; }
+.refresh-btn[disabled] { opacity: .5; cursor: not-allowed; }
+/* 「再养一只同种」：抽屉底部的加号按钮（2026-09-26，让"多个体"在真机上真的走得通）。 */
+.add-btn { margin-top: 6px; opacity: .9; }
+.drawer-body.collapsed { padding-bottom: 10px; }

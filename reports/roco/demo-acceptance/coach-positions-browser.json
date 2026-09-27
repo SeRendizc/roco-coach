@@ -21,6 +21,18 @@
    "seed": 20260921,
    "advances_planned": 5,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 307336538,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 2815986771,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 5,
    "ended_early": false,
    "turn": 6,
@@ -114,6 +126,29 @@
     "gate": null,
     "reason": "critical-risk"
    },
+   "probe": {
+    "hint_wait_ms": 259,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "「诡刺」估 #，够收对面「寂灭骨龙」这 # 血：这一轮直接收"
+    ],
+    "detail_gate": null,
+    "detail_reason": "critical-risk",
+    "detail_action": "action_hint",
+    "detail_value": 2.4,
+    "detail_floor": 1.2,
+    "detail_decisive": true,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 259,
+   "plan_tries": 1,
    "kind": "ko-now",
    "advice_contract": {
     "has_text": true,
@@ -145,6 +180,18 @@
    "seed": 20260921,
    "advances_planned": 3,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 248681129,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 3734316182,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 3,
    "ended_early": false,
    "turn": 4,
@@ -239,6 +286,29 @@
     "gate": null,
     "reason": "moderate-risk"
    },
+   "probe": {
+    "hint_wait_ms": 271,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "「火云车」估 #，够收对面「音速犬」这 # 血：这一轮直接收"
+    ],
+    "detail_gate": null,
+    "detail_reason": "moderate-risk",
+    "detail_action": "micro_hint",
+    "detail_value": 1.5,
+    "detail_floor": 1.2,
+    "detail_decisive": false,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 271,
+   "plan_tries": 1,
    "kind": "ko-now",
    "advice_contract": {
     "has_text": true,
@@ -270,6 +340,18 @@
    "seed": 20260921,
    "advances_planned": 3,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 2312396447,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 2815986771,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 3,
    "ended_early": false,
    "turn": 4,
@@ -365,6 +447,29 @@
     "gate": null,
     "reason": "moderate-risk"
    },
+   "probe": {
+    "hint_wait_ms": 273,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "能量还差 # 才能收掉它：先吃「能量果」补上，这一轮别硬顶"
+    ],
+    "detail_gate": null,
+    "detail_reason": "moderate-risk",
+    "detail_action": "micro_hint",
+    "detail_value": 1.5,
+    "detail_floor": 1.2,
+    "detail_decisive": false,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 273,
+   "plan_tries": 1,
    "kind": "energy-short",
    "advice_contract": {
     "has_text": true,
@@ -396,6 +501,18 @@
    "seed": 20260921,
    "advances_planned": 5,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 393976816,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 571014840,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 5,
    "ended_early": false,
    "turn": 6,
@@ -491,6 +608,29 @@
     "gate": null,
     "reason": "moderate-risk"
    },
+   "probe": {
+    "hint_wait_ms": 277,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "「风吹雪」打「雪影娃娃」只有抵抗（# 伤害）：别再硬用它"
+    ],
+    "detail_gate": null,
+    "detail_reason": "moderate-risk",
+    "detail_action": "micro_hint",
+    "detail_value": 1.5,
+    "detail_floor": 1.2,
+    "detail_decisive": false,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 277,
+   "plan_tries": 1,
    "kind": "type-resisted",
    "advice_contract": {
     "has_text": true,
@@ -522,6 +662,18 @@
    "seed": 20260921,
    "advances_planned": 5,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 2476751283,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 2698774032,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 5,
    "ended_early": false,
    "turn": 6,
@@ -616,6 +768,29 @@
     "gate": null,
     "reason": "moderate-risk"
    },
+   "probe": {
+    "hint_wait_ms": 276,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "「甩水」上一手打出克制（# 伤害）：继续用它压上去"
+    ],
+    "detail_gate": null,
+    "detail_reason": "moderate-risk",
+    "detail_action": "micro_hint",
+    "detail_value": 1.5,
+    "detail_floor": 1.2,
+    "detail_decisive": false,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 276,
+   "plan_tries": 1,
    "kind": "type-favoured",
    "advice_contract": {
     "has_text": true,
@@ -647,6 +822,18 @@
    "seed": 20260921,
    "advances_planned": 7,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 1897940702,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 2698774032,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 7,
    "ended_early": false,
    "turn": 8,
@@ -741,6 +928,29 @@
     "gate": null,
     "reason": "moderate-risk"
    },
+   "probe": {
+    "hint_wait_ms": 274,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "对面能量到 # 了（上限 #）：重招随时来，别拿残血硬接这一手"
+    ],
+    "detail_gate": null,
+    "detail_reason": "moderate-risk",
+    "detail_action": "micro_hint",
+    "detail_value": 1.5,
+    "detail_floor": 1.2,
+    "detail_decisive": false,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 274,
+   "plan_tries": 1,
    "kind": "foe-energy-high",
    "advice_contract": {
     "has_text": true,
@@ -772,6 +982,18 @@
    "seed": 20260921,
    "advances_planned": 9,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 2855699574,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 2815986771,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 9,
    "ended_early": false,
    "turn": 8,
@@ -856,6 +1078,29 @@
     "gate": null,
     "reason": "critical-risk"
    },
+   "probe": {
+    "hint_wait_ms": 191,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "「寂灭骨龙」倒了，换「海豹船长」顶上：对面「黑猫巫师」还在场，补位别一上来就挨打"
+    ],
+    "detail_gate": null,
+    "detail_reason": "critical-risk",
+    "detail_action": "action_hint",
+    "detail_value": 3,
+    "detail_floor": 1.2,
+    "detail_decisive": true,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 191,
+   "plan_tries": 1,
    "kind": "replace-required",
    "advice_contract": {
     "has_text": true,
@@ -887,6 +1132,18 @@
    "seed": 20260921,
    "advances_planned": 9,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 4088295054,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 2172955071,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 9,
    "ended_early": false,
    "turn": 9,
@@ -980,6 +1237,29 @@
     "gate": null,
     "reason": "critical-risk"
    },
+   "probe": {
+    "hint_wait_ms": 276,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "你只剩 #% 血，换「雪影娃娃」上来：它还厚，别把「音速犬」白送掉"
+    ],
+    "detail_gate": null,
+    "detail_reason": "critical-risk",
+    "detail_action": "action_hint",
+    "detail_value": 2.4,
+    "detail_floor": 1.2,
+    "detail_decisive": true,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 276,
+   "plan_tries": 1,
    "kind": "switch-low-hp",
    "advice_contract": {
     "has_text": true,
@@ -1011,6 +1291,18 @@
    "seed": 20260921,
    "advances_planned": 6,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 3774781696,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 3490643769,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 6,
    "ended_early": false,
    "turn": 7,
@@ -1106,6 +1398,29 @@
     "gate": null,
     "reason": "critical-risk"
    },
+   "probe": {
+    "hint_wait_ms": 269,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "对面「雪影娃娃」只剩 # 血：这一轮先把它补掉，别让它换人喘口气"
+    ],
+    "detail_gate": null,
+    "detail_reason": "critical-risk",
+    "detail_action": "action_hint",
+    "detail_value": 2.4,
+    "detail_floor": 1.2,
+    "detail_decisive": true,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 269,
+   "plan_tries": 1,
    "kind": "foe-low-hp",
    "advice_contract": {
     "has_text": true,
@@ -1137,6 +1452,18 @@
    "seed": 20260921,
    "advances_planned": 5,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 2926161549,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 2831230366,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 5,
    "ended_early": false,
    "turn": 6,
@@ -1230,6 +1557,29 @@
     "gate": null,
     "reason": "moderate-risk"
    },
+   "probe": {
+    "hint_wait_ms": 269,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "你速度 # 快过它 #：这一轮先手压上去，别把节奏让掉"
+    ],
+    "detail_gate": null,
+    "detail_reason": "moderate-risk",
+    "detail_action": "micro_hint",
+    "detail_value": 1.5,
+    "detail_floor": 1.2,
+    "detail_decisive": false,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 269,
+   "plan_tries": 1,
    "kind": "speed-decides",
    "advice_contract": {
     "has_text": true,
@@ -1261,6 +1611,18 @@
    "seed": 20260921,
    "advances_planned": 6,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 1822766220,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 4033283323,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 6,
    "ended_early": false,
    "turn": 7,
@@ -1356,6 +1718,29 @@
     "gate": null,
     "reason": "moderate-risk"
    },
+   "probe": {
+    "hint_wait_ms": 280,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": false,
+    "plan_stale_discards": 1,
+    "session_hints": 1,
+    "session_last_at_state": "set",
+    "session_cooldown": "within-cooldown",
+    "session_said": [
+     "它速度 # 快过你 #：别硬对拼，先换人或者用「防御」顶这一下"
+    ],
+    "detail_gate": null,
+    "detail_reason": "moderate-risk",
+    "detail_action": "micro_hint",
+    "detail_value": 1.5,
+    "detail_floor": 1.2,
+    "detail_decisive": false,
+    "detail_budget": null,
+    "advice_present": true
+   },
+   "hint_wait_ms": 280,
+   "plan_tries": 1,
    "kind": "speed-decides",
    "advice_contract": {
     "has_text": true,
@@ -1387,6 +1772,18 @@
    "seed": 20260921,
    "advances_planned": 0,
    "pass": "A",
+   "battle_inputs": {
+    "battle_id_digest": 883479967,
+    "seed": 20260921,
+    "self_count": 3,
+    "self_digest": 571014840,
+    "foe_field_present": true,
+    "foe_bench_slots": [
+     1,
+     2
+    ],
+    "turn": 1
+   },
    "driven_advances": 0,
    "ended_early": false,
    "turn": 1,
@@ -1482,10 +1879,31 @@
     "gate": null,
     "reason": "below-threshold"
    },
+   "probe": {
+    "hint_wait_ms": 275,
+    "plan_tries": 1,
+    "plan_missing": false,
+    "hint_plan_missing": true,
+    "plan_stale_discards": 0,
+    "session_hints": 0,
+    "session_last_at_state": "never",
+    "session_cooldown": "never",
+    "session_said": [],
+    "detail_gate": null,
+    "detail_reason": "below-threshold",
+    "detail_action": "silent",
+    "detail_value": 0.6,
+    "detail_floor": 1.2,
+    "detail_decisive": false,
+    "detail_budget": null,
+    "advice_present": false
+   },
+   "hint_wait_ms": 275,
+   "plan_tries": 1,
    "kind": null,
    "advice_contract": null,
    "spoken": false,
-   "silent_reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null",
+   "silent_reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 275ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null",
    "silent_with_advice": false,
    "node_recompute": {
     "kind": null,
@@ -1500,7 +1918,7 @@
    "screenshot": "09-position-12-silent.png"
   }
  ],
- "matrix_pass_b_digest": "1ee1da0dd023d88cc7833589268cea3a125ba5a76057694fce10053266453109",
+ "matrix_pass_b_digest": "f60fa984dac103e915e57d2c45db5ef4ef7fe0d16dcbcdfeaad442036e532568",
  "summary": {
   "generated_by": "scripts/roco/demo-acceptance.mjs",
   "schema": "roco-coach-positions-browser/v1",
@@ -1519,7 +1937,7 @@
      "gate": null,
      "reason": "below-threshold"
     },
-    "reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null"
+    "reason": "门控判定 silent（reason=below-threshold）；建议层没有一条成立的局面事实：coachAdvice 返回 null；plan-present（采样时 state.plan 在）；会话 hints=0／上次开口=never／冷却=never；等待落定 275ms／plan 请求 1 次；决策原文 gate=null/reason=below-threshold/value=0.6/floor=1.2/decisive=false/budget=null"
    }
   ],
   "distinct_kinds": 9,
@@ -1557,8 +1975,8 @@
     "silent_at_low_hp": 0,
     "silent_at_full_hp": 0,
     "battles": 110,
-    "steps": 1418,
-    "reason": "结构上不可能成立：`damage_preview.samples[]` 里**每一个技能只有一个数**（三个分析种子对同一招给出同一个 damage），所以「下限 < 血 ≤ 上限」这个形状不存在；`damage_preview.min/max` 只是「最弱那招 / 最狠那招」两个**不同**技能的包络。本轮抽样扫描（110 局 / 1418 个窗口）命中 0 次。"
+    "steps": 1417,
+    "reason": "结构上不可能成立：`damage_preview.samples[]` 里**每一个技能只有一个数**（三个分析种子对同一招给出同一个 damage），所以「下限 < 血 ≤ 上限」这个形状不存在；`damage_preview.min/max` 只是「最弱那招 / 最狠那招」两个**不同**技能的包络。本轮抽样扫描（110 局 / 1417 个窗口）命中 0 次。"
    },
    {
     "kind": "foe-status-ticking",
@@ -1567,8 +1985,8 @@
     "silent_at_low_hp": 0,
     "silent_at_full_hp": 0,
     "battles": 110,
-    "steps": 1418,
-    "reason": "没有入口：12 只手游精灵的规范配招里，没有任何一招在引擎`effect_support` 支持范围内会施加 中毒/灼烧/寄生（不支持的那些 fail closed），而 `POST /api/roco/battle/new` 不接受 loadouts —— 别的地方也挂不上去。本轮抽样扫描（110 局 / 1418 个窗口）命中 0 次。"
+    "steps": 1417,
+    "reason": "没有入口：12 只手游精灵的规范配招里，没有任何一招在引擎`effect_support` 支持范围内会施加 中毒/灼烧/寄生（不支持的那些 fail closed），而 `POST /api/roco/battle/new` 不接受 loadouts —— 别的地方也挂不上去。本轮抽样扫描（110 局 / 1417 个窗口）命中 0 次。"
    }
   ],
   "kinds_reachable_but_missing_from_matrix": [],
@@ -1612,15 +2030,15 @@
    },
    "sample_digest": "977f65bf520a6f04b79f2fcddd88c6e4f4d0af51f88d8d9e859d6b481aa1cf37",
    "battles_scanned": 110,
-   "steps_scanned": 1418,
+   "steps_scanned": 1417,
    "full_scan": "node scripts/roco/coach-kind-coverage-scan.mjs（全量 2640 局，产物 reports/roco/demo-acceptance/coach-kind-coverage-scan.json）",
    "kinds": {
     "energy-short": {
-     "hit": 212,
-     "shown": 51,
-     "shown_battle_phase": 51,
+     "hit": 201,
+     "shown": 54,
+     "shown_battle_phase": 54,
      "silent_at_low_hp": 0,
-     "silent_at_full_hp": 161,
+     "silent_at_full_hp": 147,
      "first_shown": {
       "turn": 5,
       "phase": "battle",
@@ -1705,11 +2123,11 @@
      ]
     },
     "ko-now": {
-     "hit": 181,
-     "shown": 121,
-     "shown_battle_phase": 121,
+     "hit": 182,
+     "shown": 123,
+     "shown_battle_phase": 123,
      "silent_at_low_hp": 0,
-     "silent_at_full_hp": 60,
+     "silent_at_full_hp": 59,
      "first_shown": {
       "turn": 4,
       "phase": "battle",
@@ -1786,11 +2204,11 @@
      ]
     },
     "speed-decides": {
-     "hit": 297,
-     "shown": 99,
-     "shown_battle_phase": 70,
+     "hit": 312,
+     "shown": 113,
+     "shown_battle_phase": 84,
      "silent_at_low_hp": 0,
-     "silent_at_full_hp": 198,
+     "silent_at_full_hp": 199,
      "first_shown": {
       "turn": 7,
       "phase": "replace",
@@ -1871,9 +2289,9 @@
      ]
     },
     "switch-low-hp": {
-     "hit": 257,
-     "shown": 257,
-     "shown_battle_phase": 225,
+     "hit": 251,
+     "shown": 251,
+     "shown_battle_phase": 217,
      "silent_at_low_hp": 0,
      "silent_at_full_hp": 0,
      "first_shown": {
@@ -1952,8 +2370,8 @@
      ]
     },
     "replace-required": {
-     "hit": 71,
-     "shown": 71,
+     "hit": 69,
+     "shown": 69,
      "shown_battle_phase": 0,
      "silent_at_low_hp": 0,
      "silent_at_full_hp": 0,
@@ -2045,11 +2463,11 @@
      ]
     },
     "type-favoured": {
-     "hit": 29,
+     "hit": 27,
      "shown": 4,
      "shown_battle_phase": 4,
      "silent_at_low_hp": 0,
-     "silent_at_full_hp": 25,
+     "silent_at_full_hp": 23,
      "first_shown": {
       "turn": 11,
       "phase": "battle",
@@ -2134,11 +2552,11 @@
      ]
     },
     "type-resisted": {
-     "hit": 92,
+     "hit": 94,
      "shown": 33,
      "shown_battle_phase": 33,
      "silent_at_low_hp": 0,
-     "silent_at_full_hp": 59,
+     "silent_at_full_hp": 61,
      "first_shown": {
       "turn": 6,
       "phase": "battle",
@@ -2426,8 +2844,8 @@
   "determinism": {
    "passes": 2,
    "byte_identical": true,
-   "digest_pass_a": "1ee1da0dd023d88cc7833589268cea3a125ba5a76057694fce10053266453109",
-   "digest_pass_b": "1ee1da0dd023d88cc7833589268cea3a125ba5a76057694fce10053266453109"
+   "digest_pass_a": "f60fa984dac103e915e57d2c45db5ef4ef7fe0d16dcbcdfeaad442036e532568",
+   "digest_pass_b": "f60fa984dac103e915e57d2c45db5ef4ef7fe0d16dcbcdfeaad442036e532568"
   }
  }
 }

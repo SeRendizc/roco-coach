@@ -1,0 +1,10 @@
+    "model.safetensors.index.json",
+    "preprocessor_config.json",
+    "processor_config.json",
+    "tokenizer.json",
+    "tokenizer_config.json",
+    "video_preprocessor_config.json"
+  ],
+  "mlx_available": true,
+  "peak_memory_gb": null
+}

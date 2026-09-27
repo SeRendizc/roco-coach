@@ -254,7 +254,9 @@ test('R02 工具回执真的会送到模型，最终回答与回执一致；不�
  const drifted=await runCoach({message,context,memory:freshMemory(),provider:{name:'stub',plan:async()=>({stop:true}),
   async generate(){return '我比较了撞击和撞击，换上疾爪更好。';}}});
  assert.equal(drifted.provider,'local-fallback');
- assert.match(drifted.fallbackReason,/回执/);
+ // 改钉（2026-09-26）：降级说明由「模型回答与工具回执不一致…」改成玩家话
+ // 「那份回答和引擎的记录对不上，换成我核过的这一份」——意图没变：必须说清**为什么回退了**。
+ assert.match(drifted.fallbackReason,/和引擎的记录对不上|回退|核过/);
  assert.equal(drifted.receiptConsistency.checkedText,'local-template','回退后判的是本地结论，不是被丢弃的模型正文');
  assert(drifted.receiptConsistency.rejectedModelReasons.some(r=>r.startsWith('receipt-action-mismatch')),'要记下模型是在哪里与回执不一致的');
 });

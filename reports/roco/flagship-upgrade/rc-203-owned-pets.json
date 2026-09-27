@@ -6,10 +6,10 @@
   "clock_fields": [],
   "artifact": {
     "path": "data/roco/owned/owned-pets.json",
-    "sha256": "a33e8525e69574482e30092315c063afc7730cecdf54d8bc3ffe4f6673e31b71",
-    "dataset_hash": "a72132e65e982f7a5197a1f4a20e8b91e41df898147282cc473b77953df7f847",
-    "instances": 80,
-    "battle_builds": 80
+    "sha256": "ce095ae1c8cd4f615e27873c7b4e1889cbcf051ee8ac880fe5c0d2c6b68488a0",
+    "dataset_hash": "6ef39855bfc7f6ce02ef2bed8bd85bbefcd69e749b8ef54b471b100890ebc382",
+    "instances": 48,
+    "battle_builds": 48
   },
   "schema": {
     "path": "data/roco/owned/schema.json"
@@ -46,9 +46,9 @@
     {
       "id": "C04",
       "check": "species_universe",
-      "text": "实例数 >= 80",
-      "expected": ">= 80",
-      "actual": "80",
+      "text": "实例数 == 物种数 == 48",
+      "expected": ">= 48",
+      "actual": "48",
       "ok": true,
       "problems": []
     },
@@ -73,18 +73,27 @@
     {
       "id": "C07",
       "check": "species_universe",
-      "text": "同种不同个体组数 >= 20（每组至少一项个体属性不同）",
-      "expected": ">= 20",
-      "actual": "32（其中有差异 32）",
+      "text": "同种多实例组数 == 0（一人一只：人类 2026-09-24「重复的删掉」）",
+      "expected": "== 0",
+      "actual": "0（同种组）",
       "ok": true,
       "problems": []
     },
     {
       "id": "C08",
       "check": "learnset_membership",
-      "text": "四个技能逐个属于该 species 的 learnsets.json native_skills（习得等级 <= 实例等级），且都在 skills.json 里",
+      "text": "四个技能逐个属于该 species 的学习表池（native ∪ blood ∪ stones —— **与引擎 `Ruleset.is_learnable` 同口径**；native 技能的习得等级 <= 实例等级），且都在 skills.json 里。【2026-09-25 口径对齐：配招改成逐位等于引擎 loadout 之后，只认 native_skills 会把引擎真的会装上的血统/石系技能判成违规；差异**没有消失**，单独记在 `skillsOutsideNative` / `nativeOnlyBuilds` 里】",
       "expected": "0 违规",
-      "actual": "违规 0 条，引用技能 189 个",
+      "actual": "违规 0 条，引用技能 76 个；其中非 native（blood/stones）46 个技能、四技能全 native 的 9 只",
+      "ok": true,
+      "problems": []
+    },
+    {
+      "id": "C20",
+      "check": "canonical_loadout",
+      "text": "BattleBuild.ordered_skills **逐位等于引擎 loadout**（support-matrix.json 基线 12 + layer-playable-48/support-matrix.json 叠加层 36 的 candidate_moveset，合并规则同 data.py:515-535）—— 这是「owned 的四技能 = 实战真正装上的四技能」的唯一判据（2026-09-25 人类「配招这个你得修好」）",
+      "expected": "0 违规",
+      "actual": "逐位相同 48/48，违规 0 条",
       "ok": true,
       "problems": []
     },
@@ -129,7 +138,7 @@
       "check": "provenance_on_disk",
       "text": "provenance 的 artifact_path 存在且 artifact_sha256 与磁盘一致、pointer 可解析",
       "expected": "0 失配",
-      "actual": "条目 244，sha 失配 0，pointer 失配 0",
+      "actual": "条目 196，sha 失配 0，pointer 失配 0",
       "ok": true,
       "problems": []
     },
@@ -156,7 +165,7 @@
       "check": "battle_builds",
       "text": "BattleBuild 与 OwnedPet 一一对应，derived_stats=null，derived_stats_confidence=UNKNOWN",
       "expected": "0 违规",
-      "actual": "battle_builds=80，违规 0 条",
+      "actual": "battle_builds=48，违规 0 条",
       "ok": true,
       "problems": []
     },
@@ -189,14 +198,14 @@
     }
   ],
   "counts": {
-    "instances": 80,
+    "instances": 48,
     "species": 48,
     "species_in_layer_playable_48": 36,
     "species_outside_layer_playable_48": 12,
-    "same_species_groups": 32,
-    "same_species_groups_with_difference": 32,
-    "battle_builds": 80,
-    "skills_referenced": 189
+    "same_species_groups": 0,
+    "same_species_groups_with_difference": 0,
+    "battle_builds": 48,
+    "skills_referenced": 76
   },
   "candidate_universe": {
     "definition": "pack.json 的 pet 实体（600+ 候选宇宙），不是 48 只迁移夹具",
@@ -232,96 +241,84 @@
         "species_id": "pet_000062",
         "species_name": "音速犬",
         "instances": [
-          "own-0003",
-          "own-0004"
+          "own-0002"
         ]
       },
       {
         "species_id": "pet_000112",
         "species_name": "雪影娃娃",
         "instances": [
-          "own-0007",
-          "own-0008"
+          "own-0004"
         ]
       },
       {
         "species_id": "pet_000124",
         "species_name": "化蝶",
         "instances": [
-          "own-0011",
-          "own-0012"
+          "own-0006"
         ]
       },
       {
         "species_id": "pet_000190",
         "species_name": "海豹船长",
         "instances": [
-          "own-0029",
-          "own-0030"
+          "own-0017"
         ]
       },
       {
         "species_id": "pet_000225",
         "species_name": "寂灭骨龙",
         "instances": [
-          "own-0035",
-          "own-0036"
+          "own-0020"
         ]
       },
       {
         "species_id": "pet_000417",
         "species_name": "圆号鱼",
         "instances": [
-          "own-0048",
-          "own-0049"
+          "own-0027"
         ]
       },
       {
         "species_id": "pet_000445",
         "species_name": "黑猫巫师",
         "instances": [
-          "own-0050",
-          "own-0051"
+          "own-0028"
         ]
       },
       {
         "species_id": "pet_000451",
         "species_name": "秩序鱿墨",
         "instances": [
-          "own-0055",
-          "own-0056"
+          "own-0031"
         ]
       },
       {
         "species_id": "pet_000474",
         "species_name": "画间沉铁兽",
         "instances": [
-          "own-0061",
-          "own-0062"
+          "own-0035"
         ]
       },
       {
         "species_id": "pet_000601",
         "species_name": "圣凯布米龙",
         "instances": [
-          "own-0073",
-          "own-0074"
+          "own-0044"
         ]
       },
       {
         "species_id": "pet_000608",
         "species_name": "银月狼王",
         "instances": [
-          "own-0075",
-          "own-0076"
+          "own-0045"
         ]
       },
       {
         "species_id": "pet_000611",
         "species_name": "月使鹭纳",
         "instances": [
-          "own-0078",
-          "own-0079"
+          "own-0047"
         ]
       }
     ],
@@ -335,585 +332,10 @@
     }
   },
   "same_species_groups": {
-    "expected_min": 20,
-    "count": 32,
-    "with_difference": 32,
-    "groups": [
-      {
-        "species_id": "pet_000012",
-        "species_name": "铠甲虫",
-        "instances": [
-          "own-0001",
-          "own-0002"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000062",
-        "species_name": "音速犬",
-        "instances": [
-          "own-0003",
-          "own-0004"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000100",
-        "species_name": "仪式巨像",
-        "instances": [
-          "own-0005",
-          "own-0006"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000112",
-        "species_name": "雪影娃娃",
-        "instances": [
-          "own-0007",
-          "own-0008"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000118",
-        "species_name": "皇家狮鹫",
-        "instances": [
-          "own-0009",
-          "own-0010"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000124",
-        "species_name": "化蝶",
-        "instances": [
-          "own-0011",
-          "own-0012"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000130",
-        "species_name": "朔夜伊芙",
-        "instances": [
-          "own-0013",
-          "own-0014"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000137",
-        "species_name": "多多",
-        "instances": [
-          "own-0015",
-          "own-0016"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000152",
-        "species_name": "雪蛮人",
-        "instances": [
-          "own-0019",
-          "own-0020"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000163",
-        "species_name": "耳翎瑰魅",
-        "instances": [
-          "own-0023",
-          "own-0024"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000167",
-        "species_name": "电咩咩",
-        "instances": [
-          "own-0025",
-          "own-0026"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000172",
-        "species_name": "闪电环",
-        "instances": [
-          "own-0027",
-          "own-0028"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000190",
-        "species_name": "海豹船长",
-        "instances": [
-          "own-0029",
-          "own-0030"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000218",
-        "species_name": "呼呼猪",
-        "instances": [
-          "own-0031",
-          "own-0032"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000219",
-        "species_name": "獠牙猪",
-        "instances": [
-          "own-0033",
-          "own-0034"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000225",
-        "species_name": "寂灭骨龙",
-        "instances": [
-          "own-0035",
-          "own-0036"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000240",
-        "species_name": "丢丢",
-        "instances": [
-          "own-0037",
-          "own-0038"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000243",
-        "species_name": "卡卡虫",
-        "instances": [
-          "own-0039",
-          "own-0040"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000308",
-        "species_name": "深蓝鲸",
-        "instances": [
-          "own-0042",
-          "own-0043"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000328",
-        "species_name": "声波缇塔",
-        "instances": [
-          "own-0044",
-          "own-0045"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000330",
-        "species_name": "权杖-V",
-        "instances": [
-          "own-0046",
-          "own-0047"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000417",
-        "species_name": "圆号鱼",
-        "instances": [
-          "own-0048",
-          "own-0049"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000445",
-        "species_name": "黑猫巫师",
-        "instances": [
-          "own-0050",
-          "own-0051"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000450",
-        "species_name": "混乱鱿彩",
-        "instances": [
-          "own-0053",
-          "own-0054"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000451",
-        "species_name": "秩序鱿墨",
-        "instances": [
-          "own-0055",
-          "own-0056"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000456",
-        "species_name": "十字蝌蚪",
-        "instances": [
-          "own-0057",
-          "own-0058"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000474",
-        "species_name": "画间沉铁兽",
-        "instances": [
-          "own-0061",
-          "own-0062"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000484",
-        "species_name": "迷迷箱怪",
-        "instances": [
-          "own-0064",
-          "own-0065"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000575",
-        "species_name": "棋契陛下",
-        "instances": [
-          "own-0071",
-          "own-0072"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty",
-          "bloodline"
-        ]
-      },
-      {
-        "species_id": "pet_000601",
-        "species_name": "圣凯布米龙",
-        "instances": [
-          "own-0073",
-          "own-0074"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000608",
-        "species_name": "银月狼王",
-        "instances": [
-          "own-0075",
-          "own-0076"
-        ],
-        "different_fields": [
-          "level",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      },
-      {
-        "species_id": "pet_000611",
-        "species_name": "月使鹭纳",
-        "instances": [
-          "own-0078",
-          "own-0079"
-        ],
-        "different_fields": [
-          "level",
-          "bloodline",
-          "skills"
-        ],
-        "unknown_fields": [
-          "nature",
-          "talent",
-          "specialty"
-        ]
-      }
-    ]
+    "expected_max": 0,
+    "count": 0,
+    "with_difference": 0,
+    "groups": []
   },
   "skips": {
     "counts": {
@@ -4396,49 +3818,49 @@
     {
       "field": "nature",
       "value": null,
-      "instances_affected": 80,
+      "instances_affected": 48,
       "why": "冻结目录里没有任何性格取值枚举；仓库里唯一一张性格加成表（data/roco/raw/extracted/NRC_AI/src/pokemon_nature_table.py）来自 REFERENCE_ONLY 的交叉核验来源，且标的是另一款游戏（页游），不得进入可分发产物",
       "where_it_would_be_resolved": "需要一条可分发来源给出性格取值与面板换算，并过 microcase"
     },
     {
       "field": "talent",
       "value": null,
-      "instances_affected": 80,
+      "instances_affected": 48,
       "why": "冻结目录里没有任何「个体资质」取值枚举（字段存在 ≠ 换算已知，见 10 号文档 §13）",
       "where_it_would_be_resolved": "同上"
     },
     {
       "field": "specialty",
       "value": null,
-      "instances_affected": 80,
+      "instances_affected": 48,
       "why": "冻结目录里没有任何「特长」取值枚举；快照只说「一般般的天分无法获得特长」，没有取值表",
       "where_it_would_be_resolved": "同上"
     },
     {
       "field": "bloodline.value",
       "value": null,
-      "instances_affected": 56,
+      "instances_affected": 36,
       "why": "layer-playable-48 的 36 只 overlay 在 learnsets.json 里 blood 是 null（blood_status=not_provided_by_source）；只有主 learnsets.json 的 12 只 baseline 带真实血脉名。无名可标就标 UNKNOWN，不拿 18 条无名的 skill_id 编一个「血脉」出来",
       "where_it_would_be_resolved": "需要一份逐条给出 blood 字段的可分发 learnset 导入"
     },
     {
       "field": "bloodline.effect",
       "value": "UNKNOWN",
-      "instances_affected": 80,
+      "instances_affected": 48,
       "why": "标签（blood_skills[].blood）有真实出处，但「血脉怎么参与结算」没有校准",
       "where_it_would_be_resolved": "需要血脉结算的 microcase"
     },
     {
       "field": "panel_stats",
       "value": null,
-      "instances_affected": 80,
+      "instances_affected": 48,
       "why": "等级换算后的面板值需要未校准的公式；本产物只给冻结目录的静态种族值 base_stats（带 pointer）",
       "where_it_would_be_resolved": "面板换算公式校准后由 RC-403 支持分级接管"
     },
     {
       "field": "battle_builds[].derived_stats",
       "value": null,
-      "instances_affected": 80,
+      "instances_affected": 48,
       "why": "与 panel_stats 同因：公式未校准，所以不给数（fail closed，而不是给个估数）",
       "where_it_would_be_resolved": "同上"
     }
@@ -4481,6 +3903,11 @@
     },
     {
       "check": "learnset_membership",
+      "ok": true,
+      "problems": 0
+    },
+    {
+      "check": "canonical_loadout",
       "ok": true,
       "problems": 0
     },

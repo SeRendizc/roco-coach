@@ -7,10 +7,13 @@ import {freshMemory,readMemory,rememberBattle,recordCoachEvent,rememberDecision,
 import {STAGES,SCENARIOS,stageOptions,createScenario} from '../game/content.js';
 import {DIFFICULTIES,SPECIES,SKILLS,ITEMS,TYPES,HELD_ITEMS,createGame,resolveTurn,chooseEnemy,buildVersusOpponent,legalActions,active,effectiveSpeed,rankEnemyActions} from '../game/engine.js';
 import {companionEvents,companionSession,companionCueSlot,bubbleDurationMs,companionAvatar,COMPANION_DEFER} from '../coach/companion.js';
-import {newProfile,loadProfile,TRAINING,trainingCapacity,MAX_STAT_TRAINING,train,resetTraining,settle,configurePet} from '../game/progression.js';
+import {newProfile,loadProfile,PROFILE_STORAGE_KEY,TRAINING,trainingCapacity,MAX_STAT_TRAINING,train,resetTraining,settle,configurePet} from '../game/progression.js';
 import {coachEvent,coachContext} from '../coach/session.js';
 import {rulesSections,ruleFacts} from '../game/rules.js';
-const $=id=>document.getElementById(id),storageKey='pet-coach-growth-v1';
+import {mountStalePageBanner} from './stale-page.js';
+// 「依据」栏只给玩家看人话那一部分（工程记号挑出去）——见 evidence-view.js 的文件头。
+import {playerEvidence} from './evidence-view.js';
+const $=id=>document.getElementById(id),storageKey=PROFILE_STORAGE_KEY;
 // 等级上限。真人同机对战默认双方都按这个等级打。
 const LEVEL_CAP=5;
 // PVP 的等级口径。两种模式各有一套选项，共用同一个存储键：
@@ -242,8 +245,27 @@ function renderPickSplit(){
  ebox.innerHTML=ea?`<strong>✦ 阵容</strong><span>${escape(ea.lines[0]+' '+ea.lines[2])}</span>`
   :`<span class="muted">${ai?'等待对手配队':'对方选满三只后给出评估'}</span>`;
 }
-function showCamp(){$('deploy').hidden=true;$('camp-home').hidden=false;$('camp-tab').classList.add('selected');}
-function showDeploy(mode){matchMode=mode||matchMode;$('camp-home').hidden=true;$('deploy').hidden=false;$('camp-tab').classList.remove('selected');syncMode();deployView();}
+// ── 首页启动页（人类 2026-09-25 纠偏①）───────────────────────────────────────
+// 首页 = 那张图（图上有三个按钮，热区叠在按钮位置上）；培养 / 小芽 是真链接，
+// PVP 进的是**这一页的选队页**（showDeploy('pvp')）——就是人类说的
+// 「点 pvp 功能进入现在的首页选配队，然后进入战斗页」。
+// 启动页是**浮层**（position:fixed），底下的营地/出征/对战 DOM 一个字都没变：
+// 旧入口（#go-pve / #go-pvp / #camp-tab）与既有验收脚本照常工作。
+function showLauncher(){const l=$('home-launcher');if(!l)return;l.hidden=false;document.body.dataset.home='yes';}
+function hideLauncher(){const l=$('home-launcher');if(!l)return;l.hidden=true;document.body.dataset.home='no';}
+function showCamp(){$('deploy').hidden=true;$('camp-home').hidden=false;$('camp-tab').classList.add('selected');hideLauncher();}
+function showDeploy(mode){matchMode=mode||matchMode;hideLauncher();$('camp-home').hidden=true;$('deploy').hidden=false;$('camp-tab').classList.remove('selected');syncMode();deployView();}
+/** 局末出口：回选队（人类点名「再来一局 ⇒ 回选队，不是回首页」）。
+ *  先 toCamp() 把这一局清干净，再按刚打完的模式回到选队页（PVP 回 PVP 的选队）。
+ *
+ *  为什么要有 whenMatchSettled：结算浮层是**结果一出来就显示**的，而这一局的收尾
+ *  （动画 / 成长结算）还在跑（busy=true），`toCamp()` 遇到 busy 是**直接返回**的 ——
+ *  于是刚打完那一刻点出口会「点了没反应」（真机实测：出口出现后那几秒里都是这样）。
+ *  这里等这一局收尾完再执行，而不是把 busy 强行清掉（清掉会让还在跑的收尾流程读到 null）。 */
+function whenMatchSettled(run,tries=50){if(!busy||tries<=0){run();return;}setTimeout(()=>whenMatchSettled(run,tries-1),100);}
+function backToPick(){whenMatchSettled(()=>{toCamp();if(!$('battle').hidden)return;showDeploy(matchMode||'pvp');});}
+/** 局末出口：回首页（= 那张图的启动页）。 */
+function backToHome(){whenMatchSettled(()=>{toCamp();if(!$('battle').hidden)return;location.hash='#home';showLauncher();});}
 function cultivation(){const p=grown(focus),v=profile.pets[focus],used=Object.values(v.points).reduce((a,b)=>a+b,0);$('cultivation').innerHTML=`<h3>${p.icon} ${p.name}<small>Lv.${v.level}</small></h3><p class="pet-trait">${p.bio} · ${p.trait}</p><div class="xp-track"><div style="width:${v.level===5?100:v.xp/(v.level*30)*100}%"></div></div><p class="muted xp-line">${v.level===5?'已满级':`经验 ${v.xp}/${v.level*ruleFacts().xpPerLevel} · 升级 生命+${ruleFacts().growth.level.hp} 攻防+${ruleFacts().growth.level.atk}`} · 培养格 ${used}/${trainingCapacity(v.level)}</p><div class="train-grid">${Object.entries(TRAINING).map(([key,t])=>`<div class="train-cell"><span class="train-name">${t.name}</span><span class="train-count">${v.points[key]}/${MAX_STAT_TRAINING}</span><small>${t.gain}</small><button data-train="${key}" ${preview||used>=trainingCapacity(v.level)||v.points[key]>=MAX_STAT_TRAINING||profile.tokens<1?'disabled':''}>＋1</button></div>`).join('')}</div><div id="loadout-editor"></div><button id="reset-training" ${used&&!preview?'':'disabled'}>重置 · 返还 ${used} 点</button><p class="hint">培养立即影响下次对战。本机自动保存。</p><button id="cultivation-coach">✦ 问小芽怎么培养</button><div id="growth-scene" hidden class="growth-scene"><strong>✦ 小芽 · 培养建议</strong><p>${SCENARIOS.find(x=>x.id==='growth').text}</p><button id="growth-dismiss">暂时收起</button></div>`;renderLoadout();
 // 配招编辑器：从 6 个可学技能里选 4 个。用卡片而不是下拉框，
 // 因为下拉框允许选成重复项，只能在保存时抛一个笼统错误。
@@ -279,7 +301,26 @@ function renderSides(state){$('player').innerHTML=sideView(state,'player');$('en
 // 所以不构成不公平。真正该守的底线是「不读取对方待执行动作」，那条一直没破。
 // 只有线上竞技（pvp-live）才闭麦，由 coach/policy.js 的 isLiveMatch 判断。
 // 这里原来有一个恒真的 coachAllowedInMatch()，它只是在重复上面这条结论，已删除。
-function matchContext(message){const c=buildContext(game,profile,focus,roundArchive,stageId,message);c.coachAllowed=true;return c;}
+function matchContext(message){
+ const c=buildContext(game,profile,focus,roundArchive,stageId,message);
+ c.coachAllowed=true;
+ // 「我这套阵容怎么样 / 有什么短板」在营地页也要能查引擎：`teamAsk` 认的是
+ // `profile.lineup`（当前选的这几只），而营地上下文原来只有 `profile.pets`（全部持有的 12 只）
+ // ⇒ 这类问句在营地里**一次工具都不调**，模型拿包里六维随口答（真机实测：
+ // 「我这套阵容有什么短板？」落到陪练通道，答案只有三只的一句话点评）。
+ // 这里把**当前选中的三只**按名单里的形状（id/name/types/level）挂上去，加性：
+ // 没选够三只就不挂这个键，营地/对局两条老路一个字不变。
+ // 形状与本仓「名单」一致：`{id,name,types,level}`。营地里这三只来自 `selected`
+ // （物种 id），类型用引擎的 `SPECIES` 现查 —— 不另存一份属性表。
+ const picked=(Array.isArray(selected)?selected:[]).map((id)=>{
+  const species=SPECIES.find((row)=>row&&row.id===id);
+  if(!species)return null;
+  const growth=profile?.pets?.[id]??null;
+  return {id:species.id,name:species.name,types:[species.type],level:growth?.level??null};
+ }).filter(Boolean);
+ if(picked.length>=3)c.profile={...c.profile,lineup:picked};
+ return c;
+}
 
 // 双方的行动面板用同一个渲染器，保证 UI 完全一致；只是数据取各自那一侧。
 
@@ -311,7 +352,7 @@ function actionPanelHtml(side,whichTab){
 }
 function render(){$('round-coach').textContent=game.result?'✦ 整局复盘':'✦ 回合回顾';renderSides(game);$('environment-info').textContent=game.environment?`${game.environment.name} · 剩${game.environment.turns}回合：${game.environment.desc}`:'无场地环境';$('enemy-difficulty').textContent=game.mode==='pvp-local'?('本地对战 · 对手 Lv.'+game.enemy.pets[0].level):DIFFICULTIES[game.difficulty]?.name+(game.stageName?' · '+game.stageName:' · 预制场景');const roundLabel=game.phase==='replace'?'免费补位':`第 ${Math.min(game.turn,ruleFacts().turnLimit)} 回合`;
 if($('turn').textContent!==roundLabel){$('turn').textContent=roundLabel;$('turn').classList.remove('round-pulse');void $('turn').offsetWidth;$('turn').classList.add('round-pulse');} $('phase').textContent=phaseText();$('restart').disabled=busy;$('camp-tab').disabled=busy;$('preview-exit').disabled=busy;$('preview-again').disabled=busy;$('export').disabled=busy;
-$('result').hidden=!game.result;if(game.result)$('result').innerHTML=`<strong>${{win:'训练胜利',loss:'本场失利',draw:'本场平局',escaped:'已认输'}[game.result]}</strong>${reward?`全队经验 +${reward.xp} · 训练点 +${reward.tokens}${reward.swift?' · 首次'+ruleFacts().swiftTurnLimit+'回合内速胜 +1点（已计入）':''}${reward.levels.length?' · '+reward.levels.join('，'):''}`:game.preview?'预制体验，不计入成长':'本场无成长奖励'} · ${game.preview?'退出体验可恢复原对战':'返回营地继续培养'}`;
+$('result').hidden=!game.result;const exitBar=$('result-actions');if(exitBar)exitBar.hidden=!game.result;if(game.result)$('result').innerHTML=`<strong>${{win:'训练胜利',loss:'本场失利',draw:'本场平局',escaped:'已认输'}[game.result]}</strong>${reward?`全队经验 +${reward.xp} · 训练点 +${reward.tokens}${reward.swift?' · 首次'+ruleFacts().swiftTurnLimit+'回合内速胜 +1点（已计入）':''}${reward.levels.length?' · '+reward.levels.join('，'):''}`:game.preview?'预制体验，不计入成长':'本场无成长奖励'} · ${game.preview?'退出体验可恢复原对战':'返回营地继续培养'}`;
 const forceSwitch=game.phase==='replace';
  if(forceSwitch){tab='switch';enemyTab='switch';}
  document.querySelectorAll('[data-tab]').forEach(b=>{const side=b.dataset.side||'player',mine=side==='enemy'?enemyTab:tab;
@@ -641,7 +682,10 @@ game=next;
   if(trigger){strategistHint=strategistCue(trigger);updateCoach();}
   if(game.phase!=='replace')turnIncident=null;
  }
- if(decision&&!preview){coachMemory=rememberDecision(coachMemory,{matchId,turn:old.turn,...decision,prompted:shown,rulesVersion:old.version});
+ // `game:old` 是**出招前**那份局面：习惯读数里的「残血」只认这条记录自己带着的血量事实。
+ // 不传的话那类样本恒为 0（读数会如实显示样本不足），传结算后的 game 则会把出手后的血量
+ // 冒充成决策时的血量——两种都是编数据，所以这里只认 old。
+ if(decision&&!preview){coachMemory=rememberDecision(coachMemory,{matchId,turn:old.turn,...decision,prompted:shown,rulesVersion:old.version,game:old});
   // 军师在局内反复看到同一课上的失误（判据是 transferAssessment：只数没被提示的独立行动）→
   // 把这一课标回未掌握，老师才有机会再讲一次。为什么又教，答案就是这里的 reason。
   if(decision.lesson){const struggle=observeStruggle(coachMemory,{lesson:decision.lesson});if(struggle.relearned){coachMemory=struggle.memory;logCoachEvent('relearn',decision.lesson);}}
@@ -824,8 +868,8 @@ async function ask(text){
  const epoch=contextEpoch,stamp=taskStamp({epoch,matchId:game?.id||null,rulesVersion:game?.version||'0.6'});
  try{const answer=await requestCoach({message:text,role:coachRole,context:matchContext(text),memory:coachMemory,conversation:conversation.slice(0,-1),stateToken:epoch});if(!taskIsCurrent(stamp,{epoch:contextEpoch,matchId:game?.id||null,rulesVersion:game?.version||'0.6'})||answer.stateToken!==epoch){hideThinking();$('coach-status').textContent='局面已变化或建议已过期，本次旧建议已丢弃，请重新提问';return;}coachMemory=answer.memory;if(answer.fallbackReason&&game)coachMemory=recordCoachEvent(coachMemory,{id:matchId+':'+game.turn+':fallback:'+Date.now(),kind:'coach-fallback',reason:answer.fallbackReason,matchId,turn:game.turn,rulesVersion:game.version});saveCoachMemory();if(!game)cultivation();addChat('小芽',answer.text);
  const entry=$('chat-log').lastElementChild;if(answer.choices){const controls=document.createElement('div');controls.className='quiz-choices';for(const choice of answer.choices){const b=document.createElement('button');b.textContent=choice;b.onclick=()=>{controls.remove();ask(choice);};controls.append(b);}entry.append(controls);}
- if(answer.evidence.length){const details=document.createElement('details');details.className='coach-evidence';details.innerHTML='<summary>依据 · '+escape({strategist:'军师',teacher:'老师',companion:'陪练',auto:'偏好',policy:'场景限制',guide:'游戏说明'}[answer.route]||answer.route)+'</summary>'+answer.evidence.map(x=>'<p>'+escape(x)+'</p>').join('');entry.append(details);}
- if(answer.toolTrace?.length){const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='小芽查了什么';details.append(summary);const names={read_state:'当前局面',search_rules:'规则和战术',compare_actions:'行动分支',inspect_training:'培养面板',read_last_turn:'上一回合记录',read_match:'整局记录',read_evidence:'指定回合原始证据',simulate_branch:'假设行动分支'};for(const receipt of answer.toolTrace){const line=document.createElement('p');line.textContent=names[receipt.tool]||receipt.tool;details.append(line);}entry.append(details);}
+ if(answer.evidence.length){const details=document.createElement('details');details.className='coach-evidence';details.innerHTML='<summary>依据 · '+escape({strategist:'军师',teacher:'老师',companion:'陪练',auto:'偏好',policy:'场景限制',guide:'游戏说明'}[answer.route]||answer.route)+'</summary>'+playerEvidence(answer.evidence).map(x=>'<p>'+escape(x)+'</p>').join('');entry.append(details);}
+ if(answer.toolTrace?.length){const details=document.createElement('details');const summary=document.createElement('summary');summary.textContent='小芽查了什么';details.append(summary);const names={read_state:'当前局面',search_rules:'规则和战术',compare_actions:'行动分支',inspect_training:'培养面板',read_last_turn:'上一回合记录',read_match:'整局记录',read_evidence:'指定回合原始证据',simulate_branch:'假设行动分支',query_rules:'图鉴与规则表',evaluate_team:'阵容评估',search_knowledge:'战术卡',recall_memory:'跨局记忆',read_roster:'伙伴名单',compare_team_change:'换人对比',plan_actions:'行动规划',summarize_battle:'整局总结'};for(const receipt of answer.toolTrace){const line=document.createElement('p');line.textContent=names[receipt.tool]||'引擎查询' /* 没登记的也不许把英文 id 端给玩家 */;details.append(line);}entry.append(details);}
  // 陪练这一路可能压根不是局面分析（玩家只是来搭话的），所以状态行不能一律写成
  // 「本局规则分析」——那句话对「你好呀」是错的。只改陪练这一支，其余路由文案不动。
  $('coach-status').textContent=answer.route==='companion'
@@ -843,7 +887,7 @@ function rerollSeed(){
  const el=$('seed');
  el.value=Math.floor(Math.random()*4294967295);
 }
-function startMatch(){advanceContext();resetReplaceWatchdog();
+function startMatch(){hideLauncher();advanceContext();resetReplaceWatchdog();
  // 第三道保险：队伍必须是三只。上限曾经失效过（能选到 7 只），
  // 与其相信界面上那两道，这里直接挡住。
  if(selected.length!==3){document.getElementById('save-message').textContent='请选择三只伙伴再开始。';return;}
@@ -852,16 +896,28 @@ function startMatch(){advanceContext();resetReplaceWatchdog();
  // 对手是 AI 时仍按玩家队伍的平均等级适配，那是闯关性质的对手。
  const capped=matchMode==='pvp'&&pvpLevel==='cap';
  const battlePets=capped?Object.fromEntries(Object.entries(profile.pets).map(([id,v])=>[id,{...v,level:LEVEL_CAP}])):profile.pets;
- game=createGame(seed,selected,versus?{pets:battlePets,difficulty:$('difficulty').value,mode:'pvp-local',...buildVersusOpponent(seed,{level:capped?LEVEL_CAP:avgLv,team:pvpOpponent==='human'&&enemySelected.length===3?enemySelected:null})}:{pets:profile.pets,difficulty:$('difficulty').value,mode:'pve',...stageOptions(stageId)});$('mode-badge').textContent=(matchMode==='pvp'?'对局 · PVP · v0.11':'训练 · PVE · v0.11');matchId=crypto.randomUUID();game.id=matchId;coachMemory.watches=[];saveCoachMemory();tacticalShown=new Set();tacticalCount=0;lastTacticalTurn=-10;reward=null;tab='skill';attention=attentionState(Date.now());coachSession=companionSession(coachMemory);companionSaid=new Set();companionPending=null;hideCompanionCue();strategistHint=strategistSession();turnIncident=null;strategistPanel=null;$('camp-home').hidden=true;$('deploy').hidden=true;$('battle').hidden=false;$('camp-tab').classList.remove('selected');$('message').textContent='';$('action-banner').textContent=matchMode==='pvp'?('本地对战：对手由 AI 扮演一位真人——自动配队、独立出招，界面与真人对战一致。双方各选一招后同时结算。'):'选择行动。电脑会根据回合前局面决策，不读取你的待执行选择。';render();autoCalls=0;lastAutoReason=null;visibleHintReason=null;visibleHintTurn=-10;coachMuted=false;lastFeedback=null;decideEnemyFirst();updateSideCoaches();updateCoach();}
+ game=createGame(seed,selected,versus?{pets:battlePets,difficulty:$('difficulty').value,mode:'pvp-local',...buildVersusOpponent(seed,{level:capped?LEVEL_CAP:avgLv,team:pvpOpponent==='human'&&enemySelected.length===3?enemySelected:null})}:{pets:profile.pets,difficulty:$('difficulty').value,mode:'pve',...stageOptions(stageId)});$('mode-badge').textContent=modeBadgeText(matchMode);matchId=crypto.randomUUID();game.id=matchId;coachMemory.watches=[];saveCoachMemory();tacticalShown=new Set();tacticalCount=0;lastTacticalTurn=-10;reward=null;tab='skill';attention=attentionState(Date.now());coachSession=companionSession(coachMemory);companionSaid=new Set();companionPending=null;hideCompanionCue();strategistHint=strategistSession();turnIncident=null;strategistPanel=null;$('camp-home').hidden=true;$('deploy').hidden=true;$('battle').hidden=false;$('camp-tab').classList.remove('selected');$('message').textContent='';$('action-banner').textContent=matchMode==='pvp'?('本地对战：对手由 AI 扮演一位真人——自动配队、独立出招，界面与真人对战一致。双方各选一招后同时结算。'):'选择行动。电脑会根据回合前局面决策，不读取你的待执行选择。';render();autoCalls=0;lastAutoReason=null;visibleHintReason=null;visibleHintTurn=-10;coachMuted=false;lastFeedback=null;decideEnemyFirst();updateSideCoaches();updateCoach();}
 $('start').onclick=()=>startMatch();
-function toCamp(){if(busy)return;$('mode-badge').textContent=matchMode==='pvp'?'对局 · PVP · v0.11':matchMode==='pve'?'训练 · PVE · v0.11':'营地 · v0.11';pvpPicks={player:null,enemy:null};$('panel-enemy').hidden=true;$('bottom-grid').classList.remove('versus');cancelVoice();advanceContext();if(preview){exitPreview();return;}if(game&&!game.result&&!confirm('离开会结束本次训练且没有奖励，返回营地吗？'))return;hintEpoch++;currentHint=null;$('attention-cue').hidden=true;clearTimeout(nudgeTimer);clearReplaceWatchdog();game=null;$('battle').hidden=true;companionPending=null;hideCompanionCue();$('camp-tab').classList.add('selected');$('deploy').hidden=true;$('camp-home').hidden=false;camp();}
+// 模式徽记只有**一处**文案（人类 2026-09-25：点 PVP 看到「v0.11」以为跳到了 0.1 的老版本）。
+// 以前这个版本号在 3 个地方各写一遍、且与任何真源都无关 —— 现在只报**模式**，
+// 版本/构建信息归 `/api/bootstrap` 与 roco.html 的开发者抽屉，不在玩家页眉里当装饰。
+function modeBadgeText(mode){return mode==='pvp'?'对局 · PVP':mode==='pve'?'训练 · PVE':'营地';}
+function toCamp(){if(busy)return;$('mode-badge').textContent=modeBadgeText(matchMode);pvpPicks={player:null,enemy:null};$('panel-enemy').hidden=true;$('bottom-grid').classList.remove('versus');cancelVoice();advanceContext();if(preview){exitPreview();return;}if(game&&!game.result&&!confirm('离开会结束本次训练且没有奖励，返回营地吗？'))return;hintEpoch++;currentHint=null;$('attention-cue').hidden=true;clearTimeout(nudgeTimer);
+ // 2026-09-25（本轮实测挖出来的**旧缺陷**）：这里原来写的是 `clearReplaceWatchdog()`，
+ // 而全仓**没有**这个函数（只有 `resetReplaceWatchdog()`，见上面看门狗那一段）。
+ // 于是 toCamp() 每次都在这一行抛 ReferenceError：`#restart`（返回营地）、`#camp-tab`
+ // （营地与培养）以及本轮新增的局末三个出口**全部静默失效**（点下去什么都不发生，
+ // 控制台里才有一行 "clearReplaceWatchdog is not defined"）。真无头 Chrome 实测：
+ // 认输后点「再来一局」→ 页面停在战斗态 3 秒以上，busy=false、结果条也在，就是不动。
+ // 判据：本轮的浏览器判据 B2/B3（点出口后必须真的落到选队页 / 首页）。
+ resetReplaceWatchdog();game=null;$('battle').hidden=true;companionPending=null;hideCompanionCue();$('camp-tab').classList.add('selected');$('deploy').hidden=true;$('camp-home').hidden=false;camp();}
 function syncMode(){
  const pvp=matchMode==='pvp';
  $('stage-step').hidden=pvp;$('stage-picker').hidden=pvp;$('stage-detail').hidden=pvp;
  const row=$('opponent-row');if(row)row.hidden=!pvp;
  if(!pvp)pvpOpponent='ai';
  $('start').textContent=pvp?'开始对战':'开始训练';
- $('mode-badge').textContent=matchMode===null?'营地 · v0.11':pvp?'对局 · PVP · v0.11':'训练 · PVE · v0.11';
+ $('mode-badge').textContent=modeBadgeText(pvp?'pvp':matchMode);
  if($('deploy-mode'))$('deploy-mode').textContent=pvp?'对局 · PVP':'训练 · PVE';
  $('mode-note').textContent=pvp?(pvpOpponent==='human'?'对局 · 真人同机：分屏同屏，两侧面板都可操作，各自选招后一起结算；双方各有一条教练。':`对局 · AI 模拟真人：对手从全部 ${SPECIES.length} 只里自动配队并适配你的等级，先独立出招再看不到你的选择；界面与真人对战一致。`)
   :'训练 · PVE：按关卡挑战固定对手，教练会主动提示，也可随时提问。';
@@ -869,10 +925,42 @@ function syncMode(){
 $('pvp-opponent').onchange=()=>{pvpOpponent=$('pvp-opponent').value;enemySelected=[];syncMode();if(!$('deploy').hidden)deployView();};
 $('difficulty').onchange=()=>{if(!$('deploy').hidden)deployView();};
 syncMode();
-$('restart').onclick=toCamp;$('camp-tab').onclick=()=>{if(game&&!game.result){toCamp();return;}showCamp();};$('go-pve').onclick=()=>showDeploy('pve');$('go-pvp').onclick=()=>showDeploy('pvp');$('rules-toggle').onclick=()=>$('rules').showModal();
+$('restart').onclick=toCamp;$('camp-tab').onclick=()=>{if(game&&!game.result){toCamp();return;}showCamp();};$('go-pve').onclick=()=>showDeploy('pve');
+// 2026-09-25 人类点名：「PVP 还链接在老版本」。处理：**所有叫「PVP」的入口**都去当前的 PVP 页
+// （首页热区、各页页眉的「开始 PVP」→ `/roco.html`），营地页这张卡改成它本来的名字 ——
+// 「本地对战练习（三只）」，并写明正式 PVP 走哪里。老练习流程本身不删（它有自己的判据）。
+$('go-pvp').onclick=()=>showDeploy('pvp');$('rules-toggle').onclick=()=>$('rules').showModal();
+// ── 启动页上的三个热区（人类 2026-09-25 纠偏①）+ 局末三个出口 ────────────────
+// 培养 / 小芽 是普通 `<a href>`（中键、新窗口照常）；PVP 走同一页的选队页，
+// 所以只拦左键（带修饰键的点击留给浏览器，行为与真链接一致）。
+$('home-pvp').onclick=e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;e.preventDefault();
+ // 2026-09-25 人类点名：「PVP 还链接在老版本」——以前这里跳的是**营地页的三只选队**（老流程），
+ // 现在直接去**当前的 PVP 页**：`roco.html` 的标准 PVP（六宠阵容工作台 + 选队 + 开一局）。
+ location.href='/roco.html';};
+$('home-xiaoya').onclick=()=>{location.href='/xiaoya.html';};
+$('nav-home').onclick=()=>{location.hash='#home';showLauncher();};
+$('exit-home').onclick=backToHome;
+$('exit-again').onclick=backToPick;
+$('exit-nurture').onclick=()=>{location.href='/box.html';};   // 2026-09-26：培养=刷新天分/性格，落在盒子页
+// 局末第四个出口：就地打开小芽（人类 2026-09-25：逃跑/结束都从这一组出口选去处）。
+if($('exit-xiaoya'))$('exit-xiaoya').onclick=()=>{openCoach();};
+// 直接开 `/#pvp`（例如刚打完一局点了「回到首页」又刷新）就落到选队页。
+function applyHomeRoute(){if(location.hash==='#pvp')showDeploy('pvp');}
+window.addEventListener('hashchange',applyHomeRoute);
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{if((b.dataset.side||'player')==='enemy')enemyTab=b.dataset.tab;else tab=b.dataset.tab;render();});
 $('export').onclick=()=>{const blob=new Blob([JSON.stringify(game,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`pet-battle-${game.initialSeed}-turn-${game.turn}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-$('coach-open').onclick=openCoach;$('coach-close').onclick=()=>$('coach-panel').hidden=true;$('bubble-chat').onclick=()=>{openCoach();addChat('小芽',$('bubble-text').textContent);};$('bubble-close').onclick=()=>{logCoachEvent('dismiss','companion');coachSession.dismissed=true;companionPending=null;hideCompanionCue();};$('coach-mode').onchange=()=>{cancelVoice();profile.coach.mode=$('coach-mode').value;advanceContext();hintEpoch++;$('attention-cue').hidden=true;attention.since=Date.now();if(profile.coach.mode==='quiet'){companionPending=null;hideCompanionCue();}save();if(game)updateCoach();else cultivation();};
+// 2026-09-25（人类原话：「首页点进去的小芽还是老版本啊？？为什么 0.1 的代码还在跑啊？？」）：
+// 首页上**同时**有两个小芽入口，去处却是两个样子 ——
+//   · 图片热区 `#home-xiaoya` → 单独的小芽页（`/xiaoya.html`，新版大页）；
+//   · 页眉那个「✦ 小芽」`#coach-open` → **页内面板** `#coach-panel`（旧版式：陪伴与语音设置/历史对话…）。
+// 于是"同一个小芽"点出来两个样子，看着就像旧代码还在跑（面板是同一份实现的小窗版，不是旧代码，
+// 但玩家分不出来）。现在统一：**没有进行中的对局 ⇒ 一律去单独的小芽页**（与热区同一个目的地）；
+// 对局进行中（离开页面会把这一局丢掉）⇒ 保留页内面板。
+function openXiaoya(){
+ if(game&&!game.result){openCoach();return;}
+ location.href='/xiaoya.html';
+}
+$('coach-open').onclick=openXiaoya;$('coach-close').onclick=()=>$('coach-panel').hidden=true;$('bubble-chat').onclick=()=>{openCoach();addChat('小芽',$('bubble-text').textContent);};$('bubble-close').onclick=()=>{logCoachEvent('dismiss','companion');coachSession.dismissed=true;companionPending=null;hideCompanionCue();};$('coach-mode').onchange=()=>{cancelVoice();profile.coach.mode=$('coach-mode').value;advanceContext();hintEpoch++;$('attention-cue').hidden=true;attention.since=Date.now();if(profile.coach.mode==='quiet'){companionPending=null;hideCompanionCue();}save();if(game)updateCoach();else cultivation();};
 $('chat-form').onsubmit=e=>{e.preventDefault();ask($('chat-input').value);$('chat-input').value='';};document.querySelectorAll('[data-question]').forEach(b=>b.onclick=()=>ask(b.dataset.question));
 
 // P05：难度名称与说明、规则弹窗正文都从规则数据源生成，界面不再手写数值。
@@ -886,6 +974,9 @@ restoreChats();
 $('chat-new').onclick=newChat;
 $('chat-threads').onchange=()=>{advanceContext();chatStore=selectChatSession(chatStore,$('chat-threads').value);saveChats();applyChatSession(activeChatSession(chatStore));refreshChatThreads();$('coach-status').textContent='已切回选中的那段对话；跨局记忆不受影响。';};
 camp();
+// 深链接：`/#pvp` 直接落在选队页（首页那张图的 PVP 热区写的就是 `#pvp`）。
+// 放在 camp() 之后跑：deployView() 读的是营地这一份已经渲染好的状态。
+applyHomeRoute();
 
 function renderStages(){
  $('stage-picker').innerHTML=STAGES.map(stage=>`<button data-stage="${stage.id}" class="${stage.id===stageId?'selected':''}" ${preview?'disabled':''}><strong>${stage.name}</strong><small>Lv.${stage.level} ${(profile.clearedStages||[]).includes(stage.id)?'· 已通关':''}</small></button>`).join('');
@@ -1196,3 +1287,6 @@ rerollSeed();
 
 // 模块图完整才跑得到这里：撤掉「脚本没加载成功」的兜底横幅。
 document.getElementById('boot-fallback')?.remove();
+
+// 「这一页是重启前的旧代码」探测器（2026-09-25）：服务端重启过而这一页没刷新时摆一条横幅。
+mountStalePageBanner();

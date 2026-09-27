@@ -431,3 +431,53 @@ test('台账说模型候选那一半已补齐，轨迹文档不得再声称它�
   assert.ok(status.claimsDone,
     'docs/roco/AGENT-TRAJECTORIES.md 应写明模型候选那一半已补齐，并给出 1,752 条这个宽口径数字');
 });
+
+// ── 计划侧的"明确降级"必须留着（2026-09-27，人类：「不许含糊」）──────────────────────
+test('计划里的 M1 与 RC-902 必须保持"明确降级"的状态（不许悄悄改回可宣称）', async () => {
+  const {readFileSync: read} = await import('node:fs');
+  const plan = read(new URL('../../docs/roadmap/LONG-TERM-PLAN.md', import.meta.url), 'utf8');
+  // ① M1：一栏里必须写着"当前不可宣称"，并且给出三条可核的理由
+  assert.match(plan, /M1[\s\S]{0,200}当前不可宣称/, 'M1 一栏要明说当前不可宣称');
+  for (const key of ['59 条全部是 draft', 'gate_eligible:false', '54 例']) {
+    assert.ok(plan.includes(key), `理由缺一条可核的事实：${key}`);
+  }
+  assert.ok(/解封条件/.test(plan), '要写清解封条件（把金标审完）');
+  // ② RC-902：状态必须是"不做"，不是"待开工"
+  assert.match(plan, /RC-902[\s\S]{0,120}不做/, 'RC-902 要明说是降级（不做），不许含糊成"待开工"');
+  assert.doesNotMatch(plan, /RC-902[^\n]*待开工/, 'RC-902 不许再写"待开工"');
+  // ③ 反证：这段口径更正必须**晚于**正文里的旧说法（即它确实是一处更正，而不是被删掉了）
+  const at = plan.indexOf('口径更正（2026-09-27');
+  assert.ok(at > 0 && at > plan.indexOf('| M1 |'), '口径更正要排在正文之后（它是更正，不是替代品）');
+});
+
+test('C5 第三处宽松必须是"明确降级"（不许对外宣称数字 100% 可追溯）', async () => {
+  const {readFileSync: read} = await import('node:fs');
+  const plan = read(new URL('../../docs/roadmap/LONG-TERM-PLAN.md', import.meta.url), 'utf8');
+  assert.match(plan, /C5 的第三处宽松[\s\S]{0,80}明确降级/, '第三处要明说降级');
+  // 降级的理由必须点名"已经做过的三处实体绑定"（否则读者会以为是完全没做）
+  for (const key of ['after-hp-mismatch', 'cancelled-action-claimed-as-hit', 'energy-not-full']) {
+    assert.ok(plan.includes(key), `要说清已有的实体绑定：${key}`);
+  }
+  assert.match(plan, /不对外宣称"数字 100% 可追溯"|不对外宣称「数字 100% 可追溯」/,
+    '降级后必须明确"不宣称 100% 可追溯"');
+  assert.match(plan, /重启条件/, '要写清什么时候把它改回待办');
+});
+
+test('C2 / C3 / Phase E 必须逐条"明确降级"（不许含糊挂着）', async () => {
+  const {readFileSync: read} = await import('node:fs');
+  const plan = read(new URL('../../docs/roadmap/LONG-TERM-PLAN.md', import.meta.url), 'utf8');
+  // C2：要明说待办 + 给出"为什么现在做不了"的可核理由（金标未审）+ 重启条件
+  assert.match(plan, /C2 `assess_evidence`[\s\S]{0,80}降级为待办/, 'C2 要写成待办（不是含糊挂着）');
+  assert.match(plan, /0 处实现/, 'C2 要写清事实（零实现）');
+  assert.match(plan, /\*\*重启条件\*\*：金标审完/, 'C2 要写清重启条件');
+  // C3：同上，且要与 C2 共用同一条重启条件
+  assert.match(plan, /M2（弃答率 \/ 弃答正确率）[\s\S]{0,60}降级为待办/, 'M2 要写成待办');
+  assert.match(plan, /两者的重启条件\*\*是同一条\*\*|重启条件\*\*是同一条/, 'M2 与 C2 的重启条件要写成同一条');
+  assert.match(plan, /不引用任何"弃答"相关的比率|不引用任何「弃答」相关的比率/, '要写明不引用弃答比率');
+  // Phase E：要写清"有多少、够不够、缺什么、重启条件"
+  assert.match(plan, /Phase E（困难类留出集）[\s\S]{0,40}部分存在/, 'Phase E 要写成"部分存在"');
+  assert.match(plan, /20 条/, '要写出已有多少条');
+  assert.match(plan, /≥30 条/, '要写出重启条件的数量门槛');
+  assert.match(plan, /只当"冒烟"|只当「冒烟」/, '要写明在那之前这些比率只当冒烟');
+});
+

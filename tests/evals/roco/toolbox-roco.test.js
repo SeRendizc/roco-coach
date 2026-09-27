@@ -110,7 +110,21 @@ test('query_rules 参数：只收稳定 id 与名字，额外参数、路径、U
  assert.equal(validToolArgs('query_rules',{kind:'sql',pet_id:A,state_version:0}),false);
  assert.equal(validToolArgs('query_rules',{kind:'pet',state_version:0}),false,'pet 需要 pet_id 或 name');
  assert.equal(validToolArgs('query_rules',{kind:'effect',state_version:0}),false,'effect 需要 skill_id');
- assert.equal(validToolArgs('query_rules',{kind:'learnset',name:'寂灭骨龙',state_version:0}),false,'学习表只认 pet_id');
+ // 2026-09-25：**学习表也收名字**（口径变了，判据跟着钉新口径，不是放宽）——
+ // 玩家说不出 `pet_id`，产品路径上「喵喵学得到哪些技能？」原来连工具循环都进不去；
+ // 引擎侧同日加了名字路径（唯一名给学习表、**重名给候选**，见 `roco/tests/test_learnset_lookup.py`）。
+ // 这里钉三态：按 id 收、按名字收、**两样都没有必须拒**（反证：不能变成"什么都不填也放行"）。
+ assert.equal(validToolArgs('query_rules',{kind:'learnset',pet_id:A,state_version:0}),true);
+ assert.equal(validToolArgs('query_rules',{kind:'learnset',name:'寂灭骨龙',state_version:0}),true);
+ assert.equal(validToolArgs('query_rules',{kind:'learnset',state_version:0}),false,'学习表需要 pet_id 或 name');
+ assert.equal(validToolArgs('query_rules',{kind:'learnset',name:'x'.repeat(41),state_version:0}),false,'名字超长必须拒');
+ // 2026-09-25：术语也收**名字**（玩家说不出 term_id；引擎侧同步加了名字路径：
+ // 精确名给定义、短说法给候选）。这里钉合同的两态 + 反证。
+ assert.equal(validToolArgs('query_rules',{kind:'term',term_id:'1015',state_version:0}),true);
+ assert.equal(validToolArgs('query_rules',{kind:'term',name:'应对状态',state_version:0}),true);
+ assert.equal(validToolArgs('query_rules',{kind:'term',state_version:0}),false,'术语需要 term_id 或 name');
+ assert.equal(validToolArgs('query_rules',{kind:'term',name:'x'.repeat(41),state_version:0}),false,'术语名超长必须拒绝');
+ assert.equal(validToolArgs('query_rules',{kind:'term',name:'应对状态',state_version:0,path:'/x'}),false,'多余参数照旧拒绝');
  // executeTool 在参数不合法时同步抛，绝不带着路径去执行
  assert.throws(()=>executeTool('query_rules',{kind:'pet',pet_id:A,state_version:0,path:'/etc/passwd'},ctx()),/invalid-arguments/);
 });

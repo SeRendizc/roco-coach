@@ -25,9 +25,11 @@ import assert from 'node:assert/strict';
 import {existsSync, readFileSync} from 'node:fs';
 
 import {
+  FROZEN_LAYER_SUPPORT,
+  FROZEN_MAIN_SUPPORT,
   INSTANCE_TARGET,
   MIN_OUTSIDE_LAYER,
-  MIN_SAME_SPECIES_GROUPS,
+  MAX_SAME_SPECIES_GROUPS,
   MIN_SPECIES,
   OWNED_PETS_PATH,
   OWNED_SCHEMA_PATH,
@@ -38,6 +40,7 @@ import {
   compareOwnedPets,
   datasetHash,
   expectedInstanceUnknownFields,
+  mergeCanonicalLoadouts,
   OwnedPetSpeciesMismatchError,
   resignDataset,
   sha256Hex,
@@ -114,7 +117,9 @@ test('真产物：实例数 / species 数 / 不在 48 层的逐只点名 / 同�
   assert.ok(instances.length >= INSTANCE_TARGET, `实例数 ${instances.length} < ${INSTANCE_TARGET}`);
   assert.ok(speciesIds.length >= MIN_SPECIES, `species 数 ${speciesIds.length} < ${MIN_SPECIES}`);
   assert.ok(outside.length >= MIN_OUTSIDE_LAYER, `不在 layer-playable-48 的只有 ${outside.length} < ${MIN_OUTSIDE_LAYER}`);
-  assert.ok(groups.length >= MIN_SAME_SPECIES_GROUPS, `同种组只有 ${groups.length} < ${MIN_SAME_SPECIES_GROUPS}`);
+  // 2026-09-24（人类纠正）：不再允许同种多实例 —— 那批「第二个个体」是造的，游戏里不存在。
+  assert.ok(groups.length <= MAX_SAME_SPECIES_GROUPS,
+    `同种多实例组有 ${groups.length} 组 > ${MAX_SAME_SPECIES_GROUPS}：重复个体必须删掉`);
   // 每一组都必须至少有一项个体属性不同，否则「同种不同个体」是空的。
   for (const group of groups) {
     const comparison = compareOwnedPets(group[0], group[1]);
@@ -125,27 +130,129 @@ test('真产物：实例数 / species 数 / 不在 48 层的逐只点名 / 同�
   assert.equal(dataset.counts.same_species_groups_with_difference, groups.length);
 });
 
-test('真产物：四个技能逐个都在该 species 的 learnsets.json native_skills 里', () => {
+test('真产物：四个技能逐个都在该 species 的学习表池（native ∪ blood ∪ stones，与引擎 is_learnable 同口径）里', () => {
   // 不信任产物自带的 pointer：直接按 species_id 重算一遍出处。
+  // 2026-09-25：口径从「只认 native_skills」改成**引擎自己的那一条** ——
+  // `Ruleset.is_learnable`（`roco/src/roco_env/data.py:305-307`）读的是 `Learnset.all_skill_ids`
+  // = native ∪ blood ∪ stones（`data.py:133-135`）；字段名与类型照 `data.py:477-483` 抄：
+  // `native_skills`/`blood_skills` 是 `[{skill_id}]`，`skill_stones` 是**纯字符串数组**。
   const frozen = {
     main: JSON.parse(readFileSync('data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json', 'utf8')).learnsets,
     layer: JSON.parse(readFileSync('data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json', 'utf8')).learnsets,
   };
   const skills = new Set(Object.keys(JSON.parse(readFileSync('data/roco/normalized/roco-world-s4-2026-09-10/skills.json', 'utf8')).skills));
   let checked = 0;
+  let outsideNative = 0;
+  const origins = {native: 0, blood: 0, stones: 0};
   for (const instance of dataset.instances) {
     const entry = frozen.main[instance.species_id] ?? frozen.layer[instance.species_id];
     assert.ok(entry, `${instance.instance_id} 的 ${instance.species_id} 没有冻结 learnset`);
-    const learnable = new Set(entry.native_skills.map((row) => row.skill_id));
+    const native = new Set((entry.native_skills ?? []).map((row) => row.skill_id).filter(Boolean));
+    const blood = new Set((entry.blood_skills ?? []).map((row) => row.skill_id).filter(Boolean));
+    const stones = new Set((entry.skill_stones ?? []).filter((s) => typeof s === 'string' && s.length > 0));
+    const learnable = new Set([...native, ...blood, ...stones]);
     assert.equal(instance.skills.length, 4, `${instance.instance_id} 不是四个技能`);
     for (const skill of instance.skills) {
-      assert.ok(learnable.has(skill), `${instance.instance_id} 的 ${skill} 不在 ${instance.species_id} 的 native_skills 里`);
+      assert.ok(learnable.has(skill), `${instance.instance_id} 的 ${skill} 不在 ${instance.species_id} 的学习表池里`);
       assert.ok(skills.has(skill), `${instance.instance_id} 的 ${skill} 不在全量 skills.json 里`);
+      const origin = native.has(skill) ? 'native' : blood.has(skill) ? 'blood' : 'stones';
+      origins[origin] += 1;
+      if (origin !== 'native') outsideNative += 1;
       checked += 1;
     }
   }
-  log('[实际] 逐个核对的技能引用 =', checked);
+  log('[实际] 逐个核对的技能引用 =', checked, `（native ${origins.native} / blood ${origins.blood} / stones ${origins.stones}）`);
   assert.equal(checked, dataset.instances.length * 4);
+  // 差异**不许消失**：这 46 个非 native 引用是「引擎真的会装上血统/石系技能」的证据，
+  // 谁把它们悄悄删掉（或把口径偷偷改回 native-only）都要在这里留下痕迹。
+  assert.equal(outsideNative, 46, '非 native（blood/stones）技能引用数变了 —— 请连同口径一起复核');
+});
+
+test('真产物：BattleBuild.ordered_skills **逐位**等于引擎 loadout（C20；2026-09-25 人类「配招这个你得修好」）', () => {
+  // 引擎 loadout = support-matrix.json（基线 12）+ layer-playable-48/support-matrix.json（叠加层 36）
+  // 的 candidate_moveset 合并（规则同 `roco/src/roco_env/data.py:515-535`）。
+  // 这一条**不相信 owned 自己的任何声明**：直接从两片冻结矩阵重算，逐位比对。
+  const matrices = [
+    {label: 'baseline', doc: JSON.parse(readFileSync(FROZEN_MAIN_SUPPORT, 'utf8'))},
+    {label: 'layer', doc: JSON.parse(readFileSync(FROZEN_LAYER_SUPPORT, 'utf8'))},
+  ];
+  const merged = mergeCanonicalLoadouts(matrices);
+  assert.deepEqual(merged.problems, [], `规范四技能合并本身有问题：${show(merged.problems)}`);
+  assert.equal(merged.byPetId.size, 48, '引擎 loadout 覆盖的物种数应为 48');
+  let matched = 0;
+  for (const build of dataset.battle_builds) {
+    const canonical = merged.byPetId.get(build.species_id);
+    assert.ok(canonical, `${build.build_id} 的 ${build.species_id} 不在引擎 loadout 里`);
+    assert.deepEqual(build.ordered_skills, canonical,
+      `${build.build_id}（${build.species_id}）的 ordered_skills 与引擎 loadout 不逐位相同`);
+    matched += 1;
+  }
+  log('[实际] 与引擎 loadout 逐位相同的 build =', matched, '/', dataset.battle_builds.length,
+    '；样例 =', JSON.stringify(dataset.battle_builds[0].ordered_skills));
+  assert.equal(matched, dataset.battle_builds.length);
+  // 判据本身不是空的：C20 必须在 CHECK_NAMES 里，且报告里 C20 是通过的
+  assert.ok(CHECK_NAMES.includes('canonical_loadout'), 'C20 的判据分组没接进 CHECK_NAMES');
+  assert.equal(report.criteria.find((c) => c.id === 'C20')?.ok, true, '报告里的 C20 不是通过状态');
+});
+
+test('必红反证：把 owned 的四技能换掉/调序，C20 立刻报（判据有牙）', () => {
+  // 反证 A：调换第 3、4 位 —— **只动顺序、不动集合**。这一条专抓「顺序不算数」那种放松。
+  const swapped = clone();
+  const b0 = swapped.battle_builds[0];
+  [b0.ordered_skills[2], b0.ordered_skills[3]] = [b0.ordered_skills[3], b0.ordered_skills[2]];
+  const a0 = swapped.instances.find((i) => i.instance_id === b0.owned_pet_instance_id);
+  [a0.skills[2], a0.skills[3]] = [a0.skills[3], a0.skills[2]];
+  resign(swapped);
+  const swapProblems = judge(swapped).problems;
+  assert.ok(swapProblems.some((p) => p.includes('[canonical_loadout]')),
+    `只调换顺序也必须被 C20 抓住：${show(swapProblems, 3)}`);
+  log('[反证] 调换第 3/4 位 → C20 命中：', showCheck(swapProblems, 'canonical_loadout'));
+
+  // 反证 B：把四个技能里换掉一个（换成同池的另一个合法技能）—— 集合级也要抓住。
+  const replaced = clone();
+  const b1 = replaced.battle_builds[1];
+  const original = b1.ordered_skills[1];
+  const pool = JSON.parse(readFileSync('data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/learnsets.json', 'utf8')).learnsets[b1.species_id]
+    ?? JSON.parse(readFileSync('data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json', 'utf8')).learnsets[b1.species_id];
+  const alternatives = (pool.native_skills ?? []).map((r) => r.skill_id)
+    .filter((id) => !b1.ordered_skills.includes(id));
+  assert.ok(alternatives.length > 0, '反证 B 需要至少一个候选技能');
+  b1.ordered_skills[1] = alternatives[0];
+  const a1 = replaced.instances.find((i) => i.instance_id === b1.owned_pet_instance_id);
+  a1.skills[1] = alternatives[0];
+  resign(replaced);
+  const replaceProblems = judge(replaced).problems;
+  assert.ok(replaceProblems.some((p) => p.includes('[canonical_loadout]')),
+    `换掉一个技能（${original} → ${alternatives[0]}）也必须被 C20 抓住：${show(replaceProblems, 3)}`);
+  log('[反证] 换掉一个技能 → C20 命中：', showCheck(replaceProblems, 'canonical_loadout'));
+
+  // 反证 C：真产物本身**不许**被判红（否则说明反证只是把判据弄红了）
+  assert.deepEqual(judge(dataset).problems.filter((p) => p.includes('[canonical_loadout]')), []);
+});
+
+test('已知限制（钉住）：盒子页读的冻结 roster-48.json 与引擎 loadout 有 2/48 不一致', () => {
+  // 两条链都**冻结**（`data/roco/normalized/**` 一个字节都不许动）：
+  //   · 引擎/战斗读 `support-matrix.json` + `layer-playable-48/support-matrix.json`（本判据的事实源）；
+  //   · 盒子页 `/api/roco/box` 读 `roster-48.json#pets[].moveset`（`src/server/roco-service.js:292`）。
+  // 这 2 只（基线 12 里的 pet_000451 秩序鱿墨 / pet_000474 画间沉铁兽）在两侧给出的四技能不同，
+  // 而**改不动**（两侧都在 normalized/ 里）。所以这里把它**钉成已知数字**：
+  // 任何**新增**漂移都会让这条测试红；要修必须先动 `src/**` 的读点或拿到改冻结层的授权。
+  const matrices = [
+    {label: 'baseline', doc: JSON.parse(readFileSync(FROZEN_MAIN_SUPPORT, 'utf8'))},
+    {label: 'layer', doc: JSON.parse(readFileSync(FROZEN_LAYER_SUPPORT, 'utf8'))},
+  ];
+  const engine = mergeCanonicalLoadouts(matrices).byPetId;
+  const roster = JSON.parse(readFileSync('data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json', 'utf8'));
+  const drift = [];
+  for (const pet of roster.pets) {
+    const engineSkills = engine.get(pet.pet_id);
+    const rosterSkills = (pet.moveset ?? []).map((row) => row.skill_id);
+    if (!engineSkills || rosterSkills.length === 0) continue;
+    if (JSON.stringify(engineSkills) !== JSON.stringify(rosterSkills)) drift.push(pet.pet_id);
+  }
+  log('[实际] roster-48 与引擎 loadout 不一致的物种 =', drift.length, JSON.stringify(drift));
+  assert.deepEqual(drift, ['pet_000451', 'pet_000474'],
+    '已知漂移集合变了：新增漂移必须当成缺陷处理，不许直接改这条期望值');
 });
 
 test('真产物：养成属性全部是 UNKNOWN，且没有任何被发明的公式字段', () => {
@@ -285,19 +392,24 @@ test('反证③④ 技能换成学不到的 / 四个改成三个 ⇒ 红', () =>
   const mainLearn = JSON.parse(readFileSync('data/roco/normalized/roco-world-s4-2026-09-10/learnsets.json', 'utf8')).learnsets;
 
   const bad = clone();
-  const victim = bad.instances[2];
+  // 2026-09-24：实例集合改成「一人一只」之后，第 3 个实例不一定在主 learnsets.json 里有登记
+  //（它可能只在 layer-playable-48 那份里）→ 挑一个**两份都能查到的**物种当受害者，
+  // 否则反证会因为「查不到 learnset」而报别的错，测的就不是这条判据了。
+  const victim = bad.instances.find((i) => mainLearn[i.species_id]?.native_skills?.length) ?? bad.instances[2];
   const learnable = new Set(mainLearn[victim.species_id].native_skills.map((row) => row.skill_id));
   const foreign = frozenSkills.find((skill) => !learnable.has(skill));
   victim.skills[0] = foreign;
-  bad.battle_builds[2].ordered_skills = [...victim.skills];
+  const victimBuild = bad.battle_builds.find((b) => b.owned_pet_instance_id === victim.instance_id);
+  victimBuild.ordered_skills = [...victim.skills];
   resign(bad);
   const problems = judge(bad).problems;
   log('[实际] 学了学不到的 rc =', problems.length ? 1 : 0, '；原文 =', showCheck(problems, 'learnset_membership'));
   assert.ok(problems.some((p) => p.includes('[learnset_membership]') && p.includes(foreign)));
 
   const bad2 = clone();
-  bad2.instances[3].skills = bad2.instances[3].skills.slice(0, 3);
-  bad2.battle_builds[3].ordered_skills = [...bad2.instances[3].skills];
+  const victim2 = bad2.instances.find((i) => i.instance_id !== victim.instance_id);
+  victim2.skills = victim2.skills.slice(0, 3);
+  bad2.battle_builds.find((b) => b.owned_pet_instance_id === victim2.instance_id).ordered_skills = [...victim2.skills];
   resign(bad2);
   const problems2 = judge(bad2).problems;
   log('[实际] 三个技能的 rc =', problems2.length ? 1 : 0, '；原文 =', showCheck(problems2, 'learnset_membership'));
@@ -317,8 +429,11 @@ test('反证⑤⑦ species_id 不存在 / 实例降到 79 个 ⇒ 红', () => {
   bad2.battle_builds = bad2.battle_builds.filter((b) => b.owned_pet_instance_id !== dropped.instance_id);
   resign(bad2);
   const problems2 = judge(bad2).problems;
-  log('[实际] 79 个实例 rc =', problems2.length ? 1 : 0, '；原文 =', showCheck(problems2, 'species_universe'));
-  assert.ok(problems2.some((p) => p.includes('[species_universe]') && p.includes('79')));
+  log('[实际] 少一个实例 rc =', problems2.length ? 1 : 0, '；原文 =', showCheck(problems2, 'species_universe'));
+  // 2026-09-24：实例数=物种数=48（人类要求删掉重复个体），少一个是 47 —— 判据断言「点名了实际条数」，
+  // 不再写死 79。
+  assert.ok(problems2.some((p) => p.includes('[species_universe]')
+    && p.includes(String(INSTANCE_TARGET - 1))), `少一个实例必须被点到数：${showCheck(problems2, 'species_universe')}`);
 });
 
 test('反证⑥⑪ nature.effect 填数值 / 长出公式字段 ⇒ 红', () => {

@@ -77,7 +77,29 @@ test('RC-105 配置：v3 由生成器产出、与磁盘逐字一致，且是候�
 });
 
 test('RC-105 配置：v3 只新增 mana/actions，energy 与 turn_order 与 v2 逐字相同', () => {
-  assert.deepEqual(v3.energy, v2.energy, 'v3 的 energy 必须逐字沿用 v2（一个值都不许改）');
+  // 2026-09-23（人类口径⑥）：v3 的 `energy` 现在**多一个叶子** `initial_for_all_pets`
+  // （开局每只都满 10 星，见 EV-ENERGY-PER-PET）。「逐字沿用 v2」这条判据因此改成更强的两条：
+  //   ① v2 有的每一个 key 都逐字相同（一个值都不许改）；
+  //   ② v3 多出来的 key 只允许那几个显式登记过的开关。
+  // 「v3 悄悄改了 v2 的口径」照样红，而「显式新增一个带台账引用的开关」是被允许的。
+  // 2026-09-25（RC-401 批次六）：多出 `foe_energy_loss`（「偷取/失去敌方能量」类效果的能力开关，
+  // 由 `scripts/roco/build-rule-configs.mjs` 生成、台账那一栏写 `supports`）。**钉不许删**：
+  // 名字仍然逐条列在这里，多一个少一个都会红。
+  const extraEnergyKeys = Object.keys(v3.energy).filter((k) => !(k in v2.energy)).sort();
+  // 2026-09-25（RC-401 批次九）：再登记一个 `per_layer_cost`（动态能耗修正：
+  // 「敌方每有 N 层中毒效果，本技能能耗 -M」，51 只配招带 `skill_000612 毒液渗透`）。
+  assert.deepEqual(extraEnergyKeys,
+    ['cost_modifier', 'foe_energy_loss', 'initial_for_all_pets', 'per_layer_cost'],
+    'v3 的 energy 只允许多出这四个已登记的叶子');
+  for (const key of Object.keys(v2.energy)) {
+    assert.deepEqual(v3.energy[key], v2.energy[key], `v3 的 energy.${key} 必须逐字沿用 v2`);
+  }
+  const perPet = v3.energy.initial_for_all_pets;
+  assert.equal(perPet.value, true, '开局每只都要给满星（人类实机口径⑥）');
+  assert.equal(perPet.evidence_id, 'EV-ENERGY-PER-PET');
+  assert.equal(perPet.confidence, 'RECORDED_IN_GAME');
+  assert.equal(v2.energy.initial_for_all_pets, undefined,
+    'v2 不许出现这个叶子（legacy/v2 的入场行为与指纹必须逐位不变）');
   assert.deepEqual(v3.turn_order, v2.turn_order, 'v3 的 turn_order 必须逐字沿用 v2');
   // 真的改了「什么」也要钉住：变的是 mode 规模的说明 与 新增的两块
   assert.notDeepEqual(v3.battle_mode.team_size.reason, v2.battle_mode.team_size.reason,
@@ -87,7 +109,10 @@ test('RC-105 配置：v3 只新增 mana/actions，energy 与 turn_order 与 v2 �
   assert.equal(v3.mana.faint_cost.value, 1);
   assert.equal(v3.mana.loss_when_zero.value, true);
   assert.equal(v3.mana.surrender.value, true);
-  assert.deepEqual(v3.actions.allowed_kinds.value, ['skill', 'charge', 'switch', 'surrender']);
+  // 2026-09-23：`magic`（PVP 魔法：愿力强化）也进来了 —— 它是**独立动作类**，
+  // 不是靠放开 `item` 实现的（那会同时把回复药放进来，破掉「标准 PVP 无普通道具」）。
+  assert.deepEqual(v3.actions.allowed_kinds.value,
+    ['skill', 'charge', 'switch', 'surrender', 'magic']);
   assert.deepEqual(v3.actions.forbidden_kinds.value, ['item', 'escape']);
   assert.match(v3.actions.forbidden_kinds.reason, /标准 PVP 无道具与逃跑；仅当某 PVE 模式登记允许时才出现/);
   assert.equal(v3.actions.unknown_kinds_allowed.value, false);
@@ -117,8 +142,13 @@ test('RC-105 配置：mana/actions 的每个 kind 都带 confidence，台账等�
   assert.equal(v3.actions.kinds.surrender.confidence, 'ENGINE_HYPOTHESIS');
   assert.ok(v3.actions.kinds.surrender.reason);
   // mana 四件套
+  // 2026-09-25 改钉：人类实机口径「就是4点…就是生命数，就是4颗心」⇒ EV-PVP-STANDARD-MANA 升
+  // RECORDED_IN_GAME，配置侧必须同步（台账自注的"降级风险最高"那条已被实测取代）。
+  // **旧口径留痕**：此前这里断言 'CROSS_SOURCE_SUPPORTED'；力竭扣减量那条**没有**升级（仍未核验）。
   assert.equal(v3.mana.pool.evidence_id, 'EV-PVP-STANDARD-MANA');
-  assert.equal(v3.mana.pool.confidence, 'CROSS_SOURCE_SUPPORTED');
+  assert.equal(v3.mana.pool.confidence, 'RECORDED_IN_GAME');
+  assert.equal(ledgerEntries.get('EV-PVP-STANDARD-MANA').confidence, 'RECORDED_IN_GAME',
+    '配置等级必须等于它引用的台账条目等级（不许静默升降级）');
   assert.equal(v3.mana.pool.microcase_id, 'MC-E08');
   assert.equal(v3.mana.faint_cost.evidence_id, 'EV-PVP-FAINT-MANA-LOSS');
   assert.equal(v3.mana.faint_cost.confidence, 'CROSS_SOURCE_SUPPORTED');

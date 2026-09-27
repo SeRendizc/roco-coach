@@ -1,0 +1,11 @@
+
+> roco:shadow-replay
+> node scripts/roco/shadow-replay.mjs --arm local_4b --out reports/roco/local-4b-test-2026-09-25/shadow-replay-local_4b.json
+
+[shadow-replay] ReferenceError: gatewayAsk is not defined
+    at main (file:///Users/serendizc/Developer/roco-coach/scripts/roco/shadow-replay.mjs:267:19)
+    at file:///Users/serendizc/Developer/roco-coach/scripts/roco/shadow-replay.mjs:337:3
+    at ModuleJob.run (node:internal/modules/esm/module_job:561:25)
+    at async node:internal/modules/esm/loader:647:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+EXIT=1

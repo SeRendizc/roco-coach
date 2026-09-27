@@ -49,6 +49,11 @@
         "topic": "battle_mode.boss_duel",
         "maps_to": "battle_mode.standard_pvp",
         "why": "首领对决是**主题 PVP**（闪耀大赛式标准 PVP 的一个主题变体），不是第三个独立 BattleMode：它复用标准模式的规模与结算，只把「首领化是否要求全员满足」这类主题参数写进 BattleMode / ruleset 的 theme 子对象。共享登记表（data/roco/artifact-registry.json）目前没有这个更细的键，因此映射到 battle_mode.standard_pvp —— 与 pvp.standard.team_size 同一套做法。"
+      },
+      {
+        "topic": "energy.initial_per_pet",
+        "maps_to": "energy.initial",
+        "why": "这条讲的是同一个读数**发给谁**（每只独立、开局全满），不是另一个规则主题；共享登记表里最接近的键就是 energy.initial，故映射到它。"
       }
     ]
   },
@@ -94,27 +99,34 @@
   "source_markers": [
     {
       "id": "official_first_party",
-      "definition": "官方一手：官方公告 / 官方账号发布页。"
+      "definition": "官方一手：官方公告 / 官方账号发布页。",
+      "used_entry_count": 5
     },
     {
       "id": "official_reproduction",
-      "definition": "官方公告的媒体或转述转载（例如 17173 全文转载官方更新公告）。**不计入前两级**，因为无法证明与原文逐字一致。"
+      "definition": "官方公告的媒体或转述转载（例如 17173 全文转载官方更新公告）。**不计入前两级**，因为无法证明与原文逐字一致。",
+      "used_entry_count": 6
     },
     {
       "id": "recorded_gameplay",
-      "definition": "项目自己保存的可复核实机证据（录屏 / 截图 / 实测台账）。本轮**尚无任何来源取此值**。"
+      "definition": "项目自己保存的可复核实机证据（录屏 / 截图 / 实测台账；`data/roco/evidence/user-in-game-reports.json` 是它的落点，`reporter` = owner（人类持有者）= 本仓最高权威）。**2026-09-25 更正（原话保留）**：原文写「本轮**尚无任何来源取此值**」——**那句话与数据自相矛盾**：当时实际已有 4 条条目的 `sources[].marker` 就是 `recorded_gameplay`；截至 2026-09-25 已有 **7 条**（`EV-ENERGY-INITIAL` / `EV-ENERGY-PER-PET` / `EV-PVP-STANDARD-MANA` / `EV-PVP-BOSS-FORM-STANDARD` / `EV-PVP-WISH-POWER-UP` / `EV-PVP-STANDARD-FILL-SIX` / `EV-PVP-STANDARD-SELF-BUILT-TEAM`）。这份\"标记说明\"当初是手写的，没有判据钉它 —— 现在由 `scripts/roco/verify-rules-corpus.mjs` 的 `source_markers_consistent` 判据钉住（说明里声明的条数必须等于实际条数）。",
+      "definition_prior": "项目自己保存的可复核实机证据（录屏 / 截图 / 实测台账）。本轮**尚无任何来源取此值**。",
+      "used_entry_count": 9
     },
     {
       "id": "community",
-      "definition": "社区页面 / 社区归档 / 社区攻略。"
+      "definition": "社区页面 / 社区归档 / 社区攻略。",
+      "used_entry_count": 16
     },
     {
       "id": "repo_internal",
-      "definition": "本仓库内部事实源（代码 / 快照数据 / 待验计划），不是外部证据。"
+      "definition": "本仓库内部事实源（代码 / 快照数据 / 待验计划），不是外部证据。",
+      "used_entry_count": 7
     },
     {
       "id": "product_context",
-      "definition": "产品设计前提（例如“匹配前不知道对手阵容”是我们要做的产品场景），不是游戏规则证据。"
+      "definition": "产品设计前提（例如“匹配前不知道对手阵容”是我们要做的产品场景），不是游戏规则证据。",
+      "used_entry_count": 1
     }
   ],
   "entries": [
@@ -262,6 +274,37 @@
       "notes": "开局值按**用户实机核对**定为 10（RECORDED_IN_GAME，留档 data/roco/evidence/user-in-game-reports.json）；MC-E04 未完全收口 —— 换入/补位/第二次入场的读数与继承规则仍无证据，保持 UNKNOWN（fail closed）。"
     },
     {
+      "id": "EV-ENERGY-PER-PET",
+      "topic": "energy.initial_per_pet",
+      "claim": "每只精灵的星星（能量）是**各自独立**的资源，**开局每一只都是满的 10 星**（不是「只有场上那只满、替补 0 星」）。用户（实机持有者）2026-09-23 实机核对。仍需补：换入过的精灵再次入场、力竭补位入场的读数与继承规则（MC-E04 其余子问题）。",
+      "confidence": "RECORDED_IN_GAME",
+      "value": true,
+      "value_note": "本字段是**实机结论本身**（布尔）：开局这个 10 星是**发给每一只**。生成器据此判一条硬规则 —— 任何 evidence_role=supports 地引用本条的配置叶子，值必须是 true；写成 false（回到「只发给场上那只」）必须判红。它与 `EV-ENERGY-INITIAL`（读数是 10）是两条：那条管**数**，这条管**发给谁**。",
+      "sources": [
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-23-energy-per-pet",
+          "date": "2026-09-23",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "每个精灵能量（星）是独立的，开局都是满的 10 星"
+        },
+        {
+          "url": "roco/src/roco_env/env.py#L247",
+          "date": "2026-09-21",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "旧实现只把入场能量发给场上那只（`side.field_pet.energy = initial_energy`），其余保持 0 —— 这一条正是要修掉的工程口径，不是证据。"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E04",
+      "affected_artifacts": [
+        "roco/src/roco_env/env.py",
+        "data/roco/rulesets/mobile-s4-candidate-v3.json"
+      ],
+      "notes": "这条是**配置声明**（`energy.initial_for_all_pets`）：legacy / v2 不声明它，所以那两份的入场行为与指纹逐位不变；只有声明了它的候选配置才把 10 星发给全队。MC-E04 未完全收口 —— 换入/补位/第二次入场的继承规则仍无证据，保持 UNKNOWN（fail closed）。"
+    },
+    {
       "id": "EV-ENERGY-COST8-EXISTS",
       "topic": "energy.max",
       "claim": "技能能耗 8 的存在：已冻结快照里确实存在能耗为 8 的技能，因此“上限 6”会把它们永久判成不可用——这是必须建 candidate ruleset 的工程理由。该条只证明“能耗 8 存在”，不证明“上限是 10”。",
@@ -319,8 +362,8 @@
     {
       "id": "EV-PVP-STANDARD-MANA",
       "topic": "battle_mode.standard_pvp",
-      "claim": "标准 PVP 通常 4 点魔力：我们打算按 candidate ruleset 施工“4 点魔力”，并在 UI 里标成候选规则。禁止写成官方已确认。",
-      "confidence": "CROSS_SOURCE_SUPPORTED",
+      "claim": "闪耀大赛（标准 PVP）**每方 4 点魔力**（玩家可见名是「魔力」，人类口径「**就是4点…就是生命数，就是4颗心**」），一方魔力归零即判负。本仓按「**4 点**」施工（candidate ruleset）；**禁止写成官方已确认** —— 依据是人类实机口径（RECORDED_IN_GAME），本仓没有任何官方/百科文本逐字写过这个数字（2026-09-25 全量核对结论，见 notes）。",
+      "confidence": "RECORDED_IN_GAME",
       "sources": [
         {
           "url": "https://news.17173.com/content/03182026/104940843.shtml",
@@ -335,6 +378,13 @@
           "level": "CROSS_SOURCE_SUPPORTED",
           "marker": "community",
           "quote": "在PVP对战过程中，优先级最高的是应对，俗称博弈。"
+        },
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-25-standard-pvp-six-mana-selfbuilt",
+          "date": "2026-09-25",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "「闪耀大赛就是6v6 4魔力v4魔力的pvp啊，不是随机6只啊，自己配队」；「就是4点，哎反正就是生命数，就是4颗心」"
         }
       ],
       "needs_microcase": true,
@@ -344,7 +394,8 @@
         "src/client/roco.js",
         "reports/roco/demo-acceptance/demo-acceptance.json"
       ],
-      "notes": "等级来自 10 号文档 §12.1（CROSS_SOURCE_SUPPORTED），**本条没有升等级**。风险如实登记：这 4 点魔力我只有 10 号文档的转述，两份来源列表里都没有任何一处逐字写出“标准 PVP 每方 4 点魔力”，17173 那条引句是特性回能里的“4能量”。所以这条的降级风险最高，microcase 优先级最高。"
+      "notes": "等级来自 10 号文档 §12.1（CROSS_SOURCE_SUPPORTED），**本条没有升等级**。风险如实登记：这 4 点魔力我只有 10 号文档的转述，两份来源列表里都没有任何一处逐字写出“标准 PVP 每方 4 点魔力”，17173 那条引句是特性回能里的“4能量”。所以这条的降级风险最高，microcase 优先级最高。\n\n【2026-09-25 升级（改钉不删：上面原文一字未动）】人类实机口径逐字给出「4 魔力 vs 4 魔力」与「就是4点…就是生命数，就是4颗心」⇒ 本条 confidence 从 CROSS_SOURCE_SUPPORTED 升到 RECORDED_IN_GAME，依据是**人类实机口径本身**（本仓最高权威）。**同一轮的全量核对结论（必须与升级一起读）**：① 百科「闪耀大赛」1,830 字与官方《洛个明白》全文里「魔力」**0 次**；② 官方万字更新公告里「魔力」出现 12 次但**全部是别的语义**（魔力果/魔力波动/魔力之源/魔力瓶/魔力猫，以及特性「飓风」的\"被击败时自己额外损失1点魔力\"——后者只能侧证\"力竭会扣魔力\"，**没给初始点数**）；③ 三条 B 站视频简介全文里也没有。⇒ **禁止**把百科/公告写成这条数字的来源。社区侧另有两处逐字旁证（小黑盒 P1「损失四点魔力值失败」、P6「目前PVP魔力值为4」），按台账规矩只作 community 级，不参与本次升级。",
+      "upgrade_note_2026_09_25": "CROSS_SOURCE_SUPPORTED → RECORDED_IN_GAME（依据：人类实机口径；NOT 官方文本）"
     },
     {
       "id": "EV-PVP-FAINT-MANA-LOSS",
@@ -498,8 +549,8 @@
     {
       "id": "EV-TYPE-MULTIPLIER",
       "topic": "type.multiplier",
-      "claim": "属性倍率：当前可观察到 ×3、×2、×0.5、×0.25 四档。我们**不再**沿用旧资料里“所有双弱 ×4”的说法。具体是哪几组对应哪一档仍需逐条核对。",
-      "confidence": "COMMUNITY_CURRENT",
+      "claim": "属性倍率：**双属性按两系相乘** —— 双克制 ×4、双抵抗 ×0.25、一克一抗 ×1.0；单属性不变（克制 ×2、抵抗 ×0.5、无关 ×1）。可观察到的档位因此是 ×4、×2、×0.5、×0.25 四档。快照 types.json 把双弱**封顶在 ×3**（41 格与相乘口径不同），按 2026-09-25 人类裁决改用社区源的相乘口径。",
+      "confidence": "RECORDED_IN_GAME",
       "sources": [
         {
           "url": "https://wiki.biligame.com/nrc/深渊罗隐",
@@ -514,6 +565,27 @@
           "level": "COMMUNITY_CURRENT",
           "marker": "community",
           "quote": "当前 BWIKI 条目可观察到 ×3、×2、×0.5、×0.25。"
+        },
+        {
+          "url": "https://www.9game.cn/lkwgsy/11781211.html",
+          "date": "2026-09-25",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "「…如果两个派系都被克制则会受到三倍伤害，都被抵抗则会受到0.25倍」"
+        },
+        {
+          "url": "https://m.ali213.net/news/gl2605/1774345.html",
+          "date": "2026-09-25",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "「克制：伤害 ×2；抵抗：伤害 ×0.5」"
+        },
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json",
+          "date": "2026-09-25",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」"
         }
       ],
       "needs_microcase": false,
@@ -522,9 +594,14 @@
         "data/roco/normalized/roco-world-s4-2026-09-10/types.json",
         "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
         "roco/src/roco_env/env.py",
-        "reports/roco/g02-team/model.json"
+        "reports/roco/g02-team/model.json",
+        "roco/src/roco_env/data.py",
+        "roco/src/roco_env/service.py",
+        "src/coach/rag-index.js",
+        "data/roco/rag/heldout-queries.json",
+        "data/roco/meta-prior/v1.json"
       ],
-      "notes": "10 号文档 §6 判定 COMMUNITY_CURRENT，并明确“不要沿用旧资料里‘所有双弱 ×4’”。needs_microcase=false：它可以在 BWIKI 条目与快照数据上核对，不需要实机；需要实机的是“倍率在实战取值与取整”的时机，那属于已有计划 MC-010/MC-030。"
+      "notes": "10 号文档 §6 判定 COMMUNITY_CURRENT，并明确“不要沿用旧资料里‘所有双弱 ×4’”。needs_microcase=false：它可以在 BWIKI 条目与快照数据上核对，不需要实机；需要实机的是“倍率在实战取值与取整”的时机，那属于已有计划 MC-010/MC-030。\n\n【2026-09-25 逐格核对 + 冲突登记】① **外部印证**：上面两个社区源的**单属性**克制/抵抗各 18/18 与快照 `types.json` 逐格一致（含\"普通系不克制任何属性、只被武系克制、只抵抗幽系\"这类冷门项）——这是目前最硬的一条外部印证；② **冲突（登记不裁决）**：双属性叠加算法，快照是**相加/封顶（双弱 = 3.0）**，而游侠与某粉丝站写**相乘（双弱 = 4.0）**，差异**精确 41 格**（快照 `3` 恰好出现 41 次；\"相乘=4 而快照=3\"的不一致点也恰好 41 个）；③ 本条继续维持快照口径（`types.json` 只有 0.25/0.5/2/3 四种字面量，若是生成 bug 应留 4）。**若人类裁定改成 4×，那是改台账 + 改判据，不是改一句话。**\n\n本条**为什么升到 RECORDED_IN_GAME**：它不是社区资料更新，而是**人类（唯一权威）对「快照封顶 3× vs 两个社区源相乘 4×」的裁决** —— 裁决原话逐字挂在 sources 最后一条（marker=recorded_gameplay，落档 data/roco/evidence/user-in-game-reports.json）。按台账规矩：有 recorded_gameplay 来源才可 promote 到前两级，且**来源等级不得高于条目等级**，所以条目与那条来源同为 RECORDED_IN_GAME；其余四条社区来源保持不变。\n【2026-09-25 人类裁决 ⇒ 口径反转（**改钉不删**）】人类原话：「属性双属性叠加：快照 3×（现用）vs 两个社区源 4×，差 41 格。使用社区源」。本轮据此把双属性叠加从「读快照封顶行」改成「两系相乘」：\n① **引擎**：`data.py::TypeChart.multiplier` 的双属性分支 = 两条单属性行相乘；单属性逐位不变（18/18），双属性在 **41 格**上与旧快照不同（全部是 3 → 4）；快照没有显式行的 **67** 个组合（18 选 2 共 153，快照给 86 个）一律 fail closed（不可查，不猜）。\n② **RAG 语料**：L3 的 `type_chart::*` 正文改成相乘后的值，并逐条写明「双属性按两系相乘」；判据 `tests/roco-rag-typechart.test.js` 的「没有一条是相乘的产物」按裁决**反过来**（旧断言原话留在注释里）。\n③ **服务**：`query_rules kind=type_multiplier` 与引擎同口径（相乘），并把快照值放在 `snapshot_value` 里对账。`tests/evals/roco/bridge.test.js` 里那条「capped.result.multiplier === 3」是**旧口径的钉子**，本轮**没有**改它（不在允许改动范围内）—— 它现在会红，需要另一条泳道按本条裁决改钉。\n④ **未决**：+50%/+75% 之类的天气数值与本条无关；本条只管属性相性。\n\n【旧口径留痕（逐字保留，不删）】claim 原文：\n属性倍率：当前可观察到 ×3、×2、×0.5、×0.25 四档。我们**不再**沿用旧资料里“所有双弱 ×4”的说法。具体是哪几组对应哪一档仍需逐条核对。"
     },
     {
       "id": "EV-TURN-ORDER-MECHANISMS-EXIST",
@@ -718,6 +795,243 @@
         "docs/roco/RULE-EVIDENCE-LEDGER.md"
       ],
       "notes": "等级 RECORDED_IN_GAME 的理由：它是**持有者实机口径**（人类是唯一权威），来源落在 data/roco/evidence/user-in-game-reports.json 那条，marker 记 recorded_gameplay —— 与 EV-ENERGY-INITIAL 同一套判定。它**不是** OFFICIAL_CURRENT（没有官方文案逐字支持「标准 PVP 开放首领化」），也**不是** ENGINE_HYPOTHESIS（不是我们为了有界运行选的值）。needs_microcase=false 的理由：本条回答的是「有没有 / 算哪一类 / 写成哪个策略」，不回答任何数值；数值类的未知项（次数 / 冷却 / 解除 / 是否占行动 / 持续 / 倍率）留在 BattleMode 与 ruleset 的 unknowns 里，保持 null + UNVERIFIED、引擎 fail closed。它与 EV-BATTLEMODE-PARAMETERIZED 互补：那一条说 boss_form 必须参数化，这一条说它在标准 PVP 里的**策略取值**。**为什么这里没有挂领地试炼的官方公告**：校验器有一条硬规则「official_first_party 来源只能出现在 OFFICIAL_CURRENT 条目上」，而本条是 RECORDED_IN_GAME —— 那条公告只用来证明「首领信物 / 首领化」这套机制在游戏里存在（证据见 EV-BATTLEMODE-PARAMETERIZED 的两条 official_first_party 来源），**不**用来给「标准 PVP 也开放」背书；后者由持有者口径承担，不借官方文案抬高。"
+    },
+    {
+      "id": "EV-PVP-WISH-POWER-UP",
+      "topic": "battle_mode.standard_pvp",
+      "claim": "「愿力强化」（共鸣魔法一类的 **PVP 魔法 / 特殊行动**）在标准 PVP 六宠里**可用**，而且有一整套可玩口径：**不占行动**（自由动作）、每局两次、冷却三回合、目标是自己场上那只；效果是把该精灵的第一个技能替换为「愿力冲击」（属性 = 该精灵的愿力属性；能耗 2、威力 80；物攻/魔攻按该精灵更高的那一项；对「应对状态」额外 150% 伤害）。再用一次「愿力强化」可还原（不消耗次数、进入冷却）。换上来的「愿力冲击」**是个技能**，用它照常占那一手。对手看得见愿力冲击、看不见这件道具。旧标准 PVP 口径里的 `item:0` **不**意味着它不存在 —— 这正是本条要修掉的错误。**2026-09-25 人类更正**：本条原来写「占一次行动」，人类改口为「**不占行动**（自由动作），背包物品都不占行动」；旧口径逐字保留在下面第一条来源里，不抹掉历史。",
+      "confidence": "RECORDED_IN_GAME",
+      "sources": [
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-25-wish-power-up-free-action",
+          "date": "2026-09-25",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "愿力强化不占行动，就是这样，背包物品都不占行动。不占行动，自由动作，然后再返回背包使用一次能解除这个变招状态，不恢复消耗次数，进入「愿力强化」3 回合冷却。（另：「愿力冲击」就是个技能，这个算行动。）",
+          "marker_note": "**本条取代下面 2026-09-23 那条里的「占一次行动」**：同一件道具、同一位权威，日期更晚 ⇒ 以这一条为准。旧 quote 原样保留（编号 2026-09-23-wish-power-up），不删。"
+        },
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-23-wish-power-up",
+          "date": "2026-09-23",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "愿力强化就是把使用它时场上那只的最上面的技能替换成愿力冲击，占一次行动；每局两次、冷却三回合；再用一次可以还原，不消耗次数、自动进入冷却。",
+          "marker_note": "**这一条里的「占一次行动」已被 2026-09-25 那一条取代**（同一权威改口，历史保留）；其余部分（次数 2 / 冷却 3 / 目标 / 解除语义）仍然有效。"
+        },
+        {
+          "url": "docs/roco/mockups/battle-v3h.html",
+          "date": "2026-09-23",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "定稿把它写成背包里的一件候选 PVP 魔法：「把当前精灵的第一个技能换成『愿力冲击』。再用一次可解除（解除后进冷却，不减次数）」，次数与冷却当时写「未登记」。"
+        },
+        {
+          "url": "data/roco/derived/pet-mechanisms.json",
+          "date": "2026-09-20",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "repo_internal",
+          "quote": "特性「裁决」「滋养」等文案里出现过同一族技能：「首个技能替换为光系愿力冲击 / 草系愿力冲击 / 火系愿力冲击」——说明「愿力冲击」按**属性**分形态，且机制就是「替换首个技能」。",
+          "marker_note": "引的是仓内冻结快照 data/roco/derived/pet-mechanisms.json 里「裁决」「滋养」等特性的原文（导入期的派生文件），所以用 repo_internal 而不是 community。"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "data/roco/derived/pvp-magic.json",
+        "roco/src/roco_env/env.py",
+        "roco/src/roco_env/rule_config.py",
+        "roco/src/roco_env/service.py",
+        "roco/src/roco_env/schema.py",
+        "src/client/roco.js"
+      ],
+      "notes": "等级 RECORDED_IN_GAME（人类口述，唯一权威）。仍然未核验、因此**保持 null + UNVERIFIED** 的：愿力属性的改名道具与消耗、冷却与换人/外层回合的交互、被替换技能在换下场后的还原、以及「额外 150%」的确切读法（本实现取 +150% = 总倍率 2.5）。引擎对未核验字段一律 fail closed。"
+    },
+    {
+      "id": "EV-PVP-STANDARD-FILL-SIX",
+      "topic": "pvp.standard.team_size",
+      "claim": "闪耀大赛：双方**各编入 6 只**（人类口径「6v6…自己配队」）⇒ `policies.team_size_policy.fill_required = true`。**同一句里登记张力**：官方文本的措辞是「**最多**可携带 6 只随机精灵」（上限），**没有**逐字写过\"必须选满\"；本条目按**人类实机口径**取 true（人类是本仓最高权威），张力原样留在这里，不许抹平。",
+      "confidence": "RECORDED_IN_GAME",
+      "sources": [
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-25-standard-pvp-six-mana-selfbuilt",
+          "date": "2026-09-25",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "「闪耀大赛就是6v6 4魔力v4魔力的pvp啊，不是随机6只啊，自己配队」"
+        },
+        {
+          "url": "https://news.17173.com/content/03182026/104940843.shtml",
+          "date": "2026-03-18",
+          "level": "CROSS_SOURCE_SUPPORTED",
+          "marker": "official_reproduction",
+          "quote": "支持随机精灵对战，最多可携带6只随机精灵，可指定系别随机或全随机，精灵技能也将完全随机。",
+          "level_note": "marker=official_reproduction（官方公告转载）；level 按台账六级填 CROSS_SOURCE_SUPPORTED"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E07",
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "data/roco/rulesets/mobile-s4-candidate-v3.json",
+        "roco/src/roco_env/team.py",
+        "src/client/team-workshop.js"
+      ],
+      "notes": "【张力，不许抹平】官方一手（腾讯新闻官方号《洛个明白》2026-04-14，全文精读）与官方转载（17173，2026-03-18）的措辞都是「**最多**可携带 6 只随机精灵」= **上限**，没有一处逐字写过\"必须编入 6 只\"。而人类 2026-09-25 的实机口径是「6v6…自己配队」。本仓的效力等级：**人类实机口径 = 最高权威**（`data/roco/evidence/user-in-game-reports.json` 的 reporter 就是 owner），因此 fill_required 取 true。若将来拿到官方\"可以少于 6 只\"的条文，改这条（改钉不删，原话仍在上面）。**禁止**把它写成\"官方已确认必须 6 只\"。"
+    },
+    {
+      "id": "EV-PVP-STANDARD-SELF-BUILT-TEAM",
+      "topic": "battle_mode.standard_pvp",
+      "claim": "闪耀大赛：**玩家自己配队**（不是系统随机发 6 只）。这是「阵容工坊」（`src/client/team-workshop.js`）与\"同物种唯一\"约束（`src/coach/team-request.js`）在产品上存在的**规则依据**。",
+      "confidence": "RECORDED_IN_GAME",
+      "sources": [
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-25-standard-pvp-six-mana-selfbuilt",
+          "date": "2026-09-25",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "「…不是随机6只啊，**自己配队**」"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E07",
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "src/client/team-workshop.js",
+        "src/coach/team-request.js"
+      ],
+      "notes": "同一轮把\"随机 6 只\"归位：那是**命运对决**（另一模式），不许再挂到闪耀大赛身上。官方侧只有弱证据（《洛个明白》提到「队伍编队界面…一次最多可以导入3个好友阵容镜像」——编队界面只在自己配队的前提下才存在），不足以单独成条；本条的依据是人类实机口径。"
+    },
+    {
+      "id": "EV-NATURE-BALANCE-PVP",
+      "topic": "battle_mode.standard_pvp",
+      "claim": "闪耀大赛（标准 PVP）里**性格加成被平衡**：长处 **+20%**、短处 **−10%**（负面效果无变化）。非 PVP 场景下增益随突破成长（初始 +10%，每突破一次 +2%，满突破 +20%），减益固定 −10%。",
+      "confidence": "OFFICIAL_CURRENT",
+      "sources": [
+        {
+          "url": "https://news.qq.com/rain/a/20260414A0644900",
+          "date": "2026-04-14",
+          "level": "OFFICIAL_CURRENT",
+          "marker": "official_first_party",
+          "quote": "「等级平衡至60级，成长等级平衡至50级，成长星级平衡至5星，觉醒星级平衡至0星；当前性格的加成值平衡至20%，负面效果无变化」"
+        },
+        {
+          "url": "https://wiki.biligame.com/rocom/性格图鉴",
+          "date": "2026-09-25",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "「降低固定 −10%；提升初始 +10%，精灵每完成一次突破（20/30/40/50/60 级，共 5 次）再 +2%，满突破 +20%。」"
+        },
+        {
+          "url": "https://wiki.biligame.com/rocom/PVP一速榜",
+          "date": "2026-09-25",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "「在PVP中平衡练度后，性格修正=1.2」"
+        }
+      ],
+      "needs_microcase": false,
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "src/client/nurture.js",
+        "src/coach/team-ranker.mjs"
+      ],
+      "notes": "**这是本轮外部核对里最硬的一条**（官方一手 + BWIKI 两页互相印证；官方那句「加成值平衡至20%，负面效果无变化」与社区帖子「长处 +20% / 短处 −10%」逐字吻合）。**仍未核验**：性格对**速度**这一项在 PVP 平衡后的实际取值链路（BWIKI 只给「性格修正=1.2」这个乘数）。另注：帖子 P2「随成长增益上升、减益固定」与 BWIKI 性格图鉴一致；而 9game 那篇写「个体值范围 0-31」是**页游口径**，已排除、不得引用。",
+      "microcase_id": null
+    },
+    {
+      "id": "EV-TURN-LIMIT-EXISTS-PVP",
+      "topic": "battle_mode.standard_pvp",
+      "claim": "标准 PVP **存在整局回合上限**（到回合自动结束）；**具体数值与超时判定顺序均未核实**。社区帖说「50 回合、总回合结束比剩余血量」，另一条社区评论说「先比剩余魔力值、相等再比血量」——两者冲突，不许二选一当真。",
+      "confidence": "COMMUNITY_CURRENT",
+      "sources": [
+        {
+          "url": "https://www.bilibili.com/video/BV1JHDqBhEfC",
+          "date": "2026-04-07",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "标题逐字：「以防你不知道洛克王国pvp有回合数上限 到回合自动结束」"
+        },
+        {
+          "url": "https://www.bilibili.com/video/BV15x9JB1E3E",
+          "date": "2026-04-01",
+          "level": "COMMUNITY_CURRENT",
+          "marker": "community",
+          "quote": "标题逐字：「以防你不知道洛克王国pvp有回合上限，以及回合上限后会发生什么」；评论区（观众）：「应该是50回合上限，然后比剩余魔力值得如果相等的话，应该是比剩余血量。」"
+        }
+      ],
+      "needs_microcase": true,
+      "microcase_id": "MC-E21",
+      "affected_artifacts": [
+        "data/roco/battle-modes.json",
+        "roco/src/roco_env/env.py"
+      ],
+      "notes": "**只有\"存在上限\"是多源**（两个独立视频），**\"50\"这个数字是单源**（一条观众评论），而且它与小黑盒帖 P1「比较双方宠物血量，血量更多的获胜」在**判定顺序**上冲突（先比血量 vs 先比魔力）。反面对照（**不可借用**）：搜狐《露天对决全规则》写「单局对战时长超过 20 回合…按剩余精灵血量、场上增益层数判定」，那是**露天对决**，只证明\"回合上限依模式而异\"。**不得**据此写进教练话术；要写就得先有实机 microcase。"
+    },
+    {
+      "id": "EV-PVP-FAIRNESS-NO-FUTURE-KNOWLEDGE",
+      "topic": "pvp.fairness",
+      "claim": "**PVP 的第一性规则**：双方同回合**同时**决定行动；在**我方行动确定之前**，\"对手这一手是什么\"**不是**一个已知事实（不是\"藏起来\"，而是此刻还不存在）。⇒ ① 公开面不得含对手待执行动作与真实随机种子；② 教练不得读取对手任何非公开数据（定义见规则文档的公开/非公开两栏）；③ 凡\"预测对手下一手\"的话**只许说可能性/分支，或如实说不知道**。",
+      "confidence": "RECORDED_IN_GAME",
+      "sources": [
+        {
+          "url": "data/roco/evidence/user-in-game-reports.json#2026-09-25-standard-pvp-six-mana-selfbuilt",
+          "date": "2026-09-25",
+          "level": "RECORDED_IN_GAME",
+          "marker": "recorded_gameplay",
+          "quote": "人类原话（同轮，逐字）：「这是洛克王国手游的规则，这是 pvp 大哥，公平、博弈知道吗？」、「我方确定出招前都不能知道对方动作」（c06）、「切我方不能读取对面任何非公开数据」（c02）"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "docs/roco/PVP-FAIRNESS-RULES.md",
+        "src/coach/toolbox.js",
+        "src/coach/runtime.js",
+        "roco/src/roco_env/env.py",
+        "roco/src/roco_env/service.py"
+      ],
+      "notes": "规则正文与\"公开/非公开\"两栏见 `docs/roco/PVP-FAIRNESS-RULES.md`；判据见 `tests/roco-pvp-fairness.test.js`（① 契约文本钉死 ② 隐藏键任意深度都被拒 ③ 顺序说反必红 ④ 四类确定性预测必红 ⑤ 可能性/否定/条件句不许误伤 ⑥ 规则文档必须在）。**仍未核实的边界**：段位分档的可见性差异（社区两源说\"大师以上明牌\"，官方一手未按段位分层）⇒ 本仓**没有**\"分档可见性\"概念，`EV-PVP-OPPONENT-ROSTER-VISIBLE` 仍是 `COMMUNITY_CURRENT` 单源，要区分视野必须先裁决。"
+    },
+    {
+      "id": "EV-WEATHER-STANDARD-PVP",
+      "topic": "battle_mode.standard_pvp",
+      "claim": "标准 PVP（闪耀大赛式）里**天气层存在**：天气是常驻全场的效果，双方都吃加成，且**同一时刻只能存在一种**；由技能造出（落雨→雨天 / 沙涌→沙暴 / 冬至→暴风雪 / 惊雷→雷鸣），**持续 8 回合**并受回合数限制（战报里能看到剩余回合）。四种效果以**当前规则集（S4 术语表）**为准：雨天=双方水系技能威力 +75%（term 3008）；沙暴=双方地系技能能耗减半（3006）；暴风雪=双方每回合结束获得 2 层冻结、冰系免疫（3007）；雷鸣=双方每回合结束获得 1 层引电、电系免疫（3021）。**版本冲突已登记**：官方 2026-04-14 那篇写雨天 +50%，S4 术语表写 +75%，本仓取当前规则集的 +75%，+50% 作为更早版本留在 notes。这条**推翻**了此前「天气仅存在于 PvE」的旧口径（原话留在 notes）。",
+      "confidence": "OFFICIAL_CURRENT",
+      "sources": [
+        {
+          "url": "https://news.qq.com/rain/a/20260414A0644900",
+          "date": "2026-04-14",
+          "level": "OFFICIAL_CURRENT",
+          "marker": "official_first_party",
+          "quote": "「天气是常驻在全场的效果，让对战双方都能获得相应的加成，但天气只能存在一种。」「雨天：水系环境，天气为雨天时，双方水系技能威力提升50%。」「沙暴：地系环境，天气为沙暴时，双方地系技能能耗减半。」「暴风雪：冰系环境，天气为暴风雪时，双方每回合结束时获得两层冻结（冰系精灵免疫此效果）。」「场上的天气效果还将受到回合数的限制…对局战报查看当前天气的剩余回合数！」（官方号《洛个明白》闪耀大赛入门，2026-04-14，正文全文精读；URL 与仓内 EV-NATURE-BALANCE-PVP 登记的是同一篇，见 docs/roadmap/RECON-DIGEST-2026-09-25.md §4.3）"
+        },
+        {
+          "url": "data/roco/normalized/roco-world-s4-2026-09-10/terms.json",
+          "date": "2026-09-10",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "3008 雨天「天气为雨天时，双方的水系技能威力+75%。」；3006 沙暴「天气为沙暴时，双方的地系技能能耗减半。」；3007 暴风雪「天气为暴风雪时，双方每回合结束获得2层冻结。（冰系精灵免疫此效果）」；3021 雷鸣「天气为雷鸣时，双方每回合结束获得1层引电。（电系精灵免疫此效果）」（当前规则集的术语表；数值口径以它为准）"
+        },
+        {
+          "url": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json",
+          "date": "2026-09-10",
+          "level": "ENGINE_HYPOTHESIS",
+          "marker": "repo_internal",
+          "quote": "四条造天气技能的**存在与持续回合数**（冻结快照逐字）：skill_000427 落雨 / skill_000507 沙涌 / skill_000555 冬至 / skill_000605 惊雷，描述都是「将天气改为X，持续8回合。」"
+        }
+      ],
+      "needs_microcase": false,
+      "microcase_id": null,
+      "affected_artifacts": [
+        "data/roco/battle-modes.json#modes[pvp-standard-six-pet].policies.weather_policy",
+        "data/roco/rulesets/mobile-s4-candidate-v3.json#policies.weather_policy",
+        "roco/src/roco_env/schema.py#GameState.weather",
+        "roco/src/roco_env/env.py#_end_turn_weather",
+        "roco/src/roco_env/effects.py#compute_damage",
+        "roco/src/roco_env/parse.py#_WEATHER"
+      ],
+      "notes": "【2026-09-25 人类裁决 ⇒ 口径反转（**改钉不删**）】人类原话：「那你就做！」（针对「把天气加进标准 PVP」）。\n**旧口径原话逐字保留（不删）**：「人类核实天气**仅存在于 PvE** ⇒ 这个天气系统可以删掉」（引擎侧曾据此回滚天气层，见 docs/roadmap/RECON-DIGEST-2026-09-25.md §4.3 的 C 行）。本轮依据是官方一手（4/14《洛个明白》闪耀大赛入门篇，整篇讲闪耀大赛的语境下专设「07 对战基础：印记与天气效果」一节）⇒ 旧口径被推翻：天气在标准 PVP 里**存在**。\n【数值冲突：登记，不抹平】**官方 4/14 逐字「双方水系技能威力提升50%」** vs **仓内 S4 术语表 3008 逐字「双方的水系技能威力+75%」**（相隔 5 个月，中间没有读到调整原文）。取值口径（人类裁决）：**以当前规则集（S4 术语表）为准 ⇒ +75%**；+50% 作为**更早版本**原样留在这里。\n【回合数】官方 4/14「场上的天气效果还将受到回合数的限制」；官方万字公告（2026-03-13）另给「落雨…将天气改为雨天，**持续8回合**」（该公告的仓内转载 URL 是 https://news.17173.com/content/03182026/104940843.shtml ，但那段逐字是否在该页面上**没有在本轮核对**，因此**不**把引文挂在那个 URL 上；8 回合的口径有冻结快照的四条技能描述逐字支持，见 sources）。\n【S3 新增】官方《洛个明白》S3 篇（经转载 2026-07-31）逐字「全新天气「雷鸣」…已经登场」⇒ 雷鸣是 S3 起的新天气。\n【引擎边界】数值与效果**一律从规则配置读**（`policies.weather_policy`，由 battle-modes.json 经生成器落进 rulesets）；规则集**没声明**天气层时，引擎不发明天气行为（技能里的「将天气改为…」照旧登记为 unsupported）——legacy / v2 的结算与 golden 指纹逐位不变。仍未实现、登记在 unknowns 的三处：冻结层数的结算（术语 1004）、引电 2 层的立即结算（术语 3022）、能耗减半遇奇数的取整。\n【为什么是 OFFICIAL_CURRENT】来源是官方账号发布页（official_first_party），且当前版本仍在有效期（S4 赛季内）⇒ 按台账规矩只有这一级可挂官方一手来源。"
     }
   ]
 }

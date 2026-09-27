@@ -237,6 +237,21 @@ export function checkOnDemandBuilds(doc, {catalog, skills, frozenBuilds = {}, ha
   if (hashes && doc.derived_from?.skills?.sha256 && doc.derived_from.skills.sha256 !== hashes.skills) {
     add('derived_from_stale', '-', 'skills sha256 与磁盘不符');
   }
+  // 2026-09-25（前一位子代理抓到的真缺口）：这条**原来漏了** ——
+  // `derived_from.frozen_learnsets.sha256` 记的是 `owned-pets.json` 整文件的 sha256，
+  // 而校验器只比 catalog 与 skills ⇒ **产物过期时 `--check` 照样绿**（静默过期）。
+  // 实测：`owned-pets.json` 改成引擎 loadout 之后，产物仍记 `1a7ade75…`，磁盘已是别的 sha，
+  // 于是 `compiled_matches_frozen` 比的是**旧快照**。
+  // 现在：只要这次核对给了 `hashes.frozen`，产物就必须带着**同一个** sha，缺了也红（fail closed）。
+  if (hashes && hashes.frozen) {
+    const recorded = doc.derived_from?.frozen_learnsets?.sha256 ?? null;
+    if (recorded !== hashes.frozen) {
+      add('derived_from_stale', '-', recorded === null
+        ? '产物没有登记 derived_from.frozen_learnsets.sha256，但这次核对给了 owned-pets.json 的 sha —— 来源不许省'
+        : 'frozen_learnsets（owned-pets.json）sha256 与磁盘不符 —— 产物过期，'
+          + '重跑 `node scripts/roco/build-on-demand-builds.mjs` 并重建报告');
+    }
+  }
   const builds = doc.builds && typeof doc.builds === 'object' ? doc.builds : null;
   if (!builds) { add('builds_shape', '-', 'doc.builds 不是对象'); return {ok: false, issues}; }
   const pets = new Map((catalog?.pets ?? []).map((pet) => [pet.pet_id, pet]));
@@ -337,6 +352,9 @@ export function selftest() {
   probe('同一只既编出来又登记跳过（覆盖账目对不上）', (doc) => { doc.skipped.push({pet_id: 'pet_000001', reason: 'X'}); });
   probe('选择规则被偷偷升成官方口径', (doc) => { doc.selection_rule.confidence = 'OFFICIAL_CURRENT'; });
   probe('summary 与实际不符', (doc) => { doc.summary[SUPPORT_SIMULATABLE_UNVERIFIED] = 99; });
+  // 2026-09-25 新增：产物新鲜度（`owned-pets.json` 的 sha 对不上 = 产物过期）
+  probe('产物的 frozen_learnsets sha 与磁盘不符（产物过期）', (doc) => { doc.derived_from.frozen_learnsets.sha256 = '0'.repeat(64); });
+  probe('产物干脆不登记 frozen_learnsets 来源', (doc) => { doc.derived_from.frozen_learnsets = null; });
   const failed = cases.filter((row) => !row.passed).length;
   return {ok: failed === 0, failed, cases};
 }

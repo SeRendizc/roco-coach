@@ -6,7 +6,7 @@
 //      没有就不印的定位 / 支持等级 / 收藏 / 锁定。等级、个体属性与四个技能在详情抽屉里；
 //      `provenance` / `source_scope` / `unknown_fields` / `state_version` / `coverage` /
 //      许可**只在默认收起的开发者抽屉**（`#dev-drawer`）里出现。
-//   ② **不编数值。** 路由说什么就显示什么：没有的栏目显示「本仓库没有这一项」，
+//   ② **不编数值。** 路由说什么就显示什么：没有的栏目显示「游戏数据里没有这一项」，
 //      并指向开发者抽屉。页面上永远不出现一个看起来精确的假数字。
 //   ③ **状态都在 `data-box-*` 上。** 验收脚本读它们判断「该出现的是否出现」，
 //      与训练场页同一套做法（`data-roco-*`）。
@@ -16,8 +16,22 @@
 
 const $ = (id) => document.getElementById(id);
 
+// 右上角小芽 + 弹出式小芽（人类 2026-09-25 纠偏①：「其他所有页面都要有」）。
+// 这是这一页唯一的浏览器 import：对话能力（请求、上下文、记忆、对话记录）全部复用
+// `xiaoya.js` 那一份实现 —— 盒子页不另写一套小芽，避免两套模板漂移。
+import {mountXiaoya} from './xiaoya.js';
+import {mountStalePageBanner} from './stale-page.js';
+// 「我的盒子」按种类收进抽屉（人类 2026-09-26）：纯函数在 `box-drawer.js`，这里只做状态与事件。
+import {drawerListHtml} from './box-drawer.js';
+// 个体状态（性格/天分/刷新次数）在 `box-individuals.js`：它要碰 localStorage 与服务器字段名，
+// 而这一页的玩家区代码里不许出现工程词（判据：tests/roco-box.test.js 的玩家层那一条）。
+import {individualsForRows, refreshIndividual, undoIndividual, addIndividualFor, localIndividualsOf,
+  localCardById, localIndividualsGrouped} from './box-individuals.js';
+// 刷新之后「落在哪一项」那句话只有一处（`lastRefreshNote`）——页面只负责显示。
+import {lastRefreshNote} from '../coach/individuals.js';
+
 /** 一句话口径：没有登记的栏目一律这么说，绝不用 0 或估计值顶上。 */
-const NO_ITEM = '本仓库没有这一项';
+const NO_ITEM = '游戏数据里没有这一项';
 
 // 自制头像：一个系别 → 一个符号 + 一个底色。这不是官方美术，是一眼分类用的色块。
 const TYPE_AVATAR = {
@@ -114,13 +128,41 @@ function cardHtml(card) {
   </article>`;
 }
 
+/** 点抽屉头：把这一个种类摊开或收起（`state.openDrawers` 是"玩家手动点开过"的集合）。 */
+function toggleDrawer(speciesId) {
+  const open = state.openDrawers instanceof Set ? new Set(state.openDrawers) : new Set();
+  if (open.has(speciesId)) open.delete(speciesId); else open.add(speciesId);
+  state.openDrawers = open;
+  renderCards();
+}
 function renderCards() {
   const grid = $('box-grid');
-  grid.innerHTML = state.rows.map(cardHtml).join('');
-  $('box-empty').hidden = state.rows.length > 0;
+  if (state.kind === 'mine') {
+    // 「我的盒子」按种类收进抽屉：一个种类一行；多个体才需要点开（单个体直接摊开）。
+    // 玩家点开过的种类记在 `state.openDrawers`，重画时通过 `open` 传回去，不会又收起来。
+    const individuals = individualsForRows(state.rows);
+    const open = state.openDrawers instanceof Set ? state.openDrawers : new Set();
+    const picked = (select) => state.selected.some((row) => row.select === select);
+    // 「＋ 再养一只同种」加出来的个体**不在服务端那一页里**，要单独交给抽屉画（`extras`）。
+    // ⚠ 2026-09-27 真机抓到的 bug：这个参数**从来没传过** —— 加完个体、状态行说"在下面这一行里"，
+    // 可那一行里根本没有它（单测只查了 box.js 里出现过 `localIndividualsOf`，那是 import 那一行）。
+    const extras = localIndividualsGrouped(state.rows.map((row) => row.select));
+    // 卡片本体仍然用这一页原来的 `cardHtml`（详情/比较/头像/徽章都在里面），抽屉只做分组。
+    grid.innerHTML = drawerListHtml(state.rows, {individuals, open, picked, cardHtml, extras}).html;
+    grid.dataset.grouped = 'yes';
+    // 验收钩子：这一页把几个"本机加出来的个体"交给了抽屉（0 就是没接上 —— 真机 29 号查的就是它）。
+    grid.dataset.boxExtras = String(Object.values(extras).reduce((sum, list) => sum + list.length, 0));
+  } else {
+    grid.innerHTML = state.rows.map(cardHtml).join('');
+    grid.dataset.grouped = 'no';
+  }
   document.body.dataset.boxCards = String(state.rows.length);
+  document.body.dataset.boxGroups = String(state.kind === 'mine' ? groupCount(state.rows) : 0);
 }
-
+/** 只用来给 `data-box-groups` 报数（验收脚本读它）。 */
+function groupCount(rows) {
+  return new Set(rows.map((card) => card.group ?? card.select)).size;
+}
 function renderMeta() {
   const pages = Math.max(1, Math.ceil(state.total / state.pageSize));
   const page = Math.min(pages, Math.floor(state.offset / state.pageSize) + 1);
@@ -268,14 +310,15 @@ function detailHtml(player) {
       + `<h4>种族值</h4>${metricsHtml({metrics: player.metrics, metrics_label: player.metrics_label})}`
       + `<p class="missing">${escapeAttr(player.panel.reason)}</p>`
       + `<p class="effect-note">${escapeAttr(player.effect_note)}</p>`
-      + `<p class="muted">本仓库没有登记的栏目已经照实写「${NO_ITEM}」：更细的工程字段在右上角「关于这一页」抽屉里。</p>`;
+      // 2026-09-27（审计 ②：说人话判据的文件清单里没有 box.js ⇒ 这句「本仓库」一直漏在玩家眼前）
+      + `<p class="muted">游戏数据里没有的栏目已经照实写「${NO_ITEM}」：更细的来源说明在右上角「关于这一页」抽屉里。</p>`;
   }
   return head
     + `<h4>种族值</h4>${metricsHtml(player)}`
     + `<h4>配招（四个技能）</h4>${movesetHtml(player)}`
     + `<p class="missing">${escapeAttr(player.panel.reason)}</p>`
     + `<p class="effect-note">${escapeAttr(player.effect_note)}</p>`
-    + `<p class="muted">这一条只有索引字段时，详情会照实说「${NO_ITEM}」：更细的工程字段在右上角「关于这一页」抽屉里。</p>`;
+    + `<p class="muted">这一条只有索引字段时，详情会照实说「${NO_ITEM}」：更细的来源说明在右上角「关于这一页」抽屉里。</p>`;
 }
 
 async function openDetail(select) {
@@ -306,7 +349,14 @@ function renderCompareBar() {
   // 「带上这两只去配队」要对**任意两只**可用（不要求同种）：配队看的是六只互补，
   // 不是同种个体的差异。同种比较那条判据（`compare-go`）仍然只对同种开放。
   const toTeam = $('compare-to-team');
-  if (toTeam) toTeam.disabled = selected.length === 0;
+  if (toTeam) {
+    toTeam.disabled = selected.length === 0;
+    // RC-801：按钮上**写清这一趟带走了什么**（含几只锁定）。玩家不用点进去才发现锁定没带上。
+    const lockedCount = selected.filter((row) => row?.locked === true).length;
+    toTeam.textContent = lockedCount
+      ? `带上这两只去配队（含锁定 ${lockedCount} 只）`
+      : '带上这两只去配队';
+  }
   // 「锁定这一只」只在**恰好选了一只**时可用：锁的是那一只，语义必须明确。
   const lockTeam = $('compare-lock-team');
   if (lockTeam) lockTeam.disabled = selected.length !== 1;
@@ -357,6 +407,15 @@ function renderCompare(player) {
 async function compareSelected() {
   const [a, b] = state.selected;
   if (!a || !b || a.group !== b.group) return;
+  // 2026-09-27（审计 ③）：本机新养的个体服务端不认识（比较那条路按 owned 名单解析）。
+  // 与其发一个必然失败的请求、或者**静默什么都不做**，不如照实说清"为什么现在比不了"。
+  const localOnly = [a, b].filter((row) => row.localOnly === true);
+  if (localOnly.length) {
+    $('compare-hint').textContent = `这一只（${localOnly.map((row) => row.name || row.select).join('、')}）`
+      + '是本机「再养一只同种」加出来的，还没进服务器名单，所以现在不能和名单里的个体逐字段比较 ——'
+      + '两只都在名单里才能比。它的性格与天分在这一行里看得到，也能单独培养。';
+    return;
+  }
   try {
     const data = await getJson(`/api/roco/box?compare=${encodeURIComponent(a.select)},${encodeURIComponent(b.select)}`);
     if (!data.ok) throw new Error(data.error || '这两只比不了');
@@ -372,8 +431,17 @@ function toggleCompare(select) {
   const at = state.selected.findIndex((row) => row.select === select);
   if (at >= 0) state.selected.splice(at, 1);
   else {
-    const card = state.rows.find((row) => row.select === select) ?? {};
-    state.selected.push({select, group: card.group ?? '', name: card.name ?? ''});
+    // 「＋ 再养一只同种」造出来的个体**不在** `state.rows` 里（那是服务端名单那一页），
+    // 只在本机记录里。这里要把它认出来：否则 `group` 会是空串，选完两只之后
+    // `compareSelected()` 的同种检查直接 return —— **点了没反应**（审计 ③ 说的就是这个）。
+    const found = state.rows.find((row) => row.select === select);
+    const card = found ?? localCardById(select) ?? {};
+    // `locked` 要一起带上：比选栏的按钮文案与交接参数都读它（原来只留 select/group/name，
+    // 于是"含锁定 N 只"永远不出现 —— 真机实测：工坊那边锁定确实带到了 2 只，按钮上却没说）。
+    // `localOnly` 也要带上：比大小那条路要认出"本机新养的个体"并如实说清为什么比不了
+    //（第一版没带 ⇒ 请求照发，服务端按 id 形状拒掉，玩家看到的是一句工程味的参数报错）。
+    state.selected.push({select, group: card.group ?? '', name: card.name ?? '', locked: card.locked === true,
+      localOnly: card.localOnly === true});
     if (state.selected.length > 2) state.selected.shift();
   }
   renderCards();
@@ -445,6 +513,50 @@ function wire() {
   });
   const grid = $('box-grid');
   grid.addEventListener('click', (event) => {
+    // 抽屉：先看有没有点"刷新"，再看有没有点种类头，最后才是卡片本身。
+    const addBtn = event.target.closest?.('[data-add]');
+    if (addBtn) {
+      event.preventDefault();
+      const card = state.rows.find((row) => row.group === addBtn.dataset.add);
+      const added = addIndividualFor(card ?? {select: addBtn.dataset.add, group: addBtn.dataset.add,
+        name: addBtn.dataset.add});
+      if (!added.ok) { $('box-status').textContent = added.reason; return; }
+      // 新个体加出来之后**把这一行摊开**，让玩家立刻看到两个个体（不然他会以为没反应）
+      const openNow = state.openDrawers instanceof Set ? state.openDrawers : new Set();
+      openNow.add(addBtn.dataset.add);
+      state.openDrawers = openNow;
+      renderCards();
+      $('box-status').textContent = '又养了一只同种（它们的天分和性格各自不同，在下面这一行里）';
+      return;
+    }
+    const undoBtn = event.target.closest?.('[data-undo]');
+    if (undoBtn) {
+      event.preventDefault();
+      const undone = undoIndividual(undoBtn.dataset.undo);
+      if (!undone.ok) { $('box-status').textContent = undone.reason; return; }
+      renderCards();
+      $('box-status').textContent = '已经回滚上一次刷新（次数还回来了）';
+      return;
+    }
+    const refreshBtn = event.target.closest?.('[data-refresh]');
+    if (refreshBtn) {
+      event.preventDefault();
+      const result = refreshIndividual(refreshBtn.dataset.refresh, refreshBtn.dataset.individual);
+      // 次数用完**不是**错误页面：状态行如实说一句，数据一个字不动。
+      if (!result.ok) { $('box-status').textContent = result.reason; return; }
+      // 成功：重画这一页（新的性格/天分与剩余次数立刻可见）。
+      renderCards();
+      // 2026-09-27（§C6.313② 的收尾）：状态行要说出**落在哪一项**；回滚之后重刷还要说出
+      // 「换掉了什么」（`lastRefreshNote` 那句话也就是抽屉里那一行小字 —— 只有一处事实源）。
+      // 原来这里只写「刷新了一次」，玩家得自己去那一行里找哪一项动了。
+      const note = lastRefreshNote(result.individual);
+      const fallback = refreshBtn.dataset.refresh === 'nature'
+        ? '性格刷新了一次（结果就在这一行）' : '天分刷新了一次（结果就在这一行）';
+      $('box-status').textContent = note ? `${note}（结果就在这一行）` : fallback;
+      return;
+    }
+    const head = event.target.closest?.('.drawer-head');
+    if (head) { toggleDrawer(head.dataset.species); return; }
     const cmp = event.target.closest?.('[data-cmp]');
     if (cmp) { toggleCompare(cmp.dataset.cmp); return; }
     const face = event.target.closest?.('[data-detail]');
@@ -495,7 +607,15 @@ function wire() {
       ids.push(id);
     }
     if (!ids.length) return;
-    window.location.href = `roco.html?team=${encodeURIComponent(ids.join(','))}`;
+    // RC-801（2026-09-25）：**锁定要跟着一起走**。盒子里的 `locked` 原来只是筛选条件 ——
+    // 「带上这两只去配队」把两只都当普通选人送过去，玩家在工坊里还得自己重新锁一次
+    // （而"锁定"正是配队里最贵的一个约束：它决定了贪心补位能不能动这一只）。
+    // 这里只读**已有的事实**（owned 数据的 `locked` 标记），不新增写入路径；
+    // 参数形状与工坊一致（`?lock=own-…,own-…`，认不出的 id 由下游按形状丢掉）。
+    const locked = ids.filter((id) => state.rows?.find?.((row) => row.select === id)?.locked === true);
+    const query = `team=${encodeURIComponent(ids.join(','))}`
+      + (locked.length ? `&lock=${encodeURIComponent(locked.join(','))}` : '');
+    window.location.href = `roco.html?${query}`;
   });
   $('compare-clear').addEventListener('click', () => {
     state.selected = [];
@@ -519,6 +639,8 @@ function clearBootFallback() {
 
 async function boot() {
   clearBootFallback();
+  // 右上角小芽 + 弹出式小芽（人类 2026-09-25 纠偏①）：注入到页头 .header-actions 的最右端。
+  mountXiaoya({mode: 'popup'});
   wire();
   renderCompareBar();
   await loadTotals();
@@ -526,3 +648,6 @@ async function boot() {
 }
 
 void boot();
+
+// 「这一页是重启前的旧代码」探测器（2026-09-25）：服务端重启过而这一页没刷新时摆一条横幅。
+mountStalePageBanner();

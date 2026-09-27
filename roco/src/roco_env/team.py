@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 from . import data as _data
 from . import parse as _parse
 from .data import Ruleset
+from . import rule_config as _rule_config
 
 # 职责 → 判定谓词。谓词只读数据（技能描述 / 分类 / 属性），不做数值推断。
 ROLE_RULES = {
@@ -245,6 +246,24 @@ def feature_gaps(rs: Ruleset, team: Sequence[str], skills: Dict[str, List[str]],
     return Feature(name="gaps", value=float(len(gaps)), detail={"gaps": gaps}, evidence=[])
 
 
+def declared_team_sizes() -> List[int]:
+    """登记表里**各模式声明过的**队伍规模（去重、升序）。
+
+    RC-106 起「这个模式打几 v 几」由 `battle_mode.team_size` 说了算（`require_team_size()`）。
+    这里把**所有模式**声明过的规模汇总出来，给「阵容评估支持几 v 几」用 ——
+    队伍规模不许由调用方猜，也不许在评估函数里写死 3：登记表里
+    `demo-training-3v3=3`、`pvp-speed-duel-3v3=3`、`pvp-standard-six-pet=6`、
+    `pvp-territory-trial-2v2=2` 都真实存在，而 `pve-camp` 的 `team_size` 是 null
+    （营地没有上场队伍）⇒ **null 不算一种规模**，跳过。
+    """
+    sizes = set()
+    for mode in _rule_config.battle_mode_registry().get("modes", []) or []:
+        value = (mode.get("parameters") or {}).get("team_size")
+        if isinstance(value, int) and not isinstance(value, bool) and value > 0:
+            sizes.add(value)
+    return sorted(sizes)
+
+
 def evaluate_team(
     team: Sequence[str],
     *,
@@ -253,8 +272,16 @@ def evaluate_team(
 ) -> TeamScore:
     """评估一套阵容，返回分项特征与文字结论。**不返回胜率。**"""
     rs = rs or _data.load_ruleset()
-    if len(team) != 3:
-        raise ValueError("训练场评估按 3 只队伍进行；完整 6 只阵容在第 5 周扩展")
+    # 2026-09-25（人类：「我这六只怎么样」问不出来）：**队伍规模按登记表里各模式声明的值**，
+    # 不在评估函数里写死 3。`demo-training-3v3`=3、`pvp-standard-six-pet`=**6**、
+    # `pvp-territory-trial-2v2`=2 ⇒ 这三种都收；别的规模仍然 refuse（fail closed，不猜）。
+    # 特征函数本身是按队伍长度聚合的（比值口径），所以 6 只走的还是同一套特征，不是新算法。
+    sizes = declared_team_sizes()
+    if len(team) not in sizes:
+        raise ValueError(
+            f"队伍规模必须是 {sizes} 之一（各模式在 battle-modes.json 的 parameters.team_size 里声明）；"
+            f"实际 {len(team)} 只"
+        )
 
     skills = _team_skills(rs, team, loadouts)
     f_types = feature_types(rs, team, skills)

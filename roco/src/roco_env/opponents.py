@@ -38,6 +38,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 from . import env as renv
+from . import data as _data
 from .data import Ruleset
 from .schema import ACTION_CHARGE, ACTION_ESCAPE, ACTION_ITEM, ACTION_SKILL, ACTION_SWITCH, Action
 
@@ -341,15 +342,25 @@ def _pet_at(obs: Any, index: Optional[int]) -> Any:
 
 
 def _type_mult(rs: Ruleset, defender_pet_id: str, element: str) -> float:
-    """相性倍率。只读数据，不猜。快照没有这一行时退回单属性相乘并保留原值。"""
+    """相性倍率。只读数据，不猜。
+
+    2026-09-25 人类裁决：双属性按两系**相乘**（见 `data.TypeChart`）——
+    下面直接用 `multiplier`，它的双属性分支就是相乘。
+    快照没给出该组合的行时**不可查**：这里不退回任何推断值，转成既有的
+    fail-closed 通道（`UnsupportedEffect`），由服务如实报 unsupported。
+    """
     if not element:
         return 1.0
     pet = rs.pets.get(defender_pet_id)
     if pet is None:
         return 1.0
-    if rs.type_chart.has_row(pet.types):
+    try:
         return float(rs.type_chart.multiplier(pet.types, element))
-    return float(rs.type_chart.fallback_multiplier(pet.types, element))
+    except _data.TypeCombinationUnknown as exc:
+        from . import effects as _fx
+        raise _fx.UnsupportedEffect(
+            f"属性相性（{'|'.join(pet.types)}）", str(exc),
+            "data/roco/normalized/*/types.json（可查组合 = 快照显式行）") from exc
 
 
 def _matchup(rs: Ruleset, atk_pet_id: str, def_pet_id: str) -> float:

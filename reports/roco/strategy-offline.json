@@ -1,0 +1,122 @@
+{
+ "at": "2026-09-25T18:15:26.469Z",
+ "mode": "pvp-standard-six-pet",
+ "enemyStrategy": "greedy_damage",
+ "modeIsStandardPvp": true,
+ "seeds": 1,
+ "enemies": [
+  "greedy_damage",
+  "random_legal",
+  "conservative_switch",
+  "shallow_search"
+ ],
+ "perEnemy": [
+  {
+   "enemy": "greedy_damage",
+   "baseline": {
+    "games": 1,
+    "win": 0,
+    "loss": 1,
+    "draw": 0,
+    "ended": 1,
+    "avgTurns": 47,
+    "errors": []
+   },
+   "advised": {
+    "games": 1,
+    "win": 1,
+    "loss": 0,
+    "draw": 0,
+    "ended": 1,
+    "avgTurns": 37,
+    "errors": []
+   }
+  },
+  {
+   "enemy": "random_legal",
+   "baseline": {
+    "games": 1,
+    "win": 1,
+    "loss": 0,
+    "draw": 0,
+    "ended": 1,
+    "avgTurns": 1,
+    "errors": []
+   },
+   "advised": {
+    "games": 1,
+    "win": 1,
+    "loss": 0,
+    "draw": 0,
+    "ended": 1,
+    "avgTurns": 1,
+    "errors": []
+   }
+  },
+  {
+   "enemy": "conservative_switch",
+   "baseline": {
+    "games": 1,
+    "win": 0,
+    "loss": 0,
+    "draw": 0,
+    "ended": 0,
+    "avgTurns": 60,
+    "errors": []
+   },
+   "advised": {
+    "games": 1,
+    "win": 0,
+    "loss": 0,
+    "draw": 0,
+    "ended": 0,
+    "avgTurns": 60,
+    "errors": []
+   }
+  },
+  {
+   "enemy": "shallow_search",
+   "baseline": {
+    "games": 1,
+    "win": 1,
+    "loss": 0,
+    "draw": 0,
+    "ended": 1,
+    "avgTurns": 38,
+    "errors": []
+   },
+   "advised": {
+    "games": 1,
+    "win": 1,
+    "loss": 0,
+    "draw": 0,
+    "ended": 1,
+    "avgTurns": 32,
+    "errors": []
+   }
+  }
+ ],
+ "identicalAcrossSeeds": true,
+ "arms": {
+  "baseline": {
+   "games": 4,
+   "win": 2,
+   "loss": 1,
+   "draw": 0,
+   "ended": 3,
+   "avgTurns": 36.5,
+   "errors": []
+  },
+  "advised": {
+   "games": 4,
+   "win": 3,
+   "loss": 0,
+   "draw": 0,
+   "ended": 3,
+   "avgTurns": 32.5,
+   "errors": []
+  }
+ },
+ "recommendationHitRate": 1,
+ "note": "两臂同种子配对；手臂 B 每回合问一次引擎推荐（planBattle）。这不是强化学习，也不产出权重。 ⚠ 实测换种子不改变结果（identicalAcrossSeeds），所以每种对手策略的有效样本只有 1 个 —— 别把局数当样本数。"
+}

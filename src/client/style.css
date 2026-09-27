@@ -516,3 +516,115 @@
 .boot-fallback{margin:10px 14px;padding:10px 12px;border:1px solid #7a4a3a;border-radius:10px;
  background:#2a1c18;color:#ffd7c2;font-size:13px;line-height:1.6}
 .boot-fallback code{background:#3a2a22;padding:1px 5px;border-radius:5px}
+
+/* ── 首页启动页（人类 2026-09-25 纠偏①：首页就用他给的图，图上已经画好三个按钮）──
+   热区按图上的按钮位置用**百分比**定位在 `.home-stage` 里，而 `.home-stage` 恒定保持
+   图片 1600×848 的宽高比并在视口里居中（letterbox），所以任何视口下三个热区都正好
+   压在那三个画好的按钮上。**不用** `background-size:cover`：cover 会把图裁掉一部分，
+   百分比就不再对应图上的按钮（1440×900 下 培养 会偏出 40px 以上，实测过）。
+   图片没下发时 stage 底下还有一层天空渐变 —— 首页不会变成一块黑。 */
+#home-launcher{position:fixed;inset:0;z-index:60;display:grid;place-items:center;overflow:hidden;
+ background:linear-gradient(#79c7f2,#bfe6ff 55%,#8fd06a)}
+.home-stage{position:relative;
+ width:min(100vw,calc(100vh * 1600 / 848));height:min(100vh,calc(100vw * 848 / 1600));
+ background:#8ecbf0 url('/src/client/assets/home.jpg') center/100% 100% no-repeat}
+/* 热区是**透明**的：图上的按钮就是它的样子，这里只负责接点击。 */
+.home-hot{position:absolute;padding:0;border:0;background:transparent;border-radius:16px;
+ cursor:pointer;-webkit-tap-highlight-color:transparent}
+.home-hot:hover,.home-hot:focus-visible{background:#ffffff26;box-shadow:inset 0 0 0 3px #ffffff9e;outline:none}
+.home-hot:active{transform:none;background:#ffffff3d}
+/* 图上那三个按钮的位置（相对图片的百分比，含 ~1% 的宽容边）。 */
+.home-hot-nurture{left:10.5%;top:40.5%;width:21.3%;height:35.5%}
+.home-hot-xiaoya{left:35.2%;top:70.6%;width:30%;height:19.2%}
+.home-hot-pvp{left:71.2%;top:40.5%;width:20.4%;height:35.5%}
+/* 三个热区里各放一句给读屏器/键盘用的说明（视觉上 = 图上的字，不重复画）。 */
+.home-hot span{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+ clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.home-hint{position:absolute;left:0;right:0;bottom:6px;text-align:center;font-size:12px;
+ color:#123449;text-shadow:0 1px 0 #ffffffb8}
+
+/* ── 局末三个出口（人类 2026-09-25 纠偏①）──────────────────────────────────
+   回到首页 / 再来一局（回选队）/ 我要培养。只有这一局真的结束了才出现。 */
+.result-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:2px 0 10px}
+.result-actions .muted{flex:1 1 100%}
+@media(max-width:560px){.result-actions{display:grid;grid-template-columns:1fr}.result-actions button{min-height:44px}}
+
+/* ── 小芽：右上角入口 + 弹出式对话（人类 2026-09-25 纠偏①：「其它所有页面都要有」）
+    培养页与精灵盒子原来**完全没有**小芽；这一份由 `xiaoya.js` 注入，页面外壳不用改。
+    对话走的是**同一条**能力：`/api/coach` + 同一份跨局记忆（localStorage 的
+    `xiaoya-memory-v1`），与营地页/训练场页的小芽是同一个教练，不另起一套。 */
+.xy-fab{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;height:38px;padding:0 14px;
+ border-radius:11px;border:1px solid #4a6858;background:#1a2b28;color:#cfeeda;font-size:13px;line-height:1;
+ cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s}
+.xy-fab:hover{background:#233a33;border-color:#6f9c7f}
+.xy-fab[aria-expanded="true"]{color:#152c24;background:var(--accent);border-color:var(--accent);font-weight:600}
+.xy-pop{position:fixed;right:16px;top:62px;z-index:70;display:flex;flex-direction:column;
+ width:min(430px,calc(100vw - 24px));height:min(560px,calc(100dvh - 82px));padding:14px;
+ border:1px solid #698d7b;border-radius:14px;background:#1e2d32;box-shadow:0 15px 70px #0009}
+.xy-pop-head{display:flex;align-items:center;gap:8px}
+.xy-pop-head strong{font-size:15px}
+.xy-pop-head .muted{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xy-pop-close{min-width:34px;padding:4px 9px;font-size:15px;line-height:1.2}
+.xy-log{flex:1;overflow-y:auto;margin:10px 0;min-height:60px}
+.xy-entry{font-size:14px;line-height:1.6;padding:9px;border-radius:8px;background:#2b403c;margin:8px 0}
+.xy-entry.user{background:#2b3c4c;margin-left:24px}
+.xy-entry strong{display:block;font-size:12px;color:#a5c7b2;margin-bottom:4px}
+.xy-entry details{margin-top:6px}
+.xy-entry summary{font-size:12px;color:#a9c6d8;cursor:pointer}
+.xy-entry p{margin:4px 0 0;font-size:12px;color:#b9c9d6}
+.xy-quick{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:9px}
+.xy-quick button{font-size:12px;padding:5px 9px}
+.xy-form{display:flex;gap:7px}
+.xy-form input{flex:1;min-width:0}
+.xy-form button{min-height:36px}
+@media(max-width:560px){
+ .xy-pop{right:0;left:0;top:auto;bottom:0;width:100vw;height:min(70dvh,560px);border-radius:14px 14px 0 0}
+ .xy-fab{min-height:44px}
+}
+
+/* ── 单独的小芽页面（人类 2026-09-25：「小芽就直接出一个单独的小芽页面，可以大点」）
+    与弹出式那一个共用 `xiaoya.js` 的同一段对话实现，只是版式更大、能常驻。 */
+.xy-page-body{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:10px;
+ min-height:calc(100dvh - 150px)}
+.xy-page-log{overflow-y:auto;padding:4px 2px}
+.xy-page-compose{display:grid;gap:9px}
+.xy-page-compose .xy-form input{min-height:44px;font-size:15px}
+.xy-page-compose .xy-form button{min-width:96px}
+.xy-page-roles{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.xy-page-roles .muted{margin-right:4px}
+@media(max-width:560px){.xy-page-body{min-height:auto}}
+
+/* ── 页眉导航（2026-09-25 人类口径：「页眉按钮应该是 返回首页、开始PVP、小芽，不要别的」）──
+   以前每个页面各写一套：培养页是面包屑「一级/二级/三级」+ 注入的小芽，
+   训练场页是 `roco.js` 注入的一行内联样式按钮（培养（二级）），小芽页是三个 `.xy-fab` 小链接。
+   现在**只有这一套**：`.nav-btn`（三个页面共用），主操作加 `.primary`，小芽用 `.xy`。
+   战斗态由 `roco.css` 把「返回首页 / 开始PVP」藏起来（出口统一走局末弹框，见 roco.html）。 */
+.nav-btn{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:11px;
+ border:1px solid #33465b;background:#1b2836;color:#d7e3ee;font-size:13px;line-height:1;text-decoration:none;
+ white-space:nowrap;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s,color .15s}
+.nav-btn:hover{background:#243447;border-color:#4d6a86;color:#eaf2f8}
+.nav-btn.primary{background:var(--accent);border-color:var(--accent);color:#152c24;font-weight:600}
+.nav-btn.primary:hover{background:#c6f1cc;border-color:#c6f1cc;color:#152c24}
+.nav-btn.xy{border-color:#4a6858;background:#1a2b28;color:#cfeeda}
+.nav-btn.xy:hover{background:#233a33;border-color:#6f9c7f;color:#e6f7ec}
+.nav-btn[aria-expanded="true"]{background:var(--accent);border-color:var(--accent);color:#152c24;font-weight:600}
+.header-actions{gap:8px;flex-wrap:wrap}
+/* 2026-09-27（审计 ② / 手机可点性）：这一行原来把页眉按钮在窄屏压到 **34px 高** ——
+   而 44px 是手机上"点得准"的下限（这条判据在本仓的移动端总扫里是对**声明的**可点控件判红的）。
+   实测：培养页那两个页眉按钮 84×34，被 `browser-mobile-sweep` 抓到（同一套 `.nav-btn` 的
+   其它页面此前没被声明进范围，所以一直没暴露）。这里改成 min-height 44px：字号照旧压小、
+   高度不再压 —— 一行按钮多 10px 不会让页面溢出（改完两档窄屏都复量过）。 */
+@media(max-width:560px){.nav-btn{height:auto;min-height:44px;padding:0 12px;font-size:12px;gap:4px}}
+
+/* ── 「这一页是重启前的旧代码」横幅（2026-09-25，src/client/stale-page.js）──────────────
+   人类这一晚三次看到「还是老版本 / 0.1 的代码还在跑」，每一次服务端都已经是新代码，
+   是浏览器里**正在跑的那份 document** 没换。横幅只报告 + 给一个刷新按钮，不自动刷新
+   （自动 reload 会在打字/出招中途把状态冲掉）。默认 `hidden`，由 stale-page.js 打开。 */
+.stale-page-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:9999;
+ display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;
+ background:#3a2b12;border:1px solid #8a6a24;color:#ffe6b0;font-size:13px;line-height:1.4;
+ box-shadow:0 8px 24px rgba(0,0,0,.35);max-width:min(92vw,560px)}
+.stale-page-banner[hidden]{display:none}
+.stale-page-banner button{border:1px solid #c79a3a;background:#c79a3a;color:#221703;
+ font:inherit;font-weight:600;padding:4px 10px;border-radius:8px;cursor:pointer}
+.stale-page-banner button:hover{background:#e0b455}
