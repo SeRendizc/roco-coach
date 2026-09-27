@@ -137,7 +137,27 @@ export function reconcile(catalog, capture) {
     why: capture.requested.has(id) ? 'requested-but-empty' : skippedIds.has(id) ? 'skipped-range' : 'never-requested',
   }));
   const byWhy = missing.reduce((m, row) => { (m[row.why] ??= []).push(row.id); return m; }, {});
+  // 差异的**形状**（给人看的）：按"哪几项不一致 / 仓内更高还是抓包更高 / 发版版本"分组，
+  // 因为 69 条不是一个统一变换 —— 先看形状再逐只决定，比一条条读要快。
+  const shapeOf = (row) => Object.keys(row.diff).sort().join('+');
+  const signOf = (row) => {
+    const signs = Object.values(row.diff).map(([a, b]) => Math.sign(a - b));
+    if (signs.every((one) => one >= 0)) return '仓内整体更高';
+    if (signs.every((one) => one <= 0)) return '抓包整体更高';
+    return '有高有低';
+  };
+  const tally = (rows, key) => rows.reduce((map, row) => {
+    const k = key(row); map[k] = (map[k] ?? 0) + 1; return map;
+  }, {});
+  const statDiffShape = {
+    by_pattern: tally(statDiffs, shapeOf),
+    by_direction: tally(statDiffs, signOf),
+    by_release: tally(statDiffs, (row) => catalog[row.id]?.release?.version ?? '—'),
+    note: '69 条不是一个统一变换：既有"仓内整体更高"（39）也有"抓包整体更高"（10）与"有高有低"（20）⇒ '
+      + '要逐只决定以谁为准（抓包是 2026-09-27 的实况接口，通常更新；但改数据层前要人类点头）。',
+  };
   return {
+    stat_diff_shape: statDiffShape,
     counts: {
       catalog: catIds.length, capture: capIds.length, both: both.length,
       only_catalog: onlyCatalog.length, only_capture: onlyCapture.length,
@@ -196,6 +216,16 @@ function toMarkdown(result, plan, captureDir) {
   lines.push('| 区间 | 条数 | 怎么抓 |');
   lines.push('|---|---:|---|');
   for (const range of plan) lines.push(`| ${range.from}–${range.to} | ${range.count} | ${range.how} |`);
+  lines.push('');
+  lines.push('## 六维不一致的**形状**（先看这个，再逐只决定）');
+  lines.push('');
+  lines.push(`> ${result.stat_diff_shape.note}`);
+  lines.push('');
+  for (const [label, map] of [['按"哪几项不一致"', result.stat_diff_shape.by_pattern],
+    ['按方向', result.stat_diff_shape.by_direction], ['按发版版本', result.stat_diff_shape.by_release]]) {
+    lines.push(`**${label}**：${Object.entries(map).sort((a, b) => b[1] - a[1])
+      .map(([key, count]) => `${key} ${count}`).join(' · ')}`);
+  }
   lines.push('');
   lines.push('## 六维不一致（仓内 ↔ 抓包，逐只）');
   lines.push('');
