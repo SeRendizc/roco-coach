@@ -45,10 +45,11 @@ test('判据①：L4 是 ready、只收 tactic_card，输入（派生产物）�
   assert.ok(existsSync(join(REPO_ROOT, spec.path)), `输入路径不存在：${spec.path}`);
 });
 
-test('判据②：93 篇卡片文档，id 与真源逐条相同', async () => {
+test('判据②：91 篇卡片文档，id 与真源逐条相同', async () => {   // 2026-09-27：加点两张卡退役 ⇒ 93 → 91
   const mod = await import(pathToFileURL(join(REPO_ROOT, SOURCE)).href);
   const truth = [...(mod.TACTIC_CARDS ?? []), ...(mod.REFERENCE_CARDS ?? [])].map((card) => String(card.id));
-  assert.equal(truth.length, 93, '卡片条数变了，先核对这条路再改这条');
+  // 2026-09-27 改钉（加点退役）：47 战术 + 44 引擎派生 = **91**（原来 49 + 44 = 93）。
+  assert.equal(truth.length, 91, '卡片条数变了，先核对这条路再改这条');
   const docs = buildDocuments(loadCorpus()).filter((doc) => doc.record_kind === 'tactic_card');
   assert.deepEqual(docs.map((doc) => doc.id), truth, '文档 id 必须与真源卡片 id 逐条一致（教练引用的是这套 id）');
   for (const doc of docs) {
@@ -65,7 +66,7 @@ test('判据③（漂移守卫）：产物记的 source_sha256 == 当前 content
   const sha = createHash('sha256').update(readFileSync(join(REPO_ROOT, SOURCE), 'utf8')).digest('hex');
   assert.equal(artifact.source_sha256, sha,
     'src/game/content.js 改了但派生产物没重跑 ⇒ 跑 node scripts/roco/build-tactic-cards.mjs');
-  assert.equal(artifact.counts.total, 93);
+  assert.equal(artifact.counts.total, 91);   // 2026-09-27：加点两张卡退役 ⇒ 93 → 91
 });
 
 test('判据④：要打法的问句 top-1 就是卡片', () => {

@@ -4,7 +4,9 @@ import {createGame} from '../src/game/engine.js';
 import {searchKnowledge, buildKnowledgePacket} from '../src/coach/retrieval.js';
 
 test('retrieves colloquial tactical questions with relevant cards',()=>{
-  for(const [query,id] of [['来得及奶一口吗','healing'],['换宠挡刀安全吗','switch'],['蓝量空了','energy'],['残血是不是必须追猎','overkill'],['加敏捷能先动吗','training']]) {
+  // 2026-09-27 改钉（加点退役）：`tactic:training`（加点阈值）已随加点一起删掉，
+  // 所以这一条换成**同类口语句**——「先出手」这件事现在由 `tactic:priority`（先制与速度）承载。
+  for(const [query,id] of [['来得及奶一口吗','healing'],['换宠挡刀安全吗','switch'],['蓝量空了','energy'],['残血是不是必须追猎','overkill'],['先出手靠什么','priority']]) {
     assert.ok(searchKnowledge(query).cards.some(c=>c.id==='tactic:'+id),query);
   }
 });

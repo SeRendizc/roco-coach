@@ -1,141 +1,1044 @@
 {
-  "name": "retrieval-extended",
-  "rulesVersion": "0.6",
-  "provenance": "AUTHOR-WRITTEN, NOT AN INDEPENDENT BLIND SET. The first 20 queries are the original evals/retrieval.json set kept verbatim for continuity; the remaining queries were written by the same author (an LLM agent working in this repository) as realistic Chinese player questions plus colloquial paraphrases, and the relevance labels were assigned by that same author by reading each card's principle/counterexample. No independent annotator, no inter-annotator agreement, and no blind split. Random-guess level for Hit@3 over 90 eligible cards is about 3.3%.",
-  "queries": [
-    {"id":"q01","split":"original-dev","q":"一直轮换怎么罚他","relevant":["tactic:switch-loop","tactic:safe-pressure","tactic:coverage"]},
-    {"id":"q02","split":"original-dev","q":"空蓝还能打吗","relevant":["tactic:energy","tactic:energy-net","tactic:ether-cost"]},
-    {"id":"q03","split":"original-dev","q":"想补刀又怕打过头","relevant":["tactic:overkill"]},
-    {"id":"q04","split":"original-dev","q":"防御时还会被毒死吗","relevant":["tactic:guard-status","tactic:poison"]},
-    {"id":"q05","split":"original-test","q":"他又把别的宠顶上来了","relevant":["tactic:switch","tactic:switch-loop","tactic:coverage"]},
-    {"id":"q06","split":"original-test","q":"靠回血一直拖怎么处理","relevant":["tactic:heal-punish","tactic:healing","tactic:safe-pressure"]},
-    {"id":"q07","split":"original-test","q":"我速度比他快为什么后手","relevant":["tactic:priority","tactic:speed-tie"]},
-    {"id":"q08","split":"original-test","q":"豆子不够还要不要防御","relevant":["tactic:guard-energy","tactic:energy","tactic:energy-net"]},
-    {"id":"q09","split":"original-test","q":"对方残血会不会先吃药","relevant":["tactic:heal-punish","tactic:priority-heal"]},
-    {"id":"q10","split":"original-test","q":"换人能不能顺便打一下","relevant":["tactic:switch-turn","tactic:switch"]},
-    {"id":"q11","split":"original-test","q":"毒和灼烧哪个更疼","relevant":["tactic:poison"]},
-    {"id":"q12","split":"original-test","q":"培养点加哪一项收益大","relevant":["tactic:training"]},
-    {"id":"q13","split":"original-test","q":"三只都怕同一个属性怎么办","relevant":["tactic:team"]},
-    {"id":"q14","split":"original-test","q":"火花之后接什么最赚","relevant":["tactic:burn-combo","rule:skill:pursuit"]},
-    {"id":"q15","split":"original-test","q":"防御之后还能再防御吗","relevant":["tactic:guard-repeat","rule:skill:guard"]},
-    {"id":"q16","split":"original-test","q":"舍身烈焰会不会把自己打死","relevant":["tactic:recoil","rule:skill:flare"]},
-    {"id":"q17","split":"original-test","q":"吸血是按打出来的伤害算吗","relevant":["tactic:drain-cap","rule:skill:drain"]},
-    {"id":"q18","split":"original-test","q":"后备的宠会自己回豆吗","relevant":["tactic:no-passive-recovery"]},
-    {"id":"q19","split":"original-test","q":"满血吃药是不是浪费","relevant":["tactic:heal-overflow","tactic:healing"]},
-    {"id":"q20","split":"original-test","q":"你确定这样打一定赢吗","relevant":["tactic:confidence"]},
-
-    {"id":"x01","split":"extended","q":"豆不够咋整","relevant":["tactic:energy","tactic:energy-net"],"note":"colloquial paraphrase of q02"},
-    {"id":"x02","split":"extended","q":"没豆了只能防御吗","relevant":["tactic:energy","tactic:guard-energy"]},
-    {"id":"x03","split":"extended","q":"能量果什么时候吃比较值","relevant":["tactic:ether-cost"]},
-    {"id":"x04","split":"extended","q":"耗2豆的技能实际净亏多少豆","relevant":["tactic:energy-net"]},
-    {"id":"x05","split":"extended","q":"速度一样谁先出手","relevant":["tactic:speed-tie"]},
-    {"id":"x06","split":"extended","q":"疾爪是不是一定先打","relevant":["tactic:priority","rule:skill:dash"]},
-    {"id":"x07","split":"extended","q":"药和疾爪谁先结算","relevant":["tactic:priority-heal","tactic:priority"]},
-    {"id":"x08","split":"extended","q":"减速能不能让普通技能抢过先制","relevant":["tactic:slow-priority","rule:skill:staticbolt"]},
-    {"id":"x09","split":"extended","q":"迟滞电弧降速度有什么用","relevant":["tactic:speed-control","rule:skill:staticbolt"]},
-    {"id":"x10","split":"extended","q":"主动换宠上来是不是白挨一下","relevant":["tactic:switch"]},
-    {"id":"x11","split":"extended","q":"换宠之后这回合还能出招吗","relevant":["tactic:switch-turn"]},
-    {"id":"x12","split":"extended","q":"我们俩同时换宠会怎么样","relevant":["tactic:double-switch"]},
-    {"id":"x13","split":"extended","q":"他一直来回换我要不要跟着换","relevant":["tactic:switch-loop","tactic:safe-pressure"]},
-    {"id":"x14","split":"extended","q":"倒下以后换人算不算浪费回合","relevant":["tactic:free-entry"]},
-    {"id":"x15","split":"extended","q":"后备要不要留一只专门反制","relevant":["tactic:reserve"]},
-    {"id":"x16","split":"extended","q":"打进后备的宠要不要一起算","relevant":["tactic:coverage"]},
-    {"id":"x17","split":"extended","q":"对面只剩一只了还会换人吗","relevant":["tactic:last-reserve"]},
-    {"id":"x18","split":"extended","q":"换下去以后中毒还会继续掉血吗","relevant":["tactic:status-switch","tactic:poison"]},
-    {"id":"x19","split":"extended","q":"防御能不能把中毒清掉","relevant":["tactic:guard-status"]},
-    {"id":"x20","split":"extended","q":"防御回的豆会不会溢出浪费","relevant":["tactic:guard-energy"]},
-    {"id":"x21","split":"extended","q":"能连着两回合都防御吗","relevant":["tactic:guard-repeat","rule:skill:guard"]},
-    {"id":"x22","split":"extended","q":"破甲重击能不能打过防御","relevant":["tactic:guard","rule:skill:crush"]},
-    {"id":"x23","split":"extended","q":"碎岩冲击穿过防御是什么意思","relevant":["rule:skill:stonebreak","tactic:guard"]},
-    {"id":"x24","split":"extended","q":"砾背獾防御被打了会怎样","relevant":["tactic:badger-counter","rule:pet:badger"]},
-    {"id":"x25","split":"extended","q":"残血打獾会不会被反击换掉","relevant":["tactic:guard-counter-ko","rule:pet:badger"]},
-    {"id":"x26","split":"extended","q":"残血对面肯定吃药怎么压住","relevant":["tactic:heal-punish"]},
-    {"id":"x27","split":"extended","q":"能给后备的伙伴吃药吗","relevant":["tactic:heal-target"]},
-    {"id":"x28","split":"extended","q":"满血吃药会溢出吗","relevant":["tactic:heal-overflow"]},
-    {"id":"x29","split":"extended","q":"净化药什么时候用才不亏","relevant":["tactic:cleanse-window"]},
-    {"id":"x30","split":"extended","q":"吸血按理论伤害还是实际伤害","relevant":["tactic:drain-cap","rule:skill:drain"]},
-    {"id":"x31","split":"extended","q":"舍身烈焰反伤怎么算","relevant":["tactic:recoil","rule:skill:flare"]},
-    {"id":"x32","split":"extended","q":"伤害打多了算不算失误","relevant":["tactic:overkill"]},
-    {"id":"x33","split":"extended","q":"明明能击倒还要不要挑高威力","relevant":["tactic:overkill"]},
-    {"id":"x34","split":"extended","q":"火花挂上灼烧之后追猎更疼吗","relevant":["tactic:burn-combo","rule:skill:pursuit"]},
-    {"id":"x35","split":"extended","q":"中毒每回合掉几点","relevant":["tactic:poison","rule:skill:spore"]},
-    {"id":"x36","split":"extended","q":"毒孢子能叠两层中毒吗","relevant":["tactic:poison","rule:skill:spore"]},
-    {"id":"x37","split":"extended","q":"怎么加培养点比较划算","relevant":["tactic:training"]},
-    {"id":"x38","split":"extended","q":"训练点能不能先留着不加","relevant":["tactic:growth-save"]},
-    {"id":"x39","split":"extended","q":"配招要不要带防御","relevant":["tactic:loadout","rule:skill:guard"]},
-    {"id":"x40","split":"extended","q":"蓄势叠满被破势会怎么样","relevant":["tactic:buff-dispel","rule:skill:dispel"]},
-    {"id":"x41","split":"extended","q":"蓄势最多能叠几层","relevant":["rule:skill:focus","tactic:buff-dispel"]},
-    {"id":"x42","split":"extended","q":"护甲加多少防御","relevant":["rule:skill:shell"]},
-    {"id":"x43","split":"extended","q":"细雨天气火系会变弱吗","relevant":["tactic:weather"]},
-    {"id":"x44","split":"extended","q":"山风对岩系有什么影响","relevant":["tactic:weather"]},
-    {"id":"x45","split":"extended","q":"清风把天气吹掉值不值","relevant":["rule:skill:clearwind","tactic:weather"]},
-    {"id":"x46","split":"extended","q":"守心石什么时候触发","relevant":["tactic:held"]},
-    {"id":"x47","split":"extended","q":"蓄能籽回豆的条件是什么","relevant":["tactic:held"]},
-    {"id":"x48","split":"extended","q":"三只伙伴怎么搭配比较稳","relevant":["tactic:team"]},
-    {"id":"x49","split":"extended","q":"队伍要不要准备一只收尾的","relevant":["tactic:team"]},
-    {"id":"x50","split":"extended","q":"我不想要主动提示怎么办","relevant":["tactic:quiet-player"]},
-    {"id":"x51","split":"extended","q":"速胜奖励会不会逼我打得很快","relevant":["tactic:short-win"]},
-    {"id":"x52","split":"extended","q":"怎么知道自己真的学会了","relevant":["tactic:practice-transfer"]},
-    {"id":"x53","split":"extended","q":"整局复盘和单回合解释有什么区别","relevant":["tactic:review-scope"]},
-    {"id":"x54","split":"extended","q":"首页那个随机编号有什么用","relevant":["ui:seed"]},
-    {"id":"x55","split":"extended","q":"换个编号是不是就能变强","relevant":["ui:seed"]},
-    {"id":"x56","split":"extended","q":"宝可梦的本系加成这里也算吗","relevant":["tactic:rules-boundary"]},
-    {"id":"x57","split":"extended","q":"网上攻略里的双属性这里能用吗","relevant":["tactic:rules-boundary"]},
-    {"id":"x58","split":"extended","q":"你会保证我这把一定赢吗","relevant":["tactic:confidence"]},
-    {"id":"x59","split":"extended","q":"稳健打法是不是就是一直防","relevant":["tactic:safe-pressure","tactic:guard"]},
-
-    {"id":"x60","split":"extended","q":"苔息一次回多少血","relevant":["rule:skill:moss","tactic:healing"]},
-    {"id":"x61","split":"extended","q":"风刃和回旋风暴哪个好","relevant":["rule:skill:gust","rule:skill:tempest"]},
-    {"id":"x62","split":"extended","q":"蓄能放电耗几个豆","relevant":["rule:skill:discharge"]},
-    {"id":"x63","split":"extended","q":"撞击这种零消耗技能厉害吗","relevant":["rule:skill:strike"]},
-    {"id":"x64","split":"extended","q":"水流弹基础威力多少","relevant":["rule:skill:wave"]},
-    {"id":"x65","split":"extended","q":"潮汐重击值得用吗","relevant":["rule:skill:tide"]},
-    {"id":"x66","split":"extended","q":"藤鞭的威力和消耗","relevant":["rule:skill:vine"]},
-    {"id":"x67","split":"extended","q":"砾石弹和碎岩冲击差别在哪","relevant":["rule:skill:gravel","rule:skill:stonebreak"]},
-    {"id":"x68","split":"extended","q":"余烬追猎对没烧到的目标有加成吗","relevant":["rule:skill:pursuit","tactic:burn-combo"]},
-    {"id":"x69","split":"extended","q":"防御这个技能具体什么效果","relevant":["rule:skill:guard","tactic:guard"]},
-
-    {"id":"x70","split":"extended","q":"烬尾狐的基础面板是多少","relevant":["rule:pet:fox"]},
-    {"id":"x71","split":"extended","q":"潮甲龟防御的时候有什么特别","relevant":["rule:pet:turtle"]},
-    {"id":"x72","split":"extended","q":"芽角鹿靠什么续航","relevant":["rule:pet:deer"]},
-    {"id":"x73","split":"extended","q":"炽鬃狮适合打什么位置","relevant":["rule:pet:lion"]},
-    {"id":"x74","split":"extended","q":"溪刃獭速度快吗","relevant":["rule:pet:otter"]},
-    {"id":"x75","split":"extended","q":"苔盾菇怎么打消耗","relevant":["rule:pet:shroom"]},
-    {"id":"x76","split":"extended","q":"砾背獾的面板和特性","relevant":["rule:pet:badger"]},
-    {"id":"x77","split":"extended","q":"鸣电雀怎么控速","relevant":["rule:pet:sparrow","tactic:speed-control"]},
-    {"id":"x78","split":"extended","q":"岚翎隼血量低不低","relevant":["rule:pet:falcon"]},
-    {"id":"x79","split":"extended","q":"云绒蛾输出高吗","relevant":["rule:pet:moth"]},
-    {"id":"x80","split":"extended","q":"晶角犀为什么慢","relevant":["rule:pet:rhino"]},
-    {"id":"x81","split":"extended","q":"伏光貂是不是很脆","relevant":["rule:pet:marten"]},
-
-    {"id":"x82","split":"extended","q":"火系打什么属性有加成","relevant":["rule:type:fire"]},
-    {"id":"x83","split":"extended","q":"水系克制哪些系","relevant":["rule:type:water"]},
-    {"id":"x84","split":"extended","q":"草系被什么克制","relevant":["rule:type:leaf"]},
-    {"id":"x85","split":"extended","q":"岩系能克哪些属性","relevant":["rule:type:rock"]},
-    {"id":"x86","split":"extended","q":"雷系打水系有加成吗","relevant":["rule:type:electric"]},
-    {"id":"x87","split":"extended","q":"风系克制什么","relevant":["rule:type:wind"]},
-    {"id":"x88","split":"extended","q":"属性克制倍率是多少","relevant":["tactic:rules-boundary","rule:type:fire"]},
-
-    {"id":"x89","split":"extended","q":"对面换人以后我的技能还算克制吗","relevant":["tactic:coverage","tactic:switch"]},
-    {"id":"x90","split":"extended","q":"这回合我该不该换宠挡一下","relevant":["tactic:switch","tactic:free-entry"]},
-    {"id":"x91","split":"extended","q":"我一直换宠会不会被惩罚","relevant":["tactic:switch-loop"]},
-    {"id":"x92","split":"extended","q":"豆少的时候吃果还是防御","relevant":["tactic:ether-cost","tactic:energy"]},
-
-    {"id":"n01","split":"negative","q":"今天晚饭吃什么比较好","relevant":[],"note":"out of scope: no card about meals"},
-    {"id":"n02","split":"negative","q":"帮我订一张去北京的机票","relevant":[],"note":"out of scope: no booking card"},
-    {"id":"n03","split":"negative","q":"1+1等于几","relevant":[],"note":"out of scope: arithmetic"},
-    {"id":"n04","split":"negative","q":"推荐一首适合打游戏听的歌","relevant":[],"note":"out of scope: music"},
-    {"id":"n05","split":"negative","q":"这个游戏卖多少钱","relevant":[],"note":"out of scope: pricing is not in any card"},
-    {"id":"n06","split":"negative","q":"手机能玩吗","relevant":[],"note":"out of scope: platform support is not in any card"},
-    {"id":"n07","split":"negative","q":"怎么截图保存战报图片","relevant":[],"note":"out of scope: OS screenshot"},
-    {"id":"n08","split":"negative","q":"你叫什么名字","relevant":[],"note":"out of scope: small talk"},
-    {"id":"n09","split":"negative","q":"现在几点了","relevant":[],"note":"out of scope: clock"},
-    {"id":"n10","split":"negative","q":"帮我写一段排序代码","relevant":[],"note":"out of scope: programming"},
-    {"id":"n11","split":"negative","q":"你有段位排名系统吗","relevant":[],"note":"out of scope: no ranking system in any card"},
-    {"id":"n12","split":"negative","q":"能不能用语音跟我说话","relevant":[],"note":"out of scope: voice input"},
-    {"id":"n13","split":"negative","q":"我密码忘了怎么找回","relevant":[],"note":"out of scope: account recovery"},
-    {"id":"n14","split":"negative","q":"洛克王国手游什么时候上线","relevant":[],"note":"out of scope: another product's release schedule"},
-    {"id":"n15","split":"negative","q":"这游戏支持手柄吗","relevant":[],"note":"out of scope: input devices"},
-    {"id":"n16","split":"negative","q":"给我讲个笑话吧","relevant":[],"note":"out of scope: entertainment"}
-  ]
+ "name": "retrieval-extended",
+ "rulesVersion": "0.6",
+ "provenance": "AUTHOR-WRITTEN, NOT AN INDEPENDENT BLIND SET. The first 20 queries are the original evals/retrieval.json set kept verbatim for continuity; the remaining queries were written by the same author (an LLM agent working in this repository) as realistic Chinese player questions plus colloquial paraphrases, and the relevance labels were assigned by that same author by reading each card's principle/counterexample. No independent annotator, no inter-annotator agreement, and no blind split. Random-guess level for Hit@3 over 90 eligible cards is about 3.3%.",
+ "queries": [
+  {
+   "id": "q01",
+   "split": "original-dev",
+   "q": "一直轮换怎么罚他",
+   "relevant": [
+    "tactic:switch-loop",
+    "tactic:safe-pressure",
+    "tactic:coverage"
+   ]
+  },
+  {
+   "id": "q02",
+   "split": "original-dev",
+   "q": "空蓝还能打吗",
+   "relevant": [
+    "tactic:energy",
+    "tactic:energy-net",
+    "tactic:ether-cost"
+   ]
+  },
+  {
+   "id": "q03",
+   "split": "original-dev",
+   "q": "想补刀又怕打过头",
+   "relevant": [
+    "tactic:overkill"
+   ]
+  },
+  {
+   "id": "q04",
+   "split": "original-dev",
+   "q": "防御时还会被毒死吗",
+   "relevant": [
+    "tactic:guard-status",
+    "tactic:poison"
+   ]
+  },
+  {
+   "id": "q05",
+   "split": "original-test",
+   "q": "他又把别的宠顶上来了",
+   "relevant": [
+    "tactic:switch",
+    "tactic:switch-loop",
+    "tactic:coverage"
+   ]
+  },
+  {
+   "id": "q06",
+   "split": "original-test",
+   "q": "靠回血一直拖怎么处理",
+   "relevant": [
+    "tactic:heal-punish",
+    "tactic:healing",
+    "tactic:safe-pressure"
+   ]
+  },
+  {
+   "id": "q07",
+   "split": "original-test",
+   "q": "我速度比他快为什么后手",
+   "relevant": [
+    "tactic:priority",
+    "tactic:speed-tie"
+   ]
+  },
+  {
+   "id": "q08",
+   "split": "original-test",
+   "q": "豆子不够还要不要防御",
+   "relevant": [
+    "tactic:guard-energy",
+    "tactic:energy",
+    "tactic:energy-net"
+   ]
+  },
+  {
+   "id": "q09",
+   "split": "original-test",
+   "q": "对方残血会不会先吃药",
+   "relevant": [
+    "tactic:heal-punish",
+    "tactic:priority-heal"
+   ]
+  },
+  {
+   "id": "q10",
+   "split": "original-test",
+   "q": "换人能不能顺便打一下",
+   "relevant": [
+    "tactic:switch-turn",
+    "tactic:switch"
+   ]
+  },
+  {
+   "id": "q11",
+   "split": "original-test",
+   "q": "毒和灼烧哪个更疼",
+   "relevant": [
+    "tactic:poison"
+   ]
+  },
+  {
+   "id": "q13",
+   "split": "original-test",
+   "q": "三只都怕同一个属性怎么办",
+   "relevant": [
+    "tactic:team"
+   ]
+  },
+  {
+   "id": "q14",
+   "split": "original-test",
+   "q": "火花之后接什么最赚",
+   "relevant": [
+    "tactic:burn-combo",
+    "rule:skill:pursuit"
+   ]
+  },
+  {
+   "id": "q15",
+   "split": "original-test",
+   "q": "防御之后还能再防御吗",
+   "relevant": [
+    "tactic:guard-repeat",
+    "rule:skill:guard"
+   ]
+  },
+  {
+   "id": "q16",
+   "split": "original-test",
+   "q": "舍身烈焰会不会把自己打死",
+   "relevant": [
+    "tactic:recoil",
+    "rule:skill:flare"
+   ]
+  },
+  {
+   "id": "q17",
+   "split": "original-test",
+   "q": "吸血是按打出来的伤害算吗",
+   "relevant": [
+    "tactic:drain-cap",
+    "rule:skill:drain"
+   ]
+  },
+  {
+   "id": "q18",
+   "split": "original-test",
+   "q": "后备的宠会自己回豆吗",
+   "relevant": [
+    "tactic:no-passive-recovery"
+   ]
+  },
+  {
+   "id": "q19",
+   "split": "original-test",
+   "q": "满血吃药是不是浪费",
+   "relevant": [
+    "tactic:heal-overflow",
+    "tactic:healing"
+   ]
+  },
+  {
+   "id": "q20",
+   "split": "original-test",
+   "q": "你确定这样打一定赢吗",
+   "relevant": [
+    "tactic:confidence"
+   ]
+  },
+  {
+   "id": "x01",
+   "split": "extended",
+   "q": "豆不够咋整",
+   "relevant": [
+    "tactic:energy",
+    "tactic:energy-net"
+   ],
+   "note": "colloquial paraphrase of q02"
+  },
+  {
+   "id": "x02",
+   "split": "extended",
+   "q": "没豆了只能防御吗",
+   "relevant": [
+    "tactic:energy",
+    "tactic:guard-energy"
+   ]
+  },
+  {
+   "id": "x03",
+   "split": "extended",
+   "q": "能量果什么时候吃比较值",
+   "relevant": [
+    "tactic:ether-cost"
+   ]
+  },
+  {
+   "id": "x04",
+   "split": "extended",
+   "q": "耗2豆的技能实际净亏多少豆",
+   "relevant": [
+    "tactic:energy-net"
+   ]
+  },
+  {
+   "id": "x05",
+   "split": "extended",
+   "q": "速度一样谁先出手",
+   "relevant": [
+    "tactic:speed-tie"
+   ]
+  },
+  {
+   "id": "x06",
+   "split": "extended",
+   "q": "疾爪是不是一定先打",
+   "relevant": [
+    "tactic:priority",
+    "rule:skill:dash"
+   ]
+  },
+  {
+   "id": "x07",
+   "split": "extended",
+   "q": "药和疾爪谁先结算",
+   "relevant": [
+    "tactic:priority-heal",
+    "tactic:priority"
+   ]
+  },
+  {
+   "id": "x08",
+   "split": "extended",
+   "q": "减速能不能让普通技能抢过先制",
+   "relevant": [
+    "tactic:slow-priority",
+    "rule:skill:staticbolt"
+   ]
+  },
+  {
+   "id": "x09",
+   "split": "extended",
+   "q": "迟滞电弧降速度有什么用",
+   "relevant": [
+    "tactic:speed-control",
+    "rule:skill:staticbolt"
+   ]
+  },
+  {
+   "id": "x10",
+   "split": "extended",
+   "q": "主动换宠上来是不是白挨一下",
+   "relevant": [
+    "tactic:switch"
+   ]
+  },
+  {
+   "id": "x11",
+   "split": "extended",
+   "q": "换宠之后这回合还能出招吗",
+   "relevant": [
+    "tactic:switch-turn"
+   ]
+  },
+  {
+   "id": "x12",
+   "split": "extended",
+   "q": "我们俩同时换宠会怎么样",
+   "relevant": [
+    "tactic:double-switch"
+   ]
+  },
+  {
+   "id": "x13",
+   "split": "extended",
+   "q": "他一直来回换我要不要跟着换",
+   "relevant": [
+    "tactic:switch-loop",
+    "tactic:safe-pressure"
+   ]
+  },
+  {
+   "id": "x14",
+   "split": "extended",
+   "q": "倒下以后换人算不算浪费回合",
+   "relevant": [
+    "tactic:free-entry"
+   ]
+  },
+  {
+   "id": "x15",
+   "split": "extended",
+   "q": "后备要不要留一只专门反制",
+   "relevant": [
+    "tactic:reserve"
+   ]
+  },
+  {
+   "id": "x16",
+   "split": "extended",
+   "q": "打进后备的宠要不要一起算",
+   "relevant": [
+    "tactic:coverage"
+   ]
+  },
+  {
+   "id": "x17",
+   "split": "extended",
+   "q": "对面只剩一只了还会换人吗",
+   "relevant": [
+    "tactic:last-reserve"
+   ]
+  },
+  {
+   "id": "x18",
+   "split": "extended",
+   "q": "换下去以后中毒还会继续掉血吗",
+   "relevant": [
+    "tactic:status-switch",
+    "tactic:poison"
+   ]
+  },
+  {
+   "id": "x19",
+   "split": "extended",
+   "q": "防御能不能把中毒清掉",
+   "relevant": [
+    "tactic:guard-status"
+   ]
+  },
+  {
+   "id": "x20",
+   "split": "extended",
+   "q": "防御回的豆会不会溢出浪费",
+   "relevant": [
+    "tactic:guard-energy"
+   ]
+  },
+  {
+   "id": "x21",
+   "split": "extended",
+   "q": "能连着两回合都防御吗",
+   "relevant": [
+    "tactic:guard-repeat",
+    "rule:skill:guard"
+   ]
+  },
+  {
+   "id": "x22",
+   "split": "extended",
+   "q": "破甲重击能不能打过防御",
+   "relevant": [
+    "tactic:guard",
+    "rule:skill:crush"
+   ]
+  },
+  {
+   "id": "x23",
+   "split": "extended",
+   "q": "碎岩冲击穿过防御是什么意思",
+   "relevant": [
+    "rule:skill:stonebreak",
+    "tactic:guard"
+   ]
+  },
+  {
+   "id": "x24",
+   "split": "extended",
+   "q": "砾背獾防御被打了会怎样",
+   "relevant": [
+    "tactic:badger-counter",
+    "rule:pet:badger"
+   ]
+  },
+  {
+   "id": "x25",
+   "split": "extended",
+   "q": "残血打獾会不会被反击换掉",
+   "relevant": [
+    "tactic:guard-counter-ko",
+    "rule:pet:badger"
+   ]
+  },
+  {
+   "id": "x26",
+   "split": "extended",
+   "q": "残血对面肯定吃药怎么压住",
+   "relevant": [
+    "tactic:heal-punish"
+   ]
+  },
+  {
+   "id": "x27",
+   "split": "extended",
+   "q": "能给后备的伙伴吃药吗",
+   "relevant": [
+    "tactic:heal-target"
+   ]
+  },
+  {
+   "id": "x28",
+   "split": "extended",
+   "q": "满血吃药会溢出吗",
+   "relevant": [
+    "tactic:heal-overflow"
+   ]
+  },
+  {
+   "id": "x29",
+   "split": "extended",
+   "q": "净化药什么时候用才不亏",
+   "relevant": [
+    "tactic:cleanse-window"
+   ]
+  },
+  {
+   "id": "x30",
+   "split": "extended",
+   "q": "吸血按理论伤害还是实际伤害",
+   "relevant": [
+    "tactic:drain-cap",
+    "rule:skill:drain"
+   ]
+  },
+  {
+   "id": "x31",
+   "split": "extended",
+   "q": "舍身烈焰反伤怎么算",
+   "relevant": [
+    "tactic:recoil",
+    "rule:skill:flare"
+   ]
+  },
+  {
+   "id": "x32",
+   "split": "extended",
+   "q": "伤害打多了算不算失误",
+   "relevant": [
+    "tactic:overkill"
+   ]
+  },
+  {
+   "id": "x33",
+   "split": "extended",
+   "q": "明明能击倒还要不要挑高威力",
+   "relevant": [
+    "tactic:overkill"
+   ]
+  },
+  {
+   "id": "x34",
+   "split": "extended",
+   "q": "火花挂上灼烧之后追猎更疼吗",
+   "relevant": [
+    "tactic:burn-combo",
+    "rule:skill:pursuit"
+   ]
+  },
+  {
+   "id": "x35",
+   "split": "extended",
+   "q": "中毒每回合掉几点",
+   "relevant": [
+    "tactic:poison",
+    "rule:skill:spore"
+   ]
+  },
+  {
+   "id": "x36",
+   "split": "extended",
+   "q": "毒孢子能叠两层中毒吗",
+   "relevant": [
+    "tactic:poison",
+    "rule:skill:spore"
+   ]
+  },
+  {
+   "id": "x39",
+   "split": "extended",
+   "q": "配招要不要带防御",
+   "relevant": [
+    "tactic:loadout",
+    "rule:skill:guard"
+   ]
+  },
+  {
+   "id": "x40",
+   "split": "extended",
+   "q": "蓄势叠满被破势会怎么样",
+   "relevant": [
+    "tactic:buff-dispel",
+    "rule:skill:dispel"
+   ]
+  },
+  {
+   "id": "x41",
+   "split": "extended",
+   "q": "蓄势最多能叠几层",
+   "relevant": [
+    "rule:skill:focus",
+    "tactic:buff-dispel"
+   ]
+  },
+  {
+   "id": "x42",
+   "split": "extended",
+   "q": "护甲加多少防御",
+   "relevant": [
+    "rule:skill:shell"
+   ]
+  },
+  {
+   "id": "x43",
+   "split": "extended",
+   "q": "细雨天气火系会变弱吗",
+   "relevant": [
+    "tactic:weather"
+   ]
+  },
+  {
+   "id": "x44",
+   "split": "extended",
+   "q": "山风对岩系有什么影响",
+   "relevant": [
+    "tactic:weather"
+   ]
+  },
+  {
+   "id": "x45",
+   "split": "extended",
+   "q": "清风把天气吹掉值不值",
+   "relevant": [
+    "rule:skill:clearwind",
+    "tactic:weather"
+   ]
+  },
+  {
+   "id": "x46",
+   "split": "extended",
+   "q": "守心石什么时候触发",
+   "relevant": [
+    "tactic:held"
+   ]
+  },
+  {
+   "id": "x47",
+   "split": "extended",
+   "q": "蓄能籽回豆的条件是什么",
+   "relevant": [
+    "tactic:held"
+   ]
+  },
+  {
+   "id": "x48",
+   "split": "extended",
+   "q": "三只伙伴怎么搭配比较稳",
+   "relevant": [
+    "tactic:team"
+   ]
+  },
+  {
+   "id": "x49",
+   "split": "extended",
+   "q": "队伍要不要准备一只收尾的",
+   "relevant": [
+    "tactic:team"
+   ]
+  },
+  {
+   "id": "x50",
+   "split": "extended",
+   "q": "我不想要主动提示怎么办",
+   "relevant": [
+    "tactic:quiet-player"
+   ]
+  },
+  {
+   "id": "x51",
+   "split": "extended",
+   "q": "速胜奖励会不会逼我打得很快",
+   "relevant": [
+    "tactic:short-win"
+   ]
+  },
+  {
+   "id": "x52",
+   "split": "extended",
+   "q": "怎么知道自己真的学会了",
+   "relevant": [
+    "tactic:practice-transfer"
+   ]
+  },
+  {
+   "id": "x53",
+   "split": "extended",
+   "q": "整局复盘和单回合解释有什么区别",
+   "relevant": [
+    "tactic:review-scope"
+   ]
+  },
+  {
+   "id": "x54",
+   "split": "extended",
+   "q": "首页那个随机编号有什么用",
+   "relevant": [
+    "ui:seed"
+   ]
+  },
+  {
+   "id": "x55",
+   "split": "extended",
+   "q": "换个编号是不是就能变强",
+   "relevant": [
+    "ui:seed"
+   ]
+  },
+  {
+   "id": "x56",
+   "split": "extended",
+   "q": "宝可梦的本系加成这里也算吗",
+   "relevant": [
+    "tactic:rules-boundary"
+   ]
+  },
+  {
+   "id": "x57",
+   "split": "extended",
+   "q": "网上攻略里的双属性这里能用吗",
+   "relevant": [
+    "tactic:rules-boundary"
+   ]
+  },
+  {
+   "id": "x58",
+   "split": "extended",
+   "q": "你会保证我这把一定赢吗",
+   "relevant": [
+    "tactic:confidence"
+   ]
+  },
+  {
+   "id": "x59",
+   "split": "extended",
+   "q": "稳健打法是不是就是一直防",
+   "relevant": [
+    "tactic:safe-pressure",
+    "tactic:guard"
+   ]
+  },
+  {
+   "id": "x60",
+   "split": "extended",
+   "q": "苔息一次回多少血",
+   "relevant": [
+    "rule:skill:moss",
+    "tactic:healing"
+   ]
+  },
+  {
+   "id": "x61",
+   "split": "extended",
+   "q": "风刃和回旋风暴哪个好",
+   "relevant": [
+    "rule:skill:gust",
+    "rule:skill:tempest"
+   ]
+  },
+  {
+   "id": "x62",
+   "split": "extended",
+   "q": "蓄能放电耗几个豆",
+   "relevant": [
+    "rule:skill:discharge"
+   ]
+  },
+  {
+   "id": "x63",
+   "split": "extended",
+   "q": "撞击这种零消耗技能厉害吗",
+   "relevant": [
+    "rule:skill:strike"
+   ]
+  },
+  {
+   "id": "x64",
+   "split": "extended",
+   "q": "水流弹基础威力多少",
+   "relevant": [
+    "rule:skill:wave"
+   ]
+  },
+  {
+   "id": "x65",
+   "split": "extended",
+   "q": "潮汐重击值得用吗",
+   "relevant": [
+    "rule:skill:tide"
+   ]
+  },
+  {
+   "id": "x66",
+   "split": "extended",
+   "q": "藤鞭的威力和消耗",
+   "relevant": [
+    "rule:skill:vine"
+   ]
+  },
+  {
+   "id": "x67",
+   "split": "extended",
+   "q": "砾石弹和碎岩冲击差别在哪",
+   "relevant": [
+    "rule:skill:gravel",
+    "rule:skill:stonebreak"
+   ]
+  },
+  {
+   "id": "x68",
+   "split": "extended",
+   "q": "余烬追猎对没烧到的目标有加成吗",
+   "relevant": [
+    "rule:skill:pursuit",
+    "tactic:burn-combo"
+   ]
+  },
+  {
+   "id": "x69",
+   "split": "extended",
+   "q": "防御这个技能具体什么效果",
+   "relevant": [
+    "rule:skill:guard",
+    "tactic:guard"
+   ]
+  },
+  {
+   "id": "x70",
+   "split": "extended",
+   "q": "烬尾狐的基础面板是多少",
+   "relevant": [
+    "rule:pet:fox"
+   ]
+  },
+  {
+   "id": "x71",
+   "split": "extended",
+   "q": "潮甲龟防御的时候有什么特别",
+   "relevant": [
+    "rule:pet:turtle"
+   ]
+  },
+  {
+   "id": "x72",
+   "split": "extended",
+   "q": "芽角鹿靠什么续航",
+   "relevant": [
+    "rule:pet:deer"
+   ]
+  },
+  {
+   "id": "x73",
+   "split": "extended",
+   "q": "炽鬃狮适合打什么位置",
+   "relevant": [
+    "rule:pet:lion"
+   ]
+  },
+  {
+   "id": "x74",
+   "split": "extended",
+   "q": "溪刃獭速度快吗",
+   "relevant": [
+    "rule:pet:otter"
+   ]
+  },
+  {
+   "id": "x75",
+   "split": "extended",
+   "q": "苔盾菇怎么打消耗",
+   "relevant": [
+    "rule:pet:shroom"
+   ]
+  },
+  {
+   "id": "x76",
+   "split": "extended",
+   "q": "砾背獾的面板和特性",
+   "relevant": [
+    "rule:pet:badger"
+   ]
+  },
+  {
+   "id": "x77",
+   "split": "extended",
+   "q": "鸣电雀怎么控速",
+   "relevant": [
+    "rule:pet:sparrow",
+    "tactic:speed-control"
+   ]
+  },
+  {
+   "id": "x78",
+   "split": "extended",
+   "q": "岚翎隼血量低不低",
+   "relevant": [
+    "rule:pet:falcon"
+   ]
+  },
+  {
+   "id": "x79",
+   "split": "extended",
+   "q": "云绒蛾输出高吗",
+   "relevant": [
+    "rule:pet:moth"
+   ]
+  },
+  {
+   "id": "x80",
+   "split": "extended",
+   "q": "晶角犀为什么慢",
+   "relevant": [
+    "rule:pet:rhino"
+   ]
+  },
+  {
+   "id": "x81",
+   "split": "extended",
+   "q": "伏光貂是不是很脆",
+   "relevant": [
+    "rule:pet:marten"
+   ]
+  },
+  {
+   "id": "x82",
+   "split": "extended",
+   "q": "火系打什么属性有加成",
+   "relevant": [
+    "rule:type:fire"
+   ]
+  },
+  {
+   "id": "x83",
+   "split": "extended",
+   "q": "水系克制哪些系",
+   "relevant": [
+    "rule:type:water"
+   ]
+  },
+  {
+   "id": "x84",
+   "split": "extended",
+   "q": "草系被什么克制",
+   "relevant": [
+    "rule:type:leaf"
+   ]
+  },
+  {
+   "id": "x85",
+   "split": "extended",
+   "q": "岩系能克哪些属性",
+   "relevant": [
+    "rule:type:rock"
+   ]
+  },
+  {
+   "id": "x86",
+   "split": "extended",
+   "q": "雷系打水系有加成吗",
+   "relevant": [
+    "rule:type:electric"
+   ]
+  },
+  {
+   "id": "x87",
+   "split": "extended",
+   "q": "风系克制什么",
+   "relevant": [
+    "rule:type:wind"
+   ]
+  },
+  {
+   "id": "x88",
+   "split": "extended",
+   "q": "属性克制倍率是多少",
+   "relevant": [
+    "tactic:rules-boundary",
+    "rule:type:fire"
+   ]
+  },
+  {
+   "id": "x89",
+   "split": "extended",
+   "q": "对面换人以后我的技能还算克制吗",
+   "relevant": [
+    "tactic:coverage",
+    "tactic:switch"
+   ]
+  },
+  {
+   "id": "x90",
+   "split": "extended",
+   "q": "这回合我该不该换宠挡一下",
+   "relevant": [
+    "tactic:switch",
+    "tactic:free-entry"
+   ]
+  },
+  {
+   "id": "x91",
+   "split": "extended",
+   "q": "我一直换宠会不会被惩罚",
+   "relevant": [
+    "tactic:switch-loop"
+   ]
+  },
+  {
+   "id": "x92",
+   "split": "extended",
+   "q": "豆少的时候吃果还是防御",
+   "relevant": [
+    "tactic:ether-cost",
+    "tactic:energy"
+   ]
+  },
+  {
+   "id": "n01",
+   "split": "negative",
+   "q": "今天晚饭吃什么比较好",
+   "relevant": [],
+   "note": "out of scope: no card about meals"
+  },
+  {
+   "id": "n02",
+   "split": "negative",
+   "q": "帮我订一张去北京的机票",
+   "relevant": [],
+   "note": "out of scope: no booking card"
+  },
+  {
+   "id": "n03",
+   "split": "negative",
+   "q": "1+1等于几",
+   "relevant": [],
+   "note": "out of scope: arithmetic"
+  },
+  {
+   "id": "n04",
+   "split": "negative",
+   "q": "推荐一首适合打游戏听的歌",
+   "relevant": [],
+   "note": "out of scope: music"
+  },
+  {
+   "id": "n05",
+   "split": "negative",
+   "q": "这个游戏卖多少钱",
+   "relevant": [],
+   "note": "out of scope: pricing is not in any card"
+  },
+  {
+   "id": "n06",
+   "split": "negative",
+   "q": "手机能玩吗",
+   "relevant": [],
+   "note": "out of scope: platform support is not in any card"
+  },
+  {
+   "id": "n07",
+   "split": "negative",
+   "q": "怎么截图保存战报图片",
+   "relevant": [],
+   "note": "out of scope: OS screenshot"
+  },
+  {
+   "id": "n08",
+   "split": "negative",
+   "q": "你叫什么名字",
+   "relevant": [],
+   "note": "out of scope: small talk"
+  },
+  {
+   "id": "n09",
+   "split": "negative",
+   "q": "现在几点了",
+   "relevant": [],
+   "note": "out of scope: clock"
+  },
+  {
+   "id": "n10",
+   "split": "negative",
+   "q": "帮我写一段排序代码",
+   "relevant": [],
+   "note": "out of scope: programming"
+  },
+  {
+   "id": "n11",
+   "split": "negative",
+   "q": "你有段位排名系统吗",
+   "relevant": [],
+   "note": "out of scope: no ranking system in any card"
+  },
+  {
+   "id": "n12",
+   "split": "negative",
+   "q": "能不能用语音跟我说话",
+   "relevant": [],
+   "note": "out of scope: voice input"
+  },
+  {
+   "id": "n13",
+   "split": "negative",
+   "q": "我密码忘了怎么找回",
+   "relevant": [],
+   "note": "out of scope: account recovery"
+  },
+  {
+   "id": "n14",
+   "split": "negative",
+   "q": "洛克王国手游什么时候上线",
+   "relevant": [],
+   "note": "out of scope: another product's release schedule"
+  },
+  {
+   "id": "n15",
+   "split": "negative",
+   "q": "这游戏支持手柄吗",
+   "relevant": [],
+   "note": "out of scope: input devices"
+  },
+  {
+   "id": "n16",
+   "split": "negative",
+   "q": "给我讲个笑话吧",
+   "relevant": [],
+   "note": "out of scope: entertainment"
+  }
+ ]
 }

@@ -72,31 +72,32 @@ function listedCount(context){
  * @param {{reason?: 'no-save'|'not-in-save', petName?: string|null}} [detail]
  */
 export function trainingSaveMissing(context={}, detail={}){
- const reason = ['not-in-save', 'no-points'].includes(detail.reason) ? detail.reason : 'no-save';
+ const reason = ['not-in-save', 'no-level', 'no-points'].includes(detail.reason) ? detail.reason : 'no-save';
  const roster = listedCount(context);
- // 三种"算不了"分清楚：没存档 / 存档里没这一只 / **这一只在、只是没带明细**（`points`）。
- // 第三种以前被写成"存档里没有这一只"—— 一句可核查的假话，所以单独一档。
+ // 三种"算不了"分清楚：没存档 / 存档里没这一只 / **这一只在、只是没带上等级**。
+ // （2026-09-27 加点退役之后，这一族只读**等级与经验**；原来那句「点数与已用培养格」跟着改词。）
  const what = reason === 'not-in-save'
   ? `这一份养成存档里${detail.petName ? `没有「${detail.petName}」` : '没有这一只'}`
-  : reason === 'no-points'
-   ? '这一只在这份养成存档里，但存档没带上它的**点数与已用培养格**（只有等级/经验那一部分）'
+  : reason === 'no-level' || reason === 'no-points'
+   ? '这一只在这份养成存档里，但存档没带上它的**等级与经验**那一部分'
    : '这一份上下文里没有养成存档';
  return {
-  text: `训练点和培养格来自**本机的培养存档**，而${what}`
+  text: `等级与经验来自**本机的培养存档**，而${what}`
    +`${reason === 'no-save' && roster ? `（这份上下文里只有名单里的 ${roster} 只伙伴）` : ''}`
-   +'。你可以：① 去营地页或培养页看那份存档（训练点、每只的等级与已用培养格都在它里面）；'
-   +'② 或者直接说"我现在几级、还剩几点"，我按规则算出练满还差多少（每级经验、格数公式都是引擎常量）。'
-   +'（我不猜你的进度：凭空报一个"还差 N 点"比不答更糟。）',
+   +'。你可以：① 去营地页看那份存档（每只的等级与经验都在它里面）；'
+   +'② 或者直接说"我现在几级、多少经验"，我按规则算给你（每级经验是引擎常量）。'
+   +'（我不猜你的进度。这一版**没有加点**：培养就是改性格、改天分，在我的盒子里刷。）',
   evidence: [
    reason === 'not-in-save'
-    ? '存档拿到了，但里面没有这一只（id 对不上或这只不在存档里）⇒ 这一只的等级/培养格算不了'
-    : reason === 'no-points'
-     ? '存档里有这一只，但这条记录没有 `points`（也可能是 `focus` 不是本仓物种 id，见 teacher.js 的 focusIdOf）⇒ 培养格算不了'
+    ? '存档拿到了，但里面没有这一只（id 对不上或这只不在存档里）⇒ 这一只的等级算不了'
+    : reason === 'no-level' || reason === 'no-points'
+     ? '存档里有这一只，但这条记录没有可用的等级字段 ⇒ 等级与经验算不了'
      : '这份上下文里两条来路都没有养成存档：`profile.growth` 不存在，`profile.pets` 也不是对象',
-   '养成存档长这样：`{tokens, pets:{id:{level,xp,points:{hp,atk,speed}}}}`；公开层名单是数组，里面没有 level/points',
-   '存档来源：浏览器 localStorage 的 `pet-coach-growth-v1`，由 `loadProfile()` 解析；训练点在营地页花、培养页也读它',
+   '养成存档长这样：`{tokens, pets:{id:{level,xp,points:{hp,atk,speed}}}}`；公开层名单是数组，里面没有 level/xp',
+   '存档来源：浏览器 localStorage 的 `pet-coach-growth-v1`，由 `loadProfile()` 解析（等级与经验读它）',
    '那份存档是**练习局夹具**（三只自研宠），与 622 图鉴不是一套数据 ⇒ 手游侧页面故意不把它当玩家进度送上来，所以这里不编进度，只说数据在哪',
   ],
   trace: [],
  };
 }
+

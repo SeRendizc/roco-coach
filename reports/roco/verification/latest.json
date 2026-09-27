@@ -6,7 +6,7 @@
    "id": "env",
    "why": "规则引擎与 Python 服务的不变量；这一层坏了上层全是假的",
    "ok": true,
-   "ms": 30738,
+   "ms": 30477,
    "tail": [
     "[实际] 雨天：水炮 232 → 406（系数 1.75，雨天：水系系技能威力 ×1.75（术语 3008））；普通系 38 → 38（系数 1.0）",
     "",
@@ -18,55 +18,55 @@
    "id": "unit",
    "why": "教练/判定器/轨迹/本地模型/结构契约；单测绿不等于页面能开，下面两条补这一刀",
    "ok": true,
-   "ms": 193771,
+   "ms": 189484,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 193638.565375"
+    "ℹ duration_ms 189342.442375"
    ]
   },
   {
    "id": "bridge",
    "why": "桥的隐藏信息边界；这条只在 Node 侧，单测与浏览器都覆盖不到",
    "ok": true,
-   "ms": 3550,
+   "ms": 3468,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 3410.069167"
+    "ℹ duration_ms 3353.640083"
    ]
   },
   {
    "id": "toolbox-roco",
    "why": "工具契约与 roco-client 的逐键镜像；漂了就静默给出错参数",
    "ok": true,
-   "ms": 173,
+   "ms": 167,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 54.987459"
+    "ℹ duration_ms 54.187084"
    ]
   },
   {
    "id": "plan-e2e",
    "why": "真 Python 服务的端到端规划；两边单测都绿而对不上，T02 阶段发生过",
    "ok": true,
-   "ms": 1926,
+   "ms": 1927,
    "tail": [
     "ℹ cancelled 0",
     "ℹ skipped 0",
     "ℹ todo 0",
-    "ℹ duration_ms 1819.980292"
+    "ℹ duration_ms 1824.820875"
    ]
   },
   {
    "id": "trajectories",
    "why": "轨迹集与判定器的两个方向；判定器写坏了只有这里看得见",
    "ok": true,
-   "ms": 864,
+   "ms": 855,
    "tail": [
     ""
    ]
@@ -75,7 +75,7 @@
    "id": "trajectories-model",
    "why": "W4-02 的第二半（模型候选轨迹）：同一把尺子、同一个判定器。这一份**不声称字节可复现**（模型重跑会逐条不同），它靠 `model_identity` 钉住；结构与离线回放仍然必须全过——模型臂的产物要是格式漂了，模型与规则就没法横向比",
    "ok": true,
-   "ms": 631,
+   "ms": 615,
    "tail": [
     ""
    ]
@@ -84,7 +84,7 @@
    "id": "sft-split",
    "why": "SFT 训练数据的切分：家族是否都在训练侧、留出有没有泄漏、报告里的自我描述与切分模式是否自洽，以及**逐字节复现**。第 37 轮发现报告把「留出机制」描述成「留出模板」，那一类错误只有这条抓得到",
    "ok": true,
-   "ms": 4434,
+   "ms": 4399,
    "tail": [
     "  \"test.jsonl\": true,",
     "  \"dataset-report.json\": true",
@@ -96,7 +96,7 @@
    "id": "model-manifest",
    "why": "本地权重与登记表是否同一份；换版不校验等于不知道跑的是什么",
    "ok": true,
-   "ms": 1166,
+   "ms": 1157,
    "tail": [
     "✔ mlx-community/Qwen3.5-4B-4bit — 校验 11/11 个文件",
     "manifest 校验通过"
@@ -106,7 +106,7 @@
    "id": "provenance",
    "why": "数据溯源：每条来源有可核对的锚点（归档哈希 / 逐文件清单）、逐实体的 provenance 台账完整。「所有数据必须记录来源」这条边界从散文变成检查",
    "ok": true,
-   "ms": 264,
+   "ms": 269,
    "tail": [
     "规范化文件 10 份，来源 4 个，provenance 18 条，快照校验通过 3 个",
     "溯源完整"
@@ -116,7 +116,7 @@
    "id": "rag-eval",
    "why": "RC-204：RAG 检索的 held-out 评测必须在闸门里跑判据（13 组：覆盖/泄漏/fixture 交集/推导出处/弃答一致性/冲突弃答/grounded/版本命中/证据等级/三套基线都报/清单指纹/探针登记/无挂钟）。**它报告自己的失败**：~~探针里有 1 条真的没按预期（「冰系被哪些属性克制」按系别标签召回而不是弃答，语料里确实没有克制表）~~ —— **2026-09-25 已解决（原话保留）**：语料补上了 L3 属性相性库（`types.json` → `type_chart::*` 120 篇），该探针现在**按预期答得出**（top-1 `type_chart::冰系`），探针失败数 1→0；旧期望（弃答）逐字留在 held-out 的 `expectation_prior`/`why_prior`/`derivation_prior` 里。「保留失败比做过拟合修复更有价值」这条口径不变：这次是**语料变了**，不是把判据改松。确定性：两次运行除 metadata.generated_at 外逐字节相同（1.6s）。判据的牙在 `unit`（tests/roco-rag-eval.test.js 21 条含 6 条必红反证）。",
    "ok": true,
-   "ms": 2517,
+   "ms": 2628,
    "tail": [
     "[rag-eval] ok   probe_reported: 探针 13 条；未按预期 0 条（失败也登记，不过闸门）",
     "[rag-eval] ok   catalog_coverage: 图鉴抽样 50/622 只：精灵卡覆盖 50/50，特性技能覆盖 50/50",
@@ -128,7 +128,7 @@
    "id": "game-data-pack",
    "why": "RC-202：统一索引包 `data/roco/game-data-pack/v2/pack.json` 必须与 schema 一致、逐实体 provenance 的 artifact_sha256 与磁盘对得上、licence_ref 在 sources.yaml 里找得到、**REFERENCE_ONLY 不得进 distributable 分节**、unknown_fields 与冻结产物重算一致、孤儿引用为 0、冲突未解决时**拒绝 ready**、就绪报告是最新的。判据的牙在 `unit` 里（tests/roco-game-data-pack.test.js 16 条含 8 条必红反证）以及两条脚本的 `--selftest`（10/10 与 11/11）",
    "ok": true,
-   "ms": 77,
+   "ms": 76,
    "tail": [
     "[verify]   §9-7 version_freshness: satisfied",
     "[verify]   §9-8 unavailable_fields: satisfied",
@@ -140,7 +140,7 @@
    "id": "reconciliation",
    "why": "RC-201 §9 第 9 项：公网快照 + 对账产物接进闸门。判据三条 —— ①快照能由**本地 HTML**逐字节重抽（不打网，确定性）；②报告的 reconciled/licence_ok 为真且四桶与许可登记齐全；③**已提交的报告与\"现在重算\"一致**（忽略 generated_at），即报告没过期。`--gate` 会先跑判据自检（5 条反证：reconciled=false / licence_ok=false / 离线重抽失败 / 报告过期 / 报告缺失），所以这条套件同时证明「现在是对的」与「错了会被发现」。手工触发的对账会静默过期 —— 这条就是防它（本仓库已经吃过一次：agent-trajectories-verification-model.json 声称 1752/1752、实际 1644/1752）",
    "ok": true,
-   "ms": 87,
+   "ms": 88,
    "tail": [
     "[reconciliation] live=data/roco/live/2026-09-21/public-index.json",
     "[reconciliation] reconciled=true licence_ok=true offline_check_rc=0 report_is_fresh=true",
@@ -162,11 +162,9 @@
    "id": "state-doc",
    "why": "状态文档与现实一致：声明的 HEAD 还在历史里、验证产物在、没有引用不存在的路径。第 30 轮的教训是文档能漂，而读它的人会在错的前提上继续做事",
    "ok": true,
-   "ms": 52,
+   "ms": 58,
    "tail": [
-    "状态文档：声明 HEAD 579ab2f，当前 579ab2f，最近一次全绿运行 579ab2f",
-    "警告（不阻断）：最近一次 verify:release 是 failed：失败套件 [\"five-minute-chain\"]（不阻断，但要说出来）",
-    "警告（不阻断）：套件 five-minute-chain 最近一次是失败的",
+    "状态文档：声明 HEAD 579ab2f，当前 2428864，最近一次全绿运行 2428864",
     "一致"
    ]
   },
@@ -174,7 +172,7 @@
    "id": "guard-selftest",
    "why": "注入真实违规，验证登记过的守卫**真的会红**。它逐个改写仓库文件并恢复，所以**不能**和并行跑的单测放在一起（会互相读到注入中的文件，第 28 轮实测把结构契约搞成偶发红）——只能在这里串行跑",
    "ok": true,
-   "ms": 59713,
+   "ms": 58282,
    "tail": [
     "  ✔ 红 gold-revision-drift-blind",
     "  ✔ 红 gold-reviewer-allowlist-blind",
@@ -186,7 +184,7 @@
    "id": "browser-acceptance",
    "why": "**页面真的能开**。第 24 轮的回归只有这条抓得到",
    "ok": true,
-   "ms": 20148,
+   "ms": 20922,
    "tail": [
     "[acceptance]   ✔ 过程中没有卡死（非动画期最长连续无可点 < 15）",
     "[acceptance]   ✔ 控制台零报错 / 零未捕获异常",
@@ -198,7 +196,7 @@
    "id": "demo-acceptance",
    "why": "无聊天入口的完整演示链路；页面能开但演示链路断了也在这里",
    "ok": true,
-   "ms": 154753,
+   "ms": 156220,
    "tail": [
     "[demo-acceptance] ✔ ④ 丢弃之后仍按规则短提示开口，且浮条不许挂在被丢弃那一版上 — 浮条版本=38 / 丢弃时画面=38",
     "[demo-acceptance] ✔ ④ 自然竞态下的不变量：页面上的规划/建议必须属于**当前**局面 — 同时发 plan 与 advance：局面 31 → 38；plan 版本=31 保留=false；浮条版本=38；丢弃账累计=4；（撞上与否由这两个版本号说话，不靠猜）",
@@ -210,19 +208,19 @@
    "id": "mobile-sweep",
    "why": "RC-505 移动端验收：**五个公开页面放在同一把尺子下**（390×844 与 360×640 两档）。窄屏判据此前散在四个脚本里，没有任何一处回答得了「这一版每一页在手机上都不横向溢出吗」。筛选菜单是**打开着**量的（那个状态此前没有判据覆盖，实测真的坏过：浮层把页面撑宽 111px / 140px）。带 5 条反证（横向溢出/触控目标/首屏主操作/白屏/控制台报错），反证没命中也算失败",
    "ok": true,
-   "ms": 18119,
+   "ms": 15420,
    "tail": [
     "[roco-mobile] ✔ [反证 控制台报错] — 控制台有 1 条报错",
-    "[roco-mobile] ✔ [反证 培养入口指向] — 「培养」入口应当指向 /box.html，实际 href=\"/nurture.html\" | 入口文案里要有「三只」，实际「✦ 练习养成」",
+    "[roco-mobile] ✔ [反证 培养入口指向] — 「培养」入口应当指向 /box.html，实际 href=\"/nurture.html\"",
     "[roco-mobile] ✔ [反证 页面黑话] — 页面可见文本里有工程黑话 [\"口径\"]：「要不要在引擎侧补一个培养模型（补了才有「加点后」这个数），等口径定了再算。」（共 1 处） | 页面可见文本里有工程黑话 [\"口径\"]：「等实机录制确认之后才会补上（登记在用户口径 D5）。」（共 1 处） | 页面可见文本里有工程黑话 [\"src/game/\",\".js\"]：",
-    "[roco-mobile] 报告：reports/roco/rc505/mobile-sweep.json（判据 12/12；反证 9/9）"
+    "[roco-mobile] 报告：reports/roco/rc505/mobile-sweep.json（判据 10/10；反证 9/9）"
    ]
   },
   {
    "id": "box-acceptance",
    "why": "RC-205 + RC-801 的第一步交接：盒子的个体比较、玩家层与开发者层分界、窄屏版式，以及**盒子 → 产品页六槽工作台的交接**（真鼠标点「带上这两只去配队」→ `?team=own-…` → 工作台预填、开局按钮读到的规模一致、文案如实说还差几只）",
    "ok": true,
-   "ms": 54430,
+   "ms": 54267,
    "tail": [
     "[box-acceptance] 截图 9 张 → reports/roco/box-acceptance/",
     "[box-acceptance] 判据 29/29 通过；反证 11/11 命中",
@@ -234,7 +232,7 @@
    "id": "workshop-acceptance",
    "why": "RC-305/RC-503 的产品判据：六槽工作台（候选宇宙 622、评估随阵容变化、满编五轴）与**候选规则下的 Coach 取舍**（并列比较的动作逐条都在引擎合法动作表里、未来 2—3 回合、如实标置信/未核验、不出现胜率或百分数）。真实键鼠 + 390px 版式",
    "ok": true,
-   "ms": 63296,
+   "ms": 62978,
    "tail": [
     "[workshop-acceptance] 截图 8 张 → reports/roco/workshop-acceptance/",
     "[workshop-acceptance] 判据 52/52 通过；反证 40/40 命中",
@@ -246,7 +244,7 @@
    "id": "loadout-acceptance",
    "why": "人类从第 2 轮点名的**配招（换招）玩家路径**，以及 2026-09-25 的口径「**每个技能都要对准那个精灵**，拿不准就去查」：六槽工作台里逐槽打开换招，池子必须是**去问引擎**要来的（优先按持有实例 id 解析物种），保存的键用引擎回执的 `pet_id`，并断言**六个槽位各对各的池子**（六只的可学技能数逐只记下、互不串味）；再真鼠标选出四个 → 真实请求体 `loadouts` → **引擎回执里那一只带的就是这四个**。反面同样量：非法配招由引擎拒（这一层不许自己说了算）。自起 app server 与 Chrome",
    "ok": true,
-   "ms": 7685,
+   "ms": 7768,
    "tail": [
     "✓ 08-带的正是我选的那四个 — 发出 [\"skill_000645\",\"skill_000633\",\"skill_000648\",\"skill_000641\"] / 我选的 [\"skill_000645\",\"skill_000633\",\"skill_000648\",\"skill_000641\"]",
     "✓ 09-引擎回执里这一只带的就是这四个 — 引擎回执 [\"skill_000645\",\"skill_000633\",\"skill_000648\",\"skill_000641\"]",
@@ -258,10 +256,10 @@
    "id": "five-minute-chain",
    "why": "RC-801 ②③：**把「盒子 → 个体比较 → 锁定 → 补队 → 战斗 → 主动提示 → 展开取舍 → 局末教学」当成一条链路量一遍**（此前每一段各自有验收，却没有任何一条量过整条路，也没量过耗时）。真键鼠走完全程：总墙钟 ≤ 300s，每一步另有自己的预算（分步预算之和 = 300s，与总预算同源）；「主动提示」必须**自己冒出来**（点击日志里在它出现之前没有点过小芽/提示出口）、带「依据：」、且在开局后 45s 内；「展开取舍」展开后必须有正文且与浮条那行字不同；结算与回合数只读引擎回执；「局末教学」三个字段非空 + 复盘带「依据：」+ 转折回合不超过总回合 + 局末「✦ 小芽」点得开。带 16 条必红反证（超一秒 / 缺步 / 一步吃掉别步预算 / 提示被点出来或迟到或没依据 / 展开是空的或与浮条逐字相同 / 结算不是引擎给的 / 教学字段空或转折回合越界 / 计时器是死的 / 页面报错），外加「判据对已知全绿的合成基线必须全绿」的自检。默认自起**离线**服务（这一条链路上没有联网）",
    "ok": true,
-   "ms": 14440,
+   "ms": 13080,
    "tail": [
-    "10. 窄屏复查（390×844：复盘卡与展开正文都落在视口里）：716ms / 10000ms",
-    "总耗时 12676ms / 预算 300000ms",
+    "10. 窄屏复查（390×844：复盘卡与展开正文都落在视口里）：718ms / 10000ms",
+    "总耗时 11174ms / 预算 300000ms",
     "报告：reports/roco/five-minute-chain.json",
     "五分钟链路：判据 19/19 通过；反证 19/19 命中"
    ]
@@ -270,7 +268,7 @@
    "id": "roco-ux-acceptance",
    "why": "用户 P0 的第 8 条：**页面看不到或点不动的能力不得仅凭单元测试标记完成**。这一条用真实键鼠走一遍翻页 / 筛选 / 选宠 / 行动坞 / 小芽 / 场上事实（印记·能量上限·防御冷却），并把 DOM 与引擎的公开视图逐字对齐；每条判据都配一条**必红反证**（反证没命中也算失败）",
    "ok": true,
-   "ms": 41458,
+   "ms": 41459,
    "tail": [
     "[roco-ux] ✔ RC502-防御冷却画在自己卡上 真鼠标点「防御」（必要时先切到更换屏把带防御的那只换上来）：自己卡上出现防御冷却，数字与引擎一致。【按人类 2026-09-23 版式，旧读取点 `#self-pets .ff-cooldown`（已收进 `#b3-sink[hidden]`）由 `[data-b3-self-card] [data-b3-self-buffs]` 承担；旧「没有动作卡时点 `#auto-turn`」也改成 `window.rocoDemo.autoTurn()`（那个按钮在战斗态 0×0，点了不响）】 — 引擎 {\"turn\":4,\"active\":1,\"present\":true,\"name\":\"雪影娃娃\",\"value\":2,\"box\":{\"chips\":1,\"ghost\":0,\"text\":\"防御冷却 2\"}}；页面那一行「防御冷却 2」；过程 [{\"attempt\":0,\"act\":\"swap\",\"turn\":2,\"active\":\"幽星光\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"\",\"\",\"\",\"\"]},{\"attempt\":1,\"act\":\"swap\",\"turn\":2,\"active\":\"幽星光\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"\",\"\",\"\",\"\"]},{\"attempt\":2,\"act\":\"defend\",\"turn\":3,\"active\":\"雪影娃娃\",\"defenders\":[\"雪影娃娃\"],\"labels\":[\"风吹雪\",\"防御\",\"超级糖果\",\"啮合传递\"]}]",
     "[roco-ux] ✔ RC502-场上事实不撑破版面 加上这几行之后 1440×900 仍然没有横向溢出 — clientW/scrollW=1440/1440",
@@ -282,7 +280,7 @@
    "id": "battle-feedback",
    "why": "人类 2026-09-24 点名的两件事：**伤害数字要看得见**（不是只有动效）与**出手/受击要有先后**（「洛手攻击/动作都有先后，你不要同时做」）。这一条从**页面外面**量，不看客户端自述的任何时间字段：页面内挂 `MutationObserver` 记 `performance.now()` 时间线（`.b3-attack`/`data-b3-variant=action`/动作立绘 src → `.b3-hit` → `.b3-float` 的加入与移除），再逐帧对浮字中心做 `document.elementFromPoint()` —— 被立绘压住时它命中的是 `img.b3-sprite`（这就是人类报的「只有动效没有数字」的真根因），只抬 `.b3-fx` 的 z-index 还不够，`pointer-events:none` 会让 hit-test 跳过浮字（复刻页三档实测）。带 13 条必红反证（同时播 / 顺序反了 / 被压住 / 没有数字 / 残留 / 看不清 / 命中 spritebox / 没有出手线索 / 层叠复刻 / **写死样例数字必须红（R11，2026-09-25 决策 4）** / **框底写死硬横线必须红（R12，决策 1）** 等；2026-09-25 起判据 8 条：J7 背包屏数字可追溯 + J8 立绘框底边接缝 ≤6/≤3 两条像素阈值）与一份合成健康基线（必须判空数组）；**量不到不算量到**（rect 为 0 或不在视口一律红）。自起 app server 与 Chrome",
    "ok": true,
-   "ms": 17852,
+   "ms": 17832,
    "tail": [
     "[battle-feedback] ",
     "[battle-feedback] 判据 10/10 通过（红 0、读不懂 0）；反证 15/15 命中",
@@ -294,7 +292,7 @@
    "id": "coverage-axes",
    "why": "RC-403 的**三套支持口径不许混**（数据侧 `effect_support` / 引擎侧特性实现状态 / 实机核验），外加一条**抓\"账本落后于引擎\"**的判据：`data/roco/engine-trait-status.json` 必须覆盖 `traits.py` 登记的每一条特性、且它自己那三个档位的计数必须与 `traits.implementation_summary()` 现算一致。2026-09-25 实测：`traits.py` 已 17 条（`渴求` FULL、`贪得无厌` PARTIAL），账本却停在 15 条，**没有任何一条进闸门的判据会发现**（这个核对脚本此前只在手工跑），三份文档还引着更旧的 `FULL 6 / PARTIAL 2`。现在连 `--selftest`（6 条构造必红输入）一起进闸门；判据本身 16 项。",
    "ok": true,
-   "ms": 409,
+   "ms": 395,
    "tail": [
     "   ✓ 删掉龙系（破坏属性覆盖） → roster48_size,roster48_type_min,roster48_tier_quota,roster48_must_include,roster48_unique_skills,roster60_prefix",
     "   ✓ 换成能耗 >6 的技能（引擎永远不合法） → roster48_skill_not_learnable,roster48_skill_energy,roster48_unique_skills",
@@ -306,7 +304,7 @@
    "id": "retained-assets",
    "why": "v3 红线：**保留资产不许静默退化**（Agent/RAG/Memory/三角色/game adapter/mock host/stale-result guard/release guard）。这一条不重跑那些判据，而是逐条核对「它还有判据吗、判据还接在会跑的入口上吗、产物还在生成吗、怎么才会红」——「没红」与「没在跑」在 CI 里长得一样，这一条就是分它们的。带 9 条自检必红方向",
    "ok": true,
-   "ms": 37,
+   "ms": 39,
    "tail": [
     "✔ [release-guard] release guard（发版闸门自身）（判据 suite:guard-selftest）",
     "✔ [pvp-gate] PVP 门控（按 BattleMode 裁剪合法行动）（判据 unit_file:tests/roco-standard-pvp-battle.test.js）",

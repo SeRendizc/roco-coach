@@ -48,7 +48,8 @@ test('② 答错 ⇒ 讲解 + 记一条作答（quizLog 增长、标成不正确
  const wrong = await runCoach({message: '不确定', role: 'auto', context: camp(), memory, provider: quiet()});
  memory = wrong.memory ?? memory;
  assert.match(String(wrong.text), /应选「?先出手」?|应选“先出手”/, `要给出讲解：${wrong.text}`);
- assert.match(String(wrong.text), /120\+3=123/, '讲解里的算式要写出来');
+ // 2026-09-27 改钉（加点退役）：讲解不再写「培养 +3」那道算式，改成双方速度对读
+ assert.match(String(wrong.text), /我方速度 120，对手 \d+/, '讲解里要写出双方速度');
  assert.equal(memory.quizLog.length, 1, '答一次记一条');
  assert.equal(memory.quizLog[0].correct, false, '答错要如实记成不正确');
  assert.equal(memory.pendingQuiz, null, '答完清掉待答');
@@ -84,13 +85,16 @@ test('③ 进度问句从练习记录里答（0 次模型调用）：空记录 /
  assert.equal(QUIZ_MASTERY.minIndependent, 3, '门槛常量改了要显式改这条判据（判据里不许另抄一个数）');
 });
 
-test('④ 记忆里的偏好**真的被用上**：培养建议改项、对局内综合分改权重（但事实不变）', () => {
+test('④ 记忆里的偏好**真的被用上**：对局内综合分改权重（培养那一档不再给加点建议）', () => {
+ // 2026-09-27 改钉（人类：「加点不要了」）：这一条原来还钉「速攻 ⇒ 先加力量 / 稳健 ⇒ 先加耐久」。
+ // 加点退役 ⇒ 老师那一档不再有"改项"这回事；**偏好仍然被读进去**（挂在 packet 上），
+ // 而"偏好真的影响打分"由下面那半段（对局内综合分）钉住 —— 那一半一个字没改。
  const profile = newProfile();
  const fast = teacher({profile, focus: 'fox', goal: '速攻', stageId: 'meadow'});
  const steady = teacher({profile, focus: 'fox', goal: '稳健', stageId: 'meadow'});
- assert.notEqual(fast.headline, steady.headline, `两种偏好要给不同的建议：${fast.headline} / ${steady.headline}`);
- assert.match(fast.headline, /力量/, `速攻 ⇒ 先加力量：${fast.headline}`);
- assert.match(steady.headline, /耐久/, `稳健 ⇒ 先加耐久：${steady.headline}`);
+ assert.equal(fast.goal, '速攻'); assert.equal(steady.goal, '稳健');
+ assert.match(fast.text, /没有加点/, `老师这一档要说清没有加点：${fast.text}`);
+ assert.doesNotMatch(fast.headline + steady.headline, /力量|耐久|敏捷/, '不再给"先加哪一项"的建议');
  // 对局内：偏好只改「均值 / 最糟」的权重，**不改任何事实** —— 所以 expected/worst 必须逐字相同、
  // 综合分必须不同。这一条同时是"偏好不是靠编数字体现"的反证。
  const game = createGame(445, ['fox', 'turtle', 'deer'], {mode: 'pve', difficulty: 'normal', stageId: 'meadow'});

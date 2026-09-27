@@ -535,7 +535,7 @@ function wire() {
       const undone = undoIndividual(undoBtn.dataset.undo);
       if (!undone.ok) { $('box-status').textContent = undone.reason; return; }
       renderCards();
-      $('box-status').textContent = '已经回滚上一次刷新（次数还回来了）';
+      $('box-status').textContent = '已经回滚上一次刷新（只退这一步；退掉的次数不还）';
       return;
     }
     const refreshBtn = event.target.closest?.('[data-refresh]');

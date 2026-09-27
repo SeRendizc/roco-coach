@@ -168,7 +168,8 @@ test('⑤ 手游侧页面**不许**出现练习引擎的宠物名（注释里说
   .replace(/<!--[\s\S]*?-->/g, '')          // HTML 注释
   .split('\n').filter((line) => !/^\s*\/\//.test(line)).join('\n');  // 整行 // 注释
  const names = ['烬尾狐', '潮甲龟', '林鹿'];
- const files = ['src/client/roco.html', 'src/client/xiaoya.js', 'src/client/box.html', 'src/client/nurture.html',
+ // 2026-09-27：`nurture.html` 已退役删除 ⇒ 从清单里去掉。
+ const files = ['src/client/roco.html', 'src/client/xiaoya.js', 'src/client/box.html',
   'src/client/roco.js', 'src/client/index.html'];
  for (const file of files) {
   const text = strip(readFileSync(join(ROOT, file), 'utf8'));

@@ -147,7 +147,7 @@ test('每个页面都挂「这一页是旧代码」探测器，且它与服务�
     'src/client/app.js': 'src/client/index.html',
     'src/client/roco.js': 'src/client/roco.html',
     'src/client/xiaoya.js': 'src/client/xiaoya.html',
-    'src/client/nurture.js': 'src/client/nurture.html',
+    // 2026-09-27：培养页整页退役（加点不要了）⇒ 这一页不再有入口脚本。
     'src/client/box.js': 'src/client/box.html',
   };
   for (const entry of Object.keys(pages)) {

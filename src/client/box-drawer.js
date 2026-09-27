@@ -87,20 +87,18 @@ function defaultCardHtml(card) {
 }
 
 /**
- * 回滚按钮：只有**真的能回滚**时才出现（没刷过就不显示，免得点了一个没用的按钮）。
+ * 回滚按钮：只有**真的能退**时才出现（没刷过、或刚退过一步，都不显示）。
  *
- * ⚠ 2026-09-27（真机验收 28 号当场抓到）：这里原来只判"账上有没有一次刷新"，
- * **没有判"还准不准回滚"** —— 而"每只只有一次"是 `canUndo()` 管的（`UNDO_LIMIT = 1`）。
- * 于是"刷 → 回滚 → 再刷"之后按钮**又冒出来了**，点下去只会拿到一句
- * 「这一只已经回滚过一次了」——一个点了没用的按钮。现在只认 `canUndo()` 这一个事实源。
+ * ⚠ 判据只有 `canUndo()` 一个事实源（2026-09-27 真机验收 28 号抓到过"按钮又冒出来但点了没用"）。
+ * 规则按人类口述：**一次只退一步**（退过之后要先再刷一次才能再退）、**次数不消耗也不返还**。
  */
 function undoButton(individual) {
   const rows = Array.isArray(individual?.history) ? individual.history : [];
-  const last = [...rows].reverse().find((row) => row?.kind === 'nature' || row?.kind === 'talent');
-  if (!last || !canUndo(individual)) return '';
+  const last = rows[rows.length - 1];
+  if (!last || (last.kind !== 'nature' && last.kind !== 'talent') || !canUndo(individual)) return '';
   const label = last.kind === 'nature' ? '性格' : `第 ${last.used} 级天分`;
   return `<button class="refresh-btn undo-btn" data-undo="${esc(individual?.individual_id)}"`
-    + ` title="撤销上一次刷新（${esc(label)}），次数会还回来；每只只有一次机会">回滚上一次</button>`;
+    + ` title="撤销上一次刷新（${esc(label)}）：只退这一步，退掉的次数不还；再刷一次之后可以再退">回滚上一次</button>`;
 }
 
 /** 一个个体的那一行：卡片本体 + 性格天分 + 两个刷新按钮（各 3 次，分开计数）。 */

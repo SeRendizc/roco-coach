@@ -172,7 +172,9 @@ test('reward, xp and training numbers shown on the rules page match a real settl
     const game=createGame(17,TEAM);game.result=result;game.history=[];
     const {reward}=settle(newProfile(),game,'verify-'+result);
     assert.deepEqual(f.rewards[result],{xp:reward.xp,tokens:reward.tokens},`${result} 的奖励与文案不符`);
-    assert.ok(body().includes(`经验 +${reward.xp}、训练点 +${reward.tokens}`));
+    // 2026-09-27 改钉（人类：「加点不要了」）：规则面板不再写训练点，只写经验。
+    assert.ok(body().includes(`经验 +${reward.xp}`), `${result} 的经验要写在规则面板上`);
+    assert.ok(!body().includes(`训练点 +${reward.tokens}`), `${result} 不许再写训练点`);
   }
   // 升级曲线：每个等级的实测阈值必须等于 等级 × 文案里写的基数。
   assert.ok(body().includes(`当前等级 × ${f.xpPerLevel}`));
@@ -188,26 +190,24 @@ test('reward, xp and training numbers shown on the rules page match a real settl
   assert.equal(l2.maxHp-l1.maxHp,f.growth.level.hp);
   assert.equal(l2.atk-l1.atk,f.growth.level.atk);
   assert.equal(l2.def-l1.def,f.growth.level.def);
-  for(const [stat,key] of [['hp','maxHp'],['atk','atk'],['speed','speed']]){
-    const trained=at({pets:{fox:{level:1,points:{[stat]:1}}}});
-    assert.equal(trained[key]-l1[key],f.growth.training[stat],`培养 ${stat} 的实际收益与文案不符`);
+  // 2026-09-27 改钉（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+  // 这一段原来钉「加点收益 / 培养格 / 单项上限」的文案与引擎逐值一致。加点退役之后，
+  // 引擎侧那套常量仍在（老存档与练习引擎内部还用得上），但**规则面板上一个字都不再写** ——
+  // 所以判据反过来钉：规则文案里不许出现那一套词，并**主动说清没有加点**。
+  const rulesText=body();
+  for(const word of ['训练点','培养格','加点']){
+    assert.ok(!rulesText.includes(`${word} +`) && !rulesText.includes(`${word}数`) && !rulesText.includes(`每项最多`),
+      `规则面板里不该再写「${word}」那一套：${rulesText.slice(0, 80)}…`);
   }
-  // progression.js 的展示文案与引擎实际收益必须一致，两边任一处改动都会被这里发现。
-  for(const [stat,t] of Object.entries(TRAINING)){
-    const declared=Number(t.gain.match(/\d+/)[0]);
-    assert.equal(declared,f.growth.training[stat],`TRAINING.${stat} 的文案数值与实际收益不符`);
-  }
-  assert.equal(RULES.training.hp,f.growth.training.hp);
-  assert.equal(RULES.training.atk,f.growth.training.atk);
-  assert.equal(RULES.training.speed,f.growth.training.speed);
-  // 培养格与单项上限。
-  assert.ok(body().includes(`Lv.1 可培养 ${trainingCapacity(1)} 次，Lv.${f.maxLevel} 可培养 ${trainingCapacity(f.maxLevel)} 次`));
-  assert.ok(body().includes(`每项最多 ${MAX_STAT_TRAINING} 次`));
+  assert.ok(rulesText.includes('这一版**没有加点**') || rulesText.includes('没有加点'),
+    '规则面板要主动说清"没有加点"');
+  assert.ok(rulesText.includes('每升一级基础生命 +'+f.growth.level.hp), '等级成长照旧写在面板上');
 });
 
 test('swift-win threshold shown on the rules page matches settle()',()=>{
   const limit=ruleFacts().swiftTurnLimit;
-  assert.ok(limit>0&&body().includes(`首次在 ${limit} 回合内获胜额外 +1 训练点`));
+  // 2026-09-27 改钉：速胜奖励里不再有训练点，文案改成"有额外经验"（引擎里那个计数照旧）。
+  assert.ok(limit>0&&body().includes(`首次在 ${limit} 回合内获胜有额外经验`));
   const at=rounds=>{const game=createGame(17,TEAM);game.result='win';game.stageId='verify-swift';
     game.history=Array.from({length:rounds},()=>({type:'turn'}));
     return settle(newProfile(),game,`verify-swift-${rounds}`).reward.swift;};
@@ -280,9 +280,9 @@ test('the tactics knowledge base states the same numbers as the engine',async()=
     `灼烧每次${RULES.status.burn.tick}伤害`,
     `中毒每次${RULES.status.poison.tick}伤害`,
     `能量上限${RULES.energy.max}`,
-    `每点敏捷加${RULES.training.speed}速度`,
-    `力量加${RULES.training.atk}攻击`,
-    `耐久加${RULES.training.hp}生命`,
+    // 2026-09-27 改钉（加点退役）：知识卡里不再有加点收益那三条（`tactic:training` 已删），
+    // 所以这里改成**反向**要求：任何一张卡里都不许再出现那一套说法。
+    // （引擎常量还在，老存档与练习引擎内部照旧用；判据管的是"别再说给玩家"。）
     `克制${RULES.typeAdvantage}倍`,
     // 同系已改为 ×1，所以「抵抗」这个词不再单独出现；这里验的是那个倍率本身。
     `${RULES.typeResist}倍`,

@@ -8,7 +8,8 @@
 //    rules.test.js 会实测结算结果并断言与这里生成的文案一致。
 import {RULES,RULES_VERSION,SKILLS,SPECIES,TYPES,ITEMS,HELD_ITEMS,ENVIRONMENTS,DIFFICULTIES,
   TYPE_ADVANTAGES,createGame,multiplier,typeChartLine,percent} from './engine.js';
-import {TRAINING,MAX_STAT_TRAINING,trainingCapacity,newProfile,settle} from './progression.js';
+// 2026-09-27：加点退役 ⇒ 规则文案不再需要 `TRAINING` / `MAX_STAT_TRAINING` / `trainingCapacity`。
+import {newProfile,settle} from './progression.js';
 
 const TEAM=['fox','turtle','deer'];
 const pet=(options)=>createGame(17,TEAM,options).player.pets[0];
@@ -107,7 +108,6 @@ export function rulesSections(){
   const held=Object.entries(HELD_ITEMS).map(([id,it])=>`${it.name}：${it.desc}`).join('；');
   const envs=Object.entries(ENVIRONMENTS).map(([id,e])=>`${e.name}（持续 ${e.turns} 回合）：${e.desc}`).join('；');
   const rw=f.rewards||{};
-  const trained=Object.entries(TRAINING).map(([stat,t])=>`${t.name} ${t.gain}`).join(' / ');
   // 出手顺序完全从数据分组得出：换宠/道具的优先级在 RULES.priority，技能的在各自字段。
   const skillPriority=Object.entries(SKILLS).filter(([,s])=>s.priority).reduce((m,[,s])=>{(m[s.priority]??=[]).push(s.name);return m;},{});
   const orderLine=[`换宠 ${RULES.priority.switch}`,`道具 ${RULES.priority.item}`,
@@ -161,12 +161,14 @@ export function rulesSections(){
       ...Object.values(DIFFICULTIES).map(d=>`${d.name}：${d.description}。`),
       `难度只改对手的决策方式，不改数值、不改奖励；任何难度都不读取你本回合的选择。`,
     ]},
-    {title:'胜负、奖励与培养',lines:[
-      rw.win&&rw.draw&&rw.loss?`胜利 经验 +${rw.win.xp}、训练点 +${rw.win.tokens}；平局 经验 +${rw.draw.xp}、训练点 +${rw.draw.tokens}；失利 经验 +${rw.loss.xp}、训练点 +${rw.loss.tokens}。撤退没有奖励。`:null,
-      f.swiftTurnLimit?`每关首次在 ${f.swiftTurnLimit} 回合内获胜额外 +1 训练点，重复挑战不再给；打得慢不扣基础奖励。`:null,
+    {title:'胜负、奖励与成长',lines:[
+      // 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+      // 这一节的训练点 / 培养格 / 加点 / 重置整段退役 —— 只留**原版有的**经验与等级。
+      rw.win&&rw.draw&&rw.loss?`胜利 经验 +${rw.win.xp}；平局 经验 +${rw.draw.xp}；失利 经验 +${rw.loss.xp}。撤退没有奖励。`:null,
+      f.swiftTurnLimit?`每关首次在 ${f.swiftTurnLimit} 回合内获胜有额外经验，重复挑战不再给；打得慢不扣基础奖励。`:null,
       f.xpPerLevel?`升级需要的总经验是当前等级 × ${f.xpPerLevel}，最高 Lv.${f.maxLevel}。`: `最高 Lv.${f.maxLevel}。`,
-      f.growth?`每升一级基础生命 +${f.growth.level.hp}、攻防各 +${f.growth.level.atk}，并解锁一个培养格。`:null,
-      `培养格数 = 等级 + ${trainingCapacity(1)-1}：Lv.1 可培养 ${trainingCapacity(1)} 次，Lv.${f.maxLevel} 可培养 ${trainingCapacity(f.maxLevel)} 次；每项最多 ${MAX_STAT_TRAINING} 次，每次花 1 训练点：${trained}。免费重置会返还点数。`,
+      f.growth?`每升一级基础生命 +${f.growth.level.hp}、攻防各 +${f.growth.level.atk}。`:null,
+      '这一版**没有加点**：培养就是改**性格**与**改天分** —— 在我的盒子里按种类点开个体，每只各能刷 3 次。',
       `达到 ${RULES.turnLimit} 回合仍未分出胜负记平局。`,
     ]},
     {title:'规则版本与存档',lines:[

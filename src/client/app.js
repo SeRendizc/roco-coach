@@ -7,7 +7,10 @@ import {freshMemory,readMemory,rememberBattle,recordCoachEvent,rememberDecision,
 import {STAGES,SCENARIOS,stageOptions,createScenario} from '../game/content.js';
 import {DIFFICULTIES,SPECIES,SKILLS,ITEMS,TYPES,HELD_ITEMS,createGame,resolveTurn,chooseEnemy,buildVersusOpponent,legalActions,active,effectiveSpeed,rankEnemyActions} from '../game/engine.js';
 import {companionEvents,companionSession,companionCueSlot,bubbleDurationMs,companionAvatar,COMPANION_DEFER} from '../coach/companion.js';
-import {newProfile,loadProfile,PROFILE_STORAGE_KEY,TRAINING,trainingCapacity,MAX_STAT_TRAINING,train,resetTraining,settle,configurePet} from '../game/progression.js';
+// 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+// `TRAINING`/`trainingCapacity`/`MAX_STAT_TRAINING`/`train`/`resetTraining` 不再 import ——
+// 营地页不再有加点这一档（等级/经验还在，那是原版就有的）。
+import {newProfile,loadProfile,PROFILE_STORAGE_KEY,settle,configurePet} from '../game/progression.js';
 import {coachEvent,coachContext} from '../coach/session.js';
 import {rulesSections,ruleFacts} from '../game/rules.js';
 import {mountStalePageBanner} from './stale-page.js';
@@ -96,7 +99,8 @@ function freshActError(){if(!actError||!game)return '';if(game.turn!==actError.t
 const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const badge=p=>`<span class="type ${p.type}">${TYPES[p.type]}</span>`;
 function save(){try{localStorage.setItem(storageKey,JSON.stringify(profile));}catch{$('save-message').textContent='保存失败：当前成长仍可使用，刷新后可能丢失。';}wallet();}
-function wallet(){$('wallet').textContent=`训练点 ${profile.tokens}`;$('record').textContent=`完成 ${profile.battles} 场 · 胜利 ${profile.wins} 场`;$('coach-mode').value=profile.coach.mode;}
+// 2026-09-27：钱包不再显示训练点（原版没有这个资源）。这里只留战绩，等级/经验在培养卡里。
+function wallet(){$('wallet').textContent=`完成 ${profile.battles} 场 · 胜利 ${profile.wins} 场`;$('record').textContent='';$('coach-mode').value=profile.coach.mode;}
 function grown(id){return grownAt(id,(profile.pets[id]?.level)||1);}
 // 按**指定等级**算面板。PVP 的「双方满级」口径下，界面要显示满级的面板与等级，
  // 而不是存档里的等级——否则会出现「对手 Lv.5、我方 Lv.1」这种自相矛盾的界面。
@@ -266,7 +270,21 @@ function whenMatchSettled(run,tries=50){if(!busy||tries<=0){run();return;}setTim
 function backToPick(){whenMatchSettled(()=>{toCamp();if(!$('battle').hidden)return;showDeploy(matchMode||'pvp');});}
 /** 局末出口：回首页（= 那张图的启动页）。 */
 function backToHome(){whenMatchSettled(()=>{toCamp();if(!$('battle').hidden)return;location.hash='#home';showLauncher();});}
-function cultivation(){const p=grown(focus),v=profile.pets[focus],used=Object.values(v.points).reduce((a,b)=>a+b,0);$('cultivation').innerHTML=`<h3>${p.icon} ${p.name}<small>Lv.${v.level}</small></h3><p class="pet-trait">${p.bio} · ${p.trait}</p><div class="xp-track"><div style="width:${v.level===5?100:v.xp/(v.level*30)*100}%"></div></div><p class="muted xp-line">${v.level===5?'已满级':`经验 ${v.xp}/${v.level*ruleFacts().xpPerLevel} · 升级 生命+${ruleFacts().growth.level.hp} 攻防+${ruleFacts().growth.level.atk}`} · 培养格 ${used}/${trainingCapacity(v.level)}</p><div class="train-grid">${Object.entries(TRAINING).map(([key,t])=>`<div class="train-cell"><span class="train-name">${t.name}</span><span class="train-count">${v.points[key]}/${MAX_STAT_TRAINING}</span><small>${t.gain}</small><button data-train="${key}" ${preview||used>=trainingCapacity(v.level)||v.points[key]>=MAX_STAT_TRAINING||profile.tokens<1?'disabled':''}>＋1</button></div>`).join('')}</div><div id="loadout-editor"></div><button id="reset-training" ${used&&!preview?'':'disabled'}>重置 · 返还 ${used} 点</button><p class="hint">培养立即影响下次对战。本机自动保存。</p><button id="cultivation-coach">✦ 问小芽怎么培养</button><div id="growth-scene" hidden class="growth-scene"><strong>✦ 小芽 · 培养建议</strong><p>${SCENARIOS.find(x=>x.id==='growth').text}</p><button id="growth-dismiss">暂时收起</button></div>`;renderLoadout();
+// 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+// 这一块原来是「训练点 + 培养格 + 六项加点」的训练网格。原版没有加点 ⇒ 整块退役：
+// 只留**原版就有的**东西（等级 / 经验 / 配招 / 携带物），并说清"培养"在哪做（我的盒子：刷新性格/天分）。
+function cultivation(){
+ const p=grown(focus),v=profile.pets[focus];
+ const xpLine=v.level===5?'已满级':`经验 ${v.xp}/${v.level*ruleFacts().xpPerLevel}`;
+ $('cultivation').innerHTML=`<h3>${p.icon} ${p.name}<small>Lv.${v.level}</small></h3>`
+  +`<p class="pet-trait">${p.bio} · ${p.trait}</p>`
+  +`<div class="xp-track"><div style="width:${v.level===5?100:v.xp/(v.level*30)*100}%"></div></div>`
+  +`<p class="muted xp-line">${xpLine} · 升级 生命+${ruleFacts().growth.level.hp} 攻防+${ruleFacts().growth.level.atk}</p>`
+  +'<div id="loadout-editor"></div>'
+  +'<p class="hint">这一档没有加点：培养就是<strong>改性格、改天分</strong>，'
+  +'在<a href="/box.html">我的盒子</a>里按种类点开个体就能刷。本机自动保存。</p>';
+ renderLoadout();
+}
 // 配招编辑器：从 6 个可学技能里选 4 个。用卡片而不是下拉框，
 // 因为下拉框允许选成重复项，只能在保存时抛一个笼统错误。
 function effectiveLoadout(){return [...grown(focus).skills];}
@@ -290,7 +308,7 @@ function renderLoadout(){
  $('collapse-loadout').onclick=()=>{loadoutOpen=false;renderLoadout();};
  const cancel=$('cancel-loadout');if(cancel)cancel.onclick=()=>{loadoutDraft=null;loadoutOpen=false;renderLoadout();};
 }
-document.querySelectorAll('[data-train]').forEach(b=>b.onclick=()=>{try{advanceContext();profile=train(profile,focus,b.dataset.train);save();camp();}catch(e){$('save-message').textContent=e.message;}});$('reset-training').onclick=()=>{advanceContext();profile=resetTraining(profile,focus);save();camp();};$('cultivation-coach').onclick=()=>{openCoach();ask('怎么培养');};$('growth-dismiss').onclick=()=>$('growth-scene').hidden=true;if(preview==='growth')$('growth-scene').hidden=false;renderGrowthCoach();}
+// 2026-09-27：加点按钮、重置按钮、「问小芽怎么培养」（加点建议）整块退役（原版没有加点）。
 function hp(p){return `<div class="hp-track"><div class="hp-fill ${p.hp/p.maxHp<.3?'low':''}" style="width:${p.hp/p.maxHp*100}%"></div></div>`;}
 function sideView(state,side){const s=state[side],p=active(state,side);return `<div class="pet-active"><div class="pet-heading"><span class="pet-icon">${p.icon}</span><h3>${p.name}</h3>${badge(p)}<small>Lv.${p.level}</small></div><p class="stats">${p.bio} · 攻 ${p.atk} / 防 ${p.def} / 速 ${effectiveSpeed(p)}${p.speedDown?`（减速${p.speedDown.amount}）`:""}${Object.entries(p.buffs||{}).map(([stat,b])=>` · ${stat==='atk'?'攻击':'防御'}+${Math.round(ruleFacts().buff.perStack*b.stacks*100)}%/${b.remaining}回合`).join('')}${p.heldItem&&p.heldItem!=='none'?` · ${HELD_ITEMS[p.heldItem].name}${p.heldUsed?'（已触发）':''}`:''}</p><div class="hp-line"><span>${p.hp<=0?'已倒下 · 等待补位':p.status?`${p.status.kind==='burn'?'灼烧':'中毒'} ${p.status.remaining} 回合`:'生命'}</span><strong>${p.hp} / ${p.maxHp}</strong></div>${hp(p)}<div class="energy">${'●'.repeat(p.energy)}${'○'.repeat(Math.max(0,ruleFacts().energy.max-p.energy))} <small>${p.energy}/${ruleFacts().energy.max} · 在场存活回合末 +${ruleFacts().energy.perTurn}</small></div></div><div class="bench">${s.pets.map((p,i)=>`<div class="bench-pet ${i===s.active?'current':''} ${p.hp<=0?'fainted':''}">${p.name}<div class="stats">${p.hp<=0?'已倒下':`${p.hp}HP · ${p.energy}能量`}${p.status?' · 异常':''}</div>${hp(p)}</div>`).join('')}</div><p class="inventory">回复药 ${s.items.potion} · 净化药 ${s.items.cleanse} · 能量果 ${s.items.ether}</p>`;}
 const available=a=>!busy&&legalActions(game).some(b=>a.kind===b.kind&&a.id===b.id&&a.target===b.target);
@@ -348,11 +366,11 @@ function actionPanelHtml(side,whichTab){
  if(whichTab==='switch')return s.pets.map((q,target)=>btn({kind:'switch',target},q.name,`${TYPES[q.type]}系 · ${q.hp}/${q.maxHp} HP · ${q.energy} 能量`,q.hp<=0?'已倒下':target===s.active?'正在场上':(g.phase==='replace'&&replaceOwner(g)===side)?'免费补位':'换宠占用整回合')).join('');
  if(whichTab==='item')return Object.entries(ITEMS).map(([id,item])=>`<div class="item-group"><p>${item.name} ×${s.items[id]}<br><span class="muted">${escape(item.desc)}</span></p><div class="targets">${s.pets.map((q,target)=>`<button data-side="${side}" data-action='${JSON.stringify({kind:'item',id,target})}' ${ok({kind:'item',id,target})?'':'disabled'}>${escape(q.name)}</button>`).join('')}</div></div>`).join('');
  // 认输只对本地玩家开放：对手认输会走另一条结算（引擎的 escape 语义属于我方撤退）。
- return `<div class="item-group"><p>认输立即结束本场，不获得经验与训练点。</p><button data-side="${side}" data-action='{"kind":"escape"}' ${side==='player'&&ok({kind:'escape'})?'':'disabled'}>确认撤退</button></div>`;
+ return `<div class="item-group"><p>认输立即结束本场，不获得经验。</p><button data-side="${side}" data-action='{"kind":"escape"}' ${side==='player'&&ok({kind:'escape'})?'':'disabled'}>确认撤退</button></div>`;
 }
 function render(){$('round-coach').textContent=game.result?'✦ 整局复盘':'✦ 回合回顾';renderSides(game);$('environment-info').textContent=game.environment?`${game.environment.name} · 剩${game.environment.turns}回合：${game.environment.desc}`:'无场地环境';$('enemy-difficulty').textContent=game.mode==='pvp-local'?('本地对战 · 对手 Lv.'+game.enemy.pets[0].level):DIFFICULTIES[game.difficulty]?.name+(game.stageName?' · '+game.stageName:' · 预制场景');const roundLabel=game.phase==='replace'?'免费补位':`第 ${Math.min(game.turn,ruleFacts().turnLimit)} 回合`;
 if($('turn').textContent!==roundLabel){$('turn').textContent=roundLabel;$('turn').classList.remove('round-pulse');void $('turn').offsetWidth;$('turn').classList.add('round-pulse');} $('phase').textContent=phaseText();$('restart').disabled=busy;$('camp-tab').disabled=busy;$('preview-exit').disabled=busy;$('preview-again').disabled=busy;$('export').disabled=busy;
-$('result').hidden=!game.result;const exitBar=$('result-actions');if(exitBar)exitBar.hidden=!game.result;if(game.result)$('result').innerHTML=`<strong>${{win:'训练胜利',loss:'本场失利',draw:'本场平局',escaped:'已认输'}[game.result]}</strong>${reward?`全队经验 +${reward.xp} · 训练点 +${reward.tokens}${reward.swift?' · 首次'+ruleFacts().swiftTurnLimit+'回合内速胜 +1点（已计入）':''}${reward.levels.length?' · '+reward.levels.join('，'):''}`:game.preview?'预制体验，不计入成长':'本场无成长奖励'} · ${game.preview?'退出体验可恢复原对战':'返回营地继续培养'}`;
+$('result').hidden=!game.result;const exitBar=$('result-actions');if(exitBar)exitBar.hidden=!game.result;if(game.result)$('result').innerHTML=`<strong>${{win:'训练胜利',loss:'本场失利',draw:'本场平局',escaped:'已认输'}[game.result]}</strong>${reward?`全队经验 +${reward.xp}${reward.levels.length?' · '+reward.levels.join('，'):''}`:game.preview?'预制体验，不计入成长':'本场无成长奖励'} · ${game.preview?'退出体验可恢复原对战':'返回营地继续培养'}`;
 const forceSwitch=game.phase==='replace';
  if(forceSwitch){tab='switch';enemyTab='switch';}
  document.querySelectorAll('[data-tab]').forEach(b=>{const side=b.dataset.side||'player',mine=side==='enemy'?enemyTab:tab;
@@ -981,16 +999,15 @@ applyHomeRoute();
 function renderStages(){
  $('stage-picker').innerHTML=STAGES.map(stage=>`<button data-stage="${stage.id}" class="${stage.id===stageId?'selected':''}" ${preview?'disabled':''}><strong>${stage.name}</strong><small>Lv.${stage.level} ${(profile.clearedStages||[]).includes(stage.id)?'· 已通关':''}</small></button>`).join('');
  const stage=STAGES.find(x=>x.id===stageId);
- $('stage-detail').innerHTML=`<p class="stage-desc">${escape(stage.description)}</p><p class="stage-enemy"><span class="muted">对手阵容</span>${stage.team.map(id=>{const pet=SPECIES.find(p=>p.id===id),build=stage.pets[id];return `<span class="enemy-chip">${pet.icon} ${pet.name} <em>Lv.${build.level}</em><small>耐${build.points.hp}/力${build.points.atk}/敏${build.points.speed}</small></span>`;}).join('')}</p><p class="stage-reward muted">首次 ${ruleFacts().swiftTurnLimit} 回合内获胜额外 1 训练点 · 慢打基础奖励不减</p>`;
+ $('stage-detail').innerHTML=`<p class="stage-desc">${escape(stage.description)}</p><p class="stage-enemy"><span class="muted">对手阵容</span>${stage.team.map(id=>{const pet=SPECIES.find(p=>p.id===id),build=stage.pets[id];return `<span class="enemy-chip">${pet.icon} ${pet.name} <em>Lv.${build.level}</em><small>耐${build.points.hp}/力${build.points.atk}/敏${build.points.speed}</small></span>`;}).join('')}</p><p class="stage-reward muted">首次 ${ruleFacts().swiftTurnLimit} 回合内获胜有额外经验 · 慢打基础奖励不减</p>`;
  document.querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{advanceContext();stageId=b.dataset.stage;renderStages();cultivation();});
 }
-function clearScene(){companionPending=null;hideCompanionCue();$('scene-inline').hidden=true;$('scene-result').hidden=true;$('coach-panel').hidden=true;if($('growth-scene'))$('growth-scene').hidden=true;}
+function clearScene(){companionPending=null;hideCompanionCue();$('scene-inline').hidden=true;$('scene-result').hidden=true;$('coach-panel').hidden=true;}
 function presentScene(){
  clearScene();const scene=SCENARIOS.find(x=>x.id===preview);if(!scene)return;
  if(scene.placement==='inline'){$('scene-inline').hidden=false;$('inline-copy').hidden=true;$('inline-copy').textContent=scene.text;$('inline-expand').hidden=false;}
  if(scene.placement==='bubble')showCompanionCue(scene.text,'预制场景');
  if(scene.placement==='result'){$('scene-result').hidden=false;$('scene-result-text').textContent=scene.text;}
- if(scene.placement==='growth')$('growth-scene').hidden=false;
 }
 function startPreview(id){
  if(busy)return;advanceContext();
@@ -1170,18 +1187,6 @@ function showTacticalCue(){
  $('attention-text').textContent=cue.text;$('attention-cue').hidden=false;speakCue(cue.text);
  clearTimeout(nudgeTimer);nudgeTimer=setTimeout(()=>$('attention-cue').hidden=true,12000);return true;
 }
-function renderGrowthCoach(){
- if(preview)return;
- const anchor=$('cultivation-coach');if(!anchor)return;
- const packet=teacher({...buildContext(null,profile,focus,roundArchive,stageId),goal:coachMemory.goal,favorite:coachMemory.favorite});
- const key=focus+':'+stageId;
- const box=document.createElement('div');box.className='growth-advice';box.id='growth-advice';
- const compact=packet.headline||packet.brief||concise(packet.text,70);
- const show=()=>{box.innerHTML='<div class="advice-head"><strong>✦ 小芽</strong><span class="growth-headline">'+escape(compact)+'</span><button id="growth-advice-close" aria-label="收起培养建议">×</button></div><p class="advice-reason">'+escape(packet.reason||'')+'</p><details><summary>看数值对比</summary><table class="growth-table"><thead><tr><th>项目</th><th>现在</th><th>加1点后</th></tr></thead><tbody>'+packet.comparisons.map(r=>'<tr>'+r.map(c=>'<td>'+escape(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table><small>每次消耗 1 训练点；受培养格数与单项上限约束，加错了可以免费重置。</small></details>';$('growth-advice-close').onclick=()=>{growthDismissed=key;box.hidden=true;anchor.hidden=false;};};
- $('cultivation').querySelector('h3').after(box);box.hidden=!adaptiveGate(coachMemory,{lesson:'培养',mode:profile.coach.mode}).allow||growthDismissed===key;anchor.textContent='✦ 展开培养建议';anchor.hidden=!box.hidden;
- anchor.onclick=()=>{box.hidden=false;anchor.hidden=true;show();};show();
-}
-
 function logCoachEvent(kind,channel){if(!game||preview)return;coachMemory=recordCoachEvent(coachMemory,{id:`${matchId}:${game.turn}:${kind}:${channel}`,kind,channel,matchId,turn:game.turn,rulesVersion:game.version,confidence:1});saveCoachMemory();}
 
 // 语音总开关。浏览器语音在本机 macOS Chrome 上不稳定：无论指定哪个 zh-CN 声音，

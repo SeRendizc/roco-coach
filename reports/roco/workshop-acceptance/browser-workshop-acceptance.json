@@ -3,7 +3,7 @@
  "page": "roco.html（产品页，#team-workshop 挂载点）",
  "fixture": "workshop.html（开发夹具/薄壳，不冒充产品页）",
  "module": "src/client/team-workshop.js（mountTeamWorkshop）",
- "judged_at": "2026-09-27T07:00:17.200Z",
+ "judged_at": "2026-09-27T17:24:48.027Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|ranker_status|ruleset|licence|pack_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "pseudo_precision_pattern": "/\\d+(?:\\.\\d+)?\\s*%|(?:胜率|概率|百分比|强度分)[^。；，]{0,6}\\d/",
  "screenshots": [
@@ -30,7 +30,7 @@
    "at": "six-selected",
    "clientW": 390,
    "scrollW": 390,
-   "bodyScrollW": 613,
+   "bodyScrollW": 468,
    "innerW": 390
   },
   {
@@ -38,7 +38,7 @@
    "at": "two-selected",
    "clientW": 390,
    "scrollW": 390,
-   "bodyScrollW": 863,
+   "bodyScrollW": 718,
    "innerW": 390
   }
  ],
@@ -305,7 +305,7 @@
    "id": "29-窄屏不溢出",
    "judge": "390×844：scrollW == clientW",
    "ok": true,
-   "actual": "clientW=390 scrollW=390 bodyScrollW=613"
+   "actual": "clientW=390 scrollW=390 bodyScrollW=468"
   },
   {
    "id": "30-触控目标",
@@ -317,7 +317,7 @@
    "id": "31-移动端顺序",
    "judge": "390×844：常规流里的区块顺序固定为「队伍槽位 → 候选池」（→ 若「当前评估」「小芽短提示」还在流里，必须依次排在后面）；「当前评估」改由左侧悬浮抽屉承担（真鼠标点 `#tw-eval-toggle` 能打开、面板可见且有内容）。【2026-09-23 版式演变：`.tw-coach`（✦ 小芽 · 阵容阶段）按人类批注删除；`.tw-eval` 由人类要求改成 `#tw-eval-drawer` 固定抽屉（不在常规流）。「当前评估」这条口径由抽屉可达性这条等价断言守】",
    "ok": true,
-   "actual": "顺序=[\"tw-team\",\"tw-cand\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":146},{\"cls\":\"tw-cand\",\"top\":427}]；阵容评估抽屉：存在=true 内容 4854 字节，点开后 data-open=\"yes\" 面板可见=true 面板尺寸={\"w\":300,\"h\":287} 切换按钮={\"w\":44,\"h\":132}"
+   "actual": "顺序=[\"tw-team\",\"tw-cand\"] 顶部位置=[{\"cls\":\"tw-team\",\"top\":150},{\"cls\":\"tw-cand\",\"top\":456}]；阵容评估抽屉：存在=true 内容 4854 字节，点开后 data-open=\"yes\" 面板可见=true 面板尺寸={\"w\":300,\"h\":287} 切换按钮={\"w\":44,\"h\":132}"
   },
   {
    "id": "31b-窄屏候选区有可见高度",
@@ -717,14 +717,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "30",
-    "fullMs": "27",
+    "firstMs": "35",
+    "fullMs": "25",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "21"
+    "elapsedMs": "19"
    },
    "dom": {
     "slotNodes": 6,
@@ -896,14 +896,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "20",
-    "fullMs": "16",
+    "firstMs": "22",
+    "fullMs": "18",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "10"
+    "elapsedMs": "11"
    },
    "dom": {
     "slotNodes": 6,
@@ -1078,14 +1078,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "19",
-    "fullMs": "22",
+    "firstMs": "23",
+    "fullMs": "23",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "13"
+    "elapsedMs": "14"
    },
    "dom": {
     "slotNodes": 6,
@@ -1267,14 +1267,14 @@
     "stage": "full",
     "fetches": "first|full",
     "renderedAfterFirst": "yes",
-    "firstMs": "26",
-    "fullMs": "24",
+    "firstMs": "29",
+    "fullMs": "26",
     "fullState": "ok",
     "ready": "yes",
     "serving": "roco-serving/v1",
     "withheld": "",
     "degraded": "no",
-    "elapsedMs": "18"
+    "elapsedMs": "19"
    },
    "dom": {
     "slotNodes": 6,
@@ -1313,7 +1313,7 @@
    "metrics": {
     "clientW": 390,
     "scrollW": 390,
-    "bodyScrollW": 863,
+    "bodyScrollW": 718,
     "innerW": 390
    },
    "adds": [

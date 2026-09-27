@@ -82,23 +82,30 @@ test('③ 端到端：客户端真形状下问「培养点该往哪加？」不�
   memory: freshMemory(), provider});
  assert.equal(answer.agentStop, 'policy-fact-local', `要走本地事实：${answer.agentStop}`);
  assert.equal(seen.plan + seen.generate, 0, '这一族不许问模型');
- assert.match(String(answer.text), /营地/, '如实说清数据在哪一页');
- assert.doesNotMatch(String(answer.text), /还差\s*\d+\s*点/, '拿不到存档时绝不许报一个凭空的"还差 N 点"');
+ // 2026-09-27 改钉（加点退役）：这一族现在答的是**否定句 + 指路**，不再是"存档在哪一页"。
+ assert.match(String(answer.text), /没有加点/, '要直说这一版没有加点');
+ assert.match(String(answer.text), /我的盒子/, '要说清培养在哪做');
+ assert.doesNotMatch(String(answer.text), /训练点 ?\d|培养格|还差\s*\d+\s*点/, '一个旧口径的数都不许报');
 });
 
-test('④ 加了 profile.growth ⇒ 同一句话给出**带数字**的本地账（这才是本可以给出的答案）', async () => {
- const fox = {level: 2, xp: 10, points: {hp: 1, atk: 0, speed: 0}};
- const context = growthContext({tokens: 3, pets: {fox}});
+test('④ 加了 profile.growth ⇒ 本地答出**等级/经验**，并说清没有加点（原版有的照旧给）', async () => {
+ const fox = {level: 2, xp: 10};
+ // 2026-09-27：加点退役 ⇒ 夹具不再需要 `points`；`focus` 要在（等级是"这一只"的）。
+ const context = {...growthContext({tokens: 3, pets: {fox}}), focus: 'fox'};
  const {seen, provider} = countingProvider();
  const answer = await runCoach({message: '培养点该往哪加？', role: 'auto', context,
   memory: freshMemory(), provider});
- assert.equal(answer.agentStop, 'policy-fact-local', `存档在 ⇒ 本地算：${answer.agentStop}`);
- assert.equal(seen.plan + seen.generate, 0, '数字全在手里，不必问模型');
- assert.match(String(answer.text), /培养格/, `要给培养格那份账：${answer.text}`);
- assert.match(String(answer.text), /3 个训练点/, '点数来自 growth.tokens，照实说');
- // 逐字建议来自 teacher()：同一上下文下它必须给得出（而不是又退回"没有存档"）
+ assert.equal(answer.agentStop, 'policy-fact-local', `存档在 ⇒ 本地答：${answer.agentStop}`);
+ assert.equal(seen.plan + seen.generate, 0, '全在手里，不必问模型');
+ // 2026-09-27 改钉（加点退役）：有存档时也**不再算加点账**；但**等级/经验照旧报**（原版有的）。
+ assert.match(String(answer.text), /Lv\.2/, `等级来自存档，照实说：${answer.text}`);
+ assert.match(String(answer.text), /没有加点/, '并说清这一版没有加点');
+ assert.doesNotMatch(String(answer.text), /培养格|训练点 ?\d/, '不许报旧口径的数');
+ // teacher() 这一档也一样：有存档 ⇒ 说清"培养＝改性格/改天分" + 等级，而不是加点建议
  const advice = teacher(context);
- assert.ok(advice?.headline && !/没有/.test(advice.headline), `有存档就该给建议：${JSON.stringify(advice?.headline)}`);
+ assert.ok(advice?.headline && /培养/.test(advice.headline), `有存档就该给得出这一档的话：${JSON.stringify(advice?.headline)}`);
+ assert.match(advice.text, /没有加点/, '老师那一档也说同一件事');
+ assert.doesNotMatch(advice.text, /培养格|训练点 ?\d|\+12 生命/, '老师那一档不再给加点数值');
 });
 
 test('⑤ 存档在、但这只不在里面 ⇒ 走"not-in-save"那份，且不许报别只的等级', () => {
@@ -126,7 +133,8 @@ test('⑥ 结构性：那句话只有一份（runtime.js 不许再抄一遍）�
  assert.deepEqual(holders, ['src/game/progression.js'],
   `localStorage 键只许有一处字面量（现在：${holders.join('、')}）`);
  assert.equal(PROFILE_STORAGE_KEY, 'pet-coach-growth-v1', '键值本身钉住，改它等于让所有老存档读不到');
- for (const client of ['app.js', 'nurture.js', 'xiaoya.js']) {
+ // 2026-09-27：`nurture.js` 已随培养页退役删除，清单里去掉它。
+ for (const client of ['app.js', 'xiaoya.js']) {
   const text = readFileSync(join(ROOT, 'src/client', client), 'utf8');
   assert.match(text, /PROFILE_STORAGE_KEY/, `${client} 必须从引擎取那个键，不许自己写`);
  }
@@ -200,15 +208,21 @@ test('⑧ 手游精灵编号当 focus：不许崩（小芽页真形状），且�
  assert.match(String(answer.text), /假设练习/, `要正常出题：${String(answer.text).slice(0, 60)}`);
 });
 
-test('⑨ 存档里有这一只、只是没带明细 ⇒ 说「缺明细」，不许说「没有这只」', () => {
+test('⑨ 存档里有这一只、只是没带等级 ⇒ 说「缺的是等级」，不许说「没有这只」', () => {
+ // 2026-09-27 改钉（加点退役）：这一档原来判的是"没带 `points`（点数与已用培养格）"。
+ // 加点退役之后那一族只剩**等级与经验**，所以"缺明细"的形状换成"没有可用的等级字段"。
  const grow = (pets) => ({mode: 'camp', battle: null, profile: {pets: ROSTER, growth: {tokens: 3, pets}}});
- // 这一只在存档里，但没有 points（等级/经验在）
- const packet = teacher({...grow({fox: {level: 2, xp: 0}}), focus: 'fox'});
- assert.match(packet.text, /没带上它的\*\*点数与已用培养格\*\*|缺/, `要说清缺的是明细：${packet.text}`);
+ const packet = teacher({...grow({fox: {xp: 0}}), focus: 'fox'});        // 在存档里，但没有 level
+ assert.match(packet.text, /没带上它的\*\*等级与经验\*\*|缺/, `要说清缺的是哪一部分：${packet.text}`);
  assert.doesNotMatch(packet.text, /没有「烬尾狐」/, '这只明明在存档里，不许说成"没有这只"');
- // 对照：这只真的不在存档里 ⇒ 才说"没有这一只"
- const missing = teacher({...grow({turtle: {level: 1, xp: 0, points: {hp: 0, atk: 0, speed: 0}}}), focus: 'fox'});
+ // 对照一：这只真的不在存档里 ⇒ 才说"没有这一只"
+ const missing = teacher({...grow({turtle: {level: 1, xp: 0}}), focus: 'fox'});
  assert.match(missing.text, /没有「烬尾狐」/, '真不在存档里时才点名说没有');
+ // 对照二：有等级就正常答（等级/经验照旧是原版有的东西），并说清没有加点
+ const ok = teacher({...grow({fox: {level: 2, xp: 10}}), focus: 'fox'});
+ assert.match(ok.text, /Lv\.2/, `有等级就报等级：${ok.text}`);
+ assert.match(ok.text, /没有加点/, '并说清这一版没有加点');
+ assert.doesNotMatch(ok.text, /培养格|训练点/, '不许再提那一套');
 });
 
 test('⑩ 出题用**玩家自己那只**（目标 ③）：能拿到面板就用它，拿不到就不出题（不许拿练习引擎那只冒充）', async () => {

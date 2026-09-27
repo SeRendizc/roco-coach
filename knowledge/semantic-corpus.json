@@ -185,27 +185,6 @@
     ]
   },
   {
-    "id": "tactic:training",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "培养阈值",
-    "keywords": "培养 加点 敏捷 力量 耐久 速度",
-    "principle": "每点敏捷加3速度、力量加4攻击、耐久加12生命；比较加点是否改变先手、击倒或承伤次数。",
-    "counterexample": "速度同级优先级才比较；从落后变平速不是稳定先手；已经更快时加速可能无当前收益。",
-    "requiredEvidence": "训练容量与库存、对手速度、加点前后伤害",
-    "authority": [
-      "engine.js",
-      "progression.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
     "id": "tactic:rules-boundary",
     "game": "pet-coach",
     "rulesVersion": "0.6",
@@ -535,8 +514,8 @@
     "status": "active",
     "title": "平速风险",
     "keywords": "平速 同速 敏捷 先手",
-    "principle": "相同优先级且同速存在顺序不确定性；培养到平速不能承诺稳定先手。",
-    "counterexample": "先制技能与道具的优先级不能通过单纯加速超越。",
+    "principle": "相同优先级且同速存在顺序不确定性；不能承诺稳定先手。",
+    "counterexample": "先制技能与道具的优先级不能靠速度超越。",
     "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
     "authority": [
       "engine.js"
@@ -838,26 +817,6 @@
     "keywords": "一定 必赢 最优 猜 预判",
     "principle": "枚举给出的是在特定对手行动集合与权重下的局面评分，不是胜率；分支分歧大时说明取舍。",
     "counterexample": "不能用最终赢了反证当时决策唯一正确，也不能把对手实际动作当作事前已知。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:growth-save",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "允许保留培养资源",
-    "keywords": "培养 留点 预算 上限 本命",
-    "principle": "只有当前目标的速度或伤害阈值变化值得时才优先投入；可以保留训练点，升级再分配。",
-    "counterexample": "满培养格或单项达上限不能继续推荐立即增加该项；免费重置也应由玩家决定。",
     "requiredEvidence": "合法行动、当前公开面板与规则版本",
     "authority": [
       "engine.js"

@@ -2,12 +2,12 @@
   "schema": "roco-tactic-cards/v1",
   "generated_by": "scripts/roco/build-tactic-cards.mjs",
   "source": "src/game/content.js",
-  "source_sha256": "5a2733ce682990b4226ee9fddfeecfc4d097a7b2f6f7a8d5f7bc1528d2644f43",
+  "source_sha256": "de9638ec81705b1c3c223ad76efaf6f7e670eb13d0ec7b0cd6776016dc9560bd",
   "why": "L4 战术卡库的派生真源：卡片本体在 src/game/content.js，这里只做导出与指纹。改卡片不重跑这个脚本 ⇒ source_sha256 对不上 ⇒ 判据红。",
   "counts": {
-    "tactic": 49,
+    "tactic": 47,
     "reference": 44,
-    "total": 93
+    "total": 91
   },
   "cards": [
     {
@@ -151,23 +151,6 @@
       "counterexample": "不是三个不同属性就一定合理；先检查队伍是否都怕同一种节奏，以及玩家偏好。",
       "authority": [
         "engine.js"
-      ],
-      "conditions": [
-        "battle"
-      ],
-      "rules_version": "0.6",
-      "game": "pet-coach",
-      "status": "active"
-    },
-    {
-      "id": "tactic:training",
-      "title": "培养阈值",
-      "keywords": "培养 加点 敏捷 力量 耐久 速度",
-      "principle": "每点敏捷加3速度、力量加4攻击、耐久加12生命；比较加点是否改变先手、击倒或承伤次数。",
-      "counterexample": "速度同级优先级才比较；从落后变平速不是稳定先手；已经更快时加速可能无当前收益。",
-      "authority": [
-        "engine.js",
-        "progression.js"
       ],
       "conditions": [
         "battle"
@@ -439,8 +422,8 @@
       "id": "tactic:speed-tie",
       "title": "平速风险",
       "keywords": "平速 同速 敏捷 先手",
-      "principle": "相同优先级且同速存在顺序不确定性；培养到平速不能承诺稳定先手。",
-      "counterexample": "先制技能与道具的优先级不能通过单纯加速超越。",
+      "principle": "相同优先级且同速存在顺序不确定性；不能承诺稳定先手。",
+      "counterexample": "先制技能与道具的优先级不能靠速度超越。",
       "authority": [
         "engine.js"
       ],
@@ -682,22 +665,6 @@
       "keywords": "一定 必赢 最优 猜 预判",
       "principle": "枚举给出的是在特定对手行动集合与权重下的局面评分，不是胜率；分支分歧大时说明取舍。",
       "counterexample": "不能用最终赢了反证当时决策唯一正确，也不能把对手实际动作当作事前已知。",
-      "authority": [
-        "engine.js"
-      ],
-      "conditions": [
-        "battle"
-      ],
-      "rules_version": "0.6",
-      "game": "pet-coach",
-      "status": "active"
-    },
-    {
-      "id": "tactic:growth-save",
-      "title": "允许保留培养资源",
-      "keywords": "培养 留点 预算 上限 本命",
-      "principle": "只有当前目标的速度或伤害阈值变化值得时才优先投入；可以保留训练点，升级再分配。",
-      "counterexample": "满培养格或单项达上限不能继续推荐立即增加该项；免费重置也应由玩家决定。",
       "authority": [
         "engine.js"
       ],

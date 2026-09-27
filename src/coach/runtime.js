@@ -298,25 +298,14 @@ export function localParametricFact(message='', context=null){
    knowledge:[card]};
  }
  if(/培养.{0,10}(哪个属性|加什么|加点|收益)|加点.{0,6}(收益|加多少)|每点.{0,6}(敏捷|力量|耐久)/.test(text)){
-  // 加点的**每点收益**是引擎常量（`RULES.training`），"哪一项最能改变先手"还要看对手速度
-  // —— 在**对局里**那一步走 `read_state`（本函数只管常量那一半），这里如实说清这一层。
-  const t=RULES.training;
-  if(!campShape){
-   // 手游那一档：**没有每点收益、也没有上限**（子代理全仓核实，含 data/roco/raw/extracted 的
-   // 两个第三方快照仓库与 NRC_AI 的实机核对模板 —— `*_game` 列 0/50 填）。按纪律：不给数字，
-   // 说清"有什么、缺什么、怎么给我"。**不拿营地那一档的 +12/+4/+3 顶上来。**
-   return {text:'每点加多少这条，手游那边的加点数据我这边没有：抓到的只有社区阵容里「这只加哪几项」，'
-    +'没有每点收益、也没有加点上限。营地那一档练习引擎倒是有一组每点收益的常量，'
-    +'但那是那一档自己定的，**我不把它当手机版那一档的规矩讲给你**（具体数值留在依据里，正文不念）。'
-    +'你要准确数字的话，给我一份来源或实机读数，我按它答。（来源：没有 —— 这正是要跟你要的东西。）',
-    evidence:[`手游侧加点：仓库里只有"加哪几项"的方向数据（data/roco/raw/extracted/rocom-data/data/lineups.json，169 套阵容）`
-     +`；每点收益与上限全仓无来源。营地那一档的 RULES.training={hp:${t.hp},atk:${t.atk},speed:${t.speed}} **不适用**于手游侧。`]};
-  }
-  return {text:`加点收益（每 1 点）：耐久 +${t.hp} 生命、力量 +${t.atk} 攻击、敏捷 +${t.speed} 速度。`
-   +'要判断"哪一项能改变先手"，得拿**对手的速度**比：对局里我能看着公开速度算给你；'
-   +'没有对局时我只能给这三条常量。'
-   +src('加点收益'),
-   evidence:[`RULES.training={hp:${t.hp},atk:${t.atk},speed:${t.speed}}`]};
+  // 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：这一支原来报的是
+  // 练习引擎的「每点 +12 生命 / +4 攻击 / +3 速度」。**原版没有加点 ⇒ 一条数都不报**，
+  // 直接说清"没有这套机制、培养在哪做"。两个档位（营地 / 手游）回答同一句话 —— 因为
+  // 「没有加点」对两档都成立，不再需要分档解释。
+  return {text:'这一版**没有加点**：培养就是改**性格**与**天分** —— 在我的盒子里按种类点开个体，'
+   +'每只各能刷 3 次（刷性格与刷天分分开计数）。',
+   evidence:['问句落在「加点 / 每点收益」这一族：这一版（原版）没有这套机制，所以一条数值都不报',
+    '培养＝刷新性格 / 刷新天分：各 3 次，在「我的盒子」里按种类点开个体']};
  }
  if(/本系加成|属性加成/.test(text)){
   // 这一条**真的没有来源**：本仓没有手游「本系加成」的官方/实拍依据（本地 MVP 那套
@@ -404,15 +393,12 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){
  const mult=(value)=>Number.isFinite(value)?`×${value}`:'×?';
  /** 「X系克制什么 / 冰系被什么克制」——问句里的系别名（引擎认不出就返回 null，不猜）。 */
  if(policy.reason==='training-ask-elsewhere'){
-  // 这**不是**"不知道"：养成存档（训练点/培养格）来自本机存档，这一份上下文里没有它。
-  // 说清这一点并给出两条立刻能走的路，一个数都不编。
-  //
-  // 2026-09-25：这句话**只写在这一处**（`profile-shape.js` 的 `trainingSaveMissing()`）——
-  // `teacher()` 在拿不到存档时返回的是**同一份**，判据断言两边逐字相同。
-  // 为什么必须同源：原来 `teacher()` 那条路直接抛 TypeError ⇒ `/api/coach` 500
-  // （真机「培养点该往哪加？」），而同一族的「怎么培养」在这条路上是 200 —— 措辞一变就崩，
-  // 修法必须是"两条路归一"，不是"再加一个 try/catch"。
-  return trainingSaveMissing(context);
+  // 2026-09-27：这一族原来是"养成存档（训练点/培养格）不在这份上下文里，去营地问"。
+  // 加点退役之后，答案与上面那条**同一句话**：这一版没有加点，培养＝刷新性格/天分。
+  return {text:'这一版**没有加点**：培养就是改**性格**与**天分** —— '
+   +'在我的盒子里按种类点开个体，每只各能刷 3 次（刷性格与刷天分分开计数）。等级与经验照常涨。',
+   evidence:['问句落在「训练点 / 培养格 / 加点」这一族：这一版（原版）没有这套机制，所以不给那些数'],
+   trace:[]};
  }
  if(policy.reason==='legality-ask'){
   // 逐招对照学习表的回执：**三态**要照实说（全学得到 / 有学不到的 / 有认不出来的），
@@ -846,86 +832,21 @@ async function localFactAnswer({message,context,policy,retrieve,memory=null}){
    trace:[]};
  }
  if(policy.reason==='training-ask'){
-  // 训练点 / 培养格：全部数字来自**本仓存档 + `progression.js` 常量**，一个都不编。
-  // 两种读法都要给（玩家说的"满级"可能指等级、也可能指培养格），所以先给结论再给两张账。
+  // 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些，不要了」）：
+  // 这一族原来会算「训练点 / 培养格 / 每点收益 / 该加哪只」——那些数**一个都不再报**。
+  // 现在是**明确的否定回答**（仍然是本地作答，0 次模型调用）：原版没有加点，
+  // 培养就是改性格与改天分；等级与经验照旧（那是原版有的），所以顺手把等级报出来。
   const save=trainingSaveOf(context);
-  // 走到这里说明 `trainingAsk()` 已经确认过存档在（`policyFor` 与它用同一处判定），
-  // 但**点数那一项可能没给**（`growth` 只带 pets 时）：那就不报点数，也不拿 0 顶替。
-  if(!save)return trainingSaveMissing(context);
-  const pets=Object.entries(save.pets).filter(([,pet])=>pet&&typeof pet.points==='object');
-  const usedOf=(pet)=>Object.values(pet.points).reduce((a,b)=>a+(Number.isFinite(b)?b:0),0);
-  const nameOf=(id)=>SPECIES.find((species)=>species.id===id)?.name??id;
-  const focusId=context.focus&&save.pets[context.focus]?context.focus:(pets[0]?pets[0][0]:null);
-  const rows=pets.map(([id,pet])=>{
-   const used=usedOf(pet);
-   let xpNeeded=0;
-   for(let level=pet.level;level<MAX_LEVEL;level++)xpNeeded+=levelXpCost(level)-(level===pet.level?pet.xp:0);
-   return {id,name:nameOf(id),level:pet.level,used,cap:trainingCapacity(pet.level),free:trainingCapacity(pet.level)-used,
-    toMaxLevel:MAX_LEVEL-pet.level,xpNeeded:Math.max(0,xpNeeded),slotsToMax:trainingCapacity(MAX_LEVEL)-used,
-    perStat:Object.entries(TRAINING).map(([stat,spec])=>`${spec.name} ${pet.points[stat]??0}/${MAX_STAT_TRAINING}`)};
-  });
-  if(!rows.length)return null;
-  const focus=rows.find((row)=>row.id===focusId)??rows[0];
-  const tokens=save.tokens;
-  const tokenPhrase=tokens===null?'训练点这一项这份上下文里没有':tokens>0?`${tokens} 个训练点`:'没有训练点';
-  const asked=String(message);
-  // 「就问问有几个」那种一句问句不要甩一整篇账：只数数（怎么/哪只 才给全套 + 建议）。
-  const countOnly=/(多少|几个|几格|还剩|还有)/.test(asked)&&!/(怎么|哪只|如何|该不该|划算|分配|满级|满培养)/.test(asked);
-  if(countOnly){
-   const tokenText=tokenPhrase;   // 0 点时说「没有」，不写「0 个」；没给点数就说没给，不猜
-   return {text:`你现在有 ${tokenText}；${focus.name} Lv.${focus.level} 还有 ${focus.free} 个培养格没填`
-    +`（${focus.used}/${focus.cap}）。练满（Lv.${MAX_LEVEL} 的 ${trainingCapacity(MAX_LEVEL)} 格）还差 ${focus.slotsToMax} 格`
-    +(tokens===null?'。':focus.slotsToMax>tokens?`，点数还缺 ${focus.slotsToMax-tokens} 个（赢一场 +${BATTLE_REWARD.win.tokens}）。`:'，点数够。'),
-    evidence:[`训练点=${tokens===null?'未提供（没给 growth.tokens）':tokens}；${focus.name} level=${focus.level} used=${focus.used} capacity=${focus.cap}`,
-     `常量：MAX_LEVEL=${MAX_LEVEL}、培养格=等级+${trainingCapacity(1)-1}`],
-    trace:[]};
-  }
-  const tokenText=tokenPhrase;   // 0 点时说「没有」，不写「0 个」
-  const parts=[`你现在有 ${tokenText}。`];
-  parts.push(`${focus.name} Lv.${focus.level}：培养格 ${focus.used}/${focus.cap}（还剩 ${focus.free} 格），`
-   +`三项已用 ${focus.perStat.join('、')}（每项上限 ${MAX_STAT_TRAINING}）。`);
-  parts.push(focus.toMaxLevel>0
-   ? `升到满级 Lv.${MAX_LEVEL} 还差 ${focus.toMaxLevel} 级、还要 ${focus.xpNeeded} 点经验`
-     +`（赢一场 +${BATTLE_REWARD.win.xp}、平 +${BATTLE_REWARD.draw.xp}、负 +${BATTLE_REWARD.loss.xp}）。`
-   : `它已经是满级 Lv.${MAX_LEVEL} 了。`);
-  parts.push(`培养格只跟等级走（格数 = 等级 + ${trainingCapacity(1)-1}）：满级一共 ${trainingCapacity(MAX_LEVEL)} 格，`
-   +`所以练满它还差 ${focus.slotsToMax} 格 = ${focus.slotsToMax} 个训练点。`
-   +(tokens===null
-     ? '训练点这一项这份上下文里没有，我不猜你还剩几点。'
-     : focus.slotsToMax>tokens
-      ? `你现在${tokens>0?` ${tokens} 点`:'没有训练点'}，还缺 ${focus.slotsToMax-tokens} 点 —— 打对战就有（赢一场 +${BATTLE_REWARD.win.tokens}）。`
-      : '点数够了，随时能分配。'));
-  parts.push(`每 1 点的效果：${Object.entries(TRAINING).map(([,spec])=>`${spec.name} ${spec.gain}`).join('、')}；`
-   +'先加哪一项由你定，重置免费并退回全部点数。');
-  if(rows.length>1)parts.push(`全队 ${rows.length} 只现在一共还剩 ${rows.reduce((sum,row)=>sum+row.free,0)} 个培养格没填。`);
-  // 「该加哪只 / 怎么加」这一问要的不只是账，还要一个**有据的建议**：老师那一份
-  // （`teacher(context)`）本来就是按当前关卡首发的速度/伤害算出来的，这里直接引用它，
-  // 措辞由本地模板给 —— 不建议让模型自由发挥这一族（数字全在手里，模型只会改写）。
-  let adviceText=null;
-  if(/哪只|怎么|如何|该不该|划算|分配|怎么用/.test(String(message))) {
-   try{
-    const advice=teacher(context);
-    // `brief` 的第一句与 `headline` 重复（都是「先试1点力量」），只留后半段的速度比较。
-    const tail=String(advice.brief??'').split('。').slice(1).join('。').trim();
-    adviceText=`${advice.headline}——${advice.reason}${tail?` ${tail}`:''}`;
-    parts.push(`建议：${adviceText}`);
-   }catch{/* 老师那一份拿不到就不给建议：账目照旧，绝不编一个推荐 */}
-  }
-  // ⚠ 正文里的**每一个数**都要能在这条证据里逐条查到（人类 2026-09-25 的乙口径：
-  // 「事实在 receipts 里 ⇒ 0 次调用算过，**但答案数字必须被证据守住**」）。
-  // 金标 c09 实测：正文写了 300（经验）/14（全队只数）/56（未填格合计）/31（建议里的攻击值）
-  // 四个数，证据里一个都没有 ⇒ `unsupported-number`。现在把**算式与结果**一起写进证据
-  // （数字全来自存档 + `progression.js` 常量 + `teacher(context)`，一个都不编）。
-  const totalFree=rows.reduce((sum,row)=>sum+row.free,0);
-  return {text:parts.join(''),
-   evidence:[`训练点=${tokens===null?'未提供（没给 growth.tokens）':tokens}；${focus.name} level=${focus.level} used=${focus.used} capacity=${focus.cap}`,
-    `存档来路=${save.source==='growth'?'profile.growth（客户端从本机存档带上来）':'profile.pets 对象 + profile.tokens（老来路）'}`,
-    `常量：MAX_LEVEL=${MAX_LEVEL}、每级经验=等级×30、培养格=等级+${trainingCapacity(1)-1}、每项上限=${MAX_STAT_TRAINING}`,
-    `奖励：赢 +${BATTLE_REWARD.win.xp}经验/+${BATTLE_REWARD.win.tokens}点、平 +${BATTLE_REWARD.draw.xp}/+${BATTLE_REWARD.draw.tokens}、负 +${BATTLE_REWARD.loss.xp}/+${BATTLE_REWARD.loss.tokens}`,
-    `经验账：还差 ${focus.xpNeeded} 点 = Σ(levelXpCost(${focus.level}..${MAX_LEVEL-1})) − 当前 xp；逐级需求来自上面的「每级经验」常量`,
-    `培养格账：${focus.name} 练满还差 ${focus.slotsToMax} 格 = capacity(${MAX_LEVEL}) − used(${focus.used})；`
-     +`全队未填合计 ${totalFree} = Σ(capacity − used)，名单 ${rows.length} 只（存档里带培养格的伙伴）`,
-    ...(adviceText?[`建议逐字来自 teacher(context)：${adviceText}`]:[])],
+  const focusId=context.focus&&save?.pets?.[context.focus]?context.focus:null;
+  const pet=focusId?save.pets[focusId]:null;
+  const name=pet?(SPECIES.find((species)=>species.id===focusId)?.name??focusId):null;
+  const levelLine=pet?`${name} 现在是 Lv.${pet.level}（经验 ${pet.xp??0}）。`:'';
+  return {text:'这一版**没有加点**：培养就是改**性格**与**天分** —— '
+   +'在我的盒子里按种类点开个体，每只各能刷 3 次（刷性格与刷天分分开计数）。'
+   +levelLine+'等级与经验照常涨，打对战就有。',
+   evidence:['问句落在「训练点 / 培养格 / 加点」这一族：这一版（原版）没有这套机制，所以不给那些数',
+    '培养＝刷新性格 / 刷新天分：各 3 次，在「我的盒子」里按种类点开个体（`src/client/box-individuals.js`）',
+    ...(pet?[`${name} level=${pet.level} xp=${pet.xp??0}`]:[])],
    trace:[]};
  }
  if(policy.reason==='type-chart-ask'||policy.reason==='matchup-ask'||policy.reason==='policy-ask'

@@ -131,7 +131,10 @@ test('⑩ 回滚按钮：只有能回滚时才出现，并且带得动 coach 的
   assert.match(after, /data-undo="own-0001"/, '刷过之后要能回滚');
   assert.match(after, /回滚上一次/);
   assert.match(after, /第 1 级天分/, '按钮要说清撤的是哪一次');
-  assert.match(after, /次数会还回来/, '要让玩家知道回滚不亏次数');
+  // 2026-09-27 改钉（人类口述）：「回滚不消耗也不返还次数」⇒ 按钮提示要说的是"退掉的次数不还、
+  // 再刷一次之后可以再退"，而不是旧版的"次数会还回来"。
+  assert.match(after, /退掉的次数不还|不还/, `要让玩家知道退掉的次数不还：${after.match(/title="[^"]*"/)?.[0]}`);
+  assert.match(after, /再刷一次之后可以再退/, '要说清"一次只退一步"的用法');
   const box = readFileSync(new URL('../src/client/box.js', import.meta.url), 'utf8');
   assert.match(box, /closest\?\.\('\[data-undo\]'\)/, 'box.js 要监听 data-undo');
 });
@@ -216,20 +219,18 @@ test('⑫ 掷点来源要写在页面上；数据集里真有的**不许**写（
   assert.doesNotMatch(individualHtml(ONE[0], real), /data-rolled/, '实测数据的行里不该有这句');
 });
 
-test('⑬ 回滚按钮只认 `canUndo()`：刷→回滚→再刷之后**不许**再冒出来（真机 28 号抓到的）', () => {
+test('⑬ 回滚按钮只认 `canUndo()`：真的能退才出现（真机 28 号抓到的那个"点了没用的按钮"）', () => {
   // 真机验收（`browser-box-acceptance.mjs` 的 28 号）当场抓到：抽屉里的按钮原来只判
-  // "账上有没有一次刷新"，没判"还准不准回滚" ⇒ 刷过、回滚过、再刷之后按钮又出现，
-  // 点下去只会拿到「这一只已经回滚过一次了」——一个点了没用的按钮。
+  // "账上有没有一次刷新"。现在只认 `canUndo()`（最近一条记录必须是刷新 —— 也就是"一次只退一步"）。
   const one = individualsFromDataset(dataset)[0];
   const fresh = refresh(one, 'talent', {at: 'B1'});
-  assert.match(individualHtml(CARD, fresh), /data-undo=/, '刷过一次、没回滚过 ⇒ 按钮要在');
+  assert.match(individualHtml(CARD, fresh), /data-undo=/, '刷过一次、没退过 ⇒ 按钮要在');
   const undone = undoLastRefresh(fresh, {at: 'B2'});
-  assert.doesNotMatch(individualHtml(CARD, undone), /data-undo=/, '回滚之后没有可撤的 ⇒ 按钮要消失');
+  assert.doesNotMatch(individualHtml(CARD, undone), /data-undo=/,
+    '刚退过一步 ⇒ 按钮要消失（再退就是退回两步之前）');
   const again = refresh(undone, 'talent', {at: 'B3'});
-  assert.equal(canUndo(again), false, '（前提）每人只许回滚一次');
-  assert.doesNotMatch(individualHtml(CARD, again), /data-undo=/,
-    '已经用掉那一次 ⇒ 按钮不许再出现（否则是个点了没用的按钮）');
-  // 反证：判据不是"永远没有按钮" —— 换一只没回滚过的，按钮必须还在
-  assert.match(individualHtml(CARD, refresh(individualsFromDataset(dataset)[2], 'nature', {at: 'B4'})),
-    /data-undo=/, '没回滚过的个体，按钮必须在（否则这条判据成了"恒无"）');
+  assert.equal(canUndo(again), true, '（前提）中间又刷过一次 ⇒ 又能退一步（人类：「不是回一次」）');
+  assert.match(individualHtml(CARD, again), /data-undo=/, '这时按钮必须回来（否则玩家没法退新刷的那一步）');
+  // 反证：判据不是"永远有按钮" —— 没刷过的个体一个按钮都不许有
+  assert.doesNotMatch(individualHtml(CARD, one), /data-undo=/, '没刷过 ⇒ 不许有回滚按钮');
 });

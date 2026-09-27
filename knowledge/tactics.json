@@ -1,992 +1,951 @@
 [
-  {
-    "id": "tactic:burn-combo",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "灼烧与追猎",
-    "keywords": "火花 追猎 连招 灼烧 狐狸",
-    "principle": "目标已有灼烧时，余烬追猎增加18威力；先比较实际伤害、能量与击倒条件。",
-    "counterexample": "目标未灼烧时没有追猎加成；对方防御、换宠或治疗可能改变结果。",
-    "requiredEvidence": "目标状态、合法技能、分支伤害",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle",
-      "burn"
-    ]
-  },
-  {
-    "id": "tactic:overkill",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "够用的伤害",
-    "keywords": "残血 秒掉 收尾 溢出 火花 追猎",
-    "principle": "多种技能都足以击倒时，比较成本和风险，不因面板伤害较低就判为失误。",
-    "counterexample": "静止目标的击倒条件不等于对方会留场；高伤害可能覆盖回复药分支。",
-    "requiredEvidence": "双方血量、技能成本、回复与换宠分支",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:priority",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "先制与速度",
-    "keywords": "先手 先出手 来得及 疾爪 速度 抢先",
-    "principle": "先比较行动优先级，再比较速度；疾爪优先于普通攻击。",
-    "counterexample": "速度快不保证先于回复药或防御；先出手也不等于伤害足够。",
-    "requiredEvidence": "行动优先级、双方速度、击倒伤害",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "pokemon-official-battling"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:switch",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "换宠承伤",
-    "keywords": "换宠 挡刀 换上 克制 承伤",
-    "principle": "主动换宠占用行动，新上场伙伴可能承受本回合攻击；比较换入后的血量与后续位置。",
-    "counterexample": "属性有利也可能因残血换入倒下；不要假定对方一定使用属性攻击。",
-    "requiredEvidence": "存活后备、对手合法行动、换入伤害",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "pokemon-official-battling"
-    ],
-    "conditions": [
-      "battle",
-      "reserve"
-    ]
-  },
-  {
-    "id": "tactic:healing",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "治疗时机",
-    "keywords": "回血 回复药 苔息 治疗 来得及",
-    "principle": "回复药优先级4；苔息按普通技能顺序恢复28生命。低血量时需要先判断能否活到出手。",
-    "counterexample": "不要仅比较治疗量；药品有限，满血不能用，过量恢复会浪费。",
-    "requiredEvidence": "当前生命、道具库存、合法行动、行动顺序",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "pokemon-official-battling"
-    ],
-    "conditions": [
-      "battle",
-      "potion"
-    ]
-  },
-  {
-    "id": "tactic:guard",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "防御与破防",
-    "keywords": "防御 破甲 重击 狮子 减伤",
-    "principle": "防御减伤65%、阻挡新异常并额外恢复2能量，不可连续使用；破甲重击绕过防御技能减伤。",
-    "counterexample": "破甲重击不无视基础防御属性；防御不清除已有异常。",
-    "requiredEvidence": "上次防御、对手技能、当前异常、能量",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:energy",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "资源节奏",
-    "keywords": "能量 蓝 空了 防御 能量果 消耗",
-    "principle": "比较当前出招后还能否使用关键技能。防御与能量果提供不同的恢复机会。",
-    "counterexample": "能量上限6；低能量不必总防御，零消耗攻击可能直接结束战斗。",
-    "requiredEvidence": "合法行动、技能成本、当前能量、击倒条件",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle",
-      "energy"
-    ]
-  },
-  {
-    "id": "tactic:poison",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "异常持续收益",
-    "keywords": "中毒 孢子 持续伤害 异常 灼烧",
-    "principle": "当前规则中灼烧每次6伤害、中毒每次8伤害，仅在场宠物结算；新异常可在施加回合末结算。",
-    "counterexample": "已有异常不会叠加新异常；换到后备暂停结算，不应把所有剩余跳数当作必得收益。",
-    "requiredEvidence": "状态剩余次数、换宠与净化药分支",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle",
-      "poison"
-    ]
-  },
-  {
-    "id": "tactic:team",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "组队职责",
-    "keywords": "阵容 组队 狐狸 狮子 搭配",
-    "principle": "为队伍安排输出、承伤和收尾职责；狐偏快攻与灼烧联动，狮偏慢速破防爆发。",
-    "counterexample": "不是三个不同属性就一定合理；先检查队伍是否都怕同一种节奏，以及玩家偏好。",
-    "requiredEvidence": "实际阵容、宠物成长、目标关卡、玩家偏好",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "pokemon-official-battling"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:training",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "培养阈值",
-    "keywords": "培养 加点 敏捷 力量 耐久 速度",
-    "principle": "每点敏捷加3速度、力量加4攻击、耐久加12生命；比较加点是否改变先手、击倒或承伤次数。",
-    "counterexample": "速度同级优先级才比较；从落后变平速不是稳定先手；已经更快时加速可能无当前收益。",
-    "requiredEvidence": "训练容量与库存、对手速度、加点前后伤害",
-    "authority": [
-      "engine.js",
-      "progression.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:rules-boundary",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "外部规则不能直接套用",
-    "keywords": "宝可梦 本系 加成 双属性 两倍 免疫 天气 雨天 洛克王国",
-    "principle": "当前有火、水、草、岩、雷、风七个技能属性，另有中性的普通系。克制1.5倍；打向克制你的属性0.75倍；其余含同系一律1倍；没有本系加成、双属性。环境机制是有的（细雨、山风，各按回合生效），具体以 engine.js 的 ENVIRONMENTS 为准。属性关系以 TYPE_ADVANTAGES 为准。",
-    "counterexample": "不能把外部攻略的倍率、特性或招式当作当前可用机制。",
-    "requiredEvidence": "engine.js 当前版本与真实技能清单",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:switch-loop",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "连续换宠博弈",
-    "keywords": "反复换 一直换 预判 猜拳",
-    "principle": "不要无限猜对方的下一层预判。分别比较对方留场、换入每只伙伴时的收益，优先关注最坏分支能承受的行动。",
-    "counterexample": "对手刚换过不代表一定继续换；历史频率不是下一步事实。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle",
-      "reserve"
-    ]
-  },
-  {
-    "id": "tactic:switch-turn",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "换宠的完整代价",
-    "keywords": "换宠 回合 攻击 防御 同时",
-    "principle": "主动换宠就是本回合唯一行动，不能换入后再攻击、防御或吃药。对方可能攻击换入者。",
-    "counterexample": "倒下后的强制补位免费；它与主动换宠不是同一种成本。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:double-switch",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "双方同时换宠",
-    "keywords": "双换 同时 换宠 预判",
-    "principle": "双方都换宠时本回合没有攻击，仍按引擎结算在场异常与能量。下一回合重新判断，不把换到优势对位当作造成了伤害。",
-    "counterexample": "连续换位可能只是消耗回合，并没有改善队伍的存活和资源。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle",
-      "reserve"
-    ]
-  },
-  {
-    "id": "tactic:coverage",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "覆盖换入者",
-    "keywords": "覆盖 打点 换入 普通 攻击",
-    "principle": "分别计算招式对当前目标和存活后备的伤害。普通攻击有时覆盖更稳定，但未必足以阻止治疗。",
-    "counterexample": "不能只看当前属性克制，也不能假定普通攻击总是最优。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:safe-pressure",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "稳健施压",
-    "keywords": "稳健 风险 预判 进攻",
-    "principle": "把平均分与最坏分支分开呈现。玩家可以选择稳健行动，保留后备和资源，避免为猜中一次押上全队。",
-    "counterexample": "当前搜索只有一回合；最坏分数是启发式局面评分，不是失败概率。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:free-entry",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "免费补位与主动换入",
-    "keywords": "补位 倒下 免费 换宠",
-    "principle": "伙伴倒下后补位不推进回合；主动轮换会让新伙伴暴露在当回合攻击下。",
-    "counterexample": "不能为了免费补位就随意牺牲伙伴；要比较其后续用途。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:reserve",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "保留反制伙伴",
-    "keywords": "后备 留着 反制 最后一只",
-    "principle": "换宠前检查新伙伴是不是唯一能应对敌方后备的成员，不能只顾眼前对位。",
-    "counterexample": "这是多回合规划问题；一回合高分不等于全局最优。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:heal-punish",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "对治疗分支保持压力",
-    "keywords": "回血 预判 收尾 残血",
-    "principle": "残血对手可能先使用回复药。比较攻击能否覆盖治疗后的生命，而不是只看当前血条。",
-    "counterexample": "道具库存为零或目标已满血时不要虚构治疗分支。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:status-switch",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "换宠与异常暂停",
-    "keywords": "中毒 换宠 灼烧 暂停",
-    "principle": "异常留在原宠物身上，后备期间不结算；换回场后继续。在场异常仍可能在双换回合结算。",
-    "counterexample": "暂停不是净化，不能告诉玩家换宠会清掉中毒。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:guard-status",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "防御不解毒",
-    "keywords": "防御 中毒 净化 灼烧",
-    "principle": "防御阻挡新异常，但不会清掉已有异常，也不会减免回合末固定异常伤害。",
-    "counterexample": "低血量带异常时防御仍可能倒下，先核对剩余生命。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:guard-energy",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "防御回能的上限",
-    "keywords": "防御 回豆 能量 溢出",
-    "principle": "防御额外回2能量，存活在场者回合末再回1，上限6；高能量时部分恢复会溢出。",
-    "counterexample": "防御不是免费等待：对手仍有一次行动，下一回合不能连续防御。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle",
-      "energy"
-    ]
-  },
-  {
-    "id": "tactic:energy-net",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "技能净消耗",
-    "keywords": "豆 消耗 净消耗 能量",
-    "principle": "普通存活在场者回合末回1；耗2技能通常净耗1，耗4技能通常净耗3。零消耗攻击可边输出边回能。",
-    "counterexample": "倒下者不回能，回能有上限；换宠后恢复属于新上场者而非后备。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:ether-cost",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "能量果的机会成本",
-    "keywords": "能量果 吃豆 恢复 道具",
-    "principle": "能量果恢复4并占用行动。要比较吃果后能否承伤，以及零消耗攻击或防御能否满足下一回合需求。",
-    "counterexample": "库存与目标能量必须核对；不能吃果后同回合再攻击。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:drain-cap",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "吸血看实际伤害",
-    "keywords": "吸血 生息藤 残血 过量",
-    "principle": "生息藤按实际造成伤害恢复40%，还受自身缺血限制。目标只剩少量生命时不能按理论伤害估算治疗。",
-    "counterexample": "防御会降低实际伤害，吸血不等于固定恢复。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:recoil",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "反伤与残局",
-    "keywords": "反伤 舍身 烈焰 同归于尽",
-    "principle": "舍身烈焰反伤按实际伤害20%向上取整；计算击倒目标后自身能否存活。",
-    "counterexample": "更大威力不总是更好，低血量残局要核对双倒结果。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:speed-tie",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "平速风险",
-    "keywords": "平速 同速 敏捷 先手",
-    "principle": "相同优先级且同速存在顺序不确定性；培养到平速不能承诺稳定先手。",
-    "counterexample": "先制技能与道具的优先级不能通过单纯加速超越。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:practice-transfer",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "换局面验证学习",
-    "keywords": "练习 学会 复盘 下次",
-    "principle": "复盘选一个关键取舍，下一次用不同宠物或不同血量的相似局面验证是否能独立判断。",
-    "counterexample": "照着提示点一次不代表学会，也不要每回合强制测验。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "docs/COACH-PLAN.md"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:quiet-player",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "少打扰的帮助",
-    "keywords": "静默 提示 高手 安静",
-    "principle": "玩家明确关闭主动提醒时遵守设置；未关闭时也优先在新风险与可行动的时机提示。",
-    "counterexample": "犹豫可能只是分心，不可据此说玩家不懂或不断催促。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "docs/COACH-PLAN.md"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:short-win",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "速胜与打法多样性",
-    "keywords": "速胜 奖励 回合 消耗",
-    "principle": "速胜可以提供小额一次性挑战奖励，基础成长不因回合较长扣减。另保留防守与消耗打法的成就空间。",
-    "counterexample": "不能把最短回合当作唯一教练目标，更不能为奖励推荐高风险送宠。",
-    "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
-    "authority": [
-      "docs/COACH-PLAN.md"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "requiredEvidence": "当前面板、行动优先级、存活后备和技能条件",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "id": "tactic:speed-control",
-    "title": "迟滞电弧控速",
-    "keywords": "鸣电雀 减速 迟滞 电弧 控速",
-    "principle": "迟滞电弧使目标速度降低6，改变下一回合的速度关系；本回合行动顺序已确定，不会追溯改变。",
-    "counterexample": "防御可挡减速，先制优先级仍在速度之前；换宠可能让控速对象退场。",
-    "conditions": [
-      "battle",
-      "slow"
-    ]
-  },
-  {
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "requiredEvidence": "当前面板、行动优先级、存活后备和技能条件",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "id": "tactic:badger-counter",
-    "title": "砾背獾守势反击",
-    "keywords": "砾背獾 反击 防御 岩 碎岩",
-    "principle": "砾背獾防御时受到攻击，会向仍存活的攻击者反击4点；碎岩冲击穿过防御技能减伤。",
-    "counterexample": "对方治疗或换宠不会触发反击，破防招式依然危险；反击不是自动获得的伤害。",
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "requiredEvidence": "当前面板、行动优先级、存活后备和技能条件",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "id": "ui:seed",
-    "title": "首页随机编号（种子）",
-    "keywords": "种子 首页 随机 编号 复现",
-    "principle": "随机编号用于复现随机过程；同规则、阵容、成长、难度、操作序列下才可比较复现。不是宠物或培养资源。",
-    "counterexample": "换编号不会直接增强宠物；不同选择不能保证同样结果。",
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:heal-target",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "给后备治疗也会失去场上行动",
-    "keywords": "后备 治疗 队友 目标 药",
-    "principle": "回复药可对任意存活队友使用，但仍占本方当回合行动；场上伙伴依然可能承伤。",
-    "counterexample": "给后备回血不等于保护场上宠，当前宠若倒下可能失去节奏。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:priority-heal",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "先制抢不过物品",
-    "keywords": "先制 道具 回复药 疾爪 速度",
-    "principle": "物品优先级高于疾爪，比较击倒条件时应覆盖对方先回复45生命的分支。",
-    "counterexample": "对方药品耗尽或目标满血时该治疗分支不合法，不要凭空加上回血。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:last-reserve",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "最后一只没有换宠分支",
-    "keywords": "最后一只 后备 全倒 换宠",
-    "principle": "对手只剩一只存活宠时，可排除换宠分支，但仍须检查防御、治疗和先手。",
-    "counterexample": "排除了换宠也不能直接声称必杀；防御仍会降低普通攻击伤害。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:guard-repeat",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "上一回合防御会限制本回合",
-    "keywords": "连续防御 上回合 守住 节奏",
-    "principle": "上一回合使用防御后，本回合不能再防御，可以不再把它当成对方会做的事。",
-    "counterexample": "不能假设对方必定攻击，物品和主动换宠仍可能合法。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:slow-priority",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "减速不会改变技能优先级",
-    "keywords": "减速 迟滞 先制 下一回合",
-    "principle": "迟滞电弧影响后续同优先级行动的速度比较，不会让普通技能超过疾爪优先级。",
-    "counterexample": "施加减速不会重新排列本回合已经确定的行动顺序。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:heal-overflow",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "实际恢复受到生命上限限制",
-    "keywords": "回血 溢出 浪费 药量 缺血",
-    "principle": "恢复量是标称回复和缺失生命中的较小者。比较道具价值时使用实际回复而非固定45。",
-    "counterexample": "少量回复也可能避免被击倒，不能只因溢出就认定选择错误。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:cleanse-window",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "解毒要比较剩余异常伤害",
-    "keywords": "净化 清除 异常 解毒 剩余",
-    "principle": "净化占行动；结合异常剩余次数、当前生命和对手攻击分支判断是否值得。",
-    "counterexample": "异常在后备暂停而非继续扣血，换宠不能算永久解毒。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:guard-counter-ko",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "反击可能让收尾变成互换",
-    "keywords": "獾 反击 碎岩 残血 互换",
-    "principle": "砾背獾防御时被攻击，若攻击后双方仍存活，会反击4点。收尾应检查自身剩余生命。",
-    "counterexample": "如果攻击已击倒獾则不会触发这次反击；穿防御减伤不代表关闭反击条件。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:confidence",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "分支差异大时承认不确定",
-    "keywords": "一定 必赢 最优 猜 预判",
-    "principle": "枚举给出的是在特定对手行动集合与权重下的局面评分，不是胜率；分支分歧大时说明取舍。",
-    "counterexample": "不能用最终赢了反证当时决策唯一正确，也不能把对手实际动作当作事前已知。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:growth-save",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "允许保留培养资源",
-    "keywords": "培养 留点 预算 上限 本命",
-    "principle": "只有当前目标的速度或伤害阈值变化值得时才优先投入；可以保留训练点，升级再分配。",
-    "counterexample": "满培养格或单项达上限不能继续推荐立即增加该项；免费重置也应由玩家决定。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:no-passive-recovery",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "后备不能白回能量",
-    "keywords": "后备 豆 换下 回能 等待",
-    "principle": "只有在场且存活的宠物在回合末恢复1能量，后备不会靠等待自动补满。",
-    "counterexample": "换回低能量宠物后，可能仍无法使用高消耗招式；要看它的实际能量。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:review-scope",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "整局复盘和回合解释不同",
-    "keywords": "上一局 整场 一整局 复盘",
-    "principle": "整局先统计回合与行动分布，再看关键片段；单回合用该回合前后的证据做条件比较。",
-    "counterexample": "只保存最后一回合时无法还原整局，不得编造前面的关键转折。",
-    "requiredEvidence": "合法行动、当前公开面板与规则版本",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:loadout",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "配招与机会成本",
-    "keywords": "配招与机会成本",
-    "principle": "每只伙伴6选4，防御占技能槽。配招和携带物仅在营地改变，下一局生效。",
-    "counterexample": "不带防御会失去减伤回能选择，更多攻击技能不一定更好。",
-    "requiredEvidence": "目标状态、合法技能、分支伤害",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:buff-dispel",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "强化与驱散",
-    "keywords": "强化与驱散",
-    "principle": "蓄势/护甲每层提高对应攻防15%，最多2层，3次在场回合末计时，主动换宠清空。破势命中后驱散，防御可阻挡驱散。",
-    "counterexample": "强化消耗当前行动，残血时可能来不及获得收益。",
-    "requiredEvidence": "目标状态、合法技能、分支伤害",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:weather",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "细雨与山风",
-    "keywords": "细雨与山风",
-    "principle": "后期环境持续前4回合：细雨水伤害×1.1火×0.9；山风风伤害×1.1岩×0.9。清风消耗1豆和一个行动提前移除。",
-    "counterexample": "环境对双方生效；可等待结束，清风不是强制配招。",
-    "requiredEvidence": "目标状态、合法技能、分支伤害",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  },
-  {
-    "id": "tactic:held",
-    "game": "pet-coach",
-    "rulesVersion": "0.6",
-    "status": "active",
-    "title": "一次性携带物",
-    "keywords": "一次性携带物",
-    "principle": "守心石在满血首次受攻击时减伤15%，每局一次；蓄能籽在场存活回合末能量不超过1时恢复2豆，每局一次，再结算普通回能。",
-    "counterexample": "携带物不能让当前能量不足的技能变成合法；触发后不要重复计算。",
-    "requiredEvidence": "目标状态、合法技能、分支伤害",
-    "authority": [
-      "engine.js"
-    ],
-    "inspiration": [
-      "local-design"
-    ],
-    "conditions": [
-      "battle"
-    ]
-  }
+ {
+  "id": "tactic:burn-combo",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "灼烧与追猎",
+  "keywords": "火花 追猎 连招 灼烧 狐狸",
+  "principle": "目标已有灼烧时，余烬追猎增加18威力；先比较实际伤害、能量与击倒条件。",
+  "counterexample": "目标未灼烧时没有追猎加成；对方防御、换宠或治疗可能改变结果。",
+  "requiredEvidence": "目标状态、合法技能、分支伤害",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle",
+   "burn"
+  ]
+ },
+ {
+  "id": "tactic:overkill",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "够用的伤害",
+  "keywords": "残血 秒掉 收尾 溢出 火花 追猎",
+  "principle": "多种技能都足以击倒时，比较成本和风险，不因面板伤害较低就判为失误。",
+  "counterexample": "静止目标的击倒条件不等于对方会留场；高伤害可能覆盖回复药分支。",
+  "requiredEvidence": "双方血量、技能成本、回复与换宠分支",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:priority",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "先制与速度",
+  "keywords": "先手 先出手 来得及 疾爪 速度 抢先",
+  "principle": "先比较行动优先级，再比较速度；疾爪优先于普通攻击。",
+  "counterexample": "速度快不保证先于回复药或防御；先出手也不等于伤害足够。",
+  "requiredEvidence": "行动优先级、双方速度、击倒伤害",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "pokemon-official-battling"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:switch",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "换宠承伤",
+  "keywords": "换宠 挡刀 换上 克制 承伤",
+  "principle": "主动换宠占用行动，新上场伙伴可能承受本回合攻击；比较换入后的血量与后续位置。",
+  "counterexample": "属性有利也可能因残血换入倒下；不要假定对方一定使用属性攻击。",
+  "requiredEvidence": "存活后备、对手合法行动、换入伤害",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "pokemon-official-battling"
+  ],
+  "conditions": [
+   "battle",
+   "reserve"
+  ]
+ },
+ {
+  "id": "tactic:healing",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "治疗时机",
+  "keywords": "回血 回复药 苔息 治疗 来得及",
+  "principle": "回复药优先级4；苔息按普通技能顺序恢复28生命。低血量时需要先判断能否活到出手。",
+  "counterexample": "不要仅比较治疗量；药品有限，满血不能用，过量恢复会浪费。",
+  "requiredEvidence": "当前生命、道具库存、合法行动、行动顺序",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "pokemon-official-battling"
+  ],
+  "conditions": [
+   "battle",
+   "potion"
+  ]
+ },
+ {
+  "id": "tactic:guard",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "防御与破防",
+  "keywords": "防御 破甲 重击 狮子 减伤",
+  "principle": "防御减伤65%、阻挡新异常并额外恢复2能量，不可连续使用；破甲重击绕过防御技能减伤。",
+  "counterexample": "破甲重击不无视基础防御属性；防御不清除已有异常。",
+  "requiredEvidence": "上次防御、对手技能、当前异常、能量",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:energy",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "资源节奏",
+  "keywords": "能量 蓝 空了 防御 能量果 消耗",
+  "principle": "比较当前出招后还能否使用关键技能。防御与能量果提供不同的恢复机会。",
+  "counterexample": "能量上限6；低能量不必总防御，零消耗攻击可能直接结束战斗。",
+  "requiredEvidence": "合法行动、技能成本、当前能量、击倒条件",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle",
+   "energy"
+  ]
+ },
+ {
+  "id": "tactic:poison",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "异常持续收益",
+  "keywords": "中毒 孢子 持续伤害 异常 灼烧",
+  "principle": "当前规则中灼烧每次6伤害、中毒每次8伤害，仅在场宠物结算；新异常可在施加回合末结算。",
+  "counterexample": "已有异常不会叠加新异常；换到后备暂停结算，不应把所有剩余跳数当作必得收益。",
+  "requiredEvidence": "状态剩余次数、换宠与净化药分支",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle",
+   "poison"
+  ]
+ },
+ {
+  "id": "tactic:team",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "组队职责",
+  "keywords": "阵容 组队 狐狸 狮子 搭配",
+  "principle": "为队伍安排输出、承伤和收尾职责；狐偏快攻与灼烧联动，狮偏慢速破防爆发。",
+  "counterexample": "不是三个不同属性就一定合理；先检查队伍是否都怕同一种节奏，以及玩家偏好。",
+  "requiredEvidence": "实际阵容、宠物成长、目标关卡、玩家偏好",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "pokemon-official-battling"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:rules-boundary",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "外部规则不能直接套用",
+  "keywords": "宝可梦 本系 加成 双属性 两倍 免疫 天气 雨天 洛克王国",
+  "principle": "当前有火、水、草、岩、雷、风七个技能属性，另有中性的普通系。克制1.5倍；打向克制你的属性0.75倍；其余含同系一律1倍；没有本系加成、双属性。环境机制是有的（细雨、山风，各按回合生效），具体以 engine.js 的 ENVIRONMENTS 为准。属性关系以 TYPE_ADVANTAGES 为准。",
+  "counterexample": "不能把外部攻略的倍率、特性或招式当作当前可用机制。",
+  "requiredEvidence": "engine.js 当前版本与真实技能清单",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:switch-loop",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "连续换宠博弈",
+  "keywords": "反复换 一直换 预判 猜拳",
+  "principle": "不要无限猜对方的下一层预判。分别比较对方留场、换入每只伙伴时的收益，优先关注最坏分支能承受的行动。",
+  "counterexample": "对手刚换过不代表一定继续换；历史频率不是下一步事实。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle",
+   "reserve"
+  ]
+ },
+ {
+  "id": "tactic:switch-turn",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "换宠的完整代价",
+  "keywords": "换宠 回合 攻击 防御 同时",
+  "principle": "主动换宠就是本回合唯一行动，不能换入后再攻击、防御或吃药。对方可能攻击换入者。",
+  "counterexample": "倒下后的强制补位免费；它与主动换宠不是同一种成本。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:double-switch",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "双方同时换宠",
+  "keywords": "双换 同时 换宠 预判",
+  "principle": "双方都换宠时本回合没有攻击，仍按引擎结算在场异常与能量。下一回合重新判断，不把换到优势对位当作造成了伤害。",
+  "counterexample": "连续换位可能只是消耗回合，并没有改善队伍的存活和资源。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle",
+   "reserve"
+  ]
+ },
+ {
+  "id": "tactic:coverage",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "覆盖换入者",
+  "keywords": "覆盖 打点 换入 普通 攻击",
+  "principle": "分别计算招式对当前目标和存活后备的伤害。普通攻击有时覆盖更稳定，但未必足以阻止治疗。",
+  "counterexample": "不能只看当前属性克制，也不能假定普通攻击总是最优。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:safe-pressure",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "稳健施压",
+  "keywords": "稳健 风险 预判 进攻",
+  "principle": "把平均分与最坏分支分开呈现。玩家可以选择稳健行动，保留后备和资源，避免为猜中一次押上全队。",
+  "counterexample": "当前搜索只有一回合；最坏分数是启发式局面评分，不是失败概率。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:free-entry",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "免费补位与主动换入",
+  "keywords": "补位 倒下 免费 换宠",
+  "principle": "伙伴倒下后补位不推进回合；主动轮换会让新伙伴暴露在当回合攻击下。",
+  "counterexample": "不能为了免费补位就随意牺牲伙伴；要比较其后续用途。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:reserve",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "保留反制伙伴",
+  "keywords": "后备 留着 反制 最后一只",
+  "principle": "换宠前检查新伙伴是不是唯一能应对敌方后备的成员，不能只顾眼前对位。",
+  "counterexample": "这是多回合规划问题；一回合高分不等于全局最优。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:heal-punish",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "对治疗分支保持压力",
+  "keywords": "回血 预判 收尾 残血",
+  "principle": "残血对手可能先使用回复药。比较攻击能否覆盖治疗后的生命，而不是只看当前血条。",
+  "counterexample": "道具库存为零或目标已满血时不要虚构治疗分支。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:status-switch",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "换宠与异常暂停",
+  "keywords": "中毒 换宠 灼烧 暂停",
+  "principle": "异常留在原宠物身上，后备期间不结算；换回场后继续。在场异常仍可能在双换回合结算。",
+  "counterexample": "暂停不是净化，不能告诉玩家换宠会清掉中毒。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:guard-status",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "防御不解毒",
+  "keywords": "防御 中毒 净化 灼烧",
+  "principle": "防御阻挡新异常，但不会清掉已有异常，也不会减免回合末固定异常伤害。",
+  "counterexample": "低血量带异常时防御仍可能倒下，先核对剩余生命。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:guard-energy",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "防御回能的上限",
+  "keywords": "防御 回豆 能量 溢出",
+  "principle": "防御额外回2能量，存活在场者回合末再回1，上限6；高能量时部分恢复会溢出。",
+  "counterexample": "防御不是免费等待：对手仍有一次行动，下一回合不能连续防御。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle",
+   "energy"
+  ]
+ },
+ {
+  "id": "tactic:energy-net",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "技能净消耗",
+  "keywords": "豆 消耗 净消耗 能量",
+  "principle": "普通存活在场者回合末回1；耗2技能通常净耗1，耗4技能通常净耗3。零消耗攻击可边输出边回能。",
+  "counterexample": "倒下者不回能，回能有上限；换宠后恢复属于新上场者而非后备。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:ether-cost",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "能量果的机会成本",
+  "keywords": "能量果 吃豆 恢复 道具",
+  "principle": "能量果恢复4并占用行动。要比较吃果后能否承伤，以及零消耗攻击或防御能否满足下一回合需求。",
+  "counterexample": "库存与目标能量必须核对；不能吃果后同回合再攻击。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:drain-cap",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "吸血看实际伤害",
+  "keywords": "吸血 生息藤 残血 过量",
+  "principle": "生息藤按实际造成伤害恢复40%，还受自身缺血限制。目标只剩少量生命时不能按理论伤害估算治疗。",
+  "counterexample": "防御会降低实际伤害，吸血不等于固定恢复。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:recoil",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "反伤与残局",
+  "keywords": "反伤 舍身 烈焰 同归于尽",
+  "principle": "舍身烈焰反伤按实际伤害20%向上取整；计算击倒目标后自身能否存活。",
+  "counterexample": "更大威力不总是更好，低血量残局要核对双倒结果。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:speed-tie",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "平速风险",
+  "keywords": "平速 同速 敏捷 先手",
+  "principle": "相同优先级且同速存在顺序不确定性；不能承诺稳定先手。",
+  "counterexample": "先制技能与道具的优先级不能靠速度超越。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:practice-transfer",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "换局面验证学习",
+  "keywords": "练习 学会 复盘 下次",
+  "principle": "复盘选一个关键取舍，下一次用不同宠物或不同血量的相似局面验证是否能独立判断。",
+  "counterexample": "照着提示点一次不代表学会，也不要每回合强制测验。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "docs/COACH-PLAN.md"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:quiet-player",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "少打扰的帮助",
+  "keywords": "静默 提示 高手 安静",
+  "principle": "玩家明确关闭主动提醒时遵守设置；未关闭时也优先在新风险与可行动的时机提示。",
+  "counterexample": "犹豫可能只是分心，不可据此说玩家不懂或不断催促。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "docs/COACH-PLAN.md"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:short-win",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "速胜与打法多样性",
+  "keywords": "速胜 奖励 回合 消耗",
+  "principle": "速胜可以提供小额一次性挑战奖励，基础成长不因回合较长扣减。另保留防守与消耗打法的成就空间。",
+  "counterexample": "不能把最短回合当作唯一教练目标，更不能为奖励推荐高风险送宠。",
+  "requiredEvidence": "当前合法行动、回合证据、道具与能量、适用的对手分支；产品建议不作为游戏规则",
+  "authority": [
+   "docs/COACH-PLAN.md"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "requiredEvidence": "当前面板、行动优先级、存活后备和技能条件",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "id": "tactic:speed-control",
+  "title": "迟滞电弧控速",
+  "keywords": "鸣电雀 减速 迟滞 电弧 控速",
+  "principle": "迟滞电弧使目标速度降低6，改变下一回合的速度关系；本回合行动顺序已确定，不会追溯改变。",
+  "counterexample": "防御可挡减速，先制优先级仍在速度之前；换宠可能让控速对象退场。",
+  "conditions": [
+   "battle",
+   "slow"
+  ]
+ },
+ {
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "requiredEvidence": "当前面板、行动优先级、存活后备和技能条件",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "id": "tactic:badger-counter",
+  "title": "砾背獾守势反击",
+  "keywords": "砾背獾 反击 防御 岩 碎岩",
+  "principle": "砾背獾防御时受到攻击，会向仍存活的攻击者反击4点；碎岩冲击穿过防御技能减伤。",
+  "counterexample": "对方治疗或换宠不会触发反击，破防招式依然危险；反击不是自动获得的伤害。",
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "requiredEvidence": "当前面板、行动优先级、存活后备和技能条件",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "id": "ui:seed",
+  "title": "首页随机编号（种子）",
+  "keywords": "种子 首页 随机 编号 复现",
+  "principle": "随机编号用于复现随机过程；同规则、阵容、成长、难度、操作序列下才可比较复现。不是宠物或培养资源。",
+  "counterexample": "换编号不会直接增强宠物；不同选择不能保证同样结果。",
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:heal-target",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "给后备治疗也会失去场上行动",
+  "keywords": "后备 治疗 队友 目标 药",
+  "principle": "回复药可对任意存活队友使用，但仍占本方当回合行动；场上伙伴依然可能承伤。",
+  "counterexample": "给后备回血不等于保护场上宠，当前宠若倒下可能失去节奏。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:priority-heal",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "先制抢不过物品",
+  "keywords": "先制 道具 回复药 疾爪 速度",
+  "principle": "物品优先级高于疾爪，比较击倒条件时应覆盖对方先回复45生命的分支。",
+  "counterexample": "对方药品耗尽或目标满血时该治疗分支不合法，不要凭空加上回血。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:last-reserve",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "最后一只没有换宠分支",
+  "keywords": "最后一只 后备 全倒 换宠",
+  "principle": "对手只剩一只存活宠时，可排除换宠分支，但仍须检查防御、治疗和先手。",
+  "counterexample": "排除了换宠也不能直接声称必杀；防御仍会降低普通攻击伤害。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:guard-repeat",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "上一回合防御会限制本回合",
+  "keywords": "连续防御 上回合 守住 节奏",
+  "principle": "上一回合使用防御后，本回合不能再防御，可以不再把它当成对方会做的事。",
+  "counterexample": "不能假设对方必定攻击，物品和主动换宠仍可能合法。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:slow-priority",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "减速不会改变技能优先级",
+  "keywords": "减速 迟滞 先制 下一回合",
+  "principle": "迟滞电弧影响后续同优先级行动的速度比较，不会让普通技能超过疾爪优先级。",
+  "counterexample": "施加减速不会重新排列本回合已经确定的行动顺序。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:heal-overflow",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "实际恢复受到生命上限限制",
+  "keywords": "回血 溢出 浪费 药量 缺血",
+  "principle": "恢复量是标称回复和缺失生命中的较小者。比较道具价值时使用实际回复而非固定45。",
+  "counterexample": "少量回复也可能避免被击倒，不能只因溢出就认定选择错误。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:cleanse-window",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "解毒要比较剩余异常伤害",
+  "keywords": "净化 清除 异常 解毒 剩余",
+  "principle": "净化占行动；结合异常剩余次数、当前生命和对手攻击分支判断是否值得。",
+  "counterexample": "异常在后备暂停而非继续扣血，换宠不能算永久解毒。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:guard-counter-ko",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "反击可能让收尾变成互换",
+  "keywords": "獾 反击 碎岩 残血 互换",
+  "principle": "砾背獾防御时被攻击，若攻击后双方仍存活，会反击4点。收尾应检查自身剩余生命。",
+  "counterexample": "如果攻击已击倒獾则不会触发这次反击；穿防御减伤不代表关闭反击条件。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:confidence",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "分支差异大时承认不确定",
+  "keywords": "一定 必赢 最优 猜 预判",
+  "principle": "枚举给出的是在特定对手行动集合与权重下的局面评分，不是胜率；分支分歧大时说明取舍。",
+  "counterexample": "不能用最终赢了反证当时决策唯一正确，也不能把对手实际动作当作事前已知。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:no-passive-recovery",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "后备不能白回能量",
+  "keywords": "后备 豆 换下 回能 等待",
+  "principle": "只有在场且存活的宠物在回合末恢复1能量，后备不会靠等待自动补满。",
+  "counterexample": "换回低能量宠物后，可能仍无法使用高消耗招式；要看它的实际能量。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:review-scope",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "整局复盘和回合解释不同",
+  "keywords": "上一局 整场 一整局 复盘",
+  "principle": "整局先统计回合与行动分布，再看关键片段；单回合用该回合前后的证据做条件比较。",
+  "counterexample": "只保存最后一回合时无法还原整局，不得编造前面的关键转折。",
+  "requiredEvidence": "合法行动、当前公开面板与规则版本",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:loadout",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "配招与机会成本",
+  "keywords": "配招与机会成本",
+  "principle": "每只伙伴6选4，防御占技能槽。配招和携带物仅在营地改变，下一局生效。",
+  "counterexample": "不带防御会失去减伤回能选择，更多攻击技能不一定更好。",
+  "requiredEvidence": "目标状态、合法技能、分支伤害",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:buff-dispel",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "强化与驱散",
+  "keywords": "强化与驱散",
+  "principle": "蓄势/护甲每层提高对应攻防15%，最多2层，3次在场回合末计时，主动换宠清空。破势命中后驱散，防御可阻挡驱散。",
+  "counterexample": "强化消耗当前行动，残血时可能来不及获得收益。",
+  "requiredEvidence": "目标状态、合法技能、分支伤害",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:weather",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "细雨与山风",
+  "keywords": "细雨与山风",
+  "principle": "后期环境持续前4回合：细雨水伤害×1.1火×0.9；山风风伤害×1.1岩×0.9。清风消耗1豆和一个行动提前移除。",
+  "counterexample": "环境对双方生效；可等待结束，清风不是强制配招。",
+  "requiredEvidence": "目标状态、合法技能、分支伤害",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ },
+ {
+  "id": "tactic:held",
+  "game": "pet-coach",
+  "rulesVersion": "0.6",
+  "status": "active",
+  "title": "一次性携带物",
+  "keywords": "一次性携带物",
+  "principle": "守心石在满血首次受攻击时减伤15%，每局一次；蓄能籽在场存活回合末能量不超过1时恢复2豆，每局一次，再结算普通回能。",
+  "counterexample": "携带物不能让当前能量不足的技能变成合法；触发后不要重复计算。",
+  "requiredEvidence": "目标状态、合法技能、分支伤害",
+  "authority": [
+   "engine.js"
+  ],
+  "inspiration": [
+   "local-design"
+  ],
+  "conditions": [
+   "battle"
+  ]
+ }
 ]

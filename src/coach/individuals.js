@@ -26,8 +26,11 @@ export const ROLL_RULES = {
   talent: {
     id: 'tiered-plus10/v1',
     confidence: 'RECORDED_IN_GAME',
-    note: '一/二/三级各一次，每次 +10 到一个还没被加过的属性；**可以回滚上一次**（次数归还），'
-      + '回滚之后重刷会掷到**另一个**落点；但**每人只许回滚一次**（否则"刷→回滚→刷"会把三次限制架空）。'
+    // 2026-09-27 人类口述改口径（逐字）：「只能回上一个状态，不能回前两个状态；不是回一次；
+    // 还是三次刷新次数，回滚的话不消耗也不返还次数。」
+    note: '一/二/三级各一次，每次 +10 到一个还没被加过的属性；**可以回滚上一次** —— '
+      + '一次只退一步、不能连着退（再刷一次之后才能再退），**次数不消耗也不返还**；'
+      + '回滚之后重刷会掷到**另一个**落点。'
       + '（哪一项被加是随机的 —— 随机性只在这里，幅度与次数都是定死的。）',
   },
 };
@@ -271,29 +274,51 @@ export function lastRefreshOf(individual) {
   return null;
 }
 
-/** 回滚次数上限：**每个个体一次**（人类 2026-09-26 只说"上次刷新可回滚"）。
+/**
+ * 回滚的规则（**2026-09-27 人类口述改口径**，逐字）：
+ *   「只能回上一个状态，不能回前两个状态；**不是回一次**；还是三次刷新次数，
+ *     回滚的话**不消耗也不返还**次数。」
  *
- * ⚠ 2026-09-27 口子与修法：回滚会**归还次数**，而归还之后就能再刷、再回滚 ⇒
- * 「每个个体 3 次」这条限制被架空（可以无限刷到满意）。所以回滚**只许一次**：
- * 想再换，只能靠还没用完的刷新次数。 */
-export const UNDO_LIMIT = 1;
+ * 翻成人话，就是三条：
+ *   ① **一次只退一步**：永远只撤销"最近那一次刷新"，没有"退回到两步之前"这种操作；
+ *   ② **不能连着退**：刚退完一步时，最近一条记录是 `undo` —— 这时再退就等于退两步 ⇒ 不允许；
+ *      但**再刷一次之后又能退**（所以要退几次都行，只要中间真的刷过）；
+ *   ③ **次数不退**：退掉的那一次刷新**不还给你**（三次就是三次），回滚自己也不消耗次数。
+ *
+ * ⚠ 前一版（同日更早）写的是「每人只许回滚一次」+ 次数归还 —— 那是我替产品做的决定，
+ * 人类这次把口径说清了，所以两处都改：`UNDO_LIMIT`/`undoUsed` 不再限制次数（保留导出以免调用方炸），
+ * `canUndo()` 改成"**最近一条记录就是刷新**"，`undoLastRefresh()` **不再归还次数**。
+ */
 export function undoUsed(individual) {
   return (Array.isArray(individual?.history) ? individual.history : [])
     .filter((row) => row?.kind === 'undo').length;
 }
+/** 历史里最近一条记录（没有就 null）——"只退一步"判的就是它。 */
+export function lastHistoryOf(individual) {
+  const rows = Array.isArray(individual?.history) ? individual.history : [];
+  return rows.length ? rows[rows.length - 1] : null;
+}
+/** 现在能不能退：**最近一条记录必须是刷新**（退过一次就必须先再刷一次）。 */
 export function canUndo(individual) {
-  return lastRefreshOf(individual) !== null && undoUsed(individual) < UNDO_LIMIT;
+  const last = lastHistoryOf(individual);
+  return Boolean(last && (last.kind === 'nature' || last.kind === 'talent'));
 }
 
 /**
- * 回滚上一次刷新。返回**新个体**（不原地改）；没有可回滚的刷新就抛 `nothing-to-undo`。
- * 次数按"还一次"处理：回滚的是性格就补性格的次数，且封顶在 `REFRESH_LIMIT`。
+ * 回滚上一次刷新。返回**新个体**（不原地改）；没有可回滚的刷新就抛 `nothing-to-undo`，
+ * 连着退第二步抛 `already-undone`（文案说清"只能退一步"）。
+ * **次数不动**：退掉的那次刷新不还（人类 2026-09-27 口述）。
  */
 export function undoLastRefresh(individual, {at = null} = {}) {
   const last = lastRefreshOf(individual);
-  if (!last) throw Object.assign(new Error('没有可以回滚的刷新'), {code: 'nothing-to-undo'});
-  if (undoUsed(individual) >= UNDO_LIMIT) {
-    throw Object.assign(new Error('这一只已经回滚过一次了（每人只有一次）'), {code: 'undo-used'});
+  if (!last) {
+    // 已经退到没有"最近一次刷新"了：退过一次就是"只能退一步"，否则是"还没刷过"。
+    throw Object.assign(new Error(undoUsed(individual) > 0
+      ? '这一步已经退过了：一次只能退一步，再刷一次之后才能再退'
+      : '没有可以回滚的刷新'), {code: undoUsed(individual) > 0 ? 'already-undone' : 'nothing-to-undo'});
+  }
+  if (!canUndo(individual)) {
+    throw Object.assign(new Error('这一步已经退过了：一次只能退一步，再刷一次之后才能再退'), {code: 'already-undone'});
   }
   const next = clone(individual);
   const index = next.history.lastIndexOf(last);
@@ -305,8 +330,7 @@ export function undoLastRefresh(individual, {at = null} = {}) {
     // 天分：那次加成要从账上删掉（`talent_boosts` 里 tier 等于这次的）
     next.talent_boosts = (next.talent_boosts ?? []).filter((row) => row.tier !== last.used);
   }
-  next.refreshes = {...next.refreshes,
-    [last.kind]: Math.min(REFRESH_LIMIT, Number(next.refreshes?.[last.kind] ?? 0) + 1)};
+  // 次数**一个都不动**（人类口述：「不消耗也不返还」）——原来那行 `Math.min(LIMIT, +1)` 删掉了。
   // `undid` = **被撤掉的那个落点**（性格是那条性格名，天分是那一项）。
   // 下一次重刷要靠它说出"换掉了什么"（见 `refresh()` 的 `replaced` 与 `lastRefreshNote()`）。
   next.history.push({kind: 'undo', used: last.used, undo_of: last.kind,
@@ -359,7 +383,8 @@ export function rollbackAdvice(individual, {priority = [], labels = null} = {}) 
     const before = last.before ?? '（没填）';
     const now = last.after ?? '（没填）';
     return {ok: true, kind: 'nature', worth: null,
-      text: `上一次刷性格：从「${before}」换成了「${now}」。回滚就是换回「${before}」——`
+      text: `上一次刷性格：从「${before}」换成了「${now}」。回滚就是换回「${before}」` +
+        '（只退这一步，退掉的这次刷新**不会**还给你）——'
         + '哪个更合适要看你要它干什么（抢速度、扛伤害、还是打输出），我不替你拍板。'};
   }
   const boosted = Array.isArray(individual.talent_boosts) ? individual.talent_boosts : [];

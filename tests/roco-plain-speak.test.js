@@ -25,12 +25,12 @@ const FILES = ['src/server/roco-service.js', 'src/coach/runtime.js', 'src/coach/
  'src/coach/strategist.js', 'src/client/team-workshop.js', 'src/client/xiaoya.js', 'src/client/roco.js',
  // 2026-09-26 第 51 轮扩进来：静态页面文案（HTML 文本节点）也是玩家读的。
  // `toolbox.js` 刻意**不**进这份清单：它的中文串是给规划器的工具说明与错误码，不是玩家文案。
- 'src/client/roco.html', 'src/client/nurture.html', 'src/client/index.html', 'src/client/box.html',
- 'src/client/xiaoya.html',
+ // 2026-09-27：`nurture.html` 已整页退役（加点不要了）⇒ 从扫描清单里去掉。
+ 'src/client/roco.html', 'src/client/index.html', 'src/client/box.html', 'src/client/xiaoya.html',
  // 2026-09-27（审计 ②：**判据白名单漏了这三个**）：营地页、盒子页、练习页的**页面代码**
  // 也在拼玩家文案，一直没被扫过 —— 实测漏出 4 条（`box.js` 的「本仓库」、`nurture.js` 的
  // 「口径」与两个 `src/game/*.js` 路径；都是玩家点得到的）。补进来之后那 4 条当场红、已逐条改掉。
- 'src/client/app.js', 'src/client/box.js', 'src/client/nurture.js'];
+ 'src/client/app.js', 'src/client/box.js'];
 // 2026-09-27（审计 ②）：**词表搬到 `src/coach/plain-words.js`** —— 判据、真机探针
 //（`scripts/roco/probe-answer-speak.mjs`）、移动端总扫（`browser-mobile-sweep.mjs`）三处
 // 用的是同一份。词表写两份必然漂（这一轮就是靠"三处各写一份"才发现漏了两个词）。
@@ -226,7 +226,8 @@ test('⑤ 「依据」栏只给玩家看人话：工程记号挑出去，一条�
 test('⑥ 不渲染 markdown 的落点：HTML 文本节点与纯文本出口都不许漏出 `**`', () => {
  // 审计 R6 的原话：「判 R6 必须看落点，不能看字符串」——四个回答正文的落点确实渲染 markdown，
  // 真问题在 HTML 文本节点、`textContent`、裸 `innerHTML` 这几类。
- const htmls = ['src/client/index.html', 'src/client/roco.html', 'src/client/nurture.html',
+ // 2026-09-27：`nurture.html` 已退役 ⇒ 不在清单里（页面本身不存在了）。
+ const htmls = ['src/client/index.html', 'src/client/roco.html',
   'src/client/xiaoya.html', 'src/client/box.html', 'src/client/connect.html', 'src/client/workshop.html'];
  const bad = [];
  for (const file of htmls) {
@@ -269,7 +270,7 @@ test('⑧ HTML 文本节点也要说人话（原来只查字面 `**`，`roco.htm
  // 被测对象：HTML 的**文本节点**（玩家在页面上真的读到的字），不是属性、不是注释。
  const bad = [];
  const seen = new Set();
- const targets = ['src/client/index.html', 'src/client/roco.html', 'src/client/nurture.html',
+ const targets = ['src/client/index.html', 'src/client/roco.html',
   'src/client/xiaoya.html', 'src/client/box.html', 'src/client/connect.html', 'src/client/workshop.html'];
  for (const file of targets) {
   const allowed = HTML_DEBT.hard[file] ?? HTML_DEBT.soft[file] ?? 0;

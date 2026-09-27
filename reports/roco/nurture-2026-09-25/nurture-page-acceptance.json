@@ -245,7 +245,7 @@
       "judge": "navPathProblems",
       "hit": [
         "三级必须是**同一页内**切换（页面被重新加载过就把状态丢了）",
-        "二级的「营地 · 训练场」要能回到 roco.html，实际 \"http://127.0.0.1:64992/nurture.html\""
+        "二级的「营地 · 训练场」要能回到 roco.html，实际 \"http://127.0.0.1:60410/nurture.html\""
       ]
     },
     {

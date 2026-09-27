@@ -7,7 +7,9 @@ import {rosterAdvice} from '../src/coach/strategist.js';
 import {freshMemory,rememberBattle,readMemory} from '../src/coach/memory.js';
 const request=(message,game=createGame(),profile=newProfile(),memory=freshMemory())=>runCoach({message,context:buildContext(game,profile,'fox'),memory});
 test('strategist gives a legal action grounded in current state',async()=>{const g=createGame(),answer=await request('这回合怎么打',g);assert.equal(answer.route,'strategist');assert(legalActions(g).some(a=>JSON.stringify(a)===JSON.stringify(answer.actions[0])));assert(answer.evidence.some(x=>x.includes('能量')));});
-test('teacher reads selected pet and resource limits',async()=>{const p=newProfile();p.tokens=0;const a=await request('怎么培养',null,p);assert.match(a.text,/烬尾狐/);assert.match(a.text,/没有训练点/);});
+// 2026-09-27 改钉（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+// 这一条原来钉「读到了点数上限（没有训练点）」。加点退役 ⇒ 改成钉"读到了那一只 + 说清没有加点"。
+test('teacher reads selected pet and says there is no stat-point system',async()=>{const p=newProfile();p.tokens=0;const a=await request('怎么培养',null,p);assert.match(a.text,/烬尾狐/);assert.match(a.text,/没有加点/);assert.match(a.text,/Lv\./);});
 test('quiz closes the teaching loop and records success',async()=>{const a=await request('小测验');assert(a.memory.pendingQuiz);const b=await request('先出手',createGame(),newProfile(),a.memory);assert.match(b.text,/答对/);assert.equal(b.memory.lessons.length,1);assert.equal(b.memory.pendingQuiz,null);});
 test('explicit preference persists and preview results are not remembered',async()=>{const a=await request('记住以后简短说');assert.equal(readMemory(JSON.stringify(a.memory)).preference,'brief');const g=createGame();g.result='loss';assert.equal(rememberBattle(freshMemory(),g).events.length,1);g.preview=true;assert.equal(rememberBattle(freshMemory(),g).events.length,0);});
 test('PVP restriction happens before provider calls',async()=>{let called=false;const c=buildContext(createGame(),newProfile(),'fox');c.mode='pvp-live';const a=await runCoach({message:'怎么打',context:c,memory:freshMemory(),provider:{async generate(){called=true;}}});assert.equal(called,false);assert.match(a.text,/不提供/);});
@@ -34,7 +36,7 @@ test('quiz waits for an answer, survives reload, handles question mark and cance
  const a=await runCoach({...args,message:'出一道小测验'});assert.match(a.text,/假设练习/);assert(!a.text.includes('答对'));assert.equal(a.choices.length,4);
  const memory=readMemory(JSON.stringify(a.memory));assert(memory.pendingQuiz);
  const b=await runCoach({...args,memory,message:'？'});assert(b.memory.pendingQuiz);assert.match(b.text,/等你作答/);
- const c=await runCoach({...args,memory:b.memory,message:'后出手'});assert.equal(c.quizResult.correct,false);assert.equal(c.memory.lessons.length,0);assert.match(c.text,/38\+3=41/);
+ const c=await runCoach({...args,memory:b.memory,message:'后出手'});assert.equal(c.quizResult.correct,false);assert.equal(c.memory.lessons.length,0);assert.match(c.text,/我方速度 38，对手 40/,'2026-09-27 改钉（加点退役）：讲解改成纯速度比较');
  const cancel=await runCoach({...args,memory,message:'先不做了'});assert.equal(cancel.memory.pendingQuiz,null);
 });
 test('provider receives earlier dialogue and topic instead of an isolated follow-up',async()=>{
@@ -308,7 +310,8 @@ test('小测的变式表每一档都不同：第 4 次出题不再与第 1 次�
  }
  assert.equal(new Set(ids).size,QUIZ_OFFSETS.length,`${QUIZ_OFFSETS.length} 个变式的 id 必须互不相同`);
  assert.equal(ids[3]===ids[0],false,'第 4 次出题不能与第 1 次完全一样（原来 [2,4,3] 循环就会）');
- assert.match(buildQuiz(context,{variant:0}).explanation,/38\+3=41/,'第 1 个变式的数字不能变（既有验收）');
+ assert.match(buildQuiz(context,{variant:0}).explanation,/我方速度 38，对手 40/,
+  '2026-09-27 改钉（加点退役）：第 1 个变式的数字照旧钉住，只是不再写那道加点算式');
 });
 test('独立解出才算一次：有提示的答对不算，一次答对也不是掌握',()=>{
  const context=buildContext(null,newProfile(),'fox');

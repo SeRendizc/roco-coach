@@ -104,9 +104,9 @@ const publicAssets=new Set([
  // `roco.html` 上；`workshop.html` 只是单独调试该模块的开发夹具（薄壳），
  // JS 由模块图自动收录（HTML 里的 `<script type="module">` 是入口）。
  'src/client/workshop.html',
- // RC-306「培养」页（三级导航的二级）：HTML/CSS 是页面外壳，JS 由下面的模块图自动收录
- // （`nurture.html` 里的 `<script type="module" src="/src/client/nurture.js">` 是入口）。
- 'src/client/nurture.html','src/client/nurture.css',
+ // 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+ // RC-306 的「培养」页（训练点 + 培养格 + 加点）**整页退役** —— 文件删掉、静态清单里去掉，
+ // `/nurture.html` 与 `/nurture` 由下面的 RETIRED_PAGES 302 到盒子页（旧书签不落 404）。
  'src/client/style.css','src/client/connect.css','src/client/connect.js',
  'src/client/battle-v3.css',  // v3h 战斗区样式（人类定稿的版式）
 ]);
@@ -206,7 +206,16 @@ export {publicAssets,browserModules,moduleSpecifiers,STARTED_AT};
  * 页面 URL 是对外契约：README、文档、用户书签、玩家手敲的地址都是这些短路径，
  * 所以文件搬进 `src/client/` 也不改 URL。
  */
-export const PAGE_ALIASES={'':'src/client/index.html','index.html':'src/client/index.html','connect.html':'src/client/connect.html','roco.html':'src/client/roco.html','box.html':'src/client/box.html','workshop.html':'src/client/workshop.html','nurture.html':'src/client/nurture.html','xiaoya.html':'src/client/xiaoya.html'};
+export const PAGE_ALIASES={'':'src/client/index.html','index.html':'src/client/index.html','connect.html':'src/client/connect.html','roco.html':'src/client/roco.html','box.html':'src/client/box.html','workshop.html':'src/client/workshop.html','xiaoya.html':'src/client/xiaoya.html'};
+
+/**
+ * **已退役的页面**（旧 URL → 新落点，302）。放进这里而不是让它 404：
+ * 页面 URL 是对外契约（书签/文档/别的页面里的链接都可能是老地址），退役也要退得体面。
+ *
+ * 2026-09-27：`/nurture.html`（练习养成页）整页退役 —— 它整页都在讲「训练点 / 培养格 / 加点」，
+ * 而那套东西原版没有（人类：「不要了」）。培养现在只有一件事：在我的盒子里刷新性格/天分。
+ */
+export const RETIRED_PAGES={'nurture.html':'/box.html','nurture':'/box.html'};
 
 const json=(res,status,value)=>{res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(value));};
 const fail=(status,message)=>Object.assign(new Error(message),{status});
@@ -893,10 +902,12 @@ const status=()=>({runtimeVersion:'0.11',configured:!!credential,verified,model,
    // 明明在白名单里，`/xiaoya.html` 却 404（只有首页热区用的 `/src/client/xiaoya.html` 能打开）。
    // 页面文件名就是玩家会手敲的 URL，所以每一页都要有短路径；这条现在由
    // `tests/evals/structure-contract.test.js` 的「每个页面外壳都必须有短路径」逐页钉住。
-   // RC-306「培养」页同理：`/nurture.html` 是三级导航的二级短路径（一级是 `/roco.html`）。
+   // 2026-09-27：RC-306「培养」页已退役（`RETIRED_PAGES` 里 302 到 `/box.html`），
+   // 所以短路径表里不再有它 —— 这是**唯一**一个"有 URL 但没有页面文件"的落点。
    // 其余资源一律用真实相对路径，
    // 这样浏览器按 import 说明符解析出的 URL 与白名单条目是同构的。
    const raw=decodeURIComponent(path.slice(1));
+   if(Object.hasOwn(RETIRED_PAGES,raw)){res.writeHead(302,{Location:RETIRED_PAGES[raw],'Cache-Control':'no-store'});res.end();return;}
    const asset=Object.hasOwn(PAGE_ALIASES,raw)?PAGE_ALIASES[raw]:raw;
    if(asset.includes('..'))throw fail(404,'文件不存在');
    if(!publicAssets.has(asset)&&!resolveAssetOnMiss(asset))throw fail(404,'文件不存在');

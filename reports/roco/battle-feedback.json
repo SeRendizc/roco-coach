@@ -1,7 +1,7 @@
 {
  "schema": "roco-battle-feedback/v1",
  "all_ok": true,
- "generated_at": "2026-09-27T07:01:38.638Z",
+ "generated_at": "2026-09-27T17:26:08.167Z",
  "what": "战斗反馈验收：① 伤害/治疗数字真的看得见（不是被立绘压住）② 出手与受击有先后（不同一帧齐发）③ 背包屏的数字可追溯（引擎实数 / 已登记证据）+ 该显示的必须显示（2026-09-25 决策 4「（甲）读法」）④ 立绘框底边接缝（框底那一行跳变 ≤ 6 + 跨框底一步 |Δ亮度| ≤ 3；2026-09-25 决策 1「把接缝压掉」）",
  "how": "自起 app server(8895) + 自拉 headless Chrome + 真鼠标进战斗 + 量立绘框接缝（J8：整页 PNG 的像素） + 真鼠标点「物品」读背包屏（J7）+ 真鼠标点技能；页面里挂 MutationObserver(childList/subtree/attributes/characterData) 记 DOM 变化时间，逐帧 elementFromPoint 记「数字在不在最上层」；**不读客户端自述的任何时间戳字段**",
  "totals": {
@@ -38,7 +38,7 @@
    "id": "J2",
    "name": "真的在最上层",
    "ok": true,
-   "actual": "2 个浮字逐帧 elementFromPoint：「防御 70%」39/39 帧命中自身（命中 [\"b3-float b3-float--shield\"]）／探针 \"b3-float b3-float--shield\"；「-14」40/40 帧命中自身（命中 [\"b3-float b3-float--hit\"]）／探针 \"b3-float b3-float--hit\"；总采样帧 132",
+   "actual": "2 个浮字逐帧 elementFromPoint：「防御 70%」40/40 帧命中自身（命中 [\"b3-float b3-float--shield\"]）／探针 \"b3-float b3-float--shield\"；「-14」40/40 帧命中自身（命中 [\"b3-float b3-float--hit\"]）／探针 \"b3-float b3-float--hit\"；总采样帧 134",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -48,7 +48,7 @@
    "id": "J3",
    "name": "有先后",
    "ok": true,
-   "actual": "出手线索 3 条 → 合并成 1 拍（首个 side=self t=7292ms）；受击方 cue 1 条、浮字 2 条；配对 1 对，判据要求 ≥ 100ms：出手→受击 +450.2ms（其中 出手→.b3-hit +450.2ms、出手→伤害浮字 +450.2ms「-14」）",
+   "actual": "出手线索 3 条 → 合并成 1 拍（首个 side=self t=7292.1ms）；受击方 cue 1 条、浮字 2 条；配对 1 对，判据要求 ≥ 100ms：出手→受击 +449.5ms（其中 出手→.b3-hit +449.5ms、出手→伤害浮字 +449.6ms「-14」）",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -58,7 +58,7 @@
    "id": "J4",
    "name": "不残留",
    "ok": true,
-   "actual": "结束时剩 0 个浮字；2 个浮字的存活时长：[\"防御 70%=1199.8ms\",\"-14=1200.4ms\"]",
+   "actual": "结束时剩 0 个浮字；2 个浮字的存活时长：[\"防御 70%=1199.7ms\",\"-14=1200.8ms\"]",
    "missing": [],
    "problems": [],
    "problems_detail": [],
@@ -415,7 +415,7 @@
     "key": "now",
     "label": "量真实页面时那一版 CSS（`.b3-fx` 没有 z-index、`.b3-float` 没开 pointer-events）",
     "appliedRule": "（不加任何规则）",
-    "bornT": 408.5,
+    "bornT": 411.5,
     "css": {
      "fxZIndex": "auto",
      "spriteZIndex": "1",
@@ -440,7 +440,7 @@
     "float": {
      "text": "-30",
      "side": "self",
-     "aliveMs": 105.7,
+     "aliveMs": 104.4,
      "samples": 3,
      "measurableSamples": 3,
      "onTopSamples": 0,
@@ -448,7 +448,7 @@
       "b3-sprite"
      ],
      "paintProbe": {
-      "t": 444.2,
+      "t": 431.6,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
@@ -461,21 +461,21 @@
     "paintOrderHitIsFloat": false,
     "measuredFrames": [
      {
-      "t": 444.2,
+      "t": 431.6,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
      },
      {
-      "t": 470.3,
+      "t": 465.1,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
      },
      {
-      "t": 493.9,
+      "t": 497.9,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
@@ -490,7 +490,7 @@
     "key": "zOnly",
     "label": "只把 `.b3-fx` 抬到 z-index:3（不动 pointer-events）",
     "appliedRule": ".b3-wrap .b3-fx{z-index:3}",
-    "bornT": 519.3,
+    "bornT": 521.4,
     "css": {
      "fxZIndex": "3",
      "spriteZIndex": "1",
@@ -516,14 +516,14 @@
      "text": "-30",
      "side": "self",
      "aliveMs": 103.3,
-     "samples": 4,
-     "measurableSamples": 4,
+     "samples": 3,
+     "measurableSamples": 3,
      "onTopSamples": 0,
      "hitClasses": [
       "b3-sprite"
      ],
      "paintProbe": {
-      "t": 526.6,
+      "t": 531.1,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
@@ -536,28 +536,21 @@
     "paintOrderHitIsFloat": true,
     "measuredFrames": [
      {
-      "t": 526.6,
+      "t": 531.1,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
      },
      {
-      "t": 559.1,
+      "t": 564.6,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
       "hitIsFloat": false
      },
      {
-      "t": 579.8,
-      "measurable": true,
-      "hitClass": "b3-sprite",
-      "hitTag": "img",
-      "hitIsFloat": false
-     },
-     {
-      "t": 609.2,
+      "t": 598.1,
       "measurable": true,
       "hitClass": "b3-sprite",
       "hitTag": "img",
@@ -572,7 +565,7 @@
     "key": "fixed",
     "label": "`.b3-fx{z-index:3}` + `.b3-float{pointer-events:auto}`（客户端那一版修法的两行）",
     "appliedRule": ".b3-wrap .b3-fx{z-index:3}.b3-wrap .b3-float{pointer-events:auto}",
-    "bornT": 627,
+    "bornT": 628.6,
     "css": {
      "fxZIndex": "3",
      "spriteZIndex": "1",
@@ -597,15 +590,15 @@
     "float": {
      "text": "-30",
      "side": "self",
-     "aliveMs": 105.3,
-     "samples": 3,
-     "measurableSamples": 3,
-     "onTopSamples": 3,
+     "aliveMs": 103.8,
+     "samples": 4,
+     "measurableSamples": 4,
+     "onTopSamples": 4,
      "hitClasses": [
       "b3-float b3-float--hit"
      ],
      "paintProbe": {
-      "t": 642.5,
+      "t": 631.5,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
@@ -618,21 +611,28 @@
     "paintOrderHitIsFloat": true,
     "measuredFrames": [
      {
-      "t": 642.5,
+      "t": 631.5,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
      },
      {
-      "t": 677.2,
+      "t": 664.6,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
      },
      {
-      "t": 709.1,
+      "t": 689.9,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--hit",
+      "hitTag": "span",
+      "hitIsFloat": true
+     },
+     {
+      "t": 715.2,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
@@ -648,7 +648,7 @@
    "key": "now",
    "label": "量真实页面时那一版 CSS（`.b3-fx` 没有 z-index、`.b3-float` 没开 pointer-events）",
    "appliedRule": "（不加任何规则）",
-   "bornT": 408.5,
+   "bornT": 411.5,
    "css": {
     "fxZIndex": "auto",
     "spriteZIndex": "1",
@@ -673,7 +673,7 @@
    "float": {
     "text": "-30",
     "side": "self",
-    "aliveMs": 105.7,
+    "aliveMs": 104.4,
     "samples": 3,
     "measurableSamples": 3,
     "onTopSamples": 0,
@@ -681,7 +681,7 @@
      "b3-sprite"
     ],
     "paintProbe": {
-     "t": 444.2,
+     "t": 431.6,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
@@ -694,21 +694,21 @@
    "paintOrderHitIsFloat": false,
    "measuredFrames": [
     {
-     "t": 444.2,
+     "t": 431.6,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
     },
     {
-     "t": 470.3,
+     "t": 465.1,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
     },
     {
-     "t": 493.9,
+     "t": 497.9,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
@@ -723,7 +723,7 @@
    "key": "zOnly",
    "label": "只把 `.b3-fx` 抬到 z-index:3（不动 pointer-events）",
    "appliedRule": ".b3-wrap .b3-fx{z-index:3}",
-   "bornT": 519.3,
+   "bornT": 521.4,
    "css": {
     "fxZIndex": "3",
     "spriteZIndex": "1",
@@ -749,14 +749,14 @@
     "text": "-30",
     "side": "self",
     "aliveMs": 103.3,
-    "samples": 4,
-    "measurableSamples": 4,
+    "samples": 3,
+    "measurableSamples": 3,
     "onTopSamples": 0,
     "hitClasses": [
      "b3-sprite"
     ],
     "paintProbe": {
-     "t": 526.6,
+     "t": 531.1,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
@@ -769,28 +769,21 @@
    "paintOrderHitIsFloat": true,
    "measuredFrames": [
     {
-     "t": 526.6,
+     "t": 531.1,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
     },
     {
-     "t": 559.1,
+     "t": 564.6,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
      "hitIsFloat": false
     },
     {
-     "t": 579.8,
-     "measurable": true,
-     "hitClass": "b3-sprite",
-     "hitTag": "img",
-     "hitIsFloat": false
-    },
-    {
-     "t": 609.2,
+     "t": 598.1,
      "measurable": true,
      "hitClass": "b3-sprite",
      "hitTag": "img",
@@ -805,7 +798,7 @@
    "key": "fixed",
    "label": "`.b3-fx{z-index:3}` + `.b3-float{pointer-events:auto}`（客户端那一版修法的两行）",
    "appliedRule": ".b3-wrap .b3-fx{z-index:3}.b3-wrap .b3-float{pointer-events:auto}",
-   "bornT": 627,
+   "bornT": 628.6,
    "css": {
     "fxZIndex": "3",
     "spriteZIndex": "1",
@@ -830,15 +823,15 @@
    "float": {
     "text": "-30",
     "side": "self",
-    "aliveMs": 105.3,
-    "samples": 3,
-    "measurableSamples": 3,
-    "onTopSamples": 3,
+    "aliveMs": 103.8,
+    "samples": 4,
+    "measurableSamples": 4,
+    "onTopSamples": 4,
     "hitClasses": [
      "b3-float b3-float--hit"
     ],
     "paintProbe": {
-     "t": 642.5,
+     "t": 631.5,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
@@ -851,21 +844,28 @@
    "paintOrderHitIsFloat": true,
    "measuredFrames": [
     {
-     "t": 642.5,
+     "t": 631.5,
      "measurable": true,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
     },
     {
-     "t": 677.2,
+     "t": 664.6,
      "measurable": true,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
     },
     {
-     "t": 709.1,
+     "t": 689.9,
+     "measurable": true,
+     "hitClass": "b3-float b3-float--hit",
+     "hitTag": "span",
+     "hitIsFloat": true
+    },
+    {
+     "t": 715.2,
      "measurable": true,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
@@ -987,7 +987,7 @@
   "path": "真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）",
   "manaAvailable": true,
   "turnsDriven": 4,
-  "elapsedMs": 2672,
+  "elapsedMs": 2659,
   "initial": {
    "engine": {
     "mana": {
@@ -1022,7 +1022,7 @@
     }
    },
    "bodyHearts": 8,
-   "at": 4415
+   "at": 4430
   },
   "faint": {
    "found": true,
@@ -1075,7 +1075,7 @@
      }
     },
     "bodyHearts": 8,
-    "at": 5747
+    "at": 5756
    },
    "after": {
     "engine": {
@@ -1111,7 +1111,7 @@
      }
     },
     "bodyHearts": 16,
-    "at": 6194
+    "at": 6193
    },
    "domSelf": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♥",
    "domFoe": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♡"
@@ -1154,7 +1154,7 @@
      }
     },
     "bodyHearts": 8,
-    "at": 4415
+    "at": 4430
    },
    "after": {
     "engine": {
@@ -1186,7 +1186,7 @@
      }
     },
     "bodyHearts": 0,
-    "at": 4421
+    "at": 4434
    },
    "restoredRead": {
     "engine": {
@@ -1222,7 +1222,7 @@
      }
     },
     "bodyHearts": 8,
-    "at": 4423
+    "at": 4437
    },
    "reason": "合成「引擎没给」：抽掉 state.view.mana 再 window.rocoDemo.render()（同一帧读 DOM），随后原样塞回"
   },
@@ -1696,7 +1696,7 @@
     "w": 232,
     "h": 146
    },
-   "windowMs": 3873.7,
+   "windowMs": 3851.9,
    "timeline": 8,
    "cues": 4,
    "attackCues": 3,
@@ -1704,13 +1704,13 @@
    "floats": 2,
    "digitFloats": 2,
    "defenderEvents": 3,
-   "deltaFirstPairMs": -449.5,
+   "deltaFirstPairMs": -449.9,
    "finalFloatCount": 0,
    "floatTexts": [
     "防御 70%@foe",
     "-14@foe"
    ],
-   "frames": 132,
+   "frames": 134,
    "selfErrors": [],
    "seam": {
     "shot": "battle-feedback/04-spritebox-seam.png",
@@ -2073,64 +2073,64 @@
    "float_events": 2,
    "float_gone_events": 2,
    "first_attack_cue": {
-    "t": 7292,
+    "t": 7292.1,
     "side": "self",
     "what": ".b3-attack",
     "relT": 0
    },
    "timeline_rel_ms": [
     {
-     "t": 6842.5,
-     "relT": -449.5,
+     "t": 6842.2,
+     "relT": -449.9,
      "kind": "float",
      "side": "foe",
      "what": "防御 70%"
     },
     {
-     "t": 7292,
+     "t": 7292.1,
      "relT": 0,
      "kind": "cue",
      "side": "self",
      "what": ".b3-attack"
     },
     {
-     "t": 7292,
+     "t": 7292.1,
      "relT": 0,
      "kind": "cue",
      "side": "self",
      "what": "data-b3-variant=action"
     },
     {
-     "t": 7292,
+     "t": 7292.1,
      "relT": 0,
      "kind": "cue",
      "side": "self",
      "what": "sprite src → action 立绘"
     },
     {
-     "t": 7742.2,
-     "relT": 450.2,
+     "t": 7741.6,
+     "relT": 449.5,
      "kind": "cue",
      "side": "foe",
      "what": ".b3-hit"
     },
     {
-     "t": 7742.2,
-     "relT": 450.2,
+     "t": 7741.7,
+     "relT": 449.6,
      "kind": "float",
      "side": "foe",
      "what": "-14"
     },
     {
-     "t": 8042.3,
-     "relT": 750.3,
+     "t": 8042,
+     "relT": 749.9,
      "kind": "float-gone",
      "side": null,
      "what": "防御 70%"
     },
     {
-     "t": 8942.7,
-     "relT": 1650.7,
+     "t": 8942.5,
+     "relT": 1650.4,
      "kind": "float-gone",
      "side": null,
      "what": "-14"
@@ -2140,9 +2140,9 @@
     {
      "text": "防御 70%",
      "side": "foe",
-     "bornT": 6842.5,
-     "goneT": 8042.3,
-     "aliveMs": 1199.8,
+     "bornT": 6842.2,
+     "goneT": 8041.9,
+     "aliveMs": 1199.7,
      "removed": true,
      "rect": {
       "w": 58.29,
@@ -2150,21 +2150,21 @@
       "cx": 943,
       "cy": 493.53
      },
-     "samples": 39,
-     "measurable": 39,
-     "onTop": 39,
+     "samples": 40,
+     "measurable": 40,
+     "onTop": 40,
      "hitClasses": [
       "b3-float b3-float--shield"
      ],
      "paint_probe": {
-      "t": 6873.5,
+      "t": 6871.4,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true
      },
      "sample_detail": [
       {
-       "t": 6873.5,
+       "t": 6871.4,
        "measurable": true,
        "cx": 943,
        "cy": 522.36,
@@ -2175,51 +2175,62 @@
        "hitIsFloat": true
       },
       {
-       "t": 6905.2,
+       "t": 6892.8,
        "measurable": true,
        "cx": 943,
-       "cy": 520.28,
-       "w": 55.44,
-       "h": 17.92,
+       "cy": 521.29,
+       "w": 54.5,
+       "h": 17.62,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 6939.9,
+       "t": 6921,
        "measurable": true,
        "cx": 943,
-       "cy": 518.42,
+       "cy": 519.33,
+       "w": 56.33,
+       "h": 18.21,
+       "hitClass": "b3-float b3-float--shield",
+       "hitTag": "span",
+       "hitIsFloat": true
+      },
+      {
+       "t": 6954.1,
+       "measurable": true,
+       "cx": 943,
+       "cy": 518.43,
        "w": 57.17,
-       "h": 18.49,
+       "h": 18.48,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 6973.5,
+       "t": 6988.5,
        "measurable": true,
        "cx": 943,
-       "cy": 516.79,
-       "w": 58.69,
-       "h": 18.98,
+       "cy": 516.06,
+       "w": 59.37,
+       "h": 19.2,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7005.3,
+       "t": 7013.8,
        "measurable": true,
        "cx": 943,
-       "cy": 515.4,
-       "w": 59.99,
-       "h": 19.4,
+       "cy": 515.41,
+       "w": 59.98,
+       "h": 19.39,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7040.1,
+       "t": 7038.1,
        "measurable": true,
        "cx": 943,
        "cy": 514.33,
@@ -2230,23 +2241,12 @@
        "hitIsFloat": true
       },
       {
-       "t": 7072.9,
+       "t": 7071.1,
        "measurable": true,
        "cx": 943,
-       "cy": 513.93,
-       "w": 61.36,
-       "h": 19.84,
-       "hitClass": "b3-float b3-float--shield",
-       "hitTag": "span",
-       "hitIsFloat": true
-      },
-      {
-       "t": 7106.7,
-       "measurable": true,
-       "cx": 943,
-       "cy": 513.13,
-       "w": 61.72,
-       "h": 19.95,
+       "cy": 513.65,
+       "w": 61.63,
+       "h": 19.93,
        "hitClass": "b3-float b3-float--shield",
        "hitTag": "span",
        "hitIsFloat": true
@@ -2256,9 +2256,9 @@
     {
      "text": "-14",
      "side": "foe",
-     "bornT": 7742.2,
-     "goneT": 8942.6,
-     "aliveMs": 1200.4,
+     "bornT": 7741.7,
+     "goneT": 8942.5,
+     "aliveMs": 1200.8,
      "removed": true,
      "rect": {
       "w": 32.32,
@@ -2273,14 +2273,14 @@
       "b3-float b3-float--hit"
      ],
      "paint_probe": {
-      "t": 7756.6,
+      "t": 7756.2,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true
      },
      "sample_detail": [
       {
-       "t": 7756.6,
+       "t": 7756.2,
        "measurable": true,
        "cx": 943,
        "cy": 398.97,
@@ -2291,7 +2291,7 @@
        "hitIsFloat": true
       },
       {
-       "t": 7790.2,
+       "t": 7788.4,
        "measurable": true,
        "cx": 943,
        "cy": 396.77,
@@ -2302,7 +2302,7 @@
        "hitIsFloat": true
       },
       {
-       "t": 7822.1,
+       "t": 7821.6,
        "measurable": true,
        "cx": 943,
        "cy": 394.81,
@@ -2313,7 +2313,7 @@
        "hitIsFloat": true
       },
       {
-       "t": 7851.9,
+       "t": 7852.9,
        "measurable": true,
        "cx": 943,
        "cy": 393.91,
@@ -2324,18 +2324,18 @@
        "hitIsFloat": true
       },
       {
-       "t": 7873.5,
+       "t": 7887.7,
        "measurable": true,
        "cx": 943,
-       "cy": 392.27,
-       "w": 32.54,
-       "h": 29.21,
+       "cy": 391.55,
+       "w": 32.92,
+       "h": 29.54,
        "hitClass": "b3-float b3-float--hit",
        "hitTag": "span",
        "hitIsFloat": true
       },
       {
-       "t": 7905.4,
+       "t": 7912.5,
        "measurable": true,
        "cx": 943,
        "cy": 390.89,
@@ -2346,7 +2346,7 @@
        "hitIsFloat": true
       },
       {
-       "t": 7940.1,
+       "t": 7937.9,
        "measurable": true,
        "cx": 943,
        "cy": 389.81,
@@ -2357,12 +2357,12 @@
        "hitIsFloat": true
       },
       {
-       "t": 7971.7,
+       "t": 7971.4,
        "measurable": true,
        "cx": 943,
-       "cy": 389.41,
-       "w": 34.02,
-       "h": 30.53,
+       "cy": 389.13,
+       "w": 34.17,
+       "h": 30.67,
        "hitClass": "b3-float b3-float--hit",
        "hitTag": "span",
        "hitIsFloat": true
@@ -2374,7 +2374,7 @@
    "cycles": {
     "leads": [
      {
-      "t": 7292,
+      "t": 7292.1,
       "side": "self",
       "cues": [
        ".b3-attack",
@@ -2385,11 +2385,11 @@
     ],
     "pairs": [
      {
-      "t": 7292,
+      "t": 7292.1,
       "attacker": "self",
-      "deltaMs": 450.2,
-      "deltaHitMs": 450.2,
-      "deltaFloatMs": 450.2,
+      "deltaMs": 449.5,
+      "deltaHitMs": 449.5,
+      "deltaFloatMs": 449.6,
       "floatText": "-14",
       "hitWhat": ".b3-hit",
       "reactions": 2
@@ -2399,16 +2399,16 @@
     "inversions": []
    },
    "deltas_ms": {
-    "attack_to_first_defender": 450.2,
+    "attack_to_first_defender": 449.5,
     "defender_side": "foe",
     "consecutive_ms": [
+     449.9,
+     0,
+     0,
      449.5,
-     0,
-     0,
-     450.2,
-     0,
-     300.1,
-     900.4
+     0.1,
+     300.3,
+     900.5
     ]
    }
   },
@@ -2471,7 +2471,7 @@
    "path": "真鼠标点「开一局（标准 PVP · 六宠）」（盒子六只 own 个体经 ?team= 交接；6 只）",
    "manaAvailable": true,
    "turnsDriven": 4,
-   "elapsedMs": 2672,
+   "elapsedMs": 2659,
    "initial": {
     "engine": {
      "mana": {
@@ -2506,7 +2506,7 @@
      }
     },
     "bodyHearts": 8,
-    "at": 4415
+    "at": 4430
    },
    "faint": {
     "found": true,
@@ -2559,7 +2559,7 @@
       }
      },
      "bodyHearts": 8,
-     "at": 5747
+     "at": 5756
     },
     "after": {
      "engine": {
@@ -2595,7 +2595,7 @@
       }
      },
      "bodyHearts": 16,
-     "at": 6194
+     "at": 6193
     },
     "domSelf": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♥",
     "domFoe": "掉心前 ♥♥♥♥ → 掉心后 ♥♥♥♡"
@@ -2638,7 +2638,7 @@
       }
      },
      "bodyHearts": 8,
-     "at": 4415
+     "at": 4430
     },
     "after": {
      "engine": {
@@ -2670,7 +2670,7 @@
       }
      },
      "bodyHearts": 0,
-     "at": 4421
+     "at": 4434
     },
     "restoredRead": {
      "engine": {
@@ -2706,7 +2706,7 @@
       }
      },
      "bodyHearts": 8,
-     "at": 4423
+     "at": 4437
     },
     "reason": "合成「引擎没给」：抽掉 state.view.mana 再 window.rocoDemo.render()（同一帧读 DOM），随后原样塞回"
    },
@@ -3097,7 +3097,7 @@
       "w": 232,
       "h": 146
      },
-     "windowMs": 3873.7,
+     "windowMs": 3851.9,
      "timeline": 8,
      "cues": 4,
      "attackCues": 3,
@@ -3105,13 +3105,13 @@
      "floats": 2,
      "digitFloats": 2,
      "defenderEvents": 3,
-     "deltaFirstPairMs": -449.5,
+     "deltaFirstPairMs": -449.9,
      "finalFloatCount": 0,
      "floatTexts": [
       "防御 70%@foe",
       "-14@foe"
      ],
-     "frames": 132,
+     "frames": 134,
      "selfErrors": [],
      "seam": {
       "shot": "battle-feedback/04-spritebox-seam.png",
@@ -3470,7 +3470,7 @@
   ],
   "timeline": [
    {
-    "t": 6842.5,
+    "t": 6842.2,
     "kind": "float",
     "side": "foe",
     "detail": {
@@ -3481,7 +3481,7 @@
     }
    },
    {
-    "t": 7292,
+    "t": 7292.1,
     "kind": "cue",
     "side": "self",
     "detail": {
@@ -3492,7 +3492,7 @@
     }
    },
    {
-    "t": 7292,
+    "t": 7292.1,
     "kind": "cue",
     "side": "self",
     "detail": {
@@ -3502,7 +3502,7 @@
     }
    },
    {
-    "t": 7292,
+    "t": 7292.1,
     "kind": "cue",
     "side": "self",
     "detail": {
@@ -3513,7 +3513,7 @@
     }
    },
    {
-    "t": 7742.2,
+    "t": 7741.6,
     "kind": "cue",
     "side": "foe",
     "detail": {
@@ -3524,7 +3524,7 @@
     }
    },
    {
-    "t": 7742.2,
+    "t": 7741.7,
     "kind": "float",
     "side": "foe",
     "detail": {
@@ -3535,25 +3535,25 @@
     }
    },
    {
-    "t": 8042.3,
+    "t": 8042,
     "kind": "float-gone",
     "side": null,
     "detail": {
      "role": "float-gone",
      "floatId": "f2",
      "text": "防御 70%",
-     "aliveMs": 1199.8
+     "aliveMs": 1199.7
     }
    },
    {
-    "t": 8942.7,
+    "t": 8942.5,
     "kind": "float-gone",
     "side": null,
     "detail": {
      "role": "float-gone",
      "floatId": "f3",
      "text": "-14",
-     "aliveMs": 1200.4
+     "aliveMs": 1200.8
     }
    }
   ],
@@ -3562,14 +3562,14 @@
     "id": "f2",
     "text": "防御 70%",
     "side": "foe",
-    "bornT": 6842.5,
-    "goneT": 8042.3,
+    "bornT": 6842.2,
+    "goneT": 8041.9,
     "samples": [
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 6873.5,
+      "t": 6871.4,
       "cx": 943,
       "cy": 522.36,
       "w": 53.5,
@@ -3585,11 +3585,27 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 6905.2,
+      "t": 6892.8,
       "cx": 943,
-      "cy": 520.28,
-      "w": 55.44,
-      "h": 17.92,
+      "cy": 521.29,
+      "w": 54.5,
+      "h": 17.62,
+      "inViewport": true,
+      "measurable": true,
+      "hitClass": "b3-float b3-float--shield",
+      "hitTag": "span",
+      "hitIsFloat": true,
+      "source": "timer"
+     },
+     {
+      "id": "f2",
+      "text": "防御 70%",
+      "side": "foe",
+      "t": 6921,
+      "cx": 943,
+      "cy": 519.33,
+      "w": 56.33,
+      "h": 18.21,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3601,27 +3617,27 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 6939.9,
+      "t": 6954.1,
       "cx": 943,
-      "cy": 518.42,
+      "cy": 518.43,
       "w": 57.17,
-      "h": 18.49,
+      "h": 18.48,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 6973.5,
+      "t": 6988.5,
       "cx": 943,
-      "cy": 516.79,
-      "w": 58.69,
-      "h": 18.98,
+      "cy": 516.06,
+      "w": 59.37,
+      "h": 19.2,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3633,23 +3649,23 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7005.3,
+      "t": 7013.8,
       "cx": 943,
-      "cy": 515.4,
-      "w": 59.99,
-      "h": 19.4,
+      "cy": 515.41,
+      "w": 59.98,
+      "h": 19.39,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7040.1,
+      "t": 7038.1,
       "cx": 943,
       "cy": 514.33,
       "w": 60.99,
@@ -3665,23 +3681,23 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7072.9,
+      "t": 7071.1,
       "cx": 943,
-      "cy": 513.93,
-      "w": 61.36,
-      "h": 19.84,
+      "cy": 513.65,
+      "w": 61.63,
+      "h": 19.93,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7106.7,
+      "t": 7104.5,
       "cx": 943,
       "cy": 513.13,
       "w": 61.72,
@@ -3697,7 +3713,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7132.4,
+      "t": 7134,
       "cx": 943,
       "cy": 512.56,
       "w": 61.62,
@@ -3713,7 +3729,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7155.3,
+      "t": 7154.8,
       "cx": 943,
       "cy": 511.44,
       "w": 61.42,
@@ -3729,7 +3745,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7190.3,
+      "t": 7188,
       "cx": 943,
       "cy": 510.36,
       "w": 61.23,
@@ -3745,9 +3761,9 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7222,
+      "t": 7221.1,
       "cx": 943,
-      "cy": 509.3,
+      "cy": 509.31,
       "w": 61.05,
       "h": 19.74,
       "inViewport": true,
@@ -3761,7 +3777,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7251.6,
+      "t": 7253,
       "cx": 943,
       "cy": 508.79,
       "w": 60.96,
@@ -3777,11 +3793,11 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7273.5,
+      "t": 7287.5,
       "cx": 943,
-      "cy": 507.77,
-      "w": 60.78,
-      "h": 19.65,
+      "cy": 507.28,
+      "w": 60.69,
+      "h": 19.62,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3793,7 +3809,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7307.4,
+      "t": 7313,
       "cx": 943,
       "cy": 506.79,
       "w": 60.61,
@@ -3803,13 +3819,13 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7338.7,
+      "t": 7337.8,
       "cx": 943,
       "cy": 505.83,
       "w": 60.44,
@@ -3825,23 +3841,23 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7372.8,
+      "t": 7371.1,
       "cx": 943,
-      "cy": 505.36,
-      "w": 60.36,
-      "h": 19.51,
+      "cy": 504.89,
+      "w": 60.28,
+      "h": 19.49,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7405.4,
+      "t": 7404.9,
       "cx": 943,
       "cy": 503.98,
       "w": 60.12,
@@ -3857,7 +3873,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7432.6,
+      "t": 7433.3,
       "cx": 943,
       "cy": 503.54,
       "w": 60.04,
@@ -3873,7 +3889,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7456.8,
+      "t": 7454.6,
       "cx": 943,
       "cy": 502.67,
       "w": 59.89,
@@ -3889,7 +3905,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7488.8,
+      "t": 7488.2,
       "cx": 943,
       "cy": 501.84,
       "w": 59.74,
@@ -3905,9 +3921,9 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7523.6,
+      "t": 7521.3,
       "cx": 943,
-      "cy": 501.02,
+      "cy": 501.03,
       "w": 59.6,
       "h": 19.27,
       "inViewport": true,
@@ -3921,7 +3937,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7550.3,
+      "t": 7554.1,
       "cx": 943,
       "cy": 500.63,
       "w": 59.53,
@@ -3937,11 +3953,11 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7572.1,
+      "t": 7587.9,
       "cx": 943,
-      "cy": 499.87,
-      "w": 59.4,
-      "h": 19.2,
+      "cy": 499.5,
+      "w": 59.33,
+      "h": 19.18,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -3953,9 +3969,9 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7606.9,
+      "t": 7614.2,
       "cx": 943,
-      "cy": 499.14,
+      "cy": 499.13,
       "w": 59.27,
       "h": 19.16,
       "inViewport": true,
@@ -3963,13 +3979,13 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7640.4,
+      "t": 7638.2,
       "cx": 943,
       "cy": 498.43,
       "w": 59.15,
@@ -3985,23 +4001,23 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7671.6,
+      "t": 7671.3,
       "cx": 943,
-      "cy": 498.1,
-      "w": 59.09,
-      "h": 19.1,
+      "cy": 497.77,
+      "w": 59.03,
+      "h": 19.09,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7706.9,
+      "t": 7705,
       "cx": 943,
       "cy": 497.14,
       "w": 58.92,
@@ -4017,7 +4033,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7731.5,
+      "t": 7733.3,
       "cx": 943,
       "cy": 496.84,
       "w": 58.87,
@@ -4033,7 +4049,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7756.6,
+      "t": 7756.2,
       "cx": 943,
       "cy": 496.27,
       "w": 58.77,
@@ -4049,7 +4065,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7790.2,
+      "t": 7788.4,
       "cx": 943,
       "cy": 495.74,
       "w": 58.68,
@@ -4065,7 +4081,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7822.1,
+      "t": 7821.6,
       "cx": 943,
       "cy": 495.26,
       "w": 58.59,
@@ -4081,7 +4097,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7851.9,
+      "t": 7852.9,
       "cx": 943,
       "cy": 495.04,
       "w": 58.55,
@@ -4097,11 +4113,11 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7873.5,
+      "t": 7887.7,
       "cx": 943,
-      "cy": 494.63,
-      "w": 58.48,
-      "h": 18.91,
+      "cy": 494.45,
+      "w": 58.45,
+      "h": 18.9,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
@@ -4113,7 +4129,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7905.4,
+      "t": 7912.5,
       "cx": 943,
       "cy": 494.27,
       "w": 58.42,
@@ -4123,13 +4139,13 @@
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7940.1,
+      "t": 7937.9,
       "cx": 943,
       "cy": 493.98,
       "w": 58.37,
@@ -4145,23 +4161,23 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 7971.7,
+      "t": 7971.4,
       "cx": 943,
-      "cy": 493.85,
-      "w": 58.35,
+      "cy": 493.74,
+      "w": 58.33,
       "h": 18.86,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--shield",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 8005.6,
+      "t": 8004.7,
       "cx": 943,
       "cy": 493.58,
       "w": 58.3,
@@ -4177,7 +4193,7 @@
       "id": "f2",
       "text": "防御 70%",
       "side": "foe",
-      "t": 8031.9,
+      "t": 8033.6,
       "cx": 943,
       "cy": 493.53,
       "w": 58.29,
@@ -4199,32 +4215,32 @@
     "classes": "b3-float b3-float--shield",
     "textChanges": 0,
     "paintProbe": {
-     "t": 6873.5,
+     "t": 6871.4,
      "hitClass": "b3-float b3-float--shield",
      "hitTag": "span",
      "hitIsFloat": true
     },
-    "sampleCount": 39,
-    "measurableSamples": 39,
-    "onTopSamples": 39,
+    "sampleCount": 40,
+    "measurableSamples": 40,
+    "onTopSamples": 40,
     "hitClasses": [
      "b3-float b3-float--shield"
     ],
-    "aliveMs": 1199.8,
+    "aliveMs": 1199.7,
     "removed": true
    },
    {
     "id": "f3",
     "text": "-14",
     "side": "foe",
-    "bornT": 7742.2,
-    "goneT": 8942.6,
+    "bornT": 7741.7,
+    "goneT": 8942.5,
     "samples": [
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 7756.6,
+      "t": 7756.2,
       "cx": 943,
       "cy": 398.97,
       "w": 29.08,
@@ -4240,7 +4256,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 7790.2,
+      "t": 7788.4,
       "cx": 943,
       "cy": 396.77,
       "w": 30.22,
@@ -4256,7 +4272,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 7822.1,
+      "t": 7821.6,
       "cx": 943,
       "cy": 394.81,
       "w": 31.23,
@@ -4272,7 +4288,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 7851.9,
+      "t": 7852.9,
       "cx": 943,
       "cy": 393.91,
       "w": 31.7,
@@ -4288,11 +4304,11 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 7873.5,
+      "t": 7887.7,
       "cx": 943,
-      "cy": 392.27,
-      "w": 32.54,
-      "h": 29.21,
+      "cy": 391.55,
+      "w": 32.92,
+      "h": 29.54,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
@@ -4304,7 +4320,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 7905.4,
+      "t": 7912.5,
       "cx": 943,
       "cy": 390.89,
       "w": 33.26,
@@ -4314,13 +4330,13 @@
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 7940.1,
+      "t": 7937.9,
       "cx": 943,
       "cy": 389.81,
       "w": 33.82,
@@ -4336,23 +4352,23 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 7971.7,
+      "t": 7971.4,
       "cx": 943,
-      "cy": 389.41,
-      "w": 34.02,
-      "h": 30.53,
+      "cy": 389.13,
+      "w": 34.17,
+      "h": 30.67,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8005.6,
+      "t": 8004.7,
       "cx": 943,
       "cy": 388.62,
       "w": 34.22,
@@ -4368,7 +4384,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8031.9,
+      "t": 8033.6,
       "cx": 943,
       "cy": 388.04,
       "w": 34.16,
@@ -4384,7 +4400,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8056.5,
+      "t": 8055.9,
       "cx": 943,
       "cy": 386.93,
       "w": 34.05,
@@ -4400,7 +4416,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8088.7,
+      "t": 8087.9,
       "cx": 943,
       "cy": 385.84,
       "w": 33.95,
@@ -4416,7 +4432,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8123.5,
+      "t": 8121.8,
       "cx": 943,
       "cy": 384.79,
       "w": 33.85,
@@ -4432,7 +4448,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8151.4,
+      "t": 8153.6,
       "cx": 943,
       "cy": 384.27,
       "w": 33.8,
@@ -4448,11 +4464,11 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8172.2,
+      "t": 8187.9,
       "cx": 943,
-      "cy": 383.26,
-      "w": 33.7,
-      "h": 30.24,
+      "cy": 382.76,
+      "w": 33.65,
+      "h": 30.2,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
@@ -4464,7 +4480,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8206.8,
+      "t": 8213,
       "cx": 943,
       "cy": 382.27,
       "w": 33.6,
@@ -4474,13 +4490,13 @@
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8239.5,
+      "t": 8238.1,
       "cx": 943,
       "cy": 381.31,
       "w": 33.51,
@@ -4496,23 +4512,23 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8271,
+      "t": 8271.3,
       "cx": 943,
-      "cy": 380.84,
-      "w": 33.46,
-      "h": 30.03,
+      "cy": 380.38,
+      "w": 33.42,
+      "h": 29.99,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8305.9,
+      "t": 8304.9,
       "cx": 943,
       "cy": 379.47,
       "w": 33.33,
@@ -4528,7 +4544,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8331.6,
+      "t": 8332.9,
       "cx": 943,
       "cy": 379.03,
       "w": 33.29,
@@ -4544,7 +4560,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8356.8,
+      "t": 8354.7,
       "cx": 943,
       "cy": 378.16,
       "w": 33.2,
@@ -4560,7 +4576,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8390.2,
+      "t": 8388.3,
       "cx": 943,
       "cy": 377.32,
       "w": 33.12,
@@ -4576,7 +4592,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8422.1,
+      "t": 8421.2,
       "cx": 943,
       "cy": 376.51,
       "w": 33.04,
@@ -4592,7 +4608,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8452.2,
+      "t": 8452.6,
       "cx": 943,
       "cy": 376.12,
       "w": 33.01,
@@ -4608,11 +4624,11 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8473.5,
+      "t": 8488.2,
       "cx": 943,
-      "cy": 375.35,
-      "w": 32.93,
-      "h": 29.56,
+      "cy": 374.98,
+      "w": 32.9,
+      "h": 29.52,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
@@ -4624,7 +4640,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8505.5,
+      "t": 8513.1,
       "cx": 943,
       "cy": 374.62,
       "w": 32.86,
@@ -4634,13 +4650,13 @@
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8540.3,
+      "t": 8538.3,
       "cx": 943,
       "cy": 373.92,
       "w": 32.79,
@@ -4656,23 +4672,23 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8571.4,
+      "t": 8571.5,
       "cx": 943,
-      "cy": 373.58,
-      "w": 32.76,
-      "h": 29.4,
+      "cy": 373.25,
+      "w": 32.73,
+      "h": 29.37,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8606.9,
+      "t": 8604.6,
       "cx": 943,
       "cy": 372.63,
       "w": 32.67,
@@ -4688,9 +4704,9 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8631.6,
+      "t": 8634.2,
       "cx": 943,
-      "cy": 372.33,
+      "cy": 372.32,
       "w": 32.64,
       "h": 29.29,
       "inViewport": true,
@@ -4704,7 +4720,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8655.5,
+      "t": 8654.9,
       "cx": 943,
       "cy": 371.76,
       "w": 32.58,
@@ -4720,7 +4736,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8690.1,
+      "t": 8687.9,
       "cx": 943,
       "cy": 371.23,
       "w": 32.53,
@@ -4736,7 +4752,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8722.4,
+      "t": 8721.5,
       "cx": 943,
       "cy": 370.75,
       "w": 32.48,
@@ -4752,7 +4768,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8752.4,
+      "t": 8753.8,
       "cx": 943,
       "cy": 370.52,
       "w": 32.46,
@@ -4768,11 +4784,11 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8773.4,
+      "t": 8788.3,
       "cx": 943,
-      "cy": 370.11,
-      "w": 32.42,
-      "h": 29.1,
+      "cy": 369.93,
+      "w": 32.41,
+      "h": 29.08,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
@@ -4784,7 +4800,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8806.9,
+      "t": 8814.1,
       "cx": 943,
       "cy": 369.76,
       "w": 32.39,
@@ -4794,13 +4810,13 @@
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "raf"
+      "source": "timer"
      },
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8838.7,
+      "t": 8837.8,
       "cx": 943,
       "cy": 369.46,
       "w": 32.36,
@@ -4816,23 +4832,23 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8871.2,
+      "t": 8871.8,
       "cx": 943,
-      "cy": 369.34,
-      "w": 32.35,
-      "h": 29.03,
+      "cy": 369.23,
+      "w": 32.34,
+      "h": 29.02,
       "inViewport": true,
       "measurable": true,
       "hitClass": "b3-float b3-float--hit",
       "hitTag": "span",
       "hitIsFloat": true,
-      "source": "timer"
+      "source": "raf"
      },
      {
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8905.5,
+      "t": 8904,
       "cx": 943,
       "cy": 369.07,
       "w": 32.32,
@@ -4848,7 +4864,7 @@
       "id": "f3",
       "text": "-14",
       "side": "foe",
-      "t": 8932.5,
+      "t": 8933,
       "cx": 943,
       "cy": 369.01,
       "w": 32.32,
@@ -4870,7 +4886,7 @@
     "classes": "b3-float b3-float--hit",
     "textChanges": 0,
     "paintProbe": {
-     "t": 7756.6,
+     "t": 7756.2,
      "hitClass": "b3-float b3-float--hit",
      "hitTag": "span",
      "hitIsFloat": true
@@ -4881,7 +4897,7 @@
     "hitClasses": [
      "b3-float b3-float--hit"
     ],
-    "aliveMs": 1200.4,
+    "aliveMs": 1200.8,
     "removed": true
    }
   ],
@@ -4889,7 +4905,7 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 6873.5,
+    "t": 6871.4,
     "measurable": true,
     "cx": 943,
     "cy": 522.36,
@@ -4900,10 +4916,10 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 6905.2,
+    "t": 6892.8,
     "measurable": true,
     "cx": 943,
-    "cy": 520.28,
+    "cy": 521.29,
     "hitClass": "b3-float b3-float--shield",
     "hitTag": "span",
     "hitIsFloat": true
@@ -4911,10 +4927,10 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 6939.9,
+    "t": 6921,
     "measurable": true,
     "cx": 943,
-    "cy": 518.42,
+    "cy": 519.33,
     "hitClass": "b3-float b3-float--shield",
     "hitTag": "span",
     "hitIsFloat": true
@@ -4922,10 +4938,10 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 6973.5,
+    "t": 6954.1,
     "measurable": true,
     "cx": 943,
-    "cy": 516.79,
+    "cy": 518.43,
     "hitClass": "b3-float b3-float--shield",
     "hitTag": "span",
     "hitIsFloat": true
@@ -4933,10 +4949,10 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 7005.3,
+    "t": 6988.5,
     "measurable": true,
     "cx": 943,
-    "cy": 515.4,
+    "cy": 516.06,
     "hitClass": "b3-float b3-float--shield",
     "hitTag": "span",
     "hitIsFloat": true
@@ -4944,10 +4960,10 @@
    {
     "float": "防御 70%",
     "side": "foe",
-    "t": 7040.1,
+    "t": 7013.8,
     "measurable": true,
     "cx": 943,
-    "cy": 514.33,
+    "cy": 515.41,
     "hitClass": "b3-float b3-float--shield",
     "hitTag": "span",
     "hitIsFloat": true
@@ -4955,7 +4971,7 @@
    {
     "float": "-14",
     "side": "foe",
-    "t": 7756.6,
+    "t": 7756.2,
     "measurable": true,
     "cx": 943,
     "cy": 398.97,
@@ -4966,7 +4982,7 @@
    {
     "float": "-14",
     "side": "foe",
-    "t": 7790.2,
+    "t": 7788.4,
     "measurable": true,
     "cx": 943,
     "cy": 396.77,
@@ -4977,7 +4993,7 @@
    {
     "float": "-14",
     "side": "foe",
-    "t": 7822.1,
+    "t": 7821.6,
     "measurable": true,
     "cx": 943,
     "cy": 394.81,
@@ -4988,7 +5004,7 @@
    {
     "float": "-14",
     "side": "foe",
-    "t": 7851.9,
+    "t": 7852.9,
     "measurable": true,
     "cx": 943,
     "cy": 393.91,
@@ -4999,10 +5015,10 @@
    {
     "float": "-14",
     "side": "foe",
-    "t": 7873.5,
+    "t": 7887.7,
     "measurable": true,
     "cx": 943,
-    "cy": 392.27,
+    "cy": 391.55,
     "hitClass": "b3-float b3-float--hit",
     "hitTag": "span",
     "hitIsFloat": true
@@ -5010,7 +5026,7 @@
    {
     "float": "-14",
     "side": "foe",
-    "t": 7905.4,
+    "t": 7912.5,
     "measurable": true,
     "cx": 943,
     "cy": 390.89,
@@ -5019,7 +5035,7 @@
     "hitIsFloat": true
    }
   ],
-  "frames_count": 132,
+  "frames_count": 134,
   "side_evidence": {
    "rule": "按 DOM 归属判定 side：node.closest([data-b3-side]) → [data-b3-self-card]/[data-b3-foe-card] → .b3-fighter--self/--foe → [data-b3-mirror]；不靠文本猜。（实测：客户端把 `data-b3-side` 写在 `.b3-free.b3-spritebox` 上；`[data-b3-spritebox]` 这个属性不存在，所以立绘画框那一格用 `.b3-free` 读，见下面 selfFree/foeFree。）",
    "wrap": {
@@ -5202,9 +5218,9 @@
    },
    {
     "file": "src/client/roco.html",
-    "sha256": "19f7512ee20e6ddc",
-    "bytes": 59661,
-    "mtime": "2026-09-27T04:53:33.922Z"
+    "sha256": "ebdc0c0510b03e0e",
+    "bytes": 59571,
+    "mtime": "2026-09-27T16:26:19.708Z"
    }
   ],
   "after": [
@@ -5222,9 +5238,9 @@
    },
    {
     "file": "src/client/roco.html",
-    "sha256": "19f7512ee20e6ddc",
-    "bytes": 59661,
-    "mtime": "2026-09-27T04:53:33.922Z"
+    "sha256": "ebdc0c0510b03e0e",
+    "bytes": 59571,
+    "mtime": "2026-09-27T16:26:19.708Z"
    }
   ],
   "note": "src/client 由**别的代理并行修改**：这两个哈希说明这一跑量的是哪一版；两处不同 = 跑的过程中被改过"

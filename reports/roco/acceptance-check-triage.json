@@ -1,0 +1,11 @@
+{
+ "generated_by": "scripts/roco/triage-check-warnings.mjs",
+ "scanned_calls": 142,
+ "files_scanned": 13,
+ "problems": [],
+ "counts": {
+  "ok": 1
+ },
+ "real_fake_green": [],
+ "needs_eye": []
+}

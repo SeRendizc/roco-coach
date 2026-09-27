@@ -44,7 +44,9 @@ export function coachEvent(event,context,session){
 }
 export function localReply(question,context){
  if(isLiveMatch(context))return '线上竞技 PVP 赛中不提供战术分析，结束后我们再聊。';
- if(/培养|成长|训练|加点/.test(question))return '营地里每花 1 训练点，可选 +12 生命、+4 攻击或 +3 速度。先想让伙伴承担什么职责；升级会增加培养格，重置会返还点数。';
+ // 2026-09-27（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+ // 这条原来教的是「每花 1 训练点 +12 生命 / +4 攻击 / +3 速度」。现在如实说清没有加点。
+ if(/培养|成长|训练|加点/.test(question))return '这一版没有加点：培养就是改性格与改天分 —— 在我的盒子里按种类点开个体，每只各能刷 3 次。等级与经验照常涨，打对战就有。';
  if(/狐|狮/.test(question))return '烬尾狐用火花挂灼烧，再用余烬追猎增伤，疾爪还能先制。炽鬃狮不挂灼烧，破甲重击能穿过防御，但舍身烈焰会反伤。它们现在走两种打法。';
  if(/输|烦|难|菜/.test(question))return '可以先缓一缓，不用马上再开一局。你想回看，我会从具体回合聊起。';
  if(/复盘|回顾/.test(question))return context.lastTurn?'最近一回合：'+context.lastTurn.events.filter(x=>!x.startsWith('──')).join(' '):'先完成一个回合，我就能帮你找到对应记录。';

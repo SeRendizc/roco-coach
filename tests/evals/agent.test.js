@@ -267,10 +267,17 @@ test('branch simulation covers both tie orders without mutation or hidden seed d
  context.battle.seed=987;assert.deepEqual(executeTool('simulate_branch',{actionIndex:0,opponentIndex:0},context),a);
 });
 
-test('training preserves scarce resources for an explicitly preferred partner',()=>{
+// 2026-09-27 改钉（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+// 这一条原来钉「点数不多时先留给本命」那条加点建议。加点退役 ⇒ 老师这一档只讲
+// 等级/经验 + "培养在哪做"；**偏好仍然被读进去**（`goal`/`favorite` 照旧挂在 packet 上）。
+test('teacher no longer gives stat-point advice (that system is gone) but still reads preferences',()=>{
  const p=newProfile();p.tokens=2;
  const a=teacher({...buildContext(null,p,'turtle'),favorite:'fox',goal:'速攻'});
- assert.match(a.headline,/先留给.*烬尾狐/);assert.match(a.reason,/不急/);assert.equal(p.tokens,2);
+ assert.match(a.text,/没有加点/,`要说清这一版没有加点：${a.text}`);
+ assert.match(a.text,/我的盒子/, '要说清培养在哪做');
+ assert.equal(a.goal,'速攻');assert.equal(a.favorite,'fox');
+ assert.doesNotMatch(a.text+String(a.headline),/培养格|训练点 ?\d|\+12 生命/,'不再给加点数值');
+ assert.equal(p.tokens,2,'读数不许改存档');
 });
 
 import {transferAssessment,coachSelfAudit} from '../../src/coach/memory.js';

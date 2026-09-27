@@ -91,15 +91,13 @@ test('④ 刷新/回滚：成不成都回一句人话，不抛给页面', () => 
   assert.equal(refreshIndividual('talent', 'own-0001').ok, true);
   assert.equal(refreshIndividual('nature', 'own-0001').ok, true);
   assert.equal(undoIndividual('own-0001').ok, true, '刷过就能回滚');
-  // 回滚过之后那次机会就用掉了 ⇒ 再点回滚要给"已经用过"这句话（不是"没刷过"那句）
+  // 刚退过一步 ⇒ 再点回滚要给"只能退一步"这句话（人类 2026-09-27 口述）
   const afterUndo = undoIndividual('own-0001');
-  assert.equal(afterUndo.ok, false, '回滚过之后不能马上再撤');
-  assert.match(afterUndo.reason, /已经回滚过一次/, `理由要说清：${afterUndo.reason}`);
-  // 再刷一次 ⇒ 又有可撤的了，但"每人一次"那笔账还在 ⇒ 必须明确拒绝并说清原因
+  assert.equal(afterUndo.ok, false, '刚退过一步不能马上再退');
+  assert.match(afterUndo.reason, /只能退一步/, `理由要说清：${afterUndo.reason}`);
+  // 再刷一次（还有余量）⇒ 又能退一步：这一条把"不是回一次"钉住
   assert.equal(refreshIndividual('talent', 'own-0001').ok, true);
-  const used = undoIndividual('own-0001');
-  assert.equal(used.ok, false, '每人只许回滚一次（防"刷→回滚→刷"）');
-  assert.match(used.reason, /已经回滚过一次/, `理由要说清：${used.reason}`);
+  assert.equal(undoIndividual('own-0001').ok, true, '中间刷过 ⇒ 可以再退一步');
   // 没刷过的那一只：这句话是"没有可撤的"（与"已经用过"分开说）
   assert.equal(undoIndividual('own-0002').ok, false, '没刷过就回滚 ⇒ 也要有一句话');
   assert.match(undoIndividual('own-0002').reason, /还没有可以回滚的刷新/);

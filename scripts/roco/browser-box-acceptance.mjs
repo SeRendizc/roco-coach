@@ -706,7 +706,12 @@ async function main() {
         lockProblems({...lockFacts, lockParam: '', lockedNow: '0'}), '{"lockParam":""}');
       shots.push(await shoot('box-09-lock-handoff-1440x900'));
     } else {
-      check('25-锁定随交接走：按钮上写清带了几只锁定', false, '「只看锁定」过滤后一只卡片都没有（夹具里应当有 9 只锁定）');
+      // ⚠ 2026-09-27（逐条判定 123 处警告时抓到）：这一行原来是**三参数**写法，而这个脚本的
+      // `check` 是 `(id, judge, ok, actual)` ⇒ `ok` 收到那串文本（恒真）——**这条"失败上报"
+      // 其实报的是绿**。补上判据文本，让它真的红。
+      check('25-锁定随交接走：按钮上写清带了几只锁定',
+        '「只看锁定」过滤后应当有卡片可比（夹具里 9 只锁定）',
+        false, '「只看锁定」过滤后一只卡片都没有（夹具里应当有 9 只锁定）');
     }
 
     // ── ⑧ 刷新 → 回滚 → 重刷（**真机**：真鼠标点抽屉里的按钮）──────────────────
@@ -715,9 +720,10 @@ async function main() {
     // 两轮把它记成"没做到/未验证"。这一组补上真机那一段，并且**每一步都看数据**（localStorage
     // 里的个体记录），不看"按钮点着了没有"：
     //   ① 点「刷新天分」⇒ 账上多一级、次数 3→2、那一行小字说出**落在哪一项**；
-    //   ② 点「回滚上一次」⇒ 天分数值**逐值回到刷之前**、次数还回 3、按钮消失；
-    //   ③ 再点「刷新天分」⇒ 落点必须**换一项**，而且那行小字要说清"换掉了原来的哪一项"；
-    //   ④ 再想回滚 ⇒ 按钮**不许再出现**（每人一次，见 `UNDO_LIMIT`）。
+    //   ② 点「回滚上一次」⇒ 天分数值**逐值回到刷之前**、**次数不动**（人类：「不消耗也不返还」）、
+    //      按钮消失（刚退过一步，再退就是退回两步之前）；
+    //   ③ 再点「刷新天分」⇒ 落点必须**换一项**、那行小字要说清"换掉了原来的哪一项"，
+    //      而且**按钮要回来**（中间刷过了，这一步可以退 —— 人类：「不是回一次」）。
     // 判据写成纯函数（`rollbackProblems`），反证直接喂坏数据给它。
     const rollbackProblems = (step) => {
       const bad = [];
@@ -737,8 +743,9 @@ async function main() {
       if (Number(afterUndo.boosts) !== Number(before.boosts)) {
         bad.push(`回滚之后账上应当回到 ${before.boosts} 级，实际 ${afterUndo.boosts}`);
       }
-      if (Number(afterUndo.left) !== Number(before.left)) {
-        bad.push(`回滚要把次数还回来（应当 ${before.left}，实际 ${afterUndo.left}）`);
+      // 2026-09-27 改钉（人类口述）：「回滚不消耗也不返还次数」⇒ 退一步之后次数**不动**。
+      if (Number(afterUndo.left) !== Number(afterRefresh.left)) {
+        bad.push(`回滚不动次数（应当还是 ${afterRefresh.left}，实际 ${afterUndo.left}）`);
       }
       if (JSON.stringify(afterUndo.talent) !== JSON.stringify(before.talent)) {
         bad.push(`回滚之后天分数值必须逐值回到刷之前：${JSON.stringify(before.talent)} → ${JSON.stringify(afterUndo.talent)}`);
@@ -760,8 +767,9 @@ async function main() {
       if (Number(afterReroll.boosts) !== Number(before.boosts) + 1) {
         bad.push(`重刷之后账上应当是一级，实际 ${afterReroll.boosts}`);
       }
-      if (afterReroll.undoButton !== false) {
-        bad.push('已经回滚过一次 ⇒ 那个按钮不许再出现（每人只有一次）');
+      // 中间又刷过一次 ⇒ 这一步可以退（人类：「不是回一次」）
+      if (afterReroll.undoButton !== true) {
+        bad.push('中间又刷过一次 ⇒ 回滚按钮必须回来（否则新刷的这一步退不了）');
       }
       // 状态行是**另一条渲染路径**（`box.js` 直接写 `#box-status`，抽屉那一行是 `box-drawer.js`）：
       // 两边都要走同一句话（`lastRefreshNote`），所以两边都要判。
@@ -801,7 +809,9 @@ async function main() {
     const pick = JSON.parse(await js(`(()=>{const row=document.querySelector('[data-refresh="talent"]');
       return JSON.stringify({id:row?row.dataset.individual:null});})()`));
     if (!pick.id) {
-      check('28-刷新→回滚→重刷（真机）', false, '盒子里一个「刷新天分」按钮都没有（抽屉没渲染？）');
+      check('28-刷新→回滚→重刷（真机）',
+        '盒子里要有一个能点的「刷新天分」按钮（抽屉渲染出来了）',
+        false, '盒子里一个「刷新天分」按钮都没有（抽屉没渲染？）');
     } else {
       const before = await rowFacts(pick.id);
       await mouseClick(`[data-individual="${pick.id}"] [data-refresh="talent"]`);
@@ -817,7 +827,7 @@ async function main() {
       steps.push({at: 'rollback', ...step});
       const problems = rollbackProblems(step);
       check('28-刷新→回滚→重刷（真机）',
-        '真鼠标点：刷新后账+1/次数-1且说清落点；回滚后数值逐值回到刷之前、次数还回、按钮消失；重刷换一个落点并说清换掉了谁；再回滚按钮不许再出现',
+        '真鼠标点：刷新后账+1/次数-1且说清落点；回滚后数值逐值回到刷之前、**次数不动**、按钮消失（只退一步）；重刷换一个落点、说清换掉了谁、按钮回来（不是回一次）',
         problems.length === 0,
         problems.join(' | ') || `个体 ${pick.id}：${before.boosts}级/${before.left}次 → `
           + `${afterRefresh.boosts}级/${afterRefresh.left}次「${afterRefresh.note}」 → 回滚 ${afterUndo.boosts}级/${afterUndo.left}次 `
@@ -826,10 +836,10 @@ async function main() {
       // 反证：把"回滚没把次数还回来 / 值没回去"的坏数据喂给同一条判据，必须逐条报出来
       counter('28-刷新→回滚→重刷（真机）',
         '回滚没还原数值、没还次数、重刷落点没换 —— 三种坏数据都必须被同一条判据抓住',
-        rollbackProblems({...step, afterUndo: {...afterUndo, left: before.left - 1, talent: afterRefresh.talent,
+        rollbackProblems({...step, afterUndo: {...afterUndo, left: before.left, talent: afterRefresh.talent,
           boosts: afterRefresh.boosts, undoButton: true, note: afterRefresh.note},
         afterReroll: {...afterReroll, note: String(afterRefresh.note)}}),
-        '{"afterUndo":{"left":"未还次数","talent":"未还原"},"afterReroll":{"note":"同一个落点"}}');
+        '{"afterUndo":{"left":"次数被改动了","talent":"未还原"},"afterReroll":{"note":"同一个落点"}}');
     }
 
     // ── ⑨ 「＋ 再养一只同种」→ 两个个体 → 比大小（审计 ③ 的真机那一半）────────────
@@ -863,7 +873,9 @@ async function main() {
     }
     const addTarget = await js(`document.querySelector('#box-grid [data-add]')?.dataset.add ?? ''`);
     if (!addTarget) {
-      check('29-再养一只同种→比大小', false, '页面上一个「＋ 再养一只同种」按钮都没有');
+      check('29-再养一只同种→比大小',
+        '页面上要有一个「＋ 再养一只同种」按钮（抽屉渲染出来了）',
+        false, '页面上一个「＋ 再养一只同种」按钮都没有');
     } else {
       await mouseClick(`[data-add="${addTarget}"]`);
       await sleep(700);

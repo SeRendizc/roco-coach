@@ -360,8 +360,10 @@ test('⑫ 纯事实题本地作答：0 次规划器 + 0 次正文生成，且数
     ['中毒算属性异常吗？每回合掉多少血？', '中毒'],
     ['速度快的宠物一定先出手吗？', '不一定'],
     ['有属性本系加成吗？倍率是多少？', '没有可引用的来源'],
-    // 加点收益：三档常量逐值现读（`RULES.training`），并说清"改变先手"要对手速度
-    ['培养哪个属性最能改变先手？', String(RULES.training.speed)],
+    // 2026-09-27 改钉（人类：「加点不要了」）：这一问现在答的是**否定句**（这一版没有加点），
+    // 所以不再钉"包含常量值"，改钉"包含这句话 + 指向改性格/改天分"。上面的通用断言
+    //（要有本地答案 / 要交代出处）仍然逐条过 —— 判据的意图没变。
+    ['培养哪个属性最能改变先手？', '没有加点'],
   ];
   for (const [question, expected] of cases) {
     assert.equal(parametricFactAsk(question), true, `「${question}」要被认成参数化事实`);
@@ -371,7 +373,8 @@ test('⑫ 纯事实题本地作答：0 次规划器 + 0 次正文生成，且数
     // 改钉（2026-09-26）：玩家正文里不许再出现仓库路径（人类：「自娱自乐」）。
     // 出处改成玩家话「（游戏里的固定规则：…，不是估的）」，仓库路径仍留在 `evidence` 里。
     // 判据的意图没变：**必须交代出处状态**，不许默默抛一个数。
-    assert.match(local.text, /游戏里的固定规则|来源：|缺源|没有可引用的来源/,
+    // 2026-09-27：加了一条 —— 「这一版没有 X」本身也是如实说明（机制不存在时没有出处可交代）。
+    assert.match(local.text, /游戏里的固定规则|来源：|缺源|没有可引用的来源|没有加点/,
       '本地事实必须交代出处状态（人话版：游戏里的固定规则；没有来源就明说）');
   }
   // 反证：别的问句不许被这条抢走（寒暄 / 决策 / 对位 / 相性各归各的）
@@ -555,10 +558,10 @@ test('⑬b 天气策略按模式解析：没配置 id 时报模式，营地问�
 
 // ── ⑰ 训练点问句但**存档不在这儿**（六宠页只送名单）：也要本地答，而不是「我在。」──
 //
-// 六宠对战页送的 `profile` 只有名单数组（`pets:[{id,name,types,…}]`），**没有** tokens/points
-// —— 养成存档在营地那一页。真机上「我还差多少训练点满级？」在这页会落到陪练通道 ⇒「我在。」。
-// 现在判成 `training-ask-elsewhere`：本地说清"数据在哪一页" + 两条立刻能走的路，一个数都不编。
-test('⑰ 六宠页问训练点：本地指向营地那份存档，不编进度', async () => {
+// 2026-09-27 **改钉**（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+// 这一支原来是"养成存档在营地那一页，去那边问"。加点退役之后，两个分支答的是**同一句话**：
+// 这一版没有加点、培养＝在盒子里刷新性格/天分。判定与"0 次模型调用"这两条不变。
+test('⑰ 六宠页问训练点：本地直说"这一版没有加点"，一个进度数都不编', async () => {
   const mobile = {...buildContext(createGame(445), newProfile(), 'fox'),
     profile: {pets: POOL}};   // 六宠页的真形状：只有名单，没有 tokens
   assert.equal(policyFor('我还差多少训练点满级？', mobile).reason, 'training-ask-elsewhere');
@@ -570,9 +573,10 @@ test('⑰ 六宠页问训练点：本地指向营地那份存档，不编进度'
   assert.equal(answer.agentStop, 'policy-fact-local', `要走本地事实：${answer.agentStop}`);
   assert.equal(plan + generate, 0, '不许问模型');
   const text = String(answer.text);
-  assert.match(text, /营地/, `要指出养成存档在哪一页：${text}`);
-  assert.match(text, /直接说/, '要给"直接说数"这条路径');
-  assert.doesNotMatch(text, /还差 \d+ (点|个)/, `不许凭空报一个进度：${text}`);
+  assert.match(text, /没有加点/, `要直说这一版没有加点：${text}`);
+  assert.match(text, /性格|天分/, '要指出培养是什么（改性格 / 改天分）');
+  assert.match(text, /我的盒子/, '要指出在哪做（我的盒子）');
+  assert.doesNotMatch(text, /训练点 \d|还差 \d+ (点|个)|培养格/, `不许报进度数、也不许提培养格：${text}`);
   // 反证：存档在手时仍走 training-ask（⑮ 钉着），不会被这一族截走
   const save = {...newProfile(), tokens: 2};
   assert.equal(policyFor('我还差多少训练点满级？', {...mobile, profile: {...save, lineup: []}}).reason, 'training-ask');
@@ -1432,32 +1436,37 @@ test('⑯ 队形问句但队伍不全：本地回答要给出可执行的下一�
 //   · 本地作答（0 次规划器 + 0 次正文生成）；
 //   · 每一个数都对得上**存档 + `progression.js` 常量**（不是模板里写死的字面量）；
 //   · 没有存档时不许接（拿不到数就不答）。
-test('⑮ 训练点问句本地作答：数字逐值来自存档与常量，0 次模型调用', async () => {
+test('⑮ 加点问句本地作答：直说"这一版没有加点"，0 次模型调用、一个数都不报', async () => {
+  // 2026-09-27 **改钉**（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+  // 这一条原来钉「训练点余额 / 培养格 x/y / 满级差多少格 / 每点收益」。加点退役之后，
+  // 同一族问句仍然**本地作答、0 次模型调用**，但答的是否定句 + 指路（改性格/改天分 → 我的盒子）。
   const save = {...newProfile(), tokens: 2,
     pets: {...newProfile().pets, fox: {level: 2, xp: 10, points: {hp: 1, atk: 2, speed: 0}}}};
   const context = {...buildContext(createGame(445), newProfile(), 'fox'), focus: 'fox',
     profile: {...save, lineup: []}};
   for (const q of ['我还差多少训练点满级？', '我这点训练点该怎么加？', '还有几个培养格？']) {
-    assert.equal(policyFor(q, context).reason, 'training-ask', `「${q}」要判给训练点那一族`);
+    assert.equal(policyFor(q, context).reason, 'training-ask', `「${q}」仍然判给这一族（本地作答）`);
   }
   let plan = 0; let generate = 0;
   const provider = {name: 'stub-model', async plan() { plan += 1; return {stop: true}; },
     async generate(p) { generate += 1; return String(p?.text ?? ''); }};
-  const answer = await runCoach({message: '我还差多少训练点满级？', role: 'auto', context,
+  for (const q of ['我还差多少训练点满级？', '我这点训练点该怎么加？']) {
+    const answer = await runCoach({message: q, role: 'auto', context, memory: freshMemory(), provider});
+    assert.equal(answer.agentStop, 'policy-fact-local', `要走本地事实：${answer.agentStop}`);
+    const text = String(answer.text);
+    assert.match(text, /没有加点/, `要直说没有加点：${text}`);
+    assert.match(text, /性格|天分/, `要说清培养是什么：${text}`);
+    assert.match(text, /我的盒子/, `要说清在哪做：${text}`);
+    // 一个旧口径的数都不许出现（余额 / 格数 / 每点收益 / 满级差）
+    assert.doesNotMatch(text, /训练点 ?\d|培养格|每 1 点|满级还差|还差 \d+ ?格/, `不许报旧口径的数：${text}`);
+  }
+  assert.equal(plan + generate, 0, '这一族不许问模型');
+  // 等级/经验是**原版就有的**，所以顺手报出来是可以的（存档里有就报）
+  const withLevel = await runCoach({message: '我还差多少训练点满级？', role: 'auto', context,
     memory: freshMemory(), provider});
-  assert.equal(answer.agentStop, 'policy-fact-local', `要走本地事实：${answer.agentStop}`);
-  assert.equal(plan + generate, 0, '这一族不许问模型（数字全在手里，模型只会改写）');
-  const text = String(answer.text);
-  const level = save.pets.fox.level, used = 1 + 2 + 0;
-  assert.match(text, new RegExp(`Lv\\.${level}`), `要报出当前等级：${text}`);
-  assert.match(text, new RegExp(`培养格 ${used}/${level + 3}`), `要用「已用/当前格数」这个口径：${text}`);
-  assert.match(text, new RegExp(`满级 Lv\\.${MAX_LEVEL}`), `满级数来自常量：${text}`);
-  assert.match(text, new RegExp(`还差 ${MAX_LEVEL - level} 级`), `等级差要算对：${text}`);
-  assert.match(text, new RegExp(`还差 ${MAX_LEVEL + 3 - used} 格`), `培养格差要算对（满级 ${MAX_LEVEL + 3} 格）：${text}`);
-  assert.match(text, /训练点/, '要点出训练点余额');
-  assert.match(text, new RegExp(`赢一场 \\+${BATTLE_REWARD.win.tokens}`), '缺多少点要说清怎么拿');
-  // 反证：把存档换成「没有 tokens」的页面名单形状 ⇒ 这一族不许接（不能凭空算）
-  assert.equal(policyFor('我还差多少训练点满级？', CAMP).reason === 'training-ask', false);
+  assert.match(String(withLevel.text), /Lv\.2|等级/, `等级照旧可以报：${withLevel.text}`);
+  // 反证：换成没有存档的名单形状 ⇒ 仍然本地答（`training-ask-elsewhere`），不会落到模型
+  assert.equal(policyFor('我还差多少训练点满级？', CAMP).reason, 'training-ask-elsewhere');
 });
 
 // ── ⑬c 别的模式绑的配置没声明天气层：也要换标准 PVP 再答（否则文案会说谎）──────────
@@ -1909,34 +1918,35 @@ test('⑮ 「讲讲我这队」要和「讲讲这套阵容」走同一条路（�
 // `*_game` 列 0/50 填）：**手游侧没有每点收益、没有加点上限**；`RULES.training` 的
 // +12 生命 / +4 攻击 / +3 速度与 `RULES.energy` 的上限 6 都是**本仓营地那一档练习引擎**自己定的。
 // 这一条钉两件事：① 手游形状 ⇒ 不许出现那两组数字，并且要如实说缺源；② 营地形状 ⇒ 照旧念。
-test('㉞ 加点/能量两组常量按档分开说：手游侧不念营地常量、营地侧照旧', async () => {
+test('㉞ 加点退役后：两档都说"没有加点"；能量仍然按档分开说', async () => {
+  // 2026-09-27 **改钉**（人类：「加点不要了，按照洛手的机制来，根本没有这些」）：
+  // 这一条原来钉「加点常量按档分开说」（手游侧不念营地常量）。加点退役之后，
+  // 两档答的是**同一句否定句**，判据跟着改成：① 两档都直说没有加点、都不报任何加点数值；
+  // ② 能量那条的**分档**照旧（手游 10 / 营地 6）—— 那一半没动。
   const mobile = {mode: 'camp', profile: {pets: [{id: 'pet_000118', name: '皇家狮鹫'}], lineup: []}};
   const camp = {mode: 'camp', profile: {growth: {pets: {fox: {points: {hp: 1}}}, tokens: 3}}};
 
   const ask = (q, ctx) => localParametricFact(q, ctx);
   const trainMobile = ask('加点收益是多少？', mobile);
-  const energyMobile = ask('能量上限是几个豆？', mobile);
   const trainCamp = ask('加点收益是多少？', camp);
+  const energyMobile = ask('能量上限是几个豆？', mobile);
   const energyCamp = ask('能量上限是几个豆？', camp);
 
-  // ① 手游侧：不许出现营地常量（逐值反证，不是"看起来不像"）
-  for (const [label, row] of [['加点', trainMobile], ['能量', energyMobile]]) {
-    assert.ok(row && typeof row.text === 'string', `${label}要有本地答案`);
-    assert.doesNotMatch(row.text, new RegExp(`\\+${RULES.training.hp} 生命`), `${label}：手游侧不许念营地加点常量`);
-    assert.doesNotMatch(row.text, new RegExp(`\\+${RULES.training.atk} 攻击`), `${label}：同上`);
-    assert.doesNotMatch(row.text, new RegExp(`每回合回 ${RULES.energy.perTurn} 豆`), `${label}：手游侧不许念营地回能常量`);
-    assert.match(row.text, /来源：|没有数据/, `${label}：缺源要说明，不许默默抛一个数`);
+  for (const [label, row] of [['手游侧', trainMobile], ['营地侧', trainCamp]]) {
+    assert.ok(row && typeof row.text === 'string', `${label}的加点问句要有本地答案`);
+    assert.match(row.text, /没有加点/, `${label}要直说这一版没有加点：${row.text}`);
+    assert.match(row.text, /性格|天分/, `${label}要说清培养是什么`);
+    assert.match(row.text, /我的盒子/, `${label}要说清在哪做`);
+    // 旧口径的常量一个都不许念（逐值反证）
+    assert.doesNotMatch(row.text, new RegExp(`\\+${RULES.training.hp} 生命`), `${label}不许念营地加点常量`);
+    assert.doesNotMatch(row.text, new RegExp(`\\+${RULES.training.atk} 攻击`), `${label}不许念营地加点常量`);
+    assert.doesNotMatch(row.text, /培养格|训练点 ?\d/, `${label}不许提培养格/训练点余额`);
+    assert.doesNotMatch(row.text, /本仓|台账/, '正文不许出现内部说法');
   }
-  assert.match(trainMobile.text, /没有/, '加点：手游侧没有每点收益，要直说（措辞可以变，"没有"这个事实不许省）');
-  assert.doesNotMatch(trainMobile.text, /本仓|台账/, '正文不许出现内部说法');
+  // 能量那一半照旧分档（这一半**没有**被退役影响）
   assert.match(energyMobile.text, /10/, '能量：手游侧常规上限是台账里的 10');
-  // ② 营地侧：照旧念自己的常量（分档不等于删掉常量）
-  assert.match(trainCamp.text, new RegExp(`\\+${RULES.training.hp} 生命`), '营地侧照旧');
-  assert.match(energyCamp.text, new RegExp(`${RULES.energy.max} 豆才是满豆`), '营地侧照旧');
-  // ③ 出处：手游侧那条必须点出「10 / 聚能 5」的来源等级，不许说成官方文本
+  assert.match(energyCamp.text, new RegExp(`${RULES.energy.max} 豆才是满豆`), '能量：营地侧照旧');
   assert.match(energyMobile.text, /不是官方文本/, '要说清这不是官方文本');
-  // 2026-09-26 改钉：条目名是**内部说法**，正文里不许念（工程语气棘轮当场抓到过 19→20），
-  // 但必须给得出 —— 所以钉在 `evidence` 上，正文只留人话版来源。
   assert.doesNotMatch(energyMobile.text, /EV-ENERGY-MAX/, '正文不许出现台账条目名');
   assert.match((energyMobile.evidence || []).join(' '), /EV-ENERGY-MAX/, '依据里要给得出条目名');
 });

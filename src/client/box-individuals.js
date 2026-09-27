@@ -7,7 +7,7 @@
 // 诚实边界：性格/天分现在**没有真实数值**（小黑盒那份还没导出）⇒ 缺的一律 null，
 // 页面上显示"待导出"；刷新是玩家自己的动作，存在他自己的浏览器里。
 import {refresh, individualFromInstance, canUndo, undoLastRefresh, duplicateIndividual,
-  undoUsed, UNDO_LIMIT} from '../coach/individuals.js';
+  undoUsed, lastHistoryOf} from '../coach/individuals.js';
 
 const STORE_KEY = 'roco.box.individuals.v1';
 
@@ -74,12 +74,12 @@ export function undoIndividual(individualId, {at = null} = {}) {
   const all = loadAll();
   const one = all[individualId];
   if (!one) return {ok: false, reason: '这个个体不在本地记录里'};
-  // ⚠ 2026-09-27（单测 ④ 抓到的）：`canUndo()` 为假有**两种**原因，而这里原来一律回
-  // 「还没有可以回滚的刷新」—— 已经用掉那次机会的玩家会读到一句不对的话。
-  // 两句话分开说（按钮那边已经按 `canUndo()` 藏起来了，这里是接口层的兜底）。
+  // `canUndo()` 为假有**两种**原因，分开说（按钮那边已经按 `canUndo()` 藏起来了，这里是接口层兜底）：
+  //   · 还没刷过 / 已经退到最后一步 ⇒ 没有可退的；
+  //   · 刚退过一步 ⇒ 再退就是退两步（人类口述：「只能回上一个状态，不能回前两个状态」）。
   if (!canUndo(one)) {
-    return {ok: false, reason: undoUsed(one) >= UNDO_LIMIT
-      ? '这一只已经回滚过一次了（每人只有一次）'
+    return {ok: false, reason: undoUsed(one) > 0 && lastHistoryOf(one)?.kind === 'undo'
+      ? '这一步已经退过了：一次只能退一步，再刷一次之后才能再退'
       : '这一只还没有可以回滚的刷新'};
   }
   try {

@@ -64,20 +64,15 @@ const PAGES = [
   {id: 'roco.html', name: '训练场（六宠工作台 / 小芽 / 六宠开局）',
     ready: `document.body.dataset.rocoReady==='yes'`, minText: 200, legacy: false,
     tapScope: ['#coach-entry', '#say-form button', '#start-standard-pvp', 'summary'],
-    minRequired: 4, primary: '#start-standard-pvp', expectRoute: 'six-pet', openCoach: true,
-    entryLink: {selector: '#nav-nurture', expect: 'nurture.html', label: '三只'}},
+    minRequired: 4, primary: '#start-standard-pvp', expectRoute: 'six-pet', openCoach: true},
   {id: 'box.html', name: '精灵盒子（我的 / 全图鉴）', ready: 'document.body', minText: 100,
     legacy: false, tapScope: ['.box-tab', '.box-filters button', '.box-card', '.box-search'],
     primary: null},
   {id: 'workshop.html', name: '阵容工坊（开发夹具）', ready: `document.querySelector('#team-workshop')`,
     minText: 80, legacy: false,
     tapScope: ['button', '.tw-slot', '.tw-cand'], primary: null, shadowText: true},
-  // 2026-09-27（审计 ②）：**培养页此前没有任何浏览器验收覆盖**（`--` 全仓 grep 只有单元判据
-  // 读它的源码）。它是"培养 = 刷新天分"那条口径在页面上唯一的落点之一，漏掉它等于
-  // 这一页"在自己机器上能打开"都没被验过。这里按同一把尺子加进来（就绪、不溢出、控制台干净）。
-  {id: 'nurture.html', name: '培养页（三只练习引擎那一档）',
-    ready: `document.body.dataset.nurtureReady==='yes'`, minText: 80, legacy: false,
-    tapScope: ['#retry-roster', '#nav-home', '#nav-pvp', '#crumb-nurture'], minRequired: 1, primary: null},
+  // 2026-09-27（人类：「加点不要了」）：培养页（`nurture.html`）整页退役 ⇒ 不再扫它；
+  // 退役本身由 `tests/roco-nurture-page.test.js` 钉住（旧 URL 302 到盒子页）。
 ];
 
 //: 两档窄屏：390×844 是用户点名的那一档；360×640 是更小的一档（老机型），
@@ -423,12 +418,11 @@ async function main() {
     '等实机录制确认之后才会补上（登记在用户口径 D5）。',
     '规则文案来自 src/game/rules.js 与 src/game/content.js 的知识卡原文；',
     '本仓库没有登记的栏目已经照实写「游戏数据里没有这一项」：更细的工程字段在抽屉里。'];
-  counter('培养入口指向', '把「培养」入口指回旧的加点页（或按钮上不写"三只"），同一条判据必须报出来',
-    [...narrowProblems({...healthy, entryLinkDeclared: {selector: '#home-nurture', expect: '/box.html'},
+  // 2026-09-27：练习那一档的入口按钮已删（培养页退役），所以反证只留"营地页的「培养」指错页"。
+  counter('培养入口指向', '把营地页的「培养」入口指回已退役的加点页，同一条判据必须报出来',
+    narrowProblems({...healthy, entryLinkDeclared: {selector: '#home-nurture', expect: '/box.html'},
       entryLink: {href: '/nurture.html', text: '培养'}}),
-    ...narrowProblems({...healthy, entryLinkDeclared: {selector: '#nav-nurture', expect: 'nurture.html', label: '三只'},
-      entryLink: {href: '/nurture.html', text: '✦ 练习养成'}})],
-    '{"href":"/nurture.html"} / {"text":"✦ 练习养成"}');
+    '{"href":"/nurture.html"}');
   counter('页面黑话', '把审计抓到过的四句原文放进页面文本，同一条判据必须逐句报出来',
     realLeaks.flatMap((text) => narrowProblems({...healthy, leafTexts: [text]})),
     realLeaks.map((text) => `${JSON.stringify(jargonHits(text))}`).join(' / '));

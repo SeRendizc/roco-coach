@@ -10,7 +10,7 @@ import {readFileSync} from 'node:fs';
 import {
   individualsFromDataset, individualFromInstance, groupBySpecies, panelOfIndividual,
   refresh, duplicateIndividual, seedOf, rngFrom, rollNature, rollTalentStat, boostedStatsOf,
-  canUndo, undoLastRefresh, lastRefreshOf, rollbackAdvice, lastRefreshNote,
+  canUndo, undoLastRefresh, lastRefreshOf, rollbackAdvice, lastRefreshNote, undoUsed,
   REFRESH_LIMIT, ROLL_RULES, TALENT_STEP, TALENT_TIERS,
 } from '../src/coach/individuals.js';
 import {STAT_KEYS} from '../src/coach/talent.js';
@@ -198,7 +198,10 @@ test('⑨ 掷点规则的诚实边界必须在：两条都标"建模的、非实
 });
 
 // ── ⑩ 上一次刷新可回滚（人类 2026-09-26：让 coach 判断要不要回滚）──────────────────
-test('⑩ 回滚只撤一步、次数要还、留痕；"值不值"只给理由不拍板', () => {
+// 2026-09-27 **改钉**（人类口述改口径，逐字）：「只能回上一个状态，不能回前两个状态；
+// **不是回一次**；还是三次刷新次数，回滚的话**不消耗也不返还**次数。」
+// 所以这一条从"只许回滚一次 + 次数归还"改成"只退一步 + 次数不退 + 中间刷过就能再退"。
+test('⑩ 回滚只撤一步、次数**不退**、留痕；连着退被拒；"值不值"只给理由不拍板', () => {
   let one = individualsFromDataset(dataset)[0];
   assert.equal(canUndo(one), false, '还没刷过 ⇒ 没有可回滚的');
   assert.throws(() => undoLastRefresh(one), (error) => error.code === 'nothing-to-undo');
@@ -220,7 +223,8 @@ test('⑩ 回滚只撤一步、次数要还、留痕；"值不值"只给理由�
   const rolled = undoLastRefresh(one, {at: 'T2'});
   assert.deepEqual(rolled.talent, before, '天分要回到刷新前');
   assert.deepEqual(rolled.talent_boosts, [], '那一级的加成账要删掉');
-  assert.equal(rolled.refreshes.talent, remainingBefore, '次数要还回来');
+  assert.equal(rolled.refreshes.talent, remainingBefore - 1,
+    '次数**不退**：退掉的那一次刷新不还给你（人类 2026-09-27 口述「不消耗也不返还」）');
   assert.equal(rolled.history.at(-1).kind, 'undo', '回滚本身要留痕');
   assert.equal(canUndo(rolled), false, '回滚之后没有可再撤的了（只撤一步）');
   assert.equal(JSON.stringify(one.talent_boosts).includes('tier'), true, '原对象不许被改（不可变）');
@@ -232,17 +236,37 @@ test('⑩ 回滚只撤一步、次数要还、留痕；"值不值"只给理由�
   assert.notEqual(two.nature, natureBefore);
   const back = undoLastRefresh(two);
   assert.equal(back.nature, natureBefore, '性格要换回来');
-  assert.equal(back.refreshes.nature, REFRESH_LIMIT, '性格次数也还');
-  // 改钉（2026-09-27）：回滚**每个个体只许一次** —— 它会归还次数，而归还之后就能再刷再回滚 ⇒
-  // 「每个个体 3 次」这条限制会被架空（可以无限刷到满意）。所以第二级回滚必须被拒。
+  assert.equal(back.refreshes.nature, REFRESH_LIMIT - 1, '性格次数也不退（同一套规则）');
+  // 「不能回前两个状态」：连着退第二步必须被拒（**同一只可以退多次，但中间必须真的刷过**）
   let three = individualsFromDataset(dataset)[2];
   for (const tier of [1, 2, 3]) three = refresh(three, 'talent', {at: `T${tier}`});
   assert.equal(lastRefreshOf(three).used, 3, '最近那一步是第 3 级');
   three = undoLastRefresh(three, {at: 'U3'});
-  assert.equal(three.refreshes.talent, 1, '撤掉第 3 级，次数还回 1 次');
-  assert.equal(canUndo(three), false, '已经回滚过一次 ⇒ 不许再回滚（防"刷→回滚→刷"）');
-  assert.throws(() => undoLastRefresh(three, {at: 'U2'}), (error) => error.code === 'undo-used',
-    '第二次回滚必须明确拒绝，理由写清"每人只有一次"');
+  assert.equal(three.refreshes.talent, 0, '撤掉第 3 级，但那次刷新**不还**（还是 0 次）');
+  assert.equal(canUndo(three), false, '刚退过一步 ⇒ 现在不能退（否则就是退回两步之前）');
+  assert.throws(() => undoLastRefresh(three, {at: 'U2'}), (error) => error.code === 'already-undone',
+    '第二次回滚必须明确拒绝，理由写清"一次只能退一步"');
+  // 但**再刷一次之后又能退**（这就是"不是回一次"）。注意：次数不退 ⇒ 得留有余量才能再刷。
+  let budget = individualsFromDataset(dataset)[3];
+  budget = refresh(budget, 'talent', {at: 'B1'});
+  assert.equal(budget.refreshes.talent, 2, '刷 1 次后剩 2');
+  budget = undoLastRefresh(budget, {at: 'B2'});
+  assert.equal(budget.refreshes.talent, 2, '退一步：次数不动（不还也不扣）');
+  assert.equal(canUndo(budget), false, '刚退过 ⇒ 先不能再退');
+  budget = refresh(budget, 'talent', {at: 'B3'});
+  assert.equal(budget.refreshes.talent, 1, '再刷一次才扣 1 次（三次就是三次）');
+  assert.equal(canUndo(budget), true, '中间真的刷过 ⇒ 可以再退一步');
+  const twice = undoLastRefresh(budget, {at: 'B4'});
+  assert.equal(twice.refreshes.talent, 1, '再退一次，次数同样不动');
+  assert.equal(undoUsed(twice), 2, '同一只退过两次（中间刷过一次）—— 规则允许');
+  // 余量用完后：退可以退，但**刷不回来了**（这就是"不返还"的实际后果）
+  let spent = individualsFromDataset(dataset)[4];
+  for (const tier of [1, 2, 3]) spent = refresh(spent, 'talent', {at: `S${tier}`});
+  assert.equal(spent.refreshes.talent, 0, '三次用完');
+  spent = undoLastRefresh(spent, {at: 'S4'});
+  assert.equal(spent.refreshes.talent, 0, '退掉第 3 次也不还');
+  assert.throws(() => refresh(spent, 'talent', {at: 'S5'}), (error) => error.code === 'no-refresh-left',
+    '次数不退 ⇒ 退完之后这一只就定格了（想再要别的落点只能再养一只）');
 });
 
 // ── ⑪ 回滚与规则的四处矛盾（2026-09-27，审计 ④）────────────────────────────────────
@@ -251,6 +275,7 @@ test('⑪ 回滚之后重刷必须换落点（否则教练那句"换个落点可
   const first = refresh(one, 'talent', {at: 'R1'});
   const land1 = boostedStatsOf(first).at(-1);
   const undone = undoLastRefresh(first, {at: 'R2'});
+  assert.equal(undone.refreshes.talent, first.refreshes.talent, '退一步不动次数（人类口述）');
   const again = refresh(undone, 'talent', {at: 'R3'});
   const land2 = boostedStatsOf(again).at(-1);
   assert.notEqual(land1, land2, `回滚后重刷要落到另一项（第一次 ${land1}、重刷 ${land2}）`);

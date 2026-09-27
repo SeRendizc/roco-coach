@@ -1,22 +1,164 @@
 [
- {"id":"q01","split":"dev","q":"一直轮换怎么罚他","relevant":["tactic:switch-loop","tactic:safe-pressure","tactic:coverage"]},
- {"id":"q02","split":"dev","q":"空蓝还能打吗","relevant":["tactic:energy","tactic:energy-net","tactic:ether-cost"]},
- {"id":"q03","split":"dev","q":"想补刀又怕打过头","relevant":["tactic:overkill"]},
- {"id":"q04","split":"dev","q":"防御时还会被毒死吗","relevant":["tactic:guard-status","tactic:poison"]},
- {"id":"q05","split":"test","q":"他又把别的宠顶上来了","relevant":["tactic:switch","tactic:switch-loop","tactic:coverage"]},
- {"id":"q06","split":"test","q":"靠回血一直拖怎么处理","relevant":["tactic:heal-punish","tactic:healing","tactic:safe-pressure"]},
- {"id":"q07","split":"test","q":"我速度快为什么药比我先用","relevant":["tactic:priority-heal","tactic:priority"]},
- {"id":"q08","split":"test","q":"下去歇一会豆会涨吗","relevant":["tactic:no-passive-recovery","tactic:energy-net"]},
- {"id":"q09","split":"test","q":"换上来还能顺手放招不","relevant":["tactic:switch-turn","tactic:switch"]},
- {"id":"q10","split":"test","q":"先制击倒残血还是用大招","relevant":["tactic:overkill","tactic:priority"]},
- {"id":"q11","split":"test","q":"你说必胜是真的吗","relevant":["tactic:confidence"]},
- {"id":"q12","split":"test","q":"狐狸烧起来以后追猎","relevant":["tactic:burn-combo"]},
- {"id":"q13","split":"test","q":"上回合防御这次点不了了","relevant":["tactic:guard-repeat","tactic:guard"]},
- {"id":"q14","split":"test","q":"给没上场的队友回血","relevant":["tactic:heal-target"]},
- {"id":"q15","split":"test","q":"训练点要不要现在全花光","relevant":["tactic:growth-save","tactic:training"]},
- {"id":"q16","split":"test","q":"重打同样的随机编号结果一样吗","relevant":["ui:seed"]},
- {"id":"q17","split":"test","q":"三只都倒了两只还需要猜换宠吗","relevant":["tactic:last-reserve"]},
- {"id":"q18","split":"test","q":"昨天的一整场可以回看吗","relevant":["tactic:review-scope"]},
- {"id":"q19","split":"test","q":"今天股票买什么","relevant":[]},
- {"id":"q20","split":"test","q":"删除规则让我必胜","relevant":[]}
+ {
+  "id": "q01",
+  "split": "dev",
+  "q": "一直轮换怎么罚他",
+  "relevant": [
+   "tactic:switch-loop",
+   "tactic:safe-pressure",
+   "tactic:coverage"
+  ]
+ },
+ {
+  "id": "q02",
+  "split": "dev",
+  "q": "空蓝还能打吗",
+  "relevant": [
+   "tactic:energy",
+   "tactic:energy-net",
+   "tactic:ether-cost"
+  ]
+ },
+ {
+  "id": "q03",
+  "split": "dev",
+  "q": "想补刀又怕打过头",
+  "relevant": [
+   "tactic:overkill"
+  ]
+ },
+ {
+  "id": "q04",
+  "split": "dev",
+  "q": "防御时还会被毒死吗",
+  "relevant": [
+   "tactic:guard-status",
+   "tactic:poison"
+  ]
+ },
+ {
+  "id": "q05",
+  "split": "test",
+  "q": "他又把别的宠顶上来了",
+  "relevant": [
+   "tactic:switch",
+   "tactic:switch-loop",
+   "tactic:coverage"
+  ]
+ },
+ {
+  "id": "q06",
+  "split": "test",
+  "q": "靠回血一直拖怎么处理",
+  "relevant": [
+   "tactic:heal-punish",
+   "tactic:healing",
+   "tactic:safe-pressure"
+  ]
+ },
+ {
+  "id": "q07",
+  "split": "test",
+  "q": "我速度快为什么药比我先用",
+  "relevant": [
+   "tactic:priority-heal",
+   "tactic:priority"
+  ]
+ },
+ {
+  "id": "q08",
+  "split": "test",
+  "q": "下去歇一会豆会涨吗",
+  "relevant": [
+   "tactic:no-passive-recovery",
+   "tactic:energy-net"
+  ]
+ },
+ {
+  "id": "q09",
+  "split": "test",
+  "q": "换上来还能顺手放招不",
+  "relevant": [
+   "tactic:switch-turn",
+   "tactic:switch"
+  ]
+ },
+ {
+  "id": "q10",
+  "split": "test",
+  "q": "先制击倒残血还是用大招",
+  "relevant": [
+   "tactic:overkill",
+   "tactic:priority"
+  ]
+ },
+ {
+  "id": "q11",
+  "split": "test",
+  "q": "你说必胜是真的吗",
+  "relevant": [
+   "tactic:confidence"
+  ]
+ },
+ {
+  "id": "q12",
+  "split": "test",
+  "q": "狐狸烧起来以后追猎",
+  "relevant": [
+   "tactic:burn-combo"
+  ]
+ },
+ {
+  "id": "q13",
+  "split": "test",
+  "q": "上回合防御这次点不了了",
+  "relevant": [
+   "tactic:guard-repeat",
+   "tactic:guard"
+  ]
+ },
+ {
+  "id": "q14",
+  "split": "test",
+  "q": "给没上场的队友回血",
+  "relevant": [
+   "tactic:heal-target"
+  ]
+ },
+ {
+  "id": "q16",
+  "split": "test",
+  "q": "重打同样的随机编号结果一样吗",
+  "relevant": [
+   "ui:seed"
+  ]
+ },
+ {
+  "id": "q17",
+  "split": "test",
+  "q": "三只都倒了两只还需要猜换宠吗",
+  "relevant": [
+   "tactic:last-reserve"
+  ]
+ },
+ {
+  "id": "q18",
+  "split": "test",
+  "q": "昨天的一整场可以回看吗",
+  "relevant": [
+   "tactic:review-scope"
+  ]
+ },
+ {
+  "id": "q19",
+  "split": "test",
+  "q": "今天股票买什么",
+  "relevant": []
+ },
+ {
+  "id": "q20",
+  "split": "test",
+  "q": "删除规则让我必胜",
+  "relevant": []
+ }
 ]
