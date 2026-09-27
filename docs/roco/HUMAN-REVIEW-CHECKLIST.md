@@ -4,7 +4,7 @@
 > 里面的数字**由判据钉住**（`tests/roco-human-todo.test.js` 会把下面那行注释与真源逐个数比对），
 > 所以它不会烂掉 —— 数字变了却没人改这份文档，判据就红。
 >
-> 数字：<!-- TODO-NUMBERS gold_approved=0 gold_total=59 phase_e_cases=20 rolled_individuals=48 owned_individuals=48 -->
+> 数字：<!-- TODO-NUMBERS gold_approved=0 gold_total=59 phase_e_cases=18 rolled_individuals=48 owned_individuals=48 -->
 
 ---
 
@@ -24,14 +24,14 @@
 
 ## 2. Phase E 的「困难类别」留出集
 
-- **现状**：工具覆盖切片 **20 条**（10 个工具 × 正负各一，`tests/evals/agent-tasks-v2-tool-coverage.jsonl`），
+- **现状**：工具覆盖切片 **18 条**（9 个工具 × 正负各一 —— `inspect_training` 随加点一起退役后少了 2 条，`tests/evals/agent-tasks-v2-tool-coverage.jsonl`），
   与训练集零重叠；但它考的是"**工具选择**"，**困难类别**（多轮 / 冲突回执 / 长上下文 / 模糊指代）**一条都没有**。
 - **你要做什么**：说一句「扩」，或指定你要哪几类。数据、判据、基线跑分都由我做（不需要你写数据）。
 - **文件**：计划 [`docs/roadmap/AGENT-FIRST-AT-SCALE.md`](../roadmap/AGENT-FIRST-AT-SCALE.md)｜
   现有切片 [`tests/evals/agent-tasks-v2-tool-coverage.jsonl`](../../tests/evals/agent-tasks-v2-tool-coverage.jsonl)｜
   判据 [`tests/roco-tool-task-coverage.test.js`](../../tests/roco-tool-task-coverage.test.js)
 - **达标标准**：**每个困难类别 ≥30 条**且与训练集**零重叠**；扩完**先跑基座看基线**再谈提升。
-  在那之前，这 20 条算出来的比率（如 v8 的 17/20）**只当冒烟**，不许当泛化结论。
+  在那之前，这 18 条算出来的比率**只当冒烟**，不许当泛化结论（v8 在旧 20 条切片上是 17/20，切片小了要重测才可比）。
 
 ## 3. 每只精灵的真实**性格** / **天分**
 
@@ -70,13 +70,11 @@
 1. **引擎内部那一套要不要一起删**：
    - 常量：`src/game/progression.js` 的 `TRAINING`/`tokens`/`train()`、`src/game/engine.js` 的 `RULES.training`
      （结算里那份"训练点"奖励还在发，只是**没有任何地方再显示它**）；
-   - 工具：`inspect_training`（`src/coach/toolbox.js`）—— 它执行的是 `teacher(context)`，
-     而 `teacher()` 现在答的是"这一版没有加点"；**没有任何玩家路径会调它**，
-     但它在**模型侧的覆盖面**上还占着两样东西：
-     ① 小模型提示词里的工具清单（摘要被 `PROMPT_DIGEST_PIN` 钉住）；
-     ② 工具覆盖切片里的一条用例（`tests/evals/agent-tasks-v2-tool-coverage.jsonl` 的
-        「这只还能加多少培养格？」）。
-   - **代价**：删它会改提示词摘要与切片 ⇒ v8 那两个数字（老门禁 282/288、新切片 17/20）**要重新量**才可比。
+   - 工具 `inspect_training`：**已按你说的删掉**（工具合同、执行分支、两张中文名映射、
+     本地模型可用工具白名单、覆盖切片那两条用例）。切片因此从 20 条变 18 条 ⇒ v8 的
+     「新切片」数字要重测才可比（老门禁那一份不受影响：`LOCAL_TOOL_SYSTEM` 里本来就没列它）。
+   - ⚠ 金标 c09 / c34 的**期望工具**里仍写着 `inspect_training`（`scripts/eval-live-s04.js`）——
+     金标只能你先审我再改，所以我**没动**，这两条现在会记成"期望的工具不存在"。
    - 现在它们是"内部还在、不再上屏"；要不要连引擎与工具一起退役，等你一句话。
 2. **（A5）本机两个体的逐字段比较**：现在能做到"如实说清为什么比不了"（本机新养的个体不在服务端名单里）。
    要真能比，得在客户端本地算面板，约一轮工作量。

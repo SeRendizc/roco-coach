@@ -24,6 +24,18 @@ tmp/
 #     任何人可用 sources.yaml 里的 archive_url 重新下载并核对上述哈希。
 data/roco/raw/extracted/
 data/roco/raw/NRC_AI.tar.gz
+
+# 小黑盒社区 API 抓包（2026-09-27）的**原始响应**不入库：1120 个 JSON / 35MB。
+# 与上面 NRC_AI 同一条口径 —— 体积大、可重抓、且许可未确认（UNKNOWN / REFERENCE_ONLY）：
+#   1. 上千个逐请求快照塞进 git 会让仓库无法维护，且写进历史后无法真正移除；
+#   2. 它们**可重抓**：工具与步骤留在同目录 tools/（hkey.js 等），按 README.md 的
+#      「要复抓时怎么跑」重跑即可复现；
+#   3. 这批快照全部标 UNKNOWN / REFERENCE_ONLY —— 许可未确认，不得进执行域或对外分发，
+#      因此更不该进 git 历史。
+# 入库的是**结论**：同目录的 pets.csv / index.jsonl / roster.json /
+# skipped-ranges.jsonl / CAPTURED-LIST.md（约 760KB）。
+data/roco/raw/hke-2026-09-27/raw/
+
 .dsh-pushplus-token
 reports/roco/notify-log.jsonl
 

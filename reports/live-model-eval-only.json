@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-09-27T18:17:44.355Z",
-  "runStarted": "2026-09-27T18:17:44.182Z",
-  "runEnded": "2026-09-27T18:17:44.182Z",
+  "generatedAt": "2026-09-27T20:24:17.775Z",
+  "runStarted": "2026-09-27T20:24:17.587Z",
+  "runEnded": "2026-09-27T20:24:17.587Z",
   "target": "http://127.0.0.1:8765",
   "model": "deepseek-flash",
   "provider": "local",
@@ -266,7 +266,7 @@
     "tokenizer": "DeepSeek official V4 (chat template applied)",
     "perCaseFields": "apiUsage = server-reported generation usage only; estimatedPlannerTokens = reconstructed planner prompts counted with the official tokenizer; estimatedTotalTokens = sum",
     "totals": {
-      "input": 4304,
+      "input": 4279,
       "output": 78,
       "apiInput": 2835,
       "apiOutput": 70
@@ -275,9 +275,9 @@
       "band": "off-peak",
       "inputRatePer1M": 0.15,
       "outputRatePer1M": 0.6,
-      "estimated": 0.0006923999999999999,
-      "peakBound": 0.0013847999999999998,
-      "offPeakBound": 0.0006923999999999999
+      "estimated": 0.0006886499999999999,
+      "peakBound": 0.0013772999999999997,
+      "offPeakBound": 0.0006886499999999999
     },
     "note": "Input is charged at the cache-miss rate; the API does not expose cache-hit token counts through this server, so the estimate is an upper bound on input cost."
   },
@@ -720,7 +720,7 @@
       },
       "plannerCalls": 1,
       "estimatedPlannerTokens": {
-        "input": 1469,
+        "input": 1444,
         "output": 8
       },
       "apiUsage": {
@@ -728,7 +728,7 @@
         "completion_tokens": 70
       },
       "estimatedTotalTokens": {
-        "input": 4304,
+        "input": 4279,
         "output": 78
       },
       "judgement": {

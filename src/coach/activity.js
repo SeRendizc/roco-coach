@@ -23,7 +23,6 @@ export const TOOL_WORDS = Object.freeze({
   search_rules: '查了规则与战术',
   compare_actions: '比了可选行动',
   simulate_branch: '模拟了后续走向',
-  inspect_training: '看了培养情况',
   read_match: '翻了整局统计',
   read_evidence: '翻了那一回合',
   read_last_turn: '回看了上一回合',

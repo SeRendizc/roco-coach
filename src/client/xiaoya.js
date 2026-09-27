@@ -146,7 +146,7 @@ function decorate(entry, answer) {
     // 13 个工具都要有中文名：漏一个，玩家就会在「小芽查了什么」里看到英文 id
     // （审计点名：原来只覆盖 8 个，evaluate_team 这类会原样上屏）。
     const names = {read_state: '当前局面', search_rules: '规则和战术', compare_actions: '行动分支',
-      inspect_training: '培养面板', read_last_turn: '上一回合记录', read_match: '整局记录',
+      read_last_turn: '上一回合记录', read_match: '整局记录',
       read_evidence: '指定回合原始证据', simulate_branch: '假设行动分支',
       query_rules: '图鉴与规则表', evaluate_team: '阵容评估', search_knowledge: '战术卡',
       recall_memory: '跨局记忆', read_roster: '伙伴名单',

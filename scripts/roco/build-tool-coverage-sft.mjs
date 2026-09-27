@@ -61,16 +61,6 @@ export const TOOL_TEMPLATES = {
     ],
     negative: [{id: 'n1', ask: '水系克什么？', reason: '相性查表归检索'}, {id: 'n2', ask: '今天打得还行', reason: '闲聊'}],
   },
-  inspect_training: {
-    hints: CAMP,
-    positive: [
-      {id: 't1', ask: '它还有几个培养格能用？', args: {}, receipts: null},
-      {id: 't2', ask: '我还有多少训练点？', args: {}, receipts: null},
-      {id: 't3', ask: '它满级了吗？', args: {}, receipts: null},
-      {id: 't4', ask: '培养格是怎么分配的？', args: {}, receipts: null},
-    ],
-    negative: [{id: 'n1', ask: '它是什么系的？', reason: '属性归图鉴'}, {id: 'n2', ask: '开始一场练习赛', reason: '开局'}],
-  },
   read_match: {
     hints: CAMP,
     positive: [

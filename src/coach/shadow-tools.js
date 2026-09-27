@@ -77,7 +77,6 @@ const TOOL_LABELS = Object.freeze({
   search_rules: '检索规则与战术',
   compare_actions: '对比可选行动',
   simulate_branch: '模拟行动的后续走向',
-  inspect_training: '查看培养情况',
   read_match: '查看整局统计',
   read_evidence: '查看某一回合',
   read_last_turn: '查看上一回合',

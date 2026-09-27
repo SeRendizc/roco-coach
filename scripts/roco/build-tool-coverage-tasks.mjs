@@ -26,7 +26,6 @@ export const SPECS = [
   {tool: 'search_rules', yes: '应对到底怎么算？', no: '帮我开一局', hints: {mode: 'battle', state_version: 7}, why: '规则原文不在常识里 ⇒ 要检索；开局不是查规则'},
   {tool: 'compare_actions', yes: '这回合出招还是换人，哪个更稳？', no: '我上一局输在哪？', hints: {mode: 'battle', state_version: 7, team: ['pet_000118', 'pet_000137', 'pet_000143']}, why: '有对局+队伍 ⇒ 比较两个真实候选才有意义'},
   {tool: 'simulate_branch', yes: '要是我先手换人，对面打过来会怎样？', no: '火系克制什么属性？', hints: {mode: 'battle', state_version: 7, team: ['pet_000118', 'pet_000137', 'pet_000143']}, why: '分支推演要有对局才推得动；相性查表归检索'},
-  {tool: 'inspect_training', yes: '这只还能加多少培养格？', no: '这只的属性是什么？', hints: {mode: 'camp', state_version: 0, team: ['pet_000118']}, why: '培养格只在本机存档里 ⇒ 必须读；属性归图鉴'},
   {tool: 'read_match', yes: '我最近打了哪几局？', no: '这回合该干嘛？', hints: {mode: 'camp', state_version: 0}, why: '对局历史不在常识里 ⇒ 要读；当前回合归军师'},
   {tool: 'read_evidence', yes: '第 3 回合到底发生了什么？', no: '给我讲讲这队的思路', hints: {mode: 'battle', state_version: 7}, receipts: [{turn: 1, note: '只带了第 1 回合的回执'}], why: '回执里没有第 3 回合 ⇒ 必须去读那一条'},
   {tool: 'read_last_turn', yes: '刚才那一手结算了吗？', no: '帮我组个队', hints: {mode: 'battle', state_version: 7, team: ['pet_000118', 'pet_000137', 'pet_000143']}, why: '结算结果不在回执里 ⇒ 要读上一回合；组队归阵容'},

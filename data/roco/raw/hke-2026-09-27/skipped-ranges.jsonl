@@ -1,0 +1,9 @@
+{"skipped_at":"2026-09-27T19:47:41.730Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":3048,"from":3051,"to":3054,"count":4}
+{"skipped_at":"2026-09-27T19:49:13.083Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":3054,"from":3068,"to":3068,"count":1}
+{"skipped_at":"2026-09-27T19:49:32.118Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":3159,"from":3160,"to":3169,"count":5}
+{"skipped_at":"2026-09-27T19:49:50.143Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":3219,"from":3220,"to":3224,"count":5}
+{"skipped_at":"2026-09-27T19:50:08.727Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":3254,"from":3260,"to":3261,"count":2}
+{"skipped_at":"2026-09-27T19:50:30.880Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":3312,"from":3313,"to":3314,"count":2}
+{"skipped_at":"2026-09-27T20:01:49.546Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":4013,"from":4014,"to":4025,"count":8}
+{"skipped_at":"2026-09-27T20:02:08.368Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":4033,"from":4034,"to":4037,"count":4}
+{"skipped_at":"2026-09-27T20:05:08.022Z","reason":"consecutive-empty-skip","note":"未请求即跳过；未写入索引，下次同区间运行会自动重抓","after_id":5009,"from":5010,"to":5019,"count":10}

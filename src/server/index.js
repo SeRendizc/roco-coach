@@ -515,7 +515,7 @@ export function createCoachServer({fetchImpl=fetch,timeoutMs=35000,semantic=fals
    if(mode==='off'||!base)return base;
    const wrapped=wrapWithLocalModel(base,{model:localModel(),mode});
    const localPlan=createLocalPlan({model:localModel(),tools:['read_state','search_rules','compare_actions',
-    'simulate_branch','inspect_training','read_match','read_evidence','read_last_turn']});
+    'simulate_branch','read_match','read_evidence','read_last_turn']});
    // 只有 `on` 档才让本地模型**接管**工具选择（失败方向同样是「拿不准就停止查证」）。
    //
    // 第 38 轮修：原来无论哪一档都直接把 `wrapped.plan` 换成本地规划器。而

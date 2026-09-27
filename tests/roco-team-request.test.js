@@ -327,7 +327,7 @@ test('RC-301 工具：不塞进 TOOL_CONTRACTS，既有 13 个工具的口径一
     '工具合同是独立的：塞进 TOOL_CONTRACTS 会改动已发布评测钉住的提示与面板标签');
   raw('TOOL_CONTRACTS 的键', Object.keys(TOOL_CONTRACTS));
   assert.deepEqual(Object.keys(TOOL_CONTRACTS), [
-    'read_state', 'search_rules', 'compare_actions', 'simulate_branch', 'inspect_training', 'read_match',
+    'read_state', 'search_rules', 'compare_actions', 'simulate_branch', 'read_match',
     'read_evidence', 'read_last_turn', 'query_rules', 'evaluate_team', 'compare_team_change', 'plan_actions', 'summarize_battle',
   ]);
   assert.equal(REQUEST_TEAM_RECOMMENDATION_CONTRACT.tool_return_shape.length, 7);

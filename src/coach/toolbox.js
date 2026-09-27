@@ -146,7 +146,9 @@ export const TOOL_CONTRACTS={
  search_rules:{description:'检索本地规则和战术反例',arguments:{query:'1..180字符'}},
  compare_actions:{description:'合法行动平均/最坏分支，非胜率',arguments:{}},
  simulate_branch:{description:'比较我方候选行动面对同一组合法对手行动的收益与风险；候选用稳定标识（skill:guard / switch:turtle / item:potion:turtle），不用列表下标',arguments:{candidates:'1..3个我方行动标识；一个候选也接受',opponent:'可选对手行动标识；省略则遍历该侧全部合法行动',unresolved:'可选：提问里没能解析成合法行动的原文片段',actionIndex:'兼容旧参数：我方合法行动下标',opponentIndex:'兼容旧参数：对手合法行动下标'}},
- inspect_training:{description:'当前培养资源、阈值与目标',arguments:{}},
+ // 2026-09-27（人类：「附 1. 删」+「加点不要了」）：`inspect_training`（培养面板/训练点/培养格）**退役**。
+ // 它执行的是 `teacher(context)`，而 `teacher()` 现在答的是「这一版没有加点」——
+ // 没有任何玩家路径会调它，留着只会让模型多一个死工具。
  read_match:{description:'整局统计与关键回合；可用offset/limit分页',arguments:{offset:'非负整数，默认0',limit:'1..3，默认3'}},
  read_evidence:{description:'按回合读取已保留的原始事件；无记录明确missing',arguments:{turn:'正整数',matchId:'可选对局标识；给出时只读该局的回合，避免跨局取同号回合'}},
  read_last_turn:{description:'上个已结算回合的真实事件',arguments:{}},
@@ -494,7 +496,6 @@ export function executeTool(name,args,context,message=''){
   ?searchKnowledge(args.query,{limit:3,game:g,rulesVersion:g?.version||RULES_VERSION})
   :searchRulesWithRag(args.query,{game:g,rulesVersion:g?.version||RULES_VERSION,limit:3});
  if(name==='compare_actions')return strategist({...context,query:message});
- if(name==='inspect_training')return teacher(context);
  if(name==='read_match'){
   if(!context.lastMatch)return {missing:true};
   const {keyTurns,...summary}=context.lastMatch,offset=args.offset||0,limit=args.limit||3;

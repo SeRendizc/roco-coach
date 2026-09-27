@@ -74,7 +74,11 @@ test('④ 与留出切片零重叠：问句逐字不同、case_id 也不出现�
     }
   }
   // 反证：留出切片里的问句**确实**是另一批（否则上面的"零重叠"是空的）
-  assert.ok(heldOut.length >= 20 && heldMessages.size >= 20);
+  // 2026-09-27 改钉（人类：「附 1. 删」）：`inspect_training` 随加点一起退役 ⇒
+  // 留出切片从 20 条变 **18** 条（9 个工具 × 正负各一）。判据的意思没变：留出集必须够大、
+  // 而且与训练样本零重叠；数字跟着切片走。
+  assert.ok(heldOut.length >= 18 && heldMessages.size >= 18,
+    `留出切片太小（实际 ${heldOut.length} 条）`);
 });
 
 test('⑤ user 那一段必须是生产形状（toolPromptFor：message/screen/tools/hints/receipts）', () => {

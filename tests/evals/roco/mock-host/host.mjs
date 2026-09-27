@@ -179,7 +179,7 @@ export function createEngineHost({service, team = [...HOST_DEFAULT_TEAM], enemyT
     },
     // 模型只能**提议工具**；参数照样由宿主（引擎）校验。这里不做任何规则结算。
     proposeTool: (raw) => raw,
-    allowedTools: () => ['read_state', 'search_rules', 'compare_actions', 'simulate_branch', 'inspect_training', 'read_match', 'read_evidence', 'read_last_turn'],
+    allowedTools: () => ['read_state', 'search_rules', 'compare_actions', 'simulate_branch', 'read_match', 'read_evidence', 'read_last_turn'],
     // ── 偏好与记忆 ──
     readPreference: () => ({
       ...preferences,

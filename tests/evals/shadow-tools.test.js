@@ -41,8 +41,8 @@ const BATTLE_HINTS = {mode: 'battle', state_version: 3};
 
 // ↓↓ 期望值是**字面量**，由读 `localModelPlanner` 的 `prompt()` 推出来，并另外与它直接比对过。
 // 写成一个整串是刻意的：任何键序、条件键、null/缺省的变化都会让这一行对不上。
-const CAMP_PROMPT = '{"message":"寂灭骨龙的种族值是多少？","screen":"camp","tools":["read_state","search_rules","compare_actions","simulate_branch","inspect_training","read_match","read_evidence","read_last_turn","query_rules","evaluate_team","compare_team_change","plan_actions","summarize_battle"],"hints":{"state_version":12,"locked_pet":"pet_000225","team":["pet_000225","pet_000190","pet_000445"]},"receipts":null}';
-const BATTLE_PROMPT = '{"message":"帮我看下这局该怎么打。","screen":"battle","tools":["read_state","search_rules","compare_actions","simulate_branch","inspect_training","read_match","read_evidence","read_last_turn","query_rules","evaluate_team","compare_team_change","plan_actions","summarize_battle"],"hints":{"state_version":3},"receipts":null}';
+const CAMP_PROMPT = '{"message":"寂灭骨龙的种族值是多少？","screen":"camp","tools":["read_state","search_rules","compare_actions","simulate_branch","read_match","read_evidence","read_last_turn","query_rules","evaluate_team","compare_team_change","plan_actions","summarize_battle"],"hints":{"state_version":12,"locked_pet":"pet_000225","team":["pet_000225","pet_000190","pet_000445"]},"receipts":null}';
+const BATTLE_PROMPT = '{"message":"帮我看下这局该怎么打。","screen":"battle","tools":["read_state","search_rules","compare_actions","simulate_branch","read_match","read_evidence","read_last_turn","query_rules","evaluate_team","compare_team_change","plan_actions","summarize_battle"],"hints":{"state_version":3},"receipts":null}';
 
 /** 假网关：记录每次调用，按需回一段文本或一个错误响应。 */
 function fakeFetch(reply, {ok = true, status = 200} = {}) {
