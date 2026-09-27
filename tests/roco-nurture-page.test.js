@@ -30,7 +30,11 @@ const read = (rel) => readFileSync(join(ROOT, rel), 'utf8');
 
 /** 玩家可见文案的宿主（会讲"培养"的那几处）。 */
 const COPY_FILES = ['src/client/index.html', 'src/client/box.html', 'src/client/roco.html',
-  'src/client/xiaoya.html', 'src/client/app.js', 'src/client/box.js', 'src/client/box-drawer.js'];
+  'src/client/xiaoya.html', 'src/client/app.js', 'src/client/box.js', 'src/client/box-drawer.js',
+  // 2026-09-27：这两处也直接产玩家文案 —— 规则面板那一节由 `rules.js` 生成（营地页「规则」里看得到），
+  // `session.js` 的 `localReply` 是没接模型时的本地答复。**加点退役要求"一个字都不留"**，
+  // 所以它们必须一起被扫（原来只扫客户端文件，等于给这两处留了口子）。
+  'src/game/rules.js', 'src/coach/session.js'];
 /** 那一套词（出现即红）——「没有加点」这种否定句由 `trainingSurfaceHits` 放行。 */
 const TRAINING_WORDS = ['训练点', '培养格', '加点'];
 /** 如实否定的形状。 */

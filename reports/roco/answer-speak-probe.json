@@ -1,6 +1,6 @@
 {
  "schema": "roco-answer-speak-probe/v1",
- "generated_at": "2026-09-27T17:45:17.899Z",
+ "generated_at": "2026-09-27T18:25:16.125Z",
  "origin": "http://127.0.0.1:8765",
  "why": "单元判据扫的是源码字面量，证明不了\"服务端发出来、玩家读到的\"那一份还是不是人话（审计 ②）。",
  "counters": {
