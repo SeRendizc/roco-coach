@@ -922,6 +922,98 @@ async function main() {
       shots.push(await shoot('box-11-add-then-compare-1440x900'));
     }
 
+    // ── ⑩ 性格那一侧的「刷新 → 回滚 → 重刷」（真机三步，2026-09-27 补）──────────
+    //
+    // 28 号把**天分**那一侧的三步在真机上跑通了；台账里一直记着「性格那一侧只由单测覆盖」。
+    // 同一个按钮、同一条路径，但性格的"落点"是**性格名**、`lastRefreshNote` 走的是另一支，
+    // 所以这里照着 28 号再点一遍（同一个个体，性格次数还是满的）：
+    //   ① 点「刷新性格」⇒ 性格变了、次数 3→2、那一行小字说出换成了哪条；
+    //   ② 点「回滚上一次」⇒ 性格**回到刷之前那一条**、次数不动、按钮消失；
+    //   ③ 再点「刷新性格」⇒ 换成**另一条**，小字说清"回滚之后重刷的，原来的「X」已经撤掉"。
+    const natureProblems = (step) => {
+      const bad = [];
+      const before = step?.before ?? {};
+      const afterRefresh = step?.afterRefresh ?? {};
+      const afterUndo = step?.afterUndo ?? {};
+      const afterReroll = step?.afterReroll ?? {};
+      if (Number(afterRefresh.left) !== Number(before.left) - 1) {
+        bad.push(`刷新之后性格次数应当少一次（${before.left} → ${afterRefresh.left}）`);
+      }
+      if (afterRefresh.nature === before.nature) bad.push('刷新之后性格必须变一条（还是原来那条）');
+      if (!/上一次刷性格：换成了「[^」]+」/.test(String(afterRefresh.note))) {
+        bad.push(`刷新之后要说清换成了哪条性格，实际「${afterRefresh.note}」`);
+      }
+      if (afterUndo.nature !== before.nature) {
+        bad.push(`回滚之后性格必须回到刷之前那一条（应当 ${before.nature}，实际 ${afterUndo.nature}）`);
+      }
+      if (Number(afterUndo.left) !== Number(afterRefresh.left)) {
+        bad.push(`回滚不动次数（应当还是 ${afterRefresh.left}，实际 ${afterUndo.left}）`);
+      }
+      if (afterUndo.undoButton !== false) bad.push('回滚之后那个按钮必须消失（只退一步）');
+      // ⚠ 这一行小字说的是「**还站得住的那一次刷新**」。这个个体在前面（28 号）刷过天分，
+      // 所以退掉性格这一步之后，小字应当回到**那条天分**上 —— 它**不该**再声称刚才那条性格
+      // 还站着。第一版我写成"小字必须消失"，真机当场红给我看：那不是 bug，是我的断言过宽。
+      if (String(afterUndo.note).includes(String(afterRefresh.nature))) {
+        bad.push(`回滚之后不该再声称「${afterRefresh.nature}」还站着，实际「${afterUndo.note}」`);
+      }
+      if (afterReroll.nature === afterRefresh.nature) {
+        bad.push(`回滚之后重刷必须换一条性格，两次都是「${afterReroll.nature}」`);
+      }
+      if (!/回滚之后重刷的/.test(String(afterReroll.note))) {
+        bad.push(`重刷那一次要说明这是回滚之后重刷的，实际「${afterReroll.note}」`);
+      }
+      if (!String(afterReroll.note).includes(String(afterRefresh.nature))) {
+        bad.push(`要说清"原来的「${afterRefresh.nature}」已经撤掉"，实际「${afterReroll.note}」`);
+      }
+      if (afterReroll.undoButton !== true) bad.push('中间又刷过一次 ⇒ 回滚按钮必须回来');
+      return bad;
+    };
+    await cdp.send('Page.navigate', {url: base + 'box.html'});
+    await sleep(1400);
+    for (let i = 0; i < 60; i += 1) {
+      if (await js(`document.querySelectorAll('#box-grid [data-refresh="nature"]').length > 0`)) break;
+      await sleep(200);
+    }
+    const natureFacts = async (id) => JSON.parse(await js(`(()=>{
+      const row=document.querySelector('[data-individual="${id}"]');
+      const store=JSON.parse(localStorage.getItem('roco.box.individuals.v1')||'{}');
+      const one=store[${JSON.stringify(id)}]||null;
+      return JSON.stringify({nature:one?one.nature:null, left:one&&one.refreshes?one.refreshes.nature:0,
+        note:row?String(row.querySelector('[data-refresh-note]')?.textContent||'').replace(/\s+/g,' ').trim():null,
+        undoButton:Boolean(row&&row.querySelector('[data-undo]'))});})()`));
+    const naturePick = await js(`document.querySelector('#box-grid [data-refresh="nature"]')?.dataset.individual ?? ''`);
+    if (!naturePick) {
+      check('30-性格：刷新→回滚→重刷（真机）',
+        '盒子里要有一个能点的「刷新性格」按钮（抽屉渲染出来了）',
+        false, '盒子里一个「刷新性格」按钮都没有（抽屉没渲染？）');
+    } else {
+      const nBefore = await natureFacts(naturePick);
+      await mouseClick(`[data-individual="${naturePick}"] [data-refresh="nature"]`);
+      await sleep(500);
+      const nRefresh = await natureFacts(naturePick);
+      await mouseClick(`[data-individual="${naturePick}"] [data-undo]`);
+      await sleep(500);
+      const nUndo = await natureFacts(naturePick);
+      await mouseClick(`[data-individual="${naturePick}"] [data-refresh="nature"]`);
+      await sleep(500);
+      const nReroll = await natureFacts(naturePick);
+      const nStep = {id: naturePick, before: nBefore, afterRefresh: nRefresh, afterUndo: nUndo, afterReroll: nReroll};
+      steps.push({at: 'rollback-nature', ...nStep});
+      const nProblems = natureProblems(nStep);
+      check('30-性格：刷新→回滚→重刷（真机）',
+        '真鼠标点：刷性格（次数-1、说清换成哪条）→ 回滚（性格逐值回到刷之前、次数不动、按钮消失）→ 重刷（换另一条、说清撤掉了哪条、按钮回来）',
+        nProblems.length === 0,
+        nProblems.join(' | ') || `个体 ${naturePick}：「${nBefore.nature}」/${nBefore.left}次 → `
+          + `「${nRefresh.nature}」/${nRefresh.left}次 → 回滚「${nUndo.nature}」/${nUndo.left}次 `
+          + `(按钮=${nUndo.undoButton}) → 重刷「${nReroll.nature}」`);
+      counter('30-性格：刷新→回滚→重刷（真机）',
+        '性格回滚没还原 / 次数被改动 / 重刷没换一条 —— 三种坏数据都必须被同一条判据抓住',
+        natureProblems({...nStep, afterUndo: {...nUndo, nature: nRefresh.nature, left: nBefore.left - 1, undoButton: true},
+          afterReroll: {...nReroll, nature: nRefresh.nature, note: nRefresh.note}}),
+        '{"afterUndo":{"nature":"未还原","left":"次数被改动"},"afterReroll":{"note":"同一条性格"}}');
+      shots.push(await shoot('box-12-nature-rollback-1440x900'));
+    }
+
     check('22-控制台干净', '整轮下来没有 console.error，也没有未捕获异常',
       consoleErrors.length === 0 && pageErrors.length === 0,
       `consoleErrors=${JSON.stringify(consoleErrors.slice(0, 2))} pageErrors=${JSON.stringify(pageErrors.slice(0, 2))}`);

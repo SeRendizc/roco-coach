@@ -1,7 +1,7 @@
 {
  "generated_by": "scripts/roco/browser-box-acceptance.mjs",
  "page": "box.html",
- "judged_at": "2026-09-27T17:35:24.746Z",
+ "judged_at": "2026-09-27T18:09:08.325Z",
  "forbidden_player_pattern": "/pet_id|species_id|instance_id|state_version|coverage|provenance|source_scope|unknown_fields|licence|pack_id|ruleset_id|digest|build_hash|dataset_hash|[{}]|\"\\w+\"\\s*:/",
  "screenshots": [
   "reports/roco/box-acceptance/box-01-mine-1440x900.png",
@@ -12,7 +12,8 @@
   "reports/roco/box-acceptance/box-08-handoff-roco-1440x900.png",
   "reports/roco/box-acceptance/box-09-lock-handoff-1440x900.png",
   "reports/roco/box-acceptance/box-10-rollback-1440x900.png",
-  "reports/roco/box-acceptance/box-11-add-then-compare-1440x900.png"
+  "reports/roco/box-acceptance/box-11-add-then-compare-1440x900.png",
+  "reports/roco/box-acceptance/box-12-nature-rollback-1440x900.png"
  ],
  "viewport_metrics": [
   {
@@ -218,6 +219,12 @@
    "actual": "own-0001 + own-0001-b：选中 2 只，比较栏 hidden=false，点比较后提示「这一只（铠甲虫）是本机「再养一只同种」加出来的，还没进服务器名单，所以现在不能和名单里的个体逐字段比较 ——两只都在名单里才能比。它的性格与天分在这一行里看得到」；这一行画出来的是 {\"drawer\":true,\"count\":\"2\",\"rows\":[\"own-0001\",\"own-0001\",\"own-0001\",\"own-0001-b\",\"own-0001-b\",\"own-0001-b\"],\"toggles\":[\"own-0001\",\"own-0001-b\"],\"html\":\"<button cla =\\\"drawer-head\\\" data- pecie =\\\"pet_000012\\\" aria-expanded=\\\"true\\\">\\n   < pan cla =\\\"drawer-name\\\">铠甲虫</ pan>\\n   < pan cla =\\\"drawer-type \\\">< pan cla =\\\"chip\\\">虫系</ pan></ pan>\\n   < pan cla =\\\"drawer-count\\\">2 个个体</ pan>\\n  </button><div cla =\\\"drawer-body\\\"><div cla =\\\"individual\\\" data-individual=\\\"own-0001\\\" data-level- ource=\\\"default-100\\\">\\n   < pan cla =\\\"individual-card\\\"><article cla =\\\"card\\\" data- elect=\\\"own-0001\\\" data-group=\\\"pet_000012\\\" data- tatu =\\\"idle\\\">\\n   <button cla =\\\"card-face\\\" data-detail=\\\"o\"}"
   },
   {
+   "id": "30-性格：刷新→回滚→重刷（真机）",
+   "judge": "真鼠标点：刷性格（次数-1、说清换成哪条）→ 回滚（性格逐值回到刷之前、次数不动、按钮消失）→ 重刷（换另一条、说清撤掉了哪条、按钮回来）",
+   "ok": true,
+   "actual": "个体 own-0001：「稳重」/3次 → 「踏实」/2次 → 回滚「稳重」/2次 (按钮=false) → 重刷「害羞」"
+  },
+  {
    "id": "22-控制台干净",
    "judge": "整轮下来没有 console.error，也没有未捕获异常",
    "ok": true,
@@ -301,6 +308,13 @@
    "ok": true,
    "hit": "比不了的原因要说清楚（\"本机加出来的 / 还没进服务器名单\"），实际「已选两只同种伙伴：点「比较这两只」逐字段看相同 / 不同 / 未知。」",
    "actual": "{\"hintAfterCompare\":\"（还是选人那句，等于什么都没说）\"}"
+  },
+  {
+   "id": "30-性格：刷新→回滚→重刷（真机）",
+   "judge": "性格回滚没还原 / 次数被改动 / 重刷没换一条 —— 三种坏数据都必须被同一条判据抓住",
+   "ok": true,
+   "hit": "回滚之后性格必须回到刷之前那一条（应当 稳重，实际 踏实） | 回滚之后那个按钮必须消失（只退一步） | 回滚之后重刷必须换一条性格，两次都是「踏实」 | 重刷那一次要说明这是回滚之后重刷的，实际「上一次刷性格：换成了「踏实」」",
+   "actual": "{\"afterUndo\":{\"nature\":\"未还原\",\"left\":\"次数被改动\"},\"afterReroll\":{\"note\":\"同一条性格\"}}"
   }
  ],
  "console_errors": [],
@@ -532,6 +546,34 @@
    "hintAfterPick": "已选两只同种伙伴（铠甲虫）：点「比较这两只」逐字段看相同 / 不同 / 未知。",
    "panelHidden": true,
    "hintAfterCompare": "这一只（铠甲虫）是本机「再养一只同种」加出来的，还没进服务器名单，所以现在不能和名单里的个体逐字段比较 ——两只都在名单里才能比。它的性格与天分在这一行里看得到，也能单独培养。"
+  },
+  {
+   "at": "rollback-nature",
+   "id": "own-0001",
+   "before": {
+    "nature": "稳重",
+    "left": 3,
+    "note": "上一次刷天分（第 2 级）：+10 加到「魔防」—— 这次是回滚之后重刷的，换掉了原来的「物防」。",
+    "undoButton": true
+   },
+   "afterRefresh": {
+    "nature": "踏实",
+    "left": 2,
+    "note": "上一次刷性格：换成了「踏实」",
+    "undoButton": true
+   },
+   "afterUndo": {
+    "nature": "稳重",
+    "left": 2,
+    "note": "上一次刷天分（第 2 级）：+10 加到「魔防」—— 这次是回滚之后重刷的，换掉了原来的「物防」。",
+    "undoButton": false
+   },
+   "afterReroll": {
+    "nature": "害羞",
+    "left": 1,
+    "note": "上一次刷性格：换成了「害羞」—— 这次是回滚之后重刷的，原来的「踏实」已经撤掉。",
+    "undoButton": true
+   }
   }
  ],
  "ok": true

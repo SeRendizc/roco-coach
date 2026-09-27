@@ -279,6 +279,15 @@ test('判据⑤ 三个时长互不相等，且各自有独立判据（明说 6h 
  const justOutside=playerAcceptance(refusal,{now:now+REFUSAL_TTL_MS+1});
  assert.equal(justInside.channels.advice.refusedBy.items.length,1,'6 小时内明说的拒绝仍然算数');
  assert.equal(justOutside.channels.advice.refusedBy.items.length,0,'过了 6 小时明说的拒绝自动不再拦');
+ // 2026-09-27（门禁里抓到的一次"假的偶发红"）：`rememberPreference` 原来把它收到的 `now`
+ // **丢掉**、转发给 `rememberStated` 时传了空对象 ⇒ `until` 用真钟算，而调用方用注入的钟比对，
+ // 差几毫秒就够让上面那条边界判据随机变红（高负载下必红）。这条判据把契约钉死：
+ // **注入时钟之后，账上的 `until` 必须逐毫秒等于 `now + REFUSAL_TTL_MS`**。
+ const pinned=rememberPreference(freshMemory(),'别教我了',{now});
+ const row=(pinned.stated??[]).find((item)=>item.kind==='refusal'&&item.value==='advice');
+ assert.ok(row, `注入了时钟的记忆里要有那条拒绝条目：${JSON.stringify(pinned.stated)}`);
+ assert.equal(row.until, now+REFUSAL_TTL_MS,
+   '注入 now 之后 until 必须= now+TTL（差一点都说明链路里混进了第二个钟）');
  // 点掉：7 天边界。点掉记录里的 `channel` 记的是**角色**（teacher / strategist），没有
  // 「点掉的是建议还是复盘」这种信息 —— 所以它**不进任何一档的 sampleN**（样本只由玩家
  // 明说过的话构成；把行为当成明说就是降级），而是按权重折算成这一档的怀疑票。

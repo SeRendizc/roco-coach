@@ -1,6 +1,6 @@
 {
  "generated_by": "scripts/roco/triage-check-warnings.mjs",
- "scanned_calls": 142,
+ "scanned_calls": 144,
  "files_scanned": 13,
  "problems": [],
  "counts": {

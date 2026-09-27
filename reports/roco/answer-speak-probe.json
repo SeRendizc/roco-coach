@@ -1,16 +1,18 @@
 {
  "schema": "roco-answer-speak-probe/v1",
- "generated_at": "2026-09-27T16:19:47.381Z",
+ "generated_at": "2026-09-27T17:45:17.899Z",
  "origin": "http://127.0.0.1:8765",
  "why": "单元判据扫的是源码字面量，证明不了\"服务端发出来、玩家读到的\"那一份还是不是人话（审计 ②）。",
  "counters": {
-  "asked": 11,
-  "clean": 11,
+  "asked": 13,
+  "clean": 13,
   "dirty": 0
  },
  "rows": [
   {
    "question": "雨天水系伤害加多少？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -22,6 +24,8 @@
   },
   {
    "question": "火系克制什么属性？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -33,6 +37,8 @@
   },
   {
    "question": "水系打火系有优势吗？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -44,6 +50,8 @@
   },
   {
    "question": "我这几只里谁抗龙系？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -55,6 +63,8 @@
   },
   {
    "question": "铠甲虫是谁？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -66,6 +76,8 @@
   },
   {
    "question": "小翼龙带抓挠、震击合法吗？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -77,6 +89,8 @@
   },
   {
    "question": "主动换宠还能出招吗？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -88,6 +102,8 @@
   },
   {
    "question": "倒下补位免费吗？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -99,6 +115,8 @@
   },
   {
    "question": "技能一共有多少种？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
@@ -110,17 +128,47 @@
   },
   {
    "question": "加点每点加多少？",
+   "retired": true,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",
-   "text": "每点加多少这条，手游那边的加点数据我这边没有：抓到的只有社区阵容里「这只加哪几项」，没有每点收益、也没有加点上限。营地那一档练习引擎倒是有一组每点收益的常量，但那是那一档自己定的，**我不把它当手机版那一档的规矩讲给你**（具体数值留在依据里，正文不念）。你要准确数字的话，给我一份来源或实机读数，我按它答。（来源：没有 —— 这正是要跟你要的东西。）",
+   "text": "这一版**没有加点**：培养就是改**性格**与**天分** —— 在我的盒子里按种类点开个体，每只各能刷 3 次（刷性格与刷天分分开计数）。",
    "hard": [],
    "soft": [],
    "latin": [],
-   "evidence_latin": 2
+   "evidence_latin": 0
+  },
+  {
+   "question": "我还差多少训练点满级？",
+   "retired": true,
+   "retiredProblems": [],
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "这一版**没有加点**：培养就是改**性格**与**天分** —— 在我的盒子里按种类点开个体，每只各能刷 3 次（刷性格与刷天分分开计数）。等级与经验照常涨。",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 0
+  },
+  {
+   "question": "还有几个培养格？",
+   "retired": true,
+   "retiredProblems": [],
+   "status": 200,
+   "agentStop": "policy-fact-local",
+   "provider": "local",
+   "text": "这一版**没有加点**：培养就是改**性格**与**天分** —— 在我的盒子里按种类点开个体，每只各能刷 3 次（刷性格与刷天分分开计数）。等级与经验照常涨。",
+   "hard": [],
+   "soft": [],
+   "latin": [],
+   "evidence_latin": 0
   },
   {
    "question": "我的能量上限是多少？",
+   "retired": false,
+   "retiredProblems": [],
    "status": 200,
    "agentStop": "policy-fact-local",
    "provider": "local",

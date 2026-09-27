@@ -34,20 +34,27 @@ const asJson = process.argv.includes('--json');
 //: 正文里**额外**不许出现的东西（词表抓不到的那一类：英文枚举、数据文件名、代码标识）。
 const LATIN_LEAK = /[A-Za-z_]{3,}\.(js|json)|OFFICIAL_[A-Z]+|ENGINE_[A-Z_]+|RULES\.[a-z]|weather_policy|TYPE_ADVANTAGES|policies\./g;
 
-/** 这一批问句覆盖了这一轮改过的每一条本地回答（天气/相性/图鉴/可学性/换宠/补位/技能数/加点）。 */
+/** 这一批问句覆盖了这一轮改过的每一条本地回答（天气/相性/图鉴/可学性/换宠/补位/技能数/加点/训练点）。
+ *
+ * `retired: true` 的那几条是**加点退役**的问句（2026-09-27 人类：「加点不要了」）：
+ * 除了"不许有工程黑话"之外，还要求正文**直说没有加点**、且**一个旧口径的数都不报**。 */
 const ASKS = [
-  '雨天水系伤害加多少？',
-  '火系克制什么属性？',
-  '水系打火系有优势吗？',
-  '我这几只里谁抗龙系？',
-  '铠甲虫是谁？',
-  '小翼龙带抓挠、震击合法吗？',
-  '主动换宠还能出招吗？',
-  '倒下补位免费吗？',
-  '技能一共有多少种？',
-  '加点每点加多少？',
-  '我的能量上限是多少？',
+  {q: '雨天水系伤害加多少？'},
+  {q: '火系克制什么属性？'},
+  {q: '水系打火系有优势吗？'},
+  {q: '我这几只里谁抗龙系？'},
+  {q: '铠甲虫是谁？'},
+  {q: '小翼龙带抓挠、震击合法吗？'},
+  {q: '主动换宠还能出招吗？'},
+  {q: '倒下补位免费吗？'},
+  {q: '技能一共有多少种？'},
+  {q: '加点每点加多少？', retired: true},
+  {q: '我还差多少训练点满级？', retired: true},
+  {q: '还有几个培养格？', retired: true},
+  {q: '我的能量上限是多少？'},
 ];
+/** 退役问句的判据：直说没有加点 + 不报旧数（与 `tests/roco-nurture-page.test.js` ⑤ 同一口径）。 */
+const RETIRED_LEAK = /训练点 ?\d|培养格|满级还差|还差 \d+ ?格|\+12 生命|\+4 攻击|\+3 速度/;
 
 const boot = await fetch(`${ORIGIN}/api/bootstrap`);
 const cookie = boot.headers.get('set-cookie')?.split(';')[0];
@@ -62,7 +69,8 @@ const context = {
 };
 
 const rows = [];
-for (const question of ASKS) {
+for (const ask of ASKS) {
+  const question = ask.q;
   let record = {question};
   try {
     const response = await fetch(`${ORIGIN}/api/coach`, {
@@ -76,7 +84,12 @@ for (const question of ASKS) {
     const evidence = (data.evidence ?? []).join('\n');
     const hits = speakHits(text);
     const latin = text.match(LATIN_LEAK) ?? [];
-    record = {...record, status: response.status, agentStop: data.agentStop ?? null,
+    // 加点退役那几条：直说没有加点 + 不报旧数（真机这一侧的证据）
+    const retiredProblems = !ask.retired ? []
+      : [...(text.includes('没有加点') ? [] : ['正文没有直说"没有加点"']),
+        ...(RETIRED_LEAK.test(text) ? [`正文里还报着旧口径的数：${text.match(RETIRED_LEAK)[0]}`] : [])];
+    record = {...record, retired: ask.retired === true, retiredProblems,
+      status: response.status, agentStop: data.agentStop ?? null,
       provider: data.provider ?? null, text: text.slice(0, 300),
       hard: hits.hard, soft: hits.soft, latin,
       // 依据区**允许**留文件名/编号（规范第三节的例外）——这里只记账，不判红。
@@ -85,15 +98,18 @@ for (const question of ASKS) {
     record = {...record, error: String(error?.message ?? error)};
   }
   rows.push(record);
-  const bad = (record.hard?.length ?? 0) + (record.soft?.length ?? 0) + (record.latin?.length ?? 0);
+  const bad = (record.hard?.length ?? 0) + (record.soft?.length ?? 0) + (record.latin?.length ?? 0)
+    + (record.retiredProblems?.length ?? 0);
   if (!asJson) {
     console.error(`${bad ? 'FAIL' : 'ok  '} ${question}  stop=${record.agentStop} `
-      + `正文命中=${JSON.stringify([...(record.hard ?? []), ...(record.soft ?? []), ...(record.latin ?? [])])}`);
+      + `正文命中=${JSON.stringify([...(record.hard ?? []), ...(record.soft ?? []), ...(record.latin ?? [])])}`
+      + (record.retired ? ` 退役检查=${JSON.stringify(record.retiredProblems)}` : ''));
     if (bad) console.error(`      正文：${record.text}`);
   }
 }
 
-const dirty = rows.filter((row) => (row.hard?.length ?? 0) + (row.soft?.length ?? 0) + (row.latin?.length ?? 0) > 0);
+const dirty = rows.filter((row) => (row.hard?.length ?? 0) + (row.soft?.length ?? 0)
+  + (row.latin?.length ?? 0) + (row.retiredProblems?.length ?? 0) > 0);
 const report = {
   schema: 'roco-answer-speak-probe/v1',
   generated_at: new Date().toISOString(),

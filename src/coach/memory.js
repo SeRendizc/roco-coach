@@ -31,10 +31,15 @@ export function rememberPreference(memory,message,{now=Date.now()}={}){
  //   ① 显式条目（称呼／本命／聊天风格／输了要不要复盘／里程碑／目标／拒绝）→ memory.stated
  //   ② 情绪假设 → memory.mood（低置信、30 分钟过期、可被下一句覆盖）
  //   ③ 待作答的练习题：这一条消息如果是答案，先记账再交给老师（判据见 quizMastery）
- next=rememberStated(next,message,{}).memory;
- const attempt=answerPendingQuiz(next,message);
+ // ⚠ 2026-09-27（门禁里抓到的一次假的"偶发红"）：这里原来是 `rememberStated(next,message,{})` ——
+ // **把注入的时钟丢掉了**，于是 `until` 用的是真钟 `Date.now()`，而调用方（判据/回放）用的是注入的
+ // `now`。两者差几毫秒就够让"过了 6 小时不再拦"那条边界判据随机变红（负载高时必红）。
+ // 注入时钟的契约是"整条链路只用这一个钟"，所以这里把 `now` 传下去；`answerPendingQuiz` /
+ // `hintPendingQuiz` 同样接时钟（作答与提示的记账时间也要同一个钟）。
+ next=rememberStated(next,message,{now}).memory;
+ const attempt=answerPendingQuiz(next,message,{now});
  if(attempt&&attempt.memory)next=attempt.memory;
- const hint=hintPendingQuiz(next,message);
+ const hint=hintPendingQuiz(next,message,{now});
  if(hint&&hint.memory)next=hint.memory;
  next.mood=rememberMood(next,message,{now});
  return next;
@@ -393,10 +398,11 @@ export function quizAnswerOf(message){
 // 玩家要提示：这一道题之后即使答对也不算「独立解出」。判据是**他自己要过提示**，
 // 不是我们猜他会不会。runtime 在路由前调用这一处，所以提示这件事真的会被记下。
 export const HINT_ASK=/提示|给点|怎么做|怎么选|不会|答案是|答案是什么/;
-export function hintPendingQuiz(memory,message){
+export function hintPendingQuiz(memory,message,{now=Date.now()}={}){
  const quiz=memory?.pendingQuiz;
  if(!quiz||quiz.hintShown||!HINT_ASK.test(String(message||'')))return null;
- const m=structuredClone(memory);m.pendingQuiz={...quiz,hintShown:true,hintTime:new Date().toISOString()};
+ // 2026-09-27：与 `rememberPreference` 同一条纪律 —— 注入了时钟就整条链路用它。
+ const m=structuredClone(memory);m.pendingQuiz={...quiz,hintShown:true,hintTime:new Date(now).toISOString()};
  return {memory:m,quizId:quiz.id};
 }
 export function recordQuizAttempt(memory,{quiz,answer,hinted=false,now=Date.now()}={}){
