@@ -10646,3 +10646,51 @@ C5 三处（两处收紧 + 第三处降级，§C6.310/§C6.311）、C2/C3/Phase 
 provenance/rag-eval/game-data-pack/reconciliation/sprite-identity/state-doc/guard-selftest/browser-acceptance/
 demo-acceptance/mobile-sweep/box-acceptance/workshop-acceptance/loadout-acceptance/five-minute-chain/
 roco-ux-acceptance/battle-feedback/coverage-axes/retained-assets）。
+
+#### §C6.321 第 64 轮：人类四条新指令（A1/A2/A3/D）—— **加点整块退役**、回滚改成"只退一步、次数不退"、119 处假绿逐条判定、8765 重启
+
+人类 2026-09-27 的回复（逐条照做）：
+
+**A1「不要，按照洛手的机制来，根本没有这些，不要了」⇒ 加点那一整套退役**
+- 页面：`nurture.html`/`nurture.js`/`nurture.css` **删除**；静态清单去掉；新增 `RETIRED_PAGES`，
+  `/nurture.html` 与 `/nurture` **302 到 `/box.html`**（书签不落 404）；两个入口按钮一起删；
+  营地页「伙伴培养」面板换成"等级/经验/配招 + 说清没有加点、培养在我的盒子里"。
+- 文案：钱包、局末奖励、关卡速胜奖励、认输说明、**规则面板**（`rules.js` 生成的那一节）全部去掉
+  训练点/培养格/加点；`content.js` 的「培养时 · 页内建议」预制场景退役。
+- 教练：`training-ask` / `training-ask-elsewhere` 改成**明确的否定回答**（本地作答、0 次模型调用）；
+  `teacher()` 的加点建议 → "等级/经验 + 培养在哪做"；`session.js` 同改；出题那道
+  「培养一次敏捷（+3）」换成纯速度比较（知识点与答案口径不变）。
+- 知识库：删掉 `tactic:training` / `tactic:growth-save` 两张卡（**93 → 91**），重跑三个产物生成器
+  （`build-knowledge.js` / `build-tactic-cards.mjs` / `eval-rag-retrieval.mjs`），RAG 语料里 4 条加点 query 退役。
+- 判据：`tests/roco-nurture-page.test.js` **重写成退役判据**（文件/清单/302/入口/文案/教练六件 + 反证）；
+  其余套件逐条**改钉不删**（rules / ask-coverage / teacher-shape / teaching-loop / knowledge /
+  rag-tactic-cards / coach / agent / plain-speak / wiring / type-pair-ask / mobile-sweep）。
+
+**A2「只能回上一个状态，不能回前两个状态；不是回一次；次数不消耗也不返还」**
+- `canUndo()` = "历史里**最近一条记录就是刷新**"；`undoLastRefresh()` **不再归还次数**；
+  连着退抛 `already-undone`；按钮/状态行/`rollbackAdvice`/文档同步。
+- 真机判据 28 改成：刷新（账+1、次数-1）→ 回滚（**次数不动**、数值逐值还原、按钮消失）→
+  重刷（换落点、说清换掉了谁、**按钮回来**）。**29/29 + 反证 11/11**。
+
+**A3「提交啊，为啥不提交？」** —— 两次提交：`2428864`（上一轮七项收口 + 仓库卫生）、
+`21bed20`（这一轮的加点退役 + 回滚语义 + 假绿判定）。提交前把验收截图与门禁失败日志加进 `.gitignore`
+（每次跑都变，结论在各自的 json 里）。
+
+**D1「那就重启啊」** —— 8765 演示进程已重启（旧进程 59144 收掉，新进程跑这一轮代码）：
+`/index.html` 已经能读到新的分档说明；真机探针 **11/11 干净**（重启前那份旧代码是 8/11）。
+
+**D2「119 处为啥只看 5 个」** —— 把扫描器抽成 `scripts/roco/check-arity-lib.mjs`（判据与
+`triage-check-warnings.mjs` 共用），先修**尺子自己的两个误报**（对"第二格本来就是布尔"的脚本也报警告；
+计数不可信时还判红）。123 处警告分类结果：**3 处真·假绿**（盒子套件 25/28/29 的失败上报分支
+`check(id, false, '…')` ⇒ `ok` 收到那串文本、**恒真**，也就是"失败上报其实报绿"）+ 1 处计数噪声。
+三处已补判据文本；判据现在把「多传 / 第二格塞布尔 / 第二格不明」三类**全部判红**，
+不再有"攒着没人看"的警告（逐条判定的产物：`reports/roco/acceptance-check-triage.json`）。
+
+**验证**：`test:unit` **1640 通过 / 0 失败**；`verify:release` **27/27**；盒子真机 **29/29 + 反证 11/11**；
+真机探针 **11/11**。
+
+**没做到 / 未验证**：① 引擎内部的加点模型（`progression.js` 的 `TRAINING`/`tokens`/`train()`、
+`engine.js` 的 `RULES.training`）**还在**——只是不再上屏、不再回答；要不要连引擎一起删（含存档格式与
+`settle()` 的 tokens 奖励）是下一步的显式决定（删了老存档里的 tokens 会变成无用字段，但不影响读取）；
+② A4/A5/B/C 是**问答**（v8 是什么 / 本机个体比较是什么 / 黑话与硬禁词为什么存在 / 给文件链接与标准），
+答案在给人类的汇报里；③ 性格那一侧的真机三步仍未单独跑（同一按钮同一路径）。
