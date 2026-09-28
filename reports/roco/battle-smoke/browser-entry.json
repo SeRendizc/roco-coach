@@ -1,0 +1,162 @@
+{
+ "schema_version": 1,
+ "artifact": "battle-smoke-browser",
+ "generated_at": "2026-09-28T16:32:25.120Z",
+ "base": "http://127.0.0.1:8765",
+ "why": "浏览器只验入口：选宠 → 组成合法六只 → 开一局 → 点得动技能。逐只全量在引擎侧与 HTTP 入口侧。",
+ "steps": [
+  {
+   "id": "workshop-mounted",
+   "ok": true,
+   "note": "{\"host\":true,\"shadow\":true,\"poolTotal\":null}"
+  },
+  {
+   "id": "pick-six",
+   "ok": true,
+   "note": "点了 6 只，六槽 filled=6",
+   "slots": [
+    {
+     "state": "filled",
+     "text": "喵喵 移除 草系 持有 · 可正式上场 有具体构建（算得出高低） 特性「氧循环」：使用草系技能后，回复10%生命。 机制"
+    },
+    {
+     "state": "filled",
+     "text": "水蓝蓝 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「浸润」：使用水系技能后，全技能能耗-1。 机制"
+    },
+    {
+     "state": "filled",
+     "text": "火花 移除 火系 持有 · 可正式上场 有具体构建（算得出高低） 特性「助燃」：使用火系技能后，获得双攻+20%。 机制"
+    },
+    {
+     "state": "filled",
+     "text": "迪莫 移除 光系 持有 · 可正式上场 有具体构建（算得出高低） 特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%"
+    },
+    {
+     "state": "filled",
+     "text": "水灵 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「浸润」：使用水系技能后，全技能能耗-1。 机制线"
+    },
+    {
+     "state": "filled",
+     "text": "火神 锁定 移除 火系 持有 · 可正式上场 有具体构建（算得出高低） 特性「助燃」：使用火系技能后，获得双攻+20%。"
+    }
+   ]
+  },
+  {
+   "id": "start-battle",
+   "ok": true,
+   "note": "开局后技能按钮 4 个、动作分组 skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0",
+   "started": {
+    "disabled": false,
+    "acts": [
+     {
+      "text": "🌟 0 抓挠 普通系 · 攻击 预计 28（未核验）",
+      "disabled": false
+     },
+     {
+      "text": "🌟 1 防御 普通系 · 防御 预计伤害：算不出",
+      "disabled": false
+     },
+     {
+      "text": "🌟 6 仙人掌刺击 草系 · 攻击 预计 180（未核验）",
+      "disabled": false
+     },
+     {
+      "text": "🌟 1 腐化 毒系 · 状态 预计伤害：算不出",
+      "disabled": false
+     }
+    ],
+    "turn": "第 1 回合",
+    "groups": "skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0"
+   }
+  },
+  {
+   "id": "play-one-action",
+   "ok": true,
+   "note": "点了「🌟 0 抓挠 普通系 · 攻击 预计 28（未核验）」，回合 第 1 回合 → 第 2 回合",
+   "played": {
+    "label": "🌟 0 抓挠 普通系 · 攻击 预计 28（未核验）",
+    "turn": "第 2 回合",
+    "groups": "skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0",
+    "ended": true
+   }
+  },
+  {
+   "id": "no-console-exception",
+   "ok": true,
+   "note": "页面异常 0 条",
+   "consoleErrors": []
+  }
+ ],
+ "steps_ok": 5,
+ "steps_total": 5,
+ "ok": true,
+ "extra": {
+  "clicked": {
+   "picked": [
+    "own-0001",
+    "own-0002",
+    "own-0003",
+    "own-0004",
+    "own-0005",
+    "own-0006"
+   ],
+   "rows": 7,
+   "slots": [
+    {
+     "state": "filled",
+     "text": "喵喵 移除 草系 持有 · 可正式上场 有具体构建（算得出高低） 特性「氧循环」：使用草系技能后，回复10%生命。 机制"
+    },
+    {
+     "state": "filled",
+     "text": "水蓝蓝 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「浸润」：使用水系技能后，全技能能耗-1。 机制"
+    },
+    {
+     "state": "filled",
+     "text": "火花 移除 火系 持有 · 可正式上场 有具体构建（算得出高低） 特性「助燃」：使用火系技能后，获得双攻+20%。 机制"
+    },
+    {
+     "state": "filled",
+     "text": "迪莫 移除 光系 持有 · 可正式上场 有具体构建（算得出高低） 特性「最好的伙伴」：造成克制伤害后，获得攻防速+20%"
+    },
+    {
+     "state": "filled",
+     "text": "水灵 移除 水系 持有 · 可正式上场 有具体构建（算得出高低） 特性「浸润」：使用水系技能后，全技能能耗-1。 机制线"
+    },
+    {
+     "state": "filled",
+     "text": "火神 锁定 移除 火系 持有 · 可正式上场 有具体构建（算得出高低） 特性「助燃」：使用火系技能后，获得双攻+20%。"
+    }
+   ],
+   "scope": "true"
+  },
+  "started": {
+   "disabled": false,
+   "acts": [
+    {
+     "text": "🌟 0 抓挠 普通系 · 攻击 预计 28（未核验）",
+     "disabled": false
+    },
+    {
+     "text": "🌟 1 防御 普通系 · 防御 预计伤害：算不出",
+     "disabled": false
+    },
+    {
+     "text": "🌟 6 仙人掌刺击 草系 · 攻击 预计 180（未核验）",
+     "disabled": false
+    },
+    {
+     "text": "🌟 1 腐化 毒系 · 状态 预计伤害：算不出",
+     "disabled": false
+    }
+   ],
+   "turn": "第 1 回合",
+   "groups": "skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0"
+  },
+  "played": {
+   "label": "🌟 0 抓挠 普通系 · 攻击 预计 28（未核验）",
+   "turn": "第 2 回合",
+   "groups": "skill:4,charge:1,switch:5,surrender:1,magic:1,item:0,escape:0",
+   "ended": true
+  }
+ }
+}

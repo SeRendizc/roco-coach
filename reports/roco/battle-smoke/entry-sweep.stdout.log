@@ -1,0 +1,17 @@
+{
+ "counts": {
+  "total": 542,
+  "entry_playable": 542,
+  "entry_blocked": 0,
+  "select_ok": 542,
+  "start_ok": 542,
+  "loadout_passthrough_ok": 542,
+  "settle_run": 542,
+  "settle_ok": 542,
+  "full_playable": 542
+ },
+ "combos_ok": 12,
+ "combos_total": 12,
+ "elapsed_s": 83
+}
+→ /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/entry-sweep.json

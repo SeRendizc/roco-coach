@@ -1,0 +1,93 @@
+
+=== ① 引擎侧全量逐只最小战斗冒烟 ===
+$ python3 scripts/roco/battle-smoke-engine.py
+[engine] 25/542 可玩 25 用时 2s
+[engine] 50/542 可玩 50 用时 4s
+[engine] 75/542 可玩 75 用时 6s
+[engine] 100/542 可玩 100 用时 8s
+[engine] 125/542 可玩 125 用时 9s
+[engine] 150/542 可玩 150 用时 12s
+[engine] 175/542 可玩 175 用时 14s
+[engine] 200/542 可玩 200 用时 16s
+[engine] 225/542 可玩 225 用时 19s
+[engine] 250/542 可玩 250 用时 21s
+[engine] 275/542 可玩 275 用时 23s
+[engine] 300/542 可玩 300 用时 25s
+[engine] 325/542 可玩 325 用时 26s
+[engine] 350/542 可玩 350 用时 28s
+[engine] 375/542 可玩 375 用时 30s
+[engine] 400/542 可玩 400 用时 32s
+[engine] 425/542 可玩 425 用时 35s
+[engine] 450/542 可玩 450 用时 37s
+[engine] 475/542 可玩 475 用时 39s
+[engine] 500/542 可玩 500 用时 41s
+[engine] 525/542 可玩 525 用时 44s
+[engine] 542/542 可玩 542 用时 45s
+{"total": 542, "playable": 542, "blocked": 0, "settled": 542, "all_four_used": 536, "used_at_least_one": 542, "all_four_used_on_requested_loadout": 536, "loadout_replaced": 0, "switch_out_ok": 542, "switch_in_ok": 542, "took_damage": 542, "target_fainted": 542, "any_unsupported_seen": 485}
+→ /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/engine-sweep.json
+
+=== ② HTTP 入口侧全量逐只（--settle=all） ===
+$ node scripts/roco/battle-smoke-entry.mjs --base=http://127.0.0.1:8765 --settle=all
+[entry] 25/542 入口可玩 25 用时 0s
+[entry] 50/542 入口可玩 50 用时 0s
+[entry] 75/542 入口可玩 75 用时 0s
+[entry] 100/542 入口可玩 100 用时 0s
+[entry] 125/542 入口可玩 125 用时 1s
+[entry] 150/542 入口可玩 150 用时 1s
+[entry] 175/542 入口可玩 175 用时 1s
+[entry] 200/542 入口可玩 200 用时 1s
+[entry] 225/542 入口可玩 225 用时 1s
+[entry] 250/542 入口可玩 250 用时 1s
+[entry] 275/542 入口可玩 275 用时 1s
+[entry] 300/542 入口可玩 300 用时 1s
+[entry] 325/542 入口可玩 325 用时 1s
+[entry] 350/542 入口可玩 350 用时 2s
+[entry] 375/542 入口可玩 375 用时 2s
+[entry] 400/542 入口可玩 400 用时 2s
+[entry] 425/542 入口可玩 425 用时 2s
+[entry] 450/542 入口可玩 450 用时 2s
+[entry] 475/542 入口可玩 475 用时 2s
+[entry] 500/542 入口可玩 500 用时 2s
+[entry] 525/542 入口可玩 525 用时 2s
+{
+ "counts": {
+  "total": 542,
+  "entry_playable": 542,
+  "entry_blocked": 0,
+  "select_ok": 542,
+  "start_ok": 542,
+  "loadout_passthrough_ok": 542,
+  "settle_run": 542,
+  "settle_ok": 542,
+  "full_playable": 542
+ },
+ "combos_ok": 12,
+ "combos_total": 12,
+ "elapsed_s": 84
+}
+→ /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/entry-sweep.json
+
+=== ③ 合成两列清单 + 人读 md ===
+$ python3 scripts/roco/battle-smoke-summary.py
+{"column_1": {"total": 542, "playable": 542, "blocked": 0, "settled": 542, "all_four_used": 536, "used_at_least_one": 542, "all_four_used_on_requested_loadout": 536, "loadout_replaced": 0, "switch_out_ok": 542, "switch_in_ok": 542, "took_damage": 542, "target_fainted": 542, "any_unsupported_seen": 485, "artifact": "reports/roco/battle-smoke/engine-sweep.json"}, "entry": {"total": 542, "entry_playable": 542, "entry_blocked": 0, "select_ok": 542, "start_ok": 542, "loadout_passthrough_ok": 542, "settle_run": 542, "settle_ok": 542, "full_playable": 542, "artifact": "reports/roco/battle-smoke/entry-sweep.json"}, "column_2": {"NOT_REGISTERED_IN_ENGINE": 527, "FULL": 8, "PARTIAL": 3, "REFUSED": 4}}
+→ /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/battle-smoke-summary.json
+→ /Users/serendizc/Developer/roco-coach/reports/roco/battle-smoke/battle-smoke.md
+
+=== ④ 入口侧失败局逐手复现（失败局为 0 时保留上一次产物、不覆盖） ===
+$ python3 scripts/roco/battle-smoke-repro.py
+入口侧没有打不完的局，无需复现；保留上一次的产物不动。
+（上一次的逐手 trace 复现见 reports/roco/battle-smoke/repro-own-0442-from-trace.json；不依赖任何轨迹的自足复现见 scripts/roco/battle-smoke-repro-negative-cost.py）
+
+=== ⑤ 绞轮负能耗自足复现（机制缺口，必现） ===
+$ python3 scripts/roco/battle-smoke-repro-negative-cost.py
+{"reproduced": true, "message": "未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）", "at_turn": 6}
+→ reports/roco/battle-smoke/negative-energy-cost-repro.json
+
+=== 汇总 ===
+  OK   engine-sweep（45.4s）
+  OK   entry-sweep（84.5s）
+  OK   summary（0.1s）
+  OK   repro-trace（0.2s）
+  OK   repro-negative-cost（0.2s）
+总耗时 130.3s
+产物目录：reports/roco/battle-smoke/

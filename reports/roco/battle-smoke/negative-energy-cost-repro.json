@@ -1,0 +1,264 @@
+{
+ "schema_version": 1,
+ "artifact": "battle-smoke-repro-negative-cost",
+ "how": "自足复现：不依赖任何一次冒烟的轨迹，按配方现打一遍",
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "ruleset_config_id": "mobile_s4_candidate_v3",
+ "seed": 20260921,
+ "team": [
+  "pet_000446",
+  "pet_000001",
+  "pet_000002",
+  "pet_000003",
+  "pet_000004",
+  "pet_000005"
+ ],
+ "enemy_team": [
+  "pet_000482",
+  "pet_000006",
+  "pet_000007",
+  "pet_000008",
+  "pet_000009",
+  "pet_000010"
+ ],
+ "attacker": {
+  "pet_id": "pet_000446",
+  "name": "黑羽夫人",
+  "skill": "skill_000696",
+  "skill_name": "鸣叫"
+ },
+ "rampled": {
+  "pet_id": "pet_000482",
+  "name": "溯源钟",
+  "skill": "skill_000494",
+  "skill_name": "绞轮",
+  "desc": "造成物伤，每受到1次抵抗的技能攻击（不含连击），本技能能耗永久-1。",
+  "base_energy": 5
+ },
+ "reproduced": true,
+ "failure": {
+  "stage": "exception",
+  "at_index": 5,
+  "action": {
+   "kind": "skill",
+   "skill_id": "skill_000696"
+  },
+  "exception_type": "UnsupportedEffect",
+  "message": "未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+  "traceback": [
+   "Traceback (most recent call last):",
+   "  File \"/Users/serendizc/Developer/roco-coach/scripts/roco/battle-smoke-repro-negative-cost.py\", line 180, in main",
+   "    status, env2 = svc.battle_advance({\"state\": state_dict, \"action\": action.to_dict(),",
+   "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/service.py\", line 2498, in battle_advance",
+   "    env_mod.step_joint(state, rs, player_action, enemy_action)",
+   "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/env.py\", line 737, in step_joint",
+   "    _execute(state, rs, side, action, cfg)",
+   "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/env.py\", line 928, in _execute",
+   "    raise fx.UnsupportedEffect(",
+   "roco_env.effects.UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）"
+  ],
+  "state_before": {
+   "turn": 6,
+   "phase": "battle",
+   "result": null,
+   "player": {
+    "active": 0,
+    "pets": [
+     {
+      "slot": 0,
+      "pet_id": "pet_000446",
+      "hp": 97,
+      "max_hp": 445,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 1,
+      "pet_id": "pet_000001",
+      "hp": 332,
+      "max_hp": 332,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 2,
+      "pet_id": "pet_000002",
+      "hp": 348,
+      "max_hp": 348,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 3,
+      "pet_id": "pet_000003",
+      "hp": 340,
+      "max_hp": 340,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 4,
+      "pet_id": "pet_000004",
+      "hp": 425,
+      "max_hp": 425,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 5,
+      "pet_id": "pet_000005",
+      "hp": 434,
+      "max_hp": 434,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     }
+    ]
+   },
+   "enemy": {
+    "active": 0,
+    "pets": [
+     {
+      "slot": 0,
+      "pet_id": "pet_000482",
+      "hp": 294,
+      "max_hp": 366,
+      "energy": 3,
+      "fainted": false,
+      "skill_ramps": {
+       "skill_000494": {
+        "cost": -5
+       }
+      },
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 1,
+      "pet_id": "pet_000006",
+      "hp": 420,
+      "max_hp": 420,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 2,
+      "pet_id": "pet_000007",
+      "hp": 405,
+      "max_hp": 405,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 3,
+      "pet_id": "pet_000008",
+      "hp": 377,
+      "max_hp": 377,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 4,
+      "pet_id": "pet_000009",
+      "hp": 374,
+      "max_hp": 374,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     },
+     {
+      "slot": 5,
+      "pet_id": "pet_000010",
+      "hp": 416,
+      "max_hp": 416,
+      "energy": 10,
+      "fainted": false,
+      "skill_ramps": {},
+      "energy_cost_mods": []
+     }
+    ]
+   }
+  }
+ },
+ "timeline": [
+  {
+   "i": 0,
+   "turn": 1,
+   "phase": "battle",
+   "enemy_field": "pet_000482",
+   "enemy_ramp_skill_000494": null,
+   "enemy_effective_cost_skill_000494": 5,
+   "rampled_in_enemy_legal": true,
+   "my_field": "pet_000446"
+  },
+  {
+   "i": 1,
+   "turn": 2,
+   "phase": "battle",
+   "enemy_field": "pet_000482",
+   "enemy_ramp_skill_000494": -1,
+   "enemy_effective_cost_skill_000494": 4,
+   "rampled_in_enemy_legal": true,
+   "my_field": "pet_000446"
+  },
+  {
+   "i": 2,
+   "turn": 3,
+   "phase": "battle",
+   "enemy_field": "pet_000482",
+   "enemy_ramp_skill_000494": -2,
+   "enemy_effective_cost_skill_000494": 3,
+   "rampled_in_enemy_legal": true,
+   "my_field": "pet_000446"
+  },
+  {
+   "i": 3,
+   "turn": 4,
+   "phase": "battle",
+   "enemy_field": "pet_000482",
+   "enemy_ramp_skill_000494": -3,
+   "enemy_effective_cost_skill_000494": 2,
+   "rampled_in_enemy_legal": true,
+   "my_field": "pet_000446"
+  },
+  {
+   "i": 4,
+   "turn": 5,
+   "phase": "battle",
+   "enemy_field": "pet_000482",
+   "enemy_ramp_skill_000494": -4,
+   "enemy_effective_cost_skill_000494": 1,
+   "rampled_in_enemy_legal": true,
+   "my_field": "pet_000446"
+  },
+  {
+   "i": 5,
+   "turn": 6,
+   "phase": "battle",
+   "enemy_field": "pet_000482",
+   "enemy_ramp_skill_000494": -5,
+   "enemy_effective_cost_skill_000494": 0,
+   "rampled_in_enemy_legal": true,
+   "my_field": "pet_000446"
+  }
+ ],
+ "why_it_matters": "玩家侧看到的是：这一手是页面上点得动的合法动作，点下去整局中断（HTTP 400），而且重试必复现 —— 这一局打不完。",
+ "fix_scope": "roco/src/roco_env/env.py 的 legal_actions 与 _execute 能耗口径要对齐，或在 _execute 里把这种局面转成可结算事件；service.py 的错误分类也要跟上。**不在 task-2 的写域内，未改。**"
+}

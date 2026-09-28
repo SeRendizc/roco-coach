@@ -1,0 +1,1316 @@
+{
+ "schema_version": 1,
+ "artifact": "battle-smoke-repro",
+ "how": "对 entry-sweep.json 每一局失败留下的 trace 逐手重放（引擎确定性）",
+ "total_suspects": 1,
+ "reproduced": 1,
+ "results": [
+  {
+   "instance_id": "own-0442",
+   "species_id": "pet_000445",
+   "team": [
+    "own-0442",
+    "own-0443",
+    "own-0444",
+    "own-0445",
+    "own-0446",
+    "own-0447"
+   ],
+   "enemy_team": [
+    "own-0479",
+    "own-0516",
+    "own-0011",
+    "own-0048",
+    "own-0085",
+    "own-0122"
+   ],
+   "reproduced": true,
+   "stage": "exception",
+   "at_index": 14,
+   "action": "skill:skill_000696",
+   "exception_type": "UnsupportedEffect",
+   "message": "未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "traceback": [
+    "Traceback (most recent call last):",
+    "  File \"/Users/serendizc/Developer/roco-coach/scripts/roco/battle-smoke-repro.py\", line 159, in replay",
+    "    status, env2 = svc.battle_advance({\"state\": state, \"action\": action,",
+    "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/service.py\", line 2498, in battle_advance",
+    "    env_mod.step_joint(state, rs, player_action, enemy_action)",
+    "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/env.py\", line 737, in step_joint",
+    "    _execute(state, rs, side, action, cfg)",
+    "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/env.py\", line 928, in _execute",
+    "    raise fx.UnsupportedEffect(",
+    "roco_env.effects.UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）"
+   ],
+   "state_before": {
+    "turn": 14,
+    "phase": "battle",
+    "result": null,
+    "player": {
+     "active": 1,
+     "pets": [
+      {
+       "slot": 0,
+       "pet_id": "pet_000445",
+       "name": "黑猫巫师",
+       "hp": 0,
+       "energy": 10,
+       "fainted": true,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 1,
+       "pet_id": "pet_000446",
+       "name": "黑羽夫人",
+       "hp": 329,
+       "energy": 4,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 2,
+       "pet_id": "pet_000447",
+       "name": "爆焰仔",
+       "hp": 372,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 3,
+       "pet_id": "pet_000448",
+       "name": "爆焰喷喷",
+       "hp": 411,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 4,
+       "pet_id": "pet_000449",
+       "name": "墨鱿士",
+       "hp": 396,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 5,
+       "pet_id": "pet_000450",
+       "name": "混乱鱿彩",
+       "hp": 440,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      }
+     ],
+     "loadouts": {
+      "pet_000445": [
+       "skill_000321",
+       "skill_000286",
+       "skill_000251",
+       "skill_000483"
+      ],
+      "pet_000446": [
+       "skill_000696",
+       "skill_000286",
+       "skill_000786",
+       "skill_000704"
+      ],
+      "pet_000447": [
+       "skill_000401",
+       "skill_000286",
+       "skill_000567",
+       "skill_000415"
+      ],
+      "pet_000448": [
+       "skill_000401",
+       "skill_000286",
+       "skill_000567",
+       "skill_000415"
+      ],
+      "pet_000449": [
+       "skill_000725",
+       "skill_000286",
+       "skill_000744",
+       "skill_000483"
+      ],
+      "pet_000450": [
+       "skill_000725",
+       "skill_000286",
+       "skill_000744",
+       "skill_000793"
+      ]
+     }
+    },
+    "enemy": {
+     "active": 0,
+     "pets": [
+      {
+       "slot": 0,
+       "pet_id": "pet_000482",
+       "name": "溯源钟",
+       "hp": 33,
+       "energy": 4,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {
+        "skill_000494": {
+         "cost": -5
+        }
+       }
+      },
+      {
+       "slot": 1,
+       "pet_id": "pet_000535",
+       "name": "彩虹独角兽",
+       "hp": 389,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 2,
+       "pet_id": "pet_000011",
+       "name": "鸭吉吉",
+       "hp": 452,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 3,
+       "pet_id": "pet_000048",
+       "name": "咔咔壳",
+       "hp": 374,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 4,
+       "pet_id": "pet_000085",
+       "name": "舞动路路",
+       "hp": 338,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      },
+      {
+       "slot": 5,
+       "pet_id": "pet_000122",
+       "name": "毛毛",
+       "hp": 275,
+       "energy": 10,
+       "fainted": false,
+       "energy_cost_mods": [],
+       "skill_ramps": {}
+      }
+     ],
+     "loadouts": {
+      "pet_000482": [
+       "skill_000265",
+       "skill_000286",
+       "skill_000494",
+       "skill_000483"
+      ],
+      "pet_000535": [
+       "skill_000305",
+       "skill_000286",
+       "skill_000458",
+       "skill_000298"
+      ],
+      "pet_000011": [
+       "skill_000314",
+       "skill_000286",
+       "skill_000249",
+       "skill_000298"
+      ],
+      "pet_000048": [
+       "skill_000673",
+       "skill_000286",
+       "skill_000317",
+       "skill_000298"
+      ],
+      "pet_000085": [
+       "skill_000338",
+       "skill_000286",
+       "skill_000309",
+       "skill_000364"
+      ],
+      "pet_000122": [
+       "skill_000645",
+       "skill_000286",
+       "skill_000311",
+       "skill_000294"
+      ]
+     }
+    }
+   },
+   "deep_step": {
+    "enemy_action": {
+     "kind": "skill",
+     "skill_id": "skill_000494"
+    },
+    "enemy_legal": [
+     {
+      "kind": "skill",
+      "skill_id": "skill_000265"
+     },
+     {
+      "kind": "skill",
+      "skill_id": "skill_000483"
+     },
+     {
+      "kind": "skill",
+      "skill_id": "skill_000494"
+     },
+     {
+      "kind": "charge"
+     },
+     {
+      "kind": "switch",
+      "target_index": 1
+     },
+     {
+      "kind": "switch",
+      "target_index": 2
+     },
+     {
+      "kind": "switch",
+      "target_index": 3
+     },
+     {
+      "kind": "switch",
+      "target_index": 4
+     },
+     {
+      "kind": "switch",
+      "target_index": 5
+     },
+     {
+      "kind": "magic",
+      "magic_id": "wish_power_up"
+     },
+     {
+      "kind": "surrender"
+     }
+    ],
+    "player_action_legal": true,
+    "turn": 14,
+    "energy_cost_mods": {
+     "player": [],
+     "enemy": []
+    },
+    "skill_ramps": {
+     "player": {},
+     "enemy": {
+      "skill_000494": {
+       "cost": -5
+      }
+     }
+    },
+    "weather": null,
+    "ok": false,
+    "exception_type": "UnsupportedEffect",
+    "message": "未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+    "traceback": [
+     "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/env.py\", line 737, in step_joint",
+     "    _execute(state, rs, side, action, cfg)",
+     "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/env.py\", line 928, in _execute",
+     "    raise fx.UnsupportedEffect(",
+     "roco_env.effects.UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+     "",
+     "During handling of the above exception, another exception occurred:",
+     "",
+     "Traceback (most recent call last):",
+     "  File \"/Users/serendizc/Developer/roco-coach/scripts/roco/battle-smoke-repro.py\", line 108, in deep_step",
+     "    env_mod.step_joint(state, rs2, player_action, enemy_action)",
+     "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/env.py\", line 737, in step_joint",
+     "    _execute(state, rs, side, action, cfg)",
+     "  File \"/Users/serendizc/Developer/roco-coach/roco/src/roco_env/env.py\", line 928, in _execute",
+     "    raise fx.UnsupportedEffect(",
+     "roco_env.effects.UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）"
+    ],
+    "log_tail_after": [
+     "── 第 12 回合 ──",
+     "你的黑羽夫人使用鸣叫，对溯源钟造成 20 伤害（属性抵抗）。",
+     "对手的溯源钟使用绞轮，对黑羽夫人造成 116 伤害。",
+     "── 第 13 回合 ──",
+     "对手的溯源钟使用防御：本回合减伤 70%，应对成功。",
+     "你的黑羽夫人使用鸣叫，对溯源钟造成 6 伤害（属性抵抗）（防御减伤）。",
+     "── 第 14 回合 ──",
+     "你的黑羽夫人使用鸣叫，对溯源钟造成 20 伤害（属性抵抗）。"
+    ],
+    "events_after": [
+     {
+      "kind": "turn_start",
+      "turn": 1,
+      "detail": {
+       "turn": 1
+      },
+      "evidence": []
+     },
+     {
+      "kind": "switch",
+      "turn": 1,
+      "detail": {
+       "side": "player",
+       "to_slot": 1
+      },
+      "evidence": [
+       "3009"
+      ]
+     },
+     {
+      "kind": "defense",
+      "turn": 1,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000286",
+       "reduction": 0.7,
+       "respond": false
+      },
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     },
+     {
+      "kind": "turn_start",
+      "turn": 2,
+      "detail": {
+       "turn": 2
+      },
+      "evidence": []
+     },
+     {
+      "kind": "switch",
+      "turn": 2,
+      "detail": {
+       "side": "player",
+       "to_slot": 0
+      },
+      "evidence": [
+       "3009"
+      ]
+     },
+     {
+      "kind": "damage",
+      "turn": 2,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "target_slot": 0,
+       "damage": 148,
+       "power_used": 115.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 1.0,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000494"
+      ]
+     },
+     {
+      "kind": "effects_registered_unsupported",
+      "turn": 2,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "parsed_effects": 0,
+       "unclaimed_spans": 2,
+       "unparsed_markers": 1,
+       "reason": "攻击分支只结算伤害、以及**已解析并已应用**的附带效果；这一段没有对应的实现"
+      },
+      "evidence": []
+     },
+     {
+      "kind": "turn_start",
+      "turn": 3,
+      "detail": {
+       "turn": 3
+      },
+      "evidence": []
+     },
+     {
+      "kind": "charge",
+      "turn": 3,
+      "detail": {
+       "side": "enemy",
+       "energy_gained": 5,
+       "energy": 9
+      },
+      "evidence": [
+       "EV-ENERGY-CHARGE"
+      ]
+     },
+     {
+      "kind": "damage",
+      "turn": 3,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000251",
+       "target_slot": 0,
+       "damage": 85,
+       "power_used": 130.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 0.5,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000251"
+      ]
+     },
+     {
+      "kind": "on_hit_ramp",
+      "turn": 3,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "field": "cost",
+       "delta": -1,
+       "total": -1,
+       "resisted": true
+      },
+      "evidence": []
+     },
+     {
+      "kind": "turn_start",
+      "turn": 4,
+      "detail": {
+       "turn": 4
+      },
+      "evidence": []
+     },
+     {
+      "kind": "defense",
+      "turn": 4,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000286",
+       "reduction": 0.7,
+       "respond": false
+      },
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     },
+     {
+      "kind": "defense",
+      "turn": 4,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000286",
+       "reduction": 0.7,
+       "respond": false
+      },
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     },
+     {
+      "kind": "turn_start",
+      "turn": 5,
+      "detail": {
+       "turn": 5
+      },
+      "evidence": []
+     },
+     {
+      "kind": "damage",
+      "turn": 5,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "target_slot": 0,
+       "damage": 148,
+       "power_used": 115.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 1.0,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000494"
+      ]
+     },
+     {
+      "kind": "effects_registered_unsupported",
+      "turn": 5,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "parsed_effects": 0,
+       "unclaimed_spans": 2,
+       "unparsed_markers": 1,
+       "reason": "攻击分支只结算伤害、以及**已解析并已应用**的附带效果；这一段没有对应的实现"
+      },
+      "evidence": []
+     },
+     {
+      "kind": "damage",
+      "turn": 5,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000321",
+       "target_slot": 0,
+       "damage": 157,
+       "power_used": 240.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 0.5,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000321"
+      ]
+     },
+     {
+      "kind": "on_hit_ramp",
+      "turn": 5,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "field": "cost",
+       "delta": -1,
+       "total": -2,
+       "resisted": true
+      },
+      "evidence": []
+     },
+     {
+      "kind": "turn_start",
+      "turn": 6,
+      "detail": {
+       "turn": 6
+      },
+      "evidence": []
+     },
+     {
+      "kind": "damage",
+      "turn": 6,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "target_slot": 0,
+       "damage": 148,
+       "power_used": 115.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 1.0,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000494"
+      ]
+     },
+     {
+      "kind": "effects_registered_unsupported",
+      "turn": 6,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "parsed_effects": 0,
+       "unclaimed_spans": 2,
+       "unparsed_markers": 1,
+       "reason": "攻击分支只结算伤害、以及**已解析并已应用**的附带效果；这一段没有对应的实现"
+      },
+      "evidence": []
+     },
+     {
+      "kind": "status_unsupported",
+      "turn": 6,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000483"
+      },
+      "evidence": []
+     },
+     {
+      "kind": "turn_start",
+      "turn": 7,
+      "detail": {
+       "turn": 7
+      },
+      "evidence": []
+     },
+     {
+      "kind": "defense",
+      "turn": 7,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000286",
+       "reduction": 0.7,
+       "respond": false
+      },
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     },
+     {
+      "kind": "charge",
+      "turn": 7,
+      "detail": {
+       "side": "player",
+       "energy_gained": 5,
+       "energy": 9
+      },
+      "evidence": [
+       "EV-ENERGY-CHARGE"
+      ]
+     },
+     {
+      "kind": "turn_start",
+      "turn": 8,
+      "detail": {
+       "turn": 8
+      },
+      "evidence": []
+     },
+     {
+      "kind": "charge",
+      "turn": 8,
+      "detail": {
+       "side": "enemy",
+       "energy_gained": 5,
+       "energy": 5
+      },
+      "evidence": [
+       "EV-ENERGY-CHARGE"
+      ]
+     },
+     {
+      "kind": "charge",
+      "turn": 8,
+      "detail": {
+       "side": "player",
+       "energy_gained": 1,
+       "energy": 10
+      },
+      "evidence": [
+       "EV-ENERGY-CHARGE"
+      ]
+     },
+     {
+      "kind": "turn_start",
+      "turn": 9,
+      "detail": {
+       "turn": 9
+      },
+      "evidence": []
+     },
+     {
+      "kind": "damage",
+      "turn": 9,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "target_slot": 0,
+       "damage": 30,
+       "power_used": 115.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 1.0,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000494"
+      ]
+     },
+     {
+      "kind": "faint",
+      "turn": 9,
+      "detail": {
+       "side": "player",
+       "slot": 0
+      },
+      "evidence": [
+       "3009"
+      ]
+     },
+     {
+      "kind": "mana_loss",
+      "turn": 9,
+      "detail": {
+       "side": "player",
+       "faint_cost": 1,
+       "mana": 3
+      },
+      "evidence": [
+       "EV-PVP-FAINT-MANA-LOSS"
+      ]
+     },
+     {
+      "kind": "effects_registered_unsupported",
+      "turn": 9,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "parsed_effects": 0,
+       "unclaimed_spans": 2,
+       "unparsed_markers": 1,
+       "reason": "攻击分支只结算伤害、以及**已解析并已应用**的附带效果；这一段没有对应的实现"
+      },
+      "evidence": []
+     },
+     {
+      "kind": "action_cancelled",
+      "turn": 9,
+      "detail": {
+       "side": "player",
+       "reason": "fainted"
+      },
+      "evidence": []
+     },
+     {
+      "kind": "replacement",
+      "turn": 9,
+      "detail": {
+       "side": "player",
+       "slot": 1
+      },
+      "evidence": []
+     },
+     {
+      "kind": "turn_start",
+      "turn": 10,
+      "detail": {
+       "turn": 10
+      },
+      "evidence": []
+     },
+     {
+      "kind": "defense",
+      "turn": 10,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000286",
+       "reduction": 0.7,
+       "respond": true
+      },
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     },
+     {
+      "kind": "damage",
+      "turn": 10,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000786",
+       "target_slot": 0,
+       "damage": 45,
+       "power_used": 150.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 1.0,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000786"
+      ]
+     },
+     {
+      "kind": "turn_start",
+      "turn": 11,
+      "detail": {
+       "turn": 11
+      },
+      "evidence": []
+     },
+     {
+      "kind": "damage",
+      "turn": 11,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000696",
+       "target_slot": 0,
+       "damage": 20,
+       "power_used": 40.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 0.5,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000696"
+      ]
+     },
+     {
+      "kind": "on_hit_ramp",
+      "turn": 11,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "field": "cost",
+       "delta": -1,
+       "total": -3,
+       "resisted": true
+      },
+      "evidence": []
+     },
+     {
+      "kind": "charge",
+      "turn": 11,
+      "detail": {
+       "side": "enemy",
+       "energy_gained": 5,
+       "energy": 6
+      },
+      "evidence": [
+       "EV-ENERGY-CHARGE"
+      ]
+     },
+     {
+      "kind": "turn_start",
+      "turn": 12,
+      "detail": {
+       "turn": 12
+      },
+      "evidence": []
+     },
+     {
+      "kind": "damage",
+      "turn": 12,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000696",
+       "target_slot": 0,
+       "damage": 20,
+       "power_used": 40.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 0.5,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000696"
+      ]
+     },
+     {
+      "kind": "on_hit_ramp",
+      "turn": 12,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "field": "cost",
+       "delta": -1,
+       "total": -4,
+       "resisted": true
+      },
+      "evidence": []
+     },
+     {
+      "kind": "damage",
+      "turn": 12,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "target_slot": 1,
+       "damage": 116,
+       "power_used": 115.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 1.0,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000494"
+      ]
+     },
+     {
+      "kind": "effects_registered_unsupported",
+      "turn": 12,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "parsed_effects": 0,
+       "unclaimed_spans": 2,
+       "unparsed_markers": 1,
+       "reason": "攻击分支只结算伤害、以及**已解析并已应用**的附带效果；这一段没有对应的实现"
+      },
+      "evidence": []
+     },
+     {
+      "kind": "turn_start",
+      "turn": 13,
+      "detail": {
+       "turn": 13
+      },
+      "evidence": []
+     },
+     {
+      "kind": "defense",
+      "turn": 13,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000286",
+       "reduction": 0.7,
+       "respond": true
+      },
+      "evidence": [
+       "1015",
+       "1016",
+       "1017"
+      ]
+     },
+     {
+      "kind": "damage",
+      "turn": 13,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000696",
+       "target_slot": 0,
+       "damage": 6,
+       "power_used": 40.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 0.5,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000696"
+      ]
+     },
+     {
+      "kind": "on_hit_ramp",
+      "turn": 13,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "field": "cost",
+       "delta": -1,
+       "total": -5,
+       "resisted": true
+      },
+      "evidence": []
+     },
+     {
+      "kind": "turn_start",
+      "turn": 14,
+      "detail": {
+       "turn": 14
+      },
+      "evidence": []
+     },
+     {
+      "kind": "damage",
+      "turn": 14,
+      "detail": {
+       "side": "player",
+       "skill_id": "skill_000696",
+       "target_slot": 0,
+       "damage": 20,
+       "power_used": 40.0,
+       "conditional_power": false,
+       "conditional_reason": "",
+       "type_multiplier": 0.5,
+       "stab": 1.5,
+       "ability_level": 1.0,
+       "power_multiplier": 1.0,
+       "damage_model": "community-hypothesis-v1",
+       "formula_verified": false
+      },
+      "evidence": [
+       "skill_000696"
+      ]
+     },
+     {
+      "kind": "on_hit_ramp",
+      "turn": 14,
+      "detail": {
+       "side": "enemy",
+       "skill_id": "skill_000494",
+       "field": "cost",
+       "delta": -1,
+       "total": -6,
+       "resisted": true
+      },
+      "evidence": []
+     }
+    ],
+    "live_state_after": {
+     "turn": 14,
+     "phase": "battle",
+     "result": null,
+     "player": {
+      "active": 1,
+      "pets": [
+       {
+        "slot": 0,
+        "pet_id": "pet_000445",
+        "name": "黑猫巫师",
+        "hp": 0,
+        "energy": 10,
+        "fainted": true,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 1,
+        "pet_id": "pet_000446",
+        "name": "黑羽夫人",
+        "hp": 329,
+        "energy": 4,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 2,
+        "pet_id": "pet_000447",
+        "name": "爆焰仔",
+        "hp": 372,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 3,
+        "pet_id": "pet_000448",
+        "name": "爆焰喷喷",
+        "hp": 411,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 4,
+        "pet_id": "pet_000449",
+        "name": "墨鱿士",
+        "hp": 396,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 5,
+        "pet_id": "pet_000450",
+        "name": "混乱鱿彩",
+        "hp": 440,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       }
+      ],
+      "loadouts": {
+       "pet_000445": [
+        "skill_000321",
+        "skill_000286",
+        "skill_000251",
+        "skill_000483"
+       ],
+       "pet_000446": [
+        "skill_000696",
+        "skill_000286",
+        "skill_000786",
+        "skill_000704"
+       ],
+       "pet_000447": [
+        "skill_000401",
+        "skill_000286",
+        "skill_000567",
+        "skill_000415"
+       ],
+       "pet_000448": [
+        "skill_000401",
+        "skill_000286",
+        "skill_000567",
+        "skill_000415"
+       ],
+       "pet_000449": [
+        "skill_000725",
+        "skill_000286",
+        "skill_000744",
+        "skill_000483"
+       ],
+       "pet_000450": [
+        "skill_000725",
+        "skill_000286",
+        "skill_000744",
+        "skill_000793"
+       ]
+      }
+     },
+     "enemy": {
+      "active": 0,
+      "pets": [
+       {
+        "slot": 0,
+        "pet_id": "pet_000482",
+        "name": "溯源钟",
+        "hp": 13,
+        "energy": 4,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {
+         "skill_000494": {
+          "cost": -6
+         }
+        }
+       },
+       {
+        "slot": 1,
+        "pet_id": "pet_000535",
+        "name": "彩虹独角兽",
+        "hp": 389,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 2,
+        "pet_id": "pet_000011",
+        "name": "鸭吉吉",
+        "hp": 452,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 3,
+        "pet_id": "pet_000048",
+        "name": "咔咔壳",
+        "hp": 374,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 4,
+        "pet_id": "pet_000085",
+        "name": "舞动路路",
+        "hp": 338,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       },
+       {
+        "slot": 5,
+        "pet_id": "pet_000122",
+        "name": "毛毛",
+        "hp": 275,
+        "energy": 10,
+        "fainted": false,
+        "energy_cost_mods": [],
+        "skill_ramps": {}
+       }
+      ],
+      "loadouts": {
+       "pet_000482": [
+        "skill_000265",
+        "skill_000286",
+        "skill_000494",
+        "skill_000483"
+       ],
+       "pet_000535": [
+        "skill_000305",
+        "skill_000286",
+        "skill_000458",
+        "skill_000298"
+       ],
+       "pet_000011": [
+        "skill_000314",
+        "skill_000286",
+        "skill_000249",
+        "skill_000298"
+       ],
+       "pet_000048": [
+        "skill_000673",
+        "skill_000286",
+        "skill_000317",
+        "skill_000298"
+       ],
+       "pet_000085": [
+        "skill_000338",
+        "skill_000286",
+        "skill_000309",
+        "skill_000364"
+       ],
+       "pet_000122": [
+        "skill_000645",
+        "skill_000286",
+        "skill_000311",
+        "skill_000294"
+       ]
+      }
+     }
+    }
+   }
+  }
+ ]
+}

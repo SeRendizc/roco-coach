@@ -1,0 +1,3954 @@
+{
+ "schema_version": 1,
+ "artifact": "battle-smoke-summary",
+ "generated_at": "2026-09-29T00:34:53+0800",
+ "ruleset_id": "roco-world-s4-2026-09-10",
+ "scope": "data/roco/owned/owned-pets.json 的全部实例（= 当前已拥有清单）",
+ "commands": [
+  "node scripts/roco/battle-smoke.mjs                    # 一条命令跑完下面四段（≈3min）",
+  "python3 scripts/roco/battle-smoke-engine.py            # ① 引擎侧全量 542（≈40s）",
+  "node scripts/roco/battle-smoke-entry.mjs --settle=all  # ② HTTP 入口侧全量 542（≈90s）",
+  "python3 scripts/roco/battle-smoke-summary.py           # ③ 合成清单 + 人读 md",
+  "python3 scripts/roco/battle-smoke-repro.py             # ④ 把打不完的那几局逐手复现（带 traceback）",
+  "python3 scripts/roco/battle-smoke-repro.py --only own-0442   # 只复现绞轮那一条",
+  "node scripts/roco/battle-smoke-browser.mjs --base=http://127.0.0.1:8765 --shots  # 浏览器入口（先按 tmp/BROWSER-LOCK.md 抢锁）"
+ ],
+ "column_1_playable": {
+  "total": 542,
+  "engine": {
+   "total": 542,
+   "playable": 542,
+   "blocked": 0,
+   "settled": 542,
+   "all_four_used": 536,
+   "used_at_least_one": 542,
+   "all_four_used_on_requested_loadout": 536,
+   "loadout_replaced": 0,
+   "switch_out_ok": 542,
+   "switch_in_ok": 542,
+   "took_damage": 542,
+   "target_fainted": 542,
+   "any_unsupported_seen": 485,
+   "artifact": "reports/roco/battle-smoke/engine-sweep.json"
+  },
+  "entry_http": {
+   "total": 542,
+   "entry_playable": 542,
+   "entry_blocked": 0,
+   "select_ok": 542,
+   "start_ok": 542,
+   "loadout_passthrough_ok": 542,
+   "settle_run": 542,
+   "settle_ok": 542,
+   "full_playable": 542,
+   "artifact": "reports/roco/battle-smoke/entry-sweep.json"
+  },
+  "failures_engine": [],
+  "failures_entry": [],
+  "failures_entry_settle": [],
+  "all_four_not_used": [
+   {
+    "instance_id": "own-0013",
+    "name": "阿米亚特",
+    "missing": [
+     {
+      "skill_id": "skill_000766",
+      "name": "魔爪"
+     }
+    ],
+    "reasons": [
+     {
+      "skill_id": "skill_000766",
+      "name": "魔爪",
+      "kind": "offered_but_not_used",
+      "reason": "「魔爪」可学、能耗 0、这一局也被引擎列进过合法动作，但目标精灵在被量到之前就倒下了 / 回合用完了 ⇒ **是这一局的时序没轮到，不是这一招跑不了**"
+     }
+    ]
+   },
+   {
+    "instance_id": "own-0015",
+    "name": "罗隐",
+    "missing": [
+     {
+      "skill_id": "skill_000766",
+      "name": "魔爪"
+     }
+    ],
+    "reasons": [
+     {
+      "skill_id": "skill_000766",
+      "name": "魔爪",
+      "kind": "offered_but_not_used",
+      "reason": "「魔爪」可学、能耗 0、这一局也被引擎列进过合法动作，但目标精灵在被量到之前就倒下了 / 回合用完了 ⇒ **是这一局的时序没轮到，不是这一招跑不了**"
+     }
+    ]
+   },
+   {
+    "instance_id": "own-0019",
+    "name": "地鼠",
+    "missing": [
+     {
+      "skill_id": "skill_000246",
+      "name": "抓挠"
+     }
+    ],
+    "reasons": [
+     {
+      "skill_id": "skill_000246",
+      "name": "抓挠",
+      "kind": "offered_but_not_used",
+      "reason": "「抓挠」可学、能耗 0、这一局也被引擎列进过合法动作，但目标精灵在被量到之前就倒下了 / 回合用完了 ⇒ **是这一局的时序没轮到，不是这一招跑不了**"
+     }
+    ]
+   },
+   {
+    "instance_id": "own-0217",
+    "name": "呼呼猪",
+    "missing": [
+     {
+      "skill_id": "skill_000321",
+      "name": "彗星"
+     }
+    ],
+    "reasons": [
+     {
+      "skill_id": "skill_000321",
+      "name": "彗星",
+      "kind": "offered_but_not_used",
+      "reason": "「彗星」可学、能耗 0、这一局也被引擎列进过合法动作，但目标精灵在被量到之前就倒下了 / 回合用完了 ⇒ **是这一局的时序没轮到，不是这一招跑不了**"
+     }
+    ]
+   },
+   {
+    "instance_id": "own-0218",
+    "name": "獠牙猪",
+    "missing": [
+     {
+      "skill_id": "skill_000321",
+      "name": "彗星"
+     }
+    ],
+    "reasons": [
+     {
+      "skill_id": "skill_000321",
+      "name": "彗星",
+      "kind": "offered_but_not_used",
+      "reason": "「彗星」可学、能耗 0、这一局也被引擎列进过合法动作，但目标精灵在被量到之前就倒下了 / 回合用完了 ⇒ **是这一局的时序没轮到，不是这一招跑不了**"
+     }
+    ]
+   },
+   {
+    "instance_id": "own-0434",
+    "name": "棋棋",
+    "missing": [
+     {
+      "skill_id": "skill_000673",
+      "name": "气波"
+     }
+    ],
+    "reasons": [
+     {
+      "skill_id": "skill_000673",
+      "name": "气波",
+      "kind": "offered_but_not_used",
+      "reason": "「气波」可学、能耗 0、这一局也被引擎列进过合法动作，但目标精灵在被量到之前就倒下了 / 回合用完了 ⇒ **是这一局的时序没轮到，不是这一招跑不了**"
+     }
+    ]
+   }
+  ],
+  "combos": [
+   {
+    "label": "random-six-1",
+    "team": [
+     "own-0511",
+     "own-0119",
+     "own-0369",
+     "own-0199",
+     "own-0169",
+     "own-0188"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0511",
+      "pet_000516"
+     ],
+     [
+      "own-0119",
+      "pet_000119"
+     ],
+     [
+      "own-0369",
+      "pet_000371"
+     ],
+     [
+      "own-0199",
+      "pet_000200"
+     ],
+     [
+      "own-0169",
+      "pet_000170"
+     ],
+     [
+      "own-0188",
+      "pet_000189"
+     ]
+    ],
+    "result": "loss",
+    "turns": 16,
+    "failure": null
+   },
+   {
+    "label": "random-six-2",
+    "team": [
+     "own-0527",
+     "own-0320",
+     "own-0370",
+     "own-0064",
+     "own-0267",
+     "own-0495"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0527",
+      "pet_000549"
+     ],
+     [
+      "own-0320",
+      "pet_000322"
+     ],
+     [
+      "own-0370",
+      "pet_000372"
+     ],
+     [
+      "own-0064",
+      "pet_000064"
+     ],
+     [
+      "own-0267",
+      "pet_000268"
+     ],
+     [
+      "own-0495",
+      "pet_000499"
+     ]
+    ],
+    "result": "loss",
+    "turns": 30,
+    "failure": null
+   },
+   {
+    "label": "random-six-3",
+    "team": [
+     "own-0329",
+     "own-0525",
+     "own-0040",
+     "own-0510",
+     "own-0260",
+     "own-0025"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0329",
+      "pet_000331"
+     ],
+     [
+      "own-0525",
+      "pet_000547"
+     ],
+     [
+      "own-0040",
+      "pet_000040"
+     ],
+     [
+      "own-0510",
+      "pet_000515"
+     ],
+     [
+      "own-0260",
+      "pet_000261"
+     ],
+     [
+      "own-0025",
+      "pet_000025"
+     ]
+    ],
+    "result": "win",
+    "turns": 18,
+    "failure": null
+   },
+   {
+    "label": "random-six-4",
+    "team": [
+     "own-0188",
+     "own-0206",
+     "own-0477",
+     "own-0531",
+     "own-0458",
+     "own-0307"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0188",
+      "pet_000189"
+     ],
+     [
+      "own-0206",
+      "pet_000207"
+     ],
+     [
+      "own-0477",
+      "pet_000480"
+     ],
+     [
+      "own-0531",
+      "pet_000553"
+     ],
+     [
+      "own-0458",
+      "pet_000461"
+     ],
+     [
+      "own-0307",
+      "pet_000309"
+     ]
+    ],
+    "result": "loss",
+    "turns": 22,
+    "failure": null
+   },
+   {
+    "label": "random-six-5",
+    "team": [
+     "own-0255",
+     "own-0310",
+     "own-0501",
+     "own-0208",
+     "own-0450",
+     "own-0215"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0255",
+      "pet_000256"
+     ],
+     [
+      "own-0310",
+      "pet_000312"
+     ],
+     [
+      "own-0501",
+      "pet_000505"
+     ],
+     [
+      "own-0208",
+      "pet_000209"
+     ],
+     [
+      "own-0450",
+      "pet_000453"
+     ],
+     [
+      "own-0215",
+      "pet_000216"
+     ]
+    ],
+    "result": "win",
+    "turns": 21,
+    "failure": null
+   },
+   {
+    "label": "random-six-6",
+    "team": [
+     "own-0221",
+     "own-0382",
+     "own-0364",
+     "own-0163",
+     "own-0127",
+     "own-0136"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0221",
+      "pet_000222"
+     ],
+     [
+      "own-0382",
+      "pet_000384"
+     ],
+     [
+      "own-0364",
+      "pet_000366"
+     ],
+     [
+      "own-0163",
+      "pet_000164"
+     ],
+     [
+      "own-0127",
+      "pet_000127"
+     ],
+     [
+      "own-0136",
+      "pet_000136"
+     ]
+    ],
+    "result": "loss",
+    "turns": 29,
+    "failure": null
+   },
+   {
+    "label": "random-six-7",
+    "team": [
+     "own-0225",
+     "own-0127",
+     "own-0143",
+     "own-0276",
+     "own-0125",
+     "own-0256"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0225",
+      "pet_000226"
+     ],
+     [
+      "own-0127",
+      "pet_000127"
+     ],
+     [
+      "own-0143",
+      "pet_000144"
+     ],
+     [
+      "own-0276",
+      "pet_000278"
+     ],
+     [
+      "own-0125",
+      "pet_000125"
+     ],
+     [
+      "own-0256",
+      "pet_000257"
+     ]
+    ],
+    "result": "loss",
+    "turns": 29,
+    "failure": null
+   },
+   {
+    "label": "random-six-8",
+    "team": [
+     "own-0408",
+     "own-0129",
+     "own-0250",
+     "own-0308",
+     "own-0179",
+     "own-0285"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0408",
+      "pet_000411"
+     ],
+     [
+      "own-0129",
+      "pet_000129"
+     ],
+     [
+      "own-0250",
+      "pet_000251"
+     ],
+     [
+      "own-0308",
+      "pet_000310"
+     ],
+     [
+      "own-0179",
+      "pet_000180"
+     ],
+     [
+      "own-0285",
+      "pet_000287"
+     ]
+    ],
+    "result": "loss",
+    "turns": 40,
+    "failure": null
+   },
+   {
+    "label": "random-six-9",
+    "team": [
+     "own-0218",
+     "own-0473",
+     "own-0247",
+     "own-0490",
+     "own-0337",
+     "own-0485"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0218",
+      "pet_000219"
+     ],
+     [
+      "own-0473",
+      "pet_000476"
+     ],
+     [
+      "own-0247",
+      "pet_000248"
+     ],
+     [
+      "own-0490",
+      "pet_000494"
+     ],
+     [
+      "own-0337",
+      "pet_000339"
+     ],
+     [
+      "own-0485",
+      "pet_000489"
+     ]
+    ],
+    "result": "win",
+    "turns": 27,
+    "failure": null
+   },
+   {
+    "label": "random-six-10",
+    "team": [
+     "own-0052",
+     "own-0368",
+     "own-0459",
+     "own-0362",
+     "own-0502",
+     "own-0409"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0052",
+      "pet_000052"
+     ],
+     [
+      "own-0368",
+      "pet_000370"
+     ],
+     [
+      "own-0459",
+      "pet_000462"
+     ],
+     [
+      "own-0362",
+      "pet_000364"
+     ],
+     [
+      "own-0502",
+      "pet_000506"
+     ],
+     [
+      "own-0409",
+      "pet_000412"
+     ]
+    ],
+    "result": "win",
+    "turns": 30,
+    "failure": null
+   },
+   {
+    "label": "player-actual-six",
+    "team": [
+     "own-0224",
+     "own-0189",
+     "own-0442",
+     "own-0006",
+     "own-0008",
+     "own-0019"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0224",
+      "pet_000225"
+     ],
+     [
+      "own-0189",
+      "pet_000190"
+     ],
+     [
+      "own-0442",
+      "pet_000445"
+     ],
+     [
+      "own-0006",
+      "pet_000006"
+     ],
+     [
+      "own-0008",
+      "pet_000008"
+     ],
+     [
+      "own-0019",
+      "pet_000019"
+     ]
+    ],
+    "result": "loss",
+    "turns": 22,
+    "failure": null
+   },
+   {
+    "label": "form-and-mechanism-mix",
+    "team": [
+     "own-0270",
+     "own-0376",
+     "own-0006",
+     "own-0008",
+     "own-0019",
+     "own-0032"
+    ],
+    "playable": true,
+    "team_species": [
+     [
+      "own-0270",
+      "pet_000271"
+     ],
+     [
+      "own-0376",
+      "pet_000378"
+     ],
+     [
+      "own-0006",
+      "pet_000006"
+     ],
+     [
+      "own-0008",
+      "pet_000008"
+     ],
+     [
+      "own-0019",
+      "pet_000019"
+     ],
+     [
+      "own-0032",
+      "pet_000032"
+     ]
+    ],
+    "result": "loss",
+    "turns": 19,
+    "failure": null
+   }
+  ]
+ },
+ "column_2_mechanism": {
+  "engine_trait_status": {
+   "NOT_REGISTERED_IN_ENGINE": 527,
+   "FULL": 8,
+   "PARTIAL": 3,
+   "REFUSED": 4
+  },
+  "engine_trait_status_source": "data/roco/engine-trait-status.json（引擎侧实现状态，非数据侧 effect_support）",
+  "notes": [
+   "FULL = 引擎按原语完整实现；PARTIAL = 部分实现、仍有登记的缺口；REFUSED = 依赖引擎做不到的前提，理由写在 reason 里；NOT_REGISTERED_IN_ENGINE = 这份产物里根本没有它 ⇒ 引擎没实现这条特性。",
+   "这 542 只里有 8 只的决定性特性是引擎**已实现**的。",
+   "数据侧 skills.json 的 effect_support 对 824/824 条技能全是 `unsupported`（上游快照口径），与引擎侧的实现状态是两件事，不能互相顶替。"
+  ],
+  "in_game_verified": 0,
+  "in_game_verified_note": "实机核验 = 0/542：`data/roco/derived/pet-mechanisms.json` 里这 542 只的 mechanism_status **全部**是 FROZEN_DESC，且每只都带两条 unverified（「技能/特性效果未实机核验（MC-E08 等 microcase 未录制）」、「desc 文字来自冻结导入，触发条件与时序未验证」）。本仓没有任何一只被标记成实机核验过 —— 所以这一列是 0，不是 542。",
+  "mechanism_status_distribution": {
+   "FROZEN_DESC": 542
+  },
+  "trait_rows": [
+   {
+    "instance_id": "own-0009",
+    "species_id": "pet_000009",
+    "name": "恶魔叮",
+    "trait_skill_id": "skill_000058",
+    "trait": "渴求",
+    "status": "FULL",
+    "hook": "on_enter",
+    "gaps": [],
+    "reason": "只有一条原语：吸血。数值来自解析器（`self_lifesteal` 50%），结算在 `env._settle_sustain`（造成伤害后按**实际伤害**的百分比回复自己生命，上限是最大生命；溢出部分本特性不转化，只记账）。取整口径为向下取整（同 MC-011 的百分比取整假设）。与 `贪得无厌` 共用同一段实现（按**解析结果**分派，不按特性名）。"
+   },
+   {
+    "instance_id": "own-0062",
+    "species_id": "pet_000062",
+    "name": "音速犬",
+    "trait_skill_id": "skill_000067",
+    "trait": "专注力",
+    "status": "FULL",
+    "hook": "on_enter",
+    "gaps": [],
+    "reason": "触发时机用 `entered_turn` 判定（换入即记录回合号），与术语 1010「迸发」所依据的字段是同一个。「首回合」判定为 entered_turn == 当前回合。"
+   },
+   {
+    "instance_id": "own-0112",
+    "species_id": "pet_000112",
+    "name": "雪影娃娃",
+    "trait_skill_id": "skill_000039",
+    "trait": "捉迷藏",
+    "status": "PARTIAL",
+    "hook": "after_freeze_applied",
+    "gaps": [],
+    "reason": "「给敌方挂全技能能耗+1」**已经是真机制**（RC-401 批三）：修正写进 `PetState.energy_cost_mods`，由 `env.effective_skill_cost` 在可付性判定与扣费两处读，只在配置声明 `energy.cost_modifier` 时生效。仍未实现的是它与**其他能耗修改**（湿润印记 -1、聒噪 +2）的复合顺序与下限——术语没有定义，属 MC-018 待验项；本引擎按加法累计、不设下限（负值 fail closed）。"
+   },
+   {
+    "instance_id": "own-0124",
+    "species_id": "pet_000124",
+    "name": "化蝶",
+    "trait_skill_id": "skill_000104",
+    "trait": "化茧",
+    "status": "REFUSED",
+    "hook": null,
+    "gaps": [],
+    "reason": "需要三件引擎目前没有确认的东西：①「萌化」这个状态在数据里出现在状态技能描述里，但它的**效果**没有定义；②「免疫此次伤害」发生在伤害结算的哪一步（扣血前还是扣血后、是否触发倒下判定）；③ 触发次数的计数是每局还是每次入场。三条都没证据（MC-021）。"
+   },
+   {
+    "instance_id": "own-0189",
+    "species_id": "pet_000190",
+    "name": "海豹船长",
+    "trait_skill_id": "skill_000091",
+    "trait": "身经百练",
+    "status": "FULL",
+    "hook": "on_enter",
+    "gaps": [],
+    "reason": "计数源明确（术语 1015/1016/1017 的「应对成功」），加成对象明确（水系与武系技能，入场时生效）。假设：每层 +20% 且可叠加；「入场时」= 换上该精灵的那个回合。"
+   },
+   {
+    "instance_id": "own-0224",
+    "species_id": "pet_000225",
+    "name": "寂灭骨龙",
+    "trait_skill_id": "skill_000129",
+    "trait": "不朽",
+    "status": "REFUSED",
+    "hook": null,
+    "gaps": [],
+    "reason": "复活需要「力竭后仍占用一个回合计数位」这一状态，而本引擎在精灵力竭时立刻把它移出可行动集合（术语 3009 把力竭下场与主动离场分开）。要实现它必须先确认：4 回合从哪一刻开始计、复活后生命/能量/状态/印记如何初始化、能否被再次触发。四条都没有一手证据（MC-014），所以拒绝而不是近似。"
+   },
+   {
+    "instance_id": "own-0414",
+    "species_id": "pet_000417",
+    "name": "圆号鱼",
+    "trait_skill_id": "skill_000127",
+    "trait": "泛音列",
+    "status": "PARTIAL",
+    "hook": "after_status_skill",
+    "gaps": [
+     "敌方全攻击技能能耗 +2 未接线（`after_status_skill` 只挂 `聒噪` 印记）",
+     "「持续 3 回合」与回合边界的对齐未定（MC-018 同族）"
+    ],
+    "reason": "「聒噪」的效果在数据里查得到（`聒噪` skill_000274：敌方获得全攻击技能能耗+2，持续3回合），所以不需要猜。**当前只挂印记、不结算能耗**：能耗修正机制已在 RC-401 批三落地，但这条的触发（使用状态技能）在冻结 48 名单里够得着，接线会改变既有 V3 对局结果，属于要连带重建回归指纹的独立一批；且「持续 3 回合」与回合边界的对齐仍需口径。⚠️ **2026-09-25（第 40 轮）如实降档 FULL → PARTIAL**：本文件开头那一行定义写着「FULL = 描述能被机械实现，且有测试」，而这条自己的理由里就写着「只挂印记、不结算能耗」——按同一条尺子它只能算 PARTIAL（只实现了描述的一部分）。原文一字未删，只把档位改对。"
+   },
+   {
+    "instance_id": "own-0442",
+    "species_id": "pet_000445",
+    "name": "黑猫巫师",
+    "trait_skill_id": "skill_000123",
+    "trait": "预警",
+    "status": "PARTIAL",
+    "hook": "on_turn_start",
+    "gaps": [],
+    "reason": "「速度+50」已实现为速度属性增益。未实现的是**触发条件**「敌方技能足够击败自己」——它要求对每个合法敌方技能算一遍伤害并比较当前生命，而这依赖尚未核验的官方伤害公式（MC-010/011）；用未核验的公式去决定「会不会死」，会让一条被动特性建立在假设上。因此条件未实现，特性只在测试里被显式驱动。"
+   },
+   {
+    "instance_id": "own-0448",
+    "species_id": "pet_000451",
+    "name": "秩序鱿墨",
+    "trait_skill_id": "skill_000158",
+    "trait": "绝对秩序",
+    "status": "REFUSED",
+    "hook": null,
+    "gaps": [],
+    "reason": "字面读法有两个都可疑：① 「技能系别不在敌方精灵的系别里」——那要先确认 `types.json` 的系别名与技能 `element` 是同一套词表（是同一套），但「非敌方系别」是否指「不属于对手任一属性」没有一手证据；② 若读成「与我方系别不同的技能」，那所有非本系技能都减半，量级完全不同。两种读法的结论差一倍，术语表里没有这一条，所以拒绝而不是任选一种。"
+   },
+   {
+    "instance_id": "own-0471",
+    "species_id": "pet_000474",
+    "name": "画间沉铁兽",
+    "trait_skill_id": "skill_000141",
+    "trait": "变形活画",
+    "status": "FULL",
+    "hook": "on_action",
+    "gaps": [],
+    "reason": "「敌方的增益层数」在引擎里是可数的：对手场上精灵的 `buffs` 有多少个键就有多少层（`_apply_status_effects` 每加一项写一个键）。假设（MC-020）：把 `buffs` 的**键个数**当作「层数」，同一属性的两层合并成一个键时会被算成一层——数据没有定义层数的计数方式。速度部分在 `order_actions` 之前生效，实现为 `spe` 增益。"
+   },
+   {
+    "instance_id": "own-0472",
+    "species_id": "pet_000475",
+    "name": "书魔虫",
+    "trait_skill_id": "skill_000142",
+    "trait": "图书守卫者",
+    "status": "FULL",
+    "hook": "on_enter",
+    "gaps": [],
+    "reason": "触发时点明确（入场时），效果明确（双攻 +100%），条件也**可判**：「自己的魔力值是否为 1」。RC-401 批次二：只有声明了魔力的配置才判得了这个条件，legacy 没有「魔力」这条概念 ⇒ 条件不可判 ⇒ 不结算（行为逐位不变）。假设：双攻 = 物攻与魔攻各 +100%（与「专注力」同一种 buff 落法）。"
+   },
+   {
+    "instance_id": "own-0475",
+    "species_id": "pet_000478",
+    "name": "古卷匣魔像",
+    "trait_skill_id": "skill_000143",
+    "trait": "构装契约者",
+    "status": "FULL",
+    "hook": "on_enter",
+    "gaps": [],
+    "reason": "同「图书守卫者」，只是条件看**敌方**魔力值、效果换双防。同样只在声明了魔力的配置下可判；假设：双防 = 物防与魔防各 +100%。"
+   },
+   {
+    "instance_id": "own-0540",
+    "species_id": "pet_000601",
+    "name": "圣凯布米龙",
+    "trait_skill_id": "skill_000197",
+    "trait": "热成像",
+    "status": "FULL",
+    "hook": "on_turn_start",
+    "gaps": [],
+    "reason": "「上回合」用 `state.history` 的上一回合记录判定（引擎每回合都写player_action / enemy_action，能查出技能 id 与系别），不需要猜时序。加成对象明确（自己携带的虫系技能），实现为`buffs['power_bug']`，只有该系技能吃到。"
+   },
+   {
+    "instance_id": "own-0541",
+    "species_id": "pet_000608",
+    "name": "银月狼王",
+    "trait_skill_id": "skill_000196",
+    "trait": "铭记于月亮",
+    "status": "REFUSED",
+    "hook": null,
+    "gaps": [],
+    "reason": "「获得对手的特性」要求引擎在**运行时**把另一只精灵的特性实现挂到自己身上。本引擎的特性是「按精灵 id 查表 + 固定钩子」，没有动态换表的机制；而其余 11 只里已经有 4 只是 REFUSED（拿到它们也没有意义）。要做它得先有一套「特性作为可组合对象」的重构，属于独立工作。"
+   },
+   {
+    "instance_id": "own-0542",
+    "species_id": "pet_000611",
+    "name": "月使鹭纳",
+    "trait_skill_id": "skill_000198",
+    "trait": "冷光源",
+    "status": "FULL",
+    "hook": "on_turn_start",
+    "gaps": [],
+    "reason": "与「热成像」同一机制，只是系别换成翼系触发 / 冰系受益。两条都用同一个读取上回合记录的辅助函数，避免各写一份。"
+   }
+  ],
+  "in_battle_unsupported_count": 295,
+  "in_battle_unsupported": [
+   {
+    "instance_id": "own-0001",
+    "species_id": "pet_000001",
+    "name": "喵喵",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0002",
+    "species_id": "pet_000002",
+    "name": "水蓝蓝",
+    "count": 3,
+    "skills": [
+     "skill_000418",
+     "skill_000421",
+     "skill_000808"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0004",
+    "species_id": "pet_000004",
+    "name": "迪莫",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0005",
+    "species_id": "pet_000005",
+    "name": "水灵",
+    "count": 3,
+    "skills": [
+     "skill_000418",
+     "skill_000421",
+     "skill_000808"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0006",
+    "species_id": "pet_000006",
+    "name": "火神",
+    "count": 1,
+    "skills": [
+     "skill_000378"
+    ],
+    "sample_text": "我方的火苗有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0007",
+    "species_id": "pet_000007",
+    "name": "魔力猫",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0009",
+    "species_id": "pet_000009",
+    "name": "恶魔叮",
+    "count": 3,
+    "skills": [
+     "skill_000246",
+     "skill_000610",
+     "skill_000687"
+    ],
+    "sample_text": "我方的扇风有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0012",
+    "species_id": "pet_000012",
+    "name": "铠甲虫",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0014",
+    "species_id": "pet_000014",
+    "name": "阿米樱",
+    "count": 1,
+    "skills": [
+     "skill_000528"
+    ],
+    "sample_text": "我方的砂石冲撞有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0016",
+    "species_id": "pet_000016",
+    "name": "蹦蹦种子",
+    "count": 3,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0017",
+    "species_id": "pet_000017",
+    "name": "蹦蹦草",
+    "count": 2,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0018",
+    "species_id": "pet_000018",
+    "name": "蹦蹦花",
+    "count": 1,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0021",
+    "species_id": "pet_000021",
+    "name": "遁地鼠",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0022",
+    "species_id": "pet_000022",
+    "name": "喵呜",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0023",
+    "species_id": "pet_000023",
+    "name": "绿草精灵",
+    "count": 2,
+    "skills": [
+     "skill_000805",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0024",
+    "species_id": "pet_000024",
+    "name": "蒲公英娃娃",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0025",
+    "species_id": "pet_000025",
+    "name": "冬羽雀",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0029",
+    "species_id": "pet_000029",
+    "name": "焰火",
+    "count": 1,
+    "skills": [
+     "skill_000378"
+    ],
+    "sample_text": "我方的火苗有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0030",
+    "species_id": "pet_000030",
+    "name": "波波拉",
+    "count": 3,
+    "skills": [
+     "skill_000418",
+     "skill_000421",
+     "skill_000808"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0031",
+    "species_id": "pet_000031",
+    "name": "蒲公英",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0032",
+    "species_id": "pet_000032",
+    "name": "魔草巫灵",
+    "count": 2,
+    "skills": [
+     "skill_000805",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0034",
+    "species_id": "pet_000034",
+    "name": "岚鸟",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0035",
+    "species_id": "pet_000035",
+    "name": "小甲虫",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0036",
+    "species_id": "pet_000036",
+    "name": "叮叮恶魔",
+    "count": 3,
+    "skills": [
+     "skill_000246",
+     "skill_000610",
+     "skill_000687"
+    ],
+    "sample_text": "我方的扇风有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0038",
+    "species_id": "pet_000038",
+    "name": "卡卡虫",
+    "count": 1,
+    "skills": [
+     "skill_000766"
+    ],
+    "sample_text": "我方的魔爪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0039",
+    "species_id": "pet_000039",
+    "name": "卡瓦重",
+    "count": 1,
+    "skills": [
+     "skill_000766"
+    ],
+    "sample_text": "我方的魔爪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0040",
+    "species_id": "pet_000040",
+    "name": "伊贝儿",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0041",
+    "species_id": "pet_000041",
+    "name": "伊贝粉粉",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0046",
+    "species_id": "pet_000046",
+    "name": "记忆石",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0050",
+    "species_id": "pet_000050",
+    "name": "一窝蜂",
+    "count": 1,
+    "skills": [
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0051",
+    "species_id": "pet_000051",
+    "name": "黄蜂后",
+    "count": 1,
+    "skills": [
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0052",
+    "species_id": "pet_000052",
+    "name": "小灵面",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000741"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0053",
+    "species_id": "pet_000053",
+    "name": "暗影灵面",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000741"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0057",
+    "species_id": "pet_000057",
+    "name": "忽幽狸",
+    "count": 2,
+    "skills": [
+     "skill_000246",
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0058",
+    "species_id": "pet_000058",
+    "name": "影狸",
+    "count": 2,
+    "skills": [
+     "skill_000246",
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0060",
+    "species_id": "pet_000060",
+    "name": "锤头鹳",
+    "count": 1,
+    "skills": [
+     "skill_000421"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0061",
+    "species_id": "pet_000061",
+    "name": "护主犬",
+    "count": 1,
+    "skills": [
+     "skill_000378"
+    ],
+    "sample_text": "我方的火苗有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0062",
+    "species_id": "pet_000062",
+    "name": "音速犬",
+    "count": 1,
+    "skills": [
+     "skill_000378"
+    ],
+    "sample_text": "我方的火苗有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0063",
+    "species_id": "pet_000063",
+    "name": "格兰种子",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0064",
+    "species_id": "pet_000064",
+    "name": "格兰花",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0065",
+    "species_id": "pet_000065",
+    "name": "格兰球",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0066",
+    "species_id": "pet_000066",
+    "name": "灵狐",
+    "count": 1,
+    "skills": [
+     "skill_000384"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0067",
+    "species_id": "pet_000067",
+    "name": "九尾狐",
+    "count": 1,
+    "skills": [
+     "skill_000384"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0068",
+    "species_id": "pet_000068",
+    "name": "尖嘴狐仙",
+    "count": 1,
+    "skills": [
+     "skill_000384"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0072",
+    "species_id": "pet_000072",
+    "name": "治愈兔",
+    "count": 1,
+    "skills": [
+     "skill_000384"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0073",
+    "species_id": "pet_000073",
+    "name": "红丝绒",
+    "count": 1,
+    "skills": [
+     "skill_000384"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0081",
+    "species_id": "pet_000081",
+    "name": "火尾瓦特",
+    "count": 1,
+    "skills": [
+     "skill_000659"
+    ],
+    "sample_text": "我方的寸拳有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0082",
+    "species_id": "pet_000082",
+    "name": "火尾战士",
+    "count": 1,
+    "skills": [
+     "skill_000659"
+    ],
+    "sample_text": "我方的寸拳有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0083",
+    "species_id": "pet_000083",
+    "name": "烈火守护",
+    "count": 1,
+    "skills": [
+     "skill_000659"
+    ],
+    "sample_text": "我方的寸拳有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0084",
+    "species_id": "pet_000084",
+    "name": "呆小路",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0085",
+    "species_id": "pet_000085",
+    "name": "舞动路路",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0086",
+    "species_id": "pet_000086",
+    "name": "白发路路",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0091",
+    "species_id": "pet_000091",
+    "name": "瞌睡王",
+    "count": 1,
+    "skills": [
+     "skill_000659"
+    ],
+    "sample_text": "我方的寸拳有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0095",
+    "species_id": "pet_000095",
+    "name": "石肤蜥",
+    "count": 1,
+    "skills": [
+     "skill_000518"
+    ],
+    "sample_text": "我方的地陷有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0096",
+    "species_id": "pet_000096",
+    "name": "石刺蜥",
+    "count": 1,
+    "skills": [
+     "skill_000518"
+    ],
+    "sample_text": "我方的地陷有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0097",
+    "species_id": "pet_000097",
+    "name": "石冠王蜥",
+    "count": 1,
+    "skills": [
+     "skill_000518"
+    ],
+    "sample_text": "我方的地陷有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0098",
+    "species_id": "pet_000098",
+    "name": "仪使者",
+    "count": 2,
+    "skills": [
+     "skill_000807",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0099",
+    "species_id": "pet_000099",
+    "name": "仪式之星",
+    "count": 2,
+    "skills": [
+     "skill_000807",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0100",
+    "species_id": "pet_000100",
+    "name": "仪式巨像",
+    "count": 2,
+    "skills": [
+     "skill_000807",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0101",
+    "species_id": "pet_000101",
+    "name": "甜田螺",
+    "count": 1,
+    "skills": [
+     "skill_000731"
+    ],
+    "sample_text": "我方的月光合奏有2 处未解析机制、4 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0102",
+    "species_id": "pet_000102",
+    "name": "壳乙螺",
+    "count": 1,
+    "skills": [
+     "skill_000731"
+    ],
+    "sample_text": "我方的月光合奏有2 处未解析机制、4 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0103",
+    "species_id": "pet_000103",
+    "name": "卡洛儿",
+    "count": 1,
+    "skills": [
+     "skill_000731"
+    ],
+    "sample_text": "我方的月光合奏有2 处未解析机制、4 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0104",
+    "species_id": "pet_000104",
+    "name": "风铃鲨",
+    "count": 2,
+    "skills": [
+     "skill_000418",
+     "skill_000421"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0105",
+    "species_id": "pet_000105",
+    "name": "蓝蝶鲨",
+    "count": 2,
+    "skills": [
+     "skill_000418",
+     "skill_000421"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0106",
+    "species_id": "pet_000106",
+    "name": "彩蝶鲨",
+    "count": 2,
+    "skills": [
+     "skill_000418",
+     "skill_000421"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0108",
+    "species_id": "pet_000108",
+    "name": "翡翠水母",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0109",
+    "species_id": "pet_000109",
+    "name": "琉璃水母",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0110",
+    "species_id": "pet_000110",
+    "name": "大耳帽兜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0111",
+    "species_id": "pet_000111",
+    "name": "帽兜娃娃",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0112",
+    "species_id": "pet_000112",
+    "name": "雪影娃娃",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0115",
+    "species_id": "pet_000115",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0116",
+    "species_id": "pet_000116",
+    "name": "小狮鹫",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0117",
+    "species_id": "pet_000117",
+    "name": "神圣狮鹫",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0118",
+    "species_id": "pet_000118",
+    "name": "皇家狮鹫",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0119",
+    "species_id": "pet_000119",
+    "name": "圆眼蜘蛛",
+    "count": 4,
+    "skills": [
+     "skill_000612",
+     "skill_000632"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0120",
+    "species_id": "pet_000120",
+    "name": "尖角蜘蛛",
+    "count": 4,
+    "skills": [
+     "skill_000612",
+     "skill_000632"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0121",
+    "species_id": "pet_000121",
+    "name": "芋香巨角蛛",
+    "count": 4,
+    "skills": [
+     "skill_000612",
+     "skill_000632"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0125",
+    "species_id": "pet_000125",
+    "name": "小草虫",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0126",
+    "species_id": "pet_000126",
+    "name": "草衣虫",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0127",
+    "species_id": "pet_000127",
+    "name": "花衣蝶",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0128",
+    "species_id": "pet_000128",
+    "name": "小夜",
+    "count": 1,
+    "skills": [
+     "skill_000766"
+    ],
+    "sample_text": "我方的魔爪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0130",
+    "species_id": "pet_000130",
+    "name": "朔夜伊芙",
+    "count": 1,
+    "skills": [
+     "skill_000766"
+    ],
+    "sample_text": "我方的魔爪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0131",
+    "species_id": "pet_000131",
+    "name": "小灵菇",
+    "count": 2,
+    "skills": [
+     "skill_000246",
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0132",
+    "species_id": "pet_000132",
+    "name": "幻灵菇",
+    "count": 2,
+    "skills": [
+     "skill_000246",
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0133",
+    "species_id": "pet_000133",
+    "name": "幻影灵菇",
+    "count": 2,
+    "skills": [
+     "skill_000246",
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0134",
+    "species_id": "pet_000134",
+    "name": "空空颅",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000741"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0135",
+    "species_id": "pet_000135",
+    "name": "夜宿颅",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000741"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0136",
+    "species_id": "pet_000136",
+    "name": "夜枭",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000741"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0139",
+    "species_id": "pet_000140",
+    "name": "裘洛",
+    "count": 4,
+    "skills": [
+     "skill_000602",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0140",
+    "species_id": "pet_000141",
+    "name": "裘力",
+    "count": 4,
+    "skills": [
+     "skill_000602",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0141",
+    "species_id": "pet_000142",
+    "name": "裘卡",
+    "count": 4,
+    "skills": [
+     "skill_000602",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0142",
+    "species_id": "pet_000143",
+    "name": "花魁蜂后",
+    "count": 1,
+    "skills": [
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0143",
+    "species_id": "pet_000144",
+    "name": "春团",
+    "count": 1,
+    "skills": [
+     "skill_000264"
+    ],
+    "sample_text": "我方的重击有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0144",
+    "species_id": "pet_000145",
+    "name": "春兔",
+    "count": 1,
+    "skills": [
+     "skill_000264"
+    ],
+    "sample_text": "我方的重击有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0145",
+    "species_id": "pet_000146",
+    "name": "伏地兽",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0149",
+    "species_id": "pet_000150",
+    "name": "巨灵石",
+    "count": 1,
+    "skills": [
+     "skill_000741"
+    ],
+    "sample_text": "我方的鬼火有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0161",
+    "species_id": "pet_000162",
+    "name": "瑰眼仔",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0162",
+    "species_id": "pet_000163",
+    "name": "耳翎瑰魅",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0163",
+    "species_id": "pet_000164",
+    "name": "邪眼巨魔",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0164",
+    "species_id": "pet_000165",
+    "name": "拉特",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0165",
+    "species_id": "pet_000166",
+    "name": "酷拉",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0166",
+    "species_id": "pet_000167",
+    "name": "电咩咩",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0167",
+    "species_id": "pet_000168",
+    "name": "粉咩咩",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0168",
+    "species_id": "pet_000169",
+    "name": "电球咩咩",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0169",
+    "species_id": "pet_000170",
+    "name": "小星光",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0170",
+    "species_id": "pet_000171",
+    "name": "星光狮",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0171",
+    "species_id": "pet_000172",
+    "name": "闪电环",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0172",
+    "species_id": "pet_000173",
+    "name": "刺电环",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0173",
+    "species_id": "pet_000174",
+    "name": "荆棘电环",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0179",
+    "species_id": "pet_000180",
+    "name": "贝瑟",
+    "count": 1,
+    "skills": [
+     "skill_000384"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0180",
+    "species_id": "pet_000181",
+    "name": "贝加尔",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000477"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0181",
+    "species_id": "pet_000182",
+    "name": "贝古斯",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000477"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0182",
+    "species_id": "pet_000183",
+    "name": "多西",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0183",
+    "species_id": "pet_000184",
+    "name": "库多西",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0184",
+    "species_id": "pet_000185",
+    "name": "波多西",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0185",
+    "species_id": "pet_000186",
+    "name": "小翼龙",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0186",
+    "species_id": "pet_000187",
+    "name": "翼龙",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0187",
+    "species_id": "pet_000188",
+    "name": "伊雷龙",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0190",
+    "species_id": "pet_000191",
+    "name": "古钟蛇",
+    "count": 1,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0191",
+    "species_id": "pet_000192",
+    "name": "寒音蛇",
+    "count": 1,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0192",
+    "species_id": "pet_000193",
+    "name": "菊花梨",
+    "count": 1,
+    "skills": [
+     "skill_000264"
+    ],
+    "sample_text": "我方的重击有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0199",
+    "species_id": "pet_000200",
+    "name": "牵线木偶",
+    "count": 2,
+    "skills": [
+     "skill_000805",
+     "skill_000807"
+    ],
+    "sample_text": "我方的坍缩有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0200",
+    "species_id": "pet_000201",
+    "name": "帅帅魔偶",
+    "count": 2,
+    "skills": [
+     "skill_000805",
+     "skill_000807"
+    ],
+    "sample_text": "我方的坍缩有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0201",
+    "species_id": "pet_000202",
+    "name": "小怂猫",
+    "count": 1,
+    "skills": [
+     "skill_000264"
+    ],
+    "sample_text": "我方的重击有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0202",
+    "species_id": "pet_000203",
+    "name": "怒目怂猫",
+    "count": 1,
+    "skills": [
+     "skill_000264"
+    ],
+    "sample_text": "我方的重击有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0203",
+    "species_id": "pet_000204",
+    "name": "哭哭菇",
+    "count": 2,
+    "skills": [
+     "skill_000807",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0204",
+    "species_id": "pet_000205",
+    "name": "怖须菇",
+    "count": 2,
+    "skills": [
+     "skill_000807",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0205",
+    "species_id": "pet_000206",
+    "name": "怖哭菇",
+    "count": 2,
+    "skills": [
+     "skill_000807",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0206",
+    "species_id": "pet_000207",
+    "name": "绒绒",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0207",
+    "species_id": "pet_000208",
+    "name": "小绒茧",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0208",
+    "species_id": "pet_000209",
+    "name": "绒仙子",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0209",
+    "species_id": "pet_000210",
+    "name": "小鹬",
+    "count": 1,
+    "skills": [
+     "skill_000687"
+    ],
+    "sample_text": "我方的扇风有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0210",
+    "species_id": "pet_000211",
+    "name": "鄙目鹬",
+    "count": 1,
+    "skills": [
+     "skill_000687"
+    ],
+    "sample_text": "我方的扇风有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0211",
+    "species_id": "pet_000212",
+    "name": "高脚鹬",
+    "count": 1,
+    "skills": [
+     "skill_000687"
+    ],
+    "sample_text": "我方的扇风有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0221",
+    "species_id": "pet_000222",
+    "name": "胆小鳗鱼",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0222",
+    "species_id": "pet_000223",
+    "name": "闪电鳗鱼",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0228",
+    "species_id": "pet_000229",
+    "name": "雪绒鸟",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0229",
+    "species_id": "pet_000230",
+    "name": "雪绒鸟",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0230",
+    "species_id": "pet_000231",
+    "name": "雪绒鸟",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0231",
+    "species_id": "pet_000232",
+    "name": "冬羽雀",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0232",
+    "species_id": "pet_000233",
+    "name": "冬羽雀",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0233",
+    "species_id": "pet_000234",
+    "name": "冬羽雀",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0234",
+    "species_id": "pet_000235",
+    "name": "岚鸟",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0235",
+    "species_id": "pet_000236",
+    "name": "岚鸟",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0236",
+    "species_id": "pet_000237",
+    "name": "岚鸟",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0237",
+    "species_id": "pet_000238",
+    "name": "丢丢",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0238",
+    "species_id": "pet_000239",
+    "name": "丢丢",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0239",
+    "species_id": "pet_000240",
+    "name": "丢丢",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0240",
+    "species_id": "pet_000241",
+    "name": "卡卡虫",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0241",
+    "species_id": "pet_000242",
+    "name": "卡卡虫",
+    "count": 2,
+    "skills": [
+     "skill_000368",
+     "skill_000766"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0242",
+    "species_id": "pet_000243",
+    "name": "卡卡虫",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0243",
+    "species_id": "pet_000244",
+    "name": "卡瓦重",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0244",
+    "species_id": "pet_000245",
+    "name": "卡瓦重",
+    "count": 2,
+    "skills": [
+     "skill_000368",
+     "skill_000766"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0245",
+    "species_id": "pet_000246",
+    "name": "卡瓦重",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0246",
+    "species_id": "pet_000247",
+    "name": "蹦蹦种子",
+    "count": 3,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0247",
+    "species_id": "pet_000248",
+    "name": "蹦蹦种子",
+    "count": 3,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0248",
+    "species_id": "pet_000249",
+    "name": "蹦蹦种子",
+    "count": 3,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0249",
+    "species_id": "pet_000250",
+    "name": "蹦蹦草",
+    "count": 2,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0250",
+    "species_id": "pet_000251",
+    "name": "蹦蹦草",
+    "count": 2,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0251",
+    "species_id": "pet_000252",
+    "name": "蹦蹦草",
+    "count": 2,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0252",
+    "species_id": "pet_000253",
+    "name": "蹦蹦花",
+    "count": 1,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0253",
+    "species_id": "pet_000254",
+    "name": "蹦蹦花",
+    "count": 1,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0254",
+    "species_id": "pet_000255",
+    "name": "蹦蹦花",
+    "count": 1,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0263",
+    "species_id": "pet_000264",
+    "name": "粉星仔",
+    "count": 2,
+    "skills": [
+     "skill_000805",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0264",
+    "species_id": "pet_000265",
+    "name": "粉耳星兔",
+    "count": 1,
+    "skills": [
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0268",
+    "species_id": "pet_000269",
+    "name": "海盔虫",
+    "count": 4,
+    "skills": [
+     "skill_000418",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0269",
+    "species_id": "pet_000270",
+    "name": "刺盔虫",
+    "count": 4,
+    "skills": [
+     "skill_000418",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0270",
+    "species_id": "pet_000271",
+    "name": "千棘盔",
+    "count": 4,
+    "skills": [
+     "skill_000418",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0282",
+    "species_id": "pet_000284",
+    "name": "红绒十字",
+    "count": 1,
+    "skills": [
+     "skill_000384"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0283",
+    "species_id": "pet_000285",
+    "name": "霹雳宝宝",
+    "count": 1,
+    "skills": [
+     "skill_000585"
+    ],
+    "sample_text": "我方的闪击折返有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0284",
+    "species_id": "pet_000286",
+    "name": "雷鸣小子",
+    "count": 1,
+    "skills": [
+     "skill_000585"
+    ],
+    "sample_text": "我方的闪击折返有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0285",
+    "species_id": "pet_000287",
+    "name": "雷神之子",
+    "count": 1,
+    "skills": [
+     "skill_000585"
+    ],
+    "sample_text": "我方的闪击折返有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0286",
+    "species_id": "pet_000288",
+    "name": "电动长颈鹿",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0287",
+    "species_id": "pet_000289",
+    "name": "奔乐鹿",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0288",
+    "species_id": "pet_000290",
+    "name": "爵士鹿",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0292",
+    "species_id": "pet_000294",
+    "name": "嘟嘟煲",
+    "count": 3,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0293",
+    "species_id": "pet_000295",
+    "name": "嘟嘟锅",
+    "count": 2,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0297",
+    "species_id": "pet_000299",
+    "name": "春花兔",
+    "count": 1,
+    "skills": [
+     "skill_000264"
+    ],
+    "sample_text": "我方的重击有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0301",
+    "species_id": "pet_000303",
+    "name": "旋叶虫",
+    "count": 1,
+    "skills": [
+     "skill_000636"
+    ],
+    "sample_text": "我方的虫网有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0302",
+    "species_id": "pet_000304",
+    "name": "风滚暮虫",
+    "count": 1,
+    "skills": [
+     "skill_000636"
+    ],
+    "sample_text": "我方的虫网有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0306",
+    "species_id": "pet_000308",
+    "name": "深蓝鲸",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0307",
+    "species_id": "pet_000309",
+    "name": "双灯鱼",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0308",
+    "species_id": "pet_000310",
+    "name": "利灯鱼",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0315",
+    "species_id": "pet_000317",
+    "name": "里奥",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0316",
+    "species_id": "pet_000318",
+    "name": "灵羽勇士",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0317",
+    "species_id": "pet_000319",
+    "name": "圣羽翼王",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0318",
+    "species_id": "pet_000320",
+    "name": "星尘虫",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0319",
+    "species_id": "pet_000321",
+    "name": "落星虫",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0320",
+    "species_id": "pet_000322",
+    "name": "陨星虫",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0321",
+    "species_id": "pet_000323",
+    "name": "碎晶蝎",
+    "count": 1,
+    "skills": [
+     "skill_000526"
+    ],
+    "sample_text": "我方的扬尘有1 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0322",
+    "species_id": "pet_000324",
+    "name": "晶尾蝎",
+    "count": 1,
+    "skills": [
+     "skill_000526"
+    ],
+    "sample_text": "我方的扬尘有1 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0323",
+    "species_id": "pet_000325",
+    "name": "蝎子王",
+    "count": 1,
+    "skills": [
+     "skill_000526"
+    ],
+    "sample_text": "我方的扬尘有1 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0324",
+    "species_id": "pet_000326",
+    "name": "幽冥眼",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000741"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0325",
+    "species_id": "pet_000327",
+    "name": "缇塔",
+    "count": 2,
+    "skills": [
+     "skill_000481",
+     "skill_000610"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0326",
+    "species_id": "pet_000328",
+    "name": "声波缇塔",
+    "count": 2,
+    "skills": [
+     "skill_000481",
+     "skill_000610"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0327",
+    "species_id": "pet_000329",
+    "name": "权杖-Ⅱ",
+    "count": 1,
+    "skills": [
+     "skill_000477"
+    ],
+    "sample_text": "我方的离子震荡有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0328",
+    "species_id": "pet_000330",
+    "name": "权杖-V",
+    "count": 1,
+    "skills": [
+     "skill_000477"
+    ],
+    "sample_text": "我方的离子震荡有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0329",
+    "species_id": "pet_000331",
+    "name": "伊兰亚龙",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0330",
+    "species_id": "pet_000332",
+    "name": "厉毒小萝",
+    "count": 1,
+    "skills": [
+     "skill_000766"
+    ],
+    "sample_text": "我方的魔爪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0331",
+    "species_id": "pet_000333",
+    "name": "厉毒修萝",
+    "count": 1,
+    "skills": [
+     "skill_000766"
+    ],
+    "sample_text": "我方的魔爪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0332",
+    "species_id": "pet_000334",
+    "name": "海枝枝",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0333",
+    "species_id": "pet_000335",
+    "name": "海枝枝",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0334",
+    "species_id": "pet_000336",
+    "name": "海枝枝",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0335",
+    "species_id": "pet_000337",
+    "name": "海枝枝",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0336",
+    "species_id": "pet_000338",
+    "name": "小电企鹅",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0337",
+    "species_id": "pet_000339",
+    "name": "电企鹅",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0338",
+    "species_id": "pet_000340",
+    "name": "柴渣虫",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0339",
+    "species_id": "pet_000341",
+    "name": "燃薪虫",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0344",
+    "species_id": "pet_000346",
+    "name": "小星光",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0345",
+    "species_id": "pet_000347",
+    "name": "星光狮",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0346",
+    "species_id": "pet_000348",
+    "name": "噼啪鸟",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0353",
+    "species_id": "pet_000355",
+    "name": "地鼠",
+    "count": 1,
+    "skills": [
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0354",
+    "species_id": "pet_000356",
+    "name": "遁鼠",
+    "count": 1,
+    "skills": [
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0355",
+    "species_id": "pet_000357",
+    "name": "遁地鼠",
+    "count": 2,
+    "skills": [
+     "skill_000246",
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0357",
+    "species_id": "pet_000359",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0358",
+    "species_id": "pet_000360",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0359",
+    "species_id": "pet_000361",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0360",
+    "species_id": "pet_000362",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0361",
+    "species_id": "pet_000363",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0362",
+    "species_id": "pet_000364",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0363",
+    "species_id": "pet_000365",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0364",
+    "species_id": "pet_000366",
+    "name": "圣代甜甜",
+    "count": 1,
+    "skills": [
+     "skill_000529"
+    ],
+    "sample_text": "我方的风吹雪有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0366",
+    "species_id": "pet_000368",
+    "name": "小狮鹫",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0367",
+    "species_id": "pet_000369",
+    "name": "神圣狮鹫",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0368",
+    "species_id": "pet_000370",
+    "name": "皇家狮鹫",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0374",
+    "species_id": "pet_000376",
+    "name": "海盔虫",
+    "count": 4,
+    "skills": [
+     "skill_000418",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0375",
+    "species_id": "pet_000377",
+    "name": "刺盔虫",
+    "count": 4,
+    "skills": [
+     "skill_000418",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0376",
+    "species_id": "pet_000378",
+    "name": "千棘盔",
+    "count": 4,
+    "skills": [
+     "skill_000418",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0379",
+    "species_id": "pet_000381",
+    "name": "暗影灵面",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000741"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0380",
+    "species_id": "pet_000382",
+    "name": "幽冥眼",
+    "count": 2,
+    "skills": [
+     "skill_000384",
+     "skill_000741"
+    ],
+    "sample_text": "我方的易燃物质有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0381",
+    "species_id": "pet_000383",
+    "name": "蓬叶虫",
+    "count": 1,
+    "skills": [
+     "skill_000636"
+    ],
+    "sample_text": "我方的虫网有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0383",
+    "species_id": "pet_000385",
+    "name": "落陨星兔",
+    "count": 2,
+    "skills": [
+     "skill_000805",
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0393",
+    "species_id": "pet_000395",
+    "name": "蓬叶虫",
+    "count": 1,
+    "skills": [
+     "skill_000636"
+    ],
+    "sample_text": "我方的虫网有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0394",
+    "species_id": "pet_000396",
+    "name": "风滚暮虫",
+    "count": 1,
+    "skills": [
+     "skill_000636"
+    ],
+    "sample_text": "我方的虫网有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0395",
+    "species_id": "pet_000398",
+    "name": "石肤蜥",
+    "count": 1,
+    "skills": [
+     "skill_000518"
+    ],
+    "sample_text": "我方的地陷有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0396",
+    "species_id": "pet_000399",
+    "name": "石刺蜥",
+    "count": 1,
+    "skills": [
+     "skill_000518"
+    ],
+    "sample_text": "我方的地陷有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0397",
+    "species_id": "pet_000400",
+    "name": "石冠王蜥",
+    "count": 1,
+    "skills": [
+     "skill_000518"
+    ],
+    "sample_text": "我方的地陷有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0398",
+    "species_id": "pet_000401",
+    "name": "花怨鳗",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0399",
+    "species_id": "pet_000402",
+    "name": "鳗尾兽",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0413",
+    "species_id": "pet_000416",
+    "name": "号儿鱼",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0414",
+    "species_id": "pet_000417",
+    "name": "圆号鱼",
+    "count": 1,
+    "skills": [
+     "skill_000418"
+    ],
+    "sample_text": "我方的甩水有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0415",
+    "species_id": "pet_000418",
+    "name": "小雪人",
+    "count": 2,
+    "skills": [
+     "skill_000558",
+     "skill_000559"
+    ],
+    "sample_text": "我方的冷凝有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0416",
+    "species_id": "pet_000419",
+    "name": "雪怪",
+    "count": 2,
+    "skills": [
+     "skill_000558",
+     "skill_000559"
+    ],
+    "sample_text": "我方的冷凝有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0417",
+    "species_id": "pet_000420",
+    "name": "雪绒鸟",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0426",
+    "species_id": "pet_000429",
+    "name": "圣剑侍从",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0427",
+    "species_id": "pet_000430",
+    "name": "圣剑-X",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0429",
+    "species_id": "pet_000432",
+    "name": "棋棋",
+    "count": 1,
+    "skills": [
+     "skill_000659"
+    ],
+    "sample_text": "我方的寸拳有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0434",
+    "species_id": "pet_000437",
+    "name": "棋棋",
+    "count": 1,
+    "skills": [
+     "skill_000659"
+    ],
+    "sample_text": "我方的寸拳有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0439",
+    "species_id": "pet_000442",
+    "name": "栗鼠",
+    "count": 4,
+    "skills": [
+     "skill_000246",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0440",
+    "species_id": "pet_000443",
+    "name": "壳栗丝鼠",
+    "count": 4,
+    "skills": [
+     "skill_000246",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0470",
+    "species_id": "pet_000473",
+    "name": "画间法师手",
+    "count": 1,
+    "skills": [
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0471",
+    "species_id": "pet_000474",
+    "name": "画间沉铁兽",
+    "count": 1,
+    "skills": [
+     "skill_000741"
+    ],
+    "sample_text": "我方的鬼火有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0476",
+    "species_id": "pet_000479",
+    "name": "嗜光嗡嗡",
+    "count": 1,
+    "skills": [
+     "skill_000629"
+    ],
+    "sample_text": "我方的过敏原有2 处未解析机制、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0477",
+    "species_id": "pet_000480",
+    "name": "窃光蚊",
+    "count": 1,
+    "skills": [
+     "skill_000629"
+    ],
+    "sample_text": "我方的过敏原有2 处未解析机制、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0478",
+    "species_id": "pet_000481",
+    "name": "不咕钟",
+    "count": 1,
+    "skills": [
+     "skill_000494"
+    ],
+    "sample_text": "我方的绞轮有1 处未解析机制、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0479",
+    "species_id": "pet_000482",
+    "name": "溯源钟",
+    "count": 1,
+    "skills": [
+     "skill_000494"
+    ],
+    "sample_text": "我方的绞轮有1 处未解析机制、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0480",
+    "species_id": "pet_000483",
+    "name": "小箱怪",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0481",
+    "species_id": "pet_000484",
+    "name": "迷迷箱怪",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0484",
+    "species_id": "pet_000488",
+    "name": "守夜烛",
+    "count": 1,
+    "skills": [
+     "skill_000464"
+    ],
+    "sample_text": "我方的透镜实验有1 处未解析机制、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0485",
+    "species_id": "pet_000489",
+    "name": "流明坎德拉",
+    "count": 1,
+    "skills": [
+     "skill_000464"
+    ],
+    "sample_text": "我方的透镜实验有1 处未解析机制、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0486",
+    "species_id": "pet_000490",
+    "name": "烟花团",
+    "count": 2,
+    "skills": [
+     "skill_000400",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0487",
+    "species_id": "pet_000491",
+    "name": "烟花伯爵",
+    "count": 2,
+    "skills": [
+     "skill_000400",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0492",
+    "species_id": "pet_000496",
+    "name": "优优",
+    "count": 1,
+    "skills": [
+     "skill_000460"
+    ],
+    "sample_text": "我方的天光有1 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0493",
+    "species_id": "pet_000497",
+    "name": "绒光优优",
+    "count": 1,
+    "skills": [
+     "skill_000460"
+    ],
+    "sample_text": "我方的天光有1 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0494",
+    "species_id": "pet_000498",
+    "name": "蜜果骸",
+    "count": 1,
+    "skills": [
+     "skill_000741"
+    ],
+    "sample_text": "我方的鬼火有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0495",
+    "species_id": "pet_000499",
+    "name": "半朽蜜果灵",
+    "count": 1,
+    "skills": [
+     "skill_000741"
+    ],
+    "sample_text": "我方的鬼火有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0496",
+    "species_id": "pet_000500",
+    "name": "小鼓象",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0497",
+    "species_id": "pet_000501",
+    "name": "巨鼓象",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0500",
+    "species_id": "pet_000504",
+    "name": "足尖元件",
+    "count": 1,
+    "skills": [
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0501",
+    "species_id": "pet_000505",
+    "name": "离心舞者",
+    "count": 1,
+    "skills": [
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0504",
+    "species_id": "pet_000508",
+    "name": "钨丝贝贝",
+    "count": 2,
+    "skills": [
+     "skill_000477",
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0505",
+    "species_id": "pet_000509",
+    "name": "辉光幕机",
+    "count": 2,
+    "skills": [
+     "skill_000477",
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0506",
+    "species_id": "pet_000510",
+    "name": "机幕方舟",
+    "count": 2,
+    "skills": [
+     "skill_000477",
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0512",
+    "species_id": "pet_000530",
+    "name": "苞米仔",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0513",
+    "species_id": "pet_000531",
+    "name": "炮米花",
+    "count": 1,
+    "skills": [
+     "skill_000338"
+    ],
+    "sample_text": "我方的种子弹有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0517",
+    "species_id": "pet_000536",
+    "name": "叶冕魔力猫",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0518",
+    "species_id": "pet_000537",
+    "name": "蹦蹦果",
+    "count": 1,
+    "skills": [
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0522",
+    "species_id": "pet_000543",
+    "name": "圣水守护",
+    "count": 3,
+    "skills": [
+     "skill_000418",
+     "skill_000421",
+     "skill_000808"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0523",
+    "species_id": "pet_000544",
+    "name": "神谕鲨",
+    "count": 2,
+    "skills": [
+     "skill_000418",
+     "skill_000421"
+    ],
+    "sample_text": "我方的水炮有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0524",
+    "species_id": "pet_000545",
+    "name": "千棘海针",
+    "count": 4,
+    "skills": [
+     "skill_000418",
+     "skill_000612"
+    ],
+    "sample_text": "我方的毒液渗透有1 条已解析效果、2 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0525",
+    "species_id": "pet_000547",
+    "name": "霜翼领主",
+    "count": 1,
+    "skills": [
+     "skill_000698"
+    ],
+    "sample_text": "我方的羽刃有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0526",
+    "species_id": "pet_000548",
+    "name": "女王蜂",
+    "count": 1,
+    "skills": [
+     "skill_000610"
+    ],
+    "sample_text": "我方的连续毒针有1 条已解析效果、3 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0528",
+    "species_id": "pet_000550",
+    "name": "烈火战神",
+    "count": 1,
+    "skills": [
+     "skill_000378"
+    ],
+    "sample_text": "我方的火苗有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0529",
+    "species_id": "pet_000551",
+    "name": "风暴战犬",
+    "count": 1,
+    "skills": [
+     "skill_000378"
+    ],
+    "sample_text": "我方的火苗有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0531",
+    "species_id": "pet_000553",
+    "name": "波普鹿",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0532",
+    "species_id": "pet_000554",
+    "name": "圣剑骑士",
+    "count": 1,
+    "skills": [
+     "skill_000481"
+    ],
+    "sample_text": "我方的齿轮切开有2 处未解析机制**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0533",
+    "species_id": "pet_000555",
+    "name": "伊兰龙",
+    "count": 1,
+    "skills": [
+     "skill_000602"
+    ],
+    "sample_text": "我方的强制重启有1 条已解析效果、1 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0534",
+    "species_id": "pet_000558",
+    "name": "圣光迪莫",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0535",
+    "species_id": "pet_000559",
+    "name": "圣草迪莫",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0536",
+    "species_id": "pet_000560",
+    "name": "圣火迪莫",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0537",
+    "species_id": "pet_000561",
+    "name": "圣水迪莫",
+    "count": 1,
+    "skills": [
+     "skill_000368"
+    ],
+    "sample_text": "我方的抽枝有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0538",
+    "species_id": "pet_000595",
+    "name": "宝藏小狐",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0539",
+    "species_id": "pet_000596",
+    "name": "宝藏沙狐",
+    "count": 1,
+    "skills": [
+     "skill_000246"
+    ],
+    "sample_text": "我方的抓挠有1 条已解析效果**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0540",
+    "species_id": "pet_000601",
+    "name": "圣凯布米龙",
+    "count": 1,
+    "skills": [
+     "skill_000632"
+    ],
+    "sample_text": "我方的啃咬有1 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   },
+   {
+    "instance_id": "own-0542",
+    "species_id": "pet_000611",
+    "name": "月使鹭纳",
+    "count": 1,
+    "skills": [
+     "skill_000808"
+    ],
+    "sample_text": "我方的多维击打有2 处未解析机制、5 处未认领机制词**没有结算**（未核验，不猜数值），已如实登记。"
+   }
+  ],
+  "in_battle_unsupported_note": "「战斗中这一只**自己出手**时，引擎把某条已解析的效果登记为『没有结算』」的只数。它不改变①（那一手仍然合法、仍然推进），但它是②的直接证据：这一条效果**没有**被结算，引擎只是如实记账，没有伪装结算。"
+ },
+ "blocking_mechanism_gaps": [
+  {
+   "instance_id": "own-0442（冒烟里踩到的那一只）/ 自足复现配方：pet_000446 + pet_000482",
+   "species_id": "pet_000482",
+   "name": "溯源钟（持有「绞轮」）",
+   "step": "结算中途（自足复现打在第 6 回合）",
+   "recorded_action": {
+    "kind": "skill",
+    "skill_id": "skill_000696"
+   },
+   "engine_reply": "UnsupportedEffect: 未支持的机制：技能「绞轮」的有效能耗（能耗修正把它压到 -1（基础 5）—— 负能耗的下限在术语里没有定义（MC-018），不猜一个 0，也不按负数回能）",
+   "error_type": "internal_error（服务层兜底）→ Node 报 HTTP 400",
+   "root_cause": "「绞轮」的基础能耗 5，描述是「造成物伤，每受到1次抵抗的技能攻击（不含连击），本技能能耗永久-1」。自足复现逐回合读数：ramp = -1/-2/-3/-4/-5 时有效能耗 4/3/2/1/**0**，而**这五回合它都在合法动作列表里**（引擎自己列的）。到 0 那一回合，同一回合里我方先出手的一次**属性抵抗**命中让它再 -1（ramp -6），随后轮到它结算时 `_execute` 重算能耗 = 5 + (-6) = **-1** ⇒ env.py:928 抛 UnsupportedEffect。`step_joint` 不接这个异常、`battle_advance` 只接 ValueError/RulesetError ⇒ 服务层兜底 internal_error ⇒ Node 报 HTTP 400 ⇒ **整局中断且重试必复现**。",
+   "engine_implemented": "机制**实现了一半**：能耗永久-1 的累加是真的（skill_ramps 逐回合涨），降到 0 也照常出招；缺的是「能耗被压到 0 以下怎么办」——术语里没有依据（MC-018），引擎按纪律 fail closed、不猜 0。",
+   "the_defect": "**接口不自洽**：一个已经被列为合法的动作，在同一回合结算时变成非法，而这个矛盾以「未处理异常」的形式把整局炸掉，而不是把这一手作废/改成聚能继续打。",
+   "fix_scope": "roco/src/roco_env/env.py（legal_actions 与 _execute 的能耗口径要对齐，或在 _execute 里把这种局面转成可结算事件）与 service.py 的错误分类 —— 都在 task-2 的写域之外，**未改**，报 Lead 决定。",
+   "repro": "python3 scripts/roco/battle-smoke-repro-negative-cost.py",
+   "repro_artifact": "reports/roco/battle-smoke/negative-energy-cost-repro.json",
+   "timeline": [
+    {
+     "i": 0,
+     "turn": 1,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "enemy_ramp_skill_000494": null,
+     "enemy_effective_cost_skill_000494": 5,
+     "rampled_in_enemy_legal": true,
+     "my_field": "pet_000446"
+    },
+    {
+     "i": 1,
+     "turn": 2,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "enemy_ramp_skill_000494": -1,
+     "enemy_effective_cost_skill_000494": 4,
+     "rampled_in_enemy_legal": true,
+     "my_field": "pet_000446"
+    },
+    {
+     "i": 2,
+     "turn": 3,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "enemy_ramp_skill_000494": -2,
+     "enemy_effective_cost_skill_000494": 3,
+     "rampled_in_enemy_legal": true,
+     "my_field": "pet_000446"
+    },
+    {
+     "i": 3,
+     "turn": 4,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "enemy_ramp_skill_000494": -3,
+     "enemy_effective_cost_skill_000494": 2,
+     "rampled_in_enemy_legal": true,
+     "my_field": "pet_000446"
+    },
+    {
+     "i": 4,
+     "turn": 5,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "enemy_ramp_skill_000494": -4,
+     "enemy_effective_cost_skill_000494": 1,
+     "rampled_in_enemy_legal": true,
+     "my_field": "pet_000446"
+    },
+    {
+     "i": 5,
+     "turn": 6,
+     "phase": "battle",
+     "enemy_field": "pet_000482",
+     "enemy_ramp_skill_000494": -5,
+     "enemy_effective_cost_skill_000494": 0,
+     "rampled_in_enemy_legal": true,
+     "my_field": "pet_000446"
+    }
+   ]
+  }
+ ],
+ "raw": {
+  "engine_sweep": "reports/roco/battle-smoke/engine-sweep.json",
+  "entry_sweep": "reports/roco/battle-smoke/entry-sweep.json",
+  "entry_sweep_base": "http://127.0.0.1:8765"
+ }
+}
