@@ -590,8 +590,14 @@ test('⑮ 丙：产品页的焦点只用共享实现；断线档不许再退回"
   // ② 焦点要真的进上下文（否则"我看的那只"还是传不进去）
   assert.match(roco, /context\.focusDetail = \{\.\.\.focus\.snapshot/,
     '聚焦对象必须挂进 /api/coach 的上下文');
-  // ③ 落点：卡片里那一行（玩家看得见"正在看谁"）
-  assert.match(html, /id="companion-focus"/, '小芽面板里要有焦点那一行');
+  // ③ 落点：那一行（玩家看得见"正在看谁"）。
+  // ⚠ 2026-09-30 **改钉**（task-13 甲④-1：旧面板退役）。旧断言原文留档：
+  //     assert.match(html, /id="companion-focus"/, '小芽面板里要有焦点那一行');
+  // 为什么改：`#companion-card` 整块已经从 `roco.html` 退役（同一页只留 `xiaoya.js` 一套实现），
+  // 所以焦点那一行由**浮层自己的**元素承担；**意图一个字没松**：屏幕上必须有一处写着"在看谁"。
+  assert.doesNotMatch(html, /id="companion-card"/, '甲④ 之后旧面板的 DOM 不许回来');
+  assert.match(read('src/client/xiaoya.js'), /id = mode === 'page' \? 'xy-focus' : 'xiaoya-focus'/,
+    '新家要有焦点那一行（浮层里的小芽焦点 chip）');
   // ④ 断线档：不许再有"没配密钥就直接 return 离线模板"那一支（P0-01 的第二份实现）
   // ⚠ 只看**代码行**（`\n\s*if`）：旧写法在文件里以注释留档（"旧写法原文留档，别再改回来"），
   //   那一段当然会被同一个正则命中 —— 判据不能把留档当成代码。
@@ -718,9 +724,14 @@ test('⑱ 甲②①：记忆面板搬进 xiaoya —— 同一套语义/同一批
   // ④ 入口与钩子
   assert.match(src, /id = 'open-memory'/, '要有「查看记忆」入口（与旧面板同一个名字）');
   assert.match(src, /document\.body\.dataset\.xyMemory = rows\.length/, '面板换了主人 ⇒ 钩子换成 xy-memory');
-  // ⑤ 旧面板仍然在（甲④ 之前不许退役）
-  assert.match(roco, /function renderMemory\(\)/, '甲④ 之前旧面板的 renderMemory 不许删');
-  assert.match(read('src/client/roco.html'), /id="memory-pop"/, '甲④ 之前旧面板的 #memory-pop 不许删');
+  // ⑤ **甲④-1 已退役**（2026-09-30 改钉）。旧断言原文留档：
+  //     assert.match(roco, /function renderMemory\(\)/, '甲④ 之前旧面板的 renderMemory 不许删');
+  //     assert.match(read('src/client/roco.html'), /id="memory-pop"/, '甲④ 之前旧面板的 #memory-pop 不许删');
+  // 现在反过来钉"它真的不在了"：`#memory-pop` / `#memory-list` 的 DOM 只在 xiaoya 那边有；
+  // roco.html 里不许再出现旧面板（甲④-2 还要清掉 roco.js 里的死函数与替身）。
+  assert.doesNotMatch(read('src/client/roco.html'), /id="memory-pop"|id="companion-card"/,
+    '旧面板的 DOM 不许回到 roco.html');
+  assert.doesNotMatch(read('src/client/roco.html'), /id="model-chip"/, '`#model-chip` 现在由 xiaoya 写（同名同语义）');
 });
 
 test('⑲ 甲②②：`#model-list` + `#open-connect` 搬进 xiaoya —— 同名 id/class、同一数据源、不写 chip', () => {

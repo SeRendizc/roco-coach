@@ -61,7 +61,7 @@ import {mountTeamWorkshop} from './team-workshop.js';
 // task-12（丙）：**当前聚焦对象**这一层只有一份实现 —— `xiaoya.js` 导出的
 // `createFocusProvider()` / `focusFromClick()`（与 DOM 无关的纯模块，box 页那套小芽用的也是它）。
 // 这里只 import 来接线，**不**在本文件里重写焦点逻辑（重写就是第二份事实，迟早漂）。
-import {createFocusProvider, focusFromClick, migrateLegacyMemory} from './xiaoya.js';
+import {createFocusProvider, focusFromClick, migrateLegacyMemory, mountXiaoya} from './xiaoya.js';
 import {mountStalePageBanner} from './stale-page.js';
 
 // ── 页面状态 ────────────────────────────────────────────────────────────────
@@ -130,7 +130,30 @@ const LEGACY_MEMORY_KEY = 'roco-coach-memory-v1';
 //: 教程「跳过」的记账。**刷新之后仍然要跳过**，所以存在 localStorage 而不是内存里。
 const ONBOARD_KEY = 'roco-coach-onboard-v1';
 
-const $ = (id) => document.getElementById(id);
+// 甲④-1（task-13）：`#companion-card` 那一套面板**已从这一页退役**（只剩 `xiaoya.js` 一套实现）。
+// 但 roco.js 里还有若干历史路径会写旧面板的元素（战斗内的气泡、`rocoDemo.say()` 的兜底、
+// 旧的记忆/模型面板绑定、`syncCompanionBodyVisibility`）。这里给它们一个**游离的替身元素**：
+// 写进去不抛错、也**不上屏** —— 这是"这一页不再有那个面板"的如实表达，不是第二份实现。
+// ⚠ 只有**旧面板专属**的 id 走替身（下表）；`#coach-entry` / `#xiaoya-*` / 战斗与工作台的一概不碰，
+//   所以"元素不存在"这件事在别处仍然是 null（该报错/该早退的地方照旧）。
+// 为什么用替身而不是给 ~30 处调用点逐个加守卫：逐个改的漏一处就是**一页全白**（boot 抛错），
+// 而替身把风险收敛到一处、可读也可逆；甲④-2 清死代码时这些替身会一起删掉。
+const RETIRED_COMPANION_IDS = new Set(['say-reply', 'say-input', 'say-form', 'say-send',
+  'companion-body', 'companion-line', 'companion-modal', 'memory-pop', 'memory-list', 'memory-empty',
+  'model-chip', 'model-list', 'open-connect', 'close-companion', 'open-memory',
+  'xy-fold-status', 'xy-fold-label']);
+const retiredStubs = new Map();
+const retiredStub = (id) => {
+  if (!retiredStubs.has(id)) {
+    const el = document.createElement('div');
+    el.id = `retired-${id}`;
+    el.hidden = true;
+    el.dataset.retiredCompanion = id;
+    retiredStubs.set(id, el);
+  }
+  return retiredStubs.get(id);
+};
+const $ = (id) => document.getElementById(id) ?? (RETIRED_COMPANION_IDS.has(id) ? retiredStub(id) : null);
 
 /**
  * null-safe 的事件绑定（2026-09-22）。
@@ -1531,6 +1554,9 @@ function flashDamage(events) {
 // 只列 `group === 'stated'`（玩家自己说过的那几条）。**故意不列对局记录与行为记录**：
 // 把战绩摘要和长期偏好混成一张单子，就是「拿摘要冒充记忆」的另一种写法。
 function renderMemory() {
+  // 甲④-1：旧面板已退役（这一页只有 `xiaoya.js` 一套实现）——元素不在就早退，
+  // 这些函数留给还在调用它们的验收脚本/历史路径，不再画任何东西。
+  if (!$('companion-card')) return;
   const list = $('memory-list');
   if (!list) return;
   const rows = memoryItems(state.memory).filter((row) => row.group === 'stated');
@@ -1651,6 +1677,9 @@ function bindXiaoyaPopups() {
 
 const B3_NO_INLINE_XIAOYA = true;   // 首页不内联小芽
 function syncCompanionBodyVisibility() {
+  // 甲④-1：旧面板已退役（这一页只有 `xiaoya.js` 一套实现）——元素不在就早退，
+  // 这些函数留给还在调用它们的验收脚本/历史路径，不再画任何东西。
+  if (!$('companion-card')) return;
   // 人类 2026-09-23：「展开连接状态下面那个重叠的框还在」——那块是**空的对话体**
   // （`.companion-body` 有边框与 min-height；CSS 的 `:empty` 因为里面有注释/空白而不匹配）。
   // 所以由 JS 显式判定：没有回复、没有提示行，就 `hidden`。
@@ -1696,6 +1725,9 @@ function sayScrollToBottom() {
 }
 
 function renderCompanion() {
+  // 甲④-1：旧面板已退役（这一页只有 `xiaoya.js` 一套实现）——元素不在就早退，
+  // 这些函数留给还在调用它们的验收脚本/历史路径，不再画任何东西。
+  if (!$('companion-card')) return;
   const card = $('companion-card');
   if (!card) return;
   card.hidden = !state.coach.open;
@@ -1755,6 +1787,9 @@ function companionVisibility() {
 }
 
 function openCompanion({focus = true} = {}) {
+  // 甲④-1：旧面板已退役（这一页只有 `xiaoya.js` 一套实现）——元素不在就早退，
+  // 这些函数留给还在调用它们的验收脚本/历史路径，不再画任何东西。
+  if (!$('companion-card')) return;
   void refreshSession();      // 刚在连接页填完 key 就回来问 → 先把连接状态刷新一次
   state.coach.open = true;
   renderCompanion();
@@ -1785,6 +1820,9 @@ function onboardDismissed() {
  * 读不到接口时**不编**：显示「状态未知」并保留连接入口。
  */
 async function renderModelList() {
+  // 甲④-1：旧面板已退役（这一页只有 `xiaoya.js` 一套实现）——元素不在就早退，
+  // 这些函数留给还在调用它们的验收脚本/历史路径，不再画任何东西。
+  if (!$('companion-card')) return;
   // 人类 2026-09-23：小芽弹窗里**第一排三个框**（等宽等高、**一行字**、放不下就简写）显示
   // ds api / qwen3.5-4b / qwen3.8-27b 的连接状态。别的（长理由、角色、配置入口）都不在这儿。
   const box = $('model-list');
@@ -2788,6 +2826,9 @@ function b3Float(sel, text, kind) {
 }
 
 function renderModelChip() {
+  // 甲④-1：旧面板已退役（这一页只有 `xiaoya.js` 一套实现）——元素不在就早退，
+  // 这些函数留给还在调用它们的验收脚本/历史路径，不再画任何东西。
+  if (!$('companion-card')) return;
   const chip = $('model-chip');
   if (!chip) return;
   const configured = session?.configured === true;
@@ -4102,6 +4143,35 @@ function coachLineup() {
  */
 
 /**
+ * 甲④（task-13）：**小芽只剩一套实现** —— 产品页挂 `xiaoya.js` 那一套（浮层模式），旧面板退役。
+ *
+ * 为什么是"换实现"而不是"搬 UI"：`#companion-card` 与 `xiaoya.js` 是两套聊天实现（两套历史、两套记忆键、
+ * 两套焦点），本仓这一程已经为"同一件东西两套实现"栽过三次。丙（task-12）已经把它们**共享的那几层**
+ * （焦点 provider / 记忆键 / 能力状态 / `#memory-list` / `#model-list` / `#model-chip`）接成同一份；
+ * 这一步把**宿主页**也换成同一个实现。
+ *
+ * ⚠ 局中上下文必须从**宿主动局上下文口**进去（`contextProvider`），否则局中问"我现在该换谁"
+ * 会从"有战况"退成"没有战况"——那是功能倒退（甲① 已用真机证明：不接口，请求体里 `roco_battle` 就没了）。
+ */
+let rocoXiaoya = null;
+function mountRocoXiaoya() {
+  if (rocoXiaoya) return rocoXiaoya;
+  rocoXiaoya = mountXiaoya({
+    mode: 'popup',
+    // 宿主上下文口：拿得到就带（拿不到就不加那个字段，与旧面板同一条口径）。
+    contextProvider: () => {
+      const extra = {};
+      const battle = coachRocoBattle();
+      const plan = coachRocoPlan();
+      if (battle) extra.roco_battle = battle;
+      if (plan) extra.roco_plan = plan;
+      return {stageId: 'meadow', extra};
+    },
+  }) ?? null;
+  return rocoXiaoya;
+}
+
+/**
  * 这一页的**焦点 provider**（单例）：`xiaoya.js` 那一份共享实现，只在这里挂一次。
  *
  * 为什么放在这一层：工作台是 shadow DOM 模块，槽位钩子（`data-tw-slot-instance`）只有页面能看见；
@@ -4531,20 +4601,26 @@ function bind() {
   // → 保持这个写法；重复绑定由 `dataset.bound` 守卫挡住（这正是「点不开/收不回」那个 bug 的修法）。
   if ($('coach-entry') && $('coach-entry').dataset.bound !== 'yes') {
     $('coach-entry').dataset.bound = 'yes';
+    // ⚠ 2026-09-30 **改钉**（task-13 甲④-1：旧面板退役，页头入口改成开/关**小芽浮层**）。
+    // 旧写法（原文留档，别再改回来）：
+    //     $('coach-entry').addEventListener('click', () => {
+    //       state.coach.open = !state.coach.open;
+    //       if (state.coach.open) openCompanion(); else renderCompanion();
+    //       if (state.coach.open) { … #xy-fold-status / renderModelList() … }});
+    // 为什么改：`#companion-card` 那一套已退役（同一页只留 `xiaoya.js` 一套实现）。
+    // **判据要的"这一下真的开/收"一个字没松**：开关交给浮层**自己的真按钮**
+    // （`handle.open()/close()` 复用 `#xiaoya-open` / `#xiaoya-close` 的 handler），不再是另一套开关逻辑。
     $('coach-entry').addEventListener('click', () => {
-      state.coach.open = !state.coach.open;
-      // 打开时走 `openCompanion()`：它会**把焦点落到 `#say-input`**（判据 P0-2-entry 要求）。
-      if (state.coach.open) openCompanion(); else renderCompanion();
-      if (state.coach.open) {
-    const fold = $('xy-fold-status');
-    if (fold) {
-      fold.open = false;                       // 默认收缩（人类要求）
-      fold.addEventListener('toggle', () => { if (fold.open) renderModelList(); }, {once: false});
-    }
-    renderModelList();                         // 先拉一次（summary 里也给个状态）
-  }
+      const handle = mountRocoXiaoya();
+      if (!handle) return;
+      if (handle.isOpen()) handle.close(); else handle.open();
+      state.coach.open = handle.isOpen();
+      document.body.dataset.rocoCoach = state.coach.open ? 'open' : 'closed';
     });
   }
+  // 旧写法里那一段「打开时展开 `#xy-fold-status` 并先拉一次模型列表」已经不需要：
+  // 连接状态那一块（`#model-list` / `#open-connect`）现在是 `xiaoya.js` 浮层自己的
+  // `#xy-fold-status`（甲②② 搬过去的，`toggle` 时自己 `renderModelList()`）。
 
   // 2026-09-23 死代码清理：`#xy-fold-models`（旧「展开/收起模型状态 ▼」）与
   // `#companion-close`（旧小芽面板的关闭按钮）**都已不在 roco.html 里**：
@@ -4897,6 +4973,8 @@ async function boot() {
   renderModelChip();     // 会话到手后**按真实状态**落一次（首次渲染早于 bootstrap → 文案是旧的）
   applyOnboard();
   mountWorkshop();
+  // 甲④-1：挂上**唯一的**小芽实现（浮层模式），并把宿主动局上下文口接好。
+  mountRocoXiaoya();
   // task-12 丙①：焦点接线（共享 provider）在**开局之前**就位 —— 玩家点第一格时那一行就得变，
   // 不能等第一次提问才建（那正是 box 页踩过的"滞后一拍"）。
   wireRocoFocus();
@@ -4917,7 +4995,15 @@ window.rocoDemo = {state, startBattle, playAction, autoTurn, requestPlan, say, r
   // 第 92 轮新增的**纯渲染/纯函数**出口：单元测试与浏览器验收读同一条实现，
   // 免得「测试里另写一份正则」变成另一套口径。
   actionGroupsOf, actionCardHtml, resourceHtml, rosterLineHtml, statBlockHtml, mechanismOf,
-  modeChipHtml, companionVisibility, openCompanion, offsetOfPage, standardPvpActive, resolveMode,
+  modeChipHtml, offsetOfPage, standardPvpActive, resolveMode,
+  // ⚠ 2026-09-30 甲④-1（Lead 拍板走 (i)）：`companionVisibility()` / `renderCompanion()` 这两个出口
+  // **同名同语义**转成小芽浮层的真实状态 —— 三个验收脚本（`browser-live-acceptance`、
+  // `browser-mobile-sweep`、`browser-roco-ux-acceptance`）读的就是它们，改了就得改三处判据。
+  // 两条都**必须是真的**：`companionVisibility()` 反映真实可见性（浮层可见/不可见返回值不同），
+  // `renderCompanion()` 真的触发一次重画（历史 + 记忆 + 能力状态 + 焦点），不是空函数、不是常量。
+  companionVisibility: () => (mountRocoXiaoya()?.isOpen() ? 'visible' : 'hidden'),
+  renderCompanion: () => { mountRocoXiaoya()?.render(); },
+  openCompanion: () => { mountRocoXiaoya()?.open(); },
   mechanismSourceNote, MODE_MIRROR,
   // 这几条渲染入口也给出去：验收脚本要在**不点按钮**的前提下把某一页/某一栏重画一次，
   // 而它必须走页面自己的渲染，不能在脚本里另写一份 DOM。

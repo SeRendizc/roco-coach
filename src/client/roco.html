@@ -32,60 +32,13 @@
       未核验长文、重开重试都不许占聊天弹窗的地方）。 -->
  <!-- 设置入口就是下面那个 <details> 的 summary，**不要再放一个按钮**（会造成两个「设置」）。 -->
  <!-- 可滚动的最近对话 + **固定在底部的输入框** -->
- <aside class="companion" id="companion-card" aria-label="小芽" hidden>
-  <div class="xy-modal2" id="companion-modal">
-   <div class="xy-modal2-box">
-    <div class="xy-modal2-head">
-     <strong>小芽</strong>
-     <!-- 2026-09-23（接手复核）：`#model-chip` 是判据 `live-model-status` 的**读取点**
-          （打开小芽面板后量它：要有文字、要有 `data-roco-model` 钩子、要能点去连接页、高度 ≥24）。
-          它在更早的一次改版里被整块删掉了，只剩 `renderModelChip()` 里的空转 →
-          那条判据一直红（HEAD 里就没有这个元素，与本次改动无关）。这里按判据口径放回**小芽面板**里，
-          放在标题右侧一行，不再占页头。 -->
-     <a class="model-chip" id="model-chip" href="connect.html" title="点这里去连接模型">模型：未连接</a>
-     <button class="xy-modal-x" id="close-companion" type="button" aria-label="关掉小芽">×</button>
-    </div>
-    <!-- 默认收缩：连接状态（三个模型）+ 两个入口 -->
-    <details class="xy-fold" id="xy-fold-status">
-     <summary id="xy-fold-label">展开连接状态</summary>
-     <div class="xy-models" id="model-list" role="list"></div>
-     <div class="xy-actions2">
-      <button class="xy-open" id="open-connect" type="button">调试连接</button>
-      <button class="xy-open" id="open-memory" type="button">查看记忆</button>
-     </div>
-    </details>
-    <!-- 人类 2026-09-23（第三次要求）：这几条「工坊 / 候选规则 / 匹配前对手未知」**整块删掉**，
-         不再渲染到任何地方；口径本身仍在规则配置与台账里（`state.mode` / body dataset 照旧写）。 -->
-    <!-- 焦点那一行（task-12 丙①）：**与 box 页那套小芽同一口径** —— 工作台上点第 N 格，
-         这里就说"正在看：<名字>"，并且 `data-xy-focus` 立刻是那一格的个体 id。
-         焦点逻辑只有一份实现（`xiaoya.js` 的 createFocusProvider/focusFromClick），这里只是落点。 -->
-    <!-- 样式就近写（`roco.css` 不在本任务写域）：一行、小字、只在有内容时占位。 -->
-    <style>
-     .companion-focus{font-size:12.5px;line-height:1.5;color:#9caebe;padding:4px 2px 6px;
-      border-bottom:1px solid rgba(255,255,255,.08);overflow-wrap:anywhere}
-    </style>
-    <div class="companion-focus" id="companion-focus" role="status">没在看具体的某一只 —— 在下面点一格，我就知道你在看谁。</div>
-    <div class="companion-body" id="companion-body">
-     <p id="companion-line" class="companion-line" hidden></p>
-     <div id="say-reply" class="reply" hidden></div>
-    </div>
-    <form id="say-form" class="say-form">
-     <input id="say-input" maxlength="80" placeholder="想问什么就问（比如「这回合该干嘛」）" aria-label="对小芽说一句">
-     <button class="primary" id="say-send" type="submit">说一句</button>
-    </form>
-    <!-- 三级弹窗：记忆 -->
-    <div class="xy-modal" id="memory-pop" hidden role="dialog" aria-label="小芽的记忆">
-     <div class="xy-modal-box">
-      <div class="xy-modal-head"><strong>小芽记住的（都是你说过的）</strong>
-       <button class="xy-modal-x" id="close-memory" type="button" aria-label="关掉">×</button></div>
-      <p class="muted">说错了？直接再说一句就能改，或者点「忘掉」。</p>
-      <ul id="memory-list" class="memory"></ul>
-      <p class="muted" id="memory-empty">她还没记住什么。你可以说「以后叫我老王」「本命是音速犬」「输了先不复盘」。</p>
-     </div>
-    </div>
-   </div>
-  </div>
- </aside>
+ <!-- ⚠ 2026-09-30 甲④-1（task-13）：这里原来是小芽的**第二套实现**（`#companion-card` 面板：
+      自己的对话、自己的记忆弹窗、自己的三格模型状态、自己的 `#model-chip`），
+      而营地/盒子那一页用的是 `xiaoya.js` —— 同一件东西两套实现。
+      那几层能力已经逐处搬进 `xiaoya.js`（甲②①记忆 / ②②模型列表 / ③能力状态与 role），
+      所以整块**退役**：这一页现在只有一套小芽（`mountXiaoya({mode:'popup'})`，接线在 `roco.js`）。
+      页头的「✦ 小芽」入口不变（`#coach-entry`），它现在开/关的是那个浮层。
+      旧断言与旧元素名留档在 `tests/roco-page-ux.test.js` 的"改钉不删"注释里。 -->
 
  <!-- 设置：三张模型卡 / 记忆 / 模式条 / 重开重试 / 工程抽屉，全部收在这里 -->
  
