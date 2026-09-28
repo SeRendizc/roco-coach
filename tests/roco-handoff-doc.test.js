@@ -45,16 +45,24 @@ test('交接文档的关键数字与产物一致（漂了就红，逼人重看�
   assert.equal(Number(aliasLine[2]), alias.counts.one_to_one, '1:1 组数与产物对不上');
   assert.equal(Number(aliasLine[3]), alias.counts.multi_form, '多形态组数与产物对不上');
 
-  // 门禁那一条：只有产物里真的只红一个套件时，文档才许写"唯一红的是 X"
+  // 门禁那一条：文档里点名的红项**必须与产物一致**。
+  //
+  // ⚠ 2026-09-28 改钉（接手轮）：原来写成"文档必须出现『唯一红的是 `X`』这一处"，
+  // 那个措辞是在"真的只有一个红"的时候定下的；接手之后红项换过（先 `trajectories-model`，后 `unit`），
+  // 于是这条判据变成**在逼文档写一句过期的话**。
+  // 改钉后它钉的是**同一件事的两面**：① 文档必须点名红项；② 点名的那个**必须在产物里真的红着**。
+  // 反证照旧：产物里没有的红项，文档一个字都不许说它红。
   const gate = JSON.parse(readFileSync(GATE, 'utf8'));
   const failed = Array.isArray(gate.failed) ? gate.failed : [];
   const named = doc.match(/唯一红的是 `([\w-]+)`/);
-  assert.ok(named, '文档里找不到"唯一红的是 `X`"这一处');
-  if (failed.length === 1) {
-    assert.equal(named[1], failed[0],
-      `文档说唯一红的是 ${named[1]}，产物里是 ${failed[0]}`);
-  } else {
-    assert.ok(failed.length > 1,
-      `产物显示未通过 ${JSON.stringify(failed)} —— 文档却写着"唯一红的是 ${named[1]}"（多于一个就不该这么写）`);
+  const listed = doc.match(/未通过套件[：:]\s*\[([^\]]*)\]/);
+  const names = [
+    ...(named ? [named[1]] : []),
+    ...(listed ? listed[1].split(',').map((x) => x.trim().replace(/["']/g, '')).filter(Boolean) : []),
+  ];
+  assert.ok(names.length > 0, '文档里既没有"唯一红的是 `X`"，也没有"未通过套件：[…]"这一处');
+  for (const name of names) {
+    assert.ok(failed.includes(name),
+      `文档把 ${name} 写成了红的，产物里未通过的却是 ${JSON.stringify(failed)}`);
   }
 });
