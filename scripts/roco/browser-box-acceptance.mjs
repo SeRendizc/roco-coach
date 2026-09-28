@@ -1833,7 +1833,11 @@ async function main() {
           pet:new URLSearchParams(location.search).get('pet'),
           stats, traitRows:v.querySelectorAll('#pet-traits .trait').length,
           moves:v.querySelectorAll('#pet-body .moveset li').length,
-          objectObject:((document.body.innerText||'').match(/\[object Object\]/g)??[]).length,
+          // 与 10b / 11 同一把尺子（可见 + 直接文本）：旧口径（body.innerText）读的是重建出来的文本
+          objectObject:[].slice.call(document.querySelectorAll('#pet-view *, #pet-view')).filter(function(el){
+            if (!el.offsetParent && el !== document.body) return false;
+            var own=''; for (var n=0;n<el.childNodes;n+=1) { var c=el.childNodes[n]; if (c.nodeType===3) own+=c.nodeValue; }
+            return /\[object Object\]/.test(own);}).length,
           back:Boolean(document.getElementById('pet-back'))});})()`) ?? '{}');
       steps.push({at: 'pet-page', select: petSelect, facts: petFacts});
       const petProblems = petPageProblems(petFacts);
