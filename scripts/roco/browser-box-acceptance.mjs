@@ -722,6 +722,11 @@ async function main() {
           value:String(talent?.value??''),
           statCount:(String(talent?.value??'').match(/生命\\s*\\d+|物攻\\s*\\d+|物防\\s*\\d+|魔攻\\s*\\d+|魔防\\s*\\d+|速度\\s*\\d+/g)??[]).length,
           objectObject:(page.match(/\[object Object\]/g)??[]).length,
+          // ⚠ 2026-09-28 按**容器拆开**统计：连红 8 次只报总数，无法定位。
+          inPet:(function(){var v=document.getElementById('pet-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
+          inList:(function(){var v=document.getElementById('box-list-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
+          inCompare:(function(){var v=document.getElementById('compare-view');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
+          inDev:(function(){var v=document.getElementById('dev-drawer');return v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:-1;})(),
           leakElements:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).length,
           leakWhere:[].slice.call(document.querySelectorAll('#pet-view *')).filter(function(el){return el.children.length===0&&/\[object Object\]/.test(el.textContent||'');}).slice(0,5).map(function(el){var p=el.closest('[id]');return el.tagName+'.'+String(el.className).slice(0,20)+'@'+(p?p.id:'?')+' html='+String(el.outerHTML).slice(0,120);}),
           talentRaw:String(document.getElementById('pet-view') ? (document.getElementById('pet-view').dataset.talentRaw||'') : ''),
@@ -737,7 +742,8 @@ async function main() {
           // ⚠ 排障字段**无条件拼在最后**（不管上面走哪一支）—— 连红 7 次都只看到"84 处"，
           // 就是因为这些字段原来只挂在"没红"那一支上（下一轮一次定位）。
           + `｜pet-view 内命中元素 ${talentFacts.leakElements} 个 ${JSON.stringify(talentFacts.leakWhere)}`
-          + `｜资质原样「${talentFacts.talentRaw}」｜本机记录 nature=${JSON.stringify(talentFacts.storeOne)}`);
+          + `｜资质原样「${talentFacts.talentRaw}」｜本机记录 nature=${JSON.stringify(talentFacts.storeOne)}`
+          + `｜按容器拆：pet=${talentFacts.inPet} list=${talentFacts.inList} compare=${talentFacts.inCompare} dev=${talentFacts.inDev}`);
       counter('10b-资质要摊成六维数值（own-0001）',
         '把「资质」印成 [object Object]、或者一个数值都没有 —— 两种坏样本都必须被同一条判据抓住',
         talentDisplayProblems({hasTalentRow: true, statCount: 0, objectObject: 2}),
