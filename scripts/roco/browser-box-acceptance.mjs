@@ -540,6 +540,17 @@ async function main() {
     const expectedMine = String(ownedDoc.instances.length);
     const boot = await bodyFacts();
     steps.push({at: 'boot', facts: boot});
+    // ⚠ 2026-09-28 排障（本机复现不出 10b 的 84 处，必须知道是**哪一步**写进去的）：
+    // 每过一步记一次 `#pet-view` 的长度与 `[object Object]` 计数 —— 从 0 跳到 74 的那一步就是源头。
+    const diag = async (label) => {
+      const one = JSON.parse(await safeJs(`(()=>{const v=document.getElementById('pet-view');
+        return JSON.stringify({len:v?(v.innerHTML||'').length:0,
+          txt:v?((v.innerText||'').match(/\[object Object\]/g)||[]).length:0,
+          body:v?((document.body.innerText||'').match(/\[object Object\]/g)||[]).length:0});})()`) ?? '{}');
+      log(`[diag ${label}] pet-view len=${one.len} 对象=${one.txt} 整页=${one.body}`);
+      return one;
+    };
+    await diag('boot');
     // 2026-09-24：我的盒子改成「一人一只」= 48（人类要求删掉重复个体）→ 期望值从产物现读，
     // 不再写死 80。全图鉴仍然是 622（48 只只是迁移夹具，不是全量）。
     check('01-路由总数', `我的盒子 == ${expectedMine} 个个体（= owned-pets.json 的实例数），全图鉴 == 622 条记录`,
@@ -701,6 +712,7 @@ async function main() {
     // `资质` 的值是**六维表**（`{hp, atk, def, spa, spd, spe}`），印错了会变成 `[object Object]`。
     // 这里真的用鼠标打开 **own-0001** 的详情（它在「铠甲虫」那一行里，默认收起 ⇒ 先展开那一行），
     // 量两件事：资质那一栏摊成了「生命 10 / 物攻 3 / …」这样的数值；整页不出现 [object Object]。
+    await diag('before-10b');
     const own1Route = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
     const own1Card = own1Route.player.cards.find((c) => c.select === 'own-0001') ?? null;
     const own1Species = own1Card?.group ?? '';
@@ -1790,6 +1802,7 @@ async function main() {
       '{"html":"Lv.60 + Lv.100 同一行"}');
 
     // ── ② 完整六维的二级详情页（地址 `?pet=`）──────────────────────────────
+    await diag('before-09');
     const petSelect = await js(`document.querySelector('#box-grid .individual[data-detail]')?.dataset.detail ?? ''`);
     if (petSelect) {
       await mouseClick(`#box-grid .individual[data-detail="${petSelect}"]`);
