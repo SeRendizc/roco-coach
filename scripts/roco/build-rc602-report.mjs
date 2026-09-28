@@ -1,7 +1,13 @@
 // ── RC-602 产物：reports/roco/rc602/team-ranker.json ─────────────────────────
 //
-// 这个脚本只做**测量**，不发明任何数字：所有数字都来自在 48 个冻结个体上真跑一遍
+// 这个脚本只做**测量**，不发明任何数字：所有数字都来自在 542 个冻结个体上真跑一遍
 // `src/coach/team-ranker.mjs`。时延是墙钟实测（P50/P95），可算/unknown 是逐条计数。
+//
+// 2026-09-28 换源（人类逐字拍板「所有精灵实装……直接全筛选」）：语料从 48 只
+// （`roster-48.json` 选择登记层）扩到 **542** 只（基线 `pets.json` 12 + 抓包可玩层
+// `layer-playable-48/pets.json` 530，两份都是冻结文件）。下面的 `criterion` 文本里
+// 的条数一律从 `ids` **现算**，不再写死旧数字；速度轴的两份来源另在 `corpus.speed_axis`
+// 里逐条摆出来。
 //
 // 纯函数 `buildRc602Report({inputs, source})` 供测试逐字节比对磁盘产物；
 // CLI（`node scripts/roco/build-rc602-report.mjs`）负责读盘 + 写盘。
@@ -18,7 +24,7 @@ import {buildCandidateIndex, resolveRanker} from '../../src/coach/team-candidate
 import {rulesetEnergy} from '../../src/coach/team-gaps.js';
 import {minimalReplacement, compareTeams} from '../../src/coach/team-compare.mjs';
 import {
-  FEATURE_IDS, FEATURE_SOURCE_KEYS, RANKER_ID, RANKER_STATUS, RANKER_UNITS, RANKER_VERSION,
+  FEATURE_IDS, FEATURE_SOURCE_KEYS, FROZEN_SPEED_SOURCES, RANKER_ID, RANKER_STATUS, RANKER_UNITS, RANKER_VERSION,
   RC602_REPORT_PATH, RC602_REPORT_VERSION, RULE_PAIRWISE_RANKER, TIE_BREAKS, WEIGHTS,
   auditRanker, partialCompletionValue, pairwiseFeatures, pairwiseScore, rankTeams, resolveRankerContext,
 } from '../../src/coach/team-ranker.mjs';
@@ -55,7 +61,7 @@ export function percentile(samples, q) {
   return round(sorted[index], 3);
 }
 
-/** 六只一队的 C(48,6) 太大：取 8 支互不重叠的队（48 只刚好分成 8 队），全跑一遍。 */
+/** 六只一队的 C(542,6) 太大：取**互不重叠**的队（542 只切成 90 支，余 2 只如实留着），全跑一遍。 */
 const teamShapes = (ids) => {
   const teams = [];
   for (let slot = 0; slot * 6 < ids.length; slot += 1) {
@@ -93,8 +99,19 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
   // 取哪一份上限：按 `ruleset_config_id` 字典序取第一份（确定性；本报告不替版本选规则）。
   const cap = caps.length > 0 ? caps[0].cap : null;
   const ctx = {index, ruleset_energy_cap: cap};
+  // 语料规模现算（criterion 文本与计数共用同一份，避免「文案写 48、算的是 542」）。
+  const instances = ids.length;
+  const totalPairs = (instances * (instances - 1)) / 2;
+  // 速度轴的现算条数：轴上每只有没有 spe / speed_tier，轴外（图鉴里不在轴上的）有多少只。
+  const speedAxisRows = [...index.roster.values()];
+  const speedAxis = {
+    species: index.roster.size,
+    species_with_spe: speedAxisRows.filter((row) => typeof row?.stats?.spe === 'number').length,
+    species_with_speed_tier: speedAxisRows.filter((row) => typeof row?.speed_tier === 'string').length,
+    species_outside: index.universeSpecies.size - index.roster.size,
+  };
 
-  // ── ① 全部 C(48,2) = 1128 对：逐对算成对特征，记时延 + 可算性 ──────────────
+  // ── ① 全部 C(542,2) = 146611 对：逐对算成对特征，记时延 + 可算性 ────────────
   const pairRows = [];
   const pairLatencies = [];
   const unknownReasons = {};
@@ -118,7 +135,7 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
     }
   }
 
-  // ── ② 六宠队：8 支互不重叠的队，pairwise + 排序，分别记时延 ────────────────
+  // ── ② 六宠队：互不重叠的队（542 只 → 90 支），pairwise + 排序，分别记时延 ────
   const teams = teamShapes(ids);
   const pairwiseTeamLatencies = [];
   const pairings = [];
@@ -148,7 +165,7 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
     rankLatencies.push(clock() - t0);
   }
 
-  // ── ③ 部分队伍补全价值：k = 1..6，候选池取「队外剩下的 42 只」 ──────────────
+  // ── ③ 部分队伍补全价值：k = 1..6，候选池取「队外剩下的 536 只」 ─────────────
   const baseTeam = teams[0];
   const inTeam = new Set(baseTeam.members.map((key) => key.replace(/^instance:/, '')));
   const pool = ids.filter((id) => !inTeam.has(id)).map((id) => ({kind: 'owned', instance_id: id}));
@@ -204,7 +221,7 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
   const compareSample = compareTeams({teamA: teams[0], teamB: teams[1], metaPrior: {distribution: []}, gapsByTeam: {}, ranker: null});
 
   const keySpeedLinesUnknown = '关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；'
-    + '冻结数据里 48 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），'
+    + '冻结数据里 542 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），'
     + '**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论';
 
   return {
@@ -229,10 +246,32 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
       ruleset_energy_caps: caps,
       ruleset_energy_cap_used: cap,
     },
+    // 速度轴的数据来源（2026-09-28 换源：48 → 542）。把**两份真实文件**与现算条数摆在报告里，
+    // 读者不用去读源码；档位映射 / 权重 / unknown 判定都没变，扩的只是覆盖。
+    speed_axis: {
+      criterion: '速度轴的冻结来源是**两份**文件（基线 pets.json + 抓包可玩层 '
+        + 'layer-playable-48/pets.json），不是 roster-48.json（48 只选择登记层）；'
+        + '`stats.spe` 从这两份取，5 档 `speed_tier` 取可玩层的 `role_annotations`',
+      source_files: [FROZEN_SPEED_SOURCES.baseline, FROZEN_SPEED_SOURCES.playable],
+      source_ref: FROZEN_SPEED_SOURCES.ref,
+      tier_pointer: FROZEN_SPEED_SOURCES.tier_pointer,
+      species: speedAxis.species,
+      species_with_spe: speedAxis.species_with_spe,
+      species_with_speed_tier: speedAxis.species_with_speed_tier,
+      species_outside: speedAxis.species_outside,
+      outside_status: 'axis_outside_species_have_only_knowledge_only_spe_and_no_frozen_speed_tier',
+      outside_note: `图鉴 ${index.universeSpecies.size} 只 − 冻结速度轴 ${speedAxis.species} 只 = `
+        + `${speedAxis.species_outside} 只按需推算档（SIMULATABLE_UNVERIFIED）不在轴上：`
+        + '它们只有 full-catalog.json 的 `stats.spe`（knowledge_only），照旧不算已验证、也没有冻结 `speed_tier`',
+      // 换源**收窄**的那一部分也如实写出来（不藏）：旧的 48 只登记层里有 7 只不在本轮抓包层里。
+      known_narrowing: '旧 48 只登记层里有 7 只（新月鹭 / 智辉章脑 / 祭礼巨像 / 棋契陛下×2 / 古啦多 / 学院呱呱）'
+        + '不在本轮抓包可玩层 530 只里，因此不再有冻结速度值（只剩 full-catalog 的 knowledge_only 速度值、'
+        + '没有冻结 speed_tier）；这是换源带来的收窄，不是放宽 —— 它们也都不在盒子 542 个实例里',
+    },
     pairwise_instances: {
-      criterion: '对 48 个冻结个体取全部 C(48,2) = 1128 对，逐对调 pairwiseFeatures()；'
-        + '可算 = 六个维度全部算得出（available:true）',
-      pairs_total: (ids.length * (ids.length - 1)) / 2,
+      criterion: `对 ${instances} 个冻结个体（基线 12 + 抓包可玩层 530 = 542）取全部 C(${instances},2) = ${totalPairs} 对，`
+        + '逐对调 pairwiseFeatures()；可算 = 六个维度全部算得出（available:true）',
+      pairs_total: totalPairs,
       pairs_available: available,
       pairs_unavailable: unavailable,
       unknown_reason_distribution: Object.fromEntries(Object.entries(unknownReasons).sort()),
@@ -264,7 +303,8 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
       },
     },
     pairwise_six_pet: {
-      criterion: '8 支互不重叠的六宠队（48 只刚好分 8 队）取全部 C(8,2) = 28 对',
+      criterion: `${teams.length} 支互不重叠的六宠队（${instances} 只切完余 ${instances % 6} 只）`
+        + `取全部 C(${teams.length},2) = ${(teams.length * (teams.length - 1)) / 2} 对`,
       teams: teams.map((team) => ({team_id: team.team_id, members: team.members})),
       pairs_total: pairings.length,
       pairs_available: pairings.filter((row) => row.available).length,
@@ -349,16 +389,16 @@ export function buildRc602Report({inputs, source = null, now = null} = {}) {
     // 这个排序器**算不出来**的东西（诚实清单，与文档 §⑦ 同源）。
     not_computable: [
       {feature: 'key_speed_lines', what: '关键速度线（对手速度阈之上的先手关系）', why: keySpeedLinesUnknown, unlock: '面板值换算校准（10 号文档 §13）'},
-      {feature: 'panel_stats', what: '任何依赖面板值的量（血量阈值、伤害区间）', why: '48 个实例的 panel_stats 一律 null；nature/talent/specialty/bloodline 的 effect=UNKNOWN', unlock: '养成效果校准 + 微案例'},
+      {feature: 'panel_stats', what: '任何依赖面板值的量（血量阈值、伤害区间）', why: '542 个实例的 panel_stats 一律 null；nature/talent/specialty/bloodline 的 effect=UNKNOWN', unlock: '养成效果校准 + 微案例'},
       {feature: 'learned_weights', what: '学习出来的权重（真正意义上的 Team Ranker）', why: '没有任何对局标签；RC-601 BLOCKED、RC-603 由用户亲训', unlock: 'RC-601 轨迹重建 → 标签契约 → 训练/验证/测试切分'},
       {feature: 'outcome_prediction', what: '任何胜负预测 / 概率 / 百分数', why: '红线：仓库纪律禁止发明预测类数字；本模块也没有任何标签可校准', unlock: '不计划解锁（即使有标签，也要先有 held-out 校准才允许谈预测）'},
       {feature: 'archetype_matchup', what: '对版本环境分布的表现（RC-304 前四轴）', why: 'data/roco/meta-prior/v1.json 的 distribution[] 全部 source=unknown、value=null', unlock: '一份 measured 分布（带逐条来源与日期）'},
-      {feature: 'catalog_species_panel', what: '图鉴物种（非冻结 48 只）的面板与养成', why: 'on-demand-builds 的 574 只标 SIMULATABLE_UNVERIFIED：配招是工程启发式、没有实机核验', unlock: '冻结层扩到全量图鉴 + 效果原语实现'},
+      {feature: 'catalog_species_panel', what: `图鉴物种里**不在冻结速度轴**的那 ${speedAxis.species_outside} 只（按需推算档）的面板与养成`, why: `on-demand-builds 的 ${speedAxis.species_outside} 只标 SIMULATABLE_UNVERIFIED：配招是工程启发式、没有实机核验（轴上 ${speedAxis.species} 只是 FULL_VERIFIED）`, unlock: `这 ${speedAxis.species_outside} 只补齐实机核验 + 效果原语实现`},
     ],
     // 必红反证：从 `reports/roco/rc602/red-proofs.json` 读**测试实际打印的原文**，
     // 不在脚本里复述（复述就等于把「声称判红」写进产物，而不是留着证据）。
     red_proofs: RED_PROOFS_ON_DISK,
-    generated_note: '本报告的所有数字都是在 48 个冻结个体上真跑出来的墙钟实测与计数；'
+    generated_note: `本报告的所有数字都是在 ${instances} 个冻结个体（基线 12 + 抓包可玩层 530）上真跑出来的墙钟实测与计数；`
       + '没有任何一项是估计、外推或概率。时延随机器负载浮动，复跑不保证逐位相同（数字会差）；'
       + '**可算/unknown 的计数是确定的**，所以 `--check` 只比对除时延外的字段。',
     source_length: typeof source === 'string' ? source.length : null,

@@ -31,7 +31,7 @@
     "not_available_reasons": {
       "learned_weights": "本仓没有任何 train/val/test 对局标签（RC-601 BLOCKED、RC-603 由用户亲训）",
       "outcome_prediction": "红线：不许发明胜负预测；本排序器也不产出任何概率（`emits_outcome_prediction: false`）",
-      "panel_stats": "冻结数据里 48 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN",
+      "panel_stats": "冻结数据里 542 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN",
       "key_speed_lines": "关键速度线要真实面板值（对手速度阈），面板换算公式未校准 ⇒ 现在算不出来",
       "calibration": "没有 held-out 校准集，所以 calibrated 只能是 false"
     }
@@ -73,8 +73,24 @@
     ],
     "ruleset_energy_cap_used": 6
   },
+  "speed_axis": {
+    "criterion": "速度轴的冻结来源是**两份**文件（基线 pets.json + 抓包可玩层 layer-playable-48/pets.json），不是 roster-48.json（48 只选择登记层）；`stats.spe` 从这两份取，5 档 `speed_tier` 取可玩层的 `role_annotations`",
+    "source_files": [
+      "data/roco/normalized/roco-world-s4-2026-09-10/pets.json",
+      "data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/pets.json"
+    ],
+    "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json + data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/pets.json",
+    "tier_pointer": "role_annotations[pet_id].speed_tier",
+    "species": 542,
+    "species_with_spe": 542,
+    "species_with_speed_tier": 542,
+    "species_outside": 80,
+    "outside_status": "axis_outside_species_have_only_knowledge_only_spe_and_no_frozen_speed_tier",
+    "outside_note": "图鉴 622 只 − 冻结速度轴 542 只 = 80 只按需推算档（SIMULATABLE_UNVERIFIED）不在轴上：它们只有 full-catalog.json 的 `stats.spe`（knowledge_only），照旧不算已验证、也没有冻结 `speed_tier`",
+    "known_narrowing": "旧 48 只登记层里有 7 只（新月鹭 / 智辉章脑 / 祭礼巨像 / 棋契陛下×2 / 古啦多 / 学院呱呱）不在本轮抓包可玩层 530 只里，因此不再有冻结速度值（只剩 full-catalog 的 knowledge_only 速度值、没有冻结 speed_tier）；这是换源带来的收窄，不是放宽 —— 它们也都不在盒子 542 个实例里"
+  },
   "pairwise_instances": {
-    "criterion": "对 48 个冻结个体取全部 C(48,2) = 1128 对，逐对调 pairwiseFeatures()；可算 = 六个维度全部算得出（available:true）",
+    "criterion": "对 542 个冻结个体（基线 12 + 抓包可玩层 530 = 542）取全部 C(542,2) = 146611 对，逐对调 pairwiseFeatures()；可算 = 六个维度全部算得出（available:true）",
     "pairs_total": 146611,
     "pairs_available": 146611,
     "pairs_unavailable": 0,
@@ -82,11 +98,11 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 146611,
-      "p50": 0.013,
-      "p95": 0.019,
-      "min": 0.009,
-      "max": 276.85,
-      "total": 2606.64
+      "p50": 0.012,
+      "p95": 0.017,
+      "min": 0.008,
+      "max": 264.325,
+      "total": 2339.378
     },
     "per_axis_availability": {
       "type_coverage": {
@@ -130,11 +146,11 @@
       "available": 0,
       "unavailable": 146611,
       "required": "panel_stats（等级换算后的面板值）",
-      "unknown_reason": "关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；冻结数据里 48 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论"
+      "unknown_reason": "关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；冻结数据里 542 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论"
     }
   },
   "pairwise_six_pet": {
-    "criterion": "8 支互不重叠的六宠队（48 只刚好分 8 队）取全部 C(8,2) = 28 对",
+    "criterion": "90 支互不重叠的六宠队（542 只切完余 2 只）取全部 C(90,2) = 4005 对",
     "teams": [
       {
         "team_id": "rc602-team-01",
@@ -1135,8 +1151,8 @@
       "samples": 4005,
       "p50": 0.059,
       "p95": 0.075,
-      "min": 0.034,
-      "max": 1.808
+      "min": 0.036,
+      "max": 1.321
     },
     "sample_pairing": {
       "team_a": "rc602-team-01",
@@ -1246,7 +1262,7 @@
             "contribution": 0.16,
             "from": "speed_layers",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "reason": "只用冻结速度轴 542 只（基线 pets.json 12 + 抓包可玩层 layer-playable-48/pets.json 530）的 stats.spe 与 role_annotations[].speed_tier，542/542 有值（2026-09-28 前的旧口径只读 roster-48.json 的 48 只）；轴外那 80 只按需推算档没有冻结速度值（只有 full-catalog 的 knowledge_only 种族值），不计入；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1259,7 +1275,7 @@
             "contribution": 0.16,
             "from": "respond_coverage",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），542 只有冻结学招表（基线 12 + 可玩层 530）、图鉴里另外 80 只按需推算档没有 ⇒ 中档",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1335,7 +1351,7 @@
             "contribution": 0.16,
             "from": "speed_layers",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "reason": "只用冻结速度轴 542 只（基线 pets.json 12 + 抓包可玩层 layer-playable-48/pets.json 530）的 stats.spe 与 role_annotations[].speed_tier，542/542 有值（2026-09-28 前的旧口径只读 roster-48.json 的 48 只）；轴外那 80 只按需推算档没有冻结速度值（只有 full-catalog 的 knowledge_only 种族值），不计入；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1348,7 +1364,7 @@
             "contribution": 0.16,
             "from": "respond_coverage",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），542 只有冻结学招表（基线 12 + 可玩层 530）、图鉴里另外 80 只按需推算档没有 ⇒ 中档",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1424,7 +1440,7 @@
             "contribution": 0.16,
             "from": "speed_layers",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "reason": "只用冻结速度轴 542 只（基线 pets.json 12 + 抓包可玩层 layer-playable-48/pets.json 530）的 stats.spe 与 role_annotations[].speed_tier，542/542 有值（2026-09-28 前的旧口径只读 roster-48.json 的 48 只）；轴外那 80 只按需推算档没有冻结速度值（只有 full-catalog 的 knowledge_only 种族值），不计入；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1437,7 +1453,7 @@
             "contribution": 0.16,
             "from": "respond_coverage",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），542 只有冻结学招表（基线 12 + 可玩层 530）、图鉴里另外 80 只按需推算档没有 ⇒ 中档",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1513,7 +1529,7 @@
             "contribution": 0.16,
             "from": "speed_layers",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "reason": "只用冻结速度轴 542 只（基线 pets.json 12 + 抓包可玩层 layer-playable-48/pets.json 530）的 stats.spe 与 role_annotations[].speed_tier，542/542 有值（2026-09-28 前的旧口径只读 roster-48.json 的 48 只）；轴外那 80 只按需推算档没有冻结速度值（只有 full-catalog 的 knowledge_only 种族值），不计入；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1526,7 +1542,7 @@
             "contribution": 0.16,
             "from": "respond_coverage",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），542 只有冻结学招表（基线 12 + 可玩层 530）、图鉴里另外 80 只按需推算档没有 ⇒ 中档",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1602,7 +1618,7 @@
             "contribution": 0.16,
             "from": "speed_layers",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+            "reason": "只用冻结速度轴 542 只（基线 pets.json 12 + 抓包可玩层 layer-playable-48/pets.json 530）的 stats.spe 与 role_annotations[].speed_tier，542/542 有值（2026-09-28 前的旧口径只读 roster-48.json 的 48 只）；轴外那 80 只按需推算档没有冻结速度值（只有 full-catalog 的 knowledge_only 种族值），不计入；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1615,7 +1631,7 @@
             "contribution": 0.16,
             "from": "respond_coverage",
             "provenance": "ENGINE_HYPOTHESIS",
-            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+            "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），542 只有冻结学招表（基线 12 + 可玩层 530）、图鉴里另外 80 只按需推算档没有 ⇒ 中档",
             "values": {
               "teamA": 1,
               "teamB": 1
@@ -1656,10 +1672,10 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 5,
-      "p50": 3.083,
-      "p95": 4.394,
-      "min": 2.846,
-      "max": 4.394
+      "p50": 2.799,
+      "p95": 4.811,
+      "min": 2.765,
+      "max": 4.811
     }
   },
   "partial_completion_value": {
@@ -1668,10 +1684,10 @@
     "latency_ms": {
       "unit": "毫秒（实测墙钟，只用于延迟报告）",
       "samples": 6,
-      "p50": 0.586,
-      "p95": 0.735,
-      "min": 0.536,
-      "max": 0.735
+      "p50": 0.476,
+      "p95": 1,
+      "min": 0.461,
+      "max": 1
     },
     "rows": [
       {
@@ -2245,9 +2261,9 @@
       "feature": "speed_layers",
       "source": "teamFeatures().speed",
       "provenance": "ENGINE_HYPOTHESIS",
-      "reason": "只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
+      "reason": "只用冻结速度轴 542 只（基线 pets.json 12 + 抓包可玩层 layer-playable-48/pets.json 530）的 stats.spe 与 role_annotations[].speed_tier，542/542 有值（2026-09-28 前的旧口径只读 roster-48.json 的 48 只）；轴外那 80 只按需推算档没有冻结速度值（只有 full-catalog 的 knowledge_only 种族值），不计入；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」",
       "direction": "higher_is_better",
-      "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/roster-48.json#pets[].stats.spe 与 pets[].speed_tier"
+      "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/pets.json#pets[].stats.spe + data/roco/normalized/roco-world-s4-2026-09-10/layer-playable-48/pets.json#pets[].stats.spe 与 role_annotations[].speed_tier（冻结速度轴 542 只）"
     },
     "respond_coverage": {
       "id": "respond_coverage",
@@ -2255,7 +2271,7 @@
       "feature": "respond_coverage",
       "source": "teamFeatures().respond",
       "provenance": "ENGINE_HYPOTHESIS",
-      "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档",
+      "reason": "应对三类词条由冻结 skills[].desc 判定（RC-302 判据），542 只有冻结学招表（基线 12 + 可玩层 530）、图鉴里另外 80 只按需推算档没有 ⇒ 中档",
       "direction": "higher_is_better",
       "source_ref": "data/roco/normalized/roco-world-s4-2026-09-10/skills.json#skills[].desc（词条判定见 team-gaps.js respondVariantsOf）"
     },
@@ -2319,7 +2335,7 @@
         "not_available_reasons": {
           "learned_weights": "本仓没有任何 train/val/test 对局标签（RC-601 BLOCKED、RC-603 由用户亲训）",
           "outcome_prediction": "红线：不许发明胜负预测；本排序器也不产出任何概率（`emits_outcome_prediction: false`）",
-          "panel_stats": "冻结数据里 48 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN",
+          "panel_stats": "冻结数据里 542 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN",
           "key_speed_lines": "关键速度线要真实面板值（对手速度阈），面板换算公式未校准 ⇒ 现在算不出来",
           "calibration": "没有 held-out 校准集，所以 calibrated 只能是 false"
         }
@@ -2350,7 +2366,7 @@
       },
       {
         "key": "panel_stats",
-        "reason": "冻结数据里 48 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN"
+        "reason": "冻结数据里 542 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN"
       },
       {
         "key": "key_speed_lines",
@@ -2373,13 +2389,13 @@
     {
       "feature": "key_speed_lines",
       "what": "关键速度线（对手速度阈之上的先手关系）",
-      "why": "关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；冻结数据里 48 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论",
+      "why": "关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；冻结数据里 542 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论",
       "unlock": "面板值换算校准（10 号文档 §13）"
     },
     {
       "feature": "panel_stats",
       "what": "任何依赖面板值的量（血量阈值、伤害区间）",
-      "why": "48 个实例的 panel_stats 一律 null；nature/talent/specialty/bloodline 的 effect=UNKNOWN",
+      "why": "542 个实例的 panel_stats 一律 null；nature/talent/specialty/bloodline 的 effect=UNKNOWN",
       "unlock": "养成效果校准 + 微案例"
     },
     {
@@ -2402,9 +2418,9 @@
     },
     {
       "feature": "catalog_species_panel",
-      "what": "图鉴物种（非冻结 48 只）的面板与养成",
-      "why": "on-demand-builds 的 574 只标 SIMULATABLE_UNVERIFIED：配招是工程启发式、没有实机核验",
-      "unlock": "冻结层扩到全量图鉴 + 效果原语实现"
+      "what": "图鉴物种里**不在冻结速度轴**的那 80 只（按需推算档）的面板与养成",
+      "why": "on-demand-builds 的 80 只标 SIMULATABLE_UNVERIFIED：配招是工程启发式、没有实机核验（轴上 542 只是 FULL_VERIFIED）",
+      "unlock": "这 80 只补齐实机核验 + 效果原语实现"
     }
   ],
   "red_proofs": [
@@ -2463,6 +2479,6 @@
       "actual": "[STATUS_OVERCLAIM] status.learned_weights：RANKER_STATUS.learned_weights = true：本仓没有任何学习权重，只能是 false"
     }
   ],
-  "generated_note": "本报告的所有数字都是在 48 个冻结个体上真跑出来的墙钟实测与计数；没有任何一项是估计、外推或概率。时延随机器负载浮动，复跑不保证逐位相同（数字会差）；**可算/unknown 的计数是确定的**，所以 `--check` 只比对除时延外的字段。",
-  "source_length": 69273
+  "generated_note": "本报告的所有数字都是在 542 个冻结个体（基线 12 + 抓包可玩层 530）上真跑出来的墙钟实测与计数；没有任何一项是估计、外推或概率。时延随机器负载浮动，复跑不保证逐位相同（数字会差）；**可算/unknown 的计数是确定的**，所以 `--check` 只比对除时延外的字段。",
+  "source_length": 71655
 }

@@ -20,6 +20,7 @@
 //   ⑬ 产物与 buildRc602Report() 逐字节一致（时延字段除外）
 //   ⑮ 出错时返回可审计原因（不抛错、不静默）
 //   ⑯ 离线纯净：不读盘、不联网、不起进程、不调引擎 —— **反证**：注入 fetch 必须红
+//   ⑱ 速度轴来源 = 基线 12 + 可玩层 530（542 只），不是 roster-48 的 48 只；口径一条没放宽
 //
 // 用法：`node --test tests/roco-team-ranker.test.js`
 //       `RC602_WRITE_REPORT=1 node --test tests/roco-team-ranker.test.js`（重新生成产物）
@@ -31,7 +32,7 @@ import {dirname, join, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
 import {
-  BANNED_CLAIM_KEYS, BANNED_CLAIM_PATTERNS, FEATURE_DEFINITIONS, FEATURE_IDS,
+  BANNED_CLAIM_KEYS, BANNED_CLAIM_PATTERNS, FEATURE_DEFINITIONS, FEATURE_IDS, FROZEN_SPEED_SOURCES,
   RANKER_ID, RANKER_STATUS, RANKER_UNITS, RANKER_VERSION,
   RC602_REPORT_PATH, RC602_REPORT_VERSION, RULE_PAIRWISE_RANKER, SPEED_TIERS, TIE_BREAKS,
   WEIGHTS, WEIGHT_PROVENANCE_LEVELS, auditRanker, auditWeightTable, formatRankerProblem,
@@ -741,4 +742,72 @@ test('⑰ 全量成对实测：146611 对逐对调一遍，可算/unknown 逐条
   assert.ok(pick(0.95) < 50, `单对 P95 必须远低于 50ms，实际 ${pick(0.95)}ms`);
   log(`${totalPairs} 对：可算 ${available}、不可算 ${totalPairs - available}；`
     + `P50=${pick(0.5)}ms P95=${pick(0.95)}ms max=${Number(latencies.reduce((a, b) => (b > a ? b : a), 0).toFixed(3))}ms`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// ⑱ 速度轴换源（2026-09-28：48 → 542。**扩的是覆盖，不是标准**）
+// ─────────────────────────────────────────────────────────────────────────
+// 旧口径（2026-09-28 前）：速度轴 = `roster-48.json` 的 **48 只** —— 那是 M1 的**选择登记层**
+// （`FROZEN_PATHS.roster48`），不是引擎认的冻结层；ranker 的 `evidence()` 也指着它。
+// 新口径：基线 `pets.json`（12）+ 抓包可玩层 `layer-playable-48/pets.json`（530）= **542 只**，
+// 与盒子 542 个实例、`on-demand-builds.summary.FULL_VERIFIED = 542` 同一批。
+// 依据：人类 2026-09-28 逐字拍板「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。
+// 所有精灵实装，这样就不需要我的精灵了，直接全筛选」+ 下面逐条实测出来的 542/542。
+// **判据的意图一个字没改**：档位映射（5 档）、权重（0.16）、unknown 判定（拿不到 `stats.spe` 才是
+// unknown）全部照旧；轴外那 80 只（622 − 542）照旧只有 `knowledge_only` 值，不许升级成已验证、
+// 也不许给 `speed_tier`。这条判据就是钉住「扩的是覆盖，不是标准」。
+test('⑱ 速度轴来源 = 基线 12 + 可玩层 530（542 只），不是 roster-48 的 48 只', () => {
+  const PETS = readJson(FROZEN_SPEED_SOURCES.baseline);
+  const OVERLAY = readJson(FROZEN_SPEED_SOURCES.playable);
+  const baselineIds = Object.keys(PETS.pets);
+  const playableIds = Object.keys(OVERLAY.pets);
+  const union = [...new Set([...baselineIds, ...playableIds])];
+  assert.equal(baselineIds.length, 12, `基线层应当 12 只，实际 ${baselineIds.length}`);
+  assert.equal(playableIds.length, 530, `抓包可玩层应当 530 只，实际 ${playableIds.length}`);
+  assert.equal(union.length, FROZEN_SPEED_SOURCES.species,
+    `两份文件的并集应当是 ${FROZEN_SPEED_SOURCES.species} 只，实际 ${union.length}`);
+  assert.equal(union.length, baselineIds.length + playableIds.length, '并集必须正好是两份相加（无重叠）');
+  // 轴上 542 只逐只核 spe 与 5 档 speed_tier（档位在可玩层的 role_annotations 里）。
+  const annotations = OVERLAY.role_annotations ?? {};
+  const withSpe = union.filter((id) => typeof (PETS.pets[id] ?? OVERLAY.pets[id])?.stats?.spe === 'number');
+  const withTier = union.filter((id) => typeof (annotations[id]?.speed_tier
+    ?? (PETS.pets[id] ?? OVERLAY.pets[id])?.speed_tier) === 'string');
+  assert.equal(withSpe.length, union.length, `轴上每只都要有 stats.spe（实际 ${withSpe.length}/${union.length}）`);
+  assert.equal(withTier.length, union.length, `轴上每只都要有 speed_tier（实际 ${withTier.length}/${union.length}）`);
+  // 索引读的就是这两份（真读盘的那两份），不是 roster-48。
+  assert.equal(index.roster.size, union.length, '索引里的冻结速度轴条数必须等于两份文件的并集');
+  const wrongSource = union.filter((id) => ![FROZEN_SPEED_SOURCES.baseline, FROZEN_SPEED_SOURCES.playable]
+    .includes(index.roster.get(id)?.__source));
+  assert.deepEqual(wrongSource, [], `每只的速度来源必须是那两份文件之一：${wrongSource.join(' / ')}`);
+  // 声明口径：证据里同时写出两份文件，且**不再**指 roster-48；可执行代码里也不许再读 roster48。
+  for (const [label, ref] of [['FROZEN_SPEED_SOURCES.ref', FROZEN_SPEED_SOURCES.ref],
+    ['FEATURE_DEFINITIONS.speed_layers.source_ref', FEATURE_DEFINITIONS.speed_layers.source_ref]]) {
+    assert.ok(ref.includes(FROZEN_SPEED_SOURCES.baseline), `${label} 必须写出基线那一份`);
+    assert.ok(ref.includes(FROZEN_SPEED_SOURCES.playable), `${label} 必须写出可玩层那一份`);
+    assert.ok(!ref.includes('roster-48'), `${label} 里不许再出现 roster-48.json`);
+  }
+  const executable = SOURCE.replace(/\/\*[\s\S]*?\*\//g, '').split('\n')
+    .filter((line) => !line.trim().startsWith('//')).join('\n');
+  assert.ok(!executable.includes('roster48'), '可执行代码里不许再读 roster-48（旧口径只许留在注释里）');
+  assert.ok(executable.includes('FROZEN_SPEED_SOURCES'), '速度轴必须走统一的来源常量');
+  // 语义没放宽：权重、档位映射、unknown 判定三条都逐字对一遍。
+  assert.equal(WEIGHTS.speed_layers.weight, 0.16, '换源不许动速度权重');
+  assert.deepEqual([...SPEED_TIERS], ['<=50', '51-70', '71-90', '91-110', '>=111'], '5 档映射必须一字不变');
+  assert.equal(speedBandOf(null, null), null, '数值与档位都拿不到仍然必须是 null');
+  assert.equal(speedBandOf(45, null), 'slow', '只有数值时仍按同一份边界兜底');
+  // 轴外 80 只：只有 knowledge_only 值，不许升级成 validated、也不许给 speed_tier。
+  const outside = [...index.universeSpecies].filter((id) => !index.roster.has(id)).sort();
+  assert.equal(outside.length, FROZEN_SPEED_SOURCES.species_outside,
+    `轴外应当是 ${FROZEN_SPEED_SOURCES.species_outside} 只，实际 ${outside.length}`);
+  assert.equal(union.length + outside.length, index.universeSpecies.size,
+    `账目必须闭合：${union.length}（轴内）+ ${outside.length}（轴外）== ${index.universeSpecies.size}（图鉴）`);
+  const escalated = outside.filter((id) => {
+    const feature = index.featureFor(id);
+    return feature.spe_status !== 'knowledge_only' || feature.speed_tier !== null;
+  });
+  assert.deepEqual(escalated, [],
+    `轴外的 ${outside.length} 只不许升级成已验证、不许给冻结 speed_tier：${escalated.join(' / ')}`);
+  log(`速度轴 ${union.length} 只（基线 ${baselineIds.length} + 可玩层 ${playableIds.length}）：`
+    + `stats.spe ${withSpe.length}/${union.length}、speed_tier ${withTier.length}/${union.length}；`
+    + `轴外 ${outside.length} 只全部 knowledge_only、speed_tier 一律 null；权重 ${WEIGHTS.speed_layers.weight}、5 档映射不变`);
 });

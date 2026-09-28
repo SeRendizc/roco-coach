@@ -73,7 +73,7 @@ export const RANKER_STATUS = Object.freeze({
     // 注意键名：这里刻意不叫那个常见的伪精确字段名 —— `auditRanker()` 的扫描会（正确地）
     // 把那个键名判红，而这一条的语义是「不产出任何胜负预测、也不产出任何概率」。
     outcome_prediction: '红线：不许发明胜负预测；本排序器也不产出任何概率（`emits_outcome_prediction: false`）',
-    panel_stats: '冻结数据里 48 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN',
+    panel_stats: '冻结数据里 542 个实例的 panel_stats 一律 null，养成效果 effect=UNKNOWN',
     key_speed_lines: '关键速度线要真实面板值（对手速度阈），面板换算公式未校准 ⇒ 现在算不出来',
     calibration: '没有 held-out 校准集，所以 calibrated 只能是 false',
   }),
@@ -85,6 +85,40 @@ export const RANKER_UNITS = Object.freeze({
   count: '计数（个 / 只 / 条），不带分母时不构成任何比例',
   ratio: '0～1 的占比（分子分母都来自同一份注入数据，可逐条复算；不是百分数）',
   milliseconds: '毫秒（实测墙钟，只用于延迟报告）',
+});
+
+// ─────────────────────────────────────────────────────────────────────────
+// 速度轴的数据来源（2026-09-28 换源：48 → 542）
+// ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * 速度轴的两份冻结来源文件。`evidence()` 的 `source_file` 直接指这两份，
+ * **不再**指 `roster-48.json`（那是 M1 的 48 只**选择登记层**，不是引擎认的冻结层）。
+ *
+ * 换源依据：人类 2026-09-28 逐字拍板「就用现在抓包得到的数据吧，别的不找不要了，问题数据也不要了。
+ * 所有精灵实装，这样就不需要我的精灵了，直接全筛选」⇒ 冻结可玩层 48 → **542**
+ * （基线 `pets.json` 12 只 + 抓包可玩层 `layer-playable-48/pets.json` 530 只；目录名里的
+ * 「48」是引擎 `roco/src/roco_env/data.py` 的 `LAYER_DIRNAME` 写死的，不改）。
+ *
+ * 口径**一条都没放宽**：档位映射（`SPEED_TIER_THRESHOLDS`）、权重（`WEIGHTS.speed_layers`）、
+ * unknown 判定（成员拿不到 `stats.spe` 才算 unknown）全部照旧；扩的只是**覆盖**。
+ *
+ * 轴上每只都有 `stats.spe` 与 5 档 `speed_tier`（`speed_tier` 在可玩层的
+ * `role_annotations` 里）。轴**外**还有 80 只按需推算档（图鉴 622 − 542）：
+ * 它们没有冻结速度值，只有 `full-catalog.json` 的 `stats.spe`（`knowledge_only`），
+ * 照旧**不**升级成已验证，也**不**给 `speed_tier`（没有冻结声明值就留 null）。
+ */
+export const FROZEN_SPEED_SOURCES = Object.freeze({
+  baseline: FROZEN_PATHS.pets,
+  playable: FROZEN_PATHS.petsOverlay,
+  /** 冻结速度轴里的物种数（与 `index.roster.size` 一致；报告里另有一份现算值）。 */
+  species: 542,
+  /** 轴外那一档（按需推算 / `SIMULATABLE_UNVERIFIED`）的物种数。 */
+  species_outside: 80,
+  /** 证据里原样使用的 `source_file` 串：**两份文件都写出来**。 */
+  ref: `${FROZEN_PATHS.pets} + ${FROZEN_PATHS.petsOverlay}`,
+  /** `speed_tier` 的所在位置（可玩层的 5 档声明值）。 */
+  tier_pointer: 'role_annotations[pet_id].speed_tier',
 });
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -125,8 +159,11 @@ export const FEATURE_DEFINITIONS = Object.freeze({
   speed_layers: Object.freeze({
     label: '速度层次（快/中/慢三档的分布离散度）',
     from: 'RC-303 teamFeatures().speed',
-    source_ref: `${FROZEN_PATHS.roster48}#pets[].stats.spe 与 pets[].speed_tier`,
-    unknown_when: '队伍里任何一个成员拿不到速度值（roster-48 无该物种、full-catalog 也没有）',
+    source_ref: `${FROZEN_PATHS.pets}#pets[].stats.spe + `
+      + `${FROZEN_PATHS.petsOverlay}#pets[].stats.spe 与 role_annotations[].speed_tier（冻结速度轴 542 只）`,
+    unknown_when: '队伍里任何一个成员拿不到速度值（既不在冻结速度轴 542 只里，full-catalog 也没有该物种的 '
+      + 'stats.spe）；轴外那 80 只按需推算档只有 full-catalog 的 knowledge_only 值，'
+      + '会在成员自己的 unknown_reason 里点名，不升级成已验证',
   }),
   respond_coverage: Object.freeze({
     label: '应对词条覆盖（应对攻击 / 应对状态 / 应对防御 三类）',
@@ -183,9 +220,13 @@ export const WEIGHTS = Object.freeze({
   weakness_exposure: W('weakness_exposure', 0.20,
     '与属性覆盖同源（同一张相性表），但方向相反：未承接弱点越少越好；权重略低于覆盖因为它对队伍人数更敏感'),
   speed_layers: W('speed_layers', 0.16,
-    '只用冻结 roster-48 的 stats.spe 与 speed_tier（48/48 有值）；但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」'),
+    '只用冻结速度轴 542 只（基线 pets.json 12 + 抓包可玩层 layer-playable-48/pets.json 530）的 stats.spe 与 '
+    + 'role_annotations[].speed_tier，542/542 有值（2026-09-28 前的旧口径只读 roster-48.json 的 48 只）；'
+    + '轴外那 80 只按需推算档没有冻结速度值（只有 full-catalog 的 knowledge_only 种族值），不计入；'
+    + '但真实面板值未知 ⇒ 权重不给最高，避免把「种族值层次」读成「实战先手」'),
   respond_coverage: W('respond_coverage', 0.16,
-    '应对三类词条由冻结 skills[].desc 判定（RC-302 判据），36/48 只有冻结学招表、12 只走图鉴推测 ⇒ 中档'),
+    '应对三类词条由冻结 skills[].desc 判定（RC-302 判据），542 只有冻结学招表（基线 12 + 可玩层 530）、'
+    + '图鉴里另外 80 只按需推算档没有 ⇒ 中档'),
   energy_curve: W('energy_curve', 0.14,
     '能耗来自冻结 skills[].energy 与注入规则配置的上限；上限本身在候选规则版本里（RC-601 未定）⇒ 中低档'),
   pivot_sustain: W('pivot_sustain', 0.10,
@@ -387,7 +428,7 @@ function profileFromIndex(kernel, ref) {
     energy,
     evidence: feature.evidence ?? {types: null, speed: null, pool: null},
     unknown_reason: [
-      !feature.types ? '属性未知（冻结 roster / pack tags / full-catalog 三处都没有）' : null,
+      !feature.types ? '属性未知（冻结 pets 层（基线 + 可玩层）/ pack tags / full-catalog 三处都没有）' : null,
       feature.types && !weakness.known ? `属性组合行没登记（${(feature.types ?? []).join('|')} 不在冻结相性表 120 行里）` : null,
       !feature.has_frozen_learnset ? '没有冻结学招表（四技能与合法性未校验）' : null,
       !buildKnown ? '没有具体 build（四个技能未知，能耗曲线与应对/换入手段不可算）' : null,
@@ -415,7 +456,8 @@ function weaknessProfileOf(index, types) {
 }
 
 /**
- * 速度档位：用冻结 roster-48 自己声明的 `speed_tier`（5 档）映射到 3 档层次。
+ * 速度档位：用**冻结速度轴**自己声明的 `speed_tier`（5 档，取自可玩层
+ * `layer-playable-48/pets.json#role_annotations`）映射到 3 档层次。
  * 传字符串档位（有冻结声明）就按声明的档算；只拿得到数字时按同一份档位边界兜底。
  * 两者都拿不到 ⇒ null（不猜）。
  */
@@ -475,11 +517,12 @@ function featureAvailability(kernel, profiles) {
       {members_known: known.length, members_unknown: noCombo.length}),
     speed_layers: row(noSpeed.length === 0,
       noSpeed.length === 0 ? null
-        : `成员 ${noSpeed.map((p) => p.key).join(' / ')} 没有速度值（roster-48 无此物种、full-catalog 也没有）`,
+        : `成员 ${noSpeed.map((p) => p.key).join(' / ')} 没有速度值（既不在冻结速度轴 `
+          + `${index.roster?.size ?? 0} 只［基线 12 + 可玩层 530］里、full-catalog 也没有 stats.spe）`,
       {members_with_speed: profiles.length - noSpeed.length, members_without_speed: noSpeed.length,
         key_speed_lines: row(false,
           '关键速度线要真实面板值（等级/性格/资质/特长/血脉换算后）才能判先手关系；'
-          + '冻结数据里 48 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），'
+          + '冻结数据里 542 个实例的 `panel_stats` 一律 null、养成效果 `effect=UNKNOWN`（见 owned-pets.json 的 growth_attribute_policy），'
           + '**现在算不出来**；这里只给速度档位层次（`speed_layers`），不给先手结论',
           {required: 'panel_stats（等级换算后的面板值）', panel_stats_present: false})}),
     respond_coverage: row(noPool.length === 0,
@@ -644,7 +687,7 @@ export function pairwiseFeatures(teamA, teamB, ctx = {}) {
   // 共享弱点：两队都有人怕的系别（对称量，方向无关）。
   const sharedWeaknesses = weakA.filter((type) => weakB.includes(type));
 
-  // 速度层次侧：档位分布 + 谁多占一个档位（档位来自冻结 roster-48 的 speed_tier，不是面板值）。
+  // 速度层次侧：档位分布 + 谁多占一个档位（档位来自冻结速度轴 542 只的 speed_tier，不是面板值）。
   const bandsA = uniqueSorted(a.profiles.map((p) => p.speed_band).filter(Boolean));
   const bandsB = uniqueSorted(b.profiles.map((p) => p.speed_band).filter(Boolean));
   const bandsOnlyA = bandsA.filter((band) => !bandsB.includes(band));
@@ -674,10 +717,12 @@ export function pairwiseFeatures(teamA, teamB, ctx = {}) {
   const pivotB = pivotRow(featuresB, b.profiles);
 
   const unverified = [
-    '未核实：面板值与养成效果 —— 冻结数据里 48 个实例的 `panel_stats` 一律 null，'
+    '未核实：面板值与养成效果 —— 冻结数据里 542 个实例的 `panel_stats` 一律 null，'
       + 'nature / talent / specialty / bloodline 的 `effect` 都是 UNKNOWN，所以「关键速度线」与任何依赖面板值的结论都算不出来',
     '未核实：这些特征与实战结果的关联 —— 权重是工程假设（ENGINE_HYPOTHESIS），没有任何对局数据证明它们与胜负相关',
-    '未核实：速度档位的实战含义 —— 档位只来自冻结 roster-48 的 `speed_tier` 与种族值，不是等级换算后的面板速度',
+    '未核实：速度档位的实战含义 —— 档位只来自冻结速度轴 542 只的 `speed_tier` 与种族值'
+      + '（基线 pets.json 12 + 抓包可玩层 layer-playable-48/pets.json 530；图鉴里另外 80 只按需推算档没有冻结速度值），'
+      + '不是等级换算后的面板速度',
     ...(resolved.ruleset_energy_cap === null
       ? ['未核实：超限技能数 —— 没有注入规则配置的能耗上限，所以这一项是 null（不是 0）'] : []),
   ];
@@ -750,8 +795,11 @@ export function pairwiseFeatures(teamA, teamB, ctx = {}) {
         'B 侧参与结构计算的成员数'),
       evidence(FROZEN_PATHS.types, 'types[组合键].weak / .resist', 'combos_registered', index.scaleByCombo.size,
         '属性相性**组合行优先**：多属性精灵按显式组合键查表（没有该键就整体 unknown，不回退到 types[0]）'),
-      evidence(FROZEN_PATHS.roster48, 'pets[].stats.spe + pets[].speed_tier', 'speed_bands',
-        {teamA: bandsA, teamB: bandsB}, '速度层次只从冻结 roster-48 取；档位是 5 档声明值'),
+      evidence(FROZEN_SPEED_SOURCES.ref,
+        'pets[].stats.spe（基线 12）+ pets[].stats.spe 与 role_annotations[].speed_tier（可玩层 530）', 'speed_bands',
+        {teamA: bandsA, teamB: bandsB},
+        `速度层次只从冻结速度轴 ${FROZEN_SPEED_SOURCES.species} 只取（本次注入索引里 `
+          + `${index.roster?.size ?? 0} 只有值）；档位是 5 档声明值，轴外 ${FROZEN_SPEED_SOURCES.species_outside} 只按需推算档没有冻结速度值`),
       evidence(FROZEN_PATHS.skills, 'skills[].energy', 'ruleset_energy_cap', resolved.ruleset_energy_cap,
         '超限技能数要用注入的规则配置上限；没注入就是 null（不是 0）'),
     ],
@@ -1146,7 +1194,7 @@ const TARGET_TEAM_SIZE = 6;
  *
  * 口径（每一项都是可复算的计数或占比，**没有一项是概率**）：
  *   · `coverage_resistable_types` —— 现在能抗住多少个攻击系别（冻结相性表，组合行优先）；
- *   · `speed_bands_covered`      —— 现在占了几个速度档位（3 档，来自冻结 roster-48）；
+ *   · `speed_bands_covered`      —— 现在占了几个速度档位（3 档，来自冻结速度轴 542 只的 speed_tier）；
  *   · `respond_variants_covered` —— 现在覆盖了几类应对词条（3 类，来自冻结技能描述）；
  *   · `pool_fillable_slots`      —— 候选池里还有几只能补进剩下的槽位（去重、去已在队里的）；
  *   · `uncertainty`              —— 候选池规模、池里 unknown 成员占比、缺口条数、以及由占比算出的分数区间。
@@ -1369,8 +1417,8 @@ export function partialCompletionValue(partial, ctx = {}) {
         '已选 k 只里解析得出、参与结构计算的只数（重复/非法 id 已点名，见 problems）'),
       evidence(FROZEN_PATHS.types, 'types[组合键].resist', 'resistable_attack_types', resistable,
         '能抗住的攻击系别（组合行优先；没登记的成员整体算 unknown，不回退 types[0]）'),
-      evidence(FROZEN_PATHS.roster48, 'pets[].speed_tier', 'speed_bands_covered', bandsCovered,
-        '占了几个速度档位（3 档：slow/mid/fast，来自冻结 roster-48）'),
+      evidence(FROZEN_SPEED_SOURCES.ref, 'pets[].stats.spe + role_annotations[].speed_tier', 'speed_bands_covered', bandsCovered,
+        `占了几个速度档位（3 档：slow/mid/fast，来自冻结速度轴 ${FROZEN_SPEED_SOURCES.species} 只的 speed_tier）`),
       evidence(FROZEN_PATHS.skills, 'skills[].desc', 'respond_variants_covered', respondCovered,
         `覆盖了几类应对词条（共 ${RESPOND_VARIANTS.length} 类）`),
       evidence('injected:ctx', 'ctx.candidates', 'available_pool_size', uniqueUsable.length,

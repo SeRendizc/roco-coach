@@ -52,12 +52,12 @@ RC-303 那个 `missing` 被**形状上**补上了（`resolveRanker()` 现在报 
 | --- | --- | --- | --- |
 | `type_coverage` | `teamFeatures().coverage` | 冻结相性表 `types.json` 的 `.resist`（**组合行优先**） | 组合行没登记 ⇒ 该成员整体 unknown |
 | `weakness_exposure` | `teamFeatures().synergy` | 同一张表的 `.weak` | 同上 |
-| `speed_layers` | `teamFeatures().speed` | 冻结 `roster-48.json` 的 `stats.spe` + `speed_tier`（5 档声明） | **只是种族值与档位**，不是面板速度 |
+| `speed_layers` | `teamFeatures().speed` | 冻结轴 542 只的 `stats.spe` + `speed_tier`（5 档声明）：来源是**基线 `pets.json`（12）＋可玩层 `layer-playable-48/pets.json`（530）**，2026-09-28 前是 `roster-48.json` 的 48 只 | **只是种族值与档位**，不是面板速度 |
 | `respond_coverage` | `teamFeatures().respond` | 冻结 `skills.json` 的 `desc`（判据在 RC-302 `respondVariantsOf`） | 12/48 只有图鉴推测的学招表 |
 | `energy_curve` | `teamFeatures().energy` | 冻结 `skills[].energy` + 注入规则配置的能耗上限 | 上限本身在候选规则版本里（RC-601 未定） |
 | `pivot_sustain` | `teamFeatures().pivot` | `skills[].desc` 关键字（`isPivotSkill`） | 六维里最弱的一条判据 |
 
-属性这一维**必须组合行优先**：冻结相性表 120 行 = 18 个单属性行 + 102 个组合行，48 只里 33 只是双属性。
+属性这一维**必须组合行优先**：冻结相性表 120 行 = 18 个单属性行 + 102 个组合行（旧 48 只里 33 只是双属性；冻结轴现在 542 只）。
 反证里用的例子：`own-0003`（`地系|幻系`）的组合行有 **6** 个抗性，只看 `types[0]=地系` 只有 **5** 个 ——
 判据要求模块输出必须等于组合行的数，退回单属性算法即判红。
 
@@ -66,7 +66,7 @@ RC-303 那个 `missing` 被**形状上**补上了（`resolveRanker()` 现在报 
 ```text
 type_coverage      0.24   冻结相性表（120 行，含 102 行组合）逐条可复算，六维里证据最硬
 weakness_exposure  0.20   与属性覆盖同源、方向相反；略低，因为它对队伍人数更敏感
-speed_layers       0.16   只用冻结 stats.spe/speed_tier（48/48 有值）；面板值未知 ⇒ 不给最高
+speed_layers       0.16   只用冻结 stats.spe/speed_tier（542/542 有值；2026-09-28 前写的是 48/48）；面板值未知 ⇒ 不给最高
 respond_coverage   0.16   应对三类词条由冻结 desc 判定；12 只走图鉴推测 ⇒ 中档
 energy_curve       0.14   能耗来自冻结 energy 与注入上限；上限随规则版本未定 ⇒ 中低档
 pivot_sustain      0.10   换入/离场只靠描述关键字，是最弱的一条 ⇒ 最低
@@ -106,7 +106,7 @@ pivot_sustain      0.10   换入/离场只靠描述关键字，是最弱的一�
 | `partialCompletionValue` 的 k=0 / k>6 / 重复 id / 非法 id | 不可算 | 各自的原因（见 §6） |
 
 **唯一的永久 unknown：关键速度线。** 判先手关系要真实面板值（等级 / 性格 / 资质 / 特长 / 血脉换算后），
-而冻结数据里 48 个实例的 `panel_stats` 一律 `null`、养成效果 `effect: UNKNOWN`
+而冻结数据里 542 个实例的 `panel_stats` 一律 `null`、养成效果 `effect: UNKNOWN`（2026-09-28 前是 48 个）
 （`data/roco/owned/owned-pets.json` 的 `growth_attribute_policy`），
 所以 `speed_layers.detail.key_speed_lines` 永远是 `available:false` + `values: {teamA: null, teamB: null}`。
 这是诚实的算不出来，不是 bug —— 它**不许**用 0 顶替，也不许拿种族值档位冒充先手关系。
@@ -182,7 +182,7 @@ uncertainty                 {available_pool_size, pool_unknown_ratio, pool_fully
   `emits_outcome_prediction: false` / `emits_win_rate: false` / `emits_percent: false`。
 - **名次只在本次注入的队伍集合内有意义**：换一批队伍进来，名次会变。
 - **关键速度线、面板值、养成效果现在算不出来**（§4）。
-- **图鉴物种（非冻结 48 只）** 的面板与养成只有 `on-demand-builds.json` 的 `SIMULATABLE_UNVERIFIED`
+- **轴外物种（非冻结 542 只，即按需推算那 80 只）** 的面板与养成只有 `on-demand-builds.json` 的 `SIMULATABLE_UNVERIFIED`
   推算配招，没有实机核验 —— 本模块把它们当「有值但带 unknown 的候选」，不升格。
 - **对版本环境分布的表现（RC-304 前四轴）** 现在是 assumption 档的结构分（`meta-prior/v1.json` 的分母是
   **声明假设**：7 个已识别体系各 1/7，相对表现由 RC-304 从 RC-302 结构性算出，`ENGINE_HYPOTHESIS`），
