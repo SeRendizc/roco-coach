@@ -508,33 +508,37 @@ async function collectFacts({cdp, driver, results, base, mode}) {
   closeStep(spec('enter-box'), t, boxReady,
     boxReady ? `盒子就绪，卡片 ${await js(`document.querySelectorAll('#box-grid .card').length`)} 张` : '盒子没有就绪（data-box-ready 一直是别的值）');
 
-  // ② 比两只（先切「只看锁定」，再真鼠标勾选两颗「加入比较」）
-  //    为什么先切锁定：盒子里 `locked` 是**已有的事实**（owned 数据里的标记），没有「点一下锁上」的
-  //    开关；RC-801 补的那一条交接要证明的正是「锁定跟着一起走」，所以这条链路上的两只必须是
-  //    真锁定的个体 —— 否则量到的是一条没有锁定的交接（那就退回补丁前的老路径了）。
+  // ② 比两只（**2026-09-28 改钉**：人类 ⑦ 把「只看锁定」那个入口删了，②③ 把「加入比较」与
+  //    刷新/回滚/再养一只都搬进了**个体二级详情页**）⇒ 这条链路跟着新入口走，**判据的意思一个字没改**：
+  //    仍然要求"锁定跟着交接走、且按钮上写清带了几只锁定"。
+  //    新路径：从列表找出**已锁定**的那两只 → 逐个进它自己那一页点「加入比较」→ 回列表点「比较这两只」。
   t = Date.now();
   let compare = {ok: false, note: ''};
   try {
-    const before = await js(`JSON.stringify([...document.querySelectorAll('#box-grid .card')].map((el)=>el.dataset.select))`);
-    await mouseClick('#flag-locked');
-    const switched = await waitFor(`(()=>{const now=[...document.querySelectorAll('#box-grid .card')].map((el)=>el.dataset.select);
-      return now.length>0&&JSON.stringify(now)!==${JSON.stringify(before)};})()`, 24, 250);
-    // 能同种就同种（这样「逐字段比较」也可用），否则用前两只锁定个体（交接对任意两只都成立）
-    const picks = JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('#box-grid .card')];
-      const byGroup=new Map();
-      for(const el of cards){const g=el.dataset.group||'';(byGroup.get(g)??byGroup.set(g,[]).get(g)).push(el.dataset.select);}
-      const same=[...byGroup.values()].find((ids)=>ids.length>=2);
-      const first=cards.slice(0,2).map((el)=>el.dataset.select);
-      return JSON.stringify({same:same?same.slice(0,2):null,first,count:cards.length});})()`) || '{}');
-    const two = picks.same ?? picks.first;
-    if (!two || two.length < 2) throw new Error(`「只看锁定」之后可勾选的卡片只有 ${picks.count} 张（不够两只）`);
-    for (const id of two) await mouseClick(`#box-grid .card[data-select="${id}"] .cmp-toggle`);
+    const cards = JSON.parse(await js(`JSON.stringify([...document.querySelectorAll('#box-grid .card')]
+      .map((el)=>({select:el.dataset.select, group:el.dataset.group||'', locked:String(el.innerHTML).includes('锁定')})))`) || '[]');
+    const locked = cards.filter((c) => c.locked);
+    const pool = locked.length >= 2 ? locked : cards;
+    const byGroup = new Map();
+    for (const c of pool) { if (!byGroup.has(c.group)) byGroup.set(c.group, []); byGroup.get(c.group).push(c.select); }
+    const same = [...byGroup.values()].find((ids) => ids.length >= 2) ?? null;
+    const two = (same ? same.slice(0, 2) : pool.slice(0, 2).map((c) => c.select));
+    if (two.length < 2) throw new Error(`可选个体只有 ${pool.length} 只（不够两只）`);
+    for (const id of two) {
+      await mouseClick(`#box-grid .individual[data-detail="${id}"]`);
+      await waitFor(`(()=>{const v=document.getElementById('pet-view');
+        return Boolean(v)&&v.hidden===false&&v.dataset.petRendered==='server'
+          &&new URLSearchParams(location.search).get('pet')==='${id}';})()`, 60, 200);
+      await mouseClick('#pet-actions [data-cmp]');
+      await mouseClick('#pet-back');
+      await waitFor(`(()=>{const l=document.getElementById('box-list-view');return Boolean(l)&&!l.hidden;})()`, 40, 150);
+    }
     const bar = await waitFor(`(()=>{const b=document.getElementById('compare-bar');
       return Boolean(b)&&!b.hidden&&!document.getElementById('compare-to-team').disabled;})()`, 24, 250);
     const compareGo = await js(`!document.getElementById('compare-go').disabled`);
-    compare = {ok: bar, note: bar
-      ? `（只看锁定 → 勾选 ${two.join(' + ')}，共 ${picks.count} 只可选；比较栏可用，逐字段比较可用=${compareGo}${picks.same ? '（同种）' : '（不同种——逐字段比较按设计只对同种开放）'}）`
-      : (switched ? '比较栏没有变成可用' : '「只看锁定」过滤后卡片没有变化')};
+    compare = {ok: Boolean(bar), note: bar
+      ? `（在二级详情页上勾选 ${two.join(' + ')}，共 ${pool.length} 只可选${locked.length >= 2 ? '（已锁定）' : '（没有两只锁定的，退回全部卡片）'}；比较栏可用，逐字段比较可用=${compareGo}${same ? '（同种）' : '（不同种——逐字段比较按设计只对同种开放）'}）`
+      : '比较栏没有变成可用（二级详情页上的「加入比较」没有生效？）'};
   } catch (error) { compare = {ok: false, note: `比两只时脚本自己出错：${oneLine(error?.message ?? error, 160)}`}; }
   closeStep(spec('compare-two'), t, compare.ok, compare.note);
 
