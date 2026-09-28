@@ -115,6 +115,83 @@ export function limitProblems(raw, json, status){
   return problems;
 }
 
+/**
+ * 比较的结果必须在**第二级页**上（2026-09-28 人类：「比较页面也莫名其妙，加在下面你觉得
+ * 很好看？为啥不做成二级页面，内容也啥啥没有」）。
+ *
+ * 判的是**同一屏能不能复现**：地址带齐两只、逐字段的行真的画出来了、有一个返回盒子的入口。
+ * 刷新之后再取一次同样的四个事实过同一条判据（"刷新/前进后退都能复现同一屏"这条要求，
+ * 只有把刷新**前后**都比一遍才算真的验过）。
+ */
+export function comparePageProblems(facts){
+  const problems = [];
+  if (facts?.view !== 'compare') problems.push(`没有停在比较二级页上（现在 ${JSON.stringify(facts?.view)}）`);
+  if (!facts?.a || !facts?.b) {
+    problems.push(`地址里没有带齐两只（a=${JSON.stringify(facts?.a)} b=${JSON.stringify(facts?.b)}）`);
+  }
+  if (!(Number(facts?.rows) >= 5)) {
+    problems.push(`逐字段的行太少（${JSON.stringify(facts?.rows)} 行）——「内容也啥啥没有」说的就是这个`);
+  }
+  if (facts?.back !== true) problems.push('二级页上没有返回盒子的入口');
+  return problems;
+}
+
+/**
+ * 比不了的时候（不同物种 400 / 少带一只 / 名单里找不到）二级页要**如实说清原因**，不许白屏：
+ * 停在比较页上 + 一行字段都不画 + 一句玩家读得懂的原因 + 返回入口还在，
+ * 而且说理的文案里不许出现个体编号那种形状（那是工程话）。
+ */
+export function compareFailureProblems(facts){
+  const problems = [];
+  if (facts?.view !== 'compare') problems.push(`比不了的时候没有停在比较页上（现在 ${JSON.stringify(facts?.view)}）`);
+  if (Number(facts?.rows) !== 0) problems.push(`比不了的时候不该画字段行（实际 ${JSON.stringify(facts?.rows)} 行）`);
+  if (String(facts?.note ?? '').trim().length < 10) problems.push(`没有说清为什么比不了（实际「${facts?.note}」）`);
+  if (facts?.back !== true) problems.push('比不了的时候也要有返回盒子的入口（否则是死路）');
+  if ((facts?.idShapes ?? []).length) {
+    problems.push(`玩家读到的文案里出现编号形状 ${JSON.stringify(facts.idShapes)}（工程话漏到玩家眼前）`);
+  }
+  return problems;
+}
+
+/**
+ * 「资质」那一栏是**六维表**（2026-09-28 人类③：「我的精灵」的详情/比较要显示真实的个体数据）。
+ * 判据：资质那一栏要摊成「生命 10 / 物攻 3 / …」这样的数值，页面上任何地方都不许出现
+ * `[object Object]`（那是把一个对象直接印进模板的痕迹 —— 旧代码就是这么印的）。
+ */
+export function talentDisplayProblems(facts){
+  const problems = [];
+  if (facts?.hasTalentRow !== true) problems.push('详情里没有「资质」这一栏');
+  if (!(Number(facts?.statCount) >= 3)) {
+    problems.push(`资质那一栏没有摊成六维数值（只数出 ${JSON.stringify(facts?.statCount)} 个「生命 10」这样的值）`);
+  }
+  if (Number(facts?.objectObject) > 0) {
+    problems.push(`页面上出现了 ${facts.objectObject} 处 [object Object]`);
+  }
+  return problems;
+}
+
+/**
+ * 触控目标：**主要动作**（按钮 / summary / 输入框）≥44×44；
+ * **次要控件**（卡片上的「加入比较」，`.cmp-toggle`）允许小于 44，但必须 ≥24×24。
+ *
+ * 2026-09-28 改钉（人类：「然后就是那个加入比较为啥那么大，有那么重要？」）：
+ * 触控那条线只对主要动作成立；「加入比较」是次要动作，做成 chip（实测 24px 高）。
+ * 这次改动**没有放宽**主要动作那一半，只是把次要控件单列出来，并且给它自己一个下限。
+ */
+export function touchTargetProblems(rows){
+  const problems = [];
+  const list = Array.isArray(rows) ? rows : [];
+  if (!list.length) problems.push('一个可点元素都没量到（这条判据会是空的）');
+  for (const row of list) {
+    const floor = row?.secondary === true ? 24 : 44;
+    if (Number(row?.w) < floor || Number(row?.h) < floor) {
+      problems.push(`${row?.secondary === true ? '次要控件' : '主要动作'} ${row?.tag ?? '?'}`
+        + `${row?.id ? `#${row.id}` : ''}.${row?.cls ?? ''} 只有 ${row?.w}×${row?.h}（要 ≥${floor}×${floor}）`);
+    }
+  }
+  return problems;
+}
+
 // ── CDP ───────────────────────────────────────────────────────────────────
 class Cdp {
   constructor(ws) {
@@ -250,6 +327,12 @@ async function main() {
     for (let i = 0; i < tries; i++) { if (await js(expr)) return true; await sleep(ms); }
     return false;
   };
+  /** 导航/刷新**当中**读页面：上下文还没建好时返回 null，而不是把整轮流程炸成 fatal。 */
+  const safeJs = async (expr) => { try { return await js(expr); } catch { return null; } };
+  const waitForSafe = async (expr, {tries = 80, ms = 150} = {}) => {
+    for (let i = 0; i < tries; i++) { if (await safeJs(expr)) return true; await sleep(ms); }
+    return false;
+  };
 
   const checks = []; const counterproofs = []; const steps = []; const shots = []; const screens = [];
   const check = (id, judge, ok, actual) => {
@@ -360,6 +443,14 @@ async function main() {
       entity: document.getElementById('detail-body').dataset.boxEntity ?? null,
       title: document.getElementById('detail-title').textContent,
       traits: document.querySelectorAll('#detail-body .trait').length,
+      traitLabels: [...document.querySelectorAll('#detail-body .trait')]
+        .map((el) => String(el.querySelector('b')?.textContent || '').trim()),
+      // 「天分档位」那一栏的取值与它的状态（未知的话必须带原因，见下面的判据）
+      tier: (() => {const row = [...document.querySelectorAll('#detail-body .trait')]
+        .find((el) => String(el.querySelector('b')?.textContent || '').trim() === '天分档位');
+        if (!row) return null;
+        const spans = [...row.querySelectorAll('span')].map((s) => String(s.textContent || '').trim());
+        return {value: spans[0] ?? '', effect: spans.slice(1).join(' ')};})(),
       moves: document.querySelectorAll('#detail-body .moveset li').length,
     })`));
     steps.push({at: 'detail', select: firstFace, facts: detailFacts, text: detailText.slice(0, 400)});
@@ -367,26 +458,100 @@ async function main() {
     //（人类 2026-09-26 的口径：玩家不需要知道「本仓库」）。判据的意思没变：缺的必须**说出来**。
     const needed = ['等级', '性格', '资质', '特长', '血脉', '四个技能', '效果未校准', '游戏数据里没有这一项'];
     const missingWord = needed.filter((w) => !detailText.includes(w));
-    // 27-「掷点生成」那句说明必须出现在页面上（2026-09-27，审计 ⑤：页面显示掷点值却从不说明来源）。
+    // ⚠ 2026-09-28 改钉（人类 ⑥：「性格与天分是掷点生成的（原版随机；这里是模拟掷点，不是官方概率）」
+    // 这句话**不要**）⇒ 这条判据的语义**反过来**：页面上现在**不该**再有掷点来源那一行。
+    // 判据本身一条都没删（`rollNote()` 与 `tests/roco-box-drawer.test.js` ⑫ 仍然钉着那句函数文案），
+    // 只是它现在**不上屏**，所以这一条量的是「真浏览器上 0 处」。
     const rolledNote = JSON.parse(await js(`(()=>{const notes=[...document.querySelectorAll('[data-rolled="yes"]')];
       const texts=notes.map((el)=>String(el.textContent||'').replace(/\\s+/g,' ').trim());
-      return JSON.stringify({count:texts.length,sample:texts[0]??null});})()`));
+      const page=(document.body.innerText||'');
+      return JSON.stringify({count:texts.length,sample:texts[0]??null,
+        rolledWords:(page.match(/掷点生成/g)??[]).length});})()`));
     // ⚠ 这个脚本的 check 是 `(id, judge, ok, actual)` —— 第二格是**判据文本**，不是布尔。
     // 我第一版按三参数写（第二格塞了布尔），于是 ok 收到了那串模板文本（恒真）⇒ 又一次假绿，
     // 而且参数**少**传，上一轮那条"只报多传"的静态守卫抓不到。
-    check('27-掷点来源写在页面上', '这一句必须出现在页面上：说明性格与天分是掷点生成的、不是官方概率【审计 ⑤】',
-      rolledNote.count > 0 && /不是官方概率/.test(String(rolledNote.sample)),
-      `命中 ${rolledNote.count} 条；示例「${String(rolledNote.sample ?? '').slice(0, 60)}」`);
+    check('27-掷点来源那一句不上屏', '人类 2026-09-28 决定不要「掷点生成、不是官方概率」这句 ⇒ '
+      + '真浏览器上不许再有 `[data-rolled="yes"]` 那一行，也不许出现「掷点生成」字样'
+      + '（函数与单测那一层仍保留这句，只是不上屏）',
+      rolledNote.count === 0 && rolledNote.rolledWords === 0,
+      `[data-rolled] ${rolledNote.count} 处；「掷点生成」${rolledNote.rolledWords} 处`
+      + (rolledNote.sample ? `；残留示例「${String(rolledNote.sample).slice(0, 60)}」` : ''));
 
-    check('09-个体详情', '详情抽屉里有等级 / 性格 / 资质 / 特长 / 血脉 / 四个有序技能，并且「效果未校准」与「游戏数据里没有这一项」都说了',
-      drawerOpen && detailFacts.hidden === false && detailFacts.traits === 4 && detailFacts.moves === 4 && missingWord.length === 0,
-      `traits=${detailFacts.traits} moves=${detailFacts.moves} 缺词=${JSON.stringify(missingWord)} 标题=${detailFacts.title}`);
+    // ⚠ 2026-09-28 改钉（主控在 `src/server/roco-service.js` 给详情加了第 5 栏「天分档位」，
+    // 人类 ⑤ 的四档名：一般般 / 还不错 / 相当好 / 了不起）⇒ 期望从 4 栏改成 5 栏，
+    // 并且**加强**：五栏标签必须逐条对得上，天分档位的取值必须落在那四个档名里
+    //（取不到时允许「未知」，但未知必须带原因）。判据没有被删，只是跟着数据补齐。
+    const TIERS = ['一般般', '还不错', '相当好', '了不起'];
+    const EXPECTED_TRAITS = ['性格', '资质', '特长', '血脉', '天分档位'];
+    const traitLabelsOk = JSON.stringify(detailFacts.traitLabels) === JSON.stringify(EXPECTED_TRAITS);
+    const tierValue = String(detailFacts.tier?.value ?? '');
+    // 实测页面上是「一般般的天分 / 相当好的天分」这种写法 ⇒ 判"落在哪个档名里"（含档名即算），
+    // 不去挑那个后缀（后缀怎么措辞不是这条判据要管的事）。
+    const tierKnown = TIERS.some((tier) => tierValue.includes(tier));
+    const tierMissingWithReason = /没有这一项|未知/.test(tierValue)
+      && String(detailFacts.tier?.effect ?? '').trim().length > 0;
+    check('09-个体详情', '详情抽屉里有等级 / 性格 / 资质 / 特长 / 血脉 / 天分档位 / 四个有序技能（五栏标签逐条对得上），'
+      + '天分档位的取值落在四个档名里（读不出来时照实说没有、并带上说明），'
+      + '并且「效果未校准」与「游戏数据里没有这一项」都说了',
+      drawerOpen && detailFacts.hidden === false && detailFacts.traits === 5 && traitLabelsOk
+        && (tierKnown || tierMissingWithReason) && detailFacts.moves === 4 && missingWord.length === 0,
+      `traits=${detailFacts.traits} 标签=${JSON.stringify(detailFacts.traitLabels)} `
+      + `天分档位=「${tierValue}」（命中档名=${tierKnown}；读不出来但带了说明=${tierMissingWithReason}） `
+      + `moves=${detailFacts.moves} 缺词=${JSON.stringify(missingWord)} 标题=${detailFacts.title}`);
     const detailHit = detailText.match(FORBIDDEN_PLAYER);
     check('10-详情也不说工程话', '详情抽屉（玩家点得到的）同样不出现工程字段',
       !detailHit, detailHit ? `命中 ${detailHit[0]}` : `扫过 ${detailText.length} 字`);
     shots.push(await shoot('box-04-detail-1440x900'));
     await mouseClick('#detail-close');
     await sleep(250);
+
+    // ── ⑤b 2026-09-28（人类 ③「我的精灵要显示真实的个体数据」）────────────────
+    // `资质` 的值是**六维表**（`{hp, atk, def, spa, spd, spe}`），印错了会变成 `[object Object]`。
+    // 这里真的用鼠标打开 **own-0001** 的详情（它在「铠甲虫」那一行里，默认收起 ⇒ 先展开那一行），
+    // 量两件事：资质那一栏摊成了「生命 10 / 物攻 3 / …」这样的数值；整页不出现 [object Object]。
+    const own1Route = await (await fetch(`${base}api/roco/box?kind=mine&limit=60&offset=0`)).json();
+    const own1Card = own1Route.player.cards.find((c) => c.select === 'own-0001') ?? null;
+    const own1Species = own1Card?.group ?? '';
+    const own1Head = own1Species
+      ? await js(`(()=>{const el=document.querySelector('.species-drawer[data-species="${own1Species}"] .drawer-head');
+        return el?'yes':'no';})()`)
+      : 'no';
+    if (own1Head === 'yes') { await mouseClick(`.species-drawer[data-species="${own1Species}"] .drawer-head`); await sleep(400); }
+    const own1Ready = await js(`Boolean(document.querySelector('#box-grid .card[data-select="own-0001"] [data-detail]'))`);
+    if (own1Ready) {
+      await mouseClick('#box-grid .card[data-select="own-0001"] [data-detail]');
+      await waitFor(`document.getElementById('detail-drawer')?.hidden===false`);
+      await sleep(350);
+      const talentFacts = JSON.parse(await js(`(()=>{const body=document.getElementById('detail-body');
+        const rows=[...body.querySelectorAll('.trait')].map((el)=>({label:String(el.querySelector('b')?.textContent||'').trim(),
+          value:[...el.querySelectorAll('span')].map((s)=>String(s.textContent||'').trim()).join(' ')}));
+        const talent=rows.find((r)=>r.label==='资质')??null;
+        const page=document.body.innerText||'';
+        return JSON.stringify({title:String(document.getElementById('detail-title').textContent||''),
+          labels:rows.map((r)=>r.label), hasTalentRow:Boolean(talent),
+          value:String(talent?.value??''),
+          statCount:(String(talent?.value??'').match(/生命\\s*\\d+|物攻\\s*\\d+|物防\\s*\\d+|魔攻\\s*\\d+|魔防\\s*\\d+|速度\\s*\\d+/g)??[]).length,
+          objectObject:(page.match(/\\[object Object\\]/g)??[]).length});})()`));
+      steps.push({at: 'detail-own-0001', facts: talentFacts});
+      const talentProblems = talentDisplayProblems(talentFacts);
+      check('10b-资质要摊成六维数值（own-0001）',
+        '真鼠标打开 own-0001 的详情：资质那一栏是「生命 10 / 物攻 3 / …」这样的六维数值，整页不出现 [object Object]',
+        talentProblems.length === 0,
+        talentProblems.join(' | ')
+          || `${talentFacts.title}：资质 =「${talentFacts.value}」（数出 ${talentFacts.statCount} 个数值；`
+            + `[object Object] ${talentFacts.objectObject} 处）`);
+      counter('10b-资质要摊成六维数值（own-0001）',
+        '把「资质」印成 [object Object]、或者一个数值都没有 —— 两种坏样本都必须被同一条判据抓住',
+        talentDisplayProblems({hasTalentRow: true, statCount: 0, objectObject: 2}),
+        '{"hasTalentRow":true,"statCount":0,"objectObject":2}');
+      await mouseClick('#detail-close');
+      await sleep(250);
+    } else {
+      check('10b-资质要摊成六维数值（own-0001）',
+        '「我的盒子」第一页里要能找到 own-0001 的卡片（拿它当真实个体数据的样本）',
+        false, `展开那份名单里的那一行之后没有 own-0001 的卡片（own-0001 在名单里=${Boolean(own1Card)}，`
+          + `那一种的行=${own1Head}）`);
+    }
 
     // ── ⑥ 两个同种个体比较（真实鼠标选两只 → 比较）───────────────────
     // ⚠ 2026-09-28：上面那几步给页面留下了两样**状态残留**，而这一段以前是"不可达"分支、
@@ -459,32 +624,119 @@ async function main() {
       steps.push({at: 'compare-filter', pairName, visibleLines: visible.split('\n').filter(Boolean).length, probe});
     }
     steps.push({at: 'compare-pick', pair, names: mineRoute.player.cards.filter((c) => pair.includes(c.select)).map((c) => c.name)});
+    // 期望的字段行数**从路由现读**（2026-09-28：比较回执加了「天分档位」这一栏，8 → 9；
+    // 写死 8 会在数据变好时反而判红）。判据仍然是「路由给了几栏，页面上就要逐行画几栏」。
+    const compareRoute = await (await fetch(`${base}api/roco/box?compare=${aSel},${bSel}`)).json();
+    const expectedFields = compareRoute.player.fields.length;
     await mouseClick(`#box-grid .card[data-select="${aSel}"] .cmp-toggle`);
     await mouseClick(`#box-grid .card[data-select="${bSel}"] .cmp-toggle`);
     await sleep(200);
     const picked = await bodyFacts();
     const goEnabled = await js(`document.getElementById('compare-go').disabled===false`);
     await mouseClick('#compare-go');
-    const panelShown = await waitFor(`document.getElementById('compare-panel')?.hidden===false`);
+    // ⚠ 2026-09-28 改钉（人类：「比较页面也莫名其妙，加在下面你觉得很好看？为啥不做成二级页面」）：
+    // 比较结果**不再画在列表下面**（`#compare-panel` 已删），改成第二级页 —— 地址 `?a=&b=`、
+    // 容器 `#compare-view`、列表整块收起。这一段原来读 `#compare-panel`（现在不存在，命中即 fatal），
+    // 判据的**意图一个字没改**（选两只同种 → 逐字段看到相同/不同/未知 + 未知行给原因），
+    // 落点换到新的一屏，并且把「地址带两只、返回入口在、刷新同一屏」一起判上（更严）。
+    const viewShown = await waitFor(`(()=>{const v=document.getElementById('compare-view');
+      const q=new URLSearchParams(window.location.search);
+      return Boolean(v)&&v.hidden===false&&Boolean(q.get('a'))&&Boolean(q.get('b'))
+        &&v.querySelectorAll('.cmp-row').length>0;})()`);
     await sleep(400);
-    const cmp = JSON.parse(await js(`(()=>{const rows=[...document.querySelectorAll('#compare-panel .cmp-row')];
+    const cmp = JSON.parse(await js(`(()=>{const view=document.getElementById('compare-view');
+      const rows=[...view.querySelectorAll('.cmp-row')];
+      const q=new URLSearchParams(window.location.search);
+      const back=document.getElementById('compare-back');
       return JSON.stringify({rows:rows.length,
         labels:rows.map((r)=>r.dataset.label),
         statuses:[...new Set(rows.map((r)=>r.dataset.status))],
         statusTexts:[...new Set(rows.map((r)=>r.querySelector('.cmp-status')?.textContent??''))],
         unknownReasons:rows.filter((r)=>r.dataset.status==='unknown').length,
-        reasonText:(document.querySelector('#compare-panel .cmp-reason')?.innerText??'').slice(0,120),
-        summary:document.querySelector('#compare-panel .cmp-summary')?.innerText.replace(/\\s+/g,' ')??''});})()`));
-    steps.push({at: 'compare', facts: picked, panel: cmp});
+        reasonText:(view.querySelector('.cmp-reason')?.innerText??'').slice(0,120),
+        summary:(view.querySelector('.cmp-summary')?.innerText??'').replace(/\\s+/g,' '),
+        a:q.get('a'), b:q.get('b'),
+        back:Boolean(back), backText:(back?.textContent??'').trim(),
+        gridHidden:document.getElementById('box-list-view')?.hidden===true,
+        // 比较页上也会印「资质」那类对象值：这里顺手量一次 [object Object]（人类③ 的那条）。
+        objectObject:((document.body.innerText||'').match(/\\[object Object\\]/g)??[]).length,
+        view:(document.getElementById('compare-view')?.hidden===false)?'compare':'list'});})()`));
+    steps.push({at: 'compare', facts: picked, page: cmp});
     const statusesOk = ['same', 'different', 'unknown'].every((s) => cmp.statuses.includes(s));
-    check('11-两个体比较', '选两只同种个体后逐字段比较：相同 / 不同 / 未知 三种状态都出现，未知行都给了原因',
-      picked.selected === '2' && goEnabled && panelShown && cmp.rows === 8 && statusesOk && cmp.unknownReasons >= 2,
-      `已选=${picked.selected} 比较按钮可用=${goEnabled} 字段行=${cmp.rows} 状态=${JSON.stringify(cmp.statuses)}`
-      + ` 文本=${JSON.stringify(cmp.statusTexts)} 未知行=${cmp.unknownReasons} 原因「${cmp.reasonText}」`);
+    check('11-两个体比较', '选两只同种个体后进**第二级页**（地址 ?a=&b=）逐字段比较：'
+      + '路由给的每一栏都画出来、相同 / 不同 / 未知 三种状态都出现，未知行都给了原因，'
+      + '对象值（资质那种六维表）摊成数值而不是 [object Object]',
+      picked.selected === '2' && goEnabled && viewShown && cmp.rows === expectedFields
+        && expectedFields >= 8 && statusesOk && cmp.unknownReasons >= 2 && cmp.objectObject === 0
+        && cmp.view === 'compare' && cmp.gridHidden === true && cmp.back === true && cmp.a === aSel && cmp.b === bSel,
+      `已选=${picked.selected} 比较入口可用=${goEnabled} 二级页=${viewShown} 地址 a=${cmp.a} b=${cmp.b}`
+      + ` 列表收起=${cmp.gridHidden} 返回入口=${JSON.stringify(cmp.backText)}`
+      + ` 字段行=${cmp.rows}（路由给 ${expectedFields} 栏）`
+      + ` 状态=${JSON.stringify(cmp.statuses)} 文本=${JSON.stringify(cmp.statusTexts)}`
+      + ` 未知行=${cmp.unknownReasons} [object Object]=${cmp.objectObject} 原因「${cmp.reasonText}」`);
     const cmpHit = (await playerText()).match(FORBIDDEN_PLAYER);
-    check('12-比较也不说工程话', '比较面板里不出现工程字段（未知只说「为什么未知」）',
+    check('12-比较也不说工程话', '比较二级页里不出现工程字段（未知只说「为什么未知」）',
       !cmpHit, cmpHit ? `命中 ${cmpHit[0]}` : cmp.summary);
     shots.push(await shoot('box-05-compare-1440x900'));
+
+    // ── ⑥b 刷新 / 返回：二级页的地址要能复现同一屏（2026-09-28 新要求）──────────
+    await cdp.send('Page.reload');
+    await sleep(1600);
+    const reloaded = await waitForSafe(`(()=>{const v=document.getElementById('compare-view');
+      return Boolean(v)&&v.hidden===false&&v.querySelectorAll('.cmp-row').length>0;})()`, {tries: 80, ms: 200});
+    const afterReload = JSON.parse(await safeJs(`(()=>{const view=document.getElementById('compare-view');
+      const rows=view?[...view.querySelectorAll('.cmp-row')]:[];
+      const q=new URLSearchParams(window.location.search);
+      return JSON.stringify({view:(view&&view.hidden===false)?'compare':'list', rows:rows.length,
+        statuses:[...new Set(rows.map((r)=>r.dataset.status))].sort(),
+        a:q.get('a'), b:q.get('b'), back:Boolean(document.getElementById('compare-back')),
+        backVisible:(()=>{const b=document.getElementById('compare-back');
+          if(!b)return false;const r=b.getBoundingClientRect();return r.height>=44;})()});})()`) ?? '{}');
+    const reloadProblems = comparePageProblems(afterReload);
+    check('11b-比较二级页刷新可复现', '刷新 `?a=&b=` 那一屏：地址还是这两只、逐字段的行一栏不少地还在（同一屏复现），返回入口 ≥44px 还摸得到',
+      reloaded && reloadProblems.length === 0 && afterReload.a === aSel && afterReload.b === bSel
+        && afterReload.rows === expectedFields && afterReload.backVisible === true
+        && JSON.stringify(afterReload.statuses) === JSON.stringify([...cmp.statuses].sort()),
+      reloadProblems.join(' | ') || `刷新后 view=${afterReload.view} 地址 a=${afterReload.a} b=${afterReload.b}`
+        + ` 字段行=${afterReload.rows}（刷新前 ${cmp.rows}）状态=${JSON.stringify(afterReload.statuses)}`
+        + `（刷新前 ${JSON.stringify([...cmp.statuses].sort())}）`
+        + ` 返回入口=${afterReload.back}（高 ≥44：${afterReload.backVisible}）`);
+    counter('11b-比较二级页刷新可复现', '「刷新后什么都没了」的样本（没有两只 / 一行都没有 / 没有返回入口）必须被同一条判据抓住',
+      comparePageProblems({view: 'list', rows: 0, a: null, b: null, back: false}),
+      '{"view":"list","rows":0,"a":null,"b":null,"back":false}');
+
+    // 返回入口（真鼠标）：点它就该回到盒子首层，列表与卡片都回来。
+    await mouseClick('#compare-back');
+    await sleep(1500);
+    const backHome = await waitForSafe(`(()=>{const l=document.getElementById('box-list-view');
+      return Boolean(l)&&l.hidden===false&&document.querySelectorAll('#box-grid .card').length>0
+        &&document.getElementById('compare-view').hidden===true;})()`, {tries: 60, ms: 200});
+    const backFacts = JSON.parse(await safeJs(`(()=>{const l=document.getElementById('box-list-view');
+      return JSON.stringify({list:(l&&l.hidden===false)?'shown':'hidden',
+        cards:document.querySelectorAll('#box-grid .card').length,
+        compareHidden:document.getElementById('compare-view').hidden,
+        path:window.location.pathname.split('/').pop()});})()`) ?? '{}');
+    check('11c-比较二级页的返回入口', '真鼠标点「返回精灵盒子」：回到盒子首层（列表与卡片都在，比较那一屏收起）',
+      backHome && backFacts.list === 'shown' && backFacts.compareHidden === true && backFacts.cards > 0,
+      `列表=${backFacts.list} 卡片=${backFacts.cards} 比较页收起=${backFacts.compareHidden} 落在=${backFacts.path}`);
+
+    // 浏览器的前进/后退：地址带着两只 ⇒ 回到同一屏（这是「前进后退都能复现」那一条）。
+    await js(`history.back()`);
+    await sleep(1500);
+    const backToCompare = await waitForSafe(`(()=>{const v=document.getElementById('compare-view');
+      const q=new URLSearchParams(location.search);
+      return Boolean(v)&&v.hidden===false&&Boolean(q.get('a'))&&Boolean(q.get('b'))
+        &&v.querySelectorAll('.cmp-row').length>0;})()`, {tries: 60, ms: 200});
+    const backPair = JSON.parse(await safeJs(`(()=>{const q=new URLSearchParams(location.search);
+      const rows=[...document.querySelectorAll('#compare-view .cmp-row')];
+      return JSON.stringify({a:q.get('a'),b:q.get('b'),rows:rows.length});})()`) ?? '{}');
+    await js(`history.forward()`);
+    await sleep(1500);
+    const forwardToList = await waitForSafe(`(()=>{const l=document.getElementById('box-list-view');
+      return Boolean(l)&&l.hidden===false&&document.querySelectorAll('#box-grid .card').length>0;})()`, {tries: 60, ms: 200});
+    check('11c2-比较二级页前进后退可复现', '浏览器后退回到 `?a=&b=` 那一屏（同一屏、字段行一栏不少），再前进回到盒子首层',
+      backToCompare && backPair.a === aSel && backPair.b === bSel && backPair.rows === expectedFields && forwardToList,
+      `后退：地址 a=${backPair.a} b=${backPair.b} 字段行=${backPair.rows}（期望 ${expectedFields}）；前进回列表=${forwardToList}`);
 
     }
     // 不同种必须被拒绝：路由层（同一份判据）。这一条**不管有没有同种对都跑**。
@@ -499,6 +751,54 @@ async function main() {
     counter('13-不同种拒绝', '把「接受了不同种比较」的样本过同一条判据必须报错',
       compareMismatchProblems({ok: true, player: {fields: []}}, 200),
       '{ok:true,player:{fields:[]}} / HTTP 200');
+
+    // ── ⑥c 2026-09-28 新要求：比不了的时候二级页要**如实说清原因**（不是白屏）────────
+    // 两条路都走一遍：① 不同物种（服务端 400）；② 地址上只带了一只（缺 id）。
+    // 判据是纯函数 `compareFailureProblems`，下面各喂一个坏样本做反证。
+    const otherId = otherGroup[1][0];
+    const failureFacts = async () => JSON.parse(await safeJs(`(()=>{const view=document.getElementById('compare-view');
+      const note=document.getElementById('compare-note');
+      const text=(document.body.innerText||'').replace(/\\s+/g,' ');
+      return JSON.stringify({view:(view&&view.hidden===false)?'compare':'list',
+        rows:view?view.querySelectorAll('.cmp-row').length:0,
+        note:String(note&&!note.hidden?note.textContent:'').replace(/\\s+/g,' ').trim(),
+        back:Boolean(document.getElementById('compare-back')),
+        idShapes:text.match(/pet_\\d{6}|own-\\d{4}/g)??[]});})()`) ?? '{}');
+    await cdp.send('Page.navigate', {url: `${base}box.html?a=${aSel2}&b=${otherId}`});
+    await sleep(1200);
+    const mixedShown = await waitForSafe(`(()=>{const n=document.getElementById('compare-note');
+      return Boolean(n)&&n.hidden===false&&String(n.textContent||'').trim().length>10;})()`, {tries: 60, ms: 200});
+    await sleep(200);
+    const mixedFacts = await failureFacts();
+    const mixedProblems = compareFailureProblems(mixedFacts);
+    steps.push({at: 'compare-mixed-species', url: `box.html?a=${aSel2}&b=${otherId}`, facts: mixedFacts});
+    check('11d-比不了就说清（不同种）',
+      '把两只不同种的地址直接打开（服务端 400）：二级页停在比较页上、一行字段都不画，'
+      + '用玩家话写清「不是同一种」，返回入口还在，文案里不出现个体编号',
+      mixedShown && mixedProblems.length === 0,
+      mixedProblems.join(' | ') || `原因「${mixedFacts.note}」`);
+    counter('11d-比不了就说清（不同种）',
+      '白屏 / 没有原因 / 没有返回入口 / 文案里带编号 —— 四种坏样本都必须被同一条判据抓住',
+      compareFailureProblems({view: 'compare', rows: 0, note: '', back: false, idShapes: ['pet_000012']}),
+      '{"note":"","back":false,"idShapes":["pet_000012"]}');
+
+    await cdp.send('Page.navigate', {url: `${base}box.html?a=${aSel2}`});
+    await sleep(1100);
+    const halfShown = await waitForSafe(`(()=>{const n=document.getElementById('compare-note');
+      return Boolean(n)&&n.hidden===false&&String(n.textContent||'').trim().length>10;})()`, {tries: 60, ms: 200});
+    await sleep(200);
+    const halfFacts = await failureFacts();
+    const halfProblems = compareFailureProblems(halfFacts);
+    steps.push({at: 'compare-missing-id', url: `box.html?a=${aSel2}`, facts: halfFacts});
+    check('11e-比不了就说清（少带一只）', '地址上只有一只（缺 id）：二级页也要如实说清「要两只才有得比」，不许白屏',
+      halfShown && halfProblems.length === 0,
+      halfProblems.join(' | ') || `原因「${halfFacts.note}」`);
+
+    // 这一段最后**回到盒子首层**：下面 ⑦⑧⑨ 的步骤都假定在列表那一屏上。
+    await cdp.send('Page.navigate', {url: `${base}box.html`});
+    await sleep(1200);
+    await waitForSafe(`document.querySelectorAll('#box-grid .card').length>0`, {tries: 60, ms: 200});
+    await sleep(200);
 
     // ── ⑦ 工程字段只允许在默认收起的抽屉里 ─────────────────────────────
     const drawerClosed = await js(`document.getElementById('dev-drawer').open===false`);
@@ -570,11 +870,24 @@ async function main() {
         if(r.width===0&&r.height===0)continue;
         if(el.closest('[hidden]'))continue;
         out.push({tag:el.tagName,id:el.id||null,cls:String(el.className||'').slice(0,26),
+          secondary:el.classList.contains('cmp-toggle'),
           w:Math.round(r.width),h:Math.round(r.height)});}
-      return JSON.stringify({count:out.length,small:out.filter((x)=>x.w<44||x.h<44)});})()`));
-    check('19-触控目标', '390×844：页面上每个可见可点元素（按钮 / summary / 输入框）都 ≥44×44',
-      targets.small.length === 0,
-      `量了 ${targets.count} 个元素；不达标的：${JSON.stringify(targets.small.slice(0, 4)) || '（无）'}`);
+      return JSON.stringify({count:out.length,rows:out});})()`));
+    // ⚠ 2026-09-28 改钉（人类：「然后就是那个加入比较为啥那么大，有那么重要？」）：
+    // 触控那条线只对**主要动作**成立；卡片上的「加入比较」是次要动作，按 chip 尺寸做
+    //（实测 24px 高），所以它单列一档、下限 24×24 —— 主要动作那一半**一点没放宽**。
+    const targetProblems = touchTargetProblems(targets.rows);
+    check('19-触控目标', '390×844：主要动作（按钮 / summary / 输入框）都 ≥44×44；'
+      + '卡片上的次要控件「加入比较」允许小到 24×24（2026-09-28 人类要求把它做小），但不许小于它（摸得到）',
+      targetProblems.length === 0,
+      targetProblems.slice(0, 4).join(' | ')
+        || `量了 ${targets.count} 个元素；主要动作与次要控件都在线上`
+          + `（次要控件 ${targets.rows.filter((x) => x.secondary).length} 个，最小 `
+          + `${Math.min(...targets.rows.filter((x) => x.secondary).map((x) => x.h), 99)}px 高）`);
+    counter('19-触控目标', '主要动作掉到 30px、次要控件掉到 20px —— 两种都不许过同一条判据',
+      [...touchTargetProblems([{tag: 'BUTTON', id: 'compare-go', cls: '', secondary: false, w: 120, h: 30}]),
+        ...touchTargetProblems([{tag: 'BUTTON', id: null, cls: 'cmp-toggle', secondary: true, w: 40, h: 20}])],
+      '主要动作 120×30 / 次要控件 40×20');
     shots.push(await shoot('box-06-mine-390x844'));
 
     // 窄屏下的详情（真实鼠标）+ 截图。
@@ -587,7 +900,7 @@ async function main() {
     await sleep(300);
     const narrowDrawer = await metrics();
     screens.push({viewport: '390x844', at: 'detail', ...narrowDrawer});
-    check('20-窄屏可读', '390×844：我的盒子不横向溢出，且可点目标都 ≥44×44（比较面板不可达，见 11 的登记）',
+    check('20-窄屏可读', '390×844：我的盒子不横向溢出，且可点目标都在线上（主要 44 / 次要控件 24，见 19）',
       narrowMetrics2.scrollW === narrowMetrics2.clientW,
       `clientW=${narrowMetrics2.clientW} scrollW=${narrowMetrics2.scrollW}`);
     check('21-窄屏抽屉', '390×844：详情抽屉打开时也不横向溢出',
@@ -605,7 +918,7 @@ async function main() {
     await mouseClick('#tab-mine');
     await waitFor(`document.body.dataset.boxKind==='mine'`);
     await sleep(400);
-    await js(`document.getElementById('detail-drawer').hidden = true; document.getElementById('compare-close')?.click();`);
+    await js(`document.getElementById('detail-drawer').hidden = true; true`);
     // ⚠ 2026-09-28 改钉：原来取"页面前两张卡的加入比较" —— 那时候**每个物种只有 1 个个体**，
     // 抽屉会把每个组直接摊开，所以前两张卡必然在网格里。人类批准一对同种个体之后，
     // 「铠甲虫」那一组默认**收起** ⇒ 前两张卡变成了**跨物种**（比较按钮对跨物种是禁用的），
@@ -641,13 +954,23 @@ async function main() {
     for (const sel of twoForCompare) await mouseClick(`#box-grid .card[data-select="${sel}"] .cmp-toggle`);
     await waitFor(`document.getElementById('compare-go')?.disabled===false`);
     await mouseClick('#compare-go');
-    await waitFor(`document.getElementById('compare-panel')?.hidden===false`);
+    // ⚠ 2026-09-28 改钉：比较进的是**第二级页**（`?a=&b=`），«比完就去配队» 那一个入口现在
+    // 也在那一屏上（`#compare-view-to-team`）。首层那条 `#compare-to-team` 仍在（判据 25/26 用它），
+    // 但玩家比完看到的是二级页上这一个 —— 所以这里量的是它，判据的意图没变
+    //（比完两只之后必须有一个可用的「带上这两只去配队」，触控目标 ≥44px）。
+    const handoffView = await waitForSafe(`(()=>{const v=document.getElementById('compare-view');
+      const q=new URLSearchParams(window.location.search);
+      return Boolean(v)&&v.hidden===false&&Boolean(q.get('a'))&&Boolean(q.get('b'));})()`);
     await sleep(400);
-    // 选中的个体从 **DOM** 里读（页面不暴露全局状态；`.card.picked` 就是选进比较的那些）
-    const handoffIds = await js(`JSON.stringify([...document.querySelectorAll('#box-grid .card.picked')]
-      .map((el) => el.dataset.select).filter(Boolean))`);
-    const parsedHandoff = JSON.parse(handoffIds || '[]');
-    const handoffButton = await js(`(()=>{const b=document.getElementById('compare-to-team');
+    // 选中的个体从**地址**里读（二级页就是靠这两只复现的）；网格里那些 `.card.picked` 是同一份
+    // 选中状态在首层的影子（首层收起了但仍在 DOM 里），两者不一致就当场报出来。
+    const urlPair = JSON.parse(await js(`JSON.stringify((()=>{const q=new URLSearchParams(location.search);
+      return [q.get('a'),q.get('b')].filter(Boolean);})())`) || '[]');
+    const gridPicked = JSON.parse(await js(`JSON.stringify([...document.querySelectorAll('#box-grid .card.picked')]
+      .map((el) => el.dataset.select).filter(Boolean))`) || '[]');
+    const parsedHandoff = urlPair.length === 2 ? urlPair : gridPicked;
+    steps.push({at: 'handoff-pair', handoffPair, urlPair, gridPicked, handoffView});
+    const handoffButton = await js(`(()=>{const b=document.getElementById('compare-view-to-team');
       if(!b)return null;const r=b.getBoundingClientRect();
       return {disabled:b.disabled,w:Math.round(r.width),h:Math.round(r.height)};})()`);
     const handoffEntryProblems = (facts, count) => {
@@ -658,13 +981,16 @@ async function main() {
       if (!(count > 0)) bad.push('页面上一只选中的个体都没有');
       return bad;
     };
-    check('23-带去配队的入口', '比完两只之后「带上这两只去配队」可用（触控目标 ≥44px）',
-      handoffEntryProblems(handoffButton, parsedHandoff.length).length === 0,
-      `按钮 ${JSON.stringify(handoffButton)}；选中的个体 ${JSON.stringify(parsedHandoff)}`);
+    check('23-带去配队的入口', '比完两只之后（比较二级页上）「带上这两只去配队」可用（触控目标 ≥44px），'
+      + '而且二级页地址里的两只与首层选中的那两只一致',
+      handoffEntryProblems(handoffButton, parsedHandoff.length).length === 0 && handoffView
+        && urlPair.length === 2 && (gridPicked.length === 0 || gridPicked.join() === urlPair.join()),
+      `按钮 ${JSON.stringify(handoffButton)}；地址里的两只 ${JSON.stringify(urlPair)}`
+      + `；首层选中的 ${JSON.stringify(gridPicked)}；二级页=${handoffView}`);
     counter('23-带去配队的入口', '一个 disabled 的入口等于没有入口，必须被同一条判据抓住',
       handoffEntryProblems({...handoffButton, disabled: true}, parsedHandoff.length), '{"disabled":true}');
 
-    await mouseClick('#compare-to-team');
+    await mouseClick('#compare-view-to-team');
     await sleep(1200);
     for (let i = 0; i < 60; i += 1) {
       if (await js(`document.body.dataset.rocoReady==='yes'`)) break;
@@ -935,7 +1261,12 @@ async function main() {
       if (!/同种/.test(String(facts?.hintAfterPick))) {
         bad.push(`选完两只同种之后提示要说"同种"（实际「${facts?.hintAfterPick}」）`);
       }
-      if (facts?.panelHidden !== true) bad.push('本机新养的个体不该真的比出一张面板来（服务端名单里没有它）');
+      // ⚠ 2026-09-28 改钉（比较进了二级页）：原来判的是「面板没出来」，现在判的是
+      // 「没跳进比较页、地址上没带那两只」—— 意图没变：本机新养的个体根本比不了，
+      // 页面**不许**假装比成功（也不许跳到一个读不出结果的二级页上）。
+      if (String(facts?.view ?? '') === 'compare' || /[?&]a=/.test(String(facts?.compareUrl ?? ''))) {
+        bad.push(`本机新养的个体比不了，却还是进了比较页（view=${facts?.view} 地址「${facts?.compareUrl}」）`);
+      }
       const hint = String(facts?.hintAfterCompare ?? '');
       if (!/本机/.test(hint) || !/名单/.test(hint)) {
         bad.push(`比不了的原因要说清楚（"本机加出来的 / 还没进服务器名单"），实际「${hint}」`);
@@ -991,11 +1322,17 @@ async function main() {
         facts.hintAfterPick = await js(`document.getElementById('compare-hint')?.textContent ?? ''`);
         await mouseClick('#compare-go');
         await sleep(600);
-        facts.panelHidden = await js(`document.getElementById('compare-panel')?.hidden`);
+        // ⚠ 2026-09-28 改钉：比较结果搬进了第二级页，所以这里不再问「面板有没有出来」
+        // （`#compare-panel` 已删 —— 那会**静默变成 undefined**，判据就空了），
+        // 改成问「有没有真的跳到比较页 / 地址上有没有那两只」。判据的意图一个字没变：
+        // 本机新养的个体比不了，点了比较**不许静默失败**，要如实说清为什么。
+        facts.view = await js(`document.body.dataset.boxView ?? ''`);
+        facts.compareUrl = await js(`window.location.search`);
         facts.hintAfterCompare = await js(`document.getElementById('compare-hint')?.textContent ?? ''`);
         // 诊断（点完比较之后到底发生了什么）：按钮禁用状态 / 选中了几只 / 抽屉里那两行的选择状态
         facts.diag = JSON.parse(await js(`(()=>{const cards=[...document.querySelectorAll('.individual[data-individual]')];
           return JSON.stringify({go:document.getElementById('compare-go')?.disabled,
+            view:document.body.dataset.boxView??null,
             selected:document.body.dataset.boxSelected,
             picked:[...document.querySelectorAll('.card.picked')].map((el)=>el.dataset.select),
             rows:cards.slice(0,4).map((el)=>({id:el.dataset.individual??el.dataset.individual,
@@ -1004,10 +1341,12 @@ async function main() {
       steps.push({at: 'add-then-compare', ...facts});
       const problems = rerollProblems(facts);
       check('29-再养一只同种→比大小',
-        '真鼠标：加一只同种 ⇒ 两只都能选进比较栏、提示说"同种"；点比较之后**不许静默失败** —— 要如实说清本机新养的个体还没进服务器名单',
+        '真鼠标：加一只同种 ⇒ 两只都能选进比较栏、提示说"同种"；点比较之后**不许静默失败** —— '
+        + '要如实说清本机新养的个体还没进服务器名单（也不许硬跳进一个比不了的比较页）',
         problems.length === 0,
         problems.join(' | ') || `${facts.baseId} + ${facts.extraId}：选中 ${facts.selected} 只，`
-          + `比较栏 hidden=${facts.barHidden}，点比较后提示「${String(facts.hintAfterCompare).slice(0, 80)}」`
+          + `比较栏 hidden=${facts.barHidden}，点比较后停在 ${facts.view || '(首层)'}（地址「${facts.compareUrl}」）`
+          + `，提示「${String(facts.hintAfterCompare).slice(0, 80)}」`
           + `；这一行画出来的是 ${JSON.stringify(facts.rows)}`);
       counter('29-再养一只同种→比大小',
         '静默失败（点了比较什么都不说）必须被同一条判据抓住',
