@@ -12967,3 +12967,17 @@ console_errors: []
 
 ⇒ 结论：**遗留产物已经清干净**；剩下两条不是遗漏，是 `.gitignore` 的口径，
 下次看到它们"没入库"不必再查一遍。
+
+**十三、下一轮第一件事（写在台账里，因为这一轮结束前门禁还没跑完）**
+
+门禁 `bash-522`（`reports/roco/verify-release-round92.log`，18:04 起跑）**还在跑**，
+它跑完会重写 `reports/roco/verification/latest.json`。跑完之后必须做这两步：
+
+1. **同步交接文档第 79 行**：那一行现在写的是「未通过套件：[unit, box-acceptance]」——
+   那是**第 92 轮之前那一次门禁**（`bash-511`）的读数。新门禁的套件名必须照实换掉。
+   ⚠ 判据 `tests/roco-handoff-doc.test.js` 会**逐个点名去 `latest.json` 的 `failed` 里核对**，
+   所以名字写多了（产物里不红的也算红）会当场红。若这次 `box-acceptance` 在门禁里是绿的，
+   第 79 行就只能写 `[unit]`。
+2. **把门禁读数补进台账**（本节 §九那张表里"门禁整条没重跑"那一条可以划掉），
+   然后 `node --test tests/evals/state-doc.test.js tests/roco-handoff-doc.test.js` 单独复跑一次
+   这两条与文档挂钩的判据（它们最容易被"文档改了但产物没跟上"弄红）。
