@@ -4,13 +4,13 @@
  "trajectories": "/Users/serendizc/Developer/roco-coach/tests/evals/agent-trajectories-model-v1.jsonl",
  "model_identity": {
   "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
-  "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v4",
-  "adapter_sha256": "362cc02087177eb5b61e185d324630aa8319408ebb2b64ff1c37c9c5bd9e33d6",
+  "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v8",
+  "adapter_sha256": "176ff412f5d14904707b7c131a8fef46e785554930841014f6bac191e228d2a9",
   "gateway_reachable": true,
   "ready": true,
   "adapter_file": "adapters.safetensors",
-  "adapter_basename": "qwen35-4b-tool-v4",
-  "identity_digest": "68439b22605d9a638eda96ce5e2c23bb871db02fdbe947824e43b8be53533148",
+  "adapter_basename": "qwen35-4b-tool-v8",
+  "identity_digest": "29e534701f697fa34997ae4aec965df2a65d8f7a2e2a2510668b8a0d6e9e2ac0",
   "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d"
  },
  "format": "roco-agent-trajectory-v1",
@@ -49,46 +49,15 @@
  },
  "replay": {
   "total": 1752,
-  "passed": 1644,
-  "failed": 108,
+  "passed": 1752,
+  "failed": 0,
   "by_arm": {
    "local_4b": {
     "total": 1752,
-    "passed": 1644
+    "passed": 1752
    }
   },
-  "first_failures": [
-   {
-    "traj_id": "rl-ruleset-f0-01@camp-0#local_4b",
-    "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 e0e174a59ddd，现在 b4aec4a7bf34）"
-    ]
-   },
-   {
-    "traj_id": "rl-ruleset-f0-01@camp-1#local_4b",
-    "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 e0e174a59ddd，现在 b4aec4a7bf34）"
-    ]
-   },
-   {
-    "traj_id": "rl-ruleset-f0-01@camp-2#local_4b",
-    "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 e0e174a59ddd，现在 b4aec4a7bf34）"
-    ]
-   },
-   {
-    "traj_id": "rl-ruleset-f0-01@camp-3#local_4b",
-    "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 e0e174a59ddd，现在 b4aec4a7bf34）"
-    ]
-   },
-   {
-    "traj_id": "rl-ruleset-f0-01@camp-4#local_4b",
-    "problems": [
-     "回放 query_rules 的回执与记录不一致（记录 e0e174a59ddd，现在 b4aec4a7bf34）"
-    ]
-   }
-  ],
+  "first_failures": [],
   "skipped": 0,
   "note": null
  },
@@ -100,39 +69,29 @@
    "passed": 0
   },
   "negative": {
-   "total": 5988,
-   "passed": 5988
+   "total": 4040,
+   "passed": 4040
   },
   "per_criterion": {
    "tool": {
-    "total": 1458,
-    "caught": 1458,
+    "total": 704,
+    "caught": 704,
     "example": "删掉应当调用的工具"
    },
    "args_must_match": {
-    "total": 729,
-    "caught": 729,
+    "total": 352,
+    "caught": 352,
     "example": "清空参数"
    },
    "max_tool_calls": {
-    "total": 1617,
-    "caught": 1617,
+    "total": 1240,
+    "caught": 1240,
     "example": "超出工具调用次数上限"
    },
    "must_not_fabricate": {
-    "total": 1338,
-    "caught": 1338,
+    "total": 1072,
+    "caught": 1072,
     "example": "正文里塞数字型结论"
-   },
-   "must_keep_locked": {
-    "total": 63,
-    "caught": 63,
-    "example": "把锁定的伙伴换掉"
-   },
-   "must_not_claim_winrate": {
-    "total": 219,
-    "caught": 219,
-    "example": "把分数说成胜率"
    },
    "must_mention_limitation": {
     "total": 108,
@@ -143,6 +102,11 @@
     "total": 108,
     "caught": 108,
     "example": "拿旧状态版本重算"
+   },
+   "must_not_claim_winrate": {
+    "total": 108,
+    "caught": 108,
+    "example": "把分数说成胜率"
    },
    "must_surface_conflict": {
     "total": 108,
@@ -163,7 +127,7 @@
   "per_arm": {
    "local_4b": {
     "total": 1752,
-    "passed": 1617,
+    "passed": 1240,
     "control": false
    }
   },
@@ -171,5 +135,5 @@
   "drift_example": null,
   "passes": true
  },
- "verdict": false
+ "verdict": true
 }

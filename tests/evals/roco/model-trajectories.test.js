@@ -9,9 +9,20 @@
 //   ① 格式与规则臂**逐字段相同**（否则两把尺子不能横向比）；
 //   ② 身份必须记全，且与文件名一致（第 38 轮存档错位的教训）；
 //   ③ 八类 × 三侧都在；失败原样保留（不许「重试到成功」）；
-//   ④ **两条独立代码路径给出同一组数字**——模型臂的按类别通过率必须与
-//      `shadow-replay-sft-v4.json`（另一条链：影子回放）一致。这一条最有价值：
+//   ④ **两条独立代码路径给出同一组数字**——模型臂的按窗口判定必须与
+//      `shadow-replay-sft-v8.json`（另一条链：影子回放）一致。这一条最有价值：
 //      它把「轨迹生成器」与「影子回放」钉在同一把尺子上。
+//
+// ⚠ 2026-09-28 **改钉（两条）**，都带日期与实测根据：
+//   · 适配器从 `qwen35-4b-tool-v4` 改钉成 **`qwen35-4b-tool-v8`**。原因：① 仓库默认适配器
+//     （`src/coach/local-model.js` 的 `DEFAULT_ADAPTER_NAME`）从 2026-09-28（`2428864`）起就是 v8；
+//     ② 实测 v8 更好（20 条工具覆盖 v8 17/20，v3–v6 都是 10/20、v7 是 15/20；
+//     影子回放 288 条 v8 282/288 = 97.9%，v4 275/288 = 95.5%）；
+//     ③ **旧注释里那句「与文件名 model-v1 一致」是误会** —— `model-v1` 说的是**产物格式版本**，
+//     跟适配器版本无关。人类 2026-09-28 拍板「用 v8」。旧期望逐字留在本条注释里，**没有删**。
+//   · 影子回放基准从 `shadow-replay-sft-v4.json` 换成 `shadow-replay-sft-v8.json`：
+//     对拍的两份必须**同一个适配器**，否则比出来的是模型差异不是尺子差异
+//     （实测过一次：v3 轨迹 vs v4 基准 ⇒ 70 条判定相反，其中 66 条是「没调 query_rules」）。
 
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
@@ -23,7 +34,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, '..', '..', '..');
 const ARTIFACT = join(ROOT, 'tests', 'evals', 'agent-trajectories-model-v1.jsonl');
 const MANIFEST = join(ROOT, 'tests', 'evals', 'agent-trajectories-model-v1.manifest.json');
-const SHADOW_V4 = join(ROOT, 'reports', 'roco', 'shadow-replay-sft-v4.json');
+const SHADOW_BASE = join(ROOT, 'reports', 'roco', 'shadow-replay-sft-v8.json');
 const RULE_ARM = join(ROOT, 'tests', 'evals', 'agent-trajectories-v1.jsonl');
 
 const rows = existsSync(ARTIFACT)
@@ -55,8 +66,9 @@ test('模型身份必须记全，且与文件名一致（第 38 轮存档错位�
   const identity = header?.model_identity;
   assert.ok(identity, '模型臂的产物必须带 model_identity');
   assert.ok(identity.model, '必须记基础模型路径');
-  assert.equal(identity.adapter_basename, 'qwen35-4b-tool-v4',
-    `产物里记的适配器是 ${identity.adapter_basename}，与文件名 model-v1 所指的 v4 不一致`);
+  // 2026-09-28 改钉：这一条原来写 v4（见文件头注释里的改钉记录与实测根据）。
+  assert.equal(identity.adapter_basename, 'qwen35-4b-tool-v8',
+    `产物里记的适配器是 ${identity.adapter_basename}，与人类 2026-09-28 拍板要用的 v8 不一致`);
   assert.match(String(identity.adapter_sha256), /^[0-9a-f]{64}$/, '适配器权重 sha256 缺失或不合法');
   assert.ok(header.prompt_digest, '必须记提示摘要（提示换了要能看出来）');
   assert.ok(identity.ready === true || identity.gateway_reachable === true,
@@ -100,7 +112,7 @@ test('两条独立代码路径必须给出同一组数字（轨迹生成器 vs �
   // 是**两份产物覆盖的窗口集不同**：模型那一份取满 9 个世界（1,752 个窗口），
   // 影子回放每条任务只用 1 个世界（288 个）。所以必须按窗口对拍，不能按类别总数比。
   // 这一条本身就是个教训：**比数字之前先确认两个数字量的是同一批东西**。
-  const shadow = JSON.parse(readFileSync(SHADOW_V4, 'utf8'));
+  const shadow = JSON.parse(readFileSync(SHADOW_BASE, 'utf8'));
   const mine = new Map();
   for (const row of trajectories) mine.set(`${row.case_id}@${row.input.world.id}`, row);
   const unmatched = [];
@@ -118,7 +130,7 @@ test('两条独立代码路径必须给出同一组数字（轨迹生成器 vs �
   assert.equal(mismatched.length, 0,
     `同一批窗口上两条链的判定不同：${JSON.stringify(mismatched.slice(0, 3))}`);
   // 影子回放那 288 个窗口必须**全部**在模型这份里被找到
-  assert.equal(shadow.rows.length, 288, '影子回放 v4 那一份的窗口数变了，对拍口径要重新确认');
+  assert.equal(shadow.rows.length, 288, '影子回放那一份的窗口数变了，对拍口径要重新确认');
   assert.equal(shadow.identity.adapter_sha256, header.model_identity.adapter_sha256,
     '两份产物记的适配器权重哈希不同：其中一份不是这次跑的');
 });

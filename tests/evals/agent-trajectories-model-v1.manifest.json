@@ -7,13 +7,13 @@
   "task_set_digest": "f0b5d51a9142b09e43138e4dcf924698880c032bc8f9650cc5db77abc52ef975",
   "model_identity": {
    "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
-   "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v4",
-   "adapter_sha256": "362cc02087177eb5b61e185d324630aa8319408ebb2b64ff1c37c9c5bd9e33d6",
+   "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v8",
+   "adapter_sha256": "176ff412f5d14904707b7c131a8fef46e785554930841014f6bac191e228d2a9",
    "gateway_reachable": true,
    "ready": true,
    "adapter_file": "adapters.safetensors",
-   "adapter_basename": "qwen35-4b-tool-v4",
-   "identity_digest": "68439b22605d9a638eda96ce5e2c23bb871db02fdbe947824e43b8be53533148",
+   "adapter_basename": "qwen35-4b-tool-v8",
+   "identity_digest": "29e534701f697fa34997ae4aec965df2a65d8f7a2e2a2510668b8a0d6e9e2ac0",
    "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d"
   },
   "prompt_digest": "a5cb0fbcc53fbecd356b86f921030dac1954d737dfa1af731b452b2f04a6654d",
@@ -47,8 +47,8 @@
   ],
   "totals": {
    "trajectories": 1752,
-   "passed": 1617,
-   "engine_refused": 68,
+   "passed": 1240,
+   "engine_refused": 22,
    "cases": 288,
    "worlds": 23
   },
@@ -65,8 +65,8 @@
     "note": "本机 Qwen3.5-4B-4bit + LoRA 适配器：真模型自己选工具（需网关）",
     "limit": 3,
     "total": 1752,
-    "passed": 1617,
-    "pass_rate": 0.9229,
+    "passed": 1240,
+    "pass_rate": 0.7078,
     "per_category": {
      "brief_explain": {
       "total": 180,
@@ -82,11 +82,11 @@
      },
      "roster_constraint": {
       "total": 216,
-      "passed": 111
+      "passed": 0
      },
      "rules_lookup": {
       "total": 648,
-      "passed": 618
+      "passed": 352
      },
      "silence": {
       "total": 60,
@@ -102,9 +102,10 @@
      }
     },
     "stopped": {
-     "complete": 1584,
-     "receipt-budget": 108,
-     "policy": 60
+     "complete": 1636,
+     "receipt-budget": 28,
+     "policy": 60,
+     "invalid-arguments": 28
     }
    }
   }

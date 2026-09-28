@@ -1,6 +1,6 @@
 {
  "generated_by": "scripts/roco/shadow-replay.mjs",
- "arm": "local_4b",
+ "arm": "sft-v8",
  "identity": {
   "model": "/Users/serendizc/Developer/roco-coach/.models/mlx/Qwen3.5-4B-4bit",
   "adapter": "/Users/serendizc/Developer/roco-coach/.models/adapters/qwen35-4b-tool-v8",
@@ -19,119 +19,119 @@
  "note": "同一任务集、同一世界、同一判定器，只换「谁在选工具」。模型只选工具；参数照常过 validToolArgs 与真实引擎，状态版本由运行时覆盖。",
  "summary": {
   "tasks": 288,
-  "passed": 282,
-  "pass_rate": 0.9792,
+  "passed": 267,
+  "pass_rate": 0.9271,
   "stopped": {
-   "complete": 249,
+   "complete": 254,
    "receipt-budget": 12,
-   "invalid-arguments": 15,
+   "invalid-arguments": 10,
    "policy": 12
   },
   "latency": {
-   "p50_ms": 496,
-   "p95_ms": 1044
+   "p50_ms": 660,
+   "p95_ms": 8000
   },
   "by_category": {
    "rules_lookup": {
     "total": 72,
-    "passed": 70,
-    "pass_rate": 0.9722,
-    "p50_ms": 640,
-    "p95_ms": 732
+    "passed": 64,
+    "pass_rate": 0.8889,
+    "p50_ms": 2010,
+    "p95_ms": 8001
    },
    "roster_constraint": {
     "total": 24,
-    "passed": 20,
-    "pass_rate": 0.8333,
-    "p50_ms": 1472,
-    "p95_ms": 1506
+    "passed": 11,
+    "pass_rate": 0.4583,
+    "p50_ms": 3228,
+    "p95_ms": 8001
    },
    "continue_stop": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 424,
-    "p95_ms": 512
+    "p50_ms": 3,
+    "p95_ms": 3961
    },
    "tool_failure": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 575,
-    "p95_ms": 660
+    "p50_ms": 3552,
+    "p95_ms": 8001
    },
    "stale_state": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 485,
-    "p95_ms": 511
+    "p50_ms": 468,
+    "p95_ms": 5690
    },
    "evidence_conflict": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 426,
-    "p95_ms": 689
+    "p50_ms": 419,
+    "p95_ms": 684
    },
    "silence": {
     "total": 12,
     "passed": 12,
     "pass_rate": 1,
     "p50_ms": 0,
-    "p95_ms": 1
+    "p95_ms": 0
    },
    "brief_explain": {
     "total": 36,
     "passed": 36,
     "pass_rate": 1,
-    "p50_ms": 424,
-    "p95_ms": 742
+    "p50_ms": 410,
+    "p95_ms": 734
    }
   },
   "by_split": {
    "family": {
     "held_out": {
      "total": 96,
-     "passed": 94,
-     "pass_rate": 0.9792
+     "passed": 89,
+     "pass_rate": 0.9271
     },
     "seen": {
      "total": 192,
-     "passed": 188,
-     "pass_rate": 0.9792
+     "passed": 178,
+     "pass_rate": 0.9271
     },
     "by_value": {
      "A组三人-无锁定": {
       "total": 96,
-      "passed": 94,
+      "passed": 89,
       "held_out": true,
-      "pass_rate": 0.9792
+      "pass_rate": 0.9271
      },
      "A组三人-锁定寂灭骨龙": {
       "total": 96,
-      "passed": 95,
+      "passed": 88,
       "held_out": false,
-      "pass_rate": 0.9896
+      "pass_rate": 0.9167
      },
      "混编三人-含B组": {
       "total": 96,
-      "passed": 93,
+      "passed": 90,
       "held_out": false,
-      "pass_rate": 0.9688
+      "pass_rate": 0.9375
      }
     }
    },
    "mechanism": {
     "held_out": {
      "total": 81,
-     "passed": 79,
-     "pass_rate": 0.9753
+     "passed": 77,
+     "pass_rate": 0.9506
     },
     "seen": {
      "total": 207,
-     "passed": 203,
-     "pass_rate": 0.9807
+     "passed": 190,
+     "pass_rate": 0.9179
     },
     "by_value": {
      "图鉴字段": {
@@ -148,9 +148,9 @@
      },
      "属性相性": {
       "total": 12,
-      "passed": 12,
+      "passed": 10,
       "held_out": true,
-      "pass_rate": 1
+      "pass_rate": 0.8333
      },
      "学习表": {
       "total": 12,
@@ -160,15 +160,15 @@
      },
      "应对机制": {
       "total": 12,
-      "passed": 12,
-      "held_out": false,
-      "pass_rate": 1
-     },
-     "版本指纹": {
-      "total": 12,
       "passed": 10,
       "held_out": false,
       "pass_rate": 0.8333
+     },
+     "版本指纹": {
+      "total": 12,
+      "passed": 8,
+      "held_out": false,
+      "pass_rate": 0.6667
      },
      "阵容评分": {
       "total": 12,
@@ -178,9 +178,9 @@
      },
      "换人对比": {
       "total": 12,
-      "passed": 10,
+      "passed": 1,
       "held_out": false,
-      "pass_rate": 0.8333
+      "pass_rate": 0.0833
      },
      "单一事实": {
       "total": 12,
@@ -300,33 +300,33 @@
     },
     "seen": {
      "total": 258,
-     "passed": 252,
-     "pass_rate": 0.9767
+     "passed": 237,
+     "pass_rate": 0.9186
     },
     "by_value": {
      "直问": {
       "total": 60,
-      "passed": 58,
+      "passed": 55,
       "held_out": false,
-      "pass_rate": 0.9667
+      "pass_rate": 0.9167
      },
      "口语": {
       "total": 60,
-      "passed": 59,
+      "passed": 55,
       "held_out": false,
-      "pass_rate": 0.9833
+      "pass_rate": 0.9167
      },
      "追问": {
       "total": 51,
-      "passed": 50,
+      "passed": 46,
       "held_out": false,
-      "pass_rate": 0.9804
+      "pass_rate": 0.902
      },
      "背景": {
       "total": 60,
-      "passed": 58,
+      "passed": 54,
       "held_out": false,
-      "pass_rate": 0.9667
+      "pass_rate": 0.9
      },
      "委托": {
       "total": 9,
@@ -390,7 +390,7 @@
   {
    "case_id": "rl-pet-f0-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "图鉴字段",
@@ -414,12 +414,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 672
+   "wall_ms": 3522
   },
   {
    "case_id": "rl-pet-f0-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "A组三人-无锁定",
    "mechanism": "图鉴字段",
@@ -443,12 +443,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 640
+   "wall_ms": 686
   },
   {
    "case_id": "rl-pet-f0-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-无锁定",
    "mechanism": "图鉴字段",
@@ -472,12 +472,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 664
+   "wall_ms": 681
   },
   {
    "case_id": "rl-pet-f0-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "A组三人-无锁定",
    "mechanism": "图鉴字段",
@@ -501,12 +501,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 686
+   "wall_ms": 680
   },
   {
    "case_id": "rl-pet-f1-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "图鉴字段",
@@ -529,12 +529,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 712
+   "wall_ms": 679
   },
   {
    "case_id": "rl-pet-f1-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-4",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "图鉴字段",
@@ -557,12 +557,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 717
+   "wall_ms": 691
   },
   {
    "case_id": "rl-pet-f1-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "图鉴字段",
@@ -585,12 +585,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 720
+   "wall_ms": 682
   },
   {
    "case_id": "rl-pet-f1-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "图鉴字段",
@@ -613,12 +613,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 705
+   "wall_ms": 683
   },
   {
    "case_id": "rl-pet-f2-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "混编三人-含B组",
    "mechanism": "图鉴字段",
@@ -641,12 +641,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 686
+   "wall_ms": 677
   },
   {
    "case_id": "rl-pet-f2-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "混编三人-含B组",
    "mechanism": "图鉴字段",
@@ -669,12 +669,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 687
+   "wall_ms": 680
   },
   {
    "case_id": "rl-pet-f2-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "混编三人-含B组",
    "mechanism": "图鉴字段",
@@ -697,12 +697,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 687
+   "wall_ms": 691
   },
   {
    "case_id": "rl-pet-f2-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "混编三人-含B组",
    "mechanism": "图鉴字段",
@@ -725,12 +725,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 685
+   "wall_ms": 688
   },
   {
    "case_id": "rl-skill-f0-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-无锁定",
    "mechanism": "技能静态威力",
@@ -753,12 +753,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 606
+   "wall_ms": 602
   },
   {
    "case_id": "rl-skill-f0-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "A组三人-无锁定",
    "mechanism": "技能静态威力",
@@ -781,12 +781,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 606
+   "wall_ms": 624
   },
   {
    "case_id": "rl-skill-f0-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "技能静态威力",
@@ -809,12 +809,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 610
+   "wall_ms": 595
   },
   {
    "case_id": "rl-skill-f0-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "A组三人-无锁定",
    "mechanism": "技能静态威力",
@@ -822,136 +822,6 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 605
-  },
-  {
-   "case_id": "rl-skill-f1-01",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-3",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "技能静态威力",
-   "template": "直问",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 608
-  },
-  {
-   "case_id": "rl-skill-f1-02",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-locked-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "技能静态威力",
-   "template": "口语",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 607
-  },
-  {
-   "case_id": "rl-skill-f1-03",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-0",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "技能静态威力",
-   "template": "追问",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 609
-  },
-  {
-   "case_id": "rl-skill-f1-04",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "技能静态威力",
-   "template": "背景",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "skill",
-      "name": "坟场搏击",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 605
-  },
-  {
-   "case_id": "rl-skill-f2-01",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-locked-2",
-   "family": "混编三人-含B组",
-   "mechanism": "技能静态威力",
-   "template": "直问",
-   "held_out_dimensions": [],
    "trace": [
     {
      "tool": "query_rules",
@@ -970,9 +840,139 @@
    "wall_ms": 604
   },
   {
+   "case_id": "rl-skill-f1-01",
+   "category": "rules_lookup",
+   "arm": "sft-v8",
+   "world": "camp-3",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 591
+  },
+  {
+   "case_id": "rl-skill-f1-02",
+   "category": "rules_lookup",
+   "arm": "sft-v8",
+   "world": "camp-locked-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 592
+  },
+  {
+   "case_id": "rl-skill-f1-03",
+   "category": "rules_lookup",
+   "arm": "sft-v8",
+   "world": "camp-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 586
+  },
+  {
+   "case_id": "rl-skill-f1-04",
+   "category": "rules_lookup",
+   "arm": "sft-v8",
+   "world": "camp-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "技能静态威力",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 581
+  },
+  {
+   "case_id": "rl-skill-f2-01",
+   "category": "rules_lookup",
+   "arm": "sft-v8",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "技能静态威力",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "skill",
+      "name": "坟场搏击",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 4462
+  },
+  {
    "case_id": "rl-skill-f2-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "混编三人-含B组",
    "mechanism": "技能静态威力",
@@ -993,12 +993,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 608
+   "wall_ms": 2449
   },
   {
    "case_id": "rl-skill-f2-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "混编三人-含B组",
    "mechanism": "技能静态威力",
@@ -1019,12 +1019,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 594
+   "wall_ms": 1172
   },
   {
    "case_id": "rl-skill-f2-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "混编三人-含B组",
    "mechanism": "技能静态威力",
@@ -1045,12 +1045,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 603
+   "wall_ms": 1169
   },
   {
    "case_id": "rl-type-f0-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "属性相性",
@@ -1077,12 +1077,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 727
+   "wall_ms": 7252
   },
   {
    "case_id": "rl-type-f0-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "A组三人-无锁定",
    "mechanism": "属性相性",
@@ -1109,12 +1109,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 734
+   "wall_ms": 1271
   },
   {
    "case_id": "rl-type-f0-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-无锁定",
    "mechanism": "属性相性",
@@ -1141,12 +1141,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 728
+   "wall_ms": 5894
   },
   {
    "case_id": "rl-type-f0-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "A组三人-无锁定",
    "mechanism": "属性相性",
@@ -1173,12 +1173,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 733
+   "wall_ms": 1281
   },
   {
    "case_id": "rl-type-f1-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "属性相性",
@@ -1204,12 +1204,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 726
+   "wall_ms": 2614
   },
   {
    "case_id": "rl-type-f1-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "属性相性",
@@ -1235,12 +1235,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 730
+   "wall_ms": 2595
   },
   {
    "case_id": "rl-type-f1-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "属性相性",
@@ -1248,30 +1248,19 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "type_multiplier",
-      "attack_element": "龙系",
-      "defender_types": [
-       "幽系"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 736
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 8002
   },
   {
    "case_id": "rl-type-f1-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "属性相性",
@@ -1297,12 +1286,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 732
+   "wall_ms": 1095
   },
   {
    "case_id": "rl-type-f2-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "混编三人-含B组",
    "mechanism": "属性相性",
@@ -1328,12 +1317,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 731
+   "wall_ms": 1337
   },
   {
    "case_id": "rl-type-f2-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "混编三人-含B组",
    "mechanism": "属性相性",
@@ -1359,12 +1348,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 729
+   "wall_ms": 4589
   },
   {
    "case_id": "rl-type-f2-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "混编三人-含B组",
    "mechanism": "属性相性",
@@ -1390,12 +1379,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 726
+   "wall_ms": 1270
   },
   {
    "case_id": "rl-type-f2-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "混编三人-含B组",
    "mechanism": "属性相性",
@@ -1403,30 +1392,19 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "type_multiplier",
-      "attack_element": "龙系",
-      "defender_types": [
-       "幽系"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 728
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"type_multiplier\",\"attack_element\":\"龙系\",\"defender_types\":[\"幽系\"]} 的一次调用"
+   ],
+   "wall_ms": 8001
   },
   {
    "case_id": "rl-learn-f0-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "学习表",
@@ -1449,12 +1427,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 714
+   "wall_ms": 3179
   },
   {
    "case_id": "rl-learn-f0-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "学习表",
@@ -1477,12 +1455,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 708
+   "wall_ms": 2586
   },
   {
    "case_id": "rl-learn-f0-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-无锁定",
    "mechanism": "学习表",
@@ -1505,12 +1483,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 700
+   "wall_ms": 3931
   },
   {
    "case_id": "rl-learn-f0-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "A组三人-无锁定",
    "mechanism": "学习表",
@@ -1533,12 +1511,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 698
+   "wall_ms": 4009
   },
   {
    "case_id": "rl-learn-f1-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "学习表",
@@ -1559,12 +1537,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 702
+   "wall_ms": 3371
   },
   {
    "case_id": "rl-learn-f1-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "学习表",
@@ -1585,12 +1563,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 706
+   "wall_ms": 2650
   },
   {
    "case_id": "rl-learn-f1-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "学习表",
@@ -1611,12 +1589,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 700
+   "wall_ms": 1263
   },
   {
    "case_id": "rl-learn-f1-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "学习表",
@@ -1637,12 +1615,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 706
+   "wall_ms": 3281
   },
   {
    "case_id": "rl-learn-f2-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "混编三人-含B组",
    "mechanism": "学习表",
@@ -1663,12 +1641,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 699
+   "wall_ms": 1951
   },
   {
    "case_id": "rl-learn-f2-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "混编三人-含B组",
    "mechanism": "学习表",
@@ -1689,12 +1667,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 707
+   "wall_ms": 2652
   },
   {
    "case_id": "rl-learn-f2-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "混编三人-含B组",
    "mechanism": "学习表",
@@ -1715,12 +1693,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 707
+   "wall_ms": 5919
   },
   {
    "case_id": "rl-learn-f2-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "混编三人-含B组",
    "mechanism": "学习表",
@@ -1741,12 +1719,12 @@
    "stopped": "receipt-budget",
    "passed": true,
    "violations": [],
-   "wall_ms": 710
+   "wall_ms": 7201
   },
   {
    "case_id": "rl-term-f0-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-无锁定",
    "mechanism": "应对机制",
@@ -1769,12 +1747,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 627
+   "wall_ms": 5964
   },
   {
    "case_id": "rl-term-f0-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "A组三人-无锁定",
    "mechanism": "应对机制",
@@ -1797,12 +1775,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 631
+   "wall_ms": 2344
   },
   {
    "case_id": "rl-term-f0-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-无锁定",
    "mechanism": "应对机制",
@@ -1825,12 +1803,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 634
+   "wall_ms": 1148
   },
   {
    "case_id": "rl-term-f0-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-无锁定",
    "mechanism": "应对机制",
@@ -1853,12 +1831,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 628
+   "wall_ms": 1731
   },
   {
    "case_id": "rl-term-f1-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "应对机制",
@@ -1879,12 +1857,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 628
+   "wall_ms": 1740
   },
   {
    "case_id": "rl-term-f1-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "应对机制",
@@ -1905,38 +1883,30 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 635
+   "wall_ms": 1746
   },
   {
    "case_id": "rl-term-f1-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "应对机制",
    "template": "追问",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "term",
-      "term_id": "1015",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 634
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 8000
   },
   {
    "case_id": "rl-term-f1-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-4",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "应对机制",
@@ -1957,12 +1927,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 626
+   "wall_ms": 1419
   },
   {
    "case_id": "rl-term-f2-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "混编三人-含B组",
    "mechanism": "应对机制",
@@ -1983,12 +1953,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 632
+   "wall_ms": 5359
   },
   {
    "case_id": "rl-term-f2-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "混编三人-含B组",
    "mechanism": "应对机制",
@@ -2009,12 +1979,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 635
+   "wall_ms": 1151
   },
   {
    "case_id": "rl-term-f2-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "混编三人-含B组",
    "mechanism": "应对机制",
@@ -2035,38 +2005,30 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 632
+   "wall_ms": 6616
   },
   {
    "case_id": "rl-term-f2-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "混编三人-含B组",
    "mechanism": "应对机制",
    "template": "背景",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "term",
-      "term_id": "1015",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 638
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"term\",\"term_id\":\"1015\"} 的一次调用"
+   ],
+   "wall_ms": 8002
   },
   {
    "case_id": "rl-ruleset-f0-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "A组三人-无锁定",
    "mechanism": "版本指纹",
@@ -2088,12 +2050,12 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
    ],
-   "wall_ms": 497
+   "wall_ms": 595
   },
   {
    "case_id": "rl-ruleset-f0-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-无锁定",
    "mechanism": "版本指纹",
@@ -2101,26 +2063,19 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 535
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 8001
   },
   {
    "case_id": "rl-ruleset-f0-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "A组三人-无锁定",
    "mechanism": "版本指纹",
@@ -2130,34 +2085,7 @@
    ],
    "trace": [
     {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 518
-  },
-  {
-   "case_id": "rl-ruleset-f0-04",
-   "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-3",
-   "family": "A组三人-无锁定",
-   "mechanism": "版本指纹",
-   "template": "背景",
-   "held_out_dimensions": [
-    "family"
-   ],
-   "trace": [
-    {
-     "tool": "inspect_training",
+     "tool": "read_state",
      "args": {},
      "ok": false,
      "error_type": null
@@ -2169,17 +2097,19 @@
     "没有调用应当调用的工具 query_rules",
     "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
    ],
-   "wall_ms": 476
+   "wall_ms": 1528
   },
   {
-   "case_id": "rl-ruleset-f1-01",
+   "case_id": "rl-ruleset-f0-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
-   "world": "camp-1",
-   "family": "A组三人-锁定寂灭骨龙",
+   "arm": "sft-v8",
+   "world": "camp-3",
+   "family": "A组三人-无锁定",
    "mechanism": "版本指纹",
-   "template": "直问",
-   "held_out_dimensions": [],
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
    "trace": [
     {
      "tool": "query_rules",
@@ -2194,12 +2124,30 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 519
+   "wall_ms": 7483
+  },
+  {
+   "case_id": "rl-ruleset-f1-01",
+   "category": "rules_lookup",
+   "arm": "sft-v8",
+   "world": "camp-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "版本指纹",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 query_rules",
+    "query_rules 的参数里没有同时满足 {\"kind\":\"ruleset\"} 的一次调用"
+   ],
+   "wall_ms": 8001
   },
   {
    "case_id": "rl-ruleset-f1-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "版本指纹",
@@ -2219,12 +2167,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 521
+   "wall_ms": 7388
   },
   {
    "case_id": "rl-ruleset-f1-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-4",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "版本指纹",
@@ -2244,12 +2192,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 507
+   "wall_ms": 3564
   },
   {
    "case_id": "rl-ruleset-f1-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "版本指纹",
@@ -2269,12 +2217,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 501
+   "wall_ms": 4937
   },
   {
    "case_id": "rl-ruleset-f2-01",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "混编三人-含B组",
    "mechanism": "版本指纹",
@@ -2294,12 +2242,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 496
+   "wall_ms": 2010
   },
   {
    "case_id": "rl-ruleset-f2-02",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "混编三人-含B组",
    "mechanism": "版本指纹",
@@ -2319,12 +2267,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 492
+   "wall_ms": 2777
   },
   {
    "case_id": "rl-ruleset-f2-03",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "混编三人-含B组",
    "mechanism": "版本指纹",
@@ -2344,12 +2292,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 501
+   "wall_ms": 5261
   },
   {
    "case_id": "rl-ruleset-f2-04",
    "category": "rules_lookup",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "混编三人-含B组",
    "mechanism": "版本指纹",
@@ -2369,12 +2317,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 506
+   "wall_ms": 4517
   },
   {
    "case_id": "rc-eval-f0-01",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "A组三人-无锁定",
    "mechanism": "阵容评分",
@@ -2402,12 +2350,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 972
+   "wall_ms": 1766
   },
   {
    "case_id": "rc-eval-f0-02",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "A组三人-无锁定",
    "mechanism": "阵容评分",
@@ -2435,12 +2383,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 975
+   "wall_ms": 6532
   },
   {
    "case_id": "rc-eval-f0-03",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "A组三人-无锁定",
    "mechanism": "阵容评分",
@@ -2468,12 +2416,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 985
+   "wall_ms": 3464
   },
   {
    "case_id": "rc-eval-f0-04",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-无锁定",
    "mechanism": "阵容评分",
@@ -2501,12 +2449,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 1039
+   "wall_ms": 3228
   },
   {
    "case_id": "rc-eval-f1-01",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "阵容评分",
@@ -2533,12 +2481,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 1046
+   "wall_ms": 3277
   },
   {
    "case_id": "rc-eval-f1-02",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "阵容评分",
@@ -2565,37 +2513,16 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 1049
+   "wall_ms": 5455
   },
   {
    "case_id": "rc-eval-f1-03",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "阵容评分",
    "template": "追问",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": false,
-   "violations": [
-    "没有调用应当调用的工具 evaluate_team",
-    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
-    "换掉了玩家锁定的 pet_000225"
-   ],
-   "wall_ms": 675
-  },
-  {
-   "case_id": "rc-eval-f1-04",
-   "category": "roster_constraint",
-   "arm": "local_4b",
-   "world": "camp-4",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "阵容评分",
-   "template": "背景",
    "held_out_dimensions": [
     "mechanism"
    ],
@@ -2618,12 +2545,33 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 1038
+   "wall_ms": 3936
+  },
+  {
+   "case_id": "rc-eval-f1-04",
+   "category": "roster_constraint",
+   "arm": "sft-v8",
+   "world": "camp-4",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "阵容评分",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 evaluate_team",
+    "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 8001
   },
   {
    "case_id": "rc-eval-f2-01",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-4",
    "family": "混编三人-含B组",
    "mechanism": "阵容评分",
@@ -2649,79 +2597,16 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 884
+   "wall_ms": 1485
   },
   {
    "case_id": "rc-eval-f2-02",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "混编三人-含B组",
    "mechanism": "阵容评分",
    "template": "口语",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "evaluate_team",
-     "args": {
-      "team": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 884
-  },
-  {
-   "case_id": "rc-eval-f2-03",
-   "category": "roster_constraint",
-   "arm": "local_4b",
-   "world": "camp-locked-2",
-   "family": "混编三人-含B组",
-   "mechanism": "阵容评分",
-   "template": "追问",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "evaluate_team",
-     "args": {
-      "team": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1044
-  },
-  {
-   "case_id": "rc-eval-f2-04",
-   "category": "roster_constraint",
-   "arm": "local_4b",
-   "world": "camp-locked-2",
-   "family": "混编三人-含B组",
-   "mechanism": "阵容评分",
-   "template": "背景",
    "held_out_dimensions": [
     "mechanism"
    ],
@@ -2732,12 +2617,76 @@
     "没有调用应当调用的工具 evaluate_team",
     "evaluate_team 的参数里没有同时满足 {\"team\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"]} 的一次调用"
    ],
-   "wall_ms": 507
+   "wall_ms": 1117
+  },
+  {
+   "case_id": "rc-eval-f2-03",
+   "category": "roster_constraint",
+   "arm": "sft-v8",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "阵容评分",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1948
+  },
+  {
+   "case_id": "rc-eval-f2-04",
+   "category": "roster_constraint",
+   "arm": "sft-v8",
+   "world": "camp-locked-2",
+   "family": "混编三人-含B组",
+   "mechanism": "阵容评分",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "evaluate_team",
+     "args": {
+      "team": [
+       "pet_000225",
+       "pet_000190",
+       "pet_000445"
+      ],
+      "locked_pet": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 4516
   },
   {
    "case_id": "rc-swap-f0-01",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "换人对比",
@@ -2745,36 +2694,20 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1472
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 8001
   },
   {
    "case_id": "rc-swap-f0-02",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "换人对比",
@@ -2782,36 +2715,20 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1497
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 8001
   },
   {
    "case_id": "rc-swap-f0-03",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "A组三人-无锁定",
    "mechanism": "换人对比",
@@ -2819,36 +2736,20 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1512
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 8001
   },
   {
    "case_id": "rc-swap-f0-04",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-4",
    "family": "A组三人-无锁定",
    "mechanism": "换人对比",
@@ -2856,212 +2757,132 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1503
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 8000
   },
   {
    "case_id": "rc-swap-f1-01",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "换人对比",
    "template": "直问",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1484
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 5
   },
   {
    "case_id": "rc-swap-f1-02",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "换人对比",
    "template": "口语",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1490
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 3
   },
   {
    "case_id": "rc-swap-f1-03",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "换人对比",
    "template": "追问",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1502
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 2
   },
   {
    "case_id": "rc-swap-f1-04",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-4",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "换人对比",
    "template": "背景",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1501
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"],\"locked_pet\":\"pet_000225\"} 的一次调用",
+    "换掉了玩家锁定的 pet_000225"
+   ],
+   "wall_ms": 3
   },
   {
    "case_id": "rc-swap-f2-01",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "混编三人-含B组",
    "mechanism": "换人对比",
    "template": "直问",
    "held_out_dimensions": [],
    "trace": [],
-   "stopped": "invalid-arguments",
+   "stopped": "complete",
    "passed": false,
    "violations": [
     "没有调用应当调用的工具 compare_team_change",
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
    ],
-   "wall_ms": 1493
+   "wall_ms": 4
   },
   {
    "case_id": "rc-swap-f2-02",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "混编三人-含B组",
    "mechanism": "换人对比",
    "template": "口语",
    "held_out_dimensions": [],
    "trace": [],
-   "stopped": "invalid-arguments",
+   "stopped": "complete",
    "passed": false,
    "violations": [
     "没有调用应当调用的工具 compare_team_change",
     "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
    ],
-   "wall_ms": 1501
+   "wall_ms": 4
   },
   {
    "case_id": "rc-swap-f2-03",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "混编三人-含B组",
    "mechanism": "换人对比",
@@ -3091,47 +2912,30 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 1506
+   "wall_ms": 1448
   },
   {
    "case_id": "rc-swap-f2-04",
    "category": "roster_constraint",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "混编三人-含B组",
    "mechanism": "换人对比",
    "template": "背景",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_team_change",
-     "args": {
-      "team_before": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000445"
-      ],
-      "team_after": [
-       "pet_000225",
-       "pet_000190",
-       "pet_000417"
-      ],
-      "locked_pet": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 1503
+   "passed": false,
+   "violations": [
+    "没有调用应当调用的工具 compare_team_change",
+    "compare_team_change 的参数里没有同时满足 {\"team_before\":[\"pet_000225\",\"pet_000190\",\"pet_000445\"],\"team_after\":[\"pet_000225\",\"pet_000190\",\"pet_000417\"]} 的一次调用"
+   ],
+   "wall_ms": 2
   },
   {
    "case_id": "cs-answered-f0-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "A组三人-无锁定",
    "mechanism": "单一事实",
@@ -3143,12 +2947,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 452
+   "wall_ms": 4
   },
   {
    "case_id": "cs-answered-f0-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-无锁定",
    "mechanism": "单一事实",
@@ -3160,12 +2964,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 439
+   "wall_ms": 1
   },
   {
    "case_id": "cs-answered-f0-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "单一事实",
@@ -3178,12 +2982,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 442
+   "wall_ms": 3
   },
   {
    "case_id": "cs-answered-f0-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-无锁定",
    "mechanism": "单一事实",
@@ -3195,12 +2999,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 2
   },
   {
    "case_id": "cs-answered-f1-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "单一事实",
@@ -3210,12 +3014,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 2
   },
   {
    "case_id": "cs-answered-f1-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "单一事实",
@@ -3225,12 +3029,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 3
   },
   {
    "case_id": "cs-answered-f1-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "单一事实",
@@ -3242,12 +3046,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 419
+   "wall_ms": 3
   },
   {
    "case_id": "cs-answered-f1-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "单一事实",
@@ -3257,12 +3061,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 420
+   "wall_ms": 2
   },
   {
    "case_id": "cs-answered-f2-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "混编三人-含B组",
    "mechanism": "单一事实",
@@ -3272,12 +3076,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 3
   },
   {
    "case_id": "cs-answered-f2-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "混编三人-含B组",
    "mechanism": "单一事实",
@@ -3287,12 +3091,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 3
   },
   {
    "case_id": "cs-answered-f2-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "混编三人-含B组",
    "mechanism": "单一事实",
@@ -3304,12 +3108,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 2
   },
   {
    "case_id": "cs-answered-f2-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "混编三人-含B组",
    "mechanism": "单一事实",
@@ -3319,12 +3123,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 420
+   "wall_ms": 1
   },
   {
    "case_id": "cs-lastturn-f0-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-无锁定",
    "mechanism": "回看记录",
@@ -3333,23 +3137,16 @@
     "family",
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "read_last_turn",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 501
+   "wall_ms": 2
   },
   {
    "case_id": "cs-lastturn-f0-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-1",
    "family": "A组三人-无锁定",
    "mechanism": "回看记录",
@@ -3358,23 +3155,16 @@
     "family",
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "read_last_turn",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 504
+   "wall_ms": 2
   },
   {
    "case_id": "cs-lastturn-f0-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "A组三人-无锁定",
    "mechanism": "回看记录",
@@ -3388,12 +3178,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 412
+   "wall_ms": 1
   },
   {
    "case_id": "cs-lastturn-f0-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "A组三人-无锁定",
    "mechanism": "回看记录",
@@ -3402,23 +3192,16 @@
     "family",
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "read_last_turn",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 496
+   "wall_ms": 3
   },
   {
    "case_id": "cs-lastturn-f1-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "回看记录",
@@ -3426,23 +3209,16 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "read_last_turn",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 500
+   "wall_ms": 1
   },
   {
    "case_id": "cs-lastturn-f1-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "回看记录",
@@ -3454,12 +3230,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 418
+   "wall_ms": 2
   },
   {
    "case_id": "cs-lastturn-f1-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "回看记录",
@@ -3468,25 +3244,16 @@
     "mechanism",
     "template"
    ],
-   "trace": [
-    {
-     "tool": "read_evidence",
-     "args": {
-      "turn": 1
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 534
+   "wall_ms": 2
   },
   {
    "case_id": "cs-lastturn-f1-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-4",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "回看记录",
@@ -3498,12 +3265,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 1
   },
   {
    "case_id": "cs-lastturn-f2-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "混编三人-含B组",
    "mechanism": "回看记录",
@@ -3515,12 +3282,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 2
   },
   {
    "case_id": "cs-lastturn-f2-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "混编三人-含B组",
    "mechanism": "回看记录",
@@ -3528,23 +3295,16 @@
    "held_out_dimensions": [
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "read_last_turn",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 512
+   "wall_ms": 3
   },
   {
    "case_id": "cs-lastturn-f2-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "混编三人-含B组",
    "mechanism": "回看记录",
@@ -3557,12 +3317,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 1
   },
   {
    "case_id": "cs-lastturn-f2-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "混编三人-含B组",
    "mechanism": "回看记录",
@@ -3574,12 +3334,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 418
+   "wall_ms": 2
   },
   {
    "case_id": "cs-diagnose-f0-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "A组三人-无锁定",
    "mechanism": "阵容诊断",
@@ -3591,12 +3351,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 417
+   "wall_ms": 3
   },
   {
    "case_id": "cs-diagnose-f0-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "A组三人-无锁定",
    "mechanism": "阵容诊断",
@@ -3608,12 +3368,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 412
+   "wall_ms": 3
   },
   {
    "case_id": "cs-diagnose-f0-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-2",
    "family": "A组三人-无锁定",
    "mechanism": "阵容诊断",
@@ -3626,12 +3386,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 418
+   "wall_ms": 3
   },
   {
    "case_id": "cs-diagnose-f0-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "A组三人-无锁定",
    "mechanism": "阵容诊断",
@@ -3643,12 +3403,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 417
+   "wall_ms": 2
   },
   {
    "case_id": "cs-diagnose-f1-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "阵容诊断",
@@ -3658,12 +3418,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 1783
   },
   {
    "case_id": "cs-diagnose-f1-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-5",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "阵容诊断",
@@ -3673,12 +3433,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 422
+   "wall_ms": 1734
   },
   {
    "case_id": "cs-diagnose-f1-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "阵容诊断",
@@ -3690,12 +3450,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 411
+   "wall_ms": 3293
   },
   {
    "case_id": "cs-diagnose-f1-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "阵容诊断",
@@ -3705,12 +3465,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 2881
   },
   {
    "case_id": "cs-diagnose-f2-01",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-4",
    "family": "混编三人-含B组",
    "mechanism": "阵容诊断",
@@ -3720,12 +3480,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 695
   },
   {
    "case_id": "cs-diagnose-f2-02",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-3",
    "family": "混编三人-含B组",
    "mechanism": "阵容诊断",
@@ -3735,12 +3495,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 420
+   "wall_ms": 5118
   },
   {
    "case_id": "cs-diagnose-f2-03",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-0",
    "family": "混编三人-含B组",
    "mechanism": "阵容诊断",
@@ -3752,12 +3512,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 419
+   "wall_ms": 3961
   },
   {
    "case_id": "cs-diagnose-f2-04",
    "category": "continue_stop",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-locked-0",
    "family": "混编三人-含B组",
    "mechanism": "阵容诊断",
@@ -3767,12 +3527,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 415
+   "wall_ms": 1123
   },
   {
    "case_id": "tf-damage-f0-01",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "A组三人-无锁定",
    "mechanism": "条件化威力",
@@ -3796,12 +3556,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 576
+   "wall_ms": 5182
   },
   {
    "case_id": "tf-damage-f0-02",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
    "family": "A组三人-无锁定",
    "mechanism": "条件化威力",
@@ -3825,12 +3585,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 584
+   "wall_ms": 2623
   },
   {
    "case_id": "tf-damage-f0-03",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "A组三人-无锁定",
    "mechanism": "条件化威力",
@@ -3839,145 +3599,22 @@
     "family",
     "mechanism"
    ],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "坟场搏击:1"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 587
+   "wall_ms": 8001
   },
   {
    "case_id": "tf-damage-f0-04",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "A组三人-无锁定",
    "mechanism": "条件化威力",
    "template": "背景",
    "held_out_dimensions": [
     "family",
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "pet_000225:1"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 646
-  },
-  {
-   "case_id": "tf-damage-f1-01",
-   "category": "tool_failure",
-   "arm": "local_4b",
-   "world": "battle-refuse-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "条件化威力",
-   "template": "直问",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "寂灭骨龙:坟场搏击"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 635
-  },
-  {
-   "case_id": "tf-damage-f1-02",
-   "category": "tool_failure",
-   "arm": "local_4b",
-   "world": "battle-refuse-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "条件化威力",
-   "template": "口语",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "寂灭骨龙:坟场搏击"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 632
-  },
-  {
-   "case_id": "tf-damage-f1-03",
-   "category": "tool_failure",
-   "arm": "local_4b",
-   "world": "battle-refuse-0",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "条件化威力",
-   "template": "追问",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "pet_000225:1"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 660
-  },
-  {
-   "case_id": "tf-damage-f1-04",
-   "category": "tool_failure",
-   "arm": "local_4b",
-   "world": "battle-refuse-2",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "条件化威力",
-   "template": "背景",
-   "held_out_dimensions": [
     "mechanism"
    ],
    "trace": [
@@ -3995,72 +3632,16 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 589
+   "wall_ms": 2136
   },
   {
-   "case_id": "tf-damage-f2-01",
+   "case_id": "tf-damage-f1-01",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
-   "family": "混编三人-含B组",
+   "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "条件化威力",
    "template": "直问",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "pet_000225:1"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 663
-  },
-  {
-   "case_id": "tf-damage-f2-02",
-   "category": "tool_failure",
-   "arm": "local_4b",
-   "world": "battle-refuse-0",
-   "family": "混编三人-含B组",
-   "mechanism": "条件化威力",
-   "template": "口语",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "pet_000225:1"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 658
-  },
-  {
-   "case_id": "tf-damage-f2-03",
-   "category": "tool_failure",
-   "arm": "local_4b",
-   "world": "battle-refuse-1",
-   "family": "混编三人-含B组",
-   "mechanism": "条件化威力",
-   "template": "追问",
    "held_out_dimensions": [
     "mechanism"
    ],
@@ -4079,12 +3660,180 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 555
+   "wall_ms": 914
+  },
+  {
+   "case_id": "tf-damage-f1-02",
+   "category": "tool_failure",
+   "arm": "sft-v8",
+   "world": "battle-refuse-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "条件化威力",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "simulate_branch",
+     "args": {
+      "candidates": [
+       "寂灭骨龙:坟场搏击"
+      ]
+     },
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 3776
+  },
+  {
+   "case_id": "tf-damage-f1-03",
+   "category": "tool_failure",
+   "arm": "sft-v8",
+   "world": "battle-refuse-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "条件化威力",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "simulate_branch",
+     "args": {
+      "candidates": [
+       "坟场搏击:1"
+      ]
+     },
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 3670
+  },
+  {
+   "case_id": "tf-damage-f1-04",
+   "category": "tool_failure",
+   "arm": "sft-v8",
+   "world": "battle-refuse-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "条件化威力",
+   "template": "背景",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "simulate_branch",
+     "args": {
+      "candidates": [
+       "坟场搏击:1"
+      ]
+     },
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 3036
+  },
+  {
+   "case_id": "tf-damage-f2-01",
+   "category": "tool_failure",
+   "arm": "sft-v8",
+   "world": "battle-refuse-1",
+   "family": "混编三人-含B组",
+   "mechanism": "条件化威力",
+   "template": "直问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "simulate_branch",
+     "args": {
+      "candidates": [
+       "坟场搏击:1"
+      ]
+     },
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1736
+  },
+  {
+   "case_id": "tf-damage-f2-02",
+   "category": "tool_failure",
+   "arm": "sft-v8",
+   "world": "battle-refuse-0",
+   "family": "混编三人-含B组",
+   "mechanism": "条件化威力",
+   "template": "口语",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "simulate_branch",
+     "args": {
+      "candidates": [
+       "坟场搏击:1"
+      ]
+     },
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1777
+  },
+  {
+   "case_id": "tf-damage-f2-03",
+   "category": "tool_failure",
+   "arm": "sft-v8",
+   "world": "battle-refuse-1",
+   "family": "混编三人-含B组",
+   "mechanism": "条件化威力",
+   "template": "追问",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "simulate_branch",
+     "args": {
+      "candidates": [
+       "坟场搏击:1"
+      ]
+     },
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1739
   },
   {
    "case_id": "tf-damage-f2-04",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "混编三人-含B组",
    "mechanism": "条件化威力",
@@ -4107,12 +3856,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 594
+   "wall_ms": 1083
   },
   {
    "case_id": "tf-plan-f0-01",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "A组三人-无锁定",
    "mechanism": "推演",
@@ -4120,27 +3869,16 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "defender:1"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 570
+   "wall_ms": 8002
   },
   {
    "case_id": "tf-plan-f0-02",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
    "family": "A组三人-无锁定",
    "mechanism": "推演",
@@ -4163,12 +3901,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 570
+   "wall_ms": 7813
   },
   {
    "case_id": "tf-plan-f0-03",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "A组三人-无锁定",
    "mechanism": "推演",
@@ -4191,12 +3929,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 568
+   "wall_ms": 967
   },
   {
    "case_id": "tf-plan-f0-04",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "A组三人-无锁定",
    "mechanism": "推演",
@@ -4219,12 +3957,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 573
+   "wall_ms": 841
   },
   {
    "case_id": "tf-plan-f1-01",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "推演",
@@ -4245,12 +3983,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 580
+   "wall_ms": 7602
   },
   {
    "case_id": "tf-plan-f1-02",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "推演",
@@ -4271,12 +4009,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 575
+   "wall_ms": 5023
   },
   {
    "case_id": "tf-plan-f1-03",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "推演",
@@ -4297,12 +4035,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 578
+   "wall_ms": 2024
   },
   {
    "case_id": "tf-plan-f1-04",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "推演",
@@ -4323,12 +4061,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 582
+   "wall_ms": 3552
   },
   {
    "case_id": "tf-plan-f2-01",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "混编三人-含B组",
    "mechanism": "推演",
@@ -4349,12 +4087,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 580
+   "wall_ms": 4022
   },
   {
    "case_id": "tf-plan-f2-02",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "混编三人-含B组",
    "mechanism": "推演",
@@ -4375,12 +4113,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 580
+   "wall_ms": 4682
   },
   {
    "case_id": "tf-plan-f2-03",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "混编三人-含B组",
    "mechanism": "推演",
@@ -4401,38 +4139,27 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 576
+   "wall_ms": 2407
   },
   {
    "case_id": "tf-plan-f2-04",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "混编三人-含B组",
    "mechanism": "推演",
    "template": "背景",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "simulate_branch",
-     "args": {
-      "candidates": [
-       "defender:1"
-      ]
-     },
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 574
+   "wall_ms": 8001
   },
   {
    "case_id": "tf-summary-f0-01",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "A组三人-无锁定",
    "mechanism": "复盘",
@@ -4444,12 +4171,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 425
+   "wall_ms": 8001
   },
   {
    "case_id": "tf-summary-f0-02",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "A组三人-无锁定",
    "mechanism": "复盘",
@@ -4461,12 +4188,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 2300
   },
   {
    "case_id": "tf-summary-f0-03",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "A组三人-无锁定",
    "mechanism": "复盘",
@@ -4478,12 +4205,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 697
   },
   {
    "case_id": "tf-summary-f0-04",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-2",
    "family": "A组三人-无锁定",
    "mechanism": "复盘",
@@ -4495,12 +4222,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 428
+   "wall_ms": 876
   },
   {
    "case_id": "tf-summary-f1-01",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "复盘",
@@ -4510,12 +4237,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 1001
   },
   {
    "case_id": "tf-summary-f1-02",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "复盘",
@@ -4525,12 +4252,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 421
+   "wall_ms": 6437
   },
   {
    "case_id": "tf-summary-f1-03",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "复盘",
@@ -4540,12 +4267,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 422
+   "wall_ms": 4243
   },
   {
    "case_id": "tf-summary-f1-04",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "复盘",
@@ -4555,12 +4282,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 418
+   "wall_ms": 5883
   },
   {
    "case_id": "tf-summary-f2-01",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "混编三人-含B组",
    "mechanism": "复盘",
@@ -4570,12 +4297,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 415
+   "wall_ms": 999
   },
   {
    "case_id": "tf-summary-f2-02",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-1",
    "family": "混编三人-含B组",
    "mechanism": "复盘",
@@ -4585,12 +4312,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 417
+   "wall_ms": 3796
   },
   {
    "case_id": "tf-summary-f2-03",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "混编三人-含B组",
    "mechanism": "复盘",
@@ -4600,12 +4327,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 416
+   "wall_ms": 3522
   },
   {
    "case_id": "tf-summary-f2-04",
    "category": "tool_failure",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-refuse-0",
    "family": "混编三人-含B组",
    "mechanism": "复盘",
@@ -4615,12 +4342,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 419
+   "wall_ms": 6319
   },
   {
    "case_id": "ss-plan-f0-01",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-2",
    "family": "A组三人-无锁定",
    "mechanism": "轮次推进",
@@ -4628,23 +4355,16 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [
-    {
-     "tool": "compare_actions",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 484
+   "wall_ms": 1839
   },
   {
    "case_id": "ss-plan-f0-02",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-2",
    "family": "A组三人-无锁定",
    "mechanism": "轮次推进",
@@ -4653,15 +4373,15 @@
     "family"
    ],
    "trace": [],
-   "stopped": "invalid-arguments",
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 485
+   "wall_ms": 5690
   },
   {
    "case_id": "ss-plan-f0-03",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-0",
    "family": "A组三人-无锁定",
    "mechanism": "轮次推进",
@@ -4670,15 +4390,15 @@
     "family"
    ],
    "trace": [],
-   "stopped": "invalid-arguments",
+   "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 482
+   "wall_ms": 8002
   },
   {
    "case_id": "ss-plan-f0-04",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-1",
    "family": "A组三人-无锁定",
    "mechanism": "轮次推进",
@@ -4690,12 +4410,12 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 489
+   "wall_ms": 2254
   },
   {
    "case_id": "ss-plan-f1-01",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "轮次推进",
@@ -4716,12 +4436,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 528
+   "wall_ms": 898
   },
   {
    "case_id": "ss-plan-f1-02",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "轮次推进",
@@ -4738,12 +4458,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 494
+   "wall_ms": 468
   },
   {
    "case_id": "ss-plan-f1-03",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "轮次推进",
@@ -4751,348 +4471,12 @@
    "held_out_dimensions": [],
    "trace": [
     {
-     "tool": "compare_actions",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 492
-  },
-  {
-   "case_id": "ss-plan-f1-04",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "轮次推进",
-   "template": "背景",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 490
-  },
-  {
-   "case_id": "ss-plan-f2-01",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-2",
-   "family": "混编三人-含B组",
-   "mechanism": "轮次推进",
-   "template": "直问",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_actions",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 490
-  },
-  {
-   "case_id": "ss-plan-f2-02",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-2",
-   "family": "混编三人-含B组",
-   "mechanism": "轮次推进",
-   "template": "口语",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 488
-  },
-  {
-   "case_id": "ss-plan-f2-03",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-1",
-   "family": "混编三人-含B组",
-   "mechanism": "轮次推进",
-   "template": "追问",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "invalid-arguments",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 495
-  },
-  {
-   "case_id": "ss-plan-f2-04",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-1",
-   "family": "混编三人-含B组",
-   "mechanism": "轮次推进",
-   "template": "背景",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_actions",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 492
-  },
-  {
-   "case_id": "ss-hp-f0-01",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-0",
-   "family": "A组三人-无锁定",
-   "mechanism": "面板变化",
-   "template": "直问",
-   "held_out_dimensions": [
-    "family"
-   ],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 488
-  },
-  {
-   "case_id": "ss-hp-f0-02",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-0",
-   "family": "A组三人-无锁定",
-   "mechanism": "面板变化",
-   "template": "口语",
-   "held_out_dimensions": [
-    "family"
-   ],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 478
-  },
-  {
-   "case_id": "ss-hp-f0-03",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-1",
-   "family": "A组三人-无锁定",
-   "mechanism": "面板变化",
-   "template": "追问",
-   "held_out_dimensions": [
-    "family"
-   ],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 484
-  },
-  {
-   "case_id": "ss-hp-f0-04",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-0",
-   "family": "A组三人-无锁定",
-   "mechanism": "面板变化",
-   "template": "背景",
-   "held_out_dimensions": [
-    "family"
-   ],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 491
-  },
-  {
-   "case_id": "ss-hp-f1-01",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "面板变化",
-   "template": "直问",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 491
-  },
-  {
-   "case_id": "ss-hp-f1-02",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-0",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "面板变化",
-   "template": "口语",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 484
-  },
-  {
-   "case_id": "ss-hp-f1-03",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-2",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "面板变化",
-   "template": "追问",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 485
-  },
-  {
-   "case_id": "ss-hp-f1-04",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "面板变化",
-   "template": "背景",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 485
-  },
-  {
-   "case_id": "ss-hp-f2-01",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-2",
-   "family": "混编三人-含B组",
-   "mechanism": "面板变化",
-   "template": "直问",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 421
-  },
-  {
-   "case_id": "ss-hp-f2-02",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-0",
-   "family": "混编三人-含B组",
-   "mechanism": "面板变化",
-   "template": "口语",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 425
-  },
-  {
-   "case_id": "ss-hp-f2-03",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-2",
-   "family": "混编三人-含B组",
-   "mechanism": "面板变化",
-   "template": "追问",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 418
-  },
-  {
-   "case_id": "ss-hp-f2-04",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-2",
-   "family": "混编三人-含B组",
-   "mechanism": "面板变化",
-   "template": "背景",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "read_state",
-     "args": {},
+     "tool": "simulate_branch",
+     "args": {
+      "candidates": [
+       "1"
+      ]
+     },
      "ok": false,
      "error_type": null
     }
@@ -5103,9 +4487,353 @@
    "wall_ms": 499
   },
   {
+   "case_id": "ss-plan-f1-04",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "轮次推进",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "simulate_branch",
+     "args": {
+      "candidates": [
+       "1"
+      ]
+     },
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 517
+  },
+  {
+   "case_id": "ss-plan-f2-01",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-2",
+   "family": "混编三人-含B组",
+   "mechanism": "轮次推进",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_actions",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 471
+  },
+  {
+   "case_id": "ss-plan-f2-02",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-2",
+   "family": "混编三人-含B组",
+   "mechanism": "轮次推进",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "invalid-arguments",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 467
+  },
+  {
+   "case_id": "ss-plan-f2-03",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-1",
+   "family": "混编三人-含B组",
+   "mechanism": "轮次推进",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 1614
+  },
+  {
+   "case_id": "ss-plan-f2-04",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-1",
+   "family": "混编三人-含B组",
+   "mechanism": "轮次推进",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "compare_actions",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 461
+  },
+  {
+   "case_id": "ss-hp-f0-01",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "面板变化",
+   "template": "直问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 470
+  },
+  {
+   "case_id": "ss-hp-f0-02",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "面板变化",
+   "template": "口语",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 401
+  },
+  {
+   "case_id": "ss-hp-f0-03",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "面板变化",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 468
+  },
+  {
+   "case_id": "ss-hp-f0-04",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "面板变化",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 476
+  },
+  {
+   "case_id": "ss-hp-f1-01",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "面板变化",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 482
+  },
+  {
+   "case_id": "ss-hp-f1-02",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "面板变化",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 482
+  },
+  {
+   "case_id": "ss-hp-f1-03",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "面板变化",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 479
+  },
+  {
+   "case_id": "ss-hp-f1-04",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "面板变化",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 488
+  },
+  {
+   "case_id": "ss-hp-f2-01",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-2",
+   "family": "混编三人-含B组",
+   "mechanism": "面板变化",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 416
+  },
+  {
+   "case_id": "ss-hp-f2-02",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-0",
+   "family": "混编三人-含B组",
+   "mechanism": "面板变化",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 431
+  },
+  {
+   "case_id": "ss-hp-f2-03",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-2",
+   "family": "混编三人-含B组",
+   "mechanism": "面板变化",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 414
+  },
+  {
+   "case_id": "ss-hp-f2-04",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-2",
+   "family": "混编三人-含B组",
+   "mechanism": "面板变化",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [
+    {
+     "tool": "read_state",
+     "args": {},
+     "ok": false,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 489
+  },
+  {
    "case_id": "ss-hint-f0-01",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-0",
    "family": "A组三人-无锁定",
    "mechanism": "建议失效",
@@ -5117,12 +4845,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 418
   },
   {
    "case_id": "ss-hint-f0-02",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-0",
    "family": "A组三人-无锁定",
    "mechanism": "建议失效",
@@ -5134,12 +4862,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 422
+   "wall_ms": 407
   },
   {
    "case_id": "ss-hint-f0-03",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-1",
    "family": "A组三人-无锁定",
    "mechanism": "建议失效",
@@ -5151,12 +4879,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 414
+   "wall_ms": 407
   },
   {
    "case_id": "ss-hint-f0-04",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-2",
    "family": "A组三人-无锁定",
    "mechanism": "建议失效",
@@ -5168,34 +4896,27 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 413
+   "wall_ms": 405
   },
   {
    "case_id": "ss-hint-f1-01",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "建议失效",
    "template": "直问",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_actions",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
+   "trace": [],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 486
+   "wall_ms": 407
   },
   {
    "case_id": "ss-hint-f1-02",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "建议失效",
@@ -5205,68 +4926,16 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 414
+   "wall_ms": 408
   },
   {
    "case_id": "ss-hint-f1-03",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "建议失效",
    "template": "追问",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 416
-  },
-  {
-   "case_id": "ss-hint-f1-04",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "建议失效",
-   "template": "背景",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 416
-  },
-  {
-   "case_id": "ss-hint-f2-01",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-2",
-   "family": "混编三人-含B组",
-   "mechanism": "建议失效",
-   "template": "直问",
-   "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "compare_actions",
-     "args": {},
-     "ok": false,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 484
-  },
-  {
-   "case_id": "ss-hint-f2-02",
-   "category": "stale_state",
-   "arm": "local_4b",
-   "world": "battle-stale-2",
-   "family": "混编三人-含B组",
-   "mechanism": "建议失效",
-   "template": "口语",
    "held_out_dimensions": [],
    "trace": [],
    "stopped": "complete",
@@ -5275,9 +4944,54 @@
    "wall_ms": 419
   },
   {
+   "case_id": "ss-hint-f1-04",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "建议失效",
+   "template": "背景",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 402
+  },
+  {
+   "case_id": "ss-hint-f2-01",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-2",
+   "family": "混编三人-含B组",
+   "mechanism": "建议失效",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 417
+  },
+  {
+   "case_id": "ss-hint-f2-02",
+   "category": "stale_state",
+   "arm": "sft-v8",
+   "world": "battle-stale-2",
+   "family": "混编三人-含B组",
+   "mechanism": "建议失效",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 400
+  },
+  {
    "case_id": "ss-hint-f2-03",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-0",
    "family": "混编三人-含B组",
    "mechanism": "建议失效",
@@ -5287,12 +5001,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 385
   },
   {
    "case_id": "ss-hint-f2-04",
    "category": "stale_state",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-stale-1",
    "family": "混编三人-含B组",
    "mechanism": "建议失效",
@@ -5309,12 +5023,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 511
+   "wall_ms": 493
   },
   {
    "case_id": "ec-value-f0-01",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-无锁定",
    "mechanism": "跨来源数值",
@@ -5326,12 +5040,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 599
   },
   {
    "case_id": "ec-value-f0-02",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-1",
    "family": "A组三人-无锁定",
    "mechanism": "跨来源数值",
@@ -5344,12 +5058,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 419
   },
   {
    "case_id": "ec-value-f0-03",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-无锁定",
    "mechanism": "跨来源数值",
@@ -5362,12 +5076,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 405
   },
   {
    "case_id": "ec-value-f0-04",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-1",
    "family": "A组三人-无锁定",
    "mechanism": "跨来源数值",
@@ -5379,12 +5093,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 402
   },
   {
    "case_id": "ec-value-f1-01",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "跨来源数值",
@@ -5394,12 +5108,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 412
   },
   {
    "case_id": "ec-value-f1-02",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "跨来源数值",
@@ -5411,12 +5125,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 418
+   "wall_ms": 409
   },
   {
    "case_id": "ec-value-f1-03",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "跨来源数值",
@@ -5428,12 +5142,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 418
+   "wall_ms": 417
   },
   {
    "case_id": "ec-value-f1-04",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "跨来源数值",
@@ -5443,12 +5157,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 420
+   "wall_ms": 413
   },
   {
    "case_id": "ec-value-f2-01",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-1",
    "family": "混编三人-含B组",
    "mechanism": "跨来源数值",
@@ -5458,12 +5172,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 419
+   "wall_ms": 415
   },
   {
    "case_id": "ec-value-f2-02",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "混编三人-含B组",
    "mechanism": "跨来源数值",
@@ -5475,12 +5189,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 395
   },
   {
    "case_id": "ec-value-f2-03",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "混编三人-含B组",
    "mechanism": "跨来源数值",
@@ -5492,12 +5206,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 419
+   "wall_ms": 406
   },
   {
    "case_id": "ec-value-f2-04",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-1",
    "family": "混编三人-含B组",
    "mechanism": "跨来源数值",
@@ -5507,12 +5221,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 421
+   "wall_ms": 398
   },
   {
    "case_id": "ec-form-f0-01",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-无锁定",
    "mechanism": "同名形态",
@@ -5536,12 +5250,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 683
+   "wall_ms": 678
   },
   {
    "case_id": "ec-form-f0-02",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-无锁定",
    "mechanism": "同名形态",
@@ -5553,7 +5267,152 @@
    ],
    "trace": [
     {
-     "tool": "inspect_training",
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 672
+  },
+  {
+   "case_id": "ec-form-f0-03",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "同名形态",
+   "template": "质疑",
+   "held_out_dimensions": [
+    "family",
+    "mechanism",
+    "template"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 660
+  },
+  {
+   "case_id": "ec-form-f0-04",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "同名形态",
+   "template": "对比",
+   "held_out_dimensions": [
+    "family",
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 678
+  },
+  {
+   "case_id": "ec-form-f1-01",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "同名形态",
+   "template": "封闭",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 666
+  },
+  {
+   "case_id": "ec-form-f1-02",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "同名形态",
+   "template": "确认",
+   "held_out_dimensions": [
+    "mechanism",
+    "template"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 674
+  },
+  {
+   "case_id": "ec-form-f1-03",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-2",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "同名形态",
+   "template": "质疑",
+   "held_out_dimensions": [
+    "mechanism",
+    "template"
+   ],
+   "trace": [
+    {
+     "tool": "compare_actions",
      "args": {},
      "ok": false,
      "error_type": null
@@ -5562,251 +5421,14 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 491
-  },
-  {
-   "case_id": "ec-form-f0-03",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-1",
-   "family": "A组三人-无锁定",
-   "mechanism": "同名形态",
-   "template": "质疑",
-   "held_out_dimensions": [
-    "family",
-    "mechanism",
-    "template"
-   ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 686
-  },
-  {
-   "case_id": "ec-form-f0-04",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-0",
-   "family": "A组三人-无锁定",
-   "mechanism": "同名形态",
-   "template": "对比",
-   "held_out_dimensions": [
-    "family",
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 683
-  },
-  {
-   "case_id": "ec-form-f1-01",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-0",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "同名形态",
-   "template": "封闭",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 687
-  },
-  {
-   "case_id": "ec-form-f1-02",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "同名形态",
-   "template": "确认",
-   "held_out_dimensions": [
-    "mechanism",
-    "template"
-   ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 683
-  },
-  {
-   "case_id": "ec-form-f1-03",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-2",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "同名形态",
-   "template": "质疑",
-   "held_out_dimensions": [
-    "mechanism",
-    "template"
-   ],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 428
+   "wall_ms": 486
   },
   {
    "case_id": "ec-form-f1-04",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "同名形态",
-   "template": "对比",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 689
-  },
-  {
-   "case_id": "ec-form-f2-01",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-2",
-   "family": "混编三人-含B组",
-   "mechanism": "同名形态",
-   "template": "封闭",
-   "held_out_dimensions": [
-    "mechanism"
-   ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 692
-  },
-  {
-   "case_id": "ec-form-f2-02",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-1",
-   "family": "混编三人-含B组",
-   "mechanism": "同名形态",
-   "template": "确认",
-   "held_out_dimensions": [
-    "mechanism",
-    "template"
-   ],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "pet",
-      "pet_id": "pet_000225",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 687
-  },
-  {
-   "case_id": "ec-form-f2-03",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-2",
-   "family": "混编三人-含B组",
-   "mechanism": "同名形态",
-   "template": "质疑",
-   "held_out_dimensions": [
-    "mechanism",
-    "template"
-   ],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 432
-  },
-  {
-   "case_id": "ec-form-f2-04",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-0",
-   "family": "混编三人-含B组",
    "mechanism": "同名形态",
    "template": "对比",
    "held_out_dimensions": [
@@ -5823,71 +5445,76 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 504
+   "wall_ms": 486
   },
   {
-   "case_id": "ec-strength-f0-01",
+   "case_id": "ec-form-f2-01",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-2",
-   "family": "A组三人-无锁定",
-   "mechanism": "强度口径",
+   "family": "混编三人-含B组",
+   "mechanism": "同名形态",
    "template": "封闭",
    "held_out_dimensions": [
-    "family"
+    "mechanism"
    ],
-   "trace": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 684
   },
   {
-   "case_id": "ec-strength-f0-02",
+   "case_id": "ec-form-f2-02",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-1",
-   "family": "A组三人-无锁定",
-   "mechanism": "强度口径",
+   "family": "混编三人-含B组",
+   "mechanism": "同名形态",
    "template": "确认",
    "held_out_dimensions": [
-    "family",
+    "mechanism",
     "template"
    ],
-   "trace": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000225",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 423
+   "wall_ms": 685
   },
   {
-   "case_id": "ec-strength-f0-03",
+   "case_id": "ec-form-f2-03",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-2",
-   "family": "A组三人-无锁定",
-   "mechanism": "强度口径",
+   "family": "混编三人-含B组",
+   "mechanism": "同名形态",
    "template": "质疑",
    "held_out_dimensions": [
-    "family",
+    "mechanism",
     "template"
-   ],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 406
-  },
-  {
-   "case_id": "ec-strength-f0-04",
-   "category": "evidence_conflict",
-   "arm": "local_4b",
-   "world": "camp-conflict-0",
-   "family": "A组三人-无锁定",
-   "mechanism": "强度口径",
-   "template": "对比",
-   "held_out_dimensions": [
-    "family"
    ],
    "trace": [],
    "stopped": "complete",
@@ -5896,9 +5523,107 @@
    "wall_ms": 415
   },
   {
+   "case_id": "ec-form-f2-04",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-0",
+   "family": "混编三人-含B组",
+   "mechanism": "同名形态",
+   "template": "对比",
+   "held_out_dimensions": [
+    "mechanism"
+   ],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "pet",
+      "pet_id": "pet_000190",
+      "state_version": 0
+     },
+     "ok": true,
+     "error_type": null
+    }
+   ],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 674
+  },
+  {
+   "case_id": "ec-strength-f0-01",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "强度口径",
+   "template": "封闭",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 409
+  },
+  {
+   "case_id": "ec-strength-f0-02",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-1",
+   "family": "A组三人-无锁定",
+   "mechanism": "强度口径",
+   "template": "确认",
+   "held_out_dimensions": [
+    "family",
+    "template"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 449
+  },
+  {
+   "case_id": "ec-strength-f0-03",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-2",
+   "family": "A组三人-无锁定",
+   "mechanism": "强度口径",
+   "template": "质疑",
+   "held_out_dimensions": [
+    "family",
+    "template"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 419
+  },
+  {
+   "case_id": "ec-strength-f0-04",
+   "category": "evidence_conflict",
+   "arm": "sft-v8",
+   "world": "camp-conflict-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "强度口径",
+   "template": "对比",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 419
+  },
+  {
    "case_id": "ec-strength-f1-01",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "强度口径",
@@ -5908,12 +5633,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 419
+   "wall_ms": 417
   },
   {
    "case_id": "ec-strength-f1-02",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-2",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "强度口径",
@@ -5925,12 +5650,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 417
+   "wall_ms": 411
   },
   {
    "case_id": "ec-strength-f1-03",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "强度口径",
@@ -5942,12 +5667,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 419
+   "wall_ms": 429
   },
   {
    "case_id": "ec-strength-f1-04",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "强度口径",
@@ -5957,12 +5682,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 410
+   "wall_ms": 415
   },
   {
    "case_id": "ec-strength-f2-01",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-1",
    "family": "混编三人-含B组",
    "mechanism": "强度口径",
@@ -5972,12 +5697,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 422
+   "wall_ms": 420
   },
   {
    "case_id": "ec-strength-f2-02",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-2",
    "family": "混编三人-含B组",
    "mechanism": "强度口径",
@@ -5989,12 +5714,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 422
+   "wall_ms": 419
   },
   {
    "case_id": "ec-strength-f2-03",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-2",
    "family": "混编三人-含B组",
    "mechanism": "强度口径",
@@ -6006,12 +5731,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 421
+   "wall_ms": 419
   },
   {
    "case_id": "ec-strength-f2-04",
    "category": "evidence_conflict",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "camp-conflict-2",
    "family": "混编三人-含B组",
    "mechanism": "强度口径",
@@ -6021,12 +5746,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 422
   },
   {
    "case_id": "si-submitted-f0-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "A组三人-无锁定",
    "mechanism": "回合已提交",
@@ -6045,7 +5770,7 @@
   {
    "case_id": "si-submitted-f1-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "回合已提交",
@@ -6063,7 +5788,7 @@
   {
    "case_id": "si-submitted-f2-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "混编三人-含B组",
    "mechanism": "回合已提交",
@@ -6081,7 +5806,7 @@
   {
    "case_id": "si-quiet-f0-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "A组三人-无锁定",
    "mechanism": "偏好设置",
@@ -6099,7 +5824,7 @@
   {
    "case_id": "si-quiet-f1-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "偏好设置",
@@ -6116,7 +5841,7 @@
   {
    "case_id": "si-quiet-f2-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-0",
    "family": "混编三人-含B组",
    "mechanism": "偏好设置",
@@ -6133,7 +5858,7 @@
   {
    "case_id": "si-noaction-f0-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "A组三人-无锁定",
    "mechanism": "局面状态",
@@ -6150,7 +5875,7 @@
   {
    "case_id": "si-noaction-f1-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "局面状态",
@@ -6160,12 +5885,12 @@
    "stopped": "policy",
    "passed": true,
    "violations": [],
-   "wall_ms": 1
+   "wall_ms": 0
   },
   {
    "case_id": "si-noaction-f2-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-0",
    "family": "混编三人-含B组",
    "mechanism": "局面状态",
@@ -6180,7 +5905,7 @@
   {
    "case_id": "si-refuse-f0-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "A组三人-无锁定",
    "mechanism": "拒绝",
@@ -6198,7 +5923,7 @@
   {
    "case_id": "si-refuse-f1-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "拒绝",
@@ -6215,7 +5940,7 @@
   {
    "case_id": "si-refuse-f2-01",
    "category": "silence",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "混编三人-含B组",
    "mechanism": "拒绝",
@@ -6232,7 +5957,7 @@
   {
    "case_id": "be-defense-f0-01",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "A组三人-无锁定",
    "mechanism": "行动解释",
@@ -6244,12 +5969,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 433
+   "wall_ms": 470
   },
   {
    "case_id": "be-defense-f0-02",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "A组三人-无锁定",
    "mechanism": "行动解释",
@@ -6257,85 +5982,6 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 397
-  },
-  {
-   "case_id": "be-defense-f0-03",
-   "category": "brief_explain",
-   "arm": "local_4b",
-   "world": "battle-open-0",
-   "family": "A组三人-无锁定",
-   "mechanism": "行动解释",
-   "template": "追问",
-   "held_out_dimensions": [
-    "family"
-   ],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 396
-  },
-  {
-   "case_id": "be-defense-f0-04",
-   "category": "brief_explain",
-   "arm": "local_4b",
-   "world": "battle-open-0",
-   "family": "A组三人-无锁定",
-   "mechanism": "行动解释",
-   "template": "背景",
-   "held_out_dimensions": [
-    "family"
-   ],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 391
-  },
-  {
-   "case_id": "be-defense-f1-01",
-   "category": "brief_explain",
-   "arm": "local_4b",
-   "world": "battle-mid-0",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "行动解释",
-   "template": "直问",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 401
-  },
-  {
-   "case_id": "be-defense-f1-02",
-   "category": "brief_explain",
-   "arm": "local_4b",
-   "world": "battle-mid-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "行动解释",
-   "template": "口语",
-   "held_out_dimensions": [],
-   "trace": [],
-   "stopped": "complete",
-   "passed": true,
-   "violations": [],
-   "wall_ms": 407
-  },
-  {
-   "case_id": "be-defense-f1-03",
-   "category": "brief_explain",
-   "arm": "local_4b",
-   "world": "battle-mid-1",
-   "family": "A组三人-锁定寂灭骨龙",
-   "mechanism": "行动解释",
-   "template": "追问",
-   "held_out_dimensions": [],
    "trace": [],
    "stopped": "complete",
    "passed": true,
@@ -6343,9 +5989,88 @@
    "wall_ms": 415
   },
   {
+   "case_id": "be-defense-f0-03",
+   "category": "brief_explain",
+   "arm": "sft-v8",
+   "world": "battle-open-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "行动解释",
+   "template": "追问",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 403
+  },
+  {
+   "case_id": "be-defense-f0-04",
+   "category": "brief_explain",
+   "arm": "sft-v8",
+   "world": "battle-open-0",
+   "family": "A组三人-无锁定",
+   "mechanism": "行动解释",
+   "template": "背景",
+   "held_out_dimensions": [
+    "family"
+   ],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 376
+  },
+  {
+   "case_id": "be-defense-f1-01",
+   "category": "brief_explain",
+   "arm": "sft-v8",
+   "world": "battle-mid-0",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "行动解释",
+   "template": "直问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 398
+  },
+  {
+   "case_id": "be-defense-f1-02",
+   "category": "brief_explain",
+   "arm": "sft-v8",
+   "world": "battle-mid-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "行动解释",
+   "template": "口语",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 382
+  },
+  {
+   "case_id": "be-defense-f1-03",
+   "category": "brief_explain",
+   "arm": "sft-v8",
+   "world": "battle-mid-1",
+   "family": "A组三人-锁定寂灭骨龙",
+   "mechanism": "行动解释",
+   "template": "追问",
+   "held_out_dimensions": [],
+   "trace": [],
+   "stopped": "complete",
+   "passed": true,
+   "violations": [],
+   "wall_ms": 380
+  },
+  {
    "case_id": "be-defense-f1-04",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "行动解释",
@@ -6355,12 +6080,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 422
+   "wall_ms": 373
   },
   {
    "case_id": "be-defense-f2-01",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "混编三人-含B组",
    "mechanism": "行动解释",
@@ -6370,12 +6095,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 420
+   "wall_ms": 395
   },
   {
    "case_id": "be-defense-f2-02",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-1",
    "family": "混编三人-含B组",
    "mechanism": "行动解释",
@@ -6385,12 +6110,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 425
+   "wall_ms": 381
   },
   {
    "case_id": "be-defense-f2-03",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "混编三人-含B组",
    "mechanism": "行动解释",
@@ -6400,12 +6125,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 425
+   "wall_ms": 387
   },
   {
    "case_id": "be-defense-f2-04",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-1",
    "family": "混编三人-含B组",
    "mechanism": "行动解释",
@@ -6415,12 +6140,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 378
   },
   {
    "case_id": "be-energy-f0-01",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "A组三人-无锁定",
    "mechanism": "能量机制",
@@ -6428,16 +6153,27 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "energy_power",
+      "state_version": 0
+     },
+     "ok": false,
+     "error_type": "not_found"
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 552
   },
   {
    "case_id": "be-energy-f0-02",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "A组三人-无锁定",
    "mechanism": "能量机制",
@@ -6445,16 +6181,27 @@
    "held_out_dimensions": [
     "family"
    ],
-   "trace": [],
+   "trace": [
+    {
+     "tool": "query_rules",
+     "args": {
+      "kind": "term",
+      "term_id": "energy_power",
+      "state_version": 36
+     },
+     "ok": false,
+     "error_type": "not_found"
+    }
+   ],
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 413
+   "wall_ms": 543
   },
   {
    "case_id": "be-energy-f0-03",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-1",
    "family": "A组三人-无锁定",
    "mechanism": "能量机制",
@@ -6477,12 +6224,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 595
+   "wall_ms": 556
   },
   {
    "case_id": "be-energy-f0-04",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "A组三人-无锁定",
    "mechanism": "能量机制",
@@ -6494,12 +6241,12 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 617
+   "wall_ms": 562
   },
   {
    "case_id": "be-energy-f1-01",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "能量机制",
@@ -6509,38 +6256,27 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 727
+   "wall_ms": 800
   },
   {
    "case_id": "be-energy-f1-02",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "能量机制",
    "template": "口语",
    "held_out_dimensions": [],
-   "trace": [
-    {
-     "tool": "query_rules",
-     "args": {
-      "kind": "ruleset",
-      "attack_element": "寂灭骨龙",
-      "state_version": 0
-     },
-     "ok": true,
-     "error_type": null
-    }
-   ],
-   "stopped": "complete",
+   "trace": [],
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 635
+   "wall_ms": 697
   },
   {
    "case_id": "be-energy-f1-03",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "能量机制",
@@ -6550,12 +6286,12 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 727
+   "wall_ms": 704
   },
   {
    "case_id": "be-energy-f1-04",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "能量机制",
@@ -6576,27 +6312,27 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 634
+   "wall_ms": 611
   },
   {
    "case_id": "be-energy-f2-01",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "混编三人-含B组",
    "mechanism": "能量机制",
    "template": "直问",
    "held_out_dimensions": [],
    "trace": [],
-   "stopped": "complete",
+   "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 429
+   "wall_ms": 728
   },
   {
    "case_id": "be-energy-f2-02",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-0",
    "family": "混编三人-含B组",
    "mechanism": "能量机制",
@@ -6606,12 +6342,12 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 773
+   "wall_ms": 644
   },
   {
    "case_id": "be-energy-f2-03",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "混编三人-含B组",
    "mechanism": "能量机制",
@@ -6621,12 +6357,12 @@
    "stopped": "invalid-arguments",
    "passed": true,
    "violations": [],
-   "wall_ms": 742
+   "wall_ms": 734
   },
   {
    "case_id": "be-energy-f2-04",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "混编三人-含B组",
    "mechanism": "能量机制",
@@ -6647,12 +6383,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 607
+   "wall_ms": 586
   },
   {
    "case_id": "be-loss-f0-01",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "A组三人-无锁定",
    "mechanism": "复盘",
@@ -6664,12 +6400,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 416
+   "wall_ms": 399
   },
   {
    "case_id": "be-loss-f0-02",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "A组三人-无锁定",
    "mechanism": "复盘",
@@ -6681,12 +6417,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 427
+   "wall_ms": 410
   },
   {
    "case_id": "be-loss-f0-03",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-1",
    "family": "A组三人-无锁定",
    "mechanism": "复盘",
@@ -6698,12 +6434,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 421
+   "wall_ms": 412
   },
   {
    "case_id": "be-loss-f0-04",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-1",
    "family": "A组三人-无锁定",
    "mechanism": "复盘",
@@ -6715,12 +6451,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 420
+   "wall_ms": 414
   },
   {
    "case_id": "be-loss-f1-01",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "复盘",
@@ -6730,12 +6466,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 419
+   "wall_ms": 407
   },
   {
    "case_id": "be-loss-f1-02",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "复盘",
@@ -6745,12 +6481,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 406
+   "wall_ms": 409
   },
   {
    "case_id": "be-loss-f1-03",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "复盘",
@@ -6760,12 +6496,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 422
+   "wall_ms": 399
   },
   {
    "case_id": "be-loss-f1-04",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "A组三人-锁定寂灭骨龙",
    "mechanism": "复盘",
@@ -6775,12 +6511,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 425
+   "wall_ms": 409
   },
   {
    "case_id": "be-loss-f2-01",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-mid-0",
    "family": "混编三人-含B组",
    "mechanism": "复盘",
@@ -6790,12 +6526,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 397
   },
   {
    "case_id": "be-loss-f2-02",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "混编三人-含B组",
    "mechanism": "复盘",
@@ -6805,12 +6541,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 424
+   "wall_ms": 410
   },
   {
    "case_id": "be-loss-f2-03",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-open-0",
    "family": "混编三人-含B组",
    "mechanism": "复盘",
@@ -6820,12 +6556,12 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 411
+   "wall_ms": 398
   },
   {
    "case_id": "be-loss-f2-04",
    "category": "brief_explain",
-   "arm": "local_4b",
+   "arm": "sft-v8",
    "world": "battle-late",
    "family": "混编三人-含B组",
    "mechanism": "复盘",
@@ -6835,7 +6571,7 @@
    "stopped": "complete",
    "passed": true,
    "violations": [],
-   "wall_ms": 426
+   "wall_ms": 405
   }
  ]
 }
