@@ -23,10 +23,41 @@ function saveAll(all) {
   try { globalThis.localStorage?.setItem(STORE_KEY, JSON.stringify(all)); } catch { /* 忽略 */ }
 }
 
+/**
+ * 把**存在本机的那一条**归一成客户端口径。
+ *
+ * ⚠ 2026-09-28 真机抓到（验收 10b/11：整页 **84 处** `[object Object]`，而干净浏览器里 0 处）：
+ * 旧实现按**卡片**造记录时传的是 `nature: {value: null}` / `talent: {value: null}`
+ * （那是**服务端**生长属性的形状），`individualFromInstance` 看见"是个对象"就原样留下，
+ * 于是 `nature` 被存成 `{value: null}`；`formatTraitValue` 走到对象分支、又取不到六个数值 ⇒
+ * 返回空串；而展示层按 `individual.nature` **真值判断** ⇒ 那个空对象被当成"有性格"印成
+ * `[object Object]`，并一直留在 localStorage 里跟着每一次刷新复活。
+ * 所以这里读的时候**只归一这两种形状**（别的字段一个都不动）：
+ *   · `{value: 标量}` → 那个标量；`{value: 对象/null}` → null（等于"没有"）；
+ *   · 顺手把 `talent` 里包着 `{value}` 的项拆开（六维表正常是纯数字）。
+ */
+function normalizeStored(one) {
+  if (!one || typeof one !== 'object') return one;
+  const out = {...one};
+  const unwrap = (value) => {
+    if (value && typeof value === 'object' && !Array.isArray(value) && 'value' in value) {
+      return (value.value && typeof value.value === 'object') ? null : (value.value ?? null);
+    }
+    return value;
+  };
+  if ('nature' in out) out.nature = unwrap(out.nature);
+  if (out.talent && typeof out.talent === 'object' && !Array.isArray(out.talent)) {
+    const talent = {};
+    for (const [key, value] of Object.entries(out.talent)) talent[key] = unwrap(value);
+    out.talent = talent;
+  }
+  return out;
+}
+
 /** 从一张卡造个体记录；已有记录的复用（刷新次数不能被页面重载重置）。 */
 function individualFor(all, card) {
   const hit = all[card.select];
-  if (hit && typeof hit === 'object') return hit;
+  if (hit && typeof hit === 'object') return normalizeStored(hit);
   const made = individualFromInstance({
     instance_id: card.select, species_id: card.group, species_name: card.name, level: card.level,
     nature: {value: null}, talent: {value: null},
