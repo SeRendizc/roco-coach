@@ -731,11 +731,13 @@ async function main() {
       check('10b-资质要摊成六维数值（own-0001）',
         '真鼠标打开 own-0001 的详情：资质那一栏是「生命 10 / 物攻 3 / …」这样的六维数值，整页不出现 [object Object]',
         talentProblems.length === 0,
-        talentProblems.join(' | ')
+        (talentProblems.join(' | ')
           || `${talentFacts.title}：资质 =「${talentFacts.value}」（数出 ${talentFacts.statCount} 个数值；`
-            + `[object Object] ${talentFacts.objectObject} 处）`
-            + `｜pet-view 内命中元素 ${talentFacts.leakElements} 个 ${JSON.stringify(talentFacts.leakWhere)}`
-            + `｜资质原样「${talentFacts.talentRaw}」｜本机记录 nature=${JSON.stringify(talentFacts.storeOne)}`);
+            + `[object Object] ${talentFacts.objectObject} 处）`)
+          // ⚠ 排障字段**无条件拼在最后**（不管上面走哪一支）—— 连红 7 次都只看到"84 处"，
+          // 就是因为这些字段原来只挂在"没红"那一支上（下一轮一次定位）。
+          + `｜pet-view 内命中元素 ${talentFacts.leakElements} 个 ${JSON.stringify(talentFacts.leakWhere)}`
+          + `｜资质原样「${talentFacts.talentRaw}」｜本机记录 nature=${JSON.stringify(talentFacts.storeOne)}`);
       counter('10b-资质要摊成六维数值（own-0001）',
         '把「资质」印成 [object Object]、或者一个数值都没有 —— 两种坏样本都必须被同一条判据抓住',
         talentDisplayProblems({hasTalentRow: true, statCount: 0, objectObject: 2}),
