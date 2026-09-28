@@ -1,0 +1,877 @@
+{
+ "generated": "2026-09-28T18:27:33.554Z",
+ "base": "http://127.0.0.1:8765/",
+ "dimo": "own-0004",
+ "command": "node reports/roco/build-snapshot/browser-dimo-6x4.mjs",
+ "checks": [
+  {
+   "id": "B1-锁定的迪莫在位",
+   "what": "盒子带过来的 `?team=own-0004&lock=own-0004`：六槽里迪莫在第一格、带「锁定」标记，其余五格空的",
+   "problems": []
+  },
+  {
+   "id": "B2-锁定的那一只不许被换掉/顶掉",
+   "what": "真鼠标点「移除」与「清空阵容」：锁定的迪莫必须还在队里，而且页面要说清为什么",
+   "problems": []
+  },
+  {
+   "id": "B3-组出合法六只（含锁定的迪莫）",
+   "what": "真鼠标在「我的精灵」里连点五只：六槽全满、是六个不同个体、锁定的迪莫还在",
+   "problems": []
+  },
+  {
+   "id": "B4-六只各四个技能都合法",
+   "what": "点「核对六只四技能」之后：六格都是四个技能、六个都在引擎学习表里（每格那一行要写出来）",
+   "problems": []
+  },
+  {
+   "id": "B5-建议要有依据",
+   "what": "评估抽屉里的建议逐条能追到登记数据/结构事实（回执里带的依据原文必须上屏），不出现胜率/百分数",
+   "problems": []
+  },
+  {
+   "id": "B6-应用 A：屏幕上的 == 应用的那一份",
+   "what": "点「应用这套配置」之后：状态是 applied、屏幕指纹 == 应用指纹、六格 × 四技能都在",
+   "problems": []
+  },
+  {
+   "id": "B7-应用后屏幕上的六只×四技能 == 进战斗那一份",
+   "what": "真鼠标点「开一局（标准 PVP · 六宠）」：抓 `/api/roco/battle/new` 的真实请求体，team 六只（含锁定的迪莫）、loadouts 六只各四个，与屏幕逐值一致",
+   "problems": []
+  },
+  {
+   "id": "B8-重新读取 == 应用那一份",
+   "what": "不带任何参数重新打开 `roco.html`：读回来的六只 × 四技能与应用的那一份逐值一致（指纹相同）",
+   "problems": []
+  },
+  {
+   "id": "B9-改成 B 再应用：屏幕 == 应用的那一份（且与 A 不同）",
+   "what": "换掉一只再应用：指纹变了、屏幕与应用一致、撤销按钮可用",
+   "problems": []
+  },
+  {
+   "id": "B10-撤销：逐值回到应用前（A）",
+   "what": "点「撤销上一次应用」：六只 × 四技能**逐值**回到 A（指纹与逐槽位都要回到应用 B 之前那一份）",
+   "problems": []
+  },
+  {
+   "id": "B11-性格/资质：界面如实写清引擎按种族值算",
+   "what": "六个槽位的「详情」里都要写明：引擎按种族值算、性格/资质不进引擎（没有已登记的换算公式）",
+   "problems": []
+  }
+ ],
+ "counters": [
+  {
+   "id": "B2",
+   "ok": true,
+   "text": "锁定的那一只被移除 / 清空阵容连它一起清掉",
+   "sample": "filledCount=0 / configNote 不含「锁定」",
+   "actual": [
+    "应仍是 1 格",
+    "锁定那只应留着"
+   ]
+  },
+  {
+   "id": "B4",
+   "ok": true,
+   "text": "某一格不是四个技能、或学习表没核对过却说合法",
+   "sample": "skills=3 个 / legalityAll=unknown",
+   "actual": [
+    "某格只有三个技能",
+    "学习表没核对过"
+   ]
+  },
+  {
+   "id": "B6",
+   "ok": true,
+   "text": "屏幕上的那一套与应用的那一份指纹不同",
+   "sample": "applied=a current=b",
+   "actual": [
+    "applied 与 current 不一致"
+   ]
+  },
+  {
+   "id": "B10",
+   "ok": true,
+   "text": "撤销之后六只×四技能没有逐值回到应用前",
+   "sample": "undo 后 slots 仍是 B",
+   "actual": [
+    "没有逐值回到 A"
+   ]
+  },
+  {
+   "id": "B11",
+   "ok": true,
+   "text": "界面上没有写\"引擎按种族值算\"",
+   "sample": "detailNote 为空",
+   "actual": [
+    "没有那句话"
+   ]
+  }
+ ],
+ "steps": {
+  "locked": {
+   "slots": [
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 引擎规范配招：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能：skill_000456、skill_000286、skill_000359、skill_000368 —— 还没核对学习表（点「核对六只四技能」）"
+    }
+   ],
+   "filledCount": 1,
+   "lockedNames": [
+    "迪莫"
+   ],
+   "configState": "none",
+   "configApplied": "",
+   "configCurrent": "team=own-0004|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "unknown",
+   "legalityBad": "1",
+   "configNote": "还没有应用过：选满六只、每只四个技能，点「应用这套配置」。",
+   "problemsText": "",
+   "pickNote": "622 条 · 本页 27",
+   "poolRows": 27,
+   "slotSpecies": "迪莫=pet_000004",
+   "startDisabled": true,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-01-locked-dimo.png"
+  },
+  "afterRemoveLocked": {
+   "slots": [
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 引擎规范配招：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能：skill_000456、skill_000286、skill_000359、skill_000368 —— 还没核对学习表（点「核对六只四技能」）"
+    }
+   ],
+   "filledCount": 1,
+   "lockedNames": [
+    "迪莫"
+   ],
+   "configState": "none",
+   "configApplied": "",
+   "configCurrent": "team=own-0004|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "unknown",
+   "legalityBad": "1",
+   "configNote": "「迪莫」是锁定带过来的：锁定的一只必须留在队伍里（拿掉它整条开局请求都会被拒）。要换人请先换别的槽位。",
+   "problemsText": "",
+   "pickNote": "「迪莫」是锁定带过来的：锁定的一只必须留在队伍里（拿掉它整条开局请求都会被拒）。要换人请先换别的槽位。",
+   "poolRows": 27,
+   "slotSpecies": "迪莫=pet_000004",
+   "startDisabled": true,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-02-locked-cannot-remove.png"
+  },
+  "afterReset": {
+   "slots": [
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 引擎规范配招：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能：skill_000456、skill_000286、skill_000359、skill_000368 —— 还没核对学习表（点「核对六只四技能」）"
+    }
+   ],
+   "filledCount": 1,
+   "lockedNames": [
+    "迪莫"
+   ],
+   "configState": "none",
+   "configApplied": "",
+   "configCurrent": "team=own-0004|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "unknown",
+   "legalityBad": "1",
+   "configNote": "清空了 0 只；锁定的 1 只留着（锁定的一只必须留在队伍里）。",
+   "problemsText": "",
+   "pickNote": "622 条 · 本页 27",
+   "poolRows": 27,
+   "slotSpecies": "迪莫=pet_000004",
+   "startDisabled": true,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。"
+  },
+  "six": {
+   "slots": [
+    {
+     "instance": "own-0001",
+     "name": "喵喵",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000246,skill_000286,skill_000340,skill_000624",
+     "loadout": "换招 引擎规范配招：抓挠、防御、仙人掌刺击、腐化",
+     "legalityText": "四个技能：skill_000246、skill_000286、skill_000340、skill_000624 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0002",
+     "name": "水蓝蓝",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 引擎规范配招：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能：skill_000418、skill_000286、skill_000421、skill_000808 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0003",
+     "name": "火花",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 引擎规范配招：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能：skill_000378、skill_000286、skill_000392、skill_000567 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 引擎规范配招：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能：skill_000456、skill_000286、skill_000359、skill_000368 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0005",
+     "name": "水灵",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 引擎规范配招：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能：skill_000418、skill_000286、skill_000421、skill_000808 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0006",
+     "name": "火神",
+     "locked": true,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 引擎规范配招：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能：skill_000378、skill_000286、skill_000392、skill_000567 —— 还没核对学习表（点「核对六只四技能」）"
+    }
+   ],
+   "filledCount": 6,
+   "lockedNames": [
+    "迪莫",
+    "火神"
+   ],
+   "configState": "none",
+   "configApplied": "",
+   "configCurrent": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "unknown",
+   "legalityBad": "6",
+   "configNote": "清空了 0 只；锁定的 1 只留着（锁定的一只必须留在队伍里）。",
+   "problemsText": "",
+   "pickNote": "542 条 · 本页 27",
+   "poolRows": 27,
+   "slotSpecies": "喵喵=pet_000001|水蓝蓝=pet_000002|火花=pet_000003|迪莫=pet_000004|水灵=pet_000005|火神=pet_000006",
+   "startDisabled": false,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。"
+  },
+  "legality": {
+   "slots": [
+    {
+     "instance": "own-0001",
+     "name": "喵喵",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000246,skill_000286,skill_000340,skill_000624",
+     "loadout": "换招 引擎规范配招：抓挠、防御、仙人掌刺击、腐化",
+     "legalityText": "四个技能都在引擎学习表里：抓挠、防御、仙人掌刺击、腐化"
+    },
+    {
+     "instance": "own-0002",
+     "name": "水蓝蓝",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 引擎规范配招：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0003",
+     "name": "火花",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 引擎规范配招：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    },
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 引擎规范配招：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能都在引擎学习表里：光刃、防御、棘突、抽枝"
+    },
+    {
+     "instance": "own-0005",
+     "name": "水灵",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 引擎规范配招：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0006",
+     "name": "火神",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 引擎规范配招：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    }
+   ],
+   "filledCount": 6,
+   "lockedNames": [
+    "迪莫",
+    "火神"
+   ],
+   "configState": "none",
+   "configApplied": "",
+   "configCurrent": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "ok",
+   "legalityBad": "0",
+   "configNote": "还没有应用过：选满六只、每只四个技能，点「应用这套配置」。",
+   "problemsText": "",
+   "pickNote": "542 条 · 本页 27",
+   "poolRows": 27,
+   "slotSpecies": "喵喵=pet_000001|水蓝蓝=pet_000002|火花=pet_000003|迪莫=pet_000004|水灵=pet_000005|火神=pet_000006",
+   "startDisabled": false,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-03-six-by-four-legality.png"
+  },
+  "advice": {
+   "text": "这六只的五个方面现在都能算。其中四个方面要先假设\"对手会用什么体系\"（现在各体系按同等权重，换成本赛季实测数据会更准）；这里给的高低是按阵容结构算出来的排序，不是实测数据，也不预测输赢。 ✦ 让小芽说人话 这一页的数字是按阵容结构算出来的排序（不是胜率）。 点一下让小芽用三句话讲讲它读到什么。 环境价值 现在能算 偏高 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。 原始数值与说明 0.811706 · 相对分（0～1 的序数标度） 这支队对「版本里常见的对手类型」的整体表现。要有对手分布才能算。 最怕的体系 现在能算 撞上「翼王飞翼」这类最吃亏（赛前假设这类占 14%（各体系等权）——这是假设的权重，不是实测出场率） 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。 原始数值与说明 archetype_id=wing_king_flyer · weight=0.142857 · distribution_kind=游戏数据里没有这一项 · label=翼王飞翼 撞上哪一类体系最吃亏、那一类在环境里占多少。要有对手分布才能算。 对局离散度 现在能算 偏低 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。 原始数值与说明 0.333334 · 相对分极差 表现是不是严重依赖撞到特定阵容。要有对手分布才能算。 操作容错 现在能算 中等 这一方面的高低是按阵容结构推出来的（对手分布是假设的），不是实测对局数据。 原始数值与说明 0.585714 · 相对分（0～1 的序数标度） 操作打折扣时会掉多少。要有可复跑的对局采样才能算。 覆盖置信 现在能算 偏高 这一轴的依据还没到「已核验」：它说的是我们自己知道多少，不是这支队伍有多强。 原始数值与说明 0.809524 · 相对分（0～1 的序数标度） 这六只的配招与数据我们到底知道多少——它说的是「我们自己知道多少」，不是队伍有多强。 一个最小替换 把「喵喵」换成「深渊罗隐」 换出的是队里「一个人扛下最多没人能接的弱点」的那只，换进来的这只声明能接住队里现在没人接的系别。 它能接住的系别：幽系 / 普通系 / 毒系 / 翼系。 这一只没有具体构建数据：换它不会改善覆盖置信，所以这里不把它算成收益。 这个替换只有结构理由：它补的是「队里没人接的系别」，不是「换它更强」——版本对手分布还没有，所以这里不说谁更强。 这一页现在还不知道什么 6 条 六只是否必须选满 未核实 待实机录制确认；这一页按六个槽位做，但不假装「必须选满」是官方规则。 魔力点数与力竭的准确语义 候选规则 多份社区资料一致，但不是官方说法；本页不做与魔力相关的推算。 能量上限与聚能回复量 候选规则 规则配置里有登记值，但它的证据等级仍是候选规则。 同速时的先后判定 未知 系统按 fail closed 处理：不猜先后，也不因此给结论。 对手分布（谁在环境里、各占多少） 未知 没有真实对局数据，所以「对环境的价值」这类判断现在算不出来——不补 0、不补胜率。 版本强度排序器 未产出 还没跑过离线对战统计，所以这里的排序只是按公开权重算的，不代表真实对局里的期望。 这一页不输出胜率、概率或任何伪精确百分数：能算的算，算不出的就写「现在算不出来」并点名缺什么。",
+   "axes": [
+    "环境价值",
+    "最怕的体系",
+    "对局离散度",
+    "操作容错",
+    "覆盖置信"
+   ],
+   "replacement": "换出的是队里「一个人扛下最多没人能接的弱点」的那只，换进来的这只声明能接住队里现在没人接的系别。",
+   "replacementNote": "这个替换只有结构理由：它补的是「队里没人接的系别」，不是「换它更强」——版本对手分布还没有，所以这里不说谁更强。",
+   "unknownNote": "匹配前对手未知 · 按版本环境倾向评价",
+   "hasNumbers": true,
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-04-advice-with-evidence.png"
+  },
+  "appliedA": {
+   "slots": [
+    {
+     "instance": "own-0001",
+     "name": "喵喵",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000246,skill_000286,skill_000340,skill_000624",
+     "loadout": "换招 引擎规范配招：抓挠、防御、仙人掌刺击、腐化",
+     "legalityText": "四个技能都在引擎学习表里：抓挠、防御、仙人掌刺击、腐化"
+    },
+    {
+     "instance": "own-0002",
+     "name": "水蓝蓝",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 引擎规范配招：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0003",
+     "name": "火花",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 引擎规范配招：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    },
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 引擎规范配招：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能都在引擎学习表里：光刃、防御、棘突、抽枝"
+    },
+    {
+     "instance": "own-0005",
+     "name": "水灵",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 引擎规范配招：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0006",
+     "name": "火神",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 引擎规范配招：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    }
+   ],
+   "filledCount": 6,
+   "lockedNames": [
+    "迪莫",
+    "火神"
+   ],
+   "configState": "applied",
+   "configApplied": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configCurrent": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "ok",
+   "legalityBad": "0",
+   "configNote": "已应用：屏幕上的这一套 == 开局会用的那一套 == 重新打开这一页读回来的那一套。",
+   "problemsText": "",
+   "pickNote": "542 条 · 本页 27",
+   "poolRows": 27,
+   "slotSpecies": "喵喵=pet_000001|水蓝蓝=pet_000002|火花=pet_000003|迪莫=pet_000004|水灵=pet_000005|火神=pet_000006",
+   "startDisabled": false,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-05-applied-A.png"
+  },
+  "battle": {
+   "slots": [
+    {
+     "instance": "own-0001",
+     "name": "喵喵",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000246,skill_000286,skill_000340,skill_000624",
+     "loadout": "换招 引擎规范配招：抓挠、防御、仙人掌刺击、腐化",
+     "legalityText": "四个技能都在引擎学习表里：抓挠、防御、仙人掌刺击、腐化"
+    },
+    {
+     "instance": "own-0002",
+     "name": "水蓝蓝",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 引擎规范配招：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0003",
+     "name": "火花",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 引擎规范配招：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    },
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 引擎规范配招：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能都在引擎学习表里：光刃、防御、棘突、抽枝"
+    },
+    {
+     "instance": "own-0005",
+     "name": "水灵",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 引擎规范配招：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0006",
+     "name": "火神",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 引擎规范配招：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    }
+   ],
+   "filledCount": 6,
+   "lockedNames": [
+    "迪莫",
+    "火神"
+   ],
+   "configState": "applied",
+   "configApplied": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configCurrent": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "ok",
+   "legalityBad": "0",
+   "configNote": "已应用：屏幕上的这一套 == 开局会用的那一套 == 重新打开这一页读回来的那一套。",
+   "problemsText": "",
+   "pickNote": "542 条 · 本页 27",
+   "poolRows": 27,
+   "slotSpecies": "喵喵=pet_000001|水蓝蓝=pet_000002|火花=pet_000003|迪莫=pet_000004|水灵=pet_000005|火神=pet_000006",
+   "startDisabled": false,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。",
+   "request": {
+    "mode": "pvp-standard-six-pet",
+    "team": [
+     "own-0004",
+     "own-0001",
+     "own-0002",
+     "own-0003",
+     "own-0005",
+     "own-0006"
+    ],
+    "strategy": "greedy_damage",
+    "loadouts": {
+     "pet_000004": [
+      "skill_000456",
+      "skill_000286",
+      "skill_000359",
+      "skill_000368"
+     ],
+     "pet_000001": [
+      "skill_000246",
+      "skill_000286",
+      "skill_000340",
+      "skill_000624"
+     ],
+     "pet_000002": [
+      "skill_000418",
+      "skill_000286",
+      "skill_000421",
+      "skill_000808"
+     ],
+     "pet_000003": [
+      "skill_000378",
+      "skill_000286",
+      "skill_000392",
+      "skill_000567"
+     ],
+     "pet_000005": [
+      "skill_000418",
+      "skill_000286",
+      "skill_000421",
+      "skill_000808"
+     ],
+     "pet_000006": [
+      "skill_000378",
+      "skill_000286",
+      "skill_000392",
+      "skill_000567"
+     ]
+    }
+   },
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-06-battle.png"
+  },
+  "reread": {
+   "slots": [
+    {
+     "instance": "own-0001",
+     "name": "喵喵",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000246,skill_000286,skill_000340,skill_000624",
+     "loadout": "换招 你选的：抓挠、防御、仙人掌刺击、腐化",
+     "legalityText": "四个技能：skill_000246、skill_000286、skill_000340、skill_000624 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0002",
+     "name": "水蓝蓝",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 你选的：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能：skill_000418、skill_000286、skill_000421、skill_000808 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0003",
+     "name": "火花",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 你选的：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能：skill_000378、skill_000286、skill_000392、skill_000567 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 你选的：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能：skill_000456、skill_000286、skill_000359、skill_000368 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0005",
+     "name": "水灵",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 你选的：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能：skill_000418、skill_000286、skill_000421、skill_000808 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0006",
+     "name": "火神",
+     "locked": true,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 你选的：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能：skill_000378、skill_000286、skill_000392、skill_000567 —— 还没核对学习表（点「核对六只四技能」）"
+    }
+   ],
+   "filledCount": 6,
+   "lockedNames": [
+    "迪莫",
+    "火神"
+   ],
+   "configState": "applied",
+   "configApplied": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configCurrent": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "unknown",
+   "legalityBad": "6",
+   "configNote": "已应用：屏幕上的这一套 == 开局会用的那一套 == 重新打开这一页读回来的那一套。",
+   "problemsText": "",
+   "pickNote": "622 条 · 本页 28",
+   "poolRows": 28,
+   "slotSpecies": "喵喵=pet_000001|水蓝蓝=pet_000002|火花=pet_000003|迪莫=pet_000004|水灵=pet_000005|火神=pet_000006",
+   "startDisabled": false,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-07-reread.png"
+  },
+  "appliedB": {
+   "slots": [
+    {
+     "instance": "own-0002",
+     "name": "水蓝蓝",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 你选的：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0003",
+     "name": "火花",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 你选的：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    },
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 你选的：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能都在引擎学习表里：光刃、防御、棘突、抽枝"
+    },
+    {
+     "instance": "own-0005",
+     "name": "水灵",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 你选的：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0006",
+     "name": "火神",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 你选的：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    },
+    {
+     "instance": "own-0007",
+     "name": "魔力猫",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000246,skill_000286,skill_000340,skill_000624",
+     "loadout": "换招 引擎规范配招：抓挠、防御、仙人掌刺击、腐化",
+     "legalityText": "四个技能都在引擎学习表里：抓挠、防御、仙人掌刺击、腐化"
+    }
+   ],
+   "filledCount": 6,
+   "lockedNames": [
+    "迪莫",
+    "火神"
+   ],
+   "configState": "applied",
+   "configApplied": "team=own-0004,own-0002,own-0003,own-0005,own-0006,own-0007|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567;pet_000007:skill_000246.skill_000286.skill_000340.skill_000624",
+   "configCurrent": "team=own-0004,own-0002,own-0003,own-0005,own-0006,own-0007|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567;pet_000007:skill_000246.skill_000286.skill_000340.skill_000624",
+   "configUndoable": "yes",
+   "configProblems": "0",
+   "legalityAll": "ok",
+   "legalityBad": "0",
+   "configNote": "已应用：屏幕上的这一套 == 开局会用的那一套 == 重新打开这一页读回来的那一套。",
+   "problemsText": "",
+   "pickNote": "542 条 · 本页 28",
+   "poolRows": 28,
+   "slotSpecies": "水蓝蓝=pet_000002|火花=pet_000003|迪莫=pet_000004|水灵=pet_000005|火神=pet_000006|魔力猫=pet_000007",
+   "startDisabled": false,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-08-applied-B.png"
+  },
+  "undone": {
+   "slots": [
+    {
+     "instance": "own-0001",
+     "name": "喵喵",
+     "locked": false,
+     "state": "filled",
+     "legality": "unknown",
+     "skills": "skill_000246,skill_000286,skill_000340,skill_000624",
+     "loadout": "换招 你选的：抓挠、防御、仙人掌刺击、腐化",
+     "legalityText": "四个技能：抓挠、防御、仙人掌刺击、腐化 —— 还没核对学习表（点「核对六只四技能」）"
+    },
+    {
+     "instance": "own-0002",
+     "name": "水蓝蓝",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 你选的：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0003",
+     "name": "火花",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 你选的：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    },
+    {
+     "instance": "own-0004",
+     "name": "迪莫",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000456,skill_000286,skill_000359,skill_000368",
+     "loadout": "换招 你选的：光刃、防御、棘突、抽枝",
+     "legalityText": "四个技能都在引擎学习表里：光刃、防御、棘突、抽枝"
+    },
+    {
+     "instance": "own-0005",
+     "name": "水灵",
+     "locked": false,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000418,skill_000286,skill_000421,skill_000808",
+     "loadout": "换招 你选的：甩水、防御、水炮、多维击打",
+     "legalityText": "四个技能都在引擎学习表里：甩水、防御、水炮、多维击打"
+    },
+    {
+     "instance": "own-0006",
+     "name": "火神",
+     "locked": true,
+     "state": "filled",
+     "legality": "ok",
+     "skills": "skill_000378,skill_000286,skill_000392,skill_000567",
+     "loadout": "换招 你选的：火苗、防御、火云车、龙之利爪",
+     "legalityText": "四个技能都在引擎学习表里：火苗、防御、火云车、龙之利爪"
+    }
+   ],
+   "filledCount": 6,
+   "lockedNames": [
+    "迪莫",
+    "火神"
+   ],
+   "configState": "applied",
+   "configApplied": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configCurrent": "team=own-0004,own-0001,own-0002,own-0003,own-0005,own-0006|locked=own-0004|loadouts=pet_000004:skill_000456.skill_000286.skill_000359.skill_000368;pet_000001:skill_000246.skill_000286.skill_000340.skill_000624;pet_000002:skill_000418.skill_000286.skill_000421.skill_000808;pet_000003:skill_000378.skill_000286.skill_000392.skill_000567;pet_000005:skill_000418.skill_000286.skill_000421.skill_000808;pet_000006:skill_000378.skill_000286.skill_000392.skill_000567",
+   "configUndoable": "no",
+   "configProblems": "0",
+   "legalityAll": "unknown",
+   "legalityBad": "1",
+   "configNote": "已应用：屏幕上的这一套 == 开局会用的那一套 == 重新打开这一页读回来的那一套。",
+   "problemsText": "",
+   "pickNote": "542 条 · 本页 28",
+   "poolRows": 28,
+   "slotSpecies": "喵喵=pet_000001|水蓝蓝=pet_000002|火花=pet_000003|迪莫=pet_000004|水灵=pet_000005|火神=pet_000006",
+   "startDisabled": false,
+   "engineNote": true,
+   "detailNote": "面板怎么算：引擎按种族值算（本局用它）。性格 / 资质（个体值）目前不进引擎： 引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/dimo-09-after-undo.png"
+  }
+ },
+ "battleRequests": 1,
+ "consoleErrors": [],
+ "pageErrors": []
+}

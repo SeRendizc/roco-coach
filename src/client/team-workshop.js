@@ -132,7 +132,149 @@ export const dedupePoolCards = (cards) => {
   });
 };
 
-/** 五个口径的显示顺序与玩家说明（与路由的 `axis_order` 同源，只是翻译成人话）。 */
+/**
+ * 「这一屏选出的六只 × 四技能」这套配置的**唯一本机记录**（task-8 / Codex 即时监工 B）。
+ *
+ * 为什么要有它：在这之前，阵容只有一条**临时**的传递路径 ——
+ *   · 选人靠地址 `?team=own-…`（盒子带过来）或本屏内存；换招靠 `loadout-store.js` 那把键；
+ *   · **没有**"应用这套配置"这个动作，也没有"撤销"，更没有"重新打开还是这一套"。
+ * 于是「应用 / 撤销 / 再读取三者一致」这句话在当时**无对象可判**：屏幕上是临时状态，
+ * 进战斗那一份由 `roco.js` 现拼，重新打开页面读回来的是另一回事。这一份记录把三者钉在同一串序列化上。
+ *
+ * 形状（只留一步可退，与个体"回滚只能退一步"同一口径）：
+ *   `{current: Snapshot|null, previous: Snapshot|null, applied_count: n}`
+ *   `Snapshot = {team: ['own-…'×6], locked: ['own-…'], loadouts: {pet_…: [四个技能 id]}, at: ISO}`
+ *
+ * ⚠ 这一层**只存"玩家选了什么"**，不存任何结论：不给强度排序、不给胜率、不替引擎判合法性
+ * （合法性那一半由 `slotLegalityProblems` 拿**引擎的学习表**逐条判，见下）。
+ */
+export const TEAM_CONFIG_KEY = 'roco.workshop.teamconfig.v1';
+
+/** 一份快照的**稳定序列化**：屏幕 / 应用 / 再读取三处比的都是这一串（顺序固定、可逐字核）。 */
+export function teamConfigFingerprint(cfg) {
+  if (!cfg || typeof cfg !== 'object') return '';
+  const team = Array.isArray(cfg.team) ? cfg.team.map(String) : [];
+  const locked = Array.isArray(cfg.locked) ? [...new Set(cfg.locked.map(String))].sort() : [];
+  // 技能那一侧按**队伍顺序**排（同一套六只、顺序不同 = 不同的配置），每个物种内部按玩家选定的顺序。
+  const species = Array.isArray(cfg.species) ? cfg.species.map(String) : [];
+  const loadouts = cfg.loadouts && typeof cfg.loadouts === 'object' ? cfg.loadouts : {};
+  const skills = species.map((id) => `${id}:${(loadouts[id] ?? []).map(String).join('.')}`).join(';');
+  return `team=${team.join(',')}|locked=${locked.join(',')}|loadouts=${skills}`;
+}
+
+/** 读配置记录。读不出来（没有 / JSON 坏 / 形状不对）一律当**没有**，不编一份。 */
+export function readTeamConfig(storage = null) {
+  let s = storage;
+  if (!s) { try { s = globalThis.localStorage ?? null; } catch { s = null; } }
+  const blank = {current: null, previous: null, applied_count: 0};
+  if (!s) return blank;
+  let all = null;
+  try { all = JSON.parse(s.getItem(TEAM_CONFIG_KEY) ?? 'null'); } catch { return blank; }
+  if (!all || typeof all !== 'object' || Array.isArray(all)) return blank;
+  const clean = (snap) => {
+    if (!snap || typeof snap !== 'object' || Array.isArray(snap)) return null;
+    const team = Array.isArray(snap.team) ? snap.team.filter((id) => typeof id === 'string' && id) : [];
+    if (!team.length) return null;
+    return {
+      team,
+      species: Array.isArray(snap.species) ? snap.species.filter((id) => typeof id === 'string' && id) : [],
+      locked: Array.isArray(snap.locked) ? snap.locked.filter((id) => typeof id === 'string' && id) : [],
+      loadouts: snap.loadouts && typeof snap.loadouts === 'object' && !Array.isArray(snap.loadouts)
+        ? Object.fromEntries(Object.entries(snap.loadouts)
+          .filter(([, ids]) => Array.isArray(ids) && ids.every((id) => typeof id === 'string' && id))
+          .map(([key, ids]) => [key, ids.slice()])) : {},
+      at: typeof snap.at === 'string' ? snap.at : null,
+    };
+  };
+  return {current: clean(all.current), previous: clean(all.previous),
+    applied_count: Number.isInteger(all.applied_count) ? all.applied_count : 0};
+}
+
+/** 写配置记录。写不进去（隐私模式）返回 false —— 调用方要照实说，不许乐观 UI。 */
+export function writeTeamConfig(storage, next) {
+  let s = storage;
+  if (!s) { try { s = globalThis.localStorage ?? null; } catch { s = null; } }
+  if (!s) return false;
+  try { s.setItem(TEAM_CONFIG_KEY, JSON.stringify(next)); return true; } catch { return false; }
+}
+
+/**
+ * 「这套配置能不能应用」——**纯函数**，逐条给玩家读得懂的理由（哪一格、哪个技能、为什么）。
+ *
+ * 判据的来源都写在这里，一条都不含糊：
+ *   · 六个槽位（`TEAM_SLOTS`）必须填满；
+ *   · 每一格必须是你**拥有的个体**（`own-…`）——图鉴物种没有冻结配招，引擎不能凭空给一套招；
+ *   · 锁定的那几只**必须还在队里**（服务端 RC-301 规则⑨：锁一个没入选的实例整条请求会被拒）；
+ *   · 每一格恰好四个技能、互不重复（与 `loadout-store.js` / 引擎的 `battle/new` 同一口径）；
+ *   · 四个技能必须都在**引擎给的学习表**里 —— 查不到（还没读过学习表）就如实报 `not-checked`，
+ *     **不假装合法**（"查过才说合法"）。
+ *
+ * `slots` 由调用方给（页面才知道 实例 ↔ 物种 的映射）：
+ *   `[{instance: 'own-0004', species: 'pet_000004', skills: ['skill_…'×4]}]`
+ * `learnableOf(speciesId)` 返回 `null`（还没查过）或该物种的可学技能 id 数组。
+ */
+export function teamConfigProblems({slots = [], locked = [], learnableOf = () => null} = {}) {
+  const problems = [];
+  const list = Array.isArray(slots) ? slots.filter((slot) => slot && typeof slot === 'object') : [];
+  if (list.length !== TEAM_SLOTS) {
+    problems.push({slot: 0, kind: 'count',
+      text: `正式队伍要 ${TEAM_SLOTS} 只持有个体，现在只有 ${list.length} 只。`});
+  }
+  list.forEach((slot, index) => {
+    const instance = String(slot.instance ?? '');
+    const species = String(slot.species ?? '');
+    const where = `第 ${index + 1} 格（${slot.name ?? instance}）`;
+    if (!/^own-\d+$/.test(instance)) {
+      problems.push({slot: index + 1, kind: 'not-owned',
+        text: `${where}不是你盒子里的个体（图鉴物种不能正式上场）。`});
+      return;
+    }
+    const four = Array.isArray(slot.skills) ? slot.skills.filter((id) => typeof id === 'string' && id) : [];
+    if (four.length !== SHARED_LOADOUT_SLOTS) {
+      problems.push({slot: index + 1, kind: 'skills-count',
+        text: `${where}现在不是四个技能（当前 ${four.length} 个）—— 点「换招」选满四个。`});
+      return;
+    }
+    if (new Set(four).size !== four.length) {
+      problems.push({slot: index + 1, kind: 'skills-duplicate',
+        text: `${where}的四个技能里有重复的 —— 引擎按四个互不相同校验。`});
+    }
+    const pool = learnableOf(species);
+    if (!Array.isArray(pool)) {
+      problems.push({slot: index + 1, kind: 'not-checked',
+        text: `${where}的四个技能还没核对过学习表。`});
+      return;
+    }
+    four.forEach((skillId, at) => {
+      if (!pool.includes(skillId)) {
+        problems.push({slot: index + 1, kind: 'not-learnable',
+          text: `${where}的第 ${at + 1} 个技能（${skillId}）学不到：引擎给这一只的学习表里没有它。`});
+      }
+    });
+  });
+  const ids = list.map((slot) => String(slot.instance ?? ''));
+  for (const id of (Array.isArray(locked) ? locked : [])) {
+    if (!ids.includes(String(id))) {
+      problems.push({slot: 0, kind: 'lock-missing',
+        text: `锁定的那一只（${id}）不在队伍里：锁定的精灵必须留在队里，否则整条开局请求会被拒。`});
+    }
+  }
+  return problems;
+}
+
+/** 一格（持有实例 + 它那四个技能）的合法性：纯函数，`learnable` 为 null 时如实回 `unknown`。 */
+export function slotLegalityProblems({skills = [], learnable = null} = {}) {
+  const four = Array.isArray(skills) ? skills.filter((id) => typeof id === 'string' && id) : [];
+  if (four.length !== SHARED_LOADOUT_SLOTS) {
+    return [{kind: 'count', text: `现在只有 ${four.length} 个技能（要四个）`}];
+  }
+  if (new Set(four).size !== four.length) return [{kind: 'duplicate', text: '四个技能里有重复的'}];
+  if (!Array.isArray(learnable)) return [{kind: 'unknown', text: '还没核对过学习表'}];
+  return four.map((id, at) => (learnable.includes(id) ? null : {id, at,
+    kind: 'not-learnable', text: `第 ${at + 1} 个「${id}」学不到（引擎学习表里没有）`})).filter(Boolean);
+}
+
+
 export const AXIS_LABELS = Object.freeze(['环境价值', '最怕的体系', '对局离散度', '操作容错', '覆盖置信']);
 export const AXIS_LEGEND = Object.freeze({
   环境价值: '这支队对「版本里常见的对手类型」的整体表现。要有对手分布才能算。',
@@ -143,7 +285,12 @@ export const AXIS_LEGEND = Object.freeze({
 });
 
 import {markdown as renderMarkdown} from '../coach/experience.js';
-import {readSharedLoadouts, writeSharedLoadout} from './loadout-store.js';
+// ⚠ 2026-09-29 补（`art-finish` 报的实况故障，Lead 复核并实测）：
+// 本轮 WIP 在 `slotLegalityProblems()` 等处引用了 6 次 `SHARED_LOADOUT_SLOTS`，
+// 但这一行**只导入了另外两个**、漏了它 ⇒ `ReferenceError: SHARED_LOADOUT_SLOTS is not defined`，
+// 抛在 `renderTeam → legalityRowHtml` 上 ⇒ **点候选项什么都不发生、六槽永远空**（真机实测）。
+// 定义本来就在 `loadout-store.js:26`（`export const SHARED_LOADOUT_SLOTS = 4;`），补进导入即可。
+import {readSharedLoadouts, writeSharedLoadout, SHARED_LOADOUT_SLOTS} from './loadout-store.js';
 
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => (
   {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
@@ -625,6 +772,18 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
      </details>
      
      <p class="tw-error" id="tw-team-error" hidden></p>
+     <!-- ⭐ 2026-09-29（task-8 / Codex 监工 B）：**应用 / 撤销 / 重新读取**这三个动作的落点。
+          在这之前它们**没有对象**：阵容只是这一屏的临时状态（地址带过来 / 点出来的），
+          "应用"无从谈起、"撤销"没有可退的东西、"重新读取"读回来的是另一回事。
+          现在：应用 = 把这六个槽位 × 四个技能写进本机记录 roco.workshop.teamconfig.v1 并当众核对合法性；
+          撤销 = 一步退回上一份（与个体的回滚一样：只能退一步）；重新读取 = 不带参数打开这一页时读回来。 -->
+     <div class="tw-knobs tw-knobs--right" id="tw-config-knobs">
+      <button class="tw-btn" id="tw-config-check">核对六只四技能</button>
+      <button class="tw-btn" id="tw-config-apply">应用这套配置</button>
+      <button class="tw-btn" id="tw-config-undo">撤销上一次应用</button>
+     </div>
+     <p class="tw-note" id="tw-config-note" role="status" aria-live="polite"></p>
+     <p class="tw-error" id="tw-config-problems" hidden></p>
      <div class="tw-knobs tw-knobs--right">
       <button class="tw-btn" id="tw-reset">清空阵容</button>
      </div>
@@ -674,17 +833,23 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       setTimeout(() => { loadPool(); }, 0);   // 布局稳定后再取一次数
     }
   };
-  // RC-801：从盒子带过来的初始选人（`?team=own-…`）。**只认形状对的 id**：
-  // 认不出的直接丢掉（不猜、不静默塞一个别的）——多带一只或少带一只都要看得见。
-  const initialSelected = Array.isArray(opts.initialSelected)
+  // ⭐ 2026-09-29（task-8 / Codex 监工 B）：**上一次"应用这套配置"留下的那一份**。
+  // 优先级：地址显式带过来的（盒子交接）> 本机记录里的 `current` > 空。
+  // 为什么地址优先：`?team=` 是玩家**刚刚**在盒子里点的那一下，它比上一次应用更"新"；
+  // 而"重新读取"那条路（不带参数打开）走的就是记录里那一份（见 `data-tw-config-*`）。
+  const storedConfig = readTeamConfig();
+  const urlSelected = Array.isArray(opts.initialSelected)
     ? opts.initialSelected.filter((id) => typeof id === 'string' && /^own-\d+$/.test(id)).slice(0, TEAM_SLOTS)
     : [];
+  // RC-801：从盒子带过来的初始选人（`?team=own-…`）。**只认形状对的 id**：
+  // 认不出的直接丢掉（不猜、不静默塞一个别的）——多带一只或少带一只都要看得见。
+  const initialSelected = urlSelected.length ? urlSelected : (storedConfig.current?.team ?? []).slice(0, TEAM_SLOTS);
   // 从 URL 带过来的**锁定**（`?lock=own-…`）：只认形状对的 id，且**必须在选人里**
   // （服务端会按 RC-301 规则⑨再校验一次：锁一个没入选的实例整条请求会被拒）。
-  const initialLocked = Array.isArray(opts.initialLocked)
-    ? opts.initialLocked.filter((id) => typeof id === 'string' && /^own-\d+$/.test(id))
-      .filter((id) => initialSelected.includes(id))
-    : [];
+  const urlLocked = Array.isArray(opts.initialLocked)
+    ? opts.initialLocked.filter((id) => typeof id === 'string' && /^own-\d+$/.test(id)) : [];
+  const initialLocked = (urlLocked.length ? urlLocked : (storedConfig.current?.locked ?? []))
+    .filter((id) => initialSelected.includes(id));
   // 换招（2026-09-25）：species_id → 玩家选的四个技能 id。**只存玩家真的选过的**；
   // 没选过的走引擎的规范配招（服务端 `startBattle` 不带 loadouts 时就是这么跑的）。
   //
@@ -693,13 +858,30 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   // `loadout-store.js` 那一把钥匙：开局时先把**上次存下的**读进来（盒子里配的也在里面），
   // 保存时再写回去。键与盒子写下去的是同一个 id 空间（引擎回执里的 `pet_id`）。
   const loadouts = new Map(readSharedLoadouts());
+  // ⭐ 「应用这套配置」里的技能那一半也要能**重新读取**：记录里的 current 对**这一队的物种**是权威 ——
+  //    有就盖过共用记录；没有就是"玩家没配过"，走引擎规范配招（所以先把这几个键删掉，
+  //    免得共用记录里上一次应用写下的那一份在撤销之后又冒出来）。
+  if (storedConfig.current) {
+    for (const speciesId of storedConfig.current.species) {
+      if (speciesId && !(speciesId in (storedConfig.current.loadouts ?? {}))) loadouts.delete(speciesId);
+    }
+    for (const [speciesId, ids] of Object.entries(storedConfig.current.loadouts ?? {})) {
+      if (Array.isArray(ids) && ids.length === SHARED_LOADOUT_SLOTS) loadouts.set(speciesId, ids.slice());
+    }
+  }
   /** 技能 id → 名字：读过学习表就记下来。标签里要显示**名字**（显示 id 等于让玩家读内部串）。 */
   const skillNames = new Map();
+  /** 引擎给每只的学习表：`species → 技能 id 数组`（读过才在；没读过是 undefined，**不假装查过**）。 */
+  const learnableBySpecies = new Map();
   /** 正在编辑哪一只 + 它的可学池（`/api/roco/loadout/options` 的回执）+ 草稿。 */
   let editor = null;
   const state = {
     selected: initialSelected.slice(),
     locked: initialLocked.slice(),
+    /** 「应用这套配置」那一步的状态：`none | unsaved | applied | invalid`（渲染与判据共用一份）。 */
+    config: {state: storedConfig.current && !urlSelected.length ? 'applied' : 'unsaved',
+      applied: storedConfig.current, previous: storedConfig.current ? storedConfig.previous : null,
+      problems: [], checked: false, reason: ''},
     // 理论阵容（2026-09-22 人类 P0）：**物种级**，用来做搭配分析；不要求拥有、不出战。
     // 与 `selected`（持有实例）分开，是因为这两件事的失败方向完全不同：
     // 持有清单满了才能开局，理论阵容满了才能比较与试玩。
@@ -818,6 +1000,37 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         aria-expanded="${open ? 'true' : 'false'}">${open ? '收起换招' : '换招'}</button>
       <span class="tw-meta" title="${escapeHtml(shown)}">${escapeHtml(shown)}</span>
      </div>${open ? loadoutEditorHtml(current) : ''}`;
+  }
+
+  /**
+   * ⭐ 一行**合法性**（task-8：六只各四个技能都合法，不合法要说清哪一只哪一格为什么）。
+   *
+   * 判据的来源与优先级写清楚：
+   *   · 四个技能 = `loadoutOf(slot).ids`（玩家选过就是玩家的，否则是引擎规范配招）——
+   *     与 `emit()` 交给开局的 `loadouts` **同一处**，所以这一行说的就是"会进对局的那四个"；
+   *   · 学习表 = `/api/roco/loadout/options?pet=<持有实例>` 的 `learnable`（`learnableBySpecies`）；
+   *   · **没查过就不说合法**（`data-tw-slot-legality="unknown"`）——"查过才说合法"。
+   * 玩家看的是技能**名字**；查不到名字才退回 id（不编一个名字出来）。
+   */
+  function legalityRowHtml(slot, species) {
+    // ⚠ 按物种解析"这一格是哪个个体"（见 `instanceOfSlot` 的注释：服务端槽位顺序与 selected 无关）。
+    const instance = instanceOfSlot(slot) ?? '';
+    const skills = loadoutOf(slot).ids.slice(0, 4);
+    const bad = slotLegalityProblems({skills, learnable: species ? learnableBySpecies.get(species) ?? null : null});
+    const stateName = !skills.length ? 'none'
+      : (bad.some((p) => p.kind === 'unknown') ? 'unknown' : (bad.length ? 'illegal' : 'ok'));
+    const nameOf = (id) => skillNames.get(id) ?? id;
+    const four = skills.map(nameOf).join('、') || '（引擎没给技能）';
+    const line = stateName === 'ok'
+      ? `四个技能都在引擎学习表里：${four}`
+      : (stateName === 'unknown'
+        ? `四个技能：${four} —— 还没核对学习表（点「核对六只四技能」）`
+        : (stateName === 'none'
+          ? '四个技能：引擎这一只还没给可学技能'
+          : `四个技能有问题：${bad.map((p) => p.text.replace(/「[^」]*」/g, (m) => m)).join('；')}`));
+    return `<div class="tw-meta tw-legality" data-tw-slot-legality="${stateName}"
+      data-tw-slot-skills="${escapeHtml(skills.join(','))}" data-tw-slot-legal-instance="${escapeHtml(instance)}">
+      ${escapeHtml(line)}</div>`;
   }
 
   /** 换招编辑器：可学池（`/api/roco/loadout/options`）里选四个。 */
@@ -956,24 +1169,38 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         // 「配队六槽接不进小芽 —— 槽位 DOM 上没有"这一格是哪个个体"的钩子，只有 `data-tw-slot` 序号 + 名字」）。
         // 为什么需要它：小芽要回答"我队伍里这一只的性格是什么"，就必须知道**装进这一格的那个个体 id**
         // （`own-XXXX`），而不是按名字去猜物种 —— 重名的时候猜不了（实测「棋契陛下」就有两只）。
-        // 顺序与 `data-tw-remove-slot="${slot.index - 1}"` **同一个来源**（都是 `state.selected` 的下标），
-        // 所以「移除第 N 格」和「读第 N 格的个体」永远指向同一只，不会错位。
-        const slotInstance = state.selected[slot.index - 1] ?? null;
+        // ⚠⚠ 2026-09-29 **改钉**（task-8 真机实测 + art-finish D① 报的同一处）：
+        // 原来这里是 `state.selected[slot.index - 1]`，注释还写着"顺序与移除按钮同一个来源"——
+        // 那句话**是错的**：服务端回的槽位顺序与 `state.selected` 无关（实测两条不同的 selected 地址
+        // 回同一份槽位顺序）⇒ 第 1 格写着「喵喵」而 `data-tw-slot-instance` 是 `own-0004`（迪莫），
+        // 六格全错位；「移除第 N 格」也跟着移错人。现在两边都按**物种**解析：
+        // 钩子给的是"这一格里那只的个体 id"，移除按钮带的是"这一格那只的物种"。
+        const slotInstance = instanceOfSlot(slot);
         return `<article class="tw-slot on" role="listitem" data-tw-slot="${slot.index}"
           data-tw-slot-instance="${escapeAttr(slotInstance ?? '')}"
+          data-tw-slot-species="${escapeAttr(species ?? '')}"
           data-tw-state="filled" data-tw-fieldable="${held || sameNameHeld ? 'yes' : 'no'}">
          <div class="tw-row">${twArtHtml({group: species, art: state.artBySpecies?.get?.(String(species ?? '')) === true}, {size: 32})}<span class="tw-who">${escapeHtml(slot.name ?? NO_ITEM)}</span>
           ${slot.locked ? '<span class="tw-lock">锁定</span>' : ''}
-          <button class="tw-slot-remove" data-tw-remove-slot="${slot.index - 1}"
+          <button class="tw-slot-remove" data-tw-remove-slot="${escapeAttr(species ?? '')}"
             aria-label="把这一只从队伍里移除">移除</button></div>
          <div class="tw-meta"><span class="tw-types">${teamSlugs(slot.types) || '系别未登记'}</span>
           ${tag}</div>
          <div class="tw-meta">${escapeHtml(slot.build_tier_label ?? '')}</div>
          ${mechanismRow(slot.mechanism)}
          ${loadoutRowHtml(slot)}
+         ${legalityRowHtml(slot, species)}
          <details class="tw-detail"><summary>详情（技能 / 机制原文 / 来源）</summary>
           <div class="tw-detail-body">
            ${slot.source_note ? `<div>来源：${escapeHtml(slot.source_note)}</div>` : ''}
+           <!-- ⭐ 2026-09-29（task-8 的性格/资质那一条）：**界面写清引擎按什么算**。
+                Lead 已查实（三条，我复核过同一条链）：战斗面板 = env.py 的 _data.panel_stats(pet.stats)，
+                panel_stats(race_stats) 是只吃**种族值**的纯函数；引擎里没有 nature/talent 这两个概念；
+                battle_new 的 team 是物种 id 数组，没有承载个体的字段。
+                ⇒ 这一页上的性格/资质/天分**不进引擎**，也没有已登记的换算公式可接。
+                所以这里如实写出来 —— 不为了好看把它标成"已贯通"。 -->
+           <div>面板怎么算：引擎按<strong>种族值</strong>算（本局用它）。性格 / 资质（个体值）目前<strong>不进引擎</strong>：
+             引擎里没有这两个概念，本仓也还没有已登记的换算公式 —— 所以这一页不把它们说成已生效。</div>
            ${mechanismDetailHtml(slot.mechanism)}
            ${skillsHtml(slot)}
           </div></details>
@@ -1005,7 +1232,252 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     }
   }
 
-  /** 理论阵容那六格：来源是服务端的 `player.analysis_slots`（每格带 held/on_demand/knowledge_only）。 */
+  // ── ⭐ 阵容配置：这一屏 / 应用过的那一份 / 记录里那一份，三处比的都是同一串（task-8）──────
+
+  /**
+   * ⭐ 2026-09-29（task-8 真机实测抓到的**错位**，也就是 art-finish D① 报的那一处）：
+   * 服务端回的 `player.slots` **不是**按 `selected` 的顺序排的 —— 实测
+   * `selected=own-0006,own-0005,own-0003,own-0002,own-0001,own-0004` 与
+   * `selected=own-0001…own-0006` 两条地址回**同一份槽位顺序**（喵喵/水蓝蓝/火花/迪莫/水灵/火神）。
+   * 于是原来那句 `state.selected[slot.index - 1]`（以及 `configSlots` 里的 `slots[index]`）拿的是
+   * **别人的个体**：真机上第 1 格写着「喵喵」而 `data-tw-slot-instance` 是 `own-0004`（迪莫），六格全错位。
+   * 所以槽位 ↔ 个体只能**按物种解析**：公开层不许带 id（架构约束），物种由名字唯一匹配
+   *（`speciesOfSlot`）；同一物种在队里不可能有两只（服务端按 RC-301 拒重复）⇒ 这个解析唯一。
+   */
+  function instanceOfSlot(slot) {
+    const species = speciesOfSlot(slot);
+    if (!species) return null;
+    return state.selected.find((id) => (state.ownedByInstance.get(id)?.speciesId ?? null) === species) ?? null;
+  }
+
+  /** 反过来：这个个体装在哪一格（按物种找；找不到回 null —— 不按下标猜）。 */
+  function slotOfInstance(instance) {
+    const species = state.ownedByInstance.get(instance)?.speciesId ?? null;
+    if (!species) return null;
+    const slots = Array.isArray(state.payload?.player?.slots) ? state.payload.player.slots : [];
+    return slots.find((slot) => slot?.state === 'filled' && speciesOfSlot(slot) === species) ?? null;
+  }
+
+  /** 这一屏某个个体在界面上叫什么（它自己那一格的槽位名 → 持有索引 → 退回编号）。 */
+  function slotNameOf(instance) {
+    return slotOfInstance(instance)?.name ?? state.ownedByInstance.get(instance)?.name ?? instance;
+  }
+
+  /** 这一屏六个槽位各自的事实：装的是哪个个体、什么物种、会带哪四个技能（与 `emit()` 同一处口径）。 */
+  function configSlots() {
+    return state.selected.map((instance) => {
+      const known = state.ownedByInstance.get(instance) ?? null;
+      // ⚠ 用**它自己那一格**（按物种解析），不是 `slots[index]`（服务端顺序与 selected 不同，见上）。
+      const slot = slotOfInstance(instance);
+      const species = known?.speciesId ?? (slot ? speciesOfSlot(slot) : null);
+      return {
+        instance,
+        species: species ?? '',
+        name: slot?.name ?? known?.name ?? instance,
+        // 四个技能 = `loadoutOf(slot).ids`（玩家选过就是玩家的，否则引擎规范配招）——
+        // 与 `emit()` 交给开局的 `loadouts` 同一处，所以这一份就是"会进对局的那一份"。
+        skills: slot ? loadoutOf(slot).ids.slice(0, SHARED_LOADOUT_SLOTS)
+          : (loadouts.get(species ?? '')?.slice(0, SHARED_LOADOUT_SLOTS) ?? []),
+      };
+    });
+  }
+
+  /** 这一屏现在这套配置的快照（`teamConfigFingerprint` 吃的就是它）。 */
+  function snapshotOfCurrent() {
+    const list = configSlots();
+    return {
+      team: list.map((slot) => slot.instance),
+      species: list.map((slot) => slot.species),
+      locked: state.locked.slice(),
+      loadouts: Object.fromEntries(list.filter((slot) => slot.species)
+        .map((slot) => [slot.species, slot.skills.slice()])),
+      at: new Date().toISOString(),
+    };
+  }
+
+  /** 把一份快照装回屏幕（撤销与"重新读取"都走它，**逐值**，不重算、不猜）。 */
+  function adoptSnapshot(snap) {
+    if (!snap || !Array.isArray(snap.team) || !snap.team.length) return false;
+    state.selected = snap.team.slice(0, TEAM_SLOTS);
+    state.locked = (Array.isArray(snap.locked) ? snap.locked : []).filter((id) => state.selected.includes(id));
+    for (const speciesId of (Array.isArray(snap.species) ? snap.species : [])) {
+      if (speciesId && !(speciesId in (snap.loadouts ?? {}))) loadouts.delete(speciesId);
+    }
+    for (const [speciesId, ids] of Object.entries(snap.loadouts ?? {})) {
+      if (Array.isArray(ids) && ids.length === SHARED_LOADOUT_SLOTS) {
+        loadouts.set(speciesId, ids.slice());
+        // 共用记录也写一份：这样**别的页**（盒子 / 下一次开局）读到的与这一份一致。
+        writeSharedLoadout(null, speciesId, ids.slice());
+      }
+    }
+    state.error = null;
+    return true;
+  }
+
+  /** 逐只读引擎的学习表（查过才说合法）。查不到的那几只保持 `unknown`，**不假装查过**。 */
+  async function checkLegality({announce = true} = {}) {
+    const list = configSlots();
+    for (const slot of list) {
+      if (!slot.species || learnableBySpecies.has(slot.species)) continue;
+      const via = (state.ownedBySpecies.get(slot.species) ?? []).find((row) => row?.select)?.select ?? slot.instance;
+      try {
+        const response = await fetch(`/api/roco/loadout/options?pet=${encodeURIComponent(via)}`);
+        const data = await response.json();
+        if (!response.ok || data?.ok !== true) continue;      // 查不到就保持 unknown
+        for (const skill of data.learnable ?? []) {
+          if (skill?.skill_id && skill.name) skillNames.set(skill.skill_id, skill.name);
+        }
+        learnableBySpecies.set(slot.species, (data.learnable ?? []).map((skill) => skill.skill_id).filter(Boolean));
+      } catch { /* 同上：网络/回执异常一律保持 unknown */ }
+    }
+    state.config.checked = true;
+    state.config.problems = teamConfigProblems({slots: list, locked: state.locked,
+      learnableOf: (speciesId) => learnableBySpecies.get(speciesId) ?? null});
+    // 这一份问题清单只对它被算出来的**那一套配置**有效（配置一变就当它没核过 —— 不许拿旧的结论顶）。
+    state.config.problemsFor = teamConfigFingerprint(snapshotOfCurrent());
+    state.config.reason = '';
+    if (announce) {
+      const unknown = state.config.problems.filter((p) => p.kind === 'not-checked').length;
+      setConfigNote(state.config.problems.length
+        ? (unknown === state.config.problems.length
+          ? '有几只的学习表没读到（这一台机器读不到引擎的学习表）—— 没有核对过就不说它们合法。'
+          : `这套配置现在还不能应用：${state.config.problems[0].text}`)
+        : '核对完了：六只 × 四个技能都在引擎学习表里。');
+    }
+    renderConfig();
+    // ⚠ 每一格那一行合法性也要跟着重画 —— 第一版漏了这一步：`renderConfig` 的总判据用的是刚读回来的
+    // 学习表（显示 ok），而卡上那几行还是核对之前的「还没核对」（真机实测口径不一致，玩家会以为核对没生效）。
+    refreshSlots();
+    return state.config.problems;
+  }
+
+  /** 「应用这套配置」：核对 → 写记录（只留一步可退）→ 当众说清结果。 */
+  async function applyConfig() {
+    const problems = await checkLegality({announce: false});
+    if (problems.length) {
+      state.config.state = 'invalid';
+      setConfigNote(`还不能应用：${problems[0].text}`
+        + (problems.length > 1 ? `（一共 ${problems.length} 条，都列在下面）` : ''));
+      renderConfig();
+      return false;
+    }
+    const snap = snapshotOfCurrent();
+    const before = readTeamConfig();
+    // 「撤销」要退到**上一次应用的那一份**：所以先把现在这一份（= 上一次应用的结果）记成 previous。
+    // ⚠ 初版这里写成了 `state.config.previous = state.config.previous ?? null` —— 那等于**永远保留最旧的那个**
+    // （第一次应用时是 null）⇒ 应用第二次之后仍然"没有可撤销的"。真机判据 B9/B10 当场抓到。
+    const previous = state.config.applied ?? null;
+    const stored = writeTeamConfig(null, {current: snap, previous,
+      applied_count: Number(before.applied_count ?? 0) + 1});
+    // ⚠ 2026-09-29（真机抓到「进战斗那一份没有带 loadouts」）：只写本机记录**不够** ——
+    // 开局那一份是 `emit()` 从**内存里这个 Map** 拼出来的（`roco.js` 的 `battleLoadouts` 再按队伍物种过滤）。
+    // 玩家没换过招的格子，`loadouts` 里本来没有键（设计如此：走引擎规范配招）⇒ 开局请求就不带那一只的
+    // 四个技能，"屏幕上的"与"进战斗的"只能靠"引擎的规范配招恰好一样"来对齐，**逐值不可核**。
+    // 应用之后这一套是**显式的**：六个物种的四个技能都写进 Map 与共用记录 ⇒ 进战斗那一份带着它们、
+    // 与屏幕上那一栏逐值可比。这正是"应用/撤销/再读取三者一致"要的东西。
+    for (const [speciesId, ids] of Object.entries(snap.loadouts)) {
+      if (!speciesId || !Array.isArray(ids) || ids.length !== SHARED_LOADOUT_SLOTS) continue;
+      loadouts.set(speciesId, ids.slice());
+      writeSharedLoadout(null, speciesId, ids.slice());
+    }
+    state.config.applied = snap;
+    state.config.previous = previous;
+    state.config.state = 'applied';
+    state.config.reason = '';
+    setConfigNote(stored
+      ? '已应用：六个槽位 × 四个技能，都核对过引擎学习表。开局那一份就是它。'
+      : '已应用（这一台浏览器写不进本机记录，刷新之后会丢 —— 本次开局仍然带着这一套）。');
+    renderConfig();
+    // 内存里的配招变了 ⇒ 也要重新派发一次（开局那一份读的就是 `emit()` 的 `loadouts`）。
+    emit();
+    return true;
+  }
+
+  /** 「撤销上一次应用」：**只退一步**，逐值回到应用前（与个体"回滚只能退一步"同一口径）。 */
+  function undoConfig() {
+    const prev = state.config.previous;
+    if (!prev) {
+      setConfigNote('还没有可以撤销的应用：应用一次之后才能退（一次只退一步）。');
+      return false;
+    }
+    if (!adoptSnapshot(prev)) {
+      setConfigNote('上一次应用之前的那一套读不出来，撤不了（不猜一个替代品）。');
+      return false;
+    }
+    const before = readTeamConfig();
+    writeTeamConfig(null, {current: prev, previous: null, applied_count: Number(before.applied_count ?? 0)});
+    state.config.applied = prev;
+    state.config.previous = null;
+    state.config.state = 'applied';
+    state.config.reason = '';
+    setConfigNote('已经退回上一次应用之前的那一套（只退一步；想再退就先重新应用一次）。');
+    renderConfig();
+    void reload();
+    return true;
+  }
+
+  /** 配置那一行的状态：屏幕 / 应用过 / 记录里 三处的指纹都挂在 dataset 上（判据读它，玩家看不见）。 */
+  function renderConfig() {
+    const note = $('tw-config-note');
+    const box = $('tw-config-problems');
+    const cfg = state.config;
+    const now = snapshotOfCurrent();
+    const nowFingerprint = teamConfigFingerprint(now);
+    // ⚠ 问题清单只对**它被算出来的那一套**有效：配置一变（换了人 / 换了招）就当它没核过，
+    // 免得玩家看到"这套不能应用"却其实是上一套的原因（那是最难查的一种谎）。
+    if ((cfg.problems ?? []).length && cfg.problemsFor && cfg.problemsFor !== nowFingerprint) {
+      cfg.problems = [];
+      cfg.checked = false;
+      if (cfg.state === 'invalid') cfg.state = 'unsaved';
+    }
+    const applied = cfg.applied;
+    const same = Boolean(applied) && teamConfigFingerprint(applied) === nowFingerprint;
+    const stateName = cfg.state === 'invalid' ? 'invalid'
+      : (!applied ? 'none' : (same ? 'applied' : 'unsaved'));
+    state.config.state = stateName;
+    rootEl.dataset.twConfigState = stateName;
+    rootEl.dataset.twConfigApplied = applied ? teamConfigFingerprint(applied) : '';
+    rootEl.dataset.twConfigCurrent = teamConfigFingerprint(now);
+    rootEl.dataset.twConfigUndoable = cfg.previous ? 'yes' : 'no';
+    rootEl.dataset.twConfigProblems = String((cfg.problems ?? []).length);
+    rootEl.dataset.twConfigSlots = String(configSlots().filter((slot) => slot.instance).length);
+    rootEl.dataset.twConfigSkillSlots = String(configSlots()
+      .filter((slot) => slot.skills.length === SHARED_LOADOUT_SLOTS).length);
+    // 槽位名 → 物种（判据要把屏幕上的名字对到 battle 请求体的 loadouts 键；公开层不许带 id ⇒ 挂属性上）
+    rootEl.dataset.twSlotSpecies = (Array.isArray(state.payload?.player?.slots)
+      ? state.payload.player.slots : [])
+      .filter((slot) => slot?.state === 'filled')
+      .map((slot) => `${slot.name}=${speciesOfSlot(slot) ?? ''}`).join('|');
+    // 六只四技能的**总体**合法性（逐格的在每张卡上；这里给判据一个总数）。
+    const pool = (speciesId) => learnableBySpecies.get(speciesId) ?? null;
+    const perSlot = configSlots().map((slot) => slotLegalityProblems({skills: slot.skills, learnable: pool(slot.species)}));
+    const bad = perSlot.filter((list) => list.length).length;
+    rootEl.dataset.twLegalityAll = !perSlot.length ? 'none'
+      : (perSlot.some((list) => list.some((p) => p.kind === 'unknown')) ? 'unknown'
+        : (bad ? 'illegal' : 'ok'));
+    rootEl.dataset.twLegalityBad = String(bad);
+    if (note) {
+      // ⚠ `cfg.reason`（被拦下的动作要说的话）优先：它比状态行更紧急，而且由玩家那一下触发。
+      // 一旦玩家做了配置动作（核对/应用/撤销）或改了队伍，reason 就被清掉。
+      note.textContent = cfg.reason ? cfg.reason : (cfg.state === 'invalid'
+        ? '这套配置现在不能应用（原因见下面）。'
+        : (stateName === 'applied'
+          ? '已应用：屏幕上的这一套 == 开局会用的那一套 == 重新打开这一页读回来的那一套。'
+          : (stateName === 'unsaved'
+            ? '屏幕上的这一套和上一次应用的不一样：选好之后点「应用这套配置」。'
+            : '还没有应用过：选满六只、每只四个技能，点「应用这套配置」。')));
+    }
+    if (box) {
+      const problems = cfg.problems ?? [];
+      box.hidden = !problems.length;
+      box.textContent = problems.length
+        ? `不能应用的原因（${problems.length} 条）：${problems.map((p) => p.text).join(' ')}` : '';
+    }
+    const undoBtn = $('tw-config-undo');
+    if (undoBtn) undoBtn.disabled = !cfg.previous;
+  }
+
+
   function renderAnalysis(player) {
     const slots = Array.isArray(player?.analysis_slots) ? player.analysis_slots : [];
     const box = $('tw-analysis-slots');
@@ -1020,6 +1492,12 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
         : (slot.status === 'on_demand' ? 'tw-state-trial' : 'tw-state-info');
       const canBattle = slot.can_field === true ? '可正式出战'
         : (slot.can_trial === true ? '仅试玩（未核验）' : '暂不能出战');
+      // ⚠ 2026-09-29 修（真机 `pageErrors` 抓到的**ReferenceError: species is not defined**）：
+      // `f043719`（立绘那一批）给这一行加了 `twArtHtml({group: species, …})`，而这一段的循环变量只有
+      // `slot` —— `renderTeam` 那一支前面**有** `const species = speciesOfSlot(slot)`，这一支没有
+      // ⇒ 只要理论阵容里有一格是填的，整个 `renderAnalysis` 就抛，工作台那一屏跟着坏（验收 10–24/39/40 连红）。
+      // 物种解析与 `renderTeam` **同一处口径**（公开层不许带 id，按名字唯一匹配）。
+      const species = speciesOfSlot(slot);
       return `<article class="tw-slot on" role="listitem" data-tw-analysis-slot="${slot.index}"
         data-tw-state="filled" data-tw-status="${escapeAttr(slot.status ?? '')}"
         data-tw-can-battle="${slot.can_field === true ? 'field' : (slot.can_trial === true ? 'trial' : 'no')}">
@@ -1664,6 +2142,13 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
     if (el) el.textContent = text;
   }
 
+  /** ⭐ 配置那一行的即时反馈（应用/撤销/核对的结果）。与 `setPickNote` 分开落点：
+   *  候选区那一行说"这一点为什么没动作"，配置那一行说"这套配置现在是什么状态"。 */
+  function setConfigNote(text) {
+    const el = $('tw-config-note');
+    if (el) el.textContent = String(text ?? '');
+  }
+
   function emit() {
     const detail = {
       team: state.selected.slice(),
@@ -1744,6 +2229,8 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
       rootEl.dataset.twElapsedMs = String(Math.round(serving.elapsed_ms ?? 0));
     }
     rootEl.dataset.twState = 'ok';
+    // ⭐ 配置那一行（应用状态 / 指纹 / 六只四技能合法性）跟着这一屏现算 —— 不许沿用上一次的数。
+    renderConfig();
     rootEl.dataset.twSeq = String(state.seq);
     emit();
   }
@@ -2011,10 +2498,27 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   shadow.addEventListener('click', (event) => {
     const held = event.target?.closest?.('[data-tw-remove-slot]');
     if (held) {
-      const at = Number(held.dataset.twRemoveSlot);
-      if (Number.isInteger(at) && at >= 0 && at < state.selected.length) {
+      // ⚠ 2026-09-29 改钉（与 `data-tw-slot-instance` 同一处错位）：按钮带的是**这一格的物种**，
+      // 不再带 `state.selected` 的下标 —— 服务端槽位顺序与 selected 无关，按下标会移错人。
+      const species = String(held.dataset.twRemoveSlot ?? '');
+      const at = state.selected.findIndex((id) =>
+        (state.ownedByInstance.get(id)?.speciesId ?? null) === species);
+      if (species && at >= 0) {
+        const instance = state.selected[at];
+        // ⭐ 2026-09-29（task-8：**锁定的那一只不许被换掉/顶掉**）。
+        // 在这之前「移除」对锁定的槽位照样生效 —— 而 `state.locked` 里还留着它 ⇒ 下一次请求变成
+        // "锁了一只没入选的实例"，服务端按 RC-301 规则⑨把**整条请求**拒掉，玩家看到的是一屏错误，
+        // 却不知道是自己刚把锁定的那只拿掉了。现在这一步就拦住，并说清为什么、怎么办。
+        if (state.locked.includes(instance)) {
+          state.config.reason = `「${slotNameOf(instance)}」是锁定带过来的：锁定的一只必须留在队伍里`
+            + '（拿掉它整条开局请求都会被拒）。要换人请先换别的槽位。';
+          setPickNote(state.config.reason);
+          renderConfig();
+          return;
+        }
         state.selected = state.selected.filter((_, i) => i !== at);
         state.error = null;
+        state.config.reason = '';
         void reload();
       }
       return;
@@ -2046,13 +2550,28 @@ export function mountTeamWorkshop(rootEl, opts = {}) {
   // 两个状态字段（`state.favourite` / `state.maxReplacements`）**保留**：它们是请求契约的一部分
   // （`favourites_only` / `max_replacements`，见 `workshopQuery()`）与 `onTeamChange` 的回执字段，
   // 只是现在没有任何 UI 能把它们置真 —— 这一点由下面的 reset 保持可预期（恒 false / null）。
+  // ⭐ 2026-09-29（task-8）：**「清空阵容」不许把锁定的那一只也清掉**。
+  // 原来它无条件把 `selected` 与 `locked` 一起清空；锁定的那一只是玩家从盒子带过来的**约束**
+  // （RC-801 / 「保留锁定迪莫」），清掉它等于把玩家的约束悄悄丢了。现在：解锁定的不动，
+  // 只清能动的，并把这件事写在反馈行上。
   $('tw-reset').addEventListener('click', () => {
-    state.selected = [];
-    state.locked = [];
+    const kept = state.selected.filter((id) => state.locked.includes(id));
+    const dropped = state.selected.length - kept.length;
+    state.selected = kept;
     state.favourite = false;
     state.maxReplacements = null;
+    // 这句话要落在**配置那一行**（`#tw-cand-result` 会被候选区重新取数覆盖掉 —— 真机实测抓到的）。
+    state.config.reason = kept.length
+      ? `清空了 ${dropped} 只；锁定的 ${kept.length} 只留着（锁定的一只必须留在队伍里）。`
+      : '阵容已清空。';
+    setConfigNote(state.config.reason);
     void reload();
   });
+
+  // ⭐ 2026-09-29（task-8）：应用 / 撤销 / 核对三个动作。落点与文案都在 `renderConfig()` 里。
+  $('tw-config-check').addEventListener('click', () => { void checkLegality(); });
+  $('tw-config-apply').addEventListener('click', () => { void applyConfig(); });
+  $('tw-config-undo').addEventListener('click', () => { undoConfig(); });
 
   const api = {
     root: rootEl,

@@ -968,8 +968,15 @@ test('换招要读共用记录、也要写回去（否则刷新丢、盒子里�
   const {readFileSync: read} = await import('node:fs');
   const src = read(new URL('../src/client/team-workshop.js', import.meta.url), 'utf8');
   // ① 开局时先读共用记录（盒子里配过的那一份也在里面）
-  assert.match(src, /import \{readSharedLoadouts, writeSharedLoadout\} from '\.\/loadout-store\.js'/,
-    '工坊必须用共用的那一把钥匙，不许自己再拼一个键名');
+  // ⚠ 2026-09-29 改钉（真机故障：`art-finish` 报、Lead 复核并实测）：
+  // 本轮 WIP 引用了 6 次 `SHARED_LOADOUT_SLOTS`，而这一行**只导入了另外两个**
+  // ⇒ `ReferenceError: SHARED_LOADOUT_SLOTS is not defined` 抛在 `renderTeam → legalityRowHtml`
+  // ⇒ **点候选项什么都不发生、六槽永远空**。定义本来就在 `loadout-store.js:26`，补进这一行即可。
+  // 判据的意图一个字没变（**必须用共用那一把钥匙，不许自己拼键名**），只是允许那次补的第三个名字。
+  // 旧断言留档：assert.match(src, /import \{readSharedLoadouts, writeSharedLoadout\} from '\.\/loadout-store\.js'/);
+  assert.match(src,
+    /import \{readSharedLoadouts, writeSharedLoadout, SHARED_LOADOUT_SLOTS\} from '\.\/loadout-store\.js'/,
+    '工坊必须用共用的那一把钥匙，不许自己再拼一个键名（三个名字都要从那一个模块引）');
   assert.match(src, /const loadouts = new Map\(readSharedLoadouts\(\)\)/,
     '开局时要把共用记录读进 loadouts（键 = pet_id）');
   // ② 保存时写回去
@@ -1037,4 +1044,135 @@ test('候选行的等级三种说法：Lv.60 / 等级未登记 / 未持有（不
     {level: null, select: 'pet_000277'}, {}]) {
     assert.doesNotMatch(poolRowMetaText(card), /Lv—|Lv-/, `不许再出现 Lv—：${poolRowMetaText(card)}`);
   }
+});
+
+// ── ⭐ 阵容配置：应用 / 撤销 / 再读取（task-8 / Codex 即时监工 B）────────────────────────
+//
+// 这三件事在此之前**没有对象**：阵容只是这一屏的临时状态（地址带过来 / 点出来的），
+// 没有"应用"这个动作、没有可撤的东西、重新打开读回来的是另一回事。
+// 现在有一份本机记录（`TEAM_CONFIG_KEY`，只留一步可退）+ 一条**稳定序列化**（`teamConfigFingerprint`），
+// 屏幕 / 应用过的那一份 / 重新读出来的那一份比的都是这一串。
+test('阵容配置：指纹是稳定序列化（顺序固定、不含时间戳、逐值可核）', async () => {
+  const {teamConfigFingerprint} = await import('../src/client/team-workshop.js');
+  const cfg = {team: ['own-0004', 'own-0001'], species: ['pet_000004', 'pet_000001'],
+    locked: ['own-0004'], loadouts: {pet_000004: ['skill_1', 'skill_2', 'skill_3', 'skill_4'],
+      pet_000001: ['skill_9', 'skill_8', 'skill_7', 'skill_6']}, at: '2026-09-29T01:00:00Z'};
+  const fp = teamConfigFingerprint(cfg);
+  assert.equal(fp, 'team=own-0004,own-0001|locked=own-0004|loadouts=pet_000004:skill_1.skill_2.skill_3.skill_4'
+    + ';pet_000001:skill_9.skill_8.skill_7.skill_6');
+  // ① 时间戳不进去（同一套配置不管什么时候存的，指纹必须一样）
+  assert.equal(teamConfigFingerprint({...cfg, at: '2030-01-01T00:00:00Z'}), fp, '时间戳不许进指纹');
+  // ② 锁定那一串按字典序（集合语义：锁定的顺序不该产生两个指纹）
+  assert.equal(teamConfigFingerprint({...cfg, locked: ['own-0004']}), fp);
+  // ③ 反证：换了人 / 换了招 / 少一个技能，指纹都必须变
+  assert.notEqual(teamConfigFingerprint({...cfg, team: ['own-0001', 'own-0004']}), fp, '换顺序要算不同的配置');
+  assert.notEqual(teamConfigFingerprint({...cfg,
+    loadouts: {...cfg.loadouts, pet_000001: ['skill_9', 'skill_8', 'skill_7', 'skill_5']}}), fp, '换一个技能要变');
+  assert.notEqual(teamConfigFingerprint({...cfg, locked: []}), fp, '锁定变了要变');
+  // ④ 坏输入不许抛（宁空不编）
+  assert.equal(teamConfigFingerprint(null), '');
+  assert.equal(teamConfigFingerprint({}), 'team=|locked=|loadouts=');
+});
+
+test('阵容配置：读回来的记录形状不对就当没有（不编一份）', async () => {
+  const {readTeamConfig, writeTeamConfig, TEAM_CONFIG_KEY} = await import('../src/client/team-workshop.js');
+  const store = new Map();
+  const storage = {
+    getItem: (k) => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => store.set(k, String(v)),
+  };
+  assert.deepEqual(readTeamConfig(storage), {current: null, previous: null, applied_count: 0}, '空存储 = 没有');
+  store.set(TEAM_CONFIG_KEY, '{坏 JSON');
+  assert.deepEqual(readTeamConfig(storage), {current: null, previous: null, applied_count: 0}, '坏 JSON = 没有');
+  store.set(TEAM_CONFIG_KEY, JSON.stringify({current: {team: []}}));
+  assert.equal(readTeamConfig(storage).current, null, 'team 空的那一份不算一份配置');
+  // 写进去能原样读回来（只留一步可退）
+  const snap = {team: ['own-0001', 'own-0002'], species: ['pet_000001', 'pet_000002'],
+    locked: ['own-0001'], loadouts: {pet_000001: ['a', 'b', 'c', 'd']}, at: 'x'};
+  assert.equal(writeTeamConfig(storage, {current: snap, previous: null, applied_count: 1}), true);
+  const back = readTeamConfig(storage);
+  assert.deepEqual(back.current.team, snap.team);
+  assert.deepEqual(back.current.loadouts.pet_000001, ['a', 'b', 'c', 'd']);
+  assert.equal(back.applied_count, 1);
+});
+
+test('阵容配置：应用前的校验逐条给得出理由（六只 / 四技能 / 锁定的必须留着 / 查过才说合法）', async () => {
+  const {teamConfigProblems, slotLegalityProblems} = await import('../src/client/team-workshop.js');
+  const pool = (species) => ['s1', 's2', 's3', 's4', 's5'];
+  const slots = (n, skills = ['s1', 's2', 's3', 's4']) => Array.from({length: n}, (_, i) => ({
+    instance: `own-000${i + 1}`, species: `pet_00000${i + 1}`, name: `第${i + 1}只`, skills}));
+  // ① 满六只、每只四个都在学习表里 ⇒ 无话可说
+  assert.deepEqual(teamConfigProblems({slots: slots(6), locked: ['own-0001'], learnableOf: pool}), []);
+  // ② 只有五只 ⇒ 说清差几只
+  const few = teamConfigProblems({slots: slots(5), locked: [], learnableOf: pool});
+  assert.equal(few.length, 1);
+  assert.match(few[0].text, /6 只/, `要说清要几只：${few[0].text}`);
+  // ③ 锁定的那一只不在队里 ⇒ 必须报（服务端 RC-301 规则⑨会把整条请求拒掉）
+  const lockGone = teamConfigProblems({slots: slots(6), locked: ['own-9999'], learnableOf: pool});
+  assert.ok(lockGone.some((p) => p.kind === 'lock-missing'), `锁定的不在队里要报：${JSON.stringify(lockGone)}`);
+  // ④ 某一格只有三个技能 / 有重复 ⇒ 逐条报
+  const three = teamConfigProblems({slots: slots(6, ['s1', 's2', 's3']), locked: [], learnableOf: pool});
+  assert.ok(three.some((p) => p.kind === 'skills-count'), '三个技能要报');
+  const dup = teamConfigProblems({slots: slots(6, ['s1', 's1', 's3', 's4']), locked: [], learnableOf: pool});
+  assert.ok(dup.some((p) => p.kind === 'skills-duplicate'), '重复要报');
+  // ⑤ 学不到的技能 ⇒ 点名第几格、第几个、哪个技能
+  const bad = teamConfigProblems({slots: slots(6, ['s1', 's2', 's3', 'zzz']), locked: [], learnableOf: pool});
+  assert.equal(bad.length, 6, '六格都要报（每格第 4 个技能学不到）');
+  assert.match(bad[0].text, /第 4 个技能/, `要点名是第几个：${bad[0].text}`);
+  // ⑥ **没查过就不说合法**（learning 表为 null ⇒ not-checked，而不是当成通过）
+  const unchecked = teamConfigProblems({slots: slots(6), locked: [], learnableOf: () => null});
+  assert.equal(unchecked.length, 6);
+  assert.ok(unchecked.every((p) => p.kind === 'not-checked'), '没查过一律 not-checked');
+  // ⑦ 不是持有个体（图鉴物种）⇒ 不许应用
+  const speciesOnly = teamConfigProblems({slots: [{instance: 'pet_000112', species: 'pet_000112',
+    name: '雪影娃娃', skills: ['s1', 's2', 's3', 's4']}], locked: [], learnableOf: pool});
+  assert.ok(speciesOnly.some((p) => p.kind === 'not-owned'), '图鉴物种不能正式上场');
+  // ⑧ 逐格判据（页面那一行用的就是它）：空/三个/重复/没查过/学不到
+  // ⚠ 两个入参形状不同、别混：`teamConfigProblems` 收 `learnableOf`（**函数**，按物种查），
+  // `slotLegalityProblems` 收 `learnable`（**那一只的数组**，页面手里已经有它了）。
+  const learnt = pool('pet_000001');
+  assert.equal(slotLegalityProblems({skills: ['s1', 's2', 's3', 's4'], learnable: learnt}).length, 0);
+  assert.equal(slotLegalityProblems({skills: ['s1', 's2', 's3'], learnable: learnt})[0].kind, 'count');
+  assert.equal(slotLegalityProblems({skills: ['s1', 's1', 's3', 's4'], learnable: learnt})[0].kind, 'duplicate');
+  assert.equal(slotLegalityProblems({skills: ['s1', 's2', 's3', 's4'], learnable: null})[0].kind, 'unknown');
+  const one = slotLegalityProblems({skills: ['s1', 's2', 's3', 'zzz'], learnable: learnt});
+  assert.equal(one.length, 1);
+  assert.equal(one[0].at, 3, '要说清是第几个技能（0 基下标 3 = 第 4 个）');
+});
+
+test('阵容配置：接线（应用/撤销/再读取三个落点 + 三个 dataset 钩子 + 锁定保护）', () => {
+  const src = readFileSync(new URL('../src/client/team-workshop.js', import.meta.url), 'utf8');
+  // ① 三个动作的落点
+  for (const id of ['tw-config-check', 'tw-config-apply', 'tw-config-undo']) {
+    assert.match(src, new RegExp(`id="${id}"`), `要有「${id}」这个落点`);
+  }
+  assert.match(src, /\$\('tw-config-apply'\)\.addEventListener\('click', \(\) => \{ void applyConfig\(\); \}\)/,
+    '「应用这套配置」要真的接上 applyConfig');
+  assert.match(src, /\$\('tw-config-undo'\)\.addEventListener\('click', \(\) => \{ undoConfig\(\); \}\)/,
+    '「撤销上一次应用」要真的接上 undoConfig');
+  // ② 判据读的三个钩子
+  assert.match(src, /rootEl\.dataset\.twConfigState = stateName/);
+  assert.match(src, /rootEl\.dataset\.twConfigApplied = applied \? teamConfigFingerprint\(applied\) : ''/);
+  assert.match(src, /rootEl\.dataset\.twConfigCurrent = teamConfigFingerprint\(now\)/);
+  // ③ **重新读取**：不带参数打开这一页时，记录里那一份要装回屏幕（地址带过来的优先）
+  assert.match(src, /const storedConfig = readTeamConfig\(\)/);
+  assert.match(src, /const initialSelected = urlSelected\.length \? urlSelected : \(storedConfig\.current\?\.team \?\? \[\]\)/,
+    '地址没带人时要用记录里的那一份（这就是"重新读取"）');
+  assert.match(src, /function adoptSnapshot\(snap\)/, '撤销与重新读取共用同一个"装回屏幕"的函数');
+  // ④ 锁定的那一只不许被换掉/顶掉：两处都要拦
+  assert.match(src, /state\.locked\.includes\(instance\)[\s\S]{0,200}锁定的一只必须留在队伍里/,
+    '点「移除」时要拦住锁定的那一只并说清原因');
+  assert.match(src, /const kept = state\.selected\.filter\(\(id\) => state\.locked\.includes\(id\)\)/,
+    '「清空阵容」要留着锁定的那一只（不许把玩家的约束悄悄丢了）');
+  // ⑤ 应用之后配招必须是**显式**的（否则进战斗那一份不带 loadouts，只能靠"引擎恰好一样"对齐）
+  assert.match(src, /loadouts\.set\(speciesId, ids\.slice\(\)\);\s*\n\s*writeSharedLoadout\(null, speciesId, ids\.slice\(\)\);/,
+    '应用时要把六个物种的四个技能写进内存 Map 与共用记录');
+  // ⑥ 反证：槽位 ↔ 个体**不许再按 `state.selected` 的下标**取（服务端槽位顺序与它无关，真机六格全错位）
+  assert.doesNotMatch(src, /const slotInstance = state\.selected\[slot\.index - 1\]/,
+    '反证：槽位实例不许按 selected 下标取（那正是错位的老写法）');
+  assert.match(src, /function instanceOfSlot\(slot\)/, '要有一个按物种解析"这一格是谁"的函数');
+  assert.match(src, /const slotInstance = instanceOfSlot\(slot\)/);
+  // ⑦ 性格/资质那一条：界面上要如实写"引擎按种族值算"
+  assert.match(src, /引擎按<strong>种族值<\/strong>算/);
+  assert.match(src, /性格 \/ 资质（个体值）目前<strong>不进引擎<\/strong>/);
 });

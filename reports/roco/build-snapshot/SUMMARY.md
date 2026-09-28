@@ -123,3 +123,34 @@ node scripts/roco/browser-box-acceptance.mjs
 - 00:30–00:31 `src/coach/runtime.js` 一度 **SyntaxError**（`Unexpected identifier '$'`，第 381 行附近），
   让三条要 import 服务端的测试集体红。约 30 秒后该文件被它自己的作者修好（`node --check` 通过），
   重跑即绿。**我与它没有任何改动关系**，也没去碰它。
+
+---
+
+# task-8：「迪莫 6×4」端到端 + 二级页深链（2026-09-29）
+
+批次记录：[`BATCH-06-迪莫6x4与深链.md`](../../../docs/roco/review-2026-09-28/BATCH-06-迪莫6x4与深链.md)
+
+## 跑什么
+
+```sh
+node reports/roco/build-snapshot/browser-dimo-6x4.mjs          # B1–B11 + 5 条必红反证
+node reports/roco/build-snapshot/browser-box-deeplink-proof.mjs # D1–D4 + 5 条必红反证
+```
+
+读数：`dimo-6x4.json` / `box-deeplink.json`；截图在 `docs/roco/review-2026-09-28/shots/build-snapshot/dimo-*.png`、`deeplink-*.png`。
+
+## 结果（全绿）
+
+- 锁定迪莫在位、**不许被移除也不许被「清空阵容」清掉**（拦下并说清原因）；
+- 真鼠标连点五只 → 六只不同个体、六格各四个技能**都在引擎学习表里**（`data-tw-legality-all=ok`）；
+- 应用 → **屏幕指纹 == 应用指纹**；点开局抓到的**真实请求体** `team` 六只（含锁定的迪莫）、
+  `loadouts` 六只各四个、与屏幕**逐值一致**；
+- 不带参数重新打开 → 读回来的那一份**指纹逐字相同**；换一只再应用 → 撤销 → **逐值回到应用前**；
+- 每格的「详情」都写着「引擎按种族值算；性格/资质不进引擎」（**未接**，不是贯通）。
+
+## 深链缺口③（art-finish 报，本任务收）
+
+`box.html?pet=pet_000112`（第 5 页）改前**没有 `.avatar-art`**（`id=` 空 ⇒ 404）、等级「—」、四技能空；
+改后：立绘 `id=pet_000112` **256×256**、四个技能 4 个；`?pet=own-0300`（不在第 1 页）拿回
+Lv.60 + 四技能 + 培养三栏；立绘 404 的物种**退回系别 emoji、不留空框**。
+来源改成"**这一只自己的 `?detail=` 回执为准，页面那一行只作补充**"。

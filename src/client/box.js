@@ -142,6 +142,8 @@ const state = {
 };
 
 // ── 小工具 ──────────────────────────────────────────────────────────────────
+/** 第一个**真的填了**的值（`??` 只兜 null/undefined —— 深链那个 bug 就是被空串坑的）。 */
+const firstFilled = (...values) => values.find((v) => v !== null && v !== undefined && v !== '') ?? null;
 const escapeAttr = (value) => String(value ?? '').replace(/[&<>"']/g, (c) => (
   {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 
@@ -170,9 +172,16 @@ const avatarHtml = (card, {big = false} = {}) => {
   const [emoji, color] = avatarOf(card?.types);
   const cls = big ? 'avatar big' : 'avatar';
   if (card?.art === true) {
-    const id = encodeURIComponent(String(card.group ?? card.select ?? ''));
+    // ⚠ 2026-09-29 改钉（art-finish 的独立验收报的**缺口③**，真机复现）：
+    // 原来这里是 `card.group ?? card.select ?? ''` —— `??` 只兜 null/undefined，
+    // 而深链到**不在当前页**的个体时 `card.group` 是**空串**（本机记录兜底那份的 `species_id` 是空的）
+    // ⇒ `id=` 是空的 ⇒ `/api/roco/sprite?id=&v=default` 404 ⇒ 立绘没了（截图里只剩一个占位菱形）。
+    // 现在由 `buildSnapshotOf` 先解析出**非空**的 `spriteId`（回执的 `group` → 物种页用编号自己兜底），
+    // 这里拿不到非空 id 就不画 `<img>`（宁可画系别 emoji，也不留空框）。
+    const id = String(card?.spriteId ?? card?.group ?? card?.select ?? '').trim();
+    if (!id) return `<span class="${cls}" style="border-color:${color}" aria-hidden="true">${emoji}</span>`;
     return `<span class="${cls} avatar-art" style="border-color:${color}">`
-      + `<img src="/api/roco/sprite?id=${id}&v=default" alt="" aria-hidden="true" loading="lazy" `
+      + `<img src="/api/roco/sprite?id=${encodeURIComponent(id)}&v=default" alt="" aria-hidden="true" loading="lazy" `
       + `decoding="async"></span>`;
   }
   return `<span class="${cls}" style="border-color:${color}" aria-hidden="true">${emoji}</span>`;
@@ -602,11 +611,26 @@ function buildSnapshotOf({select, card, player, individual}) {
   // 面板只在**有个体**的时候算：物种页没有天分/性格这两个输入，硬算就是编一个面板出来。
   const converted = (grown && Object.keys(race).length)
     ? panelOfIndividual({talent: grown.talent, nature: grown.nature}, race) : null;
+  // ⭐ 2026-09-29（art-finish 的缺口③）：**卡片事实以"这一只自己的回执"为准，页面那一行只作补充**。
+  // 为什么：深链到**不在当前页**的个体时（`box.html?pet=pet_000112`，第 5 页），
+  // `state.rows` 里没有它、本机也没有记录 ⇒ `card` 是 `{}` ⇒ 立绘的 id 是空串（`card.group` 是空串时
+  // `??` 也不兜底），`/api/roco/sprite?id=&v=default` 404 ⇒ 立绘没了；等级/技能那些也跟着塌。
+  // 现在：物种 id 取回执的 `group` → 物种页用**编号自己**（`pet_XXXXXX` 就是物种 id）→ 再退回页面那一行。
+  const speciesSelect = /^pet_\d{6}$/.test(String(select ?? '')) ? String(select) : null;
+  const spriteId = firstFilled(player?.group, speciesSelect, card?.group);
+  const speciesPage = !owned;
   return {
     instanceId: select,
-    speciesId: player?.group ?? card?.group ?? null,
+    speciesId: firstFilled(player?.group, card?.group, speciesSelect),
+    spriteId,
     owned,
-    name: player?.name ?? card?.name ?? null,
+    name: firstFilled(player?.name, card?.name),
+    // 系别：回执里那一份更权威（深链时页面那一行可能根本不存在）；两处都没有就是空数组（不编系别）。
+    types: (Array.isArray(player?.types) && player.types.length ? player.types
+      : (Array.isArray(card?.types) ? card.types : [])),
+    // 定位/形态这两枚标签只在**列表卡**上有；回执里没有就照实不画（不编一个定位出来）。
+    roleLabel: firstFilled(card?.role_label, player?.role_label),
+    formLabel: firstFilled(card?.form_label, player?.form_label),
     level: grown?.level ?? (Number.isFinite(Number(player?.level)) ? Number(player.level) : null),
     cultivation: grown,
     // 服务端回执里这两栏是**游戏数据字段**（不是玩家培养出来的）：有值才画，没值整栏不画。
@@ -614,11 +638,18 @@ function buildSnapshotOf({select, card, player, individual}) {
     gameTraits: ['特长', '血脉'].map((label) => byLabel.get(label)).filter(Boolean),
     raceList: Array.isArray(player?.metrics) ? player.metrics : [],
     panel: converted?.panel ?? null,
-    skills: Array.isArray(player?.skills) ? player.skills : [],
+    // ⭐ 四个技能：个体回执在 `skills`，**物种回执在 `moveset`**（同一套形状：order/name/element/
+    // category/energy/power_label/desc）—— 只读 `skills` 的话物种页那一段永远是空的。
+    skills: Array.isArray(player?.skills) ? player.skills
+      : (Array.isArray(player?.moveset) ? player.moveset : []),
     metricsMissingReason: player?.metrics_missing_reason ?? null,
     panelReason: player?.panel?.reason ?? null,
-    // 这一屏上培养那几样到底是哪儿来的（判据与排障读它；玩家看不见这个键）。
-    sources: {cultivation: owned ? 'local-record' : 'none', species: player ? 'server-detail' : 'none'},
+    // `art` = 要不要画官方立绘：回执/卡片说过"有图"就画；**物种页**手上只有编号、没法问"有没有图"，
+    // 就先按编号画，加载失败时由 `renderPetPage` 里的 `onerror` 换回系别 emoji（**不留空框**）。
+    art: player?.art === true || card?.art === true || (speciesPage && Boolean(spriteId)),
+    // 这一屏上每一样到底是哪儿来的（判据与排障读它；玩家看不见这个键）。
+    sources: {cultivation: owned ? 'local-record' : 'none',
+      species: player ? 'server-detail' : 'none', card: card?.select ? 'page-row' : 'none'},
   };
 }
 
@@ -754,18 +785,30 @@ function renderPetPage() {
   const types = build.types;
   $('pet-title').textContent = `${name} · 详情`;
   $('pet-head').innerHTML = `<div class="detail-head">
-   ${avatarHtml({...card, art: card.art ?? state.petData?.art, group: card.group ?? build.speciesId, types}, {big: true})}
+   ${avatarHtml({...card, art: build.art, spriteId: build.spriteId, group: build.spriteId, types}, {big: true})}
    <div><h3>${escapeAttr(name)}</h3>
     <span class="card-types">${typeChips(types)}</span>
-    <span class="card-tags">${[card.role_label ? `定位：${card.role_label}` : null,
+    <span class="card-tags">${[build.roleLabel ? `定位：${build.roleLabel}` : null,
       // 2026-09-28（人类：「还有就是那个仅图鉴资料是错的啊你为啥不改」）：
       // 「支持：xxx」这个标签**整个不画**了。它是引擎的收录档位（`BOX_SUPPORT_LABELS`），
       // 不是这只精灵的属性；挂在自己家的精灵身上读起来像"你的精灵是残的"。
       // 玩家要判断"能不能拿去打"，看的是「带上它去配队」能不能点、以及工坊那边的说法。
-      card.form_label].filter(Boolean)
+      build.formLabel].filter(Boolean)
       .map((t) => `<span class="tag">${escapeAttr(t)}</span>`).join('')}</span>
     ${card.extra === true ? '<span class="card-tags"><span class="tag tag-badge">本机加的</span></span>' : ''}
    </div></div>`;
+  // ⭐ 2026-09-29（art-finish 缺口③ 的收尾）：官方立绘**加载失败**（这一只没有抓包图）⇒
+  // 换回系别 emoji，**不留空框**（人类 2026-09-28 的口径）。物种页没法事先问"有没有图"，
+  // 所以这一层兜底是它敢按编号画 `<img>` 的前提。
+  {
+    const img = $('pet-head').querySelector('.avatar-art img');
+    if (img) img.addEventListener('error', () => {
+      const holder = img.parentElement;
+      if (!holder) return;
+      holder.classList.remove('avatar-art');
+      holder.textContent = avatarOf(build.types)[0];
+    }, {once: true});
+  }
   $('pet-actions').innerHTML = petActionsHtml(select, individual);
   // 换技能面板挂在动作区**后面（同级兄弟）**：`#pet-actions` 每次重画，挂它里面会被抹掉。
   // ⚠ 2026-09-29：技能也从**同一份快照**取（此前直接读 `state.petData.skills`）——
@@ -851,9 +894,21 @@ async function openPet(select, {push = true} = {}) {
     // 直接开 `?pet=` 链接、或列表那一页还没读完时，`state.petCard` 是空的 ⇒ `data-add=""`
     // ⇒ 按钮看着在、其实没带种类，点了也没用（判据读 `dataset.add` 是空串）。
     // 这里补一条**服务端详情自己带的**兜底（`player.group` 就是 species_id），仍然不编值。
-    if (data.player && typeof data.player.group === 'string' && data.player.group) {
-      state.petCard = {...(state.petCard ?? {}), group: data.player.group,
-        name: state.petCard?.name ?? data.player.name ?? null};
+    // ⭐ 2026-09-29（art-finish 缺口③）：**卡片事实以这一只自己的回执为准，页面那一行只作补充。**
+    // 原来这里只在回执带 `group`（个体那一路）时补两个字段；物种那一路（`?detail=pet_XXXXXX` 没有 `group`）
+    // 什么都不补 ⇒ 深链到不在当前页的个体时，`state.petCard` 一直是空的（标题/系别/定位/立绘全塌）。
+    // 现在按字段逐个"回执优先、页面行兜底"地补齐；两处都没有的字段就**照实不写**（不编）。
+    if (data.player) {
+      const known = state.petCard ?? {};
+      state.petCard = {
+        ...known,
+        group: firstFilled(data.player.group, known.group),
+        name: firstFilled(known.name, data.player.name),
+        types: (Array.isArray(known.types) && known.types.length ? known.types
+          : (Array.isArray(data.player.types) ? data.player.types : [])),
+        role_label: firstFilled(known.role_label, data.player.role_label),
+        form_label: firstFilled(known.form_label, data.player.form_label),
+      };
     }
     renderPetPage();
     renderDev();

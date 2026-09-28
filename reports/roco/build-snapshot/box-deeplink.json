@@ -1,0 +1,156 @@
+{
+ "generated": "2026-09-28T18:11:15.691Z",
+ "base": "http://127.0.0.1:8765/",
+ "command": "node reports/roco/build-snapshot/browser-box-deeplink-proof.mjs",
+ "checks": [
+  {
+   "id": "D1-对照：第 1 页的物种深链有立绘",
+   "what": "`box.html?pet=pet_000012`：立绘是那一只自己的 256×256、四个技能都在；物种页**不许**出现性格/资质/档位",
+   "problems": []
+  },
+  {
+   "id": "D2-缺口③：**不在当前页**的物种深链也要有立绘（个体数据不许跟着塌）",
+   "what": "`box.html?pet=pet_000112`（第 5 页）：立绘 id 必须是 pet_000112、真的加载出来；四个技能都在",
+   "problems": []
+  },
+  {
+   "id": "D3-不在当前页的**持有实例**深链：立绘 + 等级 + 四技能 + 培养三栏",
+   "what": "`box.html?pet=own-0300`（不在第 1 页）：立绘用它的物种 id、等级 Lv.60、四个技能、性格/资质/档位",
+   "problems": []
+  },
+  {
+   "id": "D4-没有抓包立绘的物种：换成系别 emoji，不留空框",
+   "what": "`box.html?pet=pet_000602`（立绘 404、可玩层里也没有这一只的层）：不许留加载不出来的 `<img>`；头像退回系别 emoji",
+   "problems": []
+  }
+ ],
+ "counters": [
+  {
+   "id": "D2",
+   "ok": true,
+   "text": "缺口③ 的现场：有图的物种却只有系别 emoji（没有 `.avatar-art`）+ 空 id 的立绘请求",
+   "sample": "无 .avatar-art / imgSrc=id=&v=default / moves=0",
+   "actual": [
+    "这一只有抓包立绘，二级页却没画出来（深链到不在当前页的个体时立绘会塌）",
+    "这一屏发出过 1 次空 id 的立绘请求（id= 是空的）"
+   ]
+  },
+  {
+   "id": "D2b",
+   "ok": true,
+   "text": "立绘画了但请求的 id 是空的（/api/roco/sprite?id=&v=default）",
+   "sample": "imgSrc 里 id 为空",
+   "actual": [
+    "立绘请求里的 id 不是这一只（期望 pet_000112，实际 /api/roco/sprite?id=&v=default）",
+    "立绘请求的 id 是空的（/api/roco/sprite?id=&v=default）—— 这正是缺口③的现场",
+    "立绘没有真的加载出来（naturalWidth=0）"
+   ]
+  },
+  {
+   "id": "D3",
+   "ok": true,
+   "text": "深链到持有实例：等级塌成「—」、技能与培养那几栏为空",
+   "sample": "moves=0 / traitRows=0 / level=—",
+   "actual": [
+    "四个技能没画全（0 个）",
+    "性格/资质/天分档位那几栏太少（0 行）",
+    "等级不是 Lv.60（实际「—」）"
+   ]
+  },
+  {
+   "id": "D3b",
+   "ok": true,
+   "text": "物种页上冒出了性格/资质（拿物种编号掷出来的假数据）",
+   "sample": "物种页出现 性格/资质/天分档位",
+   "actual": [
+    "物种页上出现了「性格」（物种没有培养数据 ⇒ 那是编出来的）",
+    "物种页上出现了「资质」（物种没有培养数据 ⇒ 那是编出来的）",
+    "物种页上出现了「天分档位」（物种没有培养数据 ⇒ 那是编出来的）"
+   ]
+  },
+  {
+   "id": "D4",
+   "ok": true,
+   "text": "立绘 404 却还留着 `<img>` 空框（没有换回 emoji）",
+   "sample": "hasAvatar=true 但 naturalWidth=0 / avatarIsEmoji=false",
+   "actual": [
+    "立绘请求里的 id 不是这一只（期望 null，实际 /api/roco/sprite?id=pet_000602&v=default）",
+    "立绘没有真的加载出来（naturalWidth=0）"
+   ]
+  }
+ ],
+ "steps": {
+  "inPage": {
+   "view": "pet",
+   "pet": "pet_000012",
+   "title": "铠甲虫 · 详情",
+   "hasAvatar": true,
+   "imgSrc": "/api/roco/sprite?id=pet_000012&v=default",
+   "naturalWidth": 256,
+   "moves": 4,
+   "traitRows": 1,
+   "traitLabels": [
+    "等级"
+   ],
+   "avatarIsEmoji": false,
+   "level": "—",
+   "headline": "铠甲虫",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/deeplink-01-inpage-pet_000012.png"
+  },
+  "offPage": {
+   "view": "pet",
+   "pet": "pet_000112",
+   "title": "雪影娃娃 · 详情",
+   "hasAvatar": true,
+   "imgSrc": "/api/roco/sprite?id=pet_000112&v=default",
+   "naturalWidth": 256,
+   "moves": 4,
+   "traitRows": 1,
+   "traitLabels": [
+    "等级"
+   ],
+   "avatarIsEmoji": false,
+   "level": "—",
+   "headline": "雪影娃娃",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/deeplink-02-offpage-pet_000112.png"
+  },
+  "offPageInstance": {
+   "view": "pet",
+   "pet": "own-0300",
+   "title": "梦想三三 · 详情",
+   "hasAvatar": true,
+   "imgSrc": "/api/roco/sprite?id=pet_000302&v=default",
+   "naturalWidth": 256,
+   "moves": 4,
+   "traitRows": 4,
+   "traitLabels": [
+    "等级",
+    "性格",
+    "资质",
+    "天分档位"
+   ],
+   "avatarIsEmoji": false,
+   "level": "Lv.60",
+   "headline": "梦想三三",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/deeplink-03-offpage-own-0300.png"
+  },
+  "noArt": {
+   "view": "pet",
+   "pet": "pet_000602",
+   "title": "玳龟 · 详情",
+   "hasAvatar": false,
+   "imgSrc": "",
+   "naturalWidth": 0,
+   "moves": 0,
+   "traitRows": 1,
+   "traitLabels": [
+    "等级"
+   ],
+   "avatarIsEmoji": true,
+   "level": "—",
+   "headline": "玳龟",
+   "shot": "docs/roco/review-2026-09-28/shots/build-snapshot/deeplink-04-noart-pet_000602.png"
+  }
+ },
+ "pageErrors": []
+}
